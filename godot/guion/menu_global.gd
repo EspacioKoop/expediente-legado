@@ -5,6 +5,8 @@
 ## Vive como autoload para no duplicarse entre las tres partes del juego.
 extends CanvasLayer
 
+const RUTA_TEXTOS := "res://datos/menu_textos.csv"
+
 var _preferencias: Dictionary = {}
 var _fondo: ColorRect
 var _panel_principal: PanelContainer
@@ -22,10 +24,35 @@ var _mouse_previo := Input.MOUSE_MODE_VISIBLE
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 100
+	_registrar_textos_menu()
 	_preferencias = PreferenciasSiga.cargar()
 	PreferenciasSiga.aplicar(_preferencias)
 	_aplicar_volumen()
 	_montar()
+
+
+## El catálogo del menú vive separado del grueso de textos para que este corte
+## no tenga que reservar `textos.csv`. Se registra al arrancar el autoload: así
+## las claves existen también en suites headless limpias, sin depender de que un
+## `.translation` generado por importación ya estuviera materializado en disco.
+func _registrar_textos_menu() -> void:
+	var archivo := FileAccess.open(RUTA_TEXTOS, FileAccess.READ)
+	if archivo == null:
+		push_error("No se pudo abrir %s" % RUTA_TEXTOS)
+		return
+
+	var traduccion := Translation.new()
+	traduccion.locale = "es"
+	var cabecera := true
+	while not archivo.eof_reached():
+		var fila := archivo.get_csv_line()
+		if cabecera:
+			cabecera = false
+			continue
+		if fila.size() < 2 or fila[0].is_empty():
+			continue
+		traduccion.add_message(fila[0], fila[1])
+	TranslationServer.add_translation(traduccion)
 
 
 func _unhandled_input(evento: InputEvent) -> void:
