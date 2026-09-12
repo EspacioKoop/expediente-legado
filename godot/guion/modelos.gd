@@ -32,10 +32,6 @@ const RUTA := "res://assets/modelos/"
 ## lo publicó su autor.
 const FORMATOS: Array[String] = [".glb", ".fbx"]
 
-## Los retratos de quienes fueron alguien. Van aparte de los modelos porque no
-## son un modelo: son una cara puesta sobre uno.
-const RETRATOS := "res://assets/retratos/%s.jpg"
-
 ## Lo que mide una persona, en metros. No lo decide este módulo: lo fija
 ## `nodes/root_scale` en el `.import` de la figura, y aquí se declara para que
 ## quien le cuelgue el nombre encima no tenga que medirlo a ojo. Si cambia allí,
@@ -166,10 +162,6 @@ static func _animar(pieza: Node3D, cual: String = "idle") -> void:
 
 ## El reproductor de animaciones, esté donde esté: unos packs lo cuelgan de la
 ## raíz y otros lo meten bajo el nodo del modelo.
-
-
-## El reproductor de animaciones, esté donde esté: unos packs lo cuelgan de la
-## raíz y otros lo meten bajo el nodo del modelo.
 static func _reproductor(nodo: Node) -> AnimationPlayer:
 	if nodo is AnimationPlayer:
 		return nodo
@@ -180,42 +172,13 @@ static func _reproductor(nodo: Node) -> AnimationPlayer:
 	return null
 
 
-## Le pone a alguien SU cara.
+## Integra una cara low-poly en el volumen de la cabeza.
 ##
-## Cinco de los compañeros son gente que existió y que acabó de oficinista: el
-## último emperador de China ordenando papeles, el inspector de aduanas que
-## escribió Moby Dick, el de la correspondencia comercial que era varios poetas,
-## el del fielato que pintaba selvas que no había visto, el de la oficina de
-## riegos de Alejandría. El chiste entero depende de que se les RECONOZCA, y una
-## figura genérica lo borra: serían cinco oficinistas cualesquiera diciendo
-## frases raras.
-##
-## Va como un plano delante de la cabeza y no como textura de la malla: la
-## cabeza trae sus coordenadas para el atlas de su autor, y una fotografía
-## encima saldría estirada por la nuca. Un plano con una foto es además
-## exactamente como se resolvía una cara en 1998.
-
-
-## Le pone a alguien SU cara.
-##
-## Cinco de los compañeros son gente que existió y que acabó de oficinista: el
-## último emperador de China ordenando papeles, el inspector de aduanas que
-## escribió Moby Dick, el de la correspondencia comercial que era varios poetas,
-## el del fielato que pintaba selvas que no había visto, el de la oficina de
-## riegos de Alejandría. El chiste entero depende de que se les RECONOZCA, y una
-## figura genérica lo borra: serían cinco oficinistas cualesquiera diciendo
-## frases raras.
-##
-## Va como un plano delante de la cabeza y no como textura de la malla: la
-## cabeza trae sus coordenadas para el atlas de su autor, y una fotografía
-## encima saldría estirada por la nuca. Un plano con una foto es además
-## exactamente como se resolvía una cara en 1998.
+## El retrato sigue identificando al personaje, pero ya no se proyecta como una
+## foto 2D. Su nombre funciona como semilla estable para pequeñas variaciones de
+## rasgos. Así el resultado acompaña al hueso `Head`, se lee también de perfil y
+## no introduce una lámina que atraviese la cabeza al girar.
 static func _poner_cara(pieza: Node3D, retrato: String) -> void:
-	var ruta := RETRATOS % retrato
-	if not ResourceLoader.exists(ruta):
-		push_warning("No hay retrato %s" % ruta)
-		return
-
 	var esqueleto := _esqueleto(pieza)
 	if esqueleto == null:
 		return
@@ -223,41 +186,92 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 	if hueso < 0:
 		return
 
-	# Colgada del HUESO y no del modelo: así la cara acompaña a la cabeza cuando
-	# la animación la mueve. Pegada a la raíz se quedaría flotando en el sitio
-	# donde estaba la cabeza al empezar.
 	var enganche := BoneAttachment3D.new()
 	enganche.bone_idx = hueso
 	esqueleto.add_child(enganche)
 
-	# Lo que mide una cabeza: del hueso del cuello a la coronilla. Sale del
-	# esqueleto y no de un número, para que valga si algún día cambia el modelo.
+	var alto := _alto_cabeza(esqueleto, hueso)
+	var semilla := absi(hash(retrato))
+	var separacion := alto * (0.18 + float(semilla % 5) * 0.008)
+	var altura_ojos := alto * (0.54 + float((semilla / 5) % 5) * 0.008)
+	var frente := alto * 0.50
+
+	var oscuro := Color(0.10, 0.08, 0.07)
+	var piel := Color(0.58, 0.43, 0.34).lerp(Color(0.82, 0.68, 0.54), float(semilla % 7) / 6.0)
+
+	_rasgo_esfera(
+		enganche,
+		Vector3(-separacion, altura_ojos, frente),
+		Vector3(alto * 0.055, alto * 0.045, alto * 0.025),
+		oscuro
+	)
+	_rasgo_esfera(
+		enganche,
+		Vector3(separacion, altura_ojos, frente),
+		Vector3(alto * 0.055, alto * 0.045, alto * 0.025),
+		oscuro
+	)
+	_rasgo_caja(
+		enganche,
+		Vector3(0.0, alto * 0.40, frente + alto * 0.025),
+		Vector3(alto * 0.055, alto * 0.16, alto * 0.07),
+		piel
+	)
+	_rasgo_caja(
+		enganche,
+		Vector3(0.0, alto * 0.25, frente + alto * 0.015),
+		Vector3(alto * (0.16 + float(semilla % 4) * 0.012), alto * 0.025, alto * 0.02),
+		oscuro
+	)
+
+
+static func _alto_cabeza(esqueleto: Skeleton3D, hueso: int) -> float:
 	var alto := 0.012
 	var coronilla := esqueleto.find_bone("HeadTop_End")
-	if coronilla >= 0:
-		alto = absf(
-			(
-				esqueleto.get_bone_global_pose(coronilla).origin.y
-				- esqueleto.get_bone_global_pose(hueso).origin.y
-			)
-		)
-
-	var cara := MeshInstance3D.new()
-	var plano := QuadMesh.new()
-	plano.size = Vector2(alto, alto) * 1.35
-	cara.mesh = plano
-	var material := StandardMaterial3D.new()
-	material.albedo_texture = load(ruta)
-	material.roughness = 1.0
-	material.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
-	cara.material_override = material
-	# Delante de la cabeza y a la altura de la cara, que está por encima del
-	# hueso del cuello.
-	cara.position = Vector3(0.0, alto * 0.5, alto * 0.62)
-	enganche.add_child(cara)
+	if coronilla < 0:
+		return alto
+	return maxf(
+		absf(
+			esqueleto.get_bone_global_pose(coronilla).origin.y
+			- esqueleto.get_bone_global_pose(hueso).origin.y
+		),
+		alto
+	)
 
 
-## El esqueleto de una figura, si lo tiene.
+static func _rasgo_esfera(
+	padre: Node3D, posicion: Vector3, escala: Vector3, color: Color
+) -> void:
+	var rasgo := MeshInstance3D.new()
+	var esfera := SphereMesh.new()
+	esfera.radius = 1.0
+	esfera.height = 2.0
+	esfera.radial_segments = 6
+	esfera.rings = 4
+	rasgo.mesh = esfera
+	rasgo.position = posicion
+	rasgo.scale = escala
+	rasgo.material_override = _material_rasgo(color)
+	padre.add_child(rasgo)
+
+
+static func _rasgo_caja(
+	padre: Node3D, posicion: Vector3, tam: Vector3, color: Color
+) -> void:
+	var rasgo := MeshInstance3D.new()
+	var caja := BoxMesh.new()
+	caja.size = tam
+	rasgo.mesh = caja
+	rasgo.position = posicion
+	rasgo.material_override = _material_rasgo(color)
+	padre.add_child(rasgo)
+
+
+static func _material_rasgo(color: Color) -> ShaderMaterial:
+	var material := ShaderMaterial.new()
+	material.shader = load(Espacio3D.SHADER_PSX)
+	material.set_shader_parameter("color_base", color)
+	return material
 
 
 ## El esqueleto de una figura, si lo tiene.
