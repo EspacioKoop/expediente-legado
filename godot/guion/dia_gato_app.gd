@@ -102,6 +102,8 @@ func _montar_objetivos_sueno() -> void:
 		return
 	var estado: Dictionary = _estado_objetivos_actual()
 	var completados: Array = estado.get("completados", [])
+	_actualizar_feedback_objetivos(SuenoObjetivos.progreso(estado))
+	_actualizar_rumbo_guia_pendiente(estado)
 	for objetivo in _objetivos_espacio:
 		if completados.has(objetivo["id"]):
 			continue
@@ -131,13 +133,45 @@ func _al_pisar_objetivo(cuerpo: Node3D, zona: Area3D) -> void:
 
 	var progreso: Vector2i = SuenoObjetivos.progreso(estado)
 	_ambiente.ambient_light_energy = minf(_ambiente.ambient_light_energy + 0.14, 1.5)
-	_rotulo.text = "◆  ◇" if progreso.x < progreso.y else "◆  ◆"
+	_actualizar_feedback_objetivos(progreso)
+	_actualizar_rumbo_guia_pendiente(estado)
+	_orientar_gato_guia()
 	if not SuenoObjetivos.resuelto(estado):
 		_guardar_o_avisar("")
 		return
 
 	_caminante.set_physics_process(false)
 	get_tree().create_timer(DEMORA_RESOLUCION).timeout.connect(_resolver_objetivos_sueno)
+
+
+func _actualizar_feedback_objetivos(progreso: Vector2i) -> void:
+	var marcas := []
+	for i in progreso.y:
+		marcas.append("◆" if i < progreso.x else "◇")
+	_rotulo.text = "  ".join(marcas)
+
+
+func _actualizar_rumbo_guia_pendiente(estado: Dictionary) -> void:
+	var completados: Array = estado.get("completados", [])
+	_hay_rumbo_guia = false
+	for objetivo in _objetivos_espacio:
+		if completados.has(objetivo["id"]):
+			continue
+		_salida_guia = objetivo.get("pos", _entrada_guia)
+		_hay_rumbo_guia = true
+		return
+
+
+func _orientar_gato_guia() -> void:
+	if not is_instance_valid(_gato_guia) or not _hay_rumbo_guia:
+		return
+	var rumbo := _salida_guia - _entrada_guia
+	rumbo.y = 0.0
+	if rumbo.length() < 0.01:
+		return
+	var direccion := rumbo.normalized()
+	if GatoAyuda.guia_orienta(jornada.get("gato", {})):
+		_gato_guia.rotation.y = atan2(direccion.x, direccion.z)
 
 
 func _resolver_objetivos_sueno() -> void:
@@ -219,6 +253,6 @@ func _montar_guia_sueno() -> void:
 	_mundo.add_child(_gato_guia)
 	_gato_guia.empezar(posicion, [posicion])
 
-	# Bien cuidado funciona como una brújula viva hacia el primer objetivo.
-	if GatoAyuda.guia_orienta(gato):
-		_gato_guia.rotation.y = atan2(direccion.x, direccion.z)
+	# Bien cuidado funciona como una brújula viva hacia el primer objetivo
+	# pendiente, no hacia la antigua salida física.
+	_orientar_gato_guia()
