@@ -3,7 +3,7 @@
 ## Este módulo no concede recursos ni decide reglas de juego. Solo conoce el
 ## catálogo y registra ids ya concedidos dentro de un diccionario de estado.
 ## Quien persista ese diccionario (Partida en el siguiente corte) conserva los
-## sellos sin que esta capa tenga que saber nada de disco ni de Steam.
+## sellos sin que esta capa tenga que saber nada de disco ni plataformas externas.
 class_name Sellos
 extends RefCounted
 
