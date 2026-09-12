@@ -7,7 +7,9 @@
 extends "res://guion/dia_gato_app.gd"
 
 const POS_PUESTO := Vector3(-4.0, 1.45, 1.0)
-const TEXTO_ONBOARDING := "PUESTO 4-B · SIGA-98\nAcérquese al terminal verde para abrir su primer expediente."
+const TEXTO_ONBOARDING := (
+	"PUESTO 4-B · SIGA-98\nAcérquese al terminal verde para abrir su primer expediente."
+)
 
 var _pista_puesto: PanelContainer
 var _luz_puesto: OmniLight3D
