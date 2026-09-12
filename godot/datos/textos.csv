@@ -188,8 +188,12 @@ VISOR_ELIJA,Elija un documento del expediente.
 VISOR_ESTADO,"%s   ·   Pistas: %d de %d   ·   Día %d, %d acción(es)%s"
 VISOR_IMPUTAR,Imputar responsabilidad…
 VISOR_ITEM,%s  %s
+VISOR_MARCAR_FOLIO,☆ Marcar folio
+VISOR_MARCADOR_GUARDADO,Folio marcado para recordarlo.
+VISOR_MARCADOR_RETIRADO,Folio retirado de sus marcadores.
 VISOR_PARTIDA_APARTADA,"PARTIDA ANTERIOR ILEGIBLE (%s), APARTADA EN %s"
 VISOR_PRECIPITADA,  ·  ACUSACIÓN PRECIPITADA: consta en su hoja de servicio.
+VISOR_QUITAR_MARCADOR,★ Quitar marcador
 VISOR_REASIGNADO,"  ·  CESE POR ACUMULACIÓN: se le reasigna. Otra persona ocupará su puesto."
 VISOR_RELACIONAR,Relacionar este documento…
 VISOR_RELACIONAR_CON,Relacionar con %s

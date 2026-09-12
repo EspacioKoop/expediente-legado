@@ -6,6 +6,7 @@ RAIZ = Path(__file__).resolve().parents[1]
 CINEMATICA = RAIZ / "godot" / "guion" / "proyeccion_onirica_cinematica.gd"
 CAPA = RAIZ / "godot" / "guion" / "visor_proyeccion_app.gd"
 CAPA_COMBINACIONES = RAIZ / "godot" / "guion" / "visor_combinaciones_app.gd"
+CAPA_ANOTACIONES = RAIZ / "godot" / "guion" / "visor_anotaciones_app.gd"
 ESCENA_VISOR = RAIZ / "godot" / "escenas" / "visor.tscn"
 
 
@@ -14,6 +15,7 @@ class ProyeccionOniricaTest(unittest.TestCase):
         self.cinematica = CINEMATICA.read_text(encoding="utf-8")
         self.capa = CAPA.read_text(encoding="utf-8")
         self.capa_combinaciones = CAPA_COMBINACIONES.read_text(encoding="utf-8")
+        self.capa_anotaciones = CAPA_ANOTACIONES.read_text(encoding="utf-8")
         self.escena = ESCENA_VISOR.read_text(encoding="utf-8")
 
     def test_estados_tienen_identidad_estable(self):
@@ -51,10 +53,13 @@ class ProyeccionOniricaTest(unittest.TestCase):
 
     def test_el_visor_activa_la_costura(self):
         # El visor puede añadir capas posteriores siempre que mantengan la
-        # proyección en su cadena de herencia. #286 añade combinaciones encima
-        # de ella, así que exigir que la escena apunte directamente a esta capa
-        # convertiría una extensión válida en un falso negativo de CI.
-        self.assertIn('path="res://guion/visor_combinaciones_app.gd"', self.escena)
+        # proyección en su cadena de herencia. Combinaciones y anotaciones son
+        # extensiones válidas; fijar una capa directa convertiría cada vertical
+        # nuevo del visor en un falso negativo de CI.
+        self.assertIn('path="res://guion/visor_anotaciones_app.gd"', self.escena)
+        self.assertIn(
+            'extends "res://guion/visor_combinaciones_app.gd"', self.capa_anotaciones
+        )
         self.assertIn('extends "res://guion/visor_proyeccion_app.gd"', self.capa_combinaciones)
 
 
