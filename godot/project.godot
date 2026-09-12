@@ -10,6 +10,10 @@ config/name="SIGA-98 · Expediente Legado"
 run/main_scene="res://escenas/inicio.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
+[autoload]
+
+MenuGlobal="*res://guion/menu_global.gd"
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
