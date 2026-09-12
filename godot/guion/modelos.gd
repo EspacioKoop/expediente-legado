@@ -232,16 +232,16 @@ static func _alto_cabeza(esqueleto: Skeleton3D, hueso: int) -> float:
 		return alto
 	return maxf(
 		absf(
-			esqueleto.get_bone_global_pose(coronilla).origin.y
-			- esqueleto.get_bone_global_pose(hueso).origin.y
+			(
+				esqueleto.get_bone_global_pose(coronilla).origin.y
+				- esqueleto.get_bone_global_pose(hueso).origin.y
+			)
 		),
 		alto
 	)
 
 
-static func _rasgo_esfera(
-	padre: Node3D, posicion: Vector3, escala: Vector3, color: Color
-) -> void:
+static func _rasgo_esfera(padre: Node3D, posicion: Vector3, escala: Vector3, color: Color) -> void:
 	var rasgo := MeshInstance3D.new()
 	var esfera := SphereMesh.new()
 	esfera.radius = 1.0
@@ -255,9 +255,7 @@ static func _rasgo_esfera(
 	padre.add_child(rasgo)
 
 
-static func _rasgo_caja(
-	padre: Node3D, posicion: Vector3, tam: Vector3, color: Color
-) -> void:
+static func _rasgo_caja(padre: Node3D, posicion: Vector3, tam: Vector3, color: Color) -> void:
 	var rasgo := MeshInstance3D.new()
 	var caja := BoxMesh.new()
 	caja.size = tam
