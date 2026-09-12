@@ -226,3 +226,12 @@ INICIO_BIENVENIDA,Empieza una nueva partida para entrar al archivo.
 INICIO_CONFIRMAR,Se reiniciará todo el progreso. Se conservará una copia de la partida anterior. ¿Empezar desde cero?
 INICIO_ERROR_REINICIO,No se pudo conservar la partida anterior. No se ha iniciado una nueva.
 INICIO_ERROR_ENTRADA,No se pudo entrar al archivo. Puedes volver a intentarlo.
+
+MENU_GLOBAL_TITULO,Menú
+MENU_GLOBAL_CONTINUAR,Continuar
+MENU_GLOBAL_OPCIONES,Opciones
+MENU_GLOBAL_VOLVER,Volver
+MENU_GLOBAL_SALIR,Salir al escritorio
+MENU_GLOBAL_VOLUMEN,Volumen
+MENU_GLOBAL_REDUCCION_MOVIMIENTO,Reducir movimiento
+MENU_GLOBAL_SUBTITULO,Preferencias comunes de archivo, casa y sueño.
