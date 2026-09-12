@@ -8,6 +8,7 @@ CINEMATICA = RAIZ / "godot" / "guion" / "ascensor_cinematica.gd"
 CAPA = RAIZ / "godot" / "guion" / "dia_ascensor_app.gd"
 CAPA_ALQUILER = RAIZ / "godot" / "guion" / "dia_alquiler_app.gd"
 CAPA_GATO = RAIZ / "godot" / "guion" / "dia_gato_app.gd"
+CAPA_ONBOARDING = RAIZ / "godot" / "guion" / "dia_onboarding_app.gd"
 ESCENA_DIA = RAIZ / "godot" / "escenas" / "dia.tscn"
 
 
@@ -17,6 +18,7 @@ class AscensorTest(unittest.TestCase):
         self.capa = CAPA.read_text(encoding="utf-8")
         self.capa_alquiler = CAPA_ALQUILER.read_text(encoding="utf-8")
         self.capa_gato = CAPA_GATO.read_text(encoding="utf-8")
+        self.capa_onboarding = CAPA_ONBOARDING.read_text(encoding="utf-8")
         self.escena = ESCENA_DIA.read_text(encoding="utf-8")
 
     def test_la_bajada_es_breve_y_tiene_remate(self):
@@ -54,7 +56,8 @@ class AscensorTest(unittest.TestCase):
             self.assertNotIn(llamada, self.capa)
 
     def test_el_dia_conserva_el_ascensor_por_herencia(self):
-        self.assertIn('path="res://guion/dia_gato_app.gd"', self.escena)
+        self.assertIn('path="res://guion/dia_onboarding_app.gd"', self.escena)
+        self.assertIn('extends "res://guion/dia_gato_app.gd"', self.capa_onboarding)
         self.assertIn('extends "res://guion/dia_alquiler_app.gd"', self.capa_gato)
         self.assertIn('extends "res://guion/dia_ascensor_app.gd"', self.capa_alquiler)
 
