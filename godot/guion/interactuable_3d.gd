@@ -18,6 +18,16 @@ enum Verbo {
 	ENCENDER,
 }
 
+const NOMBRES_VERBO := {
+	Verbo.EXAMINAR: "Examinar",
+	Verbo.USAR: "Usar",
+	Verbo.ABRIR: "Abrir",
+	Verbo.COGER: "Coger",
+	Verbo.LEER: "Leer",
+	Verbo.DAR: "Dar",
+	Verbo.ENCENDER: "Encender",
+}
+
 @export var verbo := Verbo.USAR
 @export var nombre_objeto := ""
 @export var habilitado := true
@@ -38,18 +48,4 @@ func interactuar(actor: Node) -> bool:
 
 
 func _nombre_verbo(valor: int) -> String:
-	match valor:
-		Verbo.EXAMINAR:
-			return "Examinar"
-		Verbo.ABRIR:
-			return "Abrir"
-		Verbo.COGER:
-			return "Coger"
-		Verbo.LEER:
-			return "Leer"
-		Verbo.DAR:
-			return "Dar"
-		Verbo.ENCENDER:
-			return "Encender"
-		_:
-			return "Usar"
+	return String(NOMBRES_VERBO.get(valor, "Usar"))
