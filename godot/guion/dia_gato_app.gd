@@ -129,7 +129,8 @@ func _al_pisar_objetivo(cuerpo: Node3D, zona: Area3D) -> void:
 	var id := String(zona.get_meta("objetivo", ""))
 	if not SuenoObjetivos.completar(estado, id):
 		return
-	zona.monitoring = false
+	# body_entered se emite durante físicas; diferir permite desactivar la zona.
+	zona.set_deferred("monitoring", false)
 
 	var progreso: Vector2i = SuenoObjetivos.progreso(estado)
 	_ambiente.ambient_light_energy = minf(_ambiente.ambient_light_energy + 0.14, 1.5)
