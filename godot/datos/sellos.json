@@ -1,0 +1,18 @@
+[
+  {
+    "id": "planta-en-orden",
+    "titulo": "SELLO_PLANTA_EN_ORDEN_TITULO",
+    "descripcion": "SELLO_PLANTA_EN_ORDEN_DESCRIPCION",
+    "origen": "ronda-cierre",
+    "icono": "sello-archivo",
+    "disponible": true
+  },
+  {
+    "id": "noche-improductiva",
+    "titulo": "SELLO_NOCHE_IMPRODUCTIVA_TITULO",
+    "descripcion": "SELLO_NOCHE_IMPRODUCTIVA_DESCRIPCION",
+    "origen": "ocio-casa",
+    "icono": "sello-luna",
+    "disponible": true
+  }
+]
