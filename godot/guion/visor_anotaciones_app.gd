@@ -12,7 +12,7 @@ var _marcar: Button
 func _columna_documento() -> Control:
 	var columna: Control = super._columna_documento()
 	_marcar = Button.new()
-	_marcar.text = "☆ Marcar folio"
+	_marcar.text = tr("VISOR_MARCAR_FOLIO")
 	_marcar.disabled = true
 	_marcar.pressed.connect(_al_marcar_folio)
 	columna.add_child(_marcar)
@@ -39,10 +39,10 @@ func _al_marcar_folio() -> void:
 	var marcadores := _marcadores_del_caso()
 	if marcadores.has(registro_id):
 		marcadores.erase(registro_id)
-		_estado.text = "Folio retirado de sus marcadores."
+		_estado.text = tr("VISOR_MARCADOR_RETIRADO")
 	else:
 		marcadores.append(registro_id)
-		_estado.text = "Folio marcado para recordarlo."
+		_estado.text = tr("VISOR_MARCADOR_GUARDADO")
 	_guardar_marcadores_del_caso(marcadores)
 	_guardar_o_avisar()
 	_actualizar_boton_marcador()
@@ -71,6 +71,6 @@ func _actualizar_boton_marcador() -> void:
 	var registro_id := String(registro_actual.get("id", ""))
 	_marcar.disabled = registro_id.is_empty() or not _esta_leido(registro_id)
 	if not _marcar.disabled and _marcadores_del_caso().has(registro_id):
-		_marcar.text = "★ Quitar marcador"
+		_marcar.text = tr("VISOR_QUITAR_MARCADOR")
 	else:
-		_marcar.text = "☆ Marcar folio"
+		_marcar.text = tr("VISOR_MARCAR_FOLIO")
