@@ -5,7 +5,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 MENU = ROOT / "godot" / "guion" / "menu_global.gd"
 PROJECT = ROOT / "godot" / "project.godot"
-TEXTOS = ROOT / "godot" / "datos" / "menu_textos.csv"
+TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
 
 
 class MenuGlobalTest(unittest.TestCase):
@@ -34,8 +34,9 @@ class MenuGlobalTest(unittest.TestCase):
         self.assertIn('"volumen"', self.menu)
         self.assertIn('"reduccion_movimiento"', self.menu)
 
-    def test_textos_separados_y_traducibles(self):
-        self.assertIn("menu_textos.es.translation", self.project)
+    def test_textos_compartidos_y_traducibles(self):
+        self.assertIn('locale/translations=PackedStringArray("res://datos/textos.es.translation")', self.project)
+        self.assertNotIn("menu_textos.es.translation", self.project)
         for clave in (
             "MENU_GLOBAL_TITULO",
             "MENU_GLOBAL_CONTINUAR",
