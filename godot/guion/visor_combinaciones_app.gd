@@ -87,18 +87,14 @@ func _al_relacionar() -> void:
 		var pista_id := String(relacion["id"])
 		if descubiertas.has(pista_id):
 			_estado.text = _feedback_relacion(
-				primero,
-				segundo,
-				tr("VISOR_RELACION_YA_REGISTRADA") % relacion["descripcion"]
+				primero, segundo, tr("VISOR_RELACION_YA_REGISTRADA") % relacion["descripcion"]
 			)
 		else:
 			descubiertas.append(pista_id)
 			_refrescar_archivo()
 			_guardar_o_avisar()
 			_estado.text = _feedback_relacion(
-				primero,
-				segundo,
-				tr("VISOR_RELACION_REGISTRADA") % relacion["descripcion"]
+				primero, segundo, tr("VISOR_RELACION_REGISTRADA") % relacion["descripcion"]
 			)
 
 
