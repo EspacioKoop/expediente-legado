@@ -85,7 +85,15 @@ func _montar_cabina() -> void:
 	_caja("RellanoDer", Vector3(1.82, 0, -3.15), Vector3(0.12, 3.0, 2.5), PORTAL)
 	_caja("RellanoTecho", Vector3(0, 1.52, -3.15), Vector3(3.6, 0.12, 2.5), PORTAL)
 	_caja("FondoPortal", Vector3(0, 0, -4.36), Vector3(3.6, 3.0, 0.10), PORTAL)
-	_caja("SalidaExterior", Vector3(0, -0.05, -4.28), Vector3(1.85, 2.40, 0.04), EXTERIOR, 0.0, 1.0, true)
+	_caja(
+		"SalidaExterior",
+		Vector3(0, -0.05, -4.28),
+		Vector3(1.85, 2.40, 0.04),
+		EXTERIOR,
+		0.0,
+		1.0,
+		true
+	)
 
 	_luz_techo = OmniLight3D.new()
 	_luz_techo.name = "FluorescenteCabina"
