@@ -37,9 +37,12 @@ static func url_configurada(configuracion: Dictionary = {}) -> String:
 static func texto_fallback(configuracion: Dictionary = {}) -> String:
 	var datos := configuracion if not configuracion.is_empty() else cargar_configuracion()
 	return String(
-		datos.get(
-			"fallback",
-			"Copie o guarde el parte y envíelo por el canal de pruebas acordado.",
+		(
+			datos
+			. get(
+				"fallback",
+				"Copie o guarde el parte y envíelo por el canal de pruebas acordado.",
+			)
 		)
 	)
 
@@ -64,9 +67,8 @@ static func diagnostico(escena: String, reduccion_movimiento: bool) -> Dictionar
 		"godot": version_godot,
 		"plataforma": plataforma_generica(OS.get_name()),
 		"escena": escena_segura(escena),
-		"renderer": String(
-			ProjectSettings.get_setting("rendering/renderer/rendering_method", "desconocido")
-		),
+		"renderer":
+		String(ProjectSettings.get_setting("rendering/renderer/rendering_method", "desconocido")),
 		"reduccion_movimiento": reduccion_movimiento,
 	}
 	return filtrar_diagnostico(candidato)
