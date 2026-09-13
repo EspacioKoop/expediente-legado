@@ -41,11 +41,7 @@ static func zumbido_archivo() -> AudioStreamWAV:
 		# La amplitud es deliberadamente pequeña: debe llenar el silencio, no
 		# competir con documentos, pasos o diálogos.
 		var ruido := float(((i * 1103515245 + 12345) >> 16) & 0x7FFF) / 16384.0 - 1.0
-		var muestra := (
-			sin(TAU * 50.0 * t) * 0.055
-			+ sin(TAU * 100.0 * t) * 0.018
-			+ ruido * 0.006
-		)
+		var muestra := sin(TAU * 50.0 * t) * 0.055 + sin(TAU * 100.0 * t) * 0.018 + ruido * 0.006
 		var valor := int(clampf(muestra, -1.0, 1.0) * 32767.0)
 		if valor < 0:
 			valor += 65536
