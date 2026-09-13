@@ -154,19 +154,18 @@ BuclePrincipal:
 RenderVBlank:
     call ActualizarOAM
 
-    ld a, [wHudDirty]
-    or a
-    jr z, .decor
-    xor a
-    ld [wHudDirty], a
-    call DibujarHUD
-.decor:
+    ; OAM + HUD + decorado completo exceden los 4560 ciclos de VBlank.
+    ; Priorizar un paso acotado de decorado; el HUD espera al siguiente frame.
     ld a, [wDecorDirty]
+    or a
+    jp nz, ActualizarDecoradoVBlank
+
+    ld a, [wHudDirty]
     or a
     ret z
     xor a
-    ld [wDecorDirty], a
-    call DibujarDecorado
+    ld [wHudDirty], a
+    call DibujarHUD
     ret
 
 EstadoTitulo:
@@ -474,7 +473,8 @@ ActualizarEtapa:
     ret z
     ld a, b
     ld [wStage], a
-    ld a, 1
+    ; Tres filas de borrado y un frame para pintar el nuevo decorado.
+    ld a, 4
     ld [wDecorDirty], a
     call SonidoCheckpoint
     ret
@@ -699,6 +699,7 @@ BorrarDecorado:
 
 DibujarDecorado:
     call BorrarDecorado
+PintarDecorado:
     ld a, [wStage]
     or a
     jp z, DecoradoPiramides
@@ -707,6 +708,36 @@ DibujarDecorado:
     cp 2
     jp z, DecoradoNilo
     jp DecoradoCairo
+
+ActualizarDecoradoVBlank:
+    ; 4/3/2 borran una fila visible; 1 pinta; 0 indica trabajo terminado.
+    cp 1
+    jr z, .pintar
+    ld b, a
+    ld a, 4
+    sub b
+    ld hl, BG_MAP + 32
+    ld de, 32
+    or a
+    jr z, .fila
+.buscar_fila:
+    add hl, de
+    dec a
+    jr nz, .buscar_fila
+.fila:
+    ld b, 20
+    xor a
+.borrar:
+    ld [hli], a
+    dec b
+    jr nz, .borrar
+    ld hl, wDecorDirty
+    dec [hl]
+    ret
+.pintar:
+    xor a
+    ld [wDecorDirty], a
+    jp PintarDecorado
 
 DecoradoPiramides:
     ld a, TILE_PYR_L
@@ -947,8 +978,9 @@ BorrarOAMParcial:
 LimpiarBG:
     ld hl, BG_MAP
     ld bc, 32 * 32
-    xor a
 .loop:
+    ; El OR del contador modifica A: cada celda debe recibir tile 0.
+    xor a
     ld [hli], a
     dec bc
     ld a, b

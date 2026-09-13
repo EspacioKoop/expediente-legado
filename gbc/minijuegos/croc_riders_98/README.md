@@ -20,6 +20,9 @@ En pista aparecen dos rivales cocodrilo en motocicleta y tráfico/obstáculos di
 La primera versión compilable resultaba difícil de leer y mostraba parpadeo. La revisión actual cambia el render de forma estructural:
 
 - OAM se actualiza únicamente al comienzo de **VBlank**;
+- los checkpoints reparten el decorado entre cuatro VBlank (tres filas de
+  borrado y una de pintado); el HUD pendiente se refresca a continuación,
+  sin detener el movimiento ni acumular todo el trabajo en un solo frame;
 - la carrera usa sprites **8x16**, reduciendo cada cocodrilo de cuatro sprites a dos;
 - el máximo normal queda en **9 sprites simultáneos por scanline**: jugador 2, llama 1, rivales 4 y obstáculo 2;
 - desaparece el parpadeo voluntario durante la invulnerabilidad: el cocodrilo nunca se oculta tras recibir un golpe;
@@ -63,3 +66,26 @@ build/croc_riders_98.gbc
 ```
 
 La cabecera anuncia compatibilidad Game Boy Color (`0x80`).
+
+## Pruebas de regresión
+
+Con RGBDS disponible, ejecutar desde esta carpeta:
+
+```bash
+python3 -m venv /tmp/croc-riders-tests
+/tmp/croc-riders-tests/bin/python -m pip install pyboy==2.6.1
+make clean
+make test PYTHON=/tmp/croc-riders-tests/bin/python
+```
+
+Las pruebas arrancan copias temporales de la ROM compilada en modos DMG y
+CGB. Comprueban las celdas vacías de la portada y recorren los cambios de
+etapa en las distancias 24, 46 y 68 con nitro y puntuación 99. Se instrumentan
+las instrucciones de escritura a memoria del código máquina para verificar
+que los accesos a OAM/VRAM con LCD encendida ocurren en VBlank. También se
+comprueban el decorado final, el HUD y la finalización del trabajo pendiente.
+
+PyBoy es solo una dependencia de pruebas, no se distribuye con la ROM.
+El workflow GBC compila el cartucho; la regresión se ejecuta explícitamente
+con `make test`. Estas comprobaciones no sustituyen el playtest visual ni
+la prueba con mando o hardware físico.
