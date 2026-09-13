@@ -38,25 +38,18 @@ func _probar_estado_y_fuentes() -> void:
 
 func _probar_pista_de_un_origen() -> void:
 	var caso := {
-		"pistas": [
-			{"id": "P-1", "descripcion": "el sello aparece dos veces", "registroOrigen": "F-1"}
-		]
+		"pistas":
+		[{"id": "P-1", "descripcion": "el sello aparece dos veces", "registroOrigen": "F-1"}]
 	}
-	var resultado := Pista.resolver(
-		caso, {"state": "completado", "source_ids": ["F-1"]}
-	)
+	var resultado := Pista.resolver(caso, {"state": "completado", "source_ids": ["F-1"]})
 	_comprobar(
-		resultado.get("id", "") == "P-1",
-		"#161 puede recontextualizar una pista de su único folio"
+		resultado.get("id", "") == "P-1", "#161 puede recontextualizar una pista de su único folio"
 	)
 	_comprobar(
 		resultado.get("descripcion", "") == "el sello aparece dos veces",
 		"conserva la descripción catalogada"
 	)
-	_comprobar(
-		resultado.get("fuentes", []) == ["F-1"],
-		"devuelve únicamente el origen catalogado"
-	)
+	_comprobar(resultado.get("fuentes", []) == ["F-1"], "devuelve únicamente el origen catalogado")
 
 	var duplicadas := Pista.resolver(
 		caso, {"state": "completado", "source_ids": ["F-1", "F-1", ""]}
@@ -66,7 +59,8 @@ func _probar_pista_de_un_origen() -> void:
 
 func _probar_relacion_de_dos_origenes() -> void:
 	var caso := {
-		"pistas": [
+		"pistas":
+		[
 			{
 				"id": "P-2",
 				"descripcion": "las fechas no encajan",
@@ -75,17 +69,12 @@ func _probar_relacion_de_dos_origenes() -> void:
 			}
 		]
 	}
-	var completa := Pista.resolver(
-		caso, {"state": "completado", "source_ids": ["F-2", "F-1"]}
-	)
+	var completa := Pista.resolver(caso, {"state": "completado", "source_ids": ["F-2", "F-1"]})
 	_comprobar(
 		completa.get("id", "") == "P-2",
 		"una relación se concede cuando ambos orígenes participaron"
 	)
-	_comprobar(
-		completa.get("fuentes", []) == ["F-1", "F-2"],
-		"conserva los dos orígenes catalogados"
-	)
+	_comprobar(completa.get("fuentes", []) == ["F-1", "F-2"], "conserva los dos orígenes catalogados")
 	_comprobar(
 		Pista.resolver(caso, {"state": "completado", "source_ids": ["F-1"]}).is_empty(),
 		"una relación no se concede con solo uno de sus orígenes"
@@ -106,7 +95,8 @@ func _probar_catalogo_invalido() -> void:
 	)
 
 	var segundo_vacio := {
-		"pistas": [
+		"pistas":
+		[
 			{
 				"id": "P-X",
 				"descripcion": "relación",
@@ -121,7 +111,8 @@ func _probar_catalogo_invalido() -> void:
 	)
 
 	var mismo_origen := {
-		"pistas": [
+		"pistas":
+		[
 			{
 				"id": "P-X",
 				"descripcion": "relación",
@@ -139,10 +130,7 @@ func _probar_catalogo_invalido() -> void:
 func _probar_registro_idempotente() -> void:
 	var estado := {"pistas_descubiertas": []}
 	_comprobar(Pista.registrar(estado, {"id": "P-1"}), "registra una recompensa catalogada")
-	_comprobar(
-		estado["pistas_descubiertas"] == ["P-1"],
-		"persiste únicamente el id de la pista"
-	)
+	_comprobar(estado["pistas_descubiertas"] == ["P-1"], "persiste únicamente el id de la pista")
 	_comprobar(
 		Pista.registrar(estado, {"id": "P-1"}),
 		"repetir el registro sigue siendo una operación válida"
@@ -151,13 +139,9 @@ func _probar_registro_idempotente() -> void:
 
 	var legado := {}
 	_comprobar(
-		Pista.registrar(legado, {"id": "P-2"}),
-		"inicializa la lista ausente de una partida antigua"
+		Pista.registrar(legado, {"id": "P-2"}), "inicializa la lista ausente de una partida antigua"
 	)
-	_comprobar(
-		legado["pistas_descubiertas"] == ["P-2"],
-		"la migración mínima conserva solo el id"
-	)
+	_comprobar(legado["pistas_descubiertas"] == ["P-2"], "la migración mínima conserva solo el id")
 
 	var roto := {"pistas_descubiertas": {}}
 	_comprobar(
