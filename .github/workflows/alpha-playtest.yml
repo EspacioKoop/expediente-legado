@@ -101,6 +101,9 @@ jobs:
           unzip -q "$plantillas" -d "$RUNNER_TEMP/export-templates"
           cp -a "$RUNNER_TEMP/export-templates/templates/." "$template_dir/"
 
+      - name: Importar proyecto antes del smoke
+        run: godot4 --headless --editor --path godot --quit
+
       - name: Smoke de Caza Píxeles 98 antes de exportar
         run: godot4 --headless --path godot --script res://pruebas/emulador_gb_smoke.gd
 
