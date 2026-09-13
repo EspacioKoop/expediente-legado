@@ -33,9 +33,7 @@ static func sincronizar(jornada: Dictionary, conceptos: Array) -> bool:
 		var indice := fichas.size()
 		var columna := indice % 4
 		var fila := indice / 4
-		fichas[id] = {
-			"pos": [float(columna) * 0.82 - 1.23, 0.55 - float(fila) * 0.58]
-		}
+		fichas[id] = {"pos": [float(columna) * 0.82 - 1.23, 0.55 - float(fila) * 0.58]}
 		cambio = true
 	return cambio
 
