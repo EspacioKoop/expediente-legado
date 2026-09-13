@@ -1,14 +1,15 @@
 ## Utilería doméstica procedural para dar lectura 3D a la casa (#282).
 ##
 ## Los objetos siguen construidos con primitivas simples y sin assets externos.
-## La lámpara reutiliza además la interacción común de #283 sin introducir
-## persistencia ni reglas de jornada.
+## La lámpara y la portátil reutilizan además la interacción común de #283 sin
+## introducir persistencia ni reglas de jornada.
 class_name CasaUtileria
 extends RefCounted
 
 
 static func montar(raiz: Node3D) -> void:
 	_montar_mesita(raiz, Vector3(1.7, 0.0, -2.1))
+	_montar_portatil(raiz, Vector3(1.7, 0.68, -2.1))
 	_montar_lampara_pie(raiz, Vector3(3.0, 0.0, -1.3))
 
 
@@ -24,6 +25,15 @@ static func _montar_mesita(raiz: Node3D, pos: Vector3) -> void:
 			_agregar_caja(
 				mesa, Vector3(x, 0.28, z), Vector3(0.10, 0.56, 0.10), Color(0.27, 0.19, 0.14)
 			)
+
+
+static func _montar_portatil(raiz: Node3D, pos: Vector3) -> void:
+	var portatil := ConsolaPortatil98.new()
+	portatil.name = "ConsolaPortatil98"
+	portatil.position = pos
+	portatil.rotation_degrees = Vector3(-12.0, 18.0, 0.0)
+	raiz.add_child(portatil)
+	portatil.configurar()
 
 
 static func _montar_lampara_pie(raiz: Node3D, pos: Vector3) -> void:
