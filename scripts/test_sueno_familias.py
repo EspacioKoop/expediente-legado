@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import unittest
 
 
@@ -30,8 +31,8 @@ class SuenoFamiliasTest(unittest.TestCase):
         self.assertGreaterEqual(self.texto.count('"anclas": ['), 3)
 
     def test_anular_declara_hueco_y_fragmentada_fragmentos(self):
-        self.assertIn('"hueco": PackedVector2Array', self.texto)
-        self.assertIn('"fragmentos": [', self.texto)
+        self.assertRegex(self.texto, re.compile(r'"hueco"\s*:\s*\n?\s*PackedVector2Array'))
+        self.assertRegex(self.texto, re.compile(r'"fragmentos"\s*:\s*\n?\s*\['))
 
     def test_no_toca_progreso_jornada_ni_recompensas(self):
         bloque = self.texto.lower()
