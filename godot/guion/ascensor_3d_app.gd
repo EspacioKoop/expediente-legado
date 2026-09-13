@@ -50,10 +50,20 @@ func _montar_cabina() -> void:
 	_caja("JambaDerecha", Vector3(1.62, 0, -1.9), Vector3(0.55, 3.0, 0.14), ACERO, 0.65, 0.38)
 	_caja("Dintel", Vector3(0, 1.37, -1.9), Vector3(2.75, 0.26, 0.14), ACERO, 0.65, 0.38)
 	_puerta_izquierda = _caja(
-		"PuertaIzquierda", Vector3(-0.82, -0.02, -1.84), Vector3(1.62, 2.68, 0.10), ACERO, 0.72, 0.30
+		"PuertaIzquierda",
+		Vector3(-0.82, -0.02, -1.84),
+		Vector3(1.62, 2.68, 0.10),
+		ACERO,
+		0.72,
+		0.30
 	)
 	_puerta_derecha = _caja(
-		"PuertaDerecha", Vector3(0.82, -0.02, -1.84), Vector3(1.62, 2.68, 0.10), ACERO, 0.72, 0.30
+		"PuertaDerecha",
+		Vector3(0.82, -0.02, -1.84),
+		Vector3(1.62, 2.68, 0.10),
+		ACERO,
+		0.72,
+		0.30
 	)
 	_caja("JuntaPuerta", Vector3(0, -0.02, -1.78), Vector3(0.035, 2.62, 0.025), ACERO_OSCURO)
 
