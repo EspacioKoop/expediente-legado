@@ -251,18 +251,14 @@ func _montar_asistente_siga() -> void:
 	# del gato para que la atribución de la frase sea inequívoca.
 	var puntero := Polygon2D.new()
 	puntero.name = "PunteroBocadilloGato"
-	puntero.polygon = PackedVector2Array(
-		[Vector2(342, 82), Vector2(370, 96), Vector2(342, 108)]
-	)
+	puntero.polygon = PackedVector2Array([Vector2(342, 82), Vector2(370, 96), Vector2(342, 108)])
 	puntero.color = Color(0.78, 0.79, 0.75)
 	conjunto.add_child(puntero)
 
 	var avatar := GatoAsistente2D.new()
 	avatar.name = "GatoAsistente"
 	var preferencias := PreferenciasSiga.cargar()
-	avatar.configurar(
-		GatoAyuda.nivel(gato), bool(preferencias.get("reduccion_movimiento", false))
-	)
+	avatar.configurar(GatoAyuda.nivel(gato), bool(preferencias.get("reduccion_movimiento", false)))
 	conjunto.add_child(avatar)
 
 
