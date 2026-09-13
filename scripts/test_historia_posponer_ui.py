@@ -19,9 +19,9 @@ def test_posponer_reutiliza_el_contrato_y_guarda_antes_de_cerrar() -> None:
     assert "_cerrar()" in bloque
 
 
-def test_el_boton_es_explicito_y_entra_en_el_circuito_de_foco() -> None:
+def test_el_boton_es_explicito_traducible_y_entra_en_el_circuito_de_foco() -> None:
     codigo = CAPA.read_text(encoding="utf-8")
-    assert 'text = "Decidir más tarde"' in codigo
+    assert '_posponer.text = tr("A7_VOLVER")' in codigo
     assert "botones.append(_posponer)" in codigo
     assert "focus_neighbor_top" in codigo
     assert "focus_neighbor_bottom" in codigo
