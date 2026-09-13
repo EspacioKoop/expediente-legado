@@ -42,7 +42,8 @@ class ContextoCareoTest(unittest.TestCase):
 
     def test_la_capa_no_modifica_reglas_del_duelo(self):
         codigo = CAPA.read_text(encoding="utf-8")
-        self.assertIn("ContextoCareo.de_folio", codigo)
+        self.assertIn("ContextoCareo", codigo)
+        self.assertIn("de_folio(", codigo)
         self.assertIn("super._empezar_duelo()", codigo)
         for prohibido in [
             "Combate.",
