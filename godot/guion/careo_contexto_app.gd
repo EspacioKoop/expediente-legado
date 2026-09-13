@@ -10,10 +10,13 @@ var _contexto_investigacion: Dictionary = {}
 func _ready() -> void:
 	var contenido_contexto := Contenido.new()
 	if contenido_contexto.cargar():
-		_contexto_investigacion = ContextoCareo.de_folio(
-			contenido_contexto.casos,
-			folio,
-			estado.get("pistas_descubiertas", []),
+		_contexto_investigacion = (
+			ContextoCareo
+			. de_folio(
+				contenido_contexto.casos,
+				folio,
+				estado.get("pistas_descubiertas", []),
+			)
 		)
 	super._ready()
 
