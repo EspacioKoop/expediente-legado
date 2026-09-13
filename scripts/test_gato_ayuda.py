@@ -7,6 +7,7 @@ POLITICA = ROOT / "godot" / "guion" / "gato_ayuda.gd"
 AVATAR = ROOT / "godot" / "guion" / "gato_asistente_2d.gd"
 CAPA = ROOT / "godot" / "guion" / "dia_gato_app.gd"
 CAPA_ONBOARDING = ROOT / "godot" / "guion" / "dia_onboarding_app.gd"
+CAPA_CLIMA = ROOT / "godot" / "guion" / "dia_clima_app.gd"
 ESCENA = ROOT / "godot" / "escenas" / "dia.tscn"
 
 
@@ -16,6 +17,7 @@ class GatoAyudaTest(unittest.TestCase):
         self.avatar = AVATAR.read_text(encoding="utf-8")
         self.capa = CAPA.read_text(encoding="utf-8")
         self.capa_onboarding = CAPA_ONBOARDING.read_text(encoding="utf-8")
+        self.capa_clima = CAPA_CLIMA.read_text(encoding="utf-8")
         self.escena = ESCENA.read_text(encoding="utf-8")
 
     def test_una_sola_fuente_de_estado(self):
@@ -67,7 +69,8 @@ class GatoAyudaTest(unittest.TestCase):
         self.assertNotIn("Sueno.recordar", self.capa)
 
     def test_la_escena_activa_la_nueva_capa(self):
-        self.assertIn('path="res://guion/dia_calle_app.gd"', self.escena)
+        self.assertIn('path="res://guion/dia_clima_app.gd"', self.escena)
+        self.assertIn('extends "res://guion/dia_calle_app.gd"', self.capa_clima)
         calle = (ROOT / "godot/guion/dia_calle_app.gd").read_text(encoding="utf-8")
         self.assertIn('extends "res://guion/dia_onboarding_app.gd"', calle)
         self.assertIn('extends "res://guion/dia_gato_app.gd"', self.capa_onboarding)
