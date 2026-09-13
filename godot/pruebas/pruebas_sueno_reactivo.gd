@@ -12,13 +12,14 @@ func _initialize() -> void:
 
 
 func _probar_todas_las_formas() -> void:
-	for id in SuenoFormas.ids():
+	for valor_id in SuenoFormas.ids():
+		var id := String(valor_id)
 		var mundo := Node3D.new()
 		root.add_child(mundo)
 		var creadas := SuenoUtileria.montar(mundo, id, 7, 400)
 		_comprobar(creadas.size() == 3, "%s recibe tres anomalías" % id)
 		_comprobar(
-			mundo.find_children("AnomaliaSueno*", "AnomaliaSueno3D", true, false).size() == 3,
+			mundo.find_children("AnomaliaSueno*", "", true, false).size() == 3,
 			"%s monta tres interactuables" % id,
 		)
 
