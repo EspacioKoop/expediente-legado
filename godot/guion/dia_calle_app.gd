@@ -47,26 +47,31 @@ func _bultos_calle() -> Array:
 			"color": Color(0.38, 0.37, 0.36),
 		},
 		# Fachadas discontinuas, con distintas alturas y retranqueos. Dejan cielo
-		# visible entre edificios y rompen la lectura de corredor uniforme.
+		# visible entre edificios y rompen la lectura de corredor uniforme. El
+		# revoco CC0 ya versionado evita que sigan siendo bloques de color plano.
 		{
 			"pos": Vector3(-6.3, 2.1, -11.5),
 			"tam": Vector3(2.2, 4.2, 7.0),
 			"color": Color(0.31, 0.27, 0.25),
+			"textura": "gotele",
 		},
 		{
 			"pos": Vector3(-6.7, 2.8, 9.0),
 			"tam": Vector3(2.4, 5.6, 10.0),
 			"color": Color(0.27, 0.28, 0.31),
+			"textura": "gotele",
 		},
 		{
 			"pos": Vector3(6.5, 2.5, -8.5),
 			"tam": Vector3(2.0, 5.0, 9.0),
 			"color": Color(0.30, 0.29, 0.27),
+			"textura": "gotele",
 		},
 		{
 			"pos": Vector3(6.8, 1.9, 8.5),
 			"tam": Vector3(2.5, 3.8, 9.0),
 			"color": Color(0.26, 0.25, 0.27),
+			"textura": "gotele",
 		},
 		# Tienda de electrodomésticos: fondo y marco dejan un hueco real entre
 		# fachada y cristal, de modo que las televisiones son visibles dentro del
@@ -75,6 +80,7 @@ func _bultos_calle() -> Array:
 			"pos": Vector3(-6.65, 1.70, -1.5),
 			"tam": Vector3(0.35, 3.40, 7.0),
 			"color": Color(0.24, 0.22, 0.21),
+			"textura": "gotele",
 		},
 		{
 			"pos": Vector3(-5.58, 0.35, -1.5),
@@ -127,16 +133,19 @@ func _bultos_calle() -> Array:
 			"pos": Vector3(-1.15, 1.55, 15.8),
 			"tam": Vector3(0.45, 3.1, 0.55),
 			"color": Color(0.42, 0.38, 0.32),
+			"textura": "gotele",
 		},
 		{
 			"pos": Vector3(1.15, 1.55, 15.8),
 			"tam": Vector3(0.45, 3.1, 0.55),
 			"color": Color(0.42, 0.38, 0.32),
+			"textura": "gotele",
 		},
 		{
 			"pos": Vector3(0, 2.95, 15.8),
 			"tam": Vector3(2.75, 0.35, 0.55),
 			"color": Color(0.42, 0.38, 0.32),
+			"textura": "gotele",
 		},
 	]
 
