@@ -81,19 +81,31 @@ const TRIANGULOS: Array[Vector3i] = [
 	Vector3i(43, 40, 41)
 ]
 
+static var _malla_compartida: ArrayMesh
+
 
 static func crear(color: Color) -> MeshInstance3D:
+	var instancia := MeshInstance3D.new()
+	instancia.mesh = _obtener_malla_compartida()
+	# Es dressing de fachada, no un objeto de gameplay: sin colisión y sin pasada
+	# de sombras adicional. Cada instancia mantiene un único material/superficie.
+	instancia.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var material := ShaderMaterial.new()
+	material.shader = load(Espacio3D.SHADER_PSX)
+	material.set_shader_parameter("color_base", color)
+	instancia.material_override = material
+	return instancia
+
+
+static func _obtener_malla_compartida() -> ArrayMesh:
+	if _malla_compartida != null:
+		return _malla_compartida
+
 	var superficie := SurfaceTool.new()
 	superficie.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for triangulo in TRIANGULOS:
 		for indice in [triangulo.x, triangulo.y, triangulo.z]:
 			superficie.add_vertex(VERTICES[indice])
 	superficie.generate_normals()
-
-	var instancia := MeshInstance3D.new()
-	instancia.mesh = superficie.commit()
-	var material := ShaderMaterial.new()
-	material.shader = load(Espacio3D.SHADER_PSX)
-	material.set_shader_parameter("color_base", color)
-	instancia.material_override = material
-	return instancia
+	_malla_compartida = superficie.commit()
+	return _malla_compartida
