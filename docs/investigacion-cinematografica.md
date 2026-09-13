@@ -1,6 +1,6 @@
 # Investigación cinematográfica aplicada
 
-Este documento versiona entregas parciales de la investigación de #177. No pretende cerrar el issue ni implementar las cinemáticas pendientes: convierte el análisis del hilo en criterios reutilizables para futuros PR.
+Este documento versiona la investigación de #177 y su estado de adopción. No es una cola de implementación paralela: convierte el análisis del hilo en criterios reutilizables y registra qué ideas ya llegaron a `main`, cuáles pertenecen a issues de implementación y cuáles siguen siendo solo referencias de dirección.
 
 ## Principios transferibles
 
@@ -85,17 +85,19 @@ Toda escena derivada de esta investigación debería cumplir estas reglas:
 
 Plano fijo breve del espacio de salida, un microevento de luz o sonido y corte al exterior. El cambio de fluorescente a calle, de linóleo a asfalto y de zumbido a ambiente exterior debe comunicar el cambio de bloque sin añadir exposición.
 
-No requiere decidir todavía la implementación de #72: este prototipo solo fija lenguaje de dirección.
+No debe abrir ahora un sistema paralelo. La puesta en escena concreta pertenece al trabajo de cinemáticas 3D de #395 y debe coordinarse con la identidad espacial de #277/#398.
 
 ### Casa → sueño
 
 Repetir el mismo encuadre de casa y alterar únicamente parámetros de presentación ya disponibles: luz, niebla, sonido y, si procede, presencia o ausencia de un objeto persistido. La escena no inventa pistas; deforma lo conocido.
 
-No sustituye #74 ni #87: sirve como criterio para sus futuras implementaciones.
+El principio de repetición con variación ya llegó a `main` mediante #311: la entrada al sueño presenta únicamente folios leídos y, si no hay lecturas, varía la presentación sin inventar un expediente. La conversión espacial 3D y su puesta en escena pertenecen a #395; el contenido onírico sigue perteneciendo a #87.
 
 ### Cierre de jornada
 
 Rematar el día con una pieza breve y fría: pantalla SIGA, sonido mecánico y un plano final del espacio u objeto recurrente. Debe registrar, no juzgar. Nada de notas, estrellas o clasificación moral.
+
+No es un P0 autónomo mientras el playtest siga señalando problemas de control, HUD, identidad espacial y cinemáticas principales. Solo debe abrirse como implementación separada si un gate de recorrido demuestra que el cierre diario es un problema real; #177 no autoriza por sí solo otro modal o sistema de resultados.
 
 ## Matriz de riesgo ampliada
 
@@ -126,13 +128,43 @@ No debe convertirse implícitamente en:
 
 La segunda forma requiere diseño propio, criterios de aceptación y, normalmente, un issue separado.
 
+## Estado de adopción
+
+La investigación ya no parte de cero. A fecha de esta actualización:
+
+| Entrega | Estado | Consecuencia |
+| --- | --- | --- |
+| Matriz inicial de técnicas, riesgos y tres prototipos (#246) | Integrada | Este documento es la fuente versionada de las guardas de dirección |
+| *Steins;Gate*, Lain PS1 y continuidad inspirada por Kojima (#247) | Integrada | Queda fijada la frontera `estado persistido -> variante de presentación` |
+| Repetición con variación casa → sueño (#311) | Integrada y probada | Primer principio de #177 que llegó a gameplay real; no se debe reimplementar en otro sistema |
+| Comparación jugable de Evangelion (#329) | Integrada | Completa la entrega pendiente de adaptaciones jugables y refuerza estado/determinismo/accesibilidad |
+| Cinemáticas 3D prioritarias (#395) | En implementación independiente | #177 aporta criterios; #395 es dueño de cámara, continuidad espacial y puesta en escena ejecutable |
+
+Por tanto, #177 **no debe generar más PR de código por inspiración aislada**. Una técnica solo pasa a implementación si resuelve un problema observado y el issue dueño de ese problema la adopta. Esto evita competir con el plan maestro y evita que la investigación se convierta en expansión opcional.
+
+### Gate restante de investigación
+
+La parte documental está suficientemente cubierta. El único gate propio que queda es comprobar, durante los próximos playtests de cinemáticas, que las guardas anteriores se cumplen en la práctica:
+
+- saltar una escena no cambia estado ni pierde progreso;
+- la alternativa de movimiento reducido conserva información y continuidad;
+- ninguna variación revela información no conocida;
+- una persona que no conozca las referencias externas entiende la escena;
+- las escenas recurrentes no se vuelven más largas o invasivas con la repetición.
+
+Si esos puntos se validan bajo #395/#280, #177 puede cerrarse como investigación completada sin exigir un cuarto prototipo independiente.
+
 ## Fronteras con otros issues
 
 - #66: reproductor y reglas comunes de cinemáticas.
 - #67: ritmo, salto y acortado reutilizable.
-- #72 y #74: implementación concreta de transiciones 3D.
+- #72 y #74: antecedentes de implementación concreta de transiciones.
 - #87: contenido y reglas de deformación del sueño.
 - #92: uso del gato como elemento recurrente.
 - #98, #100 y #140: finales, presentación de resultados y otros sistemas relacionados.
+- #177: investigación, guardas y trazabilidad de adopción; no es dueño de gameplay nuevo.
+- #280: validación de transiciones/cinemáticas en export.
+- #395: implementación P0 de cinemáticas 3D prioritarias.
+- #398/#399: identidad espacial y materiales sobre los que se rueda la puesta en escena.
 
-Esta entrega sigue siendo deliberadamente documental. Los siguientes pasos de #177 pueden dividirse en PR independientes: una comparación jugable adicional de Evangelion, un único microprototipo de repetición con variación y pruebas específicas de accesibilidad.
+Los próximos cambios de comportamiento deben vivir en el issue que posea el problema observado. #177 queda como referencia de dirección y como checklist de validación, no como backlog de features.
