@@ -119,9 +119,7 @@ func _archivar_en(actor: Node, host, archivador: ArchivadorInteractivo3D) -> voi
 	if _carpeta_archivado.get_parent() != actor.get_node_or_null("Camara"):
 		return
 	var destino := String(archivador.get_meta("destino_archivado", ""))
-	var correcta := ArchivadoBandeja.colocar(
-		_estado_archivado, _carpeta_archivado.caso, destino
-	)
+	var correcta := ArchivadoBandeja.colocar(_estado_archivado, _carpeta_archivado.caso, destino)
 	if not correcta:
 		host._nomina.text = _texto("destino_incorrecto")
 		_marcar_archivador(archivador, false)
