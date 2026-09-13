@@ -1,8 +1,8 @@
 ## Utilería doméstica procedural para dar lectura 3D a la casa (#282).
 ##
 ## Los objetos siguen construidos con primitivas simples y sin assets externos.
-## La lámpara y la portátil reutilizan además la interacción común de #283 sin
-## introducir persistencia ni reglas de jornada.
+## La lámpara, el televisor y la portátil reutilizan además la interacción común
+## de #283 sin introducir persistencia ni reglas de jornada.
 class_name CasaUtileria
 extends RefCounted
 
@@ -11,6 +11,7 @@ static func montar(raiz: Node3D) -> void:
 	_montar_mesita(raiz, Vector3(1.7, 0.0, -2.1))
 	_montar_portatil(raiz, Vector3(1.7, 0.68, -2.1))
 	_montar_lampara_pie(raiz, Vector3(3.0, 0.0, -1.3))
+	_montar_televisor_interactivo(raiz)
 
 
 static func _montar_mesita(raiz: Node3D, pos: Vector3) -> void:
@@ -34,6 +35,20 @@ static func _montar_portatil(raiz: Node3D, pos: Vector3) -> void:
 	portatil.rotation_degrees = Vector3(-12.0, 18.0, 0.0)
 	raiz.add_child(portatil)
 	portatil.configurar()
+
+
+## El catálogo sigue siendo dueño de la posición y el tamaño del televisor.
+## Aquí solo se superpone un volumen enfocable y el feedback luminoso local.
+static func _montar_televisor_interactivo(raiz: Node3D) -> void:
+	for bulto in EspaciosCatalogo.CASA.get("bultos", []):
+		if String(bulto.get("modelo", "")) != "televisionVintage":
+			continue
+		var televisor := TelevisionInteractiva3D.new()
+		televisor.name = "TelevisorCasaInteractuable"
+		televisor.position = bulto["pos"]
+		raiz.add_child(televisor)
+		televisor.configurar(bulto["tam"])
+		return
 
 
 static func _montar_lampara_pie(raiz: Node3D, pos: Vector3) -> void:
