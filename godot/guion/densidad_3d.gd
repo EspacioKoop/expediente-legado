@@ -37,13 +37,16 @@ static func priorizar(espacio: Dictionary, limite: int = 5) -> Array:
 		if not String(bulto.get("modelo", "")).is_empty():
 			continue
 		var tam: Vector3 = bulto.get("tam", Vector3.ZERO)
-		candidatos.append(
-			{
-				"indice": indice,
-				"volumen": absf(tam.x * tam.y * tam.z),
-				"pos": bulto.get("pos", Vector3.ZERO),
-				"tam": tam,
-			}
+		(
+			candidatos
+			. append(
+				{
+					"indice": indice,
+					"volumen": absf(tam.x * tam.y * tam.z),
+					"pos": bulto.get("pos", Vector3.ZERO),
+					"tam": tam,
+				}
+			)
 		)
 	candidatos.sort_custom(
 		func(a: Dictionary, b: Dictionary) -> bool:
