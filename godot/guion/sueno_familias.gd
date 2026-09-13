@@ -10,7 +10,10 @@ const CONVERGENTE := "convergente"
 const ANULAR := "anular"
 const FRAGMENTADA := "fragmentada"
 
-const FAMILIAS := {
+## Los PackedVector2Array se construyen en tiempo de carga y Godot 4.7 no los
+## acepta dentro de una expresión `const`. El catálogo sigue siendo de solo
+## lectura por API; se expone siempre mediante copia profunda en `de()`.
+static var FAMILIAS := {
 	CONVERGENTE: {
 		"contorno": PackedVector2Array([
 			Vector2(-15, -18),
