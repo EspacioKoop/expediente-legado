@@ -5,13 +5,19 @@
 ## Vive como autoload para no duplicarse entre las tres partes del juego.
 extends CanvasLayer
 
+const RUTA_PRESENTACION_SELLOS := "res://datos/sellos_presentacion.json"
+
 var _preferencias: Dictionary = {}
+var _presentacion_sellos: Dictionary = {}
 var _fondo: ColorRect
 var _panel_principal: PanelContainer
 var _panel_opciones: PanelContainer
+var _panel_sellos: PanelContainer
 var _continuar: Button
 var _opciones: Button
+var _sellos: Button
 var _volver: Button
+var _sellos_volver: Button
 var _salir: Button
 var _volumen: HSlider
 var _reduccion: CheckButton
@@ -27,6 +33,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 100
 	_preferencias = PreferenciasSiga.cargar()
+	_presentacion_sellos = _cargar_presentacion_sellos()
 	PreferenciasSiga.aplicar(_preferencias)
 	_aplicar_volumen()
 	_montar()
@@ -79,6 +86,12 @@ func _montar() -> void:
 	var opciones := _caja(_panel_opciones)
 	_opciones_contenido(opciones)
 
+	_panel_sellos = _crear_panel()
+	_panel_sellos.visible = false
+	centro.add_child(_panel_sellos)
+	var sellos := _caja(_panel_sellos)
+	_sellos_contenido(sellos)
+
 
 func _crear_panel() -> PanelContainer:
 	var panel := PanelContainer.new()
@@ -118,6 +131,11 @@ func _principal_contenido(caja: VBoxContainer) -> void:
 	_opciones.pressed.connect(_mostrar_opciones)
 	caja.add_child(_opciones)
 
+	_sellos = Button.new()
+	_sellos.text = String(_presentacion_sellos.get("titulo", ""))
+	_sellos.pressed.connect(_mostrar_sellos)
+	caja.add_child(_sellos)
+
 	_salir = Button.new()
 	_salir.text = tr("MENU_GLOBAL_SALIR")
 	_salir.pressed.connect(func(): get_tree().quit())
@@ -155,6 +173,50 @@ func _opciones_contenido(caja: VBoxContainer) -> void:
 	_volver.text = tr("MENU_GLOBAL_VOLVER")
 	_volver.pressed.connect(_mostrar_principal)
 	caja.add_child(_volver)
+
+
+func _sellos_contenido(caja: VBoxContainer) -> void:
+	var titulo := Label.new()
+	titulo.text = String(_presentacion_sellos.get("titulo", ""))
+	caja.add_child(titulo)
+
+	var subtitulo := Label.new()
+	subtitulo.text = String(_presentacion_sellos.get("subtitulo", ""))
+	caja.add_child(subtitulo)
+
+	for entrada in Sellos.catalogo():
+		var fila := Label.new()
+		fila.name = "Sello_%s" % String(entrada.get("id", "sin-id"))
+		fila.text = _texto_sello(entrada)
+		caja.add_child(fila)
+
+	_sellos_volver = Button.new()
+	_sellos_volver.text = tr("MENU_GLOBAL_VOLVER")
+	_sellos_volver.pressed.connect(_mostrar_principal)
+	caja.add_child(_sellos_volver)
+
+
+func _cargar_presentacion_sellos() -> Dictionary:
+	var datos = JSON.parse_string(FileAccess.get_file_as_string(RUTA_PRESENTACION_SELLOS))
+	return datos if datos is Dictionary else {}
+
+
+func _texto_sello(entrada: Dictionary) -> String:
+	var sello_id := String(entrada.get("id", ""))
+	var obtenido := Sellos.tiene_sello(_estado_partida_actual(), sello_id)
+	var marca := "◆" if obtenido else "◇"
+	var nombre := sello_id.replace("-", " ").capitalize()
+	return "%s  %s" % [marca, nombre]
+
+
+func _estado_partida_actual() -> Dictionary:
+	var escena := get_tree().current_scene
+	if escena == null:
+		return {}
+	var partida_actual = escena.get("partida")
+	if partida_actual is Partida:
+		return partida_actual.estado
+	return {}
 
 
 func _montar_remapeo(caja: VBoxContainer) -> void:
@@ -254,6 +316,7 @@ func _abrir() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_panel_principal.visible = true
 	_panel_opciones.visible = false
+	_panel_sellos.visible = false
 	_fondo.visible = true
 	get_tree().paused = true
 	_continuar.grab_focus()
@@ -273,13 +336,22 @@ func _cerrar() -> void:
 
 func _mostrar_opciones() -> void:
 	_panel_principal.visible = false
+	_panel_sellos.visible = false
 	_panel_opciones.visible = true
 	_volumen.grab_focus()
+
+
+func _mostrar_sellos() -> void:
+	_panel_principal.visible = false
+	_panel_opciones.visible = false
+	_panel_sellos.visible = true
+	_sellos_volver.grab_focus()
 
 
 func _mostrar_principal() -> void:
 	_cancelar_captura()
 	_panel_opciones.visible = false
+	_panel_sellos.visible = false
 	_panel_principal.visible = true
 	_opciones.grab_focus()
 

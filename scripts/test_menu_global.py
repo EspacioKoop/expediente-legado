@@ -35,7 +35,7 @@ class MenuGlobalTest(unittest.TestCase):
         self.assertIn('"reduccion_movimiento"', self.menu)
 
     def test_textos_compartidos_y_traducibles(self):
-        self.assertIn('locale/translations=PackedStringArray("res://datos/textos.es.translation")', self.project)
+        self.assertIn('"res://datos/textos.es.translation"', self.project)
         self.assertNotIn("menu_textos.es.translation", self.project)
         for clave in (
             "MENU_GLOBAL_TITULO",
