@@ -73,6 +73,7 @@ compilar_nativo() {
             platform="$plataforma" \
             target="$objetivo" \
             arch=x86_64 \
+            build_profile=build_profile.json \
             godot_cpp_dir="$GODOT_CPP" \
             peanut_gb_dir="$PEANUT"
     )
