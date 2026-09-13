@@ -52,4 +52,4 @@ mirar_abajo={
 
 [internationalization]
 
-locale/translations=PackedStringArray("res://datos/textos.es.translation", "res://datos/sellos_menu.es.translation")
+locale/translations=PackedStringArray("res://datos/textos.es.translation")
