@@ -4,7 +4,7 @@
 ## estrictamente local a la escena. Abrir o cerrar solo desplaza el cajón:
 ## no guarda progreso, no consume acciones y no introduce lore nuevo.
 class_name AlmacenamientoCasaInteractivo3D
-extends Interactuable3D
+extends "res://guion/interactuable_3d.gd"
 
 const POS_CERRADO := Vector3.ZERO
 const POS_ABIERTO := Vector3(0, 0, -0.36)
