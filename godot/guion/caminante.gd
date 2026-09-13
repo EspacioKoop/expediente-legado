@@ -26,9 +26,10 @@ const ZONA_MUERTA := 0.12
 ## Cuánto se puede mirar arriba y abajo. Sin tope, la cámara se da la vuelta.
 const TOPE_VERTICAL := deg_to_rad(85.0)
 
-@onready var _camara: Camera3D = $Camara
 var _detector_interaccion: DetectorInteraccion3D
 var _prompt_interaccion: Label
+
+@onready var _camara: Camera3D = $Camara
 
 
 func _ready() -> void:
