@@ -29,6 +29,17 @@ class PreferenciasSigaTest(unittest.TestCase):
         self.assertIn('"reduccion_movimiento"', self.source)
         self.assertIn('"volumen"', self.source)
 
+    def test_camara_tiene_preferencias_persistentes_y_acotadas(self):
+        for clave in (
+            '"sensibilidad_camara_raton"',
+            '"sensibilidad_camara_mando"',
+            '"invertir_camara_y"',
+        ):
+            self.assertIn(clave, self.source)
+        self.assertIn("SENSIBILIDAD_CAMARA_MIN := 0.25", self.source)
+        self.assertIn("SENSIBILIDAD_CAMARA_MAX := 3.0", self.source)
+        self.assertGreaterEqual(self.source.count("clampf("), 3)
+
 
 if __name__ == "__main__":
     unittest.main()
