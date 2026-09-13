@@ -11,6 +11,7 @@ func _initialize() -> void:
 	_probar_pista_de_un_origen()
 	_probar_relacion_de_dos_origenes()
 	_probar_catalogo_invalido()
+	_probar_registro_idempotente()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
@@ -106,6 +107,22 @@ func _probar_catalogo_invalido() -> void:
 		Pista.resolver(mismo_origen, {"state": "completado", "source_ids": ["F-1"]}).is_empty(),
 		"rechaza una falsa relación del documento consigo mismo"
 	)
+
+
+func _probar_registro_idempotente() -> void:
+	var estado := {"pistas_descubiertas": []}
+	_comprobar(Pista.registrar(estado, {"id": "P-1"}), "registra una recompensa catalogada")
+	_comprobar(estado["pistas_descubiertas"] == ["P-1"], "persiste únicamente el id de la pista")
+	_comprobar(Pista.registrar(estado, {"id": "P-1"}), "repetir el registro sigue siendo una operación válida")
+	_comprobar(estado["pistas_descubiertas"] == ["P-1"], "reintentar no duplica la recompensa")
+
+	var legado := {}
+	_comprobar(Pista.registrar(legado, {"id": "P-2"}), "inicializa la lista ausente de una partida antigua")
+	_comprobar(legado["pistas_descubiertas"] == ["P-2"], "la migración mínima conserva solo el id")
+
+	var roto := {"pistas_descubiertas": {}}
+	_comprobar(not Pista.registrar(roto, {"id": "P-3"}), "rechaza un estado con lista de pistas mal formada")
+	_comprobar(not Pista.registrar(estado, {}), "rechaza una recompensa sin identidad")
 
 
 func _comprobar(condicion: bool, nombre: String) -> void:
