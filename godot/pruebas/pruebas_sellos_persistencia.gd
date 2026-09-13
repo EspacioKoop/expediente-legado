@@ -47,8 +47,7 @@ func _initialize() -> void:
 	_comprobar(carga.get("resultado", "") == "cargada", "la partida vuelve a cargar")
 	var obtenidos: Array = recargada.estado.get("sellos_obtenidos", [])
 	_comprobar(
-		obtenidos.count("planta-en-orden") == 1,
-		"guardar y recargar conserva exactamente una copia"
+		obtenidos.count("planta-en-orden") == 1, "guardar y recargar conserva exactamente una copia"
 	)
 	_comprobar(
 		Sellos.tiene_sello(recargada.estado, "planta-en-orden"),
