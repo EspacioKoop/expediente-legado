@@ -1,5 +1,8 @@
 ## Integración real del diálogo diegético en el recorrido (#276).
-extends "res://guion/dia_clima_app.gd"
+##
+## Esta capa se inserta debajo de clima para mantener estable la raíz de
+## `dia.tscn`: calle -> diálogo -> clima -> escena.
+extends "res://guion/dia_calle_app.gd"
 
 
 func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
