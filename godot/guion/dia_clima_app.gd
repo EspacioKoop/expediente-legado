@@ -4,6 +4,7 @@
 extends "res://guion/dia_calle_app.gd"
 
 const FONDO_BASE := Color(0.05, 0.05, 0.06)
+const TAM_TERMINAL_INTERACTIVO := Vector3(1.0, 1.2, 0.8)
 
 var _clima_nodo: Node3D = null
 
@@ -36,6 +37,8 @@ func _espacio_de(fase: String) -> Dictionary:
 func _entrar_en(fase: String) -> void:
 	_retirar_clima()
 	super._entrar_en(fase)
+	if fase == "archivo":
+		_montar_terminal_interactivo()
 	# La niebla cambia el fondo global del Environment. Cada entrada restaura el
 	# valor base antes de decidir si este espacio recibe tiempo exterior.
 	_ambiente.background_color = FONDO_BASE
@@ -43,6 +46,53 @@ func _entrar_en(fase: String) -> void:
 	if not bool(espacio.get("exterior", false)):
 		return
 	_aplicar_clima(Clima.estado(int(jornada.get("dia", 1))))
+
+
+## Sustituye únicamente el volumen que antes abría el expediente al pisarlo.
+## La lógica de apertura sigue siendo `_abrir_expediente()`: aquí solo cambia
+## cómo expresa el jugador la intención, de caminar dentro a mirar y pulsar la
+## acción semántica `interactuar`.
+func _montar_terminal_interactivo() -> void:
+	var zona := _buscar_zona_destino(_mundo, "expediente")
+	if zona == null:
+		return
+
+	# El trigger antiguo no puede seguir abriendo al caminar ni interceptar el
+	# raycast del detector de interacción.
+	zona.monitoring = false
+	zona.monitorable = false
+	zona.collision_layer = 0
+
+	var terminal := Interactuable3D.new()
+	terminal.name = "TerminalSIGAInteractuable"
+	terminal.position = zona.position
+	terminal.verbo = Interactuable3D.Verbo.USAR
+	terminal.nombre_objeto = tr(String(zona.get_meta("rotulo", "SALIDA_PUESTO")))
+	terminal.activado.connect(_activar_terminal_siga)
+	_mundo.add_child(terminal)
+
+	var colision := CollisionShape3D.new()
+	var forma := BoxShape3D.new()
+	forma.size = TAM_TERMINAL_INTERACTIVO
+	colision.shape = forma
+	terminal.add_child(colision)
+
+
+func _activar_terminal_siga(_actor: Node) -> void:
+	if _pantalla != null:
+		return
+	_sonar("documento")
+	_abrir_expediente()
+
+
+func _buscar_zona_destino(nodo: Node, destino: String) -> Area3D:
+	for hijo in nodo.get_children():
+		if hijo is Area3D and String(hijo.get_meta("destino", "")) == destino:
+			return hijo
+		var encontrada := _buscar_zona_destino(hijo, destino)
+		if encontrada != null:
+			return encontrada
+	return null
 
 
 func _retirar_clima() -> void:
