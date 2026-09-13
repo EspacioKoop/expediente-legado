@@ -4,7 +4,10 @@
 ## lo guarda y mantiene la navegación por foco/mando de la ventana existente.
 extends "res://guion/historia_app.gd"
 
+const RUTA_TEXTOS := "res://datos/historia_posponer_textos.json"
+
 var _posponer: Button
+var _textos_ui: Dictionary = {}
 
 
 func _mostrar() -> void:
@@ -21,11 +24,20 @@ func _asegurar_boton_posponer() -> void:
 	if _posponer != null:
 		return
 	_posponer = Button.new()
-	_posponer.text = tr("A7_VOLVER")
+	_posponer.text = _texto_ui("boton")
+	_posponer.tooltip_text = _texto_ui("tooltip")
 	_posponer.pressed.connect(_posponer_decision)
 	var relato := _opciones.get_parent()
 	relato.add_child(_posponer)
 	relato.move_child(_posponer, _opciones.get_index() + 1)
+
+
+func _texto_ui(clave: String) -> String:
+	if _textos_ui.is_empty():
+		var datos: Variant = JSON.parse_string(FileAccess.get_file_as_string(RUTA_TEXTOS))
+		if datos is Dictionary:
+			_textos_ui = datos
+	return String(_textos_ui.get(clave, ""))
 
 
 func _posponer_decision() -> void:
