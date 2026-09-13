@@ -7,6 +7,7 @@ on:
       - ".github/workflows/gbc-fixtures.yml"
       - "scripts/test_gbc_fixture_workflow.py"
       - "docs/gbc-fixtures.md"
+      - "gbc/minijuegos/caza_pixeles_98/**"
 
 permissions:
   contents: read
@@ -19,7 +20,7 @@ env:
 
 jobs:
   build-fixtures:
-    name: Build CC0 joypad/vblank ROMs
+    name: Build GBC fixtures and Caza Pixeles 98
     runs-on: ubuntu-latest
     steps:
       - name: Checkout SIGA-98
@@ -66,29 +67,38 @@ jobs:
           mkdir -p gbc-fixtures
           cp fixture-src/src/joypad/joypad.gb gbc-fixtures/
           cp fixture-src/src/vblank/vblank.gb gbc-fixtures/
-          (
-            cd gbc-fixtures
-            sha256sum joypad.gb vblank.gb | tee SHA256SUMS
-          )
 
-      - name: Inspect ROM headers
+      - name: Build Caza Pixeles 98
         shell: bash
         run: |
           set -euo pipefail
-          for rom in gbc-fixtures/*.gb; do
+          make -C gbc/minijuegos/caza_pixeles_98
+          cp gbc/minijuegos/caza_pixeles_98/build/caza_pixeles_98.gbc gbc-fixtures/
+
+      - name: Hash and inspect ROM headers
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd gbc-fixtures
+            sha256sum joypad.gb vblank.gb caza_pixeles_98.gbc | tee SHA256SUMS
+          )
+          for rom in gbc-fixtures/*.gb gbc-fixtures/*.gbc; do
             test -s "$rom"
             size=$(stat -c %s "$rom")
             test "$size" -ge 32768
             printf '%s: %s bytes\n' "$rom" "$size"
           done
+          test "$(od -An -tx1 -j 323 -N 1 gbc-fixtures/caza_pixeles_98.gbc | tr -d ' \n')" = "80"
 
-      - name: Upload ephemeral fixture ROMs
+      - name: Upload ephemeral GBC ROMs
         uses: actions/upload-artifact@v4
         with:
-          name: gbc-cc0-fixtures-${{ github.sha }}
+          name: gbc-roms-${{ github.sha }}
           path: |
             gbc-fixtures/joypad.gb
             gbc-fixtures/vblank.gb
+            gbc-fixtures/caza_pixeles_98.gbc
             gbc-fixtures/SHA256SUMS
           if-no-files-found: error
           retention-days: 7
