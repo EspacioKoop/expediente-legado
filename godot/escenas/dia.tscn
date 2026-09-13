@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://guion/dia_skyline_cc0_app.gd" id="5"]
 [ext_resource type="Script" path="res://guion/dia_naturaleza_cc0_app.gd" id="6"]
 [ext_resource type="Script" path="res://guion/dia_oficina_utileria_app.gd" id="7"]
+[ext_resource type="Script" path="res://guion/dia_sueno_reactivo_app.gd" id="8"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -28,3 +29,6 @@ script = ExtResource("6")
 
 [node name="OficinaUtileriaController" type="Node" parent="."]
 script = ExtResource("7")
+
+[node name="SuenoReactivoController" type="Node" parent="."]
+script = ExtResource("8")
