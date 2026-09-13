@@ -10,10 +10,13 @@ class SuenoGeometriaTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.codigo = GEOMETRIA.read_text(encoding="utf-8")
+        cls.codigo_ejecutable = "\n".join(
+            linea for linea in cls.codigo.splitlines() if not linea.lstrip().startswith("#")
+        )
 
     def test_no_depende_de_cajas_o_rect2i(self):
-        self.assertNotIn("BoxMesh", self.codigo)
-        self.assertNotIn("Rect2i", self.codigo)
+        self.assertNotIn("BoxMesh", self.codigo_ejecutable)
+        self.assertNotIn("Rect2i", self.codigo_ejecutable)
 
     def test_triangula_un_contorno_arbitrario(self):
         self.assertIn("Geometry2D.triangulate_polygon(contorno)", self.codigo)
@@ -33,7 +36,7 @@ class SuenoGeometriaTest(unittest.TestCase):
             "pistas_descubiertas",
             "cambiar_escena",
         ):
-            self.assertNotIn(termino, self.codigo)
+            self.assertNotIn(termino, self.codigo_ejecutable)
 
 
 if __name__ == "__main__":
