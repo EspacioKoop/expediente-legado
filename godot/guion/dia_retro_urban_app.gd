@@ -5,6 +5,11 @@
 ## dónde aparece en el espacio real del trayecto.
 extends Node
 
+# Dos MeshInstance3D de una superficie, sin sombras ni colisión: presupuesto
+# deliberado para este corte = 2 draw calls del pase base del dressing urbano.
+const INSTANCIAS_RETRO_URBAN := 2
+const DRAW_CALLS_BASE_MAX := 2
+
 var _mundo_montado_id := 0
 
 
