@@ -128,7 +128,7 @@ func _principal_contenido(caja: VBoxContainer) -> void:
 	caja.add_child(_opciones)
 
 	_sellos = Button.new()
-	_sellos.text = "SELLOS SIGA"
+	_sellos.text = tr("MENU_SELLOS_TITULO")
 	_sellos.pressed.connect(_mostrar_sellos)
 	caja.add_child(_sellos)
 
@@ -173,11 +173,11 @@ func _opciones_contenido(caja: VBoxContainer) -> void:
 
 func _sellos_contenido(caja: VBoxContainer) -> void:
 	var titulo := Label.new()
-	titulo.text = "SELLOS SIGA"
+	titulo.text = tr("MENU_SELLOS_TITULO")
 	caja.add_child(titulo)
 
 	var subtitulo := Label.new()
-	subtitulo.text = "Registro de reconocimientos burocráticos"
+	subtitulo.text = tr("MENU_SELLOS_SUBTITULO")
 	caja.add_child(subtitulo)
 
 	for entrada in Sellos.catalogo():
