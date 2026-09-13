@@ -1,8 +1,8 @@
 ## Utilería doméstica procedural para dar lectura 3D a la casa (#282).
 ##
-## No introduce estado ni interacción: son objetos reconocibles construidos con
-## primitivas simples para reducir la sensación de greybox sin añadir assets
-## externos ni comprometer procedencia/licencias.
+## Los objetos siguen construidos con primitivas simples y sin assets externos.
+## La lámpara reutiliza además la interacción común de #283 sin introducir
+## persistencia ni reglas de jornada.
 class_name CasaUtileria
 extends RefCounted
 
@@ -27,10 +27,11 @@ static func _montar_mesita(raiz: Node3D, pos: Vector3) -> void:
 
 
 static func _montar_lampara_pie(raiz: Node3D, pos: Vector3) -> void:
-	var lampara := Node3D.new()
+	var lampara := LamparaInteractiva3D.new()
 	lampara.name = "LamparaPieCasa"
 	lampara.position = pos
 	raiz.add_child(lampara)
+	lampara.configurar()
 
 	_agregar_cilindro(lampara, Vector3(0, 0.05, 0), 0.28, 0.10, Color(0.18, 0.17, 0.16))
 	_agregar_cilindro(lampara, Vector3(0, 0.82, 0), 0.045, 1.55, Color(0.26, 0.24, 0.22))
