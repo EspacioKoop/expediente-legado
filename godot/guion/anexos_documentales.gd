@@ -37,7 +37,9 @@ static func es_valido(registro: Dictionary) -> bool:
 	return errores(registro).is_empty()
 
 
-static func _validar_anexo(anexo: Dictionary, ids_vistos: Dictionary, errores_salida: Array[String]) -> void:
+static func _validar_anexo(
+	anexo: Dictionary, ids_vistos: Dictionary, errores_salida: Array[String]
+) -> void:
 	var anexo_id := String(anexo.get("id", "")).strip_edges()
 	if anexo_id.is_empty():
 		errores_salida.append("id_vacio")
