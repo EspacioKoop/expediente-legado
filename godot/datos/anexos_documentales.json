@@ -1,0 +1,11 @@
+{
+  "oficio2@2": [
+    {
+      "id": "prescripcion-medica@2",
+      "tipo": "metadato",
+      "titulo": "Prescripción médica adjunta",
+      "contenido": "Consta como adjunta a OF-1990-114. El catálogo no conserva su contenido clínico.",
+      "contextual": true
+    }
+  ]
+}
