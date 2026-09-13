@@ -1,8 +1,10 @@
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CAPA = ROOT / "godot" / "guion" / "historia_posponer_app.gd"
 ESCENA = ROOT / "godot" / "escenas" / "historia.tscn"
+TEXTOS = ROOT / "godot" / "datos" / "historia_posponer_textos.json"
 
 
 def test_la_escena_activa_la_capa_de_posponer() -> None:
@@ -19,9 +21,13 @@ def test_posponer_reutiliza_el_contrato_y_guarda_antes_de_cerrar() -> None:
     assert "_cerrar()" in bloque
 
 
-def test_el_boton_es_explicito_traducible_y_entra_en_el_circuito_de_foco() -> None:
+def test_el_boton_usa_catalogo_y_entra_en_el_circuito_de_foco() -> None:
     codigo = CAPA.read_text(encoding="utf-8")
-    assert '_posponer.text = tr("A7_VOLVER")' in codigo
+    textos = json.loads(TEXTOS.read_text(encoding="utf-8"))
+    assert textos["boton"] == "Decidir más tarde"
+    assert "investigar más" in textos["tooltip"]
+    assert '_posponer.text = _texto_ui("boton")' in codigo
+    assert '_posponer.tooltip_text = _texto_ui("tooltip")' in codigo
     assert "botones.append(_posponer)" in codigo
     assert "focus_neighbor_top" in codigo
     assert "focus_neighbor_bottom" in codigo
