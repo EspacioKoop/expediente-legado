@@ -33,7 +33,8 @@ class EntradaCinematica3DTest(unittest.TestCase):
         self.assertIn("get_world_3d() != null", self.reproductor)
         self.assertIn("mundo != null or", self.reproductor)
         self.assertIn("not es_2d and _tiene_mundo_3d()", self.reproductor)
-        self.assertNotIn("_mundo", self.reproductor)
+        self.assertNotIn('get("_mundo")', self.reproductor)
+        self.assertNotIn("get_parent()._mundo", self.reproductor)
 
     def test_skip_y_fin_normal_comparten_salida_y_contador(self) -> None:
         salto = self.reproductor.split("func saltar() -> void:", 1)[1].split(
