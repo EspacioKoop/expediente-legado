@@ -8,14 +8,16 @@ ROOT = Path(__file__).resolve().parents[1]
 MALLA = ROOT / "godot" / "arte" / "retro_urban_awning.gd"
 CONTROLADOR = ROOT / "godot" / "guion" / "dia_retro_urban_app.gd"
 ESCENA = ROOT / "godot" / "escenas" / "dia.tscn"
+FUENTE_SHA256 = "b012c04b39d39a66c7cb45392621d7374f1ff34c6054b4a05bee019abc55b155"
 
 
 class RetroUrbanCC0Test(unittest.TestCase):
-    def test_fija_fuente_y_licencia_cc0_en_la_geometria(self) -> None:
+    def test_fija_fuente_licencia_y_hash_en_la_geometria(self) -> None:
         codigo = MALLA.read_text(encoding="utf-8")
         self.assertIn("https://kenney.nl/assets/retro-urban-kit", codigo)
         self.assertIn("CC0-1.0", codigo)
         self.assertIn("detail-awning-small.glb", codigo)
+        self.assertIn(FUENTE_SHA256, codigo)
 
     def test_la_conversion_conserva_una_malla_no_trivial(self) -> None:
         codigo = MALLA.read_text(encoding="utf-8")
