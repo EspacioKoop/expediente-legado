@@ -19,12 +19,27 @@ func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
 		super._al_pisar_salida(cuerpo, salida)
 		return
 
+	# El sello se decide con el día todavía intacto. `Jornada.dormir()` limpia
+	# los contadores diarios al preparar la noche, así que después ya no sería
+	# posible distinguir una jornada deliberadamente improductiva. El registro
+	# es idempotente y el guardado normal del tránsito casa→sueño lo persiste.
+	if jornada.get("fase", "") == "casa" and String(salida.get_meta("destino", "")) == "sueño":
+		_registrar_noche_improductiva()
+
 	var frase: String = salida.get_meta("frase", "")
 	if frase.is_empty():
 		super._al_pisar_salida(cuerpo, salida)
 		return
 
 	DialogoDiegetico.mostrar(_hud, _mundo, _caminante, salida, tr(frase))
+
+
+func _registrar_noche_improductiva() -> void:
+	if not jornada.get("leido_hoy", []).is_empty():
+		return
+	if int(jornada.get("cerrados_hoy", 0)) != 0:
+		return
+	Sellos.registrar_sello(partida.estado, "noche-improductiva")
 
 
 func _espacio_de(fase: String) -> Dictionary:
