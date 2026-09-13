@@ -1,0 +1,15 @@
+{
+  "godot_cpp": {
+    "repository": "https://github.com/godotengine/godot-cpp.git",
+    "commit": "6cceaf6a5f8b0d78ac5d71c139fd7fabba43b918",
+    "license": "MIT",
+    "api_version": "4.7"
+  },
+  "peanut_gb": {
+    "repository": "https://github.com/deltabeard/Peanut-GB.git",
+    "commit": "8e656982f08663785794b84823d3e27f856fdb7f",
+    "license": "MIT",
+    "capability": "DMG; cartuchos dual-mode CGB se ejecutan en fallback DMG; CGB-only se rechaza"
+  },
+  "scons": "4.8.1"
+}
