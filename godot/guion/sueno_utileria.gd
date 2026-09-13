@@ -65,15 +65,18 @@ static func montar(mundo: Node3D, id: String, dia: int, raiz_azar: int) -> Array
 			+ Vector3(0.0, tam.y * absf(escala.y) * 0.5, 0.0)
 		)
 		mundo.add_child(anomalia)
-		anomalia.configurar(
-			datos["modelo"],
-			tam,
-			datos["color"],
-			datos["nombre"],
-			escala,
-			datos["reaccion"],
-			datos["giro"],
-			datos["giro_reaccion"],
+		(
+			anomalia
+			. configurar(
+				datos["modelo"],
+				tam,
+				datos["color"],
+				datos["nombre"],
+				escala,
+				datos["reaccion"],
+				datos["giro"],
+				datos["giro_reaccion"],
+			)
 		)
 		creadas.append(anomalia)
 	return creadas
