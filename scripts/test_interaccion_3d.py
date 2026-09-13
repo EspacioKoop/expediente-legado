@@ -4,6 +4,7 @@ ROOT = Path(__file__).resolve().parents[1]
 INTERACTUABLE = ROOT / "godot" / "guion" / "interactuable_3d.gd"
 DETECTOR = ROOT / "godot" / "guion" / "detector_interaccion_3d.gd"
 PREFERENCIAS = ROOT / "godot" / "guion" / "preferencias_siga.gd"
+CAMINANTE = ROOT / "godot" / "guion" / "caminante.gd"
 
 
 def fuente(path: Path) -> str:
@@ -43,3 +44,21 @@ def test_nucleo_no_acopla_reglas_de_jornada_ni_inventario() -> None:
     texto = fuente(INTERACTUABLE) + fuente(DETECTOR)
     for termino in ("Jornada", "Partida", "Inventario", "casos.json", "dia_app.gd"):
         assert termino not in texto
+
+
+def test_caminante_monta_detector_bajo_la_camara() -> None:
+    texto = fuente(CAMINANTE)
+    assert "DetectorInteraccion3D.new()" in texto
+    assert "_camara.add_child(_detector_interaccion)" in texto
+    assert "objetivo_cambiado.connect(_mostrar_prompt_interaccion)" in texto
+    assert "objetivo_perdido.connect(_ocultar_prompt_interaccion)" in texto
+
+
+def test_prompt_es_contextual_y_no_hardcodea_tecla() -> None:
+    texto = fuente(CAMINANTE)
+    assert "Control.PRESET_CENTER_BOTTOM" in texto
+    assert "_prompt_interaccion.visible = false" in texto
+    assert "_prompt_interaccion.text = texto" in texto
+    assert "KEY_E" not in texto.split("func _montar_interaccion", 1)[1].split(
+        "func _asegurar_controles_movimiento", 1
+    )[0]

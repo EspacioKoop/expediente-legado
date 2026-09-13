@@ -26,16 +26,52 @@ const ZONA_MUERTA := 0.12
 ## Cuánto se puede mirar arriba y abajo. Sin tope, la cámara se da la vuelta.
 const TOPE_VERTICAL := deg_to_rad(85.0)
 
+var _detector_interaccion: DetectorInteraccion3D
+var _prompt_interaccion: Label
+
 @onready var _camara: Camera3D = $Camara
 
 
 func _ready() -> void:
 	_asegurar_controles_movimiento()
+	_montar_interaccion()
 	# `Dia` añade el reproductor 3D de pasos justo después de meter el caminante
 	# en el árbol. Diferir un turno permite atenuarlo aquí, junto al cuerpo que
 	# los produce, sin crear un bus global que también bajaría puertas o voces.
 	call_deferred("_ajustar_volumen_pisadas")
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+
+func _montar_interaccion() -> void:
+	_detector_interaccion = DetectorInteraccion3D.new()
+	_detector_interaccion.name = "DetectorInteraccion3D"
+	_camara.add_child(_detector_interaccion)
+	_detector_interaccion.objetivo_cambiado.connect(_mostrar_prompt_interaccion)
+	_detector_interaccion.objetivo_perdido.connect(_ocultar_prompt_interaccion)
+
+	var capa := CanvasLayer.new()
+	capa.layer = 20
+	add_child(capa)
+	_prompt_interaccion = Label.new()
+	_prompt_interaccion.theme = EstiloSiga.tema()
+	_prompt_interaccion.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_prompt_interaccion.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	_prompt_interaccion.offset_left = -220
+	_prompt_interaccion.offset_top = -74
+	_prompt_interaccion.offset_right = 220
+	_prompt_interaccion.offset_bottom = -30
+	_prompt_interaccion.visible = false
+	capa.add_child(_prompt_interaccion)
+
+
+func _mostrar_prompt_interaccion(_objetivo: Interactuable3D, texto: String) -> void:
+	_prompt_interaccion.text = texto
+	_prompt_interaccion.visible = not texto.is_empty()
+
+
+func _ocultar_prompt_interaccion() -> void:
+	_prompt_interaccion.text = ""
+	_prompt_interaccion.visible = false
 
 
 ## Declara un esquema de movimiento propio en vez de depender de las acciones
