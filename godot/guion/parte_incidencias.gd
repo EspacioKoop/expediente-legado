@@ -44,6 +44,14 @@ static func texto_fallback(configuracion: Dictionary = {}) -> String:
 	)
 
 
+static func texto_interfaz(clave: String, configuracion: Dictionary = {}) -> String:
+	var datos := configuracion if not configuracion.is_empty() else cargar_configuracion()
+	var textos = datos.get("textos", {})
+	if textos is Dictionary:
+		return String(textos.get(clave, clave))
+	return clave
+
+
 static func diagnostico(escena: String, reduccion_movimiento: bool) -> Dictionary:
 	var caracteristicas = ProjectSettings.get_setting(
 		"application/config/features", PackedStringArray()
