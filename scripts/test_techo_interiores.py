@@ -45,9 +45,12 @@ class PoliticaTechoTest(unittest.TestCase):
 
     def test_el_corte_no_modifica_constructor_ni_catalogo(self):
         politica = (ROOT / "godot" / "guion" / "politica_techo.gd").read_text(encoding="utf-8")
-        self.assertNotIn("EspaciosCatalogo", politica)
-        self.assertNotIn("Espacio3D", politica)
-        self.assertNotIn("CALLE", politica)
+        codigo = "\n".join(
+            linea for linea in politica.splitlines() if not linea.lstrip().startswith("##")
+        )
+        self.assertNotIn("EspaciosCatalogo", codigo)
+        self.assertNotIn("Espacio3D", codigo)
+        self.assertNotIn("CALLE", codigo)
 
 
 if __name__ == "__main__":
