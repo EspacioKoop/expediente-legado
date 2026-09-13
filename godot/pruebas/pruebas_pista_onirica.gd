@@ -42,10 +42,21 @@ func _probar_pista_de_un_origen() -> void:
 			{"id": "P-1", "descripcion": "el sello aparece dos veces", "registroOrigen": "F-1"}
 		]
 	}
-	var resultado := Pista.resolver(caso, {"state": "completado", "source_ids": ["F-1"]})
-	_comprobar(resultado.get("id", "") == "P-1", "#161 puede recontextualizar una pista de su único folio")
-	_comprobar(resultado.get("descripcion", "") == "el sello aparece dos veces", "conserva la descripción catalogada")
-	_comprobar(resultado.get("fuentes", []) == ["F-1"], "devuelve únicamente el origen catalogado")
+	var resultado := Pista.resolver(
+		caso, {"state": "completado", "source_ids": ["F-1"]}
+	)
+	_comprobar(
+		resultado.get("id", "") == "P-1",
+		"#161 puede recontextualizar una pista de su único folio"
+	)
+	_comprobar(
+		resultado.get("descripcion", "") == "el sello aparece dos veces",
+		"conserva la descripción catalogada"
+	)
+	_comprobar(
+		resultado.get("fuentes", []) == ["F-1"],
+		"devuelve únicamente el origen catalogado"
+	)
 
 	var duplicadas := Pista.resolver(
 		caso, {"state": "completado", "source_ids": ["F-1", "F-1", ""]}
@@ -67,8 +78,14 @@ func _probar_relacion_de_dos_origenes() -> void:
 	var completa := Pista.resolver(
 		caso, {"state": "completado", "source_ids": ["F-2", "F-1"]}
 	)
-	_comprobar(completa.get("id", "") == "P-2", "una relación se concede cuando ambos orígenes participaron")
-	_comprobar(completa.get("fuentes", []) == ["F-1", "F-2"], "conserva los dos orígenes catalogados")
+	_comprobar(
+		completa.get("id", "") == "P-2",
+		"una relación se concede cuando ambos orígenes participaron"
+	)
+	_comprobar(
+		completa.get("fuentes", []) == ["F-1", "F-2"],
+		"conserva los dos orígenes catalogados"
+	)
 	_comprobar(
 		Pista.resolver(caso, {"state": "completado", "source_ids": ["F-1"]}).is_empty(),
 		"una relación no se concede con solo uno de sus orígenes"
@@ -90,7 +107,12 @@ func _probar_catalogo_invalido() -> void:
 
 	var segundo_vacio := {
 		"pistas": [
-			{"id": "P-X", "descripcion": "relación", "registroOrigen": "F-1", "registroOrigen2": ""}
+			{
+				"id": "P-X",
+				"descripcion": "relación",
+				"registroOrigen": "F-1",
+				"registroOrigen2": "",
+			}
 		]
 	}
 	_comprobar(
@@ -100,7 +122,12 @@ func _probar_catalogo_invalido() -> void:
 
 	var mismo_origen := {
 		"pistas": [
-			{"id": "P-X", "descripcion": "relación", "registroOrigen": "F-1", "registroOrigen2": "F-1"}
+			{
+				"id": "P-X",
+				"descripcion": "relación",
+				"registroOrigen": "F-1",
+				"registroOrigen2": "F-1",
+			}
 		]
 	}
 	_comprobar(
@@ -112,16 +139,31 @@ func _probar_catalogo_invalido() -> void:
 func _probar_registro_idempotente() -> void:
 	var estado := {"pistas_descubiertas": []}
 	_comprobar(Pista.registrar(estado, {"id": "P-1"}), "registra una recompensa catalogada")
-	_comprobar(estado["pistas_descubiertas"] == ["P-1"], "persiste únicamente el id de la pista")
-	_comprobar(Pista.registrar(estado, {"id": "P-1"}), "repetir el registro sigue siendo una operación válida")
+	_comprobar(
+		estado["pistas_descubiertas"] == ["P-1"],
+		"persiste únicamente el id de la pista"
+	)
+	_comprobar(
+		Pista.registrar(estado, {"id": "P-1"}),
+		"repetir el registro sigue siendo una operación válida"
+	)
 	_comprobar(estado["pistas_descubiertas"] == ["P-1"], "reintentar no duplica la recompensa")
 
 	var legado := {}
-	_comprobar(Pista.registrar(legado, {"id": "P-2"}), "inicializa la lista ausente de una partida antigua")
-	_comprobar(legado["pistas_descubiertas"] == ["P-2"], "la migración mínima conserva solo el id")
+	_comprobar(
+		Pista.registrar(legado, {"id": "P-2"}),
+		"inicializa la lista ausente de una partida antigua"
+	)
+	_comprobar(
+		legado["pistas_descubiertas"] == ["P-2"],
+		"la migración mínima conserva solo el id"
+	)
 
 	var roto := {"pistas_descubiertas": {}}
-	_comprobar(not Pista.registrar(roto, {"id": "P-3"}), "rechaza un estado con lista de pistas mal formada")
+	_comprobar(
+		not Pista.registrar(roto, {"id": "P-3"}),
+		"rechaza un estado con lista de pistas mal formada"
+	)
 	_comprobar(not Pista.registrar(estado, {}), "rechaza una recompensa sin identidad")
 
 
