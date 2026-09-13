@@ -47,15 +47,16 @@ static func crear(modelo: String) -> MeshInstance3D:
 
 static func _malla(modelo: String) -> Mesh:
 	if _cache_mallas.has(modelo):
-		return _cache_mallas[modelo]
+		return _cache_mallas[modelo] as Mesh
 	var ruta := CARPETA + modelo
 	if not ResourceLoader.exists(ruta):
 		return null
 	var recurso := ResourceLoader.load(ruta)
-	if not recurso is Mesh:
+	if not (recurso is Mesh):
 		return null
-	_cache_mallas[modelo] = recurso
-	return recurso
+	var malla := recurso as Mesh
+	_cache_mallas[modelo] = malla
+	return malla
 
 
 static func _material_para(modelo: String) -> ShaderMaterial:
