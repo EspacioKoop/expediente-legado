@@ -13,9 +13,11 @@ var _fondo: ColorRect
 var _panel_principal: PanelContainer
 var _panel_opciones: PanelContainer
 var _panel_sellos: PanelContainer
+var _panel_incidencias: ParteIncidenciasApp
 var _continuar: Button
 var _opciones: Button
 var _sellos: Button
+var _incidencias: Button
 var _volver: Button
 var _sellos_volver: Button
 var _salir: Button
@@ -52,7 +54,10 @@ func _unhandled_input(evento: InputEvent) -> void:
 	if not evento.is_action_pressed("cancelar"):
 		return
 	if _fondo.visible:
-		_cerrar()
+		if _panel_incidencias.visible:
+			_volver_de_incidencias()
+		else:
+			_cerrar()
 	elif _puede_abrir():
 		_abrir()
 	get_viewport().set_input_as_handled()
@@ -91,6 +96,10 @@ func _montar() -> void:
 	centro.add_child(_panel_sellos)
 	var sellos := _caja(_panel_sellos)
 	_sellos_contenido(sellos)
+
+	_panel_incidencias = ParteIncidenciasApp.new()
+	_panel_incidencias.volver.connect(_volver_de_incidencias)
+	centro.add_child(_panel_incidencias)
 
 
 func _crear_panel() -> PanelContainer:
@@ -135,6 +144,11 @@ func _principal_contenido(caja: VBoxContainer) -> void:
 	_sellos.text = String(_presentacion_sellos.get("titulo", ""))
 	_sellos.pressed.connect(_mostrar_sellos)
 	caja.add_child(_sellos)
+
+	_incidencias = Button.new()
+	_incidencias.text = ParteIncidencias.ETIQUETA
+	_incidencias.pressed.connect(_mostrar_incidencias)
+	caja.add_child(_incidencias)
 
 	_salir = Button.new()
 	_salir.text = tr("MENU_GLOBAL_SALIR")
@@ -317,6 +331,7 @@ func _abrir() -> void:
 	_panel_principal.visible = true
 	_panel_opciones.visible = false
 	_panel_sellos.visible = false
+	_panel_incidencias.visible = false
 	_fondo.visible = true
 	get_tree().paused = true
 	_continuar.grab_focus()
@@ -337,6 +352,7 @@ func _cerrar() -> void:
 func _mostrar_opciones() -> void:
 	_panel_principal.visible = false
 	_panel_sellos.visible = false
+	_panel_incidencias.visible = false
 	_panel_opciones.visible = true
 	_volumen.grab_focus()
 
@@ -344,14 +360,31 @@ func _mostrar_opciones() -> void:
 func _mostrar_sellos() -> void:
 	_panel_principal.visible = false
 	_panel_opciones.visible = false
+	_panel_incidencias.visible = false
 	_panel_sellos.visible = true
 	_sellos_volver.grab_focus()
+
+
+func _mostrar_incidencias() -> void:
+	_panel_principal.visible = false
+	_panel_opciones.visible = false
+	_panel_sellos.visible = false
+	_panel_incidencias.abrir(_preferencias)
+
+
+func _volver_de_incidencias() -> void:
+	_panel_incidencias.visible = false
+	_panel_opciones.visible = false
+	_panel_sellos.visible = false
+	_panel_principal.visible = true
+	_incidencias.grab_focus()
 
 
 func _mostrar_principal() -> void:
 	_cancelar_captura()
 	_panel_opciones.visible = false
 	_panel_sellos.visible = false
+	_panel_incidencias.visible = false
 	_panel_principal.visible = true
 	_opciones.grab_focus()
 
