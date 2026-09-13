@@ -1,9 +1,9 @@
-## Utilería procedural y reutilizada para que los puestos del archivo parezcan
-## usados antes de abrir ningún HUD (#400).
+## Utilería procedural para que los puestos del archivo parezcan usados antes de
+## abrir ningún HUD (#400).
 ##
 ## No añade reglas: teclados, teléfonos, bandejas, tazas y cableado son dressing.
-## Los dos puestos que aún no tenían monitor reciben el mismo modelo ya versionado
-## que usa el catálogo. La única interacción de este corte es la máquina de café.
+## Los CRT ya los aporta el primer corte #401; aquí se completa su contexto sin
+## duplicarlos. La única interacción nueva es la máquina de café.
 class_name OficinaUtileria
 extends RefCounted
 
@@ -75,20 +75,6 @@ static func _montar_puesto(raiz: Node3D, indice: int, base: Vector3) -> void:
 		_agregar_bandeja(puesto, Vector3(-0.62, 0.81, -0.24))
 	else:
 		_agregar_taza(puesto, Vector3(-0.58, 0.86, -0.22))
-
-	# Los dos puestos de la derecha eran los únicos sin CRT reconocible. Se usa
-	# el modelo ya versionado; no se introduce otro asset ni una caja sustituta.
-	if indice >= 2:
-		var monitor := Node3D.new()
-		monitor.name = "MonitorCRT"
-		monitor.position = Vector3(-0.22, 0.97, -0.18)
-		puesto.add_child(monitor)
-		Modelos.mueble(
-			monitor,
-			"computerScreen",
-			Vector3(0.50, 0.45, 0.40),
-			Color(0.52, 0.54, 0.50)
-		)
 
 
 static func _agregar_bandeja(raiz: Node3D, pos: Vector3) -> void:
