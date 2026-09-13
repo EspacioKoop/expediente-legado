@@ -4,11 +4,16 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 MENU = (ROOT / "godot/guion/menu_global.gd").read_text(encoding="utf-8")
+SELLOS_TEXTOS = (ROOT / "godot/datos/sellos_menu.csv").read_text(encoding="utf-8")
+PROJECT = (ROOT / "godot/project.godot").read_text(encoding="utf-8")
 
 
 class SellosMenuTests(unittest.TestCase):
     def test_menu_expone_hoja_de_sellos(self):
-        self.assertIn('"SELLOS SIGA"', MENU)
+        self.assertIn('tr("MENU_SELLOS_TITULO")', MENU)
+        self.assertIn('tr("MENU_SELLOS_SUBTITULO")', MENU)
+        self.assertIn("MENU_SELLOS_TITULO,SELLOS SIGA", SELLOS_TEXTOS)
+        self.assertIn('"res://datos/sellos_menu.es.translation"', PROJECT)
         self.assertIn("_mostrar_sellos", MENU)
         self.assertIn("_panel_sellos", MENU)
 
