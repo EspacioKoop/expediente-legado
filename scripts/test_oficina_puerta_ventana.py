@@ -14,10 +14,11 @@ class TestOficinaPuertaVentana(unittest.TestCase):
         cls.oficina = cls.fuente[inicio:fin]
 
     def test_salida_de_oficina_conserva_destino_y_posicion(self):
-        self.assertIn(
-            '{"pos": Vector3(-6.4, 1.1, 3.5), "destino": "trayecto", "rotulo": "SALIDA_OFICINA"}',
-            self.oficina,
-        )
+        salida = self.oficina[self.oficina.index('"salidas":') :]
+        self.assertIn('"pos": Vector3(-6.4, 1.1, 3.5)', salida)
+        self.assertIn('"destino": "trayecto"', salida)
+        self.assertIn('"rotulo": "SALIDA_OFICINA"', salida)
+        self.assertIn('"visible": false', salida)
 
     def test_salida_tiene_puerta_fisica_y_marco(self):
         self.assertIn('"rol": "puerta_archivo"', self.oficina)
