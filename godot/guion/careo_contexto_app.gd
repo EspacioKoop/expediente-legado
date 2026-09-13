@@ -1,7 +1,7 @@
 ## Capa de presentación del contexto de investigación en el careo (#366).
 ##
 ## Reutiliza el folio y el estado que el careo ya recibe. La conclusión se
-## muestra como recordatorio documental y no altera ninguna regla de Combate.
+## muestra como recordatorio documental sin alterar ninguna regla del duelo.
 extends "res://guion/careo_app.gd"
 
 var _contexto_investigacion: Dictionary = {}
