@@ -104,6 +104,67 @@ static func moqueta(base: Color, semilla: int) -> ImageTexture:
 	return ImageTexture.create_from_image(imagen)
 
 
+## Melamina de escritorio: bandas largas y muy suaves. La veta está presente
+## pero no convierte una mesa administrativa laminada en madera maciza.
+static func melamina(base: Color, semilla: int) -> ImageTexture:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = semilla
+	var imagen := Image.create(LADO, LADO, false, Image.FORMAT_RGB8)
+	for y in LADO:
+		var variacion := rng.randf_range(-0.055, 0.055)
+		var tono := base.lightened(variacion) if variacion >= 0.0 else base.darkened(-variacion)
+		for x in LADO:
+			imagen.set_pixel(x, y, tono)
+	# Unas pocas juntas/rozaduras rompen la perfección sin convertirla en ruido.
+	for i in 7:
+		var y := rng.randi() % LADO
+		for x in LADO:
+			if rng.randf() < 0.42:
+				imagen.set_pixel(x, y, base.darkened(0.10))
+	return ImageTexture.create_from_image(imagen)
+
+
+## Chapa pintada de archivador: superficie casi uniforme con arañazos largos y
+## desconchones aislados. El desgaste tiene dirección y posición; no es ruido
+## repartido por toda la pieza.
+static func metal_pintado(base: Color, semilla: int) -> ImageTexture:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = semilla
+	var imagen := Image.create(LADO, LADO, false, Image.FORMAT_RGB8)
+	imagen.fill(base)
+	for i in 12:
+		var x := rng.randi() % LADO
+		var y := rng.randi() % LADO
+		var largo := rng.randi_range(3, 11)
+		for paso in largo:
+			if x + paso < LADO:
+				imagen.set_pixel(x + paso, y, base.darkened(0.16))
+	for i in 9:
+		imagen.set_pixel(
+			rng.randi() % LADO,
+			rng.randi() % LADO,
+			base.lightened(0.08)
+		)
+	return ImageTexture.create_from_image(imagen)
+
+
+## ABS de equipos y sillas: grano fino, mate y discreto. Se distingue del metal
+## por no tener arañazos direccionales ni juntas de veta.
+static func plastico_abs(base: Color, semilla: int) -> ImageTexture:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = semilla
+	var imagen := Image.create(LADO, LADO, false, Image.FORMAT_RGB8)
+	imagen.fill(base)
+	for i in LADO * LADO / 18:
+		var claro := rng.randf() < 0.45
+		imagen.set_pixel(
+			rng.randi() % LADO,
+			rng.randi() % LADO,
+			base.lightened(0.045) if claro else base.darkened(0.045)
+		)
+	return ImageTexture.create_from_image(imagen)
+
+
 ## La textura de una superficie: la traída si existe, y si no la calculada.
 ##
 ## Cada espacio la pide por NOMBRE y no importa este módulo, así que cambiar de
@@ -115,9 +176,11 @@ static func moqueta(base: Color, semilla: int) -> ImageTexture:
 ## verdad manda el material: un tono plano con motas dice "caja", por bonita que
 ## sea la mota.
 static func por_nombre(nombre: String, base: Color, semilla: int) -> Texture2D:
-	var traida := ResourceLoader.load(CARPETA % nombre, "Texture2D")
-	if traida != null:
-		return traida
+	var ruta := CARPETA % nombre
+	if ResourceLoader.exists(ruta):
+		var traida := ResourceLoader.load(ruta, "Texture2D")
+		if traida != null:
+			return traida
 	return calculada(nombre, base, semilla)
 
 
@@ -133,5 +196,11 @@ static func calculada(nombre: String, base: Color, semilla: int) -> ImageTexture
 			return asfalto(base, semilla)
 		"moqueta":
 			return moqueta(base, semilla)
+		"melamina":
+			return melamina(base, semilla)
+		"metal_pintado":
+			return metal_pintado(base, semilla)
+		"plastico_abs":
+			return plastico_abs(base, semilla)
 		_:
 			return null
