@@ -2,7 +2,7 @@
 ##
 ## No crea otro televisor: CasaUtileria coloca este Area3D en el bulto
 ## `televisionVintage` del catálogo y conserva ese modelo como representación.
-## El encendido es feedback local; no persiste ni altera Jornada o Partida.
+## El encendido es feedback local: no persiste ni altera estado de juego.
 class_name TelevisionInteractiva3D
 extends Interactuable3D
 
