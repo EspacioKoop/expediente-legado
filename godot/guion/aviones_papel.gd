@@ -28,9 +28,7 @@ const MODELOS := {
 const ESTRATEGIAS := {
 	"distancia": {"modelo": "rapido", "direccion": 0.0, "altura": 18.0, "potencia": 0.94},
 	"papelera": {"modelo": "estable", "direccion": 0.13, "altura": 12.0, "potencia": 0.72},
-	"cunado": {
-		"modelo": "impredecible", "direccion": -0.34, "altura": 27.0, "potencia": 0.83
-	},
+	"cunado": {"modelo": "impredecible", "direccion": -0.34, "altura": 27.0, "potencia": 0.83},
 }
 
 
@@ -135,7 +133,9 @@ static func lanzar_companero(estado: Dictionary, estrategia: String) -> Dictiona
 	)
 
 
-static func _lanzar_a_objetivo(estado: Dictionary, plan: Dictionary, objetivo: Vector2) -> Dictionary:
+static func _lanzar_a_objetivo(
+	estado: Dictionary, plan: Dictionary, objetivo: Vector2
+) -> Dictionary:
 	if estado.get("terminada", false) or estado.get("abandonada", false):
 		return estado
 	var participantes: Array = estado.get("participantes", [])
