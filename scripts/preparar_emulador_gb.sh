@@ -7,8 +7,14 @@ NATIVO="$RAIZ/godot/native/siga98_gb"
 LOCK="$NATIVO/deps.lock.json"
 MODO="${1:-linux-debug}"
 
+if command -v python3 >/dev/null 2>&1; then
+    PYTHON=python3
+else
+    PYTHON=python
+fi
+
 leer_lock() {
-    python3 - "$LOCK" "$1" "$2" <<'PY'
+    "$PYTHON" - "$LOCK" "$1" "$2" <<'PY'
 import json
 import sys
 
@@ -23,7 +29,7 @@ GODOT_CPP_REPO="$(leer_lock godot_cpp repository)"
 GODOT_CPP_SHA="$(leer_lock godot_cpp commit)"
 PEANUT_REPO="$(leer_lock peanut_gb repository)"
 PEANUT_SHA="$(leer_lock peanut_gb commit)"
-SCONS_VERSION="$(python3 - "$LOCK" <<'PY'
+SCONS_VERSION="$("$PYTHON" - "$LOCK" <<'PY'
 import json
 import sys
 with open(sys.argv[1], encoding="utf-8") as archivo:
@@ -60,7 +66,7 @@ compilar_nativo() {
     mkdir -p "$DEPS"
     preparar_repo "$GODOT_CPP_REPO" "$GODOT_CPP_SHA" "$GODOT_CPP" si
     preparar_repo "$PEANUT_REPO" "$PEANUT_SHA" "$PEANUT" no
-    python3 -m pip install --disable-pip-version-check --quiet "scons==$SCONS_VERSION"
+    "$PYTHON" -m pip install --disable-pip-version-check --quiet "scons==$SCONS_VERSION"
     (
         cd "$NATIVO"
         scons -Q \
