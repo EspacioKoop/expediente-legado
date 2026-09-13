@@ -9,6 +9,7 @@ on:
       - "docs/gbc-fixtures.md"
       - "gbc/minijuegos/caza_pixeles_98/**"
       - "gbc/minijuegos/paper_planes_98/**"
+      - "gbc/minijuegos/croc_riders_98/**"
 
 permissions:
   contents: read
@@ -83,13 +84,20 @@ jobs:
           make -C gbc/minijuegos/paper_planes_98
           cp gbc/minijuegos/paper_planes_98/build/paper_planes_98.gbc gbc-fixtures/
 
+      - name: Build Croc Riders 98
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C gbc/minijuegos/croc_riders_98
+          cp gbc/minijuegos/croc_riders_98/build/croc_riders_98.gbc gbc-fixtures/
+
       - name: Hash and inspect ROM headers
         shell: bash
         run: |
           set -euo pipefail
           (
             cd gbc-fixtures
-            sha256sum joypad.gb vblank.gb caza_pixeles_98.gbc paper_planes_98.gbc | tee SHA256SUMS
+            sha256sum joypad.gb vblank.gb caza_pixeles_98.gbc paper_planes_98.gbc croc_riders_98.gbc | tee SHA256SUMS
           )
           for rom in gbc-fixtures/*.gb gbc-fixtures/*.gbc; do
             test -s "$rom"
@@ -97,7 +105,7 @@ jobs:
             test "$size" -ge 32768
             printf '%s: %s bytes\n' "$rom" "$size"
           done
-          for rom in gbc-fixtures/caza_pixeles_98.gbc gbc-fixtures/paper_planes_98.gbc; do
+          for rom in gbc-fixtures/caza_pixeles_98.gbc gbc-fixtures/paper_planes_98.gbc gbc-fixtures/croc_riders_98.gbc; do
             test "$(od -An -tx1 -j 323 -N 1 "$rom" | tr -d ' \n')" = "80"
           done
 
@@ -110,6 +118,7 @@ jobs:
             gbc-fixtures/vblank.gb
             gbc-fixtures/caza_pixeles_98.gbc
             gbc-fixtures/paper_planes_98.gbc
+            gbc-fixtures/croc_riders_98.gbc
             gbc-fixtures/SHA256SUMS
           if-no-files-found: error
           retention-days: 7
