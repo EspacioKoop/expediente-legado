@@ -1,29 +1,40 @@
 ## Primer corte de escenografía CC0 visible tras el segundo playtest (#400).
 ##
-## No introduce reglas de jornada ni descarga assets en runtime. Reutiliza únicamente
-## modelos CC0 ya versionados y registrados en `assets/procedencia.json`, de modo que
-## oficina, calle y casa ganen densidad reconocible sin abrir otra vía de assets.
+## Es un controller hijo de `dia.tscn`: no sustituye la raíz histórica
+## `dia_clima_app.gd` ni altera la cadena de jornada. Observa cuándo cambia el
+## mundo montado por el día y añade únicamente dressing visual/interactivo.
 ##
-## Los puntos examinables usan el contrato semántico de #283: el detector sigue siendo
-## quien decide qué está bajo la mirada y la acción sigue siendo `interactuar`.
-extends "res://guion/dia_clima_app.gd"
+## No descarga assets en runtime. Reutiliza modelos CC0 ya versionados y
+## registrados en `assets/procedencia.json`.
+extends Node
+
+var _mundo_vestido_id := 0
 
 
-func _entrar_en(fase: String) -> void:
-	super._entrar_en(fase)
-	match fase:
+func _process(_delta: float) -> void:
+	var dia := get_parent()
+	if dia == null or dia._mundo == null:
+		return
+	var mundo: Node3D = dia._mundo
+	var mundo_id := mundo.get_instance_id()
+	if mundo_id == _mundo_vestido_id:
+		return
+
+	_mundo_vestido_id = mundo_id
+	match String(dia.jornada.get("fase", "")):
 		"archivo":
-			_vestir_archivo_cc0()
+			_vestir_archivo_cc0(mundo)
 		"trayecto":
-			_vestir_calle_cc0()
+			_vestir_calle_cc0(mundo)
 		"casa":
-			_vestir_casa_cc0()
+			_vestir_casa_cc0(mundo)
 
 
-func _vestir_archivo_cc0() -> void:
+func _vestir_archivo_cc0(mundo: Node3D) -> void:
 	# Los dos puestos del lado derecho ya tenían escritorio, pero seguían leyendo
 	# como mesas vacías. Añadir CRT reales cambia su silueta sin duplicar SIGA.
 	_mueble_cc0(
+		mundo,
 		"MonitorPuestoC",
 		"computerScreen",
 		Vector3(1.05, 0.98, -2.08),
@@ -32,6 +43,7 @@ func _vestir_archivo_cc0() -> void:
 		"monitor CRT"
 	)
 	_mueble_cc0(
+		mundo,
 		"MonitorPuestoD",
 		"computerScreen",
 		Vector3(1.05, 0.98, 1.08),
@@ -40,6 +52,7 @@ func _vestir_archivo_cc0() -> void:
 		"monitor CRT"
 	)
 	_mueble_cc0(
+		mundo,
 		"PapeleraPuestoC",
 		"trashcan",
 		Vector3(2.05, 0.22, -1.82),
@@ -49,10 +62,11 @@ func _vestir_archivo_cc0() -> void:
 	)
 
 
-func _vestir_calle_cc0() -> void:
+func _vestir_calle_cc0(mundo: Node3D) -> void:
 	# Objetos pequeños rompen la lectura de «dos paredes y tres farolas» sin
 	# estrechar la calzada. Se colocan en las aceras, fuera del eje de avance.
 	_mueble_cc0(
+		mundo,
 		"PapeleraCalleSur",
 		"trashcan",
 		Vector3(4.75, 0.22, -10.0),
@@ -61,6 +75,7 @@ func _vestir_calle_cc0() -> void:
 		"papelera de calle"
 	)
 	_mueble_cc0(
+		mundo,
 		"PapeleraCalleNorte",
 		"trashcan",
 		Vector3(-4.72, 0.22, 8.6),
@@ -69,6 +84,7 @@ func _vestir_calle_cc0() -> void:
 		"papelera de calle"
 	)
 	_mueble_cc0(
+		mundo,
 		"CajaRepartoEscaparate",
 		"cardboardBoxClosed",
 		Vector3(-4.92, 0.20, -4.55),
@@ -77,6 +93,7 @@ func _vestir_calle_cc0() -> void:
 		"caja de reparto"
 	)
 	_mueble_cc0(
+		mundo,
 		"CajaRepartoPortal",
 		"cardboardBoxClosed",
 		Vector3(4.92, 0.20, 12.5),
@@ -86,10 +103,11 @@ func _vestir_calle_cc0() -> void:
 	)
 
 
-func _vestir_casa_cc0() -> void:
+func _vestir_casa_cc0(mundo: Node3D) -> void:
 	# La vivienda necesita objetos con uso doméstico reconocible, no otra capa de
 	# cubos. Esta primera pasada deja almacenamiento, asiento y cajas reales.
 	_mueble_cc0(
+		mundo,
 		"EstanteriaCasaCC0",
 		"bookcaseClosed",
 		Vector3(3.42, 0.90, -0.15),
@@ -98,6 +116,7 @@ func _vestir_casa_cc0() -> void:
 		"estantería"
 	)
 	_mueble_cc0(
+		mundo,
 		"SillaCasaCC0",
 		"chairDesk",
 		Vector3(1.55, 0.45, 0.25),
@@ -106,6 +125,7 @@ func _vestir_casa_cc0() -> void:
 		"silla"
 	)
 	_mueble_cc0(
+		mundo,
 		"CajaCasaBaja",
 		"cardboardBoxClosed",
 		Vector3(-3.30, 0.20, -0.25),
@@ -114,6 +134,7 @@ func _vestir_casa_cc0() -> void:
 		"caja doméstica"
 	)
 	_mueble_cc0(
+		mundo,
 		"CajaCasaAlta",
 		"cardboardBoxClosed",
 		Vector3(-3.30, 0.61, -0.25),
@@ -124,6 +145,7 @@ func _vestir_casa_cc0() -> void:
 
 
 func _mueble_cc0(
+	mundo: Node3D,
 	nombre_nodo: String,
 	modelo: String,
 	posicion: Vector3,
@@ -134,7 +156,7 @@ func _mueble_cc0(
 	var cuerpo := StaticBody3D.new()
 	cuerpo.name = nombre_nodo
 	cuerpo.position = posicion
-	_mundo.add_child(cuerpo)
+	mundo.add_child(cuerpo)
 
 	var colision := CollisionShape3D.new()
 	var forma := BoxShape3D.new()
@@ -164,8 +186,7 @@ func _montar_examinable(cuerpo: Node3D, tam: Vector3, nombre_objeto: String) -> 
 	examinable.add_child(colision)
 
 	# El feedback cabe en el mismo prompt contextual: tras examinar, el objeto
-	# queda marcado localmente como observado. No abre modal, no persiste y no
-	# compite con diálogos ni instrucciones.
+	# queda marcado localmente como observado. No abre modal ni persiste.
 	examinable.activado.connect(_marcar_observado.bind(examinable))
 
 
