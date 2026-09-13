@@ -46,7 +46,6 @@ func _bultos_calle() -> Array:
 			"tam": Vector3(1.6, 0.24, 34.0),
 			"color": Color(0.38, 0.37, 0.36),
 		},
-
 		# Fachadas discontinuas, con distintas alturas y retranqueos. Dejan cielo
 		# visible entre edificios y rompen la lectura de corredor uniforme.
 		{
@@ -69,7 +68,6 @@ func _bultos_calle() -> Array:
 			"tam": Vector3(2.5, 3.8, 9.0),
 			"color": Color(0.26, 0.25, 0.27),
 		},
-
 		# Tienda de electrodomésticos: fondo y marco dejan un hueco real entre
 		# fachada y cristal, de modo que las televisiones son visibles dentro del
 		# escaparate y no un dibujo pegado por fuera.
@@ -123,7 +121,6 @@ func _bultos_calle() -> Array:
 			"tam": Vector3(1.05, 0.18, 0.80),
 			"color": Color(0.25, 0.22, 0.20),
 		},
-
 		# Portal de destino: marco alto y separado del resto de fachadas para que
 		# desde el spawn exista una composición clara hacia casa.
 		{
