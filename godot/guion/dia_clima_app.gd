@@ -1,5 +1,5 @@
 ## Presentación del clima diario sobre el trayecto exterior (#143).
-extends "res://guion/dia_calle_app.gd"
+extends "res://guion/dia_dialogo_app.gd"
 
 const FONDO_BASE := Color(0.05, 0.05, 0.06)
 
