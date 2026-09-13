@@ -174,10 +174,15 @@ static func _reproductor(nodo: Node) -> AnimationPlayer:
 
 ## Integra una cara low-poly en el volumen de la cabeza.
 ##
-## El retrato sigue identificando al personaje, pero ya no se proyecta como una
-## foto 2D. Su nombre funciona como semilla estable para pequeñas variaciones de
-## rasgos. Así el resultado acompaña al hueso `Head`, se lee también de perfil y
-## no introduce una lámina que atraviese la cabeza al girar.
+## El primer corte de #275 ya eliminó el retrato 2D, pero dejó ojos, nariz y
+## boca como piezas independientes por delante de la cabeza importada. El
+## resultado seguía leyendo como una máscara pegada. Este segundo corte crea un
+## volumen COMPLETO de cabeza con el material de piel y hunde los rasgos en la
+## superficie elipsoidal. La cabeza y los rasgos comparten `BoneAttachment3D`,
+## así que forman una sola silueta al girar y siguen el hueso `Head` al animar.
+##
+## `retrato` no vuelve a cargarse como imagen: solo sirve de semilla estable
+## para pequeñas diferencias de proporción y tono entre compañeros.
 static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 	var esqueleto := _esqueleto(pieza)
 	if esqueleto == null:
@@ -192,37 +197,83 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 
 	var alto := _alto_cabeza(esqueleto, hueso)
 	var semilla := absi(hash(retrato))
-	var separacion := alto * (0.18 + float(semilla % 5) * 0.008)
-	var altura_ojos := alto * (0.54 + float((semilla / 5) % 5) * 0.008)
-	var frente := alto * 0.50
+	var radio_x := alto * (0.34 + float(semilla % 5) * 0.008)
+	var radio_y := alto * 0.50
+	var radio_z := alto * (0.38 + float((semilla / 5) % 5) * 0.008)
+	var centro_y := alto * 0.48
+	var separacion := radio_x * (0.50 + float((semilla / 25) % 5) * 0.015)
+	var altura_ojos := centro_y + alto * 0.12
 
 	var oscuro := Color(0.10, 0.08, 0.07)
 	var piel := Color(0.58, 0.43, 0.34).lerp(Color(0.82, 0.68, 0.54), float(semilla % 7) / 6.0)
 
-	_rasgo_esfera(
+	# La cabeza procedural envuelve el cráneo importado: no hay una placa frontal
+	# que pueda verse de canto. Las pequeñas variaciones conservan el roster sin
+	# recuperar fotografías ni materiales ajenos al shader común.
+	_volumen_cabeza(
 		enganche,
-		Vector3(-separacion, altura_ojos, frente),
-		Vector3(alto * 0.055, alto * 0.045, alto * 0.025),
-		oscuro
-	)
-	_rasgo_esfera(
-		enganche,
-		Vector3(separacion, altura_ojos, frente),
-		Vector3(alto * 0.055, alto * 0.045, alto * 0.025),
-		oscuro
-	)
-	_rasgo_caja(
-		enganche,
-		Vector3(0.0, alto * 0.40, frente + alto * 0.025),
-		Vector3(alto * 0.055, alto * 0.16, alto * 0.07),
+		Vector3(0.0, centro_y, 0.0),
+		Vector3(radio_x, radio_y, radio_z),
 		piel
 	)
-	_rasgo_caja(
+
+	# Los centros de ojos y boca se colocan unos milímetros DENTRO de la
+	# superficie del elipsoide. Solo asoma la parte necesaria del volumen, de
+	# modo que a 3/4 no aparecen bolitas o barras flotando delante de la cara.
+	var hundido := alto * 0.018
+	var ojo_izq := Vector2(-separacion, altura_ojos)
+	var ojo_der := Vector2(separacion, altura_ojos)
+	var z_ojo_izq := _frente_cabeza(ojo_izq.x, ojo_izq.y, centro_y, radio_x, radio_y, radio_z) - hundido
+	var z_ojo_der := _frente_cabeza(ojo_der.x, ojo_der.y, centro_y, radio_x, radio_y, radio_z) - hundido
+	_rasgo_esfera(
 		enganche,
-		Vector3(0.0, alto * 0.25, frente + alto * 0.015),
-		Vector3(alto * (0.16 + float(semilla % 4) * 0.012), alto * 0.025, alto * 0.02),
+		Vector3(ojo_izq.x, ojo_izq.y, z_ojo_izq),
+		Vector3(alto * 0.050, alto * 0.040, alto * 0.025),
 		oscuro
 	)
+	_rasgo_esfera(
+		enganche,
+		Vector3(ojo_der.x, ojo_der.y, z_ojo_der),
+		Vector3(alto * 0.050, alto * 0.040, alto * 0.025),
+		oscuro
+	)
+
+	var nariz_y := centro_y - alto * 0.035
+	var z_nariz := _frente_cabeza(0.0, nariz_y, centro_y, radio_x, radio_y, radio_z) - alto * 0.015
+	_rasgo_esfera(
+		enganche,
+		Vector3(0.0, nariz_y, z_nariz),
+		Vector3(alto * 0.050, alto * 0.105, alto * 0.060),
+		piel
+	)
+
+	var boca_y := centro_y - alto * 0.20
+	var z_boca := _frente_cabeza(0.0, boca_y, centro_y, radio_x, radio_y, radio_z) - alto * 0.010
+	_rasgo_esfera(
+		enganche,
+		Vector3(0.0, boca_y, z_boca),
+		Vector3(alto * (0.13 + float(semilla % 4) * 0.010), alto * 0.018, alto * 0.012),
+		oscuro
+	)
+
+
+## Profundidad del frente de un elipsoide en un punto X/Y de la cara.
+##
+## En lugar de asumir que todo el rostro está en un mismo plano Z, cada rasgo
+## sigue la curvatura real del volumen de cabeza. Fuera del elipsoide se devuelve
+## 0 para que una proporción extrema nunca produzca NaN.
+static func _frente_cabeza(
+	x: float,
+	y: float,
+	centro_y: float,
+	radio_x: float,
+	radio_y: float,
+	radio_z: float
+) -> float:
+	var nx := x / maxf(radio_x, 0.0001)
+	var ny := (y - centro_y) / maxf(radio_y, 0.0001)
+	var restante := maxf(0.0, 1.0 - nx * nx - ny * ny)
+	return radio_z * sqrt(restante)
 
 
 static func _alto_cabeza(esqueleto: Skeleton3D, hueso: int) -> float:
@@ -241,6 +292,20 @@ static func _alto_cabeza(esqueleto: Skeleton3D, hueso: int) -> float:
 	)
 
 
+static func _volumen_cabeza(padre: Node3D, posicion: Vector3, escala: Vector3, color: Color) -> void:
+	var cabeza := MeshInstance3D.new()
+	var esfera := SphereMesh.new()
+	esfera.radius = 1.0
+	esfera.height = 2.0
+	esfera.radial_segments = 8
+	esfera.rings = 5
+	cabeza.mesh = esfera
+	cabeza.position = posicion
+	cabeza.scale = escala
+	cabeza.material_override = _material_rasgo(color)
+	padre.add_child(cabeza)
+
+
 static func _rasgo_esfera(padre: Node3D, posicion: Vector3, escala: Vector3, color: Color) -> void:
 	var rasgo := MeshInstance3D.new()
 	var esfera := SphereMesh.new()
@@ -251,16 +316,6 @@ static func _rasgo_esfera(padre: Node3D, posicion: Vector3, escala: Vector3, col
 	rasgo.mesh = esfera
 	rasgo.position = posicion
 	rasgo.scale = escala
-	rasgo.material_override = _material_rasgo(color)
-	padre.add_child(rasgo)
-
-
-static func _rasgo_caja(padre: Node3D, posicion: Vector3, tam: Vector3, color: Color) -> void:
-	var rasgo := MeshInstance3D.new()
-	var caja := BoxMesh.new()
-	caja.size = tam
-	rasgo.mesh = caja
-	rasgo.position = posicion
 	rasgo.material_override = _material_rasgo(color)
 	padre.add_child(rasgo)
 
