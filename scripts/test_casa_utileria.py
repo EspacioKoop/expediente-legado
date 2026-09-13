@@ -73,7 +73,7 @@ class CasaUtileriaTest(unittest.TestCase):
         self.assertIn("CatalogoRomsUsuario.listar()", self.portatil)
 
     def test_almacenamiento_reutiliza_abrir_cerrar_y_feedback_fisico(self):
-        self.assertIn("extends Interactuable3D", self.almacenamiento)
+        self.assertIn('extends "res://guion/interactuable_3d.gd"', self.almacenamiento)
         self.assertIn("verbo = Verbo.ABRIR", self.almacenamiento)
         self.assertIn("Verbo.CERRAR", self.almacenamiento)
         self.assertIn('nombre_objeto = "cajón"', self.almacenamiento)
