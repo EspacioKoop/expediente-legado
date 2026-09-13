@@ -1,6 +1,8 @@
 ## Presentación del clima diario sobre el trayecto exterior (#143).
 extends "res://guion/dia_calle_app.gd"
 
+const FONDO_BASE := Color(0.05, 0.05, 0.06)
+
 var _clima_nodo: Node3D = null
 
 
@@ -14,6 +16,9 @@ func _espacio_de(fase: String) -> Dictionary:
 func _entrar_en(fase: String) -> void:
 	_retirar_clima()
 	super._entrar_en(fase)
+	# La niebla cambia el fondo global del Environment. Cada entrada restaura el
+	# valor base antes de decidir si este espacio recibe tiempo exterior.
+	_ambiente.background_color = FONDO_BASE
 	var espacio := _espacio_de(fase)
 	if not bool(espacio.get("exterior", false)):
 		return
@@ -77,6 +82,8 @@ func _montar_precipitacion(nieve: bool) -> void:
 	var material := StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.albedo_color = Color(0.92, 0.94, 1.0, 0.82) if nieve else Color(0.65, 0.75, 0.88, 0.62)
+	material.albedo_color = (
+		Color(0.92, 0.94, 1.0, 0.82) if nieve else Color(0.65, 0.75, 0.88, 0.62)
+	)
 	malla.material = material
 	particulas.draw_pass_1 = malla
