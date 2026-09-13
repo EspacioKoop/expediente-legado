@@ -28,7 +28,7 @@ DEF rIE    EQU $FFFF
 
 DEF VRAM_TILES EQU $8000
 DEF BG_MAP     EQU $9800
-DEF OAM        EQU $FE00
+DEF OAM_BASE   EQU $FE00
 
 DEF KEY_RIGHT EQU %00000001
 DEF KEY_LEFT  EQU %00000010
@@ -214,7 +214,7 @@ SiguienteObjetivo:
     ret
 
 ActualizarOAM:
-    ld hl, OAM
+    ld hl, OAM_BASE
     ld a, [wJugadorY]
     ld [hli], a
     ld a, [wJugadorX]
@@ -235,7 +235,7 @@ ActualizarOAM:
     ret
 
 LimpiarOAM:
-    ld hl, OAM
+    ld hl, OAM_BASE
     ld b, 160
     xor a
 .loop:
