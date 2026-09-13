@@ -74,7 +74,9 @@ func _probar_relacion_de_dos_origenes() -> void:
 		completa.get("id", "") == "P-2",
 		"una relación se concede cuando ambos orígenes participaron"
 	)
-	_comprobar(completa.get("fuentes", []) == ["F-1", "F-2"], "conserva los dos orígenes catalogados")
+	_comprobar(
+		completa.get("fuentes", []) == ["F-1", "F-2"], "conserva los dos orígenes catalogados"
+	)
 	_comprobar(
 		Pista.resolver(caso, {"state": "completado", "source_ids": ["F-1"]}).is_empty(),
 		"una relación no se concede con solo uno de sus orígenes"
