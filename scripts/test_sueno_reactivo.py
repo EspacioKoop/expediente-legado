@@ -27,7 +27,7 @@ class SuenoReactivoTest(unittest.TestCase):
         self.assertIn('path="res://guion/dia_sueno_reactivo_app.gd" id="8"', self.escena)
         self.assertIn('[node name="SuenoReactivoController"', self.escena)
         self.assertIn('!= "sueño"', self.controlador)
-        self.assertIn("SuenoUtileria.montar(", self.controlador)
+        self.assertRegex(self.controlador, r"SuenoUtileria\s*\.\s*montar\(")
         self.assertNotIn('== "archivo"', self.controlador)
         self.assertNotIn('== "casa"', self.controlador)
         self.assertNotIn('== "trayecto"', self.controlador)
