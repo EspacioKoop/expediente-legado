@@ -104,6 +104,12 @@ jobs:
         run: godot4 --headless --path godot --script res://pruebas/emulador_gb_smoke.gd
 
       - name: Lint y formato GDScript
+        shell: bash
         run: |
-          gdlint godot
-          gdformat --check --diff godot
+          set -euo pipefail
+          find godot -type f -name '*.gd' \
+            -not -path 'godot/native/siga98_gb/.deps/*' -print0 \
+            | xargs -0 --no-run-if-empty gdlint
+          find godot -type f -name '*.gd' \
+            -not -path 'godot/native/siga98_gb/.deps/*' -print0 \
+            | xargs -0 --no-run-if-empty gdformat --check --diff
