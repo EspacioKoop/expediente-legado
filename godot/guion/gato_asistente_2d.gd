@@ -9,8 +9,8 @@ extends Control
 
 const ANCHO := 132.0
 const ALTO := 150.0
-const NIVEL_COMPLETO := 0
-const NIVEL_ESCASO := 1
+const NIVEL_COMPLETO := GatoAyuda.COMPLETA
+const NIVEL_ESCASO := GatoAyuda.ESCASA
 
 var _nivel := NIVEL_COMPLETO
 var _reduccion_movimiento := false
@@ -24,7 +24,7 @@ func _ready() -> void:
 	queue_redraw()
 
 
-func configurar(nivel: int, reduccion_movimiento: bool) -> void:
+func configurar(nivel: String, reduccion_movimiento: bool) -> void:
 	_nivel = nivel
 	_reduccion_movimiento = reduccion_movimiento
 	set_process(not reduccion_movimiento)
@@ -62,7 +62,13 @@ func _draw() -> void:
 		]
 	)
 	draw_colored_polygon(cuerpo, pelaje)
-	draw_polyline(PackedVector2Array([cuerpo[0], cuerpo[1], cuerpo[2], cuerpo[3], cuerpo[4], cuerpo[5], cuerpo[0]]), tinta, 3.0)
+	draw_polyline(
+		PackedVector2Array(
+			[cuerpo[0], cuerpo[1], cuerpo[2], cuerpo[3], cuerpo[4], cuerpo[5], cuerpo[0]]
+		),
+		tinta,
+		3.0
+	)
 	draw_colored_polygon(
 		PackedVector2Array([Vector2(51, 88), Vector2(45, 132), Vector2(87, 132), Vector2(81, 88)]),
 		Color(0.90, 0.90, 0.85)
@@ -81,7 +87,8 @@ func _draw() -> void:
 		PackedVector2Array([Vector2(84, 36), Vector2(111, 20), Vector2(104, 45)]), pelaje
 	)
 	draw_colored_polygon(
-		PackedVector2Array([Vector2(30, 38), Vector2(25, oreja_izq_y + 7), Vector2(43, 36)]), interior_oreja
+		PackedVector2Array([Vector2(30, 38), Vector2(25, oreja_izq_y + 7), Vector2(43, 36)]),
+		interior_oreja
 	)
 	draw_colored_polygon(
 		PackedVector2Array([Vector2(90, 35), Vector2(106, 25), Vector2(101, 40)]), interior_oreja

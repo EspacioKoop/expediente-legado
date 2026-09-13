@@ -29,6 +29,9 @@ class GatoAsistenteVisualTest(unittest.TestCase):
         self.assertIn("GatoAyuda.nivel(gato)", self.dia)
         self.assertNotIn("afinidad", self.dia.lower())
         self.assertIn("dias_sin_comer", self.ayuda)
+        self.assertIn("func configurar(nivel: String,", self.avatar)
+        self.assertIn("NIVEL_COMPLETO := GatoAyuda.COMPLETA", self.avatar)
+        self.assertIn("NIVEL_ESCASO := GatoAyuda.ESCASA", self.avatar)
 
     def test_reduccion_movimiento_congela_la_animacion(self):
         self.assertIn('preferencias.get("reduccion_movimiento", false)', self.dia)
@@ -45,3 +48,4 @@ class GatoAsistenteVisualTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
