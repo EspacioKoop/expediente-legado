@@ -1,152 +1,132 @@
 # AGENTS.md — instrucciones para agentes
 
-Este repositorio adopta las [Normas Platino](https://github.com/EspacioKoop/normas_platino):
-cooperación autónoma entre agentes, sin colisiones ni pérdida de trabajo. Autonomía
-no significa permiso ilimitado ni integración sin autorización.
+Este repositorio adopta las [Normas Platino](https://github.com/EspacioKoop/normas_platino): cooperación autónoma entre agentes, sin colisiones ni pérdida de trabajo. Autonomía no significa permiso ilimitado ni integración sin autorización.
 
-Las normas se **integran** con lo que ya había aquí; no lo sustituyen. El flujo
-de colaboración humano sigue en [CONTRIBUTING.md](CONTRIBUTING.md) y el contexto
-del proyecto en [README.md](README.md). Si dos instrucciones se contradicen,
-detén el alcance afectado y pregunta a @eGurucharri en vez de elegir por tu
-cuenta.
+El flujo humano sigue en [CONTRIBUTING.md](CONTRIBUTING.md), el contexto en [README.md](README.md) y las fases en [ROADMAP.md](ROADMAP.md). Si dos instrucciones se contradicen, no improvises: detén solo el alcance afectado y coordina con @eGurucharri.
 
-## Fuentes, antes de tocar nada
+## Fuentes de verdad, antes de tocar nada
 
 | Qué | Dónde |
 | --- | --- |
 | Prioridad y punto de control | [Plan maestro #181](https://github.com/EspacioKoop/expediente-legado/issues/181) |
-| Quién puede editar qué | [Registro único de reservas #182](https://github.com/EspacioKoop/expediente-legado/issues/182) |
+| Reservas activas | [Registro único #182](https://github.com/EspacioKoop/expediente-legado/issues/182) |
 | Fases y versiones | [ROADMAP.md](ROADMAP.md) |
 | Flujo de ramas y gates | [CONTRIBUTING.md](CONTRIBUTING.md) |
-| Protocolo comunitario | [normas_platino](https://github.com/EspacioKoop/normas_platino) |
+| Estado general | [README.md](README.md) |
+| Paridad legado → Godot | [docs/paridad-expedientes.md](docs/paridad-expedientes.md) |
 
-Esos dos números pertenecen **a este repositorio**. Los de normas_platino son
-suyos y no se reutilizan aquí.
-
-Lee también el issue concreto y **sus comentarios**: en este proyecto el
-contexto que evita duplicar trabajo suele estar en un comentario, no en el
-cuerpo.
+Lee también el issue concreto, sus comentarios, PRs relacionadas, reviews y CI. En este proyecto una decisión que evita duplicar trabajo suele estar en un comentario posterior al cuerpo original.
 
 ## Ciclo obligatorio
 
-1. Comprueba rama, checkout, cambios locales, plan, reservas y PR abiertos.
-   Elige el pendiente prioritario **libre**.
-2. Publica en **#182**, antes de modificar archivos:
+1. Comprueba `main`, PR abiertos, issue, comentarios, plan maestro y reservas.
+2. Elige un pendiente prioritario **libre**. No abras un segundo corte si ya hay una PR activa que cubre el mismo hueco.
+3. Antes de modificar archivos publica en #182:
 
    ```text
    CLAIM issue=#N agent=<nombre> branch=<rama> files=<rutas> goal=<objetivo>
    ```
 
-3. Relee inmediatamente todas las reservas. Gana la activa anterior por fecha de
-   GitHub; en empate, el ID de comentario menor. Si hay solape, no edites.
-4. Rama y checkout propios desde `main` actualizado. Nombra la rama
-   `feature/NN-slug`, `fix/NN-slug` o `docs/NN-slug` con el número del issue.
-   Commits pequeños y pushes frecuentes.
-5. Subdivide solo si los archivos y los criterios son independientes. Los
-   archivos compartidos están listados en #182: acuerda un único escritor.
-6. Pasa las **pruebas canónicas** (abajo). Ninguna afirmación de estado puede
-   exceder la evidencia: si no has jugado una partida, no digas que funciona.
-7. Abre PR hacia `main` enlazando el issue y registra `PR_READY` en #182 con PR,
-   SHA, pruebas y límites. Eso **no** libera la reserva ni autoriza el merge.
-8. Integra solo con autorización explícita de @eGurucharri y la CI en verde.
-9. Verifica el resultado remoto y publica `RELEASE`. Al pausar, deja estado, SHA
-   y próximos pasos, y **mantén** la reserva: el silencio no la caduca.
+4. Relee inmediatamente #182. Gana la reserva activa anterior por fecha de GitHub; en empate, el comentario con ID menor. Si hay solape, no edites.
+5. Trabaja en rama propia desde `main` actualizado: `feature/NN-slug`, `fix/NN-slug` o `docs/NN-slug`.
+6. Mantén el corte pequeño. Un paraguas como #279/#282/#283 se ejecuta por verticales, no con una reescritura total.
+7. Añade regresión ejecutable cuando cambie comportamiento. La inspección textual puede complementar, no sustituir, una prueba del contrato real cuando Godot pueda ejecutarlo.
+8. Pasa las pruebas canónicas y revisa el diff final.
+9. Abre PR a `main` y registra en #182:
 
-`Closes #N` solo si cierras el issue entero. `Refs #N` para una entrega parcial
-— y en el PR, di qué mitad queda fuera.
+   ```text
+   PR_READY issue=#N pr=#M sha=<sha> pruebas=<qué pasó> limites=<qué no cubre>
+   ```
+
+10. `PR_READY` mantiene la reserva y **no autoriza merge**. Integra solo con autorización explícita de @eGurucharri y los gates exigidos en verde.
+11. Verifica el resultado remoto y publica `RELEASE`. Si pausas, deja SHA, estado y siguiente paso; el silencio no caduca la reserva.
+
+Usa `Closes #N` solo si el PR satisface el issue entero. Para entregas parciales, `Refs #N` y explica lo que queda.
+
+## Archivos compartidos
+
+Reserva expresamente los archivos compartidos enumerados en #182. Entre ellos están:
+
+- `README.md`, `AGENTS.md`, `CONTRIBUTING.md`, `ROADMAP.md`;
+- `godot/datos/textos.csv`, `godot/datos/casos.json`;
+- `godot/pruebas/pruebas.gd`, los módulos que invoca y `godot/pruebas/minimo.txt`;
+- `scripts/verificar_godot.py`.
+
+Una reserva de un issue no concede automáticamente todos los archivos que ese issue podría necesitar. Declara las rutas reales del corte.
 
 ## Prohibido
 
-Push directo a `main`, force-push, reescritura de historia compartida, fusionar
-sin autorización, saltarse las pruebas, y publicar tokens, contraseñas, datos
-personales, partidas personales o rutas privadas — también en diffs, logs,
-capturas y descripciones de PR.
+- push directo a `main`;
+- force-push o reescritura de historia compartida;
+- merge sin autorización de @eGurucharri;
+- rebajar pruebas para poner verde un cambio;
+- publicar tokens, contraseñas, datos personales, partidas personales o rutas privadas;
+- inventar procedencia, licencias, hashes, hechos de expedientes o resultados de playtest;
+- decir que algo está validado visualmente o con mando si solo pasó CI headless.
+
+Si una herramienta escribe por error en `main`, revierte inmediatamente sin force-push, deja constancia en #182 y continúa únicamente desde una rama propia.
 
 ## Pruebas canónicas
 
-Ninguna entrega está terminada sin ellas. La validación local **no** equivale a
-la CI: la referencia es el workflow sobre tu SHA.
+Desde la raíz:
 
 ```bash
-# Godot: importa, corre suite y recorrido, y arranca el juego
 python3 scripts/verificar_godot.py
-python -m unittest discover -s scripts -p 'test_*.py'   # el detector de falsos verdes
-gdlint godot && gdformat --check --diff godot           # gdtoolkit==4.3.4
+python3 -m unittest discover -s scripts -p 'test_*.py'
+gdlint godot
+gdformat --check --diff godot
+```
 
-# Backend y web, desde backend/
+Desde `backend/`:
+
+```bash
 mvn test
 mvn checkstyle:check pmd:check spotbugs:check
 npm test
 ```
 
-Usa el motor de `.godot-version`. El verificador acepta **cualquier parche de esa
-línea** (un 4.7.2 vale para un `4.7-stable` declarado), y rechaza otra línea u
-otro canal. Con `GODOT_BIN=/ruta/a/godot` eliges el ejecutable.
+Usa la línea de Godot declarada en `.godot-version`. La referencia final es el workflow sobre el SHA del PR, no una ejecución local anterior.
 
-Al añadir pruebas, sube `godot/pruebas/minimo.txt`. Bajarlo exige decir qué
-pruebas se han retirado y por qué.
+`godot/pruebas/minimo.txt` protege el mínimo de la suite principal. Reducirlo exige explicar qué comprobaciones desaparecen y por qué.
 
 ## Trampas conocidas
 
-Cosas que ya han roto la suite. Léelas antes de tocar esos ficheros.
+Estas ya han provocado fallos reales.
 
-- **`godot/datos/textos.csv`**: el bloque `ARCHIVO_*` está al final, **fuera del
-  orden alfabético**. Cualquier reordenación que dé por hecho que el CSV está
-  ordenado se lo come, y la suite falla con "claves pedidas sin texto". Inserta
-  donde toque en vez de reordenar el fichero.
-- **Todo el texto vive en ese CSV.** El código solo nombra claves
-  (`tr("VISOR_ELIJA")`); una pantalla que escriba una cadena a mano hace fallar
-  la suite. Excepción real: las frases de `godot/guion/cartas_ocultas.gd` **no**
-  son traducibles, porque tienen que coincidir literalmente con el texto del
-  documento que las esconde.
-- **Cinemáticas**: la `figura` de un plano 2D es una lista de
-  `{"rect": Rect2, "color": Color}`, no de `Rect2` sueltos. Declara los planos en
-  el formato de `Cinematica` y resuélvelos con `Cinematica.resolver`, que además
-  acorta por repetición y copia en profundidad. Un módulo que se salte el
-  reproductor común dará su propio ritmo, su propio rótulo y su propio salto.
-- **Los binarios van por Git LFS.** `.gitattributes` manda texturas, mallas,
-  tipografías, sonido y vídeo a LFS. Antes de clonar o de añadir assets, corre
-  `git lfs install` una vez: sin él, `git` te deja **punteros de texto** donde
-  esperabas un PNG, y Godot falla al importar con un error que no menciona LFS
-  por ningún lado. Los `.ogg` que ya estaban se quedan en git normal: pasarlos
-  a LFS obligaría a reescribir el historial entero.
-- **`.uid`**: el repo versiona el `.uid` de cada guion. Si creas un `.gd`,
-  commitea también su `.uid`.
-- **Guardar antes de una cinemática, no después.** Toda cinemática se puede
-  saltar; si el guardado cuelga de su final, saltarla pierde el hallazgo.
+- **Nombres de fase**: `Jornada` usa `archivo`, `trayecto`, `casa`, `sueño`. La calle del recorrido es `trayecto`; comprobar `fase == "calle"` deja el hook muerto aunque el código visual exista.
+- **Cadena `dia_*`**: muchas capacidades se integran por herencia. No escribas tests que exijan que una clase herede *directamente* de una base si el contrato solo necesita herencia transitiva.
+- **`PackedVector*Array` y `const`**: Godot 4.7 no acepta todas las construcciones dinámicas de `PackedVector2Array(...)` dentro de expresiones `const`. Usa estado estático de solo lectura por API cuando corresponda.
+- **GDScript lint**: una variable `static var` no es una constante; `gdlint` exige nombre de variable, no MAYÚSCULAS de constante.
+- **`.uid`**: el repo versiona el `.uid` de cada guion. Si creas un `.gd`, incluye su `.uid` cuando Godot lo genere/requiera.
+- **`godot/datos/textos.csv`**: el bloque `ARCHIVO_*` no debe perderse por una reordenación ingenua. Inserta sin asumir que todo el fichero está ordenado.
+- **Texto visible**: interfaz y guion usan claves de traducción; no hardcodees cadenas visibles en GDScript salvo contratos deliberadamente literales, como frases que deben coincidir con el documento.
+- **Partidas**: `Partida.guardar()` devuelve éxito/fallo. Compruébalo. El disco persiste estado; no lo uses como bus entre pantallas.
+- **Cinemáticas**: guarda el estado antes de una cinemática saltables si el hallazgo debe persistir. Usa el reproductor/contrato común, no un ritmo paralelo.
+- **Interacción**: usa acciones semánticas (`interactuar`, `cancelar`, etc.) y `PreferenciasSiga`; no hardcodees `E`, Escape o botones de mando en sistemas nuevos.
+- **Audio**: `Sonido` = efectos puntuales; `Musica` = momentos dramáticos; ambiente continuo = #119. No mezcles responsabilidades para resolver un sonido concreto.
+- **Sueño**: la progresión normal desde #281 es por objetivos oníricos. No reintroduzcas una salida física invisible como requisito de terminación.
+- **Investigación**: combinar, anotar, examinar anexos o recompensar un puzzle no puede inventar hechos. Consume únicamente datos catalogados y conocidos por el jugador.
+- **Assets**: los binarios se rigen por `.gitattributes`, Git LFS y `godot/assets/procedencia.json`. No crees un puntero LFS si no puedes subir también el objeto al almacén LFS.
 
-## Archivos que no se versionan
+## Convenciones de código
 
-- `CLAUDE.md` está en `.gitignore`: son notas locales del agente para sí mismo.
-  No lo comitees ni asumas que otro colaborador lo tiene.
-- `.env`, `target/`, `node_modules/`, `dist/.cache/`, `dist/salida/`. Trabaja
-  siempre sobre `.env.example`.
-
-## Convenciones del código
-
-- **Tests sin Mockito**: dobles con `java.lang.reflect.Proxy`. Si amplías la
-  interfaz de un repositorio, añade el método al handler de cada fake que lo
-  necesite (patrón `fake(...)` / `repositoryConFindByCasoId(...)`).
-- Comentarios y nombres **en español**, coherentes con el código existente. El
-  código de este proyecto explica *por qué*, no *qué*: mantén ese registro.
-- Respeta el análisis estático: Checkstyle, PMD y SpotBugs son gates. Evita
-  campos e imports sin uso; máximo 7 parámetros por método.
-- GDScript con tabuladores, y las constantes antes de las funciones: `gdlint`
-  exige el orden de definiciones.
+- Comentarios y nombres en español, coherentes con el código existente.
+- Explica *por qué* cuando el motivo no sea obvio; evita narrar literalmente la línea siguiente.
+- GDScript con tabuladores y orden de definiciones aceptado por `gdlint`.
+- Java sin Mockito en las pruebas existentes: los dobles usan `java.lang.reflect.Proxy`.
+- Checkstyle, PMD y SpotBugs son gates, no sugerencias.
+- Prefiere contratos puros/standalone antes de tocar rutas compartidas; integra después en un segundo corte si eso reduce conflictos.
 
 ## Puntos delicados del dominio
 
-- **Acceso a casos confidenciales** (`CasoController`): valida acceso al caso *y*
-  pertenencia de la entidad hija (sospechoso/pista) a ese caso. Un `casoId`
-  público en la ruta no debe permitir operar sobre entidades de otro caso.
-- **Sembrado** (`config/DataSeeder`): cada caso debe fijar sus campos completos
-  (título, descripción, `anioSuceso`, estado). Al añadir o editar un caso,
-  compáralo con los hermanos para no dejar campos sin poblar.
-- **Progreso** (`ProgresoService` / `ResumenJuegoService`): fuente de verdad del
-  progreso; carga las pistas por lotes (`pistasPorCaso` / `findByCasoIdIn`) en vez
-  de una consulta por caso, y mantén los totales independientes del rol salvo
-  donde el diseño lo pida (p. ej. `totalCasosPrincipales`).
-- **Cache Thymeleaf**: desactivada en dev (`application.yml`) y activada en el
-  build repartido (`application-standalone.yml`). No la desactives globalmente.
-- **Partidas**: el disco persiste el estado; no es el canal de comunicación entre
-  pantallas. Comprueba siempre el booleano de `Partida.guardar()`.
+- **Acceso a casos**: valida acceso al caso y pertenencia de entidades hijas; un `casoId` de ruta no basta.
+- **Sembrado**: cada caso debe fijar todos sus campos requeridos; compara con casos hermanos.
+- **Progreso**: no dupliques una fuente de verdad para pistas, historias, economía o sueño porque una UI necesite mostrarla.
+- **Investigación SIGA**: la auditoría versionada está en `docs/paridad-expedientes.md`; actualízala cuando un corte cambie realmente la clasificación legado → Godot.
+- **Playtest**: #271/#272/#273/#280/#281/#113 contienen gates humanos. No abras más código sobre ellos sin un fallo reproducible nuevo cuando el plan maestro los marque como validación.
+
+## Archivos que no se versionan
+
+- `CLAUDE.md` es local y está ignorado.
+- `.env`, `target/`, `node_modules/`, `dist/.cache/`, `dist/salida/` no se comitean.
+- Trabaja con `.env.example` y datos sintéticos; nunca con secretos o partidas personales.
