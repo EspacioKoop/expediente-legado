@@ -71,5 +71,7 @@ func _opciones_sueno() -> Dictionary:
 	if not Trabajillos.hecho_hoy(jornada):
 		return opciones
 	var cantidad := int(opciones.get("cantidad", Sueno.ESCENAS_POR_NOCHE))
-	opciones["cantidad"] = mini(cantidad, Trabajillos.escenas_de_sueno(jornada, Sueno.ESCENAS_POR_NOCHE))
+	opciones["cantidad"] = mini(
+		cantidad, Trabajillos.escenas_de_sueno(jornada, Sueno.ESCENAS_POR_NOCHE)
+	)
 	return opciones
