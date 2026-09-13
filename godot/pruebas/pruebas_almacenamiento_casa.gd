@@ -72,12 +72,13 @@ func _probar_distribucion_domestica() -> void:
 		"la cocina incluye fregadero"
 	)
 	_comprobar(
-		cocina != null and cocina.get_node_or_null("NeveraCasa") != null,
-		"la cocina incluye nevera"
+		cocina != null and cocina.get_node_or_null("NeveraCasa") != null, "la cocina incluye nevera"
 	)
 	_comprobar(
-		estanteria != null
-		and estanteria.find_children("*", "MeshInstance3D", true, false).size() >= 6,
+		(
+			estanteria != null
+			and estanteria.find_children("*", "MeshInstance3D", true, false).size() >= 6
+		),
 		"la estantería ofrece varios huecos físicos"
 	)
 	_comprobar(
