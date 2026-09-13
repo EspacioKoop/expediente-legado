@@ -204,38 +204,62 @@ func _abrir_expediente() -> void:
 
 
 func _montar_asistente_siga() -> void:
-	var lineas := GatoAyuda.lineas_asistente(jornada.get("gato", {}))
+	var gato: Dictionary = jornada.get("gato", {})
+	var lineas := GatoAyuda.lineas_asistente(gato)
 	if lineas.is_empty():
 		return
 
-	var panel := PanelContainer.new()
-	panel.theme = EstiloSiga.tema()
-	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	panel.offset_left = 12
-	panel.offset_top = -144
-	panel.offset_right = 520
-	panel.offset_bottom = -12
-	_pantalla.add_child(panel)
+	# El conjunto no tiene fondo propio: gato y bocadillo son dos piezas
+	# visualmente independientes. El anclaje al borde inferior derecho escala con
+	# la ventana y deja el cuerpo del expediente libre en vez de ocupar la base.
+	var conjunto := HBoxContainer.new()
+	conjunto.name = "AsistenteSiga"
+	conjunto.theme = EstiloSiga.tema()
+	conjunto.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	conjunto.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	conjunto.offset_left = -540
+	conjunto.offset_top = -176
+	conjunto.offset_right = -16
+	conjunto.offset_bottom = -16
+	conjunto.add_theme_constant_override("separation", 18)
+	_pantalla.add_child(conjunto)
 
-	var fila := HBoxContainer.new()
-	fila.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.add_child(fila)
+	var burbuja := PanelContainer.new()
+	burbuja.name = "BocadilloGato"
+	burbuja.custom_minimum_size = Vector2(348, 118)
+	burbuja.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	conjunto.add_child(burbuja)
 
-	var avatar := GatoAsistente2D.new()
-	fila.add_child(avatar)
+	var margen := MarginContainer.new()
+	for lado in ["left", "top", "right", "bottom"]:
+		margen.add_theme_constant_override("margin_" + lado, 12)
+	burbuja.add_child(margen)
 
 	var caja := VBoxContainer.new()
 	caja.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	fila.add_child(caja)
-
+	caja.add_theme_constant_override("separation", 6)
+	margen.add_child(caja)
 	for clave in lineas:
 		var frase := Label.new()
 		frase.text = tr(String(clave))
 		frase.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		frase.custom_minimum_size.x = 370
+		frase.custom_minimum_size.x = 320
 		frase.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		caja.add_child(frase)
+
+	# Cola del bocadillo: un triángulo que apunta al avatar, separado del dibujo
+	# del gato para que la atribución de la frase sea inequívoca.
+	var puntero := Polygon2D.new()
+	puntero.name = "PunteroBocadilloGato"
+	puntero.polygon = PackedVector2Array([Vector2(342, 82), Vector2(370, 96), Vector2(342, 108)])
+	puntero.color = Color(0.78, 0.79, 0.75)
+	conjunto.add_child(puntero)
+
+	var avatar := GatoAsistente2D.new()
+	avatar.name = "GatoAsistente"
+	var preferencias := PreferenciasSiga.cargar()
+	avatar.configurar(GatoAyuda.nivel(gato), bool(preferencias.get("reduccion_movimiento", false)))
+	conjunto.add_child(avatar)
 
 
 func _montar_guia_sueno() -> void:
