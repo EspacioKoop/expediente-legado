@@ -11,6 +11,7 @@ EXTENSION = ROOT / "godot" / "addons" / "siga98_gb" / "siga98_gb.gdextension"
 LOCK = NATIVE / "deps.lock.json"
 CI = ROOT / ".github" / "workflows" / "ci.yml"
 ALPHA = ROOT / ".github" / "workflows" / "alpha-playtest.yml"
+SMOKE = ROOT / "godot" / "pruebas" / "emulador_gb_smoke.gd"
 
 
 class EmuladorGBTest(unittest.TestCase):
@@ -23,6 +24,7 @@ class EmuladorGBTest(unittest.TestCase):
         cls.lock = json.loads(LOCK.read_text(encoding="utf-8"))
         cls.ci = CI.read_text(encoding="utf-8")
         cls.alpha = ALPHA.read_text(encoding="utf-8")
+        cls.smoke = SMOKE.read_text(encoding="utf-8")
 
     def test_dependencias_estan_fijadas_y_son_mit(self):
         self.assertEqual(
@@ -60,6 +62,26 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn("CatalogoRomsUsuario.listar()", self.ui)
         self.assertIn('ClassDB.class_exists(&"Siga98GB")', self.ui)
         self.assertIn("JOY_BUTTON_DPAD_RIGHT", self.ui)
+
+    def test_ui_reloj_dmg_no_depende_de_fps_godot(self):
+        self.assertIn("CICLOS_CPU_DMG := 4194304.0", self.ui)
+        self.assertIn("CICLOS_POR_FRAME_DMG := 70224.0", self.ui)
+        self.assertIn("FPS_EMULADOR := CICLOS_CPU_DMG / CICLOS_POR_FRAME_DMG", self.ui)
+        self.assertIn("PASO_EMULADOR := 1.0 / FPS_EMULADOR", self.ui)
+        self.assertIn("MAX_FRAMES_POR_TICK := 4", self.ui)
+        self.assertIn("func _process(delta: float)", self.ui)
+        self.assertIn("_tiempo_emulador + maxf(delta, 0.0)", self.ui)
+        self.assertIn("while _tiempo_emulador >= PASO_EMULADOR", self.ui)
+        self.assertIn("_tiempo_emulador -= PASO_EMULADOR", self.ui)
+        self.assertNotIn("func _process(_delta: float)", self.ui)
+
+    def test_smoke_compara_pixeles_rgba_no_canales_sueltos(self):
+        self.assertIn("BYTES_POR_PIXEL := 4", self.smoke)
+        self.assertIn("func _frame_tiene_variacion", self.smoke)
+        self.assertIn("frame[indice + canal] != frame[canal]", self.smoke)
+        self.assertIn("17, 34, 51, 255, 17, 34, 51, 255", self.smoke)
+        self.assertIn("17, 34, 51, 255, 17, 35, 51, 255", self.smoke)
+        self.assertIn("if not _frame_tiene_variacion(frame)", self.smoke)
 
     def test_extension_declara_linux_y_windows(self):
         self.assertIn('compatibility_minimum = "4.7"', self.extension)

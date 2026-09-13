@@ -1,47 +1,82 @@
 extends SceneTree
 
 const ROM := "res://roms/caza_pixeles_98.gbc"
-const TAM_FRAME := 160 * 144 * 4
+const BYTES_POR_PIXEL := 4
+const TAM_FRAME := 160 * 144 * BYTES_POR_PIXEL
 
 
 func _init() -> void:
-	if not ClassDB.class_exists(&"Siga98GB"):
-		_fallar("Siga98GB no está registrada")
+	if not _autoprobar_detector():
 		return
-	if not FileAccess.file_exists(ROM):
-		_fallar("no existe la ROM propia preparada")
+	var emulador := _crear_emulador()
+	if emulador == null:
+		return
+	if not _cargar_rom(emulador):
+		return
+	var frame := _ejecutar_frames(emulador)
+	if frame.is_empty():
+		return
+	if not _frame_tiene_variacion(frame):
+		_fallar("el framebuffer quedó uniforme por píxel RGBA")
 		return
 
+	print("Emulador GB smoke: OK · %s · %d bytes/frame" % [emulador.call("rom_title"), TAM_FRAME])
+	quit(0)
+
+
+func _autoprobar_detector() -> bool:
+	var uniforme := PackedByteArray([17, 34, 51, 255, 17, 34, 51, 255])
+	if _frame_tiene_variacion(uniforme):
+		_fallar("la autoprueba aceptó dos píxeles RGBA idénticos")
+		return false
+	var variado := PackedByteArray([17, 34, 51, 255, 17, 35, 51, 255])
+	if not _frame_tiene_variacion(variado):
+		_fallar("la autoprueba no detectó variación entre píxeles RGBA")
+		return false
+	return true
+
+
+func _crear_emulador() -> Object:
+	if not ClassDB.class_exists(&"Siga98GB"):
+		_fallar("Siga98GB no está registrada")
+		return null
 	var emulador = ClassDB.instantiate(&"Siga98GB")
 	if emulador == null:
 		_fallar("no se pudo instanciar Siga98GB")
-		return
+	return emulador
+
+
+func _cargar_rom(emulador: Object) -> bool:
+	if not FileAccess.file_exists(ROM):
+		_fallar("no existe la ROM propia preparada")
+		return false
 	var rom := FileAccess.get_file_as_bytes(ROM)
 	var resultado := int(emulador.call("load_rom", rom))
 	if resultado != 0:
 		_fallar("load_rom falló: %s" % emulador.call("last_error"))
-		return
+		return false
+	return true
 
-	var frame: PackedByteArray
+
+func _ejecutar_frames(emulador: Object) -> PackedByteArray:
+	var frame := PackedByteArray()
 	for _indice in range(12):
 		emulador.call("set_buttons", 0)
 		frame = emulador.call("run_frame_rgba")
 		if frame.size() != TAM_FRAME:
 			_fallar("frame inválido: %d bytes" % frame.size())
-			return
+			return PackedByteArray()
+	return frame
 
-	var distintos := false
-	var primero := frame[0]
-	for valor in frame:
-		if valor != primero:
-			distintos = true
-			break
-	if not distintos:
-		_fallar("el framebuffer quedó uniforme")
-		return
 
-	print("Emulador GB smoke: OK · %s · %d bytes/frame" % [emulador.call("rom_title"), TAM_FRAME])
-	quit(0)
+func _frame_tiene_variacion(frame: PackedByteArray) -> bool:
+	if frame.size() < BYTES_POR_PIXEL * 2 or frame.size() % BYTES_POR_PIXEL != 0:
+		return false
+	for indice in range(BYTES_POR_PIXEL, frame.size(), BYTES_POR_PIXEL):
+		for canal in range(BYTES_POR_PIXEL):
+			if frame[indice + canal] != frame[canal]:
+				return true
+	return false
 
 
 func _fallar(mensaje: String) -> void:
