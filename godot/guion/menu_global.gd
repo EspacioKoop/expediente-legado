@@ -5,7 +5,10 @@
 ## Vive como autoload para no duplicarse entre las tres partes del juego.
 extends CanvasLayer
 
+const RUTA_PRESENTACION_SELLOS := "res://datos/sellos_presentacion.json"
+
 var _preferencias: Dictionary = {}
+var _presentacion_sellos: Dictionary = {}
 var _fondo: ColorRect
 var _panel_principal: PanelContainer
 var _panel_opciones: PanelContainer
@@ -30,6 +33,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 100
 	_preferencias = PreferenciasSiga.cargar()
+	_presentacion_sellos = _cargar_presentacion_sellos()
 	PreferenciasSiga.aplicar(_preferencias)
 	_aplicar_volumen()
 	_montar()
@@ -128,7 +132,7 @@ func _principal_contenido(caja: VBoxContainer) -> void:
 	caja.add_child(_opciones)
 
 	_sellos = Button.new()
-	_sellos.text = tr("MENU_SELLOS_TITULO")
+	_sellos.text = String(_presentacion_sellos.get("titulo", ""))
 	_sellos.pressed.connect(_mostrar_sellos)
 	caja.add_child(_sellos)
 
@@ -173,11 +177,11 @@ func _opciones_contenido(caja: VBoxContainer) -> void:
 
 func _sellos_contenido(caja: VBoxContainer) -> void:
 	var titulo := Label.new()
-	titulo.text = tr("MENU_SELLOS_TITULO")
+	titulo.text = String(_presentacion_sellos.get("titulo", ""))
 	caja.add_child(titulo)
 
 	var subtitulo := Label.new()
-	subtitulo.text = tr("MENU_SELLOS_SUBTITULO")
+	subtitulo.text = String(_presentacion_sellos.get("subtitulo", ""))
 	caja.add_child(subtitulo)
 
 	for entrada in Sellos.catalogo():
@@ -190,6 +194,11 @@ func _sellos_contenido(caja: VBoxContainer) -> void:
 	_sellos_volver.text = tr("MENU_GLOBAL_VOLVER")
 	_sellos_volver.pressed.connect(_mostrar_principal)
 	caja.add_child(_sellos_volver)
+
+
+func _cargar_presentacion_sellos() -> Dictionary:
+	var datos = JSON.parse_string(FileAccess.get_file_as_string(RUTA_PRESENTACION_SELLOS))
+	return datos if datos is Dictionary else {}
 
 
 func _texto_sello(entrada: Dictionary) -> String:
