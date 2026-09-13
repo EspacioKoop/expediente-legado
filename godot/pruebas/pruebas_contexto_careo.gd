@@ -10,11 +10,13 @@ func _init() -> void:
 	var caso := {
 		"id": "caso-prueba",
 		"titulo": "CASO_PRUEBA_TITULO",
-		"registros": [
+		"registros":
+		[
 			{"id": "r1", "folio": "F-1"},
 			{"id": "r2", "folio": "F-2"},
 		],
-		"pistas": [
+		"pistas":
+		[
 			{"id": "simple", "registroOrigen": "r1", "descripcion": "simple"},
 			{
 				"id": "relacion-a",
@@ -34,7 +36,8 @@ func _init() -> void:
 		"id": "otro",
 		"titulo": "OTRO_TITULO",
 		"registros": [{"id": "x", "folio": "X-1"}],
-		"pistas": [
+		"pistas":
+		[
 			{
 				"id": "ajena",
 				"registroOrigen": "x",
