@@ -1,7 +1,7 @@
 ## Lámpara doméstica interactiva reutilizando el contrato común de #283.
 ##
 ## El estado es deliberadamente local a la escena: encenderla o apagarla no
-## guarda partida, no consume acciones y no modifica Jornada/Partida.
+## guarda progreso, no consume acciones y no modifica estado persistente.
 class_name LamparaInteractiva3D
 extends Interactuable3D
 
