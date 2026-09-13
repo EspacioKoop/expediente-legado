@@ -1154,12 +1154,12 @@ Tiles:
     ; 31 nitro
     db $18,$00,$3C,$00,$7E,$00,$3C,$00,$18,$00,$3C,$00,$18,$00,$00,$00
 
-    ; 32-35 cocodrilo motero 16x16, dispuesto como dos sprites 8x16.
-    ; Hocico largo, ojos negros, cuerpo verde, deposito rojo y rueda trasera.
-    db $07,$00,$0F,$03,$1F,$00,$1F,$04,$3F,$00,$1F,$00,$0E,$01,$00,$1F
-    db $01,$07,$00,$07,$00,$03,$02,$03,$03,$00,$07,$00,$03,$00,$01,$00
-    db $E0,$00,$F0,$C0,$F8,$00,$F8,$20,$FC,$00,$F8,$00,$70,$80,$00,$F8
-    db $80,$E0,$00,$E0,$00,$C0,$40,$C0,$C0,$00,$E0,$00,$C0,$00,$80,$00
+    ; 32-35 cocodrilo motero 16x16: perfil lateral deliberadamente exagerado.
+    ; Cola a la izquierda, hocico largo/ojos a la derecha y moto roja con dos ruedas.
+    db $00,$00,$00,$00,$01,$00,$07,$00,$1F,$00,$7F,$00,$CF,$00,$03,$0C
+    db $00,$1F,$00,$38,$30,$30,$78,$78,$78,$78,$30,$30,$00,$00,$00,$00
+    db $00,$00,$78,$00,$FF,$40,$FF,$00,$FE,$00,$F8,$00,$E0,$00,$00,$C0
+    db $00,$F0,$00,$78,$30,$30,$78,$78,$78,$78,$30,$30,$00,$00,$00,$00
 
     ; 36-39 taxi 16x16: carroceria amarilla, cristales azules, ruedas negras.
     db $07,$00,$0F,$07,$18,$07,$18,$07,$3F,$20,$3F,$20,$3F,$23,$3F,$20
