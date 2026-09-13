@@ -7,7 +7,9 @@ var pasadas := 0
 func _init() -> void:
 	comprobar("interior sin clave conserva techo", PoliticaTecho.debe_tener({}), true)
 	comprobar("interior explícito conserva techo", PoliticaTecho.debe_tener({"techo": true}), true)
-	comprobar("exterior explícito no tiene techo", PoliticaTecho.debe_tener({"techo": false}), false)
+	comprobar(
+		"exterior explícito no tiene techo", PoliticaTecho.debe_tener({"techo": false}), false
+	)
 
 	var original := {"suelo": Vector2(9, 34), "color_techo": Color(0.1, 0.1, 0.13)}
 	var exterior := PoliticaTecho.marcar_exterior(original)
