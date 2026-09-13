@@ -77,9 +77,9 @@ func _espacio_de(fase: String) -> Dictionary:
 	sitio["bultos"].append(
 		{
 			"pos": Vector3(2.85, 0.65, 9.0),
-			"tam": Vector3(0.55, 1.3, 1.8),
-			"color": Color(0.47, 0.45, 0.41)
-		}
+				"tam": Vector3(0.55, 1.3, 1.8),
+				"color": Color(0.47, 0.45, 0.41)
+			}
 	)
 	(
 		sitio["salidas"]
@@ -105,9 +105,10 @@ func _alquiler_disponible_hoy() -> bool:
 ## La salida especial no cambia de fase. Pisar el mostrador equivale a hacer
 ## cola y ser atendido: Jornada valida fase, vencimiento, acción y dinero.
 ##
-## Si se abandona el trayecto con el vencimiento aún pendiente, el gato deja de
-## estar disponible ANTES de montar el refugio. No hay cinemática ni aviso: al
-## llegar a la oficina nocturna simplemente ya no está.
+## Si se abandona el trayecto con el vencimiento aún pendiente, se materializa
+## la pérdida de vivienda ANTES de montar el refugio. No hay cinemática ni
+## aviso: al llegar a la oficina nocturna el gato ya no está y cualquier objeto
+## que se hubiera dejado en casa deja de estar disponible.
 func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
 	if (
 		cuerpo == _caminante
@@ -126,9 +127,20 @@ func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
 		and String(salida.get_meta("destino", "")) == "casa"
 		and _impago_inminente()
 	):
-		jornada["gato"]["presente"] = false
+		_perder_vivienda()
 
 	super._al_pisar_salida(cuerpo, salida)
+
+
+## #97 separa lo que llevas encima de lo almacenado en casa. #84 consume ese
+## contrato sin decidir dónde ni cuándo se crea el inventario persistente: si
+## la partida ya lo trae, perder la vivienda elimina solo `home_storage`.
+## `carried` no se toca porque son precisamente las cosas que llevabas contigo.
+func _perder_vivienda() -> void:
+	jornada["gato"]["presente"] = false
+	var inventario = partida.estado.get("inventario", null)
+	if typeof(inventario) == TYPE_DICTIONARY:
+		Inventario.perder_casa(inventario)
 
 
 func _pagar_alquiler() -> void:
