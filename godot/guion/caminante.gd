@@ -31,6 +31,8 @@ const TOPE_VERTICAL := deg_to_rad(85.0)
 
 var _detector_interaccion: DetectorInteraccion3D
 var _prompt_interaccion: Label
+var _hud_prioridades: HUDLayer
+var _objetivo_foco: Interactuable3D
 var _preferencias_camara: Dictionary = {}
 
 @onready var _camara: Camera3D = $Camara
@@ -59,29 +61,72 @@ func _montar_interaccion() -> void:
 	_detector_interaccion.objetivo_cambiado.connect(_mostrar_prompt_interaccion)
 	_detector_interaccion.objetivo_perdido.connect(_ocultar_prompt_interaccion)
 
-	var capa := CanvasLayer.new()
-	capa.layer = 20
-	add_child(capa)
 	_prompt_interaccion = Label.new()
+	_prompt_interaccion.name = "PromptInteraccion"
 	_prompt_interaccion.theme = EstiloSiga.tema()
 	_prompt_interaccion.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_prompt_interaccion.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
-	_prompt_interaccion.offset_left = -220
+	_prompt_interaccion.offset_left = -260
 	_prompt_interaccion.offset_top = -74
-	_prompt_interaccion.offset_right = 220
+	_prompt_interaccion.offset_right = 260
 	_prompt_interaccion.offset_bottom = -30
 	_prompt_interaccion.visible = false
-	capa.add_child(_prompt_interaccion)
 
 
-func _mostrar_prompt_interaccion(_objetivo: Interactuable3D, texto: String) -> void:
-	_prompt_interaccion.text = texto
-	_prompt_interaccion.visible = not texto.is_empty()
+## El prompt deja de vivir en su propio CanvasLayer: el día lo registra en el
+## árbitro común para que diálogo, tutorial y modales puedan quitarle prioridad.
+func conectar_hud(hud: HUDLayer) -> void:
+	_hud_prioridades = hud
+	if _prompt_interaccion.get_parent() == null:
+		hud.add_child(_prompt_interaccion)
+	hud.registrar(HUDLayer.INTERACCION, _prompt_interaccion)
+	if not _prompt_interaccion.text.is_empty():
+		hud.activar(HUDLayer.INTERACCION)
+
+
+func _mostrar_prompt_interaccion(objetivo: Interactuable3D, texto: String) -> void:
+	_marcar_objetivo(_objetivo_foco, false)
+	_objetivo_foco = objetivo
+	_marcar_objetivo(_objetivo_foco, true)
+	_prompt_interaccion.text = _texto_con_entrada("interactuar", texto)
+	if _hud_prioridades != null:
+		if texto.is_empty():
+			_hud_prioridades.desactivar(HUDLayer.INTERACCION)
+		else:
+			_hud_prioridades.activar(HUDLayer.INTERACCION)
+	else:
+		_prompt_interaccion.visible = not texto.is_empty()
 
 
 func _ocultar_prompt_interaccion() -> void:
+	_marcar_objetivo(_objetivo_foco, false)
+	_objetivo_foco = null
 	_prompt_interaccion.text = ""
-	_prompt_interaccion.visible = false
+	if _hud_prioridades != null:
+		_hud_prioridades.desactivar(HUDLayer.INTERACCION)
+	else:
+		_prompt_interaccion.visible = false
+
+
+func _marcar_objetivo(objetivo: Interactuable3D, en_foco: bool) -> void:
+	if objetivo is CompaneroInteractivo3D:
+		objetivo.marcar_en_foco(en_foco)
+
+
+## El texto de entrada se deriva de InputMap, que ya contiene el remapeo real.
+## Nunca se imprime una tecla ni un botón físico fijo desde este HUD.
+func _texto_con_entrada(accion: StringName, texto: String) -> String:
+	var entradas: Array[String] = []
+	for evento in InputMap.action_get_events(accion):
+		var nombre := evento.as_text().strip_edges()
+		if nombre.is_empty() or nombre in entradas:
+			continue
+		entradas.append(nombre)
+		if entradas.size() == 2:
+			break
+	if entradas.is_empty():
+		return texto
+	return "[%s]  %s" % [" / ".join(entradas), texto]
 
 
 ## Declara un esquema de movimiento propio en vez de depender de las acciones
