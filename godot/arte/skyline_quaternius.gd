@@ -59,12 +59,7 @@ static func _seis_pisos_pila(raiz: Node3D, color: Color) -> void:
 
 
 static func _ventanas(
-	raiz: Node3D,
-	pisos: int,
-	columnas: int,
-	frente: Vector3,
-	paso_y: float,
-	separacion_x: float
+	raiz: Node3D, pisos: int, columnas: int, frente: Vector3, paso_y: float, separacion_x: float
 ) -> void:
 	var vidrio := Color(0.11, 0.14, 0.17)
 	for piso in range(pisos):
