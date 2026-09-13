@@ -19,8 +19,15 @@ MODELOS = ("Bush_1", "Bush_2", "Rock_1", "Rock_5")
 class NaturalezaCC0Test(unittest.TestCase):
     def test_incorpora_solo_cuatro_modelos_originales_con_mtl(self) -> None:
         esperados = {f"{nombre}.{extension}" for nombre in MODELOS for extension in ("obj", "mtl")}
-        presentes = {ruta.name for ruta in CARPETA.iterdir() if ruta.is_file()}
+        presentes = {
+            ruta.name
+            for ruta in CARPETA.iterdir()
+            if ruta.is_file() and ruta.suffix in {".obj", ".mtl"}
+        }
         self.assertEqual(presentes, esperados)
+        self.assertFalse(any(CARPETA.glob("*.glb")))
+        self.assertFalse(any(CARPETA.glob("*.fbx")))
+        self.assertFalse(any(CARPETA.glob("*.blend")))
 
     def test_todos_los_originales_tienen_procedencia_cc0_y_hash(self) -> None:
         datos = json.loads(PROCEDENCIA.read_text(encoding="utf-8"))
