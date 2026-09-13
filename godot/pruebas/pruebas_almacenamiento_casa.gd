@@ -18,7 +18,7 @@ func _initialize() -> void:
 		"el cajón visible forma parte del objeto"
 	)
 	_comprobar(
-		almacenamiento.get_node_or_null("CollisionShape3D") != null,
+		almacenamiento.find_children("*", "CollisionShape3D", true, false).size() == 1,
 		"expone un volumen de interacción"
 	)
 
