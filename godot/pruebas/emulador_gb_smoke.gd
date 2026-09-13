@@ -6,44 +6,67 @@ const TAM_FRAME := 160 * 144 * BYTES_POR_PIXEL
 
 
 func _init() -> void:
-	if _frame_tiene_variacion(PackedByteArray([17, 34, 51, 255, 17, 34, 51, 255])):
-		_fallar("la autoprueba aceptó dos píxeles RGBA idénticos")
+	if not _autoprobar_detector():
 		return
-	if not _frame_tiene_variacion(PackedByteArray([17, 34, 51, 255, 17, 35, 51, 255])):
-		_fallar("la autoprueba no detectó variación entre píxeles RGBA")
-		return
-
-	if not ClassDB.class_exists(&"Siga98GB"):
-		_fallar("Siga98GB no está registrada")
-		return
-	if not FileAccess.file_exists(ROM):
-		_fallar("no existe la ROM propia preparada")
-		return
-
-	var emulador = ClassDB.instantiate(&"Siga98GB")
+	var emulador := _crear_emulador()
 	if emulador == null:
-		_fallar("no se pudo instanciar Siga98GB")
 		return
-	var rom := FileAccess.get_file_as_bytes(ROM)
-	var resultado := int(emulador.call("load_rom", rom))
-	if resultado != 0:
-		_fallar("load_rom falló: %s" % emulador.call("last_error"))
+	if not _cargar_rom(emulador):
 		return
-
-	var frame: PackedByteArray
-	for _indice in range(12):
-		emulador.call("set_buttons", 0)
-		frame = emulador.call("run_frame_rgba")
-		if frame.size() != TAM_FRAME:
-			_fallar("frame inválido: %d bytes" % frame.size())
-			return
-
+	var frame := _ejecutar_frames(emulador)
+	if frame.is_empty():
+		return
 	if not _frame_tiene_variacion(frame):
 		_fallar("el framebuffer quedó uniforme por píxel RGBA")
 		return
 
 	print("Emulador GB smoke: OK · %s · %d bytes/frame" % [emulador.call("rom_title"), TAM_FRAME])
 	quit(0)
+
+
+func _autoprobar_detector() -> bool:
+	var uniforme := PackedByteArray([17, 34, 51, 255, 17, 34, 51, 255])
+	if _frame_tiene_variacion(uniforme):
+		_fallar("la autoprueba aceptó dos píxeles RGBA idénticos")
+		return false
+	var variado := PackedByteArray([17, 34, 51, 255, 17, 35, 51, 255])
+	if not _frame_tiene_variacion(variado):
+		_fallar("la autoprueba no detectó variación entre píxeles RGBA")
+		return false
+	return true
+
+
+func _crear_emulador() -> Object:
+	if not ClassDB.class_exists(&"Siga98GB"):
+		_fallar("Siga98GB no está registrada")
+		return null
+	var emulador = ClassDB.instantiate(&"Siga98GB")
+	if emulador == null:
+		_fallar("no se pudo instanciar Siga98GB")
+	return emulador
+
+
+func _cargar_rom(emulador: Object) -> bool:
+	if not FileAccess.file_exists(ROM):
+		_fallar("no existe la ROM propia preparada")
+		return false
+	var rom := FileAccess.get_file_as_bytes(ROM)
+	var resultado := int(emulador.call("load_rom", rom))
+	if resultado != 0:
+		_fallar("load_rom falló: %s" % emulador.call("last_error"))
+		return false
+	return true
+
+
+func _ejecutar_frames(emulador: Object) -> PackedByteArray:
+	var frame := PackedByteArray()
+	for _indice in range(12):
+		emulador.call("set_buttons", 0)
+		frame = emulador.call("run_frame_rgba")
+		if frame.size() != TAM_FRAME:
+			_fallar("frame inválido: %d bytes" % frame.size())
+			return PackedByteArray()
+	return frame
 
 
 func _frame_tiene_variacion(frame: PackedByteArray) -> bool:
