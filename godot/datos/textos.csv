@@ -165,6 +165,9 @@ SUENO_ROTULO,…
 TAROT_ROTULO,{carta}
 TAROT_SIN_NOMBRE,Una carta sin nombre
 TAROT_VOZ,"Estaba dentro del expediente, escrita como si nada."
+TRABAJILLO_COBRADO,"Termina el lote. Le pagan %d. Tiene %d."
+TRABAJILLO_TRANSCRIPCION,Transcribir un lote
+TRABAJILLO_YA_HECHO,No queda otro lote para esta noche.
 VENTANILLA_ADELANTA,La comisión adelanta que la próxima réplica será: %s.
 VENTANILLA_ATENDIDA,RECLAMACIÓN ATENDIDA. Racha: %d.
 VENTANILLA_HABILIDAD,%s (%d)
