@@ -10,6 +10,7 @@ MOTOR="${GODOT_BIN:-godot4}"
 DECLARADA="$(tr -d '\r\n' < "$RAIZ/.godot-version")"
 ACTUAL="$($MOTOR --version | tr -d '\r\n')"
 CONFIG_INCIDENCIAS="$GODOT_DIR/datos/incidencias.json"
+NOTAS_ALPHA="$RAIZ/docs/alpha-playtest-2026-09-13.md"
 RESPALDO_INCIDENCIAS="$(mktemp)"
 cp "$CONFIG_INCIDENCIAS" "$RESPALDO_INCIDENCIAS"
 
@@ -18,6 +19,11 @@ restaurar_config_incidencias() {
     rm -f "$RESPALDO_INCIDENCIAS"
 }
 trap restaurar_config_incidencias EXIT
+
+if [ ! -f "$NOTAS_ALPHA" ]; then
+    echo "ERROR: faltan las notas de la alpha: $NOTAS_ALPHA" >&2
+    exit 1
+fi
 
 # El formulario de feedback se configura al empaquetar, no queda hardcodeado
 # en GDScript. La URL es pública dentro de la build y solo se aceptan HTTP(S).
@@ -81,6 +87,12 @@ EOF
 exportar "Linux x86_64" "$SALIDA/godot-linux/SIGA-98.x86_64"
 chmod +x "$SALIDA/godot-linux/SIGA-98.x86_64"
 exportar "Windows x86_64" "$SALIDA/godot-windows/SIGA-98.exe"
+
+# La alpha se distribuye con su propio contexto de playtest. Así cada ZIP deja
+# claro qué contiene y qué sigue pendiente de validar aunque se comparta fuera
+# de la página de Actions donde se generó.
+cp "$NOTAS_ALPHA" "$SALIDA/godot-linux/NOTAS-ALPHA.md"
+cp "$NOTAS_ALPHA" "$SALIDA/godot-windows/NOTAS-ALPHA.md"
 
 python3 - "$SALIDA" <<'PY'
 from pathlib import Path
