@@ -5,6 +5,8 @@ import unittest
 
 RAIZ = Path(__file__).resolve().parents[1]
 CINEMATICA = RAIZ / "godot" / "guion" / "ascensor_cinematica.gd"
+APP_3D = RAIZ / "godot" / "guion" / "ascensor_3d_app.gd"
+ESCENA_ASCENSOR = RAIZ / "godot" / "escenas" / "ascensor_3d.tscn"
 CAPA = RAIZ / "godot" / "guion" / "dia_ascensor_app.gd"
 CAPA_ALQUILER = RAIZ / "godot" / "guion" / "dia_alquiler_app.gd"
 CAPA_TRABAJILLOS = RAIZ / "godot" / "guion" / "dia_trabajillos_app.gd"
@@ -17,6 +19,8 @@ ESCENA_DIA = RAIZ / "godot" / "escenas" / "dia.tscn"
 class AscensorTest(unittest.TestCase):
     def setUp(self):
         self.cinematica = CINEMATICA.read_text(encoding="utf-8")
+        self.app_3d = APP_3D.read_text(encoding="utf-8")
+        self.escena_ascensor = ESCENA_ASCENSOR.read_text(encoding="utf-8")
         self.capa = CAPA.read_text(encoding="utf-8")
         self.capa_alquiler = CAPA_ALQUILER.read_text(encoding="utf-8")
         self.capa_trabajillos = CAPA_TRABAJILLOS.read_text(encoding="utf-8")
@@ -31,10 +35,35 @@ class AscensorTest(unittest.TestCase):
         self.assertLessEqual(sum(segundos), 3.5)
         self.assertIn('"nombre": "portal"', self.cinematica)
 
+    def test_la_presentacion_ya_no_es_placeholder_2d(self):
+        self.assertEqual(self.cinematica.count('"tipo": "3d"'), 3)
+        self.assertNotIn('"tipo": "2d"', self.cinematica)
+        self.assertNotIn('"figura"', self.cinematica)
+        self.assertIn('"camara": ORIGEN + Vector3', self.cinematica)
+        self.assertIn('"mira": ORIGEN + Vector3', self.cinematica)
+
+    def test_cabina_3d_tiene_volumen_panel_y_apertura(self):
+        self.assertIn('extends "res://guion/cinematica_app.gd"', self.app_3d)
+        self.assertIn("BoxMesh.new()", self.app_3d)
+        self.assertIn("OmniLight3D.new()", self.app_3d)
+        self.assertIn('"PuertaIzquierda"', self.app_3d)
+        self.assertIn('"PuertaDerecha"', self.app_3d)
+        self.assertIn("for i in 5:", self.app_3d)
+        self.assertIn("plano_entrado.connect(_al_entrar_plano)", self.app_3d)
+        self.assertIn("func _abrir_puertas()", self.app_3d)
+        self.assertIn('tween_property(_puerta_izquierda, "position:x"', self.app_3d)
+        self.assertIn('tween_property(_puerta_derecha, "position:x"', self.app_3d)
+
+    def test_escena_especializada_se_usa_en_lugar_del_lienzo_generico(self):
+        self.assertIn('path="res://guion/ascensor_3d_app.gd"', self.escena_ascensor)
+        self.assertIn('preload("res://escenas/ascensor_3d.tscn")', self.capa)
+        self.assertNotIn('preload("res://escenas/cinematica.tscn")', self.capa)
+
     def test_reutiliza_el_reproductor_comun(self):
         self.assertIn('const ID := "ascensor-bajada"', self.cinematica)
         self.assertIn("Cinematica.resolver", self.cinematica)
         self.assertIn("Cinematica.vistas_de", self.capa)
+        self.assertIn('extends "res://guion/cinematica_app.gd"', self.app_3d)
 
     def test_solo_intercepta_archivo_hacia_trayecto(self):
         self.assertIn('jornada.get("fase", "") == "archivo"', self.capa)
