@@ -22,6 +22,8 @@ public:
         LOAD_RUNTIME_ERROR = 6,
     };
 
+    struct Impl;
+
     Siga98GB();
     ~Siga98GB() override;
 
@@ -39,7 +41,6 @@ protected:
     static void _bind_methods();
 
 private:
-    struct Impl;
     std::unique_ptr<Impl> impl;
 };
 
