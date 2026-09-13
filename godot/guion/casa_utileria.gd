@@ -1,8 +1,8 @@
-## Utilería doméstica procedural para dar lectura 3D a la casa (#282).
+## Utilería doméstica procedural para dar lectura 3D a la casa (#282, #400).
 ##
 ## Los objetos siguen construidos con primitivas simples y sin assets externos.
-## La lámpara, el televisor y la portátil reutilizan además la interacción común
-## de #283 sin introducir persistencia ni reglas de jornada.
+## La lámpara, el televisor, la portátil y el almacenamiento reutilizan la
+## interacción común de #283 sin introducir persistencia ni reglas de jornada.
 class_name CasaUtileria
 extends RefCounted
 
@@ -11,6 +11,7 @@ static func montar(raiz: Node3D) -> void:
 	_montar_mesita(raiz, Vector3(1.7, 0.0, -2.1))
 	_montar_portatil(raiz, Vector3(1.7, 0.68, -2.1))
 	_montar_lampara_pie(raiz, Vector3(3.0, 0.0, -1.3))
+	_montar_almacenamiento(raiz, Vector3(0.0, 0.0, -3.05))
 	_montar_televisor_interactivo(raiz)
 
 
@@ -35,6 +36,16 @@ static func _montar_portatil(raiz: Node3D, pos: Vector3) -> void:
 	portatil.rotation_degrees = Vector3(-12.0, 18.0, 0.0)
 	raiz.add_child(portatil)
 	portatil.configurar()
+
+
+static func _montar_almacenamiento(raiz: Node3D, pos: Vector3) -> void:
+	var almacenamiento := AlmacenamientoCasaInteractivo3D.new()
+	almacenamiento.name = "AlmacenamientoCasa"
+	almacenamiento.position = pos
+	# Está contra el muro del fondo; el cajón debe abrir hacia el interior.
+	almacenamiento.rotation_degrees.y = 180.0
+	raiz.add_child(almacenamiento)
+	almacenamiento.configurar()
 
 
 ## El catálogo sigue siendo dueño de la posición y el tamaño del televisor.
