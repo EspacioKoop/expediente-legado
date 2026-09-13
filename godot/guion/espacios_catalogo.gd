@@ -318,7 +318,12 @@ const OFICINA := {
 	"cigarros": [Vector3(-3.3, 0.76, 1.2), Vector3(1.4, 0.76, -2.1)],
 	"salidas":
 	[
-		{"pos": Vector3(-6.4, 1.1, 3.5), "destino": "trayecto", "rotulo": "SALIDA_OFICINA"},
+		{
+			"pos": Vector3(-6.4, 1.1, 3.5),
+			"destino": "trayecto",
+			"rotulo": "SALIDA_OFICINA",
+			"visible": false
+		},
 		# El puesto de trabajo. No lleva a una fase del día: abre una PANTALLA,
 		# y se entra en ella pisando el sitio donde se trabaja — igual que se
 		# ficha saliendo por la puerta. Un botón flotante diría que el archivo
