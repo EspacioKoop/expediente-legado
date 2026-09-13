@@ -14,63 +14,75 @@ const FRAGMENTADA := "fragmentada"
 ## acepta dentro de una expresión `const`. El catálogo sigue siendo de solo
 ## lectura por API; se expone siempre mediante copia profunda en `de()`.
 static var _familias := {
-	CONVERGENTE: {
-		"contorno": PackedVector2Array([
-			Vector2(-15, -18),
-			Vector2(15, -18),
-			Vector2(8, -3),
-			Vector2(11, 16),
-			Vector2(-11, 16),
-			Vector2(-8, -3),
-		]),
+	CONVERGENTE:
+	{
+		"contorno":
+		PackedVector2Array(
+			[
+				Vector2(-15, -18),
+				Vector2(15, -18),
+				Vector2(8, -3),
+				Vector2(11, 16),
+				Vector2(-11, 16),
+				Vector2(-8, -3),
+			]
+		),
 		"altura": 3.2,
 		"entrada": Vector3(0, 0, -14),
 		"anclas": [Vector3(0, 0, 10), Vector3(-6, 0, 2), Vector3(6, 0, 2)],
 	},
-	ANULAR: {
-		# El anillo se representa como dos contornos: exterior e interior. La
+	ANULAR:
+	# El anillo se representa como dos contornos: exterior e interior. La
+	{
 		# integración visible deberá montar ambos, dejando el interior como vacío.
-		"contorno": PackedVector2Array([
-			Vector2(-15, -12),
-			Vector2(-7, -17),
-			Vector2(8, -16),
-			Vector2(15, -8),
-			Vector2(14, 10),
-			Vector2(5, 16),
-			Vector2(-10, 14),
-			Vector2(-16, 5),
-		]),
-		"hueco": PackedVector2Array([
-			Vector2(-5, -4),
-			Vector2(4, -6),
-			Vector2(7, 2),
-			Vector2(2, 7),
-			Vector2(-6, 5),
-		]),
+		"contorno":
+		PackedVector2Array(
+			[
+				Vector2(-15, -12),
+				Vector2(-7, -17),
+				Vector2(8, -16),
+				Vector2(15, -8),
+				Vector2(14, 10),
+				Vector2(5, 16),
+				Vector2(-10, 14),
+				Vector2(-16, 5),
+			]
+		),
+		"hueco":
+		PackedVector2Array(
+			[
+				Vector2(-5, -4),
+				Vector2(4, -6),
+				Vector2(7, 2),
+				Vector2(2, 7),
+				Vector2(-6, 5),
+			]
+		),
 		"altura": 3.4,
 		"entrada": Vector3(-11, 0, -7),
 		"anclas": [Vector3(10, 0, -3), Vector3(6, 0, 10), Vector3(-8, 0, 9)],
 	},
-	FRAGMENTADA: {
-		# Una sala principal irregular y dos islas caminables separadas visualmente.
+	FRAGMENTADA:
+	# Una sala principal irregular y dos islas caminables separadas visualmente.
+	{
 		# No exige salto: la integración debe unirlas con pasos/rampas anchas.
-		"contorno": PackedVector2Array([
-			Vector2(-16, -15),
-			Vector2(4, -17),
-			Vector2(13, -9),
-			Vector2(10, 3),
-			Vector2(16, 12),
-			Vector2(1, 17),
-			Vector2(-13, 12),
-			Vector2(-9, 1),
-		]),
-		"fragmentos": [
-			PackedVector2Array([
-				Vector2(-7, -2), Vector2(-2, -4), Vector2(1, 1), Vector2(-4, 4)
-			]),
-			PackedVector2Array([
-				Vector2(4, 6), Vector2(9, 4), Vector2(11, 9), Vector2(6, 12)
-			]),
+		"contorno":
+		PackedVector2Array(
+			[
+				Vector2(-16, -15),
+				Vector2(4, -17),
+				Vector2(13, -9),
+				Vector2(10, 3),
+				Vector2(16, 12),
+				Vector2(1, 17),
+				Vector2(-13, 12),
+				Vector2(-9, 1),
+			]
+		),
+		"fragmentos":
+		[
+			PackedVector2Array([Vector2(-7, -2), Vector2(-2, -4), Vector2(1, 1), Vector2(-4, 4)]),
+			PackedVector2Array([Vector2(4, 6), Vector2(9, 4), Vector2(11, 9), Vector2(6, 12)]),
 		],
 		"altura": 3.0,
 		"entrada": Vector3(-10, 0, -10),
@@ -93,9 +105,7 @@ static func malla(id: String) -> ArrayMesh:
 	var familia := de(id)
 	if familia.is_empty():
 		return ArrayMesh.new()
-	return SuenoGeometria.malla_sala(
-		familia["contorno"], float(familia.get("altura", 3.2))
-	)
+	return SuenoGeometria.malla_sala(familia["contorno"], float(familia.get("altura", 3.2)))
 
 
 static func valida(id: String) -> bool:
@@ -103,4 +113,6 @@ static func valida(id: String) -> bool:
 	if familia.is_empty():
 		return false
 	var contorno: PackedVector2Array = familia.get("contorno", PackedVector2Array())
-	return SuenoGeometria.contorno_valido(contorno) and SuenoGeometria.tiene_arista_diagonal(contorno)
+	return (
+		SuenoGeometria.contorno_valido(contorno) and SuenoGeometria.tiene_arista_diagonal(contorno)
+	)
