@@ -77,9 +77,9 @@ func _espacio_de(fase: String) -> Dictionary:
 	sitio["bultos"].append(
 		{
 			"pos": Vector3(2.85, 0.65, 9.0),
-				"tam": Vector3(0.55, 1.3, 1.8),
-				"color": Color(0.47, 0.45, 0.41)
-			}
+			"tam": Vector3(0.55, 1.3, 1.8),
+			"color": Color(0.47, 0.45, 0.41)
+		}
 	)
 	(
 		sitio["salidas"]
