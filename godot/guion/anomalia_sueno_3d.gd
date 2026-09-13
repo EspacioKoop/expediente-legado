@@ -10,7 +10,7 @@ extends Interactuable3D
 const COLOR_LUZ := Color(0.58, 0.48, 0.82)
 
 var _visual: Node3D
-var _luz: PointLight3D
+var _luz: OmniLight3D
 var _escala_base := Vector3.ONE
 var _escala_reaccion := Vector3.ONE
 var _giro_base := Vector3.ZERO
@@ -52,7 +52,7 @@ func configurar(
 		_montar_respaldo(tam, color)
 	_aplicar_estado_visual()
 
-	_luz = PointLight3D.new()
+	_luz = OmniLight3D.new()
 	_luz.name = "RespuestaLuz"
 	_luz.light_color = COLOR_LUZ
 	_luz.light_energy = 1.15
