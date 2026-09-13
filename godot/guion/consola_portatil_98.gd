@@ -111,7 +111,7 @@ func _agregar_boton(pos: Vector3, color: Color) -> void:
 	cilindro.height = 0.012
 	malla.mesh = cilindro
 	malla.position = pos
-	malla.rotation_degrees.x = 90.0
+	malla.rotation_degrees = Vector3(90.0, 0.0, 0.0)
 	var material := StandardMaterial3D.new()
 	material.albedo_color = color
 	material.roughness = 0.72
