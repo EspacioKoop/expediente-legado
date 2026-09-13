@@ -29,13 +29,16 @@ static func tarjetas(caso: Dictionary, visibles: Array = []) -> Array:
 			continue
 		if not filtro.is_empty() and not filtro.has(id):
 			continue
-		resultado.append(
-			{
-				"id": id,
-				"tipo": String(registro.get("tipo", "")),
-				"folio": String(registro.get("folio", "")),
-				"fecha": String(registro.get("fecha", "")),
-			}
+		(
+			resultado
+			. append(
+				{
+					"id": id,
+					"tipo": String(registro.get("tipo", "")),
+					"folio": String(registro.get("folio", "")),
+					"fecha": String(registro.get("fecha", "")),
+				}
+			)
 		)
 	return resultado
 
@@ -60,19 +63,30 @@ static func validar(caso: Dictionary, orden: Array) -> Dictionary:
 		var fecha_anterior := String(anterior.get("fecha", ""))
 		var fecha_actual := String(actual.get("fecha", ""))
 		if fecha_anterior.is_empty() or fecha_actual.is_empty():
-			discrepancias.append(
-				{
-					"tipo": DATO_AUSENTE,
-					"id": String(anterior["id"]) if fecha_anterior.is_empty() else String(actual["id"]),
-				}
+			(
+				discrepancias
+				. append(
+					{
+						"tipo": DATO_AUSENTE,
+						"id":
+						(
+							String(anterior["id"])
+							if fecha_anterior.is_empty()
+							else String(actual["id"])
+						),
+					}
+				)
 			)
 		elif fecha_anterior > fecha_actual:
-			discrepancias.append(
-				{
-					"tipo": CONTRADICCION,
-					"anterior": anterior["id"],
-					"actual": actual["id"],
-				}
+			(
+				discrepancias
+				. append(
+					{
+						"tipo": CONTRADICCION,
+						"anterior": anterior["id"],
+						"actual": actual["id"],
+					}
+				)
 			)
 
 	var contradicciones := 0
