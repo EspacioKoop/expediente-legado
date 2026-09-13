@@ -70,55 +70,56 @@ func _bultos_calle() -> Array:
 			"color": Color(0.26, 0.25, 0.27),
 		},
 
-		# Escaparate de electrodomésticos en el hueco central izquierdo. El marco
-		# es volumen real y las televisiones son el modelo 3D ya usado en casa.
+		# Tienda de electrodomésticos: fondo y marco dejan un hueco real entre
+		# fachada y cristal, de modo que las televisiones son visibles dentro del
+		# escaparate y no un dibujo pegado por fuera.
 		{
-			"pos": Vector3(-6.15, 1.7, -1.5),
-			"tam": Vector3(1.6, 3.4, 7.0),
+			"pos": Vector3(-6.65, 1.70, -1.5),
+			"tam": Vector3(0.35, 3.40, 7.0),
 			"color": Color(0.24, 0.22, 0.21),
 		},
 		{
-			"pos": Vector3(-5.22, 0.35, -1.5),
+			"pos": Vector3(-5.58, 0.35, -1.5),
 			"tam": Vector3(0.22, 0.70, 7.0),
 			"color": Color(0.18, 0.17, 0.18),
 		},
 		{
-			"pos": Vector3(-5.22, 2.85, -1.5),
+			"pos": Vector3(-5.58, 2.85, -1.5),
 			"tam": Vector3(0.22, 0.55, 7.0),
 			"color": Color(0.18, 0.17, 0.18),
 		},
 		{
-			"pos": Vector3(-5.22, 1.6, -4.9),
+			"pos": Vector3(-5.58, 1.60, -4.9),
 			"tam": Vector3(0.22, 2.0, 0.22),
 			"color": Color(0.18, 0.17, 0.18),
 		},
 		{
-			"pos": Vector3(-5.22, 1.6, 1.9),
+			"pos": Vector3(-5.58, 1.60, 1.9),
 			"tam": Vector3(0.22, 2.0, 0.22),
 			"color": Color(0.18, 0.17, 0.18),
 		},
 		# Tres televisores juntos y a diferentes alturas: un escaparate, no seis
 		# monitores arbitrarios repartidos por la calle.
 		{
-			"pos": Vector3(-5.0, 0.82, -3.25),
+			"pos": Vector3(-5.95, 0.82, -3.25),
 			"tam": Vector3(0.78, 0.68, 0.58),
 			"color": Color(0.38, 0.34, 0.30),
 			"modelo": "televisionVintage",
 		},
 		{
-			"pos": Vector3(-4.95, 0.86, -1.45),
+			"pos": Vector3(-5.92, 0.86, -1.45),
 			"tam": Vector3(0.92, 0.78, 0.66),
 			"color": Color(0.34, 0.32, 0.30),
 			"modelo": "televisionVintage",
 		},
 		{
-			"pos": Vector3(-5.02, 1.45, 0.30),
+			"pos": Vector3(-5.98, 1.45, 0.30),
 			"tam": Vector3(0.72, 0.62, 0.54),
 			"color": Color(0.40, 0.36, 0.31),
 			"modelo": "televisionVintage",
 		},
 		{
-			"pos": Vector3(-5.05, 0.42, 0.30),
+			"pos": Vector3(-5.98, 0.42, 0.30),
 			"tam": Vector3(1.05, 0.18, 0.80),
 			"color": Color(0.25, 0.22, 0.20),
 		},
@@ -147,8 +148,8 @@ func _ventanas_calle() -> Array:
 	return [
 		# Un solo paño de escaparate agrupa visualmente los televisores.
 		{
-			"pos": Vector3(-5.12, 1.62, -1.5),
-			"tam": Vector3(0.10, 2.0, 6.45),
+			"pos": Vector3(-5.70, 1.62, -1.5),
+			"tam": Vector3(0.08, 2.0, 6.45),
 			"color": Color(0.12, 0.16, 0.22),
 		},
 		# Ventanas domésticas puntuales: repetición irregular, no paneles de TV.
