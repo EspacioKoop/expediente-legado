@@ -50,8 +50,16 @@ func _montar_colision() -> void:
 
 
 func _montar_carcasa() -> void:
-	_agregar_caja(Vector3(0, 0.18, 0), Vector3(0.24, 0.36, 0.065), Color(0.16, 0.38, 0.46))
-	_agregar_caja(Vector3(0, 0.255, -0.037), Vector3(0.19, 0.145, 0.012), Color(0.08, 0.10, 0.11))
+	_agregar_caja(
+		Vector3(0, 0.18, 0),
+		Vector3(0.24, 0.36, 0.065),
+		Color(0.16, 0.38, 0.46),
+	)
+	_agregar_caja(
+		Vector3(0, 0.255, -0.037),
+		Vector3(0.19, 0.145, 0.012),
+		Color(0.08, 0.10, 0.11),
+	)
 	var pantalla := _agregar_caja(
 		Vector3(0, 0.255, -0.045), Vector3(0.145, 0.105, 0.008), Color(0.20, 0.28, 0.22)
 	)
@@ -61,19 +69,39 @@ func _montar_carcasa() -> void:
 	_material_pantalla.emission_energy_multiplier = 0.15
 
 	# Cruceta simple y deliberadamente genérica.
-	_agregar_caja(Vector3(-0.065, 0.105, -0.047), Vector3(0.065, 0.020, 0.012), Color(0.07, 0.07, 0.08))
-	_agregar_caja(Vector3(-0.065, 0.105, -0.047), Vector3(0.020, 0.065, 0.012), Color(0.07, 0.07, 0.08))
+	_agregar_caja(
+		Vector3(-0.065, 0.105, -0.047),
+		Vector3(0.065, 0.020, 0.012),
+		Color(0.07, 0.07, 0.08),
+	)
+	_agregar_caja(
+		Vector3(-0.065, 0.105, -0.047),
+		Vector3(0.020, 0.065, 0.012),
+		Color(0.07, 0.07, 0.08),
+	)
 
 	# Dos botones de acción sin letras ni iconografía propietaria.
 	_agregar_boton(Vector3(0.063, 0.115, -0.050), Color(0.58, 0.16, 0.31))
 	_agregar_boton(Vector3(0.090, 0.085, -0.050), Color(0.76, 0.49, 0.13))
 
 	# Select/start como dos barras pequeñas.
-	_agregar_caja(Vector3(-0.020, 0.052, -0.047), Vector3(0.040, 0.010, 0.010), Color(0.12, 0.12, 0.13))
-	_agregar_caja(Vector3(0.030, 0.052, -0.047), Vector3(0.040, 0.010, 0.010), Color(0.12, 0.12, 0.13))
+	_agregar_caja(
+		Vector3(-0.020, 0.052, -0.047),
+		Vector3(0.040, 0.010, 0.010),
+		Color(0.12, 0.12, 0.13),
+	)
+	_agregar_caja(
+		Vector3(0.030, 0.052, -0.047),
+		Vector3(0.040, 0.010, 0.010),
+		Color(0.12, 0.12, 0.13),
+	)
 
 	# Ranura de cartucho: solo geometría, sin marca ni ROM física incluida.
-	_agregar_caja(Vector3(0, 0.355, 0.005), Vector3(0.13, 0.018, 0.045), Color(0.07, 0.09, 0.10))
+	_agregar_caja(
+		Vector3(0, 0.355, 0.005),
+		Vector3(0.13, 0.018, 0.045),
+		Color(0.07, 0.09, 0.10),
+	)
 
 
 func _actualizar_pantalla() -> void:
