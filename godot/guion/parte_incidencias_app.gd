@@ -27,12 +27,12 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	theme = EstiloSiga.tema()
 	custom_minimum_size = Vector2(820, 620)
+	_configuracion = ParteIncidencias.cargar_configuracion()
 	_montar()
 	visible = false
 
 
 func abrir(preferencias: Dictionary) -> void:
-	_configuracion = ParteIncidencias.cargar_configuracion()
 	_reduccion_movimiento = bool(preferencias.get("reduccion_movimiento", false))
 	_reiniciar()
 	visible = true
@@ -60,46 +60,42 @@ func _montar() -> void:
 	scroll.add_child(caja)
 
 	var cabecera := Label.new()
-	cabecera.text = "PARTE DE INCIDENCIAS · SIGA-98"
+	cabecera.text = _texto("cabecera")
 	caja.add_child(cabecera)
 
 	var ayuda := Label.new()
-	ayuda.text = (
-		"Describa el problema. El diagnóstico técnico solo se adjunta si marca la casilla."
-	)
+	ayuda.text = _texto("ayuda")
 	ayuda.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	caja.add_child(ayuda)
 
-	_rotulo(caja, "Categoría")
+	_rotulo(caja, _texto("categoria"))
 	_categoria = OptionButton.new()
 	for categoria in ParteIncidencias.CATEGORIAS:
-		_categoria.add_item(String(categoria).capitalize())
+		_categoria.add_item(_texto("categoria_" + String(categoria)))
 	_categoria.item_selected.connect(_al_cambiar_categoria)
 	caja.add_child(_categoria)
 
-	_rotulo(caja, "Título breve")
+	_rotulo(caja, _texto("titulo"))
 	_titulo = LineEdit.new()
-	_titulo.placeholder_text = "Qué ocurrió"
+	_titulo.placeholder_text = _texto("titulo_placeholder")
 	_titulo.max_length = 120
 	caja.add_child(_titulo)
 
-	_rotulo(caja, "Descripción")
-	_descripcion = _area(caja, "Qué estaba haciendo y qué ocurrió", 88)
+	_rotulo(caja, _texto("descripcion"))
+	_descripcion = _area(caja, _texto("descripcion_placeholder"), 88)
 
-	_pasos_rotulo = _rotulo(caja, "Pasos para reproducir")
-	_pasos = _area(caja, "1. …\n2. …", 80)
+	_pasos_rotulo = _rotulo(caja, _texto("pasos"))
+	_pasos = _area(caja, _texto("pasos_placeholder"), 80)
 
-	_rotulo(caja, "Esperado")
-	_esperado = _area(caja, "Qué esperaba que ocurriera", 58)
+	_rotulo(caja, _texto("esperado"))
+	_esperado = _area(caja, _texto("esperado_placeholder"), 58)
 
-	_rotulo(caja, "Observado")
-	_observado = _area(caja, "Qué ocurrió realmente", 58)
+	_rotulo(caja, _texto("observado"))
+	_observado = _area(caja, _texto("observado_placeholder"), 58)
 
 	_diagnostico = CheckButton.new()
-	_diagnostico.text = "Adjuntar diagnóstico técnico filtrado"
-	_diagnostico.tooltip_text = (
-		"Incluye solo build, Godot, plataforma genérica, escena, renderer y reducción de movimiento."
-	)
+	_diagnostico.text = _texto("diagnostico")
+	_diagnostico.tooltip_text = _texto("diagnostico_ayuda")
 	_diagnostico.toggled.connect(_actualizar_diagnostico)
 	caja.add_child(_diagnostico)
 
@@ -118,18 +114,22 @@ func _montar() -> void:
 	acciones.add_child(_accion_externa)
 
 	var guardar := Button.new()
-	guardar.text = "Guardar copia local"
+	guardar.text = _texto("guardar")
 	guardar.pressed.connect(_guardar)
 	acciones.add_child(guardar)
 
 	var volver_boton := Button.new()
-	volver_boton.text = "Volver"
+	volver_boton.text = _texto("volver")
 	volver_boton.pressed.connect(cerrar)
 	acciones.add_child(volver_boton)
 
 	_estado = Label.new()
 	_estado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	caja.add_child(_estado)
+
+
+func _texto(clave: String) -> String:
+	return ParteIncidencias.texto_interfaz(clave, _configuracion)
 
 
 func _rotulo(caja: VBoxContainer, texto: String) -> Label:
@@ -160,9 +160,7 @@ func _reiniciar() -> void:
 	_diagnostico_previa.text = ""
 	_estado.text = ParteIncidencias.texto_fallback(_configuracion)
 	var url := ParteIncidencias.url_configurada(_configuracion)
-	_accion_externa.text = (
-		"Copiar y abrir formulario" if not url.is_empty() else "Copiar parte"
-	)
+	_accion_externa.text = _texto("copiar_abrir") if not url.is_empty() else _texto("copiar")
 	_al_cambiar_categoria(_categoria.selected)
 
 
@@ -208,7 +206,7 @@ func _diagnostico_actual() -> Dictionary:
 
 func _preparar_parte() -> String:
 	if _titulo.text.strip_edges().is_empty() or _descripcion.text.strip_edges().is_empty():
-		_estado.text = "Faltan título y descripción para tramitar el parte."
+		_estado.text = _texto("faltan")
 		return ""
 	return ParteIncidencias.compilar(_campos(), _diagnostico_actual())
 
@@ -220,13 +218,10 @@ func _copiar_y_abrir() -> void:
 	DisplayServer.clipboard_set(parte)
 	var url := ParteIncidencias.url_configurada(_configuracion)
 	if url.is_empty():
-		_estado.text = "Parte copiado. " + ParteIncidencias.texto_fallback(_configuracion)
+		_estado.text = _texto("copiado_fallback") % ParteIncidencias.texto_fallback(_configuracion)
 		return
 	var error := OS.shell_open(url)
-	if error == OK:
-		_estado.text = "Parte copiado. Se ha abierto el formulario externo; péguelo allí."
-	else:
-		_estado.text = "No se pudo abrir el formulario. El parte sigue copiado al portapapeles."
+	_estado.text = _texto("copiado_abierto") if error == OK else _texto("error_abrir")
 
 
 func _guardar() -> void:
@@ -235,6 +230,6 @@ func _guardar() -> void:
 		return
 	var ruta := ParteIncidencias.guardar_local(parte)
 	if ruta.is_empty():
-		_estado.text = "No se pudo guardar la copia local. Puede copiar el parte."
+		_estado.text = _texto("error_guardar")
 	else:
-		_estado.text = "Copia local guardada: %s" % ruta.get_file()
+		_estado.text = _texto("guardado") % ruta.get_file()
