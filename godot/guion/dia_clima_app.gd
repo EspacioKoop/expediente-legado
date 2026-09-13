@@ -53,6 +53,7 @@ func _espacio_de(fase: String) -> Dictionary:
 func _entrar_en(fase: String) -> void:
 	_retirar_clima()
 	super._entrar_en(fase)
+	Ambiente.reproducir(self, fase)
 	if fase == "archivo":
 		_montar_terminal_interactivo()
 		_montar_archivadores_interactivos(_espacio_de(fase))
