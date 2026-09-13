@@ -38,9 +38,7 @@ func _montar_periferia(mundo: Node3D) -> void:
 	_pieza(mundo, NaturalezaQuaternius.ROCA_1, Vector3(4.20, 0.0, 14.2), 1.45, 8.0)
 
 
-func _pieza(
-	mundo: Node3D, modelo: String, posicion: Vector3, escala: float, giro_y: float
-) -> void:
+func _pieza(mundo: Node3D, modelo: String, posicion: Vector3, escala: float, giro_y: float) -> void:
 	var pieza := NaturalezaQuaternius.crear(modelo)
 	pieza.name = "Naturaleza_%s" % modelo.get_basename()
 	pieza.position = posicion
