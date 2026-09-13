@@ -75,22 +75,31 @@ func _al_relacionar() -> void:
 
 	var relacion := _buscar_relacion(caso, _origen_relacion, actual)
 	var primero := _folio_por_id(_origen_relacion)
+	var segundo := String(registro_actual.get("folio", actual))
 	_origen_relacion = ""
 	_actualizar_boton_relacion()
 
 	if relacion.is_empty():
 		# No se afirma que la pareja jamás pueda tener sentido narrativo: solo que
 		# con la evidencia catalogada todavía no se ha demostrado una conclusión.
-		_estado.text = (tr("VISOR_RELACION_NO_DEMOSTRADA") % [primero, registro_actual["folio"]])
+		_estado.text = tr("VISOR_RELACION_NO_DEMOSTRADA") % [primero, segundo]
 	else:
 		var pista_id := String(relacion["id"])
 		if descubiertas.has(pista_id):
-			_estado.text = tr("VISOR_RELACION_YA_REGISTRADA") % relacion["descripcion"]
+			_estado.text = _feedback_relacion(
+				primero,
+				segundo,
+				tr("VISOR_RELACION_YA_REGISTRADA") % relacion["descripcion"]
+			)
 		else:
 			descubiertas.append(pista_id)
 			_refrescar_archivo()
 			_guardar_o_avisar()
-			_estado.text = tr("VISOR_RELACION_REGISTRADA") % relacion["descripcion"]
+			_estado.text = _feedback_relacion(
+				primero,
+				segundo,
+				tr("VISOR_RELACION_REGISTRADA") % relacion["descripcion"]
+			)
 
 
 func _esta_leido(registro_id: String) -> bool:
@@ -114,6 +123,10 @@ func _actualizar_boton_relacion() -> void:
 		_relacionar.text = tr("VISOR_RELACIONAR")
 	else:
 		_relacionar.text = tr("VISOR_RELACIONAR_CON") % _folio_por_id(_origen_relacion)
+
+
+static func _feedback_relacion(primero: String, segundo: String, mensaje: String) -> String:
+	return "%s ↔ %s\n%s" % [primero, segundo, mensaje]
 
 
 ## La pareja es conmutativa: A+B y B+A descubren la misma conclusión.
