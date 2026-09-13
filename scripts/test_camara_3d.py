@@ -4,6 +4,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CAMINANTE = ROOT / "godot" / "guion" / "caminante.gd"
 PREFERENCIAS = ROOT / "godot" / "guion" / "preferencias_siga.gd"
+MENU = ROOT / "godot" / "guion" / "menu_global.gd"
 
 
 def test_camara_consumidora_de_preferencias_persistentes() -> None:
@@ -18,6 +19,24 @@ def test_camara_consumidora_de_preferencias_persistentes() -> None:
     ):
         assert clave in caminante
         assert clave in preferencias
+
+
+def test_opciones_exponen_camara_y_la_actualizan_en_vivo() -> None:
+    menu = MENU.read_text(encoding="utf-8")
+    caminante = CAMINANTE.read_text(encoding="utf-8")
+
+    for clave in (
+        "sensibilidad_camara_raton",
+        "sensibilidad_camara_mando",
+        "invertir_camara_y",
+    ):
+        assert clave in menu
+    assert "PreferenciasSiga.SENSIBILIDAD_CAMARA_MIN" in menu
+    assert "PreferenciasSiga.SENSIBILIDAD_CAMARA_MAX" in menu
+    assert 'call_group("caminante_camara", "recargar_preferencias_camara")' in menu
+    assert 'const GRUPO_CAMARA := "caminante_camara"' in caminante
+    assert "add_to_group(GRUPO_CAMARA)" in caminante
+    assert "func recargar_preferencias_camara()" in caminante
 
 
 def test_raton_y_stick_comparten_pitch_acotado_y_deadzone() -> None:
@@ -50,5 +69,6 @@ def test_escape_no_tiene_dos_duenos_y_detector_sigue_la_camara() -> None:
 
     assert 'evento.is_action_pressed("ui_cancel")' not in texto
     assert "Input.MOUSE_MODE_CAPTURED" in texto
+    assert "InputEventMouseButton" in texto
+    assert "not get_tree().paused" in texto
     assert "_camara.add_child(_detector_interaccion)" in texto
-
