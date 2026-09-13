@@ -40,6 +40,8 @@ func _entrar_en(fase: String) -> void:
 	if fase == "archivo":
 		_montar_terminal_interactivo()
 		_montar_archivadores_interactivos(_espacio_de(fase))
+	elif fase == "casa":
+		CasaUtileria.montar(_mundo)
 	# La niebla cambia el fondo global del Environment. Cada entrada restaura el
 	# valor base antes de decidir si este espacio recibe tiempo exterior.
 	_ambiente.background_color = FONDO_BASE
