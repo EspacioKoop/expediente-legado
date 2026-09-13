@@ -144,6 +144,13 @@ func _perder_vivienda() -> void:
 
 
 func _pagar_alquiler() -> void:
+	# La objeción se deriva ANTES del cobro. Si toca duelo, pagar no puede
+	# descontar primero y devolver después: ganar significa que ese dinero no
+	# salió nunca de la cuenta.
+	if AlquilerDueloReglas.ocurre(jornada):
+		_abrir_duelo_alquiler()
+		return
+
 	var resultado := Jornada.pagar_alquiler(jornada)
 	_hablando = false
 	if resultado.is_empty():
@@ -163,3 +170,52 @@ func _pagar_alquiler() -> void:
 	# El pago ya está aplicado en memoria. Si falla el disco, el mecanismo común
 	# bloquea nuevas acciones y convierte la siguiente interacción en reintento.
 	_guardar_o_avisar("")
+
+
+func _abrir_duelo_alquiler() -> void:
+	_caminante.set_physics_process(false)
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+	_pantalla = CanvasLayer.new()
+	add_child(_pantalla)
+	var duelo := AlquilerDuelo.new()
+	duelo.raiz = int(jornada.get("raiz", _raiz()))
+	duelo.vuelta = int(jornada.get("vuelta", 1))
+	duelo.dia = int(jornada.get("dia", 1))
+	duelo.cargas = historias.cargas(partida.estado)
+	duelo.terminado.connect(_cerrar_duelo_alquiler)
+	_pantalla.add_child(duelo)
+
+	_hablando = false
+	_nomina.text = ""
+
+
+func _cerrar_duelo_alquiler(gano: bool) -> void:
+	if _pantalla == null:
+		return
+	_pantalla.queue_free()
+	_pantalla = null
+
+	var resultado := AlquilerDueloReglas.resolver(jornada, gano)
+	if not resultado.is_empty() and resultado["perdio_vivienda"]:
+		_perder_vivienda()
+
+	_caminante.set_physics_process(true)
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+	if resultado.is_empty():
+		_sonar("error")
+		return
+
+	# Resultado e inventario quedan asentados juntos. Si el disco falla no se
+	# reabre otro combate: el vencimiento ya está resuelto en memoria y el
+	# mecanismo común bloquea nuevas acciones hasta reintentar ese mismo estado.
+	if not _guardar_o_avisar(""):
+		return
+
+	if gano:
+		_sonar("nomina")
+		_nomina.text = tr("DIA_VIVIR") % [0, resultado["dinero"], ""]
+	else:
+		_sonar("error")
+		_nomina.text = tr("DIA_SIN_GATO_AVISO")
