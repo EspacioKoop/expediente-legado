@@ -1,0 +1,89 @@
+extends SceneTree
+
+const MaquinaCafe := preload("res://guion/maquina_cafe_interactiva_3d.gd")
+const UtileriaOficina := preload("res://guion/oficina_utileria.gd")
+
+var _pasadas := 0
+var _fallos := 0
+
+
+func _initialize() -> void:
+	_probar_maquina()
+	_probar_puestos()
+	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
+	quit(1 if _fallos else 0)
+
+
+func _probar_maquina() -> void:
+	var maquina := MaquinaCafe.new()
+	root.add_child(maquina)
+	maquina.configurar()
+
+	_comprobar(maquina.texto_accion() == "Usar máquina de café", "prompt semántico")
+	_comprobar(not maquina.taza_visible(), "empieza sin taza servida")
+	_comprobar(maquina.get_node_or_null("TazaServida") != null, "tiene taza visible de feedback")
+	_comprobar(maquina.get_node_or_null("PilotoCafe") != null, "tiene piloto visible")
+	_comprobar(
+		maquina.find_children("*", "CollisionShape3D", true, false).size() == 1,
+		"expone un único volumen de interacción"
+	)
+
+	_comprobar(maquina.interactuar(root), "acepta la acción interactuar")
+	_comprobar(maquina.taza_visible(), "usar sirve una taza")
+	_comprobar(maquina.get_node("TazaServida").visible, "el feedback físico se hace visible")
+	var material := maquina.get_node("PilotoCafe").material_override as StandardMaterial3D
+	_comprobar(material != null and material.emission_enabled, "el piloto se enciende")
+
+	_comprobar(maquina.interactuar(root), "acepta un segundo uso")
+	_comprobar(not maquina.taza_visible(), "segundo uso limpia el feedback")
+	_comprobar(not maquina.get_node("TazaServida").visible, "la taza vuelve a ocultarse")
+	_comprobar(not material.emission_enabled, "el piloto vuelve a apagarse")
+	maquina.queue_free()
+
+
+func _probar_puestos() -> void:
+	var mundo := Node3D.new()
+	root.add_child(mundo)
+	UtileriaOficina.montar(mundo)
+
+	for i in range(1, 5):
+		var puesto := mundo.get_node_or_null("PuestoUtileria%d" % i)
+		_comprobar(puesto != null, "existe puesto vestido %d" % i)
+		if puesto == null:
+			continue
+		_comprobar(puesto.get_node_or_null("Teclado") != null, "puesto %d tiene teclado" % i)
+		_comprobar(
+			puesto.get_node_or_null("TelefonoBase") != null,
+			"puesto %d tiene teléfono" % i
+		)
+		_comprobar(puesto.get_node_or_null("Auricular") != null, "puesto %d tiene auricular" % i)
+
+	_comprobar(
+		mundo.get_node_or_null("PuestoUtileria1/BandejaEntrada") != null,
+		"primer puesto tiene bandeja"
+	)
+	_comprobar(
+		mundo.get_node_or_null("PuestoUtileria2/TazaPuesto") != null,
+		"segundo puesto tiene taza"
+	)
+	_comprobar(
+		mundo.get_node_or_null("PuestoUtileria3/BandejaEntrada") != null,
+		"tercer puesto alterna bandeja"
+	)
+	_comprobar(
+		mundo.get_node_or_null("PuestoUtileria4/TazaPuesto") != null,
+		"cuarto puesto alterna taza"
+	)
+	_comprobar(
+		mundo.get_node_or_null("MaquinaCafeInteractuable") != null,
+		"la máquina se integra en la oficina"
+	)
+	mundo.queue_free()
+
+
+func _comprobar(condicion: bool, nombre: String) -> void:
+	if condicion:
+		_pasadas += 1
+		return
+	_fallos += 1
+	push_error("FALLO OficinaUtileria: " + nombre)
