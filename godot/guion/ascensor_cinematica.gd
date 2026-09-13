@@ -9,12 +9,10 @@ extends RefCounted
 
 const ID := "ascensor-bajada"
 
-const CABINA := Color("48494c")
-const PUERTA := Color("6c6d70")
-const HUECO := Color("17181a")
-const PANEL := Color("27282b")
-const LUZ := Color("c48a43")
-const APAGADA := Color("55565a")
+## La cabina vive lejos del espacio jugable ya montado. La jornada entra en
+## `trayecto` antes de reproducir por seguridad de guardado; separar el set evita
+## que la calle atraviese visualmente las paredes del ascensor.
+const ORIGEN := Vector3(0.0, 0.0, 120.0)
 
 
 static func planos_de(vistas: int = 0) -> Array:
@@ -24,71 +22,24 @@ static func planos_de(vistas: int = 0) -> Array:
 static func _planos() -> Array:
 	return [
 		{
-			"tipo": "2d",
+			"tipo": "3d",
 			"nombre": "planta-4",
-			"segundos": 1.1,
-			"figura": _cabina(4, false),
-			"desde": Vector2.ZERO,
-			"hasta": Vector2.ZERO,
+			"segundos": 1.0,
+			"camara": ORIGEN + Vector3(0.0, 0.12, 0.82),
+			"mira": ORIGEN + Vector3(0.0, 0.05, -1.78),
 		},
 		{
-			"tipo": "2d",
+			"tipo": "3d",
 			"nombre": "bajada",
 			"segundos": 1.1,
-			"figura": _cabina(2, false),
-			"desde": Vector2(0, -14),
-			"hasta": Vector2(0, 14),
+			"camara": ORIGEN + Vector3(0.18, 0.18, 0.72),
+			"mira": ORIGEN + Vector3(1.55, 0.18, -1.42),
 		},
 		{
-			"tipo": "2d",
+			"tipo": "3d",
 			"nombre": "portal",
-			"segundos": 0.9,
-			"figura": _cabina(0, true),
-			"desde": Vector2.ZERO,
-			"hasta": Vector2.ZERO,
+			"segundos": 1.0,
+			"camara": ORIGEN + Vector3(0.0, 0.08, 0.45),
+			"mira": ORIGEN + Vector3(0.0, -0.05, -3.75),
 		},
 	]
-
-
-## La planta no se escribe como texto: el panel tiene cinco posiciones y la
-## luz activa baja de la cuarta al portal. Así la escena sigue siendo legible
-## aunque el idioma cambie y no duplica un rótulo permanente.
-static func _cabina(planta: int, abierta: bool) -> Array:
-	var figura := [
-		{"rect": Rect2(-230, -180, 460, 300), "color": CABINA},
-		{"rect": Rect2(-205, -155, 410, 250), "color": HUECO},
-		{"rect": Rect2(145, -145, 42, 205), "color": PANEL},
-	]
-	if abierta:
-		(
-			figura
-			. append_array(
-				[
-					{"rect": Rect2(-205, -155, 92, 250), "color": PUERTA},
-					{"rect": Rect2(113, -155, 92, 250), "color": PUERTA},
-				]
-			)
-		)
-	else:
-		(
-			figura
-			. append_array(
-				[
-					{"rect": Rect2(-205, -155, 203, 250), "color": PUERTA},
-					{"rect": Rect2(2, -155, 203, 250), "color": PUERTA},
-				]
-			)
-		)
-
-	var activa := clampi(4 - planta, 0, 4)
-	for i in 5:
-		(
-			figura
-			. append(
-				{
-					"rect": Rect2(156, -126 + float(i) * 35.0, 20, 20),
-					"color": LUZ if i == activa else APAGADA,
-				}
-			)
-		)
-	return figura

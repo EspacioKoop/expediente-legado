@@ -1,11 +1,11 @@
-## Capa de #238 sobre el día completo.
+## Capa de #238/#135 sobre el día completo.
 ##
 ## Intercepta únicamente archivo -> trayecto. La jornada ficha, monta la calle y
 ## se guarda antes de abrir la presentación; el ascensor no puede cobrar una
 ## nómina, avanzar el calendario ni dejar al jugador atrapado entre fases.
 extends "res://guion/dia_jornada_app.gd"
 
-const ESCENA_ASCENSOR := preload("res://escenas/cinematica.tscn")
+const ESCENA_ASCENSOR := preload("res://escenas/ascensor_3d.tscn")
 
 var _ascensor: Node3D = null
 
