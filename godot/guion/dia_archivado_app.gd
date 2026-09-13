@@ -7,8 +7,11 @@
 class_name ArchivadoSesion3D
 extends RefCounted
 
+const RUTA_TEXTOS := "res://datos/archivado_textos.json"
+
 var _estado_archivado: Dictionary = {}
 var _carpeta_archivado: CarpetaArchivable3D = null
+var _textos: Dictionary = {}
 
 
 func refrescar(host) -> void:
@@ -47,7 +50,7 @@ func _coger_carpeta(actor: Node, host, carpeta: CarpetaArchivable3D) -> void:
 	if carpeta != _carpeta_archivado or not is_instance_valid(carpeta):
 		return
 	if carpeta.llevar(actor):
-		host._nomina.text = "Carpeta en mano · busca el archivador %s" % carpeta.destino
+		host._nomina.text = _texto("carpeta_en_mano") % carpeta.destino
 		host._sonar("documento")
 
 
@@ -120,16 +123,27 @@ func _archivar_en(actor: Node, host, archivador: ArchivadorInteractivo3D) -> voi
 		_estado_archivado, _carpeta_archivado.caso, destino
 	)
 	if not correcta:
-		host._nomina.text = "Destino incorrecto · la carpeta sigue en tu mano"
+		host._nomina.text = _texto("destino_incorrecto")
 		_marcar_archivador(archivador, false)
 		host._sonar("puerta_cierra")
 		return
 
-	host._nomina.text = "Carpeta archivada · %s" % destino
+	host._nomina.text = _texto("carpeta_archivada") % destino
 	_marcar_archivador(archivador, true)
 	host._sonar("documento")
 	_carpeta_archivado.queue_free()
 	_carpeta_archivado = null
+
+
+func _texto(clave: String) -> String:
+	if _textos.is_empty():
+		var fichero := FileAccess.open(RUTA_TEXTOS, FileAccess.READ)
+		if fichero != null:
+			var crudo = JSON.parse_string(fichero.get_as_text())
+			fichero.close()
+			if typeof(crudo) == TYPE_DICTIONARY:
+				_textos = crudo
+	return String(_textos.get(clave, clave))
 
 
 func _marcar_archivador(archivador: ArchivadorInteractivo3D, correcto: bool) -> void:
