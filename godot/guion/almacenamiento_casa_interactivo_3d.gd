@@ -74,9 +74,7 @@ func _montar_cajon() -> void:
 	_agregar_caja(_cajon, Vector3(0, 0.66, -0.325), Vector3(0.24, 0.05, 0.05), interior)
 
 
-static func _agregar_caja(
-	raiz: Node3D, pos: Vector3, tam: Vector3, color: Color
-) -> void:
+static func _agregar_caja(raiz: Node3D, pos: Vector3, tam: Vector3, color: Color) -> void:
 	var malla := MeshInstance3D.new()
 	var caja := BoxMesh.new()
 	caja.size = tam
