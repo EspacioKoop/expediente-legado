@@ -126,8 +126,8 @@ func _redibujar_hilos() -> void:
 	for enlace in tablero["enlaces"]:
 		if typeof(enlace) != TYPE_ARRAY or enlace.size() != 2:
 			continue
-		var a := _posicion_de(String(enlace[0]))
-		var b := _posicion_de(String(enlace[1]))
+		var a: Variant = _posicion_de(String(enlace[0]))
+		var b: Variant = _posicion_de(String(enlace[1]))
 		if a == null or b == null:
 			continue
 		_montar_hilo(a, b)
