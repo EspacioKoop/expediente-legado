@@ -6,6 +6,7 @@ RAIZ = Path(__file__).resolve().parents[1]
 CAPA = RAIZ / "godot" / "guion" / "dia_alquiler_app.gd"
 CAPA_GATO = RAIZ / "godot" / "guion" / "dia_gato_app.gd"
 CAPA_ONBOARDING = RAIZ / "godot" / "guion" / "dia_onboarding_app.gd"
+CAPA_CLIMA = RAIZ / "godot" / "guion" / "dia_clima_app.gd"
 ESCENA_DIA = RAIZ / "godot" / "escenas" / "dia.tscn"
 
 
@@ -14,10 +15,12 @@ class VentanillaAlquilerTest(unittest.TestCase):
         self.capa = CAPA.read_text(encoding="utf-8")
         self.capa_gato = CAPA_GATO.read_text(encoding="utf-8")
         self.capa_onboarding = CAPA_ONBOARDING.read_text(encoding="utf-8")
+        self.capa_clima = CAPA_CLIMA.read_text(encoding="utf-8")
         self.escena = ESCENA_DIA.read_text(encoding="utf-8")
 
     def test_el_dia_activa_la_capa_de_alquiler(self):
-        self.assertIn('path="res://guion/dia_calle_app.gd"', self.escena)
+        self.assertIn('path="res://guion/dia_clima_app.gd"', self.escena)
+        self.assertIn('extends "res://guion/dia_calle_app.gd"', self.capa_clima)
         calle = (RAIZ / "godot/guion/dia_calle_app.gd").read_text(encoding="utf-8")
         self.assertIn('extends "res://guion/dia_onboarding_app.gd"', calle)
         self.assertIn('extends "res://guion/dia_gato_app.gd"', self.capa_onboarding)
