@@ -32,11 +32,12 @@ def test_wasd_y_flechas_quedan_emparejados() -> None:
     assert "cursor.keycode = flecha" in texto
 
 
-def test_raton_escape_y_mando_se_conservan() -> None:
+def test_raton_y_mando_se_conservan_sin_cancelacion_paralela() -> None:
     texto = fuente()
     assert "InputEventMouseMotion" in texto
-    assert 'evento.is_action_pressed("ui_cancel")' in texto
+    assert 'evento.is_action_pressed("ui_cancel")' not in texto
     assert '"mirar_izquierda", "mirar_derecha", "mirar_arriba", "mirar_abajo"' in texto
+    assert "Input.MOUSE_MODE_CAPTURED" in texto
 
 
 def test_pisadas_quedan_atenuadas_sin_tocar_pitch() -> None:
