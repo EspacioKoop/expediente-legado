@@ -56,7 +56,9 @@ class AscensorTest(unittest.TestCase):
             self.assertNotIn(llamada, self.capa)
 
     def test_el_dia_conserva_el_ascensor_por_herencia(self):
-        self.assertIn('path="res://guion/dia_onboarding_app.gd"', self.escena)
+        self.assertIn('path="res://guion/dia_calle_app.gd"', self.escena)
+        calle = (RAIZ / "godot/guion/dia_calle_app.gd").read_text(encoding="utf-8")
+        self.assertIn('extends "res://guion/dia_onboarding_app.gd"', calle)
         self.assertIn('extends "res://guion/dia_gato_app.gd"', self.capa_onboarding)
         self.assertIn('extends "res://guion/dia_alquiler_app.gd"', self.capa_gato)
         self.assertIn('extends "res://guion/dia_ascensor_app.gd"', self.capa_alquiler)
@@ -64,3 +66,4 @@ class AscensorTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

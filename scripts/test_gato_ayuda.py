@@ -67,9 +67,12 @@ class GatoAyudaTest(unittest.TestCase):
         self.assertNotIn("Sueno.recordar", self.capa)
 
     def test_la_escena_activa_la_nueva_capa(self):
-        self.assertIn('path="res://guion/dia_onboarding_app.gd"', self.escena)
+        self.assertIn('path="res://guion/dia_calle_app.gd"', self.escena)
+        calle = (ROOT / "godot/guion/dia_calle_app.gd").read_text(encoding="utf-8")
+        self.assertIn('extends "res://guion/dia_onboarding_app.gd"', calle)
         self.assertIn('extends "res://guion/dia_gato_app.gd"', self.capa_onboarding)
 
 
 if __name__ == "__main__":
     unittest.main()
+
