@@ -3,7 +3,7 @@
 ## Es la respuesta a que el medio lo elija cada momento: si cada cinemática
 ## trajera su propio reproductor, diez momentos darían diez ritmos, diez
 ## rótulos y diez formas de saltar. Aquí sabe pintar planos 3D (mueve una
-## cámara por el mundo que le den) y planos 2D (mueve figuras declaradas como
+## cámara por el mundo de la escena) y planos 2D (mueve figuras declaradas como
 ## rectángulos sobre un fondo), y aporta lo común: el rótulo, la voz, el salto
 ## y el acortado por repetición.
 ##
@@ -20,9 +20,11 @@ signal terminada
 ## desincronizan las cosas.
 signal plano_entrado(indice: int, plano: Dictionary)
 
-## El mundo 3D sobre el que mover la cámara. Si es nulo, los planos 3D no
-## tienen dónde ocurrir y se saltan: una cinemática 3D sin escena no es un
-## fallo del reproductor, es una cinemática mal pedida.
+## Override opcional del mundo 3D. Los llamantes antiguos pueden seguir
+## pasándolo, pero no hace falta: como este reproductor es Node3D, si está
+## montado dentro de la escena jugable ya comparte su World3D y la cámara puede
+## rodar ahí directamente. Así una cinemática no necesita conocer `_mundo` ni
+## ninguna propiedad privada de quien la instancia.
 var mundo: Node3D = null
 
 var _rodaje: Array = []
@@ -114,7 +116,7 @@ func _siguiente() -> void:
 	_fondo.visible = es_2d
 	_figuras.visible = es_2d
 	if _camara != null:
-		_camara.current = not es_2d and mundo != null
+		_camara.current = not es_2d and _tiene_mundo_3d()
 
 
 func _terminar() -> void:
@@ -130,8 +132,12 @@ func _terminar() -> void:
 	terminada.emit()
 
 
+func _tiene_mundo_3d() -> bool:
+	return mundo != null or (is_inside_tree() and get_world_3d() != null)
+
+
 func _mover_camara(plano: Dictionary, avance: float) -> void:
-	if _camara == null or mundo == null:
+	if _camara == null or not _tiene_mundo_3d():
 		return
 	var destino: Vector3 = plano["camara"]
 	# Se acerca despacio durante el plano. Uno quieto se lee como una imagen;
