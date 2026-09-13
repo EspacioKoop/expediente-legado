@@ -280,6 +280,70 @@
       "licencia": "CC0-1.0",
       "fuente": "https://quaternius.com/packs/modulartrain.html",
       "sha256": "80bf00b974430ade2b5d3f0eccdafb99d29d1048f7191374d6a8edb4b7b0bafc"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_nature/Bush_1.obj",
+      "titulo": "Bush_1 (OBJ) · Ultimate Nature Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatenature.html",
+      "sha256": "0cac6fca9e9a5d899fa1859867bf9cc2dbcc1817b31a0668d8b6faf2b033788b"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_nature/Bush_1.mtl",
+      "titulo": "Bush_1 (MTL) · Ultimate Nature Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatenature.html",
+      "sha256": "2a0bf1c9f6ad09cd9b54f7b8c8ef1f31b597b1e142658ddc0c68ad1449b19e0e"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_nature/Bush_2.obj",
+      "titulo": "Bush_2 (OBJ) · Ultimate Nature Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatenature.html",
+      "sha256": "836828437d2c853099744260b05b8d6b0f837b380ed7473baf11a47b9628bc8b"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_nature/Bush_2.mtl",
+      "titulo": "Bush_2 (MTL) · Ultimate Nature Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatenature.html",
+      "sha256": "7797af5258d63c7891a9b320185029b45c9e84f79d280539833bf8d184e3f8f7"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_nature/Rock_1.obj",
+      "titulo": "Rock_1 (OBJ) · Ultimate Nature Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatenature.html",
+      "sha256": "34d20ae0234a88b5cf1ceb1e5140b46ece28e6e7d72beb7e2e3a7e1fe8a8708e"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_nature/Rock_1.mtl",
+      "titulo": "Rock_1 (MTL) · Ultimate Nature Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatenature.html",
+      "sha256": "d56549cff3285edf892d4e734c41cd383fd18dfde9701209087b2c9f5484325a"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_nature/Rock_5.obj",
+      "titulo": "Rock_5 (OBJ) · Ultimate Nature Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatenature.html",
+      "sha256": "f987963f89e51d735809f006fb2b608af29b930cb4e80a9332f4e6f24c30edc2"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_nature/Rock_5.mtl",
+      "titulo": "Rock_5 (MTL) · Ultimate Nature Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatenature.html",
+      "sha256": "c1fa3fb3da15ef57d925d134a29019d94fba9de9b1308bdd2aecf9badb556639"
     }
   ]
 }
