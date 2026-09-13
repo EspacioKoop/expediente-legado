@@ -18,11 +18,14 @@ func _probar_maquina() -> void:
 	var maquina := MaquinaCafe.new()
 	root.add_child(maquina)
 	maquina.configurar()
+	var taza := maquina.get_node("TazaServida") as MeshInstance3D
+	var piloto := maquina.get_node("PilotoCafe") as MeshInstance3D
+	var material := piloto.material_override as StandardMaterial3D
 
 	_comprobar(maquina.texto_accion() == "Usar máquina de café", "prompt semántico")
 	_comprobar(not maquina.taza_visible(), "empieza sin taza servida")
-	_comprobar(maquina.get_node_or_null("TazaServida") != null, "tiene taza visible de feedback")
-	_comprobar(maquina.get_node_or_null("PilotoCafe") != null, "tiene piloto visible")
+	_comprobar(taza != null, "tiene taza visible de feedback")
+	_comprobar(piloto != null, "tiene piloto visible")
 	_comprobar(
 		maquina.find_children("*", "CollisionShape3D", true, false).size() == 1,
 		"expone un único volumen de interacción"
@@ -30,13 +33,12 @@ func _probar_maquina() -> void:
 
 	_comprobar(maquina.interactuar(root), "acepta la acción interactuar")
 	_comprobar(maquina.taza_visible(), "usar sirve una taza")
-	_comprobar(maquina.get_node("TazaServida").visible, "el feedback físico se hace visible")
-	var material := maquina.get_node("PilotoCafe").material_override as StandardMaterial3D
+	_comprobar(taza.visible, "el feedback físico se hace visible")
 	_comprobar(material != null and material.emission_enabled, "el piloto se enciende")
 
 	_comprobar(maquina.interactuar(root), "acepta un segundo uso")
 	_comprobar(not maquina.taza_visible(), "segundo uso limpia el feedback")
-	_comprobar(not maquina.get_node("TazaServida").visible, "la taza vuelve a ocultarse")
+	_comprobar(not taza.visible, "la taza vuelve a ocultarse")
 	_comprobar(not material.emission_enabled, "el piloto vuelve a apagarse")
 	maquina.queue_free()
 
