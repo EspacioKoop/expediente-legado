@@ -7,6 +7,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
+DIA_GATO = ROOT / "godot" / "guion" / "dia_gato_app.gd"
 
 
 class PistaOniricaTest(unittest.TestCase):
@@ -33,6 +34,21 @@ class PistaOniricaTest(unittest.TestCase):
         self.assertGreaterEqual(int(resumen.group(1)), 23, resultado.stdout)
         self.assertNotIn("SCRIPT ERROR:", resultado.stdout)
         self.assertNotIn("Parse Error:", resultado.stdout)
+
+    def test_el_dia_conecta_resultado_registro_y_guardado(self):
+        codigo = DIA_GATO.read_text(encoding="utf-8")
+        self.assertIn("func conectar_recompensa_onirica(nucleo, caso: Dictionary) -> bool:", codigo)
+        self.assertIn('nucleo.has_signal("resultado")', codigo)
+        self.assertIn("nucleo.resultado.connect(callback)", codigo)
+        self.assertIn("PistaOnirica.resolver(caso, resultado)", codigo)
+        self.assertIn("PistaOnirica.registrar(partida.estado, pista)", codigo)
+        self.assertIn('_guardar_o_avisar("")', codigo)
+
+    def test_el_cableado_no_escribe_partida_por_su_cuenta(self):
+        codigo = DIA_GATO.read_text(encoding="utf-8")
+        bloque = codigo.split("func conectar_recompensa_onirica", 1)[1]
+        self.assertNotIn("partida.guardar(", bloque)
+        self.assertNotIn("pistas_descubiertas.append", bloque)
 
 
 if __name__ == "__main__":
