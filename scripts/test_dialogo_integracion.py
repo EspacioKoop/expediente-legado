@@ -4,6 +4,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 CAPA = ROOT / "godot" / "guion" / "dia_dialogo_app.gd"
+CLIMA = ROOT / "godot" / "guion" / "dia_clima_app.gd"
 ESCENA = ROOT / "godot" / "escenas" / "dia.tscn"
 
 
@@ -11,11 +12,13 @@ class DialogoIntegracionTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.capa = CAPA.read_text(encoding="utf-8")
+        cls.clima = CLIMA.read_text(encoding="utf-8")
         cls.escena = ESCENA.read_text(encoding="utf-8")
 
-    def test_la_escena_activa_la_capa(self):
-        self.assertIn('res://guion/dia_dialogo_app.gd', self.escena)
-        self.assertIn('extends "res://guion/dia_clima_app.gd"', self.capa)
+    def test_la_cadena_inserta_dialogo_sin_cambiar_raiz(self):
+        self.assertIn('res://guion/dia_clima_app.gd', self.escena)
+        self.assertIn('extends "res://guion/dia_dialogo_app.gd"', self.clima)
+        self.assertIn('extends "res://guion/dia_calle_app.gd"', self.capa)
 
     def test_intervencion_real_usa_dialogo_diegetico(self):
         self.assertIn('salida.get_meta("frase", "")', self.capa)
