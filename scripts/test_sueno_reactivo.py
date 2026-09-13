@@ -60,7 +60,7 @@ class SuenoReactivoTest(unittest.TestCase):
         self.assertIn("extends Interactuable3D", self.anomalia)
         self.assertIn("verbo = Verbo.EXAMINAR", self.anomalia)
         self.assertIn("CollisionShape3D.new()", self.anomalia)
-        self.assertIn("PointLight3D.new()", self.anomalia)
+        self.assertIn("OmniLight3D.new()", self.anomalia)
         self.assertIn("_visual.scale =", self.anomalia)
         self.assertIn("_visual.rotation_degrees =", self.anomalia)
         self.assertIn("_luz.visible = _reactiva", self.anomalia)
