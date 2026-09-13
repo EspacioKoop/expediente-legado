@@ -8,7 +8,8 @@ var _fallos := 0
 
 func _initialize() -> void:
 	var espacio := {
-		"bultos": [
+		"bultos":
+		[
 			{"pos": Vector3.ZERO, "tam": Vector3(2, 1, 1), "modelo": "desk"},
 			{"pos": Vector3(1, 0, 0), "tam": Vector3(3, 2, 1)},
 			{"pos": Vector3(2, 0, 0), "tam": Vector3(1, 1, 1)},
