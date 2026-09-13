@@ -23,9 +23,12 @@ func _process(_delta: float) -> void:
 	var escenas: Array = dia.jornada.get("sueno_escenas", [])
 	if escenas.is_empty():
 		return
-	SuenoUtileria.montar(
-		mundo,
-		String(escenas[0]),
-		int(dia.jornada.get("dia", 1)),
-		dia._raiz(),
+	(
+		SuenoUtileria
+		. montar(
+			mundo,
+			String(escenas[0]),
+			int(dia.jornada.get("dia", 1)),
+			dia._raiz(),
+		)
 	)
