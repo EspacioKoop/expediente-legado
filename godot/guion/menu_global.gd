@@ -23,6 +23,9 @@ var _sellos_volver: Button
 var _salir: Button
 var _volumen: HSlider
 var _reduccion: CheckButton
+var _sensibilidad_raton: HSlider
+var _sensibilidad_mando: HSlider
+var _invertir_y: CheckButton
 var _estado_remapeo: Label
 var _botones_remapeo: Dictionary = {}
 var _captura_accion := ""
@@ -179,6 +182,8 @@ func _opciones_contenido(caja: VBoxContainer) -> void:
 	_reduccion.toggled.connect(_al_cambiar_reduccion)
 	caja.add_child(_reduccion)
 
+	_montar_preferencias_camara(caja)
+
 	var separador := HSeparator.new()
 	caja.add_child(separador)
 	_montar_remapeo(caja)
@@ -187,6 +192,49 @@ func _opciones_contenido(caja: VBoxContainer) -> void:
 	_volver.text = tr("MENU_GLOBAL_VOLVER")
 	_volver.pressed.connect(_mostrar_principal)
 	caja.add_child(_volver)
+
+
+func _montar_preferencias_camara(caja: VBoxContainer) -> void:
+	_sensibilidad_raton = _slider_preferencia(
+		caja,
+		"Sensibilidad de ratón",
+		float(_preferencias.get("sensibilidad_camara_raton", 1.0)),
+		_al_cambiar_sensibilidad_raton
+	)
+	_sensibilidad_mando = _slider_preferencia(
+		caja,
+		"Sensibilidad de stick derecho",
+		float(_preferencias.get("sensibilidad_camara_mando", 1.0)),
+		_al_cambiar_sensibilidad_mando
+	)
+	_invertir_y = CheckButton.new()
+	_invertir_y.text = "Invertir eje Y de cámara"
+	_invertir_y.button_pressed = bool(_preferencias.get("invertir_camara_y", false))
+	_invertir_y.toggled.connect(_al_cambiar_invertir_y)
+	caja.add_child(_invertir_y)
+
+
+func _slider_preferencia(
+	caja: VBoxContainer, etiqueta: String, valor: float, al_cambiar: Callable
+) -> HSlider:
+	var fila := HBoxContainer.new()
+	fila.add_theme_constant_override("separation", 10)
+	caja.add_child(fila)
+
+	var nombre := Label.new()
+	nombre.text = etiqueta
+	nombre.custom_minimum_size.x = 210
+	fila.add_child(nombre)
+
+	var slider := HSlider.new()
+	slider.min_value = PreferenciasSiga.SENSIBILIDAD_CAMARA_MIN
+	slider.max_value = PreferenciasSiga.SENSIBILIDAD_CAMARA_MAX
+	slider.step = 0.05
+	slider.value = valor
+	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	slider.value_changed.connect(al_cambiar)
+	fila.add_child(slider)
+	return slider
 
 
 func _sellos_contenido(caja: VBoxContainer) -> void:
@@ -398,6 +446,26 @@ func _al_cambiar_volumen(valor: float) -> void:
 func _al_cambiar_reduccion(activa: bool) -> void:
 	_preferencias["reduccion_movimiento"] = activa
 	PreferenciasSiga.guardar(_preferencias)
+
+
+func _al_cambiar_sensibilidad_raton(valor: float) -> void:
+	_preferencias["sensibilidad_camara_raton"] = valor
+	_guardar_y_notificar_camara()
+
+
+func _al_cambiar_sensibilidad_mando(valor: float) -> void:
+	_preferencias["sensibilidad_camara_mando"] = valor
+	_guardar_y_notificar_camara()
+
+
+func _al_cambiar_invertir_y(activa: bool) -> void:
+	_preferencias["invertir_camara_y"] = activa
+	_guardar_y_notificar_camara()
+
+
+func _guardar_y_notificar_camara() -> void:
+	PreferenciasSiga.guardar(_preferencias)
+	get_tree().call_group("caminante_camara", "recargar_preferencias_camara")
 
 
 func _aplicar_volumen() -> void:
