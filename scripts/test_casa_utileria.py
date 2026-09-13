@@ -43,6 +43,23 @@ class CasaUtileriaTest(unittest.TestCase):
         self.assertIn("BoxMesh.new()", self.utileria)
         self.assertIn("CylinderMesh.new()", self.utileria)
 
+    def test_compone_zonas_domesticas_reconocibles(self):
+        self.assertIn("montar_zonas_domesticas(raiz)", self.utileria)
+        self.assertIn('sofa.name = "SofaCasa"', self.utileria)
+        self.assertIn('cocina.name = "CocinaCasa"', self.utileria)
+        self.assertIn('fregadero.name = "FregaderoCasa"', self.utileria)
+        self.assertIn('nevera.name = "NeveraCasa"', self.utileria)
+        self.assertIn('ventana.name = "VentanaCasa"', self.utileria)
+        self.assertIn('estanteria.name = "EstanteriaComprasCasa"', self.utileria)
+        self.assertIn("Vector3(-1.65, 0.0, 1.35)", self.utileria)
+        self.assertIn("Vector3(3.30, 0.0, -0.15)", self.utileria)
+        self.assertIn("Vector3(-2.10, 1.65, -3.42)", self.utileria)
+
+    def test_distribucion_no_introduce_pantallas_ni_texto_legible(self):
+        self.assertNotIn("Label.new()", self.utileria)
+        self.assertNotIn("TextMesh.new()", self.utileria)
+        self.assertNotIn("RichTextLabel.new()", self.utileria)
+
     def test_lampara_reutiliza_interaccion_y_luz_real(self):
         self.assertIn("extends Interactuable3D", self.lampara)
         self.assertIn("verbo = Verbo.ENCENDER", self.lampara)
@@ -81,7 +98,7 @@ class CasaUtileriaTest(unittest.TestCase):
         self.assertIn('cajon.name = "CajonCasa"', self.almacenamiento)
         self.assertIn("_cajon.position = POS_ABIERTO", self.almacenamiento)
 
-    def test_almacenamiento_funciona_en_godot_headless(self):
+    def test_almacenamiento_y_distribucion_funcionan_en_godot_headless(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
         importacion = subprocess.run(
             [
@@ -119,7 +136,7 @@ class CasaUtileriaTest(unittest.TestCase):
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
         resumen = RESUMEN_GODOT.search(resultado.stdout)
         self.assertIsNotNone(resumen, resultado.stdout)
-        self.assertGreaterEqual(int(resumen.group(1)), 12, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 24, resultado.stdout)
         self.assertNotIn("SCRIPT ERROR:", resultado.stdout)
         self.assertNotIn("Parse Error:", resultado.stdout)
 
