@@ -31,10 +31,16 @@ class CompaneroInteractivo3DTest(unittest.TestCase):
     def test_identificacion_visual_solo_en_foco(self):
         self.assertIn("Label3D.new()", self.source)
         self.assertIn('name = "IndicadorConversacion"', self.source)
+        self.assertIn('_indicador.text = "◆"', self.source)
         self.assertIn("_indicador.visible = false", self.source)
         self.assertIn("func marcar_en_foco(en_foco: bool)", self.source)
         self.assertIn("_indicador.visible = en_foco and habilitado", self.source)
-        self.assertIn('"◆ %s" % nombre', self.source)
+
+    def test_tiene_volumen_de_raycast_sin_trigger_de_proximidad(self):
+        self.assertIn("CollisionShape3D.new()", self.source)
+        self.assertIn("BoxShape3D.new()", self.source)
+        self.assertIn("const TAM_COLISION", self.source)
+        self.assertNotIn("monitoring", self.source)
 
     def test_no_hardcodea_entrada_fisica(self):
         self.assertNotIn('"E"', self.source)
