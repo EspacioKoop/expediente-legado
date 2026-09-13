@@ -49,6 +49,13 @@ class MenuGlobalTest(unittest.TestCase):
             self.assertIn(clave, self.textos)
             self.assertIn(f'tr("{clave}")', self.menu)
 
+    def test_parte_incidencias_es_una_superficie_del_mismo_menu(self):
+        self.assertIn("ParteIncidenciasApp.new()", self.menu)
+        self.assertIn("ParteIncidencias.ETIQUETA", self.menu)
+        self.assertIn("_mostrar_incidencias", self.menu)
+        self.assertIn("_volver_de_incidencias", self.menu)
+        self.assertIn("_incidencias.grab_focus()", self.menu)
+
 
 if __name__ == "__main__":
     unittest.main()
