@@ -15,6 +15,10 @@ var _volver: Button
 var _salir: Button
 var _volumen: HSlider
 var _reduccion: CheckButton
+var _estado_remapeo: Label
+var _botones_remapeo: Dictionary = {}
+var _captura_accion := ""
+var _captura_tipo := ""
 var _foco_previo: Control
 var _mouse_previo := Input.MOUSE_MODE_VISIBLE
 
@@ -29,6 +33,15 @@ func _ready() -> void:
 
 
 func _unhandled_input(evento: InputEvent) -> void:
+	if not _captura_accion.is_empty():
+		if evento is InputEventKey and evento.pressed and not evento.echo:
+			_aplicar_remapeo("teclado", int(evento.physical_keycode))
+			get_viewport().set_input_as_handled()
+			return
+		if evento is InputEventJoypadButton and evento.pressed:
+			_aplicar_remapeo("mando", int(evento.button_index))
+			get_viewport().set_input_as_handled()
+			return
 	if not evento.is_action_pressed("cancelar"):
 		return
 	if _fondo.visible:
@@ -69,7 +82,7 @@ func _montar() -> void:
 
 func _crear_panel() -> PanelContainer:
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(460, 300)
+	panel.custom_minimum_size = Vector2(560, 300)
 	panel.theme = EstiloSiga.tema()
 	return panel
 
@@ -134,10 +147,105 @@ func _opciones_contenido(caja: VBoxContainer) -> void:
 	_reduccion.toggled.connect(_al_cambiar_reduccion)
 	caja.add_child(_reduccion)
 
+	var separador := HSeparator.new()
+	caja.add_child(separador)
+	_montar_remapeo(caja)
+
 	_volver = Button.new()
 	_volver.text = tr("MENU_GLOBAL_VOLVER")
 	_volver.pressed.connect(_mostrar_principal)
 	caja.add_child(_volver)
+
+
+func _montar_remapeo(caja: VBoxContainer) -> void:
+	_botones_remapeo.clear()
+	for accion in PreferenciasSiga.ACCIONES:
+		var fila := HBoxContainer.new()
+		fila.add_theme_constant_override("separation", 8)
+		caja.add_child(fila)
+
+		var nombre := Label.new()
+		nombre.text = accion.replace("_", " ").capitalize()
+		nombre.custom_minimum_size.x = 180
+		fila.add_child(nombre)
+
+		for tipo in ["teclado", "mando"]:
+			var boton := Button.new()
+			boton.custom_minimum_size.x = 120
+			boton.pressed.connect(_iniciar_captura.bind(accion, tipo))
+			fila.add_child(boton)
+			_botones_remapeo[_clave_boton(accion, tipo)] = boton
+
+	var controles := HBoxContainer.new()
+	controles.add_theme_constant_override("separation", 8)
+	caja.add_child(controles)
+
+	_estado_remapeo = Label.new()
+	_estado_remapeo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	controles.add_child(_estado_remapeo)
+
+	var restaurar := Button.new()
+	restaurar.text = "↺"
+	restaurar.pressed.connect(_restaurar_controles)
+	controles.add_child(restaurar)
+	_refrescar_remapeo()
+
+
+func _clave_boton(accion: String, tipo: String) -> String:
+	return accion + ":" + tipo
+
+
+func _iniciar_captura(accion: String, tipo: String) -> void:
+	_cancelar_captura()
+	_captura_accion = accion
+	_captura_tipo = tipo
+	_estado_remapeo.text = accion.replace("_", " ") + " · " + tipo
+	var boton: Button = _botones_remapeo[_clave_boton(accion, tipo)]
+	boton.text = "…"
+	boton.grab_focus()
+
+
+func _aplicar_remapeo(tipo: String, codigo: int) -> void:
+	if tipo != _captura_tipo:
+		return
+	var accion := _captura_accion
+	var resultado := PreferenciasSiga.remapear(_preferencias, accion, tipo, codigo)
+	if resultado.get("ok", false):
+		PreferenciasSiga.aplicar(_preferencias)
+		PreferenciasSiga.guardar(_preferencias)
+		_estado_remapeo.text = "✓ " + accion.replace("_", " ")
+	else:
+		_estado_remapeo.text = "⚠ " + String(resultado.get("accion", resultado.get("motivo", "")))
+	_captura_accion = ""
+	_captura_tipo = ""
+	_refrescar_remapeo()
+
+
+func _cancelar_captura() -> void:
+	if _captura_accion.is_empty():
+		return
+	_captura_accion = ""
+	_captura_tipo = ""
+	_refrescar_remapeo()
+
+
+func _restaurar_controles() -> void:
+	_preferencias["acciones"] = PreferenciasSiga.nuevas()["acciones"].duplicate(true)
+	PreferenciasSiga.aplicar(_preferencias)
+	PreferenciasSiga.guardar(_preferencias)
+	_estado_remapeo.text = "↺"
+	_refrescar_remapeo()
+
+
+func _refrescar_remapeo() -> void:
+	for accion in _preferencias.get("acciones", {}):
+		var mapa: Dictionary = _preferencias["acciones"][accion]
+		var tecla: Button = _botones_remapeo.get(_clave_boton(accion, "teclado"))
+		var mando: Button = _botones_remapeo.get(_clave_boton(accion, "mando"))
+		if tecla != null:
+			tecla.text = OS.get_keycode_string(int(mapa.get("teclado", 0)))
+		if mando != null:
+			mando.text = "🎮 %d" % int(mapa.get("mando", 0))
 
 
 func _abrir() -> void:
@@ -154,6 +262,7 @@ func _abrir() -> void:
 func _cerrar() -> void:
 	if not _fondo.visible:
 		return
+	_cancelar_captura()
 	_fondo.visible = false
 	get_tree().paused = false
 	Input.mouse_mode = _mouse_previo
@@ -169,6 +278,7 @@ func _mostrar_opciones() -> void:
 
 
 func _mostrar_principal() -> void:
+	_cancelar_captura()
 	_panel_opciones.visible = false
 	_panel_principal.visible = true
 	_opciones.grab_focus()
