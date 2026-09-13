@@ -16,6 +16,9 @@ const ACCIONES := {
 	"cancelar": {"teclado": KEY_ESCAPE, "mando": 1},
 }
 
+const SENSIBILIDAD_CAMARA_MIN := 0.25
+const SENSIBILIDAD_CAMARA_MAX := 3.0
+
 
 static func nuevas() -> Dictionary:
 	return {
@@ -23,6 +26,9 @@ static func nuevas() -> Dictionary:
 		"acciones": ACCIONES.duplicate(true),
 		"reduccion_movimiento": false,
 		"volumen": 1.0,
+		"sensibilidad_camara_raton": 1.0,
+		"sensibilidad_camara_mando": 1.0,
+		"invertir_camara_y": false,
 	}
 
 
@@ -96,4 +102,15 @@ static func cargar(ruta: String = RUTA) -> Dictionary:
 			resultado["acciones"][accion] = datos["acciones"][accion].duplicate()
 	resultado["reduccion_movimiento"] = bool(datos.get("reduccion_movimiento", false))
 	resultado["volumen"] = clampf(float(datos.get("volumen", 1.0)), 0.0, 1.0)
+	resultado["sensibilidad_camara_raton"] = clampf(
+		float(datos.get("sensibilidad_camara_raton", 1.0)),
+		SENSIBILIDAD_CAMARA_MIN,
+		SENSIBILIDAD_CAMARA_MAX
+	)
+	resultado["sensibilidad_camara_mando"] = clampf(
+		float(datos.get("sensibilidad_camara_mando", 1.0)),
+		SENSIBILIDAD_CAMARA_MIN,
+		SENSIBILIDAD_CAMARA_MAX
+	)
+	resultado["invertir_camara_y"] = bool(datos.get("invertir_camara_y", false))
 	return resultado
