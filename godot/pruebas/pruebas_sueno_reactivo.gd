@@ -41,7 +41,7 @@ func _probar_todas_las_formas() -> void:
 			)
 			_comprobar(not anomalia.reactiva(), "%s empieza en estado base" % id)
 			_comprobar(not anomalia.luz_visible(), "%s empieza sin respuesta luminosa" % id)
-			var escala_base := anomalia.escala_visual()
+			var escala_base: Vector3 = anomalia.escala_visual()
 			_comprobar(anomalia.interactuar(root), "%s acepta interactuar" % id)
 			_comprobar(anomalia.reactiva(), "%s cambia estado al examinar" % id)
 			_comprobar(anomalia.luz_visible(), "%s responde con luz local" % id)
