@@ -76,12 +76,7 @@ func _montar_skyline(mundo: Node3D) -> void:
 
 
 func _edificio(
-	mundo: Node3D,
-	modelo: String,
-	posicion: Vector3,
-	escala: float,
-	giro_y: float,
-	color: Color
+	mundo: Node3D, modelo: String, posicion: Vector3, escala: float, giro_y: float, color: Color
 ) -> void:
 	var edificio := SkylineQuaternius.crear(modelo, color)
 	edificio.name = "Skyline_%s" % modelo.get_basename()
