@@ -7,6 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DRESSING = ROOT / "godot" / "guion" / "dia_dressing_cc0_app.gd"
 ESCENA = ROOT / "godot" / "escenas" / "dia.tscn"
+CALLE = ROOT / "godot" / "guion" / "dia_calle_app.gd"
 PROCEDENCIA = ROOT / "godot" / "assets" / "procedencia.json"
 
 
@@ -25,7 +26,13 @@ class DressingCC0Test(unittest.TestCase):
         codigo = DRESSING.read_text(encoding="utf-8")
         datos = json.loads(PROCEDENCIA.read_text(encoding="utf-8"))
         rutas = {item["ruta"] for item in datos["assets"]}
-        for modelo in ("computerScreen", "trashcan", "cardboardBoxClosed", "bookcaseClosed", "chairDesk"):
+        for modelo in (
+            "computerScreen",
+            "trashcan",
+            "cardboardBoxClosed",
+            "bookcaseClosed",
+            "chairDesk",
+        ):
             self.assertIn(f'"{modelo}"', codigo)
             self.assertTrue(
                 any(ruta.startswith(f"modelos/{modelo}.") for ruta in rutas),
@@ -38,6 +45,16 @@ class DressingCC0Test(unittest.TestCase):
         self.assertNotIn("KEY_E", codigo)
         self.assertNotIn("is_key_pressed", codigo)
         self.assertNotIn("InputEventKey", codigo)
+
+    def test_calle_combina_asfalto_y_revoco_cc0(self) -> None:
+        calle = CALLE.read_text(encoding="utf-8")
+        self.assertIn('"textura": "asfalto"', calle)
+        self.assertGreaterEqual(calle.count('"textura": "gotele"'), 5)
+
+        datos = json.loads(PROCEDENCIA.read_text(encoding="utf-8"))
+        rutas = {item["ruta"] for item in datos["assets"]}
+        self.assertIn("texturas/asfalto.jpg", rutas)
+        self.assertIn("texturas/gotele.jpg", rutas)
 
 
 if __name__ == "__main__":
