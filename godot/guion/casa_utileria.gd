@@ -1,18 +1,104 @@
-## Utilería doméstica procedural para dar lectura 3D a la casa (#282, #400).
+## Utilería doméstica procedural para dar lectura 3D a la casa (#133, #282, #400).
 ##
 ## Los objetos siguen construidos con primitivas simples y sin assets externos.
-## La lámpara, el televisor, la portátil y el almacenamiento reutilizan la
-## interacción común de #283 sin introducir persistencia ni reglas de jornada.
+## La composición separa usos domésticos reconocibles antes de añadir más props:
+## estar frente a la tele, cocina/servicio, descanso ya declarado en el catálogo
+## y almacenamiento. La lámpara, el televisor, la portátil y el cajón conservan
+## la interacción común de #283 sin introducir persistencia ni reglas de jornada.
 class_name CasaUtileria
 extends RefCounted
 
 
 static func montar(raiz: Node3D) -> void:
-	_montar_mesita(raiz, Vector3(1.7, 0.0, -2.1))
-	_montar_portatil(raiz, Vector3(1.7, 0.68, -2.1))
-	_montar_lampara_pie(raiz, Vector3(3.0, 0.0, -1.3))
+	montar_zonas_domesticas(raiz)
+	_montar_mesita(raiz, Vector3(-2.45, 0.0, 0.35))
+	_montar_portatil(raiz, Vector3(-2.45, 0.68, 0.35))
+	_montar_lampara_pie(raiz, Vector3(-0.65, 0.0, 0.55))
 	_montar_almacenamiento(raiz, Vector3(0.0, 0.0, -3.05))
 	_montar_televisor_interactivo(raiz)
+
+
+## Vertical espacial de #133. Se mantiene separado de las interacciones para
+## poder probar que la casa se lee por zonas aunque consola, compras o gato no
+## estén activos.
+static func montar_zonas_domesticas(raiz: Node3D) -> void:
+	_montar_sofa(raiz, Vector3(-1.65, 0.0, 1.35), 90.0)
+	_montar_cocina(raiz, Vector3(3.30, 0.0, -0.15))
+	_montar_ventana(raiz, Vector3(-2.10, 1.65, -3.42))
+	_montar_estanteria_compras(raiz, Vector3(1.25, 0.0, -3.22))
+
+
+static func _montar_sofa(raiz: Node3D, pos: Vector3, giro_y: float) -> void:
+	var sofa := Node3D.new()
+	sofa.name = "SofaCasa"
+	sofa.position = pos
+	sofa.rotation_degrees.y = giro_y
+	raiz.add_child(sofa)
+
+	var tela := Color(0.31, 0.25, 0.23)
+	var tela_oscura := Color(0.24, 0.19, 0.18)
+	_agregar_caja(sofa, Vector3(0, 0.34, 0), Vector3(1.80, 0.34, 0.72), tela)
+	_agregar_caja(sofa, Vector3(0, 0.78, 0.30), Vector3(1.80, 0.88, 0.18), tela_oscura)
+	_agregar_caja(sofa, Vector3(-0.87, 0.52, 0), Vector3(0.16, 0.52, 0.72), tela_oscura)
+	_agregar_caja(sofa, Vector3(0.87, 0.52, 0), Vector3(0.16, 0.52, 0.72), tela_oscura)
+
+
+static func _montar_cocina(raiz: Node3D, pos: Vector3) -> void:
+	var cocina := Node3D.new()
+	cocina.name = "CocinaCasa"
+	cocina.position = pos
+	raiz.add_child(cocina)
+
+	var mueble := Color(0.38, 0.31, 0.25)
+	var encimera := Color(0.24, 0.23, 0.22)
+	var metal := Color(0.44, 0.46, 0.45)
+	_agregar_caja(cocina, Vector3(0, 0.45, 0), Vector3(0.56, 0.90, 1.80), mueble)
+	_agregar_caja(cocina, Vector3(-0.02, 0.93, 0), Vector3(0.64, 0.08, 1.92), encimera)
+
+	var fregadero := Node3D.new()
+	fregadero.name = "FregaderoCasa"
+	fregadero.position = Vector3(-0.03, 0.99, 0.30)
+	cocina.add_child(fregadero)
+	_agregar_caja(fregadero, Vector3.ZERO, Vector3(0.44, 0.035, 0.58), metal)
+	_agregar_cilindro(fregadero, Vector3(0.12, 0.20, 0.12), 0.025, 0.36, metal)
+	_agregar_caja(fregadero, Vector3(0.08, 0.36, 0.12), Vector3(0.22, 0.04, 0.04), metal)
+
+	var nevera := Node3D.new()
+	nevera.name = "NeveraCasa"
+	nevera.position = Vector3(0, 0, -1.48)
+	cocina.add_child(nevera)
+	_agregar_caja(nevera, Vector3(0, 0.91, 0), Vector3(0.72, 1.82, 0.72), Color(0.55, 0.54, 0.50))
+	_agregar_caja(nevera, Vector3(-0.37, 1.16, -0.23), Vector3(0.035, 0.52, 0.07), metal)
+	_agregar_caja(nevera, Vector3(-0.37, 0.55, -0.23), Vector3(0.035, 0.34, 0.07), metal)
+
+
+static func _montar_ventana(raiz: Node3D, pos: Vector3) -> void:
+	var ventana := Node3D.new()
+	ventana.name = "VentanaCasa"
+	ventana.position = pos
+	raiz.add_child(ventana)
+
+	var marco := Color(0.31, 0.27, 0.23)
+	var cristal := Color(0.10, 0.14, 0.18)
+	_agregar_caja(ventana, Vector3.ZERO, Vector3(1.80, 1.10, 0.035), cristal)
+	_agregar_caja(ventana, Vector3(0, 0.58, 0), Vector3(1.94, 0.10, 0.08), marco)
+	_agregar_caja(ventana, Vector3(0, -0.58, 0), Vector3(1.94, 0.10, 0.08), marco)
+	_agregar_caja(ventana, Vector3(-0.92, 0, 0), Vector3(0.10, 1.18, 0.08), marco)
+	_agregar_caja(ventana, Vector3(0.92, 0, 0), Vector3(0.10, 1.18, 0.08), marco)
+	_agregar_caja(ventana, Vector3(0, 0, 0), Vector3(0.07, 1.08, 0.075), marco)
+
+
+static func _montar_estanteria_compras(raiz: Node3D, pos: Vector3) -> void:
+	var estanteria := Node3D.new()
+	estanteria.name = "EstanteriaComprasCasa"
+	estanteria.position = pos
+	raiz.add_child(estanteria)
+
+	var madera := Color(0.32, 0.23, 0.17)
+	_agregar_caja(estanteria, Vector3(-0.48, 0.82, 0), Vector3(0.10, 1.64, 0.34), madera)
+	_agregar_caja(estanteria, Vector3(0.48, 0.82, 0), Vector3(0.10, 1.64, 0.34), madera)
+	for y in [0.08, 0.58, 1.08, 1.58]:
+		_agregar_caja(estanteria, Vector3(0, y, 0), Vector3(1.02, 0.09, 0.36), madera)
 
 
 static func _montar_mesita(raiz: Node3D, pos: Vector3) -> void:
