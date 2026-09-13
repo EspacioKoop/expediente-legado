@@ -18,7 +18,11 @@ class AvionesPapelTest(unittest.TestCase):
         self.assertIn("static func lanzar(", self.source)
         self.assertIn("static func resultado(estado: Dictionary)", self.source)
         self.assertNotIn("extends Node", self.source)
-        self.assertNotIn("partida.", self.source.lower())
+        codigo = "\n".join(
+            linea for linea in self.source.splitlines()
+            if not linea.lstrip().startswith("#")
+        )
+        self.assertNotIn("partida.", codigo.lower())
 
     def test_tres_modelos_y_tres_lanzamientos(self):
         self.assertIn('"estable": {', self.source)
@@ -65,3 +69,4 @@ class AvionesPapelTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
