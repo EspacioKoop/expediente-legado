@@ -47,6 +47,26 @@ build/paper_planes_98.gbc
 
 El encabezado usa el flag CGB `0x80`, de modo que la ROM es dual-mode pero aprovecha paletas de Game Boy Color cuando están disponibles.
 
+## Pruebas de regresión
+
+Con RGBDS disponible, instalar el emulador de pruebas en un entorno virtual:
+
+```bash
+python3 -m venv /tmp/paper-planes-tests
+/tmp/paper-planes-tests/bin/python -m pip install pyboy==2.6.1
+make clean
+make test PYTHON=/tmp/paper-planes-tests/bin/python
+```
+
+`test_rom.py` ejecuta el código máquina compilado en copias temporales de la
+ROM y comprueba la limpieza de las 1024 celdas del fondo, los sprites de los
+cuatro hitos en OAM y el HUD con varios valores de vidas, ruta y puntuación.
+El arnés llama a las rutinas con la LCD apagada: verifica sus escrituras en
+memoria, pero no el presupuesto de VBlank, el renderizado durante una partida
+ni controles físicos. PyBoy es una dependencia de pruebas local; no se
+distribuye con la ROM ni se integra en el juego. El workflow GBC existente
+compila la ROM; estas pruebas se ejecutan explícitamente con `make test`.
+
 ## Siguientes rutas candidatas
 
 La estructura está pensada para añadir ciudades sin alterar el contrato del minijuego. Las siguientes rutas naturales son **París 1998** (Torre Eiffel/Arco/La Défense), **Tokio 1998** (Tokyo Tower/Shinjuku) y **Londres 1998** (Big Ben/Tower Bridge/Canary Wharf).

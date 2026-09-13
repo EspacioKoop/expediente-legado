@@ -475,7 +475,10 @@ DibujarAvion:
     ret
 
 DibujarHito:
+    ; ObtenerBaseX consulta una tabla con HL; conservar el destino en OAM.
+    push hl
     call ObtenerBaseX
+    pop hl
     ld e, a
     ld a, [wTipoHito]
     or a
@@ -917,8 +920,9 @@ LimpiarOAM:
 LimpiarBG:
     ld hl, BG_MAP
     ld bc, 32 * 32
-    xor a
 .loop:
+    ; La comprobacion de BC modifica A en cada vuelta.
+    xor a
     ld [hli], a
     dec bc
     ld a, b
