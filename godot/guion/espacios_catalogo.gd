@@ -234,6 +234,40 @@ const OFICINA := {
 			"tam": Vector3(0.44, 0.04, 0.16),
 			"color": Color(0.72, 0.70, 0.64)
 		},
+		# La salida deja de ser una caja de interacción flotante: detrás del
+		# trigger hay una hoja de puerta física, con marco y manilla. Al caminar
+		# hacia ella se entra primero en el Area3D existente y la transición se
+		# mantiene, pero el límite del archivo ya se entiende sin leer el HUD.
+		{
+			"pos": Vector3(-6.88, 1.05, 3.5),
+			"tam": Vector3(0.12, 2.10, 1.28),
+			"color": Color(0.30, 0.32, 0.31),
+			"rol": "puerta_archivo"
+		},
+		{
+			"pos": Vector3(-6.80, 1.15, 2.78),
+			"tam": Vector3(0.18, 2.30, 0.14),
+			"color": Color(0.44, 0.45, 0.43),
+			"rol": "marco_puerta_archivo"
+		},
+		{
+			"pos": Vector3(-6.80, 1.15, 4.22),
+			"tam": Vector3(0.18, 2.30, 0.14),
+			"color": Color(0.44, 0.45, 0.43),
+			"rol": "marco_puerta_archivo"
+		},
+		{
+			"pos": Vector3(-6.80, 2.30, 3.5),
+			"tam": Vector3(0.18, 0.18, 1.58),
+			"color": Color(0.44, 0.45, 0.43),
+			"rol": "marco_puerta_archivo"
+		},
+		{
+			"pos": Vector3(-6.74, 1.05, 3.08),
+			"tam": Vector3(0.08, 0.08, 0.14),
+			"color": Color(0.64, 0.60, 0.44),
+			"rol": "manilla_puerta_archivo"
+		},
 	],
 	# La luz del archivo es de fluorescente: fría, plana y de más, que es lo
 	# que hace que a las tres de la tarde no se sepa qué hora es.
