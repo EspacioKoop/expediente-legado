@@ -1,7 +1,7 @@
 ## Superficie aislada para ejecutar ROMs GB desde la Portátil Color 98 (#124).
 ##
 ## La UI pausa el mundo mientras está abierta y solo habla con la clase nativa
-## Siga98GB. No conoce Partida, Jornada, casos, economía ni guardados de campaña.
+## Siga98GB. No conoce estado persistente, casos, economía ni guardados de campaña.
 class_name EmuladorPortatilApp
 extends CanvasLayer
 
