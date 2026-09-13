@@ -1,9 +1,29 @@
 ## Presentación del clima diario sobre el trayecto exterior (#143).
-extends "res://guion/dia_dialogo_app.gd"
+## También integra el diálogo diegético ambiental de #276 sin cambiar la raíz
+## histórica de la escena ni la cadena de herencia del día.
+extends "res://guion/dia_calle_app.gd"
 
 const FONDO_BASE := Color(0.05, 0.05, 0.06)
 
 var _clima_nodo: Node3D = null
+
+
+func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
+	# Un guardado pendiente tiene prioridad absoluta: la capa base sabe cómo
+	# reintentarlo sin duplicar efectos de jornada.
+	if partida.guardado_pendiente:
+		super._al_pisar_salida(cuerpo, salida)
+		return
+	if cuerpo != _caminante or _pantalla != null:
+		super._al_pisar_salida(cuerpo, salida)
+		return
+
+	var frase: String = salida.get_meta("frase", "")
+	if frase.is_empty():
+		super._al_pisar_salida(cuerpo, salida)
+		return
+
+	DialogoDiegetico.mostrar(_hud, _mundo, _caminante, salida, tr(frase))
 
 
 func _espacio_de(fase: String) -> Dictionary:
