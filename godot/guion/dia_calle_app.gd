@@ -5,7 +5,7 @@
 ## muros perimetrales, de modo que el exterior se leía como un pasillo.
 ##
 ## Esta capa mantiene el contrato de Jornada y recompone únicamente la geometría
-## de `calle`: planta vacía para no levantar envolvente interior, calzada/aceras
+## de `trayecto`: planta vacía para no levantar envolvente interior, calzada/aceras
 ## como bultos bajos, fachadas discontinuas y un único escaparate de televisores
 ## 3D. Las seis superficies `Pantalla` dispersas desaparecen.
 extends "res://guion/dia_onboarding_app.gd"
@@ -13,7 +13,7 @@ extends "res://guion/dia_onboarding_app.gd"
 
 func _espacio_de(fase: String) -> Dictionary:
 	var espacio: Dictionary = super._espacio_de(fase)
-	if fase != "calle":
+	if fase != "trayecto":
 		return espacio
 
 	# Una planta vacía evita que Espacio3D trate la calle como una habitación:
