@@ -1,5 +1,6 @@
 ## Geometría derivada de `detail-awning-small.glb` del Kenney Retro Urban Kit.
 ## Fuente oficial: https://kenney.nl/assets/retro-urban-kit
+## SHA-256 del GLB fuente: b012c04b39d39a66c7cb45392621d7374f1ff34c6054b4a05bee019abc55b155
 ## Licencia: CC0-1.0. La malla se representa como código para no saltarse Git LFS
 ## con un binario nuevo; se eliminan texturas/materiales del pack y SIGA-98 aplica
 ## su propio shader PSX.
