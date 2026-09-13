@@ -1,13 +1,12 @@
-## Presentación breve de intervenciones ambientales (#276).
+## Presentación breve de intervenciones de compañeros (#276/#397).
 ##
-## No decide qué se dice ni cuándo: recibe una zona ya activada y el texto ya
-## resuelto por la capa del día. Su única responsabilidad es atribuirlo al
-## rótulo 3D más cercano, situarlo en HUD y emitir una señal sonora breve.
+## No decide qué se dice ni cuándo: recibe el NPC que el jugador acaba de
+## activar y el texto ya resuelto por la capa del día. La procedencia deja de
+## inferirse por cercanía: el mismo objeto con el que se habló firma el subtítulo.
 class_name DialogoDiegetico
 extends RefCounted
 
 const DURACION := 3.4
-const DISTANCIA_HABLANTE_MAX := 2.8
 const FRECUENCIA := 22_050
 const DURACION_TONO := 0.08
 
@@ -15,10 +14,9 @@ static var _tono_cache: AudioStreamWAV
 
 
 static func mostrar(
-	hud: CanvasLayer,
-	mundo: Node3D,
+	hud: HUDLayer,
 	caminante: Node3D,
-	zona: Area3D,
+	companero: CompaneroInteractivo3D,
 	texto: String,
 ) -> PanelContainer:
 	var panel := PanelContainer.new()
@@ -27,9 +25,9 @@ static func mostrar(
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	panel.offset_left = -330
-	panel.offset_top = -112
+	panel.offset_top = -126
 	panel.offset_right = 330
-	panel.offset_bottom = -24
+	panel.offset_bottom = -30
 
 	var etiqueta := Label.new()
 	etiqueta.name = "TextoDialogoDiegetico"
@@ -38,36 +36,19 @@ static func mostrar(
 	etiqueta.custom_minimum_size.x = 620
 	etiqueta.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	var hablante := _hablante_mas_cercano(mundo, zona.global_position)
-	var nombre := hablante.text if hablante != null else "…"
-	var direccion := _marca_direccion(caminante, zona.global_position)
+	var nombre := companero.nombre_visible.strip_edges()
+	if nombre.is_empty():
+		nombre = "…"
+	var direccion := _marca_direccion(caminante, companero.global_position)
 	etiqueta.text = "%s  %s\n%s" % [direccion, nombre, texto]
 	panel.add_child(etiqueta)
 	hud.add_child(panel)
+	hud.registrar(HUDLayer.DIALOGO, panel)
+	hud.activar(HUDLayer.DIALOGO)
 
 	Sonido.sonar_stream(hud, _tono())
-	hud.get_tree().create_timer(DURACION).timeout.connect(_retirar.bind(panel))
+	hud.get_tree().create_timer(DURACION).timeout.connect(_retirar.bind(panel, hud))
 	return panel
-
-
-static func _hablante_mas_cercano(raiz: Node, posicion: Vector3) -> Label3D:
-	var mejor: Label3D = null
-	var distancia := INF
-	for etiqueta in _etiquetas_3d(raiz):
-		var actual := etiqueta.global_position.distance_to(posicion)
-		if actual < distancia and actual <= DISTANCIA_HABLANTE_MAX:
-			distancia = actual
-			mejor = etiqueta
-	return mejor
-
-
-static func _etiquetas_3d(raiz: Node) -> Array[Label3D]:
-	var resultado: Array[Label3D] = []
-	for hijo in raiz.get_children():
-		if hijo is Label3D:
-			resultado.append(hijo)
-		resultado.append_array(_etiquetas_3d(hijo))
-	return resultado
 
 
 static func _marca_direccion(caminante: Node3D, posicion: Vector3) -> String:
@@ -111,6 +92,8 @@ static func _tono() -> AudioStreamWAV:
 	return pista
 
 
-static func _retirar(panel: PanelContainer) -> void:
+static func _retirar(panel: PanelContainer, hud: HUDLayer) -> void:
 	if is_instance_valid(panel):
 		panel.queue_free()
+	if is_instance_valid(hud):
+		hud.desactivar(HUDLayer.DIALOGO)
