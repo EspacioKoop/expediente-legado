@@ -2,7 +2,7 @@
 ##
 ## No mueve al jugador ni anima objetos. Solo deriva una ruta determinista a
 ## partir del día y conserva un progreso idempotente que después puede vivir en
-## Partida. No concede dinero, pistas, vidas ni acciones.
+## Partida. No concede recompensas ni altera el progreso global.
 class_name RondaCierre
 extends RefCounted
 
