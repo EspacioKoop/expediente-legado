@@ -7,6 +7,7 @@ const FONDO_BASE := Color(0.05, 0.05, 0.06)
 const TAM_TERMINAL_INTERACTIVO := Vector3(1.0, 1.2, 0.8)
 
 var _clima_nodo: Node3D = null
+var _archivado_sesion := ArchivadoSesion3D.new()
 
 
 func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
@@ -40,6 +41,7 @@ func _entrar_en(fase: String) -> void:
 	if fase == "archivo":
 		_montar_terminal_interactivo()
 		_montar_archivadores_interactivos(_espacio_de(fase))
+		_archivado_sesion.refrescar(self)
 	elif fase == "casa":
 		CasaUtileria.montar(_mundo)
 	# La niebla cambia el fondo global del Environment. Cada entrada restaura el
@@ -49,6 +51,12 @@ func _entrar_en(fase: String) -> void:
 	if not bool(espacio.get("exterior", false)):
 		return
 	_aplicar_clima(Clima.estado(int(jornada.get("dia", 1))))
+
+
+func _cerrar_expediente() -> void:
+	super._cerrar_expediente()
+	if jornada.get("fase", "") == "archivo" and _pantalla == null:
+		_archivado_sesion.refrescar(self)
 
 
 ## Sustituye únicamente el volumen que antes abría el expediente al pisarlo.
