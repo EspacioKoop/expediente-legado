@@ -8,9 +8,7 @@ class_name SuenoGeometria
 extends RefCounted
 
 
-static func malla_sala(
-	contorno: PackedVector2Array, altura: float = 3.2
-) -> ArrayMesh:
+static func malla_sala(contorno: PackedVector2Array, altura: float = 3.2) -> ArrayMesh:
 	if not contorno_valido(contorno) or altura <= 0.0:
 		return ArrayMesh.new()
 
@@ -45,10 +43,7 @@ static func tiene_arista_diagonal(contorno: PackedVector2Array) -> bool:
 
 
 static func _agregar_suelo_y_techo(
-	st: SurfaceTool,
-	contorno: PackedVector2Array,
-	indices: PackedInt32Array,
-	altura: float
+	st: SurfaceTool, contorno: PackedVector2Array, indices: PackedInt32Array, altura: float
 ) -> void:
 	for i in range(0, indices.size(), 3):
 		var a := contorno[indices[i]]
@@ -58,9 +53,7 @@ static func _agregar_suelo_y_techo(
 		_triangulo(st, _punto(a, altura), _punto(b, altura), _punto(c, altura))
 
 
-static func _agregar_paredes(
-	st: SurfaceTool, contorno: PackedVector2Array, altura: float
-) -> void:
+static func _agregar_paredes(st: SurfaceTool, contorno: PackedVector2Array, altura: float) -> void:
 	for i in contorno.size():
 		var a := contorno[i]
 		var b := contorno[(i + 1) % contorno.size()]
