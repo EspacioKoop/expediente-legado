@@ -37,11 +37,7 @@ static func _montar_puesto(raiz: Node3D, indice: int, base: Vector3) -> void:
 	# El teclado está delante del monitor y hace legible el escritorio como
 	# puesto de trabajo incluso desde el pasillo central.
 	_agregar_caja(
-		puesto,
-		"Teclado",
-		Vector3(0.18, 0.79, 0.20),
-		Vector3(0.58, 0.055, 0.22),
-		COLOR_PERIFERICO
+		puesto, "Teclado", Vector3(0.18, 0.79, 0.20), Vector3(0.58, 0.055, 0.22), COLOR_PERIFERICO
 	)
 	_agregar_caja(
 		puesto,
@@ -55,18 +51,10 @@ static func _montar_puesto(raiz: Node3D, indice: int, base: Vector3) -> void:
 	# planta sin fingir que cada mesa pertenece a un personaje concreto.
 	var lado := -0.70 if indice % 2 == 0 else 0.70
 	_agregar_caja(
-		puesto,
-		"TelefonoBase",
-		Vector3(lado, 0.82, 0.12),
-		Vector3(0.36, 0.10, 0.28),
-		COLOR_TELEFONO
+		puesto, "TelefonoBase", Vector3(lado, 0.82, 0.12), Vector3(0.36, 0.10, 0.28), COLOR_TELEFONO
 	)
 	_agregar_caja(
-		puesto,
-		"Auricular",
-		Vector3(lado, 0.91, 0.12),
-		Vector3(0.42, 0.08, 0.10),
-		COLOR_TELEFONO
+		puesto, "Auricular", Vector3(lado, 0.91, 0.12), Vector3(0.42, 0.08, 0.10), COLOR_TELEFONO
 	)
 
 	# Alterna bandejas y taza: cuatro escritorios idénticos siguen pareciendo
@@ -82,9 +70,7 @@ static func _agregar_bandeja(raiz: Node3D, pos: Vector3) -> void:
 	bandeja.name = "BandejaEntrada"
 	bandeja.position = pos
 	raiz.add_child(bandeja)
-	_agregar_caja(
-		bandeja, "BaseBandeja", Vector3.ZERO, Vector3(0.44, 0.045, 0.32), COLOR_BANDEJA
-	)
+	_agregar_caja(bandeja, "BaseBandeja", Vector3.ZERO, Vector3(0.44, 0.045, 0.32), COLOR_BANDEJA)
 	_agregar_caja(
 		bandeja, "PapelBandeja", Vector3(0, 0.035, 0), Vector3(0.36, 0.025, 0.25), COLOR_PAPEL
 	)
