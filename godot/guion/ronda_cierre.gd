@@ -1,8 +1,8 @@
 ## Contrato puro de la ronda de cierre opcional (#156).
 ##
 ## No mueve al jugador ni anima objetos. Solo deriva una ruta determinista a
-## partir del día y conserva un progreso idempotente que después puede vivir en
-## Partida. No concede recompensas ni altera el progreso global.
+## partir del día y conserva un progreso idempotente preparado para persistirse
+## después. No concede recompensas ni altera el progreso global.
 class_name RondaCierre
 extends RefCounted
 
