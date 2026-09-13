@@ -12,25 +12,34 @@ signal conversacion_solicitada(
 	clave_dialogo: String,
 )
 
+const TAM_COLISION := Vector3(0.9, 1.8, 0.9)
+
 @export var nombre_visible := ""
 @export var clave_dialogo := ""
-@export var altura_indicador := 2.05
+@export var altura_indicador := 1.35
 
 var _indicador: Label3D
 
 
 func _ready() -> void:
+	var colision := CollisionShape3D.new()
+	colision.name = "ColisionConversacion"
+	var forma := BoxShape3D.new()
+	forma.size = TAM_COLISION
+	colision.shape = forma
+	add_child(colision)
+
 	_indicador = Label3D.new()
 	_indicador.name = "IndicadorConversacion"
 	_indicador.position = Vector3(0.0, altura_indicador, 0.0)
 	_indicador.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	_indicador.fixed_size = true
 	_indicador.no_depth_test = true
-	_indicador.font_size = 24
+	_indicador.font_size = 28
 	_indicador.outline_size = 8
+	_indicador.text = "◆"
 	_indicador.visible = false
 	add_child(_indicador)
-	_refrescar_indicador()
 
 
 func texto_accion() -> String:
@@ -52,10 +61,3 @@ func marcar_en_foco(en_foco: bool) -> void:
 	if not is_instance_valid(_indicador):
 		return
 	_indicador.visible = en_foco and habilitado
-
-
-func _refrescar_indicador() -> void:
-	if not is_instance_valid(_indicador):
-		return
-	var nombre := nombre_visible.strip_edges()
-	_indicador.text = "◆" if nombre.is_empty() else "◆ %s" % nombre
