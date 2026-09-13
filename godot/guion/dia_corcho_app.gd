@@ -37,7 +37,7 @@ func _process(_delta: float) -> void:
 
 
 func _montar_corcho() -> void:
-	var conceptos := _host.contenido.conceptos_desbloqueados(
+	var conceptos: Array = _host.contenido.conceptos_desbloqueados(
 		_host.partida.estado.get("pistas_descubiertas", [])
 	)
 	_corcho_3d = Corcho3D.new()
