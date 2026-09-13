@@ -9,6 +9,31 @@ SALIDA="$RAIZ/dist/salida"
 MOTOR="${GODOT_BIN:-godot4}"
 DECLARADA="$(tr -d '\r\n' < "$RAIZ/.godot-version")"
 ACTUAL="$($MOTOR --version | tr -d '\r\n')"
+CONFIG_INCIDENCIAS="$GODOT_DIR/datos/incidencias.json"
+RESPALDO_INCIDENCIAS="$(mktemp)"
+cp "$CONFIG_INCIDENCIAS" "$RESPALDO_INCIDENCIAS"
+
+restaurar_config_incidencias() {
+    cp "$RESPALDO_INCIDENCIAS" "$CONFIG_INCIDENCIAS"
+    rm -f "$RESPALDO_INCIDENCIAS"
+}
+trap restaurar_config_incidencias EXIT
+
+# El formulario de feedback se configura al empaquetar, no queda hardcodeado
+# en GDScript. La URL es pública dentro de la build y solo se aceptan HTTP(S).
+python3 - "$CONFIG_INCIDENCIAS" "${SIGA98_FEEDBACK_URL:-}" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+ruta = Path(sys.argv[1])
+url = sys.argv[2].strip()
+if url and not url.startswith(("https://", "http://")):
+    raise SystemExit("ERROR: SIGA98_FEEDBACK_URL debe usar http:// o https://")
+datos = json.loads(ruta.read_text(encoding="utf-8"))
+datos["feedback_url"] = url
+ruta.write_text(json.dumps(datos, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+PY
 
 python3 - "$DECLARADA" "$ACTUAL" <<'PY'
 import re
