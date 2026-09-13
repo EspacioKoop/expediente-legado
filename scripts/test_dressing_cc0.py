@@ -12,13 +12,17 @@ PROCEDENCIA = ROOT / "godot" / "assets" / "procedencia.json"
 
 
 class DressingCC0Test(unittest.TestCase):
-    def test_la_escena_activa_el_dressing(self) -> None:
+    def test_la_escena_conserva_la_raiz_y_activa_el_controller(self) -> None:
         escena = ESCENA.read_text(encoding="utf-8")
-        self.assertIn('res://guion/dia_dressing_cc0_app.gd', escena)
+        self.assertIn('path="res://guion/dia_clima_app.gd"', escena)
+        self.assertIn('path="res://guion/dia_dressing_cc0_app.gd"', escena)
+        self.assertIn('[node name="DressingCC0Controller" type="Node" parent="."]', escena)
 
-    def test_extiende_la_cadena_actual_y_cubre_tres_espacios(self) -> None:
+    def test_controller_cubre_tres_espacios_sin_reemplazar_el_dia(self) -> None:
         codigo = DRESSING.read_text(encoding="utf-8")
-        self.assertIn('extends "res://guion/dia_clima_app.gd"', codigo)
+        self.assertIn("extends Node", codigo)
+        self.assertNotIn('extends "res://guion/dia_clima_app.gd"', codigo)
+        self.assertIn("get_parent()", codigo)
         for fase in ('"archivo"', '"trayecto"', '"casa"'):
             self.assertIn(fase, codigo)
 
