@@ -21,8 +21,7 @@ func _asegurar_boton_posponer() -> void:
 	if _posponer != null:
 		return
 	_posponer = Button.new()
-	_posponer.text = "Decidir más tarde"
-	_posponer.tooltip_text = "Guardar esta decisión para volver a ella después de investigar más."
+	_posponer.text = tr("A7_VOLVER")
 	_posponer.pressed.connect(_posponer_decision)
 	var relato := _opciones.get_parent()
 	relato.add_child(_posponer)
