@@ -19,11 +19,7 @@ static func completar(estado: Dictionary) -> Dictionary:
 
 
 static func crear(
-	estado: Dictionary,
-	expediente_id: String,
-	tipo: String,
-	valor,
-	expuesto: bool = false
+	estado: Dictionary, expediente_id: String, tipo: String, valor, expuesto: bool = false
 ) -> bool:
 	completar(estado)
 	if expediente_id.is_empty() or tipo.is_empty() or expuesto:
