@@ -31,6 +31,13 @@ class HUDLayerTest(unittest.TestCase):
         self.assertIn("return true", self.source)
         self.assertNotIn("ESTADO: 500", self.source)
 
+    def test_superficies_transitorias_no_dejan_referencias_liberadas(self):
+        self.assertIn("_superficies[tipo] = weakref(control)", self.source)
+        self.assertIn("var referencia: WeakRef", self.source)
+        self.assertIn("referencia.get_ref() as Control", self.source)
+        self.assertIn("caducadas.append(tipo)", self.source)
+        self.assertIn("_superficies.erase(tipo)", self.source)
+
     def test_no_decide_contenido_ni_hardcodea_teclas(self):
         self.assertNotIn('"E"', self.source)
         self.assertNotIn("texto =", self.source)
