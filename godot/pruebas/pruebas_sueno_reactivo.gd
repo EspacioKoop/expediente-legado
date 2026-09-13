@@ -34,7 +34,9 @@ func _probar_todas_las_formas() -> void:
 		)
 
 		for anomalia in creadas:
-			_comprobar(_esta_en_planta(anomalia.position, bloques), "%s coloca dentro de planta" % id)
+			_comprobar(
+				_esta_en_planta(anomalia.position, bloques), "%s coloca dentro de planta" % id
+			)
 			_comprobar(
 				anomalia.texto_accion().begins_with("Examinar "),
 				"%s usa verbo semántico de examen" % id,
