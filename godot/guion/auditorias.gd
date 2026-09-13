@@ -7,27 +7,14 @@
 class_name Auditorias
 extends RefCounted
 
+## El contrato base solo declara identidades e incompatibilidades. Los rótulos
+## pertenecen a la futura capa de selección/consulta: declarar aquí claves de
+## traducción que ninguna UI consume las convertiría en texto huérfano (#105).
 const CATALOGO := {
-	"sin_releer": {
-		"rotulo": "AUDITORIA_SIN_RELEER",
-		"descripcion": "AUDITORIA_SIN_RELEER_DESC",
-		"incompatibles": [],
-	},
-	"accion_sobrante": {
-		"rotulo": "AUDITORIA_ACCION_SOBRANTE",
-		"descripcion": "AUDITORIA_ACCION_SOBRANTE_DESC",
-		"incompatibles": [],
-	},
-	"gato_diario": {
-		"rotulo": "AUDITORIA_GATO_DIARIO",
-		"descripcion": "AUDITORIA_GATO_DIARIO_DESC",
-		"incompatibles": [],
-	},
-	"sueno_completo": {
-		"rotulo": "AUDITORIA_SUENO_COMPLETO",
-		"descripcion": "AUDITORIA_SUENO_COMPLETO_DESC",
-		"incompatibles": [],
-	},
+	"sin_releer": {"incompatibles": []},
+	"accion_sobrante": {"incompatibles": []},
+	"gato_diario": {"incompatibles": []},
+	"sueno_completo": {"incompatibles": []},
 }
 
 
