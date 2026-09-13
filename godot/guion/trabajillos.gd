@@ -11,7 +11,7 @@ const ESCENAS_SUENO_PERDIDAS := 1
 
 
 static func _estado(jornada: Dictionary) -> Dictionary:
-	if not jornada.has("trabajillos") or not (jornada["trabajillos"] is Dictionary):
+	if not jornada.has("trabajillos") or typeof(jornada["trabajillos"]) != TYPE_DICTIONARY:
 		jornada["trabajillos"] = {"ultimo_dia": 0, "hechos": 0}
 	var estado: Dictionary = jornada["trabajillos"]
 	estado["ultimo_dia"] = int(estado.get("ultimo_dia", 0))
