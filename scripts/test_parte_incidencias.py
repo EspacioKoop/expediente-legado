@@ -81,7 +81,18 @@ class ParteIncidenciasTest(unittest.TestCase):
         self.assertIn("_diagnostico.button_pressed", self.app)
         self.assertIn("_diagnostico_previa.visible = activo", self.app)
         self.assertIn("formatear_diagnostico", self.app)
-        self.assertIn("Adjuntar diagnóstico técnico filtrado", self.app)
+        self.assertEqual(
+            self.config["textos"]["diagnostico"],
+            "Adjuntar diagnóstico técnico filtrado",
+        )
+
+    def test_pantalla_no_hardcodea_texto_visible(self):
+        patron = re.compile(
+            r"\.(?:text|placeholder_text|tooltip_text)\s*=\s*\"[^\"]+\""
+        )
+        self.assertEqual(patron.findall(self.app), [])
+        self.assertIn("texto_interfaz", self.nucleo)
+        self.assertIn('"textos"', CONFIG.read_text(encoding="utf-8"))
 
     def test_transporte_copia_antes_de_abrir_y_tiene_fallback_local(self):
         copiar = "DisplayServer.clipboard_set(parte)"
