@@ -13,7 +13,7 @@ const FRAGMENTADA := "fragmentada"
 ## Los PackedVector2Array se construyen en tiempo de carga y Godot 4.7 no los
 ## acepta dentro de una expresión `const`. El catálogo sigue siendo de solo
 ## lectura por API; se expone siempre mediante copia profunda en `de()`.
-static var FAMILIAS := {
+static var _familias := {
 	CONVERGENTE: {
 		"contorno": PackedVector2Array([
 			Vector2(-15, -18),
@@ -80,13 +80,13 @@ static var FAMILIAS := {
 
 
 static func ids() -> Array:
-	var resultado := FAMILIAS.keys()
+	var resultado := _familias.keys()
 	resultado.sort()
 	return resultado
 
 
 static func de(id: String) -> Dictionary:
-	return FAMILIAS.get(id, {}).duplicate(true)
+	return _familias.get(id, {}).duplicate(true)
 
 
 static func malla(id: String) -> ArrayMesh:
