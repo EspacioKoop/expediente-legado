@@ -6,6 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 POLITICA = ROOT / "godot" / "guion" / "gato_ayuda.gd"
 AVATAR = ROOT / "godot" / "guion" / "gato_asistente_2d.gd"
 CAPA = ROOT / "godot" / "guion" / "dia_gato_app.gd"
+CAPA_TRABAJILLOS = ROOT / "godot" / "guion" / "dia_trabajillos_app.gd"
 CAPA_ONBOARDING = ROOT / "godot" / "guion" / "dia_onboarding_app.gd"
 CAPA_CLIMA = ROOT / "godot" / "guion" / "dia_clima_app.gd"
 ESCENA = ROOT / "godot" / "escenas" / "dia.tscn"
@@ -16,6 +17,7 @@ class GatoAyudaTest(unittest.TestCase):
         self.politica = POLITICA.read_text(encoding="utf-8")
         self.avatar = AVATAR.read_text(encoding="utf-8")
         self.capa = CAPA.read_text(encoding="utf-8")
+        self.capa_trabajillos = CAPA_TRABAJILLOS.read_text(encoding="utf-8")
         self.capa_onboarding = CAPA_ONBOARDING.read_text(encoding="utf-8")
         self.capa_clima = CAPA_CLIMA.read_text(encoding="utf-8")
         self.escena = ESCENA.read_text(encoding="utf-8")
@@ -53,7 +55,8 @@ class GatoAyudaTest(unittest.TestCase):
         self.assertIn("nivel(gato) == COMPLETA", self.politica)
 
     def test_capa_no_duplica_estado_y_conserva_herencia(self):
-        self.assertIn('extends "res://guion/dia_alquiler_app.gd"', self.capa)
+        self.assertIn('extends "res://guion/dia_trabajillos_app.gd"', self.capa)
+        self.assertIn('extends "res://guion/dia_alquiler_app.gd"', self.capa_trabajillos)
         self.assertIn("GatoAyuda.lineas_asistente", self.capa)
         self.assertIn("GatoAyuda.guia_visible", self.capa)
         self.assertIn("GatoAyuda.guia_orienta", self.capa)

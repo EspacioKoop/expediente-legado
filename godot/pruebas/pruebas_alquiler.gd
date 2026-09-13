@@ -116,3 +116,50 @@ static func todo(comprobar: Callable) -> void:
 	comprobar.call("el impago no crea deuda negativa", impago["dinero"] >= 0, true)
 	comprobar.call("el impago se registra una sola vez", impago["alquiler"]["impagos"], 1)
 	comprobar.call("la vivienda no cobra automáticamente", impago["alquiler"]["pagados"], 0)
+
+	# --- Trabajillos de casa (#94) -------------------------------------------
+	# Esta suite es de contratos puros. La composición de la capa `dia_*` se
+	# comprueba estáticamente en Python para no construir aquí toda la cadena de
+	# escena del día; eso puede arrancar procesos/nodos ajenos al contrato y
+	# convirtió este test puro en un timeout de 120 s en CI.
+	var trabajo := Jornada.nueva()
+	trabajo["fase"] = "casa"
+	var saldo_trabajo: int = trabajo["dinero"]
+	var acciones_trabajo: int = trabajo["acciones"]
+	var cobro := Trabajillos.hacer_transcripcion(trabajo)
+	comprobar.call("la transcripción paga veinte", cobro["importe"], 20)
+	comprobar.call(
+		"el trabajillo suma dinero",
+		trabajo["dinero"],
+		saldo_trabajo + Trabajillos.PAGO_TRANSCRIPCION
+	)
+	comprobar.call(
+		"el trabajillo no consume acciones del archivo", trabajo["acciones"], acciones_trabajo
+	)
+	var tras_cobro: int = trabajo["dinero"]
+	comprobar.call(
+		"el trabajillo solo se cobra una vez por noche",
+		Trabajillos.hacer_transcripcion(trabajo),
+		{}
+	)
+	comprobar.call("repetir no imprime dinero", trabajo["dinero"], tras_cobro)
+	comprobar.call(
+		"trabajar recorta una escena del sueño",
+		Trabajillos.escenas_de_sueno(trabajo, Sueno.ESCENAS_POR_NOCHE),
+		Sueno.ESCENAS_POR_NOCHE - 1
+	)
+
+	# Antes del primer alquiler solo caben nueve noches de trabajo: el día diez
+	# se paga en el trayecto, antes de llegar a casa. Incluso haciendo todos los
+	# lotes, el salario base sin cerrar expedientes no alcanza los 700.
+	var saldo_sin_cierres_con_trabajillos := (
+		120
+		+ Jornada.BASE_DIARIA * Jornada.DIAS_POR_MES
+		+ Trabajillos.PAGO_TRANSCRIPCION * (Jornada.DIAS_POR_MES - 1)
+		- Jornada.COSTE_DIARIO * (Jornada.DIAS_POR_MES - 1)
+	)
+	comprobar.call(
+		"los trabajillos no sustituyen resolver expedientes para pagar alquiler",
+		saldo_sin_cierres_con_trabajillos < Jornada.PRECIO_ALQUILER,
+		true
+	)

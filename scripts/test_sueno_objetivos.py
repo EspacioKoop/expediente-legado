@@ -5,6 +5,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 REGLA = ROOT / "godot" / "guion" / "sueno_objetivos.gd"
 GATO = ROOT / "godot" / "guion" / "dia_gato_app.gd"
+TRABAJILLOS = ROOT / "godot" / "guion" / "dia_trabajillos_app.gd"
 ONBOARDING = ROOT / "godot" / "guion" / "dia_onboarding_app.gd"
 CLIMA = ROOT / "godot" / "guion" / "dia_clima_app.gd"
 ESCENA = ROOT / "godot" / "escenas" / "dia.tscn"
@@ -14,6 +15,7 @@ class SuenoObjetivosTest(unittest.TestCase):
     def setUp(self):
         self.regla = REGLA.read_text(encoding="utf-8")
         self.gato = GATO.read_text(encoding="utf-8")
+        self.trabajillos = TRABAJILLOS.read_text(encoding="utf-8")
         self.onboarding = ONBOARDING.read_text(encoding="utf-8")
         self.clima = CLIMA.read_text(encoding="utf-8")
         self.escena = ESCENA.read_text(encoding="utf-8")
@@ -38,7 +40,8 @@ class SuenoObjetivosTest(unittest.TestCase):
         self.assertIn('_entrar_en(destino)', self.gato)
 
     def test_el_gato_apunta_a_objetivo_y_no_a_puerta(self):
-        self.assertIn('extends "res://guion/dia_alquiler_app.gd"', self.gato)
+        self.assertIn('extends "res://guion/dia_trabajillos_app.gd"', self.gato)
+        self.assertIn('extends "res://guion/dia_alquiler_app.gd"', self.trabajillos)
         self.assertIn('espacio.get("salidas", [])', self.gato)
         self.assertIn('_salida_guia = _objetivos_espacio[0].get("pos", _entrada_guia)', self.gato)
         self.assertIn("_hay_rumbo_guia = true", self.gato)

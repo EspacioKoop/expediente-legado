@@ -3,7 +3,7 @@
 ## Conserva la herencia histórica directa desde alquiler y compone aquí el
 ## primer vertical de objetivos oníricos (#299), evitando alterar el contrato
 ## estructural comprobado por las regresiones existentes.
-extends "res://guion/dia_alquiler_app.gd"
+extends "res://guion/dia_trabajillos_app.gd"
 
 const TAM_OBJETIVO := Vector3(2.8, 2.4, 2.8)
 const DEMORA_RESOLUCION := 0.35

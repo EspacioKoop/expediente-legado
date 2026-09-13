@@ -4,6 +4,7 @@ import unittest
 
 RAIZ = Path(__file__).resolve().parents[1]
 CAPA = RAIZ / "godot" / "guion" / "dia_alquiler_app.gd"
+CAPA_TRABAJILLOS = RAIZ / "godot" / "guion" / "dia_trabajillos_app.gd"
 CAPA_GATO = RAIZ / "godot" / "guion" / "dia_gato_app.gd"
 CAPA_ONBOARDING = RAIZ / "godot" / "guion" / "dia_onboarding_app.gd"
 CAPA_CLIMA = RAIZ / "godot" / "guion" / "dia_clima_app.gd"
@@ -13,6 +14,7 @@ ESCENA_DIA = RAIZ / "godot" / "escenas" / "dia.tscn"
 class VentanillaAlquilerTest(unittest.TestCase):
     def setUp(self):
         self.capa = CAPA.read_text(encoding="utf-8")
+        self.capa_trabajillos = CAPA_TRABAJILLOS.read_text(encoding="utf-8")
         self.capa_gato = CAPA_GATO.read_text(encoding="utf-8")
         self.capa_onboarding = CAPA_ONBOARDING.read_text(encoding="utf-8")
         self.capa_clima = CAPA_CLIMA.read_text(encoding="utf-8")
@@ -24,7 +26,8 @@ class VentanillaAlquilerTest(unittest.TestCase):
         calle = (RAIZ / "godot/guion/dia_calle_app.gd").read_text(encoding="utf-8")
         self.assertIn('extends "res://guion/dia_onboarding_app.gd"', calle)
         self.assertIn('extends "res://guion/dia_gato_app.gd"', self.capa_onboarding)
-        self.assertIn('extends "res://guion/dia_alquiler_app.gd"', self.capa_gato)
+        self.assertIn('extends "res://guion/dia_trabajillos_app.gd"', self.capa_gato)
+        self.assertIn('extends "res://guion/dia_alquiler_app.gd"', self.capa_trabajillos)
         self.assertIn('extends "res://guion/dia_ascensor_app.gd"', self.capa)
 
     def test_solo_aparece_en_el_trayecto_del_vencimiento(self):
@@ -49,6 +52,13 @@ class VentanillaAlquilerTest(unittest.TestCase):
         self.assertNotIn('_entrar_en("alquiler")', self.capa)
         self.assertIn("_pagar_alquiler()", self.capa)
         self.assertIn("super._al_pisar_salida(cuerpo, salida)", self.capa)
+
+    def test_trabajillo_solo_aparece_con_vivienda_y_reduce_sueno(self):
+        self.assertIn('fase != "casa" or _vivienda() != "casa"', self.capa_trabajillos)
+        self.assertIn('"destino": DESTINO_TRABAJILLO', self.capa_trabajillos)
+        self.assertIn("Trabajillos.hacer_transcripcion(jornada)", self.capa_trabajillos)
+        self.assertIn("Trabajillos.escenas_de_sueno", self.capa_trabajillos)
+        self.assertIn('opciones["cantidad"] = mini(', self.capa_trabajillos)
 
 
 if __name__ == "__main__":
