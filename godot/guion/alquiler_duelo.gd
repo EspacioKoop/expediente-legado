@@ -60,9 +60,7 @@ func _al_jugar(tipo: String) -> void:
 	if not ronda["revelada"].is_empty():
 		_cronica.text += "\n" + tr("VENTANILLA_ADELANTA") % ronda["revelada"]
 	_replica.text = (
-		tr("CAREO_REPLICA") % tr(ronda["replica"])
-		if not ronda["replica"].is_empty()
-		else ""
+		tr("CAREO_REPLICA") % tr(ronda["replica"]) if not ronda["replica"].is_empty() else ""
 	)
 	_pintar_habilidades()
 	_actualizar_marcador()
