@@ -14,7 +14,9 @@ class OnboardingArchivoTest(unittest.TestCase):
         cls.escena = ESCENA.read_text(encoding="utf-8")
 
     def test_la_escena_activa_una_capa_fina_sobre_el_dia_existente(self):
-        self.assertIn('res://guion/dia_onboarding_app.gd', self.escena)
+        self.assertIn('path="res://guion/dia_calle_app.gd"', self.escena)
+        calle = (ROOT / "godot/guion/dia_calle_app.gd").read_text(encoding="utf-8")
+        self.assertIn('extends "res://guion/dia_onboarding_app.gd"', calle)
         self.assertIn('extends "res://guion/dia_gato_app.gd"', self.capa)
 
     def test_el_onboarding_se_limita_al_primer_arranque_sin_lecturas(self):

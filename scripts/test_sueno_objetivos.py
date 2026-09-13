@@ -42,7 +42,9 @@ class SuenoObjetivosTest(unittest.TestCase):
         self.assertIn("_hay_rumbo_guia = true", self.gato)
 
     def test_la_escena_conserva_la_capa_raiz_del_gato(self):
-        self.assertIn('path="res://guion/dia_onboarding_app.gd"', self.escena)
+        self.assertIn('path="res://guion/dia_calle_app.gd"', self.escena)
+        calle = (ROOT / "godot/guion/dia_calle_app.gd").read_text(encoding="utf-8")
+        self.assertIn('extends "res://guion/dia_onboarding_app.gd"', calle)
         self.assertIn('extends "res://guion/dia_gato_app.gd"', self.onboarding)
 
 
