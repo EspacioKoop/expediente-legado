@@ -39,6 +39,7 @@ func _entrar_en(fase: String) -> void:
 	super._entrar_en(fase)
 	if fase == "archivo":
 		_montar_terminal_interactivo()
+		_montar_archivadores_interactivos(_espacio_de(fase))
 	# La niebla cambia el fondo global del Environment. Cada entrada restaura el
 	# valor base antes de decidir si este espacio recibe tiempo exterior.
 	_ambiente.background_color = FONDO_BASE
@@ -76,6 +77,21 @@ func _montar_terminal_interactivo() -> void:
 	forma.size = TAM_TERMINAL_INTERACTIVO
 	colision.shape = forma
 	terminal.add_child(colision)
+
+
+## Añade intención a los archivadores ya declarados y modelados. No crea un
+## inventario ni documentos: el catálogo sigue siendo dueño de qué muebles hay.
+func _montar_archivadores_interactivos(espacio: Dictionary) -> void:
+	var indice := 0
+	for bulto in espacio.get("bultos", []):
+		if String(bulto.get("modelo", "")) != "bookcaseClosed":
+			continue
+		indice += 1
+		var archivador := ArchivadorInteractivo3D.new()
+		archivador.name = "ArchivadorInteractuable%d" % indice
+		archivador.position = bulto["pos"]
+		_mundo.add_child(archivador)
+		archivador.configurar(bulto["tam"])
 
 
 func _activar_terminal_siga(_actor: Node) -> void:

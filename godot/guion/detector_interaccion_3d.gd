@@ -34,6 +34,7 @@ func _unhandled_input(evento: InputEvent) -> void:
 	if _objetivo == null or not evento.is_action_pressed("interactuar"):
 		return
 	if _objetivo.interactuar(get_parent()):
+		objetivo_cambiado.emit(_objetivo, _objetivo.texto_accion())
 		get_viewport().set_input_as_handled()
 
 
