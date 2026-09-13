@@ -29,7 +29,9 @@ static func todo(comprobar: Callable) -> void:
 	Jornada.anotar_lectura(lectura, "DOC-B")
 	var acciones_tras_dos: int = lectura["acciones"]
 	comprobar.call("releer sigue permitido", Jornada.gastar_lectura(lectura, "DOC-A"), true)
-	comprobar.call("releer no vuelve a gastar", lectura["acciones"], acciones_tras_dos)
+	comprobar.call(
+		"releer no vuelve a gastar", lectura["acciones"], acciones_tras_dos
+	)
 
 	# Benchmark de #83: 32 documentos + 8 firmas = 40 operaciones. En diez días
 	# hay 30 acciones pagadas y 10 lecturas gratuitas, pero el día diez UNA de
@@ -116,3 +118,68 @@ static func todo(comprobar: Callable) -> void:
 	comprobar.call("el impago no crea deuda negativa", impago["dinero"] >= 0, true)
 	comprobar.call("el impago se registra una sola vez", impago["alquiler"]["impagos"], 1)
 	comprobar.call("la vivienda no cobra automáticamente", impago["alquiler"]["pagados"], 0)
+
+	# --- Trabajillos de casa (#94) -------------------------------------------
+	var trabajo := Jornada.nueva()
+	trabajo["fase"] = "casa"
+	var saldo_trabajo: int = trabajo["dinero"]
+	var acciones_trabajo: int = trabajo["acciones"]
+	var cobro := Trabajillos.hacer_transcripcion(trabajo)
+	comprobar.call("la transcripción paga veinte", cobro["importe"], 20)
+	comprobar.call(
+		"el trabajillo suma dinero",
+		trabajo["dinero"],
+		saldo_trabajo + Trabajillos.PAGO_TRANSCRIPCION
+	)
+	comprobar.call(
+		"el trabajillo no consume acciones del archivo", trabajo["acciones"], acciones_trabajo
+	)
+	var tras_cobro: int = trabajo["dinero"]
+	comprobar.call(
+		"el trabajillo solo se cobra una vez por noche",
+		Trabajillos.hacer_transcripcion(trabajo),
+		{}
+	)
+	comprobar.call("repetir no imprime dinero", trabajo["dinero"], tras_cobro)
+	comprobar.call(
+		"trabajar recorta una escena del sueño",
+		Trabajillos.escenas_de_sueno(trabajo, Sueno.ESCENAS_POR_NOCHE),
+		Sueno.ESCENAS_POR_NOCHE - 1
+	)
+
+	# Antes del primer alquiler solo caben nueve noches de trabajo: el día diez
+	# se paga en el trayecto, antes de llegar a casa. Incluso haciendo todos los
+	# lotes, el salario base sin cerrar expedientes no alcanza los 700.
+	var saldo_sin_cierres_con_trabajillos := (
+		120
+		+ Jornada.BASE_DIARIA * Jornada.DIAS_POR_MES
+		+ Trabajillos.PAGO_TRANSCRIPCION * (Jornada.DIAS_POR_MES - 1)
+		- Jornada.COSTE_DIARIO * (Jornada.DIAS_POR_MES - 1)
+	)
+	comprobar.call(
+		"los trabajillos no sustituyen resolver expedientes para pagar alquiler",
+		saldo_sin_cierres_con_trabajillos < Jornada.PRECIO_ALQUILER,
+		true
+	)
+
+	# La capa visual compone el coste con #84: con vivienda 3 -> 2; si se ha
+	# perdido la casa, sigue mandando la degradación más severa de una escena y
+	# el lote de transcripción ni siquiera aparece en el refugio.
+	var capa = load("res://guion/dia_trabajillos_app.gd").new()
+	capa.jornada = trabajo
+	comprobar.call("la capa aplica sueño de dos escenas", capa._opciones_sueno()["cantidad"], 2)
+	var casa := capa._espacio_de("casa")
+	comprobar.call(
+		"la casa ofrece la transcripción",
+		casa["salidas"].any(func(s): return s.get("destino", "") == "trabajillo"),
+		true
+	)
+	trabajo["alquiler"]["impagos"] = 1
+	comprobar.call("sin vivienda el sueño sigue en una escena", capa._opciones_sueno()["cantidad"], 1)
+	var refugio := capa._espacio_de("casa")
+	comprobar.call(
+		"sin vivienda no aparece el trabajillo",
+		refugio["salidas"].any(func(s): return s.get("destino", "") == "trabajillo"),
+		false
+	)
+	capa.free()
