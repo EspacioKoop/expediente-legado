@@ -22,10 +22,7 @@ static func _montar_mesita(raiz: Node3D, pos: Vector3) -> void:
 	for x in [-0.31, 0.31]:
 		for z in [-0.21, 0.21]:
 			_agregar_caja(
-				mesa,
-				Vector3(x, 0.28, z),
-				Vector3(0.10, 0.56, 0.10),
-				Color(0.27, 0.19, 0.14)
+				mesa, Vector3(x, 0.28, z), Vector3(0.10, 0.56, 0.10), Color(0.27, 0.19, 0.14)
 			)
 
 
@@ -55,9 +52,7 @@ static func _agregar_pantalla(raiz: Node3D, pos: Vector3) -> void:
 	raiz.add_child(malla)
 
 
-static func _agregar_caja(
-	raiz: Node3D, pos: Vector3, tam: Vector3, color: Color
-) -> void:
+static func _agregar_caja(raiz: Node3D, pos: Vector3, tam: Vector3, color: Color) -> void:
 	var malla := MeshInstance3D.new()
 	var caja := BoxMesh.new()
 	caja.size = tam
