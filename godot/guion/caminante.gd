@@ -10,6 +10,7 @@ const ACELERACION := 10.0
 const FRENADO := 14.0
 const SENSIBILIDAD_RATON_BASE := 0.0022
 const VOLUMEN_PISADA_DB := -8.0
+const GRUPO_CAMARA := "caminante_camara"
 
 const MOVER_IZQUIERDA := "mover_izquierda"
 const MOVER_DERECHA := "mover_derecha"
@@ -36,7 +37,8 @@ var _preferencias_camara: Dictionary = {}
 
 
 func _ready() -> void:
-	_preferencias_camara = PreferenciasSiga.cargar()
+	add_to_group(GRUPO_CAMARA)
+	recargar_preferencias_camara()
 	_asegurar_controles_movimiento()
 	_montar_interaccion()
 	# `Dia` añade el reproductor 3D de pasos justo después de meter el caminante
@@ -44,6 +46,10 @@ func _ready() -> void:
 	# los produce, sin crear un bus global que también bajaría puertas o voces.
 	call_deferred("_ajustar_volumen_pisadas")
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+
+func recargar_preferencias_camara() -> void:
+	_preferencias_camara = PreferenciasSiga.cargar()
 
 
 func _montar_interaccion() -> void:
@@ -111,6 +117,13 @@ func _ajustar_volumen_pisadas() -> void:
 
 
 func _unhandled_input(evento: InputEvent) -> void:
+	# El menú global es el único dueño de `cancelar`: al abrirlo libera el ratón y
+	# al cerrarlo restaura el modo anterior. Si el sistema operativo lo soltó por
+	# otro motivo, un clic dentro del juego recupera la captura sin otra tecla.
+	if evento is InputEventMouseButton and evento.pressed:
+		if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED and not get_tree().paused:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		return
 	if not evento is InputEventMouseMotion or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		return
 	var sensibilidad := SENSIBILIDAD_RATON_BASE * _sensibilidad_raton()
