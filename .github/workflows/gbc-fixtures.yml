@@ -8,6 +8,7 @@ on:
       - "scripts/test_gbc_fixture_workflow.py"
       - "docs/gbc-fixtures.md"
       - "gbc/minijuegos/caza_pixeles_98/**"
+      - "gbc/minijuegos/paper_planes_98/**"
 
 permissions:
   contents: read
@@ -20,7 +21,7 @@ env:
 
 jobs:
   build-fixtures:
-    name: Build GBC fixtures and Caza Pixeles 98
+    name: Build GBC fixtures and SIGA-98 ROMs
     runs-on: ubuntu-latest
     steps:
       - name: Checkout SIGA-98
@@ -75,13 +76,20 @@ jobs:
           make -C gbc/minijuegos/caza_pixeles_98
           cp gbc/minijuegos/caza_pixeles_98/build/caza_pixeles_98.gbc gbc-fixtures/
 
+      - name: Build Paper Planes 98
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C gbc/minijuegos/paper_planes_98
+          cp gbc/minijuegos/paper_planes_98/build/paper_planes_98.gbc gbc-fixtures/
+
       - name: Hash and inspect ROM headers
         shell: bash
         run: |
           set -euo pipefail
           (
             cd gbc-fixtures
-            sha256sum joypad.gb vblank.gb caza_pixeles_98.gbc | tee SHA256SUMS
+            sha256sum joypad.gb vblank.gb caza_pixeles_98.gbc paper_planes_98.gbc | tee SHA256SUMS
           )
           for rom in gbc-fixtures/*.gb gbc-fixtures/*.gbc; do
             test -s "$rom"
@@ -89,7 +97,9 @@ jobs:
             test "$size" -ge 32768
             printf '%s: %s bytes\n' "$rom" "$size"
           done
-          test "$(od -An -tx1 -j 323 -N 1 gbc-fixtures/caza_pixeles_98.gbc | tr -d ' \n')" = "80"
+          for rom in gbc-fixtures/caza_pixeles_98.gbc gbc-fixtures/paper_planes_98.gbc; do
+            test "$(od -An -tx1 -j 323 -N 1 "$rom" | tr -d ' \n')" = "80"
+          done
 
       - name: Upload ephemeral GBC ROMs
         uses: actions/upload-artifact@v4
@@ -99,6 +109,7 @@ jobs:
             gbc-fixtures/joypad.gb
             gbc-fixtures/vblank.gb
             gbc-fixtures/caza_pixeles_98.gbc
+            gbc-fixtures/paper_planes_98.gbc
             gbc-fixtures/SHA256SUMS
           if-no-files-found: error
           retention-days: 7
