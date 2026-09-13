@@ -81,17 +81,20 @@ static func configuracion(estado_presentacion: Dictionary = {}) -> Dictionary:
 		"entrada": familia.get("entrada", Vector3.ZERO),
 		"anclas": anclas,
 		"seleccion": SELECCION_MINIMA.duplicate(true),
-		"anomalias": {
-			# Al volver al mismo patio, la composición se presenta invertida. La
+		"anomalias":
+		# Al volver al mismo patio, la composición se presenta invertida. La
+		{
 			# geometría base es la misma: cambia la lectura, no la navegación.
-			"retorno_patio": {
+			"retorno_patio":
+			{
 				"activa": vuelta > 0,
 				"giro_grados": 180.0 if vuelta % 2 == 1 else 0.0,
 			},
 			# El códice cambia entre anclas conocidas de forma determinista. No
 			# crea una pista: solo mueve la representación de un documento que el
 			# llamador ya haya autorizado a mostrar.
-			"codice_desplazado": {
+			"codice_desplazado":
+			{
 				"activa": not anclas.is_empty(),
 				"ancla": anclas[indice_codice] if not anclas.is_empty() else Vector3.ZERO,
 			},
