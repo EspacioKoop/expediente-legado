@@ -1,191 +1,143 @@
 # SIGA-98 · Expediente Legado
 
-Videojuego de investigación y horror burocrático: el jugador es un auditor que
-accede a un backup restaurado de **SIGA**, un sistema de administración de
-finales de los 90, para resolver ocho casos escondidos en facturas, memorandos
-y expedientes de empleados. Detrás del sistema "roto" hay una segunda capa
-(**Prometeo**) con logros, un tarot coleccionable, dificultad, un sistema de
-vidas y varios finales.
+Videojuego de investigación y horror burocrático ambientado alrededor de **SIGA**, un sistema de administración de finales de los 90. El jugador trabaja expedientes, relaciona documentos, atraviesa el ciclo oficina → trayecto → casa → sueño y descubre una segunda capa, **Prometeo**, sin que la investigación se reduzca a una lista automática de respuestas.
+
+El proyecto nació como aplicación web con Spring Boot y se está reescribiendo en **Godot 4** para distribuirlo sin servidor. El backend sigue siendo referencia histórica y ejecutable; `godot/` es el frente principal de desarrollo del juego.
 
 ## Cómo orientarse
 
 | Dónde | Qué responde |
 | --- | --- |
-| [ROADMAP.md](ROADMAP.md) | Las fases hasta la 1.0, y qué hay en cada versión |
-| [Plan maestro #181](https://github.com/EspacioKoop/expediente-legado/issues/181) | Qué va primero, ahora mismo |
+| [Plan maestro #181](https://github.com/EspacioKoop/expediente-legado/issues/181) | Qué va primero ahora mismo |
 | [Registro de reservas #182](https://github.com/EspacioKoop/expediente-legado/issues/182) | Quién está tocando qué |
-| [AGENTS.md](AGENTS.md) | Cómo trabaja aquí un agente, y las trampas conocidas |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Ramas, gates y revisión |
-| [Milestones](https://github.com/EspacioKoop/expediente-legado/milestones) | Qué falta para la siguiente versión |
-| [Releases](https://github.com/EspacioKoop/expediente-legado/releases) | Qué se puede jugar ya |
+| [ROADMAP.md](ROADMAP.md) | Fases y dirección hasta la 1.0 |
+| [AGENTS.md](AGENTS.md) | Flujo obligatorio para agentes y trampas conocidas |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Ramas, PR, pruebas y revisión |
+| [Auditoría de paridad SIGA](docs/paridad-expedientes.md) | Qué comportamiento del legado existe ya en Godot y qué falta |
+| [Milestones](https://github.com/EspacioKoop/expediente-legado/milestones) | Qué está comprometido para una versión |
+| [Releases](https://github.com/EspacioKoop/expediente-legado/releases) | Qué se ha publicado |
 
-Este repositorio adopta las [Normas Platino](https://github.com/EspacioKoop/normas_platino)
-para la cooperación entre agentes: se reserva antes de editar, se entrega por PR
-y **la integración siempre requiere autorización**. El detalle, en
-[AGENTS.md](AGENTS.md).
+Este repositorio adopta las [Normas Platino](https://github.com/EspacioKoop/normas_platino): **reserva antes de editar, rama propia, PR obligatorio, CI y autorización humana de integración**. El silencio no caduca una reserva y `PR_READY` no equivale a permiso para mergear.
+
+## Estado actual
+
+La referencia es siempre `main`, no una rama antigua ni un comentario histórico. Tras el primer playthrough humano (#9), el trabajo se concentra en preparar una segunda alpha que pueda recorrerse sin conocimiento del código.
+
+Ya están integrados, entre otros:
+
+- **sueño por objetivos**: 3 objetivos posibles, 2 requeridos, feedback desde 0/2, resolución automática e idempotencia (#281, #301, #308, #313);
+- **investigación SIGA más profunda**: combinación manual de folios, marcadores, metadatos, feedback explícito y anexos examinables (#286, #289, #309, #318, #320, #321, #323); la auditoría legado → Godot vive en [`docs/paridad-expedientes.md`](docs/paridad-expedientes.md);
+- **menú y controles**: menú global, pausa, foco, preferencias y remapeo visual de teclado/mando (#113, #306, #335); queda validación con mando físico y de presentación;
+- **interacción 3D común**: detector contextual, terminal SIGA y archivadores reales ya usan el mismo contrato (#283, #307, #341, #345, #348);
+- **trayecto exterior**: composición de calle/escaparate y corrección del hook a la fase real `trayecto` (#277, #314, #331, #337);
+- **presentación P1**: rostros 3D low-poly (#275/#310), diálogo diegético (#276/#317/#338) y asistente-gato 2D abajo a la derecha (#285/#315);
+- **ciclo doméstico**: economía base calibrada (#83), alquiler/impago funcional y pérdida de lo almacenado en casa al quedarse sin vivienda (#84/#85/#333);
+- **audio**: `Sonido` para efectos y `Musica` para momentos dramáticos están separados; el ambiente continuo se desarrolla en #119.
+
+Siguen siendo gates humanos, no motivos para reescribir sistemas a ciegas: #271 (partida nueva/continuar), #272 (onboarding), #273 (tacto/volumen de pasos), #280 (cinemáticas en export), #281 (comprensión del sueño) y #113 (mando físico).
+
+La prioridad exacta y el punto de control viven en [#181](https://github.com/EspacioKoop/expediente-legado/issues/181).
 
 ## Stack
 
-- **Backend:** Spring Boot 3 (Java 25) + Spring Data JPA + Spring Security + Thymeleaf
-- **Base de datos:** MySQL 8 (desarrollo) / H2 embebido (build standalone alpha)
-- **Frontend:** Bootstrap 5 (vía webjars) con hojas de estilo propias: una que
-  imita un programa de escritorio de los 90 (SIGA-98) y otra moderna (Prometeo)
-- **Docker:** `docker-compose.yml` con MySQL, backend y Adminer (gestor web de BD)
-- **Calidad:** JUnit 5 (fakes por `Proxy`, sin Mockito), Vitest para la lógica
-  JS pura, Playwright para E2E de navegador real, Checkstyle + PMD + SpotBugs
+- **Juego vivo:** Godot 4.7, GDScript, renderer de compatibilidad y pruebas headless.
+- **Backend legado:** Spring Boot 3, Java 25, Spring Data JPA, Spring Security y Thymeleaf.
+- **Web legado:** Bootstrap 5, Vitest y Playwright.
+- **Datos:** JSON/CSV en `godot/datos/`; MySQL 8 en desarrollo web y H2 para el standalone web.
+- **Calidad:** suite Godot + recorrido real + arranque, unittest Python de regresión, `gdlint`, `gdformat`, JUnit, Checkstyle, PMD, SpotBugs y Vitest.
 
 ## Estructura
 
-```
+```text
 .
-├── docker-compose.yml
-├── .env                        # credenciales de desarrollo (no usar en producción)
-├── dist/                       # empaquetado del build alpha standalone
-│   └── empaquetar-alpha.sh
-├── backend/
-│   ├── Dockerfile
-│   ├── pom.xml
-│   └── src/main/java/com/legado/expediente/
-│       ├── config/             # seguridad + datos semilla + build standalone
-│       ├── model/              # Usuario, Caso, RegistroLegado, Pista, Concepto...
-│       ├── repository/         # Spring Data JPA
-│       ├── service/            # progreso, hotspots, cartas ocultas, resumen
-│       └── controller/         # login, dashboard, casos, carpeta, menú
-└── godot/                      # el port a Godot 4 (#54), donde está el trabajo vivo
-    ├── datos/                  # el contenido extraído del backend, como JSON
-    ├── guion/                  # la lógica, en GDScript
+├── README.md
+├── AGENTS.md
+├── CONTRIBUTING.md
+├── ROADMAP.md
+├── docs/                       # decisiones, investigación y auditorías versionadas
+├── scripts/                    # verificadores y regresiones auxiliares
+├── backend/                    # versión web / fuente histórica
+├── dist/                       # empaquetado del standalone web legado
+└── godot/                      # juego vivo
+    ├── assets/                 # binarios y procedencia
+    ├── datos/                  # casos, textos, catálogos
+    ├── guion/                  # lógica y capas de presentación
     ├── escenas/
     └── pruebas/
 ```
 
-## El port a Godot
+## Verificar el port a Godot
 
-El juego se está reescribiendo en **Godot 4** (issue #54) para distribuirlo sin
-servidor. `godot/` no es un port mecánico del backend: el contenido salió de
-`DataSeeder.java` a `datos/casos.json`, y la lógica se rehace en GDScript con
-sus pruebas portadas una a una desde las de JUnit y Vitest.
-
-La suite se ejecuta sin abrir el editor:
+Usa el motor de la línea declarada en `.godot-version` (actualmente 4.7). Desde la raíz:
 
 ```bash
-godot4 --headless --path godot --import          # una vez, por los class_name
-godot4 --headless --path godot --script pruebas/pruebas.gd
+python3 scripts/verificar_godot.py
+python3 -m unittest discover -s scripts -p 'test_*.py'
+gdlint godot
+gdformat --check --diff godot
 ```
 
-Para verificar una entrega, usa un **Godot de la línea 4.7**, declarada en
-`.godot-version`, y ejecuta `python3 scripts/verificar_godot.py` desde la raíz.
-Vale cualquier parche de esa línea —un 4.7.2 sirve para un `4.7-stable`
-declarado—; lo que se rechaza es otra línea u otro canal, que es lo que mete
-ruido en la suite. Puedes indicar otro ejecutable con `GODOT_BIN=/ruta/a/godot`. Este comando importa
-los recursos, ejecuta la suite en español y comprueba que el juego arranca,
-con datos temporales para no tocar tu partida. Falla ante errores de guion,
-recursos rotos, bloqueos o menos comprobaciones que `godot/pruebas/minimo.txt`.
-Al añadir pruebas, actualiza ese mínimo; reducirlo requiere justificar qué
-pruebas se han retirado.
+`verificar_godot.py` importa recursos, ejecuta la suite principal, recorre escenas reales y comprueba que el juego arranca con datos temporales. `godot/pruebas/minimo.txt` protege el mínimo de comprobaciones de la suite; reducirlo requiere justificar qué prueba desaparece.
 
-También recorre las escenas reales de oficina, visor y casa: leer y levantarse
-conserva las acciones gastadas, y volver a abrir la partida conserva el lugar,
-el día, el dinero, los compañeros, el gato y los veredictos firmados. Las partidas
-anteriores al ciclo diario reciben los campos nuevos sin borrar las pistas.
+No fijamos aquí un número de comprobaciones: cambia con frecuencia y la fuente de verdad es el workflow del SHA que se quiere integrar.
 
-Las lecturas gratuitas de expedientes firmados también se registran para el
-sueño, sin gastar acciones ni descubrir pistas nuevas. Una apertura rechazada
-no cuenta como lectura. El reloj nocturno conserva una duración total fija al
-cambiar de sala y al recargar: una noche agotada no recibe tiempo nuevo.
-Las partidas sin el campo `sueno_total` conservan sus segundos y salas pendientes;
-como no guardaban el itinerario completo, su referencia visual se fija una vez
-con lo que queda, sin inventar la duración original.
-
-El recorrido aislado exige al menos 95 comprobaciones: conserva las pruebas del
-ciclo completo y la reasignación (#167) y añade 38 regresiones de lecturas, reloj
-y migración (#166). Su mínimo está en `scripts/verificar_godot.py`, separado del
-mínimo de la suite principal. Esto no sustituye el playtesting con teclado,
-mando físico ni una partida completa.
-
-El CI ejecuta esta validación en un job independiente del backend, además de
-`gdlint godot` y `gdformat --check --diff godot` con `gdtoolkit==4.3.4`.
-El formato sigue siendo obligatorio; `--diff` muestra los ajustes requeridos
-cuando falla, sin modificar los archivos ni omitir la comprobación.
-
-El `--import` no es solo por los `class_name`: también compila `datos/textos.csv`
-a la traducción que el juego carga. **Todo el texto vive en ese CSV** y el código
-solo nombra claves (`tr("VISOR_ELIJA")`); una pantalla que escriba una cadena a
-mano hace fallar la suite, que es lo que impide que esto se deshaga solo. El
-texto de los ocho casos sigue en `datos/casos.json` y todavía no está traducido.
-
-## Estado, sin adornos
-
-`main` tiene la suite en **464 comprobaciones** y el recorrido en **95**, ambos
-sin fallos, con `gdlint` y `gdformat` limpios. Eso es validación automática:
-**no hay playtesting humano con mando ni una partida completa jugada de
-principio a fin** (#9). Ninguna afirmación de este README va más allá de esa
-evidencia.
-
-Las cinemáticas se están haciendo en **2D de forma provisional**. El objetivo es
-que acaben siendo 3D, pero no se rehacen sobre la marcha: primero se cierra la
-primera versión completa. Por eso todas se declaran en el formato común de
-`Cinematica`, que ya despacha `3d` y `2d`. Ver [ROADMAP.md](ROADMAP.md).
-
-## Clonar
-
-Los binarios del juego —texturas, mallas, tipografías— van por **Git LFS**, así
-que hace falta tenerlo antes de clonar:
+El CI también ejecuta, desde `backend/`:
 
 ```bash
-git lfs install          # una vez por máquina
+mvn test
+mvn checkstyle:check pmd:check spotbugs:check
+npm test
+```
+
+Una CI verde prueba lo automatizado. **No sustituye** una partida completa, la lectura visual, el mando físico ni el comportamiento de una exportación real.
+
+## Arquitectura del port
+
+El contenido salió del `DataSeeder` y del legado web hacia datos versionados; la lógica se rehace como contratos pequeños y capas de Godot, con regresiones antes de integrarlos en escenas compartidas.
+
+Convenciones importantes:
+
+- las fases de `Jornada` usan nombres canónicos; la calle real es `trayecto`, no `calle`;
+- la entrada se expresa mediante acciones semánticas (`interactuar`, `cancelar`, movimiento), no teclas hardcodeadas;
+- `Partida` persiste estado, pero no es el bus de comunicación entre pantallas;
+- el texto de interfaz/guion vive en `godot/datos/textos.csv`; el catálogo de casos sigue en JSON;
+- `Sonido`, `Musica` y el ambiente continuo son responsabilidades separadas;
+- el sueño normal progresa por objetivos, no por encontrar una salida física invisible;
+- las mecánicas de investigación no deben inventar hechos: relaciones, anexos y recompensas oníricas consumen datos ya catalogados.
+
+## Assets y Git LFS
+
+Texturas, mallas, tipografías, sonido y vídeo que entren como binarios siguen las reglas de `.gitattributes` y `godot/assets/procedencia.json`. Cada asset distribuible debe declarar autor, fuente, licencia compatible y `sha256`.
+
+```bash
+git lfs install
 git clone https://github.com/EspacioKoop/expediente-legado.git
 ```
 
-Si ya clonaste sin él: `git lfs install && git lfs pull`. Sin LFS te quedan
-punteros de texto donde debería haber assets, y Godot falla al importar sin
-mencionar LFS por ningún lado.
+Si ya clonaste sin LFS: `git lfs install && git lfs pull`.
 
-## Cómo levantarlo (desarrollo)
+No añadas un puntero LFS mediante una API de contenidos si el objeto binario no ha sido subido al almacén LFS: el repositorio quedaría apuntando a un objeto inexistente.
+
+## Cómo levantar la versión web legado
 
 ```bash
-cp .env.example .env   # solo la primera vez
+cp .env.example .env
 docker compose up --build
 ```
 
-- App: http://localhost:1998 (usuario demo `auditor01` / `auditor-local-123`)
-- Adminer: http://localhost:1999 (sistema: MySQL, servidor: `mysql`, usuario/clave según `.env`)
+- App: http://localhost:1998
+- Adminer: http://localhost:1999
 
-Al arrancar por primera vez, `DataSeeder` siembra los usuarios demo y los ocho
-casos completos (registros, pistas, sospechosos y el corcho de conceptos).
+Las credenciales de demostración y desarrollo viven en la configuración del proyecto; no copies secretos reales a documentación, PR, logs ni capturas.
 
-## Build alpha standalone (para betatesters)
-
-Genera dos zips autocontenidos (Windows x64 y Linux x64) con el jar, un JRE
-Temurin 25 y un lanzador — sin Docker, sin MySQL, sin instalar nada:
+## Build standalone del legado web
 
 ```bash
 bash dist/empaquetar-alpha.sh
 ```
 
-Los zips salen en `dist/salida/`. Usan el perfil Spring `standalone` (H2 en
-fichero, en `./data/` junto al lanzador) y abren el navegador solos al
-arrancar. Las instrucciones para el tester van dentro (`LEEME.txt`).
-
-## Tests y calidad
-
-Desde `backend/` (o vía la imagen `maven:3.9-eclipse-temurin-25` si el Maven
-local no es Java 25):
-
-```bash
-mvn test                                              # unitarios
-mvn checkstyle:check pmd:check spotbugs:check         # gates de calidad
-npm test                                              # Vitest (lógica JS pura)
-mvn test -Dtest=AutenticacionE2E,ModalesFocoE2E,MapaConexionesE2E \
-    -De2e.baseUrl=http://localhost:1998               # E2E (app ya levantada)
-```
+Genera paquetes autocontenidos del backend web en `dist/salida/`. Esto es independiente de la exportación del port Godot, cuyo seguimiento vive en los issues de distribución del roadmap.
 
 ## Licencia
 
-**MIT** (ver [`LICENSE`](LICENSE)): código, textos y datos de este repositorio.
-Cualquiera puede cogerlo, modificarlo y venderlo, incluido cerrar su copia — es
-lo que la MIT permite y se eligió a sabiendas.
-
-Lo que **no** cubre es el material de terceros bajo `godot/assets/`, que
-conserva la licencia con la que llegó: cada fichero declara la suya en
-`assets/procedencia.json` con su autor, su fuente y su sha256, y hay una prueba
-que falla si un asset no tiene ficha o una ficha no tiene asset.
+**MIT** para el código, textos y datos propios del repositorio (ver [`LICENSE`](LICENSE)). El material de terceros bajo `godot/assets/` conserva su licencia individual y debe estar inventariado en `godot/assets/procedencia.json`.
