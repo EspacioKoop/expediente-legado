@@ -197,18 +197,18 @@ func _opciones_contenido(caja: VBoxContainer) -> void:
 func _montar_preferencias_camara(caja: VBoxContainer) -> void:
 	_sensibilidad_raton = _slider_preferencia(
 		caja,
-		"Sensibilidad de ratón",
+		tr("MENU_GLOBAL_SENSIBILIDAD_RATON"),
 		float(_preferencias.get("sensibilidad_camara_raton", 1.0)),
 		_al_cambiar_sensibilidad_raton
 	)
 	_sensibilidad_mando = _slider_preferencia(
 		caja,
-		"Sensibilidad de stick derecho",
+		tr("MENU_GLOBAL_SENSIBILIDAD_MANDO"),
 		float(_preferencias.get("sensibilidad_camara_mando", 1.0)),
 		_al_cambiar_sensibilidad_mando
 	)
 	_invertir_y = CheckButton.new()
-	_invertir_y.text = "Invertir eje Y de cámara"
+	_invertir_y.text = tr("MENU_GLOBAL_INVERTIR_CAMARA_Y")
 	_invertir_y.button_pressed = bool(_preferencias.get("invertir_camara_y", false))
 	_invertir_y.toggled.connect(_al_cambiar_invertir_y)
 	caja.add_child(_invertir_y)
