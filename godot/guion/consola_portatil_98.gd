@@ -1,14 +1,14 @@
 ## Portátil original de 1998 para la casa (#124/#133).
 ##
-## Se inspira en las consolas portátiles de la época sin copiar logos, marcas ni
-## assets propietarios. Este corte aporta carcasa, pantalla, cruceta, botones y
-## el punto de integración con `CatalogoRomsUsuario`; todavía no emula ROMs.
+## La carcasa es propia y no copia logos ni assets propietarios. Al usarla abre
+## una superficie aislada que puede ejecutar ROMs compatibles mediante Siga98GB.
 class_name ConsolaPortatil98
 extends Interactuable3D
 
 var _encendida := false
 var _material_pantalla: StandardMaterial3D
 var _roms_detectadas: Array[Dictionary] = []
+var _app: EmuladorPortatilApp = null
 
 
 func configurar() -> void:
@@ -33,10 +33,22 @@ func roms_disponibles() -> Array[Dictionary]:
 
 
 func _alternar(_actor: Node) -> void:
-	_encendida = not _encendida
 	if _encendida:
-		CatalogoRomsUsuario.asegurar_carpeta()
-		_roms_detectadas = CatalogoRomsUsuario.listar()
+		return
+	_encendida = true
+	CatalogoRomsUsuario.asegurar_carpeta()
+	_roms_detectadas = CatalogoRomsUsuario.listar()
+	_actualizar_pantalla()
+
+	_app = EmuladorPortatilApp.new()
+	_app.cerrado.connect(_al_cerrar_app)
+	get_tree().root.add_child(_app)
+	_app.abrir()
+
+
+func _al_cerrar_app() -> void:
+	_encendida = false
+	_app = null
 	_actualizar_pantalla()
 
 

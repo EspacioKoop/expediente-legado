@@ -6,6 +6,8 @@ on:
     paths:
       - '.github/workflows/alpha-playtest.yml'
       - 'godot/**'
+      - 'gbc/minijuegos/caza_pixeles_98/**'
+      - 'scripts/preparar_emulador_gb.sh'
       - 'dist/exportar-godot-alpha.sh'
       - '.godot-version'
   workflow_dispatch:
@@ -14,13 +16,62 @@ permissions:
   contents: read
 
 jobs:
+  native-gb-windows:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compilar núcleo GB para Windows
+        shell: bash
+        run: bash scripts/preparar_emulador_gb.sh windows-release
+      - name: Adjuntar DLL del núcleo GB
+        uses: actions/upload-artifact@v4
+        with:
+          name: siga98-gb-windows-${{ github.sha }}
+          path: godot/addons/siga98_gb/bin/windows/*.dll
+          if-no-files-found: error
+          retention-days: 1
+
   export-alpha:
+    needs: native-gb-windows
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
           lfs: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Recuperar núcleo GB de Windows
+        uses: actions/download-artifact@v4
+        with:
+          name: siga98-gb-windows-${{ github.sha }}
+          path: godot/addons/siga98_gb/bin/windows
+
+      - name: Instalar RGBDS fijado
+        shell: bash
+        env:
+          RGBDS_VERSION: v1.0.3
+          RGBDS_SHA256: 280a52061a0c516999bee75ac357628d6d50784309e0486cef25f7460e6f330b
+        run: |
+          set -euo pipefail
+          url="https://github.com/gbdev/rgbds/releases/download/${RGBDS_VERSION}/rgbds-linux-x86_64.tar.xz"
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/rgbds.tar.xz" "$url"
+          echo "${RGBDS_SHA256}  $RUNNER_TEMP/rgbds.tar.xz" | sha256sum --check --strict
+          mkdir "$RUNNER_TEMP/rgbds"
+          tar -xJf "$RUNNER_TEMP/rgbds.tar.xz" -C "$RUNNER_TEMP/rgbds"
+          (cd "$RUNNER_TEMP/rgbds" && sudo ./install.sh)
+
+      - name: Compilar núcleo GB Linux y ROM propia
+        shell: bash
+        run: |
+          bash scripts/preparar_emulador_gb.sh linux-all
+          bash scripts/preparar_emulador_gb.sh rom
 
       - name: Instalar Godot y Export Templates declarados por el proyecto
         shell: bash
@@ -49,6 +100,12 @@ jobs:
           mkdir -p "$template_dir"
           unzip -q "$plantillas" -d "$RUNNER_TEMP/export-templates"
           cp -a "$RUNNER_TEMP/export-templates/templates/." "$template_dir/"
+
+      - name: Importar proyecto antes del smoke
+        run: godot4 --headless --editor --path godot --quit
+
+      - name: Smoke de Caza Píxeles 98 antes de exportar
+        run: godot4 --headless --path godot --script res://pruebas/emulador_gb_smoke.gd
 
       - name: Exportar alpha Linux y Windows
         env:
