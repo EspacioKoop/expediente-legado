@@ -16,11 +16,12 @@ class DialogoDiegeticoTest(unittest.TestCase):
         self.assertNotIn("Companeros.frase_de", self.source)
         self.assertNotIn("textos.csv", self.source)
 
-    def test_atribuye_al_rotulo_3d_mas_cercano(self):
-        self.assertIn("_hablante_mas_cercano", self.source)
-        self.assertIn("Label3D", self.source)
-        self.assertIn("DISTANCIA_HABLANTE_MAX := 2.8", self.source)
-        self.assertIn("global_position.distance_to(posicion)", self.source)
+    def test_atribuye_al_npc_interactuado_y_no_a_un_vecino(self):
+        self.assertIn("companero: CompaneroInteractivo3D", self.source)
+        self.assertIn("companero.nombre_visible", self.source)
+        self.assertIn("companero.global_position", self.source)
+        self.assertNotIn("_hablante_mas_cercano", self.source)
+        self.assertNotIn("DISTANCIA_HABLANTE_MAX", self.source)
 
     def test_subtitulo_inferior_y_direccion_discreta(self):
         self.assertIn("Control.PRESET_CENTER_BOTTOM", self.source)
@@ -28,6 +29,11 @@ class DialogoDiegeticoTest(unittest.TestCase):
         self.assertIn('return "◀"', self.source)
         self.assertIn('return "▲"', self.source)
         self.assertIn('panel.name = "DialogoDiegetico"', self.source)
+
+    def test_dialogo_toma_prioridad_en_hud_y_se_libera(self):
+        self.assertIn("hud.registrar(HUDLayer.DIALOGO, panel)", self.source)
+        self.assertIn("hud.activar(HUDLayer.DIALOGO)", self.source)
+        self.assertIn("hud.desactivar(HUDLayer.DIALOGO)", self.source)
 
     def test_desaparicion_automatica_y_no_bloquea(self):
         self.assertIn("const DURACION := 3.4", self.source)
