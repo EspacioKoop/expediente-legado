@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import unittest
 
 
@@ -6,6 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTROLADOR = ROOT / "godot" / "guion" / "dia_archivado_app.gd"
 DIA = ROOT / "godot" / "guion" / "dia_clima_app.gd"
 CARPETA = ROOT / "godot" / "guion" / "carpeta_archivable_3d.gd"
+TEXTOS = ROOT / "godot" / "datos" / "archivado_textos.json"
 ESCENA = ROOT / "godot" / "escenas" / "dia.tscn"
 
 
@@ -15,6 +17,7 @@ class Archivado3DTest(unittest.TestCase):
         cls.controlador = CONTROLADOR.read_text(encoding="utf-8")
         cls.dia = DIA.read_text(encoding="utf-8")
         cls.carpeta = CARPETA.read_text(encoding="utf-8")
+        cls.textos = json.loads(TEXTOS.read_text(encoding="utf-8"))
         cls.escena = ESCENA.read_text(encoding="utf-8")
 
     def test_conserva_la_raiz_historica_del_dia(self):
@@ -42,7 +45,8 @@ class Archivado3DTest(unittest.TestCase):
     def test_destino_incorrecto_no_destruye_la_carpeta(self):
         bloque = self.controlador.split("if not correcta:", 1)[1].split("\n\n", 1)[0]
         self.assertNotIn("queue_free", bloque)
-        self.assertIn("sigue en tu mano", bloque)
+        self.assertIn('_texto("destino_incorrecto")', bloque)
+        self.assertIn("sigue en tu mano", self.textos["destino_incorrecto"])
 
     def test_no_introduce_recompensas(self):
         texto = (self.controlador + self.carpeta).lower()
