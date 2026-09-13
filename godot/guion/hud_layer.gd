@@ -29,7 +29,10 @@ func registrar(tipo: StringName, control: Control) -> void:
 	if not _tipo_valido(tipo):
 		push_error("Superficie HUD desconocida: %s" % tipo)
 		return
-	_superficies[tipo] = control
+	# Las superficies transitorias (tutorial y diálogo) se liberan al terminar.
+	# Guardar una referencia fuerte deja un objeto ya destruido dentro del
+	# diccionario y Godot falla al intentar tiparlo en el siguiente refresco.
+	_superficies[tipo] = weakref(control)
 	_refrescar()
 
 
@@ -81,15 +84,20 @@ func _primaria_activa() -> StringName:
 
 
 func _refrescar() -> void:
+	var caducadas: Array[StringName] = []
 	for tipo in _superficies:
-		var control: Control = _superficies[tipo]
-		if not is_instance_valid(control):
+		var referencia: WeakRef = _superficies[tipo]
+		var control := referencia.get_ref() as Control
+		if control == null:
+			caducadas.append(tipo)
 			continue
 		var visible := debe_ser_visible(tipo)
 		if control.visible == visible:
 			continue
 		control.visible = visible
 		superficie_cambiada.emit(tipo, visible)
+	for tipo in caducadas:
+		_superficies.erase(tipo)
 
 
 func _tipo_valido(tipo: StringName) -> bool:
