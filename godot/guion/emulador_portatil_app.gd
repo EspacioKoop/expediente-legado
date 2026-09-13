@@ -11,6 +11,11 @@ const ROM_PROPIA := "res://roms/caza_pixeles_98.gbc"
 const TEXTOS := "res://datos/emulador_gb_textos.json"
 const ANCHO := 160
 const ALTO := 144
+const CICLOS_CPU_DMG := 4194304.0
+const CICLOS_POR_FRAME_DMG := 70224.0
+const FPS_EMULADOR := CICLOS_CPU_DMG / CICLOS_POR_FRAME_DMG
+const PASO_EMULADOR := 1.0 / FPS_EMULADOR
+const MAX_FRAMES_POR_TICK := 4
 
 const BTN_A := 0x01
 const BTN_B := 0x02
@@ -30,6 +35,7 @@ var _textura: ImageTexture
 var _jugando := false
 var _pausa_anterior := false
 var _abierto := false
+var _tiempo_emulador := 0.0
 
 
 func abrir() -> void:
@@ -39,20 +45,36 @@ func abrir() -> void:
 	_pausa_anterior = get_tree().paused
 	get_tree().paused = true
 	_abierto = true
+	_tiempo_emulador = 0.0
 	_construir_ui()
 	_preparar_nucleo()
 	_refrescar_roms()
 	set_process(true)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if not _jugando or _emulador == null:
 		return
+
+	_tiempo_emulador = minf(
+		_tiempo_emulador + maxf(delta, 0.0),
+		PASO_EMULADOR * MAX_FRAMES_POR_TICK,
+	)
 	_emulador.call("set_buttons", _botones())
-	var datos: PackedByteArray = _emulador.call("run_frame_rgba")
-	if datos.size() != ANCHO * ALTO * 4:
-		_jugando = false
-		_estado.text = _formatear("error_runtime", [_emulador.call("last_error")])
+
+	var datos := PackedByteArray()
+	var frames_ejecutados := 0
+	while _tiempo_emulador >= PASO_EMULADOR and frames_ejecutados < MAX_FRAMES_POR_TICK:
+		datos = _emulador.call("run_frame_rgba")
+		if datos.size() != ANCHO * ALTO * 4:
+			_jugando = false
+			_tiempo_emulador = 0.0
+			_estado.text = _formatear("error_runtime", [_emulador.call("last_error")])
+			return
+		_tiempo_emulador -= PASO_EMULADOR
+		frames_ejecutados += 1
+
+	if datos.is_empty():
 		return
 	var imagen := Image.create_from_data(ANCHO, ALTO, false, Image.FORMAT_RGBA8, datos)
 	if _textura == null:
@@ -192,11 +214,14 @@ func _cargar_rom(ruta: String) -> void:
 	if resultado == 3:
 		_estado.text = _texto("error_cgb")
 		_jugando = false
+		_tiempo_emulador = 0.0
 		return
 	if resultado != 0:
 		_estado.text = _formatear("error_rom", [_emulador.call("last_error")])
 		_jugando = false
+		_tiempo_emulador = 0.0
 		return
+	_tiempo_emulador = 0.0
 	_jugando = true
 	var titulo := String(_emulador.call("rom_title"))
 	if titulo.is_empty():
@@ -237,6 +262,7 @@ func _cerrar() -> void:
 	if not _abierto:
 		return
 	_jugando = false
+	_tiempo_emulador = 0.0
 	_abierto = false
 	get_tree().paused = _pausa_anterior
 	cerrado.emit()
