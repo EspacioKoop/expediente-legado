@@ -54,10 +54,7 @@ func _probar_puestos() -> void:
 		if puesto == null:
 			continue
 		_comprobar(puesto.get_node_or_null("Teclado") != null, "puesto %d tiene teclado" % i)
-		_comprobar(
-			puesto.get_node_or_null("TelefonoBase") != null,
-			"puesto %d tiene teléfono" % i
-		)
+		_comprobar(puesto.get_node_or_null("TelefonoBase") != null, "puesto %d tiene teléfono" % i)
 		_comprobar(puesto.get_node_or_null("Auricular") != null, "puesto %d tiene auricular" % i)
 
 	_comprobar(
@@ -65,16 +62,14 @@ func _probar_puestos() -> void:
 		"primer puesto tiene bandeja"
 	)
 	_comprobar(
-		mundo.get_node_or_null("PuestoUtileria2/TazaPuesto") != null,
-		"segundo puesto tiene taza"
+		mundo.get_node_or_null("PuestoUtileria2/TazaPuesto") != null, "segundo puesto tiene taza"
 	)
 	_comprobar(
 		mundo.get_node_or_null("PuestoUtileria3/BandejaEntrada") != null,
 		"tercer puesto alterna bandeja"
 	)
 	_comprobar(
-		mundo.get_node_or_null("PuestoUtileria4/TazaPuesto") != null,
-		"cuarto puesto alterna taza"
+		mundo.get_node_or_null("PuestoUtileria4/TazaPuesto") != null, "cuarto puesto alterna taza"
 	)
 	_comprobar(
 		mundo.get_node_or_null("MaquinaCafeInteractuable") != null,
