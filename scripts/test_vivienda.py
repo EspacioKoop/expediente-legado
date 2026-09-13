@@ -24,9 +24,14 @@ class ViviendaTest(unittest.TestCase):
         self.assertIn('and _impago_inminente()', self.capa)
 
     def test_el_gato_no_puede_seguir_a_la_oficina(self):
-        gato = self.capa.index('jornada["gato"]["presente"] = false')
-        delegar = self.capa.index("super._al_pisar_salida(cuerpo, salida)", gato)
-        self.assertLess(gato, delegar)
+        transito = self.capa.split("func _al_pisar_salida", 1)[1].split("func ", 1)[0]
+        perder = self.capa.split("func _perder_vivienda", 1)[1].split("func ", 1)[0]
+        self.assertIn("_perder_vivienda()", transito)
+        self.assertIn('jornada["gato"]["presente"] = false', perder)
+        self.assertLess(
+            transito.index("_perder_vivienda()"),
+            transito.index("super._al_pisar_salida(cuerpo, salida)"),
+        )
 
     def test_la_oficina_nocturna_reutiliza_la_planta_y_solo_deja_dormir(self):
         self.assertIn('EspaciosCatalogo.de_fase("archivo").duplicate(true)', self.capa)
