@@ -5,6 +5,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CAMINANTE = ROOT / "godot" / "guion" / "caminante.gd"
 PREFERENCIAS = ROOT / "godot" / "guion" / "preferencias_siga.gd"
 MENU = ROOT / "godot" / "guion" / "menu_global.gd"
+TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
 
 
 def test_camara_consumidora_de_preferencias_persistentes() -> None:
@@ -37,6 +38,19 @@ def test_opciones_exponen_camara_y_la_actualizan_en_vivo() -> None:
     assert 'const GRUPO_CAMARA := "caminante_camara"' in caminante
     assert "add_to_group(GRUPO_CAMARA)" in caminante
     assert "func recargar_preferencias_camara()" in caminante
+
+
+def test_opciones_de_camara_usan_catalogo_traducible() -> None:
+    menu = MENU.read_text(encoding="utf-8")
+    textos = TEXTOS.read_text(encoding="utf-8")
+
+    for clave in (
+        "MENU_GLOBAL_SENSIBILIDAD_RATON",
+        "MENU_GLOBAL_SENSIBILIDAD_MANDO",
+        "MENU_GLOBAL_INVERTIR_CAMARA_Y",
+    ):
+        assert clave in textos
+        assert f'tr("{clave}")' in menu
 
 
 def test_raton_y_stick_comparten_pitch_acotado_y_deadzone() -> None:
