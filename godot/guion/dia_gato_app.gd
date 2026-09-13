@@ -196,6 +196,32 @@ func _resolver_objetivos_sueno() -> void:
 	_caminante.set_physics_process(true)
 
 
+## Enlaza un núcleo de puzzle concreto con la recompensa persistente de #89.
+## La UI decide cuándo crear/mostrar el puzzle; esta capa solo posee el estado y
+## el guardado. Conectar dos veces el mismo núcleo no duplica el callback.
+func conectar_recompensa_onirica(nucleo, caso: Dictionary) -> bool:
+	if nucleo == null or not nucleo.has_signal("resultado"):
+		return false
+	var callback := _al_resultado_puzzle_onirico.bind(caso)
+	if nucleo.resultado.is_connected(callback):
+		return true
+	nucleo.resultado.connect(callback)
+	return true
+
+
+## Solo un resultado completado y catalogado puede llegar a persistencia.
+## `registrar()` muta primero memoria de forma idempotente; si el disco falla,
+## `_guardar_o_avisar` deja el mismo estado pendiente para que el mecanismo
+## normal de reintento lo escriba sin volver a conceder la pista.
+func _al_resultado_puzzle_onirico(resultado: Dictionary, caso: Dictionary) -> void:
+	var pista := PistaOnirica.resolver(caso, resultado)
+	if pista.is_empty():
+		return
+	if not PistaOnirica.registrar(partida.estado, pista):
+		return
+	_guardar_o_avisar("")
+
+
 func _abrir_expediente() -> void:
 	super._abrir_expediente()
 	if _pantalla == null:
