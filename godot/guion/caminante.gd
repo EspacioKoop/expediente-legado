@@ -6,7 +6,9 @@
 extends CharacterBody3D
 
 const VELOCIDAD := 2.6
-const SENSIBILIDAD := 0.0022
+const ACELERACION := 10.0
+const FRENADO := 14.0
+const SENSIBILIDAD_RATON_BASE := 0.0022
 const VOLUMEN_PISADA_DB := -8.0
 
 const MOVER_IZQUIERDA := "mover_izquierda"
@@ -16,11 +18,11 @@ const MOVER_ATRAS := "mover_atras"
 
 ## El stick derecho mira. Va en radianes POR SEGUNDO y no por fotograma, que es
 ## lo que hace que mirar cueste lo mismo en una máquina lenta que en una rápida.
-const SENSIBILIDAD_MANDO := 2.4
+const SENSIBILIDAD_MANDO_BASE := 2.4
 
 ## El stick descansa cerca del centro, no en el centro: sin esto la cámara
 ## deriva sola con un mando gastado. El mapa de acciones ya trae su zona muerta;
-## esta es la de la suma de los dos ejes.
+## esta segunda guarda suaviza el borde del vector combinado.
 const ZONA_MUERTA := 0.12
 
 ## Cuánto se puede mirar arriba y abajo. Sin tope, la cámara se da la vuelta.
@@ -28,11 +30,13 @@ const TOPE_VERTICAL := deg_to_rad(85.0)
 
 var _detector_interaccion: DetectorInteraccion3D
 var _prompt_interaccion: Label
+var _preferencias_camara: Dictionary = {}
 
 @onready var _camara: Camera3D = $Camara
 
 
 func _ready() -> void:
+	_preferencias_camara = PreferenciasSiga.cargar()
 	_asegurar_controles_movimiento()
 	_montar_interaccion()
 	# `Dia` añade el reproductor 3D de pasos justo después de meter el caminante
@@ -76,8 +80,8 @@ func _ocultar_prompt_interaccion() -> void:
 
 ## Declara un esquema de movimiento propio en vez de depender de las acciones
 ## UI de Godot. Solo instala los valores por defecto cuando la acción no existe:
-## una futura pantalla de remapeo (#98) puede declararla antes y este código no
-## le volverá a añadir teclas a espaldas del jugador.
+## una pantalla de remapeo (#113) puede declararla antes y este código no le
+## vuelve a añadir teclas a espaldas del jugador.
 func _asegurar_controles_movimiento() -> void:
 	_asegurar_accion(MOVER_IZQUIERDA, KEY_A, KEY_LEFT)
 	_asegurar_accion(MOVER_DERECHA, KEY_D, KEY_RIGHT)
@@ -107,19 +111,15 @@ func _ajustar_volumen_pisadas() -> void:
 
 
 func _unhandled_input(evento: InputEvent) -> void:
-	if evento is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		rotate_y(-evento.relative.x * SENSIBILIDAD)
-		_camara.rotation.x = clampf(
-			_camara.rotation.x - evento.relative.y * SENSIBILIDAD, -TOPE_VERTICAL, TOPE_VERTICAL
-		)
-	# Soltar el ratón: sin esto, una ventana que captura el puntero y no lo
-	# devuelve se siente como un programa colgado.
-	elif evento.is_action_pressed("ui_cancel"):
-		Input.mouse_mode = (
-			Input.MOUSE_MODE_VISIBLE
-			if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
-			else Input.MOUSE_MODE_CAPTURED
-		)
+	if not evento is InputEventMouseMotion or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+		return
+	var sensibilidad := SENSIBILIDAD_RATON_BASE * _sensibilidad_raton()
+	rotate_y(-evento.relative.x * sensibilidad)
+	_camara.rotation.x = clampf(
+		_camara.rotation.x - evento.relative.y * sensibilidad * _sentido_vertical(),
+		-TOPE_VERTICAL,
+		TOPE_VERTICAL
+	)
 
 
 func _physics_process(delta: float) -> void:
@@ -129,9 +129,14 @@ func _physics_process(delta: float) -> void:
 		velocity += get_gravity() * delta
 
 	var entrada := Input.get_vector(MOVER_IZQUIERDA, MOVER_DERECHA, MOVER_ADELANTE, MOVER_ATRAS)
-	var direccion := (transform.basis * Vector3(entrada.x, 0, entrada.y)).normalized()
-	velocity.x = direccion.x * VELOCIDAD
-	velocity.z = direccion.z * VELOCIDAD
+	# `Input.get_vector` ya limita la diagonal a longitud 1 y conserva cuánto se
+	# inclina un stick. No normalizar aquí evita convertir media inclinación en
+	# velocidad máxima y conserva diagonales sin acelerarlas.
+	var direccion := transform.basis * Vector3(entrada.x, 0, entrada.y)
+	var objetivo := direccion * VELOCIDAD
+	var respuesta := ACELERACION if entrada.length_squared() > 0.0001 else FRENADO
+	velocity.x = move_toward(velocity.x, objetivo.x, respuesta * delta)
+	velocity.z = move_toward(velocity.z, objetivo.z, respuesta * delta)
 	move_and_slide()
 
 
@@ -144,13 +149,41 @@ func _mirar_con_mando(delta: float) -> void:
 	var mirada := Input.get_vector(
 		"mirar_izquierda", "mirar_derecha", "mirar_arriba", "mirar_abajo"
 	)
-	if mirada.length() < ZONA_MUERTA:
+	var magnitud := mirada.length()
+	if magnitud <= ZONA_MUERTA:
 		return
 
-	rotate_y(-mirada.x * SENSIBILIDAD_MANDO * delta)
+	# La salida de la zona muerta es continua: un stick apenas desplazado no
+	# pega un salto de velocidad al cruzar el umbral.
+	var escala := clampf((magnitud - ZONA_MUERTA) / (1.0 - ZONA_MUERTA), 0.0, 1.0)
+	mirada = mirada.normalized() * escala
+	var sensibilidad := SENSIBILIDAD_MANDO_BASE * _sensibilidad_mando()
+	rotate_y(-mirada.x * sensibilidad * delta)
 	_camara.rotation.x = clampf(
-		_camara.rotation.x - mirada.y * SENSIBILIDAD_MANDO * delta, -TOPE_VERTICAL, TOPE_VERTICAL
+		_camara.rotation.x - mirada.y * sensibilidad * delta * _sentido_vertical(),
+		-TOPE_VERTICAL,
+		TOPE_VERTICAL
 	)
+
+
+func _sensibilidad_raton() -> float:
+	return clampf(
+		float(_preferencias_camara.get("sensibilidad_camara_raton", 1.0)),
+		PreferenciasSiga.SENSIBILIDAD_CAMARA_MIN,
+		PreferenciasSiga.SENSIBILIDAD_CAMARA_MAX
+	)
+
+
+func _sensibilidad_mando() -> float:
+	return clampf(
+		float(_preferencias_camara.get("sensibilidad_camara_mando", 1.0)),
+		PreferenciasSiga.SENSIBILIDAD_CAMARA_MIN,
+		PreferenciasSiga.SENSIBILIDAD_CAMARA_MAX
+	)
+
+
+func _sentido_vertical() -> float:
+	return -1.0 if bool(_preferencias_camara.get("invertir_camara_y", false)) else 1.0
 
 
 ## Deja el cuerpo en un sitio, mirando al frente. Se usa al cambiar de espacio:
