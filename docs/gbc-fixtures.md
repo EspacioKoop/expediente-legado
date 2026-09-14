@@ -8,6 +8,7 @@ Este catálogo acompaña #244 y #124. Es una lista de **fuentes de prueba**, no 
 
 | id | proyecto | plataforma | licencia revisada | uso | distribución en SIGA-98 | fuente |
 | --- | --- | --- | --- | --- | --- | --- |
+| cgb_only_smoke | SIGA-98 (este repositorio) | GBC CGB-only | MIT | gate mínimo para núcleo CGB real: cabecera `0xC0`, paleta CGB y framebuffer | sí; se compila desde fuente y solo la ROM generada sale como artefacto efímero de CI | `gbc/fixtures/cgb_only_smoke/` |
 | simple-gb-asm-examples | tbsp/simple-gb-asm-examples | GB | CC0-1.0 para código; revisar por fichero los pocos assets con licencia distinta | `joypad`, `vblank`, sprites, OAM DMA y tilemap; fixture mínimo | sí, **solo** ejemplos cuyos fuentes/assets concretos sean CC0 | https://github.com/tbsp/simple-gb-asm-examples |
 | cgb-acid2 | mattcurrie/cgb-acid2 | GBC | MIT | exactitud PPU/color y regresión visual CGB | sí, conservando aviso MIT | https://github.com/mattcurrie/cgb-acid2 |
 | SpaceGB | BotRandomness/SpaceGB | GB | MIT | ROM homebrew pequeña con input y gameplay real | sí, conservando aviso MIT y tras auditar assets incluidos | https://github.com/BotRandomness/SpaceGB |
@@ -17,13 +18,14 @@ Este catálogo acompaña #244 y #124. Es una lista de **fuentes de prueba**, no 
 
 ## Primera batería reproducible
 
-La primera integración del emulador no necesita un catálogo enorme. Debe construir desde fuente, con una revisión fijada, al menos estas pruebas:
+La primera integración del emulador no necesita un catálogo enorme. Debe construir desde fuente, con una revisión fijada cuando sea externa, al menos estas pruebas:
 
 1. `simple-gb-asm-examples/joypad`: prueba específica de entrada y mapeo de botones.
 2. `simple-gb-asm-examples/vblank`: temporización básica y actualización de vídeo.
-3. `cgb-acid2`: prueba de PPU/color en modo CGB.
+3. `cgb_only_smoke`: fixture propio CGB-only. La cabecera usa `0xC0`, programa la paleta BG mediante `BCPS/BCPD` y dibuja un patrón; Peanut-GB debe seguir rechazándolo y un núcleo que anuncie `supports_cgb() == true` deberá poder arrancarlo.
+4. `cgb-acid2`: prueba de PPU/color en modo CGB.
 
-Los dos primeros son fixtures mínimos CC0 del mismo proyecto pero prueban subsistemas distintos. `cgb-acid2` añade una prueba CGB independiente bajo MIT.
+Los dos primeros son fixtures mínimos CC0 del mismo proyecto pero prueban subsistemas distintos. `cgb_only_smoke` funciona como puerta reproducible de integración sin depender de una ROM de terceros. `cgb-acid2` queda como prueba de exactitud CGB independiente bajo MIT.
 
 ## Política de fijado y hashes
 
@@ -42,9 +44,10 @@ No se copiarán binarios GPL/CC-BY-SA al repositorio principal solo porque sean 
 
 1. arrancar `joypad` y comprobar entrada;
 2. ejecutar `vblank` y un ejemplo de sprites/tilemap;
-3. ejecutar `cgb-acid2` para PPU/color;
-4. ejecutar `libbet` o `SpaceGB` como sesión de juego completa;
-5. usar µCity como stress de GBC/RAM/guardado, externamente.
+3. ejecutar `cgb_only_smoke` como gate de CGB-only y color básico;
+4. ejecutar `cgb-acid2` para PPU/color;
+5. ejecutar `libbet` o `SpaceGB` como sesión de juego completa;
+6. usar µCity como stress de GBC/RAM/guardado, externamente.
 
 Esto mantiene separadas tres preguntas que no deben mezclarse: **¿emula bien?**, **¿podemos reproducir la prueba?** y **¿podemos redistribuir esa ROM con el juego?**
 

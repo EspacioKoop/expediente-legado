@@ -1,21 +1,39 @@
-## Capa de UI para posponer una decisión política sin resolverla (#287).
+## Capa de UI para posponer y madurar una decisión política (#287).
 ##
-## El contrato vive en `Historias.postergar()`. Esta capa solo lo hace visible,
-## lo guarda y mantiene la navegación por foco/mando de la ventana existente.
+## `Historias.postergar()` conserva la decisión pendiente. `HISTORIA_CONTEXTO`
+## separa el hallazgo de la votación hasta que exista contexto real nuevo.
 extends "res://guion/historia_app.gd"
 
+const HISTORIA_CONTEXTO := preload("res://guion/historia_contexto.gd")
 const RUTA_TEXTOS := "res://datos/historia_posponer_textos.json"
+const RUTA_TEXTOS_CONTEXTO := "res://datos/historia_contexto_textos.json"
 
 var _posponer: Button
+var _contexto_aviso: Label
 var _textos_ui: Dictionary = {}
+var _textos_contexto: Dictionary = {}
 
 
 func _mostrar() -> void:
 	super._mostrar()
 	_asegurar_boton_posponer()
+	_asegurar_aviso_contexto()
 	var vista := _historias.vista(partida.estado, carta_id)
 	var estado_vista := String(vista.get("estado", ""))
-	_posponer.visible = estado_vista == "pendiente" or estado_vista == "pospuesta"
+	var pendiente := estado_vista == "pendiente" or estado_vista == "pospuesta"
+
+	# Solo una historia pendiente nueva fija el punto de partida. Las partidas
+	# antiguas ya pospuestas carecen de instantánea y siguen siendo decidibles.
+	if (
+		estado_vista == "pendiente"
+		and not HISTORIA_CONTEXTO.tiene_registro(partida.estado, carta_id)
+	):
+		if HISTORIA_CONTEXTO.registrar(partida.estado, carta_id):
+			_guardar()
+
+	var contexto_listo := not pendiente or HISTORIA_CONTEXTO.maduro(partida.estado, carta_id)
+	_aplicar_contexto(pendiente, contexto_listo)
+	_posponer.visible = pendiente
 	_posponer.disabled = _sin_guardar
 	_enfocar.call_deferred()
 
@@ -32,12 +50,41 @@ func _asegurar_boton_posponer() -> void:
 	relato.move_child(_posponer, _opciones.get_index() + 1)
 
 
+func _asegurar_aviso_contexto() -> void:
+	if _contexto_aviso != null:
+		return
+	_contexto_aviso = _linea()
+	_contexto_aviso.text = _texto_contexto("pendiente")
+	_contexto_aviso.tooltip_text = _texto_contexto("tooltip")
+	var relato := _opciones.get_parent()
+	relato.add_child(_contexto_aviso)
+	relato.move_child(_contexto_aviso, _opciones.get_index())
+
+
+func _aplicar_contexto(pendiente: bool, contexto_listo: bool) -> void:
+	var mostrar_opciones := not pendiente or contexto_listo
+	for nodo in _opciones.get_children():
+		var boton := nodo as Button
+		if boton != null:
+			boton.visible = mostrar_opciones
+			boton.disabled = _sin_guardar or not mostrar_opciones
+	_contexto_aviso.visible = pendiente and not contexto_listo
+
+
 func _texto_ui(clave: String) -> String:
 	if _textos_ui.is_empty():
 		var datos: Variant = JSON.parse_string(FileAccess.get_file_as_string(RUTA_TEXTOS))
 		if datos is Dictionary:
 			_textos_ui = datos
 	return String(_textos_ui.get(clave, ""))
+
+
+func _texto_contexto(clave: String) -> String:
+	if _textos_contexto.is_empty():
+		var datos: Variant = JSON.parse_string(FileAccess.get_file_as_string(RUTA_TEXTOS_CONTEXTO))
+		if datos is Dictionary:
+			_textos_contexto = datos
+	return String(_textos_contexto.get(clave, ""))
 
 
 func _posponer_decision() -> void:
@@ -52,7 +99,11 @@ func _posponer_decision() -> void:
 
 
 func _enfocar() -> void:
-	var botones: Array[Node] = _opciones.get_children()
+	var botones: Array[Node] = []
+	for nodo in _opciones.get_children():
+		var opcion := nodo as Button
+		if opcion != null and opcion.visible and not opcion.disabled:
+			botones.append(opcion)
 	if _posponer != null and _posponer.visible and not _posponer.disabled:
 		botones.append(_posponer)
 	if _reintentar.visible:
