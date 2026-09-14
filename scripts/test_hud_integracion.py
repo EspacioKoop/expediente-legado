@@ -34,8 +34,29 @@ class HUDIntegracionTest(unittest.TestCase):
         self.assertIn("func conectar_hud(hud: HUDLayer)", self.caminante)
         self.assertIn("hud.registrar(HUDLayer.INTERACCION, _prompt_interaccion)", self.caminante)
         self.assertIn("InputMap.action_get_events(accion)", self.caminante)
-        self.assertIn("evento.as_text()", self.caminante)
+        self.assertIn("_evento_pertenece_a_dispositivo(evento)", self.caminante)
         self.assertNotIn("var capa := CanvasLayer.new()", self.caminante)
+
+    def test_prompt_usa_solo_el_ultimo_dispositivo(self):
+        self.assertIn("enum DispositivoEntrada", self.caminante)
+        self.assertIn("TECLADO_RATON", self.caminante)
+        self.assertIn("MANDO", self.caminante)
+        self.assertIn("InputEventJoypadButton", self.caminante)
+        self.assertIn("InputEventKey", self.caminante)
+        self.assertIn("InputEventMouseButton", self.caminante)
+        self.assertIn("func _registrar_dispositivo_entrada(evento: InputEvent)", self.caminante)
+        self.assertIn("_refrescar_prompt_interaccion()", self.caminante)
+        self.assertNotIn('" / ".join(entradas)', self.caminante)
+
+    def test_prompt_de_mando_evitar_indices_crudos_comunes(self):
+        self.assertIn('JOY_BUTTON_A: "A / Cruz"', self.caminante)
+        self.assertIn('JOY_BUTTON_B: "B / Círculo"', self.caminante)
+        self.assertIn('JOY_BUTTON_DPAD_UP: "Cruceta arriba"', self.caminante)
+        self.assertIn('"Botón %d" % evento.button_index', self.caminante)
+
+    def test_stick_derecho_actualiza_dispositivo_aunque_se_mantenga_inclinado(self):
+        cuerpo = self.caminante.split("func _mirar_con_mando", 1)[1]
+        self.assertIn("_usar_dispositivo_entrada(DispositivoEntrada.MANDO)", cuerpo)
 
     def test_mirar_npc_activa_senal_visual(self):
         self.assertIn("_marcar_objetivo(_objetivo_foco, false)", self.caminante)
