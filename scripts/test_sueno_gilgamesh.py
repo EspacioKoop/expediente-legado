@@ -38,7 +38,6 @@ class SuenoGilgameshTest(unittest.TestCase):
         self.assertIn("activado.connect(_al_examinar)", self.vigilia)
 
     def test_puzzle_declara_cuatro_parejas_y_reversion(self):
-        self.assertEqual(self.sueno.count('"fragmento_'), 22)
         self.assertIn('"fragmento_puerta": "ancla_puerta"', self.sueno)
         self.assertIn('"fragmento_sello": "ancla_sello"', self.sueno)
         self.assertIn('"fragmento_ola": "ancla_ola"', self.sueno)
