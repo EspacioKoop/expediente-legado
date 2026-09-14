@@ -91,6 +91,27 @@ static func asfalto(base: Color, semilla: int) -> ImageTexture:
 	return ImageTexture.create_from_image(imagen)
 
 
+## Revoco urbano exterior: paños verticales gastados por lluvia y suciedad.
+## No contiene carteles, números ni marcas que puedan convertirse en información
+## narrativa; solo rompe la lectura de las fachadas como cajas de color plano.
+static func revoco_urbano(base: Color, semilla: int) -> ImageTexture:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = semilla
+	var imagen := Image.create(LADO, LADO, false, Image.FORMAT_RGB8)
+	imagen.fill(base)
+	for x in LADO:
+		var escorrentia := rng.randf_range(-0.035, 0.025)
+		for y in LADO:
+			var desgaste := escorrentia + float(y) / float(LADO) * -0.025
+			var tono := base.lightened(desgaste) if desgaste >= 0.0 else base.darkened(-desgaste)
+			imagen.set_pixel(x, y, tono)
+	for i in LADO * LADO / 28:
+		var x := rng.randi() % LADO
+		var y := rng.randi() % LADO
+		imagen.set_pixel(x, y, base.darkened(rng.randf_range(0.05, 0.13)))
+	return ImageTexture.create_from_image(imagen)
+
+
 ## Moqueta de casa: trama regular con hilo suelto. La regularidad es lo que la
 ## separa del asfalto, que es ruido puro.
 static func moqueta(base: Color, semilla: int) -> ImageTexture:
@@ -244,6 +265,8 @@ static func calculada(nombre: String, base: Color, semilla: int) -> ImageTexture
 			return plancha_techo(base, semilla)
 		"asfalto":
 			return asfalto(base, semilla)
+		"revoco_urbano":
+			return revoco_urbano(base, semilla)
 		"moqueta":
 			return moqueta(base, semilla)
 		"melamina":

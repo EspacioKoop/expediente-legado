@@ -113,8 +113,13 @@ void Siga98GB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("is_loaded"), &Siga98GB::is_loaded);
     ClassDB::bind_method(D_METHOD("set_buttons", "buttons"), &Siga98GB::set_buttons);
     ClassDB::bind_method(D_METHOD("run_frame_rgba"), &Siga98GB::run_frame_rgba);
+    ClassDB::bind_method(D_METHOD("save_ram"), &Siga98GB::save_ram);
+    ClassDB::bind_method(D_METHOD("load_save_ram", "save"), &Siga98GB::load_save_ram);
     ClassDB::bind_method(D_METHOD("rom_title"), &Siga98GB::rom_title);
     ClassDB::bind_method(D_METHOD("last_error"), &Siga98GB::last_error);
+    ClassDB::bind_method(D_METHOD("core_name"), &Siga98GB::core_name);
+    ClassDB::bind_method(D_METHOD("supports_cgb"), &Siga98GB::supports_cgb);
+    ClassDB::bind_method(D_METHOD("supports_audio"), &Siga98GB::supports_audio);
     ClassDB::bind_method(D_METHOD("width"), &Siga98GB::width);
     ClassDB::bind_method(D_METHOD("height"), &Siga98GB::height);
 
@@ -212,12 +217,50 @@ PackedByteArray Siga98GB::run_frame_rgba() {
     return result;
 }
 
+PackedByteArray Siga98GB::save_ram() const {
+    PackedByteArray result;
+    if (!impl->loaded || impl->cart_ram.empty()) {
+        return result;
+    }
+    result.resize(static_cast<int64_t>(impl->cart_ram.size()));
+    std::memcpy(result.ptrw(), impl->cart_ram.data(), impl->cart_ram.size());
+    return result;
+}
+
+bool Siga98GB::load_save_ram(const PackedByteArray &p_save) {
+    if (!impl->loaded) {
+        impl->error = "No hay ROM cargada para restaurar SRAM";
+        return false;
+    }
+    if (static_cast<size_t>(p_save.size()) != impl->cart_ram.size()) {
+        impl->error = "Tamaño de SRAM no coincide con el cartucho";
+        return false;
+    }
+    if (!impl->cart_ram.empty()) {
+        std::memcpy(impl->cart_ram.data(), p_save.ptr(), impl->cart_ram.size());
+    }
+    impl->error.clear();
+    return true;
+}
+
 String Siga98GB::rom_title() const {
     return String::utf8(impl->title.c_str());
 }
 
 String Siga98GB::last_error() const {
     return String::utf8(impl->error.c_str());
+}
+
+String Siga98GB::core_name() const {
+    return "Peanut-GB";
+}
+
+bool Siga98GB::supports_cgb() const {
+    return false;
+}
+
+bool Siga98GB::supports_audio() const {
+    return false;
 }
 
 int Siga98GB::width() const {

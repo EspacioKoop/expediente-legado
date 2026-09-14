@@ -28,6 +28,17 @@ class SuenoGeometriaTest(unittest.TestCase):
         self.assertIn("not is_zero_approx(delta.x)", self.codigo)
         self.assertIn("not is_zero_approx(delta.y)", self.codigo)
 
+    def test_el_cuerpo_usa_la_misma_malla_para_visual_y_colision(self):
+        self.assertIn("static func cuerpo_sala", self.codigo)
+        self.assertIn("StaticBody3D.new()", self.codigo)
+        self.assertIn("visual.mesh = malla", self.codigo)
+        self.assertIn("CollisionShape3D.new()", self.codigo)
+        self.assertIn("malla.create_trimesh_shape()", self.codigo)
+
+    def test_un_contorno_invalido_no_intenta_crear_colision(self):
+        self.assertIn("if malla.get_surface_count() == 0:", self.codigo)
+        self.assertIn("return cuerpo", self.codigo)
+
     def test_no_toca_navegacion_ni_progreso(self):
         for termino in (
             "Caminante",

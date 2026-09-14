@@ -26,12 +26,19 @@ class SuenoFamiliasTest(unittest.TestCase):
         self.assertIn("SuenoGeometria.contorno_valido", self.texto)
         self.assertIn("SuenoGeometria.tiene_arista_diagonal", self.texto)
 
+    def test_expone_cuerpo_con_colision_compartida(self):
+        self.assertIn("static func cuerpo", self.texto)
+        self.assertIn("SuenoGeometria.cuerpo_sala", self.texto)
+        self.assertIn("StaticBody3D.new()", self.texto)
+
     def test_cada_familia_tiene_entrada_y_anclas_de_contenido(self):
         self.assertGreaterEqual(self.texto.count('"entrada": Vector3('), 3)
-        self.assertGreaterEqual(self.texto.count('"anclas": ['), 3)
+        self.assertGreaterEqual(len(re.findall(r'"anclas"\s*:\s*\[', self.texto)), 3)
 
-    def test_anular_declara_hueco_y_fragmentada_fragmentos(self):
-        self.assertRegex(self.texto, re.compile(r'"hueco"\s*:\s*\n?\s*PackedVector2Array'))
+    def test_anular_es_contorno_concavo_y_fragmentada_conserva_fragmentos(self):
+        anular = self.texto.split("\tANULAR:", 1)[1].split("\tFRAGMENTADA:", 1)[0]
+        self.assertNotIn('"hueco":', anular)
+        self.assertGreaterEqual(anular.count("Vector2("), 16)
         self.assertRegex(self.texto, re.compile(r'"fragmentos"\s*:\s*\n?\s*\['))
 
     def test_no_toca_progreso_jornada_ni_recompensas(self):

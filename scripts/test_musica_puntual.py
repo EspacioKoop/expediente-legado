@@ -27,9 +27,11 @@ class MusicaPuntualTest(unittest.TestCase):
         self.assertIn("AudioStreamPlayer.new()", self.codigo)
         self.assertIn("get_node_or_null(NODO)", self.codigo)
 
-    def test_ogg_se_prepara_para_bucle(self):
+    def test_ogg_respeta_el_bucle_del_momento(self):
         self.assertIn("pista is AudioStreamOggVorbis", self.codigo)
-        self.assertIn("pista.loop = true", self.codigo)
+        self.assertIn('"careo": true', self.codigo)
+        self.assertIn('"final": false', self.codigo)
+        self.assertIn("pista.loop = en_bucle(nombre)", self.codigo)
 
     def test_no_duplica_efectos_ni_ambiente(self):
         self.assertNotIn("Sonido.sonar", self.codigo)

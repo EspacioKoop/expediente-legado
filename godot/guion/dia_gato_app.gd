@@ -14,6 +14,7 @@ var _salida_guia := Vector3.ZERO
 var _hay_rumbo_guia := false
 var _objetivos_espacio: Array = []
 var _objetivo_escena := ""
+var _resolviendo_objetivos := false
 
 
 func _espacio_de(fase: String) -> Dictionary:
@@ -56,6 +57,10 @@ func _espacio_de(fase: String) -> Dictionary:
 
 
 func _entrar_en(fase: String) -> void:
+	# Cada entrada arranca fuera de una transición. Los callbacks retrasados de
+	# la escena anterior solo podrán actuar si el nuevo estado vuelve a cumplir
+	# el contrato de resolución, nunca por arrastrar un cerrojo viejo.
+	_resolviendo_objetivos = false
 	super._entrar_en(fase)
 	_gato_guia = null
 	if fase == "sueño":
@@ -176,22 +181,37 @@ func _orientar_gato_guia() -> void:
 
 
 func _resolver_objetivos_sueno() -> void:
+	# Un timer y un call_deferred pueden coincidir tras recargar una escena ya
+	# resuelta. Solo el primer callback puede consumir la cola de escenas.
+	if _resolviendo_objetivos:
+		return
 	if jornada.get("fase", "") != "sueño" or _objetivo_escena.is_empty():
 		return
 	var estado: Dictionary = _estado_objetivos_actual()
 	if not SuenoObjetivos.resuelto(estado):
 		return
 
+	_resolviendo_objetivos = true
+	# Resolver cambia varias piezas a la vez (cola, fase y día). Si el guardado
+	# falla, restauramos exactamente el estado anterior: quedarse visualmente en
+	# la escena vieja con la cola ya consumida haría que un reintento saltase una
+	# segunda escena y es precisamente el softlock que #299 quiere evitar.
+	var jornada_antes := jornada.duplicate(true)
 	jornada["sueno_escenas"].pop_front()
 	var destino := "sueño"
+	var dia_nuevo := -1
 	if jornada["sueno_escenas"].is_empty():
-		var dia := Jornada.despertar(jornada)
-		_hablando = false
-		_nomina.text = tr("DIA_NUEVO") % dia
+		dia_nuevo = Jornada.despertar(jornada)
 		destino = "archivo"
 	if not _guardar_o_avisar(destino):
+		jornada.clear()
+		jornada.merge(jornada_antes, true)
+		_resolviendo_objetivos = false
 		_caminante.set_physics_process(true)
 		return
+	if dia_nuevo >= 0:
+		_hablando = false
+		_nomina.text = tr("DIA_NUEVO") % dia_nuevo
 	_entrar_en(destino)
 	_caminante.set_physics_process(true)
 

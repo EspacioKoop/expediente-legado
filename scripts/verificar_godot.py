@@ -92,6 +92,12 @@ def ejecutar():
         etapas = [
             ("importación", ["--editor", "--import", "--quit"], 120, None),
             ("suite", ["--script", "pruebas/pruebas.gd"], 120, minimo),
+            (
+                "semillas-oniricas",
+                ["--script", "pruebas/pruebas_semillas_oniricas.gd"],
+                30,
+                30,
+            ),
             ("recorrido", ["--script", "pruebas/recorrido.gd"], 60, 95),
             ("arranque", ["--quit-after", "90"], 30, None),
         ]

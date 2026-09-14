@@ -13,6 +13,24 @@ A7_SIN_JORNADA,SE ACABÓ LA JORNADA. El registro ya no admite entradas hoy.
 A7_TITULO,FORMULARIO A-7  ·  IMPUTACIÓN DE RESPONSABILIDAD
 A7_VOLVER,Volver al expediente
 A7_YA_CERRADO,Este expediente ya tiene veredicto firme.
+AVIONES_EMPATE,Empate
+AVIONES_ESTADO_ABANDONADA,Ronda abandonada · el ciclo diario no cambia
+AVIONES_ESTADO_FIN,Ronda terminada · ganador: %s
+AVIONES_ESTADO_LANZAMIENTO,Tu turno · lanzamiento %d/3
+AVIONES_ESTADO_VUELO,%.1f m · %.0f precisión
+AVIONES_JUGADOR,Tú
+AVIONES_LANZAR,Lanzar
+AVIONES_MARCADOR,Marcador · Tú: %.1f · Distancia: %.1f · Papelera: %.1f · Cuñado: %.1f
+AVIONES_MODALIDAD_DISTANCIA,Distancia
+AVIONES_MODALIDAD_PRECISION,Precisión
+AVIONES_MODALIDAD_ZONA,Zona
+AVIONES_MODELO_ESTABLE,Estable
+AVIONES_MODELO_IMPREDECIBLE,Impredecible
+AVIONES_MODELO_RAPIDO,Rápido
+AVIONES_NUEVA_RONDA,Nueva ronda
+AVIONES_RIVAL_CUNADO,Cuñado
+AVIONES_RIVAL_DISTANCIA,Distancia
+AVIONES_RIVAL_PAPELERA,Papelera
 CAREO_MARCADOR,Usted %s        %s %s
 CAREO_NO_RECONOCE,%s no reconoce la acusación.
 CAREO_REPLICA,« %s »
@@ -32,6 +50,7 @@ CASO_5_TITULO,"El expediente MEMO-1978-014 (y 1993, y 2007)"
 CASO_6_TITULO,Acta constitutiva de la empresa (versión no circulada)
 CASO_7_TITULO,El expediente de la herencia Karamázov
 CASO_8_TITULO,El expediente del empleado #427
+CASO_9_TITULO,El funcionario que dejó de tramitar
 COMBATE_CRONICA,Usted: %s   ·   %s: %s   —   %s
 COMBATE_INSISTENCIA,Insistencia
 COMBATE_OBJECION,Objeción
@@ -138,6 +157,7 @@ HABILIDAD_EXTERNALIZAR,Externalizar
 HABILIDAD_EXTERNALIZAR_EFECTO,"Esta ronda el daño cuenta doble, gane quien gane."
 HABILIDAD_MESA,Mesa de diálogo
 HABILIDAD_MESA_EFECTO,Esta ronda nadie pierde vida.
+HOJA_RUTA,Hoja de ruta
 OFICIO_ATAQUE_1,Vengo por lo del expediente.
 OFICIO_ATAQUE_2,Me dijeron que preguntara aquí.
 OFICIO_ATAQUE_3,Llevo desde las siete.
@@ -245,3 +265,9 @@ MENU_GLOBAL_SUBTITULO,Preferencias comunes de archivo, casa y sueño.
 MENU_GLOBAL_SENSIBILIDAD_RATON,Sensibilidad de ratón
 MENU_GLOBAL_SENSIBILIDAD_MANDO,Sensibilidad de stick derecho
 MENU_GLOBAL_INVERTIR_CAMARA_Y,Invertir eje Y de cámara
+GATO_SIGA_EXPLORAR,Quedan documentos por revisar.
+GATO_SIGA_LISTO,Ya puede imputar responsabilidad.
+GATO_SIGA_CERRADO,Ese expediente ya está cerrado.
+GATO_SIGA_DESCUBRIMIENTO,Ha aparecido una pista nueva.
+GATO_SIGA_COMBINACION_FALLIDA,Esos documentos no justifican una relación.
+GATO_SIGA_COMBINACION_REPETIDA,Esa relación ya constaba.

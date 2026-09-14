@@ -39,11 +39,19 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 	var color_techo: Color = espacio.get("color_techo", Color(0.28, 0.28, 0.27))
 	var color_muro: Color = espacio.get("color_muro", Color(0.55, 0.54, 0.5))
 
-	# Dos formas de declarar un sitio, y la caja es el caso fácil de la otra:
-	# un espacio con `planta` es un conjunto de celdas de cualquier forma, y uno
-	# con `suelo` es el rectángulo de siempre. Lo que NO hay es un sitio con
-	# nombre: el motor sigue sin saber si esto es una oficina o un sueño.
-	if espacio.has("planta"):
+	# Tres formas de declarar un sitio. `contorno` es la generalización 3D no
+	# ortogonal; `planta` conserva celdas arbitrarias y `suelo`, el rectángulo.
+	# Ninguna ruta conoce el nombre del sitio que está construyendo.
+	if espacio.has("contorno"):
+		_por_contorno(
+			raiz,
+			espacio["contorno"],
+			float(espacio.get("altura_contorno", ALTURA_MURO)),
+			color_muro,
+			espacio.get("textura_muro", ""),
+			espacio.get("escala_textura", 1.2)
+		)
+	elif espacio.has("planta"):
 		_por_planta(
 			raiz,
 			espacio["planta"],
@@ -293,6 +301,33 @@ static func _cartel(
 	cartel.shaded = false
 	raiz.add_child(cartel)
 	return cartel
+
+
+## Un contorno poligonal ya trae suelo, techo, paredes y su colisión desde la
+## misma `ArrayMesh` (#448). Aquí solo se le aplica el material común del mundo;
+## la forma y la física no vuelven a separarse en dos representaciones.
+static func _por_contorno(
+	raiz: Node3D,
+	contorno: PackedVector2Array,
+	altura: float,
+	color: Color,
+	textura: String = "",
+	metros: float = 1.2
+) -> void:
+	var cuerpo := SuenoGeometria.cuerpo_sala(contorno, altura)
+	var malla := _malla_de(cuerpo)
+	if malla != null:
+		var material := ShaderMaterial.new()
+		material.shader = load(SHADER_PSX)
+		material.set_shader_parameter("color_base", color)
+		if not textura.is_empty():
+			var imagen := TexturaProcedural.por_nombre(textura, color, hash(textura))
+			if imagen != null:
+				material.set_shader_parameter("textura", imagen)
+				material.set_shader_parameter("con_textura", true)
+				material.set_shader_parameter("escala_textura", 1.0 / metros)
+		malla.material_override = material
+	raiz.add_child(cuerpo)
 
 
 ## Una planta cualquiera: losas donde hay celda y muros donde no hay vecina.

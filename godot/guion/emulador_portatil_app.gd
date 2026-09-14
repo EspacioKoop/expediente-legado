@@ -1,7 +1,9 @@
-## Superficie aislada para ejecutar ROMs GB desde la Portátil Color 98 (#124).
+## Superficie aislada para ejecutar ROMs GB desde la Portátil Color 98 (#124/#245).
 ##
 ## La UI pausa el mundo mientras está abierta y solo habla con la clase nativa
 ## Siga98GB. No conoce estado persistente, casos, economía ni guardados de campaña.
+## La materialidad de #245 vive fuera del núcleo: un encendido breve antes de
+## cargar, un shader LCD desactivable y sonidos físicos procedurales separados.
 class_name EmuladorPortatilApp
 extends CanvasLayer
 
@@ -9,6 +11,7 @@ signal cerrado
 
 const ROM_PROPIA := "res://roms/caza_pixeles_98.gbc"
 const TEXTOS := "res://datos/emulador_gb_textos.json"
+const SRAM_DIR := "user://sram/gb"
 const ANCHO := 160
 const ALTO := 144
 const CICLOS_CPU_DMG := 4194304.0
@@ -16,6 +19,35 @@ const CICLOS_POR_FRAME_DMG := 70224.0
 const FPS_EMULADOR := CICLOS_CPU_DMG / CICLOS_POR_FRAME_DMG
 const PASO_EMULADOR := 1.0 / FPS_EMULADOR
 const MAX_FRAMES_POR_TICK := 4
+const DURACION_ENCENDIDO := 0.32
+const FRECUENCIA_SONIDO_FISICO := 22050
+const VOLUMEN_SONIDO_FISICO_DB := -18.0
+
+const SHADER_LCD := """
+shader_type canvas_item;
+uniform bool filtro_lcd = true;
+
+void fragment() {
+    vec4 base = texture(TEXTURE, UV);
+    if (!filtro_lcd) {
+        COLOR = base;
+        return;
+    }
+
+    vec2 uv_previa = clamp(
+        UV - vec2(TEXTURE_PIXEL_SIZE.x, 0.0),
+        vec2(0.0),
+        vec2(1.0)
+    );
+    vec4 arrastre = texture(TEXTURE, uv_previa);
+    float rejilla = 1.0;
+    if (mod(floor(FRAGCOORD.y), 3.0) < 1.0) {
+        rejilla = 0.92;
+    }
+    vec3 rgb = mix(base.rgb, arrastre.rgb, 0.06) * rejilla;
+    COLOR = vec4(rgb, base.a);
+}
+"""
 
 const BTN_A := 0x01
 const BTN_B := 0x02
@@ -32,10 +64,21 @@ var _vista: TextureRect
 var _estado: Label
 var _lista: VBoxContainer
 var _textura: ImageTexture
+var _lcd_material: ShaderMaterial
+var _velo_encendido: ColorRect
+var _audio_fisico: AudioStreamPlayer
+var _sonidos_fisicos_cache: Dictionary = {}
 var _jugando := false
 var _pausa_anterior := false
 var _abierto := false
 var _tiempo_emulador := 0.0
+var _ruta_sram_actual := ""
+var _efectos_presentacion := true
+var _sonidos_fisicos := true
+var _encendiendo := false
+var _tiempo_encendido := 0.0
+var _rom_pendiente := ""
+var _botones_previos := 0
 
 
 func abrir() -> void:
@@ -47,12 +90,16 @@ func abrir() -> void:
 	_abierto = true
 	_tiempo_emulador = 0.0
 	_construir_ui()
+	_preparar_audio_fisico()
 	_preparar_nucleo()
 	_refrescar_roms()
 	set_process(true)
 
 
 func _process(delta: float) -> void:
+	if _encendiendo:
+		_actualizar_encendido(delta)
+		return
 	if not _jugando or _emulador == null:
 		return
 
@@ -60,7 +107,11 @@ func _process(delta: float) -> void:
 		_tiempo_emulador + maxf(delta, 0.0),
 		PASO_EMULADOR * MAX_FRAMES_POR_TICK,
 	)
-	_emulador.call("set_buttons", _botones())
+	var botones := _botones()
+	_emulador.call("set_buttons", botones)
+	if botones != 0 and (botones & ~_botones_previos) != 0:
+		_reproducir_sonido_fisico(&"boton")
+	_botones_previos = botones
 
 	var datos := PackedByteArray()
 	var frames_ejecutados := 0
@@ -93,6 +144,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _exit_tree() -> void:
+	_guardar_sram()
 	if _abierto and get_tree() != null:
 		get_tree().paused = _pausa_anterior
 	_abierto = false
@@ -136,7 +188,16 @@ func _construir_ui() -> void:
 	_vista.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_vista.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_vista.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_preparar_filtro_lcd()
 	izquierda.add_child(_vista)
+
+	_velo_encendido = ColorRect.new()
+	_velo_encendido.name = "VeloEncendidoLCD"
+	_velo_encendido.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_velo_encendido.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_velo_encendido.color = Color(0.70, 0.80, 0.69, 0.0)
+	_velo_encendido.visible = false
+	_vista.add_child(_velo_encendido)
 
 	_estado = Label.new()
 	_estado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -152,6 +213,28 @@ func _construir_ui() -> void:
 	carpeta.text = _formatear("carpeta", [CatalogoRomsUsuario.ruta_absoluta()])
 	carpeta.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	derecha.add_child(carpeta)
+
+	var efectos := CheckButton.new()
+	efectos.text = _texto("efectos_presentacion")
+	efectos.button_pressed = _efectos_presentacion
+	efectos.toggled.connect(_al_cambiar_efectos)
+	derecha.add_child(efectos)
+
+	var efectos_aviso := Label.new()
+	efectos_aviso.text = _texto("efectos_aviso")
+	efectos_aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	derecha.add_child(efectos_aviso)
+
+	var sonidos := CheckButton.new()
+	sonidos.text = _texto("sonidos_fisicos")
+	sonidos.button_pressed = _sonidos_fisicos
+	sonidos.toggled.connect(_al_cambiar_sonidos)
+	derecha.add_child(sonidos)
+
+	var sonidos_aviso := Label.new()
+	sonidos_aviso.text = _texto("sonidos_fisicos_aviso")
+	sonidos_aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	derecha.add_child(sonidos_aviso)
 
 	_lista = VBoxContainer.new()
 	_lista.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -171,6 +254,69 @@ func _construir_ui() -> void:
 	salir.text = _texto("cerrar")
 	salir.pressed.connect(_cerrar)
 	derecha.add_child(salir)
+
+
+func _preparar_filtro_lcd() -> void:
+	var shader := Shader.new()
+	shader.code = SHADER_LCD
+	_lcd_material = ShaderMaterial.new()
+	_lcd_material.shader = shader
+	_lcd_material.set_shader_parameter("filtro_lcd", _efectos_presentacion)
+	_vista.material = _lcd_material
+
+
+func _preparar_audio_fisico() -> void:
+	_audio_fisico = AudioStreamPlayer.new()
+	_audio_fisico.name = "AudioFisicoPortatil"
+	_audio_fisico.process_mode = Node.PROCESS_MODE_ALWAYS
+	_audio_fisico.volume_db = VOLUMEN_SONIDO_FISICO_DB
+	add_child(_audio_fisico)
+	_sonidos_fisicos_cache = {
+		&"encendido": _crear_sonido_fisico(95.0, 230.0, 0.055, 0.52),
+		&"cartucho": _crear_sonido_fisico(170.0, 65.0, 0.070, 0.58),
+		&"boton": _crear_sonido_fisico(760.0, 420.0, 0.028, 0.30),
+	}
+
+
+func _crear_sonido_fisico(
+	frecuencia_inicial: float, frecuencia_final: float, duracion: float, intensidad: float
+) -> AudioStreamWAV:
+	var muestras := maxi(1, int(round(duracion * FRECUENCIA_SONIDO_FISICO)))
+	var datos := PackedByteArray()
+	datos.resize(muestras * 2)
+	var fase := 0.0
+	for indice in range(muestras):
+		var progreso := float(indice) / float(maxi(muestras - 1, 1))
+		var frecuencia := lerpf(frecuencia_inicial, frecuencia_final, progreso)
+		fase += TAU * frecuencia / float(FRECUENCIA_SONIDO_FISICO)
+		var envolvente := 1.0 - progreso
+		envolvente *= envolvente
+		var onda := sin(fase) * 0.78 + sin(fase * 2.11) * 0.22
+		var muestra := int(clampf(onda * envolvente * intensidad, -1.0, 1.0) * 32767.0)
+		datos.encode_s16(indice * 2, muestra)
+
+	var stream := AudioStreamWAV.new()
+	stream.format = AudioStreamWAV.FORMAT_16_BITS
+	stream.mix_rate = FRECUENCIA_SONIDO_FISICO
+	stream.stereo = false
+	stream.data = datos
+	return stream
+
+
+func _reproducir_sonido_fisico(tipo: StringName) -> void:
+	if not _sonidos_fisicos or _audio_fisico == null:
+		return
+	var sonido = _sonidos_fisicos_cache.get(tipo)
+	if sonido is not AudioStream:
+		return
+	_audio_fisico.stream = sonido
+	_audio_fisico.play()
+
+
+func _al_cambiar_sonidos(activos: bool) -> void:
+	_sonidos_fisicos = activos
+	if not activos and _audio_fisico != null:
+		_audio_fisico.stop()
 
 
 func _preparar_nucleo() -> void:
@@ -208,6 +354,62 @@ func _refrescar_roms() -> void:
 func _cargar_rom(ruta: String) -> void:
 	if _emulador == null or ruta.is_empty():
 		return
+	_guardar_sram()
+	_ruta_sram_actual = ""
+	_reproducir_sonido_fisico(&"cartucho")
+	if not _efectos_presentacion:
+		_cargar_rom_ahora(ruta)
+		return
+
+	_jugando = false
+	_tiempo_emulador = 0.0
+	_rom_pendiente = ruta
+	_tiempo_encendido = DURACION_ENCENDIDO
+	_encendiendo = true
+	_estado.text = _texto("encendiendo")
+	if _velo_encendido != null:
+		_velo_encendido.color = Color(0.70, 0.80, 0.69, 0.92)
+		_velo_encendido.visible = true
+
+
+func _actualizar_encendido(delta: float) -> void:
+	_tiempo_encendido = maxf(0.0, _tiempo_encendido - maxf(delta, 0.0))
+	if _velo_encendido != null:
+		var proporcion := _tiempo_encendido / DURACION_ENCENDIDO
+		_velo_encendido.color = Color(0.70, 0.80, 0.69, proporcion * 0.92)
+	if _tiempo_encendido > 0.0:
+		return
+
+	var ruta := _rom_pendiente
+	_cancelar_encendido()
+	_reproducir_sonido_fisico(&"encendido")
+	_cargar_rom_ahora(ruta)
+
+
+func _cancelar_encendido() -> void:
+	_encendiendo = false
+	_tiempo_encendido = 0.0
+	_rom_pendiente = ""
+	if _velo_encendido != null:
+		_velo_encendido.visible = false
+
+
+func _al_cambiar_efectos(activos: bool) -> void:
+	_efectos_presentacion = activos
+	if _lcd_material != null:
+		_lcd_material.set_shader_parameter("filtro_lcd", activos)
+	if activos or not _encendiendo:
+		return
+
+	var ruta := _rom_pendiente
+	_cancelar_encendido()
+	_reproducir_sonido_fisico(&"encendido")
+	_cargar_rom_ahora(ruta)
+
+
+func _cargar_rom_ahora(ruta: String) -> void:
+	if _emulador == null or ruta.is_empty():
+		return
 	_estado.text = _formatear("cargando", [ruta.get_file()])
 	var rom := FileAccess.get_file_as_bytes(ruta)
 	var resultado := int(_emulador.call("load_rom", rom))
@@ -221,12 +423,118 @@ func _cargar_rom(ruta: String) -> void:
 		_jugando = false
 		_tiempo_emulador = 0.0
 		return
+	_ruta_sram_actual = _ruta_sram(rom)
+	_restaurar_sram()
 	_tiempo_emulador = 0.0
+	_botones_previos = 0
 	_jugando = true
 	var titulo := String(_emulador.call("rom_title"))
 	if titulo.is_empty():
 		titulo = ruta.get_file()
 	_estado.text = _formatear("ejecutando", [titulo])
+
+
+func _ruta_sram(rom: PackedByteArray) -> String:
+	var contexto := HashingContext.new()
+	if contexto.start(HashingContext.HASH_SHA256) != OK:
+		return ""
+	if contexto.update(rom) != OK:
+		return ""
+	var huella := contexto.finish().hex_encode()
+	return SRAM_DIR + "/" + huella + ".sav" if not huella.is_empty() else ""
+
+
+func _restaurar_sram() -> void:
+	if _emulador == null or _ruta_sram_actual.is_empty():
+		return
+	_recuperar_respaldo_sram()
+	if not FileAccess.file_exists(_ruta_sram_actual):
+		return
+	var datos := FileAccess.get_file_as_bytes(_ruta_sram_actual)
+	if bool(_emulador.call("load_save_ram", datos)):
+		return
+	var rota := _ruta_sram_actual + ".roto"
+	_eliminar_si_existe(rota)
+	var error := DirAccess.rename_absolute(
+		ProjectSettings.globalize_path(_ruta_sram_actual), ProjectSettings.globalize_path(rota)
+	)
+	if error != OK:
+		push_warning("No se pudo apartar SRAM incompatible: %s" % _ruta_sram_actual)
+	else:
+		push_warning("SRAM incompatible apartada en %s" % rota)
+
+
+func _guardar_sram() -> bool:
+	var datos := PackedByteArray()
+	if _emulador != null and not _ruta_sram_actual.is_empty():
+		datos = _emulador.call("save_ram")
+	if datos.is_empty():
+		return true
+	var carpeta_absoluta := ProjectSettings.globalize_path(SRAM_DIR)
+	var error_carpeta := DirAccess.make_dir_recursive_absolute(carpeta_absoluta)
+	if error_carpeta != OK and error_carpeta != ERR_ALREADY_EXISTS:
+		push_warning("No se pudo preparar la carpeta de SRAM")
+		return false
+
+	var temporal := _ruta_sram_actual + ".nuevo"
+	var respaldo := _ruta_sram_actual + ".anterior"
+	var archivo := FileAccess.open(temporal, FileAccess.WRITE)
+	if archivo == null:
+		push_warning("No se pudo escribir SRAM temporal")
+		return false
+	archivo.store_buffer(datos)
+	archivo.flush()
+	archivo.close()
+
+	_eliminar_si_existe(respaldo)
+	if FileAccess.file_exists(_ruta_sram_actual):
+		var mover_actual := (
+			DirAccess
+			. rename_absolute(
+				ProjectSettings.globalize_path(_ruta_sram_actual),
+				ProjectSettings.globalize_path(respaldo),
+			)
+		)
+		if mover_actual != OK:
+			_eliminar_si_existe(temporal)
+			push_warning("No se pudo preparar el reemplazo de SRAM")
+			return false
+
+	var mover_nuevo := DirAccess.rename_absolute(
+		ProjectSettings.globalize_path(temporal), ProjectSettings.globalize_path(_ruta_sram_actual)
+	)
+	if mover_nuevo != OK:
+		if FileAccess.file_exists(respaldo):
+			(
+				DirAccess
+				. rename_absolute(
+					ProjectSettings.globalize_path(respaldo),
+					ProjectSettings.globalize_path(_ruta_sram_actual),
+				)
+			)
+		_eliminar_si_existe(temporal)
+		push_warning("No se pudo reemplazar la SRAM")
+		return false
+	_eliminar_si_existe(respaldo)
+	return true
+
+
+func _recuperar_respaldo_sram() -> void:
+	var respaldo := _ruta_sram_actual + ".anterior"
+	if FileAccess.file_exists(_ruta_sram_actual) or not FileAccess.file_exists(respaldo):
+		return
+	(
+		DirAccess
+		. rename_absolute(
+			ProjectSettings.globalize_path(respaldo),
+			ProjectSettings.globalize_path(_ruta_sram_actual),
+		)
+	)
+
+
+func _eliminar_si_existe(ruta: String) -> void:
+	if FileAccess.file_exists(ruta):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(ruta))
 
 
 func _botones() -> int:
@@ -261,8 +569,13 @@ func _joy(boton: JoyButton) -> bool:
 func _cerrar() -> void:
 	if not _abierto:
 		return
+	_guardar_sram()
 	_jugando = false
 	_tiempo_emulador = 0.0
+	_botones_previos = 0
+	_cancelar_encendido()
+	if _audio_fisico != null:
+		_audio_fisico.stop()
 	_abierto = false
 	get_tree().paused = _pausa_anterior
 	cerrado.emit()

@@ -735,6 +735,111 @@
           "desenlace": "Se presenta la acusación contra quien está leyendo el expediente. No hay una casilla pensada para esta respuesta, así que el sistema la registra igual, en blanco, bajo el nombre '#427'."
         }
       ]
+    },
+    {
+      "id": "caso9@9",
+      "titulo": "CASO_9_TITULO",
+      "descripcion": "El lote administrativo 44-B fue asignado a la serie R-17 y a la mesa de Leandro Vela. Durante tres jornadas, Vela devolvió los expedientes sin tramitar porque el índice oficial no reconoce esa serie. El mismo archivo conserva, sin embargo, una ubicación física reservada para R-17 y una orden posterior de reclasificar el lote como R-18 para que el circuito siguiera funcionando.",
+      "anioSuceso": 1997,
+      "estado": "ABIERTO",
+      "confidencial": false,
+      "principal": false,
+      "registros": [
+        {
+          "id": "memoAsignacion9@9",
+          "tipo": "MEMORANDO",
+          "folio": "MEMO-1997-144",
+          "contenido": "De: Jefatura de Sección. Para: Mesa 12, Leandro Vela. Se asigna el lote 44-B, compuesto por doce expedientes, a la serie administrativa R-17. Tramitar por el circuito ordinario y remitir a Archivo al cierre de cada jornada.",
+          "fecha": "1997-04-07"
+        },
+        {
+          "id": "parteDevolucion9@9",
+          "tipo": "PARTE",
+          "folio": "PARTE-1997-031",
+          "contenido": "Mesa 12 devuelve sin trámite el lote 44-B. Motivo consignado por Leandro Vela: 'No consta unidad receptora para la serie R-17.' Se registraron cuatro devoluciones el 07/04, cuatro el 08/04 y cuatro el 09/04.",
+          "fecha": "1997-04-09"
+        },
+        {
+          "id": "indiceSeries9@9",
+          "tipo": "INDICE",
+          "folio": "IND-1997-SERIES",
+          "contenido": "Extracto del Índice General de Series Administrativas vigente: R-16 — Reclamaciones internas, Archivo A; R-18 — Revisión extraordinaria, Archivo A. Entre ambas entradas no figura ninguna serie ni nota de anulación.",
+          "fecha": "1997-01-02"
+        },
+        {
+          "id": "controlPresencia9@9",
+          "tipo": "CONTROL",
+          "folio": "CTRL-1997-041",
+          "contenido": "Control de presencia, Mesa 12. Leandro Vela: entrada 07:56 / salida 16:04 los días 07/04, 08/04 y 09/04. Sin ausencias, permisos ni incidencias registradas. Las devoluciones del lote 44-B se anotaron dentro de esas jornadas.",
+          "fecha": "1997-04-09"
+        },
+        {
+          "id": "incidenciaJefatura9@9",
+          "tipo": "INCIDENCIA",
+          "folio": "INC-1997-052",
+          "contenido": "Marta Ochoa, Jefatura de Sección: para evitar la paralización del circuito, reclasificar provisionalmente el lote 44-B como R-18. No modificar los documentos de origen. La regularización del código R-17 se tramitará por separado.",
+          "fecha": "1997-04-10"
+        },
+        {
+          "id": "hojaRuta9@9",
+          "tipo": "HOJA_RUTA",
+          "folio": "RUTA-1997-A4-17",
+          "contenido": "Archivo A — hoja de ocupación. Ubicación reservada: estante 4, hueco 17, serie R-17. Capacidad: 24 expedientes. Último movimiento consignado: reserva de espacio para lote 44-B, autorizada el 04/04/1997.",
+          "fecha": "1997-04-04"
+        }
+      ],
+      "pistas": [
+        {
+          "id": "pista36@9",
+          "registroOrigen": "parteDevolucion9@9",
+          "descripcion": "Leandro dejó por escrito el motivo exacto de las devoluciones: el circuito no identificaba una unidad receptora para R-17.",
+          "fraseGatillo": "No consta unidad receptora para la serie R-17."
+        },
+        {
+          "id": "pista37@9",
+          "registroOrigen": "hojaRuta9@9",
+          "descripcion": "Archivo había reservado una ubicación física para R-17 antes de que comenzaran las devoluciones del lote 44-B.",
+          "fraseGatillo": "Ubicación reservada: estante 4, hueco 17, serie R-17."
+        },
+        {
+          "id": "pista38@9",
+          "registroOrigen": "memoAsignacion9@9",
+          "registroOrigen2": "indiceSeries9@9",
+          "descripcion": "El memorando asigna oficialmente el lote 44-B a R-17, pero el índice vigente salta de R-16 a R-18 sin registrar esa serie ni su anulación."
+        },
+        {
+          "id": "pista39@9",
+          "registroOrigen": "parteDevolucion9@9",
+          "registroOrigen2": "controlPresencia9@9",
+          "descripcion": "Las doce devoluciones se registraron durante jornadas en las que Leandro constaba presente en su mesa; no hay una ausencia o permiso que explique la falta de tramitación."
+        },
+        {
+          "id": "pista40@9",
+          "registroOrigen": "incidenciaJefatura9@9",
+          "registroOrigen2": "hojaRuta9@9",
+          "descripcion": "Jefatura ordenó reclasificar el lote como R-18 para desbloquear el circuito aunque Archivo ya conservaba un hueco R-17 reservado específicamente para ese mismo lote."
+        }
+      ],
+      "sospechosos": [
+        {
+          "id": "sospechosoLeandro9@9",
+          "nombre": "Leandro Vela",
+          "descripcion": "Funcionario de la Mesa 12. Devolvió los doce expedientes del lote 44-B alegando que R-17 no tenía unidad receptora en el índice operativo.",
+          "desenlace": "Se atribuye a Leandro Vela la interrupción del trámite por devolver el lote en vez de elevar la anomalía antes de la tercera jornada. La medida explica las devoluciones, pero deja sin resolver por qué una serie ausente del índice tenía asignación formal y espacio físico reservado."
+        },
+        {
+          "id": "sospechosoMarta9@9",
+          "nombre": "Marta Ochoa",
+          "descripcion": "Jefa de sección. Ordenó reclasificar provisionalmente el lote 44-B como R-18 para que el circuito continuara sin corregir primero la discrepancia de R-17.",
+          "desenlace": "Se atribuye a Marta Ochoa la normalización de una clasificación contradictoria. El lote vuelve a circular como R-18, mientras la orden original y la reserva física continúan identificándolo como R-17."
+        },
+        {
+          "id": "sospechosoJulian9@9",
+          "nombre": "Julián Bermejo",
+          "descripcion": "Responsable del índice administrativo vigente. El extracto bajo su custodia salta de R-16 a R-18 sin serie R-17 ni nota de anulación.",
+          "desenlace": "Se atribuye a Julián Bermejo el mantenimiento incompleto del índice administrativo. Corregir el índice explicaría el bloqueo operativo, pero no determina por sí solo si R-17 debía figurar, anularse o conservar el hueco que Archivo ya le había reservado."
+        }
+      ]
     }
   ],
   "conceptos": [

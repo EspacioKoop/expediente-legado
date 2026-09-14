@@ -7,10 +7,15 @@
   "sin_roms": "No hay ROMs disponibles. Puedes añadir .gb/.gbc compatibles a la carpeta local.",
   "rom_propia_ausente": "La ROM propia no está preparada en esta build.",
   "cargando": "Cargando %s…",
+  "encendiendo": "Encendiendo…",
+  "efectos_presentacion": "Efectos físicos / LCD",
+  "efectos_aviso": "Capa visual opcional: no modifica los píxeles ni la emulación.",
+  "sonidos_fisicos": "Sonidos físicos de carcasa",
+  "sonidos_fisicos_aviso": "Clics originales y procedurales de cartucho, interruptor y botones. Son una capa aparte del audio de la ROM.",
   "ejecutando": "Ejecutando %s · Esc para salir · flechas/WASD + Z/X + Enter/Tab",
   "error_cgb": "Esta ROM requiere Game Boy Color real; el núcleo actual solo ofrece modo GB/DMG.",
   "error_rom": "No se pudo arrancar la ROM: %s",
   "error_runtime": "La emulación se detuvo de forma controlada: %s",
   "aviso": "Las ROMs locales son opcionales y responsabilidad de quien las aporta. No se descargan ni redistribuyen.",
-  "audio": "Prototipo actual: vídeo e input; audio y SRAM persistente quedan para un corte posterior."
+  "audio": "SRAM por ROM activa. El núcleo actual aún no ofrece audio emulado; #456 prepara el reemplazo CGB/audio. Los sonidos de carcasa son independientes."
 }

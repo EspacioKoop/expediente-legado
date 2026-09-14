@@ -1,0 +1,12 @@
+{
+  "restaurar_tooltip": "Restaurar controles por defecto",
+  "captura_teclado": "una tecla",
+  "captura_mando": "un botón del mando",
+  "captura_estado": "%s · pulsa %s",
+  "asignado": "✓ %s",
+  "conflicto": "⚠ %s ya usa ese control",
+  "error_asignacion": "⚠ No se pudo asignar ese control",
+  "restaurado": "↺ Controles restaurados",
+  "tooltip_teclado": "%s · teclado",
+  "tooltip_mando": "%s · mando"
+}

@@ -13,6 +13,8 @@ func _init() -> void:
 		return
 	if not _cargar_rom(emulador):
 		return
+	if not _probar_sram(emulador):
+		return
 	var frame := _ejecutar_frames(emulador)
 	if frame.is_empty():
 		return
@@ -54,6 +56,17 @@ func _cargar_rom(emulador: Object) -> bool:
 	var resultado := int(emulador.call("load_rom", rom))
 	if resultado != 0:
 		_fallar("load_rom falló: %s" % emulador.call("last_error"))
+		return false
+	return true
+
+
+func _probar_sram(emulador: Object) -> bool:
+	var sram = emulador.call("save_ram")
+	if not (sram is PackedByteArray):
+		_fallar("save_ram no devolvió PackedByteArray")
+		return false
+	if not bool(emulador.call("load_save_ram", sram)):
+		_fallar("load_save_ram rechazó su propio snapshot")
 		return false
 	return true
 

@@ -51,6 +51,21 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn("direct.joypad", self.cpp)
         self.assertIn("run_frame_rgba", self.cpp)
 
+    def test_nucleo_declara_capacidades_para_migracion_cgb(self):
+        self.assertIn('D_METHOD("core_name")', self.cpp)
+        self.assertIn('D_METHOD("supports_cgb")', self.cpp)
+        self.assertIn('D_METHOD("supports_audio")', self.cpp)
+        self.assertIn('return "Peanut-GB";', self.cpp)
+        self.assertIn("bool Siga98GB::supports_cgb() const", self.cpp)
+        self.assertIn("bool Siga98GB::supports_audio() const", self.cpp)
+
+    def test_nucleo_expone_sram_sin_saltarse_tamano_del_cartucho(self):
+        self.assertIn('D_METHOD("save_ram")', self.cpp)
+        self.assertIn('D_METHOD("load_save_ram", "save")', self.cpp)
+        self.assertIn("impl->cart_ram", self.cpp)
+        self.assertIn("p_save.size()", self.cpp)
+        self.assertIn("Tamaño de SRAM no coincide con el cartucho", self.cpp)
+
     def test_portatil_abre_ui_sin_estado_de_campana(self):
         self.assertIn("EmuladorPortatilApp.new()", self.portatil)
         combinado = self.cpp + self.ui + self.portatil
@@ -75,6 +90,47 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn("_tiempo_emulador -= PASO_EMULADOR", self.ui)
         self.assertNotIn("func _process(_delta: float)", self.ui)
 
+    def test_ui_persiste_sram_por_sha256_fuera_de_la_partida(self):
+        self.assertIn('SRAM_DIR := "user://sram/gb"', self.ui)
+        self.assertIn("HashingContext.HASH_SHA256", self.ui)
+        self.assertIn("hex_encode()", self.ui)
+        self.assertIn('_emulador.call("save_ram")', self.ui)
+        self.assertIn('_emulador.call("load_save_ram", datos)', self.ui)
+        self.assertIn('".nuevo"', self.ui)
+        self.assertIn('".anterior"', self.ui)
+        self.assertIn('".roto"', self.ui)
+        self.assertIn("_recuperar_respaldo_sram()", self.ui)
+
+    def test_presentacion_fisica_es_externa_desactivable_y_cancelable(self):
+        self.assertIn("DURACION_ENCENDIDO := 0.32", self.ui)
+        self.assertIn("uniform bool filtro_lcd = true", self.ui)
+        self.assertIn('set_shader_parameter("filtro_lcd", _efectos_presentacion)', self.ui)
+        self.assertIn("func _al_cambiar_efectos(activos: bool)", self.ui)
+        self.assertIn("if not _efectos_presentacion:", self.ui)
+        self.assertIn("_cargar_rom_ahora(ruta)", self.ui)
+        self.assertIn("_rom_pendiente = ruta", self.ui)
+        self.assertIn(
+            "if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE",
+            self.ui,
+        )
+        self.assertIn("func _cancelar_encendido()", self.ui)
+        self.assertIn('var resultado := int(_emulador.call("load_rom", rom))', self.ui)
+        self.assertNotIn("Partida", self.ui)
+        self.assertNotIn("Jornada", self.ui)
+
+    def test_sonido_fisico_es_procedural_separable_y_desactivable(self):
+        self.assertIn("FRECUENCIA_SONIDO_FISICO := 22050", self.ui)
+        self.assertIn("AudioStreamPlayer.new()", self.ui)
+        self.assertIn("AudioStreamWAV.new()", self.ui)
+        self.assertIn("AudioStreamWAV.FORMAT_16_BITS", self.ui)
+        self.assertIn("datos.encode_s16(indice * 2, muestra)", self.ui)
+        self.assertIn("func _al_cambiar_sonidos(activos: bool)", self.ui)
+        self.assertIn('_reproducir_sonido_fisico(&"cartucho")', self.ui)
+        self.assertIn('_reproducir_sonido_fisico(&"encendido")', self.ui)
+        self.assertIn('_reproducir_sonido_fisico(&"boton")', self.ui)
+        self.assertIn("_botones_previos = botones", self.ui)
+        self.assertNotIn('_emulador.call("audio', self.ui)
+
     def test_smoke_compara_pixeles_rgba_no_canales_sueltos(self):
         self.assertIn("BYTES_POR_PIXEL := 4", self.smoke)
         self.assertIn("func _frame_tiene_variacion", self.smoke)
@@ -82,6 +138,11 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn("17, 34, 51, 255, 17, 34, 51, 255", self.smoke)
         self.assertIn("17, 34, 51, 255, 17, 35, 51, 255", self.smoke)
         self.assertIn("if not _frame_tiene_variacion(frame)", self.smoke)
+
+    def test_smoke_ejercita_api_sram_nativa(self):
+        self.assertIn("func _probar_sram", self.smoke)
+        self.assertIn('emulador.call("save_ram")', self.smoke)
+        self.assertIn('emulador.call("load_save_ram", sram)', self.smoke)
 
     def test_extension_declara_linux_y_windows(self):
         self.assertIn('compatibility_minimum = "4.7"', self.extension)

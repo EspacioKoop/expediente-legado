@@ -32,8 +32,13 @@ public:
     bool is_loaded() const;
     void set_buttons(int64_t p_buttons);
     PackedByteArray run_frame_rgba();
+    PackedByteArray save_ram() const;
+    bool load_save_ram(const PackedByteArray &p_save);
     String rom_title() const;
     String last_error() const;
+    String core_name() const;
+    bool supports_cgb() const;
+    bool supports_audio() const;
     int width() const;
     int height() const;
 

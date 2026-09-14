@@ -6,9 +6,36 @@
 extends CanvasLayer
 
 const RUTA_PRESENTACION_SELLOS := "res://datos/sellos_presentacion.json"
+const RUTA_TEXTOS_REMAPEO := "res://datos/menu_remapeo_textos.json"
+const ETIQUETAS_ACCIONES := {
+	"mover_adelante": "Avanzar",
+	"mover_atras": "Retroceder",
+	"mover_izquierda": "Mover a la izquierda",
+	"mover_derecha": "Mover a la derecha",
+	"interactuar": "Interactuar",
+	"cancelar": "Volver / cancelar",
+}
+const NOMBRES_BOTONES_MANDO := {
+	JOY_BUTTON_A: "A / Cruz",
+	JOY_BUTTON_B: "B / Círculo",
+	JOY_BUTTON_X: "X / Cuadrado",
+	JOY_BUTTON_Y: "Y / Triángulo",
+	JOY_BUTTON_BACK: "Select / Vista",
+	JOY_BUTTON_GUIDE: "Guía",
+	JOY_BUTTON_START: "Start / Menú",
+	JOY_BUTTON_LEFT_STICK: "Stick izquierdo",
+	JOY_BUTTON_RIGHT_STICK: "Stick derecho",
+	JOY_BUTTON_LEFT_SHOULDER: "LB / L1",
+	JOY_BUTTON_RIGHT_SHOULDER: "RB / R1",
+	JOY_BUTTON_DPAD_UP: "Cruceta arriba",
+	JOY_BUTTON_DPAD_DOWN: "Cruceta abajo",
+	JOY_BUTTON_DPAD_LEFT: "Cruceta izquierda",
+	JOY_BUTTON_DPAD_RIGHT: "Cruceta derecha",
+}
 
 var _preferencias: Dictionary = {}
 var _presentacion_sellos: Dictionary = {}
+var _textos_remapeo: Dictionary = {}
 var _fondo: ColorRect
 var _panel_principal: PanelContainer
 var _panel_opciones: PanelContainer
@@ -107,7 +134,7 @@ func _montar() -> void:
 
 func _crear_panel() -> PanelContainer:
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(560, 300)
+	panel.custom_minimum_size = Vector2(640, 300)
 	panel.theme = EstiloSiga.tema()
 	return panel
 
@@ -263,6 +290,14 @@ func _cargar_presentacion_sellos() -> Dictionary:
 	return datos if datos is Dictionary else {}
 
 
+func _texto_remapeo(clave: String) -> String:
+	if _textos_remapeo.is_empty():
+		var datos = JSON.parse_string(FileAccess.get_file_as_string(RUTA_TEXTOS_REMAPEO))
+		if datos is Dictionary:
+			_textos_remapeo = datos
+	return String(_textos_remapeo.get(clave, ""))
+
+
 func _texto_sello(entrada: Dictionary) -> String:
 	var sello_id := String(entrada.get("id", ""))
 	var obtenido := Sellos.tiene_sello(_estado_partida_actual(), sello_id)
@@ -289,13 +324,13 @@ func _montar_remapeo(caja: VBoxContainer) -> void:
 		caja.add_child(fila)
 
 		var nombre := Label.new()
-		nombre.text = accion.replace("_", " ").capitalize()
-		nombre.custom_minimum_size.x = 180
+		nombre.text = _nombre_accion(accion)
+		nombre.custom_minimum_size.x = 200
 		fila.add_child(nombre)
 
 		for tipo in ["teclado", "mando"]:
 			var boton := Button.new()
-			boton.custom_minimum_size.x = 120
+			boton.custom_minimum_size.x = 160
 			boton.pressed.connect(_iniciar_captura.bind(accion, tipo))
 			fila.add_child(boton)
 			_botones_remapeo[_clave_boton(accion, tipo)] = boton
@@ -310,6 +345,7 @@ func _montar_remapeo(caja: VBoxContainer) -> void:
 
 	var restaurar := Button.new()
 	restaurar.text = "↺"
+	restaurar.tooltip_text = _texto_remapeo("restaurar_tooltip")
 	restaurar.pressed.connect(_restaurar_controles)
 	controles.add_child(restaurar)
 	_refrescar_remapeo()
@@ -319,11 +355,22 @@ func _clave_boton(accion: String, tipo: String) -> String:
 	return accion + ":" + tipo
 
 
+func _nombre_accion(accion: String) -> String:
+	return String(ETIQUETAS_ACCIONES.get(accion, accion.replace("_", " ").capitalize()))
+
+
+func _nombre_boton_mando(codigo: int) -> String:
+	return String(NOMBRES_BOTONES_MANDO.get(codigo, "Botón %d" % codigo))
+
+
 func _iniciar_captura(accion: String, tipo: String) -> void:
 	_cancelar_captura()
 	_captura_accion = accion
 	_captura_tipo = tipo
-	_estado_remapeo.text = accion.replace("_", " ") + " · " + tipo
+	var dispositivo := (
+		_texto_remapeo("captura_teclado") if tipo == "teclado" else _texto_remapeo("captura_mando")
+	)
+	_estado_remapeo.text = _texto_remapeo("captura_estado") % [_nombre_accion(accion), dispositivo]
 	var boton: Button = _botones_remapeo[_clave_boton(accion, tipo)]
 	boton.text = "…"
 	boton.grab_focus()
@@ -337,9 +384,14 @@ func _aplicar_remapeo(tipo: String, codigo: int) -> void:
 	if resultado.get("ok", false):
 		PreferenciasSiga.aplicar(_preferencias)
 		PreferenciasSiga.guardar(_preferencias)
-		_estado_remapeo.text = "✓ " + accion.replace("_", " ")
+		_estado_remapeo.text = _texto_remapeo("asignado") % _nombre_accion(accion)
 	else:
-		_estado_remapeo.text = "⚠ " + String(resultado.get("accion", resultado.get("motivo", "")))
+		var conflicto := String(resultado.get("accion", ""))
+		_estado_remapeo.text = (
+			_texto_remapeo("conflicto") % _nombre_accion(conflicto)
+			if not conflicto.is_empty()
+			else _texto_remapeo("error_asignacion")
+		)
 	_captura_accion = ""
 	_captura_tipo = ""
 	_refrescar_remapeo()
@@ -357,7 +409,7 @@ func _restaurar_controles() -> void:
 	_preferencias["acciones"] = PreferenciasSiga.nuevas()["acciones"].duplicate(true)
 	PreferenciasSiga.aplicar(_preferencias)
 	PreferenciasSiga.guardar(_preferencias)
-	_estado_remapeo.text = "↺"
+	_estado_remapeo.text = _texto_remapeo("restaurado")
 	_refrescar_remapeo()
 
 
@@ -368,8 +420,10 @@ func _refrescar_remapeo() -> void:
 		var mando: Button = _botones_remapeo.get(_clave_boton(accion, "mando"))
 		if tecla != null:
 			tecla.text = OS.get_keycode_string(int(mapa.get("teclado", 0)))
+			tecla.tooltip_text = _texto_remapeo("tooltip_teclado") % _nombre_accion(accion)
 		if mando != null:
-			mando.text = "🎮 %d" % int(mapa.get("mando", 0))
+			mando.text = _nombre_boton_mando(int(mapa.get("mando", 0)))
+			mando.tooltip_text = _texto_remapeo("tooltip_mando") % _nombre_accion(accion)
 
 
 func _abrir() -> void:
