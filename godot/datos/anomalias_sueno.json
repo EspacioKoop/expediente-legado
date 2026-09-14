@@ -1,0 +1,35 @@
+[
+  {
+    "id": "silla-demasiado-alta",
+    "origen_tipo": "objeto",
+    "origen_id": "chairDesk",
+    "representacion": {
+      "tipo": "modelo-procedural",
+      "modelo": "chairDesk",
+      "rasgo": "vertical-exagerada"
+    },
+    "modo_observacion": "exploracion"
+  },
+  {
+    "id": "monitor-estirado",
+    "origen_tipo": "objeto",
+    "origen_id": "computerScreen",
+    "representacion": {
+      "tipo": "modelo-procedural",
+      "modelo": "computerScreen",
+      "rasgo": "horizontal-estirado"
+    },
+    "modo_observacion": "exploracion"
+  },
+  {
+    "id": "archivador-torcido",
+    "origen_tipo": "objeto",
+    "origen_id": "bookcaseClosed",
+    "representacion": {
+      "tipo": "modelo-procedural",
+      "modelo": "bookcaseClosed",
+      "rasgo": "torsion-asimetrica"
+    },
+    "modo_observacion": "exploracion"
+  }
+]
