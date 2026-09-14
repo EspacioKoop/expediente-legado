@@ -63,7 +63,7 @@ sameboy_env.Append(
     ],
     CFLAGS=["-std=gnu11", r'-DGB_VERSION=\"1.0.3\"'],
 )
-sameboy_objects = sameboy_env.Object(sameboy_sources)
+sameboy_objects = sameboy_env.SharedObject(sameboy_sources)
 
 sources = Glob("src/*.cpp") + sameboy_objects
 if env["platform"] != "windows":
