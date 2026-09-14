@@ -219,7 +219,7 @@ static func responder_minotauro(estado: Dictionary, nodo_actual: String) -> Dict
 		return {"presencia": PRESENCIAS[0], "bloqueo": "", "ruta_recuperable": false}
 	var cruces: Array = estado.get("cruces", [])
 	var nivel := mini(cruces.size(), PRESENCIAS.size() - 1)
-	var presencia := PRESENCIAS[nivel]
+	var presencia: String = String(PRESENCIAS[nivel])
 	var candidatos := [ARCHIVO_RETORNO, CRUCE_SUR, ARCHIVO_ESTE, CRUCE_NORTE]
 	var bloqueo := ""
 	if nivel >= 2:
