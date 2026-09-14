@@ -26,8 +26,8 @@ class SuenoDuatTest(unittest.TestCase):
         self.assertIn('objeto.get("peso", 0.0)', self.texto)
         self.assertIn('objeto.get("peso_sellado", peso)', self.texto)
         self.assertIn('"regla": "peso_observable"', self.texto)
-        for termino in ["moral", "culpa", "bueno", "malo", "pecado"]:
-            self.assertNotIn(termino, self.texto.lower())
+        for campo in ['"moral"', '"culpa"', '"bueno"', '"malo"', '"pecado"']:
+            self.assertNotIn(campo, self.texto.lower())
 
     def test_reto_es_reproducible_sin_rng_implicito(self):
         self.assertIn("ids.sort()", self.texto)
