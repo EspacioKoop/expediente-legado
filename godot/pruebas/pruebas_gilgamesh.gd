@@ -68,7 +68,9 @@ func _probar_vigilia_activa() -> void:
 
 	libro.examinar()
 	_comprobar(libro.paginas_examinadas(), 3, "la tercera interacción alcanza la reproducción")
-	_comprobar(not libro.tablilla_observada(), "alcanzar la página no equivale a examinar la tablilla")
+	_comprobar(
+		not libro.tablilla_observada(), "alcanzar la página no equivale a examinar la tablilla"
+	)
 	_comprobar(not libro.esta_activada(), "la mera aparición de la reproducción no activa")
 
 	libro.examinar()
@@ -93,10 +95,13 @@ func _probar_vigilia_activa() -> void:
 
 func _probar_puzzle_reversible() -> void:
 	var estado := {}
-	var invalida := SuenoGilgamesh.evaluar_colocacion(
-		estado,
-		"fragmento_puerta",
-		"ancla_ola",
+	var invalida := (
+		SuenoGilgamesh
+		. evaluar_colocacion(
+			estado,
+			"fragmento_puerta",
+			"ancla_ola",
+		)
 	)
 	_comprobar(not invalida["aceptada"], "una pareja visual incorrecta se rechaza")
 	_comprobar(invalida["revertir"], "una pareja incorrecta pide reversión")
@@ -105,20 +110,26 @@ func _probar_puzzle_reversible() -> void:
 	var ids: Array = SuenoGilgamesh.ENCAJES.keys()
 	ids.sort()
 	for fragmento in ids:
-		var resultado := SuenoGilgamesh.evaluar_colocacion(
-			estado,
-			fragmento,
-			SuenoGilgamesh.ENCAJES[fragmento],
+		var resultado := (
+			SuenoGilgamesh
+			. evaluar_colocacion(
+				estado,
+				fragmento,
+				SuenoGilgamesh.ENCAJES[fragmento],
+			)
 		)
 		_comprobar(resultado["aceptada"], "%s acepta su ancla visual" % fragmento)
 		_comprobar(not resultado["revertir"], "%s no revierte al acertar" % fragmento)
 		estado = resultado["estado"]
 
 	_comprobar(estado.size(), 4, "los cuatro fragmentos producen cuatro estados resueltos")
-	var final := SuenoGilgamesh.evaluar_colocacion(
-		estado,
-		"fragmento_puerta",
-		"ancla_puerta",
+	var final := (
+		SuenoGilgamesh
+		. evaluar_colocacion(
+			estado,
+			"fragmento_puerta",
+			"ancla_puerta",
+		)
 	)
 	_comprobar(final["completa"], "repetir un acierto no rompe el estado completo")
 	_comprobar(final["total"], 4, "repetir un acierto no duplica progreso")
@@ -167,10 +178,13 @@ func _probar_vertical_3d() -> void:
 	var ids: Array = SuenoGilgamesh.ENCAJES.keys()
 	ids.sort()
 	for fragmento in ids:
-		var resultado := sueno.colocar_fragmento(
-			fragmento,
-			SuenoGilgamesh.ENCAJES[fragmento],
-			true,
+		var resultado := (
+			sueno
+			. colocar_fragmento(
+				fragmento,
+				SuenoGilgamesh.ENCAJES[fragmento],
+				true,
+			)
 		)
 		_comprobar(resultado["aceptada"], "la instancia acepta %s" % fragmento)
 
