@@ -4,8 +4,8 @@
 ## `dia_clima_app.gd` ni altera la cadena de jornada. Observa cuándo cambia el
 ## mundo montado por el día y añade únicamente dressing visual/interactivo.
 ##
-## No descarga assets en runtime. Reutiliza modelos CC0 ya versionados y
-## registrados en `assets/procedencia.json`.
+## No descarga assets en runtime. Reutiliza modelos CC0 ya versionados y una
+## adaptación procedural CC0 documentada, sin introducir nuevos binarios/LFS.
 extends Node
 
 var _mundo_vestido_id := 0
@@ -60,6 +60,26 @@ func _vestir_archivo_cc0(mundo: Node3D) -> void:
 		Color(0.34, 0.34, 0.32),
 		"papelera"
 	)
+	_archivador_vintage_cc0(mundo)
+
+
+func _archivador_vintage_cc0(mundo: Node3D) -> void:
+	# Cierra el extremo libre de la batería de archivadores existente con una
+	# silueta distinta y legible. El frente mira hacia el pasillo central.
+	var tam := VintageWoodenDrawer.TAMANO
+	var cuerpo := StaticBody3D.new()
+	cuerpo.name = "ArchivadorVintageCC0"
+	cuerpo.position = Vector3(5.50, tam.y * 0.5, 4.42)
+	cuerpo.rotation_degrees.y = 90.0
+	mundo.add_child(cuerpo)
+
+	var colision := CollisionShape3D.new()
+	var forma := BoxShape3D.new()
+	forma.size = tam
+	colision.shape = forma
+	cuerpo.add_child(colision)
+	cuerpo.add_child(VintageWoodenDrawer.crear())
+	_montar_examinable(cuerpo, tam, "archivador vintage")
 
 
 func _vestir_calle_cc0(mundo: Node3D) -> void:
