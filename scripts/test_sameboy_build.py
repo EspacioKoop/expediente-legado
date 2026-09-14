@@ -60,7 +60,8 @@ class SameBoyBuildGateTest(unittest.TestCase):
             "GB_DISABLE_CHEAT_SEARCH",
         ):
             self.assertIn(f'"{define}"', self.sconstruct)
-        self.assertIn("sameboy_env.Object(sameboy_sources)", self.sconstruct)
+        self.assertIn(r'-DGB_VERSION=\"1.0.3\"', self.sconstruct)
+        self.assertIn("sameboy_env.SharedObject(sameboy_sources)", self.sconstruct)
 
     def test_stage_no_declara_capacidades_antes_del_adapter(self):
         self.assertIn('return "Peanut-GB";', self.wrapper)
