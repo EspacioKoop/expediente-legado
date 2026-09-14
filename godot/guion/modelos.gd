@@ -58,6 +58,19 @@ const ESCALAS_MATERIAL := {
 ## cambia aquí.
 const ALTO_PERSONA := 1.75
 
+const PERFILES_FACIALES := {
+	"emperador":
+	{"piel": Color(0.72, 0.56, 0.43), "cabello": Color(0.08, 0.07, 0.06), "x": 0.96, "z": 0.92},
+	"aduanero_ny":
+	{"piel": Color(0.66, 0.48, 0.36), "cabello": Color(0.12, 0.09, 0.07), "x": 1.04, "z": 1.00},
+	"correspondencia":
+	{"piel": Color(0.70, 0.53, 0.40), "cabello": Color(0.10, 0.08, 0.07), "x": 0.92, "z": 0.96},
+	"riegos":
+	{"piel": Color(0.73, 0.57, 0.43), "cabello": Color(0.16, 0.12, 0.09), "x": 1.08, "z": 1.02},
+	"fielato":
+	{"piel": Color(0.62, 0.46, 0.35), "cabello": Color(0.07, 0.06, 0.05), "x": 1.00, "z": 1.08},
+}
+
 ## Lo que se carga una vez y se reusa. Las salas repiten mueble —seis
 ## archivadores, cuatro puestos— y volver a leer el `.glb` por cada uno es leer
 ## el mismo fichero seis veces para obtener seis cosas idénticas.
@@ -203,6 +216,8 @@ static func _reproductor(nodo: Node) -> AnimationPlayer:
 ##
 ## `retrato` no vuelve a cargarse como imagen: solo sirve de semilla estable
 ## para pequeñas diferencias de proporción y tono entre compañeros.
+
+
 static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 	var esqueleto := _esqueleto(pieza)
 	if esqueleto == null:
@@ -217,15 +232,19 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 
 	var alto := _alto_cabeza(esqueleto, hueso)
 	var semilla := absi(hash(retrato))
-	var radio_x := alto * (0.34 + float(semilla % 5) * 0.008)
+	var perfil: Dictionary = PERFILES_FACIALES.get(retrato, {})
+	var radio_x := alto * (0.34 + float(semilla % 5) * 0.008) * float(perfil.get("x", 1.0))
 	var radio_y := alto * 0.50
-	var radio_z := alto * (0.38 + float((semilla / 5) % 5) * 0.008)
+	var radio_z := alto * (0.38 + float((semilla / 5) % 5) * 0.008) * float(perfil.get("z", 1.0))
 	var centro_y := alto * 0.48
 	var separacion := radio_x * (0.50 + float((semilla / 25) % 5) * 0.015)
 	var altura_ojos := centro_y + alto * 0.12
 
 	var oscuro := Color(0.10, 0.08, 0.07)
-	var piel := Color(0.58, 0.43, 0.34).lerp(Color(0.82, 0.68, 0.54), float(semilla % 7) / 6.0)
+	var piel: Color = perfil.get(
+		"piel", Color(0.58, 0.43, 0.34).lerp(Color(0.82, 0.68, 0.54), float(semilla % 7) / 6.0)
+	)
+	var cabello: Color = perfil.get("cabello", oscuro)
 
 	# La cabeza procedural envuelve el cráneo importado: no hay una placa frontal
 	# que pueda verse de canto. Las pequeñas variaciones conservan el roster sin
@@ -320,6 +339,22 @@ static func _volumen_cabeza(
 	cabeza.scale = escala
 	cabeza.material_override = _material_rasgo(color)
 	padre.add_child(cabeza)
+
+
+static func _cabello_cabeza(
+	padre: Node3D, posicion: Vector3, escala: Vector3, color: Color
+) -> void:
+	var cabello := MeshInstance3D.new()
+	var esfera := SphereMesh.new()
+	esfera.radius = 1.0
+	esfera.height = 2.0
+	esfera.radial_segments = 8
+	esfera.rings = 4
+	cabello.mesh = esfera
+	cabello.position = posicion
+	cabello.scale = escala
+	cabello.material_override = _material_rasgo(color)
+	padre.add_child(cabello)
 
 
 static func _rasgo_esfera(padre: Node3D, posicion: Vector3, escala: Vector3, color: Color) -> void:
