@@ -23,8 +23,7 @@ func _probar_movimiento() -> void:
 	var giro := cuerpo.rotation.y
 	idle._process(0.5)
 	_comprobar(
-		not cuerpo.scale.is_equal_approx(escala),
-		"la respiración altera solo la escala visual"
+		not cuerpo.scale.is_equal_approx(escala), "la respiración altera solo la escala visual"
 	)
 	_comprobar(
 		not is_equal_approx(cuerpo.rotation.y, giro),
