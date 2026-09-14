@@ -12,15 +12,17 @@ class HUDLayerTest(unittest.TestCase):
 
     def test_declara_superficies_separadas(self):
         self.assertIn("class_name HUDLayer", self.source)
-        for nombre in ["ESTADO", "INTERACCION", "TUTORIAL", "DIALOGO", "MODAL"]:
+        for nombre in ["ESTADO", "INTERACCION", "TUTORIAL", "FASE", "DIALOGO", "MODAL"]:
             self.assertIn(f"const {nombre}", self.source)
 
-    def test_dialogo_gana_a_tutorial_e_interaccion(self):
+    def test_dialogo_gana_a_fase_tutorial_e_interaccion(self):
         self.assertIn("INTERACCION: 100", self.source)
         self.assertIn("TUTORIAL: 200", self.source)
+        self.assertIn("FASE: 250", self.source)
         self.assertIn("DIALOGO: 300", self.source)
         self.assertIn("MODAL: 400", self.source)
         self.assertIn("return tipo == _primaria_activa()", self.source)
+        self.assertIn("[INTERACCION, TUTORIAL, FASE, DIALOGO]", self.source)
 
     def test_modal_oculta_el_resto(self):
         self.assertIn("if esta_activa(MODAL):", self.source)

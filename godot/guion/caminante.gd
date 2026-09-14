@@ -5,6 +5,11 @@
 ## un salto convertiría cualquier sitio en un sitio para trepar.
 extends CharacterBody3D
 
+enum DispositivoEntrada {
+	TECLADO_RATON,
+	MANDO,
+}
+
 const VELOCIDAD := 2.6
 const ACELERACION := 10.0
 const FRENADO := 14.0
@@ -26,14 +31,38 @@ const SENSIBILIDAD_MANDO_BASE := 2.4
 ## esta segunda guarda suaviza el borde del vector combinado.
 const ZONA_MUERTA := 0.12
 
+## Cambiar el tipo de prompt exige un gesto inequívoco. Un stick gastado puede
+## oscilar dentro de la zona de reposo y no debe hacer parpadear teclado ↔ mando.
+const UMBRAL_CAMBIO_DISPOSITIVO := 0.35
+
 ## Cuánto se puede mirar arriba y abajo. Sin tope, la cámara se da la vuelta.
 const TOPE_VERTICAL := deg_to_rad(85.0)
+
+const NOMBRES_BOTONES_MANDO := {
+	JOY_BUTTON_A: "A / Cruz",
+	JOY_BUTTON_B: "B / Círculo",
+	JOY_BUTTON_X: "X / Cuadrado",
+	JOY_BUTTON_Y: "Y / Triángulo",
+	JOY_BUTTON_BACK: "Select / Vista",
+	JOY_BUTTON_GUIDE: "Guía",
+	JOY_BUTTON_START: "Start / Menú",
+	JOY_BUTTON_LEFT_STICK: "Stick izquierdo",
+	JOY_BUTTON_RIGHT_STICK: "Stick derecho",
+	JOY_BUTTON_LEFT_SHOULDER: "LB / L1",
+	JOY_BUTTON_RIGHT_SHOULDER: "RB / R1",
+	JOY_BUTTON_DPAD_UP: "Cruceta arriba",
+	JOY_BUTTON_DPAD_DOWN: "Cruceta abajo",
+	JOY_BUTTON_DPAD_LEFT: "Cruceta izquierda",
+	JOY_BUTTON_DPAD_RIGHT: "Cruceta derecha",
+}
 
 var _detector_interaccion: DetectorInteraccion3D
 var _prompt_interaccion: Label
 var _hud_prioridades: HUDLayer
 var _objetivo_foco: Interactuable3D
 var _preferencias_camara: Dictionary = {}
+var _ultimo_dispositivo := DispositivoEntrada.TECLADO_RATON
+var _texto_interaccion_actual := ""
 
 @onready var _camara: Camera3D = $Camara
 
@@ -88,7 +117,8 @@ func _mostrar_prompt_interaccion(objetivo: Interactuable3D, texto: String) -> vo
 	_marcar_objetivo(_objetivo_foco, false)
 	_objetivo_foco = objetivo
 	_marcar_objetivo(_objetivo_foco, true)
-	_prompt_interaccion.text = _texto_con_entrada("interactuar", texto)
+	_texto_interaccion_actual = texto
+	_refrescar_prompt_interaccion()
 	if _hud_prioridades != null:
 		if texto.is_empty():
 			_hud_prioridades.desactivar(HUDLayer.INTERACCION)
@@ -101,6 +131,7 @@ func _mostrar_prompt_interaccion(objetivo: Interactuable3D, texto: String) -> vo
 func _ocultar_prompt_interaccion() -> void:
 	_marcar_objetivo(_objetivo_foco, false)
 	_objetivo_foco = null
+	_texto_interaccion_actual = ""
 	_prompt_interaccion.text = ""
 	if _hud_prioridades != null:
 		_hud_prioridades.desactivar(HUDLayer.INTERACCION)
@@ -113,20 +144,67 @@ func _marcar_objetivo(objetivo: Interactuable3D, en_foco: bool) -> void:
 		objetivo.marcar_en_foco(en_foco)
 
 
-## El texto de entrada se deriva de InputMap, que ya contiene el remapeo real.
-## Nunca se imprime una tecla ni un botón físico fijo desde este HUD.
+func _refrescar_prompt_interaccion() -> void:
+	if not is_instance_valid(_prompt_interaccion):
+		return
+	_prompt_interaccion.text = _texto_con_entrada("interactuar", _texto_interaccion_actual)
+
+
+## El prompt enseña una sola entrada: la del último dispositivo usado. `InputMap`
+## sigue siendo la fuente de verdad, así que un remapeo se refleja sin hardcodear
+## una tecla física y cambiar de teclado/ratón a mando refresca el texto en vivo.
 func _texto_con_entrada(accion: StringName, texto: String) -> String:
-	var entradas: Array[String] = []
+	if texto.is_empty():
+		return ""
 	for evento in InputMap.action_get_events(accion):
-		var nombre := evento.as_text().strip_edges()
-		if nombre.is_empty() or nombre in entradas:
+		if not _evento_pertenece_a_dispositivo(evento):
 			continue
-		entradas.append(nombre)
-		if entradas.size() == 2:
-			break
-	if entradas.is_empty():
-		return texto
-	return "[%s]  %s" % [" / ".join(entradas), texto]
+		var nombre := _nombre_entrada(evento)
+		if not nombre.is_empty():
+			return "[%s]  %s" % [nombre, texto]
+	return texto
+
+
+func _evento_pertenece_a_dispositivo(evento: InputEvent) -> bool:
+	if _ultimo_dispositivo == DispositivoEntrada.MANDO:
+		return evento is InputEventJoypadButton or evento is InputEventJoypadMotion
+	return evento is InputEventKey or evento is InputEventMouseButton
+
+
+func _nombre_entrada(evento: InputEvent) -> String:
+	if evento is InputEventJoypadButton:
+		return String(
+			NOMBRES_BOTONES_MANDO.get(evento.button_index, "Botón %d" % evento.button_index)
+		)
+	if evento is InputEventKey:
+		var codigo: Key = (
+			evento.physical_keycode if evento.physical_keycode != 0 else evento.keycode
+		)
+		return OS.get_keycode_string(codigo)
+	return evento.as_text().strip_edges()
+
+
+func _registrar_dispositivo_entrada(evento: InputEvent) -> void:
+	if evento is InputEventJoypadButton:
+		if evento.pressed:
+			_usar_dispositivo_entrada(DispositivoEntrada.MANDO)
+	elif evento is InputEventJoypadMotion:
+		if absf(evento.axis_value) >= UMBRAL_CAMBIO_DISPOSITIVO:
+			_usar_dispositivo_entrada(DispositivoEntrada.MANDO)
+	elif (
+		evento is InputEventKey
+		or evento is InputEventMouseButton
+		or evento is InputEventMouseMotion
+	):
+		_usar_dispositivo_entrada(DispositivoEntrada.TECLADO_RATON)
+
+
+func _usar_dispositivo_entrada(dispositivo: int) -> void:
+	if dispositivo == _ultimo_dispositivo:
+		return
+	_ultimo_dispositivo = dispositivo
+	if not _texto_interaccion_actual.is_empty():
+		_refrescar_prompt_interaccion()
 
 
 ## Declara un esquema de movimiento propio en vez de depender de las acciones
@@ -162,6 +240,7 @@ func _ajustar_volumen_pisadas() -> void:
 
 
 func _unhandled_input(evento: InputEvent) -> void:
+	_registrar_dispositivo_entrada(evento)
 	# El menú global es el único dueño de `cancelar`: al abrirlo libera el ratón y
 	# al cerrarlo restaura el modo anterior. Si el sistema operativo lo soltó por
 	# otro motivo, un clic dentro del juego recupera la captura sin otra tecla.
@@ -211,6 +290,8 @@ func _mirar_con_mando(delta: float) -> void:
 	if magnitud <= ZONA_MUERTA:
 		return
 
+	if magnitud >= UMBRAL_CAMBIO_DISPOSITIVO:
+		_usar_dispositivo_entrada(DispositivoEntrada.MANDO)
 	# La salida de la zona muerta es continua: un stick apenas desplazado no
 	# pega un salto de velocidad al cruzar el umbral.
 	var escala := clampf((magnitud - ZONA_MUERTA) / (1.0 - ZONA_MUERTA), 0.0, 1.0)
