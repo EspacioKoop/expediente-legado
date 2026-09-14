@@ -25,7 +25,8 @@ class GatoAsistenteVisualTest(unittest.TestCase):
         self.assertIn("Polygon2D.new()", self.dia)
 
     def test_el_estado_sigue_viniendo_de_gato_ayuda(self):
-        self.assertIn("GatoAyuda.lineas_asistente(gato)", self.dia)
+        self.assertIn("GatoAyuda.lineas_asistente(gato, contexto)", self.dia)
+        self.assertIn("GatoAyuda.contexto_siga", self.dia)
         self.assertIn("GatoAyuda.nivel(gato)", self.dia)
         self.assertNotIn("afinidad", self.dia.lower())
         self.assertIn("dias_sin_comer", self.ayuda)

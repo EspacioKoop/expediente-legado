@@ -9,6 +9,7 @@ CAPA = ROOT / "godot" / "guion" / "dia_gato_app.gd"
 CAPA_TRABAJILLOS = ROOT / "godot" / "guion" / "dia_trabajillos_app.gd"
 CAPA_ONBOARDING = ROOT / "godot" / "guion" / "dia_onboarding_app.gd"
 CAPA_CLIMA = ROOT / "godot" / "guion" / "dia_clima_app.gd"
+VISOR_COMBINACIONES = ROOT / "godot" / "guion" / "visor_combinaciones_app.gd"
 ESCENA = ROOT / "godot" / "escenas" / "dia.tscn"
 
 
@@ -20,6 +21,7 @@ class GatoAyudaTest(unittest.TestCase):
         self.capa_trabajillos = CAPA_TRABAJILLOS.read_text(encoding="utf-8")
         self.capa_onboarding = CAPA_ONBOARDING.read_text(encoding="utf-8")
         self.capa_clima = CAPA_CLIMA.read_text(encoding="utf-8")
+        self.visor_combinaciones = VISOR_COMBINACIONES.read_text(encoding="utf-8")
         self.escena = ESCENA.read_text(encoding="utf-8")
 
     def test_una_sola_fuente_de_estado(self):
@@ -73,6 +75,27 @@ class GatoAyudaTest(unittest.TestCase):
         # ESCASA conserva únicamente la instrucción necesaria y AUSENTE calla.
         self.assertGreaterEqual(self.politica.count('return ["VISOR_ELIJA"]'), 2)
         self.assertGreaterEqual(self.politica.count("return []"), 2)
+
+    def test_visor_expone_contexto_real_sin_estado_paralelo(self):
+        visor = self.visor_combinaciones
+        self.assertIn("signal contexto_asistente_cambiado", visor)
+        self.assertIn("func contexto_asistente()", visor)
+        self.assertIn("Progreso.de_casos([caso], descubiertas)", visor)
+        self.assertIn("Acusacion.esta_cerrado(partida.estado", visor)
+        for evento in ("descubrimiento", "combinacion_fallida", "combinacion_repetida"):
+            self.assertIn(f'_emitir_contexto_asistente("{evento}")', visor)
+        self.assertNotIn("contexto_gato", visor)
+        self.assertNotIn('jornada["contexto', visor)
+
+    def test_capa_consume_solo_superficie_publica_del_visor(self):
+        self.assertIn('get_node_or_null("Visor")', self.capa)
+        self.assertIn('has_method("contexto_asistente")', self.capa)
+        self.assertIn('has_signal("contexto_asistente_cambiado")', self.capa)
+        self.assertIn("GatoAyuda.contexto_siga", self.capa)
+        self.assertIn('connect("contexto_asistente_cambiado"', self.capa)
+        self.assertIn("_actualizar_lineas_asistente_siga", self.capa)
+        self.assertNotIn('get_node_or_null("Visor/', self.capa)
+        self.assertNotIn('get_node("Visor/', self.capa)
 
     def test_hay_un_gato_2d_visible_tipo_ayudante_de_escritorio(self):
         self.assertIn("class_name GatoAsistente2D", self.avatar)
