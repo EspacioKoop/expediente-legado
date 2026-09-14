@@ -1,0 +1,127 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://guion/minijuego_aviones_papel.gd" id="1_aviones"]
+
+[node name="MinijuegoAvionesPapel" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_aviones")
+
+[node name="Titulo" type="Label" parent="."]
+layout_mode = 0
+offset_left = 82.0
+offset_top = 16.0
+offset_right = 570.0
+offset_bottom = 42.0
+text = "PLANTA 4 · AVIONES DE PAPEL"
+horizontal_alignment = 1
+
+[node name="Avion" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 330.0
+offset_top = 575.0
+offset_right = 362.0
+offset_bottom = 607.0
+theme_override_font_sizes/font_size = 24
+text = "▲"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 0
+offset_left = 660.0
+offset_top = 40.0
+offset_right = 990.0
+offset_bottom = 640.0
+
+[node name="Margen" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Controles" type="VBoxContainer" parent="Panel/Margen"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Ayuda" type="Label" parent="Panel/Margen/Controles"]
+layout_mode = 2
+text = "Teclado/mando: navega controles y confirma con A/Enter."
+autowrap_mode = 2
+
+[node name="ModalidadLabel" type="Label" parent="Panel/Margen/Controles"]
+layout_mode = 2
+text = "Modalidad"
+
+[node name="Modalidad" type="OptionButton" parent="Panel/Margen/Controles"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ModeloLabel" type="Label" parent="Panel/Margen/Controles"]
+layout_mode = 2
+text = "Modelo"
+
+[node name="Modelo" type="OptionButton" parent="Panel/Margen/Controles"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="DireccionLabel" type="Label" parent="Panel/Margen/Controles"]
+layout_mode = 2
+text = "Dirección"
+
+[node name="Direccion" type="HSlider" parent="Panel/Margen/Controles"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = -1.0
+max_value = 1.0
+step = 0.05
+
+[node name="AlturaLabel" type="Label" parent="Panel/Margen/Controles"]
+layout_mode = 2
+text = "Altura"
+
+[node name="Altura" type="HSlider" parent="Panel/Margen/Controles"]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = -20.0
+max_value = 55.0
+step = 1.0
+value = 18.0
+
+[node name="PotenciaLabel" type="Label" parent="Panel/Margen/Controles"]
+layout_mode = 2
+text = "Potencia"
+
+[node name="Potencia" type="HSlider" parent="Panel/Margen/Controles"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 1.0
+step = 0.05
+value = 0.75
+
+[node name="Lanzar" type="Button" parent="Panel/Margen/Controles"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Lanzar"
+
+[node name="Abandonar" type="Button" parent="Panel/Margen/Controles"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Abandonar"
+
+[node name="Estado" type="Label" parent="Panel/Margen/Controles"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Preparando ronda…"
+autowrap_mode = 2
+
+[node name="Marcador" type="Label" parent="Panel/Margen/Controles"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Marcador"
