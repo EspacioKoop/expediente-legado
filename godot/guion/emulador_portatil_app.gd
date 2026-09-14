@@ -267,9 +267,9 @@ func _restaurar_sram() -> void:
 
 
 func _guardar_sram() -> bool:
-	if _emulador == null or _ruta_sram_actual.is_empty():
-		return true
-	var datos: PackedByteArray = _emulador.call("save_ram")
+	var datos := PackedByteArray()
+	if _emulador != null and not _ruta_sram_actual.is_empty():
+		datos = _emulador.call("save_ram")
 	if datos.is_empty():
 		return true
 	var carpeta_absoluta := ProjectSettings.globalize_path(SRAM_DIR)
