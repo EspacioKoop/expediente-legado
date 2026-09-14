@@ -4,12 +4,14 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "gbc-fixtures.yml"
+CGB_ONLY_FIXTURE = ROOT / "gbc" / "fixtures" / "cgb_only_smoke" / "main.asm"
 
 
 class GbcFixtureWorkflowTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.texto = WORKFLOW.read_text(encoding="utf-8")
+        cls.cgb_only = CGB_ONLY_FIXTURE.read_text(encoding="utf-8")
 
     def test_upstream_y_toolchain_estan_fijados(self):
         self.assertIn("RGBDS_VERSION: v1.0.3", self.texto)
@@ -23,12 +25,21 @@ class GbcFixtureWorkflowTest(unittest.TestCase):
         )
         self.assertIn("sha256sum --check --strict", self.texto)
 
-    def test_solo_compila_los_dos_fixtures_cc0_iniciales(self):
+    def test_solo_compila_los_dos_fixtures_cc0_externos_iniciales(self):
         self.assertIn("for fixture in joypad vblank", self.texto)
         self.assertIn("joypad.gb", self.texto)
         self.assertIn("vblank.gb", self.texto)
         self.assertNotIn("ucity.gbc", self.texto)
         self.assertNotIn("BIOS", self.texto)
+
+    def test_fixture_cgb_only_es_propio_y_se_compila_desde_fuente(self):
+        self.assertIn("gbc/fixtures/cgb_only_smoke/**", self.texto)
+        self.assertIn("make -C gbc/fixtures/cgb_only_smoke clean all", self.texto)
+        self.assertIn("cgb_only_smoke.gbc", self.texto)
+        self.assertIn('= "c0"', self.texto)
+        self.assertIn("db $C0", self.cgb_only)
+        self.assertIn("rBCPS", self.cgb_only)
+        self.assertIn("rBCPD", self.cgb_only)
 
     def test_roms_no_se_versionan_y_solo_salen_como_artefacto_corto(self):
         self.assertIn("actions/upload-artifact@v4", self.texto)
