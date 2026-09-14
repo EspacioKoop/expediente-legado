@@ -1,7 +1,7 @@
 ## Consola de sobremesa original para el rincón de televisión de la casa (#95).
 ##
 ## Reutiliza el backend ya aislado de ConsolaPortatil98: catálogo de ROMs,
-## EmuladorPortatilApp, pausa/salida y ausencia de efectos sobre Partida/Jornada.
+## EmuladorPortatilApp, pausa/salida y ausencia de efectos sobre campaña/progreso.
 ## Solo cambia la presencia física para que los minijuegos de #95 se jueguen
 ## desde una consola reconocible junto al televisor, no desde la portátil.
 class_name ConsolaSobremesa98
