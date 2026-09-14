@@ -368,9 +368,7 @@ func _iniciar_captura(accion: String, tipo: String) -> void:
 	_captura_accion = accion
 	_captura_tipo = tipo
 	var dispositivo := (
-		_texto_remapeo("captura_teclado")
-		if tipo == "teclado"
-		else _texto_remapeo("captura_mando")
+		_texto_remapeo("captura_teclado") if tipo == "teclado" else _texto_remapeo("captura_mando")
 	)
 	_estado_remapeo.text = _texto_remapeo("captura_estado") % [_nombre_accion(accion), dispositivo]
 	var boton: Button = _botones_remapeo[_clave_boton(accion, tipo)]
@@ -517,7 +515,6 @@ func _al_cambiar_sensibilidad_mando(valor: float) -> void:
 func _al_cambiar_invertir_y(activa: bool) -> void:
 	_preferencias["invertir_camara_y"] = activa
 	_guardar_y_notificar_camara()
-
 
 func _guardar_y_notificar_camara() -> void:
 	PreferenciasSiga.guardar(_preferencias)
