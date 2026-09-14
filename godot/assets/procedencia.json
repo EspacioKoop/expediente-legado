@@ -523,7 +523,9 @@
       "fuente": "https://valsekamerplant.itch.io/psx-style-opulent-office",
       "sha256": "18e7384d87f7943fff6ca1bb728bd90c5e8e827a846bb94c4e7226a4630b1875",
       "archivo_origen": "textura embebida en el GLB del pack",
-      "paquete_sha256": "391eeaf906a60822a4704e65effdee75962a539ae88bfe6a3f20852879eea409",
+      "paquete_sha256": "391eeaf906a60822a4704e65effdee75962a539ae88bfe6a3f20852879eea409"
+    },
+    {
       "ruta": "texturas/poster-1998-01.png",
       "titulo": "La información es de todos",
       "autor": "Imagen generada con IA; herramienta y modelo no especificados por el proveedor",
