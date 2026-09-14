@@ -26,6 +26,10 @@ const SENSIBILIDAD_MANDO_BASE := 2.4
 ## esta segunda guarda suaviza el borde del vector combinado.
 const ZONA_MUERTA := 0.12
 
+## Cambiar el tipo de prompt exige un gesto inequívoco. Un stick gastado puede
+## oscilar dentro de la zona de reposo y no debe hacer parpadear teclado ↔ mando.
+const UMBRAL_CAMBIO_DISPOSITIVO := 0.35
+
 ## Cuánto se puede mirar arriba y abajo. Sin tope, la cámara se da la vuelta.
 const TOPE_VERTICAL := deg_to_rad(85.0)
 
@@ -179,8 +183,12 @@ func _nombre_entrada(evento: InputEvent) -> String:
 
 
 func _registrar_dispositivo_entrada(evento: InputEvent) -> void:
-	if evento is InputEventJoypadButton or evento is InputEventJoypadMotion:
-		_usar_dispositivo_entrada(DispositivoEntrada.MANDO)
+	if evento is InputEventJoypadButton:
+		if evento.pressed:
+			_usar_dispositivo_entrada(DispositivoEntrada.MANDO)
+	elif evento is InputEventJoypadMotion:
+		if absf(evento.axis_value) >= UMBRAL_CAMBIO_DISPOSITIVO:
+			_usar_dispositivo_entrada(DispositivoEntrada.MANDO)
 	elif (
 		evento is InputEventKey
 		or evento is InputEventMouseButton
@@ -280,7 +288,8 @@ func _mirar_con_mando(delta: float) -> void:
 	if magnitud <= ZONA_MUERTA:
 		return
 
-	_usar_dispositivo_entrada(DispositivoEntrada.MANDO)
+	if magnitud >= UMBRAL_CAMBIO_DISPOSITIVO:
+		_usar_dispositivo_entrada(DispositivoEntrada.MANDO)
 	# La salida de la zona muerta es continua: un stick apenas desplazado no
 	# pega un salto de velocidad al cruzar el umbral.
 	var escala := clampf((magnitud - ZONA_MUERTA) / (1.0 - ZONA_MUERTA), 0.0, 1.0)
