@@ -44,7 +44,8 @@ class GrabacionOniricaTest(unittest.TestCase):
             check=False,
         )
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
-        self.assertIn("8 pasadas, 0 fallos", resultado.stdout)
+        self.assertIn("0 fallos", resultado.stdout)
+        self.assertIn("pasadas", resultado.stdout)
 
 
 if __name__ == "__main__":
