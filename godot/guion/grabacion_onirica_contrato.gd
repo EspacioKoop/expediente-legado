@@ -17,7 +17,7 @@ enum EstadoGrabacion { VALIDA, CONTAMINADA }
 ##     - hubo_corte: bool (¿hubo corte o interrupción durante la toma?)
 ## Retorna:
 ##   EstadoGrabacion.VALIDA si se cumplen todas las reglas, EstadoGrabacion.CONTAMINADA en caso contrario.
-static func evaluar_toma(datos: Dictionary) -> EstadoGrabacion:
+func evaluar_toma(datos: Dictionary) -> EstadoGrabacion:
     # Validar presenza de claves esenciales
     var requeridas = ["original_identificado", "frase_completa", "tiempo_sujeto", "duracion_total", "figura_detecto_camara", "hubo_corte"]
     for clave in requeridas:
