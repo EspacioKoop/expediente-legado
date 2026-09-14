@@ -141,12 +141,15 @@ static func poner_marca(estado: Dictionary, nodo_aparente_id: String) -> bool:
 	for marca in marcas:
 		if String(marca.get("real", "")) == real:
 			return false
-	marcas.append(
-		{
-			"real": real,
-			"aparente_inicial": nodo_aparente_id,
-			"fase_inicial": fase,
-		}
+	(
+		marcas
+		. append(
+			{
+				"real": real,
+				"aparente_inicial": nodo_aparente_id,
+				"fase_inicial": fase,
+			}
+		)
 	)
 	estado["marcas"] = marcas
 	return true
