@@ -47,10 +47,6 @@ func _aplicar(angulo: float) -> void:
 		objetivo.rotation.y = _rotacion_base
 		return
 	var respiracion := sin(angulo) * AMPLITUD_RESPIRACION
-	objetivo.scale = Vector3(
-		_escala_base.x,
-		_escala_base.y * (1.0 + respiracion),
-		_escala_base.z
-	)
+	objetivo.scale = Vector3(_escala_base.x, _escala_base.y * (1.0 + respiracion), _escala_base.z)
 	var gesto := sin(angulo * 0.55) * AMPLITUD_GESTO if gesto_telefono else 0.0
 	objetivo.rotation.y = _rotacion_base + gesto
