@@ -355,13 +355,16 @@ static func _carteles_poligonales(familia: Dictionary, frases: Array) -> Array:
 		if not is_zero_approx(hacia_dentro.length()):
 			hacia_dentro = hacia_dentro.normalized()
 		var posicion := medio + hacia_dentro * SEPARACION_PARED
-		carteles.append(
-			{
-				"texto": frases[i],
-				"pos": Vector3(posicion.x, 0, posicion.y),
-				"giro": atan2(hacia_dentro.x, hacia_dentro.y),
-				"color": COLOR_TEXTO,
-			}
+		(
+			carteles
+			. append(
+				{
+					"texto": frases[i],
+					"pos": Vector3(posicion.x, 0, posicion.y),
+					"giro": atan2(hacia_dentro.x, hacia_dentro.y),
+					"color": COLOR_TEXTO,
+				}
+			)
 		)
 	return carteles
 
