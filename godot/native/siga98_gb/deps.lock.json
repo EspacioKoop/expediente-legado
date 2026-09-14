@@ -11,5 +11,12 @@
     "license": "MIT",
     "capability": "DMG; cartuchos dual-mode CGB se ejecutan en fallback DMG; CGB-only se rechaza"
   },
+  "sameboy": {
+    "repository": "https://github.com/LIJI32/SameBoy.git",
+    "commit": "213a12ce93d66b105a113debd9396306066a7cfc",
+    "license": "Expat",
+    "scope": "Core/",
+    "capability": "CGB real, framebuffer, SRAM y APU; preparado en build pero todavía no activo en runtime"
+  },
   "scons": "4.8.1"
 }

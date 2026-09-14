@@ -6,6 +6,7 @@ libname = "siga98_gb"
 projectdir = "../../addons/siga98_gb"
 godot_cpp_dir = ARGUMENTS.get("godot_cpp_dir", ".deps/godot-cpp")
 peanut_gb_dir = ARGUMENTS.get("peanut_gb_dir", ".deps/peanut-gb")
+sameboy_dir = ARGUMENTS.get("sameboy_dir", ".deps/sameboy")
 
 local_env = Environment(tools=["default"], PLATFORM="")
 opts = Variables([], ARGUMENTS)
@@ -18,13 +19,55 @@ if not os.path.isfile(os.path.join(godot_cpp_dir, "SConstruct")):
 if not os.path.isfile(os.path.join(peanut_gb_dir, "peanut_gb.h")):
     print("ERROR: Peanut-GB no preparado; ejecuta scripts/preparar_emulador_gb.sh", file=sys.stderr)
     Exit(1)
+if not os.path.isfile(os.path.join(sameboy_dir, "Core", "gb.h")):
+    print("ERROR: SameBoy/Core no preparado; ejecuta scripts/preparar_emulador_gb.sh", file=sys.stderr)
+    Exit(1)
 
 env = SConscript(
     os.path.join(godot_cpp_dir, "SConstruct"),
     {"env": env, "api_version": "4.7"},
 )
 env.Append(CPPPATH=["src", peanut_gb_dir])
-sources = Glob("src/*.cpp")
+
+# #456: SameBoy se compila ya dentro de la GDExtension, pero el wrapper sigue
+# usando Peanut-GB hasta que el fixture CGB-only pueda pasar de extremo a extremo.
+# Se excluyen subsistemas que no necesita el runtime de SIGA-98 y se mantienen
+# las mismas opciones en Linux/Windows para que el siguiente corte solo cambie
+# el adapter, no la cadena de build.
+sameboy_core_dir = os.path.join(sameboy_dir, "Core")
+sameboy_disabled_sources = {
+    "cheat_search.c",
+    "cheats.c",
+    "debugger.c",
+    "rewind.c",
+    "sm83_disassembler.c",
+    "symbol_hash.c",
+}
+sameboy_sources = [
+    os.path.join(sameboy_core_dir, filename)
+    for filename in sorted(os.listdir(sameboy_core_dir))
+    if filename.endswith(".c") and filename not in sameboy_disabled_sources
+]
+
+sameboy_env = env.Clone()
+sameboy_env.Append(CPPPATH=[sameboy_dir, sameboy_core_dir])
+sameboy_env.Append(
+    CPPDEFINES=[
+        "GB_INTERNAL",
+        "_GNU_SOURCE",
+        "GB_DISABLE_TIMEKEEPING",
+        "GB_DISABLE_REWIND",
+        "GB_DISABLE_DEBUGGER",
+        "GB_DISABLE_CHEATS",
+        "GB_DISABLE_CHEAT_SEARCH",
+    ],
+    CFLAGS=["-std=gnu11", r'-DGB_VERSION=\"1.0.3\"'],
+)
+sameboy_objects = sameboy_env.SharedObject(sameboy_sources)
+
+sources = Glob("src/*.cpp") + sameboy_objects
+if env["platform"] != "windows":
+    env.Append(LIBS=["m"])
 
 suffix = env["suffix"].replace(".dev", "").replace(".universal", "")
 lib_filename = "{}{}{}{}".format(

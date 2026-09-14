@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Prepara la GDExtension GB y/o la ROM propia de #124 de forma reproducible.
+# Prepara la GDExtension GB/GBC y/o la ROM propia de #124 de forma reproducible.
 set -euo pipefail
 
 RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -29,6 +29,8 @@ GODOT_CPP_REPO="$(leer_lock godot_cpp repository)"
 GODOT_CPP_SHA="$(leer_lock godot_cpp commit)"
 PEANUT_REPO="$(leer_lock peanut_gb repository)"
 PEANUT_SHA="$(leer_lock peanut_gb commit)"
+SAMEBOY_REPO="$(leer_lock sameboy repository)"
+SAMEBOY_SHA="$(leer_lock sameboy commit)"
 SCONS_VERSION="$("$PYTHON" - "$LOCK" <<'PY'
 import json
 import sys
@@ -39,6 +41,7 @@ PY
 DEPS="$NATIVO/.deps"
 GODOT_CPP="$DEPS/godot-cpp"
 PEANUT="$DEPS/peanut-gb"
+SAMEBOY="$DEPS/sameboy"
 
 preparar_repo() {
     local repo="$1"
@@ -66,6 +69,7 @@ compilar_nativo() {
     mkdir -p "$DEPS"
     preparar_repo "$GODOT_CPP_REPO" "$GODOT_CPP_SHA" "$GODOT_CPP" si
     preparar_repo "$PEANUT_REPO" "$PEANUT_SHA" "$PEANUT" no
+    preparar_repo "$SAMEBOY_REPO" "$SAMEBOY_SHA" "$SAMEBOY" no
     "$PYTHON" -m pip install --disable-pip-version-check --quiet "scons==$SCONS_VERSION"
     (
         cd "$NATIVO"
@@ -75,7 +79,8 @@ compilar_nativo() {
             arch=x86_64 \
             build_profile=build_profile.json \
             godot_cpp_dir="$GODOT_CPP" \
-            peanut_gb_dir="$PEANUT"
+            peanut_gb_dir="$PEANUT" \
+            sameboy_dir="$SAMEBOY"
     )
 }
 
