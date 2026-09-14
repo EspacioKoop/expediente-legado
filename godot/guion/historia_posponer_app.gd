@@ -1,10 +1,10 @@
 ## Capa de UI para posponer y madurar una decisión política (#287).
 ##
-## `Historias.postergar()` conserva la decisión pendiente. `HistoriaContexto`
+## `Historias.postergar()` conserva la decisión pendiente. `HISTORIA_CONTEXTO`
 ## separa el hallazgo de la votación hasta que exista contexto real nuevo.
 extends "res://guion/historia_app.gd"
 
-const HistoriaContexto := preload("res://guion/historia_contexto.gd")
+const HISTORIA_CONTEXTO := preload("res://guion/historia_contexto.gd")
 const RUTA_TEXTOS := "res://datos/historia_posponer_textos.json"
 const RUTA_TEXTOS_CONTEXTO := "res://datos/historia_contexto_textos.json"
 
@@ -24,13 +24,13 @@ func _mostrar() -> void:
 
 	# Solo una historia pendiente nueva fija el punto de partida. Las partidas
 	# antiguas ya pospuestas carecen de instantánea y siguen siendo decidibles.
-	if estado_vista == "pendiente" and not HistoriaContexto.tiene_registro(
+	if estado_vista == "pendiente" and not HISTORIA_CONTEXTO.tiene_registro(
 		partida.estado, carta_id
 	):
-		if HistoriaContexto.registrar(partida.estado, carta_id):
+		if HISTORIA_CONTEXTO.registrar(partida.estado, carta_id):
 			_guardar()
 
-	var contexto_listo := not pendiente or HistoriaContexto.maduro(partida.estado, carta_id)
+	var contexto_listo := not pendiente or HISTORIA_CONTEXTO.maduro(partida.estado, carta_id)
 	_aplicar_contexto(pendiente, contexto_listo)
 	_posponer.visible = pendiente
 	_posponer.disabled = _sin_guardar
