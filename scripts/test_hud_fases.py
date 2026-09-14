@@ -3,13 +3,15 @@ import unittest
 
 
 RAIZ = Path(__file__).resolve().parents[1]
-DIA = RAIZ / "godot" / "guion" / "dia_clima_app.gd"
+DIA = RAIZ / "godot" / "guion" / "dia_hud_fases_app.gd"
+ESCENA = RAIZ / "godot" / "escenas" / "dia.tscn"
 
 
 class HudFasesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.dia = DIA.read_text(encoding="utf-8")
+        cls.escena = ESCENA.read_text(encoding="utf-8")
 
     def test_estado_permanente_se_limita_al_archivo(self):
         self.assertIn("_sincronizar_estado_hud(fase)", self.dia)
@@ -24,6 +26,10 @@ class HudFasesTest(unittest.TestCase):
         self.assertNotIn("INTERACCION", cuerpo)
         self.assertNotIn("DIALOGO", cuerpo)
         self.assertNotIn("MODAL", cuerpo)
+
+    def test_la_escena_usa_la_capa_de_hud_por_fases(self):
+        self.assertIn('path="res://guion/dia_hud_fases_app.gd" id="1"', self.escena)
+        self.assertNotIn('path="res://guion/dia_clima_app.gd" id="1"', self.escena)
 
 
 if __name__ == "__main__":
