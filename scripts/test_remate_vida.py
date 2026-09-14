@@ -14,6 +14,7 @@ class RemateVidaTest(unittest.TestCase):
         for campo in (
             'jornada.get("alquiler", {})',
             'jornada.get("gato", {})',
+            'jornada.get("trabajillos", {})',
             'jornada.get("dinero", 0)',
             'jornada.get("vuelta", 1)',
         ):
@@ -41,6 +42,17 @@ class RemateVidaTest(unittest.TestCase):
         self.assertIn('const SIN_HOGAR := "sin_hogar"', self.codigo)
         self.assertIn('impagos == 0', self.codigo)
         self.assertIn('not resumen["gato_presente"]', self.codigo)
+
+    def test_recuerda_los_trabajillos_sin_puntuarlos(self):
+        self.assertIn('trabajillos.get("hechos", 0)', self.codigo)
+        self.assertIn('"trabajillos_hechos": trabajillos_hechos', self.codigo)
+        self.assertIn('"trabajo_nocturno": trabajillos_hechos > 0', self.codigo)
+
+        variante = self.codigo.split("static func variante", 1)[1].split(
+            "static func resolver", 1
+        )[0]
+        self.assertNotIn("trabajillos_hechos", variante)
+        self.assertNotIn("trabajo_nocturno", variante)
 
 
 if __name__ == "__main__":
