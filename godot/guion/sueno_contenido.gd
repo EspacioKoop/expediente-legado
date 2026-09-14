@@ -66,6 +66,21 @@ static func fuentes(
 				)
 			)
 
+	# Añadir contenido onírico de semillas activadas (interacciones fuera de la oficina)
+	var contenido_onirico := SemillasOniricas.obtener_contenido_onirico()
+	for frase in contenido_onirico.get("frases", []):
+		if not frase.is_empty() and not frases.has(frase):
+			frases.append(frase)
+	for figura in contenido_onirico.get("figuras", []):
+		# Evitar duplicados por nombre (simplificado)
+		var ya_existe := false
+		for f in figuras:
+			if f.get("nombre") == figura["nombre"]:
+				ya_existe = true
+				break
+		if not ya_existe:
+			figuras.append(figura)
+
 	return {"frases": frases, "figuras": figuras, "casos": casos_tocados.keys()}
 
 

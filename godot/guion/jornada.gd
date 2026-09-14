@@ -215,6 +215,7 @@ static func despertar(jornada: Dictionary) -> int:
 	if jornada["fase"] != "sueño":
 		return jornada["dia"]
 	jornada["dia"] += 1
+	SemillasOniricas.reiniciar_dia()
 	jornada["fase"] = "archivo"
 	jornada["cerrados_hoy"] = 0
 	jornada["acciones"] = ACCIONES_POR_DIA
