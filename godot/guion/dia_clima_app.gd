@@ -3,6 +3,11 @@
 extends "res://guion/dia_calle_app.gd"
 
 const FONDO_BASE := Color(0.05, 0.05, 0.06)
+## El exterior necesita horizonte: el fondo interior casi negro convertía los
+## huecos entre fachadas en vacío. Este azul nocturno sigue siendo oscuro, pero
+## separa con claridad cielo y siluetas urbanas. La niebla conserva prioridad y
+## lo sustituye cuando el clima lo exige.
+const FONDO_EXTERIOR := Color(0.035, 0.055, 0.10)
 const TAM_TERMINAL_INTERACTIVO := Vector3(1.0, 1.2, 0.8)
 
 var _clima_nodo: Node3D = null
@@ -110,6 +115,9 @@ func _entrar_en(fase: String) -> void:
 	var espacio := _espacio_de(fase)
 	if not bool(espacio.get("exterior", false)):
 		return
+	# Un cielo exterior legible no necesita otro WorldEnvironment: basta cambiar
+	# el fondo del ya existente antes de aplicar clima. Niebla puede sobrescribirlo.
+	_ambiente.background_color = FONDO_EXTERIOR
 	_aplicar_clima(Clima.estado(int(jornada.get("dia", 1))))
 
 
