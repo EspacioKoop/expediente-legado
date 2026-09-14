@@ -20,7 +20,7 @@ class SuenoAnularRuntimeTest(unittest.TestCase):
         self.assertIn('"contorno":', bloque)
         self.assertNotIn('"hueco":', bloque)
         self.assertGreaterEqual(bloque.count("Vector2("), 16)
-        self.assertIn('"entrada": Vector3(-50, 0, 0)', bloque)
+        self.assertIn('"entrada": Vector3(-17, 0, 0)', bloque)
 
     def test_patio_usa_la_familia_anular(self):
         bloque = self.formas.split('"patio":', 1)[1].split('"peine":', 1)[0]
