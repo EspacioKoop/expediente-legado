@@ -9,6 +9,8 @@ func _initialize() -> void:
 
 
 func _probar() -> void:
+	# La escena usa el catálogo español; el runner no pasa por Inicio.
+	TranslationServer.set_locale("es")
 	var dia: Node = load("res://escenas/dia.tscn").instantiate()
 	root.add_child(dia)
 	for frame in 8:
