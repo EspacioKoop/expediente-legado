@@ -194,9 +194,7 @@ static func tejido_domestico(base: Color, semilla: int) -> ImageTexture:
 			var urdimbre := 0.030 if y % 4 < 2 else -0.020
 			var variacion := trama + urdimbre + rng.randf_range(-0.015, 0.015)
 			imagen.set_pixel(
-				x,
-				y,
-				base.lightened(variacion) if variacion >= 0.0 else base.darkened(-variacion)
+				x, y, base.lightened(variacion) if variacion >= 0.0 else base.darkened(-variacion)
 			)
 	return ImageTexture.create_from_image(imagen)
 
@@ -212,9 +210,7 @@ static func acero_cocina(base: Color, semilla: int) -> ImageTexture:
 		for x in LADO:
 			var cepillado := 0.045 if x % 8 == 0 else linea
 			imagen.set_pixel(
-				x,
-				y,
-				base.lightened(cepillado) if cepillado >= 0.0 else base.darkened(-cepillado)
+				x, y, base.lightened(cepillado) if cepillado >= 0.0 else base.darkened(-cepillado)
 			)
 	return ImageTexture.create_from_image(imagen)
 
