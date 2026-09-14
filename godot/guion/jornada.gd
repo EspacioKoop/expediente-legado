@@ -76,6 +76,9 @@ static func nueva(raiz: int = 0, vuelta: int = 1) -> Dictionary:
 		# Lo leído hoy: es lo que alimenta el sueño de esta noche. Se vacía al
 		# despertar, porque un sueño es de su día.
 		"leido_hoy": [],
+		# Tarjeta diaria del Bingo SIGA y su histórico de esta vida laboral.
+		# Va en Jornada para usar el mismo guardado y reiniciarse al reasignar.
+		"bingo_siga": {"actual": {}, "historial": []},
 		# Las salas del sueño ya vistas. Es de la VUELTA y no de por vida
 		# (#86): cada vida laboral sueña lo suyo, así que el mapa se lo lleva
 		# el despido igual que el dinero — sin borrarlo en ningún sitio, porque
@@ -285,6 +288,10 @@ static func dormir(jornada: Dictionary) -> Dictionary:
 		if gato["dias_sin_comer"] > PACIENCIA_GATO:
 			gato["presente"] = false
 			se_fue = true
+
+	# Congela el Bingo cuando todas las consecuencias del día ya son definitivas,
+	# pero antes de que el sueño/despertar pueda limpiar sus contadores.
+	BingoSiga.cerrar_jornada(jornada)
 
 	jornada["fase"] = "sueño"
 	jornada["sueno_escenas"] = Sueno.noche(
