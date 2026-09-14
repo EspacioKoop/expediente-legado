@@ -48,11 +48,14 @@ static func registrar_semilla(
 	if giros < GIROS_MINIMOS or not talon_observado:
 		return false
 	if estado.has("dia"):
-		return SemillasOniricas.activar_semilla_onirica(
-			estado,
-			ID_MITO,
-			fuente,
-			intensidad,
+		return (
+			SemillasOniricas
+			. activar_semilla_onirica(
+				estado,
+				ID_MITO,
+				fuente,
+				intensidad,
+			)
 		)
 	estado[CLAVE_SEMILLA] = true
 	return true
@@ -107,11 +110,14 @@ func aplicar_resolucion(accion: String, reduccion_movimiento: bool) -> bool:
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_SINE)
 	tween.set_ease(Tween.EASE_IN_OUT)
-	tween.tween_property(
-		_figura,
-		"scale",
-		Vector3(1.0, 0.055, 1.0),
-		float(plan["duracion"]),
+	(
+		tween
+		. tween_property(
+			_figura,
+			"scale",
+			Vector3(1.0, 0.055, 1.0),
+			float(plan["duracion"]),
+		)
 	)
 	return true
 
