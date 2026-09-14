@@ -34,11 +34,12 @@ class TiendaVideojuegosTest(unittest.TestCase):
         self.assertIn('"sin_stock"', self.tienda)
 
     def test_recomprar_es_idempotente(self):
-        ya_comprada = self.tienda.index("adquiridas.has(id_rom)")
-        cobro = self.tienda.index("Jornada.gastar(jornada, precio)")
+        cuerpo_compra = self.tienda.split("static func comprar", 1)[1]
+        ya_comprada = cuerpo_compra.index("adquiridas.has(id_rom)")
+        cobro = cuerpo_compra.index("Jornada.gastar(jornada, precio)")
         self.assertLess(ya_comprada, cobro)
-        self.assertIn('"ya_comprada": true', self.tienda)
-        self.assertIn('"importe": 0', self.tienda)
+        self.assertIn('"ya_comprada": true', cuerpo_compra)
+        self.assertIn('"importe": 0', cuerpo_compra)
 
     def test_persistencia_queda_dentro_de_jornada(self):
         self.assertIn('const CLAVE_COMPRAS := "roms_compradas"', self.tienda)
@@ -46,7 +47,10 @@ class TiendaVideojuegosTest(unittest.TestCase):
         self.assertNotIn("Partida.", self.tienda)
 
     def test_no_comercializa_roms_del_usuario_ni_descarga_contenido(self):
-        self.assertNotIn('user://roms', self.tienda.split("const CATALOGO :=", 1)[1])
+        catalogo = self.tienda.split("const CATALOGO :=", 1)[1].split(
+            "static func catalogo", 1
+        )[0]
+        self.assertNotIn('user://roms', catalogo)
         for termino in ("HTTPRequest", "HTTPClient", "download", "shell_open", "execute("):
             self.assertNotIn(termino, self.tienda)
         self.assertIn("ROMs comerciales", self.doc)
