@@ -140,11 +140,7 @@ static func metal_pintado(base: Color, semilla: int) -> ImageTexture:
 			if x + paso < LADO:
 				imagen.set_pixel(x + paso, y, base.darkened(0.16))
 	for i in 9:
-		imagen.set_pixel(
-			rng.randi() % LADO,
-			rng.randi() % LADO,
-			base.lightened(0.08)
-		)
+		imagen.set_pixel(rng.randi() % LADO, rng.randi() % LADO, base.lightened(0.08))
 	return ImageTexture.create_from_image(imagen)
 
 
