@@ -247,3 +247,9 @@ MENU_GLOBAL_SUBTITULO,Preferencias comunes de archivo, casa y sueño.
 MENU_GLOBAL_SENSIBILIDAD_RATON,Sensibilidad de ratón
 MENU_GLOBAL_SENSIBILIDAD_MANDO,Sensibilidad de stick derecho
 MENU_GLOBAL_INVERTIR_CAMARA_Y,Invertir eje Y de cámara
+GATO_SIGA_EXPLORAR,Quedan documentos por revisar.
+GATO_SIGA_LISTO,Ya puede imputar responsabilidad.
+GATO_SIGA_CERRADO,Ese expediente ya está cerrado.
+GATO_SIGA_DESCUBRIMIENTO,Ha aparecido una pista nueva.
+GATO_SIGA_COMBINACION_FALLIDA,Esos documentos no justifican una relación.
+GATO_SIGA_COMBINACION_REPETIDA,Esa relación ya constaba.

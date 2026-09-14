@@ -38,6 +38,42 @@ class GatoAyudaTest(unittest.TestCase):
         for clave in ("PUESTO_LEVANTARSE", "ARCHIVO_ERROR_GUARDAR", "A7_PRESENTAR"):
             self.assertNotIn(clave, self.politica)
 
+    def test_contexto_siga_recupera_categorias_historicas_sin_estado_nuevo(self):
+        self.assertIn("static func contexto_siga", self.politica)
+        for contexto in (
+            "CONTEXTO_EXPLORAR",
+            "CONTEXTO_LISTO",
+            "CONTEXTO_CERRADO",
+            "CONTEXTO_DESCUBRIMIENTO",
+            "CONTEXTO_COMBINACION_FALLIDA",
+            "CONTEXTO_COMBINACION_REPETIDA",
+        ):
+            self.assertIn(contexto, self.politica)
+        self.assertIn('estado.get("cerrado", false)', self.politica)
+        self.assertIn('estado.get("listo_para_imputar", false)', self.politica)
+        self.assertIn("EVENTO_A_CONTEXTO.has(evento)", self.politica)
+        self.assertNotIn('estado["contexto_gato"] =', self.politica)
+        self.assertNotIn('gato["contexto"] =', self.politica)
+
+    def test_contexto_tiene_comentarios_distintos_y_hambre_no_los_muestra(self):
+        claves = (
+            "GATO_SIGA_EXPLORAR",
+            "GATO_SIGA_LISTO",
+            "GATO_SIGA_CERRADO",
+            "GATO_SIGA_DESCUBRIMIENTO",
+            "GATO_SIGA_COMBINACION_FALLIDA",
+            "GATO_SIGA_COMBINACION_REPETIDA",
+        )
+        for clave in claves:
+            self.assertEqual(self.politica.count(f'"{clave}"'), 1)
+        self.assertIn("static func comentario_contextual", self.politica)
+        self.assertIn("if contexto.is_empty():", self.politica)
+        self.assertIn("var comentario := comentario_contextual(contexto)", self.politica)
+        self.assertIn("lineas.append(comentario)", self.politica)
+        # ESCASA conserva únicamente la instrucción necesaria y AUSENTE calla.
+        self.assertGreaterEqual(self.politica.count('return ["VISOR_ELIJA"]'), 2)
+        self.assertGreaterEqual(self.politica.count("return []"), 2)
+
     def test_hay_un_gato_2d_visible_tipo_ayudante_de_escritorio(self):
         self.assertIn("class_name GatoAsistente2D", self.avatar)
         self.assertIn("extends Control", self.avatar)
