@@ -121,6 +121,19 @@ func _vestir_calle_cc0(mundo: Node3D) -> void:
 		Color(0.50, 0.43, 0.32),
 		"caja de reparto"
 	)
+	_zona_servicio_industrial_cc0(mundo)
+
+
+func _zona_servicio_industrial_cc0(mundo: Node3D) -> void:
+	# El hueco entre las dos fachadas de la acera derecha se convierte en una
+	# pequeña zona de servicio. Queda detrás del borde caminable de la acera y
+	# no añade colisión ni interacción: debe leerse como infraestructura de fondo.
+	var zona := IndustrialCC0.crear_zona_servicio()
+	zona.name = "ZonaServicioIndustrialCC0"
+	zona.position = Vector3(6.05, 0.14, -0.40)
+	zona.rotation_degrees.y = -90.0
+	zona.scale = Vector3.ONE * 0.90
+	mundo.add_child(zona)
 
 
 func _vestir_casa_cc0(mundo: Node3D) -> void:
