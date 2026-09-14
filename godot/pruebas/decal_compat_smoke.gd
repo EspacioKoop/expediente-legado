@@ -14,15 +14,18 @@ func _init() -> void:
 	imagen.fill(Color(0.24, 0.19, 0.14, 0.5))
 	var textura := ImageTexture.create_from_image(imagen)
 
-	var decal := DecalCompat.montar(
-		raiz,
-		{
-			"textura": textura,
-			"pos": Vector3(1.0, 2.0, 3.0),
-			"ancho": 2.0,
-			"opacidad": 0.4,
-			"separacion": 0.01,
-		}
+	var decal := (
+		DecalCompat
+		. montar(
+			raiz,
+			{
+				"textura": textura,
+				"pos": Vector3(1.0, 2.0, 3.0),
+				"ancho": 2.0,
+				"opacidad": 0.4,
+				"separacion": 0.01,
+			}
+		)
 	)
 
 	comprobar("se crea Sprite3D", decal != null)
