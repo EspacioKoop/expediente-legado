@@ -440,6 +440,54 @@
         1022,
         1524
       ]
+    },
+    {
+      "ruta": "modelos/traffic_road/Manhole_Cover.glb",
+      "titulo": "Manhole Cover (Traffic Road Assets, GLB original)",
+      "autor": "jamesdev / MilkAndBanana",
+      "licencia": "CC0-1.0",
+      "fuente": "https://milkandbanana.itch.io/traffic-road-assets",
+      "sha256": "9ebec03b3f8105d467800a07843f67e0b8f11de1831873b3905553a40ca3d0e8"
+    },
+    {
+      "ruta": "modelos/traffic_road/Road_Block.glb",
+      "titulo": "Road Block (Traffic Road Assets, GLB original)",
+      "autor": "jamesdev / MilkAndBanana",
+      "licencia": "CC0-1.0",
+      "fuente": "https://milkandbanana.itch.io/traffic-road-assets",
+      "sha256": "71a15df469bfa8f90f918b6d371f7893fb21a14a9d35eade8a8f12ebbcddf374"
+    },
+    {
+      "ruta": "modelos/traffic_road/Traffic_Cone.glb",
+      "titulo": "Traffic Cone (Traffic Road Assets, GLB original)",
+      "autor": "jamesdev / MilkAndBanana",
+      "licencia": "CC0-1.0",
+      "fuente": "https://milkandbanana.itch.io/traffic-road-assets",
+      "sha256": "24265b511462ee8d25b208ce7f2902255f0ccf6f642cd2c684c4bc7bb63a7bfe"
+    },
+    {
+      "ruta": "modelos/traffic_road/Manhole_Cover_PastedImage220104-201001.png",
+      "titulo": "Atlas embebido extraído por Godot de Manhole_Cover.glb",
+      "autor": "jamesdev / MilkAndBanana",
+      "licencia": "CC0-1.0",
+      "fuente": "https://milkandbanana.itch.io/traffic-road-assets",
+      "sha256": "53cd37f68d5a6a857cfa6dbe1ee5023d52fec25c97936dd0d3fb4373df9372ce"
+    },
+    {
+      "ruta": "modelos/traffic_road/Road_Block_PastedImage220104-201001.png",
+      "titulo": "Atlas embebido extraído por Godot de Road_Block.glb",
+      "autor": "jamesdev / MilkAndBanana",
+      "licencia": "CC0-1.0",
+      "fuente": "https://milkandbanana.itch.io/traffic-road-assets",
+      "sha256": "53cd37f68d5a6a857cfa6dbe1ee5023d52fec25c97936dd0d3fb4373df9372ce"
+    },
+    {
+      "ruta": "modelos/traffic_road/Traffic_Cone_PastedImage220104-201001.png",
+      "titulo": "Atlas embebido extraído por Godot de Traffic_Cone.glb",
+      "autor": "jamesdev / MilkAndBanana",
+      "licencia": "CC0-1.0",
+      "fuente": "https://milkandbanana.itch.io/traffic-road-assets",
+      "sha256": "53cd37f68d5a6a857cfa6dbe1ee5023d52fec25c97936dd0d3fb4373df9372ce"
     }
   ]
 }

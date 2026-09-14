@@ -73,16 +73,16 @@ Los `.glb`, `.fbx` y texturas raster deben entrar mediante **Git LFS real**, con
 
 ## Checklist del PR binario
 
-- [ ] descargar `Traffic Road Assets.zip` desde la página oficial;
-- [ ] inspeccionar nombres, escalas, atlas y materiales reales del ZIP;
-- [ ] elegir solo 3–4 modelos neutrales de las familias anteriores;
-- [ ] descartar piezas con lectura temporal/geográfica problemática;
-- [ ] importar preferentemente GLB; no conservar FBX duplicado en runtime si no hace falta;
-- [ ] comprobar que cada binario entra como puntero LFS;
-- [ ] calcular SHA-256 de cada fichero final y registrar `procedencia.json`;
-- [ ] adaptar materiales al look SIGA-98 sin introducir señalética nueva;
-- [ ] colocar las piezas fuera de objetivos interactivos y del paso principal;
-- [ ] medir el coste con varias instancias simultáneas;
+- [x] descargar `Traffic Road Assets.zip` desde la página oficial;
+- [x] inspeccionar nombres, escalas, atlas y materiales reales del ZIP;
+- [x] elegir solo 3–4 modelos neutrales de las familias anteriores;
+- [x] descartar piezas con lectura temporal/geográfica problemática;
+- [x] importar preferentemente GLB; no conservar FBX duplicado en runtime si no hace falta;
+- [x] comprobar que cada binario entra como puntero LFS;
+- [x] calcular SHA-256 de cada fichero final y registrar `procedencia.json`;
+- [x] adaptar materiales al look SIGA-98 sin introducir señalética nueva;
+- [x] colocar las piezas fuera de objetivos interactivos y del paso principal;
+- [x] medir el coste con varias instancias simultáneas;
 - [ ] ejecutar importación Godot, suite, arranque y Alpha;
 - [ ] validación visual humana de época, escala, clipping y legibilidad.
 
@@ -94,6 +94,70 @@ Los `.glb`, `.fbx` y texturas raster deben entrar mediante **Git LFS real**, con
 
 ## Fuera de alcance de este corte
 
-Este documento **no cierra #225**. Fija una selección honesta y reproducible antes de introducir binarios. El issue debe seguir abierto hasta que un pequeño lote real entre por LFS, quede registrado con hashes y sea visible en el trayecto con validación visual.
+Este corte **no cierra #225**: el lote real descrito debajo queda integrado en el trayecto; la aceptación humana de época, escala y legibilidad sigue pendiente.
 
 — Odiseo (GPT-5.6 Sol)
+
+
+## Lote real de septiembre de 2026
+
+Se incorporan byte a byte tres originales de `Traffic Road Assets/GLB/All/`:
+`Manhole_Cover.glb`, `Road_Block.glb` y `Traffic_Cone.glb`.
+El ZIP incluye `License.txt`, que acredita a **MilkAndBanana** y permite uso
+personal, educativo y comercial bajo CC0; la página actual firma **jamesdev**.
+Las fichas conservan ambos nombres. No se redistribuye el ZIP completo.
+
+| Original | Triángulos | Uso y escala final |
+| --- | ---: | --- |
+| Manhole_Cover | 232 | Dos tapas octogonales, diámetro 0,70 m |
+| Road_Block | 316 | Una barrera, altura 1,10 m, al borde de la calzada |
+| Traffic_Cone | 82 | Dos conos enteros, altura 0,65 m, junto a la barrera |
+
+El lote suma **cinco instancias y 944 triángulos** (LOD principal). Se normaliza
+cada GLB por su AABB real: su origen viene desplazado y no representa la base.
+Las tapas se apoyan 4 mm sobre el asfalto para evitar z-fighting; el resto apoya
+en cota cero. El corredor central de 3,20 m permanece libre. La barrera, al ser
+alcanzable, tiene una única colisión de caja ajustada y orientada con la malla.
+No hay IA, física dinámica, interacción ni nuevas luces.
+
+Cada GLB contiene su atlas PNG. Godot 4.7 lo extrae junto al modelo, por lo que
+se versionan también esos tres PNG y sus opciones de importación. Los seis
+binarios tienen ficha SHA-256 en `procedencia.json` y entran por Git LFS.
+Las instancias repetidas comparten las mallas y los materiales del lote.
+
+Se mantienen el atlas original y sus UV con `StandardMaterial3D`, iluminación
+por vértice, muestreo nearest con mipmaps, tinte gris 0,72, rugosidad 1 y brillo
+especular desactivado. No se modifica el shader PSX común: estas piezas conservan
+la paleta low-poly del autor, pero no reciben su temblor ni dithering espacial.
+La farola se deja fuera para no duplicar la iluminación existente.
+
+`TraficoVialCC0.montar()` es idempotente por mundo. Lo invoca la entrada real de
+`dia_calle_app.gd` únicamente en `trayecto`; al salir se destruye con ese mundo.
+La regresión de `scripts/test_traffic_road_assets_contract.py` ejecuta Godot con
+datos temporales y comprueba los originales, hashes, atlas, medidas, apoyo,
+colisión, presupuesto, idempotencia y entradas archivo → trayecto → casa →
+trayecto → archivo sobre `dia.tscn`. No requiere editar el agregador compartido.
+
+Capturas reales sin HUD, Godot 4.7.2 Compatibility / Mesa llvmpipe, 1280×720:
+
+- [Barrera y conos en el trayecto](../capturas/trafico-vial-225.png).
+- [Detalle de la tapa](../capturas/trafico-vial-225-tapa.png).
+
+Se utilizó la cámara del caminante, FOV 75°, a 1,65 m de altura, con posición
+fijada para inspección. No son un playthrough humano ni una prueba de mando.
+
+Medición adicional con cámara fija `(0, 4, -10)` mirando a `(0, 0, 4)`, FOV 100°,
+misma escena detenida y 60 fotogramas de estabilización por muestra: ocultar /
+mostrar únicamente el lote cambia **197 → 202 llamadas de dibujo** y
+**12 508 → 13 118 primitivas**. Son +5 llamadas y +610 primitivas renderizadas
+con los LOD de Godot; el lote sin LOD suma 944 triángulos. Es una medición de
+coste geométrico con renderer software, no un presupuesto de FPS certificado
+para hardware objetivo. No se introducen procesos por fotograma.
+
+Verificación local: 626 unittest Python (incluyen 58 comprobaciones de este
+lote en Godot), suite principal 662, semillas 34, recorrido 153 y arranque;
+50 pruebas Java, 28 Vitest, Checkstyle, PMD, SpotBugs, gdlint y gdformat verdes.
+No hay cobertura instrumentada GDScript configurada. La CI y Alpha del SHA de
+la PR son la referencia de entrega; la aceptación visual humana sigue abierta.
+
+SHA-256 del ZIP oficial inspeccionado: `8401078c95231677c07e1eb1639f8d2f0e222f62f9c1463c3999bdb2a0814237`.
