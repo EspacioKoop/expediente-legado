@@ -117,6 +117,9 @@ void Siga98GB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("load_save_ram", "save"), &Siga98GB::load_save_ram);
     ClassDB::bind_method(D_METHOD("rom_title"), &Siga98GB::rom_title);
     ClassDB::bind_method(D_METHOD("last_error"), &Siga98GB::last_error);
+    ClassDB::bind_method(D_METHOD("core_name"), &Siga98GB::core_name);
+    ClassDB::bind_method(D_METHOD("supports_cgb"), &Siga98GB::supports_cgb);
+    ClassDB::bind_method(D_METHOD("supports_audio"), &Siga98GB::supports_audio);
     ClassDB::bind_method(D_METHOD("width"), &Siga98GB::width);
     ClassDB::bind_method(D_METHOD("height"), &Siga98GB::height);
 
@@ -246,6 +249,18 @@ String Siga98GB::rom_title() const {
 
 String Siga98GB::last_error() const {
     return String::utf8(impl->error.c_str());
+}
+
+String Siga98GB::core_name() const {
+    return "Peanut-GB";
+}
+
+bool Siga98GB::supports_cgb() const {
+    return false;
+}
+
+bool Siga98GB::supports_audio() const {
+    return false;
 }
 
 int Siga98GB::width() const {
