@@ -23,7 +23,10 @@ const CATALOGO := [
 
 
 static func catalogo() -> Array[Dictionary]:
-	return CATALOGO.duplicate(true)
+	var salida: Array[Dictionary] = []
+	for entrada in CATALOGO:
+		salida.append(entrada.duplicate(true))
+	return salida
 
 
 ## Devuelve IDs válidos, únicos y conocidos. El estado vive dentro de jornada:
