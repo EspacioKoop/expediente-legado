@@ -34,8 +34,10 @@ static func maduro(estado: Dictionary, carta_id: String) -> bool:
 	var anterior: Variant = registros[carta_id]
 	if typeof(anterior) != TYPE_DICTIONARY:
 		return true
-	return _hay_nuevo(_leidos(estado), anterior.get("leidos", [])) or _hay_nuevo(
-		_pistas(estado), anterior.get("pistas", [])
+	var contexto: Dictionary = anterior
+	return (
+		_hay_nuevo(_leidos(estado), contexto.get("leidos", []))
+		or _hay_nuevo(_pistas(estado), contexto.get("pistas", []))
 	)
 
 
