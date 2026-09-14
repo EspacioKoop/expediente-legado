@@ -33,22 +33,22 @@ static var _familias := {
 	},
 	ANULAR:
 	{
-		# Anillo abierto por una hendidura lateral. Es un único polígono cóncavo,
-		# no dos mallas superpuestas: el gran recorte central queda realmente fuera
-		# de suelo/techo/colisión y la abertura permite entrar andando sin salto.
-		# Esto mantiene la misma ruta `malla_sala()` que la familia convergente y
-		# evita introducir una segunda representación física solo para el patio.
+		# Anillo abierto y deliberadamente asimétrico. Es un único polígono
+		# cóncavo: el recorte central queda realmente fuera de suelo/techo/colisión
+		# y la hendidura lateral permite entrar andando sin salto. La gran banda
+		# izquierda hace además que el centro lógico usado para sembrar contenido
+		# caiga sobre superficie caminable y no dentro del vacío.
 		"contorno":
 		PackedVector2Array(
 			[
-				Vector2(-16, -12),
-				Vector2(0, -18),
+				Vector2(-38, -12),
+				Vector2(-18, -22),
 				Vector2(16, -12),
-				Vector2(18, 0),
-				Vector2(14, 14),
-				Vector2(0, 18),
-				Vector2(-14, 14),
-				Vector2(-18, 2),
+				Vector2(20, 0),
+				Vector2(16, 16),
+				Vector2(-18, 22),
+				Vector2(-38, 12),
+				Vector2(-42, 2),
 				Vector2(-7, 2),
 				Vector2(-6, 6),
 				Vector2(0, 8),
@@ -57,17 +57,17 @@ static var _familias := {
 				Vector2(3, -8),
 				Vector2(-5, -6),
 				Vector2(-7, -2),
-				Vector2(-18, -2),
+				Vector2(-42, -2),
 			]
 		),
 		"altura": 3.4,
-		"entrada": Vector3(-13, 0, 0),
+		"entrada": Vector3(-28, 0, 0),
 		"anclas":
 		[
-			Vector3(0, 0, -13),
-			Vector3(12, 0, 0),
-			Vector3(0, 0, 13),
-			Vector3(-10, 0, 8),
+			Vector3(-15, 0, -14),
+			Vector3(11, 0, -6),
+			Vector3(11, 0, 9),
+			Vector3(-15, 0, 15),
 		],
 	},
 	FRAGMENTADA:
