@@ -24,6 +24,31 @@ static func malla_sala(contorno: PackedVector2Array, altura: float = 3.2) -> Arr
 	return st.commit()
 
 
+## La misma geometría visible también define la colisión.
+##
+## Una malla poligonal superpuesta a una planta de cajas no sirve como corte de
+## runtime: el jugador vería paredes diagonales pero chocaría con los antiguos
+## Rect2i. El cuerpo estático evita esa divergencia generando el trimesh desde
+## el ArrayMesh exacto que se dibuja. `ConcavePolygonShape3D` es apropiado aquí
+## porque nunca se usa como cuerpo dinámico, solo como arquitectura inmóvil.
+static func cuerpo_sala(contorno: PackedVector2Array, altura: float = 3.2) -> StaticBody3D:
+	var cuerpo := StaticBody3D.new()
+	var malla := malla_sala(contorno, altura)
+	if malla.get_surface_count() == 0:
+		return cuerpo
+
+	var visual := MeshInstance3D.new()
+	visual.name = "Malla"
+	visual.mesh = malla
+	cuerpo.add_child(visual)
+
+	var colision := CollisionShape3D.new()
+	colision.name = "Colision"
+	colision.shape = malla.create_trimesh_shape()
+	cuerpo.add_child(colision)
+	return cuerpo
+
+
 static func contorno_valido(contorno: PackedVector2Array) -> bool:
 	if contorno.size() < 3:
 		return false
