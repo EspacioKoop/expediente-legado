@@ -33,6 +33,7 @@ var _transcurrido := 0.0
 var _reproduciendo := false
 var _id := ""
 var _estado: Dictionary = {}
+var _reduccion_movimiento := false
 
 var _camara: Camera3D
 var _lienzo: Control
@@ -56,6 +57,7 @@ func reproducir(rodaje: Array, id: String = "", estado: Dictionary = {}) -> void
 	_id = id
 	_estado = estado
 	_rodaje = rodaje
+	_reduccion_movimiento = bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false))
 	_plano = -1
 	_reproduciendo = true
 	visible = true
@@ -140,9 +142,11 @@ func _mover_camara(plano: Dictionary, avance: float) -> void:
 	if _camara == null or not _tiene_mundo_3d():
 		return
 	var destino: Vector3 = plano["camara"]
-	# Se acerca despacio durante el plano. Uno quieto se lee como una imagen;
-	# uno que avanza se lee como alguien mirando.
-	var acercamiento: Vector3 = destino.normalized() * -0.25 * avance
+	# Con reducción de movimiento se conserva el plano y su duración, pero la
+	# cámara queda fija en la posición declarada. Sin ella mantiene el avance
+	# suave que diferencia una mirada cinematográfica de una captura estática.
+	var factor_movimiento := 0.0 if _reduccion_movimiento else avance
+	var acercamiento: Vector3 = destino.normalized() * -0.25 * factor_movimiento
 	_camara.global_position = destino + acercamiento
 	_camara.look_at(plano["mira"], Vector3.UP)
 
@@ -161,7 +165,10 @@ func _dibujar_figuras() -> void:
 	var avance: float = clampf(_transcurrido / duracion, 0.0, 1.0)
 	var desde: Vector2 = plano.get("desde", Vector2.ZERO)
 	var hasta: Vector2 = plano.get("hasta", desde)
-	var deriva: Vector2 = desde.lerp(hasta, avance)
+	# La alternativa accesible no elimina la escena: presenta inmediatamente la
+	# figura en su pose final y conserva rótulo, voz, duración y skip.
+	var factor_movimiento := 1.0 if _reduccion_movimiento else avance
+	var deriva: Vector2 = desde.lerp(hasta, factor_movimiento)
 	var centro := _lienzo.size / 2.0
 
 	for pieza in plano["figura"]:
