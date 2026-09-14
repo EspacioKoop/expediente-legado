@@ -159,7 +159,7 @@ func _probar_seleccion_reproducible() -> void:
 
 	SemillasOniricas.activar_semilla_onirica(jornada, "aquiles", "tv:deporte", 3)
 	SemillasOniricas.activar_semilla_onirica(jornada, "hidra", "rom:hidra", 2)
-	var limitada := SemillasOniricas.seleccionar_para_noche(jornada, 99, 2)["familias"]
+	var limitada: Array = SemillasOniricas.seleccionar_para_noche(jornada, 99, 2)["familias"]
 	_comprobar(limitada.size(), 2, "la competición nocturna respeta el máximo de familias")
 	_comprobar(_sin_duplicados(limitada), "una familia no ocupa dos huecos de la noche")
 
