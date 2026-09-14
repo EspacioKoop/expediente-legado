@@ -14,7 +14,7 @@ var _resuelta := false
 
 
 func _ready() -> void:
-	super._ready()
+	super()
 	_montar_puzzle()
 
 
