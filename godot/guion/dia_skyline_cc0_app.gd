@@ -24,7 +24,8 @@ func _process(_delta: float) -> void:
 
 
 func _montar_skyline(mundo: Node3D) -> void:
-	# Detrás de las fachadas existentes: ninguna pieza invade acera/calzada.
+	# Primera línea: detrás de las fachadas existentes. Ninguna pieza invade
+	# acera/calzada; son las seis siluetas del primer corte de #218.
 	_edificio(
 		mundo,
 		SkylineQuaternius.MODELO_BALCON,
@@ -72,6 +73,59 @@ func _montar_skyline(mundo: Node3D) -> void:
 		1.65,
 		-14.0,
 		Color(0.16, 0.17, 0.19)
+	)
+
+	# Segunda línea: el playtest #394 seguía leyendo un decorado abierto porque
+	# entre las seis piezas anteriores quedaban grandes huecos de fondo plano.
+	# Estas siluetas están aún más lejos y desaturadas: cierran horizonte sin
+	# convertir el recorrido en otro pasillo ni añadir colisión invisible.
+	_edificio(
+		mundo,
+		SkylineQuaternius.MODELO_PILA,
+		Vector3(-19.0, 0.0, -28.0),
+		2.45,
+		11.0,
+		Color(0.105, 0.12, 0.15)
+	)
+	_edificio(
+		mundo,
+		SkylineQuaternius.MODELO_BALCON,
+		Vector3(17.5, 0.0, -30.0),
+		2.60,
+		-16.0,
+		Color(0.11, 0.125, 0.15)
+	)
+	_edificio(
+		mundo,
+		SkylineQuaternius.MODELO_CUATRO,
+		Vector3(-20.0, 0.0, 1.5),
+		2.15,
+		-7.0,
+		Color(0.095, 0.11, 0.135)
+	)
+	_edificio(
+		mundo,
+		SkylineQuaternius.MODELO_PILA,
+		Vector3(19.5, 0.0, 2.5),
+		2.05,
+		14.0,
+		Color(0.10, 0.115, 0.14)
+	)
+	_edificio(
+		mundo,
+		SkylineQuaternius.MODELO_BALCON,
+		Vector3(-7.0, 0.0, 36.0),
+		2.35,
+		6.0,
+		Color(0.105, 0.115, 0.135)
+	)
+	_edificio(
+		mundo,
+		SkylineQuaternius.MODELO_CUATRO,
+		Vector3(7.5, 0.0, 38.0),
+		2.55,
+		-9.0,
+		Color(0.09, 0.105, 0.13)
 	)
 
 

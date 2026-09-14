@@ -6,6 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 LOD = ROOT / "godot" / "arte" / "skyline_quaternius.gd"
 CONTROLADOR = ROOT / "godot" / "guion" / "dia_skyline_cc0_app.gd"
+CLIMA = ROOT / "godot" / "guion" / "dia_clima_app.gd"
 ESCENA = ROOT / "godot" / "escenas" / "dia.tscn"
 
 
@@ -31,7 +32,7 @@ class SkylineCC0Test(unittest.TestCase):
         self.assertIn("BoxMesh.new()", codigo)
 
     def test_es_fondo_sin_colision_ni_interaccion(self) -> None:
-        codigo = (LOD.read_text(encoding="utf-8") + CONTROLADOR.read_text(encoding="utf-8"))
+        codigo = LOD.read_text(encoding="utf-8") + CONTROLADOR.read_text(encoding="utf-8")
         for prohibido in (
             "StaticBody3D",
             "CollisionShape3D",
@@ -42,13 +43,28 @@ class SkylineCC0Test(unittest.TestCase):
         ):
             self.assertNotIn(prohibido, codigo)
 
-    def test_solo_monta_en_trayecto_y_repite_los_tres_lod(self) -> None:
+    def test_solo_monta_en_trayecto_y_repite_los_tres_lod_en_dos_profundidades(self) -> None:
         codigo = CONTROLADOR.read_text(encoding="utf-8")
         self.assertIn('!= "trayecto"', codigo)
-        self.assertEqual(codigo.count("SkylineQuaternius.MODELO_BALCON"), 2)
-        self.assertEqual(codigo.count("SkylineQuaternius.MODELO_CUATRO"), 2)
-        self.assertEqual(codigo.count("SkylineQuaternius.MODELO_PILA"), 2)
-        self.assertGreaterEqual(codigo.count("_edificio("), 7)
+        self.assertEqual(codigo.count("SkylineQuaternius.MODELO_BALCON"), 4)
+        self.assertEqual(codigo.count("SkylineQuaternius.MODELO_CUATRO"), 4)
+        self.assertEqual(codigo.count("SkylineQuaternius.MODELO_PILA"), 4)
+        self.assertGreaterEqual(codigo.count("_edificio("), 13)
+        self.assertIn("Segunda línea", codigo)
+        self.assertIn("Vector3(-19.0, 0.0, -28.0)", codigo)
+        self.assertIn("Vector3(7.5, 0.0, 38.0)", codigo)
+
+    def test_exterior_tiene_cielo_distinto_y_clima_conserva_prioridad(self) -> None:
+        codigo = CLIMA.read_text(encoding="utf-8")
+        self.assertIn("const FONDO_BASE := Color(0.05, 0.05, 0.06)", codigo)
+        self.assertIn("const FONDO_EXTERIOR := Color(0.035, 0.055, 0.10)", codigo)
+        self.assertIn('_ambiente.background_color = FONDO_EXTERIOR', codigo)
+        self.assertIn('if not bool(espacio.get("exterior", false)):', codigo)
+        self.assertIn('_ambiente.background_color = Color(0.34, 0.35, 0.38)', codigo)
+        self.assertLess(
+            codigo.index("_ambiente.background_color = FONDO_EXTERIOR"),
+            codigo.index("_aplicar_clima(Clima.estado"),
+        )
 
     def test_dia_conserva_raiz_historica_y_activa_skyline(self) -> None:
         escena = ESCENA.read_text(encoding="utf-8")
