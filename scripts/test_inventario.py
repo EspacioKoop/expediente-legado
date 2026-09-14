@@ -44,7 +44,7 @@ class InventarioTest(unittest.TestCase):
             check=False,
         )
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
-        self.assertIn("23 pasadas, 0 fallos", resultado.stdout)
+        self.assertIn("33 pasadas, 0 fallos", resultado.stdout)
 
 
 if __name__ == "__main__":
