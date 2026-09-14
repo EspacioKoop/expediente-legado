@@ -70,11 +70,14 @@ static func registrar_semilla(
 	if paginas_examinadas < PAGINAS_MINIMAS or not tablilla_observada:
 		return false
 	if estado.has("dia"):
-		return SemillasOniricas.activar_semilla_onirica(
-			estado,
-			ID_MITO,
-			fuente,
-			intensidad,
+		return (
+			SemillasOniricas
+			. activar_semilla_onirica(
+				estado,
+				ID_MITO,
+				fuente,
+				intensidad,
+			)
 		)
 	estado[CLAVE_SEMILLA] = true
 	return true
@@ -82,9 +85,7 @@ static func registrar_semilla(
 
 ## Contrato lógico del puzzle. Devuelve un estado nuevo y nunca destruye el
 ## anterior: una pareja incorrecta pide reversión y deja el progreso intacto.
-static func evaluar_colocacion(
-	estado: Dictionary, fragmento: String, ancla: String
-) -> Dictionary:
+static func evaluar_colocacion(estado: Dictionary, fragmento: String, ancla: String) -> Dictionary:
 	var siguiente := estado.duplicate(true)
 	if not ENCAJES.has(fragmento) or String(ENCAJES[fragmento]) != ancla:
 		return {
@@ -113,9 +114,7 @@ static func plan_transformacion(reduccion_movimiento: bool, aciertos: int) -> Di
 		"duracion": 0.0 if reduccion_movimiento else 0.65,
 		"sacudida_camara": false,
 		"desplazar_camara": false,
-		"transformacion_final": (
-			TRANSFORMACION_FINAL if aciertos >= FRAGMENTOS_NECESARIOS else ""
-		),
+		"transformacion_final": TRANSFORMACION_FINAL if aciertos >= FRAGMENTOS_NECESARIOS else "",
 	}
 
 
@@ -330,11 +329,14 @@ func _abrir_ruta(reduccion_movimiento: bool) -> void:
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_SINE)
 	tween.set_ease(Tween.EASE_IN_OUT)
-	tween.tween_property(
-		_muralla_techo,
-		"scale",
-		Vector3.ONE,
-		float(plan["duracion"]),
+	(
+		tween
+		. tween_property(
+			_muralla_techo,
+			"scale",
+			Vector3.ONE,
+			float(plan["duracion"]),
+		)
 	)
 
 
