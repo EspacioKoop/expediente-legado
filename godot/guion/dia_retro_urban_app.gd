@@ -26,6 +26,7 @@ func _process(_delta: float) -> void:
 		return
 	_mundo_montado_id = mundo_id
 	_montar_toldos(mundo)
+	CalleMateriales.montar(mundo)
 
 
 func _montar_toldos(mundo: Node3D) -> void:

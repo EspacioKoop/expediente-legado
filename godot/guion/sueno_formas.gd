@@ -169,11 +169,15 @@ const FORMAS := {
 		"color_techo": Color(0.14, 0.17, 0.19),
 	},
 	# Una nave enorme que se estrecha hasta un cuello y se vuelve a abrir. Se
-	# ve el final desde el principio y aun así hay que rodear.
+	# ve el final desde el principio y aun así hay que rodear. Desde #279 esta
+	# es además la primera forma que deja de ser ortogonal en runtime: la planta
+	# se conserva como contrato lógico/timing, y la arquitectura visible/física
+	# usa la familia poligonal declarada aquí.
 	"embudo":
 	{
 		"rotulo": "SUENO_ROTULO",
 		"bloques": [Rect2i(0, 0, 16, 9), Rect2i(6, 9, 4, 4), Rect2i(2, 13, 12, 7)],
+		"familia_poligonal": SuenoFamilias.CONVERGENTE,
 		"textura_suelo": "asfalto",
 		"textura_muro": "gotele",
 		"escala_textura": 0.35,
