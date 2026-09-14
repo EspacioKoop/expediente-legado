@@ -21,11 +21,13 @@ const MITOS_VALIDOS := [
 const INTENSIDAD_MAX := 3
 
 const MITO_CONTENIDO := {
-	"gilgamesh": {
+	"gilgamesh":
+	{
 		"frases": ["¿Quién vigila al vigilante?", "La eternidad es una carga"],
 		"figuras": [{"nombre": "Gilgamesh", "acusado": false}],
 	},
-	"minotauro": {
+	"minotauro":
+	{
 		"frases": ["El laberinto no tiene salida", "El rugido resuena en la piedra"],
 		"figuras": [{"nombre": "Minotauro", "acusado": false}],
 	},
