@@ -210,12 +210,7 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 	# La cabeza procedural envuelve el cráneo importado: no hay una placa frontal
 	# que pueda verse de canto. Las pequeñas variaciones conservan el roster sin
 	# recuperar fotografías ni materiales ajenos al shader común.
-	_volumen_cabeza(
-		enganche,
-		Vector3(0.0, centro_y, 0.0),
-		Vector3(radio_x, radio_y, radio_z),
-		piel
-	)
+	_volumen_cabeza(enganche, Vector3(0.0, centro_y, 0.0), Vector3(radio_x, radio_y, radio_z), piel)
 
 	# Los centros de ojos y boca se colocan unos milímetros DENTRO de la
 	# superficie del elipsoide. Solo asoma la parte necesaria del volumen, de
@@ -267,12 +262,7 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 ## sigue la curvatura real del volumen de cabeza. Fuera del elipsoide se devuelve
 ## 0 para que una proporción extrema nunca produzca NaN.
 static func _frente_cabeza(
-	x: float,
-	y: float,
-	centro_y: float,
-	radio_x: float,
-	radio_y: float,
-	radio_z: float
+	x: float, y: float, centro_y: float, radio_x: float, radio_y: float, radio_z: float
 ) -> float:
 	var nx := x / maxf(radio_x, 0.0001)
 	var ny := (y - centro_y) / maxf(radio_y, 0.0001)
