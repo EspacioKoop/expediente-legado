@@ -1,8 +1,9 @@
-## Cómoda doméstica con un cajón utilizable para la casa (#400).
+## Cómoda doméstica con un cajón utilizable para la casa (#400/#97).
 ##
-## Reutiliza el contrato semántico de Interactuable3D y mantiene el estado
-## estrictamente local a la escena. Abrir o cerrar solo desplaza el cajón:
-## no guarda progreso, no consume acciones y no introduce lore nuevo.
+## Reutiliza el contrato semántico de Interactuable3D para abrir/cerrar y el
+## contrato puro de Inventario para mover objetos entre carried/home_storage.
+## La cómoda no posee ni persiste estado: recibe el diccionario de inventario
+## explícitamente y solo permite guardar/sacar mientras el cajón está abierto.
 class_name AlmacenamientoCasaInteractivo3D
 extends "res://guion/interactuable_3d.gd"
 
@@ -35,6 +36,25 @@ func esta_abierto() -> bool:
 
 func posicion_cajon() -> Vector3:
 	return _cajon.position
+
+
+func guardar_objeto(estado_inventario: Dictionary, objeto_id: String) -> bool:
+	if not _abierto or objeto_id.strip_edges().is_empty():
+		return false
+	return Inventario.guardar_en_casa(estado_inventario, objeto_id)
+
+
+func sacar_objeto(estado_inventario: Dictionary, objeto_id: String) -> bool:
+	if not _abierto or objeto_id.strip_edges().is_empty():
+		return false
+	return Inventario.sacar_de_casa(estado_inventario, objeto_id)
+
+
+func contenido(estado_inventario: Dictionary) -> Array:
+	if not _abierto:
+		return []
+	Inventario.completar(estado_inventario)
+	return estado_inventario[Inventario.HOME_STORAGE].duplicate(true)
 
 
 func _alternar(_actor: Node) -> void:
