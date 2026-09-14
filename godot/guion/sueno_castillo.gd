@@ -98,9 +98,11 @@ static func configuracion(estado_presentacion: Dictionary = {}) -> Dictionary:
 			{
 				"activa": vuelta > 0 and not anclas.is_empty(),
 				"entrada":
-				anclas[posmod(vuelta, anclas.size())]
-				if not anclas.is_empty()
-				else familia.get("entrada", Vector3.ZERO),
+				(
+					anclas[posmod(vuelta, anclas.size())]
+					if not anclas.is_empty()
+					else familia.get("entrada", Vector3.ZERO)
+				),
 			},
 			# El códice cambia entre anclas conocidas de forma determinista. No
 			# crea una pista: solo mueve la representación de un documento que el
@@ -159,28 +161,34 @@ static func adaptar_espacio(
 	if not frases.is_empty() and bool(codice.get("activa", false)):
 		var ancla_codice: Vector3 = codice.get("ancla", Vector3.ZERO)
 		var salidas: Array = resultado.get("salidas", []).duplicate(true)
-		salidas.append(
-			{
-				"pos": ancla_codice + Vector3(0, 1.0, 0),
-				"destino": "",
-				"frase": frases[0],
-				"tam": Vector3(2.4, 2.0, 2.4),
-				"visible": false,
-			}
+		(
+			salidas
+			. append(
+				{
+					"pos": ancla_codice + Vector3(0, 1.0, 0),
+					"destino": "",
+					"frase": frases[0],
+					"tam": Vector3(2.4, 2.0, 2.4),
+					"visible": false,
+				}
+			)
 		)
 		resultado["salidas"] = salidas
 
 		# La luz no representa el códice ni añade otro objeto provisional: solo
 		# hace legible dónde ocurre la anomalía hasta que haya prop con procedencia.
 		var luces: Array = resultado.get("luces", []).duplicate(true)
-		luces.append(
-			{
-				"pos": ancla_codice + Vector3(0, 1.4, 0),
-				"color": COLOR_CODICE,
-				"energia": ENERGIA_CODICE,
-				"alcance": ALCANCE_CODICE,
-				"carcasa": false,
-			}
+		(
+			luces
+			. append(
+				{
+					"pos": ancla_codice + Vector3(0, 1.4, 0),
+					"color": COLOR_CODICE,
+					"energia": ENERGIA_CODICE,
+					"alcance": ALCANCE_CODICE,
+					"carcasa": false,
+				}
+			)
 		)
 		resultado["luces"] = luces
 
