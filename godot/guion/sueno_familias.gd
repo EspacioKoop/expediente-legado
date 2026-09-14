@@ -33,41 +33,40 @@ static var _familias := {
 	},
 	ANULAR:
 	{
-		# Anillo abierto y deliberadamente asimétrico. Es un único polígono
-		# cóncavo: el recorte central queda realmente fuera de suelo/techo/colisión
-		# y la hendidura lateral permite entrar andando sin salto. La gran banda
-		# izquierda hace además que el centro lógico usado para sembrar contenido
-		# caiga sobre superficie caminable y no dentro del vacío.
+		# Anillo abierto en C y deliberadamente irregular. Sigue cabiendo dentro
+		# de la envolvente histórica de `patio`: la planta de celdas conserva
+		# timing/mapa y esta silueta sustituye solo la arquitectura visible/física.
+		# El recorte central queda fuera de suelo, techo y colisión; la abertura
+		# lateral permite recorrerlo andando sin salto ni navegación especial.
 		"contorno":
 		PackedVector2Array(
 			[
-				Vector2(-70, -12),
-				Vector2(-30, -18),
-				Vector2(16, -12),
-				Vector2(18, -2),
-				Vector2(7, -2),
-				Vector2(5, -6),
-				Vector2(-3, -8),
-				Vector2(-8, -3),
-				Vector2(-8, 4),
-				Vector2(-2, 8),
-				Vector2(5, 6),
-				Vector2(7, 2),
-				Vector2(18, 2),
-				Vector2(14, 14),
-				Vector2(-30, 18),
-				Vector2(-65, 14),
-				Vector2(-72, 2),
+				Vector2(-18, -12),
+				Vector2(-14, -18),
+				Vector2(12, -18),
+				Vector2(12, -10),
+				Vector2(2, -10),
+				Vector2(0, -8),
+				Vector2(-8, -8),
+				Vector2(-8, 8),
+				Vector2(0, 8),
+				Vector2(2, 10),
+				Vector2(12, 10),
+				Vector2(12, 18),
+				Vector2(-14, 18),
+				Vector2(-18, 12),
+				Vector2(-18, 4),
+				Vector2(-18, -4),
 			]
 		),
 		"altura": 3.4,
-		"entrada": Vector3(-50, 0, 0),
+		"entrada": Vector3(-17, 0, 0),
 		"anclas":
 		[
-			Vector3(-40, 0, -10),
-			Vector3(12, 0, -8),
-			Vector3(12, 0, 8),
-			Vector3(-40, 0, 10),
+			Vector3(-15, 0, -14),
+			Vector3(8, 0, -14),
+			Vector3(8, 0, 14),
+			Vector3(-15, 0, 14),
 		],
 	},
 	FRAGMENTADA:
