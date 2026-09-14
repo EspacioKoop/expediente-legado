@@ -22,10 +22,18 @@ var estado: Dictionary = {}
 
 
 func _ready() -> void:
-	for nombre in ["Distancia", "Precisión", "Zona"]:
-		modalidad.add_item(nombre)
-	for nombre in ["Estable", "Rápido", "Impredecible"]:
-		modelo.add_item(nombre)
+	for clave in [
+		"AVIONES_MODALIDAD_DISTANCIA",
+		"AVIONES_MODALIDAD_PRECISION",
+		"AVIONES_MODALIDAD_ZONA",
+	]:
+		modalidad.add_item(tr(clave))
+	for clave in [
+		"AVIONES_MODELO_ESTABLE",
+		"AVIONES_MODELO_RAPIDO",
+		"AVIONES_MODELO_IMPREDECIBLE",
+	]:
+		modelo.add_item(tr(clave))
 	modalidad.item_selected.connect(_al_cambiar_modalidad)
 	lanzar.pressed.connect(_al_lanzar)
 	abandonar.pressed.connect(_al_abandonar)
@@ -55,7 +63,9 @@ func _draw() -> void:
 		)
 	)
 	draw_circle(papelera, 10.0, Color("40484d"))
-	var objetivo := _proyectar(Vector3(AvionesPapel.OBJETIVO.x, 0.0, AvionesPapel.OBJETIVO.y))
+	var objetivo := _proyectar(
+		Vector3(AvionesPapel.OBJETIVO.x, 0.0, AvionesPapel.OBJETIVO.y)
+	)
 	draw_circle(objetivo, 22.0, Color("76896b"), false, 3.0)
 
 
@@ -68,9 +78,9 @@ func _nueva_ronda() -> void:
 	potencia.editable = true
 	abandonar.disabled = false
 	lanzar.disabled = false
-	lanzar.text = "Lanzar"
+	lanzar.text = tr("AVIONES_LANZAR")
 	avion.position = _origen_avion()
-	estado_label.text = "Tu turno · lanzamiento 1/3"
+	estado_label.text = tr("AVIONES_ESTADO_LANZAMIENTO") % 1
 	_actualizar_marcador()
 
 
@@ -104,7 +114,9 @@ func _al_lanzar() -> void:
 	if int(estado.get("turno", 0)) > 0:
 		_resolver_companeros()
 	else:
-		estado_label.text = "Tu turno · lanzamiento %d/3" % (int(estado["lanzamiento"]) + 1)
+		estado_label.text = tr("AVIONES_ESTADO_LANZAMIENTO") % (
+			int(estado["lanzamiento"]) + 1
+		)
 
 
 func _resolver_companeros() -> void:
@@ -120,9 +132,9 @@ func _resolver_companeros() -> void:
 
 func _terminar_ronda() -> void:
 	var resultado := AvionesPapel.resultado(estado)
-	var ganador := String(resultado.get("ganador", "empate"))
-	estado_label.text = "Ronda terminada · ganador: %s" % ganador
-	lanzar.text = "Nueva ronda"
+	var ganador := _nombre_participante(String(resultado.get("ganador", "empate")))
+	estado_label.text = tr("AVIONES_ESTADO_FIN") % ganador
+	lanzar.text = tr("AVIONES_NUEVA_RONDA")
 	modelo.disabled = true
 	direccion.editable = false
 	altura.editable = false
@@ -136,8 +148,8 @@ func _al_abandonar() -> void:
 	if estado.get("terminada", false) or estado.get("abandonada", false):
 		return
 	var resultado := AvionesPapel.abandonar(estado)
-	estado_label.text = "Ronda abandonada · el ciclo diario no cambia"
-	lanzar.text = "Nueva ronda"
+	estado_label.text = tr("AVIONES_ESTADO_ABANDONADA")
+	lanzar.text = tr("AVIONES_NUEVA_RONDA")
 	modelo.disabled = true
 	direccion.editable = false
 	altura.editable = false
@@ -155,22 +167,35 @@ func _animar_vuelo(vuelo: Dictionary) -> void:
 	tween.set_trans(Tween.TRANS_QUAD)
 	tween.set_ease(Tween.EASE_OUT)
 	tween.tween_property(avion, "position", destino, duracion)
-	estado_label.text = "%.1f m · %.0f precisión · %s" % [
+	estado_label.text = tr("AVIONES_ESTADO_VUELO") % [
 		float(vuelo.get("distancia", 0.0)),
 		float(vuelo.get("precision", 0.0)),
-		String(vuelo.get("motivo", "aterrizaje")),
 	]
 
 
 func _actualizar_marcador() -> void:
 	var resultado := AvionesPapel.resultado(estado)
 	var puntuaciones: Dictionary = resultado.get("puntuaciones", {})
-	marcador.text = "Marcador\nTú: %.1f\nDistancia: %.1f\nPapelera: %.1f\nCuñado: %.1f" % [
+	marcador.text = tr("AVIONES_MARCADOR") % [
 		float(puntuaciones.get("jugador", 0.0)),
 		float(puntuaciones.get("distancia", 0.0)),
 		float(puntuaciones.get("papelera", 0.0)),
 		float(puntuaciones.get("cunado", 0.0)),
 	]
+
+
+func _nombre_participante(id_participante: String) -> String:
+	match id_participante:
+		"jugador":
+			return tr("AVIONES_JUGADOR")
+		"distancia":
+			return tr("AVIONES_RIVAL_DISTANCIA")
+		"papelera":
+			return tr("AVIONES_RIVAL_PAPELERA")
+		"cunado":
+			return tr("AVIONES_RIVAL_CUNADO")
+		_:
+			return tr("AVIONES_EMPATE")
 
 
 func _hay_lanzamientos() -> bool:
