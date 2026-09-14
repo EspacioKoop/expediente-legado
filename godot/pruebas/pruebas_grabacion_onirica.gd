@@ -75,9 +75,7 @@ func _init() -> void:
 	var sin_id := valida.duplicate(true)
 	sin_id["original_id"] = ""
 	_comprobar(
-		"identificador vacío",
-		Contrato.evaluar_toma(sin_id),
-		Contrato.EstadoGrabacion.CONTAMINADA
+		"identificador vacío", Contrato.evaluar_toma(sin_id), Contrato.EstadoGrabacion.CONTAMINADA
 	)
 
 	var detallada := Contrato.evaluar_toma_detallada(valida)
@@ -132,9 +130,7 @@ func _probar_metraje(plantilla: Dictionary) -> void:
 	var tomas: Array = final.get("tomas", [])
 	if tomas.size() == 2:
 		_comprobar(
-			"primera toma intacta",
-			tomas[0].get("toma", {}).get("original_id"),
-			"original-01"
+			"primera toma intacta", tomas[0].get("toma", {}).get("original_id"), "original-01"
 		)
 
 
