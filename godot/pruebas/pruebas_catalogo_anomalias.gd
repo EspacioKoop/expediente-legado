@@ -30,7 +30,10 @@ func _initialize() -> void:
 	)
 
 	CatalogoAnomalias.reiniciar_vuelta(estado)
-	_comprobar(CatalogoAnomalias.conocida(estado, "silla-demasiado-alta"), "la memoria total sobrevive")
+	_comprobar(
+		CatalogoAnomalias.conocida(estado, "silla-demasiado-alta"),
+		"la memoria total sobrevive"
+	)
 	_comprobar(
 		not CatalogoAnomalias.conocida_en_vuelta(estado, "silla-demasiado-alta"),
 		"la nueva vida laboral empieza sin hallazgos de vuelta"
