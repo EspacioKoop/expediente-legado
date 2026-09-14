@@ -68,9 +68,7 @@ static func activar_semilla_onirica(
 		return true
 
 	fuentes.append(fuente_limpia)
-	entrada["intensidad"] = mini(
-		int(entrada.get("intensidad", 0)) + intensidad, INTENSIDAD_MAX
-	)
+	entrada["intensidad"] = mini(int(entrada.get("intensidad", 0)) + intensidad, INTENSIDAD_MAX)
 	return true
 
 
@@ -117,10 +115,7 @@ static func seleccionar_para_noche(
 	var firma := _firma(estado)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = Azar.derivar_texto(
-		raiz,
-		"sueno",
-		"semillas_oniricas|%s" % firma,
-		[int(jornada.get("dia", 0))]
+		raiz, "sueno", "semillas_oniricas|%s" % firma, [int(jornada.get("dia", 0))]
 	)
 
 	var elegidas: Array[String] = []
@@ -178,8 +173,9 @@ static func _normalizar_dia(jornada: Dictionary) -> Dictionary:
 			continue
 
 		var fuentes_crudas = entrada.get("fuentes", [])
-		if entrada.has("fuente") and (
-			typeof(fuentes_crudas) != TYPE_ARRAY or fuentes_crudas.is_empty()
+		if (
+			entrada.has("fuente")
+			and (typeof(fuentes_crudas) != TYPE_ARRAY or fuentes_crudas.is_empty())
 		):
 			fuentes_crudas = [entrada["fuente"]]
 		if typeof(fuentes_crudas) != TYPE_ARRAY:
@@ -215,13 +211,18 @@ static func _firma(estado: Dictionary) -> String:
 		var entrada: Dictionary = estado[clave_mito]
 		var fuentes: Array = entrada.get("fuentes", []).duplicate()
 		fuentes.sort()
-		partes.append(
-			"%s:%d:%s"
-			% [
-				String(clave_mito),
-				int(entrada.get("intensidad", 0)),
-				",".join(fuentes),
-			]
+		(
+			partes
+			. append(
+				(
+					"%s:%d:%s"
+					% [
+						String(clave_mito),
+						int(entrada.get("intensidad", 0)),
+						",".join(fuentes),
+					]
+				)
+			)
 		)
 	return ";".join(partes)
 
