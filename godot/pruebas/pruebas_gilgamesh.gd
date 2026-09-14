@@ -148,6 +148,9 @@ func _probar_transformacion_y_accesibilidad() -> void:
 func _probar_vertical_3d() -> void:
 	var sueno := SuenoGilgamesh.new()
 	get_root().add_child(sueno)
+	# SceneTree._initialize() corre antes del primer ciclo de lifecycle. Ejecutamos
+	# _ready de forma explícita para validar el mismo montaje que usa la escena real.
+	sueno._ready()
 	_comprobar(sueno.get_node_or_null("CiudadImposible") != null, "la escena monta una ciudad 3D")
 	_comprobar(
 		sueno.get_node_or_null("CiudadImposible/MurallaVertical") != null,
