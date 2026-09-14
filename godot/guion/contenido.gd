@@ -72,8 +72,10 @@ static func _idioma(locale: String) -> String:
 
 
 ## Compara forma y reglas, permitiendo que cambie únicamente el texto visible.
-## Así una copia localizada no puede ir un caso, pista o flag por detrás.
-static func _misma_estructura(base: Variant, localizada: Variant, campo: String = "") -> bool:
+## Así una copia localizada no puede perder un caso, pista o flag por detrás.
+static func _misma_estructura(
+	base: Variant, localizada: Variant, campo: String = ""
+) -> bool:
 	if typeof(base) != typeof(localizada):
 		return false
 	if base is Dictionary:
