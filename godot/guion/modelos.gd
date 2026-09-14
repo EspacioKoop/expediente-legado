@@ -250,6 +250,14 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 	# que pueda verse de canto. Las pequeñas variaciones conservan el roster sin
 	# recuperar fotografías ni materiales ajenos al shader común.
 	_volumen_cabeza(enganche, Vector3(0.0, centro_y, 0.0), Vector3(radio_x, radio_y, radio_z), piel)
+	# Una pieza superior sencilla distingue peinados y silueta sin convertir el
+	# retrato en una textura plana. Se ancla al mismo hueso que la cabeza.
+	_cabello_cabeza(
+		enganche,
+		Vector3(0.0, centro_y + radio_y * 0.72, -radio_z * 0.04),
+		Vector3(radio_x * 1.04, alto * 0.16, radio_z * 0.88),
+		cabello
+	)
 
 	# Los centros de ojos y boca se colocan unos milímetros DENTRO de la
 	# superficie del elipsoide. Solo asoma la parte necesaria del volumen, de

@@ -42,6 +42,15 @@ class Rostros3DTest(unittest.TestCase):
         self.assertIn("absi(hash(retrato))", self.cara)
         self.assertNotIn("randf()", self.cara)
 
+    def test_perfiles_historicos_explicitos_y_cabello_integrado(self):
+        for retrato in ("emperador", "aduanero_ny", "correspondencia", "riegos", "fielato"):
+            self.assertIn('"%s"' % retrato, self.texto)
+        self.assertIn("PERFILES_FACIALES.get(retrato", self.cara)
+        self.assertIn("_cabello_cabeza(", self.cara)
+        self.assertIn("perfil.get(", self.cara)
+        self.assertIn("\"piel\"", self.cara)
+        self.assertIn("perfil.get(\"x\"", self.cara)
+
     def test_conserva_el_shader_comun(self):
         self.assertIn("material.shader = load(Espacio3D.SHADER_PSX)", self.texto)
 
