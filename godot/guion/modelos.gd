@@ -32,6 +32,26 @@ const RUTA := "res://assets/modelos/"
 ## lo publicó su autor.
 const FORMATOS: Array[String] = [".glb", ".fbx"]
 
+## La forma viene del asset; la MATERIA sigue siendo del proyecto. Esta tabla es
+## deliberadamente semántica: un escritorio de otro pack sigue siendo melamina,
+## no necesita copiar una textura casi idéntica en cada escena.
+const MATERIALES_MUEBLE := {
+	"desk": "melamina",
+	"bookcaseClosed": "metal_pintado",
+	"computerScreen": "plastico_abs",
+	"chairDesk": "plastico_abs",
+	"trashcan": "metal_pintado",
+}
+
+## Repeticiones por metro en el triplanar común. La escala pertenece al material,
+## no a una instancia concreta: dos archivadores no deben tener arañazos de un
+## tamaño distinto solo porque su caja declarada cambie.
+const ESCALAS_MATERIAL := {
+	"melamina": 2.2,
+	"metal_pintado": 3.4,
+	"plastico_abs": 5.0,
+}
+
 ## Lo que mide una persona, en metros. No lo decide este módulo: lo fija
 ## `nodes/root_scale` en el `.import` de la figura, y aquí se declara para que
 ## quien le cuelgue el nombre encima no tenga que medirlo a ojo. Si cambia allí,
@@ -54,7 +74,7 @@ static func mueble(cuerpo: Node3D, nombre: String, tam: Vector3, color: Color) -
 	if pieza == null:
 		return false
 	_encajar(pieza, tam)
-	_pintar(pieza, color)
+	_pintar(pieza, color, String(MATERIALES_MUEBLE.get(nombre, "")))
 	return true
 
 
@@ -379,13 +399,21 @@ static func _limites(nodo: Node3D) -> AABB:
 	return total
 
 
-## Le pone a cada malla el material de la casa. El modelo pone la forma y el
-## catálogo el color, que es lo que evita que un mueble importado se vea como
-## de otro juego.
-static func _pintar(nodo: Node3D, color: Color) -> void:
+## Le pone a cada malla el material de la casa. El modelo aporta la forma y el
+## proyecto aporta color + materia, para que un asset importado no vuelva a
+## convertirse en una superficie plana de otro juego.
+static func _pintar(nodo: Node3D, color: Color, textura: String = "") -> void:
 	var material := ShaderMaterial.new()
 	material.shader = load(Espacio3D.SHADER_PSX)
 	material.set_shader_parameter("color_base", color)
+	if not textura.is_empty():
+		var imagen := TexturaProcedural.por_nombre(textura, color, hash(textura))
+		if imagen != null:
+			material.set_shader_parameter("textura", imagen)
+			material.set_shader_parameter("con_textura", true)
+			material.set_shader_parameter(
+				"escala_textura", float(ESCALAS_MATERIAL.get(textura, 1.0))
+			)
 	for hijo in _mallas(nodo):
 		var malla: MeshInstance3D = hijo
 		malla.material_override = material
