@@ -63,9 +63,7 @@ func _draw() -> void:
 		)
 	)
 	draw_circle(papelera, 10.0, Color("40484d"))
-	var objetivo := _proyectar(
-		Vector3(AvionesPapel.OBJETIVO.x, 0.0, AvionesPapel.OBJETIVO.y)
-	)
+	var objetivo := _proyectar(Vector3(AvionesPapel.OBJETIVO.x, 0.0, AvionesPapel.OBJETIVO.y))
 	draw_circle(objetivo, 22.0, Color("76896b"), false, 3.0)
 
 
@@ -114,9 +112,7 @@ func _al_lanzar() -> void:
 	if int(estado.get("turno", 0)) > 0:
 		_resolver_companeros()
 	else:
-		estado_label.text = tr("AVIONES_ESTADO_LANZAMIENTO") % (
-			int(estado["lanzamiento"]) + 1
-		)
+		estado_label.text = tr("AVIONES_ESTADO_LANZAMIENTO") % (int(estado["lanzamiento"]) + 1)
 
 
 func _resolver_companeros() -> void:
@@ -167,21 +163,27 @@ func _animar_vuelo(vuelo: Dictionary) -> void:
 	tween.set_trans(Tween.TRANS_QUAD)
 	tween.set_ease(Tween.EASE_OUT)
 	tween.tween_property(avion, "position", destino, duracion)
-	estado_label.text = tr("AVIONES_ESTADO_VUELO") % [
-		float(vuelo.get("distancia", 0.0)),
-		float(vuelo.get("precision", 0.0)),
-	]
+	estado_label.text = (
+		tr("AVIONES_ESTADO_VUELO")
+		% [
+			float(vuelo.get("distancia", 0.0)),
+			float(vuelo.get("precision", 0.0)),
+		]
+	)
 
 
 func _actualizar_marcador() -> void:
 	var resultado := AvionesPapel.resultado(estado)
 	var puntuaciones: Dictionary = resultado.get("puntuaciones", {})
-	marcador.text = tr("AVIONES_MARCADOR") % [
-		float(puntuaciones.get("jugador", 0.0)),
-		float(puntuaciones.get("distancia", 0.0)),
-		float(puntuaciones.get("papelera", 0.0)),
-		float(puntuaciones.get("cunado", 0.0)),
-	]
+	marcador.text = (
+		tr("AVIONES_MARCADOR")
+		% [
+			float(puntuaciones.get("jugador", 0.0)),
+			float(puntuaciones.get("distancia", 0.0)),
+			float(puntuaciones.get("papelera", 0.0)),
+			float(puntuaciones.get("cunado", 0.0)),
+		]
+	)
 
 
 func _nombre_participante(id_participante: String) -> String:
