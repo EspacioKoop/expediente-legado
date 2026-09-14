@@ -1,11 +1,13 @@
 ## Pantalla encendida del escaparate (#142).
 ##
-## El contenido está separado de la geometría: una pantalla sin fichero muestra
-## nieve; con un fichero de vídeo válido reproduce ese contenido en silencio.
+## El contenido está separado de la geometría: un vídeo válido tiene prioridad;
+## una declaración `contenido = "media_luna"` usa un gráfico procedural ligero;
+## cualquier otro caso conserva la nieve histórica como fallback.
 class_name Pantalla
 extends RefCounted
 
 const SHADER_NIEVE := "res://arte/nieve.gdshader"
+const SHADER_MEDIA_LUNA := "res://arte/media_luna.gdshader"
 const RESOLUCION := Vector2i(256, 192)
 
 
@@ -18,7 +20,11 @@ static func montar(raiz: Node3D, declaracion: Dictionary) -> Node3D:
 	raiz.add_child(vista)
 
 	if not _montar_video(vista, String(declaracion.get("fichero", ""))):
-		_montar_nieve(vista, float(declaracion.get("semilla", 0.0)))
+		var contenido := String(declaracion.get("contenido", ""))
+		if contenido == "media_luna":
+			_montar_media_luna(vista, float(declaracion.get("semilla", 0.0)))
+		else:
+			_montar_nieve(vista, float(declaracion.get("semilla", 0.0)))
 
 	var cristal := MeshInstance3D.new()
 	var plano := QuadMesh.new()
@@ -51,6 +57,19 @@ static func _montar_video(vista: SubViewport, fichero: String) -> bool:
 	video.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	vista.add_child(video)
 	return true
+
+
+static func _montar_media_luna(vista: SubViewport, semilla: float) -> void:
+	var lienzo := ColorRect.new()
+	lienzo.name = "MediaLuna"
+	lienzo.size = Vector2(RESOLUCION)
+	var material := ShaderMaterial.new()
+	material.shader = load(SHADER_MEDIA_LUNA)
+	material.set_shader_parameter("semilla", semilla)
+	lienzo.material = material
+	vista.add_child(lienzo)
+	# El motivo es estático: se renderiza una vez y no consume un refresco por TV.
+	vista.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 
 static func _montar_nieve(vista: SubViewport, semilla: float) -> void:
