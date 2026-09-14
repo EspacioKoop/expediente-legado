@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+import os
+import sys
+
+libname = "siga98_gb"
+projectdir = "../../addons/siga98_gb"
+godot_cpp_dir = ARGUMENTS.get("godot_cpp_dir", ".deps/godot-cpp")
+peanut_gb_dir = ARGUMENTS.get("peanut_gb_dir", ".deps/peanut-gb")
+
+local_env = Environment(tools=["default"], PLATFORM="")
+opts = Variables([], ARGUMENTS)
+opts.Update(local_env)
+env = local_env.Clone()
+
+if not os.path.isfile(os.path.join(godot_cpp_dir, "SConstruct")):
+    print("ERROR: godot-cpp no preparado; ejecuta scripts/preparar_emulador_gb.sh", file=sys.stderr)
+    Exit(1)
+if not os.path.isfile(os.path.join(peanut_gb_dir, "peanut_gb.h")):
+    print("ERROR: Peanut-GB no preparado; ejecuta scripts/preparar_emulador_gb.sh", file=sys.stderr)
+    Exit(1)
+
+env = SConscript(
+    os.path.join(godot_cpp_dir, "SConstruct"),
+    {"env": env, "api_version": "4.7"},
+)
+env.Append(CPPPATH=["src", peanut_gb_dir])
+sources = Glob("src/*.cpp")
+
+suffix = env["suffix"].replace(".dev", "").replace(".universal", "")
+lib_filename = "{}{}{}{}".format(
+    env.subst("$SHLIBPREFIX"),
+    libname,
+    suffix,
+    env.subst("$SHLIBSUFFIX"),
+)
+library = env.SharedLibrary("bin/{}/{}".format(env["platform"], lib_filename), source=sources)
+copy = env.Install("{}/bin/{}/".format(projectdir, env["platform"]), library)
+Default(library, copy)

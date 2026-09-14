@@ -8,9 +8,11 @@
 class_name BBCode
 extends RefCounted
 
+
 ## Un corchete literal en el texto de un expediente abriría una etiqueta.
 static func escapar(texto: String) -> String:
 	return texto.replace("[", "[lb]")
+
 
 static func render(segmentos: Array) -> String:
 	var salida := ""
@@ -18,16 +20,22 @@ static func render(segmentos: Array) -> String:
 		var texto: String = escapar(segmento["texto"])
 		match segmento["tipo"]:
 			"pista":
-				salida += "[url=pista:%s][color=#0000aa][u]%s[/u][/color][/url]" % [
-					segmento["meta"]["pista"], texto]
+				salida += (
+					"[url=pista:%s][color=#0000aa][u]%s[/u][/color][/url]"
+					% [segmento["meta"]["pista"], texto]
+				)
 			"pista_vista":
 				salida += "[bgcolor=#c8c800]%s[/bgcolor]" % texto
 			"carta":
-				salida += "[url=carta:%s][color=#0000aa][u]%s[/u][/color][/url]" % [
-					segmento["meta"]["carta"], texto]
+				salida += (
+					"[url=carta:%s][color=#0000aa][u]%s[/u][/color][/url]"
+					% [segmento["meta"]["carta"], texto]
+				)
 			"concepto":
-				salida += "[url=concepto:%s][color=#0000aa][u]%s[/u][/color][/url]" % [
-					segmento["meta"]["nombre"], texto]
+				salida += (
+					"[url=concepto:%s][color=#0000aa][u]%s[/u][/color][/url]"
+					% [segmento["meta"]["nombre"], texto]
+				)
 			"concepto_pendiente":
 				# Se lee, no lleva a ninguna parte: un expediente no localizado.
 				salida += "[color=#808080]%s[/color]" % texto

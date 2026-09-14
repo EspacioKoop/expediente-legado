@@ -1,0 +1,124 @@
+name: GBC fixtures
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/gbc-fixtures.yml"
+      - "scripts/test_gbc_fixture_workflow.py"
+      - "docs/gbc-fixtures.md"
+      - "gbc/minijuegos/caza_pixeles_98/**"
+      - "gbc/minijuegos/paper_planes_98/**"
+      - "gbc/minijuegos/croc_riders_98/**"
+
+permissions:
+  contents: read
+
+env:
+  RGBDS_VERSION: v1.0.3
+  RGBDS_SHA256: 280a52061a0c516999bee75ac357628d6d50784309e0486cef25f7460e6f330b
+  FIXTURES_REPO: https://github.com/tbsp/simple-gb-asm-examples.git
+  FIXTURES_COMMIT: 54270e0673ac16452447ff65cca26a1ef42eefec
+
+jobs:
+  build-fixtures:
+    name: Build GBC fixtures and SIGA-98 ROMs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout SIGA-98
+        uses: actions/checkout@v4
+
+      - name: Validate workflow contract
+        run: python -m unittest scripts.test_gbc_fixture_workflow
+
+      - name: Install pinned RGBDS
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://github.com/gbdev/rgbds/releases/download/${RGBDS_VERSION}/rgbds-linux-x86_64.tar.xz"
+          curl --fail --location --retry 3 --output rgbds.tar.xz "$url"
+          echo "${RGBDS_SHA256}  rgbds.tar.xz" | sha256sum --check --strict
+          mkdir rgbds
+          tar -xJf rgbds.tar.xz -C rgbds
+          (
+            cd rgbds
+            sudo ./install.sh
+          )
+          rgbasm --version
+
+      - name: Fetch pinned CC0 fixture sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init fixture-src
+          git -C fixture-src remote add origin "$FIXTURES_REPO"
+          git -C fixture-src fetch --depth 1 origin "$FIXTURES_COMMIT"
+          git -C fixture-src checkout --detach FETCH_HEAD
+          test "$(git -C fixture-src rev-parse HEAD)" = "$FIXTURES_COMMIT"
+
+      - name: Build joypad and vblank
+        shell: bash
+        run: |
+          set -euo pipefail
+          for fixture in joypad vblank; do
+            (
+              cd "fixture-src/src/${fixture}"
+              ../build.sh "${fixture}.asm"
+            )
+          done
+          mkdir -p gbc-fixtures
+          cp fixture-src/src/joypad/joypad.gb gbc-fixtures/
+          cp fixture-src/src/vblank/vblank.gb gbc-fixtures/
+
+      - name: Build Caza Pixeles 98
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C gbc/minijuegos/caza_pixeles_98
+          cp gbc/minijuegos/caza_pixeles_98/build/caza_pixeles_98.gbc gbc-fixtures/
+
+      - name: Build Paper Planes 98
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C gbc/minijuegos/paper_planes_98
+          cp gbc/minijuegos/paper_planes_98/build/paper_planes_98.gbc gbc-fixtures/
+
+      - name: Build Croc Riders 98
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C gbc/minijuegos/croc_riders_98
+          cp gbc/minijuegos/croc_riders_98/build/croc_riders_98.gbc gbc-fixtures/
+
+      - name: Hash and inspect ROM headers
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd gbc-fixtures
+            sha256sum joypad.gb vblank.gb caza_pixeles_98.gbc paper_planes_98.gbc croc_riders_98.gbc | tee SHA256SUMS
+          )
+          for rom in gbc-fixtures/*.gb gbc-fixtures/*.gbc; do
+            test -s "$rom"
+            size=$(stat -c %s "$rom")
+            test "$size" -ge 32768
+            printf '%s: %s bytes\n' "$rom" "$size"
+          done
+          for rom in gbc-fixtures/caza_pixeles_98.gbc gbc-fixtures/paper_planes_98.gbc gbc-fixtures/croc_riders_98.gbc; do
+            test "$(od -An -tx1 -j 323 -N 1 "$rom" | tr -d ' \n')" = "80"
+          done
+
+      - name: Upload ephemeral GBC ROMs
+        uses: actions/upload-artifact@v4
+        with:
+          name: gbc-roms-${{ github.sha }}
+          path: |
+            gbc-fixtures/joypad.gb
+            gbc-fixtures/vblank.gb
+            gbc-fixtures/caza_pixeles_98.gbc
+            gbc-fixtures/paper_planes_98.gbc
+            gbc-fixtures/croc_riders_98.gbc
+            gbc-fixtures/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 7

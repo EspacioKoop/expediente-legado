@@ -11,6 +11,7 @@
 class_name Progreso
 extends RefCounted
 
+
 static func caso_resuelto(caso: Dictionary, descubiertas: Array) -> bool:
 	var pistas: Array = caso.get("pistas", [])
 	if pistas.is_empty():
@@ -20,6 +21,7 @@ static func caso_resuelto(caso: Dictionary, descubiertas: Array) -> bool:
 			return false
 	return true
 
+
 static func todos_resueltos(casos: Array, descubiertas: Array) -> bool:
 	if casos.is_empty():
 		return false
@@ -27,6 +29,7 @@ static func todos_resueltos(casos: Array, descubiertas: Array) -> bool:
 		if not caso_resuelto(caso, descubiertas):
 			return false
 	return true
+
 
 ## Por cada caso: cuántas pistas tiene, cuántas se han encontrado y si está
 ## resuelto.
@@ -38,10 +41,15 @@ static func de_casos(casos: Array, descubiertas: Array) -> Array:
 		for pista in pistas:
 			if descubiertas.has(pista["id"]):
 				encontradas += 1
-		resumen.append({
-			"caso": caso,
-			"total": pistas.size(),
-			"encontradas": encontradas,
-			"resuelto": not pistas.is_empty() and encontradas == pistas.size(),
-		})
+		(
+			resumen
+			. append(
+				{
+					"caso": caso,
+					"total": pistas.size(),
+					"encontradas": encontradas,
+					"resuelto": not pistas.is_empty() and encontradas == pistas.size(),
+				}
+			)
+		)
 	return resumen

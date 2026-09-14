@@ -18,19 +18,28 @@
 class_name Sueno
 extends RefCounted
 
-## Cuántas escenas tiene una noche. Ni una sala grande ni un recorrido largo:
-## tres. Acota lo que dura una noche cuando se sueña diez o catorce veces por
-## partida, y le da al mapa que crece una unidad de medida — crece de tres en
-## tres, y por eso se nota cuál se repite.
+## Cuántas escenas tiene una noche NORMAL. Ni una sala grande ni un recorrido
+## largo: tres. #210 permite que otra variante pida menos sin cambiar este
+## valor ni duplicar la selección; la noche corriente sigue usando tres.
 const ESCENAS_POR_NOCHE := 3
 
 ## Cómo se ve un sospechoso, y cómo se ve el que firmaste. La diferencia es
 ## todo lo que hace falta: aparecen todos los del expediente que tocaste, pero
-## haberle puesto el nombre a uno se nota (#87).
+## haberle puesto el nombre a uno se nota (#87). Y es el mismo que se deja
+## pelear (#88): lo que se ve distinto es lo que se puede tocar.
 const COLOR_FIGURA := Color(0.30, 0.28, 0.34)
 const COLOR_ACUSADO := Color(0.46, 0.20, 0.20)
 const COLOR_TEXTO := Color(0.78, 0.77, 0.80)
 const COLOR_ACUSADO_TEXTO := Color(0.86, 0.62, 0.58)
+
+## La salida sigue sin marca ni volumen visible (#90), pero el playtest #9
+## demostró que una zona completamente muda se lee como bloqueo. Este resplandor
+## no dice "salida" ni se ve desde toda la sala: solo altera el ambiente cuando
+## el jugador ya está cerca, suficiente para que buscar tenga feedback y no sea
+## rozar paredes a ciegas.
+const COLOR_PISTA_SALIDA := Color(0.48, 0.58, 0.74)
+const ENERGIA_PISTA_SALIDA := 1.15
+const ALCANCE_PISTA_SALIDA := 4.2
 
 ## Lo que se separa un cartel de su muro. Tiene que ser MAYOR que medio grosor
 ## de muro, y ese es el número que importa: un muro es una caja centrada en la
@@ -78,31 +87,47 @@ static func segundos_de_noche(escenas: Array) -> float:
 ## El día entra para que dos noches con la misma lectura no sean la misma
 ## noche; lo leído entra para que la noche sea de su día. Sin lo leído, el
 ## sueño sería una función del calendario.
-static func semilla(dia: int, leido_hoy: Array) -> int:
+## [param raiz] es la semilla de la partida (#147): entra para que dos partidas
+## distintas con el mismo día y la misma lectura no sueñen lo mismo. Sin ella
+## el sueño sería una función del contenido y no de quien lo soñó.
+static func semilla(dia: int, leido_hoy: Array, raiz: int = 0) -> int:
 	var texto := str(dia)
 	var folios := leido_hoy.duplicate()
 	folios.sort()
 	for folio in folios:
 		texto += "|" + str(folio)
-	return abs(hash(texto))
+	# Por Azar y no por `hash()`: `hash()` puede cambiar de una versión de
+	# Godot a otra, y una noche que cambia al actualizar el motor no se puede
+	# volver a ver cuando alguien informa de que salió rara.
+	return Azar.derivar_texto(raiz, "sueno", texto, [dia])
 
 
-## Las tres escenas de esta noche, en orden.
+## Las escenas de esta noche, en orden.
 ##
-## Lo NUEVO va primero: mientras queden salas sin ver se ven salas sin ver, y
-## solo cuando el mapa ya las tiene todas se empiezan a repetir. Es lo que hace
-## que el mapa crezca de verdad en vez de crecer de casualidad.
-static func noche(dia: int, leido_hoy: Array, mapa: Array) -> Array:
+## Por defecto conserva la regla de #86: tres escenas y lo NUEVO primero.
+## `opciones` existe para que #84 pueda pedir una variante degradada sin copiar
+## este algoritmo ni decidir aquí cuál será esa política. Dos claves bastan:
+##
+## - `cantidad`: cuántas escenas pedir; se limita de 0 al catálogo disponible.
+## - `priorizar_vistas`: si es `true`, las salas ya conocidas van antes.
+##
+## La semilla y el barajado no cambian: misma entrada + misma política produce
+## siempre el mismo itinerario, también al recargar.
+static func noche(
+	dia: int, leido_hoy: Array, mapa: Array, raiz: int = 0, opciones: Dictionary = {}
+) -> Array:
 	var rng := RandomNumberGenerator.new()
-	rng.seed = semilla(dia, leido_hoy)
+	rng.seed = semilla(dia, leido_hoy, raiz)
 
 	var nuevas := SuenoFormas.ids().filter(func(id): return not mapa.has(id))
 	var vistas := SuenoFormas.ids().filter(func(id): return mapa.has(id))
 	_barajar(nuevas, rng)
 	_barajar(vistas, rng)
 
-	var escenas := nuevas + vistas
-	return escenas.slice(0, mini(ESCENAS_POR_NOCHE, escenas.size()))
+	var priorizar_vistas := bool(opciones.get("priorizar_vistas", false))
+	var escenas := vistas + nuevas if priorizar_vistas else nuevas + vistas
+	var cantidad := clampi(int(opciones.get("cantidad", ESCENAS_POR_NOCHE)), 0, escenas.size())
+	return escenas.slice(0, cantidad)
 
 
 ## Anota una sala en el mapa. El mapa es lo que se ha visto, así que una sala
@@ -124,7 +149,21 @@ static func espacio(id: String, quedan: int, contenido: Dictionary = {}) -> Dict
 	var forma := SuenoFormas.de(id)
 	var bloques: Array = forma["bloques"]
 	var entrada: Vector2i = forma["entrada"]
+	var familia_id := String(forma.get("familia_poligonal", ""))
+	var familia := SuenoFamilias.de(familia_id) if not familia_id.is_empty() else {}
+	var es_poligonal := not familia.is_empty()
 	var salida := Planta.mas_lejana(bloques, entrada)
+	var posicion_entrada := (
+		Vector3(familia["entrada"]) if es_poligonal else Planta.centro_en_metros(bloques, entrada)
+	)
+	# Mantiene el contrato histórico de #90 para las salas de `Planta`; una
+	# familia poligonal sustituye después esa base sin cambiar cómo se derivan
+	# la zona de salida ni su pista ambiental.
+	var posicion_salida := Planta.centro_en_metros(bloques, salida)
+	if es_poligonal:
+		posicion_salida = _salida_poligonal(familia)
+	var base_salida := posicion_salida
+	posicion_salida += Vector3(0, 1.1, 0)
 
 	# Las figuras se reparten por la sala, lejos entre sí y lejos de por donde
 	# se entra y se sale: un sospechoso plantado en la puerta se ve antes de
@@ -132,40 +171,83 @@ static func espacio(id: String, quedan: int, contenido: Dictionary = {}) -> Dict
 	var figuras := []
 	var quienes: Array = contenido.get("figuras", [])
 	var celdas := []
-	if not quienes.is_empty():
+	var sitios_poligonales := _sitios_poligonales(familia, base_salida) if es_poligonal else []
+	if not es_poligonal and not quienes.is_empty():
 		# La primera, DELANTE: al llegar hay alguien. Las demás repartidas por
 		# la sala. Todas lejos es lo mismo que ninguna en una nave de cuarenta
 		# metros — se llega, no se ve nada, y el sueño parece vacío.
 		celdas.append(Planta.a_la_vista(bloques, entrada, PASOS_PRIMERA_FIGURA))
-		celdas.append_array(Planta.repartidas(
-			bloques, quienes.size() - 1, [entrada, salida, celdas[0]]))
+		celdas.append_array(
+			Planta.repartidas(bloques, quienes.size() - 1, [entrada, salida, celdas[0]])
+		)
 	for i in quienes.size():
 		var quien: Dictionary = quienes[i]
-		figuras.append({
-			"pos": Planta.centro_en_metros(bloques, celdas[i]),
-			"color": COLOR_ACUSADO if quien.get("acusado", false) else COLOR_FIGURA,
-			"rotulo": quien.get("nombre", ""),
-			"color_rotulo": COLOR_ACUSADO_TEXTO if quien.get("acusado", false) \
-				else COLOR_TEXTO,
-		})
+		var posicion_figura := (
+			Vector3(sitios_poligonales[i % sitios_poligonales.size()])
+			if es_poligonal
+			else Planta.centro_en_metros(bloques, celdas[i])
+		)
+		(
+			figuras
+			. append(
+				{
+					"pos": posicion_figura,
+					"color": COLOR_ACUSADO if quien.get("acusado", false) else COLOR_FIGURA,
+					"rotulo": quien.get("nombre", ""),
+					"color_rotulo":
+					# Con el que firmaste se pelea (#88). Va como un dato de la figura
+					# —su id— y no como una bandera: quien lo pise tiene que saber
+					COLOR_ACUSADO_TEXTO if quien.get("acusado", false) else COLOR_TEXTO,
+					# CONTRA QUIÉN, porque ganar se apunta por persona.
+					"duelo": quien.get("id", "") if quien.get("acusado", false) else "",
+					"ataques": quien.get("ataques", []),
+				}
+			)
+		)
 
 	# Las frases van a los paños más anchos, y solo caben las que caben: un
 	# muro por frase. Lo que sobra no se apila en el mismo sitio — se queda
 	# fuera, que es lo que hace que una pared diga UNA cosa.
-	var carteles := []
-	var paredes := Planta.paredes(bloques)
 	var frases: Array = contenido.get("frases", [])
-	for i in mini(frases.size(), paredes.size()):
-		var sitio := Planta.en_pared(bloques, paredes[i], SEPARACION_PARED)
-		carteles.append({
-			"texto": frases[i],
-			"pos": sitio["pos"],
-			"giro": sitio["giro"],
-			"color": COLOR_TEXTO,
-		})
+	var carteles := _carteles_poligonales(familia, frases) if es_poligonal else []
+	if not es_poligonal:
+		var paredes := Planta.paredes(bloques)
+		for i in mini(frases.size(), paredes.size()):
+			var sitio := Planta.en_pared(bloques, paredes[i], SEPARACION_PARED)
+			(
+				carteles
+				. append(
+					{
+						"texto": frases[i],
+						"pos": sitio["pos"],
+						"giro": sitio["giro"],
+						"color": COLOR_TEXTO,
+					}
+				)
+			)
 
-	return {
+	# Conserva las luces propias de cada forma y añade una señal local al final
+	# del recorrido. No lleva carcasa: en el sueño puede haber una luz sin
+	# lámpara, y precisamente así evita convertirse en una puerta/waypoint.
+	var luces: Array = forma.get("luces", []).duplicate(true)
+	(
+		luces
+		. append(
+			{
+				"pos": posicion_salida + Vector3(0, 0.8, 0),
+				"color": COLOR_PISTA_SALIDA,
+				"energia": ENERGIA_PISTA_SALIDA,
+				"alcance": ALCANCE_PISTA_SALIDA,
+				"carcasa": false,
+			}
+		)
+	)
+
+	var resultado := {
 		"rotulo": forma["rotulo"],
+		# La planta se conserva incluso en la primera familia poligonal: sigue
+		# siendo el contrato de timing/mapa y permite comparar el corte nuevo con
+		# el recorrido anterior. `Espacio3D` prioriza `contorno` cuando existe.
 		"planta": bloques,
 		"color_suelo": forma["color_suelo"],
 		"color_muro": forma["color_muro"],
@@ -176,24 +258,124 @@ static func espacio(id: String, quedan: int, contenido: Dictionary = {}) -> Dict
 		"ambiente": forma.get("ambiente", Color(0.20, 0.19, 0.24)),
 		"ambiente_energia": forma.get("ambiente_energia", 0.32),
 		"sol": forma.get("sol", 0.05),
-		"luces": forma.get("luces", []),
-		"entrada": Planta.centro_en_metros(bloques, entrada),
+		"luces": luces,
+		"entrada": posicion_entrada,
 		"figuras": figuras,
 		"carteles": carteles,
-		"salidas": [{
-			"pos": Planta.centro_en_metros(bloques, salida) + Vector3(0, 1.1, 0),
-			"destino": "sueño" if quedan > 0 else "archivo",
-			"rotulo": "SALIDA_DESPERTAR" if quedan == 0 else "SUENO_ROTULO",
-			# No se ve (#90): hay que dar con ella. Lo que impide que sea una
-			# lotería no es una marca sino el MAPA que crece (#86) — la segunda
-			# vez que te toca una sala, ya sabes por dónde se salía.
-			"visible": false,
-			# Y por eso es más ancha que una puerta: buscar a ciegas un cuadro
-			# de metro y medio en una nave de cuarenta es otro juego, y no uno
-			# mejor.
-			"tam": Vector3(3.2, 2.4, 3.2),
-		}],
+		"salidas":
+		[
+			{
+				"pos": posicion_salida,
+				"destino": "sueño" if quedan > 0 else "archivo",
+				"rotulo": "SALIDA_DESPERTAR" if quedan == 0 else "SUENO_ROTULO",
+				# No se ve (#90): hay que dar con ella. El resplandor cercano da
+				# feedback ambiental, pero la zona sigue sin geometría ni marca.
+				"visible": false,
+				# Y por eso es más ancha que una puerta: buscar a ciegas un cuadro
+				# de metro y medio en una nave de cuarenta es otro juego, y no uno
+				# mejor.
+				"tam": Vector3(3.2, 2.4, 3.2),
+			}
+		],
 	}
+	if es_poligonal:
+		resultado["contorno"] = familia["contorno"]
+		resultado["altura_contorno"] = float(familia.get("altura", 3.2))
+	return resultado
+
+
+## Una familia poligonal no puede heredar las coordenadas de una planta de
+## celdas: hacerlo sería volver al fallo que #448 evita, con objetos y triggers
+## al otro lado de una pared visible. La salida usa el ancla más alejada de la
+## entrada declarada por la familia.
+static func _salida_poligonal(familia: Dictionary) -> Vector3:
+	var entrada: Vector3 = familia.get("entrada", Vector3.ZERO)
+	var mejor := entrada
+	var distancia := -1.0
+	for dato in familia.get("anclas", []):
+		var ancla: Vector3 = dato
+		var candidata := entrada.distance_squared_to(ancla)
+		if candidata > distancia:
+			distancia = candidata
+			mejor = ancla
+	return mejor
+
+
+## Sitios seguros para figuras: primero un punto de llegada legible, después las
+## anclas del catálogo y finalmente puntos interiores derivados del contorno.
+## No se escriben coordenadas especiales para `embudo`: cualquier forma que
+## declare una familia poligonal entra por el mismo contrato.
+static func _sitios_poligonales(familia: Dictionary, salida: Vector3) -> Array:
+	var contorno: PackedVector2Array = familia.get("contorno", PackedVector2Array())
+	var entrada: Vector3 = familia.get("entrada", Vector3.ZERO)
+	var centro := _centro_contorno(contorno)
+	var sitios := []
+	var entrada_2d := Vector2(entrada.x, entrada.z)
+	var cerca := entrada_2d.lerp(centro, 0.38)
+	sitios.append(Vector3(cerca.x, 0, cerca.y))
+
+	for dato in familia.get("anclas", []):
+		var ancla: Vector3 = dato
+		if ancla.distance_to(salida) > 2.5 and ancla.distance_to(entrada) > 2.5:
+			sitios.append(ancla)
+
+	for punto in contorno:
+		var interior := centro.lerp(punto, 0.42)
+		var sitio := Vector3(interior.x, 0, interior.y)
+		if sitio.distance_to(salida) > 2.5 and sitio.distance_to(entrada) > 2.5:
+			sitios.append(sitio)
+
+	if sitios.is_empty():
+		sitios.append(Vector3(centro.x, 0, centro.y))
+	return sitios
+
+
+## Las frases siguen perteneciendo a paredes. En un polígono las paredes son
+## sus aristas: se priorizan las largas, se coloca el texto un poco hacia el
+## centro y se orienta su frente hacia el interior.
+static func _carteles_poligonales(familia: Dictionary, frases: Array) -> Array:
+	var contorno: PackedVector2Array = familia.get("contorno", PackedVector2Array())
+	if contorno.size() < 2 or frases.is_empty():
+		return []
+	var centro := _centro_contorno(contorno)
+	var paredes := []
+	for i in contorno.size():
+		var a := contorno[i]
+		var b := contorno[(i + 1) % contorno.size()]
+		paredes.append({"a": a, "b": b, "largo": a.distance_squared_to(b)})
+	paredes.sort_custom(func(a, b): return a["largo"] > b["largo"])
+
+	var carteles := []
+	for i in mini(frases.size(), paredes.size()):
+		var pared: Dictionary = paredes[i]
+		var a: Vector2 = pared["a"]
+		var b: Vector2 = pared["b"]
+		var medio := (a + b) / 2.0
+		var hacia_dentro := centro - medio
+		if not is_zero_approx(hacia_dentro.length()):
+			hacia_dentro = hacia_dentro.normalized()
+		var posicion := medio + hacia_dentro * SEPARACION_PARED
+		(
+			carteles
+			. append(
+				{
+					"texto": frases[i],
+					"pos": Vector3(posicion.x, 0, posicion.y),
+					"giro": atan2(hacia_dentro.x, hacia_dentro.y),
+					"color": COLOR_TEXTO,
+				}
+			)
+		)
+	return carteles
+
+
+static func _centro_contorno(contorno: PackedVector2Array) -> Vector2:
+	if contorno.is_empty():
+		return Vector2.ZERO
+	var centro := Vector2.ZERO
+	for punto in contorno:
+		centro += punto
+	return centro / float(contorno.size())
 
 
 ## Lo que queda de noche, dicho sin un número.

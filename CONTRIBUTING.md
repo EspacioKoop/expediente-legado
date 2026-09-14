@@ -1,95 +1,143 @@
 # Cómo colaborar en SIGA-98 · Expediente Legado
 
-Gracias por sumarte. Estas son las pautas de trabajo del proyecto. Son las que
-ya seguimos de facto (mira el historial de commits); aquí quedan escritas para
-que cualquiera —persona o agente— pueda incorporarse sin adivinar.
+Este proyecto combina colaboración humana y agentes. El objetivo no es maximizar cambios simultáneos, sino avanzar sin pisar trabajo ajeno y sin afirmar más de lo que se ha probado.
 
-## Regla de oro: nunca se empuja a la rama de integración
+Las reglas operativas completas están en [AGENTS.md](AGENTS.md). La prioridad vigente está en el [plan maestro #181](https://github.com/EspacioKoop/expediente-legado/issues/181) y las reservas en [#182](https://github.com/EspacioKoop/expediente-legado/issues/182).
 
-Nada se hace directamente sobre `main` ni sobre `integracion`. **Todo cambio va
-en su propia rama y entra por Pull Request.**
+## Regla de oro: nunca se trabaja directamente sobre `main`
 
-- Nombra la rama según el tipo de trabajo y el issue asociado:
-  - `feature/NN-slug-corto` para funcionalidad nueva.
-  - `fix/NN-slug-corto` para correcciones.
-  - `docs/NN-slug-corto` para documentación.
+Todo cambio entra mediante rama + Pull Request.
 
-  donde `NN` es el número del issue de GitHub. Ejemplos reales del historial:
-  `feature/49-pulido-pre-betatest`, `fix/44-canje-solo-a-cero`.
-- Abre un issue antes si el cambio no tiene uno; el PR debe referenciarlo (`#NN`).
-- El PR lo revisa y mergea otra persona (o tú tras revisión), nunca se saltan
-  los gates de calidad de abajo.
+Ramas:
+
+- `feature/NN-slug-corto` para funcionalidad;
+- `fix/NN-slug-corto` para correcciones;
+- `docs/NN-slug-corto` para documentación.
+
+`NN` es el issue asociado. Si no existe issue, créalo antes de empezar.
+
+Antes de modificar archivos compartidos —y, para agentes, antes de cualquier edición— publica un `CLAIM` en #182 con issue, agente, rama, archivos y objetivo. Relee las reservas después de publicarlo. Una reserva anterior activa gana; no resuelvas un solape por tu cuenta.
+
+## Flujo de entrega
+
+1. Actualiza contexto: `main`, issue, comentarios, PR relacionadas, #181 y #182.
+2. Reserva las rutas reales del corte.
+3. Trabaja en rama propia y mantén el alcance pequeño.
+4. Añade pruebas de comportamiento cuando corresponda.
+5. Ejecuta los gates locales.
+6. Abre PR contra `main` y describe qué cubre y qué deja fuera.
+7. Registra `PR_READY` en #182 con SHA, pruebas y límites.
+8. Espera CI y revisión. `PR_READY` no autoriza merge.
+9. La integración requiere autorización explícita de @eGurucharri.
+10. Tras integrar, verifica el remoto y publica `RELEASE` en #182.
+
+No uses `Closes #N` en una entrega parcial. Usa `Refs #N` y deja explícito qué falta.
 
 ## Mensajes de commit
 
-En español, con prefijo de tipo y el issue entre paréntesis al final:
+En español, con prefijo y referencia al issue cuando aplique:
 
+```text
+feat: relacionar folios desde el visor (#286)
+fix: usar la fase real trayecto en la calle (#277)
+docs: actualizar el punto de control (#354)
 ```
-feat: los reclamantes de la Ventanilla salen del corcho (#48)
-fix: puertos menos comunes y tematicos — app 1998, adminer 1999 (#42)
-```
 
-Usa `feat:` para funcionalidad, `fix:` para correcciones, `docs:` para docs.
+## Gates de calidad
 
-## Entorno de desarrollo
+### Godot
 
-Ver el [README](README.md) para el detalle. En resumen:
+Desde la raíz:
 
 ```bash
-cp .env.example .env      # solo la primera vez (credenciales de desarrollo)
-docker compose up --build
+python3 scripts/verificar_godot.py
+python3 -m unittest discover -s scripts -p 'test_*.py'
+gdlint godot
+gdformat --check --diff godot
 ```
 
-- App: http://localhost:1998 (demo `auditor01` / `auditor-local-123`)
-- Adminer: http://localhost:1999
+Usa la versión/línea indicada en `.godot-version`. El verificador importa recursos, ejecuta suite y recorrido, arranca el juego con datos temporales y falla ante errores aunque Godot termine con código cero.
 
-Nunca comitees `.env` (ya está en `.gitignore`): solo `.env.example` con valores
-de relleno.
+`godot/pruebas/minimo.txt` fija un mínimo de comprobaciones. No se reduce para hacer pasar una entrega.
 
-## Gates de calidad — nada se da por terminado sin pasarlos
+### Backend y web legado
 
-Antes de abrir o mergear un PR, desde `backend/` (o vía la imagen
-`maven:3.9-eclipse-temurin-25` si tu Maven local no es Java 25):
+Desde `backend/`:
 
 ```bash
-mvn test                                            # unitarios (JUnit 5)
-mvn checkstyle:check pmd:check spotbugs:check        # análisis estático
-npm test                                            # Vitest (lógica JS pura)
+mvn test
+mvn checkstyle:check pmd:check spotbugs:check
+npm test
 ```
 
-Los E2E de navegador real (Playwright) corren con la app ya levantada:
+Los E2E de navegador requieren la aplicación levantada y se ejecutan de forma explícita, por ejemplo:
 
 ```bash
 mvn test -Dtest=AutenticacionE2E,ModalesFocoE2E,MapaConexionesE2E \
     -De2e.baseUrl=http://localhost:1998
 ```
 
-Convenciones de test del repo:
+La CI sobre el SHA del PR es la referencia final. Una ejecución local anterior no sustituye al workflow remoto.
 
-- **Sin Mockito**: los dobles se hacen con `java.lang.reflect.Proxy` (ver
-  `CasoControllerTest`, `ResumenJuegoServiceTest`). Si añades un método a un
-  repositorio y un fake lo usa, impleméntalo en el handler del proxy.
-- Los `*E2E` se excluyen de `mvn test` por convención de nombre (ver `pom.xml`),
-  no están deshabilitados.
-- Todo cambio de comportamiento lleva su test.
+## Qué significa “validado”
 
-## Mantener la documentación viva
+Sé específico:
 
-Cuando cambies build, dependencias, puertos, variables de entorno o el
-sembrado de datos (`DataSeeder`), actualiza en el mismo PR:
+- **CI verde**: pruebas automatizadas y análisis configurados han pasado.
+- **Alpha exportada**: se ha generado el artefacto correspondiente.
+- **Validación visual**: alguien ha mirado el comportamiento real.
+- **Mando físico**: se ha probado con hardware, no solo con eventos sintéticos.
+- **Playthrough**: se ha recorrido una partida real, no una batería de funciones aisladas.
 
-- El [README](README.md).
-- Este `CONTRIBUTING.md` y `AGENTS.md` si cambian las pautas o el flujo.
-- Las plantillas de empaquetado en `dist/` si afecta al build alpha.
+No uses una de estas expresiones para significar otra.
 
-## Antes de tocar zonas sensibles
+## Cambios de documentación
 
-- **Acceso a casos confidenciales**: el control de acceso vive en
-  `CasoController` (`sinAcceso`). Cualquier endpoint que actúe sobre un caso o
-  sobre una entidad hija (sospechoso, pista) debe validar *tanto* el acceso al
-  caso *como* que la entidad pertenece a ese caso. No te fíes solo del `casoId`
-  de la ruta.
-- **Progreso y resumen**: `ProgresoService` / `ResumenJuegoService` son la
-  única fuente de verdad del progreso real del jugador (la capa Prometeo del
-  navegador reacciona a ellos). Sus números deben ser exactos e independientes
-  del rol salvo donde el diseño lo exija.
+Actualiza documentación en el mismo PR cuando cambie una regla estable del repositorio:
+
+- `README.md` para estado/arquitectura/setup;
+- `AGENTS.md` para flujo de agentes, reservas y trampas;
+- `CONTRIBUTING.md` para ramas, gates o revisión;
+- `ROADMAP.md` para fases de fondo;
+- #181 para prioridad operativa vigente;
+- `docs/paridad-expedientes.md` cuando cambie la clasificación legado → Godot del núcleo SIGA.
+
+No conviertas README/ROADMAP en una copia de la lista de issues. Los criterios específicos siguen viviendo en cada issue.
+
+## Assets y licencias
+
+Los binarios distribuidos deben seguir `.gitattributes`, Git LFS cuando corresponda y `godot/assets/procedencia.json`.
+
+Cada asset externo necesita procedencia verificable: autor, fuente, licencia compatible con distribución comercial y `sha256`. “Gratis” no es una licencia.
+
+No añadas un puntero LFS si no puedes subir también el objeto al almacén LFS. No inventes hashes ni fichas para desbloquear CI.
+
+## Entorno de la versión web legado
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+- App: http://localhost:1998
+- Adminer: http://localhost:1999
+
+Nunca comitees `.env`, secretos, datos personales, partidas personales ni rutas privadas.
+
+## Convenciones de test/código
+
+- Todo cambio de comportamiento lleva regresión proporcional al riesgo.
+- Evita tests rígidos sobre detalles accidentales de arquitectura. Si una capacidad depende de herencia, prueba el contrato necesario y no una relación directa que pueda volverse transitiva.
+- En Java, los dobles existentes usan `java.lang.reflect.Proxy`; no introduzcas Mockito solo para un caso aislado.
+- Los `*E2E` se excluyen del `mvn test` normal por convención de nombre, no porque estén deshabilitados.
+- GDScript debe pasar `gdlint` y `gdformat`; una variable estática no se nombra como constante solo por vivir a nivel de clase.
+
+## Zonas sensibles
+
+- **Casos confidenciales**: valida acceso al caso y pertenencia de cualquier entidad hija.
+- **Progreso/persistencia**: no dupliques fuentes de verdad para facilitar una UI.
+- **`textos.csv`**: no asumas orden global ni reordenes eliminando bloques especiales.
+- **Fases**: usa los nombres canónicos de `Jornada`; la calle del recorrido se llama `trayecto`.
+- **Entrada**: usa acciones semánticas y `PreferenciasSiga`, no teclas hardcodeadas.
+- **Sueño**: progresa por objetivos; no recuperes la salida física invisible como ruta normal.
+- **Investigación**: relaciones, anexos y recompensas solo pueden afirmar datos catalogados/ya conocidos.

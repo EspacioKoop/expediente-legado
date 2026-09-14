@@ -1,0 +1,58 @@
+import os
+from pathlib import Path
+import re
+import subprocess
+import unittest
+
+
+ROOT = Path(__file__).resolve().parents[1]
+PRUEBA_GODOT = "pruebas/pruebas_sellos_persistencia.gd"
+RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
+
+
+class SellosPersistenciaRuntimeTest(unittest.TestCase):
+    def test_idempotencia_y_recarga_en_godot_real(self):
+        motor = os.environ.get("GODOT_BIN", "godot4")
+        importacion = subprocess.run(
+            [
+                motor,
+                "--headless",
+                "--path",
+                str(ROOT / "godot"),
+                "--editor",
+                "--import",
+                "--quit",
+            ],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            timeout=60,
+            check=False,
+        )
+        self.assertEqual(importacion.returncode, 0, importacion.stdout)
+
+        resultado = subprocess.run(
+            [
+                motor,
+                "--headless",
+                "--path",
+                str(ROOT / "godot"),
+                "--script",
+                PRUEBA_GODOT,
+            ],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            timeout=30,
+            check=False,
+        )
+        self.assertEqual(resultado.returncode, 0, resultado.stdout)
+        resumen = RESUMEN.search(resultado.stdout)
+        self.assertIsNotNone(resumen, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 10, resultado.stdout)
+        self.assertNotIn("SCRIPT ERROR:", resultado.stdout)
+        self.assertNotIn("Parse Error:", resultado.stdout)
+
+
+if __name__ == "__main__":
+    unittest.main()

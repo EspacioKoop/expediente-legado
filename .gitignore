@@ -22,6 +22,13 @@ dist/salida/
 # Caché de importación de Godot: se regenera con `godot4 --import`
 godot/.godot/
 
+# Núcleo GB de #124: dependencias pinneadas y binarios se regeneran en CI/local.
+godot/native/siga98_gb/.deps/
+godot/native/siga98_gb/bin/
+godot/addons/siga98_gb/bin/
+godot/roms/*.gb
+godot/roms/*.gbc
+
 # Sistema
 .DS_Store
 Thumbs.db
@@ -42,3 +49,7 @@ CLAUDE.md
 
 # Traducciones compiladas: se regeneran con `godot4 --import` desde el .csv
 *.translation
+
+# Python
+__pycache__/
+*.pyc

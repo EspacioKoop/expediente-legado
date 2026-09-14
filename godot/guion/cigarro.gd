@@ -28,8 +28,7 @@ static func construir(raiz: Node3D, base: Vector3) -> Node3D:
 	# del cenicero sería una colilla, y una colilla no humea.
 	_pieza(todo, Vector3(0.05, 0.045, 0), Vector3(0.14, 0.012, 0.012), COLOR_PAPEL)
 
-	var brasa := _pieza(todo, Vector3(0.115, 0.045, 0),
-		Vector3(0.016, 0.016, 0.016), COLOR_BRASA)
+	var brasa := _pieza(todo, Vector3(0.115, 0.045, 0), Vector3(0.016, 0.016, 0.016), COLOR_BRASA)
 	var material: StandardMaterial3D = brasa.material_override
 	material.emission_enabled = true
 	material.emission = COLOR_BRASA

@@ -14,7 +14,10 @@
 ##   que #79 tiene abierto y #89 tiene que resolver.
 ## - **Los sospechosos, como figuras.** Todos los de los expedientes que
 ##   tocaste, y **el que acusaste se ve distinto**: no te persigue solo quien
-##   firmaste, pero firmarlo se nota.
+##   firmaste, pero firmarlo se nota. Y con el que firmaste **se puede pelear**
+##   (#88, `SuenoCombate`), así que la figura se lleva su id y sus réplicas
+##   puestas: quien monta la sala no tiene que volver al archivo a buscar
+##   contra quién está peleando.
 ##
 ## Todo esto es PURO: entran diccionarios de contenido y salen listas de qué
 ## poner. Dónde cae cada cosa lo decide quien monta la sala, que es el único
@@ -26,9 +29,17 @@ extends RefCounted
 ## Lo que el día de hoy deja para deformar esta noche.
 ##
 ## [param leido_hoy] son folios; [param descubiertas], ids de pista;
-## [param veredictos], el `caso_id -> sospechoso_id` que guarda `Acusacion`.
-static func fuentes(leido_hoy: Array, casos: Array, descubiertas: Array,
-		veredictos: Dictionary) -> Dictionary:
+## [param veredictos], el `caso_id -> sospechoso_id` que guarda `Acusacion`;
+## [param vencidos], los que ya te peleaste y ganaste (#88), que **dejan de
+## aparecer**. Es la consecuencia que se ve sin texto que la explique: la sala
+## donde estaba está vacía la próxima vez.
+static func fuentes(
+	leido_hoy: Array,
+	casos: Array,
+	descubiertas: Array,
+	veredictos: Dictionary,
+	vencidos: Array = []
+) -> Dictionary:
 	var frases := []
 	var figuras := []
 	var casos_tocados := {}
@@ -55,10 +66,23 @@ static func fuentes(leido_hoy: Array, casos: Array, descubiertas: Array,
 
 		var acusado: String = veredictos.get(caso["id"], "")
 		for sospechoso in caso.get("sospechosos", []):
-			figuras.append({
-				"nombre": sospechoso.get("nombre", ""),
-				"acusado": sospechoso.get("id", "") == acusado,
-			})
+			var id: String = sospechoso.get("id", "")
+			if vencidos.has(id):
+				continue
+			(
+				figuras
+				. append(
+					{
+						"id": id,
+						"nombre": sospechoso.get("nombre", ""),
+						"acusado": id == acusado,
+						# Sus réplicas viajan con él porque el duelo es dentro del
+						# sueño: un rival sin nada escrito pelea igual y no dice nada,
+						# que es mejor que decir algo genérico.
+						"ataques": sospechoso.get("ataques", []),
+					}
+				)
+			)
 
 	return {"frases": frases, "figuras": figuras, "casos": casos_tocados.keys()}
 

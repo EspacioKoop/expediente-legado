@@ -7,17 +7,48 @@ config_version=5
 [application]
 
 config/name="SIGA-98 · Expediente Legado"
-run/main_scene="res://escenas/dia.tscn"
+run/main_scene="res://escenas/inicio.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
+
+[autoload]
+
+MenuGlobal="*res://guion/menu_global.gd"
 
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
 
+[gui]
+
+theme/custom_font="res://assets/fonts/MFBOldstyle-Regular.otf"
+
 [display]
 
 window/size/viewport_width=1024
 window/size/viewport_height=680
+
+[input]
+
+mirar_izquierda={
+"deadzone": 0.2,
+"events": [Object(InputEventJoypadMotion,"resource_local_to_scene":false,"resource_name":"","device":-1,"axis":2,"axis_value":-1.0,"script":null)
+]
+}
+mirar_derecha={
+"deadzone": 0.2,
+"events": [Object(InputEventJoypadMotion,"resource_local_to_scene":false,"resource_name":"","device":-1,"axis":2,"axis_value":1.0,"script":null)
+]
+}
+mirar_arriba={
+"deadzone": 0.2,
+"events": [Object(InputEventJoypadMotion,"resource_local_to_scene":false,"resource_name":"","device":-1,"axis":3,"axis_value":-1.0,"script":null)
+]
+}
+mirar_abajo={
+"deadzone": 0.2,
+"events": [Object(InputEventJoypadMotion,"resource_local_to_scene":false,"resource_name":"","device":-1,"axis":3,"axis_value":1.0,"script":null)
+]
+}
 
 [internationalization]
 

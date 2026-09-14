@@ -2,6 +2,14 @@
   "_regla": "Todo fichero bajo assets/ necesita su ficha aquí, con sha256. Una prueba lo exige en las dos direcciones: ni ficheros sin ficha ni fichas sin fichero. Ver LEEME.md.",
   "assets": [
     {
+      "ruta": "fonts/MFBOldstyle-Regular.otf",
+      "titulo": "MFB Oldstyle Regular",
+      "autor": "Daniel Benjamin Miller",
+      "licencia": "CC0-1.0",
+      "fuente": "https://ctan.org/tex-archive/fonts/mfb-oldstyle",
+      "sha256": "3fc8e4f6c4f2b5418f9e3e9370637343cf9b12dc07fd54902acd0b44f8c307a0"
+    },
+    {
       "ruta": "audio/bookFlip1.ogg",
       "titulo": "Book flip 1 (RPG Audio)",
       "autor": "Kenney",
@@ -96,6 +104,342 @@
       "licencia": "CC0-1.0",
       "fuente": "https://kenney.nl/assets/interface-sounds",
       "sha256": "6fc395be2ad1f99ce318a5d28f98fb76dbeb676d83a0b28239d8c1fb90736180"
+    },
+    {
+      "ruta": "modelos/bookcaseClosed.glb",
+      "titulo": "Bookcase closed (Furniture Kit)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/furniture-kit",
+      "sha256": "9d210448de5e1179541da895450bbc7a39f4cd673d677654cd6b134e4ea0e047"
+    },
+    {
+      "ruta": "modelos/cardboardBoxClosed.glb",
+      "titulo": "Cardboard box closed (Furniture Kit)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/furniture-kit",
+      "sha256": "4af079dca52960912764574950f0549ff2ae1224b3db1528718629473a2d5d81"
+    },
+    {
+      "ruta": "modelos/chairDesk.glb",
+      "titulo": "Chair desk (Furniture Kit)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/furniture-kit",
+      "sha256": "46406619186034cbe92b19b79a5f1a8e3f442a17a70a7524ef2c0ad0f35095c6"
+    },
+    {
+      "ruta": "modelos/computerScreen.glb",
+      "titulo": "Computer screen (Furniture Kit)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/furniture-kit",
+      "sha256": "5942cbad29a2d2b956619569926e81d50a4174403d592fece6556e57632dc643"
+    },
+    {
+      "ruta": "modelos/desk.glb",
+      "titulo": "Desk (Furniture Kit)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/furniture-kit",
+      "sha256": "0164fe828f028b321730fb8c74502e353583f751be74da1682d42fff7d3c5a42"
+    },
+    {
+      "ruta": "modelos/persona.fbx",
+      "titulo": "Animated Human (low poly, con esqueleto y animaciones)",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/animated-human-low-poly",
+      "sha256": "edd4fde3a73afe2a22ddb5a10a215373a0880d9a4ee32a0815879a260b8e8445"
+    },
+    {
+      "ruta": "modelos/televisionVintage.glb",
+      "titulo": "Television vintage (Furniture Kit)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/furniture-kit",
+      "sha256": "eb144cc8fb1e7f761e3665226e4266c8868679421d21d6548f24d2abad7c67cf"
+    },
+    {
+      "ruta": "modelos/trashcan.glb",
+      "titulo": "Trashcan (Furniture Kit)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/furniture-kit",
+      "sha256": "e0ccc1fe50cbd05386477fdff527171d1cf7c0de2ba7ff3233f8d9561feb2561"
+    },
+    {
+      "ruta": "retratos/aduanero_ny.jpg",
+      "titulo": "Herman Melville, hacia 1846",
+      "autor": "Desconocido / dominio público",
+      "licencia": "Public domain",
+      "fuente": "https://commons.wikimedia.org/wiki/File:Herman_Melville,_ca._1846-1847.jpg",
+      "sha256": "9e67de4432c04ecdb87bf381cd7ad7f0675a7a1e17d19dc12697af0df98fdd6f"
+    },
+    {
+      "ruta": "retratos/correspondencia.jpg",
+      "titulo": "Fernando Pessoa, 1912",
+      "autor": "Desconocido / dominio público",
+      "licencia": "Public domain",
+      "fuente": "https://commons.wikimedia.org/wiki/File:Fernando_Pessoa_1912.jpg",
+      "sha256": "4f40814d081ca18fcb21acaf01c6295dd95437bf4d8ed2bd5c4497266161ce08"
+    },
+    {
+      "ruta": "retratos/emperador.jpg",
+      "titulo": "Puyi, último emperador de China",
+      "autor": "Desconocido / dominio público",
+      "licencia": "Public domain",
+      "fuente": "https://commons.wikimedia.org/wiki/File:Colorised_Puyi_portrait.png",
+      "sha256": "a4f54eb122d754dc98025b1068182c0259de80d73a31c115bd275c13fc856ad8"
+    },
+    {
+      "ruta": "retratos/fielato.jpg",
+      "titulo": "Henri Rousseau, autorretrato",
+      "autor": "Desconocido / dominio público",
+      "licencia": "Public domain",
+      "fuente": "https://commons.wikimedia.org/wiki/File:Brooklyn_Museum_-_Self-Portrait_-_Henri-Julien-F%C3%A9lix_Rousseau_called_Le_Douanier_Rousseau.jpg",
+      "sha256": "d3ae857e5868d9637f73beed98acbf8a3c9ee299e0bf8b2fa9257886ceaa3d9f"
+    },
+    {
+      "ruta": "retratos/riegos.jpg",
+      "titulo": "Constantino Cavafis, hacia 1900",
+      "autor": "Desconocido / dominio público",
+      "licencia": "Public domain",
+      "fuente": "https://commons.wikimedia.org/wiki/File:Constantine_Cavafy,_ca_1900.jpg",
+      "sha256": "e9a3a4e357efd9d43ea848d0942b013b49d8be8bd6c07ab0f490e2b8af3e9c62"
+    },
+    {
+      "ruta": "texturas/asfalto.jpg",
+      "titulo": "Asphalt 012 (mapa de color, 1K)",
+      "autor": "ambientCG",
+      "licencia": "CC0-1.0",
+      "fuente": "https://ambientcg.com/view?id=Asphalt012",
+      "sha256": "c7a142a1c12f517024d1b4c92472c700af86cfe3bfc12263c4260e414d4c2c59"
+    },
+    {
+      "ruta": "texturas/gotele.jpg",
+      "titulo": "Plaster 001 (mapa de color, 1K)",
+      "autor": "ambientCG",
+      "licencia": "CC0-1.0",
+      "fuente": "https://ambientcg.com/view?id=Plaster001",
+      "sha256": "d3fe43282859ab7293ad41f2fa3c29f02df077e5bc326cf90a65cc588a4ac5a4"
+    },
+    {
+      "ruta": "texturas/linoleo.jpg",
+      "titulo": "Carpet 012 (mapa de color, 1K)",
+      "autor": "ambientCG",
+      "licencia": "CC0-1.0",
+      "fuente": "https://ambientcg.com/view?id=Carpet012",
+      "sha256": "3c4af04d67ad6803be57c82ba4ee2939c24b437dae903061ec3dd1082d0563c5"
+    },
+    {
+      "ruta": "texturas/moqueta.jpg",
+      "titulo": "Carpet 013 (mapa de color, 1K)",
+      "autor": "ambientCG",
+      "licencia": "CC0-1.0",
+      "fuente": "https://ambientcg.com/view?id=Carpet013",
+      "sha256": "dfbdb1f88da8d46449826b81002bf1e613e2c1498dcfc539df3325c75de875f6"
+    },
+    {
+      "ruta": "texturas/techo.jpg",
+      "titulo": "Office Ceiling 001 (mapa de color, 1K)",
+      "autor": "ambientCG",
+      "licencia": "CC0-1.0",
+      "fuente": "https://ambientcg.com/view?id=OfficeCeiling001",
+      "sha256": "1a34c9db312a12c49365875630136e421d77e729f275ef93529ad20c0b336208"
+    },
+    {
+      "ruta": "cc0/quaternius_modular_train/CargoTrain_WagonEmpty.obj",
+      "titulo": "CargoTrain WagonEmpty — malla original",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/modulartrain.html",
+      "sha256": "0ededa1fe89ac2b8f85c73cab653ea4098e89224afa7c70e2d3233a8f0a6a6cb"
+    },
+    {
+      "ruta": "cc0/quaternius_modular_train/CargoTrain_WagonEmpty.mtl",
+      "titulo": "CargoTrain WagonEmpty — materiales originales",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/modulartrain.html",
+      "sha256": "d37bd61c15fdd4b1ae848a4dad6ddaeedf3a1662694513ca225b16d38e032885"
+    },
+    {
+      "ruta": "cc0/quaternius_modular_train/RailwayTrack_Straight.obj",
+      "titulo": "RailwayTrack Straight — malla original",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/modulartrain.html",
+      "sha256": "8704b2f032696773415348c1a7ef88f5d9f2435152630d33405acd1a05241e57"
+    },
+    {
+      "ruta": "cc0/quaternius_modular_train/RailwayTrack_Straight.mtl",
+      "titulo": "RailwayTrack Straight — materiales originales",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/modulartrain.html",
+      "sha256": "80bf00b974430ade2b5d3f0eccdafb99d29d1048f7191374d6a8edb4b7b0bafc"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_nature/Bush_1.obj",
+      "titulo": "Bush_1 (OBJ) · Ultimate Nature Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatenature.html",
+      "sha256": "0cac6fca9e9a5d899fa1859867bf9cc2dbcc1817b31a0668d8b6faf2b033788b"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_nature/Bush_1.mtl",
+      "titulo": "Bush_1 (MTL) · Ultimate Nature Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatenature.html",
+      "sha256": "2a0bf1c9f6ad09cd9b54f7b8c8ef1f31b597b1e142658ddc0c68ad1449b19e0e"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_nature/Bush_2.obj",
+      "titulo": "Bush_2 (OBJ) · Ultimate Nature Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatenature.html",
+      "sha256": "836828437d2c853099744260b05b8d6b0f837b380ed7473baf11a47b9628bc8b"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_nature/Bush_2.mtl",
+      "titulo": "Bush_2 (MTL) · Ultimate Nature Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatenature.html",
+      "sha256": "7797af5258d63c7891a9b320185029b45c9e84f79d280539833bf8d184e3f8f7"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_nature/Rock_1.obj",
+      "titulo": "Rock_1 (OBJ) · Ultimate Nature Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatenature.html",
+      "sha256": "34d20ae0234a88b5cf1ceb1e5140b46ece28e6e7d72beb7e2e3a7e1fe8a8708e"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_nature/Rock_1.mtl",
+      "titulo": "Rock_1 (MTL) · Ultimate Nature Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatenature.html",
+      "sha256": "d56549cff3285edf892d4e734c41cd383fd18dfde9701209087b2c9f5484325a"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_nature/Rock_5.obj",
+      "titulo": "Rock_5 (OBJ) · Ultimate Nature Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatenature.html",
+      "sha256": "f987963f89e51d735809f006fb2b608af29b930cb4e80a9332f4e6f24c30edc2"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_nature/Rock_5.mtl",
+      "titulo": "Rock_5 (MTL) · Ultimate Nature Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatenature.html",
+      "sha256": "c1fa3fb3da15ef57d925d134a29019d94fba9de9b1308bdd2aecf9badb556639"
+    },
+    {
+      "ruta": "texturas/poster-1998-01.png",
+      "titulo": "La información es de todos",
+      "autor": "Imagen generada con IA; herramienta y modelo no especificados por el proveedor",
+      "licencia": "Material generado con IA aportado por el usuario para su integración y distribución en SIGA-98; sin atribución CC0",
+      "fuente": "https://github.com/EspacioKoop/expediente-legado/issues/443",
+      "sha256": "b94f569a38ebbda711334c0b23a6fea050184afb59652015903315f8653672ad",
+      "origen": "generado_con_IA",
+      "lamina_sha256": "5f5a6f91ddf8d37cd636352823183612b3fe86a7ffd27cabe4530ec6634046ed",
+      "recorte_px": [
+        2,
+        2,
+        335,
+        743
+      ]
+    },
+    {
+      "ruta": "texturas/poster-1998-02.png",
+      "titulo": "El futuro ya está en su mesa",
+      "autor": "Imagen generada con IA; herramienta y modelo no especificados por el proveedor",
+      "licencia": "Material generado con IA aportado por el usuario para su integración y distribución en SIGA-98; sin atribución CC0",
+      "fuente": "https://github.com/EspacioKoop/expediente-legado/issues/443",
+      "sha256": "2ba3604d686a460d8fea08a9bf270034bd4181c3d73739ce9db1db01f5a94851",
+      "origen": "generado_con_IA",
+      "lamina_sha256": "5f5a6f91ddf8d37cd636352823183612b3fe86a7ffd27cabe4530ec6634046ed",
+      "recorte_px": [
+        348,
+        2,
+        678,
+        743
+      ]
+    },
+    {
+      "ruta": "texturas/poster-1998-03.png",
+      "titulo": "Asamblea de personal",
+      "autor": "Imagen generada con IA; herramienta y modelo no especificados por el proveedor",
+      "licencia": "Material generado con IA aportado por el usuario para su integración y distribución en SIGA-98; sin atribución CC0",
+      "fuente": "https://github.com/EspacioKoop/expediente-legado/issues/443",
+      "sha256": "879f2510d74c27d7ac6ab1e77ddcc0d0615a40f4fe5b6a09bc7fd043dc762cf9",
+      "origen": "generado_con_IA",
+      "lamina_sha256": "5f5a6f91ddf8d37cd636352823183612b3fe86a7ffd27cabe4530ec6634046ed",
+      "recorte_px": [
+        691,
+        2,
+        1022,
+        743
+      ]
+    },
+    {
+      "ruta": "texturas/poster-1998-04.png",
+      "titulo": "Tómese cinco minutos",
+      "autor": "Imagen generada con IA; herramienta y modelo no especificados por el proveedor",
+      "licencia": "Material generado con IA aportado por el usuario para su integración y distribución en SIGA-98; sin atribución CC0",
+      "fuente": "https://github.com/EspacioKoop/expediente-legado/issues/443",
+      "sha256": "36943c8b0792841aaec047037e65521ef1ca14bd231a0c7b3697eb8e3548fdb6",
+      "origen": "generado_con_IA",
+      "lamina_sha256": "5f5a6f91ddf8d37cd636352823183612b3fe86a7ffd27cabe4530ec6634046ed",
+      "recorte_px": [
+        2,
+        756,
+        335,
+        1524
+      ]
+    },
+    {
+      "ruta": "texturas/poster-1998-05.png",
+      "titulo": "Cineclub del viernes",
+      "autor": "Imagen generada con IA; herramienta y modelo no especificados por el proveedor",
+      "licencia": "Material generado con IA aportado por el usuario para su integración y distribución en SIGA-98; sin atribución CC0",
+      "fuente": "https://github.com/EspacioKoop/expediente-legado/issues/443",
+      "sha256": "c163caac19110b0e6eb64b7e7fb4842750b331e74b7b08bedeb3e8da5f96da64",
+      "origen": "generado_con_IA",
+      "lamina_sha256": "5f5a6f91ddf8d37cd636352823183612b3fe86a7ffd27cabe4530ec6634046ed",
+      "recorte_px": [
+        348,
+        756,
+        678,
+        1524
+      ]
+    },
+    {
+      "ruta": "texturas/poster-1998-06.png",
+      "titulo": "¿Está preparado su equipo?",
+      "autor": "Imagen generada con IA; herramienta y modelo no especificados por el proveedor",
+      "licencia": "Material generado con IA aportado por el usuario para su integración y distribución en SIGA-98; sin atribución CC0",
+      "fuente": "https://github.com/EspacioKoop/expediente-legado/issues/443",
+      "sha256": "e684d96c05279d8ef52c5922c35d3cee6f6ac707fdd58e3e921cf661acda2af6",
+      "origen": "generado_con_IA",
+      "lamina_sha256": "5f5a6f91ddf8d37cd636352823183612b3fe86a7ffd27cabe4530ec6634046ed",
+      "recorte_px": [
+        691,
+        756,
+        1022,
+        1524
+      ]
     }
   ]
 }

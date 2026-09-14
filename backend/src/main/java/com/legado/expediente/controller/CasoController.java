@@ -2,24 +2,15 @@ package com.legado.expediente.controller;
 
 import com.legado.expediente.model.Caso;
 import com.legado.expediente.model.CombateEnCurso;
-import com.legado.expediente.model.Descubrimiento;
 import com.legado.expediente.model.Pista;
-import com.legado.expediente.model.RegistroLegado;
 import com.legado.expediente.model.Rol;
 import com.legado.expediente.model.Sospechoso;
 import com.legado.expediente.model.Usuario;
 import com.legado.expediente.model.Veredicto;
 import com.legado.expediente.repository.CasoRepository;
-import com.legado.expediente.repository.CombateEnCursoRepository;
-import com.legado.expediente.repository.DescubrimientoRepository;
-import com.legado.expediente.repository.PistaRepository;
-import com.legado.expediente.repository.RegistroLegadoRepository;
-import com.legado.expediente.repository.SospechosoRepository;
-import com.legado.expediente.repository.VeredictoRepository;
-import com.legado.expediente.service.CartaOcultaService;
-import com.legado.expediente.service.HotspotService;
-import com.legado.expediente.service.ProgresoService;
 import com.legado.expediente.service.ResumenJuegoService;
+import com.legado.expediente.service.InvestigacionCasoService;
+import com.legado.expediente.service.ResolucionCasoService;
 import com.legado.expediente.service.UsuarioContexto;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -31,10 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Controller
 public class CasoController {
@@ -46,48 +34,21 @@ public class CasoController {
             "Solicitud denegada. Nivel de acreditación insuficiente para este expediente.";
 
     private final CasoRepository casoRepository;
-    private final RegistroLegadoRepository registroLegadoRepository;
-    private final PistaRepository pistaRepository;
-    private final DescubrimientoRepository descubrimientoRepository;
-    private final SospechosoRepository sospechosoRepository;
-    private final VeredictoRepository veredictoRepository;
-    private final CombateEnCursoRepository combateEnCursoRepository;
-    private final ProgresoService progresoService;
+    private final InvestigacionCasoService investigacionCasoService;
+    private final ResolucionCasoService resolucionCasoService;
     private final ResumenJuegoService resumenJuegoService;
     private final UsuarioContexto usuarioContexto;
-    private final HotspotService hotspotService;
-    private final CartaOcultaService cartaOcultaService;
 
     public CasoController(CasoRepository casoRepository,
-                           RegistroLegadoRepository registroLegadoRepository,
-                           PistaRepository pistaRepository,
-                           DescubrimientoRepository descubrimientoRepository,
-                           SospechosoRepository sospechosoRepository,
-                           VeredictoRepository veredictoRepository,
-                           CombateEnCursoRepository combateEnCursoRepository,
-                           ProgresoService progresoService,
-                           ResumenJuegoService resumenJuegoService,
-                           UsuarioContexto usuarioContexto,
-                           HotspotService hotspotService,
-                           CartaOcultaService cartaOcultaService) {
+            InvestigacionCasoService investigacionCasoService,
+            ResolucionCasoService resolucionCasoService,
+            ResumenJuegoService resumenJuegoService,
+            UsuarioContexto usuarioContexto) {
         this.casoRepository = casoRepository;
-        this.registroLegadoRepository = registroLegadoRepository;
-        this.pistaRepository = pistaRepository;
-        this.descubrimientoRepository = descubrimientoRepository;
-        this.sospechosoRepository = sospechosoRepository;
-        this.veredictoRepository = veredictoRepository;
-        this.combateEnCursoRepository = combateEnCursoRepository;
-        this.progresoService = progresoService;
+        this.investigacionCasoService = investigacionCasoService;
+        this.resolucionCasoService = resolucionCasoService;
         this.resumenJuegoService = resumenJuegoService;
         this.usuarioContexto = usuarioContexto;
-        this.hotspotService = hotspotService;
-        this.cartaOcultaService = cartaOcultaService;
-    }
-
-    public record PistaVista(Long id, String descripcion, boolean descubierta) {
-    }
-
-    public record RegistroVista(RegistroLegado registro, PistaVista pista, String contenidoHtml) {
     }
 
     public record CombateVista(String nombreSospechoso, List<String> ataques) {
@@ -104,48 +65,21 @@ public class CasoController {
             return RUTA_INICIO;
         }
 
-        Set<Long> descubiertas = progresoService.pistasDescubiertas(usuario);
-        List<Pista> pistas = pistaRepository.findByCasoId(id);
-        Map<Long, Pista> pistaPorRegistro = pistas.stream()
-                .filter(p -> p.getRegistroOrigen() != null && p.getRegistroOrigen2() == null)
-                .collect(Collectors.toMap(p -> p.getRegistroOrigen().getId(), p -> p, (a, b) -> a));
+        var investigacion = investigacionCasoService.preparar(id, usuario);
 
-        List<RegistroVista> registrosVista = registroLegadoRepository.findByCasoId(id).stream()
-                .map(r -> {
-                    Pista p = pistaPorRegistro.get(r.getId());
-                    boolean descubierta = p != null && descubiertas.contains(p.getId());
-                    PistaVista pv = p == null ? null : new PistaVista(p.getId(), p.getDescripcion(), descubierta);
-                    String fraseGatillo = p == null ? null : p.getFraseGatillo();
-                    Long pistaId = p == null ? null : p.getId();
-                    String html = hotspotService.render(r.getContenido(), fraseGatillo, pistaId, descubierta);
-                    html = cartaOcultaService.aplicar(html, r.getFolio());
-                    return new RegistroVista(r, pv, html);
-                })
-                .toList();
-
-        List<Pista> conclusionesPistas = pistas.stream()
-                .filter(p -> p.getRegistroOrigen2() != null)
-                .toList();
-        List<PistaVista> conclusiones = conclusionesPistas.stream()
-                .map(p -> new PistaVista(p.getId(), p.getDescripcion(), descubiertas.contains(p.getId())))
-                .toList();
-        long conclusionesEncontradas = conclusionesPistas.stream().filter(p -> descubiertas.contains(p.getId())).count();
-
-        long encontradas = pistas.stream().filter(p -> descubiertas.contains(p.getId())).count();
-
-        Veredicto veredicto = veredictoRepository.findByUsuarioIdAndCasoId(usuario.getId(), id).orElse(null);
+        Veredicto veredicto = resolucionCasoService.veredicto(usuario, id).orElse(null);
         CombateEnCurso combate = veredicto == null
-                ? combateEnCursoRepository.findByUsuarioIdAndCasoId(usuario.getId(), id).orElse(null)
+                ? resolucionCasoService.combate(usuario, id).orElse(null)
                 : null;
 
         model.addAttribute("caso", caso);
-        model.addAttribute("registros", registrosVista);
-        model.addAttribute("conclusiones", conclusiones);
-        model.addAttribute("totalConclusiones", conclusionesPistas.size());
-        model.addAttribute("conclusionesEncontradas", (int) conclusionesEncontradas);
-        model.addAttribute("totalPistas", pistas.size());
-        model.addAttribute("pistasEncontradas", (int) encontradas);
-        model.addAttribute("sospechosos", sospechosoRepository.findByCasoId(id));
+        model.addAttribute("registros", investigacion.registros());
+        model.addAttribute("conclusiones", investigacion.conclusiones());
+        model.addAttribute("totalConclusiones", investigacion.totalConclusiones());
+        model.addAttribute("conclusionesEncontradas", investigacion.conclusionesEncontradas());
+        model.addAttribute("totalPistas", investigacion.totalPistas());
+        model.addAttribute("pistasEncontradas", investigacion.pistasEncontradas());
+        model.addAttribute("sospechosos", resolucionCasoService.sospechosos(id));
         model.addAttribute("veredicto", veredicto);
         model.addAttribute("combate", combate == null ? null : construirCombateVista(combate));
         model.addAttribute("rutaActual", "/casos/" + id);
@@ -162,19 +96,14 @@ public class CasoController {
     public String descubrirPista(@PathVariable Long casoId, @PathVariable Long pistaId,
                                   Authentication authentication, RedirectAttributes redirectAttributes) {
         Usuario usuario = usuarioContexto.actual(authentication);
-        Pista pista = pistaRepository.findById(pistaId).orElseThrow();
+        Pista pista = investigacionCasoService.buscarPista(pistaId);
 
-        if (sinAcceso(pista.getCaso(), usuario)) {
+        if (!pista.getCaso().getId().equals(casoId) || sinAcceso(pista.getCaso(), usuario)) {
             redirectAttributes.addFlashAttribute(ATRIBUTO_MENSAJE, MENSAJE_ACCESO_DENEGADO);
             return RUTA_INICIO;
         }
 
-        if (!descubrimientoRepository.existsByUsuarioIdAndPistaId(usuario.getId(), pistaId)) {
-            Descubrimiento descubrimiento = new Descubrimiento();
-            descubrimiento.setUsuario(usuario);
-            descubrimiento.setPista(pista);
-            descubrimientoRepository.save(descubrimiento);
-        }
+        investigacionCasoService.descubrir(usuario, pista);
 
         redirectAttributes.addFlashAttribute(ATRIBUTO_MENSAJE, "Pista añadida a tu carpeta.");
         redirectAttributes.addFlashAttribute("pistaDescubiertaId", pistaId);
@@ -198,17 +127,13 @@ public class CasoController {
             return RUTA_CASOS + casoId;
         }
 
-        Pista pista = pistaRepository.findCombinacion(casoId, registroIds.get(0), registroIds.get(1)).orElse(null);
+        Pista pista = investigacionCasoService.buscarCombinacion(casoId, registroIds);
         if (pista == null) {
             redirectAttributes.addFlashAttribute(ATRIBUTO_MENSAJE, "No encuentra ninguna relación entre esos documentos.");
             return RUTA_CASOS + casoId;
         }
 
-        if (!descubrimientoRepository.existsByUsuarioIdAndPistaId(usuario.getId(), pista.getId())) {
-            Descubrimiento descubrimiento = new Descubrimiento();
-            descubrimiento.setUsuario(usuario);
-            descubrimiento.setPista(pista);
-            descubrimientoRepository.save(descubrimiento);
+        if (investigacionCasoService.descubrir(usuario, pista)) {
             redirectAttributes.addFlashAttribute(ATRIBUTO_MENSAJE, "Nueva conclusión anotada al expediente.");
             redirectAttributes.addFlashAttribute("pistaDescubiertaId", pista.getId());
         } else {
@@ -228,7 +153,7 @@ public class CasoController {
             return RUTA_INICIO;
         }
 
-        Sospechoso sospechoso = sospechosoRepository.findById(sospechosoId).orElseThrow();
+        Sospechoso sospechoso = resolucionCasoService.buscarSospechoso(sospechosoId);
         // El control de acceso se hizo sobre el caso de la ruta; hay que exigir
         // que el sospechoso pertenezca a ese mismo caso. Si no, un auditor
         // podría acusar (y abrir combate/veredicto contra) un sospechoso de un
@@ -238,19 +163,7 @@ public class CasoController {
             return RUTA_INICIO;
         }
 
-        boolean yaHayVeredicto = veredictoRepository.findByUsuarioIdAndCasoId(usuario.getId(), casoId).isPresent();
-        boolean yaHayCombate = combateEnCursoRepository.findByUsuarioIdAndCasoId(usuario.getId(), casoId).isPresent();
-
-        if (!yaHayVeredicto && !yaHayCombate) {
-            if (sospechoso.getAtaques().isEmpty()) {
-                registrarVeredicto(usuario, sospechoso);
-            } else {
-                CombateEnCurso combate = new CombateEnCurso();
-                combate.setUsuario(usuario);
-                combate.setCaso(sospechoso.getCaso());
-                combate.setSospechoso(sospechoso);
-                combateEnCursoRepository.save(combate);
-            }
+        if (resolucionCasoService.acusar(usuario, sospechoso)) {
             redirectAttributes.addFlashAttribute("accionReciente", "acusacion");
         }
 
@@ -272,7 +185,7 @@ public class CasoController {
         // el combate ya no existe: no-op, como guarda /acusar con
         // yaHayVeredicto/yaHayCombate — el veredicto ya quedó registrado.
         Optional<CombateEnCurso> pendiente =
-                combateEnCursoRepository.findByUsuarioIdAndCasoId(usuario.getId(), casoId);
+                resolucionCasoService.combate(usuario, casoId);
         if (pendiente.isEmpty()) {
             return RUTA_CASOS + casoId;
         }
@@ -283,8 +196,7 @@ public class CasoController {
             return RUTA_INICIO;
         }
 
-        registrarVeredicto(usuario, combate.getSospechoso());
-        combateEnCursoRepository.delete(combate);
+        resolucionCasoService.finalizar(usuario, combate);
         // Misma marca que /acusar: la acusación se cierra aquí cuando el
         // sospechoso tenía cartas, así que la penalización por acusación
         // precipitada debe evaluarse igual que en el caso sin combate.
@@ -296,11 +208,4 @@ public class CasoController {
         return caso.isConfidencial() && usuario.getRol() != Rol.ADMIN;
     }
 
-    private void registrarVeredicto(Usuario usuario, Sospechoso sospechoso) {
-        Veredicto veredicto = new Veredicto();
-        veredicto.setUsuario(usuario);
-        veredicto.setCaso(sospechoso.getCaso());
-        veredicto.setSospechoso(sospechoso);
-        veredictoRepository.save(veredicto);
-    }
 }

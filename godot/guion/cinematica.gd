@@ -50,11 +50,12 @@ static func resolver(planos: Array, datos: Dictionary = {}, vistas: int = 0) -> 
 		# DESPUÉS: al revés, los huecos se sustituirían en la clave y ya no
 		# habría clave que buscar.
 		plano["rotulo"] = _rellenar(
-			TranslationServer.translate(String(plano.get("rotulo", ""))), datos)
-		plano["voz"] = _rellenar(
-			TranslationServer.translate(String(plano.get("voz", ""))), datos)
-		plano["segundos"] = float(plano.get("segundos", 0.0)) \
-			* factor(vistas, i == planos.size() - 1)
+			TranslationServer.translate(String(plano.get("rotulo", ""))), datos
+		)
+		plano["voz"] = _rellenar(TranslationServer.translate(String(plano.get("voz", ""))), datos)
+		plano["segundos"] = (
+			float(plano.get("segundos", 0.0)) * factor(vistas, i == planos.size() - 1)
+		)
 		rodaje.append(plano)
 	return rodaje
 
@@ -92,8 +93,11 @@ static func validar(planos: Array) -> Array:
 				if not plano.has(campo):
 					problemas.append("plano %d: 3d sin %s" % [i, campo])
 		elif tipo == "2d":
-			if not plano.has("figura") or not (plano["figura"] is Array) \
-					or plano["figura"].is_empty():
+			if (
+				not plano.has("figura")
+				or not (plano["figura"] is Array)
+				or plano["figura"].is_empty()
+			):
 				problemas.append("plano %d: 2d sin figura" % i)
 	return problemas
 

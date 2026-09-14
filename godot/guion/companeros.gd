@@ -23,6 +23,15 @@ extends RefCounted
 ## Cuántos se sientan alrededor, sin contar al cuñado.
 const POR_VUELTA := 3
 
+## El cuerpo, uno para todos.
+##
+## Once mallas distintas serían once descargas de dos megas para que la
+## diferencia entre dos oficinistas sea el corte del pelo. Lo que distingue a
+## estos es otra cosa: el color de la ropa, que declara cada uno, y la CARA, que
+## cinco de ellos tienen y es la suya de verdad. Reutilizar el cuerpo y cambiar
+## la cara es además cómo se resolvía esto en la máquina que el juego imita.
+const CUERPO := "persona"
+
 ## El que está siempre. No entra en el sorteo.
 const CUNADO := {
 	"id": "cunado",
@@ -35,31 +44,35 @@ const ROSTER := [
 	# --- Los que fueron alguien ---
 	{
 		"id": "emperador",
+		"retrato": "emperador",
 		"nombre": "COMPA_EMPERADOR",
 		"frases": ["COMPA_EMPERADOR_1", "COMPA_EMPERADOR_2", "COMPA_EMPERADOR_3"],
 		"color": Color(0.30, 0.28, 0.30),
 	},
 	{
 		"id": "aduanero_ny",
+		"retrato": "aduanero_ny",
 		"nombre": "COMPA_ADUANERO_NY",
 		"frases": ["COMPA_ADUANERO_NY_1", "COMPA_ADUANERO_NY_2", "COMPA_ADUANERO_NY_3"],
 		"color": Color(0.28, 0.29, 0.33),
 	},
 	{
 		"id": "correspondencia",
+		"retrato": "correspondencia",
 		"nombre": "COMPA_CORRESPONDENCIA",
-		"frases": ["COMPA_CORRESPONDENCIA_1", "COMPA_CORRESPONDENCIA_2",
-			"COMPA_CORRESPONDENCIA_3"],
+		"frases": ["COMPA_CORRESPONDENCIA_1", "COMPA_CORRESPONDENCIA_2", "COMPA_CORRESPONDENCIA_3"],
 		"color": Color(0.31, 0.30, 0.33),
 	},
 	{
 		"id": "riegos",
+		"retrato": "riegos",
 		"nombre": "COMPA_RIEGOS",
 		"frases": ["COMPA_RIEGOS_1", "COMPA_RIEGOS_2", "COMPA_RIEGOS_3"],
 		"color": Color(0.33, 0.32, 0.29),
 	},
 	{
 		"id": "fielato",
+		"retrato": "fielato",
 		"nombre": "COMPA_FIELATO",
 		"frases": ["COMPA_FIELATO_1", "COMPA_FIELATO_2", "COMPA_FIELATO_3"],
 		"color": Color(0.29, 0.32, 0.30),
@@ -108,6 +121,24 @@ static func plantilla(semilla: int) -> Array:
 		sorteo[i] = sorteo[j]
 		sorteo[j] = guardado
 	return [CUNADO] + sorteo.slice(0, mini(POR_VUELTA, sorteo.size()))
+
+
+## Quiénes fueron antes, para ponerles su cara.
+##
+## Cinco del roster existieron y acabaron de oficinistas: Puyi ordenando papeles
+## después de haber sido emperador, Melville diecinueve años de inspector de
+## aduanas, Pessoa en la correspondencia comercial, el aduanero Rousseau
+## pintando selvas que no vio, Cavafis treinta años en la Oficina de Riegos de
+## Alejandría. Sus frases solo funcionan si se les reconoce, así que el retrato
+## se declara AQUÍ, al lado de quien es: al revés que el cuerpo, que se deriva
+## porque da igual cuál toque.
+## Qué cuerpo tiene alguien: el de todos, salvo que no sea nadie.
+##
+## Sigue siendo una función y no una constante suelta porque quien la llama no
+## tiene por qué saber que hoy hay un solo cuerpo. El día que haya varios, cambia
+## aquí y no en la oficina.
+static func cuerpo_de(companero: Dictionary) -> String:
+	return "" if String(companero.get("id", "")).is_empty() else CUERPO
 
 
 ## Lo que dice hoy. Rota con el día y no al azar: alguien que dijera otra cosa

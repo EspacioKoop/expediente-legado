@@ -41,8 +41,9 @@ const TENDENCIA_REACTIVA := 0.7
 ## renombrados) y adopta los metadatos y las entradas nuevas.
 ##
 ## No muta ninguna de las dos listas de entrada.
-static func fusionar_con_guardado(guardados: Array, actuales: Array,
-		campos_estado: Array, alias: Dictionary = {}) -> Array:
+static func fusionar_con_guardado(
+	guardados: Array, actuales: Array, campos_estado: Array, alias: Dictionary = {}
+) -> Array:
 	var fusionados := []
 	for item in actuales:
 		var ids_buscados := [item["id"]]
@@ -84,8 +85,9 @@ static func acusacion_precipitada(descubiertas: int, total: int, umbral: float) 
 ## final político, expuesto también como recuento: son los puntos de ideología
 ## de las cargas de habilidad en combate — la partida política ES el
 ## equipamiento, sin pantalla de asignación.
-static func puntos_por_eje(historias: Dictionary, resueltas: Array,
-		orden: Array = EJES) -> Dictionary:
+static func puntos_por_eje(
+	historias: Dictionary, resueltas: Array, orden: Array = EJES
+) -> Dictionary:
 	var conteo := {}
 	for eje in orden:
 		conteo[eje] = 0
@@ -98,8 +100,7 @@ static func puntos_por_eje(historias: Dictionary, resueltas: Array,
 
 ## El eje ganador. Cualquier empate lo gana el primero de [param orden], que
 ## por eso no es un detalle: es la ideología por defecto del final.
-static func eje_ganador(historias: Dictionary, resueltas: Array,
-		orden: Array = EJES) -> String:
+static func eje_ganador(historias: Dictionary, resueltas: Array, orden: Array = EJES) -> String:
 	var conteo := puntos_por_eje(historias, resueltas, orden)
 	var ganador: String = orden[0]
 	var mas_votos := -1
@@ -124,8 +125,9 @@ static func clasificar_eleccion(carta_id: String, eje: String) -> String:
 ##
 ## Asume la cadena circular de tipos del juego —cada índice vence al
 ## siguiente—, así que lo que vence a X es el índice anterior a X.
-static func jugada_rival(modo: String, ronda: int, total_tipos: int,
-		azar: Callable, ultima_del_jugador: int = -1) -> int:
+static func jugada_rival(
+	modo: String, ronda: int, total_tipos: int, azar: Callable, ultima_del_jugador: int = -1
+) -> int:
 	if modo == "reactiva":
 		if ultima_del_jugador < 0 or azar.call() >= TENDENCIA_REACTIVA:
 			return int(azar.call() * total_tipos)

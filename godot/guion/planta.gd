@@ -92,12 +92,26 @@ static func contorno(bloques: Array) -> Array:
 				if posiciones[i] == ultima + 1 and lado[posiciones[i]] == lado[ultima]:
 					ultima = posiciones[i]
 					continue
-				tramos.append({"eje": eje, "linea": linea, "desde": desde,
-					"hasta": ultima + 1, "hacia": lado[ultima]})
+				tramos.append(
+					{
+						"eje": eje,
+						"linea": linea,
+						"desde": desde,
+						"hasta": ultima + 1,
+						"hacia": lado[ultima]
+					}
+				)
 				desde = posiciones[i]
 				ultima = posiciones[i]
-			tramos.append({"eje": eje, "linea": linea, "desde": desde,
-				"hasta": ultima + 1, "hacia": lado[ultima]})
+			tramos.append(
+				{
+					"eje": eje,
+					"linea": linea,
+					"desde": desde,
+					"hasta": ultima + 1,
+					"hacia": lado[ultima]
+				}
+			)
 	tramos.sort_custom(func(a, b): return str(a) < str(b))
 	return tramos
 
@@ -242,8 +256,11 @@ static func rectangulos(bloques: Array) -> Array:
 		# Los que ya no siguen se cierran; los nuevos empiezan aquí.
 		for tramo in pendientes.keys():
 			if not actuales.has(tramo) or pendientes[tramo][1] != z:
-				salida.append(Rect2i(tramo.x, pendientes[tramo][0],
-					tramo.y - tramo.x, z - pendientes[tramo][0]))
+				salida.append(
+					Rect2i(
+						tramo.x, pendientes[tramo][0], tramo.y - tramo.x, z - pendientes[tramo][0]
+					)
+				)
 				pendientes.erase(tramo)
 		for tramo in actuales:
 			if pendientes.has(tramo):
@@ -251,8 +268,14 @@ static func rectangulos(bloques: Array) -> Array:
 			else:
 				pendientes[tramo] = [z, z + 1]
 	for tramo in pendientes:
-		salida.append(Rect2i(tramo.x, pendientes[tramo][0],
-			tramo.y - tramo.x, pendientes[tramo][1] - pendientes[tramo][0]))
+		salida.append(
+			Rect2i(
+				tramo.x,
+				pendientes[tramo][0],
+				tramo.y - tramo.x,
+				pendientes[tramo][1] - pendientes[tramo][0]
+			)
+		)
 	salida.sort_custom(func(a, b): return str(a) < str(b))
 	return salida
 
@@ -295,14 +318,15 @@ static func repartidas(bloques: Array, cuantas: int, evitar: Array = []) -> Arra
 ## lados. El orden es por longitud para que lo primero que se cuelgue vaya al
 ## paño más ancho, que es donde se ve.
 static func paredes(bloques: Array, minimo: int = 3) -> Array:
-	var utiles := contorno(bloques).filter(
-		func(t): return t["hasta"] - t["desde"] >= minimo)
-	utiles.sort_custom(func(a, b):
-		var largo_a: int = a["hasta"] - a["desde"]
-		var largo_b: int = b["hasta"] - b["desde"]
-		if largo_a != largo_b:
-			return largo_a > largo_b
-		return str(a) < str(b))
+	var utiles := contorno(bloques).filter(func(t): return t["hasta"] - t["desde"] >= minimo)
+	utiles.sort_custom(
+		func(a, b):
+			var largo_a: int = a["hasta"] - a["desde"]
+			var largo_b: int = b["hasta"] - b["desde"]
+			if largo_a != largo_b:
+				return largo_a > largo_b
+			return str(a) < str(b)
+	)
 	return utiles
 
 
@@ -317,13 +341,20 @@ static func en_pared(bloques: Array, tramo: Dictionary, separacion: float) -> Di
 	var punto: Vector3
 	var giro: float
 	if tramo["eje"] == "x":
-		punto = origen + Vector3(medio * CELDA, 0,
-			float(tramo["linea"]) * CELDA + separacion * float(tramo["hacia"]))
+		punto = (
+			origen
+			+ Vector3(
+				medio * CELDA, 0, float(tramo["linea"]) * CELDA + separacion * float(tramo["hacia"])
+			)
+		)
 		giro = 0.0 if int(tramo["hacia"]) > 0 else PI
 	else:
-		punto = origen + Vector3(
-			float(tramo["linea"]) * CELDA + separacion * float(tramo["hacia"]),
-			0, medio * CELDA)
+		punto = (
+			origen
+			+ Vector3(
+				float(tramo["linea"]) * CELDA + separacion * float(tramo["hacia"]), 0, medio * CELDA
+			)
+		)
 		giro = PI / 2.0 if int(tramo["hacia"]) > 0 else -PI / 2.0
 	return {"pos": punto, "giro": giro}
 

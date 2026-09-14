@@ -9,6 +9,8 @@
 ## está firmada — el careo es una escena con una vida en juego, no un examen.
 extends Node3D
 
+signal terminado(gano: bool)
+
 ## Cada cuánto habla el compañero, como mucho. Sin tope comentaría cada ronda y
 ## dejaría de tener gracia: un cuñado que no calla nunca es ruido, y uno que
 ## habla de vez en cuando es un cuñado.
@@ -25,7 +27,11 @@ var cargas: Dictionary = {}
 ## ella el careo funciona igual, solo que siempre a duración completa.
 var estado: Dictionary = {}
 
-signal terminado(gano: bool)
+## La semilla de las tiradas de este careo (#147). La pone quien abre la escena
+## —derivada de la partida— para que el careo se pueda volver a ver igual. En
+## cero se cae al reloj: es el modo de abrir la escena suelta desde el editor o
+## desde la herramienta de capturas, donde no hay partida de la que derivar.
+var semilla_tiradas := 0
 
 var _reproductor: Node3D
 var _en_cinematica := true
@@ -42,7 +48,10 @@ var _camara_duelo: Camera3D
 
 
 func _ready() -> void:
-	_azar.randomize()
+	if semilla_tiradas != 0:
+		_azar.seed = semilla_tiradas
+	else:
+		_azar.randomize()
 	if acusado.is_empty():
 		acusado = {"nombre": "El acusado", "ataques": []}
 
@@ -59,7 +68,8 @@ func _ready() -> void:
 	_reproductor.plano_entrado.connect(_al_entrar_plano)
 	var vistas := Cinematica.vistas_de(estado, ID_CINEMATICA)
 	_reproductor.reproducir(
-		CareoCinematica.planos_de(acusado, folio, vistas), ID_CINEMATICA, estado)
+		CareoCinematica.planos_de(acusado, folio, vistas), ID_CINEMATICA, estado
+	)
 
 
 ## El compañero llega en el segundo plano: justo cuando la cosa se está
@@ -87,10 +97,20 @@ func _al_jugar(tipo: String) -> void:
 	if _combate["terminado"]:
 		return
 	var ronda := Combate.jugar(_combate, tipo, "", _tirada())
+	# El sonido cuenta un daño que YA está resuelto. En empate no hay golpe y
+	# nunca interviene en la tirada, la vida ni el veredicto.
+	if ronda["veredicto"] != "empate":
+		Sonido.sonar_stream(self, Sonido.impacto_careo())
 
-	_cronica.text = tr("COMBATE_CRONICA") % [
-		Combate.etiqueta(ronda["tipo_jugador"]), acusado["nombre"],
-		Combate.etiqueta(ronda["tipo_rival"]), _veredicto(ronda["veredicto"])]
+	_cronica.text = (
+		tr("COMBATE_CRONICA")
+		% [
+			Combate.etiqueta(ronda["tipo_jugador"]),
+			acusado["nombre"],
+			Combate.etiqueta(ronda["tipo_rival"]),
+			_veredicto(ronda["veredicto"])
+		]
+	)
 	if not ronda["replica"].is_empty():
 		_cronica.text += "\n" + tr("CAREO_REPLICA") % ronda["replica"]
 
@@ -114,9 +134,12 @@ func _decir(frase: String) -> void:
 
 func _veredicto(cual: String) -> String:
 	match cual:
-		"gana_jugador": return tr("CAREO_VEREDICTO_JUGADOR")
-		"gana_rival": return tr("CAREO_VEREDICTO_RIVAL")
-		_: return tr("VEREDICTO_EMPATE")
+		"gana_jugador":
+			return tr("CAREO_VEREDICTO_JUGADOR")
+		"gana_rival":
+			return tr("CAREO_VEREDICTO_RIVAL")
+		_:
+			return tr("VEREDICTO_EMPATE")
 
 
 func _tirada() -> Callable:
@@ -124,13 +147,18 @@ func _tirada() -> Callable:
 
 
 func _actualizar_marcador() -> void:
-	_marcador.text = tr("CAREO_MARCADOR") % [
-		"█".repeat(maxi(0, _combate["vida_jugador"])),
-		acusado["nombre"],
-		"█".repeat(maxi(0, _combate["vida_rival"]))]
+	_marcador.text = (
+		tr("CAREO_MARCADOR")
+		% [
+			"█".repeat(maxi(0, _combate["vida_jugador"])),
+			acusado["nombre"],
+			"█".repeat(maxi(0, _combate["vida_rival"]))
+		]
+	)
 
 
 # --- La sala ----------------------------------------------------------------
+
 
 func _montar_sala() -> void:
 	var entorno := WorldEnvironment.new()
@@ -164,18 +192,29 @@ func _montar_sala() -> void:
 	relleno.omni_range = 9.0
 	add_child(relleno)
 
-	Espacio3D.construir(self, {
-		"suelo": Vector2(12, 12),
-		"color_suelo": Color(0.14, 0.14, 0.15),
-		"color_muro": Color(0.10, 0.10, 0.12),
-		"color_techo": Color(0.06, 0.06, 0.07),
-	})
+	(
+		Espacio3D
+		. construir(
+			self,
+			{
+				"suelo": Vector2(12, 12),
+				"color_suelo": Color(0.14, 0.14, 0.15),
+				"color_muro": Color(0.10, 0.10, 0.12),
+				"color_techo": Color(0.06, 0.06, 0.07),
+			}
+		)
+	)
 
+	# El acusado conserva la silueta sin rostro. No es un placeholder: es la
+	# abstracción deliberada que comparten el careo y el sueño.
 	_figura(self, Vector3(0, 0, 0), Color(0.52, 0.51, 0.48))
+	# El cuñado, en cambio, es una persona concreta. Reutiliza la misma malla
+	# humana CC0 que los compañeros de oficina (#199) en vez de inventar una
+	# segunda representación de personas para las cinemáticas.
 	# Apartado de las cuatro posiciones de cámara. En la primera versión estaba
 	# en (2.4, 0, 1.9) y la cámara de la órbita cae en (2.8, 1.7, 2.0): el plano
 	# se rodaba DENTRO de su cabeza y no se veía más que un bulto negro.
-	_figura_cunado = _figura(self, Vector3(-3.2, 0, 3.4), Color(0.44, 0.42, 0.38))
+	_figura_cunado = _persona(self, Vector3(-3.2, 0, 3.4), Color(0.44, 0.42, 0.38))
 	_figura_cunado.visible = false
 
 	# La cámara del duelo es de esta escena; la de la cinemática es del
@@ -189,6 +228,18 @@ func _montar_sala() -> void:
 ## (#87) empezó a poblar sus salas con los mismos sospechosos.
 func _figura(raiz: Node3D, base: Vector3, color: Color) -> Node3D:
 	return FiguraSilueta.construir(raiz, base, color)
+
+
+## Una persona concreta usa la malla común. Si el asset no pudiera cargarse,
+## la escena sigue siendo funcional con la silueta anterior en vez de fallar al
+## montar el careo.
+func _persona(raiz: Node3D, base: Vector3, color: Color) -> Node3D:
+	var figura := Node3D.new()
+	figura.position = base
+	raiz.add_child(figura)
+	if not Modelos.persona(figura, "persona", color):
+		FiguraSilueta.construir(figura, Vector3.ZERO, color)
+	return figura
 
 
 func _montar_interfaz() -> void:

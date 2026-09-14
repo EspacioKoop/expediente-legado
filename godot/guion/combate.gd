@@ -28,12 +28,12 @@ const ETIQUETAS := {
 	"insistencia": "COMBATE_INSISTENCIA",
 }
 
+const VIDA_INICIAL := 3
+
 
 ## El nombre de una jugada, ya en el idioma de la partida.
 static func etiqueta(tipo: String) -> String:
 	return TranslationServer.translate(ETIQUETAS.get(tipo, ""))
-
-const VIDA_INICIAL := 3
 
 
 ## Un combate recién empezado.
@@ -70,8 +70,9 @@ static func vence_a(tipo: String) -> String:
 ##
 ## Muta el combate y devuelve la crónica de la ronda, que es lo que la pantalla
 ## cuenta. El motor no sabe pintar y no elige textos: devuelve qué pasó.
-static func jugar(combate: Dictionary, tipo_jugador: String, habilidad: String,
-		azar: Callable) -> Dictionary:
+static func jugar(
+	combate: Dictionary, tipo_jugador: String, habilidad: String, azar: Callable
+) -> Dictionary:
 	if combate["terminado"]:
 		return {}
 
@@ -114,8 +115,8 @@ static func jugar(combate: Dictionary, tipo_jugador: String, habilidad: String,
 		# `jugada_rival` YA devuelve el índice dentro de TIPOS: buscarlo otra
 		# vez con find() daba -1, o sea que la habilidad no revelaba nada.
 		combate["revelada"] = Prometeo.jugada_rival(
-			combate["modo"], combate["ronda"], TIPOS.size(),
-			azar, combate["ultima_jugada_jugador"])
+			combate["modo"], combate["ronda"], TIPOS.size(), azar, combate["ultima_jugada_jugador"]
+		)
 
 	_comprobar_final(combate)
 
@@ -126,8 +127,7 @@ static func jugar(combate: Dictionary, tipo_jugador: String, habilidad: String,
 		"habilidad": gastada,
 		"dano_al_jugador": a_jugador,
 		"dano_al_rival": a_rival,
-		"revelada": etiqueta(TIPOS[combate["revelada"]]) \
-			if combate["revelada"] >= 0 else "",
+		"revelada": etiqueta(TIPOS[combate["revelada"]]) if combate["revelada"] >= 0 else "",
 		"replica": _replica(combate, azar),
 		"terminado": combate["terminado"],
 		"ganador": combate["ganador"],
@@ -156,8 +156,8 @@ static func _jugada_rival(combate: Dictionary, azar: Callable) -> String:
 		combate["revelada"] = -1
 		return anunciada
 	return TIPOS[Prometeo.jugada_rival(
-		combate["modo"], combate["ronda"], TIPOS.size(),
-		azar, combate["ultima_jugada_jugador"])]
+		combate["modo"], combate["ronda"], TIPOS.size(), azar, combate["ultima_jugada_jugador"]
+	)]
 
 
 static func _comprobar_final(combate: Dictionary) -> void:

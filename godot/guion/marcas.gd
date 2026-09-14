@@ -17,6 +17,7 @@ extends RefCounted
 ## Referencia a un concepto del corcho: [[Nombre]].
 const REFERENCIA := "\\[\\[([^\\[\\]]+)\\]\\]"
 
+
 ## Localiza la PRIMERA aparición de una frase, como hacía el indexOf de Java.
 ## Devuelve un hallazgo, o un diccionario vacío si la frase no está.
 static func frase(texto: String, buscada: String, tipo: String, meta: Dictionary) -> Dictionary:
@@ -33,6 +34,7 @@ static func frase(texto: String, buscada: String, tipo: String, meta: Dictionary
 		"meta": meta,
 	}
 
+
 ## Todas las referencias [[Concepto]] del texto, en orden de aparición.
 ## [param desbloqueados] son los nombres que el jugador ya ha descubierto: una
 ## referencia a un concepto que aún no tiene se marca igual, pero como
@@ -43,15 +45,21 @@ static func referencias(texto: String, desbloqueados: Array) -> Array:
 	var hallazgos := []
 	for coincidencia in expresion.search_all(texto):
 		var nombre: String = coincidencia.get_string(1)
-		hallazgos.append({
-			"inicio": coincidencia.get_start(),
-			"fin": coincidencia.get_end(),
-			# Los corchetes desaparecen: lo que se lee es el nombre.
-			"texto": nombre,
-			"tipo": "concepto" if desbloqueados.has(nombre) else "concepto_pendiente",
-			"meta": {"nombre": nombre},
-		})
+		(
+			hallazgos
+			. append(
+				{
+					"inicio": coincidencia.get_start(),
+					"fin": coincidencia.get_end(),
+					# Los corchetes desaparecen: lo que se lee es el nombre.
+					"texto": nombre,
+					"tipo": "concepto" if desbloqueados.has(nombre) else "concepto_pendiente",
+					"meta": {"nombre": nombre},
+				}
+			)
+		)
 	return hallazgos
+
 
 ## Parte el texto en segmentos alternos de texto plano y texto marcado.
 ##
@@ -69,27 +77,40 @@ static func segmentar(texto: String, hallazgos: Array) -> Array:
 		if hallazgo["inicio"] < cursor:
 			continue  # solapa con uno ya colocado
 		if hallazgo["inicio"] > cursor:
-			segmentos.append({
-				"texto": texto.substr(cursor, hallazgo["inicio"] - cursor),
-				"tipo": "",
-				"meta": {},
-			})
-		segmentos.append({
-			"texto": hallazgo["texto"],
-			"tipo": hallazgo["tipo"],
-			"meta": hallazgo["meta"],
-		})
+			(
+				segmentos
+				. append(
+					{
+						"texto": texto.substr(cursor, hallazgo["inicio"] - cursor),
+						"tipo": "",
+						"meta": {},
+					}
+				)
+			)
+		(
+			segmentos
+			. append(
+				{
+					"texto": hallazgo["texto"],
+					"tipo": hallazgo["tipo"],
+					"meta": hallazgo["meta"],
+				}
+			)
+		)
 		cursor = hallazgo["fin"]
 
 	if cursor < texto.length():
 		segmentos.append({"texto": texto.substr(cursor), "tipo": "", "meta": {}})
 	return segmentos
 
+
 ## Los segmentos de un registro del expediente: su frase gatillo (si la pista
 ## no está descubierta todavía, es pulsable; si lo está, queda como leída) y la
 ## carta de tarot escondida en él, si la hay.
 static func de_registro(registro: Dictionary, pistas: Array, descubiertas: Array) -> Array:
-	var contenido: String = registro.get("contenido", "") if registro.get("contenido") != null else ""
+	var contenido: String = (
+		registro.get("contenido", "") if registro.get("contenido") != null else ""
+	)
 	var hallazgos := []
 
 	for pista in pistas:
@@ -97,10 +118,14 @@ static func de_registro(registro: Dictionary, pistas: Array, descubiertas: Array
 		if gatillo == null:
 			continue
 		var descubierta: bool = descubiertas.has(pista.get("id"))
-		hallazgos.append(frase(
-			contenido, gatillo,
-			"pista_vista" if descubierta else "pista",
-			{"pista": pista.get("id")}))
+		hallazgos.append(
+			frase(
+				contenido,
+				gatillo,
+				"pista_vista" if descubierta else "pista",
+				{"pista": pista.get("id")}
+			)
+		)
 
 	var carta := CartasOcultas.en_folio(registro.get("folio", ""))
 	if not carta.is_empty():

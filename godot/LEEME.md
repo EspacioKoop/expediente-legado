@@ -18,7 +18,13 @@ godot4 --headless --path godot --import          # solo la primera vez
 godot4 --headless --path godot --script pruebas/pruebas.gd
 ```
 
-Sale `0` si todo pasa. Los casos están portados uno a uno de `WikiLinkServiceTest`,
+Sale `0` si todo pasa. **Hace falta un Godot de la línea 4.7**, que es la que
+declara `project.godot`: con un binario más viejo la suite falla por cosas que
+no son del código —assets importados con un formato que no entiende, y guiones
+que usan API posterior— y ese ruido esconde los fallos de verdad. Lo que se
+mide contra un baseline sucio no se mide.
+
+Los casos están portados uno a uno de `WikiLinkServiceTest`,
 `HotspotServiceTest`, `CartaOcultaServiceTest` y `ProgresoServiceTest`, con el
 nombre del test Java en un comentario: si el port cambia una decisión del
 original, se ve cuál.
@@ -47,6 +53,32 @@ Los catálogos (20 logros, 22 cartas) salen de `datos/prometeo.json`, extraídos
 de `prometeo-ui.js` con `datos/extraer-prometeo.mjs` por el mismo motivo que
 los casos: es contenido, y teclearlo introduce erratas que nadie compara con el
 original.
+
+## El azar de una partida (#147)
+
+`guion/azar.gd`. Una partida tiene **una semilla** (`estado["semilla"]`) y todo
+lo jugable que se sortea sale de ella por derivación, no de `randi()` global.
+Eso es lo que permite volver a ver un fallo del que alguien informa: misma
+semilla y mismas acciones, misma partida.
+
+- `Azar.derivar(raiz, dominio, indices)` — función pura, mismo resultado en
+  cualquier máquina. Los dominios son una lista cerrada en `Azar.DOMINIOS`:
+  uno nuevo se declara ahí.
+- `Azar.derivar_guardable(...)` — **para todo número que acabe en el fichero de
+  partida**. JSON no tiene enteros: un entero de 63 bits vuelve redondeado y la
+  partida recargada sortea otra cosa. Pasó con la plantilla de compañeros —
+  recargar te cambiaba media oficina— y por eso lo persistido cabe en 32 bits.
+- `Azar.manifiesto(estado)` / `manifiesto_en_texto(estado)` — semilla, vuelta,
+  día, versión del guardado y huella de los catálogos, para pegar en un informe
+  de bug. **No se enseña al jugador**: va en las herramientas de depuración.
+
+Cada dominio deriva por su lado a propósito, para que el sueño de la noche 3 no
+cambie porque el combate haya tirado una vez más.
+
+Lo que **sí** puede seguir usando el azar global es la presentación —el tono de
+una pisada, hacia dónde mira el gato, el grano de una textura—: no decide nada.
+La suite tiene una guarda que recorre `guion/*.gd` y falla si aparece un
+`randi()`/`randf()`/`randomize()` suelto fuera de esa lista corta.
 
 ## La Ventanilla de Reclamaciones
 
@@ -84,6 +116,26 @@ gasta una; **releer es gratis**, porque cobrar por volver a un documento
 castigaría justo lo que el juego pide hacer. Lo que se decide con esto no es
 leer deprisa sino QUÉ leer.
 
+### El gato
+
+Es **el único ser vivo del juego**, y por eso es lo único que no está hecho de
+cajas: `guion/malla_organica.gd` construye tubos a lo largo de una espina —un
+lomo que se estrecha, cuatro patas, dos orejas de punta (un tubo cuyo último
+radio es cero) y una cola que se curva—, con siete lados por anillo, que es la
+misma decisión que las texturas de 64 píxeles. Una oficina de cajas es una
+oficina de 1998; un gato de cajas es un gato de cajas.
+
+**Se comporta, y de ahí se deduce cómo le has tratado** (`gato_conducta.gd`).
+No hay barra ni aviso: bien comido se acerca a ti —la única recompensa que da
+el juego por cuidarlo—, y con hambre se queda junto al cuenco con la cola
+tensa. Deja de venir **un día antes** del límite de paciencia, así que la señal
+llega a tiempo de arreglarla en vez de anunciar algo que ya ha pasado. Hay
+prueba de esa desigualdad, que es la que hace que sea una señal.
+
+Se le da de comer **acercándose al cuenco**, como todo lo demás en este juego:
+no hay menú ni inventario. La lata se paga (`PRECIO_COMIDA_GATO`), cuesta menos
+que vivir un día y un cuenco ya lleno no cobra dos veces.
+
 **El gato no es estado de la vuelta.** Sobrevive a que te reasignen, porque es
 tuyo y no del trabajo: si lo cuidaste sigue ahí en la vida laboral siguiente, y
 si se fue no vuelve. Acaba siendo lo único cálido del registro permanente, al
@@ -102,9 +154,48 @@ argumento que la tipografía sin suavizar. Y los techos van **emisivos** porque
 la luz del motor viene de arriba, así que la cara inferior de un techo está
 siempre en el mínimo y salía negra por construcción.
 
-El **sueño** todavía no existe: hay una habitación de paso que devuelve al
-archivo. La tercera parte (salas oníricas procedurales alimentadas por lo leído
-ese día) va después.
+## El sueño
+
+La tercera parte del ciclo. **No es aleatorio: es el archivo devuelto deforme**
+(#79). La semilla sale del día y de lo leído ESE día (`jornada.leido_hoy`), así
+que dos días distintos sueñan distinto y el mismo día repetido sueña lo mismo —
+un sueño que cambiara al recargar la partida sería un generador de ruido con
+otro nombre.
+
+Tres escenas por noche (`Sueno.noche`), lo nuevo primero, y el mapa crece con lo
+que se pisa. La salida **no se ve** (#90): lo que impide que sea una lotería no
+es una marca, es el mapa, que la segunda vez que te toca una sala ya sabes por
+dónde se salía. La noche tiene reloj, y si se acaba se despierta de golpe: el
+único castigo es que las salas de esa noche no quedan en el mapa.
+
+Lo que amuebla las salas (#87) sale de lo leído: las frases gatillo que **sí**
+notaste escritas en las paredes —escribir la que se te pasó sería decirte dónde
+mirar, y dormir pasaría a ser lo óptimo— y los sospechosos de esos expedientes
+como figuras, con **el que firmaste de otro color**.
+
+### Los combates oníricos (#88)
+
+Y con el que firmaste se puede pelear, acercándose a él. El motor es el mismo
+`Combate` de siempre en modo `reactiva` —contesta a tu última jugada, se puede
+cebar, que es lo que es discutir con uno mismo—, con las cargas de habilidad de
+la partida política.
+
+**Solo contra los que acusaste.** El sueño como conciencia: te persigue lo que
+hiciste, no lo que había. Una partida donde no has firmado a nadie no tiene
+combates oníricos, y eso está bien.
+
+Y a diferencia del careo —donde el veredicto ya está firmado y el duelo no lo
+cambia—, aquí **sí hay consecuencias**, que es su razón de existir:
+
+- **Ganar devuelve una vida**, con el tope de la dificultad, y al vencido no se
+  le vuelve a ver: la sala donde estaba está vacía la próxima vez. Es la
+  consecuencia que se ve sin texto que la explique.
+- **Perder corta la noche** — se despierta de golpe, con lo que eso cuesta. No
+  cuesta además una vida: ya te costó una firmarlo mal, y cobrar dos veces por
+  el mismo acusado convertiría dormir en un riesgo que se esquiva no durmiendo.
+
+`guion/sueno_combate.gd` es quién y qué pasa (puro), `guion/sueno_duelo.gd` la
+pantalla. El motor no se tocó.
 
 ## Assets
 
@@ -171,6 +262,36 @@ Mirar la captura ya ha pagado su coste: encontró que el año salía como
 "Expediente 1999.0" (los números del JSON llegan en coma flotante) y que el
 documento abierto quedaba en blanco sobre blanco en la lista. Ninguna prueba de
 las 44 veía ninguno de los dos.
+
+## Estado del port: lógica, interfaz y evidencia (#163)
+
+Esta matriz separa tres cosas que no deben confundirse: que una regla exista,
+que la pantalla la use y que haya una prueba que lo demuestre. El estado se
+refiere a `main`; los PR abiertos se indican como pendientes y no como trabajo
+integrado.
+
+| Área | Lógica implementada | Interfaz conectada | Evidencia disponible | Pendiente |
+| --- | --- | --- | --- | --- |
+| Casos y visor | Sí: contenido, marcas, progreso y lecturas | Sí: visor SIGA | Suite Godot y capturas headless | Playtesting humano completo |
+| Formulario A-7 | Sí: acusación, veredicto y coste de acciones | Sí: formulario de firma | Suite Godot | Careo desde la firma (#75) |
+| Persistencia | Sí: escritura atómica, versión y reintentos; H1 integrado por #203 | Parcial: la validación estructural de H5 sigue en #190 | Suite Godot y regresiones de guardado | Integrar H5 (#190) y completar playtesting |
+| Jornada y día | Sí: acciones, tránsito, casa, sueño y gato | Sí: escenas del ciclo | Suite y recorrido headless | Playthrough completo y pruebas con hardware |
+| Sueño | Sí: salas, semilla, lecturas y reloj; H2/H3 integrados por #166 | Sí: entrada y salida de la noche | Suite y recorrido | Validar experiencia visual con playtesting |
+| Careo | Sí: cinemática, combate y consecuencias | Parcial en `main`: escena disponible, conexión A-7 en #75 | Suite aislada del combate | Integrar #75 y probar victoria/derrota |
+
+### Qué significa “evidencia”
+
+- **Suite** demuestra reglas y estados límite; no demuestra que una pantalla sea
+  legible ni que el flujo sea cómodo.
+- **Recorrido** demuestra que varias escenas pueden encadenarse en headless; no
+  sustituye una partida completa con teclado, mando y ratón.
+- **Capturas** sirven para inspección visual puntual; no demuestran persistencia.
+- Un PR abierto no cuenta como integrado hasta que su CI esté verde, se revise y
+  llegue a `main`.
+
+La matriz debe actualizarse cuando un PR cambie de estado. En la revisión actual de #163,
+H1, H2 y H3 están integrados; H4 continúa en #75 y H5 en #190. No es una promesa
+de cobertura ni un sustituto del playtesting de #9.
 
 ## Lo que este corte NO incluye
 

@@ -1,0 +1,119 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Test backend with Maven
+        run: |
+          cd backend
+          mvn -B test
+          mvn -B checkstyle:check pmd:check spotbugs:check
+
+      - name: Test frontend with Vitest
+        run: |
+          cd backend
+          npm ci
+          npm test
+
+  godot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar RGBDS fijado
+        shell: bash
+        env:
+          RGBDS_VERSION: v1.0.3
+          RGBDS_SHA256: 280a52061a0c516999bee75ac357628d6d50784309e0486cef25f7460e6f330b
+        run: |
+          set -euo pipefail
+          url="https://github.com/gbdev/rgbds/releases/download/${RGBDS_VERSION}/rgbds-linux-x86_64.tar.xz"
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/rgbds.tar.xz" "$url"
+          echo "${RGBDS_SHA256}  $RUNNER_TEMP/rgbds.tar.xz" | sha256sum --check --strict
+          mkdir "$RUNNER_TEMP/rgbds"
+          tar -xJf "$RUNNER_TEMP/rgbds.tar.xz" -C "$RUNNER_TEMP/rgbds"
+          (cd "$RUNNER_TEMP/rgbds" && sudo ./install.sh)
+          rgbasm --version
+
+      - name: Compilar núcleo GB y ROM propia
+        shell: bash
+        run: |
+          bash scripts/preparar_emulador_gb.sh linux-debug
+          bash scripts/preparar_emulador_gb.sh rom
+
+      - name: Instalar el motor declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Instalar gdtoolkit
+        run: python -m pip install gdtoolkit==4.3.4
+
+      - name: Verificar el detector de falsos verdes
+        run: python -m unittest discover -s scripts -p 'test_*.py'
+
+      - name: Importar, ejecutar la suite y arrancar el juego
+        run: python scripts/verificar_godot.py
+
+      - name: Arrancar Caza Píxeles 98 en el núcleo nativo
+        run: godot4 --headless --path godot --script res://pruebas/emulador_gb_smoke.gd
+
+      - name: Lint y formato GDScript
+        shell: bash
+        run: |
+          set -euo pipefail
+          find godot -type f -name '*.gd' \
+            -not -path 'godot/native/siga98_gb/.deps/*' -print0 \
+            | xargs -0 --no-run-if-empty gdlint
+          find godot -type f -name '*.gd' \
+            -not -path 'godot/native/siga98_gb/.deps/*' -print0 \
+            | xargs -0 --no-run-if-empty gdformat --check --diff

@@ -74,11 +74,19 @@ static func planos_de(acusado: Dictionary, folio: String = "", vistas: int = 0) 
 	if cargo.is_empty():
 		cargo = _cargo_deducido(acusado)
 
-	return Cinematica.resolver(PLANOS, {
-		"nombre": nombre,
-		"cargo": cargo,
-		"folio": folio if not folio.is_empty() else TranslationServer.translate("CAREO_SIN_FOLIO"),
-	}, vistas)
+	return (
+		Cinematica
+		. resolver(
+			PLANOS,
+			{
+				"nombre": nombre,
+				"cargo": cargo,
+				"folio":
+				folio if not folio.is_empty() else TranslationServer.translate("CAREO_SIN_FOLIO"),
+			},
+			vistas
+		)
+	)
 
 
 ## El cargo sale de la descripción que ya trae el sospechoso: su primera frase.

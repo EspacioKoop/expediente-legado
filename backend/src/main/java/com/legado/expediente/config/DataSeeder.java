@@ -1284,6 +1284,10 @@ public class DataSeeder implements CommandLineRunner {
                 + "lo requiera.' Existen al menos tres actas de cierre para este expediente, cada una "
                 + "con un desenlace distinto e incompatible con las demás, las tres fechadas el mismo "
                 + "día.");
+        // El suceso son las tres actas de cierre incompatibles, las tres del
+        // 05/11/1998. El registro de empleado es de 1983, pero eso es cuando
+        // entro, no cuando paso lo que se investiga.
+        caso8.setAnioSuceso(1998);
         caso8.setEstado(EstadoCaso.ABIERTO);
         caso8.setPrincipal(false);
         casoRepository.save(caso8);

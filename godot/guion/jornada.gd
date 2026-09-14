@@ -24,26 +24,45 @@ const BASE_DIARIA := 40
 ## cerrar bien: un expediente mal cerrado paga lo mismo, y el gato come de eso.
 const POR_EXPEDIENTE := 60
 
-## Lo que cuesta vivir un día, se haga lo que se haga.
-const COSTE_DIARIO := 25
+## Lo que cuesta vivir un día, se haga lo que se haga. Sube desde 25, pero solo
+## hasta 26: el día 10 hay que reservar además una acción para pagar el alquiler;
+## con siete cierres, subirlo más haría imposible reunir los 700 sin trabajillos.
+const COSTE_DIARIO := 26
 
-## Cuántas cosas se pueden hacer en un día: abrir un documento, acusar, atender
-## la Ventanilla. Es lo que obliga a fichar la salida — sin un tope, lo óptimo
-## sería no salir nunca de la oficina y el resto del día no existiría.
-##
-## Lo que se decide con esto no es leer deprisa sino QUÉ leer: un expediente
-## tiene más documentos de los que caben en una jornada.
-const ACCIONES_POR_DIA := 6
+## Tres acciones pagadas al día. La primera lectura nueva sale gratis; el día de
+## alquiler una de estas acciones tiene que sobrevivir al archivo para pagar en
+## el trayecto. Así el vencimiento llega mientras todavía queda trabajo por hacer.
+const ACCIONES_POR_DIA := 3
+const DOCUMENTOS_GRATIS_POR_DIA := 1
 
 ## Días seguidos sin comer que aguanta el gato antes de irse. No se muere ni
 ## deja cadáver: un día no está. En este sistema las cosas no terminan, se
 ## traspapelan.
 const PACIENCIA_GATO := 3
 
+## Lo que cuesta una lata. Casi la mitad de lo que cuesta vivir un día, y por
+## eso es una decisión y no un botón: en una racha mala, darle de comer se nota
+## en lo que te queda.
+const PRECIO_COMIDA_GATO := 10
 
-static func nueva() -> Dictionary:
+## El alquiler introduce el mes sin convertirlo en un contador separado del día.
+## Se vence cada diez días y se paga manualmente en el trayecto (#83/#85).
+const DIAS_POR_MES := 10
+const PRECIO_ALQUILER := 700
+
+
+## [param raiz] es la semilla de la partida (#147) y [param vuelta] el número
+## de vida laboral. Juntas deciden lo que esta vuelta trae sorteado: la misma
+## semilla da siempre la misma primera vuelta, y la segunda no se parece a la
+## primera porque el índice cambia, no porque se haya vuelto a tirar.
+static func nueva(raiz: int = 0, vuelta: int = 1) -> Dictionary:
 	return {
 		"dia": 1,
+		# De dónde sale lo que se sortea en esta vida laboral. Viaja dentro de
+		# la jornada para que nada de aquí tenga que ir a preguntarle a la
+		# partida cada vez que quiere sortear algo.
+		"raiz": raiz,
+		"vuelta": vuelta,
 		"fase": "archivo",
 		"dinero": 120,
 		"cerrados_hoy": 0,
@@ -52,6 +71,8 @@ static func nueva() -> Dictionary:
 		# porque es tuyo y no del trabajo. Acaba siendo lo único cálido del
 		# registro permanente, al lado de las cartas que recuerdas.
 		"gato": {"presente": true, "dias_sin_comer": 0},
+		# Último vencimiento resuelto: pagado o registrado como impago.
+		"alquiler": {"ultimo_resuelto": 0, "pagados": 0, "impagos": 0},
 		# Lo leído hoy: es lo que alimenta el sueño de esta noche. Se vacía al
 		# despertar, porque un sueño es de su día.
 		"leido_hoy": [],
@@ -68,40 +89,66 @@ static func nueva() -> Dictionary:
 		# (#90), así que hace falta algo que corte: un sitio del que no se sale
 		# es un juego colgado.
 		"sueno_resto": 0.0,
+		# Referencia fija para el indicador: las salas pendientes se consumen,
+		# pero salir de una sala no hace que la noche vuelva a empezar (#163).
+		"sueno_total": 0.0,
 		# El mapa tal y como estaba al dormirse. Si la noche se acaba sin haber
 		# salido, se vuelve a él: **el mapa no crece esa noche**, que es un
 		# castigo que es exactamente lo que perdiste — no llegaste.
 		"mapa_anoche": [],
-		# Con quién te toca compartir planta esta vida laboral. Se sortea una
-		# vez y se guarda: los compañeros cambian cuando te reasignan, no
-		# cuando recargas la partida.
-		"plantilla": randi(),
+		# Con quién te toca compartir planta esta vida laboral. Ya no se sortea
+		# con el azar global: se DERIVA de la semilla y de la vuelta, así que
+		# los compañeros cambian cuando te reasignan y solo entonces — ni al
+		# recargar, ni al reinstalar, ni en otra máquina.
+		"plantilla": Azar.derivar_guardable(raiz, "companeros", [vuelta]),
 	}
 
 
 ## Rellena lo que le falte a una jornada guardada.
 ##
 ## Una partida escrita por una versión anterior no trae las claves que esa
-## versión no tenía —el mapa del sueño, el reloj de la noche—, y el juego se
-## las encuentra a cero o directamente no están. No es teórico: la primera
-## partida que entró en el sueño con el reloj nuevo despertó de golpe nada más
-## dormirse, porque su noche valía cero segundos.
-##
-## Se completa con lo que trae `nueva()` y NO se pisa lo que ya hay: esto
-## rellena huecos, no reinicia días.
-static func completar(jornada: Dictionary) -> Dictionary:
-	var molde := nueva()
+## versión no tenía —el mapa del sueño, el reloj de la noche—. Se completa
+## con `nueva()` sin pisar lo que ya estaba: esto no reinicia días ni relojes.
+static func completar(jornada: Dictionary, raiz: int = 0) -> Dictionary:
+	# Hay que distinguir un reloj ausente de uno agotado ANTES de completar
+	# el molde. Cargar cero segundos no debe conceder otra noche entera.
+	var sin_reloj := not jornada.has("sueno_resto")
+	var sin_total := not jornada.has("sueno_total")
+	var molde := nueva(raiz)
 	for clave in molde:
 		if not jornada.has(clave):
 			jornada[clave] = molde[clave]
-	# Y si se cargó dentro del sueño sin noche que gastar, se le da una: un
-	# sueño de cero segundos es despertarse en el mismo fotograma.
-	if jornada["fase"] == "sueño" and jornada["sueno_resto"] <= 0.0:
-		if jornada["sueno_escenas"].is_empty():
-			jornada["sueno_escenas"] = Sueno.noche(
-				jornada["dia"], jornada["leido_hoy"], jornada["mapa"])
-		jornada["sueno_resto"] = Sueno.segundos_de_noche(jornada["sueno_escenas"])
-		jornada["mapa_anoche"] = jornada["mapa"].duplicate()
+		elif typeof(molde[clave]) == TYPE_INT:
+			jornada[clave] = int(jornada[clave])
+	jornada["gato"]["dias_sin_comer"] = int(jornada["gato"].get("dias_sin_comer", 0))
+	for clave in ["ultimo_resuelto", "pagados", "impagos"]:
+		jornada["alquiler"][clave] = int(jornada["alquiler"].get(clave, 0))
+	# Una jornada guardada antes de que existiera la semilla (#147) trae un
+	# cero: se le pone la de la partida, y de ahí en adelante ya es
+	# reproducible. Lo que NO se toca es su plantilla — los compañeros de esa
+	# vuelta ya están puestos, y cambiarlos al actualizar el juego sería
+	# vaciarle la oficina a quien va por el día quince.
+	if int(jornada.get("raiz", 0)) == 0 and raiz != 0:
+		jornada["raiz"] = raiz
+	if jornada["fase"] == "sueño":
+		# Solo las partidas anteriores al reloj necesitan recibir tiempo.
+		if sin_reloj:
+			if jornada["sueno_escenas"].is_empty():
+				jornada["sueno_escenas"] = Sueno.noche(
+					jornada["dia"],
+					jornada["leido_hoy"],
+					jornada["mapa"],
+					int(jornada.get("raiz", 0))
+				)
+			jornada["sueno_resto"] = Sueno.segundos_de_noche(jornada["sueno_escenas"])
+			jornada["mapa_anoche"] = jornada["mapa"].duplicate()
+		if sin_total:
+			# El formato antiguo no conserva el itinerario completo. Se fija
+			# una referencia con lo que queda sin inventar el total original
+			# ni cambiar segundos, salas, semilla o mapa. Solo se hace una vez.
+			jornada["sueno_total"] = maxf(
+				jornada["sueno_resto"], Sueno.segundos_de_noche(jornada["sueno_escenas"])
+			)
 	return jornada
 
 
@@ -112,6 +159,19 @@ static func gastar_accion(jornada: Dictionary) -> bool:
 		return false
 	jornada["acciones"] -= 1
 	return true
+
+
+## Abrir un documento nuevo tiene una franquicia diaria: la primera lectura
+## nueva sale gratis. Releer nunca llega aquí desde el visor, pero se acepta de
+## forma idempotente para que el contrato siga siendo seguro desde otros sitios.
+static func gastar_lectura(jornada: Dictionary, folio: String) -> bool:
+	if jornada["fase"] != "archivo":
+		return false
+	if jornada["leido_hoy"].has(folio):
+		return true
+	if jornada["leido_hoy"].size() < DOCUMENTOS_GRATIS_POR_DIA:
+		return true
+	return gastar_accion(jornada)
 
 
 ## Si ya no queda nada que hacer hoy. Quien pinte la oficina lo usa para decir
@@ -162,6 +222,50 @@ static func alimentar_gato(jornada: Dictionary, precio: int) -> bool:
 	return true
 
 
+## Día de vencimiento del alquiler. El calendario sale solo del día, no del azar.
+static func alquiler_vencimiento(dia: int) -> int:
+	return maxi(DIAS_POR_MES, int(ceil(float(dia) / DIAS_POR_MES)) * DIAS_POR_MES)
+
+
+## Si el vencimiento actual ya se resolvió, no se vuelve a ofrecer ni cobrar.
+static func alquiler_pendiente(jornada: Dictionary) -> bool:
+	var vencimiento := alquiler_vencimiento(int(jornada.get("dia", 1)))
+	return int(jornada["alquiler"].get("ultimo_resuelto", 0)) < vencimiento
+
+
+## Pagar el alquiler en la fase de trayecto. El pago consume una acción y es
+## idempotente: después de resolver el vencimiento, repetirlo no cobra nada.
+static func pagar_alquiler(jornada: Dictionary) -> Dictionary:
+	if jornada.get("fase", "") != "trayecto" or not alquiler_pendiente(jornada):
+		return {}
+	var vencimiento := alquiler_vencimiento(int(jornada["dia"]))
+	if int(jornada["dia"]) != vencimiento or jornada["acciones"] <= 0:
+		return {}
+	if not gastar(jornada, PRECIO_ALQUILER):
+		return {}
+	jornada["acciones"] -= 1
+	jornada["alquiler"]["ultimo_resuelto"] = vencimiento
+	jornada["alquiler"]["pagados"] += 1
+	return {
+		"vencimiento": vencimiento,
+		"importe": PRECIO_ALQUILER,
+		"impago": false,
+		"dinero": jornada["dinero"],
+		"acciones": jornada["acciones"],
+	}
+
+
+## Cerrar el día de vencimiento sin pagar registra un único impago. No crea
+## deuda ni saldo negativo: la consecuencia de vivienda la decide #84.
+static func resolver_impago_alquiler(jornada: Dictionary) -> bool:
+	var vencimiento := alquiler_vencimiento(int(jornada["dia"]))
+	if int(jornada["dia"]) != vencimiento or not alquiler_pendiente(jornada):
+		return false
+	jornada["alquiler"]["ultimo_resuelto"] = vencimiento
+	jornada["alquiler"]["impagos"] += 1
+	return true
+
+
 ## Dormir: cierra el día, cobra la vida y decide qué queda por la mañana.
 ##
 ## Devuelve lo que hay que contar al despertar. El gato que se va no se anuncia
@@ -171,6 +275,8 @@ static func dormir(jornada: Dictionary) -> Dictionary:
 		return {}
 
 	jornada["dinero"] = maxi(0, jornada["dinero"] - COSTE_DIARIO)
+
+	var impago := resolver_impago_alquiler(jornada)
 
 	var gato: Dictionary = jornada["gato"]
 	var se_fue := false
@@ -182,10 +288,17 @@ static func dormir(jornada: Dictionary) -> Dictionary:
 
 	jornada["fase"] = "sueño"
 	jornada["sueno_escenas"] = Sueno.noche(
-		jornada["dia"], jornada["leido_hoy"], jornada["mapa"])
-	jornada["sueno_resto"] = Sueno.segundos_de_noche(jornada["sueno_escenas"])
+		jornada["dia"], jornada["leido_hoy"], jornada["mapa"], int(jornada.get("raiz", 0))
+	)
+	jornada["sueno_total"] = Sueno.segundos_de_noche(jornada["sueno_escenas"])
+	jornada["sueno_resto"] = jornada["sueno_total"]
 	jornada["mapa_anoche"] = jornada["mapa"].duplicate()
-	return {"coste": COSTE_DIARIO, "dinero": jornada["dinero"], "gato_se_fue": se_fue}
+	return {
+		"coste": COSTE_DIARIO,
+		"dinero": jornada["dinero"],
+		"gato_se_fue": se_fue,
+		"alquiler_impago": impago,
+	}
 
 
 ## Despertar: día nuevo, contadores a cero y el sueño de anoche olvidado.
@@ -201,6 +314,7 @@ static func despertar(jornada: Dictionary) -> int:
 	# puede dejar media noche esperando a la siguiente.
 	jornada["sueno_escenas"] = []
 	jornada["sueno_resto"] = 0.0
+	jornada["sueno_total"] = 0.0
 	jornada["mapa_anoche"] = []
 	return jornada["dia"]
 
@@ -221,7 +335,7 @@ static func gastar_sueno(jornada: Dictionary, segundos: float) -> bool:
 ## cifras dentro de un sueño es una interfaz de videojuego dentro de la parte
 ## del juego que menos tiene que parecerlo.
 static func noche_restante(jornada: Dictionary) -> float:
-	var total: float = Sueno.segundos_de_noche(jornada["sueno_escenas"])
+	var total: float = jornada.get("sueno_total", 0.0)
 	if total <= 0.0:
 		return 0.0
 	return clampf(jornada["sueno_resto"] / total, 0.0, 1.0)
@@ -266,7 +380,9 @@ static func siguiente_fase(fase: String) -> String:
 ## la que más dice de cómo llevaste la vuelta anterior.
 static func reiniciar_vuelta(jornada: Dictionary) -> Dictionary:
 	var gato: Dictionary = jornada["gato"]
-	var nueva_vida := nueva()
+	# La raíz es de la PARTIDA y sobrevive al despido; el contador de vuelta
+	# avanza, que es lo que hace que la planta 4 se llene de otra gente.
+	var nueva_vida := nueva(int(jornada.get("raiz", 0)), int(jornada.get("vuelta", 1)) + 1)
 	nueva_vida["gato"] = gato
 	for clave in nueva_vida:
 		jornada[clave] = nueva_vida[clave]

@@ -1,0 +1,540 @@
+{
+  "tarot": [
+    {
+      "recogida": true,
+      "nombre": "El Loco",
+      "requisito": "",
+      "descripcion": "Empezó sin saber en qué expediente se estaba metiendo.",
+      "id": "el-loco",
+      "gastada": false
+    },
+    {
+      "recogida": false,
+      "nombre": "El Mago",
+      "requisito": "Descubra su primera pista.",
+      "descripcion": "Convierte un formulario en otro con solo cambiar el membrete.",
+      "id": "el-mago",
+      "gastada": false
+    },
+    {
+      "recogida": false,
+      "nombre": "La Sacerdotisa",
+      "requisito": "Hay algo oculto en «El expediente del empleado #427».",
+      "descripcion": "Sabe lo que hay en el cajón cerrado y no lo dice.",
+      "id": "la-sacerdotisa",
+      "gastada": false
+    },
+    {
+      "recogida": false,
+      "nombre": "La Emperatriz",
+      "requisito": "Hay algo oculto en «El expediente de la herencia Karamázov».",
+      "descripcion": "Firma en nombre de alguien que ya no trabaja aquí.",
+      "id": "la-emperatriz",
+      "gastada": false
+    },
+    {
+      "recogida": false,
+      "nombre": "El Emperador",
+      "requisito": "Consiga acceso administrativo.",
+      "descripcion": "Su despacho existe aunque nadie lo haya visto abierto.",
+      "id": "el-emperador",
+      "gastada": false
+    },
+    {
+      "recogida": false,
+      "nombre": "El Hierofante",
+      "requisito": "Cierre un expediente con una acusación.",
+      "descripcion": "Dicta el procedimiento correcto, que cambia según el día.",
+      "id": "el-hierofante",
+      "gastada": false
+    },
+    {
+      "recogida": false,
+      "nombre": "Los Enamorados",
+      "requisito": "Complete la investigación de un expediente.",
+      "descripcion": "Dos documentos que no deberían ir juntos, van juntos.",
+      "id": "los-enamorados",
+      "gastada": false
+    },
+    {
+      "recogida": false,
+      "nombre": "El Carro",
+      "requisito": "Hay algo oculto en «El expediente MEMO-1978-014 (y 1993, y 2007)».",
+      "descripcion": "Avanza aunque nadie sepa hacia dónde apunta el trámite.",
+      "id": "el-carro",
+      "gastada": false
+    },
+    {
+      "recogida": false,
+      "nombre": "La Fuerza",
+      "requisito": "Juegue en dificultad difícil.",
+      "descripcion": "No necesita imponerse: solo aguanta más rondas de las que debería.",
+      "id": "la-fuerza",
+      "gastada": false
+    },
+    {
+      "recogida": false,
+      "nombre": "El Ermitaño",
+      "requisito": "Pierda una vida por acusar sin fundamento.",
+      "descripcion": "Se quedó solo con el expediente después de que lo señalaran.",
+      "id": "el-ermitanio",
+      "gastada": false
+    },
+    {
+      "recogida": false,
+      "nombre": "La Rueda de la Fortuna",
+      "requisito": "Hay algo oculto en «El trámite de la silla 4-B».",
+      "descripcion": "El trámite gira y siempre cae del lado que no esperaba.",
+      "id": "la-rueda",
+      "gastada": false
+    },
+    {
+      "recogida": false,
+      "nombre": "La Justicia",
+      "requisito": "Hay algo oculto en «El cierre de caja de 1999».",
+      "descripcion": "Pesa las pruebas después de haber decidido ya la sentencia.",
+      "id": "la-justicia",
+      "gastada": false
+    },
+    {
+      "recogida": false,
+      "nombre": "El Colgado",
+      "requisito": "Gane un enfrentamiento.",
+      "descripcion": "Cuelga de una decisión que todavía no ha terminado de tomar.",
+      "id": "el-colgado",
+      "gastada": false
+    },
+    {
+      "recogida": false,
+      "nombre": "La Muerte",
+      "requisito": "Sea reasignado por acumular demasiados fallos.",
+      "descripcion": "No es el final. Aquí nunca lo es.",
+      "id": "la-muerte",
+      "gastada": false
+    },
+    {
+      "recogida": false,
+      "nombre": "La Templanza",
+      "requisito": "Canjee una carta por una vida.",
+      "descripcion": "Cambia una certeza por otra cosa que todavía no sabe si necesita.",
+      "id": "la-templanza",
+      "gastada": false
+    },
+    {
+      "recogida": false,
+      "nombre": "El Diablo",
+      "requisito": "Tropiece con una verificación falsa.",
+      "descripcion": "Le hizo marcar una casilla que no significaba nada. Y usted la marcó.",
+      "id": "el-diablo",
+      "gastada": false
+    },
+    {
+      "recogida": false,
+      "nombre": "La Torre",
+      "requisito": "Deje pasar demasiado tiempo sin hacer nada.",
+      "descripcion": "Todo lo que creía firme se cae de golpe, y sigue ahí de pie de todos modos.",
+      "id": "la-torre",
+      "gastada": false
+    },
+    {
+      "recogida": false,
+      "nombre": "La Estrella",
+      "requisito": "Descubra al menos veinte pistas.",
+      "descripcion": "Una luz pequeña, pero constante, entre tanto expediente sin cerrar.",
+      "id": "la-estrella",
+      "gastada": false
+    },
+    {
+      "recogida": false,
+      "nombre": "La Luna",
+      "requisito": "Hay algo oculto en «Contrato de fin de año con Carcosa Servicios Escénicos».",
+      "descripcion": "Ilumina lo mismo de siempre, pero ahora se ve todo lo que había alrededor.",
+      "id": "la-luna",
+      "gastada": false
+    },
+    {
+      "recogida": false,
+      "nombre": "El Sol",
+      "requisito": "Hay algo oculto en un expediente confidencial. Necesitará acceso administrativo.",
+      "descripcion": "El único documento que no necesita ninguna firma para ser verdad.",
+      "id": "el-sol",
+      "gastada": false
+    },
+    {
+      "recogida": false,
+      "nombre": "El Juicio",
+      "requisito": "Hay algo oculto en «Traspaso de personal: expediente de E. Montalvo».",
+      "descripcion": "Ha señalado a alguien en cada expediente. Ahora que decida el sistema.",
+      "id": "el-juicio",
+      "gastada": false
+    },
+    {
+      "recogida": false,
+      "nombre": "El Mundo",
+      "requisito": "Reúna el resto de cartas sin gastar ninguna.",
+      "descripcion": "Las veintiuna cartas anteriores, cerrando el círculo.",
+      "id": "el-mundo",
+      "gastada": false
+    }
+  ],
+  "logros": [
+    {
+      "desbloqueado": false,
+      "titulo": "Primer mirada",
+      "descripcion": "Abriste el menú de verdad.",
+      "por_vuelta": false,
+      "id": "primer-mirada"
+    },
+    {
+      "desbloqueado": false,
+      "titulo": "Sospecha",
+      "descripcion": "Te topaste con una verificación falsa.",
+      "por_vuelta": false,
+      "id": "sospecha"
+    },
+    {
+      "desbloqueado": false,
+      "titulo": "Primer expediente",
+      "descripcion": "Cerraste un caso con una acusación.",
+      "por_vuelta": true,
+      "id": "primer-expediente"
+    },
+    {
+      "desbloqueado": false,
+      "titulo": "El archivo completo",
+      "descripcion": "Resolviste todos los expedientes a tu cargo.",
+      "por_vuelta": true,
+      "id": "archivo-completo"
+    },
+    {
+      "desbloqueado": false,
+      "titulo": "Acceso privilegiado",
+      "descripcion": "Alguien le franqueó el paso a un nivel que no debería existir.",
+      "por_vuelta": false,
+      "id": "acceso-privilegiado"
+    },
+    {
+      "desbloqueado": false,
+      "titulo": "Reasignado",
+      "descripcion": "El sistema decidió que ya no le necesitaba.",
+      "por_vuelta": true,
+      "id": "reasignado"
+    },
+    {
+      "desbloqueado": false,
+      "titulo": "Las cuatro cartas",
+      "descripcion": "QUERY LENGTH LIMIT EXCEEDED. MAX ALLOWED QUERY : 500 CHARS",
+      "por_vuelta": false,
+      "id": "final-verdadero"
+    },
+    {
+      "desbloqueado": false,
+      "titulo": "Constancia registrada",
+      "descripcion": "Atendió tres reclamaciones seguidas sin perder la compostura.",
+      "por_vuelta": false,
+      "id": "ventanilla-tres"
+    },
+    {
+      "desbloqueado": false,
+      "titulo": "Referencias cruzadas",
+      "descripcion": "Encontró todas las conclusiones que exigen combinar documentos.",
+      "por_vuelta": true,
+      "id": "referencias-cruzadas"
+    },
+    {
+      "desbloqueado": false,
+      "titulo": "Leído de cabo a rabo",
+      "descripcion": "Descubrió hasta la última pista del archivo.",
+      "por_vuelta": true,
+      "id": "lectura-integra"
+    },
+    {
+      "desbloqueado": false,
+      "titulo": "Hoja de servicio sin tacha",
+      "descripcion": "Cerró todos los expedientes a su cargo sin perder una sola vida.",
+      "por_vuelta": true,
+      "id": "hoja-sin-tacha"
+    },
+    {
+      "desbloqueado": false,
+      "titulo": "Disciplina de partido",
+      "descripcion": "Respondió las ocho historias con la misma ideología, pasara lo que pasara.",
+      "por_vuelta": true,
+      "id": "disciplina-de-partido"
+    },
+    {
+      "desbloqueado": false,
+      "titulo": "Instinto de archivo",
+      "descripcion": "Las ocho decisiones fueron la útil para el expediente. Ninguna por convicción.",
+      "por_vuelta": true,
+      "id": "instinto-de-archivo"
+    },
+    {
+      "desbloqueado": false,
+      "titulo": "QUERY LENGTH LIMIT EXCEEDED. MAX ALLOWED QUERY : 500 CHARS",
+      "descripcion": "Las ocho decisiones sembraron confusión. El archivo tomó nota.",
+      "por_vuelta": true,
+      "id": "metodo-del-descarte"
+    },
+    {
+      "desbloqueado": false,
+      "titulo": "Papeleta depositada",
+      "descripcion": "Llegó a un final político, fuera el que fuera.",
+      "por_vuelta": true,
+      "id": "papeleta-depositada"
+    },
+    {
+      "desbloqueado": false,
+      "titulo": "Último recurso ejercido",
+      "descripcion": "Canjeó una carta por una vida. Consta en acta.",
+      "por_vuelta": true,
+      "id": "ultimo-recurso"
+    },
+    {
+      "desbloqueado": false,
+      "titulo": "Funcionario del mes",
+      "descripcion": "Cinco reclamaciones seguidas atendidas en la Ventanilla.",
+      "por_vuelta": false,
+      "id": "funcionario-del-mes"
+    },
+    {
+      "desbloqueado": false,
+      "titulo": "Ventanilla inagotable",
+      "descripcion": "Diez reclamaciones seguidas. El mostrador ya tiene su forma.",
+      "por_vuelta": false,
+      "id": "ventanilla-inagotable"
+    },
+    {
+      "desbloqueado": false,
+      "titulo": "Careo a puerta cerrada",
+      "descripcion": "Ganó un enfrentamiento que oficialmente nunca tuvo lugar.",
+      "por_vuelta": false,
+      "id": "careo-a-puerta-cerrada"
+    },
+    {
+      "desbloqueado": false,
+      "titulo": "La garganta abierta",
+      "descripcion": "Se quedó mirando el sistema hasta que el sistema le devolvió la mirada.",
+      "por_vuelta": false,
+      "id": "la-garganta-abierta"
+    }
+  ],
+  "historias": {
+    "la-emperatriz": {
+      "secuelaConfusion": "Un supuesto testamento ológrafo circula por Dirección. Conseguir una copia resolvería el reparto.",
+      "texto": "La herencia Karamázov lleva generaciones sin repartirse: cada heredero firma en nombre de alguien que ya no puede firmar. Nadie recuerda quién empezó. Alguien, ahora, tiene que decidir cómo se reparte lo que ya nadie sabe de quién era.",
+      "opciones": [
+        {
+          "etiqueta": "QUERY LENGTH LIMIT EXCEEDED. MAX ALLOWED QUERY : 500 CHARS",
+          "texto": "Repartirla a partes iguales entre todos los que alguna vez trabajaron en el expediente, herederos o no.",
+          "eje": "comunismo"
+        },
+        {
+          "etiqueta": "Centrismo radical del término medio",
+          "texto": "Congelarla indefinidamente hasta que los herederos 'lleguen a un consenso', sin fijar ningún mecanismo para lograrlo.",
+          "eje": "centrista"
+        },
+        {
+          "etiqueta": "Socialdemocracia nórdica de catálogo IKEA",
+          "texto": "Repartirla según necesidad certificada, con una comisión de herederos que revise cada solicitud.",
+          "eje": "socialdemocrata"
+        },
+        {
+          "etiqueta": "Neoliberalismo disruptivo de startup unicornio",
+          "texto": "Sacarla a subasta entre los propios herederos. Gana quien más pueda pagar por lo que ya era suyo.",
+          "eje": "neoliberal"
+        }
+      ],
+      "secuelaUtil": "El reparto exige acreditar titularidades, y aflora un cuarto apellido que no está entre los reclamantes. Búsquelo en los papeles de personal, no en los de familia."
+    },
+    "la-justicia": {
+      "secuelaConfusion": "Fuentes de la propia mesa aseguran que el descuadre nació en nómina, no en caja. Revisar las nóminas de 1998 parece el siguiente paso obvio.",
+      "texto": "El cierre de caja de 1999 nunca cuadró. Faltan 47 pesetas que nadie reclamó y sobran 47 pesetas que nadie explicó. Alguien, en algún momento, decidió que ambas cosas eran la misma cosa. ¿Qué hacer con esa discrepancia que lleva veintisiete años cuadrando sola?",
+      "opciones": [
+        {
+          "etiqueta": "Comunismo de lujo automatizado",
+          "texto": "Abolir la caja. Que las 47 pesetas se repartan entre todos los empleados a partes iguales, incluidos los que ya no trabajan aquí.",
+          "eje": "comunismo"
+        },
+        {
+          "etiqueta": "Centrismo radical del término medio",
+          "texto": "Formar una mesa de diálogo entre las 47 pesetas que faltan y las que sobran, sin comprometerse a ningún resultado antes de la próxima legislatura contable.",
+          "eje": "centrista"
+        },
+        {
+          "etiqueta": "Socialdemocracia nórdica de catálogo IKEA",
+          "texto": "Crear una comisión de seguimiento del desajuste, con informe anual y compromiso de revisión en cuatro años.",
+          "eje": "socialdemocrata"
+        },
+        {
+          "etiqueta": "Neoliberalismo disruptivo de startup unicornio",
+          "texto": "QUERY LENGTH LIMIT EXCEEDED. MAX ALLOWED QUERY : 500 CHARS",
+          "eje": "neoliberal"
+        }
+      ],
+      "secuelaUtil": "La decisión remueve el archivo: la factura F-1999-00231 y el acta de Contraloría se registraron con cinco minutos de diferencia. Puestas una junto a la otra, quizá cuadren algo más que la caja."
+    },
+    "el-carro": {
+      "secuelaConfusion": "Hay quien jura que existe una cuarta copia, de 1963, en el registro de entrada. Encontrarla lo explicaría todo.",
+      "texto": "El memorando 1978-014 se ha vuelto a presentar, idéntico, en 1993 y en 2007. Nadie sabe quién lo redactó la primera vez ni por qué vuelve. Alguien tiene que decidir si se aprueba otra vez, se archiva para siempre, o se deja avanzar sin saber hacia dónde.",
+      "opciones": [
+        {
+          "etiqueta": "Comunismo de lujo automatizado",
+          "texto": "Aprobarlo de una vez por todas y liberar el recurso que llevaba pidiendo desde 1978, sin más trámite.",
+          "eje": "comunismo"
+        },
+        {
+          "etiqueta": "Centrismo radical del término medio",
+          "texto": "Reenviarlo a estudio, otra vez, sin fecha límite, para que el ciclo se resuelva solo con el tiempo.",
+          "eje": "centrista"
+        },
+        {
+          "etiqueta": "Socialdemocracia nórdica de catálogo IKEA",
+          "texto": "Aprobarlo parcialmente, con revisión programada para dentro de otros catorce años, por si acaso.",
+          "eje": "socialdemocrata"
+        },
+        {
+          "etiqueta": "Neoliberalismo disruptivo de startup unicornio",
+          "texto": "QUERY LENGTH LIMIT EXCEEDED. MAX ALLOWED QUERY : 500 CHARS",
+          "eje": "neoliberal"
+        }
+      ],
+      "secuelaUtil": "El trámite obliga a cotejar las tres copias: comparten hasta las erratas, y las fechas de archivo dibujan un patrón de quince años. No es coincidencia, es instrucción."
+    },
+    "la-sacerdotisa": {
+      "secuelaConfusion": "Alguien recuerda que #427 firmaba como 'V.' en los partes de limpieza. Los partes de limpieza no se conservan, pero puede intentarlo.",
+      "texto": "El empleado #427 nunca tuvo nombre en ningún documento, solo número. Alguien, en algún cajón, sabe quién fue. No lo dice. Alguien más tiene que decidir si merece la pena preguntarlo.",
+      "opciones": [
+        {
+          "etiqueta": "Comunismo de lujo automatizado",
+          "texto": "Devolverle el nombre, borrar el número de todos los archivos y hacerlo público como acto reparador.",
+          "eje": "comunismo"
+        },
+        {
+          "etiqueta": "Centrismo radical del término medio",
+          "texto": "Dejar el expediente como está, ni número ni nombre, 'por respeto a todas las partes', sin especificar cuáles.",
+          "eje": "centrista"
+        },
+        {
+          "etiqueta": "Socialdemocracia nórdica de catálogo IKEA",
+          "texto": "Abrir una investigación oficial, con plazo, presupuesto y un informe final que probablemente nadie lea.",
+          "eje": "QUERY LENGTH LIMIT EXCEEDED. MAX ALLOWED QUERY : 500 CHARS"
+        },
+        {
+          "etiqueta": "Neoliberalismo disruptivo de startup unicornio",
+          "texto": "Vender el expediente a un interesado externo. La identidad, como todo, tiene un precio de mercado.",
+          "eje": "neoliberal"
+        }
+      ],
+      "secuelaUtil": "La consulta deja un rastro: el número 427 aparece una vez más en el archivo, lejos de personal, en un registro de transmisiones. Lo que se transmitió no era una vacante."
+    },
+    "el-juicio": {
+      "secuelaConfusion": "En Dirección insisten en que Montalvo pidió el traslado él mismo, de palabra. Bastaría con encontrar a quien se lo oyó decir.",
+      "texto": "A E. Montalvo lo trasladan de departamento por tercera vez este año, aunque nadie recuerda haberlo autorizado ni haberlo pedido. El expediente dice que el traspaso 'responde a criterios objetivos'. Nadie ha visto esos criterios. Alguien tiene que decidir qué se hace con Montalvo, otra vez.",
+      "opciones": [
+        {
+          "etiqueta": "QUERY LENGTH LIMIT EXCEEDED. MAX ALLOWED QUERY : 500 CHARS",
+          "texto": "Abolir los departamentos. Montalvo trabaja donde quiera, cuando quiera, o no trabaja, y el departamento se adapta a Montalvo.",
+          "eje": "comunismo"
+        },
+        {
+          "etiqueta": "Centrismo radical del término medio",
+          "texto": "Trasladarlo a un departamento intermedio, a medio camino entre el anterior y el siguiente, hasta nuevo aviso.",
+          "eje": "centrista"
+        },
+        {
+          "etiqueta": "Socialdemocracia nórdica de catálogo IKEA",
+          "texto": "Garantizar estabilidad mediante un contrato de traspasos regulados, con derecho a apelar cada reasignación.",
+          "eje": "socialdemocrata"
+        },
+        {
+          "etiqueta": "Neoliberalismo disruptivo de startup unicornio",
+          "texto": "Que Montalvo compita por su propio puesto cada trimestre. La motivación, dicen, mejora con la incertidumbre.",
+          "eje": "neoliberal"
+        }
+      ],
+      "secuelaUtil": "Al revisar el traslado, alguien repara en la copia sellada del memorándum: el destino no es un departamento, es un piso. Léala otra vez, despacio."
+    },
+    "la-luna": {
+      "secuelaConfusion": "El elenco, dicen, sigue cobrando nóminas. Buscar los recibos de los actores parece la vía rápida.",
+      "texto": "El contrato con Carcosa Servicios Escénicos incluye una cláusula que nadie ha leído entera: dice que la función 'continuará representándose mientras exista un público, aunque el público no lo sepa'. Nadie quiere preguntar qué pasa si se cancela.",
+      "opciones": [
+        {
+          "etiqueta": "Comunismo de lujo automatizado",
+          "texto": "Cancelar el contrato y declarar la función patrimonio común: que la represente quien quiera, gratis, para siempre.",
+          "eje": "comunismo"
+        },
+        {
+          "etiqueta": "Centrismo radical del término medio",
+          "texto": "Renovar el contrato 'con reservas', sin especificar cuáles, para poder invocarlas después si hace falta.",
+          "eje": "centrista"
+        },
+        {
+          "etiqueta": "Socialdemocracia nórdica de catálogo IKEA",
+          "texto": "Renovar con una cláusula de revisión social que garantice condiciones dignas al elenco, sea quien sea el elenco.",
+          "eje": "QUERY LENGTH LIMIT EXCEEDED. MAX ALLOWED QUERY : 500 CHARS"
+        },
+        {
+          "etiqueta": "Neoliberalismo disruptivo de startup unicornio",
+          "texto": "Renovar y ampliar. Si el público no sabe que es público, es un mercado sin competencia. Hay que explotarlo.",
+          "eje": "neoliberal"
+        }
+      ],
+      "secuelaUtil": "La gestión saca a la luz un concepto facturado en negativo: un recargo cobrado por NO representar algo. Lo importante de ese contrato está en lo que no se hizo."
+    },
+    "el-sol": {
+      "secuelaConfusion": "La versión oficial bastaría: la diferencia con la original, aseguran, es solo tipográfica.",
+      "texto": "El acta original de constitución de la empresa nunca circuló. Dice cosas que la versión oficial no dice. Es, quizás, el único documento de todo el archivo que no necesita ninguna firma para ser verdad. Alguien tiene que decidir si se hace pública.",
+      "opciones": [
+        {
+          "etiqueta": "Comunismo de lujo automatizado",
+          "texto": "Publicarla entera, sin editar, y disolver la empresa en una asamblea abierta a cualquiera que quisiera entrar.",
+          "eje": "comunismo"
+        },
+        {
+          "etiqueta": "Centrismo radical del término medio",
+          "texto": "Publicar un resumen, sin las partes 'susceptibles de generar controversia', que resultan ser casi todas.",
+          "eje": "centrista"
+        },
+        {
+          "etiqueta": "Socialdemocracia nórdica de catálogo IKEA",
+          "texto": "Publicarla con un informe de acompañamiento que explique el contexto y proponga reformas graduales.",
+          "eje": "socialdemocrata"
+        },
+        {
+          "etiqueta": "Neoliberalismo disruptivo de startup unicornio",
+          "texto": "Vender los derechos a quien mejor la sepa monetizar. La verdad, bien gestionada, es un activo.",
+          "eje": "neoliberal"
+        }
+      ],
+      "secuelaUtil": "El acta menciona una lista de firmantes autorizados desde 1958. Hay un nombre en esa lista que usted conoce mejor que ninguno."
+    },
+    "la-rueda": {
+      "secuelaConfusion": "Se rumorea que la silla llegó a entregarse y que Salcido la rechazó por escrito. Encontrar ese escrito lo cerraría todo.",
+      "texto": "La silla 4-B lleva seis años esperando una firma que autorice su propia existencia. Cada vez que el trámite avanza una casilla, aparece una casilla nueva delante. Alguien, en algún despacho, puede detener la rueda. O puede que solo la esté empujando.",
+      "opciones": [
+        {
+          "etiqueta": "Comunismo de lujo automatizado",
+          "texto": "Eliminar el trámite. La silla 4-B pasa a pertenecer a quien la necesite, sin formulario, sin firma, sin 4-B.",
+          "eje": "comunismo"
+        },
+        {
+          "etiqueta": "Centrismo radical del término medio",
+          "texto": "Rebautizar el trámite como 'silla 4-B (en revisión)' y dejarlo así indefinidamente, para no sentar precedente en ningún sentido.",
+          "eje": "centrista"
+        },
+        {
+          "etiqueta": "Socialdemocracia nórdica de catálogo IKEA",
+          "texto": "Aprobar la silla con carácter provisional, sujeta a una evaluación de impacto silla-trabajador cada dos años.",
+          "eje": "socialdemocrata"
+        },
+        {
+          "etiqueta": "Neoliberalismo disruptivo de startup unicornio",
+          "texto": "Externalizar la silla 4-B a una empresa de mobiliario que cobre por uso. Quien necesite sentarse, que puje.",
+          "eje": "neoliberal"
+        }
+      ],
+      "secuelaUtil": "El movimiento obliga a fechar los papeles: la Circular 12 es de 1988, y hay un oficio de 1987 sobre cierta jefatura. Dos documentos que piden ser leídos juntos."
+    }
+  }
+}

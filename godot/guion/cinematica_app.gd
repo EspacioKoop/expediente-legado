@@ -3,7 +3,7 @@
 ## Es la respuesta a que el medio lo elija cada momento: si cada cinemática
 ## trajera su propio reproductor, diez momentos darían diez ritmos, diez
 ## rótulos y diez formas de saltar. Aquí sabe pintar planos 3D (mueve una
-## cámara por el mundo que le den) y planos 2D (mueve figuras declaradas como
+## cámara por el mundo de la escena) y planos 2D (mueve figuras declaradas como
 ## rectángulos sobre un fondo), y aporta lo común: el rótulo, la voz, el salto
 ## y el acortado por repetición.
 ##
@@ -20,9 +20,11 @@ signal terminada
 ## desincronizan las cosas.
 signal plano_entrado(indice: int, plano: Dictionary)
 
-## El mundo 3D sobre el que mover la cámara. Si es nulo, los planos 3D no
-## tienen dónde ocurrir y se saltan: una cinemática 3D sin escena no es un
-## fallo del reproductor, es una cinemática mal pedida.
+## Override opcional del mundo 3D. Los llamantes antiguos pueden seguir
+## pasándolo, pero no hace falta: como este reproductor es Node3D, si está
+## montado dentro de la escena jugable ya comparte su World3D y la cámara puede
+## rodar ahí directamente. Así una cinemática no necesita conocer `_mundo` ni
+## ninguna propiedad privada de quien la instancia.
 var mundo: Node3D = null
 
 var _rodaje: Array = []
@@ -31,6 +33,7 @@ var _transcurrido := 0.0
 var _reproduciendo := false
 var _id := ""
 var _estado: Dictionary = {}
+var _reduccion_movimiento := false
 
 var _camara: Camera3D
 var _lienzo: Control
@@ -54,6 +57,7 @@ func reproducir(rodaje: Array, id: String = "", estado: Dictionary = {}) -> void
 	_id = id
 	_estado = estado
 	_rodaje = rodaje
+	_reduccion_movimiento = bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false))
 	_plano = -1
 	_reproduciendo = true
 	visible = true
@@ -85,9 +89,12 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(evento: InputEvent) -> void:
-	# Saltable siempre, con lo que sea. Una cinemática que no se puede saltar es
-	# lo que hace que la segunda partida se juegue mirando a otro lado.
-	if _reproduciendo and evento.is_pressed():
+	# El salto debe ser deliberado. Las transiciones suelen empezar mientras el
+	# jugador aún mantiene movimiento; aceptar cualquier `pressed` hacía que un
+	# repeat de esa tecla cerrase la cinemática en su primer fotograma (#280).
+	if not _reproduciendo:
+		return
+	if evento.is_action_pressed("ui_accept") or evento.is_action_pressed("ui_cancel"):
 		saltar()
 
 
@@ -103,8 +110,7 @@ func _siguiente() -> void:
 	_voz.text = String(plano.get("voz", ""))
 	# Un rótulo largo es una frase y quiere cuerpo menor; uno corto es un
 	# nombre y quiere presencia.
-	_rotulo.add_theme_font_size_override(
-		"font_size", 34 if _rotulo.text.length() > 28 else 48)
+	_rotulo.add_theme_font_size_override("font_size", 34 if _rotulo.text.length() > 28 else 48)
 
 	plano_entrado.emit(_plano, plano)
 
@@ -112,7 +118,7 @@ func _siguiente() -> void:
 	_fondo.visible = es_2d
 	_figuras.visible = es_2d
 	if _camara != null:
-		_camara.current = not es_2d and mundo != null
+		_camara.current = not es_2d and _tiene_mundo_3d()
 
 
 func _terminar() -> void:
@@ -128,13 +134,19 @@ func _terminar() -> void:
 	terminada.emit()
 
 
+func _tiene_mundo_3d() -> bool:
+	return mundo != null or (is_inside_tree() and get_world_3d() != null)
+
+
 func _mover_camara(plano: Dictionary, avance: float) -> void:
-	if _camara == null or mundo == null:
+	if _camara == null or not _tiene_mundo_3d():
 		return
 	var destino: Vector3 = plano["camara"]
-	# Se acerca despacio durante el plano. Uno quieto se lee como una imagen;
-	# uno que avanza se lee como alguien mirando.
-	var acercamiento: Vector3 = destino.normalized() * -0.25 * avance
+	# Con reducción de movimiento se conserva el plano y su duración, pero la
+	# cámara queda fija en la posición declarada. Sin ella mantiene el avance
+	# suave que diferencia una mirada cinematográfica de una captura estática.
+	var factor_movimiento := 0.0 if _reduccion_movimiento else avance
+	var acercamiento: Vector3 = destino.normalized() * -0.25 * factor_movimiento
 	_camara.global_position = destino + acercamiento
 	_camara.look_at(plano["mira"], Vector3.UP)
 
@@ -153,17 +165,21 @@ func _dibujar_figuras() -> void:
 	var avance: float = clampf(_transcurrido / duracion, 0.0, 1.0)
 	var desde: Vector2 = plano.get("desde", Vector2.ZERO)
 	var hasta: Vector2 = plano.get("hasta", desde)
-	var deriva: Vector2 = desde.lerp(hasta, avance)
+	# La alternativa accesible no elimina la escena: presenta inmediatamente la
+	# figura en su pose final y conserva rótulo, voz, duración y skip.
+	var factor_movimiento := 1.0 if _reduccion_movimiento else avance
+	var deriva: Vector2 = desde.lerp(hasta, factor_movimiento)
 	var centro := _lienzo.size / 2.0
 
 	for pieza in plano["figura"]:
 		var rect: Rect2 = pieza["rect"]
 		_figuras.draw_rect(
-			Rect2(centro + rect.position + deriva, rect.size),
-			pieza.get("color", EstiloSiga.BLANCO))
+			Rect2(centro + rect.position + deriva, rect.size), pieza.get("color", EstiloSiga.BLANCO)
+		)
 
 
 # --- Cajas ------------------------------------------------------------------
+
 
 func _montar() -> void:
 	_camara = Camera3D.new()

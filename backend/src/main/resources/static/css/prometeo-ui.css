@@ -783,6 +783,78 @@
     image-rendering: pixelated;
 }
 
+/* La miniatura es un botón: al pulsarla se abre el visor ampliado. */
+.prometeo-tarot-ampliar {
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+    flex-shrink: 0;
+    border-radius: 4px;
+    line-height: 0;
+}
+
+.prometeo-tarot-ampliar:focus-visible {
+    outline: 2px solid #b79fe0;
+    outline-offset: 2px;
+}
+
+/* Visor ampliado de una carta: overlay + arte grande y nítido. */
+.prometeo-tarot-visor {
+    position: fixed;
+    inset: 0;
+    /* Por debajo de la historia de la carta (2150): si la historia se abre
+       con el visor delante, debe verse encima y no quedar tapada. */
+    z-index: 2140;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgba(10, 8, 16, 0.9);
+}
+
+.prometeo-tarot-visor-card {
+    width: min(94vw, 420px);
+    max-height: 92vh;
+    overflow-y: auto;
+    padding: 1.15rem;
+    border-radius: 12px;
+    background: #17131f;
+    color: #ece6f5;
+    border: 1px solid #5b4a7a;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    text-align: center;
+}
+
+.prometeo-tarot-visor-arte {
+    display: flex;
+    justify-content: center;
+    margin: 0 auto 0.9rem;
+}
+
+.prometeo-tarot-visor-arte .prometeo-tarot-pixelart {
+    width: min(70vw, 240px);
+    height: auto;
+    aspect-ratio: 4 / 5;
+    border-radius: 8px;
+}
+
+.prometeo-tarot-visor-card h3 {
+    margin: 0.6rem 0 0.5rem;
+    font-size: 1.15rem;
+}
+
+.prometeo-tarot-visor-desc,
+.prometeo-tarot-visor-card p {
+    margin: 0 0 1rem;
+    line-height: 1.5;
+    color: #d9d0ea;
+}
+
+/* Carta vista en partidas anteriores pero no poseída ahora: arte en gris. */
+.prometeo-tarot-visor-arte.is-ghost .prometeo-tarot-pixelart {
+    filter: grayscale(1) opacity(0.65);
+}
+
 .prometeo-tarot-card {
     align-items: flex-start;
 }

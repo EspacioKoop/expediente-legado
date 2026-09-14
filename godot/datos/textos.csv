@@ -21,6 +21,18 @@ CAREO_SIN_CARGO,Cargo no consta en el expediente
 CAREO_SIN_FOLIO,SIN NÚMERO
 CAREO_VEREDICTO_JUGADOR,cede un punto
 CAREO_VEREDICTO_RIVAL,se le impone
+CASA_BORRADO,Expediente personal borrado. No consta que haya estado usted aquí.
+CASA_BORRAR,Empezar de cero
+CASA_BORRAR_SEGURO,"¿Seguro? Se pierde TODO: cartas, logros y rachas"
+CASO_1_TITULO,El cierre de caja de 1999
+CASO_2_TITULO,El trámite de la silla 4-B
+CASO_3_TITULO,Traspaso de personal: expediente de E. Montalvo
+CASO_4_TITULO,Contrato de fin de año con Carcosa Servicios Escénicos
+CASO_5_TITULO,"El expediente MEMO-1978-014 (y 1993, y 2007)"
+CASO_6_TITULO,Acta constitutiva de la empresa (versión no circulada)
+CASO_7_TITULO,El expediente de la herencia Karamázov
+CASO_8_TITULO,El expediente del empleado #427
+CASO_9_TITULO,El funcionario que dejó de tramitar
 COMBATE_CRONICA,Usted: %s   ·   %s: %s   —   %s
 COMBATE_INSISTENCIA,Insistencia
 COMBATE_OBJECION,Objeción
@@ -96,12 +108,26 @@ CUNADO_VICTORIA_3,"Yo lo habría cerrado el martes, pero oye, cada uno."
 DIA_DESPERTAR_DE_GOLPE,"Se despierta de golpe. Día %d, y de esta noche no queda nada."
 DIA_DICE,— %s
 DIA_EN_EL_PUESTO,Se sienta en su puesto.
+DIA_GATO_COME,"Le pone una lata: %d. Le quedan %d."
+DIA_GATO_LLENO,"El cuenco está lleno. No le hace ni caso."
+DIA_GATO_SIN_DINERO,"Una lata cuesta %d, y no lo tiene."
 DIA_NOMINA,Nómina del día %d: %d (base %d + %d por %d expediente(s)).  Tiene %d.
 DIA_NUEVO,Día %d.
 DIA_ROTULO,Día %d  ·  %s  ·  %d en el bolsillo%s
 DIA_SIN_GATO,  ·  sin gato
 DIA_SIN_GATO_AVISO,  El gato no está.
 DIA_VIVIR,Vivir cuesta %d. Le quedan %d.%s
+ENTRADA_AUDITOR,AUDITOR EN TURNO: {usuario}
+ENTRADA_COPIA_INDICES,"Copia parcial. No se restauran los índices; el volumen se monta sin ellos."
+ENTRADA_COPIA_INTEGRA,Copia íntegra. Sin incidencias que reseñar.
+ENTRADA_COPIA_SECTORES,"Copia con sectores ilegibles. Se restaura lo legible y se continúa."
+ENTRADA_COPIA_SIN_CUENTA,"No consta cuántas veces se ha restaurado este volumen. El campo no admite ese número."
+ENTRADA_NADIE_MIRA,NINGÚN OTRO USUARIO CONSTA CON ACCESO A ESTE VOLUMEN
+ENTRADA_RESTAURANDO,RESTAURANDO COPIA DE SEGURIDAD
+ENTRADA_SISTEMA,SIGA-98 · SISTEMA INTEGRAL DE GESTIÓN DE ARCHIVO
+ENTRADA_VOZ_SOLO,"Lo que haga aquí no lo revisa nadie. Tampoco lo revisó nadie antes."
+ENTRADA_VOZ_TURNO,"Acreditación vigente. Fecha de alta anterior a la contratación; el sistema no señala el desajuste."
+ENTRADA_VOZ_VOLUMEN,"Volumen montado en modo lectura y escritura. Última salida limpia: no consta."
 FICHA_COMITE,COMITÉ
 FICHA_PERSONA,PERSONA
 FICHA_RECLAMANTE,[b]%s[/b]   ·   %s\n\n%s
@@ -113,6 +139,7 @@ HABILIDAD_EXTERNALIZAR,Externalizar
 HABILIDAD_EXTERNALIZAR_EFECTO,"Esta ronda el daño cuenta doble, gane quien gane."
 HABILIDAD_MESA,Mesa de diálogo
 HABILIDAD_MESA_EFECTO,Esta ronda nadie pierde vida.
+HOJA_RUTA,Hoja de ruta
 OFICIO_ATAQUE_1,Vengo por lo del expediente.
 OFICIO_ATAQUE_2,Me dijeron que preguntara aquí.
 OFICIO_ATAQUE_3,Llevo desde las siete.
@@ -120,6 +147,7 @@ OFICIO_ATAQUE_4,¿Es esta la ventanilla?
 OFICIO_NOMBRE,Reclamante sin expediente asignado
 OFICIO_RESUMEN,Se presenta cada mañana. No consta quién es ni qué reclama; el sistema le asigna un turno igualmente.
 PUESTO_LEVANTARSE,Levantarse del puesto
+SALIDA_CUENCO,El cuenco
 SALIDA_DESPERTAR,Despertar
 SALIDA_DORMIR,Dormir
 SALIDA_OFICINA,Salida
@@ -129,7 +157,19 @@ SIN_FECHA_CORTA,s/f
 SITIO_CALLE,De vuelta a casa
 SITIO_CASA,Casa
 SITIO_OFICINA,"SIGA — Archivo, planta 4"
+SUENO_DUELO_GANADO,"Se apaga. Esta vez no vuelve."
+SUENO_DUELO_PERDIDO,"Se le impone. La noche se acaba aquí."
+SUENO_DUELO_SEGUIR,Seguir
+SUENO_DUELO_SE_QUEDA,%s no se aparta.
+SUENO_DUELO_SIN_VIDA,"Ha descansado, aunque no le hacía falta."
+SUENO_DUELO_VIDA,"Ha descansado. Le quedan %d."
 SUENO_ROTULO,…
+TAROT_ROTULO,{carta}
+TAROT_SIN_NOMBRE,Una carta sin nombre
+TAROT_VOZ,"Estaba dentro del expediente, escrita como si nada."
+TRABAJILLO_COBRADO,"Termina el lote. Le pagan %d. Tiene %d."
+TRABAJILLO_TRANSCRIPCION,Transcribir un lote
+TRABAJILLO_YA_HECHO,No queda otro lote para esta noche.
 VENTANILLA_ADELANTA,La comisión adelanta que la próxima réplica será: %s.
 VENTANILLA_ATENDIDA,RECLAMACIÓN ATENDIDA. Racha: %d.
 VENTANILLA_HABILIDAD,%s (%d)
@@ -153,9 +193,57 @@ VISOR_ELIJA,Elija un documento del expediente.
 VISOR_ESTADO,"%s   ·   Pistas: %d de %d   ·   Día %d, %d acción(es)%s"
 VISOR_IMPUTAR,Imputar responsabilidad…
 VISOR_ITEM,%s  %s
+VISOR_MARCAR_FOLIO,☆ Marcar folio
+VISOR_MARCADOR_GUARDADO,Folio marcado para recordarlo.
+VISOR_MARCADOR_RETIRADO,Folio retirado de sus marcadores.
 VISOR_PARTIDA_APARTADA,"PARTIDA ANTERIOR ILEGIBLE (%s), APARTADA EN %s"
 VISOR_PRECIPITADA,  ·  ACUSACIÓN PRECIPITADA: consta en su hoja de servicio.
+VISOR_QUITAR_MARCADOR,★ Quitar marcador
+VISOR_REASIGNADO,"  ·  CESE POR ACUMULACIÓN: se le reasigna. Otra persona ocupará su puesto."
+VISOR_RELACIONAR,Relacionar este documento…
+VISOR_RELACIONAR_CON,Relacionar con %s
+VISOR_RELACION_DISTINTO,Selecciona un segundo documento distinto.
+VISOR_RELACION_LEA_ANTES,Lee el documento antes de relacionarlo.
+VISOR_RELACION_NO_DEMOSTRADA,No has demostrado una relación directa entre %s y %s.
+VISOR_RELACION_PRIMERO,Primer documento fijado: %s. Abre otro documento y vuelve a relacionar.
+VISOR_RELACION_PRIMERO_INVALIDO,El primer documento ya no está disponible como lectura válida.
+VISOR_RELACION_REGISTRADA,Relación registrada: %s
+VISOR_RELACION_YA_REGISTRADA,Relación ya registrada: %s
 VISOR_RESUELTO,   ·   EXPEDIENTE RESUELTO
 VISOR_SIN_FECHA,sin fecha de registro
 VISOR_SIN_JORNADA,SE ACABÓ LA JORNADA. Fiche la salida.
 VOZ_CUNADO,— %s
+ARCHIVO_TITULO,EXPEDIENTES
+ARCHIVO_ITEM,%s %d/%d · %s
+ARCHIVO_SELLADO,■
+ARCHIVO_ABIERTO,□
+ARCHIVO_CONFIDENCIAL,"CONFIDENCIAL · "
+ARCHIVO_YA_FIRMADO,ESTE EXPEDIENTE YA TIENE VEREDICTO FIRME.
+ARCHIVO_ERROR_GUARDAR,NO SE PUDO GUARDAR LA PARTIDA
+HISTORIA_TITULO,La historia de la carta
+HISTORIA_REINTENTAR,Reintentar guardado
+HISTORIA_NO_DISPONIBLE,Esta carta no tiene historia disponible.
+HISTORIA_OPCION,%s — %s
+ARCHIVO_GUARDADO_HECHO,"PARTIDA GUARDADA. Puede seguir."
+
+INICIO_TITULO,SIGA-98 · Expediente Legado
+INICIO_CONTINUAR,Continuar partida
+INICIO_NUEVA,Nueva partida
+INICIO_CANCELAR,Cancelar
+INICIO_EXISTENTE,Hay una partida guardada. Puedes continuar o empezar desde cero.
+INICIO_BIENVENIDA,Empieza una nueva partida para entrar al archivo.
+INICIO_CONFIRMAR,Se reiniciará todo el progreso. Se conservará una copia de la partida anterior. ¿Empezar desde cero?
+INICIO_ERROR_REINICIO,No se pudo conservar la partida anterior. No se ha iniciado una nueva.
+INICIO_ERROR_ENTRADA,No se pudo entrar al archivo. Puedes volver a intentarlo.
+
+MENU_GLOBAL_TITULO,Menú
+MENU_GLOBAL_CONTINUAR,Continuar
+MENU_GLOBAL_OPCIONES,Opciones
+MENU_GLOBAL_VOLVER,Volver
+MENU_GLOBAL_SALIR,Salir al escritorio
+MENU_GLOBAL_VOLUMEN,Volumen
+MENU_GLOBAL_REDUCCION_MOVIMIENTO,Reducir movimiento
+MENU_GLOBAL_SUBTITULO,Preferencias comunes de archivo, casa y sueño.
+MENU_GLOBAL_SENSIBILIDAD_RATON,Sensibilidad de ratón
+MENU_GLOBAL_SENSIBILIDAD_MANDO,Sensibilidad de stick derecho
+MENU_GLOBAL_INVERTIR_CAMARA_Y,Invertir eje Y de cámara

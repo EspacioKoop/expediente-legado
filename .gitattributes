@@ -1,0 +1,43 @@
+# Git LFS para los binarios del juego.
+#
+# Se configura ANTES de meter volumen a propósito: pasar a LFS lo que ya está
+# en el historial obliga a reescribirlo entero, y eso rompe el checkout de todo
+# el que tenga el repo clonado. Los .ogg que ya había pesan 12-28 KB y se
+# quedan donde están; convertirlos no compensa el trastorno.
+#
+# Lo que venga de aquí en adelante —texturas CC0, mallas, cuadros, tipografías,
+# vídeo— sí va por LFS.
+
+# Texturas e imágenes
+*.png   filter=lfs diff=lfs merge=lfs -text
+*.jpg   filter=lfs diff=lfs merge=lfs -text
+*.jpeg  filter=lfs diff=lfs merge=lfs -text
+*.webp  filter=lfs diff=lfs merge=lfs -text
+*.tga   filter=lfs diff=lfs merge=lfs -text
+*.exr   filter=lfs diff=lfs merge=lfs -text
+*.hdr   filter=lfs diff=lfs merge=lfs -text
+*.ktx   filter=lfs diff=lfs merge=lfs -text
+
+# Mallas y escenas de terceros
+*.glb   filter=lfs diff=lfs merge=lfs -text
+*.fbx   filter=lfs diff=lfs merge=lfs -text
+*.blend filter=lfs diff=lfs merge=lfs -text
+
+# Sonido y vídeo
+*.wav   filter=lfs diff=lfs merge=lfs -text
+*.mp3   filter=lfs diff=lfs merge=lfs -text
+*.webm  filter=lfs diff=lfs merge=lfs -text
+*.ogv   filter=lfs diff=lfs merge=lfs -text
+
+# Tipografías
+*.ttf   filter=lfs diff=lfs merge=lfs -text
+*.otf   filter=lfs diff=lfs merge=lfs -text
+*.woff2 filter=lfs diff=lfs merge=lfs -text
+
+# Y lo que NO va por LFS aunque lo parezca: los .gltf y .obj son texto, y los
+# .import y .tres de Godot son ficheros de configuración que hay que poder leer
+# en un diff.
+*.gltf   text
+*.obj    text
+*.import text
+*.tres   text

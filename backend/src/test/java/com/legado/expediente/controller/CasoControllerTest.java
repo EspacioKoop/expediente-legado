@@ -1,6 +1,9 @@
 package com.legado.expediente.controller;
 
 import com.legado.expediente.model.Caso;
+import com.legado.expediente.model.Pista;
+import com.legado.expediente.model.Descubrimiento;
+import com.legado.expediente.repository.DescubrimientoRepository;
 import com.legado.expediente.model.CombateEnCurso;
 import com.legado.expediente.model.Rol;
 import com.legado.expediente.model.Sospechoso;
@@ -12,6 +15,8 @@ import com.legado.expediente.repository.SospechosoRepository;
 import com.legado.expediente.repository.UsuarioRepository;
 import com.legado.expediente.repository.VeredictoRepository;
 import com.legado.expediente.service.UsuarioContexto;
+import com.legado.expediente.service.InvestigacionCasoService;
+import com.legado.expediente.service.ResolucionCasoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -51,6 +56,9 @@ class CasoControllerTest {
     private final Caso caso = new Caso();
 
     private CasoController controller;
+    private final Map<Long, Pista> pistas = new HashMap<>();
+    private final List<Descubrimiento> descubrimientos = new ArrayList<>();
+    private Pista combinacion;
 
     @BeforeEach
     void configurar() {
@@ -89,11 +97,29 @@ class CasoControllerTest {
         SospechosoRepository sospechosoRepository = fake(SospechosoRepository.class, Map.of(
                 "findById", args -> Optional.ofNullable(sospechosos.get((Long) args[0]))
         ));
-        PistaRepository pistaRepository = fake(PistaRepository.class, Map.of());
+        PistaRepository pistaRepository = fake(PistaRepository.class, Map.of(
+                "findById", args -> Optional.ofNullable(pistas.get((Long) args[0])),
+                "findCombinacion", args -> {
+                    assertEquals(CASO_ID, args[0]);
+                    assertEquals(1L, args[1]);
+                    assertEquals(2L, args[2]);
+                    return Optional.ofNullable(combinacion);
+                }
+        ));
+        DescubrimientoRepository descubrimientoRepository = fake(DescubrimientoRepository.class, Map.of(
+                "existsByUsuarioIdAndPistaId", args -> descubrimientos.stream().anyMatch(
+                        d -> d.getUsuario().getId().equals(args[0]) && d.getPista().getId().equals(args[1])),
+                "save", args -> {
+                    Descubrimiento descubrimiento = (Descubrimiento) args[0];
+                    descubrimientos.add(descubrimiento);
+                    return descubrimiento;
+                }
+        ));
 
-        controller = new CasoController(casoRepository, null, pistaRepository, null, sospechosoRepository,
-                veredictoRepository, combateEnCursoRepository, null, null, new UsuarioContexto(usuarioRepository),
-                null, null);
+        controller = new CasoController(casoRepository,
+                new InvestigacionCasoService(null, pistaRepository, descubrimientoRepository, null, null, null),
+                new ResolucionCasoService(sospechosoRepository, veredictoRepository, combateEnCursoRepository),
+                null, new UsuarioContexto(usuarioRepository));
     }
 
     @Test
@@ -246,6 +272,105 @@ class CasoControllerTest {
         assertEquals(existente, veredictosPorCaso.get(CASO_ID));
         assertTrue(combatesGuardados.isEmpty());
         assertNull(redirectAttributes.getFlashAttributes().get("accionReciente"));
+    }
+
+    @Test
+    void descubrirPistaDeOtroCasoEsDenegadoSinGuardar() {
+        Pista pista = pista(40L);
+        Caso otro = new Caso();
+        otro.setId(99L);
+        pista.setCaso(otro);
+        RedirectAttributesModelMap mensajes = new RedirectAttributesModelMap();
+
+        assertEquals("redirect:/", controller.descubrirPista(CASO_ID, 40L, authentication, mensajes));
+        assertTrue(descubrimientos.isEmpty());
+        assertNull(mensajes.getFlashAttributes().get("pistaDescubiertaId"));
+    }
+
+    @Test
+    void descubrirPistaConfidencialExigeAdmin() {
+        caso.setConfidencial(true);
+        pista(40L);
+        assertEquals("redirect:/", controller.descubrirPista(
+                CASO_ID, 40L, authentication, new RedirectAttributesModelMap()));
+        assertTrue(descubrimientos.isEmpty());
+
+        usuario.setRol(Rol.ADMIN);
+        assertEquals("redirect:/casos/" + CASO_ID, controller.descubrirPista(
+                CASO_ID, 40L, authentication, new RedirectAttributesModelMap()));
+        assertEquals(1, descubrimientos.size());
+    }
+
+    @Test
+    void descubrirDosVecesConservaUnSoloDescubrimientoYElMensaje() {
+        Pista pista = pista(40L);
+        controller.descubrirPista(CASO_ID, 40L, authentication, new RedirectAttributesModelMap());
+        RedirectAttributesModelMap mensajes = new RedirectAttributesModelMap();
+        assertEquals("redirect:/casos/" + CASO_ID,
+                controller.descubrirPista(CASO_ID, 40L, authentication, mensajes));
+        assertEquals(1, descubrimientos.size());
+        assertEquals(usuario, descubrimientos.get(0).getUsuario());
+        assertEquals(pista, descubrimientos.get(0).getPista());
+        assertEquals("Pista añadida a tu carpeta.", mensajes.getFlashAttributes().get("mensaje"));
+        assertEquals(40L, mensajes.getFlashAttributes().get("pistaDescubiertaId"));
+    }
+
+    @Test
+    void combinarRegistraLaConclusionUnaVezYDistingueElDuplicado() {
+        combinacion = pista(41L);
+        RedirectAttributesModelMap primera = new RedirectAttributesModelMap();
+        assertEquals("redirect:/casos/" + CASO_ID,
+                controller.combinar(CASO_ID, List.of(1L, 2L), authentication, primera));
+        assertEquals("Nueva conclusión anotada al expediente.", primera.getFlashAttributes().get("mensaje"));
+        assertEquals(41L, primera.getFlashAttributes().get("pistaDescubiertaId"));
+        RedirectAttributesModelMap segunda = new RedirectAttributesModelMap();
+        controller.combinar(CASO_ID, List.of(1L, 2L), authentication, segunda);
+        assertEquals("Esa conclusión ya estaba anotada.", segunda.getFlashAttributes().get("mensaje"));
+        assertNull(segunda.getFlashAttributes().get("pistaDescubiertaId"));
+        assertEquals(1, descubrimientos.size());
+    }
+
+    @Test
+    void combinarSinRelacionNoGuardaDescubrimientos() {
+        RedirectAttributesModelMap mensajes = new RedirectAttributesModelMap();
+        controller.combinar(CASO_ID, List.of(1L, 2L), authentication, mensajes);
+        assertEquals("No encuentra ninguna relación entre esos documentos.", mensajes.getFlashAttributes().get("mensaje"));
+        assertTrue(descubrimientos.isEmpty());
+    }
+
+    @Test
+    void combinarExigeExactamenteDosDocumentos() {
+        for (List<Long> ids : Arrays.asList(null, List.<Long>of(), List.of(1L), List.of(1L, 2L, 3L))) {
+            RedirectAttributesModelMap mensajes = new RedirectAttributesModelMap();
+            assertEquals("redirect:/casos/" + CASO_ID, controller.combinar(CASO_ID, ids, authentication, mensajes));
+            assertEquals("Selecciona exactamente dos documentos para combinarlos.",
+                    mensajes.getFlashAttributes().get("mensaje"));
+        }
+        assertTrue(descubrimientos.isEmpty());
+    }
+
+    @Test
+    void acusarConCombatePendienteNoLoSustituyeNiMarcaOtraAccion() {
+        Sospechoso sospechoso = sospechoso(6L, List.of("Ataque"));
+        sospechosos.put(6L, sospechoso);
+        CombateEnCurso pendiente = new CombateEnCurso();
+        pendiente.setCaso(caso);
+        pendiente.setSospechoso(sospechoso);
+        combatesPorCaso.put(CASO_ID, pendiente);
+        RedirectAttributesModelMap mensajes = new RedirectAttributesModelMap();
+        controller.acusar(CASO_ID, 6L, authentication, mensajes);
+        assertEquals(pendiente, combatesPorCaso.get(CASO_ID));
+        assertTrue(combatesGuardados.isEmpty());
+        assertTrue(veredictosPorCaso.isEmpty());
+        assertNull(mensajes.getFlashAttributes().get("accionReciente"));
+    }
+
+    private Pista pista(Long id) {
+        Pista pista = new Pista();
+        pista.setId(id);
+        pista.setCaso(caso);
+        pistas.put(id, pista);
+        return pista;
     }
 
     private Sospechoso sospechoso(Long id, List<String> ataques) {

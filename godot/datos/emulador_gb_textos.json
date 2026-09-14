@@ -1,0 +1,19 @@
+{
+  "titulo": "PORTÁTIL COLOR 98",
+  "rom_propia": "Caza Píxeles 98 (incluida)",
+  "cerrar": "Salir de la portátil",
+  "carpeta": "ROMs locales: %s",
+  "sin_nucleo": "El núcleo de emulación no está compilado en esta versión.",
+  "sin_roms": "No hay ROMs disponibles. Puedes añadir .gb/.gbc compatibles a la carpeta local.",
+  "rom_propia_ausente": "La ROM propia no está preparada en esta build.",
+  "cargando": "Cargando %s…",
+  "encendiendo": "Encendiendo…",
+  "efectos_presentacion": "Efectos físicos / LCD",
+  "efectos_aviso": "Capa visual opcional: no modifica los píxeles ni la emulación.",
+  "ejecutando": "Ejecutando %s · Esc para salir · flechas/WASD + Z/X + Enter/Tab",
+  "error_cgb": "Esta ROM requiere Game Boy Color real; el núcleo actual solo ofrece modo GB/DMG.",
+  "error_rom": "No se pudo arrancar la ROM: %s",
+  "error_runtime": "La emulación se detuvo de forma controlada: %s",
+  "aviso": "Las ROMs locales son opcionales y responsabilidad de quien las aporta. No se descargan ni redistribuyen.",
+  "audio": "Prototipo actual: vídeo e input; audio y SRAM persistente quedan para un corte posterior."
+}

@@ -1,0 +1,895 @@
+{
+  "casos": [
+    {
+      "id": "caso@1",
+      "titulo": "El cierre de caja de 1999",
+      "descripcion": "Un descuadre nunca explicado en el cierre contable de fin de año quedó enterrado en el sistema SIGA. La empresa quiere saber qué ocurrió realmente.",
+      "anioSuceso": 1999,
+      "estado": "ABIERTO",
+      "confidencial": false,
+      "principal": true,
+      "registros": [
+        {
+          "id": "factura1@1",
+          "tipo": "FACTURA",
+          "folio": "F-1999-00231",
+          "contenido": "Factura por 'servicios de consultoría' emitida el 30/12/1999. Monto: $482,000. Proveedor sin RFC registrado.",
+          "fecha": "1999-12-30"
+        },
+        {
+          "id": "memo1@1",
+          "tipo": "MEMORANDO",
+          "folio": "MEMO-1999-088",
+          "contenido": "De: Dirección de Finanzas. Para: Contraloría. 'Autorizo el pago urgente sin revisión previa, bajo mi responsabilidad.' Firmado: J. Ibarra.",
+          "fecha": "1999-12-29"
+        },
+        {
+          "id": "empleado1@1",
+          "tipo": "EMPLEADO",
+          "folio": "EMP-0456",
+          "contenido": "J. Ibarra. Director de Finanzas 1997-2000. Renunció el 03/01/2000, cuatro días después del cierre de caja.",
+          "fecha": "2000-01-03"
+        },
+        {
+          "id": "actaContraloria1@1",
+          "tipo": "ACTA",
+          "folio": "ACTA-1999-014",
+          "contenido": "Acta de revisión de Contraloría sobre el pago urgente: 'Se revisó la documentación y no se encontraron observaciones.' Firmada el mismo día del pago, cinco minutos después de la hora de registro de la factura.",
+          "fecha": "1999-12-30"
+        }
+      ],
+      "pistas": [
+        {
+          "id": "pista1@1",
+          "registroOrigen": "memo1@1",
+          "descripcion": "El memorándum de autorización se firmó un día antes del cierre, saltándose el proceso normal de revisión.",
+          "fraseGatillo": "sin revisión previa"
+        },
+        {
+          "id": "pista2@1",
+          "registroOrigen": "empleado1@1",
+          "descripcion": "El Director de Finanzas renunció justo después del cierre de caja, sin explicación registrada.",
+          "fraseGatillo": "cuatro días después del cierre de caja"
+        },
+        {
+          "id": "pista20@1",
+          "registroOrigen": "factura1@1",
+          "registroOrigen2": "actaContraloria1@1",
+          "descripcion": "La revisión de Contraloría se completó en cinco minutos, el mismo día del pago, sin observar que el proveedor de la factura no tenía RFC registrado."
+        },
+        {
+          "id": "pista28@1",
+          "registroOrigen": "memo1@1",
+          "registroOrigen2": "empleado1@1",
+          "descripcion": "El memo que autoriza el pago urgente y la renuncia de J. Ibarra están firmados con la misma pluma, según el peritaje de tinta anexo al expediente — un peritaje que nadie recuerda haber solicitado."
+        }
+      ],
+      "sospechosos": [
+        {
+          "id": "sospechosoIbarra@1",
+          "nombre": "J. Ibarra",
+          "descripcion": "Director de Finanzas. Firmó la autorización de pago urgente y renunció días después.",
+          "desenlace": "Se emite responsiva a nombre de J. Ibarra por el monto completo. El caso se cierra. Nadie recupera el dinero: Ibarra nunca fue localizado para notificarle."
+        },
+        {
+          "id": "sospechosoProveedor@1",
+          "nombre": "El proveedor sin RFC",
+          "descripcion": "La empresa que recibió el pago de 'servicios de consultoría' no tiene registro fiscal ni existencia comprobable.",
+          "desenlace": "Se cursa una orden de investigación contra un proveedor que, según el registro mercantil, nunca existió legalmente. La orden se archiva por 'imposibilidad práctica de notificación'."
+        },
+        {
+          "id": "sospechosoContraloria@1",
+          "nombre": "Contraloría",
+          "descripcion": "El área responsable de revisar el pago antes de autorizarlo lo aprobó sin observaciones en cinco minutos.",
+          "desenlace": "Se turna el caso a Contraloría para que audite el proceder de Contraloría. El resultado de dicha autoevaluación nunca se hizo público."
+        }
+      ]
+    },
+    {
+      "id": "caso2@2",
+      "titulo": "El trámite de la silla 4-B",
+      "descripcion": "En 1990, un empleado de Almacén solicitó una silla ergonómica tras una lesión de espalda certificada por el médico de la empresa. La solicitud pasó por catorce oficinas distintas a lo largo de seis años, cada una exigiendo un nuevo formulario que citaba al anterior, hasta que el empleado se jubiló sin haber recibido la silla ni una negativa por escrito. El expediente nunca se aprobó, nunca se rechazó, y en sentido estricto tampoco llegó a cerrarse.",
+      "anioSuceso": 1996,
+      "estado": "CERRADO",
+      "confidencial": false,
+      "principal": true,
+      "registros": [
+        {
+          "id": "oficio2@2",
+          "tipo": "OFICIO",
+          "folio": "OF-1990-114",
+          "contenido": "Solicito silla ergonómica por prescripción médica adjunta. Se turna a Comité de Bienestar Laboral conforme a la Circular 12, para su valoración y trámite correspondiente.",
+          "fecha": "1990-03-14"
+        },
+        {
+          "id": "circular2@2",
+          "tipo": "CIRCULAR",
+          "folio": "CIRC-1988-012",
+          "contenido": "Toda solicitud de mobiliario especial deberá ser dictaminada por el Comité de Bienestar Laboral, el cual sesionará cuando exista quórum. El comité no ha sesionado desde su fundación por falta de quórum.",
+          "fecha": "1988-06-01"
+        },
+        {
+          "id": "empleado2@2",
+          "tipo": "EMPLEADO",
+          "folio": "EMP-0112",
+          "contenido": "R. Salcido. Almacén general 1979-1996. Se jubiló el 20/02/1996. Última anotación en su expediente: 'sigo esperando respuesta sobre la silla.'",
+          "fecha": "1996-02-20"
+        },
+        {
+          "id": "oficioReestructura2@2",
+          "tipo": "OFICIO",
+          "folio": "OF-1987-200",
+          "contenido": "Se notifica la eliminación de la Jefatura de Bienestar Laboral por reestructuración administrativa, efectiva a partir de esta fecha.",
+          "fecha": "1987-05-04"
+        }
+      ],
+      "pistas": [
+        {
+          "id": "pista3@2",
+          "registroOrigen": "circular2@2",
+          "descripcion": "El Comité de Bienestar Laboral, único con autoridad para aprobar la solicitud, jamás ha alcanzado quórum desde que fue creado.",
+          "fraseGatillo": "no ha sesionado desde su fundación por falta de quórum"
+        },
+        {
+          "id": "pista4@2",
+          "registroOrigen": "empleado2@2",
+          "descripcion": "El puesto con firma autorizante para este trámite fue eliminado en la reestructuración de 1987, un año antes de que se emitiera la propia Circular 12.",
+          "fraseGatillo": "sigo esperando respuesta sobre la silla"
+        },
+        {
+          "id": "pista22@2",
+          "registroOrigen": "circular2@2",
+          "registroOrigen2": "oficioReestructura2@2",
+          "descripcion": "La Circular 12 exige la firma de la Jefatura de Bienestar Laboral para aprobar cualquier trámite de mobiliario especial, pero esa jefatura fue eliminada un año antes de que la circular se emitiera."
+        },
+        {
+          "id": "pista29@2",
+          "registroOrigen": "oficio2@2",
+          "registroOrigen2": "empleado2@2",
+          "descripcion": "La solicitud original de 1990 nunca fue marcada como aprobada, rechazada ni cancelada: sigue en trámite, catorce oficinas después, a nombre de un empleado que ya se jubiló."
+        }
+      ],
+      "sospechosos": [
+        {
+          "id": "sospechosoComite2@2",
+          "nombre": "El Comité de Bienestar Laboral",
+          "descripcion": "Único con autoridad para aprobar la solicitud. Nunca ha alcanzado quórum desde su fundación.",
+          "desenlace": "Se notifica al Comité de Bienestar Laboral que se le atribuye la responsabilidad del caso. El comité no puede acusar recibo porque nunca ha sesionado."
+        },
+        {
+          "id": "sospechosoCircular2@2",
+          "nombre": "La Circular 12",
+          "descripcion": "El propio documento que exige una firma imposible de obtener desde antes de existir.",
+          "desenlace": "Se abre un procedimiento para modificar la Circular 12. El procedimiento para modificar circulares está regulado, a su vez, por la Circular 12."
+        },
+        {
+          "id": "sospechosoSalcido@2",
+          "nombre": "R. Salcido",
+          "descripcion": "El propio solicitante. Esperó seis años sin escalar el trámite por otra vía.",
+          "desenlace": "Se determina que el solicitante debió dar seguimiento con mayor insistencia. No se especifica ante quién, ya que el puesto correspondiente fue eliminado en 1987."
+        }
+      ]
+    },
+    {
+      "id": "caso3@3",
+      "titulo": "Traspaso de personal: expediente de E. Montalvo",
+      "descripcion": "En 1993 se registró el traslado del empleado E. Montalvo al 'Departamento de Enlace Especial', ubicado según el memo en el piso 13. El edificio, de acuerdo con todos los planos y actas de mantenimiento, tiene solo doce pisos. A partir de la fecha del traslado no existe ningún otro registro de Montalvo: ni recibos de nómina, ni renuncia, ni baja. El memo de traslado, sin embargo, aparece debidamente sellado de recibido.",
+      "anioSuceso": 1993,
+      "estado": "ABIERTO",
+      "confidencial": false,
+      "principal": true,
+      "registros": [
+        {
+          "id": "memo3@3",
+          "tipo": "MEMORANDO",
+          "folio": "MEMO-1993-201",
+          "contenido": "Se traslada a E. Montalvo al Departamento de Enlace Especial, piso 13, por instrucción del Comité Ad Honorem. Preséntese el día 05/07/1993 sin excepción.",
+          "fecha": "1993-07-01"
+        },
+        {
+          "id": "oficio3@3",
+          "tipo": "OFICIO",
+          "folio": "OF-1993-055",
+          "contenido": "Administración de edificio informa que el inmueble consta de doce niveles. No existe botón de piso 13 en ningún elevador ni escalera registrada en los planos vigentes.",
+          "fecha": "1993-07-10"
+        },
+        {
+          "id": "acta3@3",
+          "tipo": "ACTA",
+          "folio": "ACTA-1993-009",
+          "contenido": "Acta de reunión del Comité Ad Honorem donde se autoriza el traslado. Lista de asistentes: L. Pardo, R. Guzmán, [nombre ilegible en el original digitalizado]. No se encontró este comité en ningún organigrama oficial de la empresa.",
+          "fecha": "1993-06-28"
+        },
+        {
+          "id": "empleado3@3",
+          "tipo": "EMPLEADO",
+          "folio": "EMP-0233",
+          "contenido": "E. Montalvo. Auxiliar administrativo 1988-1993. Último recibo de nómina: junio de 1993. Sin renuncia ni baja registrada después del traslado.",
+          "fecha": "1993-06-30"
+        }
+      ],
+      "pistas": [
+        {
+          "id": "pista5@3",
+          "registroOrigen": "oficio3@3",
+          "descripcion": "No existe un piso 13 en los planos del edificio, pero el memo de traslado fue timbrado de recibido como si el destino fuera real.",
+          "fraseGatillo": "No existe botón de piso 13"
+        },
+        {
+          "id": "pista6@3",
+          "registroOrigen": "acta3@3",
+          "descripcion": "El 'Comité Ad Honorem' que ordenó el traslado no figura en ningún organigrama, presupuesto ni acta de constitución conocida de la empresa.",
+          "fraseGatillo": "No se encontró este comité en ningún organigrama oficial"
+        },
+        {
+          "id": "pista23@3",
+          "registroOrigen": "memo3@3",
+          "registroOrigen2": "oficio3@3",
+          "descripcion": "La confirmación de que no existe un piso 13 llegó cinco días después de la fecha en que, según el propio memo de traslado, Montalvo ya debía haberse presentado ahí."
+        },
+        {
+          "id": "pista30@3",
+          "registroOrigen": "acta3@3",
+          "registroOrigen2": "empleado3@3",
+          "descripcion": "El nombre ilegible en la lista de asistentes del acta comparte la misma clave de empleado que aparece en el expediente de E. Montalvo."
+        }
+      ],
+      "sospechosos": [
+        {
+          "id": "sospechosoComite3@3",
+          "nombre": "Comité Ad Honorem",
+          "descripcion": "Ordenó el traslado a un piso que, según todos los planos, no existe.",
+          "desenlace": "Se solicita al Comité Ad Honorem un informe sobre el traslado. La solicitud se turna, por instrucción del propio comité, al Departamento de Enlace Especial, piso 13."
+        },
+        {
+          "id": "sospechosoRecepcion3@3",
+          "nombre": "Recepción del edificio",
+          "descripcion": "Selló de recibido un memorándum con un destino que el propio edificio no tiene.",
+          "desenlace": "Se amonesta al personal de recepción por sellar de recibido un memorándum con un destino inexistente. El sello utilizado ese día ya no está en el inventario de la empresa."
+        },
+        {
+          "id": "sospechosoMontalvo@3",
+          "nombre": "E. Montalvo",
+          "descripcion": "El propio empleado trasladado. Nunca reportó la inconsistencia del piso 13 antes de presentarse.",
+          "desenlace": "Se determina que correspondía al propio empleado señalar la inconsistencia del piso 13 antes de presentarse a su nuevo puesto. El expediente no aclara cómo debía hacerlo, dado que ya no hay forma de contactarlo."
+        }
+      ]
+    },
+    {
+      "id": "caso4@4",
+      "titulo": "Contrato de fin de año con Carcosa Servicios Escénicos",
+      "descripcion": "Para la fiesta de aniversario de 1996, Recursos Humanos contrató a 'Carcosa Servicios Escénicos' para montar una obra de teatro. Las facturas detallan un cobro adicional específicamente por NO representar el segundo acto. En la semana siguiente al evento, varios empleados que asistieron solicitaron cambio de área o renunciaron, citando motivos que ninguno quiso poner por escrito.",
+      "anioSuceso": 1996,
+      "estado": "ABIERTO",
+      "confidencial": false,
+      "principal": true,
+      "registros": [
+        {
+          "id": "factura4@4",
+          "tipo": "FACTURA",
+          "folio": "F-1996-00187",
+          "contenido": "Carcosa Servicios Escénicos S. de R.L. Concepto: 'montaje escénico, Acto I únicamente'. Recargo por omisión del Acto II, incluido a solicitud expresa del cliente. Campo de RFC del proveedor: en blanco. Sello de recibido: no corresponde al sello oficial de la empresa; es de color amarillo.",
+          "fecha": "1996-12-18"
+        },
+        {
+          "id": "memo4@4",
+          "tipo": "MEMORANDO",
+          "folio": "MEMO-1996-233",
+          "contenido": "De: Recursos Humanos. Nota interna posterior al evento: cinco empleados han solicitado cambio de área esta semana. Motivo consignado por todos ellos, de forma idéntica: 'prefiero no decirlo por escrito'. Se recomienda no dar seguimiento adicional al tema.",
+          "fecha": "1996-12-23"
+        },
+        {
+          "id": "acta4@4",
+          "tipo": "ACTA",
+          "folio": "ACTA-1996-041",
+          "contenido": "Acta del comité organizador agradeciendo a Carcosa Servicios Escénicos por un 'excelente Acto I'. Se decidió, por unanimidad y sin discusión, no proceder con la lectura del segundo acto, conforme a la cláusula 4 del contrato.",
+          "fecha": "1996-12-19"
+        },
+        {
+          "id": "empleado4@4",
+          "tipo": "EMPLEADO",
+          "folio": "EMP-0378",
+          "contenido": "Empleado solicitó cambio de área el 21/12/1996, tres días después del evento de aniversario. Motivo consignado en el formulario oficial: 'prefiero no decirlo por escrito.'",
+          "fecha": "1996-12-21"
+        }
+      ],
+      "pistas": [
+        {
+          "id": "pista7@4",
+          "registroOrigen": "acta4@4",
+          "descripcion": "El contrato con Carcosa incluye una cláusula que prohíbe expresamente representar el Acto II. Nadie en el comité recuerda quién la propuso ni por qué.",
+          "fraseGatillo": "no proceder con la lectura del segundo acto"
+        },
+        {
+          "id": "pista8@4",
+          "registroOrigen": "memo4@4",
+          "descripcion": "Cinco empleados pidieron cambio de área la misma semana, con la misma frase exacta como motivo. Recursos Humanos decidió no investigar más a fondo.",
+          "fraseGatillo": "prefiero no decirlo por escrito"
+        },
+        {
+          "id": "pista24@4",
+          "registroOrigen": "factura4@4",
+          "registroOrigen2": "acta4@4",
+          "descripcion": "La cláusula 4 del contrato aparece redactada con la misma tinta y sello amarillo de la factura, aunque ningún miembro del comité recuerda haberla negociado ni firmado ese documento."
+        },
+        {
+          "id": "pista31@4",
+          "registroOrigen": "memo4@4",
+          "registroOrigen2": "empleado4@4",
+          "descripcion": "Este es el primero de los cinco empleados que reportó Recursos Humanos esa semana; es también el único cuyo nombre no aparece tachado en la lista interna adjunta al memo."
+        }
+      ],
+      "sospechosos": [
+        {
+          "id": "sospechosoCarcosa@4",
+          "nombre": "Carcosa Servicios Escénicos",
+          "descripcion": "El proveedor contratado para el evento. Cobró un recargo específico por no representar el Acto II.",
+          "desenlace": "Se cancela el contrato con Carcosa Servicios Escénicos para futuros eventos. La empresa no tiene manera de notificarles: el domicilio fiscal registrado corresponde a un teatro clausurado en 1962."
+        },
+        {
+          "id": "sospechosoComiteOrganizador@4",
+          "nombre": "El comité organizador del evento",
+          "descripcion": "Aprobó la cláusula que prohíbe el Acto II sin discusión ni registro de quién la propuso.",
+          "desenlace": "Se solicita al comité organizador una explicación por no cuestionar la cláusula del Acto II. Ningún integrante recuerda haber estado en la reunión donde se aprobó."
+        },
+        {
+          "id": "sospechosoRRHH4@4",
+          "nombre": "Recursos Humanos",
+          "descripcion": "Recibió los cinco reportes de cambio de área la misma semana y decidió no darles seguimiento.",
+          "desenlace": "Se instruye a Recursos Humanos investigar los cambios de área solicitados esa semana. Recursos Humanos responde que, siguiendo su propia recomendación anterior, no le dará seguimiento."
+        }
+      ]
+    },
+    {
+      "id": "caso5@5",
+      "titulo": "El expediente MEMO-1978-014 (y 1993, y 2007)",
+      "descripcion": "Un memorándum con el mismo folio, la misma fecha de redacción y el mismo texto letra por letra —incluida una falta de ortografía— aparece archivado por separado en 1978, 1993 y 2007. La copia de 2007 incluye además una nota manuscrita que se dirige, literalmente, 'al auditor que lo esté leyendo ahora'. Determinar cuál copia es la original, si alguna lo es.",
+      "anioSuceso": 1978,
+      "estado": "ABIERTO",
+      "confidencial": false,
+      "principal": true,
+      "registros": [
+        {
+          "id": "memo5@5",
+          "tipo": "MEMORANDO",
+          "folio": "MEMO-1978-014",
+          "contenido": "Texto idéntico en las tres copias archivadas (1978, 1993, 2007), incluida la misma falta de ortografía en la tercera línea. La copia de 2007 trae, al margen y a mano: 'esto es para el auditor que lo esté leyendo ahora, sin importar cuándo sea ahora.'",
+          "fecha": "2007-04-09"
+        },
+        {
+          "id": "acta5@5",
+          "tipo": "ACTA",
+          "folio": "ACTA-2007-002",
+          "contenido": "Acta del Archivo Muerto: se deja constancia de que este expediente debe 'revisarse' aproximadamente cada quince años, aunque no existe razón administrativa registrada para dicha periodicidad, ni acuerdo que la haya establecido.",
+          "fecha": "2007-04-09"
+        },
+        {
+          "id": "empleado5@5",
+          "tipo": "EMPLEADO",
+          "folio": "EMP-AUD-1993",
+          "contenido": "Auditor predecesor, comisión especial de 1993. Nota de cierre de su propio informe sobre este expediente, palabra por palabra idéntica a la que cualquier auditor posterior redactaría al llegar a la misma conclusión.",
+          "fecha": "1993-05-02"
+        }
+      ],
+      "pistas": [
+        {
+          "id": "pista9@5",
+          "registroOrigen": "memo5@5",
+          "descripcion": "Las tres copias comparten folio, fecha y hasta errores de mecanografía idénticos: algo imposible si en verdad fueron redactadas por separado.",
+          "fraseGatillo": "incluida la misma falta de ortografía en la tercera línea"
+        },
+        {
+          "id": "pista10@5",
+          "registroOrigen": "empleado5@5",
+          "descripcion": "El informe de cierre del auditor de 1993 coincide, palabra por palabra, con lo que el auditor actual está a punto de escribir.",
+          "fraseGatillo": "palabra por palabra idéntica a la que cualquier auditor posterior redactaría"
+        },
+        {
+          "id": "pista25@5",
+          "registroOrigen": "memo5@5",
+          "registroOrigen2": "empleado5@5",
+          "descripcion": "La nota manuscrita en el margen del memo de 2007 y el informe de cierre del auditor de 1993 están escritos con la misma letra, aunque fueron encontrados en cajas archivadas catorce años y miles de kilómetros aparte."
+        },
+        {
+          "id": "pista32@5",
+          "registroOrigen": "acta5@5",
+          "registroOrigen2": "memo5@5",
+          "descripcion": "La periodicidad de revisión que fija esta acta coincide, año con año, con las fechas de las tres copias del memo — como si ya se supiera, en 2007, cuándo iba a aparecer la siguiente."
+        }
+      ],
+      "sospechosos": [
+        {
+          "id": "sospechosoArchivoMuerto5@5",
+          "nombre": "El Archivo Muerto",
+          "descripcion": "El lugar donde conviven, sin explicación, las tres copias del mismo memo.",
+          "desenlace": "Se ordena una auditoría al Archivo Muerto. La orden se archiva, correctamente, en el Archivo Muerto."
+        },
+        {
+          "id": "sospechosoAuditor1993@5",
+          "nombre": "El auditor de 1993",
+          "descripcion": "Escribió, palabra por palabra, la misma conclusión que cualquier auditor posterior llegaría a escribir.",
+          "desenlace": "Se le atribuye responsabilidad al auditor de la comisión especial de 1993. No hay forma de notificarle: su expediente de personal tampoco puede localizarse."
+        },
+        {
+          "id": "sospechosoUsted5@5",
+          "nombre": "Usted mismo",
+          "descripcion": "Quien firma este cierre ahora, sin importar cuándo sea 'ahora'.",
+          "desenlace": "Se le atribuye la responsabilidad a quien firma este cierre. Dado que usted es quien lo firma, el expediente queda, por primera vez en su historia, formalmente resuelto. No hay precedente de qué hacer con esa información."
+        }
+      ]
+    },
+    {
+      "id": "caso6@6",
+      "titulo": "Acta constitutiva de la empresa (versión no circulada)",
+      "descripcion": "En el fondo del Archivo Muerto hay una versión del acta constitutiva de la empresa que nunca se hizo pública. En ella, el órgano fundador no es un consejo de accionistas sino un 'Comité Ad Honorem' cuyo único objeto declarado es 'la administración perpetua del expediente'. No lleva sello notarial: lleva el mismo sello amarillo visto en la factura de Carcosa Servicios Escénicos de 1996. La última página lista firmantes autorizados vigentes, y entre ellos ya aparece, con fecha muy anterior a su contratación, el usuario del auditor que revisa este expediente.",
+      "anioSuceso": 1958,
+      "estado": "ABIERTO",
+      "confidencial": true,
+      "principal": true,
+      "registros": [
+        {
+          "id": "acta6@6",
+          "tipo": "ACTA",
+          "folio": "ACTA-1958-001",
+          "contenido": "Acta constitutiva, versión no circulada. Órgano fundador: 'Comité Ad Honorem'. Objeto social declarado: 'la administración perpetua del expediente'. Sellada con sello amarillo, no notarial, idéntico al usado por Carcosa Servicios Escénicos en 1996.",
+          "fecha": "1958-03-03"
+        },
+        {
+          "id": "circular6@6",
+          "tipo": "CIRCULAR",
+          "folio": "CIRC-0000-001",
+          "contenido": "El proceso de auditoría continuará sin interrupción, conforme al acta fundacional, hasta que el expediente decida cerrarse por sí mismo. No se establece fecha límite porque no corresponde establecerla.",
+          "fecha": null
+        },
+        {
+          "id": "fax6@6",
+          "tipo": "FAX",
+          "folio": "FAX-1996-077",
+          "contenido": "Transmisión entrante, calidad deficiente. Encabezado y pie de página legibles; el cuerpo del mensaje está compuesto por trazos que no corresponden a ningún alfabeto reconocido. El número de origen coincide con el registrado para Carcosa Servicios Escénicos.",
+          "fecha": "1996-12-17"
+        },
+        {
+          "id": "empleado6@6",
+          "tipo": "EMPLEADO",
+          "folio": "EMP-0001",
+          "contenido": "Lista de firmantes autorizados del Comité Ad Honorem, vigente desde su fundación. Incluye el usuario 'auditor01', con fecha de alta anterior a cualquier contratación registrada para dicho usuario en el sistema de nómina.",
+          "fecha": "1958-03-03"
+        }
+      ],
+      "pistas": [
+        {
+          "id": "pista11@6",
+          "registroOrigen": "acta6@6",
+          "descripcion": "El sello del Comité Ad Honorem es idéntico al sello amarillo usado por Carcosa Servicios Escénicos en la factura de 1996.",
+          "fraseGatillo": "Sellada con sello amarillo, no notarial"
+        },
+        {
+          "id": "pista12@6",
+          "registroOrigen": "empleado6@6",
+          "descripcion": "La lista de firmantes autorizados del comité ya incluye al usuario del auditor actual, con una fecha de alta anterior a su propia contratación.",
+          "fraseGatillo": "con fecha de alta anterior a cualquier contratación registrada"
+        },
+        {
+          "id": "pista13@6",
+          "registroOrigen": "circular6@6",
+          "descripcion": "La circular que rige la auditoría no tiene fecha de emisión ni de cierre. Conforme al acta fundacional, el expediente se cerrará solo cuando decida hacerlo.",
+          "fraseGatillo": "hasta que el expediente decida cerrarse por sí mismo"
+        },
+        {
+          "id": "pista26@6",
+          "registroOrigen": "acta6@6",
+          "registroOrigen2": "fax6@6",
+          "descripcion": "El número de origen del fax coincide con el registrado en la factura de Carcosa de 1996, pero la línea telefónica correspondiente fue dada de baja, según los registros de la compañía telefónica, en 1962."
+        },
+        {
+          "id": "pista33@6",
+          "registroOrigen": "circular6@6",
+          "registroOrigen2": "empleado6@6",
+          "descripcion": "La circular sin fecha límite y la lista de firmantes de 1958 se imprimieron, según los metadatos conservados, con la misma impresora — un modelo que la empresa no adquirió sino hasta 1989."
+        }
+      ],
+      "sospechosos": [
+        {
+          "id": "sospechosoComite6@6",
+          "nombre": "El Comité Ad Honorem",
+          "descripcion": "El órgano que ha autorizado todo desde 1958 sin figurar en ningún organigrama.",
+          "desenlace": "Se presenta la acusación ante el Comité Ad Honorem. El comité la recibe, la sella con el mismo sello amarillo de siempre, y la incorpora al acta fundacional como el artículo que faltaba. El expediente queda, oficialmente, más completo que antes.",
+          "ataques": [
+            "El Comité solicita que la acusación se presente por triplicado, en el formato vigente en 1958.",
+            "El Comité informa que ese formato fue derogado por un acuerdo del propio Comité, no localizado en el archivo.",
+            "El Comité cita el artículo 4 del acta fundacional: toda objeción en su contra se considera, automáticamente, parte del acta."
+          ]
+        },
+        {
+          "id": "sospechosoCarcosa6@6",
+          "nombre": "Carcosa Servicios Escénicos",
+          "descripcion": "La compañía teatral cuyo sello amarillo es idéntico al del comité fundador.",
+          "desenlace": "Se presenta la acusación contra Carcosa Servicios Escénicos. No hay a quién notificar: su domicilio fiscal es un teatro que, según el catastro, jamás terminó de construirse.",
+          "ataques": [
+            "Carcosa contesta que la acusación corresponde, en realidad, a una reseña del Acto I, y la archiva como tal.",
+            "Carcosa ofrece un descuento del 15% en la próxima puesta en escena si se retira el cargo.",
+            "Carcosa advierte que insistir obliga a representar el Acto II completo, ante todos los presentes."
+          ]
+        },
+        {
+          "id": "sospechosoAuditor1958@6",
+          "nombre": "auditor01 (usted, desde 1958)",
+          "descripcion": "El firmante que ya figuraba en la lista autorizada décadas antes de existir.",
+          "desenlace": "Se presenta la acusación contra el firmante registrado desde 1958. Es usted. El sistema acepta la acusación sin objeción: en el fondo, siempre fue lo único congruente que se podía escribir en este expediente.",
+          "ataques": [
+            "Usted intenta objetar. La objeción ya está redactada, con su letra, en un documento de 1958.",
+            "Revisa la fecha de alta que consta a su nombre: es anterior a la de esta objeción.",
+            "No hay forma de acusarse a uno mismo sin, con ello, ratificar la propia firma."
+          ]
+        },
+        {
+          "id": "sospechosoSiga6@6",
+          "nombre": "SIGA (el sistema mismo)",
+          "descripcion": "El propio sistema que procesa esta acusación.",
+          "desenlace": "Se presenta la acusación contra el sistema SIGA. No existe un formulario diseñado para acusar al sistema que procesa las acusaciones. La pantalla parpadea, marca las 11:34, y no vuelve a actualizarse durante el resto de su turno.",
+          "ataques": [
+            "El sistema responde con el mismo formulario que usted acaba de enviar, sin cambios.",
+            "El sistema marca la hora: 11:34. Sigue marcando las 11:34.",
+            "El sistema le informa que su sesión, técnicamente, nunca ha comenzado."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "caso7@7",
+      "titulo": "El expediente de la herencia Karamázov",
+      "descripcion": "Tras la muerte repentina de F. P. Karamázov, fundador y accionista mayoritario, sus tres hijos reclamaron una herencia de $3,000,000 en acciones que nunca se formalizó en ningún testamento. Uno de ellos fue despedido y señalado por Recursos Humanos como responsable de la desaparición de los fondos; el expediente de su defensa nunca llegó a revisarse.",
+      "anioSuceso": 1998,
+      "estado": "CERRADO",
+      "confidencial": false,
+      "principal": false,
+      "registros": [
+        {
+          "id": "empleadoD@7",
+          "tipo": "EMPLEADO",
+          "folio": "EMP-0512",
+          "contenido": "D. Karamázov. Gerente de Ventas 1990-1998. Reclamó por escrito, en al menos tres juntas, el dinero que su padre le adeudaba. Despedido el 14/09/1998 por 'conducta impropia', cuatro días después de la desaparición de los fondos.",
+          "fecha": "1998-09-14"
+        },
+        {
+          "id": "memoI@7",
+          "tipo": "MEMORANDO",
+          "folio": "MEMO-1998-091",
+          "contenido": "De: I. Karamázov, Departamento de Planeación. Circular interna sin destinatario claro: 'Si ningún superior revisa jamás un expediente, entonces todo lo que hagamos con él está permitido.' Distribuida por correo interno una semana antes del cierre de caja.",
+          "fecha": "1998-09-06"
+        },
+        {
+          "id": "empleadoSmerdiakov@7",
+          "tipo": "EMPLEADO",
+          "folio": "EMP-0533",
+          "contenido": "P. Smerdiakov. Asistente personal de F. P. Karamázov, único empleado con llave de la caja fuerte. Falleció el 20/09/1998, seis días después de la desaparición de los fondos. Recursos Humanos cerró su expediente sin abrir investigación.",
+          "fecha": "1998-09-20"
+        },
+        {
+          "id": "oficioA@7",
+          "tipo": "OFICIO",
+          "folio": "OF-1998-077",
+          "contenido": "A. Karamázov solicita la reapertura del caso de su hermano D. Karamázov, argumentando que la acusación se basó solo en reclamos verbales, no en evidencia de acceso a la caja fuerte. Respuesta de Contraloría: 'Procedimiento cerrado, no ha lugar.'",
+          "fecha": "1998-10-02"
+        }
+      ],
+      "pistas": [
+        {
+          "id": "pista14@7",
+          "registroOrigen": "memoI@7",
+          "descripcion": "El memorándum de I. Karamázov circuló apenas una semana antes de la desaparición de los fondos, y llegó por correo interno a todo el personal con llave de la caja fuerte.",
+          "fraseGatillo": "una semana antes del cierre de caja"
+        },
+        {
+          "id": "pista15@7",
+          "registroOrigen": "empleadoSmerdiakov@7",
+          "descripcion": "El único empleado con acceso a la caja fuerte falleció seis días después de los hechos, sin que Recursos Humanos abriera investigación alguna sobre su fallecimiento.",
+          "fraseGatillo": "sin abrir investigación"
+        },
+        {
+          "id": "pista16@7",
+          "registroOrigen": "empleadoD@7",
+          "descripcion": "La acusación contra D. Karamázov se basó únicamente en sus reclamos públicos por escrito; nadie verificó si tuvo acceso real a la caja fuerte.",
+          "fraseGatillo": "cuatro días después de la desaparición de los fondos"
+        },
+        {
+          "id": "pista21@7",
+          "registroOrigen": "memoI@7",
+          "registroOrigen2": "empleadoSmerdiakov@7",
+          "descripcion": "El memo de I. Karamázov fue sellado de recibido por P. Smerdiakov el mismo día en que este retiró la llave de la caja fuerte de su cajón habitual."
+        },
+        {
+          "id": "pista34@7",
+          "registroOrigen": "empleadoD@7",
+          "registroOrigen2": "oficioA@7",
+          "descripcion": "La solicitud de reapertura de A. Karamázov está fechada el mismo día en que, según el expediente de su hermano, Contraloría ya había archivado el caso como 'sin elementos adicionales' — antes de recibir la solicitud."
+        }
+      ],
+      "sospechosos": [
+        {
+          "id": "sospechosoD@7",
+          "nombre": "D. Karamázov",
+          "descripcion": "Reclamó públicamente el dinero que su padre le debía. Fue despedido cuatro días después de la desaparición de los fondos.",
+          "desenlace": "Se ratifica el despido de D. Karamázov. Nadie investiga si tuvo acceso real a los fondos. Expediente cerrado por segunda vez, con el mismo error que la primera."
+        },
+        {
+          "id": "sospechosoI@7",
+          "nombre": "I. Karamázov",
+          "descripcion": "Distribuyó una circular argumentando que, sin revisión, todo está permitido, justo antes de la desaparición de los fondos.",
+          "desenlace": "Se le cita a comparecer por 'responsabilidad intelectual' sobre la circular. La empresa no cuenta con ningún procedimiento para sancionar una idea, así que el citatorio se archiva sin trámite posterior."
+        },
+        {
+          "id": "sospechosoSmerdiakovAcusado@7",
+          "nombre": "P. Smerdiakov",
+          "descripcion": "Único empleado con llave de la caja fuerte. Falleció seis días después de los hechos.",
+          "desenlace": "Se emite responsiva en contra de un empleado fallecido. Recursos Humanos confirma que, en efecto, no hay impedimento normativo para ello."
+        },
+        {
+          "id": "sospechosoA@7",
+          "nombre": "A. Karamázov",
+          "descripcion": "El único hermano que pidió reabrir el caso, argumentando que la acusación original no tenía sustento.",
+          "desenlace": "Se le atribuye responsabilidad por 'exceso de insistencia en la reapertura del caso'. Es la primera vez que solicitar una revisión se documenta como falta administrativa."
+        }
+      ]
+    },
+    {
+      "id": "caso8@8",
+      "titulo": "El expediente del empleado #427",
+      "descripcion": "El registro de nómina identifica a este empleado únicamente como '#427'. Su descripción de funciones, íntegra, dice: 'Presionar el botón cuando el sistema lo requiera.' Existen al menos tres actas de cierre para este expediente, cada una con un desenlace distinto e incompatible con las demás, las tres fechadas el mismo día.",
+      "estado": "ABIERTO",
+      "confidencial": false,
+      "principal": false,
+      "registros": [
+        {
+          "id": "empleado427@8",
+          "tipo": "EMPLEADO",
+          "folio": "EMP-0427",
+          "contenido": "#427. Puesto: Operador de terminal, función C. Descripción de funciones íntegra: 'Presionar el botón cuando el sistema lo requiera.' Quince años de antigüedad. Sin evaluaciones de desempeño registradas. Sin nombre en el campo correspondiente.",
+          "fecha": "1983-01-10"
+        },
+        {
+          "id": "actaA@8",
+          "tipo": "ACTA",
+          "folio": "ACTA-1998-427A",
+          "contenido": "Se determinó que el empleado #427 fue reasignado a labores de conserjería en el sótano, donde permanece. Cierre definitivo del expediente.",
+          "fecha": "1998-11-05"
+        },
+        {
+          "id": "actaB@8",
+          "tipo": "ACTA",
+          "folio": "ACTA-1998-427B",
+          "contenido": "Se determinó que el empleado #427 abandonó el inmueble por una ventana del cuarto piso. No hubo testigos. Cierre definitivo del expediente.",
+          "fecha": "1998-11-05"
+        },
+        {
+          "id": "actaC@8",
+          "tipo": "ACTA",
+          "folio": "ACTA-1998-427C",
+          "contenido": "Se determinó que las instalaciones fueron desmanteladas por completo cuarenta y ocho horas después de iniciada esta investigación, incluido el expediente mismo, que sin embargo usted sigue leyendo. Cierre definitivo del expediente.",
+          "fecha": "1998-11-05"
+        },
+        {
+          "id": "fax427@8",
+          "tipo": "FAX",
+          "folio": "FAX-1998-427",
+          "contenido": "Transmisión sin remitente identificado, sin registro de envío ni de recepción. El texto dice, en su totalidad: 'Muy bien. Ha llegado hasta aquí.'",
+          "fecha": "1998-11-05"
+        }
+      ],
+      "pistas": [
+        {
+          "id": "pista17@8",
+          "registroOrigen": "actaA@8",
+          "descripcion": "Las tres actas de cierre están fechadas el mismo día y a la misma hora, y ninguna hace referencia a las otras dos.",
+          "fraseGatillo": "reasignado a labores de conserjería en el sótano"
+        },
+        {
+          "id": "pista18@8",
+          "registroOrigen": "empleado427@8",
+          "descripcion": "La descripción de funciones de #427 nunca fue cuestionada en quince años: presionar un botón, sin más contexto administrativo ni evaluación alguna.",
+          "fraseGatillo": "Sin evaluaciones de desempeño registradas"
+        },
+        {
+          "id": "pista19@8",
+          "registroOrigen": "fax427@8",
+          "descripcion": "La transmisión sin remitente se dirige directamente a quien consulta el expediente, sin importar cuál de las tres actas haya leído primero.",
+          "fraseGatillo": "Ha llegado hasta aquí"
+        },
+        {
+          "id": "pista27@8",
+          "registroOrigen": "empleado427@8",
+          "registroOrigen2": "fax427@8",
+          "descripcion": "El campo de nombre en el expediente de #427 nunca estuvo lleno. Nadie había notado, hasta ahora, que el campo de remitente del fax tampoco lo está: los dos huecos coinciden en formato, como si fueran el mismo campo repetido dos veces."
+        },
+        {
+          "id": "pista35@8",
+          "registroOrigen": "actaB@8",
+          "registroOrigen2": "actaC@8",
+          "descripcion": "El Acta B dice que #427 salió por una ventana del cuarto piso; el Acta C dice que las instalaciones fueron desmanteladas cuarenta y ocho horas después de iniciar la investigación. Ninguna de las dos actas fue escrita después de la otra: comparten la misma hora de firma."
+        }
+      ],
+      "sospechosos": [
+        {
+          "id": "sospechosoConserjeria@8",
+          "nombre": "Conserjería del sótano",
+          "descripcion": "Según el Acta A, ahí fue reasignado el empleado #427.",
+          "desenlace": "Se presenta la acusación ante Conserjería. Confirman que #427 nunca se ha presentado a laborar ahí, aunque su gafete sigue registrado en la lista de asistencia diaria."
+        },
+        {
+          "id": "sospechosoMantenimiento@8",
+          "nombre": "Mantenimiento de la cuarta planta",
+          "descripcion": "Según el Acta B, por su ventana salió el empleado #427.",
+          "desenlace": "Se presenta la acusación ante Mantenimiento. Confirman que la ventana en cuestión no puede abrirse: está sellada desde la construcción del edificio."
+        },
+        {
+          "id": "sospechosoEmpresaDesmantelada@8",
+          "nombre": "La empresa que ya no existe",
+          "descripcion": "Según el Acta C, desmantelada por completo cuarenta y ocho horas después de iniciada la investigación.",
+          "desenlace": "Se presenta la acusación contra una empresa que, según las actas, fue desmantelada hace décadas. La acusación se procesa con normalidad. Aparentemente, alguien sigue ahí para recibirla."
+        },
+        {
+          "id": "sospechosoUsted8@8",
+          "nombre": "Usted",
+          "descripcion": "Quien está leyendo el expediente ahora mismo, a quien se dirige la transmisión sin remitente.",
+          "desenlace": "Se presenta la acusación contra quien está leyendo el expediente. No hay una casilla pensada para esta respuesta, así que el sistema la registra igual, en blanco, bajo el nombre '#427'."
+        }
+      ]
+    }
+  ],
+  "conceptos": [
+    {
+      "id": "conceptoComite@6",
+      "nombre": "Comité Ad Honorem",
+      "tipo": "COMITE",
+      "resumen": "Órgano que autoriza decisiones desde al menos 1958 sin figurar jamás en un organigrama oficial. Ordenó el traslado de [[E. Montalvo]] a un piso que no existe, y redactó una versión no circulada del acta constitutiva de la empresa. Su sello es idéntico al de [[Carcosa Servicios Escénicos]]. El mismo patrón de cierres sin preguntas reaparece en el expediente de [[P. Smerdiakov]], años antes de que el Comité existiera oficialmente en ningún papel. La fórmula de su acta fundacional reaparece, palabra por palabra, en la creación del [[Comité de Bienestar Laboral]] de 1988.",
+      "pistas": [
+        "pista3@2",
+        "pista6@3",
+        "pista11@6",
+        "pista12@6",
+        "pista13@6",
+        "pista15@7"
+      ]
+    },
+    {
+      "id": "conceptoBienestar@6",
+      "nombre": "Comité de Bienestar Laboral",
+      "tipo": "COMITE",
+      "resumen": "Creado en 1988 para dictaminar solicitudes de mobiliario especial. No ha alcanzado quórum ni una sola vez desde su fundación, lo que dejó seis años en trámite la silla de R. Salcido. Su acta de creación reproduce, palabra por palabra, la fórmula del acta fundacional del [[Comité Ad Honorem]] de 1958 — incluida la cláusula que define el quórum de un modo que ningún número de asistentes puede satisfacer.",
+      "pistas": [
+        "pista3@2",
+        "pista22@2"
+      ]
+    },
+    {
+      "id": "conceptoCarcosa@6",
+      "nombre": "Carcosa Servicios Escénicos",
+      "tipo": "EMPRESA",
+      "resumen": "Proveedor contratado en 1996 para el evento de aniversario. Cobró un recargo específico por NO representar el segundo acto de su montaje, [[El Rey de Amarillo (Acto II)]]. Selló su factura con un sello amarillo que no corresponde a ningún notario ni al sello oficial de la empresa: el mismo que usa el [[Comité Ad Honorem]]. La dirección fiscal de su contrato reaparece en 1999, declarada por [[El proveedor sin RFC]] del cierre de caja.",
+      "pistas": [
+        "pista20@1",
+        "pista7@4",
+        "pista8@4",
+        "pista11@6"
+      ]
+    },
+    {
+      "id": "conceptoProveedor@6",
+      "nombre": "El proveedor sin RFC",
+      "tipo": "EMPRESA",
+      "resumen": "Cobró $482,000 por 'servicios de consultoría' el 30/12/1999, autorizado sin revisión previa y aprobado por Contraloría en cinco minutos. El registro mercantil no lo conoce. La dirección fiscal declarada en su factura coincide con la que usó [[Carcosa Servicios Escénicos]] en su contrato de 1996 — un local que, según el padrón municipal, lleva vacío desde 1994.",
+      "pistas": [
+        "pista20@1"
+      ]
+    },
+    {
+      "id": "conceptoActoII@6",
+      "nombre": "El Rey de Amarillo (Acto II)",
+      "tipo": "DOCUMENTO",
+      "resumen": "Segundo acto de la obra montada por [[Carcosa Servicios Escénicos]] en la fiesta de aniversario de 1996. El contrato prohíbe expresamente representarlo. Nadie en el comité organizador recuerda quién propuso esa cláusula, ni por qué el Acto I bastó para que varios asistentes pidieran cambio de área la misma semana.",
+      "pistas": [
+        "pista7@4"
+      ]
+    },
+    {
+      "id": "conceptoPiso13@6",
+      "nombre": "El piso 13 / Enlace Especial",
+      "tipo": "LUGAR",
+      "resumen": "Destino del traslado de [[E. Montalvo]] en 1993, según un memorándum sellado de recibido. El edificio, de acuerdo con todos los planos vigentes, tiene doce pisos. La orden de traslado la firmó el [[Comité Ad Honorem]].",
+      "pistas": [
+        "pista5@3",
+        "pista6@3"
+      ]
+    },
+    {
+      "id": "conceptoMontalvo@6",
+      "nombre": "E. Montalvo",
+      "tipo": "PERSONA",
+      "resumen": "Auxiliar administrativo 1988-1993. Trasladado a [[El piso 13 / Enlace Especial]] por instrucción del [[Comité Ad Honorem]]. No hay renuncia, baja ni recibo de nómina posterior a la fecha del traslado.",
+      "pistas": [
+        "pista5@3"
+      ]
+    },
+    {
+      "id": "conceptoMemoRepetido@6",
+      "nombre": "El expediente que se repite (MEMO-1978-014)",
+      "tipo": "DOCUMENTO",
+      "resumen": "Un memorándum con folio, fecha y errores de mecanografía idénticos aparece archivado por separado en 1978, 1993 y 2007. La copia más reciente incluye una nota dirigida, literalmente, a quien lo esté leyendo ahora. Guardado en el [[Archivo Muerto]].",
+      "pistas": [
+        "pista9@5",
+        "pista10@5"
+      ]
+    },
+    {
+      "id": "conceptoArchivoMuerto@6",
+      "nombre": "Archivo Muerto",
+      "tipo": "LUGAR",
+      "resumen": "Depósito de expedientes que, según un acta de 2007, deben 'revisarse' cada quince años sin que exista razón administrativa registrada para ello. Ahí apareció también la versión no circulada del acta fundacional del [[Comité Ad Honorem]], de 1958. Ahí, tarde o temprano, terminan también los expedientes sin remitente ni destino claro, como el de [[Empleado #427]].",
+      "pistas": [
+        "pista9@5",
+        "pista19@8"
+      ]
+    },
+    {
+      "id": "conceptoAuditor@6",
+      "nombre": "auditor01 (usted)",
+      "tipo": "PERSONA",
+      "resumen": "Su propio usuario figura en la lista de firmantes autorizados del [[Comité Ad Honorem]] desde 1958, con una fecha de alta muy anterior a su contratación real. No hay una explicación administrativa registrada para ello. Tampoco se ha solicitado una.",
+      "pistas": [
+        "pista12@6"
+      ]
+    },
+    {
+      "id": "conceptoEpilogo@6",
+      "nombre": "Memorándum de acreditación especial",
+      "tipo": "DOCUMENTO",
+      "resumen": "Para: auditor en turno. Habiendo dado cierre a los cinco expedientes bajo su cargo, se le concede acceso temporal a los archivos del [[Comité Ad Honorem]], en los términos del acta fundacional. Usuario: enlace13. Clave de acceso: hastur-local-13. Esta acreditación no requiere renovación ni caduca: simplemente, no se ha previsto ese caso.",
+      "epilogo": true
+    },
+    {
+      "id": "conceptoDKaramazov@7",
+      "nombre": "D. Karamázov",
+      "tipo": "PERSONA",
+      "resumen": "Gerente de Ventas despedido por 'conducta impropia' cuatro días después de la desaparición de los fondos de su padre. La acusación en su contra se basó solo en sus reclamos por escrito, nunca en evidencia de acceso a la caja fuerte, que sí tenía [[P. Smerdiakov]].",
+      "pistas": [
+        "pista16@7"
+      ]
+    },
+    {
+      "id": "conceptoIKaramazov@7",
+      "nombre": "I. Karamázov",
+      "tipo": "PERSONA",
+      "resumen": "Del Departamento de Planeación. Distribuyó una circular interna una semana antes de la desaparición de los fondos, argumentando que sin revisión todo está permitido. La leyó, entre otros, [[P. Smerdiakov]].",
+      "pistas": [
+        "pista14@7"
+      ]
+    },
+    {
+      "id": "conceptoSmerdiakov@7",
+      "nombre": "P. Smerdiakov",
+      "tipo": "PERSONA",
+      "resumen": "Único empleado con llave de la caja fuerte. Falleció seis días después de la desaparición de los fondos; Recursos Humanos cerró su expediente sin preguntar por qué, poco después de que circulara el memorándum de [[I. Karamázov]]. El mismo silencio administrativo, el mismo cierre sin explicación, reaparece décadas después en los expedientes que ya autoriza el [[Comité Ad Honorem]].",
+      "pistas": [
+        "pista15@7"
+      ]
+    },
+    {
+      "id": "concepto427@8",
+      "nombre": "Empleado #427",
+      "tipo": "PERSONA",
+      "resumen": "Quince años presionando un botón sin que nadie preguntara para qué. Su expediente tiene tres actas de cierre incompatibles entre sí, y después llegó [[La transmisión sin remitente]].",
+      "pistas": [
+        "pista18@8"
+      ]
+    },
+    {
+      "id": "conceptoTransmision@8",
+      "nombre": "La transmisión sin remitente",
+      "tipo": "DOCUMENTO",
+      "resumen": "Un fax sin origen registrado, llegado el mismo día de las tres actas de cierre de [[Empleado #427]]. No dice a quién va dirigido, y aun así parece saber exactamente quién lo está leyendo. Expedientes así, sin remitente ni destino claro, suelen terminar en el [[Archivo Muerto]].",
+      "pistas": [
+        "pista19@8"
+      ]
+    }
+  ]
+}

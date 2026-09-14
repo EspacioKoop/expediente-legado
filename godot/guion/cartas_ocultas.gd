@@ -7,7 +7,8 @@ class_name CartasOcultas
 extends RefCounted
 
 const POR_FOLIO := {
-	"ACTA-1999-014": {"frase": "cinco minutos después de la hora de registro", "carta": "la-justicia"},
+	"ACTA-1999-014":
+	{"frase": "cinco minutos después de la hora de registro", "carta": "la-justicia"},
 	"OF-1990-114": {"frase": "para su valoración y trámite correspondiente", "carta": "la-rueda"},
 	"MEMO-1993-201": {"frase": "Preséntese el día 05/07/1993 sin excepción", "carta": "el-juicio"},
 	"F-1996-00187": {"frase": "es de color amarillo", "carta": "la-luna"},
@@ -16,6 +17,7 @@ const POR_FOLIO := {
 	"OF-1998-077": {"frase": "no ha lugar", "carta": "la-emperatriz"},
 	"ACTA-1998-427B": {"frase": "No hubo testigos", "carta": "la-sacerdotisa"},
 }
+
 
 static func en_folio(folio) -> Dictionary:
 	if folio == null:

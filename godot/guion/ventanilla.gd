@@ -22,7 +22,8 @@ const DE_OFICIO := {
 	"nombre": "OFICIO_NOMBRE",
 	"tipo": "PERSONA",
 	"resumen": "OFICIO_RESUMEN",
-	"ataques": [
+	"ataques":
+	[
 		"OFICIO_ATAQUE_1",
 		"OFICIO_ATAQUE_2",
 		"OFICIO_ATAQUE_3",
@@ -46,7 +47,8 @@ static func disponibles(contenido: Contenido, descubiertas: Array) -> Array:
 ## sobrevive a la partida — es la meta-progresión de la Ventanilla.
 static func cerrar(estado: Dictionary, racha: int, gano: bool) -> Dictionary:
 	var resultado := Prometeo.actualizar_racha(
-		racha, int(estado.get("coliseo_racha_mejor", 0)), gano)
+		racha, int(estado.get("coliseo_racha_mejor", 0)), gano
+	)
 	estado["coliseo_racha_mejor"] = resultado["mejor"]
 
 	var logros := []

@@ -1,0 +1,13 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://arte/cielo_siga.gdshader" id="1_cielo"]
+
+[resource]
+shader = ExtResource("1_cielo")
+shader_parameter/cielo_alto = Color(0.055, 0.075, 0.11, 1)
+shader_parameter/horizonte = Color(0.18, 0.17, 0.17, 1)
+shader_parameter/ocaso = Color(0.30, 0.16, 0.10, 1)
+shader_parameter/sol_color = Color(0.82, 0.72, 0.54, 1)
+shader_parameter/ocaso_mezcla = 0.18
+shader_parameter/sol_tamano = 0.012
+shader_parameter/bandas = 42.0

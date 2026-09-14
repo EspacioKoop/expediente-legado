@@ -9,14 +9,14 @@
 class_name EstiloSiga
 extends RefCounted
 
-const GRIS := Color("c0c0c0")           ## el gris de sistema de la época
-const GRIS_CLARO := Color("dfdfdf")     ## la luz del bisel
-const GRIS_OSCURO := Color("808080")    ## su sombra
+const GRIS := Color("c0c0c0")  ## el gris de sistema de la época
+const GRIS_CLARO := Color("dfdfdf")  ## la luz del bisel
+const GRIS_OSCURO := Color("808080")  ## su sombra
 const NEGRO := Color("000000")
 const BLANCO := Color("ffffff")
-const AZUL_TITULO := Color("000080")    ## la barra de título activa
+const AZUL_TITULO := Color("000080")  ## la barra de título activa
 const AZUL_ENLACE := Color("0000aa")
-const AMARILLO_VISTO := Color("c8c800") ## una frase gatillo ya leída
+const AMARILLO_VISTO := Color("c8c800")  ## una frase gatillo ya leída
 const GRIS_TEXTO := Color("808080")
 
 const GROSOR := 2
@@ -30,15 +30,23 @@ static func dibujar_bisel(lienzo: CanvasItem, rect: Rect2, fondo: Color, salient
 	for i in GROSOR:
 		var d := float(i)
 		# Arriba e izquierda.
-		lienzo.draw_line(rect.position + Vector2(d, d),
-			rect.position + Vector2(rect.size.x - d, d), luz)
-		lienzo.draw_line(rect.position + Vector2(d, d),
-			rect.position + Vector2(d, rect.size.y - d), luz)
+		lienzo.draw_line(
+			rect.position + Vector2(d, d), rect.position + Vector2(rect.size.x - d, d), luz
+		)
+		lienzo.draw_line(
+			rect.position + Vector2(d, d), rect.position + Vector2(d, rect.size.y - d), luz
+		)
 		# Abajo y derecha.
-		lienzo.draw_line(rect.position + Vector2(d, rect.size.y - 1.0 - d),
-			rect.position + Vector2(rect.size.x - d, rect.size.y - 1.0 - d), sombra)
-		lienzo.draw_line(rect.position + Vector2(rect.size.x - 1.0 - d, d),
-			rect.position + Vector2(rect.size.x - 1.0 - d, rect.size.y - d), sombra)
+		lienzo.draw_line(
+			rect.position + Vector2(d, rect.size.y - 1.0 - d),
+			rect.position + Vector2(rect.size.x - d, rect.size.y - 1.0 - d),
+			sombra
+		)
+		lienzo.draw_line(
+			rect.position + Vector2(rect.size.x - 1.0 - d, d),
+			rect.position + Vector2(rect.size.x - 1.0 - d, rect.size.y - d),
+			sombra
+		)
 
 
 ## El tema de toda la interfaz.
@@ -53,8 +61,7 @@ static func dibujar_bisel(lienzo: CanvasItem, rect: Rect2, fondo: Color, salient
 ## donde no estén, la que haya. Que la elección degrade es lo que evita traer un
 ## binario al repositorio.
 static func fuente() -> SystemFont:
-	return _sin_suavizar([
-		"MS Sans Serif", "Tahoma", "Verdana", "DejaVu Sans", "Sans-Serif"])
+	return _sin_suavizar(["MS Sans Serif", "Tahoma", "Verdana", "DejaVu Sans", "Sans-Serif"])
 
 
 ## La del cuerpo de un documento: monoespaciada, porque es un volcado de un
@@ -64,8 +71,7 @@ static func fuente() -> SystemFont:
 ## sueño escribe en las paredes (#87) van en la letra del documento del que
 ## salen, que es media parte de reconocerlas.
 static func fuente_mono() -> SystemFont:
-	return _sin_suavizar([
-		"Courier New", "DejaVu Sans Mono", "Liberation Mono", "Monospace"])
+	return _sin_suavizar(["Courier New", "DejaVu Sans Mono", "Liberation Mono", "Monospace"])
 
 
 static func _sin_suavizar(nombres: Array) -> SystemFont:

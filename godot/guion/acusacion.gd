@@ -46,8 +46,13 @@ static func esta_cerrado(estado: Dictionary, caso_id: String) -> bool:
 ## Devuelve qué ha pasado, con todo lo que la pantalla necesita contar. El
 ## desenlace lo trae el propio sospechoso: no se compone aquí, porque es
 ## contenido y no regla.
-static func acusar(estado: Dictionary, jornada: Dictionary, caso: Dictionary,
-		sospechoso: Dictionary, descubiertas: Array) -> Dictionary:
+static func acusar(
+	estado: Dictionary,
+	jornada: Dictionary,
+	caso: Dictionary,
+	sospechoso: Dictionary,
+	descubiertas: Array
+) -> Dictionary:
 	var caso_id: String = caso["id"]
 	if esta_cerrado(estado, caso_id):
 		return {"resultado": "ya_cerrado"}
@@ -65,7 +70,8 @@ static func acusar(estado: Dictionary, jornada: Dictionary, caso: Dictionary,
 	var pistas: Array = caso.get("pistas", [])
 	var encontradas := pistas.filter(func(p): return descubiertas.has(p["id"])).size()
 	var precipitada := Prometeo.acusacion_precipitada(
-		encontradas, pistas.size(), ajustes(estado)["umbral"])
+		encontradas, pistas.size(), ajustes(estado)["umbral"]
+	)
 
 	var castigo := {}
 	if precipitada:

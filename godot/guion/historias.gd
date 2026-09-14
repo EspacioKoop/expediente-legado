@@ -29,19 +29,23 @@ const TOPE_CARGAS := 2
 ## `nombre` y `efecto` son CLAVES de traducción: el texto vive en
 ## `datos/textos.csv` y lo resuelve quien pinta el botón.
 const HABILIDADES := {
-	"comunismo": {
+	"comunismo":
+	{
 		"nombre": "HABILIDAD_ASAMBLEA",
 		"efecto": "HABILIDAD_ASAMBLEA_EFECTO",
 	},
-	"centrista": {
+	"centrista":
+	{
 		"nombre": "HABILIDAD_MESA",
 		"efecto": "HABILIDAD_MESA_EFECTO",
 	},
-	"socialdemocrata": {
+	"socialdemocrata":
+	{
 		"nombre": "HABILIDAD_COMISION",
 		"efecto": "HABILIDAD_COMISION_EFECTO",
 	},
-	"neoliberal": {
+	"neoliberal":
+	{
 		"nombre": "HABILIDAD_EXTERNALIZAR",
 		"efecto": "HABILIDAD_EXTERNALIZAR_EFECTO",
 	},
@@ -68,8 +72,8 @@ func de(carta_id: String) -> Dictionary:
 
 
 ## Qué enseñar al abrir una carta: sus cuatro opciones si está sin resolver, o
-## su secuela si ya se decidió. Una historia no se vuelve a preguntar — la
-## decisión política de una partida se toma una vez.
+## su secuela si ya se decidió. Posponer no rerrollea ni sustituye opciones:
+## solo deja constancia de que el jugador decidió volver después.
 func vista(estado: Dictionary, carta_id: String) -> Dictionary:
 	var historia := de(carta_id)
 	if historia.is_empty():
@@ -78,7 +82,7 @@ func vista(estado: Dictionary, carta_id: String) -> Dictionary:
 	var elegido = estado.get("historias_cartas", {}).get(carta_id)
 	if elegido == null:
 		return {
-			"estado": "pendiente",
+			"estado": "pospuesta" if esta_pospuesta(estado, carta_id) else "pendiente",
 			"texto": historia["texto"],
 			"opciones": historia["opciones"],
 		}
@@ -89,6 +93,27 @@ func vista(estado: Dictionary, carta_id: String) -> Dictionary:
 		"clasificacion": Prometeo.clasificar_eleccion(carta_id, elegido),
 		"secuela": _secuela(historia, carta_id, elegido),
 	}
+
+
+## Registra que esta vez se cierra el relato sin elegir. No concede cargas,
+## secuelas, puntos ni pistas: la historia sigue pendiente y puede reabrirse
+## con exactamente el mismo catálogo. Repetir la operación es idempotente.
+func postergar(estado: Dictionary, carta_id: String) -> bool:
+	if de(carta_id).is_empty():
+		return false
+	if estado.get("historias_cartas", {}).has(carta_id):
+		return false
+	var pospuestas := _pospuestas(estado)
+	if not pospuestas.has(carta_id):
+		pospuestas.append(carta_id)
+		pospuestas.sort()
+	estado["historias_pospuestas"] = pospuestas
+	return true
+
+
+func esta_pospuesta(estado: Dictionary, carta_id: String) -> bool:
+	var pospuestas = estado.get("historias_pospuestas", [])
+	return typeof(pospuestas) == TYPE_ARRAY and pospuestas.has(carta_id)
 
 
 ## Registra la elección y devuelve lo que hay que contar. Muta el estado: la
@@ -107,22 +132,22 @@ func resolver(estado: Dictionary, carta_id: String, eje: String) -> Dictionary:
 	if not historias.has(carta_id):
 		historias[carta_id] = eje
 		estado["historias_cartas"] = historias
+		_quitar_pospuesta(estado, carta_id)
 
 	return vista(estado, carta_id)
 
 
 ## Las cargas de habilidad disponibles, por eje.
 func cargas(estado: Dictionary) -> Dictionary:
-	var puntos := Prometeo.puntos_por_eje(
-		estado.get("historias_cartas", {}), catalogo.keys())
+	var puntos := Prometeo.puntos_por_eje(estado.get("historias_cartas", {}), catalogo.keys())
 	var disponibles := {}
 	for eje in Prometeo.EJES:
 		disponibles[eje] = mini(TOPE_CARGAS, puntos[eje])
 	return disponibles
 
 
-## Cuántas historias quedan por decidir. El final político no llega hasta que
-## se han resuelto las ocho.
+## Cuántas historias quedan por decidir. Posponer no reduce este contador: el
+## final político no llega hasta que se han resuelto las ocho.
 func pendientes(estado: Dictionary) -> int:
 	var resueltas: Dictionary = estado.get("historias_cartas", {})
 	var quedan := 0
@@ -132,7 +157,21 @@ func pendientes(estado: Dictionary) -> int:
 	return quedan
 
 
+func _pospuestas(estado: Dictionary) -> Array:
+	var valor = estado.get("historias_pospuestas", [])
+	return valor.duplicate() if typeof(valor) == TYPE_ARRAY else []
+
+
+func _quitar_pospuesta(estado: Dictionary, carta_id: String) -> void:
+	var pospuestas := _pospuestas(estado)
+	if pospuestas.has(carta_id):
+		pospuestas.erase(carta_id)
+		estado["historias_pospuestas"] = pospuestas
+
+
 func _secuela(historia: Dictionary, carta_id: String, eje: String) -> String:
-	return historia["secuelaUtil"] \
-		if Prometeo.clasificar_eleccion(carta_id, eje) == "pista" \
+	return (
+		historia["secuelaUtil"]
+		if Prometeo.clasificar_eleccion(carta_id, eje) == "pista"
 		else historia["secuelaConfusion"]
+	)
