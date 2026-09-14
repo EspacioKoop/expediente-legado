@@ -51,6 +51,13 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn("direct.joypad", self.cpp)
         self.assertIn("run_frame_rgba", self.cpp)
 
+    def test_nucleo_expone_sram_sin_saltarse_tamano_del_cartucho(self):
+        self.assertIn('D_METHOD("save_ram")', self.cpp)
+        self.assertIn('D_METHOD("load_save_ram", "save")', self.cpp)
+        self.assertIn("impl->cart_ram", self.cpp)
+        self.assertIn("p_save.size()", self.cpp)
+        self.assertIn("Tamaño de SRAM no coincide con el cartucho", self.cpp)
+
     def test_portatil_abre_ui_sin_estado_de_campana(self):
         self.assertIn("EmuladorPortatilApp.new()", self.portatil)
         combinado = self.cpp + self.ui + self.portatil
@@ -75,6 +82,17 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn("_tiempo_emulador -= PASO_EMULADOR", self.ui)
         self.assertNotIn("func _process(_delta: float)", self.ui)
 
+    def test_ui_persiste_sram_por_sha256_fuera_de_la_partida(self):
+        self.assertIn('SRAM_DIR := "user://sram/gb"', self.ui)
+        self.assertIn("HashingContext.HASH_SHA256", self.ui)
+        self.assertIn('hex_encode()', self.ui)
+        self.assertIn('_emulador.call("save_ram")', self.ui)
+        self.assertIn('_emulador.call("load_save_ram", datos)', self.ui)
+        self.assertIn('".nuevo"', self.ui)
+        self.assertIn('".anterior"', self.ui)
+        self.assertIn('".roto"', self.ui)
+        self.assertIn("_recuperar_respaldo_sram()", self.ui)
+
     def test_smoke_compara_pixeles_rgba_no_canales_sueltos(self):
         self.assertIn("BYTES_POR_PIXEL := 4", self.smoke)
         self.assertIn("func _frame_tiene_variacion", self.smoke)
@@ -82,6 +100,11 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn("17, 34, 51, 255, 17, 34, 51, 255", self.smoke)
         self.assertIn("17, 34, 51, 255, 17, 35, 51, 255", self.smoke)
         self.assertIn("if not _frame_tiene_variacion(frame)", self.smoke)
+
+    def test_smoke_ejercita_api_sram_nativa(self):
+        self.assertIn("func _probar_sram", self.smoke)
+        self.assertIn('emulador.call("save_ram")', self.smoke)
+        self.assertIn('emulador.call("load_save_ram", sram)', self.smoke)
 
     def test_extension_declara_linux_y_windows(self):
         self.assertIn('compatibility_minimum = "4.7"', self.extension)
