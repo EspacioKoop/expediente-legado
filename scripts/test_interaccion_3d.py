@@ -54,11 +54,14 @@ def test_caminante_monta_detector_bajo_la_camara() -> None:
     assert "objetivo_perdido.connect(_ocultar_prompt_interaccion)" in texto
 
 
-def test_prompt_es_contextual_y_no_hardcodea_tecla() -> None:
+def test_prompt_es_contextual_remapeable_y_no_hardcodea_tecla() -> None:
     texto = fuente(CAMINANTE)
     assert "Control.PRESET_CENTER_BOTTOM" in texto
     assert "_prompt_interaccion.visible = false" in texto
-    assert "_prompt_interaccion.text = texto" in texto
+    assert "_texto_interaccion_actual = texto" in texto
+    assert '_prompt_interaccion.text = _texto_con_entrada("interactuar", _texto_interaccion_actual)' in texto
+    assert "InputMap.action_get_events(accion)" in texto
+    assert "_evento_pertenece_a_dispositivo(evento)" in texto
     assert "KEY_E" not in texto.split("func _montar_interaccion", 1)[1].split(
         "func _asegurar_controles_movimiento", 1
     )[0]
