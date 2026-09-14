@@ -7,6 +7,7 @@ on:
       - ".github/workflows/gbc-fixtures.yml"
       - "scripts/test_gbc_fixture_workflow.py"
       - "docs/gbc-fixtures.md"
+      - "gbc/fixtures/cgb_only_smoke/**"
       - "gbc/minijuegos/caza_pixeles_98/**"
       - "gbc/minijuegos/paper_planes_98/**"
       - "gbc/minijuegos/croc_riders_98/**"
@@ -70,6 +71,13 @@ jobs:
           cp fixture-src/src/joypad/joypad.gb gbc-fixtures/
           cp fixture-src/src/vblank/vblank.gb gbc-fixtures/
 
+      - name: Build CGB-only smoke fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C gbc/fixtures/cgb_only_smoke clean all
+          cp gbc/fixtures/cgb_only_smoke/build/cgb_only_smoke.gbc gbc-fixtures/
+
       - name: Build Caza Pixeles 98
         shell: bash
         run: |
@@ -97,7 +105,7 @@ jobs:
           set -euo pipefail
           (
             cd gbc-fixtures
-            sha256sum joypad.gb vblank.gb caza_pixeles_98.gbc paper_planes_98.gbc croc_riders_98.gbc | tee SHA256SUMS
+            sha256sum joypad.gb vblank.gb cgb_only_smoke.gbc caza_pixeles_98.gbc paper_planes_98.gbc croc_riders_98.gbc | tee SHA256SUMS
           )
           for rom in gbc-fixtures/*.gb gbc-fixtures/*.gbc; do
             test -s "$rom"
@@ -108,6 +116,7 @@ jobs:
           for rom in gbc-fixtures/caza_pixeles_98.gbc gbc-fixtures/paper_planes_98.gbc gbc-fixtures/croc_riders_98.gbc; do
             test "$(od -An -tx1 -j 323 -N 1 "$rom" | tr -d ' \n')" = "80"
           done
+          test "$(od -An -tx1 -j 323 -N 1 gbc-fixtures/cgb_only_smoke.gbc | tr -d ' \n')" = "c0"
 
       - name: Upload ephemeral GBC ROMs
         uses: actions/upload-artifact@v4
@@ -116,6 +125,7 @@ jobs:
           path: |
             gbc-fixtures/joypad.gb
             gbc-fixtures/vblank.gb
+            gbc-fixtures/cgb_only_smoke.gbc
             gbc-fixtures/caza_pixeles_98.gbc
             gbc-fixtures/paper_planes_98.gbc
             gbc-fixtures/croc_riders_98.gbc
