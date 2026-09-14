@@ -223,8 +223,12 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 	var hundido := alto * 0.018
 	var ojo_izq := Vector2(-separacion, altura_ojos)
 	var ojo_der := Vector2(separacion, altura_ojos)
-	var z_ojo_izq := _frente_cabeza(ojo_izq.x, ojo_izq.y, centro_y, radio_x, radio_y, radio_z) - hundido
-	var z_ojo_der := _frente_cabeza(ojo_der.x, ojo_der.y, centro_y, radio_x, radio_y, radio_z) - hundido
+	var z_ojo_izq := (
+		_frente_cabeza(ojo_izq.x, ojo_izq.y, centro_y, radio_x, radio_y, radio_z) - hundido
+	)
+	var z_ojo_der := (
+		_frente_cabeza(ojo_der.x, ojo_der.y, centro_y, radio_x, radio_y, radio_z) - hundido
+	)
 	_rasgo_esfera(
 		enganche,
 		Vector3(ojo_izq.x, ojo_izq.y, z_ojo_izq),
@@ -292,7 +296,9 @@ static func _alto_cabeza(esqueleto: Skeleton3D, hueso: int) -> float:
 	)
 
 
-static func _volumen_cabeza(padre: Node3D, posicion: Vector3, escala: Vector3, color: Color) -> void:
+static func _volumen_cabeza(
+	padre: Node3D, posicion: Vector3, escala: Vector3, color: Color
+) -> void:
 	var cabeza := MeshInstance3D.new()
 	var esfera := SphereMesh.new()
 	esfera.radius = 1.0
