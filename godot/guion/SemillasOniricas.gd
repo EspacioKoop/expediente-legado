@@ -1,4 +1,5 @@
-## Gestión de semillas oníricas: activación de familias de sueño por interacciones fuera de la oficina.
+## Gestión de semillas oníricas: activación de familias de sueño por
+## interacciones fuera de la oficina.
 ## Implementa el contrato descrito en el issue #442.
 ##
 ## La semilla se activa mediante interacciones voluntarias con fuentes externas
@@ -30,12 +31,12 @@ const MITO_CONTENIDO := {
 	},
 }
 
+static var _instancia: SemillasOniricas = null
+
 # Estado efímero del singleton. El wiring con la jornada pertenece al PR de
 # semillas; esta clase no inventa una API de Jornada que no existe.
 var semillas_oniricas_hoy: Dictionary = {}
 var _dia_actual := 0
-
-static var _instancia: SemillasOniricas = null
 
 
 static func reiniciar_dia() -> void:
