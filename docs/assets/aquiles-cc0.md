@@ -1,6 +1,6 @@
 # Aquiles — catálogo CC0 para #438
 
-Este directorio reserva el destino de los assets externos del vertical de Aquiles. El primer corte no incluye binarios: el repositorio exige registrar binarios en `godot/assets/procedencia.json` y, cuando corresponda, subir también sus objetos Git LFS. Esa ruta está compartida/reservada por otros trabajos, así que aquí se documentan únicamente fuentes verificadas y rutas de importación previstas.
+Este documento reserva el destino de los assets externos del vertical de Aquiles. El primer corte no incluye binarios: el repositorio exige registrar binarios en `godot/assets/procedencia.json` y, cuando corresponda, subir también sus objetos Git LFS. Esa ruta está compartida/reservada por otros trabajos, así que aquí se documentan únicamente fuentes verificadas y rutas de importación previstas.
 
 ## 3D — figura principal
 
@@ -41,8 +41,16 @@ Al vendorizarlo conviene conservar el original y generar/importar una copia GLB 
 - Autor: Felice Giani.
 - Fecha: ca. 1790.
 - La ficha Smithsonian declara `Restrictions & Rights: CC0`.
-- Búsqueda/ficha Smithsonian: <https://www.si.edu/object/thetis-plunges-achilles-river-styx:chndm_1901-39-2713>
+- Ficha Smithsonian: <https://www.si.edu/object/thetis-plunges-achilles-river-styx:chndm_1901-39-3288>
 - Uso previsto: alternativa de póster doméstico o referencia compositiva para el reflejo imposible del sueño.
+
+## Candidatos CC0 para ampliar el decorado
+
+- `3d Greek Weapons Set`, también de gamekorp: espada, vaina, escudo y lanza bajo **CC0**. <https://opengameart.org/content/3d-greek-weapons-set>
+- `Modular Temple - 3D Models`, de Fertile Soil Productions: módulos OBJ de templo bajo **CC0**. <https://opengameart.org/content/modular-temple-3d-models>
+- `3TD Fantasy Ruins Pack`, de Ron Kapaun: columnas, arcos y templos en ruinas bajo **CC0**. <https://opengameart.org/content/3td-fantasy-ruins-pack>
+
+Estos secundarios encajan como escenografía o impactos congelados, pero no son necesarios para el primer vertical y por tanto no deben inflar el PR inicial.
 
 ## Criterio de integración
 

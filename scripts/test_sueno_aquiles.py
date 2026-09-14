@@ -5,7 +5,7 @@ import unittest
 RAIZ = Path(__file__).resolve().parents[1]
 SUENO = RAIZ / "godot" / "guion" / "sueno_aquiles.gd"
 ESCENA = RAIZ / "godot" / "escenas" / "sueno_aquiles.tscn"
-CATALOGO = RAIZ / "godot" / "assets" / "cc0" / "aquiles" / "README.md"
+CATALOGO = RAIZ / "docs" / "assets" / "aquiles-cc0.md"
 
 
 class SuenoAquilesTest(unittest.TestCase):
@@ -53,7 +53,9 @@ class SuenoAquilesTest(unittest.TestCase):
         self.assertIn("The Baptism of Achilles", self.catalogo)
         self.assertIn("Cleveland Museum of Art", self.catalogo)
         self.assertIn("Thetis Dipping the Infant Achilles", self.catalogo)
-        self.assertGreaterEqual(self.catalogo.count("CC0"), 5)
+        self.assertIn("3d Greek Weapons Set", self.catalogo)
+        self.assertIn("Modular Temple - 3D Models", self.catalogo)
+        self.assertGreaterEqual(self.catalogo.count("CC0"), 8)
 
     def test_no_finge_binarios_que_aun_no_estan_vendorados(self):
         self.assertIn("El primer corte no incluye binarios", self.catalogo)
