@@ -41,8 +41,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/api/golf/ranking/**"))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/webjars/**", "/css/**", "/js/**").permitAll()
+                .requestMatchers(
+                    "/login",
+                    "/webjars/**",
+                    "/css/**",
+                    "/js/**",
+                    "/api/golf/ranking/**")
+                .permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
