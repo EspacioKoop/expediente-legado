@@ -1,8 +1,8 @@
-## Primer vertical reutilizable del castillo onírico (#296).
+## Primer vertical reutilizable del castillo onírico (#296/#284).
 ##
 ## No importa un pack entero ni decide todavía cuándo aparece el castillo. Toma
 ## la familia anular de #279 como patio reconocible, fija una selección mínima
-## de categorías CC0 verificadas y deriva dos anomalías de presentación de un
+## de categorías CC0 verificadas y deriva anomalías de presentación de un
 ## estado explícito y reproducible.
 class_name SuenoCastillo
 extends RefCounted
@@ -11,6 +11,14 @@ const ID := "castillo"
 const LICENCIA := "CC0-1.0"
 const FUENTE_ARQUITECTURA := "https://valsekamerplant.itch.io/psx-style-going-medieval"
 const FUENTE_PROPS := "https://quaternius.com/packs/fantasypropsmegakit.html"
+
+## Señal local del códice. No pretende sustituir el prop final: permite que la
+## interacción sea localizable mientras #296 no haya incorporado una pieza
+## concreta con procedencia/hash/LFS. No añade texto nuevo; solo acompaña una
+## frase que el sueño ya estaba autorizado a mostrar.
+const COLOR_CODICE := Color(0.72, 0.58, 0.32)
+const ENERGIA_CODICE := 0.9
+const ALCANCE_CODICE := 3.2
 
 ## Las categorías, no nombres de fichero inventados. Los binarios concretos se
 ## resolverán solo al importar una pieza real con procedencia/hash/LFS.
@@ -82,13 +90,19 @@ static func configuracion(estado_presentacion: Dictionary = {}) -> Dictionary:
 		"anclas": anclas,
 		"seleccion": SELECCION_MINIMA.duplicate(true),
 		"anomalias":
-		# Al volver al mismo patio, la composición se presenta invertida. La
+		# Al volver al mismo patio, la entrada reaparece en otra ancla conocida.
+		# La geometría no se teletransporta ni se inventan coordenadas fuera de
+		# la familia: cambia la lectura del recorrido conservando sitios válidos.
 		{
-			# geometría base es la misma: cambia la lectura, no la navegación.
 			"retorno_patio":
 			{
-				"activa": vuelta > 0,
-				"giro_grados": 180.0 if vuelta % 2 == 1 else 0.0,
+				"activa": vuelta > 0 and not anclas.is_empty(),
+				"entrada":
+				(
+					anclas[posmod(vuelta, anclas.size())]
+					if not anclas.is_empty()
+					else familia.get("entrada", Vector3.ZERO)
+				),
 			},
 			# El códice cambia entre anclas conocidas de forma determinista. No
 			# crea una pista: solo mueve la representación de un documento que el
@@ -100,6 +114,85 @@ static func configuracion(estado_presentacion: Dictionary = {}) -> Dictionary:
 			},
 		},
 	}
+
+
+## Convierte un espacio ANULAR ya construido por `Sueno.espacio()` en la
+## presentación de castillo sin duplicar navegación ni tocar estado jugable.
+##
+## Este adaptador es deliberadamente independiente de la selección nocturna:
+## #279 mantiene ahora reservados `sueno.gd`/`sueno_formas.gd`. Cuando ese corte
+## termine, conectar el castillo consiste en llamar a esta función sobre la sala
+## `patio`; no hace falta volver a implementar geometría, salida ni contenido.
+##
+## `contenido_conocido` solo aporta material que el sueño ya obtuvo de #87. Si
+## no hay frase conocida, no se crea una interacción de códice vacía ni se
+## inventa texto de ambientación.
+static func adaptar_espacio(
+	espacio_base: Dictionary,
+	estado_presentacion: Dictionary = {},
+	contenido_conocido: Dictionary = {}
+) -> Dictionary:
+	if espacio_base.is_empty():
+		return {}
+
+	var configurada := configuracion(estado_presentacion)
+	if configurada.is_empty():
+		return espacio_base.duplicate(true)
+
+	var resultado := espacio_base.duplicate(true)
+	resultado["identidad_onirica"] = ID
+	resultado["contorno"] = configurada["contorno"]
+	resultado["altura_contorno"] = float(configurada.get("altura", 3.4))
+	resultado["seleccion_onirica"] = configurada["seleccion"].duplicate(true)
+	resultado["anomalias_oniricas"] = configurada["anomalias"].duplicate(true)
+
+	var anomalias: Dictionary = configurada.get("anomalias", {})
+	var retorno: Dictionary = anomalias.get("retorno_patio", {})
+	if bool(retorno.get("activa", false)):
+		resultado["entrada"] = retorno.get("entrada", configurada["entrada"])
+	else:
+		resultado["entrada"] = configurada["entrada"]
+
+	# Interacción ambiental: el primer fragmento de contenido YA conocido se
+	# vuelve una lectura localizada. `Espacio3D` entiende una salida con frase y
+	# destino vacío como zona de proximidad; no abre otra fase ni muta progreso.
+	var frases: Array = contenido_conocido.get("frases", [])
+	var codice: Dictionary = anomalias.get("codice_desplazado", {})
+	if not frases.is_empty() and bool(codice.get("activa", false)):
+		var ancla_codice: Vector3 = codice.get("ancla", Vector3.ZERO)
+		var salidas: Array = resultado.get("salidas", []).duplicate(true)
+		(
+			salidas
+			. append(
+				{
+					"pos": ancla_codice + Vector3(0, 1.0, 0),
+					"destino": "",
+					"frase": frases[0],
+					"tam": Vector3(2.4, 2.0, 2.4),
+					"visible": false,
+				}
+			)
+		)
+		resultado["salidas"] = salidas
+
+		# La luz no representa el códice ni añade otro objeto provisional: solo
+		# hace legible dónde ocurre la anomalía hasta que haya prop con procedencia.
+		var luces: Array = resultado.get("luces", []).duplicate(true)
+		(
+			luces
+			. append(
+				{
+					"pos": ancla_codice + Vector3(0, 1.4, 0),
+					"color": COLOR_CODICE,
+					"energia": ENERGIA_CODICE,
+					"alcance": ALCANCE_CODICE,
+					"carcasa": false,
+				}
+			)
+		)
+		resultado["luces"] = luces
+
+	return resultado
 
 
 static func malla_base() -> ArrayMesh:

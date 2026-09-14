@@ -37,6 +37,25 @@ static func recorrer(arbol: SceneTree, comprobar: Callable) -> void:
 		comprobar.call("pendiente muestra cuatro opciones", pantalla._opciones.get_child_count(), 4)
 		comprobar.call("el relato no está vacío", pantalla._texto.text.is_empty(), false)
 		comprobar.call(
+			"sin contexto la primera opción se oculta",
+			pantalla._opciones.get_child(0).visible,
+			false
+		)
+		comprobar.call("sin contexto el foco va a posponer", pantalla._posponer.has_focus(), true)
+
+		# Una pista nueva posterior a la instantánea madura la decisión. A partir
+		# de aquí se conserva la regresión histórica de teclado y mando.
+		var pistas: Array = pantalla.partida.estado.get("pistas_descubiertas", []).duplicate()
+		pistas.append("contexto-prueba-%s" % carta)
+		pantalla.partida.estado["pistas_descubiertas"] = pistas
+		pantalla._mostrar()
+		await arbol.process_frame
+		comprobar.call(
+			"contexto nuevo vuelve a mostrar las opciones",
+			pantalla._opciones.get_child(0).visible,
+			true
+		)
+		comprobar.call(
 			"el foco empieza en las opciones", pantalla._opciones.get_child(0).has_focus(), true
 		)
 		var boton: Button = pantalla._opciones.get_child(0)
@@ -108,10 +127,18 @@ static func _fallo_guardado(arbol: SceneTree, comprobar: Callable) -> void:
 	pantalla.partida = Partida.new()
 	pantalla.partida.estado = Partida.nueva()
 	pantalla.carta_id = "la-justicia"
-	pantalla.guardar = func(): return false
+	# Registrar el contexto inicial sí puede guardarse; el fallo que queremos
+	# probar ocurre al confirmar la elección ya madura.
+	pantalla.guardar = func(): return true
 	arbol.root.add_child(pantalla)
 	pantalla.popup_centered_clamped(Vector2i(900, 600), 0.9)
 	await arbol.process_frame
+	var pistas: Array = pantalla.partida.estado.get("pistas_descubiertas", []).duplicate()
+	pistas.append("contexto-prueba-guardado")
+	pantalla.partida.estado["pistas_descubiertas"] = pistas
+	pantalla._mostrar()
+	await arbol.process_frame
+	pantalla.guardar = func(): return false
 	pantalla._opciones.get_child(1).pressed.emit()
 	await arbol.process_frame
 	comprobar.call(

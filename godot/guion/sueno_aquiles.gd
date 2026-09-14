@@ -1,14 +1,15 @@
-## Vertical standalone para el sueño de Aquiles (#438).
+## Vertical del sueño de Aquiles (#438).
 ##
-## Este nodo no entra todavía en la selección nocturna: conserva el corte libre
-## de archivos compartidos y deja el contrato jugable listo para integrarlo en
-## un segundo PR. El modelo CC0 es opcional; mientras no esté vendorizado se usa
-## una silueta geométrica que permite probar luz, lectura espacial y resolución.
+## La familia usa el contrato común de `SemillasOniricas`: la vigilia activa
+## `aquiles` dentro de Jornada y este módulo solo consulta/consume ese estado.
+## El modelo CC0 sigue siendo opcional hasta poder registrarlo en procedencia/LFS.
 class_name SuenoAquiles
 extends Node3D
 
+const ID_MITO := "aquiles"
 const CLAVE_SEMILLA := "semilla_onirica_aquiles"
 const GIROS_MINIMOS := 1
+const FUENTE_VIGILIA := "estampa:bautismo_aquiles_cc0"
 const ACCIONES_RESOLUCION := ["tocar", "sellar", "enfocar", "colocar"]
 const TRANSFORMACION := "papel_y_sellos"
 const MODELO_CC0_RUTA := "res://assets/cc0/aquiles/modelo/achilles_spartan_greek_warrior.glb"
@@ -25,17 +26,37 @@ var _talon: MeshInstance3D
 var _impactos: Array[MeshInstance3D] = []
 
 
-## La familia solo puede entrar en la noche si la contraparte doméstica fue
-## examinada de forma deliberada. Pasar junto al objeto no escribe esta clave.
+## Una Jornada real consulta el catálogo común. El fallback plano conserva
+## compatibilidad con prototipos guardados durante el primer corte de #438.
 static func puede_entrar(estado: Dictionary) -> bool:
+	if estado.has("dia"):
+		return SemillasOniricas.familias_activas(estado).has(ID_MITO)
 	return bool(estado.get(CLAVE_SEMILLA, false))
 
 
-## Registrar la semilla exige manipular la contraparte y observar el talón.
-## `giros` representa cambios de ángulo deliberados del póster/figura doméstica.
-static func registrar_semilla(estado: Dictionary, giros: int, talon_observado: bool) -> bool:
+## Registrar exige manipulación deliberada y observación del talón.
+##
+## En Jornada se persiste mediante SemillasOniricas. El fallback plano solo
+## existe para no romper harnesses/prototipos del corte anterior.
+static func registrar_semilla(
+	estado: Dictionary,
+	giros: int,
+	talon_observado: bool,
+	fuente: String = FUENTE_VIGILIA,
+	intensidad: int = 2,
+) -> bool:
 	if giros < GIROS_MINIMOS or not talon_observado:
 		return false
+	if estado.has("dia"):
+		return (
+			SemillasOniricas
+			. activar_semilla_onirica(
+				estado,
+				ID_MITO,
+				fuente,
+				intensidad,
+			)
+		)
 	estado[CLAVE_SEMILLA] = true
 	return true
 
@@ -46,8 +67,8 @@ static func vulnerabilidad_visible(luz_alineada: bool, reflejo_alineado: bool) -
 	return luz_alineada or reflejo_alineado
 
 
-## Resolver no implica combate. Solo las acciones semánticas de observación y
-## manipulación tienen efecto, y únicamente después de revelar la vulnerabilidad.
+## Resolver no implica combate. Solo acciones de observación/manipulación tienen
+## efecto y únicamente después de revelar la vulnerabilidad.
 static func resolver(vulnerabilidad_revelada: bool, accion: String) -> Dictionary:
 	var normalizada := accion.strip_edges().to_lower()
 	var resuelta := vulnerabilidad_revelada and ACCIONES_RESOLUCION.has(normalizada)
@@ -58,8 +79,7 @@ static func resolver(vulnerabilidad_revelada: bool, accion: String) -> Dictionar
 	}
 
 
-## `reduccion_movimiento` conserva la misma solución sin sacudidas ni flashes.
-## Solo cambia el ritmo de la transformación final.
+## La misma solución se conserva con reducción de movimiento.
 static func plan_transformacion(reduccion_movimiento: bool) -> Dictionary:
 	return {
 		"sacudida_camara": false,
@@ -73,15 +93,12 @@ func _ready() -> void:
 	_montar_prototipo()
 
 
-## Expone el mismo contrato puro en la escena standalone y da feedback visible.
 func aplicar_lectura_espacial(luz_alineada: bool, reflejo_alineado: bool) -> bool:
 	var revelada := vulnerabilidad_visible(luz_alineada, reflejo_alineado)
 	_talon.visible = revelada
 	return revelada
 
 
-## La figura se pliega hasta parecer una lámina de archivo; no hay cámara
-## forzada, arma ni botón de ataque. La duración respeta reducción de movimiento.
 func aplicar_resolucion(accion: String, reduccion_movimiento: bool) -> bool:
 	var resultado := resolver(_talon.visible, accion)
 	if not resultado["resuelta"]:
@@ -93,7 +110,15 @@ func aplicar_resolucion(accion: String, reduccion_movimiento: bool) -> bool:
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_SINE)
 	tween.set_ease(Tween.EASE_IN_OUT)
-	tween.tween_property(_figura, "scale", Vector3(1.0, 0.055, 1.0), float(plan["duracion"]))
+	(
+		tween
+		. tween_property(
+			_figura,
+			"scale",
+			Vector3(1.0, 0.055, 1.0),
+			float(plan["duracion"]),
+		)
+	)
 	return true
 
 
@@ -234,14 +259,18 @@ func _montar_pasarela() -> void:
 
 
 func _montar_impactos() -> void:
-	var posiciones := [Vector3(-2.6, 6.8, 1.5), Vector3(2.5, 5.9, 1.1), Vector3(0.7, 8.0, 1.2)]
+	var posiciones := [
+		Vector3(-2.6, 6.8, 1.5),
+		Vector3(2.5, 5.9, 1.1),
+		Vector3(0.7, 8.0, 1.2),
+	]
 	for i in posiciones.size():
 		var impacto := _crear_caja(
 			self,
 			"ImpactoAdministrativo%d" % (i + 1),
 			Vector3(0.72, 0.12, 0.52),
 			posiciones[i],
-			COLOR_PAPEL
+			COLOR_PAPEL,
 		)
 		impacto.rotation_degrees = Vector3(12.0 * i, 24.0 * i, -18.0 + 9.0 * i)
 		_impactos.append(impacto)
@@ -253,6 +282,7 @@ func _montar_iluminacion() -> void:
 	general.rotation_degrees = Vector3(-48.0, -28.0, 0.0)
 	general.light_energy = 1.35
 	add_child(general)
+
 	var lectura := SpotLight3D.new()
 	lectura.name = "LuzDeLectura"
 	lectura.position = Vector3(0.8, 3.0, 5.6)
@@ -273,7 +303,11 @@ func _montar_camara() -> void:
 
 
 func _crear_caja(
-	padre: Node3D, nombre: String, tam: Vector3, posicion: Vector3, color: Color
+	padre: Node3D,
+	nombre: String,
+	tam: Vector3,
+	posicion: Vector3,
+	color: Color,
 ) -> MeshInstance3D:
 	var malla := BoxMesh.new()
 	malla.size = tam
