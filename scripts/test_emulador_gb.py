@@ -75,6 +75,20 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn("_tiempo_emulador -= PASO_EMULADOR", self.ui)
         self.assertNotIn("func _process(_delta: float)", self.ui)
 
+    def test_presentacion_fisica_es_externa_desactivable_y_cancelable(self):
+        self.assertIn("DURACION_ENCENDIDO := 0.32", self.ui)
+        self.assertIn("uniform bool filtro_lcd = true", self.ui)
+        self.assertIn('set_shader_parameter("filtro_lcd", _efectos_presentacion)', self.ui)
+        self.assertIn("func _al_cambiar_efectos(activos: bool)", self.ui)
+        self.assertIn("if not _efectos_presentacion:", self.ui)
+        self.assertIn("_cargar_rom_ahora(ruta)", self.ui)
+        self.assertIn("_rom_pendiente = ruta", self.ui)
+        self.assertIn("if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE", self.ui)
+        self.assertIn("func _cancelar_encendido()", self.ui)
+        self.assertIn('var resultado := int(_emulador.call("load_rom", rom))', self.ui)
+        self.assertNotIn("Partida", self.ui)
+        self.assertNotIn("Jornada", self.ui)
+
     def test_smoke_compara_pixeles_rgba_no_canales_sueltos(self):
         self.assertIn("BYTES_POR_PIXEL := 4", self.smoke)
         self.assertIn("func _frame_tiene_variacion", self.smoke)
