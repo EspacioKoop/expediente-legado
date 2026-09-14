@@ -27,17 +27,15 @@ func _probar_recogida_valida() -> void:
 	_reiniciar_senales()
 	var estado := Inventario.nuevo()
 	var recogible = Recogible.new()
-	recogible.configurar(
-		estado,
-		{
-			"id": "llave_archivo",
-			"nombre": "llave del archivo",
-			"vendible": true,
-			"precio": 120,
-			"origen": "escenario",
-			"categoria": "llave",
-		}
-	)
+	var datos := {
+		"id": "llave_archivo",
+		"nombre": "llave del archivo",
+		"vendible": true,
+		"precio": 120,
+		"origen": "escenario",
+		"categoria": "llave",
+	}
+	recogible.configurar(estado, datos)
 	recogible.activado.connect(_al_activar)
 	recogible.recogido.connect(_al_recoger)
 	root.add_child(recogible)
