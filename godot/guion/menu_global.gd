@@ -516,6 +516,7 @@ func _al_cambiar_invertir_y(activa: bool) -> void:
 	_preferencias["invertir_camara_y"] = activa
 	_guardar_y_notificar_camara()
 
+
 func _guardar_y_notificar_camara() -> void:
 	PreferenciasSiga.guardar(_preferencias)
 	get_tree().call_group("caminante_camara", "recargar_preferencias_camara")
