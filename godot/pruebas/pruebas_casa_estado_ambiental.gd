@@ -37,12 +37,18 @@ func _probar() -> void:
 	_comprobar(Inventario.guardar_en_casa(inventario, "taza"), "guarda taza en casa")
 	_comprobar(Inventario.recoger(inventario, llaves), "lleva llaves encima")
 	var con_objetos := CasaEstadoAmbiental.derivar(jornada, inventario)
-	_comprobar(con_objetos["objetos_casa_ids"] == ["taza"], "solo home_storage materializa casa")
+	_comprobar(
+		con_objetos["objetos_casa_ids"] == ["taza"],
+		"solo home_storage materializa casa"
+	)
 	_comprobar(not con_objetos["objetos_casa_ids"].has("llaves"), "carried no decora la casa")
 
 	# La señal es una instantánea, no una referencia mutable al guardado.
 	con_objetos["objetos_casa"][0]["nombre"] = "Mutada"
-	_comprobar(inventario[Inventario.HOME_STORAGE][0]["nombre"] == "Taza", "derivar no muta inventario")
+	_comprobar(
+		inventario[Inventario.HOME_STORAGE][0]["nombre"] == "Taza",
+		"derivar no muta inventario"
+	)
 
 	jornada["gato"]["dias_sin_comer"] = 1
 	_comprobar(
@@ -58,7 +64,10 @@ func _probar() -> void:
 	)
 
 	jornada["vuelta"] = 4
-	_comprobar(CasaEstadoAmbiental.derivar(jornada, inventario)["vuelta"] == 4, "conserva vueltas reales")
+	_comprobar(
+		CasaEstadoAmbiental.derivar(jornada, inventario)["vuelta"] == 4,
+		"conserva vueltas reales"
+	)
 
 	# Vender algo almacenado debe dejar el hueco sin tocar una variable visual.
 	var venta := Inventario.vender(inventario, "taza")
@@ -83,18 +92,26 @@ func _probar() -> void:
 	var sin_casa := CasaEstadoAmbiental.derivar(jornada, inventario)
 	_comprobar(sin_casa["objetos_casa"].is_empty(), "perder casa limpia la composicion")
 	_comprobar(inventario[Inventario.CARRIED].size() == 1, "perder casa conserva carried")
-	_comprobar(not sin_casa["objetos_casa_ids"].has("llaves"), "carried conservado sigue fuera del decorado")
+	_comprobar(
+		not sin_casa["objetos_casa_ids"].has("llaves"),
+		"carried conservado sigue fuera del decorado"
+	)
 
 	# Guardados incompletos o antiguos degradan a ausencia, nunca inventan props.
 	_comprobar(
-		CasaEstadoAmbiental.derivar({}, {Inventario.HOME_STORAGE: "invalido"})["objetos_casa"].is_empty(),
+		CasaEstadoAmbiental.derivar(
+			{}, {Inventario.HOME_STORAGE: "invalido"}
+		)["objetos_casa"].is_empty(),
 		"inventario invalido no inventa objetos"
 	)
 	_comprobar(
 		CasaEstadoAmbiental.derivar({}, {})["gato_estado"] == CasaEstadoAmbiental.GATO_AUSENTE,
 		"jornada incompleta no inventa gato"
 	)
-	_comprobar(CasaEstadoAmbiental.derivar({}, {})["vuelta"] == 1, "jornada antigua usa vuelta minima")
+	_comprobar(
+		CasaEstadoAmbiental.derivar({}, {})["vuelta"] == 1,
+		"jornada antigua usa vuelta minima"
+	)
 
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
