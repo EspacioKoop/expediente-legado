@@ -43,9 +43,10 @@ class GolfTest(unittest.TestCase):
     def test_abandono_no_marca_partida_completa(self):
         self.assertIn('estado["abandonada"] = true', self.source)
         self.assertIn(
-            'estado.get("terminada", false) and not estado.get("abandonada", false)',
+            'var completa: bool = bool(estado.get("terminada", false))',
             self.source,
         )
+        self.assertIn('estado.get("abandonada", false)', self.source)
 
 
 if __name__ == "__main__":
