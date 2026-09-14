@@ -36,17 +36,13 @@ func _probar_persiana() -> void:
 	_comprobar(persiana.interactuar(root), "acepta la interacción semántica")
 	_comprobar(persiana.esta_abierta(), "abre tras interactuar")
 	_comprobar(persiana.texto_accion() == "Cerrar persiana", "actualiza el verbo")
-	_comprobar(
-		persiana.posicion_hoja().y > posicion_cerrada.y,
-		"la hoja sube de forma visible"
-	)
+	_comprobar(persiana.posicion_hoja().y > posicion_cerrada.y, "la hoja sube de forma visible")
 
 	_comprobar(persiana.interactuar(root), "acepta cerrar")
 	_comprobar(not persiana.esta_abierta(), "vuelve a cerrada")
 	_comprobar(persiana.texto_accion() == "Abrir persiana", "restaura el prompt")
 	_comprobar(
-		persiana.posicion_hoja().is_equal_approx(posicion_cerrada),
-		"restaura la posición física"
+		persiana.posicion_hoja().is_equal_approx(posicion_cerrada), "restaura la posición física"
 	)
 	persiana.queue_free()
 
