@@ -35,10 +35,10 @@ def test_una_partida_antigua_sin_instantanea_no_queda_bloqueada() -> None:
 
 def test_la_primera_exposicion_guarda_contexto_y_oculta_opciones() -> None:
     codigo = CAPA.read_text(encoding="utf-8")
-    assert "HistoriaContexto.tiene_registro" in codigo
-    assert "HistoriaContexto.registrar(partida.estado, carta_id)" in codigo
+    assert "HISTORIA_CONTEXTO.tiene_registro" in codigo
+    assert "HISTORIA_CONTEXTO.registrar(partida.estado, carta_id)" in codigo
     assert "_guardar()" in codigo
-    assert "HistoriaContexto.maduro(partida.estado, carta_id)" in codigo
+    assert "HISTORIA_CONTEXTO.maduro(partida.estado, carta_id)" in codigo
     assert "boton.visible = mostrar_opciones" in codigo
     assert "boton.disabled = _sin_guardar or not mostrar_opciones" in codigo
 
