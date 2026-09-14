@@ -11,6 +11,10 @@ var _objeto_recibido: Dictionary = {}
 
 
 func _initialize() -> void:
+	call_deferred("_ejecutar")
+
+
+func _ejecutar() -> void:
 	_probar_recogida_valida()
 	_probar_duplicado()
 	_probar_id_invalido()
