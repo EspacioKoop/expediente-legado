@@ -14,8 +14,19 @@ var _resuelta := false
 
 
 func _ready() -> void:
-	super()
-	_montar_puzzle()
+	if _figura == null:
+		super()
+	if _reflector == null:
+		_montar_puzzle()
+
+
+## Hace el vertical utilizable también desde instanciación programática y tests
+## que todavía están dentro de `SceneTree._initialize()`, antes del primer frame.
+func preparar() -> void:
+	if _figura == null:
+		_montar_prototipo()
+	if _reflector == null:
+		_montar_puzzle()
 
 
 func reflector() -> AquilesReflector:
