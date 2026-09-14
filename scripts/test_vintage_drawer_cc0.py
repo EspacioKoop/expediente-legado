@@ -41,7 +41,7 @@ class VintageDrawerCC0Test(unittest.TestCase):
     def test_se_coloca_al_final_de_la_bateria_de_archivadores(self) -> None:
         codigo = DRESSING.read_text(encoding="utf-8")
         self.assertIn("Vector3(5.50, tam.y * 0.5, 4.42)", codigo)
-        self.assertIn("el frente mira hacia el pasillo central", codigo)
+        self.assertIn("El frente mira hacia el pasillo central", codigo)
 
 
 if __name__ == "__main__":
