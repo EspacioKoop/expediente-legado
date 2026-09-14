@@ -4,7 +4,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 CINEMATICA = ROOT / "godot" / "guion" / "sueno_cinematica.gd"
-CAPA = ROOT / "godot" / "guion" / "dia_cinematica_sueno_app.gd"
+CONTROLLER = ROOT / "godot" / "guion" / "dia_sueno_reactivo_app.gd"
 CALLE = ROOT / "godot" / "guion" / "dia_calle_app.gd"
 REPRODUCTOR = ROOT / "godot" / "guion" / "cinematica_app.gd"
 
@@ -12,7 +12,7 @@ REPRODUCTOR = ROOT / "godot" / "guion" / "cinematica_app.gd"
 class SuenoCinematica3DTest(unittest.TestCase):
     def setUp(self) -> None:
         self.cinematica = CINEMATICA.read_text(encoding="utf-8")
-        self.capa = CAPA.read_text(encoding="utf-8")
+        self.controller = CONTROLLER.read_text(encoding="utf-8")
         self.calle = CALLE.read_text(encoding="utf-8")
         self.reproductor = REPRODUCTOR.read_text(encoding="utf-8")
 
@@ -26,30 +26,24 @@ class SuenoCinematica3DTest(unittest.TestCase):
         self.assertNotIn("MeshInstance3D", self.cinematica)
         self.assertNotIn("BoxMesh", self.cinematica)
 
-    def test_capa_se_inserta_sin_tocar_la_raiz_del_dia(self) -> None:
-        self.assertIn(
-            'extends "res://guion/dia_cinematica_sueno_app.gd"', self.calle
-        )
-        self.assertIn('extends "res://guion/dia_onboarding_app.gd"', self.capa)
-        self.assertIn('String(jornada.get("fase", "")) != "casa"', self.capa)
-        self.assertIn('String(salida.get_meta("destino", "")) != "sueño"', self.capa)
-        self.assertIn("super._al_pisar_salida(cuerpo, salida)", self.capa)
+    def test_no_cambia_la_cadena_historica_del_dia(self) -> None:
+        self.assertIn('extends "res://guion/dia_onboarding_app.gd"', self.calle)
+        self.assertIn('if fase == "casa":', self.controller)
+        self.assertIn("_preparar_transicion_sueno(dia, mundo)", self.controller)
+        self.assertIn('String(hijo.get_meta("destino", "")) == "sueño"', self.controller)
+        self.assertIn("callback.get_object() == dia", self.controller)
 
-    def test_economia_y_fase_se_aplican_despues_de_la_cinematica(self) -> None:
-        inicio = self.capa.split("func _iniciar_cinematica_sueno() -> void:", 1)[1].split(
-            "func _terminar_cinematica_sueno", 1
-        )[0]
-        fin = self.capa.split("func _terminar_cinematica_sueno() -> void:", 1)[1]
-        self.assertNotIn("Jornada.dormir(jornada)", inicio)
-        self.assertEqual(fin.count("Jornada.dormir(jornada)"), 1)
-        self.assertIn("_aplicar_politica_sueno()", fin)
-        self.assertIn('_entrar_en("sueño")', fin)
-        self.assertIn('_guardar_o_avisar("")', fin)
+    def test_el_evento_vuelve_al_flujo_oficial_sin_duplicar_jornada(self) -> None:
+        self.assertNotIn("Jornada.dormir", self.controller)
+        self.assertNotIn("_aplicar_politica_sueno", self.controller)
+        fin = self.controller.split("func _terminar_transicion_sueno() -> void:", 1)[1]
+        self.assertEqual(fin.count("dia._al_pisar_salida(dia._caminante, salida)"), 1)
+        self.assertIn("dia.set_process(true)", fin)
 
     def test_skip_y_fin_normal_comparten_el_mismo_callback(self) -> None:
         self.assertIn(
-            "_cinematica_sueno.terminada.connect(_terminar_cinematica_sueno)",
-            self.capa,
+            "_cinematica_sueno.terminada.connect(_terminar_transicion_sueno)",
+            self.controller,
         )
         salto = self.reproductor.split("func saltar() -> void:", 1)[1].split(
             "func _process", 1
@@ -58,12 +52,19 @@ class SuenoCinematica3DTest(unittest.TestCase):
         self.assertIn("terminada.emit()", self.reproductor)
         self.assertIn("Cinematica.anotar_vista(_estado, _id)", self.reproductor)
 
-    def test_mundo_domestico_queda_congelado_mientras_rueda(self) -> None:
-        self.assertIn("if _cinematica_sueno != null:", self.capa)
-        self.assertIn("_caminante.set_physics_process(false)", self.capa)
-        self.assertIn("_caminante.set_physics_process(true)", self.capa)
-        self.assertIn("_hud.visible = false", self.capa)
-        self.assertIn("_hud.visible = true", self.capa)
+    def test_la_casa_queda_congelada_mientras_rueda(self) -> None:
+        self.assertIn("dia.set_process(false)", self.controller)
+        self.assertIn("dia._caminante.set_physics_process(false)", self.controller)
+        self.assertIn("dia._caminante.set_physics_process(true)", self.controller)
+        self.assertIn("dia._hud.visible = false", self.controller)
+        self.assertIn("dia._hud.visible = true", self.controller)
+        self.assertIn('if fase != "sueño":', self.controller)
+
+    def test_conserva_el_dressing_reactivo_preexistente(self) -> None:
+        self.assertIn("SuenoUtileria", self.controller)
+        self.assertIn(". montar(", self.controller)
+        self.assertIn('String(escenas[0])', self.controller)
+        self.assertIn("dia._raiz()", self.controller)
 
 
 if __name__ == "__main__":
