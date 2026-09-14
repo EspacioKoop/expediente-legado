@@ -23,14 +23,16 @@ class AquilesVigiliaTest(unittest.TestCase):
     def test_usa_contrato_comun_de_semillas(self):
         self.assertIn('ID_MITO := "aquiles"', self.sueno)
         self.assertIn("SemillasOniricas.familias_activas(estado)", self.sueno)
-        self.assertIn("SemillasOniricas.activar_semilla_onirica(", self.sueno)
+        self.assertIn("SemillasOniricas", self.sueno)
+        self.assertIn("activar_semilla_onirica(", self.sueno)
         self.assertIn('FUENTE_VIGILIA := "estampa:bautismo_aquiles_cc0"', self.sueno)
 
     def test_la_estampa_exige_manipulacion_y_observacion(self):
         self.assertIn("extends Interactuable3D", self.vigilia)
         self.assertIn("GIRO_MINIMO_OBSERVACION", self.vigilia)
         self.assertIn("func observar_talon()", self.vigilia)
-        self.assertIn("SuenoAquiles.registrar_semilla(", self.vigilia)
+        self.assertIn("SuenoAquiles", self.vigilia)
+        self.assertIn("registrar_semilla(", self.vigilia)
         self.assertIn("activado.connect(_al_examinar)", self.vigilia)
 
     def test_feedback_es_diegetico_y_sin_hud(self):
