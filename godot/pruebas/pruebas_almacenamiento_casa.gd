@@ -33,8 +33,7 @@ func _probar_almacenamiento() -> void:
 	var inventario := Inventario.nuevo()
 	_comprobar(
 		Inventario.recoger(
-			inventario,
-			{"id": "sello_oficina", "origen": "archivo", "usos": ["archivo"]}
+			inventario, {"id": "sello_oficina", "origen": "archivo", "usos": ["archivo"]}
 		),
 		"prepara un objeto llevado para probar la cómoda"
 	)
@@ -43,8 +42,10 @@ func _probar_almacenamiento() -> void:
 		"el cajón cerrado no guarda objetos"
 	)
 	_comprobar(
-		inventario[Inventario.CARRIED].size() == 1
-		and inventario[Inventario.HOME_STORAGE].is_empty(),
+		(
+			inventario[Inventario.CARRIED].size() == 1
+			and inventario[Inventario.HOME_STORAGE].is_empty()
+		),
 		"rechazar con el cajón cerrado no muta el inventario"
 	)
 	_comprobar(
@@ -65,8 +66,10 @@ func _probar_almacenamiento() -> void:
 		"guardar mueve un objeto llevado al almacenamiento doméstico"
 	)
 	_comprobar(
-		inventario[Inventario.CARRIED].is_empty()
-		and inventario[Inventario.HOME_STORAGE].size() == 1,
+		(
+			inventario[Inventario.CARRIED].is_empty()
+			and inventario[Inventario.HOME_STORAGE].size() == 1
+		),
 		"guardar usa carried/home_storage como fuente de verdad"
 	)
 	var contenido := almacenamiento.contenido(inventario)
@@ -83,8 +86,10 @@ func _probar_almacenamiento() -> void:
 		"sacar devuelve el objeto al inventario llevado"
 	)
 	_comprobar(
-		inventario[Inventario.CARRIED].size() == 1
-		and inventario[Inventario.HOME_STORAGE].is_empty(),
+		(
+			inventario[Inventario.CARRIED].size() == 1
+			and inventario[Inventario.HOME_STORAGE].is_empty()
+		),
 		"sacar conserva una única copia del objeto"
 	)
 	_comprobar(
@@ -104,8 +109,10 @@ func _probar_almacenamiento() -> void:
 		"cerrar vuelve a bloquear operaciones de almacenamiento"
 	)
 	_comprobar(
-		inventario[Inventario.CARRIED].size() == 1
-		and inventario[Inventario.HOME_STORAGE].is_empty(),
+		(
+			inventario[Inventario.CARRIED].size() == 1
+			and inventario[Inventario.HOME_STORAGE].is_empty()
+		),
 		"el bloqueo al cerrar tampoco muta estado"
 	)
 	almacenamiento.queue_free()
