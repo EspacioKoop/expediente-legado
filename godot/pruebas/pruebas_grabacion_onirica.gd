@@ -53,11 +53,7 @@ func _init() -> void:
 
 	var cortada := valida.duplicate(true)
 	cortada["hubo_corte"] = true
-	_comprobar(
-		"toma cortada",
-		Contrato.evaluar_toma(cortada),
-		Contrato.EstadoGrabacion.CONTAMINADA
-	)
+	_comprobar("toma cortada", Contrato.evaluar_toma(cortada), Contrato.EstadoGrabacion.CONTAMINADA)
 
 	var sin_duracion := valida.duplicate(true)
 	sin_duracion["duracion_total"] = 0.0
