@@ -8,7 +8,7 @@
 ## de `trayecto`: planta vacía para no levantar envolvente interior, calzada/aceras
 ## como bultos bajos, fachadas discontinuas y un único escaparate de televisores
 ## 3D. Las seis superficies `Pantalla` dispersas desaparecen.
-extends "res://guion/dia_onboarding_app.gd"
+extends "res://guion/dia_cinematica_sueno_app.gd"
 
 
 func _espacio_de(fase: String) -> Dictionary:
