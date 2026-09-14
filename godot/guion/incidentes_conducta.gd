@@ -14,6 +14,22 @@ const CASA := "casa"
 const SUENO := "sueño"
 
 
+## Entrada preparada para el estado real de Partida.
+##
+## El historial vive DENTRO de `jornada`: Partida ya persiste ese diccionario
+## completo y Jornada.completar conserva claves adicionales. Así el incidente
+## sobrevive a guardar/cargar y a los cambios de día sin crear un segundo
+## fichero ni contaminar la raíz permanente con una regla de una vida laboral.
+static func registrar_en_partida(
+	partida_estado: Dictionary, tipo: String, lugar: String
+) -> Dictionary:
+	var jornada = partida_estado.get("jornada", {})
+	if typeof(jornada) != TYPE_DICTIONARY:
+		return {}
+	var dia := int(jornada.get("dia", 0))
+	return registrar_incidente(jornada, tipo, lugar, dia)
+
+
 ## Registra una conducta y devuelve consecuencias declarativas.
 ##
 ## El mismo incidente repetido en el mismo día es idempotente: no añade otra
