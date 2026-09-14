@@ -15,5 +15,5 @@
   "error_rom": "No se pudo arrancar la ROM: %s",
   "error_runtime": "La emulación se detuvo de forma controlada: %s",
   "aviso": "Las ROMs locales son opcionales y responsabilidad de quien las aporta. No se descargan ni redistribuyen.",
-  "audio": "Prototipo actual: vídeo e input; audio y SRAM persistente quedan para un corte posterior."
+  "audio": "SRAM por ROM activa. El núcleo actual aún no ofrece audio emulado; #456 prepara el reemplazo CGB/audio."
 }
