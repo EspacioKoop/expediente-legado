@@ -4,10 +4,11 @@ El vertical de #124 integra un núcleo nativo para que la portátil de la casa p
 
 ## Núcleo actual y licencia
 
-La GDExtension usa dos dependencias fijadas por commit en `godot/native/siga98_gb/deps.lock.json`:
+La GDExtension usa tres dependencias fijadas por commit en `godot/native/siga98_gb/deps.lock.json`:
 
 - `godotengine/godot-cpp`, licencia MIT, bindings oficiales de GDExtension;
-- `deltabeard/Peanut-GB`, licencia MIT, núcleo de emulación Game Boy/DMG.
+- `deltabeard/Peanut-GB`, licencia MIT, núcleo DMG todavía activo en runtime;
+- `LIJI32/SameBoy`, licencia Expat para el alcance usado `Core/`, compilado como gate del futuro adapter CGB.
 
 Las dependencias no se vendorizan ni se descargan en tiempo de juego. `scripts/preparar_emulador_gb.sh` las obtiene exclusivamente durante el build desde los commits fijados y genera las bibliotecas nativas.
 
@@ -25,38 +26,40 @@ Peanut-GB es un núcleo **DMG**, no un emulador Game Boy Color completo. Por eso
 
 `Siga98GB` expone además `core_name()`, `supports_cgb()` y `supports_audio()`. Con Peanut-GB esos valores son, respectivamente, `Peanut-GB`, `false` y `false`. El contrato permite sustituir el núcleo sin hacer que la UI deduzca capacidades a partir de errores o del nombre de una dependencia.
 
-## Decisión para #456: candidato CGB + audio
+## Decisión para #456: SameBoy/Core
 
-El candidato seleccionado para el siguiente corte es **SameBoy/Core** (`LIJI32/SameBoy`) fijado para evaluación en el commit:
+El núcleo seleccionado para el siguiente adapter es **SameBoy/Core** (`LIJI32/SameBoy`) fijado en el commit:
 
 `213a12ce93d66b105a113debd9396306066a7cfc`
 
-La licencia del repositorio declara que, salvo `iOS/` y `HexFiend/`, los archivos están bajo **Expat License**, una licencia permisiva compatible con el objetivo MIT del proyecto. La integración propuesta usaría únicamente `Core/`; no se incorporarán las excepciones de `iOS/` o `HexFiend/`.
+La licencia del repositorio declara que, salvo `iOS/` y `HexFiend/`, los archivos están bajo **Expat License**, una licencia permisiva compatible con el objetivo MIT del proyecto. La integración usa únicamente `Core/`; no se incorporan las excepciones de `iOS/` o `HexFiend/`.
 
-La API pública y el frontend libretro de SameBoy confirman las piezas que necesita este proyecto:
+La API pública confirma las piezas que necesita este proyecto:
 
 - modelo CGB (`GB_MODEL_CGB_E`);
 - carga de ROM desde memoria (`GB_load_rom_from_buffer`);
 - framebuffer configurable (`GB_set_pixels_output`);
 - ejecución por frame (`GB_run_frame`);
+- persistencia de batería mediante buffer;
 - APU con callback de muestras (`GB_apu_set_sample_callback`).
 
 Esto permite conservar el contrato 160×144 de `Siga98GB`, añadir color real y llevar PCM al `AudioStreamGenerator` de Godot sin mezclarlo con los sonidos físicos de la carcasa de #245.
 
 **Gearboy queda descartado para este proyecto**: aunque implementa Game Boy Color y audio, su repositorio declara GPL-3.0. Introducirlo en el binario actual incumpliría la restricción de #456 de no añadir accidentalmente un núcleo GPL.
 
-SameBoy todavía **no es dependencia de runtime ni de build** en este corte. Primero se fija la decisión y el contrato de capacidades; el cambio de núcleo debe entrar en un PR separado con build Linux/Windows, fixture CGB legal y smoke correspondiente. No se añadirá ninguna BIOS o boot ROM propietaria para hacerlo funcionar.
+SameBoy ya es una **dependencia de build**: el preparador obtiene el commit fijado y `SConstruct` compila `Core/*.c` dentro de la GDExtension, excluyendo debugger, cheats, cheat search, rewind y disassembler/symbols. El adapter de runtime sigue siendo Peanut-GB. Este staging fuerza a Linux/Windows a detectar incompatibilidades de compilación antes de cambiar el núcleo visible y evita declarar CGB real hasta que el fixture CGB-only pase de extremo a extremo.
 
 ## Ruta de integración SameBoy
 
 El reemplazo del núcleo debe mantener estable la superficie usada por Godot:
 
 1. conservar `load_rom`, `reset`, `set_buttons`, `run_frame_rgba`, `save_ram`, `load_save_ram`, `rom_title`, `last_error`, `width` y `height`;
-2. cambiar `supports_cgb()` a `true` solo cuando una ROM CGB-only legal arranque y dibuje correctamente en CI;
-3. añadir un buffer PCM nativo y activar `supports_audio()` solo cuando exista consumo real desde Godot;
-4. mantener SRAM por identidad SHA-256 bajo `user://sram/gb`, independientemente del núcleo;
-5. conservar soporte GB clásico y dual-mode y no tocar `Partida`, `Jornada` ni los guardados de campaña;
-6. fijar el commit de SameBoy en la configuración de build antes de retirar Peanut-GB.
+2. sustituir internals por `GB_MODEL_CGB_E`, `GB_load_rom_from_buffer`, `GB_set_pixels_output` y `GB_run_frame`;
+3. cambiar `supports_cgb()` a `true` solo cuando `cgb_only_smoke.gbc` arranque y dibuje correctamente en CI;
+4. mapear SRAM a `GB_save_battery_to_buffer` / `GB_load_battery_from_buffer` sin cambiar la identidad SHA-256 bajo `user://sram/gb`;
+5. añadir un buffer PCM nativo y activar `supports_audio()` solo cuando exista consumo real desde Godot;
+6. conservar soporte GB clásico y dual-mode y no tocar `Partida`, `Jornada` ni los guardados de campaña;
+7. retirar Peanut-GB del build solo después de que SameBoy supere los smoke GB, dual-mode y CGB-only.
 
 ## Interfaz
 
@@ -112,8 +115,9 @@ Devuelve el framebuffer RGBA, estado de capacidades y mensajes de error. No reci
 
 ## Limitaciones pendientes de #456
 
-- sin emulación CGB real mientras Peanut-GB siga activo;
-- sin audio emulado mientras Peanut-GB siga activo;
+- sin emulación CGB real mientras Peanut-GB siga siendo el adapter activo;
+- sin audio emulado mientras Peanut-GB siga siendo el adapter activo;
+- SameBoy está compilado pero todavía no recibe ROM/input ni entrega framebuffer/audio al wrapper;
 - una ROM incompatible se rechaza en la inicialización cuando Peanut-GB puede identificarla;
 - no se promete compatibilidad con todos los MBC o homebrew existentes.
 
@@ -126,13 +130,13 @@ bash scripts/preparar_emulador_gb.sh linux-debug
 bash scripts/preparar_emulador_gb.sh rom
 ```
 
-Para generar bibliotecas de exportación:
+El build nativo descarga los commits fijados de godot-cpp, Peanut-GB y SameBoy/Core. Para generar bibliotecas de exportación:
 
 ```bash
 bash scripts/preparar_emulador_gb.sh linux-all
 bash scripts/preparar_emulador_gb.sh windows-release
 ```
 
-CI ejecuta además `godot/pruebas/emulador_gb_smoke.gd`: carga `Caza Píxeles 98`, prueba la superficie SRAM nativa, ejecuta frames y exige un framebuffer de 160×144×4 bytes con contenido no uniforme.
+CI ejecuta además `godot/pruebas/emulador_gb_smoke.gd`: carga `Caza Píxeles 98`, prueba la superficie SRAM nativa, ejecuta frames y exige un framebuffer de 160×144×4 bytes con contenido no uniforme. El workflow de fixtures compila por separado `cgb_only_smoke.gbc`, que será el gate funcional del cambio de adapter.
 
 — Odiseo (GPT-5.6 Sol)
