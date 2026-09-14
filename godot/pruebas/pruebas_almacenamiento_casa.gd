@@ -30,6 +30,28 @@ func _probar_almacenamiento() -> void:
 		"expone un volumen de interacción"
 	)
 
+	var inventario := Inventario.nuevo()
+	_comprobar(
+		Inventario.recoger(
+			inventario,
+			{"id": "sello_oficina", "origen": "archivo", "usos": ["archivo"]}
+		),
+		"prepara un objeto llevado para probar la cómoda"
+	)
+	_comprobar(
+		not almacenamiento.guardar_objeto(inventario, "sello_oficina"),
+		"el cajón cerrado no guarda objetos"
+	)
+	_comprobar(
+		inventario[Inventario.CARRIED].size() == 1
+		and inventario[Inventario.HOME_STORAGE].is_empty(),
+		"rechazar con el cajón cerrado no muta el inventario"
+	)
+	_comprobar(
+		almacenamiento.contenido(inventario).is_empty(),
+		"el contenido doméstico no se expone con el cajón cerrado"
+	)
+
 	var posicion_cerrada := almacenamiento.posicion_cajon()
 	_comprobar(almacenamiento.interactuar(root), "acepta la interacción semántica")
 	_comprobar(almacenamiento.esta_abierto(), "abre tras interactuar")
@@ -38,6 +60,37 @@ func _probar_almacenamiento() -> void:
 		almacenamiento.posicion_cajon().z < posicion_cerrada.z,
 		"el cajón se desplaza de forma visible"
 	)
+	_comprobar(
+		almacenamiento.guardar_objeto(inventario, "sello_oficina"),
+		"guardar mueve un objeto llevado al almacenamiento doméstico"
+	)
+	_comprobar(
+		inventario[Inventario.CARRIED].is_empty()
+		and inventario[Inventario.HOME_STORAGE].size() == 1,
+		"guardar usa carried/home_storage como fuente de verdad"
+	)
+	var contenido := almacenamiento.contenido(inventario)
+	_comprobar(
+		contenido.size() == 1 and String(contenido[0].get("id", "")) == "sello_oficina",
+		"el cajón abierto enumera su contenido"
+	)
+	_comprobar(
+		not almacenamiento.guardar_objeto(inventario, "sello_oficina"),
+		"no duplica un objeto que ya está guardado"
+	)
+	_comprobar(
+		almacenamiento.sacar_objeto(inventario, "sello_oficina"),
+		"sacar devuelve el objeto al inventario llevado"
+	)
+	_comprobar(
+		inventario[Inventario.CARRIED].size() == 1
+		and inventario[Inventario.HOME_STORAGE].is_empty(),
+		"sacar conserva una única copia del objeto"
+	)
+	_comprobar(
+		not almacenamiento.sacar_objeto(inventario, "no_existe"),
+		"sacar un id inexistente falla sin inventar objetos"
+	)
 
 	_comprobar(almacenamiento.interactuar(root), "acepta cerrar")
 	_comprobar(not almacenamiento.esta_abierto(), "vuelve a cerrado")
@@ -45,6 +98,15 @@ func _probar_almacenamiento() -> void:
 	_comprobar(
 		almacenamiento.posicion_cajon().is_equal_approx(posicion_cerrada),
 		"restaura la posición física"
+	)
+	_comprobar(
+		not almacenamiento.guardar_objeto(inventario, "sello_oficina"),
+		"cerrar vuelve a bloquear operaciones de almacenamiento"
+	)
+	_comprobar(
+		inventario[Inventario.CARRIED].size() == 1
+		and inventario[Inventario.HOME_STORAGE].is_empty(),
+		"el bloqueo al cerrar tampoco muta estado"
 	)
 	almacenamiento.queue_free()
 
