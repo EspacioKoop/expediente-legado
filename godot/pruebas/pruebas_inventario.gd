@@ -70,6 +70,33 @@ func _probar() -> void:
 	_comprobar(Inventario.completar({}).has(Inventario.CARRIED), "migra carried ausente")
 	_comprobar(Inventario.completar({}).has(Inventario.HOME_STORAGE), "migra home_storage ausente")
 
+	var lleno := Inventario.nuevo()
+	_comprobar(Inventario.CAPACIDAD == 10, "capacidad base es diez")
+	_comprobar(Inventario.tiene_hueco(lleno), "inventario nuevo tiene hueco")
+	var lleno_hasta_limite := true
+	for i in Inventario.CAPACIDAD:
+		lleno_hasta_limite = Inventario.recoger(lleno, {"id": "cupo-%d" % i}) and lleno_hasta_limite
+	_comprobar(lleno_hasta_limite, "acepta objetos hasta el limite")
+	_comprobar(lleno[Inventario.CARRIED].size() == Inventario.CAPACIDAD, "carried queda en diez")
+	_comprobar(not Inventario.tiene_hueco(lleno), "inventario lleno no anuncia hueco")
+	_comprobar(not Inventario.recoger(lleno, {"id": "undecimo"}), "rechaza el undecimo objeto")
+	_comprobar(lleno[Inventario.CARRIED].size() == Inventario.CAPACIDAD, "rechazo no muta carried")
+
+	var desde_casa := Inventario.nuevo()
+	Inventario.recoger(desde_casa, {"id": "guardado"})
+	Inventario.guardar_en_casa(desde_casa, "guardado")
+	for i in Inventario.CAPACIDAD:
+		Inventario.recoger(desde_casa, {"id": "bolsillo-%d" % i})
+	_comprobar(not Inventario.sacar_de_casa(desde_casa, "guardado"), "lleno no saca de casa")
+	_comprobar(
+		desde_casa[Inventario.HOME_STORAGE].size() == 1,
+		"rechazar sacar conserva el objeto almacenado"
+	)
+	_comprobar(
+		desde_casa[Inventario.CARRIED].size() == Inventario.CAPACIDAD,
+		"rechazar sacar no desborda carried"
+	)
+
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
