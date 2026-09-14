@@ -21,22 +21,26 @@ Este repositorio adopta las [Normas Platino](https://github.com/EspacioKoop/norm
 
 ## Estado actual
 
-La referencia es siempre `main`, no una rama antigua ni un comentario histórico. Tras el primer playthrough humano (#9), el trabajo se concentra en preparar una segunda alpha que pueda recorrerse sin conocimiento del código.
+La referencia es siempre `main`, no una rama antigua ni un comentario histórico. El **segundo playtest humano** de la alpha #237 / PR #394 falló el gate de experiencia aunque CI y export fueran verdes: el recorrido existía, pero cámara, HUD, identidad espacial, materiales, densidad, animación y puesta en escena todavía hacían que la build se percibiera como prototipo/greybox.
 
-Ya están integrados, entre otros:
+Desde ese playtest se ha integrado un bloque P0 importante. Esto **no equivale a validación humana**: cuando un issue sigue abierto por sensación, lectura visual o mando físico, no se reimplementa a ciegas; se prueba la versión ya integrada y solo se corrige un fallo reproducible.
 
-- **sueño por objetivos**: 3 objetivos posibles, 2 requeridos, feedback desde 0/2, resolución automática e idempotencia (#281, #301, #308, #313);
-- **investigación SIGA más profunda**: combinación manual de folios, marcadores, metadatos, feedback explícito y anexos examinables (#286, #289, #309, #318, #320, #321, #323); la auditoría legado → Godot vive en [`docs/paridad-expedientes.md`](docs/paridad-expedientes.md);
-- **menú y controles**: menú global, pausa, foco, preferencias y remapeo visual de teclado/mando (#113, #306, #335); queda validación con mando físico y de presentación;
-- **interacción 3D común**: detector contextual, terminal SIGA y archivadores reales ya usan el mismo contrato (#283, #307, #341, #345, #348);
-- **trayecto exterior**: composición de calle/escaparate y corrección del hook a la fase real `trayecto` (#277, #314, #331, #337);
-- **presentación P1**: rostros 3D low-poly (#275/#310), diálogo diegético (#276/#317/#338) y asistente-gato 2D abajo a la derecha (#285/#315);
-- **ciclo doméstico**: economía base calibrada (#83), alquiler/impago funcional y pérdida de lo almacenado en casa al quedarse sin vivienda (#84/#85/#333);
-- **audio**: `Sonido` para efectos y `Musica` para momentos dramáticos están separados; el ambiente continuo se desarrolla en #119.
+Estado relevante de `main`:
 
-Siguen siendo gates humanos, no motivos para reescribir sistemas a ciegas: #271 (partida nueva/continuar), #272 (onboarding), #273 (tacto/volumen de pasos), #280 (cinemáticas en export), #281 (comprensión del sueño) y #113 (mando físico).
+- **cámara y locomoción 3D**: #405 cubre el núcleo técnico de #396 — ratón y stick derecho, sensibilidad e inversión Y persistentes, deadzone, aceleración/frenado y captura de cursor; #396 queda como gate de sensación con ratón y mando físico;
+- **HUD y diálogo**: #406 unifica prioridades de interacción/tutorial/diálogo/modal y convierte a los compañeros en NPC conversables explícitos; #453 retira HUD permanente fuera del archivo. #397/#276 siguen requiriendo un pase visual humano;
+- **cinemáticas prioritarias 3D**: #410 sustituye la avalancha inicial 2D por una secuencia sobre la oficina real y #428 hace casa → sueño en el mundo 3D. #395 queda pendiente de captura/vídeo y legibilidad humana, no de volver a montar esas dos transiciones;
+- **identidad espacial y materiales**: oficina tiene perfiles materiales reutilizables (#412); casa tiene composición doméstica y materiales propios (#420/#427); el trayecto tiene cielo/profundidad urbana (#429) y fachadas materializadas (#449). #398/#399 siguen abiertos sobre todo por sueño y por la comparación humana sin HUD;
+- **densidad e interacción ambiental**: #400 ya tiene verticales en casa (#407), oficina (#423), sueño (#424) y calle (#433); #465 sustituye dos proxies domésticos de alto valor por cama y cuenco reconocibles. Falta validar la densidad transversal desde cámara de juego;
+- **personajes**: #445 añade un primer movimiento ambiental mínimo compatible con reducción de movimiento; #134 sigue abierto por validación. #275 continúa siendo un gate visual de rostros y no debe darse por resuelto solo porque exista una malla low-poly;
+- **tratamiento PSX**: #470 cerró #115 con comparativas controladas de oficina/sueño y mantuvo `dithering=0.65`; interfaz, HUD y documentos quedan fuera del efecto;
+- **SIGA e investigación**: relaciones, marcadores, metadatos, anexos, feedback y contexto de careo ya están integrados (#289/#309/#318/#320/#321/#323/#352/#367); #286 se valida con playtest específico, no añadiendo capas indefinidamente;
+- **decisión política**: además de posponer (#339/#369), #477 exige contexto nuevo antes de decidir, evitando resolver la presión narrativa con un simple botón de aplazamiento;
+- **sueño por objetivos**: 3 objetivos posibles, 2 requeridos, feedback 0/2 → 2/2 y resolución automática siguen siendo la base (#281/#301/#308/#313), con contenido limitado a hechos/pistas catalogados (#332).
 
-La prioridad exacta y el punto de control viven en [#181](https://github.com/EspacioKoop/expediente-legado/issues/181).
+Los extras ya integrados —portátil, emulación GB, minijuegos y verticales opcionales posteriores— **no convierten esa expansión en prioridad**. Mientras el siguiente pase humano P0 no sea satisfactorio, el orden exacto y el punto de control los fija [#181](https://github.com/EspacioKoop/expediente-legado/issues/181).
+
+Siguen siendo gates humanos de recorrido: #271 (partida nueva/continuar), #272 (onboarding), #273/#396 (tacto y cámara), #280/#395 (transiciones en export), #281 (comprensión del sueño), #113 (mando físico/remapeo), #286 (profundidad SIGA), #397/#398/#399 (lectura visual) y #275/#134/#282/#400 (personajes/densidad).
 
 ## Stack
 
