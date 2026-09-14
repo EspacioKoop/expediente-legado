@@ -6,7 +6,7 @@
 ## intensidad del mito hasta un límite. La activación es idempotente por fuente.
 ##
 ## Uso:
-##   SemillasOniricas.activar_semilla_onirica("gilgamesh", "ROM_GBC", 1)
+##   SemillasOniricas.activar_semilla_onirica("gilgamesh", "rom_gbc", 1)
 ##   var activas = SemillasOniricas.obtener_semillas()
 
 class_name SemillasOniricas
