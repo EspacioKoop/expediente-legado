@@ -199,10 +199,9 @@ func _resolver_objetivos_sueno() -> void:
 	var jornada_antes := jornada.duplicate(true)
 	jornada["sueno_escenas"].pop_front()
 	var destino := "sueño"
+	var dia_nuevo := -1
 	if jornada["sueno_escenas"].is_empty():
-		var dia := Jornada.despertar(jornada)
-		_hablando = false
-		_nomina.text = tr("DIA_NUEVO") % dia
+		dia_nuevo = Jornada.despertar(jornada)
 		destino = "archivo"
 	if not _guardar_o_avisar(destino):
 		jornada.clear()
@@ -210,6 +209,9 @@ func _resolver_objetivos_sueno() -> void:
 		_resolviendo_objetivos = false
 		_caminante.set_physics_process(true)
 		return
+	if dia_nuevo >= 0:
+		_hablando = false
+		_nomina.text = tr("DIA_NUEVO") % dia_nuevo
 	_entrar_en(destino)
 	_caminante.set_physics_process(true)
 
