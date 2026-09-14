@@ -27,6 +27,11 @@ class SuenoConvergenteRuntimeTest(unittest.TestCase):
         self.assertIn('_sitios_poligonales(familia, base_salida)', self.sueno)
         self.assertIn('_carteles_poligonales(familia, frases)', self.sueno)
 
+    def test_conserva_planta_logica_pero_remapea_la_entrada_runtime(self):
+        self.assertIn('"planta": bloques', self.sueno)
+        self.assertIn('"entrada": posicion_entrada', self.sueno)
+        self.assertIn('familia["entrada"]', self.sueno)
+
     def test_espacio_prioriza_poligono_sobre_planta(self):
         bloque_contorno = self.espacio.index('if espacio.has("contorno")')
         bloque_planta = self.espacio.index('elif espacio.has("planta")')
@@ -38,7 +43,10 @@ class SuenoConvergenteRuntimeTest(unittest.TestCase):
         fin = self.espacio.index('for bulto in espacio.get("bultos", [])')
         seleccion = self.espacio[inicio:fin]
         self.assertIn('elif espacio.has("planta")', seleccion)
-        self.assertNotIn('_por_planta(\n\t\t\traiz,\n\t\t\tespacio["planta"]', seleccion.split('elif espacio.has("planta")')[0])
+        self.assertNotIn(
+            '_por_planta(\n\t\t\traiz,\n\t\t\tespacio["planta"]',
+            seleccion.split('elif espacio.has("planta")')[0],
+        )
 
     def test_corte_no_activa_semillas_mitologicas(self):
         combinado = self.formas + self.sueno + self.espacio
