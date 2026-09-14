@@ -27,6 +27,24 @@ func _espacio_de(fase: String) -> Dictionary:
 	return espacio
 
 
+func _entrar_en(fase: String) -> void:
+	super._entrar_en(fase)
+	if fase == "trayecto":
+		_montar_persiana_calle()
+
+
+func _montar_persiana_calle() -> void:
+	if _mundo == null or _mundo.get_node_or_null("PersianaCalleInteractuable") != null:
+		return
+	var persiana := PersianaCalleInteractiva3D.new()
+	persiana.name = "PersianaCalleInteractuable"
+	# Se superpone a la ventana doméstica existente de la fachada derecha. Su
+	# posición queda lejos del portal final para no competir con la transición.
+	persiana.position = Vector3(5.28, 1.22, -10.0)
+	_mundo.add_child(persiana)
+	persiana.configurar()
+
+
 func _bultos_calle() -> Array:
 	return [
 		# Calzada y dos aceras: la sección transversal ya no es la de un pasillo.
