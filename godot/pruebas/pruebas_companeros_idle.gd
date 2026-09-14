@@ -22,8 +22,14 @@ func _probar_movimiento() -> void:
 	var escala := cuerpo.scale
 	var giro := cuerpo.rotation.y
 	idle._process(0.5)
-	_comprobar(not cuerpo.scale.is_equal_approx(escala), "la respiración altera solo la escala visual")
-	_comprobar(not is_equal_approx(cuerpo.rotation.y, giro), "el gesto contextual mueve suavemente el cuerpo")
+	_comprobar(
+		not cuerpo.scale.is_equal_approx(escala),
+		"la respiración altera solo la escala visual"
+	)
+	_comprobar(
+		not is_equal_approx(cuerpo.rotation.y, giro),
+		"el gesto contextual mueve suavemente el cuerpo"
+	)
 	idle.free()
 	_comprobar(cuerpo.scale.is_equal_approx(escala), "al retirar el idle restaura la escala")
 	_comprobar(is_equal_approx(cuerpo.rotation.y, giro), "al retirar el idle restaura el giro")
