@@ -30,6 +30,7 @@ func configurar(tam: Vector3) -> void:
 	add_child(_brillo)
 
 	activado.connect(_alternar)
+	_montar_mando_domestico()
 
 
 func esta_encendida() -> bool:
@@ -42,6 +43,26 @@ func texto_accion() -> String:
 	return super.texto_accion()
 
 
+## Punto público mínimo para accesorios domésticos como el mando IR.
+## Mantiene una sola fuente de verdad para el estado visual de la televisión.
+func alternar_desde_mando() -> void:
+	_alternar(null)
+
+
 func _alternar(_actor: Node) -> void:
 	_encendida = not _encendida
 	_brillo.visible = _encendida
+
+
+func _montar_mando_domestico() -> void:
+	var contenedor := get_parent()
+	if contenedor == null:
+		return
+	var mando := MandoTelevision98.new()
+	mando.name = "MandoTelevision98"
+	# Queda sobre la mesita del rincón de ocio, junto a la portátil pero sin
+	# solaparla. La posición parte del televisor para viajar con el conjunto.
+	mando.position = position + Vector3(1.25, 0.23, -1.18)
+	mando.rotation_degrees = Vector3(0.0, 14.0, 0.0)
+	contenedor.add_child(mando)
+	mando.configurar(self)

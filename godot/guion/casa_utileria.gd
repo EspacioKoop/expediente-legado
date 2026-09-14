@@ -3,7 +3,7 @@
 ## Los objetos siguen construidos con primitivas simples y sin assets externos.
 ## La composición separa usos domésticos reconocibles antes de añadir más props:
 ## estar frente a la tele, cocina/servicio, descanso ya declarado en el catálogo
-## y almacenamiento. La lámpara, el televisor, la portátil y el cajón conservan
+## y almacenamiento. La lámpara, el televisor, las consolas y el cajón conservan
 ## la interacción común de #283 sin introducir persistencia ni reglas de jornada.
 ##
 ## Desde #399 la forma procedural también recibe MATERIA: madera, tejido y acero
@@ -21,6 +21,7 @@ static func montar(raiz: Node3D) -> void:
 	montar_zonas_domesticas(raiz)
 	_montar_mesita(raiz, Vector3(-2.45, 0.0, 0.35))
 	_montar_portatil(raiz, Vector3(-2.45, 0.68, 0.35))
+	_montar_consola_sobremesa(raiz, Vector3(-3.35, 0.02, 2.03))
 	_montar_lampara_pie(raiz, Vector3(-0.65, 0.0, 0.55))
 	_montar_almacenamiento(raiz, Vector3(0.0, 0.0, -3.05))
 	_montar_televisor_interactivo(raiz)
@@ -200,6 +201,15 @@ static func _montar_portatil(raiz: Node3D, pos: Vector3) -> void:
 	portatil.rotation_degrees = Vector3(-12.0, 18.0, 0.0)
 	raiz.add_child(portatil)
 	portatil.configurar()
+
+
+static func _montar_consola_sobremesa(raiz: Node3D, pos: Vector3) -> void:
+	var consola := ConsolaSobremesa98.new()
+	consola.name = "ConsolaSobremesa98"
+	consola.position = pos
+	consola.rotation_degrees.y = 180.0
+	raiz.add_child(consola)
+	consola.configurar()
 
 
 static func _montar_almacenamiento(raiz: Node3D, pos: Vector3) -> void:
