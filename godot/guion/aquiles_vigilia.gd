@@ -75,12 +75,15 @@ func _intentar_activar() -> bool:
 	if _activada or _jornada.is_empty():
 		return _activada
 	var giros := 1 if absf(_giro_acumulado) >= GIRO_MINIMO_OBSERVACION else 0
-	_activada = SuenoAquiles.registrar_semilla(
-		_jornada,
-		giros,
-		_talon_observado,
-		FUENTE,
-		2,
+	_activada = (
+		SuenoAquiles
+		. registrar_semilla(
+			_jornada,
+			giros,
+			_talon_observado,
+			FUENTE,
+			2,
+		)
 	)
 	_actualizar_feedback()
 	return _activada
