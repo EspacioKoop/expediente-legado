@@ -36,9 +36,11 @@ class MaterialesCasaTest(unittest.TestCase):
         self.assertIn('const MADERA := "madera_domestica"', self.utileria)
         self.assertIn('const TEJIDO := "tejido_domestico"', self.utileria)
         self.assertIn('const ACERO := "acero_cocina"', self.utileria)
-        self.assertGreaterEqual(self.utileria.count("TEJIDO)"), 5)
-        self.assertGreaterEqual(self.utileria.count("MADERA)"), 10)
-        self.assertGreaterEqual(self.utileria.count("ACERO)"), 7)
+        # Se cuentan referencias semánticas, no `TOKEN)`; gdformat puede partir
+        # una llamada en varias líneas sin cambiar qué material usa.
+        self.assertGreaterEqual(self.utileria.count("TEJIDO"), 6)
+        self.assertGreaterEqual(self.utileria.count("MADERA"), 13)
+        self.assertGreaterEqual(self.utileria.count("ACERO"), 9)
 
     def test_utileria_reutiliza_el_shader_psx_central(self):
         self.assertIn("Modelos._pintar(malla, color, textura)", self.utileria)
