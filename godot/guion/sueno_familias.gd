@@ -118,9 +118,7 @@ static func cuerpo(id: String) -> StaticBody3D:
 	var familia := de(id)
 	if familia.is_empty():
 		return StaticBody3D.new()
-	return SuenoGeometria.cuerpo_sala(
-		familia["contorno"], float(familia.get("altura", 3.2))
-	)
+	return SuenoGeometria.cuerpo_sala(familia["contorno"], float(familia.get("altura", 3.2)))
 
 
 static func valida(id: String) -> bool:
