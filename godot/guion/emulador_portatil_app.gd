@@ -9,6 +9,7 @@ signal cerrado
 
 const ROM_PROPIA := "res://roms/caza_pixeles_98.gbc"
 const TEXTOS := "res://datos/emulador_gb_textos.json"
+const SRAM_DIR := "user://sram/gb"
 const ANCHO := 160
 const ALTO := 144
 const CICLOS_CPU_DMG := 4194304.0
@@ -36,6 +37,7 @@ var _jugando := false
 var _pausa_anterior := false
 var _abierto := false
 var _tiempo_emulador := 0.0
+var _ruta_sram_actual := ""
 
 
 func abrir() -> void:
@@ -93,6 +95,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _exit_tree() -> void:
+	_guardar_sram()
 	if _abierto and get_tree() != null:
 		get_tree().paused = _pausa_anterior
 	_abierto = false
@@ -208,6 +211,8 @@ func _refrescar_roms() -> void:
 func _cargar_rom(ruta: String) -> void:
 	if _emulador == null or ruta.is_empty():
 		return
+	_guardar_sram()
+	_ruta_sram_actual = ""
 	_estado.text = _formatear("cargando", [ruta.get_file()])
 	var rom := FileAccess.get_file_as_bytes(ruta)
 	var resultado := int(_emulador.call("load_rom", rom))
@@ -221,12 +226,108 @@ func _cargar_rom(ruta: String) -> void:
 		_jugando = false
 		_tiempo_emulador = 0.0
 		return
+	_ruta_sram_actual = _ruta_sram(rom)
+	_restaurar_sram()
 	_tiempo_emulador = 0.0
 	_jugando = true
 	var titulo := String(_emulador.call("rom_title"))
 	if titulo.is_empty():
 		titulo = ruta.get_file()
 	_estado.text = _formatear("ejecutando", [titulo])
+
+
+func _ruta_sram(rom: PackedByteArray) -> String:
+	var contexto := HashingContext.new()
+	if contexto.start(HashingContext.HASH_SHA256) != OK:
+		return ""
+	if contexto.update(rom) != OK:
+		return ""
+	var huella := contexto.finish().hex_encode()
+	return SRAM_DIR + "/" + huella + ".sav" if not huella.is_empty() else ""
+
+
+func _restaurar_sram() -> void:
+	if _emulador == null or _ruta_sram_actual.is_empty():
+		return
+	_recuperar_respaldo_sram()
+	if not FileAccess.file_exists(_ruta_sram_actual):
+		return
+	var datos := FileAccess.get_file_as_bytes(_ruta_sram_actual)
+	if bool(_emulador.call("load_save_ram", datos)):
+		return
+	var rota := _ruta_sram_actual + ".roto"
+	_eliminar_si_existe(rota)
+	var error := DirAccess.rename_absolute(
+		ProjectSettings.globalize_path(_ruta_sram_actual), ProjectSettings.globalize_path(rota)
+	)
+	if error != OK:
+		push_warning("No se pudo apartar SRAM incompatible: %s" % _ruta_sram_actual)
+	else:
+		push_warning("SRAM incompatible apartada en %s" % rota)
+
+
+func _guardar_sram() -> bool:
+	if _emulador == null or _ruta_sram_actual.is_empty():
+		return true
+	var datos: PackedByteArray = _emulador.call("save_ram")
+	if datos.is_empty():
+		return true
+	var carpeta_absoluta := ProjectSettings.globalize_path(SRAM_DIR)
+	var error_carpeta := DirAccess.make_dir_recursive_absolute(carpeta_absoluta)
+	if error_carpeta != OK and error_carpeta != ERR_ALREADY_EXISTS:
+		push_warning("No se pudo preparar la carpeta de SRAM")
+		return false
+
+	var temporal := _ruta_sram_actual + ".nuevo"
+	var respaldo := _ruta_sram_actual + ".anterior"
+	var archivo := FileAccess.open(temporal, FileAccess.WRITE)
+	if archivo == null:
+		push_warning("No se pudo escribir SRAM temporal")
+		return false
+	archivo.store_buffer(datos)
+	archivo.flush()
+	archivo.close()
+
+	_eliminar_si_existe(respaldo)
+	if FileAccess.file_exists(_ruta_sram_actual):
+		var mover_actual := DirAccess.rename_absolute(
+			ProjectSettings.globalize_path(_ruta_sram_actual),
+			ProjectSettings.globalize_path(respaldo),
+		)
+		if mover_actual != OK:
+			_eliminar_si_existe(temporal)
+			push_warning("No se pudo preparar el reemplazo de SRAM")
+			return false
+
+	var mover_nuevo := DirAccess.rename_absolute(
+		ProjectSettings.globalize_path(temporal), ProjectSettings.globalize_path(_ruta_sram_actual)
+	)
+	if mover_nuevo != OK:
+		if FileAccess.file_exists(respaldo):
+			DirAccess.rename_absolute(
+				ProjectSettings.globalize_path(respaldo),
+				ProjectSettings.globalize_path(_ruta_sram_actual),
+			)
+		_eliminar_si_existe(temporal)
+		push_warning("No se pudo reemplazar la SRAM")
+		return false
+	_eliminar_si_existe(respaldo)
+	return true
+
+
+func _recuperar_respaldo_sram() -> void:
+	var respaldo := _ruta_sram_actual + ".anterior"
+	if FileAccess.file_exists(_ruta_sram_actual) or not FileAccess.file_exists(respaldo):
+		return
+	DirAccess.rename_absolute(
+		ProjectSettings.globalize_path(respaldo),
+		ProjectSettings.globalize_path(_ruta_sram_actual),
+	)
+
+
+func _eliminar_si_existe(ruta: String) -> void:
+	if FileAccess.file_exists(ruta):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(ruta))
 
 
 func _botones() -> int:
@@ -261,6 +362,7 @@ func _joy(boton: JoyButton) -> bool:
 func _cerrar() -> void:
 	if not _abierto:
 		return
+	_guardar_sram()
 	_jugando = false
 	_tiempo_emulador = 0.0
 	_abierto = false
