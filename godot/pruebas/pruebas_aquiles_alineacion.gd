@@ -9,7 +9,7 @@ var _fallos := 0
 
 func _initialize() -> void:
 	_probar_reflector_deliberado()
-	_probar_resolucion_diegética()
+	_probar_resolucion_diegetica()
 	_probar_contrato_no_combate()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -38,7 +38,7 @@ func _probar_reflector_deliberado() -> void:
 	reflector.queue_free()
 
 
-func _probar_resolucion_diegética() -> void:
+func _probar_resolucion_diegetica() -> void:
 	var sueno := PuzzleScript.new()
 	sueno.reduccion_movimiento = true
 	root.add_child(sueno)
