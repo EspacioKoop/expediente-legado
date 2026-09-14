@@ -178,7 +178,9 @@ static func _normalizar_dia(jornada: Dictionary) -> Dictionary:
 			continue
 
 		var fuentes_crudas = entrada.get("fuentes", [])
-		if typeof(fuentes_crudas) != TYPE_ARRAY and entrada.has("fuente"):
+		if entrada.has("fuente") and (
+			typeof(fuentes_crudas) != TYPE_ARRAY or fuentes_crudas.is_empty()
+		):
 			fuentes_crudas = [entrada["fuente"]]
 		if typeof(fuentes_crudas) != TYPE_ARRAY:
 			continue
