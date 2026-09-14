@@ -161,7 +161,7 @@ func _probar_seleccion_reproducible() -> void:
 	SemillasOniricas.activar_semilla_onirica(jornada, "hidra", "rom:hidra", 2)
 	var limitada := SemillasOniricas.seleccionar_para_noche(jornada, 99, 2)["familias"]
 	_comprobar(limitada.size(), 2, "la competición nocturna respeta el máximo de familias")
-	_comprobar(limiteda_sin_duplicados(limitada), true, "una familia no ocupa dos huecos de la noche")
+	_comprobar(_sin_duplicados(limitada), "una familia no ocupa dos huecos de la noche")
 
 
 func _probar_guardado_de_partida() -> void:
@@ -191,7 +191,7 @@ func _probar_catalogo_cerrado() -> void:
 	_comprobar(SemillasOniricas.clave("otro"), "", "un mito futuro requiere alta explícita")
 
 
-func limiteda_sin_duplicados(familias: Array) -> bool:
+func _sin_duplicados(familias: Array) -> bool:
 	var unicas := []
 	for familia in familias:
 		if unicas.has(familia):
@@ -201,6 +201,9 @@ func limiteda_sin_duplicados(familias: Array) -> bool:
 
 
 func _comprobar(actual, esperado = true, nombre: String = "") -> void:
+	if typeof(esperado) == TYPE_STRING and nombre.is_empty():
+		nombre = String(esperado)
+		esperado = true
 	if actual == esperado:
 		_pasadas += 1
 		return
