@@ -1,21 +1,32 @@
 ## Ajuste de composición del HUD por fase (#397).
 ##
-## El bloque de estado general ayuda en el archivo, donde contextualiza la jornada,
-## pero fuera compite con el espacio 3D sin aportar una acción inmediata. Esta capa
-## conserva el mismo HUDLayer para interacción, diálogo y modales y solo retira el
-## estado permanente en trayecto, casa y sueño.
-extends "res://guion/dia_clima_app.gd"
+## Controller hijo: conserva `dia_clima_app.gd` como raíz histórica y observa la
+## fase efectiva de Jornada. Solo gobierna el slot ESTADO del HUD común; prompts,
+## diálogo y modales siguen siendo responsabilidad de HUDLayer y del día.
+extends Node
+
+var _fase_anterior := ""
 
 
-func _entrar_en(fase: String) -> void:
-	super._entrar_en(fase)
-	_sincronizar_estado_hud(fase)
-
-
-func _sincronizar_estado_hud(fase: String) -> void:
-	if _hud_prioridades == null:
+func _process(_delta: float) -> void:
+	var dia := get_parent()
+	if dia == null:
 		return
+	var jornada = dia.get("jornada")
+	if not jornada is Dictionary:
+		return
+	var fase := String(jornada.get("fase", ""))
+	if fase == _fase_anterior:
+		return
+	var hud = dia.get("_hud_prioridades")
+	if not hud is HUDLayer:
+		return
+	_fase_anterior = fase
+	_sincronizar_estado_hud(hud, fase)
+
+
+func _sincronizar_estado_hud(hud: HUDLayer, fase: String) -> void:
 	if fase == "archivo":
-		_hud_prioridades.activar(HUDLayer.ESTADO)
+		hud.activar(HUDLayer.ESTADO)
 	else:
-		_hud_prioridades.desactivar(HUDLayer.ESTADO)
+		hud.desactivar(HUDLayer.ESTADO)
