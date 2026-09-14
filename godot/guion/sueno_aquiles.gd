@@ -133,11 +133,41 @@ func _montar_modelo_cc0() -> bool:
 
 
 func _montar_figura_fallback() -> void:
-	_crear_caja(_figura, "Torso", Vector3(3.3, 4.0, 1.5), Vector3(0.0, 6.2, 0.0), COLOR_PIEDRA)
-	_crear_caja(_figura, "PiernaIzquierda", Vector3(1.0, 4.3, 1.0), Vector3(-0.9, 2.2, 0.0), COLOR_PIEDRA)
-	_crear_caja(_figura, "PiernaDerecha", Vector3(1.0, 4.3, 1.0), Vector3(0.9, 2.2, 0.0), COLOR_PIEDRA)
-	_crear_caja(_figura, "BrazoIzquierdo", Vector3(0.8, 3.6, 0.8), Vector3(-2.0, 6.0, 0.0), COLOR_BRONCE)
-	_crear_caja(_figura, "BrazoDerecho", Vector3(0.8, 3.6, 0.8), Vector3(2.0, 6.0, 0.0), COLOR_BRONCE)
+	_crear_caja(
+		_figura,
+		"Torso",
+		Vector3(3.3, 4.0, 1.5),
+		Vector3(0.0, 6.2, 0.0),
+		COLOR_PIEDRA,
+	)
+	_crear_caja(
+		_figura,
+		"PiernaIzquierda",
+		Vector3(1.0, 4.3, 1.0),
+		Vector3(-0.9, 2.2, 0.0),
+		COLOR_PIEDRA,
+	)
+	_crear_caja(
+		_figura,
+		"PiernaDerecha",
+		Vector3(1.0, 4.3, 1.0),
+		Vector3(0.9, 2.2, 0.0),
+		COLOR_PIEDRA,
+	)
+	_crear_caja(
+		_figura,
+		"BrazoIzquierdo",
+		Vector3(0.8, 3.6, 0.8),
+		Vector3(-2.0, 6.0, 0.0),
+		COLOR_BRONCE,
+	)
+	_crear_caja(
+		_figura,
+		"BrazoDerecho",
+		Vector3(0.8, 3.6, 0.8),
+		Vector3(2.0, 6.0, 0.0),
+		COLOR_BRONCE,
+	)
 	var cabeza_malla := SphereMesh.new()
 	cabeza_malla.radius = 1.05
 	cabeza_malla.height = 2.1
@@ -163,16 +193,40 @@ func _montar_talon() -> void:
 
 
 func _montar_pasarela() -> void:
-	_crear_caja(self, "PasarelaNorte", Vector3(13.0, 0.3, 2.0), Vector3(0.0, -0.15, -6.0), COLOR_BRONCE)
-	_crear_caja(self, "PasarelaSur", Vector3(13.0, 0.3, 2.0), Vector3(0.0, -0.15, 6.0), COLOR_BRONCE)
-	_crear_caja(self, "PasarelaEste", Vector3(2.0, 0.3, 10.0), Vector3(5.5, -0.15, 0.0), COLOR_BRONCE)
-	_crear_caja(self, "PasarelaOeste", Vector3(2.0, 0.3, 10.0), Vector3(-5.5, -0.15, 0.0), COLOR_BRONCE)
+	_crear_caja(
+		self,
+		"PasarelaNorte",
+		Vector3(13.0, 0.3, 2.0),
+		Vector3(0.0, -0.15, -6.0),
+		COLOR_BRONCE,
+	)
+	_crear_caja(
+		self,
+		"PasarelaSur",
+		Vector3(13.0, 0.3, 2.0),
+		Vector3(0.0, -0.15, 6.0),
+		COLOR_BRONCE,
+	)
+	_crear_caja(
+		self,
+		"PasarelaEste",
+		Vector3(2.0, 0.3, 10.0),
+		Vector3(5.5, -0.15, 0.0),
+		COLOR_BRONCE,
+	)
+	_crear_caja(
+		self,
+		"PasarelaOeste",
+		Vector3(2.0, 0.3, 10.0),
+		Vector3(-5.5, -0.15, 0.0),
+		COLOR_BRONCE,
+	)
 	var espejo := _crear_caja(
 		self,
 		"EspejoLateral",
 		Vector3(0.18, 4.0, 3.2),
 		Vector3(-6.1, 2.0, -1.5),
-		Color(0.42, 0.48, 0.52)
+		Color(0.42, 0.48, 0.52),
 	)
 	var material := espejo.material_override as StandardMaterial3D
 	material.metallic = 0.85
