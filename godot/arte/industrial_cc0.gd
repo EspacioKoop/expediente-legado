@@ -39,9 +39,33 @@ static func _bobina(raiz: Node3D) -> void:
 	grupo.position = Vector3(-1.35, 0.58, 0.30)
 	raiz.add_child(grupo)
 
-	_cilindro(grupo, "DiscoIzquierdo", 0.12, 0.58, Vector3(-0.42, 0, 0), METAL_CLARO, Vector3(0, 0, 90))
-	_cilindro(grupo, "DiscoDerecho", 0.12, 0.58, Vector3(0.42, 0, 0), METAL_CLARO, Vector3(0, 0, 90))
-	_cilindro(grupo, "NucleoCable", 0.72, 0.27, Vector3.ZERO, CABLE, Vector3(0, 0, 90))
+	_cilindro(
+		grupo,
+		"DiscoIzquierdo",
+		0.12,
+		0.58,
+		Vector3(-0.42, 0, 0),
+		METAL_CLARO,
+		Vector3(0, 0, 90),
+	)
+	_cilindro(
+		grupo,
+		"DiscoDerecho",
+		0.12,
+		0.58,
+		Vector3(0.42, 0, 0),
+		METAL_CLARO,
+		Vector3(0, 0, 90),
+	)
+	_cilindro(
+		grupo,
+		"NucleoCable",
+		0.72,
+		0.27,
+		Vector3.ZERO,
+		CABLE,
+		Vector3(0, 0, 90),
+	)
 
 
 static func _cuadro_electrico(raiz: Node3D) -> void:
@@ -51,8 +75,20 @@ static func _cuadro_electrico(raiz: Node3D) -> void:
 	raiz.add_child(grupo)
 
 	_caja(grupo, "CajaMetalica", Vector3(0.78, 1.18, 0.28), Vector3.ZERO, METAL)
-	_caja(grupo, "Puerta", Vector3(0.70, 1.08, 0.04), Vector3(0, 0, -0.16), METAL_CLARO)
-	_caja(grupo, "Maneta", Vector3(0.05, 0.24, 0.05), Vector3(0.24, 0, -0.20), Color(0.10, 0.10, 0.10))
+	_caja(
+		grupo,
+		"Puerta",
+		Vector3(0.70, 1.08, 0.04),
+		Vector3(0, 0, -0.16),
+		METAL_CLARO,
+	)
+	_caja(
+		grupo,
+		"Maneta",
+		Vector3(0.05, 0.24, 0.05),
+		Vector3(0.24, 0, -0.20),
+		Color(0.10, 0.10, 0.10),
+	)
 
 
 static func _carro_plataforma(raiz: Node3D) -> void:
@@ -62,8 +98,20 @@ static func _carro_plataforma(raiz: Node3D) -> void:
 	raiz.add_child(grupo)
 
 	_caja(grupo, "Plataforma", Vector3(1.08, 0.12, 0.64), Vector3.ZERO, METAL_CLARO)
-	_caja(grupo, "AsaIzquierda", Vector3(0.06, 0.92, 0.06), Vector3(-0.48, 0.48, 0.26), METAL)
-	_caja(grupo, "AsaDerecha", Vector3(0.06, 0.92, 0.06), Vector3(0.48, 0.48, 0.26), METAL)
+	_caja(
+		grupo,
+		"AsaIzquierda",
+		Vector3(0.06, 0.92, 0.06),
+		Vector3(-0.48, 0.48, 0.26),
+		METAL,
+	)
+	_caja(
+		grupo,
+		"AsaDerecha",
+		Vector3(0.06, 0.92, 0.06),
+		Vector3(0.48, 0.48, 0.26),
+		METAL,
+	)
 	_caja(grupo, "AsaSuperior", Vector3(1.02, 0.06, 0.06), Vector3(0, 0.92, 0.26), METAL)
 	for x in [-0.42, 0.42]:
 		for z in [-0.24, 0.24]:
@@ -87,7 +135,13 @@ static func _foco_obra(raiz: Node3D) -> void:
 	_caja(grupo, "PataA", Vector3(0.08, 0.06, 0.72), Vector3(-0.20, 0.05, 0.05), METAL)
 	_caja(grupo, "PataB", Vector3(0.08, 0.06, 0.72), Vector3(0.20, 0.05, 0.05), METAL)
 	_caja(grupo, "Mastil", Vector3(0.08, 0.92, 0.08), Vector3(0, 0.50, 0), METAL)
-	_caja(grupo, "Carcasa", Vector3(0.46, 0.34, 0.24), Vector3(0, 1.08, 0), AMARILLO_OBRA)
+	_caja(
+		grupo,
+		"Carcasa",
+		Vector3(0.46, 0.34, 0.24),
+		Vector3(0, 1.08, 0),
+		AMARILLO_OBRA,
+	)
 	_caja(grupo, "Lente", Vector3(0.36, 0.25, 0.025), Vector3(0, 1.08, -0.135), LENTE)
 
 
