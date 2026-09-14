@@ -76,9 +76,13 @@ func _probar_fallo_y_salida() -> void:
 	var presentacion = _nuevo("F-P4", 404)
 	for intento in range(2):
 		var resultado := _seleccionar_orden(presentacion, [2, 1, 0])
-		_comprobar(resultado == Presentacion.EVENTO_INCORRECTO, "un fallo temprano permite reintentar")
+		_comprobar(
+			resultado == Presentacion.EVENTO_INCORRECTO, "un fallo temprano permite reintentar"
+		)
 		_comprobar(presentacion.seleccion.is_empty(), "un fallo limpia la secuencia visual")
-		_comprobar(presentacion.ecos.intentos == intento + 1, "el fallo consume exactamente un intento")
+		_comprobar(
+			presentacion.ecos.intentos == intento + 1, "el fallo consume exactamente un intento"
+		)
 	var final := _seleccionar_orden(presentacion, [2, 1, 0])
 	_comprobar(final == Presentacion.EVENTO_DISPERSADO, "el tercer fallo dispersa los ecos")
 	_comprobar(
