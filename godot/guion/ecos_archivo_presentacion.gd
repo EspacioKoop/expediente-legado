@@ -67,7 +67,7 @@ func seleccionar() -> String:
 	if seleccion.size() < Ecos.CANTIDAD_FRAGMENTOS:
 		return ultimo_evento
 
-	var resultado := ecos.probar(seleccion)
+	var resultado: String = str(ecos.probar(seleccion))
 	ultimo_evento = resultado
 	if resultado == EVENTO_INCORRECTO:
 		seleccion.clear()
@@ -91,8 +91,8 @@ func deshacer() -> bool:
 func abandonar() -> bool:
 	if ecos == null:
 		return false
-	var estaba_pendiente := ecos.nucleo.pendiente()
-	var seguro := ecos.salir()
+	var estaba_pendiente: bool = bool(ecos.nucleo.pendiente())
+	var seguro: bool = bool(ecos.salir())
 	if not seguro:
 		return false
 	cerrada = true
@@ -111,16 +111,15 @@ func vista(reduccion_movimiento: bool) -> Dictionary:
 	for indice in range(presentados.size()):
 		var eco: Dictionary = presentados[indice]
 		var id := int(eco.get("id", -1))
-		elementos.append(
-			{
-				"slot": indice,
-				"id": id,
-				"texto": str(eco.get("texto", "")),
-				"foco": indice == foco,
-				"seleccionado": seleccion.has(id),
-				"posicion_seleccion": seleccion.find(id),
-			}
-		)
+		var elemento := {
+			"slot": indice,
+			"id": id,
+			"texto": str(eco.get("texto", "")),
+			"foco": indice == foco,
+			"seleccionado": seleccion.has(id),
+			"posicion_seleccion": seleccion.find(id),
+		}
+		elementos.append(elemento)
 	return {
 		"regla": "Recompón los tres ecos en el orden en que aparecían en el archivo.",
 		"elementos": elementos,
