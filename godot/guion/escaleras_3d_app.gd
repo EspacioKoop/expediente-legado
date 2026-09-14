@@ -35,7 +35,6 @@ const PUNTOS := [
 ]
 
 var _camara: Camera3D
-var _indicador: Label
 var _distancia := 0.0
 var _longitud_total := 0.0
 var _terminando := false
@@ -45,7 +44,6 @@ func _ready() -> void:
 	_montar_geometria()
 	_calcular_longitud()
 	_montar_camara()
-	_montar_indicador()
 	_actualizar_camara()
 
 
@@ -92,24 +90,6 @@ func _actualizar_camara() -> void:
 	if _camara.position.distance_to(mira) > 0.05:
 		_camara.look_at(mira, Vector3.UP)
 
-	if _indicador != null:
-		_indicador.text = "%s\n↑ avanzar · ↓ retroceder" % _planta_actual()
-
-
-func _planta_actual() -> String:
-	if _longitud_total <= 0.0:
-		return "Escaleras · planta 4"
-	var t := _distancia / _longitud_total
-	if t < 0.22:
-		return "Escaleras · planta 4"
-	if t < 0.45:
-		return "Escaleras · planta 3"
-	if t < 0.69:
-		return "Escaleras · planta 2"
-	if t < 0.91:
-		return "Escaleras · planta 1"
-	return "Escaleras · portal"
-
 
 func _montar_camara() -> void:
 	_camara = Camera3D.new()
@@ -117,22 +97,6 @@ func _montar_camara() -> void:
 	_camara.current = true
 	_camara.fov = 67.0
 	add_child(_camara)
-
-
-func _montar_indicador() -> void:
-	var capa := CanvasLayer.new()
-	capa.name = "HUDRutaEscaleras"
-	add_child(capa)
-
-	var panel := PanelContainer.new()
-	panel.position = Vector2(24.0, 24.0)
-	panel.custom_minimum_size = Vector2(300.0, 66.0)
-	capa.add_child(panel)
-
-	_indicador = Label.new()
-	_indicador.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_indicador.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	panel.add_child(_indicador)
 
 
 func _montar_geometria() -> void:
