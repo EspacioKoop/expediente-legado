@@ -71,7 +71,9 @@ static func evaluar_toma_detallada(datos: Dictionary) -> Dictionary:
 	return _resultado(datos, motivos, proporcion_sujeto)
 
 
-static func _resultado(datos: Dictionary, motivos: Array[String], proporcion_sujeto: float) -> Dictionary:
+static func _resultado(
+	datos: Dictionary, motivos: Array[String], proporcion_sujeto: float
+) -> Dictionary:
 	return {
 		"estado": ESTADO_VALIDA if motivos.is_empty() else ESTADO_CONTAMINADA,
 		"motivos": motivos.duplicate(),
