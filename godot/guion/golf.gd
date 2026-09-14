@@ -86,7 +86,9 @@ static func resultado(estado: Dictionary) -> Dictionary:
 			return int(a["golpes"]) < int(b["golpes"])
 	)
 
-	var completa := estado.get("terminada", false) and not estado.get("abandonada", false)
+	var completa: bool = bool(estado.get("terminada", false)) and not bool(
+		estado.get("abandonada", false)
+	)
 	var ganador := ""
 	if completa and not ranking.is_empty():
 		ganador = String(ranking[0]["jugador"])
