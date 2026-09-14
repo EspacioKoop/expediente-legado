@@ -20,7 +20,7 @@ def test_el_contexto_se_congela_con_evidencia_real_y_no_con_un_contador() -> Non
     assert 'jornada.get("leidos_total", [])' in codigo
     assert 'estado.get("pistas_descubiertas", [])' in codigo
     assert "_hay_nuevo(_leidos(estado)" in codigo
-    assert "_hay_nuevo(\n\t\t_pistas(estado)" in codigo
+    assert "_hay_nuevo(_pistas(estado)" in codigo
     assert "Time." not in codigo
     assert "RandomNumberGenerator" not in codigo
     assert ">=" not in codigo
