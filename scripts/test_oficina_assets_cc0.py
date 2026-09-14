@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class OficinaAssetsCc0Test(unittest.TestCase):
     def test_nueve_glb_originales_autocontenidos(self):
         fichas = json.loads((ROOT / 'godot/assets/procedencia.json').read_text())['assets']
-        fichas = [f for f in fichas if f['ruta'].startswith('modelos/oficina_psx/')]
+        fichas = [f for f in fichas if f['ruta'].startswith('modelos/oficina_psx/') and f['ruta'].endswith('.glb')]
         self.assertEqual(len(fichas), 9)
         for ficha in fichas:
             contenido = (ROOT / 'godot/assets' / ficha['ruta']).read_bytes()
