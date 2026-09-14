@@ -145,9 +145,7 @@ func _montar_tramo(nombre: String, desde: Vector3, hasta: Vector3) -> void:
 		var posicion := desde.lerp(hasta, t)
 		var paso := largo / float(ESCALONES_POR_TRAMO) + 0.025
 		var tamano := (
-			Vector3(paso, 0.12, ANCHO_TRAMO)
-			if por_x
-			else Vector3(ANCHO_TRAMO, 0.12, paso)
+			Vector3(paso, 0.12, ANCHO_TRAMO) if por_x else Vector3(ANCHO_TRAMO, 0.12, paso)
 		)
 		_caja("%s_Escalon%02d" % [nombre, i], posicion - Vector3(0.0, 0.08, 0.0), tamano, HORMIGON)
 
@@ -155,11 +153,7 @@ func _montar_tramo(nombre: String, desde: Vector3, hasta: Vector3) -> void:
 func _montar_rellano(nombre: String, desde: Vector3, hasta: Vector3) -> void:
 	var centro := desde.lerp(hasta, 0.5) - Vector3(0.0, 0.08, 0.0)
 	var delta := hasta - desde
-	var tamano := Vector3(
-		maxf(absf(delta.x), ANCHO_TRAMO),
-		0.14,
-		maxf(absf(delta.z), ANCHO_TRAMO)
-	)
+	var tamano := Vector3(maxf(absf(delta.x), ANCHO_TRAMO), 0.14, maxf(absf(delta.z), ANCHO_TRAMO))
 	_caja(nombre, centro, tamano, BORDE)
 
 
