@@ -62,10 +62,7 @@ func _montar_hoja() -> void:
 		var y := 0.12 + float(indice) * 0.145
 		_agregar_caja(_hoja, Vector3(0, y, 0), Vector3(0.10, 0.12, 1.48), metal)
 		_agregar_caja(
-			_hoja,
-			Vector3(-0.055, y - 0.055, 0),
-			Vector3(0.025, 0.025, 1.48),
-			metal_sombra
+			_hoja, Vector3(-0.055, y - 0.055, 0), Vector3(0.025, 0.025, 1.48), metal_sombra
 		)
 	_agregar_caja(_hoja, Vector3(-0.02, 0.04, 0), Vector3(0.16, 0.08, 1.54), metal_sombra)
 
