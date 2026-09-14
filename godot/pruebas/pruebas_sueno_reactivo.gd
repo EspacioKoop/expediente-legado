@@ -2,6 +2,7 @@ extends SceneTree
 
 var _pasadas := 0
 var _fallos := 0
+var _observaciones: Array = []
 
 
 func _initialize() -> void:
@@ -41,6 +42,14 @@ func _probar_todas_las_formas() -> void:
 				anomalia.texto_accion().begins_with("Examinar "),
 				"%s usa verbo semántico de examen" % id,
 			)
+			var catalogo_id: String = anomalia.id_catalogo()
+			_comprobar(not catalogo_id.is_empty(), "%s declara id de catálogo" % id)
+			_comprobar(
+				not CatalogoAnomalias.ficha(catalogo_id).is_empty(),
+				"%s enlaza una entrada real del catálogo" % id,
+			)
+			_observaciones.clear()
+			anomalia.observada.connect(_capturar_observacion)
 			_comprobar(not anomalia.reactiva(), "%s empieza en estado base" % id)
 			_comprobar(not anomalia.luz_visible(), "%s empieza sin respuesta luminosa" % id)
 			var escala_base: Vector3 = anomalia.escala_visual()
@@ -51,9 +60,23 @@ func _probar_todas_las_formas() -> void:
 				anomalia.escala_visual() != escala_base,
 				"%s cambia deformación visible" % id,
 			)
+			_comprobar(_observaciones.size() == 1, "%s emite una observación" % id)
+			if _observaciones.size() == 1:
+				_comprobar(
+					_observaciones[0]["id"] == catalogo_id,
+					"%s emite el id estable esperado" % id,
+				)
+				_comprobar(
+					_observaciones[0]["actor"] == root,
+					"%s conserva el actor que examinó" % id,
+				)
 			_comprobar(anomalia.interactuar(root), "%s acepta segundo examen" % id)
 			_comprobar(not anomalia.reactiva(), "%s vuelve al estado base" % id)
 			_comprobar(anomalia.escala_visual() == escala_base, "%s restaura su forma" % id)
+			_comprobar(
+				_observaciones.size() == 2,
+				"%s notifica cada examen y deja la idempotencia al catálogo" % id,
+			)
 		mundo.queue_free()
 
 
@@ -70,8 +93,16 @@ func _probar_reproducibilidad() -> void:
 			primera[i].nombre_objeto == segunda[i].nombre_objeto,
 			"orden reproducible %d" % i,
 		)
+		_comprobar(
+			primera[i].id_catalogo() == segunda[i].id_catalogo(),
+			"id de catálogo reproducible %d" % i,
+		)
 	a.queue_free()
 	b.queue_free()
+
+
+func _capturar_observacion(anomalia_id: String, actor: Node) -> void:
+	_observaciones.append({"id": anomalia_id, "actor": actor})
 
 
 func _esta_en_planta(posicion: Vector3, bloques: Array) -> bool:

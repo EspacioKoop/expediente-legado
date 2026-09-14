@@ -1,13 +1,15 @@
-## Dressing reactivo para las salas compuestas del sueño (#400).
+## Dressing reactivo para las salas compuestas del sueño (#400 / #149).
 ##
 ## No modifica Sueno/SuenoFormas: lee la forma que ya se eligió y coloca tres
 ## objetos familiares únicamente sobre celdas transitables. Uno queda delante de
 ## la entrada y los otros se reparten lejos entre sí, evitando también la salida.
+## Cada prescripción enlaza además con un ID estable de CatalogoAnomalias.
 class_name SuenoUtileria
 extends RefCounted
 
 const PRESCRIPCIONES := [
 	{
+		"anomalia_id": "silla-demasiado-alta",
 		"modelo": "chairDesk",
 		"tam": Vector3(0.62, 0.95, 0.62),
 		"color": Color(0.30, 0.31, 0.38),
@@ -18,6 +20,7 @@ const PRESCRIPCIONES := [
 		"giro_reaccion": Vector3(0.0, 112.0, 8.0),
 	},
 	{
+		"anomalia_id": "monitor-estirado",
 		"modelo": "computerScreen",
 		"tam": Vector3(0.50, 0.45, 0.40),
 		"color": Color(0.48, 0.55, 0.52),
@@ -28,6 +31,7 @@ const PRESCRIPCIONES := [
 		"giro_reaccion": Vector3(9.0, 42.0, 13.0),
 	},
 	{
+		"anomalia_id": "archivador-torcido",
 		"modelo": "bookcaseClosed",
 		"tam": Vector3(1.0, 1.8, 0.6),
 		"color": Color(0.34, 0.31, 0.38),
@@ -68,6 +72,7 @@ static func montar(mundo: Node3D, id: String, dia: int, raiz_azar: int) -> Array
 		(
 			anomalia
 			. configurar(
+				datos["anomalia_id"],
 				datos["modelo"],
 				tam,
 				datos["color"],
