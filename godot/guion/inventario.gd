@@ -3,6 +3,7 @@ extends RefCounted
 
 const CARRIED := "carried"
 const HOME_STORAGE := "home_storage"
+const CAPACIDAD := 10
 
 
 static func nuevo() -> Dictionary:
@@ -20,12 +21,17 @@ static func completar(estado: Dictionary) -> Dictionary:
 	return estado
 
 
+static func tiene_hueco(estado: Dictionary) -> bool:
+	completar(estado)
+	return estado[CARRIED].size() < CAPACIDAD
+
+
 static func recoger(estado: Dictionary, objeto: Dictionary) -> bool:
 	completar(estado)
 	if not _objeto_valido(objeto):
 		return false
 	var id := String(objeto["id"])
-	if contiene(estado, id):
+	if contiene(estado, id) or not tiene_hueco(estado):
 		return false
 	estado[CARRIED].append(objeto.duplicate(true))
 	return true
@@ -36,6 +42,8 @@ static func guardar_en_casa(estado: Dictionary, objeto_id: String) -> bool:
 
 
 static func sacar_de_casa(estado: Dictionary, objeto_id: String) -> bool:
+	if not tiene_hueco(estado):
+		return false
 	return _mover(estado, objeto_id, HOME_STORAGE, CARRIED)
 
 
