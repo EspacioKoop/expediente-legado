@@ -42,6 +42,12 @@ func texto_accion() -> String:
 	return super.texto_accion()
 
 
+## Punto público mínimo para accesorios domésticos como el mando IR.
+## Mantiene una sola fuente de verdad para el estado visual de la televisión.
+func alternar_desde_mando() -> void:
+	_alternar(null)
+
+
 func _alternar(_actor: Node) -> void:
 	_encendida = not _encendida
 	_brillo.visible = _encendida
