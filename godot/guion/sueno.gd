@@ -156,10 +156,14 @@ static func espacio(id: String, quedan: int, contenido: Dictionary = {}) -> Dict
 	var posicion_entrada := (
 		Vector3(familia["entrada"]) if es_poligonal else Planta.centro_en_metros(bloques, entrada)
 	)
-	var base_salida := (
-		_salida_poligonal(familia) if es_poligonal else Planta.centro_en_metros(bloques, salida)
-	)
-	var posicion_salida := base_salida + Vector3(0, 1.1, 0)
+	# Mantiene el contrato histórico de #90 para las salas de `Planta`; una
+	# familia poligonal sustituye después esa base sin cambiar cómo se derivan
+	# la zona de salida ni su pista ambiental.
+	var posicion_salida := Planta.centro_en_metros(bloques, salida)
+	if es_poligonal:
+		posicion_salida = _salida_poligonal(familia)
+	var base_salida := posicion_salida
+	posicion_salida += Vector3(0, 1.1, 0)
 
 	# Las figuras se reparten por la sala, lejos entre sí y lejos de por donde
 	# se entra y se sale: un sospechoso plantado en la puerta se ve antes de
