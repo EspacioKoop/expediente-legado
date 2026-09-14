@@ -42,6 +42,7 @@ func _probar_resolucion_diegetica() -> void:
 	var sueno := PuzzleScript.new()
 	sueno.reduccion_movimiento = true
 	root.add_child(sueno)
+	sueno.preparar()
 
 	var reflector := sueno.reflector()
 	var sello := sueno.sello()
