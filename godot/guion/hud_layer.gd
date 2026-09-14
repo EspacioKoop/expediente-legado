@@ -1,7 +1,7 @@
 ## Árbitro común de superficies del HUD (#397).
 ##
 ## No decide contenido ni crea textos: únicamente aplica la jerarquía visual
-## entre estado, interacción, tutorial, diálogo y modales. Así cada sistema
+## entre estado, interacción, tutorial, fase, diálogo y modales. Así cada sistema
 ## puede seguir siendo dueño de su contenido sin pelear por la misma atención.
 class_name HUDLayer
 extends CanvasLayer
@@ -11,12 +11,14 @@ signal superficie_cambiada(tipo: StringName, visible: bool)
 const ESTADO := &"estado"
 const INTERACCION := &"interaccion"
 const TUTORIAL := &"tutorial"
+const FASE := &"fase"
 const DIALOGO := &"dialogo"
 const MODAL := &"modal"
 
 const PRIORIDADES := {
 	INTERACCION: 100,
 	TUTORIAL: 200,
+	FASE: 250,
 	DIALOGO: 300,
 	MODAL: 400,
 }
@@ -29,7 +31,7 @@ func registrar(tipo: StringName, control: Control) -> void:
 	if not _tipo_valido(tipo):
 		push_error("Superficie HUD desconocida: %s" % tipo)
 		return
-	# Las superficies transitorias (tutorial y diálogo) se liberan al terminar.
+	# Las superficies transitorias (tutorial, fase y diálogo) se liberan al terminar.
 	# Guardar una referencia fuerte deja un objeto ya destruido dentro del
 	# diccionario y Godot falla al intentar tiparlo en el siguiente refresco.
 	_superficies[tipo] = weakref(control)
@@ -73,7 +75,7 @@ func debe_ser_visible(tipo: StringName) -> bool:
 func _primaria_activa() -> StringName:
 	var elegida := StringName()
 	var prioridad := -1
-	for tipo in [INTERACCION, TUTORIAL, DIALOGO]:
+	for tipo in [INTERACCION, TUTORIAL, FASE, DIALOGO]:
 		if not esta_activa(tipo):
 			continue
 		var actual := int(PRIORIDADES[tipo])
@@ -101,4 +103,4 @@ func _refrescar() -> void:
 
 
 func _tipo_valido(tipo: StringName) -> bool:
-	return tipo in [ESTADO, INTERACCION, TUTORIAL, DIALOGO, MODAL]
+	return tipo in [ESTADO, INTERACCION, TUTORIAL, FASE, DIALOGO, MODAL]
