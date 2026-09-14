@@ -7,10 +7,10 @@
 class_name MandoTelevision98
 extends Interactuable3D
 
-var _televisor: TelevisionInteractiva3D
+var _televisor: Node
 
 
-func configurar(televisor: TelevisionInteractiva3D) -> void:
+func configurar(televisor: Node) -> void:
 	_televisor = televisor
 	verbo = Verbo.USAR
 	nombre_objeto = "mando del televisor"
@@ -22,7 +22,8 @@ func configurar(televisor: TelevisionInteractiva3D) -> void:
 func _usar(_actor: Node) -> void:
 	if _televisor == null or not is_instance_valid(_televisor):
 		return
-	_televisor.alternar_desde_mando()
+	if _televisor.has_method("alternar_desde_mando"):
+		_televisor.call("alternar_desde_mando")
 
 
 func _montar_colision() -> void:
