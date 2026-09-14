@@ -161,6 +161,64 @@ static func plastico_abs(base: Color, semilla: int) -> ImageTexture:
 	return ImageTexture.create_from_image(imagen)
 
 
+## Madera doméstica: veta más marcada e irregular que la melamina de oficina.
+## Tiene bandas y pequeños nudos; debe leerse como mueble de casa, no como mesa
+## administrativa laminada.
+static func madera_domestica(base: Color, semilla: int) -> ImageTexture:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = semilla
+	var imagen := Image.create(LADO, LADO, false, Image.FORMAT_RGB8)
+	for y in LADO:
+		var banda := sin(float(y) * 0.42 + rng.randf_range(-0.25, 0.25)) * 0.055
+		var tono := base.lightened(banda) if banda >= 0.0 else base.darkened(-banda)
+		for x in LADO:
+			imagen.set_pixel(x, y, tono)
+	for i in 10:
+		var x := rng.randi() % LADO
+		var y := rng.randi() % LADO
+		imagen.set_pixel(x, y, base.darkened(0.18))
+		if x + 1 < LADO:
+			imagen.set_pixel(x + 1, y, base.darkened(0.10))
+	return ImageTexture.create_from_image(imagen)
+
+
+## Tejido doméstico: urdimbre y trama visibles a resolución baja. El patrón
+## diferencia un sofá o pantalla de lámpara de cualquier bloque pintado.
+static func tejido_domestico(base: Color, semilla: int) -> ImageTexture:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = semilla
+	var imagen := Image.create(LADO, LADO, false, Image.FORMAT_RGB8)
+	for x in LADO:
+		for y in LADO:
+			var trama := 0.035 if x % 4 < 2 else -0.025
+			var urdimbre := 0.030 if y % 4 < 2 else -0.020
+			var variacion := trama + urdimbre + rng.randf_range(-0.015, 0.015)
+			imagen.set_pixel(
+				x,
+				y,
+				base.lightened(variacion) if variacion >= 0.0 else base.darkened(-variacion)
+			)
+	return ImageTexture.create_from_image(imagen)
+
+
+## Acero de cocina: cepillado fino y direccional. No tiene desconchones de chapa
+## pintada; fregadero, nevera y herrajes deben leer como metal limpio de casa.
+static func acero_cocina(base: Color, semilla: int) -> ImageTexture:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = semilla
+	var imagen := Image.create(LADO, LADO, false, Image.FORMAT_RGB8)
+	for y in LADO:
+		var linea := rng.randf_range(-0.035, 0.035)
+		for x in LADO:
+			var cepillado := 0.045 if x % 8 == 0 else linea
+			imagen.set_pixel(
+				x,
+				y,
+				base.lightened(cepillado) if cepillado >= 0.0 else base.darkened(-cepillado)
+			)
+	return ImageTexture.create_from_image(imagen)
+
+
 ## La textura de una superficie: la traída si existe, y si no la calculada.
 ##
 ## Cada espacio la pide por NOMBRE y no importa este módulo, así que cambiar de
@@ -198,5 +256,11 @@ static func calculada(nombre: String, base: Color, semilla: int) -> ImageTexture
 			return metal_pintado(base, semilla)
 		"plastico_abs":
 			return plastico_abs(base, semilla)
+		"madera_domestica":
+			return madera_domestica(base, semilla)
+		"tejido_domestico":
+			return tejido_domestico(base, semilla)
+		"acero_cocina":
+			return acero_cocina(base, semilla)
 		_:
 			return null
