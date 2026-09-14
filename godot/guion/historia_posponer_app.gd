@@ -24,8 +24,9 @@ func _mostrar() -> void:
 
 	# Solo una historia pendiente nueva fija el punto de partida. Las partidas
 	# antiguas ya pospuestas carecen de instantánea y siguen siendo decidibles.
-	if estado_vista == "pendiente" and not HISTORIA_CONTEXTO.tiene_registro(
-		partida.estado, carta_id
+	if (
+		estado_vista == "pendiente"
+		and not HISTORIA_CONTEXTO.tiene_registro(partida.estado, carta_id)
 	):
 		if HISTORIA_CONTEXTO.registrar(partida.estado, carta_id):
 			_guardar()
@@ -80,9 +81,7 @@ func _texto_ui(clave: String) -> String:
 
 func _texto_contexto(clave: String) -> String:
 	if _textos_contexto.is_empty():
-		var datos: Variant = JSON.parse_string(
-			FileAccess.get_file_as_string(RUTA_TEXTOS_CONTEXTO)
-		)
+		var datos: Variant = JSON.parse_string(FileAccess.get_file_as_string(RUTA_TEXTOS_CONTEXTO))
 		if datos is Dictionary:
 			_textos_contexto = datos
 	return String(_textos_contexto.get(clave, ""))
