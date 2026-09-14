@@ -177,7 +177,9 @@ func _nombre_entrada(evento: InputEvent) -> String:
 			NOMBRES_BOTONES_MANDO.get(evento.button_index, "Botón %d" % evento.button_index)
 		)
 	if evento is InputEventKey:
-		var codigo := evento.physical_keycode if evento.physical_keycode != 0 else evento.keycode
+		var codigo: Key = (
+			evento.physical_keycode if evento.physical_keycode != 0 else evento.keycode
+		)
 		return OS.get_keycode_string(codigo)
 	return evento.as_text().strip_edges()
 
