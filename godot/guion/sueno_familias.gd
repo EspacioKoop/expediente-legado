@@ -32,35 +32,42 @@ static var _familias := {
 		"anclas": [Vector3(0, 0, 10), Vector3(-6, 0, 2), Vector3(6, 0, 2)],
 	},
 	ANULAR:
-	# El anillo se representa como dos contornos: exterior e interior. La
+	# Anillo abierto en C y deliberadamente irregular. Sigue cabiendo dentro
+	# de la envolvente histórica de `patio`: la planta de celdas conserva
+	# timing/mapa y esta silueta sustituye solo la arquitectura visible/física.
+	# El recorte central queda fuera de suelo, techo y colisión; la abertura
 	{
-		# integración visible deberá montar ambos, dejando el interior como vacío.
+		# lateral permite recorrerlo andando sin salto ni navegación especial.
 		"contorno":
 		PackedVector2Array(
 			[
-				Vector2(-15, -12),
-				Vector2(-7, -17),
-				Vector2(8, -16),
-				Vector2(15, -8),
-				Vector2(14, 10),
-				Vector2(5, 16),
-				Vector2(-10, 14),
-				Vector2(-16, 5),
-			]
-		),
-		"hueco":
-		PackedVector2Array(
-			[
-				Vector2(-5, -4),
-				Vector2(4, -6),
-				Vector2(7, 2),
-				Vector2(2, 7),
-				Vector2(-6, 5),
+				Vector2(-18, -12),
+				Vector2(-14, -18),
+				Vector2(12, -18),
+				Vector2(12, -10),
+				Vector2(2, -10),
+				Vector2(0, -8),
+				Vector2(-8, -8),
+				Vector2(-8, 8),
+				Vector2(0, 8),
+				Vector2(2, 10),
+				Vector2(12, 10),
+				Vector2(12, 18),
+				Vector2(-14, 18),
+				Vector2(-18, 12),
+				Vector2(-18, 4),
+				Vector2(-18, -4),
 			]
 		),
 		"altura": 3.4,
-		"entrada": Vector3(-11, 0, -7),
-		"anclas": [Vector3(10, 0, -3), Vector3(6, 0, 10), Vector3(-8, 0, 9)],
+		"entrada": Vector3(-17, 0, 0),
+		"anclas":
+		[
+			Vector3(-15, 0, -14),
+			Vector3(8, 0, -14),
+			Vector3(8, 0, 14),
+			Vector3(-15, 0, 14),
+		],
 	},
 	FRAGMENTADA:
 	# Una sala principal irregular y dos islas caminables separadas visualmente.

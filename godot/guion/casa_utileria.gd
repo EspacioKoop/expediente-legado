@@ -3,7 +3,7 @@
 ## Los objetos siguen construidos con primitivas simples y sin assets externos.
 ## La composición separa usos domésticos reconocibles antes de añadir más props:
 ## estar frente a la tele, cocina/servicio, descanso ya declarado en el catálogo
-## y almacenamiento. La lámpara, el televisor, la portátil y el cajón conservan
+## y almacenamiento. La lámpara, el televisor, las consolas y el cajón conservan
 ## la interacción común de #283 sin introducir persistencia ni reglas de jornada.
 ##
 ## Desde #399 la forma procedural también recibe MATERIA: madera, tejido y acero
@@ -21,19 +21,82 @@ static func montar(raiz: Node3D) -> void:
 	montar_zonas_domesticas(raiz)
 	_montar_mesita(raiz, Vector3(-2.45, 0.0, 0.35))
 	_montar_portatil(raiz, Vector3(-2.45, 0.68, 0.35))
+	_montar_consola_sobremesa(raiz, Vector3(-3.35, 0.02, 2.03))
 	_montar_lampara_pie(raiz, Vector3(-0.65, 0.0, 0.55))
 	_montar_almacenamiento(raiz, Vector3(0.0, 0.0, -3.05))
 	_montar_televisor_interactivo(raiz)
 
 
-## Vertical espacial de #133. Se mantiene separado de las interacciones para
+## Vertical espacial de #133/#282. Se mantiene separado de las interacciones para
 ## poder probar que la casa se lee por zonas aunque consola, compras o gato no
-## estén activos.
+## estén activos. Cama y cuenco toman sus anclas del catálogo: no duplican la
+## posición de la salida a sueño ni el punto al que camina el gato.
 static func montar_zonas_domesticas(raiz: Node3D) -> void:
+	_montar_cama(raiz, _ancla_salida("sueño", Vector3(-2.4, 0.0, -2.0)))
+	_montar_cuenco_gato(raiz, _ancla_cuenco(Vector3(2.8, 0.0, 1.5)))
 	_montar_sofa(raiz, Vector3(-1.65, 0.0, 1.35), 90.0)
 	_montar_cocina(raiz, Vector3(3.30, 0.0, -0.15))
 	_montar_ventana(raiz, Vector3(-2.10, 1.65, -3.42))
 	_montar_estanteria_compras(raiz, Vector3(1.25, 0.0, -3.22))
+
+
+static func _ancla_salida(destino: String, fallback: Vector3) -> Vector3:
+	for salida in EspaciosCatalogo.CASA.get("salidas", []):
+		if String(salida.get("destino", "")) != destino:
+			continue
+		var pos: Vector3 = salida.get("pos", fallback)
+		return Vector3(pos.x, 0.0, pos.z)
+	return fallback
+
+
+static func _ancla_cuenco(fallback: Vector3) -> Vector3:
+	var sitios: Array = EspaciosCatalogo.CASA.get("sitios_gato", [])
+	if sitios.is_empty():
+		return fallback
+	var pos: Vector3 = sitios[0]
+	return Vector3(pos.x, 0.0, pos.z)
+
+
+static func _montar_cama(raiz: Node3D, pos: Vector3) -> void:
+	var cama := Node3D.new()
+	cama.name = "CamaCasa"
+	cama.position = pos
+	raiz.add_child(cama)
+
+	# El prisma histórico queda integrado como colchón/volumen de salida. Marco,
+	# cabecero, patas, almohada y manta le dan una silueta de cama desde frente,
+	# lateral y 3/4 sin tocar el trigger que inicia el sueño.
+	var madera := Color(0.30, 0.21, 0.16)
+	var tela := Color(0.55, 0.46, 0.40)
+	var tela_clara := Color(0.70, 0.64, 0.56)
+	_agregar_caja(cama, Vector3(0, 0.20, 0), Vector3(1.56, 0.20, 2.34), madera, MADERA)
+	_agregar_caja(cama, Vector3(0, 0.72, -1.14), Vector3(1.58, 1.18, 0.12), madera, MADERA)
+	_agregar_caja(cama, Vector3(0, 0.36, 1.14), Vector3(1.58, 0.48, 0.10), madera, MADERA)
+	_agregar_caja(cama, Vector3(0, 0.61, -0.67), Vector3(0.92, 0.16, 0.42), tela_clara, TEJIDO)
+	_agregar_caja(cama, Vector3(0, 0.60, 0.34), Vector3(1.30, 0.08, 1.06), tela, TEJIDO)
+	for x in [-0.66, 0.66]:
+		for z in [-0.96, 0.96]:
+			_agregar_caja(
+				cama,
+				Vector3(x, 0.09, z),
+				Vector3(0.10, 0.18, 0.10),
+				Color(0.24, 0.17, 0.13),
+				MADERA
+			)
+
+
+static func _montar_cuenco_gato(raiz: Node3D, pos: Vector3) -> void:
+	var cuenco := Node3D.new()
+	cuenco.name = "CuencoGato3D"
+	cuenco.position = pos
+	raiz.add_child(cuenco)
+
+	# Un tronco de cono bajo con centro oscuro hace legible el recipiente abierto
+	# sin añadir estado propio: lleno/vacío sigue perteneciendo a la lógica del gato.
+	_agregar_cilindro_truncado(
+		cuenco, Vector3(0, 0.07, 0), 0.18, 0.11, 0.11, Color(0.48, 0.46, 0.42), ACERO
+	)
+	_agregar_cilindro(cuenco, Vector3(0, 0.132, 0), 0.13, 0.012, Color(0.10, 0.09, 0.08))
 
 
 static func _montar_sofa(raiz: Node3D, pos: Vector3, giro_y: float) -> void:
@@ -140,6 +203,15 @@ static func _montar_portatil(raiz: Node3D, pos: Vector3) -> void:
 	portatil.configurar()
 
 
+static func _montar_consola_sobremesa(raiz: Node3D, pos: Vector3) -> void:
+	var consola := ConsolaSobremesa98.new()
+	consola.name = "ConsolaSobremesa98"
+	consola.position = pos
+	consola.rotation_degrees.y = 180.0
+	raiz.add_child(consola)
+	consola.configurar()
+
+
 static func _montar_almacenamiento(raiz: Node3D, pos: Vector3) -> void:
 	var almacenamiento := AlmacenamientoCasaInteractivo3D.new()
 	almacenamiento.name = "AlmacenamientoCasa"
@@ -207,6 +279,26 @@ static func _agregar_cilindro(
 	var cilindro := CylinderMesh.new()
 	cilindro.top_radius = radio
 	cilindro.bottom_radius = radio
+	cilindro.height = alto
+	malla.mesh = cilindro
+	malla.position = pos
+	_aplicar_materia(malla, color, textura)
+	raiz.add_child(malla)
+
+
+static func _agregar_cilindro_truncado(
+	raiz: Node3D,
+	pos: Vector3,
+	radio_superior: float,
+	radio_inferior: float,
+	alto: float,
+	color: Color,
+	textura: String = ""
+) -> void:
+	var malla := MeshInstance3D.new()
+	var cilindro := CylinderMesh.new()
+	cilindro.top_radius = radio_superior
+	cilindro.bottom_radius = radio_inferior
 	cilindro.height = alto
 	malla.mesh = cilindro
 	malla.position = pos

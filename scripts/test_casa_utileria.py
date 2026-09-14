@@ -45,15 +45,27 @@ class CasaUtileriaTest(unittest.TestCase):
 
     def test_compone_zonas_domesticas_reconocibles(self):
         self.assertIn("montar_zonas_domesticas(raiz)", self.utileria)
+        self.assertIn('cama.name = "CamaCasa"', self.utileria)
+        self.assertIn('cuenco.name = "CuencoGato3D"', self.utileria)
         self.assertIn('sofa.name = "SofaCasa"', self.utileria)
         self.assertIn('cocina.name = "CocinaCasa"', self.utileria)
         self.assertIn('fregadero.name = "FregaderoCasa"', self.utileria)
         self.assertIn('nevera.name = "NeveraCasa"', self.utileria)
         self.assertIn('ventana.name = "VentanaCasa"', self.utileria)
         self.assertIn('estanteria.name = "EstanteriaComprasCasa"', self.utileria)
+        self.assertIn('_ancla_salida("sueño"', self.utileria)
+        self.assertIn("_ancla_cuenco(", self.utileria)
+        self.assertIn("_agregar_cilindro_truncado(", self.utileria)
         self.assertIn("Vector3(-1.65, 0.0, 1.35)", self.utileria)
         self.assertIn("Vector3(3.30, 0.0, -0.15)", self.utileria)
         self.assertIn("Vector3(-2.10, 1.65, -3.42)", self.utileria)
+
+    def test_cama_y_cuenco_reutilizan_anclas_de_gameplay(self):
+        self.assertIn('for salida in EspaciosCatalogo.CASA.get("salidas", [])', self.utileria)
+        self.assertIn('String(salida.get("destino", "")) != destino', self.utileria)
+        self.assertIn('EspaciosCatalogo.CASA.get("sitios_gato", [])', self.utileria)
+        self.assertNotIn('"destino": "sueño"', self.utileria)
+        self.assertNotIn('"destino": "cuenco"', self.utileria)
 
     def test_distribucion_no_introduce_pantallas_ni_texto_legible(self):
         self.assertNotIn("Label.new()", self.utileria)
@@ -136,7 +148,7 @@ class CasaUtileriaTest(unittest.TestCase):
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
         resumen = RESUMEN_GODOT.search(resultado.stdout)
         self.assertIsNotNone(resumen, resultado.stdout)
-        self.assertGreaterEqual(int(resumen.group(1)), 24, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 30, resultado.stdout)
         self.assertNotIn("SCRIPT ERROR:", resultado.stdout)
         self.assertNotIn("Parse Error:", resultado.stdout)
 

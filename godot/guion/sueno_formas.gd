@@ -2,7 +2,7 @@
 ##
 ## Pocas y GRANDES (#86): el sueño no es un laberinto de cuartos encadenados
 ## sino unos pocos sitios amplios y mal hechos donde uno se pierde de verdad.
-## Por eso son cinco y no cincuenta, y por eso ninguna es un rectángulo — una
+## Por eso son pocas y no cincuenta, y por eso ninguna es un rectángulo — una
 ## sala rara no es una caja más grande, que es exactamente lo que `Espacio3D`
 ## sabía construir hasta ahora.
 ##
@@ -72,9 +72,9 @@ const FORMAS := {
 		"color_muro": Color(0.33, 0.30, 0.39),
 		"color_techo": Color(0.19, 0.17, 0.22),
 	},
-	# Un anillo alrededor de un patio al que no se entra. Es la forma que
-	# justifica el issue entero: sus cuatro muros de dentro no los declara
-	# nadie, salen de que el patio también es contorno.
+	# Un anillo alrededor de un patio al que no se entra. Desde #279 la forma
+	# lógica de celdas se conserva para timing/mapa, mientras la arquitectura
+	# visible y física usa la familia cóncava ANULAR con vacío central real.
 	"patio":
 	{
 		"rotulo": "SUENO_ROTULO",
@@ -85,6 +85,7 @@ const FORMAS := {
 			Rect2i(0, 0, 3, 18),
 			Rect2i(15, 0, 3, 18),
 		],
+		"familia_poligonal": SuenoFamilias.ANULAR,
 		"textura_suelo": "techo",
 		"textura_muro": "gotele",
 		"escala_textura": 0.55,
@@ -198,6 +199,37 @@ const FORMAS := {
 		"color_suelo": Color(0.30, 0.23, 0.23),
 		"color_muro": Color(0.37, 0.27, 0.27),
 		"color_techo": Color(0.18, 0.13, 0.13),
+	},
+	# Variante monumental inspirada en Gilgamesh. Conserva el rótulo genérico
+	# del sueño para no introducir una clave de localización sin catálogo.
+	"gilgamesh":
+	{
+		"rotulo": "SUENO_ROTULO",
+		"bloques":
+		[
+			Rect2i(0, 5, 22, 6),
+			Rect2i(8, 0, 6, 16),
+		],
+		"textura_suelo": "linoleo",
+		"textura_muro": "gotele",
+		"escala_textura": 7.5,
+		"ambiente": Color(0.20, 0.19, 0.26),
+		"ambiente_energia": 0.42,
+		"sol": 0.05,
+		"luces":
+		[
+			{
+				"pos": Vector3(0, 2.4, -12),
+				"color": Color(0.55, 0.52, 0.78),
+				"energia": 3.4,
+				"alcance": 16.0,
+				"tam": Vector3(0.5, 0.1, 0.5)
+			}
+		],
+		"entrada": Vector2i(11, 14),
+		"color_suelo": Color(0.26, 0.24, 0.30),
+		"color_muro": Color(0.33, 0.30, 0.39),
+		"color_techo": Color(0.19, 0.17, 0.22),
 	},
 }
 

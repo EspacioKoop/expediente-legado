@@ -54,15 +54,35 @@ func _probar_distribucion_domestica() -> void:
 	root.add_child(casa)
 	CasaUtileriaScript.montar_zonas_domesticas(casa)
 
+	var cama := casa.get_node_or_null("CamaCasa") as Node3D
+	var cuenco := casa.get_node_or_null("CuencoGato3D") as Node3D
 	var sofa := casa.get_node_or_null("SofaCasa") as Node3D
 	var cocina := casa.get_node_or_null("CocinaCasa") as Node3D
 	var ventana := casa.get_node_or_null("VentanaCasa") as Node3D
 	var estanteria := casa.get_node_or_null("EstanteriaComprasCasa") as Node3D
 
+	_comprobar(cama != null, "el descanso se lee como cama 3D")
+	_comprobar(cuenco != null, "el punto de alimentación tiene cuenco 3D")
 	_comprobar(sofa != null, "la zona de estar tiene sofá")
 	_comprobar(cocina != null, "la casa tiene una zona de cocina")
 	_comprobar(ventana != null, "la vivienda tiene ventana declarada")
 	_comprobar(estanteria != null, "hay superficie vacía reservada para compras")
+	_comprobar(
+		cama != null and cama.find_children("*", "MeshInstance3D", true, false).size() >= 9,
+		"la cama añade marco, cabecero, ropa y patas al volumen histórico"
+	)
+	_comprobar(
+		cuenco != null and cuenco.find_children("*", "MeshInstance3D", true, false).size() >= 2,
+		"el cuenco tiene cuerpo e interior diferenciados"
+	)
+	_comprobar(
+		cama != null and cama.position.is_equal_approx(Vector3(-2.4, 0.0, -2.0)),
+		"la cama conserva el ancla de la salida a sueño"
+	)
+	_comprobar(
+		cuenco != null and cuenco.position.is_equal_approx(Vector3(2.8, 0.0, 1.5)),
+		"el cuenco conserva el primer sitio del gato"
+	)
 	_comprobar(
 		sofa != null and sofa.find_children("*", "MeshInstance3D", true, false).size() >= 4,
 		"el sofá se compone como mueble reconocible"
