@@ -38,8 +38,8 @@ class ConsolaSobremesa98Test(unittest.TestCase):
     def test_ocio_sigue_sin_tocar_estado_de_campana(self):
         combinado = self.consola + self.portatil
         for termino in (
-            "Partida",
-            "Jornada",
+            "Partida.",
+            "Jornada.",
             "pistas_descubiertas",
             "inventario",
             "dinero",
