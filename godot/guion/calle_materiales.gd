@@ -46,7 +46,8 @@ static func _fachada(ficha: Dictionary) -> MeshInstance3D:
 	material.shader = load(Espacio3D.SHADER_PSX)
 	material.set_shader_parameter("color_base", ficha["color"])
 	material.set_shader_parameter(
-		"textura", TexturaProcedural.por_nombre("revoco_urbano", ficha["color"], hash(ficha["nombre"]))
+		"textura",
+		TexturaProcedural.por_nombre("revoco_urbano", ficha["color"], hash(ficha["nombre"]))
 	)
 	material.set_shader_parameter("con_textura", true)
 	material.set_shader_parameter("escala_textura", 1.8)
