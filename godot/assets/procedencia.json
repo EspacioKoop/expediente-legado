@@ -344,6 +344,102 @@
       "licencia": "CC0-1.0",
       "fuente": "https://quaternius.com/packs/ultimatenature.html",
       "sha256": "c1fa3fb3da15ef57d925d134a29019d94fba9de9b1308bdd2aecf9badb556639"
+    },
+    {
+      "ruta": "texturas/poster-1998-01.png",
+      "titulo": "La información es de todos",
+      "autor": "Imagen generada con IA; herramienta y modelo no especificados por el proveedor",
+      "licencia": "Material generado con IA aportado por el usuario para su integración y distribución en SIGA-98; sin atribución CC0",
+      "fuente": "https://github.com/EspacioKoop/expediente-legado/issues/443",
+      "sha256": "b94f569a38ebbda711334c0b23a6fea050184afb59652015903315f8653672ad",
+      "origen": "generado_con_IA",
+      "lamina_sha256": "5f5a6f91ddf8d37cd636352823183612b3fe86a7ffd27cabe4530ec6634046ed",
+      "recorte_px": [
+        2,
+        2,
+        335,
+        743
+      ]
+    },
+    {
+      "ruta": "texturas/poster-1998-02.png",
+      "titulo": "El futuro ya está en su mesa",
+      "autor": "Imagen generada con IA; herramienta y modelo no especificados por el proveedor",
+      "licencia": "Material generado con IA aportado por el usuario para su integración y distribución en SIGA-98; sin atribución CC0",
+      "fuente": "https://github.com/EspacioKoop/expediente-legado/issues/443",
+      "sha256": "2ba3604d686a460d8fea08a9bf270034bd4181c3d73739ce9db1db01f5a94851",
+      "origen": "generado_con_IA",
+      "lamina_sha256": "5f5a6f91ddf8d37cd636352823183612b3fe86a7ffd27cabe4530ec6634046ed",
+      "recorte_px": [
+        348,
+        2,
+        678,
+        743
+      ]
+    },
+    {
+      "ruta": "texturas/poster-1998-03.png",
+      "titulo": "Asamblea de personal",
+      "autor": "Imagen generada con IA; herramienta y modelo no especificados por el proveedor",
+      "licencia": "Material generado con IA aportado por el usuario para su integración y distribución en SIGA-98; sin atribución CC0",
+      "fuente": "https://github.com/EspacioKoop/expediente-legado/issues/443",
+      "sha256": "879f2510d74c27d7ac6ab1e77ddcc0d0615a40f4fe5b6a09bc7fd043dc762cf9",
+      "origen": "generado_con_IA",
+      "lamina_sha256": "5f5a6f91ddf8d37cd636352823183612b3fe86a7ffd27cabe4530ec6634046ed",
+      "recorte_px": [
+        691,
+        2,
+        1022,
+        743
+      ]
+    },
+    {
+      "ruta": "texturas/poster-1998-04.png",
+      "titulo": "Tómese cinco minutos",
+      "autor": "Imagen generada con IA; herramienta y modelo no especificados por el proveedor",
+      "licencia": "Material generado con IA aportado por el usuario para su integración y distribución en SIGA-98; sin atribución CC0",
+      "fuente": "https://github.com/EspacioKoop/expediente-legado/issues/443",
+      "sha256": "36943c8b0792841aaec047037e65521ef1ca14bd231a0c7b3697eb8e3548fdb6",
+      "origen": "generado_con_IA",
+      "lamina_sha256": "5f5a6f91ddf8d37cd636352823183612b3fe86a7ffd27cabe4530ec6634046ed",
+      "recorte_px": [
+        2,
+        756,
+        335,
+        1524
+      ]
+    },
+    {
+      "ruta": "texturas/poster-1998-05.png",
+      "titulo": "Cineclub del viernes",
+      "autor": "Imagen generada con IA; herramienta y modelo no especificados por el proveedor",
+      "licencia": "Material generado con IA aportado por el usuario para su integración y distribución en SIGA-98; sin atribución CC0",
+      "fuente": "https://github.com/EspacioKoop/expediente-legado/issues/443",
+      "sha256": "c163caac19110b0e6eb64b7e7fb4842750b331e74b7b08bedeb3e8da5f96da64",
+      "origen": "generado_con_IA",
+      "lamina_sha256": "5f5a6f91ddf8d37cd636352823183612b3fe86a7ffd27cabe4530ec6634046ed",
+      "recorte_px": [
+        348,
+        756,
+        678,
+        1524
+      ]
+    },
+    {
+      "ruta": "texturas/poster-1998-06.png",
+      "titulo": "¿Está preparado su equipo?",
+      "autor": "Imagen generada con IA; herramienta y modelo no especificados por el proveedor",
+      "licencia": "Material generado con IA aportado por el usuario para su integración y distribución en SIGA-98; sin atribución CC0",
+      "fuente": "https://github.com/EspacioKoop/expediente-legado/issues/443",
+      "sha256": "e684d96c05279d8ef52c5922c35d3cee6f6ac707fdd58e3e921cf661acda2af6",
+      "origen": "generado_con_IA",
+      "lamina_sha256": "5f5a6f91ddf8d37cd636352823183612b3fe86a7ffd27cabe4530ec6634046ed",
+      "recorte_px": [
+        691,
+        756,
+        1022,
+        1524
+      ]
     }
   ]
 }
