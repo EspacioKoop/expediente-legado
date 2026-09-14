@@ -40,9 +40,7 @@ func _probar_sin_interaccion() -> void:
 func _probar_activacion_estable() -> void:
 	var jornada := {"dia": 7}
 	_comprobar(
-		SemillasOniricas.activar_semilla_onirica(
-			jornada, "minotauro", "rom:laberinto_gbc", 1
-		),
+		SemillasOniricas.activar_semilla_onirica(jornada, "minotauro", "rom:laberinto_gbc", 1),
 		"una interacción deliberada activa la semilla",
 	)
 	var semillas := SemillasOniricas.obtener_semillas(jornada)
@@ -138,9 +136,7 @@ func _probar_seleccion_reproducible() -> void:
 	)
 
 	var solo_minotauro := {"dia": 6}
-	SemillasOniricas.activar_semilla_onirica(
-		solo_minotauro, "minotauro", "rom:laberinto_gbc", 1
-	)
+	SemillasOniricas.activar_semilla_onirica(solo_minotauro, "minotauro", "rom:laberinto_gbc", 1)
 	var seleccion := SemillasOniricas.seleccionar_para_noche(solo_minotauro, 4242)
 	_comprobar(
 		seleccion["familias"],
