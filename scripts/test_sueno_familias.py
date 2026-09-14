@@ -26,6 +26,11 @@ class SuenoFamiliasTest(unittest.TestCase):
         self.assertIn("SuenoGeometria.contorno_valido", self.texto)
         self.assertIn("SuenoGeometria.tiene_arista_diagonal", self.texto)
 
+    def test_expone_cuerpo_con_colision_compartida(self):
+        self.assertIn("static func cuerpo", self.texto)
+        self.assertIn("SuenoGeometria.cuerpo_sala", self.texto)
+        self.assertIn("StaticBody3D.new()", self.texto)
+
     def test_cada_familia_tiene_entrada_y_anclas_de_contenido(self):
         self.assertGreaterEqual(self.texto.count('"entrada": Vector3('), 3)
         self.assertGreaterEqual(self.texto.count('"anclas": ['), 3)
