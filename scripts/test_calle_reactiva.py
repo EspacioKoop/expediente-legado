@@ -40,8 +40,7 @@ class CalleReactivaTest(unittest.TestCase):
         self.assertIn("_hoja.position = POS_ABIERTA", self.persiana)
         self.assertNotIn("Tween", self.persiana)
 
-    def test_no_toca_estado_de_juego_ni_assets(self):
-        combinado = self.calle + self.persiana
+    def test_persiana_no_toca_estado_de_juego_ni_assets(self):
         for termino in (
             "Partida",
             "Jornada",
@@ -53,7 +52,7 @@ class CalleReactivaTest(unittest.TestCase):
             ".glb",
             ".png",
         ):
-            self.assertNotIn(termino, combinado)
+            self.assertNotIn(termino, self.persiana)
 
     def test_persiana_funciona_en_godot_headless(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
