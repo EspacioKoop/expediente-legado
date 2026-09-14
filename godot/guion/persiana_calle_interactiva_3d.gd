@@ -7,7 +7,7 @@ class_name PersianaCalleInteractiva3D
 extends "res://guion/interactuable_3d.gd"
 
 const POS_CERRADA := Vector3.ZERO
-const POS_ABIERTA := Vector3(0, 0.92, 0)
+const POS_ABIERTA := Vector3(0, 1.25, 0)
 const TAM_INTERACCION := Vector3(0.42, 1.35, 1.65)
 
 var _abierta := false
