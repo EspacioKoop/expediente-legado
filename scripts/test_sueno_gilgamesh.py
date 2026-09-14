@@ -26,7 +26,10 @@ class SuenoGilgameshTest(unittest.TestCase):
         self.assertIn('ID_MITO := "gilgamesh"', self.sueno)
         self.assertIn('CLAVE_SEMILLA := "semilla_onirica_gilgamesh"', self.sueno)
         self.assertIn("SemillasOniricas.familias_activas(estado)", self.sueno)
-        self.assertIn("SemillasOniricas.activar_semilla_onirica(", self.sueno)
+        self.assertRegex(
+            self.sueno,
+            r"SemillasOniricas\s*\.\s*activar_semilla_onirica\s*\(",
+        )
         self.assertIn('FUENTE_VIGILIA := "libro:arqueologia_uruk_98"', self.sueno)
 
     def test_vigilia_exige_interaccion_activa(self):
@@ -34,7 +37,10 @@ class SuenoGilgameshTest(unittest.TestCase):
         self.assertIn("PAGINAS_MINIMAS := 3", self.vigilia)
         self.assertIn("func examinar()", self.vigilia)
         self.assertIn("_tablilla_observada = true", self.vigilia)
-        self.assertIn("SuenoGilgamesh.registrar_semilla(", self.vigilia)
+        self.assertRegex(
+            self.vigilia,
+            r"SuenoGilgamesh\s*\.\s*registrar_semilla\s*\(",
+        )
         self.assertIn("activado.connect(_al_examinar)", self.vigilia)
 
     def test_puzzle_declara_cuatro_parejas_y_reversion(self):
