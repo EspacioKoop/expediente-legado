@@ -32,39 +32,47 @@ static var _familias := {
 		"anclas": [Vector3(0, 0, 10), Vector3(-6, 0, 2), Vector3(6, 0, 2)],
 	},
 	ANULAR:
-	# El anillo se representa como dos contornos: exterior e interior. La
 	{
-		# integración visible deberá montar ambos, dejando el interior como vacío.
+		# Anillo abierto por una hendidura lateral. Es un único polígono cóncavo,
+		# no dos mallas superpuestas: el gran recorte central queda realmente fuera
+		# de suelo/techo/colisión y la abertura permite entrar andando sin salto.
+		# Esto mantiene la misma ruta `malla_sala()` que la familia convergente y
+		# evita introducir una segunda representación física solo para el patio.
 		"contorno":
 		PackedVector2Array(
 			[
-				Vector2(-15, -12),
-				Vector2(-7, -17),
-				Vector2(8, -16),
-				Vector2(15, -8),
-				Vector2(14, 10),
-				Vector2(5, 16),
-				Vector2(-10, 14),
-				Vector2(-16, 5),
-			]
-		),
-		"hueco":
-		PackedVector2Array(
-			[
-				Vector2(-5, -4),
-				Vector2(4, -6),
-				Vector2(7, 2),
-				Vector2(2, 7),
-				Vector2(-6, 5),
+				Vector2(-16, -12),
+				Vector2(0, -18),
+				Vector2(16, -12),
+				Vector2(18, 0),
+				Vector2(14, 14),
+				Vector2(0, 18),
+				Vector2(-14, 14),
+				Vector2(-18, 2),
+				Vector2(-7, 2),
+				Vector2(-6, 6),
+				Vector2(0, 8),
+				Vector2(7, 4),
+				Vector2(8, -3),
+				Vector2(3, -8),
+				Vector2(-5, -6),
+				Vector2(-7, -2),
+				Vector2(-18, -2),
 			]
 		),
 		"altura": 3.4,
-		"entrada": Vector3(-11, 0, -7),
-		"anclas": [Vector3(10, 0, -3), Vector3(6, 0, 10), Vector3(-8, 0, 9)],
+		"entrada": Vector3(-13, 0, 0),
+		"anclas":
+		[
+			Vector3(0, 0, -13),
+			Vector3(12, 0, 0),
+			Vector3(0, 0, 13),
+			Vector3(-10, 0, 8),
+		],
 	},
 	FRAGMENTADA:
-	# Una sala principal irregular y dos islas caminables separadas visualmente.
 	{
+		# Una sala principal irregular y dos islas caminables separadas visualmente.
 		# No exige salto: la integración debe unirlas con pasos/rampas anchas.
 		"contorno":
 		PackedVector2Array(
