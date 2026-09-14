@@ -46,15 +46,9 @@ static func _montar_sofa(raiz: Node3D, pos: Vector3, giro_y: float) -> void:
 	var tela := Color(0.31, 0.25, 0.23)
 	var tela_oscura := Color(0.24, 0.19, 0.18)
 	_agregar_caja(sofa, Vector3(0, 0.34, 0), Vector3(1.80, 0.34, 0.72), tela, TEJIDO)
-	_agregar_caja(
-		sofa, Vector3(0, 0.78, 0.30), Vector3(1.80, 0.88, 0.18), tela_oscura, TEJIDO
-	)
-	_agregar_caja(
-		sofa, Vector3(-0.87, 0.52, 0), Vector3(0.16, 0.52, 0.72), tela_oscura, TEJIDO
-	)
-	_agregar_caja(
-		sofa, Vector3(0.87, 0.52, 0), Vector3(0.16, 0.52, 0.72), tela_oscura, TEJIDO
-	)
+	_agregar_caja(sofa, Vector3(0, 0.78, 0.30), Vector3(1.80, 0.88, 0.18), tela_oscura, TEJIDO)
+	_agregar_caja(sofa, Vector3(-0.87, 0.52, 0), Vector3(0.16, 0.52, 0.72), tela_oscura, TEJIDO)
+	_agregar_caja(sofa, Vector3(0.87, 0.52, 0), Vector3(0.16, 0.52, 0.72), tela_oscura, TEJIDO)
 
 
 static func _montar_cocina(raiz: Node3D, pos: Vector3) -> void:
@@ -67,9 +61,7 @@ static func _montar_cocina(raiz: Node3D, pos: Vector3) -> void:
 	var encimera := Color(0.24, 0.23, 0.22)
 	var metal := Color(0.44, 0.46, 0.45)
 	_agregar_caja(cocina, Vector3(0, 0.45, 0), Vector3(0.56, 0.90, 1.80), mueble, MADERA)
-	_agregar_caja(
-		cocina, Vector3(-0.02, 0.93, 0), Vector3(0.64, 0.08, 1.92), encimera, MADERA
-	)
+	_agregar_caja(cocina, Vector3(-0.02, 0.93, 0), Vector3(0.64, 0.08, 1.92), encimera, MADERA)
 
 	var fregadero := Node3D.new()
 	fregadero.name = "FregaderoCasa"
@@ -77,9 +69,7 @@ static func _montar_cocina(raiz: Node3D, pos: Vector3) -> void:
 	cocina.add_child(fregadero)
 	_agregar_caja(fregadero, Vector3.ZERO, Vector3(0.44, 0.035, 0.58), metal, ACERO)
 	_agregar_cilindro(fregadero, Vector3(0.12, 0.20, 0.12), 0.025, 0.36, metal, ACERO)
-	_agregar_caja(
-		fregadero, Vector3(0.08, 0.36, 0.12), Vector3(0.22, 0.04, 0.04), metal, ACERO
-	)
+	_agregar_caja(fregadero, Vector3(0.08, 0.36, 0.12), Vector3(0.22, 0.04, 0.04), metal, ACERO)
 
 	var nevera := Node3D.new()
 	nevera.name = "NeveraCasa"
@@ -88,12 +78,8 @@ static func _montar_cocina(raiz: Node3D, pos: Vector3) -> void:
 	_agregar_caja(
 		nevera, Vector3(0, 0.91, 0), Vector3(0.72, 1.82, 0.72), Color(0.55, 0.54, 0.50), ACERO
 	)
-	_agregar_caja(
-		nevera, Vector3(-0.37, 1.16, -0.23), Vector3(0.035, 0.52, 0.07), metal, ACERO
-	)
-	_agregar_caja(
-		nevera, Vector3(-0.37, 0.55, -0.23), Vector3(0.035, 0.34, 0.07), metal, ACERO
-	)
+	_agregar_caja(nevera, Vector3(-0.37, 1.16, -0.23), Vector3(0.035, 0.52, 0.07), metal, ACERO)
+	_agregar_caja(nevera, Vector3(-0.37, 0.55, -0.23), Vector3(0.035, 0.34, 0.07), metal, ACERO)
 
 
 static func _montar_ventana(raiz: Node3D, pos: Vector3) -> void:
@@ -119,12 +105,8 @@ static func _montar_estanteria_compras(raiz: Node3D, pos: Vector3) -> void:
 	raiz.add_child(estanteria)
 
 	var madera := Color(0.32, 0.23, 0.17)
-	_agregar_caja(
-		estanteria, Vector3(-0.48, 0.82, 0), Vector3(0.10, 1.64, 0.34), madera, MADERA
-	)
-	_agregar_caja(
-		estanteria, Vector3(0.48, 0.82, 0), Vector3(0.10, 1.64, 0.34), madera, MADERA
-	)
+	_agregar_caja(estanteria, Vector3(-0.48, 0.82, 0), Vector3(0.10, 1.64, 0.34), madera, MADERA)
+	_agregar_caja(estanteria, Vector3(0.48, 0.82, 0), Vector3(0.10, 1.64, 0.34), madera, MADERA)
 	for y in [0.08, 0.58, 1.08, 1.58]:
 		_agregar_caja(estanteria, Vector3(0, y, 0), Vector3(1.02, 0.09, 0.36), madera, MADERA)
 
@@ -136,11 +118,7 @@ static func _montar_mesita(raiz: Node3D, pos: Vector3) -> void:
 	raiz.add_child(mesa)
 
 	_agregar_caja(
-		mesa,
-		Vector3(0, 0.55, 0),
-		Vector3(0.82, 0.12, 0.62),
-		Color(0.32, 0.23, 0.17),
-		MADERA
+		mesa, Vector3(0, 0.55, 0), Vector3(0.82, 0.12, 0.62), Color(0.32, 0.23, 0.17), MADERA
 	)
 	for x in [-0.31, 0.31]:
 		for z in [-0.21, 0.21]:
@@ -193,12 +171,8 @@ static func _montar_lampara_pie(raiz: Node3D, pos: Vector3) -> void:
 	raiz.add_child(lampara)
 	lampara.configurar()
 
-	_agregar_cilindro(
-		lampara, Vector3(0, 0.05, 0), 0.28, 0.10, Color(0.18, 0.17, 0.16), ACERO
-	)
-	_agregar_cilindro(
-		lampara, Vector3(0, 0.82, 0), 0.045, 1.55, Color(0.26, 0.24, 0.22), ACERO
-	)
+	_agregar_cilindro(lampara, Vector3(0, 0.05, 0), 0.28, 0.10, Color(0.18, 0.17, 0.16), ACERO)
+	_agregar_cilindro(lampara, Vector3(0, 0.82, 0), 0.045, 1.55, Color(0.26, 0.24, 0.22), ACERO)
 	_agregar_pantalla(lampara, Vector3(0, 1.62, 0))
 
 
@@ -227,12 +201,7 @@ static func _agregar_caja(
 
 
 static func _agregar_cilindro(
-	raiz: Node3D,
-	pos: Vector3,
-	radio: float,
-	alto: float,
-	color: Color,
-	textura: String = ""
+	raiz: Node3D, pos: Vector3, radio: float, alto: float, color: Color, textura: String = ""
 ) -> void:
 	var malla := MeshInstance3D.new()
 	var cilindro := CylinderMesh.new()
