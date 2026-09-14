@@ -110,6 +110,17 @@ class CasaUtileriaTest(unittest.TestCase):
         self.assertIn('cajon.name = "CajonCasa"', self.almacenamiento)
         self.assertIn("_cajon.position = POS_ABIERTO", self.almacenamiento)
 
+    def test_almacenamiento_conecta_carried_y_home_storage_sin_estado_global(self):
+        self.assertIn("func guardar_objeto(", self.almacenamiento)
+        self.assertIn("func sacar_objeto(", self.almacenamiento)
+        self.assertIn("func contenido(", self.almacenamiento)
+        self.assertIn("Inventario.guardar_en_casa(", self.almacenamiento)
+        self.assertIn("Inventario.sacar_de_casa(", self.almacenamiento)
+        self.assertIn("Inventario.HOME_STORAGE", self.almacenamiento)
+        self.assertIn("if not _abierto", self.almacenamiento)
+        self.assertNotIn("Jornada.actual", self.almacenamiento)
+        self.assertNotIn("Partida", self.almacenamiento)
+
     def test_almacenamiento_y_distribucion_funcionan_en_godot_headless(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
         importacion = subprocess.run(
@@ -148,11 +159,11 @@ class CasaUtileriaTest(unittest.TestCase):
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
         resumen = RESUMEN_GODOT.search(resultado.stdout)
         self.assertIsNotNone(resumen, resultado.stdout)
-        self.assertGreaterEqual(int(resumen.group(1)), 30, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 40, resultado.stdout)
         self.assertNotIn("SCRIPT ERROR:", resultado.stdout)
         self.assertNotIn("Parse Error:", resultado.stdout)
 
-    def test_toggle_es_local_y_no_toca_estado_de_juego(self):
+    def test_interacciones_domesticas_no_acoplan_partida_global(self):
         combinado = (
             self.utileria
             + self.lampara
@@ -162,10 +173,8 @@ class CasaUtileriaTest(unittest.TestCase):
         )
         for termino in (
             "Partida",
-            "Jornada",
+            "Jornada.actual",
             "pistas_descubiertas",
-            "inventario",
-            "guardar(",
         ):
             self.assertNotIn(termino, combinado)
 
