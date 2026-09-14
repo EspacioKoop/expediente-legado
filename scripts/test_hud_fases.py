@@ -20,11 +20,41 @@ class HudFasesTest(unittest.TestCase):
         self.assertIn("hud.desactivar(HUDLayer.ESTADO)", cuerpo)
 
     def test_cambiar_fase_no_apaga_el_arbitro_completo(self):
-        cuerpo = self.controlador.split("func _sincronizar_estado_hud", 1)[1]
+        cuerpo = self.controlador.split("func _sincronizar_estado_hud", 1)[1].split(
+            "func _mostrar_tarjeta_fase", 1
+        )[0]
         self.assertNotIn("visible = false", cuerpo)
         self.assertNotIn("INTERACCION", cuerpo)
         self.assertNotIn("DIALOGO", cuerpo)
         self.assertNotIn("MODAL", cuerpo)
+
+    def test_tarjeta_identifica_las_cuatro_fases(self):
+        for texto in (
+            '"archivo": "ARCHIVO · PLANTA 4"',
+            '"trayecto": "TRAYECTO"',
+            '"casa": "CASA"',
+            '"sueño": "SUEÑO"',
+        ):
+            self.assertIn(texto, self.controlador)
+
+    def test_tarjeta_es_breve_y_desaparece_sola(self):
+        self.assertIn("DURACION_TARJETA_FASE := 1.5", self.controlador)
+        self.assertIn("_temporizador_fase.one_shot = true", self.controlador)
+        self.assertIn("_temporizador_fase.timeout.connect(_ocultar_tarjeta_fase)", self.controlador)
+        self.assertIn("hud.activar(HUDLayer.FASE)", self.controlador)
+        self.assertIn("hud.desactivar(HUDLayer.FASE)", self.controlador)
+
+    def test_tarjeta_no_se_consume_detras_de_cinematica(self):
+        proceso = self.controlador.split("func _process", 1)[1].split(
+            "func _sincronizar_estado_hud", 1
+        )[0]
+        self.assertIn("if not hud.visible:", proceso)
+        self.assertLess(proceso.index("if not hud.visible:"), proceso.index("_fase_anterior = fase"))
+
+    def test_tarjeta_se_registra_en_arbitro_comun(self):
+        self.assertIn("hud.add_child(_tarjeta_fase)", self.controlador)
+        self.assertIn("hud.registrar(HUDLayer.FASE, _tarjeta_fase)", self.controlador)
+        self.assertNotIn("CanvasLayer.new()", self.controlador)
 
     def test_la_escena_conserva_raiz_historica_y_anade_controller(self):
         self.assertIn('path="res://guion/dia_clima_app.gd" id="1"', self.escena)
