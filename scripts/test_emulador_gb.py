@@ -51,6 +51,14 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn("direct.joypad", self.cpp)
         self.assertIn("run_frame_rgba", self.cpp)
 
+    def test_nucleo_declara_capacidades_para_migracion_cgb(self):
+        self.assertIn('D_METHOD("core_name")', self.cpp)
+        self.assertIn('D_METHOD("supports_cgb")', self.cpp)
+        self.assertIn('D_METHOD("supports_audio")', self.cpp)
+        self.assertIn('return "Peanut-GB";', self.cpp)
+        self.assertIn("bool Siga98GB::supports_cgb() const", self.cpp)
+        self.assertIn("bool Siga98GB::supports_audio() const", self.cpp)
+
     def test_nucleo_expone_sram_sin_saltarse_tamano_del_cartucho(self):
         self.assertIn('D_METHOD("save_ram")', self.cpp)
         self.assertIn('D_METHOD("load_save_ram", "save")', self.cpp)
@@ -92,6 +100,7 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn('".anterior"', self.ui)
         self.assertIn('".roto"', self.ui)
         self.assertIn("_recuperar_respaldo_sram()", self.ui)
+
     def test_presentacion_fisica_es_externa_desactivable_y_cancelable(self):
         self.assertIn("DURACION_ENCENDIDO := 0.32", self.ui)
         self.assertIn("uniform bool filtro_lcd = true", self.ui)
