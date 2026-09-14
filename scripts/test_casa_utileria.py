@@ -55,6 +55,17 @@ class CasaUtileriaTest(unittest.TestCase):
         self.assertIn("Vector3(3.30, 0.0, -0.15)", self.utileria)
         self.assertIn("Vector3(-2.10, 1.65, -3.42)", self.utileria)
 
+    def test_utileria_domestica_reutiliza_materiales_y_shader_psx(self):
+        self.assertIn("ShaderMaterial.new()", self.utileria)
+        self.assertIn("Espacio3D.SHADER_PSX", self.utileria)
+        self.assertIn("TexturaProcedural.por_nombre", self.utileria)
+        self.assertIn('"moqueta"', self.utileria)
+        self.assertIn('"melamina"', self.utileria)
+        self.assertIn('"metal_pintado"', self.utileria)
+        self.assertIn('material.set_shader_parameter("con_textura", true)', self.utileria)
+        self.assertIn('material.set_shader_parameter("escala_textura", 1.2)', self.utileria)
+        self.assertNotIn("StandardMaterial3D.new()", self.utileria)
+
     def test_distribucion_no_introduce_pantallas_ni_texto_legible(self):
         self.assertNotIn("Label.new()", self.utileria)
         self.assertNotIn("TextMesh.new()", self.utileria)
@@ -165,11 +176,16 @@ class CasaUtileriaTest(unittest.TestCase):
             + self.portatil
             + self.almacenamiento
         )
+        # La utilería puede cargar el shader PSX interno; lo que este vertical no
+        # debe incorporar son modelos/texturas binarias ni una procedencia nueva.
+        self.assertIn("ResourceLoader.load(Espacio3D.SHADER_PSX)", self.utileria)
         for termino in (
-            "load(",
-            "preload(",
             ".glb",
+            ".fbx",
             ".png",
+            ".jpg",
+            ".jpeg",
+            ".webp",
         ):
             self.assertNotIn(termino, combinado)
 
