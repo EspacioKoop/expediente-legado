@@ -15,6 +15,7 @@ var _hay_rumbo_guia := false
 var _objetivos_espacio: Array = []
 var _objetivo_escena := ""
 var _resolviendo_objetivos := false
+var _asistente_siga_caja: VBoxContainer
 
 
 func _espacio_de(fase: String) -> Dictionary:
@@ -250,8 +251,14 @@ func _abrir_expediente() -> void:
 
 
 func _montar_asistente_siga() -> void:
+	_asistente_siga_caja = null
 	var gato: Dictionary = jornada.get("gato", {})
-	var lineas := GatoAyuda.lineas_asistente(gato)
+	var visor: Node = _pantalla.get_node_or_null("Visor")
+	var contexto := ""
+	if visor != null and visor.has_method("contexto_asistente"):
+		var estado: Dictionary = visor.call("contexto_asistente")
+		contexto = GatoAyuda.contexto_siga(estado)
+	var lineas := GatoAyuda.lineas_asistente(gato, contexto)
 	if lineas.is_empty():
 		return
 
@@ -281,17 +288,11 @@ func _montar_asistente_siga() -> void:
 		margen.add_theme_constant_override("margin_" + lado, 12)
 	burbuja.add_child(margen)
 
-	var caja := VBoxContainer.new()
-	caja.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	caja.add_theme_constant_override("separation", 6)
-	margen.add_child(caja)
-	for clave in lineas:
-		var frase := Label.new()
-		frase.text = tr(String(clave))
-		frase.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		frase.custom_minimum_size.x = 320
-		frase.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		caja.add_child(frase)
+	_asistente_siga_caja = VBoxContainer.new()
+	_asistente_siga_caja.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_asistente_siga_caja.add_theme_constant_override("separation", 6)
+	margen.add_child(_asistente_siga_caja)
+	_actualizar_lineas_asistente_siga(lineas)
 
 	# Cola del bocadillo: un triángulo que apunta al avatar, separado del dibujo
 	# del gato para que la atribución de la frase sea inequívoca.
@@ -306,6 +307,32 @@ func _montar_asistente_siga() -> void:
 	var preferencias := PreferenciasSiga.cargar()
 	avatar.configurar(GatoAyuda.nivel(gato), bool(preferencias.get("reduccion_movimiento", false)))
 	conjunto.add_child(avatar)
+
+	# Solo escuchamos la superficie pública del visor. El día no necesita saber
+	# qué botones, listas o etiquetas produjeron el cambio de contexto.
+	if visor != null and visor.has_signal("contexto_asistente_cambiado"):
+		visor.connect("contexto_asistente_cambiado", Callable(self, "_al_contexto_asistente_siga"))
+
+
+func _al_contexto_asistente_siga(estado: Dictionary, evento: String) -> void:
+	var contexto := GatoAyuda.contexto_siga(estado, evento)
+	var lineas := GatoAyuda.lineas_asistente(jornada.get("gato", {}), contexto)
+	_actualizar_lineas_asistente_siga(lineas)
+
+
+func _actualizar_lineas_asistente_siga(lineas: Array) -> void:
+	if not is_instance_valid(_asistente_siga_caja):
+		return
+	for hijo in _asistente_siga_caja.get_children():
+		_asistente_siga_caja.remove_child(hijo)
+		hijo.queue_free()
+	for clave in lineas:
+		var frase := Label.new()
+		frase.text = tr(String(clave))
+		frase.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		frase.custom_minimum_size.x = 320
+		frase.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_asistente_siga_caja.add_child(frase)
 
 
 func _montar_guia_sueno() -> void:
