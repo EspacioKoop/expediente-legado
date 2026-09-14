@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CASOS = ROOT / "godot" / "datos" / "casos.json"
+TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
 
 
 class CatalogoExpedientesTest(unittest.TestCase):
@@ -115,6 +116,18 @@ class CatalogoExpedientesTest(unittest.TestCase):
                     )
                 ids.append(sospechoso["id"])
             self.assertEqual(len(ids), len(set(ids)), f"{caso['id']}: IDs de sospechoso duplicados")
+
+    def test_caso9_r17_fija_el_corte_del_piloto(self):
+        casos_por_id = {caso["id"]: caso for caso in self.casos}
+        self.assertIn("caso9@9", casos_por_id)
+        caso = casos_por_id["caso9@9"]
+
+        self.assertEqual(caso["titulo"], "CASO_9_TITULO")
+        self.assertEqual(len(caso["registros"]), 6)
+        self.assertEqual(len(caso["sospechosos"]), 3)
+        self.assertGreaterEqual(sum("fraseGatillo" in pista for pista in caso["pistas"]), 2)
+        self.assertGreaterEqual(sum("registroOrigen2" in pista for pista in caso["pistas"]), 2)
+        self.assertIn("CASO_9_TITULO,", TEXTOS.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

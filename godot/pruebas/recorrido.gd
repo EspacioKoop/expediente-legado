@@ -29,7 +29,7 @@ func _recorrer() -> void:
 	var visor = dia._pantalla.get_child(0)
 	_comprobar("el puesto abre en el mismo día", visor.jornada["dia"], 5)
 	_comprobar("la plantilla no cambia al sentarse", visor.jornada["plantilla"], 427)
-	_comprobar("el archivo ofrece los ocho expedientes", visor._archivo.item_count, 8)
+	_comprobar("el archivo ofrece los nueve expedientes", visor._archivo.item_count, 9)
 	for i in visor.contenido.casos.size():
 		visor._al_elegir_caso(i)
 		_comprobar(
@@ -162,7 +162,7 @@ func _vuelta_entera() -> void:
 	)
 
 	# La noche se recorre escena a escena. La salida de la última lleva al
-	# archivo y las demás a la siguiente sala: es el propio sueño quien lo dice,
+	# archivo y las demás a la siguiente: es el propio sueño quien lo dice,
 	# así que la prueba pisa lo que el espacio ofrece en vez de adivinarlo.
 	for queda in range(Sueno.ESCENAS_POR_NOCHE, 0, -1):
 		_pisar(dia, "sueño" if queda > 1 else "archivo")
