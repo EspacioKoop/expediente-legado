@@ -20,10 +20,7 @@ func _initialize() -> void:
 	)
 
 	var repetida := CatalogoAnomalias.registrar(estado, "silla-demasiado-alta")
-	_comprobar(
-		repetida.get("resultado", "") == "ya-reconocida",
-		"volver a observar no duplica"
-	)
+	_comprobar(repetida.get("resultado", "") == "ya-reconocida", "volver a observar no duplica")
 	_comprobar(
 		estado[CatalogoAnomalias.CLAVE_TOTAL].count("silla-demasiado-alta") == 1,
 		"el total mantiene una sola copia"
@@ -31,8 +28,7 @@ func _initialize() -> void:
 
 	CatalogoAnomalias.reiniciar_vuelta(estado)
 	_comprobar(
-		CatalogoAnomalias.conocida(estado, "silla-demasiado-alta"),
-		"la memoria total sobrevive"
+		CatalogoAnomalias.conocida(estado, "silla-demasiado-alta"), "la memoria total sobrevive"
 	)
 	_comprobar(
 		not CatalogoAnomalias.conocida_en_vuelta(estado, "silla-demasiado-alta"),
