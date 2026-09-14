@@ -149,8 +149,17 @@ static func espacio(id: String, quedan: int, contenido: Dictionary = {}) -> Dict
 	var forma := SuenoFormas.de(id)
 	var bloques: Array = forma["bloques"]
 	var entrada: Vector2i = forma["entrada"]
+	var familia_id := String(forma.get("familia_poligonal", ""))
+	var familia := SuenoFamilias.de(familia_id) if not familia_id.is_empty() else {}
+	var es_poligonal := not familia.is_empty()
 	var salida := Planta.mas_lejana(bloques, entrada)
-	var posicion_salida := Planta.centro_en_metros(bloques, salida) + Vector3(0, 1.1, 0)
+	var posicion_entrada := (
+		Vector3(familia["entrada"]) if es_poligonal else Planta.centro_en_metros(bloques, entrada)
+	)
+	var base_salida := (
+		_salida_poligonal(familia) if es_poligonal else Planta.centro_en_metros(bloques, salida)
+	)
+	var posicion_salida := base_salida + Vector3(0, 1.1, 0)
 
 	# Las figuras se reparten por la sala, lejos entre sí y lejos de por donde
 	# se entra y se sale: un sospechoso plantado en la puerta se ve antes de
@@ -158,7 +167,8 @@ static func espacio(id: String, quedan: int, contenido: Dictionary = {}) -> Dict
 	var figuras := []
 	var quienes: Array = contenido.get("figuras", [])
 	var celdas := []
-	if not quienes.is_empty():
+	var sitios_poligonales := _sitios_poligonales(familia, base_salida) if es_poligonal else []
+	if not es_poligonal and not quienes.is_empty():
 		# La primera, DELANTE: al llegar hay alguien. Las demás repartidas por
 		# la sala. Todas lejos es lo mismo que ninguna en una nave de cuarenta
 		# metros — se llega, no se ve nada, y el sueño parece vacío.
@@ -168,11 +178,16 @@ static func espacio(id: String, quedan: int, contenido: Dictionary = {}) -> Dict
 		)
 	for i in quienes.size():
 		var quien: Dictionary = quienes[i]
+		var posicion_figura := (
+			Vector3(sitios_poligonales[i % sitios_poligonales.size()])
+			if es_poligonal
+			else Planta.centro_en_metros(bloques, celdas[i])
+		)
 		(
 			figuras
 			. append(
 				{
-					"pos": Planta.centro_en_metros(bloques, celdas[i]),
+					"pos": posicion_figura,
 					"color": COLOR_ACUSADO if quien.get("acusado", false) else COLOR_FIGURA,
 					"rotulo": quien.get("nombre", ""),
 					"color_rotulo":
@@ -189,22 +204,23 @@ static func espacio(id: String, quedan: int, contenido: Dictionary = {}) -> Dict
 	# Las frases van a los paños más anchos, y solo caben las que caben: un
 	# muro por frase. Lo que sobra no se apila en el mismo sitio — se queda
 	# fuera, que es lo que hace que una pared diga UNA cosa.
-	var carteles := []
-	var paredes := Planta.paredes(bloques)
 	var frases: Array = contenido.get("frases", [])
-	for i in mini(frases.size(), paredes.size()):
-		var sitio := Planta.en_pared(bloques, paredes[i], SEPARACION_PARED)
-		(
-			carteles
-			. append(
-				{
-					"texto": frases[i],
-					"pos": sitio["pos"],
-					"giro": sitio["giro"],
-					"color": COLOR_TEXTO,
-				}
+	var carteles := _carteles_poligonales(familia, frases) if es_poligonal else []
+	if not es_poligonal:
+		var paredes := Planta.paredes(bloques)
+		for i in mini(frases.size(), paredes.size()):
+			var sitio := Planta.en_pared(bloques, paredes[i], SEPARACION_PARED)
+			(
+				carteles
+				. append(
+					{
+						"texto": frases[i],
+						"pos": sitio["pos"],
+						"giro": sitio["giro"],
+						"color": COLOR_TEXTO,
+					}
+				)
 			)
-		)
 
 	# Conserva las luces propias de cada forma y añade una señal local al final
 	# del recorrido. No lleva carcasa: en el sueño puede haber una luz sin
@@ -223,8 +239,11 @@ static func espacio(id: String, quedan: int, contenido: Dictionary = {}) -> Dict
 		)
 	)
 
-	return {
+	var resultado := {
 		"rotulo": forma["rotulo"],
+		# La planta se conserva incluso en la primera familia poligonal: sigue
+		# siendo el contrato de timing/mapa y permite comparar el corte nuevo con
+		# el recorrido anterior. `Espacio3D` prioriza `contorno` cuando existe.
 		"planta": bloques,
 		"color_suelo": forma["color_suelo"],
 		"color_muro": forma["color_muro"],
@@ -236,7 +255,7 @@ static func espacio(id: String, quedan: int, contenido: Dictionary = {}) -> Dict
 		"ambiente_energia": forma.get("ambiente_energia", 0.32),
 		"sol": forma.get("sol", 0.05),
 		"luces": luces,
-		"entrada": Planta.centro_en_metros(bloques, entrada),
+		"entrada": posicion_entrada,
 		"figuras": figuras,
 		"carteles": carteles,
 		"salidas":
@@ -255,6 +274,101 @@ static func espacio(id: String, quedan: int, contenido: Dictionary = {}) -> Dict
 			}
 		],
 	}
+	if es_poligonal:
+		resultado["contorno"] = familia["contorno"]
+		resultado["altura_contorno"] = float(familia.get("altura", 3.2))
+	return resultado
+
+
+## Una familia poligonal no puede heredar las coordenadas de una planta de
+## celdas: hacerlo sería volver al fallo que #448 evita, con objetos y triggers
+## al otro lado de una pared visible. La salida usa el ancla más alejada de la
+## entrada declarada por la familia.
+static func _salida_poligonal(familia: Dictionary) -> Vector3:
+	var entrada: Vector3 = familia.get("entrada", Vector3.ZERO)
+	var mejor := entrada
+	var distancia := -1.0
+	for dato in familia.get("anclas", []):
+		var ancla: Vector3 = dato
+		var candidata := entrada.distance_squared_to(ancla)
+		if candidata > distancia:
+			distancia = candidata
+			mejor = ancla
+	return mejor
+
+
+## Sitios seguros para figuras: primero un punto de llegada legible, después las
+## anclas del catálogo y finalmente puntos interiores derivados del contorno.
+## No se escriben coordenadas especiales para `embudo`: cualquier forma que
+## declare una familia poligonal entra por el mismo contrato.
+static func _sitios_poligonales(familia: Dictionary, salida: Vector3) -> Array:
+	var contorno: PackedVector2Array = familia.get("contorno", PackedVector2Array())
+	var entrada: Vector3 = familia.get("entrada", Vector3.ZERO)
+	var centro := _centro_contorno(contorno)
+	var sitios := []
+	var entrada_2d := Vector2(entrada.x, entrada.z)
+	var cerca := entrada_2d.lerp(centro, 0.38)
+	sitios.append(Vector3(cerca.x, 0, cerca.y))
+
+	for dato in familia.get("anclas", []):
+		var ancla: Vector3 = dato
+		if ancla.distance_to(salida) > 2.5 and ancla.distance_to(entrada) > 2.5:
+			sitios.append(ancla)
+
+	for punto in contorno:
+		var interior := centro.lerp(punto, 0.42)
+		var sitio := Vector3(interior.x, 0, interior.y)
+		if sitio.distance_to(salida) > 2.5 and sitio.distance_to(entrada) > 2.5:
+			sitios.append(sitio)
+
+	if sitios.is_empty():
+		sitios.append(Vector3(centro.x, 0, centro.y))
+	return sitios
+
+
+## Las frases siguen perteneciendo a paredes. En un polígono las paredes son
+## sus aristas: se priorizan las largas, se coloca el texto un poco hacia el
+## centro y se orienta su frente hacia el interior.
+static func _carteles_poligonales(familia: Dictionary, frases: Array) -> Array:
+	var contorno: PackedVector2Array = familia.get("contorno", PackedVector2Array())
+	if contorno.size() < 2 or frases.is_empty():
+		return []
+	var centro := _centro_contorno(contorno)
+	var paredes := []
+	for i in contorno.size():
+		var a := contorno[i]
+		var b := contorno[(i + 1) % contorno.size()]
+		paredes.append({"a": a, "b": b, "largo": a.distance_squared_to(b)})
+	paredes.sort_custom(func(a, b): return a["largo"] > b["largo"])
+
+	var carteles := []
+	for i in mini(frases.size(), paredes.size()):
+		var pared: Dictionary = paredes[i]
+		var a: Vector2 = pared["a"]
+		var b: Vector2 = pared["b"]
+		var medio := (a + b) / 2.0
+		var hacia_dentro := centro - medio
+		if not is_zero_approx(hacia_dentro.length()):
+			hacia_dentro = hacia_dentro.normalized()
+		var posicion := medio + hacia_dentro * SEPARACION_PARED
+		carteles.append(
+			{
+				"texto": frases[i],
+				"pos": Vector3(posicion.x, 0, posicion.y),
+				"giro": atan2(hacia_dentro.x, hacia_dentro.y),
+				"color": COLOR_TEXTO,
+			}
+		)
+	return carteles
+
+
+static func _centro_contorno(contorno: PackedVector2Array) -> Vector2:
+	if contorno.is_empty():
+		return Vector2.ZERO
+	var centro := Vector2.ZERO
+	for punto in contorno:
+		centro += punto
+	return centro / float(contorno.size())
 
 
 ## Lo que queda de noche, dicho sin un número.
