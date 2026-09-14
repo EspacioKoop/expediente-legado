@@ -3,7 +3,7 @@
 ## La UI pausa el mundo mientras está abierta y solo habla con la clase nativa
 ## Siga98GB. No conoce estado persistente, casos, economía ni guardados de campaña.
 ## La materialidad de #245 vive fuera del núcleo: un encendido breve antes de
-## cargar y un shader LCD desactivable que nunca modifica el framebuffer fuente.
+## cargar, un shader LCD desactivable y sonidos físicos procedurales separados.
 class_name EmuladorPortatilApp
 extends CanvasLayer
 
@@ -20,6 +20,8 @@ const FPS_EMULADOR := CICLOS_CPU_DMG / CICLOS_POR_FRAME_DMG
 const PASO_EMULADOR := 1.0 / FPS_EMULADOR
 const MAX_FRAMES_POR_TICK := 4
 const DURACION_ENCENDIDO := 0.32
+const FRECUENCIA_SONIDO_FISICO := 22050
+const VOLUMEN_SONIDO_FISICO_DB := -18.0
 
 const SHADER_LCD := """
 shader_type canvas_item;
@@ -64,15 +66,19 @@ var _lista: VBoxContainer
 var _textura: ImageTexture
 var _lcd_material: ShaderMaterial
 var _velo_encendido: ColorRect
+var _audio_fisico: AudioStreamPlayer
+var _sonidos_fisicos_cache: Dictionary = {}
 var _jugando := false
 var _pausa_anterior := false
 var _abierto := false
 var _tiempo_emulador := 0.0
 var _ruta_sram_actual := ""
 var _efectos_presentacion := true
+var _sonidos_fisicos := true
 var _encendiendo := false
 var _tiempo_encendido := 0.0
 var _rom_pendiente := ""
+var _botones_previos := 0
 
 
 func abrir() -> void:
@@ -84,6 +90,7 @@ func abrir() -> void:
 	_abierto = true
 	_tiempo_emulador = 0.0
 	_construir_ui()
+	_preparar_audio_fisico()
 	_preparar_nucleo()
 	_refrescar_roms()
 	set_process(true)
@@ -100,7 +107,11 @@ func _process(delta: float) -> void:
 		_tiempo_emulador + maxf(delta, 0.0),
 		PASO_EMULADOR * MAX_FRAMES_POR_TICK,
 	)
-	_emulador.call("set_buttons", _botones())
+	var botones := _botones()
+	_emulador.call("set_buttons", botones)
+	if botones != 0 and (botones & ~_botones_previos) != 0:
+		_reproducir_sonido_fisico(&"boton")
+	_botones_previos = botones
 
 	var datos := PackedByteArray()
 	var frames_ejecutados := 0
@@ -214,6 +225,17 @@ func _construir_ui() -> void:
 	efectos_aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	derecha.add_child(efectos_aviso)
 
+	var sonidos := CheckButton.new()
+	sonidos.text = _texto("sonidos_fisicos")
+	sonidos.button_pressed = _sonidos_fisicos
+	sonidos.toggled.connect(_al_cambiar_sonidos)
+	derecha.add_child(sonidos)
+
+	var sonidos_aviso := Label.new()
+	sonidos_aviso.text = _texto("sonidos_fisicos_aviso")
+	sonidos_aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	derecha.add_child(sonidos_aviso)
+
 	_lista = VBoxContainer.new()
 	_lista.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	derecha.add_child(_lista)
@@ -241,6 +263,60 @@ func _preparar_filtro_lcd() -> void:
 	_lcd_material.shader = shader
 	_lcd_material.set_shader_parameter("filtro_lcd", _efectos_presentacion)
 	_vista.material = _lcd_material
+
+
+func _preparar_audio_fisico() -> void:
+	_audio_fisico = AudioStreamPlayer.new()
+	_audio_fisico.name = "AudioFisicoPortatil"
+	_audio_fisico.process_mode = Node.PROCESS_MODE_ALWAYS
+	_audio_fisico.volume_db = VOLUMEN_SONIDO_FISICO_DB
+	add_child(_audio_fisico)
+	_sonidos_fisicos_cache = {
+		&"encendido": _crear_sonido_fisico(95.0, 230.0, 0.055, 0.52),
+		&"cartucho": _crear_sonido_fisico(170.0, 65.0, 0.070, 0.58),
+		&"boton": _crear_sonido_fisico(760.0, 420.0, 0.028, 0.30),
+	}
+
+
+func _crear_sonido_fisico(
+	frecuencia_inicial: float, frecuencia_final: float, duracion: float, intensidad: float
+) -> AudioStreamWAV:
+	var muestras := maxi(1, int(round(duracion * FRECUENCIA_SONIDO_FISICO)))
+	var datos := PackedByteArray()
+	datos.resize(muestras * 2)
+	var fase := 0.0
+	for indice in range(muestras):
+		var progreso := float(indice) / float(maxi(muestras - 1, 1))
+		var frecuencia := lerpf(frecuencia_inicial, frecuencia_final, progreso)
+		fase += TAU * frecuencia / float(FRECUENCIA_SONIDO_FISICO)
+		var envolvente := 1.0 - progreso
+		envolvente *= envolvente
+		var onda := sin(fase) * 0.78 + sin(fase * 2.11) * 0.22
+		var muestra := int(clampf(onda * envolvente * intensidad, -1.0, 1.0) * 32767.0)
+		datos.encode_s16(indice * 2, muestra)
+
+	var stream := AudioStreamWAV.new()
+	stream.format = AudioStreamWAV.FORMAT_16_BITS
+	stream.mix_rate = FRECUENCIA_SONIDO_FISICO
+	stream.stereo = false
+	stream.data = datos
+	return stream
+
+
+func _reproducir_sonido_fisico(tipo: StringName) -> void:
+	if not _sonidos_fisicos or _audio_fisico == null:
+		return
+	var sonido = _sonidos_fisicos_cache.get(tipo)
+	if sonido is not AudioStream:
+		return
+	_audio_fisico.stream = sonido
+	_audio_fisico.play()
+
+
+func _al_cambiar_sonidos(activos: bool) -> void:
+	_sonidos_fisicos = activos
+	if not activos and _audio_fisico != null:
+		_audio_fisico.stop()
 
 
 func _preparar_nucleo() -> void:
@@ -280,6 +356,7 @@ func _cargar_rom(ruta: String) -> void:
 		return
 	_guardar_sram()
 	_ruta_sram_actual = ""
+	_reproducir_sonido_fisico(&"cartucho")
 	if not _efectos_presentacion:
 		_cargar_rom_ahora(ruta)
 		return
@@ -305,6 +382,7 @@ func _actualizar_encendido(delta: float) -> void:
 
 	var ruta := _rom_pendiente
 	_cancelar_encendido()
+	_reproducir_sonido_fisico(&"encendido")
 	_cargar_rom_ahora(ruta)
 
 
@@ -325,6 +403,7 @@ func _al_cambiar_efectos(activos: bool) -> void:
 
 	var ruta := _rom_pendiente
 	_cancelar_encendido()
+	_reproducir_sonido_fisico(&"encendido")
 	_cargar_rom_ahora(ruta)
 
 
@@ -347,6 +426,7 @@ func _cargar_rom_ahora(ruta: String) -> void:
 	_ruta_sram_actual = _ruta_sram(rom)
 	_restaurar_sram()
 	_tiempo_emulador = 0.0
+	_botones_previos = 0
 	_jugando = true
 	var titulo := String(_emulador.call("rom_title"))
 	if titulo.is_empty():
@@ -492,7 +572,10 @@ func _cerrar() -> void:
 	_guardar_sram()
 	_jugando = false
 	_tiempo_emulador = 0.0
+	_botones_previos = 0
 	_cancelar_encendido()
+	if _audio_fisico != null:
+		_audio_fisico.stop()
 	_abierto = false
 	get_tree().paused = _pausa_anterior
 	cerrado.emit()

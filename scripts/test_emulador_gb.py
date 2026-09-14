@@ -93,7 +93,7 @@ class EmuladorGBTest(unittest.TestCase):
     def test_ui_persiste_sram_por_sha256_fuera_de_la_partida(self):
         self.assertIn('SRAM_DIR := "user://sram/gb"', self.ui)
         self.assertIn("HashingContext.HASH_SHA256", self.ui)
-        self.assertIn('hex_encode()', self.ui)
+        self.assertIn("hex_encode()", self.ui)
         self.assertIn('_emulador.call("save_ram")', self.ui)
         self.assertIn('_emulador.call("load_save_ram", datos)', self.ui)
         self.assertIn('".nuevo"', self.ui)
@@ -109,11 +109,27 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn("if not _efectos_presentacion:", self.ui)
         self.assertIn("_cargar_rom_ahora(ruta)", self.ui)
         self.assertIn("_rom_pendiente = ruta", self.ui)
-        self.assertIn("if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE", self.ui)
+        self.assertIn(
+            "if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE",
+            self.ui,
+        )
         self.assertIn("func _cancelar_encendido()", self.ui)
         self.assertIn('var resultado := int(_emulador.call("load_rom", rom))', self.ui)
         self.assertNotIn("Partida", self.ui)
         self.assertNotIn("Jornada", self.ui)
+
+    def test_sonido_fisico_es_procedural_separable_y_desactivable(self):
+        self.assertIn("FRECUENCIA_SONIDO_FISICO := 22050", self.ui)
+        self.assertIn("AudioStreamPlayer.new()", self.ui)
+        self.assertIn("AudioStreamWAV.new()", self.ui)
+        self.assertIn("AudioStreamWAV.FORMAT_16_BITS", self.ui)
+        self.assertIn("datos.encode_s16(indice * 2, muestra)", self.ui)
+        self.assertIn("func _al_cambiar_sonidos(activos: bool)", self.ui)
+        self.assertIn('_reproducir_sonido_fisico(&"cartucho")', self.ui)
+        self.assertIn('_reproducir_sonido_fisico(&"encendido")', self.ui)
+        self.assertIn('_reproducir_sonido_fisico(&"boton")', self.ui)
+        self.assertIn("_botones_previos = botones", self.ui)
+        self.assertNotIn('_emulador.call("audio', self.ui)
 
     def test_smoke_compara_pixeles_rgba_no_canales_sueltos(self):
         self.assertIn("BYTES_POR_PIXEL := 4", self.smoke)
