@@ -2,6 +2,96 @@
   "_regla": "Todo fichero bajo assets/ necesita su ficha aquí, con sha256. Una prueba lo exige en las dos direcciones: ni ficheros sin ficha ni fichas sin fichero. Ver LEEME.md.",
   "assets": [
     {
+      "ruta": "modelos/oficina_psx/desk1.glb",
+      "titulo": "desk1 — PSX style office pack",
+      "autor": "valsekamerplant",
+      "licencia": "CC0-1.0",
+      "fuente": "https://valsekamerplant.itch.io/psx-style-opulent-office",
+      "sha256": "96b0dd32236f62e5fb3b85dee23bc579500e727fa98d6845bae3e7dad89b3202",
+      "archivo_origen": "OFFICE/desks/desk1.glb",
+      "paquete_sha256": "391eeaf906a60822a4704e65effdee75962a539ae88bfe6a3f20852879eea409"
+    },
+    {
+      "ruta": "modelos/oficina_psx/desk2.glb",
+      "titulo": "desk2 — PSX style office pack",
+      "autor": "valsekamerplant",
+      "licencia": "CC0-1.0",
+      "fuente": "https://valsekamerplant.itch.io/psx-style-opulent-office",
+      "sha256": "55fd7b7b12b96cd835fc9bfec540549db541b06889cea8296fbd3efc91f3733d",
+      "archivo_origen": "OFFICE/desks/desk2.glb",
+      "paquete_sha256": "391eeaf906a60822a4704e65effdee75962a539ae88bfe6a3f20852879eea409"
+    },
+    {
+      "ruta": "modelos/oficina_psx/file_cabinet_large.glb",
+      "titulo": "file_cabinet_large — PSX style office pack",
+      "autor": "valsekamerplant",
+      "licencia": "CC0-1.0",
+      "fuente": "https://valsekamerplant.itch.io/psx-style-opulent-office",
+      "sha256": "5ac8fc7017677ae7048032449a1ab3770d6e51f62ba99b90a142caf7ee494091",
+      "archivo_origen": "OFFICE/file_cabinets/file_cabinet_large.glb",
+      "paquete_sha256": "391eeaf906a60822a4704e65effdee75962a539ae88bfe6a3f20852879eea409"
+    },
+    {
+      "ruta": "modelos/oficina_psx/file_cabinet_smaller.glb",
+      "titulo": "file_cabinet_smaller — PSX style office pack",
+      "autor": "valsekamerplant",
+      "licencia": "CC0-1.0",
+      "fuente": "https://valsekamerplant.itch.io/psx-style-opulent-office",
+      "sha256": "5009d41b6cbf979160049d5c779baaba3a94f816b8142442183a4a6ffc2414dd",
+      "archivo_origen": "OFFICE/file_cabinets/file_cabinet_smaller.glb",
+      "paquete_sha256": "391eeaf906a60822a4704e65effdee75962a539ae88bfe6a3f20852879eea409"
+    },
+    {
+      "ruta": "modelos/oficina_psx/computer_monitor.glb",
+      "titulo": "computer_monitor — PSX style office pack",
+      "autor": "valsekamerplant",
+      "licencia": "CC0-1.0",
+      "fuente": "https://valsekamerplant.itch.io/psx-style-opulent-office",
+      "sha256": "3ff1d1f778996b5951e410e88954eccd0e2cd657c6cabb885d7f8c486053fd29",
+      "archivo_origen": "OFFICE/computers/computer_monitor.glb",
+      "paquete_sha256": "391eeaf906a60822a4704e65effdee75962a539ae88bfe6a3f20852879eea409"
+    },
+    {
+      "ruta": "modelos/oficina_psx/desk_phone.glb",
+      "titulo": "desk_phone — PSX style office pack",
+      "autor": "valsekamerplant",
+      "licencia": "CC0-1.0",
+      "fuente": "https://valsekamerplant.itch.io/psx-style-opulent-office",
+      "sha256": "52a7108fb24758b12df5791b314a74fc001418ac811c73c42ac18c1ac142708e",
+      "archivo_origen": "OFFICE/extras/desk_phone.glb",
+      "paquete_sha256": "391eeaf906a60822a4704e65effdee75962a539ae88bfe6a3f20852879eea409"
+    },
+    {
+      "ruta": "modelos/oficina_psx/office_chair_black.glb",
+      "titulo": "office_chair_black — PSX style office pack",
+      "autor": "valsekamerplant",
+      "licencia": "CC0-1.0",
+      "fuente": "https://valsekamerplant.itch.io/psx-style-opulent-office",
+      "sha256": "f1a786ae69137cc73db25192f1cc2677cac8e85dcb39b2745b5e0af6f6b9332f",
+      "archivo_origen": "OFFICE/chairs/office_chair_black.glb",
+      "paquete_sha256": "391eeaf906a60822a4704e65effdee75962a539ae88bfe6a3f20852879eea409"
+    },
+    {
+      "ruta": "modelos/oficina_psx/square_desklamp.glb",
+      "titulo": "square_desklamp — PSX style office pack",
+      "autor": "valsekamerplant",
+      "licencia": "CC0-1.0",
+      "fuente": "https://valsekamerplant.itch.io/psx-style-opulent-office",
+      "sha256": "5216994b32653cd0e776ffb0924ba2de6159c286ad420dd98cd6234a5f777f4d",
+      "archivo_origen": "OFFICE/extras/square_desklamp.glb",
+      "paquete_sha256": "391eeaf906a60822a4704e65effdee75962a539ae88bfe6a3f20852879eea409"
+    },
+    {
+      "ruta": "modelos/oficina_psx/computer_keyboard.glb",
+      "titulo": "computer_keyboard — PSX style office pack",
+      "autor": "valsekamerplant",
+      "licencia": "CC0-1.0",
+      "fuente": "https://valsekamerplant.itch.io/psx-style-opulent-office",
+      "sha256": "0851afa1a288ed9c860a7a954f996b19881522ee0f92d4907b61fc54adde6f94",
+      "archivo_origen": "OFFICE/computers/computer_keyboard.glb",
+      "paquete_sha256": "391eeaf906a60822a4704e65effdee75962a539ae88bfe6a3f20852879eea409"
+    },
+    {
       "ruta": "fonts/MFBOldstyle-Regular.otf",
       "titulo": "MFB Oldstyle Regular",
       "autor": "Daniel Benjamin Miller",
@@ -344,6 +434,96 @@
       "licencia": "CC0-1.0",
       "fuente": "https://quaternius.com/packs/ultimatenature.html",
       "sha256": "c1fa3fb3da15ef57d925d134a29019d94fba9de9b1308bdd2aecf9badb556639"
+    },
+    {
+      "ruta": "modelos/oficina_psx/computer_keyboard_computer.jpg",
+      "titulo": "computer_keyboard_computer — textura embebida del PSX style office pack",
+      "autor": "valsekamerplant",
+      "licencia": "CC0-1.0",
+      "fuente": "https://valsekamerplant.itch.io/psx-style-opulent-office",
+      "sha256": "449b4ac23f8f3c9c493d6b382112c87e4ce6c3b045af9543fba6b0bebb27406e",
+      "archivo_origen": "textura embebida en el GLB del pack",
+      "paquete_sha256": "391eeaf906a60822a4704e65effdee75962a539ae88bfe6a3f20852879eea409"
+    },
+    {
+      "ruta": "modelos/oficina_psx/computer_monitor_computer.jpg",
+      "titulo": "computer_monitor_computer — textura embebida del PSX style office pack",
+      "autor": "valsekamerplant",
+      "licencia": "CC0-1.0",
+      "fuente": "https://valsekamerplant.itch.io/psx-style-opulent-office",
+      "sha256": "449b4ac23f8f3c9c493d6b382112c87e4ce6c3b045af9543fba6b0bebb27406e",
+      "archivo_origen": "textura embebida en el GLB del pack",
+      "paquete_sha256": "391eeaf906a60822a4704e65effdee75962a539ae88bfe6a3f20852879eea409"
+    },
+    {
+      "ruta": "modelos/oficina_psx/desk1_desk_1.jpg",
+      "titulo": "desk1_desk_1 — textura embebida del PSX style office pack",
+      "autor": "valsekamerplant",
+      "licencia": "CC0-1.0",
+      "fuente": "https://valsekamerplant.itch.io/psx-style-opulent-office",
+      "sha256": "2240df54a462f8701493bfd783ae87d08de36b13fa20d979769d31a1e067abc5",
+      "archivo_origen": "textura embebida en el GLB del pack",
+      "paquete_sha256": "391eeaf906a60822a4704e65effdee75962a539ae88bfe6a3f20852879eea409"
+    },
+    {
+      "ruta": "modelos/oficina_psx/desk2_desk_2.jpg",
+      "titulo": "desk2_desk_2 — textura embebida del PSX style office pack",
+      "autor": "valsekamerplant",
+      "licencia": "CC0-1.0",
+      "fuente": "https://valsekamerplant.itch.io/psx-style-opulent-office",
+      "sha256": "3f1bf1a9d1cb8b88829b965fd7144a7866f37b6ec37ec8a6ec0e7ba064b89765",
+      "archivo_origen": "textura embebida en el GLB del pack",
+      "paquete_sha256": "391eeaf906a60822a4704e65effdee75962a539ae88bfe6a3f20852879eea409"
+    },
+    {
+      "ruta": "modelos/oficina_psx/desk_phone_deskphone.jpg",
+      "titulo": "desk_phone_deskphone — textura embebida del PSX style office pack",
+      "autor": "valsekamerplant",
+      "licencia": "CC0-1.0",
+      "fuente": "https://valsekamerplant.itch.io/psx-style-opulent-office",
+      "sha256": "4f456fbe75586cf19f88ab131c39f48515a6efd5ae7faad926b967cd8dcd9ce3",
+      "archivo_origen": "textura embebida en el GLB del pack",
+      "paquete_sha256": "391eeaf906a60822a4704e65effdee75962a539ae88bfe6a3f20852879eea409"
+    },
+    {
+      "ruta": "modelos/oficina_psx/file_cabinet_large_file_cabinet_big.png",
+      "titulo": "file_cabinet_large_file_cabinet_big — textura embebida del PSX style office pack",
+      "autor": "valsekamerplant",
+      "licencia": "CC0-1.0",
+      "fuente": "https://valsekamerplant.itch.io/psx-style-opulent-office",
+      "sha256": "d53455f44e752210452f917cacefda6f4e06bcf870d237f3db4d10bbd1e70336",
+      "archivo_origen": "textura embebida en el GLB del pack",
+      "paquete_sha256": "391eeaf906a60822a4704e65effdee75962a539ae88bfe6a3f20852879eea409"
+    },
+    {
+      "ruta": "modelos/oficina_psx/file_cabinet_smaller_file_cabinet_Small.jpg",
+      "titulo": "file_cabinet_smaller_file_cabinet_Small — textura embebida del PSX style office pack",
+      "autor": "valsekamerplant",
+      "licencia": "CC0-1.0",
+      "fuente": "https://valsekamerplant.itch.io/psx-style-opulent-office",
+      "sha256": "29447d0b0223b0a1da5025d043934b9d0ceb37c00be38b8453437f04d90ae5ab",
+      "archivo_origen": "textura embebida en el GLB del pack",
+      "paquete_sha256": "391eeaf906a60822a4704e65effdee75962a539ae88bfe6a3f20852879eea409"
+    },
+    {
+      "ruta": "modelos/oficina_psx/office_chair_black_office_chair_black.jpg",
+      "titulo": "office_chair_black_office_chair_black — textura embebida del PSX style office pack",
+      "autor": "valsekamerplant",
+      "licencia": "CC0-1.0",
+      "fuente": "https://valsekamerplant.itch.io/psx-style-opulent-office",
+      "sha256": "da35c90b442094dec4899feaa227f77ea5b227ba9d3284e4907e4a776d1d5844",
+      "archivo_origen": "textura embebida en el GLB del pack",
+      "paquete_sha256": "391eeaf906a60822a4704e65effdee75962a539ae88bfe6a3f20852879eea409"
+    },
+    {
+      "ruta": "modelos/oficina_psx/square_desklamp_desk-lamp.png",
+      "titulo": "square_desklamp_desk-lamp — textura embebida del PSX style office pack",
+      "autor": "valsekamerplant",
+      "licencia": "CC0-1.0",
+      "fuente": "https://valsekamerplant.itch.io/psx-style-opulent-office",
+      "sha256": "18e7384d87f7943fff6ca1bb728bd90c5e8e827a846bb94c4e7226a4630b1875",
+      "archivo_origen": "textura embebida en el GLB del pack",
+      "paquete_sha256": "391eeaf906a60822a4704e65effdee75962a539ae88bfe6a3f20852879eea409"
     },
     {
       "ruta": "texturas/poster-1998-01.png",

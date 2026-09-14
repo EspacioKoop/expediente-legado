@@ -20,4 +20,5 @@ func _process(_delta: float) -> void:
 	_mundo_vestido_id = mundo_id
 	if String(dia.jornada.get("fase", "")) == "archivo":
 		OficinaUtileria.montar(mundo)
+		OficinaAssetsCc0.montar(mundo)
 		PostersOficina.montar(mundo)
