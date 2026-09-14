@@ -58,8 +58,7 @@ static func ruta_catalogo(nombre: String, locale: String = "") -> String:
 	var localizada := _leer_json(candidata, false)
 	if base.is_empty() or localizada.is_empty() or not _misma_estructura(base, localizada):
 		push_warning(
-			"Catálogo %s desincronizado para %s; se usa %s"
-			% [nombre, idioma, IDIOMA_CANONICO]
+			"Catálogo %s desincronizado para %s; se usa %s" % [nombre, idioma, IDIOMA_CANONICO]
 		)
 		return canonica
 	return candidata
@@ -73,9 +72,7 @@ static func _idioma(locale: String) -> String:
 
 ## Compara forma y reglas, permitiendo que cambie únicamente el texto visible.
 ## Así una copia localizada no puede perder un caso, pista o flag por detrás.
-static func _misma_estructura(
-	base: Variant, localizada: Variant, campo: String = ""
-) -> bool:
+static func _misma_estructura(base: Variant, localizada: Variant, campo: String = "") -> bool:
 	if typeof(base) != typeof(localizada):
 		return false
 	if base is Dictionary:
