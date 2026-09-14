@@ -108,6 +108,21 @@ static func malla(id: String) -> ArrayMesh:
 	return SuenoGeometria.malla_sala(familia["contorno"], float(familia.get("altura", 3.2)))
 
 
+## Materializa una familia como arquitectura estática completa.
+##
+## El catálogo sigue sin decidir cuándo aparece: simplemente entrega al runtime
+## una malla y una colisión que comparten exactamente el mismo contorno. Esto
+## permite integrar una familia en una noche real sin volver a una colisión de
+## cajas distinta de lo que ve el jugador.
+static func cuerpo(id: String) -> StaticBody3D:
+	var familia := de(id)
+	if familia.is_empty():
+		return StaticBody3D.new()
+	return SuenoGeometria.cuerpo_sala(
+		familia["contorno"], float(familia.get("altura", 3.2))
+	)
+
+
 static func valida(id: String) -> bool:
 	var familia := de(id)
 	if familia.is_empty():
