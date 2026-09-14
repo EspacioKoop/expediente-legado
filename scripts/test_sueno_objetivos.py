@@ -39,6 +39,22 @@ class SuenoObjetivosTest(unittest.TestCase):
         self.assertIn("Jornada.despertar(jornada)", self.gato)
         self.assertIn('_entrar_en(destino)', self.gato)
 
+    def test_resolucion_tiene_cerrojo_contra_doble_transicion(self):
+        self.assertIn("var _resolviendo_objetivos := false", self.gato)
+        self.assertIn("if _resolviendo_objetivos:", self.gato)
+        self.assertIn("_resolviendo_objetivos = true", self.gato)
+        # La escena siguiente reinicia el cerrojo al entrar, no desde un timer
+        # externo que pudiera dejarlo arrastrado entre escenas.
+        self.assertIn("func _entrar_en(fase: String) -> void:", self.gato)
+        self.assertIn("_resolviendo_objetivos = false\n\tsuper._entrar_en(fase)", self.gato)
+
+    def test_fallo_de_guardado_no_consume_otra_escena_al_reintentar(self):
+        self.assertIn("var jornada_antes := jornada.duplicate(true)", self.gato)
+        self.assertIn("if not _guardar_o_avisar(destino):", self.gato)
+        self.assertIn("jornada.clear()", self.gato)
+        self.assertIn("jornada.merge(jornada_antes, true)", self.gato)
+        self.assertIn("_resolviendo_objetivos = false", self.gato)
+
     def test_el_gato_apunta_a_objetivo_y_no_a_puerta(self):
         self.assertIn('extends "res://guion/dia_trabajillos_app.gd"', self.gato)
         self.assertIn('extends "res://guion/dia_alquiler_app.gd"', self.trabajillos)
