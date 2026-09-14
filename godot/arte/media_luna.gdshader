@@ -1,8 +1,8 @@
 shader_type canvas_item;
 
 // Motivo estático para el escaparate (#142). La semilla solo cambia orientación
-// y matiz entre aparatos; no usa TIME, así que el SubViewport puede renderizarse
-// una sola vez.
+// y matiz entre aparatos; no depende del reloj, así que el SubViewport puede
+// renderizarse una sola vez.
 uniform float semilla = 0.0;
 
 void fragment() {
