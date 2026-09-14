@@ -93,17 +93,9 @@ static func _montar_cuenco_gato(raiz: Node3D, pos: Vector3) -> void:
 	# Un tronco de cono bajo con centro oscuro hace legible el recipiente abierto
 	# sin añadir estado propio: lleno/vacío sigue perteneciendo a la lógica del gato.
 	_agregar_cilindro_truncado(
-		cuenco,
-		Vector3(0, 0.07, 0),
-		0.18,
-		0.11,
-		0.11,
-		Color(0.48, 0.46, 0.42),
-		ACERO
+		cuenco, Vector3(0, 0.07, 0), 0.18, 0.11, 0.11, Color(0.48, 0.46, 0.42), ACERO
 	)
-	_agregar_cilindro(
-		cuenco, Vector3(0, 0.132, 0), 0.13, 0.012, Color(0.10, 0.09, 0.08)
-	)
+	_agregar_cilindro(cuenco, Vector3(0, 0.132, 0), 0.13, 0.012, Color(0.10, 0.09, 0.08))
 
 
 static func _montar_sofa(raiz: Node3D, pos: Vector3, giro_y: float) -> void:
