@@ -55,6 +55,13 @@ class SuenoObjetivosTest(unittest.TestCase):
         self.assertIn("jornada.merge(jornada_antes, true)", self.gato)
         self.assertIn("_resolviendo_objetivos = false", self.gato)
 
+    def test_feedback_de_despertar_solo_aparece_despues_de_guardar(self):
+        self.assertIn("var dia_nuevo := -1", self.gato)
+        self.assertIn("if dia_nuevo >= 0:", self.gato)
+        guardar = self.gato.index("if not _guardar_o_avisar(destino):")
+        feedback = self.gato.index("if dia_nuevo >= 0:")
+        self.assertGreater(feedback, guardar)
+
     def test_el_gato_apunta_a_objetivo_y_no_a_puerta(self):
         self.assertIn('extends "res://guion/dia_trabajillos_app.gd"', self.gato)
         self.assertIn('extends "res://guion/dia_alquiler_app.gd"', self.trabajillos)
