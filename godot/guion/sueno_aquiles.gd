@@ -1,0 +1,243 @@
+## Vertical standalone para el sueño de Aquiles (#438).
+##
+## Este nodo no entra todavía en la selección nocturna: conserva el corte libre
+## de archivos compartidos y deja el contrato jugable listo para integrarlo en
+## un segundo PR. El modelo CC0 es opcional; mientras no esté vendorizado se usa
+## una silueta geométrica que permite probar luz, lectura espacial y resolución.
+class_name SuenoAquiles
+extends Node3D
+
+const CLAVE_SEMILLA := "semilla_onirica_aquiles"
+const GIROS_MINIMOS := 1
+const ACCIONES_RESOLUCION := ["tocar", "sellar", "enfocar", "colocar"]
+const TRANSFORMACION := "papel_y_sellos"
+const MODELO_CC0_RUTA := "res://assets/cc0/aquiles/modelo/achilles_spartan_greek_warrior.glb"
+const MODELO_CC0_FUENTE := "https://opengameart.org/content/achilles-spartan-greek-warrior"
+const POSTER_CC0_FUENTE := "https://www.clevelandart.org/art/2009.587"
+
+const COLOR_PIEDRA := Color(0.54, 0.50, 0.46)
+const COLOR_BRONCE := Color(0.34, 0.25, 0.16)
+const COLOR_TALON := Color(0.78, 0.24, 0.12)
+const COLOR_PAPEL := Color(0.76, 0.70, 0.57)
+
+var _figura: Node3D
+var _talon: MeshInstance3D
+var _impactos: Array[MeshInstance3D] = []
+
+
+## La familia solo puede entrar en la noche si la contraparte doméstica fue
+## examinada de forma deliberada. Pasar junto al objeto no escribe esta clave.
+static func puede_entrar(estado: Dictionary) -> bool:
+	return bool(estado.get(CLAVE_SEMILLA, false))
+
+
+## Registrar la semilla exige manipular la contraparte y observar el talón.
+## `giros` representa cambios de ángulo deliberados del póster/figura doméstica.
+static func registrar_semilla(estado: Dictionary, giros: int, talon_observado: bool) -> bool:
+	if giros < GIROS_MINIMOS or not talon_observado:
+		return false
+	estado[CLAVE_SEMILLA] = true
+	return true
+
+
+## El punto débil no se descubre probando superficies: aparece cuando la lectura
+## espacial alinea una luz o un reflejo con el talón.
+static func vulnerabilidad_visible(luz_alineada: bool, reflejo_alineado: bool) -> bool:
+	return luz_alineada or reflejo_alineado
+
+
+## Resolver no implica combate. Solo las acciones semánticas de observación y
+## manipulación tienen efecto, y únicamente después de revelar la vulnerabilidad.
+static func resolver(vulnerabilidad_revelada: bool, accion: String) -> Dictionary:
+	var normalizada := accion.strip_edges().to_lower()
+	var resuelta := vulnerabilidad_revelada and ACCIONES_RESOLUCION.has(normalizada)
+	return {
+		"resuelta": resuelta,
+		"transformacion": TRANSFORMACION if resuelta else "",
+		"accion": normalizada,
+	}
+
+
+## `reduccion_movimiento` conserva la misma solución sin sacudidas ni flashes.
+## Solo cambia el ritmo de la transformación final.
+static func plan_transformacion(reduccion_movimiento: bool) -> Dictionary:
+	return {
+		"sacudida_camara": false,
+		"flash": false,
+		"duracion": 1.2 if reduccion_movimiento else 0.55,
+		"modo": "escala_progresiva_y_fundido",
+	}
+
+
+func _ready() -> void:
+	_montar_prototipo()
+
+
+## Expone el mismo contrato puro en la escena standalone y da feedback visible.
+func aplicar_lectura_espacial(luz_alineada: bool, reflejo_alineado: bool) -> bool:
+	var revelada := vulnerabilidad_visible(luz_alineada, reflejo_alineado)
+	_talon.visible = revelada
+	return revelada
+
+
+## La figura se pliega hasta parecer una lámina de archivo; no hay cámara
+## forzada, arma ni botón de ataque. La duración respeta reducción de movimiento.
+func aplicar_resolucion(accion: String, reduccion_movimiento: bool) -> bool:
+	var resultado := resolver(_talon.visible, accion)
+	if not resultado["resuelta"]:
+		return false
+	for impacto in _impactos:
+		impacto.visible = false
+	_talon.material_override = _material(COLOR_PAPEL)
+	var plan := plan_transformacion(reduccion_movimiento)
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(_figura, "scale", Vector3(1.0, 0.055, 1.0), float(plan["duracion"]))
+	return true
+
+
+func _montar_prototipo() -> void:
+	_figura = Node3D.new()
+	_figura.name = "FiguraAquiles"
+	add_child(_figura)
+	if not _montar_modelo_cc0():
+		_montar_figura_fallback()
+	_montar_talon()
+	_montar_pasarela()
+	_montar_impactos()
+	_montar_iluminacion()
+	_montar_camara()
+
+
+func _montar_modelo_cc0() -> bool:
+	if not ResourceLoader.exists(MODELO_CC0_RUTA):
+		return false
+	var recurso := load(MODELO_CC0_RUTA)
+	if recurso is PackedScene:
+		var escena := recurso as PackedScene
+		var instancia := escena.instantiate() as Node3D
+		if instancia == null:
+			return false
+		_figura.add_child(instancia)
+		instancia.scale = Vector3(4.5, 4.5, 4.5)
+		return true
+	if recurso is Mesh:
+		var malla_recurso := recurso as Mesh
+		var malla := MeshInstance3D.new()
+		malla.mesh = malla_recurso
+		malla.scale = Vector3(4.5, 4.5, 4.5)
+		_figura.add_child(malla)
+		return true
+	return false
+
+
+func _montar_figura_fallback() -> void:
+	_crear_caja(_figura, "Torso", Vector3(3.3, 4.0, 1.5), Vector3(0.0, 6.2, 0.0), COLOR_PIEDRA)
+	_crear_caja(_figura, "PiernaIzquierda", Vector3(1.0, 4.3, 1.0), Vector3(-0.9, 2.2, 0.0), COLOR_PIEDRA)
+	_crear_caja(_figura, "PiernaDerecha", Vector3(1.0, 4.3, 1.0), Vector3(0.9, 2.2, 0.0), COLOR_PIEDRA)
+	_crear_caja(_figura, "BrazoIzquierdo", Vector3(0.8, 3.6, 0.8), Vector3(-2.0, 6.0, 0.0), COLOR_BRONCE)
+	_crear_caja(_figura, "BrazoDerecho", Vector3(0.8, 3.6, 0.8), Vector3(2.0, 6.0, 0.0), COLOR_BRONCE)
+	var cabeza_malla := SphereMesh.new()
+	cabeza_malla.radius = 1.05
+	cabeza_malla.height = 2.1
+	var cabeza := MeshInstance3D.new()
+	cabeza.name = "Cabeza"
+	cabeza.mesh = cabeza_malla
+	cabeza.position = Vector3(0.0, 9.2, 0.0)
+	cabeza.material_override = _material(COLOR_PIEDRA)
+	_figura.add_child(cabeza)
+
+
+func _montar_talon() -> void:
+	var malla := SphereMesh.new()
+	malla.radius = 0.34
+	malla.height = 0.68
+	_talon = MeshInstance3D.new()
+	_talon.name = "VulnerabilidadTalon"
+	_talon.mesh = malla
+	_talon.position = Vector3(0.9, 0.45, -0.56)
+	_talon.material_override = _material(COLOR_TALON, true)
+	_talon.visible = false
+	_figura.add_child(_talon)
+
+
+func _montar_pasarela() -> void:
+	_crear_caja(self, "PasarelaNorte", Vector3(13.0, 0.3, 2.0), Vector3(0.0, -0.15, -6.0), COLOR_BRONCE)
+	_crear_caja(self, "PasarelaSur", Vector3(13.0, 0.3, 2.0), Vector3(0.0, -0.15, 6.0), COLOR_BRONCE)
+	_crear_caja(self, "PasarelaEste", Vector3(2.0, 0.3, 10.0), Vector3(5.5, -0.15, 0.0), COLOR_BRONCE)
+	_crear_caja(self, "PasarelaOeste", Vector3(2.0, 0.3, 10.0), Vector3(-5.5, -0.15, 0.0), COLOR_BRONCE)
+	var espejo := _crear_caja(
+		self,
+		"EspejoLateral",
+		Vector3(0.18, 4.0, 3.2),
+		Vector3(-6.1, 2.0, -1.5),
+		Color(0.42, 0.48, 0.52)
+	)
+	var material := espejo.material_override as StandardMaterial3D
+	material.metallic = 0.85
+	material.roughness = 0.18
+
+
+func _montar_impactos() -> void:
+	var posiciones := [Vector3(-2.6, 6.8, 1.5), Vector3(2.5, 5.9, 1.1), Vector3(0.7, 8.0, 1.2)]
+	for i in posiciones.size():
+		var impacto := _crear_caja(
+			self,
+			"ImpactoAdministrativo%d" % (i + 1),
+			Vector3(0.72, 0.12, 0.52),
+			posiciones[i],
+			COLOR_PAPEL
+		)
+		impacto.rotation_degrees = Vector3(12.0 * i, 24.0 * i, -18.0 + 9.0 * i)
+		_impactos.append(impacto)
+
+
+func _montar_iluminacion() -> void:
+	var general := DirectionalLight3D.new()
+	general.name = "LuzGeneral"
+	general.rotation_degrees = Vector3(-48.0, -28.0, 0.0)
+	general.light_energy = 1.35
+	add_child(general)
+	var lectura := SpotLight3D.new()
+	lectura.name = "LuzDeLectura"
+	lectura.position = Vector3(0.8, 3.0, 5.6)
+	lectura.light_color = Color(0.86, 0.72, 0.48)
+	lectura.light_energy = 7.0
+	lectura.spot_range = 11.0
+	add_child(lectura)
+	lectura.look_at(Vector3(0.9, 0.45, -0.56), Vector3.UP)
+
+
+func _montar_camara() -> void:
+	var camara := Camera3D.new()
+	camara.name = "CamaraStandalone"
+	camara.position = Vector3(0.0, 6.2, 18.0)
+	camara.current = true
+	add_child(camara)
+	camara.look_at(Vector3(0.0, 4.6, 0.0), Vector3.UP)
+
+
+func _crear_caja(
+	padre: Node3D, nombre: String, tam: Vector3, posicion: Vector3, color: Color
+) -> MeshInstance3D:
+	var malla := BoxMesh.new()
+	malla.size = tam
+	var nodo := MeshInstance3D.new()
+	nodo.name = nombre
+	nodo.mesh = malla
+	nodo.position = posicion
+	nodo.material_override = _material(color)
+	padre.add_child(nodo)
+	return nodo
+
+
+func _material(color: Color, emision: bool = false) -> StandardMaterial3D:
+	var material := StandardMaterial3D.new()
+	material.albedo_color = color
+	material.roughness = 0.72
+	if emision:
+		material.emission_enabled = true
+		material.emission = color
+		material.emission_energy_multiplier = 1.8
+	return material
