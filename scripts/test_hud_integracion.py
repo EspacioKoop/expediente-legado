@@ -54,8 +54,13 @@ class HUDIntegracionTest(unittest.TestCase):
         self.assertIn('JOY_BUTTON_DPAD_UP: "Cruceta arriba"', self.caminante)
         self.assertIn('"Botón %d" % evento.button_index', self.caminante)
 
-    def test_stick_derecho_actualiza_dispositivo_aunque_se_mantenga_inclinado(self):
+    def test_drift_no_cambia_el_tipo_de_prompt(self):
+        self.assertIn("UMBRAL_CAMBIO_DISPOSITIVO := 0.35", self.caminante)
+        self.assertIn(
+            "absf(evento.axis_value) >= UMBRAL_CAMBIO_DISPOSITIVO", self.caminante
+        )
         cuerpo = self.caminante.split("func _mirar_con_mando", 1)[1]
+        self.assertIn("if magnitud >= UMBRAL_CAMBIO_DISPOSITIVO:", cuerpo)
         self.assertIn("_usar_dispositivo_entrada(DispositivoEntrada.MANDO)", cuerpo)
 
     def test_mirar_npc_activa_senal_visual(self):
