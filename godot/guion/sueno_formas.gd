@@ -72,9 +72,9 @@ const FORMAS := {
 		"color_muro": Color(0.33, 0.30, 0.39),
 		"color_techo": Color(0.19, 0.17, 0.22),
 	},
-	# Un anillo alrededor de un patio al que no se entra. Es la forma que
-	# justifica el issue entero: sus cuatro muros de dentro no los declara
-	# nadie, salen de que el patio también es contorno.
+	# Un anillo alrededor de un patio al que no se entra. Desde #279 la forma
+	# lógica de celdas se conserva para timing/mapa, mientras la arquitectura
+	# visible y física usa la familia cóncava ANULAR con vacío central real.
 	"patio":
 	{
 		"rotulo": "SUENO_ROTULO",
@@ -85,6 +85,7 @@ const FORMAS := {
 			Rect2i(0, 0, 3, 18),
 			Rect2i(15, 0, 3, 18),
 		],
+		"familia_poligonal": SuenoFamilias.ANULAR,
 		"textura_suelo": "techo",
 		"textura_muro": "gotele",
 		"escala_textura": 0.55,
