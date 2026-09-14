@@ -14,6 +14,14 @@ const CATALOGO := {
 	"final": "",
 }
 
+## El bucle también es una decisión musical, no una propiedad accidental del
+## formato. El careo puede repetirse mientras dure el duelo; un final debe poder
+## terminar por sí mismo y no alargar una cinemática ni obligarla a cortar audio.
+const BUCLE := {
+	"careo": true,
+	"final": false,
+}
+
 
 static func stream(nombre: String) -> AudioStream:
 	if not CATALOGO.has(nombre):
@@ -26,6 +34,10 @@ static func stream(nombre: String) -> AudioStream:
 		return null
 	var pista := load(ruta)
 	return pista if pista is AudioStream else null
+
+
+static func en_bucle(nombre: String) -> bool:
+	return bool(BUCLE.get(nombre, false))
 
 
 static func reproducir(nodo: Node, nombre: String, volumen_db: float = -8.0) -> AudioStreamPlayer:
@@ -41,7 +53,7 @@ static func reproducir(nodo: Node, nombre: String, volumen_db: float = -8.0) -> 
 	voz.stream = pista
 	voz.volume_db = volumen_db
 	if pista is AudioStreamOggVorbis:
-		pista.loop = true
+		pista.loop = en_bucle(nombre)
 	nodo.add_child(voz)
 	voz.play()
 	return voz
