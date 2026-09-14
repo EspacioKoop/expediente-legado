@@ -32,11 +32,11 @@ static var _familias := {
 		"anclas": [Vector3(0, 0, 10), Vector3(-6, 0, 2), Vector3(6, 0, 2)],
 	},
 	ANULAR:
+	# Anillo abierto en C y deliberadamente irregular. Sigue cabiendo dentro
+	# de la envolvente histórica de `patio`: la planta de celdas conserva
+	# timing/mapa y esta silueta sustituye solo la arquitectura visible/física.
+	# El recorte central queda fuera de suelo, techo y colisión; la abertura
 	{
-		# Anillo abierto en C y deliberadamente irregular. Sigue cabiendo dentro
-		# de la envolvente histórica de `patio`: la planta de celdas conserva
-		# timing/mapa y esta silueta sustituye solo la arquitectura visible/física.
-		# El recorte central queda fuera de suelo, techo y colisión; la abertura
 		# lateral permite recorrerlo andando sin salto ni navegación especial.
 		"contorno":
 		PackedVector2Array(
@@ -70,8 +70,8 @@ static var _familias := {
 		],
 	},
 	FRAGMENTADA:
+	# Una sala principal irregular y dos islas caminables separadas visualmente.
 	{
-		# Una sala principal irregular y dos islas caminables separadas visualmente.
 		# No exige salto: la integración debe unirlas con pasos/rampas anchas.
 		"contorno":
 		PackedVector2Array(
