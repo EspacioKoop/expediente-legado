@@ -47,7 +47,8 @@ const MINIMO_GRANDE := 60
 const FORMAS := {
 	# Dos naves cruzadas. Desde el centro se ven cuatro fondos y ninguno dice
 	# nada; desde un brazo no se ve el resto.
-	"crucero": {
+	"crucero":
+	{
 		"rotulo": "SUENO_ROTULO",
 		"bloques": [Rect2i(0, 5, 22, 6), Rect2i(8, 0, 6, 16)],
 		"textura_suelo": "linoleo",
@@ -56,7 +57,16 @@ const FORMAS := {
 		"ambiente": Color(0.20, 0.19, 0.26),
 		"ambiente_energia": 0.42,
 		"sol": 0.05,
-		"luces": [{"pos": Vector3(0, 2.4, -12), "color": Color(0.55, 0.52, 0.78), "energia": 3.4, "alcance": 16.0, "tam": Vector3(0.5, 0.1, 0.5)}],
+		"luces":
+		[
+			{
+				"pos": Vector3(0, 2.4, -12),
+				"color": Color(0.55, 0.52, 0.78),
+				"energia": 3.4,
+				"alcance": 16.0,
+				"tam": Vector3(0.5, 0.1, 0.5)
+			}
+		],
 		"entrada": Vector2i(11, 14),
 		"color_suelo": Color(0.26, 0.24, 0.30),
 		"color_muro": Color(0.33, 0.30, 0.39),
@@ -65,11 +75,15 @@ const FORMAS := {
 	# Un anillo alrededor de un patio al que no se entra. Es la forma que
 	# justifica el issue entero: sus cuatro muros de dentro no los declara
 	# nadie, salen de que el patio también es contorno.
-	"patio": {
+	"patio":
+	{
 		"rotulo": "SUENO_ROTULO",
-		"bloques": [
-			Rect2i(0, 0, 18, 3), Rect2i(0, 15, 18, 3),
-			Rect2i(0, 0, 3, 18), Rect2i(15, 0, 3, 18),
+		"bloques":
+		[
+			Rect2i(0, 0, 18, 3),
+			Rect2i(0, 15, 18, 3),
+			Rect2i(0, 0, 3, 18),
+			Rect2i(15, 0, 3, 18),
 		],
 		"textura_suelo": "techo",
 		"textura_muro": "gotele",
@@ -79,9 +93,17 @@ const FORMAS := {
 		"sol": 0.04,
 		# En el CORREDOR, no en el patio: puesta en el centro geométrico caía
 		# en el hueco al que no se entra, iluminando un sitio donde no hay
-		# nadie y dejando la sala entera a oscuras.
-		"luces": [{"pos": Vector3(-15, 2.4, 6), "color": Color(0.78, 0.74, 0.62),
-			"energia": 3.4, "alcance": 15.0, "tam": Vector3(0.6, 0.1, 0.6)}],
+		"luces":
+		[
+			# nadie y dejando la sala entera a oscuras.
+			{
+				"pos": Vector3(-15, 2.4, 6),
+				"color": Color(0.78, 0.74, 0.62),
+				"energia": 3.4,
+				"alcance": 15.0,
+				"tam": Vector3(0.6, 0.1, 0.6)
+			}
+		],
 		"entrada": Vector2i(1, 16),
 		"color_suelo": Color(0.28, 0.27, 0.26),
 		"color_muro": Color(0.35, 0.34, 0.32),
@@ -89,11 +111,15 @@ const FORMAS := {
 	},
 	# El archivo, si el archivo fuera infinito a lo ancho: un pasillo larguísimo
 	# con estanterías que son salas.
-	"peine": {
+	"peine":
+	{
 		"rotulo": "SUENO_ROTULO",
-		"bloques": [
+		"bloques":
+		[
 			Rect2i(0, 0, 26, 4),
-			Rect2i(2, 4, 4, 9), Rect2i(11, 4, 4, 9), Rect2i(20, 4, 4, 9),
+			Rect2i(2, 4, 4, 9),
+			Rect2i(11, 4, 4, 9),
+			Rect2i(20, 4, 4, 9),
 		],
 		"textura_suelo": "linoleo",
 		"textura_muro": "linoleo",
@@ -101,14 +127,24 @@ const FORMAS := {
 		"ambiente": Color(0.22, 0.20, 0.17),
 		"ambiente_energia": 0.42,
 		"sol": 0.05,
-		"luces": [{"pos": Vector3(-20, 2.4, 0), "color": Color(0.85, 0.70, 0.45), "energia": 3.2, "alcance": 15.0, "tam": Vector3(0.4, 0.1, 0.4)}],
+		"luces":
+		[
+			{
+				"pos": Vector3(-20, 2.4, 0),
+				"color": Color(0.85, 0.70, 0.45),
+				"energia": 3.2,
+				"alcance": 15.0,
+				"tam": Vector3(0.4, 0.1, 0.4)
+			}
+		],
 		"entrada": Vector2i(3, 11),
 		"color_suelo": Color(0.27, 0.24, 0.20),
 		"color_muro": Color(0.37, 0.33, 0.27),
 		"color_techo": Color(0.19, 0.17, 0.13),
 	},
 	# Salas que se desbordan una en otra en diagonal. Se anda siempre torcido.
-	"escalera": {
+	"escalera":
+	{
 		"rotulo": "SUENO_ROTULO",
 		"bloques": [Rect2i(0, 0, 10, 6), Rect2i(7, 5, 10, 6), Rect2i(14, 10, 10, 6)],
 		"textura_suelo": "moqueta",
@@ -117,35 +153,59 @@ const FORMAS := {
 		"ambiente": Color(0.17, 0.20, 0.24),
 		"ambiente_energia": 0.42,
 		"sol": 0.06,
-		"luces": [{"pos": Vector3(10, 2.4, 8), "color": Color(0.55, 0.75, 0.85), "energia": 3.0, "alcance": 14.0, "tam": Vector3(0.5, 0.1, 0.5)}],
+		"luces":
+		[
+			{
+				"pos": Vector3(10, 2.4, 8),
+				"color": Color(0.55, 0.75, 0.85),
+				"energia": 3.0,
+				"alcance": 14.0,
+				"tam": Vector3(0.5, 0.1, 0.5)
+			}
+		],
 		"entrada": Vector2i(15, 14),
 		"color_suelo": Color(0.20, 0.24, 0.28),
 		"color_muro": Color(0.27, 0.32, 0.37),
 		"color_techo": Color(0.14, 0.17, 0.19),
 	},
 	# Una nave enorme que se estrecha hasta un cuello y se vuelve a abrir. Se
-	# ve el final desde el principio y aun así hay que rodear.
-	"embudo": {
+	# ve el final desde el principio y aun así hay que rodear. Desde #279 esta
+	# es además la primera forma que deja de ser ortogonal en runtime: la planta
+	# se conserva como contrato lógico/timing, y la arquitectura visible/física
+	# usa la familia poligonal declarada aquí.
+	"embudo":
+	{
 		"rotulo": "SUENO_ROTULO",
 		"bloques": [Rect2i(0, 0, 16, 9), Rect2i(6, 9, 4, 4), Rect2i(2, 13, 12, 7)],
+		"familia_poligonal": SuenoFamilias.CONVERGENTE,
 		"textura_suelo": "asfalto",
 		"textura_muro": "gotele",
 		"escala_textura": 0.35,
 		"ambiente": Color(0.24, 0.18, 0.18),
 		"ambiente_energia": 0.42,
 		"sol": 0.05,
-		"luces": [{"pos": Vector3(0, 2.4, 6), "color": Color(0.90, 0.45, 0.35), "energia": 3.2, "alcance": 14.0, "tam": Vector3(0.5, 0.1, 0.5)}],
+		"luces":
+		[
+			{
+				"pos": Vector3(0, 2.4, 6),
+				"color": Color(0.90, 0.45, 0.35),
+				"energia": 3.2,
+				"alcance": 14.0,
+				"tam": Vector3(0.5, 0.1, 0.5)
+			}
+		],
 		"entrada": Vector2i(8, 18),
 		"color_suelo": Color(0.30, 0.23, 0.23),
 		"color_muro": Color(0.37, 0.27, 0.27),
 		"color_techo": Color(0.18, 0.13, 0.13),
 	},
-	# Variante monumental inspirada en Gilgamesh. Reutiliza la silueta del
-	# crucero pero conserva el rótulo genérico del sueño: no introduce una clave
-	# de traducción huérfana antes de que exista contenido visible específico.
-	"gilgamesh": {
+	# Variante monumental inspirada en Gilgamesh. Conserva el rótulo genérico
+	# del sueño para no introducir una clave de localización sin catálogo.
+	"gilgamesh":
+	{
 		"rotulo": "SUENO_ROTULO",
-		"bloques": [
+		"bloques":
+		[
 			Rect2i(0, 5, 22, 6),
 			Rect2i(8, 0, 6, 16),
 		],
@@ -155,7 +215,16 @@ const FORMAS := {
 		"ambiente": Color(0.20, 0.19, 0.26),
 		"ambiente_energia": 0.42,
 		"sol": 0.05,
-		"luces": [{"pos": Vector3(0, 2.4, -12), "color": Color(0.55, 0.52, 0.78), "energia": 3.4, "alcance": 16.0, "tam": Vector3(0.5, 0.1, 0.5)}],
+		"luces":
+		[
+			{
+				"pos": Vector3(0, 2.4, -12),
+				"color": Color(0.55, 0.52, 0.78),
+				"energia": 3.4,
+				"alcance": 16.0,
+				"tam": Vector3(0.5, 0.1, 0.5)
+			}
+		],
 		"entrada": Vector2i(11, 14),
 		"color_suelo": Color(0.26, 0.24, 0.30),
 		"color_muro": Color(0.33, 0.30, 0.39),
