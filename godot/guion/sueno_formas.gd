@@ -140,7 +140,7 @@ const FORMAS := {
 		"color_muro": Color(0.37, 0.27, 0.27),
 		"color_techo": Color(0.18, 0.13, 0.13),
 	},
-}
+	"gilgamesh": {		"rotulo": "SUENO_GILGAMESH",		"bloques": [			Rect2i(0, 5, 22, 6),  # horizontal bar			Rect2i(8, 0, 6, 16),   # vertical bar		],		"textura_suelo": "linoleo",		"textura_muro": "gotele",		"escala_textura": 7.5,		"ambiente": Color(0.20, 0.19, 0.26),		"ambiente_energia": 0.42,		"sol": 0.05,		"luces": [{"pos": Vector3(0, 2.4, -12), "color": Color(0.55, 0.52, 0.78), "energia": 3.4, "alcance": 16.0, "tam": Vector3(0.5, 0.1, 0.5)}],		"entrada": Vector2i(11, 14),		"color_suelo": Color(0.26, 0.24, 0.30),		"color_muro": Color(0.33, 0.30, 0.39),		"color_techo": Color(0.19, 0.17, 0.22),	},}
 
 
 static func ids() -> Array:
