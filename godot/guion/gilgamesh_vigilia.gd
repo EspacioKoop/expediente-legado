@@ -72,12 +72,15 @@ func _al_examinar(_actor: Node) -> void:
 func _intentar_activar() -> bool:
 	if _activada or _jornada.is_empty():
 		return _activada
-	_activada = SuenoGilgamesh.registrar_semilla(
-		_jornada,
-		_paginas_examinadas,
-		_tablilla_observada,
-		FUENTE,
-		2,
+	_activada = (
+		SuenoGilgamesh
+		. registrar_semilla(
+			_jornada,
+			_paginas_examinadas,
+			_tablilla_observada,
+			FUENTE,
+			2,
+		)
 	)
 	_actualizar_feedback()
 	return _activada
