@@ -26,14 +26,14 @@ var _activada := false
 
 
 func _ready() -> void:
-	verbo = Verbo.EXAMINAR
-	nombre_objeto = "estampa de Aquiles"
+	_configurar_prompt()
 	if _lamina == null:
 		_montar()
 
 
 func configurar(jornada: Dictionary) -> void:
 	_jornada = jornada
+	_configurar_prompt()
 	if _lamina == null:
 		_montar()
 	if not activado.is_connected(_al_examinar):
@@ -84,6 +84,11 @@ func _intentar_activar() -> bool:
 	)
 	_actualizar_feedback()
 	return _activada
+
+
+func _configurar_prompt() -> void:
+	verbo = Verbo.EXAMINAR
+	nombre_objeto = "estampa de Aquiles"
 
 
 func _montar() -> void:
