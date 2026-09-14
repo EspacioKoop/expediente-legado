@@ -86,8 +86,8 @@ static func resultado(estado: Dictionary) -> Dictionary:
 			return int(a["golpes"]) < int(b["golpes"])
 	)
 
-	var completa: bool = bool(estado.get("terminada", false)) and not bool(
-		estado.get("abandonada", false)
+	var completa: bool = (
+		bool(estado.get("terminada", false)) and not bool(estado.get("abandonada", false))
 	)
 	var ganador := ""
 	if completa and not ranking.is_empty():

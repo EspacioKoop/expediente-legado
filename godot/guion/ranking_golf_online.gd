@@ -55,17 +55,18 @@ func publicar(alias: String, golpes: int) -> bool:
 		error_online.emit("ranking_online_puntuacion_invalida")
 		return false
 	var cabeceras := PackedStringArray(["Content-Type: application/json"])
-	var cuerpo := JSON.stringify(
-		{
-			"alias": String(item["alias"]),
-			"golpes": int(item["golpes"]),
-			"hoyos": int(item["hoyos"]),
-		}
+	var cuerpo := (
+		JSON
+		. stringify(
+			{
+				"alias": String(item["alias"]),
+				"golpes": int(item["golpes"]),
+				"hoyos": int(item["hoyos"]),
+			}
+		)
 	)
 	_operacion = "publicar"
-	var error := _http.request(
-		endpoint_base + RUTA_API, cabeceras, HTTPClient.METHOD_POST, cuerpo
-	)
+	var error := _http.request(endpoint_base + RUTA_API, cabeceras, HTTPClient.METHOD_POST, cuerpo)
 	if error != OK:
 		_operacion = ""
 		error_online.emit("ranking_online_solicitud_fallida")
