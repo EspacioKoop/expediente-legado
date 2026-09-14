@@ -14,10 +14,12 @@ static func resumir(estado: Dictionary) -> Dictionary:
 	var jornada: Dictionary = estado.get("jornada", {})
 	var alquiler: Dictionary = jornada.get("alquiler", {})
 	var gato: Dictionary = jornada.get("gato", {})
+	var trabajillos: Dictionary = jornada.get("trabajillos", {})
 	var impagos := int(alquiler.get("impagos", 0))
 	var presente := bool(gato.get("presente", true))
 	var dinero := int(jornada.get("dinero", 0))
 	var vuelta := int(jornada.get("vuelta", 1))
+	var trabajillos_hechos := int(trabajillos.get("hechos", 0))
 
 	return {
 		"vuelta": vuelta,
@@ -26,6 +28,8 @@ static func resumir(estado: Dictionary) -> Dictionary:
 		"alquileres_impagados": impagos,
 		"casa_conservada": impagos == 0,
 		"gato_presente": presente,
+		"trabajillos_hechos": trabajillos_hechos,
+		"trabajo_nocturno": trabajillos_hechos > 0,
 	}
 
 
