@@ -290,9 +290,12 @@ func _guardar_sram() -> bool:
 
 	_eliminar_si_existe(respaldo)
 	if FileAccess.file_exists(_ruta_sram_actual):
-		var mover_actual := DirAccess.rename_absolute(
-			ProjectSettings.globalize_path(_ruta_sram_actual),
-			ProjectSettings.globalize_path(respaldo),
+		var mover_actual := (
+			DirAccess
+			. rename_absolute(
+				ProjectSettings.globalize_path(_ruta_sram_actual),
+				ProjectSettings.globalize_path(respaldo),
+			)
 		)
 		if mover_actual != OK:
 			_eliminar_si_existe(temporal)
@@ -304,9 +307,12 @@ func _guardar_sram() -> bool:
 	)
 	if mover_nuevo != OK:
 		if FileAccess.file_exists(respaldo):
-			DirAccess.rename_absolute(
-				ProjectSettings.globalize_path(respaldo),
-				ProjectSettings.globalize_path(_ruta_sram_actual),
+			(
+				DirAccess
+				. rename_absolute(
+					ProjectSettings.globalize_path(respaldo),
+					ProjectSettings.globalize_path(_ruta_sram_actual),
+				)
 			)
 		_eliminar_si_existe(temporal)
 		push_warning("No se pudo reemplazar la SRAM")
@@ -319,9 +325,12 @@ func _recuperar_respaldo_sram() -> void:
 	var respaldo := _ruta_sram_actual + ".anterior"
 	if FileAccess.file_exists(_ruta_sram_actual) or not FileAccess.file_exists(respaldo):
 		return
-	DirAccess.rename_absolute(
-		ProjectSettings.globalize_path(respaldo),
-		ProjectSettings.globalize_path(_ruta_sram_actual),
+	(
+		DirAccess
+		. rename_absolute(
+			ProjectSettings.globalize_path(respaldo),
+			ProjectSettings.globalize_path(_ruta_sram_actual),
+		)
 	)
 
 
