@@ -79,9 +79,9 @@ func _probar_vigilia_activa() -> void:
 		["gilgamesh"],
 		"la vigilia usa el contrato común y no un booleano paralelo",
 	)
-	var intensidad := SemillasOniricas.obtener_semillas(jornada)[
-		"semilla_onirica_gilgamesh"
-	]["intensidad"]
+	var intensidad: int = int(
+		SemillasOniricas.obtener_semillas(jornada)["semilla_onirica_gilgamesh"]["intensidad"]
+	)
 	libro.examinar()
 	_comprobar(
 		SemillasOniricas.obtener_semillas(jornada)["semilla_onirica_gilgamesh"]["intensidad"],
