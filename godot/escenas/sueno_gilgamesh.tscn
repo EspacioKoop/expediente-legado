@@ -1,6 +1,52 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://guion/sueno_gilgamesh.gd" id="1"]
+[ext_resource type="Texture2D" path="res://arte/gilgamesh/muralla_ladrillo_archivo.svg" id="2_muralla"]
+[ext_resource type="Texture2D" path="res://arte/gilgamesh/sellos_siga_oniricos.svg" id="3_sellos"]
+[ext_resource type="Texture2D" path="res://arte/gilgamesh/cielo_hoja_mecanografiada.svg" id="4_cielo"]
+
+[sub_resource type="StandardMaterial3D" id="Material_muralla"]
+cull_mode = 2
+roughness = 0.9
+albedo_texture = ExtResource("2_muralla")
+
+[sub_resource type="QuadMesh" id="Mesh_muralla"]
+material = SubResource("Material_muralla")
+size = Vector2(21, 6)
+
+[sub_resource type="StandardMaterial3D" id="Material_sellos"]
+transparency = 1
+cull_mode = 2
+roughness = 0.85
+albedo_texture = ExtResource("3_sellos")
+
+[sub_resource type="QuadMesh" id="Mesh_sellos"]
+material = SubResource("Material_sellos")
+size = Vector2(3.4, 3.4)
+
+[sub_resource type="StandardMaterial3D" id="Material_cielo"]
+cull_mode = 2
+roughness = 1.0
+albedo_texture = ExtResource("4_cielo")
+
+[sub_resource type="QuadMesh" id="Mesh_cielo"]
+material = SubResource("Material_cielo")
+size = Vector2(22, 18)
 
 [node name="SuenoGilgamesh" type="Node3D"]
 script = ExtResource("1")
+
+[node name="ArteAmbiental" type="Node3D" parent="."]
+
+[node name="MurallaLadrilloArchivo" type="MeshInstance3D" parent="ArteAmbiental"]
+position = Vector3(0, 3.2, -7.72)
+mesh = SubResource("Mesh_muralla")
+
+[node name="SellosSiga" type="MeshInstance3D" parent="ArteAmbiental"]
+position = Vector3(-7.9, 2.9, -7.05)
+mesh = SubResource("Mesh_sellos")
+
+[node name="CieloMecanografiado" type="MeshInstance3D" parent="ArteAmbiental"]
+position = Vector3(0, 10.5, -0.5)
+rotation_degrees = Vector3(-90, 0, 0)
+mesh = SubResource("Mesh_cielo")
