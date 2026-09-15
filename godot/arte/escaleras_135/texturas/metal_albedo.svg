@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512">
+<defs><pattern id="p" width="64" height="64" patternUnits="userSpaceOnUse">
+<rect width="64" height="64" fill="#303a34"/>
+<path d="M0 8h64M0 24h64M0 42h64M0 57h64" stroke="#202923" stroke-width="1" opacity=".7"/>
+<path d="M4 14h31M28 31h30M7 50h42M40 4h20" stroke="#101713" stroke-width="1" opacity=".7"/>
+<circle cx="12" cy="20" r="3" fill="#8b5d3c" opacity=".7"/><circle cx="50" cy="36" r="2" fill="#a06b43" opacity=".65"/><circle cx="30" cy="58" r="4" fill="#6f4b37" opacity=".6"/>
+</pattern></defs><rect width="512" height="512" fill="url(#p)"/></svg>

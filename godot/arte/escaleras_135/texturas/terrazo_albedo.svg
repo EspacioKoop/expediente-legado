@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512">
+<defs><pattern id="p" width="64" height="64" patternUnits="userSpaceOnUse">
+<rect width="64" height="64" fill="#777268"/>
+<g opacity=".92">
+<circle cx="5" cy="7" r="2" fill="#292825"/><circle cx="14" cy="25" r="3" fill="#bcb3a4"/><circle cx="24" cy="10" r="2" fill="#514e47"/><circle cx="34" cy="18" r="4" fill="#918a7d"/><circle cx="48" cy="7" r="2" fill="#d0c5b2"/><circle cx="58" cy="30" r="3" fill="#373633"/>
+<circle cx="8" cy="48" r="4" fill="#a39b8e"/><circle cx="20" cy="56" r="2" fill="#353432"/><circle cx="31" cy="40" r="3" fill="#c2b8a7"/><circle cx="45" cy="51" r="2" fill="#56524c"/><circle cx="57" cy="58" r="4" fill="#8c8578"/>
+<circle cx="4" cy="33" r="1" fill="#d7cbb7"/><circle cx="27" cy="28" r="1" fill="#24231f"/><circle cx="39" cy="62" r="2" fill="#d5cab8"/><circle cx="62" cy="13" r="1" fill="#2b2a27"/>
+</g></pattern></defs><rect width="512" height="512" fill="url(#p)"/></svg>

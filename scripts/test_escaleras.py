@@ -6,6 +6,8 @@ RAIZ = Path(__file__).resolve().parents[1]
 CAPA = RAIZ / "godot" / "guion" / "dia_ascensor_app.gd"
 APP = RAIZ / "godot" / "guion" / "escaleras_3d_app.gd"
 ESCENA = RAIZ / "godot" / "escenas" / "escaleras_3d.tscn"
+ARTE = RAIZ / "godot" / "arte" / "escaleras_135" / "escaleras_135_arte.gd"
+ARTE_ESCENA = RAIZ / "godot" / "arte" / "escaleras_135" / "escaleras_135_arte.tscn"
 
 
 class EscalerasTest(unittest.TestCase):
@@ -13,6 +15,8 @@ class EscalerasTest(unittest.TestCase):
         self.capa = CAPA.read_text(encoding="utf-8")
         self.app = APP.read_text(encoding="utf-8")
         self.escena = ESCENA.read_text(encoding="utf-8")
+        self.arte = ARTE.read_text(encoding="utf-8")
+        self.arte_escena = ARTE_ESCENA.read_text(encoding="utf-8")
 
     def test_la_salida_ofrece_dos_rutas_sin_duplicar_el_fichaje(self):
         self.assertIn('preload("res://escenas/ascensor_3d.tscn")', self.capa)
@@ -48,12 +52,30 @@ class EscalerasTest(unittest.TestCase):
             "partida.guardar",
         ):
             self.assertNotIn(llamada, self.app)
+            self.assertNotIn(llamada, self.arte)
 
     def test_ascensor_y_escaleras_restauran_el_mismo_dia(self):
         self.assertIn("_ascensor.terminada.connect(_cerrar_ascensor)", self.capa)
         self.assertIn("_escaleras.terminada.connect(_cerrar_escaleras)", self.capa)
         self.assertIn("_restaurar_dia_tras_transito()", self.capa)
         self.assertGreaterEqual(self.capa.count("_restaurar_dia_tras_transito()"), 3)
+
+    def test_vestuario_fotorealista_es_visual_y_no_bloquea_la_ruta(self):
+        self.assertIn(
+            'preload("res://arte/escaleras_135/escaleras_135_arte.tscn")',
+            self.app,
+        )
+        self.assertIn("VestuarioEscaleras135", self.app)
+        self.assertIn('path="res://arte/escaleras_135/escaleras_135_arte.gd"', self.arte_escena)
+        self.assertIn("MAT_PARED", self.arte)
+        self.assertIn("MAT_TERRAZO", self.arte)
+        self.assertIn("MAT_METAL", self.arte)
+        self.assertIn("SENAL_4", self.arte)
+        self.assertIn("_montar_barandillas()", self.arte)
+        self.assertIn("_puerta_cortafuegos", self.arte)
+        self.assertIn("_extintor", self.arte)
+        self.assertNotIn("CollisionShape3D", self.arte)
+        self.assertNotIn("StaticBody3D", self.arte)
 
 
 if __name__ == "__main__":
