@@ -20,8 +20,21 @@ Los atlas de utilidades y bandeja son **recursos preparados**, no accesos del es
 - `web_destinos_32.svg`: atlas 10×32 para portal institucional, directorio/buscador, deportes, meteo, tecnología, ocio, clasificados, página personal, intranet y error.
 - `prensa_cabeceras_98.svg`: cuatro cabeceras ficticias de 468×60 (`La Plaza`, `Diario Central`, `El Horizonte`, `Gaceta Mercantil`) pensadas para recibir titulares y encuadres editoriales desde datos, no desde la imagen.
 - `web_badges_88x31.svg`: ocho micro-badges de época para 800×600, sin marcos, web local, en obras, mirror, intranet, archivo y actualizado.
+- `web_cabeceras_sitios_98.svg`: cinco cabeceras ficticias de 468×72 para deportes (`Marcador 98`), meteorología (`MeteoRed`), tecnología (`Byte Local`), entretenimiento (`Butaca 7`) y clasificados (`El Tablón`).
+- `web_navegacion_sitios_98.svg`: cinco barras de navegación 468×24 coordinadas con esas cabeceras.
+- `web_modulos_sitios_98.svg`: módulos reutilizables de marcador deportivo, previsión 72 h, descarga destacada, cartelera, anuncio clasificado y contador/página personal.
 
 Los SVG web se entregan como atlas con grupos identificados y tamaños regulares para que Godot pueda recortarlos por región sin duplicar ficheros. Las cabeceras no codifican una etiqueta ideológica: la lectura política debe seguir naciendo del tratamiento editorial definido por #537.
+
+### IDs de la segunda tanda
+
+Cabeceras: `site-marcador98`, `site-meteored`, `site-byte-local`, `site-butaca7`, `site-el-tablon`.
+
+Navegación: `nav-marcador98`, `nav-meteored`, `nav-byte-local`, `nav-butaca7`, `nav-el-tablon`.
+
+Módulos: `mod-deportes-marcador`, `mod-meteo-pronostico`, `mod-tech-descarga`, `mod-ocio-cartelera`, `mod-clasificados-ficha`, `mod-web-personal-contador`.
+
+Los textos de resultado, temperatura, descargas, horarios, precios o fechas presentes en los módulos son **placeholders visuales**: cuando el dato tenga valor jugable debe dibujarse desde el modelo temporal/editorial y no tratarse como fuente de verdad.
 
 ## Dirección visual
 
