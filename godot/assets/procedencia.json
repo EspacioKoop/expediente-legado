@@ -716,6 +716,214 @@
       "licencia": "CC0-1.0",
       "fuente": "https://ggbot.itch.io/psx-style-cars",
       "sha256": "fc0009ac3ed6a9d39956cbd3ec3b9e9bfbde38bd0c5a5aa6b1cd22c92a9f3a81"
+    },
+    {
+      "ruta": "modelos/household_goods/2_seat_sofa_01.glb",
+      "titulo": "2_seat_sofa_01 (Low poly household goods, GLB original)",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "466332d33ca6f1e7d70ab45b34033a61813561693c0209b341a7c075b9056641"
+    },
+    {
+      "ruta": "modelos/household_goods/2_seat_sofa_01_basic-pallete.png",
+      "titulo": "Paleta embebida extraída por Godot de 2_seat_sofa_01.glb",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "6b1047aa157c1d0ef329f1046722f55d73b81a4b1a67a61a4947aa3642a35512"
+    },
+    {
+      "ruta": "modelos/household_goods/chair_01.glb",
+      "titulo": "chair_01 (Low poly household goods, GLB original)",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "54f67d97503fab7618346e4691b2d93c1878ba730de7d07028e7a1762de0df93"
+    },
+    {
+      "ruta": "modelos/household_goods/chair_01_basic-pallete.png",
+      "titulo": "Paleta embebida extraída por Godot de chair_01.glb",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "6b1047aa157c1d0ef329f1046722f55d73b81a4b1a67a61a4947aa3642a35512"
+    },
+    {
+      "ruta": "modelos/household_goods/coffee_table_01.glb",
+      "titulo": "coffee_table_01 (Low poly household goods, GLB original)",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "79ee46c5c61af14c883bd46d80d0759e4065df96a5efa6580598036161fa4d66"
+    },
+    {
+      "ruta": "modelos/household_goods/coffee_table_01_basic-pallete.png",
+      "titulo": "Paleta embebida extraída por Godot de coffee_table_01.glb",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "6b1047aa157c1d0ef329f1046722f55d73b81a4b1a67a61a4947aa3642a35512"
+    },
+    {
+      "ruta": "modelos/household_goods/cupboard_01.glb",
+      "titulo": "cupboard_01 (Low poly household goods, GLB original)",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "21102e41d8cbdf7a74f2580faa94d1bb2c7434041d3e0f6e99e6bc4f62f90839"
+    },
+    {
+      "ruta": "modelos/household_goods/cupboard_01_basic-pallete.png",
+      "titulo": "Paleta embebida extraída por Godot de cupboard_01.glb",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "6b1047aa157c1d0ef329f1046722f55d73b81a4b1a67a61a4947aa3642a35512"
+    },
+    {
+      "ruta": "modelos/household_goods/dine_table_01.glb",
+      "titulo": "dine_table_01 (Low poly household goods, GLB original)",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "c6d332bd429d568dd3aeb418d1cf0526e46bbe776aeed66168f495627a6036fe"
+    },
+    {
+      "ruta": "modelos/household_goods/dine_table_01_basic-pallete.png",
+      "titulo": "Paleta embebida extraída por Godot de dine_table_01.glb",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "6b1047aa157c1d0ef329f1046722f55d73b81a4b1a67a61a4947aa3642a35512"
+    },
+    {
+      "ruta": "modelos/household_goods/kettle_01.glb",
+      "titulo": "kettle_01 (Low poly household goods, GLB original)",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "4e6a79d617a53e0d29fb675174310f4aa28b5f0e6285f01e326773877feb3570"
+    },
+    {
+      "ruta": "modelos/household_goods/kettle_01_basic-pallete.png",
+      "titulo": "Paleta embebida extraída por Godot de kettle_01.glb",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "6b1047aa157c1d0ef329f1046722f55d73b81a4b1a67a61a4947aa3642a35512"
+    },
+    {
+      "ruta": "modelos/household_goods/microwave_01.glb",
+      "titulo": "microwave_01 (Low poly household goods, GLB original)",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "8b69567677020c464f7caee2a893196f0009ba6dba4d0544d3fad55b3428f092"
+    },
+    {
+      "ruta": "modelos/household_goods/microwave_01_basic-pallete.png",
+      "titulo": "Paleta embebida extraída por Godot de microwave_01.glb",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "6b1047aa157c1d0ef329f1046722f55d73b81a4b1a67a61a4947aa3642a35512"
+    },
+    {
+      "ruta": "modelos/household_goods/stove_01.glb",
+      "titulo": "stove_01 (Low poly household goods, GLB original)",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "45b67fbf015ad71ee9389eb895eae31b548c41989c75714caea0319c3f653cd3"
+    },
+    {
+      "ruta": "modelos/household_goods/stove_01_basic-pallete.png",
+      "titulo": "Paleta embebida extraída por Godot de stove_01.glb",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "6b1047aa157c1d0ef329f1046722f55d73b81a4b1a67a61a4947aa3642a35512"
+    },
+    {
+      "ruta": "modelos/household_goods/table_lamp_01.glb",
+      "titulo": "table_lamp_01 (Low poly household goods, GLB original)",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "afd29c4b17e11e1e1b5d352925fcc4fc932171c436c6178c0bc4efca124117b3"
+    },
+    {
+      "ruta": "modelos/household_goods/table_lamp_01_basic-pallete.png",
+      "titulo": "Paleta embebida extraída por Godot de table_lamp_01.glb",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "6b1047aa157c1d0ef329f1046722f55d73b81a4b1a67a61a4947aa3642a35512"
+    },
+    {
+      "ruta": "modelos/household_goods/toaster_01.glb",
+      "titulo": "toaster_01 (Low poly household goods, GLB original)",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "5745ac36e00597a296a0bf56487c1d1ffa588efbf10412766a156983c00602d9"
+    },
+    {
+      "ruta": "modelos/household_goods/toaster_01_basic-pallete.png",
+      "titulo": "Paleta embebida extraída por Godot de toaster_01.glb",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "6b1047aa157c1d0ef329f1046722f55d73b81a4b1a67a61a4947aa3642a35512"
+    },
+    {
+      "ruta": "modelos/household_goods/tv_cabinet_01.glb",
+      "titulo": "tv_cabinet_01 (Low poly household goods, GLB original)",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "1f21557fc513d8ce061e011bcae33e4ee0ca3c0c3a63bf0652fb13dfdb71c2b3"
+    },
+    {
+      "ruta": "modelos/household_goods/tv_cabinet_01_basic-pallete.png",
+      "titulo": "Paleta embebida extraída por Godot de tv_cabinet_01.glb",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "6b1047aa157c1d0ef329f1046722f55d73b81a4b1a67a61a4947aa3642a35512"
+    },
+    {
+      "ruta": "modelos/household_goods/wardrobe_01.glb",
+      "titulo": "wardrobe_01 (Low poly household goods, GLB original)",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "4e16fd33c1f15f925e3c9abd348be3935ba4e1002bc43a7c46e9dc1a38163eb4"
+    },
+    {
+      "ruta": "modelos/household_goods/wardrobe_01_basic-pallete.png",
+      "titulo": "Paleta embebida extraída por Godot de wardrobe_01.glb",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "6b1047aa157c1d0ef329f1046722f55d73b81a4b1a67a61a4947aa3642a35512"
+    },
+    {
+      "ruta": "modelos/household_goods/washing_machine_01.glb",
+      "titulo": "washing_machine_01 (Low poly household goods, GLB original)",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "baf91b0dbbabdf8a02b665d074dcc3bcd1361f317cf68f97b0a63547b303bc70"
+    },
+    {
+      "ruta": "modelos/household_goods/washing_machine_01_basic-pallete.png",
+      "titulo": "Paleta embebida extraída por Godot de washing_machine_01.glb",
+      "autor": "samusaa / mastjie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://mastjie.itch.io/low-poly-household-goods",
+      "sha256": "6b1047aa157c1d0ef329f1046722f55d73b81a4b1a67a61a4947aa3642a35512"
     }
   ]
 }

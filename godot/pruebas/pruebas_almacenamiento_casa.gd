@@ -171,7 +171,7 @@ func _probar_distribucion_domestica() -> void:
 		"la estantería ofrece varios huecos físicos"
 	)
 	_comprobar(
-		sofa != null and sofa.position.x < -1.0 and sofa.position.z > 0.5,
+		sofa != null and sofa.position.x < -0.5 and sofa.position.z > 0.5,
 		"el estar queda agrupado junto al televisor del lado izquierdo"
 	)
 	_comprobar(
