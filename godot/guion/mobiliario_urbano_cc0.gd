@@ -12,15 +12,15 @@ const ACERA_Y := 0.14
 # En los aparatos de aire la rejilla está en +X local: 180° en la fachada
 # derecha (x > 0) y 0° en la izquierda.
 const PIEZAS := [
-	# Contenedor en la calzada junto al bordillo, con la basura desbordada en la acera.
-	["Contenedor", "TrashCan", Vector3(3.35, 0.0, 10.0), 1.35, 90.0],
-	["BolsaContenedorA", "GarbageBag", Vector3(4.35, ACERA_Y, 9.35), 0.55, 0.0],
-	["BolsaContenedorB", "GarbageBag", Vector3(4.55, ACERA_Y, 10.05), 0.48, 70.0],
-	["BolsaContenedorC", "GarbageBag", Vector3(4.30, ACERA_Y, 10.75), 0.42, 150.0],
-	["CartonContenedor", "Cardboard", Vector3(4.75, ACERA_Y + 0.01, 11.35), 0.95, 25.0],
+	# Contenedor en la calzada junto al bordillo izquierdo, con la basura desbordada.
+	["Contenedor", "TrashCan", Vector3(-3.35, 0.0, 5.6), 1.35, 90.0],
+	["BolsaContenedorA", "GarbageBag", Vector3(-4.35, ACERA_Y, 4.95), 0.55, 0.0],
+	["BolsaContenedorB", "GarbageBag", Vector3(-4.55, ACERA_Y, 5.65), 0.48, 70.0],
+	["BolsaContenedorC", "GarbageBag", Vector3(-4.30, ACERA_Y, 6.35), 0.42, 150.0],
+	["CartonContenedor", "Cardboard", Vector3(-4.75, ACERA_Y + 0.01, 4.25), 0.95, 25.0],
 	# Aparatos de aire colgados de las fachadas, por encima de las ventanas.
-	["AireFachadaSur", "Conditioner", Vector3(5.50, 3.35, -7.20), 0.62, 180.0],
-	["AireFachadaNorte", "Conditioner", Vector3(5.55, 2.75, 11.60), 0.62, 180.0],
+	["AireFachadaSur", "Conditioner", Vector3(5.50, 3.65, -12.30), 0.62, 180.0],
+	["AireFachadaNorte", "Conditioner", Vector3(5.55, 3.70, 13.20), 0.62, 180.0],
 	["AireFachadaOeste", "Conditioner", Vector3(-5.50, 3.40, 12.20), 0.62, 0.0],
 ]
 const EN_FACHADA := ["Conditioner"]

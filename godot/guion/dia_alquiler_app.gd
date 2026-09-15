@@ -65,32 +65,18 @@ func _espacio_de(fase: String) -> Dictionary:
 	if fase != "trayecto" or not _alquiler_disponible_hoy():
 		return sitio
 
-	# Un mostrador pequeño metido en el lateral de la calle. Son cajas a
-	# propósito: #85 prueba el trámite, no estrena un pack de mobiliario.
-	sitio["bultos"].append(
-		{
-			"pos": Vector3(3.55, 1.1, 9.0),
-			"tam": Vector3(1.35, 2.2, 2.4),
-			"color": Color(0.31, 0.30, 0.29)
-		}
-	)
-	sitio["bultos"].append(
-		{
-			"pos": Vector3(2.85, 0.65, 9.0),
-			"tam": Vector3(0.55, 1.3, 1.8),
-			"color": Color(0.47, 0.45, 0.41)
-		}
-	)
+	# La ventanilla es la de la administración de fincas de la acera derecha
+	# (CalleIdentidad): el día del vencimiento se atiende en su repisa.
 	(
 		sitio["salidas"]
 		. append(
 			{
-				"pos": Vector3(2.45, 1.1, 9.0),
+				"pos": Vector3(4.75, 1.1, 9.6),
 				"destino": DESTINO_ALQUILER,
 				# Es la MISMA ventanilla de #58: el rótulo común deja esa decisión
 				# visible sin crear una segunda institución en la calle.
 				"rotulo": "VENTANILLA_TITULO",
-				"tam": Vector3(1.8, 2.2, 2.2)
+				"tam": Vector3(1.4, 2.2, 2.0)
 			}
 		)
 	)

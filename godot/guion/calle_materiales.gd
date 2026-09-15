@@ -9,20 +9,20 @@ extends RefCounted
 const FACHADAS := [
 	{
 		"nombre": "FachadaRevocoOesteSur",
-		"pos": Vector3(-2.59, 1.40, -6.0),
-		"tam": Vector3(0.025, 2.78, 3.90),
+		"pos": Vector3(-5.185, 4.5, -12.65),
+		"tam": Vector3(0.025, 9.0, 9.3),
 		"color": Color(0.26, 0.25, 0.26),
 	},
 	{
 		"nombre": "FachadaRevocoEsteCentro",
-		"pos": Vector3(2.59, 1.40, 1.0),
-		"tam": Vector3(0.025, 2.78, 5.90),
+		"pos": Vector3(5.485, 5.0, -10.65),
+		"tam": Vector3(0.025, 10.0, 13.3),
 		"color": Color(0.26, 0.25, 0.26),
 	},
 	{
 		"nombre": "FachadaRevocoOesteNorte",
-		"pos": Vector3(-2.59, 1.40, 8.0),
-		"tam": Vector3(0.025, 2.78, 4.90),
+		"pos": Vector3(-5.485, 5.5, 10.15),
+		"tam": Vector3(0.025, 11.0, 12.3),
 		"color": Color(0.26, 0.25, 0.26),
 	},
 ]
