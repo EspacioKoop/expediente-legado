@@ -1,0 +1,57 @@
+[gd_scene load_steps=6 format=3]
+
+[sub_resource type="StandardMaterial3D" id="MatFrame"]
+albedo_color = Color(0.09, 0.08, 0.065, 1)
+metallic = 0.45
+roughness = 0.46
+
+[sub_resource type="StandardMaterial3D" id="MatFace"]
+albedo_color = Color(0.80, 0.78, 0.67, 1)
+roughness = 0.72
+
+[sub_resource type="StandardMaterial3D" id="MatHand"]
+albedo_color = Color(0.025, 0.025, 0.022, 1)
+roughness = 0.38
+
+[sub_resource type="CylinderMesh" id="ClockBody"]
+top_radius = 0.72
+bottom_radius = 0.72
+height = 0.12
+radial_segments = 32
+
+[sub_resource type="BoxMesh" id="Hand"]
+size = Vector3(0.055, 0.56, 0.035)
+
+[node name="RelojEscolarAnomalo" type="Node3D"]
+
+[node name="Marco" type="MeshInstance3D" parent="."]
+mesh = SubResource("ClockBody")
+material_override = SubResource("MatFrame")
+rotation_degrees = Vector3(90, 0, 0)
+
+[node name="Esfera" type="MeshInstance3D" parent="."]
+mesh = SubResource("ClockBody")
+material_override = SubResource("MatFace")
+position = Vector3(0, 0, 0.07)
+rotation_degrees = Vector3(90, 0, 0)
+scale = Vector3(0.89, 0.89, 0.18)
+
+[node name="AgujaHora" type="MeshInstance3D" parent="."]
+mesh = SubResource("Hand")
+material_override = SubResource("MatHand")
+position = Vector3(0.10, 0.18, 0.15)
+rotation_degrees = Vector3(0, 0, -28)
+scale = Vector3(1, 0.68, 1)
+
+[node name="AgujaMinuto" type="MeshInstance3D" parent="."]
+mesh = SubResource("Hand")
+material_override = SubResource("MatHand")
+position = Vector3(-0.14, 0.20, 0.16)
+rotation_degrees = Vector3(0, 0, 41)
+
+[node name="AgujaFantasma" type="MeshInstance3D" parent="."]
+mesh = SubResource("Hand")
+material_override = SubResource("MatHand")
+position = Vector3(0.15, -0.16, 0.17)
+rotation_degrees = Vector3(0, 0, 132)
+scale = Vector3(0.72, 0.72, 0.72)

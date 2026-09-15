@@ -1,0 +1,82 @@
+[gd_scene load_steps=5 format=3]
+
+[sub_resource type="StandardMaterial3D" id="MatLocker"]
+albedo_color = Color(0.16, 0.18, 0.18, 1)
+metallic = 0.55
+roughness = 0.62
+
+[sub_resource type="StandardMaterial3D" id="MatInset"]
+albedo_color = Color(0.045, 0.05, 0.05, 1)
+metallic = 0.8
+roughness = 0.45
+
+[sub_resource type="BoxMesh" id="Box"]
+size = Vector3(1, 1, 1)
+
+[sub_resource type="CylinderMesh" id="Handle"]
+top_radius = 0.035
+bottom_radius = 0.035
+height = 0.17
+radial_segments = 8
+
+[node name="TaquillasEscolares" type="Node3D"]
+
+[node name="Cuerpo" type="MeshInstance3D" parent="."]
+mesh = SubResource("Box")
+material_override = SubResource("MatLocker")
+position = Vector3(0, 1.10, 0)
+scale = Vector3(2.25, 2.20, 0.52)
+
+[node name="Puerta1" type="MeshInstance3D" parent="."]
+mesh = SubResource("Box")
+material_override = SubResource("MatLocker")
+position = Vector3(-0.75, 1.10, 0.28)
+scale = Vector3(0.70, 2.10, 0.07)
+
+[node name="Puerta2" type="MeshInstance3D" parent="."]
+mesh = SubResource("Box")
+material_override = SubResource("MatLocker")
+position = Vector3(0, 1.10, 0.28)
+scale = Vector3(0.70, 2.10, 0.07)
+
+[node name="Puerta3" type="MeshInstance3D" parent="."]
+mesh = SubResource("Box")
+material_override = SubResource("MatLocker")
+position = Vector3(0.75, 1.10, 0.28)
+scale = Vector3(0.70, 2.10, 0.07)
+
+[node name="Ranura1" type="MeshInstance3D" parent="."]
+mesh = SubResource("Box")
+material_override = SubResource("MatInset")
+position = Vector3(-0.75, 1.72, 0.325)
+scale = Vector3(0.38, 0.045, 0.025)
+
+[node name="Ranura2" type="MeshInstance3D" parent="."]
+mesh = SubResource("Box")
+material_override = SubResource("MatInset")
+position = Vector3(0, 1.72, 0.325)
+scale = Vector3(0.38, 0.045, 0.025)
+
+[node name="Ranura3" type="MeshInstance3D" parent="."]
+mesh = SubResource("Box")
+material_override = SubResource("MatInset")
+position = Vector3(0.75, 1.72, 0.325)
+scale = Vector3(0.38, 0.045, 0.025)
+
+[node name="Tirador1" type="MeshInstance3D" parent="."]
+mesh = SubResource("Handle")
+material_override = SubResource("MatInset")
+position = Vector3(-0.50, 1.18, 0.38)
+rotation_degrees = Vector3(90, 0, 0)
+
+[node name="Tirador2" type="MeshInstance3D" parent="."]
+mesh = SubResource("Handle")
+material_override = SubResource("MatInset")
+position = Vector3(0.25, 1.18, 0.38)
+rotation_degrees = Vector3(90, 0, 0)
+
+[node name="Tirador3" type="MeshInstance3D" parent="."]
+mesh = SubResource("Handle")
+material_override = SubResource("MatInset")
+position = Vector3(1.00, 1.18, 0.38)
+rotation_degrees = Vector3(90, 0, 0)
