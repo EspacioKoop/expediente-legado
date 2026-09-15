@@ -31,6 +31,15 @@ class MaterialesCalleTest(unittest.TestCase):
         self.assertEqual(self.calle.count('"nombre": "FachadaRevoco'), 3)
         self.assertIn('TexturaProcedural.por_nombre("revoco_urbano"', self.calle)
 
+    def test_las_pieles_guardan_margen_con_la_fachada(self):
+        self.assertIn("const SEPARACION_FACHADA := 0.02", self.calle)
+        self.assertIn("const GROSOR_PIEL_FACHADA := 0.025", self.calle)
+        self.assertIn('"cara_x": CalleIdentidad.CARA_OESTE_SUR', self.calle)
+        self.assertIn('"cara_x": CalleIdentidad.CARA_ESTE_SUR', self.calle)
+        self.assertIn('"cara_x": CalleIdentidad.CARA_OESTE_NORTE', self.calle)
+        self.assertEqual(self.calle.count('"hacia_calle":'), 3)
+        self.assertIn("SEPARACION_FACHADA + tam.x * 0.5", self.calle)
+
     def test_las_pieles_no_cambian_colisiones(self):
         self.assertNotIn("CollisionShape3D", self.calle)
         self.assertNotIn("StaticBody3D", self.calle)
