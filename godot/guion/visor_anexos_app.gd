@@ -37,7 +37,8 @@ func _refrescar_archivo() -> void:
 
 func _al_elegir_documento(indice: int) -> void:
 	super._al_elegir_documento(indice)
-	_identidad_expedientes.mostrar_portada(false)
+	if not registro_actual.is_empty():
+		_identidad_expedientes.mostrar_portada(false)
 	_anexo_abierto = false
 	_actualizar_anexo()
 
