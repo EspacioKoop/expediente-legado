@@ -162,7 +162,9 @@ static func _malla(comprobar: Callable) -> void:
 	# #570: la raíz conserva el ciclo de vida ligero de siempre, pero lleva una
 	# sonda volumétrica que consulta el mobiliario antes de aceptar cada paso.
 	var codigo_gato := FileAccess.get_file_as_string("res://guion/gato.gd")
-	comprobar.call("el gato sigue siendo un nodo ligero", codigo_gato.contains("extends Node3D"), true)
+	comprobar.call(
+		"el gato sigue siendo un nodo ligero", codigo_gato.contains("extends Node3D"), true
+	)
 	comprobar.call(
 		"el gato tiene sonda volumétrica", codigo_gato.contains("ShapeCast3D.new()"), true
 	)
