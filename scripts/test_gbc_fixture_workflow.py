@@ -41,8 +41,16 @@ class GbcFixtureWorkflowTest(unittest.TestCase):
             "CGB_ACID2_MGBLIB_COMMIT: 5d829bf2ffa1447dcfd63c5dab2c44488632617e",
             self.texto,
         )
+        self.assertIn(
+            "CGB_ACID2_SHA256: 197fb0bcec544f0400527fc707e0a94f55435974986e6986b424ace5de81720e",
+            self.texto,
+        )
         self.assertIn("git -C cgb-acid2-src submodule update --init --depth 1 mgblib", self.texto)
         self.assertIn("cgb-acid2.gbc", self.texto)
+        self.assertIn(
+            'echo "${CGB_ACID2_SHA256}  cgb-acid2.gbc" | sha256sum --check --strict',
+            self.texto,
+        )
         self.assertIn(
             'test "$(od -An -tx1 -j 323 -N 1 gbc-fixtures/cgb-acid2.gbc | tr -d \' \\n\')" = "c0"',
             self.texto,
