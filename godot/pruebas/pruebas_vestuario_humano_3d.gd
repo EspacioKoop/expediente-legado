@@ -93,7 +93,9 @@ func _comprobar(actual, esperado = true, nombre: String = "") -> void:
 		_pasadas += 1
 		return
 	_fallos += 1
-	push_error("FALLO Vestuario humano #275: %s (actual=%s esperado=%s)" % [nombre, actual, esperado])
+	push_error(
+		"FALLO Vestuario humano #275: %s (actual=%s esperado=%s)" % [nombre, actual, esperado]
+	)
 
 
 func _terminar() -> void:
