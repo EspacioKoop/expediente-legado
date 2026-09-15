@@ -46,9 +46,9 @@ func _vestir_si_persona(pieza: Node) -> void:
 	var clave := String(pieza.get_parent().name if pieza.get_parent() != null else pieza.name)
 	var semilla := absi(hash(clave))
 	var perfiles := [
-		{"nombre": "estrecho", "ancho": 0.90, "fondo": 0.92, "largo": 1.02},
-		{"nombre": "medio", "ancho": 1.00, "fondo": 1.00, "largo": 1.00},
-		{"nombre": "robusto", "ancho": 1.12, "fondo": 1.08, "largo": 0.97},
+		{"nombre": "estrecho", "ancho": 0.92, "fondo": 0.90, "largo": 1.04},
+		{"nombre": "medio", "ancho": 1.00, "fondo": 0.96, "largo": 1.03},
+		{"nombre": "robusto", "ancho": 1.07, "fondo": 1.03, "largo": 1.01},
 	]
 	var perfil: Dictionary = perfiles[semilla % perfiles.size()]
 	var color_base := _color_base(pieza)
@@ -60,36 +60,61 @@ func _vestir_si_persona(pieza: Node) -> void:
 	# Los FBX de este pack pueden traer escalas internas poco intuitivas. La
 	# distancia entre huesos mantiene todo en el mismo espacio que el esqueleto.
 	alto_torso = maxf(alto_torso, 0.01)
-	var ancho := alto_torso * 0.30 * float(perfil["ancho"])
-	var fondo := alto_torso * 0.16 * float(perfil["fondo"])
-	var largo := alto_torso * 0.39 * float(perfil["largo"])
+	# La captura de revisión mostraba un bloque corto y ancho, que hacía leer la
+	# figura como muñeco cabezón. Se alarga la prenda y se adelgaza el volumen
+	# central; los hombros recuperan anchura en una pieza propia, no engordando
+	# todo el tronco.
+	var ancho := alto_torso * 0.27 * float(perfil["ancho"])
+	var fondo := alto_torso * 0.135 * float(perfil["fondo"])
+	var largo := alto_torso * 0.47 * float(perfil["largo"])
 
-	# Chaqueta/abrigo: volumen simple PSX que rompe la silueta de maniquí desnudo.
+	# Chaqueta/abrigo: volumen largo y estrecho, más cercano a una silueta humana
+	# vestida que al bloque corto de la primera iteración.
 	var torso := _enganche(esqueleto, pecho, "VestuarioTorso")
-	_caja(torso, Vector3(ancho, largo, fondo), Vector3(0.0, -largo * 0.22, 0.0), color_chaqueta)
-
-	# Camisa visible en el centro; una pieza fina evita el efecto de bloque único.
 	_caja(
 		torso,
-		Vector3(ancho * 0.30, largo * 0.74, fondo * 1.035),
-		Vector3(0.0, -largo * 0.20, -fondo * 0.025),
+		Vector3(ancho, largo, fondo),
+		Vector3(0.0, -largo * 0.24, 0.0),
+		color_chaqueta
+	)
+
+	# La línea de hombros se lee por separado. Así se puede ensanchar arriba sin
+	# convertir abdomen y cintura en el mismo prisma grueso.
+	var hombros := _enganche(esqueleto, pecho, "VestuarioHombros")
+	_caja(
+		hombros,
+		Vector3(ancho * 1.18, largo * 0.12, fondo * 1.03),
+		Vector3(0.0, -largo * 0.02, 0.0),
+		color_chaqueta
+	)
+
+	# Camisa visible en el centro; una pieza fina rompe el bloque de chaqueta sin
+	# recuperar la lectura de maniquí desnudo.
+	_caja(
+		torso,
+		Vector3(ancho * 0.26, largo * 0.70, fondo * 1.035),
+		Vector3(0.0, -largo * 0.21, -fondo * 0.025),
 		color_camisa
 	)
 
-	# Cintura/pantalón: anclado a pelvis para que la parte superior acompañe la
-	# locomoción sin convertir la ropa en colisión ni modificar la malla original.
+	# Cintura/pantalón: más estrecha que los hombros para recuperar la relación
+	# torso-cadera sin tocar escala ni poses del esqueleto.
 	var cintura := _enganche(esqueleto, cadera, "VestuarioCintura")
 	_caja(
 		cintura,
-		Vector3(ancho * 0.86, largo * 0.20, fondo * 0.92),
-		Vector3(0.0, largo * 0.05, 0.0),
+		Vector3(ancho * 0.78, largo * 0.18, fondo * 0.90),
+		Vector3(0.0, largo * 0.04, 0.0),
 		color_pantalon
 	)
 
 	# Mangas independientes cuando el rig expone brazos. Al estar cada una en su
 	# hueso siguen el idle y futuras animaciones en lugar de flotar junto al torso.
-	_poner_manga(esqueleto, ["LeftArm", "UpperArm_L", "upperarm_l"], alto_torso, ancho, color_chaqueta, "L")
-	_poner_manga(esqueleto, ["RightArm", "UpperArm_R", "upperarm_r"], alto_torso, ancho, color_chaqueta, "R")
+	_poner_manga(
+		esqueleto, ["LeftArm", "UpperArm_L", "upperarm_l"], alto_torso, ancho, color_chaqueta, "L"
+	)
+	_poner_manga(
+		esqueleto, ["RightArm", "UpperArm_R", "upperarm_r"], alto_torso, ancho, color_chaqueta, "R"
+	)
 
 	esqueleto.set_meta(MARCA, String(perfil["nombre"]))
 
@@ -107,8 +132,8 @@ func _poner_manga(
 		return
 	var brazo := _enganche(esqueleto, hueso, "VestuarioManga" + sufijo)
 	var malla := CapsuleMesh.new()
-	malla.radius = ancho_torso * 0.105
-	malla.height = maxf(alto * 0.24, malla.radius * 2.05)
+	malla.radius = ancho_torso * 0.085
+	malla.height = maxf(alto * 0.27, malla.radius * 2.05)
 	malla.radial_segments = 6
 	malla.rings = 3
 	var instancia := MeshInstance3D.new()
