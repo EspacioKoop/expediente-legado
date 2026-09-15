@@ -6,25 +6,37 @@
 class_name CalleMateriales
 extends RefCounted
 
+## La piel no puede rozar la cara arquitectónica: con 2,5 mm de separación el
+## depth buffer alternaba ambas superficies al mover la cámara (#563). Dejamos
+## 2 cm libres antes de empezar el volumen visual, sin tocar colisiones.
+const SEPARACION_FACHADA := 0.02
+const GROSOR_PIEL_FACHADA := 0.025
+
 const FACHADAS := [
 	{
 		"nombre": "FachadaRevocoOesteSur",
-		"pos": Vector3(-5.185, 4.5, -12.65),
-		"tam": Vector3(0.025, 9.0, 9.3),
+		"cara_x": CalleIdentidad.CARA_OESTE_SUR,
+		"hacia_calle": 1.0,
+		"pos": Vector3(0.0, 4.5, -12.65),
+		"tam": Vector3(GROSOR_PIEL_FACHADA, 9.0, 9.3),
 		"color": Color(0.26, 0.25, 0.26),
 		"material_pbr": "fachada_edificio",
 	},
 	{
 		"nombre": "FachadaRevocoEsteCentro",
-		"pos": Vector3(5.485, 5.0, -10.65),
-		"tam": Vector3(0.025, 10.0, 13.3),
+		"cara_x": CalleIdentidad.CARA_ESTE_SUR,
+		"hacia_calle": -1.0,
+		"pos": Vector3(0.0, 5.0, -10.65),
+		"tam": Vector3(GROSOR_PIEL_FACHADA, 10.0, 13.3),
 		"color": Color(0.26, 0.25, 0.26),
 		"material_pbr": "fachada_edificio",
 	},
 	{
 		"nombre": "FachadaRevocoOesteNorte",
-		"pos": Vector3(-5.485, 5.5, 10.15),
-		"tam": Vector3(0.025, 11.0, 12.3),
+		"cara_x": CalleIdentidad.CARA_OESTE_NORTE,
+		"hacia_calle": 1.0,
+		"pos": Vector3(0.0, 5.5, 10.15),
+		"tam": Vector3(GROSOR_PIEL_FACHADA, 11.0, 12.3),
 		"color": Color(0.26, 0.25, 0.26),
 		"material_pbr": "fachada_edificio",
 	},
@@ -89,9 +101,15 @@ static func _superficie_suelo(ficha: Dictionary) -> MeshInstance3D:
 static func _fachada(ficha: Dictionary) -> MeshInstance3D:
 	var superficie := MeshInstance3D.new()
 	superficie.name = String(ficha["nombre"])
-	superficie.position = ficha["pos"]
+	var tam: Vector3 = ficha["tam"]
+	var posicion: Vector3 = ficha["pos"]
+	posicion.x = (
+		float(ficha["cara_x"])
+		+ float(ficha["hacia_calle"]) * (SEPARACION_FACHADA + tam.x * 0.5)
+	)
+	superficie.position = posicion
 	var caja := BoxMesh.new()
-	caja.size = ficha["tam"]
+	caja.size = tam
 	superficie.mesh = caja
 	superficie.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
