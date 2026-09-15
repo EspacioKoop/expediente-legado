@@ -35,9 +35,7 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	escritorio.configurar_reduccion_movimiento(
 		bool(preferencias.get("reduccion_movimiento", false))
 	)
-	escritorio.establecer_reloj_narrativo(
-		tr("ESCRITORIO_RELOJ") % int(dia.jornada.get("dia", 1))
-	)
+	escritorio.establecer_reloj_narrativo(tr("ESCRITORIO_RELOJ") % int(dia.jornada.get("dia", 1)))
 
 	var creador_visor := Callable(self, "_crear_visor")
 	var titulo_siga := tr("ESCRITORIO_SIGA_TITULO")
