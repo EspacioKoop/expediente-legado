@@ -16,8 +16,8 @@ const MALLA_VIA := preload("res://assets/cc0/quaternius_modular_train/RailwayTra
 
 class DiaHarness:
 	extends Node
-	var _mundo: Node3D
 	var jornada := {"fase": "trayecto"}
+	var _mundo: Node3D
 
 
 var _modo := "baseline"
