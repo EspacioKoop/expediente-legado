@@ -86,7 +86,7 @@ static func resuelto(estado: Dictionary) -> bool:
 
 
 static func _normalizar(dato) -> Dictionary:
-	var id := String(dato)
+	var id := ""
 	var tipo := "interaccion"
 	var condicion := "evento_determinista"
 	var feedback := "ambiente"
@@ -97,6 +97,8 @@ static func _normalizar(dato) -> Dictionary:
 		condicion = String(dato.get("condicion", condicion))
 		feedback = String(dato.get("feedback", feedback))
 		cuenta = bool(dato.get("cuenta", true))
+	else:
+		id = String(dato)
 	return {
 		"id": id,
 		"tipo": tipo,
