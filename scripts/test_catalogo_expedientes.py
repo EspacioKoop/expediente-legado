@@ -117,6 +117,16 @@ class CatalogoExpedientesTest(unittest.TestCase):
                 ids.append(sospechoso["id"])
             self.assertEqual(len(ids), len(set(ids)), f"{caso['id']}: IDs de sospechoso duplicados")
 
+    def test_caso1_conserva_evidencia_documental_ampliada(self):
+        casos_por_id = {caso["id"]: caso for caso in self.casos}
+        caso = casos_por_id["caso@1"]
+        registros = {registro["id"]: registro["contenido"] for registro in caso["registros"]}
+
+        self.assertIn("qué trabajo se entregó", registros["factura1@1"])
+        self.assertIn("peritaje de tinta", registros["memo1@1"])
+        self.assertIn("comprobarlo de forma independiente", registros["empleado1@1"])
+        self.assertIn("alcance de la revisión", registros["actaContraloria1@1"])
+
     def test_caso9_r17_fija_el_corte_del_piloto(self):
         casos_por_id = {caso["id"]: caso for caso in self.casos}
         self.assertIn("caso9@9", casos_por_id)
