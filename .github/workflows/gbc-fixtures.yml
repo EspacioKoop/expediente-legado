@@ -25,6 +25,7 @@ env:
   CGB_ACID2_MGBLIB_COMMIT: 5d829bf2ffa1447dcfd63c5dab2c44488632617e
   CGB_ACID2_RGBDS_REPO: https://github.com/gbdev/rgbds.git
   CGB_ACID2_RGBDS_COMMIT: 0759c98d913e3d4d21207a8886a319c85add2041
+  CGB_ACID2_SHA256: 197fb0bcec544f0400527fc707e0a94f55435974986e6986b424ace5de81720e
 
 jobs:
   build-fixtures:
@@ -146,6 +147,7 @@ jobs:
           (
             cd gbc-fixtures
             sha256sum joypad.gb vblank.gb cgb-acid2.gbc cgb_only_smoke.gbc caza_pixeles_98.gbc paper_planes_98.gbc croc_riders_98.gbc | tee SHA256SUMS
+            echo "${CGB_ACID2_SHA256}  cgb-acid2.gbc" | sha256sum --check --strict
           )
           for rom in gbc-fixtures/*.gb gbc-fixtures/*.gbc; do
             test -s "$rom"
