@@ -322,6 +322,15 @@ func _process(delta: float) -> void:
 ## jornada, que sigue siendo lo vigente aunque el disco no se haya enterado.
 func _guardar_o_avisar(destino: String) -> bool:
 	if partida.guardar():
+		# Sección aparte y deliberadamente distinta de la partida (#535): si
+		# esto falla no se cuenta como fallo de guardado de campaña, que es
+		# lo que de verdad bloquea el tránsito.
+		var escritorio_controller := get_node_or_null("EscritorioSigaController")
+		if (
+			escritorio_controller != null
+			and escritorio_controller.has_method("guardar_estado_aplicaciones")
+		):
+			escritorio_controller.guardar_estado_aplicaciones()
 		return true
 	_transito_pendiente = destino
 	_hablando = false

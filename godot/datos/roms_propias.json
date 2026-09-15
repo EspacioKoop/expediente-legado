@@ -17,12 +17,7 @@
       "cgb": "dual",
       "incluida": true,
       "precio": 0,
-      "issues": [
-        124,
-        95,
-        384,
-        386
-      ],
+      "issues": [124, 95, 384, 386],
       "mito": ""
     },
     {
@@ -37,10 +32,7 @@
       "cgb": "dual",
       "incluida": false,
       "precio": 45,
-      "issues": [
-        95,
-        388
-      ],
+      "issues": [95, 388],
       "mito": ""
     },
     {
@@ -55,10 +47,7 @@
       "cgb": "dual",
       "incluida": false,
       "precio": 45,
-      "issues": [
-        95,
-        389
-      ],
+      "issues": [95, 389],
       "mito": ""
     },
     {
@@ -73,11 +62,7 @@
       "cgb": "",
       "incluida": false,
       "precio": 0,
-      "issues": [
-        437,
-        442,
-        512
-      ],
+      "issues": [437, 442, 512],
       "mito": "minotauro"
     },
     {
@@ -92,10 +77,7 @@
       "cgb": "",
       "incluida": false,
       "precio": 0,
-      "issues": [
-        436,
-        442
-      ],
+      "issues": [436, 442],
       "mito": "gilgamesh"
     },
     {
@@ -110,10 +92,7 @@
       "cgb": "",
       "incluida": false,
       "precio": 0,
-      "issues": [
-        439,
-        442
-      ],
+      "issues": [439, 442],
       "mito": "hidra"
     },
     {
@@ -128,11 +107,7 @@
       "cgb": "dual",
       "incluida": false,
       "precio": 0,
-      "issues": [
-        440,
-        442,
-        542
-      ],
+      "issues": [440, 442, 542],
       "mito": "dragon_japones"
     },
     {
@@ -147,28 +122,22 @@
       "cgb": "",
       "incluida": false,
       "precio": 0,
-      "issues": [
-        441,
-        442
-      ],
+      "issues": [441, 442],
       "mito": "duat"
     },
     {
       "id": "aquiles_98",
-      "titulo": "Sin título (Aquiles)",
-      "estado": "en_proyecto",
-      "genero": "duelo",
-      "resumen": "Un rival que solo reacciona en un punto concreto; contraparte del sueño de Aquiles. Título por decidir.",
-      "fuente": "",
-      "rom": "",
-      "cabecera": "",
-      "cgb": "",
+      "titulo": "MYRMIDON 98",
+      "estado": "jugable",
+      "genero": "duelo de observación",
+      "resumen": "Leer el ciclo de guardia de un rival aparentemente invulnerable y golpear el talón solo durante su ventana vulnerable.",
+      "fuente": "gbc/minijuegos/aquiles_98",
+      "rom": "res://roms/aquiles_98.gbc",
+      "cabecera": "MYRMIDON98",
+      "cgb": "dual",
       "incluida": false,
-      "precio": 0,
-      "issues": [
-        438,
-        442
-      ],
+      "precio": 45,
+      "issues": [438, 442],
       "mito": "aquiles"
     }
   ]

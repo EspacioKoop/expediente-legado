@@ -16,6 +16,10 @@ func _probar() -> void:
 	await _probar_ciclo_de_ventana()
 	await _probar_modal_bloquea_y_atrapa_foco()
 	await _probar_escala_ui()
+	await _probar_capacidades_declaradas_de_app_sintetica()
+	await _probar_redimensionado_con_agarre()
+	await _probar_varias_instancias()
+	await _probar_sin_varias_instancias_reenfoca()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
@@ -135,6 +139,123 @@ func _probar_escala_ui() -> void:
 		"configurar_escala_ui satura al máximo admitido",
 	)
 	fuera_de_rango.queue_free()
+
+
+## App sintética (#535): cero dominio propio, solo el contrato. Comprueba que
+## el shell respeta lo que declara `describir_capacidades()` sin conocerla.
+func _probar_capacidades_declaradas_de_app_sintetica() -> void:
+	var escritorio := await _crear_escritorio()
+	var fixture := AppSinteticaPrueba.new("sintetica-tamanos")
+	fixture.app.registrar_en(escritorio)
+
+	escritorio.abrir_aplicacion("sintetica-tamanos")
+	var panel: Control = escritorio._ventanas["sintetica-tamanos"]["panel"]
+	_comprobar(
+		(
+			panel.size.x >= AppSinteticaPrueba.TAMANO_MINIMO.x
+			and panel.size.y >= AppSinteticaPrueba.TAMANO_MINIMO.y
+		),
+		"abrir respeta el tamaño mínimo declarado por la app sintética"
+	)
+	_comprobar(
+		(
+			panel.size.x <= AppSinteticaPrueba.TAMANO_PREFERIDO.x
+			and panel.size.y <= AppSinteticaPrueba.TAMANO_PREFERIDO.y
+		),
+		"abrir no excede el tamaño preferido declarado por la app sintética"
+	)
+
+	escritorio.queue_free()
+
+
+func _probar_redimensionado_con_agarre() -> void:
+	var escritorio := await _crear_escritorio()
+	var fixture := AppSinteticaPrueba.new("sintetica-agarre")
+	fixture.app.registrar_en(escritorio)
+	escritorio.abrir_aplicacion("sintetica-agarre")
+
+	var panel: Control = escritorio._ventanas["sintetica-agarre"]["panel"]
+	var minimo_esc: Vector2 = escritorio._ventanas["sintetica-agarre"]["tamano_minimo"]
+
+	# Encoger de más: el agarre no puede bajar del mínimo declarado.
+	panel.size = minimo_esc - Vector2(500, 500)
+	escritorio._limitar_ventana(panel, minimo_esc)
+	_comprobar(
+		panel.size.x >= minimo_esc.x and panel.size.y >= minimo_esc.y,
+		"el agarre no reduce la ventana por debajo de su tamaño mínimo"
+	)
+
+	# Agrandar de más: no puede superar el área disponible del escritorio.
+	# Se limita aparte con un mínimo de (1, 1): el mínimo declarado por la app
+	# (260×180) es mayor que el área de la ventana de pruebas sin cabecera
+	# real (64×64), y el mínimo SIEMPRE gana sobre el área (ver
+	# `_limitar_ventana`), así que comprobar el tope de área exige aislarlo
+	# del mínimo real de la app.
+	panel.size = escritorio._area_ventanas.size + Vector2(400, 400)
+	escritorio._limitar_ventana(panel, Vector2(1, 1))
+	_comprobar(
+		(
+			panel.size.x <= escritorio._area_ventanas.size.x
+			and panel.size.y <= escritorio._area_ventanas.size.y
+		),
+		"el agarre no agranda la ventana más allá del área del escritorio"
+	)
+
+	escritorio.queue_free()
+
+
+## `multiples_instancias = true` abre una segunda ventana independiente sin
+## tocar la primera, y cada una se minimiza/restaura/cierra por su cuenta.
+func _probar_varias_instancias() -> void:
+	var escritorio := await _crear_escritorio()
+	var fixture := AppSinteticaPrueba.new("sintetica-instancias")
+	fixture.app.registrar_en(escritorio)
+
+	escritorio.abrir_aplicacion("sintetica-instancias")
+	escritorio.abrir_aplicacion("sintetica-instancias")
+	_comprobar(
+		(
+			escritorio._ventanas.has("sintetica-instancias")
+			and escritorio._ventanas.has("sintetica-instancias#2")
+		),
+		"multiples_instancias abre una segunda ventana independiente"
+	)
+
+	escritorio.minimizar("sintetica-instancias#2")
+	_comprobar(
+		(
+			not escritorio._ventanas["sintetica-instancias#2"]["panel"].visible
+			and escritorio._ventanas["sintetica-instancias"]["panel"].visible
+		),
+		"minimizar una instancia no afecta a la otra"
+	)
+
+	escritorio.cerrar("sintetica-instancias#2")
+	_comprobar(
+		(
+			not escritorio._ventanas.has("sintetica-instancias#2")
+			and escritorio._ventanas.has("sintetica-instancias")
+		),
+		"cerrar una instancia no afecta a la otra"
+	)
+
+	escritorio.queue_free()
+
+
+## Sin `multiples_instancias`, una segunda apertura sigue reenfocando la
+## misma ventana en vez de abrir otra (comportamiento de siempre).
+func _probar_sin_varias_instancias_reenfoca() -> void:
+	var escritorio := await _crear_escritorio()
+	escritorio.registrar_aplicacion("unica", "Única", func() -> Control: return Label.new())
+
+	escritorio.abrir_aplicacion("unica")
+	escritorio.abrir_aplicacion("unica")
+	_comprobar(escritorio._ventanas.size(), 1, "sin multiples_instancias solo hay una ventana")
+	_comprobar(
+		not escritorio._ventanas.has("unica#2"), "sin multiples_instancias no se crean instancias"
+	)
+
+	escritorio.queue_free()
 
 
 ## `add_child` no marca el nodo dentro del árbol hasta el siguiente
