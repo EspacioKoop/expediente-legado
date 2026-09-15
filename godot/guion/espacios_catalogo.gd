@@ -218,19 +218,22 @@ const OFICINA := {
 		},
 		# El ordenador de su puesto: encendido y sin nada legible hasta que se
 		# sienta. Una pantalla con datos afirmaría una lectura que no existe.
+		# La pantalla va contra el fondo de la mesa y el teclado al borde de la
+		# silla (#564): al revés, quien se sentaba tenía que alcanzar el
+		# teclado por detrás del propio monitor.
 		{
-			"pos": Vector3(-4.0, 0.98, 1.35),
+			"pos": Vector3(-4.0, 0.98, 0.68),
 			"tam": Vector3(0.42, 0.36, 0.36),
 			"color": Color(0.74, 0.72, 0.66)
 		},
 		{
-			"pos": Vector3(-4.0, 0.98, 1.16),
+			"pos": Vector3(-4.0, 0.98, 0.87),
 			"tam": Vector3(0.34, 0.26, 0.02),
 			"color": Color(0.30, 0.42, 0.34),
 			"emisivo": true
 		},
 		{
-			"pos": Vector3(-4.0, 0.78, 0.85),
+			"pos": Vector3(-4.0, 0.78, 1.35),
 			"tam": Vector3(0.44, 0.04, 0.16),
 			"color": Color(0.72, 0.70, 0.64)
 		},
