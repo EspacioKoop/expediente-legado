@@ -16,6 +16,10 @@ class EscritorioSigaVisualTest(unittest.TestCase):
             "system_mark.svg": "0 0 18 18",
             "iconos_32.svg": "0 0 192 32",
             "iconos_16.svg": "0 0 96 16",
+            "cursores_32.svg": "0 0 192 32",
+            "iconos_utilidades_32.svg": "0 0 256 32",
+            "bandeja_16.svg": "0 0 80 16",
+            "texturas_ui.svg": "0 0 640 128",
         }
         for nombre, view_box in esperados.items():
             ruta = ARTE / nombre
@@ -30,6 +34,28 @@ class EscritorioSigaVisualTest(unittest.TestCase):
             for identidad in ids:
                 self.assertIn(f'id="icon-{identidad}"', fuente, (nombre, identidad))
 
+    def test_pack_extendido_conserva_identidades_del_asset_sheet(self):
+        cursores = (ARTE / "cursores_32.svg").read_text(encoding="utf-8")
+        for identidad in ("normal", "ayuda", "ocupado", "seleccionar", "texto", "no-disponible"):
+            self.assertIn(f'id="cursor-{identidad}"', cursores)
+
+        utilidades = (ARTE / "iconos_utilidades_32.svg").read_text(encoding="utf-8")
+        for identidad in (
+            "correo",
+            "configuracion",
+            "impresora",
+            "notas",
+            "calendario",
+            "buscar",
+            "ejecutar",
+            "apagar",
+        ):
+            self.assertIn(f'id="util-{identidad}"', utilidades)
+
+        bandeja = (ARTE / "bandeja_16.svg").read_text(encoding="utf-8")
+        for identidad in ("volumen", "red", "correo", "sincronizando", "alertas"):
+            self.assertIn(f'id="tray-{identidad}"', bandeja)
+
     def test_wallpaper_no_hornea_texto_ni_marcas_ajenas(self):
         fuente = (ARTE / "wallpaper.svg").read_text(encoding="utf-8").lower()
         self.assertNotIn("<text", fuente)
@@ -43,12 +69,20 @@ class EscritorioSigaVisualTest(unittest.TestCase):
             "res://arte/os98/system_mark.svg",
             "res://arte/os98/iconos_32.svg",
             "res://arte/os98/iconos_16.svg",
+            "res://arte/os98/cursores_32.svg",
         ):
             self.assertIn(ruta, fuente)
         self.assertIn("extends EscritorioSiga", fuente)
         self.assertIn("AtlasTexture.new()", fuente)
         self.assertIn("STRETCH_KEEP_ASPECT_COVERED", fuente)
         self.assertIn("ORDEN_ICONOS", fuente)
+        self.assertIn("ORDEN_CURSORES", fuente)
+
+    def test_cursor_del_os98_se_instala_y_se_restaura_al_salir(self):
+        fuente = VISUAL.read_text(encoding="utf-8")
+        self.assertIn('Input.set_custom_mouse_cursor(_cursor("normal")', fuente)
+        self.assertIn("Input.set_custom_mouse_cursor(null, Input.CURSOR_ARROW)", fuente)
+        self.assertIn('atlas.region = Rect2(float(indice * 32), 0.0, 32.0, 32.0)', fuente)
 
     def test_el_adaptador_asigna_solo_iconos_a_apps_reales(self):
         fuente = ADAPTADOR.read_text(encoding="utf-8")
