@@ -11,8 +11,9 @@ Solo entran ROMs **propias**: código de este repositorio compilado con RGBDS de
 | `caza_pixeles_98` | Caza Píxeles 98 | arcade de 30 s | incluida con la consola | — | #124 #95 #384 #386 |
 | `paper_planes_98` | Paper Planes 98 | vuelo; ruta Nueva York 1998 | tienda de videojuegos | 45 | #95 #388 |
 | `croc_riders_98` | Croc Riders 98 | carreras; El Cairo → Giza | tienda de videojuegos | 45 | #95 #389 |
+| `ryu_flow_98` | RYU FLOW | puzle de flujo; tres compuertas | tienda de videojuegos | 45 | #440 #442 #542 |
 
-Las tres son de 32 KiB, modo dual CGB (`0x80`), y ninguna guarda nada ni da recompensas (contrato de #95).
+Las cuatro son de 32 KiB y modo dual CGB (`0x80`). Ninguna concede recompensas sistémicas por jugar. En `RYU FLOW`, arrancar y salir no cuenta como finalización: el micro-objetivo exige manipular las tres compuertas y resolver el cauce. El marcador local de completado queda preparado para #442, pero este corte todavía no activa la semilla Ryū ni modifica el selector nocturno.
 
 ## En proyecto
 
@@ -23,7 +24,6 @@ Contrapartes de vigilia de los sueños mitológicos (#435, #442). Tienen issue p
 | `ariadna_labertinto_98` | ARIADNA | Minotauro | laberinto de archivo; ya existe su cartucho 3D en casa | #437 #512 |
 | `uruk_98` | URUK 98 | Gilgamesh | ciudad mínima y tablilla que reconstruir | #436 |
 | `hydra_loop_98` | HYDRA LOOP | Hidra | cortar cabezas empeora todo hasta dar con el nodo común | #439 |
-| `ryu_flow_98` | RYU FLOW | dragón japonés | desviar cauces; arte del cartucho en `docs/visuales/ryu-flow` | #440 #542 |
 | `duat_98` | DUAT 98 | Duat | cámaras y contrapesos | #441 |
 | `aquiles_98` | Sin título (Aquiles) | Aquiles | un rival que solo reacciona en un punto; título por decidir | #438 |
 
@@ -32,7 +32,7 @@ Contrapartes de vigilia de los sueños mitológicos (#435, #442). Tienen issue p
 - **Build:** `scripts/preparar_emulador_gb.sh rom` compila todas las `jugable` y las deja en `godot/roms/<id>.gbc`. La exportación ya incluye `roms/*.gbc`. El workflow `gbc-fixtures` también las compila e inspecciona.
 - **Tienda:** `TiendaVideojuegos.catalogo()` vende las jugables con precio (`RomsPropias.a_la_venta()`).
 - **Consola:** la Portátil Color 98 y la consola de sobremesa muestran las `incluida` más las compradas en la jornada (`RomsPropias.en_consola`), siempre que el artefacto exista en la build.
-- **Sueños:** la fuente de semilla de una ROM es `RomsPropias.fuente_semilla(id)` (`rom:<id>`). El cartucho ARIADNA del Minotauro ya la usa.
+- **Sueños:** la fuente de semilla de una ROM es `RomsPropias.fuente_semilla(id)` (`rom:<id>`). El cartucho ARIADNA del Minotauro ya la usa. `RYU FLOW` conserva su `mito` en el índice, pero su evento de finalización no se conecta aún a #442.
 
 ## Añadir una ROM
 
