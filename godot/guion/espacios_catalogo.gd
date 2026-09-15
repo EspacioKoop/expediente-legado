@@ -70,37 +70,37 @@ const OFICINA := {
 		# Archivadores contra el muro del fondo. Son seis y no dos: un archivo
 		# con dos archivadores es un despacho.
 		{
-			"pos": Vector3(5.5, 0.9, -4),
+			"pos": Vector3(6.4, 0.9, -4),
 			"tam": Vector3(1.0, 1.8, 0.6),
 			"color": Color(0.40, 0.39, 0.36),
 			"modelo": "bookcaseClosed"
 		},
 		{
-			"pos": Vector3(5.5, 0.9, -2.5),
+			"pos": Vector3(6.4, 0.9, -2.5),
 			"tam": Vector3(1.0, 1.8, 0.6),
 			"color": Color(0.40, 0.39, 0.36),
 			"modelo": "bookcaseClosed"
 		},
 		{
-			"pos": Vector3(5.5, 0.9, -1.0),
+			"pos": Vector3(6.4, 0.9, -1.0),
 			"tam": Vector3(1.0, 1.8, 0.6),
 			"color": Color(0.40, 0.39, 0.36),
 			"modelo": "bookcaseClosed"
 		},
 		{
-			"pos": Vector3(5.5, 0.9, 0.5),
+			"pos": Vector3(6.4, 0.9, 0.5),
 			"tam": Vector3(1.0, 1.8, 0.6),
 			"color": Color(0.38, 0.37, 0.35),
 			"modelo": "bookcaseClosed"
 		},
 		{
-			"pos": Vector3(5.5, 0.9, 2.0),
+			"pos": Vector3(6.4, 0.9, 2.0),
 			"tam": Vector3(1.0, 1.8, 0.6),
 			"color": Color(0.40, 0.39, 0.36),
 			"modelo": "bookcaseClosed"
 		},
 		{
-			"pos": Vector3(5.5, 0.9, 3.5),
+			"pos": Vector3(6.4, 0.9, 3.5),
 			"tam": Vector3(1.0, 1.8, 0.6),
 			"color": Color(0.38, 0.37, 0.35),
 			"modelo": "bookcaseClosed"
@@ -270,6 +270,53 @@ const OFICINA := {
 			"tam": Vector3(0.08, 0.08, 0.14),
 			"color": Color(0.64, 0.60, 0.44),
 			"rol": "manilla_puerta_archivo"
+		},
+		# Las ventanas (#564): el cristal emisivo de "ventanas" es solo el
+		# hueco, y un hueco sin marco es una superficie flotando en la pared.
+		# Las dos comparten banda (se solapan 0.1 en el catálogo de cristales),
+		# así que el marco es uno solo con un parteluz por hoja, igual que la
+		# puerta ya llevaba marco y manilla.
+		{
+			"pos": Vector3(-3.16, 1.75, 4.85),
+			"tam": Vector3(0.12, 1.62, 0.16),
+			"color": Color(0.72, 0.71, 0.66),
+			"rol": "marco_ventana_oficina"
+		},
+		{
+			"pos": Vector3(4.26, 1.75, 4.85),
+			"tam": Vector3(0.12, 1.62, 0.16),
+			"color": Color(0.72, 0.71, 0.66),
+			"rol": "marco_ventana_oficina"
+		},
+		{
+			"pos": Vector3(1.05, 1.75, 4.85),
+			"tam": Vector3(0.12, 1.62, 0.16),
+			"color": Color(0.72, 0.71, 0.66),
+			"rol": "marco_ventana_oficina"
+		},
+		{
+			"pos": Vector3(0.55, 2.56, 4.85),
+			"tam": Vector3(7.54, 0.12, 0.16),
+			"color": Color(0.72, 0.71, 0.66),
+			"rol": "marco_ventana_oficina"
+		},
+		{
+			"pos": Vector3(0.55, 0.93, 4.87),
+			"tam": Vector3(7.54, 0.14, 0.26),
+			"color": Color(0.68, 0.67, 0.62),
+			"rol": "alfeizar_ventana_oficina"
+		},
+		{
+			"pos": Vector3(-1.5, 1.75, 4.85),
+			"tam": Vector3(0.10, 1.62, 0.16),
+			"color": Color(0.72, 0.71, 0.66),
+			"rol": "parteluz_ventana_oficina"
+		},
+		{
+			"pos": Vector3(2.6, 1.75, 4.85),
+			"tam": Vector3(0.10, 1.62, 0.16),
+			"color": Color(0.72, 0.71, 0.66),
+			"rol": "parteluz_ventana_oficina"
 		},
 	],
 	# La luz del archivo es de fluorescente: fría, plana y de más, que es lo
