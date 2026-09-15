@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512">
+<defs><pattern id="p" width="64" height="64" patternUnits="userSpaceOnUse">
+<rect width="64" height="64" fill="#8080ff"/>
+<path d="M8 4v21M29 10v34M51 2v17M60 31v25M15 45v13M40 39v22" stroke="#7987fa" stroke-width="2" opacity=".55"/>
+<path d="M9 4v21M30 10v34M52 2v17M61 31v25M16 45v13M41 39v22" stroke="#8879fa" stroke-width="1" opacity=".4"/>
+</pattern></defs><rect width="512" height="512" fill="url(#p)"/></svg>
