@@ -35,12 +35,15 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	escritorio.configurar_reduccion_movimiento(
 		bool(preferencias.get("reduccion_movimiento", false))
 	)
-	escritorio.establecer_reloj_narrativo("DÍA %02d" % int(dia.jornada.get("dia", 1)))
+	escritorio.establecer_reloj_narrativo(
+		tr("ESCRITORIO_RELOJ") % int(dia.jornada.get("dia", 1))
+	)
 
 	var creador_visor := Callable(self, "_crear_visor")
-	escritorio.registrar_aplicacion("siga-98", "SIGA-98", creador_visor)
+	var titulo_siga := tr("ESCRITORIO_SIGA_TITULO")
+	escritorio.registrar_aplicacion("siga-98", titulo_siga, creador_visor)
 	escritorio.activar_ayuda_sistema()
-	escritorio.adoptar_aplicacion("siga-98", "SIGA-98", visor, creador_visor)
+	escritorio.adoptar_aplicacion("siga-98", titulo_siga, visor, creador_visor)
 	escritorio.salir_solicitado.connect(_solicitar_salida)
 
 	# `_abrir_expediente()` conserva temporalmente el botón histórico para que
