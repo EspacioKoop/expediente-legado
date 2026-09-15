@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="468" height="360" viewBox="0 0 468 360" shape-rendering="crispEdges">
+  <!-- 5 cabeceras ficticias 468x72 para el ecosistema web de 1998 (#537). -->
+  <g id="site-marcador98" transform="translate(0 0)">
+    <rect width="468" height="72" fill="#0b2d1e"/>
+    <rect x="4" y="4" width="460" height="64" fill="#153c29" stroke="#d9d8d1" stroke-width="2"/>
+    <rect x="10" y="10" width="54" height="52" fill="#d9d8d1"/>
+    <path d="M18 19h38v6H18zm4 11h30v6H22zm-4 11h38v6H18zm8 11h22v5H26z" fill="#0b2d1e"/>
+    <circle cx="51" cy="20" r="7" fill="#f1d72f" stroke="#1c2b38"/>
+    <text x="78" y="33" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#f4f0d8">MARCADOR 98</text>
+    <text x="80" y="51" font-family="Arial,sans-serif" font-size="10" fill="#bdd7c7">RESULTADOS · CLASIFICACIONES · RADIO EN DIRECTO*</text>
+    <rect x="350" y="14" width="99" height="18" fill="#f1d72f" stroke="#151515"/>
+    <text x="399" y="27" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" font-weight="700" fill="#1b1b1b">ÚLTIMA HORA</text>
+    <rect x="350" y="39" width="99" height="18" fill="#d9d8d1" stroke="#151515"/>
+    <text x="399" y="52" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#153c29">EDICIÓN 1998</text>
+    <text x="460" y="68" text-anchor="end" font-family="Arial,sans-serif" font-size="6" fill="#739a83">*SIMULADA</text>
+  </g>
+
+  <g id="site-meteored" transform="translate(0 72)">
+    <rect width="468" height="72" fill="#d9ecf7"/>
+    <rect x="4" y="4" width="460" height="64" fill="#eaf5fb" stroke="#174c98" stroke-width="2"/>
+    <rect x="11" y="10" width="54" height="52" fill="#174c98"/>
+    <circle cx="32" cy="29" r="11" fill="#f1d72f"/>
+    <path d="M28 43h25c6 0 8 9 1 11H26c-7-2-5-11 2-11z" fill="#ffffff" stroke="#8ca9c1"/>
+    <text x="78" y="31" font-family="Georgia,serif" font-size="24" font-weight="700" fill="#174c98">MeteoRed</text>
+    <text x="80" y="50" font-family="Arial,sans-serif" font-size="10" fill="#3f617c">PREVISIÓN LOCAL · MAPAS · AVISOS</text>
+    <rect x="349" y="13" width="101" height="42" fill="#ffffff" stroke="#8ca9c1"/>
+    <text x="360" y="27" font-family="Arial,sans-serif" font-size="8" fill="#3f617c">HOY</text>
+    <text x="360" y="45" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#174c98">18°</text>
+    <path d="M418 25h22v22h-22z" fill="#d9ecf7"/><circle cx="428" cy="33" r="6" fill="#f1d72f"/><path d="M421 41h19v7h-19z" fill="#fff" stroke="#8ca9c1"/>
+  </g>
+
+  <g id="site-byte-local" transform="translate(0 144)">
+    <rect width="468" height="72" fill="#14161a"/>
+    <rect x="4" y="4" width="460" height="64" fill="#202630" stroke="#78d35b" stroke-width="2"/>
+    <rect x="11" y="10" width="54" height="52" fill="#0a0f12" stroke="#4e5e69"/>
+    <text x="38" y="35" text-anchor="middle" font-family="monospace" font-size="21" font-weight="700" fill="#78d35b">&gt;_</text>
+    <rect x="17" y="48" width="42" height="4" fill="#174c98"/>
+    <text x="78" y="32" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#e9eef2">BYTE LOCAL</text>
+    <text x="80" y="50" font-family="monospace" font-size="9" fill="#78d35b">software // redes // hardware // trucos</text>
+    <rect x="351" y="12" width="96" height="18" fill="#0a0f12" stroke="#4e5e69"/>
+    <text x="399" y="25" text-anchor="middle" font-family="monospace" font-size="8" fill="#78d35b">MODEM: 33.6K</text>
+    <rect x="351" y="37" width="96" height="18" fill="#174c98"/>
+    <text x="399" y="50" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#fff">NUEVAS DESCARGAS</text>
+  </g>
+
+  <g id="site-butaca7" transform="translate(0 216)">
+    <rect width="468" height="72" fill="#3c0f28"/>
+    <rect x="4" y="4" width="460" height="64" fill="#6f1f34" stroke="#f1d72f" stroke-width="2"/>
+    <rect x="11" y="10" width="54" height="52" fill="#23101d"/>
+    <path d="M16 16h44v10H16zm0 15h44v10H16zm0 15h44v10H16z" fill="#f1d72f"/>
+    <path d="M21 16l8 10m8-10 8 10m8-10 7 9M21 31l8 10m8-10 8 10m8-10 7 9M21 46l8 10m8-10 8 10m8-10 7 9" stroke="#6f1f34" stroke-width="3"/>
+    <text x="78" y="32" font-family="Georgia,serif" font-size="25" font-weight="700" fill="#fff0c7">BUTACA 7</text>
+    <text x="80" y="50" font-family="Arial,sans-serif" font-size="10" fill="#f0c9d6">CINE · MÚSICA · TELEVISIÓN · AGENDA</text>
+    <rect x="352" y="13" width="95" height="40" fill="#23101d" stroke="#d8a84c"/>
+    <text x="399" y="28" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" fill="#fff0c7">ESTRENO</text>
+    <text x="399" y="43" text-anchor="middle" font-family="Georgia,serif" font-size="12" font-weight="700" fill="#f1d72f">VIERNES</text>
+  </g>
+
+  <g id="site-el-tablon" transform="translate(0 288)">
+    <rect width="468" height="72" fill="#d6cfb2"/>
+    <rect x="4" y="4" width="460" height="64" fill="#f4efdc" stroke="#544d3b" stroke-width="2"/>
+    <rect x="11" y="10" width="54" height="52" fill="#b8a67a" stroke="#544d3b"/>
+    <rect x="17" y="16" width="42" height="40" fill="#f8f3df" stroke="#544d3b"/>
+    <path d="M22 23h31M22 30h31M22 37h22M22 44h27M22 51h16" stroke="#6b5f45" stroke-width="2"/>
+    <circle cx="21" cy="19" r="3" fill="#a83232"/><circle cx="55" cy="19" r="3" fill="#174c98"/>
+    <text x="78" y="31" font-family="Georgia,serif" font-size="24" font-weight="700" fill="#403a2d">EL TABLÓN</text>
+    <text x="80" y="50" font-family="Arial,sans-serif" font-size="10" fill="#6a6253">COMPRA · VENDE · CAMBIA · BUSCA</text>
+    <rect x="350" y="13" width="99" height="18" fill="#e7cd4a" stroke="#544d3b"/>
+    <text x="399" y="26" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#403a2d">PUBLICAR ANUNCIO</text>
+    <text x="399" y="47" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" fill="#6a6253">ÚLTIMOS: 143</text>
+  </g>
+</svg>
