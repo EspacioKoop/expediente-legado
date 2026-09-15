@@ -159,12 +159,12 @@ static func _cuenco(comprobar: Callable) -> void:
 ## está hecho de cajas: si esta geometría cambia, ha cambiado el gato y no un
 ## detalle de implementación.
 static func _malla(comprobar: Callable) -> void:
-	# #570: fijamos el contrato físico sin instanciar un cuerpo de física desde
-	# SceneTree._init(). Godot 4.7 puede bloquear el cierre del proceso al crear
-	# y liberar CharacterBody3D antes de que exista un mundo físico; el arranque
-	# integral del CI sí monta la escena real y cubre esa integración.
+	# #570: fija el contrato físico sin construir un cuerpo dentro de la suite
+	# unitaria. La integración real se comprueba al importar y arrancar el juego.
 	var codigo_gato := FileAccess.get_file_as_string("res://guion/gato.gd")
-	comprobar.call("el gato es un cuerpo físico", codigo_gato.contains("extends CharacterBody3D"), true)
+	comprobar.call(
+		"el gato es un cuerpo físico", codigo_gato.contains("extends CharacterBody3D"), true
+	)
 	comprobar.call(
 		"el gato tiene forma de colisión", codigo_gato.contains("CollisionShape3D.new()"), true
 	)
