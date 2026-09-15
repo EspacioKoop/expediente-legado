@@ -153,6 +153,7 @@ func _columna_indice() -> Control:
 	_refrescar_archivo()
 	_archivo.select(0)
 	columna.add_child(_etiqueta(tr("VISOR_DOCUMENTOS"), EstiloSiga.NEGRO))
+	columna.add_child(_etiqueta(tr("VISOR_COSTE_REGLA"), EstiloSiga.NEGRO))
 
 	_lista = ItemList.new()
 	_lista.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -168,8 +169,7 @@ func _columna_indice() -> Control:
 	_lista.add_theme_stylebox_override("selected_focus", seleccion)
 	_archivo.add_theme_stylebox_override("selected", seleccion)
 	_archivo.add_theme_stylebox_override("selected_focus", seleccion)
-	for registro in caso["registros"]:
-		_lista.add_item(tr("VISOR_ITEM") % [_icono(registro["tipo"]), registro["folio"]])
+	_refrescar_lista_documentos()
 	_lista.item_selected.connect(_al_elegir_documento)
 	columna.add_child(_lista)
 	return columna
@@ -205,6 +205,28 @@ func _refrescar_archivo() -> void:
 			_archivo.select(i)
 
 
+## El coste se pinta antes de abrir un documento y sale de Jornada, no de una
+## segunda regla de UI. Al gastar o releer se repinta toda la lista para que lo
+## siguiente que pulse el jugador refleje el presupuesto real de ese instante.
+func _refrescar_lista_documentos() -> void:
+	if _lista == null:
+		return
+	var seleccionados := _lista.get_selected_items()
+	var seleccionado := -1 if seleccionados.is_empty() else int(seleccionados[0])
+	var cerrado := Acusacion.esta_cerrado(partida.estado, caso["id"])
+	_lista.clear()
+	for registro in caso["registros"]:
+		var coste := 0 if cerrado else Jornada.coste_lectura(jornada, registro["folio"])
+		var rotulo_coste := tr("VISOR_COSTE_GRATIS") if coste == 0 else tr("VISOR_COSTE_ACCION")
+		var texto := (
+			tr("VISOR_ITEM_COSTE") % [_icono(registro["tipo"]), registro["folio"], rotulo_coste]
+		)
+		_lista.add_item(texto)
+		_lista.set_item_tooltip(_lista.get_item_count() - 1, tr("VISOR_COSTE_REGLA"))
+	if seleccionado >= 0 and seleccionado < _lista.get_item_count():
+		_lista.select(seleccionado)
+
+
 func _al_elegir_caso(indice: int) -> void:
 	caso = contenido.casos[indice]
 	registro_actual = {}
@@ -215,9 +237,7 @@ func _al_elegir_caso(indice: int) -> void:
 		tr("VISOR_BARRA_TITULO")
 		% (int(caso["anioSuceso"]) if caso.get("anioSuceso") != null else tr("SIN_FECHA_CORTA"))
 	)
-	_lista.clear()
-	for registro in caso["registros"]:
-		_lista.add_item(tr("VISOR_ITEM") % [_icono(registro["tipo"]), registro["folio"]])
+	_lista.deselect_all()
 	_refrescar_estado()
 
 
@@ -477,6 +497,7 @@ func _mostrar_cierre(acusacion: Dictionary, duelo: Dictionary = {}) -> void:
 func _refrescar_estado() -> void:
 	_imputar.disabled = Acusacion.esta_cerrado(partida.estado, caso["id"])
 	_refrescar_archivo()
+	_refrescar_lista_documentos()
 	if not _aviso_partida.is_empty():
 		_estado.text = _aviso_partida
 		return
@@ -489,6 +510,7 @@ func _refrescar_estado() -> void:
 			resumen["total"],
 			jornada.get("dia", 1),
 			jornada.get("acciones", 0),
+			Jornada.ACCIONES_POR_DIA,
 			tr("VISOR_RESUELTO") if resumen["resuelto"] else ""
 		]
 	)

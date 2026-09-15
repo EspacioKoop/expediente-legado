@@ -249,11 +249,14 @@ VISOR_CABECERA,Folio %s   ·   %s   ·   %s
 VISOR_CARTA,Carta localizada: %s
 VISOR_CERRADO,EXPEDIENTE CERRADO. %s%s
 VISOR_CONCEPTO,Concepto: %s
+VISOR_COSTE_ACCION,1 acción
+VISOR_COSTE_GRATIS,GRATIS
+VISOR_COSTE_REGLA,Primera lectura nueva del día: GRATIS · siguientes: 1 acción · releer hoy: GRATIS
 VISOR_DOCUMENTOS,Documentos del expediente:
 VISOR_ELIJA,Elija un documento del expediente.
-VISOR_ESTADO,"%s   ·   Pistas: %d de %d   ·   Día %d, %d acción(es)%s"
+VISOR_ESTADO,"%s   ·   Pistas: %d de %d   ·   Día %d   ·   Presupuesto: %d/%d acciones%s"
 VISOR_IMPUTAR,Imputar responsabilidad…
-VISOR_ITEM,%s  %s
+VISOR_ITEM_COSTE,"%s  %s   ·   %s"
 VISOR_MARCAR_FOLIO,☆ Marcar folio
 VISOR_MARCADOR_GUARDADO,Folio marcado para recordarlo.
 VISOR_MARCADOR_RETIRADO,Folio retirado de sus marcadores.
