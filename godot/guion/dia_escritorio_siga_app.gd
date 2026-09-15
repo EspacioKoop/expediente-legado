@@ -1,4 +1,4 @@
-## Adaptador del puesto de trabajo al shell de escritorio (#534).
+## Adaptador del puesto de trabajo al shell de escritorio (#534, #535).
 ##
 ## `Dia` sigue siendo dueño de entrar/salir del puesto y de persistir la partida.
 ## Este controller detecta únicamente la pantalla que contiene el visor histórico,
@@ -6,6 +6,7 @@
 extends Node
 
 var _pantalla_envuelta_id := 0
+var _siga_app: EscritorioSigaApp
 
 
 func _process(_delta: float) -> void:
@@ -40,13 +41,16 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	)
 	escritorio.establecer_reloj_narrativo(tr("ESCRITORIO_RELOJ") % int(dia.jornada.get("dia", 1)))
 
-	escritorio.registrar_identidad_visual("siga-98", "siga")
-	escritorio.registrar_identidad_visual("ayuda-sistema", "ayuda")
 	var creador_visor := Callable(self, "_crear_visor")
 	var titulo_siga := tr("ESCRITORIO_SIGA_TITULO")
-	escritorio.registrar_aplicacion("siga-98", titulo_siga, creador_visor)
+	_siga_app = EscritorioSigaApp.new("siga-98", titulo_siga, creador_visor, "siga")
+	_siga_app.registrar_en(escritorio)
+
+	# Ayuda sigue siendo utilidad propia del shell; #535 solo migra aquí SIGA,
+	# que es el primer consumidor real del contrato de aplicación.
+	escritorio.registrar_identidad_visual("ayuda-sistema", "ayuda")
 	escritorio.activar_ayuda_sistema()
-	escritorio.adoptar_aplicacion("siga-98", titulo_siga, visor, creador_visor)
+	_siga_app.adoptar_en(escritorio, visor)
 	escritorio.salir_solicitado.connect(_solicitar_salida)
 
 	# `_abrir_expediente()` conserva temporalmente el botón histórico para que
