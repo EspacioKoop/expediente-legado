@@ -7,7 +7,7 @@ class_name HidraVigilia
 extends Interactuable3D
 
 const ID_MITO := "hidra"
-const FUENTE := "rom:hydra_loop"
+const FUENTE := "rom:hydra_loop_98"
 const INTERACCIONES_REQUERIDAS := 2
 
 var _jornada: Dictionary = {}
