@@ -156,7 +156,10 @@ static func _montar_cocina(raiz: Node3D, pos: Vector3) -> void:
 static func _montar_ventana(raiz: Node3D, pos: Vector3) -> void:
 	var ventana := Node3D.new()
 	ventana.name = "VentanaCasa"
-	ventana.position = pos
+	# El ancla histórica está 2 cm dentro del grosor del muro. Adelantar el
+	# conjunto 8 cm deja fondo y marco delante de la cara interior (z=-3.4)
+	# sin cambiar el punto declarado por #133 ni abrir un hueco en la colisión.
+	ventana.position = pos + Vector3(0, 0, 0.08)
 	raiz.add_child(ventana)
 
 	var vista := Node3D.new()
