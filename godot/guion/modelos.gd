@@ -71,6 +71,15 @@ const PERFILES_FACIALES := {
 	{"piel": Color(0.62, 0.46, 0.35), "cabello": Color(0.07, 0.06, 0.05), "x": 1.00, "z": 1.08},
 }
 
+## `retrato` sigue siendo la clave estable que llega desde el catálogo, pero la
+## identidad visual deja de salir solo de un hash. Cada entrada de esta tabla
+## habilita rasgos modelados para la persona histórica concreta. Puyi es el
+## primer corte; el resto del roster puede incorporarse uno a uno sin volver a
+## una fotografía pegada sobre la cara.
+const PERSONAJES_FACIALES := {
+	"emperador": "Puyi",
+}
+
 ## Lo que se carga una vez y se reusa. Las salas repiten mueble —seis
 ## archivadores, cuatro puestos— y volver a leer el `.glb` por cada uno es leer
 ## el mismo fichero seis veces para obtener seis cosas idénticas.
@@ -214,8 +223,10 @@ static func _reproductor(nodo: Node) -> AnimationPlayer:
 ## superficie elipsoidal. La cabeza y los rasgos comparten `BoneAttachment3D`,
 ## así que forman una sola silueta al girar y siguen el hueso `Head` al animar.
 ##
-## `retrato` no vuelve a cargarse como imagen: solo sirve de semilla estable
-## para pequeñas diferencias de proporción y tono entre compañeros.
+## `retrato` ya no se usa solo como semilla: cuando existe una entrada en
+## `PERSONAJES_FACIALES`, añade geometría característica de esa persona sobre el
+## mismo volumen. El fallback determinista se conserva para los compañeros que
+## todavía no tienen su pase individual.
 
 
 static func _poner_cara(pieza: Node3D, retrato: String) -> void:
@@ -233,11 +244,17 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 	var alto := _alto_cabeza(esqueleto, hueso)
 	var semilla := absi(hash(retrato))
 	var perfil: Dictionary = PERFILES_FACIALES.get(retrato, {})
+	var personaje := String(PERSONAJES_FACIALES.get(retrato, ""))
 	var radio_x := alto * (0.34 + float(semilla % 5) * 0.008) * float(perfil.get("x", 1.0))
 	var radio_y := alto * 0.50
 	var radio_z := alto * (0.38 + float((semilla / 5) % 5) * 0.008) * float(perfil.get("z", 1.0))
 	var centro_y := alto * 0.48
 	var separacion := radio_x * (0.50 + float((semilla / 25) % 5) * 0.015)
+	if personaje == "Puyi":
+		# Sus retratos adultos se leen sobre todo por el rostro estrecho y las
+		# gafas redondas. Acercamos ligeramente los ojos para que el armazón no
+		# invada las sienes y siga integrado en la elipse.
+		separacion = radio_x * 0.47
 	var altura_ojos := centro_y + alto * 0.12
 
 	var oscuro := Color(0.10, 0.08, 0.07)
@@ -251,11 +268,17 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 	# recuperar fotografías ni materiales ajenos al shader común.
 	_volumen_cabeza(enganche, Vector3(0.0, centro_y, 0.0), Vector3(radio_x, radio_y, radio_z), piel)
 	# Una pieza superior sencilla distingue peinados y silueta sin convertir el
-	# retrato en una textura plana. Se ancla al mismo hueso que la cabeza.
+	# retrato en una textura plana. Puyi recibe una tapa algo más ceñida: el
+	# mechón lateral específico se modela más abajo con el resto de sus rasgos.
+	var pelo_y := centro_y + radio_y * 0.72
+	var pelo_escala := Vector3(radio_x * 1.04, alto * 0.16, radio_z * 0.88)
+	if personaje == "Puyi":
+		pelo_y = centro_y + radio_y * 0.76
+		pelo_escala = Vector3(radio_x * 0.99, alto * 0.13, radio_z * 0.84)
 	_cabello_cabeza(
 		enganche,
-		Vector3(0.0, centro_y + radio_y * 0.72, -radio_z * 0.04),
-		Vector3(radio_x * 1.04, alto * 0.16, radio_z * 0.88),
+		Vector3(0.0, pelo_y, -radio_z * 0.04),
+		pelo_escala,
 		cabello
 	)
 
@@ -271,36 +294,149 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 	var z_ojo_der := (
 		_frente_cabeza(ojo_der.x, ojo_der.y, centro_y, radio_x, radio_y, radio_z) - hundido
 	)
+	var escala_ojo := Vector3(alto * 0.050, alto * 0.040, alto * 0.025)
+	if personaje == "Puyi":
+		escala_ojo = Vector3(alto * 0.043, alto * 0.032, alto * 0.020)
 	_rasgo_esfera(
 		enganche,
 		Vector3(ojo_izq.x, ojo_izq.y, z_ojo_izq),
-		Vector3(alto * 0.050, alto * 0.040, alto * 0.025),
+		escala_ojo,
 		oscuro
 	)
 	_rasgo_esfera(
 		enganche,
 		Vector3(ojo_der.x, ojo_der.y, z_ojo_der),
-		Vector3(alto * 0.050, alto * 0.040, alto * 0.025),
+		escala_ojo,
 		oscuro
 	)
 
+	if personaje == "Puyi":
+		_rasgos_puyi(
+			enganche,
+			alto,
+			centro_y,
+			radio_x,
+			radio_y,
+			radio_z,
+			separacion,
+			altura_ojos,
+			oscuro,
+			cabello
+		)
+
 	var nariz_y := centro_y - alto * 0.035
 	var z_nariz := _frente_cabeza(0.0, nariz_y, centro_y, radio_x, radio_y, radio_z) - alto * 0.015
+	var nariz_escala := Vector3(alto * 0.050, alto * 0.105, alto * 0.060)
+	if personaje == "Puyi":
+		nariz_escala = Vector3(alto * 0.043, alto * 0.100, alto * 0.052)
 	_rasgo_esfera(
 		enganche,
 		Vector3(0.0, nariz_y, z_nariz),
-		Vector3(alto * 0.050, alto * 0.105, alto * 0.060),
+		nariz_escala,
 		piel
 	)
 
 	var boca_y := centro_y - alto * 0.20
 	var z_boca := _frente_cabeza(0.0, boca_y, centro_y, radio_x, radio_y, radio_z) - alto * 0.010
+	var ancho_boca := alto * (0.13 + float(semilla % 4) * 0.010)
+	if personaje == "Puyi":
+		ancho_boca = alto * 0.105
 	_rasgo_esfera(
 		enganche,
 		Vector3(0.0, boca_y, z_boca),
-		Vector3(alto * (0.13 + float(semilla % 4) * 0.010), alto * 0.018, alto * 0.012),
+		Vector3(ancho_boca, alto * 0.018, alto * 0.012),
 		oscuro
 	)
+
+
+## Puyi no se distingue por un color distinto, sino por rasgos concretos.
+##
+## El armazón de las gafas es volumen real y se hunde levemente en el frente de
+## la cabeza; por eso de perfil no aparece un plano atravesando la cara. El
+## puente comparte la misma curvatura y el mechón frontal rompe la tapa de pelo
+## genérica sin depender de una fotografía o textura externa.
+static func _rasgos_puyi(
+	padre: Node3D,
+	alto: float,
+	centro_y: float,
+	radio_x: float,
+	radio_y: float,
+	radio_z: float,
+	separacion: float,
+	altura_ojos: float,
+	oscuro: Color,
+	cabello: Color
+) -> void:
+	var hundido_gafas := alto * 0.006
+	var z_izq := (
+		_frente_cabeza(-separacion, altura_ojos, centro_y, radio_x, radio_y, radio_z)
+		- hundido_gafas
+	)
+	var z_der := (
+		_frente_cabeza(separacion, altura_ojos, centro_y, radio_x, radio_y, radio_z)
+		- hundido_gafas
+	)
+	var radio_gafa := alto * 0.080
+	var grosor_gafa := alto * 0.012
+	_aro_gafa(padre, Vector3(-separacion, altura_ojos, z_izq), radio_gafa, grosor_gafa, oscuro)
+	_aro_gafa(padre, Vector3(separacion, altura_ojos, z_der), radio_gafa, grosor_gafa, oscuro)
+
+	var z_puente := (
+		_frente_cabeza(0.0, altura_ojos, centro_y, radio_x, radio_y, radio_z) - hundido_gafas
+	)
+	_rasgo_esfera(
+		padre,
+		Vector3(0.0, altura_ojos, z_puente),
+		Vector3(separacion * 0.34, alto * 0.010, alto * 0.010),
+		oscuro
+	)
+
+	# Cejas rectas y finas por encima del armazón; también quedan parcialmente
+	# embebidas en el elipsoide para que el 3/4 siga leyendo como una sola cara.
+	var ceja_y := altura_ojos + alto * 0.095
+	for lado in [-1.0, 1.0]:
+		var x_ceja: float = separacion * lado
+		var z_ceja := (
+			_frente_cabeza(x_ceja, ceja_y, centro_y, radio_x, radio_y, radio_z) - alto * 0.012
+		)
+		_rasgo_esfera(
+			padre,
+			Vector3(x_ceja, ceja_y, z_ceja),
+			Vector3(alto * 0.105, alto * 0.012, alto * 0.010),
+			oscuro
+		)
+
+	# Raya/mechón lateral peinado hacia atrás, inspirado en los retratos adultos.
+	# Son dos elipsoides pequeños sobre el mismo cráneo, no una lámina frontal.
+	var mechon_y := centro_y + radio_y * 0.63
+	var mechon_x := -radio_x * 0.26
+	var z_mechon := (
+		_frente_cabeza(mechon_x, mechon_y, centro_y, radio_x, radio_y, radio_z) - alto * 0.035
+	)
+	_rasgo_esfera(
+		padre,
+		Vector3(mechon_x, mechon_y, z_mechon),
+		Vector3(radio_x * 0.48, alto * 0.055, radio_z * 0.10),
+		cabello
+	)
+
+
+static func _aro_gafa(
+	padre: Node3D, posicion: Vector3, radio: float, grosor: float, color: Color
+) -> void:
+	var aro := MeshInstance3D.new()
+	var toro := TorusMesh.new()
+	toro.inner_radius = maxf(0.001, radio - grosor)
+	toro.outer_radius = radio
+	toro.rings = 12
+	toro.ring_segments = 4
+	aro.mesh = toro
+	aro.position = posicion
+	# TorusMesh nace alrededor del eje Y; al girarlo, el hueco mira hacia el
+	# frente Z de la misma superficie usada por `_frente_cabeza`.
+	aro.rotation.x = PI / 2.0
+	aro.material_override = _material_rasgo(color)
+	padre.add_child(aro)
 
 
 ## Profundidad del frente de un elipsoide en un punto X/Y de la cara.
