@@ -89,15 +89,15 @@ func _montar_barandillas() -> void:
 		var direccion := horizontal.normalized()
 		var lateral := Vector3(-direccion.z, 0.0, direccion.x) * (ANCHO_TRAMO * 0.53)
 		for signo in [-1.0, 1.0]:
-			var lado := lateral * signo
-			var inicio := desde + lado + Vector3.UP * 0.52
-			var fin := hasta + lado + Vector3.UP * 0.52
+			var lado: Vector3 = lateral * float(signo)
+			var inicio: Vector3 = desde + lado + Vector3.UP * 0.52
+			var fin: Vector3 = hasta + lado + Vector3.UP * 0.52
 			_barra_entre(
 				"Pasamanos_%d_%s" % [i, "A" if signo < 0.0 else "B"], inicio, fin, 0.055, MAT_METAL
 			)
 			for poste in 4:
 				var t := float(poste) / 3.0
-				var base := desde.lerp(hasta, t) + lado
+				var base: Vector3 = desde.lerp(hasta, t) + lado
 				_caja(
 					"Poste_%d_%d_%s" % [i, poste, "A" if signo < 0.0 else "B"],
 					base + Vector3.UP * 0.27,
@@ -106,7 +106,7 @@ func _montar_barandillas() -> void:
 				)
 				if poste < 3:
 					var t2 := (float(poste) + 0.5) / 3.0
-					var centro := desde.lerp(hasta, t2) + lado + Vector3.UP * 0.28
+					var centro: Vector3 = desde.lerp(hasta, t2) + lado + Vector3.UP * 0.28
 					_caja(
 						"Barrote_%d_%d_%s" % [i, poste, "A" if signo < 0.0 else "B"],
 						centro,
