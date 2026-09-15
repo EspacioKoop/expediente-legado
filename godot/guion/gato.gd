@@ -13,18 +13,59 @@
 class_name Gato
 extends Node3D
 
-const COLOR := Color(0.28, 0.26, 0.25)
-const COLOR_CLARO := Color(0.40, 0.38, 0.36)
+const COLOR := Color(0.30, 0.27, 0.25)
+const COLOR_CLARO := Color(0.62, 0.58, 0.53)
+const COLOR_OJO := Color(0.78, 0.62, 0.18)
+const COLOR_PUPILA := Color(0.05, 0.05, 0.05)
+const COLOR_NARIZ := Color(0.55, 0.36, 0.36)
 
 ## Lo alto que es. Un gato mide unos 25 cm a la cruz, y a esa escala se lee
 ## como un gato al lado de una silla de 45.
 const ALTO := 0.26
+
+## Todo lo que tiene dentro el gato cabe en un solo lado: las piezas se
+## describen en el sistema del cuerpo, con el morro hacia -Z y el suelo en 0.
+const LOMO := [
+	{"c": Vector3(0, 0.182, 0.222), "r": Vector2(0.022, 0.024)},
+	{"c": Vector3(0, 0.182, 0.200), "r": Vector2(0.055, 0.058)},
+	{"c": Vector3(0, 0.185, 0.150), "r": Vector2(0.078, 0.080)},
+	{"c": Vector3(0, 0.180, 0.060), "r": Vector2(0.080, 0.078)},
+	{"c": Vector3(0, 0.185, -0.040), "r": Vector2(0.072, 0.076)},
+	{"c": Vector3(0, 0.200, -0.120), "r": Vector2(0.066, 0.078)},
+	{"c": Vector3(0, 0.235, -0.175), "r": Vector2(0.050, 0.060)},
+	{"c": Vector3(0, 0.270, -0.200), "r": Vector2(0.040, 0.042)},
+]
+
+## La cabeza es ancha y corta: lo contrario de un perro. Los carrillos son el
+## anillo más ancho y el morro casi no sobresale.
+const CABEZA := [
+	{"c": Vector3(0, 0.290, -0.175), "r": Vector2(0.040, 0.040)},
+	{"c": Vector3(0, 0.292, -0.205), "r": Vector2(0.068, 0.060)},
+	{"c": Vector3(0, 0.285, -0.245), "r": Vector2(0.072, 0.058)},
+	{"c": Vector3(0, 0.280, -0.275), "r": Vector2(0.056, 0.046)},
+	{"c": Vector3(0, 0.276, -0.292), "r": Vector2(0.030, 0.026)},
+]
+
+## El hocico claro que va debajo de la nariz, y el pecho, que es lo único
+## claro que se ve desde la altura del jugador.
+const HOCICO := [
+	{"c": Vector3(0, 0.262, -0.255), "r": Vector2(0.034, 0.024)},
+	{"c": Vector3(0, 0.258, -0.290), "r": Vector2(0.026, 0.019)},
+	{"c": Vector3(0, 0.260, -0.302), "r": Vector2(0.010, 0.008)},
+]
+const PECHO := [
+	{"c": Vector3(0, 0.175, -0.080), "r": Vector2(0.040, 0.050)},
+	{"c": Vector3(0, 0.200, -0.150), "r": Vector2(0.046, 0.055)},
+	{"c": Vector3(0, 0.240, -0.185), "r": Vector2(0.030, 0.036)},
+]
 
 var estado: Dictionary = {}
 var sitios: Array = []
 
 var _cola: Node3D
 var _cuerpo: Node3D
+var _cabeza: Node3D
+var _orejas: Array[Node3D] = []
 var _reloj := 0.0
 
 
@@ -32,142 +73,158 @@ func _init() -> void:
 	_cuerpo = Node3D.new()
 	add_child(_cuerpo)
 
-	# El lomo. Más ancho que alto (radio elíptico) y estrechándose por delante:
-	# ese perfil es la mitad de lo que se lee como un gato, y no cuesta un
-	# triángulo más que un cilindro.
-	(
-		MallaOrganica
-		. pieza(
+	_pieza(_cuerpo, LOMO, COLOR)
+	_pieza(_cuerpo, PECHO, COLOR_CLARO)
+
+	# Las patas. Delanteras rectas; traseras con muslo ancho y corvejón hacia
+	# atrás, que es lo que hace que un gato parado parezca a punto de saltar.
+	for x in [-0.040, 0.040]:
+		_pieza(
 			_cuerpo,
-			(
-				MallaOrganica
-				. tubo(
-					[
-						{"c": Vector3(0, 0, 0.22), "r": Vector2(0.055, 0.050)},
-						{"c": Vector3(0, 0.01, 0.10), "r": Vector2(0.093, 0.082)},
-						{"c": Vector3(0, 0.01, -0.06), "r": Vector2(0.098, 0.086)},
-						{"c": Vector3(0, 0, -0.18), "r": Vector2(0.080, 0.072)},
-					]
-				)
-			),
-			Vector3(0, ALTO, 0),
-			Vector3.ZERO,
-			COLOR
+			[
+				{"c": Vector3(x, 0.200, -0.120), "r": 0.030},
+				{"c": Vector3(x, 0.110, -0.125), "r": 0.022},
+				{"c": Vector3(x, 0.012, -0.130), "r": 0.019},
+			],
+			COLOR,
+			6
 		)
+		_pieza(
+			_cuerpo,
+			[
+				{"c": Vector3(x, 0.018, -0.128), "r": Vector2(0.022, 0.016)},
+				{"c": Vector3(x, 0.012, -0.160), "r": Vector2(0.020, 0.010)},
+			],
+			COLOR_CLARO,
+			6
+		)
+	for x in [-0.052, 0.052]:
+		_pieza(
+			_cuerpo,
+			[
+				{"c": Vector3(x, 0.200, 0.120), "r": Vector2(0.034, 0.055)},
+				{"c": Vector3(x, 0.130, 0.150), "r": Vector2(0.032, 0.040)},
+				{"c": Vector3(x, 0.075, 0.170), "r": 0.021},
+				{"c": Vector3(x, 0.012, 0.160), "r": 0.018},
+			],
+			COLOR,
+			6
+		)
+		_pieza(
+			_cuerpo,
+			[
+				{"c": Vector3(x, 0.014, 0.172), "r": Vector2(0.021, 0.014)},
+				{"c": Vector3(x, 0.011, 0.132), "r": Vector2(0.019, 0.009)},
+			],
+			COLOR_CLARO,
+			6
+		)
+
+	# La cabeza cuelga de su nodo para poder mirar y mover las orejas.
+	_cabeza = Node3D.new()
+	_cabeza.position = Vector3(0, 0.27, -0.19)
+	_cuerpo.add_child(_cabeza)
+	var origen := _cabeza.position
+	_pieza(_cabeza, _relativa(CABEZA, origen), COLOR)
+	_pieza(_cabeza, _relativa(HOCICO, origen), COLOR_CLARO, 6)
+	_pieza(
+		_cabeza,
+		_relativa(
+			[
+				{"c": Vector3(0, 0.281, -0.290), "r": Vector2(0.011, 0.007)},
+				{"c": Vector3(0, 0.279, -0.300), "r": Vector2(0.006, 0.004)},
+			],
+			origen
+		),
+		COLOR_NARIZ,
+		5
 	)
 
-	# La cabeza, corta y casi redonda, y el hocico más claro: es lo único que
-	# le da cara sin dibujar ojos. El primer anillo coincide con el extremo del
-	# lomo para que desde arriba o 3/4 no aparezca una ranura oscura entre ambos.
-	(
-		MallaOrganica
-		. pieza(
-			_cuerpo,
-			(
-				MallaOrganica
-				. tubo(
-					[
-						{"c": Vector3(0, 0, 0.02), "r": Vector2(0.066, 0.062)},
-						{"c": Vector3(0, 0, -0.06), "r": Vector2(0.072, 0.068)},
-						{"c": Vector3(0, 0, -0.11), "r": Vector2(0.055, 0.050)},
-					]
-				)
+	# Ojos: un disco ámbar con la pupila vertical encima. Sin ojos, a la altura
+	# de la cámara, un gato es una patata con orejas.
+	for x in [-0.030, 0.030]:
+		_pieza(
+			_cabeza,
+			_relativa(
+				[
+					{"c": Vector3(x, 0.300, -0.272), "r": Vector2(0.017, 0.014)},
+					{"c": Vector3(x, 0.300, -0.290), "r": Vector2(0.014, 0.011)},
+				],
+				origen
 			),
-			Vector3(0, ALTO + 0.12, -0.20),
-			Vector3.ZERO,
-			COLOR
+			COLOR_OJO,
+			6
 		)
-	)
-	(
-		MallaOrganica
-		. pieza(
-			_cuerpo,
-			(
-				MallaOrganica
-				. tubo(
-					[
-						{"c": Vector3(0, 0, 0), "r": 0.030},
-						{"c": Vector3(0, 0, -0.05), "r": 0.022},
-					]
-				)
+		_pieza(
+			_cabeza,
+			_relativa(
+				[
+					{"c": Vector3(x, 0.300, -0.288), "r": Vector2(0.004, 0.011)},
+					{"c": Vector3(x, 0.300, -0.294), "r": Vector2(0.003, 0.008)},
+				],
+				origen
 			),
-			Vector3(0, ALTO + 0.09, -0.32),
-			Vector3.ZERO,
-			COLOR_CLARO
-		)
-	)
-
-	# Las orejas: un tubo cuyo último radio es cero, que es como se hace una
-	# punta. Un triángulo de verdad no se vería distinto y sí sería otra clase.
-	for x in [-0.045, 0.045]:
-		(
-			MallaOrganica
-			. pieza(
-				_cuerpo,
-				(
-					MallaOrganica
-					. tubo(
-						[
-							{"c": Vector3(0, 0, 0), "r": Vector2(0.030, 0.014)},
-							{"c": Vector3(0, 0, -0.07), "r": 0.0},
-						],
-						5
-					)
-				),
-				Vector3(x, ALTO + 0.18, -0.25),
-				Vector3(PI / 2.0, 0, 0),
-				COLOR
-			)
+			COLOR_PUPILA,
+			4
 		)
 
-	# Cuatro patas, tubos de pie. Las de delante algo más cortas: un gato no es
-	# una mesa, y ese centímetro es lo que le da la inclinación del lomo.
-	for x in [-0.055, 0.055]:
-		for z in [-0.13, 0.14]:
-			(
-				MallaOrganica
-				. pieza(
-					_cuerpo,
-					(
-						MallaOrganica
-						. tubo(
-							[
-								{"c": Vector3(0, 0, 0), "r": 0.026},
-								{"c": Vector3(0, 0, -ALTO + 0.02), "r": 0.020},
-							],
-							5
-						)
-					),
-					Vector3(x, ALTO - 0.02, z),
-					Vector3(-PI / 2.0, 0, 0),
-					COLOR
-				)
-			)
+	# Orejas: una pirámide de tres lados, ancha en la base y separada, con el
+	# interior claro. Son la silueta que dice «gato» antes que nada.
+	for lado in [-1.0, 1.0]:
+		var oreja := Node3D.new()
+		oreja.position = Vector3(0.040 * lado, 0.335, -0.215) - origen
+		oreja.rotation = Vector3(-0.15, 0, -0.35 * lado)
+		_cabeza.add_child(oreja)
+		_pieza(
+			oreja,
+			[
+				{"c": Vector3(0, -0.012, 0), "r": Vector2(0.030, 0.014)},
+				{"c": Vector3(0, 0.060, 0.004), "r": 0.0},
+			],
+			COLOR,
+			4
+		)
+		_pieza(
+			oreja,
+			[
+				{"c": Vector3(0, -0.004, -0.009), "r": Vector2(0.018, 0.005)},
+				{"c": Vector3(0, 0.040, -0.004), "r": 0.0},
+			],
+			COLOR_NARIZ,
+			4
+		)
+		_orejas.append(oreja)
 
-	# La cola cuelga de su propio nodo porque es lo único que se mueve.
+	# La cola cuelga de su propio nodo porque se mueve. Gruesa y larga, sale
+	# del lomo y sube en curva de interrogación: un gato tranquilo.
 	_cola = Node3D.new()
-	_cola.position = Vector3(0, ALTO + 0.04, 0.20)
+	_cola.position = Vector3(0, 0.190, 0.200)
 	_cuerpo.add_child(_cola)
-	(
-		MallaOrganica
-		. pieza(
-			_cola,
-			(
-				MallaOrganica
-				. tubo(
-					[
-						{"c": Vector3(0, 0, 0), "r": 0.024},
-						{"c": Vector3(0, 0.03, 0.10), "r": 0.019},
-						{"c": Vector3(0, 0.05, 0.19), "r": 0.013},
-					],
-					5
-				)
-			),
-			Vector3.ZERO,
-			Vector3.ZERO,
-			COLOR
-		)
+	_pieza(
+		_cola,
+		[
+			{"c": Vector3(0, 0.000, -0.020), "r": 0.024},
+			{"c": Vector3(0, 0.020, 0.060), "r": 0.022},
+			{"c": Vector3(0, 0.080, 0.120), "r": 0.020},
+			{"c": Vector3(0, 0.170, 0.140), "r": 0.019},
+			{"c": Vector3(0, 0.240, 0.115), "r": 0.017},
+			{"c": Vector3(0, 0.270, 0.075), "r": 0.013},
+			{"c": Vector3(0, 0.272, 0.055), "r": 0.0},
+		],
+		COLOR,
+		6
 	)
+
+
+func _pieza(raiz: Node3D, espina: Array, color: Color, lados := MallaOrganica.LADOS) -> void:
+	MallaOrganica.pieza(raiz, MallaOrganica.tubo(espina, lados), Vector3.ZERO, Vector3.ZERO, color)
+
+
+static func _relativa(espina: Array, origen: Vector3) -> Array:
+	var fuera := []
+	for punto in espina:
+		fuera.append({"c": punto["c"] - origen, "r": punto["r"]})
+	return fuera
 
 
 ## Lo pone en marcha. [param sitios] son los rincones por los que se mueve, y
@@ -201,3 +258,15 @@ func avanzar(hambre: int, jugador: Vector3, delta: float) -> void:
 	var ritmo := 3.4 if estado["estado"] == "hambriento" else 1.5
 	_cola.rotation.y = sin(_reloj * ritmo) * 0.35
 	_cola.rotation.x = sin(_reloj * ritmo * 0.6) * 0.12
+	_animar_reposo(ritmo)
+
+
+## Lo que hace que no parezca una figura: respira, y de vez en cuando mueve
+## una oreja. Con hambre, las orejas se echan un poco atrás.
+func _animar_reposo(ritmo: float) -> void:
+	_cuerpo.scale.y = 1.0 + sin(_reloj * 2.2) * 0.012
+	_cabeza.rotation.y = sin(_reloj * 0.45) * 0.18
+	var atras := 0.25 if ritmo > 2.0 else 0.0
+	for i in _orejas.size():
+		var tic := pow(maxf(sin(_reloj * 0.9 + i * 2.3), 0.0), 24.0) * 0.3
+		_orejas[i].rotation.x = -0.15 - atras - tic

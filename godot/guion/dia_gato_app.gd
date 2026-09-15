@@ -178,7 +178,7 @@ func _orientar_gato_guia() -> void:
 		return
 	var direccion := rumbo.normalized()
 	if GatoAyuda.guia_orienta(jornada.get("gato", {})):
-		_gato_guia.rotation.y = atan2(direccion.x, direccion.z)
+		_gato_guia.rotation.y = atan2(direccion.x, direccion.z) + PI
 
 
 func _resolver_objetivos_sueno() -> void:
