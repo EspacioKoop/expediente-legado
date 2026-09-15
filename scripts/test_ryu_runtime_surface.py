@@ -61,7 +61,10 @@ class RyuRuntimeSurfaceTest(unittest.TestCase):
         self.assertIn('const ID_ROM := "ryu_flow_98"', self.vigilia)
         self.assertIn('const ID_MITO := "dragon_japones"', self.vigilia)
         self.assertIn("RomsPropias.fuente_semilla(ID_ROM)", self.vigilia)
-        self.assertIn("SemillasOniricas.activar_semilla_onirica(", self.vigilia)
+        self.assertRegex(
+            self.vigilia,
+            r"SemillasOniricas\s*\.\s*activar_semilla_onirica\s*\(",
+        )
         self.assertIn("INTENSIDAD_SEMILLA", self.vigilia)
 
     def test_observer_funciona_mientras_el_emulador_pausa_el_mundo(self):
