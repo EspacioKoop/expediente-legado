@@ -1,0 +1,62 @@
+[gd_scene load_steps=6 format=3]
+
+[sub_resource type="StandardMaterial3D" id="MatWood"]
+albedo_color = Color(0.34, 0.20, 0.10, 1)
+roughness = 0.82
+
+[sub_resource type="StandardMaterial3D" id="MatMetal"]
+albedo_color = Color(0.10, 0.115, 0.12, 1)
+metallic = 0.72
+roughness = 0.46
+
+[sub_resource type="BoxMesh" id="Box"]
+size = Vector3(1, 1, 1)
+
+[sub_resource type="CylinderMesh" id="Leg"]
+top_radius = 0.035
+bottom_radius = 0.045
+height = 1
+radial_segments = 8
+
+[sub_resource type="BoxMesh" id="Top"]
+size = Vector3(1.55, 0.10, 0.72)
+
+[node name="PupitreEscolar" type="Node3D"]
+
+[node name="Tablero" type="MeshInstance3D" parent="."]
+mesh = SubResource("Top")
+material_override = SubResource("MatWood")
+position = Vector3(0, 0.83, 0)
+rotation_degrees = Vector3(-4, 0, 0)
+
+[node name="Faldon" type="MeshInstance3D" parent="."]
+mesh = SubResource("Box")
+material_override = SubResource("MatWood")
+position = Vector3(0, 0.61, 0.29)
+scale = Vector3(1.25, 0.42, 0.07)
+
+[node name="PataFI" type="MeshInstance3D" parent="."]
+mesh = SubResource("Leg")
+material_override = SubResource("MatMetal")
+position = Vector3(-0.58, 0.39, 0.22)
+
+[node name="PataFD" type="MeshInstance3D" parent="."]
+mesh = SubResource("Leg")
+material_override = SubResource("MatMetal")
+position = Vector3(0.58, 0.39, 0.22)
+
+[node name="PataTI" type="MeshInstance3D" parent="."]
+mesh = SubResource("Leg")
+material_override = SubResource("MatMetal")
+position = Vector3(-0.58, 0.39, -0.22)
+
+[node name="PataTD" type="MeshInstance3D" parent="."]
+mesh = SubResource("Leg")
+material_override = SubResource("MatMetal")
+position = Vector3(0.58, 0.39, -0.22)
+
+[node name="BarraInferior" type="MeshInstance3D" parent="."]
+mesh = SubResource("Box")
+material_override = SubResource("MatMetal")
+position = Vector3(0, 0.18, 0.28)
+scale = Vector3(1.20, 0.055, 0.055)

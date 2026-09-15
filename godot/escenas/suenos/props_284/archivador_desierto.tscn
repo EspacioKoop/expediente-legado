@@ -1,0 +1,76 @@
+[gd_scene load_steps=5 format=3]
+
+[sub_resource type="StandardMaterial3D" id="MatCabinet"]
+albedo_color = Color(0.18, 0.20, 0.19, 1)
+metallic = 0.62
+roughness = 0.58
+
+[sub_resource type="StandardMaterial3D" id="MatDark"]
+albedo_color = Color(0.055, 0.06, 0.06, 1)
+metallic = 0.75
+roughness = 0.40
+
+[sub_resource type="BoxMesh" id="Box"]
+size = Vector3(1, 1, 1)
+
+[sub_resource type="CylinderMesh" id="Handle"]
+top_radius = 0.045
+bottom_radius = 0.045
+height = 0.34
+radial_segments = 8
+
+[node name="ArchivadorDesierto" type="Node3D"]
+
+[node name="Cuerpo" type="MeshInstance3D" parent="."]
+mesh = SubResource("Box")
+material_override = SubResource("MatCabinet")
+position = Vector3(0, 1.05, 0)
+scale = Vector3(0.86, 2.10, 0.72)
+
+[node name="Cajon1" type="MeshInstance3D" parent="."]
+mesh = SubResource("Box")
+material_override = SubResource("MatCabinet")
+position = Vector3(0, 1.75, 0.39)
+scale = Vector3(0.76, 0.35, 0.08)
+
+[node name="Cajon2" type="MeshInstance3D" parent="."]
+mesh = SubResource("Box")
+material_override = SubResource("MatCabinet")
+position = Vector3(0, 1.30, 0.39)
+scale = Vector3(0.76, 0.35, 0.08)
+
+[node name="Cajon3" type="MeshInstance3D" parent="."]
+mesh = SubResource("Box")
+material_override = SubResource("MatCabinet")
+position = Vector3(0, 0.85, 0.39)
+scale = Vector3(0.76, 0.35, 0.08)
+
+[node name="Cajon4" type="MeshInstance3D" parent="."]
+mesh = SubResource("Box")
+material_override = SubResource("MatCabinet")
+position = Vector3(0, 0.40, 0.39)
+scale = Vector3(0.76, 0.35, 0.08)
+
+[node name="Tirador1" type="MeshInstance3D" parent="."]
+mesh = SubResource("Handle")
+material_override = SubResource("MatDark")
+position = Vector3(0, 1.75, 0.50)
+rotation_degrees = Vector3(90, 0, 0)
+
+[node name="Tirador2" type="MeshInstance3D" parent="."]
+mesh = SubResource("Handle")
+material_override = SubResource("MatDark")
+position = Vector3(0, 1.30, 0.50)
+rotation_degrees = Vector3(90, 0, 0)
+
+[node name="Tirador3" type="MeshInstance3D" parent="."]
+mesh = SubResource("Handle")
+material_override = SubResource("MatDark")
+position = Vector3(0, 0.85, 0.50)
+rotation_degrees = Vector3(90, 0, 0)
+
+[node name="Tirador4" type="MeshInstance3D" parent="."]
+mesh = SubResource("Handle")
+material_override = SubResource("MatDark")
+position = Vector3(0, 0.40, 0.50)
+rotation_degrees = Vector3(90, 0, 0)
