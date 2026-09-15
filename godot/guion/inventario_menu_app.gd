@@ -18,13 +18,15 @@ var _volver_boton: Button
 var _modelo_actual: Dictionary = {}
 
 
+func _init() -> void:
+	visible = false
+
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	theme = EstiloSiga.tema()
 	custom_minimum_size = Vector2(760, 500)
-	_textos = _cargar_textos()
-	_montar()
-	visible = false
+	_asegurar_montado()
 
 
 static func etiqueta() -> String:
@@ -51,6 +53,7 @@ static func modelo(estado_partida: Dictionary) -> Dictionary:
 
 
 func abrir(estado_partida: Dictionary) -> void:
+	_asegurar_montado()
 	_modelo_actual = modelo(estado_partida)
 	_refrescar()
 	visible = true
@@ -66,6 +69,14 @@ func abrir(estado_partida: Dictionary) -> void:
 ## El controlador dueño del modal restaura pausa, ratón y HUD al recibir volver.
 func cerrar() -> void:
 	volver.emit()
+
+
+func _asegurar_montado() -> void:
+	if is_instance_valid(_arbol):
+		return
+	if _textos.is_empty():
+		_textos = _cargar_textos()
+	_montar()
 
 
 func _montar() -> void:
