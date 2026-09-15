@@ -58,7 +58,7 @@ class ConsolaSobremesa98Test(unittest.TestCase):
             self.assertIn(nombre, self.consola)
 
     def test_el_arte_es_local_y_no_convierte_props_en_roms(self):
-        self.assertIn("res://assets/consola98/cartuchos/", self.consola)
+        self.assertIn("res://arte/consola98/cartuchos/", self.consola)
         self.assertIn("Texture2D", self.consola)
         for termino in (
             "http://",

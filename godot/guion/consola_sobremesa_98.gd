@@ -7,9 +7,9 @@
 class_name ConsolaSobremesa98
 extends ConsolaPortatil98
 
-const ETIQUETA_CAZA_PIXELES := "res://assets/consola98/cartuchos/caza_pixeles_98.jpg"
-const ETIQUETA_PAPER_PLANES := "res://assets/consola98/cartuchos/paper_planes_98.jpg"
-const ETIQUETA_CROC_RIDERS := "res://assets/consola98/cartuchos/croc_riders_98.jpg"
+const ETIQUETA_CAZA_PIXELES := "res://arte/consola98/cartuchos/caza_pixeles_98.jpg"
+const ETIQUETA_PAPER_PLANES := "res://arte/consola98/cartuchos/paper_planes_98.jpg"
+const ETIQUETA_CROC_RIDERS := "res://arte/consola98/cartuchos/croc_riders_98.jpg"
 
 
 func configurar() -> void:
