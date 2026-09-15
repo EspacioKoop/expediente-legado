@@ -27,15 +27,19 @@ ao.png           # 4096x4096 o superior
 
 El objetivo 4K es conservar detalle en el **master**; el aspecto retro/PSX se sigue decidiendo en el import/shader del juego. No se debe confundir una fuente fotorrealista con eliminar el tratamiento PSX de #115.
 
-## Integración actual, sin tocar GDScript
+## Integración runtime
 
-`TexturaProcedural.por_nombre()` ya intenta cargar `res://assets/texturas/<nombre>.jpg` antes de usar el fallback procedural. Por eso el preparador duplica el `albedo.jpg` validado en esa ruta y guarda el set completo en:
+`TexturaProcedural.por_nombre()` sigue intentando cargar `res://assets/texturas/<nombre>.jpg` antes de usar el fallback procedural. El preparador conserva esa compatibilidad y, además, guarda el set completo en:
 
 ```text
 godot/assets/texturas/pbr/<nombre>/
 ```
 
-Así, el **albedo de alta calidad puede sustituir inmediatamente** la textura procedural en cualquier superficie que pida ese nombre, sin cambiar escenas ni el fallback. `normal`, `roughness` y `ao` quedan versionados junto al mismo material para un corte posterior del shader; este documento no afirma que el shader PSX actual los esté muestreando.
+`TexturasPBR` detecta esa carpeta y crea un material con `psx_pbr.gdshader` cuando existe al menos el albedo. La variante PBR conserva temblor de vértices, cuantización de color y dithering Bayer, pero usa iluminación por píxel para que normal/roughness/AO puedan aportar volumen. El shader PSX canónico no se modifica: cualquier superficie sin set PBR conserva el camino anterior.
+
+La primera integración real está en `CalleMateriales`: las tres masas de fachada intentan cargar `fachada_edificio`. Si el set no está disponible —por ejemplo, en un checkout sin objetos Git LFS— vuelven automáticamente al `revoco_urbano` procedural ya integrado.
+
+El mapa normal se aplica únicamente cuando el material usa UV de malla; roughness y AO funcionan tanto en UV como en el muestreo triplanar de la variante PBR. Este primer corte evita fingir un normal triplanar correcto sin transformar el espacio tangente de cada proyección.
 
 Ejemplo de preparación:
 
@@ -57,6 +61,6 @@ El fragmento se genera aparte a propósito: `procedencia.json` es la fuente de v
 
 ## QA visual antes de dar por bueno un material
 
-El validador comprueba estructura, tamaño y hashes, no calidad artística. Antes de integrar un set hay que revisar manualmente: costuras en mosaico 2x2, escala física coherente, normal sin inversión de canal Y, roughness sin clipping, ausencia de texto/logos accidentales y legibilidad real con el shader PSX activo.
+El validador comprueba estructura, tamaño y hashes, no calidad artística. Antes de integrar un set hay que revisar manualmente: costuras en mosaico 2x2, escala física coherente, normal sin inversión de canal Y, roughness sin clipping, ausencia de texto/logos accidentales y legibilidad real con el tratamiento PSX activo.
 
 Para sueño, la deformación debe seguir partiendo de un material reconocible: `asfalto_sueno`, `fachada_sueno` y `suelo_onirico` no deben convertirse en ruido oscuro genérico.
