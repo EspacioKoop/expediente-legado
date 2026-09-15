@@ -70,10 +70,7 @@ static func montar(mundo: Node3D) -> void:
 
 static func _superficie_suelo(ficha: Dictionary) -> MeshInstance3D:
 	var material := TexturasPBR.crear(
-		String(ficha["material_pbr"]),
-		Color.WHITE,
-		float(ficha["escala"]),
-		true
+		String(ficha["material_pbr"]), Color.WHITE, float(ficha["escala"]), true
 	)
 	if material == null:
 		return null
@@ -107,11 +104,7 @@ static func _fachada(ficha: Dictionary) -> MeshInstance3D:
 		material.set_shader_parameter("color_base", ficha["color"])
 		material.set_shader_parameter(
 			"textura",
-			TexturaProcedural.por_nombre(
-				"revoco_urbano",
-				ficha["color"],
-				hash(ficha["nombre"])
-			)
+			TexturaProcedural.por_nombre("revoco_urbano", ficha["color"], hash(ficha["nombre"]))
 		)
 		material.set_shader_parameter("con_textura", true)
 		material.set_shader_parameter("escala_textura", 1.8)
