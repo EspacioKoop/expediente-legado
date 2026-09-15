@@ -24,22 +24,31 @@ Lee también el issue concreto, sus comentarios, PRs relacionadas, reviews y CI.
 3. Antes de modificar archivos publica en #182:
 
    ```text
-   CLAIM issue=#N agent=<nombre> branch=<rama> files=<rutas> goal=<objetivo>
+   CLAIM issue=#N agent=<nombre> branch=<rama> files=<rutas> goal=<objetivo> lease=48h
    ```
 
 4. Relee inmediatamente #182. Gana la reserva activa anterior por fecha de GitHub; en empate, el comentario con ID menor. Si hay solape, no edites.
-5. Trabaja en rama propia desde `main` actualizado: `feature/NN-slug`, `fix/NN-slug` o `docs/NN-slug`.
-6. Mantén el corte pequeño. Un paraguas como #279/#282/#283 se ejecuta por verticales, no con una reescritura total.
-7. Añade regresión ejecutable cuando cambie comportamiento. La inspección textual puede complementar, no sustituir, una prueba del contrato real cuando Godot pueda ejecutarlo.
-8. Pasa las pruebas canónicas y revisa el diff final.
-9. Abre PR a `main` y registra en #182:
+5. La lease dura 48 horas mientras no exista una PR abierta. Para renovar trabajo sin PR publica:
+
+   ```text
+   HEARTBEAT issue=#N branch=<rama>
+   ```
+
+   Una `PR_READY` asociada a una PR abierta mantiene la reserva sin depender del reloj. `.github/workflows/reservas.yml` publica `RELEASE` automáticamente al fusionar/cerrar la PR y barre leases vencidas cada 6 horas.
+6. Trabaja en rama propia desde `main` actualizado: `feature/NN-slug`, `fix/NN-slug` o `docs/NN-slug`.
+7. Mantén el corte pequeño. Un paraguas como #279/#282/#283 se ejecuta por verticales, no con una reescritura total.
+8. Añade regresión ejecutable cuando cambie comportamiento. La inspección textual puede complementar, no sustituir, una prueba del contrato real cuando Godot pueda ejecutarlo.
+9. Pasa las pruebas canónicas y revisa el diff final.
+10. Abre PR a `main` y registra en #182:
 
    ```text
    PR_READY issue=#N pr=#M sha=<sha> pruebas=<qué pasó> limites=<qué no cubre>
    ```
 
-10. `PR_READY` mantiene la reserva y **no autoriza merge**. Integra solo con autorización explícita de @eGurucharri y los gates exigidos en verde.
-11. Verifica el resultado remoto y publica `RELEASE`. Si pausas, deja SHA, estado y siguiente paso; el silencio no caduca la reserva.
+11. `PR_READY` mantiene la reserva y **no autoriza merge**. Integra solo con autorización explícita de @eGurucharri y los gates exigidos en verde.
+12. Si abandonas antes de abrir PR, publica `RELEASE issue=#N motivo=abandonado`. Tras cerrar o fusionar una PR no publiques un `RELEASE` duplicado: el workflow de reservas lo hace de forma idempotente.
+
+Las reservas legacy anteriores al corte de migración del 15 de septiembre de 2026 se liberan automáticamente porque se confirmó que no había otros agentes trabajando durante la migración. A partir de ahí, todo `CLAIM` nuevo debe llevar `lease=48h`.
 
 Usa `Closes #N` solo si el PR satisface el issue entero. Para entregas parciales, `Refs #N` y explica lo que queda.
 
@@ -66,15 +75,30 @@ Una reserva de un issue no concede automáticamente todos los archivos que ese i
 
 Si una herramienta escribe por error en `main`, revierte inmediatamente sin force-push, deja constancia en #182 y continúa únicamente desde una rama propia.
 
+## GDScript: preflight obligatorio
+
+Si modificas cualquier archivo `*.gd`, ejecuta **antes de abrir o dar por listo el PR**:
+
+```bash
+bash scripts/check_gdscript.sh
+```
+
+En local el script aplica `gdformat` primero, después ejecuta `gdlint`, la suite Python y un `gdformat --check --diff` final. En CI usa el mismo script, pero no modifica el checkout: exige que el GDScript ya llegue formateado. La versión canónica es `gdtoolkit==4.3.4`.
+
+Reglas para evitar falsos fallos:
+
+- no escribas tests que dependan de espacios, saltos de línea o encadenamientos exactos que `gdformat` pueda reescribir;
+- si un test Python inspecciona una llamada GDScript, usa una regex tolerante a whitespace o, mejor, una prueba del comportamiento/contrato;
+- si el preflight local modifica un `.gd`, revisa y conserva ese formato antes de ejecutar el resto de validaciones o crear el commit;
+- no omitas este paso porque el cambio parezca documental o pequeño: si toca `*.gd`, el preflight es obligatorio.
+
 ## Pruebas canónicas
 
 Desde la raíz:
 
 ```bash
+bash scripts/check_gdscript.sh
 python3 scripts/verificar_godot.py
-python3 -m unittest discover -s scripts -p 'test_*.py'
-gdlint godot
-gdformat --check --diff godot
 ```
 
 Desde `backend/`:
@@ -97,6 +121,7 @@ Estas ya han provocado fallos reales.
 - **Cadena `dia_*`**: muchas capacidades se integran por herencia. No escribas tests que exijan que una clase herede *directamente* de una base si el contrato solo necesita herencia transitiva.
 - **`PackedVector*Array` y `const`**: Godot 4.7 no acepta todas las construcciones dinámicas de `PackedVector2Array(...)` dentro de expresiones `const`. Usa estado estático de solo lectura por API cuando corresponda.
 - **GDScript lint**: una variable `static var` no es una constante; `gdlint` exige nombre de variable, no MAYÚSCULAS de constante.
+- **GDScript formato**: `gdformat` puede partir expresiones como `Objeto.metodo(...)` en varias líneas. No fijes tests al texto exacto cuando el contrato no dependa del layout.
 - **`.uid`**: el repo versiona el `.uid` de cada guion. Si creas un `.gd`, incluye su `.uid` cuando Godot lo genere/requiera.
 - **`godot/datos/textos.csv`**: el bloque `ARCHIVO_*` no debe perderse por una reordenación ingenua. Inserta sin asumir que todo el fichero está ordenado.
 - **Texto visible**: interfaz y guion usan claves de traducción; no hardcodees cadenas visibles en GDScript salvo contratos deliberadamente literales, como frases que deben coincidir con el documento.

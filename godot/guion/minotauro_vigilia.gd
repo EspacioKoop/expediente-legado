@@ -52,15 +52,7 @@ func _intentar_activar() -> bool:
 		return _activada
 	if _interacciones < INTERACCIONES_REQUERIDAS:
 		return false
-	_activada = (
-		SemillasOniricas
-		. activar_semilla_onirica(
-			_jornada,
-			ID_MITO,
-			FUENTE,
-			2,
-		)
-	)
+	_activada = SemillasOniricas.activar_semilla_onirica(_jornada, ID_MITO, FUENTE, 2)
 	_actualizar_feedback()
 	return _activada
 
