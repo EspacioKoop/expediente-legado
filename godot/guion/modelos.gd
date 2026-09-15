@@ -62,7 +62,13 @@ const PERFILES_FACIALES := {
 	"emperador":
 	{"piel": Color(0.72, 0.56, 0.43), "cabello": Color(0.08, 0.07, 0.06), "x": 0.96, "z": 0.92},
 	"aduanero_ny":
-	{"piel": Color(0.66, 0.48, 0.36), "cabello": Color(0.12, 0.09, 0.07), "x": 1.04, "z": 1.00},
+	{
+		"piel": Color(0.66, 0.48, 0.36),
+		"cabello": Color(0.18, 0.16, 0.14),
+		"barba": Color(0.28, 0.25, 0.22),
+		"x": 1.04,
+		"z": 1.00,
+	},
 	"correspondencia":
 	{"piel": Color(0.70, 0.53, 0.40), "cabello": Color(0.10, 0.08, 0.07), "x": 0.92, "z": 0.96},
 	"riegos":
@@ -73,11 +79,12 @@ const PERFILES_FACIALES := {
 
 ## `retrato` sigue siendo la clave estable que llega desde el catálogo, pero la
 ## identidad visual deja de salir solo de un hash. Cada entrada de esta tabla
-## habilita rasgos modelados para la persona histórica concreta. Puyi es el
-## primer corte; el resto del roster puede incorporarse uno a uno sin volver a
-## una fotografía pegada sobre la cara.
+## habilita rasgos modelados para la persona histórica concreta. Puyi abrió el
+## corte y Melville lo extiende; el resto del roster puede incorporarse uno a
+## uno sin volver a una fotografía pegada sobre la cara.
 const PERSONAJES_FACIALES := {
 	"emperador": "Puyi",
+	"aduanero_ny": "Herman Melville",
 }
 
 ## Lo que se carga una vez y se reusa. Las salas repiten mueble —seis
@@ -255,6 +262,11 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 		# gafas redondas. Acercamos ligeramente los ojos para que el armazón no
 		# invada las sienes y siga integrado en la elipse.
 		separacion = radio_x * 0.47
+	elif personaje == "Herman Melville":
+		# En los retratos de madurez la barba domina una cara relativamente larga;
+		# dejamos los ojos algo más juntos para reservar volumen a las sienes y a
+		# la masa de barba que envuelve la mandíbula.
+		separacion = radio_x * 0.49
 	var altura_ojos := centro_y + alto * 0.12
 
 	var oscuro := Color(0.10, 0.08, 0.07)
@@ -262,6 +274,7 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 		"piel", Color(0.58, 0.43, 0.34).lerp(Color(0.82, 0.68, 0.54), float(semilla % 7) / 6.0)
 	)
 	var cabello: Color = perfil.get("cabello", oscuro)
+	var barba: Color = perfil.get("barba", cabello)
 
 	# La cabeza procedural envuelve el cráneo importado: no hay una placa frontal
 	# que pueda verse de canto. Las pequeñas variaciones conservan el roster sin
@@ -275,6 +288,11 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 	if personaje == "Puyi":
 		pelo_y = centro_y + radio_y * 0.76
 		pelo_escala = Vector3(radio_x * 0.99, alto * 0.13, radio_z * 0.84)
+	elif personaje == "Herman Melville":
+		# Frente alta y pelo retirado/peinado hacia atrás en los retratos de
+		# madurez. Las sienes específicas completan la silueta más abajo.
+		pelo_y = centro_y + radio_y * 0.82
+		pelo_escala = Vector3(radio_x * 0.94, alto * 0.11, radio_z * 0.78)
 	_cabello_cabeza(enganche, Vector3(0.0, pelo_y, -radio_z * 0.04), pelo_escala, cabello)
 
 	# Los centros de ojos y boca se colocan unos milímetros DENTRO de la
@@ -308,12 +326,16 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 			oscuro,
 			cabello
 		)
+	elif personaje == "Herman Melville":
+		_rasgos_melville(enganche, alto, centro_y, radio_x, radio_y, radio_z, cabello, barba)
 
 	var nariz_y := centro_y - alto * 0.035
 	var z_nariz := _frente_cabeza(0.0, nariz_y, centro_y, radio_x, radio_y, radio_z) - alto * 0.015
 	var nariz_escala := Vector3(alto * 0.050, alto * 0.105, alto * 0.060)
 	if personaje == "Puyi":
 		nariz_escala = Vector3(alto * 0.043, alto * 0.100, alto * 0.052)
+	elif personaje == "Herman Melville":
+		nariz_escala = Vector3(alto * 0.048, alto * 0.118, alto * 0.064)
 	_rasgo_esfera(enganche, Vector3(0.0, nariz_y, z_nariz), nariz_escala, piel)
 
 	var boca_y := centro_y - alto * 0.20
@@ -321,6 +343,8 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 	var ancho_boca := alto * (0.13 + float(semilla % 4) * 0.010)
 	if personaje == "Puyi":
 		ancho_boca = alto * 0.105
+	elif personaje == "Herman Melville":
+		ancho_boca = alto * 0.10
 	_rasgo_esfera(
 		enganche,
 		Vector3(0.0, boca_y, z_boca),
@@ -398,6 +422,75 @@ static func _rasgos_puyi(
 		Vector3(radio_x * 0.48, alto * 0.055, radio_z * 0.10),
 		cabello
 	)
+
+
+## Melville se reconoce por la masa de barba y bigote, no por una textura.
+##
+## Las piezas se solapan dentro del elipsoide de cabeza para construir una
+## mandíbula barbada continua a 3/4. Las sienes añaden el pelo peinado hacia
+## atrás de sus retratos de madurez y dejan visible una frente alta.
+static func _rasgos_melville(
+	padre: Node3D,
+	alto: float,
+	centro_y: float,
+	radio_x: float,
+	radio_y: float,
+	radio_z: float,
+	cabello: Color,
+	barba: Color
+) -> void:
+	var barba_y := centro_y - alto * 0.22
+	var barba_x := radio_x * 0.23
+	var z_barba_izq := (
+		_frente_cabeza(-barba_x, barba_y, centro_y, radio_x, radio_y, radio_z) - alto * 0.020
+	)
+	var z_barba_der := (
+		_frente_cabeza(barba_x, barba_y, centro_y, radio_x, radio_y, radio_z) - alto * 0.020
+	)
+	var escala_barba := Vector3(radio_x * 0.38, alto * 0.17, radio_z * 0.18)
+	_rasgo_esfera(padre, Vector3(-barba_x, barba_y, z_barba_izq), escala_barba, barba)
+	_rasgo_esfera(padre, Vector3(barba_x, barba_y, z_barba_der), escala_barba, barba)
+
+	# Una tercera masa prolonga la barba por debajo de la mandíbula. Al compartir
+	# volumen con las dos mejillas no queda un bloque suelto visto de perfil.
+	var menton_y := centro_y - alto * 0.34
+	var z_menton := (
+		_frente_cabeza(0.0, menton_y, centro_y, radio_x, radio_y, radio_z) - alto * 0.020
+	)
+	_rasgo_esfera(
+		padre,
+		Vector3(0.0, menton_y, z_menton),
+		Vector3(radio_x * 0.62, alto * 0.22, radio_z * 0.20),
+		barba
+	)
+
+	# Bigote partido: dos volúmenes pequeños que nacen bajo la nariz y se funden
+	# con la barba. No se dibuja una raya frontal sobre la cara.
+	var bigote_y := centro_y - alto * 0.13
+	var bigote_x := alto * 0.050
+	var z_bigote_izq := (
+		_frente_cabeza(-bigote_x, bigote_y, centro_y, radio_x, radio_y, radio_z) - alto * 0.008
+	)
+	var z_bigote_der := (
+		_frente_cabeza(bigote_x, bigote_y, centro_y, radio_x, radio_y, radio_z) - alto * 0.008
+	)
+	var escala_bigote := Vector3(alto * 0.095, alto * 0.028, alto * 0.034)
+	_rasgo_esfera(padre, Vector3(-bigote_x, bigote_y, z_bigote_izq), escala_bigote, barba)
+	_rasgo_esfera(padre, Vector3(bigote_x, bigote_y, z_bigote_der), escala_bigote, barba)
+
+	# Dos masas laterales, estrechas y altas, continúan la tapa retirada hacia
+	# atrás. Así la frente queda despejada sin que el pelo parezca un casco.
+	var sien_y := centro_y + radio_y * 0.48
+	var sien_x := radio_x * 0.56
+	var z_sien_izq := (
+		_frente_cabeza(-sien_x, sien_y, centro_y, radio_x, radio_y, radio_z) - alto * 0.030
+	)
+	var z_sien_der := (
+		_frente_cabeza(sien_x, sien_y, centro_y, radio_x, radio_y, radio_z) - alto * 0.030
+	)
+	var escala_sien := Vector3(radio_x * 0.28, alto * 0.10, radio_z * 0.12)
+	_rasgo_esfera(padre, Vector3(-sien_x, sien_y, z_sien_izq), escala_sien, cabello)
+	_rasgo_esfera(padre, Vector3(sien_x, sien_y, z_sien_der), escala_sien, cabello)
 
 
 static func _aro_gafa(
