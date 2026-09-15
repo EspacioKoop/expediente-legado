@@ -5,6 +5,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DIA_GATO = ROOT / "godot" / "guion" / "dia_gato_app.gd"
 AVATAR = ROOT / "godot" / "guion" / "gato_asistente_2d.gd"
 AYUDA = ROOT / "godot" / "guion" / "gato_ayuda.gd"
+ATLAS = ROOT / "godot" / "arte" / "gato_asistente_gba.svg"
 
 
 class GatoAsistenteVisualTest(unittest.TestCase):
@@ -12,6 +13,7 @@ class GatoAsistenteVisualTest(unittest.TestCase):
         self.dia = DIA_GATO.read_text(encoding="utf-8")
         self.avatar = AVATAR.read_text(encoding="utf-8")
         self.ayuda = AYUDA.read_text(encoding="utf-8")
+        self.atlas = ATLAS.read_text(encoding="utf-8")
 
     def test_el_asistente_se_ancla_abajo_a_la_derecha(self):
         self.assertIn("Control.PRESET_BOTTOM_RIGHT", self.dia)
@@ -37,14 +39,37 @@ class GatoAsistenteVisualTest(unittest.TestCase):
     def test_reduccion_movimiento_congela_la_animacion(self):
         self.assertIn('preferencias.get("reduccion_movimiento", false)', self.dia)
         self.assertIn("set_process(not reduccion_movimiento)", self.avatar)
-        self.assertIn("if _reduccion_movimiento else", self.avatar)
+        self.assertIn("if _reduccion_movimiento:", self.avatar)
+        self.assertIn("return FRAME_IDLE", self.avatar)
 
-    def test_el_avatar_es_procedural_y_tiene_cuerpo_completo(self):
-        self.assertIn("draw_colored_polygon", self.avatar)
-        self.assertIn("# Torso sentado y pecho claro", self.avatar)
-        self.assertIn("# Cola grande detrás del cuerpo", self.avatar)
-        self.assertNotIn("Texture2D", self.avatar)
-        self.assertNotIn("preload(", self.avatar)
+    def test_el_avatar_usa_atlas_gba_original(self):
+        self.assertIn("gato_asistente_gba.svg", self.avatar)
+        self.assertIn("Texture2D", self.avatar)
+        self.assertIn("draw_texture_rect_region", self.avatar)
+        self.assertIn("TEXTURE_FILTER_NEAREST", self.avatar)
+        self.assertIn("ANCHO_FRAME := 48.0", self.avatar)
+        self.assertIn("ALTO_FRAME := 64.0", self.avatar)
+        self.assertIn("Asset original", self.atlas)
+        self.assertNotIn("draw_colored_polygon", self.avatar)
+
+    def test_el_atlas_reserva_ocho_posturas_discretas(self):
+        frames = (
+            "idle",
+            "alerta",
+            "parpadeo",
+            "hambriento",
+            "satisfecho",
+            "loaf",
+            "mirando",
+            "espalda",
+        )
+        self.assertEqual(self.atlas.count('id="frame-'), len(frames))
+        for frame in frames:
+            self.assertIn(f'id="frame-{frame}"', self.atlas)
+        self.assertIn("FRAME_PARPADEO", self.avatar)
+        self.assertIn("FRAME_ALERTA", self.avatar)
+        self.assertIn("FRAME_MIRANDO", self.avatar)
+        self.assertIn("FRAME_HAMBRIENTO", self.avatar)
 
 
 if __name__ == "__main__":
