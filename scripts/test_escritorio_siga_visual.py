@@ -87,7 +87,7 @@ class EscritorioSigaVisualTest(unittest.TestCase):
     def test_el_adaptador_asigna_solo_iconos_a_apps_reales(self):
         fuente = ADAPTADOR.read_text(encoding="utf-8")
         self.assertIn("EscritorioSigaVisual.new()", fuente)
-        self.assertIn('registrar_identidad_visual("siga-98", "siga")', fuente)
+        self.assertIn('EscritorioSigaApp.new("siga-98", titulo_siga, creador_visor, "siga")', fuente)
         self.assertIn('registrar_identidad_visual("ayuda-sistema", "ayuda")', fuente)
         for id_sin_app in ("equipo", "documentos", "red", "papelera"):
             self.assertNotIn(f'registrar_aplicacion("{id_sin_app}"', fuente)

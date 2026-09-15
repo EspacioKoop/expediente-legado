@@ -1,4 +1,4 @@
-## Adaptador del puesto de trabajo al shell de escritorio (#534).
+## Adaptador del puesto de trabajo al shell de escritorio (#534, #535, #536).
 ##
 ## `Dia` sigue siendo dueño de entrar/salir del puesto y de persistir la partida.
 ## Este controller detecta únicamente la pantalla que contiene el visor histórico,
@@ -6,6 +6,8 @@
 extends Node
 
 var _pantalla_envuelta_id := 0
+var _siga_app: EscritorioSigaApp
+var _explorador_app: EscritorioSigaApp
 
 
 func _process(_delta: float) -> void:
@@ -40,13 +42,27 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	)
 	escritorio.establecer_reloj_narrativo(tr("ESCRITORIO_RELOJ") % int(dia.jornada.get("dia", 1)))
 
-	escritorio.registrar_identidad_visual("siga-98", "siga")
-	escritorio.registrar_identidad_visual("ayuda-sistema", "ayuda")
 	var creador_visor := Callable(self, "_crear_visor")
 	var titulo_siga := tr("ESCRITORIO_SIGA_TITULO")
-	escritorio.registrar_aplicacion("siga-98", titulo_siga, creador_visor)
+	_siga_app = EscritorioSigaApp.new("siga-98", titulo_siga, creador_visor, "siga")
+	_siga_app.registrar_en(escritorio)
+
+	# El Explorador consume el mismo contrato que SIGA, pero su contenido se crea
+	# bajo demanda y recibe solo el contexto de campaña que necesita para resolver
+	# reglas declarativas. No conserva ni modifica jornada/expedientes por su cuenta.
+	_explorador_app = EscritorioSigaApp.new(
+		"explorador", "Explorador", Callable(self, "_crear_explorador"), "equipo"
+	)
+	_explorador_app.tamano_minimo = Vector2(480, 330)
+	_explorador_app.tamano_preferido = Vector2(720, 520)
+	_explorador_app.redimensionable = true
+	_explorador_app.registrar_en(escritorio)
+
+	# Ayuda sigue siendo utilidad propia del shell; las aplicaciones de juego usan
+	# EscritorioSigaApp y no conocen la tabla de ventanas interna.
+	escritorio.registrar_identidad_visual("ayuda-sistema", "ayuda")
 	escritorio.activar_ayuda_sistema()
-	escritorio.adoptar_aplicacion("siga-98", titulo_siga, visor, creador_visor)
+	_siga_app.adoptar_en(escritorio, visor)
 	escritorio.salir_solicitado.connect(_solicitar_salida)
 
 	# `_abrir_expediente()` conserva temporalmente el botón histórico para que
@@ -59,6 +75,26 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 
 func _crear_visor() -> Control:
 	return load("res://escenas/visor.tscn").instantiate() as Control
+
+
+func _crear_explorador() -> Control:
+	var explorador := ExploradorSiga.new()
+	var dia := get_parent()
+	var jornada_actual := 1
+	if dia != null:
+		jornada_actual = int(dia.jornada.get("dia", 1))
+	(
+		explorador
+		. configurar_contexto(
+			{
+				"jornada": jornada_actual,
+				# Reservas explícitas para #28: por defecto no revelan ni desbloquean nada.
+				"habilitar_enlace13": false,
+				"credenciales": [],
+			}
+		)
+	)
+	return explorador
 
 
 func _solicitar_salida() -> void:
