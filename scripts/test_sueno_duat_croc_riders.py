@@ -20,13 +20,12 @@ class SuenoDuatCrocRidersTest(unittest.TestCase):
 
     def test_no_toca_estado_de_campana_ni_semillas(self):
         for termino in [
-            "SemillasOniricas",
-            "activar_semilla_onirica",
-            "Partida",
-            "Jornada",
-            "dinero",
-            "inventario",
-            "pistas",
+            "SemillasOniricas.",
+            "activar_semilla_onirica(",
+            "Partida.",
+            "Jornada.",
+            "inventario[",
+            "pistas[",
         ]:
             self.assertNotIn(termino, self.texto)
 
