@@ -13,10 +13,10 @@ class TiendaVideojuegosTest(unittest.TestCase):
         cls.tienda = TIENDA.read_text(encoding="utf-8")
         cls.doc = DOC.read_text(encoding="utf-8")
 
-    def test_catalogo_empieza_con_rom_propia_reproducible(self):
-        self.assertIn('"id": "caza_pixeles_98"', self.tienda)
-        self.assertIn('"ruta": "res://roms/caza_pixeles_98.gbc"', self.tienda)
+    def test_catalogo_sale_del_indice_de_roms_propias(self):
+        self.assertIn("RomsPropias.a_la_venta()", self.tienda)
         self.assertIn('"origen": "propia"', self.tienda)
+        self.assertNotIn("const CATALOGO", self.tienda)
 
     def test_compra_solo_durante_trayecto(self):
         self.assertIn('jornada.get("fase", "")) != "trayecto"', self.tienda)
@@ -47,8 +47,8 @@ class TiendaVideojuegosTest(unittest.TestCase):
         self.assertNotIn("Partida.", self.tienda)
 
     def test_no_comercializa_roms_del_usuario_ni_descarga_contenido(self):
-        catalogo = self.tienda.split("const CATALOGO :=", 1)[1].split(
-            "static func catalogo", 1
+        catalogo = self.tienda.split("static func catalogo", 1)[1].split(
+            "static func compras", 1
         )[0]
         self.assertNotIn('user://roms', catalogo)
         for termino in ("HTTPRequest", "HTTPClient", "download", "shell_open", "execute("):
@@ -60,7 +60,7 @@ class TiendaVideojuegosTest(unittest.TestCase):
         for referencia in ("#83", "#93", "#124", "#244", "#277"):
             self.assertIn(referencia, self.doc)
         self.assertIn("no modifica `espacios_catalogo.gd`", self.doc)
-        self.assertIn("no filtra todavía el selector del emulador", self.doc)
+        self.assertIn("filtra el selector del emulador", self.doc)
 
 
 if __name__ == "__main__":

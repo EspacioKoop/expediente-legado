@@ -1,0 +1,175 @@
+{
+  "_regla": "Índice único de ROMs propias de SIGA-98. Toda ROM propia que se compile, se venda, aparezca en la consola o active una semilla onírica está aquí con un id estable. Solo código propio compilado desde gbc/minijuegos/<id>; nunca BIOS, dumps ni ROMs comerciales. Ver docs/roms-propias.md.",
+  "estados": {
+    "jugable": "Hay fuente en gbc/minijuegos/<id>, compila con RGBDS y el build la deja en res://roms/<id>.gbc.",
+    "en_proyecto": "Decidida y con issue, sin fuente todavía. No se compila, no se vende y no aparece en la consola."
+  },
+  "roms": [
+    {
+      "id": "caza_pixeles_98",
+      "titulo": "Caza Píxeles 98",
+      "estado": "jugable",
+      "genero": "arcade de 30 segundos",
+      "resumen": "Perseguir un rombo con el cursor antes de que acabe el tiempo.",
+      "fuente": "gbc/minijuegos/caza_pixeles_98",
+      "rom": "res://roms/caza_pixeles_98.gbc",
+      "cabecera": "CAZAPIXEL98",
+      "cgb": "dual",
+      "incluida": true,
+      "precio": 0,
+      "issues": [
+        124,
+        95,
+        384,
+        386
+      ],
+      "mito": ""
+    },
+    {
+      "id": "paper_planes_98",
+      "titulo": "Paper Planes 98",
+      "estado": "jugable",
+      "genero": "vuelo de desplazamiento",
+      "resumen": "Un avión de papel por Nueva York 1998: Liberty, WTC, Brooklyn Bridge y Empire.",
+      "fuente": "gbc/minijuegos/paper_planes_98",
+      "rom": "res://roms/paper_planes_98.gbc",
+      "cabecera": "PAPERPLANES98",
+      "cgb": "dual",
+      "incluida": false,
+      "precio": 45,
+      "issues": [
+        95,
+        388
+      ],
+      "mito": ""
+    },
+    {
+      "id": "croc_riders_98",
+      "titulo": "Croc Riders 98",
+      "estado": "jugable",
+      "genero": "carreras",
+      "resumen": "Cocodrilos moteros de El Cairo a Giza en tres carriles, con nitro y rivales.",
+      "fuente": "gbc/minijuegos/croc_riders_98",
+      "rom": "res://roms/croc_riders_98.gbc",
+      "cabecera": "CROCRIDERS98",
+      "cgb": "dual",
+      "incluida": false,
+      "precio": 45,
+      "issues": [
+        95,
+        389
+      ],
+      "mito": ""
+    },
+    {
+      "id": "ariadna_labertinto_98",
+      "titulo": "ARIADNA",
+      "estado": "en_proyecto",
+      "genero": "laberinto",
+      "resumen": "Completar un recorrido o marcar una ruta en un laberinto de archivo; contraparte de vigilia del sueño del Minotauro.",
+      "fuente": "",
+      "rom": "",
+      "cabecera": "",
+      "cgb": "",
+      "incluida": false,
+      "precio": 0,
+      "issues": [
+        437,
+        442,
+        512
+      ],
+      "mito": "minotauro"
+    },
+    {
+      "id": "uruk_98",
+      "titulo": "URUK 98",
+      "estado": "en_proyecto",
+      "genero": "exploración",
+      "resumen": "Explorar una ciudad mínima y reconstruir una tablilla; contraparte del sueño de Gilgamesh.",
+      "fuente": "",
+      "rom": "",
+      "cabecera": "",
+      "cgb": "",
+      "incluida": false,
+      "precio": 0,
+      "issues": [
+        436,
+        442
+      ],
+      "mito": "gilgamesh"
+    },
+    {
+      "id": "hydra_loop_98",
+      "titulo": "HYDRA LOOP",
+      "estado": "en_proyecto",
+      "genero": "puzle de acción",
+      "resumen": "Cortar cabezas a lo loco empeora la pantalla hasta descubrir el nodo común.",
+      "fuente": "",
+      "rom": "",
+      "cabecera": "",
+      "cgb": "",
+      "incluida": false,
+      "precio": 0,
+      "issues": [
+        439,
+        442
+      ],
+      "mito": "hidra"
+    },
+    {
+      "id": "ryu_flow_98",
+      "titulo": "RYU FLOW",
+      "estado": "en_proyecto",
+      "genero": "puzle de flujo",
+      "resumen": "Desviar cauces para guiar a una criatura serpentina; la semilla se activa al completar un desvío, no al arrancar. Arte del cartucho en docs/visuales/ryu-flow.",
+      "fuente": "",
+      "rom": "",
+      "cabecera": "",
+      "cgb": "",
+      "incluida": false,
+      "precio": 0,
+      "issues": [
+        440,
+        442,
+        542
+      ],
+      "mito": "dragon_japones"
+    },
+    {
+      "id": "duat_98",
+      "titulo": "DUAT 98",
+      "estado": "en_proyecto",
+      "genero": "puzle de pesos",
+      "resumen": "Pequeño puzle de cámaras y contrapesos; contraparte del pesaje burocrático del Duat.",
+      "fuente": "",
+      "rom": "",
+      "cabecera": "",
+      "cgb": "",
+      "incluida": false,
+      "precio": 0,
+      "issues": [
+        441,
+        442
+      ],
+      "mito": "duat"
+    },
+    {
+      "id": "aquiles_98",
+      "titulo": "Sin título (Aquiles)",
+      "estado": "en_proyecto",
+      "genero": "duelo",
+      "resumen": "Un rival que solo reacciona en un punto concreto; contraparte del sueño de Aquiles. Título por decidir.",
+      "fuente": "",
+      "rom": "",
+      "cabecera": "",
+      "cgb": "",
+      "incluida": false,
+      "precio": 0,
+      "issues": [
+        438,
+        442
+      ],
+      "mito": "aquiles"
+    }
+  ]
+}

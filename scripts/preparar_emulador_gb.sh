@@ -84,11 +84,24 @@ compilar_nativo() {
     )
 }
 
+# Compila TODAS las ROMs jugables del índice godot/datos/roms_propias.json y
+# las deja en godot/roms/<id>.gbc. Una ROM en proyecto no tiene fuente y se omite.
 compilar_rom() {
     mkdir -p "$RAIZ/godot/roms"
-    make -C "$RAIZ/gbc/minijuegos/caza_pixeles_98" clean all
-    cp "$RAIZ/gbc/minijuegos/caza_pixeles_98/build/caza_pixeles_98.gbc" \
-        "$RAIZ/godot/roms/caza_pixeles_98.gbc"
+    local id
+    while read -r id; do
+        make -C "$RAIZ/gbc/minijuegos/$id" clean all
+        cp "$RAIZ/gbc/minijuegos/$id/build/$id.gbc" "$RAIZ/godot/roms/$id.gbc"
+    done < <("$PYTHON" - "$RAIZ/godot/datos/roms_propias.json" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as archivo:
+    for rom in json.load(archivo)["roms"]:
+        if rom["estado"] == "jugable":
+            print(rom["id"])
+PY
+)
 }
 
 case "$MODO" in
