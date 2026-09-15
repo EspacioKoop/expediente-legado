@@ -4,6 +4,8 @@ import re
 import subprocess
 import unittest
 
+from scripts.godot_pruebas import importar_proyecto
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SUENO = ROOT / "godot" / "guion" / "sueno_gilgamesh.gd"
@@ -82,24 +84,7 @@ class SuenoGilgameshTest(unittest.TestCase):
 
     def test_contrato_funciona_en_godot_headless(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
-        importacion = subprocess.run(
-            [
-                motor,
-                "--headless",
-                "--path",
-                str(ROOT / "godot"),
-                "--editor",
-                "--import",
-                "--quit",
-            ],
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            timeout=60,
-            check=False,
-        )
-        self.assertEqual(importacion.returncode, 0, importacion.stdout)
-        self.assertNotIn("Parse Error:", importacion.stdout)
+        importar_proyecto()
 
         resultado = subprocess.run(
             [

@@ -83,7 +83,9 @@ Si modificas cualquier archivo `*.gd`, ejecuta **antes de abrir o dar por listo 
 bash scripts/check_gdscript.sh
 ```
 
-En local el script aplica `gdformat` primero, después ejecuta `gdlint`, la suite Python y un `gdformat --check --diff` final. En CI usa el mismo script, pero no modifica el checkout: exige que el GDScript ya llegue formateado. La versión canónica es `gdtoolkit==4.3.4`.
+En local el script aplica `gdformat` primero, después ejecuta `gdlint`, la suite Python y un `gdformat --check --diff` final. En CI usa el mismo script, pero no modifica el checkout: exige que el GDScript ya llegue formateado. La versión canónica es `gdtoolkit==4.3.4`, y el propio script la instala en un venv si no la encuentra en el PATH.
+
+La suite necesita la GDExtension GB/GBC y las ROMs propias compiladas; sin ellas, las pruebas que arrancan Godot se saltan diciéndolo. `bash scripts/preparar_entorno.sh` deja ambas listas y es idempotente. Con `SIGA98_EXIGIR_EXTENSION=1` esos saltos pasan a ser fallos: CI lo define siempre, y conviene usarlo en local antes de dar un verde por bueno.
 
 Reglas para evitar falsos fallos:
 

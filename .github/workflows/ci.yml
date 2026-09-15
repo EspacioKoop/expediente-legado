@@ -97,6 +97,11 @@ jobs:
 
       - name: Preflight GDScript canónico
         shell: bash
+        # El script formatea, lintea y ejecuta la suite de scripts/. Aquí la
+        # GDExtension ya está compilada, así que su ausencia sería un entorno
+        # roto y no un salto legítimo: se exige.
+        env:
+          SIGA98_EXIGIR_EXTENSION: '1'
         run: bash scripts/check_gdscript.sh
 
       - name: Importar, ejecutar la suite y arrancar el juego

@@ -4,6 +4,8 @@ import re
 import subprocess
 import unittest
 
+from scripts.godot_pruebas import importar_proyecto
+
 
 ROOT = Path(__file__).resolve().parents[1]
 PRUEBA_GODOT = "pruebas/pruebas_sellos_persistencia.gd"
@@ -13,23 +15,7 @@ RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 class SellosPersistenciaRuntimeTest(unittest.TestCase):
     def test_idempotencia_y_recarga_en_godot_real(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
-        importacion = subprocess.run(
-            [
-                motor,
-                "--headless",
-                "--path",
-                str(ROOT / "godot"),
-                "--editor",
-                "--import",
-                "--quit",
-            ],
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            timeout=60,
-            check=False,
-        )
-        self.assertEqual(importacion.returncode, 0, importacion.stdout)
+        importar_proyecto()
 
         resultado = subprocess.run(
             [

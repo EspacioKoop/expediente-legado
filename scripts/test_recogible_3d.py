@@ -3,7 +3,7 @@ from pathlib import Path
 import subprocess
 import unittest
 
-from scripts.verificar_godot import validar
+from scripts.godot_pruebas import importar_proyecto
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -12,22 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class Recogible3DTest(unittest.TestCase):
     def test_contrato_de_recogida_3d_en_godot(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
-        importacion = subprocess.run(
-            [
-                motor,
-                "--headless",
-                "--path",
-                str(ROOT / "godot"),
-                "--editor",
-                "--import",
-            ],
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            timeout=120,
-            check=False,
-        )
-        validar(importacion.stdout, importacion.returncode, importando=True)
+        importar_proyecto()
         resultado = subprocess.run(
             [
                 motor,
