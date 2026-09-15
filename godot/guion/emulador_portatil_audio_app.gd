@@ -113,8 +113,11 @@ func _bombear_audio_emulado() -> void:
 		)
 	_audio_pendiente.append_array(nuevos_frames)
 	if _audio_pendiente.size() > MAX_FRAMES_AUDIO_PENDIENTE:
-		_audio_pendiente = _audio_pendiente.slice(
-			_audio_pendiente.size() - MAX_FRAMES_AUDIO_PENDIENTE,
+		_audio_pendiente = (
+			_audio_pendiente
+			. slice(
+				_audio_pendiente.size() - MAX_FRAMES_AUDIO_PENDIENTE,
+			)
 		)
 
 	var disponibles := _audio_playback.get_frames_available()
