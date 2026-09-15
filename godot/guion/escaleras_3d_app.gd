@@ -7,6 +7,7 @@ extends Node3D
 
 signal terminada
 
+const ARTE_ESCALERAS: PackedScene = preload("res://arte/escaleras_135/escaleras_135_arte.tscn")
 const ORIGEN := Vector3(0.0, 0.0, 150.0)
 const VELOCIDAD := 6.0
 const ZONA_MUERTA_STICK := 0.2
@@ -104,8 +105,8 @@ func _montar_camara() -> void:
 
 
 func _montar_geometria() -> void:
-	# Caja del hueco. Se mantiene deliberadamente sobria: el objetivo de este
-	# corte es validar espacio, orientación y ritmo sin comprometer arte final.
+	# Caja del hueco. La geometría sigue siendo la autoridad del recorrido;
+	# `escaleras_135_arte.tscn` la viste sin añadir colisiones.
 	_caja("MuroOeste", Vector3(-1.32, 0.0, 0.9), Vector3(0.16, 6.5, 9.0), HORMIGON_OSCURO)
 	_caja("MuroEste", Vector3(4.32, 0.0, 0.9), Vector3(0.16, 6.5, 9.0), HORMIGON_OSCURO)
 	_caja("MuroFondo", Vector3(1.5, 0.0, -4.0), Vector3(5.8, 6.5, 0.16), HORMIGON_OSCURO)
@@ -138,6 +139,11 @@ func _montar_geometria() -> void:
 	luz_portal.light_energy = 1.35
 	luz_portal.omni_range = 4.5
 	add_child(luz_portal)
+
+	var arte: Node3D = ARTE_ESCALERAS.instantiate()
+	arte.name = "VestuarioEscaleras135"
+	arte.position = ORIGEN
+	add_child(arte)
 
 
 func _montar_tramo(nombre: String, desde: Vector3, hasta: Vector3) -> void:
