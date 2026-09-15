@@ -9,6 +9,7 @@ signal terminada
 
 const ORIGEN := Vector3(0.0, 0.0, 150.0)
 const VELOCIDAD := 6.0
+const ZONA_MUERTA_STICK := 0.2
 const ALTURA_CAMARA := 0.78
 const ANTICIPO_MIRADA := 1.35
 const ANCHO_TRAMO := 2.15
@@ -51,9 +52,12 @@ func _process(delta: float) -> void:
 	if _terminando:
 		return
 
-	# `ui_up`/`ui_down` funcionan también con mando y no añaden acciones nuevas
-	# al proyecto. La ruta se puede retroceder hasta el rellano inicial.
-	var avance := Input.get_axis("ui_down", "ui_up")
+	# Mismo esquema de movimiento que `caminante.gd` (#396): las acciones
+	# semánticas `mover_adelante`/`mover_atras` respetan teclado, mando y el
+	# remapeo de #113. `ui_up`/`ui_down` no cubrían WASD y dejaban al jugador
+	# bloqueado en la bajada (#562). La ruta se puede retroceder hasta el
+	# rellano inicial.
+	var avance := Input.get_axis("mover_atras", "mover_adelante")
 	if not is_zero_approx(avance):
 		_distancia = clampf(_distancia + avance * VELOCIDAD * delta, 0.0, _longitud_total)
 		_actualizar_camara()

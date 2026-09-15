@@ -8,7 +8,9 @@ extends "res://guion/dia_gato_app.gd"
 
 const POS_PUESTO := Vector3(-4.0, 1.45, 1.0)
 const TEXTO_ONBOARDING := (
-	"PUESTO 4-B · SIGA-98\n" + "Acérquese al terminal verde para abrir su primer expediente."
+	"PUESTO 4-B · SIGA-98\n"
+	+ "Acérquese al terminal verde para abrir su primer expediente.\n"
+	+ "Mayús corre, Ctrl agacha y Espacio salta (remapeable en el menú)."
 )
 
 var _pista_puesto: PanelContainer

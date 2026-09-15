@@ -1,8 +1,6 @@
-## El cuerpo que anda. Primera persona, sin correr y sin saltar.
-##
-## Las dos ausencias son deliberadas: esto no es un juego de movimiento, es el
-## rato entre el trabajo y la cama. Ir despacio es parte de lo que se cuenta, y
-## un salto convertiría cualquier sitio en un sitio para trepar.
+## El cuerpo que anda. Primera persona, con paso normal, carrera, agachado y
+## salto (petición de playtest tras #562): siguen siendo gestos utilitarios
+## para sortear la geometría del sitio, no un modo de movimiento propio.
 extends CharacterBody3D
 
 enum DispositivoEntrada {
@@ -11,6 +9,8 @@ enum DispositivoEntrada {
 }
 
 const VELOCIDAD := 2.6
+const VELOCIDAD_CORRER := 4.4
+const VELOCIDAD_AGACHADO := 1.4
 const ACELERACION := 10.0
 const FRENADO := 14.0
 const SENSIBILIDAD_RATON_BASE := 0.0022
@@ -21,6 +21,17 @@ const MOVER_IZQUIERDA := "mover_izquierda"
 const MOVER_DERECHA := "mover_derecha"
 const MOVER_ADELANTE := "mover_adelante"
 const MOVER_ATRAS := "mover_atras"
+const SALTAR := "saltar"
+const CORRER := "correr"
+const AGACHARSE := "agacharse"
+
+## Altura de la cápsula y de la cámara en pie frente a agachado. La cápsula
+## vive en `escenas/caminante.tscn`; aquí solo se redimensiona en caliente.
+const ALTURA_NORMAL := 1.7
+const ALTURA_AGACHADO := 1.05
+const CAMARA_Y_NORMAL := 0.65
+const CAMARA_Y_AGACHADO := 0.30
+const IMPULSO_SALTO := 4.6
 
 ## El stick derecho mira. Va en radianes POR SEGUNDO y no por fotograma, que es
 ## lo que hace que mirar cueste lo mismo en una máquina lenta que en una rápida.
@@ -63,8 +74,10 @@ var _objetivo_foco: Interactuable3D
 var _preferencias_camara: Dictionary = {}
 var _ultimo_dispositivo := DispositivoEntrada.TECLADO_RATON
 var _texto_interaccion_actual := ""
+var _agachado := false
 
 @onready var _camara: Camera3D = $Camara
+@onready var _colision: CollisionShape3D = $Colision
 
 
 func _ready() -> void:
@@ -216,6 +229,9 @@ func _asegurar_controles_movimiento() -> void:
 	_asegurar_accion(MOVER_DERECHA, KEY_D, KEY_RIGHT)
 	_asegurar_accion(MOVER_ADELANTE, KEY_W, KEY_UP)
 	_asegurar_accion(MOVER_ATRAS, KEY_S, KEY_DOWN)
+	_asegurar_accion_simple(SALTAR, KEY_SPACE)
+	_asegurar_accion_simple(CORRER, KEY_SHIFT)
+	_asegurar_accion_simple(AGACHARSE, KEY_CTRL)
 
 
 func _asegurar_accion(accion: StringName, tecla_fisica: Key, flecha: Key) -> void:
@@ -230,6 +246,15 @@ func _asegurar_accion(accion: StringName, tecla_fisica: Key, flecha: Key) -> voi
 	var cursor := InputEventKey.new()
 	cursor.keycode = flecha
 	InputMap.action_add_event(accion, cursor)
+
+
+func _asegurar_accion_simple(accion: StringName, tecla_fisica: Key) -> void:
+	if InputMap.has_action(accion):
+		return
+	InputMap.add_action(accion)
+	var evento := InputEventKey.new()
+	evento.physical_keycode = tecla_fisica
+	InputMap.action_add_event(accion, evento)
 
 
 func _ajustar_volumen_pisadas() -> void:
@@ -261,20 +286,56 @@ func _unhandled_input(evento: InputEvent) -> void:
 
 func _physics_process(delta: float) -> void:
 	_mirar_con_mando(delta)
+	_actualizar_agachado()
 
 	if not is_on_floor():
 		velocity += get_gravity() * delta
+	elif Input.is_action_just_pressed(SALTAR) and not _agachado:
+		velocity.y = IMPULSO_SALTO
 
 	var entrada := Input.get_vector(MOVER_IZQUIERDA, MOVER_DERECHA, MOVER_ADELANTE, MOVER_ATRAS)
 	# `Input.get_vector` ya limita la diagonal a longitud 1 y conserva cuánto se
 	# inclina un stick. No normalizar aquí evita convertir media inclinación en
 	# velocidad máxima y conserva diagonales sin acelerarlas.
 	var direccion := transform.basis * Vector3(entrada.x, 0, entrada.y)
-	var objetivo := direccion * VELOCIDAD
+	# Agacharse manda sobre correr: no se puede correr agachado.
+	var velocidad_base := VELOCIDAD
+	if _agachado:
+		velocidad_base = VELOCIDAD_AGACHADO
+	elif Input.is_action_pressed(CORRER):
+		velocidad_base = VELOCIDAD_CORRER
+	var objetivo := direccion * velocidad_base
 	var respuesta := ACELERACION if entrada.length_squared() > 0.0001 else FRENADO
 	velocity.x = move_toward(velocity.x, objetivo.x, respuesta * delta)
 	velocity.z = move_toward(velocity.z, objetivo.z, respuesta * delta)
 	move_and_slide()
+
+
+## Agacharse encoge la cápsula y baja la cámara; levantarse solo ocurre si hay
+## sitio por encima, para no atravesar el techo de un hueco bajo.
+func _actualizar_agachado() -> void:
+	var quiere_agacharse := Input.is_action_pressed(AGACHARSE)
+	if quiere_agacharse and not _agachado:
+		_agachado = true
+		_ajustar_altura(ALTURA_AGACHADO, CAMARA_Y_AGACHADO)
+	elif not quiere_agacharse and _agachado and _hay_sitio_para_levantarse():
+		_agachado = false
+		_ajustar_altura(ALTURA_NORMAL, CAMARA_Y_NORMAL)
+
+
+func _hay_sitio_para_levantarse() -> bool:
+	var diferencia := ALTURA_NORMAL - ALTURA_AGACHADO
+	var parametros := PhysicsTestMotionParameters3D.new()
+	parametros.from = global_transform
+	parametros.motion = Vector3.UP * diferencia
+	var resultado := PhysicsTestMotionResult3D.new()
+	return not PhysicsServer3D.body_test_motion(get_rid(), parametros, resultado)
+
+
+func _ajustar_altura(altura: float, camara_y: float) -> void:
+	var forma: CapsuleShape3D = _colision.shape
+	forma.height = altura
+	_camara.position.y = camara_y
 
 
 ## Mirar con el stick derecho, además de con el ratón.

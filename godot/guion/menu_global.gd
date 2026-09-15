@@ -12,6 +12,9 @@ const ETIQUETAS_ACCIONES := {
 	"mover_atras": "Retroceder",
 	"mover_izquierda": "Mover a la izquierda",
 	"mover_derecha": "Mover a la derecha",
+	"saltar": "Saltar",
+	"correr": "Correr",
+	"agacharse": "Agacharse",
 	"interactuar": "Interactuar",
 	"cancelar": "Volver / cancelar",
 }
