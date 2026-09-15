@@ -32,7 +32,8 @@ class EntradaCinematica3DTest(unittest.TestCase):
         self.assertIn("func _tiene_mundo_3d() -> bool:", self.reproductor)
         self.assertIn("get_world_3d() != null", self.reproductor)
         self.assertIn("mundo != null or", self.reproductor)
-        self.assertIn("not es_2d and _tiene_mundo_3d()", self.reproductor)
+        # #395: un plano con decorado rueda en su plató aunque no haya mundo.
+        self.assertIn("not es_2d and (not decorado.is_empty() or _tiene_mundo_3d())", self.reproductor)
         self.assertNotIn('get("_mundo")', self.reproductor)
         self.assertNotIn("get_parent()._mundo", self.reproductor)
 
