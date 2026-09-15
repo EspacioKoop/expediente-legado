@@ -104,8 +104,7 @@ static func _fachada(ficha: Dictionary) -> MeshInstance3D:
 	var tam: Vector3 = ficha["tam"]
 	var posicion: Vector3 = ficha["pos"]
 	posicion.x = (
-		float(ficha["cara_x"])
-		+ float(ficha["hacia_calle"]) * (SEPARACION_FACHADA + tam.x * 0.5)
+		float(ficha["cara_x"]) + float(ficha["hacia_calle"]) * (SEPARACION_FACHADA + tam.x * 0.5)
 	)
 	superficie.position = posicion
 	var caja := BoxMesh.new()
