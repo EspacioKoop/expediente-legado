@@ -49,6 +49,9 @@ DEF ESTADO_JUEGO  EQU 1
 DEF ESTADO_CLEAR  EQU 2
 DEF ESTADO_CRASH  EQU 3
 
+DEF VIENTO_ARRIBA EQU 1
+DEF VIENTO_ABAJO  EQU 2
+
 DEF TILE_AVION_IZQ EQU 1
 DEF TILE_AVION_DER EQU 2
 DEF TILE_EDIFICIO  EQU 3
@@ -137,6 +140,7 @@ EstadoTitulo:
 
 EstadoJuego:
     call MoverAvion
+    call AplicarViento
     call MoverHito
 
     ld a, [wEstado]
@@ -171,6 +175,7 @@ IniciarPartida:
     xor a
     ld [wTipoHito], a
     ld [wScore], a
+    ld [wPerfectos], a
     ld [wGateChecked], a
     ld [wLandCrashed], a
     ld [wInv], a
@@ -244,6 +249,13 @@ PrepararFinal:
     ld a, [wScore]
     call EscribirDosDigitosFinal
 
+    ld hl, TextoPerfect
+    ld de, BG_MAP + (11 * 32) + 4
+    call EscribirCadena
+    ld a, [wPerfectos]
+    call TileDigito
+    ld [BG_MAP + (11 * 32) + 12], a
+
     ld hl, TextoAgain
     ld de, BG_MAP + (13 * 32) + 2
     call EscribirCadena
@@ -253,6 +265,12 @@ PrepararFinal:
     ret
 
 MoverAvion:
+    ; B pliega el avion: mantiene la altura actual y bloquea el viento.
+    ; El mundo no se detiene, asi que hay que alinearse antes de estabilizar.
+    ld a, [wKeys]
+    and KEY_B
+    ret nz
+
     ld a, [wKeys]
     and KEY_SUBIR
     jr z, .abajo
@@ -305,6 +323,45 @@ MoverAvion:
     ret nc
     inc a
     ld [wAvionX], a
+    ret
+
+AplicarViento:
+    ; B funciona como estabilizador: no corrige una mala trayectoria, solo
+    ; conserva la posicion mientras se mantiene pulsado.
+    ld a, [wKeys]
+    and KEY_B
+    ret nz
+
+    ld a, [wTipoHito]
+    ld e, a
+    ld d, 0
+    ld hl, MascaraViento
+    add hl, de
+    ld b, [hl]
+    ld a, [wFrame]
+    and b
+    ret nz
+
+    ld hl, DireccionViento
+    add hl, de
+    ld a, [hl]
+    cp VIENTO_ARRIBA
+    jr z, .arriba
+
+.abajo:
+    ld a, [wAvionY]
+    cp 126
+    ret nc
+    inc a
+    ld [wAvionY], a
+    ret
+
+.arriba:
+    ld a, [wAvionY]
+    cp 42
+    ret c
+    dec a
+    ld [wAvionY], a
     ret
 
 MoverHito:
@@ -420,11 +477,50 @@ ComprobarPaso:
     or a
     ret nz
 
+    call EsPasoPreciso
+    jr nc, .normal
+
+    ld a, [wScore]
+    add 2
+    ld [wScore], a
+    ld a, [wPerfectos]
+    inc a
+    ld [wPerfectos], a
+    call SonidoPrecision
+    call DibujarHUD
+    ret
+
+.normal:
     ld a, [wScore]
     inc a
     ld [wScore], a
     call SonidoPaso
     call DibujarHUD
+    ret
+
+EsPasoPreciso:
+    ld a, [wTipoHito]
+    ld e, a
+    ld d, 0
+    ld hl, PrecisionTop
+    add hl, de
+    ld b, [hl]
+    ld a, [wAvionY]
+    cp b
+    jr c, .no
+
+    ld hl, PrecisionBottom
+    add hl, de
+    ld b, [hl]
+    ld a, [wAvionY]
+    cp b
+    jr c, .si
+    jr z, .si
+.no:
+    and a
+    ret
+.si:
+    scf
     ret
 
 ObtenerBaseX:
@@ -721,7 +817,14 @@ PonerSprite:
     ret
 
 DibujarHUD:
-    ld hl, TextoHUD0
+    ld a, [wTipoHito]
+    and 1
+    jr nz, .viento_abajo
+    ld hl, TextoHUDUp
+    jr .hud0
+.viento_abajo:
+    ld hl, TextoHUDDown
+.hud0:
     ld de, BG_MAP
     call EscribirCadena
     ld hl, TextoHUD1
@@ -730,12 +833,12 @@ DibujarHUD:
 
     ld a, [wVidas]
     call TileDigito
-    ld [BG_MAP + 13], a
+    ld [BG_MAP + 10], a
 
     ld a, [wTipoHito]
     inc a
     call TileDigito
-    ld [BG_MAP + 32 + 5], a
+    ld [BG_MAP + 32 + 4], a
 
     ld a, [wScore]
     ld b, 0
@@ -747,8 +850,12 @@ DibujarHUD:
     ld c, a
     ld a, b
     call TileDigito
-    ld [BG_MAP + 32 + 15], a
+    ld [BG_MAP + 32 + 9], a
     ld a, c
+    call TileDigito
+    ld [BG_MAP + 32 + 10], a
+
+    ld a, [wPerfectos]
     call TileDigito
     ld [BG_MAP + 32 + 16], a
     ret
@@ -1028,6 +1135,19 @@ SonidoPaso:
     ldh [rNR14], a
     ret
 
+SonidoPrecision:
+    xor a
+    ldh [rNR10], a
+    ld a, $40
+    ldh [rNR11], a
+    ld a, $F1
+    ldh [rNR12], a
+    ld a, $D0
+    ldh [rNR13], a
+    ld a, $87
+    ldh [rNR14], a
+    ret
+
 SonidoChoque:
     xor a
     ldh [rNR10], a
@@ -1063,13 +1183,28 @@ CorredorTop:
 CorredorBottom:
     db 88, 64, 104, 68
 
+; Ventana central que concede dos puntos y cuenta un paso perfecto.
+PrecisionTop:
+    db 58, 46, 82, 48
+PrecisionBottom:
+    db 70, 58, 94, 60
+
+; Liberty/Bridge empujan hacia arriba cada 8 frames. WTC/Empire tienen
+; rachas hacia abajo cada 4 frames, obligando a anticipar los corredores
+; estrechos. B permite mantener altura, pero mientras se pulsa no se maniobra.
+DireccionViento:
+    db VIENTO_ARRIBA, VIENTO_ABAJO, VIENTO_ARRIBA, VIENTO_ABAJO
+MascaraViento:
+    db $07, $03, $07, $03
+
 TextoTitulo:    db "PAPER PLANES 98", 0
 TextoNY1998:   db "NEW YORK 1998", 0
-TextoVolar:    db "A/START TO FLY", 0
+TextoVolar:    db "A/UP FLY  B HOLD", 0
 TextoRuta1:    db "LIBERTY > WTC", 0
 TextoRuta2:    db "BRIDGE > EMPIRE", 0
-TextoHUD0:     db "NYC 98  FOLD 3", 0
-TextoHUD1:     db "GATE 1/4 SCORE 00", 0
+TextoHUDUp:    db "NYC98 FOLD3 WIND UP", 0
+TextoHUDDown:  db "NYC98 FOLD3 WIND DN", 0
+TextoHUD1:     db "GATE1/4 S00 PERF0", 0
 TextoLiberty:  db "LIBERTY", 0
 TextoWTC:      db "WTC", 0
 TextoBridge:   db "BRIDGE", 0
@@ -1077,6 +1212,7 @@ TextoEmpire:   db "EMPIRE", 0
 TextoClear:    db "NYC CLEAR", 0
 TextoCrumpled: db "PLANE CRUMPLED", 0
 TextoScore:    db "SCORE 00", 0
+TextoPerfect:  db "PERFECT 0/4", 0
 TextoAgain:    db "A/START AGAIN", 0
 
 Tiles:
@@ -1161,5 +1297,6 @@ wTipoHito:     ds 1
 wGateChecked:  ds 1
 wLandCrashed:  ds 1
 wScore:        ds 1
+wPerfectos:    ds 1
 wVidas:        ds 1
 wInv:          ds 1
