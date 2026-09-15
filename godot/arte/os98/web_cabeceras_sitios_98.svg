@@ -1,72 +1,150 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="468" height="360" viewBox="0 0 468 360" shape-rendering="crispEdges">
-  <!-- 5 cabeceras ficticias 468x72 para el ecosistema web de 1998 (#537). -->
-  <g id="site-marcador98" transform="translate(0 0)">
-    <rect width="468" height="72" fill="#0b2d1e"/>
-    <rect x="4" y="4" width="460" height="64" fill="#153c29" stroke="#d9d8d1" stroke-width="2"/>
-    <rect x="10" y="10" width="54" height="52" fill="#d9d8d1"/>
-    <path d="M18 19h38v6H18zm4 11h30v6H22zm-4 11h38v6H18zm8 11h22v5H26z" fill="#0b2d1e"/>
-    <circle cx="51" cy="20" r="7" fill="#f1d72f" stroke="#1c2b38"/>
-    <text x="78" y="33" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#f4f0d8">MARCADOR 98</text>
-    <text x="80" y="51" font-family="Arial,sans-serif" font-size="10" fill="#bdd7c7">RESULTADOS · CLASIFICACIONES · RADIO EN DIRECTO*</text>
-    <rect x="350" y="14" width="99" height="18" fill="#f1d72f" stroke="#151515"/>
-    <text x="399" y="27" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" font-weight="700" fill="#1b1b1b">ÚLTIMA HORA</text>
-    <rect x="350" y="39" width="99" height="18" fill="#d9d8d1" stroke="#151515"/>
-    <text x="399" y="52" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#153c29">EDICIÓN 1998</text>
-    <text x="460" y="68" text-anchor="end" font-family="Arial,sans-serif" font-size="6" fill="#739a83">*SIMULADA</text>
-  </g>
+<defs>
+  <linearGradient id="g-score" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0a2a1b"/><stop offset="1" stop-color="#214d34"/></linearGradient>
+  <linearGradient id="g-sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#8dc9ef"/><stop offset="1" stop-color="#e9f7ff"/></linearGradient>
+  <linearGradient id="g-byte" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#101419"/><stop offset=".55" stop-color="#26323a"/><stop offset="1" stop-color="#11161b"/></linearGradient>
+  <linearGradient id="g-cinema" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#34101f"/><stop offset=".55" stop-color="#7d2942"/><stop offset="1" stop-color="#2b0b1c"/></linearGradient>
+  <linearGradient id="g-paper" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff7df"/><stop offset="1" stop-color="#d9ca9e"/></linearGradient>
+  <pattern id="p-score" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="none"/><path d="M0 7h8M7 0v8" stroke="#315e43" stroke-width="1" opacity=".5"/></pattern>
+  <pattern id="p-scan" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="2" fill="#000" opacity=".14"/></pattern>
+  <pattern id="p-cork" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="10" height="10" fill="#b99b68"/><rect x="1" y="2" width="2" height="1" fill="#8f744b"/><rect x="6" y="6" width="3" height="1" fill="#d6ba83"/><rect x="8" y="1" width="1" height="2" fill="#7c6543"/></pattern>
+  <pattern id="p-dots" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#fff" opacity=".08"/></pattern>
+</defs>
 
-  <g id="site-meteored" transform="translate(0 72)">
-    <rect width="468" height="72" fill="#d9ecf7"/>
-    <rect x="4" y="4" width="460" height="64" fill="#eaf5fb" stroke="#174c98" stroke-width="2"/>
-    <rect x="11" y="10" width="54" height="52" fill="#174c98"/>
-    <circle cx="32" cy="29" r="11" fill="#f1d72f"/>
-    <path d="M28 43h25c6 0 8 9 1 11H26c-7-2-5-11 2-11z" fill="#ffffff" stroke="#8ca9c1"/>
-    <text x="78" y="31" font-family="Georgia,serif" font-size="24" font-weight="700" fill="#174c98">MeteoRed</text>
-    <text x="80" y="50" font-family="Arial,sans-serif" font-size="10" fill="#3f617c">PREVISIÓN LOCAL · MAPAS · AVISOS</text>
-    <rect x="349" y="13" width="101" height="42" fill="#ffffff" stroke="#8ca9c1"/>
-    <text x="360" y="27" font-family="Arial,sans-serif" font-size="8" fill="#3f617c">HOY</text>
-    <text x="360" y="45" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#174c98">18°</text>
-    <path d="M418 25h22v22h-22z" fill="#d9ecf7"/><circle cx="428" cy="33" r="6" fill="#f1d72f"/><path d="M421 41h19v7h-19z" fill="#fff" stroke="#8ca9c1"/>
+<!-- 5 cabeceras ficticias 468x72. V3: más detalle, textura, bisel y micro-UI sin hornear datos narrativos. -->
+<g id="site-marcador98" transform="translate(0 0)">
+  <rect width="468" height="72" fill="#071d13"/>
+  <rect x="2" y="2" width="464" height="68" fill="url(#g-score)" stroke="#d7d6ce" stroke-width="2"/>
+  <rect x="5" y="5" width="458" height="62" fill="url(#p-score)" opacity=".9"/>
+  <path d="M5 57h458v10H5z" fill="#071d13"/><path d="M5 58h458" stroke="#5e8b6f"/>
+  <g transform="translate(10 8)">
+    <rect width="53" height="46" fill="#d9d8d1" stroke="#0a1710" stroke-width="2"/>
+    <rect x="4" y="4" width="45" height="38" fill="#0d3523"/>
+    <path d="M26 6v34M6 23h41" stroke="#6a9a79"/>
+    <circle cx="26" cy="23" r="7" fill="none" stroke="#6a9a79"/>
+    <path d="M17 14l7-4 8 4 3 9-4 9-10 1-7-7z" fill="#f4f0d8" stroke="#17231b"/>
+    <path d="M23 15l5-2 4 4-2 5-6 1-3-4z" fill="#202020"/>
   </g>
+  <text x="75" y="28" font-family="Arial,sans-serif" font-size="23" font-weight="900" fill="#f5f0d7">MARCADOR <tspan fill="#f1d72f">98</tspan></text>
+  <text x="77" y="42" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#b7d0c0">RESULTADOS · CLASIFICACIONES · CRÓNICAS</text>
+  <g transform="translate(344 8)">
+    <rect width="108" height="20" fill="#161616" stroke="#6f8a77"/>
+    <rect x="2" y="2" width="104" height="16" fill="#f1d72f"/>
+    <text x="54" y="13" text-anchor="middle" font-family="Arial" font-size="8" font-weight="900" fill="#181818">ÚLTIMA HORA</text>
+    <rect y="25" width="108" height="22" fill="#d9d8d1" stroke="#151515"/>
+    <rect x="4" y="29" width="18" height="14" fill="#173e7a"/><path d="M8 32h10v2H8zm0 4h7v2H8zm0 4h9v1H8z" fill="#fff"/>
+    <text x="28" y="38" font-family="Arial" font-size="7" font-weight="700" fill="#163121">EDICIÓN DIGITAL</text>
+    <text x="28" y="45" font-family="monospace" font-size="6" fill="#59675c">ACTUALIZANDO...</text>
+  </g>
+  <g font-family="monospace" font-size="6" fill="#b9d2c2">
+    <text x="12" y="65">[ EN DIRECTO ]</text><text x="94" y="65">PORTADA ACTUALIZADA</text><text x="396" y="65">28.8K</text>
+  </g>
+  <rect x="430" y="60" width="4" height="4" fill="#f1d72f"/><rect x="436" y="60" width="4" height="4" fill="#78d35b"/><rect x="442" y="60" width="4" height="4" fill="#e84d4d"/>
+</g>
 
-  <g id="site-byte-local" transform="translate(0 144)">
-    <rect width="468" height="72" fill="#14161a"/>
-    <rect x="4" y="4" width="460" height="64" fill="#202630" stroke="#78d35b" stroke-width="2"/>
-    <rect x="11" y="10" width="54" height="52" fill="#0a0f12" stroke="#4e5e69"/>
-    <text x="38" y="35" text-anchor="middle" font-family="monospace" font-size="21" font-weight="700" fill="#78d35b">&gt;_</text>
-    <rect x="17" y="48" width="42" height="4" fill="#174c98"/>
-    <text x="78" y="32" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#e9eef2">BYTE LOCAL</text>
-    <text x="80" y="50" font-family="monospace" font-size="9" fill="#78d35b">software // redes // hardware // trucos</text>
-    <rect x="351" y="12" width="96" height="18" fill="#0a0f12" stroke="#4e5e69"/>
-    <text x="399" y="25" text-anchor="middle" font-family="monospace" font-size="8" fill="#78d35b">MODEM: 33.6K</text>
-    <rect x="351" y="37" width="96" height="18" fill="#174c98"/>
-    <text x="399" y="50" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#fff">NUEVAS DESCARGAS</text>
+<g id="site-meteored" transform="translate(0 72)">
+  <rect width="468" height="72" fill="#6eaed7"/>
+  <rect x="2" y="2" width="464" height="68" fill="url(#g-sky)" stroke="#174c98" stroke-width="2"/>
+  <path d="M1 54C70 43 97 61 161 49s102 13 158-1 93 5 148-8" fill="none" stroke="#70a6c9" stroke-width="1"/>
+  <path d="M15 15C84 2 122 21 190 12s97 9 154-1 76 3 109-3" fill="none" stroke="#c8e9fb" stroke-width="2"/>
+  <g transform="translate(12 10)">
+    <rect width="52" height="48" fill="#174c98" stroke="#0d315f" stroke-width="2"/>
+    <circle cx="19" cy="17" r="10" fill="#f1d72f"/>
+    <path d="M14 32h28c8 0 8 12 0 12H12c-7 0-7-10 2-12z" fill="#fff" stroke="#8ca9c1"/>
+    <path d="M12 16l-5-3m15-9 2-5m10 11 5-4" stroke="#f7e77a" stroke-width="2"/>
   </g>
+  <text x="76" y="27" font-family="Georgia,serif" font-size="24" font-weight="700" fill="#123d74">Meteo<tspan fill="#5b86a5">Red</tspan></text>
+  <text x="78" y="41" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#345f7d">PREVISIÓN LOCAL · MAPAS · AVISOS · ARCHIVO</text>
+  <g transform="translate(344 8)">
+    <rect width="110" height="47" fill="#f8fdff" stroke="#6d99b8"/>
+    <rect x="3" y="3" width="104" height="12" fill="#dceef9"/>
+    <text x="8" y="12" font-family="Arial" font-size="7" font-weight="700" fill="#315f7b">ESTACIÓN LOCAL</text>
+    <text x="8" y="33" font-family="Arial" font-size="20" font-weight="900" fill="#174c98">18°</text>
+    <text x="48" y="27" font-family="monospace" font-size="6" fill="#58778a">HUM 62%</text>
+    <text x="48" y="35" font-family="monospace" font-size="6" fill="#58778a">VIENTO O 12</text>
+    <rect x="47" y="39" width="53" height="4" fill="#d6e8f4"/><rect x="47" y="39" width="31" height="4" fill="#63a5d1"/>
+  </g>
+  <rect x="6" y="59" width="456" height="8" fill="#174c98" opacity=".92"/>
+  <text x="12" y="65" font-family="monospace" font-size="6" fill="#fff">MAPA 06:00 · MODELO LOCAL · DATOS SIMULADOS</text>
+  <path d="M379 63h7l4-4 5 7 5-5 8 2" fill="none" stroke="#f1d72f"/>
+</g>
 
-  <g id="site-butaca7" transform="translate(0 216)">
-    <rect width="468" height="72" fill="#3c0f28"/>
-    <rect x="4" y="4" width="460" height="64" fill="#6f1f34" stroke="#f1d72f" stroke-width="2"/>
-    <rect x="11" y="10" width="54" height="52" fill="#23101d"/>
-    <path d="M16 16h44v10H16zm0 15h44v10H16zm0 15h44v10H16z" fill="#f1d72f"/>
-    <path d="M21 16l8 10m8-10 8 10m8-10 7 9M21 31l8 10m8-10 8 10m8-10 7 9M21 46l8 10m8-10 8 10m8-10 7 9" stroke="#6f1f34" stroke-width="3"/>
-    <text x="78" y="32" font-family="Georgia,serif" font-size="25" font-weight="700" fill="#fff0c7">BUTACA 7</text>
-    <text x="80" y="50" font-family="Arial,sans-serif" font-size="10" fill="#f0c9d6">CINE · MÚSICA · TELEVISIÓN · AGENDA</text>
-    <rect x="352" y="13" width="95" height="40" fill="#23101d" stroke="#d8a84c"/>
-    <text x="399" y="28" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" fill="#fff0c7">ESTRENO</text>
-    <text x="399" y="43" text-anchor="middle" font-family="Georgia,serif" font-size="12" font-weight="700" fill="#f1d72f">VIERNES</text>
+<g id="site-byte-local" transform="translate(0 144)">
+  <rect width="468" height="72" fill="#080b0e"/>
+  <rect x="2" y="2" width="464" height="68" fill="url(#g-byte)" stroke="#4f6a74" stroke-width="2"/>
+  <rect x="3" y="3" width="462" height="66" fill="url(#p-scan)"/>
+  <path d="M6 55h456" stroke="#78d35b" opacity=".45"/>
+  <g transform="translate(10 8)">
+    <rect width="55" height="47" fill="#070b0d" stroke="#68818a" stroke-width="2"/>
+    <rect x="5" y="5" width="45" height="32" fill="#101d18"/>
+    <path d="M10 13l8 6-8 6M22 26h16" fill="none" stroke="#78d35b" stroke-width="3"/>
+    <rect x="7" y="39" width="41" height="3" fill="#174c98"/><rect x="10" y="40" width="12" height="1" fill="#77b5ff"/>
   </g>
+  <text x="77" y="27" font-family="Arial,sans-serif" font-size="22" font-weight="900" fill="#e9eef2">BYTE <tspan fill="#78d35b">LOCAL</tspan></text>
+  <text x="79" y="42" font-family="monospace" font-size="8" fill="#8fdc76">software // redes // hardware // utilidades</text>
+  <path d="M78 48h222" stroke="#4e5e69"/><path d="M78 51h154" stroke="#263d46"/>
+  <g transform="translate(344 7)">
+    <rect width="110" height="20" fill="#050708" stroke="#4e5e69"/>
+    <circle cx="10" cy="10" r="3" fill="#78d35b"/><circle cx="20" cy="10" r="3" fill="#f1d72f"/><circle cx="30" cy="10" r="3" fill="#a83232"/>
+    <text x="40" y="13" font-family="monospace" font-size="7" fill="#9fb0bd">33.6K ONLINE</text>
+    <rect y="25" width="110" height="23" fill="#112438" stroke="#174c98"/>
+    <rect x="4" y="29" width="24" height="15" fill="#173e7a"/><path d="M8 32h16M8 36h12M8 40h14" stroke="#9bc8ff"/>
+    <text x="34" y="36" font-family="Arial" font-size="7" font-weight="700" fill="#fff">DESCARGAS</text>
+    <text x="34" y="43" font-family="monospace" font-size="6" fill="#78d35b">12 NUEVAS</text>
+  </g>
+  <g font-family="monospace" font-size="6" fill="#6f8d80"><text x="10" y="65">NODE: LOCAL-07</text><text x="132" y="65">PING 084ms</text><text x="408" y="65">v2.3</text></g>
+</g>
 
-  <g id="site-el-tablon" transform="translate(0 288)">
-    <rect width="468" height="72" fill="#d6cfb2"/>
-    <rect x="4" y="4" width="460" height="64" fill="#f4efdc" stroke="#544d3b" stroke-width="2"/>
-    <rect x="11" y="10" width="54" height="52" fill="#b8a67a" stroke="#544d3b"/>
-    <rect x="17" y="16" width="42" height="40" fill="#f8f3df" stroke="#544d3b"/>
-    <path d="M22 23h31M22 30h31M22 37h22M22 44h27M22 51h16" stroke="#6b5f45" stroke-width="2"/>
-    <circle cx="21" cy="19" r="3" fill="#a83232"/><circle cx="55" cy="19" r="3" fill="#174c98"/>
-    <text x="78" y="31" font-family="Georgia,serif" font-size="24" font-weight="700" fill="#403a2d">EL TABLÓN</text>
-    <text x="80" y="50" font-family="Arial,sans-serif" font-size="10" fill="#6a6253">COMPRA · VENDE · CAMBIA · BUSCA</text>
-    <rect x="350" y="13" width="99" height="18" fill="#e7cd4a" stroke="#544d3b"/>
-    <text x="399" y="26" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#403a2d">PUBLICAR ANUNCIO</text>
-    <text x="399" y="47" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" fill="#6a6253">ÚLTIMOS: 143</text>
+<g id="site-butaca7" transform="translate(0 216)">
+  <rect width="468" height="72" fill="#210816"/>
+  <rect x="2" y="2" width="464" height="68" fill="url(#g-cinema)" stroke="#d8a84c" stroke-width="2"/>
+  <rect x="4" y="4" width="460" height="64" fill="url(#p-dots)"/>
+  <g fill="#f1d72f">
+    <circle cx="9" cy="8" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="27" cy="8" r="2"/><circle cx="36" cy="8" r="2"/><circle cx="45" cy="8" r="2"/><circle cx="54" cy="8" r="2"/>
+    <circle cx="9" cy="64" r="2"/><circle cx="18" cy="64" r="2"/><circle cx="27" cy="64" r="2"/><circle cx="36" cy="64" r="2"/><circle cx="45" cy="64" r="2"/><circle cx="54" cy="64" r="2"/>
   </g>
+  <g transform="translate(10 12)">
+    <rect width="54" height="43" fill="#1a0812" stroke="#d8a84c"/>
+    <path d="M4 6h46v9H4zm0 13h46v9H4zm0 13h46v7H4z" fill="#e8c45e"/>
+    <path d="M8 6l7 9m9-9 7 9m9-9 7 9M8 19l7 9m9-9 7 9m9-9 7 9M8 32l6 7m10-7 6 7m10-7 6 7" stroke="#6f1f34" stroke-width="3"/>
+  </g>
+  <text x="77" y="28" font-family="Georgia,serif" font-size="24" font-weight="700" fill="#fff0c7">BUTACA <tspan fill="#f1d72f">7</tspan></text>
+  <text x="79" y="42" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#efc7d4">CINE · MÚSICA · TELEVISIÓN · AGENDA CULTURAL</text>
+  <g transform="translate(345 8)">
+    <rect width="108" height="47" fill="#1f0b16" stroke="#d8a84c"/>
+    <path d="M6 6h96v8H6z" fill="#6f1f34"/>
+    <text x="54" y="13" text-anchor="middle" font-family="Arial" font-size="6" font-weight="700" fill="#fff0c7">ESTRENO DE LA SEMANA</text>
+    <path d="M8 20h28v21H8z" fill="#4a1530"/><path d="M11 23h22v3H11zm0 5h18v3H11zm0 5h20v3H11z" fill="#f1d72f"/>
+    <text x="44" y="28" font-family="Georgia" font-size="9" font-weight="700" fill="#f1d72f">VIERNES</text>
+    <text x="44" y="38" font-family="Arial" font-size="6" fill="#e8c7d3">CRÍTICAS + FICHA</text>
+  </g>
+  <rect x="70" y="51" width="258" height="14" fill="#250a18" stroke="#9d4a62"/>
+  <text x="77" y="61" font-family="monospace" font-size="6" fill="#f0c9d6">HOY: 18:00 · 20:30 · 22:45  |  AGENDA ACTUALIZADA</text>
+</g>
+
+<g id="site-el-tablon" transform="translate(0 288)">
+  <rect width="468" height="72" fill="#8a724d"/>
+  <rect x="2" y="2" width="464" height="68" fill="url(#p-cork)" stroke="#544d3b" stroke-width="2"/>
+  <g transform="translate(9 8)">
+    <rect x="3" y="4" width="56" height="48" fill="#8b7650" opacity=".5"/>
+    <rect width="56" height="48" fill="url(#g-paper)" stroke="#544d3b" transform="rotate(-2 28 24)"/>
+    <circle cx="10" cy="7" r="3" fill="#a83232"/><circle cx="47" cy="7" r="3" fill="#174c98"/>
+    <path d="M8 16h40M8 22h32M8 28h38M8 34h25M8 40h36" stroke="#6a6253" stroke-width="2"/>
+  </g>
+  <rect x="72" y="8" width="266" height="47" fill="#f7efd4" stroke="#675b41"/>
+  <path d="M75 11h260v3H75z" fill="#d9ca9e"/>
+  <text x="81" y="29" font-family="Georgia,serif" font-size="23" font-weight="700" fill="#403a2d">EL TABLÓN</text>
+  <text x="83" y="42" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#6a6253">COMPRA · VENDE · CAMBIA · BUSCA</text>
+  <rect x="82" y="47" width="115" height="5" fill="#e7cd4a"/><rect x="202" y="47" width="58" height="5" fill="#174c98"/><rect x="265" y="47" width="64" height="5" fill="#a83232"/>
+  <g transform="translate(345 8)">
+    <rect width="108" height="47" fill="#f7efd4" stroke="#544d3b"/>
+    <rect x="3" y="3" width="102" height="15" fill="#e7cd4a" stroke="#8e7a43"/>
+    <text x="54" y="13" text-anchor="middle" font-family="Arial" font-size="7" font-weight="900" fill="#403a2d">PUBLICAR ANUNCIO</text>
+    <text x="8" y="30" font-family="Arial" font-size="7" fill="#6a6253">ACTIVOS</text>
+    <text x="100" y="31" text-anchor="end" font-family="monospace" font-size="12" font-weight="700" fill="#a83232">143</text>
+    <path d="M8 37h92" stroke="#baa97c"/><text x="8" y="44" font-family="Arial" font-size="6" fill="#6a6253">HOY +12</text>
+  </g>
+  <rect x="5" y="59" width="458" height="8" fill="#544d3b"/>
+  <text x="10" y="65" font-family="monospace" font-size="6" fill="#f3e9c9">TABLÓN LOCAL · RESPONDE BAJO TU RESPONSABILIDAD · ARCHIVO 1998</text>
+</g>
 </svg>

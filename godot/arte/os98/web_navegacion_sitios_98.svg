@@ -1,8 +1,66 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="468" height="120" viewBox="0 0 468 120" shape-rendering="crispEdges">
-  <!-- Cinco barras 468x24 coordinadas con las cabeceras; botones planos deliberadamente simples. -->
-  <g id="nav-marcador98" transform="translate(0 0)"><rect width="468" height="24" fill="#0b2d1e"/><g font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#f4f0d8"><text x="16" y="16">PORTADA</text><text x="86" y="16">FÚTBOL</text><text x="145" y="16">BALONCESTO</text><text x="229" y="16">MOTOR</text><text x="282" y="16">RESULTADOS</text><text x="366" y="16">ARCHIVO</text></g><rect x="446" y="6" width="12" height="12" fill="#f1d72f"/></g>
-  <g id="nav-meteored" transform="translate(0 24)"><rect width="468" height="24" fill="#174c98"/><g font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#fff"><text x="16" y="16">LOCAL</text><text x="66" y="16">PENÍNSULA</text><text x="145" y="16">MAPAS</text><text x="198" y="16">AVISOS</text><text x="254" y="16">HISTÓRICO</text><text x="330" y="16">SATÉLITE*</text></g><text x="455" y="16" text-anchor="end" font-family="Arial" font-size="6" fill="#d9ecf7">*SIMULADO</text></g>
-  <g id="nav-byte-local" transform="translate(0 48)"><rect width="468" height="24" fill="#0a0f12"/><g font-family="monospace" font-size="8" font-weight="700" fill="#78d35b"><text x="14" y="16">INICIO</text><text x="65" y="16">NOTICIAS</text><text x="130" y="16">DESCARGAS</text><text x="207" y="16">TRUCOS</text><text x="261" y="16">HARDWARE</text><text x="331" y="16">REDES</text><text x="380" y="16">FORO</text></g><rect x="442" y="7" width="16" height="10" fill="#174c98"/></g>
-  <g id="nav-butaca7" transform="translate(0 72)"><rect width="468" height="24" fill="#23101d"/><g font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#fff0c7"><text x="15" y="16">PORTADA</text><text x="79" y="16">CINE</text><text x="124" y="16">MÚSICA</text><text x="178" y="16">TV</text><text x="210" y="16">AGENDA</text><text x="267" y="16">CRÍTICAS</text><text x="333" y="16">ESTRENOS</text></g><text x="452" y="16" text-anchor="end" font-family="Georgia" font-size="11" font-weight="700" fill="#f1d72f">7</text></g>
-  <g id="nav-el-tablon" transform="translate(0 96)"><rect width="468" height="24" fill="#d6cfb2"/><g font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#403a2d"><text x="15" y="16">TODOS</text><text x="69" y="16">EMPLEO</text><text x="127" y="16">MOTOR</text><text x="180" y="16">HOGAR</text><text x="230" y="16">INFORMÁTICA</text><text x="317" y="16">OTROS</text><text x="369" y="16">PUBLICAR</text></g><rect x="446" y="6" width="12" height="12" fill="#a83232"/></g>
+<defs>
+ <linearGradient id="b-silver" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f5f5f0"/><stop offset=".45" stop-color="#c9c8c0"/><stop offset="1" stop-color="#8d8c86"/></linearGradient>
+ <linearGradient id="b-blue" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#4f83c7"/><stop offset="1" stop-color="#174c98"/></linearGradient>
+</defs>
+<!-- Cinco barras 468x24. V3: botones con bisel, separadores, estado activo e indicadores. -->
+<g id="nav-marcador98">
+ <rect width="468" height="24" fill="#071d13"/><path d="M0 0h468v2H0z" fill="#668b73"/>
+ <g font-family="Arial" font-size="7" font-weight="700">
+  <g transform="translate(6 3)"><rect width="58" height="17" fill="#244a35" stroke="#6f8e79"/><rect x="2" y="2" width="54" height="13" fill="#f1d72f"/><text x="29" y="12" text-anchor="middle" fill="#181818">PORTADA</text></g>
+  <g transform="translate(68 3)"><rect width="55" height="17" fill="#244a35" stroke="#6f8e79"/><text x="27" y="12" text-anchor="middle" fill="#eef3ee">FÚTBOL</text></g>
+  <g transform="translate(127 3)"><rect width="76" height="17" fill="#244a35" stroke="#6f8e79"/><text x="38" y="12" text-anchor="middle" fill="#eef3ee">BALONCESTO</text></g>
+  <g transform="translate(207 3)"><rect width="49" height="17" fill="#244a35" stroke="#6f8e79"/><text x="24" y="12" text-anchor="middle" fill="#eef3ee">MOTOR</text></g>
+  <g transform="translate(260 3)"><rect width="76" height="17" fill="#244a35" stroke="#6f8e79"/><text x="38" y="12" text-anchor="middle" fill="#eef3ee">RESULTADOS</text></g>
+  <g transform="translate(340 3)"><rect width="58" height="17" fill="#244a35" stroke="#6f8e79"/><text x="29" y="12" text-anchor="middle" fill="#eef3ee">ARCHIVO</text></g>
+ </g><rect x="414" y="5" width="43" height="13" fill="#0c2c1d" stroke="#5c7e69"/><text x="435" y="14" text-anchor="middle" font-family="monospace" font-size="6" fill="#78d35b">LIVE ●</text>
+</g>
+
+<g id="nav-meteored" transform="translate(0 24)">
+ <rect width="468" height="24" fill="#174c98"/><path d="M0 1h468" stroke="#8cc5e7"/>
+ <g font-family="Arial" font-size="7" font-weight="700">
+  <g transform="translate(6 3)"><rect width="49" height="17" fill="url(#b-blue)" stroke="#9bcaf0"/><text x="24" y="12" text-anchor="middle" fill="#fff">LOCAL</text></g>
+  <g transform="translate(59 3)"><rect width="72" height="17" fill="#2e66a8" stroke="#7fb0d5"/><text x="36" y="12" text-anchor="middle" fill="#fff">PENÍNSULA</text></g>
+  <g transform="translate(135 3)"><rect width="50" height="17" fill="#2e66a8" stroke="#7fb0d5"/><text x="25" y="12" text-anchor="middle" fill="#fff">MAPAS</text></g>
+  <g transform="translate(189 3)"><rect width="50" height="17" fill="#2e66a8" stroke="#7fb0d5"/><text x="25" y="12" text-anchor="middle" fill="#fff">AVISOS</text></g>
+  <g transform="translate(243 3)"><rect width="67" height="17" fill="#2e66a8" stroke="#7fb0d5"/><text x="33" y="12" text-anchor="middle" fill="#fff">HISTÓRICO</text></g>
+  <g transform="translate(314 3)"><rect width="61" height="17" fill="#2e66a8" stroke="#7fb0d5"/><text x="30" y="12" text-anchor="middle" fill="#fff">SATÉLITE</text></g>
+ </g><rect x="392" y="4" width="67" height="16" fill="#eaf5fb" stroke="#8ca9c1"/><circle cx="401" cy="12" r="4" fill="#f1d72f"/><text x="431" y="14" text-anchor="middle" font-family="Arial" font-size="6" fill="#174c98">18° / 62%</text>
+</g>
+
+<g id="nav-byte-local" transform="translate(0 48)">
+ <rect width="468" height="24" fill="#050708"/><path d="M0 22h468" stroke="#78d35b" opacity=".6"/>
+ <g font-family="monospace" font-size="7" font-weight="700">
+  <g transform="translate(6 3)"><rect width="50" height="17" fill="#10231b" stroke="#78d35b"/><text x="25" y="12" text-anchor="middle" fill="#78d35b">&gt; INICIO</text></g>
+  <g transform="translate(60 3)"><rect width="60" height="17" fill="#11181b" stroke="#42555d"/><text x="30" y="12" text-anchor="middle" fill="#8fdc76">NOTICIAS</text></g>
+  <g transform="translate(124 3)"><rect width="72" height="17" fill="#11181b" stroke="#42555d"/><text x="36" y="12" text-anchor="middle" fill="#8fdc76">DESCARGAS</text></g>
+  <g transform="translate(200 3)"><rect width="53" height="17" fill="#11181b" stroke="#42555d"/><text x="26" y="12" text-anchor="middle" fill="#8fdc76">TRUCOS</text></g>
+  <g transform="translate(257 3)"><rect width="67" height="17" fill="#11181b" stroke="#42555d"/><text x="33" y="12" text-anchor="middle" fill="#8fdc76">HARDWARE</text></g>
+  <g transform="translate(328 3)"><rect width="48" height="17" fill="#11181b" stroke="#42555d"/><text x="24" y="12" text-anchor="middle" fill="#8fdc76">REDES</text></g>
+ </g><rect x="385" y="4" width="74" height="16" fill="#0e1a26" stroke="#174c98"/><text x="422" y="14" text-anchor="middle" font-family="monospace" font-size="6" fill="#77b5ff">33.6K CONNECT</text>
+</g>
+
+<g id="nav-butaca7" transform="translate(0 72)">
+ <rect width="468" height="24" fill="#210816"/><path d="M0 1h468" stroke="#d8a84c"/>
+ <g font-family="Arial" font-size="7" font-weight="700">
+  <g transform="translate(6 3)"><rect width="59" height="17" fill="#f1d72f" stroke="#fff0c7"/><text x="29" y="12" text-anchor="middle" fill="#3b1026">PORTADA</text></g>
+  <g transform="translate(69 3)"><rect width="45" height="17" fill="#6f1f34" stroke="#a75e75"/><text x="22" y="12" text-anchor="middle" fill="#fff0c7">CINE</text></g>
+  <g transform="translate(118 3)"><rect width="54" height="17" fill="#6f1f34" stroke="#a75e75"/><text x="27" y="12" text-anchor="middle" fill="#fff0c7">MÚSICA</text></g>
+  <g transform="translate(176 3)"><rect width="37" height="17" fill="#6f1f34" stroke="#a75e75"/><text x="18" y="12" text-anchor="middle" fill="#fff0c7">TV</text></g>
+  <g transform="translate(217 3)"><rect width="55" height="17" fill="#6f1f34" stroke="#a75e75"/><text x="27" y="12" text-anchor="middle" fill="#fff0c7">AGENDA</text></g>
+  <g transform="translate(276 3)"><rect width="60" height="17" fill="#6f1f34" stroke="#a75e75"/><text x="30" y="12" text-anchor="middle" fill="#fff0c7">CRÍTICAS</text></g>
+ </g><rect x="349" y="4" width="110" height="16" fill="#1c0a14" stroke="#d8a84c"/><text x="404" y="14" text-anchor="middle" font-family="Georgia" font-size="7" font-weight="700" fill="#f1d72f">★ ESTRENOS DEL VIERNES ★</text>
+</g>
+
+<g id="nav-el-tablon" transform="translate(0 96)">
+ <rect width="468" height="24" fill="#8c7752"/><path d="M0 0h468v2H0z" fill="#efe4c0"/>
+ <g font-family="Arial" font-size="7" font-weight="700">
+  <g transform="translate(6 3)"><rect width="50" height="17" fill="url(#b-silver)" stroke="#544d3b"/><text x="25" y="12" text-anchor="middle" fill="#403a2d">TODOS</text></g>
+  <g transform="translate(60 3)"><rect width="55" height="17" fill="#e8ddbd" stroke="#7f6d4d"/><text x="27" y="12" text-anchor="middle" fill="#403a2d">EMPLEO</text></g>
+  <g transform="translate(119 3)"><rect width="49" height="17" fill="#e8ddbd" stroke="#7f6d4d"/><text x="24" y="12" text-anchor="middle" fill="#403a2d">MOTOR</text></g>
+  <g transform="translate(172 3)"><rect width="49" height="17" fill="#e8ddbd" stroke="#7f6d4d"/><text x="24" y="12" text-anchor="middle" fill="#403a2d">HOGAR</text></g>
+  <g transform="translate(225 3)"><rect width="83" height="17" fill="#e8ddbd" stroke="#7f6d4d"/><text x="41" y="12" text-anchor="middle" fill="#403a2d">INFORMÁTICA</text></g>
+  <g transform="translate(312 3)"><rect width="49" height="17" fill="#e8ddbd" stroke="#7f6d4d"/><text x="24" y="12" text-anchor="middle" fill="#403a2d">OTROS</text></g>
+ </g><rect x="369" y="3" width="90" height="17" fill="#e7cd4a" stroke="#544d3b"/><circle cx="380" cy="11" r="4" fill="#a83232"/><text x="419" y="14" text-anchor="middle" font-family="Arial" font-size="7" font-weight="900" fill="#403a2d">PUBLICAR</text>
+</g>
 </svg>
