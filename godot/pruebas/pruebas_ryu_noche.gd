@@ -37,7 +37,9 @@ func _initialize() -> void:
 	var compuerta_1 := arquitectura.get_node_or_null("CompuertaCauce1") as Interactuable3D
 	var compuerta_2 := arquitectura.get_node_or_null("CompuertaCauce2") as Interactuable3D
 	var compuerta_3 := arquitectura.get_node_or_null("CompuertaCauce3") as Interactuable3D
-	_comprobar(compuerta_1 != null and compuerta_2 != null and compuerta_3 != null, "tres compuertas")
+	_comprobar(
+		compuerta_1 != null and compuerta_2 != null and compuerta_3 != null, "tres compuertas"
+	)
 	if compuerta_1 != null and compuerta_2 != null and compuerta_3 != null:
 		# Las tres empiezan opuestas a sus guías. Una interacción deliberada por
 		# compuerta basta para reconstruir el cauce objetivo [true, false, true].
