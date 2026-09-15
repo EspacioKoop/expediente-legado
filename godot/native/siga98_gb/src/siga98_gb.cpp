@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstring>
 #include <string>
+#include <vector>
 
 #include <godot_cpp/core/class_db.hpp>
 
@@ -29,6 +30,9 @@ constexpr int HEADER_START = 0x134;
 constexpr int HEADER_END = 0x14C;
 constexpr int TITLE_START = 0x134;
 constexpr int TITLE_END = 0x143;
+constexpr unsigned AUDIO_SAMPLE_RATE = 48000;
+constexpr size_t AUDIO_BYTES_PER_FRAME = 4; // S16LE estéreo.
+constexpr size_t MAX_AUDIO_BUFFER_BYTES = AUDIO_SAMPLE_RATE * AUDIO_BYTES_PER_FRAME;
 
 // Contrato público de set_buttons (heredado de Peanut-GB): A, B, Select, Start,
 // Derecha, Izquierda, Arriba, Abajo en los bits 0..7.
@@ -41,12 +45,15 @@ constexpr GB_key_t BUTTON_KEYS[8] = {
 struct Siga98GB::Impl {
     GB_gameboy_t *gb = nullptr;
     std::array<uint32_t, FRAME_WIDTH * FRAME_HEIGHT> pixels{};
+    std::vector<uint8_t> audio_pcm;
     bool loaded = false;
     std::string title;
     std::string error;
 
     ~Impl() {
         if (gb != nullptr) {
+            GB_apu_set_sample_callback(gb, nullptr);
+            GB_set_user_data(gb, nullptr);
             GB_free(gb);
             GB_dealloc(gb);
         }
@@ -71,6 +78,24 @@ static void discard_log(GB_gameboy_t *p_gb, const char *p_string, GB_log_attribu
     (void)p_attributes;
 }
 
+static void append_s16le(std::vector<uint8_t> &p_buffer, int16_t p_sample) {
+    const uint16_t bits = static_cast<uint16_t>(p_sample);
+    p_buffer.push_back(static_cast<uint8_t>(bits & 0xFF));
+    p_buffer.push_back(static_cast<uint8_t>((bits >> 8) & 0xFF));
+}
+
+static void capture_audio_sample(GB_gameboy_t *p_gb, GB_sample_t *p_sample) {
+    if (p_gb == nullptr || p_sample == nullptr) {
+        return;
+    }
+    auto *impl = static_cast<Siga98GB::Impl *>(GB_get_user_data(p_gb));
+    if (impl == nullptr || impl->audio_pcm.size() + AUDIO_BYTES_PER_FRAME > MAX_AUDIO_BUFFER_BYTES) {
+        return;
+    }
+    append_s16le(impl->audio_pcm, p_sample->left);
+    append_s16le(impl->audio_pcm, p_sample->right);
+}
+
 Siga98GB::Siga98GB() : impl(std::make_unique<Impl>()) {}
 
 Siga98GB::~Siga98GB() = default;
@@ -81,6 +106,8 @@ void Siga98GB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("is_loaded"), &Siga98GB::is_loaded);
     ClassDB::bind_method(D_METHOD("set_buttons", "buttons"), &Siga98GB::set_buttons);
     ClassDB::bind_method(D_METHOD("run_frame_rgba"), &Siga98GB::run_frame_rgba);
+    ClassDB::bind_method(D_METHOD("drain_audio_pcm16"), &Siga98GB::drain_audio_pcm16);
+    ClassDB::bind_method(D_METHOD("audio_sample_rate"), &Siga98GB::audio_sample_rate);
     ClassDB::bind_method(D_METHOD("save_ram"), &Siga98GB::save_ram);
     ClassDB::bind_method(D_METHOD("load_save_ram", "save"), &Siga98GB::load_save_ram);
     ClassDB::bind_method(D_METHOD("rom_title"), &Siga98GB::rom_title);
@@ -132,6 +159,9 @@ int Siga98GB::load_rom(const PackedByteArray &p_rom) {
     GB_set_rgb_encode_callback(impl->gb, &encode_rgba);
     GB_set_pixels_output(impl->gb, impl->pixels.data());
     GB_set_color_correction_mode(impl->gb, GB_COLOR_CORRECTION_MODERN_BALANCED);
+    GB_set_user_data(impl->gb, impl.get());
+    GB_apu_set_sample_callback(impl->gb, &capture_audio_sample);
+    GB_set_sample_rate(impl->gb, AUDIO_SAMPLE_RATE);
     GB_load_rom_from_buffer(impl->gb, rom, static_cast<size_t>(size));
     GB_reset(impl->gb);
 
@@ -176,6 +206,21 @@ PackedByteArray Siga98GB::run_frame_rgba() {
     result.resize(static_cast<int64_t>(bytes));
     std::memcpy(result.ptrw(), impl->pixels.data(), bytes);
     return result;
+}
+
+PackedByteArray Siga98GB::drain_audio_pcm16() {
+    PackedByteArray result;
+    if (impl->audio_pcm.empty()) {
+        return result;
+    }
+    result.resize(static_cast<int64_t>(impl->audio_pcm.size()));
+    std::memcpy(result.ptrw(), impl->audio_pcm.data(), impl->audio_pcm.size());
+    impl->audio_pcm.clear();
+    return result;
+}
+
+int Siga98GB::audio_sample_rate() const {
+    return static_cast<int>(AUDIO_SAMPLE_RATE);
 }
 
 PackedByteArray Siga98GB::save_ram() const {
