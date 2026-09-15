@@ -19,12 +19,15 @@ const ACERO := "acero_cocina"
 
 static func montar(raiz: Node3D) -> void:
 	montar_zonas_domesticas(raiz)
-	_montar_mesita(raiz, Vector3(-2.45, 0.0, 0.35))
-	_montar_portatil(raiz, Vector3(-2.45, 0.68, 0.35))
-	_montar_consola_sobremesa(raiz, Vector3(-3.35, 0.02, 2.03))
-	_montar_lampara_pie(raiz, Vector3(-0.65, 0.0, 0.55))
+	# Mesita de noche junto al cabecero, con la portátil encima; la consola de
+	# sobremesa va sobre el mueble de la tele y la lámpara de pie, tras el sofá.
+	_montar_mesita(raiz, Vector3(-1.1, 0.0, -3.05))
+	_montar_portatil(raiz, Vector3(-1.1, 0.68, -3.05))
+	_montar_consola_sobremesa(raiz, Vector3(-3.6, 0.54, 1.95))
+	_montar_lampara_pie(raiz, Vector3(-1.0, 0.0, 2.85))
 	_montar_almacenamiento(raiz, Vector3(0.0, 0.0, -3.05))
 	_montar_televisor_interactivo(raiz)
+	CasaHogarCC0.montar(raiz)
 
 
 ## Vertical espacial de #133/#282. Se mantiene separado de las interacciones para
@@ -34,7 +37,7 @@ static func montar(raiz: Node3D) -> void:
 static func montar_zonas_domesticas(raiz: Node3D) -> void:
 	_montar_cama(raiz, _ancla_salida("sueño", Vector3(-2.4, 0.0, -2.0)))
 	_montar_cuenco_gato(raiz, _ancla_cuenco(Vector3(2.8, 0.0, 1.5)))
-	_montar_sofa(raiz, Vector3(-1.65, 0.0, 1.35), 90.0)
+	_montar_sofa(raiz, Vector3(-0.95, 0.0, 1.4), 90.0)
 	_montar_cocina(raiz, Vector3(3.30, 0.0, -0.15))
 	_montar_ventana(raiz, Vector3(-2.10, 1.65, -3.42))
 	_montar_estanteria_compras(raiz, Vector3(1.25, 0.0, -3.22))
