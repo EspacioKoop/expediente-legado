@@ -8,10 +8,10 @@
 ## misma decisión que las texturas de 64 píxeles.
 ##
 ## Lo que lo convierte en un gato tampoco es la malla: es que se mueva como
-## uno, y eso lo decide `GatoConducta`. Aquí solo está el bicho y su cola, que
-## es lo único que se anima y lo que hace que un bulto parado parezca vivo.
+## uno, y eso lo decide `GatoConducta`. Aquí está el bicho, su colisión y las
+## animaciones observables; hambre y afinidad siguen fuera de esta clase.
 class_name Gato
-extends Node3D
+extends CharacterBody3D
 
 const COLOR := Color(0.30, 0.27, 0.25)
 const COLOR_CLARO := Color(0.62, 0.58, 0.53)
@@ -22,6 +22,12 @@ const COLOR_NARIZ := Color(0.55, 0.36, 0.36)
 ## Lo alto que es. Un gato mide unos 25 cm a la cruz, y a esa escala se lee
 ## como un gato al lado de una silla de 45.
 const ALTO := 0.26
+
+## Cuando un mueble corta la línea recta al destino, durante un instante bordea
+## el obstáculo por el lateral que más lo acerca al destino. No es navegación:
+## es suficiente para que una cama o una mesa no conviertan el paseo en un
+## teletransporte a través de la caja ni en quedarse empotrado para siempre.
+const DURACION_DESVIO := 1.1
 
 ## Todo lo que tiene dentro el gato cabe en un solo lado: las piezas se
 ## describen en el sistema del cuerpo, con el morro hacia -Z y el suelo en 0.
@@ -65,11 +71,26 @@ var sitios: Array = []
 var _cola: Node3D
 var _cuerpo: Node3D
 var _cabeza: Node3D
+var _colision: CollisionShape3D
 var _orejas: Array[Node3D] = []
 var _reloj := 0.0
+var _desvio := Vector3.ZERO
+var _desvio_resto := 0.0
 
 
 func _init() -> void:
+	# El gato consulta las colisiones del mundo, pero no se convierte en un
+	# obstáculo para el jugador. Así los muebles lo frenan sin que un animal de
+	# veinte centímetros pueda bloquear un pasillo al personaje.
+	collision_layer = 0
+	collision_mask = 1
+	_colision = CollisionShape3D.new()
+	_colision.position = Vector3(0, 0.20, -0.03)
+	var caja_col := BoxShape3D.new()
+	caja_col.size = Vector3(0.20, 0.16, 0.50)
+	_colision.shape = caja_col
+	add_child(_colision)
+
 	_cuerpo = Node3D.new()
 	add_child(_cuerpo)
 
@@ -240,10 +261,18 @@ func avanzar(hambre: int, jugador: Vector3, delta: float) -> void:
 	if estado.is_empty():
 		return
 	_reloj += delta
+
+	# Conducta propone un paso; el cuerpo físico decide cuánto de ese paso cabe
+	# realmente en la casa. Al final se devuelve la posición real a la conducta,
+	# para que nunca crea que atravesó un mueble mientras la malla quedó detrás.
+	estado["pos"] = position
 	estado = GatoConducta.avanzar(estado, sitios, hambre, jugador, delta)
+	var propuesta: Vector3 = estado["pos"]
+	estado["pos"] = position
 
 	var antes := position
-	position = estado["pos"]
+	_mover_sin_atravesar(propuesta - position, delta)
+	estado["pos"] = position
 
 	# Mira hacia donde anda. El morro del modelo apunta a -Z, así que el yaw
 	# necesita media vuelta respecto a la convención habitual (+Z hacia avance).
@@ -251,22 +280,73 @@ func avanzar(hambre: int, jugador: Vector3, delta: float) -> void:
 	# como un error de física, no como un gato.
 	var avance := position - antes
 	if avance.length() > 0.001:
-		_cuerpo.rotation.y = atan2(avance.x, avance.z) + PI
+		var giro := atan2(avance.x, avance.z) + PI
+		_cuerpo.rotation.y = giro
+		_colision.rotation.y = giro
 
 	# La cola. Más deprisa con hambre, que es la otra mitad de la señal: si no
-	# viene y además está tensa, algo pasa.
-	var ritmo := 3.4 if estado["estado"] == "hambriento" else 1.5
+	# viene y además está tensa, algo pasa. Durante los mimos vuelve a moverse
+	# con intención, pero sin parecer la tensión del hambre.
+	var ritmo := 1.5
+	if estado["estado"] == "hambriento":
+		ritmo = 3.4
+	elif estado["estado"] == "mimos":
+		ritmo = 2.4
 	_cola.rotation.y = sin(_reloj * ritmo) * 0.35
 	_cola.rotation.x = sin(_reloj * ritmo * 0.6) * 0.12
 	_animar_reposo(ritmo)
 
 
+## Aplica el paso propuesto contra las mismas colisiones que usan los muebles.
+## Al chocar elige un lateral y lo mantiene brevemente: una mesa se rodea en
+## vez de cruzarse, sin introducir un sistema de navegación para una sola casa.
+func _mover_sin_atravesar(paso: Vector3, delta: float) -> void:
+	var plano := Vector3(paso.x, 0, paso.z)
+	if plano.length_squared() < 0.000001:
+		_desvio_resto = maxf(0.0, _desvio_resto - delta)
+		return
+
+	var distancia := minf(plano.length(), GatoConducta.VELOCIDAD * delta)
+	var movimiento := plano.normalized() * distancia
+	if _desvio_resto > 0.0 and _desvio.length_squared() > 0.0:
+		movimiento = _desvio * distancia
+		_desvio_resto = maxf(0.0, _desvio_resto - delta)
+
+	var choque := move_and_collide(movimiento)
+	if choque == null:
+		return
+
+	var normal: Vector3 = choque.get_normal()
+	var lateral := Vector3(-normal.z, 0, normal.x)
+	if lateral.length_squared() < 0.000001:
+		return
+	lateral = lateral.normalized()
+
+	var destino: Vector3 = estado.get("destino", position)
+	var hacia_destino := Vector3(destino.x - position.x, 0, destino.z - position.z)
+	if (-lateral).dot(hacia_destino) > lateral.dot(hacia_destino):
+		lateral = -lateral
+	_desvio = lateral
+	_desvio_resto = DURACION_DESVIO
+
+	# Aprovecha el resto del paso ya en este frame; si hay una esquina, el
+	# siguiente frame recalculará el lateral con la nueva normal.
+	var resto := choque.get_remainder().length()
+	if resto > 0.001:
+		move_and_collide(lateral * resto)
+
+
 ## Lo que hace que no parezca una figura: respira, y de vez en cuando mueve
-## una oreja. Con hambre, las orejas se echan un poco atrás.
+## una oreja. Con hambre, las orejas se echan un poco atrás. En `mimos` el
+## cuerpo se frota lateralmente y la cabeza acompaña el gesto.
 func _animar_reposo(ritmo: float) -> void:
 	_cuerpo.scale.y = 1.0 + sin(_reloj * 2.2) * 0.012
+	var dando_mimos := estado.get("estado", "") == "mimos"
+	_cuerpo.position.x = sin(_reloj * 4.2) * 0.028 if dando_mimos else 0.0
+	_cuerpo.rotation.z = sin(_reloj * 3.1) * 0.045 if dando_mimos else 0.0
 	_cabeza.rotation.y = sin(_reloj * 0.45) * 0.18
-	var atras := 0.25 if ritmo > 2.0 else 0.0
+	_cabeza.rotation.z = -0.12 if dando_mimos else 0.0
+	var atras := 0.25 if ritmo > 3.0 else 0.0
 	for i in _orejas.size():
 		var tic := pow(maxf(sin(_reloj * 0.9 + i * 2.3), 0.0), 24.0) * 0.3
 		_orejas[i].rotation.x = -0.15 - atras - tic
