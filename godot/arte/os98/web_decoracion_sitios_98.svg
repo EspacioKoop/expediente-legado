@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="468" height="124" viewBox="0 0 468 124" shape-rendering="crispEdges">
+<!-- Decoración web 1998 reutilizable: separadores, bullets, mini-banners y estados. -->
+<g id="separadores" transform="translate(0 0)">
+ <rect width="468" height="28" fill="#d7d6ce"/>
+ <path d="M8 7h130" stroke="#174c98" stroke-width="2"/><path d="M8 12h130" stroke="#8ca9c1"/><circle cx="148" cy="9" r="4" fill="#f1d72f" stroke="#544d3b"/>
+ <path d="M170 5h120v3H170zm0 7h120v3H170" fill="#6f1f34"/><rect x="300" y="5" width="70" height="10" fill="#0a0f12"/><path d="M304 10h62" stroke="#78d35b"/>
+ <path d="M385 5l8 8 8-8 8 8 8-8 8 8 8-8 8 8 8-8" fill="none" stroke="#174c98" stroke-width="2"/>
+</g>
+<g id="bullets" transform="translate(0 28)">
+ <rect width="468" height="24" fill="#f6f4df"/>
+ <circle cx="14" cy="12" r="5" fill="#174c98"/><path d="M12 9l5 3-5 3z" fill="#fff"/>
+ <rect x="35" y="7" width="10" height="10" fill="#78d35b" stroke="#173e7a"/><path d="M38 12h4M40 10v4" stroke="#fff"/>
+ <path d="M66 7h12l-2 10H68z" fill="#e7cd4a" stroke="#544d3b"/><rect x="67" y="5" width="10" height="3" fill="#f7e77a"/>
+ <circle cx="103" cy="12" r="5" fill="#a83232"/><text x="103" y="15" text-anchor="middle" font-family="Arial" font-size="7" font-weight="700" fill="#fff">!</text>
+ <text x="130" y="15" font-family="Arial" font-size="7" fill="#403a2d">Bullets y marcadores para listas de enlaces</text>
+</g>
+<g id="mini-banners" transform="translate(0 52)">
+ <rect width="468" height="40" fill="#c9c8c0"/>
+ <g transform="translate(6 5)"><rect width="110" height="30" fill="#0b2d1e" stroke="#f1d72f"/><text x="55" y="12" text-anchor="middle" font-family="Arial" font-size="7" font-weight="900" fill="#f1d72f">RESULTADOS</text><text x="55" y="23" text-anchor="middle" font-family="monospace" font-size="6" fill="#f4f0d8">ACTUALIZADOS</text></g>
+ <g transform="translate(122 5)"><rect width="110" height="30" fill="#174c98" stroke="#d9ecf7"/><circle cx="18" cy="15" r="8" fill="#f1d72f"/><text x="67" y="12" text-anchor="middle" font-family="Arial" font-size="7" font-weight="900" fill="#fff">PREVISIÓN</text><text x="67" y="23" text-anchor="middle" font-family="monospace" font-size="6" fill="#d9ecf7">LOCAL 72H</text></g>
+ <g transform="translate(238 5)"><rect width="110" height="30" fill="#0a0f12" stroke="#78d35b"/><text x="55" y="12" text-anchor="middle" font-family="monospace" font-size="7" font-weight="700" fill="#78d35b">&gt; DOWNLOAD</text><text x="55" y="23" text-anchor="middle" font-family="monospace" font-size="6" fill="#9fb0bd">MIRROR LOCAL</text></g>
+ <g transform="translate(354 5)"><rect width="108" height="30" fill="#6f1f34" stroke="#f1d72f"/><text x="54" y="12" text-anchor="middle" font-family="Georgia" font-size="7" font-weight="700" fill="#fff0c7">ESTRENOS</text><text x="54" y="23" text-anchor="middle" font-family="Arial" font-size="6" fill="#f1d72f">VIERNES</text></g>
+</g>
+<g id="estados" transform="translate(0 92)">
+ <rect width="468" height="32" fill="#f6f4df"/>
+ <g transform="translate(8 6)"><rect width="88" height="20" fill="#d9d8d1" stroke="#555"/><rect x="2" y="2" width="84" height="16" fill="#fff"/><text x="44" y="13" text-anchor="middle" font-family="Arial" font-size="7" fill="#333">CARGANDO...</text></g>
+ <g transform="translate(104 6)"><rect width="88" height="20" fill="#f1d72f" stroke="#544d3b"/><text x="44" y="13" text-anchor="middle" font-family="Arial" font-size="7" font-weight="700" fill="#403a2d">EN OBRAS</text></g>
+ <g transform="translate(200 6)"><rect width="88" height="20" fill="#a83232" stroke="#5f1c1c"/><text x="44" y="13" text-anchor="middle" font-family="Arial" font-size="7" font-weight="700" fill="#fff">404 / MUERTO</text></g>
+ <g transform="translate(296 6)"><rect width="88" height="20" fill="#174c98" stroke="#0c2c56"/><text x="44" y="13" text-anchor="middle" font-family="Arial" font-size="7" font-weight="700" fill="#fff">MIRROR</text></g>
+ <g transform="translate(392 6)"><rect width="68" height="20" fill="#0b2d1e" stroke="#315e43"/><circle cx="11" cy="10" r="4" fill="#78d35b"/><text x="41" y="13" text-anchor="middle" font-family="Arial" font-size="7" fill="#fff">ONLINE</text></g>
+</g>
+</svg>
