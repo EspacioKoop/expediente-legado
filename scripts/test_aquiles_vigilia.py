@@ -10,7 +10,9 @@ from scripts.godot_pruebas import importar_proyecto
 ROOT = Path(__file__).resolve().parents[1]
 VIGILIA = ROOT / "godot" / "guion" / "aquiles_vigilia.gd"
 SUENO = ROOT / "godot" / "guion" / "sueno_aquiles.gd"
+CONTROLLER = ROOT / "godot" / "guion" / "dia_aquiles_vigilia_app.gd"
 ESCENA = ROOT / "godot" / "escenas" / "aquiles_vigilia.tscn"
+DIA = ROOT / "godot" / "escenas" / "dia.tscn"
 PRUEBA_GODOT = "res://pruebas/pruebas_aquiles_vigilia.gd"
 RESUMEN_GODOT = re.compile(r"(\d+) pasadas, 0 fallos")
 
@@ -20,7 +22,9 @@ class AquilesVigiliaTest(unittest.TestCase):
     def setUpClass(cls):
         cls.vigilia = VIGILIA.read_text(encoding="utf-8")
         cls.sueno = SUENO.read_text(encoding="utf-8")
+        cls.controller = CONTROLLER.read_text(encoding="utf-8")
         cls.escena = ESCENA.read_text(encoding="utf-8")
+        cls.dia = DIA.read_text(encoding="utf-8")
 
     def test_usa_contrato_comun_de_semillas(self):
         self.assertIn('ID_MITO := "aquiles"', self.sueno)
@@ -55,6 +59,17 @@ class AquilesVigiliaTest(unittest.TestCase):
     def test_escena_standalone_usa_la_contraparte(self):
         self.assertIn('path="res://guion/aquiles_vigilia.gd"', self.escena)
         self.assertIn('[node name="AquilesVigilia" type="Area3D"]', self.escena)
+
+    def test_vigilia_alcanzable_desde_casa_real(self):
+        self.assertIn('String(dia.jornada.get("fase", "")) != "casa"', self.controller)
+        self.assertIn("AquilesVigilia.new()", self.controller)
+        self.assertIn("estampa.configurar(jornada)", self.controller)
+        self.assertIn('mundo.get_node_or_null("AquilesVigiliaCasa")', self.controller)
+        self.assertIn(
+            'path="res://guion/dia_aquiles_vigilia_app.gd"',
+            self.dia,
+        )
+        self.assertIn('[node name="AquilesVigiliaController" type="Node" parent="."]', self.dia)
 
     def test_contrato_funciona_en_godot_headless(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
