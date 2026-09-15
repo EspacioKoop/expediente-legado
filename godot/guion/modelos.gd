@@ -417,6 +417,7 @@ static func _aro_gafa(
 	aro.material_override = _material_rasgo(color)
 	padre.add_child(aro)
 
+
 ## Profundidad del frente de un elipsoide en un punto X/Y de la cara.
 ##
 ## En lugar de asumir que todo el rostro está en un mismo plano Z, cada rasgo
