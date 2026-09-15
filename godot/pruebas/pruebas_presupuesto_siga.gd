@@ -8,15 +8,9 @@ func _init() -> void:
 	var jornada := Jornada.nueva()
 
 	comprobar(
-		"la primera lectura nueva se anuncia gratis",
-		Jornada.coste_lectura(jornada, "DOC-A"),
-		0
+		"la primera lectura nueva se anuncia gratis", Jornada.coste_lectura(jornada, "DOC-A"), 0
 	)
-	comprobar(
-		"consultar el coste no gasta acciones",
-		jornada["acciones"],
-		Jornada.ACCIONES_POR_DIA
-	)
+	comprobar("consultar el coste no gasta acciones", jornada["acciones"], Jornada.ACCIONES_POR_DIA)
 	comprobar("la primera lectura se puede abrir", Jornada.gastar_lectura(jornada, "DOC-A"), true)
 	comprobar(
 		"la primera lectura gratuita no gasta acciones",
@@ -26,25 +20,17 @@ func _init() -> void:
 
 	Jornada.anotar_lectura(jornada, "DOC-A")
 	comprobar(
-		"la siguiente lectura nueva anuncia una accion",
-		Jornada.coste_lectura(jornada, "DOC-B"),
-		1
+		"la siguiente lectura nueva anuncia una accion", Jornada.coste_lectura(jornada, "DOC-B"), 1
 	)
 	comprobar("la segunda lectura se puede abrir", Jornada.gastar_lectura(jornada, "DOC-B"), true)
 	comprobar(
-		"la segunda lectura consume una accion",
-		jornada["acciones"],
-		Jornada.ACCIONES_POR_DIA - 1
+		"la segunda lectura consume una accion", jornada["acciones"], Jornada.ACCIONES_POR_DIA - 1
 	)
 
 	Jornada.anotar_lectura(jornada, "DOC-B")
 	comprobar("releer hoy se anuncia gratis", Jornada.coste_lectura(jornada, "DOC-B"), 0)
 	comprobar("releer hoy se puede abrir", Jornada.gastar_lectura(jornada, "DOC-B"), true)
-	comprobar(
-		"releer hoy no vuelve a gastar",
-		jornada["acciones"],
-		Jornada.ACCIONES_POR_DIA - 1
-	)
+	comprobar("releer hoy no vuelve a gastar", jornada["acciones"], Jornada.ACCIONES_POR_DIA - 1)
 
 	jornada["acciones"] = 0
 	comprobar(
