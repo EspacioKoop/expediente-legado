@@ -129,21 +129,26 @@ func _probar_tienda(dia, calle: Node3D) -> void:
 		return
 	_comprobar(puerta.global_position.x > 4.0, "se compra desde la acera derecha")
 	dia.jornada["dinero"] = 100
-	var hay_stock := FileAccess.file_exists(String(TiendaVideojuegos.CATALOGO[0]["ruta"]))
+	var primera: Dictionary = TiendaVideojuegos.catalogo()[0]
+	var hay_stock := FileAccess.file_exists(String(primera["ruta"]))
 	puerta.interactuar(dia._caminante)
 	await process_frame
 	var compradas := TiendaVideojuegos.compras(dia.jornada)
 	if hay_stock:
 		_comprobar(compradas.size() == 1, "comprar añade el cartucho a la jornada")
+		_comprobar(int(dia.jornada["dinero"]) == 100 - int(primera["precio"]), "cobra el precio")
+		# Cada uso compra el siguiente cartucho pendiente; cuando no queda nada,
+		# se avisa y ya no se cobra.
+		var gastado := 0
+		for entrada in TiendaVideojuegos.catalogo():
+			gastado += int(entrada["precio"])
+		for i in TiendaVideojuegos.catalogo().size():
+			puerta.interactuar(dia._caminante)
 		_comprobar(
-			int(dia.jornada["dinero"]) == 100 - int(TiendaVideojuegos.CATALOGO[0]["precio"]),
-			"cobra el precio"
+			TiendaVideojuegos.compras(dia.jornada).size() == TiendaVideojuegos.catalogo().size(),
+			"se puede comprar todo el catálogo"
 		)
-		puerta.interactuar(dia._caminante)
-		_comprobar(
-			int(dia.jornada["dinero"]) == 100 - int(TiendaVideojuegos.CATALOGO[0]["precio"]),
-			"no cobra dos veces"
-		)
+		_comprobar(int(dia.jornada["dinero"]) == 100 - gastado, "no cobra dos veces")
 		_comprobar(
 			puerta.nombre_objeto == TranslationServer.translate("CALLE_TIENDA_TODO_COMPRADO"),
 			"avisa de que ya lo tiene"

@@ -9,7 +9,6 @@ extends CanvasLayer
 
 signal cerrado
 
-const ROM_PROPIA := "res://roms/caza_pixeles_98.gbc"
 const TEXTOS := "res://datos/emulador_gb_textos.json"
 const SRAM_DIR := "user://sram/gb"
 const ANCHO := 160
@@ -58,6 +57,8 @@ const BTN_LEFT := 0x20
 const BTN_UP := 0x40
 const BTN_DOWN := 0x80
 
+## Qué ROMs propias hay en el selector: incluidas + compradas (RomsPropias).
+var roms_compradas: Array = []
 var _textos: Dictionary = {}
 var _emulador: Object = null
 var _vista: TextureRect
@@ -331,9 +332,11 @@ func _refrescar_roms() -> void:
 		hijo.queue_free()
 
 	var entradas: Array[Dictionary] = []
-	if FileAccess.file_exists(ROM_PROPIA):
-		entradas.append({"nombre": _texto("rom_propia"), "ruta": ROM_PROPIA})
-	elif _emulador != null:
+	var propias := RomsPropias.en_consola(roms_compradas)
+	for rom in propias:
+		var etiqueta := "rom_propia" if bool(rom.get("incluida", false)) else "rom_comprada"
+		entradas.append({"nombre": _formatear(etiqueta, [rom["titulo"]]), "ruta": rom["rom"]})
+	if propias.is_empty() and _emulador != null:
 		_estado.text = _texto("rom_propia_ausente")
 	entradas.append_array(CatalogoRomsUsuario.listar())
 

@@ -43,7 +43,7 @@ static func clave(id_mito: String) -> String:
 ##
 ## Repetir la MISMA fuente es idempotente. Fuentes distintas aumentan la
 ## intensidad hasta `INTENSIDAD_MAX`; la fuente es un id estable de la
-## interacción concreta (por ejemplo `rom:tablillas_gilgamesh` o
+## interacción concreta (por ejemplo `RomsPropias.fuente_semilla("uruk_98")` o
 ## `tv:documental_duat`), no el texto que ve el jugador.
 static func activar_semilla_onirica(
 	jornada: Dictionary, id_mito: String, fuente: String, intensidad: int = 1
