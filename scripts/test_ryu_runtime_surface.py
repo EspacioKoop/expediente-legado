@@ -77,12 +77,20 @@ class RyuRuntimeSurfaceTest(unittest.TestCase):
         self.assertIn("RyuFlowVigilia.new()", self.dia)
         self.assertIn("observador.configurar(jornada, consola)", self.dia)
 
-    def test_rom_no_marca_completado_al_arrancar(self):
+    def test_rom_no_marca_completado_al_arrancar_ni_al_reiniciar(self):
         self.assertIn('SECTION "Handshake", WRAM0[$C100]', self.rom_source)
         self.assertIn("DEF MARCA_COMPLETADO     EQU $A5", self.rom_source)
-        inicio = self.rom_source.split("Inicio:", 1)[1].split("BuclePrincipal:", 1)[0]
+
+        inicio = self.rom_source.split("Inicio:", 1)[1].split("Bucle:", 1)[0]
         self.assertIn("xor a", inicio)
         self.assertIn("ld [wRyuFlowCompletado], a", inicio)
+
+        reinicio = self.rom_source.split("IniciarJuego:", 1)[1].split(
+            "SeleccionarAnterior:", 1
+        )[0]
+        self.assertIn("xor a", reinicio)
+        self.assertIn("ld [wRyuFlowCompletado], a", reinicio)
+
         completar = self.rom_source.split("CompletarFlujo:", 1)[1].split(
             "DesactivarLCD:", 1
         )[0]
