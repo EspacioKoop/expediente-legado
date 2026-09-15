@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 import re
+import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Callable
@@ -17,6 +18,10 @@ REGISTRO_ISSUE = int(os.environ.get("REGISTRO_RESERVAS_ISSUE", "182"))
 API_URL = os.environ.get("GITHUB_API_URL", "https://api.github.com").rstrip("/")
 REPO = os.environ.get("GITHUB_REPOSITORY", "")
 TOKEN = os.environ.get("GITHUB_TOKEN", "")
+
+REINTENTOS_MAX = int(os.environ.get("RESERVAS_REINTENTOS", "5"))
+ESPERA_MAX_SEGUNDOS = float(os.environ.get("RESERVAS_ESPERA_MAX", "60"))
+CODIGOS_TRANSITORIOS = frozenset({429, 500, 502, 503, 504})
 
 CLAIM_RE = re.compile(
     r"^CLAIM issue=#(?P<issue>\d+) agent=(?P<agent>\S+) "
@@ -127,7 +132,13 @@ def planificar_barrido(
 
         if reserva.pr is not None:
             if reserva.pr not in cache_pr:
-                cache_pr[reserva.pr] = obtener_pr(reserva.pr)
+                try:
+                    cache_pr[reserva.pr] = obtener_pr(reserva.pr)
+                except RuntimeError as exc:
+                    # Sin saber el estado del PR no se libera: se mantiene la reserva
+                    # y se sigue planificando el resto en vez de abortar el barrido.
+                    print(f"AVISO: no se pudo consultar el PR #{reserva.pr}: {exc}")
+                    continue
             pr = cache_pr[reserva.pr]
             if pr.get("state") == "closed":
                 motivo = "merge-detectado-automaticamente" if pr.get("merged_at") else "PR-cerrado-sin-integrar"
@@ -157,16 +168,66 @@ def headers() -> dict[str, str]:
     }
 
 
-def api_json(method: str, path: str, payload: dict | None = None) -> tuple[object, dict]:
+class ErrorTransitorio(RuntimeError):
+    """Fallo de API que merece reintento: rate limit secundario o error de servidor."""
+
+
+def es_transitorio(code: int, detalle: str) -> bool:
+    if code in CODIGOS_TRANSITORIOS:
+        return True
+    # GitHub devuelve 403 tanto para permisos como para el rate limit secundario.
+    # Solo el segundo se reintenta; un 403 de permisos no mejora esperando.
+    return code == 403 and "rate limit" in detalle.lower()
+
+
+def espera_recomendada(cabeceras: dict[str, str], intento: int, ahora: float) -> float:
+    """Segundos a esperar antes del siguiente intento (0-indexado)."""
+    retry_after = cabeceras.get("Retry-After") or cabeceras.get("retry-after")
+    if retry_after:
+        try:
+            return max(0.0, min(float(retry_after), ESPERA_MAX_SEGUNDOS))
+        except ValueError:
+            pass
+    restantes = cabeceras.get("X-RateLimit-Remaining") or cabeceras.get("x-ratelimit-remaining")
+    reset = cabeceras.get("X-RateLimit-Reset") or cabeceras.get("x-ratelimit-reset")
+    if restantes == "0" and reset:
+        try:
+            return max(0.0, min(float(reset) - ahora, ESPERA_MAX_SEGUNDOS))
+        except ValueError:
+            pass
+    return min(2.0**intento, ESPERA_MAX_SEGUNDOS)
+
+
+def api_json(
+    method: str,
+    path: str,
+    payload: dict | None = None,
+    dormir: Callable[[float], None] = time.sleep,
+) -> tuple[object, dict]:
     data = json.dumps(payload).encode() if payload is not None else None
-    request = Request(f"{API_URL}{path}", data=data, headers=headers(), method=method)
-    try:
-        with urlopen(request, timeout=30) as response:
-            raw = response.read()
-            return (json.loads(raw) if raw else None), dict(response.headers.items())
-    except HTTPError as exc:
-        detalle = exc.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"GitHub API {exc.code} en {path}: {detalle}") from exc
+    for intento in range(REINTENTOS_MAX):
+        request = Request(f"{API_URL}{path}", data=data, headers=headers(), method=method)
+        try:
+            with urlopen(request, timeout=30) as response:
+                raw = response.read()
+                return (json.loads(raw) if raw else None), dict(response.headers.items())
+        except HTTPError as exc:
+            detalle = exc.read().decode("utf-8", errors="replace")
+            cabeceras = dict(exc.headers.items()) if exc.headers else {}
+            if not es_transitorio(exc.code, detalle) or intento == REINTENTOS_MAX - 1:
+                error = RuntimeError(f"GitHub API {exc.code} en {path}: {detalle}")
+                if es_transitorio(exc.code, detalle):
+                    error = ErrorTransitorio(
+                        f"GitHub API {exc.code} en {path} tras {REINTENTOS_MAX} intentos: {detalle}"
+                    )
+                raise error from exc
+            espera = espera_recomendada(cabeceras, intento, time.time())
+            print(
+                f"AVISO: GitHub API {exc.code} en {path}; "
+                f"reintento {intento + 1}/{REINTENTOS_MAX - 1} en {espera:.0f}s"
+            )
+            dormir(espera)
+    raise AssertionError("inalcanzable")
 
 
 def obtener_comentarios() -> list[dict]:
@@ -217,9 +278,15 @@ def liberar_por_pr(reservas: dict[tuple[int, str], Reserva], numero_pr: int, dry
         if not reserva.released and (reserva.pr == numero_pr or reserva.branch == branch)
     ]
     motivo = "merge-detectado-automaticamente" if pr.get("merged_at") else "PR-cerrado-sin-integrar"
+    fallos = 0
     for reserva in candidatas:
-        publicar_release(reserva, motivo, pr, dry_run)
-    return len(candidatas)
+        try:
+            publicar_release(reserva, motivo, pr, dry_run)
+        except RuntimeError as exc:
+            # Un fallo por reserva no debe dejar sin liberar a las siguientes.
+            fallos += 1
+            print(f"ERROR: no se pudo liberar #{reserva.issue} ({reserva.branch}): {exc}")
+    return fallos
 
 
 def main() -> int:
@@ -233,15 +300,21 @@ def main() -> int:
 
     reservas = reconstruir_reservas(obtener_comentarios())
     if args.pr:
-        liberar_por_pr(reservas, args.pr, args.dry_run)
-        return 0
+        return 1 if liberar_por_pr(reservas, args.pr, args.dry_run) else 0
 
     cutoff = parse_fecha(args.legacy_cutoff) if args.legacy_cutoff else None
     ahora = datetime.now(timezone.utc)
     acciones = planificar_barrido(reservas, ahora, obtener_pr, cutoff)
+    fallos = 0
     for reserva, motivo, pr in acciones:
-        publicar_release(reserva, motivo, pr, args.dry_run)
-    return 0
+        try:
+            publicar_release(reserva, motivo, pr, args.dry_run)
+        except RuntimeError as exc:
+            fallos += 1
+            print(f"ERROR: no se pudo liberar #{reserva.issue} ({reserva.branch}): {exc}")
+    if fallos:
+        print(f"ERROR: {fallos} de {len(acciones)} liberaciones fallaron; el resto sí se publicó")
+    return 1 if fallos else 0
 
 
 if __name__ == "__main__":
