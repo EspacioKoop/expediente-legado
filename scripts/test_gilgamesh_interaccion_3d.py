@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -29,7 +30,10 @@ class GilgameshInteraccion3DTest(unittest.TestCase):
 
     def test_seleccionar_fragmento_y_ancla_usa_el_contrato_existente(self):
         self.assertIn('_fragmento_seleccionado = fragmento', self.interaccion)
-        self.assertIn("sueno.colocar_fragmento(", self.interaccion)
+        self.assertRegex(
+            self.interaccion,
+            r"sueno\s*\.\s*colocar_fragmento\s*\(",
+        )
         self.assertIn("seleccionado,", self.interaccion)
         self.assertIn("ancla_id,", self.interaccion)
         self.assertIn("_reduccion_movimiento,", self.interaccion)
