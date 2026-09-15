@@ -58,7 +58,8 @@ def test_visibilidad_reactiva_depende_de_jornada_real() -> None:
     assert '"visible_si": {"clave": "jornada", "op": ">=", "valor": 2}' in modelo
     condicion = bloque_funcion(modelo, "_cumple_condicion")
     assert 'not _contexto.has(clave)' in condicion
-    assert 'return float(actual) >= float(esperado)' in condicion
+    mayor_igual = bloque_funcion(modelo, "_cumple_mayor_igual")
+    assert 'return float(actual) >= float(esperado)' in mayor_igual
     assert 'jornada_actual = int(dia.jornada.get("dia", 1))' in adaptador
     assert '"jornada": jornada_actual' in adaptador
 
@@ -70,8 +71,8 @@ def test_acceso_restringido_enlace13_esta_preparado_pero_cerrado() -> None:
     assert '"acceso_si": {"clave": "credenciales", "op": "incluye", "valor": "enlace13"}' in modelo
     assert '"habilitar_enlace13": false' in adaptador
     assert '"credenciales": []' in adaptador
-    condicion = bloque_funcion(modelo, "_cumple_condicion")
-    assert '(actual as Array).has(esperado)' in condicion
+    incluye = bloque_funcion(modelo, "_cumple_incluye")
+    assert '(actual as Array).has(esperado)' in incluye
 
 
 def test_tres_tipos_documentales_tienen_accion_de_apertura() -> None:

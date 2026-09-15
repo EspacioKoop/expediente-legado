@@ -83,13 +83,16 @@ func _crear_explorador() -> Control:
 	var jornada_actual := 1
 	if dia != null:
 		jornada_actual = int(dia.jornada.get("dia", 1))
-	explorador.configurar_contexto(
-		{
-			"jornada": jornada_actual,
-			# Reservas explícitas para #28: por defecto no revelan ni desbloquean nada.
-			"habilitar_enlace13": false,
-			"credenciales": [],
-		}
+	(
+		explorador
+		. configurar_contexto(
+			{
+				"jornada": jornada_actual,
+				# Reservas explícitas para #28: por defecto no revelan ni desbloquean nada.
+				"habilitar_enlace13": false,
+				"credenciales": [],
+			}
+		)
 	)
 	return explorador
 

@@ -124,7 +124,11 @@ var _entradas: Array[Dictionary] = [
 		"padre": "equipo/c/administracion",
 		"nombre": "LEEME.TXT",
 		"tipo": "texto",
-		"contenido": "Carpeta de trabajo administrativa. Los documentos con consecuencias de campaña deben proceder de una regla de diseño explícita.",
+		"contenido":
+		(
+			"Carpeta de trabajo administrativa. Los documentos con consecuencias de"
+			+ " campaña deben proceder de una regla de diseño explícita."
+		),
 		"fecha_narrativa": "1998",
 		"visible_si": {},
 		"acceso_si": {},
@@ -137,7 +141,11 @@ var _entradas: Array[Dictionary] = [
 		"padre": "equipo/red",
 		"nombre": "Circular de archivo",
 		"tipo": "circular",
-		"contenido": "CIRCULAR INTERNA\n\nMantenga la documentación de cada jornada en su ubicación asignada y utilice las unidades compartidas solo para material de trabajo.",
+		"contenido":
+		(
+			"CIRCULAR INTERNA\n\nMantenga la documentación de cada jornada en su ubicación"
+			+ " asignada y utilice las unidades compartidas solo para material de trabajo."
+		),
 		"fecha_narrativa": "1998",
 		"visible_si": {},
 		"acceso_si": {},
@@ -150,7 +158,11 @@ var _entradas: Array[Dictionary] = [
 		"padre": "equipo/documentos",
 		"nombre": "Formulario de incidencia",
 		"tipo": "formulario",
-		"contenido": "FORMULARIO DE INCIDENCIA\n\nFecha: __________\nReferencia: __________\nDescripción: ______________________________\nFirma: __________",
+		"contenido":
+		(
+			"FORMULARIO DE INCIDENCIA\n\nFecha: __________\nReferencia: __________"
+			+ "\nDescripción: ______________________________\nFirma: __________"
+		),
 		"fecha_narrativa": "1998",
 		"visible_si": {},
 		"acceso_si": {},
@@ -163,7 +175,11 @@ var _entradas: Array[Dictionary] = [
 		"padre": "equipo/documentos",
 		"nombre": "Registro de jornada anterior.txt",
 		"tipo": "texto",
-		"contenido": "El sistema conserva un registro local de que existe una jornada anterior. No contiene pistas ni altera la progresión.",
+		"contenido":
+		(
+			"El sistema conserva un registro local de que existe una jornada anterior."
+			+ " No contiene pistas ni altera la progresión."
+		),
 		"fecha_narrativa": "dinámica",
 		"visible_si": {"clave": "jornada", "op": ">=", "valor": 2},
 		"acceso_si": {},
@@ -285,15 +301,23 @@ func _cumple_condicion(condicion: Dictionary) -> bool:
 		"igual":
 			return actual == esperado
 		">=":
-			if not (actual is int or actual is float):
-				return false
-			if not (esperado is int or esperado is float):
-				return false
-			return float(actual) >= float(esperado)
+			return _cumple_mayor_igual(actual, esperado)
 		"incluye":
-			if actual is Array:
-				return (actual as Array).has(esperado)
-			if actual is PackedStringArray:
-				return (actual as PackedStringArray).has(String(esperado))
-			return false
+			return _cumple_incluye(actual, esperado)
+	return false
+
+
+func _cumple_mayor_igual(actual: Variant, esperado: Variant) -> bool:
+	var actual_numerico := actual is int or actual is float
+	var esperado_numerico := esperado is int or esperado is float
+	if not (actual_numerico and esperado_numerico):
+		return false
+	return float(actual) >= float(esperado)
+
+
+func _cumple_incluye(actual: Variant, esperado: Variant) -> bool:
+	if actual is Array:
+		return (actual as Array).has(esperado)
+	if actual is PackedStringArray:
+		return (actual as PackedStringArray).has(String(esperado))
 	return false

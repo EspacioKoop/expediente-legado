@@ -161,16 +161,24 @@ func _abrir_documento(entrada: Dictionary) -> void:
 		return
 	_modelo.registrar_apertura(String(entrada.get("id", "")))
 	var tipo := String(entrada.get("tipo", "texto"))
-	var rotulo := {
-		"texto": "ARCHIVO DE TEXTO",
-		"circular": "CIRCULAR INTERNA",
-		"formulario": "FORMULARIO",
-	}.get(tipo, "DOCUMENTO")
-	_visor.text = "%s — %s\n\n%s" % [
-		rotulo,
-		String(entrada.get("nombre", "")),
-		String(entrada.get("contenido", "")),
-	]
+	var rotulo := String(
+		(
+			{
+				"texto": "ARCHIVO DE TEXTO",
+				"circular": "CIRCULAR INTERNA",
+				"formulario": "FORMULARIO",
+			}
+			. get(tipo, "DOCUMENTO")
+		)
+	)
+	_visor.text = (
+		"%s — %s\n\n%s"
+		% [
+			rotulo,
+			String(entrada.get("nombre", "")),
+			String(entrada.get("contenido", "")),
+		]
+	)
 	_mostrar_estado("Abierto: %s" % String(entrada.get("nombre", "")))
 	# La carpeta virtual de recientes refleja inmediatamente actividad real.
 	if _ruta_actual == ExploradorSigaModelo.RUTA_RECIENTES:
