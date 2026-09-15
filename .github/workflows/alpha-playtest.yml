@@ -20,7 +20,40 @@ permissions:
   contents: read
 
 jobs:
+  gbc-boot-rom:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Instalar RGBDS fijado
+        shell: bash
+        env:
+          RGBDS_VERSION: v1.0.3
+          RGBDS_SHA256: 280a52061a0c516999bee75ac357628d6d50784309e0486cef25f7460e6f330b
+        run: |
+          set -euo pipefail
+          url="https://github.com/gbdev/rgbds/releases/download/${RGBDS_VERSION}/rgbds-linux-x86_64.tar.xz"
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/rgbds.tar.xz" "$url"
+          echo "${RGBDS_SHA256}  $RUNNER_TEMP/rgbds.tar.xz" | sha256sum --check --strict
+          mkdir "$RUNNER_TEMP/rgbds"
+          tar -xJf "$RUNNER_TEMP/rgbds.tar.xz" -C "$RUNNER_TEMP/rgbds"
+          (cd "$RUNNER_TEMP/rgbds" && sudo ./install.sh)
+      - name: Compilar boot ROM CGB libre de SameBoy
+        shell: bash
+        run: bash scripts/preparar_emulador_gb.sh boot-rom
+      - name: Adjuntar boot ROM CGB
+        uses: actions/upload-artifact@v4
+        with:
+          name: siga98-gbc-boot-rom-${{ github.sha }}
+          path: godot/native/siga98_gb/.deps/bootroms/cgb_boot_fast.bin
+          if-no-files-found: error
+          retention-days: 1
+
   native-gb-windows:
+    needs: gbc-boot-rom
     runs-on: windows-latest
     timeout-minutes: 20
     steps:
@@ -28,6 +61,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Recuperar boot ROM CGB
+        uses: actions/download-artifact@v4
+        with:
+          name: siga98-gbc-boot-rom-${{ github.sha }}
+          path: godot/native/siga98_gb/.deps/bootroms
       - name: Compilar núcleo GB para Windows
         shell: bash
         run: bash scripts/preparar_emulador_gb.sh windows-release

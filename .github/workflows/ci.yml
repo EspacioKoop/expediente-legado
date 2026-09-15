@@ -104,3 +104,10 @@ jobs:
 
       - name: Arrancar Caza Píxeles 98 en el núcleo nativo
         run: godot4 --headless --path godot --script res://pruebas/emulador_gb_smoke.gd
+
+      - name: Arrancar la ROM CGB-only en el núcleo nativo
+        shell: bash
+        run: |
+          make -C gbc/fixtures/cgb_only_smoke clean all
+          godot4 --headless --path godot --script res://pruebas/emulador_gbc_smoke.gd \
+            -- "$GITHUB_WORKSPACE/gbc/fixtures/cgb_only_smoke/build/cgb_only_smoke.gbc"

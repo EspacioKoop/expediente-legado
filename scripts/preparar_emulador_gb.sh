@@ -27,10 +27,9 @@ PY
 
 GODOT_CPP_REPO="$(leer_lock godot_cpp repository)"
 GODOT_CPP_SHA="$(leer_lock godot_cpp commit)"
-PEANUT_REPO="$(leer_lock peanut_gb repository)"
-PEANUT_SHA="$(leer_lock peanut_gb commit)"
 SAMEBOY_REPO="$(leer_lock sameboy repository)"
 SAMEBOY_SHA="$(leer_lock sameboy commit)"
+BOOT_ROM_SHA="$("$PYTHON" -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["sameboy"]["boot_rom"]["sha256"])' "$LOCK")"
 SCONS_VERSION="$("$PYTHON" - "$LOCK" <<'PY'
 import json
 import sys
@@ -40,7 +39,7 @@ PY
 )"
 DEPS="$NATIVO/.deps"
 GODOT_CPP="$DEPS/godot-cpp"
-PEANUT="$DEPS/peanut-gb"
+BOOTROMS="$DEPS/bootroms"
 SAMEBOY="$DEPS/sameboy"
 
 preparar_repo() {
@@ -63,13 +62,33 @@ preparar_repo() {
     fi
 }
 
+# Compila la boot ROM CGB libre de SameBoy (Expat) desde el commit fijado. Nunca
+# se usa ni se descarga la BIOS de Nintendo. Requiere RGBDS y un compilador C.
+compilar_boot_rom() {
+    local salida="$BOOTROMS/cgb_boot_fast.bin"
+    local obj="$BOOTROMS/obj"
+    mkdir -p "$DEPS"
+    preparar_repo "$SAMEBOY_REPO" "$SAMEBOY_SHA" "$SAMEBOY" no
+    rm -rf "$BOOTROMS"
+    mkdir -p "$obj"
+    "${CC:-cc}" -std=c99 -Wall -Werror "$SAMEBOY/BootROMs/pb12.c" -o "$obj/pb12"
+    rgbgfx -Z -u -c embedded -o "$obj/SameBoyLogo.2bpp" "$SAMEBOY/BootROMs/SameBoyLogo.png"
+    "$obj/pb12" < "$obj/SameBoyLogo.2bpp" > "$obj/SameBoyLogo.pb12"
+    rgbasm --include "$obj/" --include "$SAMEBOY/BootROMs/" \
+        -o "$obj/cgb_boot_fast.o" "$SAMEBOY/BootROMs/cgb_boot_fast.asm"
+    rgblink -x -o "$salida" "$obj/cgb_boot_fast.o"
+    echo "$BOOT_ROM_SHA  $salida" | sha256sum --check --strict
+}
+
 compilar_nativo() {
     local plataforma="$1"
     local objetivo="$2"
     mkdir -p "$DEPS"
     preparar_repo "$GODOT_CPP_REPO" "$GODOT_CPP_SHA" "$GODOT_CPP" si
-    preparar_repo "$PEANUT_REPO" "$PEANUT_SHA" "$PEANUT" no
     preparar_repo "$SAMEBOY_REPO" "$SAMEBOY_SHA" "$SAMEBOY" no
+    if [ ! -f "$BOOTROMS/cgb_boot_fast.bin" ]; then
+        compilar_boot_rom
+    fi
     "$PYTHON" -m pip install --disable-pip-version-check --quiet "scons==$SCONS_VERSION"
     (
         cd "$NATIVO"
@@ -79,8 +98,8 @@ compilar_nativo() {
             arch=x86_64 \
             build_profile=build_profile.json \
             godot_cpp_dir="$GODOT_CPP" \
-            peanut_gb_dir="$PEANUT" \
-            sameboy_dir="$SAMEBOY"
+            sameboy_dir="$SAMEBOY" \
+            boot_rom="$BOOTROMS/cgb_boot_fast.bin"
     )
 }
 
@@ -115,6 +134,9 @@ case "$MODO" in
     windows-release)
         compilar_nativo windows template_release
         ;;
+    boot-rom)
+        compilar_boot_rom
+        ;;
     rom)
         compilar_rom
         ;;
@@ -124,7 +146,7 @@ case "$MODO" in
         compilar_rom
         ;;
     *)
-        echo "Uso: $0 {linux-debug|linux-all|windows-release|rom|todo-linux}" >&2
+        echo "Uso: $0 {linux-debug|linux-all|windows-release|boot-rom|rom|todo-linux}" >&2
         exit 2
         ;;
 esac
