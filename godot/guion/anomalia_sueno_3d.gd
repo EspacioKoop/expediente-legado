@@ -1,14 +1,17 @@
-## Objeto familiar del día devuelto deformado por el sueño (#400).
+## Objeto familiar del día devuelto deformado por el sueño (#400 / #149).
 ##
 ## Es una microinteracción local: no escribe Partida/Jornada ni concede progreso.
-## Mirarlo y usar `interactuar` alterna una segunda deformación y una luz breve
-## permanente mientras ese estado esté activo. No hay tween: el cambio instantáneo
-## respeta reducción de movimiento sin necesitar una ruta especial.
+## Mirarlo y usar `interactuar` alterna una segunda deformación, mantiene la luz
+## local y emite `observada` con un ID estable de catálogo. La persistencia y la
+## idempotencia pertenecen a CatalogoAnomalias/Partida, no a este componente 3D.
 class_name AnomaliaSueno3D
 extends Interactuable3D
 
+signal observada(anomalia_id: String, actor: Node)
+
 const COLOR_LUZ := Color(0.58, 0.48, 0.82)
 
+var _catalogo_id := ""
 var _visual: Node3D
 var _luz: OmniLight3D
 var _escala_base := Vector3.ONE
@@ -19,6 +22,7 @@ var _reactiva := false
 
 
 func configurar(
+	catalogo_id: String,
 	modelo: String,
 	tam: Vector3,
 	color: Color,
@@ -30,6 +34,7 @@ func configurar(
 ) -> void:
 	verbo = Verbo.EXAMINAR
 	nombre_objeto = nombre
+	_catalogo_id = catalogo_id.strip_edges()
 	_escala_base = escala_base
 	_escala_reaccion = escala_reaccion
 	_giro_base = giro_base
@@ -62,6 +67,11 @@ func configurar(
 	add_child(_luz)
 
 	activado.connect(_alternar)
+	activado.connect(_emitir_observacion)
+
+
+func id_catalogo() -> String:
+	return _catalogo_id
 
 
 func reactiva() -> bool:
@@ -80,6 +90,13 @@ func _alternar(_actor: Node) -> void:
 	_reactiva = not _reactiva
 	_aplicar_estado_visual()
 	_luz.visible = _reactiva
+
+
+func _emitir_observacion(actor: Node) -> void:
+	if _catalogo_id.is_empty():
+		push_warning("Anomalía 3D sin ID de catálogo")
+		return
+	observada.emit(_catalogo_id, actor)
 
 
 func _aplicar_estado_visual() -> void:

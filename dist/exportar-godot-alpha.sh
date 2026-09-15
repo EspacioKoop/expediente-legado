@@ -10,7 +10,7 @@ MOTOR="${GODOT_BIN:-godot4}"
 DECLARADA="$(tr -d '\r\n' < "$RAIZ/.godot-version")"
 ACTUAL="$($MOTOR --version | tr -d '\r\n')"
 CONFIG_INCIDENCIAS="$GODOT_DIR/datos/incidencias.json"
-NOTAS_ALPHA="$RAIZ/docs/alpha-playtest-2026-09-13.md"
+NOTAS_ALPHA="$RAIZ/docs/alpha-playtest-2026-09-15.md"
 RESPALDO_INCIDENCIAS="$(mktemp)"
 cp "$CONFIG_INCIDENCIAS" "$RESPALDO_INCIDENCIAS"
 
@@ -93,6 +93,23 @@ exportar "Windows x86_64" "$SALIDA/godot-windows/SIGA-98.exe"
 # de la página de Actions donde se generó.
 cp "$NOTAS_ALPHA" "$SALIDA/godot-linux/NOTAS-ALPHA.md"
 cp "$NOTAS_ALPHA" "$SALIDA/godot-windows/NOTAS-ALPHA.md"
+
+# Identificación mínima del paquete para que un parte de incidencias pueda
+# apuntar al artefacto exacto incluso si el ZIP se descarga fuera de Actions.
+BUILD_SHA="${GITHUB_SHA:-$(git -C "$RAIZ" rev-parse HEAD 2>/dev/null || printf 'desconocido')}"
+BUILD_REF="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME:-local}}"
+BUILD_UTC="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+NOTAS_NOMBRE="$(basename "$NOTAS_ALPHA")"
+for plataforma in linux windows; do
+    cat > "$SALIDA/godot-$plataforma/BUILD-INFO.txt" <<EOF
+SIGA-98 alpha playtest
+build_sha=$BUILD_SHA
+source_ref=$BUILD_REF
+godot=$DECLARADA
+notes=$NOTAS_NOMBRE
+built_utc=$BUILD_UTC
+EOF
+done
 
 python3 - "$SALIDA" <<'PY'
 from pathlib import Path

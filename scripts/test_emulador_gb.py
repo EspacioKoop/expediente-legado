@@ -10,6 +10,7 @@ PORTATIL = ROOT / "godot" / "guion" / "consola_portatil_98.gd"
 EXTENSION = ROOT / "godot" / "addons" / "siga98_gb" / "siga98_gb.gdextension"
 LOCK = NATIVE / "deps.lock.json"
 CI = ROOT / ".github" / "workflows" / "ci.yml"
+CHECK_GDSCRIPT = ROOT / "scripts" / "check_gdscript.sh"
 ALPHA = ROOT / ".github" / "workflows" / "alpha-playtest.yml"
 SMOKE = ROOT / "godot" / "pruebas" / "emulador_gb_smoke.gd"
 
@@ -23,6 +24,7 @@ class EmuladorGBTest(unittest.TestCase):
         cls.extension = EXTENSION.read_text(encoding="utf-8")
         cls.lock = json.loads(LOCK.read_text(encoding="utf-8"))
         cls.ci = CI.read_text(encoding="utf-8")
+        cls.check_gdscript = CHECK_GDSCRIPT.read_text(encoding="utf-8")
         cls.alpha = ALPHA.read_text(encoding="utf-8")
         cls.smoke = SMOKE.read_text(encoding="utf-8")
 
@@ -151,7 +153,8 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn("windows.x86_64.single.release", self.extension)
 
     def test_ci_no_lintea_dependencias_descargadas(self):
-        self.assertIn("-not -path 'godot/native/siga98_gb/.deps/*'", self.ci)
+        self.assertIn("bash scripts/check_gdscript.sh", self.ci)
+        self.assertIn("-not -path 'godot/native/siga98_gb/.deps/*'", self.check_gdscript)
         self.assertNotIn("gdlint godot\n", self.ci)
 
     def test_alpha_importa_antes_del_smoke(self):

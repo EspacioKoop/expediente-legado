@@ -5,6 +5,11 @@
 ## conclusión exacta para ese par, conserva su id en pistas_descubiertas.
 extends "res://guion/visor_proyeccion_app.gd"
 
+## Superficie pública para consumidores contextuales como el gato (#455).
+## El visor ya conoce estos hechos; la señal los expone sin guardar otra copia
+## ni obligar a quien escucha a inspeccionar controles o nodos internos.
+signal contexto_asistente_cambiado(estado: Dictionary, evento: String)
+
 var _relacionar: Button
 var _origen_relacion := ""
 
@@ -42,6 +47,38 @@ func _al_elegir_caso(indice: int) -> void:
 	super._al_elegir_caso(indice)
 	_origen_relacion = ""
 	_actualizar_boton_relacion()
+	_emitir_contexto_asistente()
+
+
+## Devuelve solo hechos que el visor ya ha resuelto. No es estado persistente:
+## cada consulta vuelve a derivarlo del caso, las pistas y los veredictos reales.
+func contexto_asistente() -> Dictionary:
+	if caso.is_empty():
+		return {}
+	var resumen: Dictionary = Progreso.de_casos([caso], descubiertas)[0]
+	return {
+		"cerrado": Acusacion.esta_cerrado(partida.estado, caso["id"]),
+		"listo_para_imputar": bool(resumen.get("resuelto", false)),
+	}
+
+
+func _emitir_contexto_asistente(evento: String = "") -> void:
+	contexto_asistente_cambiado.emit(contexto_asistente(), evento)
+
+
+## Un descubrimiento de pista es un evento del visor, no un temporizador del
+## asistente. Solo se emite cuando la colección real de pistas ha crecido.
+func _al_pulsar_marca(meta: Variant) -> void:
+	var descubiertas_antes := descubiertas.size()
+	super._al_pulsar_marca(meta)
+	if String(meta).begins_with("pista:") and descubiertas.size() > descubiertas_antes:
+		_emitir_contexto_asistente("descubrimiento")
+
+
+## Cerrar el expediente cambia el contexto base aunque no haya evento efímero.
+func _mostrar_cierre(acusacion: Dictionary, duelo: Dictionary = {}) -> void:
+	super._mostrar_cierre(acusacion, duelo)
+	_emitir_contexto_asistente()
 
 
 func _al_relacionar() -> void:
@@ -83,12 +120,14 @@ func _al_relacionar() -> void:
 		# No se afirma que la pareja jamás pueda tener sentido narrativo: solo que
 		# con la evidencia catalogada todavía no se ha demostrado una conclusión.
 		_estado.text = tr("VISOR_RELACION_NO_DEMOSTRADA") % [primero, segundo]
+		_emitir_contexto_asistente("combinacion_fallida")
 	else:
 		var pista_id := String(relacion["id"])
 		if descubiertas.has(pista_id):
 			_estado.text = _feedback_relacion(
 				primero, segundo, tr("VISOR_RELACION_YA_REGISTRADA") % relacion["descripcion"]
 			)
+			_emitir_contexto_asistente("combinacion_repetida")
 		else:
 			descubiertas.append(pista_id)
 			_refrescar_archivo()
@@ -96,6 +135,7 @@ func _al_relacionar() -> void:
 			_estado.text = _feedback_relacion(
 				primero, segundo, tr("VISOR_RELACION_REGISTRADA") % relacion["descripcion"]
 			)
+			_emitir_contexto_asistente("descubrimiento")
 
 
 func _esta_leido(registro_id: String) -> bool:

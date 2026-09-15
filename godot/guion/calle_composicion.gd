@@ -1,7 +1,7 @@
-## Recomposición visual del trayecto para #277.
+## Recomposición visual del trayecto para #277 y contenido del escaparate #142.
 ##
-## No cambia reglas de fase ni contenido de las pantallas. Toma la calle ya
-## declarada y concentra sus seis aparatos en un único escaparate reconocible.
+## Toma la calle ya declarada, concentra sus seis aparatos en un único escaparate
+## reconocible y les asigna el motivo ligero de medias lunas acordado en #142.
 class_name CalleComposicion
 extends RefCounted
 
@@ -21,6 +21,7 @@ static func aplicar(calle: Dictionary) -> Dictionary:
 		var columna := i % 3
 		pantallas[i]["pos"] = Vector3(-2.56, 1.25 + fila * 0.92, z_columnas[columna])
 		pantallas[i]["giro"] = 90.0
+		pantallas[i]["contenido"] = "media_luna"
 	resultado["pantallas"] = pantallas
 
 	var bultos: Array = resultado.get("bultos", []).duplicate(true)

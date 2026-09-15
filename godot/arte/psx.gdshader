@@ -27,6 +27,8 @@ uniform vec4 color_base : source_color = vec4(1.0);
 // vértices, la luz por vértice, el color cortado y el dithering.
 uniform sampler2D textura : source_color, filter_linear_mipmap_anisotropic, repeat_enable, hint_default_white;
 uniform bool con_textura = false;
+// Los assets con atlas conservan sus UV; el escenario sigue siendo triplanar.
+uniform bool usar_uv = false;
 uniform float escala_textura = 1.0;
 uniform vec4 emision : source_color = vec4(0.0);
 uniform float emision_fuerza = 0.0;
@@ -95,7 +97,11 @@ float bayer_4x4(vec2 pixel) {
 void fragment() {
 	vec3 color = color_base.rgb;
 	if (con_textura) {
-		color = muestra_triplanar(mundo, NORMAL);
+		if (usar_uv) {
+			color = texture(textura, UV).rgb * color_base.rgb;
+		} else {
+			color = muestra_triplanar(mundo, NORMAL);
+		}
 	}
 
 	float niveles = max(tonos, 1.0);
