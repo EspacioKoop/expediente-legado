@@ -26,8 +26,7 @@ func _probar_partida_nueva() -> void:
 		"el inventario persistente es un diccionario"
 	)
 	_comprobar(
-		estado["inventario"][Inventario.CARRIED].is_empty(),
-		"una partida nueva no lleva objetos"
+		estado["inventario"][Inventario.CARRIED].is_empty(), "una partida nueva no lleva objetos"
 	)
 	_comprobar(
 		estado["inventario"][Inventario.HOME_STORAGE].is_empty(),
@@ -86,8 +85,7 @@ func _probar_guardado_y_recarga() -> void:
 	var segunda := Partida.new()
 	var segunda_carga := segunda.cargar(RUTA)
 	_comprobar(
-		segunda_carga.get("resultado", "") == "cargada",
-		"una segunda recarga sigue siendo válida"
+		segunda_carga.get("resultado", "") == "cargada", "una segunda recarga sigue siendo válida"
 	)
 	_comprobar(
 		_contar_id(segunda.estado["inventario"], "sello_oficina") == 1,
@@ -108,8 +106,7 @@ func _probar_migracion_partida_antigua() -> void:
 	var carga := migrada.cargar(RUTA_ANTIGUA)
 	_comprobar(carga.get("resultado", "") == "cargada", "la partida antigua sigue cargando")
 	_comprobar(
-		migrada.estado.has("inventario"),
-		"la carga completa la clave inventario que faltaba"
+		migrada.estado.has("inventario"), "la carga completa la clave inventario que faltaba"
 	)
 	_comprobar(
 		migrada.estado["inventario"][Inventario.CARRIED].is_empty(),
@@ -130,7 +127,8 @@ func _probar_validacion() -> void:
 
 	var duplicado := {
 		"version": Partida.VERSION,
-		"inventario": {
+		"inventario":
+		{
 			Inventario.CARRIED: [{"id": "mismo"}],
 			Inventario.HOME_STORAGE: [{"id": "mismo"}],
 		}
