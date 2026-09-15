@@ -71,12 +71,7 @@ func _vestir_si_persona(pieza: Node) -> void:
 	# Chaqueta/abrigo: volumen largo y estrecho, más cercano a una silueta humana
 	# vestida que al bloque corto de la primera iteración.
 	var torso := _enganche(esqueleto, pecho, "VestuarioTorso")
-	_caja(
-		torso,
-		Vector3(ancho, largo, fondo),
-		Vector3(0.0, -largo * 0.24, 0.0),
-		color_chaqueta
-	)
+	_caja(torso, Vector3(ancho, largo, fondo), Vector3(0.0, -largo * 0.24, 0.0), color_chaqueta)
 
 	# La línea de hombros se lee por separado. Así se puede ensanchar arriba sin
 	# convertir abdomen y cintura en el mismo prisma grueso.
