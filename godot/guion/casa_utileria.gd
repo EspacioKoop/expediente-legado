@@ -148,10 +148,19 @@ static func _montar_cocina(raiz: Node3D, pos: Vector3) -> void:
 	_agregar_caja(nevera, Vector3(-0.37, 0.55, -0.23), Vector3(0.035, 0.34, 0.07), metal, ACERO)
 
 
+## El ancla histórica (#133) cae 2 cm dentro del grosor del muro trasero de la
+## casa: `Espacio3D` construye ese muro con GROSOR_MURO=0.2 sobre un suelo de
+## 7 m de fondo, así que su cara interior queda en z=-3.4 y el ancla declarada,
+## en z=-3.42. #566 detectó que eso basta para que el marco y el `Exterior3D`
+## de #572 (colgado como hijo de este nodo) queden embebidos en el muro y no
+## se lean desde el dormitorio. Adelantar el conjunto 8 cm dentro de la
+## habitación resuelve la profundidad sin tocar el ancla declarada por #133 ni
+## el mecanismo de #572, que sigue colgando su vista 3D como hijo del mismo
+## nodo "VentanaCasa".
 static func _montar_ventana(raiz: Node3D, pos: Vector3) -> void:
 	var ventana := Node3D.new()
 	ventana.name = "VentanaCasa"
-	ventana.position = pos
+	ventana.position = pos + Vector3(0, 0, 0.08)
 	raiz.add_child(ventana)
 
 	var marco := Color(0.31, 0.27, 0.23)
