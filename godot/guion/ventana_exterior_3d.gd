@@ -118,15 +118,47 @@ func _montar_pantalla() -> void:
 
 func _montar_barrio(raiz: Node3D) -> void:
 	# Calle y aceras: profundidad real, no una imagen en perspectiva.
-	_agregar_caja(raiz, "Asfalto", Vector3(0.0, -0.12, -10.0), Vector3(18.0, 0.20, 21.0), Color(0.16, 0.16, 0.15))
-	_agregar_caja(raiz, "AceraIzquierda", Vector3(-6.25, 0.02, -10.0), Vector3(3.2, 0.18, 21.0), Color(0.43, 0.41, 0.37))
-	_agregar_caja(raiz, "AceraDerecha", Vector3(6.25, 0.02, -10.0), Vector3(3.2, 0.18, 21.0), Color(0.43, 0.41, 0.37))
+	_agregar_caja(
+		raiz,
+		"Asfalto",
+		Vector3(0.0, -0.12, -10.0),
+		Vector3(18.0, 0.20, 21.0),
+		Color(0.16, 0.16, 0.15)
+	)
+	_agregar_caja(
+		raiz,
+		"AceraIzquierda",
+		Vector3(-6.25, 0.02, -10.0),
+		Vector3(3.2, 0.18, 21.0),
+		Color(0.43, 0.41, 0.37)
+	)
+	_agregar_caja(
+		raiz,
+		"AceraDerecha",
+		Vector3(6.25, 0.02, -10.0),
+		Vector3(3.2, 0.18, 21.0),
+		Color(0.43, 0.41, 0.37)
+	)
 
 	# Bloques asimétricos: proporciones de barrio español de finales de los 90.
-	_montar_edificio(raiz, Vector3(-6.2, 3.0, -12.8), Vector3(5.2, 6.0, 4.2), Color(0.52, 0.43, 0.34), 4, 4, true)
-	_montar_edificio(raiz, Vector3(5.9, 3.6, -14.0), Vector3(5.0, 7.2, 4.5), Color(0.45, 0.42, 0.36), 5, 4, true)
-	_montar_edificio(raiz, Vector3(-1.1, 3.15, -20.0), Vector3(6.4, 6.3, 3.6), Color(0.50, 0.47, 0.39), 4, 6, false)
-	_montar_edificio(raiz, Vector3(8.8, 2.7, -22.0), Vector3(4.2, 5.4, 3.4), Color(0.39, 0.38, 0.35), 3, 3, false)
+	_montar_edificio(
+		raiz, Vector3(-6.2, 3.0, -12.8), Vector3(5.2, 6.0, 4.2), Color(0.52, 0.43, 0.34), 4, 4, true
+	)
+	_montar_edificio(
+		raiz, Vector3(5.9, 3.6, -14.0), Vector3(5.0, 7.2, 4.5), Color(0.45, 0.42, 0.36), 5, 4, true
+	)
+	_montar_edificio(
+		raiz,
+		Vector3(-1.1, 3.15, -20.0),
+		Vector3(6.4, 6.3, 3.6),
+		Color(0.50, 0.47, 0.39),
+		4,
+		6,
+		false
+	)
+	_montar_edificio(
+		raiz, Vector3(8.8, 2.7, -22.0), Vector3(4.2, 5.4, 3.4), Color(0.39, 0.38, 0.35), 3, 3, false
+	)
 
 	# Coches aparcados y uno más lejano rompen la lectura de maqueta vacía.
 	_montar_coche(raiz, Vector3(-3.3, 0.30, -6.7), Color(0.22, 0.25, 0.27), 8.0)
@@ -170,16 +202,47 @@ func _montar_edificio(
 			var x := -ancho_util * 0.5 + paso_x * (float(columna) + 0.5)
 			var encendida := ((planta * 7 + columna * 3 + columnas) % 8) == 0
 			var cristal := Color(0.60, 0.53, 0.36) if encendida else Color(0.12, 0.16, 0.17)
-			_agregar_caja(edificio, "Ventana", Vector3(x, y, frente_z), Vector3(paso_x * 0.46, paso_y * 0.46, 0.055), cristal, encendida)
+			_agregar_caja(
+				edificio,
+				"Ventana",
+				Vector3(x, y, frente_z),
+				Vector3(paso_x * 0.46, paso_y * 0.46, 0.055),
+				cristal,
+				encendida
+			)
 
 			if balcones and planta > 0 and (columna + planta) % 2 == 0:
 				var profundidad := 0.48
-				_agregar_caja(edificio, "Balcon", Vector3(x, y - paso_y * 0.28, frente_z + profundidad * 0.42), Vector3(paso_x * 0.72, 0.08, profundidad), Color(0.29, 0.28, 0.25))
-				_agregar_caja(edificio, "Barandilla", Vector3(x, y - 0.02, frente_z + profundidad * 0.78), Vector3(paso_x * 0.72, 0.42, 0.035), Color(0.20, 0.20, 0.19))
+				_agregar_caja(
+					edificio,
+					"Balcon",
+					Vector3(x, y - paso_y * 0.28, frente_z + profundidad * 0.42),
+					Vector3(paso_x * 0.72, 0.08, profundidad),
+					Color(0.29, 0.28, 0.25)
+				)
+				_agregar_caja(
+					edificio,
+					"Barandilla",
+					Vector3(x, y - 0.02, frente_z + profundidad * 0.78),
+					Vector3(paso_x * 0.72, 0.42, 0.035),
+					Color(0.20, 0.20, 0.19)
+				)
 
 	# Cornisa, cuarto de azotea y antena aportan perfil urbano y profundidad.
-	_agregar_caja(edificio, "Cornisa", Vector3(0.0, tam.y * 0.5 + 0.07, 0.0), Vector3(tam.x + 0.20, 0.14, tam.z + 0.16), color.darkened(0.10))
-	_agregar_caja(edificio, "CasetaAzotea", Vector3(tam.x * 0.18, tam.y * 0.5 + 0.45, 0.15), Vector3(1.0, 0.76, 1.15), color.darkened(0.16))
+	_agregar_caja(
+		edificio,
+		"Cornisa",
+		Vector3(0.0, tam.y * 0.5 + 0.07, 0.0),
+		Vector3(tam.x + 0.20, 0.14, tam.z + 0.16),
+		color.darkened(0.10)
+	)
+	_agregar_caja(
+		edificio,
+		"CasetaAzotea",
+		Vector3(tam.x * 0.18, tam.y * 0.5 + 0.45, 0.15),
+		Vector3(1.0, 0.76, 1.15),
+		color.darkened(0.16)
+	)
 	_montar_antena(edificio, Vector3(-tam.x * 0.18, tam.y * 0.5 + 0.18, 0.10))
 
 
@@ -188,9 +251,21 @@ func _montar_antena(raiz: Node3D, pos: Vector3) -> void:
 	antena.name = "AntenaTV"
 	antena.position = pos
 	raiz.add_child(antena)
-	_agregar_caja(antena, "Mastil", Vector3(0.0, 0.72, 0.0), Vector3(0.035, 1.45, 0.035), Color(0.24, 0.25, 0.24))
+	_agregar_caja(
+		antena,
+		"Mastil",
+		Vector3(0.0, 0.72, 0.0),
+		Vector3(0.035, 1.45, 0.035),
+		Color(0.24, 0.25, 0.24)
+	)
 	for y in [0.64, 0.82, 1.00, 1.18]:
-		_agregar_caja(antena, "Elemento", Vector3(0.0, y, 0.0), Vector3(0.72, 0.025, 0.025), Color(0.24, 0.25, 0.24))
+		_agregar_caja(
+			antena,
+			"Elemento",
+			Vector3(0.0, y, 0.0),
+			Vector3(0.72, 0.025, 0.025),
+			Color(0.24, 0.25, 0.24)
+		)
 
 
 func _montar_coche(raiz: Node3D, pos: Vector3, color: Color, giro: float) -> void:
@@ -200,10 +275,24 @@ func _montar_coche(raiz: Node3D, pos: Vector3, color: Color, giro: float) -> voi
 	coche.rotation_degrees.y = giro
 	raiz.add_child(coche)
 	_agregar_caja(coche, "Carroceria", Vector3(0.0, 0.28, 0.0), Vector3(1.65, 0.42, 0.78), color)
-	_agregar_caja(coche, "Habitaculo", Vector3(-0.12, 0.58, -0.02), Vector3(0.92, 0.34, 0.70), color.lightened(0.04))
+	_agregar_caja(
+		coche,
+		"Habitaculo",
+		Vector3(-0.12, 0.58, -0.02),
+		Vector3(0.92, 0.34, 0.70),
+		color.lightened(0.04)
+	)
 	for x in [-0.58, 0.58]:
 		for z in [-0.39, 0.39]:
-			_agregar_cilindro(coche, "Rueda", Vector3(x, 0.16, z), 0.15, 0.10, Color(0.055, 0.055, 0.05), Vector3(90.0, 0.0, 0.0))
+			_agregar_cilindro(
+				coche,
+				"Rueda",
+				Vector3(x, 0.16, z),
+				0.15,
+				0.10,
+				Color(0.055, 0.055, 0.05),
+				Vector3(90.0, 0.0, 0.0)
+			)
 
 
 func _montar_arbol(raiz: Node3D, pos: Vector3, escala: float) -> void:
@@ -223,8 +312,21 @@ func _montar_farola(raiz: Node3D, pos: Vector3) -> void:
 	farola.position = pos
 	raiz.add_child(farola)
 	_agregar_cilindro(farola, "Poste", Vector3(0.0, 1.55, 0.0), 0.045, 3.1, Color(0.19, 0.20, 0.19))
-	_agregar_caja(farola, "Brazo", Vector3(0.20, 3.02, 0.0), Vector3(0.44, 0.045, 0.045), Color(0.19, 0.20, 0.19))
-	_agregar_caja(farola, "Luminaria", Vector3(0.42, 2.94, 0.0), Vector3(0.25, 0.10, 0.18), Color(0.70, 0.62, 0.38), true)
+	_agregar_caja(
+		farola,
+		"Brazo",
+		Vector3(0.20, 3.02, 0.0),
+		Vector3(0.44, 0.045, 0.045),
+		Color(0.19, 0.20, 0.19)
+	)
+	_agregar_caja(
+		farola,
+		"Luminaria",
+		Vector3(0.42, 2.94, 0.0),
+		Vector3(0.25, 0.10, 0.18),
+		Color(0.70, 0.62, 0.38),
+		true
+	)
 
 
 func _montar_clima(raiz: Node3D) -> void:
@@ -236,7 +338,13 @@ func _montar_clima(raiz: Node3D) -> void:
 		nube.position = Vector3(-6.0 + i * 3.2, 7.0 + (i % 2) * 0.45, -24.0 - (i % 3) * 2.0)
 		_nubes.add_child(nube)
 		for j in range(3):
-			_agregar_esfera(nube, "VolumenNube", Vector3(j * 0.85 - 0.8, sin(float(j)) * 0.18, 0.0), 1.05 - j * 0.10, Color(0.66, 0.68, 0.69))
+			_agregar_esfera(
+				nube,
+				"VolumenNube",
+				Vector3(j * 0.85 - 0.8, sin(float(j)) * 0.18, 0.0),
+				1.05 - j * 0.10,
+				Color(0.66, 0.68, 0.69)
+			)
 
 	_niebla = Node3D.new()
 	_niebla.name = "BancosNiebla3D"
@@ -266,7 +374,13 @@ func _montar_clima(raiz: Node3D) -> void:
 	_suelo_nieve = Node3D.new()
 	_suelo_nieve.name = "NieveAcumulada"
 	raiz.add_child(_suelo_nieve)
-	_agregar_caja(_suelo_nieve, "CapaCalle", Vector3(0.0, 0.015, -10.0), Vector3(17.0, 0.035, 20.0), Color(0.76, 0.79, 0.80))
+	_agregar_caja(
+		_suelo_nieve,
+		"CapaCalle",
+		Vector3(0.0, 0.015, -10.0),
+		Vector3(17.0, 0.035, 20.0),
+		Color(0.76, 0.79, 0.80)
+	)
 
 
 func _crear_precipitacion(es_nieve: bool) -> GPUParticles3D:
@@ -342,12 +456,7 @@ func _aplicar_clima() -> void:
 
 
 func _agregar_caja(
-	raiz: Node3D,
-	nombre: String,
-	pos: Vector3,
-	tam: Vector3,
-	color: Color,
-	emisivo := false
+	raiz: Node3D, nombre: String, pos: Vector3, tam: Vector3, color: Color, emisivo := false
 ) -> MeshInstance3D:
 	var nodo := MeshInstance3D.new()
 	nodo.name = nombre
@@ -385,11 +494,7 @@ func _agregar_cilindro(
 
 
 func _agregar_esfera(
-	raiz: Node3D,
-	nombre: String,
-	pos: Vector3,
-	radio: float,
-	color: Color
+	raiz: Node3D, nombre: String, pos: Vector3, radio: float, color: Color
 ) -> MeshInstance3D:
 	var nodo := MeshInstance3D.new()
 	nodo.name = nombre
