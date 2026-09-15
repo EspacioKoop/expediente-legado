@@ -8,7 +8,8 @@ if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
   PYTHON_BIN=python
 fi
 
-if ! command -v gdformat >/dev/null 2>&1 || ! command -v gdlint >/dev/null 2>&1; then
+INSTALLED_GDTOOLKIT="$($PYTHON_BIN -c 'import importlib.metadata; print(importlib.metadata.version("gdtoolkit"))' 2>/dev/null || true)"
+if [[ "$INSTALLED_GDTOOLKIT" != "$GDTOOLKIT_VERSION" ]]; then
   "$PYTHON_BIN" -m pip install "gdtoolkit==${GDTOOLKIT_VERSION}"
 fi
 
