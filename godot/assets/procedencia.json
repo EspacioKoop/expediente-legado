@@ -716,6 +716,70 @@
       "licencia": "CC0-1.0",
       "fuente": "https://ggbot.itch.io/psx-style-cars",
       "sha256": "fc0009ac3ed6a9d39956cbd3ec3b9e9bfbde38bd0c5a5aa6b1cd22c92a9f3a81"
+    },
+    {
+      "ruta": "modelos/street_furniture/Cardboard.glb",
+      "titulo": "Cardboard (Street Furniture, Сardboard/Сardboard.fbx + cardboard.png convertido a GLB)",
+      "autor": "Kkryy",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kkryy.itch.io/streetfurniture",
+      "sha256": "9c6a9bb1c267d89ae88e2d682ab8618c53fbe01079b2202254732e0427006779"
+    },
+    {
+      "ruta": "modelos/street_furniture/Cardboard_Cardboard_albedo.png",
+      "titulo": "Textura embebida extraída por Godot de Cardboard.glb",
+      "autor": "Kkryy",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kkryy.itch.io/streetfurniture",
+      "sha256": "c90e03fa9bd9fe9eb2c4c6f0b4e6e3f05735d880baaf0c3c19095437b3e42a17"
+    },
+    {
+      "ruta": "modelos/street_furniture/Conditioner.glb",
+      "titulo": "Conditioner (Street Furniture, Conditioner/Conditioner.fbx + Conditioner.png convertido a GLB)",
+      "autor": "Kkryy",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kkryy.itch.io/streetfurniture",
+      "sha256": "f770191722606eebc095e95b860638baa8beaddee74e166e711e382adf181491"
+    },
+    {
+      "ruta": "modelos/street_furniture/Conditioner_Conditioner_albedo.png",
+      "titulo": "Textura embebida extraída por Godot de Conditioner.glb",
+      "autor": "Kkryy",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kkryy.itch.io/streetfurniture",
+      "sha256": "a62c096176becbb69dfe4576a44add3c2e2989bd7fa13f28d5ff974ea32ff0b8"
+    },
+    {
+      "ruta": "modelos/street_furniture/GarbageBag.glb",
+      "titulo": "GarbageBag (Street Furniture, GarbageBag/GarbageBag.fbx + GarbageBag.png convertido a GLB)",
+      "autor": "Kkryy",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kkryy.itch.io/streetfurniture",
+      "sha256": "83ab07a0744a756a72223df1aee4128e6382954f229ed1dd29dbe74bb0d1c7f6"
+    },
+    {
+      "ruta": "modelos/street_furniture/GarbageBag_GarbageBag_albedo.png",
+      "titulo": "Textura embebida extraída por Godot de GarbageBag.glb",
+      "autor": "Kkryy",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kkryy.itch.io/streetfurniture",
+      "sha256": "360df34f0dfcf54db574b11815648af2019642191c791e6cb58e70abbffe39e1"
+    },
+    {
+      "ruta": "modelos/street_furniture/TrashCan.glb",
+      "titulo": "TrashCan (Street Furniture, TrashCan/TrashCan.fbx + TrashCan.png convertido a GLB)",
+      "autor": "Kkryy",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kkryy.itch.io/streetfurniture",
+      "sha256": "8f1f573c1361fd9ebaee988b60b7653f6c83cda34dce1c3f1eaab305bee36ae4"
+    },
+    {
+      "ruta": "modelos/street_furniture/TrashCan_TrashCan_albedo.png",
+      "titulo": "Textura embebida extraída por Godot de TrashCan.glb",
+      "autor": "Kkryy",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kkryy.itch.io/streetfurniture",
+      "sha256": "11c222763759be006655df5df4cf63ea10b14b97dc198e325d2fdd169334b368"
     }
   ]
 }
