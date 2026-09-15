@@ -109,6 +109,7 @@ func _entrar_en(fase: String) -> void:
 		_archivado_sesion.refrescar(self)
 	elif fase == "casa":
 		CasaUtileria.montar(_mundo)
+		_montar_gilgamesh_vigilia()
 	# La niebla cambia el fondo global del Environment. Cada entrada restaura el
 	# valor base antes de decidir si este espacio recibe tiempo exterior.
 	_ambiente.background_color = FONDO_BASE
@@ -212,6 +213,19 @@ func _cerrar_duelo(gano: bool, quien: Dictionary, zona: Area3D) -> void:
 
 
 ## Sustituye únicamente el volumen que antes abría el expediente al pisarlo.
+## Wiring de #436: el libro de arqueología pasó de standalone (#503) a
+## alcanzable desde el recorrido real de casa. Se remonta en cada entrada
+## porque `_mundo` es siempre nuevo (ver `_entrar_en` en `dia_app.gd`); la
+## semilla en sí ya vive en `jornada`, así que perder el progreso de páginas
+## de una visita a otra el mismo día no descarta nada ya registrado.
+func _montar_gilgamesh_vigilia() -> void:
+	var libro := GilgameshVigilia.new()
+	libro.name = "GilgameshVigiliaCasa"
+	libro.position = Vector3(1.5, 0.0, 0.2)
+	_mundo.add_child(libro)
+	libro.configurar(jornada)
+
+
 ## La lógica de apertura sigue siendo `_abrir_expediente()`: aquí solo cambia
 ## cómo expresa el jugador la intención, de caminar dentro a mirar y pulsar la
 ## acción semántica `interactuar`.
