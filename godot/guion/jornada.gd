@@ -164,15 +164,24 @@ static func gastar_accion(jornada: Dictionary) -> bool:
 	return true
 
 
+## Consulta cuánto costaría abrir este folio sin modificar la jornada. La UI
+## usa exactamente la misma regla que el cobro: primera lectura nueva gratis,
+## relectura del día gratis y las demás lecturas nuevas a una acción.
+static func coste_lectura(jornada: Dictionary, folio: String) -> int:
+	if jornada["leido_hoy"].has(folio):
+		return 0
+	if jornada["leido_hoy"].size() < DOCUMENTOS_GRATIS_POR_DIA:
+		return 0
+	return 1
+
+
 ## Abrir un documento nuevo tiene una franquicia diaria: la primera lectura
 ## nueva sale gratis. Releer nunca llega aquí desde el visor, pero se acepta de
 ## forma idempotente para que el contrato siga siendo seguro desde otros sitios.
 static func gastar_lectura(jornada: Dictionary, folio: String) -> bool:
 	if jornada["fase"] != "archivo":
 		return false
-	if jornada["leido_hoy"].has(folio):
-		return true
-	if jornada["leido_hoy"].size() < DOCUMENTOS_GRATIS_POR_DIA:
+	if coste_lectura(jornada, folio) == 0:
 		return true
 	return gastar_accion(jornada)
 
