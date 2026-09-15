@@ -11,7 +11,6 @@ const ESTADO_OBJETIVO := [true, false, true]
 const CANTIDAD_COMPUERTAS := 3
 const SEGMENTOS_DRAGON := 15
 
-const COLOR_AGUA := Color(0.12, 0.46, 0.68, 0.72)
 const COLOR_AGUA_ACTIVA := Color(0.18, 0.72, 0.82, 0.82)
 const COLOR_METAL := Color(0.25, 0.29, 0.31)
 const COLOR_GUIA := Color(0.38, 0.88, 0.74)
@@ -282,8 +281,9 @@ func _comprobar_resolucion() -> void:
 		return
 	var tween := create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(_puente, "position:y", 0.7, 0.8)
-	tween.tween_property(_puente, "rotation_degrees:z", 0.0, 0.8)
+	var destino_puente := Vector3(_puente.position.x, 0.7, _puente.position.z)
+	tween.tween_property(_puente, "position", destino_puente, 0.8)
+	tween.tween_property(_puente, "rotation_degrees", Vector3.ZERO, 0.8)
 	tween.tween_property(_ojo_luna, "scale", Vector3.ONE * 1.35, 0.8)
 
 
@@ -408,8 +408,4 @@ func _material(color: Color, transparente: bool = false) -> StandardMaterial3D:
 	material.roughness = 0.58
 	if transparente:
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.emission_enabled = color.max_component_value() > 0.72
-	if material.emission_enabled:
-		material.emission = Color(color.r, color.g, color.b)
-		material.emission_energy_multiplier = 0.35
 	return material
