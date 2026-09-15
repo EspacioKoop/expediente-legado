@@ -303,16 +303,20 @@ const OFICINA := {
 			"color": Color(0.09, 0.11, 0.20)
 		},
 	],
+	# En la silla de cada mesa, no delante de ella (#565): la silla ya marca
+	# el sitio y el lado, y de pie en el otro lado un compañero parecía estar
+	# esperando turno para su propio puesto.
 	"sitios_companeros":
 	# El cuñado, de pie al lado de su mesa. Apartado del punto de entrada:
 	[
 		# puesto encima, te saludaba antes de que hubieras dado un paso.
 		Vector3(-1.9, 0, 0.4),
-		Vector3(-4, 0, -2.95),
-		Vector3(1, 0, -2.95),
-		# Al otro lado de su mesa, no en el lado de la puerta: sentado ahí, se
-		# entraba en la oficina con su nombre a metro y medio de la cara.
-		Vector3(1, 0, 0.05),
+		Vector3(-4, 0, -0.9),
+		Vector3(1, 0, -0.9),
+		# En su silla, mirando a su mesa como todas las demás: de pie al otro
+		# lado, con la puerta a la espalda, su nombre te llegaba antes que su
+		# cara.
+		Vector3(1, 0, 2.1),
 	],
 	# Uno en su puesto y otro en el de al lado, que no es suyo y también humea.
 	"cigarros": [Vector3(-3.3, 0.76, 1.2), Vector3(1.4, 0.76, -2.1)],
