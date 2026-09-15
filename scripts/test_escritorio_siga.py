@@ -4,6 +4,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SHELL = ROOT / "godot" / "guion" / "escritorio_siga.gd"
 ADAPTADOR = ROOT / "godot" / "guion" / "dia_escritorio_siga_app.gd"
 DIA = ROOT / "godot" / "escenas" / "dia.tscn"
+TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
 
 
 def fuente(path: Path) -> str:
@@ -32,12 +33,41 @@ def test_escritorio_tiene_barra_menu_reloj_y_dos_lanzadores() -> None:
     assert 'name = "BarraInferior"' in texto
     assert 'name = "MenuSistema"' in texto
     assert 'name = "RelojNarrativo"' in texto
-    assert 'registrar_aplicacion("ayuda-sistema", "Ayuda"' in texto
+    assert 'registrar_aplicacion("ayuda-sistema", tr("ESCRITORIO_AYUDA")' in texto
 
     adaptador = fuente(ADAPTADOR)
-    assert 'registrar_aplicacion("siga-98", "SIGA-98"' in adaptador
+    assert 'tr("ESCRITORIO_SIGA_TITULO")' in adaptador
     assert "activar_ayuda_sistema()" in adaptador
-    assert 'adoptar_aplicacion("siga-98", "SIGA-98", visor' in adaptador
+    assert 'adoptar_aplicacion("siga-98", titulo_siga, visor' in adaptador
+
+
+def test_textos_del_escritorio_viven_en_catalogo() -> None:
+    shell = fuente(SHELL)
+    adaptador = fuente(ADAPTADOR)
+    catalogo = fuente(TEXTOS)
+    claves = (
+        "ESCRITORIO_AYUDA",
+        "ESCRITORIO_AYUDA_ABRIR",
+        "ESCRITORIO_AYUDA_ARRASTRAR",
+        "ESCRITORIO_AYUDA_BARRA",
+        "ESCRITORIO_AYUDA_CERRAR_MENU",
+        "ESCRITORIO_AYUDA_TECLADO",
+        "ESCRITORIO_AYUDA_TITULO",
+        "ESCRITORIO_CABECERA",
+        "ESCRITORIO_CERRAR",
+        "ESCRITORIO_CERRAR_SESION",
+        "ESCRITORIO_MARCA",
+        "ESCRITORIO_MENU",
+        "ESCRITORIO_MINIMIZAR",
+        "ESCRITORIO_PROGRAMAS",
+        "ESCRITORIO_RELOJ",
+        "ESCRITORIO_RELOJ_VACIO",
+        "ESCRITORIO_SIGA_TITULO",
+    )
+    codigo = shell + adaptador
+    for clave in claves:
+        assert f'"{clave}"' in codigo
+        assert f"\n{clave}," in f"\n{catalogo}"
 
 
 def test_lanzadores_requieren_doble_clic_o_teclado() -> None:
@@ -81,6 +111,7 @@ def test_reloj_no_usa_hora_real_del_equipo() -> None:
     combinado = shell + adaptador
     assert "Time.get_" not in combinado
     assert "OS.get_" not in combinado
+    assert 'tr("ESCRITORIO_RELOJ")' in adaptador
     assert 'dia.jornada.get("dia", 1)' in adaptador
 
 
