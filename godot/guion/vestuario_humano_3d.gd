@@ -165,13 +165,13 @@ func _material(color: Color) -> ShaderMaterial:
 
 func _color_base(nodo: Node) -> Color:
 	if nodo is MeshInstance3D:
-		var material := nodo.material_override
+		var material: Material = (nodo as MeshInstance3D).material_override
 		if material is ShaderMaterial:
 			var parametro: Variant = material.get_shader_parameter("color_base")
 			if parametro is Color:
 				return parametro
 	for hijo in nodo.get_children():
-		var encontrado := _color_base_opcional(hijo)
+		var encontrado: Variant = _color_base_opcional(hijo)
 		if encontrado != null:
 			return encontrado
 	return Color(0.36, 0.39, 0.42)
@@ -179,7 +179,7 @@ func _color_base(nodo: Node) -> Color:
 
 func _color_base_opcional(nodo: Node) -> Variant:
 	if nodo is MeshInstance3D:
-		var material := nodo.material_override
+		var material: Material = (nodo as MeshInstance3D).material_override
 		if material is ShaderMaterial:
 			var parametro: Variant = material.get_shader_parameter("color_base")
 			if parametro is Color:
