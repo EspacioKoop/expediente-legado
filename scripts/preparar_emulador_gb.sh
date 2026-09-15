@@ -80,6 +80,37 @@ compilar_boot_rom() {
     echo "$BOOT_ROM_SHA  $salida" | sha256sum --check --strict
 }
 
+# scons se instala en un entorno virtual propio dentro de .deps/ (ya ignorado).
+# Un `pip install` contra el Python del sistema funciona en el runner de CI pero
+# falla con `externally-managed-environment` (PEP 668) en cualquier Debian o
+# Ubuntu reciente, que es donde se desarrolla: el venv hace la orden idéntica en
+# las dos máquinas sin tocar nada fuera del repo.
+# Un venv coloca sus ejecutables en bin/ en POSIX y en Scripts/ en Windows, y
+# este script se compila también en windows-latest. Se detecta en vez de asumirlo.
+venv_bin() {
+    local venv="$1"
+    if [ -d "$venv/Scripts" ]; then
+        printf '%s' "$venv/Scripts"
+    else
+        printf '%s' "$venv/bin"
+    fi
+}
+
+preparar_scons() {
+    local venv="$DEPS/venv"
+    local bin
+    bin="$(venv_bin "$venv")"
+    SCONS="$bin/scons"
+    if [ -x "$SCONS" ] && "$SCONS" --version 2>/dev/null | grep -qF "$SCONS_VERSION"; then
+        return
+    fi
+    "$PYTHON" -m venv "$venv"
+    bin="$(venv_bin "$venv")"
+    SCONS="$bin/scons"
+    "$bin/python" -m pip install --disable-pip-version-check --quiet \
+        "scons==$SCONS_VERSION"
+}
+
 compilar_nativo() {
     local plataforma="$1"
     local objetivo="$2"
@@ -89,10 +120,10 @@ compilar_nativo() {
     if [ ! -f "$BOOTROMS/cgb_boot_fast.bin" ]; then
         compilar_boot_rom
     fi
-    "$PYTHON" -m pip install --disable-pip-version-check --quiet "scons==$SCONS_VERSION"
+    preparar_scons
     (
         cd "$NATIVO"
-        scons -Q \
+        "$SCONS" -Q \
             platform="$plataforma" \
             target="$objetivo" \
             arch=x86_64 \
