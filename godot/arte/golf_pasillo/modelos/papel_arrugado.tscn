@@ -1,0 +1,24 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Shader" path="res://arte/golf_pasillo/shaders/papel_arrugado.gdshader" id="1_shader"]
+
+[sub_resource type="ShaderMaterial" id="PaperMaterial"]
+shader = ExtResource("1_shader")
+
+[sub_resource type="SphereMesh" id="PaperMesh"]
+material = SubResource("PaperMaterial")
+radius = 0.038
+height = 0.076
+radial_segments = 40
+rings = 24
+
+[sub_resource type="SphereShape3D" id="PaperShape"]
+radius = 0.037
+
+[node name="PapelArrugado" type="StaticBody3D"]
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("PaperMesh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("PaperShape")

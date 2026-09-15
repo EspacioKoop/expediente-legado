@@ -1,0 +1,55 @@
+[gd_scene load_steps=7 format=3]
+
+[sub_resource type="StandardMaterial3D" id="Cardboard"]
+albedo_color = Color(0.48, 0.31, 0.17, 1)
+roughness = 0.88
+
+[sub_resource type="StandardMaterial3D" id="Felt"]
+albedo_color = Color(0.055, 0.20, 0.10, 1)
+roughness = 0.96
+
+[sub_resource type="BoxMesh" id="RampMesh"]
+material = SubResource("Felt")
+size = Vector3(0.29, 0.015, 0.42)
+
+[sub_resource type="BoxMesh" id="RailMesh"]
+material = SubResource("Cardboard")
+size = Vector3(0.026, 0.055, 0.42)
+
+[sub_resource type="BoxShape3D" id="RampShape"]
+size = Vector3(0.29, 0.018, 0.42)
+
+[sub_resource type="BoxShape3D" id="RailShape"]
+size = Vector3(0.026, 0.055, 0.42)
+
+[node name="RampaArchivo" type="StaticBody3D"]
+
+[node name="Superficie" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.052, 0)
+rotation_degrees = Vector3(-13, 0, 0)
+mesh = SubResource("RampMesh")
+
+[node name="RailIzq" type="MeshInstance3D" parent="."]
+position = Vector3(-0.145, 0.073, 0)
+rotation_degrees = Vector3(-13, 0, 0)
+mesh = SubResource("RailMesh")
+
+[node name="RailDer" type="MeshInstance3D" parent="."]
+position = Vector3(0.145, 0.073, 0)
+rotation_degrees = Vector3(-13, 0, 0)
+mesh = SubResource("RailMesh")
+
+[node name="RampCollision" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.052, 0)
+rotation_degrees = Vector3(-13, 0, 0)
+shape = SubResource("RampShape")
+
+[node name="RailIzqCollision" type="CollisionShape3D" parent="."]
+position = Vector3(-0.145, 0.073, 0)
+rotation_degrees = Vector3(-13, 0, 0)
+shape = SubResource("RailShape")
+
+[node name="RailDerCollision" type="CollisionShape3D" parent="."]
+position = Vector3(0.145, 0.073, 0)
+rotation_degrees = Vector3(-13, 0, 0)
+shape = SubResource("RailShape")
