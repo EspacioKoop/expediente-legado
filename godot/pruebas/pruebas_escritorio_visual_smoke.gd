@@ -95,7 +95,9 @@ func _ejecutar() -> void:
 	await process_frame
 	await process_frame
 
-	_comprobar(escritorio._modal_id == "smoke-modal", "la segunda captura contiene una modal activa")
+	_comprobar(
+		escritorio._modal_id == "smoke-modal", "la segunda captura contiene una modal activa"
+	)
 	_comprobar(
 		escritorio.get_node_or_null("BloqueadorModal") != null,
 		"la modal incluye su bloqueador visual"
