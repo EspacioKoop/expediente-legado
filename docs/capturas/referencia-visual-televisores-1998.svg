@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
+  <title id="title">Referencia visual del escaparate de televisores de 1998</title>
+  <desc id="desc">Seis televisores CRT con emisiones distintas: informativo, deporte, publicidad institucional, señal técnica, anomalía y programa infantil.</desc>
+  <rect width="1200" height="820" fill="#111412"/>
+  <text x="40" y="58" font-family="monospace" font-size="32" font-weight="700" fill="#e7e0ce">SIGA-98 · ESCAPARATE DE TELEVISORES</text>
+  <text x="40" y="90" font-family="monospace" font-size="15" fill="#aaa596">CATÁLOGO DE EMISIONES · REFERENCIA 1998 · SEIS APARATOS, SEIS SEÑALES</text>
+  <line x1="40" y1="108" x2="1160" y2="108" stroke="#6f716b" stroke-width="2"/>
+  <defs>
+    <style>
+      .tv{fill:#292d2a;stroke:#555b56;stroke-width:5}.screen{fill:#202522;stroke:#0a0d0b;stroke-width:10}.h{font:700 17px monospace;fill:#eee7d6}.p{font:13px monospace;fill:#bcb6a8}.white{fill:#e9e4d8}.line{stroke:#e9e4d8;stroke-width:3;fill:none}.muted{fill:#7f887f}.red{fill:#9b4338}.blue{fill:#4d6476}.green{fill:#61725b}.yellow{fill:#b69b57}
+    </style>
+  </defs>
+
+  <!-- TV 1 informativo -->
+  <g transform="translate(40 142)"><rect class="tv" width="350" height="248" rx="18"/><rect class="screen" x="20" y="18" width="310" height="184" rx="28"/><rect x="30" y="28" width="290" height="164" class="blue"/><circle cx="118" cy="92" r="34" fill="#d2c6b5"/><path d="M84 146c17-31 58-31 76 0" fill="#c7b9a7"/><path d="M190 54l90 0M190 78l72 0M190 102l98 0" stroke="#d9d4c8" stroke-width="5"/><rect x="30" y="158" width="290" height="34" fill="#263f61"/><text x="44" y="181" font-family="monospace" font-size="14" class="white">INFORMATIVO LOCAL · 14 JUL 1998</text><text x="16" y="230" class="h">01 · NOTICIAS</text></g>
+
+  <!-- TV 2 deporte -->
+  <g transform="translate(425 142)"><rect class="tv" width="350" height="248" rx="18"/><rect class="screen" x="20" y="18" width="310" height="184" rx="28"/><rect x="30" y="28" width="290" height="164" fill="#477245"/><path d="M30 110h290M175 28v164" stroke="#d8d6c9" stroke-width="3"/><circle cx="175" cy="110" r="38" fill="none" stroke="#d8d6c9" stroke-width="3"/><g fill="#ece8da"><circle cx="94" cy="84" r="7"/><circle cx="124" cy="132" r="7"/><circle cx="238" cy="82" r="7"/><circle cx="260" cy="138" r="7"/></g><rect x="38" y="36" width="90" height="26" fill="#253a59"/><text x="47" y="54" font-family="monospace" font-size="13" class="white">BAR 1-0 MAD</text><text x="16" y="230" class="h">02 · DEPORTE</text></g>
+
+  <!-- TV 3 institucional -->
+  <g transform="translate(810 142)"><rect class="tv" width="350" height="248" rx="18"/><rect class="screen" x="20" y="18" width="310" height="184" rx="28"/><rect x="30" y="28" width="290" height="164" fill="#93a097"/><path d="M30 142l72-65 47 44 52-68 119 89v50H30z" fill="#546a5f"/><circle cx="274" cy="62" r="24" fill="#c7b87a"/><text x="175" y="86" text-anchor="middle" font-family="serif" font-style="italic" font-size="24" class="white">Un país mejor</text><text x="175" y="116" text-anchor="middle" font-family="serif" font-style="italic" font-size="24" class="white">entre todos</text><rect x="212" y="146" width="90" height="30" class="yellow"/><text x="257" y="166" text-anchor="middle" font-family="monospace" font-size="11" fill="#2a2923">CAMPAÑA 98</text><text x="16" y="230" class="h">03 · INSTITUCIONAL</text></g>
+
+  <!-- TV 4 técnica -->
+  <g transform="translate(40 438)"><rect class="tv" width="350" height="248" rx="18"/><rect class="screen" x="20" y="18" width="310" height="184" rx="28"/><rect x="30" y="28" width="290" height="164" fill="#26334a"/><text x="175" y="62" text-anchor="middle" font-family="monospace" font-size="18" class="white">SEÑAL DE PRUEBAS</text><g transform="translate(62 82)"><rect width="36" height="58" fill="#d7d7cf"/><rect x="36" width="36" height="58" fill="#c7b94f"/><rect x="72" width="36" height="58" fill="#4ea9a0"/><rect x="108" width="36" height="58" fill="#5a9652"/><rect x="144" width="36" height="58" fill="#aa4b63"/><rect x="180" width="36" height="58" fill="#a83d38"/></g><text x="175" y="164" text-anchor="middle" font-family="monospace" font-size="14" class="white">CANAL 32 · SERVICIO TÉCNICO</text><text x="16" y="230" class="h">04 · EMISIÓN TÉCNICA</text></g>
+
+  <!-- TV 5 anomalía -->
+  <g transform="translate(425 438)"><rect class="tv" width="350" height="248" rx="18"/><rect class="screen" x="20" y="18" width="310" height="184" rx="28"/><rect x="30" y="28" width="290" height="164" fill="#9ca6a2"/><rect x="30" y="122" width="290" height="70" fill="#56666b"/><path d="M30 122c54-18 95-12 142 6 52 20 94 13 148-6" fill="none" stroke="#d6d5c9" stroke-width="4"/><path d="M198 122l38-68 38 68z" fill="#333c3f"/><circle cx="98" cy="116" r="17" fill="#202523"/><path d="M98 133v38" stroke="#202523" stroke-width="7"/><text x="42" y="48" font-family="monospace" font-size="13" class="white">12:24 · 14/07/98</text><text x="16" y="230" class="h">05 · IMAGEN ANÓMALA</text></g>
+
+  <!-- TV 6 infantil -->
+  <g transform="translate(810 438)"><rect class="tv" width="350" height="248" rx="18"/><rect class="screen" x="20" y="18" width="310" height="184" rx="28"/><rect x="30" y="28" width="290" height="164" fill="#a47863"/><circle cx="172" cy="93" r="44" fill="#5b8f78"/><circle cx="154" cy="78" r="14" fill="#e5d7af"/><circle cx="190" cy="78" r="14" fill="#e5d7af"/><circle cx="154" cy="78" r="5" fill="#222"/><circle cx="190" cy="78" r="5" fill="#222"/><path d="M151 113q21 18 42 0" fill="none" stroke="#402a28" stroke-width="5"/><circle cx="86" cy="144" r="24" fill="#d9c7a3"/><circle cx="258" cy="144" r="24" fill="#d9c7a3"/><text x="16" y="230" class="h">06 · INFANTIL / OCIO</text></g>
+
+  <text x="40" y="744" class="p">Regla visual: cada aparato emite algo distinto; la nieve sigue siendo válida cuando no exista contenido decidido.</text>
+  <text x="40" y="770" class="p">Evitar marcas, logos y hechos reales no verificados: la lámina define categorías y tono, no metraje definitivo.</text>
+  <text x="40" y="800" font-family="monospace" font-size="13" fill="#747a74">REFERENCIA ARTÍSTICA · NO ASSET RUNTIME · Refs #61 #140 #142</text>
+</svg>
