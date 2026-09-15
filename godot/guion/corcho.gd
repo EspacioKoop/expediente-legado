@@ -57,8 +57,9 @@ static func limitar_posiciones(jornada: Dictionary, limite: Vector2) -> bool:
 	var cambio := false
 
 	for id in fichas.keys():
+		var datos_invalidos := typeof(fichas[id]) != TYPE_DICTIONARY
 		var datos: Dictionary = {}
-		if typeof(fichas[id]) == TYPE_DICTIONARY:
+		if not datos_invalidos:
 			datos = fichas[id]
 		var pos = datos.get("pos", [0.0, 0.0])
 		var x := 0.0
@@ -67,8 +68,8 @@ static func limitar_posiciones(jornada: Dictionary, limite: Vector2) -> bool:
 			x = float(pos[0])
 			y = float(pos[1])
 		var nueva := [clampf(x, -max_x, max_x), clampf(y, -max_y, max_y)]
-		var invalida := typeof(pos) != TYPE_ARRAY or pos.size() < 2
-		if invalida or not is_equal_approx(x, nueva[0]) or not is_equal_approx(y, nueva[1]):
+		var pos_invalida := typeof(pos) != TYPE_ARRAY or pos.size() < 2
+		if datos_invalidos or pos_invalida or not is_equal_approx(x, nueva[0]) or not is_equal_approx(y, nueva[1]):
 			datos["pos"] = nueva
 			fichas[id] = datos
 			cambio = true
