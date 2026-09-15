@@ -1,5 +1,5 @@
-ROM := build/ryu_flow.gbc
-OBJ := build/ryu_flow.o
+ROM := build/ryu_flow_98.gbc
+OBJ := build/ryu_flow_98.o
 PYTHON ?= python3
 
 .PHONY: all clean test

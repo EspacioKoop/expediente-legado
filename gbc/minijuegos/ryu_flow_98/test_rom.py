@@ -4,7 +4,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parent
 SOURCE = ROOT / "main.asm"
-ROM = ROOT / "build" / "ryu_flow.gbc"
+ROM = ROOT / "build" / "ryu_flow_98.gbc"
 
 
 class RyuFlowTest(unittest.TestCase):
@@ -34,10 +34,10 @@ class RyuFlowTest(unittest.TestCase):
         self.assertIn("ld [wRyuFlowCompletado], a", bloque)
 
     def test_rom_compilada_es_dual_mode_y_tiene_titulo_propio(self):
-        self.assertTrue(ROM.exists(), "falta compilar build/ryu_flow.gbc")
+        self.assertTrue(ROM.exists(), "falta compilar build/ryu_flow_98.gbc")
         data = ROM.read_bytes()
         self.assertGreaterEqual(len(data), 32768)
-        self.assertEqual(data[0x134:0x13F].rstrip(b"\0"), b"RYUFLOW98")
+        self.assertEqual(data[0x134:0x143].rstrip(b"\0"), b"RYUFLOW98")
         self.assertEqual(data[0x143], 0x80)
 
 

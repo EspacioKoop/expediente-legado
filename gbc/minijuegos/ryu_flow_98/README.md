@@ -1,8 +1,9 @@
 # RYU_FLOW
 
 Micro-ROM propia para la **Portátil Color 98**, vinculada al vertical Ryū de #440.
-Se mantiene como código fuente RGBDS y el `.gbc` se genera en CI; no se versiona
-ninguna ROM binaria.
+Su id canónico en el catálogo del proyecto es `ryu_flow_98`. Se mantiene como
+código fuente RGBDS y el `.gbc` se genera en build/CI; no se versiona ninguna
+ROM binaria.
 
 ## Bucle jugable
 
@@ -26,19 +27,19 @@ Al completar de verdad el puzzle se escribe `0xA5` en la dirección WRAM fija
 a `0x00`.
 
 Este byte es **solo un punto de integración futuro**: este corte no modifica
-Godot, no registra todavía `semilla_onirica_ryu` y no conecta #440 al selector
-nocturno. La futura integración de #442 debe observar la finalización del
-micro-objetivo, no el mero arranque de la ROM.
+Godot para registrar `semilla_onirica_ryu` ni conecta #440 al selector nocturno.
+La futura integración de #442 debe observar la finalización del micro-objetivo,
+no el mero arranque de la ROM.
 
 ## Build
 
 Requiere RGBDS (misma versión fijada por `.github/workflows/gbc-fixtures.yml`):
 
 ```bash
-make -C gbc/minijuegos/ryu_flow clean test
+make -C gbc/minijuegos/ryu_flow_98 clean test
 ```
 
-Salida local: `gbc/minijuegos/ryu_flow/build/ryu_flow.gbc` (efímera).
+Salida local: `gbc/minijuegos/ryu_flow_98/build/ryu_flow_98.gbc` (efímera).
 
 La cabecera usa flag CGB `0x80` para conservar compatibilidad dual-mode y el
 catálogo actual de la Portátil Color 98.
