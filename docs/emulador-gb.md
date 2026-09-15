@@ -24,11 +24,11 @@ SameBoy ejecuta hardware Game Boy Color real:
 
 La boot ROM rápida tarda unos 16 frames en ceder el control al cartucho.
 
-`Siga98GB` expone `core_name()`, `supports_cgb()` y `supports_audio()`, que ahora devuelven `SameBoy`, `true` y `false`. El audio sigue desactivado hasta que exista consumo PCM real desde Godot.
+`Siga98GB` expone `core_name()`, `supports_cgb()` y `supports_audio()`, que ahora devuelven `SameBoy`, `true` y `true`. La APU entrega PCM S16LE estéreo a 48 kHz y la Portátil Color 98 lo consume mediante un `AudioStreamGenerator` separado de los sonidos físicos de carcasa.
 
 ## Decisión para #456: SameBoy/Core
 
-El núcleo seleccionado para el siguiente adapter es **SameBoy/Core** (`LIJI32/SameBoy`) fijado en el commit:
+El núcleo seleccionado es **SameBoy/Core** (`LIJI32/SameBoy`) fijado en el commit:
 
 `213a12ce93d66b105a113debd9396306066a7cfc`
 
@@ -47,7 +47,7 @@ Esto permite conservar el contrato 160×144 de `Siga98GB`, añadir color real y 
 
 **Gearboy queda descartado para este proyecto**: aunque implementa Game Boy Color y audio, su repositorio declara GPL-3.0. Introducirlo en el binario actual incumpliría la restricción de #456 de no añadir accidentalmente un núcleo GPL.
 
-SameBoy ya es una **dependencia de build**: el preparador obtiene el commit fijado y `SConstruct` compila `Core/*.c` dentro de la GDExtension, excluyendo debugger, cheats, cheat search, rewind y disassembler/symbols. Ese staging (#500) forzó a Linux/Windows a detectar incompatibilidades de compilación antes de cambiar el núcleo visible; desde este corte SameBoy es el adapter de runtime.
+SameBoy ya es una **dependencia de build**: el preparador obtiene el commit fijado y `SConstruct` compila `Core/*.c` dentro de la GDExtension, excluyendo debugger, cheats, cheat search, rewind y disassembler/symbols. Ese staging (#500) forzó a Linux/Windows a detectar incompatibilidades de compilación antes de cambiar el núcleo visible; desde #555 SameBoy es el adapter de runtime.
 
 ## Integración SameBoy
 
@@ -57,9 +57,10 @@ El cambio de adapter conservó la superficie usada por Godot:
 2. internamente se usan `GB_MODEL_CGB_E`, `GB_load_rom_from_buffer`, `GB_set_pixels_output` y `GB_run_frame`;
 3. `set_buttons` mantiene el orden de bits público (A, B, Select, Start, Derecha, Izquierda, Arriba, Abajo) y lo traduce a `GB_set_key_state`;
 4. la SRAM usa `GB_save_battery_to_buffer` / `GB_load_battery_from_buffer` con la misma identidad SHA-256 bajo `user://sram/gb`. Para cartuchos sin reloj el formato son los mismos bytes crudos; en cartuchos con RTC el tamaño incluye el reloj y un save antiguo se aparta como `.roto`;
-5. Peanut-GB se ha retirado del build tras superar los smoke GB y CGB-only.
+5. Peanut-GB se ha retirado del build tras superar los smoke GB y CGB-only;
+6. la APU de SameBoy se captura a 48 kHz como S16LE estéreo y `EmuladorPortatilAudioApp` lo convierte a frames estéreo normalizados para `AudioStreamGeneratorPlayback`.
 
-Pendiente: buffer PCM nativo y `supports_audio() == true` solo cuando Godot consuma audio real.
+El backlog nativo está limitado a un segundo y el consumer Godot a 9600 frames. El audio pendiente se limpia al cambiar de ROM, mutear, cerrar o retirar la UI. Volumen y mute del audio de ROM son independientes de los sonidos físicos procedurales de #245.
 
 ## Interfaz
 
@@ -71,7 +72,8 @@ Al usar la Portátil Color 98:
 4. se añaden los `.gb`/`.gbc` válidos descubiertos en `user://roms`;
 5. la ROM elegida se carga en memoria y el núcleo produce un framebuffer RGBA de 160×144;
 6. la SRAM de cartucho se restaura y guarda por ROM cuando corresponde;
-7. `Esc` sale de la portátil y restaura el estado de pausa previo.
+7. el PCM de la ROM se reproduce por un stream dedicado, separado de clics/sonidos de carcasa;
+8. `Esc` sale de la portátil, corta el audio pendiente y restaura el estado de pausa previo.
 
 Controles del corte actual:
 
@@ -111,13 +113,13 @@ El wrapper nativo recibe únicamente:
 - estado de ocho botones;
 - SRAM del cartucho correspondiente.
 
-Devuelve el framebuffer RGBA, estado de capacidades y mensajes de error. No recibe referencias a `Partida`, `Jornada`, expedientes, dinero, pistas ni guardados del juego principal.
+Devuelve el framebuffer RGBA, PCM de audio, estado de capacidades y mensajes de error. No recibe referencias a `Partida`, `Jornada`, expedientes, dinero, pistas ni guardados del juego principal.
 
 ## Limitaciones pendientes de #456
 
-- sin audio emulado: la APU de SameBoy corre, pero su salida no llega todavía a Godot;
 - la ROM de SIGA-98 corre en modelo CGB; no hay selector de modelo DMG/GBA;
-- no se promete compatibilidad con todos los MBC o homebrew existentes.
+- no se promete compatibilidad con todos los MBC o homebrew existentes;
+- el smoke headless verifica producción y consumo contractual de PCM, pero la latencia y continuidad audible requieren una pasada manual en una alpha con dispositivo de audio real.
 
 ## Build reproducible
 
@@ -139,7 +141,7 @@ El runner Windows no tiene RGBDS: la alpha compila la boot ROM en Linux (`prepar
 
 CI ejecuta dos smoke:
 
-- `godot/pruebas/emulador_gb_smoke.gd`: carga `Caza Píxeles 98`, prueba la superficie SRAM nativa y exige un framebuffer de 160×144×4 bytes con contenido no uniforme;
+- `godot/pruebas/emulador_gb_smoke.gd`: carga `Caza Píxeles 98`, prueba SRAM, framebuffer y PCM nativo a 48 kHz, y exige `supports_audio() == true`;
 - `godot/pruebas/emulador_gbc_smoke.gd -- <rom>`: carga `cgb_only_smoke.gbc` y exige píxeles rojos y verdes puros de la paleta CGB, imposibles en un núcleo DMG.
 
 — Odiseo (GPT-5.6 Sol)

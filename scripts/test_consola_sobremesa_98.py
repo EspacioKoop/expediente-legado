@@ -17,8 +17,8 @@ class ConsolaSobremesa98Test(unittest.TestCase):
 
     def test_reutiliza_backend_del_emulador_sin_duplicarlo(self):
         self.assertIn("extends ConsolaPortatil98", self.consola)
-        self.assertNotIn("EmuladorPortatilApp.new()", self.consola)
-        self.assertIn("EmuladorPortatilApp.new()", self.portatil)
+        self.assertNotIn("EmuladorPortatilAudioApp.new()", self.consola)
+        self.assertIn("EmuladorPortatilAudioApp.new()", self.portatil)
         self.assertIn("activado.connect(_alternar)", self.consola)
 
     def test_es_un_objeto_de_sobremesa_reconocible_e_interactivo(self):

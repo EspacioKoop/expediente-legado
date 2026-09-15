@@ -84,13 +84,14 @@ class SameBoyBuildGateTest(unittest.TestCase):
         self.assertIn("needs: gbc-boot-rom", alpha)
         self.assertIn("path: godot/native/siga98_gb/.deps/bootroms", alpha)
 
-    def test_adapter_activo_declara_cgb_pero_no_audio(self):
+    def test_adapter_activo_declara_cgb_y_audio(self):
         self.assertIn('return "SameBoy";', self.wrapper)
         self.assertNotIn('return "Peanut-GB";', self.wrapper)
         cgb = self.wrapper.index("bool Siga98GB::supports_cgb() const")
         audio = self.wrapper.index("bool Siga98GB::supports_audio() const")
+        width = self.wrapper.index("int Siga98GB::width() const")
         self.assertIn("return true;", self.wrapper[cgb:audio])
-        self.assertIn("return false;", self.wrapper[audio:audio + 80])
+        self.assertIn("return true;", self.wrapper[audio:width])
 
 
 if __name__ == "__main__":
