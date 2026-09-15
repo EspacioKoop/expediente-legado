@@ -8,27 +8,33 @@ func _initialize() -> void:
 	var estado := Partida.nueva()
 	var inventario: Dictionary = estado["inventario"]
 	_comprobar(
-		Inventario.recoger(
-			inventario,
-			{
-				"id": "sello_oficina",
-				"nombre": "Sello de oficina",
-				"descripcion": "Un sello administrativo.",
-				"origen": "archivo",
-				"usos": ["archivo"],
-			}
+		(
+			Inventario
+			. recoger(
+				inventario,
+				{
+					"id": "sello_oficina",
+					"nombre": "Sello de oficina",
+					"descripcion": "Un sello administrativo.",
+					"origen": "archivo",
+					"usos": ["archivo"],
+				}
+			)
 		),
 		"prepara un objeto llevado"
 	)
 	_comprobar(
-		Inventario.recoger(
-			inventario,
-			{
-				"id": "llave_casa",
-				"nombre": "Llave de casa",
-				"origen": "casa",
-				"usos": ["casa"],
-			}
+		(
+			Inventario
+			. recoger(
+				inventario,
+				{
+					"id": "llave_casa",
+					"nombre": "Llave de casa",
+					"origen": "casa",
+					"usos": ["casa"],
+				}
+			)
 		),
 		"prepara un objeto doméstico"
 	)
