@@ -22,10 +22,7 @@ var _estado_local: Dictionary = {}
 
 
 func _init(
-	id_app: String,
-	titulo_app: String,
-	creador_app: Callable,
-	identidad_visual_app: String = ""
+	id_app: String, titulo_app: String, creador_app: Callable, identidad_visual_app: String = ""
 ) -> void:
 	id = id_app
 	titulo = titulo_app
