@@ -23,9 +23,7 @@ func _process(_delta: float) -> void:
 	if puzzle == null:
 		return
 
-	_reduccion_movimiento = bool(
-		PreferenciasSiga.cargar().get("reduccion_movimiento", false)
-	)
+	_reduccion_movimiento = bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false))
 	_montar_interacciones(sueno, puzzle)
 	_montada = true
 	set_process(false)
@@ -101,8 +99,7 @@ func _al_fragmento_activado(_actor: Node, fragmento: String) -> void:
 	if sueno == null:
 		return
 	var pieza := (
-		sueno.get_node_or_null("CiudadImposible/PuzzleTablilla/%s" % fragmento)
-		as MeshInstance3D
+		sueno.get_node_or_null("CiudadImposible/PuzzleTablilla/%s" % fragmento) as MeshInstance3D
 	)
 	if pieza == null or not pieza.visible:
 		return
@@ -118,10 +115,13 @@ func _al_ancla_activada(_actor: Node, ancla_id: String) -> void:
 		return
 
 	var seleccionado := _fragmento_seleccionado
-	var resultado := sueno.colocar_fragmento(
-		seleccionado,
-		ancla_id,
-		_reduccion_movimiento,
+	var resultado := (
+		sueno
+		. colocar_fragmento(
+			seleccionado,
+			ancla_id,
+			_reduccion_movimiento,
+		)
 	)
 	if not bool(resultado["aceptada"]):
 		# El contrato base exige reversión: conservar la selección permite probar
@@ -144,9 +144,7 @@ func _actualizar_feedback_seleccion(sueno: SuenoGilgamesh) -> void:
 		var pieza := puzzle.get_node_or_null(fragmento) as MeshInstance3D
 		if pieza == null or not pieza.visible:
 			continue
-		pieza.scale = (
-			Vector3.ONE * 1.14 if fragmento == _fragmento_seleccionado else Vector3.ONE
-		)
+		pieza.scale = (Vector3.ONE * 1.14 if fragmento == _fragmento_seleccionado else Vector3.ONE)
 
 
 func _deshabilitar(zona: Interactuable3D) -> void:
