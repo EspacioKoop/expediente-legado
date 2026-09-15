@@ -219,8 +219,7 @@ func _refrescar_lista_documentos() -> void:
 		var coste := 0 if cerrado else Jornada.coste_lectura(jornada, registro["folio"])
 		var rotulo_coste := tr("VISOR_COSTE_GRATIS") if coste == 0 else tr("VISOR_COSTE_ACCION")
 		var texto := (
-			tr("VISOR_ITEM_COSTE")
-			% [_icono(registro["tipo"]), registro["folio"], rotulo_coste]
+			tr("VISOR_ITEM_COSTE") % [_icono(registro["tipo"]), registro["folio"], rotulo_coste]
 		)
 		_lista.add_item(texto)
 		_lista.set_item_tooltip(_lista.get_item_count() - 1, tr("VISOR_COSTE_REGLA"))
