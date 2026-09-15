@@ -20,7 +20,9 @@ const COLOR_OJO := Color(0.78, 0.86, 0.52)
 
 @export var reduccion_movimiento := false
 
-var _estado_compuertas := [false, false, false]
+# Las tres compuertas parten en la orientación opuesta al objetivo. Así las
+# guías se pueden leer espacialmente y cada interacción necesaria es visible.
+var _estado_compuertas := [false, true, false]
 var _compuertas_tocadas := [false, false, false]
 var _compuertas: Array[Interactuable3D] = []
 var _brazos: Array[MeshInstance3D] = []
