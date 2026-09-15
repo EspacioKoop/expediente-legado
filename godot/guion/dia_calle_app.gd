@@ -10,6 +10,8 @@
 ## 3D. Las seis superficies `Pantalla` dispersas desaparecen.
 extends "res://guion/dia_onboarding_app.gd"
 
+const VENTANILLA := preload("res://escenas/ventanilla.tscn")
+
 
 func _espacio_de(fase: String) -> Dictionary:
 	var espacio: Dictionary = super._espacio_de(fase)
@@ -34,6 +36,45 @@ func _entrar_en(fase: String) -> void:
 		TraficoVialCC0.montar(_mundo)
 		CochesPsxCC0.montar(_mundo)
 		MobiliarioUrbanoCC0.montar(_mundo)
+		var calle := CalleIdentidad.montar(_mundo)
+		var ventanilla := calle.find_child("EntrarVentanillaReclamaciones", true, false)
+		if (
+			ventanilla != null
+			and not ventanilla.activado.is_connected(_abrir_ventanilla_reclamaciones)
+		):
+			ventanilla.activado.connect(_abrir_ventanilla_reclamaciones)
+
+
+## El Coliseo de #43 se juega en su propia pantalla; desde la calle se abre
+## encima del día, con la misma partida, y al salir se vuelve a andar.
+func abrir_ventanilla_reclamaciones() -> void:
+	_abrir_ventanilla_reclamaciones(null)
+
+
+func _abrir_ventanilla_reclamaciones(_actor: Node) -> void:
+	if _pantalla != null:
+		return
+	# Lo pendiente del día queda escrito antes: la Ventanilla guarda por su cuenta.
+	if not _guardar_o_avisar(""):
+		return
+	_caminante.set_physics_process(false)
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	_pantalla = CanvasLayer.new()
+	_pantalla.name = "PantallaVentanilla"
+	add_child(_pantalla)
+	var ventanilla = VENTANILLA.instantiate()
+	ventanilla.partida_externa = partida
+	ventanilla.cerrada.connect(_cerrar_ventanilla_reclamaciones)
+	_pantalla.add_child(ventanilla)
+
+
+func _cerrar_ventanilla_reclamaciones() -> void:
+	if _pantalla == null:
+		return
+	_pantalla.queue_free()
+	_pantalla = null
+	_caminante.set_physics_process(true)
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
 func _montar_persiana_calle() -> void:
@@ -71,27 +112,34 @@ func _bultos_calle() -> Array:
 		# visible entre edificios y rompen la lectura de corredor uniforme. El
 		# revoco CC0 ya versionado evita que sigan siendo bloques de color plano.
 		{
-			"pos": Vector3(-6.3, 2.1, -11.5),
-			"tam": Vector3(2.2, 4.2, 7.0),
+			"pos": Vector3(-6.3, 4.5, -12.65),
+			"tam": Vector3(2.2, 9.0, 9.3),
 			"color": Color(0.31, 0.27, 0.25),
 			"textura": "gotele",
 		},
 		{
-			"pos": Vector3(-6.7, 2.8, 9.0),
-			"tam": Vector3(2.4, 5.6, 10.0),
+			"pos": Vector3(-6.7, 5.5, 10.15),
+			"tam": Vector3(2.4, 11.0, 12.3),
 			"color": Color(0.27, 0.28, 0.31),
 			"textura": "gotele",
 		},
 		{
-			"pos": Vector3(6.5, 2.5, -8.5),
-			"tam": Vector3(2.0, 5.0, 9.0),
+			"pos": Vector3(6.5, 5.0, -10.65),
+			"tam": Vector3(2.0, 10.0, 13.3),
 			"color": Color(0.30, 0.29, 0.27),
 			"textura": "gotele",
 		},
 		{
-			"pos": Vector3(6.8, 1.9, 8.5),
-			"tam": Vector3(2.5, 3.8, 9.0),
+			"pos": Vector3(6.8, 4.0, 10.15),
+			"tam": Vector3(2.5, 8.0, 12.3),
 			"color": Color(0.26, 0.25, 0.27),
+			"textura": "gotele",
+		},
+		# Plantas altas sobre la tienda de electrodomésticos.
+		{
+			"pos": Vector3(-6.65, 6.4, -1.5),
+			"tam": Vector3(2.4, 6.0, 7.0),
+			"color": Color(0.29, 0.27, 0.26),
 			"textura": "gotele",
 		},
 		# Tienda de electrodomésticos: fondo y marco dejan un hueco real entre
@@ -123,31 +171,6 @@ func _bultos_calle() -> Array:
 			"tam": Vector3(0.22, 2.0, 0.22),
 			"color": Color(0.18, 0.17, 0.18),
 		},
-		# Tres televisores juntos y a diferentes alturas: un escaparate, no seis
-		# monitores arbitrarios repartidos por la calle.
-		{
-			"pos": Vector3(-5.95, 0.82, -3.25),
-			"tam": Vector3(0.78, 0.68, 0.58),
-			"color": Color(0.38, 0.34, 0.30),
-			"modelo": "televisionVintage",
-		},
-		{
-			"pos": Vector3(-5.92, 0.86, -1.45),
-			"tam": Vector3(0.92, 0.78, 0.66),
-			"color": Color(0.34, 0.32, 0.30),
-			"modelo": "televisionVintage",
-		},
-		{
-			"pos": Vector3(-5.98, 1.45, 0.30),
-			"tam": Vector3(0.72, 0.62, 0.54),
-			"color": Color(0.40, 0.36, 0.31),
-			"modelo": "televisionVintage",
-		},
-		{
-			"pos": Vector3(-5.98, 0.42, 0.30),
-			"tam": Vector3(1.05, 0.18, 0.80),
-			"color": Color(0.25, 0.22, 0.20),
-		},
 		# Portal de destino: marco alto y separado del resto de fachadas para que
 		# desde el spawn exista una composición clara hacia casa.
 		{
@@ -173,12 +196,8 @@ func _bultos_calle() -> Array:
 
 func _ventanas_calle() -> Array:
 	return [
-		# Un solo paño de escaparate agrupa visualmente los televisores.
-		{
-			"pos": Vector3(-5.70, 1.62, -1.5),
-			"tam": Vector3(0.08, 2.0, 6.45),
-			"color": Color(0.12, 0.16, 0.22),
-		},
+		# El paño del escaparate es cristal translúcido de CalleIdentidad: un
+		# cristal opaco tapaba los televisores que la tienda tiene que enseñar.
 		# Ventanas domésticas puntuales: repetición irregular, no paneles de TV.
 		{
 			"pos": Vector3(5.42, 1.85, -10.0),
@@ -186,7 +205,7 @@ func _ventanas_calle() -> Array:
 			"color": Color(0.13, 0.15, 0.18),
 		},
 		{
-			"pos": Vector3(5.72, 1.55, 8.8),
+			"pos": Vector3(5.52, 1.55, 6.2),
 			"tam": Vector3(0.08, 0.90, 1.15),
 			"color": Color(0.16, 0.13, 0.10),
 		},

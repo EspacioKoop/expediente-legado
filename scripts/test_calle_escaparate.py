@@ -23,8 +23,13 @@ class CalleEscaparateTest(unittest.TestCase):
 
     def test_las_televisiones_forman_un_unico_escaparate_3d(self):
         texto = CALLE.read_text(encoding="utf-8")
-        self.assertEqual(texto.count('"modelo": "televisionVintage"'), 3)
-        self.assertIn("Un solo paño de escaparate", texto)
+        identidad = (ROOT / "godot/guion/calle_identidad.gd").read_text(encoding="utf-8")
+        # Las teles ya no son bultos sueltos: la tienda las monta en dos hileras de cuatro.
+        self.assertEqual(texto.count('"modelo": "televisionVintage"'), 0)
+        self.assertIn("const TELES_Z := [-3.75, -2.25, -0.75, 0.75]", identidad)
+        self.assertIn("const TELES_Y := [0.74, 1.64]", identidad)
+        self.assertIn('Modelos.mueble(tele, "televisionVintage"', identidad)
+        self.assertIn('"CristalEscaparate"', identidad)
         self.assertTrue(MODELO_TV.exists())
 
     def test_conserva_el_destino_hacia_casa_en_la_cadena_base(self):

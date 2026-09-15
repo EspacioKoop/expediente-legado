@@ -138,3 +138,4 @@ func _edificio(
 	edificio.scale = Vector3.ONE * escala
 	edificio.rotation_degrees.y = giro_y
 	mundo.add_child(edificio)
+	CalleIdentidad.iluminar_ventanas(edificio, int(posicion.x * 10.0 + posicion.z))

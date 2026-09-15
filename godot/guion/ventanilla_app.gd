@@ -18,6 +18,10 @@
 ##   sacudidas ni escritura progresiva.
 extends Control
 
+## Cuando se abre desde la calle, la Ventanilla atiende con la MISMA partida del
+## día: dos copias del estado guardando a la vez se pisarían la racha o la jornada.
+signal cerrada
+
 ## Cuánto tarda en escribirse una réplica, por carácter.
 const SEGUNDOS_POR_CARACTER := 0.018
 
@@ -27,6 +31,7 @@ const SACUDIDA_SEGUNDOS := 0.28
 
 var contenido := Contenido.new()
 var partida := Partida.new()
+var partida_externa: Partida = null
 var historias := Historias.new()
 
 var combate: Dictionary = {}
@@ -54,7 +59,10 @@ func _ready() -> void:
 	theme = EstiloSiga.tema()
 	contenido.cargar()
 	historias.cargar()
-	partida.cargar()
+	if partida_externa != null:
+		partida = partida_externa
+	else:
+		partida.cargar()
 	_sembrar_tiradas()
 	_construir()
 	_llenar_turno()
@@ -362,6 +370,13 @@ func _construir() -> void:
 
 	_habilidades = HBoxContainer.new()
 	_tablero.add_child(_habilidades)
+
+	if partida_externa != null:
+		var salir := Button.new()
+		salir.name = "SalirVentanilla"
+		salir.text = tr("VENTANILLA_SALIR")
+		salir.pressed.connect(func(): cerrada.emit())
+		_tablero.add_child(salir)
 
 
 func _titulo(texto: String) -> Control:
