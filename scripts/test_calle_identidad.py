@@ -48,8 +48,10 @@ class CalleIdentidadTest(unittest.TestCase):
         self.assertIn("partida = partida_externa", self.ventanilla)
 
     def test_las_pieles_de_revoco_cubren_fachadas_reales(self):
-        for x in ("-5.185", "5.485", "-5.485"):
-            self.assertIn(f"Vector3({x},", self.materiales)
+        for cara in ("CARA_OESTE_SUR", "CARA_ESTE_SUR", "CARA_OESTE_NORTE"):
+            self.assertIn(f'"cara_x": CalleIdentidad.{cara}', self.materiales)
+        self.assertEqual(self.materiales.count('"hacia_calle":'), 3)
+        self.assertIn("SEPARACION_FACHADA + tam.x * 0.5", self.materiales)
         self.assertNotIn("2.59", self.materiales)
 
     def test_el_cielo_es_una_noche_urbana_estatica(self):
