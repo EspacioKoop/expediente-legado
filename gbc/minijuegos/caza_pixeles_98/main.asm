@@ -6,6 +6,7 @@
 ; al apagar o salir: no concede dinero, pistas ni progreso en SIGA-98.
 
 DEF rP1    EQU $FF00
+DEF rDIV   EQU $FF04
 DEF rNR10  EQU $FF10
 DEF rNR11  EQU $FF11
 DEF rNR12  EQU $FF12
@@ -65,6 +66,9 @@ DEF TILE_EXCL     EQU 27
 
 DEF SEGUNDOS_PARTIDA EQU 30
 DEF FRAMES_SEGUNDO   EQU 60
+DEF COMBO_DURACION    EQU 90
+DEF COMBO_X2          EQU 3
+DEF COMBO_X3          EQU 6
 
 SECTION "VBlank", ROM0[$0040]
 VBlank:
@@ -133,6 +137,7 @@ EstadoJuego:
     call ActualizarHUD
     call MoverJugador
     call MoverObjetivo
+    call TickCombo
     call ComprobarCaptura
     call TickTiempo
     call ActualizarOAM
@@ -205,17 +210,28 @@ IniciarPartida:
     ld [wObjetivoTick], a
     ld [wDirX], a
     ld [wDirY], a
+    ld [wCombo], a
+    ld [wComboFrames], a
+
+    ld a, 1
+    ld [wMultiplicador], a
+
+    ; La semilla depende del reloj hardware en el instante de empezar. Evita
+    ; que cada partida repita la misma secuencia de 16 posiciones sin meter
+    ; estado externo ni afectar a la reproducibilidad del binario.
+    ldh a, [rDIV]
+    or a
+    jr nz, .semilla_lista
+    ld a, $A5
+.semilla_lista:
+    ld [wRng], a
 
     ld a, SEGUNDOS_PARTIDA
     ld [wTiempo], a
     ld a, 5
     ld [wIntervaloObjetivo], a
 
-    ld hl, PosicionesObjetivo
-    ld a, [hli]
-    ld [wObjetivoX], a
-    ld a, [hl]
-    ld [wObjetivoY], a
+    call SiguienteObjetivo
     call ActualizarOAM
 
     ld a, ESTADO_JUEGO
@@ -422,13 +438,7 @@ ComprobarCaptura:
     cp b
     jr nc, .no_captura
 
-    ld a, [wPuntos]
-    cp 99
-    jr nc, .sin_incremento
-    inc a
-    ld [wPuntos], a
-
-.sin_incremento:
+    call RegistrarCaptura
     call AjustarDificultad
     call SiguienteObjetivo
     call SonidoCaptura
@@ -436,32 +446,111 @@ ComprobarCaptura:
 .no_captura:
     ret
 
-AjustarDificultad:
+RegistrarCaptura:
+    ; Encadenar capturas antes de que expire el contador sube el multiplicador.
+    ; El combo se capa en 9 porque el HUD solo necesita comunicar x1/x2/x3.
+    ld a, [wCombo]
+    cp 9
+    jr nc, .combo_listo
+    inc a
+    ld [wCombo], a
+.combo_listo:
+    ld a, COMBO_DURACION
+    ld [wComboFrames], a
+
+    ld a, [wCombo]
+    cp COMBO_X3
+    jr nc, .x3
+    cp COMBO_X2
+    jr nc, .x2
+    ld a, 1
+    jr .guardar_multiplicador
+.x2:
+    ld a, 2
+    jr .guardar_multiplicador
+.x3:
+    ld a, 3
+.guardar_multiplicador:
+    ld [wMultiplicador], a
+    ld b, a
+
+    ; Suma x1/x2/x3 y satura en 99 incluso si el salto cruza el limite.
     ld a, [wPuntos]
+    cp 99
+    ret nc
+    add b
+    cp 100
+    jr c, .guardar_puntos
+    ld a, 99
+.guardar_puntos:
+    ld [wPuntos], a
+    ret
+
+TickCombo:
+    ld a, [wComboFrames]
+    or a
+    ret z
+    dec a
+    ld [wComboFrames], a
+    ret nz
+
+    xor a
+    ld [wCombo], a
+    inc a
+    ld [wMultiplicador], a
+    ret
+
+AjustarDificultad:
+    ; Usa rangos, no igualdad: con multiplicadores el score puede saltar
+    ; directamente por encima de 5/10/20.
+    ld a, [wPuntos]
+    cp 20
+    jr nc, .nivel3
+    cp 10
+    jr nc, .nivel2
     cp 5
-    jr nz, .nivel2
+    ret c
     ld a, 4
     ld [wIntervaloObjetivo], a
     ret
 .nivel2:
-    cp 10
-    jr nz, .nivel3
     ld a, 3
     ld [wIntervaloObjetivo], a
     ret
 .nivel3:
-    cp 20
-    ret nz
     ld a, 2
     ld [wIntervaloObjetivo], a
     ret
 
+AvanzarRng:
+    ; LFSR de 8 bits. $B8 corresponde al polinomio x^8+x^6+x^5+x^4+1
+    ; usando desplazamiento a la derecha. El estado cero se evita explicitamente.
+    ld a, [wRng]
+    srl a
+    jr nc, .no_feedback
+    xor $B8
+.no_feedback:
+    or a
+    jr nz, .guardar
+    ld a, $A5
+.guardar:
+    ld [wRng], a
+    ret
+
 SiguienteObjetivo:
-    ld a, [wObjetivoIndice]
-    inc a
+    call AvanzarRng
     and $0F
-    ld [wObjetivoIndice], a
     ld b, a
+    ld a, [wObjetivoIndice]
+    cp b
+    jr nz, .indice_listo
+    inc b
+    ld a, b
+    and $0F
+    ld b, a
+.indice_listo:
+    ld a, b
+    ld [wObjetivoIndice], a
     add a
     ld e, a
     ld d, 0
@@ -523,10 +612,17 @@ ActualizarOAM:
 
 ActualizarHUD:
     ld a, [wPuntos]
-    ld hl, BG_MAP + 7
+    ld hl, BG_MAP + 6
     call EscribirNumero2
+
+    ld hl, BG_MAP + 10
+    call EsperarVRAM
+    ld a, [wMultiplicador]
+    add TILE_DIGITO0
+    ld [hl], a
+
     ld a, [wTiempo]
-    ld hl, BG_MAP + 15
+    ld hl, BG_MAP + 17
     call EscribirNumero2
     ret
 
@@ -547,18 +643,24 @@ DibujarTitulo:
     ret
 
 DibujarHUD:
-    ld hl, BG_MAP + 1
+    ld hl, BG_MAP
     ld de, TextoScore
     call EscribirTexto
     xor a
-    ld hl, BG_MAP + 7
+    ld hl, BG_MAP + 6
     call EscribirNumero2
 
-    ld hl, BG_MAP + 10
+    ld hl, BG_MAP + 9
+    ld a, TILE_X
+    ld [hli], a
+    ld a, TILE_DIGITO0 + 1
+    ld [hl], a
+
+    ld hl, BG_MAP + 12
     ld de, TextoTime
     call EscribirTexto
     ld a, SEGUNDOS_PARTIDA
-    ld hl, BG_MAP + 15
+    ld hl, BG_MAP + 17
     call EscribirNumero2
 
     ld hl, BG_MAP + 32 + 2
@@ -706,7 +808,21 @@ SonidoCaptura:
     ldh [rNR11], a
     ld a, $F1
     ldh [rNR12], a
+
+    ; El combo se oye: x2 y x3 elevan progresivamente el tono de captura.
+    ld a, [wMultiplicador]
+    cp 3
+    jr z, .x3
+    cp 2
+    jr z, .x2
     ld a, $40
+    jr .frecuencia
+.x2:
+    ld a, $70
+    jr .frecuencia
+.x3:
+    ld a, $A0
+.frecuencia:
     ldh [rNR13], a
     ld a, $87
     ldh [rNR14], a
@@ -825,6 +941,10 @@ wDirY:              ds 1
 wObjetivoTick:      ds 1
 wIntervaloObjetivo: ds 1
 wPuntos:            ds 1
+wCombo:             ds 1
+wComboFrames:       ds 1
+wMultiplicador:     ds 1
+wRng:               ds 1
 wTiempo:            ds 1
 wFrames:            ds 1
 wTeclas:            ds 1

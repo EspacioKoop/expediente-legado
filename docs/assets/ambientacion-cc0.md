@@ -25,7 +25,7 @@ Los elementos de fondo deben seguir siendo secundarios: niebla, distancia, palet
 | --- | ---: | --- | --- |
 | Modular Train Pack | #217 | **integrado** | PR #236: vagón + vía originales de Quaternius, procedencia/SHA-256, montaje lejano sin colisión/IA/interacción. |
 | Godot Skies | #224 | **integrado** | PR #235: shader CC0 adaptado, preset propio y montaje real en la escena diaria. |
-| Retro Urban Kit | #295 | **parcial** | PRs #402 y #415: una pieza fuente (`detail-awning-small.glb`) convertida a geometría del proyecto y reutilizada en dos toldos. Falta llegar a 6–10 piezas y captura/medición conjunta. |
+| Retro Urban Kit | #295 | **parcial** | PRs #402, #415 y segundo corte: cuatro piezas fuente (toldo, banco, farola, barrera) convertidas a geometría del proyecto, ocho instancias en el trayecto. Falta captura/medición conjunta antes de considerar el corte suficiente. |
 | Ultimate Nature Pack | #229 | **cerrado** | El issue está marcado `completed`; antes de reutilizarlo como evidencia de #216 hay que enlazar el PR/commit de entrega si existe. |
 | Retro PSX Street Furniture | #222 | **pendiente** | Candidato prioritario para completar la calle con piezas pequeñas de bajo coste. |
 | Traffic Road Assets | #225 | **pendiente** | Existe ficha técnica en `docs/assets/traffic-road-assets.md`; no equivale por sí sola a integración. |

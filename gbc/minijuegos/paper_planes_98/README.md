@@ -24,12 +24,17 @@ No se incorporan fotografías, logotipos, BIOS ni ROMs de terceros. Todos los gr
 - **Arriba o A** hace remontar el avión.
 - **Abajo** permite picar.
 - **Izquierda/Derecha** desplazan lateralmente el avión para afinar la trayectoria.
+- **B** pliega momentáneamente el avión: mantiene la altura y anula el viento, pero mientras se mantiene pulsado no se puede maniobrar.
 - Hay **3 pliegues** (`FOLD`): un impacto arruga el avión y consume uno.
-- Cada hito pasado sin choque suma un punto.
-- Tras Empire se muestra `NYC CLEAR`; con cero pliegues, `PLANE CRUMPLED`.
+- Cada hito alterna un patrón de viento propio. Liberty y Brooklyn Bridge empujan suavemente hacia arriba; WTC y Empire tienen rachas descendentes más frecuentes.
+- Pasar un hito limpio suma **1 punto**. Cruzar además la franja central de precisión suma **2 puntos** y aumenta `PERF`.
+- El HUD informa de `FOLD`, dirección del viento, puerta actual, puntuación y número de pasos perfectos.
+- Tras Empire se muestra `NYC CLEAR`; con cero pliegues, `PLANE CRUMPLED`. La pantalla final muestra puntuación y `PERFECT n/4`.
 - A/Start reinicia inmediatamente.
 
-La puntuación, las vidas y la ruta existen únicamente dentro de la RAM de la ROM. No hay dinero, pistas, progreso de `Partida`, cambios de `Jornada` ni efectos sobre sueño/archivo.
+El segundo pase convierte la ruta en algo más que memorizar cuatro alturas: el jugador debe anticipar la racha del siguiente tramo, decidir cuándo corregir y cuándo fijar la trayectoria con **B**, y escoger entre un paso simplemente seguro o buscar la banda estrecha que da el perfecto.
+
+La puntuación, las vidas, los perfectos y la ruta existen únicamente dentro de la RAM de la ROM. No hay dinero, pistas, progreso de `Partida`, cambios de `Jornada` ni efectos sobre sueño/archivo.
 
 ## Compilar
 
@@ -58,15 +63,10 @@ make clean
 make test PYTHON=/tmp/paper-planes-tests/bin/python
 ```
 
-`test_rom.py` ejecuta el código máquina compilado en copias temporales de la
-ROM y comprueba la limpieza de las 1024 celdas del fondo, los sprites de los
-cuatro hitos en OAM y el HUD con varios valores de vidas, ruta y puntuación.
-El arnés llama a las rutinas con la LCD apagada: verifica sus escrituras en
-memoria, pero no el presupuesto de VBlank, el renderizado durante una partida
-ni controles físicos. PyBoy es una dependencia de pruebas local; no se
-distribuye con la ROM ni se integra en el juego. El workflow GBC existente
-compila la ROM; estas pruebas se ejecutan explícitamente con `make test`.
+`test_rom.py` ejecuta el código máquina compilado en copias temporales de la ROM y comprueba la cabecera dual-mode, la limpieza de las 1024 celdas del fondo, los sprites de los cuatro hitos en OAM, el HUD, la alternancia/frecuencia de las rachas, el bloqueo del viento con **B** y la diferencia entre un paso normal y un paso perfecto.
+
+El arnés llama a las rutinas con la LCD apagada: verifica sus escrituras en memoria, pero no el presupuesto de VBlank, el renderizado durante una partida ni controles físicos. PyBoy es una dependencia de pruebas local; no se distribuye con la ROM ni se integra en el juego. El workflow GBC existente compila la ROM; estas pruebas se ejecutan explícitamente con `make test`.
 
 ## Siguientes rutas candidatas
 
-La estructura está pensada para añadir ciudades sin alterar el contrato del minijuego. Las siguientes rutas naturales son **París 1998** (Torre Eiffel/Arco/La Défense), **Tokio 1998** (Tokyo Tower/Shinjuku) y **Londres 1998** (Big Ben/Tower Bridge/Canary Wharf).
+La estructura sigue pensada para añadir ciudades que cambien también el comportamiento de vuelo, no solo el decorado. Las siguientes rutas naturales son **París 1998** (Torre Eiffel/Arco/La Défense), **Tokio 1998** (Tokyo Tower/Shinjuku) y **Londres 1998** (Big Ben/Tower Bridge/Canary Wharf). Una segunda ruta debería traer su propio patrón de viento/obstáculos para que no sea un simple reskin de Nueva York.

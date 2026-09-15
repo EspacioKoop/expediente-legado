@@ -296,6 +296,10 @@ INICIO_BIENVENIDA,Empieza una nueva partida para entrar al archivo.
 INICIO_CONFIRMAR,Se reiniciará todo el progreso. Se conservará una copia de la partida anterior. ¿Empezar desde cero?
 INICIO_ERROR_REINICIO,No se pudo conservar la partida anterior. No se ha iniciado una nueva.
 INICIO_ERROR_ENTRADA,No se pudo entrar al archivo. Puedes volver a intentarlo.
+INICIO_CARGAR,Cargar partida
+INICIO_CARGAR_TOOLTIP,Carga la partida guardada de este perfil.
+INICIO_VENTANILLA,Ventanilla de reclamaciones
+INICIO_ERROR_AJUSTES,No se pudieron abrir los ajustes.
 
 MENU_GLOBAL_TITULO,Menú
 MENU_GLOBAL_CONTINUAR,Continuar

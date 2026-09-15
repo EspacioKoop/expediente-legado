@@ -32,6 +32,8 @@ public:
     bool is_loaded() const;
     void set_buttons(int64_t p_buttons);
     PackedByteArray run_frame_rgba();
+    PackedByteArray drain_audio_pcm16();
+    int audio_sample_rate() const;
     PackedByteArray save_ram() const;
     bool load_save_ram(const PackedByteArray &p_save);
     String rom_title() const;

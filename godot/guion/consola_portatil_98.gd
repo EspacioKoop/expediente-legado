@@ -40,7 +40,7 @@ func _alternar(_actor: Node) -> void:
 	_roms_detectadas = CatalogoRomsUsuario.listar()
 	_actualizar_pantalla()
 
-	_app = EmuladorPortatilApp.new()
+	_app = EmuladorPortatilAudioApp.new()
 	_app.roms_compradas = _compradas_en_jornada()
 	_app.cerrado.connect(_al_cerrar_app)
 	get_tree().root.add_child(_app)

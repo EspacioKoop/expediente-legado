@@ -3,6 +3,8 @@ extends SceneTree
 const ROM := "res://roms/caza_pixeles_98.gbc"
 const BYTES_POR_PIXEL := 4
 const TAM_FRAME := 160 * 144 * BYTES_POR_PIXEL
+const BYTES_POR_MUESTRA_ESTEREO := 4
+const FRECUENCIA_AUDIO := 48000
 ## La boot ROM CGB de SameBoy tarda ~16 frames en ceder el control al cartucho.
 const FRAMES_ARRANQUE := 60
 
@@ -18,13 +20,18 @@ func _init() -> void:
 	if not _probar_sram(emulador):
 		return
 	var frame := _ejecutar_frames(emulador)
-	if frame.is_empty():
+	if not _validar_frame(frame):
 		return
-	if not _frame_tiene_variacion(frame):
-		_fallar("el framebuffer quedó uniforme por píxel RGBA")
+	var bytes_audio := _probar_audio_nativo(emulador)
+	if bytes_audio < 0:
 		return
 
-	print("Emulador GB smoke: OK · %s · %d bytes/frame" % [emulador.call("rom_title"), TAM_FRAME])
+	print(
+		(
+			"Emulador GB smoke: OK · %s · %d bytes/frame · %d bytes PCM"
+			% [emulador.call("rom_title"), TAM_FRAME, bytes_audio]
+		)
+	)
 	quit(0)
 
 
@@ -82,6 +89,40 @@ func _ejecutar_frames(emulador: Object) -> PackedByteArray:
 			_fallar("frame inválido: %d bytes" % frame.size())
 			return PackedByteArray()
 	return frame
+
+
+func _validar_frame(frame: PackedByteArray) -> bool:
+	if frame.is_empty():
+		return false
+	if not _frame_tiene_variacion(frame):
+		_fallar("el framebuffer quedó uniforme por píxel RGBA")
+		return false
+	return true
+
+
+func _probar_audio_nativo(emulador: Object) -> int:
+	var error := ""
+	var pcm = null
+	if not bool(emulador.call("supports_audio")):
+		error = "supports_audio debe estar activo con el puente AudioStreamGenerator"
+	elif int(emulador.call("audio_sample_rate")) != FRECUENCIA_AUDIO:
+		error = "frecuencia PCM inesperada"
+	else:
+		pcm = emulador.call("drain_audio_pcm16")
+		if not (pcm is PackedByteArray):
+			error = "drain_audio_pcm16 no devolvió PackedByteArray"
+		elif pcm.is_empty():
+			error = "SameBoy no produjo muestras PCM tras ejecutar frames"
+		elif pcm.size() % BYTES_POR_MUESTRA_ESTEREO != 0:
+			error = "el PCM no está alineado a S16LE estéreo"
+		else:
+			var vacio = emulador.call("drain_audio_pcm16")
+			if not (vacio is PackedByteArray) or not vacio.is_empty():
+				error = "drain_audio_pcm16 no vació la cola nativa"
+	if not error.is_empty():
+		_fallar(error)
+		return -1
+	return pcm.size()
 
 
 func _frame_tiene_variacion(frame: PackedByteArray) -> bool:

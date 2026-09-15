@@ -38,8 +38,22 @@ static func _gato(comprobar: Callable) -> void:
 	# Recién comido y con alguien cerca, se acerca. Es la única recompensa que
 	# da el juego por cuidarlo, y no lleva ningún número.
 	var contento := GatoConducta.nuevo(sitios[1])
-	GatoConducta.avanzar(contento, sitios, 0, sitios[1] + Vector3(1.5, 0, 0), 0.1)
+	var jugador: Vector3 = sitios[1] + Vector3(1.5, 0, 0)
+	GatoConducta.avanzar(contento, sitios, 0, jugador, 0.1)
 	comprobar.call("bien comido, se acerca", contento["estado"], "viene")
+
+	# #570: alcanzar al jugador no termina en un parado indistinguible del
+	# paseo. Se frota durante un instante, sin tocar hambre ni jornada.
+	for _paso in 12:
+		GatoConducta.avanzar(contento, sitios, 0, jugador, 0.1)
+	comprobar.call("al alcanzar al jugador pide mimos", contento["estado"], "mimos")
+	var pos_mimos: Vector3 = contento["pos"]
+	GatoConducta.avanzar(contento, sitios, 0, jugador, 0.2)
+	comprobar.call(
+		"durante los mimos se queda junto al jugador",
+		[contento["estado"], contento["pos"]],
+		["mimos", pos_mimos]
+	)
 
 	# Un día sin comer todavía no es desconfianza: hay margen para arreglarlo.
 	var dudoso := GatoConducta.nuevo(sitios[1])
@@ -145,6 +159,19 @@ static func _cuenco(comprobar: Callable) -> void:
 ## está hecho de cajas: si esta geometría cambia, ha cambiado el gato y no un
 ## detalle de implementación.
 static func _malla(comprobar: Callable) -> void:
+	# #570: la raíz conserva el ciclo de vida ligero de siempre, pero lleva una
+	# sonda volumétrica que consulta el mobiliario antes de aceptar cada paso.
+	var codigo_gato := FileAccess.get_file_as_string("res://guion/gato.gd")
+	comprobar.call(
+		"el gato sigue siendo un nodo ligero", codigo_gato.contains("extends Node3D"), true
+	)
+	comprobar.call(
+		"el gato tiene sonda volumétrica", codigo_gato.contains("ShapeCast3D.new()"), true
+	)
+	comprobar.call(
+		"la sonda fuerza consulta física", codigo_gato.contains("force_shapecast_update()"), true
+	)
+
 	# Un tubo de N anillos y L lados: dos triángulos por cara y una tapa por
 	# punta.
 	var espina := [
