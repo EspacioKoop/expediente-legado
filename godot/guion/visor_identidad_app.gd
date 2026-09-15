@@ -10,6 +10,7 @@ const IDENTIDAD_FALLBACK := {
 	"codigo": "SIGA",
 	"acento": "#4B6284",
 	"icono": "",
+	"lamina": "",
 }
 
 var _identidades: Dictionary = {}
@@ -18,6 +19,7 @@ var _banda: PanelContainer
 var _icono: TextureRect
 var _titulo: Label
 var _codigo: Label
+var _portada: TextureRect
 
 
 func montar(columna: Control, caso: Dictionary) -> void:
@@ -48,6 +50,15 @@ func montar(columna: Control, caso: Dictionary) -> void:
 	_banda.add_child(fila)
 	columna.add_child(_banda)
 	columna.move_child(_banda, 0)
+
+	_portada = TextureRect.new()
+	_portada.custom_minimum_size = Vector2(0, 124)
+	_portada.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_portada.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_portada.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_portada.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	columna.add_child(_portada)
+	columna.move_child(_portada, 1)
 	actualizar(caso)
 
 
@@ -58,7 +69,7 @@ func aplicar_archivo(archivo: ItemList, casos: Array) -> void:
 	var cantidad := mini(casos.size(), archivo.get_item_count())
 	for i in cantidad:
 		var ficha: Dictionary = casos[i]
-		var textura := _textura_de(_identidad_de(String(ficha.get("id", ""))))
+		var textura := _textura_de(_identidad_de(String(ficha.get("id", ""))), "icono")
 		if textura != null:
 			archivo.set_item_icon(i, textura)
 
@@ -72,7 +83,7 @@ func actualizar(caso: Dictionary) -> void:
 	)
 	_banda.add_theme_stylebox_override("panel", _estilo(acento))
 
-	_icono.texture = _textura_de(identidad)
+	_icono.texture = _textura_de(identidad, "icono")
 	_icono.visible = _icono.texture != null
 	_titulo.text = tr(String(caso.get("titulo", "")))
 
@@ -80,6 +91,15 @@ func actualizar(caso: Dictionary) -> void:
 	if caso.get("anioSuceso") != null:
 		anio = str(int(caso["anioSuceso"]))
 	_codigo.text = "%s   ·   %s" % [String(identidad.get("codigo", "SIGA")), anio]
+
+	if _portada != null:
+		_portada.texture = _textura_de(identidad, "lamina")
+		_portada.visible = _portada.texture != null
+
+
+func mostrar_portada(visible: bool) -> void:
+	if _portada != null:
+		_portada.visible = visible and _portada.texture != null
 
 
 func _asegurar_identidades() -> void:
@@ -100,8 +120,8 @@ func _identidad_de(caso_id: String) -> Dictionary:
 	return IDENTIDAD_FALLBACK
 
 
-func _textura_de(identidad: Dictionary) -> Texture2D:
-	var ruta := String(identidad.get("icono", ""))
+func _textura_de(identidad: Dictionary, campo: String) -> Texture2D:
+	var ruta := String(identidad.get(campo, ""))
 	if ruta.is_empty() or not ResourceLoader.exists(ruta):
 		return null
 	if not _texturas_identidad.has(ruta):
