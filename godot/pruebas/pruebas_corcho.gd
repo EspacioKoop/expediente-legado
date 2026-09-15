@@ -63,11 +63,17 @@ func _probar_presentacion_interactiva() -> void:
 		var caja := tablero.mesh as BoxMesh
 		_comprobar(caja != null and caja.size.x < 3.0, "el tablero deja de dominar la pared")
 	if etiqueta != null:
-		var texto := etiqueta.get_node_or_null("Texto") as Label3D
-		_comprobar(texto != null and texto.text == "CORCHO DE CONCEPTOS", "la etiqueta aclara qué objeto es")
+		var texto_etiqueta := etiqueta.get_node_or_null("Texto") as Label3D
+		_comprobar(
+			texto_etiqueta != null and texto_etiqueta.text == "CORCHO DE CONCEPTOS",
+			"la etiqueta aclara qué objeto es",
+		)
 	if instruccion != null:
-		var texto := instruccion.get_node_or_null("Texto") as Label3D
-		_comprobar(texto != null and texto.text.contains("DOS FICHAS"), "la instrucción aclara cómo acceder")
+		var texto_instruccion := instruccion.get_node_or_null("Texto") as Label3D
+		_comprobar(
+			texto_instruccion != null and texto_instruccion.text.contains("DOS FICHAS"),
+			"la instrucción aclara cómo acceder",
+		)
 
 	var ficha_a := corcho.get_node_or_null("Ficha_a") as Interactuable3D
 	var ficha_b := corcho.get_node_or_null("Ficha_b") as Interactuable3D
@@ -78,15 +84,23 @@ func _probar_presentacion_interactiva() -> void:
 	_comprobar(ficha_a.texto_accion() == "Usar ficha «Alpha»", "el prompt nombra la ficha como objeto")
 
 	var papel_a := ficha_a.get_node_or_null("Papel") as MeshInstance3D
-	var material_a := papel_a.material_override as StandardMaterial3D if papel_a != null else null
+	var material_a: StandardMaterial3D = null
+	if papel_a != null:
+		material_a = papel_a.material_override as StandardMaterial3D
 	_comprobar(material_a != null, "la ficha expone papel visible")
 	_comprobar(ficha_a.interactuar(root), "permite seleccionar la primera ficha")
 	if material_a != null:
-		_comprobar(material_a.albedo_color == Corcho3DScript.COLOR_FICHA_SELECCIONADA, "marca la primera selección")
+		_comprobar(
+			material_a.albedo_color == Corcho3DScript.COLOR_FICHA_SELECCIONADA,
+			"marca la primera selección",
+		)
 	_comprobar(ficha_b.interactuar(root), "permite completar el par")
 	_comprobar(CorchoScript.estado(jornada)["enlaces"].size() == 1, "dos fichas crean un hilo manual")
 	if material_a != null:
-		_comprobar(material_a.albedo_color == Corcho3DScript.COLOR_FICHA, "limpia el feedback al completar el par")
+		_comprobar(
+			material_a.albedo_color == Corcho3DScript.COLOR_FICHA,
+			"limpia el feedback al completar el par",
+		)
 
 	_comprobar(ficha_b.interactuar(root), "permite iniciar el mismo par en orden inverso")
 	_comprobar(ficha_a.interactuar(root), "permite completar el mismo par en orden inverso")
