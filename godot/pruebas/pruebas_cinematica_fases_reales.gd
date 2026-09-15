@@ -102,14 +102,21 @@ func _recorrer(saltar: bool) -> Dictionary:
 		Cinematica.vistas_de(dia.partida.estado, SuenoCinematica.ID) == 1,
 		"terminar la cama anota su primera vista",
 	)
-	_comprobar(dia.jornada.get("fase", "") == "sueño", "el callback real ejecuta la regla de dormir")
+	_comprobar(
+		dia.jornada.get("fase", "") == "sueño", "el callback real ejecuta la regla de dormir"
+	)
 	_comprobar(dia._entrada_sueno != null, "dormir encadena la entrada a la sala onírica")
 	_comprobar(
 		Cinematica.vistas_de(dia.partida.estado, EntradaSuenoCinematica.ID) == 0,
 		"la segunda cinemática no se marca hasta terminar",
 	)
-	_comprobar(dia._mundo.process_mode == Node.PROCESS_MODE_DISABLED, "el sueño queda congelado durante la entrada")
-	_comprobar(not dia._caminante.is_physics_processing(), "la entrada mantiene bloqueado al jugador")
+	_comprobar(
+		dia._mundo.process_mode == Node.PROCESS_MODE_DISABLED,
+		"el sueño queda congelado durante la entrada"
+	)
+	_comprobar(
+		not dia._caminante.is_physics_processing(), "la entrada mantiene bloqueado al jugador"
+	)
 
 	var entrada = dia._entrada_sueno
 	if entrada != null:
@@ -120,8 +127,14 @@ func _recorrer(saltar: bool) -> Dictionary:
 		"terminar la entrada anota su primera vista",
 	)
 	_comprobar(dia._entrada_sueno == null, "el callback retira el reproductor al terminar")
-	_comprobar(dia._mundo.process_mode == Node.PROCESS_MODE_INHERIT, "el mundo vuelve a procesar al recuperar control")
-	_comprobar(dia._caminante.is_physics_processing(), "el jugador recupera movimiento después de la entrada")
+	_comprobar(
+		dia._mundo.process_mode == Node.PROCESS_MODE_INHERIT,
+		"el mundo vuelve a procesar al recuperar control"
+	)
+	_comprobar(
+		dia._caminante.is_physics_processing(),
+		"el jugador recupera movimiento después de la entrada"
+	)
 	_comprobar(dia._hud.visible, "el HUD vuelve después de la transición")
 
 	var resultado := {
