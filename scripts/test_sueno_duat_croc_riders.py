@@ -22,8 +22,8 @@ class SuenoDuatCrocRidersTest(unittest.TestCase):
         for termino in [
             "SemillasOniricas.",
             "activar_semilla_onirica(",
-            "Partida.",
-            "Jornada.",
+            "jornada: Dictionary",
+            "partida: Dictionary",
             "inventario[",
             "pistas[",
         ]:
