@@ -20,6 +20,12 @@ env:
   RGBDS_SHA256: 280a52061a0c516999bee75ac357628d6d50784309e0486cef25f7460e6f330b
   FIXTURES_REPO: https://github.com/tbsp/simple-gb-asm-examples.git
   FIXTURES_COMMIT: 54270e0673ac16452447ff65cca26a1ef42eefec
+  CGB_ACID2_REPO: https://github.com/mattcurrie/cgb-acid2.git
+  CGB_ACID2_COMMIT: fa5b7f86d6fb599f79e55169494d981a7af75a31
+  CGB_ACID2_MGBLIB_COMMIT: 5d829bf2ffa1447dcfd63c5dab2c44488632617e
+  CGB_ACID2_RGBDS_REPO: https://github.com/gbdev/rgbds.git
+  CGB_ACID2_RGBDS_COMMIT: 0759c98d913e3d4d21207a8886a319c85add2041
+  CGB_ACID2_SHA256: 197fb0bcec544f0400527fc707e0a94f55435974986e6986b424ace5de81720e
 
 jobs:
   build-fixtures:
@@ -71,6 +77,41 @@ jobs:
           cp fixture-src/src/joypad/joypad.gb gbc-fixtures/
           cp fixture-src/src/vblank/vblank.gb gbc-fixtures/
 
+      - name: Fetch pinned MIT cgb-acid2 sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init cgb-acid2-src
+          git -C cgb-acid2-src remote add origin "$CGB_ACID2_REPO"
+          git -C cgb-acid2-src fetch --depth 1 origin "$CGB_ACID2_COMMIT"
+          git -C cgb-acid2-src checkout --detach FETCH_HEAD
+          test "$(git -C cgb-acid2-src rev-parse HEAD)" = "$CGB_ACID2_COMMIT"
+          git -C cgb-acid2-src submodule update --init --depth 1 mgblib
+          test "$(git -C cgb-acid2-src/mgblib rev-parse HEAD)" = "$CGB_ACID2_MGBLIB_COMMIT"
+
+      - name: Build pinned legacy RGBDS for cgb-acid2
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y byacc flex pkg-config libpng-dev
+          git init rgbds-legacy-src
+          git -C rgbds-legacy-src remote add origin "$CGB_ACID2_RGBDS_REPO"
+          git -C rgbds-legacy-src fetch --depth 1 origin "$CGB_ACID2_RGBDS_COMMIT"
+          git -C rgbds-legacy-src checkout --detach FETCH_HEAD
+          test "$(git -C rgbds-legacy-src rev-parse HEAD)" = "$CGB_ACID2_RGBDS_COMMIT"
+          make -C rgbds-legacy-src CFLAGS="-g -fcommon"
+          for tool in rgbasm rgblink rgbfix rgbgfx; do
+            test -x "rgbds-legacy-src/$tool"
+          done
+
+      - name: Build cgb-acid2 with historical RGBDS
+        shell: bash
+        run: |
+          set -euo pipefail
+          PATH="$GITHUB_WORKSPACE/rgbds-legacy-src:$PATH" make -C cgb-acid2-src all
+          cp cgb-acid2-src/build/cgb-acid2.gbc gbc-fixtures/
+
       - name: Build CGB-only smoke fixture
         shell: bash
         run: |
@@ -105,7 +146,8 @@ jobs:
           set -euo pipefail
           (
             cd gbc-fixtures
-            sha256sum joypad.gb vblank.gb cgb_only_smoke.gbc caza_pixeles_98.gbc paper_planes_98.gbc croc_riders_98.gbc | tee SHA256SUMS
+            sha256sum joypad.gb vblank.gb cgb-acid2.gbc cgb_only_smoke.gbc caza_pixeles_98.gbc paper_planes_98.gbc croc_riders_98.gbc | tee SHA256SUMS
+            echo "${CGB_ACID2_SHA256}  cgb-acid2.gbc" | sha256sum --check --strict
           )
           for rom in gbc-fixtures/*.gb gbc-fixtures/*.gbc; do
             test -s "$rom"
@@ -113,6 +155,7 @@ jobs:
             test "$size" -ge 32768
             printf '%s: %s bytes\n' "$rom" "$size"
           done
+          test "$(od -An -tx1 -j 323 -N 1 gbc-fixtures/cgb-acid2.gbc | tr -d ' \n')" = "c0"
           for rom in gbc-fixtures/caza_pixeles_98.gbc gbc-fixtures/paper_planes_98.gbc gbc-fixtures/croc_riders_98.gbc; do
             test "$(od -An -tx1 -j 323 -N 1 "$rom" | tr -d ' \n')" = "80"
           done
@@ -125,6 +168,7 @@ jobs:
           path: |
             gbc-fixtures/joypad.gb
             gbc-fixtures/vblank.gb
+            gbc-fixtures/cgb-acid2.gbc
             gbc-fixtures/cgb_only_smoke.gbc
             gbc-fixtures/caza_pixeles_98.gbc
             gbc-fixtures/paper_planes_98.gbc
