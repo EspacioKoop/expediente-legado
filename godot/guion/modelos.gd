@@ -79,13 +79,14 @@ const PERFILES_FACIALES := {
 
 ## `retrato` sigue siendo la clave estable que llega desde el catálogo, pero la
 ## identidad visual deja de salir solo de un hash. Cada entrada de esta tabla
-## habilita rasgos modelados para la persona histórica concreta. Puyi, Melville
-## y Pessoa ya tienen pase propio; el resto puede incorporarse uno a uno sin
-## volver a una fotografía pegada sobre la cara.
+## habilita rasgos modelados para la persona histórica concreta. Puyi, Melville,
+## Pessoa y Cavafis ya tienen pase propio; el resto puede incorporarse uno a uno
+## sin volver a una fotografía pegada sobre la cara.
 const PERSONAJES_FACIALES := {
 	"emperador": "Puyi",
 	"aduanero_ny": "Herman Melville",
 	"correspondencia": "Fernando Pessoa",
+	"riegos": "Constantino Cavafis",
 }
 
 ## Lo que se carga una vez y se reusa. Las salas repiten mueble —seis
@@ -272,6 +273,9 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 		# Las gafas redondas son muy visibles y quedan mejor algo recogidas hacia
 		# el puente, sin invadir las sienes bajo el ala del sombrero.
 		separacion = radio_x * 0.48
+	elif personaje == "Constantino Cavafis":
+		# Las gafas quedan algo más abiertas sobre el rostro ancho de `riegos`.
+		separacion = radio_x * 0.50
 	var altura_ojos := centro_y + alto * 0.12
 
 	var oscuro := Color(0.10, 0.08, 0.07)
@@ -303,6 +307,11 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 		# atraviese el ala y deja apenas lectura en sienes y nuca.
 		pelo_y = centro_y + radio_y * 0.76
 		pelo_escala = Vector3(radio_x * 0.90, alto * 0.09, radio_z * 0.76)
+	elif personaje == "Constantino Cavafis":
+		# Los retratos de madurez dejan una frente muy despejada: la tapa se reduce
+		# casi a coronilla y `_rasgos_cavafis` recupera pelo solo en las sienes.
+		pelo_y = centro_y + radio_y * 0.88
+		pelo_escala = Vector3(radio_x * 0.92, alto * 0.055, radio_z * 0.55)
 	_cabello_cabeza(enganche, Vector3(0.0, pelo_y, -radio_z * 0.04), pelo_escala, cabello)
 
 	# Los centros de ojos y boca se colocan unos milímetros DENTRO de la
@@ -322,6 +331,8 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 		escala_ojo = Vector3(alto * 0.043, alto * 0.032, alto * 0.020)
 	elif personaje == "Fernando Pessoa":
 		escala_ojo = Vector3(alto * 0.041, alto * 0.032, alto * 0.020)
+	elif personaje == "Constantino Cavafis":
+		escala_ojo = Vector3(alto * 0.044, alto * 0.034, alto * 0.021)
 	_rasgo_esfera(enganche, Vector3(ojo_izq.x, ojo_izq.y, z_ojo_izq), escala_ojo, oscuro)
 	_rasgo_esfera(enganche, Vector3(ojo_der.x, ojo_der.y, z_ojo_der), escala_ojo, oscuro)
 
@@ -344,6 +355,19 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 		_rasgos_pessoa(
 			enganche, alto, centro_y, radio_x, radio_y, radio_z, separacion, altura_ojos, oscuro
 		)
+	elif personaje == "Constantino Cavafis":
+		_rasgos_cavafis(
+			enganche,
+			alto,
+			centro_y,
+			radio_x,
+			radio_y,
+			radio_z,
+			separacion,
+			altura_ojos,
+			oscuro,
+			cabello
+		)
 
 	var nariz_y := centro_y - alto * 0.035
 	var z_nariz := _frente_cabeza(0.0, nariz_y, centro_y, radio_x, radio_y, radio_z) - alto * 0.015
@@ -354,6 +378,8 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 		nariz_escala = Vector3(alto * 0.048, alto * 0.118, alto * 0.064)
 	elif personaje == "Fernando Pessoa":
 		nariz_escala = Vector3(alto * 0.043, alto * 0.116, alto * 0.055)
+	elif personaje == "Constantino Cavafis":
+		nariz_escala = Vector3(alto * 0.052, alto * 0.125, alto * 0.064)
 	_rasgo_esfera(enganche, Vector3(0.0, nariz_y, z_nariz), nariz_escala, piel)
 
 	var boca_y := centro_y - alto * 0.20
@@ -365,6 +391,8 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 		ancho_boca = alto * 0.10
 	elif personaje == "Fernando Pessoa":
 		ancho_boca = alto * 0.095
+	elif personaje == "Constantino Cavafis":
+		ancho_boca = alto * 0.105
 	_rasgo_esfera(
 		enganche,
 		Vector3(0.0, boca_y, z_boca),
@@ -588,6 +616,85 @@ static func _rasgos_pessoa(
 	copa.scale = Vector3(1.0, 1.0, 0.82)
 	copa.material_override = _material_rasgo(oscuro)
 	padre.add_child(copa)
+
+
+## Cavafis se separa de Pessoa por una silueta más ancha y despejada: gafas
+## redondas, bigote más amplio y pelo retirado que solo conserva masa lateral.
+## Los rasgos siguen la curvatura del mismo elipsoide y el mismo hueso de cabeza.
+static func _rasgos_cavafis(
+	padre: Node3D,
+	alto: float,
+	centro_y: float,
+	radio_x: float,
+	radio_y: float,
+	radio_z: float,
+	separacion: float,
+	altura_ojos: float,
+	oscuro: Color,
+	cabello: Color
+) -> void:
+	var hundido_gafas := alto * 0.007
+	var z_izq := (
+		_frente_cabeza(-separacion, altura_ojos, centro_y, radio_x, radio_y, radio_z)
+		- hundido_gafas
+	)
+	var z_der := (
+		_frente_cabeza(separacion, altura_ojos, centro_y, radio_x, radio_y, radio_z) - hundido_gafas
+	)
+	var radio_gafa := alto * 0.074
+	var grosor_gafa := alto * 0.010
+	_aro_gafa(padre, Vector3(-separacion, altura_ojos, z_izq), radio_gafa, grosor_gafa, oscuro)
+	_aro_gafa(padre, Vector3(separacion, altura_ojos, z_der), radio_gafa, grosor_gafa, oscuro)
+
+	var z_puente := (
+		_frente_cabeza(0.0, altura_ojos, centro_y, radio_x, radio_y, radio_z) - hundido_gafas
+	)
+	_rasgo_esfera(
+		padre,
+		Vector3(0.0, altura_ojos, z_puente),
+		Vector3(separacion * 0.31, alto * 0.009, alto * 0.009),
+		oscuro
+	)
+
+	# Bigote ancho y algo más pesado que el de Pessoa, pero sin convertirse en
+	# barba: dos volúmenes que siguen la curva bajo la nariz.
+	var bigote_y := centro_y - alto * 0.13
+	var bigote_x := alto * 0.055
+	var z_bigote_izq := (
+		_frente_cabeza(-bigote_x, bigote_y, centro_y, radio_x, radio_y, radio_z) - alto * 0.008
+	)
+	var z_bigote_der := (
+		_frente_cabeza(bigote_x, bigote_y, centro_y, radio_x, radio_y, radio_z) - alto * 0.008
+	)
+	var escala_bigote := Vector3(alto * 0.102, alto * 0.027, alto * 0.030)
+	_rasgo_esfera(padre, Vector3(-bigote_x, bigote_y, z_bigote_izq), escala_bigote, oscuro)
+	_rasgo_esfera(padre, Vector3(bigote_x, bigote_y, z_bigote_der), escala_bigote, oscuro)
+
+	# La coronilla queda casi limpia; dos masas laterales reconstruyen el pelo
+	# retirado de los retratos sin volver a formar un casco sobre la frente.
+	var sien_cabello_y := centro_y + radio_y * 0.46
+	var sien_cabello_x := radio_x * 0.61
+	var z_sien_izq := (
+		_frente_cabeza(-sien_cabello_x, sien_cabello_y, centro_y, radio_x, radio_y, radio_z)
+		- alto * 0.028
+	)
+	var z_sien_der := (
+		_frente_cabeza(sien_cabello_x, sien_cabello_y, centro_y, radio_x, radio_y, radio_z)
+		- alto * 0.028
+	)
+	var escala_sien := Vector3(radio_x * 0.22, alto * 0.13, radio_z * 0.14)
+	_rasgo_esfera(
+		padre,
+		Vector3(-sien_cabello_x, sien_cabello_y, z_sien_izq),
+		escala_sien,
+		cabello
+	)
+	_rasgo_esfera(
+		padre,
+		Vector3(sien_cabello_x, sien_cabello_y, z_sien_der),
+		escala_sien,
+		cabello
+	)
 
 
 static func _aro_gafa(
