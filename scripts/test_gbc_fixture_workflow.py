@@ -25,12 +25,29 @@ class GbcFixtureWorkflowTest(unittest.TestCase):
         )
         self.assertIn("sha256sum --check --strict", self.texto)
 
-    def test_solo_compila_los_dos_fixtures_cc0_externos_iniciales(self):
+    def test_compila_los_fixtures_cc0_minimos(self):
         self.assertIn("for fixture in joypad vblank", self.texto)
         self.assertIn("joypad.gb", self.texto)
         self.assertIn("vblank.gb", self.texto)
         self.assertNotIn("ucity.gbc", self.texto)
         self.assertNotIn("BIOS", self.texto)
+
+    def test_cgb_acid2_esta_fijado_y_se_compila_desde_fuente(self):
+        self.assertIn(
+            "CGB_ACID2_COMMIT: fa5b7f86d6fb599f79e55169494d981a7af75a31",
+            self.texto,
+        )
+        self.assertIn(
+            "CGB_ACID2_MGBLIB_COMMIT: 5d829bf2ffa1447dcfd63c5dab2c44488632617e",
+            self.texto,
+        )
+        self.assertIn("git -C cgb-acid2-src submodule update --init --depth 1 mgblib", self.texto)
+        self.assertIn("make -C cgb-acid2-src all", self.texto)
+        self.assertIn("cgb-acid2.gbc", self.texto)
+        self.assertIn(
+            'test "$(od -An -tx1 -j 323 -N 1 gbc-fixtures/cgb-acid2.gbc | tr -d \' \\n\')" = "c0"',
+            self.texto,
+        )
 
     def test_fixture_cgb_only_es_propio_y_se_compila_desde_fuente(self):
         self.assertIn("gbc/fixtures/cgb_only_smoke/**", self.texto)
