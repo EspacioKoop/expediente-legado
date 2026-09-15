@@ -16,7 +16,9 @@ const SENAL_2: Texture2D = preload("res://arte/escaleras_135/senaletica/planta_2
 const SENAL_1: Texture2D = preload("res://arte/escaleras_135/senaletica/planta_1.svg")
 const SENAL_PB: Texture2D = preload("res://arte/escaleras_135/senaletica/planta_pb.svg")
 const SENAL_SALIDA: Texture2D = preload("res://arte/escaleras_135/senaletica/salida.svg")
-const SENAL_INCENDIO: Texture2D = preload("res://arte/escaleras_135/senaletica/no_ascensor_incendio.svg")
+const SENAL_INCENDIO: Texture2D = preload(
+	"res://arte/escaleras_135/senaletica/no_ascensor_incendio.svg"
+)
 
 const ANCHO_TRAMO := 2.15
 const PUNTOS := [
@@ -90,16 +92,34 @@ func _montar_barandillas() -> void:
 			var lado := lateral * signo
 			var inicio := desde + lado + Vector3.UP * 0.52
 			var fin := hasta + lado + Vector3.UP * 0.52
-			_barra_entre("Pasamanos_%d_%s" % [i, "A" if signo < 0.0 else "B"], inicio, fin, 0.055, MAT_METAL)
+			_barra_entre(
+				"Pasamanos_%d_%s" % [i, "A" if signo < 0.0 else "B"], inicio, fin, 0.055, MAT_METAL
+			)
 			for poste in 4:
 				var t := float(poste) / 3.0
 				var base := desde.lerp(hasta, t) + lado
-				_caja("Poste_%d_%d_%s" % [i, poste, "A" if signo < 0.0 else "B"], base + Vector3.UP * 0.27, Vector3(0.045, 0.54, 0.045), MAT_METAL)
+				_caja(
+					"Poste_%d_%d_%s" % [i, poste, "A" if signo < 0.0 else "B"],
+					base + Vector3.UP * 0.27,
+					Vector3(0.045, 0.54, 0.045),
+					MAT_METAL
+				)
 				if poste < 3:
 					var t2 := (float(poste) + 0.5) / 3.0
 					var centro := desde.lerp(hasta, t2) + lado + Vector3.UP * 0.28
-					_caja("Barrote_%d_%d_%s" % [i, poste, "A" if signo < 0.0 else "B"], centro, Vector3(0.035, 0.50, 0.035), MAT_METAL)
-			_barra_entre("Grip_%d_%s" % [i, "A" if signo < 0.0 else "B"], inicio + Vector3.UP * 0.035, fin + Vector3.UP * 0.035, 0.028, MAT_GOMA)
+					_caja(
+						"Barrote_%d_%d_%s" % [i, poste, "A" if signo < 0.0 else "B"],
+						centro,
+						Vector3(0.035, 0.50, 0.035),
+						MAT_METAL
+					)
+			_barra_entre(
+				"Grip_%d_%s" % [i, "A" if signo < 0.0 else "B"],
+				inicio + Vector3.UP * 0.035,
+				fin + Vector3.UP * 0.035,
+				0.028,
+				MAT_GOMA
+			)
 
 
 func _montar_narices_peldanos() -> void:
@@ -113,8 +133,17 @@ func _montar_narices_peldanos() -> void:
 		for escalon in 12:
 			var t := (float(escalon) + 0.5) / 12.0
 			var posicion := desde.lerp(hasta, t)
-			var tamano := Vector3(0.065, 0.018, ANCHO_TRAMO * 0.96) if por_x else Vector3(ANCHO_TRAMO * 0.96, 0.018, 0.065)
-			_caja("Nosing_%d_%02d" % [i, escalon], posicion - Vector3(0.0, 0.012, 0.0), tamano, MAT_GOMA)
+			var tamano := (
+				Vector3(0.065, 0.018, ANCHO_TRAMO * 0.96)
+				if por_x
+				else Vector3(ANCHO_TRAMO * 0.96, 0.018, 0.065)
+			)
+			_caja(
+				"Nosing_%d_%02d" % [i, escalon],
+				posicion - Vector3(0.0, 0.012, 0.0),
+				tamano,
+				MAT_GOMA
+			)
 
 
 func _montar_rellanos() -> void:
@@ -144,10 +173,18 @@ func _montar_senaletica() -> void:
 	_senal_pared("Planta4", SENAL_4, Vector3(-1.205, 3.03, 2.60), Vector3(0.0, 90.0, 0.0), 0.00082)
 	_senal_pared("Planta3", SENAL_3, Vector3(-1.205, 1.83, -2.55), Vector3(0.0, 90.0, 0.0), 0.00082)
 	_senal_pared("Planta2", SENAL_2, Vector3(-1.205, 0.63, 2.55), Vector3(0.0, 90.0, 0.0), 0.00082)
-	_senal_pared("Planta1", SENAL_1, Vector3(-1.205, -0.57, -2.55), Vector3(0.0, 90.0, 0.0), 0.00082)
-	_senal_pared("PlantaPB", SENAL_PB, Vector3(4.205, -1.77, 3.65), Vector3(0.0, -90.0, 0.0), 0.00082)
-	_senal_pared("Salida", SENAL_SALIDA, Vector3(3.0, -1.22, 5.18), Vector3(0.0, 180.0, 0.0), 0.00105)
-	_senal_pared("Incendio", SENAL_INCENDIO, Vector3(4.205, 2.83, 1.52), Vector3(0.0, -90.0, 0.0), 0.00062)
+	_senal_pared(
+		"Planta1", SENAL_1, Vector3(-1.205, -0.57, -2.55), Vector3(0.0, 90.0, 0.0), 0.00082
+	)
+	_senal_pared(
+		"PlantaPB", SENAL_PB, Vector3(4.205, -1.77, 3.65), Vector3(0.0, -90.0, 0.0), 0.00082
+	)
+	_senal_pared(
+		"Salida", SENAL_SALIDA, Vector3(3.0, -1.22, 5.18), Vector3(0.0, 180.0, 0.0), 0.00105
+	)
+	_senal_pared(
+		"Incendio", SENAL_INCENDIO, Vector3(4.205, 2.83, 1.52), Vector3(0.0, -90.0, 0.0), 0.00062
+	)
 
 
 func _montar_luces_ambiente() -> void:
@@ -171,19 +208,54 @@ func _montar_luces_ambiente() -> void:
 
 func _puerta_cortafuegos(nombre: String, posicion: Vector3) -> void:
 	_caja(nombre, posicion, Vector3(0.085, 0.82, 0.82), MAT_METAL)
-	_caja(nombre + "_MarcoA", posicion + Vector3(-0.025, 0.0, -0.45), Vector3(0.13, 0.90, 0.065), MAT_METAL)
-	_caja(nombre + "_MarcoB", posicion + Vector3(-0.025, 0.0, 0.45), Vector3(0.13, 0.90, 0.065), MAT_METAL)
-	_caja(nombre + "_Dintel", posicion + Vector3(-0.025, 0.45, 0.0), Vector3(0.13, 0.065, 0.96), MAT_METAL)
+	_caja(
+		nombre + "_MarcoA",
+		posicion + Vector3(-0.025, 0.0, -0.45),
+		Vector3(0.13, 0.90, 0.065),
+		MAT_METAL
+	)
+	_caja(
+		nombre + "_MarcoB",
+		posicion + Vector3(-0.025, 0.0, 0.45),
+		Vector3(0.13, 0.90, 0.065),
+		MAT_METAL
+	)
+	_caja(
+		nombre + "_Dintel",
+		posicion + Vector3(-0.025, 0.45, 0.0),
+		Vector3(0.13, 0.065, 0.96),
+		MAT_METAL
+	)
 	var rojo := _material_color(Color("8f1e18"), 0.58, 0.1)
-	_caja(nombre + "_Antipanico", posicion + Vector3(-0.070, -0.02, 0.0), Vector3(0.055, 0.055, 0.58), rojo)
+	_caja(
+		nombre + "_Antipanico",
+		posicion + Vector3(-0.070, -0.02, 0.0),
+		Vector3(0.055, 0.055, 0.58),
+		rojo
+	)
 
 
 func _radiador(nombre: String, posicion: Vector3) -> void:
 	var metal_claro := _material_color(Color("b7b0a0"), 0.72, 0.18)
 	for i in 7:
-		_caja("%s_Aleta%d" % [nombre, i], posicion + Vector3(0.0, 0.0, (i - 3) * 0.075), Vector3(0.07, 0.47, 0.048), metal_claro)
-	_caja(nombre + "_ColectorSup", posicion + Vector3(0.0, 0.235, 0.0), Vector3(0.075, 0.05, 0.53), metal_claro)
-	_caja(nombre + "_ColectorInf", posicion - Vector3(0.0, 0.235, 0.0), Vector3(0.075, 0.05, 0.53), metal_claro)
+		_caja(
+			"%s_Aleta%d" % [nombre, i],
+			posicion + Vector3(0.0, 0.0, (i - 3) * 0.075),
+			Vector3(0.07, 0.47, 0.048),
+			metal_claro
+		)
+	_caja(
+		nombre + "_ColectorSup",
+		posicion + Vector3(0.0, 0.235, 0.0),
+		Vector3(0.075, 0.05, 0.53),
+		metal_claro
+	)
+	_caja(
+		nombre + "_ColectorInf",
+		posicion - Vector3(0.0, 0.235, 0.0),
+		Vector3(0.075, 0.05, 0.53),
+		metal_claro
+	)
 
 
 func _cuadro_electrico(nombre: String, posicion: Vector3) -> void:
@@ -191,7 +263,12 @@ func _cuadro_electrico(nombre: String, posicion: Vector3) -> void:
 	_caja(nombre, posicion, Vector3(0.08, 0.48, 0.36), gris)
 	_caja(nombre + "_Tapa", posicion + Vector3(0.045, 0.0, 0.0), Vector3(0.02, 0.42, 0.31), gris)
 	var amarillo := _material_color(Color("d3ad2e"), 0.72, 0.0)
-	_caja(nombre + "_Aviso", posicion + Vector3(0.058, 0.02, 0.0), Vector3(0.012, 0.13, 0.13), amarillo)
+	_caja(
+		nombre + "_Aviso",
+		posicion + Vector3(0.058, 0.02, 0.0),
+		Vector3(0.012, 0.13, 0.13),
+		amarillo
+	)
 
 
 func _extintor(nombre: String, posicion: Vector3) -> void:
@@ -207,18 +284,36 @@ func _extintor(nombre: String, posicion: Vector3) -> void:
 	cilindro.position = posicion
 	cilindro.material_override = rojo
 	add_child(cilindro)
-	_caja(nombre + "_Soporte", posicion + Vector3(-0.055, 0.0, 0.0), Vector3(0.035, 0.42, 0.22), MAT_METAL)
-	_barra_entre(nombre + "_Manguera", posicion + Vector3(0.0, 0.21, 0.0), posicion + Vector3(0.0, 0.28, 0.15), 0.018, MAT_GOMA)
+	_caja(
+		nombre + "_Soporte",
+		posicion + Vector3(-0.055, 0.0, 0.0),
+		Vector3(0.035, 0.42, 0.22),
+		MAT_METAL
+	)
+	_barra_entre(
+		nombre + "_Manguera",
+		posicion + Vector3(0.0, 0.21, 0.0),
+		posicion + Vector3(0.0, 0.28, 0.15),
+		0.018,
+		MAT_GOMA
+	)
 
 
 func _luz_emergencia(nombre: String, posicion: Vector3) -> void:
 	var carcasa := _material_color(Color("8b887d"), 0.82, 0.0)
 	var emisor := _material_emisivo(Color("efe3b7"), 2.2)
 	_caja(nombre + "_Carcasa", posicion, Vector3(0.10, 0.18, 0.54), carcasa)
-	_caja(nombre + "_Difusor", posicion + Vector3(-0.058, 0.0, 0.0), Vector3(0.018, 0.13, 0.45), emisor)
+	_caja(
+		nombre + "_Difusor",
+		posicion + Vector3(-0.058, 0.0, 0.0),
+		Vector3(0.018, 0.13, 0.45),
+		emisor
+	)
 
 
-func _senal_pared(nombre: String, textura: Texture2D, posicion: Vector3, rotacion: Vector3, pixel: float) -> void:
+func _senal_pared(
+	nombre: String, textura: Texture2D, posicion: Vector3, rotacion: Vector3, pixel: float
+) -> void:
 	var sprite := Sprite3D.new()
 	sprite.name = nombre
 	sprite.texture = textura
@@ -229,7 +324,9 @@ func _senal_pared(nombre: String, textura: Texture2D, posicion: Vector3, rotacio
 	add_child(sprite)
 
 
-func _barra_entre(nombre: String, desde: Vector3, hasta: Vector3, grosor: float, material: Material) -> void:
+func _barra_entre(
+	nombre: String, desde: Vector3, hasta: Vector3, grosor: float, material: Material
+) -> void:
 	var nodo := MeshInstance3D.new()
 	nodo.name = nombre
 	var malla := BoxMesh.new()
@@ -241,7 +338,9 @@ func _barra_entre(nombre: String, desde: Vector3, hasta: Vector3, grosor: float,
 	nodo.look_at(to_global(hasta), Vector3.UP)
 
 
-func _caja(nombre: String, posicion: Vector3, tamano: Vector3, material: Material) -> MeshInstance3D:
+func _caja(
+	nombre: String, posicion: Vector3, tamano: Vector3, material: Material
+) -> MeshInstance3D:
 	var nodo := MeshInstance3D.new()
 	nodo.name = nombre
 	var malla := BoxMesh.new()
