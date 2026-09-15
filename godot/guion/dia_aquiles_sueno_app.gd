@@ -35,10 +35,13 @@ func _process(_delta: float) -> void:
 
 	if _aquiles_montado_esta_noche or not _es_primera_escena(dia):
 		return
-	var seleccion := SemillasOniricas.seleccionar_para_noche(
-		dia.jornada,
-		dia._raiz(),
-		MAX_FAMILIAS_NOCHE,
+	var seleccion := (
+		SemillasOniricas
+		. seleccionar_para_noche(
+			dia.jornada,
+			dia._raiz(),
+			MAX_FAMILIAS_NOCHE,
+		)
 	)
 	var familias: Array = seleccion.get("familias", [])
 	if not familias.has(SuenoAquiles.ID_MITO):
