@@ -36,6 +36,7 @@ public:
     int audio_sample_rate() const;
     PackedByteArray save_ram() const;
     bool load_save_ram(const PackedByteArray &p_save);
+    int read_memory_u8(int64_t p_address) const;
     String rom_title() const;
     String last_error() const;
     String core_name() const;
