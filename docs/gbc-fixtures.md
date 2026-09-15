@@ -35,9 +35,10 @@ El workflow `.github/workflows/gbc-fixtures.yml` fija las fuentes externas que r
 - `mattcurrie/cgb-acid2` → tag `v1.1`, commit `fa5b7f86d6fb599f79e55169494d981a7af75a31`;
 - submódulo `mattcurrie/mgblib` usado por esa revisión → commit `5d829bf2ffa1447dcfd63c5dab2c44488632617e`;
 - RGBDS actual para fixtures propios y `simple-gb-asm-examples` → `v1.0.3`, cuyo paquete Linux se verifica por SHA-256 antes de instalar;
-- RGBDS histórico para `cgb-acid2 v1.1` → `v0.3.10`, commit `0759c98d913e3d4d21207a8886a319c85add2041`, compilado desde fuente y usado únicamente mediante un `PATH` local durante ese build.
+- RGBDS histórico para `cgb-acid2 v1.1` → `v0.3.10`, commit `0759c98d913e3d4d21207a8886a319c85add2041`, compilado desde fuente con `-fcommon` para compatibilidad con GCC moderno y usado únicamente mediante un `PATH` local durante ese build;
+- ROM resultante `cgb-acid2.gbc` → SHA-256 esperado `197fb0bcec544f0400527fc707e0a94f55435974986e6986b424ace5de81720e`.
 
-`cgb-acid2 v1.1` usa sintaxis de RGBDS anterior a la aceptada por `v1.0.3`; por eso CI conserva un toolchain histórico aislado en lugar de modificar la fuente de upstream. El workflow comprueba los commits de ambos repositorios y del toolchain, compila `joypad`, `vblank` y `cgb-acid2`, valida que `cgb-acid2.gbc` sea CGB-only (`0xC0`), calcula `SHA256SUMS` junto al resto de ROMs generadas y conserva los binarios únicamente como artefactos efímeros durante 7 días.
+`cgb-acid2 v1.1` usa sintaxis de RGBDS anterior a la aceptada por `v1.0.3`; por eso CI conserva un toolchain histórico aislado en lugar de modificar la fuente de upstream. El workflow comprueba los commits de ambos repositorios y del toolchain, compila `joypad`, `vblank` y `cgb-acid2`, verifica el SHA-256 determinista de Acid2, valida que `cgb-acid2.gbc` sea CGB-only (`0xC0`), calcula `SHA256SUMS` junto al resto de ROMs generadas y conserva los binarios únicamente como artefactos efímeros durante 7 días.
 
 ## Política de fijado y hashes
 
