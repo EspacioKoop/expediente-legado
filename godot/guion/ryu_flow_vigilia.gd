@@ -37,11 +37,14 @@ func _process(_delta: float) -> void:
 	var fuente := RomsPropias.fuente_semilla(ID_ROM)
 	if fuente.is_empty():
 		return
-	_registrada = SemillasOniricas.activar_semilla_onirica(
-		_jornada,
-		ID_MITO,
-		fuente,
-		INTENSIDAD_SEMILLA,
+	_registrada = (
+		SemillasOniricas
+		. activar_semilla_onirica(
+			_jornada,
+			ID_MITO,
+			fuente,
+			INTENSIDAD_SEMILLA,
+		)
 	)
 	if _registrada:
 		set_process(false)
