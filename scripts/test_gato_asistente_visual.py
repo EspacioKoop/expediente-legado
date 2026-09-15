@@ -41,6 +41,7 @@ class GatoAsistenteVisualTest(unittest.TestCase):
         self.assertIn("set_process(not reduccion_movimiento)", self.avatar)
         self.assertIn("if _reduccion_movimiento:", self.avatar)
         self.assertIn("return FRAME_IDLE", self.avatar)
+        self.assertIn("return 0.0", self.avatar)
 
     def test_el_avatar_usa_atlas_gba_original(self):
         self.assertIn("gato_asistente_gba.svg", self.avatar)
@@ -51,6 +52,17 @@ class GatoAsistenteVisualTest(unittest.TestCase):
         self.assertIn("ALTO_FRAME := 64.0", self.avatar)
         self.assertIn("Asset original", self.atlas)
         self.assertNotIn("draw_colored_polygon", self.avatar)
+
+    def test_las_poses_respiran_sin_redisenar_el_atlas(self):
+        self.assertIn("func _respiracion() -> float:", self.avatar)
+        self.assertIn("func _amplitud_respiracion(frame: int) -> Vector2:", self.avatar)
+        self.assertIn("sin((_tiempo / 4.0) * TAU)", self.avatar)
+        self.assertIn("TAMANO_DIBUJO.y * escala_y", self.avatar)
+        self.assertIn("ALTO - tamano.y", self.avatar)
+        self.assertIn("frame == FRAME_HAMBRIENTO", self.avatar)
+        self.assertIn("frame == FRAME_ALERTA or frame == FRAME_MIRANDO", self.avatar)
+        # La profundidad nueva sale del render; no se rediseña ni amplía el atlas.
+        self.assertEqual(self.atlas.count('id="frame-'), 8)
 
     def test_no_invade_la_barra_de_botones_del_visor(self):
         # #285 (segunda vuelta): el offset fijo original tapaba Relacionar/Marcar
