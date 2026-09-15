@@ -1,1 +1,49 @@
-__PLACEHOLDER__
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="32" viewBox="0 0 192 32" shape-rendering="crispEdges">
+  <!-- Atlas pixel-art 6x32 derivado del asset sheet aprobado: siga, equipo, documentos, red, papelera, ayuda. -->
+  <g id="icon-siga" transform="translate(0 0)">
+    <rect x="5" y="3" width="20" height="24" fill="#1c2b38"/>
+    <rect x="7" y="5" width="16" height="20" fill="#d9d8d1"/>
+    <rect x="9" y="7" width="14" height="4" fill="#174c98"/>
+    <rect x="11" y="13" width="10" height="8" fill="#f6f4df"/>
+    <path d="M12 19h2v-2h2v-3h2v4h2v2h-8z" fill="#173e7a"/>
+    <rect x="4" y="6" width="3" height="17" fill="#2f66bd"/>
+  </g>
+  <g id="icon-equipo" transform="translate(32 0)">
+    <rect x="4" y="4" width="20" height="15" fill="#c9c8c0" stroke="#242424"/>
+    <rect x="7" y="6" width="14" height="10" fill="#0c4fa9"/>
+    <rect x="9" y="8" width="10" height="6" fill="#2b7ce0"/>
+    <rect x="11" y="20" width="7" height="3" fill="#77766e"/>
+    <rect x="8" y="23" width="13" height="2" fill="#2d2d2d"/>
+    <rect x="24" y="8" width="5" height="16" fill="#aaa99f" stroke="#252525"/>
+    <rect x="25" y="19" width="3" height="2" fill="#39b54a"/>
+  </g>
+  <g id="icon-documentos" transform="translate(64 0)">
+    <rect x="4" y="9" width="24" height="17" fill="#e7cd4a" stroke="#3d3520"/>
+    <rect x="6" y="6" width="10" height="5" fill="#f7e77a" stroke="#3d3520"/>
+    <rect x="6" y="11" width="20" height="13" fill="#f5de61"/>
+    <rect x="8" y="13" width="16" height="2" fill="#fff1a1"/>
+  </g>
+  <g id="icon-red" transform="translate(96 0)">
+    <circle cx="16" cy="10" r="7" fill="#1f6fd0" stroke="#21324b"/>
+    <path d="M10 8h4V5h5v3h3v4h-4v3h-5v-3h-3z" fill="#43a83b"/>
+    <rect x="5" y="20" width="8" height="6" fill="#d6d4cb" stroke="#2a2a2a"/>
+    <rect x="19" y="20" width="8" height="6" fill="#d6d4cb" stroke="#2a2a2a"/>
+    <rect x="7" y="22" width="4" height="2" fill="#225aa7"/>
+    <rect x="21" y="22" width="4" height="2" fill="#225aa7"/>
+    <rect x="15" y="16" width="2" height="7" fill="#303030"/>
+    <rect x="11" y="18" width="10" height="2" fill="#303030"/>
+  </g>
+  <g id="icon-papelera" transform="translate(128 0)">
+    <path d="M8 7h17l-2 20H10z" fill="#d4d4d0" stroke="#333"/>
+    <rect x="7" y="5" width="19" height="3" fill="#a8a8a4" stroke="#333"/>
+    <rect x="12" y="11" width="2" height="12" fill="#8f8f8c"/>
+    <rect x="18" y="11" width="2" height="12" fill="#8f8f8c"/>
+    <path d="M14 14h5v2h2v4h-2v2h-5v-2h-2v-4h2z" fill="#42a447"/>
+  </g>
+  <g id="icon-ayuda" transform="translate(160 0)">
+    <path d="M5 8l16-5 7 6-5 18-16 2-3-5z" fill="#5c1a98" stroke="#26113a"/>
+    <path d="M8 9l14-4 4 4-4 14-13 2z" fill="#7d28c8"/>
+    <path d="M14 9h5l3 3v4l-3 3h-3v3h-4v-5h4l2-2v-2l-2-1h-2z" fill="#f1d72f"/>
+    <rect x="12" y="24" width="4" height="3" fill="#f1d72f"/>
+  </g>
+</svg>
