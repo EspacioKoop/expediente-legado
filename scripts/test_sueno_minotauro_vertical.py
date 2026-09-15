@@ -19,7 +19,10 @@ class MinotauroVerticalTest(unittest.TestCase):
         self.assertIn('const FUENTE := "rom:ariadna_labertinto_98"', self.vigilia)
         self.assertIn("const INTERACCIONES_REQUERIDAS := 2", self.vigilia)
         self.assertIn("_interacciones < INTERACCIONES_REQUERIDAS", self.vigilia)
-        self.assertIn("SemillasOniricas.activar_semilla_onirica", self.vigilia)
+        self.assertRegex(
+            self.vigilia,
+            r"SemillasOniricas\s*\.\s*activar_semilla_onirica",
+        )
 
     def test_fuente_es_estable_y_semilla_canonica(self):
         self.assertIn('const ID_MITO := "minotauro"', self.vigilia)
