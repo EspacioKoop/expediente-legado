@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="468" height="240" viewBox="0 0 468 240" shape-rendering="crispEdges">
+  <!-- Cuatro cabeceras ficticias. Cada franja ocupa 468x60 y evita etiquetas ideológicas explícitas. -->
+  <g id="prensa-la-plaza" transform="translate(0 0)">
+    <rect width="468" height="60" fill="#f5edda"/><rect y="0" width="468" height="6" fill="#7b2733"/><rect y="54" width="468" height="2" fill="#7b2733"/>
+    <rect x="18" y="15" width="30" height="30" fill="#7b2733"/><path d="M24 38h18V22h-4v12H28V26h-4z" fill="#f5edda"/>
+    <text x="62" y="37" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700" fill="#2e2420">LA PLAZA</text>
+    <text x="64" y="51" font-family="Arial, sans-serif" font-size="9" letter-spacing="2" fill="#6c6258">DIARIO DE INFORMACIÓN GENERAL · EDICIÓN DE TARDE</text>
+  </g>
+  <g id="prensa-diario-central" transform="translate(0 60)">
+    <rect width="468" height="60" fill="#f3f3ef"/><rect x="0" y="0" width="468" height="3" fill="#233f68"/><rect x="0" y="56" width="468" height="1" fill="#8c8c86"/>
+    <circle cx="32" cy="30" r="17" fill="#233f68"/><rect x="25" y="21" width="14" height="18" fill="#f3f3ef"/><rect x="28" y="24" width="8" height="2" fill="#233f68"/><rect x="28" y="29" width="8" height="2" fill="#233f68"/>
+    <text x="62" y="36" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#233f68">DIARIO CENTRAL</text>
+    <text x="64" y="50" font-family="Arial, sans-serif" font-size="9" fill="#5d6570">Noticias · Economía · Sociedad · Cultura · Deportes</text>
+  </g>
+  <g id="prensa-el-horizonte" transform="translate(0 120)">
+    <rect width="468" height="60" fill="#eef4f1"/><rect y="52" width="468" height="8" fill="#2d756d"/>
+    <path d="M14 38c9-18 23-22 40-15-10 0-18 5-24 15z" fill="#2d756d"/><circle cx="47" cy="21" r="5" fill="#e0b646"/>
+    <text x="67" y="36" font-family="Trebuchet MS, Arial, sans-serif" font-size="29" font-weight="700" fill="#24544f">EL HORIZONTE</text>
+    <text x="68" y="49" font-family="Arial, sans-serif" font-size="9" letter-spacing="1.2" fill="#4f6c68">ACTUALIDAD · TRABAJO · CIUDAD · CIENCIA · CULTURA</text>
+  </g>
+  <g id="prensa-gaceta-mercantil" transform="translate(0 180)">
+    <rect width="468" height="60" fill="#f8f5eb"/><rect y="0" width="468" height="2" fill="#233029"/><rect y="55" width="468" height="3" fill="#233029"/>
+    <rect x="18" y="13" width="30" height="30" fill="#233029"/><path d="M23 35l6-8 5 4 8-10v14z" fill="#c6a24a"/><rect x="22" y="39" width="22" height="2" fill="#c6a24a"/>
+    <text x="61" y="34" font-family="Georgia, 'Times New Roman', serif" font-size="26" font-weight="700" fill="#233029">GACETA MERCANTIL</text>
+    <text x="63" y="49" font-family="Arial, sans-serif" font-size="9" letter-spacing="1.5" fill="#5b5a52">ECONOMÍA · EMPRESAS · MERCADOS · POLÍTICA · MUNDO</text>
+  </g>
+</svg>
