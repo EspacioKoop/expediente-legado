@@ -60,6 +60,20 @@ class SuenoCinematica3DTest(unittest.TestCase):
         fin = self.controller.split("func _terminar_transicion_sueno() -> void:", 1)[1]
         self.assertEqual(fin.count("dia._al_pisar_salida(dia._caminante, salida)"), 1)
         self.assertIn("dia.set_process(true)", fin)
+        # Se restaura antes de reenviar: la entrada al sueño vuelve a bloquear.
+        reenvio = fin.index("dia._al_pisar_salida(dia._caminante, salida)")
+        self.assertLess(fin.index("dia._caminante.set_physics_process(true)"), reenvio)
+        self.assertLess(fin.index("dia._hud.visible = true"), reenvio)
+
+    def test_la_entrada_al_sueno_rueda_en_la_sala_real(self) -> None:
+        entrada = (ROOT / "godot" / "guion" / "entrada_sueno_cinematica.gd").read_text(encoding="utf-8")
+        sueno = (ROOT / "godot" / "guion" / "dia_sueno_app.gd").read_text(encoding="utf-8")
+        self.assertNotIn('"tipo": "2d"', entrada)
+        self.assertNotIn('"figura"', entrada)
+        self.assertEqual(entrada.count('"tipo": "3d"'), 3)
+        for dato in ('"entrada"', '"figuras"', '"carteles"', '"salidas"'):
+            self.assertIn(dato, entrada)
+        self.assertIn("_espacio_actual", sueno)
 
     def test_skip_y_fin_normal_comparten_el_mismo_callback(self) -> None:
         self.assertIn(

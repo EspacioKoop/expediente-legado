@@ -131,6 +131,8 @@ DIA_GATO_LLENO,"El cuenco está lleno. No le hace ni caso."
 DIA_GATO_SIN_DINERO,"Una lata cuesta %d, y no lo tiene."
 DIA_NOMINA,Nómina del día %d: %d (base %d + %d por %d expediente(s)).  Tiene %d.
 DIA_NUEVO,Día %d.
+INICIO_JORNADA_ESTADO,"%d en el bolsillo  ·  %d acciones por delante%s"
+INICIO_JORNADA_GATO,"  ·  el gato espera en casa"
 DIA_ROTULO,Día %d  ·  %s  ·  %d en el bolsillo%s
 DIA_SIN_GATO,  ·  sin gato
 DIA_SIN_GATO_AVISO,  El gato no está.

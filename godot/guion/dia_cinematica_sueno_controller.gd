@@ -97,10 +97,13 @@ func _terminar_transicion_sueno() -> void:
 
 	# Fin normal y skip convergen aquí. El controller solo reenvía el evento; el
 	# flujo principal sigue siendo dueño de sellos, política, montaje y guardado.
+	# Se restaura ANTES de reenviar: el flujo principal encadena la entrada al
+	# sueño (#395) y vuelve a bloquear cuerpo y HUD. Restaurar después devolvía
+	# el control al jugador con la segunda secuencia rodando.
 	dia.set_process(true)
-	dia._al_pisar_salida(dia._caminante, salida)
 	dia._caminante.set_physics_process(true)
 	dia._hud.visible = true
 	var prioridades := dia.get_node_or_null("HUDPrioridades")
 	if prioridades != null:
 		prioridades.set("visible", _hud_prioridades_previo)
+	dia._al_pisar_salida(dia._caminante, salida)

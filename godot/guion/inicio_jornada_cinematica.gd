@@ -1,21 +1,22 @@
-## Inicio de jornada: una ficha breve antes de devolver el control al archivo.
+## Inicio de jornada: dos miradas a la oficina antes de devolver el control.
 ##
 ## No avanza el día ni calcula economía: recibe una Jornada ya resuelta y solo
-## la representa. Es deliberadamente 2D y provisional, como el resto de v0.7;
-## migrarla a 3D no debe cambiar ni el marcador persistente ni el llamante.
+## la representa. Desde #395 rueda en 3D dentro del archivo real —el corcho de
+## conceptos y el terminal del puesto propio— en vez de una ficha de
+## rectángulos; el marcador persistente y el llamante no cambian.
 class_name InicioJornadaCinematica
 extends RefCounted
 
 const ID := "inicio-jornada"
 
-const PAPEL := Color("d8d5cc")
-const TINTA := Color("35363a")
-const SELLO := Color("8a4740")
-const ACTIVA := Color("c7c4b9")
-const VACIA := Color("58585c")
+## El corcho de conceptos (`Corcho3D.POSICION`) y el terminal SIGA del puesto
+## propio (`EspaciosCatalogo.OFICINA`). Se repiten aquí como datos del plano:
+## el reproductor no sabe qué es un corcho.
+const CORCHO := Vector3(0.0, 1.55, -3.42)
+const TERMINAL := Vector3(-4.3, 1.0, -2.1)
 
 
-## Los datos exactos que se presentan. Separarlos de la figura permite probar
+## Los datos exactos que se presentan. Separarlos de los planos permite probar
 ## que la cinemática mira el estado real y no mantiene otro contador paralelo.
 static func datos_de(jornada: Dictionary) -> Dictionary:
 	return {
@@ -32,91 +33,42 @@ static func marca_de(jornada: Dictionary) -> String:
 	return "%d:%d" % [int(jornada.get("vuelta", 1)), int(jornada.get("dia", 1))]
 
 
-## Dos planos y 2,2 s en la primera vista. Al repetirse, el reproductor común
-## los acorta; el segundo es el remate y conserva el suelo común de #67.
+## Dos planos y 3,4 s en la primera vista: lo justo para leer un rótulo sobre
+## un sitio que se reconoce. Al repetirse, el reproductor común los acorta; el
+## segundo es el remate y conserva el suelo común de #67.
 static func planos_de(jornada: Dictionary, vistas: int = 0) -> Array:
 	var datos := datos_de(jornada)
-	var rodaje := Cinematica.resolver(_planos(datos), {}, vistas)
+	var rodaje := Cinematica.resolver(planos(), {}, vistas)
 	# Reutiliza el texto ya traducido del día en vez de duplicarlo en el CSV.
 	rodaje[0]["rotulo"] = TranslationServer.translate("DIA_NUEVO") % datos["dia"]
+	rodaje[1]["voz"] = (
+		TranslationServer.translate("INICIO_JORNADA_ESTADO")
+		% [
+			datos["dinero"],
+			datos["acciones"],
+			TranslationServer.translate("INICIO_JORNADA_GATO") if datos["gato"] else "",
+		]
+	)
 	return rodaje
 
 
-static func _planos(datos: Dictionary) -> Array:
+static func planos() -> Array:
 	return [
 		{
-			"tipo": "2d",
-			"segundos": 1.2,
-			"figura": _calendario(datos["dia"]),
-			"desde": Vector2.ZERO,
-			"hasta": Vector2.ZERO,
+			# El día se lee delante del corcho: lo que se ha ido entendiendo
+			# del archivo sigue clavado donde se dejó ayer.
+			"tipo": "3d",
+			"nombre": "corcho",
+			"camara": Vector3(-0.2, 1.9, 3.3),
+			"mira": CORCHO,
+			"segundos": 1.6,
 		},
 		{
-			"tipo": "2d",
-			"segundos": 1.0,
-			"figura": _estado(datos["dinero"], datos["acciones"], datos["gato"]),
-			"desde": Vector2.ZERO,
-			"hasta": Vector2.ZERO,
+			# Y el trabajo espera en el puesto propio, con el terminal encendido.
+			"tipo": "3d",
+			"nombre": "puesto",
+			"camara": Vector3(-2.7, 1.5, 0.3),
+			"mira": TERMINAL,
+			"segundos": 1.8,
 		},
 	]
-
-
-## Una hoja arrancada. El número se expresa en el rótulo; las marcas rojas
-## cambian con el día para que la repetición no sea una diapositiva idéntica.
-static func _calendario(dia: int) -> Array:
-	var figura := [
-		{"rect": Rect2(-145, -135, 290, 230), "color": PAPEL},
-		{"rect": Rect2(-145, -135, 290, 38), "color": SELLO},
-		{"rect": Rect2(-112, -70, 224, 16), "color": TINTA},
-		{"rect": Rect2(-112, -34, 172, 12), "color": TINTA},
-	]
-	for i in mini(maxi(dia, 1), 12):
-		(
-			figura
-			. append(
-				{
-					"rect": Rect2(-112 + float(i % 6) * 38.0, 14 + float(i / 6) * 30.0, 24, 10),
-					"color": SELLO,
-				}
-			)
-		)
-	return figura
-
-
-## Estado sin duplicar el HUD en texto: dinero = grosor del bloque izquierdo,
-## acciones = casillas centrales y gato = silueta derecha. Todo procede de la
-## Jornada ya persistida; la animación no concede ni consume nada.
-static func _estado(dinero: int, acciones: int, gato: bool) -> Array:
-	var figura := [
-		{"rect": Rect2(-270, -120, 540, 210), "color": TINTA},
-		{"rect": Rect2(-245, -92, 150, 150), "color": PAPEL},
-	]
-
-	var bandas := clampi(int(maxi(dinero, 0) / 100), 0, 8)
-	for i in bandas:
-		figura.append({"rect": Rect2(-224, 36 - float(i) * 15.0, 108, 9), "color": SELLO})
-
-	for i in Jornada.ACCIONES_POR_DIA:
-		(
-			figura
-			. append(
-				{
-					"rect": Rect2(-60 + float(i % 3) * 42.0, -48 + float(i / 3) * 46.0, 28, 28),
-					"color": ACTIVA if i < acciones else VACIA,
-				}
-			)
-		)
-
-	var color_gato := ACTIVA if gato else VACIA
-	(
-		figura
-		. append_array(
-			[
-				{"rect": Rect2(120, -34, 92, 70), "color": color_gato},
-				{"rect": Rect2(134, -70, 62, 42), "color": color_gato},
-				{"rect": Rect2(134, -84, 16, 18), "color": color_gato},
-				{"rect": Rect2(180, -84, 16, 18), "color": color_gato},
-			]
-		)
-	)
-	return figura
