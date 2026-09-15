@@ -144,8 +144,7 @@ func _probar_tienda(dia, calle: Node3D) -> void:
 	if hay_stock:
 		_comprobar(compradas.size() == 1, "comprar añade el cartucho a la jornada")
 		_comprobar(
-			int(dia.jornada["dinero"]) == saldo_inicial - int(primera["precio"]),
-			"cobra el precio"
+			int(dia.jornada["dinero"]) == saldo_inicial - int(primera["precio"]), "cobra el precio"
 		)
 		# Cada uso compra el siguiente cartucho pendiente; cuando no queda nada,
 		# se avisa y ya no se cobra.
