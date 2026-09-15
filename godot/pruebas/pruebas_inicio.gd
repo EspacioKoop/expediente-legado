@@ -46,6 +46,22 @@ func _probar() -> void:
 	var inicio := InicioPrueba.new()
 	inicio.ruta = _ruta
 	root.add_child(inicio)
+	var fondo := inicio.get_node_or_null("FondoInicio")
+	_comprobar(fondo is TextureRect and fondo.texture != null, "inicio usa wallpaper 2D propio")
+	var marca := inicio.find_child("MarcaInicio", true, false)
+	_comprobar(marca is TextureRect and marca.texture != null, "cabecera usa marca visual propia")
+	var marco := inicio.find_child("MarcoInicio", true, false)
+	_comprobar(
+		marco != null and marco.get("saliente") == true, "marco principal conserva relieve saliente"
+	)
+	var estado := inicio.find_child("EstadoInicio", true, false)
+	_comprobar(
+		estado != null and estado.get("saliente") == false, "estado queda hundido respecto al marco"
+	)
+	_comprobar(
+		inicio._continuar.custom_minimum_size.y >= 36.0,
+		"acciones tienen presencia visual suficiente"
+	)
 	_comprobar(inicio._continuar.disabled, "sin guardado no permite continuar")
 	_comprobar(inicio._cargar.disabled, "sin guardado no permite cargar")
 	_comprobar(not FileAccess.file_exists(_ruta), "abrir menú no crea partida")
