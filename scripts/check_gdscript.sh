@@ -2,9 +2,14 @@
 set -euo pipefail
 
 GDTOOLKIT_VERSION="${GDTOOLKIT_VERSION:-4.3.4}"
+PYTHON_BIN="${PYTHON_BIN:-python3}"
+
+if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
+  PYTHON_BIN=python
+fi
 
 if ! command -v gdformat >/dev/null 2>&1 || ! command -v gdlint >/dev/null 2>&1; then
-  python -m pip install "gdtoolkit==${GDTOOLKIT_VERSION}"
+  "$PYTHON_BIN" -m pip install "gdtoolkit==${GDTOOLKIT_VERSION}"
 fi
 
 find_gd() {
@@ -23,7 +28,7 @@ fi
 
 find_gd | xargs -0 --no-run-if-empty gdlint
 
-python -m unittest discover -s scripts -p 'test_*.py'
+"$PYTHON_BIN" -m unittest discover -s scripts -p 'test_*.py'
 
 # El cierre siempre vuelve a comprobar formato para detectar cambios posteriores
 # y mantener una única condición de salida tanto para agentes como para Actions.
