@@ -256,7 +256,6 @@ VISOR_DOCUMENTOS,Documentos del expediente:
 VISOR_ELIJA,Elija un documento del expediente.
 VISOR_ESTADO,"%s   ·   Pistas: %d de %d   ·   Día %d   ·   Presupuesto: %d/%d acciones%s"
 VISOR_IMPUTAR,Imputar responsabilidad…
-VISOR_ITEM,%s  %s
 VISOR_ITEM_COSTE,"%s  %s   ·   %s"
 VISOR_MARCAR_FOLIO,☆ Marcar folio
 VISOR_MARCADOR_GUARDADO,Folio marcado para recordarlo.
