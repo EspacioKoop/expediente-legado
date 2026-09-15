@@ -37,7 +37,9 @@ godot/assets/texturas/pbr/<nombre>/
 
 `TexturasPBR` detecta esa carpeta y crea un material con `psx_pbr.gdshader` cuando existe al menos el albedo. La variante PBR conserva temblor de vértices, cuantización de color y dithering Bayer, pero usa iluminación por píxel para que normal/roughness/AO puedan aportar volumen. El shader PSX canónico no se modifica: cualquier superficie sin set PBR conserva el camino anterior.
 
-La primera integración real está en `CalleMateriales`: las tres masas de fachada intentan cargar `fachada_edificio`. Si el set no está disponible —por ejemplo, en un checkout sin objetos Git LFS— vuelven automáticamente al `revoco_urbano` procedural ya integrado.
+La primera integración real está en `CalleMateriales`. Las tres masas de fachada intentan cargar `fachada_edificio`; además, el suelo 9×34 del trayecto se puede vestir con una calzada central de `asfalto_urbano` y dos aceras de `acera_barcelona`. Estas tres pieles de suelo son `MeshInstance3D` sin colisión, colocadas unos milímetros por encima de la geometría jugable existente: no cambian navegación, triggers ni medidas del catálogo.
+
+Las pieles de calzada/acera **solo se crean si existe el set PBR correspondiente**. En un checkout sin objetos Git LFS no aparece geometría adicional y sigue viéndose el asfalto procedural actual. Las fachadas, por su parte, vuelven automáticamente a `revoco_urbano`. Los albedos PBR se aplican con `Color.WHITE` para no destruir el color fotográfico multiplicándolo por el tinte oscuro del fallback procedural.
 
 El mapa normal se aplica únicamente cuando el material usa UV de malla; roughness y AO funcionan tanto en UV como en el muestreo triplanar de la variante PBR. Este primer corte evita fingir un normal triplanar correcto sin transformar el espacio tangente de cada proyección.
 
@@ -61,6 +63,6 @@ El fragmento se genera aparte a propósito: `procedencia.json` es la fuente de v
 
 ## QA visual antes de dar por bueno un material
 
-El validador comprueba estructura, tamaño y hashes, no calidad artística. Antes de integrar un set hay que revisar manualmente: costuras en mosaico 2x2, escala física coherente, normal sin inversión de canal Y, roughness sin clipping, ausencia de texto/logos accidentales y legibilidad real con el tratamiento PSX activo.
+El validador comprueba estructura, tamaño y hashes, no calidad artística. Antes de integrar un set hay que revisar manualmente: costuras en mosaico 2×2, escala física coherente, normal sin inversión de canal Y, roughness sin clipping, ausencia de texto/logos accidentales y legibilidad real con el tratamiento PSX activo.
 
-Para sueño, la deformación debe seguir partiendo de un material reconocible: `asfalto_sueno`, `fachada_sueno` y `suelo_onirico` no deben convertirse en ruido oscuro genérico.
+Para sueño, la deformación debe seguir partiendo de un material reconocible: `asfalto_sueno`, `fachada_sueno` y `suelo_onirico` no deben convertirse en ruido oscuro genérico. El runtime onírico está fuera de este corte mientras sus archivos están reservados por otro vertical activo.
