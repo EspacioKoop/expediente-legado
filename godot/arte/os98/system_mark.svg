@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
+  <!-- Marca geométrica original; funciona a 18 px sin depender de tipografía. -->
+  <path d="M9 1.5L16.5 9 9 16.5 1.5 9z" fill="#1f4d55" stroke="#203235" stroke-width="1"/>
+  <path d="M9 4.2L13.8 9 9 13.8 4.2 9z" fill="none" stroke="#eee7d0" stroke-width="1.6"/>
+  <path d="M9 6.5L11.5 9 9 11.5 6.5 9z" fill="#eee7d0"/>
+</svg>
