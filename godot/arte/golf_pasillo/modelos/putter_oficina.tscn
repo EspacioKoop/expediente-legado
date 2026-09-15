@@ -1,0 +1,66 @@
+[gd_scene load_steps=9 format=3]
+
+[sub_resource type="StandardMaterial3D" id="Metal"]
+albedo_color = Color(0.56, 0.58, 0.57, 1)
+metallic = 0.82
+roughness = 0.22
+
+[sub_resource type="StandardMaterial3D" id="Rubber"]
+albedo_color = Color(0.055, 0.06, 0.058, 1)
+metallic = 0.0
+roughness = 0.84
+
+[sub_resource type="BoxMesh" id="HeadMesh"]
+material = SubResource("Metal")
+size = Vector3(0.12, 0.03, 0.034)
+
+[sub_resource type="BoxMesh" id="InsertMesh"]
+material = SubResource("Rubber")
+size = Vector3(0.09, 0.019, 0.004)
+
+[sub_resource type="CylinderMesh" id="ShaftMesh"]
+material = SubResource("Metal")
+top_radius = 0.006
+bottom_radius = 0.006
+height = 0.70
+radial_segments = 20
+
+[sub_resource type="CylinderMesh" id="GripMesh"]
+material = SubResource("Rubber")
+top_radius = 0.011
+bottom_radius = 0.0125
+height = 0.155
+radial_segments = 20
+
+[sub_resource type="BoxShape3D" id="HeadShape"]
+size = Vector3(0.12, 0.03, 0.034)
+
+[sub_resource type="CylinderShape3D" id="ShaftShape"]
+radius = 0.007
+height = 0.70
+
+[node name="PutterOficina" type="StaticBody3D"]
+
+[node name="Cabeza" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.02, 0)
+mesh = SubResource("HeadMesh")
+
+[node name="Inserto" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.02, -0.019)
+mesh = SubResource("InsertMesh")
+
+[node name="Varilla" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.385, 0.012)
+mesh = SubResource("ShaftMesh")
+
+[node name="Grip" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.81, 0.012)
+mesh = SubResource("GripMesh")
+
+[node name="HeadCollision" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.02, 0)
+shape = SubResource("HeadShape")
+
+[node name="ShaftCollision" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.385, 0.012)
+shape = SubResource("ShaftShape")

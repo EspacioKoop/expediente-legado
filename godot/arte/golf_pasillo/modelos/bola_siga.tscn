@@ -1,0 +1,26 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Shader" path="res://arte/golf_pasillo/shaders/bola_siga.gdshader" id="1_shader"]
+
+[sub_resource type="ShaderMaterial" id="BallMaterial"]
+shader = ExtResource("1_shader")
+
+[sub_resource type="SphereMesh" id="BallMesh"]
+material = SubResource("BallMaterial")
+radius = 0.02135
+height = 0.0427
+radial_segments = 64
+rings = 32
+
+[sub_resource type="SphereShape3D" id="BallShape"]
+radius = 0.02135
+
+[node name="BolaSIGA" type="RigidBody3D"]
+mass = 0.046
+continuous_cd = true
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("BallMesh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BallShape")
