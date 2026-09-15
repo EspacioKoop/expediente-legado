@@ -18,13 +18,14 @@ permissions:
 
 jobs:
   gestionar:
+    if: github.event_name != 'pull_request_target' || github.event.pull_request.base.ref == 'main'
     runs-on: ubuntu-latest
     steps:
-      # pull_request_target es deliberado: nunca se hace checkout del head de la PR.
-      # El script ejecutado es siempre el de la rama base confiable.
+      # pull_request_target es deliberado y no ejecuta código del head de la PR.
+      # Incluso workflow_dispatch hace checkout fijo de main antes de usar issues:write.
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.base.ref || github.ref_name }}
+          ref: main
 
       - uses: actions/setup-python@v5
         with:
