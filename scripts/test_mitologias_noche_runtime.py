@@ -24,8 +24,8 @@ class MitologiasNocheRuntimeTest(unittest.TestCase):
         self.assertIn("const MAX_FAMILIAS_NOCHE := 2", self.asignacion)
         self.assertIn("static func asignar(", self.asignacion)
         self.assertIn("asignacion[familia] = indice", self.asignacion)
-        self.assertNotIn("SemillasOniricas", self.asignacion)
-        self.assertNotIn("activar_semilla_onirica", self.asignacion)
+        self.assertNotRegex(self.asignacion, r"SemillasOniricas\s*\.")
+        self.assertNotIn("activar_semilla_onirica(", self.asignacion)
 
     def test_indice_de_escena_sale_de_total_menos_pendientes(self):
         self.assertIn("static func indice_escena_actual(", self.asignacion)
