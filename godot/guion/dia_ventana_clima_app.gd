@@ -13,13 +13,15 @@ func _process(_delta: float) -> void:
 	if dia == null:
 		return
 	var mundo: Node3D = dia._mundo
-	if mundo == null or dia.fase != "casa":
+	if mundo == null or String(dia.jornada.get("fase", "")) != "casa":
 		_mundo_id = -1
 		_estado = ""
 		return
 
 	var ventana := mundo.get_node_or_null("VentanaCasa") as Node3D
 	if ventana == null:
+		_mundo_id = -1
+		_estado = ""
 		return
 
 	var estado_clima := Clima.estado(int(dia.jornada.get("dia", 1)))
