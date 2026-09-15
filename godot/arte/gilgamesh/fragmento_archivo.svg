@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<defs><filter id="rough" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="436" result="noise"/><feBlend in="SourceGraphic" in2="noise" mode="multiply"/></filter></defs>
+<path d="M98 58 L382 68 L448 176 L416 420 L318 456 L126 438 L60 312 L74 154 Z" fill="#8a7d57" stroke="#3d2a20" stroke-width="8" filter="url(#rough)"/>
+<g fill="none" stroke="#3d2a20" stroke-width="7"><rect x="128" y="134" width="70" height="58" rx="7"/><rect x="220" y="134" width="70" height="58" rx="7"/><rect x="312" y="134" width="70" height="58" rx="7"/><rect x="128" y="224" width="70" height="58" rx="7"/><rect x="220" y="224" width="70" height="58" rx="7"/><rect x="312" y="224" width="70" height="58" rx="7"/><rect x="128" y="314" width="70" height="58" rx="7"/><rect x="220" y="314" width="70" height="58" rx="7"/><rect x="312" y="314" width="70" height="58" rx="7"/></g>
+<g stroke="#3d2a20" stroke-width="5"><path d="M142 154 H182 M142 172 H174 M234 154 H274 M234 172 H266 M326 154 H366 M326 172 H358 M142 244 H182 M142 262 H174 M234 244 H274 M234 262 H266 M326 244 H366 M326 262 H358 M142 334 H182 M142 352 H174 M234 334 H274 M234 352 H266 M326 334 H366 M326 352 H358"/></g>
+<path d="M112 410 H400" stroke="#3d2a20" stroke-width="10"/>
+<g fill="#3d2a20" opacity=".45"><path d="M120 110 l16 4 l-12 11 Z"/><path d="M157 171 l16 4 l-12 11 Z"/><path d="M194 232 l16 4 l-12 11 Z"/><path d="M231 293 l16 4 l-12 11 Z"/><path d="M268 354 l16 4 l-12 11 Z"/><path d="M305 115 l16 4 l-12 11 Z"/><path d="M342 176 l16 4 l-12 11 Z"/><path d="M379 237 l16 4 l-12 11 Z"/></g>
+</svg>

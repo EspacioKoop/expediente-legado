@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<defs><filter id="rough" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="436" result="noise"/><feBlend in="SourceGraphic" in2="noise" mode="multiply"/></filter></defs>
+<path d="M84 70 L385 60 L432 135 L410 414 L320 458 L132 438 L66 322 L78 164 Z" fill="#bd6b33" stroke="#3d2a20" stroke-width="8" filter="url(#rough)"/>
+<path d="M170 145 H342 V374 H170 Z M218 223 H294 V374 H218" fill="none" stroke="#3d2a20" stroke-width="12"/>
+<path d="M138 172 L372 157 M138 208 L372 190 M138 254 L372 235 M138 300 L372 280" stroke="#3d2a20" stroke-width="7"/>
+<g fill="#3d2a20" opacity=".45"><path d="M120 110 l16 4 l-12 11 Z"/><path d="M157 171 l16 4 l-12 11 Z"/><path d="M194 232 l16 4 l-12 11 Z"/><path d="M231 293 l16 4 l-12 11 Z"/><path d="M268 354 l16 4 l-12 11 Z"/><path d="M305 115 l16 4 l-12 11 Z"/><path d="M342 176 l16 4 l-12 11 Z"/><path d="M379 237 l16 4 l-12 11 Z"/><path d="M146 298 l16 4 l-12 11 Z"/><path d="M183 359 l16 4 l-12 11 Z"/><path d="M220 120 l16 4 l-12 11 Z"/><path d="M257 181 l16 4 l-12 11 Z"/><path d="M294 242 l16 4 l-12 11 Z"/><path d="M331 303 l16 4 l-12 11 Z"/><path d="M368 364 l16 4 l-12 11 Z"/></g>
+</svg>
