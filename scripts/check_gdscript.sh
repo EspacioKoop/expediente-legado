@@ -20,13 +20,19 @@ version_en_path() {
     [[ "$(gdformat --version 2>/dev/null)" == "gdformat $GDTOOLKIT_VERSION" ]]
 }
 
+# Un venv coloca sus ejecutables en bin/ en POSIX y en Scripts/ en Windows. Se
+# detecta en vez de asumirlo: este script también se ejecuta a mano en Windows.
+venv_bin() {
+  if [[ -d "$VENV/Scripts" ]]; then echo "$VENV/Scripts"; else echo "$VENV/bin"; fi
+}
+
 if ! version_en_path; then
-  if [[ ! -x "$VENV/bin/gdformat" ]]; then
+  if [[ ! -x "$(venv_bin)/gdformat" ]]; then
     "$PYTHON_BIN" -m venv "$VENV"
-    "$VENV/bin/python" -m pip install --disable-pip-version-check --quiet \
+    "$(venv_bin)/python" -m pip install --disable-pip-version-check --quiet \
       "gdtoolkit==${GDTOOLKIT_VERSION}"
   fi
-  PATH="$VENV/bin:$PATH"
+  PATH="$(venv_bin):$PATH"
   export PATH
 fi
 

@@ -85,14 +85,29 @@ compilar_boot_rom() {
 # falla con `externally-managed-environment` (PEP 668) en cualquier Debian o
 # Ubuntu reciente, que es donde se desarrolla: el venv hace la orden idéntica en
 # las dos máquinas sin tocar nada fuera del repo.
+# Un venv coloca sus ejecutables en bin/ en POSIX y en Scripts/ en Windows, y
+# este script se compila también en windows-latest. Se detecta en vez de asumirlo.
+venv_bin() {
+    local venv="$1"
+    if [ -d "$venv/Scripts" ]; then
+        printf '%s' "$venv/Scripts"
+    else
+        printf '%s' "$venv/bin"
+    fi
+}
+
 preparar_scons() {
     local venv="$DEPS/venv"
-    SCONS="$venv/bin/scons"
+    local bin
+    bin="$(venv_bin "$venv")"
+    SCONS="$bin/scons"
     if [ -x "$SCONS" ] && "$SCONS" --version 2>/dev/null | grep -qF "$SCONS_VERSION"; then
         return
     fi
     "$PYTHON" -m venv "$venv"
-    "$venv/bin/python" -m pip install --disable-pip-version-check --quiet \
+    bin="$(venv_bin "$venv")"
+    SCONS="$bin/scons"
+    "$bin/python" -m pip install --disable-pip-version-check --quiet \
         "scons==$SCONS_VERSION"
 }
 
