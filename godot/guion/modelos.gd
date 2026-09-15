@@ -275,12 +275,7 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 	if personaje == "Puyi":
 		pelo_y = centro_y + radio_y * 0.76
 		pelo_escala = Vector3(radio_x * 0.99, alto * 0.13, radio_z * 0.84)
-	_cabello_cabeza(
-		enganche,
-		Vector3(0.0, pelo_y, -radio_z * 0.04),
-		pelo_escala,
-		cabello
-	)
+	_cabello_cabeza(enganche, Vector3(0.0, pelo_y, -radio_z * 0.04), pelo_escala, cabello)
 
 	# Los centros de ojos y boca se colocan unos milímetros DENTRO de la
 	# superficie del elipsoide. Solo asoma la parte necesaria del volumen, de
@@ -297,18 +292,8 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 	var escala_ojo := Vector3(alto * 0.050, alto * 0.040, alto * 0.025)
 	if personaje == "Puyi":
 		escala_ojo = Vector3(alto * 0.043, alto * 0.032, alto * 0.020)
-	_rasgo_esfera(
-		enganche,
-		Vector3(ojo_izq.x, ojo_izq.y, z_ojo_izq),
-		escala_ojo,
-		oscuro
-	)
-	_rasgo_esfera(
-		enganche,
-		Vector3(ojo_der.x, ojo_der.y, z_ojo_der),
-		escala_ojo,
-		oscuro
-	)
+	_rasgo_esfera(enganche, Vector3(ojo_izq.x, ojo_izq.y, z_ojo_izq), escala_ojo, oscuro)
+	_rasgo_esfera(enganche, Vector3(ojo_der.x, ojo_der.y, z_ojo_der), escala_ojo, oscuro)
 
 	if personaje == "Puyi":
 		_rasgos_puyi(
@@ -329,12 +314,7 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 	var nariz_escala := Vector3(alto * 0.050, alto * 0.105, alto * 0.060)
 	if personaje == "Puyi":
 		nariz_escala = Vector3(alto * 0.043, alto * 0.100, alto * 0.052)
-	_rasgo_esfera(
-		enganche,
-		Vector3(0.0, nariz_y, z_nariz),
-		nariz_escala,
-		piel
-	)
+	_rasgo_esfera(enganche, Vector3(0.0, nariz_y, z_nariz), nariz_escala, piel)
 
 	var boca_y := centro_y - alto * 0.20
 	var z_boca := _frente_cabeza(0.0, boca_y, centro_y, radio_x, radio_y, radio_z) - alto * 0.010
@@ -373,8 +353,7 @@ static func _rasgos_puyi(
 		- hundido_gafas
 	)
 	var z_der := (
-		_frente_cabeza(separacion, altura_ojos, centro_y, radio_x, radio_y, radio_z)
-		- hundido_gafas
+		_frente_cabeza(separacion, altura_ojos, centro_y, radio_x, radio_y, radio_z) - hundido_gafas
 	)
 	var radio_gafa := alto * 0.080
 	var grosor_gafa := alto * 0.012
@@ -426,7 +405,7 @@ static func _aro_gafa(
 ) -> void:
 	var aro := MeshInstance3D.new()
 	var toro := TorusMesh.new()
-	toro.inner_radius = maxf(0.001, radio - grosor)
+	toro.inner_radius = maxf(radio * 0.2, radio - grosor)
 	toro.outer_radius = radio
 	toro.rings = 12
 	toro.ring_segments = 4
@@ -437,7 +416,6 @@ static func _aro_gafa(
 	aro.rotation.x = PI / 2.0
 	aro.material_override = _material_rasgo(color)
 	padre.add_child(aro)
-
 
 ## Profundidad del frente de un elipsoide en un punto X/Y de la cara.
 ##
