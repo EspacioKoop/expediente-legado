@@ -12,8 +12,9 @@ Solo entran ROMs **propias**: código de este repositorio bajo `gbc/minijuegos/<
 | `paper_planes_98` | Paper Planes 98 | vuelo; ruta Nueva York 1998 | tienda de videojuegos | 45 | #95 #388 |
 | `croc_riders_98` | Croc Riders 98 | carreras; El Cairo → Giza | tienda de videojuegos | 45 | #95 #389 |
 | `aquiles_98` | MYRMIDON 98 | duelo de observación; leer guardia y talón vulnerable | tienda de videojuegos | 45 | #438 #442 |
+| `ryu_flow_98` | RYU FLOW | puzle de flujo; tres compuertas y cauce determinista | incluida con la consola | — | #440 #442 #542 #609 #622 |
 
-Las cuatro son de 32 KiB, modo dual CGB (`0x80`), y ninguna guarda nada ni da recompensas persistentes (contrato de #95).
+Todas son ROMs propias de 32 KiB y modo dual CGB (`0x80`). `RYU FLOW` es la primera que expone además un handshake de finalización para integración diegética: completar realmente el cauce deja `0xA5` en WRAM `$C100`; arrancar, jugar a medias o salir no lo hace.
 
 ## En proyecto
 
@@ -24,18 +25,17 @@ Contrapartes de vigilia de los sueños mitológicos (#435, #442). Permanecen fue
 | `ariadna_labertinto_98` | ARIADNA | Minotauro | laberinto de archivo; ya existe su cartucho 3D en casa | #437 #512 |
 | `uruk_98` | URUK 98 | Gilgamesh | ciudad mínima y tablilla que reconstruir | #436 |
 | `hydra_loop_98` | HYDRA LOOP | Hidra | cortar cabezas empeora todo hasta dar con el nodo común | #439 |
-| `ryu_flow_98` | RYU FLOW | Dragón japonés | **prototipo GBC reproducible**: tres compuertas, cauce determinista y handshake local; todavía fuera de runtime por #181/#442 | #440 #442 #542 |
 | `duat_98` | DUAT 98 | Duat | cámaras y contrapesos | #441 |
 
-`RYU FLOW` es el primer caso con fuente avanzada antes de su promoción. `gbc/minijuegos/ryu_flow_98/` compila una ROM dual-mode de 32 KiB con cabecera `RYUFLOW98`; el workflow GBC la prueba y publica como artefacto efímero. Arrancar y salir no cuenta: el micro-objetivo exige manipular las tres compuertas y resolver el cauce. Al completarlo deja `0xA5` en `$C100` como punto de integración futuro para #442, pero no existe todavía ruta `res://roms/ryu_flow_98.gbc`, precio, compra ni semilla Ryū en runtime.
+`RYU FLOW` salió de esta lista tras #609/#622: su fuente RGBDS es reproducible, el core puede leer su memoria sin efectos laterales y el índice ya la incluye en el build de runtime. El paso siguiente no pertenece al catálogo ni al emulador: una capa de gameplay debe traducir el handshake de finalización a la semilla Ryū mediante #442.
 
 ## Qué hace el índice
 
-- **Build de runtime:** `scripts/preparar_emulador_gb.sh rom` compila solo las entradas `jugable` y las deja en `godot/roms/<id>.gbc`. Una fuente prototipo que siga `en_proyecto`, como `ryu_flow_98`, queda fuera de ese build.
+- **Build de runtime:** `scripts/preparar_emulador_gb.sh rom` compila solo las entradas `jugable` y las deja en `godot/roms/<id>.gbc`. Una fuente prototipo que siga `en_proyecto` queda fuera de ese build.
 - **CI GBC:** `.github/workflows/gbc-fixtures.yml` puede compilar e inspeccionar también fuentes prototipo para demostrar que son reproducibles sin exponerlas al juego.
 - **Tienda:** `TiendaVideojuegos.catalogo()` vende las jugables con precio (`RomsPropias.a_la_venta()`).
 - **Consola:** la Portátil Color 98 y la consola de sobremesa muestran las `incluida` más las compradas en la jornada (`RomsPropias.en_consola`), siempre que el artefacto exista en la build.
-- **Sueños:** la fuente de semilla de una ROM es `RomsPropias.fuente_semilla(id)` (`rom:<id>`). El cartucho ARIADNA del Minotauro ya la usa. `MYRMIDON 98` deja preparado ese origen para Aquiles y `RYU FLOW` conserva el suyo para Ryū, pero ninguno de esos eventos de finalización se conecta aquí a una semilla onírica.
+- **Sueños:** la fuente de semilla de una ROM es `RomsPropias.fuente_semilla(id)` (`rom:<id>`). El cartucho ARIADNA del Minotauro ya la usa. `MYRMIDON 98` deja preparado ese origen para Aquiles y `RYU FLOW` conserva el suyo para Ryū; la traducción del final de ROM a semilla vive fuera de este índice.
 
 ## Añadir una ROM
 
