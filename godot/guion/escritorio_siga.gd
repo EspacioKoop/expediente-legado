@@ -161,7 +161,7 @@ func enfocar(id: String) -> void:
 func activar_ayuda_sistema() -> void:
 	if _aplicaciones.has("ayuda-sistema"):
 		return
-	registrar_aplicacion("ayuda-sistema", "Ayuda", _crear_ayuda_sistema)
+	registrar_aplicacion("ayuda-sistema", tr("ESCRITORIO_AYUDA"), _crear_ayuda_sistema)
 
 
 func _construir_escritorio() -> void:
@@ -174,7 +174,7 @@ func _construir_escritorio() -> void:
 
 	_marca = Label.new()
 	_marca.name = "MarcaCorporativa"
-	_marca.text = "ARCHIVO CENTRAL · TERMINAL 98"
+	_marca.text = tr("ESCRITORIO_MARCA")
 	_marca.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_marca.add_theme_color_override("font_color", Color(CREMA, 0.62))
 	_marca.set_anchors_preset(Control.PRESET_TOP_RIGHT)
@@ -222,7 +222,7 @@ func _construir_barra() -> void:
 
 	var boton_menu := Button.new()
 	boton_menu.name = "BotonMenu"
-	boton_menu.text = "MENÚ"
+	boton_menu.text = tr("ESCRITORIO_MENU")
 	boton_menu.custom_minimum_size = Vector2(78, 0)
 	_preparar_boton(boton_menu)
 	boton_menu.pressed.connect(_alternar_menu)
@@ -236,7 +236,7 @@ func _construir_barra() -> void:
 
 	_reloj = Label.new()
 	_reloj.name = "RelojNarrativo"
-	_reloj.text = "DÍA --"
+	_reloj.text = tr("ESCRITORIO_RELOJ_VACIO")
 	_reloj.custom_minimum_size = Vector2(88, 0)
 	_reloj.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_reloj.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -272,7 +272,7 @@ func _construir_menu() -> void:
 	margen.add_child(columna)
 
 	var cabecera := Label.new()
-	cabecera.text = "ARCHIVO CENTRAL 98"
+	cabecera.text = tr("ESCRITORIO_CABECERA")
 	cabecera.add_theme_color_override("font_color", PETROLEO)
 	columna.add_child(cabecera)
 
@@ -280,7 +280,7 @@ func _construir_menu() -> void:
 	columna.add_child(separador)
 
 	var rotulo_programas := Label.new()
-	rotulo_programas.text = "Programas"
+	rotulo_programas.text = tr("ESCRITORIO_PROGRAMAS")
 	columna.add_child(rotulo_programas)
 
 	_programas_menu = VBoxContainer.new()
@@ -292,7 +292,7 @@ func _construir_menu() -> void:
 	columna.add_child(relleno)
 
 	var salir := Button.new()
-	salir.text = "Cerrar sesión"
+	salir.text = tr("ESCRITORIO_CERRAR_SESION")
 	_preparar_boton(salir)
 	salir.pressed.connect(_solicitar_salida)
 	columna.add_child(salir)
@@ -384,7 +384,7 @@ func _crear_ventana(id: String, titulo: String, contenido: Control) -> void:
 
 	var minimizar_boton := Button.new()
 	minimizar_boton.text = "—"
-	minimizar_boton.tooltip_text = "Minimizar"
+	minimizar_boton.tooltip_text = tr("ESCRITORIO_MINIMIZAR")
 	minimizar_boton.custom_minimum_size = Vector2(31, 24)
 	_preparar_boton(minimizar_boton)
 	minimizar_boton.pressed.connect(minimizar.bind(id))
@@ -392,7 +392,7 @@ func _crear_ventana(id: String, titulo: String, contenido: Control) -> void:
 
 	var cerrar_boton := Button.new()
 	cerrar_boton.text = "×"
-	cerrar_boton.tooltip_text = "Cerrar"
+	cerrar_boton.tooltip_text = tr("ESCRITORIO_CERRAR")
 	cerrar_boton.custom_minimum_size = Vector2(31, 24)
 	_preparar_boton(cerrar_boton)
 	cerrar_boton.pressed.connect(cerrar.bind(id))
@@ -582,17 +582,19 @@ func _crear_ayuda_sistema() -> Control:
 	margen.add_child(columna)
 
 	var titulo := Label.new()
-	titulo.text = "Ayuda del terminal"
+	titulo.text = tr("ESCRITORIO_AYUDA_TITULO")
 	titulo.add_theme_font_size_override("font_size", 18)
 	columna.add_child(titulo)
 
 	var texto := Label.new()
-	texto.text = (
-		"Doble clic: abrir programa.\n"
-		+ "Tab: recorrer controles. Intro/Espacio: activar.\n"
-		+ "Arrastra la barra de título para mover una ventana.\n"
-		+ "La barra inferior minimiza y restaura programas.\n"
-		+ "Esc cierra el menú del sistema."
+	texto.text = "\n".join(
+		[
+			tr("ESCRITORIO_AYUDA_ABRIR"),
+			tr("ESCRITORIO_AYUDA_TECLADO"),
+			tr("ESCRITORIO_AYUDA_ARRASTRAR"),
+			tr("ESCRITORIO_AYUDA_BARRA"),
+			tr("ESCRITORIO_AYUDA_CERRAR_MENU"),
+		]
 	)
 	texto.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	texto.size_flags_horizontal = Control.SIZE_EXPAND_FILL
