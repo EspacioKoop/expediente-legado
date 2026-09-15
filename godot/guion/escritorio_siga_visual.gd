@@ -11,7 +11,9 @@ const WALLPAPER: Texture2D = preload("res://arte/os98/wallpaper.svg")
 const SYSTEM_MARK: Texture2D = preload("res://arte/os98/system_mark.svg")
 const ICONOS_32: Texture2D = preload("res://arte/os98/iconos_32.svg")
 const ICONOS_16: Texture2D = preload("res://arte/os98/iconos_16.svg")
+const CURSORES_32: Texture2D = preload("res://arte/os98/cursores_32.svg")
 const ORDEN_ICONOS := ["siga", "equipo", "documentos", "red", "papelera", "ayuda"]
+const ORDEN_CURSORES := ["normal", "ayuda", "ocupado", "seleccionar", "texto", "no-disponible"]
 
 var _identidades_visuales: Dictionary = {}
 
@@ -21,6 +23,12 @@ func _ready() -> void:
 	_instalar_wallpaper()
 	_instalar_marca()
 	_decorar_boton_menu()
+	_instalar_cursor()
+
+
+func _exit_tree() -> void:
+	# El cursor del OS98 pertenece al puesto de trabajo, no a todo el juego.
+	Input.set_custom_mouse_cursor(null, Input.CURSOR_ARROW)
 
 
 func registrar_identidad_visual(id: String, clave: String) -> void:
@@ -78,6 +86,10 @@ func _decorar_boton_menu() -> void:
 		boton.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 
 
+func _instalar_cursor() -> void:
+	Input.set_custom_mouse_cursor(_cursor("normal"), Input.CURSOR_ARROW, Vector2(1, 1))
+
+
 func _decorar_accesos(id: String) -> void:
 	var clave := String(_identidades_visuales.get(id, ""))
 	if clave.is_empty():
@@ -130,4 +142,14 @@ func _icono(clave: String, tamano: int) -> Texture2D:
 	var atlas := AtlasTexture.new()
 	atlas.atlas = ICONOS_32 if tamano == 32 else ICONOS_16
 	atlas.region = Rect2(float(indice * tamano), 0.0, float(tamano), float(tamano))
+	return atlas
+
+
+func _cursor(clave: String) -> Texture2D:
+	var indice := ORDEN_CURSORES.find(clave)
+	if indice < 0:
+		return null
+	var atlas := AtlasTexture.new()
+	atlas.atlas = CURSORES_32
+	atlas.region = Rect2(float(indice * 32), 0.0, 32.0, 32.0)
 	return atlas

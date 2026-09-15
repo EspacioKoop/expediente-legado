@@ -1,36 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="96" height="16" viewBox="0 0 96 16">
-  <!-- Atlas 6x16 px: siga, equipo, documentos, red, papelera, ayuda. -->
-  <g id="icon-siga" transform="translate(0 0)" stroke="#203235" stroke-width="1" stroke-linejoin="round">
-    <rect x="2" y="2" width="11" height="12" fill="#d9d1ba"/>
-    <rect x="4" y="4" width="7" height="4" fill="#315f61"/>
-    <circle cx="11" cy="11" r="3" fill="#8ea7a4"/>
-    <path d="M13 13l2 2" stroke-width="1.5"/>
-  </g>
-  <g id="icon-equipo" transform="translate(16 0)" stroke="#203235" stroke-width="1" stroke-linejoin="round">
-    <rect x="1.5" y="3" width="10" height="8" fill="#d7d2c4"/>
-    <rect x="3" y="4.5" width="7" height="5" fill="#315f61"/>
-    <path d="M5 13h4M7 11v2"/>
-    <rect x="12.5" y="4" width="2" height="10" fill="#a9a58f"/>
-  </g>
-  <g id="icon-documentos" transform="translate(32 0)" stroke="#203235" stroke-width="1" stroke-linejoin="round">
-    <path d="M2 5h5l1.5 2H14v7H2z" fill="#b8aa72"/>
-    <path d="M3 4h5l1 1.5h4V7H3z" fill="#d7cfb0"/>
-    <path d="M5 9h6M5 11h5" stroke="#6c664f"/>
-  </g>
-  <g id="icon-red" transform="translate(48 0)" stroke="#203235" stroke-width="1">
-    <path d="M4 5l4-3 4 3M4 5l4 7 4-7M8 2v10" fill="none"/>
-    <rect x="2" y="4" width="4" height="4" fill="#8ea7a4"/>
-    <rect x="10" y="4" width="4" height="4" fill="#8ea7a4"/>
-    <rect x="6" y="10" width="4" height="4" fill="#d9d1ba"/>
-  </g>
-  <g id="icon-papelera" transform="translate(64 0)" stroke="#203235" stroke-width="1" stroke-linejoin="round">
-    <path d="M4 5h8l-1 9H5z" fill="#b9c2bd"/>
-    <path d="M3 4h10M6 4l1-2h3l1 2M7 7v5M9 7v5" fill="none"/>
-  </g>
-  <g id="icon-ayuda" transform="translate(80 0)" stroke="#203235" stroke-width="1">
-    <circle cx="8" cy="8" r="6" fill="#d9d1ba"/>
-    <circle cx="8" cy="8" r="3.5" fill="#315f61"/>
-    <path d="M6.7 6.5c.2-1 1-1.5 2-1.5 1.2 0 2 .7 2 1.6 0 .9-.5 1.4-1.3 1.9-.7.4-.9.8-.9 1.5" fill="none" stroke="#eee7d0" stroke-width="1.2" stroke-linecap="round"/>
-    <circle cx="8.5" cy="11.6" r=".7" fill="#eee7d0" stroke="none"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="16" viewBox="0 0 96 16" shape-rendering="crispEdges">
+  <!-- Atlas pixel-art 6x16 derivado del asset sheet aprobado. -->
+  <g id="icon-siga" transform="translate(0 0)"><rect x="2" y="1" width="11" height="13" fill="#1c2b38"/><rect x="3" y="2" width="9" height="11" fill="#d9d8d1"/><rect x="4" y="3" width="7" height="2" fill="#174c98"/><path d="M5 11h2V9h1V7h1v2h2v2z" fill="#173e7a"/></g>
+  <g id="icon-equipo" transform="translate(16 0)"><rect x="1" y="2" width="11" height="8" fill="#c9c8c0" stroke="#242424"/><rect x="3" y="3" width="7" height="5" fill="#1f6fd0"/><rect x="5" y="11" width="4" height="2" fill="#77766e"/><rect x="12" y="4" width="3" height="9" fill="#aaa99f" stroke="#252525"/></g>
+  <g id="icon-documentos" transform="translate(32 0)"><rect x="2" y="5" width="13" height="9" fill="#e7cd4a" stroke="#3d3520"/><rect x="3" y="3" width="6" height="3" fill="#f7e77a" stroke="#3d3520"/><rect x="4" y="7" width="9" height="1" fill="#fff1a1"/></g>
+  <g id="icon-red" transform="translate(48 0)"><circle cx="8" cy="5" r="4" fill="#1f6fd0" stroke="#21324b"/><path d="M5 4h2V2h3v2h2v2h-2v2H7V6H5z" fill="#43a83b"/><rect x="1" y="11" width="5" height="3" fill="#d6d4cb" stroke="#2a2a2a"/><rect x="10" y="11" width="5" height="3" fill="#d6d4cb" stroke="#2a2a2a"/><rect x="7" y="8" width="2" height="4" fill="#303030"/></g>
+  <g id="icon-papelera" transform="translate(64 0)"><path d="M4 4h9l-1 10H5z" fill="#d4d4d0" stroke="#333"/><rect x="3" y="2" width="11" height="2" fill="#a8a8a4" stroke="#333"/><path d="M7 7h3v1h1v3h-1v1H7v-1H6V8h1z" fill="#42a447"/></g>
+  <g id="icon-ayuda" transform="translate(80 0)"><path d="M2 4l9-3 4 3-3 10-9 1-2-3z" fill="#5c1a98" stroke="#26113a"/><path d="M6 4h3l2 2v2L9 10H7v2H5V9h2l2-1V7L8 6H6z" fill="#f1d72f"/></g>
 </svg>

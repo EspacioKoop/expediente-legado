@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="32" viewBox="0 0 192 32" shape-rendering="crispEdges">
+  <!-- Atlas 6x32: normal, ayuda, ocupado, seleccionar, texto, no-disponible. -->
+  <g id="cursor-normal" transform="translate(0 0)"><path d="M4 3v22l6-6 4 9 4-2-4-9h8z" fill="#f4f4ef" stroke="#111" stroke-width="2"/></g>
+  <g id="cursor-ayuda" transform="translate(32 0)"><path d="M4 3v22l6-6 4 9 4-2-4-9h8z" fill="#f4f4ef" stroke="#111" stroke-width="2"/><circle cx="24" cy="22" r="6" fill="#5d46c8" stroke="#111"/><path d="M22 20h4v2h-2v2h-2zm0 6h2v2h-2z" fill="#fff"/></g>
+  <g id="cursor-ocupado" transform="translate(64 0)"><path d="M10 3h12v4l-4 5 4 5v9H10v-9l4-5-4-5z" fill="#d9d4c6" stroke="#17202b" stroke-width="2"/><path d="M12 6h8l-4 5zm0 18h8l-4-5z" fill="#4566c0"/></g>
+  <g id="cursor-seleccionar" transform="translate(96 0)"><rect x="15" y="4" width="2" height="24" fill="#17202b"/><rect x="4" y="15" width="24" height="2" fill="#17202b"/><rect x="14" y="14" width="4" height="4" fill="#4e68d4"/></g>
+  <g id="cursor-texto" transform="translate(128 0)"><rect x="14" y="4" width="4" height="24" fill="#171717"/><rect x="10" y="4" width="12" height="2" fill="#171717"/><rect x="10" y="26" width="12" height="2" fill="#171717"/></g>
+  <g id="cursor-no-disponible" transform="translate(160 0)"><circle cx="16" cy="16" r="11" fill="#f1ece0" stroke="#202020" stroke-width="2"/><circle cx="16" cy="16" r="8" fill="none" stroke="#cf2e2e" stroke-width="4"/><path d="M10 10l12 12" stroke="#cf2e2e" stroke-width="4"/></g>
+</svg>
