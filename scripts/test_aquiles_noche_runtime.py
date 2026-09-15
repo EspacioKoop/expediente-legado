@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -18,7 +19,10 @@ class AquilesNocheRuntimeTest(unittest.TestCase):
 
     def test_solo_monta_durante_sueno_y_por_seleccion_comun(self):
         self.assertIn('if fase != "sueño":', self.controller)
-        self.assertIn("SemillasOniricas.seleccionar_para_noche(", self.controller)
+        self.assertRegex(
+            self.controller,
+            r"SemillasOniricas\s*\.\s*seleccionar_para_noche\s*\(",
+        )
         self.assertIn("familias.has(SuenoAquiles.ID_MITO)", self.controller)
         self.assertNotIn("activar_semilla_onirica", self.controller)
         self.assertNotIn("semilla_onirica_aquiles", self.controller)
