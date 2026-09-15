@@ -7,6 +7,9 @@ class_name Corcho
 extends RefCounted
 
 const CLAVE := "corcho"
+const COLUMNAS_INICIALES := 5
+const PASO_INICIAL := Vector2(0.48, 0.32)
+const ORIGEN_INICIAL := Vector2(-0.96, 0.48)
 
 
 static func estado(jornada: Dictionary) -> Dictionary:
@@ -31,10 +34,47 @@ static func sincronizar(jornada: Dictionary, conceptos: Array) -> bool:
 		if id.is_empty() or fichas.has(id):
 			continue
 		var indice := fichas.size()
-		var columna := indice % 4
-		var fila := indice / 4
-		fichas[id] = {"pos": [float(columna) * 0.82 - 1.23, 0.55 - float(fila) * 0.58]}
+		var columna := indice % COLUMNAS_INICIALES
+		var fila := int(indice / COLUMNAS_INICIALES)
+		fichas[id] = {
+			"pos": [
+				ORIGEN_INICIAL.x + float(columna) * PASO_INICIAL.x,
+				ORIGEN_INICIAL.y - float(fila) * PASO_INICIAL.y,
+			]
+		}
 		cambio = true
+	return cambio
+
+
+## Sanea posiciones persistidas contra el área útil que le entrega la vista 3D.
+## No reordena la interpretación del jugador: solo impide que una ficha quede
+## físicamente fuera del tablón por datos antiguos o por crecimiento del grafo.
+static func limitar_posiciones(jornada: Dictionary, limite: Vector2) -> bool:
+	var tablero := estado(jornada)
+	var fichas: Dictionary = tablero["fichas"]
+	var max_x := maxf(0.0, limite.x)
+	var max_y := maxf(0.0, limite.y)
+	var cambio := false
+
+	for id in fichas.keys():
+		var datos_invalidos := typeof(fichas[id]) != TYPE_DICTIONARY
+		var datos: Dictionary = {}
+		if not datos_invalidos:
+			datos = fichas[id]
+		var pos = datos.get("pos", [0.0, 0.0])
+		var x := 0.0
+		var y := 0.0
+		if typeof(pos) == TYPE_ARRAY and pos.size() >= 2:
+			x = float(pos[0])
+			y = float(pos[1])
+		var nueva_x := clampf(x, -max_x, max_x)
+		var nueva_y := clampf(y, -max_y, max_y)
+		var pos_invalida := typeof(pos) != TYPE_ARRAY or pos.size() < 2
+		if datos_invalidos or pos_invalida or not is_equal_approx(x, nueva_x) or not is_equal_approx(y, nueva_y):
+			datos["pos"] = [nueva_x, nueva_y]
+			fichas[id] = datos
+			cambio = true
+
 	return cambio
 
 
