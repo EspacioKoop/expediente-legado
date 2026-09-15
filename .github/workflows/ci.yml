@@ -99,6 +99,13 @@ jobs:
         shell: bash
         run: bash scripts/check_gdscript.sh
 
+      - name: Suite de contratos de scripts/
+        # El plan maestro #181 la declara canónica, pero hasta ahora solo se
+        # ejecutaba en local: CI corría tres módulos sueltos de los 150.
+        env:
+          SIGA98_EXIGIR_EXTENSION: '1'
+        run: python -m unittest discover -s scripts -p 'test_*.py'
+
       - name: Importar, ejecutar la suite y arrancar el juego
         run: python scripts/verificar_godot.py
 
