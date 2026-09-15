@@ -40,6 +40,10 @@ class PreferenciasSigaTest(unittest.TestCase):
         self.assertIn("SENSIBILIDAD_CAMARA_MAX := 3.0", self.source)
         self.assertGreaterEqual(self.source.count("clampf("), 3)
 
+    def test_posicion_del_asistente_gato_es_opcional_y_valida(self):
+        self.assertIn('"posicion_asistente_gato": null', self.source)
+        self.assertIn('posicion.has("x") and posicion.has("y")', self.source)
+
 
 if __name__ == "__main__":
     unittest.main()

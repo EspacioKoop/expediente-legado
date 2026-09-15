@@ -52,6 +52,29 @@ class GatoAsistenteVisualTest(unittest.TestCase):
         self.assertIn("Asset original", self.atlas)
         self.assertNotIn("draw_colored_polygon", self.avatar)
 
+    def test_no_invade_la_barra_de_botones_del_visor(self):
+        # #285 (segunda vuelta): el offset fijo original tapaba Relacionar/Marcar
+        # folio/Imputar. En vez de adivinar otro número fijo, se pregunta al
+        # árbol real por el Button más alto y se sube el conjunto si hace falta,
+        # así que cualquier traducción o resolución sigue quedando cubierta.
+        self.assertIn("func _colocar_asistente_siga(", self.dia)
+        self.assertIn("func _limite_superior_botones_visor(", self.dia)
+        self.assertIn("nodo is Button", self.dia)
+        # Un botón oculto (como el anexo sin desbloquear) no debe contar como
+        # límite: el fix original de este mismo bug lo subía ~600px y dejaba
+        # al gato prácticamente fuera de pantalla.
+        self.assertIn("nodo.is_visible_in_tree()", self.dia)
+        self.assertIn("nodo.size.y > 0.0", self.dia)
+        self.assertIn("call_deferred(\"_colocar_asistente_siga\"", self.dia)
+        self.assertIn("MARGEN_BOTONES_ASISTENTE", self.dia)
+
+    def test_el_conjunto_se_puede_arrastrar_y_la_posicion_persiste(self):
+        self.assertIn("func _al_input_asistente_siga(", self.dia)
+        self.assertIn("func _fijar_posicion_libre_asistente(", self.dia)
+        self.assertIn("func _guardar_posicion_asistente_siga(", self.dia)
+        self.assertIn('CLAVE_POSICION_ASISTENTE := "posicion_asistente_gato"', self.dia)
+        self.assertIn("conjunto.mouse_filter = Control.MOUSE_FILTER_PASS", self.dia)
+
     def test_el_atlas_reserva_ocho_posturas_discretas(self):
         frames = (
             "idle",
