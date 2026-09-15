@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-import re
 import shutil
 import subprocess
 import tempfile
@@ -24,6 +23,7 @@ class RyuNocheRuntimeTest(unittest.TestCase):
     def test_vertical_declara_familia_y_flujo_determinista(self):
         self.assertIn('const ID_MITO := "dragon_japones"', self.vertical)
         self.assertIn("const ESTADO_OBJETIVO := [true, false, true]", self.vertical)
+        self.assertIn("var _estado_compuertas := [false, true, false]", self.vertical)
         self.assertIn("const CANTIDAD_COMPUERTAS := 3", self.vertical)
         self.assertIn("Curve3D.new()", self.vertical)
         self.assertIn("func _puntos_cauce() -> PackedVector3Array:", self.vertical)
@@ -84,7 +84,7 @@ class RyuNocheRuntimeTest(unittest.TestCase):
 
     def test_smoke_ejerce_solucion_y_bloqueo_posterior(self):
         self.assertIn("compuerta_1.interactuar(actor)", self.smoke)
-        self.assertEqual(self.smoke.count("compuerta_2.interactuar(actor)"), 2)
+        self.assertEqual(self.smoke.count("compuerta_2.interactuar(actor)"), 1)
         self.assertIn("compuerta_3.interactuar(actor)", self.smoke)
         self.assertIn("ryu.estado_compuertas() == [true, false, true]", self.smoke)
         self.assertIn("ryu.resuelto()", self.smoke)
