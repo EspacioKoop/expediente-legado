@@ -4,6 +4,7 @@ extends SceneTree
 ## La escena del día se carga una vez: los tres recorridos la instancian, y
 ## cargarla en cada uno es pedirle lo mismo tres veces al gestor de recursos.
 const ESCENA_DIA := preload("res://escenas/dia.tscn")
+const SCRIPT_VISOR := preload("res://guion/visor_anexos_app.gd")
 
 var pasadas := 0
 var fallos := 0
@@ -26,7 +27,11 @@ func _recorrer() -> void:
 	dia.jornada["acciones"] = Jornada.ACCIONES_POR_DIA
 	dia._abrir_expediente()
 	await process_frame
-	var visor = dia._pantalla.get_child(0)
+	var visor = _visor_abierto(dia)
+	_comprobar("el puesto conserva el visor al envolverlo", visor != null, true)
+	if visor == null:
+		quit(1)
+		return
 	_comprobar("el puesto abre en el mismo día", visor.jornada["dia"], 5)
 	_comprobar("la plantilla no cambia al sentarse", visor.jornada["plantilla"], 427)
 	_comprobar("el archivo ofrece los nueve expedientes", visor._archivo.item_count, 9)
@@ -81,7 +86,11 @@ func _recorrer() -> void:
 	)
 	vuelta._abrir_expediente()
 	await process_frame
-	var archivo = vuelta._pantalla.get_child(0)
+	var archivo = _visor_abierto(vuelta)
+	_comprobar("reabrir conserva el visor al envolverlo", archivo != null, true)
+	if archivo == null:
+		quit(1)
+		return
 	archivo.partida.estado["veredictos"][archivo.caso["id"]] = archivo.caso["sospechosos"][0]["id"]
 	archivo._refrescar_estado()
 	archivo._al_elegir_documento(1)
@@ -204,7 +213,10 @@ func _reasignacion() -> void:
 
 	dia._abrir_expediente()
 	await process_frame
-	var visor = dia._pantalla.get_child(0)
+	var visor = _visor_abierto(dia)
+	_comprobar("reasignar conserva el visor al envolverlo", visor != null, true)
+	if visor == null:
+		return
 
 	# Se acusa sin haber mirado nada y con una sola vida: precipitada, y la
 	# última. Es el camino real al despido, no un reinicio a mano.
@@ -319,6 +331,17 @@ func _remates_duelo() -> void:
 
 	visor.queue_free()
 	await process_frame
+
+
+## Encuentra el visor por su script, no por su posición en el árbol. Desde #534
+## el shell lo adopta dentro de una ventana y deja de ser hijo directo de la capa.
+func _visor_abierto(dia):
+	if dia._pantalla == null:
+		return null
+	for nodo in dia._pantalla.find_children("*", "", true, false):
+		if nodo.get_script() == SCRIPT_VISOR:
+			return nodo
+	return null
 
 
 ## Pisa la salida que lleva a [param destino], como haría el jugador al cruzarla.
