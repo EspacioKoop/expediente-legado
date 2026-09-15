@@ -42,12 +42,24 @@ class GbcFixtureWorkflowTest(unittest.TestCase):
             self.texto,
         )
         self.assertIn("git -C cgb-acid2-src submodule update --init --depth 1 mgblib", self.texto)
-        self.assertIn("make -C cgb-acid2-src all", self.texto)
         self.assertIn("cgb-acid2.gbc", self.texto)
         self.assertIn(
             'test "$(od -An -tx1 -j 323 -N 1 gbc-fixtures/cgb-acid2.gbc | tr -d \' \\n\')" = "c0"',
             self.texto,
         )
+
+    def test_cgb_acid2_usa_toolchain_historico_aislado(self):
+        self.assertIn(
+            "CGB_ACID2_RGBDS_COMMIT: 0759c98d913e3d4d21207a8886a319c85add2041",
+            self.texto,
+        )
+        self.assertIn("make -C rgbds-legacy-src", self.texto)
+        self.assertIn(
+            'PATH="$GITHUB_WORKSPACE/rgbds-legacy-src:$PATH" make -C cgb-acid2-src all',
+            self.texto,
+        )
+        self.assertIn("byacc flex pkg-config libpng-dev", self.texto)
+        self.assertIn("make -C gbc/fixtures/cgb_only_smoke clean all", self.texto)
 
     def test_fixture_cgb_only_es_propio_y_se_compila_desde_fuente(self):
         self.assertIn("gbc/fixtures/cgb_only_smoke/**", self.texto)
