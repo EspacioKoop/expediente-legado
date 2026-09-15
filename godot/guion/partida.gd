@@ -81,6 +81,7 @@ static func nueva() -> Dictionary:
 		"semilla": Azar.raiz_nueva(),
 		"pistas_descubiertas": [],
 		"sellos_obtenidos": [],
+		"inventario": Inventario.nuevo(),
 		# La fusión solo recupera claves del molde. Si faltan aquí, guardar
 		# escribe el día y las firmas, pero cargar los descarta silenciosamente.
 		"jornada": Jornada.nueva(),
@@ -252,6 +253,12 @@ static func validar(guardado) -> Array:
 		else:
 			errores.append_array(_validar_jornada(guardado["jornada"]))
 
+	if guardado.has("inventario"):
+		if typeof(guardado["inventario"]) != TYPE_DICTIONARY:
+			errores.append("inventario no es un objeto")
+		else:
+			errores.append_array(_validar_inventario(guardado["inventario"]))
+
 	if guardado.has("vida") and not _entero_valido(guardado["vida"], 0, VIDA_MAXIMA):
 		errores.append("vida inválida")
 	for clave in ["pistas_descubiertas", "cartas_conocidas", "sueno_vencidos", "sellos_obtenidos"]:
@@ -266,6 +273,27 @@ static func validar(guardado) -> Array:
 	for clave in CAMPOS_ENTEROS:
 		if guardado.has(clave) and not _entero_valido(guardado[clave], 0, 9223372036854775807):
 			errores.append("%s inválido" % clave)
+	return errores
+
+
+static func _validar_inventario(inventario: Dictionary) -> Array:
+	var errores := []
+	var ids := {}
+	for ubicacion in [Inventario.CARRIED, Inventario.HOME_STORAGE]:
+		if inventario.has(ubicacion) and typeof(inventario[ubicacion]) != TYPE_ARRAY:
+			errores.append("inventario.%s no es una lista" % ubicacion)
+			continue
+		for objeto in inventario.get(ubicacion, []):
+			if typeof(objeto) != TYPE_DICTIONARY:
+				errores.append("inventario.%s contiene un objeto inválido" % ubicacion)
+				continue
+			var objeto_id := String(objeto.get("id", "")).strip_edges()
+			if objeto_id.is_empty():
+				errores.append("inventario.%s contiene un id vacío" % ubicacion)
+			elif ids.has(objeto_id):
+				errores.append("inventario contiene id duplicado: %s" % objeto_id)
+			else:
+				ids[objeto_id] = true
 	return errores
 
 
@@ -338,6 +366,7 @@ func _fusionar(guardado: Dictionary) -> Dictionary:
 		guardado.get("tarot", []), fusionado["tarot"], ESTADO_CARTA, ALIAS
 	)
 	Jornada.completar(fusionado["jornada"])
+	Inventario.completar(fusionado["inventario"])
 	return fusionado
 
 
