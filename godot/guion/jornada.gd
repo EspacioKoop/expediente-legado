@@ -35,6 +35,15 @@ const COSTE_DIARIO := 26
 const ACCIONES_POR_DIA := 3
 const DOCUMENTOS_GRATIS_POR_DIA := 1
 
+## Tope duro de #93: como mucho una acción extra por jornada, sin importar
+## cuántos consumibles de trabajo se posean. Sin este tope, un café que da
+## acciones y unas acciones que dan dinero disparan la economía sin fin.
+const BONUS_ACCIONES_MAX_POR_DIA := 1
+
+## Lo que cuesta el café. Convierte dinero en tiempo, pero solo hasta el tope:
+## comprar un segundo no da una segunda acción.
+const PRECIO_CAFE := 12
+
 ## Días seguidos sin comer que aguanta el gato antes de irse. No se muere ni
 ## deja cadáver: un día no está. En este sistema las cosas no terminan, se
 ## traspapelan.
@@ -72,6 +81,10 @@ static func nueva(raiz: int = 0, vuelta: int = 1) -> Dictionary:
 		"dinero": 120,
 		"cerrados_hoy": 0,
 		"acciones": ACCIONES_POR_DIA,
+		# Cuántas acciones extra ha dado ya el café hoy. Vive separado de
+		# "acciones" para poder aplicar el tope sin depender de cuánto quede
+		# por gastar.
+		"acciones_bonus_hoy": 0,
 		# El gato NO es estado de la vuelta: sobrevive a que te reasignen,
 		# porque es tuyo y no del trabajo. Acaba siendo lo único cálido del
 		# registro permanente, al lado de las cartas que recuerdas.
@@ -136,6 +149,7 @@ static func completar(jornada: Dictionary, raiz: int = 0) -> Dictionary:
 	jornada["comida_propia"]["dias_sin_comer"] = int(
 		jornada["comida_propia"].get("dias_sin_comer", 0)
 	)
+	jornada["acciones_bonus_hoy"] = int(jornada.get("acciones_bonus_hoy", 0))
 	for clave in ["ultimo_resuelto", "pagados", "impagos"]:
 		jornada["alquiler"][clave] = int(jornada["alquiler"].get(clave, 0))
 	# Una jornada guardada antes de que existiera la semilla (#147) trae un
@@ -256,6 +270,21 @@ static func comer(jornada: Dictionary, precio: int) -> bool:
 	return true
 
 
+## El café: convierte dinero en tiempo, pero con tope duro (#93). Solo en el
+## archivo, que es donde se gastan las acciones que da. Pasado el tope de hoy,
+## no cobra ni concede — no hay motivo para pagar por nada.
+static func tomar_cafe(jornada: Dictionary, precio: int) -> bool:
+	if jornada["fase"] != "archivo":
+		return false
+	if int(jornada.get("acciones_bonus_hoy", 0)) >= BONUS_ACCIONES_MAX_POR_DIA:
+		return false
+	if not gastar(jornada, precio):
+		return false
+	jornada["acciones"] += 1
+	jornada["acciones_bonus_hoy"] = int(jornada.get("acciones_bonus_hoy", 0)) + 1
+	return true
+
+
 ## Día de vencimiento del alquiler. El calendario sale solo del día, no del azar.
 static func alquiler_vencimiento(dia: int) -> int:
 	return maxi(DIAS_POR_MES, int(ceil(float(dia) / DIAS_POR_MES)) * DIAS_POR_MES)
@@ -348,6 +377,7 @@ static func despertar(jornada: Dictionary) -> int:
 	jornada["fase"] = "archivo"
 	jornada["cerrados_hoy"] = 0
 	jornada["acciones"] = ACCIONES_POR_DIA
+	jornada["acciones_bonus_hoy"] = 0
 	jornada["leido_hoy"] = []
 	# La noche se acabó aunque queden escenas: despertar de golpe (#90) no
 	# puede dejar media noche esperando a la siguiente.
