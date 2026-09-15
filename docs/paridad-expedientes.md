@@ -36,9 +36,10 @@ No se considera "portada" una mecánica solo porque exista un módulo o un campo
 
 1. La principal carencia funcional original —las conclusiones de dos documentos presentes en datos pero sin interacción jugable— quedó cubierta por #289. No debe volver a figurar como pendiente.
 2. #309, #318, #320 y #323 añadieron profundidad sin inventar hechos: memoria personal, metadatos, feedback y anexos explícitos.
-3. La auditoría de **logros/registro/colecciones** sigue incompleta. Es el hueco de paridad más claro que queda antes de afirmar cobertura total del legado.
-4. #155 posee la reconstrucción cronológica/contradicciones. #286 no debe crear un segundo sistema incompatible.
-5. Cualquier nueva capa debe seguir la regla central de #286: premiar leer, relacionar y recordar; no hacer clic en todo ni producir una respuesta correcta automática.
+3. #513 amplía el caso `caso@1` con contexto interno en factura, memorándum, ficha y acta: el peritaje de tinta y el alcance de la revisión quedan consultables sin convertirlos en una conclusión automática.
+4. La auditoría de **logros/registro/colecciones** sigue incompleta. Es el hueco de paridad más claro que queda antes de afirmar cobertura total del legado.
+5. #155 posee la reconstrucción cronológica/contradicciones. #286 no debe crear un segundo sistema incompatible.
+6. Cualquier nueva capa debe seguir la regla central de #286: premiar leer, relacionar y recordar; no hacer clic en todo ni producir una respuesta correcta automática.
 
 ## Próximos cortes recomendados
 

@@ -13,28 +13,28 @@
           "id": "factura1@1",
           "tipo": "FACTURA",
           "folio": "F-1999-00231",
-          "contenido": "Factura por 'servicios de consultoría' emitida el 30/12/1999. Monto: $482,000. Proveedor sin RFC registrado.",
+          "contenido": "Factura por 'servicios de consultoría' emitida el 30/12/1999. Monto: $482,000. Proveedor sin RFC registrado. Concepto facturado: servicios de consultoría; no se identifica qué trabajo se entregó. La falta de RFC deja pendiente la identificación fiscal del proveedor. La factura acredita lo reclamado al cobro, pero no explica cómo se autorizó ni revisó el pago.",
           "fecha": "1999-12-30"
         },
         {
           "id": "memo1@1",
           "tipo": "MEMORANDO",
           "folio": "MEMO-1999-088",
-          "contenido": "De: Dirección de Finanzas. Para: Contraloría. 'Autorizo el pago urgente sin revisión previa, bajo mi responsabilidad.' Firmado: J. Ibarra.",
+          "contenido": "De: Dirección de Finanzas. Para: Contraloría. 'Autorizo el pago urgente sin revisión previa, bajo mi responsabilidad.' Firmado: J. Ibarra. La autorización lleva fecha de 29/12/1999 y la factura conservada está fechada al día siguiente. La fórmula 'bajo mi responsabilidad' atribuye la autorización al firmante, pero no identifica al proveedor ni describe el servicio. Nota de cotejo: el peritaje de tinta citado al relacionar este memorándum con la renuncia atribuye ambas firmas a la misma pluma. Nadie recuerda haber solicitado ese peritaje.",
           "fecha": "1999-12-29"
         },
         {
           "id": "empleado1@1",
           "tipo": "EMPLEADO",
           "folio": "EMP-0456",
-          "contenido": "J. Ibarra. Director de Finanzas 1997-2000. Renunció el 03/01/2000, cuatro días después del cierre de caja.",
+          "contenido": "J. Ibarra. Director de Finanzas 1997-2000. Renunció el 03/01/2000, cuatro días después del cierre de caja. La ficha fija el cargo y la fecha de renuncia, pero no contiene una explicación de su proximidad con el cierre contable. Nota de cotejo: el peritaje incorporado al memorándum MEMO-1999-088 vincula la tinta de esta firma con la de la autorización; la ficha no permite comprobarlo de forma independiente.",
           "fecha": "2000-01-03"
         },
         {
           "id": "actaContraloria1@1",
           "tipo": "ACTA",
           "folio": "ACTA-1999-014",
-          "contenido": "Acta de revisión de Contraloría sobre el pago urgente: 'Se revisó la documentación y no se encontraron observaciones.' Firmada el mismo día del pago, cinco minutos después de la hora de registro de la factura.",
+          "contenido": "Acta de revisión de Contraloría sobre el pago urgente: 'Se revisó la documentación y no se encontraron observaciones.' Firmada el mismo día del pago, cinco minutos después de la hora de registro de la factura. El acta no explica cómo se resolvió la falta de RFC que figura en la factura. La autorización de Finanzas prescindía de revisión previa; esta acta declara que hubo revisión. El intervalo permite cuestionar el alcance de la revisión, pero no determina por sí solo si hubo negligencia, una instrucción deliberada o una comprobación insuficiente.",
           "fecha": "1999-12-30"
         }
       ],
