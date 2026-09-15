@@ -4,8 +4,6 @@ import re
 import subprocess
 import unittest
 
-from scripts.godot_pruebas import importar_proyecto
-
 
 ROOT = Path(__file__).resolve().parents[1]
 UTILERIA = ROOT / "godot" / "guion" / "casa_utileria.gd"
@@ -125,7 +123,23 @@ class CasaUtileriaTest(unittest.TestCase):
 
     def test_almacenamiento_y_distribucion_funcionan_en_godot_headless(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
-        importar_proyecto()
+        importacion = subprocess.run(
+            [
+                motor,
+                "--headless",
+                "--path",
+                str(ROOT / "godot"),
+                "--editor",
+                "--import",
+                "--quit",
+            ],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            timeout=60,
+            check=False,
+        )
+        self.assertEqual(importacion.returncode, 0, importacion.stdout)
 
         resultado = subprocess.run(
             [
