@@ -12,6 +12,7 @@ on:
       - "gbc/minijuegos/paper_planes_98/**"
       - "gbc/minijuegos/croc_riders_98/**"
       - "gbc/minijuegos/aquiles_98/**"
+      - "gbc/minijuegos/ryu_flow_98/**"
 
 permissions:
   contents: read
@@ -100,6 +101,7 @@ jobs:
           git -C rgbds-legacy-src remote add origin "$CGB_ACID2_RGBDS_REPO"
           git -C rgbds-legacy-src fetch --depth 1 origin "$CGB_ACID2_RGBDS_COMMIT"
           git -C rgbds-legacy-src checkout --detach FETCH_HEAD
+          test "$(git -C rgbds-legacy-src rev-parse HEAD)" = "$CGB_ACID2_RGBDS_COMMIT"
           make -C rgbds-legacy-src CFLAGS="-g -fcommon"
           for tool in rgbasm rgblink rgbfix rgbgfx; do
             test -x "rgbds-legacy-src/$tool"
@@ -147,13 +149,20 @@ jobs:
           make -C gbc/minijuegos/aquiles_98 test
           cp gbc/minijuegos/aquiles_98/build/aquiles_98.gbc gbc-fixtures/
 
+      - name: Build RYU_FLOW
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C gbc/minijuegos/ryu_flow_98 clean test
+          cp gbc/minijuegos/ryu_flow_98/build/ryu_flow_98.gbc gbc-fixtures/
+
       - name: Hash and inspect ROM headers
         shell: bash
         run: |
           set -euo pipefail
           (
             cd gbc-fixtures
-            sha256sum joypad.gb vblank.gb cgb-acid2.gbc cgb_only_smoke.gbc caza_pixeles_98.gbc paper_planes_98.gbc croc_riders_98.gbc aquiles_98.gbc | tee SHA256SUMS
+            sha256sum joypad.gb vblank.gb cgb-acid2.gbc cgb_only_smoke.gbc caza_pixeles_98.gbc paper_planes_98.gbc croc_riders_98.gbc aquiles_98.gbc ryu_flow_98.gbc | tee SHA256SUMS
             echo "${CGB_ACID2_SHA256}  cgb-acid2.gbc" | sha256sum --check --strict
           )
           for rom in gbc-fixtures/*.gb gbc-fixtures/*.gbc; do
@@ -163,7 +172,7 @@ jobs:
             printf '%s: %s bytes\n' "$rom" "$size"
           done
           test "$(od -An -tx1 -j 323 -N 1 gbc-fixtures/cgb-acid2.gbc | tr -d ' \n')" = "c0"
-          for rom in gbc-fixtures/caza_pixeles_98.gbc gbc-fixtures/paper_planes_98.gbc gbc-fixtures/croc_riders_98.gbc gbc-fixtures/aquiles_98.gbc; do
+          for rom in gbc-fixtures/caza_pixeles_98.gbc gbc-fixtures/paper_planes_98.gbc gbc-fixtures/croc_riders_98.gbc gbc-fixtures/aquiles_98.gbc gbc-fixtures/ryu_flow_98.gbc; do
             test "$(od -An -tx1 -j 323 -N 1 "$rom" | tr -d ' \n')" = "80"
           done
           test "$(od -An -tx1 -j 323 -N 1 gbc-fixtures/cgb_only_smoke.gbc | tr -d ' \n')" = "c0"
@@ -181,6 +190,7 @@ jobs:
             gbc-fixtures/paper_planes_98.gbc
             gbc-fixtures/croc_riders_98.gbc
             gbc-fixtures/aquiles_98.gbc
+            gbc-fixtures/ryu_flow_98.gbc
             gbc-fixtures/SHA256SUMS
           if-no-files-found: error
           retention-days: 7
