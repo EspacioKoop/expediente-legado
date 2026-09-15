@@ -28,6 +28,13 @@ class VentanaCasaTest(unittest.TestCase):
             self.utileria,
         )
 
+    def test_el_exterior_sale_por_delante_de_la_cara_interior_del_muro(self):
+        self.assertIn(
+            'ventana.position = pos + Vector3(0, 0, 0.08)',
+            self.utileria,
+        )
+        self.assertIn('cara interior (z=-3.4)', self.utileria)
+
     def test_el_exterior_tiene_profundidad_y_detalle_no_textual(self):
         self.assertIn('Vector3(0, 0, -0.045)', self.utileria)
         self.assertIn('Vector3(-0.62, -0.18, -0.027)', self.utileria)
