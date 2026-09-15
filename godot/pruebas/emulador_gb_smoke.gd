@@ -30,8 +30,10 @@ func _init() -> void:
 		return
 
 	print(
-		"Emulador GB smoke: OK · %s · %d bytes/frame · %d bytes PCM"
-		% [emulador.call("rom_title"), TAM_FRAME, bytes_audio]
+		(
+			"Emulador GB smoke: OK · %s · %d bytes/frame · %d bytes PCM"
+			% [emulador.call("rom_title"), TAM_FRAME, bytes_audio]
+		)
 	)
 	quit(0)
 
