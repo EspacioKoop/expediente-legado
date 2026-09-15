@@ -12,6 +12,8 @@ const ALTO_BARRA := 34.0
 const ALTO_TITULO := 28.0
 const MARGEN := 12.0
 const ANCHO_TITULO_RECUPERABLE := 120.0
+## Por encima del bloqueador modal (1002) y de cualquier ventana normal.
+const Z_MODAL := 3000
 
 ## Identidad propia: gramática de 1998 sin copiar el escritorio de Windows.
 const FONDO_CORPORATIVO := Color("315d5c")
@@ -35,6 +37,12 @@ var _aplicaciones: Dictionary = {}
 var _ventanas: Dictionary = {}
 var _z_siguiente := 10
 var _arrastre_id := ""
+
+## Solo puede haber una modal activa a la vez: bloquea el resto del shell
+## (escritorio, barra, menú y demás ventanas) hasta que se cierre.
+var _modal_id := ""
+var _foco_previo_modal: Control = null
+var _bloqueador_modal: Control
 
 
 func _ready() -> void:
@@ -85,7 +93,7 @@ func adoptar_aplicacion(
 
 
 func abrir_aplicacion(id: String) -> void:
-	if not _aplicaciones.has(id):
+	if not _modal_id.is_empty() or not _aplicaciones.has(id):
 		return
 	if _ventanas.has(id):
 		var datos: Dictionary = _ventanas[id]
@@ -105,8 +113,31 @@ func abrir_aplicacion(id: String) -> void:
 	_crear_ventana(id, String(_aplicaciones[id]["titulo"]), creado as Control)
 
 
+## Abre [param contenido] como ventana modal: bloquea el resto del shell
+## (escritorio, barra, menú y demás ventanas) y atrapa el foco de teclado
+## dentro suyo hasta que se cierre con [method cerrar], su botón de cerrar o Esc.
+## Al cerrarse, el foco vuelve a quien lo tenía antes de abrirla.
+func abrir_modal(id: String, titulo: String, contenido: Control) -> void:
+	if id.is_empty() or contenido == null or _ventanas.has(id) or not _modal_id.is_empty():
+		return
+	_foco_previo_modal = get_viewport().gui_get_focus_owner()
+	_menu.visible = false
+	_bloqueador_modal = ColorRect.new()
+	_bloqueador_modal.name = "BloqueadorModal"
+	_bloqueador_modal.color = Color(EstiloSiga.NEGRO, 0.35)
+	_bloqueador_modal.mouse_filter = Control.MOUSE_FILTER_STOP
+	_bloqueador_modal.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_bloqueador_modal.z_index = 1002
+	add_child(_bloqueador_modal)
+	_modal_id = id
+	_crear_ventana(id, titulo, contenido, true)
+	var primero := _primer_control_enfocable(contenido)
+	if primero != null:
+		primero.grab_focus()
+
+
 func minimizar(id: String) -> void:
-	if not _ventanas.has(id):
+	if not _ventanas.has(id) or (not _modal_id.is_empty() and id != _modal_id):
 		return
 	var datos: Dictionary = _ventanas[id]
 	var panel: Control = datos["panel"]
@@ -117,7 +148,7 @@ func minimizar(id: String) -> void:
 
 
 func restaurar(id: String) -> void:
-	if not _ventanas.has(id):
+	if not _ventanas.has(id) or (not _modal_id.is_empty() and id != _modal_id):
 		return
 	var datos: Dictionary = _ventanas[id]
 	var panel: Control = datos["panel"]
@@ -132,7 +163,7 @@ func cerrar(id: String) -> void:
 		return
 	var datos: Dictionary = _ventanas[id]
 	var panel: Control = datos["panel"]
-	var tarea: Button = datos["tarea"]
+	var tarea: Button = datos.get("tarea")
 	_ventanas.erase(id)
 	if is_instance_valid(panel):
 		panel.queue_free()
@@ -140,16 +171,33 @@ func cerrar(id: String) -> void:
 		tarea.queue_free()
 	if _arrastre_id == id:
 		_arrastre_id = ""
-	_enfocar_superior()
+	if _modal_id == id:
+		_cerrar_modal()
+	else:
+		_enfocar_superior()
+
+
+func _cerrar_modal() -> void:
+	_modal_id = ""
+	if is_instance_valid(_bloqueador_modal):
+		_bloqueador_modal.queue_free()
+	_bloqueador_modal = null
+	if is_instance_valid(_foco_previo_modal):
+		_foco_previo_modal.grab_focus()
+	else:
+		_enfocar_superior()
+	_foco_previo_modal = null
 
 
 func enfocar(id: String) -> void:
 	if not _ventanas.has(id):
 		return
+	if not _modal_id.is_empty() and id != _modal_id:
+		return
 	_z_siguiente += 1
 	var datos: Dictionary = _ventanas[id]
 	var panel: Control = datos["panel"]
-	panel.z_index = _z_siguiente
+	panel.z_index = Z_MODAL if id == _modal_id else _z_siguiente
 	for otro_id in _ventanas:
 		var otro: Dictionary = _ventanas[otro_id]
 		var activo := String(otro_id) == id and not bool(otro.get("minimizada", false))
@@ -349,7 +397,7 @@ func _abrir_desde_menu(id: String) -> void:
 	abrir_aplicacion(id)
 
 
-func _crear_ventana(id: String, titulo: String, contenido: Control) -> void:
+func _crear_ventana(id: String, titulo: String, contenido: Control, es_modal: bool = false) -> void:
 	var panel := PanelContainer.new()
 	panel.name = "Ventana_%s" % id
 	panel.position = _posicion_inicial(_ventanas.size())
@@ -382,13 +430,14 @@ func _crear_ventana(id: String, titulo: String, contenido: Control) -> void:
 	etiqueta.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	fila_titulo.add_child(etiqueta)
 
-	var minimizar_boton := Button.new()
-	minimizar_boton.text = "—"
-	minimizar_boton.tooltip_text = tr("ESCRITORIO_MINIMIZAR")
-	minimizar_boton.custom_minimum_size = Vector2(31, 24)
-	_preparar_boton(minimizar_boton)
-	minimizar_boton.pressed.connect(minimizar.bind(id))
-	fila_titulo.add_child(minimizar_boton)
+	if not es_modal:
+		var minimizar_boton := Button.new()
+		minimizar_boton.text = "—"
+		minimizar_boton.tooltip_text = tr("ESCRITORIO_MINIMIZAR")
+		minimizar_boton.custom_minimum_size = Vector2(31, 24)
+		_preparar_boton(minimizar_boton)
+		minimizar_boton.pressed.connect(minimizar.bind(id))
+		fila_titulo.add_child(minimizar_boton)
 
 	var cerrar_boton := Button.new()
 	cerrar_boton.text = String.chr(0xD7)
@@ -422,13 +471,15 @@ func _crear_ventana(id: String, titulo: String, contenido: Control) -> void:
 	tarea.custom_minimum_size.x = 122
 	_preparar_boton(tarea)
 	tarea.pressed.connect(_al_pulsar_tarea.bind(id))
-	_tareas.add_child(tarea)
+	if not es_modal:
+		_tareas.add_child(tarea)
 
 	_ventanas[id] = {
 		"panel": panel,
 		"titulo_barra": titulo_barra,
 		"tarea": tarea,
 		"minimizada": false,
+		"modal": es_modal,
 	}
 	_limitar_ventana(panel)
 	enfocar(id)
@@ -556,6 +607,35 @@ func _primer_control_en(nodo: Node) -> Control:
 	return null
 
 
+## A diferencia de [method _primer_control_en], baja recursivamente: el
+## contenido de una modal puede anidar contenedores antes del primer control.
+func _primer_control_enfocable(nodo: Node) -> Control:
+	if nodo is Control and (nodo as Control).focus_mode != Control.FOCUS_NONE:
+		return nodo as Control
+	for hijo in nodo.get_children():
+		var encontrado := _primer_control_enfocable(hijo)
+		if encontrado != null:
+			return encontrado
+	return null
+
+
+## Controles enfocables de la ventana modal activa, en orden de aparición.
+func _controles_enfocables_modal() -> Array[Control]:
+	var resultado: Array[Control] = []
+	if _modal_id.is_empty() or not _ventanas.has(_modal_id):
+		return resultado
+	var panel: Control = _ventanas[_modal_id]["panel"]
+	_recolectar_enfocables(panel, resultado)
+	return resultado
+
+
+func _recolectar_enfocables(nodo: Node, resultado: Array[Control]) -> void:
+	if nodo is Control and (nodo as Control).focus_mode != Control.FOCUS_NONE:
+		resultado.append(nodo as Control)
+	for hijo in nodo.get_children():
+		_recolectar_enfocables(hijo, resultado)
+
+
 func _solicitar_salida() -> void:
 	_menu.visible = false
 	salir_solicitado.emit()
@@ -565,9 +645,35 @@ func _unhandled_key_input(evento: InputEvent) -> void:
 	if not evento is InputEventKey:
 		return
 	var tecla := evento as InputEventKey
-	if tecla.pressed and not tecla.echo and tecla.keycode == KEY_ESCAPE and _menu.visible:
-		_menu.visible = false
+	if not tecla.pressed or tecla.echo:
+		return
+	if tecla.keycode == KEY_ESCAPE:
+		if not _modal_id.is_empty():
+			cerrar(_modal_id)
+			get_viewport().set_input_as_handled()
+		elif _menu.visible:
+			_menu.visible = false
+			get_viewport().set_input_as_handled()
+		return
+	if tecla.keycode == KEY_TAB and not _modal_id.is_empty():
+		_ciclar_foco_modal(tecla.shift_pressed)
 		get_viewport().set_input_as_handled()
+
+
+## El foco por defecto de Godot recorre todo el árbol visible; con una modal
+## abierta debe quedarse dentro de ella, para no "escapar" al escritorio o la
+## barra que hay detrás del bloqueador.
+func _ciclar_foco_modal(hacia_atras: bool) -> void:
+	var controles := _controles_enfocables_modal()
+	if controles.is_empty():
+		return
+	var actual := get_viewport().gui_get_focus_owner()
+	var indice := controles.find(actual)
+	if indice == -1:
+		controles[0].grab_focus()
+		return
+	var siguiente := (indice - 1 + controles.size()) if hacia_atras else (indice + 1)
+	controles[siguiente % controles.size()].grab_focus()
 
 
 func _crear_ayuda_sistema() -> Control:
