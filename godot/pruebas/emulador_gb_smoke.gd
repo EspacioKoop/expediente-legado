@@ -3,6 +3,8 @@ extends SceneTree
 const ROM := "res://roms/caza_pixeles_98.gbc"
 const BYTES_POR_PIXEL := 4
 const TAM_FRAME := 160 * 144 * BYTES_POR_PIXEL
+const BYTES_POR_MUESTRA_ESTEREO := 4
+const FRECUENCIA_AUDIO := 48000
 ## La boot ROM CGB de SameBoy tarda ~16 frames en ceder el control al cartucho.
 const FRAMES_ARRANQUE := 60
 
@@ -23,8 +25,14 @@ func _init() -> void:
 	if not _frame_tiene_variacion(frame):
 		_fallar("el framebuffer quedó uniforme por píxel RGBA")
 		return
+	var bytes_audio := _probar_audio_nativo(emulador)
+	if bytes_audio < 0:
+		return
 
-	print("Emulador GB smoke: OK · %s · %d bytes/frame" % [emulador.call("rom_title"), TAM_FRAME])
+	print(
+		"Emulador GB smoke: OK · %s · %d bytes/frame · %d bytes PCM"
+		% [emulador.call("rom_title"), TAM_FRAME, bytes_audio]
+	)
 	quit(0)
 
 
@@ -82,6 +90,30 @@ func _ejecutar_frames(emulador: Object) -> PackedByteArray:
 			_fallar("frame inválido: %d bytes" % frame.size())
 			return PackedByteArray()
 	return frame
+
+
+func _probar_audio_nativo(emulador: Object) -> int:
+	if bool(emulador.call("supports_audio")):
+		_fallar("supports_audio no debe activarse antes de conectar AudioStreamGenerator")
+		return -1
+	if int(emulador.call("audio_sample_rate")) != FRECUENCIA_AUDIO:
+		_fallar("frecuencia PCM inesperada")
+		return -1
+	var pcm = emulador.call("drain_audio_pcm16")
+	if not (pcm is PackedByteArray):
+		_fallar("drain_audio_pcm16 no devolvió PackedByteArray")
+		return -1
+	if pcm.is_empty():
+		_fallar("SameBoy no produjo muestras PCM tras ejecutar frames")
+		return -1
+	if pcm.size() % BYTES_POR_MUESTRA_ESTEREO != 0:
+		_fallar("el PCM no está alineado a S16LE estéreo")
+		return -1
+	var vacio = emulador.call("drain_audio_pcm16")
+	if not (vacio is PackedByteArray) or not vacio.is_empty():
+		_fallar("drain_audio_pcm16 no vació la cola nativa")
+		return -1
+	return pcm.size()
 
 
 func _frame_tiene_variacion(frame: PackedByteArray) -> bool:
