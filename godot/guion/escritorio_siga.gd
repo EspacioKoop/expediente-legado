@@ -335,7 +335,11 @@ func _al_input_lanzador(evento: InputEvent, id: String) -> void:
 		return
 	if evento is InputEventKey:
 		var tecla := evento as InputEventKey
-		if tecla.pressed and not tecla.echo and tecla.keycode in [KEY_ENTER, KEY_KP_ENTER, KEY_SPACE]:
+		if (
+			tecla.pressed
+			and not tecla.echo
+			and tecla.keycode in [KEY_ENTER, KEY_KP_ENTER, KEY_SPACE]
+		):
 			abrir_aplicacion(id)
 			get_viewport().set_input_as_handled()
 
@@ -602,8 +606,12 @@ func _preparar_boton(boton: Button, icono_escritorio: bool = false) -> void:
 	if icono_escritorio:
 		normal = _estilo_panel(Color(FONDO_CORPORATIVO, 0.35), Color(FONDO_CORPORATIVO, 0.0))
 	boton.add_theme_stylebox_override("normal", normal)
-	boton.add_theme_stylebox_override("hover", _estilo_panel(EstiloSiga.GRIS_CLARO, EstiloSiga.BLANCO))
-	boton.add_theme_stylebox_override("pressed", _estilo_panel(EstiloSiga.GRIS_OSCURO, EstiloSiga.NEGRO))
+	boton.add_theme_stylebox_override(
+		"hover", _estilo_panel(EstiloSiga.GRIS_CLARO, EstiloSiga.BLANCO)
+	)
+	boton.add_theme_stylebox_override(
+		"pressed", _estilo_panel(EstiloSiga.GRIS_OSCURO, EstiloSiga.NEGRO)
+	)
 	var foco := _estilo_panel(Color(0, 0, 0, 0), CREMA)
 	foco.border_width_left = 2
 	foco.border_width_top = 2
@@ -611,7 +619,9 @@ func _preparar_boton(boton: Button, icono_escritorio: bool = false) -> void:
 	foco.border_width_bottom = 2
 	boton.add_theme_stylebox_override("focus", foco)
 	boton.add_theme_color_override("font_color", CREMA if icono_escritorio else EstiloSiga.NEGRO)
-	boton.add_theme_color_override("font_focus_color", CREMA if icono_escritorio else EstiloSiga.NEGRO)
+	boton.add_theme_color_override(
+		"font_focus_color", CREMA if icono_escritorio else EstiloSiga.NEGRO
+	)
 
 
 func _estilo_panel(fondo: Color, borde: Color) -> StyleBoxFlat:
