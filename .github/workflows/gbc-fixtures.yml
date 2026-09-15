@@ -99,7 +99,7 @@ jobs:
           git -C rgbds-legacy-src fetch --depth 1 origin "$CGB_ACID2_RGBDS_COMMIT"
           git -C rgbds-legacy-src checkout --detach FETCH_HEAD
           test "$(git -C rgbds-legacy-src rev-parse HEAD)" = "$CGB_ACID2_RGBDS_COMMIT"
-          make -C rgbds-legacy-src
+          make -C rgbds-legacy-src CFLAGS="-g -fcommon"
           for tool in rgbasm rgblink rgbfix rgbgfx; do
             test -x "rgbds-legacy-src/$tool"
           done
