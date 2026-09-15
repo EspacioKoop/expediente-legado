@@ -16,10 +16,7 @@ static func hay(nombre: String) -> bool:
 
 
 static func crear(
-	nombre: String,
-	color: Color = Color.WHITE,
-	escala: float = 1.0,
-	usar_uv: bool = true
+	nombre: String, color: Color = Color.WHITE, escala: float = 1.0, usar_uv: bool = true
 ) -> ShaderMaterial:
 	var albedo := _cargar(nombre, "albedo")
 	if albedo == null:
