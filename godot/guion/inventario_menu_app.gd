@@ -185,7 +185,10 @@ func _texto_detalle(objeto: Dictionary) -> String:
 	)
 	var usos = objeto.get("usos", [])
 	if usos is Array and not usos.is_empty():
-		lineas.append(String(_textos.get("detalle_uso", "Uso: %s")) % ", ".join(usos))
+		var usos_texto := PackedStringArray()
+		for uso in usos:
+			usos_texto.append(String(uso))
+		lineas.append(String(_textos.get("detalle_uso", "Uso: %s")) % ", ".join(usos_texto))
 	var origen := String(objeto.get("origen", "")).strip_edges()
 	if not origen.is_empty():
 		lineas.append(String(_textos.get("detalle_origen", "Origen: %s")) % origen)
