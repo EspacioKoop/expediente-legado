@@ -6,6 +6,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 NATIVE = ROOT / "godot" / "native" / "siga98_gb"
 UI = ROOT / "godot" / "guion" / "emulador_portatil_app.gd"
+AUDIO_UI = ROOT / "godot" / "guion" / "emulador_portatil_audio_app.gd"
 PORTATIL = ROOT / "godot" / "guion" / "consola_portatil_98.gd"
 EXTENSION = ROOT / "godot" / "addons" / "siga98_gb" / "siga98_gb.gdextension"
 LOCK = NATIVE / "deps.lock.json"
@@ -20,6 +21,7 @@ class EmuladorGBTest(unittest.TestCase):
     def setUpClass(cls):
         cls.cpp = (NATIVE / "src" / "siga98_gb.cpp").read_text(encoding="utf-8")
         cls.ui = UI.read_text(encoding="utf-8")
+        cls.audio_ui = AUDIO_UI.read_text(encoding="utf-8")
         cls.portatil = PORTATIL.read_text(encoding="utf-8")
         cls.extension = EXTENSION.read_text(encoding="utf-8")
         cls.lock = json.loads(LOCK.read_text(encoding="utf-8"))
@@ -72,13 +74,17 @@ class EmuladorGBTest(unittest.TestCase):
         ):
             self.assertIn(f"const {constante} := {valor}", self.ui)
 
-    def test_nucleo_declara_capacidades_cgb(self):
+    def test_nucleo_declara_capacidades_cgb_y_audio(self):
         self.assertIn('D_METHOD("core_name")', self.cpp)
         self.assertIn('D_METHOD("supports_cgb")', self.cpp)
         self.assertIn('D_METHOD("supports_audio")', self.cpp)
         self.assertIn('return "SameBoy";', self.cpp)
         self.assertIn("bool Siga98GB::supports_cgb() const", self.cpp)
         self.assertIn("bool Siga98GB::supports_audio() const", self.cpp)
+        self.assertIn(
+            "bool Siga98GB::supports_audio() const {\n    return true;\n}",
+            self.cpp,
+        )
 
     def test_nucleo_expone_sram_sin_saltarse_tamano_del_cartucho(self):
         self.assertIn('D_METHOD("save_ram")', self.cpp)
@@ -89,8 +95,9 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn("Tamaño de SRAM no coincide con el cartucho", self.cpp)
 
     def test_portatil_abre_ui_sin_estado_de_campana(self):
-        self.assertIn("EmuladorPortatilApp.new()", self.portatil)
-        combinado = self.cpp + self.ui + self.portatil
+        self.assertIn("EmuladorPortatilAudioApp.new()", self.portatil)
+        self.assertIn("extends EmuladorPortatilApp", self.audio_ui)
+        combinado = self.cpp + self.ui + self.audio_ui + self.portatil
         for termino in ("Partida", "Jornada", "pistas_descubiertas", "dinero"):
             self.assertNotIn(termino, combinado)
 
@@ -153,6 +160,24 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn("_botones_previos = botones", self.ui)
         self.assertNotIn('_emulador.call("audio', self.ui)
 
+    def test_audio_rom_usa_generator_separado_acotado_y_limpiable(self):
+        self.assertIn("AudioStreamGenerator.new()", self.audio_ui)
+        self.assertIn('name = "AudioEmuladoPortatil"', self.audio_ui)
+        self.assertIn("AudioStreamGeneratorPlayback", self.audio_ui)
+        self.assertIn('call("drain_audio_pcm16")', self.audio_ui)
+        self.assertIn("pcm.decode_s16(offset)", self.audio_ui)
+        self.assertIn("pcm.decode_s16(offset + 2)", self.audio_ui)
+        self.assertIn("get_frames_available()", self.audio_ui)
+        self.assertIn("push_buffer(lote)", self.audio_ui)
+        self.assertIn("MAX_FRAMES_AUDIO_PENDIENTE := 9600", self.audio_ui)
+        self.assertIn("clear_buffer()", self.audio_ui)
+        self.assertIn("func set_audio_emulado_muted(muted: bool)", self.audio_ui)
+        self.assertIn("func set_audio_emulado_volumen(volumen: float)", self.audio_ui)
+        self.assertIn("func _cargar_rom(ruta: String)", self.audio_ui)
+        self.assertIn("func _cerrar()", self.audio_ui)
+        self.assertIn("func _exit_tree()", self.audio_ui)
+        self.assertNotIn("AudioStreamWAV", self.audio_ui)
+
     def test_smoke_compara_pixeles_rgba_no_canales_sueltos(self):
         self.assertIn("BYTES_POR_PIXEL := 4", self.smoke)
         self.assertIn("func _frame_tiene_variacion", self.smoke)
@@ -165,6 +190,12 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn("func _probar_sram", self.smoke)
         self.assertIn('emulador.call("save_ram")', self.smoke)
         self.assertIn('emulador.call("load_save_ram", sram)', self.smoke)
+
+    def test_smoke_exige_audio_nativo_activo(self):
+        self.assertIn('if not bool(emulador.call("supports_audio")):', self.smoke)
+        self.assertIn('emulador.call("drain_audio_pcm16")', self.smoke)
+        self.assertIn("BYTES_POR_MUESTRA_ESTEREO := 4", self.smoke)
+        self.assertIn("FRECUENCIA_AUDIO := 48000", self.smoke)
 
     def test_extension_declara_linux_y_windows(self):
         self.assertIn('compatibility_minimum = "4.7"', self.extension)

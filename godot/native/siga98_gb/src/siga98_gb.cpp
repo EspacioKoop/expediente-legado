@@ -270,7 +270,7 @@ bool Siga98GB::supports_cgb() const {
 }
 
 bool Siga98GB::supports_audio() const {
-    return false;
+    return true;
 }
 
 int Siga98GB::width() const {

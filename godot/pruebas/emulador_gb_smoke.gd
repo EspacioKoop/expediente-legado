@@ -103,8 +103,8 @@ func _validar_frame(frame: PackedByteArray) -> bool:
 func _probar_audio_nativo(emulador: Object) -> int:
 	var error := ""
 	var pcm = null
-	if bool(emulador.call("supports_audio")):
-		error = "supports_audio no debe activarse antes de conectar AudioStreamGenerator"
+	if not bool(emulador.call("supports_audio")):
+		error = "supports_audio debe estar activo con el puente AudioStreamGenerator"
 	elif int(emulador.call("audio_sample_rate")) != FRECUENCIA_AUDIO:
 		error = "frecuencia PCM inesperada"
 	else:
