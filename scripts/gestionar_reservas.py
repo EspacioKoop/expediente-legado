@@ -121,7 +121,9 @@ def planificar_barrido(
             continue
 
         if reserva.pr is not None:
-            pr = cache_pr.setdefault(reserva.pr, obtener_pr(reserva.pr))
+            if reserva.pr not in cache_pr:
+                cache_pr[reserva.pr] = obtener_pr(reserva.pr)
+            pr = cache_pr[reserva.pr]
             if pr.get("state") == "closed":
                 motivo = "merge-detectado-automaticamente" if pr.get("merged_at") else "PR-cerrado-sin-integrar"
                 acciones.append((reserva, motivo, pr))
