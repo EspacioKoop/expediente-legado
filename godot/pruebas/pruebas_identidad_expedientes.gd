@@ -20,7 +20,9 @@ func _init() -> void:
 		var valor: Variant = catalogo.get(caso_id, {})
 		var identidad: Dictionary = valor if valor is Dictionary else {}
 		comprobar("%s tiene identidad" % caso_id, not identidad.is_empty(), true)
-		comprobar("%s tiene código" % caso_id, not String(identidad.get("codigo", "")).is_empty(), true)
+		comprobar(
+			"%s tiene código" % caso_id, not String(identidad.get("codigo", "")).is_empty(), true
+		)
 
 		var ruta := String(identidad.get("icono", ""))
 		var existe := not ruta.is_empty() and ResourceLoader.exists(ruta)
