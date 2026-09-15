@@ -40,7 +40,8 @@ class VentanaExterior3DTest(unittest.TestCase):
         self.assertIn('name = "Nubes3D"', self.exterior)
 
     def test_la_casa_no_se_convierte_en_exterior(self):
-        self.assertIn('dia.fase != "casa"', self.controlador)
+        self.assertIn('dia.jornada.get("fase", "")', self.controlador)
+        self.assertIn('!= "casa"', self.controlador)
         self.assertIn('Clima.estado(int(dia.jornada.get("dia", 1)))', self.controlador)
         self.assertIn('get_node_or_null("VentanaCasa")', self.controlador)
         self.assertNotIn('"exterior"', self.controlador)
