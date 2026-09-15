@@ -117,8 +117,10 @@ func _ejecutar() -> void:
 		"resolution": [ANCHO, ALTO],
 		"warmup_frames": CALENTAMIENTO,
 		"sample_frames": MUESTRAS,
-		"rendering_method": ProjectSettings.get_setting("rendering/renderer/rendering_method", "unknown"),
-		"camera": {
+		"rendering_method":
+		ProjectSettings.get_setting("rendering/renderer/rendering_method", "unknown"),
+		"camera":
+		{
 			"position": [camara.position.x, camara.position.y, camara.position.z],
 			"target": [0.0, 1.25, 5.0],
 			"fov": camara.fov,
@@ -127,7 +129,8 @@ func _ejecutar() -> void:
 		"metrics_avg": promedios,
 		"metrics_max": maximos,
 		"gpu_frame_ms": null,
-		"gpu_frame_ms_note": "N/D: Godot Performance no expone un tiempo GPU portable para este runner.",
+		"gpu_frame_ms_note":
+		"N/D: Godot Performance no expone un tiempo GPU portable para este runner.",
 		"screenshot": png.get_file(),
 	}
 	var json_path := _salida.path_join("%s.json" % _modo)
