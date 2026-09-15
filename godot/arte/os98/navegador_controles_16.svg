@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="16" viewBox="0 0 160 16" shape-rendering="crispEdges">
+  <!-- Atlas 10x16 para navegador OS98: atrás, adelante, recargar, parar, inicio, historial, favoritos, buscar, enlace, error. -->
+  <rect width="160" height="16" fill="none"/>
+  <g id="nav-atras" transform="translate(0 0)"><path d="M2 8l6-6v4h6v4H8v4z" fill="#174c98" stroke="#1c2b38"/></g>
+  <g id="nav-adelante" transform="translate(16 0)"><path d="M14 8L8 2v4H2v4h6v4z" fill="#174c98" stroke="#1c2b38"/></g>
+  <g id="nav-recargar" transform="translate(32 0)"><path d="M4 5h2V3h5v2h2V3l2 3-2 3V7h-2V6H7v1H5v4h2v1h4v-2h2v3h-2v1H6v-1H4v-2H3V7h1z" fill="#2b7ce0"/><rect x="10" y="2" width="3" height="1" fill="#1c2b38"/></g>
+  <g id="nav-parar" transform="translate(48 0)"><rect x="3" y="3" width="10" height="10" fill="#8e2c2c" stroke="#4a1717"/><rect x="5" y="5" width="6" height="6" fill="#d84c43"/></g>
+  <g id="nav-inicio" transform="translate(64 0)"><path d="M2 8l6-6 6 6v6H9v-4H7v4H2z" fill="#e7cd4a" stroke="#3d3520"/><rect x="5" y="8" width="6" height="6" fill="#f5de61"/></g>
+  <g id="nav-historial" transform="translate(80 0)"><circle cx="8" cy="8" r="6" fill="#d9d8d1" stroke="#1c2b38"/><path d="M8 4v4h3" fill="none" stroke="#174c98" stroke-width="2"/><rect x="2" y="7" width="2" height="2" fill="#43a83b"/></g>
+  <g id="nav-favoritos" transform="translate(96 0)"><path d="M8 1l2 4 5 1-4 3 1 5-4-2-4 2 1-5-4-3 5-1z" fill="#f1d72f" stroke="#6f5d12"/></g>
+  <g id="nav-buscar" transform="translate(112 0)"><circle cx="7" cy="7" r="4" fill="#e9eef2" stroke="#174c98" stroke-width="2"/><path d="M10 10l4 4" stroke="#1c2b38" stroke-width="2"/></g>
+  <g id="nav-enlace" transform="translate(128 0)"><path d="M3 6h5v3H5v2h4V9h3v4H4v-2H2V7zM8 3h4v2h2v4h-2v2H8V8h3V6H8z" fill="#2f66bd"/></g>
+  <g id="nav-error" transform="translate(144 0)"><path d="M8 1l7 13H1z" fill="#f1d72f" stroke="#5f4d0c"/><rect x="7" y="5" width="2" height="5" fill="#3a2c00"/><rect x="7" y="12" width="2" height="2" fill="#3a2c00"/></g>
+</svg>
