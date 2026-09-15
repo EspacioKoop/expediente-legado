@@ -29,6 +29,22 @@ class GestionarReservasTest(unittest.TestCase):
         self.assertEqual("Probar algo", reserva.goal)
         self.assertTrue(reserva.released)
 
+    def test_release_con_branch_no_libera_otro_corte_del_mismo_issue(self):
+        t0 = datetime(2026, 9, 15, 0, 0, tzinfo=UTC)
+        comentarios = [
+            comentario("CLAIM issue=#10 agent=A branch=feature/10-a files=a.gd goal=A lease=48h", t0),
+            comentario("CLAIM issue=#10 agent=B branch=feature/10-b files=b.gd goal=B lease=48h", t0),
+            comentario(
+                "RELEASE issue=#10 motivo=entregado branch=feature/10-a auto=reservas.yml",
+                t0 + timedelta(hours=1),
+            ),
+        ]
+
+        estado = reservas.reconstruir_reservas(comentarios)
+
+        self.assertTrue(estado[(10, "feature/10-a")].released)
+        self.assertFalse(estado[(10, "feature/10-b")].released)
+
     def test_heartbeat_renueva_lease(self):
         t0 = datetime(2026, 9, 15, 0, 0, tzinfo=UTC)
         comentarios = [
