@@ -683,18 +683,8 @@ static func _rasgos_cavafis(
 		- alto * 0.028
 	)
 	var escala_sien := Vector3(radio_x * 0.22, alto * 0.13, radio_z * 0.14)
-	_rasgo_esfera(
-		padre,
-		Vector3(-sien_cabello_x, sien_cabello_y, z_sien_izq),
-		escala_sien,
-		cabello
-	)
-	_rasgo_esfera(
-		padre,
-		Vector3(sien_cabello_x, sien_cabello_y, z_sien_der),
-		escala_sien,
-		cabello
-	)
+	_rasgo_esfera(padre, Vector3(-sien_cabello_x, sien_cabello_y, z_sien_izq), escala_sien, cabello)
+	_rasgo_esfera(padre, Vector3(sien_cabello_x, sien_cabello_y, z_sien_der), escala_sien, cabello)
 
 
 static func _aro_gafa(
