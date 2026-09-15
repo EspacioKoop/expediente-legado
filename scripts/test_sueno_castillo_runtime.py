@@ -4,12 +4,16 @@ import unittest
 
 RAIZ = Path(__file__).resolve().parents[1]
 CASTILLO = RAIZ / "godot" / "guion" / "sueno_castillo.gd"
+FORMAS = RAIZ / "godot" / "guion" / "sueno_formas.gd"
+SUENO = RAIZ / "godot" / "guion" / "sueno.gd"
 
 
 class SuenoCastilloRuntimeTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.texto = CASTILLO.read_text(encoding="utf-8")
+        cls.formas = FORMAS.read_text(encoding="utf-8")
+        cls.sueno = SUENO.read_text(encoding="utf-8")
 
     def test_expone_adaptador_sin_duplicar_seleccion_nocturna(self):
         self.assertIn("static func adaptar_espacio(", self.texto)
@@ -43,6 +47,33 @@ class SuenoCastilloRuntimeTest(unittest.TestCase):
         self.assertIn('LICENCIA := "CC0-1.0"', self.texto)
         self.assertEqual(self.texto.count('"grupo": "arquitectura"'), 3)
         self.assertEqual(self.texto.count('"grupo": "prop"'), 3)
+
+    def test_patio_declara_castillo_sobre_familia_anular(self):
+        self.assertIn('"familia_poligonal": SuenoFamilias.ANULAR', self.formas)
+        self.assertIn('"identidad_onirica": SuenoCastillo.ID', self.formas)
+        self.assertIn('"vuelta_castillo": 1', self.formas)
+        self.assertIn('"semilla_castillo": 0', self.formas)
+
+    def test_sueno_delega_presentacion_sin_hardcodear_patio(self):
+        self.assertIn(
+            'var identidad_onirica := String(forma.get("identidad_onirica", ""))',
+            self.sueno,
+        )
+        self.assertIn('if identidad_onirica == SuenoCastillo.ID:', self.sueno)
+        self.assertIn(
+            'estado_presentacion.merge(contenido.get("estado_presentacion", {}), true)',
+            self.sueno,
+        )
+        self.assertIn(
+            "resultado = SuenoCastillo.adaptar_espacio(resultado, estado_presentacion, contenido)",
+            self.sueno,
+        )
+        self.assertNotIn('id == "patio"', self.sueno)
+
+    def test_adaptacion_ocurre_despues_del_contorno_poligonal(self):
+        contorno = self.sueno.index('resultado["contorno"] = familia["contorno"]')
+        adaptador = self.sueno.index("resultado = SuenoCastillo.adaptar_espacio(")
+        self.assertLess(contorno, adaptador)
 
 
 if __name__ == "__main__":

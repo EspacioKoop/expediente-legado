@@ -75,6 +75,9 @@ const FORMAS := {
 	# Un anillo alrededor de un patio al que no se entra. Desde #279 la forma
 	# lógica de celdas se conserva para timing/mapa, mientras la arquitectura
 	# visible y física usa la familia cóncava ANULAR con vacío central real.
+	# #284 reutiliza esa misma familia como primer castillo jugable: la forma
+	# declara la identidad y el estado inicial, mientras `Sueno.espacio()`
+	# conserva el contenido conocido y delega solo la presentación al adaptador.
 	"patio":
 	{
 		"rotulo": "SUENO_ROTULO",
@@ -86,6 +89,8 @@ const FORMAS := {
 			Rect2i(15, 0, 3, 18),
 		],
 		"familia_poligonal": SuenoFamilias.ANULAR,
+		"identidad_onirica": SuenoCastillo.ID,
+		"estado_presentacion": {"vuelta_castillo": 1, "semilla_castillo": 0},
 		"textura_suelo": "techo",
 		"textura_muro": "gotele",
 		"escala_textura": 0.55,

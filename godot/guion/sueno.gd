@@ -281,6 +281,16 @@ static func espacio(id: String, quedan: int, contenido: Dictionary = {}) -> Dict
 	if es_poligonal:
 		resultado["contorno"] = familia["contorno"]
 		resultado["altura_contorno"] = float(familia.get("altura", 3.2))
+
+	# #284: la forma decide si tiene una identidad onírica fuerte. `Sueno`
+	# termina primero el contrato espacial genérico y solo después delega la
+	# presentación, de modo que visual y colisión siguen naciendo del mismo
+	# contorno poligonal de #451. El contenido conocido se pasa sin modificar.
+	var identidad_onirica := String(forma.get("identidad_onirica", ""))
+	if identidad_onirica == SuenoCastillo.ID:
+		var estado_presentacion: Dictionary = forma.get("estado_presentacion", {}).duplicate(true)
+		estado_presentacion.merge(contenido.get("estado_presentacion", {}), true)
+		resultado = SuenoCastillo.adaptar_espacio(resultado, estado_presentacion, contenido)
 	return resultado
 
 
