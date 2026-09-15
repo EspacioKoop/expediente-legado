@@ -668,6 +668,54 @@
       "licencia": "CC0-1.0",
       "fuente": "https://milkandbanana.itch.io/traffic-road-assets",
       "sha256": "53cd37f68d5a6a857cfa6dbe1ee5023d52fec25c97936dd0d3fb4373df9372ce"
+    },
+    {
+      "ruta": "modelos/psx_cars/Car01.glb",
+      "titulo": "Car 01 — station wagon, textura car.png (PSX Style Cars, OBJ original convertido a GLB)",
+      "autor": "GGBotNet",
+      "licencia": "CC0-1.0",
+      "fuente": "https://ggbot.itch.io/psx-style-cars",
+      "sha256": "5f6652067e6cfeee69311bac0559bad412045b2ae062e582e75c1f4934758945"
+    },
+    {
+      "ruta": "modelos/psx_cars/Car03.glb",
+      "titulo": "Car 03 — hatchback, textura car3_red.png (PSX Style Cars, OBJ original convertido a GLB)",
+      "autor": "GGBotNet",
+      "licencia": "CC0-1.0",
+      "fuente": "https://ggbot.itch.io/psx-style-cars",
+      "sha256": "4dedb35a4dfdb733753b24782735d921d5716c264c894b3a121719dea450d6de"
+    },
+    {
+      "ruta": "modelos/psx_cars/Car04.glb",
+      "titulo": "Car 04 — minivan, textura car4.png (PSX Style Cars, OBJ original convertido a GLB)",
+      "autor": "GGBotNet",
+      "licencia": "CC0-1.0",
+      "fuente": "https://ggbot.itch.io/psx-style-cars",
+      "sha256": "58188655b892e85bf1543c4b5fb4ab97493d82a0883908fbf3aba54f7a0f6226"
+    },
+    {
+      "ruta": "modelos/psx_cars/Car01_0.png",
+      "titulo": "Textura embebida extraída por Godot de Car01.glb",
+      "autor": "GGBotNet",
+      "licencia": "CC0-1.0",
+      "fuente": "https://ggbot.itch.io/psx-style-cars",
+      "sha256": "b9da2be39f88ad9b775d446b9eaf81ebfece628b308171b22b6c543c166fba00"
+    },
+    {
+      "ruta": "modelos/psx_cars/Car03_0.png",
+      "titulo": "Textura embebida extraída por Godot de Car03.glb",
+      "autor": "GGBotNet",
+      "licencia": "CC0-1.0",
+      "fuente": "https://ggbot.itch.io/psx-style-cars",
+      "sha256": "a01934d2f7b0fa0bdc213e9b68a95bec69e046eb0b073dbdfa9a28f29fcb3fda"
+    },
+    {
+      "ruta": "modelos/psx_cars/Car04_0.png",
+      "titulo": "Textura embebida extraída por Godot de Car04.glb",
+      "autor": "GGBotNet",
+      "licencia": "CC0-1.0",
+      "fuente": "https://ggbot.itch.io/psx-style-cars",
+      "sha256": "fc0009ac3ed6a9d39956cbd3ec3b9e9bfbde38bd0c5a5aa6b1cd22c92a9f3a81"
     }
   ]
 }
