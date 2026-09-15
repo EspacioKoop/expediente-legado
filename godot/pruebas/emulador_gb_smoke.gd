@@ -20,10 +20,7 @@ func _init() -> void:
 	if not _probar_sram(emulador):
 		return
 	var frame := _ejecutar_frames(emulador)
-	if frame.is_empty():
-		return
-	if not _frame_tiene_variacion(frame):
-		_fallar("el framebuffer quedó uniforme por píxel RGBA")
+	if not _validar_frame(frame):
 		return
 	var bytes_audio := _probar_audio_nativo(emulador)
 	if bytes_audio < 0:
@@ -94,26 +91,36 @@ func _ejecutar_frames(emulador: Object) -> PackedByteArray:
 	return frame
 
 
+func _validar_frame(frame: PackedByteArray) -> bool:
+	if frame.is_empty():
+		return false
+	if not _frame_tiene_variacion(frame):
+		_fallar("el framebuffer quedó uniforme por píxel RGBA")
+		return false
+	return true
+
+
 func _probar_audio_nativo(emulador: Object) -> int:
+	var error := ""
+	var pcm = null
 	if bool(emulador.call("supports_audio")):
-		_fallar("supports_audio no debe activarse antes de conectar AudioStreamGenerator")
-		return -1
-	if int(emulador.call("audio_sample_rate")) != FRECUENCIA_AUDIO:
-		_fallar("frecuencia PCM inesperada")
-		return -1
-	var pcm = emulador.call("drain_audio_pcm16")
-	if not (pcm is PackedByteArray):
-		_fallar("drain_audio_pcm16 no devolvió PackedByteArray")
-		return -1
-	if pcm.is_empty():
-		_fallar("SameBoy no produjo muestras PCM tras ejecutar frames")
-		return -1
-	if pcm.size() % BYTES_POR_MUESTRA_ESTEREO != 0:
-		_fallar("el PCM no está alineado a S16LE estéreo")
-		return -1
-	var vacio = emulador.call("drain_audio_pcm16")
-	if not (vacio is PackedByteArray) or not vacio.is_empty():
-		_fallar("drain_audio_pcm16 no vació la cola nativa")
+		error = "supports_audio no debe activarse antes de conectar AudioStreamGenerator"
+	elif int(emulador.call("audio_sample_rate")) != FRECUENCIA_AUDIO:
+		error = "frecuencia PCM inesperada"
+	else:
+		pcm = emulador.call("drain_audio_pcm16")
+		if not (pcm is PackedByteArray):
+			error = "drain_audio_pcm16 no devolvió PackedByteArray"
+		elif pcm.is_empty():
+			error = "SameBoy no produjo muestras PCM tras ejecutar frames"
+		elif pcm.size() % BYTES_POR_MUESTRA_ESTEREO != 0:
+			error = "el PCM no está alineado a S16LE estéreo"
+		else:
+			var vacio = emulador.call("drain_audio_pcm16")
+			if not (vacio is PackedByteArray) or not vacio.is_empty():
+				error = "drain_audio_pcm16 no vació la cola nativa"
+	if not error.is_empty():
+		_fallar(error)
 		return -1
 	return pcm.size()
 
