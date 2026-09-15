@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="300" viewBox="0 0 440 300" shape-rendering="crispEdges">
+  <!-- Módulos visuales genéricos. El texto de contenido real debe sustituirse desde UI/datos cuando sea jugable. -->
+  <g id="mod-deportes-marcador" transform="translate(0 0)">
+    <rect width="220" height="100" fill="#153c29" stroke="#0b2d1e" stroke-width="2"/>
+    <rect x="6" y="6" width="208" height="18" fill="#0b2d1e"/>
+    <text x="12" y="19" font-family="Arial,sans-serif" font-size="9" font-weight="700" fill="#f1d72f">RESULTADOS</text>
+    <text x="202" y="19" text-anchor="end" font-family="Arial,sans-serif" font-size="8" fill="#bdd7c7">FINAL</text>
+    <text x="14" y="46" font-family="Arial,sans-serif" font-size="11" font-weight="700" fill="#f4f0d8">LOCAL</text>
+    <text x="206" y="46" text-anchor="end" font-family="monospace" font-size="15" font-weight="700" fill="#fff">2</text>
+    <line x1="10" y1="55" x2="210" y2="55" stroke="#739a83"/>
+    <text x="14" y="76" font-family="Arial,sans-serif" font-size="11" font-weight="700" fill="#f4f0d8">VISITANTE</text>
+    <text x="206" y="76" text-anchor="end" font-family="monospace" font-size="15" font-weight="700" fill="#fff">1</text>
+    <text x="110" y="94" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" fill="#bdd7c7">CRÓNICA · ESTADÍSTICAS · CLASIFICACIÓN</text>
+  </g>
+
+  <g id="mod-meteo-pronostico" transform="translate(220 0)">
+    <rect width="220" height="100" fill="#eaf5fb" stroke="#174c98" stroke-width="2"/>
+    <rect x="6" y="6" width="208" height="18" fill="#174c98"/>
+    <text x="12" y="19" font-family="Arial,sans-serif" font-size="9" font-weight="700" fill="#fff">PRÓXIMAS 72 HORAS</text>
+    <g transform="translate(10 31)"><rect width="62" height="58" fill="#fff" stroke="#8ca9c1"/><text x="31" y="12" text-anchor="middle" font-family="Arial" font-size="8" fill="#3f617c">HOY</text><circle cx="31" cy="30" r="8" fill="#f1d72f"/><text x="31" y="52" text-anchor="middle" font-family="Arial" font-size="11" font-weight="700" fill="#174c98">18°</text></g>
+    <g transform="translate(79 31)"><rect width="62" height="58" fill="#fff" stroke="#8ca9c1"/><text x="31" y="12" text-anchor="middle" font-family="Arial" font-size="8" fill="#3f617c">MAÑANA</text><path d="M18 32h28v12H18z" fill="#d9ecf7" stroke="#8ca9c1"/><text x="31" y="52" text-anchor="middle" font-family="Arial" font-size="11" font-weight="700" fill="#174c98">16°</text></g>
+    <g transform="translate(148 31)"><rect width="62" height="58" fill="#fff" stroke="#8ca9c1"/><text x="31" y="12" text-anchor="middle" font-family="Arial" font-size="8" fill="#3f617c">+2 DÍAS</text><path d="M18 27h28v16H18z" fill="#8ca9c1"/><path d="M20 47l5 7m8-7 5 7m8-7 5 7" stroke="#174c98"/><text x="31" y="52" text-anchor="middle" font-family="Arial" font-size="11" font-weight="700" fill="#174c98">14°</text></g>
+  </g>
+
+  <g id="mod-tech-descarga" transform="translate(0 100)">
+    <rect width="220" height="100" fill="#202630" stroke="#78d35b" stroke-width="2"/>
+    <rect x="6" y="6" width="208" height="18" fill="#0a0f12"/>
+    <text x="12" y="19" font-family="monospace" font-size="9" font-weight="700" fill="#78d35b">DESCARGA DESTACADA</text>
+    <rect x="12" y="33" width="45" height="45" fill="#0a0f12" stroke="#4e5e69"/>
+    <path d="M34 39v22m-9-9 9 9 9-9M23 68h22" stroke="#78d35b" stroke-width="3" fill="none"/>
+    <text x="68" y="45" font-family="Arial,sans-serif" font-size="11" font-weight="700" fill="#e9eef2">UTILIDAD.ZIP</text>
+    <text x="68" y="60" font-family="monospace" font-size="8" fill="#9fb0bd">742 KB · freeware</text>
+    <rect x="68" y="69" width="88" height="19" fill="#174c98" stroke="#7aa2d8"/>
+    <text x="112" y="82" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#fff">DESCARGAR</text>
+    <text x="210" y="94" text-anchor="end" font-family="monospace" font-size="7" fill="#78d35b">[ contador: 00421 ]</text>
+  </g>
+
+  <g id="mod-ocio-cartelera" transform="translate(220 100)">
+    <rect width="220" height="100" fill="#6f1f34" stroke="#3c0f28" stroke-width="2"/>
+    <rect x="6" y="6" width="208" height="18" fill="#23101d"/>
+    <text x="12" y="19" font-family="Arial,sans-serif" font-size="9" font-weight="700" fill="#f1d72f">CARTELERA</text>
+    <rect x="12" y="31" width="48" height="58" fill="#23101d" stroke="#d8a84c"/>
+    <path d="M17 37h38v8H17zm0 13h38v8H17zm0 13h38v8H17z" fill="#f1d72f"/>
+    <text x="70" y="44" font-family="Georgia,serif" font-size="11" font-weight="700" fill="#fff0c7">SESIÓN 20:30</text>
+    <text x="70" y="60" font-family="Arial,sans-serif" font-size="8" fill="#f0c9d6">Cine Avenida · Sala 2</text>
+    <text x="70" y="74" font-family="Arial,sans-serif" font-size="8" fill="#f0c9d6">Drama · 112 min</text>
+    <text x="70" y="88" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#f1d72f">[ ficha ] [ críticas ]</text>
+  </g>
+
+  <g id="mod-clasificados-ficha" transform="translate(0 200)">
+    <rect width="220" height="100" fill="#f4efdc" stroke="#544d3b" stroke-width="2"/>
+    <rect x="6" y="6" width="208" height="18" fill="#d6cfb2"/>
+    <text x="12" y="19" font-family="Arial,sans-serif" font-size="9" font-weight="700" fill="#403a2d">ANUNCIO #0143</text>
+    <text x="12" y="42" font-family="Georgia,serif" font-size="12" font-weight="700" fill="#403a2d">SE VENDE EQUIPO</text>
+    <text x="12" y="57" font-family="Arial,sans-serif" font-size="8" fill="#6a6253">Buen estado. Incluye manuales.</text>
+    <text x="12" y="70" font-family="Arial,sans-serif" font-size="8" fill="#6a6253">Recogida local. No cambios.</text>
+    <rect x="12" y="78" width="88" height="16" fill="#e7cd4a" stroke="#544d3b"/>
+    <text x="56" y="89" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#403a2d">VER CONTACTO</text>
+    <text x="207" y="89" text-anchor="end" font-family="Arial,sans-serif" font-size="10" font-weight="700" fill="#a83232">12.500 ptas.</text>
+  </g>
+
+  <g id="mod-web-personal-contador" transform="translate(220 200)">
+    <rect width="220" height="100" fill="#10104c" stroke="#7a7aff" stroke-width="2"/>
+    <text x="110" y="18" text-anchor="middle" font-family="Comic Sans MS,Arial,sans-serif" font-size="11" font-weight="700" fill="#ffff55">★ MI RINCÓN EN LA RED ★</text>
+    <line x1="12" y1="26" x2="208" y2="26" stroke="#ff55ff" stroke-width="2"/>
+    <text x="14" y="43" font-family="Arial,sans-serif" font-size="8" fill="#55ffff">Gracias por visitar mi página.</text>
+    <text x="14" y="57" font-family="Arial,sans-serif" font-size="8" fill="#ffffff">Última actualización: 12/09/98</text>
+    <rect x="13" y="66" width="92" height="20" fill="#000" stroke="#55ff55"/>
+    <text x="59" y="80" text-anchor="middle" font-family="monospace" font-size="10" fill="#55ff55">00001337</text>
+    <text x="116" y="79" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#ffff55">VISITANTES</text>
+    <text x="110" y="96" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" fill="#ff55ff">[ libro de visitas ] [ enlaces ]</text>
+  </g>
+</svg>
