@@ -1,0 +1,45 @@
+[gd_scene load_steps=6 format=3]
+
+[sub_resource type="StandardMaterial3D" id="MatFabric"]
+albedo_color = Color(0.22, 0.015, 0.02, 1)
+roughness = 0.90
+cull_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="MatGold"]
+albedo_color = Color(0.66, 0.36, 0.08, 1)
+metallic = 0.35
+roughness = 0.52
+
+[sub_resource type="QuadMesh" id="Banner"]
+size = Vector2(1.8, 3.2)
+
+[sub_resource type="TorusMesh" id="Ring"]
+inner_radius = 0.35
+outer_radius = 0.56
+rings = 16
+ring_segments = 32
+
+[sub_resource type="CylinderMesh" id="Rod"]
+top_radius = 0.045
+bottom_radius = 0.045
+height = 2.25
+radial_segments = 10
+
+[node name="EstandarteAnular" type="Node3D"]
+
+[node name="Tela" type="MeshInstance3D" parent="."]
+mesh = SubResource("Banner")
+material_override = SubResource("MatFabric")
+position = Vector3(0, -1.55, 0)
+
+[node name="EmblemaAnular" type="MeshInstance3D" parent="."]
+mesh = SubResource("Ring")
+material_override = SubResource("MatGold")
+position = Vector3(0, -1.28, 0.05)
+rotation_degrees = Vector3(90, 0, 0)
+
+[node name="Barra" type="MeshInstance3D" parent="."]
+mesh = SubResource("Rod")
+material_override = SubResource("MatGold")
+position = Vector3(0, 0.15, 0)
+rotation_degrees = Vector3(0, 0, 90)

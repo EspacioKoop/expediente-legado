@@ -8,24 +8,25 @@ extends RefCounted
 
 const CLAVE_COMPRAS := "roms_compradas"
 
-## Precios deliberadamente pequeños y provisionales hasta la calibración de #83.
-## Solo entra contenido propio del repositorio. Las ROMs de user://roms siguen
-## siendo aportadas por el jugador y nunca se convierten en mercancía de SIGA-98.
-const CATALOGO := [
-	{
-		"id": "caza_pixeles_98",
-		"nombre": "Caza Píxeles 98",
-		"precio": 35,
-		"ruta": "res://roms/caza_pixeles_98.gbc",
-		"origen": "propia",
-	},
-]
 
-
+## El catálogo sale del índice de ROMs propias (RomsPropias): jugables con
+## precio. Precios provisionales hasta la calibración de #83. Las ROMs de
+## user://roms siguen siendo aportadas por el jugador y nunca son mercancía.
 static func catalogo() -> Array[Dictionary]:
 	var salida: Array[Dictionary] = []
-	for entrada in CATALOGO:
-		salida.append(entrada.duplicate(true))
+	for rom in RomsPropias.a_la_venta():
+		(
+			salida
+			. append(
+				{
+					"id": String(rom["id"]),
+					"nombre": String(rom["titulo"]),
+					"precio": int(rom["precio"]),
+					"ruta": String(rom["rom"]),
+					"origen": "propia",
+				}
+			)
+		)
 	return salida
 
 
@@ -51,7 +52,7 @@ static func compras(jornada: Dictionary) -> Array[String]:
 static func listar(jornada: Dictionary) -> Array[Dictionary]:
 	var adquiridas := compras(jornada)
 	var salida: Array[Dictionary] = []
-	for base in CATALOGO:
+	for base in catalogo():
 		var entrada: Dictionary = base.duplicate(true)
 		var id_rom := String(entrada.get("id", ""))
 		entrada["comprada"] = adquiridas.has(id_rom)
@@ -114,9 +115,9 @@ static func roms_compradas(jornada: Dictionary) -> Array[Dictionary]:
 
 
 static func _buscar(id_rom: String) -> Dictionary:
-	for entrada in CATALOGO:
+	for entrada in catalogo():
 		if String(entrada.get("id", "")) == id_rom:
-			return entrada.duplicate(true)
+			return entrada
 	return {}
 
 

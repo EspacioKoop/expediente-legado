@@ -8,16 +8,11 @@ La tienda convierte **dinero en ocio opcional**, no dinero en más dinero. Compr
 
 La compra solo es válida durante `trayecto`, porque el local pertenece a la calle. El estado se guarda en `jornada["roms_compradas"]`: `Partida` ya serializa el diccionario completo y `Jornada.completar()` conserva claves adicionales, así que este corte no modifica esos módulos compartidos.
 
-## Catálogo inicial
+## Catálogo
 
-El primer SKU es `Caza Píxeles 98`, la ROM propia ya construida para #124:
+El catálogo sale del índice de ROMs propias ([`roms-propias.md`](roms-propias.md), `godot/datos/roms_propias.json`): se venden las jugables con precio. Hoy son `Paper Planes 98` y `Croc Riders 98`, a 45 cada una. `Caza Píxeles 98` viene incluida con la consola y no se vende.
 
-- ID estable: `caza_pixeles_98`;
-- ruta esperada: `res://roms/caza_pixeles_98.gbc`;
-- precio inicial: 35;
-- origen: propio.
-
-El precio es provisional hasta la calibración de #83. Si el artefacto no existe en el build, la tienda lo considera `sin_stock` y **no descuenta dinero**.
+Los precios son provisionales hasta la calibración de #83. Si el artefacto no existe en el build, la tienda lo considera `sin_stock` y **no descuenta dinero**.
 
 Nuevas ROMs comprables deben cumplir la misma frontera de #244: código y assets propios o con licencia/procedencia verificada. No se incorporan BIOS, dumps ni ROMs comerciales.
 
@@ -43,7 +38,7 @@ Este corte es **standalone first** y no modifica `espacios_catalogo.gd`. Esa rut
 
 - no añade todavía el escaparate 3D ni una puerta física a la tienda;
 - no añade UI de caja/dependiente;
-- no filtra todavía el selector del emulador de #124 según `roms_compradas`;
+- filtra el selector del emulador: incluidas y compradas (`RomsPropias.en_consola`) de #124 según `roms_compradas`;
 - no cambia la disponibilidad histórica de `Caza Píxeles 98` en la Portátil Color 98;
 - no añade ROMs binarias ni contenido de terceros.
 

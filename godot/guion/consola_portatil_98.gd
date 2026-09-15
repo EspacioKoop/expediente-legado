@@ -41,9 +41,22 @@ func _alternar(_actor: Node) -> void:
 	_actualizar_pantalla()
 
 	_app = EmuladorPortatilApp.new()
+	_app.roms_compradas = _compradas_en_jornada()
 	_app.cerrado.connect(_al_cerrar_app)
 	get_tree().root.add_child(_app)
 	_app.abrir()
+
+
+## Los cartuchos comprados en la tienda viven en la jornada del día que monta
+## esta consola; fuera de un día (pruebas, escena suelta) solo hay incluidas.
+func _compradas_en_jornada() -> Array:
+	var actual := get_parent()
+	while actual != null:
+		var jornada = actual.get("jornada")
+		if jornada is Dictionary:
+			return TiendaVideojuegos.compras(jornada)
+		actual = actual.get_parent()
+	return []
 
 
 func _al_cerrar_app() -> void:
