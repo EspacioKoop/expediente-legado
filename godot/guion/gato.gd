@@ -341,7 +341,7 @@ func _mover_sin_atravesar(paso: Vector3, delta: float) -> void:
 ## cuerpo se frota lateralmente y la cabeza acompaña el gesto.
 func _animar_reposo(ritmo: float) -> void:
 	_cuerpo.scale.y = 1.0 + sin(_reloj * 2.2) * 0.012
-	var dando_mimos := estado.get("estado", "") == "mimos"
+	var dando_mimos: bool = estado.get("estado", "") == "mimos"
 	_cuerpo.position.x = sin(_reloj * 4.2) * 0.028 if dando_mimos else 0.0
 	_cuerpo.rotation.z = sin(_reloj * 3.1) * 0.045 if dando_mimos else 0.0
 	_cabeza.rotation.y = sin(_reloj * 0.45) * 0.18
