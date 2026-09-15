@@ -66,15 +66,30 @@ Una reserva de un issue no concede automáticamente todos los archivos que ese i
 
 Si una herramienta escribe por error en `main`, revierte inmediatamente sin force-push, deja constancia en #182 y continúa únicamente desde una rama propia.
 
+## GDScript: preflight obligatorio
+
+Si modificas cualquier archivo `*.gd`, ejecuta **antes de abrir o dar por listo el PR**:
+
+```bash
+bash scripts/check_gdscript.sh
+```
+
+En local el script aplica `gdformat` primero, después ejecuta `gdlint`, la suite Python y un `gdformat --check --diff` final. En CI usa el mismo script, pero no modifica el checkout: exige que el GDScript ya llegue formateado. La versión canónica es `gdtoolkit==4.3.4`.
+
+Reglas para evitar falsos fallos:
+
+- no escribas tests que dependan de espacios, saltos de línea o encadenamientos exactos que `gdformat` pueda reescribir;
+- si un test Python inspecciona una llamada GDScript, usa una regex tolerante a whitespace o, mejor, una prueba del comportamiento/contrato;
+- si el preflight local modifica un `.gd`, revisa y conserva ese formato antes de ejecutar el resto de validaciones o crear el commit;
+- no omitas este paso porque el cambio parezca documental o pequeño: si toca `*.gd`, el preflight es obligatorio.
+
 ## Pruebas canónicas
 
 Desde la raíz:
 
 ```bash
+bash scripts/check_gdscript.sh
 python3 scripts/verificar_godot.py
-python3 -m unittest discover -s scripts -p 'test_*.py'
-gdlint godot
-gdformat --check --diff godot
 ```
 
 Desde `backend/`:
@@ -97,6 +112,7 @@ Estas ya han provocado fallos reales.
 - **Cadena `dia_*`**: muchas capacidades se integran por herencia. No escribas tests que exijan que una clase herede *directamente* de una base si el contrato solo necesita herencia transitiva.
 - **`PackedVector*Array` y `const`**: Godot 4.7 no acepta todas las construcciones dinámicas de `PackedVector2Array(...)` dentro de expresiones `const`. Usa estado estático de solo lectura por API cuando corresponda.
 - **GDScript lint**: una variable `static var` no es una constante; `gdlint` exige nombre de variable, no MAYÚSCULAS de constante.
+- **GDScript formato**: `gdformat` puede partir expresiones como `Objeto.metodo(...)` en varias líneas. No fijes tests al texto exacto cuando el contrato no dependa del layout.
 - **`.uid`**: el repo versiona el `.uid` de cada guion. Si creas un `.gd`, incluye su `.uid` cuando Godot lo genere/requiera.
 - **`godot/datos/textos.csv`**: el bloque `ARCHIVO_*` no debe perderse por una reordenación ingenua. Inserta sin asumir que todo el fichero está ordenado.
 - **Texto visible**: interfaz y guion usan claves de traducción; no hardcodees cadenas visibles en GDScript salvo contratos deliberadamente literales, como frases que deben coincidir con el documento.
