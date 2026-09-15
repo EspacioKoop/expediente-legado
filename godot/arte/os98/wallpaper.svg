@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="768" viewBox="0 0 1024 768">
+  <!-- Fondo corporativo original para Expediente Legado: sobrio, legible y sin texto horneado. -->
+  <rect width="1024" height="768" fill="#2d5556"/>
+  <path d="M0 0h1024v118L0 286z" fill="#315f61"/>
+  <path d="M0 558l1024-210v420H0z" fill="#274b4e"/>
+  <g fill="none" stroke="#d9d1ba" stroke-width="1" opacity="0.075">
+    <path d="M64 0v768M128 0v768M192 0v768M256 0v768M320 0v768M384 0v768M448 0v768M512 0v768M576 0v768M640 0v768M704 0v768M768 0v768M832 0v768M896 0v768M960 0v768"/>
+    <path d="M0 64h1024M0 128h1024M0 192h1024M0 256h1024M0 320h1024M0 384h1024M0 448h1024M0 512h1024M0 576h1024M0 640h1024M0 704h1024"/>
+  </g>
+  <g opacity="0.18" transform="translate(705 168)">
+    <path d="M0 146L146 0l146 146-146 146z" fill="#1f4448"/>
+    <path d="M42 146L146 42l104 104-104 104z" fill="none" stroke="#d9d1ba" stroke-width="8"/>
+    <path d="M94 146l52-52 52 52-52 52z" fill="#d9d1ba"/>
+    <path d="M146 42v208M42 146h208" stroke="#8ea7a4" stroke-width="3"/>
+  </g>
+  <g opacity="0.16" fill="#e6dfc8">
+    <rect x="46" y="635" width="226" height="3"/>
+    <rect x="46" y="650" width="154" height="2"/>
+    <rect x="46" y="665" width="92" height="2"/>
+    <rect x="892" y="690" width="84" height="2"/>
+    <rect x="916" y="704" width="60" height="2"/>
+  </g>
+  <g fill="#d9d1ba" opacity="0.14">
+    <circle cx="48" cy="48" r="4"/><circle cx="64" cy="48" r="2"/><circle cx="76" cy="48" r="2"/>
+    <circle cx="976" cy="720" r="4"/><circle cx="960" cy="720" r="2"/><circle cx="948" cy="720" r="2"/>
+  </g>
+</svg>

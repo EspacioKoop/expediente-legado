@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="32" viewBox="0 0 192 32">
+  <!-- Atlas 6x32 px: siga, equipo, documentos, red, papelera, ayuda. -->
+  <g id="icon-siga" transform="translate(0 0)" stroke="#203235" stroke-width="1.5" stroke-linejoin="round">
+    <rect x="5" y="4" width="22" height="23" rx="1" fill="#d9d1ba"/>
+    <path d="M9 8h14v8H9z" fill="#315f61"/>
+    <path d="M10 20h8M10 23h5" stroke="#657b79"/>
+    <circle cx="22" cy="22" r="5" fill="#8ea7a4"/>
+    <path d="M25.5 25.5l3 3" stroke="#203235" stroke-width="2"/>
+  </g>
+  <g id="icon-equipo" transform="translate(32 0)" stroke="#203235" stroke-width="1.5" stroke-linejoin="round">
+    <rect x="3" y="5" width="20" height="15" rx="1" fill="#d7d2c4"/>
+    <rect x="6" y="8" width="14" height="9" fill="#315f61"/>
+    <path d="M10 23h7M13.5 20v3"/>
+    <rect x="24" y="8" width="5" height="16" fill="#a9a58f"/>
+    <circle cx="26.5" cy="20.5" r="1" fill="#eee7d0" stroke="none"/>
+  </g>
+  <g id="icon-documentos" transform="translate(64 0)" stroke="#203235" stroke-width="1.5" stroke-linejoin="round">
+    <path d="M4 9h9l2 3h13v14H4z" fill="#b8aa72"/>
+    <path d="M6 7h9l2 3h9v3H6z" fill="#d7cfb0"/>
+    <path d="M10 15h13M10 19h10M10 23h7" stroke="#6c664f"/>
+  </g>
+  <g id="icon-red" transform="translate(96 0)" stroke="#203235" stroke-width="1.5" stroke-linecap="square">
+    <path d="M8 11l8-5 8 5M8 11l8 11 8-11M16 6v16" fill="none"/>
+    <rect x="4" y="9" width="8" height="7" fill="#8ea7a4"/>
+    <rect x="20" y="9" width="8" height="7" fill="#8ea7a4"/>
+    <rect x="12" y="20" width="8" height="7" fill="#d9d1ba"/>
+  </g>
+  <g id="icon-papelera" transform="translate(128 0)" stroke="#203235" stroke-width="1.5" stroke-linejoin="round">
+    <path d="M8 9h17l-2 18H10z" fill="#b9c2bd"/>
+    <path d="M6 7h21M12 7l1-3h8l1 3" fill="none"/>
+    <path d="M13 12v11M17 12v11M21 12v11" stroke="#657b79"/>
+  </g>
+  <g id="icon-ayuda" transform="translate(160 0)" stroke="#203235" stroke-width="1.5" stroke-linejoin="round">
+    <circle cx="16" cy="16" r="12" fill="#d9d1ba"/>
+    <circle cx="16" cy="16" r="7" fill="#315f61"/>
+    <path d="M13 13c.3-2 1.6-3 3.4-3 2 0 3.4 1.1 3.4 2.8 0 1.6-.8 2.3-2.2 3.2-1.3.8-1.6 1.4-1.6 2.5" fill="none" stroke="#eee7d0" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="16" cy="22" r="1.2" fill="#eee7d0" stroke="none"/>
+  </g>
+</svg>

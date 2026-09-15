@@ -27,7 +27,7 @@ func _process(_delta: float) -> void:
 
 
 func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
-	var escritorio := EscritorioSiga.new()
+	var escritorio := EscritorioSigaVisual.new()
 	escritorio.name = "EscritorioSiga"
 	pantalla.add_child(escritorio)
 
@@ -37,6 +37,8 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	)
 	escritorio.establecer_reloj_narrativo(tr("ESCRITORIO_RELOJ") % int(dia.jornada.get("dia", 1)))
 
+	escritorio.registrar_identidad_visual("siga-98", "siga")
+	escritorio.registrar_identidad_visual("ayuda-sistema", "ayuda")
 	var creador_visor := Callable(self, "_crear_visor")
 	var titulo_siga := tr("ESCRITORIO_SIGA_TITULO")
 	escritorio.registrar_aplicacion("siga-98", titulo_siga, creador_visor)
