@@ -53,7 +53,7 @@ class GbcFixtureWorkflowTest(unittest.TestCase):
             "CGB_ACID2_RGBDS_COMMIT: 0759c98d913e3d4d21207a8886a319c85add2041",
             self.texto,
         )
-        self.assertIn("make -C rgbds-legacy-src", self.texto)
+        self.assertIn('make -C rgbds-legacy-src CFLAGS="-g -fcommon"', self.texto)
         self.assertIn(
             'PATH="$GITHUB_WORKSPACE/rgbds-legacy-src:$PATH" make -C cgb-acid2-src all',
             self.texto,
