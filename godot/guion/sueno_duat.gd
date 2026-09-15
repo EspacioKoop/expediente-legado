@@ -276,7 +276,9 @@ static func _montar_pesos(raiz: Node3D, estado_pesaje: Dictionary) -> void:
 		area.set_meta("duat_interaccion", "pesar")
 		area.set_meta("duat_objeto_id", String(objeto.get("id", "")))
 		area.set_meta("duat_peso", float(objeto.get("peso", 0.0)))
-		area.set_meta("duat_peso_sellado", float(objeto.get("peso_sellado", objeto.get("peso", 0.0))))
+		area.set_meta(
+			"duat_peso_sellado", float(objeto.get("peso_sellado", objeto.get("peso", 0.0)))
+		)
 		pesos.add_child(area)
 
 		var radio := clampf(0.26 + sqrt(float(objeto.get("peso", 1.0))) * 0.08, 0.30, 0.62)
@@ -413,11 +415,15 @@ static func _transformar_arquitectura(
 ) -> void:
 	var arquitectura := raiz.get_node_or_null("ArquitecturaPesable") as Node3D
 	var inferior := raiz.get_node_or_null("ArquitecturaPesable/PiramideInferior") as MeshInstance3D
-	var invertida := raiz.get_node_or_null("ArquitecturaPesable/PiramideInvertida") as MeshInstance3D
+	var invertida := (
+		raiz.get_node_or_null("ArquitecturaPesable/PiramideInvertida") as MeshInstance3D
+	)
 	if arquitectura == null or inferior == null or invertida == null:
 		return
 
-	var destino_inferior := POS_PIRAMIDE_INFERIOR_EQUILIBRIO if equilibrado else POS_PIRAMIDE_INFERIOR
+	var destino_inferior := (
+		POS_PIRAMIDE_INFERIOR_EQUILIBRIO if equilibrado else POS_PIRAMIDE_INFERIOR
+	)
 	var destino_invertida := (
 		POS_PIRAMIDE_INVERTIDA_EQUILIBRIO if equilibrado else POS_PIRAMIDE_INVERTIDA
 	)
