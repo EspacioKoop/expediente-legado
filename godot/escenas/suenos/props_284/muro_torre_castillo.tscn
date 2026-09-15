@@ -1,96 +1,21 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="ArrayMesh" path="res://escenas/suenos/props_284/muro_arco_castillo_psx.obj" id="1_arco"]
 
 [sub_resource type="StandardMaterial3D" id="MatStone"]
-albedo_color = Color(0.23, 0.235, 0.23, 1)
-roughness = 0.98
-
-[sub_resource type="StandardMaterial3D" id="MatWood"]
-albedo_color = Color(0.12, 0.065, 0.035, 1)
-roughness = 0.91
-
-[sub_resource type="StandardMaterial3D" id="MatIron"]
-albedo_color = Color(0.055, 0.06, 0.06, 1)
-metallic = 0.82
-roughness = 0.43
-
-[sub_resource type="BoxMesh" id="Box"]
-size = Vector3(1, 1, 1)
-
-[sub_resource type="CylinderMesh" id="Tower"]
-top_radius = 1.55
-bottom_radius = 1.72
-height = 5.4
-radial_segments = 16
-
-[sub_resource type="CylinderMesh" id="Stud"]
-top_radius = 0.045
-bottom_radius = 0.045
-height = 0.08
-radial_segments = 8
+albedo_color = Color(0.215, 0.205, 0.19, 1)
+roughness = 0.96
+metallic = 0.02
 
 [node name="MuroTorreCastillo" type="Node3D"]
 
-[node name="Muro" type="MeshInstance3D" parent="."]
-mesh = SubResource("Box")
+[node name="PortadaArqueada" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_arco")
 material_override = SubResource("MatStone")
-position = Vector3(0, 1.75, 0)
-scale = Vector3(5.80, 3.50, 0.70)
 
-[node name="Torre" type="MeshInstance3D" parent="."]
-mesh = SubResource("Tower")
-material_override = SubResource("MatStone")
-position = Vector3(-3.25, 2.70, 0)
-
-[node name="Puerta" type="MeshInstance3D" parent="."]
-mesh = SubResource("Box")
-material_override = SubResource("MatWood")
-position = Vector3(0.95, 1.25, 0.40)
-scale = Vector3(1.55, 2.50, 0.16)
-
-[node name="RefuerzoPuerta1" type="MeshInstance3D" parent="."]
-mesh = SubResource("Box")
-material_override = SubResource("MatIron")
-position = Vector3(0.95, 1.70, 0.50)
-scale = Vector3(1.48, 0.10, 0.06)
-
-[node name="RefuerzoPuerta2" type="MeshInstance3D" parent="."]
-mesh = SubResource("Box")
-material_override = SubResource("MatIron")
-position = Vector3(0.95, 0.82, 0.50)
-scale = Vector3(1.48, 0.10, 0.06)
-
-[node name="Almena1" type="MeshInstance3D" parent="."]
-mesh = SubResource("Box")
-material_override = SubResource("MatStone")
-position = Vector3(-2.25, 3.88, 0)
-scale = Vector3(0.55, 0.80, 0.86)
-
-[node name="Almena2" type="MeshInstance3D" parent="."]
-mesh = SubResource("Box")
-material_override = SubResource("MatStone")
-position = Vector3(-0.95, 3.88, 0)
-scale = Vector3(0.55, 0.80, 0.86)
-
-[node name="Almena3" type="MeshInstance3D" parent="."]
-mesh = SubResource("Box")
-material_override = SubResource("MatStone")
-position = Vector3(0.35, 3.88, 0)
-scale = Vector3(0.55, 0.80, 0.86)
-
-[node name="Almena4" type="MeshInstance3D" parent="."]
-mesh = SubResource("Box")
-material_override = SubResource("MatStone")
-position = Vector3(1.65, 3.88, 0)
-scale = Vector3(0.55, 0.80, 0.86)
-
-[node name="Almena5" type="MeshInstance3D" parent="."]
-mesh = SubResource("Box")
-material_override = SubResource("MatStone")
-position = Vector3(2.75, 3.88, 0)
-scale = Vector3(0.55, 0.80, 0.86)
-
-[node name="ClavoPuerta" type="MeshInstance3D" parent="."]
-mesh = SubResource("Stud")
-material_override = SubResource("MatIron")
-position = Vector3(1.48, 1.26, 0.58)
-rotation_degrees = Vector3(90, 0, 0)
+[node name="LuzUmbral" type="OmniLight3D" parent="."]
+position = Vector3(0, 2.15, 0.9)
+light_color = Color(0.62, 0.46, 0.31, 1)
+light_energy = 0.42
+omni_range = 4.2
+shadow_enabled = true
