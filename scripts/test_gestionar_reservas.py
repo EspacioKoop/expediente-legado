@@ -1,5 +1,8 @@
 from datetime import datetime, timedelta, timezone
+import io
 import unittest
+from unittest import mock
+from urllib.error import HTTPError
 
 import gestionar_reservas as reservas
 
@@ -173,6 +176,122 @@ class GestionarReservasTest(unittest.TestCase):
         )
 
         self.assertEqual([], acciones)
+
+
+def http_error(code: int, cuerpo: str, cabeceras: dict[str, str] | None = None) -> HTTPError:
+    return HTTPError(
+        "https://api.github.com/x", code, "error", cabeceras or {}, io.BytesIO(cuerpo.encode())
+    )
+
+
+SECUNDARIO = (
+    '{"message":"You have exceeded a secondary rate limit and have been '
+    'temporarily blocked from content creation."}'
+)
+
+
+class ReintentosTest(unittest.TestCase):
+    def test_403_de_rate_limit_secundario_es_transitorio_y_el_de_permisos_no(self):
+        self.assertTrue(reservas.es_transitorio(403, SECUNDARIO))
+        self.assertFalse(reservas.es_transitorio(403, '{"message":"Resource not accessible"}'))
+        self.assertTrue(reservas.es_transitorio(429, ""))
+        self.assertTrue(reservas.es_transitorio(502, ""))
+        self.assertFalse(reservas.es_transitorio(404, ""))
+
+    def test_espera_usa_retry_after_luego_reset_y_si_no_backoff_exponencial(self):
+        self.assertEqual(7.0, reservas.espera_recomendada({"Retry-After": "7"}, 0, 1000.0))
+        cabeceras = {"x-ratelimit-remaining": "0", "x-ratelimit-reset": "1030"}
+        self.assertEqual(30.0, reservas.espera_recomendada(cabeceras, 0, 1000.0))
+        self.assertEqual(4.0, reservas.espera_recomendada({}, 2, 1000.0))
+
+    def test_espera_nunca_supera_el_tope(self):
+        self.assertEqual(
+            reservas.ESPERA_MAX_SEGUNDOS,
+            reservas.espera_recomendada({"Retry-After": "99999"}, 0, 1000.0),
+        )
+        self.assertEqual(reservas.ESPERA_MAX_SEGUNDOS, reservas.espera_recomendada({}, 20, 1000.0))
+
+    def test_api_json_reintenta_el_rate_limit_secundario_y_acaba_publicando(self):
+        respuestas = [http_error(403, SECUNDARIO, {"Retry-After": "1"}), b'{"id": 1}']
+
+        def falso_urlopen(request, timeout=None):
+            siguiente = respuestas.pop(0)
+            if isinstance(siguiente, HTTPError):
+                raise siguiente
+            return mock.MagicMock(
+                __enter__=lambda self: mock.Mock(
+                    read=lambda: siguiente, headers=mock.Mock(items=lambda: [])
+                ),
+                __exit__=lambda *a: False,
+            )
+
+        esperas: list[float] = []
+        with mock.patch.object(reservas, "urlopen", falso_urlopen), mock.patch.object(
+            reservas, "TOKEN", "x"
+        ):
+            payload, _ = reservas.api_json("POST", "/x", {"body": "y"}, dormir=esperas.append)
+
+        self.assertEqual({"id": 1}, payload)
+        self.assertEqual([1.0], esperas)
+
+    def test_api_json_no_reintenta_un_403_de_permisos(self):
+        llamadas = []
+
+        def falso_urlopen(request, timeout=None):
+            llamadas.append(request)
+            raise http_error(403, '{"message":"Resource not accessible by integration"}')
+
+        with mock.patch.object(reservas, "urlopen", falso_urlopen), mock.patch.object(
+            reservas, "TOKEN", "x"
+        ):
+            with self.assertRaises(RuntimeError) as ctx:
+                reservas.api_json("POST", "/x", {"body": "y"}, dormir=lambda _: None)
+
+        self.assertEqual(1, len(llamadas))
+        self.assertNotIsInstance(ctx.exception, reservas.ErrorTransitorio)
+
+
+class AislamientoDeFallosTest(unittest.TestCase):
+    def test_un_fallo_al_liberar_no_impide_liberar_las_demas(self):
+        t0 = datetime(2026, 9, 15, 0, 0, tzinfo=UTC)
+        comentarios = [
+            comentario("CLAIM issue=#10 agent=A branch=feature/10-a files=a.gd goal=A lease=1h", t0),
+            comentario("CLAIM issue=#11 agent=B branch=feature/11-b files=b.gd goal=B lease=1h", t0),
+        ]
+        estado = reservas.reconstruir_reservas(comentarios)
+        acciones = reservas.planificar_barrido(estado, t0 + timedelta(hours=2), lambda n: {})
+        self.assertEqual(2, len(acciones))
+
+        publicadas: list[int] = []
+
+        def publicar(reserva, motivo, pr, dry_run):
+            if reserva.issue == 10:
+                raise reservas.ErrorTransitorio("rate limit")
+            publicadas.append(reserva.issue)
+
+        with mock.patch.object(reservas, "publicar_release", publicar), mock.patch.object(
+            reservas, "obtener_comentarios", lambda: comentarios
+        ), mock.patch("sys.argv", ["x", "--sweep"]):
+            codigo = reservas.main()
+
+        self.assertEqual(1, codigo)
+        self.assertEqual([11], publicadas)
+
+    def test_un_pr_inconsultable_no_aborta_el_barrido_ni_libera_su_reserva(self):
+        t0 = datetime(2026, 9, 15, 0, 0, tzinfo=UTC)
+        comentarios = [
+            comentario("CLAIM issue=#10 agent=A branch=feature/10-a files=a.gd goal=A lease=1h", t0),
+            comentario("PR_READY issue=#10 pr=#500", t0),
+            comentario("CLAIM issue=#11 agent=B branch=feature/11-b files=b.gd goal=B lease=1h", t0),
+        ]
+        estado = reservas.reconstruir_reservas(comentarios)
+
+        def obtener_pr(numero: int) -> dict:
+            raise reservas.ErrorTransitorio("rate limit")
+
+        acciones = reservas.planificar_barrido(estado, t0 + timedelta(hours=2), obtener_pr)
+
+        self.assertEqual([(11, "reserva-caducada")], [(a[0].issue, a[1]) for a in acciones])
 
 
 if __name__ == "__main__":
