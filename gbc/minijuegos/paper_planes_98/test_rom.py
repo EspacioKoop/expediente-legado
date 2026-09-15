@@ -60,6 +60,10 @@ class PruebasROM(unittest.TestCase):
             finally:
                 emulador.stop(save=False)
 
+    def test_cabecera_sigue_siendo_dual_mode(self):
+        self.assertEqual(self.rom[0x134:0x141], b"PAPERPLANES98")
+        self.assertEqual(self.rom[0x143], 0x80)
+
     def test_limpia_las_1024_celdas_sin_salirse(self):
         def preparar(emulador):
             emulador.memory[0x97FF:0x9C01] = [0x55] * 1026
@@ -87,7 +91,61 @@ class PruebasROM(unittest.TestCase):
                 self.assertTrue(all(0 < sprites[i * 4 + 2] <= 9
                                     for i in range(2, cantidad + 2)))
 
-    def test_hud_actualiza_digitos_sin_restos(self):
+    def test_viento_alterna_y_b_estabiliza(self):
+        casos = (
+            (0, 8, 0, 79),  # Liberty: racha suave hacia arriba.
+            (1, 8, 0, 81),  # WTC: racha más frecuente hacia abajo.
+            (2, 8, 0, 79),
+            (3, 8, 0, 81),
+            (1, 8, 2, 80),  # B anula la racha y mantiene la altura.
+            (1, 9, 0, 80),  # Fuera del pulso no hay desplazamiento.
+        )
+        for tipo, frame, keys, esperado in casos:
+            with self.subTest(hito=tipo, frame=frame, keys=keys):
+                def preparar(emulador):
+                    for nombre, valor in {"wTipoHito": tipo, "wFrame": frame,
+                                          "wKeys": keys, "wAvionY": 80}.items():
+                        emulador.memory[self.simbolos[nombre]] = valor
+
+                memoria = self.ejecutar("AplicarViento", preparar)
+                self.assertEqual(memoria[self.simbolos["wAvionY"]], esperado)
+
+    def test_paso_perfecto_dobla_puntos_y_cuenta_precision(self):
+        precisos = (64, 52, 88, 54)
+        normales = (48, 42, 74, 42)
+        for tipo, (y_precisa, y_normal) in enumerate(zip(precisos, normales)):
+            with self.subTest(hito=tipo, clase="perfecto"):
+                def preparar(emulador):
+                    valores = {
+                        "wTipoHito": tipo, "wHitoX": 40, "wAvionX": 40,
+                        "wAvionY": y_precisa, "wGateChecked": 0,
+                        "wLandCrashed": 0, "wScore": 0, "wPerfectos": 0,
+                        "wVidas": 3,
+                    }
+                    for nombre, valor in valores.items():
+                        emulador.memory[self.simbolos[nombre]] = valor
+
+                memoria = self.ejecutar("ComprobarPaso", preparar)
+                self.assertEqual(memoria[self.simbolos["wScore"]], 2)
+                self.assertEqual(memoria[self.simbolos["wPerfectos"]], 1)
+                self.assertEqual(memoria[self.simbolos["wGateChecked"]], 1)
+
+            with self.subTest(hito=tipo, clase="normal"):
+                def preparar(emulador):
+                    valores = {
+                        "wTipoHito": tipo, "wHitoX": 40, "wAvionX": 40,
+                        "wAvionY": y_normal, "wGateChecked": 0,
+                        "wLandCrashed": 0, "wScore": 0, "wPerfectos": 0,
+                        "wVidas": 3,
+                    }
+                    for nombre, valor in valores.items():
+                        emulador.memory[self.simbolos[nombre]] = valor
+
+                memoria = self.ejecutar("ComprobarPaso", preparar)
+                self.assertEqual(memoria[self.simbolos["wScore"]], 1)
+                self.assertEqual(memoria[self.simbolos["wPerfectos"]], 0)
+
+    def test_hud_muestra_viento_score_y_perfectos_sin_restos(self):
         def tile(caracter):
             if caracter == " ":
                 return 0
@@ -97,17 +155,27 @@ class PruebasROM(unittest.TestCase):
                 return 51
             return 23 + ord(caracter) - ord("A")
 
-        for vidas, hito, puntos in ((3, 0, 0), (2, 1, 1), (1, 2, 3), (0, 3, 4)):
+        casos = (
+            (3, 0, 0, 0, "UP"),
+            (2, 1, 2, 1, "DN"),
+            (1, 2, 5, 2, "UP"),
+            (0, 3, 8, 4, "DN"),
+        )
+        for vidas, hito, puntos, perfectos, viento in casos:
             with self.subTest(vidas=vidas, hito=hito, puntos=puntos):
                 def preparar(emulador):
                     emulador.memory[0x9800:0x9840] = [0] * 64
-                    for nombre, valor in {"wVidas": vidas, "wTipoHito": hito,
-                                          "wScore": puntos}.items():
+                    valores = {"wVidas": vidas, "wTipoHito": hito,
+                               "wScore": puntos, "wPerfectos": perfectos}
+                    for nombre, valor in valores.items():
                         emulador.memory[self.simbolos[nombre]] = valor
 
                 memoria = self.ejecutar("DibujarHUD", preparar)
-                for fila, texto in enumerate((f"NYC 98  FOLD {vidas}",
-                                              f"GATE {hito + 1}/4 SCORE {puntos:02}")):
+                textos = (
+                    f"NYC98 FOLD{vidas} WIND {viento}",
+                    f"GATE{hito + 1}/4 S{puntos:02} PERF{perfectos}",
+                )
+                for fila, texto in enumerate(textos):
                     esperado = bytes(map(tile, texto.ljust(20)))
                     inicio = 0x9800 + fila * 32
                     self.assertEqual(memoria[inicio:inicio + 20], esperado)
