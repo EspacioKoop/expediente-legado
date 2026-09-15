@@ -6,7 +6,7 @@
 ## Jornada real, sin añadir estado paralelo ni contaminar la raíz del día.
 extends Node
 
-const POSICION_ESTAMP_A := Vector3(-2.6, 1.35, -3.2)
+const POSICION_ESTAMPA := Vector3(-2.6, 1.35, -3.2)
 
 var _mundo_montado_id := 0
 
@@ -31,6 +31,6 @@ func _montar_estampa(mundo: Node3D, jornada: Dictionary) -> void:
 		return
 	var estampa := AquilesVigilia.new()
 	estampa.name = "AquilesVigiliaCasa"
-	estampa.position = POSICION_ESTAMP_A
+	estampa.position = POSICION_ESTAMPA
 	mundo.add_child(estampa)
 	estampa.configurar(jornada)
