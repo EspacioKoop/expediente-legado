@@ -33,6 +33,7 @@ func _entrar_en(fase: String) -> void:
 		_montar_persiana_calle()
 		TraficoVialCC0.montar(_mundo)
 		CochesPsxCC0.montar(_mundo)
+		MobiliarioUrbanoCC0.montar(_mundo)
 
 
 func _montar_persiana_calle() -> void:
