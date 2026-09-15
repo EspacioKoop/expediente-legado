@@ -130,6 +130,32 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn('".roto"', self.ui)
         self.assertIn("_recuperar_respaldo_sram()", self.ui)
 
+    def test_ui_deriva_sram_del_contenido_no_de_ruta_ni_nombre(self):
+        self.assertIn("func _ruta_sram(rom: PackedByteArray) -> String:", self.ui)
+        cuerpo_ruta_sram = self.ui.split("func _ruta_sram(rom: PackedByteArray) -> String:", 1)[
+            1
+        ].split("func ", 1)[0]
+        self.assertNotIn("ruta", cuerpo_ruta_sram)
+        self.assertNotIn("get_file()", cuerpo_ruta_sram)
+
+    def test_ui_cambia_de_rom_sin_mezclar_sram(self):
+        cuerpo_cargar_rom = self.ui.split("func _cargar_rom(ruta: String) -> void:", 1)[
+            1
+        ].split("func ", 1)[0]
+        indice_guardar = cuerpo_cargar_rom.index("_guardar_sram()")
+        indice_reset_ruta = cuerpo_cargar_rom.index('_ruta_sram_actual = ""')
+        indice_carga = cuerpo_cargar_rom.index("_cargar_rom_ahora(ruta)")
+        self.assertLess(
+            indice_guardar,
+            indice_reset_ruta,
+            "la SRAM de la ROM saliente debe guardarse antes de soltar su ruta",
+        )
+        self.assertLess(
+            indice_reset_ruta,
+            indice_carga,
+            "_ruta_sram_actual debe limpiarse antes de cargar la ROM entrante",
+        )
+
     def test_presentacion_fisica_es_externa_desactivable_y_cancelable(self):
         self.assertIn("DURACION_ENCENDIDO := 0.32", self.ui)
         self.assertIn("uniform bool filtro_lcd = true", self.ui)
