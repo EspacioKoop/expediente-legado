@@ -27,7 +27,7 @@ Contrapartes de vigilia de los sueños mitológicos (#435, #442). Permanecen fue
 | `hydra_loop_98` | HYDRA LOOP | Hidra | cortar cabezas empeora todo hasta dar con el nodo común | #439 |
 | `duat_98` | DUAT 98 | Duat | cámaras y contrapesos | #441 |
 
-`RYU FLOW` salió de esta lista tras #609/#622: su fuente RGBDS es reproducible, el core puede leer su memoria sin efectos laterales y el índice ya la incluye en el build de runtime. El paso siguiente no pertenece al catálogo ni al emulador: una capa de gameplay debe traducir el handshake de finalización a la semilla Ryū mediante #442.
+`RYU FLOW` salió de esta lista tras #609/#622: su fuente RGBDS es reproducible, el core puede leer su memoria sin efectos laterales y el índice la incluye en el build de runtime. `RyuFlowVigilia`, montado desde la casa real, observa la cabecera `RYUFLOW98` y solo cuando `$C100 == 0xA5` registra `dragon_japones` mediante `SemillasOniricas`; el emulador y la consola siguen sin conocer ese handshake concreto.
 
 ## Qué hace el índice
 
@@ -35,7 +35,7 @@ Contrapartes de vigilia de los sueños mitológicos (#435, #442). Permanecen fue
 - **CI GBC:** `.github/workflows/gbc-fixtures.yml` puede compilar e inspeccionar también fuentes prototipo para demostrar que son reproducibles sin exponerlas al juego.
 - **Tienda:** `TiendaVideojuegos.catalogo()` vende las jugables con precio (`RomsPropias.a_la_venta()`).
 - **Consola:** la Portátil Color 98 y la consola de sobremesa muestran las `incluida` más las compradas en la jornada (`RomsPropias.en_consola`), siempre que el artefacto exista en la build.
-- **Sueños:** la fuente de semilla de una ROM es `RomsPropias.fuente_semilla(id)` (`rom:<id>`). El cartucho ARIADNA del Minotauro ya la usa. `MYRMIDON 98` deja preparado ese origen para Aquiles y `RYU FLOW` conserva el suyo para Ryū; la traducción del final de ROM a semilla vive fuera de este índice.
+- **Sueños:** la fuente de semilla de una ROM es `RomsPropias.fuente_semilla(id)` (`rom:<id>`). El cartucho ARIADNA del Minotauro ya la usa. `RYU FLOW` consume ese mismo contrato desde `RyuFlowVigilia`; arrancar la ROM por sí solo no registra nada.
 
 ## Añadir una ROM
 
