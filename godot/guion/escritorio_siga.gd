@@ -587,14 +587,17 @@ func _crear_ayuda_sistema() -> Control:
 	columna.add_child(titulo)
 
 	var texto := Label.new()
-	texto.text = "\n".join(
-		[
-			tr("ESCRITORIO_AYUDA_ABRIR"),
-			tr("ESCRITORIO_AYUDA_TECLADO"),
-			tr("ESCRITORIO_AYUDA_ARRASTRAR"),
-			tr("ESCRITORIO_AYUDA_BARRA"),
-			tr("ESCRITORIO_AYUDA_CERRAR_MENU"),
-		]
+	texto.text = (
+		"\n"
+		. join(
+			[
+				tr("ESCRITORIO_AYUDA_ABRIR"),
+				tr("ESCRITORIO_AYUDA_TECLADO"),
+				tr("ESCRITORIO_AYUDA_ARRASTRAR"),
+				tr("ESCRITORIO_AYUDA_BARRA"),
+				tr("ESCRITORIO_AYUDA_CERRAR_MENU"),
+			]
+		)
 	)
 	texto.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	texto.size_flags_horizontal = Control.SIZE_EXPAND_FILL
