@@ -45,6 +45,11 @@ const PACIENCIA_GATO := 3
 ## en lo que te queda.
 const PRECIO_COMIDA_GATO := 10
 
+## Lo que cuesta comer tú (#93). Por debajo del coste de vivir, que ya paga lo
+## mínimo: comer de verdad es un extra, y compite con la lata del gato por el
+## mismo dinero — ahí está la decisión, no en una barra de hambre.
+const PRECIO_COMIDA_PROPIA := 15
+
 ## El alquiler introduce el mes sin convertirlo en un contador separado del día.
 ## Se vence cada diez días y se paga manualmente en el trayecto (#83/#85).
 const DIAS_POR_MES := 10
@@ -71,6 +76,10 @@ static func nueva(raiz: int = 0, vuelta: int = 1) -> Dictionary:
 		# porque es tuyo y no del trabajo. Acaba siendo lo único cálido del
 		# registro permanente, al lado de las cartas que recuerdas.
 		"gato": {"presente": true, "dias_sin_comer": 0},
+		# Comer tú es una compra aparte de la del gato: mismo dinero, dos
+		# hambres. No lleva barra visible (#93): la cuenta es interna hasta
+		# que #96 decida cómo se nota en la casa.
+		"comida_propia": {"dias_sin_comer": 0},
 		# Último vencimiento resuelto: pagado o registrado como impago.
 		"alquiler": {"ultimo_resuelto": 0, "pagados": 0, "impagos": 0},
 		# Lo leído hoy: es lo que alimenta el sueño de esta noche. Se vacía al
@@ -124,6 +133,9 @@ static func completar(jornada: Dictionary, raiz: int = 0) -> Dictionary:
 		elif typeof(molde[clave]) == TYPE_INT:
 			jornada[clave] = int(jornada[clave])
 	jornada["gato"]["dias_sin_comer"] = int(jornada["gato"].get("dias_sin_comer", 0))
+	jornada["comida_propia"]["dias_sin_comer"] = int(
+		jornada["comida_propia"].get("dias_sin_comer", 0)
+	)
 	for clave in ["ultimo_resuelto", "pagados", "impagos"]:
 		jornada["alquiler"][clave] = int(jornada["alquiler"].get(clave, 0))
 	# Una jornada guardada antes de que existiera la semilla (#147) trae un
@@ -234,6 +246,16 @@ static func alimentar_gato(jornada: Dictionary, precio: int) -> bool:
 	return true
 
 
+## Comer tú, no el gato. La misma frontera: sin dinero no se come, y no se
+## queda a deber. Compite por el mismo saldo que la lata, que es la decisión
+## que pide #93.
+static func comer(jornada: Dictionary, precio: int) -> bool:
+	if not gastar(jornada, precio):
+		return false
+	jornada["comida_propia"]["dias_sin_comer"] = 0
+	return true
+
+
 ## Día de vencimiento del alquiler. El calendario sale solo del día, no del azar.
 static func alquiler_vencimiento(dia: int) -> int:
 	return maxi(DIAS_POR_MES, int(ceil(float(dia) / DIAS_POR_MES)) * DIAS_POR_MES)
@@ -297,6 +319,7 @@ static func dormir(jornada: Dictionary) -> Dictionary:
 		if gato["dias_sin_comer"] > PACIENCIA_GATO:
 			gato["presente"] = false
 			se_fue = true
+	jornada["comida_propia"]["dias_sin_comer"] += 1
 
 	# Congela el Bingo cuando todas las consecuencias del día ya son definitivas,
 	# pero antes de que el sueño/despertar pueda limpiar sus contadores.
