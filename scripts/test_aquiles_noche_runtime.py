@@ -23,14 +23,20 @@ class AquilesNocheRuntimeTest(unittest.TestCase):
             self.controller,
             r"SemillasOniricas\s*\.\s*seleccionar_para_noche\s*\(",
         )
-        self.assertIn("familias.has(SuenoAquiles.ID_MITO)", self.controller)
+        self.assertIn("MitologiasNoche.MAX_FAMILIAS_NOCHE", self.controller)
+        self.assertIn("_corresponde_a_esta_escena(dia, familias)", self.controller)
+        self.assertRegex(
+            self.controller,
+            r"MitologiasNoche\s*\.\s*corresponde_a_escena\s*\(",
+        )
+        self.assertIn("SuenoAquiles.ID_MITO", self.controller)
         self.assertNotIn("activar_semilla_onirica", self.controller)
         self.assertNotIn("semilla_onirica_aquiles", self.controller)
 
-    def test_no_repite_aquiles_en_las_tres_salas(self):
-        self.assertIn("_es_primera_escena(dia)", self.controller)
-        self.assertIn("pendientes.size() == cantidad", self.controller)
+    def test_no_repite_aquiles_y_ya_no_fuerza_la_primera_escena(self):
         self.assertIn("_aquiles_montado_esta_noche = true", self.controller)
+        self.assertNotIn("_es_primera_escena", self.controller)
+        self.assertNotIn("pendientes.size() == cantidad", self.controller)
 
     def test_reutiliza_vertical_interactivo_y_no_secuestra_camara(self):
         self.assertIn("SuenoAquilesAlineacion.new()", self.controller)

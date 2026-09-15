@@ -1,14 +1,14 @@
-## Wiring nocturno de Aquiles dentro del recorrido real (#435/#438).
+## Wiring nocturno de Gilgamesh dentro del recorrido real (#435/#436).
 ##
-## El selector común decide si Aquiles puede contaminar esta noche. Este
-## controller solo materializa el vertical en la escena que le asigna
-## `MitologiasNoche`, conservando sala y salida genéricas.
+## `SemillasOniricas` decide si Gilgamesh sale y `MitologiasNoche` decide en qué
+## escena se materializa. Este controller solo monta el vertical ya integrado.
 extends Node
 
-const ESCALA_ENCUENTRO := 0.62
+const ESCENA_GILGAMESH := preload("res://escenas/sueno_gilgamesh.tscn")
+const ESCALA_ENCUENTRO := 0.44
 
 var _mundo_montado_id := 0
-var _aquiles_montado_esta_noche := false
+var _gilgamesh_montado_esta_noche := false
 var _fase_anterior := ""
 
 
@@ -20,7 +20,7 @@ func _process(_delta: float) -> void:
 	var fase := String(dia.jornada.get("fase", ""))
 	if fase != _fase_anterior:
 		if fase != "sueño":
-			_aquiles_montado_esta_noche = false
+			_gilgamesh_montado_esta_noche = false
 		_fase_anterior = fase
 	if fase != "sueño":
 		return
@@ -30,7 +30,7 @@ func _process(_delta: float) -> void:
 	if mundo_id == _mundo_montado_id:
 		return
 	_mundo_montado_id = mundo_id
-	if _aquiles_montado_esta_noche:
+	if _gilgamesh_montado_esta_noche:
 		return
 
 	var seleccion := (
@@ -45,8 +45,8 @@ func _process(_delta: float) -> void:
 	if not _corresponde_a_esta_escena(dia, familias):
 		return
 
-	_montar_aquiles(mundo, dia._espacio_actual)
-	_aquiles_montado_esta_noche = true
+	_montar_gilgamesh(mundo, dia._espacio_actual)
+	_gilgamesh_montado_esta_noche = true
 
 
 func _corresponde_a_esta_escena(dia: Node, familias: Array) -> bool:
@@ -60,7 +60,7 @@ func _corresponde_a_esta_escena(dia: Node, familias: Array) -> bool:
 	return (
 		MitologiasNoche
 		. corresponde_a_escena(
-			SuenoAquiles.ID_MITO,
+			SuenoGilgamesh.ID_MITO,
 			familias,
 			cantidad,
 			pendientes.size(),
@@ -68,30 +68,27 @@ func _corresponde_a_esta_escena(dia: Node, familias: Array) -> bool:
 	)
 
 
-func _montar_aquiles(mundo: Node3D, espacio: Dictionary) -> void:
-	if mundo.get_node_or_null("SuenoAquilesNoche") != null:
+func _montar_gilgamesh(mundo: Node3D, espacio: Dictionary) -> void:
+	if mundo.get_node_or_null("SuenoGilgameshNoche") != null:
 		return
 
-	var aquiles := SuenoAquilesAlineacion.new()
-	aquiles.name = "SuenoAquilesNoche"
-	aquiles.reduccion_movimiento = bool(
-		PreferenciasSiga.cargar().get("reduccion_movimiento", false)
-	)
-	# Preparar fuera del árbol permite retirar la cámara standalone antes de
-	# que pueda hacerse current y robarle la vista al Caminante de Dia.
-	aquiles.preparar()
-	var camara := aquiles.get_node_or_null("CamaraStandalone")
+	var gilgamesh := ESCENA_GILGAMESH.instantiate() as SuenoGilgamesh
+	if gilgamesh == null:
+		return
+	gilgamesh.name = "SuenoGilgameshNoche"
+	# Igual que Aquiles: preparar antes de entrar en SceneTree para poder retirar
+	# la cámara standalone antes de que se haga current.
+	gilgamesh.preparar()
+	var camara := gilgamesh.get_node_or_null("CamaraStandalone")
 	if camara != null:
-		aquiles.remove_child(camara)
+		gilgamesh.remove_child(camara)
 		camara.free()
 
-	aquiles.scale = Vector3.ONE * ESCALA_ENCUENTRO
-	aquiles.position = _ancla_entre_entrada_y_salida(espacio)
-	mundo.add_child(aquiles)
+	gilgamesh.scale = Vector3.ONE * ESCALA_ENCUENTRO
+	gilgamesh.position = _ancla_entre_entrada_y_salida(espacio)
+	mundo.add_child(gilgamesh)
 
 
-## Colocar la capa en mitad del recorrido conserva tanto la entrada como la
-## salida genéricas y evita inventar coordenadas específicas de una forma.
 func _ancla_entre_entrada_y_salida(espacio: Dictionary) -> Vector3:
 	var entrada: Vector3 = espacio.get("entrada", Vector3.ZERO)
 	var salidas: Array = espacio.get("salidas", [])
@@ -101,5 +98,5 @@ func _ancla_entre_entrada_y_salida(espacio: Dictionary) -> Vector3:
 	return entrada.lerp(salida, 0.5)
 
 
-func aquiles_montado_esta_noche() -> bool:
-	return _aquiles_montado_esta_noche
+func gilgamesh_montado_esta_noche() -> bool:
+	return _gilgamesh_montado_esta_noche

@@ -122,6 +122,13 @@ func _ready() -> void:
 	_montar_prototipo()
 
 
+## Permite preparar el vertical fuera del árbol antes de insertarlo en una
+## noche real. `_montar_prototipo` es idempotente, así que la llamada posterior
+## de `_ready` no duplica geometría ni interacción.
+func preparar() -> void:
+	_montar_prototipo()
+
+
 func progreso() -> int:
 	return _estado_puzzle.size()
 

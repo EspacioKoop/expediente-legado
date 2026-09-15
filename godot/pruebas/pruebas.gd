@@ -55,6 +55,7 @@ func _init() -> void:
 
 	PruebasGato._gato(comprobar_cb)
 	PruebasGato._cuenco(comprobar_cb)
+	PruebasGato._comida_propia(comprobar_cb)
 	PruebasGato._malla(comprobar_cb)
 
 	PruebasSemilla._semilla(comprobar_cb)
