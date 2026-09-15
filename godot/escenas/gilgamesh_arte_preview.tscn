@@ -1,0 +1,50 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Texture2D" path="res://arte/gilgamesh/muralla_ladrillo_archivo.svg" id="1_muralla"]
+[ext_resource type="Texture2D" path="res://arte/gilgamesh/fragmento_archivo.svg" id="2_archivo"]
+[ext_resource type="Texture2D" path="res://arte/gilgamesh/fragmento_ola.svg" id="3_ola"]
+[ext_resource type="Texture2D" path="res://arte/gilgamesh/fragmento_puerta.svg" id="4_puerta"]
+[ext_resource type="Texture2D" path="res://arte/gilgamesh/fragmento_sello.svg" id="5_sello"]
+[ext_resource type="Texture2D" path="res://arte/gilgamesh/libro_reproduccion_tablilla.svg" id="6_libro"]
+[ext_resource type="Texture2D" path="res://arte/gilgamesh/sellos_siga_oniricos.svg" id="7_sellos"]
+
+[node name="GilgameshArtePreview" type="Node3D"]
+
+[node name="Muralla" type="Sprite3D" parent="."]
+position = Vector3(0, 0.4, -1.5)
+pixel_size = 0.020
+texture = ExtResource("1_muralla")
+
+[node name="FragmentoArchivo" type="Sprite3D" parent="."]
+position = Vector3(-4.5, 1.8, 0)
+pixel_size = 0.006
+texture = ExtResource("2_archivo")
+
+[node name="FragmentoOla" type="Sprite3D" parent="."]
+position = Vector3(-1.5, 1.8, 0)
+pixel_size = 0.006
+texture = ExtResource("3_ola")
+
+[node name="FragmentoPuerta" type="Sprite3D" parent="."]
+position = Vector3(1.5, 1.8, 0)
+pixel_size = 0.006
+texture = ExtResource("4_puerta")
+
+[node name="FragmentoSello" type="Sprite3D" parent="."]
+position = Vector3(4.5, 1.8, 0)
+pixel_size = 0.006
+texture = ExtResource("5_sello")
+
+[node name="LibroReproduccion" type="Sprite3D" parent="."]
+position = Vector3(-2.2, -2.0, 0)
+pixel_size = 0.007
+texture = ExtResource("6_libro")
+
+[node name="SellosSiga" type="Sprite3D" parent="."]
+position = Vector3(2.8, -2.0, 0)
+pixel_size = 0.007
+texture = ExtResource("7_sellos")
+
+[node name="Camara" type="Camera3D" parent="."]
+position = Vector3(0, 0, 13)
+current = true
