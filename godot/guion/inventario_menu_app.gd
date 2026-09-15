@@ -43,9 +43,8 @@ static func modelo(estado_partida: Dictionary) -> Dictionary:
 	return {
 		"en_casa": en_casa,
 		Inventario.CARRIED: inventario[Inventario.CARRIED].duplicate(true),
-		Inventario.HOME_STORAGE: (
-			inventario[Inventario.HOME_STORAGE].duplicate(true) if en_casa else []
-		),
+		Inventario.HOME_STORAGE:
+		inventario[Inventario.HOME_STORAGE].duplicate(true) if en_casa else [],
 	}
 
 
@@ -62,8 +61,8 @@ func abrir(estado_partida: Dictionary) -> void:
 		_volver_boton.grab_focus()
 
 
+## El controlador dueño del modal restaura pausa, ratón y HUD al recibir volver.
 func cerrar() -> void:
-	visible = false
 	volver.emit()
 
 
@@ -116,9 +115,7 @@ func _refrescar() -> void:
 	_arbol.clear()
 	_detalle.text = ""
 	var en_casa := bool(_modelo_actual.get("en_casa", false))
-	_ayuda.text = String(
-		_textos.get("ayuda_casa" if en_casa else "ayuda_fuera", "")
-	)
+	_ayuda.text = String(_textos.get("ayuda_casa" if en_casa else "ayuda_fuera", ""))
 	var raiz := _arbol.create_item()
 	_llenar_seccion(
 		raiz,
