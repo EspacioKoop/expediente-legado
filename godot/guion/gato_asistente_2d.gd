@@ -51,9 +51,38 @@ func _draw() -> void:
 	var frame := _frame_actual()
 	var origen := Vector2(float(frame) * ANCHO_FRAME, 0.0)
 	var region := Rect2(origen, Vector2(ANCHO_FRAME, ALTO_FRAME))
-	var posicion := Vector2((ANCHO - TAMANO_DIBUJO.x) * 0.5, ALTO - TAMANO_DIBUJO.y)
-	var destino := Rect2(posicion, TAMANO_DIBUJO)
+	var respiracion := _respiracion()
+	var amplitud := _amplitud_respiracion(frame)
+	var escala_x := 1.0 - respiracion * amplitud.x
+	var escala_y := 1.0 + respiracion * amplitud.y
+	var tamano := Vector2(TAMANO_DIBUJO.x * escala_x, TAMANO_DIBUJO.y * escala_y)
+	# El sprite se dilata desde las patas, no desde el centro. Así el cuerpo
+	# parece respirar sin flotar ni perder el apoyo sobre la interfaz.
+	var posicion := Vector2((ANCHO - tamano.x) * 0.5, ALTO - tamano.y)
+	var destino := Rect2(posicion, tamano)
 	draw_texture_rect_region(ATLAS_GATO, destino, region)
+
+
+func _respiracion() -> float:
+	if _reduccion_movimiento:
+		return 0.0
+	# Dos respiraciones por ciclo, con una modulación lenta de amplitud. Las dos
+	# ondas cierran exactamente en 8 s para evitar un salto al reiniciar `_tiempo`
+	# y romper la sensación orgánica con un loop demasiado perfecto.
+	var respiracion_base := sin((_tiempo / 4.0) * TAU)
+	var variacion := 0.78 + 0.22 * sin((_tiempo / 8.0) * TAU + 0.8)
+	return respiracion_base * variacion
+
+
+func _amplitud_respiracion(frame: int) -> Vector2:
+	# No todas las poses respiran igual: el idle tiene más caja torácica; alerta
+	# y mirada son más tensas, y hambre queda algo más contenida. El atlas no se
+	# redibuja: solo cambia menos de ~1 px de alto en el tamaño de destino.
+	if frame == FRAME_HAMBRIENTO:
+		return Vector2(0.002, 0.006)
+	if frame == FRAME_ALERTA or frame == FRAME_MIRANDO:
+		return Vector2(0.0025, 0.005)
+	return Vector2(0.0035, 0.008)
 
 
 func _frame_actual() -> int:

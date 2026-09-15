@@ -8,6 +8,14 @@ extends "res://guion/dia_trabajillos_app.gd"
 const TAM_OBJETIVO := Vector3(2.8, 2.4, 2.8)
 const DEMORA_RESOLUCION := 0.35
 
+## Margen que se deja entre el conjunto y el primer botón de acción del visor
+## al calcular si el anclaje por defecto (#285) invade la barra de acciones.
+const MARGEN_BOTONES_ASISTENTE := 12.0
+
+## Clave de #285: la posición elegida por el jugador arrastrando al gato
+## persiste en preferencias, no en la partida, porque es presentación pura.
+const CLAVE_POSICION_ASISTENTE := "posicion_asistente_gato"
+
 var _gato_guia: Gato
 var _entrada_guia := Vector3.ZERO
 var _salida_guia := Vector3.ZERO
@@ -16,6 +24,9 @@ var _objetivos_espacio: Array = []
 var _objetivo_escena := ""
 var _resolviendo_objetivos := false
 var _asistente_siga_caja: VBoxContainer
+var _asistente_siga_conjunto: Control
+var _arrastrando_asistente := false
+var _arrastre_asistente_offset := Vector2.ZERO
 
 
 func _espacio_de(fase: String) -> Dictionary:
@@ -252,6 +263,7 @@ func _abrir_expediente() -> void:
 
 func _montar_asistente_siga() -> void:
 	_asistente_siga_caja = null
+	_asistente_siga_conjunto = null
 	var gato: Dictionary = jornada.get("gato", {})
 	var visor: Node = _pantalla.get_node_or_null("Visor")
 	var contexto := ""
@@ -264,18 +276,22 @@ func _montar_asistente_siga() -> void:
 
 	# El conjunto no tiene fondo propio: gato y bocadillo son dos piezas
 	# visualmente independientes. El anclaje al borde inferior derecho escala con
-	# la ventana y deja el cuerpo del expediente libre en vez de ocupar la base.
+	# la ventana y deja el cuerpo del expediente libre en vez de ocupar la base;
+	# PASS (no IGNORE) porque el jugador puede arrastrar el conjunto para
+	# apartarlo, sin dejar de dejar pasar los clics que no lo tocan a él.
 	var conjunto := HBoxContainer.new()
 	conjunto.name = "AsistenteSiga"
 	conjunto.theme = EstiloSiga.tema()
-	conjunto.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	conjunto.mouse_filter = Control.MOUSE_FILTER_PASS
 	conjunto.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	conjunto.offset_left = -540
 	conjunto.offset_top = -176
 	conjunto.offset_right = -16
 	conjunto.offset_bottom = -16
 	conjunto.add_theme_constant_override("separation", 18)
+	conjunto.gui_input.connect(_al_input_asistente_siga.bind(conjunto))
 	_pantalla.add_child(conjunto)
+	_asistente_siga_conjunto = conjunto
 
 	var burbuja := PanelContainer.new()
 	burbuja.name = "BocadilloGato"
@@ -312,6 +328,93 @@ func _montar_asistente_siga() -> void:
 	# qué botones, listas o etiquetas produjeron el cambio de contexto.
 	if visor != null and visor.has_signal("contexto_asistente_cambiado"):
 		visor.connect("contexto_asistente_cambiado", Callable(self, "_al_contexto_asistente_siga"))
+
+	# El layout del visor (botones, traducciones) no se conoce hasta que la
+	# escena termina de encuadrar en este frame; colocar un frame más tarde
+	# evita medir un tamaño 0x0 tanto del conjunto como de los botones.
+	call_deferred("_colocar_asistente_siga", conjunto, visor)
+
+
+## Sitúa el conjunto donde el jugador lo dejó (#285); si nunca lo movió, usa el
+## anclaje por defecto pero lo sube lo justo para no invadir la fila de
+## acciones del visor (Relacionar/Marcar folio/Imputar), sea cual sea su altura
+## real una vez traducida y en la resolución en curso.
+func _colocar_asistente_siga(conjunto: Control, visor: Node) -> void:
+	if not is_instance_valid(conjunto):
+		return
+	var preferencias := PreferenciasSiga.cargar()
+	var guardada: Variant = preferencias.get(CLAVE_POSICION_ASISTENTE, null)
+	if guardada is Dictionary:
+		_fijar_posicion_libre_asistente(conjunto, Vector2(guardada["x"], guardada["y"]))
+		return
+	if visor == null:
+		return
+	var limite := _limite_superior_botones_visor(visor)
+	if limite == INF:
+		return
+	var exceso: float = (
+		(conjunto.global_position.y + conjunto.size.y) - (limite - MARGEN_BOTONES_ASISTENTE)
+	)
+	if exceso > 0.0:
+		conjunto.offset_top -= exceso
+		conjunto.offset_bottom -= exceso
+
+
+## El visor no expone sus botones como superficie pública (#455 ya fijó que
+## solo se escucha su señal), así que en vez de asumir nombres o huecos en
+## píxeles se pregunta al árbol real por el más alto de sus Button: cualquier
+## fila de acciones que se añada o se alargue por traducción se sigue
+## respetando sin tener que volver a adivinar un offset fijo.
+func _limite_superior_botones_visor(visor: Node) -> float:
+	var limite := INF
+	var pila: Array = [visor]
+	while not pila.is_empty():
+		var nodo: Node = pila.pop_back()
+		# Un botón oculto (p.ej. el anexo aún sin desbloquear de #.../visor_anexos_app.gd)
+		# no ocupa fila real: contarlo movería el conjunto por un hueco que nadie ve.
+		if nodo is Button and nodo.is_visible_in_tree() and nodo.size.y > 0.0:
+			limite = minf(limite, nodo.global_position.y)
+		for hijo in nodo.get_children():
+			pila.append(hijo)
+	return limite
+
+
+func _al_input_asistente_siga(evento: InputEvent, conjunto: Control) -> void:
+	if not is_instance_valid(conjunto):
+		return
+	if evento is InputEventMouseButton and evento.button_index == MOUSE_BUTTON_LEFT:
+		if evento.pressed:
+			_arrastrando_asistente = true
+			_arrastre_asistente_offset = (
+				conjunto.get_global_mouse_position() - conjunto.global_position
+			)
+		elif _arrastrando_asistente:
+			_arrastrando_asistente = false
+			_guardar_posicion_asistente_siga(conjunto)
+		conjunto.accept_event()
+	elif evento is InputEventMouseMotion and _arrastrando_asistente:
+		_fijar_posicion_libre_asistente(
+			conjunto, conjunto.get_global_mouse_position() - _arrastre_asistente_offset
+		)
+		conjunto.accept_event()
+
+
+## Arrastrar cambia el conjunto de un anclaje relativo (abajo a la derecha) a
+## una posición libre en píxeles, acotada a la pantalla para que no se pueda
+## soltar el gato fuera de la vista tras redimensionar la ventana.
+func _fijar_posicion_libre_asistente(conjunto: Control, nueva: Vector2) -> void:
+	var techo := conjunto.get_parent()
+	var limite: Vector2 = techo.size if techo is Control else conjunto.get_viewport_rect().size
+	nueva.x = clampf(nueva.x, 0.0, maxf(limite.x - conjunto.size.x, 0.0))
+	nueva.y = clampf(nueva.y, 0.0, maxf(limite.y - conjunto.size.y, 0.0))
+	conjunto.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	conjunto.position = nueva
+
+
+func _guardar_posicion_asistente_siga(conjunto: Control) -> void:
+	var preferencias := PreferenciasSiga.cargar()
+	preferencias[CLAVE_POSICION_ASISTENTE] = {"x": conjunto.position.x, "y": conjunto.position.y}
+	PreferenciasSiga.guardar(preferencias)
 
 
 func _al_contexto_asistente_siga(estado: Dictionary, evento: String) -> void:

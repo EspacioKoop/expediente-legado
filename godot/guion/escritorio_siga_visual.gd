@@ -44,8 +44,8 @@ func registrar_aplicacion(id: String, titulo: String, creador: Callable) -> void
 	_decorar_accesos(id)
 
 
-func _crear_ventana(id: String, titulo: String, contenido: Control) -> void:
-	super._crear_ventana(id, titulo, contenido)
+func _crear_ventana(id: String, titulo: String, contenido: Control, es_modal: bool = false) -> void:
+	super._crear_ventana(id, titulo, contenido, es_modal)
 	_decorar_ventana(id)
 
 

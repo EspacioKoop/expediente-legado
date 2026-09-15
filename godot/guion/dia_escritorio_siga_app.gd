@@ -29,9 +29,12 @@ func _process(_delta: float) -> void:
 func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	var escritorio := EscritorioSigaVisual.new()
 	escritorio.name = "EscritorioSiga"
+	var preferencias := PreferenciasSiga.cargar()
+	# configurar_escala_ui() construye la interfaz al entrar en el árbol, así
+	# que tiene que fijarse antes de add_child; el resto de "configurar_*" da igual.
+	escritorio.configurar_escala_ui(float(preferencias.get("escala_ui", 1.0)))
 	pantalla.add_child(escritorio)
 
-	var preferencias := PreferenciasSiga.cargar()
 	escritorio.configurar_reduccion_movimiento(
 		bool(preferencias.get("reduccion_movimiento", false))
 	)
