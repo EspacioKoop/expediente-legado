@@ -36,7 +36,9 @@ static func etiqueta() -> String:
 ## mutar el guardado por accidente.
 static func modelo(estado_partida: Dictionary) -> Dictionary:
 	var bruto = estado_partida.get("inventario", {})
-	var inventario: Dictionary = bruto.duplicate(true) if bruto is Dictionary else Inventario.nuevo()
+	var inventario: Dictionary = (
+		bruto.duplicate(true) if bruto is Dictionary else Inventario.nuevo()
+	)
 	Inventario.completar(inventario)
 	var jornada = estado_partida.get("jornada", {})
 	var en_casa := jornada is Dictionary and String(jornada.get("fase", "")) == "casa"
