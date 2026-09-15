@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
-  <!-- Marca geométrica original; funciona a 18 px sin depender de tipografía. -->
-  <path d="M9 1.5L16.5 9 9 16.5 1.5 9z" fill="#1f4d55" stroke="#203235" stroke-width="1"/>
-  <path d="M9 4.2L13.8 9 9 13.8 4.2 9z" fill="none" stroke="#eee7d0" stroke-width="1.6"/>
-  <path d="M9 6.5L11.5 9 9 11.5 6.5 9z" fill="#eee7d0"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" shape-rendering="crispEdges">
+  <!-- Marca pixel-art inspirada en la lámina aprobada: arco institucional y escalones diagonales. -->
+  <path d="M2 15V8l2-4 4-2h4v3H9L6 7 5 10v5z" fill="#173a5c"/>
+  <path d="M3 15h11v-2H5v-1h8v-2H6V9h6V7H7v2H5v2H4v2H3z" fill="#6d8fa8"/>
+  <rect x="9" y="3" width="3" height="2" fill="#d4d8d8"/>
 </svg>
