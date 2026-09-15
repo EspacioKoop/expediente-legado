@@ -42,6 +42,25 @@ class TexturasPBRRuntimeTest(unittest.TestCase):
         self.assertIn("TexturasPBR.crear", self.calle)
         self.assertIn("if material == null:", self.calle)
         self.assertIn('"revoco_urbano"', self.calle)
+        self.assertIn("Color.WHITE", self.calle)
+
+    def test_calzada_y_aceras_solo_existen_con_pbr(self):
+        self.assertIn('"asfalto_urbano"', self.calle)
+        self.assertIn('"acera_barcelona"', self.calle)
+        self.assertIn('"CalzadaPBR"', self.calle)
+        self.assertIn('"AceraOestePBR"', self.calle)
+        self.assertIn('"AceraEstePBR"', self.calle)
+        self.assertIn("var superficie := _superficie_suelo(ficha)", self.calle)
+        self.assertIn("if superficie != null:", self.calle)
+        self.assertIn("if material == null:\n\t\treturn null", self.calle)
+
+    def test_pieles_de_suelo_no_crean_colision(self):
+        bloque = self.calle.split("static func _superficie_suelo", 1)[1].split(
+            "static func _fachada", 1
+        )[0]
+        self.assertNotIn("CollisionShape3D", bloque)
+        self.assertNotIn("StaticBody3D", bloque)
+        self.assertIn("MeshInstance3D", bloque)
 
 
 if __name__ == "__main__":
