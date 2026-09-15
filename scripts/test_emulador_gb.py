@@ -28,43 +28,63 @@ class EmuladorGBTest(unittest.TestCase):
         cls.alpha = ALPHA.read_text(encoding="utf-8")
         cls.smoke = SMOKE.read_text(encoding="utf-8")
 
-    def test_dependencias_estan_fijadas_y_son_mit(self):
+    def test_dependencias_estan_fijadas_y_son_permisivas(self):
         self.assertEqual(
             self.lock["godot_cpp"]["commit"],
             "6cceaf6a5f8b0d78ac5d71c139fd7fabba43b918",
         )
-        self.assertEqual(
-            self.lock["peanut_gb"]["commit"],
-            "8e656982f08663785794b84823d3e27f856fdb7f",
-        )
         self.assertEqual(self.lock["godot_cpp"]["license"], "MIT")
-        self.assertEqual(self.lock["peanut_gb"]["license"], "MIT")
+        self.assertEqual(self.lock["sameboy"]["license"], "Expat")
+        self.assertNotIn("peanut_gb", self.lock)
+        self.assertNotIn("peanut_gb.h", self.cpp)
 
-    def test_nucleo_rechaza_cgb_only_y_acota_roms(self):
-        self.assertIn("CGB_ONLY_FLAG = 0xC0", self.cpp)
+    def test_nucleo_admite_cgb_only_y_acota_roms(self):
+        self.assertNotIn("CGB_ONLY_FLAG", self.cpp)
         self.assertIn("LOAD_CGB_ONLY", self.cpp)
         self.assertIn("MIN_ROM_SIZE = 32 * 1024", self.cpp)
         self.assertIn("MAX_ROM_SIZE = 8 * 1024 * 1024", self.cpp)
+        self.assertIn("HEADER_CHECKSUM_OFFSET = 0x14D", self.cpp)
+        self.assertIn("GB_MODEL_CGB_E", self.cpp)
 
     def test_framebuffer_y_joypad_tienen_contrato_minimo(self):
         self.assertIn("FRAME_WIDTH = 160", self.cpp)
         self.assertIn("FRAME_HEIGHT = 144", self.cpp)
-        self.assertIn("gb_run_frame", self.cpp)
-        self.assertIn("direct.joypad", self.cpp)
+        self.assertIn("GB_run_frame", self.cpp)
+        self.assertIn("GB_set_pixels_output", self.cpp)
+        self.assertIn("GB_set_key_state", self.cpp)
         self.assertIn("run_frame_rgba", self.cpp)
 
-    def test_nucleo_declara_capacidades_para_migracion_cgb(self):
+    def test_set_buttons_conserva_orden_de_bits_publico(self):
+        self.assertIn(
+            "GB_KEY_A, GB_KEY_B, GB_KEY_SELECT, GB_KEY_START,\n"
+            "    GB_KEY_RIGHT, GB_KEY_LEFT, GB_KEY_UP, GB_KEY_DOWN,",
+            self.cpp,
+        )
+        for constante, valor in (
+            ("BTN_A", "0x01"),
+            ("BTN_B", "0x02"),
+            ("BTN_SELECT", "0x04"),
+            ("BTN_START", "0x08"),
+            ("BTN_RIGHT", "0x10"),
+            ("BTN_LEFT", "0x20"),
+            ("BTN_UP", "0x40"),
+            ("BTN_DOWN", "0x80"),
+        ):
+            self.assertIn(f"const {constante} := {valor}", self.ui)
+
+    def test_nucleo_declara_capacidades_cgb(self):
         self.assertIn('D_METHOD("core_name")', self.cpp)
         self.assertIn('D_METHOD("supports_cgb")', self.cpp)
         self.assertIn('D_METHOD("supports_audio")', self.cpp)
-        self.assertIn('return "Peanut-GB";', self.cpp)
+        self.assertIn('return "SameBoy";', self.cpp)
         self.assertIn("bool Siga98GB::supports_cgb() const", self.cpp)
         self.assertIn("bool Siga98GB::supports_audio() const", self.cpp)
 
     def test_nucleo_expone_sram_sin_saltarse_tamano_del_cartucho(self):
         self.assertIn('D_METHOD("save_ram")', self.cpp)
         self.assertIn('D_METHOD("load_save_ram", "save")', self.cpp)
-        self.assertIn("impl->cart_ram", self.cpp)
+        self.assertIn("GB_save_battery_size", self.cpp)
+        self.assertIn("GB_load_battery_from_buffer", self.cpp)
         self.assertIn("p_save.size()", self.cpp)
         self.assertIn("Tamaño de SRAM no coincide con el cartucho", self.cpp)
 
@@ -156,6 +176,19 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn("bash scripts/check_gdscript.sh", self.ci)
         self.assertIn("-not -path 'godot/native/siga98_gb/.deps/*'", self.check_gdscript)
         self.assertNotIn("gdlint godot\n", self.ci)
+
+    def test_smoke_espera_a_la_boot_rom(self):
+        self.assertIn("const FRAMES_ARRANQUE := 60", self.smoke)
+        self.assertIn("range(FRAMES_ARRANQUE)", self.smoke)
+
+    def test_ci_arranca_rom_cgb_only(self):
+        self.assertIn("make -C gbc/fixtures/cgb_only_smoke clean all", self.ci)
+        self.assertIn("res://pruebas/emulador_gbc_smoke.gd", self.ci)
+        gbc = (ROOT / "godot" / "pruebas" / "emulador_gbc_smoke.gd").read_text(encoding="utf-8")
+        self.assertIn('emulador.call("supports_cgb")', gbc)
+        self.assertIn("rom[0x143] != 0xC0", gbc)
+        self.assertIn("_contiene(frame, 0)", gbc)
+        self.assertIn("_contiene(frame, 1)", gbc)
 
     def test_alpha_importa_antes_del_smoke(self):
         importar = "godot4 --headless --editor --path godot --quit"

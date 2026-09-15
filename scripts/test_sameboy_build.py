@@ -63,11 +63,34 @@ class SameBoyBuildGateTest(unittest.TestCase):
         self.assertIn(r'-DGB_VERSION=\"1.0.3\"', self.sconstruct)
         self.assertIn("sameboy_env.SharedObject(sameboy_sources)", self.sconstruct)
 
-    def test_stage_no_declara_capacidades_antes_del_adapter(self):
-        self.assertIn('return "Peanut-GB";', self.wrapper)
-        self.assertIn("bool Siga98GB::supports_cgb() const", self.wrapper)
-        self.assertIn("bool Siga98GB::supports_audio() const", self.wrapper)
-        self.assertNotIn('return "SameBoy";', self.wrapper)
+    def test_boot_rom_es_la_libre_de_sameboy_y_esta_fijada(self):
+        boot = self.lock["sameboy"]["boot_rom"]
+        self.assertEqual(boot["source"], "BootROMs/cgb_boot_fast.asm")
+        self.assertEqual(boot["license"], "Expat")
+        self.assertEqual(
+            boot["sha256"],
+            "734fc76858bc6d78e724df75efe90146c612817f05c5a837409f9ea34c70e26e",
+        )
+        self.assertIn("compilar_boot_rom()", self.prepare)
+        self.assertIn('BootROMs/cgb_boot_fast.asm"', self.prepare)
+        self.assertIn('sha256sum --check --strict', self.prepare)
+        self.assertIn("hashlib.sha256(boot_rom).hexdigest() != boot_rom_sha", self.sconstruct)
+        self.assertIn("SAMEBOY_CGB_BOOT", self.wrapper)
+        self.assertIn("GB_set_boot_rom_load_callback", self.wrapper)
+
+    def test_windows_recibe_boot_rom_compilada_en_linux(self):
+        alpha = (ROOT / ".github" / "workflows" / "alpha-playtest.yml").read_text(encoding="utf-8")
+        self.assertIn("bash scripts/preparar_emulador_gb.sh boot-rom", alpha)
+        self.assertIn("needs: gbc-boot-rom", alpha)
+        self.assertIn("path: godot/native/siga98_gb/.deps/bootroms", alpha)
+
+    def test_adapter_activo_declara_cgb_pero_no_audio(self):
+        self.assertIn('return "SameBoy";', self.wrapper)
+        self.assertNotIn('return "Peanut-GB";', self.wrapper)
+        cgb = self.wrapper.index("bool Siga98GB::supports_cgb() const")
+        audio = self.wrapper.index("bool Siga98GB::supports_audio() const")
+        self.assertIn("return true;", self.wrapper[cgb:audio])
+        self.assertIn("return false;", self.wrapper[audio:audio + 80])
 
 
 if __name__ == "__main__":
