@@ -97,14 +97,12 @@ jobs:
 
       - name: Preflight GDScript canónico
         shell: bash
-        run: bash scripts/check_gdscript.sh
-
-      - name: Suite de contratos de scripts/
-        # El plan maestro #181 la declara canónica, pero hasta ahora solo se
-        # ejecutaba en local: CI corría tres módulos sueltos de los 150.
+        # El script formatea, lintea y ejecuta la suite de scripts/. Aquí la
+        # GDExtension ya está compilada, así que su ausencia sería un entorno
+        # roto y no un salto legítimo: se exige.
         env:
           SIGA98_EXIGIR_EXTENSION: '1'
-        run: python -m unittest discover -s scripts -p 'test_*.py'
+        run: bash scripts/check_gdscript.sh
 
       - name: Importar, ejecutar la suite y arrancar el juego
         run: python scripts/verificar_godot.py
