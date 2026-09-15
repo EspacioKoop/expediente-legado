@@ -95,9 +95,6 @@ jobs:
           chmod +x godot-bin/godot4
           echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
 
-      - name: Instalar gdtoolkit
-        run: python -m pip install gdtoolkit==4.3.4
-
       - name: Preflight GDScript canónico
         shell: bash
         run: bash scripts/check_gdscript.sh
