@@ -47,12 +47,12 @@ func _ready() -> void:
 	_nueva.pressed.connect(_pedir_nueva)
 	caja.add_child(_nueva)
 	_cargar = Button.new()
-	_cargar.text = "Cargar partida"
-	_cargar.tooltip_text = "Carga la partida guardada de este perfil."
+	_cargar.text = tr("INICIO_CARGAR")
+	_cargar.tooltip_text = tr("INICIO_CARGAR_TOOLTIP")
 	_cargar.pressed.connect(_cargar_partida)
 	caja.add_child(_cargar)
 	_ventanilla = Button.new()
-	_ventanilla.text = "Ventanilla de reclamaciones"
+	_ventanilla.text = tr("INICIO_VENTANILLA")
 	_ventanilla.pressed.connect(_abrir_ventanilla)
 	caja.add_child(_ventanilla)
 	_ajustes = Button.new()
@@ -152,7 +152,7 @@ func _abrir_ajustes() -> void:
 	if menu != null and menu.has_method("_abrir"):
 		menu.call("_abrir")
 	else:
-		_aviso.text = "No se pudieron abrir los ajustes."
+		_aviso.text = tr("INICIO_ERROR_AJUSTES")
 
 
 func _salir_del_juego() -> void:
