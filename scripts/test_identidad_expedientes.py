@@ -8,6 +8,7 @@ from scripts.godot_pruebas import comprobar_contrato
 ROOT = Path(__file__).resolve().parents[1]
 CATALOGO = ROOT / "godot" / "datos" / "identidad_expedientes.json"
 VISOR = ROOT / "godot" / "guion" / "visor_identidad_app.gd"
+ANEXOS = ROOT / "godot" / "guion" / "visor_anexos_app.gd"
 ESCENA = ROOT / "godot" / "escenas" / "visor.tscn"
 
 
@@ -29,18 +30,22 @@ class IdentidadExpedientesTest(unittest.TestCase):
             self.assertTrue(ficha["motivo"])
             self.assertTrue(ficha["icono"].startswith("res://arte/siga_expedientes/"))
 
-    def test_el_visor_aplica_identidad_sin_tocar_reglas_de_juego(self):
+    def test_la_identidad_es_presentacion_sin_reglas_de_juego(self):
         codigo = VISOR.read_text(encoding="utf-8")
-        self.assertIn('extends "res://guion/visor_anexos_app.gd"', codigo)
-        self.assertIn("_archivo.set_item_icon", codigo)
-        self.assertIn("_actualizar_identidad()", codigo)
+        self.assertIn("extends RefCounted", codigo)
+        self.assertIn("archivo.set_item_icon", codigo)
+        self.assertIn("func actualizar(caso: Dictionary)", codigo)
         self.assertNotIn("gastar_accion", codigo)
         self.assertNotIn("gastar_lectura", codigo)
         self.assertNotIn("Acusacion.acusar", codigo)
 
-    def test_la_escena_activa_la_capa_de_identidad(self):
+    def test_anexos_monta_identidad_sin_romper_el_entrypoint(self):
+        anexos = ANEXOS.read_text(encoding="utf-8")
         escena = ESCENA.read_text(encoding="utf-8")
-        self.assertIn('path="res://guion/visor_identidad_app.gd"', escena)
+        self.assertIn('extends "res://guion/visor_metadatos_app.gd"', anexos)
+        self.assertIn('preload("res://guion/visor_identidad_app.gd")', anexos)
+        self.assertIn("_identidad_expedientes.aplicar_archivo", anexos)
+        self.assertIn('path="res://guion/visor_anexos_app.gd"', escena)
 
 
 if __name__ == "__main__":
