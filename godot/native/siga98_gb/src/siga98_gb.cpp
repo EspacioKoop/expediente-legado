@@ -270,7 +270,6 @@ bool Siga98GB::supports_cgb() const {
 }
 
 bool Siga98GB::supports_audio() const {
-    // La APU ya expone PCM, pero la capacidad pública se activa cuando Godot lo consuma.
     return false;
 }
 
