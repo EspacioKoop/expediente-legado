@@ -1,0 +1,56 @@
+{
+  "caso@1": {
+    "codigo": "F-1999",
+    "acento": "#8A4D3B",
+    "icono": "res://arte/siga_expedientes/caso_01_cierre.svg",
+    "motivo": "cierre contable, factura y revisión urgente"
+  },
+  "caso2@2": {
+    "codigo": "4-B",
+    "acento": "#68743F",
+    "icono": "res://arte/siga_expedientes/caso_02_silla.svg",
+    "motivo": "silla ergonómica atrapada en un trámite imposible"
+  },
+  "caso3@3": {
+    "codigo": "13",
+    "acento": "#4E627E",
+    "icono": "res://arte/siga_expedientes/caso_03_piso13.svg",
+    "motivo": "traslado a un piso que no existe"
+  },
+  "caso4@4": {
+    "codigo": "CARCOSA",
+    "acento": "#8A6B2D",
+    "icono": "res://arte/siga_expedientes/caso_04_carcosa.svg",
+    "motivo": "contrato escénico y segundo acto no representado"
+  },
+  "caso5@5": {
+    "codigo": "MEMO 78/93/07",
+    "acento": "#705A7E",
+    "icono": "res://arte/siga_expedientes/caso_05_memo.svg",
+    "motivo": "memorándum idéntico archivado en tres épocas"
+  },
+  "caso6@6": {
+    "codigo": "1958",
+    "acento": "#9A7A32",
+    "icono": "res://arte/siga_expedientes/caso_06_acta.svg",
+    "motivo": "acta constitutiva no circulada y sello amarillo"
+  },
+  "caso7@7": {
+    "codigo": "KARAMÁZOV",
+    "acento": "#536E5A",
+    "icono": "res://arte/siga_expedientes/caso_07_herencia.svg",
+    "motivo": "herencia en acciones y tres reclamantes"
+  },
+  "caso8@8": {
+    "codigo": "#427",
+    "acento": "#5C6474",
+    "icono": "res://arte/siga_expedientes/caso_08_427.svg",
+    "motivo": "empleado reducido a número y botón"
+  },
+  "caso9@9": {
+    "codigo": "R-17 → R-18",
+    "acento": "#735E48",
+    "icono": "res://arte/siga_expedientes/caso_09_r17.svg",
+    "motivo": "serie inexistente reclasificada para mantener el circuito"
+  }
+}
