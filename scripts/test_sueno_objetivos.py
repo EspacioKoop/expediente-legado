@@ -1,6 +1,8 @@
 from pathlib import Path
 import unittest
 
+from scripts.godot_pruebas import comprobar_contrato
+
 
 ROOT = Path(__file__).resolve().parents[1]
 REGLA = ROOT / "godot" / "guion" / "sueno_objetivos.gd"
@@ -26,6 +28,13 @@ class SuenoObjetivosTest(unittest.TestCase):
         self.assertIn('"completados": []', self.regla)
         self.assertIn('completados.has(id)', self.regla)
         self.assertIn('estado["resuelto"] = true', self.regla)
+
+    def test_contrato_real_se_ejecuta_en_godot(self):
+        comprobar_contrato(
+            self,
+            "pruebas/sueno_objetivos_smoke.gd",
+            "Sueño objetivos smoke: OK",
+        )
 
     def test_el_sueno_ya_no_monta_la_salida_como_progreso_normal(self):
         self.assertIn('espacio["salidas"] = []', self.gato)
