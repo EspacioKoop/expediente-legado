@@ -56,6 +56,18 @@ static func planos_de(gato_presente: bool, vistas: int = 0, voz_cunado: String =
 	)
 
 
+## Variante de cierre para #100. Conserva `planos_de()` intacta para llamadas
+## antiguas y añade, después del despido, el plano común derivado de la vida.
+## El estado solo se lee: ni el veredicto ni la jornada se resuelven aquí.
+static func planos_con_remate(
+	estado: Dictionary, vistas: int = 0, voz_cunado: String = ""
+) -> Array:
+	var resumen := RemateVida.resumir(estado)
+	var planos := planos_de(bool(resumen["gato_presente"]), vistas, voz_cunado)
+	planos.append_array(RemateVidaCinematica.planos_de(estado, vistas))
+	return planos
+
+
 ## La carpeta sellada permanece físicamente en el puesto: cambia la persona,
 ## no el veredicto que dejó firmado.
 static func _puesto_que_queda() -> Array:

@@ -459,11 +459,6 @@ const CASA := {
 			"tam": Vector3(1.4, 0.55, 2.2),
 			"color": Color(0.40, 0.33, 0.30)
 		},
-		{
-			"pos": Vector3(2.6, 0.45, -2.4),
-			"tam": Vector3(1.6, 0.9, 0.7),
-			"color": Color(0.44, 0.38, 0.32)
-		},
 		# El cuenco del gato. Vacío mientras no se compre comida.
 		{
 			"pos": Vector3(2.8, 0.05, 1.5),
@@ -474,13 +469,13 @@ const CASA := {
 		# proyectar una cinta ante un jurado, y aquí está en casa sin encender:
 		# que sea el MISMO modelo es lo que hará que esa escena se reconozca.
 		{
-			"pos": Vector3(-3.4, 0.42, 1.6),
+			"pos": Vector3(-3.55, 0.895, 1.35),
 			"tam": Vector3(0.85, 0.75, 0.6),
 			"color": Color(0.38, 0.34, 0.30),
 			"modelo": "televisionVintage"
 		},
 		{
-			"pos": Vector3(3.4, 0.22, 2.6),
+			"pos": Vector3(3.55, 0.22, 3.15),
 			"tam": Vector3(0.34, 0.45, 0.34),
 			"color": Color(0.40, 0.38, 0.34),
 			"modelo": "trashcan"
@@ -511,8 +506,8 @@ const CASA := {
 		Vector3(2.9, 0, -2.9),
 		Vector3(-3.2, 0, 2.4),
 	],
-	# El de casa está en la mesa, encendido y solo. Nadie lo ha apagado.
-	"cigarros": [Vector3(2.6, 0.91, -2.4)],
+	# El de casa está en la mesa del comedor, encendido y solo. Nadie lo ha apagado.
+	"cigarros": [Vector3(1.7, 0.77, -1.0)],
 	"salidas":
 	[
 		{
