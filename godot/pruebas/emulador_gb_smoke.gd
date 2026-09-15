@@ -15,9 +15,7 @@ func _init() -> void:
 	var emulador := _crear_emulador()
 	if emulador == null:
 		return
-	if not _cargar_rom(emulador):
-		return
-	if not _probar_sram(emulador):
+	if not _preparar_rom_y_memoria(emulador):
 		return
 	var frame := _ejecutar_frames(emulador)
 	if not _validar_frame(frame):
@@ -33,6 +31,16 @@ func _init() -> void:
 		)
 	)
 	quit(0)
+
+
+func _preparar_rom_y_memoria(emulador: Object) -> bool:
+	if not _probar_lectura_memoria_sin_rom(emulador):
+		return false
+	if not _cargar_rom(emulador):
+		return false
+	if not _probar_lectura_memoria_cargada(emulador):
+		return false
+	return _probar_sram(emulador)
 
 
 func _autoprobar_detector() -> bool:
@@ -57,6 +65,13 @@ func _crear_emulador() -> Object:
 	return emulador
 
 
+func _probar_lectura_memoria_sin_rom(emulador: Object) -> bool:
+	if int(emulador.call("read_memory_u8", 0xC000)) != -1:
+		_fallar("read_memory_u8 debe rechazar lecturas sin ROM cargada")
+		return false
+	return true
+
+
 func _cargar_rom(emulador: Object) -> bool:
 	if not FileAccess.file_exists(ROM):
 		_fallar("no existe la ROM propia preparada")
@@ -65,6 +80,20 @@ func _cargar_rom(emulador: Object) -> bool:
 	var resultado := int(emulador.call("load_rom", rom))
 	if resultado != 0:
 		_fallar("load_rom falló: %s" % emulador.call("last_error"))
+		return false
+	return true
+
+
+func _probar_lectura_memoria_cargada(emulador: Object) -> bool:
+	if int(emulador.call("read_memory_u8", -1)) != -1:
+		_fallar("read_memory_u8 aceptó una dirección negativa")
+		return false
+	if int(emulador.call("read_memory_u8", 0x10000)) != -1:
+		_fallar("read_memory_u8 aceptó una dirección fuera de 16 bits")
+		return false
+	var valor := int(emulador.call("read_memory_u8", 0xC000))
+	if valor < 0 or valor > 0xFF:
+		_fallar("read_memory_u8 no devolvió un byte válido de WRAM")
 		return false
 	return true
 
