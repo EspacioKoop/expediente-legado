@@ -33,7 +33,7 @@ class EscalerasTest(unittest.TestCase):
     def test_escaleras_son_ruta_jugable_de_cuatro_tramos(self):
         self.assertIn('path="res://guion/escaleras_3d_app.gd"', self.escena)
         self.assertIn('signal terminada', self.app)
-        self.assertIn('Input.get_axis("ui_down", "ui_up")', self.app)
+        self.assertIn('Input.get_axis("mover_atras", "mover_adelante")', self.app)
         self.assertIn("const ESCALONES_POR_TRAMO := 12", self.app)
         self.assertIn("4 -> 3 -> 2 -> 1 -> portal", self.app)
         self.assertIn("terminada.emit()", self.app)

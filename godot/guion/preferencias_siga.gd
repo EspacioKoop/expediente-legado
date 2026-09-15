@@ -12,6 +12,9 @@ const ACCIONES := {
 	"mover_atras": {"teclado": 83, "mando": 13},
 	"mover_izquierda": {"teclado": 65, "mando": 14},
 	"mover_derecha": {"teclado": 68, "mando": 15},
+	"saltar": {"teclado": KEY_SPACE, "mando": 2},
+	"correr": {"teclado": KEY_SHIFT, "mando": 9},
+	"agacharse": {"teclado": KEY_CTRL, "mando": 7},
 	"interactuar": {"teclado": 69, "mando": 0},
 	"cancelar": {"teclado": KEY_ESCAPE, "mando": 1},
 }
