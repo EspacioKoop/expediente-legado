@@ -142,8 +142,15 @@ func _abrir_ajustes() -> void:
 	# MenuGlobal ya contiene la superficie canónica de preferencias y restaura
 	# el foco previo al cerrarse. Se reutiliza desde inicio en vez de mantener
 	# una segunda copia de volumen/remapeo/reducción de movimiento.
-	if MenuGlobal.has_method("_abrir"):
-		MenuGlobal.call("_abrir")
+	#
+	# Se busca por ruta (no por el identificador global implícito) porque los
+	# scripts de prueba que arrancan con `--script` sobre un SceneTree propio
+	# nunca pasan por el arranque normal del proyecto: ahí el autoload sigue
+	# presente en el árbol, pero el compilador de GDScript no resuelve su
+	# nombre global y el script entero deja de compilar.
+	var menu := get_node_or_null("/root/MenuGlobal")
+	if menu != null and menu.has_method("_abrir"):
+		menu.call("_abrir")
 	else:
 		_aviso.text = "No se pudieron abrir los ajustes."
 
