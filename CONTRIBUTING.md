@@ -58,6 +58,17 @@ gdformat --check --diff godot
 
 Usa la versión/línea indicada en `.godot-version`. El verificador importa recursos, ejecuta suite y recorrido, arranca el juego con datos temporales y falla ante errores aunque Godot termine con código cero.
 
+`scripts/check_gdscript.sh` ejecuta los cuatro de una vez y es lo que corre CI. Instala `gdtoolkit==4.3.4` en un venv propio si no encuentra esa versión en el PATH, así que no hace falta preparar nada a mano.
+
+Antes de la primera pasada hay que compilar la GDExtension GB/GBC y las ROMs propias, o las pruebas que arrancan Godot se saltan indicándolo:
+
+```bash
+bash scripts/preparar_emulador_gb.sh linux-debug
+bash scripts/preparar_emulador_gb.sh rom
+```
+
+Con `SIGA98_EXIGIR_EXTENSION=1` esas pruebas dejan de saltarse y su entorno incompleto pasa a ser un fallo. CI lo define siempre: allí la extensión se compila antes, y su ausencia sería un entorno roto, no un salto legítimo.
+
 `godot/pruebas/minimo.txt` fija un mínimo de comprobaciones. No se reduce para hacer pasar una entrega.
 
 ### Backend y web legado
