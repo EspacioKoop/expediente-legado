@@ -16,6 +16,7 @@ const ACCIONES := {
 	"correr": {"teclado": KEY_SHIFT, "mando": 9},
 	"agacharse": {"teclado": KEY_CTRL, "mando": 7},
 	"interactuar": {"teclado": 69, "mando": 0},
+	"inventario": {"teclado": KEY_I, "mando": JOY_BUTTON_Y},
 	"cancelar": {"teclado": KEY_ESCAPE, "mando": 1},
 }
 

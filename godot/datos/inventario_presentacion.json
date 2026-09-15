@@ -1,0 +1,12 @@
+{
+  "titulo": "Inventario",
+  "ayuda_fuera": "Fuera de casa solo puedes consultar lo que llevas encima.",
+  "ayuda_casa": "En casa puedes consultar lo que llevas y lo que has dejado guardado.",
+  "carried": "Llevas encima",
+  "home_storage": "Guardado en casa",
+  "vacio": "Vacío",
+  "sin_descripcion": "Sin descripción.",
+  "detalle_uso": "Uso: %s",
+  "detalle_origen": "Origen: %s",
+  "volver": "Volver"
+}
