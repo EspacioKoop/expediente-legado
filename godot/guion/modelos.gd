@@ -79,12 +79,13 @@ const PERFILES_FACIALES := {
 
 ## `retrato` sigue siendo la clave estable que llega desde el catálogo, pero la
 ## identidad visual deja de salir solo de un hash. Cada entrada de esta tabla
-## habilita rasgos modelados para la persona histórica concreta. Puyi abrió el
-## corte y Melville lo extiende; el resto del roster puede incorporarse uno a
-## uno sin volver a una fotografía pegada sobre la cara.
+## habilita rasgos modelados para la persona histórica concreta. Puyi, Melville
+## y Pessoa ya tienen pase propio; el resto puede incorporarse uno a uno sin
+## volver a una fotografía pegada sobre la cara.
 const PERSONAJES_FACIALES := {
 	"emperador": "Puyi",
 	"aduanero_ny": "Herman Melville",
+	"correspondencia": "Fernando Pessoa",
 }
 
 ## Lo que se carga una vez y se reusa. Las salas repiten mueble —seis
@@ -267,6 +268,10 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 		# dejamos los ojos algo más juntos para reservar volumen a las sienes y a
 		# la masa de barba que envuelve la mandíbula.
 		separacion = radio_x * 0.49
+	elif personaje == "Fernando Pessoa":
+		# Las gafas redondas son muy visibles y quedan mejor algo recogidas hacia
+		# el puente, sin invadir las sienes bajo el ala del sombrero.
+		separacion = radio_x * 0.48
 	var altura_ojos := centro_y + alto * 0.12
 
 	var oscuro := Color(0.10, 0.08, 0.07)
@@ -293,6 +298,11 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 		# madurez. Las sienes específicas completan la silueta más abajo.
 		pelo_y = centro_y + radio_y * 0.82
 		pelo_escala = Vector3(radio_x * 0.94, alto * 0.11, radio_z * 0.78)
+	elif personaje == "Fernando Pessoa":
+		# El sombrero tapa casi toda la coronilla; una tapa menor evita que el pelo
+		# atraviese el ala y deja apenas lectura en sienes y nuca.
+		pelo_y = centro_y + radio_y * 0.76
+		pelo_escala = Vector3(radio_x * 0.90, alto * 0.09, radio_z * 0.76)
 	_cabello_cabeza(enganche, Vector3(0.0, pelo_y, -radio_z * 0.04), pelo_escala, cabello)
 
 	# Los centros de ojos y boca se colocan unos milímetros DENTRO de la
@@ -310,6 +320,8 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 	var escala_ojo := Vector3(alto * 0.050, alto * 0.040, alto * 0.025)
 	if personaje == "Puyi":
 		escala_ojo = Vector3(alto * 0.043, alto * 0.032, alto * 0.020)
+	elif personaje == "Fernando Pessoa":
+		escala_ojo = Vector3(alto * 0.041, alto * 0.032, alto * 0.020)
 	_rasgo_esfera(enganche, Vector3(ojo_izq.x, ojo_izq.y, z_ojo_izq), escala_ojo, oscuro)
 	_rasgo_esfera(enganche, Vector3(ojo_der.x, ojo_der.y, z_ojo_der), escala_ojo, oscuro)
 
@@ -328,6 +340,18 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 		)
 	elif personaje == "Herman Melville":
 		_rasgos_melville(enganche, alto, centro_y, radio_x, radio_y, radio_z, cabello, barba)
+	elif personaje == "Fernando Pessoa":
+		_rasgos_pessoa(
+			enganche,
+			alto,
+			centro_y,
+			radio_x,
+			radio_y,
+			radio_z,
+			separacion,
+			altura_ojos,
+			oscuro
+		)
 
 	var nariz_y := centro_y - alto * 0.035
 	var z_nariz := _frente_cabeza(0.0, nariz_y, centro_y, radio_x, radio_y, radio_z) - alto * 0.015
@@ -336,6 +360,8 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 		nariz_escala = Vector3(alto * 0.043, alto * 0.100, alto * 0.052)
 	elif personaje == "Herman Melville":
 		nariz_escala = Vector3(alto * 0.048, alto * 0.118, alto * 0.064)
+	elif personaje == "Fernando Pessoa":
+		nariz_escala = Vector3(alto * 0.043, alto * 0.116, alto * 0.055)
 	_rasgo_esfera(enganche, Vector3(0.0, nariz_y, z_nariz), nariz_escala, piel)
 
 	var boca_y := centro_y - alto * 0.20
@@ -345,6 +371,8 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 		ancho_boca = alto * 0.105
 	elif personaje == "Herman Melville":
 		ancho_boca = alto * 0.10
+	elif personaje == "Fernando Pessoa":
+		ancho_boca = alto * 0.095
 	_rasgo_esfera(
 		enganche,
 		Vector3(0.0, boca_y, z_boca),
@@ -491,6 +519,83 @@ static func _rasgos_melville(
 	var escala_sien := Vector3(radio_x * 0.28, alto * 0.10, radio_z * 0.12)
 	_rasgo_esfera(padre, Vector3(-sien_x, sien_y, z_sien_izq), escala_sien, cabello)
 	_rasgo_esfera(padre, Vector3(sien_x, sien_y, z_sien_der), escala_sien, cabello)
+
+
+## Pessoa conserva tres señales que sobreviven bien al low-poly: gafas redondas,
+## bigote fino y sombrero oscuro de ala ancha. Todo es volumen real unido al
+## hueso de cabeza; ninguna fotografía entra en materiales o texturas.
+static func _rasgos_pessoa(
+	padre: Node3D,
+	alto: float,
+	centro_y: float,
+	radio_x: float,
+	radio_y: float,
+	radio_z: float,
+	separacion: float,
+	altura_ojos: float,
+	oscuro: Color
+) -> void:
+	var hundido_gafas := alto * 0.006
+	var z_izq := (
+		_frente_cabeza(-separacion, altura_ojos, centro_y, radio_x, radio_y, radio_z)
+		- hundido_gafas
+	)
+	var z_der := (
+		_frente_cabeza(separacion, altura_ojos, centro_y, radio_x, radio_y, radio_z) - hundido_gafas
+	)
+	var radio_gafa := alto * 0.072
+	var grosor_gafa := alto * 0.010
+	_aro_gafa(padre, Vector3(-separacion, altura_ojos, z_izq), radio_gafa, grosor_gafa, oscuro)
+	_aro_gafa(padre, Vector3(separacion, altura_ojos, z_der), radio_gafa, grosor_gafa, oscuro)
+
+	var z_puente := (
+		_frente_cabeza(0.0, altura_ojos, centro_y, radio_x, radio_y, radio_z) - hundido_gafas
+	)
+	_rasgo_esfera(
+		padre,
+		Vector3(0.0, altura_ojos, z_puente),
+		Vector3(separacion * 0.30, alto * 0.009, alto * 0.009),
+		oscuro
+	)
+
+	# Bigote corto y partido, colocado sobre la misma curvatura de la cara.
+	var bigote_y := centro_y - alto * 0.135
+	var bigote_x := alto * 0.043
+	var z_bigote_izq := (
+		_frente_cabeza(-bigote_x, bigote_y, centro_y, radio_x, radio_y, radio_z) - alto * 0.008
+	)
+	var z_bigote_der := (
+		_frente_cabeza(bigote_x, bigote_y, centro_y, radio_x, radio_y, radio_z) - alto * 0.008
+	)
+	var escala_bigote := Vector3(alto * 0.080, alto * 0.022, alto * 0.025)
+	_rasgo_esfera(padre, Vector3(-bigote_x, bigote_y, z_bigote_izq), escala_bigote, oscuro)
+	_rasgo_esfera(padre, Vector3(bigote_x, bigote_y, z_bigote_der), escala_bigote, oscuro)
+
+	# El ala es un cilindro muy bajo y la copa otro cilindro algo troncocónico.
+	# Se solapan con la coronilla para que el sombrero siga la cabeza al animar.
+	var ala := MeshInstance3D.new()
+	var malla_ala := CylinderMesh.new()
+	malla_ala.top_radius = radio_x * 1.58
+	malla_ala.bottom_radius = radio_x * 1.58
+	malla_ala.height = alto * 0.035
+	malla_ala.radial_segments = 10
+	ala.mesh = malla_ala
+	ala.position = Vector3(0.0, centro_y + radio_y * 0.95, -radio_z * 0.02)
+	ala.scale = Vector3(1.0, 1.0, 0.72)
+	ala.material_override = _material_rasgo(oscuro)
+	padre.add_child(ala)
+
+	var copa := MeshInstance3D.new()
+	var malla_copa := CylinderMesh.new()
+	malla_copa.top_radius = radio_x * 0.68
+	malla_copa.bottom_radius = radio_x * 0.80
+	malla_copa.height = alto * 0.26
+	malla_copa.radial_segments = 10
+	copa.mesh = malla_copa
+	copa.position = Vector3(0.0, centro_y + radio_y * 1.18, -radio_z * 0.04)
+	copa.scale = Vector3(1.0, 1.0, 0.82)
+	copa.material_override = _material_rasgo(oscuro)
+	padre.add_child(copa)
 
 
 static func _aro_gafa(
