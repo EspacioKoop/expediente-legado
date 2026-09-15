@@ -100,14 +100,14 @@
       "titulo": "RYU FLOW",
       "estado": "jugable",
       "genero": "puzle de flujo",
-      "resumen": "Desviar tres compuertas para recomponer un cauce y guiar a una criatura serpentina. Solo la solución completa publica el handshake WRAM que puede alimentar la futura semilla Ryū.",
+      "resumen": "Desviar tres compuertas para recomponer un cauce y guiar a una criatura serpentina. Solo la solución completa publica el handshake WRAM que activa la semilla Ryū.",
       "fuente": "gbc/minijuegos/ryu_flow_98",
       "rom": "res://roms/ryu_flow_98.gbc",
       "cabecera": "RYUFLOW98",
       "cgb": "dual",
-      "incluida": true,
-      "precio": 0,
-      "issues": [440, 442, 542, 609, 622],
+      "incluida": false,
+      "precio": 45,
+      "issues": [440, 442, 542, 609, 622, 627],
       "mito": "dragon_japones"
     },
     {
