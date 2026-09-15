@@ -1,27 +1,53 @@
 ## Mobiliario CC0 de «Low poly household goods» (samusaa / mastjie, #227).
 ##
 ## La casa se ordena por zonas que se leen desde la puerta:
-## - dormitorio al fondo izquierda: cama bajo la ventana, mesita y armario;
+## - dormitorio cerrado al fondo izquierda: cama bajo la ventana, mesita y armario;
 ## - estar delante a la izquierda: mueble de TV, mesa baja y sofá mirando a la tele;
-## - cocina-comedor a la derecha: encimera y nevera, horno, lavadora, mesa con sillas;
+## - cocina-comedor abierta a la derecha: encimera y nevera, horno, lavadora, mesa con sillas;
 ## - entrada: aparador con lámpara junto a la puerta.
-## CasaUtileria sigue siendo dueña de las piezas interactivas; aquí solo entra
-## mobiliario estático y el visual CC0 del sofá.
+## CasaUtileria sigue siendo dueña de las piezas interactivas; aquí entra
+## mobiliario estático, el visual CC0 del sofá y los tabiques domésticos de #133.
 class_name CasaHogarCC0
 extends RefCounted
 
 const CARPETA := "household_goods/"
 const SOFA := "2_seat_sofa_01"
 const TAM_SOFA := Vector3(1.9, 0.86, 0.87)
+const ALTO_TABIQUE := 2.8
+const GROSOR_TABIQUE := 0.18
+const NOMBRE_HABITACIONES := "HabitacionesCasa"
+
+# El dormitorio ocupa el fondo izquierdo. La puerta queda centrada en el paso
+# histórico hacia la cama, de modo que la nueva arquitectura no invalida el
+# recorrido ni mueve el trigger de sueño. El lateral separa el dormitorio de la
+# cocina-comedor; el resto permanece abierto como un piso pequeño de 1998.
+const TABIQUES := [
+	[
+		"TabiqueDormitorioFrente",
+		Vector3(-2.275, ALTO_TABIQUE / 2.0, -0.65),
+		Vector3(3.45, ALTO_TABIQUE, GROSOR_TABIQUE)
+	],
+	[
+		"TabiqueDormitorioLateral",
+		Vector3(0.55, ALTO_TABIQUE / 2.0, -2.075),
+		Vector3(GROSOR_TABIQUE, ALTO_TABIQUE, 2.85)
+	],
+	[
+		"DintelDormitorio",
+		Vector3(0.0, 2.40, -0.65),
+		Vector3(1.10, 0.80, GROSOR_TABIQUE)
+	],
+]
 
 # nombre, modelo, base en el suelo o superficie, caja de encaje (ejes del
 # modelo), giro Y (0 = frente hacia +Z), con colisión.
 const PIEZAS := [
-	# Estar
+	# Estar: tele, mesa baja y sofá comparten eje visual para que el rincón se
+	# lea como salón y no como tres props repartidos.
 	[
 		"MuebleTVHogar",
 		"tv_cabinet_01",
-		Vector3(-3.60, 0.0, 1.45),
+		Vector3(-3.60, 0.0, 1.35),
 		Vector3(1.5, 0.52, 0.5),
 		90.0,
 		true
@@ -29,16 +55,17 @@ const PIEZAS := [
 	[
 		"MesaBajaHogar",
 		"coffee_table_01",
-		Vector3(-2.25, 0.0, 1.40),
+		Vector3(-2.25, 0.0, 1.35),
 		Vector3(1.1, 0.3, 0.55),
 		90.0,
 		true
 	],
-	# Dormitorio
+	# Dormitorio: el armario deja de flotar en el salón y queda contra el muro
+	# izquierdo, sin invadir la cama ni la puerta nueva.
 	[
 		"ArmarioHogar",
 		"wardrobe_01",
-		Vector3(-3.66, 0.0, 0.10),
+		Vector3(-3.55, 0.0, -2.45),
 		Vector3(0.99, 1.93, 0.63),
 		90.0,
 		true
@@ -135,6 +162,8 @@ static func montar(raiz: Node3D) -> Node3D:
 		return null
 	var existente := raiz.get_node_or_null("CasaHogarCC0") as Node3D
 	if existente != null:
+		_montar_habitaciones(raiz)
+		_ordenar_rincon_television(raiz)
 		return existente
 	var lote := Node3D.new()
 	lote.name = "CasaHogarCC0"
@@ -142,11 +171,13 @@ static func montar(raiz: Node3D) -> Node3D:
 	for ficha in PIEZAS:
 		_crear_pieza(lote, ficha)
 	vestir_sofa(raiz.get_node_or_null("SofaCasa") as Node3D)
+	_montar_habitaciones(raiz)
+	_ordenar_rincon_television(raiz)
 	return lote
 
 
-## El sofá conserva nodo, posición y giro de CasaUtileria; solo cambia lo que
-## se ve. Si el GLB faltara, la versión procedural sigue visible.
+## El sofá conserva nodo y orientación de CasaUtileria; solo cambia lo que se
+## ve. Si el GLB faltara, la versión procedural sigue visible.
 static func vestir_sofa(sofa: Node3D) -> void:
 	if sofa == null or sofa.has_node("VisualHogar"):
 		return
@@ -162,6 +193,63 @@ static func vestir_sofa(sofa: Node3D) -> void:
 		return
 	for malla in anteriores:
 		malla.layers = 0
+
+
+## #133: materializa habitaciones de verdad, no solo agrupaciones de muebles.
+## Los tabiques son StaticBody3D para que la puerta importe al recorrer la casa.
+static func _montar_habitaciones(raiz: Node3D) -> Node3D:
+	var existente := raiz.get_node_or_null(NOMBRE_HABITACIONES) as Node3D
+	if existente != null:
+		return existente
+	var habitaciones := Node3D.new()
+	habitaciones.name = NOMBRE_HABITACIONES
+	raiz.add_child(habitaciones)
+	for ficha in TABIQUES:
+		_crear_tabique(habitaciones, ficha)
+	return habitaciones
+
+
+static func _crear_tabique(habitaciones: Node3D, ficha: Array) -> StaticBody3D:
+	var cuerpo := StaticBody3D.new()
+	cuerpo.name = ficha[0]
+	cuerpo.position = ficha[1]
+	habitaciones.add_child(cuerpo)
+
+	var malla := MeshInstance3D.new()
+	var caja := BoxMesh.new()
+	caja.size = ficha[2]
+	malla.mesh = caja
+	var color: Color = EspaciosCatalogo.CASA.get("color_muro", Color(0.52, 0.47, 0.42))
+	var material := ShaderMaterial.new()
+	material.shader = load("res://arte/psx.gdshader")
+	material.set_shader_parameter("color_base", color)
+	var textura := TexturaProcedural.por_nombre("gotele", color, hash(String(ficha[0])))
+	if textura != null:
+		material.set_shader_parameter("textura", textura)
+		material.set_shader_parameter("con_textura", true)
+		material.set_shader_parameter("escala_textura", 1.0 / 1.2)
+	malla.material_override = material
+	cuerpo.add_child(malla)
+
+	var colision := CollisionShape3D.new()
+	var forma := BoxShape3D.new()
+	forma.size = ficha[2]
+	colision.shape = forma
+	cuerpo.add_child(colision)
+	return cuerpo
+
+
+## Tele, mesa baja y sofá quedan centrados en el mismo eje. La consola se gira
+## hacia el interior de la estancia y se desplaza al extremo libre del mueble,
+## de modo que pueda enfocarse sin que la propia tele la tape (#133/#95).
+static func _ordenar_rincon_television(raiz: Node3D) -> void:
+	var sofa := raiz.get_node_or_null("SofaCasa") as Node3D
+	if sofa != null:
+		sofa.position.z = 1.35
+	var consola := raiz.get_node_or_null("ConsolaSobremesa98") as Node3D
+	if consola != null:
+		consola.position = Vector3(-3.58, 0.54, 1.82)
+		consola.rotation_degrees.y = -90.0
 
 
 static func _crear_pieza(lote: Node3D, ficha: Array) -> Node3D:
