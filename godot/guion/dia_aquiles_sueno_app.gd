@@ -1,13 +1,11 @@
 ## Wiring nocturno de Aquiles dentro del recorrido real (#435/#438).
 ##
 ## El selector común decide si Aquiles puede contaminar esta noche. Este
-## controller solo materializa el vertical ya existente en la primera escena
-## del sueño seleccionada para la jornada. Mantiene la sala base y su salida:
-## Aquiles es una capa interactiva del sueño, no un segundo gestor de fases.
+## controller solo materializa el vertical en la escena que le asigna
+## `MitologiasNoche`, conservando sala y salida genéricas.
 extends Node
 
 const ESCALA_ENCUENTRO := 0.62
-const MAX_FAMILIAS_NOCHE := 2
 
 var _mundo_montado_id := 0
 var _aquiles_montado_esta_noche := false
@@ -32,29 +30,26 @@ func _process(_delta: float) -> void:
 	if mundo_id == _mundo_montado_id:
 		return
 	_mundo_montado_id = mundo_id
-
-	if _aquiles_montado_esta_noche or not _es_primera_escena(dia):
+	if _aquiles_montado_esta_noche:
 		return
+
 	var seleccion := (
 		SemillasOniricas
 		. seleccionar_para_noche(
 			dia.jornada,
 			dia._raiz(),
-			MAX_FAMILIAS_NOCHE,
+			MitologiasNoche.MAX_FAMILIAS_NOCHE,
 		)
 	)
 	var familias: Array = seleccion.get("familias", [])
-	if not familias.has(SuenoAquiles.ID_MITO):
+	if not _corresponde_a_esta_escena(dia, familias):
 		return
 
 	_montar_aquiles(mundo, dia._espacio_actual)
 	_aquiles_montado_esta_noche = true
 
 
-## El encuentro entra una vez, al principio de la noche. Así una semilla no
-## convierte las tres salas en tres copias del mismo mito y recargar a mitad de
-## noche no reinyecta Aquiles en una escena posterior.
-func _es_primera_escena(dia: Node) -> bool:
+func _corresponde_a_esta_escena(dia: Node, familias: Array) -> bool:
 	var opciones: Dictionary = dia._opciones_sueno()
 	var cantidad := clampi(
 		int(opciones.get("cantidad", Sueno.ESCENAS_POR_NOCHE)),
@@ -62,7 +57,12 @@ func _es_primera_escena(dia: Node) -> bool:
 		SuenoFormas.ids().size(),
 	)
 	var pendientes: Array = dia.jornada.get("sueno_escenas", [])
-	return pendientes.size() == cantidad
+	return MitologiasNoche.corresponde_a_escena(
+		SuenoAquiles.ID_MITO,
+		familias,
+		cantidad,
+		pendientes.size(),
+	)
 
 
 func _montar_aquiles(mundo: Node3D, espacio: Dictionary) -> void:
