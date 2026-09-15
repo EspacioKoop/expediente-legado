@@ -42,19 +42,29 @@ class RomsPropiasTest(unittest.TestCase):
 
     def test_cada_fuente_de_gbc_minijuegos_esta_indexada_y_viceversa(self):
         carpetas = {p.name for p in MINIJUEGOS.iterdir() if (p / "Makefile").exists()}
-        jugables = {r["id"] for r in self.roms if r["estado"] == "jugable"}
-        self.assertEqual(carpetas, jugables)
+        con_fuente = {r["id"] for r in self.roms if r["fuente"]}
+        self.assertEqual(carpetas, con_fuente)
         for rom in self.roms:
             with self.subTest(rom=rom["id"]):
-                if rom["estado"] == "jugable":
+                if rom["fuente"]:
                     self.assertEqual(rom["fuente"], f"gbc/minijuegos/{rom['id']}")
-                    self.assertEqual(rom["rom"], f"res://roms/{rom['id']}.gbc")
                     makefile = (ROOT / rom["fuente"] / "Makefile").read_text(encoding="utf-8")
                     self.assertIn(f"ROM := build/{rom['id']}.gbc", makefile)
                     self.assertTrue((ROOT / rom["fuente"] / "README.md").exists())
+                    self.assertTrue(rom["cabecera"])
                     self.assertLessEqual(len(rom["cabecera"]), 15)
+                    self.assertIn(rom["cgb"], ("dual", "solo"))
                 else:
-                    self.assertEqual((rom["fuente"], rom["rom"], rom["precio"]), ("", "", 0))
+                    self.assertEqual((rom["cabecera"], rom["cgb"]), ("", ""))
+
+                if rom["estado"] == "jugable":
+                    self.assertTrue(rom["fuente"])
+                    self.assertEqual(rom["rom"], f"res://roms/{rom['id']}.gbc")
+                else:
+                    # Un proyecto puede tener ya una fuente prototipo verificable sin
+                    # entrar todavía en build/runtime. Mientras siga en proyecto no se
+                    # vende, no se incluye y no tiene ruta de ROM consumible por Godot.
+                    self.assertEqual((rom["rom"], rom["precio"]), ("", 0))
                     self.assertFalse(rom["incluida"])
 
     def test_la_consola_trae_una_y_la_tienda_vende_el_resto(self):
@@ -64,13 +74,13 @@ class RomsPropiasTest(unittest.TestCase):
             if rom["estado"] == "jugable" and not rom["incluida"]:
                 self.assertGreater(rom["precio"], 0, rom["id"])
 
-    def test_build_y_workflows_compilan_todas_las_jugables(self):
+    def test_build_y_workflows_respetan_estado_y_fuentes(self):
         preparar = (ROOT / "scripts/preparar_emulador_gb.sh").read_text(encoding="utf-8")
         self.assertIn("godot/datos/roms_propias.json", preparar)
         self.assertIn('rom["estado"] == "jugable"', preparar)
         fixtures = (ROOT / ".github/workflows/gbc-fixtures.yml").read_text(encoding="utf-8")
         for rom in self.roms:
-            if rom["estado"] == "jugable":
+            if rom["fuente"]:
                 self.assertIn(f"{rom['fuente']}", fixtures, rom["id"])
 
     def test_toda_fuente_rom_citada_en_codigo_esta_en_el_indice(self):
@@ -88,9 +98,9 @@ class RomsPropiasTest(unittest.TestCase):
             self.assertIn(rom["titulo"], texto)
 
     @unittest.skipUnless(shutil.which("rgbasm"), "RGBDS no instalado")
-    def test_las_jugables_compilan_con_la_cabecera_declarada(self):
+    def test_las_fuentes_compilan_con_la_cabecera_declarada(self):
         for rom in self.roms:
-            if rom["estado"] != "jugable":
+            if not rom["fuente"]:
                 continue
             with self.subTest(rom=rom["id"]):
                 fuente = ROOT / rom["fuente"]
