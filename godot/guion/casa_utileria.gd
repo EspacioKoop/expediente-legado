@@ -148,20 +148,80 @@ static func _montar_cocina(raiz: Node3D, pos: Vector3) -> void:
 	_agregar_caja(nevera, Vector3(-0.37, 0.55, -0.23), Vector3(0.035, 0.34, 0.07), metal, ACERO)
 
 
+## La pared de la casa sigue siendo maciza; por eso la vista funciona como un
+## pequeño diorama embebido delante del muro. Las capas están separadas unos
+## centímetros en Z: cielo -> edificios -> luces -> reflejos -> marco. Desde el
+## dormitorio se lee profundidad y exterior sin abrir geometría ni introducir
+## una textura externa/LFS solo para este primer corte de #566.
 static func _montar_ventana(raiz: Node3D, pos: Vector3) -> void:
 	var ventana := Node3D.new()
 	ventana.name = "VentanaCasa"
 	ventana.position = pos
 	raiz.add_child(ventana)
 
+	var vista := Node3D.new()
+	vista.name = "VistaExteriorCasa"
+	ventana.add_child(vista)
+
+	# Fondo frío de noche. Está por delante del muro físico y por detrás del
+	# resto de capas, así nunca vuelve a verse el gotelé a través del hueco.
+	var cielo := Node3D.new()
+	cielo.name = "CieloExteriorCasa"
+	vista.add_child(cielo)
+	_agregar_caja(
+		cielo, Vector3(0, 0, -0.045), Vector3(1.80, 1.10, 0.016), Color(0.12, 0.18, 0.30)
+	)
+
+	# Skyline deliberadamente asimétrico: varias alturas hacen que la ventana
+	# parezca mirar a una manzana real y no a otra placa de color.
+	var edificios := Node3D.new()
+	edificios.name = "PerfilUrbanoCasa"
+	vista.add_child(edificios)
+	_agregar_caja(
+		edificios, Vector3(-0.62, -0.18, -0.027), Vector3(0.54, 0.72, 0.018), Color(0.08, 0.08, 0.11)
+	)
+	_agregar_caja(
+		edificios, Vector3(-0.16, -0.27, -0.026), Vector3(0.34, 0.54, 0.020), Color(0.10, 0.09, 0.12)
+	)
+	_agregar_caja(
+		edificios, Vector3(0.25, -0.10, -0.025), Vector3(0.44, 0.88, 0.022), Color(0.07, 0.08, 0.10)
+	)
+	_agregar_caja(
+		edificios, Vector3(0.69, -0.23, -0.024), Vector3(0.36, 0.62, 0.024), Color(0.11, 0.10, 0.12)
+	)
+
+	# Ventanas lejanas: pocos puntos cálidos, irregulares y sin texto. Son lo
+	# bastante pequeños para que el dithering/temblor PSX los integre en la vista.
+	var luces := Node3D.new()
+	luces.name = "LucesExteriorCasa"
+	vista.add_child(luces)
+	var luz := Color(0.90, 0.62, 0.30)
+	_agregar_caja(luces, Vector3(-0.72, -0.06, -0.012), Vector3(0.10, 0.09, 0.010), luz)
+	_agregar_caja(luces, Vector3(-0.51, -0.29, -0.011), Vector3(0.09, 0.08, 0.010), luz)
+	_agregar_caja(luces, Vector3(-0.16, -0.20, -0.010), Vector3(0.08, 0.08, 0.010), luz)
+	_agregar_caja(luces, Vector3(0.18, 0.06, -0.009), Vector3(0.09, 0.09, 0.010), luz)
+	_agregar_caja(luces, Vector3(0.34, -0.26, -0.008), Vector3(0.08, 0.08, 0.010), luz)
+	_agregar_caja(luces, Vector3(0.70, -0.12, -0.007), Vector3(0.09, 0.08, 0.010), luz)
+
+	# Dos reflejos finos sugieren cristal sin volver a tapar el exterior. La
+	# transparencia real exigiría un segundo shader; aquí se conserva el shader
+	# PSX común y se deja casi todo el paño visualmente abierto.
+	var reflejos := Node3D.new()
+	reflejos.name = "ReflejosCristalCasa"
+	vista.add_child(reflejos)
+	_agregar_caja(
+		reflejos, Vector3(-0.45, 0.34, 0.004), Vector3(0.48, 0.025, 0.008), Color(0.38, 0.48, 0.58)
+	)
+	_agregar_caja(
+		reflejos, Vector3(0.52, 0.19, 0.005), Vector3(0.30, 0.018, 0.008), Color(0.31, 0.40, 0.50)
+	)
+
 	var marco := Color(0.31, 0.27, 0.23)
-	var cristal := Color(0.10, 0.14, 0.18)
-	_agregar_caja(ventana, Vector3.ZERO, Vector3(1.80, 1.10, 0.035), cristal)
-	_agregar_caja(ventana, Vector3(0, 0.58, 0), Vector3(1.94, 0.10, 0.08), marco, MADERA)
-	_agregar_caja(ventana, Vector3(0, -0.58, 0), Vector3(1.94, 0.10, 0.08), marco, MADERA)
-	_agregar_caja(ventana, Vector3(-0.92, 0, 0), Vector3(0.10, 1.18, 0.08), marco, MADERA)
-	_agregar_caja(ventana, Vector3(0.92, 0, 0), Vector3(0.10, 1.18, 0.08), marco, MADERA)
-	_agregar_caja(ventana, Vector3(0, 0, 0), Vector3(0.07, 1.08, 0.075), marco, MADERA)
+	_agregar_caja(ventana, Vector3(0, 0.58, 0.018), Vector3(1.94, 0.10, 0.08), marco, MADERA)
+	_agregar_caja(ventana, Vector3(0, -0.58, 0.018), Vector3(1.94, 0.10, 0.08), marco, MADERA)
+	_agregar_caja(ventana, Vector3(-0.92, 0, 0.018), Vector3(0.10, 1.18, 0.08), marco, MADERA)
+	_agregar_caja(ventana, Vector3(0.92, 0, 0.018), Vector3(0.10, 1.18, 0.08), marco, MADERA)
+	_agregar_caja(ventana, Vector3(0, 0, 0.020), Vector3(0.07, 1.08, 0.075), marco, MADERA)
 
 
 static func _montar_estanteria_compras(raiz: Node3D, pos: Vector3) -> void:
