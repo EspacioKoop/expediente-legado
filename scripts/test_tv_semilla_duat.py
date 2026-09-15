@@ -66,8 +66,8 @@ class TvSemillaDuatTest(unittest.TestCase):
         for termino in ["desbloqueado", "unlock", "hudlayer", "semilla activada"]:
             self.assertNotIn(termino, texto)
 
-    def test_no_acopla_utileria_a_partida_o_jornada(self):
-        self.assertNotIn("Partida", self.tv)
+    def test_no_acopla_utileria_al_estado_global(self):
+        self.assertNotIn("partida.estado", self.tv)
         self.assertNotIn("Jornada.", self.tv)
         self.assertIn("get_property_list()", self.tv)
         self.assertIn('String(propiedad.get("name", "")) != "jornada"', self.tv)
