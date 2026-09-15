@@ -32,6 +32,31 @@ func roms_disponibles() -> Array[Dictionary]:
 	return _roms_detectadas.duplicate(true)
 
 
+## Consulta genérica para capas externas que necesiten observar una ROM propia
+## sin recibir el objeto emulador ni acoplar la consola a estado de campaña.
+func titulo_rom_activa() -> String:
+	var emulador := _emulador_activo()
+	if emulador == null or not bool(emulador.call("is_loaded")):
+		return ""
+	return String(emulador.call("rom_title"))
+
+
+## Lee un byte mediante el contrato seguro de Siga98GB. La dirección pertenece
+## a quien consume esta API; la consola no conoce handshakes ni recompensas.
+func leer_memoria_rom_u8(direccion: int) -> int:
+	var emulador := _emulador_activo()
+	if emulador == null:
+		return -1
+	return int(emulador.call("read_memory_u8", direccion))
+
+
+func _emulador_activo() -> Object:
+	if _app == null:
+		return null
+	var emulador = _app.get("_emulador")
+	return emulador if emulador is Object else null
+
+
 func _alternar(_actor: Node) -> void:
 	if _encendida:
 		return

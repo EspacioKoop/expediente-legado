@@ -110,6 +110,7 @@ func _entrar_en(fase: String) -> void:
 	elif fase == "casa":
 		CasaUtileria.montar(_mundo)
 		_montar_gilgamesh_vigilia()
+		_montar_ryu_flow_vigilia()
 	# La niebla cambia el fondo global del Environment. Cada entrada restaura el
 	# valor base antes de decidir si este espacio recibe tiempo exterior.
 	_ambiente.background_color = FONDO_BASE
@@ -224,6 +225,19 @@ func _montar_gilgamesh_vigilia() -> void:
 	libro.position = Vector3(1.5, 0.0, 0.2)
 	_mundo.add_child(libro)
 	libro.configurar(jornada)
+
+
+## RYU FLOW vive en la consola física ya montada por CasaUtileria. El observer
+## se mantiene fuera de la consola y del emulador: solo esta capa de jornada
+## traduce el handshake de finalización a una semilla cultural.
+func _montar_ryu_flow_vigilia() -> void:
+	var consola := _mundo.get_node_or_null("ConsolaPortatil98") as ConsolaPortatil98
+	if consola == null:
+		return
+	var observador := RyuFlowVigilia.new()
+	observador.name = "RyuFlowVigiliaCasa"
+	_mundo.add_child(observador)
+	observador.configurar(jornada, consola)
 
 
 ## La lógica de apertura sigue siendo `_abrir_expediente()`: aquí solo cambia
