@@ -88,8 +88,11 @@ func _preparar_audio_emulado() -> void:
 func _bombear_audio_emulado() -> void:
 	if _audio_playback == null or _emulador == null:
 		return
-	var pcm = _emulador.call("drain_audio_pcm16")
-	if not (pcm is PackedByteArray) or pcm.is_empty():
+	var pcm_variante = _emulador.call("drain_audio_pcm16")
+	if not (pcm_variante is PackedByteArray):
+		return
+	var pcm: PackedByteArray = pcm_variante
+	if pcm.is_empty():
 		return
 	if pcm.size() % AUDIO_BYTES_PER_FRAME != 0:
 		push_warning("PCM GB desalineado; se descarta el bloque")
@@ -99,8 +102,9 @@ func _bombear_audio_emulado() -> void:
 		_audio_playback.clear_buffer()
 		return
 
+	var cantidad_frames := int(pcm.size() / AUDIO_BYTES_PER_FRAME)
 	var nuevos_frames := PackedVector2Array()
-	nuevos_frames.resize(pcm.size() / AUDIO_BYTES_PER_FRAME)
+	nuevos_frames.resize(cantidad_frames)
 	for indice in range(nuevos_frames.size()):
 		var offset := indice * AUDIO_BYTES_PER_FRAME
 		nuevos_frames[indice] = Vector2(
