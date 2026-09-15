@@ -3,12 +3,14 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 MUSICA = ROOT / "godot" / "guion" / "musica.gd"
+GITATTRIBUTES = ROOT / ".gitattributes"
 
 
 class MusicaPuntualTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.codigo = MUSICA.read_text(encoding="utf-8")
+        cls.atributos = GITATTRIBUTES.read_text(encoding="utf-8")
 
     def test_solo_declara_momentos_dramaticos(self):
         self.assertIn('"careo": ""', self.codigo)
@@ -32,6 +34,11 @@ class MusicaPuntualTest(unittest.TestCase):
         self.assertIn('"careo": true', self.codigo)
         self.assertIn('"final": false', self.codigo)
         self.assertIn("pista.loop = en_bucle(nombre)", self.codigo)
+
+    def test_ogg_musical_nuevo_entra_por_lfs_sin_migrar_efectos(self):
+        regla = "godot/assets/audio/musica/*.ogg filter=lfs diff=lfs merge=lfs -text"
+        self.assertIn(regla, self.atributos)
+        self.assertNotIn("\n*.ogg   filter=lfs", self.atributos)
 
     def test_no_duplica_efectos_ni_ambiente(self):
         self.assertNotIn("Sonido.sonar", self.codigo)

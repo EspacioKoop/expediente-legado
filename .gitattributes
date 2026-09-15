@@ -29,6 +29,11 @@
 *.webm  filter=lfs diff=lfs merge=lfs -text
 *.ogv   filter=lfs diff=lfs merge=lfs -text
 
+# Los OGG de efectos ya versionados son pequeños y se conservan como blobs Git.
+# La música puntual nueva vive en su subdirectorio y sí debe entrar por LFS, de
+# modo que no haya que migrar el historial para cumplir #76.
+godot/assets/audio/musica/*.ogg filter=lfs diff=lfs merge=lfs -text
+
 # Tipografías
 *.ttf   filter=lfs diff=lfs merge=lfs -text
 *.otf   filter=lfs diff=lfs merge=lfs -text
