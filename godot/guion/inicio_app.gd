@@ -108,7 +108,9 @@ func _crear_cabecera(caja: VBoxContainer) -> void:
 	var barra := PanelContainer.new()
 	barra.name = "BarraTituloInicio"
 	barra.custom_minimum_size.y = 42
-	barra.add_theme_stylebox_override("panel", _caja_plana(EstiloSiga.AZUL_TITULO, EstiloSiga.NEGRO, 1))
+	barra.add_theme_stylebox_override(
+		"panel", _caja_plana(EstiloSiga.AZUL_TITULO, EstiloSiga.NEGRO, 1)
+	)
 	caja.add_child(barra)
 
 	var fila := HBoxContainer.new()
@@ -157,10 +159,16 @@ func _crear_boton(texto: String, accion: Callable) -> Button:
 	boton.add_theme_color_override("font_pressed_color", EstiloSiga.NEGRO)
 	boton.add_theme_color_override("font_focus_color", EstiloSiga.NEGRO)
 	boton.add_theme_color_override("font_disabled_color", EstiloSiga.GRIS_OSCURO)
-	boton.add_theme_stylebox_override("normal", _caja_plana(EstiloSiga.GRIS, EstiloSiga.GRIS_OSCURO, 2))
-	boton.add_theme_stylebox_override("hover", _caja_plana(EstiloSiga.GRIS_CLARO, EstiloSiga.AZUL_TITULO, 2))
+	boton.add_theme_stylebox_override(
+		"normal", _caja_plana(EstiloSiga.GRIS, EstiloSiga.GRIS_OSCURO, 2)
+	)
+	boton.add_theme_stylebox_override(
+		"hover", _caja_plana(EstiloSiga.GRIS_CLARO, EstiloSiga.AZUL_TITULO, 2)
+	)
 	boton.add_theme_stylebox_override("pressed", _caja_plana(Color("a8a8a8"), EstiloSiga.NEGRO, 2))
-	boton.add_theme_stylebox_override("disabled", _caja_plana(Color("b8b8b8"), EstiloSiga.GRIS_OSCURO, 2))
+	boton.add_theme_stylebox_override(
+		"disabled", _caja_plana(Color("b8b8b8"), EstiloSiga.GRIS_OSCURO, 2)
+	)
 	boton.add_theme_stylebox_override("focus", _caja_plana(Color(0, 0, 0, 0), EstiloSiga.NEGRO, 1))
 	boton.pressed.connect(accion)
 	return boton
