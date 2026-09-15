@@ -67,6 +67,26 @@ class SuenoDuatTest(unittest.TestCase):
         for termino in ["Sueno.noche(", "SuenoFormas", "Partida", "veredicto", "dinero"]:
             self.assertNotIn(termino, self.texto)
 
+    def test_prototipo_3d_materializa_balanza_y_pesos_interactivos(self):
+        self.assertIn("static func crear_prototipo_3d(", self.texto)
+        self.assertIn('balanza.name = "Balanza"', self.texto)
+        self.assertIn('area.set_meta("duat_interaccion", "pesar")', self.texto)
+        self.assertIn("Area3D.new()", self.texto)
+        self.assertIn("SphereShape3D.new()", self.texto)
+        self.assertNotIn("BoxMesh.new()", self.texto)
+
+    def test_equilibrio_transforma_dos_piramides_y_accesibilidad_es_discreta(self):
+        self.assertIn("static func aplicar_pesaje_3d(", self.texto)
+        self.assertIn('"PiramideInferior"', self.texto)
+        self.assertIn('"PiramideInvertida"', self.texto)
+        transformar = self.texto.split("static func _transformar_arquitectura(", 1)[1].split(
+            "static func _material(", 1
+        )[0]
+        self.assertIn("if reduccion_movimiento:", transformar)
+        self.assertIn('tween.tween_property(inferior, "position"', transformar)
+        self.assertIn('tween.tween_property(invertida, "position"', transformar)
+        self.assertIn('tween.tween_property(arquitectura, "rotation_degrees"', transformar)
+
     def test_no_copia_franquicias_noventeras(self):
         texto = self.texto.lower()
         for franquicia in ["stargate", "tomb raider", "lara croft"]:
