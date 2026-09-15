@@ -11,8 +11,9 @@ Solo entran ROMs **propias**: código de este repositorio compilado con RGBDS de
 | `caza_pixeles_98` | Caza Píxeles 98 | arcade de 30 s | incluida con la consola | — | #124 #95 #384 #386 |
 | `paper_planes_98` | Paper Planes 98 | vuelo; ruta Nueva York 1998 | tienda de videojuegos | 45 | #95 #388 |
 | `croc_riders_98` | Croc Riders 98 | carreras; El Cairo → Giza | tienda de videojuegos | 45 | #95 #389 |
+| `aquiles_98` | MYRMIDON 98 | duelo de observación; leer guardia y talón vulnerable | tienda de videojuegos | 45 | #438 #442 |
 
-Las tres son de 32 KiB, modo dual CGB (`0x80`), y ninguna guarda nada ni da recompensas (contrato de #95).
+Las cuatro son de 32 KiB, modo dual CGB (`0x80`), y ninguna guarda nada ni da recompensas persistentes (contrato de #95).
 
 ## En proyecto
 
@@ -25,14 +26,13 @@ Contrapartes de vigilia de los sueños mitológicos (#435, #442). Tienen issue p
 | `hydra_loop_98` | HYDRA LOOP | Hidra | cortar cabezas empeora todo hasta dar con el nodo común | #439 |
 | `ryu_flow_98` | RYU FLOW | dragón japonés | desviar cauces; arte del cartucho en `docs/visuales/ryu-flow` | #440 #542 |
 | `duat_98` | DUAT 98 | Duat | cámaras y contrapesos | #441 |
-| `aquiles_98` | Sin título (Aquiles) | Aquiles | un rival que solo reacciona en un punto; título por decidir | #438 |
 
 ## Qué hace el índice
 
 - **Build:** `scripts/preparar_emulador_gb.sh rom` compila todas las `jugable` y las deja en `godot/roms/<id>.gbc`. La exportación ya incluye `roms/*.gbc`. El workflow `gbc-fixtures` también las compila e inspecciona.
 - **Tienda:** `TiendaVideojuegos.catalogo()` vende las jugables con precio (`RomsPropias.a_la_venta()`).
 - **Consola:** la Portátil Color 98 y la consola de sobremesa muestran las `incluida` más las compradas en la jornada (`RomsPropias.en_consola`), siempre que el artefacto exista en la build.
-- **Sueños:** la fuente de semilla de una ROM es `RomsPropias.fuente_semilla(id)` (`rom:<id>`). El cartucho ARIADNA del Minotauro ya la usa.
+- **Sueños:** la fuente de semilla de una ROM es `RomsPropias.fuente_semilla(id)` (`rom:<id>`). El cartucho ARIADNA del Minotauro ya la usa. `MYRMIDON 98` deja preparado ese origen para Aquiles, pero este corte no conecta todavía la victoria de la ROM con `semilla_onirica_aquiles`.
 
 ## Añadir una ROM
 
