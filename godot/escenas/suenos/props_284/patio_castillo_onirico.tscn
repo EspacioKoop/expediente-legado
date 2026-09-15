@@ -1,0 +1,48 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://escenas/suenos/props_284/muro_torre_castillo.tscn" id="1_muro"]
+[ext_resource type="PackedScene" path="res://escenas/suenos/props_284/escalera_anular_castillo.tscn" id="2_escalera"]
+[ext_resource type="PackedScene" path="res://escenas/suenos/props_284/estandarte_anular.tscn" id="3_estandarte"]
+
+[sub_resource type="StandardMaterial3D" id="MatPatio"]
+albedo_color = Color(0.115, 0.105, 0.095, 1)
+roughness = 1.0
+
+[sub_resource type="PlaneMesh" id="Patio"]
+size = Vector2(14, 14)
+
+[node name="PatioCastilloOnirico" type="Node3D"]
+
+[node name="SueloPatio" type="MeshInstance3D" parent="."]
+mesh = SubResource("Patio")
+material_override = SubResource("MatPatio")
+
+[node name="PortadaNorte" parent="." instance=ExtResource("1_muro")]
+position = Vector3(0, 0, -6.1)
+
+[node name="PortadaSur" parent="." instance=ExtResource("1_muro")]
+position = Vector3(0, 0, 6.1)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="PortadaEste" parent="." instance=ExtResource("1_muro")]
+position = Vector3(6.1, 0, 0)
+rotation_degrees = Vector3(0, -90, 0)
+
+[node name="EscaleraImposible" parent="." instance=ExtResource("2_escalera")]
+position = Vector3(-1.2, 0.02, 0.7)
+rotation_degrees = Vector3(0, 18, 0)
+
+[node name="EstandarteNorte" parent="." instance=ExtResource("3_estandarte")]
+position = Vector3(-2.35, 4.1, -5.45)
+rotation_degrees = Vector3(0, 0, 0)
+
+[node name="EstandarteEste" parent="." instance=ExtResource("3_estandarte")]
+position = Vector3(5.45, 4.1, 2.35)
+rotation_degrees = Vector3(0, -90, 0)
+
+[node name="LuzPatio" type="OmniLight3D" parent="."]
+position = Vector3(0, 3.1, 0)
+light_color = Color(0.48, 0.36, 0.28, 1)
+light_energy = 0.7
+omni_range = 9.5
+shadow_enabled = true
