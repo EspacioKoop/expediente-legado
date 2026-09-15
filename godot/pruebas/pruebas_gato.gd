@@ -155,6 +155,47 @@ static func _cuenco(comprobar: Callable) -> void:
 	)
 
 
+## Comer tú, no el gato (#93): compra aparte, mismo dinero. Misma frontera que
+## la lata, así que la prueba es simétrica y vive aquí por tema, aunque el
+## estado sea de Jornada y no del bicho.
+static func _comida_propia(comprobar: Callable) -> void:
+	comprobar.call(
+		"comer cuesta menos que vivir un día",
+		Jornada.PRECIO_COMIDA_PROPIA < Jornada.COSTE_DIARIO,
+		true
+	)
+	var hambriento := Jornada.nueva()
+	hambriento["comida_propia"]["dias_sin_comer"] = 2
+	var saldo_antes: int = hambriento["dinero"]
+	(
+		comprobar
+		. call(
+			"comer reinicia la cuenta y cobra",
+			[
+				Jornada.comer(hambriento, Jornada.PRECIO_COMIDA_PROPIA),
+				hambriento["dinero"],
+				hambriento["comida_propia"]["dias_sin_comer"],
+			],
+			[true, saldo_antes - Jornada.PRECIO_COMIDA_PROPIA, 0]
+		)
+	)
+	hambriento["dinero"] = 0
+	comprobar.call(
+		"sin dinero no se come, y no se queda a deber",
+		[Jornada.comer(hambriento, Jornada.PRECIO_COMIDA_PROPIA), hambriento["dinero"]],
+		[false, 0]
+	)
+
+	# Dormir sin comer suma la cuenta, igual que con el gato, sin castigo aquí:
+	# lo que se note en la casa lo decide #96.
+	var sin_comer := Jornada.nueva()
+	sin_comer["fase"] = "casa"
+	Jornada.dormir(sin_comer)
+	comprobar.call(
+		"una noche sin comer suma un día", sin_comer["comida_propia"]["dias_sin_comer"], 1
+	)
+
+
 ## Que el bicho tenga malla. Es el único ser vivo del juego y lo único que no
 ## está hecho de cajas: si esta geometría cambia, ha cambiado el gato y no un
 ## detalle de implementación.
