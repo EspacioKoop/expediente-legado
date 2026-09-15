@@ -41,6 +41,14 @@ class VestuarioHumano3DTest(unittest.TestCase):
         self.assertNotIn("randf(", self.vestuario)
         self.assertNotIn("randi(", self.vestuario)
 
+    def test_el_volumen_prioriza_hombros_y_torso_alargado(self):
+        self.assertIn('"VestuarioHombros"', self.vestuario)
+        self.assertIn('alto_torso * 0.27 * float(perfil["ancho"])', self.vestuario)
+        self.assertIn('alto_torso * 0.135 * float(perfil["fondo"])', self.vestuario)
+        self.assertIn('alto_torso * 0.47 * float(perfil["largo"])', self.vestuario)
+        self.assertIn("Vector3(ancho * 0.78, largo * 0.18, fondo * 0.90)", self.vestuario)
+        self.assertIn("malla.radius = ancho_torso * 0.085", self.vestuario)
+
     def test_conserva_el_shader_visual_del_proyecto(self):
         self.assertIn("load(Espacio3D.SHADER_PSX)", self.vestuario)
         self.assertIn('get_shader_parameter("color_base")', self.vestuario)
