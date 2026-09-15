@@ -25,7 +25,10 @@ class AquilesNocheRuntimeTest(unittest.TestCase):
         )
         self.assertIn("MitologiasNoche.MAX_FAMILIAS_NOCHE", self.controller)
         self.assertIn("_corresponde_a_esta_escena(dia, familias)", self.controller)
-        self.assertIn("MitologiasNoche.corresponde_a_escena(", self.controller)
+        self.assertRegex(
+            self.controller,
+            r"MitologiasNoche\s*\.\s*corresponde_a_escena\s*\(",
+        )
         self.assertIn("SuenoAquiles.ID_MITO", self.controller)
         self.assertNotIn("activar_semilla_onirica", self.controller)
         self.assertNotIn("semilla_onirica_aquiles", self.controller)
