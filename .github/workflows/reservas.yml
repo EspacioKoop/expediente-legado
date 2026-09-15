@@ -1,0 +1,51 @@
+name: Reservas
+
+on:
+  pull_request_target:
+    types: [closed]
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: reservas-${{ github.repository }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  gestionar:
+    if: github.event_name != 'pull_request_target' || github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      # pull_request_target es deliberado y no ejecuta código del head de la PR.
+      # Incluso workflow_dispatch hace checkout fijo de main antes de usar issues:write.
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Regresión del gestor de reservas
+        run: python -m unittest discover -s scripts -p 'test_gestionar_reservas.py'
+
+      - name: Liberar reserva de PR cerrada
+        if: github.event_name == 'pull_request_target'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: python scripts/gestionar_reservas.py --pr "$PR_NUMBER"
+
+      - name: Barrer leases y migrar reservas legacy
+        if: github.event_name != 'pull_request_target'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >-
+          python scripts/gestionar_reservas.py
+          --sweep
+          --legacy-cutoff 2026-09-15T04:06:30Z
