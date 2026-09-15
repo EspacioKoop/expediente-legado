@@ -17,6 +17,11 @@ const Z_MODAL := 3000
 const ESCALA_UI_MIN := 0.8
 const ESCALA_UI_MAX := 1.5
 
+## Tamaños de serie para quien registre una aplicación sin declarar los suyos
+## (p. ej. las pruebas de humo que solo pasan id/título/fábrica).
+const TAMANO_MINIMO_SERIE := Vector2(300, 220)
+const TAMANO_PREFERIDO_SERIE := Vector2(760, 540)
+
 ## Identidad propia: gramática de 1998 sin copiar el escritorio de Windows.
 const FONDO_CORPORATIVO := Color("315d5c")
 const PETROLEO := Color("1f4d55")
@@ -44,6 +49,7 @@ var _aplicaciones: Dictionary = {}
 var _ventanas: Dictionary = {}
 var _z_siguiente := 10
 var _arrastre_id := ""
+var _redimension_id := ""
 
 ## Solo puede haber una modal activa a la vez: bloquea el resto del shell
 ## (escritorio, barra, menú y demás ventanas) hasta que se cierre.
@@ -93,10 +99,28 @@ func establecer_reloj_narrativo(texto: String) -> void:
 
 ## Registra una aplicación sin acoplar el shell a su escena.
 ## [param creador] debe devolver un Control nuevo cada vez que se abra tras cerrar.
-func registrar_aplicacion(id: String, titulo: String, creador: Callable) -> void:
+## [param tamano_minimo]/[param tamano_preferido]/[param redimensionable]/
+## [param multiples_instancias] vienen de [method EscritorioSigaApp.describir_capacidades];
+## quien no las declare recibe los valores de serie de siempre.
+func registrar_aplicacion(
+	id: String,
+	titulo: String,
+	creador: Callable,
+	tamano_minimo: Vector2 = TAMANO_MINIMO_SERIE,
+	tamano_preferido: Vector2 = TAMANO_PREFERIDO_SERIE,
+	redimensionable: bool = false,
+	multiples_instancias: bool = false
+) -> void:
 	if id.is_empty() or _aplicaciones.has(id) or not creador.is_valid():
 		return
-	_aplicaciones[id] = {"titulo": titulo, "creador": creador}
+	_aplicaciones[id] = {
+		"titulo": titulo,
+		"creador": creador,
+		"tamano_minimo": tamano_minimo,
+		"tamano_preferido": tamano_preferido,
+		"redimensionable": redimensionable,
+		"multiples_instancias": multiples_instancias,
+	}
 	_crear_lanzador(id, titulo)
 	_crear_entrada_programa(id, titulo)
 
@@ -104,31 +128,54 @@ func registrar_aplicacion(id: String, titulo: String, creador: Callable) -> void
 ## Adopta una instancia ya creada. Sirve para migrar el visor histórico sin
 ## obligar al día a construir dos veces la misma aplicación durante la transición.
 func adoptar_aplicacion(
-	id: String, titulo: String, contenido: Control, creador: Callable = Callable()
+	id: String,
+	titulo: String,
+	contenido: Control,
+	creador: Callable = Callable(),
+	tamano_minimo: Vector2 = TAMANO_MINIMO_SERIE,
+	tamano_preferido: Vector2 = TAMANO_PREFERIDO_SERIE,
+	redimensionable: bool = false,
+	multiples_instancias: bool = false
 ) -> void:
 	if contenido == null:
 		return
 	if not _aplicaciones.has(id):
 		if not creador.is_valid():
 			return
-		registrar_aplicacion(id, titulo, creador)
+		registrar_aplicacion(
+			id,
+			titulo,
+			creador,
+			tamano_minimo,
+			tamano_preferido,
+			redimensionable,
+			multiples_instancias
+		)
 	elif creador.is_valid():
 		_aplicaciones[id]["creador"] = creador
 	if _ventanas.has(id):
 		cerrar(id)
-	_crear_ventana(id, titulo, contenido)
+	_crear_ventana(id, titulo, contenido, false, id)
 
 
+## Abre [param id]. Si la aplicación declara [code]multiples_instancias[/code]
+## y ya hay una ventana abierta, crea una instancia independiente en vez de
+## reenfocar la existente; si no lo declara, mantiene el comportamiento de
+## siempre (reenfocar/restaurar la única ventana).
 func abrir_aplicacion(id: String) -> void:
 	if not _modal_id.is_empty() or not _aplicaciones.has(id):
 		return
-	if _ventanas.has(id):
+	var multiples: bool = bool(_aplicaciones[id].get("multiples_instancias", false))
+	if _ventanas.has(id) and not multiples:
 		var datos: Dictionary = _ventanas[id]
 		if bool(datos.get("minimizada", false)):
 			restaurar(id)
 		else:
 			enfocar(id)
 		return
+	var id_ventana := id
+	if _ventanas.has(id) and multiples:
+		id_ventana = _siguiente_id_instancia(id)
 	var creador: Callable = _aplicaciones[id]["creador"]
 	if not creador.is_valid():
 		return
@@ -137,7 +184,17 @@ func abrir_aplicacion(id: String) -> void:
 		if creado is Node:
 			(creado as Node).queue_free()
 		return
-	_crear_ventana(id, String(_aplicaciones[id]["titulo"]), creado as Control)
+	_crear_ventana(id_ventana, String(_aplicaciones[id]["titulo"]), creado as Control, false, id)
+
+
+## Sufija con "#2", "#3"... el primer id libre. La primera instancia siempre
+## se queda con el id desnudo, así que las llamadas existentes (una sola
+## ventana por aplicación) no ven ningún cambio en su id de ventana.
+func _siguiente_id_instancia(id_app: String) -> String:
+	var numero := 2
+	while _ventanas.has("%s#%d" % [id_app, numero]):
+		numero += 1
+	return "%s#%d" % [id_app, numero]
 
 
 ## Abre [param contenido] como ventana modal: bloquea el resto del shell
@@ -181,7 +238,7 @@ func restaurar(id: String) -> void:
 	var panel: Control = datos["panel"]
 	panel.visible = true
 	datos["minimizada"] = false
-	_limitar_ventana(panel)
+	_limitar_ventana(panel, datos.get("tamano_minimo", Vector2.ONE))
 	enfocar(id)
 
 
@@ -424,19 +481,40 @@ func _abrir_desde_menu(id: String) -> void:
 	abrir_aplicacion(id)
 
 
-func _crear_ventana(id: String, titulo: String, contenido: Control, es_modal: bool = false) -> void:
-	var panel := PanelContainer.new()
+## [param id_app] es la aplicación registrada de la que vienen las capacidades
+## (tamaños, redimensionado); puede diferir de [param id] cuando este es una
+## instancia adicional ("explorador#2"). Vacío equivale a usar [param id],
+## que es lo que hacen las modales y las llamadas sin varias instancias.
+func _crear_ventana(
+	id: String, titulo: String, contenido: Control, es_modal: bool = false, id_app: String = ""
+) -> void:
+	var capacidades: Dictionary = _aplicaciones.get(id_app if not id_app.is_empty() else id, {})
+	var tamano_minimo: Vector2 = capacidades.get("tamano_minimo", TAMANO_MINIMO_SERIE)
+	var tamano_preferido: Vector2 = capacidades.get("tamano_preferido", TAMANO_PREFERIDO_SERIE)
+	var redimensionable: bool = capacidades.get("redimensionable", false)
+	var tamano_minimo_esc := _esc_v(tamano_minimo)
+
+	## Control simple (no contenedor) para que el agarre de redimensionado
+	## pueda convivir con el resto sin que el layout lo estire a pantalla
+	## completa, como haría un segundo hijo de un PanelContainer.
+	var panel := Control.new()
 	panel.name = "Ventana_%s" % id
 	panel.position = _posicion_inicial(_ventanas.size())
-	panel.size = _tamano_inicial()
-	panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	panel.add_theme_stylebox_override("panel", _estilo_panel(EstiloSiga.GRIS, EstiloSiga.NEGRO))
+	panel.size = _tamano_inicial(tamano_minimo, tamano_preferido)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_area_ventanas.add_child(panel)
+
+	var fondo := PanelContainer.new()
+	fondo.name = "Fondo"
+	fondo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	fondo.mouse_filter = Control.MOUSE_FILTER_STOP
+	fondo.add_theme_stylebox_override("panel", _estilo_panel(EstiloSiga.GRIS, EstiloSiga.NEGRO))
+	panel.add_child(fondo)
 
 	var columna := VBoxContainer.new()
 	columna.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	columna.add_theme_constant_override("separation", 0)
-	panel.add_child(columna)
+	fondo.add_child(columna)
 
 	var titulo_barra := PanelContainer.new()
 	titulo_barra.name = "BarraTitulo"
@@ -501,14 +579,30 @@ func _crear_ventana(id: String, titulo: String, contenido: Control, es_modal: bo
 	if not es_modal:
 		_tareas.add_child(tarea)
 
+	if redimensionable and not es_modal:
+		var lado := _esc(14.0)
+		var agarre := ColorRect.new()
+		agarre.name = "AgarreRedimension"
+		agarre.color = Color(EstiloSiga.NEGRO, 0.5)
+		agarre.mouse_default_cursor_shape = Control.CURSOR_FDIAGSIZE
+		agarre.mouse_filter = Control.MOUSE_FILTER_STOP
+		agarre.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+		agarre.offset_left = -lado
+		agarre.offset_top = -lado
+		agarre.offset_right = 0.0
+		agarre.offset_bottom = 0.0
+		agarre.gui_input.connect(_al_input_agarre.bind(id))
+		panel.add_child(agarre)
+
 	_ventanas[id] = {
 		"panel": panel,
 		"titulo_barra": titulo_barra,
 		"tarea": tarea,
 		"minimizada": false,
 		"modal": es_modal,
+		"tamano_minimo": tamano_minimo_esc,
 	}
-	_limitar_ventana(panel)
+	_limitar_ventana(panel, tamano_minimo_esc)
 	enfocar(id)
 
 
@@ -543,28 +637,70 @@ func _al_input_titulo(evento: InputEvent, id: String) -> void:
 		return
 	if evento is InputEventMouseMotion and _arrastre_id == id:
 		var movimiento := evento as InputEventMouseMotion
-		var panel: Control = _ventanas[id]["panel"]
+		var datos: Dictionary = _ventanas[id]
+		var panel: Control = datos["panel"]
 		panel.position += movimiento.relative
-		_limitar_ventana(panel)
+		_limitar_ventana(panel, datos.get("tamano_minimo", Vector2.ONE))
 		get_viewport().set_input_as_handled()
 
 
-func _limitar_ventana(panel: Control) -> void:
-	var ancho_disponible := maxf(_area_ventanas.size.x, 1.0)
-	var alto_disponible := maxf(_area_ventanas.size.y, _alto_titulo)
-	panel.size.x = minf(panel.size.x, ancho_disponible)
-	panel.size.y = minf(panel.size.y, alto_disponible)
-	var minimo_x := minf(0.0, -panel.size.x + _ancho_titulo_recuperable)
-	var maximo_x := maxf(0.0, ancho_disponible - _ancho_titulo_recuperable)
-	var maximo_y := maxf(0.0, alto_disponible - _alto_titulo)
-	panel.position.x = clampf(panel.position.x, minimo_x, maximo_x)
-	panel.position.y = clampf(panel.position.y, 0.0, maximo_y)
+## Arrastre del agarre inferior-derecho. Solo existe en ventanas cuya
+## aplicación declaró [code]redimensionable = true[/code]; el resto ni
+## siquiera tiene el control de arrastre en su árbol.
+func _al_input_agarre(evento: InputEvent, id: String) -> void:
+	if not _ventanas.has(id):
+		return
+	if evento is InputEventMouseButton:
+		var raton := evento as InputEventMouseButton
+		if raton.button_index != MOUSE_BUTTON_LEFT:
+			return
+		if raton.pressed:
+			_redimension_id = id
+			enfocar(id)
+		else:
+			_redimension_id = ""
+		get_viewport().set_input_as_handled()
+		return
+	if evento is InputEventMouseMotion and _redimension_id == id:
+		var movimiento := evento as InputEventMouseMotion
+		var datos: Dictionary = _ventanas[id]
+		var panel: Control = datos["panel"]
+		panel.size += movimiento.relative
+		_limitar_ventana(panel, datos.get("tamano_minimo", Vector2.ONE))
+		get_viewport().set_input_as_handled()
 
 
-func _tamano_inicial() -> Vector2:
+## Recorta tamaño y posición al área disponible del escritorio y, si se da
+## [param tamano_minimo], no deja que la ventana baje de ahí (el agarre de
+## redimensionado y cualquier reflujo por cambio de tamaño del escritorio
+## comparten esta misma regla).
+func _limitar_ventana(panel: Control, tamano_minimo: Vector2 = Vector2.ONE) -> void:
+	# El mínimo declarado NUNCA se viola, aunque el área disponible sea menor
+	# (un escritorio diminuto o, como en las pruebas de humo sin ventana real,
+	# de 64×64): el límite superior se ensancha para no pedirle a [method
+	# clampf] un rango imposible, y la ventana puede quedar más grande que el
+	# área en vez de más pequeña que su mínimo.
+	var ancho_disponible := maxf(maxf(_area_ventanas.size.x, 1.0), tamano_minimo.x)
+	var alto_disponible := maxf(maxf(_area_ventanas.size.y, _alto_titulo), tamano_minimo.y)
+	panel.size.x = clampf(panel.size.x, tamano_minimo.x, ancho_disponible)
+	panel.size.y = clampf(panel.size.y, tamano_minimo.y, alto_disponible)
+	var minimo_pos_x := minf(0.0, -panel.size.x + _ancho_titulo_recuperable)
+	var maximo_pos_x := maxf(0.0, ancho_disponible - _ancho_titulo_recuperable)
+	var maximo_pos_y := maxf(0.0, alto_disponible - _alto_titulo)
+	panel.position.x = clampf(panel.position.x, minimo_pos_x, maximo_pos_x)
+	panel.position.y = clampf(panel.position.y, 0.0, maximo_pos_y)
+
+
+func _tamano_inicial(tamano_minimo: Vector2, tamano_preferido: Vector2) -> Vector2:
 	return Vector2(
-		minf(_esc(760.0), maxf(_esc(300.0), _area_ventanas.size.x - _esc(86.0))),
-		minf(_esc(540.0), maxf(_esc(220.0), _area_ventanas.size.y - _esc(64.0)))
+		minf(
+			_esc(tamano_preferido.x),
+			maxf(_esc(tamano_minimo.x), _area_ventanas.size.x - _esc(86.0))
+		),
+		minf(
+			_esc(tamano_preferido.y),
+			maxf(_esc(tamano_minimo.y), _area_ventanas.size.y - _esc(64.0))
+		)
 	)
 
 
@@ -576,7 +712,7 @@ func _posicion_inicial(indice: int) -> Vector2:
 func _al_redimensionar() -> void:
 	for id in _ventanas:
 		var datos: Dictionary = _ventanas[id]
-		_limitar_ventana(datos["panel"])
+		_limitar_ventana(datos["panel"], datos.get("tamano_minimo", Vector2.ONE))
 
 
 func _enfocar_superior() -> void:

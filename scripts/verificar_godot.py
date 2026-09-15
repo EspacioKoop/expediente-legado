@@ -102,7 +102,7 @@ def ejecutar():
                 "escritorio-modal",
                 ["--script", "pruebas/pruebas_escritorio_modal.gd"],
                 30,
-                19,
+                28,
             ),
             (
                 "vestuario-humano",
