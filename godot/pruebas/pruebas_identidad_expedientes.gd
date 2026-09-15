@@ -23,15 +23,19 @@ func _init() -> void:
 		comprobar(
 			"%s tiene código" % caso_id, not String(identidad.get("codigo", "")).is_empty(), true
 		)
-
-		var ruta := String(identidad.get("icono", ""))
-		var existe := not ruta.is_empty() and ResourceLoader.exists(ruta)
-		comprobar("%s tiene icono importable" % caso_id, existe, true)
-		var textura: Variant = load(ruta) if existe else null
-		comprobar("%s carga como textura" % caso_id, textura is Texture2D, true)
+		comprobar_recurso(caso_id, identidad, "icono")
+		comprobar_recurso(caso_id, identidad, "lamina")
 
 	print("%d pasadas, %d fallos" % [pasadas, fallos])
 	quit(1 if fallos > 0 else 0)
+
+
+func comprobar_recurso(caso_id: String, identidad: Dictionary, campo: String) -> void:
+	var ruta := String(identidad.get(campo, ""))
+	var existe := not ruta.is_empty() and ResourceLoader.exists(ruta)
+	comprobar("%s tiene %s importable" % [caso_id, campo], existe, true)
+	var textura: Variant = load(ruta) if existe else null
+	comprobar("%s carga %s como textura" % [caso_id, campo], textura is Texture2D, true)
 
 
 func comprobar(nombre: String, obtenido, esperado) -> void:

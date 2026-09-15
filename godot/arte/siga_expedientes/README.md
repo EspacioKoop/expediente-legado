@@ -1,9 +1,14 @@
 # Identidad visual de expedientes SIGA
 
-Pack de iconos de 32×32 para que los nueve expedientes principales sean
-reconocibles antes de leer el título completo. Son SVG construidos con
-primitivas simples y sin material externo; conservan el aspecto sobrio de una
-aplicación administrativa de finales de los 90.
+Pack visual para que los nueve expedientes principales sean reconocibles antes
+de leer el título completo. Todo el material es SVG original construido con
+primitivas simples y sin fuentes gráficas externas.
+
+Cada expediente tiene dos escalas:
+
+- **Icono 32×32:** identificación rápida en la lista de SIGA.
+- **Lámina 320×120:** portada visual que aparece al seleccionar la carpeta y se
+  retira al abrir un folio, para no competir con la lectura.
 
 | Expediente | Código visual | Motivo |
 | --- | --- | --- |
@@ -14,10 +19,10 @@ aplicación administrativa de finales de los 90.
 | 5 | MEMO 78/93/07 | copias superpuestas del mismo memorándum |
 | 6 | 1958 | acta fundacional y sello amarillo |
 | 7 | KARAMÁZOV | árbol de tres reclamantes |
-| 8 | #427 | botón y ficha numerada |
+| 8 | #427 | ficha laboral y empleado numerado |
 | 9 | R-17 → R-18 | reclasificación entre series |
 
-La asociación entre caso, color e icono vive en
-`res://datos/identidad_expedientes.json`. El visor solo consume ese catálogo:
-no contiene casos codificados uno a uno ni altera pistas, acciones, acusaciones
-o guardado.
+La asociación entre caso, color, icono y lámina vive en
+`res://datos/identidad_expedientes.json`. El componente visual consume ese
+catálogo sin contener casos codificados uno a uno ni alterar pistas, acciones,
+acusaciones o guardado.
