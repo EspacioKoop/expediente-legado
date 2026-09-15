@@ -12,6 +12,7 @@ SUENO = ROOT / "godot" / "guion" / "sueno_gilgamesh.gd"
 VIGILIA = ROOT / "godot" / "guion" / "gilgamesh_vigilia.gd"
 ESCENA_SUENO = ROOT / "godot" / "escenas" / "sueno_gilgamesh.tscn"
 ESCENA_VIGILIA = ROOT / "godot" / "escenas" / "gilgamesh_vigilia.tscn"
+DIA = ROOT / "godot" / "guion" / "dia_clima_app.gd"
 PRUEBA_GODOT = "res://pruebas/pruebas_gilgamesh.gd"
 RESUMEN_GODOT = re.compile(r"(\d+) pasadas, 0 fallos")
 
@@ -23,6 +24,7 @@ class SuenoGilgameshTest(unittest.TestCase):
         cls.vigilia = VIGILIA.read_text(encoding="utf-8")
         cls.escena_sueno = ESCENA_SUENO.read_text(encoding="utf-8")
         cls.escena_vigilia = ESCENA_VIGILIA.read_text(encoding="utf-8")
+        cls.dia = DIA.read_text(encoding="utf-8")
 
     def test_usa_semilla_comun_y_no_entrada_incondicional(self):
         self.assertIn('ID_MITO := "gilgamesh"', self.sueno)
@@ -81,6 +83,13 @@ class SuenoGilgameshTest(unittest.TestCase):
         self.assertIn('[node name="SuenoGilgamesh" type="Node3D"]', self.escena_sueno)
         self.assertIn('path="res://guion/gilgamesh_vigilia.gd"', self.escena_vigilia)
         self.assertIn('[node name="GilgameshVigilia" type="Area3D"]', self.escena_vigilia)
+
+    def test_vigilia_alcanzable_desde_casa_real(self):
+        self.assertIn('elif fase == "casa":', self.dia)
+        self.assertIn("CasaUtileria.montar(_mundo)", self.dia)
+        self.assertIn("_montar_gilgamesh_vigilia()", self.dia)
+        self.assertIn("GilgameshVigilia.new()", self.dia)
+        self.assertIn("libro.configurar(jornada)", self.dia)
 
     def test_contrato_funciona_en_godot_headless(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
