@@ -159,17 +159,15 @@ static func _cuenco(comprobar: Callable) -> void:
 ## está hecho de cajas: si esta geometría cambia, ha cambiado el gato y no un
 ## detalle de implementación.
 static func _malla(comprobar: Callable) -> void:
-	# #570: fija el contrato físico sin construir un cuerpo dentro de la suite
-	# unitaria. La integración real se comprueba al importar y arrancar el juego.
+	# #570: la raíz conserva el ciclo de vida ligero de siempre, pero lleva una
+	# sonda volumétrica que consulta el mobiliario antes de aceptar cada paso.
 	var codigo_gato := FileAccess.get_file_as_string("res://guion/gato.gd")
+	comprobar.call("el gato sigue siendo un nodo ligero", codigo_gato.contains("extends Node3D"), true)
 	comprobar.call(
-		"el gato es un cuerpo físico", codigo_gato.contains("extends CharacterBody3D"), true
+		"el gato tiene sonda volumétrica", codigo_gato.contains("ShapeCast3D.new()"), true
 	)
 	comprobar.call(
-		"el gato tiene forma de colisión", codigo_gato.contains("CollisionShape3D.new()"), true
-	)
-	comprobar.call(
-		"el movimiento consulta colisiones", codigo_gato.contains("move_and_collide("), true
+		"la sonda fuerza consulta física", codigo_gato.contains("force_shapecast_update()"), true
 	)
 
 	# Un tubo de N anillos y L lados: dos triángulos por cara y una tapa por
