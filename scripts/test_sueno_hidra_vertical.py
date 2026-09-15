@@ -19,7 +19,7 @@ class HidraVerticalTest(unittest.TestCase):
     def test_vigilia_hydra_loop_requiere_dos_interacciones_deliberadas(self):
         self.assertIn("extends Interactuable3D", self.vigilia)
         self.assertIn('const ID_MITO := "hidra"', self.vigilia)
-        self.assertIn('const FUENTE := "rom:hydra_loop"', self.vigilia)
+        self.assertIn('const FUENTE := "rom:hydra_loop_98"', self.vigilia)
         self.assertIn("HYDRA_LOOP", self.vigilia)
         self.assertIn("const INTERACCIONES_REQUERIDAS := 2", self.vigilia)
         self.assertIn("_interacciones < INTERACCIONES_REQUERIDAS", self.vigilia)
