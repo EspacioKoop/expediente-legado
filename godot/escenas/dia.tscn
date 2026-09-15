@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -14,6 +14,7 @@
 [ext_resource type="Script" path="res://guion/dia_escritorio_siga_app.gd" id="12"]
 [ext_resource type="Script" path="res://guion/dia_ventana_clima_app.gd" id="13"]
 [ext_resource type="Script" path="res://guion/dia_aquiles_vigilia_app.gd" id="14"]
+[ext_resource type="Script" path="res://guion/dia_aquiles_sueno_app.gd" id="15"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -56,3 +57,6 @@ script = ExtResource("13")
 
 [node name="AquilesVigiliaController" type="Node" parent="."]
 script = ExtResource("14")
+
+[node name="AquilesSuenoController" type="Node" parent="."]
+script = ExtResource("15")
