@@ -1,8 +1,8 @@
 {
-  "_regla": "Índice único de ROMs propias de SIGA-98. Toda ROM propia que se compile, se venda, aparezca en la consola o active una semilla onírica está aquí con un id estable. Solo código propio compilado desde gbc/minijuegos/<id>; nunca BIOS, dumps ni ROMs comerciales. Ver docs/roms-propias.md.",
+  "_regla": "Índice único de ROMs propias de SIGA-98. Toda ROM propia que tenga fuente, se compile, se venda, aparezca en la consola o active una semilla onírica está aquí con un id estable. Una ROM en_proyecto puede tener fuente prototipo verificable sin entrar todavía en runtime. Solo código propio bajo gbc/minijuegos/<id>; nunca BIOS, dumps ni ROMs comerciales. Ver docs/roms-propias.md.",
   "estados": {
-    "jugable": "Hay fuente en gbc/minijuegos/<id>, compila con RGBDS y el build la deja en res://roms/<id>.gbc.",
-    "en_proyecto": "Decidida y con issue, sin fuente todavía. No se compila, no se vende y no aparece en la consola."
+    "jugable": "Hay fuente en gbc/minijuegos/<id>, compila con RGBDS y el build de runtime la deja en res://roms/<id>.gbc.",
+    "en_proyecto": "Decidida y con issue. Puede no tener fuente o tener un prototipo compilable en CI aislado; no se vende, no entra en el build de runtime y no aparece en la consola."
   },
   "roms": [
     {
@@ -119,15 +119,15 @@
     {
       "id": "ryu_flow_98",
       "titulo": "RYU FLOW",
-      "estado": "jugable",
+      "estado": "en_proyecto",
       "genero": "puzle de flujo",
-      "resumen": "Desviar tres compuertas para recomponer un cauce y guiar a una criatura serpentina; completar el desvío deja un marcador local para la futura semilla, pero arrancar la ROM no cuenta.",
+      "resumen": "Prototipo GBC reproducible: desviar tres compuertas para recomponer un cauce y guiar a una criatura serpentina. Completar el desvío deja un marcador local para la futura semilla; arrancar la ROM no cuenta.",
       "fuente": "gbc/minijuegos/ryu_flow_98",
-      "rom": "res://roms/ryu_flow_98.gbc",
+      "rom": "",
       "cabecera": "RYUFLOW98",
       "cgb": "dual",
       "incluida": false,
-      "precio": 45,
+      "precio": 0,
       "issues": [
         440,
         442,
