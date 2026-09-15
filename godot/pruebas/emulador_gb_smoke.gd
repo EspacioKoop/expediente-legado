@@ -15,13 +15,7 @@ func _init() -> void:
 	var emulador := _crear_emulador()
 	if emulador == null:
 		return
-	if not _probar_lectura_memoria_sin_rom(emulador):
-		return
-	if not _cargar_rom(emulador):
-		return
-	if not _probar_lectura_memoria_cargada(emulador):
-		return
-	if not _probar_sram(emulador):
+	if not _preparar_rom_y_memoria(emulador):
 		return
 	var frame := _ejecutar_frames(emulador)
 	if not _validar_frame(frame):
@@ -37,6 +31,16 @@ func _init() -> void:
 		)
 	)
 	quit(0)
+
+
+func _preparar_rom_y_memoria(emulador: Object) -> bool:
+	if not _probar_lectura_memoria_sin_rom(emulador):
+		return false
+	if not _cargar_rom(emulador):
+		return false
+	if not _probar_lectura_memoria_cargada(emulador):
+		return false
+	return _probar_sram(emulador)
 
 
 func _autoprobar_detector() -> bool:
