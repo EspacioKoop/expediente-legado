@@ -23,6 +23,15 @@ class PreferenciasSigaTest(unittest.TestCase):
         self.assertIn('"motivo": "conflicto"', self.source)
         self.assertIn("InputMap.action_add_event", self.source)
 
+    def test_remapeo_llega_a_los_controles_nativos_de_godot(self):
+        self.assertIn('_copiar_accion_ui("interactuar", "ui_accept")', self.source)
+        self.assertIn('_copiar_accion_ui("cancelar", "ui_cancel")', self.source)
+        self.assertIn("InputMap.action_erase_events(destino)", self.source)
+        self.assertIn("InputMap.action_get_events(origen)", self.source)
+        self.assertIn("evento.duplicate() as InputEvent", self.source)
+        self.assertIn("enter.keycode = KEY_ENTER", self.source)
+        self.assertIn("_sincronizar_acciones_ui()", self.source)
+
     def test_guardado_es_atomico_y_preferencias_no_partida(self):
         self.assertIn('var temporal := ruta + ".nuevo"', self.source)
         self.assertIn("DirAccess.rename_absolute", self.source)
