@@ -146,6 +146,23 @@ ENTRADA_SISTEMA,SIGA-98 · SISTEMA INTEGRAL DE GESTIÓN DE ARCHIVO
 ENTRADA_VOZ_SOLO,"Lo que haga aquí no lo revisa nadie. Tampoco lo revisó nadie antes."
 ENTRADA_VOZ_TURNO,"Acreditación vigente. Fecha de alta anterior a la contratación; el sistema no señala el desajuste."
 ENTRADA_VOZ_VOLUMEN,"Volumen montado en modo lectura y escritura. Última salida limpia: no consta."
+ESCRITORIO_AYUDA,Ayuda
+ESCRITORIO_AYUDA_ABRIR,Doble clic: abrir programa.
+ESCRITORIO_AYUDA_ARRASTRAR,Arrastra la barra de título para mover una ventana.
+ESCRITORIO_AYUDA_BARRA,La barra inferior minimiza y restaura programas.
+ESCRITORIO_AYUDA_CERRAR_MENU,Esc cierra el menú del sistema.
+ESCRITORIO_AYUDA_TECLADO,Tab: recorrer controles. Intro/Espacio: activar.
+ESCRITORIO_AYUDA_TITULO,Ayuda del terminal
+ESCRITORIO_CABECERA,ARCHIVO CENTRAL 98
+ESCRITORIO_CERRAR,Cerrar
+ESCRITORIO_CERRAR_SESION,Cerrar sesión
+ESCRITORIO_MARCA,ARCHIVO CENTRAL · TERMINAL 98
+ESCRITORIO_MENU,MENÚ
+ESCRITORIO_MINIMIZAR,Minimizar
+ESCRITORIO_PROGRAMAS,Programas
+ESCRITORIO_RELOJ,DÍA %02d
+ESCRITORIO_RELOJ_VACIO,DÍA --
+ESCRITORIO_SIGA_TITULO,SIGA-98
 FICHA_COMITE,COMITÉ
 FICHA_PERSONA,PERSONA
 FICHA_RECLAMANTE,[b]%s[/b]   ·   %s\n\n%s
