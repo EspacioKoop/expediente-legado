@@ -5,15 +5,19 @@
 extends "res://guion/visor_metadatos_app.gd"
 
 const RUTA_ANEXOS := "res://datos/anexos_documentales.json"
+const IdentidadExpedientes := preload("res://guion/visor_identidad_app.gd")
 
 var _boton_anexo: Button
 var _detalle_anexo: Label
 var _catalogo_anexos: Dictionary = {}
 var _anexo_abierto := false
+var _identidad_expedientes := IdentidadExpedientes.new()
 
 
 func _columna_documento() -> Control:
 	var columna: Control = super._columna_documento()
+	_identidad_expedientes.montar(columna, caso)
+
 	_boton_anexo = Button.new()
 	_boton_anexo.visible = false
 	_boton_anexo.pressed.connect(_alternar_anexo)
@@ -26,6 +30,11 @@ func _columna_documento() -> Control:
 	return columna
 
 
+func _refrescar_archivo() -> void:
+	super._refrescar_archivo()
+	_identidad_expedientes.aplicar_archivo(_archivo, contenido.casos)
+
+
 func _al_elegir_documento(indice: int) -> void:
 	super._al_elegir_documento(indice)
 	_anexo_abierto = false
@@ -36,6 +45,7 @@ func _al_elegir_caso(indice: int) -> void:
 	super._al_elegir_caso(indice)
 	_anexo_abierto = false
 	_actualizar_anexo()
+	_identidad_expedientes.actualizar(caso)
 
 
 func _alternar_anexo() -> void:
