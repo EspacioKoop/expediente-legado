@@ -3,6 +3,8 @@ extends SceneTree
 const ROM := "res://roms/caza_pixeles_98.gbc"
 const BYTES_POR_PIXEL := 4
 const TAM_FRAME := 160 * 144 * BYTES_POR_PIXEL
+## La boot ROM CGB de SameBoy tarda ~16 frames en ceder el control al cartucho.
+const FRAMES_ARRANQUE := 60
 
 
 func _init() -> void:
@@ -73,7 +75,7 @@ func _probar_sram(emulador: Object) -> bool:
 
 func _ejecutar_frames(emulador: Object) -> PackedByteArray:
 	var frame := PackedByteArray()
-	for _indice in range(12):
+	for _indice in range(FRAMES_ARRANQUE):
 		emulador.call("set_buttons", 0)
 		frame = emulador.call("run_frame_rgba")
 		if frame.size() != TAM_FRAME:

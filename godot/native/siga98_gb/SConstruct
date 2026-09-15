@@ -1,12 +1,14 @@
 #!/usr/bin/env python
+import hashlib
+import json
 import os
 import sys
 
 libname = "siga98_gb"
 projectdir = "../../addons/siga98_gb"
 godot_cpp_dir = ARGUMENTS.get("godot_cpp_dir", ".deps/godot-cpp")
-peanut_gb_dir = ARGUMENTS.get("peanut_gb_dir", ".deps/peanut-gb")
 sameboy_dir = ARGUMENTS.get("sameboy_dir", ".deps/sameboy")
+boot_rom_path = ARGUMENTS.get("boot_rom", ".deps/bootroms/cgb_boot_fast.bin")
 
 local_env = Environment(tools=["default"], PLATFORM="")
 opts = Variables([], ARGUMENTS)
@@ -16,24 +18,49 @@ env = local_env.Clone()
 if not os.path.isfile(os.path.join(godot_cpp_dir, "SConstruct")):
     print("ERROR: godot-cpp no preparado; ejecuta scripts/preparar_emulador_gb.sh", file=sys.stderr)
     Exit(1)
-if not os.path.isfile(os.path.join(peanut_gb_dir, "peanut_gb.h")):
-    print("ERROR: Peanut-GB no preparado; ejecuta scripts/preparar_emulador_gb.sh", file=sys.stderr)
-    Exit(1)
 if not os.path.isfile(os.path.join(sameboy_dir, "Core", "gb.h")):
     print("ERROR: SameBoy/Core no preparado; ejecuta scripts/preparar_emulador_gb.sh", file=sys.stderr)
     Exit(1)
+if not os.path.isfile(boot_rom_path):
+    print("ERROR: boot ROM CGB de SameBoy no preparada; ejecuta scripts/preparar_emulador_gb.sh", file=sys.stderr)
+    Exit(1)
+
+with open("deps.lock.json", encoding="utf-8") as lock_file:
+    boot_rom_sha = json.load(lock_file)["sameboy"]["boot_rom"]["sha256"]
+with open(boot_rom_path, "rb") as boot_file:
+    boot_rom = boot_file.read()
+if hashlib.sha256(boot_rom).hexdigest() != boot_rom_sha:
+    print("ERROR: la boot ROM CGB no coincide con el SHA-256 fijado en deps.lock.json", file=sys.stderr)
+    Exit(1)
+
+# La boot ROM libre de SameBoy se incrusta en la biblioteca: el juego nunca carga
+# ficheros de BIOS en runtime.
+generated_dir = os.path.join(".deps", "generated")
+os.makedirs(generated_dir, exist_ok=True)
+generated_header = os.path.join(generated_dir, "sameboy_cgb_boot.h")
+header = "#pragma once\nstatic const unsigned char SAMEBOY_CGB_BOOT[] = {\n"
+header += ",\n".join(
+    ", ".join("0x%02X" % value for value in boot_rom[offset:offset + 16])
+    for offset in range(0, len(boot_rom), 16)
+)
+header += "\n};\n"
+previous = None
+if os.path.isfile(generated_header):
+    with open(generated_header, encoding="utf-8") as existing:
+        previous = existing.read()
+if previous != header:
+    with open(generated_header, "w", encoding="utf-8") as output:
+        output.write(header)
 
 env = SConscript(
     os.path.join(godot_cpp_dir, "SConstruct"),
     {"env": env, "api_version": "4.7"},
 )
-env.Append(CPPPATH=["src", peanut_gb_dir])
+env.Append(CPPPATH=["src", sameboy_dir, generated_dir])
 
-# #456: SameBoy se compila ya dentro de la GDExtension, pero el wrapper sigue
-# usando Peanut-GB hasta que el fixture CGB-only pueda pasar de extremo a extremo.
-# Se excluyen subsistemas que no necesita el runtime de SIGA-98 y se mantienen
-# las mismas opciones en Linux/Windows para que el siguiente corte solo cambie
-# el adapter, no la cadena de build.
+# #456: SameBoy/Core es el núcleo activo del wrapper (modelo CGB-E). Se excluyen
+# subsistemas que no necesita el runtime de SIGA-98 y se mantienen las mismas
+# opciones en Linux/Windows.
 sameboy_core_dir = os.path.join(sameboy_dir, "Core")
 sameboy_disabled_sources = {
     "cheat_search.c",

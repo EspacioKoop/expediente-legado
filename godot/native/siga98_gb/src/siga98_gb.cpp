@@ -1,18 +1,20 @@
 #include "siga98_gb.h"
 
-#include <algorithm>
 #include <array>
 #include <cctype>
 #include <cstdint>
 #include <cstring>
 #include <string>
-#include <vector>
 
 #include <godot_cpp/core/class_db.hpp>
 
 extern "C" {
-#include "peanut_gb.h"
+#include "Core/gb.h"
 }
+
+// Generado por SConstruct desde la boot ROM libre de SameBoy (cgb_boot_fast.asm,
+// Expat). No es la BIOS de Nintendo.
+#include "sameboy_cgb_boot.h"
 
 namespace godot {
 
@@ -22,85 +24,51 @@ constexpr int FRAME_HEIGHT = 144;
 constexpr int FRAME_CHANNELS = 4;
 constexpr int MIN_ROM_SIZE = 32 * 1024;
 constexpr int MAX_ROM_SIZE = 8 * 1024 * 1024;
-constexpr uint8_t CGB_ONLY_FLAG = 0xC0;
-constexpr int CGB_FLAG_OFFSET = 0x143;
+constexpr int HEADER_CHECKSUM_OFFSET = 0x14D;
+constexpr int HEADER_START = 0x134;
+constexpr int HEADER_END = 0x14C;
 constexpr int TITLE_START = 0x134;
 constexpr int TITLE_END = 0x143;
+
+// Contrato público de set_buttons (heredado de Peanut-GB): A, B, Select, Start,
+// Derecha, Izquierda, Arriba, Abajo en los bits 0..7.
+constexpr GB_key_t BUTTON_KEYS[8] = {
+    GB_KEY_A, GB_KEY_B, GB_KEY_SELECT, GB_KEY_START,
+    GB_KEY_RIGHT, GB_KEY_LEFT, GB_KEY_UP, GB_KEY_DOWN,
+};
 } // namespace
 
 struct Siga98GB::Impl {
-    gb_s gb{};
-    std::vector<uint8_t> rom;
-    std::vector<uint8_t> cart_ram;
-    std::array<uint8_t, FRAME_WIDTH * FRAME_HEIGHT * FRAME_CHANNELS> frame{};
+    GB_gameboy_t *gb = nullptr;
+    std::array<uint32_t, FRAME_WIDTH * FRAME_HEIGHT> pixels{};
     bool loaded = false;
-    bool runtime_error = false;
     std::string title;
     std::string error;
+
+    ~Impl() {
+        if (gb != nullptr) {
+            GB_free(gb);
+            GB_dealloc(gb);
+        }
+    }
 };
 
-static Siga98GB::Impl *priv(gb_s *p_gb) {
-    return static_cast<Siga98GB::Impl *>(p_gb->direct.priv);
+static void load_boot_rom(GB_gameboy_t *p_gb, GB_boot_rom_t p_type) {
+    (void)p_type;
+    GB_load_boot_rom_from_buffer(p_gb, SAMEBOY_CGB_BOOT, sizeof(SAMEBOY_CGB_BOOT));
 }
 
-static uint8_t read_rom(gb_s *p_gb, const uint_fast32_t p_addr) {
-    const Siga98GB::Impl *p = priv(p_gb);
-    if (p == nullptr || p_addr >= p->rom.size()) {
-        return 0xFF;
-    }
-    return p->rom[p_addr];
+// Empaqueta RGBA en orden de bytes little-endian para copiar el framebuffer tal cual.
+static uint32_t encode_rgba(GB_gameboy_t *p_gb, uint8_t p_r, uint8_t p_g, uint8_t p_b) {
+    (void)p_gb;
+    return 0xFF000000u | (static_cast<uint32_t>(p_b) << 16) |
+            (static_cast<uint32_t>(p_g) << 8) | p_r;
 }
 
-static uint8_t read_cart_ram(gb_s *p_gb, const uint_fast32_t p_addr) {
-    const Siga98GB::Impl *p = priv(p_gb);
-    if (p == nullptr || p_addr >= p->cart_ram.size()) {
-        return 0xFF;
-    }
-    return p->cart_ram[p_addr];
-}
-
-static void write_cart_ram(gb_s *p_gb, const uint_fast32_t p_addr, const uint8_t p_value) {
-    Siga98GB::Impl *p = priv(p_gb);
-    if (p != nullptr && p_addr < p->cart_ram.size()) {
-        p->cart_ram[p_addr] = p_value;
-    }
-}
-
-static void emulator_error(gb_s *p_gb, const gb_error_e p_error, const uint16_t p_addr) {
-    Siga98GB::Impl *p = priv(p_gb);
-    if (p == nullptr) {
-        return;
-    }
-    p->runtime_error = true;
-    p->error = "Peanut-GB runtime error " + std::to_string(static_cast<int>(p_error)) +
-            " at 0x";
-    constexpr char hex[] = "0123456789ABCDEF";
-    for (int shift = 12; shift >= 0; shift -= 4) {
-        p->error.push_back(hex[(p_addr >> shift) & 0x0F]);
-    }
-}
-
-static void draw_line(gb_s *p_gb, const uint8_t p_pixels[FRAME_WIDTH],
-        const uint_fast8_t p_line) {
-    Siga98GB::Impl *p = priv(p_gb);
-    if (p == nullptr || p_line >= FRAME_HEIGHT) {
-        return;
-    }
-
-    static constexpr uint8_t palette[4][3] = {
-        {224, 232, 196},
-        {164, 184, 132},
-        {84, 112, 76},
-        {24, 38, 30},
-    };
-    for (int x = 0; x < FRAME_WIDTH; ++x) {
-        const uint8_t shade = p_pixels[x] & 0x03;
-        const size_t offset = (static_cast<size_t>(p_line) * FRAME_WIDTH + x) * FRAME_CHANNELS;
-        p->frame[offset] = palette[shade][0];
-        p->frame[offset + 1] = palette[shade][1];
-        p->frame[offset + 2] = palette[shade][2];
-        p->frame[offset + 3] = 255;
-    }
+static void discard_log(GB_gameboy_t *p_gb, const char *p_string, GB_log_attributes_t p_attributes) {
+    (void)p_gb;
+    (void)p_string;
+    (void)p_attributes;
 }
 
 Siga98GB::Siga98GB() : impl(std::make_unique<Impl>()) {}
@@ -135,7 +103,7 @@ void Siga98GB::_bind_methods() {
 int Siga98GB::load_rom(const PackedByteArray &p_rom) {
     reset();
     const int64_t size = p_rom.size();
-    if (size < MIN_ROM_SIZE || size <= CGB_FLAG_OFFSET) {
+    if (size < MIN_ROM_SIZE) {
         impl->error = "ROM demasiado pequeña";
         return LOAD_TOO_SMALL;
     }
@@ -143,36 +111,33 @@ int Siga98GB::load_rom(const PackedByteArray &p_rom) {
         impl->error = "ROM demasiado grande";
         return LOAD_TOO_LARGE;
     }
-    if (p_rom[CGB_FLAG_OFFSET] == CGB_ONLY_FLAG) {
-        impl->error = "ROM CGB-only no soportada por el núcleo DMG";
-        return LOAD_CGB_ONLY;
+
+    const uint8_t *rom = p_rom.ptr();
+    uint8_t checksum = 0;
+    for (int index = HEADER_START; index <= HEADER_END; ++index) {
+        checksum = static_cast<uint8_t>(checksum - rom[index] - 1);
     }
-
-    impl->rom.resize(static_cast<size_t>(size));
-    std::memcpy(impl->rom.data(), p_rom.ptr(), static_cast<size_t>(size));
-
-    const int init_result = static_cast<int>(gb_init(
-            &impl->gb, &read_rom, &read_cart_ram, &write_cart_ram, &emulator_error, impl.get()));
-    if (init_result != static_cast<int>(GB_INIT_NO_ERROR)) {
-        impl->error = "ROM rechazada por Peanut-GB: " + std::to_string(init_result);
-        impl->rom.clear();
+    if (checksum != rom[HEADER_CHECKSUM_OFFSET]) {
+        impl->error = "Cabecera de ROM inválida";
         return LOAD_INVALID_ROM;
     }
 
-    size_t save_size = 0;
-    if (gb_get_save_size_s(&impl->gb, &save_size) < 0) {
-        impl->error = "Tamaño de SRAM inválido";
-        impl->rom.clear();
-        return LOAD_INVALID_SAVE;
+    impl->gb = GB_init(GB_alloc(), GB_MODEL_CGB_E);
+    if (impl->gb == nullptr) {
+        impl->error = "No se pudo inicializar SameBoy";
+        return LOAD_RUNTIME_ERROR;
     }
-    impl->cart_ram.assign(save_size, 0);
-    gb_init_lcd(&impl->gb, &draw_line);
-    impl->gb.direct.joypad = 0xFF;
-    impl->frame.fill(0);
+    GB_set_log_callback(impl->gb, &discard_log);
+    GB_set_boot_rom_load_callback(impl->gb, &load_boot_rom);
+    GB_set_rgb_encode_callback(impl->gb, &encode_rgba);
+    GB_set_pixels_output(impl->gb, impl->pixels.data());
+    GB_set_color_correction_mode(impl->gb, GB_COLOR_CORRECTION_MODERN_BALANCED);
+    GB_load_rom_from_buffer(impl->gb, rom, static_cast<size_t>(size));
+    GB_reset(impl->gb);
 
     impl->title.clear();
     for (int index = TITLE_START; index < TITLE_END; ++index) {
-        const uint8_t value = impl->rom[static_cast<size_t>(index)];
+        const uint8_t value = rom[index];
         if (value == 0) {
             break;
         }
@@ -195,8 +160,9 @@ void Siga98GB::set_buttons(const int64_t p_buttons) {
     if (!impl->loaded) {
         return;
     }
-    const uint8_t pressed = static_cast<uint8_t>(p_buttons & 0xFF);
-    impl->gb.direct.joypad = static_cast<uint8_t>(~pressed);
+    for (int bit = 0; bit < 8; ++bit) {
+        GB_set_key_state(impl->gb, BUTTON_KEYS[bit], (p_buttons >> bit) & 1);
+    }
 }
 
 PackedByteArray Siga98GB::run_frame_rgba() {
@@ -205,25 +171,24 @@ PackedByteArray Siga98GB::run_frame_rgba() {
         return result;
     }
 
-    impl->runtime_error = false;
-    gb_run_frame(&impl->gb);
-    if (impl->runtime_error) {
-        impl->loaded = false;
-        return result;
-    }
-
-    result.resize(static_cast<int64_t>(impl->frame.size()));
-    std::memcpy(result.ptrw(), impl->frame.data(), impl->frame.size());
+    GB_run_frame(impl->gb);
+    const size_t bytes = impl->pixels.size() * FRAME_CHANNELS;
+    result.resize(static_cast<int64_t>(bytes));
+    std::memcpy(result.ptrw(), impl->pixels.data(), bytes);
     return result;
 }
 
 PackedByteArray Siga98GB::save_ram() const {
     PackedByteArray result;
-    if (!impl->loaded || impl->cart_ram.empty()) {
+    if (!impl->loaded) {
         return result;
     }
-    result.resize(static_cast<int64_t>(impl->cart_ram.size()));
-    std::memcpy(result.ptrw(), impl->cart_ram.data(), impl->cart_ram.size());
+    const int size = GB_save_battery_size(impl->gb);
+    if (size <= 0) {
+        return result;
+    }
+    result.resize(size);
+    GB_save_battery_to_buffer(impl->gb, result.ptrw(), static_cast<size_t>(size));
     return result;
 }
 
@@ -232,12 +197,12 @@ bool Siga98GB::load_save_ram(const PackedByteArray &p_save) {
         impl->error = "No hay ROM cargada para restaurar SRAM";
         return false;
     }
-    if (static_cast<size_t>(p_save.size()) != impl->cart_ram.size()) {
+    if (p_save.size() != GB_save_battery_size(impl->gb)) {
         impl->error = "Tamaño de SRAM no coincide con el cartucho";
         return false;
     }
-    if (!impl->cart_ram.empty()) {
-        std::memcpy(impl->cart_ram.data(), p_save.ptr(), impl->cart_ram.size());
+    if (p_save.size() > 0) {
+        GB_load_battery_from_buffer(impl->gb, p_save.ptr(), static_cast<size_t>(p_save.size()));
     }
     impl->error.clear();
     return true;
@@ -252,11 +217,11 @@ String Siga98GB::last_error() const {
 }
 
 String Siga98GB::core_name() const {
-    return "Peanut-GB";
+    return "SameBoy";
 }
 
 bool Siga98GB::supports_cgb() const {
-    return false;
+    return true;
 }
 
 bool Siga98GB::supports_audio() const {

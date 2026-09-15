@@ -1,30 +1,30 @@
 # Emulador GB de la Portátil Color 98
 
-El vertical de #124 integra un núcleo nativo para que la portátil de la casa pueda ejecutar la ROM propia `Caza Píxeles 98` y ROMs locales aportadas opcionalmente por el jugador.
+El vertical de #124 integra un núcleo nativo para que la portátil de la casa pueda ejecutar las ROMs propias del índice `godot/datos/roms_propias.json` y ROMs locales aportadas opcionalmente por el jugador.
 
 ## Núcleo actual y licencia
 
-La GDExtension usa tres dependencias fijadas por commit en `godot/native/siga98_gb/deps.lock.json`:
+La GDExtension usa dos dependencias fijadas por commit en `godot/native/siga98_gb/deps.lock.json`:
 
 - `godotengine/godot-cpp`, licencia MIT, bindings oficiales de GDExtension;
-- `deltabeard/Peanut-GB`, licencia MIT, núcleo DMG todavía activo en runtime;
-- `LIJI32/SameBoy`, licencia Expat para el alcance usado `Core/`, compilado como gate del futuro adapter CGB.
+- `LIJI32/SameBoy`, licencia Expat para el alcance usado (`Core/` y `BootROMs/`), **núcleo activo** en modelo CGB-E.
 
 Las dependencias no se vendorizan ni se descargan en tiempo de juego. `scripts/preparar_emulador_gb.sh` las obtiene exclusivamente durante el build desde los commits fijados y genera las bibliotecas nativas.
 
-No se incluye BIOS, boot ROM ni ROM comercial.
+No se incluye BIOS de Nintendo ni ROM comercial. La boot ROM que necesita el modelo CGB es `BootROMs/cgb_boot_fast.asm` de SameBoy: código original bajo Expat, compilado desde fuente con RGBDS v1.0.3 y comprobado contra el SHA-256 fijado en el lock. `SConstruct` la incrusta en la biblioteca, así que el juego nunca busca ficheros de BIOS en disco.
 
 ## Compatibilidad actual
 
-Peanut-GB es un núcleo **DMG**, no un emulador Game Boy Color completo. Por eso este corte declara exactamente estas reglas:
+SameBoy ejecuta hardware Game Boy Color real:
 
-- ROM Game Boy normal: compatible si el cartucho/MBC es admitido por Peanut-GB;
-- cartucho dual-mode con byte CGB `0x80`: se admite en fallback DMG;
-- ROM CGB-only con byte `0xC0`: se rechaza antes de inicializar el núcleo.
+- ROM Game Boy clásica: arranca en un CGB con la paleta de compatibilidad que asigna la boot ROM;
+- cartucho dual-mode con byte CGB `0x80`: corre en modo Color con sus propias paletas;
+- ROM CGB-only con byte `0xC0`: se admite (`LOAD_CGB_ONLY` se conserva en la API por estabilidad, pero ya no se devuelve);
+- cabecera con checksum incorrecto: se rechaza con `LOAD_INVALID_ROM`, como ya hacía el núcleo anterior.
 
-`Caza Píxeles 98` usa `0x80` y contiene fallback DMG, así que sirve como fixture propio para la integración. Sus paletas CGB no se reproducen todavía cuando corre mediante este núcleo.
+La boot ROM rápida tarda unos 16 frames en ceder el control al cartucho.
 
-`Siga98GB` expone además `core_name()`, `supports_cgb()` y `supports_audio()`. Con Peanut-GB esos valores son, respectivamente, `Peanut-GB`, `false` y `false`. El contrato permite sustituir el núcleo sin hacer que la UI deduzca capacidades a partir de errores o del nombre de una dependencia.
+`Siga98GB` expone `core_name()`, `supports_cgb()` y `supports_audio()`, que ahora devuelven `SameBoy`, `true` y `false`. El audio sigue desactivado hasta que exista consumo PCM real desde Godot.
 
 ## Decisión para #456: SameBoy/Core
 
@@ -47,19 +47,19 @@ Esto permite conservar el contrato 160×144 de `Siga98GB`, añadir color real y 
 
 **Gearboy queda descartado para este proyecto**: aunque implementa Game Boy Color y audio, su repositorio declara GPL-3.0. Introducirlo en el binario actual incumpliría la restricción de #456 de no añadir accidentalmente un núcleo GPL.
 
-SameBoy ya es una **dependencia de build**: el preparador obtiene el commit fijado y `SConstruct` compila `Core/*.c` dentro de la GDExtension, excluyendo debugger, cheats, cheat search, rewind y disassembler/symbols. El adapter de runtime sigue siendo Peanut-GB. Este staging fuerza a Linux/Windows a detectar incompatibilidades de compilación antes de cambiar el núcleo visible y evita declarar CGB real hasta que el fixture CGB-only pase de extremo a extremo.
+SameBoy ya es una **dependencia de build**: el preparador obtiene el commit fijado y `SConstruct` compila `Core/*.c` dentro de la GDExtension, excluyendo debugger, cheats, cheat search, rewind y disassembler/symbols. Ese staging (#500) forzó a Linux/Windows a detectar incompatibilidades de compilación antes de cambiar el núcleo visible; desde este corte SameBoy es el adapter de runtime.
 
-## Ruta de integración SameBoy
+## Integración SameBoy
 
-El reemplazo del núcleo debe mantener estable la superficie usada por Godot:
+El cambio de adapter conservó la superficie usada por Godot:
 
-1. conservar `load_rom`, `reset`, `set_buttons`, `run_frame_rgba`, `save_ram`, `load_save_ram`, `rom_title`, `last_error`, `width` y `height`;
-2. sustituir internals por `GB_MODEL_CGB_E`, `GB_load_rom_from_buffer`, `GB_set_pixels_output` y `GB_run_frame`;
-3. cambiar `supports_cgb()` a `true` solo cuando `cgb_only_smoke.gbc` arranque y dibuje correctamente en CI;
-4. mapear SRAM a `GB_save_battery_to_buffer` / `GB_load_battery_from_buffer` sin cambiar la identidad SHA-256 bajo `user://sram/gb`;
-5. añadir un buffer PCM nativo y activar `supports_audio()` solo cuando exista consumo real desde Godot;
-6. conservar soporte GB clásico y dual-mode y no tocar `Partida`, `Jornada` ni los guardados de campaña;
-7. retirar Peanut-GB del build solo después de que SameBoy supere los smoke GB, dual-mode y CGB-only.
+1. `load_rom`, `reset`, `set_buttons`, `run_frame_rgba`, `save_ram`, `load_save_ram`, `rom_title`, `last_error`, `width` y `height` no cambian de firma;
+2. internamente se usan `GB_MODEL_CGB_E`, `GB_load_rom_from_buffer`, `GB_set_pixels_output` y `GB_run_frame`;
+3. `set_buttons` mantiene el orden de bits público (A, B, Select, Start, Derecha, Izquierda, Arriba, Abajo) y lo traduce a `GB_set_key_state`;
+4. la SRAM usa `GB_save_battery_to_buffer` / `GB_load_battery_from_buffer` con la misma identidad SHA-256 bajo `user://sram/gb`. Para cartuchos sin reloj el formato son los mismos bytes crudos; en cartuchos con RTC el tamaño incluye el reloj y un save antiguo se aparta como `.roto`;
+5. Peanut-GB se ha retirado del build tras superar los smoke GB y CGB-only.
+
+Pendiente: buffer PCM nativo y `supports_audio() == true` solo cuando Godot consuma audio real.
 
 ## Interfaz
 
@@ -115,28 +115,31 @@ Devuelve el framebuffer RGBA, estado de capacidades y mensajes de error. No reci
 
 ## Limitaciones pendientes de #456
 
-- sin emulación CGB real mientras Peanut-GB siga siendo el adapter activo;
-- sin audio emulado mientras Peanut-GB siga siendo el adapter activo;
-- SameBoy está compilado pero todavía no recibe ROM/input ni entrega framebuffer/audio al wrapper;
-- una ROM incompatible se rechaza en la inicialización cuando Peanut-GB puede identificarla;
+- sin audio emulado: la APU de SameBoy corre, pero su salida no llega todavía a Godot;
+- la ROM de SIGA-98 corre en modelo CGB; no hay selector de modelo DMG/GBA;
 - no se promete compatibilidad con todos los MBC o homebrew existentes.
 
 ## Build reproducible
 
-En Linux, con RGBDS disponible para la ROM propia:
+En Linux, con RGBDS v1.0.3 y un compilador C disponibles (la boot ROM y las ROMs propias se ensamblan con RGBDS):
 
 ```bash
 bash scripts/preparar_emulador_gb.sh linux-debug
 bash scripts/preparar_emulador_gb.sh rom
 ```
 
-El build nativo descarga los commits fijados de godot-cpp, Peanut-GB y SameBoy/Core. Para generar bibliotecas de exportación:
+El build nativo descarga los commits fijados de godot-cpp y SameBoy, y compila la boot ROM si no existe en `godot/native/siga98_gb/.deps/bootroms/`. Para generar bibliotecas de exportación:
 
 ```bash
 bash scripts/preparar_emulador_gb.sh linux-all
 bash scripts/preparar_emulador_gb.sh windows-release
 ```
 
-CI ejecuta además `godot/pruebas/emulador_gb_smoke.gd`: carga `Caza Píxeles 98`, prueba la superficie SRAM nativa, ejecuta frames y exige un framebuffer de 160×144×4 bytes con contenido no uniforme. El workflow de fixtures compila por separado `cgb_only_smoke.gbc`, que será el gate funcional del cambio de adapter.
+El runner Windows no tiene RGBDS: la alpha compila la boot ROM en Linux (`preparar_emulador_gb.sh boot-rom`), la pasa como artefacto y `SConstruct` vuelve a verificar su SHA-256 antes de incrustarla.
+
+CI ejecuta dos smoke:
+
+- `godot/pruebas/emulador_gb_smoke.gd`: carga `Caza Píxeles 98`, prueba la superficie SRAM nativa y exige un framebuffer de 160×144×4 bytes con contenido no uniforme;
+- `godot/pruebas/emulador_gbc_smoke.gd -- <rom>`: carga `cgb_only_smoke.gbc` y exige píxeles rojos y verdes puros de la paleta CGB, imposibles en un núcleo DMG.
 
 — Odiseo (GPT-5.6 Sol)

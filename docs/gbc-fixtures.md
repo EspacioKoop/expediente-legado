@@ -22,7 +22,7 @@ La primera integración del emulador no necesita un catálogo enorme. Debe const
 
 1. `simple-gb-asm-examples/joypad`: prueba específica de entrada y mapeo de botones.
 2. `simple-gb-asm-examples/vblank`: temporización básica y actualización de vídeo.
-3. `cgb_only_smoke`: fixture propio CGB-only. La cabecera usa `0xC0`, programa la paleta BG mediante `BCPS/BCPD` y dibuja un patrón; Peanut-GB debe seguir rechazándolo y un núcleo que anuncie `supports_cgb() == true` deberá poder arrancarlo.
+3. `cgb_only_smoke`: fixture propio CGB-only. La cabecera usa `0xC0`, programa la paleta BG mediante `BCPS/BCPD` y dibuja un patrón; desde #456 el núcleo SameBoy lo arranca y CI lo verifica con `godot/pruebas/emulador_gbc_smoke.gd`.
 4. `cgb-acid2`: prueba de PPU/color en modo CGB.
 
 Los dos primeros son fixtures mínimos CC0 del mismo proyecto pero prueban subsistemas distintos. `cgb_only_smoke` funciona como puerta reproducible de integración sin depender de una ROM de terceros. `cgb-acid2` queda como prueba de exactitud CGB independiente bajo MIT.

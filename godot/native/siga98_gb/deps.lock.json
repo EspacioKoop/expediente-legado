@@ -5,18 +5,18 @@
     "license": "MIT",
     "api_version": "4.7"
   },
-  "peanut_gb": {
-    "repository": "https://github.com/deltabeard/Peanut-GB.git",
-    "commit": "8e656982f08663785794b84823d3e27f856fdb7f",
-    "license": "MIT",
-    "capability": "DMG; cartuchos dual-mode CGB se ejecutan en fallback DMG; CGB-only se rechaza"
-  },
   "sameboy": {
     "repository": "https://github.com/LIJI32/SameBoy.git",
     "commit": "213a12ce93d66b105a113debd9396306066a7cfc",
     "license": "Expat",
     "scope": "Core/",
-    "capability": "CGB real, framebuffer, SRAM y APU; preparado en build pero todavía no activo en runtime"
+    "capability": "Núcleo activo: modelo CGB-E; ROMs GB, dual-mode y CGB-only; framebuffer y SRAM. APU todavía sin salida a Godot",
+    "boot_rom": {
+      "source": "BootROMs/cgb_boot_fast.asm",
+      "license": "Expat",
+      "rgbds": "v1.0.3",
+      "sha256": "734fc76858bc6d78e724df75efe90146c612817f05c5a837409f9ea34c70e26e"
+    }
   },
   "scons": "4.8.1"
 }
