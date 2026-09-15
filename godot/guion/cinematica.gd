@@ -10,7 +10,10 @@
 ## **Un plano común** lleva `tipo` (`3d` | `2d`), `segundos`, y opcionalmente
 ## `rotulo` y `voz`. Lo demás lo pide su tipo:
 ##
-## - `3d`: `camara` y `mira`, en coordenadas del mundo de la escena.
+## - `3d`: `camara` y `mira`, en coordenadas del mundo de la escena. Si trae
+##   `decorado` —un espacio en el formato de `Espacio3D`—, el reproductor lo
+##   monta en un plató propio y la cámara rueda ahí: sirve a los momentos que
+##   ocurren dentro de una pantalla sin sala detrás (#395).
 ## - `2d`: `figura` —una lista de rectángulos con color, no un nombre— más
 ##   `desde` y `hasta` para moverla. La figura va como DATOS y no como un
 ##   nombre a propósito: si el reproductor tuviera que saber qué es un "sello",
@@ -92,6 +95,8 @@ static func validar(planos: Array) -> Array:
 			for campo in ["camara", "mira"]:
 				if not plano.has(campo):
 					problemas.append("plano %d: 3d sin %s" % [i, campo])
+			if plano.has("decorado") and not (plano["decorado"] is Dictionary):
+				problemas.append("plano %d: decorado no es un espacio" % i)
 		elif tipo == "2d":
 			if (
 				not plano.has("figura")
