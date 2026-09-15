@@ -10,9 +10,21 @@ var _ruta := ""
 class InicioPrueba:
 	extends "res://guion/inicio_app.gd"
 	var entradas := 0
+	var ventanillas := 0
+	var ajustes := 0
+	var salidas := 0
 
 	func _entrar() -> void:
 		entradas += 1
+
+	func _abrir_ventanilla() -> void:
+		ventanillas += 1
+
+	func _abrir_ajustes() -> void:
+		ajustes += 1
+
+	func _salir_del_juego() -> void:
+		salidas += 1
 
 
 class PartidaFallida:
@@ -35,7 +47,14 @@ func _probar() -> void:
 	inicio.ruta = _ruta
 	root.add_child(inicio)
 	_comprobar(inicio._continuar.disabled, "sin guardado no permite continuar")
+	_comprobar(inicio._cargar.disabled, "sin guardado no permite cargar")
 	_comprobar(not FileAccess.file_exists(_ruta), "abrir menú no crea partida")
+	inicio._ventanilla.pressed.emit()
+	_comprobar(inicio.ventanillas == 1, "ventanilla es accesible desde inicio")
+	inicio._ajustes.pressed.emit()
+	_comprobar(inicio.ajustes == 1, "ajustes son accesibles desde inicio")
+	inicio._salir.pressed.emit()
+	_comprobar(inicio.salidas == 1, "salir es accesible desde inicio")
 	inicio.free()
 
 	var anterior := Partida.new()
@@ -48,6 +67,7 @@ func _probar() -> void:
 	inicio.ruta = _ruta
 	root.add_child(inicio)
 	_comprobar(not inicio._continuar.disabled, "ofrece continuar")
+	_comprobar(not inicio._cargar.disabled, "ofrece cargar la ranura guardada")
 	_comprobar(FileAccess.get_file_as_string(_ruta) == original, "menú no modifica guardado")
 	inicio._nueva.pressed.emit()
 	_comprobar(inicio._confirmacion.visible, "nueva requiere confirmación")
@@ -55,8 +75,10 @@ func _probar() -> void:
 	inicio._confirmacion.canceled.emit()
 	_comprobar(FileAccess.get_file_as_string(_ruta) == original, "cancelar conserva bytes")
 	_comprobar(inicio.entradas == 0, "cancelar no entra al mundo")
+	inicio._cargar.pressed.emit()
+	_comprobar(inicio.entradas == 1, "cargar entra usando la ranura canónica")
 	inicio._continuar.pressed.emit()
-	_comprobar(inicio.entradas == 1, "continuar entra")
+	_comprobar(inicio.entradas == 2, "continuar entra")
 	_comprobar(FileAccess.get_file_as_string(_ruta) == original, "continuar conserva bytes")
 	inicio.free()
 
