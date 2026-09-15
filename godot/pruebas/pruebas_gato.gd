@@ -38,7 +38,7 @@ static func _gato(comprobar: Callable) -> void:
 	# Recién comido y con alguien cerca, se acerca. Es la única recompensa que
 	# da el juego por cuidarlo, y no lleva ningún número.
 	var contento := GatoConducta.nuevo(sitios[1])
-	var jugador := sitios[1] + Vector3(1.5, 0, 0)
+	var jugador: Vector3 = sitios[1] + Vector3(1.5, 0, 0)
 	GatoConducta.avanzar(contento, sitios, 0, jugador, 0.1)
 	comprobar.call("bien comido, se acerca", contento["estado"], "viene")
 
