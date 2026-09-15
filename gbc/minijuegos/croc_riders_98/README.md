@@ -51,6 +51,18 @@ La ROM es autónoma. No guarda dinero, pistas, progreso de `Partida`, `Jornada`,
 
 No incluye fotografías, logotipos, BIOS, ROMs comerciales ni recursos externos. Código, sprites y siluetas se crean en el propio repositorio bajo su licencia MIT.
 
+## Relación con el Duat (#441)
+
+`Croc Riders 98` y el sueño del Duat comparten deliberadamente un **vocabulario visual propio del proyecto**: pirámides, Nilo, silueta de cocodrilo y lectura gráfica de finales de los 90. La relación es estética y diegética, no una recompensa de campaña.
+
+- jugar a `Croc Riders 98` **no** activa `semilla_onirica_duat`;
+- terminar la carrera, puntuar o usar nitro **no** modifica la selección ni el resultado del sueño;
+- el Duat puede reutilizar esos motivos como recuerdo cultural deformado, igual que una revista, un anuncio o un documental de 1998;
+- el eco implementado en `godot/guion/sueno_duat_croc_riders.gd` es procedural y no copia tiles ni sprites de esta ROM;
+- ambos sistemas pueden evolucionar por separado: el segundo pase jugable de la ROM (#600) no debe convertirse en dependencia de #441.
+
+Esto conserva el contrato de #95: la consola sigue siendo ocio improductivo. La semilla activa del Duat continúa siendo una interacción de vigilia propia y explícita; Croc Riders aporta **memoria visual**, no gating.
+
 ## Compilar
 
 Requiere RGBDS 1.0.x; CI usa la versión fijada por el repositorio.
