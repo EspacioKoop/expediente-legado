@@ -19,12 +19,17 @@ const ACCIONES := {
 const SENSIBILIDAD_CAMARA_MIN := 0.25
 const SENSIBILIDAD_CAMARA_MAX := 3.0
 
+## Límites del escalado de la interfaz del escritorio OS-98 (#534).
+const ESCALA_UI_MIN := 0.8
+const ESCALA_UI_MAX := 1.5
+
 
 static func nuevas() -> Dictionary:
 	return {
 		"version": VERSION,
 		"acciones": ACCIONES.duplicate(true),
 		"reduccion_movimiento": false,
+		"escala_ui": 1.0,
 		"volumen": 1.0,
 		"sensibilidad_camara_raton": 1.0,
 		"sensibilidad_camara_mando": 1.0,
@@ -101,6 +106,9 @@ static func cargar(ruta: String = RUTA) -> Dictionary:
 		if datos.get("acciones", {}).has(accion):
 			resultado["acciones"][accion] = datos["acciones"][accion].duplicate()
 	resultado["reduccion_movimiento"] = bool(datos.get("reduccion_movimiento", false))
+	resultado["escala_ui"] = clampf(
+		float(datos.get("escala_ui", 1.0)), ESCALA_UI_MIN, ESCALA_UI_MAX
+	)
 	resultado["volumen"] = clampf(float(datos.get("volumen", 1.0)), 0.0, 1.0)
 	resultado["sensibilidad_camara_raton"] = clampf(
 		float(datos.get("sensibilidad_camara_raton", 1.0)),

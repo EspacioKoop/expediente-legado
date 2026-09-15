@@ -15,6 +15,7 @@ func _initialize() -> void:
 func _probar() -> void:
 	await _probar_ciclo_de_ventana()
 	await _probar_modal_bloquea_y_atrapa_foco()
+	await _probar_escala_ui()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
@@ -105,11 +106,43 @@ func _probar_modal_bloquea_y_atrapa_foco() -> void:
 	escritorio.queue_free()
 
 
+func _probar_escala_ui() -> void:
+	var base := await _crear_escritorio()
+	base.registrar_aplicacion("a", "A", func() -> Control: return Label.new())
+	base.abrir_aplicacion("a")
+	var tamano_base: Vector2 = base._ventanas["a"]["panel"].size
+	var fuente_base: int = base.theme.default_font_size
+	base.queue_free()
+
+	var grande := await _crear_escritorio(1.5)
+	grande.registrar_aplicacion("a", "A", func() -> Control: return Label.new())
+	grande.abrir_aplicacion("a")
+	var tamano_grande: Vector2 = grande._ventanas["a"]["panel"].size
+	_comprobar(
+		grande.theme.default_font_size > fuente_base,
+		"escala_ui > 1 agranda la tipografía del tema",
+	)
+	_comprobar(
+		tamano_grande.x >= tamano_base.x and tamano_grande.y >= tamano_base.y,
+		"escala_ui > 1 agranda también la ventana por defecto",
+	)
+	grande.queue_free()
+
+	var fuera_de_rango := await _crear_escritorio(9.0)
+	_comprobar(
+		fuera_de_rango._escala_ui,
+		EscritorioSiga.ESCALA_UI_MAX,
+		"configurar_escala_ui satura al máximo admitido",
+	)
+	fuera_de_rango.queue_free()
+
+
 ## `add_child` no marca el nodo dentro del árbol hasta el siguiente
 ## fotograma en un guion `--script`; sin eso `_ready()` nunca construye la
 ## interfaz y `get_viewport()` devuelve null.
-func _crear_escritorio() -> EscritorioSiga:
+func _crear_escritorio(escala_ui: float = 1.0) -> EscritorioSiga:
 	var escritorio := EscritorioSiga.new()
+	escritorio.configurar_escala_ui(escala_ui)
 	root.add_child(escritorio)
 	await process_frame
 	return escritorio

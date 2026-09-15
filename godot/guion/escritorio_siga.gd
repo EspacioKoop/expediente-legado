@@ -14,6 +14,8 @@ const MARGEN := 12.0
 const ANCHO_TITULO_RECUPERABLE := 120.0
 ## Por encima del bloqueador modal (1002) y de cualquier ventana normal.
 const Z_MODAL := 3000
+const ESCALA_UI_MIN := 0.8
+const ESCALA_UI_MAX := 1.5
 
 ## Identidad propia: gramática de 1998 sin copiar el escritorio de Windows.
 const FONDO_CORPORATIVO := Color("315d5c")
@@ -22,6 +24,11 @@ const PETROLEO_INACTIVO := Color("526b6c")
 const CREMA := Color("eee7d0")
 
 var reduccion_movimiento := false
+
+var _escala_ui := 1.0
+var _alto_barra := ALTO_BARRA
+var _alto_titulo := ALTO_TITULO
+var _ancho_titulo_recuperable := ANCHO_TITULO_RECUPERABLE
 
 var _fondo: ColorRect
 var _marca: Label
@@ -47,7 +54,11 @@ var _bloqueador_modal: Control
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_alto_barra = ALTO_BARRA * _escala_ui
+	_alto_titulo = ALTO_TITULO * _escala_ui
+	_ancho_titulo_recuperable = ANCHO_TITULO_RECUPERABLE * _escala_ui
 	theme = EstiloSiga.tema()
+	theme.default_font_size = roundi(theme.default_font_size * _escala_ui)
 	_construir_escritorio()
 	resized.connect(_al_redimensionar)
 
@@ -57,6 +68,22 @@ func _ready() -> void:
 ## instantáneos y por tanto seguros con reducción de movimiento activada.
 func configurar_reduccion_movimiento(activa: bool) -> void:
 	reduccion_movimiento = activa
+
+
+## A diferencia de las demás `configurar_*`, esta debe llamarse ANTES de meter
+## el escritorio en el árbol: `_ready()` construye la interfaz con el tamaño
+## final en cuanto entra, y el primer corte no la reconstruye si la escala
+## cambia después.
+func configurar_escala_ui(escala: float) -> void:
+	_escala_ui = clampf(escala, ESCALA_UI_MIN, ESCALA_UI_MAX)
+
+
+func _esc(valor: float) -> float:
+	return valor * _escala_ui
+
+
+func _esc_v(valor: Vector2) -> Vector2:
+	return valor * _escala_ui
 
 
 func establecer_reloj_narrativo(texto: String) -> void:
@@ -235,15 +262,15 @@ func _construir_escritorio() -> void:
 
 	_iconos = VBoxContainer.new()
 	_iconos.name = "Lanzadores"
-	_iconos.position = Vector2(12, 14)
-	_iconos.size = Vector2(132, 360)
-	_iconos.add_theme_constant_override("separation", 8)
+	_iconos.position = _esc_v(Vector2(12, 14))
+	_iconos.size = _esc_v(Vector2(132, 360))
+	_iconos.add_theme_constant_override("separation", roundi(_esc(8)))
 	add_child(_iconos)
 
 	_area_ventanas = Control.new()
 	_area_ventanas.name = "AreaVentanas"
 	_area_ventanas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_area_ventanas.offset_bottom = -ALTO_BARRA
+	_area_ventanas.offset_bottom = -_alto_barra
 	_area_ventanas.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_area_ventanas)
 
@@ -258,7 +285,7 @@ func _construir_barra() -> void:
 	_barra.anchor_right = 1.0
 	_barra.anchor_top = 1.0
 	_barra.anchor_bottom = 1.0
-	_barra.offset_top = -ALTO_BARRA
+	_barra.offset_top = -_alto_barra
 	_barra.offset_bottom = 0.0
 	_barra.z_index = 1000
 	_barra.add_theme_stylebox_override("panel", _estilo_panel(EstiloSiga.GRIS, EstiloSiga.NEGRO))
@@ -271,7 +298,7 @@ func _construir_barra() -> void:
 	var boton_menu := Button.new()
 	boton_menu.name = "BotonMenu"
 	boton_menu.text = tr("ESCRITORIO_MENU")
-	boton_menu.custom_minimum_size = Vector2(78, 0)
+	boton_menu.custom_minimum_size = _esc_v(Vector2(78, 0))
 	_preparar_boton(boton_menu)
 	boton_menu.pressed.connect(_alternar_menu)
 	fila.add_child(boton_menu)
@@ -285,7 +312,7 @@ func _construir_barra() -> void:
 	_reloj = Label.new()
 	_reloj.name = "RelojNarrativo"
 	_reloj.text = tr("ESCRITORIO_RELOJ_VACIO")
-	_reloj.custom_minimum_size = Vector2(88, 0)
+	_reloj.custom_minimum_size = _esc_v(Vector2(88, 0))
 	_reloj.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_reloj.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_reloj.add_theme_color_override("font_color", EstiloSiga.NEGRO)
@@ -300,9 +327,9 @@ func _construir_menu() -> void:
 	_menu.anchor_top = 1.0
 	_menu.anchor_bottom = 1.0
 	_menu.offset_left = 4.0
-	_menu.offset_right = 230.0
-	_menu.offset_top = -(ALTO_BARRA + 250.0)
-	_menu.offset_bottom = -ALTO_BARRA
+	_menu.offset_right = _esc(230.0)
+	_menu.offset_top = -(_alto_barra + _esc(250.0))
+	_menu.offset_bottom = -_alto_barra
 	_menu.z_index = 1001
 	_menu.visible = false
 	_menu.add_theme_stylebox_override("panel", _estilo_panel(EstiloSiga.GRIS, EstiloSiga.NEGRO))
@@ -350,7 +377,7 @@ func _crear_lanzador(id: String, titulo: String) -> void:
 	var boton := Button.new()
 	boton.name = "Lanzador_%s" % id
 	boton.text = titulo
-	boton.custom_minimum_size = Vector2(118, 48)
+	boton.custom_minimum_size = _esc_v(Vector2(118, 48))
 	boton.focus_mode = Control.FOCUS_ALL
 	_preparar_boton(boton, true)
 	boton.gui_input.connect(_al_input_lanzador.bind(id))
@@ -413,7 +440,7 @@ func _crear_ventana(id: String, titulo: String, contenido: Control, es_modal: bo
 
 	var titulo_barra := PanelContainer.new()
 	titulo_barra.name = "BarraTitulo"
-	titulo_barra.custom_minimum_size.y = ALTO_TITULO
+	titulo_barra.custom_minimum_size.y = _alto_titulo
 	titulo_barra.mouse_filter = Control.MOUSE_FILTER_STOP
 	titulo_barra.gui_input.connect(_al_input_titulo.bind(id))
 	columna.add_child(titulo_barra)
@@ -434,7 +461,7 @@ func _crear_ventana(id: String, titulo: String, contenido: Control, es_modal: bo
 		var minimizar_boton := Button.new()
 		minimizar_boton.text = "—"
 		minimizar_boton.tooltip_text = tr("ESCRITORIO_MINIMIZAR")
-		minimizar_boton.custom_minimum_size = Vector2(31, 24)
+		minimizar_boton.custom_minimum_size = _esc_v(Vector2(31, 24))
 		_preparar_boton(minimizar_boton)
 		minimizar_boton.pressed.connect(minimizar.bind(id))
 		fila_titulo.add_child(minimizar_boton)
@@ -442,7 +469,7 @@ func _crear_ventana(id: String, titulo: String, contenido: Control, es_modal: bo
 	var cerrar_boton := Button.new()
 	cerrar_boton.text = String.chr(0xD7)
 	cerrar_boton.tooltip_text = tr("ESCRITORIO_CERRAR")
-	cerrar_boton.custom_minimum_size = Vector2(31, 24)
+	cerrar_boton.custom_minimum_size = _esc_v(Vector2(31, 24))
 	_preparar_boton(cerrar_boton)
 	cerrar_boton.pressed.connect(cerrar.bind(id))
 	fila_titulo.add_child(cerrar_boton)
@@ -468,7 +495,7 @@ func _crear_ventana(id: String, titulo: String, contenido: Control, es_modal: bo
 	var tarea := Button.new()
 	tarea.name = "Tarea_%s" % id
 	tarea.text = titulo
-	tarea.custom_minimum_size.x = 122
+	tarea.custom_minimum_size.x = _esc(122)
 	_preparar_boton(tarea)
 	tarea.pressed.connect(_al_pulsar_tarea.bind(id))
 	if not es_modal:
@@ -524,26 +551,26 @@ func _al_input_titulo(evento: InputEvent, id: String) -> void:
 
 func _limitar_ventana(panel: Control) -> void:
 	var ancho_disponible := maxf(_area_ventanas.size.x, 1.0)
-	var alto_disponible := maxf(_area_ventanas.size.y, ALTO_TITULO)
+	var alto_disponible := maxf(_area_ventanas.size.y, _alto_titulo)
 	panel.size.x = minf(panel.size.x, ancho_disponible)
 	panel.size.y = minf(panel.size.y, alto_disponible)
-	var minimo_x := minf(0.0, -panel.size.x + ANCHO_TITULO_RECUPERABLE)
-	var maximo_x := maxf(0.0, ancho_disponible - ANCHO_TITULO_RECUPERABLE)
-	var maximo_y := maxf(0.0, alto_disponible - ALTO_TITULO)
+	var minimo_x := minf(0.0, -panel.size.x + _ancho_titulo_recuperable)
+	var maximo_x := maxf(0.0, ancho_disponible - _ancho_titulo_recuperable)
+	var maximo_y := maxf(0.0, alto_disponible - _alto_titulo)
 	panel.position.x = clampf(panel.position.x, minimo_x, maximo_x)
 	panel.position.y = clampf(panel.position.y, 0.0, maximo_y)
 
 
 func _tamano_inicial() -> Vector2:
 	return Vector2(
-		minf(760.0, maxf(300.0, _area_ventanas.size.x - 86.0)),
-		minf(540.0, maxf(220.0, _area_ventanas.size.y - 64.0))
+		minf(_esc(760.0), maxf(_esc(300.0), _area_ventanas.size.x - _esc(86.0))),
+		minf(_esc(540.0), maxf(_esc(220.0), _area_ventanas.size.y - _esc(64.0)))
 	)
 
 
 func _posicion_inicial(indice: int) -> Vector2:
-	var desplazamiento := float(indice % 6) * 24.0
-	return Vector2(156.0 + desplazamiento, 42.0 + desplazamiento)
+	var desplazamiento := float(indice % 6) * _esc(24.0)
+	return Vector2(_esc(156.0) + desplazamiento, _esc(42.0) + desplazamiento)
 
 
 func _al_redimensionar() -> void:
