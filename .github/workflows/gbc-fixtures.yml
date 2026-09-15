@@ -23,6 +23,8 @@ env:
   CGB_ACID2_REPO: https://github.com/mattcurrie/cgb-acid2.git
   CGB_ACID2_COMMIT: fa5b7f86d6fb599f79e55169494d981a7af75a31
   CGB_ACID2_MGBLIB_COMMIT: 5d829bf2ffa1447dcfd63c5dab2c44488632617e
+  CGB_ACID2_RGBDS_REPO: https://github.com/gbdev/rgbds.git
+  CGB_ACID2_RGBDS_COMMIT: 0759c98d913e3d4d21207a8886a319c85add2041
 
 jobs:
   build-fixtures:
@@ -86,11 +88,27 @@ jobs:
           git -C cgb-acid2-src submodule update --init --depth 1 mgblib
           test "$(git -C cgb-acid2-src/mgblib rev-parse HEAD)" = "$CGB_ACID2_MGBLIB_COMMIT"
 
-      - name: Build cgb-acid2
+      - name: Build pinned legacy RGBDS for cgb-acid2
         shell: bash
         run: |
           set -euo pipefail
-          make -C cgb-acid2-src all
+          sudo apt-get update
+          sudo apt-get install -y byacc flex pkg-config libpng-dev
+          git init rgbds-legacy-src
+          git -C rgbds-legacy-src remote add origin "$CGB_ACID2_RGBDS_REPO"
+          git -C rgbds-legacy-src fetch --depth 1 origin "$CGB_ACID2_RGBDS_COMMIT"
+          git -C rgbds-legacy-src checkout --detach FETCH_HEAD
+          test "$(git -C rgbds-legacy-src rev-parse HEAD)" = "$CGB_ACID2_RGBDS_COMMIT"
+          make -C rgbds-legacy-src
+          for tool in rgbasm rgblink rgbfix rgbgfx; do
+            test -x "rgbds-legacy-src/$tool"
+          done
+
+      - name: Build cgb-acid2 with historical RGBDS
+        shell: bash
+        run: |
+          set -euo pipefail
+          PATH="$GITHUB_WORKSPACE/rgbds-legacy-src:$PATH" make -C cgb-acid2-src all
           cp cgb-acid2-src/build/cgb-acid2.gbc gbc-fixtures/
 
       - name: Build CGB-only smoke fixture
