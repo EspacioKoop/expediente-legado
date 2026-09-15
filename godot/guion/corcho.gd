@@ -67,10 +67,11 @@ static func limitar_posiciones(jornada: Dictionary, limite: Vector2) -> bool:
 		if typeof(pos) == TYPE_ARRAY and pos.size() >= 2:
 			x = float(pos[0])
 			y = float(pos[1])
-		var nueva := [clampf(x, -max_x, max_x), clampf(y, -max_y, max_y)]
+		var nueva_x := clampf(x, -max_x, max_x)
+		var nueva_y := clampf(y, -max_y, max_y)
 		var pos_invalida := typeof(pos) != TYPE_ARRAY or pos.size() < 2
-		if datos_invalidos or pos_invalida or not is_equal_approx(x, nueva[0]) or not is_equal_approx(y, nueva[1]):
-			datos["pos"] = nueva
+		if datos_invalidos or pos_invalida or not is_equal_approx(x, nueva_x) or not is_equal_approx(y, nueva_y):
+			datos["pos"] = [nueva_x, nueva_y]
 			fichas[id] = datos
 			cambio = true
 
