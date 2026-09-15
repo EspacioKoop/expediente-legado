@@ -42,27 +42,27 @@ func _construir_interfaz() -> void:
 	_boton_atras = Button.new()
 	_boton_atras.name = "Atras"
 	_boton_atras.text = "<"
-	_boton_atras.tooltip_text = "Atrás"
+	_boton_atras.tooltip_text = tr("EXPLORADOR_ATRAS")
 	_boton_atras.pressed.connect(_ir_atras)
 	barra.add_child(_boton_atras)
 
 	_boton_adelante = Button.new()
 	_boton_adelante.name = "Adelante"
 	_boton_adelante.text = ">"
-	_boton_adelante.tooltip_text = "Adelante"
+	_boton_adelante.tooltip_text = tr("EXPLORADOR_ADELANTE")
 	_boton_adelante.pressed.connect(_ir_adelante)
 	barra.add_child(_boton_adelante)
 
 	_boton_arriba = Button.new()
 	_boton_arriba.name = "Arriba"
 	_boton_arriba.text = "↑"
-	_boton_arriba.tooltip_text = "Subir un nivel"
+	_boton_arriba.tooltip_text = tr("EXPLORADOR_SUBIR")
 	_boton_arriba.pressed.connect(_ir_arriba)
 	barra.add_child(_boton_arriba)
 
 	_ruta = LineEdit.new()
 	_ruta.name = "Ruta"
-	_ruta.placeholder_text = "Mi equipo"
+	_ruta.placeholder_text = tr("EXPLORADOR_RAIZ")
 	_ruta.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_ruta.text_submitted.connect(_ruta_introducida)
 	barra.add_child(_ruta)
@@ -87,7 +87,7 @@ func _construir_interfaz() -> void:
 	_visor.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_visor.fit_content = false
 	_visor.selection_enabled = true
-	_visor.text = "Seleccione una carpeta o abra un documento con doble clic o Enter."
+	_visor.text = tr("EXPLORADOR_VISOR_INICIAL")
 	contenido.add_child(_visor)
 
 	_estado = Label.new()
@@ -221,9 +221,10 @@ func _mostrar_estado(texto: String) -> void:
 
 
 func _ruta_legible(ruta: String) -> String:
+	var raiz := tr("EXPLORADOR_RAIZ")
 	if ruta == ExploradorSigaModelo.RUTA_RAIZ:
-		return "Mi equipo"
-	return "Mi equipo/" + ruta.trim_prefix(ExploradorSigaModelo.RUTA_RAIZ + "/")
+		return raiz
+	return raiz + "/" + ruta.trim_prefix(ExploradorSigaModelo.RUTA_RAIZ + "/")
 
 
 func _descripcion_entrada(entrada: Dictionary, bloqueada: bool) -> String:
