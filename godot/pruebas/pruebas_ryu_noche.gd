@@ -39,10 +39,9 @@ func _initialize() -> void:
 	var compuerta_3 := arquitectura.get_node_or_null("CompuertaCauce3") as Interactuable3D
 	_comprobar(compuerta_1 != null and compuerta_2 != null and compuerta_3 != null, "tres compuertas")
 	if compuerta_1 != null and compuerta_2 != null and compuerta_3 != null:
-		# Objetivo [true, false, true]. La central se toca dos veces: el puzzle no
-		# acepta un estado inicial correcto que nunca haya sido observado/manipulado.
+		# Las tres empiezan opuestas a sus guías. Una interacción deliberada por
+		# compuerta basta para reconstruir el cauce objetivo [true, false, true].
 		compuerta_1.interactuar(actor)
-		compuerta_2.interactuar(actor)
 		compuerta_2.interactuar(actor)
 		compuerta_3.interactuar(actor)
 		_comprobar(ryu.estado_compuertas() == [true, false, true], "estado objetivo")
