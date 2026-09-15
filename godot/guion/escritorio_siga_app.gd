@@ -38,7 +38,9 @@ func es_valida() -> bool:
 func registrar_en(escritorio: EscritorioSiga) -> bool:
 	if escritorio == null or not es_valida():
 		return false
-	escritorio.registrar_aplicacion(id, titulo, creador)
+	escritorio.registrar_aplicacion(
+		id, titulo, creador, tamano_minimo, tamano_preferido, redimensionable, multiples_instancias
+	)
 	_aplicar_identidad_visual(escritorio)
 	return true
 
@@ -47,7 +49,16 @@ func registrar_en(escritorio: EscritorioSiga) -> bool:
 func adoptar_en(escritorio: EscritorioSiga, contenido: Control) -> bool:
 	if escritorio == null or contenido == null or not es_valida():
 		return false
-	escritorio.adoptar_aplicacion(id, titulo, contenido, creador)
+	escritorio.adoptar_aplicacion(
+		id,
+		titulo,
+		contenido,
+		creador,
+		tamano_minimo,
+		tamano_preferido,
+		redimensionable,
+		multiples_instancias
+	)
 	_aplicar_identidad_visual(escritorio)
 	return true
 
@@ -80,7 +91,7 @@ func restaurar(escritorio: EscritorioSiga) -> void:
 
 
 ## Estado estrictamente local de aplicación. La campaña sigue perteneciendo a
-## Dia/EstadoJuego; por defecto ni siquiera se declara persistible.
+## Dia/Partida; por defecto ni siquiera se declara persistible.
 func establecer_estado_local(clave: String, valor: Variant) -> void:
 	if clave.is_empty():
 		return

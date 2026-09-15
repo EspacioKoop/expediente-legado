@@ -9,6 +9,10 @@ var _pantalla_envuelta_id := 0
 var _siga_app: EscritorioSigaApp
 var _explorador_app: EscritorioSigaApp
 
+## Todas las apps registradas en este puesto, para persistencia declarada
+## (#535): quien guarde/cargue partida no necesita conocerlas una a una.
+var _apps: Array[EscritorioSigaApp] = []
+
 
 func _process(_delta: float) -> void:
 	var dia := get_parent()
@@ -46,6 +50,7 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	var titulo_siga := tr("ESCRITORIO_SIGA_TITULO")
 	_siga_app = EscritorioSigaApp.new("siga-98", titulo_siga, creador_visor, "siga")
 	_siga_app.registrar_en(escritorio)
+	_apps.append(_siga_app)
 
 	# El Explorador consume el mismo contrato que SIGA, pero su contenido se crea
 	# bajo demanda y recibe solo el contexto de campaña que necesita para resolver
@@ -57,6 +62,12 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	_explorador_app.tamano_preferido = Vector2(720, 520)
 	_explorador_app.redimensionable = true
 	_explorador_app.registrar_en(escritorio)
+	_apps.append(_explorador_app)
+
+	# Reponer el estado declarado ANTES de adoptar/abrir nada: así una app que
+	# lea su estado local al construir su contenido (como haría una real) ya
+	# lo ve actualizado desde el primer fotograma.
+	EstadoAplicacionesSiga.cargar(_apps)
 
 	# Ayuda sigue siendo utilidad propia del shell; las aplicaciones de juego usan
 	# EscritorioSigaApp y no conocen la tabla de ventanas interna.
@@ -71,6 +82,14 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	for hijo in pantalla.get_children():
 		if hijo is Button:
 			(hijo as Button).visible = false
+
+
+## Vuelca el estado local de las apps que lo declaren (#535). Se llama desde
+## el mismo punto donde `Dia` guarda `Partida`, pero escribe en un fichero
+## aparte: la campaña y el estado de aplicaciones nunca comparten sección.
+func guardar_estado_aplicaciones() -> void:
+	if not _apps.is_empty():
+		EstadoAplicacionesSiga.guardar(_apps)
 
 
 func _crear_visor() -> Control:

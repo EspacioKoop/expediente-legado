@@ -39,13 +39,25 @@ func registrar_identidad_visual(id: String, clave: String) -> void:
 	_decorar_ventana(id)
 
 
-func registrar_aplicacion(id: String, titulo: String, creador: Callable) -> void:
-	super.registrar_aplicacion(id, titulo, creador)
+func registrar_aplicacion(
+	id: String,
+	titulo: String,
+	creador: Callable,
+	tamano_minimo: Vector2 = TAMANO_MINIMO_SERIE,
+	tamano_preferido: Vector2 = TAMANO_PREFERIDO_SERIE,
+	redimensionable: bool = false,
+	multiples_instancias: bool = false
+) -> void:
+	super.registrar_aplicacion(
+		id, titulo, creador, tamano_minimo, tamano_preferido, redimensionable, multiples_instancias
+	)
 	_decorar_accesos(id)
 
 
-func _crear_ventana(id: String, titulo: String, contenido: Control, es_modal: bool = false) -> void:
-	super._crear_ventana(id, titulo, contenido, es_modal)
+func _crear_ventana(
+	id: String, titulo: String, contenido: Control, es_modal: bool = false, id_app: String = ""
+) -> void:
+	super._crear_ventana(id, titulo, contenido, es_modal, id_app)
 	_decorar_ventana(id)
 
 
@@ -109,7 +121,10 @@ func _decorar_accesos(id: String) -> void:
 func _decorar_ventana(id: String) -> void:
 	if not _ventanas.has(id):
 		return
-	var clave := String(_identidades_visuales.get(id, ""))
+	# Una instancia adicional ("explorador#2") comparte la identidad visual de
+	# su aplicación base: el "#" nunca es parte de un id registrado.
+	var id_base := id.split("#")[0]
+	var clave := String(_identidades_visuales.get(id, _identidades_visuales.get(id_base, "")))
 	if clave.is_empty():
 		return
 	var datos: Dictionary = _ventanas[id]

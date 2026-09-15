@@ -102,7 +102,7 @@ def ejecutar():
                 "escritorio-modal",
                 ["--script", "pruebas/pruebas_escritorio_modal.gd"],
                 30,
-                19,
+                28,
             ),
             ("recorrido", ["--script", "pruebas/recorrido.gd"], 60, 95),
             ("arranque", ["--quit-after", "90"], 30, None),
