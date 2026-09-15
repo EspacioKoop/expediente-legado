@@ -47,14 +47,25 @@ class ConsolaSobremesa98Test(unittest.TestCase):
         ):
             self.assertNotIn(termino, combinado)
 
-    def test_no_introduce_assets_ni_roms_nuevas(self):
+    def test_monta_tres_cartuchos_de_expositor(self):
+        self.assertIn("_montar_cartuchos_expositor()", self.consola)
+        self.assertEqual(self.consola.count("_agregar_cartucho("), 4)
+        for nombre in (
+            "caza_pixeles_98.jpg",
+            "paper_planes_98.jpg",
+            "croc_riders_98.jpg",
+        ):
+            self.assertIn(nombre, self.consola)
+
+    def test_el_arte_es_local_y_no_convierte_props_en_roms(self):
+        self.assertIn("res://assets/consola98/cartuchos/", self.consola)
+        self.assertIn("Texture2D", self.consola)
         for termino in (
-            "load(",
-            "preload(",
-            ".glb",
-            ".png",
+            "http://",
+            "https://",
             ".gbc",
             ".gb",
+            "EmuladorPortatilApp.new()",
         ):
             self.assertNotIn(termino, self.consola)
 
