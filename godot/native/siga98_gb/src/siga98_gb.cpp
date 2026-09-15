@@ -110,6 +110,7 @@ void Siga98GB::_bind_methods() {
     ClassDB::bind_method(D_METHOD("audio_sample_rate"), &Siga98GB::audio_sample_rate);
     ClassDB::bind_method(D_METHOD("save_ram"), &Siga98GB::save_ram);
     ClassDB::bind_method(D_METHOD("load_save_ram", "save"), &Siga98GB::load_save_ram);
+    ClassDB::bind_method(D_METHOD("read_memory_u8", "address"), &Siga98GB::read_memory_u8);
     ClassDB::bind_method(D_METHOD("rom_title"), &Siga98GB::rom_title);
     ClassDB::bind_method(D_METHOD("last_error"), &Siga98GB::last_error);
     ClassDB::bind_method(D_METHOD("core_name"), &Siga98GB::core_name);
@@ -251,6 +252,13 @@ bool Siga98GB::load_save_ram(const PackedByteArray &p_save) {
     }
     impl->error.clear();
     return true;
+}
+
+int Siga98GB::read_memory_u8(const int64_t p_address) const {
+    if (!impl->loaded || impl->gb == nullptr || p_address < 0 || p_address > 0xFFFF) {
+        return -1;
+    }
+    return static_cast<int>(GB_safe_read_memory(impl->gb, static_cast<uint16_t>(p_address)));
 }
 
 String Siga98GB::rom_title() const {
