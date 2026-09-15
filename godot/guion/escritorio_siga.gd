@@ -391,7 +391,7 @@ func _crear_ventana(id: String, titulo: String, contenido: Control) -> void:
 	fila_titulo.add_child(minimizar_boton)
 
 	var cerrar_boton := Button.new()
-	cerrar_boton.text = "×"
+	cerrar_boton.text = String.chr(0xD7)
 	cerrar_boton.tooltip_text = tr("ESCRITORIO_CERRAR")
 	cerrar_boton.custom_minimum_size = Vector2(31, 24)
 	_preparar_boton(cerrar_boton)
