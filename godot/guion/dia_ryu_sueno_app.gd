@@ -73,9 +73,7 @@ func _montar_ryu(mundo: Node3D, espacio: Dictionary) -> void:
 
 	var ryu := SuenoRyu.new()
 	ryu.name = "SuenoRyuNoche"
-	ryu.reduccion_movimiento = bool(
-		PreferenciasSiga.cargar().get("reduccion_movimiento", false)
-	)
+	ryu.reduccion_movimiento = bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false))
 	# Se prepara fuera del árbol para que reducción de movimiento determine
 	# desde el inicio la densidad de lluvia y no exista cámara standalone.
 	ryu.preparar()
