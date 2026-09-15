@@ -24,22 +24,31 @@ Lee también el issue concreto, sus comentarios, PRs relacionadas, reviews y CI.
 3. Antes de modificar archivos publica en #182:
 
    ```text
-   CLAIM issue=#N agent=<nombre> branch=<rama> files=<rutas> goal=<objetivo>
+   CLAIM issue=#N agent=<nombre> branch=<rama> files=<rutas> goal=<objetivo> lease=48h
    ```
 
 4. Relee inmediatamente #182. Gana la reserva activa anterior por fecha de GitHub; en empate, el comentario con ID menor. Si hay solape, no edites.
-5. Trabaja en rama propia desde `main` actualizado: `feature/NN-slug`, `fix/NN-slug` o `docs/NN-slug`.
-6. Mantén el corte pequeño. Un paraguas como #279/#282/#283 se ejecuta por verticales, no con una reescritura total.
-7. Añade regresión ejecutable cuando cambie comportamiento. La inspección textual puede complementar, no sustituir, una prueba del contrato real cuando Godot pueda ejecutarlo.
-8. Pasa las pruebas canónicas y revisa el diff final.
-9. Abre PR a `main` y registra en #182:
+5. La lease dura 48 horas mientras no exista una PR abierta. Para renovar trabajo sin PR publica:
+
+   ```text
+   HEARTBEAT issue=#N branch=<rama>
+   ```
+
+   Una `PR_READY` asociada a una PR abierta mantiene la reserva sin depender del reloj. `.github/workflows/reservas.yml` publica `RELEASE` automáticamente al fusionar/cerrar la PR y barre leases vencidas cada 6 horas.
+6. Trabaja en rama propia desde `main` actualizado: `feature/NN-slug`, `fix/NN-slug` o `docs/NN-slug`.
+7. Mantén el corte pequeño. Un paraguas como #279/#282/#283 se ejecuta por verticales, no con una reescritura total.
+8. Añade regresión ejecutable cuando cambie comportamiento. La inspección textual puede complementar, no sustituir, una prueba del contrato real cuando Godot pueda ejecutarlo.
+9. Pasa las pruebas canónicas y revisa el diff final.
+10. Abre PR a `main` y registra en #182:
 
    ```text
    PR_READY issue=#N pr=#M sha=<sha> pruebas=<qué pasó> limites=<qué no cubre>
    ```
 
-10. `PR_READY` mantiene la reserva y **no autoriza merge**. Integra solo con autorización explícita de @eGurucharri y los gates exigidos en verde.
-11. Verifica el resultado remoto y publica `RELEASE`. Si pausas, deja SHA, estado y siguiente paso; el silencio no caduca la reserva.
+11. `PR_READY` mantiene la reserva y **no autoriza merge**. Integra solo con autorización explícita de @eGurucharri y los gates exigidos en verde.
+12. Si abandonas antes de abrir PR, publica `RELEASE issue=#N motivo=abandonado`. Tras cerrar o fusionar una PR no publiques un `RELEASE` duplicado: el workflow de reservas lo hace de forma idempotente.
+
+Las reservas legacy anteriores al corte de migración del 15 de septiembre de 2026 se liberan automáticamente porque se confirmó que no había otros agentes trabajando durante la migración. A partir de ahí, todo `CLAIM` nuevo debe llevar `lease=48h`.
 
 Usa `Closes #N` solo si el PR satisface el issue entero. Para entregas parciales, `Refs #N` y explica lo que queda.
 
