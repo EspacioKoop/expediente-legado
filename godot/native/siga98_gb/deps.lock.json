@@ -10,7 +10,7 @@
     "commit": "213a12ce93d66b105a113debd9396306066a7cfc",
     "license": "Expat",
     "scope": "Core/",
-    "capability": "Núcleo activo: modelo CGB-E; ROMs GB, dual-mode y CGB-only; framebuffer y SRAM. APU todavía sin salida a Godot",
+    "capability": "Núcleo activo: modelo CGB-E; ROMs GB, dual-mode y CGB-only; framebuffer, SRAM y audio (APU) con salida a Godot",
     "boot_rom": {
       "source": "BootROMs/cgb_boot_fast.asm",
       "license": "Expat",
