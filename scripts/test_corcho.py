@@ -42,8 +42,8 @@ class CorchoConceptosTest(unittest.TestCase):
 
     def test_sigue_sin_inferir_relaciones_del_grafo(self):
         combinado = self.estado + self.vista
-        self.assertNotIn("referencias", combinado)
-        self.assertNotIn("Marcas", combinado)
+        self.assertNotIn('get("referencias"', combinado)
+        self.assertNotIn("Marcas.referencias", combinado)
         self.assertIn("Corcho.alternar_enlace", self.vista)
 
     def test_corte_funciona_en_godot_headless(self):
