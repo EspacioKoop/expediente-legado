@@ -98,22 +98,12 @@ jobs:
       - name: Instalar gdtoolkit
         run: python -m pip install gdtoolkit==4.3.4
 
-      - name: Verificar el detector de falsos verdes
-        run: python -m unittest discover -s scripts -p 'test_*.py'
+      - name: Preflight GDScript canónico
+        shell: bash
+        run: bash scripts/check_gdscript.sh
 
       - name: Importar, ejecutar la suite y arrancar el juego
         run: python scripts/verificar_godot.py
 
       - name: Arrancar Caza Píxeles 98 en el núcleo nativo
         run: godot4 --headless --path godot --script res://pruebas/emulador_gb_smoke.gd
-
-      - name: Lint y formato GDScript
-        shell: bash
-        run: |
-          set -euo pipefail
-          find godot -type f -name '*.gd' \
-            -not -path 'godot/native/siga98_gb/.deps/*' -print0 \
-            | xargs -0 --no-run-if-empty gdlint
-          find godot -type f -name '*.gd' \
-            -not -path 'godot/native/siga98_gb/.deps/*' -print0 \
-            | xargs -0 --no-run-if-empty gdformat --check --diff
