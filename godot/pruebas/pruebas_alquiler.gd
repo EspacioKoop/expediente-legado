@@ -163,3 +163,52 @@ static func todo(comprobar: Callable) -> void:
 		saldo_sin_cierres_con_trabajillos < Jornada.PRECIO_ALQUILER,
 		true
 	)
+
+	# --- El café: tope duro de una acción extra por jornada (#93) ------------
+	# El riesgo del diseño es un consumible que dé acciones y unas acciones que
+	# den dinero: sin tope, la economía se dispara. Se prueba el tope, no solo
+	# el efecto.
+	comprobar.call(
+		"el café cuesta menos que vivir un día", Jornada.PRECIO_CAFE < Jornada.COSTE_DIARIO, true
+	)
+
+	var oficina := Jornada.nueva()
+	var acciones_sin_cafe: int = oficina["acciones"]
+	var saldo_sin_cafe: int = oficina["dinero"]
+	comprobar.call(
+		"el primer café da una acción y cobra",
+		[Jornada.tomar_cafe(oficina, Jornada.PRECIO_CAFE), oficina["acciones"], oficina["dinero"]],
+		[true, acciones_sin_cafe + 1, saldo_sin_cafe - Jornada.PRECIO_CAFE]
+	)
+	var saldo_tras_uno: int = oficina["dinero"]
+	comprobar.call(
+		"el segundo café del mismo día no da nada ni cobra",
+		[Jornada.tomar_cafe(oficina, Jornada.PRECIO_CAFE), oficina["acciones"], oficina["dinero"]],
+		[false, acciones_sin_cafe + 1, saldo_tras_uno]
+	)
+
+	var sin_dinero := Jornada.nueva()
+	sin_dinero["dinero"] = Jornada.PRECIO_CAFE - 1
+	comprobar.call(
+		"sin dinero no hay café ni acción de más",
+		Jornada.tomar_cafe(sin_dinero, Jornada.PRECIO_CAFE),
+		false
+	)
+
+	var fuera_de_horario := Jornada.nueva()
+	fuera_de_horario["fase"] = "trayecto"
+	comprobar.call(
+		"el café solo se toma en el archivo, que es donde se usa la acción",
+		Jornada.tomar_cafe(fuera_de_horario, Jornada.PRECIO_CAFE),
+		false
+	)
+
+	var otro_dia := Jornada.nueva()
+	Jornada.tomar_cafe(otro_dia, Jornada.PRECIO_CAFE)
+	otro_dia["fase"] = "sueño"
+	Jornada.despertar(otro_dia)
+	comprobar.call(
+		"un día nuevo resetea el tope del café",
+		Jornada.tomar_cafe(otro_dia, Jornada.PRECIO_CAFE),
+		true
+	)
