@@ -104,6 +104,12 @@ def ejecutar():
                 30,
                 19,
             ),
+            (
+                "vestuario-humano",
+                ["--script", "pruebas/pruebas_vestuario_humano_3d.gd"],
+                30,
+                9,
+            ),
             ("recorrido", ["--script", "pruebas/recorrido.gd"], 60, 95),
             ("arranque", ["--quit-after", "90"], 30, None),
         ]
