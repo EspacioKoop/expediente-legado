@@ -1,9 +1,10 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://guion/sueno_gilgamesh.gd" id="1"]
 [ext_resource type="Texture2D" path="res://arte/gilgamesh/muralla_ladrillo_archivo.svg" id="2_muralla"]
 [ext_resource type="Texture2D" path="res://arte/gilgamesh/sellos_siga_oniricos.svg" id="3_sellos"]
 [ext_resource type="Texture2D" path="res://arte/gilgamesh/cielo_hoja_mecanografiada.svg" id="4_cielo"]
+[ext_resource type="Script" path="res://guion/gilgamesh_interaccion_3d.gd" id="5_interaccion"]
 
 [sub_resource type="StandardMaterial3D" id="Material_muralla"]
 cull_mode = 2
@@ -50,3 +51,6 @@ mesh = SubResource("Mesh_sellos")
 position = Vector3(0, 10.5, -0.5)
 rotation_degrees = Vector3(-90, 0, 0)
 mesh = SubResource("Mesh_cielo")
+
+[node name="Interaccion3D" type="Node" parent="."]
+script = ExtResource("5_interaccion")
