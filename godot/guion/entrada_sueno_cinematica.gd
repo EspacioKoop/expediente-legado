@@ -1,99 +1,110 @@
-## Entrada al sueño: la casa sigue reconocible mientras deja de serlo.
+## Entrada al sueño: la primera sala se descubre desde dentro (#74, #395).
 ##
-## La noche, el mapa y la primera sala ya están calculados cuando esta pieza se
-## reproduce. Aquí no se elige contenido ni se modifica la jornada: solo se
-## representa el cambio de género entre casa y sueño.
+## La noche, el mapa y la primera sala ya están calculados y MONTADOS cuando
+## esta pieza se reproduce. Desde #395 no dibuja una habitación de rectángulos:
+## rueda en la sala onírica real que el jugador va a pisar, encadenada a la cama
+## de `SuenoCinematica`, de modo que casa→sueño se lee como una sola secuencia.
+##
+## Aprovecha lo que la sala ya trae —entrada, figuras, carteles con frases de lo
+## leído y el resplandor de la salida— sin añadir geometría ni elegir contenido.
+## Tampoco modifica la jornada: saltarla o verla entera deja el mismo estado.
 class_name EntradaSuenoCinematica
 extends RefCounted
 
 const ID := "entrada-sueno"
 
-const CASA := Color("77736b")
-const PAPEL := Color("dedbd2")
-const TINTA := Color("3e3e42")
-const SOMBRA := Color("29282b")
-const UMBRAL := Color("5b5660")
+## Altura de los ojos del caminante sobre el suelo de la sala.
+const OJOS := 1.6
+
+## Si la sala no trae nada a lo que mirar, se mira hacia delante (-z), que es
+## hacia donde se entra cuando el sitio no declara rumbo.
+const DELANTE := Vector3(0, 0, -6)
 
 
-## La composición depende solo de los folios que YA fueron leídos ese día. Si no hay
-## ninguno, la misma transición funciona sin inventar contenido de relleno.
-## Todos los planos son estáticos: comunica lo mismo con movimiento reducido.
-static func planos_de(folios_leidos: Array, vistas: int = 0) -> Array:
+## [param espacio] es el diccionario de la sala ya montada (`Sueno.espacio`).
+## Sin él los planos siguen siendo válidos alrededor del origen, para pruebas y
+## llamantes antiguos.
+static func planos_de(folios_leidos: Array, vistas: int = 0, espacio: Dictionary = {}) -> Array:
 	var conocidos := []
 	for folio in folios_leidos:
 		if folio is String and not folio.is_empty() and not conocidos.has(folio):
 			conocidos.append(folio)
 			if conocidos.size() == 3:
 				break
-	var rodaje := Cinematica.resolver(_planos(conocidos.size()), {}, vistas)
+	var rodaje := Cinematica.resolver(planos(espacio), {}, vistas)
 	if not conocidos.is_empty():
 		rodaje[1]["rotulo"] = conocidos[0]
 	return rodaje
 
 
-static func _planos(cantidad: int) -> Array:
+## Tres planos: llegar, reconocer lo leído y quedarse a la altura de los ojos.
+## Todos declaran cámara fija y mira: con reducción de movimiento comunican lo
+## mismo porque el reproductor solo quita el avance.
+static func planos(espacio: Dictionary = {}) -> Array:
+	var entrada: Vector3 = espacio.get("entrada", Vector3.ZERO)
+	var foco := foco_de(espacio)
+	var detalle := detalle_de(espacio)
+	var hacia := foco - entrada
+	hacia.y = 0.0
+	if hacia.length() < 0.5:
+		hacia = DELANTE
+	var atras := -hacia.normalized()
 	return [
 		{
-			"tipo": "2d",
-			"segundos": 0.85,
-			"figura": _habitacion(),
-			"desde": Vector2.ZERO,
-			"hasta": Vector2.ZERO,
+			# Llegada: desde encima y detrás del umbral se ve la sala entera y
+			# el primer encuentro; el sueño ya es un sitio, no una tarjeta.
+			"tipo": "3d",
+			"nombre": "llegada",
+			"camara": entrada + atras * 2.2 + Vector3(0, 2.6, 0),
+			"mira": foco + Vector3(0, 0.6, 0),
+			"segundos": 2.0,
 		},
 		{
-			"tipo": "2d",
-			"segundos": 0.9,
-			"figura": _habitacion_alterada(cantidad),
-			"desde": Vector2.ZERO,
-			"hasta": Vector2.ZERO,
+			# Lo leído: la cámara se acerca a un cartel de la sala (frases que
+			# salen de los folios del día) o, si no hay, a la primera figura.
+			"tipo": "3d",
+			"nombre": "leido",
+			"camara": entrada.lerp(detalle, 0.55) + Vector3(0, 1.9, 0),
+			"mira": detalle + Vector3(0, 1.2, 0),
+			"segundos": 2.2,
 		},
 		{
-			"tipo": "2d",
-			"segundos": 1.0,
-			"figura": _umbral(),
-			"desde": Vector2.ZERO,
-			"hasta": Vector2.ZERO,
+			# Remate a la altura de los ojos del caminante y mirando al mismo
+			# encuentro: devolver el control no es un corte de cámara.
+			"tipo": "3d",
+			"nombre": "mirada",
+			"camara": entrada + Vector3(0, OJOS, 0),
+			"mira": foco + Vector3(0, 1.1, 0),
+			"segundos": 1.6,
 		},
 	]
 
 
-static func _habitacion() -> Array:
-	return [
-		{"rect": Rect2(-190, 70, 380, 28), "color": CASA},
-		{"rect": Rect2(-142, 6, 176, 64), "color": CASA},
-		{"rect": Rect2(-126, -8, 62, 14), "color": PAPEL},
-		{"rect": Rect2(92, -92, 66, 92), "color": SOMBRA},
-	]
+## El primer encuentro: la figura puesta delante de la entrada o, en una sala
+## vacía, el resplandor de la salida que invita a buscarla.
+static func foco_de(espacio: Dictionary) -> Vector3:
+	var entrada: Vector3 = espacio.get("entrada", Vector3.ZERO)
+	var figuras: Array = espacio.get("figuras", [])
+	if not figuras.is_empty():
+		return Vector3(figuras[0].get("pos", entrada + DELANTE))
+	var salidas: Array = espacio.get("salidas", [])
+	if not salidas.is_empty():
+		var pos: Vector3 = salidas[0].get("pos", entrada + DELANTE)
+		return Vector3(pos.x, entrada.y, pos.z)
+	return entrada + DELANTE
 
 
-## La composición sigue siendo la casa; lo que no encaja es el expediente que
-## aparece donde antes solo había dormitorio. Su identificador se rotula aparte
-## y procede de `leido_hoy`.
-static func _habitacion_alterada(cantidad: int) -> Array:
-	var figura := _habitacion()
-	# La noche vacía altera la luz del dormitorio, sin fabricar un expediente.
-	if cantidad == 0:
-		figura[0]["color"] = UMBRAL
-		figura[1]["color"] = UMBRAL
-		return figura
-	# Repetición contenida: hasta tres folios conocidos ocupan el mismo encuadre.
-	# La densidad deriva de lo leído, nunca del azar ni de pistas nuevas.
-	for indice in mini(cantidad, 3):
-		var desplazamiento := Vector2(indice * 24, indice * 12)
-		for pieza in [
-			{"rect": Rect2(-42, -108, 116, 78), "color": PAPEL},
-			{"rect": Rect2(-28, -88, 82, 7), "color": TINTA},
-			{"rect": Rect2(-28, -66, 58, 7), "color": TINTA},
-		]:
-			pieza["rect"].position += desplazamiento
-			figura.append(pieza)
-	return figura
-
-
-static func _umbral() -> Array:
-	return [
-		{"rect": Rect2(-210, -130, 420, 260), "color": SOMBRA},
-		{"rect": Rect2(-88, -118, 176, 236), "color": UMBRAL},
-		{"rect": Rect2(-54, -82, 108, 164), "color": TINTA},
-		{"rect": Rect2(-18, -22, 36, 44), "color": PAPEL},
-	]
+## Lo que representa lo leído dentro de la sala: el cartel más cercano a la
+## entrada. Sin carteles, el mismo foco del primer plano.
+static func detalle_de(espacio: Dictionary) -> Vector3:
+	var entrada: Vector3 = espacio.get("entrada", Vector3.ZERO)
+	var carteles: Array = espacio.get("carteles", [])
+	var mejor := foco_de(espacio)
+	var distancia := INF
+	for cartel in carteles:
+		var pos: Vector3 = cartel.get("pos", mejor)
+		var d := entrada.distance_to(pos)
+		if d < distancia:
+			distancia = d
+			mejor = Vector3(pos.x, entrada.y, pos.z)
+	return mejor

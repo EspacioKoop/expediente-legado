@@ -18,11 +18,14 @@ func _entrar_en(fase: String) -> void:
 		call_deferred("_abrir_inicio_jornada_si_toca")
 
 
-## #68 manda al principio de una vida laboral. Cuando termina, #69 puede poner
-## la ficha de ese primer día; así no compiten dos reproductores por la pantalla.
+## #68 manda al principio de una vida laboral. Cuando termina, el primer día
+## queda marcado como presentado sin rodar #69 encima (#395).
 func _cerrar_vuelta() -> void:
 	super._cerrar_vuelta()
-	call_deferred("_abrir_inicio_jornada_si_toca")
+	# La entrada (#68) ya ha presentado este primer día en la misma oficina.
+	# #395 prohíbe encadenar dos cinemáticas al arrancar: se anota el comienzo
+	# como presentado y no se rueda otra encima.
+	call_deferred("_abrir_inicio_jornada_si_toca", true)
 
 
 ## Si el guardado previo al inicio falló, el reintento debe poder recuperar la
@@ -33,7 +36,7 @@ func _reintentar_guardado() -> void:
 		call_deferred("_abrir_inicio_jornada_si_toca")
 
 
-func _abrir_inicio_jornada_si_toca() -> void:
+func _abrir_inicio_jornada_si_toca(tras_entrada := false) -> void:
 	if _inicio_jornada != null or _entrada != null or _pantalla != null:
 		return
 	if partida.guardado_pendiente:
@@ -60,9 +63,14 @@ func _abrir_inicio_jornada_si_toca() -> void:
 		else:
 			partida.estado[CLAVE_ULTIMO_INICIO] = anterior
 		return
+	if not tras_entrada:
+		_rodar_inicio_jornada()
 
+
+func _rodar_inicio_jornada() -> void:
 	_caminante.set_physics_process(false)
 	_hud.visible = false
+	_mostrar_prioridades(false)
 	_inicio_jornada = ESCENA_INICIO_JORNADA.instantiate()
 	add_child(_inicio_jornada)
 	_inicio_jornada.terminada.connect(_cerrar_inicio_jornada)
@@ -81,6 +89,7 @@ func _cerrar_inicio_jornada() -> void:
 	_inicio_jornada = null
 	_caminante.set_physics_process(true)
 	_hud.visible = true
+	_mostrar_prioridades(true)
 	# El reproductor acaba de anotar la vista. El día y la marca ya estaban
 	# guardados antes de empezar; este segundo guardado solo conserva la cuenta.
 	_guardar_o_avisar("")

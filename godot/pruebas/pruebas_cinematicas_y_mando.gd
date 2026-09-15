@@ -235,8 +235,8 @@ static func _cinematicas(comprobar: Callable) -> void:
 	comprobar.call("la entrada al sueño está bien declarada", Cinematica.validar(entrada_sueno), [])
 	comprobar.call("la entrada al sueño tiene tres planos", entrada_sueno.size(), 3)
 	comprobar.call(
-		"la entrada al sueño no mueve la figura",
-		entrada_sueno.all(func(p): return p["desde"] == p["hasta"]),
+		"la entrada al sueño rueda en 3D",
+		entrada_sueno.all(func(p): return p["tipo"] == "3d"),
 		true
 	)
 	comprobar.call(

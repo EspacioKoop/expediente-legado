@@ -57,13 +57,18 @@ func _dormir_con_entrada() -> void:
 	_guardar_o_avisar("")
 
 	_caminante.set_physics_process(false)
+	# La secuencia rueda dentro de la sala: sin HUD encima, igual que la cama.
+	_hud.visible = false
+	_mostrar_prioridades(false)
 	_mundo.process_mode = Node.PROCESS_MODE_DISABLED
 	_entrada_sueno = ESCENA_CINEMATICA.instantiate()
 	add_child(_entrada_sueno)
 	_entrada_sueno.terminada.connect(_cerrar_entrada_sueno)
 	_entrada_sueno.reproducir(
 		EntradaSuenoCinematica.planos_de(
-			jornada["leido_hoy"], Cinematica.vistas_de(partida.estado, EntradaSuenoCinematica.ID)
+			jornada["leido_hoy"],
+			Cinematica.vistas_de(partida.estado, EntradaSuenoCinematica.ID),
+			_espacio_actual
 		),
 		EntradaSuenoCinematica.ID,
 		partida.estado
@@ -77,6 +82,14 @@ func _cerrar_entrada_sueno() -> void:
 	_entrada_sueno = null
 	_mundo.process_mode = Node.PROCESS_MODE_INHERIT
 	_caminante.set_physics_process(true)
+	_hud.visible = true
+	_mostrar_prioridades(true)
 	# Conserva también la cuenta de vistas de la cinemática. El resto del sueño
 	# ya se había guardado antes de empezar a verla.
 	_guardar_o_avisar("")
+
+
+func _mostrar_prioridades(mostrar: bool) -> void:
+	var prioridades := get_node_or_null("HUDPrioridades")
+	if prioridades != null:
+		prioridades.set("visible", mostrar)

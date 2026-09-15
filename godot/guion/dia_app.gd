@@ -36,6 +36,11 @@ var _hud: CanvasLayer
 ## La entrada de la vuelta mientras se está poniendo (#68). Fuera de ella es
 ## nula: el reproductor se descarta al terminar en vez de quedarse escuchando.
 var _entrada: Node3D
+
+## El sitio montado ahora mismo, tal como se construyó. Las cinemáticas que
+## ruedan dentro de él (#395) lo leen en vez de volver a pedirlo: en el sueño
+## pedirlo otra vez apuntaría la sala en el mapa por segunda vez.
+var _espacio_actual: Dictionary = {}
 var _ambiente: Environment
 var _sol: DirectionalLight3D
 var _voz: AudioStreamPlayer
@@ -210,6 +215,7 @@ func _entrar_en(fase: String) -> void:
 	add_child(_mundo)
 
 	var espacio := _espacio_de(fase)
+	_espacio_actual = espacio
 	for salida in Espacio3D.construir(_mundo, espacio):
 		salida.body_entered.connect(_al_pisar_salida.bind(salida))
 
