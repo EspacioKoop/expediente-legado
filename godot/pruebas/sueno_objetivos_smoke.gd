@@ -36,19 +36,22 @@ func _comprobar_vertical_0_1_2() -> void:
 
 
 func _comprobar_objetivo_no_puntuable() -> void:
-	var estado := Regla.nuevo(
-		[
-			{
-				"id": "eco",
-				"tipo": "anomalia",
-				"condicion": "observar",
-				"feedback": "ambiente",
-				"cuenta": false,
-			},
-			{"id": "a", "tipo": "interaccion", "cuenta": true},
-			{"id": "b", "tipo": "figura", "cuenta": true},
-		],
-		2,
+	var estado := (
+		Regla
+		. nuevo(
+			[
+				{
+					"id": "eco",
+					"tipo": "anomalia",
+					"condicion": "observar",
+					"feedback": "ambiente",
+					"cuenta": false,
+				},
+				{"id": "a", "tipo": "interaccion", "cuenta": true},
+				{"id": "b", "tipo": "figura", "cuenta": true},
+			],
+			2,
+		)
 	)
 	_comprobar(Regla.completar(estado, "eco"), "no puntuable puede completarse")
 	_comprobar(Regla.progreso(estado) == Vector2i(0, 2), "no puntuable no suma")
