@@ -22,3 +22,4 @@ func _process(_delta: float) -> void:
 		OficinaUtileria.montar(mundo)
 		OficinaAssetsCc0.montar(mundo)
 		PostersOficina.montar(mundo)
+		CuadrosOficina.montar(mundo)
