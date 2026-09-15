@@ -57,11 +57,14 @@ func _corresponde_a_esta_escena(dia: Node, familias: Array) -> bool:
 		SuenoFormas.ids().size(),
 	)
 	var pendientes: Array = dia.jornada.get("sueno_escenas", [])
-	return MitologiasNoche.corresponde_a_escena(
-		SuenoGilgamesh.ID_MITO,
-		familias,
-		cantidad,
-		pendientes.size(),
+	return (
+		MitologiasNoche
+		. corresponde_a_escena(
+			SuenoGilgamesh.ID_MITO,
+			familias,
+			cantidad,
+			pendientes.size(),
+		)
 	)
 
 
