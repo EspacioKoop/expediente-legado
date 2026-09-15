@@ -37,6 +37,7 @@ func _refrescar_archivo() -> void:
 
 func _al_elegir_documento(indice: int) -> void:
 	super._al_elegir_documento(indice)
+	_identidad_expedientes.mostrar_portada(false)
 	_anexo_abierto = false
 	_actualizar_anexo()
 
@@ -46,6 +47,7 @@ func _al_elegir_caso(indice: int) -> void:
 	_anexo_abierto = false
 	_actualizar_anexo()
 	_identidad_expedientes.actualizar(caso)
+	_identidad_expedientes.mostrar_portada(true)
 
 
 func _alternar_anexo() -> void:
