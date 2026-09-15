@@ -342,15 +342,7 @@ static func _poner_cara(pieza: Node3D, retrato: String) -> void:
 		_rasgos_melville(enganche, alto, centro_y, radio_x, radio_y, radio_z, cabello, barba)
 	elif personaje == "Fernando Pessoa":
 		_rasgos_pessoa(
-			enganche,
-			alto,
-			centro_y,
-			radio_x,
-			radio_y,
-			radio_z,
-			separacion,
-			altura_ojos,
-			oscuro
+			enganche, alto, centro_y, radio_x, radio_y, radio_z, separacion, altura_ojos, oscuro
 		)
 
 	var nariz_y := centro_y - alto * 0.035
