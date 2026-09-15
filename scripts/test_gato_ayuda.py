@@ -101,11 +101,10 @@ class GatoAyudaTest(unittest.TestCase):
         self.assertIn("class_name GatoAsistente2D", self.avatar)
         self.assertIn("extends Control", self.avatar)
         self.assertIn("func _draw()", self.avatar)
-        self.assertIn("draw_circle", self.avatar)
-        self.assertIn("draw_colored_polygon", self.avatar)
+        self.assertIn("draw_texture_rect_region", self.avatar)
+        self.assertIn('preload("res://arte/gato_asistente_gba.svg")', self.avatar)
         self.assertIn("GatoAsistente2D.new()", self.capa)
         self.assertNotIn("Sprite2D", self.avatar)
-        self.assertNotIn("load(", self.avatar)
 
     def test_el_mismo_nivel_gobierna_el_guia(self):
         self.assertIn("static func guia_visible", self.politica)
