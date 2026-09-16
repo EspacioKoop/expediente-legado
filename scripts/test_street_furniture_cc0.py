@@ -19,7 +19,7 @@ class StreetFurnitureCc0Test(unittest.TestCase):
     def test_seleccion_acotada(self):
         self.assertEqual(
             sorted(p.stem for p in CARPETA.glob("*.glb")),
-            ["Cardboard", "Conditioner", "GarbageBag", "TrashCan"],
+            ["Barrel", "Bottles", "Cardboard", "Conditioner", "GarbageBag", "TrashCan"],
         )
         self.assertFalse(list(CARPETA.glob("*.fbx")), "los FBX de origen no se versionan")
 
