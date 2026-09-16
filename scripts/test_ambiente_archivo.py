@@ -24,7 +24,8 @@ class AmbienteArchivoTest(unittest.TestCase):
                     self.texto,
                     rf'"{re.escape(fase)}"',
                 )
-        self.assertIn('if not fase in ["archivo", "trayecto", "casa", "sueño"]', self.texto)
+        self.assertIn('const FASES := ["archivo", "trayecto", "casa", "sueño"]', self.texto)
+        self.assertIn("if not FASES.has(fase)", self.texto)
         self.assertIn("return null", self.texto)
 
     def test_perfiles_sonoros_son_distintos(self):
