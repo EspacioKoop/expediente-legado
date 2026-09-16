@@ -70,7 +70,7 @@ static func limitar_posiciones(jornada: Dictionary, limite: Vector2) -> bool:
 			y = float(pos[1])
 		var nueva_x := clampf(x, -max_x, max_x)
 		var nueva_y := clampf(y, -max_y, max_y)
-		var pos_invalida := typeof(pos) != TYPE_ARRAY or pos.size() < 2
+		var pos_invalida: bool = typeof(pos) != TYPE_ARRAY or pos.size() < 2
 		if (
 			datos_invalidos
 			or pos_invalida
