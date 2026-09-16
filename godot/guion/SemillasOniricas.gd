@@ -25,6 +25,8 @@ const MITOS_VALIDOS := [
 	"duat",
 	"simurgh",
 	"yggdrasil",
+	"mari",
+	"anansi_akan",
 ]
 
 ## Mezclas excepcionales y declaradas. La existencia de dos semillas no inventa

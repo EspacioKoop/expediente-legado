@@ -1,15 +1,30 @@
 extends SceneTree
 
+const OBJETOS_TOCADOS := ["silla", "monitor", "archivador"]
+
 var _pasadas := 0
 var _fallos := 0
 var _observaciones: Array = []
 
 
 func _initialize() -> void:
+	_probar_sin_objetos_tocados()
 	_probar_todas_las_formas()
 	_probar_reproducibilidad()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
+
+
+func _probar_sin_objetos_tocados() -> void:
+	var mundo := Node3D.new()
+	root.add_child(mundo)
+	var creadas := SuenoUtileria.montar(mundo, "crucero", 7, 400)
+	_comprobar(creadas.is_empty(), "sin objetos tocados no inventa anomalías")
+	_comprobar(
+		mundo.find_children("AnomaliaSueno*", "", true, false).is_empty(),
+		"sin objetos tocados no monta interactuables de relleno",
+	)
+	mundo.queue_free()
 
 
 func _probar_todas_las_formas() -> void:
@@ -17,11 +32,11 @@ func _probar_todas_las_formas() -> void:
 		var id := String(valor_id)
 		var mundo := Node3D.new()
 		root.add_child(mundo)
-		var creadas := SuenoUtileria.montar(mundo, id, 7, 400)
-		_comprobar(creadas.size() == 3, "%s recibe tres anomalías" % id)
+		var creadas := SuenoUtileria.montar(mundo, id, 7, 400, [], OBJETOS_TOCADOS)
+		_comprobar(creadas.size() == 3, "%s recibe tres anomalías tocadas" % id)
 		_comprobar(
 			mundo.find_children("AnomaliaSueno*", "", true, false).size() == 3,
-			"%s monta tres interactuables" % id,
+			"%s monta tres interactuables tocados" % id,
 		)
 
 		var forma := SuenoFormas.de(id)
@@ -85,8 +100,8 @@ func _probar_reproducibilidad() -> void:
 	var b := Node3D.new()
 	root.add_child(a)
 	root.add_child(b)
-	var primera := SuenoUtileria.montar(a, "crucero", 9, 12345)
-	var segunda := SuenoUtileria.montar(b, "crucero", 9, 12345)
+	var primera := SuenoUtileria.montar(a, "crucero", 9, 12345, [], OBJETOS_TOCADOS)
+	var segunda := SuenoUtileria.montar(b, "crucero", 9, 12345, [], OBJETOS_TOCADOS)
 	for i in range(3):
 		_comprobar(primera[i].position == segunda[i].position, "posición reproducible %d" % i)
 		_comprobar(

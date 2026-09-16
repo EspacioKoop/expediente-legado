@@ -40,7 +40,8 @@ func _vestir_archivo_cc0(mundo: Node3D) -> void:
 		Vector3(1.05, 0.98, -2.08),
 		Vector3(0.48, 0.42, 0.38),
 		Color(0.56, 0.55, 0.50),
-		"monitor CRT"
+		"monitor CRT",
+		"monitor"
 	)
 	_mueble_cc0(
 		mundo,
@@ -49,7 +50,8 @@ func _vestir_archivo_cc0(mundo: Node3D) -> void:
 		Vector3(1.05, 0.98, 1.08),
 		Vector3(0.48, 0.42, 0.38),
 		Color(0.54, 0.53, 0.49),
-		"monitor CRT"
+		"monitor CRT",
+		"monitor"
 	)
 	_mueble_cc0(
 		mundo,
@@ -79,7 +81,7 @@ func _archivador_vintage_cc0(mundo: Node3D) -> void:
 	colision.shape = forma
 	cuerpo.add_child(colision)
 	cuerpo.add_child(VintageWoodenDrawer.crear())
-	_montar_examinable(cuerpo, tam, "archivador vintage")
+	_montar_examinable(cuerpo, tam, "archivador vintage", "archivador")
 
 
 func _vestir_calle_cc0(mundo: Node3D) -> void:
@@ -155,6 +157,7 @@ func _vestir_casa_cc0(mundo: Node3D) -> void:
 		Vector3(-1.75, 0.48, 2.55),
 		Vector3(0.62, 0.95, 0.62),
 		Color(0.30, 0.31, 0.30),
+		"silla",
 		"silla"
 	)
 	_mueble_cc0(
@@ -184,7 +187,8 @@ func _mueble_cc0(
 	posicion: Vector3,
 	tam: Vector3,
 	color: Color,
-	nombre_examinable: String = ""
+	nombre_examinable: String = "",
+	objeto_onirico_id: String = ""
 ) -> void:
 	var cuerpo := StaticBody3D.new()
 	cuerpo.name = nombre_nodo
@@ -202,14 +206,17 @@ func _mueble_cc0(
 		return
 
 	if not nombre_examinable.is_empty():
-		_montar_examinable(cuerpo, tam, nombre_examinable)
+		_montar_examinable(cuerpo, tam, nombre_examinable, objeto_onirico_id)
 
 
-func _montar_examinable(cuerpo: Node3D, tam: Vector3, nombre_objeto: String) -> void:
+func _montar_examinable(
+	cuerpo: Node3D, tam: Vector3, nombre_objeto: String, objeto_onirico_id: String = ""
+) -> void:
 	var examinable := Interactuable3D.new()
 	examinable.name = "Examinar%s" % cuerpo.name
 	examinable.verbo = Interactuable3D.Verbo.EXAMINAR
 	examinable.nombre_objeto = nombre_objeto
+	examinable.set_meta("objeto_onirico_id", objeto_onirico_id)
 	cuerpo.add_child(examinable)
 
 	var colision := CollisionShape3D.new()
@@ -218,8 +225,9 @@ func _montar_examinable(cuerpo: Node3D, tam: Vector3, nombre_objeto: String) -> 
 	colision.shape = forma
 	examinable.add_child(colision)
 
-	# El feedback cabe en el mismo prompt contextual: tras examinar, el objeto
-	# queda marcado localmente como observado. No abre modal ni persiste.
+	# El feedback cabe en el mismo prompt contextual. Solo las tres familias con
+	# deformación catalogada (#87/#149) dejan memoria para el sueño; el resto del
+	# dressing sigue siendo examinable pero no fabrica una anomalía genérica.
 	examinable.activado.connect(_marcar_observado.bind(examinable))
 
 
@@ -228,3 +236,14 @@ func _marcar_observado(_actor: Node, examinable: Interactuable3D) -> void:
 		return
 	examinable.set_meta("observado", true)
 	examinable.nombre_objeto = "%s · observado" % examinable.nombre_objeto
+
+	var objeto_id := String(examinable.get_meta("objeto_onirico_id", ""))
+	if objeto_id.is_empty():
+		return
+	var dia := get_parent()
+	if dia == null:
+		return
+	if ObjetosOniricos.registrar(dia.jornada, objeto_id):
+		# El sueño se monta después de cambios de fase y puede mediar una recarga;
+		# guardar aquí evita que una interacción deliberada desaparezca entre ambas.
+		dia._guardar_o_avisar("")
