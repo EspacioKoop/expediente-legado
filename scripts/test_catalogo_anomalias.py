@@ -7,6 +7,7 @@ import unittest
 RAIZ = Path(__file__).resolve().parents[1]
 CATALOGO = RAIZ / "godot" / "datos" / "anomalias_sueno.json"
 TEXTOS = RAIZ / "godot" / "datos" / "catalogo_anomalias_textos.json"
+VISUALES = RAIZ / "godot" / "datos" / "catalogo_anomalias_visuales.json"
 CONTRATO = RAIZ / "godot" / "guion" / "catalogo_anomalias.gd"
 UI = RAIZ / "godot" / "guion" / "catalogo_anomalias_siga.gd"
 UTILERIA = RAIZ / "godot" / "guion" / "sueno_utileria.gd"
@@ -21,6 +22,7 @@ class CatalogoAnomaliasTest(unittest.TestCase):
     def setUp(self):
         self.catalogo = json.loads(CATALOGO.read_text(encoding="utf-8"))
         self.textos = json.loads(TEXTOS.read_text(encoding="utf-8"))
+        self.visuales = json.loads(VISUALES.read_text(encoding="utf-8"))
         self.codigo = CONTRATO.read_text(encoding="utf-8")
         self.ui = UI.read_text(encoding="utf-8")
         self.utileria = UTILERIA.read_text(encoding="utf-8")
@@ -60,6 +62,25 @@ class CatalogoAnomaliasTest(unittest.TestCase):
         serializado = json.dumps(self.catalogo, ensure_ascii=False).lower()
         for prohibido in ("coordenad", "ubicacion", "solucion", "dinero", "pista", "accion"):
             self.assertNotIn(prohibido, serializado)
+
+    def test_recompensas_visuales_estan_separadas_y_autocontenidas(self):
+        ids = {entrada["id"] for entrada in self.catalogo}
+        self.assertEqual(set(self.visuales), ids | {"@vuelta-completa"})
+        for clave, ficha in self.visuales.items():
+            self.assertEqual(set(ficha), {"tipo", "ruta"})
+            if clave == "@vuelta-completa":
+                self.assertEqual(ficha["tipo"], "sello")
+            else:
+                self.assertEqual(ficha["tipo"], "boceto")
+            ruta = ficha["ruta"]
+            self.assertTrue(ruta.startswith("res://arte/catalogo_anomalias/"))
+            self.assertTrue(ruta.endswith(".svg"))
+            local = RAIZ / "godot" / ruta.removeprefix("res://")
+            self.assertTrue(local.is_file(), ruta)
+            svg = local.read_text(encoding="utf-8").lower()
+            self.assertIn("<svg", svg)
+            self.assertNotIn("<script", svg)
+            self.assertNotRegex(svg, r'(?:href|xlink:href)=["\']https?://')
 
     def test_hay_anomalia_visible_por_exploracion(self):
         self.assertTrue(
@@ -127,7 +148,7 @@ class CatalogoAnomaliasTest(unittest.TestCase):
         ):
             self.assertNotIn(prohibido, bloque)
 
-    def test_ui_muestra_variantes_solo_en_entradas_conocidas(self):
+    def test_ui_muestra_variantes_y_recompensa_solo_en_entradas_conocidas(self):
         self.assertIn("class_name CatalogoAnomaliasSiga", self.ui)
         self.assertIn("CatalogoAnomalias.progreso(_estado)", self.ui)
         self.assertIn("CatalogoAnomalias.conocida(_estado, id)", self.ui)
@@ -138,12 +159,21 @@ class CatalogoAnomaliasTest(unittest.TestCase):
         self.assertIn('_t("variantes_ninguna")', self.ui)
         self.assertIn('_t("entrada_bloqueada")', self.ui)
         self.assertIn('_t("entrada_vuelta_completa")', self.ui)
+        self.assertIn(
+            'const RUTA_VISUALES := "res://datos/catalogo_anomalias_visuales.json"', self.ui
+        )
+        self.assertIn("TextureRect.new()", self.ui)
+        self.assertIn("_mostrar_recompensa(id)", self.ui)
+        self.assertIn('_mostrar_recompensa("@vuelta-completa")', self.ui)
+        self.assertIn("ResourceLoader.exists(ruta)", self.ui)
+        self.assertIn("_texturas_visuales[ruta] = load(ruta)", self.ui)
         self.assertNotIn('get("origen_id"', self.ui)
         self.assertNotIn('get("modo_observacion"', self.ui)
         bloque_bloqueada = self.ui.split("func _mostrar_bloqueada", 1)[1].split(
             "func _mostrar_vuelta_completa", 1
         )[0]
-        self.assertNotIn("CatalogoAnomalias.variantes", bloque_bloqueada)
+        self.assertIn("_ocultar_recompensa()", bloque_bloqueada)
+        self.assertNotIn("_mostrar_recompensa", bloque_bloqueada)
         for prohibido in ("SuenoObjetivos", 'jornada["dinero"]', 'jornada["acciones"]'):
             self.assertNotIn(prohibido, self.ui)
 
