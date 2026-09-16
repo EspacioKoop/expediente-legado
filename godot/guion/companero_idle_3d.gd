@@ -4,6 +4,7 @@
 ## montado por Espacio3D y vuelve exactamente a su transform base al desactivarse.
 ## La actividad de escritorio reutiliza el clip `work` que ya trae persona.fbx:
 ## no añade rigs, huesos ni assets nuevos y alterna con `idle` de forma estable.
+## Quien está al teléfono habla de verdad con la llamada de `AnimacionesUAL`.
 class_name CompaneroIdle3D
 extends Node
 
@@ -40,6 +41,8 @@ func configurar(
 	_reloj_actividad = float(absi(semilla) % int(CICLO_TRABAJO * 1000.0)) / 1000.0
 	_aplicar(0.0)
 	_actualizar_actividad(true)
+	if gesto_telefono:
+		AnimacionesUAL.reproducir(objetivo, "telefono", fase / TAU)
 
 
 func _process(delta: float) -> void:
@@ -79,7 +82,7 @@ func _exit_tree() -> void:
 	if is_instance_valid(objetivo):
 		objetivo.scale = _escala_base
 		objetivo.rotation.y = _rotacion_base
-		if actividad_trabajo:
+		if actividad_trabajo or gesto_telefono:
 			Modelos._animar(objetivo, "idle")
 
 
