@@ -34,7 +34,9 @@ func _initialize() -> void:
 	var encuentro := SuenoDuatInteraccion3D.new()
 	root.add_child(encuentro)
 	_comprobar(encuentro.configurar(objetos, 0, true), "pesaje interactivo configurado")
-	_comprobar(encuentro.estado_pesaje().get("objetos", []).size() == 3, "solo recuerdos manipulados")
+	_comprobar(
+		encuentro.estado_pesaje().get("objetos", []).size() == 3, "solo recuerdos manipulados"
+	)
 
 	var factura := encuentro.interactuable("factura")
 	var rom := encuentro.interactuable("rom")
@@ -47,11 +49,20 @@ func _initialize() -> void:
 
 	if factura != null and rom != null and telefono != null:
 		_comprobar(rom.interactuar(actor), "ROM colocada con peso observado")
-		_comprobar(encuentro.seleccion_actual().get("rom", true) == false, "primer uso pesa valor observado")
-		_comprobar(rom.get_meta("duat_estado", "") == "observado", "estado observado visible en hotspot")
+		_comprobar(
+			encuentro.seleccion_actual().get("rom", true) == false,
+			"primer uso pesa valor observado"
+		)
+		_comprobar(
+			rom.get_meta("duat_estado", "") == "observado", "estado observado visible en hotspot"
+		)
 		_comprobar(rom.interactuar(actor), "ROM pasa a variante sellada")
-		_comprobar(encuentro.seleccion_actual().get("rom", false) == true, "segundo uso pesa valor sellado")
-		_comprobar(rom.get_meta("duat_estado", "") == "sellado", "estado sellado visible en hotspot")
+		_comprobar(
+			encuentro.seleccion_actual().get("rom", false) == true, "segundo uso pesa valor sellado"
+		)
+		_comprobar(
+			rom.get_meta("duat_estado", "") == "sellado", "estado sellado visible en hotspot"
+		)
 		_comprobar(rom.interactuar(actor), "tercer uso retira ROM")
 		_comprobar(not encuentro.seleccion_actual().has("rom"), "ciclo vuelve a fuera")
 
@@ -60,7 +71,10 @@ func _initialize() -> void:
 		_comprobar(not encuentro.resuelto(), "una pieza no resuelve el pesaje")
 		_comprobar(telefono.interactuar(actor), "telefono colocado")
 		_comprobar(encuentro.resuelto(), "peso observable correcto equilibra la balanza")
-		_comprobar(encuentro.resultado_actual().get("equilibrado", false) == true, "resultado físico equilibrado")
+		_comprobar(
+			encuentro.resultado_actual().get("equilibrado", false) == true,
+			"resultado físico equilibrado"
+		)
 		_comprobar(not factura.interactuar(actor), "interacciones bloqueadas tras resolver")
 		_comprobar(not telefono.interactuar(actor), "resolución idempotente")
 
@@ -72,14 +86,24 @@ func _initialize() -> void:
 			presentacion.get("transicion_piramide", "") == "estado_discreto",
 			"reducción de movimiento conserva estado discreto",
 		)
-		var inferior := prototipo.get_node_or_null("ArquitecturaPesable/PiramideInferior") as MeshInstance3D
-		var invertida := prototipo.get_node_or_null("ArquitecturaPesable/PiramideInvertida") as MeshInstance3D
+		var inferior := (
+			prototipo.get_node_or_null("ArquitecturaPesable/PiramideInferior") as MeshInstance3D
+		)
+		var invertida := (
+			prototipo.get_node_or_null("ArquitecturaPesable/PiramideInvertida") as MeshInstance3D
+		)
 		_comprobar(
-			inferior != null and inferior.position.is_equal_approx(SuenoDuat.POS_PIRAMIDE_INFERIOR_EQUILIBRIO),
+			(
+				inferior != null
+				and inferior.position.is_equal_approx(SuenoDuat.POS_PIRAMIDE_INFERIOR_EQUILIBRIO)
+			),
 			"pirámide inferior transforma al equilibrar",
 		)
 		_comprobar(
-			invertida != null and invertida.position.is_equal_approx(SuenoDuat.POS_PIRAMIDE_INVERTIDA_EQUILIBRIO),
+			(
+				invertida != null
+				and invertida.position.is_equal_approx(SuenoDuat.POS_PIRAMIDE_INVERTIDA_EQUILIBRIO)
+			),
 			"pirámide invertida responde al peso",
 		)
 
