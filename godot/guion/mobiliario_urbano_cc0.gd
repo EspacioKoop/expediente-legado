@@ -18,13 +18,16 @@ const PIEZAS := [
 	["BolsaContenedorB", "GarbageBag", Vector3(-4.55, ACERA_Y, 5.65), 0.48, 70.0],
 	["BolsaContenedorC", "GarbageBag", Vector3(-4.30, ACERA_Y, 6.35), 0.42, 150.0],
 	["CartonContenedor", "Cardboard", Vector3(-4.75, ACERA_Y + 0.01, 4.25), 0.95, 25.0],
+	# Bidón y botellas en la acera derecha, lejos del contenedor y del escaparate.
+	["BidonAcera", "Barrel", Vector3(4.60, ACERA_Y, 10.50), 0.85, 0.0],
+	["BotellasAcera", "Bottles", Vector3(4.95, ACERA_Y, 9.80), 0.28, 40.0],
 	# Aparatos de aire colgados de las fachadas, por encima de las ventanas.
 	["AireFachadaSur", "Conditioner", Vector3(5.50, 3.65, -12.30), 0.62, 180.0],
 	["AireFachadaNorte", "Conditioner", Vector3(5.55, 3.70, 13.20), 0.62, 180.0],
 	["AireFachadaOeste", "Conditioner", Vector3(-5.50, 3.40, 12.20), 0.62, 0.0],
 ]
 const EN_FACHADA := ["Conditioner"]
-const CON_COLISION := ["TrashCan"]
+const CON_COLISION := ["TrashCan", "Barrel"]
 
 
 static func montar(mundo: Node3D) -> Node3D:

@@ -926,6 +926,38 @@
       "sha256": "6b1047aa157c1d0ef329f1046722f55d73b81a4b1a67a61a4947aa3642a35512"
     },
     {
+      "ruta": "modelos/street_furniture/Barrel.glb",
+      "titulo": "Barrel (Street Furniture, Barrel/Barrel.fbx + barrel.png convertido a GLB)",
+      "autor": "Kkryy",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kkryy.itch.io/streetfurniture",
+      "sha256": "88e485072389f4b4775bc22d9b892d652c3d3dc97884db48ead4abe5e375462f"
+    },
+    {
+      "ruta": "modelos/street_furniture/Barrel_Barrel_albedo.png",
+      "titulo": "Textura embebida extraída por Godot de Barrel.glb",
+      "autor": "Kkryy",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kkryy.itch.io/streetfurniture",
+      "sha256": "146f539d2f3c765efe811aa0cf212cf705e750e26a0447b456eebe974d7f8c61"
+    },
+    {
+      "ruta": "modelos/street_furniture/Bottles.glb",
+      "titulo": "Bottles (Street Furniture, Bottles/Bottles.fbx + Bottles.png convertido a GLB)",
+      "autor": "Kkryy",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kkryy.itch.io/streetfurniture",
+      "sha256": "1b7cd0afcf0deaf9b8942b108a8c4139b3099cac05f72c067f60efc5e61be1d6"
+    },
+    {
+      "ruta": "modelos/street_furniture/Bottles_Bottles_albedo.png",
+      "titulo": "Textura embebida extraída por Godot de Bottles.glb",
+      "autor": "Kkryy",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kkryy.itch.io/streetfurniture",
+      "sha256": "9d57a012a529ad0b0c22cf63d03cad1ee3d77072e190577fa8dd89af95383668"
+    },
+    {
       "ruta": "modelos/street_furniture/Cardboard.glb",
       "titulo": "Cardboard (Street Furniture, Сardboard/Сardboard.fbx + cardboard.png convertido a GLB)",
       "autor": "Kkryy",
