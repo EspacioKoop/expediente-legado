@@ -1,6 +1,9 @@
 [
   {
     "id": "silla-demasiado-alta",
+    "titulo": "Silla desproporcionada",
+    "descripcion": "Una silla de oficina aparece con una altura impropia respecto a sus proporciones normales.",
+    "nota_visual": "silueta vertical exagerada",
     "origen_tipo": "objeto",
     "origen_id": "chairDesk",
     "representacion": {
@@ -12,6 +15,9 @@
   },
   {
     "id": "monitor-estirado",
+    "titulo": "Monitor estirado",
+    "descripcion": "La pantalla conserva su aspecto reconocible, pero el ancho se prolonga más allá de una carcasa plausible.",
+    "nota_visual": "marco horizontal excesivamente ancho",
     "origen_tipo": "objeto",
     "origen_id": "computerScreen",
     "representacion": {
@@ -23,6 +29,9 @@
   },
   {
     "id": "archivador-torcido",
+    "titulo": "Archivador torsionado",
+    "descripcion": "Un archivador cerrado mantiene su volumen general mientras sus laterales se desalinean en una torsión imposible.",
+    "nota_visual": "cuerpo inclinado con torsión asimétrica",
     "origen_tipo": "objeto",
     "origen_id": "bookcaseClosed",
     "representacion": {
