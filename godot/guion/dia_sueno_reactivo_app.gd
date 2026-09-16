@@ -3,7 +3,7 @@
 ## Observa el mundo ya construido por Dia y añade dressing solo cuando la fase
 ## activa es sueño. No cambia la cadena de herencia, no decide objetivos y no
 ## toca el diccionario espacial que usa #281. El reconocimiento de una anomalía
-## se limita a registrar su ID en la partida y guardar ese cambio.
+## registra su ID y, si existe, el folio ya leído que originó esa aparición.
 extends Node
 
 var _mundo_vestido_id := 0
@@ -31,13 +31,17 @@ func _process(_delta: float) -> void:
 			String(escenas[0]),
 			int(dia.jornada.get("dia", 1)),
 			dia._raiz(),
+			dia.jornada.get("leido_hoy", []),
 		)
 	)
 	for anomalia in anomalias:
-		anomalia.observada.connect(_al_observar_anomalia)
+		var documento_origen := String(anomalia.get_meta("documento_origen", ""))
+		anomalia.observada.connect(_al_observar_anomalia.bind(documento_origen))
 
 
-func _al_observar_anomalia(anomalia_id: String, _actor: Node) -> void:
+func _al_observar_anomalia(
+	anomalia_id: String, _actor: Node, documento_origen: String = ""
+) -> void:
 	var dia := get_parent()
 	if dia == null:
 		return
@@ -46,7 +50,12 @@ func _al_observar_anomalia(anomalia_id: String, _actor: Node) -> void:
 		return
 
 	var registro := CatalogoAnomalias.registrar(partida_actual.estado, anomalia_id)
-	if String(registro.get("resultado", "")) in ["registrada", "reencontrada"]:
-		# Solo se escribe cuando cambia la memoria. Reexaminar la misma anomalía
-		# conserva la interacción visual de #400, pero no machaca el disco.
+	var variante := CatalogoAnomalias.registrar_variante(
+		partida_actual.estado, anomalia_id, documento_origen
+	)
+	var cambio := String(registro.get("resultado", "")) in ["registrada", "reencontrada"]
+	cambio = cambio or String(variante.get("resultado", "")) == "variante-registrada"
+	if cambio:
+		# Se escribe una sola vez aunque el vistazo descubra a la vez la
+		# anomalía base y su variante documental. Repetir ambas no toca disco.
 		dia._guardar_o_avisar("")
