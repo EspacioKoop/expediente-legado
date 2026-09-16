@@ -1,11 +1,18 @@
+import os
 from pathlib import Path
+import re
+import subprocess
 import unittest
+
+from scripts.godot_pruebas import importar_proyecto
 
 
 RAIZ = Path(__file__).resolve().parents[1]
 APP = RAIZ / "godot" / "guion" / "reconstruccion_expediente_app.gd"
 ESCENA = RAIZ / "godot" / "escenas" / "reconstruccion_expediente.tscn"
 VISOR = RAIZ / "godot" / "guion" / "visor_expediente.gd"
+PRUEBA_GODOT = "pruebas/pruebas_reconstruccion_ui.gd"
+RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 
 
 class ReconstruccionUiTest(unittest.TestCase):
@@ -72,6 +79,29 @@ class ReconstruccionUiTest(unittest.TestCase):
         self.assertIn("panel.cerrada.connect(_cerrar_reconstruccion.bind(panel))", self.visor)
         self.assertIn("_reconstruir.grab_focus()", self.visor)
         self.assertIn('Callable(self, "_guardar_o_avisar")', self.visor)
+
+    def test_reordenacion_y_guardado_reales_en_godot(self):
+        motor = os.environ.get("GODOT_BIN", "godot4")
+        importar_proyecto()
+        resultado = subprocess.run(
+            [
+                motor,
+                "--headless",
+                "--path",
+                str(RAIZ / "godot"),
+                "--script",
+                PRUEBA_GODOT,
+            ],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            timeout=30,
+            check=False,
+        )
+        self.assertEqual(resultado.returncode, 0, resultado.stdout)
+        resumen = RESUMEN.search(resultado.stdout)
+        self.assertIsNotNone(resumen, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 8, resultado.stdout)
 
 
 if __name__ == "__main__":
