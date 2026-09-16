@@ -49,7 +49,8 @@ class PreferenciasSigaTest(unittest.TestCase):
                 self.assertIn(f'datos.get("{clave}", 1.0)', self.source)
         self.assertIn('"volumen": 1.0', self.source)
         self.assertIn('datos.get("volumen", 1.0)', self.source)
-        self.assertIn("const VERSION := 1", self.source)
+        self.assertIn("const VERSION := 2", self.source)
+        self.assertIn("not in [1, VERSION]", self.source)
 
     def test_camara_tiene_preferencias_persistentes_y_acotadas(self):
         for clave in (

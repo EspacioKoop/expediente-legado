@@ -27,9 +27,7 @@ class MenuRemapeoPresentacionTest(unittest.TestCase):
     def test_mando_no_muestra_indices_crudos(self):
         self.assertNotIn('mando.text = "🎮 %d"', self.menu)
         self.assertIn("func _nombre_boton_mando(codigo: int)", self.menu)
-        self.assertIn('JOY_BUTTON_A: "A / Cruz"', self.menu)
-        self.assertIn('JOY_BUTTON_DPAD_UP: "Cruceta arriba"', self.menu)
-        self.assertIn('"Botón %d" % codigo', self.menu)
+        self.assertIn("return PreferenciasSiga.nombre_boton_mando(codigo)", self.menu)
 
     def test_captura_y_conflictos_son_legibles(self):
         self.assertEqual(self.textos["captura_teclado"], "una tecla")

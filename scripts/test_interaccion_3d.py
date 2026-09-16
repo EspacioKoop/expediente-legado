@@ -35,7 +35,7 @@ def test_interaccion_usa_accion_semantica_remapeable() -> None:
     detector = fuente(DETECTOR)
     preferencias = fuente(PREFERENCIAS)
     assert 'evento.is_action_pressed("interactuar")' in detector
-    assert '"interactuar": {"teclado": 69, "mando": 0}' in preferencias
+    assert '"interactuar": {"teclado": 69, "mando": JOY_BUTTON_A}' in preferencias
     assert "KEY_E" not in detector
     assert "InputEventKey" not in detector
 

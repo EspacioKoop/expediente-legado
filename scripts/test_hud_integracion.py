@@ -49,10 +49,8 @@ class HUDIntegracionTest(unittest.TestCase):
         self.assertNotIn('" / ".join(entradas)', self.caminante)
 
     def test_prompt_de_mando_evitar_indices_crudos_comunes(self):
-        self.assertIn('JOY_BUTTON_A: "A / Cruz"', self.caminante)
-        self.assertIn('JOY_BUTTON_B: "B / Círculo"', self.caminante)
-        self.assertIn('JOY_BUTTON_DPAD_UP: "Cruceta arriba"', self.caminante)
-        self.assertIn('"Botón %d" % evento.button_index', self.caminante)
+        self.assertIn("PreferenciasSiga.nombre_boton_mando(", self.caminante)
+        self.assertIn("PreferenciasSiga.familia_mando(evento.device)", self.caminante)
 
     def test_drift_no_cambia_el_tipo_de_prompt(self):
         self.assertIn("UMBRAL_CAMBIO_DISPOSITIVO := 0.35", self.caminante)

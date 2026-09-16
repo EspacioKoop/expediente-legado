@@ -18,23 +18,6 @@ const ETIQUETAS_ACCIONES := {
 	"interactuar": "Interactuar",
 	"cancelar": "Volver / cancelar",
 }
-const NOMBRES_BOTONES_MANDO := {
-	JOY_BUTTON_A: "A / Cruz",
-	JOY_BUTTON_B: "B / Círculo",
-	JOY_BUTTON_X: "X / Cuadrado",
-	JOY_BUTTON_Y: "Y / Triángulo",
-	JOY_BUTTON_BACK: "Select / Vista",
-	JOY_BUTTON_GUIDE: "Guía",
-	JOY_BUTTON_START: "Start / Menú",
-	JOY_BUTTON_LEFT_STICK: "Stick izquierdo",
-	JOY_BUTTON_RIGHT_STICK: "Stick derecho",
-	JOY_BUTTON_LEFT_SHOULDER: "LB / L1",
-	JOY_BUTTON_RIGHT_SHOULDER: "RB / R1",
-	JOY_BUTTON_DPAD_UP: "Cruceta arriba",
-	JOY_BUTTON_DPAD_DOWN: "Cruceta abajo",
-	JOY_BUTTON_DPAD_LEFT: "Cruceta izquierda",
-	JOY_BUTTON_DPAD_RIGHT: "Cruceta derecha",
-}
 
 var _preferencias: Dictionary = {}
 var _presentacion_sellos: Dictionary = {}
@@ -84,7 +67,23 @@ func _unhandled_input(evento: InputEvent) -> void:
 			_aplicar_remapeo("mando", int(evento.button_index))
 			get_viewport().set_input_as_handled()
 			return
+	# Start/Options/+ abre y cierra el menú como en cualquier juego. Con mando,
+	# B solo vuelve atrás: abrir el menú al pulsarlo en el mundo era un tropiezo.
+	var start: bool = (
+		evento is InputEventJoypadButton
+		and evento.pressed
+		and evento.button_index == JOY_BUTTON_START
+	)
+	if start:
+		if _fondo.visible:
+			_cerrar()
+		elif _puede_abrir():
+			_abrir()
+		get_viewport().set_input_as_handled()
+		return
 	if not evento.is_action_pressed("cancelar"):
+		return
+	if not _fondo.visible and evento is InputEventJoypadButton:
 		return
 	if _fondo.visible:
 		if _panel_incidencias.visible:
@@ -367,7 +366,7 @@ func _nombre_accion(accion: String) -> String:
 
 
 func _nombre_boton_mando(codigo: int) -> String:
-	return String(NOMBRES_BOTONES_MANDO.get(codigo, "Botón %d" % codigo))
+	return PreferenciasSiga.nombre_boton_mando(codigo)
 
 
 func _iniciar_captura(accion: String, tipo: String) -> void:
