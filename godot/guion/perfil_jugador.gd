@@ -108,6 +108,10 @@ const PEINADOS := ["corto", "medio", "rapado", "recogido"]
 static func nuevo() -> Dictionary:
 	return {
 		"version": VERSION,
+		# Una partida recién creada debe pasar por la ficha al menos una vez.
+		# Los guardados anteriores a #701 se marcan como legado en Partida y no
+		# fuerzan esta pantalla al jugador que ya estaba a mitad de campaña.
+		"configurado": false,
 		"apariencia":
 		{
 			"cuerpo": "medio",
@@ -130,6 +134,8 @@ static func completar(valor) -> Dictionary:
 	var base := nuevo()
 	if typeof(valor) != TYPE_DICTIONARY:
 		return base
+	if typeof(valor.get("configurado", false)) == TYPE_BOOL:
+		base["configurado"] = valor.get("configurado", false)
 	var apariencia = valor.get("apariencia", {})
 	if typeof(apariencia) == TYPE_DICTIONARY:
 		var cuerpo := String(apariencia.get("cuerpo", base["apariencia"]["cuerpo"]))
@@ -152,6 +158,10 @@ static func completar(valor) -> Dictionary:
 	if not trasfondo_por_id(trasfondo).is_empty():
 		base["trasfondo"] = trasfondo
 	return base
+
+
+static func esta_configurado(perfil: Dictionary) -> bool:
+	return bool(completar(perfil)["configurado"])
 
 
 static func perfil_cuerpo(id: String) -> Dictionary:
