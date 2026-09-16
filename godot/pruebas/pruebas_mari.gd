@@ -162,7 +162,9 @@ func _probar_accesibilidad_y_reproduccion() -> void:
 	copia.preparar()
 	copia.restaurar_estado(guardado)
 	_comprobar(copia.estado_reproducible(), guardado, "clima se reproduce exactamente")
-	_comprobar(copia.rutas_disponibles(), sueno.rutas_disponibles(), "mismas rutas para mismo estado")
+	_comprobar(
+		copia.rutas_disponibles(), sueno.rutas_disponibles(), "mismas rutas para mismo estado"
+	)
 	copia.restaurar_estado({"clima": "inventado"})
 	_comprobar(copia.clima_actual(), SuenoMari.CLIMA_CALMA, "estado inválido vuelve a calma segura")
 	_comprobar(copia.ruta_retorno_disponible(), "restauración inválida conserva salida")
