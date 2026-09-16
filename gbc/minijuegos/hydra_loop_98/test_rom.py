@@ -132,6 +132,7 @@ class PruebasHydraLoop(unittest.TestCase):
 
     def test_el_cuello_se_ilumina_solo_mientras_dura_la_lectura(self):
         emulador = self.jugar()
+        observadas = self.vigilar_escrituras(emulador)
         self.poner(emulador, "wCursor", 0)
         self.pulsar(emulador, "b")
         emulador.tick(2, False)
@@ -145,6 +146,10 @@ class PruebasHydraLoop(unittest.TestCase):
         self.assertEqual(emulador.memory[celda(4, 1):celda(4, 3)],
                          [TILE_CABEZA + 4, TILE_CABEZA + 5])
         self.assertEqual(emulador.memory[celda(3, 3)], TILE_GLIFO + 1)
+        # Encender y apagar el cuello tambien cabe en VBlank.
+        activas = [x for x in observadas if x[4]]
+        self.assertTrue(any(x[1] == celda(4, 1) for x in activas))
+        self.assertEqual([x for x in activas if x[2] < 144 or x[3] != 1], [])
 
     def test_sellar_sin_leer_el_nodo_hace_crecer_la_raiz_dominante(self):
         emulador = self.jugar()

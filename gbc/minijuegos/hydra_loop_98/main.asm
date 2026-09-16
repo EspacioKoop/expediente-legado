@@ -180,8 +180,8 @@ IniciarNivel:
     ld de, VRAM_TILES
     ld bc, TilesJuegoFin - TilesJuego
     call CopiarMemoria
-    ; Atributos CGB estaticos: agua, hidra, raiz y HUD. En DMG caen en el
-    ; mapa normal y se sobrescriben justo despues con LimpiarBG y el fondo.
+    ; Atributos CGB estaticos: agua, hidra, raiz, placas y HUD. En DMG caen en
+    ; el mapa normal y se sobrescriben justo despues con LimpiarBG y el fondo.
     ld a, 1
     ldh [rVBK], a
     ld hl, AtributosJuego
