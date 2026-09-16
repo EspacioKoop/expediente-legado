@@ -247,7 +247,7 @@ func _registrar_documento_os98(documento_id: String) -> void:
 	if ContaminacionOs98.registrar_documento(
 		(partida_actual as Partida).estado, estado, documento_id
 	):
-		_guardar_estado_os98(dia, estado)
+		_persistir_estado_os98(dia, estado)
 		_sincronizar_contexto_os98(dia)
 
 
@@ -257,7 +257,7 @@ func _registrar_ruta_os98(ruta: String) -> void:
 		return
 	var estado := _estado_os98(dia)
 	if ContaminacionOs98.registrar_ruta(estado, ruta):
-		_guardar_estado_os98(dia, estado)
+		_persistir_estado_os98(dia, estado)
 
 
 func _sincronizar_contexto_os98(dia: Node) -> void:
@@ -300,7 +300,7 @@ func _estado_os98(dia: Node) -> Dictionary:
 	return ContaminacionOs98.completar(estado)
 
 
-func _guardar_estado_os98(dia: Node, estado: Dictionary) -> void:
+func _persistir_estado_os98(dia: Node, estado: Dictionary) -> void:
 	if _explorador_app == null:
 		return
 	var por_vuelta: Dictionary = {}
