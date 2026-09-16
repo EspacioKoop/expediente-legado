@@ -12,7 +12,7 @@ const RADIO_HORIZONTE := 34.0
 const CENTRO_SILENCIO := Vector3(-7.5, 0.0, 4.5)
 const RADIO_SILENCIO := 3.4
 
-var _estructura_horizonte: Node3D
+var _estructura_horizonte: MeshInstance3D
 var _papel: MeshInstance3D
 var _papel_base := Vector3.ZERO
 var _ambiente: AudioStreamPlayer3D
