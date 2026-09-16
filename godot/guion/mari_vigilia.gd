@@ -107,10 +107,18 @@ func _montar() -> void:
 	colision.position = Vector3(0.0, 0.55, 0.0)
 	add_child(colision)
 
-	_agregar_caja(_folleto, "Papel", Vector3(1.75, 1.05, 0.06), Vector3(0.0, 0.55, 0.0), COLOR_PAPEL)
-	_agregar_caja(_folleto, "Pliegue", Vector3(0.05, 0.92, 0.03), Vector3(0.0, 0.55, -0.05), COLOR_TINTA)
-	_agregar_caja(_folleto, "Montana", Vector3(0.52, 0.42, 0.03), Vector3(-0.43, 0.72, -0.06), COLOR_TINTA)
-	_agregar_caja(_folleto, "Cueva", Vector3(0.44, 0.32, 0.03), Vector3(0.48, 0.36, -0.06), COLOR_TINTA)
+	_agregar_caja(
+		_folleto, "Papel", Vector3(1.75, 1.05, 0.06), Vector3(0.0, 0.55, 0.0), COLOR_PAPEL
+	)
+	_agregar_caja(
+		_folleto, "Pliegue", Vector3(0.05, 0.92, 0.03), Vector3(0.0, 0.55, -0.05), COLOR_TINTA
+	)
+	_agregar_caja(
+		_folleto, "Montana", Vector3(0.52, 0.42, 0.03), Vector3(-0.43, 0.72, -0.06), COLOR_TINTA
+	)
+	_agregar_caja(
+		_folleto, "Cueva", Vector3(0.44, 0.32, 0.03), Vector3(0.48, 0.36, -0.06), COLOR_TINTA
+	)
 	_ruta = _agregar_caja(
 		_folleto,
 		"RutaImpresa",
