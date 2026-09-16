@@ -247,9 +247,7 @@ func _abrir_paquete_software(entrada: Dictionary) -> void:
 			String(entrada.get("procedencia_medio", "")),
 		]
 	)
-	_mostrar_estado(
-		tr("EXPLORADOR_MEDIO_SOFTWARE_DISPONIBLE") % String(paquete.get("nombre", ""))
-	)
+	_mostrar_estado(tr("EXPLORADOR_MEDIO_SOFTWARE_DISPONIBLE") % String(paquete.get("nombre", "")))
 
 
 func _refrescar_medios() -> void:
