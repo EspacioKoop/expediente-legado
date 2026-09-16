@@ -123,7 +123,10 @@ class CatalogoAnomaliasTest(unittest.TestCase):
         self.assertIn("documentos_origen: Array = []", self.utileria)
         self.assertIn("var folios := _folios_validos(documentos_origen)", self.utileria)
         self.assertIn('anomalia.set_meta("documento_origen"', self.utileria)
-        self.assertIn("folios[(i + desplazamiento) % folios.size()]", self.utileria)
+        self.assertIn(
+            "var indice := (i + desplazamiento) % prescripciones.size()", self.utileria
+        )
+        self.assertIn("folios[indice % folios.size()]", self.utileria)
         self.assertIn("static func _folios_validos(documentos_origen: Array)", self.utileria)
         self.assertNotIn("casos.json", self.utileria)
         self.assertNotIn("pistas_descubiertas", self.utileria)

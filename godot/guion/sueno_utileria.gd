@@ -1,14 +1,15 @@
 ## Dressing reactivo para las salas compuestas del sueño (#400 / #149).
 ##
-## No modifica Sueno/SuenoFormas: lee la forma que ya se eligió y coloca tres
-## objetos familiares únicamente sobre celdas transitables. Uno queda delante de
-## la entrada y los otros se reparten lejos entre sí, evitando también la salida.
+## No modifica Sueno/SuenoFormas: lee la forma que ya se eligió y coloca solo
+## objetos familiares cuyo original se examinó deliberadamente durante este día
+## (#79/#87). Si no hay originales compatibles, la sala no inventa utilería.
 ## Cada prescripción enlaza además con un ID estable de CatalogoAnomalias.
 class_name SuenoUtileria
 extends RefCounted
 
 const PRESCRIPCIONES := [
 	{
+		"objeto_id": "silla",
 		"anomalia_id": "silla-demasiado-alta",
 		"modelo": "chairDesk",
 		"tam": Vector3(0.62, 0.95, 0.62),
@@ -20,6 +21,7 @@ const PRESCRIPCIONES := [
 		"giro_reaccion": Vector3(0.0, 112.0, 8.0),
 	},
 	{
+		"objeto_id": "monitor",
 		"anomalia_id": "monitor-estirado",
 		"modelo": "computerScreen",
 		"tam": Vector3(0.50, 0.45, 0.40),
@@ -31,6 +33,7 @@ const PRESCRIPCIONES := [
 		"giro_reaccion": Vector3(9.0, 42.0, 13.0),
 	},
 	{
+		"objeto_id": "archivador",
 		"anomalia_id": "archivador-torcido",
 		"modelo": "bookcaseClosed",
 		"tam": Vector3(1.0, 1.8, 0.6),
@@ -45,24 +48,36 @@ const PRESCRIPCIONES := [
 
 
 static func montar(
-	mundo: Node3D, id: String, dia: int, raiz_azar: int, documentos_origen: Array = []
+	mundo: Node3D,
+	id: String,
+	dia: int,
+	raiz_azar: int,
+	documentos_origen: Array = [],
+	objetos_tocados: Array = []
 ) -> Array:
+	var prescripciones := prescripciones_para(objetos_tocados)
+	if prescripciones.is_empty():
+		return []
+
 	var forma := SuenoFormas.de(id)
 	var bloques: Array = forma["bloques"]
 	var entrada: Vector2i = forma["entrada"]
 	var salida := Planta.mas_lejana(bloques, entrada)
 	var primera := Planta.a_la_vista(bloques, entrada, 3)
+	var cantidad := mini(prescripciones.size(), 3)
 	var celdas := [primera]
-	celdas.append_array(Planta.repartidas(bloques, 2, [entrada, primera, salida]))
+	if cantidad > 1:
+		celdas.append_array(Planta.repartidas(bloques, cantidad - 1, [entrada, primera, salida]))
 
-	# Mismo día + misma semilla = misma distribución. Cambiar de noche rota qué
-	# objeto se encuentra primero sin introducir un sorteo imposible de reproducir.
+	# Mismo día + misma semilla + mismos originales = misma distribución. El
+	# desplazamiento no introduce familias nuevas: solo rota las que sí tocaste.
 	var semilla := Azar.derivar_texto(raiz_azar, "sueno", "utileria:%s" % id, [dia])
-	var desplazamiento := posmod(semilla, PRESCRIPCIONES.size())
+	var desplazamiento := posmod(semilla, prescripciones.size())
 	var folios := _folios_validos(documentos_origen)
 	var creadas := []
-	for i in range(3):
-		var datos: Dictionary = PRESCRIPCIONES[(i + desplazamiento) % PRESCRIPCIONES.size()]
+	for i in cantidad:
+		var indice := (i + desplazamiento) % prescripciones.size()
+		var datos: Dictionary = prescripciones[indice]
 		var anomalia := AnomaliaSueno3D.new()
 		anomalia.name = "AnomaliaSueno%d" % (i + 1)
 		var tam: Vector3 = datos["tam"]
@@ -71,10 +86,12 @@ static func montar(
 			Planta.centro_en_metros(bloques, celdas[i])
 			+ Vector3(0.0, tam.y * absf(escala.y) * 0.5, 0.0)
 		)
-		# Una variante solo puede proceder de un folio que ya estaba en
-		# `leido_hoy`. Con la misma entrada la asociación es reproducible.
+		anomalia.set_meta("objeto_origen", datos["objeto_id"])
+		# Una variante documental solo puede proceder de un folio que ya estaba
+		# en `leido_hoy`. La procedencia del objeto y la documental son contratos
+		# independientes y ninguno rellena el hueco del otro.
 		if not folios.is_empty():
-			anomalia.set_meta("documento_origen", folios[(i + desplazamiento) % folios.size()])
+			anomalia.set_meta("documento_origen", folios[indice % folios.size()])
 		mundo.add_child(anomalia)
 		(
 			anomalia
@@ -92,6 +109,21 @@ static func montar(
 		)
 		creadas.append(anomalia)
 	return creadas
+
+
+## Contrato puro usado también por la regresión: desconocidos, vacíos y
+## duplicados no fabrican contenido; el catálogo decide la representación.
+static func prescripciones_para(objetos_tocados: Array) -> Array:
+	var ids := []
+	for valor in objetos_tocados:
+		var objeto_id := String(valor).strip_edges()
+		if not objeto_id.is_empty() and not ids.has(objeto_id):
+			ids.append(objeto_id)
+	var elegidas := []
+	for datos in PRESCRIPCIONES:
+		if ids.has(datos["objeto_id"]):
+			elegidas.append(datos)
+	return elegidas
 
 
 static func _folios_validos(documentos_origen: Array) -> Array:
