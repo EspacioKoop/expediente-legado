@@ -63,7 +63,7 @@ class SkylineCC0Test(unittest.TestCase):
         self.assertIn('_ambiente.background_color = Color(0.34, 0.35, 0.38)', codigo)
         self.assertLess(
             codigo.index("_ambiente.background_color = FONDO_EXTERIOR"),
-            codigo.index("_aplicar_clima(Clima.estado"),
+            codigo.index("_aplicar_clima(forzado if not forzado.is_empty() else Clima.estado"),
         )
 
     def test_dia_conserva_raiz_historica_y_activa_skyline(self) -> None:

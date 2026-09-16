@@ -7,19 +7,87 @@
 class_name PreferenciasSiga
 extends RefCounted
 
-const VERSION := 1
+## v2 (#98): los códigos de mando de v1 estaban desplazados una posición (la
+## cruceta «arriba» era la 12, que en Godot 4 es abajo) y el stick izquierdo no
+## movía. Al leer una v1 se conservan las teclas y se reponen los botones.
+const VERSION := 2
 const RUTA := "user://preferencias-siga.json"
 const ACCIONES := {
-	"mover_adelante": {"teclado": 87, "mando": 12},
-	"mover_atras": {"teclado": 83, "mando": 13},
-	"mover_izquierda": {"teclado": 65, "mando": 14},
-	"mover_derecha": {"teclado": 68, "mando": 15},
-	"saltar": {"teclado": KEY_SPACE, "mando": 2},
-	"correr": {"teclado": KEY_SHIFT, "mando": 9},
-	"agacharse": {"teclado": KEY_CTRL, "mando": 7},
-	"interactuar": {"teclado": 69, "mando": 0},
+	"mover_adelante": {"teclado": 87, "mando": JOY_BUTTON_DPAD_UP},
+	"mover_atras": {"teclado": 83, "mando": JOY_BUTTON_DPAD_DOWN},
+	"mover_izquierda": {"teclado": 65, "mando": JOY_BUTTON_DPAD_LEFT},
+	"mover_derecha": {"teclado": 68, "mando": JOY_BUTTON_DPAD_RIGHT},
+	"saltar": {"teclado": KEY_SPACE, "mando": JOY_BUTTON_X},
+	"correr": {"teclado": KEY_SHIFT, "mando": JOY_BUTTON_LEFT_STICK},
+	"agacharse": {"teclado": KEY_CTRL, "mando": JOY_BUTTON_RIGHT_STICK},
+	"interactuar": {"teclado": 69, "mando": JOY_BUTTON_A},
 	"inventario": {"teclado": KEY_I, "mando": JOY_BUTTON_Y},
-	"cancelar": {"teclado": KEY_ESCAPE, "mando": 1},
+	"cancelar": {"teclado": KEY_ESCAPE, "mando": JOY_BUTTON_B},
+}
+
+## El stick izquierdo mueve siempre, además del botón remapeable de la cruceta.
+## No entra en el remapeo: es la convención de cualquier mando.
+const EJES_MOVIMIENTO := {
+	"mover_adelante": [JOY_AXIS_LEFT_Y, -1.0],
+	"mover_atras": [JOY_AXIS_LEFT_Y, 1.0],
+	"mover_izquierda": [JOY_AXIS_LEFT_X, -1.0],
+	"mover_derecha": [JOY_AXIS_LEFT_X, 1.0],
+}
+## La zona muerta por defecto de una acción es 0,5: con ella el stick solo
+## respondía a partir de media inclinación.
+const ZONA_MUERTA_MOVIMIENTO := 0.2
+
+## Nombres por familia. Godot entrega los botones por POSICIÓN (A es siempre el
+## de abajo), así que en Nintendo el de abajo se llama B.
+const NOMBRES_MANDO := {
+	"xbox":
+	{
+		JOY_BUTTON_A: "A",
+		JOY_BUTTON_B: "B",
+		JOY_BUTTON_X: "X",
+		JOY_BUTTON_Y: "Y",
+		JOY_BUTTON_BACK: "Vista",
+		JOY_BUTTON_GUIDE: "Xbox",
+		JOY_BUTTON_START: "Menú",
+		JOY_BUTTON_LEFT_STICK: "LS",
+		JOY_BUTTON_RIGHT_STICK: "RS",
+		JOY_BUTTON_LEFT_SHOULDER: "LB",
+		JOY_BUTTON_RIGHT_SHOULDER: "RB",
+	},
+	"playstation":
+	{
+		JOY_BUTTON_A: "Cruz",
+		JOY_BUTTON_B: "Círculo",
+		JOY_BUTTON_X: "Cuadrado",
+		JOY_BUTTON_Y: "Triángulo",
+		JOY_BUTTON_BACK: "Share",
+		JOY_BUTTON_GUIDE: "PS",
+		JOY_BUTTON_START: "Options",
+		JOY_BUTTON_LEFT_STICK: "L3",
+		JOY_BUTTON_RIGHT_STICK: "R3",
+		JOY_BUTTON_LEFT_SHOULDER: "L1",
+		JOY_BUTTON_RIGHT_SHOULDER: "R1",
+	},
+	"nintendo":
+	{
+		JOY_BUTTON_A: "B",
+		JOY_BUTTON_B: "A",
+		JOY_BUTTON_X: "Y",
+		JOY_BUTTON_Y: "X",
+		JOY_BUTTON_BACK: "−",
+		JOY_BUTTON_GUIDE: "Home",
+		JOY_BUTTON_START: "+",
+		JOY_BUTTON_LEFT_STICK: "Stick L",
+		JOY_BUTTON_RIGHT_STICK: "Stick R",
+		JOY_BUTTON_LEFT_SHOULDER: "L",
+		JOY_BUTTON_RIGHT_SHOULDER: "R",
+	},
+}
+const NOMBRES_CRUCETA := {
+	JOY_BUTTON_DPAD_UP: "Cruceta arriba",
+	JOY_BUTTON_DPAD_DOWN: "Cruceta abajo",
+	JOY_BUTTON_DPAD_LEFT: "Cruceta izquierda",
+	JOY_BUTTON_DPAD_RIGHT: "Cruceta derecha",
 }
 
 const SENSIBILIDAD_CAMARA_MIN := 0.25
@@ -86,7 +154,43 @@ static func aplicar(preferencias: Dictionary) -> void:
 		var boton := InputEventJoypadButton.new()
 		boton.button_index = int(descripcion.get("mando", 0))
 		InputMap.action_add_event(accion, boton)
+		if EJES_MOVIMIENTO.has(accion):
+			var eje := InputEventJoypadMotion.new()
+			eje.axis = EJES_MOVIMIENTO[accion][0]
+			eje.axis_value = EJES_MOVIMIENTO[accion][1]
+			InputMap.action_add_event(accion, eje)
+			InputMap.action_set_deadzone(accion, ZONA_MUERTA_MOVIMIENTO)
 	_sincronizar_acciones_ui()
+
+
+## Familia del mando conectado, para nombrar sus botones como están impresos.
+static func familia_mando(dispositivo: int = -1) -> String:
+	if dispositivo < 0:
+		var conectados := Input.get_connected_joypads()
+		if conectados.is_empty():
+			return "xbox"
+		dispositivo = conectados[0]
+	return familia_por_nombre(Input.get_joy_name(dispositivo))
+
+
+static func familia_por_nombre(nombre: String) -> String:
+	var bajo := nombre.to_lower()
+	for pista in ["playstation", "dualshock", "dualsense", "ps3", "ps4", "ps5", "sony"]:
+		if bajo.contains(pista):
+			return "playstation"
+	for pista in ["nintendo", "switch", "joy-con", "pro controller"]:
+		if bajo.contains(pista):
+			return "nintendo"
+	return "xbox"
+
+
+static func nombre_boton_mando(codigo: int, familia: String = "") -> String:
+	if NOMBRES_CRUCETA.has(codigo):
+		return String(NOMBRES_CRUCETA[codigo])
+	var nombres: Dictionary = NOMBRES_MANDO.get(
+		familia if not familia.is_empty() else familia_mando(), NOMBRES_MANDO["xbox"]
+	)
+	return String(nombres.get(codigo, "Botón %d" % codigo))
 
 
 ## Los controles de Godot escuchan `ui_accept` y varias pantallas antiguas aún
@@ -135,12 +239,16 @@ static func cargar(ruta: String = RUTA) -> Dictionary:
 	if not FileAccess.file_exists(ruta):
 		return nuevas()
 	var datos = JSON.parse_string(FileAccess.get_file_as_string(ruta))
-	if not datos is Dictionary or int(datos.get("version", 0)) != VERSION:
+	if not datos is Dictionary or int(datos.get("version", 0)) not in [1, VERSION]:
 		return nuevas()
 	var resultado := nuevas()
+	var botones_v1 := int(datos.get("version", 0)) == 1
 	for accion in resultado["acciones"]:
 		if datos.get("acciones", {}).has(accion):
-			resultado["acciones"][accion] = datos["acciones"][accion].duplicate()
+			var guardada: Dictionary = datos["acciones"][accion].duplicate()
+			if botones_v1:
+				guardada["mando"] = ACCIONES[accion]["mando"]
+			resultado["acciones"][accion] = guardada
 	resultado["reduccion_movimiento"] = bool(datos.get("reduccion_movimiento", false))
 	resultado["escala_ui"] = clampf(
 		float(datos.get("escala_ui", 1.0)), ESCALA_UI_MIN, ESCALA_UI_MAX

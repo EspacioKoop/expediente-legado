@@ -49,24 +49,6 @@ const UMBRAL_CAMBIO_DISPOSITIVO := 0.35
 ## Cuánto se puede mirar arriba y abajo. Sin tope, la cámara se da la vuelta.
 const TOPE_VERTICAL := deg_to_rad(85.0)
 
-const NOMBRES_BOTONES_MANDO := {
-	JOY_BUTTON_A: "A / Cruz",
-	JOY_BUTTON_B: "B / Círculo",
-	JOY_BUTTON_X: "X / Cuadrado",
-	JOY_BUTTON_Y: "Y / Triángulo",
-	JOY_BUTTON_BACK: "Select / Vista",
-	JOY_BUTTON_GUIDE: "Guía",
-	JOY_BUTTON_START: "Start / Menú",
-	JOY_BUTTON_LEFT_STICK: "Stick izquierdo",
-	JOY_BUTTON_RIGHT_STICK: "Stick derecho",
-	JOY_BUTTON_LEFT_SHOULDER: "LB / L1",
-	JOY_BUTTON_RIGHT_SHOULDER: "RB / R1",
-	JOY_BUTTON_DPAD_UP: "Cruceta arriba",
-	JOY_BUTTON_DPAD_DOWN: "Cruceta abajo",
-	JOY_BUTTON_DPAD_LEFT: "Cruceta izquierda",
-	JOY_BUTTON_DPAD_RIGHT: "Cruceta derecha",
-}
-
 var _detector_interaccion: DetectorInteraccion3D
 var _prompt_interaccion: Label
 var _hud_prioridades: HUDLayer
@@ -186,8 +168,8 @@ func _evento_pertenece_a_dispositivo(evento: InputEvent) -> bool:
 
 func _nombre_entrada(evento: InputEvent) -> String:
 	if evento is InputEventJoypadButton:
-		return String(
-			NOMBRES_BOTONES_MANDO.get(evento.button_index, "Botón %d" % evento.button_index)
+		return PreferenciasSiga.nombre_boton_mando(
+			evento.button_index, PreferenciasSiga.familia_mando(evento.device)
 		)
 	if evento is InputEventKey:
 		var codigo: Key = (

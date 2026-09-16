@@ -334,7 +334,7 @@ static func _mando(comprobar: Callable) -> void:
 				return evento.axis
 		return -1
 
-	# Eje 2 y 3 son el stick DERECHO. El izquierdo (0 y 1) ya anda, y mirar con
+	# Eje 2 y 3 son el stick DERECHO. El izquierdo (0 y 1) mueve, y mirar con
 	# él sería mirar mientras se camina.
 	comprobar.call("mirar a los lados va en el eje derecho X", eje_de.call("mirar_izquierda"), 2)
 	comprobar.call("y a la derecha también", eje_de.call("mirar_derecha"), 2)
@@ -346,3 +346,97 @@ static func _mando(comprobar: Callable) -> void:
 		comprobar.call(
 			"%s tiene zona muerta" % accion, InputMap.action_get_deadzone(accion) > 0.0, true
 		)
+
+	_mando_movimiento(comprobar)
+
+
+## #98: el stick izquierdo no movía y la cruceta estaba desplazada una posición
+## (adelante caía en abajo). Se comprueba el mapa que queda tras aplicar las
+## preferencias, que es lo que lee `Input.get_vector` del caminante.
+static func _mando_movimiento(comprobar: Callable) -> void:
+	PreferenciasSiga.aplicar(PreferenciasSiga.nuevas())
+	var eventos_de := func(accion: String, clase: String) -> Array:
+		return InputMap.action_get_events(accion).filter(func(e): return e.is_class(clase))
+	var esperados := {
+		"mover_adelante": [JOY_AXIS_LEFT_Y, -1.0, JOY_BUTTON_DPAD_UP],
+		"mover_atras": [JOY_AXIS_LEFT_Y, 1.0, JOY_BUTTON_DPAD_DOWN],
+		"mover_izquierda": [JOY_AXIS_LEFT_X, -1.0, JOY_BUTTON_DPAD_LEFT],
+		"mover_derecha": [JOY_AXIS_LEFT_X, 1.0, JOY_BUTTON_DPAD_RIGHT],
+	}
+	for accion in esperados:
+		var ejes: Array = eventos_de.call(accion, "InputEventJoypadMotion")
+		comprobar.call("%s responde al stick izquierdo" % accion, ejes.size(), 1)
+		if ejes.size() == 1:
+			comprobar.call(
+				"%s va en su eje y sentido" % accion,
+				[ejes[0].axis, ejes[0].axis_value],
+				[esperados[accion][0], esperados[accion][1]]
+			)
+		var botones: Array = eventos_de.call(accion, "InputEventJoypadButton")
+		comprobar.call(
+			"%s va en su cruceta" % accion,
+			botones.map(func(b): return b.button_index),
+			[esperados[accion][2]]
+		)
+		comprobar.call(
+			"%s no exige medio stick" % accion, InputMap.action_get_deadzone(accion) <= 0.25, true
+		)
+
+	var accion_de_boton := func(boton: int) -> String:
+		for accion in PreferenciasSiga.ACCIONES:
+			if int(PreferenciasSiga.ACCIONES[accion]["mando"]) == boton:
+				return accion
+		return ""
+	comprobar.call("A interactúa", accion_de_boton.call(JOY_BUTTON_A), "interactuar")
+	comprobar.call("B cancela", accion_de_boton.call(JOY_BUTTON_B), "cancelar")
+	comprobar.call("X salta", accion_de_boton.call(JOY_BUTTON_X), "saltar")
+	var sin_repetir := {}
+	for descripcion in PreferenciasSiga.ACCIONES.values():
+		sin_repetir[int(descripcion["mando"])] = true
+	comprobar.call(
+		"ningún botón hace dos cosas", sin_repetir.size(), PreferenciasSiga.ACCIONES.size()
+	)
+
+	# Unas preferencias v1 guardadas conservan las teclas y reponen los botones.
+	var ruta := "user://preferencias-v1-prueba.json"
+	var v1 := PreferenciasSiga.nuevas()
+	v1["version"] = 1
+	v1["acciones"]["mover_adelante"] = {"teclado": KEY_UP, "mando": 12}
+	var fichero := FileAccess.open(ruta, FileAccess.WRITE)
+	fichero.store_string(JSON.stringify(v1))
+	fichero.close()
+	var migradas := PreferenciasSiga.cargar(ruta)
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(ruta))
+	comprobar.call(
+		"la v1 conserva la tecla remapeada",
+		int(migradas["acciones"]["mover_adelante"]["teclado"]),
+		KEY_UP
+	)
+	comprobar.call(
+		"y repone el botón desplazado",
+		int(migradas["acciones"]["mover_adelante"]["mando"]),
+		JOY_BUTTON_DPAD_UP
+	)
+
+	comprobar.call(
+		"un DualSense se nombra como PlayStation",
+		PreferenciasSiga.familia_por_nombre("PS5 Controller"),
+		"playstation"
+	)
+	comprobar.call(
+		"un Pro Controller como Nintendo",
+		PreferenciasSiga.familia_por_nombre("Nintendo Switch Pro Controller"),
+		"nintendo"
+	)
+	(
+		comprobar
+		. call(
+			"y el botón de abajo se llama como está impreso",
+			[
+				PreferenciasSiga.nombre_boton_mando(JOY_BUTTON_A, "xbox"),
+				PreferenciasSiga.nombre_boton_mando(JOY_BUTTON_A, "playstation"),
+				PreferenciasSiga.nombre_boton_mando(JOY_BUTTON_A, "nintendo"),
+			],
+			["A", "Cruz", "B"]
+		)
+	)
