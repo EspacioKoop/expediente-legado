@@ -38,7 +38,8 @@ class CorreoPostalTest(unittest.TestCase):
 
         self.assertNotIn("Jornada.gastar(", correo)
         self.assertIn("Inventario.recoger", correo)
-        self.assertIn('fase != "trayecto"', correo)
+        self.assertIn('jornada.get("fase", "")', correo)
+        self.assertIn('"fuera_del_portal"', correo)
         self.assertIn('buzon.name = "BuzonPostal"', controlador)
         self.assertIn("dia_correo_postal_app.gd", escena)
 
