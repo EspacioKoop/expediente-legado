@@ -27,7 +27,8 @@ const PAQUETES := [
 		"tamano_kb": 512,
 		"origen_superficie": "bbs",
 		"origen": "BBS Nodo 7 · Área de ficheros",
-		"descripcion": "Empaqueta carpetas en contenedores .AZO. La compresión es enteramente simulada.",
+		"descripcion":
+		"Empaqueta carpetas en contenedores .AZO. La compresión es enteramente simulada.",
 		"interaccion": "compresor",
 	},
 	{
@@ -63,7 +64,8 @@ const PAQUETES := [
 		"tamano_kb": 176,
 		"origen_superficie": "correo",
 		"origen": "Adjunto controlado de correo · RELOJ18.ZIP",
-		"descripcion": "Reloj de sobremesa con alarmas ficticias. El trial solo aporta ambientación.",
+		"descripcion":
+		"Reloj de sobremesa con alarmas ficticias. El trial solo aporta ambientación.",
 		"interaccion": "reloj",
 	},
 	{
@@ -99,7 +101,8 @@ const PAQUETES := [
 		"tamano_kb": 1420,
 		"origen_superficie": "cd",
 		"origen": "CD Revista Byte Lunar · DEMOS",
-		"descripcion": "Demo de un minuto: un topo astronauta recoge tres tornillos y vuelve al módulo.",
+		"descripcion":
+		"Demo de un minuto: un topo astronauta recoge tres tornillos y vuelve al módulo.",
 		"interaccion": "demo",
 	},
 ]
@@ -157,18 +160,28 @@ func ejecutar(id: String) -> Dictionary:
 			var indice := 680 + numero * 13
 			return {
 				"ok": true,
-				"mensaje": "Índice Administrativo Total: %d puntos. Archivo de sellos: EXCELENTE." % indice,
+				"mensaje":
+				"Índice Administrativo Total: %d puntos. Archivo de sellos: EXCELENTE." % indice,
 			}
 		"banner":
 			return {"ok": true, "mensaje": "===  EXPEDIENTE  ===  · rótulo generado en memoria."}
 		"demo":
 			return {"ok": true, "mensaje": "Astro Topo: 3 tornillos encontrados. DEMO COMPLETADA."}
 		"reloj":
-			return {"ok": true, "mensaje": "Alarma ficticia programada para dentro de 15 minutos narrativos."}
+			return {
+				"ok": true,
+				"mensaje": "Alarma ficticia programada para dentro de 15 minutos narrativos."
+			}
 		"salvapantallas":
-			return {"ok": true, "mensaje": "Vista previa: 48 estrellas, estela corta, reloj desactivado."}
+			return {
+				"ok": true,
+				"mensaje": "Vista previa: 48 estrellas, estela corta, reloj desactivado."
+			}
 		"compresor":
-			return {"ok": true, "mensaje": "Simulación: 12 archivos → ARCHIVO.AZO (41% de ahorro ficticio)."}
+			return {
+				"ok": true,
+				"mensaje": "Simulación: 12 archivos → ARCHIVO.AZO (41% de ahorro ficticio)."
+			}
 		"iconos":
 			return {"ok": true, "mensaje": "Lienzo 32×32 abierto con paleta de 16 colores."}
 		_:
