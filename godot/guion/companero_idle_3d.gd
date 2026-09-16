@@ -40,6 +40,9 @@ var gesto_telefono := false
 var actividad_trabajo := false
 var actividad_brazos := false
 var sentado := false
+## El recado en curso (#400), si lo hay: mientras dura, la rutina se pausa y es
+## el recado quien mueve y anima el cuerpo.
+var recado: RecadoCompanero3D
 var reduccion_movimiento := false
 var _escala_base := Vector3.ONE
 var _rotacion_base := 0.0
@@ -90,11 +93,34 @@ func conversar(activo: bool) -> void:
 	if activo and reduccion_movimiento:
 		return
 	_conversando = activo
+	if en_recado():
+		# A mitad de recado está de pie: se para, habla y luego sigue.
+		recado.pausar(activo)
+		if activo:
+			AnimacionesUAL.reproducir(objetivo, "conversar", fase / TAU)
+		return
 	if activo:
 		var clip := CLIP_SENTADO_ACTIVO if sentado else "conversar"
 		AnimacionesUAL.reproducir(objetivo, clip, fase / TAU)
 	else:
 		_retomar_rutina()
+
+
+func en_recado() -> bool:
+	return is_instance_valid(recado)
+
+
+func empezar_recado(nuevo: RecadoCompanero3D) -> void:
+	recado = nuevo
+	_trabajando = false
+	_brazos_cruzados = false
+
+
+func terminar_recado(hecho: RecadoCompanero3D) -> void:
+	if recado != hecho:
+		return
+	recado = null
+	_retomar_rutina()
 
 
 func esta_conversando() -> bool:
@@ -118,6 +144,8 @@ func _process(delta: float) -> void:
 		return
 	fase = fmod(fase + delta * VELOCIDAD, TAU)
 	_reloj_actividad = fmod(_reloj_actividad + delta, CICLO_TRABAJO)
+	if en_recado():
+		return
 	_actualizar_actividad(false)
 	_aplicar(fase)
 
@@ -134,6 +162,9 @@ func huir_de(origen_global: Vector3) -> void:
 	_brazos_cruzados = false
 	_conversando = false
 	sentado = false
+	if en_recado():
+		recado.cancelar()
+	recado = null
 	Modelos._animar(objetivo, "idle")
 	var direccion := objetivo.global_position - origen_global
 	direccion.y = 0.0
