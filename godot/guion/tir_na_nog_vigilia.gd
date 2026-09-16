@@ -78,12 +78,15 @@ func _al_usar(_actor: Node) -> void:
 func _intentar_activar() -> bool:
 	if _activada or _jornada.is_empty():
 		return _activada
-	_activada = SuenoTirNaNog.registrar_semilla(
-		_jornada,
-		_programa_sintonizado,
-		_segmentos_escuchados >= SEGMENTOS_REQUERIDOS,
-		FUENTE,
-		2,
+	_activada = (
+		SuenoTirNaNog
+		. registrar_semilla(
+			_jornada,
+			_programa_sintonizado,
+			_segmentos_escuchados >= SEGMENTOS_REQUERIDOS,
+			FUENTE,
+			2,
+		)
 	)
 	_actualizar_feedback()
 	return _activada
@@ -112,13 +115,21 @@ func _montar() -> void:
 		_radio, "Carcasa", Vector3(1.45, 0.85, 0.48), Vector3(0.0, 0.43, 0.0), COLOR_CARCASA
 	)
 	_agregar_caja(
-		_radio, "Altavoz", Vector3(0.68, 0.46, 0.04), Vector3(-0.30, 0.43, -0.265), Color(0.14, 0.13, 0.12)
+		_radio,
+		"Altavoz",
+		Vector3(0.68, 0.46, 0.04),
+		Vector3(-0.30, 0.43, -0.265),
+		Color(0.14, 0.13, 0.12)
 	)
 	_dial = _agregar_caja(
 		_radio, "Dial", Vector3(0.38, 0.16, 0.04), Vector3(0.43, 0.58, -0.27), COLOR_DIAL
 	)
 	_agregar_caja(
-		_radio, "Mando", Vector3(0.20, 0.20, 0.10), Vector3(0.48, 0.30, -0.28), COLOR_DIAL.darkened(0.2)
+		_radio,
+		"Mando",
+		Vector3(0.20, 0.20, 0.10),
+		Vector3(0.48, 0.30, -0.28),
+		COLOR_DIAL.darkened(0.2)
 	)
 	_actualizar_feedback()
 
