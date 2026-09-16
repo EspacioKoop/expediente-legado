@@ -31,13 +31,19 @@ class SuenoSimurghTest(unittest.TestCase):
         self.assertIn('ID_MITO := "simurgh"', self.sueno)
         self.assertIn('CLAVE_SEMILLA := "semilla_onirica_simurgh"', self.sueno)
         self.assertIn("SemillasOniricas.familias_activas(estado)", self.sueno)
-        self.assertIn("SemillasOniricas.activar_semilla_onirica(", self.sueno)
+        self.assertRegex(
+            self.sueno,
+            r"SemillasOniricas\s*\.\s*activar_semilla_onirica\s*\(",
+        )
 
     def test_vigilia_es_deliberada_y_sin_hud(self):
         self.assertIn("extends Interactuable3D", self.vigilia)
         self.assertIn("INSPECCIONES_MINIMAS := 2", self.vigilia)
         self.assertIn("_girada = true", self.vigilia)
-        self.assertIn("SuenoSimurgh.registrar_semilla(", self.vigilia)
+        self.assertRegex(
+            self.vigilia,
+            r"SuenoSimurgh\s*\.\s*registrar_semilla\s*\(",
+        )
         combinado = self.sueno + self.vigilia
         self.assertNotIn("Label.new()", combinado)
         self.assertNotIn("CanvasLayer", combinado)
