@@ -67,7 +67,8 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 
 	# Correo es otra app del contrato común: su contenido se resuelve contra la
 	# jornada viva y la plantilla real de esta vuelta. Solo persiste qué mensajes
-	# se leyeron; no guarda una copia de la campaña ni concede progreso.
+	# se leyeron y qué respuestas eligió el jugador; no guarda una copia de la
+	# campaña ni concede progreso.
 	_correo_app = EscritorioSigaApp.new(
 		"correo", CorreoSiga.texto("titulo_app"), Callable(self, "_crear_correo"), "correo"
 	)
@@ -146,12 +147,21 @@ func _crear_correo() -> Control:
 	correo.configurar_contexto(dia.jornada, presentes)
 
 	if _correo_app != null:
+		var clave := _clave_partida(dia)
 		var por_partida: Variant = _correo_app.obtener_estado_local("leidos_por_partida", {})
 		if por_partida is Dictionary:
-			var guardados: Variant = (por_partida as Dictionary).get(_clave_partida(dia), [])
+			var guardados: Variant = (por_partida as Dictionary).get(clave, [])
 			if guardados is Array:
 				correo.configurar_leidos(guardados as Array)
+		var respuestas_por_partida: Variant = _correo_app.obtener_estado_local(
+			"respuestas_por_partida", {}
+		)
+		if respuestas_por_partida is Dictionary:
+			var respuestas: Variant = (respuestas_por_partida as Dictionary).get(clave, {})
+			if respuestas is Dictionary:
+				correo.configurar_respuestas_enviadas(respuestas as Dictionary)
 	correo.mensaje_leido.connect(_registrar_correo_leido)
+	correo.respuesta_enviada.connect(_registrar_respuesta_correo)
 	return correo
 
 
@@ -174,6 +184,34 @@ func _registrar_correo_leido(id: String) -> void:
 		leidos.append(id)
 	por_partida[clave] = leidos
 	_correo_app.establecer_estado_local("leidos_por_partida", por_partida)
+
+
+func _registrar_respuesta_correo(
+	mensaje_id: String, opcion_id: String, dia_envio: int, acciones_envio: int
+) -> void:
+	if _correo_app == null or mensaje_id.is_empty() or opcion_id.is_empty():
+		return
+	var dia := get_parent()
+	if dia == null:
+		return
+	var por_partida: Dictionary = {}
+	var guardado: Variant = _correo_app.obtener_estado_local("respuestas_por_partida", {})
+	if guardado is Dictionary:
+		por_partida = (guardado as Dictionary).duplicate(true)
+	var clave := _clave_partida(dia)
+	var respuestas: Dictionary = {}
+	var anteriores: Variant = por_partida.get(clave, {})
+	if anteriores is Dictionary:
+		respuestas = (anteriores as Dictionary).duplicate(true)
+	if respuestas.has(mensaje_id):
+		return
+	respuestas[mensaje_id] = {
+		"opcion_id": opcion_id,
+		"dia": dia_envio,
+		"acciones": acciones_envio,
+	}
+	por_partida[clave] = respuestas
+	_correo_app.establecer_estado_local("respuestas_por_partida", por_partida)
 
 
 func _clave_partida(dia: Node) -> String:
