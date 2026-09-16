@@ -46,6 +46,75 @@ func _probar() -> void:
 		"leer solo cambia el contador y no la bandeja"
 	)
 
+	_comprobar(
+		modelo.opciones_respuesta("cunado-asuntos-mayusculas").size() == 3,
+		"el cuñado ofrece tres respuestas declarativas"
+	)
+	_comprobar(
+		modelo.opciones_respuesta("sistema-buzon-alta").is_empty(),
+		"los mensajes de sistema no se pueden responder"
+	)
+
+	var respuestas := {
+		"cunado-asuntos-mayusculas": {
+			"opcion_id": "quien-lo-dijo",
+			"dia": 1,
+			"acciones": 2,
+		}
+	}
+	modelo.configurar_respuestas_enviadas(respuestas)
+	_configurar(modelo, 1, 2, presentes)
+	_comprobar(
+		not _ids(modelo).has("contestacion-cunado-asuntos-mayusculas-quien-lo-dijo"),
+		"la réplica no llega en el mismo instante del envío"
+	)
+
+	_configurar(modelo, 1, 1, presentes)
+	var id_cunado := "contestacion-cunado-asuntos-mayusculas-quien-lo-dijo"
+	var tras_otra_accion := _ids(modelo)
+	_comprobar(tras_otra_accion.has(id_cunado), "el cuñado contesta tras avanzar la jornada")
+	var contestacion_cunado := _mensaje(modelo, id_cunado)
+	_comprobar(
+		String(contestacion_cunado.get("asunto", "")).begins_with("RE:"),
+		"la contestación mantiene forma de hilo"
+	)
+	_comprobar(
+		String(contestacion_cunado.get("respuesta_a", "")) == "cunado-asuntos-mayusculas",
+		"la contestación conserva referencia al correo original"
+	)
+	_comprobar(
+		contestacion_cunado.get("importancia_narrativa", true) == false,
+		"contestar no convierte el correo en una pista sistémica"
+	)
+	_comprobar(
+		String(contestacion_cunado.get("cuerpo", "")).contains("me haces dudar"),
+		"la réplica conserva la voz insegura del cuñado"
+	)
+
+	respuestas["telefono-centralita"] = {
+		"opcion_id": "como-te-pasas",
+		"dia": 1,
+		"acciones": 0,
+	}
+	respuestas["correspondencia-sobres"] = {
+		"opcion_id": "de-donde-vienen",
+		"dia": 1,
+		"acciones": 0,
+	}
+	modelo.configurar_respuestas_enviadas(respuestas)
+	_configurar(modelo, 1, 0, presentes)
+	var id_telefono := "contestacion-telefono-centralita-como-te-pasas"
+	_comprobar(not _ids(modelo).has(id_telefono), "una respuesta al cierre espera al día siguiente")
+
+	_configurar(modelo, 2, Jornada.ACCIONES_POR_DIA, presentes)
+	var siguiente_manana := _ids(modelo)
+	_comprobar(siguiente_manana.has(id_telefono), "el del teléfono responde al abrir el día siguiente")
+	_comprobar(siguiente_manana.has(id_cunado), "las conversaciones anteriores permanecen visibles")
+	_comprobar(
+		not siguiente_manana.has("contestacion-correspondencia-sobres-de-donde-vienen"),
+		"no aparece una réplica de un compañero ausente"
+	)
+
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
@@ -69,6 +138,13 @@ func _ids(modelo: Variant) -> Array[String]:
 	for mensaje in modelo.mensajes_disponibles():
 		resultado.append(String(mensaje.get("id", "")))
 	return resultado
+
+
+func _mensaje(modelo: Variant, mensaje_id: String) -> Dictionary:
+	for mensaje in modelo.mensajes_disponibles():
+		if String(mensaje.get("id", "")) == mensaje_id:
+			return (mensaje as Dictionary).duplicate(true)
+	return {}
 
 
 func _comprobar(condicion: bool, mensaje: String) -> void:
