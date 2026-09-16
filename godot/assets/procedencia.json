@@ -1241,6 +1241,70 @@
       "sha256": "66bd734c14a5c6c44d1ae6ef26d7a7d73a1111b7dfa2276ab04353180f8996b7",
       "archivo_origen": "21_world.png",
       "sha256_fuente": "66bd734c14a5c6c44d1ae6ef26d7a7d73a1111b7dfa2276ab04353180f8996b7"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_buildings/2Story_Mat.obj",
+      "titulo": "2Story_Mat (OBJ) · Ultimate Buildings Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatetexturedbuildings.html",
+      "sha256": "ac71c13ad7a5b9f328a2f2d6cf0360bb6561182295bf7af494791cf17c6f4d21"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_buildings/2Story_Mat.mtl",
+      "titulo": "2Story_Mat (MTL) · Ultimate Buildings Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatetexturedbuildings.html",
+      "sha256": "915fcf2aeda6bb5a9c6cd7c8072c6df256d6822285e9c64fb61037e0b67716b6"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_buildings/6Story_Stack_Mat.obj",
+      "titulo": "6Story_Stack_Mat (OBJ) · Ultimate Buildings Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatetexturedbuildings.html",
+      "sha256": "7603fb874a8cc6cb4b355e0c6d3f26bdb07968cd724d6906c6358a6ba7cb112c"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_buildings/6Story_Stack_Mat.mtl",
+      "titulo": "6Story_Stack_Mat (MTL) · Ultimate Buildings Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatetexturedbuildings.html",
+      "sha256": "3bb9edc0805fcb0e4607b3c7b587f3a2011a6a1f7436d2370206d6539b53a48f"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_buildings/4Story_Mat.obj",
+      "titulo": "4Story_Mat (OBJ) · Ultimate Buildings Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatetexturedbuildings.html",
+      "sha256": "201078e0c89315b3d501504fd0e5e41740095931ce73d4530379c9bb7d520812"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_buildings/4Story_Mat.mtl",
+      "titulo": "4Story_Mat (MTL) · Ultimate Buildings Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatetexturedbuildings.html",
+      "sha256": "05bb8240734f74e4e800b7908203ed9ffe1894749ee0882290f3998f6fff712d"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_buildings/1Story_Sign_Mat.obj",
+      "titulo": "1Story_Sign_Mat (OBJ) · Ultimate Buildings Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatetexturedbuildings.html",
+      "sha256": "d7c514018a6034a3cec5f2c09be37bb40e280e4e96b959c2655a71fbbc515d17"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_buildings/1Story_Sign_Mat.mtl",
+      "titulo": "1Story_Sign_Mat (MTL) · Ultimate Buildings Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatetexturedbuildings.html",
+      "sha256": "d2964227d93ec3cc0ae3ccb806a409ea03b39c8683456c516259f922d34ea0d0"
     }
   ]
 }
