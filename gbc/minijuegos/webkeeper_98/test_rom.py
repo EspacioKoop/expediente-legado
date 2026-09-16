@@ -62,6 +62,14 @@ class PruebasWebkeeper(unittest.TestCase):
         emulador.button_release(boton)
         emulador.tick(espera, False)
 
+    def esperar_salida_partido(self, emulador, max_frames=8):
+        """Espera la transición completa de pantalla sin ocultar el estado final."""
+        for _ in range(max_frames):
+            if self.leer(emulador, "wEstado") != ESTADO_PARTIDO:
+                return
+            emulador.tick(1, False)
+        self.fail("WEBKEEPER no salió de ESTADO_PARTIDO tras resolver el último tiro")
+
     def entrar_partido(self, emulador):
         self.pulsar(emulador, "a")
         self.assertEqual(self.leer(emulador, "wEstado"), ESTADO_HISTORIA)
@@ -77,7 +85,7 @@ class PruebasWebkeeper(unittest.TestCase):
         self.poner(emulador, "wObjetivoAltura", 0)
         self.poner(emulador, "wVentanaParada", 10)
         self.poner(emulador, "wTimerTiro", 0)
-        emulador.tick(1, False)
+        self.esperar_salida_partido(emulador)
 
     def resolver_ultimo_como_gol(self, emulador, total):
         self.poner(emulador, "wTiro", total - 1)
@@ -89,7 +97,7 @@ class PruebasWebkeeper(unittest.TestCase):
         self.poner(emulador, "wVentanaParada", 0)
         self.poner(emulador, "wVentanaRed", 0)
         self.poner(emulador, "wTimerTiro", 0)
-        emulador.tick(1, False)
+        self.esperar_salida_partido(emulador)
 
     def test_portada_no_publica_handshake(self):
         for cgb in (False, True):
