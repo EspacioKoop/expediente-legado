@@ -35,7 +35,9 @@ func _probar_gate_y_semilla() -> void:
 		["anansi_akan"],
 		"Anansi akan participa en el catálogo común",
 	)
-	var entrada: Dictionary = SemillasOniricas.obtener_semillas(jornada)["semilla_onirica_anansi_akan"]
+	var entrada: Dictionary = (
+		SemillasOniricas.obtener_semillas(jornada)["semilla_onirica_anansi_akan"]
+	)
 	_comprobar(
 		entrada["fuentes"],
 		["cassette:anansi_akan_relato_98"],
