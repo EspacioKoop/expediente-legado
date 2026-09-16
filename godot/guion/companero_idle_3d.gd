@@ -67,9 +67,12 @@ func huir_de(origen_global: Vector3) -> void:
 		direccion = Vector3.RIGHT
 	var destino := objetivo.position + direccion.normalized() * DISTANCIA_HUIDA
 	var tween := create_tween()
-	tween.tween_property(objetivo, "position", destino, DURACION_HUIDA).set_trans(
-		Tween.TRANS_QUAD
-	).set_ease(Tween.EASE_OUT)
+	(
+		tween
+		. tween_property(objetivo, "position", destino, DURACION_HUIDA)
+		. set_trans(Tween.TRANS_QUAD)
+		. set_ease(Tween.EASE_OUT)
+	)
 
 
 func _exit_tree() -> void:
