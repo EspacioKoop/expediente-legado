@@ -226,8 +226,30 @@
       "disponible_hasta_dia": 0,
       "requiere_conocimiento": ["enlace13"],
       "mirrors": [],
-      "enlaces": [],
+      "enlaces": ["volcado-cache-13"],
       "cache": null
+    },
+    {
+      "id": "volcado-cache-13",
+      "url": "http://intranet.dgai/cache/diag-13/",
+      "titulo": "Volcado local 13",
+      "snippet": "Copia de caché asociada a una navegación que no figura en el historial normal.",
+      "categoria": "archivo",
+      "terminos": ["volcado", "cache", "diagnostico", "registro"],
+      "prioridad": 5,
+      "orden_directorio": 999,
+      "indexado": false,
+      "disponible_desde_dia": 1,
+      "disponible_hasta_dia": 0,
+      "requiere_conocimiento": ["os98_incoherencia"],
+      "mirrors": [],
+      "enlaces": ["diagnostico-enlace13"],
+      "cache": {
+        "capturada_dia": 99,
+        "titulo": "Volcado local 13 — copia en caché",
+        "snippet": "El sello de captura no coincide con ninguna jornada alcanzable del registro actual.",
+        "cuerpo_resumen": "La caché contiene una referencia al archivo REGISTRO_13.TMP de la unidad compartida, aunque el navegador no registra una visita previa a este recurso."
+      }
     }
   ]
 }
