@@ -165,6 +165,27 @@ ESCRITORIO_PROGRAMAS,Programas
 ESCRITORIO_RELOJ,DÍA %02d
 ESCRITORIO_RELOJ_VACIO,DÍA --
 ESCRITORIO_SIGA_TITULO,SIGA-98
+NAVEGADOR_ADELANTE,Adelante
+NAVEGADOR_ATRAS,Atrás
+NAVEGADOR_BUSCAR,Buscar
+NAVEGADOR_BUSCAR_ETIQUETA,Buscar:
+NAVEGADOR_CACHE,Ver caché
+NAVEGADOR_CACHE_PAGINA,[b]%s[/b]\nCopia guardada · día %d\n\n%s\n\n%s
+NAVEGADOR_CACHE_TITULO,Copia en caché
+NAVEGADOR_DIRECCION,Dirección
+NAVEGADOR_ENLACE,Enlace
+NAVEGADOR_ENLACES,Enlaces
+NAVEGADOR_FAVORITO,Favorito
+NAVEGADOR_FAVORITOS,Favoritos
+NAVEGADOR_HISTORIAL,Historial
+NAVEGADOR_INICIO,Inicio
+NAVEGADOR_IR,Ir
+NAVEGADOR_NO_ENCONTRADO,[b]No se puede encontrar la página[/b]\n%s\n\nCompruebe la dirección o vuelva al portal interno.
+NAVEGADOR_PAGINA_OK,[b]%s[/b]\n%s\n\n%s\n\nCategoría: %s · vía: %s
+NAVEGADOR_QUITAR_FAVORITO,Quitar favorito
+NAVEGADOR_RESULTADOS,[b]Resultados para «%s»[/b]\n\n%d coincidencias en el índice local.
+NAVEGADOR_SERVIDOR_CAIDO,[b]Servidor no disponible[/b]\n%s\n\nEl servidor simulado no responde.
+NAVEGADOR_SIN_TITULO,Sin título
 EXPLORADOR_ATRAS,Atrás
 EXPLORADOR_ADELANTE,Adelante
 EXPLORADOR_SUBIR,Subir un nivel
