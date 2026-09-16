@@ -17,12 +17,55 @@ class_name Sonido
 extends RefCounted
 
 const RUTA := "res://assets/audio/"
-const FRECUENCIA_IMPACTO := 22_050
-const DURACION_IMPACTO := 0.09
 
 ## Los pasos son varios a propósito: uno solo repetido a cada zancada deja de
 ## ser un paso y pasa a ser un tic.
 const PASOS := ["footstep00.ogg", "footstep01.ogg", "footstep02.ogg", "footstep03.ogg"]
+
+## Lo que se pisa suena a lo que es: moqueta que amortigua en casa, suelo duro en
+## la oficina y la calle, nieve cuando nieva fuera. La clave es la
+## `textura_suelo` que ya declara cada espacio en `EspaciosCatalogo`, más la
+## nieve, que no es un suelo sino el tiempo encima de uno. Un suelo sin entrada
+## conserva los pasos genéricos de `PASOS`.
+const NIEVE := "nieve"
+const PASOS_POR_SUELO := {
+	"moqueta":
+	[
+		"footstep_carpet_000.ogg",
+		"footstep_carpet_001.ogg",
+		"footstep_carpet_002.ogg",
+		"footstep_carpet_003.ogg",
+		"footstep_carpet_004.ogg",
+	],
+	"linoleo":
+	[
+		"footstep_concrete_000.ogg",
+		"footstep_concrete_001.ogg",
+		"footstep_concrete_002.ogg",
+		"footstep_concrete_003.ogg",
+		"footstep_concrete_004.ogg",
+	],
+	"asfalto":
+	[
+		"footstep_concrete_000.ogg",
+		"footstep_concrete_001.ogg",
+		"footstep_concrete_002.ogg",
+		"footstep_concrete_003.ogg",
+		"footstep_concrete_004.ogg",
+	],
+	NIEVE:
+	[
+		"footstep_snow_000.ogg",
+		"footstep_snow_001.ogg",
+		"footstep_snow_002.ogg",
+		"footstep_snow_003.ogg",
+		"footstep_snow_004.ogg",
+	],
+}
+
+## Golpe seco del careo y de la pared: una sola toma para que no cambie entre
+## repeticiones del mismo duelo.
+const IMPACTO_CAREO := "impactWood_heavy_000.ogg"
 
 const CATALOGO := {
 	"puerta_abre": "doorOpen_1.ogg",
@@ -46,7 +89,6 @@ const FAMILIAS := {
 }
 const VARIACION_TONO := 1.08
 
-static var _impacto_careo: AudioStreamWAV
 static var _familias := {}
 
 
@@ -77,40 +119,19 @@ static func paso(cual: int = -1) -> AudioStream:
 	return load(RUTA + PASOS[i % PASOS.size()])
 
 
-## Golpe seco del careo.
-##
-## Es procedimental a propósito mientras el asset final no pueda entrar por el
-## flujo LFS: no reutiliza un clic o un error de interfaz y, al ser determinista,
-## tampoco cambia entre repeticiones del mismo duelo. La función queda aislada
-## para que sustituirla por un `Impact Sounds` de Kenney sea cambiar un solo
-## sitio cuando se suba el `.ogg` por Git/LFS normal.
-static func impacto_careo() -> AudioStreamWAV:
-	if _impacto_careo != null:
-		return _impacto_careo
+## Un paso sobre [param suelo], con las mismas reglas que [method paso].
+static func paso_sobre(suelo: String, cual: int = -1) -> AudioStream:
+	if not PASOS_POR_SUELO.has(suelo):
+		return paso(cual)
+	var tomas: Array = PASOS_POR_SUELO[suelo]
+	var i := cual if cual >= 0 else randi()
+	return load(RUTA + tomas[i % tomas.size()])
 
-	var pista := AudioStreamWAV.new()
-	pista.format = AudioStreamWAV.FORMAT_16_BITS
-	pista.mix_rate = FRECUENCIA_IMPACTO
-	pista.stereo = false
 
-	var muestras := int(FRECUENCIA_IMPACTO * DURACION_IMPACTO)
-	var datos := PackedByteArray()
-	datos.resize(muestras * 2)
-	for i in muestras:
-		var t := float(i) / FRECUENCIA_IMPACTO
-		var avance := float(i) / muestras
-		var envolvente := pow(1.0 - avance, 3.0)
-		# Grave corto + ruido determinista: un golpe, no una notificación.
-		var ruido := float(((i * 1103515245 + 12345) >> 16) & 0x7FFF) / 16384.0 - 1.0
-		var muestra := clampf((sin(TAU * 82.0 * t) * 0.72 + ruido * 0.28) * envolvente, -1.0, 1.0)
-		var valor := int(muestra * 32767.0)
-		if valor < 0:
-			valor += 65536
-		datos[i * 2] = valor & 0xFF
-		datos[i * 2 + 1] = (valor >> 8) & 0xFF
-	pista.data = datos
-	_impacto_careo = pista
-	return pista
+## Golpe seco del careo: un impacto de madera de Kenney, que suena a mesa y no
+## a notificación de interfaz.
+static func impacto_careo() -> AudioStream:
+	return load(RUTA + IMPACTO_CAREO)
 
 
 ## Suena una vez, en la pantalla que lo pide.
@@ -164,4 +185,9 @@ static func ficheros() -> Array:
 		todos.append(CATALOGO[nombre])
 	for nombre in FAMILIAS:
 		todos.append_array(FAMILIAS[nombre])
+	for suelo in PASOS_POR_SUELO:
+		for fichero in PASOS_POR_SUELO[suelo]:
+			if not todos.has(fichero):
+				todos.append(fichero)
+	todos.append(IMPACTO_CAREO)
 	return todos

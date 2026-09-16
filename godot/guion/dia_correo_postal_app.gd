@@ -8,6 +8,13 @@ extends Node
 const BuzonPostal := preload("res://guion/buzon_postal_interactivo_3d.gd")
 
 var _mundo_id := 0
+var _lector: CorreoPostalLector
+var _mouse_previo := Input.MOUSE_MODE_CAPTURED
+
+
+func _ready() -> void:
+	# El lector pausa el árbol; este controller debe poder restaurarlo al cerrarse.
+	process_mode = Node.PROCESS_MODE_ALWAYS
 
 
 func _process(_delta: float) -> void:
@@ -37,15 +44,61 @@ func _process(_delta: float) -> void:
 	mundo.add_child(buzon)
 	buzon.configurar(dia.jornada, inventario)
 	buzon.correo_recogido.connect(_al_recoger_correo)
+	buzon.buzon_vacio.connect(_al_buzon_vacio)
 
 
 func _al_recoger_correo(resultado: Dictionary, _actor: Node) -> void:
 	var dia := get_parent()
 	if dia == null:
 		return
-	# La pieza ya está en Jornada/Inventario. Persistimos antes de que el jugador
-	# abandone el portal para que recargar no duplique paquetes.
+	# La pieza ya está en Jornada/Inventario. Persistimos antes de abrir el lector
+	# para que incluso cerrar el juego desde la lectura no duplique paquetes.
 	if dia.has_method("_guardar_o_avisar"):
 		dia._guardar_o_avisar("")
-	# Hook no persistente para presentación posterior (visor, voz o carta 3D).
 	dia.set_meta("ultimo_correo_postal", resultado.duplicate(true))
+	_abrir_resultado(resultado)
+
+
+func _al_buzon_vacio(_actor: Node) -> void:
+	if get_tree().paused:
+		return
+	var dia := get_parent()
+	if dia == null:
+		return
+	_asegurar_lector(dia)
+	_preparar_modal()
+	_lector.abrir_vacio()
+
+
+func _abrir_resultado(resultado: Dictionary) -> void:
+	if get_tree().paused:
+		return
+	var dia := get_parent()
+	if dia == null:
+		return
+	_asegurar_lector(dia)
+	_preparar_modal()
+	_lector.abrir(resultado.duplicate(true))
+
+
+func _asegurar_lector(dia: Node) -> void:
+	if is_instance_valid(_lector):
+		return
+	_lector = CorreoPostalLector.new()
+	_lector.name = "CorreoPostalLector"
+	_lector.cerrada.connect(_cerrar_lector)
+	dia.add_child(_lector)
+
+
+func _preparar_modal() -> void:
+	_mouse_previo = Input.mouse_mode
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	get_tree().paused = true
+
+
+func _cerrar_lector() -> void:
+	if not is_instance_valid(_lector) or not _lector.visible:
+		return
+	_lector.hide()
+	get_tree().paused = false
+	Input.mouse_mode = _mouse_previo

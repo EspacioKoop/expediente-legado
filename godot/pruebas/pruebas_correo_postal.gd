@@ -1,5 +1,7 @@
 extends SceneTree
 
+const CasaEstadoAmbientalScript := preload("res://guion/casa_estado_ambiental.gd")
+
 var _pasadas := 0
 var _fallos := 0
 
@@ -15,6 +17,32 @@ func _probar() -> void:
 	for pieza in catalogo:
 		categorias[String(pieza.get("categoria", ""))] = true
 	_comprobar(categorias.size() >= 8, "las ocho piezas cubren categorias distintas")
+
+	var pieza_lectura: Dictionary = catalogo[0].duplicate(true)
+	pieza_lectura["fecha"] = 1
+	var modelo_lectura := CorreoPostalLector.modelo_resultado({"pieza": pieza_lectura})
+	_comprobar(
+		String(modelo_lectura.get("titulo", "")) == String(pieza_lectura.get("asunto", "")),
+		"el lector conserva el asunto",
+	)
+	_comprobar(
+		String(modelo_lectura.get("cabecera", "")).contains(
+			String(pieza_lectura.get("remitente", ""))
+		),
+		"el lector muestra remitente",
+	)
+	_comprobar(
+		String(modelo_lectura.get("cabecera", "")).contains("1"),
+		"el lector muestra la jornada como fecha",
+	)
+	_comprobar(
+		String(modelo_lectura.get("contenido", "")) == String(pieza_lectura.get("contenido", "")),
+		"el lector muestra el contenido sin mutarlo",
+	)
+	_comprobar(
+		not String(CorreoPostalLector.modelo_vacio().get("contenido", "")).is_empty(),
+		"el buzon vacio tiene feedback legible",
+	)
 
 	var jornada := Jornada.nueva(672, 1)
 	jornada["fase"] = "trayecto"
@@ -114,6 +142,25 @@ func _probar() -> void:
 		paquete, inventario_paquete, "paquete_calendario_magnetico"
 	)
 	_comprobar(not bool(duplicado.get("ok", false)), "un paquete no puede recogerse dos veces")
+	_comprobar(String(objeto.get("categoria", "")) == "papel", "el calendario usa familia visual")
+	var modelo_paquete := CorreoPostalLector.modelo_resultado(entrega)
+	_comprobar(
+		String(modelo_paquete.get("detalle", "")).contains("Calendario magnético 1998"),
+		"el lector confirma el objeto fisico sin crear recompensa",
+	)
+	_comprobar(
+		Inventario.guardar_en_casa(inventario_paquete, "postal_iman_calendario"),
+		"el calendario usa el traslado canonico a home_storage",
+	)
+	var ambiente := CasaEstadoAmbientalScript.derivar(paquete, inventario_paquete)
+	_comprobar(
+		ambiente.get("objetos_casa_ids", []).has("postal_iman_calendario"),
+		"el contrato de casa #96 recibe el calendario desde home_storage",
+	)
+	_comprobar(
+		CasaAcumulacion3D.firma(ambiente).contains("postal_iman_calendario"),
+		"la materializacion #677 incluye el objeto postal",
+	)
 
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)

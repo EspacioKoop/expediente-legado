@@ -10,6 +10,7 @@ var _fallos := 0
 
 func _initialize() -> void:
 	_probar_acumulacion_domestica()
+	_probar_iman_postal_en_nevera()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
@@ -93,6 +94,80 @@ func _probar_acumulacion_domestica() -> void:
 	_comprobar(limitado.get_child_count() == 8, "la presentación no crece como inventario infinito")
 
 	casa.queue_free()
+
+
+func _probar_iman_postal_en_nevera() -> void:
+	var casa := Node3D.new()
+	root.add_child(casa)
+	CasaUtileriaScript.montar_zonas_domesticas(casa)
+	var nevera := casa.find_child("NeveraCasa", true, false) as Node3D
+	_comprobar(nevera != null, "la casa ofrece el ancla física NeveraCasa")
+
+	var objeto := {
+		"id": CasaAcumulacion.ID_IMAN_CALENDARIO,
+		"nombre": "Calendario magnético 1998",
+		"categoria": "papel",
+		"origen": "correo_postal",
+	}
+	var inventario := Inventario.nuevo()
+	_comprobar(Inventario.recoger(inventario, objeto), "recoge el calendario postal")
+	_comprobar(
+		Inventario.guardar_en_casa(inventario, CasaAcumulacion.ID_IMAN_CALENDARIO),
+		"el jugador mueve el calendario a home_storage"
+	)
+
+	var estado := CasaEstadoAmbientalScript.derivar({"vuelta": 1}, inventario)
+	var acumulacion := CasaAcumulacion.montar(casa, estado)
+	var iman := nevera.get_node_or_null(CasaAcumulacion.NOMBRE_IMAN_CALENDARIO) as Node3D
+	_comprobar(iman != null, "home_storage materializa el calendario sobre NeveraCasa")
+	_comprobar(
+		String(iman.get_meta("objeto_id", "")) == CasaAcumulacion.ID_IMAN_CALENDARIO,
+		"el imán conserva la identidad del objeto real"
+	)
+	_comprobar(
+		String(iman.get_meta("origen", "")) == "correo_postal",
+		"el imán conserva la procedencia del correo"
+	)
+	_comprobar(
+		String(iman.get_meta("variante", "")) == "iman_calendario", "declara variante propia"
+	)
+	_comprobar(iman.position.x < -0.36, "el imán queda delante de la puerta de la nevera")
+	_comprobar(iman.get_child_count() >= 8, "el calendario tiene cuerpo y cuadrícula visibles")
+	_comprobar(acumulacion.get_child_count() == 0, "el imán no se duplica en la estantería")
+
+	CasaAcumulacion.montar(casa, estado)
+	_comprobar(
+		nevera.get_node_or_null(CasaAcumulacion.NOMBRE_IMAN_CALENDARIO) != null,
+		"refrescar el mismo estado conserva un único imán"
+	)
+
+	_comprobar(
+		Inventario.sacar_de_casa(inventario, CasaAcumulacion.ID_IMAN_CALENDARIO),
+		"retirar el calendario cambia la fuente de verdad"
+	)
+	var sin_iman := CasaEstadoAmbientalScript.derivar({"vuelta": 1}, inventario)
+	CasaAcumulacion.montar(casa, sin_iman)
+	_comprobar(
+		nevera.get_node_or_null(CasaAcumulacion.NOMBRE_IMAN_CALENDARIO) == null,
+		"sacar de home_storage retira el imán sin flags paralelos"
+	)
+	casa.queue_free()
+
+	var casa_sin_nevera := Node3D.new()
+	root.add_child(casa_sin_nevera)
+	var estanteria := Node3D.new()
+	estanteria.name = "EstanteriaComprasCasa"
+	casa_sin_nevera.add_child(estanteria)
+	var fallback := CasaAcumulacion.montar(casa_sin_nevera, {"objetos_casa": [objeto]})
+	_comprobar(fallback != null and fallback.get_child_count() == 1, "sin nevera usa estantería")
+	_comprobar(
+		(
+			String(fallback.get_child(0).get_meta("objeto_id", ""))
+			== CasaAcumulacion.ID_IMAN_CALENDARIO
+		),
+		"el fallback no pierde el objeto físico"
+	)
+	casa_sin_nevera.queue_free()
 
 
 func _comprobar(condicion: bool, nombre: String) -> void:

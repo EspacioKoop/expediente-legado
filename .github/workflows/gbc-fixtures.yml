@@ -28,6 +28,11 @@ env:
   CGB_ACID2_RGBDS_REPO: https://github.com/gbdev/rgbds.git
   CGB_ACID2_RGBDS_COMMIT: 0759c98d913e3d4d21207a8886a319c85add2041
   CGB_ACID2_SHA256: 197fb0bcec544f0400527fc707e0a94f55435974986e6986b424ace5de81720e
+  UCITY_REPO: https://github.com/AntonioND/ucity.git
+  UCITY_TAG: v1.3
+  UCITY_COMMIT: d1880a2a112d7c26f16c0fc06a15b6c32fdc9137
+  UCITY_URL: https://github.com/AntonioND/ucity/releases/download/v1.3/ucity.gbc
+  UCITY_SHA256: 9422ee2ca7b7ea1d46b58b2a429fff3f354dfd3e732dee1e7ae6220f148ce6e0
 
 jobs:
   build-fixtures:
@@ -113,6 +118,21 @@ jobs:
           set -euo pipefail
           PATH="$GITHUB_WORKSPACE/rgbds-legacy-src:$PATH" make -C cgb-acid2-src all
           cp cgb-acid2-src/build/cgb-acid2.gbc gbc-fixtures/
+
+      - name: Fetch and verify external uCity v1.3 fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag_sha="$(git ls-remote "$UCITY_REPO" "refs/tags/${UCITY_TAG}" | cut -f1)"
+          test "$tag_sha" = "$UCITY_COMMIT"
+          mkdir -p external-fixtures
+          curl --fail --location --retry 3 --output external-fixtures/ucity.gbc "$UCITY_URL"
+          echo "${UCITY_SHA256}  external-fixtures/ucity.gbc" | sha256sum --check --strict
+          test "$(stat -c %s external-fixtures/ucity.gbc)" -eq 131072
+          test "$(od -An -tx1 -j 323 -N 1 external-fixtures/ucity.gbc | tr -d ' \n')" = "c0"
+          test "$(od -An -tx1 -j 327 -N 1 external-fixtures/ucity.gbc | tr -d ' \n')" = "1b"
+          test "$(od -An -tx1 -j 328 -N 1 external-fixtures/ucity.gbc | tr -d ' \n')" = "02"
+          test "$(od -An -tx1 -j 329 -N 1 external-fixtures/ucity.gbc | tr -d ' \n')" = "04"
 
       - name: Build CGB-only smoke fixture
         shell: bash
