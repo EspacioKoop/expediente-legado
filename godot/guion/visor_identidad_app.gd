@@ -11,6 +11,7 @@ const IDENTIDAD_FALLBACK := {
 	"acento": "#4B6284",
 	"icono": "",
 	"lamina": "",
+	"sujeto": "",
 }
 
 var _identidades: Dictionary = {}
@@ -19,6 +20,8 @@ var _banda: PanelContainer
 var _icono: TextureRect
 var _titulo: Label
 var _codigo: Label
+var _portada_fila: HBoxContainer
+var _sujeto: TextureRect
 var _portada: TextureRect
 
 
@@ -51,14 +54,27 @@ func montar(columna: Control, caso: Dictionary) -> void:
 	columna.add_child(_banda)
 	columna.move_child(_banda, 0)
 
+	_portada_fila = HBoxContainer.new()
+	_portada_fila.custom_minimum_size.y = 124.0
+	_portada_fila.add_theme_constant_override("separation", 8)
+
+	_sujeto = TextureRect.new()
+	_sujeto.custom_minimum_size = Vector2(88, 124)
+	_sujeto.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_sujeto.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_sujeto.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_portada_fila.add_child(_sujeto)
+
 	_portada = TextureRect.new()
 	_portada.custom_minimum_size = Vector2(0, 124)
 	_portada.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_portada.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_portada.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_portada.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	columna.add_child(_portada)
-	columna.move_child(_portada, 1)
+	_portada_fila.add_child(_portada)
+
+	columna.add_child(_portada_fila)
+	columna.move_child(_portada_fila, 1)
 	actualizar(caso)
 
 
@@ -92,14 +108,19 @@ func actualizar(caso: Dictionary) -> void:
 		anio = str(int(caso["anioSuceso"]))
 	_codigo.text = "%s   ·   %s" % [String(identidad.get("codigo", "SIGA")), anio]
 
+	if _sujeto != null:
+		_sujeto.texture = _textura_de(identidad, "sujeto")
+		_sujeto.visible = _sujeto.texture != null
 	if _portada != null:
 		_portada.texture = _textura_de(identidad, "lamina")
 		_portada.visible = _portada.texture != null
+	if _portada_fila != null:
+		_portada_fila.visible = (_sujeto != null and _sujeto.texture != null) or (_portada != null and _portada.texture != null)
 
 
 func mostrar_portada(visible: bool) -> void:
-	if _portada != null:
-		_portada.visible = visible and _portada.texture != null
+	if _portada_fila != null:
+		_portada_fila.visible = visible and ((_sujeto != null and _sujeto.texture != null) or (_portada != null and _portada.texture != null))
 
 
 func _asegurar_identidades() -> void:
