@@ -39,10 +39,13 @@ func _process(_delta: float) -> void:
 		return
 	_mundo_sueno_id = mundo_id
 
-	var seleccion := SemillasOniricas.seleccionar_para_noche(
-		dia.jornada,
-		dia._raiz(),
-		MitologiasNoche.MAX_FAMILIAS_NOCHE,
+	var seleccion := (
+		SemillasOniricas
+		. seleccionar_para_noche(
+			dia.jornada,
+			dia._raiz(),
+			MitologiasNoche.MAX_FAMILIAS_NOCHE,
+		)
 	)
 	var familias: Array = seleccion.get("familias", [])
 	if not _corresponde_a_esta_escena(dia, familias):
@@ -70,11 +73,14 @@ func _corresponde_a_esta_escena(dia: Node, familias: Array) -> bool:
 		SuenoFormas.ids().size(),
 	)
 	var pendientes: Array = dia.jornada.get("sueno_escenas", [])
-	return MitologiasNoche.corresponde_a_escena(
-		SuenoAnansiAkan.ID_MITO,
-		familias,
-		cantidad,
-		pendientes.size(),
+	return (
+		MitologiasNoche
+		. corresponde_a_escena(
+			SuenoAnansiAkan.ID_MITO,
+			familias,
+			cantidad,
+			pendientes.size(),
+		)
 	)
 
 
@@ -83,9 +89,7 @@ func _montar_sueno(mundo: Node3D, espacio: Dictionary) -> void:
 		return
 	var anansi := SuenoAnansiAkan.new()
 	anansi.name = "SuenoAnansiAkanNoche"
-	anansi.reduccion_movimiento = bool(
-		PreferenciasSiga.cargar().get("reduccion_movimiento", false)
-	)
+	anansi.reduccion_movimiento = bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false))
 	anansi.scale = Vector3.ONE * ESCALA_SUENO
 	anansi.position = _ancla_entre_entrada_y_salida(espacio)
 	# La red crea tweens y orienta hilos durante _ready; por eso se monta dentro
