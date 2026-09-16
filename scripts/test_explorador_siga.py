@@ -60,19 +60,34 @@ def test_visibilidad_reactiva_depende_de_jornada_real() -> None:
     assert 'not _contexto.has(clave)' in condicion
     mayor_igual = bloque_funcion(modelo, "_cumple_mayor_igual")
     assert 'return float(actual) >= float(esperado)' in mayor_igual
-    assert 'jornada_actual = int(dia.jornada.get("dia", 1))' in adaptador
-    assert '"jornada": jornada_actual' in adaptador
+    assert 'int(dia.jornada.get("dia", 1))' in adaptador
+    assert 'ContaminacionOs98.contexto(' in adaptador
 
 
-def test_acceso_restringido_enlace13_esta_preparado_pero_cerrado() -> None:
+def test_enlace13_se_activa_desde_estado_os98_persistente() -> None:
     modelo = fuente(MODELO)
+    vista = fuente(VISTA)
     adaptador = fuente(ADAPTADOR)
+    assert '"id": "memorandum_enlace13"' in modelo
     assert '"id": "enlace13_reservado"' in modelo
     assert '"acceso_si": {"clave": "credenciales", "op": "incluye", "valor": "enlace13"}' in modelo
-    assert '"habilitar_enlace13": false' in adaptador
-    assert '"credenciales": []' in adaptador
+    assert 'signal documento_abierto(id: String)' in vista
+    assert 'signal ruta_abierta(ruta: String)' in vista
+    assert "_explorador_app.persistir_estado = true" in adaptador
+    assert '"contaminacion_por_vuelta"' in adaptador
+    assert "func _clave_vuelta(" in adaptador
+    assert "ContaminacionOs98.contexto(" in adaptador
     incluye = bloque_funcion(modelo, "_cumple_incluye")
     assert '(actual as Array).has(esperado)' in incluye
+
+
+def test_primera_incoherencia_esta_gobernada_por_fase() -> None:
+    modelo = fuente(MODELO)
+    assert '"id": "diagnostico_enlace13"' in modelo
+    assert '"id": "registro_imposible_13"' in modelo
+    assert '"visible_si": {"clave": "fase_contaminacion", "op": ">=", "valor": 2}' in modelo
+    assert '"04/01/1999"' in modelo
+    assert '"http://intranet.dgai/cache/diag-13/"' in modelo
 
 
 def test_tres_tipos_documentales_tienen_accion_de_apertura() -> None:
@@ -83,7 +98,7 @@ def test_tres_tipos_documentales_tienen_accion_de_apertura() -> None:
         assert f'"{tipo}":' in vista
     assert modelo.count('"accion": "mostrar_contenido"') >= 3
     assert "func _abrir_documento(" in vista
-    assert '_modelo.registrar_apertura(String(entrada.get("id", "")))' in vista
+    assert "_modelo.registrar_apertura(documento_id)" in vista
 
 
 def test_recientes_refleja_documentos_abiertos_y_papelera_no_es_obligatoria() -> None:
