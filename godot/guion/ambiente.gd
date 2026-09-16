@@ -11,12 +11,13 @@ const NODO := "AmbienteContinuo"
 const FRECUENCIA := 22_050
 const DURACION_CORTA := 1.0
 const DURACION_LARGA := 4.0
+const FASES := ["archivo", "trayecto", "casa", "sueño"]
 
 static var _pistas: Dictionary = {}
 
 
 static func stream(fase: String) -> AudioStream:
-	if not fase in ["archivo", "trayecto", "casa", "sueño"]:
+	if not FASES.has(fase):
 		return null
 	if not _pistas.has(fase):
 		_pistas[fase] = _crear_pista(fase)
