@@ -1,0 +1,12 @@
+{
+  "titulo_app": "Correo interno",
+  "bandeja": "BANDEJA DE ENTRADA",
+  "seleccionar": "Seleccione un mensaje",
+  "espera": "El correo nuevo aparecerá aquí a medida que avance la jornada.",
+  "marca_nuevo": "[NUEVO] ",
+  "metadatos": "%s <%s> · Día %d · %s",
+  "estado": "%d mensaje(s) · %d sin leer",
+  "responder": "RESPONDER",
+  "respuesta_enviada": "Enviado: %s",
+  "respuesta_espera": "La respuesta, si llega, aparecerá más adelante en la bandeja."
+}
