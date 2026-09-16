@@ -26,6 +26,7 @@ static func montar(raiz: Node3D) -> void:
 	_montar_consola_sobremesa(raiz, Vector3(-3.6, 0.54, 1.95))
 	_montar_lampara_pie(raiz, Vector3(-1.0, 0.0, 2.85))
 	_montar_almacenamiento(raiz, Vector3(0.0, 0.0, -3.05))
+	_montar_minicadena(raiz, Vector3(1.25, 1.66, -3.12))
 	_montar_televisor_interactivo(raiz)
 	CasaHogarCC0.montar(raiz)
 
@@ -232,6 +233,14 @@ static func _montar_almacenamiento(raiz: Node3D, pos: Vector3) -> void:
 	almacenamiento.rotation_degrees.y = 180.0
 	raiz.add_child(almacenamiento)
 	almacenamiento.configurar()
+
+
+static func _montar_minicadena(raiz: Node3D, pos: Vector3) -> void:
+	var minicadena := MinicadenaDomestica98.new()
+	minicadena.name = "MinicadenaDomestica98"
+	minicadena.position = pos
+	raiz.add_child(minicadena)
+	minicadena.configurar()
 
 
 ## El catálogo sigue siendo dueño de la posición y el tamaño del televisor.
