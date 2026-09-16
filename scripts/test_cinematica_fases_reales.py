@@ -43,7 +43,10 @@ class CinematicaFasesRealesTest(unittest.TestCase):
                 check=False,
             )
 
-        validar(resultado.stdout, resultado.returncode, minimo=40)
+        try:
+            validar(resultado.stdout, resultado.returncode, minimo=40)
+        except ValueError as error:
+            self.fail(f"{error}\n{resultado.stdout}")
         self.assertIn("0 fallos", resultado.stdout)
 
 
