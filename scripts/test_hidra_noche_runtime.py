@@ -32,6 +32,7 @@ class HidraNocheRuntimeTest(unittest.TestCase):
         self.assertNotIn("Input.", self.interaction)
         self.assertIn("const MAX_CABEZAS := 9", self.core)
         self.assertIn("const MAX_REGENERACIONES := 2", self.core)
+        self.assertIn("return semillas.has(SEMILLA)", self.core)
 
     def test_tres_intenciones_son_interactuables_reales(self):
         self.assertIn('"SintomaHidra"', self.interaction)
