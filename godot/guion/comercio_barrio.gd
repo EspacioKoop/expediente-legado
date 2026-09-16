@@ -92,7 +92,9 @@ static func compras(jornada: Dictionary) -> Array[String]:
 	return salida
 
 
-static func listar(superficie_id: String, jornada: Dictionary, inventario: Dictionary) -> Array[Dictionary]:
+static func listar(
+	superficie_id: String, jornada: Dictionary, inventario: Dictionary
+) -> Array[Dictionary]:
 	if superficie_id == "videojuegos":
 		return TiendaVideojuegos.listar(jornada)
 	var adquiridas := compras(jornada)
