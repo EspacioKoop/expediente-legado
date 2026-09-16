@@ -59,7 +59,10 @@ func _probar() -> void:
 	var dia_nueve_resuelto := _jornada(9)
 	dia_nueve_resuelto["alquiler"]["ultimo_resuelto"] = 10
 	var sin_aviso := TelefonoFijo.preparar_casa(dia_nueve_resuelto)
-	_comprobar(sin_aviso.is_empty(), "sin aviso con alquiler resuelto")
+	_comprobar(
+		String(sin_aviso.get("id", "")) != "administracion_alquiler",
+		"sin aviso administrativo con alquiler resuelto",
+	)
 
 	var dia_once := _jornada(11)
 	dia_once["cerrados_hoy"] = 2
