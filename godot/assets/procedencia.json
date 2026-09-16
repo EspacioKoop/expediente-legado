@@ -988,6 +988,227 @@
       "licencia": "CC0-1.0",
       "fuente": "https://kkryy.itch.io/streetfurniture",
       "sha256": "11c222763759be006655df5df4cf63ea10b14b97dc198e325d2fdd169334b368"
+    },
+    {
+      "ruta": "tarot/el-loco.png",
+      "titulo": "Tarot de Marseille — The Fool",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "f2c62cfb5971828e548cfe5fc0e153ec5611a073d575a7a4897841b932fb65d8",
+      "archivo_origen": "00_fool.png",
+      "sha256_fuente": "f2c62cfb5971828e548cfe5fc0e153ec5611a073d575a7a4897841b932fb65d8"
+    },
+    {
+      "ruta": "tarot/el-mago.png",
+      "titulo": "Tarot de Marseille — The Magician",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "dea550fae4d44a0cc7bc1c96c870c975dfb09aa42226e3ae8c9dcdddf90626ee",
+      "archivo_origen": "01_magician.png",
+      "sha256_fuente": "dea550fae4d44a0cc7bc1c96c870c975dfb09aa42226e3ae8c9dcdddf90626ee"
+    },
+    {
+      "ruta": "tarot/la-sacerdotisa.png",
+      "titulo": "Tarot de Marseille — The High Priestess",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "bbcca2989da32deb0c88a2046308bc0401737407e093e8cc8aef017f8ea63757",
+      "archivo_origen": "02_high_priestess.png",
+      "sha256_fuente": "bbcca2989da32deb0c88a2046308bc0401737407e093e8cc8aef017f8ea63757"
+    },
+    {
+      "ruta": "tarot/la-emperatriz.png",
+      "titulo": "Tarot de Marseille — The Empress",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "5f79ee0320f56575aff96c1f12277d4a7f47fdeb91d65aa20eb8c6bc16d74bfb",
+      "archivo_origen": "03_empress.png",
+      "sha256_fuente": "5f79ee0320f56575aff96c1f12277d4a7f47fdeb91d65aa20eb8c6bc16d74bfb"
+    },
+    {
+      "ruta": "tarot/el-emperador.png",
+      "titulo": "Tarot de Marseille — The Emperor",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "2e9c64351e6e4448af22afb70914f10ccddbfa73cea400f560eff4056a4c810e",
+      "archivo_origen": "04_emperor.png",
+      "sha256_fuente": "2e9c64351e6e4448af22afb70914f10ccddbfa73cea400f560eff4056a4c810e"
+    },
+    {
+      "ruta": "tarot/el-hierofante.png",
+      "titulo": "Tarot de Marseille — The Pope",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "e56776a98569628caef150e3d4ba7bc2a17e6cdb02cabdd9576ec24f4b5e5cdb",
+      "archivo_origen": "05_pope.png",
+      "sha256_fuente": "e56776a98569628caef150e3d4ba7bc2a17e6cdb02cabdd9576ec24f4b5e5cdb"
+    },
+    {
+      "ruta": "tarot/los-enamorados.png",
+      "titulo": "Tarot de Marseille — The Lovers",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "5c96fcf0dbab81fed701eb318bf40929d635336e299c3f507ae635afda9b569b",
+      "archivo_origen": "06_lovers.png",
+      "sha256_fuente": "5c96fcf0dbab81fed701eb318bf40929d635336e299c3f507ae635afda9b569b"
+    },
+    {
+      "ruta": "tarot/el-carro.png",
+      "titulo": "Tarot de Marseille — The Chariot",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "f2b9d1945027facff9c0344892e7858d606324a49319c227e2f2d3c7b4b85060",
+      "archivo_origen": "07_chariot.png",
+      "sha256_fuente": "f2b9d1945027facff9c0344892e7858d606324a49319c227e2f2d3c7b4b85060"
+    },
+    {
+      "ruta": "tarot/la-justicia.png",
+      "titulo": "Tarot de Marseille — Justice",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "e3eb4539d7493bf6526a8f4aa9c214d978b2a547872a55c4618c92d537908f88",
+      "archivo_origen": "08_justice.png",
+      "sha256_fuente": "e3eb4539d7493bf6526a8f4aa9c214d978b2a547872a55c4618c92d537908f88"
+    },
+    {
+      "ruta": "tarot/el-ermitanio.png",
+      "titulo": "Tarot de Marseille — The Hermit",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "2f59ba29ea8c6d560abf1aa4e9083936fc469546ace9be1eff6a10f0aa2fc3bc",
+      "archivo_origen": "09_hermit.png",
+      "sha256_fuente": "2f59ba29ea8c6d560abf1aa4e9083936fc469546ace9be1eff6a10f0aa2fc3bc"
+    },
+    {
+      "ruta": "tarot/la-rueda.png",
+      "titulo": "Tarot de Marseille — The Wheel of Fortune",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "8a4217a55976279bd50b712525943b002c0c3dcf6a04012c0311227ee36d2d56",
+      "archivo_origen": "10_wheel_of_fortune.png",
+      "sha256_fuente": "8a4217a55976279bd50b712525943b002c0c3dcf6a04012c0311227ee36d2d56"
+    },
+    {
+      "ruta": "tarot/la-fuerza.png",
+      "titulo": "Tarot de Marseille — Strength",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "66a725f36a840ce50803b639024dc256d3e5725b9817fb9f174e4f84c017a9ab",
+      "archivo_origen": "11_strength.png",
+      "sha256_fuente": "125b5239627913bca5c999510fa256d70916a57bee0b1ddceb5d18370d77d8d2",
+      "transformacion": "redimensionado 203x379→200x375 (Lanczos/Pillow)"
+    },
+    {
+      "ruta": "tarot/el-colgado.png",
+      "titulo": "Tarot de Marseille — The Hanged Man",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "fe64009ed182bf9d931ecd5b378b208b64201b19302ec38f528790099523457d",
+      "archivo_origen": "12_hanged_man.png",
+      "sha256_fuente": "fe64009ed182bf9d931ecd5b378b208b64201b19302ec38f528790099523457d"
+    },
+    {
+      "ruta": "tarot/la-muerte.png",
+      "titulo": "Tarot de Marseille — Death",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "4da2ba23df77551e62e30125b8e6c9bacc41859a0dd601b2b91299c591fb5207",
+      "archivo_origen": "13_death.png",
+      "sha256_fuente": "4da2ba23df77551e62e30125b8e6c9bacc41859a0dd601b2b91299c591fb5207"
+    },
+    {
+      "ruta": "tarot/la-templanza.png",
+      "titulo": "Tarot de Marseille — Temperance",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "cdac3c44373a752a4c67918ee451a14e2f6e1c670e3556051641c42d64aed145",
+      "archivo_origen": "14_temperance.png",
+      "sha256_fuente": "cdac3c44373a752a4c67918ee451a14e2f6e1c670e3556051641c42d64aed145"
+    },
+    {
+      "ruta": "tarot/el-diablo.png",
+      "titulo": "Tarot de Marseille — The Devil",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "ca2d7b0615f5a14b6f75c6ed7a5356eaa95f077f499ee5cebf0f80255a8a2923",
+      "archivo_origen": "15_devil.png",
+      "sha256_fuente": "ca2d7b0615f5a14b6f75c6ed7a5356eaa95f077f499ee5cebf0f80255a8a2923"
+    },
+    {
+      "ruta": "tarot/la-torre.png",
+      "titulo": "Tarot de Marseille — The Tower",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "ccd1a2115ad6627c01faa12a854a01ec1242d29ea223fdb57b66d7b703222758",
+      "archivo_origen": "16_tower.png",
+      "sha256_fuente": "ccd1a2115ad6627c01faa12a854a01ec1242d29ea223fdb57b66d7b703222758"
+    },
+    {
+      "ruta": "tarot/la-estrella.png",
+      "titulo": "Tarot de Marseille — The Star",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "804dbb3c743552fedc9fb9b3cd1f3b7a2d867893d90717361285f32d8f5623ba",
+      "archivo_origen": "17_star.png",
+      "sha256_fuente": "804dbb3c743552fedc9fb9b3cd1f3b7a2d867893d90717361285f32d8f5623ba"
+    },
+    {
+      "ruta": "tarot/la-luna.png",
+      "titulo": "Tarot de Marseille — The Moon",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "853050f826dacd8309e6cef912357b382a26a5bea5754d1815779032af5e2295",
+      "archivo_origen": "18_moon.png",
+      "sha256_fuente": "853050f826dacd8309e6cef912357b382a26a5bea5754d1815779032af5e2295"
+    },
+    {
+      "ruta": "tarot/el-sol.png",
+      "titulo": "Tarot de Marseille — The Sun",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "fc70fe3a0bfcb107331012186d0123cc1a0b583f50b91415f284e9ab11db1051",
+      "archivo_origen": "19_sun.png",
+      "sha256_fuente": "fc70fe3a0bfcb107331012186d0123cc1a0b583f50b91415f284e9ab11db1051"
+    },
+    {
+      "ruta": "tarot/el-juicio.png",
+      "titulo": "Tarot de Marseille — The Judgment",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "08975269610447d7322d8af119ed0f362e3148a069302e3c236b45087cf6348e",
+      "archivo_origen": "20_judgment.png",
+      "sha256_fuente": "08975269610447d7322d8af119ed0f362e3148a069302e3c236b45087cf6348e"
+    },
+    {
+      "ruta": "tarot/el-mundo.png",
+      "titulo": "Tarot de Marseille — The World",
+      "autor": "Jean Dodal (publicación digital enviada por Clint Bellanger)",
+      "licencia": "CC0-1.0",
+      "fuente": "https://opengameart.org/content/tarot-cards-major-arcana",
+      "sha256": "66bd734c14a5c6c44d1ae6ef26d7a7d73a1111b7dfa2276ab04353180f8996b7",
+      "archivo_origen": "21_world.png",
+      "sha256_fuente": "66bd734c14a5c6c44d1ae6ef26d7a7d73a1111b7dfa2276ab04353180f8996b7"
     }
   ]
 }
