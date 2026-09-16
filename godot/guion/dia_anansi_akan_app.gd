@@ -86,14 +86,15 @@ func _montar_sueno(mundo: Node3D, espacio: Dictionary) -> void:
 	anansi.reduccion_movimiento = bool(
 		PreferenciasSiga.cargar().get("reduccion_movimiento", false)
 	)
-	anansi.preparar()
+	anansi.scale = Vector3.ONE * ESCALA_SUENO
+	anansi.position = _ancla_entre_entrada_y_salida(espacio)
+	# La red crea tweens y orienta hilos durante _ready; por eso se monta dentro
+	# del árbol antes de retirar su cámara standalone.
+	mundo.add_child(anansi)
 	var camara := anansi.get_node_or_null("CamaraStandalone")
 	if camara != null:
 		anansi.remove_child(camara)
 		camara.free()
-	anansi.scale = Vector3.ONE * ESCALA_SUENO
-	anansi.position = _ancla_entre_entrada_y_salida(espacio)
-	mundo.add_child(anansi)
 
 
 func _ancla_entre_entrada_y_salida(espacio: Dictionary) -> Vector3:
