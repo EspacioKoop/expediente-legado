@@ -11,6 +11,8 @@ var _explorador_app: EscritorioSigaApp
 var _navegador_app: EscritorioSigaApp
 var _software_app: EscritorioSigaApp
 var _correo_app: EscritorioSigaApp
+var _bloc_notas_app: EscritorioSigaApp
+var _calculadora_app: EscritorioSigaApp
 var _catalogo_anomalias_app: EscritorioSigaApp
 
 ## Todas las apps registradas en este puesto, para persistencia declarada
@@ -106,6 +108,27 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	_correo_app.persistir_estado = true
 	_correo_app.registrar_en(escritorio)
 	_apps.append(_correo_app)
+
+	# Primeras utilidades funcionales de #538. El bloc persiste solo texto local,
+	# separado por raíz de partida; la calculadora no conserva estado y limita su
+	# evaluación a aritmética, sin acceso a rutas, procesos ni APIs del host.
+	_bloc_notas_app = EscritorioSigaApp.new(
+		"bloc-notas", "Bloc de notas", Callable(self, "_crear_bloc_notas"), "documentos"
+	)
+	_bloc_notas_app.tamano_minimo = Vector2(440, 300)
+	_bloc_notas_app.tamano_preferido = Vector2(620, 440)
+	_bloc_notas_app.redimensionable = true
+	_bloc_notas_app.persistir_estado = true
+	_bloc_notas_app.registrar_en(escritorio)
+	_apps.append(_bloc_notas_app)
+
+	_calculadora_app = EscritorioSigaApp.new(
+		"calculadora", "Calculadora", Callable(self, "_crear_calculadora"), "equipo"
+	)
+	_calculadora_app.tamano_minimo = Vector2(360, 220)
+	_calculadora_app.tamano_preferido = Vector2(430, 300)
+	_calculadora_app.registrar_en(escritorio)
+	_apps.append(_calculadora_app)
 
 	# El catálogo de #149 es una vista de la memoria de Partida: no guarda estado
 	# paralelo ni interpreta el sueño. Las entradas bloqueadas tampoco exponen
@@ -234,6 +257,21 @@ func _crear_correo() -> Control:
 	return correo
 
 
+func _crear_bloc_notas() -> Control:
+	var bloc := BlocNotasSiga.new()
+	var dia := get_parent()
+	if dia != null and _bloc_notas_app != null:
+		var guardado: Variant = _bloc_notas_app.obtener_estado_local("texto_por_partida", {})
+		if guardado is Dictionary:
+			bloc.configurar_texto(String((guardado as Dictionary).get(_clave_partida(dia), "")))
+	bloc.contenido_cambiado.connect(_registrar_texto_bloc)
+	return bloc
+
+
+func _crear_calculadora() -> Control:
+	return CalculadoraSiga.new()
+
+
 func _crear_catalogo_anomalias() -> Control:
 	var catalogo := CatalogoAnomaliasSiga.new()
 	var dia := get_parent()
@@ -302,6 +340,20 @@ func _registrar_respuesta_correo(
 	}
 	por_partida[clave] = respuestas
 	_correo_app.establecer_estado_local("respuestas_por_partida", por_partida)
+
+
+func _registrar_texto_bloc(texto: String) -> void:
+	if _bloc_notas_app == null:
+		return
+	var dia := get_parent()
+	if dia == null:
+		return
+	var por_partida: Dictionary = {}
+	var guardado: Variant = _bloc_notas_app.obtener_estado_local("texto_por_partida", {})
+	if guardado is Dictionary:
+		por_partida = (guardado as Dictionary).duplicate(true)
+	por_partida[_clave_partida(dia)] = texto
+	_bloc_notas_app.establecer_estado_local("texto_por_partida", por_partida)
 
 
 func _clave_partida(dia: Node) -> String:
