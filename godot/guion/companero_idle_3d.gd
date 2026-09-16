@@ -58,9 +58,7 @@ func _exit_tree() -> void:
 
 func _actualizar_actividad(forzar: bool) -> void:
 	var debe_trabajar := (
-		actividad_trabajo
-		and not reduccion_movimiento
-		and _reloj_actividad < DURACION_TRABAJO
+		actividad_trabajo and not reduccion_movimiento and _reloj_actividad < DURACION_TRABAJO
 	)
 	if not forzar and debe_trabajar == _trabajando:
 		return
