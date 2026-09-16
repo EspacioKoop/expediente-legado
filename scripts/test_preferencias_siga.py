@@ -38,6 +38,19 @@ class PreferenciasSigaTest(unittest.TestCase):
         self.assertIn('"reduccion_movimiento"', self.source)
         self.assertIn('"volumen"', self.source)
 
+    def test_mixer_audio_es_persistente_y_compatible_con_preferencias_antiguas(self):
+        for clave in (
+            "volumen_efectos",
+            "volumen_ambiente",
+            "volumen_musica",
+        ):
+            with self.subTest(clave=clave):
+                self.assertGreaterEqual(self.source.count(f'"{clave}"'), 2)
+                self.assertIn(f'datos.get("{clave}", 1.0)', self.source)
+        self.assertIn('"volumen": 1.0', self.source)
+        self.assertIn('datos.get("volumen", 1.0)', self.source)
+        self.assertIn("const VERSION := 1", self.source)
+
     def test_camara_tiene_preferencias_persistentes_y_acotadas(self):
         for clave in (
             '"sensibilidad_camara_raton"',
@@ -47,7 +60,7 @@ class PreferenciasSigaTest(unittest.TestCase):
             self.assertIn(clave, self.source)
         self.assertIn("SENSIBILIDAD_CAMARA_MIN := 0.25", self.source)
         self.assertIn("SENSIBILIDAD_CAMARA_MAX := 3.0", self.source)
-        self.assertGreaterEqual(self.source.count("clampf("), 3)
+        self.assertGreaterEqual(self.source.count("clampf("), 6)
 
     def test_posicion_del_asistente_gato_es_opcional_y_valida(self):
         self.assertIn('"posicion_asistente_gato": null', self.source)
