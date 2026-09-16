@@ -1,8 +1,9 @@
-## Dressing reactivo para las salas compuestas del sueño (#400 / #149).
+## Dressing reactivo para las salas compuestas del sueño (#400 / #149 / #87).
 ##
 ## No modifica Sueno/SuenoFormas: lee la forma que ya se eligió y coloca solo
-## objetos familiares cuyo original se examinó deliberadamente durante este día
-## (#79/#87). Si no hay originales compatibles, la sala no inventa utilería.
+## objetos familiares cuyo original se examinó deliberadamente durante este día.
+## Una carta de tarot cuenta únicamente si su folio se leyó hoy y ya fue recogida;
+## si no hay originales compatibles, la sala no inventa utilería.
 ## Cada prescripción enlaza además con un ID estable de CatalogoAnomalias.
 class_name SuenoUtileria
 extends RefCounted
@@ -46,6 +47,18 @@ const PRESCRIPCIONES := [
 	},
 ]
 
+const PRESCRIPCION_TAROT := {
+	"anomalia_id": "tarot-geometria-viva",
+	"modelo": "tarotCard",
+	"tam": Vector3(0.42, 0.70, 0.035),
+	"color": Color(0.52, 0.44, 0.67),
+	"nombre": "carta de tarot deformada",
+	"escala": Vector3(1.25, 1.85, 0.55),
+	"reaccion": Vector3(0.72, 0.88, 4.80),
+	"giro": Vector3(-5.0, 23.0, 7.0),
+	"giro_reaccion": Vector3(18.0, 117.0, -13.0),
+}
+
 
 static func montar(
 	mundo: Node3D,
@@ -53,31 +66,36 @@ static func montar(
 	dia: int,
 	raiz_azar: int,
 	documentos_origen: Array = [],
-	objetos_tocados: Array = []
+	objetos_tocados: Array = [],
+	cartas_recogidas: Array = [],
 ) -> Array:
+	var folios := _folios_validos(documentos_origen)
 	var prescripciones := prescripciones_para(objetos_tocados)
-	if prescripciones.is_empty():
+	var tarot := _tarot_del_dia(folios, cartas_recogidas)
+	if prescripciones.is_empty() and tarot.is_empty():
 		return []
 
 	var forma := SuenoFormas.de(id)
 	var bloques: Array = forma["bloques"]
 	var entrada: Vector2i = forma["entrada"]
 	var salida := Planta.mas_lejana(bloques, entrada)
+
+	var semilla := Azar.derivar_texto(raiz_azar, "sueno", "utileria:%s" % id, [dia])
+	var desplazamiento := 0
+	if not prescripciones.is_empty():
+		desplazamiento = posmod(semilla, prescripciones.size())
+	var plan := _plan_deformaciones(prescripciones, folios, tarot, desplazamiento, semilla)
+	var cantidad := mini(plan.size(), 3)
+
 	var primera := Planta.a_la_vista(bloques, entrada, 3)
-	var cantidad := mini(prescripciones.size(), 3)
 	var celdas := [primera]
 	if cantidad > 1:
 		celdas.append_array(Planta.repartidas(bloques, cantidad - 1, [entrada, primera, salida]))
 
-	# Mismo día + misma semilla + mismos originales = misma distribución. El
-	# desplazamiento no introduce familias nuevas: solo rota las que sí tocaste.
-	var semilla := Azar.derivar_texto(raiz_azar, "sueno", "utileria:%s" % id, [dia])
-	var desplazamiento := posmod(semilla, prescripciones.size())
-	var folios := _folios_validos(documentos_origen)
 	var creadas := []
 	for i in cantidad:
-		var indice := (i + desplazamiento) % prescripciones.size()
-		var datos: Dictionary = prescripciones[indice]
+		var paso: Dictionary = plan[i]
+		var datos: Dictionary = paso["datos"]
 		var anomalia := AnomaliaSueno3D.new()
 		anomalia.name = "AnomaliaSueno%d" % (i + 1)
 		var tam: Vector3 = datos["tam"]
@@ -86,12 +104,17 @@ static func montar(
 			Planta.centro_en_metros(bloques, celdas[i])
 			+ Vector3(0.0, tam.y * absf(escala.y) * 0.5, 0.0)
 		)
-		anomalia.set_meta("objeto_origen", datos["objeto_id"])
-		# Una variante documental solo puede proceder de un folio que ya estaba
-		# en `leido_hoy`. La procedencia del objeto y la documental son contratos
-		# independientes y ninguno rellena el hueco del otro.
-		if not folios.is_empty():
-			anomalia.set_meta("documento_origen", folios[indice % folios.size()])
+
+		var objeto := String(paso.get("objeto", ""))
+		if not objeto.is_empty():
+			anomalia.set_meta("objeto_origen", objeto)
+		var folio := String(paso.get("folio", ""))
+		if not folio.is_empty():
+			anomalia.set_meta("documento_origen", folio)
+		var carta := String(paso.get("carta", ""))
+		if not carta.is_empty():
+			anomalia.set_meta("carta_origen", carta)
+
 		mundo.add_child(anomalia)
 		(
 			anomalia
@@ -109,6 +132,50 @@ static func montar(
 		)
 		creadas.append(anomalia)
 	return creadas
+
+
+static func _plan_deformaciones(
+	prescripciones: Array,
+	folios: Array,
+	tarot: Array,
+	desplazamiento: int,
+	semilla: int,
+) -> Array:
+	var plan := []
+	if not tarot.is_empty():
+		var elegida: Dictionary = tarot[posmod(semilla, tarot.size())]
+		var paso_tarot := {
+			"datos": PRESCRIPCION_TAROT,
+			"folio": elegida["folio"],
+			"carta": elegida["carta"],
+		}
+		plan.append(paso_tarot)
+
+	var huecos := 3 - plan.size()
+	var cantidad_objetos := mini(prescripciones.size(), huecos)
+	for i in cantidad_objetos:
+		var indice := (i + desplazamiento) % prescripciones.size()
+		var datos: Dictionary = prescripciones[indice]
+		var paso := {"datos": datos, "objeto": datos["objeto_id"]}
+		if not folios.is_empty():
+			paso["folio"] = folios[indice % folios.size()]
+		plan.append(paso)
+	return plan
+
+
+## Devuelve solo cartas que el jugador puede reconocer legítimamente esta noche:
+## el folio fue leído hoy y el estado persistente confirma que ya se recogió.
+static func _tarot_del_dia(folios: Array, cartas_recogidas: Array) -> Array:
+	var resultado := []
+	for folio in folios:
+		var oculta := CartasOcultas.en_folio(folio)
+		if oculta.is_empty():
+			continue
+		var carta := String(oculta.get("carta", "")).strip_edges()
+		if carta.is_empty() or not cartas_recogidas.has(carta):
+			continue
+		resultado.append({"folio": folio, "carta": carta})
+	return resultado
 
 
 ## Contrato puro usado también por la regresión: desconocidos, vacíos y

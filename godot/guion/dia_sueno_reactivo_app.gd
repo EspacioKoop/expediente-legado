@@ -1,4 +1,4 @@
-## Controller hijo para el corte onírico de #400 / #149.
+## Controller hijo para el corte onírico de #400 / #149 / #87.
 ##
 ## Observa el mundo ya construido por Dia y añade dressing solo cuando la fase
 ## activa es sueño. No cambia la cadena de herencia, no decide objetivos y no
@@ -24,6 +24,17 @@ func _process(_delta: float) -> void:
 	var escenas: Array = dia.jornada.get("sueno_escenas", [])
 	if escenas.is_empty():
 		return
+
+	var cartas_recogidas := []
+	var partida_actual = dia.get("partida")
+	if partida_actual is Partida:
+		for carta in partida_actual.estado.get("tarot", []):
+			if not bool(carta.get("recogida", false)):
+				continue
+			var carta_id := String(carta.get("id", "")).strip_edges()
+			if not carta_id.is_empty() and not cartas_recogidas.has(carta_id):
+				cartas_recogidas.append(carta_id)
+
 	var anomalias := (
 		SuenoUtileria
 		. montar(
@@ -33,6 +44,7 @@ func _process(_delta: float) -> void:
 			dia._raiz(),
 			dia.jornada.get("leido_hoy", []),
 			ObjetosOniricos.del_dia(dia.jornada),
+			cartas_recogidas,
 		)
 	)
 	for anomalia in anomalias:

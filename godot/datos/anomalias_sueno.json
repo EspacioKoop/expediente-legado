@@ -40,5 +40,19 @@
       "rasgo": "torsion-asimetrica"
     },
     "modo_observacion": "exploracion"
+  },
+  {
+    "id": "tarot-geometria-viva",
+    "titulo": "Carta de tarot deformada",
+    "descripcion": "Una carta ya encontrada conserva el formato de naipe, pero sus proporciones y profundidad cambian como si la geometría respirara.",
+    "nota_visual": "carta fina reconocible que se pliega hacia una profundidad imposible",
+    "origen_tipo": "objeto",
+    "origen_id": "tarotCard",
+    "representacion": {
+      "tipo": "modelo-procedural",
+      "modelo": "tarotCard",
+      "rasgo": "pliegue-imposible"
+    },
+    "modo_observacion": "exploracion"
   }
 ]
