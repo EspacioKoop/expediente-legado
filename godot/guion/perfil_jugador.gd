@@ -108,10 +108,10 @@ const PEINADOS := ["corto", "medio", "rapado", "recogido"]
 static func nuevo() -> Dictionary:
 	return {
 		"version": VERSION,
-		# Una partida recién creada debe pasar por la ficha al menos una vez.
-		# Los guardados anteriores a #701 se marcan como legado en Partida y no
-		# fuerzan esta pantalla al jugador que ya estaba a mitad de campaña.
-		"configurado": false,
+		# `true` es el fallback compatible para partidas anteriores a #701. El
+		# flujo explícito de Nueva partida lo cambia a `false` antes de guardar,
+		# obligando solo a las partidas nuevas a completar su ficha inicial.
+		"configurado": true,
 		"apariencia":
 		{
 			"cuerpo": "medio",
@@ -134,8 +134,8 @@ static func completar(valor) -> Dictionary:
 	var base := nuevo()
 	if typeof(valor) != TYPE_DICTIONARY:
 		return base
-	if typeof(valor.get("configurado", false)) == TYPE_BOOL:
-		base["configurado"] = valor.get("configurado", false)
+	if typeof(valor.get("configurado", true)) == TYPE_BOOL:
+		base["configurado"] = valor.get("configurado", true)
 	var apariencia = valor.get("apariencia", {})
 	if typeof(apariencia) == TYPE_DICTIONARY:
 		var cuerpo := String(apariencia.get("cuerpo", base["apariencia"]["cuerpo"]))
