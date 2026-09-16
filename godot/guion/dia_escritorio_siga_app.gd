@@ -1,4 +1,4 @@
-## Adaptador del puesto de trabajo al shell de escritorio (#534, #535, #536, #538, #663).
+## Adaptador del puesto de trabajo al shell de escritorio (#534, #535, #536, #537, #538, #663).
 ##
 ## `Dia` sigue siendo dueño de entrar/salir del puesto y de persistir la partida.
 ## Este controller detecta únicamente la pantalla que contiene el visor histórico,
@@ -8,6 +8,7 @@ extends Node
 var _pantalla_envuelta_id := 0
 var _siga_app: EscritorioSigaApp
 var _explorador_app: EscritorioSigaApp
+var _navegador_app: EscritorioSigaApp
 var _software_app: EscritorioSigaApp
 var _correo_app: EscritorioSigaApp
 var _catalogo_anomalias_app: EscritorioSigaApp
@@ -66,6 +67,19 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	_explorador_app.redimensionable = true
 	_explorador_app.registrar_en(escritorio)
 	_apps.append(_explorador_app)
+
+	# Navegador Web98 consume el índice declarativo ya existente (#667). Historial
+	# y favoritos son estado local persistible; la jornada/conocimiento siguen
+	# viniendo de la campaña y nunca se duplican dentro de la aplicación.
+	_navegador_app = EscritorioSigaApp.new(
+		"navegador-web98", "Navegador Web98", Callable(self, "_crear_navegador"), "red"
+	)
+	_navegador_app.tamano_minimo = Vector2(640, 430)
+	_navegador_app.tamano_preferido = Vector2(820, 560)
+	_navegador_app.redimensionable = true
+	_navegador_app.persistir_estado = true
+	_navegador_app.registrar_en(escritorio)
+	_apps.append(_navegador_app)
 
 	# #663 se aloja como una aplicación normal del shell. Su estado local solo
 	# contiene instalaciones y ejecuciones ficticias; nunca toca campaña ni host.
@@ -163,6 +177,21 @@ func _crear_explorador() -> Control:
 	return explorador
 
 
+func _crear_navegador() -> Control:
+	var navegador := NavegadorSiga.new()
+	var dia := get_parent()
+	var jornada_actual := 1
+	if dia != null:
+		jornada_actual = int(dia.jornada.get("dia", 1))
+	# #539 conectará conocimiento/caídas narrativas a estado real. Hasta entonces
+	# el navegador aprende y respeta la normalidad, sin filtrar enlace13.
+	navegador.configurar_contexto({"dia": jornada_actual, "conocimiento": [], "urls_caidas": []})
+	if _navegador_app != null:
+		navegador.configurar_estado(_navegador_app.obtener_estado_local("estado", {}))
+	navegador.estado_cambiado.connect(_registrar_estado_navegador)
+	return navegador
+
+
 func _crear_software() -> Control:
 	var software := SoftwareSiga.new()
 	if _software_app != null:
@@ -214,6 +243,11 @@ func _crear_catalogo_anomalias() -> Control:
 	if partida_actual is Partida:
 		catalogo.configurar_estado(partida_actual.estado)
 	return catalogo
+
+
+func _registrar_estado_navegador(estado: Dictionary) -> void:
+	if _navegador_app != null:
+		_navegador_app.establecer_estado_local("estado", estado)
 
 
 func _registrar_estado_software(estado: Dictionary) -> void:

@@ -1,4 +1,4 @@
-## Prueba headless aislada del índice web ficticio del OS98 (#660 / #667).
+## Prueba headless aislada del índice y navegador web ficticio del OS98 (#537 / #660 / #667).
 extends SceneTree
 
 var _pasadas := 0
@@ -93,8 +93,55 @@ func _probar() -> void:
 		"las URLs desconocidas producen un 404 simulado",
 	)
 
+	_probar_navegador()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
+
+
+func _probar_navegador() -> void:
+	var navegador := NavegadorSiga.new()
+	navegador.configurar_contexto({"dia": 1, "conocimiento": [], "urls_caidas": []})
+	_comprobar(
+		navegador.navegar(NavegadorSiga.URL_INICIO)["estado"] == "ok",
+		"el navegador abre el portal de inicio mediante Web98Indice",
+	)
+	_comprobar(
+		navegador.buscar("shareware")[0]["id"] == "byte-local",
+		"la búsqueda del navegador delega en el índice",
+	)
+	navegador.navegar("http://byte.local/")
+	_comprobar(navegador.historial().size() == 2, "registra navegación en historial")
+	_comprobar(navegador.url_actual() == "http://byte.local/", "expone la URL actual")
+	navegador.ir_atras()
+	_comprobar(
+		navegador.url_actual() == NavegadorSiga.URL_INICIO, "Atrás recupera la visita anterior"
+	)
+	navegador.ir_adelante()
+	_comprobar(
+		navegador.url_actual() == "http://byte.local/", "Adelante recupera la visita siguiente"
+	)
+	navegador.alternar_favorito_actual()
+	_comprobar(navegador.favoritos().has("http://byte.local/"), "permite marcar favoritos")
+
+	var estado := navegador.exportar_estado()
+	var restaurado := NavegadorSiga.new()
+	restaurado.configurar_contexto({"dia": 1, "conocimiento": [], "urls_caidas": []})
+	restaurado.configurar_estado(estado)
+	_comprobar(restaurado.historial() == navegador.historial(), "restaura historial persistible")
+	_comprobar(restaurado.favoritos() == navegador.favoritos(), "restaura favoritos persistibles")
+	_comprobar(
+		restaurado.navegar("http://intranet.dgai/diag/enlace13/")["estado"] == "no_encontrado",
+		"el navegador no salta el gating de conocimiento",
+	)
+	restaurado.configurar_contexto(
+		{"dia": 1, "conocimiento": [], "urls_caidas": ["http://byte.local/"]}
+	)
+	_comprobar(
+		restaurado.navegar("http://byte.local/")["estado"] == "caido",
+		"propaga estados de servidor simulado sin tocar la red real",
+	)
+	navegador.free()
+	restaurado.free()
 
 
 func _ids(recursos: Array[Dictionary]) -> Array[String]:
