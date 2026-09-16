@@ -47,7 +47,10 @@ func _montar(mundo: Node3D) -> void:
 		var trabajo := indice > 0 and indice % 2 == 1
 		# Quien no trabaja ni está al teléfono se cruza de brazos a ratos.
 		var brazos := indice > 0 and not trabajo
-		idle.configurar(cuerpo, semilla, telefono, reducir, trabajo, brazos)
+		# Quien trabaja lo hace sentado en su puesto; el cuñado y quien espera
+		# con los brazos cruzados siguen de pie.
+		var en_silla := trabajo
+		idle.configurar(cuerpo, semilla, telefono, reducir, trabajo, brazos, en_silla)
 		_idles.append(idle)
 	_conectar_conversaciones(mundo)
 
@@ -60,7 +63,8 @@ func _conectar_conversaciones(mundo: Node3D) -> void:
 			continue
 		var pies: Vector3 = hijo.position - Vector3(0.0, ALTURA_CONVERSABLE, 0.0)
 		for idle in _idles:
-			if idle.objetivo.position.distance_to(pies) < 0.05:
+			# `sitio()` y no la posición actual: sentarse sube y acerca el cuerpo.
+			if idle.sitio().distance_to(pies) < 0.05:
 				hijo.conversacion_solicitada.connect(_al_conversar.bind(idle))
 				break
 

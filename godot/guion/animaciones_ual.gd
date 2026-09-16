@@ -21,6 +21,7 @@ const BIBLIOTECA := &"ual"
 const CLIPS := {
 	"telefono": ["UAL2_Standard.glb", "Idle_TalkingPhone"],
 	"sentado": ["UAL1_Standard.glb", "Sitting_Idle"],
+	"sentado_hablando": ["UAL1_Standard.glb", "Sitting_Talking"],
 	"conversar": ["UAL1_Standard.glb", "Idle_Talking"],
 	"brazos_cruzados": ["UAL2_Standard.glb", "Idle_FoldArms"],
 }
