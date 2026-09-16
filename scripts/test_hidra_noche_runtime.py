@@ -76,10 +76,14 @@ class HidraNocheRuntimeTest(unittest.TestCase):
         self.assertIn('[node name="HidraVigiliaController" type="Node" parent="."]', self.dia)
         self.assertIn('[node name="HidraSuenoController" type="Node" parent="."]', self.dia)
 
+    def test_ruta_hidra_no_usa_constructor_bool(self):
+        for codigo in (self.core, self.interaction, self.night, self.smoke):
+            self.assertNotIn("bool(", codigo)
+
     def test_smoke_cubre_proliferacion_regeneracion_y_raiz(self):
         self.assertIn("not nodo.interactuar(actor)", self.smoke)
         self.assertIn("int(estado.get(\"regeneraciones\", 0)) == 1", self.smoke)
-        self.assertIn("bool(estado.get(\"nodo_legible\", false))", self.smoke)
+        self.assertIn('estado.get("nodo_legible", false) == true', self.smoke)
         self.assertIn("encuentro.resuelta()", self.smoke)
         self.assertIn('hidra.modo_aparicion() == "fundido_discreto"', self.smoke)
 
