@@ -2,6 +2,7 @@ extends SceneTree
 
 const PuzzleScript := preload("res://guion/sueno_aquiles_alineacion.gd")
 const ReflectorScript := preload("res://guion/aquiles_reflector.gd")
+const ControllerScript := preload("res://guion/dia_aquiles_sueno_app.gd")
 
 var _pasadas := 0
 var _fallos := 0
@@ -11,6 +12,7 @@ func _initialize() -> void:
 	_probar_reflector_deliberado()
 	_probar_resolucion_diegetica()
 	_probar_contrato_no_combate()
+	_probar_orientacion_recorrido()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
@@ -80,6 +82,52 @@ func _probar_contrato_no_combate() -> void:
 	var reducido := SuenoAquiles.plan_transformacion(true)
 	_comprobar(not reducido["flash"], "reducción de movimiento no usa flash")
 	_comprobar(not reducido["sacudida_camara"], "reducción de movimiento no sacude cámara")
+
+
+func _probar_orientacion_recorrido() -> void:
+	var controller := ControllerScript.new()
+	var encuentro := Node3D.new()
+
+	var frontal := {
+		"entrada": Vector3(0.0, 0.0, 4.0),
+		"salidas": [{"pos": Vector3(0.0, 0.0, -4.0)}],
+	}
+	controller._orientar_segun_recorrido(encuentro, frontal)
+	var frente := (-encuentro.transform.basis.z).normalized()
+	_comprobar(
+		frente.dot(Vector3(0.0, 0.0, -1.0)) > 0.999,
+		"Aquiles orienta -Z hacia una salida frontal",
+	)
+	_comprobar(
+		encuentro.transform.basis.z.normalized().dot(Vector3(0.0, 0.0, 1.0)) > 0.999,
+		"el lado +Z de los interactuables queda hacia la entrada frontal",
+	)
+
+	var lateral := {
+		"entrada": Vector3(-4.0, 0.0, 0.0),
+		"salidas": [{"pos": Vector3(4.0, 0.0, 0.0)}],
+	}
+	controller._orientar_segun_recorrido(encuentro, lateral)
+	frente = (-encuentro.transform.basis.z).normalized()
+	_comprobar(
+		frente.dot(Vector3.RIGHT) > 0.999,
+		"Aquiles se adapta también a recorridos laterales",
+	)
+
+	var rotacion_previa := encuentro.rotation
+	(
+		controller
+		. _orientar_segun_recorrido(
+			encuentro,
+			{"entrada": Vector3.ZERO, "salidas": []},
+		)
+	)
+	_comprobar(
+		encuentro.rotation.distance_to(rotacion_previa) < 0.0001,
+		"sin salida conserva la orientación existente",
+	)
+	encuentro.free()
+	controller.free()
 
 
 func _comprobar(condicion: bool, nombre: String) -> void:
