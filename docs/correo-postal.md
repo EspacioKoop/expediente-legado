@@ -43,11 +43,13 @@ El lector solo informa de que el objeto fue recogido. No mueve objetos, no vende
 
 ### Casa (#96 / #677)
 
-El calendario postal se declara como categoría visual `papel`, una familia que `CasaAcumulacion3D` ya materializa. La recogida en el portal lo deja en `Inventario.CARRIED`: no aparece mágicamente en casa.
+El calendario postal se declara como categoría visual `papel`. La recogida en el portal lo deja en `Inventario.CARRIED`: no aparece mágicamente en casa.
 
-Cuando el jugador usa el almacenamiento doméstico existente, `Inventario.guardar_en_casa()` lo mueve a `HOME_STORAGE`. A partir de ahí `CasaEstadoAmbiental.derivar()` lo incluye en `objetos_casa` y #677 puede materializarlo en la estantería. Así el correo produce un cambio visual mediante el contrato de #96 sin escribir estado estético propio.
+Cuando el jugador usa el almacenamiento doméstico existente, `Inventario.guardar_en_casa()` lo mueve a `HOME_STORAGE`. A partir de ahí `CasaEstadoAmbiental.derivar()` lo incluye en `objetos_casa` y `CasaAcumulacion3D` reconoce únicamente el id real `postal_iman_calendario` para colocarlo sobre la puerta de `NeveraCasa`.
 
-Este enlace todavía no coloca el imán específicamente sobre la puerta de la nevera; reutiliza la familia física `papel` del sistema doméstico ya existente.
+La representación es procedural y ligera: una cartulina fina con cabecera, cuadrícula y pequeño imán, situada unos milímetros delante de la puerta y apartada de las asas. Conserva `objeto_id` y `origen` como metadatos; no crea ningún flag de decoración. Si el objeto sale de `HOME_STORAGE`, el siguiente refresco retira el imán. Si la escena no ofrece `NeveraCasa`, el objeto mantiene el fallback de `papel` en `EstanteriaComprasCasa` en vez de desaparecer.
+
+Así el correo produce un cambio visual específico mediante el contrato de #96/#677 sin introducir estado estético paralelo ni teletransportar el paquete desde el portal.
 
 ## Persistencia y accesibilidad
 
@@ -61,8 +63,10 @@ El buzón no anima puertas ni desplaza cámara, así que no añade movimiento fo
 
 `pruebas_correo_postal.gd` cubre catálogo, variación por jornada/estado, economía delegada, persistencia de recogida, modelo del lector, feedback vacío, paquete físico y el recorrido `carried → home_storage → CasaEstadoAmbiental → CasaAcumulacion3D`.
 
-`scripts/test_correo_postal.py` verifica además que el controller conecta el feedback vacío, que el lector conserva el patrón modal accesible y que el calendario usa una familia visual comprendida por #677.
+`pruebas_casa_acumulacion.gd` verifica además que el calendario aparece sobre `NeveraCasa`, no se duplica en la estantería, conserva identidad/procedencia, desaparece al salir de `HOME_STORAGE` y conserva un fallback visible si la nevera no está disponible.
+
+Los wrappers Python verifican las fronteras estáticas de integración y ejecutan ambas verticales en Godot headless dentro del preflight canónico.
 
 ## Fuera de este corte
 
-Quedan para cortes posteriores los assets finales de sobres/paquetes, una representación específica del calendario pegado a la nevera y validación humana del flujo completo con teclado, mando y lector de accesibilidad. Por ello el trabajo sigue enlazando #672 con `Refs`, no lo cierra automáticamente.
+Quedan como validación final los assets definitivos de sobres/paquetes y el playtest humano del flujo completo con teclado, mando y tecnologías de accesibilidad. La lógica automatizada ya cubre el recorrido postal y el cambio visual doméstico, pero #672 no debe cerrarse automáticamente sin esa validación humana.

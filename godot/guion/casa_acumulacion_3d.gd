@@ -8,6 +8,8 @@ class_name CasaAcumulacion3D
 extends RefCounted
 
 const NOMBRE_RAIZ := "AcumulacionCasa"
+const NOMBRE_IMAN_CALENDARIO := "ImanCalendarioCorreo"
+const ID_IMAN_CALENDARIO := "postal_iman_calendario"
 const MAX_OBJETOS := 8
 const ANCLAS := [
 	Vector3(-0.30, 0.28, -0.03),
@@ -40,13 +42,23 @@ static func montar(raiz: Node3D, estado_ambiental: Dictionary) -> Node3D:
 		estanteria.remove_child(anterior)
 		anterior.queue_free()
 
+	var nevera := raiz.find_child("NeveraCasa", true, false) as Node3D
+	_limpiar_iman_calendario(nevera)
+
 	var acumulacion := Node3D.new()
 	acumulacion.name = NOMBRE_RAIZ
 	estanteria.add_child(acumulacion)
 
 	var objetos := _objetos_ordenados(estado_ambiental)
-	for indice in mini(MAX_OBJETOS, objetos.size()):
-		_montar_objeto(acumulacion, objetos[indice], indice)
+	var indice_estante := 0
+	for objeto in objetos:
+		if _es_iman_calendario(objeto) and nevera != null:
+			_montar_iman_calendario(nevera, objeto)
+			continue
+		if indice_estante >= MAX_OBJETOS:
+			break
+		_montar_objeto(acumulacion, objeto, indice_estante)
+		indice_estante += 1
 	return acumulacion
 
 
@@ -100,6 +112,49 @@ static func _montar_objeto(padre: Node3D, objeto: Dictionary, indice: int) -> vo
 			_recuerdo(nodo)
 		_:
 			_util(nodo)
+
+
+static func _es_iman_calendario(objeto: Dictionary) -> bool:
+	return String(objeto.get("id", "")) == ID_IMAN_CALENDARIO
+
+
+static func _limpiar_iman_calendario(nevera: Node3D) -> void:
+	if nevera == null:
+		return
+	var anterior := nevera.get_node_or_null(NOMBRE_IMAN_CALENDARIO)
+	if anterior != null:
+		nevera.remove_child(anterior)
+		anterior.queue_free()
+
+
+static func _montar_iman_calendario(nevera: Node3D, objeto: Dictionary) -> void:
+	var iman := Node3D.new()
+	iman.name = NOMBRE_IMAN_CALENDARIO
+	# La puerta visible de NeveraCasa está en x=-0.36. El papel queda unos
+	# milímetros por delante, alejado de las asas situadas hacia z negativo.
+	iman.position = Vector3(-0.372, 1.28, 0.10)
+	iman.set_meta("objeto_id", String(objeto.get("id", "")))
+	iman.set_meta("origen", String(objeto.get("origen", "")))
+	iman.set_meta("variante", "iman_calendario")
+	nevera.add_child(iman)
+
+	# Cuerpo del calendario: cartulina fina, cabecera y una cuadrícula mínima.
+	_caja(iman, Vector3.ZERO, Vector3(0.014, 0.24, 0.18), Color(0.74, 0.70, 0.56))
+	_caja(iman, Vector3(-0.010, 0.085, 0), Vector3(0.010, 0.045, 0.16), Color(0.48, 0.20, 0.16))
+	for y in [-0.045, -0.005, 0.035]:
+		_caja(iman, Vector3(-0.010, y, 0), Vector3(0.010, 0.008, 0.14), Color(0.34, 0.32, 0.28))
+	for z in [-0.045, 0.0, 0.045]:
+		_caja(
+			iman, Vector3(-0.010, -0.025, z), Vector3(0.010, 0.12, 0.006), Color(0.34, 0.32, 0.28)
+		)
+	_cilindro(
+		iman,
+		Vector3(-0.018, 0.095, 0.060),
+		0.018,
+		0.012,
+		Color(0.16, 0.20, 0.24),
+		Vector3(0, 0, 90)
+	)
 
 
 static func _variante(objeto: Dictionary) -> String:

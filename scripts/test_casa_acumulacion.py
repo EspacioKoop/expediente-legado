@@ -38,6 +38,16 @@ class CasaAcumulacionTest(unittest.TestCase):
         for extension in (".glb", ".png", ".jpg", ".webp"):
             self.assertNotIn(extension, self.acumulacion.lower())
 
+    def test_iman_postal_usa_nevera_y_conserva_fallback(self):
+        self.assertIn('const ID_IMAN_CALENDARIO := "postal_iman_calendario"', self.acumulacion)
+        self.assertIn('raiz.find_child("NeveraCasa", true, false)', self.acumulacion)
+        self.assertIn("_montar_iman_calendario(nevera, objeto)", self.acumulacion)
+        self.assertIn('iman.set_meta("objeto_id"', self.acumulacion)
+        self.assertIn('iman.set_meta("origen"', self.acumulacion)
+        self.assertIn('iman.set_meta("variante", "iman_calendario")', self.acumulacion)
+        self.assertIn("if _es_iman_calendario(objeto) and nevera != null", self.acumulacion)
+        self.assertNotIn("Inventario.guardar_en_casa", self.acumulacion)
+
     def test_controller_deriva_desde_estado_oficial(self):
         self.assertIn('fase != "casa"', self.controller)
         self.assertIn('partida.estado.get("inventario", {})', self.controller)
@@ -91,7 +101,7 @@ class CasaAcumulacionTest(unittest.TestCase):
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
         resumen = RESUMEN_GODOT.search(resultado.stdout)
         self.assertIsNotNone(resumen, resultado.stdout)
-        self.assertGreaterEqual(int(resumen.group(1)), 30, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 40, resultado.stdout)
         self.assertNotIn("SCRIPT ERROR:", resultado.stdout)
         self.assertNotIn("Parse Error:", resultado.stdout)
 
