@@ -28,7 +28,8 @@ func _probar_registro_diario() -> void:
 
 
 func _probar_caducidad_y_recuperacion() -> void:
-	var jornada := {"dia": 8, Objetos.CLAVE: {"dia": 7, "ids": ["monitor"]}}
+	var jornada := {"dia": 8}
+	jornada[Objetos.CLAVE] = {"dia": 7, "ids": ["monitor"]}
 	_comprobar(Objetos.del_dia(jornada).is_empty(), "una noche anterior no contamina el día actual")
 	_comprobar(Objetos.registrar(jornada, "archivador"), "el primer toque del día reemplaza la memoria caducada")
 	_comprobar(
@@ -36,7 +37,8 @@ func _probar_caducidad_y_recuperacion() -> void:
 		"tras caducar no reaparecen objetos tocados ayer"
 	)
 
-	var roto := {"dia": 2, Objetos.CLAVE: {"dia": 2, "ids": {}}}
+	var roto := {"dia": 2}
+	roto[Objetos.CLAVE] = {"dia": 2, "ids": {}}
 	_comprobar(Objetos.del_dia(roto).is_empty(), "un guardado mal formado falla vacío")
 	_comprobar(Objetos.registrar(roto, "silla"), "el siguiente toque repara la lista mal formada")
 	_comprobar(Objetos.del_dia(roto) == ["silla"], "la reparación no inventa otros ids")
