@@ -9,8 +9,10 @@ Starter pack de **assets 3D originales del proyecto** para las cuatro familias d
 - `pupitre_escolar.tscn`: pupitre escolar completo con tablero, faldón y estructura metálica.
 - `taquillas_escolares.tscn`: módulo de tres taquillas con puertas, respiraderos y tiradores.
 - `reloj_escolar_anomalo.tscn`: reloj mural con doble juego de agujas para mutaciones del sueño.
-- `archivador_desierto.tscn`: archivador metálico de cuatro cajones con tiradores.
-- `cabina_telefono_desierto.tscn`: cabina telefónica aislada con bastidor, techo, teléfono y auricular.
+- `archivador_desierto.tscn`: archivador metálico de cuatro cajones basado en la malla original `archivador_desierto_psx.obj`; conserva tiradores reutilizables, pero elimina el cuerpo construido con `BoxMesh`.
+- `archivador_desierto_psx.obj`: malla original y diffable del archivador aislado del desierto.
+- `cabina_telefono_desierto.tscn`: cabina telefónica aislada basada en `cabina_telefono_desierto_psx.obj`, con dial, auricular y panel translúcido sin estructura de cajas genéricas.
+- `cabina_telefono_desierto_psx.obj`: malla original y diffable para la silueta principal de la cabina, incluido bastidor, pedestal, teléfono y cubierta a dos aguas.
 - `muro_torre_castillo.tscn`: portada medieval basada en la malla original `muro_arco_castillo_psx.obj`, con arco de dovelas, contrafuertes, torres octogonales troncocónicas y cubiertas apuntadas.
 - `muro_arco_castillo_psx.obj`: malla low-poly original y diffable que sustituye la fachada de primitivas del primer starter pack; no usa `BoxMesh`/`CylinderMesh` como arquitectura visible.
 - `escalera_anular_castillo.tscn`: versión reutilizable de la escalera imposible basada en la malla original `escalera_anular_castillo_psx.obj`.
@@ -26,7 +28,9 @@ Cada fichero es una pieza independiente. Puede instanciarse directamente o abrir
 
 La montaña se compone en runtime desde `SuenoMontana3D`: la familia CONVERGENTE conserva la única colisión, mientras la presentación añade cima nevada, laderas, mar de nubes, huellas anticipadas, documento congelado y la cabaña de este directorio.
 
-El feedback de playtest de `c2b4b714` descarta que la arquitectura final del sueño se lea como asset genérico estilo "Minecraft". Por eso tanto el castillo como la cabaña de montaña pasan a siluetas originales antes de usarse como presentación final.
+El desierto se compone en runtime desde `SuenoDesierto3D`: `SuenoDesierto` sustituye la planta histórica de `peine` por el contorno caminable de la familia FRAGMENTADA antes de que `Espacio3D` construya la sala. La presentación mantiene esa única física y añade arena, dunas lejanas, huellas geométricas, sombra sin objeto, papel semienterrado, cabina, archivador y una estructura de horizonte que conserva distancia aparente. El sonido es procedural: viento con ecos de oficina, tono telefónico y una zona local donde ambos desaparecen.
+
+El feedback de playtest de `c2b4b714` descarta que la arquitectura final del sueño se lea como asset genérico estilo "Minecraft". Por eso castillo, montaña y desierto pasan a siluetas originales antes de usarse como presentación final.
 
 ## Procedencia
 
