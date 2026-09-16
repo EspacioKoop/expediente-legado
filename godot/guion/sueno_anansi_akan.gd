@@ -29,28 +29,32 @@ const NODOS_BASE := {
 ## Tres relaciones reales permiten resolver el estado. La cuarta es un señuelo
 ## observable: su orientación de tensión no coincide en ambos extremos.
 const CONEXIONES_BASE := {
-	"telefono_impresora": {
+	"telefono_impresora":
+	{
 		"origen": "telefono",
 		"destino": "impresora",
 		"real": true,
 		"polaridad": 1,
 		"pista": "tension_continua",
 	},
-	"impresora_archivador": {
+	"impresora_archivador":
+	{
 		"origen": "impresora",
 		"destino": "archivador",
 		"real": true,
 		"polaridad": 1,
 		"pista": "tension_continua",
 	},
-	"archivador_puerta": {
+	"archivador_puerta":
+	{
 		"origen": "archivador",
 		"destino": "puerta",
 		"real": true,
 		"polaridad": -1,
 		"pista": "tension_invertida_legible",
 	},
-	"telefono_puerta_senuelo": {
+	"telefono_puerta_senuelo":
+	{
 		"origen": "telefono",
 		"destino": "puerta",
 		"real": false,
@@ -88,11 +92,14 @@ static func registrar_semilla(
 	if pasos_escuchados < PASOS_RELATO_MINIMOS or not relato_terminado:
 		return false
 	if estado.has("dia"):
-		return SemillasOniricas.activar_semilla_onirica(
-			estado,
-			ID_MITO,
-			fuente,
-			intensidad,
+		return (
+			SemillasOniricas
+			. activar_semilla_onirica(
+				estado,
+				ID_MITO,
+				fuente,
+				intensidad,
+			)
 		)
 	estado[CLAVE_SEMILLA] = true
 	return true
@@ -153,13 +160,18 @@ static func manipular_conexion(
 		valor_destino_anterior = int(destino.get("valor", 0))
 
 	var historial: Array = resultado.get("historial", [])
-	historial.append({
-		"conexion": id_conexion,
-		"tension": int(conexion.get("tension", 0)),
-		"activa": bool(conexion.get("activa", true)),
-		"destino": destino_id,
-		"valor_destino": valor_destino_anterior,
-	})
+	(
+		historial
+		. append(
+			{
+				"conexion": id_conexion,
+				"tension": int(conexion.get("tension", 0)),
+				"activa": bool(conexion.get("activa", true)),
+				"destino": destino_id,
+				"valor_destino": valor_destino_anterior,
+			}
+		)
+	)
 	resultado["historial"] = historial
 
 	var efecto_remoto := ""
@@ -340,7 +352,7 @@ func _crear_hilo(
 	hilo.set_meta("anansi_pista", String(CONEXIONES_BASE[id_conexion]["pista"]))
 	hilo.activado.connect(_al_usar_hilo.bind(id_conexion))
 	add_child(hilo)
-	hilo.look_at(destino + Vector3(0.0, 0.65, 0.0), Vector3.UP)
+	hilo.look_at(to_global(destino + Vector3(0.0, 0.65, 0.0)), Vector3.UP)
 
 	var largo := maxf(origen.distance_to(destino), 0.25)
 	_crear_caja(
@@ -378,7 +390,9 @@ func _aplicar_estado_visual() -> void:
 		if not _nodos_visuales.has(id_nodo):
 			continue
 		var datos: Dictionary = nodos[id_nodo]
-		var objetivo: Vector3 = datos["pos"] + Vector3(0.0, float(datos.get("valor", 0)) * 0.45, 0.0)
+		var objetivo: Vector3 = (
+			datos["pos"] + Vector3(0.0, float(datos.get("valor", 0)) * 0.45, 0.0)
+		)
 		var visual: Node3D = _nodos_visuales[id_nodo]
 		if reduccion_movimiento:
 			visual.position = objetivo
