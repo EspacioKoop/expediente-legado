@@ -68,12 +68,15 @@ func _al_examinar(_actor: Node) -> void:
 func _intentar_activar() -> bool:
 	if _activada or _jornada.is_empty():
 		return _activada
-	_activada = SuenoYggdrasil.registrar_semilla(
-		_jornada,
-		_inspecciones,
-		_conexion_reconocida,
-		FUENTE,
-		2,
+	_activada = (
+		SuenoYggdrasil
+		. registrar_semilla(
+			_jornada,
+			_inspecciones,
+			_conexion_reconocida,
+			FUENTE,
+			2,
+		)
 	)
 	_actualizar_feedback()
 	return _activada
@@ -98,11 +101,25 @@ func _montar() -> void:
 	add_child(colision)
 
 	_agregar_caja(_poster, "Marco", Vector3(2.05, 1.55, 0.12), Vector3(0.0, 0.78, 0.0), COLOR_MARCO)
-	_agregar_caja(_poster, "Papel", Vector3(1.78, 1.28, 0.05), Vector3(0.0, 0.78, -0.08), COLOR_PAPEL)
-	_agregar_caja(_poster, "Tronco", Vector3(0.16, 0.92, 0.035), Vector3(0.0, 0.78, -0.13), COLOR_TINTA)
-	_agregar_caja(_poster, "NodoIzquierdo", Vector3(0.26, 0.26, 0.035), Vector3(-0.56, 1.12, -0.14), COLOR_TINTA)
-	_agregar_caja(_poster, "NodoDerecho", Vector3(0.26, 0.26, 0.035), Vector3(0.56, 1.12, -0.14), COLOR_TINTA)
-	_agregar_caja(_poster, "NodoRaiz", Vector3(0.26, 0.26, 0.035), Vector3(0.0, 0.30, -0.14), COLOR_TINTA)
+	_agregar_caja(
+		_poster, "Papel", Vector3(1.78, 1.28, 0.05), Vector3(0.0, 0.78, -0.08), COLOR_PAPEL
+	)
+	_agregar_caja(
+		_poster, "Tronco", Vector3(0.16, 0.92, 0.035), Vector3(0.0, 0.78, -0.13), COLOR_TINTA
+	)
+	_agregar_caja(
+		_poster,
+		"NodoIzquierdo",
+		Vector3(0.26, 0.26, 0.035),
+		Vector3(-0.56, 1.12, -0.14),
+		COLOR_TINTA
+	)
+	_agregar_caja(
+		_poster, "NodoDerecho", Vector3(0.26, 0.26, 0.035), Vector3(0.56, 1.12, -0.14), COLOR_TINTA
+	)
+	_agregar_caja(
+		_poster, "NodoRaiz", Vector3(0.26, 0.26, 0.035), Vector3(0.0, 0.30, -0.14), COLOR_TINTA
+	)
 	_conexion = _agregar_caja(
 		_poster,
 		"ConexionVisible",
