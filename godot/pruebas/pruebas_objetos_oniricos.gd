@@ -18,7 +18,9 @@ func _initialize() -> void:
 func _probar_registro_diario() -> void:
 	var jornada := {"dia": 4}
 	_comprobar(Objetos.registrar(jornada, "monitor"), "el primer monitor deja memoria")
-	_comprobar(not Objetos.registrar(jornada, "monitor"), "repetir el monitor no fuerza otro guardado")
+	_comprobar(
+		not Objetos.registrar(jornada, "monitor"), "repetir el monitor no fuerza otro guardado"
+	)
 	_comprobar(Objetos.registrar(jornada, " silla "), "otra familia tocada se incorpora")
 	_comprobar(
 		Objetos.del_dia(jornada) == ["monitor", "silla"],
@@ -31,7 +33,10 @@ func _probar_caducidad_y_recuperacion() -> void:
 	var jornada := {"dia": 8}
 	jornada[Objetos.CLAVE] = {"dia": 7, "ids": ["monitor"]}
 	_comprobar(Objetos.del_dia(jornada).is_empty(), "una noche anterior no contamina el día actual")
-	_comprobar(Objetos.registrar(jornada, "archivador"), "el primer toque del día reemplaza la memoria caducada")
+	_comprobar(
+		Objetos.registrar(jornada, "archivador"),
+		"el primer toque del día reemplaza la memoria caducada"
+	)
 	_comprobar(
 		Objetos.del_dia(jornada) == ["archivador"],
 		"tras caducar no reaparecen objetos tocados ayer"
