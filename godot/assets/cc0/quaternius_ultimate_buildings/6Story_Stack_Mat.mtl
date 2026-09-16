@@ -1,0 +1,93 @@
+# File produced by Open Asset Import Library (http://www.assimp.sf.net)
+# (assimp v5.3.0)
+
+newmtl Bricks
+Kd 0.132105768 0.247575164 0.209800526
+Ka 0 0 0
+Ks 1 1 1
+Ke 0 0 0
+Tf 0 0 0
+d 1
+Ns 9.6078434
+illum 2
+
+newmtl Dark
+Kd 0.0547825471 0.0915483013 0.0895459577
+Ka 0 0 0
+Ks 1 1 1
+Ke 0 0 0
+Tf 0 0 0
+d 1
+Ns 9.6078434
+illum 2
+
+newmtl White
+Kd 0.467262805 0.467262805 0.467262805
+Ka 0 0 0
+Ks 1 1 1
+Ke 0 0 0
+Tf 0 0 0
+d 1
+Ns 9.6078434
+illum 2
+
+newmtl Main
+Kd 0.0920371711 0.17122294 0.143844262
+Ka 0 0 0
+Ks 1 1 1
+Ke 0 0 0
+Tf 0 0 0
+d 1
+Ns 9.6078434
+illum 2
+
+newmtl Wood
+Kd 0.19071807 0.0692003816 0.0373320729
+Ka 0 0 0
+Ks 1 1 1
+Ke 0 0 0
+Tf 0 0 0
+d 1
+Ns 9.6078434
+illum 2
+
+newmtl Glass
+Kd 0.139717937 0.203321725 0.262222499
+Ka 0 0 0
+Ks 1 1 1
+Ke 0 0 0
+Tf 0 0 0
+d 1
+Ns 9.6078434
+illum 2
+
+newmtl DarkWood
+Kd 0.106294684 0.0489968471 0.0236454755
+Ka 0 0 0
+Ks 1 1 1
+Ke 0 0 0
+Tf 0 0 0
+d 1
+Ns 9.6078434
+illum 2
+
+newmtl Light
+Kd 0.269730926 0.301009715 0.17268841
+Ka 0 0 0
+Ks 1 1 1
+Ke 0 0 0
+Tf 0 0 0
+d 1
+Ns 9.6078434
+illum 2
+
+newmtl Black
+Kd 0.0533007495 0.0533007495 0.0533007495
+Ka 0 0 0
+Ks 1 1 1
+Ke 0 0 0
+Tf 0 0 0
+d 1
+Ns 9.6078434
+illum 2
+
