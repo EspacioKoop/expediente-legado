@@ -19,10 +19,10 @@ static func timbre() -> AudioStreamWAV:
 		var t := float(i) / MUESTRAS_POR_SEGUNDO
 		var envolvente := exp(-t * 2.65) * minf(1.0, t * 36.0)
 		var muestra := (
-			sin(TAU * 720.0 * t)
-			+ sin(TAU * 1080.0 * t) * 0.62
-			+ sin(TAU * 1510.0 * t) * 0.33
-		) * envolvente * 0.22
+			(sin(TAU * 720.0 * t) + sin(TAU * 1080.0 * t) * 0.62 + sin(TAU * 1510.0 * t) * 0.33)
+			* envolvente
+			* 0.22
+		)
 		_escribir_i16(datos, i, muestra)
 	return _onda(datos, false)
 
@@ -37,8 +37,7 @@ static func voces_vacias() -> AudioStreamWAV:
 		var pseudo := float(((i * 1103515245 + 12345) >> 16) & 0x7FFF) / 16383.5 - 1.0
 		anterior = lerpf(anterior, pseudo, 0.018)
 		var silabas := (
-			maxf(0.0, sin(TAU * 2.1 * t)) * 0.46
-			+ maxf(0.0, sin(TAU * 2.8 * t + 1.7)) * 0.35
+			maxf(0.0, sin(TAU * 2.1 * t)) * 0.46 + maxf(0.0, sin(TAU * 2.8 * t + 1.7)) * 0.35
 		)
 		var grave := sin(TAU * 118.0 * t) * silabas * 0.035
 		var muestra := anterior * (0.018 + silabas * 0.035) + grave
