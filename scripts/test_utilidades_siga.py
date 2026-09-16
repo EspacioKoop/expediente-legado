@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import re
 import subprocess
 import unittest
 
@@ -43,7 +44,8 @@ class UtilidadesSigaTest(unittest.TestCase):
         self.assertIn("Expression.new()", fuente)
         self.assertIn("_entrada_permitida", fuente)
         for api in ("FileAccess", "DirAccess", "OS.", "JavaScriptBridge", "Shell"):
-            self.assertNotIn(api, fuente)
+            # Límite de palabra: «CARACTERES_PERMITIDOS.contains» no es «OS.».
+            self.assertIsNone(re.search(rf"\b{re.escape(api)}", fuente), api)
 
     def test_utilidades_ejecutables_en_godot(self) -> None:
         motor = os.environ.get("GODOT_BIN", "godot4")
