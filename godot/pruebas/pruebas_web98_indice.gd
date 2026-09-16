@@ -30,9 +30,7 @@ func _probar() -> void:
 		indice.resolver_url("http://intranet.dgai/diag/enlace13/")["estado"] == "no_encontrado",
 		"una URL restringida tampoco revela el recurso por acceso directo",
 	)
-	indice.configurar_contexto(
-		{"dia": 1, "conocimiento": ["enlace13"], "urls_caidas": []}
-	)
+	indice.configurar_contexto({"dia": 1, "conocimiento": ["enlace13"], "urls_caidas": []})
 	var restringido := indice.buscar("enlace13")
 	_comprobar(restringido.size() == 1, "el conocimiento habilita el resultado restringido")
 	_comprobar(restringido[0]["id"] == "diagnostico-enlace13", "habilita el recurso correcto")
@@ -43,7 +41,8 @@ func _probar() -> void:
 	_comprobar(origen["estado"] == "ok" and origen["via"] == "origen", "resuelve el origen")
 	_comprobar(mirror["estado"] == "ok" and mirror["via"] == "mirror", "resuelve el mirror")
 	_comprobar(
-		origen["recurso"]["id"] == mirror["recurso"]["id"], "origen y mirror apuntan al mismo recurso"
+		origen["recurso"]["id"] == mirror["recurso"]["id"],
+		"origen y mirror apuntan al mismo recurso"
 	)
 
 	indice.configurar_contexto(
@@ -54,12 +53,16 @@ func _probar() -> void:
 	_comprobar(origen["estado"] == "caido", "el origen puede estar caído de forma declarativa")
 	_comprobar(origen["cache_disponible"], "el error informa de que existe caché")
 	_comprobar(mirror["estado"] == "ok", "caer el origen no derriba el mirror")
-	_comprobar(indice.cache_de("byte-local")["estado"] == "ok", "la caché sobrevive al servidor caído")
+	_comprobar(
+		indice.cache_de("byte-local")["estado"] == "ok", "la caché sobrevive al servidor caído"
+	)
 
 	indice.configurar_contexto({"dia": 3, "conocimiento": [], "urls_caidas": []})
 	_comprobar(
-		indice.resolver_url("http://archivo.red98/modem/guia-33k.html")["estado"]
-		== "no_encontrado",
+		(
+			indice.resolver_url("http://archivo.red98/modem/guia-33k.html")["estado"]
+			== "no_encontrado"
+		),
 		"un recurso puede salir de publicación por jornada",
 	)
 	_comprobar(
@@ -79,7 +82,10 @@ func _probar() -> void:
 	var personales := _ids(indice.directorio("personal"))
 	_comprobar(personales.has("pagina-becario"), "el directorio incluye la página del becario")
 	_comprobar(personales.has("pagina-telefono"), "el directorio incluye la página de centralita")
-	_comprobar(indice.cache_de("portal-dgai")["estado"] == "sin_cache", "no todos los recursos inventan caché")
+	_comprobar(
+		indice.cache_de("portal-dgai")["estado"] == "sin_cache",
+		"no todos los recursos inventan caché"
+	)
 	_comprobar(
 		indice.resolver_url("http://no-existe.red98/")["estado"] == "no_encontrado",
 		"las URLs desconocidas producen un 404 simulado",
