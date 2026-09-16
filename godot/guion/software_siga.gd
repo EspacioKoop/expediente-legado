@@ -127,7 +127,9 @@ func _refrescar() -> void:
 	_lista.clear()
 	for paquete in _modelo.catalogo():
 		var id := String(paquete.get("id", ""))
-		var marca := SoftwareSigaTextos.texto("instalado_marca") if _modelo.esta_instalado(id) else ""
+		var marca := (
+			SoftwareSigaTextos.texto("instalado_marca") if _modelo.esta_instalado(id) else ""
+		)
 		var indice := _lista.add_item(marca + String(paquete.get("nombre", id)))
 		_lista.set_item_metadata(indice, id)
 		if id == seleccionado:
@@ -156,11 +158,11 @@ func _seleccionar(indice: int) -> void:
 		SoftwareSigaTextos.texto("ficha_tipo")
 		% [String(paquete.get("tipo", "Utilidad")), int(paquete.get("tamano_kb", 0))]
 	)
-	_origen.text = SoftwareSigaTextos.texto("ficha_origen") % String(
-		paquete.get("origen", "desconocida")
+	_origen.text = (
+		SoftwareSigaTextos.texto("ficha_origen") % String(paquete.get("origen", "desconocida"))
 	)
-	_licencia.text = SoftwareSigaTextos.texto("ficha_licencia") % String(
-		paquete.get("licencia", "freeware")
+	_licencia.text = (
+		SoftwareSigaTextos.texto("ficha_licencia") % String(paquete.get("licencia", "freeware"))
 	)
 	_descripcion.text = String(paquete.get("descripcion", ""))
 	var instalado := _modelo.esta_instalado(id)
