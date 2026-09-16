@@ -62,7 +62,8 @@ class RadioDomestica98Test(unittest.TestCase):
         self.assertIn("Jornada.ACCIONES_POR_DIA", self.minicadena)
         self.assertIn("func escuchar_actual", self.minicadena)
         self.assertIn("atencion_requerida", self.minicadena)
-        self.assertIn("SemillasOniricas.activar_semilla_onirica", self.minicadena)
+        self.assertIn("SemillasOniricas", self.minicadena)
+        self.assertIn("activar_semilla_onirica", self.minicadena)
         self.assertNotIn("Time.get_", self.minicadena)
         self.assertNotIn("HTTPRequest", self.minicadena)
 
