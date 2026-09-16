@@ -32,11 +32,7 @@ const TABIQUES := [
 		Vector3(0.55, ALTO_TABIQUE / 2.0, -2.075),
 		Vector3(GROSOR_TABIQUE, ALTO_TABIQUE, 2.85)
 	],
-	[
-		"DintelDormitorio",
-		Vector3(0.0, 2.40, -0.65),
-		Vector3(1.10, 0.80, GROSOR_TABIQUE)
-	],
+	["DintelDormitorio", Vector3(0.0, 2.40, -0.65), Vector3(1.10, 0.80, GROSOR_TABIQUE)],
 ]
 
 # nombre, modelo, base en el suelo o superficie, caja de encaje (ejes del
