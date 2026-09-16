@@ -3,9 +3,9 @@ extends SceneTree
 ## Smoke real del pase global de cuerpo/ropa de #275.
 ##
 ## No inspecciona texto fuente: carga `persona.fbx` mediante la misma ruta que el
-## juego, deja actuar al autoload y comprueba el árbol 3D resultante. Si cambia el
-## rig o el importador y el vestuario deja de engancharse, CI debe verlo antes de
-## que reaparezca el maniquí desnudo en una captura.
+## juego, deja actuar al autoload y comprueba el árbol 3D resultante. Además usa
+## el color real de Puyi desde `Companeros` para demostrar que el perfil explícito
+## por NPC sustituye al antiguo hash de orden sin tocar rig ni colisiones.
 
 var _pasadas := 0
 var _fallos := 0
@@ -19,7 +19,9 @@ func _probar() -> void:
 	var cuerpo := Node3D.new()
 	root.add_child(cuerpo)
 
-	var creada := Modelos.persona(cuerpo, "persona", Color(0.42, 0.38, 0.34))
+	var emperador: Dictionary = Companeros.ROSTER[0]
+	_comprobar(String(emperador["id"]), "emperador", "el fixture usa a Puyi")
+	var creada := Modelos.persona(cuerpo, "persona", emperador["color"])
 	_comprobar(creada, "el modelo humano real se puede instanciar")
 	if not creada:
 		_terminar()
@@ -42,8 +44,14 @@ func _probar() -> void:
 
 	_comprobar(esqueleto.has_meta("vestuario_humano_275"), "el autoload marca la figura vestida")
 	_comprobar(
-		String(esqueleto.get_meta("vestuario_humano_275")) in ["estrecho", "medio", "robusto"],
-		"el perfil corporal pertenece al vocabulario estable",
+		String(esqueleto.get_meta("vestuario_humano_275")),
+		"emperador",
+		"Puyi recibe su perfil corporal explícito y no un fallback por hash",
+	)
+	_comprobar(
+		String(esqueleto.get_meta("vestuario_identidad_275")),
+		"emperador",
+		"la identidad resuelta queda visible para depuración visual",
 	)
 	_comprobar(
 		esqueleto.find_child("VestuarioTorso", true, false) is BoneAttachment3D,
