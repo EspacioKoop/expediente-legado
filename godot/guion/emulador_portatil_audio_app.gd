@@ -221,8 +221,8 @@ func _bombear_audio_emulado() -> void:
 		push_warning("PCM GB desalineado; se descarta el bloque")
 		return
 	if _audio_emulado_muted:
+		# El búfer ya se vació al silenciar; aquí basta con no acumular.
 		_audio_pendiente.clear()
-		_audio_playback.clear_buffer()
 		return
 
 	var cantidad_frames := int(pcm.size() / AUDIO_BYTES_PER_FRAME)
@@ -256,7 +256,13 @@ func _limpiar_audio_emulado() -> void:
 	_audio_pendiente.clear()
 	if _emulador != null:
 		_emulador.call("drain_audio_pcm16")
-	if _audio_playback != null:
+	if _audio_emulado != null and _audio_emulado.playing:
+		# `clear_buffer()` falla con el generador activo: reiniciar el player
+		# descarta lo encolado y deja un playback nuevo y vacío.
+		_audio_emulado.stop()
+		_audio_emulado.play()
+		_audio_playback = _audio_emulado.get_stream_playback() as AudioStreamGeneratorPlayback
+	elif _audio_playback != null:
 		_audio_playback.clear_buffer()
 
 

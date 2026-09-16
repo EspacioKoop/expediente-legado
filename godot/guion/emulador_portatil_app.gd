@@ -30,21 +30,20 @@ void fragment() {
     vec4 base = texture(TEXTURE, UV);
     if (!filtro_lcd) {
         COLOR = base;
-        return;
+    } else {
+        vec2 uv_previa = clamp(
+            UV - vec2(TEXTURE_PIXEL_SIZE.x, 0.0),
+            vec2(0.0),
+            vec2(1.0)
+        );
+        vec4 arrastre = texture(TEXTURE, uv_previa);
+        float rejilla = 1.0;
+        if (mod(floor(FRAGCOORD.y), 3.0) < 1.0) {
+            rejilla = 0.92;
+        }
+        vec3 rgb = mix(base.rgb, arrastre.rgb, 0.06) * rejilla;
+        COLOR = vec4(rgb, base.a);
     }
-
-    vec2 uv_previa = clamp(
-        UV - vec2(TEXTURE_PIXEL_SIZE.x, 0.0),
-        vec2(0.0),
-        vec2(1.0)
-    );
-    vec4 arrastre = texture(TEXTURE, uv_previa);
-    float rejilla = 1.0;
-    if (mod(floor(FRAGCOORD.y), 3.0) < 1.0) {
-        rejilla = 0.92;
-    }
-    vec3 rgb = mix(base.rgb, arrastre.rgb, 0.06) * rejilla;
-    COLOR = vec4(rgb, base.a);
 }
 """
 
