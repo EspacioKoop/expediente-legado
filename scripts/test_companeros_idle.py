@@ -23,7 +23,10 @@ class CompanerosIdleTest(unittest.TestCase):
         self.assertIn("AMPLITUD_RESPIRACION", self.idle)
         self.assertIn("objetivo.scale = _escala_base", self.idle)
         self.assertIn("objetivo.rotation.y = _rotacion_base", self.idle)
-        self.assertNotIn("position =", self.idle)
+        # Sentarse (#134) mueve el cuerpo al asiento; al desmontarse vuelve
+        # exactamente a su sitio.
+        self.assertIn("objetivo.position = _posicion_original", self.idle)
+        self.assertIn("objetivo.rotation.y = _rotacion_original", self.idle)
 
     def test_reduccion_movimiento_es_preferencia_y_no_jornada(self):
         self.assertIn("PreferenciasSiga.cargar()", self.controller)
