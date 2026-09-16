@@ -133,10 +133,7 @@ static func decorado(carta_id: String = "") -> Dictionary:
 		cara.call(-GROSOR - 0.003, Vector3(ancho - margen, alto - margen, 0.002), DORSO_MARCA),
 		cara.call(GROSOR, Vector3(ancho, alto, 0.004), FRENTE, true),
 		cara.call(
-			GROSOR + 0.003,
-			Vector3(ancho - margen, alto - margen, 0.002),
-			FRENTE_MARCA,
-			true
+			GROSOR + 0.003, Vector3(ancho - margen, alto - margen, 0.002), FRENTE_MARCA, true
 		),
 	]
 	var mesa := MesaCinematica.con(
