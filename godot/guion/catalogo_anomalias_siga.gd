@@ -169,8 +169,9 @@ func _mostrar_ficha(entrada: Dictionary) -> void:
 	_titulo.text = String(entrada.get("titulo", "Anomalía registrada"))
 	_origen.text = "Origen material: %s" % String(entrada.get("origen_tipo", "no clasificado"))
 	_descripcion.text = String(entrada.get("descripcion", "Registro observacional sin comentario."))
-	_representacion.text = "Representación archivada: %s" % String(
-		entrada.get("nota_visual", "sin miniatura disponible")
+	_representacion.text = (
+		"Representación archivada: %s"
+		% String(entrada.get("nota_visual", "sin miniatura disponible"))
 	)
 
 
@@ -219,7 +220,10 @@ func _id_seleccionado() -> String:
 
 
 func _firma_actual() -> String:
-	return "%s|%s" % [
-		JSON.stringify(_estado.get(CatalogoAnomalias.CLAVE_TOTAL, [])),
-		JSON.stringify(_estado.get(CatalogoAnomalias.CLAVE_VUELTA, [])),
-	]
+	return (
+		"%s|%s"
+		% [
+			JSON.stringify(_estado.get(CatalogoAnomalias.CLAVE_TOTAL, [])),
+			JSON.stringify(_estado.get(CatalogoAnomalias.CLAVE_VUELTA, [])),
+		]
+	)
