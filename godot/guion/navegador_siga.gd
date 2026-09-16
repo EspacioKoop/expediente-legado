@@ -336,8 +336,10 @@ func _texto_portada_prensa(portada: Dictionary) -> String:
 				if dato_valor is Dictionary:
 					var dato := dato_valor as Dictionary
 					bloques.append(
-						tr("NAVEGADOR_PRENSA_DATO")
-						% [String(dato.get("etiqueta", "")), String(dato.get("valor", ""))]
+						(
+							tr("NAVEGADOR_PRENSA_DATO")
+							% [String(dato.get("etiqueta", "")), String(dato.get("valor", ""))]
+						)
 					)
 		var opinion := String(tratamiento.get("opinion", "")).strip_edges()
 		if not opinion.is_empty():
@@ -347,9 +349,7 @@ func _texto_portada_prensa(portada: Dictionary) -> String:
 
 func _renderizar_enlaces(recurso: Dictionary) -> void:
 	for destino in _indice.enlaces_desde(String(recurso.get("id", ""))):
-		var indice_item := _enlaces.add_item(
-			String(destino.get("titulo", tr("NAVEGADOR_ENLACE")))
-		)
+		var indice_item := _enlaces.add_item(String(destino.get("titulo", tr("NAVEGADOR_ENLACE"))))
 		_enlaces.set_item_metadata(indice_item, String(destino.get("url", "")))
 
 
