@@ -12,6 +12,7 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [autoload]
 
+MezclaAudio="*res://guion/mezcla_audio.gd"
 MenuGlobal="*res://guion/menu_global.gd"
 VestuarioHumano3D="*res://guion/vestuario_humano_3d.gd"
 
