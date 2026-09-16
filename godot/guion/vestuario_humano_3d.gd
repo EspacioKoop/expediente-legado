@@ -200,12 +200,6 @@ func _vestir_si_persona(pieza: Node) -> void:
 	if esqueleto == null or esqueleto.has_meta(MARCA):
 		return
 
-	var cadera := _buscar_hueso(esqueleto, ["Hips", "Pelvis"])
-	var pecho := _buscar_hueso(esqueleto, ["Spine2", "Chest", "UpperChest", "Spine1", "Spine"])
-	var cabeza := _buscar_hueso(esqueleto, ["Head"])
-	if cadera < 0 or pecho < 0 or cabeza < 0:
-		return
-
 	# La identidad del roster vive en Companeros. El material conserva exactamente
 	# su color declarado, así que puede usarse como puente sin copiar ids ni
 	# depender de Node.name/orden de instanciación. Figuras ajenas al roster usan
@@ -213,7 +207,23 @@ func _vestir_si_persona(pieza: Node) -> void:
 	var color_base := _color_base(pieza)
 	var identidad := _identidad_por_color(color_base)
 	var clave := String(pieza.get_parent().name if pieza.get_parent() != null else pieza.name)
-	var perfil := _perfil_para(identidad, clave)
+	vestir(pieza, _perfil_para(identidad, clave), color_base, identidad)
+
+
+## Viste [param pieza] con un perfil explícito en vez del resuelto por roster.
+## Lo usa el protagonista (#701), cuyo cuerpo y prenda salen de su ficha. Tras
+## vestirla, la marca impide que el pase automático la vuelva a vestir.
+## Devuelve falso si no es una figura con los huesos esperados o ya está vestida.
+func vestir(pieza: Node, perfil: Dictionary, color_base: Color, identidad: String) -> bool:
+	var esqueleto := _buscar_esqueleto(pieza)
+	if esqueleto == null or esqueleto.has_meta(MARCA):
+		return false
+	var cadera := _buscar_hueso(esqueleto, ["Hips", "Pelvis"])
+	var pecho := _buscar_hueso(esqueleto, ["Spine2", "Chest", "UpperChest", "Spine1", "Spine"])
+	var cabeza := _buscar_hueso(esqueleto, ["Head"])
+	if cadera < 0 or pecho < 0 or cabeza < 0:
+		return false
+
 	var color_chaqueta := color_base.darkened(0.24)
 	var color_camisa := color_base.lightened(0.22)
 	var color_pantalon := color_base.darkened(0.34)
@@ -285,6 +295,7 @@ func _vestir_si_persona(pieza: Node) -> void:
 
 	esqueleto.set_meta(MARCA, String(perfil["nombre"]))
 	esqueleto.set_meta(MARCA_IDENTIDAD, identidad)
+	return true
 
 
 func _perfil_para(identidad: String, clave: String) -> Dictionary:

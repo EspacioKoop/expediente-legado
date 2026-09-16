@@ -1,16 +1,52 @@
 ## Cuerpo visual del protagonista para primera persona.
 ##
-## Es deliberadamente independiente de CharacterBody3D: no crea colisiones ni
-## cambia la escala del caminante. Su trabajo es que mirar hacia abajo revele
-## una persona y no una cámara flotante. El perfil lo entrega quien ya tiene la
-## partida cargada (`DiaApp`): este nodo no lee ni escribe guardados.
+## Es la misma figura que los compañeros —`persona.fbx`, vestida por el pase de
+## #275 y animada con UAL— para que mirar hacia abajo revele a una persona del
+## mismo mundo y no a un maniquí de cajas. Sigue siendo deliberadamente visual:
+## no crea colisiones ni cambia la escala del caminante. El perfil lo entrega
+## quien ya tiene la partida cargada (`DiaApp`): este nodo no lee ni escribe
+## guardados.
 class_name CuerpoJugador3D
 extends Node3D
 
-const SHADER := "res://arte/psx.gdshader"
+## Por encima, se corre (VELOCIDAD 2.6 anda; VELOCIDAD_CORRER 4.4 corre).
+const UMBRAL_ANDAR := 0.25
+const UMBRAL_CORRER := 3.4
+## Velocidad a la que `Walk_Formal` de UAL pisa sin patinar.
+const PASO_ANDAR := 1.4
+## Los pies van al suelo de la cápsula (alto 1.7 centrada en el origen). El
+## cuello queda bajo la cámara (1.50 m): cuello y cabeza se ocultan y el cuerpo
+## se retrasa para que, al mirar abajo, se vean brazos, manos y piernas y no la
+## parte alta de los hombros desde dentro. Se comparó en captura con ocultar
+## todo el torso: dejaba un muñón puntiagudo bajo la cámara.
+const PIES_Y := -0.85
+const RETRASO_Z := 0.26
+## A escala 1 el cuello queda 12 cm bajo la cámara y los hombros llenan la vista
+## al mirar abajo. Un 6 % menos deja aire sin que los pies se separen del suelo.
+const ESCALA_BASE := 0.94
+## La cámara agachada baja 0.35 m: el cuerpo baja lo mismo para no atravesarla.
+const BAJADA_AGACHADO := -0.35
+const IDENTIDAD := "jugador"
 
 var perfil: Dictionary = {}
+var estado := ""
+
 var _camara: Camera3D
+var _figura: Node3D
+var _reproductor: AnimationPlayer
+
+
+## Encoge el hueso `Neck` (y con él la cabeza) después de cada animación. La
+## cámara vive donde estaría la cabeza: sin esto, el interior del cráneo y el
+## cuello tapan la vista al girar.
+class OcultarCabeza:
+	extends SkeletonModifier3D
+
+	func _process_modification() -> void:
+		var esqueleto := get_skeleton()
+		var cuello := esqueleto.find_bone("Neck") if esqueleto != null else -1
+		if cuello >= 0:
+			esqueleto.set_bone_pose_scale(cuello, Vector3.ONE * 0.001)
 
 
 func _ready() -> void:
@@ -22,196 +58,116 @@ func _ready() -> void:
 func aplicar(valor: Dictionary) -> void:
 	perfil = PerfilJugador.completar(valor)
 	for hijo in get_children():
+		remove_child(hijo)
 		hijo.queue_free()
+	_figura = null
+	_reproductor = null
+	estado = ""
 	_construir()
 
 
+func figura() -> Node3D:
+	return _figura
+
+
 func _process(delta: float) -> void:
-	# Al agacharse la cámara baja mucho. Se baja también la capa visual para que
-	# el pecho no atraviese el near plane; la cápsula y la física no se tocan.
-	if _camara == null:
+	if _figura == null:
 		return
-	var objetivo := -0.16 if _camara.position.y < 0.5 else 0.0
+	var objetivo := BAJADA_AGACHADO if _camara != null and _camara.position.y < 0.5 else 0.0
 	position.y = lerpf(position.y, objetivo, minf(1.0, delta * 12.0))
+	var cuerpo := get_parent() as CharacterBody3D
+	var velocidad := Vector2(cuerpo.velocity.x, cuerpo.velocity.z).length() if cuerpo else 0.0
+	animar(velocidad)
+
+
+## Elige el gesto según la velocidad horizontal. Solo reinicia la animación
+## cuando cambia de estado; al andar, ajusta el ritmo para que no patine.
+func animar(velocidad: float) -> void:
+	var nuevo := "reposo"
+	if velocidad >= UMBRAL_CORRER:
+		nuevo = "correr"
+	elif velocidad >= UMBRAL_ANDAR:
+		nuevo = "andar"
+	if nuevo != estado:
+		estado = nuevo
+		match nuevo:
+			"andar":
+				if not AnimacionesUAL.reproducir(_figura, "andar"):
+					Modelos._animar(_figura, "walk")
+			"correr":
+				Modelos._animar(_figura, "run")
+			_:
+				Modelos._animar(_figura, "idle")
+	if _reproductor != null:
+		_reproductor.speed_scale = (
+			clampf(velocidad / PASO_ANDAR, 0.6, 2.0) if estado == "andar" else 1.0
+		)
 
 
 func _construir() -> void:
 	var apariencia: Dictionary = perfil["apariencia"]
-	var base := PerfilJugador.perfil_cuerpo(String(apariencia["cuerpo"]))
-	var altura := float(apariencia["altura"])
-	var ancho := float(base["ancho"])
-	var fondo := float(base["fondo"])
-	var hombros := float(base["hombros"]) * float(apariencia["hombros"])
-	var cintura := float(base["cintura"]) * float(apariencia["cintura"])
-	var extremidad := float(base["extremidad"])
 	var piel := Color.from_string(String(apariencia["piel"]), Color("c9916b"))
 	var ropa := Color.from_string(String(apariencia["ropa"]), Color("59616b"))
-	var pantalon := ropa.darkened(0.30)
-	var zapatos := ropa.darkened(0.55)
 
-	# El cuello es la única piel superior visible desde primera persona. No se
-	# modela cabeza aquí: la cámara vive donde estaría y una cabeza local daría
-	# clipping. El perfil sí conserva pelo/peinado para espejos/cinemáticas futuras.
-	_cilindro("Cuello", Vector3(0.0, 0.43 * altura, 0.0), 0.075 * ancho, 0.13 * altura, piel)
+	var soporte := Node3D.new()
+	soporte.name = "Figura"
+	# persona.fbx mira a +Z; el caminante, a -Z.
+	soporte.rotation.y = PI
+	soporte.position = Vector3(0.0, PIES_Y, RETRASO_Z)
+	var altura := float(apariencia["altura"])
+	soporte.scale = Vector3.ONE * ESCALA_BASE * altura
+	add_child(soporte)
 
-	var torso_ancho := 0.42 * ancho * hombros
-	var torso_fondo := 0.22 * fondo
-	var torso_alto := 0.54 * altura
-	_caja(
-		"TorsoRopa",
-		Vector3(0.0, 0.12 * altura, 0.0),
-		Vector3(torso_ancho, torso_alto, torso_fondo),
-		ropa
-	)
+	# Como en la oficina, el maniquí se tiñe del color de la ropa y el vestuario
+	# pone encima chaqueta más oscura y camisa más clara.
+	if not Modelos.persona(soporte, "persona", ropa):
+		return
+	_figura = soporte.get_child(0) as Node3D
+	_reproductor = Modelos._reproductor(_figura)
+	var esqueleto := Modelos._esqueleto(_figura)
+	if esqueleto == null:
+		return
 
-	# Una segunda pieza de hombros evita que delgado/robusto sean solo un cambio
-	# de escala uniforme y mantiene una silueta noventera low-poly legible.
-	_caja(
-		"HombrosRopa",
-		Vector3(0.0, 0.34 * altura, 0.0),
-		Vector3(torso_ancho * 1.10, 0.11 * altura, torso_fondo * 1.03),
-		ropa.lightened(0.03)
-	)
+	var vestuario := get_node_or_null("/root/VestuarioHumano3D")
+	if vestuario != null:
+		vestuario.vestir(_figura, PerfilJugador.perfil_vestuario(apariencia), ropa, IDENTIDAD)
+		# La hombrera queda a la altura de la cámara: desde dentro es una losa.
+		var hombros := esqueleto.find_child("VestuarioHombros", true, false) as Node3D
+		if hombros != null:
+			hombros.visible = false
+	else:
+		# Sin el autoload (una escena suelta) se marca igual: nadie más la viste.
+		esqueleto.set_meta("vestuario_identidad_275", IDENTIDAD)
 
-	var prenda := String(apariencia["prenda"])
-	_detalle_prenda(prenda, torso_ancho, torso_fondo, torso_alto, altura, ropa)
+	var oculta := OcultarCabeza.new()
+	oculta.name = "OcultarCabeza"
+	esqueleto.add_child(oculta)
 
-	var cadera_ancho := 0.30 * ancho * cintura
-	_caja(
-		"Cadera",
-		Vector3(0.0, -0.20 * altura, 0.0),
-		Vector3(cadera_ancho, 0.19 * altura, torso_fondo * 0.92),
-		pantalon
-	)
-
-	var brazo_x := torso_ancho * 0.62
-	var brazo_radio := 0.055 * extremidad
-	for lado in [-1.0, 1.0]:
-		var sufijo := "I" if lado < 0.0 else "D"
-		_capsula(
-			"Brazo" + sufijo,
-			Vector3(brazo_x * lado, 0.08 * altura, 0.0),
-			brazo_radio,
-			0.48 * altura,
-			ropa
-		)
-		_esfera(
-			"Mano" + sufijo,
-			Vector3(brazo_x * lado, -0.19 * altura, 0.0),
-			Vector3(0.075, 0.095, 0.065) * extremidad,
-			piel
-		)
-
-	var pierna_x := cadera_ancho * 0.24
-	var pierna_radio := 0.072 * extremidad
-	for lado in [-1.0, 1.0]:
-		var sufijo := "I" if lado < 0.0 else "D"
-		_capsula(
-			"Pierna" + sufijo,
-			Vector3(pierna_x * lado, -0.55 * altura, 0.0),
-			pierna_radio,
-			0.62 * altura,
-			pantalon
-		)
-		_caja(
-			"Zapato" + sufijo,
-			Vector3(pierna_x * lado, -0.84 * altura, -0.045),
-			Vector3(0.15, 0.09, 0.25) * extremidad,
-			zapatos
-		)
+	for hueso in ["LeftHand", "RightHand"]:
+		_mano(esqueleto, hueso, piel)
+	animar(0.0)
 
 
-## Las alturas van en la misma proporción que torso y hombros: con una altura
-## visual distinta de 1, cuello y solapas siguen pegados a la prenda.
-func _detalle_prenda(
-	prenda: String, ancho: float, fondo: float, alto: float, altura: float, color: Color
-) -> void:
-	match prenda:
-		"jersey":
-			_caja(
-				"CuelloJersey",
-				Vector3(0.0, 0.38 * altura, -fondo * 0.03),
-				Vector3(ancho * 0.34, alto * 0.10, fondo * 1.05),
-				color.lightened(0.05)
-			)
-		"chaqueta":
-			_caja(
-				"SolapaI",
-				Vector3(-ancho * 0.12, 0.19 * altura, -fondo * 0.51),
-				Vector3(ancho * 0.14, alto * 0.55, fondo * 0.06),
-				color.darkened(0.08)
-			)
-			_caja(
-				"SolapaD",
-				Vector3(ancho * 0.12, 0.19 * altura, -fondo * 0.51),
-				Vector3(ancho * 0.14, alto * 0.55, fondo * 0.06),
-				color.darkened(0.08)
-			)
-		_:
-			_caja(
-				"CamisaCentro",
-				Vector3(0.0, 0.16 * altura, -fondo * 0.51),
-				Vector3(ancho * 0.24, alto * 0.70, fondo * 0.055),
-				color.lightened(0.20)
-			)
-
-
-func _caja(nombre: String, posicion: Vector3, tam: Vector3, color: Color) -> void:
+## Las manos son lo que más se ve en primera persona: van en su tono de piel.
+func _mano(esqueleto: Skeleton3D, hueso: String, piel: Color) -> void:
+	var indice := esqueleto.find_bone(hueso)
+	if indice < 0:
+		return
+	var enganche := BoneAttachment3D.new()
+	enganche.name = "Mano" + hueso
+	enganche.bone_name = hueso
+	esqueleto.add_child(enganche)
 	var malla := BoxMesh.new()
-	malla.size = tam
+	# El esqueleto va escalado dentro del fbx: el tamaño se expresa en metros
+	# del mundo y se deshace la escala acumulada del hueso.
+	var escala := esqueleto.global_transform.basis.get_scale().x
+	malla.size = Vector3(0.085, 0.11, 0.04) / maxf(escala, 0.0001)
 	var instancia := MeshInstance3D.new()
-	instancia.name = nombre
+	instancia.name = "Piel"
 	instancia.mesh = malla
-	instancia.position = posicion
-	instancia.material_override = _material(color)
-	add_child(instancia)
-
-
-func _capsula(nombre: String, posicion: Vector3, radio: float, alto: float, color: Color) -> void:
-	var malla := CapsuleMesh.new()
-	malla.radius = radio
-	malla.height = maxf(alto, radio * 2.05)
-	malla.radial_segments = 6
-	malla.rings = 3
-	var instancia := MeshInstance3D.new()
-	instancia.name = nombre
-	instancia.mesh = malla
-	instancia.position = posicion
-	instancia.material_override = _material(color)
-	add_child(instancia)
-
-
-func _esfera(nombre: String, posicion: Vector3, escala: Vector3, color: Color) -> void:
-	var malla := SphereMesh.new()
-	malla.radial_segments = 6
-	malla.rings = 4
-	malla.height = 1.0
-	malla.radius = 0.5
-	var instancia := MeshInstance3D.new()
-	instancia.name = nombre
-	instancia.mesh = malla
-	instancia.position = posicion
-	instancia.scale = escala
-	instancia.material_override = _material(color)
-	add_child(instancia)
-
-
-func _cilindro(nombre: String, posicion: Vector3, radio: float, alto: float, color: Color) -> void:
-	var malla := CylinderMesh.new()
-	malla.top_radius = radio
-	malla.bottom_radius = radio * 1.04
-	malla.height = alto
-	malla.radial_segments = 6
-	var instancia := MeshInstance3D.new()
-	instancia.name = nombre
-	instancia.mesh = malla
-	instancia.position = posicion
-	instancia.material_override = _material(color)
-	add_child(instancia)
-
-
-func _material(color: Color) -> ShaderMaterial:
+	instancia.position = Vector3(0.0, 0.05, 0.0) / maxf(escala, 0.0001)
 	var material := ShaderMaterial.new()
-	material.shader = load(SHADER)
-	material.set_shader_parameter("color_base", color)
-	return material
+	material.shader = load("res://arte/psx.gdshader")
+	material.set_shader_parameter("color_base", piel)
+	instancia.material_override = material
+	enganche.add_child(instancia)
