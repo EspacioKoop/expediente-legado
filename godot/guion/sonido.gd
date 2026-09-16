@@ -35,13 +35,39 @@ const CATALOGO := {
 	"marcar": "switch_002.ogg",
 }
 
+## Gestos físicos que se repiten mucho —abrir el mismo archivador diez veces al
+## día—. Cada uno es una familia de tomas de **Impact Sounds** de Kenney: el
+## `AudioStreamRandomizer` alterna toma y tono para que la décima vez no sea un
+## calco de la primera.
+const FAMILIAS := {
+	"abrir": ["impactMetal_light_000.ogg", "impactMetal_light_001.ogg"],
+	"cerrar": ["impactMetal_medium_000.ogg"],
+	"coger": ["impactSoft_medium_000.ogg", "impactSoft_medium_001.ogg"],
+}
+const VARIACION_TONO := 1.08
+
 static var _impacto_careo: AudioStreamWAV
+static var _familias := {}
 
 
 static func stream(nombre: String) -> AudioStream:
+	if FAMILIAS.has(nombre):
+		return _familia(nombre)
 	if not CATALOGO.has(nombre):
 		return null
 	return load(RUTA + CATALOGO[nombre])
+
+
+static func _familia(nombre: String) -> AudioStreamRandomizer:
+	if _familias.has(nombre):
+		return _familias[nombre]
+	var familia := AudioStreamRandomizer.new()
+	familia.random_pitch = VARIACION_TONO
+	familia.playback_mode = AudioStreamRandomizer.PLAYBACK_RANDOM_NO_REPEATS
+	for fichero in FAMILIAS[nombre]:
+		familia.add_stream(-1, load(RUTA + fichero))
+	_familias[nombre] = familia
+	return familia
 
 
 ## Un paso, el que toque. [param cual] hace la elección determinista para quien
@@ -109,6 +135,26 @@ static func sonar_stream(nodo: Node, pista: AudioStream) -> void:
 	voz.play()
 
 
+## Suena una vez donde está [param origen], en el espacio 3D.
+##
+## La voz no cuelga del objeto sino de la escena: quien la pide puede
+## desaparecer en el mismo gesto —un recogible se libera al cogerlo— y el
+## sonido de cogerlo no debe cortarse con él.
+static func sonar_en(origen: Node3D, nombre: String) -> void:
+	var pista := stream(nombre)
+	if pista == null or origen == null or not origen.is_inside_tree():
+		return
+	var anfitrion: Node = origen.get_tree().current_scene
+	if anfitrion == null:
+		anfitrion = origen.get_parent()
+	var voz := AudioStreamPlayer3D.new()
+	voz.stream = pista
+	voz.finished.connect(voz.queue_free)
+	anfitrion.add_child(voz)
+	voz.global_position = origen.global_position
+	voz.play()
+
+
 ## Todos los ficheros que el catálogo puede pedir. Para que una prueba
 ## compruebe que existen TODOS: un nombre que apunta a un fichero que no está
 ## no falla al arrancar, falla el día que alguien abre esa puerta.
@@ -116,4 +162,6 @@ static func ficheros() -> Array:
 	var todos := PASOS.duplicate()
 	for nombre in CATALOGO:
 		todos.append(CATALOGO[nombre])
+	for nombre in FAMILIAS:
+		todos.append_array(FAMILIAS[nombre])
 	return todos

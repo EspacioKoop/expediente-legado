@@ -32,9 +32,25 @@ const NOMBRES_VERBO := {
 	Verbo.GOLPEAR: "Golpear",
 }
 
+## Solo los gestos físicos suenan por defecto. `EXAMINAR` es mirar, `USAR` cubre
+## desde una consola hasta una compuerta onírica y `GOLPEAR` ya lo sonoriza su
+## dueño: darles un ruido genérico sería mentir sobre lo que pasa.
+const SONIDO_POR_VERBO := {
+	Verbo.ABRIR: "abrir",
+	Verbo.CERRAR: "cerrar",
+	Verbo.COGER: "coger",
+	Verbo.DAR: "coger",
+	Verbo.LEER: "documento",
+	Verbo.ENCENDER: "marcar",
+}
+## Valor de [member sonido] que calla el objeto aunque su verbo suene.
+const SIN_SONIDO := "-"
+
 @export var verbo := Verbo.USAR
 @export var nombre_objeto := ""
 @export var habilitado := true
+## Nombre del catálogo de `Sonido`. Vacío usa el del verbo.
+@export var sonido := ""
 
 
 func texto_accion() -> String:
@@ -48,7 +64,16 @@ func interactuar(actor: Node) -> bool:
 	if not habilitado:
 		return false
 	activado.emit(actor)
+	Sonido.sonar_en(self, nombre_sonido())
 	return true
+
+
+func nombre_sonido() -> String:
+	if sonido == SIN_SONIDO:
+		return ""
+	if not sonido.is_empty():
+		return sonido
+	return String(SONIDO_POR_VERBO.get(verbo, ""))
 
 
 func _nombre_verbo(valor: int) -> String:
