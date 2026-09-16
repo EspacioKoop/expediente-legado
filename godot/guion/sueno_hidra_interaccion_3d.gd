@@ -110,8 +110,8 @@ func _actualizar_hotspots() -> void:
 	if _sintoma == null or _conexiones == null or _nodo == null:
 		return
 	var estado := estado_actual()
-	var terminada := estado.get("resuelta", false) == true
-	var nodo_legible := estado.get("nodo_legible", false) == true
+	var terminada: bool = estado.get("resuelta", false) == true
+	var nodo_legible: bool = estado.get("nodo_legible", false) == true
 	_sintoma.habilitado = _habilitada and not terminada
 	_conexiones.habilitado = _habilitada and not terminada
 	_nodo.habilitado = _habilitada and nodo_legible and not terminada
