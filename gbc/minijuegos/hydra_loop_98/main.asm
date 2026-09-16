@@ -15,6 +15,7 @@ DEF rLCDC  EQU $FF40
 DEF rLY    EQU $FF44
 DEF rBGP   EQU $FF47
 DEF rOBP0  EQU $FF48
+DEF rVBK   EQU $FF4F
 DEF rBCPS  EQU $FF68
 DEF rBCPD  EQU $FF69
 DEF rOCPS  EQU $FF6A
@@ -52,22 +53,30 @@ DEF NUM_PENDIENTES        EQU 15
 DEF MAX_DIBUJOS_VBLANK    EQU 3
 DEF MARCA_COMPLETADO      EQU $A5
 
-DEF TILE_CABEZA   EQU 1
-DEF TILE_HUECO    EQU 5
-DEF TILE_NODO     EQU 9
-DEF TILE_SELLO    EQU 13
-DEF TILE_GLIFO    EQU 17
-DEF TILE_DIGITO   EQU 20
-DEF TILE_L        EQU 30
-DEF TILE_O        EQU 31
-DEF TILE_P        EQU 32
-DEF TILE_R        EQU 33
-DEF TILE_T        EQU 34
-DEF TILE_ICONO    EQU 35
-DEF TILE_RELOJ_ON EQU 36
-DEF TILE_RELOJ_OFF EQU 37
-DEF TILE_CURSOR   EQU 38
-DEF TILE_DESTELLO EQU 39
+; Tiles generados desde la maqueta A «Pantano de Lerna».
+DEF TILE_AGUA           EQU 0
+DEF TILE_ONDA           EQU 1
+DEF TILE_CABEZA         EQU 3
+DEF TILE_HUECO          EQU 9
+DEF TILE_NODO           EQU 15
+DEF TILE_SELLO          EQU 21
+DEF TILE_CUELLO_LUZ     EQU 27
+DEF TILE_ZARCILLO       EQU 29
+DEF TILE_BARRO          EQU 31
+DEF TILE_PLACA_AGUA     EQU 34
+DEF TILE_PLACA_DUDA     EQU 35
+DEF TILE_GLIFO          EQU 36
+DEF TILE_DIGITO         EQU 39
+DEF TILE_L              EQU 49
+DEF TILE_ICONO          EQU 54
+DEF TILE_RELOJ_ON       EQU 55
+DEF TILE_CURSOR         EQU 57
+DEF TILE_DESTELLO       EQU 58
+DEF TILE_O              EQU 50
+DEF TILE_P              EQU 51
+DEF TILE_R              EQU 52
+DEF TILE_T              EQU 53
+DEF TILE_RELOJ_OFF      EQU 56
 
 SECTION "VBlank", ROM0[$0040]
     reti
@@ -146,28 +155,17 @@ PrepararTitulo:
     ld de, VRAM_TILES
     ld bc, HydraLoopTitleTilesFin - HydraLoopTitleTiles
     call CopiarMemoria
-
+    ; La portada usa solo la paleta 0: se borran los atributos de la partida.
+    ld a, 1
+    ldh [rVBK], a
+    call LimpiarBG
+    xor a
+    ldh [rVBK], a
     ld hl, HydraLoopTitleMap
-    ld de, BG_MAP
-    ld c, 18
-.fila:
-    ld b, 20
-.columna:
-    ld a, [hli]
-    ld [de], a
-    inc de
-    dec b
-    jr nz, .columna
-    ld a, e
-    add 12
-    ld e, a
-    jr nc, .sin_acarreo
-    inc d
-.sin_acarreo:
-    dec c
-    jr nz, .fila
+    call CopiarMapa
 
     ld hl, HydraLoopTitlePalette
+    ld b, 8
     call CargarPaletaBG
     ld a, ESTADO_TITULO
     ld [wEstado], a
@@ -182,8 +180,19 @@ IniciarNivel:
     ld de, VRAM_TILES
     ld bc, TilesJuegoFin - TilesJuego
     call CopiarMemoria
+    ; Atributos CGB estaticos: agua, hidra, raiz, placas y HUD. En DMG caen en
+    ; el mapa normal y se sobrescriben justo despues con LimpiarBG y el fondo.
+    ld a, 1
+    ldh [rVBK], a
+    ld hl, AtributosJuego
+    call CopiarMapa
+    xor a
+    ldh [rVBK], a
     call LimpiarBG
+    ld hl, FondoJuego
+    call CopiarMapa
     ld hl, PaletaJuego
+    ld b, PaletaJuegoFin - PaletaJuego
     call CargarPaletaBG
     ld a, $80
     ldh [rOCPS], a
@@ -256,6 +265,13 @@ ActualizarJuego:
     ; Observar cuesta tiempo: la hidra sigue creciendo mientras tanto.
     dec a
     ld [wBloqueo], a
+    jr nz, .reloj
+    ld a, [wHuecoLeido]
+    ld e, a
+    ld d, 0
+    ld hl, wPendientes
+    add hl, de
+    ld [hl], 1
     jr .reloj
 .entrada:
     call MoverCursor
@@ -316,6 +332,8 @@ Observar:
     ret z
     dec a
     ld [wNodoLeido], a
+    ld a, e
+    ld [wHuecoLeido], a
     ld hl, wObservadas
     add hl, de
     ld [hl], 1
@@ -625,6 +643,21 @@ Desbordar:
 PantallaFinal:
     call ApagarLCD
     call BorrarOAM
+    ; Agua de fondo y franja oscura (paleta HUD) en las filas 5-9.
+    ld a, 1
+    ldh [rVBK], a
+    call LimpiarBG
+    ld hl, BG_MAP + 5 * 32
+    ld bc, 5 * 32
+.franja:
+    ld a, 4
+    ld [hli], a
+    dec bc
+    ld a, b
+    or c
+    jr nz, .franja
+    xor a
+    ldh [rVBK], a
     call LimpiarBG
     ld hl, BG_MAP + (6 * 32) + 8
     call EscribirLoop
@@ -711,27 +744,48 @@ DibujarHueco:
     ld a, b
     or a
     jr z, .vacio
-    ; La marca de raiz solo aparece despues de observar la cabeza.
+    ; Placa: interrogacion hasta observar, despues la marca de su raiz.
     ld a, c
     or a
-    jr z, .sin_marca
+    ld a, TILE_PLACA_DUDA
+    jr z, .placa
     ld a, b
     add TILE_GLIFO - 1
-.sin_marca:
+.placa:
     ld c, a
     ld b, TILE_CABEZA
     jr .direccion
 .vacio:
-    ld c, 0
+    ld c, TILE_PLACA_AGUA
     ld b, TILE_HUECO
 .direccion:
+    push bc
+    push de
     ld hl, DireccionesHuecos
     add hl, de
     add hl, de
     ld a, [hli]
     ld h, [hl]
     ld l, a
-    jp Pintar2x2
+    call Pintar2x3
+    pop de
+    pop bc
+    ; Mientras dura la lectura, el cuello de la cabeza observada se ilumina.
+    ld a, b
+    cp TILE_CABEZA
+    ret nz
+    ld a, [wBloqueo]
+    or a
+    ret z
+    ld a, [wHuecoLeido]
+    cp e
+    ret nz
+    dec hl
+    ld a, TILE_CUELLO_LUZ
+    ld [hli], a
+    inc a
+    ld [hl], a
+    ret
 
 DibujarNodo:
     sub NUM_HUECOS
@@ -755,20 +809,26 @@ DibujarNodo:
     ld h, [hl]
     ld l, a
 
-Pintar2x2:
-    ; HL=celda superior izquierda, B=primer tile, C=marca bajo el bloque.
+Pintar2x3:
+    ; HL=celda superior izquierda, B=primer tile de 6, C=placa a la derecha
+    ; de la fila central. Devuelve HL en la celda inferior derecha.
+    ld de, 31
     ld a, b
     ld [hli], a
     inc a
     ld [hl], a
-    ld de, 31
+    add hl, de
+    inc a
+    ld [hli], a
+    inc a
+    ld [hli], a
+    ld [hl], c
+    dec hl
     add hl, de
     inc a
     ld [hli], a
     inc a
     ld [hl], a
-    add hl, de
-    ld [hl], c
     ret
 
 DibujarHUD:
@@ -942,14 +1002,36 @@ CopiarMemoria:
     ret
 
 CargarPaletaBG:
+    ; HL=colores, B=bytes.
     ld a, $80
     ldh [rBCPS], a
-    ld b, 8
 .bucle:
     ld a, [hli]
     ldh [rBCPD], a
     dec b
     jr nz, .bucle
+    ret
+
+CopiarMapa:
+    ; HL=mapa 20x18 -> BG_MAP (o atributos si VBK=1).
+    ld de, BG_MAP
+    ld c, 18
+.fila:
+    ld b, 20
+.columna:
+    ld a, [hli]
+    ld [de], a
+    inc de
+    dec b
+    jr nz, .columna
+    ld a, e
+    add 12
+    ld e, a
+    jr nc, .sin_acarreo
+    inc d
+.sin_acarreo:
+    dec c
+    jr nz, .fila
     ret
 
 ConfigurarAudio:
@@ -997,31 +1079,32 @@ Vecinos:
     db 10, 12, 7, $FF
     db 11, $FF, 9, $FF
 
-; Cabezas 2x2 en filas 3 y 8, columnas 1/5/9/13/17; marca de raiz debajo.
+; Cabezas 2x3 en filas 2 y 7, columnas 1/5/9/13/17; placa en la fila central.
 DireccionesHuecos:
-FOR FILA, 3, 9, 5
+FOR FILA, 2, 8, 5
     FOR COL, 1, 18, 4
         dw BG_MAP + FILA * 32 + COL
     ENDR
 ENDR
 
-DEF FILA_NODOS EQU 13
+DEF FILA_NODOS EQU 12
 DireccionesNodos:
     dw BG_MAP + FILA_NODOS * 32 + 3
     dw BG_MAP + FILA_NODOS * 32 + 9
     dw BG_MAP + FILA_NODOS * 32 + 15
 
-; OAM Y/X: flecha a la izquierda de cada objetivo.
+; OAM Y/X: flecha a la izquierda de la fila central de cada bloque.
 PosicionesCursor:
-FOR FILA, 3, 9, 5
+FOR FILA, 2, 8, 5
     FOR COL, 1, 18, 4
-        db FILA * 8 + 20, COL * 8
+        db FILA * 8 + 24, COL * 8
     ENDR
 ENDR
-    db FILA_NODOS * 8 + 20, 3 * 8
-    db FILA_NODOS * 8 + 20, 9 * 8
-    db FILA_NODOS * 8 + 20, 15 * 8
+    db FILA_NODOS * 8 + 24, 3 * 8
+    db FILA_NODOS * 8 + 24, 9 * 8
+    db FILA_NODOS * 8 + 24, 15 * 8
 
+; Destello sobre las raices que suben de cada nodo.
 PosicionesDestello:
     db (FILA_NODOS - 1) * 8 + 16, 3 * 8 + 12
     db (FILA_NODOS - 1) * 8 + 16, 9 * 8 + 12
@@ -1037,8 +1120,16 @@ Niveles:
 TicksPorSegmento:
     db 60, 45, 40
 
+; 0 agua, 1 hidra, 2 raiz y barro, 3 placas, 4 HUD. Las cuatro primeras
+; comparten el azul profundo del agua como color 0: los bordes de bloque no
+; se notan y, en DMG, ese indice es el blanco del fondo.
 PaletaJuego:
-    dw $5B9A, $2A46, $18D8, $1042
+    dw $2D44, $3DE7, $52AD, $1881
+    dw $2D44, $1E66, $2373, $0CA1
+    dw $2D44, $2CED, $253C, $1044
+    dw $2D44, $1462, $1B1D, $6FDC
+    dw $1462, $2D44, $1B1D, $6FDC
+PaletaJuegoFin:
 
 PaletaCursor:
     dw $0000, $139F, $7FFF, $0000
@@ -1046,64 +1137,118 @@ PaletaCursor:
     INCLUDE "assets/title_palette.inc"
 
 TilesJuego:
-    ; 0 vacio
+    ; 0 agua lisa
     dw `00000000, `00000000, `00000000, `00000000
     dw `00000000, `00000000, `00000000, `00000000
-    ; 1-4 cabeza de hidra
-    dw `00000011, `00001111, `00011111, `00111311
-    dw `00111111, `00111111, `00011222, `00001122
-    dw `11000000, `11110000, `11111000, `11311100
-    dw `11111100, `11111100, `22211000, `22110000
-    dw `00000111, `00000111, `00001111, `00001111
-    dw `00011111, `00011111, `00111111, `00111111
-    dw `11100000, `11100000, `11110000, `11110000
-    dw `11111000, `11111000, `11111100, `11111100
-    ; 5-8 hueco: muñon cortado
+    ; 1-2 ondas de agua (2 variantes)
+    dw `00000000, `00000000, `00022200, `02200022
+    dw `00000000, `00000000, `00000000, `00000000
+    dw `00000000, `00000000, `00000000, `00000000
+    dw `00111000, `01000110, `00000000, `00000000
+    ; 3-8 cabeza de hidra con cuello, 2x3
+    dw `03000000, `31300000, `31130333, `03113111
+    dw `00311111, `03112111, `03123211, `03112111
+    dw `00000030, `00000313, `33303113, `11131130
+    dw `11111300, `11121130, `11232130, `11121130
+    dw `03111111, `00311111, `00031333, `00313333
+    dw `03132323, `03133333, `00313233, `00031111
+    dw `11111130, `11111300, `33313000, `33331300
+    dw `32323130, `33333130, `33231300, `11113000
+    dw `00003111, `00003121, `00003111, `00003212
+    dw `00003111, `00031121, `00311111, `03333333
+    dw `11130000, `21130000, `11130000, `12130000
+    dw `11130000, `21113000, `11111300, `33333330
+    ; 9-14 munon cortado sobre el agua, 2x3
     dw `00000000, `00000000, `00000000, `00000000
     dw `00000000, `00000000, `00000000, `00000000
     dw `00000000, `00000000, `00000000, `00000000
     dw `00000000, `00000000, `00000000, `00000000
     dw `00000000, `00000000, `00000000, `00000000
-    dw `00000000, `00000000, `00000333, `00003333
     dw `00000000, `00000000, `00000000, `00000000
-    dw `00000000, `00000000, `33300000, `33330000
-    ; 9-12 nodo raiz
-    dw `00033333, `00311111, `03111111, `31112111
-    dw `31121111, `31111111, `31111112, `31111111
-    dw `33333000, `11111300, `11111130, `11211113
-    dw `11112113, `11111113, `21111113, `11111113
-    dw `31111111, `31211111, `31111111, `31111121
-    dw `03111111, `00311111, `00033333, `00000000
-    dw `11111113, `11111213, `11111113, `12111113
-    dw `11111130, `11111300, `33333000, `00000000
-    ; 13-16 nodo sellado
-    dw `00033333, `00333333, `03322333, `33332233
-    dw `33333322, `33333332, `33333333, `33333333
-    dw `33333000, `33333300, `33322330, `33223333
-    dw `22333333, `23333333, `33333333, `33333333
-    dw `33333333, `33333333, `33333332, `33333322
-    dw `03332233, `00322333, `00033333, `00000000
-    dw `33333333, `33333333, `23333333, `22333333
-    dw `33223330, `33322300, `33333000, `00000000
-    ; 17-19 marcas de raiz: circulo, cuadrado, triangulo
-    dw `00000000, `00333300, `03300330, `03000030
-    dw `03000030, `03300330, `00333300, `00000000
-    dw `00000000, `03333330, `03000030, `03000030
-    dw `03000030, `03000030, `03333330, `00000000
-    dw `00000000, `00033000, `00300300, `00300300
-    dw `03000030, `03000030, `33333333, `00000000
-    ; 20-29 digitos 0-9
-    db $1C,$1C,$22,$22,$26,$26,$2A,$2A,$32,$32,$22,$22,$1C,$1C,$00,$00
-    db $08,$08,$18,$18,$08,$08,$08,$08,$08,$08,$08,$08,$1C,$1C,$00,$00
-    db $1C,$1C,$22,$22,$02,$02,$04,$04,$08,$08,$10,$10,$3E,$3E,$00,$00
-    db $3C,$3C,$02,$02,$02,$02,$1C,$1C,$02,$02,$02,$02,$3C,$3C,$00,$00
-    db $04,$04,$0C,$0C,$14,$14,$24,$24,$3E,$3E,$04,$04,$04,$04,$00,$00
-    db $3E,$3E,$20,$20,$20,$20,$3C,$3C,$02,$02,$02,$02,$3C,$3C,$00,$00
-    db $1C,$1C,$20,$20,$20,$20,$3C,$3C,$22,$22,$22,$22,$1C,$1C,$00,$00
-    db $3E,$3E,$02,$02,$04,$04,$08,$08,$10,$10,$10,$10,$10,$10,$00,$00
-    db $1C,$1C,$22,$22,$22,$22,$1C,$1C,$22,$22,$22,$22,$1C,$1C,$00,$00
-    db $1C,$1C,$22,$22,$22,$22,$1E,$1E,$02,$02,$02,$02,$1C,$1C,$00,$00
-    ; 30-34 L O P R T
+    dw `00000000, `00000000, `00000000, `00000000
+    dw `00000000, `00000000, `00000000, `00000000
+    dw `00000000, `00000000, `00000333, `00003222
+    dw `00003121, `00003111, `00031111, `03333333
+    dw `00000000, `00000000, `33300000, `22230000
+    dw `21130000, `11130000, `11113000, `33333330
+    ; 15-20 nudo de raiz con nucleo vivo, 2x3
+    dw `00000000, `00000333, `00033111, `00311111
+    dw `03111133, `03111322, `31113222, `31113222
+    dw `00000000, `33300000, `11133000, `11111300
+    dw `33111130, `22311130, `22231113, `22231113
+    dw `31111322, `03111133, `03111111, `00311111
+    dw `00033111, `00311311, `03110131, `31100311
+    dw `22311113, `33111130, `11111130, `11111300
+    dw `11133000, `11311300, `13101130, `11300113
+    dw `31003110, `10031100, `10311000, `03110000
+    dw `31100000, `11000000, `10000000, `11111111
+    dw `01130013, `00113001, `00011301, `00001130
+    dw `00000113, `00000011, `00000001, `11111111
+    ; 21-26 nudo sellado: nucleo apagado con aspa, 2x3
+    dw `00000000, `00000333, `00033111, `00311111
+    dw `03111233, `03111323, `31113332, `31113332
+    dw `00000000, `33300000, `11133000, `11111300
+    dw `33211130, `32311130, `23331113, `23331113
+    dw `31111323, `03111233, `03111111, `00311111
+    dw `00033111, `00333333, `03330333, `33300333
+    dw `32311113, `33211130, `11111130, `11111300
+    dw `11133000, `33333300, `33303330, `33300333
+    dw `33003330, `30033300, `30333000, `03330000
+    dw `33300000, `33000000, `30000000, `33333333
+    dw `03330033, `00333003, `00033303, `00003330
+    dw `00000333, `00000033, `00000003, `33333333
+    ; 27-28 tramo de cuello iluminado al observar, 2x1
+    dw `00003222, `00003222, `00003222, `00003222
+    dw `00003222, `00032222, `00311111, `03333333
+    dw `22230000, `22230000, `22230000, `22230000
+    dw `22230000, `22223000, `11111300, `33333330
+    ; 29-30 raices que suben del nodo, 2x1
+    dw `00001000, `00001000, `00010000, `00010000
+    dw `00001000, `00001000, `00000100, `00000100
+    dw `00001000, `00010000, `00010000, `00100000
+    dw `00100000, `01000000, `01000000, `01000000
+    ; 31-33 orilla y barro (borde, A, B)
+    dw `10011001, `11111111, `11131111, `11111111
+    dw `31111113, `11111111, `11113111, `11111111
+    dw `11111111, `11131111, `11111111, `31111113
+    dw `11111111, `11113111, `11111111, `13111111
+    dw `11111111, `11111311, `13111111, `11111111
+    dw `11311111, `11111111, `11111131, `11111111
+    ; 34 placa sin cabeza: solo agua
+    dw `00000000, `00000000, `00000000, `00000000
+    dw `00000000, `00000000, `00000000, `00000000
+    ; 35 placa de cabeza sin leer
+    dw `01111110, `11122111, `11211211, `11111211
+    dw `11112111, `11121111, `11111111, `01121110
+    ; 36-38 marcas de raiz: circulo, cuadrado, triangulo
+    dw `01111110, `11333311, `13111131, `13111131
+    dw `13111131, `13111131, `11333311, `01111110
+    dw `01111110, `13333331, `13111131, `13111131
+    dw `13111131, `13111131, `13333331, `01111110
+    dw `01111110, `11133111, `11311311, `11311311
+    dw `13111131, `13111131, `13333331, `01111110
+    ; 39-48 digitos 0-9
+    dw `00033300, `00300030, `00300330, `00303030
+    dw `00330030, `00300030, `00033300, `00000000
+    dw `00003000, `00033000, `00003000, `00003000
+    dw `00003000, `00003000, `00033300, `00000000
+    dw `00033300, `00300030, `00000030, `00000300
+    dw `00003000, `00030000, `00333330, `00000000
+    dw `00333300, `00000030, `00000030, `00033300
+    dw `00000030, `00000030, `00333300, `00000000
+    dw `00000300, `00003300, `00030300, `00300300
+    dw `00333330, `00000300, `00000300, `00000000
+    dw `00333330, `00300000, `00300000, `00333300
+    dw `00000030, `00000030, `00333300, `00000000
+    dw `00033300, `00300000, `00300000, `00333300
+    dw `00300030, `00300030, `00033300, `00000000
+    dw `00333330, `00000030, `00000300, `00003000
+    dw `00030000, `00030000, `00030000, `00000000
+    dw `00033300, `00300030, `00300030, `00033300
+    dw `00300030, `00300030, `00033300, `00000000
+    dw `00033300, `00300030, `00300030, `00033330
+    dw `00000030, `00000030, `00033300, `00000000
+    ; 49-53 L O P R T
     dw `03000000, `03000000, `03000000, `03000000
     dw `03000000, `03000000, `03333300, `00000000
     dw `00333000, `03000300, `03000300, `03000300
@@ -1114,21 +1259,61 @@ TilesJuego:
     dw `03030000, `03003000, `03000300, `00000000
     dw `03333300, `00030000, `00030000, `00030000
     dw `00030000, `00030000, `00030000, `00000000
-    ; 35 icono de cabeza
-    dw `00111100, `01311310, `01111110, `00122100
-    dw `00011000, `00011000, `00111100, `00000000
-    ; 36-37 reloj de brote lleno / vacio
+    ; 54 icono de hidra del HUD
+    dw `22022022, `32032032, `22022022, `02022020
+    dw `00222200, `00022000, `00022000, `00222200
+    ; 55-56 reloj de brote lleno / vacio
     dw `00000000, `03333330, `03222230, `03222230
     dw `03222230, `03222230, `03333330, `00000000
     dw `00000000, `03333330, `03000030, `03000030
     dw `03000030, `03000030, `03333330, `00000000
-    ; 38 cursor (sprite)
-    dw `00000000, `03300000, `03130000, `03113000
-    dw `03111300, `03113000, `03130000, `03300000
-    ; 39 destello de raiz (sprite)
-    dw `00030000, `00313000, `03111300, `31121130
-    dw `03111300, `00313000, `00030000, `00000000
+    ; 57 cursor (sprite)
+    dw `33000000, `32300000, `31230000, `31123000
+    dw `31112300, `31123000, `31230000, `33300000
+    ; 58 destello de raiz (sprite)
+    dw `00030000, `00323000, `03222300, `32212230
+    dw `03222300, `00323000, `00030000, `00000000
 TilesJuegoFin:
+
+FondoJuego:
+    db  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+    db  0,  0,  1,  0,  0,  0,  2,  0,  0,  0,  0,  0,  0,  0,  0,  1,  0,  0,  1,  0
+    db  0,  0,  0,  0,  0,  0,  0,  0,  1,  0,  0,  1,  0,  0,  0,  2,  0,  0,  0,  0
+    db  0,  0,  0, 34,  1,  0,  0, 34,  2,  0,  0, 34,  0,  0,  0, 34,  0,  0,  0, 34
+    db  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+    db  0,  0,  0,  1,  0,  0,  1,  0,  0,  0,  2,  0,  0,  0,  0,  0,  0,  0,  0,  1
+    db  0,  0,  0,  2,  0,  0,  0,  0,  0,  0,  0,  0,  1,  0,  0,  1,  0,  0,  0,  2
+    db  0,  0,  0,  0,  0,  0,  0,  0,  1,  0,  0,  0,  2,  0,  0,  0,  0,  0,  0,  0
+    db  0,  0,  0, 34,  0,  0,  0, 34,  0,  0,  0, 34,  0,  0,  0, 34,  0,  0,  0, 34
+    db  0,  0,  0,  0,  0,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+    db  1,  0,  0,  1,  0,  0,  0,  2,  0,  0,  0,  0,  0,  0,  0,  0,  1,  0,  0,  1
+    db  0,  0,  0, 29, 30,  0,  0,  0,  0, 29, 30,  0,  0,  0,  0, 29, 30,  0,  0,  0
+    db  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+    db  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+    db  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+    db 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31
+    db 33, 32, 33, 32, 33, 32, 33, 32, 33, 32, 33, 32, 33, 32, 33, 32, 33, 32, 33, 32
+    db 32, 33, 32, 33, 32, 33, 32, 33, 32, 33, 32, 33, 32, 33, 32, 33, 32, 33, 32, 33
+
+AtributosJuego:
+    db  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4
+    db  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+    db  0,  1,  1,  0,  0,  1,  1,  0,  0,  1,  1,  0,  0,  1,  1,  0,  0,  1,  1,  0
+    db  0,  1,  1,  3,  0,  1,  1,  3,  0,  1,  1,  3,  0,  1,  1,  3,  0,  1,  1,  3
+    db  0,  1,  1,  0,  0,  1,  1,  0,  0,  1,  1,  0,  0,  1,  1,  0,  0,  1,  1,  0
+    db  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+    db  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+    db  0,  1,  1,  0,  0,  1,  1,  0,  0,  1,  1,  0,  0,  1,  1,  0,  0,  1,  1,  0
+    db  0,  1,  1,  3,  0,  1,  1,  3,  0,  1,  1,  3,  0,  1,  1,  3,  0,  1,  1,  3
+    db  0,  1,  1,  0,  0,  1,  1,  0,  0,  1,  1,  0,  0,  1,  1,  0,  0,  1,  1,  0
+    db  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0
+    db  0,  0,  0,  2,  2,  0,  0,  0,  0,  2,  2,  0,  0,  0,  0,  2,  2,  0,  0,  0
+    db  0,  0,  0,  2,  2,  0,  0,  0,  0,  2,  2,  0,  0,  0,  0,  2,  2,  0,  0,  0
+    db  0,  0,  0,  2,  2,  3,  0,  0,  0,  2,  2,  3,  0,  0,  0,  2,  2,  3,  0,  0
+    db  0,  0,  0,  2,  2,  0,  0,  0,  0,  2,  2,  0,  0,  0,  0,  2,  2,  0,  0,  0
+    db  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2
+    db  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2
+    db  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2
 
     INCLUDE "assets/title_tiles.asm"
     INCLUDE "assets/title_tilemap.asm"
@@ -1149,6 +1334,7 @@ wSegmentos:     ds 1
 wOrigenBrote:   ds 1
 wBloqueo:       ds 1
 wNodoLeido:     ds 1
+wHuecoLeido:    ds 1
 wLecturas:      ds 1
 wMejorRaiz:     ds 1
 wMejorCuenta:   ds 1

@@ -15,6 +15,16 @@ ROM = RAIZ / "build/hydra_loop_98.gbc"
 SIMBOLOS = RAIZ / "build/hydra_loop_98.sym"
 NIVEL_1 = [2, 0, 2, 0, 0, 0, 2, 0, 2, 0]
 NIVEL_2 = [1, 3, 0, 1, 0, 3, 0, 1, 0, 2]
+BG = 0x9800
+# Indices de tile de main.asm (EQU no exportadas al .sym).
+TILE_CABEZA, TILE_HUECO, TILE_SELLO, TILE_CUELLO_LUZ = 3, 9, 21, 27
+TILE_PLACA_AGUA, TILE_PLACA_DUDA, TILE_GLIFO, TILE_DIGITO = 34, 35, 36, 39
+TILE_L, TILE_O, TILE_P, TILE_R, TILE_T = 49, 50, 51, 52, 53
+TILE_ICONO, TILE_RELOJ_ON = 54, 55
+
+
+def celda(fila, col):
+    return BG + fila * 32 + col
 
 
 class CabeceraROM(unittest.TestCase):
@@ -94,9 +104,15 @@ class PruebasHydraLoop(unittest.TestCase):
         self.assertEqual(self.leer(emulador, "wCabezas", 10), NIVEL_1)
         self.assertEqual(self.leer(emulador, "wObservadas", 10), [0] * 10)
         # HUD: nivel 1, cuatro cabezas, reloj lleno.
-        self.assertEqual(emulador.memory[0x9800:0x9802], [30, 21])
-        self.assertEqual(emulador.memory[0x9804:0x9807], [35, 20, 24])
-        self.assertEqual(emulador.memory[0x980D:0x9813], [36] * 6)
+        self.assertEqual(emulador.memory[BG:BG + 2], [TILE_L, TILE_DIGITO + 1])
+        self.assertEqual(emulador.memory[BG + 4:BG + 7],
+                         [TILE_ICONO, TILE_DIGITO, TILE_DIGITO + 4])
+        self.assertEqual(emulador.memory[BG + 13:BG + 19], [TILE_RELOJ_ON] * 6)
+        # Hueco 0 con cabeza sin leer y hueco 1 vacio, con sus placas.
+        self.assertEqual(emulador.memory[celda(2, 1)], TILE_CABEZA)
+        self.assertEqual(emulador.memory[celda(3, 3)], TILE_PLACA_DUDA)
+        self.assertEqual(emulador.memory[celda(2, 5)], TILE_HUECO)
+        self.assertEqual(emulador.memory[celda(3, 7)], TILE_PLACA_AGUA)
 
     def test_cortar_una_cabeza_hace_brotar_dos_de_la_misma_raiz(self):
         emulador = self.jugar()
@@ -110,9 +126,30 @@ class PruebasHydraLoop(unittest.TestCase):
         self.observar(emulador, 2)
         self.assertEqual(self.leer(emulador, "wObservadas", 10)[2], 1)
         self.assertEqual(self.leer(emulador, "wNodoLeido"), 1)
-        # Marca bajo el hueco 2 (fila 5, columna 9): cuadrado del nodo central.
-        self.assertEqual(emulador.memory[0x9800 + 5 * 32 + 9], 18)
-        self.assertEqual(emulador.memory[0x9800 + 15 * 32 + 9], 18)
+        # Placa del hueco 2 (fila 3, columna 11): cuadrado del nodo central.
+        self.assertEqual(emulador.memory[celda(3, 11)], TILE_GLIFO + 1)
+        self.assertEqual(emulador.memory[celda(13, 11)], TILE_GLIFO + 1)
+
+    def test_el_cuello_se_ilumina_solo_mientras_dura_la_lectura(self):
+        emulador = self.jugar()
+        observadas = self.vigilar_escrituras(emulador)
+        self.poner(emulador, "wCursor", 0)
+        self.pulsar(emulador, "b")
+        emulador.tick(2, False)
+        self.assertEqual(emulador.memory[celda(4, 1):celda(4, 3)],
+                         [TILE_CUELLO_LUZ, TILE_CUELLO_LUZ + 1])
+        # Las demas cabezas no delatan su raiz.
+        self.assertEqual(emulador.memory[celda(4, 9):celda(4, 11)],
+                         [TILE_CABEZA + 4, TILE_CABEZA + 5])
+        emulador.tick(34, False)
+        self.assertEqual(self.leer(emulador, "wBloqueo"), 0)
+        self.assertEqual(emulador.memory[celda(4, 1):celda(4, 3)],
+                         [TILE_CABEZA + 4, TILE_CABEZA + 5])
+        self.assertEqual(emulador.memory[celda(3, 3)], TILE_GLIFO + 1)
+        # Encender y apagar el cuello tambien cabe en VBlank.
+        activas = [x for x in observadas if x[4]]
+        self.assertTrue(any(x[1] == celda(4, 1) for x in activas))
+        self.assertEqual([x for x in activas if x[2] < 144 or x[3] != 1], [])
 
     def test_sellar_sin_leer_el_nodo_hace_crecer_la_raiz_dominante(self):
         emulador = self.jugar()
@@ -154,9 +191,10 @@ class PruebasHydraLoop(unittest.TestCase):
         self.assertTrue(any(0xFE00 <= x[1] < 0xFEA0 for x in activas))
         self.assertEqual([x for x in activas if x[2] < 144 or x[3] != 1], [])
         # Nodo 0 sellado en pantalla y cabezas retiradas.
-        self.assertEqual(emulador.memory[0x9800 + 13 * 32 + 3], 13)
-        self.assertEqual(emulador.memory[0x9800 + 3 * 32 + 1], 5)
-        self.assertEqual(emulador.memory[0x9800 + 3 * 32 + 13], 5)
+        self.assertEqual(emulador.memory[celda(12, 3)], TILE_SELLO)
+        self.assertEqual(emulador.memory[celda(2, 1)], TILE_HUECO)
+        self.assertEqual(emulador.memory[celda(2, 13)], TILE_HUECO)
+        self.assertEqual(emulador.memory[celda(3, 3)], TILE_PLACA_AGUA)
 
     def test_el_reloj_hace_brotar_la_raiz_dominante(self):
         emulador = self.jugar()
@@ -176,8 +214,8 @@ class PruebasHydraLoop(unittest.TestCase):
         self.assertEqual(self.leer(emulador, "wEstado"), 2)
         self.assertEqual(emulador.memory[0xC100], 0)
         # Pantalla LOOP y reintento del mismo nivel.
-        self.assertEqual(emulador.memory[0x9800 + 6 * 32 + 8:0x9800 + 6 * 32 + 12],
-                         [30, 31, 31, 32])
+        self.assertEqual(emulador.memory[celda(6, 8):celda(6, 12)],
+                         [TILE_L, TILE_O, TILE_O, TILE_P])
         self.pulsar(emulador, "start")
         self.assertEqual(self.leer(emulador, "wEstado"), 1)
         self.assertEqual(self.leer(emulador, "wCabezas", 10), NIVEL_1)
@@ -190,8 +228,8 @@ class PruebasHydraLoop(unittest.TestCase):
         self.accion(emulador, 12)
         self.assertEqual(self.leer(emulador, "wEstado"), 3)
         self.assertEqual(emulador.memory[0xC100], 0xA5)
-        self.assertEqual(emulador.memory[0x9800 + 8 * 32 + 8:0x9800 + 8 * 32 + 12],
-                         [33, 31, 34, 31])
+        self.assertEqual(emulador.memory[celda(8, 8):celda(8, 12)],
+                         [TILE_R, TILE_O, TILE_T, TILE_O])
 
     def test_niveles_2_y_3_son_resolubles_con_las_reglas(self):
         """Resuelve los niveles reales sin tocar WRAM, salvo el cursor."""
