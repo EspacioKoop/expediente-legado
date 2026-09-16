@@ -65,23 +65,26 @@ static func _montar_persiana(
 	accion.name = "PersianaCasaInteractuable"
 	accion.position = Vector3(-0.74, -0.46, 0.18)
 	ventana.add_child(accion)
-	accion.configurar(
-		jornada,
-		CasaRutinas.PERSIANA_ABIERTA,
-		visual,
-		Vector3(0, 0.0, 0.10),
-		Vector3(0, 0.78, 0.10),
-		Vector3.ZERO,
-		Vector3.ZERO,
-		Vector3(0.30, 0.32, 0.30),
-		"Abrir persiana",
-		"Cerrar persiana",
-		"abrir",
-		"cerrar",
-		bool(estado.get(CasaRutinas.PERSIANA_ABIERTA, false)),
-		Interactuable3D.Verbo.ABRIR,
-		Interactuable3D.Verbo.CERRAR,
-		reduccion,
+	(
+		accion
+		. configurar(
+			jornada,
+			CasaRutinas.PERSIANA_ABIERTA,
+			visual,
+			Vector3(0, 0.0, 0.10),
+			Vector3(0, 0.78, 0.10),
+			Vector3.ZERO,
+			Vector3.ZERO,
+			Vector3(0.30, 0.32, 0.30),
+			"Abrir persiana",
+			"Cerrar persiana",
+			"abrir",
+			"cerrar",
+			bool(estado.get(CasaRutinas.PERSIANA_ABIERTA, false)),
+			Interactuable3D.Verbo.ABRIR,
+			Interactuable3D.Verbo.CERRAR,
+			reduccion,
+		)
 	)
 
 
@@ -104,23 +107,26 @@ static func _montar_ventana(
 	accion.name = "VentanaCasaInteractuable"
 	accion.position = Vector3(0.70, -0.05, 0.18)
 	ventana.add_child(accion)
-	accion.configurar(
-		jornada,
-		CasaRutinas.VENTANA_ABIERTA,
-		hoja,
-		Vector3(0.88, 0, 0.10),
-		Vector3(0.88, 0, 0.10),
-		Vector3.ZERO,
-		Vector3(0, -58.0, 0),
-		Vector3(0.28, 0.34, 0.30),
-		"Abrir ventana",
-		"Cerrar ventana",
-		"abrir",
-		"cerrar",
-		bool(estado.get(CasaRutinas.VENTANA_ABIERTA, false)),
-		Interactuable3D.Verbo.ABRIR,
-		Interactuable3D.Verbo.CERRAR,
-		reduccion,
+	(
+		accion
+		. configurar(
+			jornada,
+			CasaRutinas.VENTANA_ABIERTA,
+			hoja,
+			Vector3(0.88, 0, 0.10),
+			Vector3(0.88, 0, 0.10),
+			Vector3.ZERO,
+			Vector3(0, -58.0, 0),
+			Vector3(0.28, 0.34, 0.30),
+			"Abrir ventana",
+			"Cerrar ventana",
+			"abrir",
+			"cerrar",
+			bool(estado.get(CasaRutinas.VENTANA_ABIERTA, false)),
+			Interactuable3D.Verbo.ABRIR,
+			Interactuable3D.Verbo.CERRAR,
+			reduccion,
+		)
 	)
 
 
@@ -134,29 +140,34 @@ static func _montar_nevera(
 	puerta.name = "PuertaNeveraRutina"
 	nevera.add_child(puerta)
 	_caja(puerta, Vector3(0, 0, -0.33), Vector3(0.045, 1.70, 0.66), Color(0.61, 0.60, 0.56))
-	_caja(puerta, Vector3(-0.035, 0.22, -0.54), Vector3(0.055, 0.48, 0.055), Color(0.35, 0.36, 0.35))
+	_caja(
+		puerta, Vector3(-0.035, 0.22, -0.54), Vector3(0.055, 0.48, 0.055), Color(0.35, 0.36, 0.35)
+	)
 
 	var accion := CasaRutinaInteractiva3D.new()
 	accion.name = "NeveraCasaInteractuable"
 	accion.position = Vector3(-0.50, 0.92, 0)
 	nevera.add_child(accion)
-	accion.configurar(
-		jornada,
-		CasaRutinas.NEVERA_ABIERTA,
-		puerta,
-		Vector3(-0.39, 0.92, 0.34),
-		Vector3(-0.39, 0.92, 0.34),
-		Vector3.ZERO,
-		Vector3(0, 68.0, 0),
-		Vector3(0.30, 1.30, 0.56),
-		"Abrir nevera",
-		"Cerrar nevera",
-		"abrir",
-		"cerrar",
-		bool(estado.get(CasaRutinas.NEVERA_ABIERTA, false)),
-		Interactuable3D.Verbo.ABRIR,
-		Interactuable3D.Verbo.CERRAR,
-		reduccion,
+	(
+		accion
+		. configurar(
+			jornada,
+			CasaRutinas.NEVERA_ABIERTA,
+			puerta,
+			Vector3(-0.39, 0.92, 0.34),
+			Vector3(-0.39, 0.92, 0.34),
+			Vector3.ZERO,
+			Vector3(0, 68.0, 0),
+			Vector3(0.30, 1.30, 0.56),
+			"Abrir nevera",
+			"Cerrar nevera",
+			"abrir",
+			"cerrar",
+			bool(estado.get(CasaRutinas.NEVERA_ABIERTA, false)),
+			Interactuable3D.Verbo.ABRIR,
+			Interactuable3D.Verbo.CERRAR,
+			reduccion,
+		)
 	)
 
 
@@ -177,23 +188,26 @@ static func _montar_platos(
 			0.018,
 			Color(0.63, 0.60, 0.50),
 		)
-	accion.configurar(
-		jornada,
-		CasaRutinas.PLATOS_RECOGIDOS,
-		accion,
-		Vector3(0, 0.12, 0.05),
-		Vector3(0, 0.18, -0.52),
-		Vector3.ZERO,
-		Vector3.ZERO,
-		Vector3(0.38, 0.24, 0.38),
-		"Fregar y recoger platos",
-		"Sacar platos",
-		"coger",
-		"coger",
-		bool(estado.get(CasaRutinas.PLATOS_RECOGIDOS, false)),
-		Interactuable3D.Verbo.USAR,
-		Interactuable3D.Verbo.USAR,
-		reduccion,
+	(
+		accion
+		. configurar(
+			jornada,
+			CasaRutinas.PLATOS_RECOGIDOS,
+			accion,
+			Vector3(0, 0.12, 0.05),
+			Vector3(0, 0.18, -0.52),
+			Vector3.ZERO,
+			Vector3.ZERO,
+			Vector3(0.38, 0.24, 0.38),
+			"Fregar y recoger platos",
+			"Sacar platos",
+			"coger",
+			"coger",
+			bool(estado.get(CasaRutinas.PLATOS_RECOGIDOS, false)),
+			Interactuable3D.Verbo.USAR,
+			Interactuable3D.Verbo.USAR,
+			reduccion,
+		)
 	)
 
 
@@ -211,23 +225,26 @@ static func _montar_toalla(
 	_caja(accion, Vector3.ZERO, Vector3(0.46, 0.05, 0.62), Color(0.48, 0.42, 0.37))
 	var pos_sofa := raiz.to_local(sofa.to_global(Vector3(0.54, 0.72, 0.10)))
 	var pos_ventana := raiz.to_local(ventana.to_global(Vector3(-0.60, -0.24, 0.22)))
-	accion.configurar(
-		jornada,
-		CasaRutinas.TOALLA_TENDIDA,
-		accion,
-		pos_sofa,
-		pos_ventana,
-		Vector3(0, 0, 8.0),
-		Vector3(0, 0, 90.0),
-		Vector3(0.50, 0.18, 0.66),
-		"Tender toalla",
-		"Recoger toalla",
-		"coger",
-		"coger",
-		bool(estado.get(CasaRutinas.TOALLA_TENDIDA, false)),
-		Interactuable3D.Verbo.USAR,
-		Interactuable3D.Verbo.COGER,
-		reduccion,
+	(
+		accion
+		. configurar(
+			jornada,
+			CasaRutinas.TOALLA_TENDIDA,
+			accion,
+			pos_sofa,
+			pos_ventana,
+			Vector3(0, 0, 8.0),
+			Vector3(0, 0, 90.0),
+			Vector3(0.50, 0.18, 0.66),
+			"Tender toalla",
+			"Recoger toalla",
+			"coger",
+			"coger",
+			bool(estado.get(CasaRutinas.TOALLA_TENDIDA, false)),
+			Interactuable3D.Verbo.USAR,
+			Interactuable3D.Verbo.COGER,
+			reduccion,
+		)
 	)
 
 
