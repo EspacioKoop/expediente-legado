@@ -56,6 +56,19 @@ class AquilesNocheRuntimeTest(unittest.TestCase):
         self.assertIn('espacio.get("salidas", [])', self.controller)
         self.assertIn("entrada.lerp(salida, 0.5)", self.controller)
 
+    def test_orienta_el_puzzle_segun_la_ruta_real(self):
+        self.assertIn(
+            "_orientar_segun_recorrido(aquiles, mundo, espacio)",
+            self.controller,
+        )
+        self.assertIn("direccion := salida - entrada", self.controller)
+        self.assertIn("direccion.y = 0.0", self.controller)
+        self.assertIn("direccion.length_squared() <= 0.0001", self.controller)
+        self.assertIn(
+            "aquiles.look_at(mundo.to_global(salida), Vector3.UP)",
+            self.controller,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
