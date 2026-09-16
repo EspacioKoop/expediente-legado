@@ -7,7 +7,6 @@ extends Interactuable3D
 
 const FUENTE := "radio:tir_na_nog_98"
 const SEGMENTOS_REQUERIDOS := 2
-const SIN_SONIDO := ""
 
 const COLOR_CARCASA := Color(0.22, 0.19, 0.16)
 const COLOR_DIAL := Color(0.66, 0.55, 0.34)
