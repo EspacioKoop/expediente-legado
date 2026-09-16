@@ -88,6 +88,27 @@ func _montar_aquiles(mundo: Node3D, espacio: Dictionary) -> void:
 	aquiles.scale = Vector3.ONE * ESCALA_ENCUENTRO
 	aquiles.position = _ancla_entre_entrada_y_salida(espacio)
 	mundo.add_child(aquiles)
+	_orientar_segun_recorrido(aquiles, mundo, espacio)
+
+
+## El vertical standalone fue compuesto con reflector y sello en su lado +Z.
+## Hacer que -Z mire a la salida deja esos interactuables del lado por el que
+## llega el jugador, independientemente de la orientación de la forma nocturna.
+func _orientar_segun_recorrido(
+	aquiles: Node3D,
+	mundo: Node3D,
+	espacio: Dictionary,
+) -> void:
+	var entrada: Vector3 = espacio.get("entrada", Vector3.ZERO)
+	var salidas: Array = espacio.get("salidas", [])
+	if salidas.is_empty():
+		return
+	var salida: Vector3 = salidas[0].get("pos", entrada)
+	var direccion := salida - entrada
+	direccion.y = 0.0
+	if direccion.length_squared() <= 0.0001:
+		return
+	aquiles.look_at(mundo.to_global(salida), Vector3.UP)
 
 
 ## Colocar la capa en mitad del recorrido conserva tanto la entrada como la
