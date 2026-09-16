@@ -1,4 +1,4 @@
-## Adaptador del puesto de trabajo al shell de escritorio (#534, #535, #536, #538).
+## Adaptador del puesto de trabajo al shell de escritorio (#534, #535, #536, #538, #663).
 ##
 ## `Dia` sigue siendo dueño de entrar/salir del puesto y de persistir la partida.
 ## Este controller detecta únicamente la pantalla que contiene el visor histórico,
@@ -8,6 +8,7 @@ extends Node
 var _pantalla_envuelta_id := 0
 var _siga_app: EscritorioSigaApp
 var _explorador_app: EscritorioSigaApp
+var _software_app: EscritorioSigaApp
 var _correo_app: EscritorioSigaApp
 var _catalogo_anomalias_app: EscritorioSigaApp
 
@@ -65,6 +66,18 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	_explorador_app.redimensionable = true
 	_explorador_app.registrar_en(escritorio)
 	_apps.append(_explorador_app)
+
+	# #663 se aloja como una aplicación normal del shell. Su estado local solo
+	# contiene instalaciones y ejecuciones ficticias; nunca toca campaña ni host.
+	_software_app = EscritorioSigaApp.new(
+		"software-98", "Archivo de programas", Callable(self, "_crear_software"), "equipo"
+	)
+	_software_app.tamano_minimo = Vector2(600, 390)
+	_software_app.tamano_preferido = Vector2(760, 520)
+	_software_app.redimensionable = true
+	_software_app.persistir_estado = true
+	_software_app.registrar_en(escritorio)
+	_apps.append(_software_app)
 
 	# Correo es otra app del contrato común: su contenido se resuelve contra la
 	# jornada viva y la plantilla real de esta vuelta. Solo persiste qué mensajes
@@ -150,6 +163,14 @@ func _crear_explorador() -> Control:
 	return explorador
 
 
+func _crear_software() -> Control:
+	var software := SoftwareSiga.new()
+	if _software_app != null:
+		software.configurar_estado(_software_app.obtener_estado_local("estado", {}))
+	software.estado_cambiado.connect(_registrar_estado_software)
+	return software
+
+
 func _crear_correo() -> Control:
 	var correo := CorreoSiga.new()
 	var dia := get_parent()
@@ -193,6 +214,11 @@ func _crear_catalogo_anomalias() -> Control:
 	if partida_actual is Partida:
 		catalogo.configurar_estado(partida_actual.estado)
 	return catalogo
+
+
+func _registrar_estado_software(estado: Dictionary) -> void:
+	if _software_app != null:
+		_software_app.establecer_estado_local("estado", estado)
 
 
 func _registrar_correo_leido(id: String) -> void:
