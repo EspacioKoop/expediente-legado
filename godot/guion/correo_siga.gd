@@ -67,11 +67,14 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if _jornada.is_empty():
 		return
-	var firma := "%d|%d|%s" % [
-		int(_jornada.get("dia", 1)),
-		int(_jornada.get("acciones", Jornada.ACCIONES_POR_DIA)),
-		String(_jornada.get("fase", "archivo")),
-	]
+	var firma := (
+		"%d|%d|%s"
+		% [
+			int(_jornada.get("dia", 1)),
+			int(_jornada.get("acciones", Jornada.ACCIONES_POR_DIA)),
+			String(_jornada.get("fase", "archivo")),
+		]
+	)
 	if firma != _firma_contexto:
 		_refrescar()
 
@@ -145,11 +148,14 @@ func _refrescar() -> void:
 		if id == seleccionado:
 			_lista.select(indice)
 	_actualizar_estado(mensajes.size())
-	_firma_contexto = "%d|%d|%s" % [
-		int(_jornada.get("dia", 1)),
-		int(_jornada.get("acciones", Jornada.ACCIONES_POR_DIA)),
-		String(_jornada.get("fase", "archivo")),
-	]
+	_firma_contexto = (
+		"%d|%d|%s"
+		% [
+			int(_jornada.get("dia", 1)),
+			int(_jornada.get("acciones", Jornada.ACCIONES_POR_DIA)),
+			String(_jornada.get("fase", "archivo")),
+		]
+	)
 
 
 func _seleccionar_mensaje(indice: int) -> void:
@@ -161,12 +167,15 @@ func _seleccionar_mensaje(indice: int) -> void:
 	var mensaje := valor as Dictionary
 	var id := String(mensaje.get("id", ""))
 	_cabecera.text = String(mensaje.get("asunto", ""))
-	_meta.text = texto("metadatos") % [
-		String(mensaje.get("remitente", "")),
-		String(mensaje.get("direccion", "")),
-		int(mensaje.get("dia_entrega", 1)),
-		String(mensaje.get("hora", "--:--")),
-	]
+	_meta.text = (
+		texto("metadatos")
+		% [
+			String(mensaje.get("remitente", "")),
+			String(mensaje.get("direccion", "")),
+			int(mensaje.get("dia_entrega", 1)),
+			String(mensaje.get("hora", "--:--")),
+		]
+	)
 	_cuerpo.text = String(mensaje.get("cuerpo", ""))
 	if not _leidos.has(id):
 		_leidos.append(id)
@@ -198,19 +207,25 @@ func _mensaje_seleccionado() -> String:
 
 func _rotulo(mensaje: Dictionary, nuevo: bool) -> String:
 	var marca := texto("marca_nuevo") if nuevo else ""
-	return "%s%s · %s\n%s" % [
-		marca,
-		String(mensaje.get("hora", "--:--")),
-		String(mensaje.get("remitente", "")),
-		String(mensaje.get("asunto", "")),
-	]
+	return (
+		"%s%s · %s\n%s"
+		% [
+			marca,
+			String(mensaje.get("hora", "--:--")),
+			String(mensaje.get("remitente", "")),
+			String(mensaje.get("asunto", "")),
+		]
+	)
 
 
 func _tooltip(mensaje: Dictionary) -> String:
-	return "%s <%s>" % [
-		String(mensaje.get("remitente", "")),
-		String(mensaje.get("direccion", "")),
-	]
+	return (
+		"%s <%s>"
+		% [
+			String(mensaje.get("remitente", "")),
+			String(mensaje.get("direccion", "")),
+		]
+	)
 
 
 func _actualizar_estado(total: int) -> void:
