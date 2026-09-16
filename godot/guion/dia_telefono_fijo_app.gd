@@ -110,8 +110,11 @@ func _emitir_timbre_si_procede(dia: Node) -> void:
 	if llamada.is_empty() or _timbre_emitido_dia == numero_dia or not is_instance_valid(_telefono):
 		return
 	_timbre_emitido_dia = numero_dia
-	# Reutiliza un efecto corto ya distribuido por el proyecto. El piloto ámbar
-	# permanece como señal visual continua y el transcript cubre el contenido.
+	# Los tests headless no tienen una escena audiovisual que consumir y una voz
+	# 3D efímera puede seguir viva al destruir escenas deliberadamente en el mismo
+	# frame. El juego normal conserva el timbre; el piloto visual es continuo.
+	if DisplayServer.get_name() == "headless":
+		return
 	Sonido.sonar_en(_telefono, "marcar")
 
 
