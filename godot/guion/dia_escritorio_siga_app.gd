@@ -185,9 +185,7 @@ func _crear_navegador() -> Control:
 		jornada_actual = int(dia.jornada.get("dia", 1))
 	# #539 conectará conocimiento/caídas narrativas a estado real. Hasta entonces
 	# el navegador aprende y respeta la normalidad, sin filtrar enlace13.
-	navegador.configurar_contexto(
-		{"dia": jornada_actual, "conocimiento": [], "urls_caidas": []}
-	)
+	navegador.configurar_contexto({"dia": jornada_actual, "conocimiento": [], "urls_caidas": []})
 	if _navegador_app != null:
 		navegador.configurar_estado(_navegador_app.obtener_estado_local("estado", {}))
 	navegador.estado_cambiado.connect(_registrar_estado_navegador)
