@@ -1393,6 +1393,26 @@
       "licencia": "CC0-1.0",
       "fuente": "https://quaternius.com/packs/stylizedtree.html",
       "sha256": "9e21133bc5d3462c55e7c0411e5d9eb2a4c5701cf4641dfe078b03985acf2ee4"
+    },
+    {
+      "ruta": "cc0/quaternius_ual/UAL1_Standard.glb",
+      "titulo": "Universal Animation Library (Standard, glTF) · animaciones humanoides",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/universalanimationlibrary.html",
+      "sha256": "69591853d817488edaa8fd9bf8fc1d821eaeaf789f8627b3cd23b41c4ed67997",
+      "archivo_origen": "Universal Animation Library[Standard]/Unreal-Godot/UAL1_Standard.glb",
+      "paquete_sha256": "cc73fc4e495b82958207316596317a3f40b9fa38065bde1027937452da537724"
+    },
+    {
+      "ruta": "cc0/quaternius_ual/UAL2_Standard.glb",
+      "titulo": "Universal Animation Library 2 (Standard, glTF) · animaciones humanoides",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/universalanimationlibrary2.html",
+      "sha256": "8cee20ab1bc55130092447e810e26df22dd2803eccc54f52137a7d54d7ab88a8",
+      "archivo_origen": "Universal Animation Library 2[Standard]/Unreal-Godot/UAL2_Standard.glb",
+      "paquete_sha256": "4008ea208a604773a2b2177d965f0f5d3195498b5bf838c3f5785d68e95f2a68"
     }
   ]
 }
