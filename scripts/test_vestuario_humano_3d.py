@@ -33,7 +33,7 @@ class VestuarioHumano3DTest(unittest.TestCase):
         self.assertNotIn("esqueleto.scale =", self.vestuario)
         self.assertNotIn("CollisionShape3D", self.vestuario)
 
-    def test_las_siluetas_son_deterministas(self):
+    def test_el_fallback_sigue_siendo_determinista(self):
         self.assertIn('"nombre": "estrecho"', self.vestuario)
         self.assertIn('"nombre": "medio"', self.vestuario)
         self.assertIn('"nombre": "robusto"', self.vestuario)
@@ -41,13 +41,47 @@ class VestuarioHumano3DTest(unittest.TestCase):
         self.assertNotIn("randf(", self.vestuario)
         self.assertNotIn("randi(", self.vestuario)
 
-    def test_el_volumen_prioriza_hombros_y_torso_alargado(self):
-        self.assertIn('"VestuarioHombros"', self.vestuario)
+    def test_el_roster_tiene_perfiles_explicitos_por_identidad(self):
+        self.assertIn("Companeros.CUNADO", self.vestuario)
+        self.assertIn("Companeros.ROSTER", self.vestuario)
+        self.assertIn("color.is_equal_approx(esperado)", self.vestuario)
+        for identidad in (
+            "emperador",
+            "aduanero_ny",
+            "correspondencia",
+            "riegos",
+            "fielato",
+            "cunado",
+            "becario",
+            "jubilacion",
+            "mesa_de_en_medio",
+            "telefono",
+        ):
+            self.assertIn(f'"{identidad}": {{', self.vestuario)
+
+    def test_las_siluetas_varian_hombros_cintura_y_mangas(self):
         self.assertIn('alto_torso * 0.27 * float(perfil["ancho"])', self.vestuario)
         self.assertIn('alto_torso * 0.135 * float(perfil["fondo"])', self.vestuario)
         self.assertIn('alto_torso * 0.47 * float(perfil["largo"])', self.vestuario)
-        self.assertIn("Vector3(ancho * 0.78, largo * 0.18, fondo * 0.90)", self.vestuario)
-        self.assertIn("malla.radius = ancho_torso * 0.085", self.vestuario)
+        self.assertIn('ancho * float(perfil["hombros"])', self.vestuario)
+        self.assertIn('ancho * float(perfil["cintura"])', self.vestuario)
+        self.assertIn('float(perfil["manga"])', self.vestuario)
+        self.assertIn('float(perfil["largo_manga"])', self.vestuario)
+
+    def test_hay_vocabulario_reutilizable_de_prendas(self):
+        for prenda in (
+            "cuello_cerrado",
+            "abrigo",
+            "traje_chaleco",
+            "traje",
+            "chaqueta_trabajo",
+            "camisa",
+            "chaleco",
+            "jersey",
+        ):
+            self.assertIn(f'"{prenda}"', self.vestuario)
+        self.assertIn("func _detalle_prenda(", self.vestuario)
+        self.assertIn("func _solapas(", self.vestuario)
 
     def test_conserva_el_shader_visual_del_proyecto(self):
         self.assertIn("load(Espacio3D.SHADER_PSX)", self.vestuario)
