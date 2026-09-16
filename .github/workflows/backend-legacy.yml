@@ -1,0 +1,58 @@
+name: Backend legacy
+
+# `backend/` es la versión web antigua y se está migrando a Godot: aquí no se
+# desarrolla nada nuevo. Sus pruebas solo corren cuando alguien lo toca, para
+# que un cambio accidental no pase sin compilar, sin gastar tiempo en cada PR.
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-legacy.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-legacy.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Test backend with Maven
+        run: |
+          cd backend
+          mvn -B test
+          mvn -B checkstyle:check pmd:check spotbugs:check
+
+      - name: Test frontend with Vitest
+        run: |
+          cd backend
+          npm ci
+          npm test
