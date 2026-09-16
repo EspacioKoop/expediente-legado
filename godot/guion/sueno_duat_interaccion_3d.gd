@@ -41,11 +41,14 @@ func configurar(
 	_prototipo.name = "DuatInteractivo"
 	add_child(_prototipo)
 	_montar_interacciones()
-	_ultimo_resultado = SuenoDuat.aplicar_pesaje_3d(
-		_prototipo,
-		_estado_pesaje,
-		_seleccion,
-		_reduccion_movimiento,
+	_ultimo_resultado = (
+		SuenoDuat
+		. aplicar_pesaje_3d(
+			_prototipo,
+			_estado_pesaje,
+			_seleccion,
+			_reduccion_movimiento,
+		)
 	)
 	return true
 
@@ -126,11 +129,14 @@ func _al_peso(_actor: Node, id_objeto: String) -> void:
 		_seleccion.erase(id_objeto)
 
 	_actualizar_pesos()
-	_ultimo_resultado = SuenoDuat.aplicar_pesaje_3d(
-		_prototipo,
-		_estado_pesaje,
-		_seleccion,
-		_reduccion_movimiento,
+	_ultimo_resultado = (
+		SuenoDuat
+		. aplicar_pesaje_3d(
+			_prototipo,
+			_estado_pesaje,
+			_seleccion,
+			_reduccion_movimiento,
+		)
 	)
 	if _ultimo_resultado.get("equilibrado", false) == true:
 		_resuelto = true
