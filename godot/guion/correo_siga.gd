@@ -161,7 +161,7 @@ func _seleccionar_mensaje(indice: int) -> void:
 	var mensaje := valor as Dictionary
 	var id := String(mensaje.get("id", ""))
 	_cabecera.text = String(mensaje.get("asunto", ""))
-	_meta.text = "%s <%s> · Día %d · %s" % [
+	_meta.text = texto("metadatos") % [
 		String(mensaje.get("remitente", "")),
 		String(mensaje.get("direccion", "")),
 		int(mensaje.get("dia_entrega", 1)),
