@@ -104,8 +104,7 @@ func _ejecutar() -> void:
 	)
 	var captura_modal := await _capturar("escritorio-modal.png", "estado modal")
 	_comprobar(
-		captura_base != captura_modal,
-		"los estados base y modal producen capturas PNG distintas"
+		captura_base != captura_modal, "los estados base y modal producen capturas PNG distintas"
 	)
 
 	escritorio.queue_free()
@@ -115,8 +114,10 @@ func _ejecutar() -> void:
 		quit(1)
 		return
 	print(
-		"SMOKE_VISUAL_ESCRITORIO_OK captures=2 resolution=%dx%d bytes_base=%d bytes_modal=%d distinct=1"
-		% [ANCHO, ALTO, captura_base.size(), captura_modal.size()]
+		(
+			"SMOKE_VISUAL_ESCRITORIO_OK captures=2 resolution=%dx%d bytes_base=%d bytes_modal=%d distinct=1"
+			% [ANCHO, ALTO, captura_base.size(), captura_modal.size()]
+		)
 	)
 	quit(0)
 
