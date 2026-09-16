@@ -203,6 +203,7 @@ func _opciones_contenido(caja: VBoxContainer) -> void:
 	_volumen.max_value = 1.0
 	_volumen.step = 0.05
 	_volumen.value = float(_preferencias.get("volumen", 1.0))
+	_volumen.accessibility_name = volumen_titulo.text
 	_volumen.value_changed.connect(_al_cambiar_volumen)
 	caja.add_child(_volumen)
 
@@ -261,6 +262,7 @@ func _slider_preferencia(
 	slider.max_value = PreferenciasSiga.SENSIBILIDAD_CAMARA_MAX
 	slider.step = 0.05
 	slider.value = valor
+	slider.accessibility_name = etiqueta
 	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	slider.value_changed.connect(al_cambiar)
 	fila.add_child(slider)
@@ -343,12 +345,14 @@ func _montar_remapeo(caja: VBoxContainer) -> void:
 	caja.add_child(controles)
 
 	_estado_remapeo = Label.new()
+	_estado_remapeo.accessibility_live = AccessibilityServer.LIVE_POLITE
 	_estado_remapeo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	controles.add_child(_estado_remapeo)
 
 	var restaurar := Button.new()
 	restaurar.text = "↺"
 	restaurar.tooltip_text = _texto_remapeo("restaurar_tooltip")
+	restaurar.accessibility_name = restaurar.tooltip_text
 	restaurar.pressed.connect(_restaurar_controles)
 	controles.add_child(restaurar)
 	_refrescar_remapeo()
