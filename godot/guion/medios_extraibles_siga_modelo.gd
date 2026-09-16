@@ -407,16 +407,17 @@ func _cumple_condicion(condicion: Dictionary) -> bool:
 		return false
 	var actual: Variant = _contexto[clave]
 	var esperado: Variant = condicion.get("valor")
+	var cumple := false
 	match String(condicion.get("op", "igual")):
 		"igual":
-			return actual == esperado
+			cumple = actual == esperado
 		">=":
 			var actual_numerico := actual is int or actual is float
 			var esperado_numerico := esperado is int or esperado is float
-			return actual_numerico and esperado_numerico and float(actual) >= float(esperado)
+			cumple = actual_numerico and esperado_numerico and float(actual) >= float(esperado)
 		"incluye":
 			if actual is Array:
-				return (actual as Array).has(esperado)
-			if actual is PackedStringArray:
-				return (actual as PackedStringArray).has(String(esperado))
-	return false
+				cumple = (actual as Array).has(esperado)
+			elif actual is PackedStringArray:
+				cumple = (actual as PackedStringArray).has(String(esperado))
+	return cumple
