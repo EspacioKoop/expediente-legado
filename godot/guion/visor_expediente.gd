@@ -42,6 +42,7 @@ var _aviso_partida := ""
 var _lista: ItemList
 var _archivo: ItemList
 var _titulo_ventana: Label
+var _reconstruir: Button
 var _imputar: Button
 var _documento: RichTextLabel
 var _cabecera: Label
@@ -102,10 +103,19 @@ func _construir() -> void:
 	columnas.add_child(_columna_indice())
 	columnas.add_child(_columna_documento())
 
+	var acciones := HBoxContainer.new()
+	acciones.add_theme_constant_override("separation", 6)
+	_reconstruir = Button.new()
+	_reconstruir.text = "Reconstruir expediente…"
+	_reconstruir.tooltip_text = "Lea al menos dos documentos del expediente en esta jornada."
+	_reconstruir.pressed.connect(_abrir_reconstruccion)
+	acciones.add_child(_reconstruir)
+
 	_imputar = Button.new()
 	_imputar.text = tr("VISOR_IMPUTAR")
 	_imputar.pressed.connect(_abrir_formulario)
-	raiz.add_child(_imputar)
+	acciones.add_child(_imputar)
+	raiz.add_child(acciones)
 
 	_estado = _etiqueta("", EstiloSiga.NEGRO)
 	var barra_estado := _hueco()
@@ -416,6 +426,42 @@ func _abrir_historia(carta_id: String) -> void:
 	historia.popup_centered_clamped(Vector2i(900, 600), 0.9)
 
 
+## Solo los folios abiertos en la jornada entran en este corte. Así la
+## reconstrucción funciona con información parcial sin revelar documentos que
+## el jugador todavía no ha elegido leer.
+func _ids_leidos_del_caso() -> Array:
+	var ids: Array = []
+	var leidos: Array = jornada.get("leido_hoy", [])
+	for registro in caso.get("registros", []):
+		if leidos.has(registro.get("folio")):
+			ids.append(String(registro.get("id", "")))
+	return ids
+
+
+func _abrir_reconstruccion() -> void:
+	if _hay_guardado_a_medias():
+		return
+	var visibles := _ids_leidos_del_caso()
+	if visibles.size() < 2:
+		_aviso_partida = "Lea al menos dos documentos del expediente para reconstruirlo."
+		_refrescar_estado()
+		return
+
+	var panel: Control = load("res://escenas/reconstruccion_expediente.tscn").instantiate()
+	panel.caso = caso
+	panel.estado = partida.estado
+	panel.visibles = visibles
+	panel.guardar = Callable(self, "_guardar_o_avisar")
+	panel.cerrada.connect(_cerrar_reconstruccion.bind(panel))
+	add_child(panel)
+
+
+func _cerrar_reconstruccion(panel: Control) -> void:
+	panel.queue_free()
+	_refrescar_estado()
+	_reconstruir.grab_focus()
+
+
 ## Abre el formulario A-7. La ventana no decide nada: rellena un papel y
 ## devuelve lo que  haya resuelto.
 func _abrir_formulario() -> void:
@@ -495,6 +541,7 @@ func _mostrar_cierre(acusacion: Dictionary, duelo: Dictionary = {}) -> void:
 
 
 func _refrescar_estado() -> void:
+	_reconstruir.disabled = _ids_leidos_del_caso().size() < 2
 	_imputar.disabled = Acusacion.esta_cerrado(partida.estado, caso["id"])
 	_refrescar_archivo()
 	_refrescar_lista_documentos()
