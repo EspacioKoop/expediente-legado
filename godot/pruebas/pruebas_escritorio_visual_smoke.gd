@@ -3,10 +3,14 @@ extends SceneTree
 ## Smoke visual reproducible del shell OS98 (#534).
 ##
 ## No sustituye una revisión humana: monta el EscritorioSigaVisual real a una
-## resolución fija, fuerza dos estados representativos y guarda capturas PNG
+## resolución fija, fuerza dos estados representativos y codifica capturas PNG
 ## para que CI demuestre que la composición puede renderizarse de extremo a
 ## extremo. Además valida estructura y diversidad mínima de la imagen para no
 ## aceptar una captura vacía o monocroma como evidencia.
+##
+## Para inspección manual puede usarse --output=user://directorio (o cualquier
+## ruta aceptada por Godot). CI valida los buffers PNG en memoria y no depende
+## de que Python y FileAccess compartan el mismo namespace de rutas.
 
 const ANCHO := 1024
 const ALTO := 680
@@ -21,11 +25,8 @@ func _initialize() -> void:
 	for argumento in OS.get_cmdline_user_args():
 		if argumento.begins_with("--output="):
 			_salida = argumento.trim_prefix("--output=")
-	if _salida.is_empty():
-		_fallar("falta --output=<directorio>")
-		quit(1)
-		return
-	DirAccess.make_dir_recursive_absolute(_salida)
+	if not _salida.is_empty():
+		DirAccess.make_dir_recursive_absolute(_salida)
 	_ejecutar.call_deferred()
 
 
@@ -76,8 +77,7 @@ func _ejecutar() -> void:
 		"la barra inferior forma parte de la composición"
 	)
 
-	var captura_base := _salida.path_join("escritorio-ventanas.png")
-	await _capturar(captura_base, "estado con dos ventanas y menú")
+	var captura_base := await _capturar("escritorio-ventanas.png", "estado con dos ventanas y menú")
 
 	escritorio._menu.visible = false
 	var modal := VBoxContainer.new()
@@ -102,8 +102,11 @@ func _ejecutar() -> void:
 		escritorio.get_node_or_null("BloqueadorModal") != null,
 		"la modal incluye su bloqueador visual"
 	)
-	var captura_modal := _salida.path_join("escritorio-modal.png")
-	await _capturar(captura_modal, "estado modal")
+	var captura_modal := await _capturar("escritorio-modal.png", "estado modal")
+	_comprobar(
+		captura_base != captura_modal,
+		"los estados base y modal producen capturas PNG distintas"
+	)
 
 	escritorio.queue_free()
 	await process_frame
@@ -111,7 +114,10 @@ func _ejecutar() -> void:
 		print("SMOKE_VISUAL_ESCRITORIO_FALLO fallos=%d" % _fallos)
 		quit(1)
 		return
-	print("SMOKE_VISUAL_ESCRITORIO_OK captures=2 resolution=%dx%d" % [ANCHO, ALTO])
+	print(
+		"SMOKE_VISUAL_ESCRITORIO_OK captures=2 resolution=%dx%d bytes_base=%d bytes_modal=%d distinct=1"
+		% [ANCHO, ALTO, captura_base.size(), captura_modal.size()]
+	)
 	quit(0)
 
 
@@ -136,7 +142,7 @@ func _crear_contenido(titulo_texto: String, detalle_texto: String) -> Control:
 	return margen
 
 
-func _capturar(ruta: String, nombre: String) -> void:
+func _capturar(nombre_archivo: String, nombre: String) -> PackedByteArray:
 	var imagen := get_root().get_texture().get_image()
 	_comprobar(not imagen.is_empty(), "%s produce una imagen no vacía" % nombre)
 	_comprobar(
@@ -147,17 +153,12 @@ func _capturar(ruta: String, nombre: String) -> void:
 		_contar_colores_muestreados(imagen) >= MINIMO_COLORES_MUESTREADOS,
 		"%s conserva diversidad visual mínima" % nombre
 	)
-	var error := imagen.save_png(ruta)
-	_comprobar(error == OK, "%s se guarda como PNG" % nombre)
-	if error != OK:
-		return
-	var archivo := FileAccess.open(ruta, FileAccess.READ)
-	_comprobar(archivo != null, "%s puede reabrirse desde disco" % nombre)
-	if archivo == null:
-		return
-	var bytes := archivo.get_length()
-	archivo.close()
-	_comprobar(bytes >= MINIMO_BYTES_PNG, "%s no es una captura PNG trivial" % nombre)
+	var png := imagen.save_png_to_buffer()
+	_comprobar(png.size() >= MINIMO_BYTES_PNG, "%s codifica un PNG no trivial" % nombre)
+	if not _salida.is_empty():
+		var error := imagen.save_png(_salida.path_join(nombre_archivo))
+		_comprobar(error == OK, "%s se guarda como PNG cuando se solicita" % nombre)
+	return png
 
 
 func _contar_colores_muestreados(imagen: Image) -> int:
