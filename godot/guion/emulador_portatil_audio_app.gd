@@ -118,7 +118,7 @@ func _al_cambiar_efectos(activos: bool) -> void:
 
 func _cerrar() -> void:
 	_cancelar_cambio_cartucho()
-	_limpiar_audio_emulado()
+	_limpiar_audio_emulado(false)
 	if _audio_emulado != null:
 		_audio_emulado.stop()
 	super._cerrar()
@@ -126,7 +126,7 @@ func _cerrar() -> void:
 
 func _exit_tree() -> void:
 	_cancelar_cambio_cartucho()
-	_limpiar_audio_emulado()
+	_limpiar_audio_emulado(false)
 	if _audio_emulado != null:
 		_audio_emulado.stop()
 	super._exit_tree()
@@ -252,18 +252,19 @@ func _bombear_audio_emulado() -> void:
 		_audio_pendiente = _audio_pendiente.slice(cantidad)
 
 
-func _limpiar_audio_emulado() -> void:
+func _limpiar_audio_emulado(reanudar: bool = true) -> void:
 	_audio_pendiente.clear()
 	if _emulador != null:
 		_emulador.call("drain_audio_pcm16")
-	if _audio_emulado != null and _audio_emulado.playing:
-		# `clear_buffer()` falla con el generador activo: reiniciar el player
+	if not reanudar or not is_inside_tree():
+		_audio_playback = null
+	elif _audio_emulado != null and _audio_playback != null:
+		# `clear_buffer()` falla con el generador activo, y `playing` no basta
+		# para saberlo (con el árbol en pausa sigue activo). Reiniciar el player
 		# descarta lo encolado y deja un playback nuevo y vacío.
 		_audio_emulado.stop()
 		_audio_emulado.play()
 		_audio_playback = _audio_emulado.get_stream_playback() as AudioStreamGeneratorPlayback
-	elif _audio_playback != null:
-		_audio_playback.clear_buffer()
 
 
 func _aplicar_volumen_audio() -> void:
