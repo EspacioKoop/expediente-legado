@@ -79,7 +79,7 @@ func _montar_hidra(mundo: Node3D, espacio: Dictionary, dia: Node) -> void:
 	mundo.add_child(hidra)
 
 	var semillas := SemillasOniricas.obtener_semillas(dia.jornada)
-	var reduccion := bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false))
+	var reduccion := PreferenciasSiga.cargar().get("reduccion_movimiento", false) == true
 	hidra.configurar(semillas, reduccion, dia._raiz())
 
 
