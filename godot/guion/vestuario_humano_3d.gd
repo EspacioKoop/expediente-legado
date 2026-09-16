@@ -52,7 +52,8 @@ const PERFILES_BASE := [
 ## cintura, mangas y familia de prenda. Los valores no alteran el Skeleton3D.
 ## Si entra una figura humana fuera del roster, cae al vocabulario BASE.
 const PERFILES_PERSONAJE := {
-	"emperador": {
+	"emperador":
+	{
 		"nombre": "emperador",
 		"ancho": 0.89,
 		"fondo": 0.88,
@@ -63,7 +64,8 @@ const PERFILES_PERSONAJE := {
 		"largo_manga": 0.29,
 		"prenda": "cuello_cerrado",
 	},
-	"aduanero_ny": {
+	"aduanero_ny":
+	{
 		"nombre": "aduanero_ny",
 		"ancho": 1.06,
 		"fondo": 1.00,
@@ -74,7 +76,8 @@ const PERFILES_PERSONAJE := {
 		"largo_manga": 0.30,
 		"prenda": "abrigo",
 	},
-	"correspondencia": {
+	"correspondencia":
+	{
 		"nombre": "correspondencia",
 		"ancho": 0.90,
 		"fondo": 0.89,
@@ -85,7 +88,8 @@ const PERFILES_PERSONAJE := {
 		"largo_manga": 0.28,
 		"prenda": "traje_chaleco",
 	},
-	"riegos": {
+	"riegos":
+	{
 		"nombre": "riegos",
 		"ancho": 1.03,
 		"fondo": 0.96,
@@ -96,7 +100,8 @@ const PERFILES_PERSONAJE := {
 		"largo_manga": 0.27,
 		"prenda": "traje",
 	},
-	"fielato": {
+	"fielato":
+	{
 		"nombre": "fielato",
 		"ancho": 0.97,
 		"fondo": 0.95,
@@ -107,7 +112,8 @@ const PERFILES_PERSONAJE := {
 		"largo_manga": 0.26,
 		"prenda": "chaqueta_trabajo",
 	},
-	"cunado": {
+	"cunado":
+	{
 		"nombre": "cunado",
 		"ancho": 1.04,
 		"fondo": 1.00,
@@ -118,7 +124,8 @@ const PERFILES_PERSONAJE := {
 		"largo_manga": 0.26,
 		"prenda": "chaqueta",
 	},
-	"becario": {
+	"becario":
+	{
 		"nombre": "becario",
 		"ancho": 0.88,
 		"fondo": 0.88,
@@ -129,7 +136,8 @@ const PERFILES_PERSONAJE := {
 		"largo_manga": 0.29,
 		"prenda": "camisa",
 	},
-	"jubilacion": {
+	"jubilacion":
+	{
 		"nombre": "jubilacion",
 		"ancho": 1.06,
 		"fondo": 1.04,
@@ -140,7 +148,8 @@ const PERFILES_PERSONAJE := {
 		"largo_manga": 0.25,
 		"prenda": "chaleco",
 	},
-	"mesa_de_en_medio": {
+	"mesa_de_en_medio":
+	{
 		"nombre": "mesa_de_en_medio",
 		"ancho": 1.00,
 		"fondo": 0.98,
@@ -151,7 +160,8 @@ const PERFILES_PERSONAJE := {
 		"largo_manga": 0.27,
 		"prenda": "jersey",
 	},
-	"telefono": {
+	"telefono":
+	{
 		"nombre": "telefono",
 		"ancho": 0.95,
 		"fondo": 0.92,
@@ -270,14 +280,7 @@ func _vestir_si_persona(pieza: Node) -> void:
 	)
 
 	_detalle_prenda(
-		torso,
-		hombros,
-		String(perfil["prenda"]),
-		ancho,
-		fondo,
-		largo,
-		color_chaqueta,
-		color_camisa
+		torso, hombros, String(perfil["prenda"]), ancho, fondo, largo, color_chaqueta, color_camisa
 	)
 
 	esqueleto.set_meta(MARCA, String(perfil["nombre"]))
