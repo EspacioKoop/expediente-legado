@@ -53,13 +53,7 @@ func _construir() -> void:
 	# El cuello es la única piel superior visible desde primera persona. No se
 	# modela cabeza aquí: la cámara vive donde estaría y una cabeza local daría
 	# clipping. El perfil sí conserva pelo/peinado para espejos/cinemáticas futuras.
-	_cilindro(
-		"Cuello",
-		Vector3(0.0, 0.43 * altura, 0.0),
-		0.075 * ancho,
-		0.13 * altura,
-		piel
-	)
+	_cilindro("Cuello", Vector3(0.0, 0.43 * altura, 0.0), 0.075 * ancho, 0.13 * altura, piel)
 
 	var torso_ancho := 0.42 * ancho * hombros
 	var torso_fondo := 0.22 * fondo
@@ -128,9 +122,7 @@ func _construir() -> void:
 		)
 
 
-func _detalle_prenda(
-	prenda: String, ancho: float, fondo: float, alto: float, color: Color
-) -> void:
+func _detalle_prenda(prenda: String, ancho: float, fondo: float, alto: float, color: Color) -> void:
 	match prenda:
 		"jersey":
 			_caja(
@@ -172,9 +164,7 @@ func _caja(nombre: String, posicion: Vector3, tam: Vector3, color: Color) -> voi
 	add_child(instancia)
 
 
-func _capsula(
-	nombre: String, posicion: Vector3, radio: float, alto: float, color: Color
-) -> void:
+func _capsula(nombre: String, posicion: Vector3, radio: float, alto: float, color: Color) -> void:
 	var malla := CapsuleMesh.new()
 	malla.radius = radio
 	malla.height = maxf(alto, radio * 2.05)
@@ -188,9 +178,7 @@ func _capsula(
 	add_child(instancia)
 
 
-func _esfera(
-	nombre: String, posicion: Vector3, escala: Vector3, color: Color
-) -> void:
+func _esfera(nombre: String, posicion: Vector3, escala: Vector3, color: Color) -> void:
 	var malla := SphereMesh.new()
 	malla.radial_segments = 6
 	malla.rings = 4
@@ -205,9 +193,7 @@ func _esfera(
 	add_child(instancia)
 
 
-func _cilindro(
-	nombre: String, posicion: Vector3, radio: float, alto: float, color: Color
-) -> void:
+func _cilindro(nombre: String, posicion: Vector3, radio: float, alto: float, color: Color) -> void:
 	var malla := CylinderMesh.new()
 	malla.top_radius = radio
 	malla.bottom_radius = radio * 1.04
