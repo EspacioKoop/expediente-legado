@@ -2,7 +2,7 @@
 
 Primer corte de arte reutilizable para la contraparte de vigilia de la familia onírica **Hidra**.
 
-Este directorio **no implementa todavía la ROM ni activa `semilla_onirica_hidra`**. Solo deja una portada y sus datos gráficos en un formato que RGBDS puede consumir sin depender de assets comerciales.
+Este directorio solo contiene la portada y sus datos gráficos, en un formato que RGBDS puede consumir sin depender de assets comerciales. La ROM jugable prototipo que los usa vive en [`../hydra_loop_98`](../hydra_loop_98/README.md); ninguno de los dos activa `semilla_onirica_hidra`.
 
 ## Contenido
 
