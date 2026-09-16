@@ -34,7 +34,9 @@ func _probar_gate_y_semilla() -> void:
 		["yggdrasil"],
 		"Yggdrasil participa en catálogo común",
 	)
-	var entrada: Dictionary = SemillasOniricas.obtener_semillas(jornada)["semilla_onirica_yggdrasil"]
+	var entrada: Dictionary = (
+		SemillasOniricas.obtener_semillas(jornada)["semilla_onirica_yggdrasil"]
+	)
 	_comprobar(entrada["fuentes"], ["poster:yggdrasil_98"], "la procedencia es estable")
 	_comprobar(entrada["intensidad"], 2, "intensidad declarada conservada")
 	jornada["dia"] = 9
@@ -75,11 +77,19 @@ func _probar_grafo_y_causalidad() -> void:
 	sueno.preparar()
 	var conexiones := sueno.conexiones_visibles()
 	_comprobar(conexiones.size(), 3, "hay tres conexiones visibles")
-	_comprobar(conexiones[SuenoYggdrasil.NODO_RAIZ], SuenoYggdrasil.NODO_RAMA, "raíz conecta con rama")
-	_comprobar(conexiones[SuenoYggdrasil.NODO_RAMA], SuenoYggdrasil.NODO_TRONCO, "rama conecta con tronco")
-	_comprobar(conexiones[SuenoYggdrasil.NODO_TRONCO], SuenoYggdrasil.NODO_RAIZ, "tronco conecta con raíz")
+	_comprobar(
+		conexiones[SuenoYggdrasil.NODO_RAIZ], SuenoYggdrasil.NODO_RAMA, "raíz conecta con rama"
+	)
+	_comprobar(
+		conexiones[SuenoYggdrasil.NODO_RAMA], SuenoYggdrasil.NODO_TRONCO, "rama conecta con tronco"
+	)
+	_comprobar(
+		conexiones[SuenoYggdrasil.NODO_TRONCO], SuenoYggdrasil.NODO_RAIZ, "tronco conecta con raíz"
+	)
 	_comprobar(sueno.get_node_or_null("Conexiones") != null, "el grafo existe en escena")
-	_comprobar(sueno.get_node("Conexiones").get_child_count(), 3, "cada arista tiene representación física")
+	_comprobar(
+		sueno.get_node("Conexiones").get_child_count(), 3, "cada arista tiene representación física"
+	)
 
 	var inicial := sueno.estado_reproducible()
 	_comprobar(inicial[SuenoYggdrasil.NODO_RAMA], 0, "rama empieza neutra")
@@ -89,11 +99,17 @@ func _probar_grafo_y_causalidad() -> void:
 	_comprobar(desde_raiz["destino"], SuenoYggdrasil.NODO_RAMA, "efecto ocurre a distancia")
 	_comprobar(desde_raiz["accion"], "alimentar", "acción declarada es rastreable")
 	_comprobar(desde_raiz["efecto"], "luz", "efecto remoto declarado")
-	_comprobar(sueno.estado_reproducible()[SuenoYggdrasil.NODO_RAMA], 1, "solo cambia destino remoto")
-	_comprobar(sueno.estado_reproducible()[SuenoYggdrasil.NODO_RAIZ], 0, "origen no se auto modifica")
+	_comprobar(
+		sueno.estado_reproducible()[SuenoYggdrasil.NODO_RAMA], 1, "solo cambia destino remoto"
+	)
+	_comprobar(
+		sueno.estado_reproducible()[SuenoYggdrasil.NODO_RAIZ], 0, "origen no se auto modifica"
+	)
 
 	var desde_rama := sueno.intervenir(SuenoYggdrasil.NODO_RAMA)
-	_comprobar(desde_rama["destino"], SuenoYggdrasil.NODO_TRONCO, "segunda arista también es remota")
+	_comprobar(
+		desde_rama["destino"], SuenoYggdrasil.NODO_TRONCO, "segunda arista también es remota"
+	)
 	_comprobar(desde_rama["efecto"], "altura", "rama controla altura del tronco")
 	var desde_tronco := sueno.intervenir(SuenoYggdrasil.NODO_TRONCO)
 	_comprobar(desde_tronco["destino"], SuenoYggdrasil.NODO_RAIZ, "tercera arista cierra grafo")
@@ -129,13 +145,22 @@ func _probar_accesibilidad_y_reproduccion() -> void:
 	copia.preparar()
 	copia.restaurar_estado(guardado)
 	_comprobar(copia.estado_reproducible(), guardado, "estado se reproduce exactamente")
-	copia.restaurar_estado({
-		SuenoYggdrasil.NODO_RAIZ: 99,
-		SuenoYggdrasil.NODO_TRONCO: -4,
-		SuenoYggdrasil.NODO_RAMA: 1,
-	})
-	_comprobar(copia.estado_reproducible()[SuenoYggdrasil.NODO_RAIZ], 2, "restauración acota máximo")
-	_comprobar(copia.estado_reproducible()[SuenoYggdrasil.NODO_TRONCO], 0, "restauración acota mínimo")
+	(
+		copia
+		. restaurar_estado(
+			{
+				SuenoYggdrasil.NODO_RAIZ: 99,
+				SuenoYggdrasil.NODO_TRONCO: -4,
+				SuenoYggdrasil.NODO_RAMA: 1,
+			}
+		)
+	)
+	_comprobar(
+		copia.estado_reproducible()[SuenoYggdrasil.NODO_RAIZ], 2, "restauración acota máximo"
+	)
+	_comprobar(
+		copia.estado_reproducible()[SuenoYggdrasil.NODO_TRONCO], 0, "restauración acota mínimo"
+	)
 	_comprobar(copia.ruta_retorno_disponible(), "estado extremo mantiene retorno")
 	sueno.queue_free()
 	copia.queue_free()
