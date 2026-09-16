@@ -2,7 +2,8 @@ extends SceneTree
 
 const CASO := {
 	"id": "caso_ui_155",
-	"registros": [
+	"registros":
+	[
 		{"id": "doc_a", "tipo": "informe", "folio": "1", "fecha": "1998-01-01"},
 		{"id": "doc_b", "tipo": "oficio", "folio": "2", "fecha": "1998-01-02"},
 	]
