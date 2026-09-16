@@ -91,6 +91,23 @@ class GbcFixtureWorkflowTest(unittest.TestCase):
         self.assertNotIn("ucity.gbc", upload)
         self.assertNotIn("external-fixtures", upload)
 
+    def test_inspector_se_ejecuta_sobre_fixture_externo_y_roms_generadas(self):
+        self.assertIn('"scripts/inspect_gb_rom.py"', self.texto)
+        self.assertIn('"scripts/test_inspect_gb_rom.py"', self.texto)
+        self.assertIn(
+            "python -m unittest scripts.test_gbc_fixture_workflow scripts.test_inspect_gb_rom",
+            self.texto,
+        )
+        self.assertIn(
+            'python scripts/inspect_gb_rom.py external-fixtures/ucity.gbc --expect-sha256 "$UCITY_SHA256" --compact',
+            self.texto,
+        )
+        self.assertIn(
+            'python scripts/inspect_gb_rom.py "$rom" --compact >> gbc-fixtures/rom-metadata.jsonl',
+            self.texto,
+        )
+        self.assertIn("gbc-fixtures/rom-metadata.jsonl", self.texto)
+
     def test_fixture_cgb_only_es_propio_y_se_compila_desde_fuente(self):
         self.assertIn("gbc/fixtures/cgb_only_smoke/**", self.texto)
         self.assertIn("make -C gbc/fixtures/cgb_only_smoke clean all", self.texto)
