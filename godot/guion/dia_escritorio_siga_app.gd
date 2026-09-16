@@ -9,6 +9,7 @@ var _pantalla_envuelta_id := 0
 var _siga_app: EscritorioSigaApp
 var _explorador_app: EscritorioSigaApp
 var _correo_app: EscritorioSigaApp
+var _catalogo_anomalias_app: EscritorioSigaApp
 
 ## Todas las apps registradas en este puesto, para persistencia declarada
 ## (#535): quien guarde/cargue partida no necesita conocerlas una a una.
@@ -78,6 +79,24 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	_correo_app.persistir_estado = true
 	_correo_app.registrar_en(escritorio)
 	_apps.append(_correo_app)
+
+	# El catálogo de #149 es una vista de la memoria de Partida: no guarda estado
+	# paralelo ni interpreta el sueño. Las entradas bloqueadas tampoco exponen
+	# metadata del catálogo declarativo.
+	_catalogo_anomalias_app = (
+		EscritorioSigaApp
+		. new(
+			"catalogo-anomalias",
+			CatalogoAnomaliasSiga.texto("titulo_app"),
+			Callable(self, "_crear_catalogo_anomalias"),
+			"siga",
+		)
+	)
+	_catalogo_anomalias_app.tamano_minimo = Vector2(560, 360)
+	_catalogo_anomalias_app.tamano_preferido = Vector2(760, 500)
+	_catalogo_anomalias_app.redimensionable = true
+	_catalogo_anomalias_app.registrar_en(escritorio)
+	_apps.append(_catalogo_anomalias_app)
 
 	# Reponer el estado declarado ANTES de adoptar/abrir nada: así una app que
 	# lea su estado local al construir su contenido (como hace Correo) ya
@@ -163,6 +182,17 @@ func _crear_correo() -> Control:
 	correo.mensaje_leido.connect(_registrar_correo_leido)
 	correo.respuesta_enviada.connect(_registrar_respuesta_correo)
 	return correo
+
+
+func _crear_catalogo_anomalias() -> Control:
+	var catalogo := CatalogoAnomaliasSiga.new()
+	var dia := get_parent()
+	if dia == null:
+		return catalogo
+	var partida_actual: Variant = dia.get("partida")
+	if partida_actual is Partida:
+		catalogo.configurar_estado(partida_actual.estado)
+	return catalogo
 
 
 func _registrar_correo_leido(id: String) -> void:

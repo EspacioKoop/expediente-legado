@@ -1,26 +1,33 @@
 import json
 from pathlib import Path
+import re
 import unittest
 
 
 RAIZ = Path(__file__).resolve().parents[1]
 CATALOGO = RAIZ / "godot" / "datos" / "anomalias_sueno.json"
+TEXTOS = RAIZ / "godot" / "datos" / "catalogo_anomalias_textos.json"
 CONTRATO = RAIZ / "godot" / "guion" / "catalogo_anomalias.gd"
+UI = RAIZ / "godot" / "guion" / "catalogo_anomalias_siga.gd"
 UTILERIA = RAIZ / "godot" / "guion" / "sueno_utileria.gd"
 PARTIDA = RAIZ / "godot" / "guion" / "partida.gd"
 PROMETEO = RAIZ / "godot" / "guion" / "prometeo.gd"
 CONTROLADOR = RAIZ / "godot" / "guion" / "dia_sueno_reactivo_app.gd"
+ESCRITORIO = RAIZ / "godot" / "guion" / "dia_escritorio_siga_app.gd"
 PRUEBA_GODOT = RAIZ / "godot" / "pruebas" / "pruebas_catalogo_anomalias.gd"
 
 
 class CatalogoAnomaliasTest(unittest.TestCase):
     def setUp(self):
         self.catalogo = json.loads(CATALOGO.read_text(encoding="utf-8"))
+        self.textos = json.loads(TEXTOS.read_text(encoding="utf-8"))
         self.codigo = CONTRATO.read_text(encoding="utf-8")
+        self.ui = UI.read_text(encoding="utf-8")
         self.utileria = UTILERIA.read_text(encoding="utf-8")
         self.partida = PARTIDA.read_text(encoding="utf-8")
         self.prometeo = PROMETEO.read_text(encoding="utf-8")
         self.controlador = CONTROLADOR.read_text(encoding="utf-8")
+        self.escritorio = ESCRITORIO.read_text(encoding="utf-8")
         self.prueba_godot = PRUEBA_GODOT.read_text(encoding="utf-8")
 
     def test_catalogo_declara_ids_estables_y_origen_real(self):
@@ -30,6 +37,9 @@ class CatalogoAnomaliasTest(unittest.TestCase):
         for entrada in self.catalogo:
             self.assertEqual(entrada["origen_tipo"], "objeto")
             self.assertIn(entrada["origen_id"], self.utileria)
+            self.assertTrue(entrada["titulo"].strip())
+            self.assertTrue(entrada["descripcion"].strip())
+            self.assertTrue(entrada["nota_visual"].strip())
             representacion = entrada["representacion"]
             self.assertEqual(representacion["modelo"], entrada["origen_id"])
             self.assertEqual(representacion["tipo"], "modelo-procedural")
@@ -37,6 +47,9 @@ class CatalogoAnomaliasTest(unittest.TestCase):
     def test_catalogo_no_contiene_ubicaciones_soluciones_ni_recompensas(self):
         permitidas = {
             "id",
+            "titulo",
+            "descripcion",
+            "nota_visual",
             "origen_tipo",
             "origen_id",
             "representacion",
@@ -92,6 +105,62 @@ class CatalogoAnomaliasTest(unittest.TestCase):
             "SuenoObjetivos",
         ):
             self.assertNotIn(prohibido, bloque)
+
+    def test_ui_muestra_progreso_y_oculta_metadata_de_bloqueadas(self):
+        self.assertIn("class_name CatalogoAnomaliasSiga", self.ui)
+        self.assertIn("CatalogoAnomalias.progreso(_estado)", self.ui)
+        self.assertIn("CatalogoAnomalias.conocida(_estado, id)", self.ui)
+        self.assertIn("CatalogoAnomalias.conocida_en_vuelta(_estado, id)", self.ui)
+        self.assertIn('_t("entrada_bloqueada")', self.ui)
+        self.assertIn('_t("entrada_vuelta_completa")', self.ui)
+        self.assertNotIn('get("origen_id"', self.ui)
+        self.assertNotIn('get("modo_observacion"', self.ui)
+        for prohibido in ("SuenoObjetivos", 'jornada["dinero"]', 'jornada["acciones"]'):
+            self.assertNotIn(prohibido, self.ui)
+
+    def test_ui_externaliza_los_textos_fijos(self):
+        claves = {
+            "titulo_app",
+            "titulo_indice",
+            "leyenda",
+            "progreso",
+            "entrada_bloqueada",
+            "entrada_vuelta_completa",
+            "origen_material",
+            "representacion_archivada",
+            "titulo_bloqueada",
+            "origen_vacio",
+            "descripcion_bloqueada",
+            "representacion_vacia",
+            "titulo_vuelta_completa",
+            "origen_vuelta_completa",
+            "descripcion_vuelta_completa",
+            "representacion_vuelta_completa",
+            "titulo_espera",
+            "descripcion_espera",
+            "titulo_fallback",
+            "origen_fallback",
+            "descripcion_fallback",
+            "representacion_fallback",
+        }
+        self.assertEqual(set(self.textos), claves)
+        self.assertTrue(all(isinstance(valor, str) and valor.strip() for valor in self.textos.values()))
+        self.assertIn('const RUTA_TEXTOS := "res://datos/catalogo_anomalias_textos.json"', self.ui)
+        self.assertIn("static func texto(clave: String) -> String", self.ui)
+        literal_ui = re.compile(r'\.text\s*=\s*"[^\"]*[a-zá-úA-ZÁ-Ú]')
+        self.assertIsNone(literal_ui.search(self.ui))
+
+    def test_escritorio_registra_catalogo_como_app_sin_estado_paralelo(self):
+        self.assertIn('"catalogo-anomalias"', self.escritorio)
+        self.assertIn('CatalogoAnomaliasSiga.texto("titulo_app")', self.escritorio)
+        self.assertIn('Callable(self, "_crear_catalogo_anomalias")', self.escritorio)
+        self.assertIn("CatalogoAnomaliasSiga.new()", self.escritorio)
+        self.assertIn("catalogo.configurar_estado(partida_actual.estado)", self.escritorio)
+        bloque = self.escritorio.split("func _crear_catalogo_anomalias", 1)[1].split(
+            "func _registrar_correo_leido", 1
+        )[0]
+        self.assertNotIn("guardar", bloque.lower())
+        self.assertNotIn("registrar(", bloque)
 
     def test_hay_regresion_ejecutable_en_godot(self):
         self.assertIn("extends SceneTree", self.prueba_godot)
