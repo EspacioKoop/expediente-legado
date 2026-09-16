@@ -1,13 +1,11 @@
-## Identidad persistente del protagonista.
+## Identidad del protagonista: forma, límites y vocabulario narrativo.
 ##
-## Se mantiene separada del controlador de movimiento: apariencia y pasado no
-## cambian cápsula, velocidad ni navegación. El cuerpo 3D consume esta forma y
-## los sistemas narrativos pueden consultar las etiquetas del trasfondo sin
-## convertirlo en una clase con una respuesta correcta.
+## La persistencia pertenece a Partida. Este módulo solo define y normaliza la
+## apariencia y el trasfondo para que movimiento, UI y narrativa consuman la
+## misma forma sin crear una segunda autoridad de guardado.
 class_name PerfilJugador
 extends RefCounted
 
-const RUTA := "user://perfil_jugador.json"
 const VERSION := 1
 
 const CUERPOS := {
@@ -154,40 +152,6 @@ static func completar(valor) -> Dictionary:
 	if not trasfondo_por_id(trasfondo).is_empty():
 		base["trasfondo"] = trasfondo
 	return base
-
-
-static func cargar(ruta: String = RUTA) -> Dictionary:
-	if not FileAccess.file_exists(ruta):
-		return nuevo()
-	var fichero := FileAccess.open(ruta, FileAccess.READ)
-	if fichero == null:
-		return nuevo()
-	var crudo = JSON.parse_string(fichero.get_as_text())
-	fichero.close()
-	return completar(crudo)
-
-
-static func guardar(perfil: Dictionary, ruta: String = RUTA) -> bool:
-	var normalizado := completar(perfil)
-	var temporal := ruta + ".nuevo"
-	var fichero := FileAccess.open(temporal, FileAccess.WRITE)
-	if fichero == null:
-		return false
-	fichero.store_string(JSON.stringify(normalizado, "\t"))
-	fichero.close()
-	var error := DirAccess.rename_absolute(
-		ProjectSettings.globalize_path(temporal), ProjectSettings.globalize_path(ruta)
-	)
-	if error != OK:
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(temporal))
-		return false
-	return true
-
-
-static func reiniciar(ruta: String = RUTA) -> bool:
-	if FileAccess.file_exists(ruta):
-		return DirAccess.remove_absolute(ProjectSettings.globalize_path(ruta)) == OK
-	return true
 
 
 static func perfil_cuerpo(id: String) -> Dictionary:
