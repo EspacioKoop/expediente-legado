@@ -18,13 +18,11 @@ func _initialize() -> void:
 		"stream procedural se reutiliza y no se regenera por frame",
 	)
 	_comprobar(
-		SuenoMinotauroAudio.volumen_db("lejano")
-		< SuenoMinotauroAudio.volumen_db("respiracion"),
+		SuenoMinotauroAudio.volumen_db("lejano") < SuenoMinotauroAudio.volumen_db("respiracion"),
 		"la respiración sube al aproximarse",
 	)
 	_comprobar(
-		SuenoMinotauroAudio.volumen_db("respiracion")
-		< SuenoMinotauroAudio.volumen_db("cruce"),
+		SuenoMinotauroAudio.volumen_db("respiracion") < SuenoMinotauroAudio.volumen_db("cruce"),
 		"el cruce aumenta presencia sonora",
 	)
 	_comprobar(
