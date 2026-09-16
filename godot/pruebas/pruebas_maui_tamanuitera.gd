@@ -112,7 +112,7 @@ func _probar_tensores_y_puente() -> void:
 	_comprobar(not sueno.colision_puente_activa(), "la colisión se retira de nuevo")
 
 	var repetido := SuenoMauiTamanuitera.resolver_geometria(2, 1)
-	_comprobar(repetido, solapado.duplicate().filter(func(_clave): return false), "") if false else _pasadas += 0
+	_comprobar(repetido["estado"], solapado["estado"], "la combinación se reproduce")
 	_comprobar(repetido["azimut_sol"], solapado["azimut_sol"], "geometría solar determinista")
 	_comprobar(repetido["sombra_a_x"], solapado["sombra_a_x"], "sombra A determinista")
 	_comprobar(repetido["sombra_b_x"], solapado["sombra_b_x"], "sombra B determinista")
