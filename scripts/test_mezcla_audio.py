@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 import unittest
 
@@ -9,6 +10,7 @@ PROYECTO = RAIZ / "godot" / "project.godot"
 LAYOUT = RAIZ / "godot" / "default_bus_layout.tres"
 ROUTER = RAIZ / "godot" / "guion" / "mezcla_audio.gd"
 PREFERENCIAS = RAIZ / "godot" / "guion" / "preferencias_siga.gd"
+TEXTOS = RAIZ / "godot" / "datos" / "mezcla_audio_textos.json"
 
 
 class MezclaAudioTest(unittest.TestCase):
@@ -18,6 +20,7 @@ class MezclaAudioTest(unittest.TestCase):
         cls.layout = LAYOUT.read_text(encoding="utf-8")
         cls.router = ROUTER.read_text(encoding="utf-8")
         cls.preferencias = PREFERENCIAS.read_text(encoding="utf-8")
+        cls.textos = json.loads(TEXTOS.read_text(encoding="utf-8"))
 
     def test_layout_declara_tres_buses_separados_hacia_master(self):
         for nombre in ("Efectos", "Ambiente", "Musica"):
@@ -41,11 +44,20 @@ class MezclaAudioTest(unittest.TestCase):
     def test_mixer_se_monta_dentro_de_opciones_sin_segunda_persistencia(self):
         self.assertIn('call_deferred("_montar_mixer_opciones")', self.router)
         self.assertIn('bloque.name = "MixerAudio"', self.router)
-        self.assertIn('titulo.text = "Mezcla"', self.router)
         self.assertIn('menu.get("_volumen") as HSlider', self.router)
         self.assertIn('menu.get("_preferencias")', self.router)
-        for etiqueta in ("Efectos", "Ambiente", "Música"):
-            self.assertIn(f'"etiqueta": "{etiqueta}"', self.router)
+        self.assertIn('titulo.text = _texto("seccion")', self.router)
+        self.assertIn('etiqueta.text = _texto(String(control["texto"]))', self.router)
+        self.assertIn('RUTA_TEXTOS := "res://datos/mezcla_audio_textos.json"', self.router)
+        self.assertEqual(
+            self.textos,
+            {
+                "seccion": "Mezcla",
+                "efectos": "Efectos",
+                "ambiente": "Ambiente",
+                "musica": "Música",
+            },
+        )
         self.assertIn("PreferenciasSiga.guardar(_preferencias)", self.router)
         self.assertNotIn("user://", self.router)
 
