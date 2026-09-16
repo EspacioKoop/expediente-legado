@@ -109,15 +109,15 @@ func _montar_corredores(raiz: Node3D) -> void:
 
 
 func _crear_corredor(padre: Node3D, nombre: String, desde: Vector3, hasta: Vector3) -> void:
-	var direccion := hasta - desde
+	var direccion: Vector3 = hasta - desde
 	direccion.y = 0.0
-	var largo := direccion.length()
+	var largo: float = direccion.length()
 	if largo <= MARGEN_CRUCE * 1.25:
 		return
-	var unidad := direccion.normalized()
+	var unidad: Vector3 = direccion.normalized()
 	var normal := Vector3(-unidad.z, 0.0, unidad.x)
-	var longitud_muro := maxf(0.8, largo - MARGEN_CRUCE)
-	var centro := desde.lerp(hasta, 0.5)
+	var longitud_muro: float = maxf(0.8, largo - MARGEN_CRUCE)
+	var centro: Vector3 = desde.lerp(hasta, 0.5)
 
 	_crear_tramo_visual(
 		padre,
@@ -129,14 +129,15 @@ func _crear_corredor(padre: Node3D, nombre: String, desde: Vector3, hasta: Vecto
 		COLOR_SUELO,
 	)
 	for lado in [-1.0, 1.0]:
-		var posicion := centro + normal * lado * ANCHO_CORREDOR * 0.5
+		var lado_float := float(lado)
+		var posicion: Vector3 = centro + normal * lado_float * ANCHO_CORREDOR * 0.5
 		_crear_muro_fisico(
 			padre,
-			"Muro_%s_%s" % [nombre, "A" if lado < 0.0 else "B"],
+			"Muro_%s_%s" % [nombre, "A" if lado_float < 0.0 else "B"],
 			posicion,
 			unidad,
 			longitud_muro,
-			COLOR_ARCHIVO_OSCURO if lado < 0.0 else COLOR_ARCHIVO,
+			COLOR_ARCHIVO_OSCURO if lado_float < 0.0 else COLOR_ARCHIVO,
 		)
 
 
@@ -151,8 +152,8 @@ func _crear_muro_fisico(
 	var cuerpo := StaticBody3D.new()
 	cuerpo.name = nombre
 	cuerpo.position = posicion
-	cuerpo.look_at(posicion + direccion, Vector3.UP)
 	padre.add_child(cuerpo)
+	cuerpo.look_at(posicion + direccion, Vector3.UP)
 
 	var tam := Vector3(GROSOR_MURO, ALTURA_MURO, longitud)
 	var malla := BoxMesh.new()
@@ -186,7 +187,7 @@ func _montar_archivadores(raiz: Node3D) -> void:
 	]
 	for indice in range(ids.size()):
 		var id_nodo := String(ids[indice])
-		var base := SuenoMinotauro.posicion(id_nodo)
+		var base: Vector3 = SuenoMinotauro.posicion(id_nodo)
 		var lado := -1.0 if indice % 2 == 0 else 1.0
 		var torre := Node3D.new()
 		torre.name = "Archivador_%s" % id_nodo
@@ -274,14 +275,15 @@ func _montar_umbral_topologico(raiz: Node3D, nombre: String, id_nodo: String) ->
 	colision.shape = forma
 	umbral.add_child(colision)
 	for lado in [-1.0, 1.0]:
+		var lado_float := float(lado)
 		var jamba := _crear_caja(
 			umbral,
-			"Jamba%s" % ("A" if lado < 0.0 else "B"),
+			"Jamba%s" % ("A" if lado_float < 0.0 else "B"),
 			Vector3(0.22, 3.4, 0.22),
-			Vector3(lado * 1.1, 0.4, 0.0),
+			Vector3(lado_float * 1.1, 0.4, 0.0),
 			COLOR_BISAGRA,
 		)
-		jamba.rotation_degrees.z = lado * 11.0
+		jamba.rotation_degrees.z = lado_float * 11.0
 
 
 func _montar_repliegue(raiz: Node3D) -> void:
@@ -347,29 +349,31 @@ func _montar_minotauro(raiz: Node3D) -> void:
 	_minotauro.add_child(cabeza_visual)
 
 	for lado in [-1.0, 1.0]:
+		var lado_float := float(lado)
 		var cuerno := CylinderMesh.new()
 		cuerno.top_radius = 0.04
 		cuerno.bottom_radius = 0.18
 		cuerno.height = 1.15
 		cuerno.radial_segments = 6
 		var visual := MeshInstance3D.new()
-		visual.name = "Cuerno%s" % ("A" if lado < 0.0 else "B")
+		visual.name = "Cuerno%s" % ("A" if lado_float < 0.0 else "B")
 		visual.mesh = cuerno
-		visual.position = Vector3(lado * 0.55, 3.85, 0.0)
-		visual.rotation_degrees.z = lado * -34.0
+		visual.position = Vector3(lado_float * 0.55, 3.85, 0.0)
+		visual.rotation_degrees.z = lado_float * -34.0
 		visual.material_override = _material(Color(0.44, 0.40, 0.31))
 		_minotauro.add_child(visual)
 
 	for lado in [-1.0, 1.0]:
+		var lado_float := float(lado)
 		var ojo := SphereMesh.new()
 		ojo.radius = 0.075
 		ojo.height = 0.15
 		ojo.radial_segments = 6
 		ojo.rings = 4
 		var ojo_visual := MeshInstance3D.new()
-		ojo_visual.name = "Ojo%s" % ("A" if lado < 0.0 else "B")
+		ojo_visual.name = "Ojo%s" % ("A" if lado_float < 0.0 else "B")
 		ojo_visual.mesh = ojo
-		ojo_visual.position = Vector3(lado * 0.27, 3.48, -0.70)
+		ojo_visual.position = Vector3(lado_float * 0.27, 3.48, -0.70)
 		ojo_visual.material_override = _material_emisivo(COLOR_OJO)
 		_minotauro.add_child(ojo_visual)
 
@@ -425,7 +429,7 @@ func _actualizar_marcas() -> void:
 		if lectura.is_empty():
 			continue
 		var aparente := String(lectura.get("aparece_en", ""))
-		var posicion := SuenoMinotauro.posicion(aparente) + Vector3(0.0, 0.14, 0.0)
+		var posicion: Vector3 = SuenoMinotauro.posicion(aparente) + Vector3(0.0, 0.14, 0.0)
 		_crear_caja(
 			_raiz_marcas,
 			"MarcaVisible%02d" % indice,
@@ -457,7 +461,7 @@ func _actualizar_repliegue(animar: bool) -> void:
 		if ala == null:
 			continue
 		var aparente := SuenoMinotauro.nodo_aparente(real, fase)
-		var destino := SuenoMinotauro.posicion(aparente)
+		var destino: Vector3 = SuenoMinotauro.posicion(aparente)
 		var signo := -1.0 if indice % 2 == 0 else 1.0
 		destino += Vector3(signo * 2.9, 3.0, 0.0)
 		if SuenoMinotauro.transformacion_actual(_estado) == "escala_imposible":
@@ -508,8 +512,8 @@ func _crear_tramo_visual(
 	alto: float,
 	color: Color,
 ) -> MeshInstance3D:
-	var distancia := desde.distance_to(hasta)
-	var centro := desde.lerp(hasta, 0.5)
+	var distancia: float = desde.distance_to(hasta)
+	var centro: Vector3 = desde.lerp(hasta, 0.5)
 	centro.y = maxf(desde.y, hasta.y) + alto * 0.5
 	var nodo := _crear_caja(
 		padre,
