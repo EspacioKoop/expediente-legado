@@ -40,7 +40,7 @@ func _montar(mundo: Node3D) -> void:
 		# El del teléfono conserva su gesto propio. Entre el resto solo la mitad
 		# alterna actividad para evitar una oficina sincronizada artificialmente.
 		var trabajo := indice > 0 and indice % 2 == 1
-		idle.configurar(cuerpo, semilla, telefono, trabajo, reducir)
+		idle.configurar(cuerpo, semilla, telefono, reducir, trabajo)
 		_idles.append(idle)
 
 
