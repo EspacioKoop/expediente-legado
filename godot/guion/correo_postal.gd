@@ -26,7 +26,8 @@ const CATALOGO := [
 		"categoria": "factura",
 		"remitente": "Aguas Municipales",
 		"asunto": "Lectura bimestral",
-		"contenido": "Recibo doméstico. Recogerlo no cobra nada: cualquier efecto económico pertenece a #93/#83.",
+		"contenido":
+		"Recibo doméstico. Recogerlo no cobra nada: cualquier efecto económico pertenece a #93/#83.",
 		"desde": 2,
 		"cada": 5,
 		"resto": 2,
@@ -37,7 +38,8 @@ const CATALOGO := [
 		"categoria": "catalogo",
 		"remitente": "Electro Hogar 98",
 		"asunto": "Catálogo otoño/invierno",
-		"contenido": "Televisores, radiocasetes, aspiradores y pequeños electrodomésticos impresos a dos tintas.",
+		"contenido":
+		"Televisores, radiocasetes, aspiradores y pequeños electrodomésticos impresos a dos tintas.",
 		"desde": 3,
 		"cada": 4,
 		"resto": 3,
@@ -47,7 +49,8 @@ const CATALOGO := [
 		"categoria": "comunidad",
 		"remitente": "Comunidad de propietarios",
 		"asunto": "Aviso del portal",
-		"contenido": "La puerta vuelve a quedarse mal cerrada. Se ruega comprobar el pestillo al entrar.",
+		"contenido":
+		"La puerta vuelve a quedarse mal cerrada. Se ruega comprobar el pestillo al entrar.",
 		"desde": 4,
 		"cada": 6,
 		"resto": 4,
@@ -57,7 +60,8 @@ const CATALOGO := [
 		"categoria": "personal",
 		"remitente": "Manuela, 3.º B",
 		"asunto": "Sobre sin sello",
-		"contenido": "Una nota breve agradece que no se deje comida en el rellano y pregunta por el gato.",
+		"contenido":
+		"Una nota breve agradece que no se deje comida en el rellano y pregunta por el gato.",
 		"desde": 2,
 		"cada": 7,
 		"resto": 2,
@@ -68,7 +72,8 @@ const CATALOGO := [
 		"categoria": "notificacion",
 		"remitente": "Administración de fincas",
 		"asunto": "Vencimiento de alquiler",
-		"contenido": "Recordatorio del vencimiento. El pago sigue resolviéndose exclusivamente mediante la economía existente.",
+		"contenido":
+		"Recordatorio del vencimiento. El pago sigue resolviéndose exclusivamente mediante la economía existente.",
 		"desde": 10,
 		"requiere_alquiler_pendiente": true,
 		"economia": "delegada",
@@ -80,7 +85,8 @@ const CATALOGO := [
 		"asunto": "Muestra promocional",
 		"contenido": "Un sobre acolchado contiene un pequeño calendario magnético para la nevera.",
 		"dias": [4],
-		"objeto": {
+		"objeto":
+		{
 			"id": "postal_iman_calendario",
 			"nombre": "Calendario magnético 1998",
 			"categoria": "hogar",
@@ -94,7 +100,8 @@ const CATALOGO := [
 		"categoria": "certificado",
 		"remitente": "SIGA · Personal",
 		"asunto": "Comunicación certificada",
-		"contenido": "El sobre confirma únicamente que existe una comunicación administrativa; no revela expedientes no conocidos.",
+		"contenido":
+		"El sobre confirma únicamente que existe una comunicación administrativa; no revela expedientes no conocidos.",
 		"desde": 3,
 		"min_cerrados_hoy": 1,
 	},
