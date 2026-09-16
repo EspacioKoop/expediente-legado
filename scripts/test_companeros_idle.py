@@ -29,6 +29,7 @@ class CompanerosIdleTest(unittest.TestCase):
         self.assertIn("PreferenciasSiga.cargar()", self.controller)
         self.assertIn('get("reduccion_movimiento", false)', self.controller)
         self.assertIn("if reduccion_movimiento:", self.idle)
+        self.assertIn("actividad_trabajo and not reduccion_movimiento", self.idle)
 
     def test_controller_solo_monta_en_archivo(self):
         self.assertIn('!= "archivo"', self.controller)
@@ -36,8 +37,16 @@ class CompanerosIdleTest(unittest.TestCase):
         self.assertIn("Modelos._esqueleto(nodo) != null", self.controller)
 
     def test_gesto_telefono_es_selectivo(self):
-        self.assertIn("indice == 0", self.controller)
+        self.assertIn("telefono := indice == 0", self.controller)
         self.assertIn("if gesto_telefono else 0.0", self.idle)
+        self.assertIn("trabajo and not telefono", self.idle)
+
+    def test_actividad_trabajo_es_selectiva_e_intermitente(self):
+        self.assertIn("indice > 0 and indice % 2 == 1", self.controller)
+        self.assertIn("DURACION_TRABAJO", self.idle)
+        self.assertIn("DURACION_PAUSA", self.idle)
+        self.assertIn('"work" if _trabajando else "idle"', self.idle)
+        self.assertIn("_reloj_actividad = fmod", self.idle)
 
     def test_dia_monta_controller_hijo(self):
         self.assertIn("dia_companeros_idle_app.gd", self.dia)

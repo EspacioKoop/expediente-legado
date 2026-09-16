@@ -35,7 +35,12 @@ func _montar(mundo: Node3D) -> void:
 		var idle := CompaneroIdle3D.new()
 		idle.name = "IdleCompanero%d" % (indice + 1)
 		add_child(idle)
-		idle.configurar(cuerpo, hash("companero-%d" % indice), indice == 0, reducir)
+		var semilla := hash("companero-%d" % indice)
+		var telefono := indice == 0
+		# El del teléfono conserva su gesto propio. Entre el resto solo la mitad
+		# alterna actividad para evitar una oficina sincronizada artificialmente.
+		var trabajo := indice > 0 and indice % 2 == 1
+		idle.configurar(cuerpo, semilla, telefono, reducir, trabajo)
 		_idles.append(idle)
 
 
