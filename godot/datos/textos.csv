@@ -55,7 +55,7 @@ COMBATE_CRONICA,Usted: %s   ·   %s: %s   —   %s
 COMBATE_INSISTENCIA,Insistencia
 COMBATE_OBJECION,Objeción
 COMBATE_SILENCIO,Silencio
-COMBATE_VIDAS,Usted  %s %d        %s  %s %d
+COMBATE_VIDAS,Usted  %s %d        %s: %s   —   %s
 COMPA_ADUANERO_NY,El inspector
 COMPA_ADUANERO_NY_1,Diecinueve años mirando lo que entra por el puerto. Aquí entra menos.
 COMPA_ADUANERO_NY_2,"Escribí un libro. No lo lea, es muy largo."
@@ -182,6 +182,10 @@ NAVEGADOR_INICIO,Inicio
 NAVEGADOR_IR,Ir
 NAVEGADOR_NO_ENCONTRADO,[b]No se puede encontrar la página[/b]\n%s\n\nCompruebe la dirección o vuelva al portal interno.
 NAVEGADOR_PAGINA_OK,[b]%s[/b]\n%s\n\n%s\n\nCategoría: %s · vía: %s
+NAVEGADOR_PRENSA_DATO,• %s: %s
+NAVEGADOR_PRENSA_EDICION,Edición Web98 · jornada %d
+NAVEGADOR_PRENSA_OPINION,[i]Opinión · %s[/i]
+NAVEGADOR_PRENSA_SIN_ARTICULOS,No hay artículos disponibles para esta jornada.
 NAVEGADOR_QUITAR_FAVORITO,Quitar favorito
 NAVEGADOR_RESULTADOS,[b]Resultados para «%s»[/b]\n\n%d coincidencias en el índice local.
 NAVEGADOR_SERVIDOR_CAIDO,[b]Servidor no disponible[/b]\n%s\n\nEl servidor simulado no responde.
