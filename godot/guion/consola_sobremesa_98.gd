@@ -23,8 +23,12 @@ func configurar() -> void:
 func _montar_colision() -> void:
 	var colision := CollisionShape3D.new()
 	var forma := BoxShape3D.new()
-	forma.size = Vector3(0.58, 0.22, 0.44)
-	colision.position = Vector3(0, 0.12, 0)
+	# El volumen de foco es deliberadamente algo mayor que la carcasa: sobre el
+	# mueble de la tele el aparato queda bajo respecto a la cámara y el playtest
+	# de #133 demostró que la caja exacta era demasiado difícil de adquirir.
+	# Sigue siendo local al aparato y no invade el pasillo frente al mueble.
+	forma.size = Vector3(0.68, 0.38, 0.52)
+	colision.position = Vector3(0, 0.20, 0)
 	colision.shape = forma
 	add_child(colision)
 
