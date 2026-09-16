@@ -13,6 +13,8 @@ const VELOCIDAD := 1.35
 const DURACION_TRABAJO := 5.5
 const DURACION_PAUSA := 3.5
 const CICLO_TRABAJO := DURACION_TRABAJO + DURACION_PAUSA
+const DISTANCIA_HUIDA := 1.35
+const DURACION_HUIDA := 0.42
 
 var objetivo: Node3D
 var fase := 0.0
@@ -48,6 +50,26 @@ func _process(delta: float) -> void:
 	_reloj_actividad = fmod(_reloj_actividad + delta, CICLO_TRABAJO)
 	_actualizar_actividad(false)
 	_aplicar(fase)
+
+
+## Reacción social breve de #209. No cambia estado de juego: desplaza el cuerpo
+## visual que ya existe, alejándolo del origen del incidente antes de que la
+## jornada desmonte la oficina.
+func huir_de(origen_global: Vector3) -> void:
+	if not is_instance_valid(objetivo):
+		return
+	actividad_trabajo = false
+	_trabajando = false
+	Modelos._animar(objetivo, "idle")
+	var direccion := objetivo.global_position - origen_global
+	direccion.y = 0.0
+	if direccion.length_squared() < 0.01:
+		direccion = Vector3.RIGHT
+	var destino := objetivo.position + direccion.normalized() * DISTANCIA_HUIDA
+	var tween := create_tween()
+	tween.tween_property(objetivo, "position", destino, DURACION_HUIDA).set_trans(
+		Tween.TRANS_QUAD
+	).set_ease(Tween.EASE_OUT)
 
 
 func _exit_tree() -> void:
