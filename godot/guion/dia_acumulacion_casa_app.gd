@@ -5,6 +5,9 @@
 ## refresca la estantería cuando cambia el contenido de home_storage.
 extends Node
 
+const CasaAcumulacion := preload("res://guion/casa_acumulacion_3d.gd")
+const CasaEstadoAmbientalScript := preload("res://guion/casa_estado_ambiental.gd")
+
 var _mundo_id := 0
 var _firma := ""
 
@@ -25,11 +28,11 @@ func _process(_delta: float) -> void:
 	var inventario = dia.partida.estado.get("inventario", {})
 	if typeof(inventario) != TYPE_DICTIONARY:
 		inventario = {}
-	var estado := CasaEstadoAmbiental.derivar(dia.jornada, inventario)
-	var firma := CasaAcumulacion3D.firma(estado)
+	var estado := CasaEstadoAmbientalScript.derivar(dia.jornada, inventario)
+	var firma := CasaAcumulacion.firma(estado)
 	if mundo_id == _mundo_id and firma == _firma:
 		return
 
 	_mundo_id = mundo_id
 	_firma = firma
-	CasaAcumulacion3D.montar(mundo, estado)
+	CasaAcumulacion.montar(mundo, estado)
