@@ -17,7 +17,7 @@ class IdentidadExpedientesTest(unittest.TestCase):
         comprobar_contrato(
             self,
             "pruebas/pruebas_identidad_expedientes.gd",
-            "57 pasadas, 0 fallos",
+            "61 pasadas, 0 fallos",
         )
 
     def test_hay_nueve_identidades_y_portadas_distintas(self):
@@ -32,12 +32,30 @@ class IdentidadExpedientesTest(unittest.TestCase):
             self.assertTrue(ficha["icono"].startswith("res://arte/siga_expedientes/"))
             self.assertTrue(ficha["lamina"].startswith("res://arte/siga_expedientes/lamina_"))
 
+    def test_los_dos_casos_del_gate_tienen_fichas_de_sujeto_no_biograficas(self):
+        catalogo = json.loads(CATALOGO.read_text(encoding="utf-8"))
+        sujetos = {
+            caso_id: ficha["sujeto"]
+            for caso_id, ficha in catalogo.items()
+            if ficha.get("sujeto")
+        }
+        self.assertEqual(set(sujetos), {"caso@1", "caso2@2"})
+        self.assertEqual(len(set(sujetos.values())), 2)
+        for ruta in sujetos.values():
+            self.assertTrue(ruta.startswith("res://arte/siga_expedientes/sujeto_"))
+            asset = ROOT / "godot" / ruta.removeprefix("res://")
+            texto = asset.read_text(encoding="utf-8")
+            self.assertIn("silueta no biográfica", texto)
+            self.assertNotIn("<text", texto)
+
     def test_la_identidad_es_presentacion_sin_reglas_de_juego(self):
         codigo = VISOR.read_text(encoding="utf-8")
         self.assertIn("extends RefCounted", codigo)
         self.assertIn("archivo.set_item_icon", codigo)
         self.assertIn("func actualizar(caso: Dictionary)", codigo)
         self.assertIn("func mostrar_portada(visible: bool)", codigo)
+        self.assertIn('_textura_de(identidad, "sujeto")', codigo)
+        self.assertIn("_portada_fila", codigo)
         self.assertNotIn("gastar_accion", codigo)
         self.assertNotIn("gastar_lectura", codigo)
         self.assertNotIn("Acusacion.acusar", codigo)
