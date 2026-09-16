@@ -116,14 +116,19 @@ class CorreoSigaTest(unittest.TestCase):
         self.assertIn("selection_enabled = true", fuente)
         self.assertIn('texto("marca_nuevo")', fuente)
 
-    def test_adaptador_registra_correo_y_persiste_solo_leidos(self) -> None:
+    def test_adaptador_registra_correo_y_persiste_por_partida(self) -> None:
         fuente = ADAPTADOR.read_text(encoding="utf-8")
         self.assertRegex(
             fuente,
             r'EscritorioSigaApp\.new\(\s*"correo",\s*CorreoSiga\.texto\("titulo_app"\)',
         )
         self.assertIn("_correo_app.persistir_estado = true", fuente)
-        self.assertIn('_correo_app.establecer_estado_local("leidos", leidos)', fuente)
+        self.assertIn('obtener_estado_local("leidos_por_partida", {})', fuente)
+        self.assertIn(
+            '_correo_app.establecer_estado_local("leidos_por_partida", por_partida)',
+            fuente,
+        )
+        self.assertIn('dia.jornada.get("raiz", 0)', fuente)
         self.assertIn("Companeros.plantilla", fuente)
         self.assertIn("correo.configurar_contexto(dia.jornada, presentes)", fuente)
 
