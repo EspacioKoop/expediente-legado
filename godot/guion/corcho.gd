@@ -37,7 +37,8 @@ static func sincronizar(jornada: Dictionary, conceptos: Array) -> bool:
 		var columna := indice % COLUMNAS_INICIALES
 		var fila := int(indice / COLUMNAS_INICIALES)
 		fichas[id] = {
-			"pos": [
+			"pos":
+			[
 				ORIGEN_INICIAL.x + float(columna) * PASO_INICIAL.x,
 				ORIGEN_INICIAL.y - float(fila) * PASO_INICIAL.y,
 			]
@@ -70,7 +71,12 @@ static func limitar_posiciones(jornada: Dictionary, limite: Vector2) -> bool:
 		var nueva_x := clampf(x, -max_x, max_x)
 		var nueva_y := clampf(y, -max_y, max_y)
 		var pos_invalida := typeof(pos) != TYPE_ARRAY or pos.size() < 2
-		if datos_invalidos or pos_invalida or not is_equal_approx(x, nueva_x) or not is_equal_approx(y, nueva_y):
+		if (
+			datos_invalidos
+			or pos_invalida
+			or not is_equal_approx(x, nueva_x)
+			or not is_equal_approx(y, nueva_y)
+		):
 			datos["pos"] = [nueva_x, nueva_y]
 			fichas[id] = datos
 			cambio = true
