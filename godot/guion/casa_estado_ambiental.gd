@@ -3,7 +3,7 @@
 ## La casa no mantiene una segunda estadística estética. Este módulo traduce
 ## hechos que ya existen en el guardado a señales discretas que una escena puede
 ## materializar más tarde: qué objetos siguen realmente en casa, cómo está el
-## gato y qué vuelta se está viviendo.
+## gato, qué rutinas domésticas quedaron físicamente y qué vuelta se está viviendo.
 ##
 ## No crea nodos, no toca escenas y no muta jornada ni inventario.
 extends RefCounted
@@ -19,6 +19,7 @@ static func derivar(jornada: Dictionary, inventario: Dictionary = {}) -> Diction
 		"gato_estado": _estado_gato(jornada),
 		"objetos_casa": objetos_casa,
 		"objetos_casa_ids": _ids(objetos_casa),
+		"rutinas_casa": CasaRutinas.estado(jornada),
 		"vuelta": maxi(1, int(jornada.get("vuelta", 1))),
 	}
 
