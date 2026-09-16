@@ -55,7 +55,7 @@ COMBATE_CRONICA,Usted: %s   ·   %s: %s   —   %s
 COMBATE_INSISTENCIA,Insistencia
 COMBATE_OBJECION,Objeción
 COMBATE_SILENCIO,Silencio
-COMBATE_VIDAS,Usted  %s %d        %s: %s   —   %s
+COMBATE_VIDAS,Usted  %s %d        %s  %s %d
 COMPA_ADUANERO_NY,El inspector
 COMPA_ADUANERO_NY_1,Diecinueve años mirando lo que entra por el puerto. Aquí entra menos.
 COMPA_ADUANERO_NY_2,"Escribí un libro. No lo lea, es muy largo."
