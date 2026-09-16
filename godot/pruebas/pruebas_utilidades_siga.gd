@@ -32,8 +32,12 @@ func _probar() -> void:
 	_comprobar(calculadora.resolver("(10 + 2) / 3") == "4", "acepta paréntesis y división")
 	_comprobar(calculadora.resolver("1,5 + 2,5") == "4.0", "acepta coma decimal")
 	_comprobar(calculadora.resolver("OS.execute()") == "Entrada no válida", "rechaza APIs del host")
-	_comprobar(calculadora.resolver("sqrt(9)") == "Entrada no válida", "rechaza llamadas a funciones")
-	_comprobar(calculadora.get_node_or_null("Entrada") is LineEdit, "la entrada es accesible por teclado")
+	_comprobar(
+		calculadora.resolver("sqrt(9)") == "Entrada no válida", "rechaza llamadas a funciones"
+	)
+	_comprobar(
+		calculadora.get_node_or_null("Entrada") is LineEdit, "la entrada es accesible por teclado"
+	)
 	calculadora.queue_free()
 
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
