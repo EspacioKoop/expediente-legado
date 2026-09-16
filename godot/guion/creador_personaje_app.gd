@@ -85,20 +85,22 @@ func _construir() -> void:
 	columnas.add_child(aspecto)
 	_cabecera(aspecto, "APARIENCIA")
 
-	_cuerpo = _opcion(aspecto, "Complexión", [
-		["Delgado", "delgado"], ["Medio", "medio"], ["Robusto", "robusto"]
-	])
+	_cuerpo = _opcion(
+		aspecto, "Complexión", [["Delgado", "delgado"], ["Medio", "medio"], ["Robusto", "robusto"]]
+	)
 	_altura = _deslizador(aspecto, "Altura visual", 0.92, 1.08)
 	_hombros = _deslizador(aspecto, "Hombros", 0.88, 1.12)
 	_cintura = _deslizador(aspecto, "Cintura", 0.88, 1.12)
 	_piel = _opcion(aspecto, "Tono de piel", PIELES)
 	_cabello = _opcion(aspecto, "Color de pelo", CABELLOS)
-	_peinado = _opcion(aspecto, "Peinado", [
-		["Corto", "corto"], ["Medio", "medio"], ["Rapado", "rapado"], ["Recogido", "recogido"]
-	])
-	_prenda = _opcion(aspecto, "Prenda", [
-		["Camisa", "camisa"], ["Jersey", "jersey"], ["Chaqueta", "chaqueta"]
-	])
+	_peinado = _opcion(
+		aspecto,
+		"Peinado",
+		[["Corto", "corto"], ["Medio", "medio"], ["Rapado", "rapado"], ["Recogido", "recogido"]]
+	)
+	_prenda = _opcion(
+		aspecto, "Prenda", [["Camisa", "camisa"], ["Jersey", "jersey"], ["Chaqueta", "chaqueta"]]
+	)
 	_ropa = _opcion(aspecto, "Color de ropa", ROPAS)
 
 	var pasado := VBoxContainer.new()
@@ -222,20 +224,26 @@ func _valor(control: OptionButton):
 
 
 func _desde_controles() -> Dictionary:
-	return PerfilJugador.completar({
-		"apariencia": {
-			"cuerpo": _valor(_cuerpo),
-			"altura": _altura.value,
-			"hombros": _hombros.value,
-			"cintura": _cintura.value,
-			"piel": _valor(_piel),
-			"cabello": _valor(_cabello),
-			"peinado": _valor(_peinado),
-			"prenda": _valor(_prenda),
-			"ropa": _valor(_ropa),
-		},
-		"trasfondo": _valor(_trasfondo),
-	})
+	return (
+		PerfilJugador
+		. completar(
+			{
+				"apariencia":
+				{
+					"cuerpo": _valor(_cuerpo),
+					"altura": _altura.value,
+					"hombros": _hombros.value,
+					"cintura": _cintura.value,
+					"piel": _valor(_piel),
+					"cabello": _valor(_cabello),
+					"peinado": _valor(_peinado),
+					"prenda": _valor(_prenda),
+					"ropa": _valor(_ropa),
+				},
+				"trasfondo": _valor(_trasfondo),
+			}
+		)
+	)
 
 
 func _refrescar() -> void:
@@ -245,13 +253,16 @@ func _refrescar() -> void:
 	var pasado := PerfilJugador.trasfondo_por_id(String(candidato["trasfondo"]))
 	_descripcion.text = String(pasado.get("descripcion", ""))
 	var etiquetas := Array(pasado.get("etiquetas", []))
-	_resumen.text = "Etiquetas narrativas: %s\nComplexión: %s · altura %.2f · hombros %.2f · cintura %.2f" % [
-		", ".join(etiquetas),
-		String(candidato["apariencia"]["cuerpo"]),
-		float(candidato["apariencia"]["altura"]),
-		float(candidato["apariencia"]["hombros"]),
-		float(candidato["apariencia"]["cintura"]),
-	]
+	_resumen.text = (
+		"Etiquetas narrativas: %s\nComplexión: %s · altura %.2f · hombros %.2f · cintura %.2f"
+		% [
+			", ".join(etiquetas),
+			String(candidato["apariencia"]["cuerpo"]),
+			float(candidato["apariencia"]["altura"]),
+			float(candidato["apariencia"]["hombros"]),
+			float(candidato["apariencia"]["cintura"]),
+		]
+	)
 
 
 func _guardar() -> void:
