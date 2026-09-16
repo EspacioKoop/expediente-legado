@@ -67,12 +67,15 @@ func _al_usar(_actor: Node) -> void:
 func _intentar_activar() -> bool:
 	if _activada or _jornada.is_empty():
 		return _activada
-	_activada = SuenoAnansiAkan.registrar_semilla(
-		_jornada,
-		_pasos_escuchados,
-		_terminada,
-		FUENTE,
-		2,
+	_activada = (
+		SuenoAnansiAkan
+		. registrar_semilla(
+			_jornada,
+			_pasos_escuchados,
+			_terminada,
+			FUENTE,
+			2,
+		)
 	)
 	return _activada
 
