@@ -8,6 +8,7 @@ var _observaciones: Array = []
 func _initialize() -> void:
 	_probar_todas_las_formas()
 	_probar_reproducibilidad()
+	_probar_tarot_no_filtra_pistas()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
@@ -99,6 +100,59 @@ func _probar_reproducibilidad() -> void:
 		)
 	a.queue_free()
 	b.queue_free()
+
+
+func _probar_tarot_no_filtra_pistas() -> void:
+	var folio_luna := "F-1996-00187"
+
+	var sin_recoger := Node3D.new()
+	root.add_child(sin_recoger)
+	var ocultas := SuenoUtileria.montar(sin_recoger, "crucero", 4, 8700, [folio_luna], [])
+	_comprobar(
+		_buscar_id(ocultas, "tarot-geometria-viva") == null,
+		"leer el folio sin recoger la carta no la filtra al sueño",
+	)
+	sin_recoger.queue_free()
+
+	var recogida := Node3D.new()
+	root.add_child(recogida)
+	var visibles := SuenoUtileria.montar(
+		recogida, "crucero", 4, 8700, [folio_luna], ["la-luna"]
+	)
+	var tarot = _buscar_id(visibles, "tarot-geometria-viva")
+	_comprobar(tarot != null, "una carta recogida desde un folio de hoy sí puede deformarse")
+	if tarot != null:
+		_comprobar(
+			String(tarot.get_meta("documento_origen", "")) == folio_luna,
+			"la deformación conserva el folio real que la originó",
+		)
+		_comprobar(
+			String(tarot.get_meta("carta_origen", "")) == "la-luna",
+			"la deformación conserva el id de la carta reconocida",
+		)
+		_comprobar(
+			tarot.find_child("Carta", true, false) != null,
+			"el tarot mantiene silueta propia en vez de caer al cubo genérico",
+		)
+	recogida.queue_free()
+
+	var otro_folio := Node3D.new()
+	root.add_child(otro_folio)
+	var ajenas := SuenoUtileria.montar(
+		otro_folio, "crucero", 4, 8700, ["ACTA-SIN-TAROT"], ["la-luna"]
+	)
+	_comprobar(
+		_buscar_id(ajenas, "tarot-geometria-viva") == null,
+		"una carta recogida no aparece si su documento no fue leído hoy",
+	)
+	otro_folio.queue_free()
+
+
+func _buscar_id(anomalias: Array, id: String):
+	for anomalia in anomalias:
+		if anomalia.id_catalogo() == id:
+			return anomalia
+	return null
 
 
 func _capturar_observacion(anomalia_id: String, actor: Node) -> void:
