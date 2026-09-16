@@ -70,7 +70,10 @@ func _construir() -> void:
 	raiz.add_child(titulo)
 
 	var subtitulo := Label.new()
-	subtitulo.text = "La apariencia no modifica colisiones ni estadísticas. El trasfondo describe tu vida anterior a SIGA."
+	subtitulo.text = (
+		"La apariencia no modifica colisiones ni estadísticas. "
+		+ "El trasfondo describe tu vida anterior a SIGA."
+	)
 	subtitulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	raiz.add_child(subtitulo)
 
@@ -126,7 +129,10 @@ func _construir() -> void:
 	pasado.add_child(_descripcion)
 
 	var nota := Label.new()
-	nota.text = "El trasfondo podrá matizar diálogos, recuerdos, objetos y sueños; no concede una solución automática de expediente."
+	nota.text = (
+		"El trasfondo podrá matizar diálogos, recuerdos, objetos y sueños; "
+		+ "no concede una solución automática de expediente."
+	)
 	nota.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	pasado.add_child(nota)
 
