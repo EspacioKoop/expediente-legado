@@ -146,9 +146,11 @@ func _crear_correo() -> Control:
 	correo.configurar_contexto(dia.jornada, presentes)
 
 	if _correo_app != null:
-		var guardados: Variant = _correo_app.obtener_estado_local("leidos", [])
-		if guardados is Array:
-			correo.configurar_leidos(guardados as Array)
+		var por_partida: Variant = _correo_app.obtener_estado_local("leidos_por_partida", {})
+		if por_partida is Dictionary:
+			var guardados: Variant = (por_partida as Dictionary).get(_clave_partida(dia), [])
+			if guardados is Array:
+				correo.configurar_leidos(guardados as Array)
 	correo.mensaje_leido.connect(_registrar_correo_leido)
 	return correo
 
@@ -156,13 +158,26 @@ func _crear_correo() -> Control:
 func _registrar_correo_leido(id: String) -> void:
 	if _correo_app == null or id.is_empty():
 		return
+	var dia := get_parent()
+	if dia == null:
+		return
+	var por_partida: Dictionary = {}
+	var guardado: Variant = _correo_app.obtener_estado_local("leidos_por_partida", {})
+	if guardado is Dictionary:
+		por_partida = (guardado as Dictionary).duplicate(true)
+	var clave := _clave_partida(dia)
 	var leidos: Array = []
-	var guardados: Variant = _correo_app.obtener_estado_local("leidos", [])
-	if guardados is Array:
-		leidos = (guardados as Array).duplicate()
+	var anteriores: Variant = por_partida.get(clave, [])
+	if anteriores is Array:
+		leidos = (anteriores as Array).duplicate()
 	if not leidos.has(id):
 		leidos.append(id)
-	_correo_app.establecer_estado_local("leidos", leidos)
+	por_partida[clave] = leidos
+	_correo_app.establecer_estado_local("leidos_por_partida", por_partida)
+
+
+func _clave_partida(dia: Node) -> String:
+	return str(int(dia.jornada.get("raiz", 0)))
 
 
 func _solicitar_salida() -> void:
