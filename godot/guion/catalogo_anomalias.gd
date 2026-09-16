@@ -4,7 +4,7 @@
 ## estado y mantiene dos lecturas del mismo hallazgo. La colección total puede
 ## persistirse entre vidas laborales; la colección de vuelta se reinicia al
 ## comenzar una nueva. Las variantes documentales viajan como registros opacos
-## dentro de la memoria total para no ampliar el formato de Partida.
+## dentro de la memoria total sin ampliar el esquema de guardado.
 class_name CatalogoAnomalias
 extends RefCounted
 
