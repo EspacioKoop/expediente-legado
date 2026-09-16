@@ -128,7 +128,9 @@ func _probar_iman_postal_en_nevera() -> void:
 		String(iman.get_meta("origen", "")) == "correo_postal",
 		"el imán conserva la procedencia del correo"
 	)
-	_comprobar(String(iman.get_meta("variante", "")) == "iman_calendario", "declara variante propia")
+	_comprobar(
+		String(iman.get_meta("variante", "")) == "iman_calendario", "declara variante propia"
+	)
 	_comprobar(iman.position.x < -0.36, "el imán queda delante de la puerta de la nevera")
 	_comprobar(iman.get_child_count() >= 8, "el calendario tiene cuerpo y cuadrícula visibles")
 	_comprobar(acumulacion.get_child_count() == 0, "el imán no se duplica en la estantería")
@@ -159,8 +161,10 @@ func _probar_iman_postal_en_nevera() -> void:
 	var fallback := CasaAcumulacion.montar(casa_sin_nevera, {"objetos_casa": [objeto]})
 	_comprobar(fallback != null and fallback.get_child_count() == 1, "sin nevera usa estantería")
 	_comprobar(
-		String(fallback.get_child(0).get_meta("objeto_id", ""))
-		== CasaAcumulacion.ID_IMAN_CALENDARIO,
+		(
+			String(fallback.get_child(0).get_meta("objeto_id", ""))
+			== CasaAcumulacion.ID_IMAN_CALENDARIO
+		),
 		"el fallback no pierde el objeto físico"
 	)
 	casa_sin_nevera.queue_free()
