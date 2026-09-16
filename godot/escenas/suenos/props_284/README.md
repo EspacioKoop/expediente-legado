@@ -6,8 +6,10 @@ Starter pack de **assets 3D originales del proyecto** para las cuatro familias d
 
 - `cabana_nieve.tscn`: cabaña de montaña reutilizable; el pase de #284 sustituye el cuerpo de primitivas por la malla original `cabana_nieve_psx.obj`, mantiene nieve, ventanas cálidas y luz interior.
 - `cabana_nieve_psx.obj`: malla low-poly original y diffable con planta irregular, tejado a dos aguas, chimenea y porche; evita que la arquitectura final de montaña se lea como bloques genéricos.
-- `pupitre_escolar.tscn`: pupitre escolar completo con tablero, faldón y estructura metálica.
-- `taquillas_escolares.tscn`: módulo de tres taquillas con puertas, respiraderos y tiradores.
+- `pupitre_escolar.tscn`: pupitre escolar basado en la malla original `pupitre_escolar_psx.obj`.
+- `pupitre_escolar_psx.obj`: malla original y diffable del pupitre usado por la pesadilla escolar; sustituye el montaje visible de `BoxMesh`/`CylinderMesh`.
+- `taquillas_escolares.tscn`: módulo de tres taquillas basado en la malla original `taquillas_escolares_psx.obj`.
+- `taquillas_escolares_psx.obj`: malla original y diffable del bloque de taquillas escolares.
 - `reloj_escolar_anomalo.tscn`: reloj mural con doble juego de agujas para mutaciones del sueño.
 - `archivador_desierto.tscn`: archivador metálico de cuatro cajones basado en la malla original `archivador_desierto_psx.obj`; conserva tiradores reutilizables, pero elimina el cuerpo construido con `BoxMesh`.
 - `archivador_desierto_psx.obj`: malla original y diffable del archivador aislado del desierto.
@@ -30,10 +32,14 @@ La montaña se compone en runtime desde `SuenoMontana3D`: la familia CONVERGENTE
 
 El desierto se compone en runtime desde `SuenoDesierto3D`: `SuenoDesierto` sustituye la planta histórica de `peine` por el contorno caminable de la familia FRAGMENTADA antes de que `Espacio3D` construya la sala. La presentación mantiene esa única física y añade arena, dunas lejanas, huellas geométricas, sombra sin objeto, papel semienterrado, cabina, archivador y una estructura de horizonte que conserva distancia aparente. El sonido es procedural: viento con ecos de oficina, tono telefónico y una zona local donde ambos desaparecen.
 
-El feedback de playtest de `c2b4b714` descarta que la arquitectura final del sueño se lea como asset genérico estilo "Minecraft". Por eso castillo, montaña y desierto pasan a siluetas originales antes de usarse como presentación final.
+La escuela se compone en runtime desde `SuenoEscuela3D`: reutiliza la planta `crucero` como dos pasillos escolares cruzados y conserva esa física invisible. La presentación se reconstruye con linóleo, zócalo verde, paredes crema, fluorescentes, puertas numeradas, pupitres, taquillas, pizarra y reloj. Con cada timbre procedural se reordenan las puertas/números y los pupitres pasan a mirar hacia la pared opuesta; una tercera aguja gira a contratiempo y las voces procedurales vienen de un aula vacía. El dibujo del pupitre interactivo reutiliza una frase ya conocida por #87.
+
+#223 sigue siendo el corte independiente para una futura importación del School Classrooms Asset Pack mediante Git LFS + ficha de procedencia/hash. La vertical escolar de #284 **no depende** de ese pack ni incorpora binarios externos.
+
+El feedback de playtest de `c2b4b714` descarta que la arquitectura final del sueño se lea como asset genérico estilo "Minecraft". Por eso castillo, montaña, desierto y escuela pasan a presentación propia antes de usarse como acabado final.
 
 ## Procedencia
 
 Contenido original creado específicamente para `EspacioKoop/expediente-legado`; no deriva de packs externos. Por eso vive fuera de `godot/assets/`, cuyo registro `procedencia.json` está reservado al material de terceros.
 
-Refs #284 #87 #279 #296
+Refs #284 #87 #223 #279 #296
