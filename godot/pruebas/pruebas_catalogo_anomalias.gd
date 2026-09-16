@@ -35,8 +35,10 @@ func _initialize() -> void:
 	)
 	CatalogoAnomalias.registrar_variante(estado, "silla-demasiado-alta", "FOLIO-PRUEBA-B")
 	_comprobar(
-		CatalogoAnomalias.variantes(estado, "silla-demasiado-alta")
-		== ["FOLIO-PRUEBA-A", "FOLIO-PRUEBA-B"],
+		(
+			CatalogoAnomalias.variantes(estado, "silla-demasiado-alta")
+			== ["FOLIO-PRUEBA-A", "FOLIO-PRUEBA-B"]
+		),
 		"una misma anomalía conserva variantes de folios distintos"
 	)
 	_comprobar(
@@ -130,8 +132,7 @@ func _probar_persistencia_y_reasignacion() -> void:
 		"la memoria de vuelta también sobrevive a recargar"
 	)
 	_comprobar(
-		CatalogoAnomalias.variantes(recargada.estado, "monitor-estirado")
-		== ["FOLIO-PERSISTENTE"],
+		CatalogoAnomalias.variantes(recargada.estado, "monitor-estirado") == ["FOLIO-PERSISTENTE"],
 		"la variante documental sobrevive a guardar y recargar"
 	)
 
@@ -145,8 +146,7 @@ func _probar_persistencia_y_reasignacion() -> void:
 		"reasignar limpia solo la memoria de vuelta"
 	)
 	_comprobar(
-		CatalogoAnomalias.variantes(recargada.estado, "monitor-estirado")
-		== ["FOLIO-PERSISTENTE"],
+		CatalogoAnomalias.variantes(recargada.estado, "monitor-estirado") == ["FOLIO-PERSISTENTE"],
 		"reasignar conserva las variantes documentales"
 	)
 	_limpiar(ruta)
