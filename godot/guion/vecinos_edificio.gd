@@ -77,9 +77,7 @@ static func presencias(
 
 ## Estado ambiental pequeño que una futura capa 3D puede aplicar al portal sin
 ## depender de NPC visibles. Los sonidos salen de las mismas presencias del día.
-static func estado_portal(
-	jornada: Dictionary, reduccion_movimiento: bool = false
-) -> Dictionary:
+static func estado_portal(jornada: Dictionary, reduccion_movimiento: bool = false) -> Dictionary:
 	var dia := _dia(jornada)
 	var sonidos: Array[String] = []
 	var ids_presentes: Array[String] = []
