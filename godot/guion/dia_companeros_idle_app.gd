@@ -1,8 +1,12 @@
 ## Controller hijo para presencia ambiental de compañeros (#134).
 extends Node
 
+## `CompaneroInteractivo3D` flota esta altura sobre los pies de su cuerpo.
+const ALTURA_CONVERSABLE := 0.9
+
 var _mundo_id := 0
 var _idles: Array[CompaneroIdle3D] = []
+var _conversando: CompaneroIdle3D
 
 
 func _process(_delta: float) -> void:
@@ -12,6 +16,7 @@ func _process(_delta: float) -> void:
 	var mundo: Node3D = dia._mundo
 	var id := mundo.get_instance_id()
 	if id == _mundo_id:
+		_vigilar_conversacion(dia)
 		return
 	_mundo_id = id
 	_limpiar()
@@ -40,8 +45,44 @@ func _montar(mundo: Node3D) -> void:
 		# El del teléfono conserva su gesto propio. Entre el resto solo la mitad
 		# alterna actividad para evitar una oficina sincronizada artificialmente.
 		var trabajo := indice > 0 and indice % 2 == 1
-		idle.configurar(cuerpo, semilla, telefono, reducir, trabajo)
+		# Quien no trabaja ni está al teléfono se cruza de brazos a ratos.
+		var brazos := indice > 0 and not trabajo
+		idle.configurar(cuerpo, semilla, telefono, reducir, trabajo, brazos)
 		_idles.append(idle)
+	_conectar_conversaciones(mundo)
+
+
+## El diálogo lo abre `dia_clima_app.gd`; aquí solo se enlaza cada volumen
+## conversable con el cuerpo que tiene debajo para que gesticule al hablar.
+func _conectar_conversaciones(mundo: Node3D) -> void:
+	for hijo in mundo.get_children():
+		if not hijo is CompaneroInteractivo3D:
+			continue
+		var pies: Vector3 = hijo.position - Vector3(0.0, ALTURA_CONVERSABLE, 0.0)
+		for idle in _idles:
+			if idle.objetivo.position.distance_to(pies) < 0.05:
+				hijo.conversacion_solicitada.connect(_al_conversar.bind(idle))
+				break
+
+
+func _al_conversar(
+	_companero: CompaneroInteractivo3D, _actor: Node, _clave: String, idle: CompaneroIdle3D
+) -> void:
+	if is_instance_valid(_conversando) and _conversando != idle:
+		_conversando.conversar(false)
+	_conversando = idle
+	idle.conversar(true)
+
+
+## La conversación dura lo que dure el diálogo diegético. Se comprueba un
+## fotograma después de pedirla: si no llegó a abrirse, el gesto se retira.
+func _vigilar_conversacion(dia: Node) -> void:
+	if not is_instance_valid(_conversando):
+		return
+	if is_instance_valid(dia.get("_dialogo_actual")):
+		return
+	_conversando.conversar(false)
+	_conversando = null
 
 
 ## Reacción colectiva consumida por el incidente de pared (#209). Este
@@ -64,6 +105,7 @@ func _cuerpo_en(mundo: Node3D, posicion: Vector3) -> Node3D:
 
 
 func _limpiar() -> void:
+	_conversando = null
 	for idle in _idles:
 		if is_instance_valid(idle):
 			idle.queue_free()
