@@ -62,8 +62,8 @@ class MinotauroNocheRuntimeTest(unittest.TestCase):
     def test_minotauro_es_presencia_sin_combate_ni_cuerpo_jugable(self):
         self.assertIn('minotauro.name = "SuenoMinotauroNoche"', self.controller)
         self.assertIn('"PresenciaMinotauro"', self.vertical)
-        self.assertIn('"CuernoA"', self.vertical)
-        self.assertIn('"OjoB"', self.vertical)
+        self.assertIn('visual.name = "Cuerno%s"', self.vertical)
+        self.assertIn('ojo_visual.name = "Ojo%s"', self.vertical)
         self.assertNotIn("RigidBody3D", self.vertical)
         self.assertNotIn("CharacterBody3D", self.vertical)
         self.assertNotIn("ataque", self.vertical.lower())
@@ -82,7 +82,7 @@ class MinotauroNocheRuntimeTest(unittest.TestCase):
         self.assertIn("SuenoMinotauro3D.ID_MITO", self.controller)
         self.assertNotIn("activar_semilla_onirica", self.controller)
 
-    def test_controller_encaja_labertinto_en_sala_existente(self):
+    def test_controller_encaja_laberinto_en_sala_existente(self):
         self.assertIn('fase != "sueño"', self.controller)
         self.assertIn("var minotauro := SuenoMinotauro3D.new()", self.controller)
         self.assertIn("minotauro.reduccion_movimiento", self.controller)
