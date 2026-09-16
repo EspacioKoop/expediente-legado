@@ -144,7 +144,9 @@ static func _montar_iman_calendario(nevera: Node3D, objeto: Dictionary) -> void:
 	for y in [-0.045, -0.005, 0.035]:
 		_caja(iman, Vector3(-0.010, y, 0), Vector3(0.010, 0.008, 0.14), Color(0.34, 0.32, 0.28))
 	for z in [-0.045, 0.0, 0.045]:
-		_caja(iman, Vector3(-0.010, -0.025, z), Vector3(0.010, 0.12, 0.006), Color(0.34, 0.32, 0.28))
+		_caja(
+			iman, Vector3(-0.010, -0.025, z), Vector3(0.010, 0.12, 0.006), Color(0.34, 0.32, 0.28)
+		)
 	_cilindro(
 		iman,
 		Vector3(-0.018, 0.095, 0.060),
