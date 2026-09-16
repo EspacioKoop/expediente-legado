@@ -25,9 +25,12 @@ Contrapartes de vigilia de los sueños mitológicos (#435, #442). Permanecen fue
 | `ariadna_labertinto_98` | ARIADNA | Minotauro | laberinto de archivo; ya existe su cartucho 3D en casa | #437 #512 |
 | `uruk_98` | URUK 98 | Gilgamesh | ciudad mínima y tablilla que reconstruir | #436 |
 | `hydra_loop_98` | HYDRA LOOP | Hidra | **fuente prototipo jugable**: cortar hace brotar dos cabezas; sellar un nodo exige haber leído dos cabezas suyas; tres niveles y handshake `$C100 = 0xA5` al romper el bucle | #439 #600 |
+| `webkeeper_98` | WEBKEEPER 98 | Anansi akan | **fuente prototipo jugable**: Kwaku, una araña-portero, disputa tres partidos breves; amagos legibles, telaraña de emergencia, reintento local y handshake solo al ganar la final | #748 #656 #442 |
 | `duat_98` | DUAT 98 | Duat | cámaras y contrapesos | #441 |
 
 `HYDRA LOOP` tiene ya fuente prototipo en `gbc/minijuegos/hydra_loop_98` (portada de `gbc/minijuegos/hydra_loop`) y se compila y prueba con PyBoy en el workflow GBC. Sigue fuera del runtime: `HidraVigilia` no lee todavía su handshake.
+
+`WEBKEEPER 98` abre el género **deportivo / portero arcade**. El debut pide 3 paradas de 6, el segundo partido 4 de 8 y la final 5 de 9. Los amagos cambian de destino visual antes del tiro con una ventana de reacción explícita; tras dos derrotas en el mismo partido se activa una ayuda que muestra directamente el destino real. Perder repite solo el encuentro actual. La ROM mantiene `$C100 == 0` durante arranque, derrotas y victorias parciales, y escribe `0xA5` únicamente al completar la final. Sigue `en_proyecto`: aún no se vende ni activa `anansi_akan` desde el runtime.
 
 `RYU FLOW` salió de esta lista tras #609/#622: su fuente RGBDS es reproducible, el core puede leer su memoria sin efectos laterales y el índice la incluye en el build de runtime. Se mantiene en la tienda, igual que las demás ROMs jugables no incluidas, para respetar el contrato de una sola ROM de serie. `RyuFlowVigilia`, montado desde la casa real, observa la cabecera `RYUFLOW98` y solo cuando `$C100 == 0xA5` registra `dragon_japones` mediante `SemillasOniricas`; el emulador y la consola siguen sin conocer ese handshake concreto.
 
