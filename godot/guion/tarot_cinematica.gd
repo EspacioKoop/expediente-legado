@@ -23,6 +23,11 @@ const ID := "tarot-hallazgo"
 const ANCHO := 180.0
 const ALTO := 260.0
 
+## El arte final de #645 entra por ID canónico. Mientras ese fichero no exista
+## se conserva exactamente el frontal geométrico del corte 3D de #395.
+const RUTA_FRENTE := "res://assets/tarot/%s.png"
+const RESOLUCION_FRENTE := Vector2i(200, 375)
+
 ## El dorso es del gris de sistema: todavía no ha pasado nada.
 const DORSO := Color("606070")
 const DORSO_MARCA := Color("484858")
@@ -92,7 +97,7 @@ const PLANOS := [
 ## Devuelve copias —las hace `Cinematica.resolver`, en profundidad—, así que
 ## reproducir una cinemática no puede estropear la siguiente.
 static func planos_de(carta: Dictionary, vistas: int = 0) -> Array:
-	var decorado := decorado()
+	var decorado := decorado(String(carta.get("id", "")))
 	var planos := []
 	for declarado in PLANOS:
 		var plano: Dictionary = declarado.duplicate(true)
@@ -107,7 +112,11 @@ static func planos_de(carta: Dictionary, vistas: int = 0) -> Array:
 
 ## La mesa con la carta encima. El frontal se enciende: es el único color
 ## del juego y tiene que verse aunque la oficina esté en penumbra.
-static func decorado() -> Dictionary:
+##
+## Si existe el PNG canónico de la carta, una superficie UV se coloca apenas
+## por delante del frontal geométrico. Si no existe, no se añade nada: el
+## placeholder de #395 sigue siendo el fallback y el juego no depende de LFS.
+static func decorado(carta_id: String = "") -> Dictionary:
 	var ancho := ANCHO / 500.0
 	var alto := ALTO / 500.0
 	var margen := 0.12
@@ -118,31 +127,38 @@ static func decorado() -> Dictionary:
 			"color": color,
 			"emisivo": emisivo,
 		}
-	return (
-		MesaCinematica
-		. con(
-			[
-				cara.call(0.0, Vector3(ancho, alto, GROSOR * 2.0), CANTO),
-				cara.call(-GROSOR, Vector3(ancho, alto, 0.004), DORSO),
-				cara.call(
-					-GROSOR - 0.003, Vector3(ancho - margen, alto - margen, 0.002), DORSO_MARCA
-				),
-				cara.call(GROSOR, Vector3(ancho, alto, 0.004), FRENTE, true),
-				cara.call(
-					GROSOR + 0.003,
-					Vector3(ancho - margen, alto - margen, 0.002),
-					FRENTE_MARCA,
-					true
-				),
-			],
-			[
-				{
-					"pos": CENTRO + Vector3(0, 0.5, 0.6),
-					"color": FRENTE,
-					"energia": 1.2,
-					"alcance": 3.0,
-					"carcasa": false
-				}
-			]
-		)
+	var piezas := [
+		cara.call(0.0, Vector3(ancho, alto, GROSOR * 2.0), CANTO),
+		cara.call(-GROSOR, Vector3(ancho, alto, 0.004), DORSO),
+		cara.call(-GROSOR - 0.003, Vector3(ancho - margen, alto - margen, 0.002), DORSO_MARCA),
+		cara.call(GROSOR, Vector3(ancho, alto, 0.004), FRENTE, true),
+		cara.call(
+			GROSOR + 0.003, Vector3(ancho - margen, alto - margen, 0.002), FRENTE_MARCA, true
+		),
+	]
+	var mesa := MesaCinematica.con(
+		piezas,
+		[
+			{
+				"pos": CENTRO + Vector3(0, 0.5, 0.6),
+				"color": FRENTE,
+				"energia": 1.2,
+				"alcance": 3.0,
+				"carcasa": false
+			}
+		]
 	)
+
+	var ruta_frontal := "" if carta_id.is_empty() else RUTA_FRENTE % carta_id
+	if not ruta_frontal.is_empty() and ResourceLoader.exists(ruta_frontal):
+		var alto_arte := alto - margen
+		var ancho_arte := alto_arte * float(RESOLUCION_FRENTE.x) / float(RESOLUCION_FRENTE.y)
+		mesa["pantallas"] = [
+			{
+				"pos": CENTRO + Vector3(0, 0, GROSOR + 0.006),
+				"tam": Vector2(ancho_arte, alto_arte),
+				"fichero": ruta_frontal,
+				"resolucion": RESOLUCION_FRENTE,
+			}
+		]
+	return mesa

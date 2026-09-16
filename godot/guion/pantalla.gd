@@ -1,8 +1,9 @@
 ## Pantalla encendida del escaparate (#142).
 ##
 ## El contenido está separado de la geometría: un vídeo válido tiene prioridad;
-## una declaración `contenido = "media_luna"` usa un gráfico procedural ligero;
-## cualquier otro caso conserva la nieve histórica como fallback.
+## una imagen estática válida se muestra como textura UV; una declaración
+## `contenido = "media_luna"` usa un gráfico procedural ligero; cualquier otro
+## caso conserva la nieve histórica como fallback.
 class_name Pantalla
 extends RefCounted
 
@@ -13,13 +14,14 @@ const RESOLUCION := Vector2i(256, 192)
 
 static func montar(raiz: Node3D, declaracion: Dictionary) -> Node3D:
 	var vista := SubViewport.new()
-	vista.size = RESOLUCION
+	vista.size = declaracion.get("resolucion", RESOLUCION)
 	vista.disable_3d = true
 	vista.transparent_bg = false
 	vista.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	raiz.add_child(vista)
 
-	if not _montar_video(vista, String(declaracion.get("fichero", ""))):
+	var fichero := String(declaracion.get("fichero", ""))
+	if not _montar_video(vista, fichero) and not _montar_imagen(vista, fichero):
 		var contenido := String(declaracion.get("contenido", ""))
 		if contenido == "media_luna":
 			_montar_media_luna(vista, float(declaracion.get("semilla", 0.0)))
@@ -59,10 +61,32 @@ static func _montar_video(vista: SubViewport, fichero: String) -> bool:
 	return true
 
 
+## Una imagen importada no se convierte en vídeo ni en material especial: se
+## dibuja una vez en el mismo plano UV que ya usa el escaparate. Así una carta,
+## un cartel o una foto pueden reutilizar esta superficie sin conocer el shader
+## ni la geometría que los rodea.
+static func _montar_imagen(vista: SubViewport, fichero: String) -> bool:
+	if fichero.is_empty() or not ResourceLoader.exists(fichero):
+		return false
+	var recurso := load(fichero)
+	if not recurso is Texture2D:
+		return false
+
+	var imagen := TextureRect.new()
+	imagen.name = "Imagen"
+	imagen.texture = recurso
+	imagen.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	imagen.stretch_mode = TextureRect.STRETCH_SCALE
+	imagen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	vista.add_child(imagen)
+	vista.render_target_update_mode = SubViewport.UPDATE_ONCE
+	return true
+
+
 static func _montar_media_luna(vista: SubViewport, semilla: float) -> void:
 	var lienzo := ColorRect.new()
 	lienzo.name = "MediaLuna"
-	lienzo.size = Vector2(RESOLUCION)
+	lienzo.size = Vector2(vista.size)
 	var material := ShaderMaterial.new()
 	material.shader = load(SHADER_MEDIA_LUNA)
 	material.set_shader_parameter("semilla", semilla)
@@ -75,7 +99,7 @@ static func _montar_media_luna(vista: SubViewport, semilla: float) -> void:
 static func _montar_nieve(vista: SubViewport, semilla: float) -> void:
 	var lienzo := ColorRect.new()
 	lienzo.name = "Nieve"
-	lienzo.size = Vector2(RESOLUCION)
+	lienzo.size = Vector2(vista.size)
 	var material := ShaderMaterial.new()
 	material.shader = load(SHADER_NIEVE)
 	material.set_shader_parameter("semilla", semilla)
