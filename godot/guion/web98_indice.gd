@@ -144,15 +144,14 @@ func enlaces_desde(recurso_id: String) -> Array[Dictionary]:
 		var destino_url := String(enlace.get("url", ""))
 		if destino_url.is_empty():
 			continue
-		resultado.append(
-			{
-				"id": "",
-				"url": destino_url,
-				"titulo": String(enlace.get("titulo", destino_url)),
-				"categoria": "personal",
-				"tipo": "enlace_virtual",
-			}
-		)
+		var enlace_virtual := {
+			"id": "",
+			"url": destino_url,
+			"titulo": String(enlace.get("titulo", destino_url)),
+			"categoria": "personal",
+			"tipo": "enlace_virtual",
+		}
+		resultado.append(enlace_virtual)
 	return resultado
 
 
@@ -216,8 +215,7 @@ func _presentar_amateur(recurso: Dictionary, dia: int) -> String:
 	if recurso.has("contador_actual"):
 		var formato_contador := String(recurso.get("contador_formato", "%05d"))
 		bloques.append(
-			"[center]%s[/center]"
-			% (formato_contador % int(recurso.get("contador_actual", 0)))
+			"[center]%s[/center]" % (formato_contador % int(recurso.get("contador_actual", 0)))
 		)
 	var entradas: Variant = recurso.get("entradas_guestbook", [])
 	if entradas is Array and not (entradas as Array).is_empty():
@@ -229,14 +227,10 @@ func _presentar_amateur(recurso: Dictionary, dia: int) -> String:
 			if not entrada_valor is Dictionary:
 				continue
 			var entrada := entrada_valor as Dictionary
-			firmas.append(
-				"%s · [b]%s[/b]\n%s"
-				% [
-					String(entrada.get("fecha", "")),
-					String(entrada.get("autor", "")),
-					String(entrada.get("texto", "")),
-				]
-			)
+			var fecha := String(entrada.get("fecha", ""))
+			var autor := String(entrada.get("autor", ""))
+			var texto_entrada := String(entrada.get("texto", ""))
+			firmas.append("%s · [b]%s[/b]\n%s" % [fecha, autor, texto_entrada])
 		bloques.append("\n\n".join(firmas))
 	var firma := String(recurso.get("firma", "")).strip_edges()
 	if not firma.is_empty():
