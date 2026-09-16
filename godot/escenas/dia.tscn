@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3]
+[gd_scene load_steps=21 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -19,6 +19,7 @@
 [ext_resource type="Script" path="res://guion/dia_ryu_sueno_app.gd" id="17"]
 [ext_resource type="Script" path="res://guion/dia_minotauro_sueno_app.gd" id="18"]
 [ext_resource type="Script" path="res://guion/dia_ecos_archivo_app.gd" id="19"]
+[ext_resource type="Script" path="res://guion/dia_incidente_pared_app.gd" id="20"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -76,3 +77,6 @@ script = ExtResource("18")
 
 [node name="EcosArchivoController" type="Node" parent="."]
 script = ExtResource("19")
+
+[node name="IncidenteParedController" type="Node" parent="."]
+script = ExtResource("20")
