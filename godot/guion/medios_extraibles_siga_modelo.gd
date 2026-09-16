@@ -19,7 +19,8 @@ const MEDIOS := [
 		"icono": "disquete_trabajo",
 		"procedencia": "Archivador del puesto · material administrativo heredado",
 		"obtener_si": {},
-		"entradas": [
+		"entradas":
+		[
 			{
 				"id": "turnos_97_formularios",
 				"ruta_relativa": "formularios",
@@ -80,7 +81,8 @@ const MEDIOS := [
 		"icono": "disquete_personal",
 		"procedencia": "Cajón compartido · etiqueta manuscrita",
 		"obtener_si": {"clave": "jornada", "op": ">=", "valor": 2},
-		"entradas": [
+		"entradas":
+		[
 			{
 				"id": "cosas_notas",
 				"ruta_relativa": "notas.txt",
@@ -125,7 +127,8 @@ const MEDIOS := [
 		"icono": "cd_revista",
 		"procedencia": "Revista informática ficticia · número 6",
 		"obtener_si": {},
-		"entradas": [
+		"entradas":
+		[
 			{
 				"id": "byte_lunar_demos",
 				"ruta_relativa": "demos",
