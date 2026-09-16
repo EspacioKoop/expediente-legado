@@ -108,8 +108,9 @@ func _objetivo_alcanzado(objetivo: Dictionary) -> bool:
 		return true
 	if dia_actual < dia_objetivo:
 		return false
-	return int(_contexto.get("acciones", Jornada.ACCIONES_POR_DIA)) <= int(
-		objetivo.get("acciones", Jornada.ACCIONES_POR_DIA)
+	return (
+		int(_contexto.get("acciones", Jornada.ACCIONES_POR_DIA))
+		<= int(objetivo.get("acciones", Jornada.ACCIONES_POR_DIA))
 	)
 
 
