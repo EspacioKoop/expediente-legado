@@ -19,6 +19,33 @@ func _initialize() -> void:
 		"queda en memoria de la vuelta"
 	)
 
+	var variante := CatalogoAnomalias.registrar_variante(
+		estado, "silla-demasiado-alta", "FOLIO-PRUEBA-A"
+	)
+	_comprobar(
+		variante.get("resultado", "") == "variante-registrada",
+		"un folio leído añade una variante documental"
+	)
+	var repetida_variante := CatalogoAnomalias.registrar_variante(
+		estado, "silla-demasiado-alta", "FOLIO-PRUEBA-A"
+	)
+	_comprobar(
+		repetida_variante.get("resultado", "") == "variante-conocida",
+		"el mismo folio no duplica la variante"
+	)
+	CatalogoAnomalias.registrar_variante(estado, "silla-demasiado-alta", "FOLIO-PRUEBA-B")
+	_comprobar(
+		(
+			CatalogoAnomalias.variantes(estado, "silla-demasiado-alta")
+			== ["FOLIO-PRUEBA-A", "FOLIO-PRUEBA-B"]
+		),
+		"una misma anomalía conserva variantes de folios distintos"
+	)
+	_comprobar(
+		CatalogoAnomalias.progreso(estado).get("descubiertas_total", 0) == 1,
+		"las variantes no cuentan como anomalías adicionales"
+	)
+
 	var repetida := CatalogoAnomalias.registrar(estado, "silla-demasiado-alta")
 	_comprobar(repetida.get("resultado", "") == "ya-reconocida", "volver a observar no duplica")
 	_comprobar(
@@ -34,11 +61,25 @@ func _initialize() -> void:
 		not CatalogoAnomalias.conocida_en_vuelta(estado, "silla-demasiado-alta"),
 		"la nueva vida laboral empieza sin hallazgos de vuelta"
 	)
+	_comprobar(
+		CatalogoAnomalias.variantes(estado, "silla-demasiado-alta").size() == 2,
+		"reasignar no borra las variantes documentales"
+	)
 	var reencontrada := CatalogoAnomalias.registrar(estado, "silla-demasiado-alta")
 	_comprobar(
 		reencontrada.get("resultado", "") == "reencontrada",
 		"reconocerla en otra vuelta no la concede de nuevo"
 	)
+
+	var estado_sin_base := {}
+	var huerfana := CatalogoAnomalias.registrar_variante(
+		estado_sin_base, "monitor-estirado", "FOLIO-HUERFANO"
+	)
+	_comprobar(
+		huerfana.get("resultado", "") == "anomalia-no-registrada",
+		"una variante no descubre la anomalía base"
+	)
+	_comprobar(estado_sin_base.is_empty(), "una variante huérfana no modifica memoria")
 
 	var antes_invalida := estado.duplicate(true)
 	var invalida := CatalogoAnomalias.registrar(estado, "anomalia-que-no-existe")
@@ -76,6 +117,7 @@ func _probar_persistencia_y_reasignacion() -> void:
 		"Partida declara la memoria de la vuelta"
 	)
 	CatalogoAnomalias.registrar(partida.estado, "monitor-estirado")
+	CatalogoAnomalias.registrar_variante(partida.estado, "monitor-estirado", "FOLIO-PERSISTENTE")
 	_comprobar(partida.guardar(ruta), "el reconocimiento se puede guardar")
 
 	var recargada := Partida.new()
@@ -89,6 +131,10 @@ func _probar_persistencia_y_reasignacion() -> void:
 		CatalogoAnomalias.conocida_en_vuelta(recargada.estado, "monitor-estirado"),
 		"la memoria de vuelta también sobrevive a recargar"
 	)
+	_comprobar(
+		CatalogoAnomalias.variantes(recargada.estado, "monitor-estirado") == ["FOLIO-PERSISTENTE"],
+		"la variante documental sobrevive a guardar y recargar"
+	)
 
 	Prometeo.reiniciar_vuelta(recargada.estado, Partida.VIDA_MAXIMA)
 	_comprobar(
@@ -98,6 +144,10 @@ func _probar_persistencia_y_reasignacion() -> void:
 	_comprobar(
 		not CatalogoAnomalias.conocida_en_vuelta(recargada.estado, "monitor-estirado"),
 		"reasignar limpia solo la memoria de vuelta"
+	)
+	_comprobar(
+		CatalogoAnomalias.variantes(recargada.estado, "monitor-estirado") == ["FOLIO-PERSISTENTE"],
+		"reasignar conserva las variantes documentales"
 	)
 	_limpiar(ruta)
 
@@ -109,7 +159,16 @@ func _limpiar(ruta: String) -> void:
 
 
 func _catalogo_es_opaco(catalogo: Array) -> bool:
-	var permitidas := ["id", "origen_tipo", "origen_id", "representacion", "modo_observacion"]
+	var permitidas := [
+		"id",
+		"titulo",
+		"descripcion",
+		"nota_visual",
+		"origen_tipo",
+		"origen_id",
+		"representacion",
+		"modo_observacion",
+	]
 	for entrada in catalogo:
 		for clave in entrada.keys():
 			if not permitidas.has(clave):

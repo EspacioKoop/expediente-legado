@@ -16,6 +16,7 @@ var _lista: ItemList
 var _progreso: Label
 var _titulo: Label
 var _origen: Label
+var _variantes: Label
 var _descripcion: RichTextLabel
 var _representacion: Label
 
@@ -104,6 +105,11 @@ func _construir_interfaz() -> void:
 	_origen.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	derecha.add_child(_origen)
 
+	_variantes = Label.new()
+	_variantes.name = "Variantes"
+	_variantes.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	derecha.add_child(_variantes)
+
 	_descripcion = RichTextLabel.new()
 	_descripcion.name = "Descripcion"
 	_descripcion.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -185,8 +191,15 @@ func _seleccionar(indice: int) -> void:
 
 
 func _mostrar_ficha(entrada: Dictionary) -> void:
+	var id := String(entrada.get("id", ""))
+	var variantes := CatalogoAnomalias.variantes(_estado, id)
 	_titulo.text = String(entrada.get("titulo", _t("titulo_fallback")))
 	_origen.text = _t("origen_material") % String(entrada.get("origen_tipo", _t("origen_fallback")))
+	_variantes.text = _t("variantes_documentales") % variantes.size()
+	if variantes.is_empty():
+		_variantes.text += "\n" + _t("variantes_ninguna")
+	else:
+		_variantes.text += "\n" + (_t("variantes_folios") % ", ".join(variantes))
 	_descripcion.text = String(entrada.get("descripcion", _t("descripcion_fallback")))
 	_representacion.text = (
 		_t("representacion_archivada")
@@ -197,6 +210,7 @@ func _mostrar_ficha(entrada: Dictionary) -> void:
 func _mostrar_bloqueada() -> void:
 	_titulo.text = _t("titulo_bloqueada")
 	_origen.text = _t("origen_vacio")
+	_variantes.text = ""
 	_descripcion.text = _t("descripcion_bloqueada")
 	_representacion.text = _t("representacion_vacia")
 
@@ -204,6 +218,7 @@ func _mostrar_bloqueada() -> void:
 func _mostrar_vuelta_completa() -> void:
 	_titulo.text = _t("titulo_vuelta_completa")
 	_origen.text = _t("origen_vuelta_completa")
+	_variantes.text = ""
 	_descripcion.text = _t("descripcion_vuelta_completa")
 	_representacion.text = _t("representacion_vuelta_completa")
 
@@ -211,6 +226,7 @@ func _mostrar_vuelta_completa() -> void:
 func _mostrar_espera() -> void:
 	_titulo.text = _t("titulo_espera")
 	_origen.text = ""
+	_variantes.text = ""
 	_descripcion.text = _t("descripcion_espera")
 	_representacion.text = ""
 
