@@ -24,19 +24,22 @@ const OBJETOS := [OBJ_TAZA, OBJ_SILLA, OBJ_ARCHIVADOR]
 ## Cada acción tiene una consecuencia explícita y reconocible en la otra versión.
 ## Las cadenas son ids de estado, no texto narrativo ni conocimiento folklórico.
 const REGLAS_OBJETOS := {
-	OBJ_TAZA: {
+	OBJ_TAZA:
+	{
 		"reciente": "alfeizar",
 		"reflejo_envejecido": "marca_circular_alfeizar",
 		"envejecida": "alfeizar_agrietado",
 		"reflejo_reciente": "alfeizar_desgastado",
 	},
-	OBJ_SILLA: {
+	OBJ_SILLA:
+	{
 		"reciente": "junto_puerta",
 		"reflejo_envejecido": "silueta_polvo_junto_puerta",
 		"envejecida": "junto_puerta_rota",
 		"reflejo_reciente": "junto_puerta_desgastada",
 	},
-	OBJ_ARCHIVADOR: {
+	OBJ_ARCHIVADOR:
+	{
 		"reciente": "pared_norte",
 		"reflejo_envejecido": "huella_oxido_pared_norte",
 		"envejecida": "pared_norte_oxidada",
@@ -144,17 +147,20 @@ func cruzar_umbral(
 	_version_actual = _otra_version(_version_actual)
 	_aplicar_estado_visual()
 	var salida := plan_presentacion(reduccion_movimiento)
-	salida.merge(
-		{
-			"ok": true,
-			"umbral": UMBRAL_PRINCIPAL,
-			"desde": desde,
-			"hacia": _version_actual,
-			"irreversible": false,
-			"objetos_criticos_borrados": false,
-			"retorno_disponible": ruta_retorno_disponible(),
-		},
-		true,
+	(
+		salida
+		. merge(
+			{
+				"ok": true,
+				"umbral": UMBRAL_PRINCIPAL,
+				"desde": desde,
+				"hacia": _version_actual,
+				"irreversible": false,
+				"objetos_criticos_borrados": false,
+				"retorno_disponible": ruta_retorno_disponible(),
+			},
+			true,
+		)
 	)
 	return salida
 
@@ -226,12 +232,18 @@ func _montar_version(id_version: String, color_pared: Color, color_suelo: Color)
 	version.name = "Version_%s" % id_version
 	add_child(version)
 
+	_crear_caja(version, "Suelo", Vector3(10.0, 0.20, 8.0), Vector3(0.0, -0.10, 0.0), color_suelo)
 	_crear_caja(
-		version, "Suelo", Vector3(10.0, 0.20, 8.0), Vector3(0.0, -0.10, 0.0), color_suelo
+		version, "ParedNorte", Vector3(10.0, 3.0, 0.20), Vector3(0.0, 1.5, -4.0), color_pared
 	)
-	_crear_caja(version, "ParedNorte", Vector3(10.0, 3.0, 0.20), Vector3(0.0, 1.5, -4.0), color_pared)
 	_crear_caja(version, "ParedEste", Vector3(0.20, 3.0, 8.0), Vector3(5.0, 1.5, 0.0), color_pared)
-	_crear_caja(version, "Mesa", Vector3(2.8, 0.15, 1.2), Vector3(-1.8, 0.85, 0.8), color_pared.lightened(0.12))
+	_crear_caja(
+		version,
+		"Mesa",
+		Vector3(2.8, 0.15, 1.2),
+		Vector3(-1.8, 0.85, 0.8),
+		color_pared.lightened(0.12)
+	)
 	_crear_caja(version, "Arroyo", Vector3(0.85, 0.04, 8.0), Vector3(0.9, 0.03, 0.0), COLOR_ARROYO)
 	_crear_objeto(version, OBJ_TAZA, Vector3(-1.8, 1.06, 0.8), Color(0.62, 0.55, 0.43))
 	_crear_objeto(version, OBJ_SILLA, Vector3(-3.1, 0.55, 1.3), Color(0.30, 0.27, 0.22))
@@ -252,8 +264,12 @@ func _montar_umbral() -> void:
 	marco.name = "UmbralPrincipal"
 	marco.position = Vector3(0.0, 0.0, 3.35)
 	add_child(marco)
-	_crear_caja(marco, "JambaIzquierda", Vector3(0.25, 2.8, 0.25), Vector3(-1.05, 1.4, 0.0), COLOR_UMBRAL)
-	_crear_caja(marco, "JambaDerecha", Vector3(0.25, 2.8, 0.25), Vector3(1.05, 1.4, 0.0), COLOR_UMBRAL)
+	_crear_caja(
+		marco, "JambaIzquierda", Vector3(0.25, 2.8, 0.25), Vector3(-1.05, 1.4, 0.0), COLOR_UMBRAL
+	)
+	_crear_caja(
+		marco, "JambaDerecha", Vector3(0.25, 2.8, 0.25), Vector3(1.05, 1.4, 0.0), COLOR_UMBRAL
+	)
 	_crear_caja(marco, "Dintel", Vector3(2.35, 0.25, 0.25), Vector3(0.0, 2.72, 0.0), COLOR_UMBRAL)
 
 
@@ -281,7 +297,10 @@ func _aplicar_estado_visual() -> void:
 		var nodo_version := get_node_or_null("Version_%s" % version_id) as Node3D
 		if nodo_version == null:
 			continue
-		nodo_version.visible = version_id == _version_actual
+		var version_visible := version_id == _version_actual
+		for hijo in nodo_version.get_children():
+			if hijo is VisualInstance3D:
+				(hijo as VisualInstance3D).visible = version_visible
 		for objeto in OBJETOS:
 			var nodo_objeto := nodo_version.get_node_or_null("Objeto_%s" % objeto) as MeshInstance3D
 			if nodo_objeto == null:
@@ -299,11 +318,11 @@ func _posicion_para_estado(objeto: String, estado: String) -> Vector3:
 	else:
 		base = Vector3(3.9, 1.2, -2.2)
 
-	if "alfeizar" in estado:
+	if estado.contains("alfeizar"):
 		return Vector3(3.4, base.y, -3.55)
-	if "junto_puerta" in estado:
+	if estado.contains("junto_puerta"):
 		return Vector3(-1.65, base.y, 3.0)
-	if "pared_norte" in estado:
+	if estado.contains("pared_norte"):
 		return Vector3(1.8, base.y, -3.45)
 	return base
 
