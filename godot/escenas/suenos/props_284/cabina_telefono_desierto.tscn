@@ -1,21 +1,19 @@
 [gd_scene load_steps=7 format=3]
 
+[ext_resource type="ArrayMesh" path="res://escenas/suenos/props_284/cabina_telefono_desierto_psx.obj" id="1_cabina"]
+
 [sub_resource type="StandardMaterial3D" id="MatFrame"]
 albedo_color = Color(0.16, 0.08, 0.055, 1)
 metallic = 0.42
 roughness = 0.63
 
 [sub_resource type="StandardMaterial3D" id="MatGlass"]
-albedo_color = Color(0.33, 0.48, 0.52, 0.28)
+albedo_color = Color(0.33, 0.48, 0.52, 0.24)
 transparency = 1
 roughness = 0.12
 
-[sub_resource type="StandardMaterial3D" id="MatPhone"]
-albedo_color = Color(0.055, 0.055, 0.05, 1)
-roughness = 0.42
-
-[sub_resource type="BoxMesh" id="Box"]
-size = Vector3(1, 1, 1)
+[sub_resource type="QuadMesh" id="GlassPanel"]
+size = Vector2(1.28, 2.10)
 
 [sub_resource type="CylinderMesh" id="Receiver"]
 top_radius = 0.10
@@ -31,56 +29,23 @@ ring_segments = 24
 
 [node name="CabinaTelefonoDesierto" type="Node3D"]
 
-[node name="PosteFI" type="MeshInstance3D" parent="."]
-mesh = SubResource("Box")
+[node name="EstructuraOriginal" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_cabina")
 material_override = SubResource("MatFrame")
-position = Vector3(-0.72, 1.25, 0.52)
-scale = Vector3(0.10, 2.50, 0.10)
 
-[node name="PosteFD" type="MeshInstance3D" parent="."]
-mesh = SubResource("Box")
-material_override = SubResource("MatFrame")
-position = Vector3(0.72, 1.25, 0.52)
-scale = Vector3(0.10, 2.50, 0.10)
-
-[node name="PosteTI" type="MeshInstance3D" parent="."]
-mesh = SubResource("Box")
-material_override = SubResource("MatFrame")
-position = Vector3(-0.72, 1.25, -0.52)
-scale = Vector3(0.10, 2.50, 0.10)
-
-[node name="PosteTD" type="MeshInstance3D" parent="."]
-mesh = SubResource("Box")
-material_override = SubResource("MatFrame")
-position = Vector3(0.72, 1.25, -0.52)
-scale = Vector3(0.10, 2.50, 0.10)
-
-[node name="Techo" type="MeshInstance3D" parent="."]
-mesh = SubResource("Box")
-material_override = SubResource("MatFrame")
-position = Vector3(0, 2.56, 0)
-scale = Vector3(1.60, 0.18, 1.25)
-
-[node name="PanelTrasero" type="MeshInstance3D" parent="."]
-mesh = SubResource("Box")
+[node name="CristalTrasero" type="MeshInstance3D" parent="."]
+mesh = SubResource("GlassPanel")
 material_override = SubResource("MatGlass")
-position = Vector3(0, 1.25, -0.55)
-scale = Vector3(1.35, 2.20, 0.04)
-
-[node name="Telefono" type="MeshInstance3D" parent="."]
-mesh = SubResource("Box")
-material_override = SubResource("MatPhone")
-position = Vector3(0, 1.24, -0.42)
-scale = Vector3(0.52, 0.72, 0.22)
+position = Vector3(0, 1.30, -0.545)
 
 [node name="Dial" type="MeshInstance3D" parent="."]
 mesh = SubResource("Dial")
 material_override = SubResource("MatFrame")
-position = Vector3(0, 1.24, -0.27)
+position = Vector3(0, 1.16, -0.285)
 rotation_degrees = Vector3(90, 0, 0)
 
 [node name="Auricular" type="MeshInstance3D" parent="."]
 mesh = SubResource("Receiver")
-material_override = SubResource("MatPhone")
-position = Vector3(0, 1.73, -0.24)
+material_override = SubResource("MatFrame")
+position = Vector3(0, 1.58, -0.28)
 rotation_degrees = Vector3(0, 0, 90)
