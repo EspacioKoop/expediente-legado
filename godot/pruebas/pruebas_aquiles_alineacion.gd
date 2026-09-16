@@ -86,24 +86,20 @@ func _probar_contrato_no_combate() -> void:
 
 func _probar_orientacion_recorrido() -> void:
 	var controller := ControllerScript.new()
-	root.add_child(controller)
-	var mundo := Node3D.new()
-	root.add_child(mundo)
 	var encuentro := Node3D.new()
-	mundo.add_child(encuentro)
 
 	var frontal := {
 		"entrada": Vector3(0.0, 0.0, 4.0),
 		"salidas": [{"pos": Vector3(0.0, 0.0, -4.0)}],
 	}
-	controller._orientar_segun_recorrido(encuentro, mundo, frontal)
-	var frente := (-encuentro.global_transform.basis.z).normalized()
+	controller._orientar_segun_recorrido(encuentro, frontal)
+	var frente := (-encuentro.transform.basis.z).normalized()
 	_comprobar(
 		frente.dot(Vector3(0.0, 0.0, -1.0)) > 0.999,
 		"Aquiles orienta -Z hacia una salida frontal",
 	)
 	_comprobar(
-		encuentro.global_transform.basis.z.normalized().dot(Vector3(0.0, 0.0, 1.0)) > 0.999,
+		encuentro.transform.basis.z.normalized().dot(Vector3(0.0, 0.0, 1.0)) > 0.999,
 		"el lado +Z de los interactuables queda hacia la entrada frontal",
 	)
 
@@ -111,28 +107,24 @@ func _probar_orientacion_recorrido() -> void:
 		"entrada": Vector3(-4.0, 0.0, 0.0),
 		"salidas": [{"pos": Vector3(4.0, 0.0, 0.0)}],
 	}
-	controller._orientar_segun_recorrido(encuentro, mundo, lateral)
-	frente = (-encuentro.global_transform.basis.z).normalized()
+	controller._orientar_segun_recorrido(encuentro, lateral)
+	frente = (-encuentro.transform.basis.z).normalized()
 	_comprobar(
 		frente.dot(Vector3.RIGHT) > 0.999,
 		"Aquiles se adapta también a recorridos laterales",
 	)
 
 	var rotacion_previa := encuentro.rotation
-	(
-		controller
-		. _orientar_segun_recorrido(
-			encuentro,
-			mundo,
-			{"entrada": Vector3.ZERO, "salidas": []},
-		)
+	controller._orientar_segun_recorrido(
+		encuentro,
+		{"entrada": Vector3.ZERO, "salidas": []},
 	)
 	_comprobar(
 		encuentro.rotation.distance_to(rotacion_previa) < 0.0001,
 		"sin salida conserva la orientación existente",
 	)
-	mundo.queue_free()
-	controller.queue_free()
+	encuentro.free()
+	controller.free()
 
 
 func _comprobar(condicion: bool, nombre: String) -> void:
