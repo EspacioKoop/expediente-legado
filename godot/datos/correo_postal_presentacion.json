@@ -1,0 +1,20 @@
+{
+  "ventana_titulo": "Correo postal",
+  "titulo_vacio": "Buzón del portal",
+  "cuerpo_vacio": "No hay correo nuevo.",
+  "remitente": "De: %s",
+  "dia": "Día %d",
+  "categoria": "Categoría: %s",
+  "objeto_recogido": "Contenido del paquete: %s. Se ha añadido a lo que llevas.",
+  "cerrar": "Cerrar",
+  "categorias": {
+    "publicidad": "Publicidad",
+    "factura": "Factura",
+    "catalogo": "Catálogo",
+    "comunidad": "Comunidad",
+    "personal": "Personal",
+    "notificacion": "Notificación",
+    "paquete": "Paquete",
+    "certificado": "Certificado"
+  }
+}
