@@ -116,9 +116,7 @@ func _probar_tarot_no_filtra_pistas() -> void:
 
 	var recogida := Node3D.new()
 	root.add_child(recogida)
-	var visibles := SuenoUtileria.montar(
-		recogida, "crucero", 4, 8700, [folio_luna], ["la-luna"]
-	)
+	var visibles := SuenoUtileria.montar(recogida, "crucero", 4, 8700, [folio_luna], ["la-luna"])
 	var tarot = _buscar_id(visibles, "tarot-geometria-viva")
 	_comprobar(tarot != null, "una carta recogida desde un folio de hoy sí puede deformarse")
 	if tarot != null:
