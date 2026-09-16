@@ -7,13 +7,13 @@
         {
           "id": "boletin_barrio",
           "desde": "08:00",
-          "hasta": "16:29",
+          "hasta": "15:59",
           "titulo": "Boletín del barrio",
           "transcripcion": "Tráfico lento junto al mercado, obras en la avenida y aviso de lluvia para la tarde."
         },
         {
           "id": "mesa_local",
-          "desde": "16:30",
+          "desde": "16:00",
           "hasta": "23:59",
           "titulo": "Mesa local",
           "transcripcion": "Vecinos, comercios y asociaciones repasan la jornada sin convertir la emisión en una misión."
@@ -27,13 +27,13 @@
         {
           "id": "previa_deportiva",
           "desde": "08:00",
-          "hasta": "17:29",
+          "hasta": "15:59",
           "titulo": "Previa deportiva",
           "transcripcion": "Resultados, convocatorias y horarios de competiciones ficticias de la ciudad."
         },
         {
           "id": "tercer_tiempo",
-          "desde": "17:30",
+          "desde": "16:00",
           "hasta": "23:59",
           "titulo": "Tercer tiempo",
           "transcripcion": "La mesa comenta la jornada deportiva y abre el teléfono a oyentes ficticios."
@@ -47,13 +47,13 @@
         {
           "id": "archivo_de_voces",
           "desde": "08:00",
-          "hasta": "16:59",
+          "hasta": "15:59",
           "titulo": "Archivo de voces",
           "transcripcion": "Una selección de entrevistas y pequeñas piezas documentales de producción propia."
         },
         {
           "id": "alas_sobre_el_desierto",
-          "desde": "17:00",
+          "desde": "16:00",
           "hasta": "23:59",
           "titulo": "Alas sobre el desierto",
           "transcripcion": "El programa relata un ave imposible que reúne a quienes buscan respuestas al otro lado de siete valles.",
