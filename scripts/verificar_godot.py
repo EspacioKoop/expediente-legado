@@ -85,9 +85,11 @@ def ejecutar():
         entorno = os.environ.copy()
         entorno["LEGADO_PRUEBAS_AISLADAS"] = "1"
         # Las pruebas y el arranque nunca usan la partida real de quien verifica.
-        for variable, carpeta in [("XDG_DATA_HOME", "datos"),
-                                  ("XDG_CONFIG_HOME", "config"),
-                                  ("XDG_CACHE_HOME", "cache")]:
+        for variable, carpeta in [
+            ("XDG_DATA_HOME", "datos"),
+            ("XDG_CONFIG_HOME", "config"),
+            ("XDG_CACHE_HOME", "cache"),
+        ]:
             entorno[variable] = str(Path(temporal) / carpeta)
         etapas = [
             ("importación", ["--editor", "--import", "--quit"], 120, None),
@@ -97,6 +99,12 @@ def ejecutar():
                 ["--script", "pruebas/pruebas_semillas_oniricas.gd"],
                 30,
                 30,
+            ),
+            (
+                "anansi-akan",
+                ["--script", "pruebas/pruebas_anansi_akan.gd"],
+                30,
+                48,
             ),
             (
                 "escritorio-modal",
@@ -116,10 +124,21 @@ def ejecutar():
         for nombre, argumentos, limite, suelo in etapas:
             print(f"\nGodot: {nombre}", flush=True)
             resultado = subprocess.run(
-                [motor, "--headless", "--language", "es", "--path", str(RAIZ / "godot"),
-                 *argumentos],
-                env=entorno, text=True, stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT, timeout=limite, check=False,
+                [
+                    motor,
+                    "--headless",
+                    "--language",
+                    "es",
+                    "--path",
+                    str(RAIZ / "godot"),
+                    *argumentos,
+                ],
+                env=entorno,
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                timeout=limite,
+                check=False,
             )
             print(resultado.stdout, flush=True)
             validar(resultado.stdout, resultado.returncode, suelo, nombre == "importación")
