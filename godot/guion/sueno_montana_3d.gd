@@ -172,9 +172,12 @@ func _montar_huellas() -> void:
 	var forma := QuadMesh.new()
 	forma.size = Vector2(0.18, 0.38)
 	var posiciones := [
-		Vector3(-0.18, 0.055, -11.4), Vector3(0.20, 0.055, -10.8),
-		Vector3(-0.17, 0.055, -9.6), Vector3(0.21, 0.055, -9.0),
-		Vector3(-0.15, 0.055, -7.8), Vector3(0.23, 0.055, -7.2),
+		Vector3(-0.18, 0.055, -11.4),
+		Vector3(0.20, 0.055, -10.8),
+		Vector3(-0.17, 0.055, -9.6),
+		Vector3(0.21, 0.055, -9.0),
+		Vector3(-0.15, 0.055, -7.8),
+		Vector3(0.23, 0.055, -7.2),
 	]
 	var grupo := Node3D.new()
 	grupo.name = "HuellasAnticipadas"
