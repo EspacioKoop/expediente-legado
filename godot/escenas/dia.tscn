@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=3]
+[gd_scene load_steps=30 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -28,6 +28,7 @@
 [ext_resource type="Script" path="res://guion/dia_correo_postal_app.gd" id="26"]
 [ext_resource type="Script" path="res://guion/dia_telefono_fijo_app.gd" id="27"]
 [ext_resource type="Script" path="res://guion/dia_anansi_akan_app.gd" id="28"]
+[ext_resource type="Script" path="res://guion/dia_rutinas_casa_app.gd" id="29"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -112,3 +113,6 @@ script = ExtResource("27")
 
 [node name="AnansiAkanController" type="Node" parent="."]
 script = ExtResource("28")
+
+[node name="RutinasCasaController" type="Node" parent="."]
+script = ExtResource("29")
