@@ -125,8 +125,14 @@ func _refrescar() -> void:
 		partes.append("Línea libre.")
 	else:
 		partes.append(
-			"Llamada entrante · %s · día %d · %s"
-			% [llamada.get("remitente", "Número desconocido"), llamada.get("dia", 1), llamada.get("hora", "")]
+			(
+				"Llamada entrante · %s · día %d · %s"
+				% [
+					llamada.get("remitente", "Número desconocido"),
+					llamada.get("dia", 1),
+					llamada.get("hora", "")
+				]
+			)
 		)
 	partes.append("Contestador: %d mensaje(s) nuevo(s)." % nuevos)
 	partes.append("Auricular: %s." % ("descolgado" if descolgado else "colgado"))
@@ -148,11 +154,14 @@ func _al_descolgar() -> void:
 		return
 	if String(resultado.get("tipo", "")) == "entrante":
 		var llamada = resultado.get("llamada", {})
-		_contenido.text = "%s · %s\n\n%s" % [
-			llamada.get("remitente", "Número desconocido"),
-			llamada.get("hora", ""),
-			resultado.get("texto", ""),
-		]
+		_contenido.text = (
+			"%s · %s\n\n%s"
+			% [
+				llamada.get("remitente", "Número desconocido"),
+				llamada.get("hora", ""),
+				resultado.get("texto", ""),
+			]
+		)
 	else:
 		_contenido.text = String(resultado.get("texto", "Tono de línea."))
 	_estado_cambio()
@@ -164,11 +173,14 @@ func _al_contestador() -> void:
 		_mostrar_error(resultado)
 		return
 	var mensaje = resultado.get("mensaje", {})
-	_contenido.text = "El contestador graba el mensaje.\n\n%s · %s\n%s" % [
-		mensaje.get("remitente", "Número desconocido"),
-		mensaje.get("hora", ""),
-		mensaje.get("texto", ""),
-	]
+	_contenido.text = (
+		"El contestador graba el mensaje.\n\n%s · %s\n%s"
+		% [
+			mensaje.get("remitente", "Número desconocido"),
+			mensaje.get("hora", ""),
+			mensaje.get("texto", ""),
+		]
+	)
 	_estado_cambio()
 
 
@@ -178,12 +190,15 @@ func _al_escuchar() -> void:
 		_mostrar_error(resultado)
 		return
 	var mensaje = resultado.get("mensaje", {})
-	_contenido.text = "Contestador · día %d · %s\n%s\n\n%s" % [
-		mensaje.get("dia", 1),
-		mensaje.get("hora", ""),
-		mensaje.get("remitente", "Número desconocido"),
-		mensaje.get("texto", ""),
-	]
+	_contenido.text = (
+		"Contestador · día %d · %s\n%s\n\n%s"
+		% [
+			mensaje.get("dia", 1),
+			mensaje.get("hora", ""),
+			mensaje.get("remitente", "Número desconocido"),
+			mensaje.get("texto", ""),
+		]
+	)
 	_estado_cambio()
 
 
@@ -193,11 +208,14 @@ func _al_llamar(contacto_id: String) -> void:
 		_mostrar_error(resultado)
 		return
 	var contacto = resultado.get("contacto", {})
-	_contenido.text = "Llamada saliente · %s · %s\n\n%s" % [
-		contacto.get("nombre", "Contacto"),
-		contacto.get("numero", ""),
-		resultado.get("texto", ""),
-	]
+	_contenido.text = (
+		"Llamada saliente · %s · %s\n\n%s"
+		% [
+			contacto.get("nombre", "Contacto"),
+			contacto.get("numero", ""),
+			resultado.get("texto", ""),
+		]
+	)
 	_estado_cambio()
 
 
@@ -216,7 +234,9 @@ func _estado_cambio() -> void:
 
 
 func _mostrar_error(resultado: Dictionary) -> void:
-	_contenido.text = "No se puede completar la acción: %s." % resultado.get("motivo", "estado_no_valido")
+	_contenido.text = (
+		"No se puede completar la acción: %s." % resultado.get("motivo", "estado_no_valido")
+	)
 	_refrescar()
 
 
