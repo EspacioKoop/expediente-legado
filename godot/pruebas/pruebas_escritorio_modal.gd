@@ -132,13 +132,13 @@ func _probar_foco_visible_en_piel_real() -> void:
 	)
 
 	escritorio.restaurar("foco")
-	escritorio._alternar_menu()
+	escritorio._boton_menu_visual.emit_signal("pressed")
 	var entrada_programa := escritorio._programas_menu.get_child(0) as Control
 	_comprobar(
 		root.gui_get_focus_owner() == entrada_programa,
 		"abrir el menú lleva el foco al primer programa",
 	)
-	escritorio._alternar_menu()
+	escritorio._boton_menu_visual.emit_signal("pressed")
 	_comprobar(
 		root.gui_get_focus_owner() == escritorio._boton_menu_visual,
 		"cerrar el menú devuelve el foco al botón del sistema",
@@ -147,7 +147,7 @@ func _probar_foco_visible_en_piel_real() -> void:
 	# Si una modal se abre mientras el menú tenía el foco, el shell base guarda
 	# ese Control como foco previo. Al cerrar, la piel real debe detectar que ya
 	# está oculto y recuperar un objetivo visible.
-	escritorio._alternar_menu()
+	escritorio._boton_menu_visual.emit_signal("pressed")
 	var aviso := Label.new()
 	aviso.text = "Aviso"
 	escritorio.abrir_modal("aviso-foco", "Aviso", aviso)
