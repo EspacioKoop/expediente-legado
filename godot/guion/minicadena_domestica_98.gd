@@ -214,11 +214,14 @@ func _activar_semilla(contenido: Dictionary) -> bool:
 	var jornada := _jornada_actual()
 	if jornada.is_empty():
 		return false
-	return SemillasOniricas.activar_semilla_onirica(
-		jornada,
-		String(semilla.get("id_mito", "")),
-		String(semilla.get("fuente", "")),
-		int(semilla.get("intensidad", 1)),
+	return (
+		SemillasOniricas
+		. activar_semilla_onirica(
+			jornada,
+			String(semilla.get("id_mito", "")),
+			String(semilla.get("fuente", "")),
+			int(semilla.get("intensidad", 1)),
+		)
 	)
 
 
