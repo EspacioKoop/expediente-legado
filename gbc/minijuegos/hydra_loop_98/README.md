@@ -15,9 +15,10 @@ Todo es determinista: no hay RNG.
 
 - **Cortar** (A sobre una cabeza) la elimina y hace brotar **dos** cabezas de la
   misma raíz en huecos libres.
-- **Observar** (B sobre una cabeza) revela su raíz: aparece bajo la cabeza la
-  marca del nodo (círculo, cuadrado o triángulo) y el nodo destella. Leer cuesta
-  medio segundo sin poder actuar, y la Hidra sigue creciendo mientras tanto.
+- **Observar** (B sobre una cabeza) revela su raíz: la placa a su derecha pasa
+  de `?` a la marca del nodo (círculo, cuadrado o triángulo), el cuello de esa
+  cabeza se ilumina y el nodo destella. Leer cuesta medio segundo sin poder
+  actuar, y la Hidra sigue creciendo mientras tanto.
 - **Sellar** (A sobre un nodo) solo funciona si ya se han leído **al menos dos
   cabezas** de esa raíz. Entonces caen todas sus cabezas y el reloj se reinicia.
   Sellar a ciegas, o un nodo que no se ha leído, tapa el síntoma: brota una
@@ -52,11 +53,27 @@ que `RyuFlowVigilia`.
 - B: observar una cabeza.
 - Start/A: empezar desde la portada o reintentar tras desbordar.
 
-## Render
+## Arte y render
+
+Dirección «Pantano de Lerna»: cabezas de serpiente con cuello que salen del
+agua, muñones donde se cortó una cabeza, nudos de raíz que laten sobre el barro
+y un nudo apagado con aspa cuando se sella.
 
 - La portada reutiliza los 251 tiles, el mapa y la paleta de
   `gbc/minijuegos/hydra_loop/assets` (#556). El juego recarga su propio banco de
-  tiles con la LCD apagada.
+  59 tiles con la LCD apagada. Los tiles están en `main.asm` como literales
+  gráficos de RGBDS, legibles píxel a píxel.
+- En CGB, el color se asigna con el mapa de atributos, **estático**: agua,
+  hidra, raíz y barro, placas y HUD usan cinco paletas. Se escribe una vez al
+  cargar cada nivel con la LCD apagada y no cuesta nada en VBlank. Las cuatro
+  primeras comparten el azul del agua como color 0, así que los bordes de cada
+  bloque no se notan.
+- En DMG, las escrituras de atributos caen en el mapa normal y se sobrescriben
+  enseguida. El color 0 es el blanco del fondo, de modo que una placa sin
+  cabeza es agua y no un cuadrado gris.
+- Cabezas y nodos son bloques 2×3 con la placa en la fila central. Solo el
+  cuello de la cabeza observada cambia durante la lectura y se redibuja al
+  terminar.
 - Durante la partida, VRAM y OAM solo se tocan al comienzo de VBlank. Cada
   cambio marca un elemento pendiente (hueco, nodo, HUD o reloj) y se dibujan
   como mucho tres por frame, así que un sellado se reparte en dos o tres frames.
@@ -76,6 +93,7 @@ make test PYTHON=/tmp/hydra-tests/bin/python
 `test_rom.py` arranca la ROM real en PyBoy y comprueba:
 - la cabecera;
 - la regla de cortar, observar y sellar, incluido el nodo equivocado y sellar a ciegas;
+- las placas (`?`, marca o agua) y el cuello iluminado solo durante la lectura;
 - el reloj y el desborde con reintento;
 - el handshake, que solo aparece al terminar;
 - que los niveles 2 y 3 se resuelven jugando con las reglas;
