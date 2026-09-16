@@ -106,8 +106,8 @@ func _construir() -> void:
 	var acciones := HBoxContainer.new()
 	acciones.add_theme_constant_override("separation", 6)
 	_reconstruir = Button.new()
-	_reconstruir.text = "Reconstruir expediente…"
-	_reconstruir.tooltip_text = "Lea al menos dos documentos del expediente en esta jornada."
+	_reconstruir.text = tr("VISOR_RECONSTRUIR")
+	_reconstruir.tooltip_text = tr("VISOR_RECONSTRUIR_AYUDA")
 	_reconstruir.pressed.connect(_abrir_reconstruccion)
 	acciones.add_child(_reconstruir)
 

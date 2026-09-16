@@ -303,6 +303,8 @@ VISOR_PARTIDA_APARTADA,"PARTIDA ANTERIOR ILEGIBLE (%s), APARTADA EN %s"
 VISOR_PRECIPITADA,  ·  ACUSACIÓN PRECIPITADA: consta en su hoja de servicio.
 VISOR_QUITAR_MARCADOR,★ Quitar marcador
 VISOR_REASIGNADO,"  ·  CESE POR ACUMULACIÓN: se le reasigna. Otra persona ocupará su puesto."
+VISOR_RECONSTRUIR,Reconstruir expediente…
+VISOR_RECONSTRUIR_AYUDA,Lea al menos dos documentos del expediente en esta jornada.
 VISOR_RELACIONAR,Relacionar este documento…
 VISOR_RELACIONAR_CON,Relacionar con %s
 VISOR_RELACION_DISTINTO,Selecciona un segundo documento distinto.
