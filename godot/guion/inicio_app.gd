@@ -200,6 +200,11 @@ func _actualizar() -> void:
 func _seguir() -> void:
 	if _entrando or _reinicio_pendiente or not FileAccess.file_exists(ruta):
 		return
+	partida.cargar(ruta)
+	var perfil := PerfilJugador.completar(partida.estado.get("perfil_jugador", {}))
+	if not PerfilJugador.esta_configurado(perfil):
+		_abrir_personaje()
+		return
 	_entrar()
 
 
@@ -231,11 +236,14 @@ func _empezar() -> void:
 			return
 		_reinicio_pendiente = true
 	_actualizar()
+	var perfil := PerfilJugador.completar(partida.estado.get("perfil_jugador", {}))
+	perfil["configurado"] = false
+	partida.estado["perfil_jugador"] = perfil
 	if not partida.guardar(ruta):
 		_aviso.text = tr("ARCHIVO_ERROR_GUARDAR")
 		return
 	_reinicio_pendiente = false
-	_entrar()
+	_abrir_personaje()
 
 
 func _abrir_personaje() -> void:
