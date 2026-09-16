@@ -20,8 +20,10 @@ func _probar() -> void:
 	var informatica := indice.buscar("informática")
 	_comprobar(not informatica.is_empty(), "normaliza tildes al buscar")
 	_comprobar(informatica[0]["id"] == "byte-local", "Byte Local responde a informática")
+	var primera_busqueda := _ids(indice.buscar("shareware"))
+	var segunda_busqueda := _ids(indice.buscar("shareware"))
 	_comprobar(
-		_ids(indice.buscar("shareware")) == _ids(indice.buscar("shareware")),
+		primera_busqueda == segunda_busqueda,
 		"la misma consulta y estado producen el mismo orden",
 	)
 
