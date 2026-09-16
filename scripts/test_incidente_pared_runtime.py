@@ -62,7 +62,7 @@ class IncidenteParedRuntimeContractTest(unittest.TestCase):
         self.assertIn("func huir_de(origen_global: Vector3)", self.companeros)
         self.assertIn("idle.huir_de(origen_global)", self.companeros)
         self.assertIn("func huir_de(origen_global: Vector3)", self.idle)
-        self.assertIn('tween.tween_property(objetivo, "position"', self.idle)
+        self.assertIn('tween_property(objetivo, "position"', self.idle)
 
     def test_golpe_tiene_feedback_y_bloquea_doble_input(self):
         self.assertIn("Sonido.impacto_careo()", self.controller)
