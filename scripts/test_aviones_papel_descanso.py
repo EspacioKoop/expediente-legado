@@ -9,6 +9,11 @@ ESCENA = ROOT / "godot" / "escenas" / "minijuego_aviones_papel_jornada.tscn"
 CUNADO = ROOT / "godot" / "guion" / "cunado.gd"
 
 
+def sin_comentarios(fuente):
+    """Quita los comentarios GDScript para comprobar solo el código ejecutable."""
+    return "\n".join(linea.split("#", 1)[0] for linea in fuente.splitlines())
+
+
 class AvionesPapelDescansoTest(unittest.TestCase):
     def setUp(self):
         self.regla = REGLA.read_text(encoding="utf-8")
@@ -29,6 +34,7 @@ class AvionesPapelDescansoTest(unittest.TestCase):
         self.assertIn("marcar_jugado(jornada)", self.regla)
 
     def test_descanso_no_gasta_acciones_ni_concede_recursos(self):
+        codigo = sin_comentarios(self.regla)
         for prohibido in (
             "Jornada.gastar_accion",
             'jornada["acciones"] -=',
@@ -36,7 +42,7 @@ class AvionesPapelDescansoTest(unittest.TestCase):
             "registrar_sello(",
             "pistas_descubiertas",
         ):
-            self.assertNotIn(prohibido, self.regla)
+            self.assertNotIn(prohibido, codigo)
 
     def test_comentario_reutiliza_la_guarda_del_cunado(self):
         self.assertIn("Cunado.POR_MOMENTO", self.regla)
