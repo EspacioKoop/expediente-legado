@@ -147,10 +147,13 @@ func _al_activar_eco(_actor: Node, slot: int) -> void:
 	presentacion.foco = slot
 	var evento: String = str(presentacion.seleccionar())
 	_sincronizar()
-	if evento in [
-		EcosArchivoPresentacion.EVENTO_COMPLETADO,
-		EcosArchivoPresentacion.EVENTO_DISPERSADO,
-	]:
+	if (
+		evento
+		in [
+			EcosArchivoPresentacion.EVENTO_COMPLETADO,
+			EcosArchivoPresentacion.EVENTO_DISPERSADO,
+		]
+	):
 		terminado.emit(evento)
 
 
@@ -175,8 +178,11 @@ func _sincronizar() -> void:
 		panel.material_override = material
 
 	if _estado != null:
-		_estado.text = "Intentos %d/%d · %s" % [
-			int(vista.get("intentos", 0)),
-			int(vista.get("max_intentos", 3)),
-			str(vista.get("estado", "activo")),
-		]
+		_estado.text = (
+			"Intentos %d/%d · %s"
+			% [
+				int(vista.get("intentos", 0)),
+				int(vista.get("max_intentos", 3)),
+				str(vista.get("estado", "activo")),
+			]
+		)
