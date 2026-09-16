@@ -12,16 +12,15 @@ func _initialize() -> void:
 func _probar() -> void:
 	var chat := ChatCorporativoModelo.new()
 	var companeros := ["becario", "telefono", "cunado", "correspondencia", "jubilacion"]
-	chat.configurar_contexto(
-		{
-			"fase": "archivo",
-			"dia": 1,
-			"acciones": Jornada.ACCIONES_POR_DIA,
-			"companeros": companeros,
-			"conocimiento": [],
-			"eventos": [],
-		}
-	)
+	var contexto := {
+		"fase": "archivo",
+		"dia": 1,
+		"acciones": Jornada.ACCIONES_POR_DIA,
+		"companeros": companeros,
+		"conocimiento": [],
+		"eventos": [],
+	}
+	chat.configurar_contexto(contexto)
 
 	var canales := _ids(chat.canales_visibles())
 	_comprobar(canales.size() == 4, "sin incidencia hay cuatro canales normales")
@@ -34,16 +33,8 @@ func _probar() -> void:
 	_comprobar(chat.estado_usuario("becario") == "conectado", "el becario empieza conectado")
 	_comprobar(chat.estado_usuario("telefono") == "conectado", "centralita empieza conectada")
 
-	chat.configurar_contexto(
-		{
-			"fase": "archivo",
-			"dia": 1,
-			"acciones": 3,
-			"companeros": companeros,
-			"conocimiento": [],
-			"eventos": [],
-		}
-	)
+	contexto["acciones"] = 3
+	chat.configurar_contexto(contexto)
 	_comprobar(chat.hora_narrativa() == "10:16", "consumir una acción avanza la hora narrativa")
 	_comprobar(chat.estado_usuario("telefono") == "ausente", "centralita pasa a ausente")
 	_comprobar(chat.estado_usuario("becario") == "ausente", "el becario puede marcar AFK")
@@ -61,16 +52,8 @@ func _probar() -> void:
 		"no existe entrada de respuesta arbitraria",
 	)
 
-	chat.configurar_contexto(
-		{
-			"fase": "archivo",
-			"dia": 1,
-			"acciones": 2,
-			"companeros": companeros,
-			"conocimiento": [],
-			"eventos": [],
-		}
-	)
+	contexto["acciones"] = 2
+	chat.configurar_contexto(contexto)
 	_comprobar(chat.hora_narrativa() == "12:16", "dos acciones sitúan la jornada al mediodía")
 	_comprobar(chat.estado_usuario("becario") == "conectado", "el becario vuelve de AFK")
 	_comprobar(chat.estado_usuario("cunado") == "ausente", "el compañero está fuera por café")
@@ -83,31 +66,16 @@ func _probar() -> void:
 		"un enlace normal apunta al recurso web conocido",
 	)
 
-	chat.configurar_contexto(
-		{
-			"fase": "archivo",
-			"dia": 1,
-			"acciones": 1,
-			"companeros": companeros,
-			"conocimiento": [],
-			"eventos": [],
-		}
-	)
+	contexto["acciones"] = 1
+	chat.configurar_contexto(contexto)
 	_comprobar(
 		chat.estado_usuario("jubilacion") == "desconectado",
 		"una persona puede desconectarse antes del cierre de jornada",
 	)
 
-	chat.configurar_contexto(
-		{
-			"fase": "archivo",
-			"dia": 1,
-			"acciones": 2,
-			"companeros": ["becario", "cunado", "correspondencia", "jubilacion"],
-			"conocimiento": [],
-			"eventos": [],
-		}
-	)
+	contexto["acciones"] = 2
+	contexto["companeros"] = ["becario", "cunado", "correspondencia", "jubilacion"]
+	chat.configurar_contexto(contexto)
 	_comprobar(
 		chat.estado_usuario("telefono") == "desconectado",
 		"un compañero ausente de la plantilla no inventa sesión",
@@ -117,46 +85,28 @@ func _probar() -> void:
 		"tampoco aparecen mensajes de una persona que no existe en esta vuelta",
 	)
 
-	chat.configurar_contexto(
-		{
-			"fase": "archivo",
-			"dia": 1,
-			"acciones": 2,
-			"companeros": companeros,
-			"conocimiento": [],
-			"eventos": ["impresora_atascada"],
-		}
+	contexto["companeros"] = companeros
+	contexto["eventos"] = ["impresora_atascada"]
+	chat.configurar_contexto(contexto)
+	_comprobar(
+		_ids(chat.canales_visibles()).has("inc-impresora"), "el evento abre el canal temporal"
 	)
-	_comprobar(_ids(chat.canales_visibles()).has("inc-impresora"), "el evento abre el canal temporal")
 	var incidencia := _ids(chat.mensajes_de_canal("inc-impresora"))
 	_comprobar(incidencia.size() == 3, "la incidencia tiene conversación breve y acotada")
 	_comprobar(incidencia.has("sistema-incidencia-abierta"), "el sistema diferencia la apertura")
 
-	chat.configurar_contexto(
-		{
-			"fase": "archivo",
-			"dia": 2,
-			"acciones": Jornada.ACCIONES_POR_DIA,
-			"companeros": companeros,
-			"conocimiento": [],
-			"eventos": [],
-		}
-	)
+	contexto["dia"] = 2
+	contexto["acciones"] = Jornada.ACCIONES_POR_DIA
+	contexto["eventos"] = []
+	chat.configurar_contexto(contexto)
 	_comprobar(
 		chat.estado_usuario("becario") == "ausente",
 		"una regla específica de jornada prevalece sobre el horario general",
 	)
 
-	chat.configurar_contexto(
-		{
-			"fase": "archivo",
-			"dia": 3,
-			"acciones": 2,
-			"companeros": companeros,
-			"conocimiento": [],
-			"eventos": [],
-		}
-	)
+	contexto["dia"] = 3
+	contexto["acciones"] = 2
+	chat.configurar_contexto(contexto)
 	var sistemas_bloqueado := _ids(chat.mensajes_de_canal("sistemas"))
 	_comprobar(
 		not sistemas_bloqueado.has("sistema-diagnostico-reservado"),
@@ -171,16 +121,8 @@ func _probar() -> void:
 		"el enlace restringido no se resuelve por acceso directo",
 	)
 
-	chat.configurar_contexto(
-		{
-			"fase": "archivo",
-			"dia": 3,
-			"acciones": 2,
-			"companeros": companeros,
-			"conocimiento": ["enlace13"],
-			"eventos": [],
-		}
-	)
+	contexto["conocimiento"] = ["enlace13"]
+	chat.configurar_contexto(contexto)
 	var sistemas_autorizado := _ids(chat.mensajes_de_canal("sistemas"))
 	_comprobar(
 		sistemas_autorizado.has("sistema-diagnostico-reservado"),
@@ -201,21 +143,20 @@ func _probar() -> void:
 	)
 	var perfil := chat.perfil_usuario("becario")
 	_comprobar(String(perfil.get("nick", "")) == "becario4", "el nick del personaje es estable")
-	_comprobar(not String(perfil.get("estilo", "")).is_empty(), "el perfil conserva una voz declarada")
-
-	chat.configurar_contexto(
-		{
-			"fase": "casa",
-			"dia": 1,
-			"acciones": 2,
-			"companeros": companeros,
-			"conocimiento": [],
-			"eventos": [],
-		}
-	)
-	_comprobar(chat.canales_visibles().is_empty(), "el chat no funciona fuera del puesto de archivo")
 	_comprobar(
-		chat.estado_usuario("becario") == "desconectado", "fuera del puesto no hay presencia digital"
+		not String(perfil.get("estilo", "")).is_empty(), "el perfil conserva una voz declarada"
+	)
+
+	contexto["fase"] = "casa"
+	contexto["dia"] = 1
+	contexto["conocimiento"] = []
+	chat.configurar_contexto(contexto)
+	_comprobar(
+		chat.canales_visibles().is_empty(), "el chat no funciona fuera del puesto de archivo"
+	)
+	_comprobar(
+		chat.estado_usuario("becario") == "desconectado",
+		"fuera del puesto no hay presencia digital"
 	)
 	_comprobar(chat.mensajes_de_canal("no-existe").is_empty(), "un canal inexistente no se inventa")
 
