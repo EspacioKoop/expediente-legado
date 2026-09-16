@@ -25,7 +25,9 @@ func _probar_layout_acotado() -> void:
 	var limite := Vector2(1.03, 0.57)
 	_comprobar(CorchoScript.limitar_posiciones(jornada, limite), "sanea posiciones fuera de área")
 	fichas = CorchoScript.estado(jornada)["fichas"]
-	_comprobar(typeof(fichas["entrada_rota"]) == TYPE_DICTIONARY, "repara una entrada antigua corrupta")
+	_comprobar(
+		typeof(fichas["entrada_rota"]) == TYPE_DICTIONARY, "repara una entrada antigua corrupta"
+	)
 
 	for id in fichas:
 		var datos: Dictionary = fichas[id]
@@ -81,7 +83,9 @@ func _probar_presentacion_interactiva() -> void:
 	if ficha_a == null or ficha_b == null:
 		corcho.queue_free()
 		return
-	_comprobar(ficha_a.texto_accion() == "Usar ficha «Alpha»", "el prompt nombra la ficha como objeto")
+	_comprobar(
+		ficha_a.texto_accion() == "Usar ficha «Alpha»", "el prompt nombra la ficha como objeto"
+	)
 
 	var papel_a := ficha_a.get_node_or_null("Papel") as MeshInstance3D
 	var material_a: StandardMaterial3D = null
@@ -95,7 +99,9 @@ func _probar_presentacion_interactiva() -> void:
 			"marca la primera selección",
 		)
 	_comprobar(ficha_b.interactuar(root), "permite completar el par")
-	_comprobar(CorchoScript.estado(jornada)["enlaces"].size() == 1, "dos fichas crean un hilo manual")
+	_comprobar(
+		CorchoScript.estado(jornada)["enlaces"].size() == 1, "dos fichas crean un hilo manual"
+	)
 	if material_a != null:
 		_comprobar(
 			material_a.albedo_color == Corcho3DScript.COLOR_FICHA,
