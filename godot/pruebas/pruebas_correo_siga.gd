@@ -56,7 +56,8 @@ func _probar() -> void:
 	)
 
 	var respuestas := {
-		"cunado-asuntos-mayusculas": {
+		"cunado-asuntos-mayusculas":
+		{
 			"opcion_id": "quien-lo-dijo",
 			"dia": 1,
 			"acciones": 2,
@@ -108,7 +109,9 @@ func _probar() -> void:
 
 	_configurar(modelo, 2, Jornada.ACCIONES_POR_DIA, presentes)
 	var siguiente_manana := _ids(modelo)
-	_comprobar(siguiente_manana.has(id_telefono), "el del teléfono responde al abrir el día siguiente")
+	_comprobar(
+		siguiente_manana.has(id_telefono), "el del teléfono responde al abrir el día siguiente"
+	)
 	_comprobar(siguiente_manana.has(id_cunado), "las conversaciones anteriores permanecen visibles")
 	_comprobar(
 		not siguiente_manana.has("contestacion-correspondencia-sobres-de-donde-vienen"),
