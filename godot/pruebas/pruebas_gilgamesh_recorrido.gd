@@ -36,7 +36,7 @@ func _probar() -> void:
 	var libro := dia._mundo.get_node_or_null("GilgameshVigiliaCasa") as GilgameshVigilia
 	_comprobar(libro != null, "el libro de Gilgamesh está alcanzable en la casa real")
 	if libro == null:
-		_finalizar(dia, null)
+		await _finalizar(dia, null)
 		return
 
 	var actor := Node.new()
@@ -80,7 +80,7 @@ func _probar() -> void:
 	var sueno := dia._mundo.get_node_or_null("SuenoGilgameshNoche") as SuenoGilgamesh
 	_comprobar(sueno != null, "Dia monta el vertical Gilgamesh en la noche real")
 	if sueno == null:
-		_finalizar(dia, actor)
+		await _finalizar(dia, actor)
 		return
 	_comprobar(
 		sueno.get_node_or_null("CamaraStandalone") == null,
@@ -91,7 +91,7 @@ func _probar() -> void:
 	_comprobar(interaccion != null, "el controller físico del puzzle está presente")
 	_comprobar(puzzle != null, "el puzzle 3D está montado en el vertical nocturno")
 	if interaccion == null or puzzle == null:
-		_finalizar(dia, actor)
+		await _finalizar(dia, actor)
 		return
 
 	# Un fallo real de colocación debe ser reversible y mantener la pieza en la
@@ -106,7 +106,7 @@ func _probar() -> void:
 		"fragmento y anclas iniciales tienen zonas físicas",
 	)
 	if fragmento_puerta == null or ancla_ola == null or ancla_puerta == null:
-		_finalizar(dia, actor)
+		await _finalizar(dia, actor)
 		return
 
 	fragmento_puerta.interactuar(actor)
@@ -147,7 +147,7 @@ func _probar() -> void:
 	_comprobar(puerta != null and not puerta.visible, "resolver retira el bloqueo")
 	_comprobar(ruta != null and ruta.visible, "resolver hace visible la ruta final")
 
-	_finalizar(dia, actor)
+	await _finalizar(dia, actor)
 
 
 func _finalizar(dia: Node, actor: Node) -> void:
