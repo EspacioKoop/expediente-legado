@@ -87,7 +87,7 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 		EscritorioSigaApp
 		. new(
 			"catalogo-anomalias",
-			"Catálogo de anomalías",
+			CatalogoAnomaliasSiga.texto("titulo_app"),
 			Callable(self, "_crear_catalogo_anomalias"),
 			"siga",
 		)
