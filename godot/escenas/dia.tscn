@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -17,6 +17,7 @@
 [ext_resource type="Script" path="res://guion/dia_aquiles_sueno_app.gd" id="15"]
 [ext_resource type="Script" path="res://guion/dia_gilgamesh_sueno_app.gd" id="16"]
 [ext_resource type="Script" path="res://guion/dia_ryu_sueno_app.gd" id="17"]
+[ext_resource type="Script" path="res://guion/dia_ecos_archivo_app.gd" id="18"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -68,3 +69,6 @@ script = ExtResource("16")
 
 [node name="RyuSuenoController" type="Node" parent="."]
 script = ExtResource("17")
+
+[node name="EcosArchivoController" type="Node" parent="."]
+script = ExtResource("18")
