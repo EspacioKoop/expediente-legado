@@ -47,11 +47,11 @@ func _construir_interfaz() -> void:
 	add_child(izquierda)
 
 	var cabecera := Label.new()
-	cabecera.text = "Archivo de programas · 1998"
+	cabecera.text = SoftwareSigaTextos.texto("cabecera")
 	izquierda.add_child(cabecera)
 
 	var ayuda := Label.new()
-	ayuda.text = "Enter/doble clic instala o ejecuta. Todo ocurre dentro del OS ficticio."
+	ayuda.text = SoftwareSigaTextos.texto("ayuda")
 	ayuda.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	izquierda.add_child(ayuda)
 
@@ -110,7 +110,7 @@ func _construir_interfaz() -> void:
 
 	_ejecutar = Button.new()
 	_ejecutar.name = "Ejecutar"
-	_ejecutar.text = "Ejecutar / probar"
+	_ejecutar.text = SoftwareSigaTextos.texto("ejecutar")
 	_ejecutar.pressed.connect(_ejecutar_seleccion)
 	acciones.add_child(_ejecutar)
 
@@ -127,7 +127,7 @@ func _refrescar() -> void:
 	_lista.clear()
 	for paquete in _modelo.catalogo():
 		var id := String(paquete.get("id", ""))
-		var marca := "[instalado] " if _modelo.esta_instalado(id) else ""
+		var marca := SoftwareSigaTextos.texto("instalado_marca") if _modelo.esta_instalado(id) else ""
 		var indice := _lista.add_item(marca + String(paquete.get("nombre", id)))
 		_lista.set_item_metadata(indice, id)
 		if id == seleccionado:
@@ -149,18 +149,25 @@ func _seleccionar(indice: int) -> void:
 	if paquete.is_empty():
 		return
 	_titulo.text = (
-		"%s · v%s" % [String(paquete.get("nombre", id)), String(paquete.get("version", "?"))]
+		SoftwareSigaTextos.texto("ficha_titulo")
+		% [String(paquete.get("nombre", id)), String(paquete.get("version", "?"))]
 	)
 	_tipo.text = (
-		"Tipo: %s · %d KB ficticios"
+		SoftwareSigaTextos.texto("ficha_tipo")
 		% [String(paquete.get("tipo", "Utilidad")), int(paquete.get("tamano_kb", 0))]
 	)
-	_origen.text = "Procedencia: %s" % String(paquete.get("origen", "desconocida"))
-	_licencia.text = "Licencia ficticia: %s" % String(paquete.get("licencia", "freeware"))
+	_origen.text = SoftwareSigaTextos.texto("ficha_origen") % String(
+		paquete.get("origen", "desconocida")
+	)
+	_licencia.text = SoftwareSigaTextos.texto("ficha_licencia") % String(
+		paquete.get("licencia", "freeware")
+	)
 	_descripcion.text = String(paquete.get("descripcion", ""))
 	var instalado := _modelo.esta_instalado(id)
-	_estado.text = "Estado: instalado" if instalado else "Estado: disponible"
-	_instalar.text = "Desinstalar" if instalado else "Instalar"
+	_estado.text = SoftwareSigaTextos.texto(
+		"estado_instalado" if instalado else "estado_disponible"
+	)
+	_instalar.text = SoftwareSigaTextos.texto("desinstalar" if instalado else "instalar")
 	_ejecutar.disabled = not instalado
 	_resultado.text = ""
 
@@ -183,10 +190,10 @@ func _alternar_instalacion() -> void:
 	var mensaje := ""
 	if _modelo.esta_instalado(id):
 		_modelo.desinstalar(id)
-		mensaje = "Desinstalación simulada completada."
+		mensaje = SoftwareSigaTextos.texto("desinstalacion_ok")
 	else:
 		_modelo.instalar(id)
-		mensaje = "Instalación simulada completada."
+		mensaje = SoftwareSigaTextos.texto("instalacion_ok")
 	estado_cambiado.emit(_modelo.exportar_estado())
 	_refrescar()
 	_resultado.text = mensaje
