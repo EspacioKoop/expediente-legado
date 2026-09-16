@@ -42,12 +42,15 @@ static func resolver(caso: Dictionary, resultado_puzzle: Dictionary) -> Dictiona
 				continue
 			origenes.append(b)
 
-		candidatas.append(
-			{
-				"id": pista_id,
-				"descripcion": str(pista.get("descripcion", "")),
-				"fuentes": origenes,
-			}
+		(
+			candidatas
+			. append(
+				{
+					"id": pista_id,
+					"descripcion": str(pista.get("descripcion", "")),
+					"fuentes": origenes,
+				}
+			)
 		)
 
 	if candidatas.size() != 1:
