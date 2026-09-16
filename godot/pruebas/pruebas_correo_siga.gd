@@ -50,16 +50,17 @@ func _probar() -> void:
 	quit(1 if _fallos else 0)
 
 
-func _configurar(
-	modelo: Variant, dia: int, acciones: int, presentes: Array[String]
-) -> void:
-	modelo.configurar_contexto(
-		{
-			"dia": dia,
-			"acciones": acciones,
-			"fase": "archivo",
-			"companeros": presentes,
-		}
+func _configurar(modelo: Variant, dia: int, acciones: int, presentes: Array[String]) -> void:
+	(
+		modelo
+		. configurar_contexto(
+			{
+				"dia": dia,
+				"acciones": acciones,
+				"fase": "archivo",
+				"companeros": presentes,
+			}
+		)
 	)
 
 
