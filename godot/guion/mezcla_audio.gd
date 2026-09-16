@@ -43,8 +43,4 @@ func _enrutar(nodo: Node) -> void:
 
 
 func _es_reproductor(nodo: Node) -> bool:
-	return (
-		nodo is AudioStreamPlayer
-		or nodo is AudioStreamPlayer2D
-		or nodo is AudioStreamPlayer3D
-	)
+	return nodo is AudioStreamPlayer or nodo is AudioStreamPlayer2D or nodo is AudioStreamPlayer3D
