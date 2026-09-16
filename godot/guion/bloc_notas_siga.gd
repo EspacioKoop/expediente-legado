@@ -37,17 +37,17 @@ func _ready() -> void:
 
 func _construir_interfaz() -> void:
 	var cabecera := Label.new()
-	cabecera.text = "Bloc de notas"
+	cabecera.text = tr("BLOC_NOTAS_TITULO")
 	add_child(cabecera)
 
 	var ayuda := Label.new()
-	ayuda.text = "Anotaciones locales de trabajo. Se guardan con el estado de esta partida."
+	ayuda.text = tr("BLOC_NOTAS_AYUDA")
 	ayuda.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(ayuda)
 
 	_editor = TextEdit.new()
 	_editor.name = "Editor"
-	_editor.placeholder_text = "Escriba aquí sus notas..."
+	_editor.placeholder_text = tr("BLOC_NOTAS_PLACEHOLDER")
 	_editor.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
 	_editor.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_editor.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -67,6 +67,4 @@ func _al_cambiar_texto() -> void:
 
 func _actualizar_estado() -> void:
 	if _estado != null:
-		_estado.text = (
-			"%d caracteres · guardado local al persistir la partida" % exportar_texto().length()
-		)
+		_estado.text = (tr("BLOC_NOTAS_ESTADO") % exportar_texto().length())

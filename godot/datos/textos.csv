@@ -422,3 +422,18 @@ GATO_SIGA_DESCUBRIMIENTO,Ha aparecido una pista nueva.
 GATO_SIGA_COMBINACION_FALLIDA,Esos documentos no justifican una relación.
 GATO_SIGA_COMBINACION_REPETIDA,Esa relación ya constaba.
 RESUMEN_PLANTILLA,Resumen de plantilla
+BLOC_NOTAS_TITULO,Bloc de notas
+BLOC_NOTAS_AYUDA,Anotaciones locales de trabajo. Se guardan con el estado de esta partida.
+BLOC_NOTAS_PLACEHOLDER,Escriba aquí sus notas...
+BLOC_NOTAS_ESTADO,%d caracteres · guardado local al persistir la partida
+CALCULADORA_TITULO,Calculadora
+CALCULADORA_AYUDA,"Operaciones disponibles: +, -, *, / y paréntesis. Pulse Intro para calcular."
+CALCULADORA_PLACEHOLDER,Ej.: (1250 + 340) / 2
+CALCULADORA_CALCULAR,Calcular
+CALCULADORA_BORRAR,Borrar
+CALCULADORA_RESULTADO,Resultado: %s
+CALCULADORA_RESULTADO_VACIO,Resultado:
+CALCULADORA_ENTRADA_NO_VALIDA,Entrada no válida
+CALCULADORA_EXPRESION_NO_VALIDA,Expresión no válida
+CALCULADORA_NO_SE_PUDO,No se pudo calcular
+CALCULADORA_NO_NUMERICO,Resultado no numérico

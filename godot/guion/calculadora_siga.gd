@@ -24,32 +24,32 @@ func resolver(texto: String) -> String:
 	if expresion.is_empty():
 		return ""
 	if not _entrada_permitida(expresion):
-		return "Entrada no válida"
+		return tr("CALCULADORA_ENTRADA_NO_VALIDA")
 
 	var calculo := Expression.new()
 	if calculo.parse(expresion, []) != OK:
-		return "Expresión no válida"
+		return tr("CALCULADORA_EXPRESION_NO_VALIDA")
 	var valor: Variant = calculo.execute([], null, false)
 	if calculo.has_execute_failed():
-		return "No se pudo calcular"
+		return tr("CALCULADORA_NO_SE_PUDO")
 	if not (valor is int or valor is float):
-		return "Resultado no numérico"
+		return tr("CALCULADORA_NO_NUMERICO")
 	return str(valor)
 
 
 func _construir_interfaz() -> void:
 	var cabecera := Label.new()
-	cabecera.text = "Calculadora"
+	cabecera.text = tr("CALCULADORA_TITULO")
 	add_child(cabecera)
 
 	var ayuda := Label.new()
-	ayuda.text = "Operaciones disponibles: +, -, *, / y paréntesis. Pulse Intro para calcular."
+	ayuda.text = tr("CALCULADORA_AYUDA")
 	ayuda.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(ayuda)
 
 	_entrada = LineEdit.new()
 	_entrada.name = "Entrada"
-	_entrada.placeholder_text = "Ej.: (1250 + 340) / 2"
+	_entrada.placeholder_text = tr("CALCULADORA_PLACEHOLDER")
 	_entrada.text_submitted.connect(_al_enviar)
 	add_child(_entrada)
 
@@ -59,19 +59,19 @@ func _construir_interfaz() -> void:
 
 	var calcular := Button.new()
 	calcular.name = "Calcular"
-	calcular.text = "Calcular"
+	calcular.text = tr("CALCULADORA_CALCULAR")
 	calcular.pressed.connect(_calcular)
 	acciones.add_child(calcular)
 
 	var borrar := Button.new()
 	borrar.name = "Borrar"
-	borrar.text = "Borrar"
+	borrar.text = tr("CALCULADORA_BORRAR")
 	borrar.pressed.connect(_borrar)
 	acciones.add_child(borrar)
 
 	_resultado = Label.new()
 	_resultado.name = "Resultado"
-	_resultado.text = "Resultado:"
+	_resultado.text = tr("CALCULADORA_RESULTADO_VACIO")
 	_resultado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(_resultado)
 
@@ -82,12 +82,12 @@ func _al_enviar(_texto: String) -> void:
 
 func _calcular() -> void:
 	var valor := resolver(_entrada.text)
-	_resultado.text = "Resultado: %s" % valor
+	_resultado.text = tr("CALCULADORA_RESULTADO") % valor
 
 
 func _borrar() -> void:
 	_entrada.clear()
-	_resultado.text = "Resultado:"
+	_resultado.text = tr("CALCULADORA_RESULTADO_VACIO")
 	_entrada.grab_focus()
 
 
