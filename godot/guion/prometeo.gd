@@ -160,6 +160,9 @@ static func reiniciar_vuelta(estado: Dictionary, vida_maxima: int) -> Dictionary
 	estado["final_politico_mostrado"] = false
 	estado["final_verdadero_mostrado"] = false
 	estado["perdio_vida_en_esta_vuelta"] = false
+	# El catálogo conserva la memoria total, pero una nueva vida laboral debe
+	# empezar sin hallazgos atribuidos a la vuelta anterior (#149).
+	CatalogoAnomalias.reiniciar_vuelta(estado)
 
 	for carta in estado.get("tarot", []):
 		carta["recogida"] = carta["id"] == "el-loco"

@@ -55,8 +55,57 @@ func _initialize() -> void:
 	)
 	_comprobar(bool(progreso.get("vuelta_completa", false)), "se detecta una vuelta completa")
 
+	_probar_persistencia_y_reasignacion()
+
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
+
+
+func _probar_persistencia_y_reasignacion() -> void:
+	var ruta := "user://prueba-catalogo-anomalias-%d.json" % Time.get_ticks_usec()
+	_limpiar(ruta)
+
+	var partida := Partida.new()
+	partida.estado = Partida.nueva()
+	_comprobar(
+		partida.estado.has(CatalogoAnomalias.CLAVE_TOTAL),
+		"Partida declara la memoria total del catálogo"
+	)
+	_comprobar(
+		partida.estado.has(CatalogoAnomalias.CLAVE_VUELTA),
+		"Partida declara la memoria de la vuelta"
+	)
+	CatalogoAnomalias.registrar(partida.estado, "monitor-estirado")
+	_comprobar(partida.guardar(ruta), "el reconocimiento se puede guardar")
+
+	var recargada := Partida.new()
+	var carga := recargada.cargar(ruta)
+	_comprobar(carga.get("resultado", "") == "cargada", "la partida con catálogo recarga")
+	_comprobar(
+		CatalogoAnomalias.conocida(recargada.estado, "monitor-estirado"),
+		"la memoria total sobrevive a guardar y recargar"
+	)
+	_comprobar(
+		CatalogoAnomalias.conocida_en_vuelta(recargada.estado, "monitor-estirado"),
+		"la memoria de vuelta también sobrevive a recargar"
+	)
+
+	Prometeo.reiniciar_vuelta(recargada.estado, Partida.VIDA_MAXIMA)
+	_comprobar(
+		CatalogoAnomalias.conocida(recargada.estado, "monitor-estirado"),
+		"reasignar conserva la memoria total"
+	)
+	_comprobar(
+		not CatalogoAnomalias.conocida_en_vuelta(recargada.estado, "monitor-estirado"),
+		"reasignar limpia solo la memoria de vuelta"
+	)
+	_limpiar(ruta)
+
+
+func _limpiar(ruta: String) -> void:
+	for candidata in [ruta, ruta + ".nuevo", ruta + ".roto"]:
+		if FileAccess.file_exists(candidata):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(candidata))
 
 
 func _catalogo_es_opaco(catalogo: Array) -> bool:
