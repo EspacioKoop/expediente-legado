@@ -39,7 +39,9 @@ func configurar_contexto(contexto: Dictionary) -> void:
 func configurar_estado(estado: Dictionary) -> void:
 	_historial = _lista_strings(estado.get("historial", []))
 	_favoritos = _lista_strings(estado.get("favoritos", []))
-	_indice_historial = clampi(int(estado.get("indice_historial", _historial.size() - 1)), -1, _historial.size() - 1)
+	_indice_historial = clampi(
+		int(estado.get("indice_historial", _historial.size() - 1)), -1, _historial.size() - 1
+	)
 	if is_node_ready():
 		_refrescar_laterales()
 		if _indice_historial >= 0:
@@ -256,30 +258,43 @@ func _renderizar(resultado: Dictionary) -> void:
 		var titulo := String(recurso.get("titulo", "Sin título"))
 		var snippet := String(recurso.get("snippet", ""))
 		var via := String(resultado.get("via", "origen"))
-		_pagina.text = "[b]%s[/b]\n%s\n\n%s\n\nCategoría: %s · vía: %s" % [
-			titulo,
-			url,
-			snippet,
-			String(recurso.get("categoria", "")),
-			via,
-		]
+		_pagina.text = (
+			"[b]%s[/b]\n%s\n\n%s\n\nCategoría: %s · vía: %s"
+			% [
+				titulo,
+				url,
+				snippet,
+				String(recurso.get("categoria", "")),
+				via,
+			]
+		)
 		for destino in _indice.enlaces_desde(String(recurso.get("id", ""))):
 			var indice_item := _enlaces.add_item(String(destino.get("titulo", "Enlace")))
 			_enlaces.set_item_metadata(indice_item, String(destino.get("url", "")))
 		return
 	if estado == "caido":
-		_pagina.text = "[b]Servidor no disponible[/b]\n%s\n\nEl servidor simulado no responde." % url
+		_pagina.text = (
+			"[b]Servidor no disponible[/b]\n%s\n\nEl servidor simulado no responde." % url
+		)
 		_cache.visible = bool(resultado.get("cache_disponible", false))
 		return
-	_pagina.text = "[b]No se puede encontrar la página[/b]\n%s\n\nCompruebe la dirección o vuelva al portal interno." % url
+	_pagina.text = (
+		"[b]No se puede encontrar la página[/b]\n%s\n\nCompruebe la dirección o vuelva al portal interno."
+		% url
+	)
 
 
 func _mostrar_busqueda(consulta: String) -> void:
 	var resultados := buscar(consulta)
-	_pagina.text = "[b]Resultados para «%s»[/b]\n\n%d coincidencias en el índice local." % [consulta, resultados.size()]
+	_pagina.text = (
+		"[b]Resultados para «%s»[/b]\n\n%d coincidencias en el índice local."
+		% [consulta, resultados.size()]
+	)
 	_enlaces.clear()
 	for recurso in resultados:
-		var indice_item := _enlaces.add_item("%s — %s" % [recurso.get("titulo", ""), recurso.get("snippet", "")])
+		var indice_item := _enlaces.add_item(
+			"%s — %s" % [recurso.get("titulo", ""), recurso.get("snippet", "")]
+		)
 		_enlaces.set_item_metadata(indice_item, String(recurso.get("url", "")))
 
 
@@ -289,12 +304,15 @@ func _abrir_cache_actual() -> void:
 	if String(cache.get("estado", "")) != "ok":
 		return
 	var datos: Dictionary = cache.get("cache", {})
-	_pagina.text = "[b]%s[/b]\nCopia guardada · día %d\n\n%s\n\n%s" % [
-		String(datos.get("titulo", "Copia en caché")),
-		int(datos.get("capturada_dia", 0)),
-		String(datos.get("snippet", "")),
-		String(datos.get("cuerpo_resumen", "")),
-	]
+	_pagina.text = (
+		"[b]%s[/b]\nCopia guardada · día %d\n\n%s\n\n%s"
+		% [
+			String(datos.get("titulo", "Copia en caché")),
+			int(datos.get("capturada_dia", 0)),
+			String(datos.get("snippet", "")),
+			String(datos.get("cuerpo_resumen", "")),
+		]
+	)
 	_enlaces.clear()
 
 
