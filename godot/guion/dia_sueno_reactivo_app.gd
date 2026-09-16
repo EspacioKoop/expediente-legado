@@ -32,6 +32,7 @@ func _process(_delta: float) -> void:
 			int(dia.jornada.get("dia", 1)),
 			dia._raiz(),
 			dia.jornada.get("leido_hoy", []),
+			ObjetosOniricos.del_dia(dia.jornada),
 		)
 	)
 	for anomalia in anomalias:

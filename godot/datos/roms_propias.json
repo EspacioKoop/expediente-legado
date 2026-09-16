@@ -96,6 +96,21 @@
       "mito": "hidra"
     },
     {
+      "id": "webkeeper_98",
+      "titulo": "WEBKEEPER 98",
+      "estado": "en_proyecto",
+      "genero": "deportivo / portero arcade",
+      "resumen": "Kwaku, una araña suplente, defiende Web United en tres partidos breves: leer tiros y amagos, cubrir seis zonas y reservar la telaraña para emergencias. Solo ganar la final publica el handshake WRAM.",
+      "fuente": "gbc/minijuegos/webkeeper_98",
+      "rom": "",
+      "cabecera": "WEBKEEPER98",
+      "cgb": "dual",
+      "incluida": false,
+      "precio": 0,
+      "issues": [748, 656, 442],
+      "mito": "anansi_akan"
+    },
+    {
       "id": "ryu_flow_98",
       "titulo": "RYU FLOW",
       "estado": "jugable",
