@@ -30,6 +30,23 @@ class CasaHabitacionesTest(unittest.TestCase):
         self.assertIn("Vector3(3.45, ALTO_TABIQUE, GROSOR_TABIQUE)", self.hogar)
         self.assertIn("Vector3(0.55, ALTO_TABIQUE / 2.0, -2.075)", self.hogar)
         self.assertIn("Vector3(1.10, 0.80, GROSOR_TABIQUE)", self.hogar)
+        self.assertIn('"UmbralDormitorio", Vector3(0.0, 0.015, -0.55)', self.hogar)
+        self.assertIn('Vector3(1.10, 0.03, 0.18)', self.hogar)
+
+    def test_el_hueco_del_dormitorio_tiene_marco_visual_sin_cambiar_colision(self):
+        self.assertIn('const NOMBRE_TRANSICIONES := "TransicionesCasa"', self.hogar)
+        self.assertIn('"JambaDormitorioIzquierda"', self.hogar)
+        self.assertIn('"JambaDormitorioDerecha"', self.hogar)
+        self.assertIn('"MarcoSuperiorDormitorio"', self.hogar)
+        self.assertIn("static func _montar_transiciones_domesticas", self.hogar)
+        self.assertIn("var malla := MeshInstance3D.new()", self.hogar)
+        self.assertIn('"madera_domestica"', self.hogar)
+
+    def test_el_salon_tiene_alfombra_que_agrupa_el_eje_de_ocio(self):
+        self.assertIn('ALFOMBRA_SALON_POS := Vector3(-2.10, 0.015, 1.35)', self.hogar)
+        self.assertIn('ALFOMBRA_SALON_TAM := Vector3(2.85, 0.03, 1.95)', self.hogar)
+        self.assertIn('"AlfombraSalon"', self.hogar)
+        self.assertIn('"tejido_domestico"', self.hogar)
 
     def test_el_armario_esta_en_el_dormitorio_y_no_en_el_salon(self):
         self.assertIn('"ArmarioHogar",\n\t\t"wardrobe_01",\n\t\tVector3(-3.55, 0.0, -2.45)', self.hogar)
