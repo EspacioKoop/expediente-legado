@@ -83,9 +83,9 @@ func estado_usuario(usuario_id: String) -> String:
 	return estado
 
 
-## La hora narrativa usa la misma escala que correo_siga_modelo.gd: cuatro
-## acciones recorren aproximadamente una jornada laboral. Así chat y correo
-## pueden coincidir sin consultar el reloj real del equipo.
+## La hora narrativa usa la misma escala que correo_siga_modelo.gd: las
+## acciones disponibles recorren aproximadamente una jornada laboral. Así chat
+## y correo pueden coincidir sin consultar el reloj real del equipo.
 func hora_narrativa() -> String:
 	var acciones := clampi(
 		int(_contexto.get("acciones", Jornada.ACCIONES_POR_DIA)), 0, Jornada.ACCIONES_POR_DIA
