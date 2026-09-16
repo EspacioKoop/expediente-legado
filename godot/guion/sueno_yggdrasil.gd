@@ -122,15 +122,21 @@ func intervenir(origen: String, reduccion_movimiento: bool = false) -> Dictionar
 	_aplicar_estado_visual()
 
 	var salida := plan_presentacion(reduccion_movimiento)
-	salida.merge({
-		"ok": true,
-		"origen": origen,
-		"destino": destino,
-		"accion": String(regla["accion"]),
-		"efecto": String(regla["efecto"]),
-		"nivel_destino": int(_estado[destino]),
-		"retorno_disponible": ruta_retorno_disponible(),
-	}, true)
+	(
+		salida
+		. merge(
+			{
+				"ok": true,
+				"origen": origen,
+				"destino": destino,
+				"accion": String(regla["accion"]),
+				"efecto": String(regla["efecto"]),
+				"nivel_destino": int(_estado[destino]),
+				"retorno_disponible": ruta_retorno_disponible(),
+			},
+			true
+		)
+	)
 	return salida
 
 
@@ -155,8 +161,12 @@ func _crear_nodo(id: String, posicion: Vector3, color: Color, detalle: String) -
 	contenedor.position = posicion
 	add_child(contenedor)
 	_crear_caja(contenedor, "Nucleo", Vector3(2.2, 2.2, 2.2), Vector3(0.0, 1.1, 0.0), color)
-	_crear_caja(contenedor, detalle, Vector3(1.3, 0.35, 1.3), Vector3(0.0, 2.45, 0.0), color.lightened(0.15))
-	_crear_caja(contenedor, "Indicador", Vector3(0.65, 0.18, 0.65), Vector3(0.0, 2.95, 0.0), COLOR_ACTIVO)
+	_crear_caja(
+		contenedor, detalle, Vector3(1.3, 0.35, 1.3), Vector3(0.0, 2.45, 0.0), color.lightened(0.15)
+	)
+	_crear_caja(
+		contenedor, "Indicador", Vector3(0.65, 0.18, 0.65), Vector3(0.0, 2.95, 0.0), COLOR_ACTIVO
+	)
 
 
 func _montar_conexiones() -> void:
