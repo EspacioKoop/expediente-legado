@@ -9,6 +9,7 @@ var partida := Partida.new()
 var _continuar: Button
 var _nueva: Button
 var _cargar: Button
+var _personaje: Button
 var _ventanilla: Button
 var _ajustes: Button
 var _salir: Button
@@ -72,7 +73,7 @@ func _construir_interfaz() -> void:
 
 	var marco := PanelBisel.new()
 	marco.name = "MarcoInicio"
-	marco.custom_minimum_size = Vector2(520, 500)
+	marco.custom_minimum_size = Vector2(520, 540)
 	marco.saliente = true
 	for lado in ["left", "top", "right", "bottom"]:
 		marco.add_theme_constant_override("margin_" + lado, 10)
@@ -91,6 +92,9 @@ func _construir_interfaz() -> void:
 	_cargar = _crear_boton(tr("INICIO_CARGAR"), _cargar_partida)
 	_cargar.tooltip_text = tr("INICIO_CARGAR_TOOLTIP")
 	caja.add_child(_cargar)
+	_personaje = _crear_boton("Crear / editar personaje", _abrir_personaje)
+	_personaje.tooltip_text = "Apariencia física y trasfondo del protagonista"
+	caja.add_child(_personaje)
 
 	var separador := HSeparator.new()
 	separador.name = "SeparadorInicio"
@@ -232,6 +236,16 @@ func _empezar() -> void:
 		return
 	_reinicio_pendiente = false
 	_entrar()
+
+
+func _abrir_personaje() -> void:
+	if _entrando:
+		return
+	_entrando = true
+	var error := get_tree().change_scene_to_file("res://escenas/creador_personaje.tscn")
+	if error != OK:
+		_entrando = false
+		_aviso.text = tr("INICIO_ERROR_ENTRADA")
 
 
 func _abrir_ventanilla() -> void:
