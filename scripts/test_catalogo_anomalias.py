@@ -6,10 +6,12 @@ import unittest
 RAIZ = Path(__file__).resolve().parents[1]
 CATALOGO = RAIZ / "godot" / "datos" / "anomalias_sueno.json"
 CONTRATO = RAIZ / "godot" / "guion" / "catalogo_anomalias.gd"
+UI = RAIZ / "godot" / "guion" / "catalogo_anomalias_siga.gd"
 UTILERIA = RAIZ / "godot" / "guion" / "sueno_utileria.gd"
 PARTIDA = RAIZ / "godot" / "guion" / "partida.gd"
 PROMETEO = RAIZ / "godot" / "guion" / "prometeo.gd"
 CONTROLADOR = RAIZ / "godot" / "guion" / "dia_sueno_reactivo_app.gd"
+ESCRITORIO = RAIZ / "godot" / "guion" / "dia_escritorio_siga_app.gd"
 PRUEBA_GODOT = RAIZ / "godot" / "pruebas" / "pruebas_catalogo_anomalias.gd"
 
 
@@ -17,10 +19,12 @@ class CatalogoAnomaliasTest(unittest.TestCase):
     def setUp(self):
         self.catalogo = json.loads(CATALOGO.read_text(encoding="utf-8"))
         self.codigo = CONTRATO.read_text(encoding="utf-8")
+        self.ui = UI.read_text(encoding="utf-8")
         self.utileria = UTILERIA.read_text(encoding="utf-8")
         self.partida = PARTIDA.read_text(encoding="utf-8")
         self.prometeo = PROMETEO.read_text(encoding="utf-8")
         self.controlador = CONTROLADOR.read_text(encoding="utf-8")
+        self.escritorio = ESCRITORIO.read_text(encoding="utf-8")
         self.prueba_godot = PRUEBA_GODOT.read_text(encoding="utf-8")
 
     def test_catalogo_declara_ids_estables_y_origen_real(self):
@@ -30,6 +34,9 @@ class CatalogoAnomaliasTest(unittest.TestCase):
         for entrada in self.catalogo:
             self.assertEqual(entrada["origen_tipo"], "objeto")
             self.assertIn(entrada["origen_id"], self.utileria)
+            self.assertTrue(entrada["titulo"].strip())
+            self.assertTrue(entrada["descripcion"].strip())
+            self.assertTrue(entrada["nota_visual"].strip())
             representacion = entrada["representacion"]
             self.assertEqual(representacion["modelo"], entrada["origen_id"])
             self.assertEqual(representacion["tipo"], "modelo-procedural")
@@ -37,6 +44,9 @@ class CatalogoAnomaliasTest(unittest.TestCase):
     def test_catalogo_no_contiene_ubicaciones_soluciones_ni_recompensas(self):
         permitidas = {
             "id",
+            "titulo",
+            "descripcion",
+            "nota_visual",
             "origen_tipo",
             "origen_id",
             "representacion",
@@ -92,6 +102,30 @@ class CatalogoAnomaliasTest(unittest.TestCase):
             "SuenoObjetivos",
         ):
             self.assertNotIn(prohibido, bloque)
+
+    def test_ui_muestra_progreso_y_oculta_metadata_de_bloqueadas(self):
+        self.assertIn("class_name CatalogoAnomaliasSiga", self.ui)
+        self.assertIn("CatalogoAnomalias.progreso(_estado)", self.ui)
+        self.assertIn("CatalogoAnomalias.conocida(_estado, id)", self.ui)
+        self.assertIn("CatalogoAnomalias.conocida_en_vuelta(_estado, id)", self.ui)
+        self.assertIn("□ Entrada no registrada", self.ui)
+        self.assertIn("★ Registro de vuelta completa", self.ui)
+        self.assertNotIn('get("origen_id"', self.ui)
+        self.assertNotIn('get("modo_observacion"', self.ui)
+        for prohibido in ("SuenoObjetivos", 'jornada["dinero"]', 'jornada["acciones"]'):
+            self.assertNotIn(prohibido, self.ui)
+
+    def test_escritorio_registra_catalogo_como_app_sin_estado_paralelo(self):
+        self.assertIn('"catalogo-anomalias"', self.escritorio)
+        self.assertIn('"Catálogo de anomalías"', self.escritorio)
+        self.assertIn('Callable(self, "_crear_catalogo_anomalias")', self.escritorio)
+        self.assertIn("CatalogoAnomaliasSiga.new()", self.escritorio)
+        self.assertIn("catalogo.configurar_estado(partida_actual.estado)", self.escritorio)
+        bloque = self.escritorio.split("func _crear_catalogo_anomalias", 1)[1].split(
+            "func _registrar_correo_leido", 1
+        )[0]
+        self.assertNotIn("guardar", bloque.lower())
+        self.assertNotIn("registrar(", bloque)
 
     def test_hay_regresion_ejecutable_en_godot(self):
         self.assertIn("extends SceneTree", self.prueba_godot)
