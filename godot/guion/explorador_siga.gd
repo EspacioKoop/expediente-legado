@@ -325,8 +325,7 @@ func _alternar_medio() -> void:
 		return
 	if _resolver_ruta(_ruta_actual).is_empty():
 		_navegar_a(
-			ruta_unidad if _medios.unidad_persistente(id) else ExploradorSigaModelo.RUTA_RAIZ,
-			true
+			ruta_unidad if _medios.unidad_persistente(id) else ExploradorSigaModelo.RUTA_RAIZ, true
 		)
 	else:
 		_refrescar()
@@ -391,7 +390,11 @@ func _descripcion_entrada(entrada: Dictionary, bloqueada: bool) -> String:
 	if entrada.has("medio_id"):
 		var procedencia := String(entrada.get("procedencia_medio", ""))
 		var capacidad := String(entrada.get("capacidad_medio", ""))
-		var modo := "solo lectura" if bool(entrada.get("solo_lectura", true)) else "lectura/escritura simulada"
+		var modo := (
+			"solo lectura"
+			if bool(entrada.get("solo_lectura", true))
+			else "lectura/escritura simulada"
+		)
 		return "%s · %s · %s" % [capacidad, modo, procedencia]
 	var fecha := String(entrada.get("fecha_narrativa", ""))
 	if fecha.is_empty():
