@@ -62,6 +62,18 @@ DEF TILE_S          EQU 28
 DEF TILE_ARROW      EQU 29
 DEF TILE_SCALE      EQU 30
 DEF TILE_NITRO      EQU 31
+DEF TILE_DRAFT_OFF  EQU 52
+DEF TILE_DRAFT_ON   EQU 53
+
+; Segundo pase (#600): rivales que avisan antes de cambiar de carril, rebufo
+; que se carga detras de un rival y nitro prolongado al gastar rebufo lleno.
+DEF RIVAL_AVISO_Y   EQU 72
+DEF RIVAL_CAMBIO_Y  EQU 88
+DEF COLISION_Y      EQU 112
+DEF REBUFO_Y_MIN    EQU 56
+DEF REBUFO_MAX      EQU 32
+DEF TURBO_NORMAL    EQU 90
+DEF TURBO_REBUFO    EQU 150
 
 ; Sprites 8x16. Los indices deben ser pares: cada sprite usa N y N+1.
 DEF TILE_CROC_L     EQU 32
@@ -162,11 +174,20 @@ RenderVBlank:
 
     ld a, [wHudDirty]
     or a
-    ret z
+    jr z, .rebufo
     xor a
     ld [wHudDirty], a
     call DibujarHUD
     ret
+
+.rebufo:
+    ; HUD con marcador 99 ya apura VBlank: el medidor va en su propio frame.
+    ld a, [wDraftDirty]
+    or a
+    ret z
+    xor a
+    ld [wDraftDirty], a
+    jp DibujarRebufo
 
 EstadoTitulo:
     ld a, [wNewKeys]
@@ -257,6 +278,10 @@ IniciarCarrera:
     ld [wHudDirty], a
     ld [wDecorDirty], a
     ld [wHazType], a
+    ld [wR1Dir], a
+    ld [wR2Dir], a
+    ld [wDraft], a
+    ld [wDraftDirty], a
 
     ld a, 3
     ld [wLives], a
@@ -278,6 +303,7 @@ IniciarCarrera:
     ld [wHazY], a
 
     call DibujarHUD
+    call DibujarRebufo
     call DibujarDecorado
     call ActualizarOAM
     call SonidoSalida
@@ -319,7 +345,17 @@ ControlCarrera:
     ret z
     dec a
     ld [wNitro], a
-    ld a, 90
+    ; Con rebufo lleno el nitro lo consume y dura mas. LD no altera flags.
+    ld a, [wDraft]
+    cp REBUFO_MAX
+    ld a, TURBO_NORMAL
+    jr c, .turbo
+    xor a
+    ld [wDraft], a
+    inc a
+    ld [wDraftDirty], a
+    ld a, TURBO_REBUFO
+.turbo:
     ld [wTurbo], a
     ld a, 1
     ld [wHudDirty], a
@@ -339,6 +375,7 @@ AvanzarCarrera:
     call MoverRival1
     call MoverRival2
     call MoverObstaculo
+    call ActualizarRebufo
 
     ld a, [wDistanceTick]
     inc a
@@ -375,6 +412,8 @@ MoverRival1:
     jr c, .guardar
     ld a, 24
     ld [wR1Y], a
+    xor a
+    ld [wR1Dir], a
     ld a, [wR1Lane]
     inc a
     cp 3
@@ -386,6 +425,22 @@ MoverRival1:
     ret
 .guardar:
     ld [wR1Y], a
+    cp RIVAL_AVISO_Y
+    jr nz, .cambio
+    ld a, [wR1Lane]
+    call ElegirCambioCarril
+    ld [wR1Dir], a
+    ret
+.cambio:
+    cp RIVAL_CAMBIO_Y
+    ret nz
+    ld a, [wR1Dir]
+    ld b, a
+    xor a
+    ld [wR1Dir], a
+    ld a, [wR1Lane]
+    add b
+    ld [wR1Lane], a
     ret
 
 MoverRival2:
@@ -395,6 +450,8 @@ MoverRival2:
     jr c, .guardar
     ld a, 8
     ld [wR2Y], a
+    xor a
+    ld [wR2Dir], a
     ld a, [wR2Lane]
     inc a
     cp 3
@@ -406,6 +463,22 @@ MoverRival2:
     ret
 .guardar:
     ld [wR2Y], a
+    cp RIVAL_AVISO_Y
+    jr nz, .cambio
+    ld a, [wR2Lane]
+    call ElegirCambioCarril
+    ld [wR2Dir], a
+    ret
+.cambio:
+    cp RIVAL_CAMBIO_Y
+    ret nz
+    ld a, [wR2Dir]
+    ld b, a
+    xor a
+    ld [wR2Dir], a
+    ld a, [wR2Lane]
+    add b
+    ld [wR2Lane], a
     ret
 
 MoverObstaculo:
@@ -437,11 +510,76 @@ MoverObstaculo:
     ld [wHazY], a
     ret
 
+ElegirCambioCarril:
+    ; A=carril del rival. Devuelve A=0, 1 o $FF: un carril hacia el jugador.
+    ; Los bits 1-2 del frame dan variedad (~75%) sin PRNG adicional.
+    ld b, a
+    ld a, [wFrame]
+    and %110
+    jr z, .quieto
+    ld a, [wPlayerLane]
+    cp b
+    jr z, .quieto
+    jr c, .izquierda
+    ld a, 1
+    ret
+.izquierda:
+    ld a, $FF
+    ret
+.quieto:
+    xor a
+    ret
+
+ActualizarRebufo:
+    ; Carga mientras un rival va delante en el mismo carril, antes de la
+    ; zona de choque. Solo marca el HUD al completar un segmento de 8.
+    ld a, [wPlayerLane]
+    ld b, a
+    ld a, [wR1Lane]
+    cp b
+    jr nz, .r2
+    ld a, [wR1Y]
+    cp REBUFO_Y_MIN
+    jr c, .r2
+    cp COLISION_Y
+    jr c, .cargar
+.r2:
+    ld a, [wR2Lane]
+    cp b
+    ret nz
+    ld a, [wR2Y]
+    cp REBUFO_Y_MIN
+    ret c
+    cp COLISION_Y
+    ret nc
+.cargar:
+    ld a, [wDraft]
+    cp REBUFO_MAX
+    ret nc
+    inc a
+    ld [wDraft], a
+    and 7
+    ret nz
+    ld a, 1
+    ld [wDraftDirty], a
+    ret
+
 SumarPunto:
+    ; Adelantar en turbo vale doble; el marcador sigue capado a 99.
+    ld a, [wTurbo]
+    or a
+    ld b, 1
+    jr z, .sumar
+    ld b, 2
+.sumar:
     ld a, [wScore]
     cp 99
     ret nc
-    inc a
+    add b
+    cp 99
+    jr c, .guardar
+    ld a, 99
+.guardar:
     ld [wScore], a
     ld a, 1
     ld [wHudDirty], a
@@ -501,12 +639,14 @@ CheckR1:
     cp b
     ret nz
     ld a, [wR1Y]
-    cp 112
+    cp COLISION_Y
     ret c
     cp 145
     ret nc
     ld a, 24
     ld [wR1Y], a
+    xor a
+    ld [wR1Dir], a
     call Golpe
     ret
 
@@ -517,12 +657,14 @@ CheckR2:
     cp b
     ret nz
     ld a, [wR2Y]
-    cp 112
+    cp COLISION_Y
     ret c
     cp 145
     ret nc
     ld a, 8
     ld [wR2Y], a
+    xor a
+    ld [wR2Dir], a
     call Golpe
     ret
 
@@ -533,7 +675,7 @@ CheckHaz:
     cp b
     ret nz
     ld a, [wHazY]
-    cp 112
+    cp COLISION_Y
     ret c
     cp 145
     ret nc
@@ -547,6 +689,11 @@ Golpe:
     ; Asi no existe un parpadeo voluntario confundible con fallo grafico.
     ld a, 54
     ld [wInv], a
+    ; El golpe rompe el rebufo acumulado.
+    xor a
+    ld [wDraft], a
+    inc a
+    ld [wDraftDirty], a
     ld a, [wLives]
     dec a
     ld [wLives], a
@@ -619,6 +766,28 @@ DibujarHUD:
     ld a, [wNitro]
     add DIGIT_BASE
     ld [BG_MAP + 15], a
+    ret
+
+DibujarRebufo:
+    ; Cuatro segmentos de fondo en las columnas libres 16-19 del HUD.
+    ld a, [wDraft]
+    srl a
+    srl a
+    srl a
+    ld b, a
+    ld hl, BG_MAP + 16
+    ld c, 4
+.segmento:
+    ld a, b
+    or a
+    ld a, TILE_DRAFT_OFF
+    jr z, .poner
+    dec b
+    ld a, TILE_DRAFT_ON
+.poner:
+    ld [hli], a
+    dec c
+    jr nz, .segmento
     ret
 
 EscribirDosDigitos:
@@ -823,6 +992,8 @@ DibujarRival1:
     ld a, [wR1Lane]
     call LaneToX
     ld b, a
+    ld a, [wR1Dir]
+    call AplicarAviso
     ld a, [wR1Y]
     ld d, 1
     call PonerCroc16
@@ -832,6 +1003,8 @@ DibujarRival2:
     ld a, [wR2Lane]
     call LaneToX
     ld b, a
+    ld a, [wR2Dir]
+    call AplicarAviso
     ld a, [wR2Y]
     ld d, 1
     call PonerCroc16
@@ -862,6 +1035,20 @@ DibujarObstaculo:
 .pinta:
     ld a, e
     call PonerVehiculo16
+    ret
+
+AplicarAviso:
+    ; A=direccion pendiente, B=X. Vaiven de 2 px hacia el carril destino.
+    or a
+    ret z
+    ld c, a
+    ld a, [wFrame]
+    and 4
+    ret z
+    ld a, b
+    add c
+    add c
+    ld b, a
     ret
 
 PonerCroc16:
@@ -1218,6 +1405,9 @@ Tiles:
     ; 50 trofeo / 51 choque (fondo)
     db $7E,$7E,$5A,$5A,$7E,$7E,$3C,$3C,$18,$18,$18,$18,$3C,$3C,$7E,$7E
     db $81,$81,$42,$42,$24,$24,$18,$18,$18,$18,$24,$24,$42,$42,$81,$81
+    ; 52 segmento de rebufo vacio / 53 lleno (contorno negro, relleno amarillo)
+    db $00,$00,$7E,$7E,$42,$42,$42,$42,$42,$42,$42,$42,$7E,$7E,$00,$00
+    db $00,$00,$7E,$7E,$42,$7E,$42,$7E,$42,$7E,$42,$7E,$7E,$7E,$00,$00
 TilesFin:
 
 PaletaFondo:
@@ -1260,3 +1450,7 @@ wR2Y:          ds 1
 wHazLane:      ds 1
 wHazY:         ds 1
 wHazType:      ds 1
+wR1Dir:        ds 1
+wR2Dir:        ds 1
+wDraft:        ds 1
+wDraftDirty:   ds 1
