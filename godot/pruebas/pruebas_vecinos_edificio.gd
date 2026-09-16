@@ -89,9 +89,13 @@ func _probar_paquete_equivocado() -> void:
 	var resultado := Vecinos.resolver_interaccion(jornada, Vecinos.ID_PAQUETE_EQUIVOCADO)
 	_comprobar(bool(resultado["ok"]), "recolocar el paquete se resuelve")
 	_comprobar(not bool(resultado["bloquea_campana"]), "el gesto vecinal nunca bloquea campaña")
-	_comprobar(Vecinos.interacciones(jornada).is_empty(), "la resolución es persistente durante el día")
+	_comprobar(
+		Vecinos.interacciones(jornada).is_empty(), "la resolución es persistente durante el día"
+	)
 	var repetido := Vecinos.resolver_interaccion(jornada, Vecinos.ID_PAQUETE_EQUIVOCADO)
-	_comprobar(bool(repetido["ok"]) and bool(repetido["ya_resuelta"]), "resolver dos veces es idempotente")
+	_comprobar(
+		bool(repetido["ok"]) and bool(repetido["ya_resuelta"]), "resolver dos veces es idempotente"
+	)
 	_comprobar(not resultado.has("dinero"), "el gesto no crea una economía vecinal")
 
 
