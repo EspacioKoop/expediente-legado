@@ -351,8 +351,9 @@ func _crear_hilo(
 	hilo.set_meta("anansi_conexion", id_conexion)
 	hilo.set_meta("anansi_pista", String(CONEXIONES_BASE[id_conexion]["pista"]))
 	hilo.activado.connect(_al_usar_hilo.bind(id_conexion))
+	var direccion := destino + Vector3(0.0, 0.65, 0.0) - hilo.position
+	hilo.basis = Basis.looking_at(direccion, Vector3.UP)
 	add_child(hilo)
-	hilo.look_at(to_global(destino + Vector3(0.0, 0.65, 0.0)), Vector3.UP)
 
 	var largo := maxf(origen.distance_to(destino), 0.25)
 	_crear_caja(
