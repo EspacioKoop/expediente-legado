@@ -14,6 +14,8 @@ class VisorExpedientes513Test(unittest.TestCase):
     def setUpClass(cls):
         catalogo = json.loads(CASOS.read_text(encoding="utf-8"))
         cls.caso1 = next(caso for caso in catalogo["casos"] if caso["id"] == "caso@1")
+        cls.registros = {registro["id"]: registro for registro in cls.caso1["registros"]}
+        cls.pistas = {pista["id"]: pista for pista in cls.caso1["pistas"]}
         cls.visor = VISOR.read_text(encoding="utf-8")
         cls.proyecto = PROYECTO.read_text(encoding="utf-8")
 
@@ -24,17 +26,58 @@ class VisorExpedientes513Test(unittest.TestCase):
             "empleado1@1": "EMP-0456",
             "actaContraloria1@1": "ACTA-1999-014",
         }
-        registros = {registro["id"]: registro for registro in self.caso1["registros"]}
 
-        self.assertTrue(esperados.keys() <= registros.keys())
+        self.assertTrue(esperados.keys() <= self.registros.keys())
         for registro_id, folio in esperados.items():
-            registro = registros[registro_id]
+            registro = self.registros[registro_id]
             self.assertEqual(registro["folio"], folio)
             self.assertGreaterEqual(
                 len(registro["contenido"]),
                 300,
                 f"{folio}: el corte documental dejó de ser un folio ampliado",
             )
+
+    def test_las_frases_gatillo_del_caso_1_siguen_en_su_documento(self):
+        esperadas = {
+            "pista1@1": ("memo1@1", "sin revisión previa"),
+            "pista2@1": ("empleado1@1", "cuatro días después del cierre de caja"),
+        }
+
+        for pista_id, (registro_id, frase) in esperadas.items():
+            pista = self.pistas[pista_id]
+            self.assertEqual(pista["registroOrigen"], registro_id)
+            self.assertEqual(pista["fraseGatillo"], frase)
+            self.assertIn(frase, self.registros[registro_id]["contenido"])
+
+    def test_las_conclusiones_documentales_siguen_exigiendo_relacionar_dos_folios(self):
+        relaciones = {
+            "pista20@1": ("factura1@1", "actaContraloria1@1"),
+            "pista28@1": ("memo1@1", "empleado1@1"),
+        }
+
+        for pista_id, origenes in relaciones.items():
+            pista = self.pistas[pista_id]
+            self.assertEqual(
+                (pista["registroOrigen"], pista["registroOrigen2"]),
+                origenes,
+            )
+            self.assertNotIn(
+                "fraseGatillo",
+                pista,
+                f"{pista_id}: una relación entre documentos no debe descubrirse al leer un solo folio",
+            )
+
+    def test_el_peritaje_permanece_como_evidencia_cruzada_no_como_gatillo(self):
+        self.assertIn("peritaje", self.registros["memo1@1"]["contenido"].lower())
+        self.assertIn("peritaje", self.registros["empleado1@1"]["contenido"].lower())
+        self.assertEqual(
+            {
+                self.pistas["pista28@1"]["registroOrigen"],
+                self.pistas["pista28@1"]["registroOrigen2"],
+            },
+            {"memo1@1", "empleado1@1"},
+        )
+        self.assertNotIn("fraseGatillo", self.pistas["pista28@1"])
 
     def test_el_visor_acota_el_cuerpo_y_activa_scroll(self):
         self.assertIn("_documento = RichTextLabel.new()", self.visor)
@@ -44,6 +87,17 @@ class VisorExpedientes513Test(unittest.TestCase):
             "_documento.size_flags_vertical = Control.SIZE_EXPAND_FILL",
             self.visor,
         )
+
+    def test_releer_un_folio_largo_no_vuelve_a_consumir_lectura(self):
+        self.assertIn(
+            'var ya_visto: bool = jornada["leido_hoy"].has(registro["folio"])',
+            self.visor,
+        )
+        self.assertIn(
+            'if not ya_visto and not Acusacion.esta_cerrado(partida.estado, caso["id"]):',
+            self.visor,
+        )
+        self.assertIn("if not ya_visto:\n\t\tJornada.anotar_lectura", self.visor)
 
     def test_el_texto_largo_mantiene_tipografia_de_lectura(self):
         self.assertIn(
