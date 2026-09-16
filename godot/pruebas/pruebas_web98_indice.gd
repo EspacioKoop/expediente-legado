@@ -113,9 +113,13 @@ func _probar_navegador() -> void:
 	_comprobar(navegador.historial().size() == 2, "registra navegación en historial")
 	_comprobar(navegador.url_actual() == "http://byte.local/", "expone la URL actual")
 	navegador.ir_atras()
-	_comprobar(navegador.url_actual() == NavegadorSiga.URL_INICIO, "Atrás recupera la visita anterior")
+	_comprobar(
+		navegador.url_actual() == NavegadorSiga.URL_INICIO, "Atrás recupera la visita anterior"
+	)
 	navegador.ir_adelante()
-	_comprobar(navegador.url_actual() == "http://byte.local/", "Adelante recupera la visita siguiente")
+	_comprobar(
+		navegador.url_actual() == "http://byte.local/", "Adelante recupera la visita siguiente"
+	)
 	navegador.alternar_favorito_actual()
 	_comprobar(navegador.favoritos().has("http://byte.local/"), "permite marcar favoritos")
 
