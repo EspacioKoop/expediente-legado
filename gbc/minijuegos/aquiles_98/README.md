@@ -38,11 +38,15 @@ No hay flash de pantalla ni sacudida. La lectura depende de posición, ritmo y c
 
 La ROM ensaya en pequeño la gramática del sueño de Aquiles: **presencia aparentemente invulnerable → observación deliberada → vulnerabilidad puntual → transformación/derrota**.
 
-Este corte hace jugable la ROM, pero no conecta todavía su victoria con `semilla_onirica_aquiles`. Si se usa como contraparte de vigilia, el contrato correcto es registrar la semilla **al completar deliberadamente el duelo**, nunca al comprar, insertar o arrancar el cartucho.
+La victoria está conectada al contrato común de vigilia mediante `Aquiles98Vigilia`. El observer comprueba primero que la ROM activa tenga cabecera `MYRMIDON98` y después lee `wEstado`, el primer byte de la única sección WRAM0 de la ROM (`$C000`). Solo el valor `ESTADO_VICTORIA = 2`, alcanzado tras tres impactos válidos, registra `semilla_onirica_aquiles` con la fuente estable `rom:aquiles_98`.
+
+Comprar, insertar o arrancar el cartucho **no** activa la semilla. Empezar un duelo tampoco. El trigger exige completar deliberadamente el patrón jugable y llegar a la pantalla de victoria.
 
 ## Integración y persistencia
 
-`MYRMIDON 98` es autónoma. No guarda dinero, pistas, expedientes, puntuaciones persistentes ni progreso de `Partida`/`Jornada`. Al salir del cartucho se pierde todo su estado.
+`MYRMIDON 98` sigue siendo autónoma: no guarda dinero, pistas, expedientes, puntuaciones persistentes ni progreso de `Partida`/`Jornada` dentro del cartucho. Al salir de la ROM se pierde su estado interno.
+
+La persistencia de campaña pertenece a Godot. `Aquiles98Vigilia` observa la ROM a través de la API genérica de `ConsolaPortatil98` y, al detectar la victoria, usa `SemillasOniricas.activar_semilla_onirica(...)`. La consola y el emulador no contienen reglas específicas de Aquiles.
 
 No incluye BIOS, dumps, ROMs comerciales, logotipos ni recursos externos. Código y pixel-art nacen en este repositorio bajo su licencia MIT.
 
@@ -66,8 +70,9 @@ La cabecera es `MYRMIDON98` y la ROM declara compatibilidad dual Game Boy / Game
 
 ```bash
 make test
+python3 scripts/test_aquiles_rom_runtime.py
 ```
 
-La prueba compila la ROM y valida tamaño mínimo, cabecera CGB y varias invariantes del contrato de juego. El workflow GBC compila además el cartucho junto al resto de ROMs propias.
+La prueba de la ROM valida tamaño mínimo, cabecera CGB y varias invariantes del contrato de juego. La regresión de runtime fija además el ABI mínimo usado por el observer (`wEstado` en `$C000`), comprueba que solo la victoria registra la semilla y garantiza que `ConsolaPortatil98` siga siendo genérica. El workflow GBC compila el cartucho junto al resto de ROMs propias.
 
 El test automático no sustituye un playtest visual con emulador o hardware real.
