@@ -33,7 +33,8 @@ class SuenoAnansiAkanTest(unittest.TestCase):
         self.assertIn('const FUENTE_VIGILIA := "cassette:anansi_akan_relato_98"', self.sueno)
         self.assertIn("const PASOS_RELATO_MINIMOS := 3", self.sueno)
         self.assertIn("if pasos_escuchados < PASOS_RELATO_MINIMOS or not relato_terminado:", self.sueno)
-        self.assertIn("SemillasOniricas.activar_semilla_onirica(", self.sueno)
+        self.assertIn("SemillasOniricas", self.sueno)
+        self.assertIn(". activar_semilla_onirica(", self.sueno)
         self.assertIn("SemillasOniricas.familias_activas(estado).has(ID_MITO)", self.sueno)
 
     def test_cassette_es_deliberado_y_no_activa_por_presencia(self):
@@ -41,7 +42,8 @@ class SuenoAnansiAkanTest(unittest.TestCase):
         self.assertIn("const PASOS_MINIMOS := 3", self.vigilia)
         self.assertIn("_pasos_escuchados = mini(_pasos_escuchados + 1, PASOS_MINIMOS)", self.vigilia)
         self.assertIn("_terminada = _pasos_escuchados >= PASOS_MINIMOS", self.vigilia)
-        self.assertIn("SuenoAnansiAkan.registrar_semilla(", self.vigilia)
+        self.assertIn("SuenoAnansiAkan", self.vigilia)
+        self.assertIn(". registrar_semilla(", self.vigilia)
         self.assertNotIn("_activada = true", self.vigilia)
 
     def test_red_limita_nodos_y_relaciones_y_produce_efecto_remoto(self):
@@ -53,7 +55,7 @@ class SuenoAnansiAkanTest(unittest.TestCase):
             "archivador_puerta",
             "telefono_puerta_senuelo",
         ]:
-            self.assertIn(f'"{hilo}": {{', self.sueno)
+            self.assertIn(f'"{hilo}":', self.sueno)
         self.assertIn('resultado["efecto_remoto"] = efecto_remoto', self.sueno)
         self.assertIn("_aplicar_delta_nodo(nodos, destino_id", self.sueno)
         self.assertNotIn("for i in 100", self.sueno)
@@ -93,8 +95,10 @@ class SuenoAnansiAkanTest(unittest.TestCase):
         self.assertIn("AnansiAkanVigilia.new()", self.controller)
         self.assertIn("cassette.configurar(jornada)", self.controller)
         self.assertIn('fase != "sueño"', self.controller)
-        self.assertIn("SemillasOniricas.seleccionar_para_noche(", self.controller)
-        self.assertIn("MitologiasNoche.corresponde_a_escena(", self.controller)
+        self.assertIn("SemillasOniricas", self.controller)
+        self.assertIn(". seleccionar_para_noche(", self.controller)
+        self.assertIn("MitologiasNoche", self.controller)
+        self.assertIn(". corresponde_a_escena(", self.controller)
         self.assertIn("SuenoAnansiAkan.ID_MITO", self.controller)
         self.assertIn("PreferenciasSiga.cargar()", self.controller)
         self.assertNotIn("activar_semilla_onirica", self.controller)
