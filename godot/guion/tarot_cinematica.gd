@@ -6,10 +6,8 @@
 ## en la paleta común. Si el color se volviera un recurso compartido, dejaría
 ## de significar que has encontrado algo.
 ##
-## El volteo no lo hace el reproductor: no sabe escalar una figura, solo
-## moverla. Se hace como se hacía en una máquina de la época —tres planos con
-## la carta cada vez más estrecha, hasta el canto— y funciona por el mismo
-## motivo por el que funcionaba entonces: a esa velocidad, el ojo lo completa.
+## Desde #395 el volteo es 3D: la carta tiene dos caras sobre la mesa del
+## archivo y la cámara la rodea (ver `decorado`).
 ##
 ## Los planos se declaran en el formato común de `Cinematica` y los reproduce
 ## el reproductor común: este módulo solo aporta el plano de rodaje.
@@ -21,13 +19,9 @@ extends RefCounted
 ## carta se ve corta, que es justo lo que se quiere de un momento que se repite.
 const ID := "tarot-hallazgo"
 
-## La carta, medida desde el centro del lienzo.
+## La carta, en píxeles de la época: 500 px por metro en el decorado.
 const ANCHO := 180.0
 const ALTO := 260.0
-
-## Y subida, porque el rótulo del reproductor ocupa la banda inferior: centrada
-## a secas, el nombre de la carta se montaba sobre su borde de abajo.
-const ALZADA := 56.0
 
 ## El dorso es del gris de sistema: todavía no ha pasado nada.
 const DORSO := Color("606070")
@@ -40,69 +34,57 @@ const FRENTE_MARCA := Color("8e2f4a")
 ## El canto, en el instante en que la carta está de perfil.
 const CANTO := Color("d8d8dc")
 
+## La carta flota sobre la mesa del archivo, de pie. Tiene dos caras de verdad
+## —el dorso mira a -z y el frontal a +z— y el volteo es la cámara dándole la
+## vuelta: dorso, canto y frontal son tres posiciones alrededor de la misma
+## carta, que es lo que en 2D había que fingir estrechando un rectángulo.
+const CENTRO := Vector3(0.0, 1.12, 0.1)
+const GROSOR := 0.01
+
 ## Un plano dura lo que dura. Se pueden saltar todos, siempre.
-##
-## Cada plano declara su `ancho` y su `cara`; la `figura` en el formato del
-## reproductor se construye al resolver, porque una constante no puede llamar
-## a una función. `planos_de` es la única superficie pública: estos planos, por
-## sí solos, todavía no son un rodaje válido.
 const PLANOS := [
 	{
 		# El dorso, quieto. Lo que hay antes de saber qué has encontrado.
-		"tipo": "2d",
+		"tipo": "3d",
 		"nombre": "reverso",
-		"cara": "dorso",
-		"ancho": ANCHO,
-		"desde": Vector2(0.0, 18.0),
-		"hasta": Vector2(0.0, 0.0),
+		"camara": CENTRO + Vector3(0.15, 0.05, -1.05),
+		"mira": CENTRO,
 		"segundos": 0.7,
 		"rotulo": "",
 		"voz": "",
 	},
 	{
 		# De perfil: la carta ya no es un dorso y todavía no es una carta.
-		"tipo": "2d",
+		"tipo": "3d",
 		"nombre": "canto",
-		"cara": "canto",
-		"ancho": 16.0,
-		"desde": Vector2(0.0, 0.0),
-		"hasta": Vector2(0.0, 0.0),
-		"segundos": 0.22,
+		"camara": CENTRO + Vector3(1.0, 0.02, 0.0),
+		"mira": CENTRO,
+		"segundos": 0.35,
 		"rotulo": "",
 		"voz": "",
 	},
 	{
 		# El frontal, con su nombre. El único color del juego.
-		"tipo": "2d",
+		"tipo": "3d",
 		"nombre": "frontal",
-		"cara": "frente",
-		"ancho": ANCHO,
-		"desde": Vector2(0.0, 0.0),
-		"hasta": Vector2(0.0, 0.0),
+		"camara": CENTRO + Vector3(-0.1, 0.05, 0.95),
+		"mira": CENTRO,
 		"segundos": 1.9,
 		"rotulo": "TAROT_ROTULO",
 		"voz": "TAROT_VOZ",
 	},
 	{
-		# El remate: la carta se levanta y deja paso a su historia.
-		"tipo": "2d",
+		# El remate: la cámara se aparta y la carta queda sobre el puesto,
+		# dejando paso a su historia.
+		"tipo": "3d",
 		"nombre": "entrega",
-		"cara": "frente",
-		"ancho": ANCHO,
-		"desde": Vector2(0.0, 0.0),
-		"hasta": Vector2(0.0, -30.0),
+		"camara": CENTRO + Vector3(0.0, 0.45, 1.7),
+		"mira": CENTRO + Vector3(0, -0.1, 0),
 		"segundos": 0.7,
 		"rotulo": "TAROT_ROTULO",
 		"voz": "",
 	},
 ]
-
-## Los colores de cada cara, para no repartir condicionales por el rodaje.
-const CARAS := {
-	"dorso": [DORSO, DORSO_MARCA],
-	"canto": [CANTO, CANTO],
-	"frente": [FRENTE, FRENTE_MARCA],
-}
 
 
 ## El plano de rodaje ya resuelto para una carta.
@@ -110,13 +92,11 @@ const CARAS := {
 ## Devuelve copias —las hace `Cinematica.resolver`, en profundidad—, así que
 ## reproducir una cinemática no puede estropear la siguiente.
 static func planos_de(carta: Dictionary, vistas: int = 0) -> Array:
+	var decorado := decorado()
 	var planos := []
 	for declarado in PLANOS:
 		var plano: Dictionary = declarado.duplicate(true)
-		var colores: Array = CARAS[plano["cara"]]
-		plano["figura"] = _carta(float(plano["ancho"]), colores[0], colores[1])
-		plano.erase("cara")
-		plano.erase("ancho")
+		plano["decorado"] = decorado
 		planos.append(plano)
 
 	var nombre: String = carta.get("nombre", "")
@@ -125,20 +105,44 @@ static func planos_de(carta: Dictionary, vistas: int = 0) -> Array:
 	return Cinematica.resolver(planos, {"carta": nombre}, vistas)
 
 
-static func _carta(ancho: float, fondo: Color, marca: Color) -> Array:
-	## Un rectángulo de fondo y otro dentro: sin el interior, el dorso y el
-	## frontal serían dos rectángulos planos y el volteo no se leería.
-	var margen := minf(14.0, ancho / 4.0)
-	return [
-		{"rect": Rect2(-ancho / 2.0, -ALTO / 2.0 - ALZADA, ancho, ALTO), "color": fondo},
-		{
-			"rect":
-			Rect2(
-				-ancho / 2.0 + margen,
-				-ALTO / 2.0 - ALZADA + margen,
-				ancho - margen * 2.0,
-				ALTO - margen * 2.0
-			),
-			"color": marca,
-		},
-	]
+## La mesa con la carta encima. El frontal se enciende: es el único color
+## del juego y tiene que verse aunque la oficina esté en penumbra.
+static func decorado() -> Dictionary:
+	var ancho := ANCHO / 500.0
+	var alto := ALTO / 500.0
+	var margen := 0.12
+	var cara := func(z: float, tam: Vector3, color: Color, emisivo: bool = false) -> Dictionary:
+		return {
+			"pos": Vector3(CENTRO.x, CENTRO.y, CENTRO.z + z),
+			"tam": tam,
+			"color": color,
+			"emisivo": emisivo,
+		}
+	return (
+		MesaCinematica
+		. con(
+			[
+				cara.call(0.0, Vector3(ancho, alto, GROSOR * 2.0), CANTO),
+				cara.call(-GROSOR, Vector3(ancho, alto, 0.004), DORSO),
+				cara.call(
+					-GROSOR - 0.003, Vector3(ancho - margen, alto - margen, 0.002), DORSO_MARCA
+				),
+				cara.call(GROSOR, Vector3(ancho, alto, 0.004), FRENTE, true),
+				cara.call(
+					GROSOR + 0.003,
+					Vector3(ancho - margen, alto - margen, 0.002),
+					FRENTE_MARCA,
+					true
+				),
+			],
+			[
+				{
+					"pos": CENTRO + Vector3(0, 0.5, 0.6),
+					"color": FRENTE,
+					"energia": 1.2,
+					"alcance": 3.0,
+					"carcasa": false
+				}
+			]
+		)
+	)
