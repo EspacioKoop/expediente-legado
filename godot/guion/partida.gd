@@ -81,6 +81,10 @@ static func nueva() -> Dictionary:
 		"semilla": Azar.raiz_nueva(),
 		"pistas_descubiertas": [],
 		"sellos_obtenidos": [],
+		# #149: dos lecturas del mismo catálogo. La total sobrevive a una
+		# reasignación; la de vuelta se vacía al empezar otra vida laboral.
+		"anomalias_descubiertas": [],
+		"anomalias_descubiertas_vuelta": [],
 		"inventario": Inventario.nuevo(),
 		# La fusión solo recupera claves del molde. Si faltan aquí, guardar
 		# escribe el día y las firmas, pero cargar los descarta silenciosamente.
@@ -261,7 +265,14 @@ static func validar(guardado) -> Array:
 
 	if guardado.has("vida") and not _entero_valido(guardado["vida"], 0, VIDA_MAXIMA):
 		errores.append("vida inválida")
-	for clave in ["pistas_descubiertas", "cartas_conocidas", "sueno_vencidos", "sellos_obtenidos"]:
+	for clave in [
+		"pistas_descubiertas",
+		"cartas_conocidas",
+		"sueno_vencidos",
+		"sellos_obtenidos",
+		"anomalias_descubiertas",
+		"anomalias_descubiertas_vuelta",
+	]:
 		if guardado.has(clave) and typeof(guardado[clave]) != TYPE_ARRAY:
 			errores.append("%s no es una lista" % clave)
 	for clave in ["logros", "tarot"]:
