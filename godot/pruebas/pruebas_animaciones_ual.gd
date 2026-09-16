@@ -29,7 +29,8 @@ func _probar_clips_sobre_persona() -> void:
 		)
 		var animacion := reproductor.get_animation("ual/%s" % clip)
 		_comprobar(animacion.get_track_count() > 20, "%s conserva el cuerpo entero" % clip)
-		_comprobar(animacion.loop_mode == Animation.LOOP_LINEAR, "%s va en bucle" % clip)
+		var modo := Animation.LOOP_LINEAR if AnimacionesUAL.en_bucle(clip) else Animation.LOOP_NONE
+		_comprobar(animacion.loop_mode == modo, "%s respeta su modo de bucle" % clip)
 		var huerfanas := []
 		for pista in animacion.get_track_count():
 			var hueso := String(animacion.track_get_path(pista).get_concatenated_subnames())
