@@ -37,13 +37,16 @@ La primera versión compilable resultaba difícil de leer y mostraba parpadeo. L
 - 3 escamas de resistencia (`SCALE`).
 - 3 cargas de nitro.
 - Un choque consume una escama y da invulnerabilidad breve, sin hacer desaparecer al sprite.
-- Adelantar rivales suma puntuación.
+- Adelantar rivales suma puntuación; **durante el turbo cada adelantamiento vale doble** (el marcador sigue capado a 99), a cambio de cruzar tráfico y rivales al doble de velocidad.
 - El turbo duplica temporalmente la velocidad del mundo.
+- **Rivales activos:** al llegar a media pista, cada rival puede cambiar un carril hacia el jugador. Antes lo avisa con un vaivén de 2 px hacia el carril de destino; el cambio se completa antes de la zona de choque, de modo que hay margen para reaccionar.
+- **Rebufo:** ir detrás de un rival en su mismo carril, antes de la zona de choque, carga el medidor de rebufo (cuatro segmentos). Un choque lo vacía.
+- **Nitro con rebufo:** si el rebufo está lleno al pulsar A, el nitro lo consume y el turbo dura 150 frames en lugar de 90. Sin rebufo lleno, el nitro dura lo de siempre y el rebufo se conserva.
 - La distancia activa automáticamente los cuatro decorados/checkpoints.
 - Al llegar a 90 unidades se muestra el trofeo; al perder las 3 escamas aparece la pantalla de choque.
 - **A / Start** inicia y reinicia la carrera.
 
-El HUD se mantiene deliberadamente compacto: `D` indica distancia, `S` puntuación, el icono de escama muestra resistencia y el icono de nitro las cargas restantes.
+El HUD se mantiene deliberadamente compacto: `D` indica distancia, `S` puntuación, el icono de escama muestra resistencia, el icono de nitro las cargas restantes y los cuatro segmentos de la derecha el rebufo. El medidor es fondo, no sprites, y se redibuja en su propio VBlank para no apurar el frame en que se pinta el HUD.
 
 ## Integración y persistencia
 
@@ -96,6 +99,12 @@ etapa en las distancias 24, 46 y 68 con nitro y puntuación 99. Se instrumentan
 las instrucciones de escritura a memoria del código máquina para verificar
 que los accesos a OAM/VRAM con LCD encendida ocurren en VBlank. También se
 comprueban el decorado final, el HUD y la finalización del trabajo pendiente.
+
+El segundo pase (#600) añade regresiones de juego: el rival avisa con el
+vaivén y cambia un carril hacia el jugador antes de la zona de choque (y a
+veces no cambia); el rebufo se carga detrás de un rival, se redibuja en
+VBlank, prolonga el nitro al gastarse lleno y se pierde con un golpe; y los
+adelantamientos en turbo puntúan doble sin pasar de 99.
 
 PyBoy es solo una dependencia de pruebas, no se distribuye con la ROM.
 El workflow GBC compila el cartucho; la regresión se ejecuta explícitamente

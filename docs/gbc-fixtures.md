@@ -45,6 +45,14 @@ El workflow `.github/workflows/gbc-fixtures.yml` fija las fuentes externas que r
 
 Para µCity, CI resuelve `refs/tags/v1.3` y exige que apunte al commit fijado antes de descargar la ROM oficial de la release. Después comprueba el SHA-256, el tamaño exacto de 128 KiB y los campos relevantes de cabecera: CGB-only (`0xC0`), cartucho MBC5+RAM+batería (`0x1B`), ROM de 128 KiB (`0x02`) y RAM de 128 KiB/1 Mbit (`0x04`). El fichero vive en `external-fixtures/` durante el job y no entra en `gbc-fixtures/`, `SHA256SUMS` ni `actions/upload-artifact`.
 
+## Contrato de consumo de ROM
+
+`scripts/inspect_gb_rom.py` concentra el parseo que antes quedaba repartido entre `stat`, `od` y `sha256sum`. No ejecuta la ROM: recibe una ruta y, opcionalmente, un SHA-256 esperado, valida que exista una cabecera GB/GBC suficiente y emite JSON con una interfaz estable para herramientas posteriores.
+
+El contrato expone `rom_path`, `sha256`, tamaño real, título, plataforma GB/GBC, modo CGB (`dmg`, `cgb_compatible` o `cgb_only`), flags de CGB/SGB, tipo de cartucho, tamaños declarados de ROM/RAM y validez del checksum de cabecera. Un hash esperado incorrecto o un fichero truncado provocan fallo explícito.
+
+En `GBC fixtures`, µCity pasa por este consumidor con su SHA-256 fijado pero su JSON permanece local al job porque sigue siendo un fixture externo. Las ROMs que sí forman parte del artefacto efímero se inspeccionan una a una y producen `gbc-fixtures/rom-metadata.jsonl`, que se publica junto a `SHA256SUMS`. Así el siguiente consumidor puede trabajar con metadatos normalizados sin conocer si la ROM se construyó desde fuente, vino de otro workflow o fue descargada externamente.
+
 ## Política de fijado y hashes
 
 Antes de usar un candidato en CI:

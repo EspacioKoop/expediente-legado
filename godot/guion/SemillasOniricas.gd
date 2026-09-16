@@ -24,6 +24,7 @@ const MITOS_VALIDOS := [
 	"dragon_japones",
 	"duat",
 	"simurgh",
+	"yggdrasil",
 	"anansi_akan",
 ]
 

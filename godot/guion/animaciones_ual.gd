@@ -16,13 +16,21 @@ extends RefCounted
 const RUTA := "res://assets/cc0/quaternius_ual/"
 const BIBLIOTECA := &"ual"
 
-## Clip propio → [fichero, animación de UAL]. Los nombres no terminan en `idle`
-## ni en `work` a propósito: `Modelos._animar` busca por sufijo.
+## Clip propio → [fichero, animación de UAL, en bucle]. El tercer valor falta en
+## los gestos continuos; los de un solo paso —levantarse, sentarse, coger algo—
+## lo declaran falso para quedarse en su último fotograma. Los nombres no
+## terminan en `idle` ni en `work` a propósito: `Modelos._animar` busca por sufijo.
 const CLIPS := {
 	"telefono": ["UAL2_Standard.glb", "Idle_TalkingPhone"],
 	"sentado": ["UAL1_Standard.glb", "Sitting_Idle"],
+	"sentado_hablando": ["UAL1_Standard.glb", "Sitting_Talking"],
 	"conversar": ["UAL1_Standard.glb", "Idle_Talking"],
 	"brazos_cruzados": ["UAL2_Standard.glb", "Idle_FoldArms"],
+	"levantarse": ["UAL1_Standard.glb", "Sitting_Exit", false],
+	"sentarse": ["UAL1_Standard.glb", "Sitting_Enter", false],
+	"andar": ["UAL1_Standard.glb", "Walk_Formal"],
+	"andar_cargando": ["UAL2_Standard.glb", "Walk_Carry"],
+	"coger": ["UAL1_Standard.glb", "Interact", false],
 }
 
 ## Perfil humanoide de Godot → hueso de `persona.fbx`. Los dedos corazón, anular
@@ -94,6 +102,19 @@ static func reproducir(pieza: Node3D, clip: String, desfase: float = 0.0) -> boo
 
 ## La animación ya convertida para una ruta de esqueleto. Se cachea por ruta:
 ## todas las figuras de `persona.fbx` comparten la misma y reutilizan el recurso.
+static func en_bucle(clip: String) -> bool:
+	var datos: Array = CLIPS.get(clip, [])
+	return datos.size() < 3 or bool(datos[2])
+
+
+## Cuánto dura [param clip] en segundos, o 0 si no existe.
+static func duracion(clip: String) -> float:
+	if not CLIPS.has(clip):
+		return 0.0
+	var fuente := _fuente(CLIPS[clip][0], CLIPS[clip][1])
+	return fuente.length if fuente != null else 0.0
+
+
 static func _animacion(clip: String, ruta_esqueleto: String, altura: float) -> Animation:
 	var clave := "%s|%s|%.4f" % [clip, ruta_esqueleto, altura]
 	if _convertidas.has(clave):
@@ -101,7 +122,7 @@ static func _animacion(clip: String, ruta_esqueleto: String, altura: float) -> A
 	var fuente := _fuente(CLIPS[clip][0], CLIPS[clip][1])
 	if fuente == null:
 		return null
-	var animacion := convertir(fuente, ruta_esqueleto, altura)
+	var animacion := convertir(fuente, ruta_esqueleto, altura, en_bucle(clip))
 	_convertidas[clave] = animacion
 	return animacion
 
@@ -132,10 +153,12 @@ static func _fuente(fichero: String, nombre: String) -> Animation:
 ## [param altura_cadera] la devuelve a la escala de la figura dentro de las
 ## propias claves, y no con `Skeleton3D.motion_scale`: eso escalaría también las
 ## pistas de `Idle` y `Working` y la figura se hundiría al volver a ellas.
-static func convertir(fuente: Animation, ruta_esqueleto: String, altura_cadera: float) -> Animation:
+static func convertir(
+	fuente: Animation, ruta_esqueleto: String, altura_cadera: float, bucle: bool = true
+) -> Animation:
 	var animacion := Animation.new()
 	animacion.length = fuente.length
-	animacion.loop_mode = Animation.LOOP_LINEAR
+	animacion.loop_mode = Animation.LOOP_LINEAR if bucle else Animation.LOOP_NONE
 	for pista in fuente.get_track_count():
 		var hueso := String(fuente.track_get_path(pista).get_concatenated_subnames())
 		if not HUESOS.has(hueso):

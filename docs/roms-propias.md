@@ -24,8 +24,10 @@ Contrapartes de vigilia de los sueños mitológicos (#435, #442). Permanecen fue
 |---|---|---|---|---|
 | `ariadna_labertinto_98` | ARIADNA | Minotauro | laberinto de archivo; ya existe su cartucho 3D en casa | #437 #512 |
 | `uruk_98` | URUK 98 | Gilgamesh | ciudad mínima y tablilla que reconstruir | #436 |
-| `hydra_loop_98` | HYDRA LOOP | Hidra | cortar cabezas empeora todo hasta dar con el nodo común | #439 |
+| `hydra_loop_98` | HYDRA LOOP | Hidra | **fuente prototipo jugable**: cortar hace brotar dos cabezas; sellar un nodo exige haber leído dos cabezas suyas; tres niveles y handshake `$C100 = 0xA5` al romper el bucle | #439 #600 |
 | `duat_98` | DUAT 98 | Duat | cámaras y contrapesos | #441 |
+
+`HYDRA LOOP` tiene ya fuente prototipo en `gbc/minijuegos/hydra_loop_98` (portada de `gbc/minijuegos/hydra_loop`) y se compila y prueba con PyBoy en el workflow GBC. Sigue fuera del runtime: `HidraVigilia` no lee todavía su handshake.
 
 `RYU FLOW` salió de esta lista tras #609/#622: su fuente RGBDS es reproducible, el core puede leer su memoria sin efectos laterales y el índice la incluye en el build de runtime. Se mantiene en la tienda, igual que las demás ROMs jugables no incluidas, para respetar el contrato de una sola ROM de serie. `RyuFlowVigilia`, montado desde la casa real, observa la cabecera `RYUFLOW98` y solo cuando `$C100 == 0xA5` registra `dragon_japones` mediante `SemillasOniricas`; el emulador y la consola siguen sin conocer ese handshake concreto.
 

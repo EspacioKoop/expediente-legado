@@ -257,16 +257,76 @@ func _cargar_catalogo(ruta: String) -> void:
 	for valor in (datos as Dictionary).get("recursos", []):
 		if not valor is Dictionary:
 			continue
-		var recurso := (valor as Dictionary).duplicate(true)
-		var recurso_id := String(recurso.get("id", ""))
-		var url := String(recurso.get("url", ""))
-		if recurso_id.is_empty() or url.is_empty() or _por_id.has(recurso_id):
-			continue
-		_recursos.append(recurso)
-		_por_id[recurso_id] = recurso
-		_registrar_url(url, recurso_id, "origen")
-		for mirror in recurso.get("mirrors", []):
-			_registrar_url(String(mirror), recurso_id, "mirror")
+		_registrar_recurso((valor as Dictionary).duplicate(true))
+	_cargar_cabeceras_prensa()
+	_anexar_enlaces_prensa()
+
+
+func _cargar_cabeceras_prensa() -> void:
+	var prensa := Web98Prensa.new()
+	for cabecera in prensa.cabeceras():
+		var recurso := {
+			"id": String(cabecera.get("recurso_id", "")),
+			"url": String(cabecera.get("url", "")),
+			"titulo": String(cabecera.get("nombre", "")),
+			"snippet": String(cabecera.get("snippet", "")),
+			"categoria": "actualidad",
+			"terminos": cabecera.get("terminos", []).duplicate(true),
+			"prioridad": int(cabecera.get("prioridad", 60)),
+			"orden_directorio": int(cabecera.get("orden_directorio", 50)),
+			"indexado": true,
+			"disponible_desde_dia": 1,
+			"disponible_hasta_dia": 0,
+			"requiere_conocimiento": [],
+			"mirrors": [],
+			"enlaces": [],
+			"cache": null,
+			"tipo": "prensa",
+			"cabecera_id": String(cabecera.get("id", "")),
+		}
+		_registrar_recurso(recurso)
+
+
+func _anexar_enlaces_prensa() -> void:
+	var prensa_ids: Array[String] = []
+	for recurso in _recursos:
+		if String(recurso.get("tipo", "")) == "prensa":
+			prensa_ids.append(String(recurso.get("id", "")))
+	for origen_id in ["portal-dgai", "directorio-red98"]:
+		_anexar_enlaces(origen_id, prensa_ids)
+	for prensa_id in prensa_ids:
+		var destinos := ["portal-dgai"]
+		for otro_id in prensa_ids:
+			if otro_id != prensa_id:
+				destinos.append(otro_id)
+		_anexar_enlaces(prensa_id, destinos)
+
+
+func _anexar_enlaces(recurso_id: String, nuevos: Array) -> void:
+	var recurso: Variant = _por_id.get(recurso_id, {})
+	if not recurso is Dictionary:
+		return
+	var enlaces: Array = []
+	var declarados: Variant = (recurso as Dictionary).get("enlaces", [])
+	if declarados is Array:
+		enlaces = (declarados as Array).duplicate()
+	for destino_id in nuevos:
+		var destino := String(destino_id)
+		if not destino.is_empty() and _por_id.has(destino) and not enlaces.has(destino):
+			enlaces.append(destino)
+	(recurso as Dictionary)["enlaces"] = enlaces
+
+
+func _registrar_recurso(recurso: Dictionary) -> void:
+	var recurso_id := String(recurso.get("id", ""))
+	var url := String(recurso.get("url", ""))
+	if recurso_id.is_empty() or url.is_empty() or _por_id.has(recurso_id):
+		return
+	_recursos.append(recurso)
+	_por_id[recurso_id] = recurso
+	_registrar_url(url, recurso_id, "origen")
+	for mirror in recurso.get("mirrors", []):
+		_registrar_url(String(mirror), recurso_id, "mirror")
 
 
 func _registrar_url(url: String, recurso_id: String, via: String) -> void:
