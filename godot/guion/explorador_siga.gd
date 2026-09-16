@@ -1,9 +1,12 @@
-## Explorador corporativo del escritorio OS98 (#536, #664).
+## Explorador corporativo del escritorio OS98 (#536, #539, #664).
 ##
 ## Presenta el modelo declarativo de ExploradorSigaModelo y superpone los medios
 ## extraíbles simulados sin tocar el filesystem real ni conservar estado de campaña.
 class_name ExploradorSiga
 extends VBoxContainer
+
+signal documento_abierto(id: String)
+signal ruta_abierta(ruta: String)
 
 var _modelo := ExploradorSigaModelo.new()
 var _medios := MediosExtraiblesSigaModelo.new()
@@ -137,6 +140,7 @@ func _navegar_a(ruta: String, registrar_historial: bool) -> void:
 		_historial.append(_ruta_actual)
 		_indice_historial = _historial.size() - 1
 	_refrescar()
+	ruta_abierta.emit(_ruta_actual)
 
 
 func _refrescar() -> void:
@@ -206,8 +210,9 @@ func _abrir_documento(entrada: Dictionary) -> void:
 	if accion != "mostrar_contenido":
 		_mostrar_estado("Este elemento no tiene una acción disponible")
 		return
+	var documento_id := String(entrada.get("id", ""))
 	if not entrada.has("medio_id"):
-		_modelo.registrar_apertura(String(entrada.get("id", "")))
+		_modelo.registrar_apertura(documento_id)
 	var tipo := String(entrada.get("tipo", "texto"))
 	var rotulo := String(
 		(
@@ -228,6 +233,8 @@ func _abrir_documento(entrada: Dictionary) -> void:
 		]
 	)
 	_mostrar_estado("Abierto: %s" % String(entrada.get("nombre", "")))
+	if not documento_id.is_empty():
+		documento_abierto.emit(documento_id)
 	if _ruta_actual == ExploradorSigaModelo.RUTA_RECIENTES:
 		_refrescar()
 
