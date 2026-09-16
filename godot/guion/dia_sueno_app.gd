@@ -10,6 +10,19 @@ const ESCENA_CINEMATICA := preload("res://escenas/cinematica.tscn")
 var _entrada_sueno: Node3D = null
 
 
+## La montaña usa una forma ya existente y no altera la selección nocturna.
+## Después de que la capa base haya construido el contenido autorizado de #87,
+## transforma `embudo` en su identidad fuerte reutilizando solo ese resultado.
+func _espacio_de(fase: String) -> Dictionary:
+	var espacio: Dictionary = super._espacio_de(fase)
+	if fase != "sueño" or jornada["sueno_escenas"].is_empty():
+		return espacio
+	var id := String(jornada["sueno_escenas"][0])
+	if not SuenoMontana.es_forma(id):
+		return espacio
+	return SuenoMontana.adaptar_espacio(espacio, {"variante_cabana": 0})
+
+
 ## Las presentaciones específicas se montan DESPUÉS del espacio jugable. Así la
 ## familia poligonal sigue siendo la única autoridad de navegación/colisión y el
 ## arte puede vestirla sin duplicar reglas ni conocer el id de la sala aquí.
@@ -18,6 +31,7 @@ func _entrar_en(fase: String) -> void:
 	if fase != "sueño" or _mundo == null:
 		return
 	SuenoCastillo3D.montar(_mundo, _espacio_actual)
+	SuenoMontana3D.montar(_mundo, _espacio_actual)
 
 
 ## Mientras se ve la bisagra no corre el reloj onírico. La noche ya existe,
