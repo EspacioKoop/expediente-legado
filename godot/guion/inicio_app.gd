@@ -92,8 +92,8 @@ func _construir_interfaz() -> void:
 	_cargar = _crear_boton(tr("INICIO_CARGAR"), _cargar_partida)
 	_cargar.tooltip_text = tr("INICIO_CARGAR_TOOLTIP")
 	caja.add_child(_cargar)
-	_personaje = _crear_boton("Crear / editar personaje", _abrir_personaje)
-	_personaje.tooltip_text = "Apariencia física y trasfondo del protagonista"
+	_personaje = _crear_boton(tr("INICIO_PERSONAJE"), _abrir_personaje)
+	_personaje.tooltip_text = tr("INICIO_PERSONAJE_TOOLTIP")
 	caja.add_child(_personaje)
 
 	var separador := HSeparator.new()

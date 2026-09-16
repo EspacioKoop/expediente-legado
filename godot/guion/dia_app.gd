@@ -153,6 +153,10 @@ func _montar_entorno() -> void:
 	_sol = sol
 
 	_caminante = load("res://escenas/caminante.tscn").instantiate()
+	# #701: el cuerpo visible usa la ficha de ESTA partida, ya cargada aquí.
+	var cuerpo_jugador := _caminante.get_node_or_null("CuerpoJugador3D") as CuerpoJugador3D
+	if cuerpo_jugador != null:
+		cuerpo_jugador.perfil = partida.estado.get("perfil_jugador", {})
 	add_child(_caminante)
 
 	# Dos voces: lo que pasa (una puerta, la nómina) y lo que haces tú (andar).

@@ -9,6 +9,8 @@ CUERPO = RAIZ / "godot/guion/cuerpo_jugador_3d.gd"
 CREADOR = RAIZ / "godot/guion/creador_personaje_app.gd"
 CAMINANTE = RAIZ / "godot/escenas/caminante.tscn"
 INICIO = RAIZ / "godot/guion/inicio_app.gd"
+DIA = RAIZ / "godot/guion/dia_app.gd"
+TEXTOS = RAIZ / "godot/datos/textos.csv"
 
 
 class ProtagonistaConfigurableTest(unittest.TestCase):
@@ -20,6 +22,8 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
         cls.creador = CREADOR.read_text()
         cls.caminante = CAMINANTE.read_text()
         cls.inicio = INICIO.read_text()
+        cls.dia = DIA.read_text()
+        cls.textos = TEXTOS.read_text()
 
     def test_hay_tres_complexiones_reutilizables(self):
         for nombre in ("delgado", "medio", "robusto"):
@@ -37,6 +41,10 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
         for identificador in ids:
             self.assertIn(f'"{identificador}"', self.perfil)
         self.assertIn('"etiquetas"', self.perfil)
+        # Nombre y descripcion se traducen: el perfil solo guarda claves.
+        for clave in ("AUXILIAR", "ALMACEN", "INFORMATICA", "ESTUDIANTE", "CUIDADOS", "RECIEN_LLEGADO"):
+            self.assertIn(f'"TRASFONDO_{clave}"', self.perfil)
+            self.assertIn(f"TRASFONDO_{clave}_DESCRIPCION,", self.textos)
         self.assertNotIn('"bono"', self.perfil)
         self.assertNotIn('"bonus"', self.perfil)
 
@@ -73,16 +81,17 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
         self.assertIn("height = 1.7", self.caminante)
 
     def test_editor_expone_aspecto_y_trasfondo(self):
-        textos = (
-            "Complexión",
-            "Altura visual",
-            "Tono de piel",
-            "Peinado",
-            "Prenda",
-            "Antes de SIGA",
-        )
-        for texto in textos:
-            self.assertIn(texto, self.creador)
+        textos = {
+            "PERSONAJE_COMPLEXION": "Complexión",
+            "PERSONAJE_ALTURA": "Altura visual",
+            "PERSONAJE_PIEL": "Tono de piel",
+            "PERSONAJE_PEINADO": "Peinado",
+            "PERSONAJE_PRENDA": "Prenda",
+            "PERSONAJE_ANTES_DE_SIGA": "Antes de SIGA",
+        }
+        for clave, texto in textos.items():
+            self.assertIn(f'"{clave}"', self.creador)
+            self.assertIn(f"{clave},{texto}", self.textos)
         self.assertIn("PerfilJugador.TRASFONDOS", self.creador)
         self.assertIn('_partida.estado["perfil_jugador"]', self.creador)
         self.assertIn("_partida.guardar()", self.creador)
@@ -95,12 +104,16 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
         self.assertIn("_alta_pendiente", self.creador)
         self.assertIn('change_scene_to_file("res://escenas/dia.tscn")', self.creador)
 
-    def test_cuerpo_lee_el_mismo_perfil_de_partida(self):
-        self.assertIn("var partida := Partida.new()", self.cuerpo)
-        self.assertIn('partida.estado.get("perfil_jugador", {})', self.cuerpo)
+    def test_cuerpo_recibe_el_perfil_de_la_partida_cargada(self):
+        # El dia ya tiene la partida: el cuerpo no vuelve a leer el disco.
+        self.assertNotIn("Partida.new()", self.cuerpo)
+        self.assertNotIn(".cargar(", self.cuerpo)
+        self.assertNotIn(".guardar(", self.cuerpo)
+        self.assertIn('cuerpo_jugador.perfil = partida.estado.get("perfil_jugador", {})', self.dia)
 
     def test_editor_es_accesible_desde_inicio(self):
-        self.assertIn("Crear / editar personaje", self.inicio)
+        self.assertIn('tr("INICIO_PERSONAJE")', self.inicio)
+        self.assertIn("INICIO_PERSONAJE,Crear / editar personaje", self.textos)
         self.assertIn("res://escenas/creador_personaje.tscn", self.inicio)
 
 

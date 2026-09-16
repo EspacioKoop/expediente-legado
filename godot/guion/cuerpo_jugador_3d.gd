@@ -2,7 +2,8 @@
 ##
 ## Es deliberadamente independiente de CharacterBody3D: no crea colisiones ni
 ## cambia la escala del caminante. Su trabajo es que mirar hacia abajo revele
-## una persona y no una cámara flotante, usando el perfil guardado en Partida.
+## una persona y no una cámara flotante. El perfil lo entrega quien ya tiene la
+## partida cargada (`DiaApp`): este nodo no lee ni escribe guardados.
 class_name CuerpoJugador3D
 extends Node3D
 
@@ -14,21 +15,15 @@ var _camara: Camera3D
 
 func _ready() -> void:
 	_camara = get_parent().get_node_or_null("Camara") as Camera3D
-	var partida := Partida.new()
-	partida.cargar()
-	aplicar(partida.estado.get("perfil_jugador", {}))
+	# Sin perfil previo se monta el cuerpo por defecto de PerfilJugador.
+	aplicar(perfil)
 
 
-func aplicar(valor: Dictionary, persistir: bool = false) -> void:
+func aplicar(valor: Dictionary) -> void:
 	perfil = PerfilJugador.completar(valor)
 	for hijo in get_children():
 		hijo.queue_free()
 	_construir()
-	if persistir:
-		var partida := Partida.new()
-		partida.cargar()
-		partida.estado["perfil_jugador"] = perfil
-		partida.guardar()
 
 
 func _process(delta: float) -> void:
@@ -79,7 +74,7 @@ func _construir() -> void:
 	)
 
 	var prenda := String(apariencia["prenda"])
-	_detalle_prenda(prenda, torso_ancho, torso_fondo, torso_alto, ropa)
+	_detalle_prenda(prenda, torso_ancho, torso_fondo, torso_alto, altura, ropa)
 
 	var cadera_ancho := 0.30 * ancho * cintura
 	_caja(
@@ -126,32 +121,36 @@ func _construir() -> void:
 		)
 
 
-func _detalle_prenda(prenda: String, ancho: float, fondo: float, alto: float, color: Color) -> void:
+## Las alturas van en la misma proporción que torso y hombros: con una altura
+## visual distinta de 1, cuello y solapas siguen pegados a la prenda.
+func _detalle_prenda(
+	prenda: String, ancho: float, fondo: float, alto: float, altura: float, color: Color
+) -> void:
 	match prenda:
 		"jersey":
 			_caja(
 				"CuelloJersey",
-				Vector3(0.0, 0.38, -fondo * 0.03),
+				Vector3(0.0, 0.38 * altura, -fondo * 0.03),
 				Vector3(ancho * 0.34, alto * 0.10, fondo * 1.05),
 				color.lightened(0.05)
 			)
 		"chaqueta":
 			_caja(
 				"SolapaI",
-				Vector3(-ancho * 0.12, 0.19, -fondo * 0.51),
+				Vector3(-ancho * 0.12, 0.19 * altura, -fondo * 0.51),
 				Vector3(ancho * 0.14, alto * 0.55, fondo * 0.06),
 				color.darkened(0.08)
 			)
 			_caja(
 				"SolapaD",
-				Vector3(ancho * 0.12, 0.19, -fondo * 0.51),
+				Vector3(ancho * 0.12, 0.19 * altura, -fondo * 0.51),
 				Vector3(ancho * 0.14, alto * 0.55, fondo * 0.06),
 				color.darkened(0.08)
 			)
 		_:
 			_caja(
 				"CamisaCentro",
-				Vector3(0.0, 0.16, -fondo * 0.51),
+				Vector3(0.0, 0.16 * altura, -fondo * 0.51),
 				Vector3(ancho * 0.24, alto * 0.70, fondo * 0.055),
 				color.lightened(0.20)
 			)

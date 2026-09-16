@@ -5,27 +5,44 @@
 ## aspecto físico.
 extends Control
 
+## Cada opción es [clave de textos.csv, valor guardado en el perfil].
+const CUERPOS := [
+	["PERSONAJE_CUERPO_DELGADO", "delgado"],
+	["PERSONAJE_CUERPO_MEDIO", "medio"],
+	["PERSONAJE_CUERPO_ROBUSTO", "robusto"],
+]
 const PIELES := [
-	["Claro", "#e7c3a4"],
-	["Medio claro", "#c9916b"],
-	["Medio", "#a96f50"],
-	["Oliva", "#9a7655"],
-	["Oscuro", "#6f4936"],
-	["Muy oscuro", "#452f26"],
+	["PERSONAJE_PIEL_CLARO", "#e7c3a4"],
+	["PERSONAJE_PIEL_MEDIO_CLARO", "#c9916b"],
+	["PERSONAJE_PIEL_MEDIO", "#a96f50"],
+	["PERSONAJE_PIEL_OLIVA", "#9a7655"],
+	["PERSONAJE_PIEL_OSCURO", "#6f4936"],
+	["PERSONAJE_PIEL_MUY_OSCURO", "#452f26"],
 ]
 const CABELLOS := [
-	["Negro", "#1f1b19"],
-	["Castaño oscuro", "#30251f"],
-	["Castaño", "#5b4030"],
-	["Rubio oscuro", "#8b7754"],
-	["Canoso", "#77736f"],
+	["PERSONAJE_CABELLO_NEGRO", "#1f1b19"],
+	["PERSONAJE_CABELLO_CASTANO_OSCURO", "#30251f"],
+	["PERSONAJE_CABELLO_CASTANO", "#5b4030"],
+	["PERSONAJE_CABELLO_RUBIO_OSCURO", "#8b7754"],
+	["PERSONAJE_CABELLO_CANOSO", "#77736f"],
+]
+const PEINADOS := [
+	["PERSONAJE_PEINADO_CORTO", "corto"],
+	["PERSONAJE_PEINADO_MEDIO", "medio"],
+	["PERSONAJE_PEINADO_RAPADO", "rapado"],
+	["PERSONAJE_PEINADO_RECOGIDO", "recogido"],
+]
+const PRENDAS := [
+	["PERSONAJE_PRENDA_CAMISA", "camisa"],
+	["PERSONAJE_PRENDA_JERSEY", "jersey"],
+	["PERSONAJE_PRENDA_CHAQUETA", "chaqueta"],
 ]
 const ROPAS := [
-	["Gris oficina", "#59616b"],
-	["Azul gastado", "#45566e"],
-	["Marrón", "#665044"],
-	["Verde apagado", "#4f5f52"],
-	["Burdeos", "#69454c"],
+	["PERSONAJE_ROPA_GRIS", "#59616b"],
+	["PERSONAJE_ROPA_AZUL", "#45566e"],
+	["PERSONAJE_ROPA_MARRON", "#665044"],
+	["PERSONAJE_ROPA_VERDE", "#4f5f52"],
+	["PERSONAJE_ROPA_BURDEOS", "#69454c"],
 ]
 
 var _partida := Partida.new()
@@ -69,15 +86,12 @@ func _construir() -> void:
 	margen.add_child(raiz)
 
 	var titulo := Label.new()
-	titulo.text = "EXPEDIENTE PERSONAL · ALTA DE EMPLEADO"
+	titulo.text = tr("PERSONAJE_TITULO")
 	titulo.add_theme_font_size_override("font_size", 20)
 	raiz.add_child(titulo)
 
 	var subtitulo := Label.new()
-	subtitulo.text = (
-		"La apariencia no modifica colisiones ni estadísticas. "
-		+ "El trasfondo describe tu vida anterior a SIGA."
-	)
+	subtitulo.text = tr("PERSONAJE_SUBTITULO")
 	subtitulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	raiz.add_child(subtitulo)
 
@@ -90,39 +104,31 @@ func _construir() -> void:
 	aspecto.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	aspecto.add_theme_constant_override("separation", 8)
 	columnas.add_child(aspecto)
-	_cabecera(aspecto, "APARIENCIA")
+	_cabecera(aspecto, "PERSONAJE_APARIENCIA")
 
-	_cuerpo = _opcion(
-		aspecto, "Complexión", [["Delgado", "delgado"], ["Medio", "medio"], ["Robusto", "robusto"]]
-	)
-	_altura = _deslizador(aspecto, "Altura visual", 0.92, 1.08)
-	_hombros = _deslizador(aspecto, "Hombros", 0.88, 1.12)
-	_cintura = _deslizador(aspecto, "Cintura", 0.88, 1.12)
-	_piel = _opcion(aspecto, "Tono de piel", PIELES)
-	_cabello = _opcion(aspecto, "Color de pelo", CABELLOS)
-	_peinado = _opcion(
-		aspecto,
-		"Peinado",
-		[["Corto", "corto"], ["Medio", "medio"], ["Rapado", "rapado"], ["Recogido", "recogido"]]
-	)
-	_prenda = _opcion(
-		aspecto, "Prenda", [["Camisa", "camisa"], ["Jersey", "jersey"], ["Chaqueta", "chaqueta"]]
-	)
-	_ropa = _opcion(aspecto, "Color de ropa", ROPAS)
+	_cuerpo = _opcion(aspecto, "PERSONAJE_COMPLEXION", CUERPOS)
+	_altura = _deslizador(aspecto, "PERSONAJE_ALTURA", 0.92, 1.08)
+	_hombros = _deslizador(aspecto, "PERSONAJE_HOMBROS", 0.88, 1.12)
+	_cintura = _deslizador(aspecto, "PERSONAJE_CINTURA", 0.88, 1.12)
+	_piel = _opcion(aspecto, "PERSONAJE_PIEL", PIELES)
+	_cabello = _opcion(aspecto, "PERSONAJE_CABELLO", CABELLOS)
+	_peinado = _opcion(aspecto, "PERSONAJE_PEINADO", PEINADOS)
+	_prenda = _opcion(aspecto, "PERSONAJE_PRENDA", PRENDAS)
+	_ropa = _opcion(aspecto, "PERSONAJE_ROPA", ROPAS)
 
 	var pasado := VBoxContainer.new()
 	pasado.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	pasado.add_theme_constant_override("separation", 8)
 	columnas.add_child(pasado)
-	_cabecera(pasado, "TRASFONDO")
+	_cabecera(pasado, "PERSONAJE_TRASFONDO")
 
 	var etiqueta := Label.new()
-	etiqueta.text = "Antes de SIGA"
+	etiqueta.text = tr("PERSONAJE_ANTES_DE_SIGA")
 	pasado.add_child(etiqueta)
 	_trasfondo = OptionButton.new()
 	_trasfondo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for entrada in PerfilJugador.TRASFONDOS:
-		_trasfondo.add_item(String(entrada["nombre"]))
+		_trasfondo.add_item(tr(String(entrada["nombre"])))
 		_trasfondo.set_item_metadata(_trasfondo.item_count - 1, entrada["id"])
 	_trasfondo.item_selected.connect(func(_indice): _refrescar())
 	pasado.add_child(_trasfondo)
@@ -133,10 +139,7 @@ func _construir() -> void:
 	pasado.add_child(_descripcion)
 
 	var nota := Label.new()
-	nota.text = (
-		"El trasfondo podrá matizar diálogos, recuerdos, objetos y sueños; "
-		+ "no concede una solución automática de expediente."
-	)
+	nota.text = tr("PERSONAJE_NOTA_TRASFONDO")
 	nota.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	pasado.add_child(nota)
 
@@ -153,47 +156,47 @@ func _construir() -> void:
 	botones.add_theme_constant_override("separation", 8)
 	raiz.add_child(botones)
 	var volver := Button.new()
-	volver.text = "Cancelar"
+	volver.text = tr("PERSONAJE_CANCELAR")
 	volver.pressed.connect(_volver)
 	botones.add_child(volver)
 	var guardar := Button.new()
-	guardar.text = "Guardar ficha"
+	guardar.text = tr("PERSONAJE_GUARDAR")
 	guardar.pressed.connect(_guardar)
 	botones.add_child(guardar)
 
 
-func _cabecera(caja: VBoxContainer, texto: String) -> void:
+func _cabecera(caja: VBoxContainer, clave: String) -> void:
 	var etiqueta := Label.new()
-	etiqueta.text = texto
+	etiqueta.text = tr(clave)
 	etiqueta.add_theme_font_size_override("font_size", 16)
 	caja.add_child(etiqueta)
 	caja.add_child(HSeparator.new())
 
 
-func _opcion(caja: VBoxContainer, texto: String, opciones: Array) -> OptionButton:
+func _opcion(caja: VBoxContainer, clave: String, opciones: Array) -> OptionButton:
 	var fila := HBoxContainer.new()
 	fila.add_theme_constant_override("separation", 8)
 	caja.add_child(fila)
 	var etiqueta := Label.new()
-	etiqueta.text = texto
+	etiqueta.text = tr(clave)
 	etiqueta.custom_minimum_size.x = 125
 	fila.add_child(etiqueta)
 	var control := OptionButton.new()
 	control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for opcion in opciones:
-		control.add_item(String(opcion[0]))
+		control.add_item(tr(String(opcion[0])))
 		control.set_item_metadata(control.item_count - 1, opcion[1])
 	control.item_selected.connect(func(_indice): _refrescar())
 	fila.add_child(control)
 	return control
 
 
-func _deslizador(caja: VBoxContainer, texto: String, minimo: float, maximo: float) -> HSlider:
+func _deslizador(caja: VBoxContainer, clave: String, minimo: float, maximo: float) -> HSlider:
 	var fila := HBoxContainer.new()
 	fila.add_theme_constant_override("separation", 8)
 	caja.add_child(fila)
 	var etiqueta := Label.new()
-	etiqueta.text = texto
+	etiqueta.text = tr(clave)
 	etiqueta.custom_minimum_size.x = 125
 	fila.add_child(etiqueta)
 	var control := HSlider.new()
@@ -261,13 +264,13 @@ func _refrescar() -> void:
 		return
 	var candidato := _desde_controles()
 	var pasado := PerfilJugador.trasfondo_por_id(String(candidato["trasfondo"]))
-	_descripcion.text = String(pasado.get("descripcion", ""))
+	_descripcion.text = tr(String(pasado.get("descripcion", "")))
 	var etiquetas := Array(pasado.get("etiquetas", []))
 	_resumen.text = (
-		"Etiquetas narrativas: %s\nComplexión: %s · altura %.2f · hombros %.2f · cintura %.2f"
+		tr("PERSONAJE_RESUMEN")
 		% [
 			", ".join(etiquetas),
-			String(candidato["apariencia"]["cuerpo"]),
+			_cuerpo.get_item_text(maxi(_cuerpo.selected, 0)),
 			float(candidato["apariencia"]["altura"]),
 			float(candidato["apariencia"]["hombros"]),
 			float(candidato["apariencia"]["cintura"]),
@@ -280,15 +283,15 @@ func _guardar() -> void:
 	_perfil["configurado"] = true
 	_partida.estado["perfil_jugador"] = _perfil
 	if not _partida.guardar():
-		_estado.text = "No se pudo guardar la ficha."
+		_estado.text = tr("PERSONAJE_ERROR_GUARDAR")
 		return
 	if _alta_pendiente:
 		_alta_pendiente = false
 		var error := get_tree().change_scene_to_file("res://escenas/dia.tscn")
 		if error != OK:
-			_estado.text = "Ficha guardada, pero no se pudo iniciar la jornada."
+			_estado.text = tr("PERSONAJE_ERROR_JORNADA")
 		return
-	_estado.text = "Ficha guardada."
+	_estado.text = tr("PERSONAJE_GUARDADA")
 
 
 func _volver() -> void:

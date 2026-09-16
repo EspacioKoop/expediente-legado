@@ -38,65 +38,42 @@ const CUERPOS := {
 ## Los trasfondos son pasado, no profesión actual ni alineamiento. Las etiquetas
 ## son vocabulario narrativo para futuros diálogos, recuerdos, sueños u objetos;
 ## no conceden por sí solas pistas, dinero, acciones ni una decisión óptima.
+## Nombre y descripción son claves de textos.csv: se traducen al mostrarse.
 const TRASFONDOS := [
 	{
 		"id": "auxiliar_administrativo",
-		"nombre": "Auxiliar administrativo",
-		"descripcion":
-		(
-			"Años de ventanillas, fotocopias y contratos temporales. "
-			+ "Sabes cómo suena una oficina antes de saber quién manda en ella."
-		),
+		"nombre": "TRASFONDO_AUXILIAR",
+		"descripcion": "TRASFONDO_AUXILIAR_DESCRIPCION",
 		"etiquetas": ["oficina", "papel", "burocracia"],
 	},
 	{
 		"id": "almacen_fabrica",
-		"nombre": "Almacén y fábrica",
-		"descripcion":
-		(
-			"Turnos, inventarios, muelles de carga y encargados con prisa. "
-			+ "Estás acostumbrado a leer un espacio por cómo trabaja la gente dentro."
-		),
+		"nombre": "TRASFONDO_ALMACEN",
+		"descripcion": "TRASFONDO_ALMACEN_DESCRIPCION",
 		"etiquetas": ["trabajo_manual", "almacen", "turnos"],
 	},
 	{
 		"id": "informatica_autodidacta",
-		"nombre": "Informática autodidacta",
-		"descripcion":
-		(
-			"Aprendiste con manuales, disquetes prestados y ordenadores que nadie quería tocar. "
-			+ "Entiendes sistemas por insistencia, no por título."
-		),
+		"nombre": "TRASFONDO_INFORMATICA",
+		"descripcion": "TRASFONDO_INFORMATICA_DESCRIPCION",
 		"etiquetas": ["tecnica", "ordenadores", "autodidacta"],
 	},
 	{
 		"id": "estudiante_nocturno",
-		"nombre": "Estudiante nocturno",
-		"descripcion":
-		(
-			"Trabajas de día y estudias cuando puedes. Tienes práctica reuniendo fragmentos, "
-			+ "tomando notas y funcionando con horarios poco razonables."
-		),
+		"nombre": "TRASFONDO_ESTUDIANTE",
+		"descripcion": "TRASFONDO_ESTUDIANTE_DESCRIPCION",
 		"etiquetas": ["estudio", "biblioteca", "nocturno"],
 	},
 	{
 		"id": "cuidados_familiares",
-		"nombre": "Cuidados familiares",
-		"descripcion":
-		(
-			"Antes de SIGA ya organizabas citas, compras, papeles y días alrededor de otra persona. "
-			+ "Conoces la logística invisible de sostener una casa."
-		),
+		"nombre": "TRASFONDO_CUIDADOS",
+		"descripcion": "TRASFONDO_CUIDADOS_DESCRIPCION",
 		"etiquetas": ["cuidados", "casa", "responsabilidad"],
 	},
 	{
 		"id": "recien_llegado",
-		"nombre": "Recién llegado a la ciudad",
-		"descripcion":
-		(
-			"Todavía estás aprendiendo barrios, líneas, horarios y costumbres. "
-			+ "Miras lugares cotidianos con la atención de quien aún no los da por hechos."
-		),
+		"nombre": "TRASFONDO_RECIEN_LLEGADO",
+		"descripcion": "TRASFONDO_RECIEN_LLEGADO_DESCRIPCION",
 		"etiquetas": ["calle", "transporte", "forastero"],
 	},
 ]
