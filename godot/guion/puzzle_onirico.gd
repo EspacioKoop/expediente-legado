@@ -8,8 +8,8 @@
 ##
 ## También se separa el resultado de la recompensa. Completar un puzzle emite
 ## un hecho una sola vez; otro sistema decide si eso abre una salida, entrega un
-## objeto o recontextualiza una pista. Así este módulo no puede crear dinero,
-## acciones ni conocimiento por accidente.
+## objeto o recontextualiza una pista. `reward_id` es solo una identidad opaca:
+## permite dirigir esa recompensa sin enseñar al núcleo qué significa.
 class_name PuzzleOnirico
 extends RefCounted
 
@@ -26,6 +26,7 @@ const _RUTA_SCRIPT := "res://guion/puzzle_onirico.gd"
 
 var puzzle_id := ""
 var source_ids: Array = []
+var reward_id := ""
 var seed := 0
 var state := ESTADO_PENDIENTE
 var _resultado_emitido := false
@@ -35,7 +36,11 @@ var _resultado_emitido := false
 ##
 ## Las fuentes se ordenan y deduplican antes de derivar la semilla: presentar
 ## los mismos folios en otro orden no debe rerrollear la solución al recargar.
-static func crear(id: String, fuentes: Array, leido_hoy: Array, semilla_raiz: int):
+## `reward_id` es opcional y no participa en la semilla: cambiar la recompensa
+## asociada no debe rerrollear la disposición de un puzzle ya definido.
+static func crear(
+	id: String, fuentes: Array, leido_hoy: Array, semilla_raiz: int, reward_id: String = ""
+):
 	var normalizadas := _normalizar_fuentes(fuentes)
 	if id.strip_edges().is_empty() or normalizadas.is_empty():
 		return null
@@ -45,6 +50,7 @@ static func crear(id: String, fuentes: Array, leido_hoy: Array, semilla_raiz: in
 	var puzzle = _nueva_instancia()
 	puzzle.puzzle_id = id
 	puzzle.source_ids = normalizadas
+	puzzle.reward_id = reward_id.strip_edges()
 	puzzle.seed = semilla(semilla_raiz, id, normalizadas)
 	return puzzle
 
@@ -70,6 +76,7 @@ static func restaurar(datos: Dictionary, leido_hoy: Array):
 	var id := str(datos.get("puzzle_id", ""))
 	var fuentes: Array = datos.get("source_ids", [])
 	var normalizadas := _normalizar_fuentes(fuentes)
+	var recompensa := str(datos.get("reward_id", "")).strip_edges()
 	var estado := str(datos.get("state", ""))
 	var emitido := bool(datos.get("resultado_emitido", false))
 	if id.strip_edges().is_empty() or normalizadas.is_empty():
@@ -87,6 +94,7 @@ static func restaurar(datos: Dictionary, leido_hoy: Array):
 	var puzzle = _nueva_instancia()
 	puzzle.puzzle_id = id
 	puzzle.source_ids = normalizadas
+	puzzle.reward_id = recompensa
 	puzzle.seed = int(datos.get("seed", 0)) & _SEMILLA_GUARDABLE
 	puzzle.state = estado
 	puzzle._resultado_emitido = emitido
@@ -110,11 +118,13 @@ func pendiente() -> bool:
 
 
 ## Datos suficientes para persistir el puzzle dentro de la sesión onírica.
-## No guarda recompensa: el consumidor del resultado es dueño de esa decisión.
+## No guarda recompensa: solo conserva su identidad opaca para que el consumidor
+## resuelva después el efecto concreto.
 func serializar() -> Dictionary:
 	return {
 		"puzzle_id": puzzle_id,
 		"source_ids": source_ids.duplicate(),
+		"reward_id": reward_id,
 		"seed": seed,
 		"state": state,
 		"resultado_emitido": _resultado_emitido,
@@ -132,6 +142,7 @@ func _cerrar(nuevo_estado: String) -> bool:
 			{
 				"puzzle_id": puzzle_id,
 				"source_ids": source_ids.duplicate(),
+				"reward_id": reward_id,
 				"seed": seed,
 				"state": state,
 			}

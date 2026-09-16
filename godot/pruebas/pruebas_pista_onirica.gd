@@ -10,6 +10,7 @@ func _initialize() -> void:
 	_probar_estado_y_fuentes()
 	_probar_pista_de_un_origen()
 	_probar_relacion_de_dos_origenes()
+	_probar_recompensa_dirigida_y_ambiguedad()
 	_probar_catalogo_invalido()
 	_probar_registro_idempotente()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
@@ -80,6 +81,57 @@ func _probar_relacion_de_dos_origenes() -> void:
 	_comprobar(
 		Pista.resolver(caso, {"state": "completado", "source_ids": ["F-1"]}).is_empty(),
 		"una relación no se concede con solo uno de sus orígenes"
+	)
+
+
+func _probar_recompensa_dirigida_y_ambiguedad() -> void:
+	var caso := {
+		"pistas":
+		[
+			{"id": "P-1", "descripcion": "primer detalle", "registroOrigen": "F-1"},
+			{"id": "P-2", "descripcion": "segundo detalle", "registroOrigen": "F-1"},
+			{
+				"id": "P-3",
+				"descripcion": "relación concreta",
+				"registroOrigen": "F-1",
+				"registroOrigen2": "F-2",
+			},
+		]
+	}
+	var ambiguo := Pista.resolver(caso, {"state": "completado", "source_ids": ["F-1"]})
+	_comprobar(
+		ambiguo.is_empty(),
+		"dos pistas compatibles sin reward_id fallan cerrado en vez de depender del orden"
+	)
+
+	var dirigida := Pista.resolver(
+		caso, {"state": "completado", "source_ids": ["F-1"], "reward_id": "P-2"}
+	)
+	_comprobar(dirigida.get("id", "") == "P-2", "reward_id selecciona la pista diseñada")
+	_comprobar(
+		dirigida.get("descripcion", "") == "segundo detalle",
+		"la recompensa dirigida conserva el contenido catalogado"
+	)
+
+	var desconocida := Pista.resolver(
+		caso, {"state": "completado", "source_ids": ["F-1"], "reward_id": "P-X"}
+	)
+	_comprobar(
+		desconocida.is_empty(), "un reward_id inexistente no concede otra pista por fallback"
+	)
+
+	var relacion_sin_fuente := Pista.resolver(
+		caso, {"state": "completado", "source_ids": ["F-1"], "reward_id": "P-3"}
+	)
+	_comprobar(
+		relacion_sin_fuente.is_empty(),
+		"la recompensa dirigida sigue exigiendo todos los documentos de origen"
+	)
+	var relacion := Pista.resolver(
+		caso, {"state": "completado", "source_ids": ["F-2", "F-1"], "reward_id": "P-3"}
+	)
+	_comprobar(
+		relacion.get("id", "") == "P-3", "una relación dirigida resuelve al cubrir ambos orígenes"
 	)
 
 
