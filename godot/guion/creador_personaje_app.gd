@@ -30,6 +30,7 @@ const ROPAS := [
 
 var _partida := Partida.new()
 var _perfil: Dictionary
+var _alta_pendiente := false
 var _cuerpo: OptionButton
 var _altura: HSlider
 var _hombros: HSlider
@@ -50,6 +51,7 @@ func _ready() -> void:
 	theme = EstiloSiga.tema()
 	_partida.cargar()
 	_perfil = PerfilJugador.completar(_partida.estado.get("perfil_jugador", {}))
+	_alta_pendiente = not PerfilJugador.esta_configurado(_perfil)
 	_construir()
 	_cargar_controles()
 	_refrescar()
@@ -275,11 +277,18 @@ func _refrescar() -> void:
 
 func _guardar() -> void:
 	_perfil = _desde_controles()
+	_perfil["configurado"] = true
 	_partida.estado["perfil_jugador"] = _perfil
-	if _partida.guardar():
-		_estado.text = "Ficha guardada."
-	else:
+	if not _partida.guardar():
 		_estado.text = "No se pudo guardar la ficha."
+		return
+	if _alta_pendiente:
+		_alta_pendiente = false
+		var error := get_tree().change_scene_to_file("res://escenas/dia.tscn")
+		if error != OK:
+			_estado.text = "Ficha guardada, pero no se pudo iniciar la jornada."
+		return
+	_estado.text = "Ficha guardada."
 
 
 func _volver() -> void:
