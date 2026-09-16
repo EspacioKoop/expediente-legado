@@ -297,7 +297,7 @@ func _aplicar_estado_visual() -> void:
 		var nodo_version := get_node_or_null("Version_%s" % version_id) as Node3D
 		if nodo_version == null:
 			continue
-		var version_visible := version_id == _version_actual
+		var version_visible: bool = String(version_id) == _version_actual
 		for hijo in nodo_version.get_children():
 			if hijo is VisualInstance3D:
 				(hijo as VisualInstance3D).visible = version_visible
