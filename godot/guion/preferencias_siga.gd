@@ -147,9 +147,7 @@ static func cargar(ruta: String = RUTA) -> Dictionary:
 	)
 	resultado["volumen"] = clampf(float(datos.get("volumen", 1.0)), 0.0, 1.0)
 	resultado["volumen_efectos"] = clampf(float(datos.get("volumen_efectos", 1.0)), 0.0, 1.0)
-	resultado["volumen_ambiente"] = clampf(
-		float(datos.get("volumen_ambiente", 1.0)), 0.0, 1.0
-	)
+	resultado["volumen_ambiente"] = clampf(float(datos.get("volumen_ambiente", 1.0)), 0.0, 1.0)
 	resultado["volumen_musica"] = clampf(float(datos.get("volumen_musica", 1.0)), 0.0, 1.0)
 	resultado["sensibilidad_camara_raton"] = clampf(
 		float(datos.get("sensibilidad_camara_raton", 1.0)),
