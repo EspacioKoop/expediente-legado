@@ -80,8 +80,10 @@ func _construir() -> void:
 	raiz.add_child(_titulo("RECONSTRUCCIÓN DEL EXPEDIENTE"))
 	raiz.add_child(
 		_linea(
-			"Seleccione una tarjeta y use ↑/↓ para moverla. "
-			+ "La puntuación mide coherencia con los documentos disponibles."
+			(
+				"Seleccione una tarjeta y use ↑/↓ para moverla. "
+				+ "La puntuación mide coherencia con los documentos disponibles."
+			)
 		)
 	)
 
@@ -245,17 +247,21 @@ func _detalle_discrepancias(discrepancias: Array) -> String:
 		if typeof(discrepancia) != TYPE_DICTIONARY:
 			continue
 		if discrepancia.get("tipo") == ReconstruccionExpediente.CONTRADICCION:
-			lineas.append(
-				"Contradicción: folio %s aparece antes que folio %s."
-				% [
-					_folio_de(String(discrepancia.get("anterior", ""))),
-					_folio_de(String(discrepancia.get("actual", ""))),
-				]
+			(
+				lineas
+				. append(
+					(
+						"Contradicción: folio %s aparece antes que folio %s."
+						% [
+							_folio_de(String(discrepancia.get("anterior", ""))),
+							_folio_de(String(discrepancia.get("actual", ""))),
+						]
+					)
+				)
 			)
 		elif discrepancia.get("tipo") == ReconstruccionExpediente.DATO_AUSENTE:
 			lineas.append(
-				"Dato ausente en folio %s."
-				% _folio_de(String(discrepancia.get("id", "")))
+				"Dato ausente en folio %s." % _folio_de(String(discrepancia.get("id", "")))
 			)
 	return "\n".join(lineas)
 
