@@ -55,7 +55,7 @@ func texto_accion() -> String:
 ## El mando conserva una única fuente de verdad para el estado visual, pero no
 ## avanza contenido: dejar la TV encendida de fondo no activa semillas.
 func alternar_desde_mando() -> void:
-	_alternar()
+	_alternar(null)
 
 
 ## La interacción directa exige tres pasos observables: encender, elegir el
@@ -63,10 +63,10 @@ func alternar_desde_mando() -> void:
 ## semilla; salir o apagar antes reinicia el progreso incompleto.
 func _interactuar_directo(_actor: Node) -> void:
 	if not _encendida:
-		_alternar()
+		_alternar(_actor)
 		return
 	if _documental_completado:
-		_alternar()
+		_alternar(_actor)
 		return
 	if _paso_documental == 0:
 		_paso_documental = 1
@@ -78,7 +78,7 @@ func _interactuar_directo(_actor: Node) -> void:
 	_documental_completado = SuenoDuat.registrar_documental(jornada_actual, true)
 
 
-func _alternar() -> void:
+func _alternar(_actor: Node) -> void:
 	_encendida = not _encendida
 	_brillo.visible = _encendida
 	if not _encendida and not _documental_completado:
@@ -86,8 +86,8 @@ func _alternar() -> void:
 
 
 ## `TelevisionInteractiva3D` vive bajo `_mundo`, que se recrea al entrar en casa.
-## Buscar la propiedad `jornada` en ancestros evita meter Partida/Jornada en la
-## utilería y mantiene el montaje de CasaUtileria ajeno a persistencia.
+## Buscar la propiedad `jornada` en ancestros evita acoplar la utilería al estado
+## global y mantiene el montaje de CasaUtileria ajeno a persistencia.
 func _jornada_en_escena() -> Dictionary:
 	var nodo: Node = self
 	while nodo != null:
