@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "hilos": {
+    "cunado-asuntos-mayusculas": {
+      "espera_acciones": 1,
+      "opciones": [
+        {
+          "id": "cafe-y-asuntos",
+          "texto": "Me apunto al café. Y RE: solo si estoy respondiendo.",
+          "contestacion": "Vale, café hecho. Lo de RE: te lo decía porque aquí da sensación de que el asunto ya viene hablado y la gente pregunta menos. No digo que esté bien, digo que funciona.\n\nTe aviso cuando baje."
+        },
+        {
+          "id": "quien-lo-dijo",
+          "texto": "¿Quién te dijo lo de poner los asuntos en mayúsculas?",
+          "contestacion": "Ahora me haces dudar. Creo que el de Sistemas. O Personal. También puede ser que se lo oyera al de la mesa de en medio y él lo dijera por otra cosa.\n\nTú ponlos normales de momento. Si alguien se queja, ya sabemos que sí era una norma."
+        },
+        {
+          "id": "gracias",
+          "texto": "Gracias por avisar.",
+          "contestacion": "De nada. Si descubro si era obligatorio de verdad te digo. Lo del café sigue en pie, que eso sí lo tengo confirmado."
+        }
+      ]
+    },
+    "correspondencia-sobres": {
+      "espera_acciones": 1,
+      "opciones": [
+        {
+          "id": "ayudar-repartir",
+          "texto": "Si quieres, te ayudo a averiguar de quién son.",
+          "contestacion": "Gracias, pero mejor que no pasen por más manos. Si a media tarde nadie los reclama, bajo al registro y pregunto allí.\n\nNo es desconfianza. Es que cuando un sobre pierde dueño, enseguida gana testigos."
+        },
+        {
+          "id": "de-donde-vienen",
+          "texto": "¿Sabes al menos de dónde vienen?",
+          "contestacion": "Dos tienen matasellos de aquí y uno de fuera. El de fuera pesa más y no lleva remite. Eso es todo lo que sé sin abrirlos, y prefiero seguir sabiendo solo eso."
+        }
+      ]
+    },
+    "telefono-centralita": {
+      "espera_acciones": 1,
+      "opciones": [
+        {
+          "id": "cubrir-llamadas",
+          "texto": "¿Quieres que te cubra si vuelven a llamar?",
+          "contestacion": "No hace falta, gracias. Centralita ya me cubre bastante: hoy me han preguntado dos veces si podía localizarme y las dos veces les he dicho que lo intentaría.\n\nSi llaman por algo urgente, entonces sí: diles que sigo al teléfono."
+        },
+        {
+          "id": "como-te-pasas",
+          "texto": "¿Cómo consiguen pasarte una llamada contigo mismo?",
+          "contestacion": "Si lo descubres, me lo dices. Mi teoría es que hay dos fichas mías en el listín y ninguna quiere admitir que sobra.\n\nHe probado a colgar una línea y ha sonado la otra, así que de momento empate."
+        },
+        {
+          "id": "recibido",
+          "texto": "Recibido.",
+          "contestacion": "Perfecto. Si llaman preguntando si he recibido algo, diles que no sabes nada. Técnicamente también será verdad hasta que te lo cuente."
+        }
+      ]
+    },
+    "becario-listado": {
+      "espera_acciones": 1,
+      "opciones": [
+        {
+          "id": "avisar-listado",
+          "texto": "Te aviso si veo tu nombre en el directorio.",
+          "contestacion": "Gracias. Si salgo, dime solo en qué pantalla. Iba a pedirte que la imprimieras, pero mejor no dejar otro papel con mi nombre dando vueltas.\n\nA estas alturas prefiero pruebas pequeñas."
+        },
+        {
+          "id": "cuatro-anos",
+          "texto": "Cuatro años de prácticas no suena muy normal.",
+          "contestacion": "Ya. Cada vez que pregunto me dicen que mi situación está «en trámite». El primer año preguntaba qué trámite. El segundo, cuándo terminaba. Ahora solo pregunto si sigo cobrando este mes.\n\nDe momento, sí."
+        },
+        {
+          "id": "no-nominas",
+          "texto": "No puedo ayudarte con nóminas, lo siento.",
+          "contestacion": "No pasa nada. Yo tampoco puedo ayudarme con nóminas y llevo bastante más tiempo intentándolo.\n\nSi ves algo raro en el directorio, con que me lo digas basta."
+        }
+      ]
+    },
+    "jubilacion-cosas-nuevas": {
+      "espera_acciones": 1,
+      "opciones": [
+        {
+          "id": "que-procedimiento",
+          "texto": "¿Qué procedimiento nuevo no piensas aprender?",
+          "contestacion": "El del escáner nuevo, para empezar. Tiene seis botones para hacer lo que el anterior hacía con dos y una luz que parpadea incluso cuando no lo toca nadie.\n\nEn tres semanas será problema de otra persona. Lo considero planificación."
+        },
+        {
+          "id": "dejar-manana",
+          "texto": "Entendido. Lo que llegue tarde puede esperar a mañana.",
+          "contestacion": "Exacto. Mañana seguirá siendo papel y nosotros seguiremos siendo funcionarios. Si alguna de esas dos cosas cambia esta tarde, entonces sí me avisas."
+        },
+        {
+          "id": "cerrar-hoy",
+          "texto": "Prefiero dejarlo todo cerrado antes de irme.",
+          "contestacion": "Tú mismo. Yo también hacía eso cuando empecé. Luego descubrí que el archivo vuelve a llenarse por la noche aunque uno lo deje vacío.\n\nNo te quito la ilusión; solo te ahorro la sorpresa."
+        }
+      ]
+    }
+  }
+}
