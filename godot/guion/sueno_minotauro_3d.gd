@@ -96,7 +96,9 @@ func _montar_corredores() -> void:
 			if dibujados.has(clave) or dibujados.has(inversa):
 				continue
 			dibujados[clave] = true
-			_crear_corredor(_posicion_local(origen), _posicion_local(destino), origen + "_" + destino)
+			_crear_corredor(
+				_posicion_local(origen), _posicion_local(destino), origen + "_" + destino
+			)
 
 
 func _crear_corredor(desde: Vector3, hasta: Vector3, nombre: String) -> void:
@@ -215,7 +217,9 @@ func _montar_luz() -> void:
 
 
 func _aplicar_estado_visual(animar_repliegue: bool) -> void:
-	var fase := posmod(int(_estado.get("fase_topologica", 0)), SuenoMinotauro.TRANSFORMACIONES.size())
+	var fase := posmod(
+		int(_estado.get("fase_topologica", 0)), SuenoMinotauro.TRANSFORMACIONES.size()
+	)
 	var posiciones := [
 		Vector3.ZERO,
 		Vector3(0.0, 1.7, -0.6),
@@ -236,11 +240,14 @@ func _aplicar_estado_visual(animar_repliegue: bool) -> void:
 	else:
 		var tween := create_tween()
 		tween.set_parallel(true)
-		tween.tween_property(
-			_ala_replegable,
-			"position",
-			_posicion_local(SuenoMinotauro.CENTRO) + destino_posicion,
-			0.72,
+		(
+			tween
+			. tween_property(
+				_ala_replegable,
+				"position",
+				_posicion_local(SuenoMinotauro.CENTRO) + destino_posicion,
+				0.72,
+			)
 		)
 		tween.tween_property(_ala_replegable, "rotation_degrees", destino_rotacion, 0.72)
 	_actualizar_marcas()
