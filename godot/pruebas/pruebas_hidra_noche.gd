@@ -41,7 +41,9 @@ func _initialize() -> void:
 		_comprobar(sintoma.interactuar(actor), "primer síntoma interactuable")
 		_comprobar(sintoma.interactuar(actor), "segundo síntoma interactuable")
 		var estado := encuentro.estado_actual()
-		_comprobar(int(estado.get("cabezas", 0)) > SuenoHidra.CABEZAS_INICIALES, "proliferación visible")
+		_comprobar(
+			int(estado.get("cabezas", 0)) > SuenoHidra.CABEZAS_INICIALES, "proliferación visible"
+		)
 		_comprobar(int(estado.get("regeneraciones", 0)) == 1, "regeneración arquitectónica")
 		_comprobar(bool(estado.get("nodo_legible", false)), "raíz deducible tras insistir")
 		_comprobar(nodo.habilitado, "nodo común habilitado al ser legible")
