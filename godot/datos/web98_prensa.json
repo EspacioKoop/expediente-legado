@@ -1,0 +1,163 @@
+{
+  "version": 1,
+  "cabeceras": [
+    {
+      "id": "la-plaza",
+      "recurso_id": "prensa-la-plaza",
+      "nombre": "La Plaza",
+      "fila_cabecera": 0,
+      "lema": "Trabajo, barrio y vida común",
+      "prioridades": ["condiciones de trabajo", "organización colectiva", "servicios compartidos"]
+    },
+    {
+      "id": "diario-central",
+      "recurso_id": "prensa-diario-central",
+      "nombre": "Diario Central",
+      "fila_cabecera": 1,
+      "lema": "Información general y seguimiento institucional",
+      "prioridades": ["procedimiento", "continuidad institucional", "contraste de posiciones"]
+    },
+    {
+      "id": "el-horizonte",
+      "recurso_id": "prensa-el-horizonte",
+      "nombre": "El Horizonte",
+      "fila_cabecera": 2,
+      "lema": "Actualidad, trabajo, ciudad y ciencia",
+      "prioridades": ["servicios públicos", "protección social", "negociación"]
+    },
+    {
+      "id": "gaceta-mercantil",
+      "recurso_id": "prensa-gaceta-mercantil",
+      "nombre": "Gaceta Mercantil",
+      "fila_cabecera": 3,
+      "lema": "Economía, empresas, mercados y política",
+      "prioridades": ["costes", "eficiencia", "actividad empresarial"]
+    }
+  ],
+  "hechos": [
+    {
+      "id": "turnos-atencion-planta4",
+      "jornada": 1,
+      "titulo_base": "La DGAI ensaya un nuevo turno de atención en la planta 4",
+      "personas_organismos": ["DGAI", "plantilla de atención", "comité de personal"],
+      "temas": ["trabajo", "servicio público", "organización interna"],
+      "disponible_desde_dia": 1,
+      "disponible_hasta_dia": 1,
+      "datos": [
+        {"id": "duracion", "etiqueta": "Duración", "valor": "prueba de dos semanas"},
+        {"id": "plantilla", "etiqueta": "Personal afectado", "valor": "14 puestos de atención"},
+        {"id": "franja", "etiqueta": "Franja", "valor": "la atención vespertina se amplía 30 minutos"},
+        {"id": "salario", "etiqueta": "Retribución", "valor": "la circular no modifica salarios"},
+        {"id": "seguimiento", "etiqueta": "Seguimiento", "valor": "el comité pide una evaluación escrita tras la primera semana"},
+        {"id": "objetivo", "etiqueta": "Objetivo declarado", "valor": "reducir acumulaciones al final de la jornada"}
+      ]
+    },
+    {
+      "id": "licitacion-terminales-registro",
+      "jornada": 2,
+      "titulo_base": "La DGAI abre la compra de doce terminales para el registro",
+      "personas_organismos": ["DGAI", "mesa de contratación", "proveedores"],
+      "temas": ["informática", "contratación", "presupuesto"],
+      "disponible_desde_dia": 2,
+      "disponible_hasta_dia": 0,
+      "datos": [
+        {"id": "unidades", "etiqueta": "Unidades", "valor": "12 terminales"},
+        {"id": "tope", "etiqueta": "Presupuesto máximo", "valor": "1.240.000 pesetas"},
+        {"id": "ofertas", "etiqueta": "Ofertas recibidas", "valor": "3"},
+        {"id": "plazo", "etiqueta": "Instalación", "valor": "hasta 10 días desde la adjudicación"},
+        {"id": "mantenimiento", "etiqueta": "Mantenimiento", "valor": "un año incluido"},
+        {"id": "estado", "etiqueta": "Estado", "valor": "la adjudicación todavía no es definitiva"}
+      ]
+    }
+  ],
+  "tratamientos": [
+    {
+      "hecho_id": "turnos-atencion-planta4",
+      "cabecera_id": "la-plaza",
+      "orden": 10,
+      "titular": "La plantilla reclama seguimiento del nuevo turno de atención",
+      "entradilla": "La prueba afecta a catorce puestos y amplía media hora la franja de tarde; el comité pide revisar por escrito sus efectos tras la primera semana.",
+      "datos_destacados": ["plantilla", "franja", "seguimiento", "salario"],
+      "omisiones": ["objetivo"],
+      "enfasis": ["impacto laboral", "capacidad de revisión colectiva"],
+      "opinion": "La organización del servicio debe medirse también por cómo reparte sus costes entre quienes lo sostienen."
+    },
+    {
+      "hecho_id": "turnos-atencion-planta4",
+      "cabecera_id": "diario-central",
+      "orden": 10,
+      "titular": "La DGAI prueba durante dos semanas un nuevo horario en la planta 4",
+      "entradilla": "La circular amplía treinta minutos la atención vespertina y prevé evaluar el funcionamiento del cambio durante el periodo de prueba.",
+      "datos_destacados": ["duracion", "franja", "objetivo", "seguimiento"],
+      "omisiones": ["salario"],
+      "enfasis": ["carácter provisional", "seguimiento del procedimiento"],
+      "opinion": "Una prueba acotada permite comparar resultados antes de convertir el cambio en rutina."
+    },
+    {
+      "hecho_id": "turnos-atencion-planta4",
+      "cabecera_id": "el-horizonte",
+      "orden": 10,
+      "titular": "Más tiempo de atención con revisión prevista tras la primera semana",
+      "entradilla": "La DGAI amplía la franja vespertina en una prueba de dos semanas mientras el comité de personal solicita evaluar su impacto antes de consolidarla.",
+      "datos_destacados": ["franja", "duracion", "seguimiento", "plantilla"],
+      "omisiones": ["salario"],
+      "enfasis": ["acceso al servicio", "negociación y evaluación"],
+      "opinion": "Extender un servicio puede ser útil si la mejora de atención y las condiciones de trabajo se revisan conjuntamente."
+    },
+    {
+      "hecho_id": "turnos-atencion-planta4",
+      "cabecera_id": "gaceta-mercantil",
+      "orden": 10,
+      "titular": "La DGAI ajusta horarios para reducir acumulaciones al cierre",
+      "entradilla": "El organismo ensaya durante dos semanas una franja vespertina treinta minutos mayor sin cambios retributivos previstos en la circular.",
+      "datos_destacados": ["objetivo", "duracion", "franja", "salario"],
+      "omisiones": ["seguimiento"],
+      "enfasis": ["organización del tiempo", "coste operativo declarado"],
+      "opinion": "El ensayo será útil si permite atender la misma carga con menos cuellos de botella y resultados medibles."
+    },
+    {
+      "hecho_id": "licitacion-terminales-registro",
+      "cabecera_id": "la-plaza",
+      "orden": 10,
+      "titular": "Doce nuevos terminales llegan al registro mediante concurso",
+      "entradilla": "La DGAI fija un máximo de 1,24 millones de pesetas para renovar puestos de trabajo; la adjudicación sigue abierta entre tres ofertas.",
+      "datos_destacados": ["unidades", "tope", "ofertas", "estado"],
+      "omisiones": ["mantenimiento"],
+      "enfasis": ["herramientas de trabajo", "control del gasto común"],
+      "opinion": "La renovación tecnológica debe traducirse en mejores herramientas y no sólo en nuevas partidas presupuestarias."
+    },
+    {
+      "hecho_id": "licitacion-terminales-registro",
+      "cabecera_id": "diario-central",
+      "orden": 10,
+      "titular": "Tres ofertas concurren al suministro de doce terminales para el registro",
+      "entradilla": "La mesa de contratación estudia propuestas con un límite de 1,24 millones de pesetas y un plazo de instalación de hasta diez días.",
+      "datos_destacados": ["ofertas", "unidades", "tope", "plazo", "estado"],
+      "omisiones": [],
+      "enfasis": ["estado del procedimiento", "condiciones de contratación"],
+      "opinion": "La comparación será más útil cuando la adjudicación permita contrastar precio, plazo y mantenimiento."
+    },
+    {
+      "hecho_id": "licitacion-terminales-registro",
+      "cabecera_id": "el-horizonte",
+      "orden": 10,
+      "titular": "El registro prepara doce terminales nuevos con mantenimiento incluido",
+      "entradilla": "El concurso prevé un año de mantenimiento y hasta diez días de instalación para una renovación que todavía no tiene adjudicatario definitivo.",
+      "datos_destacados": ["unidades", "mantenimiento", "plazo", "estado"],
+      "omisiones": ["ofertas"],
+      "enfasis": ["continuidad del servicio", "calidad de la infraestructura pública"],
+      "opinion": "La compra tendrá valor si la renovación incluye soporte suficiente para sostener el servicio después de instalar los equipos."
+    },
+    {
+      "hecho_id": "licitacion-terminales-registro",
+      "cabecera_id": "gaceta-mercantil",
+      "orden": 10,
+      "titular": "Tres proveedores compiten por un contrato de 1,24 millones de pesetas",
+      "entradilla": "La DGAI licita doce terminales con instalación en diez días y un año de mantenimiento incluido; la adjudicación permanece abierta.",
+      "datos_destacados": ["ofertas", "tope", "plazo", "mantenimiento", "estado"],
+      "omisiones": [],
+      "enfasis": ["competencia entre proveedores", "precio y condiciones del contrato"],
+      "opinion": "La competencia entre ofertas permite comparar no sólo el precio, sino también plazo y servicio posventa."
+    }
+  ]
+}
