@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="120" viewBox="0 0 96 120" shape-rendering="crispEdges">
+<title>Ficha administrativa de R. Salcido; silueta no biográfica</title>
+<rect width="96" height="120" fill="#e9e5d8"/>
+<rect x="4" y="4" width="88" height="112" fill="#fffdf4" stroke="#353535" stroke-width="2"/>
+<path d="M10 16h76M10 98h76" stroke="#68743F" stroke-width="3"/>
+<rect x="12" y="21" width="44" height="58" fill="#ded9ca" stroke="#353535" stroke-width="2" stroke-dasharray="3 2"/>
+<circle cx="34" cy="39" r="11" fill="#67645f"/>
+<path d="M17 70c2-13 8-20 17-20s15 7 17 20v5H17z" fill="#67645f"/>
+<path d="M64 27h18M64 36h14M64 45h18" stroke="#353535" stroke-width="2"/>
+<rect x="62" y="55" width="8" height="8" fill="none" stroke="#68743F" stroke-width="2"/>
+<rect x="74" y="55" width="8" height="8" fill="none" stroke="#68743F" stroke-width="2"/>
+<path d="M66 64v10h12V64M61 75h22" fill="none" stroke="#68743F" stroke-width="2"/>
+<path d="M15 88h38M15 94h45" stroke="#353535" stroke-width="2"/>
+<path d="M68 83v10M68 83h13v10M68 88h13M72 93v5M78 93v5" fill="none" stroke="#68743F" stroke-width="2"/>
+</svg>

@@ -4,6 +4,7 @@
     "acento": "#8A4D3B",
     "icono": "res://arte/siga_expedientes/caso_01_cierre.svg",
     "lamina": "res://arte/siga_expedientes/lamina_01_cierre.svg",
+    "sujeto": "res://arte/siga_expedientes/sujeto_01_ibarra.svg",
     "motivo": "cierre contable, factura y revisión urgente"
   },
   "caso2@2": {
@@ -11,6 +12,7 @@
     "acento": "#68743F",
     "icono": "res://arte/siga_expedientes/caso_02_silla.svg",
     "lamina": "res://arte/siga_expedientes/lamina_02_silla.svg",
+    "sujeto": "res://arte/siga_expedientes/sujeto_02_salcido.svg",
     "motivo": "silla ergonómica atrapada en un trámite imposible"
   },
   "caso3@3": {
