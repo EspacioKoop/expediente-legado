@@ -130,6 +130,114 @@ class PruebasROM(unittest.TestCase):
                         self.assertEqual(emulador.memory[inicio:inicio + 20],
                                          esperado[fila * 32:fila * 32 + 20])
 
+    def iniciar_carrera(self, cgb=True):
+        emulador = self.arrancar(cgb)
+        self.pulsar(emulador, "start")
+        emulador.tick(3, False)
+        return emulador
+
+    def pulsar(self, emulador, boton):
+        emulador.button_press(boton)
+        emulador.tick(2, False)
+        emulador.button_release(boton)
+        emulador.tick(1, False)
+
+    def poner(self, emulador, **valores):
+        for nombre, valor in valores.items():
+            emulador.memory[self.simbolos[nombre]] = valor
+
+    def leer(self, emulador, nombre):
+        return emulador.memory[self.simbolos[nombre]]
+
+    def test_rival_avisa_antes_de_cambiar_hacia_el_jugador(self):
+        cambios = quietos = 0
+        for semilla in range(8):
+            with self.subTest(semilla=semilla):
+                emulador = self.iniciar_carrera()
+                # Jugador a la derecha, rival 1 a la izquierda; nadie choca.
+                self.poner(emulador, wInv=255, wPlayerLane=2, wR1Lane=0,
+                           wR1Y=64, wR1Dir=0, wR2Lane=2, wR2Y=8,
+                           wHazLane=2, wHazY=32, wFrame=semilla)
+                for _ in range(40):
+                    if self.leer(emulador, "wR1Y") >= 72:
+                        break
+                    emulador.tick(1, False)
+                direccion = self.leer(emulador, "wR1Dir")
+                if direccion == 0:
+                    quietos += 1
+                    emulador.tick(40, False)
+                    self.assertEqual(self.leer(emulador, "wR1Lane"), 0)
+                    continue
+                cambios += 1
+                self.assertEqual(direccion, 1)
+                # Aviso: vaiven de 2 px hacia el destino, sin sprites extra.
+                xs = set()
+                while self.leer(emulador, "wR1Dir"):
+                    self.assertLess(self.leer(emulador, "wR1Y"), 88)
+                    self.assertEqual(self.leer(emulador, "wR1Lane"), 0)
+                    emulador.tick(1, False)
+                    if self.leer(emulador, "wR1Dir"):
+                        xs.add(emulador.memory[0xFE09])
+                self.assertEqual(xs, {48, 50})
+                self.assertEqual(self.leer(emulador, "wR1Lane"), 1)
+                # El cambio llega antes de la zona de choque.
+                self.assertLessEqual(self.leer(emulador, "wR1Y"), 88)
+        self.assertGreater(cambios, 0)
+        self.assertGreater(quietos, 0)
+
+    def test_rebufo_lleno_prolonga_nitro(self):
+        emulador = self.iniciar_carrera()
+        self.poner(emulador, wInv=255, wPlayerLane=1, wR1Lane=1, wR1Y=56,
+                   wR2Lane=0, wR2Y=8, wHazLane=0, wHazY=32, wDraft=0)
+        observadas = self.vigilar_escrituras(emulador)
+        emulador.tick(72, False)
+        self.assertEqual(self.leer(emulador, "wDraft"), 32)
+        # El medidor se redibuja por segmentos y siempre dentro de VBlank.
+        activas = [x for x in observadas if x[4]]
+        self.assertTrue(any(0x9810 <= x[1] < 0x9814 for x in activas))
+        self.assertEqual([x for x in activas if x[2] < 144 or x[3] != 1], [])
+        self.assertEqual(self.leer(emulador, "wDraftDirty"), 0)
+        self.assertEqual(emulador.memory[0x9810:0x9814], [53] * 4)
+
+        self.poner(emulador, wPlayerLane=2)
+        self.pulsar(emulador, "a")
+        self.assertGreater(self.leer(emulador, "wTurbo"), 140)
+        self.assertEqual(self.leer(emulador, "wDraft"), 0)
+        self.assertEqual(self.leer(emulador, "wNitro"), 2)
+        emulador.tick(4, False)
+        self.assertEqual(emulador.memory[0x9810:0x9814], [52] * 4)
+
+        # Sin rebufo lleno, el nitro conserva su duracion original.
+        self.poner(emulador, wTurbo=0, wDraft=31)
+        self.pulsar(emulador, "a")
+        self.assertLessEqual(self.leer(emulador, "wTurbo"), 90)
+        self.assertEqual(self.leer(emulador, "wDraft"), 31)
+        self.assertEqual(self.leer(emulador, "wNitro"), 1)
+
+    def test_golpe_rompe_rebufo(self):
+        emulador = self.iniciar_carrera()
+        self.poner(emulador, wInv=0, wPlayerLane=1, wR1Lane=1, wR1Y=118,
+                   wR2Lane=0, wR2Y=8, wHazLane=0, wHazY=32, wDraft=32)
+        emulador.tick(2, False)
+        self.assertEqual(self.leer(emulador, "wLives"), 2)
+        self.assertEqual(self.leer(emulador, "wDraft"), 0)
+
+    def test_adelantar_en_turbo_puntua_doble(self):
+        emulador = self.iniciar_carrera()
+        self.poner(emulador, wInv=255, wPlayerLane=2, wR1Lane=0, wR1Y=159,
+                   wR2Lane=0, wR2Y=100, wHazLane=0, wHazY=32,
+                   wScore=10, wTurbo=60)
+        emulador.tick(1, False)
+        self.assertEqual(self.leer(emulador, "wScore"), 12)
+
+        self.poner(emulador, wTurbo=0, wR1Y=159, wR2Y=100)
+        emulador.tick(2, False)
+        self.assertEqual(self.leer(emulador, "wScore"), 13)
+
+        self.poner(emulador, wTurbo=60, wR1Y=159, wR2Y=100, wScore=98)
+        emulador.tick(1, False)
+        self.assertEqual(self.leer(emulador, "wScore"), 99)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
