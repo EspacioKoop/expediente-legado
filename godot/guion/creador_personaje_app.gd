@@ -28,6 +28,7 @@ const ROPAS := [
 	["Burdeos", "#69454c"],
 ]
 
+var _partida := Partida.new()
 var _perfil: Dictionary
 var _cuerpo: OptionButton
 var _altura: HSlider
@@ -47,7 +48,8 @@ var _estado: Label
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	theme = EstiloSiga.tema()
-	_perfil = PerfilJugador.cargar()
+	_partida.cargar()
+	_perfil = PerfilJugador.completar(_partida.estado.get("perfil_jugador", {}))
 	_construir()
 	_cargar_controles()
 	_refrescar()
@@ -273,7 +275,8 @@ func _refrescar() -> void:
 
 func _guardar() -> void:
 	_perfil = _desde_controles()
-	if PerfilJugador.guardar(_perfil):
+	_partida.estado["perfil_jugador"] = _perfil
+	if _partida.guardar():
 		_estado.text = "Ficha guardada."
 	else:
 		_estado.text = "No se pudo guardar la ficha."
