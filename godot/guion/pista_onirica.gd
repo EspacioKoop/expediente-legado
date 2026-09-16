@@ -14,16 +14,23 @@ extends RefCounted
 ##
 ## `resultado_puzzle` debe proceder de PuzzleOnirico y estar completado. Si el
 ## puzzle falló, fue abandonado o sus fuentes no cubren todos los orígenes de la
-## pista, no hay recompensa. Las relaciones de dos documentos son conmutativas.
+## pista, no hay recompensa. Si `reward_id` viene informado, solo esa pista puede
+## resolverse. Sin objetivo explícito se exige una única candidata: varias pistas
+## compatibles con las mismas fuentes son ambiguas y se rechazan en vez de elegir
+## arbitrariamente la primera del catálogo.
 static func resolver(caso: Dictionary, resultado_puzzle: Dictionary) -> Dictionary:
 	if str(resultado_puzzle.get("state", "")) != "completado":
 		return {}
 	var fuentes := _normalizar(resultado_puzzle.get("source_ids", []))
 	if fuentes.is_empty():
 		return {}
+	var objetivo := str(resultado_puzzle.get("reward_id", "")).strip_edges()
+	var candidatas: Array = []
 
 	for pista in caso.get("pistas", []):
 		var pista_id := str(pista.get("id", ""))
+		if not objetivo.is_empty() and pista_id != objetivo:
+			continue
 		var a := str(pista.get("registroOrigen", ""))
 		if pista_id.is_empty() or a.is_empty() or not fuentes.has(a):
 			continue
@@ -35,12 +42,17 @@ static func resolver(caso: Dictionary, resultado_puzzle: Dictionary) -> Dictiona
 				continue
 			origenes.append(b)
 
-		return {
-			"id": pista_id,
-			"descripcion": str(pista.get("descripcion", "")),
-			"fuentes": origenes,
-		}
-	return {}
+		candidatas.append(
+			{
+				"id": pista_id,
+				"descripcion": str(pista.get("descripcion", "")),
+				"fuentes": origenes,
+			}
+		)
+
+	if candidatas.size() != 1:
+		return {}
+	return candidatas[0]
 
 
 ## Registra únicamente la identidad catalogada de una recompensa ya resuelta.
