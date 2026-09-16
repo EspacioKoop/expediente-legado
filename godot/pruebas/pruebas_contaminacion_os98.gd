@@ -21,9 +21,7 @@ func _probar() -> void:
 	_comprobar(not contexto["habilitar_enlace13"], "la superficie restringida no se anuncia antes")
 	_comprobar(contexto["credenciales"].is_empty(), "una partida nueva no conoce credenciales")
 	_comprobar(
-		not ContaminacionOs98.registrar_documento(
-			partida, estado, ContaminacionOs98.MEMORANDUM_ID
-		),
+		not ContaminacionOs98.registrar_documento(partida, estado, ContaminacionOs98.MEMORANDUM_ID),
 		"no se puede adelantar enlace13 abriendo un id antes del hito",
 	)
 
@@ -79,8 +77,10 @@ func _probar() -> void:
 	var otra_vuelta := ContaminacionOs98.nuevo()
 	var contexto_nuevo := ContaminacionOs98.contexto(partida, otra_vuelta, 1)
 	_comprobar(
-		contexto_nuevo["credenciales"].is_empty()
-		and contexto_nuevo["fase_contaminacion"] == ContaminacionOs98.FASE_NORMALIDAD,
+		(
+			contexto_nuevo["credenciales"].is_empty()
+			and contexto_nuevo["fase_contaminacion"] == ContaminacionOs98.FASE_NORMALIDAD
+		),
 		"un estado de vuelta nuevo no hereda contaminación",
 	)
 
