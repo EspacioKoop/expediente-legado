@@ -111,27 +111,25 @@ static func _cinematicas(comprobar: Callable) -> void:
 
 	# --- Encontrar una carta de tarot (#71) ---
 
-	# La del tarot se valida ya RESUELTA: sus planos declaran el ancho y la
-	# cara, y la figura en el formato del reproductor se construye al resolver.
+	# La del tarot se valida ya RESUELTA: el decorado de la mesa se añade a
+	# cada plano al resolver.
 	var carta := {"id": "la-luna", "nombre": "La Luna"}
 	var tarot := TarotCinematica.planos_de(carta)
 	comprobar.call("la cinemática del tarot está bien declarada", Cinematica.validar(tarot), [])
 	comprobar.call("tiene los cuatro planos", tarot.size(), 4)
-	comprobar.call("todos son 2d", tarot.all(func(p): return p["tipo"] == "2d"), true)
-
-	# El volteo es un estrechamiento: el reproductor no sabe escalar, así que
-	# si el canto dejara de ser más estrecho, la carta no se voltearía.
-	var anchos := tarot.map(func(p): return p["figura"][0]["rect"].size.x)
-	comprobar.call("el canto es el plano más estrecho", anchos[1], anchos.min())
-	comprobar.call("y el dorso y el frontal miden igual", anchos[0], anchos[2])
-
-	# El frontal es el único momento de color del juego: si se quedara del gris
-	# del dorso, encontrar una carta no se distinguiría de no encontrarla.
+	comprobar.call("todos son 3d", tarot.all(func(p): return p["tipo"] == "3d"), true)
 	comprobar.call(
-		"el frontal no tiene el color del dorso",
-		tarot[2]["figura"][0]["color"] != tarot[0]["figura"][0]["color"],
+		"todos ruedan sobre la misma mesa",
+		tarot.all(func(p): return p["decorado"] == tarot[0]["decorado"]),
 		true
 	)
+
+	# El volteo es la cámara rodeando una carta con dos caras: el dorso se ve
+	# desde -z, el canto de lado y el frontal desde +z.
+	var centro := TarotCinematica.CENTRO
+	comprobar.call("el reverso mira el dorso", tarot[0]["camara"].z < centro.z, true)
+	comprobar.call("el canto se mira de lado", absf(tarot[1]["camara"].z - centro.z) < 0.01, true)
+	comprobar.call("el frontal mira el frente", tarot[2]["camara"].z > centro.z, true)
 
 	# El rótulo lleva el nombre de la carta, que es lo único que cambia entre
 	# las ocho: el rodaje es el mismo.
@@ -150,13 +148,45 @@ static func _cinematicas(comprobar: Callable) -> void:
 		true
 	)
 
-	# Y no se estropea entre reproducciones: la figura es un valor anidado, que
-	# es justo lo que una copia superficial compartiría.
-	tarot[0]["figura"][0]["color"] = Color.RED
+	# Y no se estropea entre reproducciones: el decorado es un valor anidado,
+	# que es justo lo que una copia superficial compartiría.
+	tarot[0]["decorado"]["bultos"].clear()
 	comprobar.call(
-		"la figura se entrega en copia profunda",
-		TarotCinematica.planos_de(carta)[0]["figura"][0]["color"] != Color.RED,
+		"el decorado se entrega en copia profunda",
+		TarotCinematica.planos_de(carta)[0]["decorado"]["bultos"].is_empty(),
+		false
+	)
+
+	# --- El sello (#70) en 3D sobre la mesa del archivo ---
+	var sello := SelloCinematica.planos_de(false)
+	var sello_prisa := SelloCinematica.planos_de(true)
+	comprobar.call("el sello está bien declarado", Cinematica.validar(sello), [])
+	comprobar.call(
+		"el sello tiene tres planos 3d", sello.filter(func(p): return p["tipo"] == "3d").size(), 3
+	)
+	comprobar.call(
+		"la prisa deja una huella de más",
+		sello_prisa[1]["decorado"]["bultos"].size() > sello[1]["decorado"]["bultos"].size(),
 		true
+	)
+	comprobar.call(
+		"un decorado que no es un espacio no valida",
+		(
+			Cinematica
+			. validar(
+				[
+					{
+						"tipo": "3d",
+						"segundos": 1.0,
+						"camara": Vector3.ONE,
+						"mira": Vector3.ZERO,
+						"decorado": 3
+					}
+				]
+			)
+			. size()
+		),
+		1
 	)
 
 	# --- La entrada de una vida laboral (#68) ---

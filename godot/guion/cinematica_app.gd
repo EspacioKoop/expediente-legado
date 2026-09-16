@@ -36,6 +36,13 @@ var _estado: Dictionary = {}
 var _reduccion_movimiento := false
 
 var _camara: Camera3D
+## El plató: un mundo 3D propio para los planos que traen `decorado`. Existe
+## porque hay momentos —el sello, la carta— que ocurren dentro de una pantalla
+## de interfaz, sin sala detrás por la que mover la cámara.
+var _plato: SubViewportContainer
+var _vista_plato: SubViewport
+var _decorado: Node3D
+var _huella_decorado := 0
 var _lienzo: Control
 var _rotulo: Label
 var _voz: Label
@@ -117,8 +124,10 @@ func _siguiente() -> void:
 	var es_2d: bool = plano["tipo"] == "2d"
 	_fondo.visible = es_2d
 	_figuras.visible = es_2d
+	var decorado: Dictionary = plano.get("decorado", {}) if not es_2d else {}
+	_preparar_plato(decorado)
 	if _camara != null:
-		_camara.current = not es_2d and _tiene_mundo_3d()
+		_camara.current = not es_2d and (not decorado.is_empty() or _tiene_mundo_3d())
 
 
 func _terminar() -> void:
@@ -131,6 +140,7 @@ func _terminar() -> void:
 	_voz.text = ""
 	_fondo.visible = false
 	_figuras.visible = false
+	_preparar_plato({})
 	terminada.emit()
 
 
@@ -139,7 +149,7 @@ func _tiene_mundo_3d() -> bool:
 
 
 func _mover_camara(plano: Dictionary, avance: float) -> void:
-	if _camara == null or not _tiene_mundo_3d():
+	if _camara == null or not (_plato.visible or _tiene_mundo_3d()):
 		return
 	var destino: Vector3 = plano["camara"]
 	# Con reducción de movimiento se conserva el plano y su duración, pero la
@@ -178,6 +188,29 @@ func _dibujar_figuras() -> void:
 		)
 
 
+## Monta (o reutiliza) el decorado de un plano en el plató. El decorado es un
+## espacio en el formato de `Espacio3D` —bultos, luces, suelo—: el reproductor
+## no sabe qué hay en la mesa, igual que no sabe qué es un sello en 2D. Planos
+## seguidos con el mismo decorado no lo reconstruyen.
+func _preparar_plato(decorado: Dictionary) -> void:
+	if decorado.is_empty():
+		_plato.visible = false
+		if _camara.get_parent() != self:
+			_camara.reparent(self, false)
+		return
+	var huella := hash(decorado)
+	if _decorado == null or huella != _huella_decorado:
+		if _decorado != null:
+			_decorado.free()
+		_decorado = Node3D.new()
+		_vista_plato.add_child(_decorado)
+		Espacio3D.construir(_decorado, decorado)
+		_huella_decorado = huella
+	if _camara.get_parent() != _vista_plato:
+		_camara.reparent(_vista_plato, false)
+	_plato.visible = true
+
+
 # --- Cajas ------------------------------------------------------------------
 
 
@@ -187,6 +220,24 @@ func _montar() -> void:
 
 	var capa := CanvasLayer.new()
 	add_child(capa)
+
+	_plato = SubViewportContainer.new()
+	_plato.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_plato.stretch = true
+	_plato.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_plato.visible = false
+	capa.add_child(_plato)
+	_vista_plato = SubViewport.new()
+	_vista_plato.own_world_3d = true
+	_plato.add_child(_vista_plato)
+	var entorno := WorldEnvironment.new()
+	entorno.environment = Environment.new()
+	entorno.environment.background_mode = Environment.BG_COLOR
+	entorno.environment.background_color = Color(0.05, 0.05, 0.06)
+	entorno.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	entorno.environment.ambient_light_color = Color(0.55, 0.55, 0.58)
+	entorno.environment.ambient_light_energy = 0.55
+	_vista_plato.add_child(entorno)
 
 	_lienzo = Control.new()
 	_lienzo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
