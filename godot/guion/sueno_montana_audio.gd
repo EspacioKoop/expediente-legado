@@ -48,8 +48,7 @@ static func viento_y_madera() -> AudioStreamWAV:
 			# Dos parciales de madera con una deriva mínima producen un crujido
 			# reconocible sin copiar una grabación concreta.
 			var madera := (
-				sin(TAU * (61.0 + desde * 19.0) * desde) * 0.090
-				+ sin(TAU * 137.0 * desde) * 0.034
+				sin(TAU * (61.0 + desde * 19.0) * desde) * 0.090 + sin(TAU * 137.0 * desde) * 0.034
 			)
 			muestra += madera * envolvente
 
