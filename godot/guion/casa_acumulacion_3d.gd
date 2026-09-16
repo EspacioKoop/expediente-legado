@@ -125,9 +125,7 @@ static func _variante(objeto: Dictionary) -> String:
 static func _lampara(raiz: Node3D) -> void:
 	_cilindro(raiz, Vector3(0, -0.09, 0), 0.09, 0.04, Color(0.16, 0.28, 0.18))
 	_cilindro(raiz, Vector3(0, 0.02, 0), 0.018, 0.20, Color(0.30, 0.31, 0.27))
-	_cilindro_truncado(
-		raiz, Vector3(0, 0.14, 0), 0.07, 0.12, 0.12, Color(0.24, 0.42, 0.27)
-	)
+	_cilindro_truncado(raiz, Vector3(0, 0.14, 0), 0.07, 0.12, 0.12, Color(0.24, 0.42, 0.27))
 
 
 static func _marco(raiz: Node3D) -> void:
@@ -164,9 +162,7 @@ static func _papel(raiz: Node3D) -> void:
 
 static func _recuerdo(raiz: Node3D) -> void:
 	_cilindro(raiz, Vector3(0, -0.09, 0), 0.075, 0.035, Color(0.30, 0.26, 0.22))
-	_cilindro_truncado(
-		raiz, Vector3(0, 0.00, 0), 0.035, 0.055, 0.14, Color(0.34, 0.45, 0.53)
-	)
+	_cilindro_truncado(raiz, Vector3(0, 0.00, 0), 0.035, 0.055, 0.14, Color(0.34, 0.45, 0.53))
 	_caja(raiz, Vector3(0, 0.09, 0), Vector3(0.10, 0.07, 0.08), Color(0.42, 0.52, 0.58))
 
 
