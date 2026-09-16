@@ -196,6 +196,46 @@
       "sha256": "6fc395be2ad1f99ce318a5d28f98fb76dbeb676d83a0b28239d8c1fb90736180"
     },
     {
+      "ruta": "audio/impactMetal_light_000.ogg",
+      "titulo": "Impact metal light 000 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "33b5e6e37c6e9d54e07bf5a89b12c76e879f40c1ea83cdd82714df1d6f9fec6d"
+    },
+    {
+      "ruta": "audio/impactMetal_light_001.ogg",
+      "titulo": "Impact metal light 001 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "fba69c467ddd85da7b1d82e259f936b876d9ba6a3d6f1b24bdd10468e46bfe08"
+    },
+    {
+      "ruta": "audio/impactMetal_medium_000.ogg",
+      "titulo": "Impact metal medium 000 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "a96f879fec0864a8938e0c745b6996a6c5679c16a234ce31a01cc995e8401003"
+    },
+    {
+      "ruta": "audio/impactSoft_medium_000.ogg",
+      "titulo": "Impact soft medium 000 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "7d3ba0bb5e60a11b5d3e558c141303dcf494256675fbf753c0d252d2cf0481e3"
+    },
+    {
+      "ruta": "audio/impactSoft_medium_001.ogg",
+      "titulo": "Impact soft medium 001 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "7642a4fd43e547afe4f7adfadb3dabb681c0ff512f52c1674bae30a726841faf"
+    },
+    {
       "ruta": "modelos/bookcaseClosed.glb",
       "titulo": "Bookcase closed (Furniture Kit)",
       "autor": "Kenney",
