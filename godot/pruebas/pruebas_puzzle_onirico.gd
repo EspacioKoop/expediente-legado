@@ -65,9 +65,7 @@ func _probar_recompensa_dirigida() -> void:
 		"el resultado transporta la identidad de recompensa"
 	)
 
-	var misma_disposicion = Puzzle.crear(
-		"cronologia", ["F-1", "F-2"], ["F-1", "F-2"], 93, "P-8"
-	)
+	var misma_disposicion = Puzzle.crear("cronologia", ["F-1", "F-2"], ["F-1", "F-2"], 93, "P-8")
 	_comprobar(
 		misma_disposicion.seed == puzzle.seed,
 		"cambiar la recompensa no rerrollea la disposición del puzzle"
@@ -75,9 +73,7 @@ func _probar_recompensa_dirigida() -> void:
 
 
 func _probar_serializacion() -> void:
-	var puzzle = Puzzle.crear(
-		"ecos", ["F-2", "F-1"], ["F-1", "F-2"], 123456, "P-serializada"
-	)
+	var puzzle = Puzzle.crear("ecos", ["F-2", "F-1"], ["F-1", "F-2"], 123456, "P-serializada")
 	puzzle.fallar()
 	var texto := JSON.stringify(puzzle.serializar())
 	var desde_json: Dictionary = JSON.parse_string(texto)
@@ -86,8 +82,7 @@ func _probar_serializacion() -> void:
 	_comprobar(restaurado.seed == puzzle.seed, "recargar no altera la semilla")
 	_comprobar(restaurado.state == Puzzle.ESTADO_FALLADO, "recargar conserva el estado")
 	_comprobar(
-		restaurado.reward_id == "P-serializada",
-		"recargar conserva la identidad de recompensa"
+		restaurado.reward_id == "P-serializada", "recargar conserva la identidad de recompensa"
 	)
 	_comprobar(not restaurado.completar(), "recargar un terminal no reemite resultado")
 
@@ -105,7 +100,9 @@ func _probar_serializacion() -> void:
 	legado.erase("reward_id")
 	var restaurado_legado = Puzzle.restaurar(legado, ["F-1", "F-2"])
 	_comprobar(restaurado_legado != null, "restaura guardados anteriores sin reward_id")
-	_comprobar(restaurado_legado.reward_id.is_empty(), "un guardado antiguo queda sin recompensa dirigida")
+	_comprobar(
+		restaurado_legado.reward_id.is_empty(), "un guardado antiguo queda sin recompensa dirigida"
+	)
 
 
 func _comprobar(condicion: bool, nombre: String) -> void:
