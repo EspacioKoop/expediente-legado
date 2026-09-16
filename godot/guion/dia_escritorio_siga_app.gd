@@ -278,10 +278,13 @@ func _contexto_os98(dia: Node) -> Dictionary:
 			"conocimiento": [],
 			"urls_caidas": [],
 		}
-	return ContaminacionOs98.contexto(
-		(partida_actual as Partida).estado,
-		_estado_os98(dia),
-		int(dia.jornada.get("dia", 1)),
+	return (
+		ContaminacionOs98
+		. contexto(
+			(partida_actual as Partida).estado,
+			_estado_os98(dia),
+			int(dia.jornada.get("dia", 1)),
+		)
 	)
 
 
