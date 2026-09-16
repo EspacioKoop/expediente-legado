@@ -45,12 +45,14 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
         self.assertIn('clampf(float(apariencia.get("altura"', self.perfil)
 
     def test_cuerpo_es_visual_y_no_crea_colisiones(self):
+        self.assertIn("extends Node3D", self.cuerpo)
         self.assertIn("BoxMesh.new()", self.cuerpo)
         self.assertIn("CapsuleMesh.new()", self.cuerpo)
         self.assertIn("SphereMesh.new()", self.cuerpo)
         self.assertIn("CylinderMesh.new()", self.cuerpo)
-        self.assertNotIn("CollisionShape3D", self.cuerpo)
-        self.assertNotIn("CharacterBody3D", self.cuerpo)
+        self.assertNotIn("CollisionShape3D.new()", self.cuerpo)
+        self.assertNotIn("extends CharacterBody3D", self.cuerpo)
+        self.assertNotIn("move_and_slide()", self.cuerpo)
 
     def test_caminante_monta_el_cuerpo_sin_cambiar_su_capsula(self):
         self.assertIn('path="res://guion/cuerpo_jugador_3d.gd"', self.caminante)
