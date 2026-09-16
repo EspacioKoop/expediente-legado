@@ -1,16 +1,18 @@
 ## Navegador corporativo simulado del escritorio OS98 (#537).
 ##
-## Consume exclusivamente Web98Indice: no interpreta HTML, no realiza peticiones de
-## red y no conoce el host. Historial/favoritos son estado local de aplicación;
-## la disponibilidad de recursos sigue dependiendo del estado narrativo recibido.
+## Consume exclusivamente modelos Web98 locales: no interpreta HTML, no realiza
+## peticiones de red y no conoce el host. Historial/favoritos son estado local de
+## aplicación; la disponibilidad sigue dependiendo del estado narrativo recibido.
 class_name NavegadorSiga
 extends VBoxContainer
 
 signal estado_cambiado(estado: Dictionary)
 
 const URL_INICIO := "http://intranet.dgai/"
+const TEXTURA_CABECERAS_PRENSA := preload("res://arte/os98/prensa_cabeceras_98.svg")
 
 var _indice := Web98Indice.new()
+var _prensa := Web98Prensa.new()
 var _contexto: Dictionary = {"dia": 1, "conocimiento": [], "urls_caidas": []}
 var _historial: Array[String] = []
 var _indice_historial := -1
@@ -21,6 +23,7 @@ var _atras: Button
 var _adelante: Button
 var _direccion: LineEdit
 var _favorito: Button
+var _cabecera_prensa: TextureRect
 var _pagina: RichTextLabel
 var _enlaces: ItemList
 var _historial_lista: ItemList
@@ -32,6 +35,7 @@ var _cache: Button
 func configurar_contexto(contexto: Dictionary) -> void:
 	_contexto = contexto.duplicate(true)
 	_indice.configurar_contexto(_contexto)
+	_prensa.configurar_contexto(_contexto)
 	if is_node_ready() and not url_actual().is_empty():
 		_resolver_sin_historial(url_actual())
 
@@ -128,6 +132,7 @@ func _ready() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_indice.configurar_contexto(_contexto)
+	_prensa.configurar_contexto(_contexto)
 	_construir_interfaz()
 	if _indice_historial >= 0 and _indice_historial < _historial.size():
 		_resolver_sin_historial(_historial[_indice_historial])
@@ -202,6 +207,12 @@ func _construir_interfaz() -> void:
 	principal.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	cuerpo.add_child(principal)
 
+	_cabecera_prensa = TextureRect.new()
+	_cabecera_prensa.custom_minimum_size = Vector2(468, 60)
+	_cabecera_prensa.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_cabecera_prensa.visible = false
+	principal.add_child(_cabecera_prensa)
+
 	_pagina = RichTextLabel.new()
 	_pagina.bbcode_enabled = true
 	_pagina.fit_content = false
@@ -253,28 +264,16 @@ func _renderizar(resultado: Dictionary) -> void:
 	)
 	_enlaces.clear()
 	_cache.visible = false
+	_cabecera_prensa.visible = false
 
 	var estado := String(resultado.get("estado", "no_encontrado"))
 	if estado == "ok":
 		var recurso: Dictionary = resultado.get("recurso", {})
-		var titulo := String(recurso.get("titulo", tr("NAVEGADOR_SIN_TITULO")))
-		var snippet := String(recurso.get("snippet", ""))
-		var via := String(resultado.get("via", "origen"))
-		_pagina.text = (
-			tr("NAVEGADOR_PAGINA_OK")
-			% [
-				titulo,
-				url,
-				snippet,
-				String(recurso.get("categoria", "")),
-				via,
-			]
-		)
-		for destino in _indice.enlaces_desde(String(recurso.get("id", ""))):
-			var indice_item := _enlaces.add_item(
-				String(destino.get("titulo", tr("NAVEGADOR_ENLACE")))
-			)
-			_enlaces.set_item_metadata(indice_item, String(destino.get("url", "")))
+		if String(recurso.get("tipo", "")) == "prensa":
+			_renderizar_prensa(recurso)
+		else:
+			_renderizar_recurso_generico(resultado, recurso, url)
+		_renderizar_enlaces(recurso)
 		return
 	if estado == "caido":
 		_pagina.text = tr("NAVEGADOR_SERVIDOR_CAIDO") % url
@@ -283,8 +282,80 @@ func _renderizar(resultado: Dictionary) -> void:
 	_pagina.text = tr("NAVEGADOR_NO_ENCONTRADO") % url
 
 
+func _renderizar_recurso_generico(resultado: Dictionary, recurso: Dictionary, url: String) -> void:
+	var titulo := String(recurso.get("titulo", tr("NAVEGADOR_SIN_TITULO")))
+	var snippet := String(recurso.get("snippet", ""))
+	var via := String(resultado.get("via", "origen"))
+	_pagina.text = (
+		tr("NAVEGADOR_PAGINA_OK")
+		% [
+			titulo,
+			url,
+			snippet,
+			String(recurso.get("categoria", "")),
+			via,
+		]
+	)
+
+
+func _renderizar_prensa(recurso: Dictionary) -> void:
+	var cabecera_id := String(recurso.get("cabecera_id", ""))
+	var portada := _prensa.portada(cabecera_id)
+	if String(portada.get("estado", "")) != "ok":
+		_pagina.text = tr("NAVEGADOR_PRENSA_SIN_ARTICULOS")
+		return
+	var cabecera: Dictionary = portada.get("cabecera", {})
+	var fila := clampi(int(cabecera.get("fila_cabecera", 0)), 0, 3)
+	var atlas := AtlasTexture.new()
+	atlas.atlas = TEXTURA_CABECERAS_PRENSA
+	atlas.region = Rect2(0, fila * 60, 468, 60)
+	_cabecera_prensa.texture = atlas
+	_cabecera_prensa.visible = true
+	_pagina.text = _texto_portada_prensa(portada)
+
+
+func _texto_portada_prensa(portada: Dictionary) -> String:
+	var bloques: Array[String] = []
+	bloques.append(tr("NAVEGADOR_PRENSA_EDICION") % int(portada.get("jornada", 1)))
+	var articulos: Variant = portada.get("articulos", [])
+	if not articulos is Array or (articulos as Array).is_empty():
+		bloques.append(tr("NAVEGADOR_PRENSA_SIN_ARTICULOS"))
+		return "\n\n".join(bloques)
+	for articulo_valor in articulos as Array:
+		if not articulo_valor is Dictionary:
+			continue
+		var articulo := articulo_valor as Dictionary
+		var tratamiento: Dictionary = articulo.get("tratamiento", {})
+		bloques.append(
+			"[b][font_size=18]%s[/font_size][/b]" % String(tratamiento.get("titular", ""))
+		)
+		bloques.append(String(tratamiento.get("entradilla", "")))
+		var datos: Variant = articulo.get("datos_destacados", [])
+		if datos is Array:
+			for dato_valor in datos as Array:
+				if dato_valor is Dictionary:
+					var dato := dato_valor as Dictionary
+					bloques.append(
+						tr("NAVEGADOR_PRENSA_DATO")
+						% [String(dato.get("etiqueta", "")), String(dato.get("valor", ""))]
+					)
+		var opinion := String(tratamiento.get("opinion", "")).strip_edges()
+		if not opinion.is_empty():
+			bloques.append(tr("NAVEGADOR_PRENSA_OPINION") % opinion)
+	return "\n\n".join(bloques)
+
+
+func _renderizar_enlaces(recurso: Dictionary) -> void:
+	for destino in _indice.enlaces_desde(String(recurso.get("id", ""))):
+		var indice_item := _enlaces.add_item(
+			String(destino.get("titulo", tr("NAVEGADOR_ENLACE")))
+		)
+		_enlaces.set_item_metadata(indice_item, String(destino.get("url", "")))
+
+
 func _mostrar_busqueda(consulta: String) -> void:
 	var resultados := buscar(consulta)
+	_cabecera_prensa.visible = false
 	_pagina.text = tr("NAVEGADOR_RESULTADOS") % [consulta, resultados.size()]
 	_enlaces.clear()
 	for recurso in resultados:
@@ -300,6 +371,7 @@ func _abrir_cache_actual() -> void:
 	if String(cache.get("estado", "")) != "ok":
 		return
 	var datos: Dictionary = cache.get("cache", {})
+	_cabecera_prensa.visible = false
 	_pagina.text = (
 		tr("NAVEGADOR_CACHE_PAGINA")
 		% [
