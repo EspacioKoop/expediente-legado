@@ -72,8 +72,7 @@ const CATALOGO := [
 		"categoria": "notificacion",
 		"remitente": "Administración de fincas",
 		"asunto": "Vencimiento de alquiler",
-		"contenido":
-		"Recordatorio del vencimiento. El pago sigue resolviéndose exclusivamente mediante la economía existente.",
+		"contenido": "Recordatorio de vencimiento. El pago pertenece a la economía existente.",
 		"desde": 10,
 		"requiere_alquiler_pendiente": true,
 		"economia": "delegada",
@@ -100,8 +99,7 @@ const CATALOGO := [
 		"categoria": "certificado",
 		"remitente": "SIGA · Personal",
 		"asunto": "Comunicación certificada",
-		"contenido":
-		"El sobre confirma únicamente que existe una comunicación administrativa; no revela expedientes no conocidos.",
+		"contenido": "Confirma una comunicación administrativa sin revelar expedientes desconocidos.",
 		"desde": 3,
 		"min_cerrados_hoy": 1,
 	},
