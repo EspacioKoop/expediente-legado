@@ -8,6 +8,7 @@ RAIZ = Path(__file__).resolve().parents[1]
 PROYECTO = RAIZ / "godot" / "project.godot"
 LAYOUT = RAIZ / "godot" / "default_bus_layout.tres"
 ROUTER = RAIZ / "godot" / "guion" / "mezcla_audio.gd"
+PREFERENCIAS = RAIZ / "godot" / "guion" / "preferencias_siga.gd"
 
 
 class MezclaAudioTest(unittest.TestCase):
@@ -16,6 +17,7 @@ class MezclaAudioTest(unittest.TestCase):
         cls.proyecto = PROYECTO.read_text(encoding="utf-8")
         cls.layout = LAYOUT.read_text(encoding="utf-8")
         cls.router = ROUTER.read_text(encoding="utf-8")
+        cls.preferencias = PREFERENCIAS.read_text(encoding="utf-8")
 
     def test_layout_declara_tres_buses_separados_hacia_master(self):
         for nombre in ("Efectos", "Ambiente", "Musica"):
@@ -36,11 +38,31 @@ class MezclaAudioTest(unittest.TestCase):
         self.assertIn('const BUS_AMBIENTE := &"Ambiente"', self.router)
         self.assertIn('const BUS_MUSICA := &"Musica"', self.router)
 
+    def test_mixer_se_monta_dentro_de_opciones_sin_segunda_persistencia(self):
+        self.assertIn('call_deferred("_montar_mixer_opciones")', self.router)
+        self.assertIn('bloque.name = "MixerAudio"', self.router)
+        self.assertIn('titulo.text = "Mezcla"', self.router)
+        self.assertIn('menu.get("_volumen") as HSlider', self.router)
+        self.assertIn('menu.get("_preferencias")', self.router)
+        for etiqueta in ("Efectos", "Ambiente", "Música"):
+            self.assertIn(f'"etiqueta": "{etiqueta}"', self.router)
+        self.assertIn("PreferenciasSiga.guardar(_preferencias)", self.router)
+        self.assertNotIn("user://", self.router)
+
+    def test_mixer_aplica_master_y_subniveles_por_nombre_de_bus(self):
+        self.assertIn("func aplicar_volumenes(preferencias: Dictionary)", self.router)
+        self.assertIn("AudioServer.get_bus_index(bus)", self.router)
+        self.assertIn("AudioServer.set_bus_volume_db", self.router)
+        self.assertIn("AudioServer.set_bus_mute", self.router)
+        for clave in ("volumen_efectos", "volumen_ambiente", "volumen_musica"):
+            self.assertIn(f'"{clave}"', self.preferencias)
+            self.assertIn(f'"{clave}"', self.router)
+
     def test_contrato_runtime_se_ejecuta_en_godot(self):
         comprobar_contrato(
             self,
             "pruebas/pruebas_mezcla_audio.gd",
-            "12 pasadas, 0 fallos",
+            "18 pasadas, 0 fallos",
         )
 
 
