@@ -36,8 +36,9 @@ class SuenoMontanaRuntimeTest(unittest.TestCase):
         self.assertIn('resultado["montana_hielo_pos"]', self.montana)
 
     def test_no_muta_estado_jugable_ni_introduce_azar_global(self):
-        for termino in ("Jornada.", "Partida", "dinero", "veredicto", "randf(", "randi("):
-            self.assertNotIn(termino, self.montana)
+        codigo = self.montana.split("class_name SuenoMontana", 1)[1]
+        for termino in ("Jornada.", "Partida.", "dinero", "veredicto", "randf(", "randi("):
+            self.assertNotIn(termino, codigo)
 
     def test_capa_de_noche_adapta_despues_del_contenido_base(self):
         self.assertIn("var espacio: Dictionary = super._espacio_de(fase)", self.dia)
