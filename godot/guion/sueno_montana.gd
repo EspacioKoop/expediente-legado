@@ -7,7 +7,12 @@ class_name SuenoMontana
 extends RefCounted
 
 const ID := "montana"
+const FORMA := "embudo"
 const FAMILIA := SuenoFamilias.CONVERGENTE
+
+
+static func es_forma(id: String) -> bool:
+	return id == FORMA
 
 
 static func adaptar_espacio(
