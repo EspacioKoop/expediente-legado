@@ -3,6 +3,11 @@
 ## Mantiene el audio de la ROM separado de los sonidos físicos de #245. La cola
 ## nativa entrega S16LE estéreo a 48 kHz; aquí se convierte a Vector2 y se alimenta
 ## un AudioStreamGenerator con su propio volumen/mute y un backlog acotado.
+##
+## El cambio de ROM también se presenta como un cartucho físico: con los efectos
+## activos se detiene la ROM saliente, se muestra expulsión/ranura/inserción y solo
+## entonces se delega el encendido al flujo base. Con efectos desactivados la carga
+## sigue siendo inmediata.
 class_name EmuladorPortatilAudioApp
 extends EmuladorPortatilApp
 
@@ -12,17 +17,26 @@ const AUDIO_BYTES_PER_FRAME := 4
 const AUDIO_PCM_SCALE := 32768.0
 const MAX_FRAMES_AUDIO_PENDIENTE := 9600
 const AUDIO_SILENCIO_DB := -80.0
+const DURACION_EXPULSION_CARTUCHO := 0.12
+const DURACION_RANURA_VACIA := 0.06
+const DURACION_INSERCION_CARTUCHO := 0.14
 
 var _audio_emulado: AudioStreamPlayer
 var _audio_playback: AudioStreamGeneratorPlayback
 var _audio_pendiente := PackedVector2Array()
 var _audio_emulado_muted := false
 var _audio_emulado_volumen := 0.80
+var _cartucho_visual: Label
+var _ruta_cartucho_actual := ""
+var _rom_cartucho_pendiente := ""
+var _cambiando_cartucho := false
+var _cambio_cartucho_token := 0
 
 
 func abrir() -> void:
 	super.abrir()
 	_preparar_audio_emulado()
+	_preparar_cartucho_visual()
 
 
 func _process(delta: float) -> void:
@@ -33,10 +47,77 @@ func _process(delta: float) -> void:
 
 func _cargar_rom(ruta: String) -> void:
 	_limpiar_audio_emulado()
+	if _emulador == null or ruta.is_empty() or _cambiando_cartucho:
+		return
+	if not _efectos_presentacion:
+		_ruta_cartucho_actual = ruta
+		_actualizar_cartucho_visual()
+		super._cargar_rom(ruta)
+		return
+
+	_cambiando_cartucho = true
+	_rom_cartucho_pendiente = ruta
+	_cambio_cartucho_token += 1
+	var token := _cambio_cartucho_token
+	_guardar_sram()
+	_ruta_sram_actual = ""
+	_jugando = false
+	_tiempo_emulador = 0.0
+	_botones_previos = 0
+	_cancelar_encendido()
+
+	if not _ruta_cartucho_actual.is_empty():
+		_estado.text = _formatear(
+			"cartucho_expulsando",
+			[_nombre_cartucho(_ruta_cartucho_actual)],
+		)
+		_reproducir_sonido_fisico(&"cartucho")
+		var sigue_expulsion := await _esperar_cambio_cartucho(
+			DURACION_EXPULSION_CARTUCHO,
+			token,
+		)
+		if not sigue_expulsion:
+			return
+
+	_ruta_cartucho_actual = ""
+	_actualizar_cartucho_visual()
+	_estado.text = _texto("cartucho_ranura_vacia")
+	var sigue_vacio := await _esperar_cambio_cartucho(DURACION_RANURA_VACIA, token)
+	if not sigue_vacio:
+		return
+
+	_estado.text = _formatear("cartucho_insertando", [_nombre_cartucho(ruta)])
+	var sigue_insercion := await _esperar_cambio_cartucho(
+		DURACION_INSERCION_CARTUCHO,
+		token,
+	)
+	if not sigue_insercion:
+		return
+
+	_ruta_cartucho_actual = ruta
+	_actualizar_cartucho_visual()
+	_cambiando_cartucho = false
+	_rom_cartucho_pendiente = ""
+	# El padre aporta el clic de inserción, el encendido cancelable y la carga real.
+	super._cargar_rom(ruta)
+
+
+func _al_cambiar_efectos(activos: bool) -> void:
+	super._al_cambiar_efectos(activos)
+	if activos or not _cambiando_cartucho:
+		return
+	var ruta := _rom_cartucho_pendiente
+	_cancelar_cambio_cartucho()
+	if ruta.is_empty():
+		return
+	_ruta_cartucho_actual = ruta
+	_actualizar_cartucho_visual()
+	# Al desactivar presentación en mitad del gesto se salta toda espera restante.
 	super._cargar_rom(ruta)
 
 
 func _cerrar() -> void:
+	_cancelar_cambio_cartucho()
 	_limpiar_audio_emulado()
 	if _audio_emulado != null:
 		_audio_emulado.stop()
@@ -44,6 +125,7 @@ func _cerrar() -> void:
 
 
 func _exit_tree() -> void:
+	_cancelar_cambio_cartucho()
 	_limpiar_audio_emulado()
 	if _audio_emulado != null:
 		_audio_emulado.stop()
@@ -60,6 +142,47 @@ func set_audio_emulado_muted(muted: bool) -> void:
 func set_audio_emulado_volumen(volumen: float) -> void:
 	_audio_emulado_volumen = clampf(volumen, 0.0, 1.0)
 	_aplicar_volumen_audio()
+
+
+func _preparar_cartucho_visual() -> void:
+	if _lista == null:
+		return
+	_cartucho_visual = Label.new()
+	_cartucho_visual.name = "EstadoCartuchoPortatil"
+	_cartucho_visual.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_cartucho_visual.custom_minimum_size = Vector2(0, 42)
+	_lista.add_child(_cartucho_visual)
+	_lista.move_child(_cartucho_visual, 0)
+	_actualizar_cartucho_visual()
+
+
+func _actualizar_cartucho_visual() -> void:
+	if _cartucho_visual == null:
+		return
+	if _ruta_cartucho_actual.is_empty():
+		_cartucho_visual.text = _texto("cartucho_ranura_vacia")
+		return
+	_cartucho_visual.text = _formatear(
+		"cartucho_insertado",
+		[_nombre_cartucho(_ruta_cartucho_actual)],
+	)
+
+
+func _nombre_cartucho(ruta: String) -> String:
+	var archivo := ruta.get_file()
+	var nombre := archivo.get_basename()
+	return nombre if not nombre.is_empty() else archivo
+
+
+func _esperar_cambio_cartucho(segundos: float, token: int) -> bool:
+	await get_tree().create_timer(segundos, true).timeout
+	return _abierto and token == _cambio_cartucho_token
+
+
+func _cancelar_cambio_cartucho() -> void:
+	_cambio_cartucho_token += 1
+	_cambiando_cartucho = false
+	_rom_cartucho_pendiente = ""
 
 
 func _preparar_audio_emulado() -> void:
