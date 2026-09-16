@@ -148,8 +148,13 @@ func _seleccionar(indice: int) -> void:
 	var paquete := _modelo.ficha(id)
 	if paquete.is_empty():
 		return
-	_titulo.text = "%s · v%s" % [String(paquete.get("nombre", id)), String(paquete.get("version", "?"))]
-	_tipo.text = "Tipo: %s · %d KB ficticios" % [String(paquete.get("tipo", "Utilidad")), int(paquete.get("tamano_kb", 0))]
+	_titulo.text = (
+		"%s · v%s" % [String(paquete.get("nombre", id)), String(paquete.get("version", "?"))]
+	)
+	_tipo.text = (
+		"Tipo: %s · %d KB ficticios"
+		% [String(paquete.get("tipo", "Utilidad")), int(paquete.get("tamano_kb", 0))]
+	)
 	_origen.text = "Procedencia: %s" % String(paquete.get("origen", "desconocida"))
 	_licencia.text = "Licencia ficticia: %s" % String(paquete.get("licencia", "freeware"))
 	_descripcion.text = String(paquete.get("descripcion", ""))
@@ -175,13 +180,16 @@ func _alternar_instalacion() -> void:
 	var id := _id_seleccionado()
 	if id.is_empty():
 		return
+	var mensaje := ""
 	if _modelo.esta_instalado(id):
 		_modelo.desinstalar(id)
+		mensaje = "Desinstalación simulada completada."
 	else:
 		_modelo.instalar(id)
-	_resultado.text = "Operación completada de forma simulada."
+		mensaje = "Instalación simulada completada."
 	estado_cambiado.emit(_modelo.exportar_estado())
 	_refrescar()
+	_resultado.text = mensaje
 
 
 func _ejecutar_seleccion() -> void:
