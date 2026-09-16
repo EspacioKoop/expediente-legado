@@ -1,4 +1,4 @@
-## Adaptador del puesto de trabajo al shell de escritorio (#534, #535, #536, #537, #538, #663).
+## Adaptador del puesto de trabajo al shell de escritorio (#534, #535, #536, #537, #538, #539, #663).
 ##
 ## `Dia` sigue siendo dueño de entrar/salir del puesto y de persistir la partida.
 ## Este controller detecta únicamente la pantalla que contiene el visor histórico,
@@ -12,6 +12,8 @@ var _navegador_app: EscritorioSigaApp
 var _software_app: EscritorioSigaApp
 var _correo_app: EscritorioSigaApp
 var _catalogo_anomalias_app: EscritorioSigaApp
+var _explorador_vista: ExploradorSiga
+var _navegador_vista: NavegadorSiga
 
 ## Todas las apps registradas en este puesto, para persistencia declarada
 ## (#535): quien guarde/cargue partida no necesita conocerlas una a una.
@@ -57,20 +59,21 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	_apps.append(_siga_app)
 
 	# El Explorador consume el mismo contrato que SIGA, pero su contenido se crea
-	# bajo demanda y recibe solo el contexto de campaña que necesita para resolver
-	# reglas declarativas. No conserva ni modifica jornada/expedientes por su cuenta.
+	# bajo demanda. Desde #539 persiste únicamente la progresión local del OS por
+	# partida/vuelta; no duplica jornada, expedientes ni contenido de campaña.
 	_explorador_app = EscritorioSigaApp.new(
 		"explorador", "Explorador", Callable(self, "_crear_explorador"), "equipo"
 	)
 	_explorador_app.tamano_minimo = Vector2(480, 330)
 	_explorador_app.tamano_preferido = Vector2(720, 520)
 	_explorador_app.redimensionable = true
+	_explorador_app.persistir_estado = true
 	_explorador_app.registrar_en(escritorio)
 	_apps.append(_explorador_app)
 
 	# Navegador Web98 consume el índice declarativo ya existente (#667). Historial
-	# y favoritos son estado local persistible; la jornada/conocimiento siguen
-	# viniendo de la campaña y nunca se duplican dentro de la aplicación.
+	# y favoritos son estado local persistible; el conocimiento de #539 se deriva
+	# del mismo estado OS98 que recibe Explorador.
 	_navegador_app = EscritorioSigaApp.new(
 		"navegador-web98", "Navegador Web98", Callable(self, "_crear_navegador"), "red"
 	)
@@ -126,7 +129,7 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	_apps.append(_catalogo_anomalias_app)
 
 	# Reponer el estado declarado ANTES de adoptar/abrir nada: así una app que
-	# lea su estado local al construir su contenido (como hace Correo) ya
+	# lea su estado local al construir su contenido (como hacen Correo y #539) ya
 	# lo ve actualizado desde el primer fotograma.
 	EstadoAplicacionesSiga.cargar(_apps)
 
@@ -159,33 +162,21 @@ func _crear_visor() -> Control:
 
 func _crear_explorador() -> Control:
 	var explorador := ExploradorSiga.new()
+	_explorador_vista = explorador
 	var dia := get_parent()
-	var jornada_actual := 1
 	if dia != null:
-		jornada_actual = int(dia.jornada.get("dia", 1))
-	(
-		explorador
-		. configurar_contexto(
-			{
-				"jornada": jornada_actual,
-				# Reservas explícitas para #28: por defecto no revelan ni desbloquean nada.
-				"habilitar_enlace13": false,
-				"credenciales": [],
-			}
-		)
-	)
+		explorador.configurar_contexto(_contexto_os98(dia))
+	explorador.documento_abierto.connect(_registrar_documento_os98)
+	explorador.ruta_abierta.connect(_registrar_ruta_os98)
 	return explorador
 
 
 func _crear_navegador() -> Control:
 	var navegador := NavegadorSiga.new()
+	_navegador_vista = navegador
 	var dia := get_parent()
-	var jornada_actual := 1
 	if dia != null:
-		jornada_actual = int(dia.jornada.get("dia", 1))
-	# #539 conectará conocimiento/caídas narrativas a estado real. Hasta entonces
-	# el navegador aprende y respeta la normalidad, sin filtrar enlace13.
-	navegador.configurar_contexto({"dia": jornada_actual, "conocimiento": [], "urls_caidas": []})
+		navegador.configurar_contexto(_contexto_os98(dia))
 	if _navegador_app != null:
 		navegador.configurar_estado(_navegador_app.obtener_estado_local("estado", {}))
 	navegador.estado_cambiado.connect(_registrar_estado_navegador)
@@ -243,6 +234,78 @@ func _crear_catalogo_anomalias() -> Control:
 	if partida_actual is Partida:
 		catalogo.configurar_estado(partida_actual.estado)
 	return catalogo
+
+
+func _registrar_documento_os98(documento_id: String) -> void:
+	var dia := get_parent()
+	if dia == null or _explorador_app == null:
+		return
+	var partida_actual: Variant = dia.get("partida")
+	if not partida_actual is Partida:
+		return
+	var estado := _estado_os98(dia)
+	if ContaminacionOs98.registrar_documento(
+		(partida_actual as Partida).estado, estado, documento_id
+	):
+		_guardar_estado_os98(dia, estado)
+		_sincronizar_contexto_os98(dia)
+
+
+func _registrar_ruta_os98(ruta: String) -> void:
+	var dia := get_parent()
+	if dia == null or _explorador_app == null:
+		return
+	var estado := _estado_os98(dia)
+	if ContaminacionOs98.registrar_ruta(estado, ruta):
+		_guardar_estado_os98(dia, estado)
+
+
+func _sincronizar_contexto_os98(dia: Node) -> void:
+	var contexto := _contexto_os98(dia)
+	if _explorador_vista != null and is_instance_valid(_explorador_vista):
+		_explorador_vista.configurar_contexto(contexto)
+	if _navegador_vista != null and is_instance_valid(_navegador_vista):
+		_navegador_vista.configurar_contexto(contexto)
+
+
+func _contexto_os98(dia: Node) -> Dictionary:
+	var partida_actual: Variant = dia.get("partida")
+	if not partida_actual is Partida:
+		return {
+			"jornada": int(dia.jornada.get("dia", 1)),
+			"dia": int(dia.jornada.get("dia", 1)),
+			"credenciales": [],
+			"conocimiento": [],
+			"urls_caidas": [],
+		}
+	return ContaminacionOs98.contexto(
+		(partida_actual as Partida).estado,
+		_estado_os98(dia),
+		int(dia.jornada.get("dia", 1)),
+	)
+
+
+func _estado_os98(dia: Node) -> Dictionary:
+	var estado := ContaminacionOs98.nuevo()
+	if _explorador_app == null:
+		return estado
+	var por_vuelta: Variant = _explorador_app.obtener_estado_local("contaminacion_por_vuelta", {})
+	if por_vuelta is Dictionary:
+		var guardado: Variant = (por_vuelta as Dictionary).get(_clave_vuelta(dia), {})
+		if guardado is Dictionary:
+			estado = (guardado as Dictionary).duplicate(true)
+	return ContaminacionOs98.completar(estado)
+
+
+func _guardar_estado_os98(dia: Node, estado: Dictionary) -> void:
+	if _explorador_app == null:
+		return
+	var por_vuelta: Dictionary = {}
+	var guardado: Variant = _explorador_app.obtener_estado_local("contaminacion_por_vuelta", {})
+	if guardado is Dictionary:
+		por_vuelta = (guardado as Dictionary).duplicate(true)
+	por_vuelta[_clave_vuelta(dia)] = ContaminacionOs98.completar(estado).duplicate(true)
+	_explorador_app.establecer_estado_local("contaminacion_por_vuelta", por_vuelta)
 
 
 func _registrar_estado_navegador(estado: Dictionary) -> void:
@@ -306,6 +369,10 @@ func _registrar_respuesta_correo(
 
 func _clave_partida(dia: Node) -> String:
 	return str(int(dia.jornada.get("raiz", 0)))
+
+
+func _clave_vuelta(dia: Node) -> String:
+	return "%s:%d" % [_clave_partida(dia), int(dia.jornada.get("vuelta", 1))]
 
 
 func _solicitar_salida() -> void:
