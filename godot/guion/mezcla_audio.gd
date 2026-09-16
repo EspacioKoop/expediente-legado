@@ -16,19 +16,22 @@ const BUS_AMBIENTE := &"Ambiente"
 const BUS_MUSICA := &"Musica"
 const NODO_AMBIENTE := &"AmbienteContinuo"
 const NODO_MUSICA := &"MusicaPuntual"
+const RUTA_TEXTOS := "res://datos/mezcla_audio_textos.json"
 const CONTROLES_MEZCLA := [
-	{"clave": "volumen_efectos", "bus": BUS_EFECTOS, "etiqueta": "Efectos"},
-	{"clave": "volumen_ambiente", "bus": BUS_AMBIENTE, "etiqueta": "Ambiente"},
-	{"clave": "volumen_musica", "bus": BUS_MUSICA, "etiqueta": "Música"},
+	{"clave": "volumen_efectos", "bus": BUS_EFECTOS, "texto": "efectos"},
+	{"clave": "volumen_ambiente", "bus": BUS_AMBIENTE, "texto": "ambiente"},
+	{"clave": "volumen_musica", "bus": BUS_MUSICA, "texto": "musica"},
 ]
 
 var _preferencias: Dictionary = {}
+var _textos: Dictionary = {}
 var _mixer_montado := false
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_preferencias = PreferenciasSiga.cargar()
+	_textos = _cargar_textos()
 	aplicar_volumenes(_preferencias)
 	get_tree().node_added.connect(_al_anadir_nodo)
 	_enrutar_subarbol(get_tree().root)
@@ -50,6 +53,17 @@ func _aplicar_bus(bus: StringName, valor: float) -> void:
 	var nivel := clampf(valor, 0.0, 1.0)
 	AudioServer.set_bus_volume_db(indice, linear_to_db(maxf(nivel, 0.0001)))
 	AudioServer.set_bus_mute(indice, nivel <= 0.0)
+
+
+func _cargar_textos() -> Dictionary:
+	if not FileAccess.file_exists(RUTA_TEXTOS):
+		return {}
+	var datos = JSON.parse_string(FileAccess.get_file_as_string(RUTA_TEXTOS))
+	return datos if datos is Dictionary else {}
+
+
+func _texto(clave: String) -> String:
+	return String(_textos.get(clave, clave))
 
 
 func _montar_mixer_opciones() -> void:
@@ -79,7 +93,7 @@ func _montar_mixer_opciones() -> void:
 	caja.move_child(bloque, volumen_master.get_index() + 1)
 
 	var titulo := Label.new()
-	titulo.text = "Mezcla"
+	titulo.text = _texto("seccion")
 	bloque.add_child(titulo)
 	for control in CONTROLES_MEZCLA:
 		_agregar_control_mezcla(bloque, control)
@@ -92,7 +106,7 @@ func _agregar_control_mezcla(caja: VBoxContainer, control: Dictionary) -> void:
 	caja.add_child(fila)
 
 	var etiqueta := Label.new()
-	etiqueta.text = String(control["etiqueta"])
+	etiqueta.text = _texto(String(control["texto"]))
 	etiqueta.custom_minimum_size.x = 210
 	fila.add_child(etiqueta)
 
