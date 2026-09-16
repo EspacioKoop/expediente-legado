@@ -9,6 +9,8 @@ extends HSplitContainer
 
 signal mensaje_leido(id: String)
 
+const RUTA_TEXTOS := "res://datos/correo_siga_textos.json"
+
 var _modelo := CorreoSigaModelo.new()
 var _jornada: Dictionary = {}
 var _companeros: Array[String] = []
@@ -20,6 +22,15 @@ var _cabecera: Label
 var _meta: Label
 var _cuerpo: RichTextLabel
 var _estado: Label
+
+
+static func texto(clave: String) -> String:
+	if not FileAccess.file_exists(RUTA_TEXTOS):
+		return clave
+	var datos: Variant = JSON.parse_string(FileAccess.get_file_as_string(RUTA_TEXTOS))
+	if datos is Dictionary:
+		return String((datos as Dictionary).get(clave, clave))
+	return clave
 
 
 func configurar_contexto(jornada: Dictionary, companeros: Array[String]) -> void:
@@ -74,7 +85,7 @@ func _construir_interfaz() -> void:
 
 	var titulo := Label.new()
 	titulo.name = "TituloBandeja"
-	titulo.text = "BANDEJA DE ENTRADA"
+	titulo.text = texto("bandeja")
 	izquierda.add_child(titulo)
 
 	_lista = ItemList.new()
@@ -99,7 +110,7 @@ func _construir_interfaz() -> void:
 	_cabecera = Label.new()
 	_cabecera.name = "Asunto"
 	_cabecera.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_cabecera.text = "Seleccione un mensaje"
+	_cabecera.text = texto("seleccionar")
 	derecha.add_child(_cabecera)
 
 	_meta = Label.new()
@@ -114,7 +125,7 @@ func _construir_interfaz() -> void:
 	_cuerpo.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_cuerpo.selection_enabled = true
 	_cuerpo.fit_content = false
-	_cuerpo.text = "El correo nuevo aparecerá aquí a medida que avance la jornada."
+	_cuerpo.text = texto("espera")
 	derecha.add_child(_cuerpo)
 
 
@@ -186,7 +197,7 @@ func _mensaje_seleccionado() -> String:
 
 
 func _rotulo(mensaje: Dictionary, nuevo: bool) -> String:
-	var marca := "[NUEVO] " if nuevo else ""
+	var marca := texto("marca_nuevo") if nuevo else ""
 	return "%s%s · %s\n%s" % [
 		marca,
 		String(mensaje.get("hora", "--:--")),
@@ -204,4 +215,4 @@ func _tooltip(mensaje: Dictionary) -> String:
 
 func _actualizar_estado(total: int) -> void:
 	var nuevos := _modelo.contar_no_leidos(_leidos)
-	_estado.text = "%d mensaje(s) · %d sin leer" % [total, nuevos]
+	_estado.text = texto("estado") % [total, nuevos]
