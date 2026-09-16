@@ -17,8 +17,11 @@ class EscritorioVisualSmokeTest(unittest.TestCase):
     def test_shell_real_genera_capturas_reproducibles(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
         importar_proyecto()
-        with tempfile.TemporaryDirectory(prefix="siga98-shell-smoke-") as temporal:
+        with tempfile.TemporaryDirectory(
+            prefix=".siga98-shell-smoke-", dir=ROOT / "godot"
+        ) as temporal:
             salida = Path(temporal).resolve()
+            salida_godot = f"res://{salida.name}"
             resultado = subprocess.run(
                 [
                     motor,
@@ -28,7 +31,7 @@ class EscritorioVisualSmokeTest(unittest.TestCase):
                     "--script",
                     "pruebas/pruebas_escritorio_visual_smoke.gd",
                     "--",
-                    f"--output={salida}",
+                    f"--output={salida_godot}",
                 ],
                 text=True,
                 stdout=subprocess.PIPE,
