@@ -37,16 +37,22 @@ func _process(_delta: float) -> void:
 	var candidato := _candidato(dia)
 	if candidato.is_empty():
 		return
-	var raiz := Sueno.semilla(
-		int(dia.jornada.get("dia", 1)),
-		dia.jornada.get("leido_hoy", []),
-		dia._raiz(),
+	var raiz := (
+		Sueno
+		. semilla(
+			int(dia.jornada.get("dia", 1)),
+			dia.jornada.get("leido_hoy", []),
+			dia._raiz(),
+		)
 	)
-	var ecos = EcosArchivo.crear(
-		String(candidato.get("folio", "")),
-		String(candidato.get("frase", "")),
-		dia.jornada.get("leido_hoy", []),
-		raiz,
+	var ecos = (
+		EcosArchivo
+		. crear(
+			String(candidato.get("folio", "")),
+			String(candidato.get("frase", "")),
+			dia.jornada.get("leido_hoy", []),
+			raiz,
+		)
 	)
 	var presentacion = EcosArchivoPresentacion.crear(ecos)
 	if presentacion == null:
@@ -55,9 +61,12 @@ func _process(_delta: float) -> void:
 	var vertical := SuenoEcosArchivo3D.new()
 	vertical.name = "EcosArchivo3D"
 	vertical.position = _ancla(dia._espacio_actual)
-	if not vertical.configurar(
-		presentacion,
-		bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false)),
+	if not (
+		vertical
+		. configurar(
+			presentacion,
+			bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false)),
+		)
 	):
 		vertical.free()
 		return
@@ -74,21 +83,27 @@ func _candidato(dia: Node) -> Dictionary:
 	if leido_hoy.is_empty():
 		return {}
 	var descubiertas: Array = dia.partida.estado.get("pistas_descubiertas", [])
-	var fuentes := SuenoContenido.fuentes(
-		leido_hoy,
-		dia.contenido.casos,
-		descubiertas,
-		dia.partida.estado.get("veredictos", {}),
-		SuenoCombate.vencidos(dia.partida.estado),
+	var fuentes := (
+		SuenoContenido
+		. fuentes(
+			leido_hoy,
+			dia.contenido.casos,
+			descubiertas,
+			dia.partida.estado.get("veredictos", {}),
+			SuenoCombate.vencidos(dia.partida.estado),
+		)
 	)
 	var frases: Array = fuentes.get("frases", []).duplicate()
 	if frases.is_empty():
 		return {}
 	frases.sort()
-	var semilla := Sueno.semilla(
-		int(dia.jornada.get("dia", 1)),
-		leido_hoy,
-		dia._raiz(),
+	var semilla := (
+		Sueno
+		. semilla(
+			int(dia.jornada.get("dia", 1)),
+			leido_hoy,
+			dia._raiz(),
+		)
 	)
 	var frase := String(frases[posmod(semilla, frases.size())])
 	var folio := _folio_de_frase(frase, leido_hoy, descubiertas, dia.contenido.casos)
