@@ -4,5 +4,6 @@
   "seleccionar": "Seleccione un mensaje",
   "espera": "El correo nuevo aparecerá aquí a medida que avance la jornada.",
   "marca_nuevo": "[NUEVO] ",
+  "metadatos": "%s <%s> · Día %d · %s",
   "estado": "%d mensaje(s) · %d sin leer"
 }
