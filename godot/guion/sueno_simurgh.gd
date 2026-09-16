@@ -44,11 +44,14 @@ static func registrar_semilla(
 	if inspecciones < INSPECCIONES_MINIMAS or not lamina_girada:
 		return false
 	if estado.has("dia"):
-		return SemillasOniricas.activar_semilla_onirica(
-			estado,
-			ID_MITO,
-			fuente,
-			intensidad,
+		return (
+			SemillasOniricas
+			. activar_semilla_onirica(
+				estado,
+				ID_MITO,
+				fuente,
+				intensidad,
+			)
 		)
 	estado[CLAVE_SEMILLA] = true
 	return true
@@ -174,7 +177,9 @@ func _montar_monumental(capa: Node3D) -> void:
 			Vector3(cos(angulo) * 1.4, 0.0, sin(angulo) * 1.4),
 			COLOR_LUZ,
 		)
-	_crear_caja(capa, "SombraSimurgh", Vector3(8.0, 0.08, 2.0), Vector3(-1.2, 7.8, -5.5), COLOR_SOMBRA)
+	_crear_caja(
+		capa, "SombraSimurgh", Vector3(8.0, 0.08, 2.0), Vector3(-1.2, 7.8, -5.5), COLOR_SOMBRA
+	)
 	_crear_caja(capa, "Retorno", Vector3(2.2, 0.18, 2.2), Vector3(-8.0, 0.12, 6.0), COLOR_RETORNO)
 
 
