@@ -27,6 +27,7 @@ const MITOS_VALIDOS := [
 	"yggdrasil",
 	"mari",
 	"anansi_akan",
+	"maui_tamanuitera",
 ]
 
 ## Mezclas excepcionales y declaradas. La existencia de dos semillas no inventa
