@@ -44,7 +44,9 @@ const PRESCRIPCIONES := [
 ]
 
 
-static func montar(mundo: Node3D, id: String, dia: int, raiz_azar: int) -> Array:
+static func montar(
+	mundo: Node3D, id: String, dia: int, raiz_azar: int, documentos_origen: Array = []
+) -> Array:
 	var forma := SuenoFormas.de(id)
 	var bloques: Array = forma["bloques"]
 	var entrada: Vector2i = forma["entrada"]
@@ -57,6 +59,7 @@ static func montar(mundo: Node3D, id: String, dia: int, raiz_azar: int) -> Array
 	# objeto se encuentra primero sin introducir un sorteo imposible de reproducir.
 	var semilla := Azar.derivar_texto(raiz_azar, "sueno", "utileria:%s" % id, [dia])
 	var desplazamiento := posmod(semilla, PRESCRIPCIONES.size())
+	var folios := _folios_validos(documentos_origen)
 	var creadas := []
 	for i in range(3):
 		var datos: Dictionary = PRESCRIPCIONES[(i + desplazamiento) % PRESCRIPCIONES.size()]
@@ -68,6 +71,10 @@ static func montar(mundo: Node3D, id: String, dia: int, raiz_azar: int) -> Array
 			Planta.centro_en_metros(bloques, celdas[i])
 			+ Vector3(0.0, tam.y * absf(escala.y) * 0.5, 0.0)
 		)
+		# Una variante solo puede proceder de un folio que ya estaba en
+		# `leido_hoy`. Con la misma entrada la asociación es reproducible.
+		if not folios.is_empty():
+			anomalia.set_meta("documento_origen", folios[(i + desplazamiento) % folios.size()])
 		mundo.add_child(anomalia)
 		(
 			anomalia
@@ -85,3 +92,12 @@ static func montar(mundo: Node3D, id: String, dia: int, raiz_azar: int) -> Array
 		)
 		creadas.append(anomalia)
 	return creadas
+
+
+static func _folios_validos(documentos_origen: Array) -> Array:
+	var folios := []
+	for valor in documentos_origen:
+		var folio := String(valor).strip_edges()
+		if not folio.is_empty() and not folios.has(folio):
+			folios.append(folio)
+	return folios
