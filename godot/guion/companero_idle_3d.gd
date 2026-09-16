@@ -25,7 +25,9 @@ var _reloj_actividad := 0.0
 var _trabajando := false
 
 
-func configurar(nodo: Node3D, semilla: int, telefono: bool, trabajo: bool, reducir: bool) -> void:
+func configurar(
+	nodo: Node3D, semilla: int, telefono: bool, reducir: bool, trabajo: bool = false
+) -> void:
 	objetivo = nodo
 	fase = float(absi(semilla) % 1000) / 1000.0 * TAU
 	gesto_telefono = telefono
