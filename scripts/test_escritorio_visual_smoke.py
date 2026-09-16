@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import unittest
 
@@ -13,15 +14,25 @@ class EscritorioVisualSmokeTest(unittest.TestCase):
     def test_shell_real_genera_capturas_reproducibles(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
         importar_proyecto()
+        comando = [
+            motor,
+            "--path",
+            str(ROOT / "godot"),
+            "--rendering-method",
+            "gl_compatibility",
+            "--audio-driver",
+            "Dummy",
+            "--script",
+            "pruebas/pruebas_escritorio_visual_smoke.gd",
+        ]
+        if not os.environ.get("DISPLAY"):
+            xvfb = shutil.which("xvfb-run")
+            if xvfb is None:
+                self.skipTest("el smoke visual requiere DISPLAY o xvfb-run")
+            comando = [xvfb, "-a", "-s", "-screen 0 1280x800x24", *comando]
+
         resultado = subprocess.run(
-            [
-                motor,
-                "--headless",
-                "--path",
-                str(ROOT / "godot"),
-                "--script",
-                "pruebas/pruebas_escritorio_visual_smoke.gd",
-            ],
+            comando,
             text=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
