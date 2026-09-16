@@ -88,7 +88,8 @@ const CATALOGO := [
 		{
 			"id": "postal_iman_calendario",
 			"nombre": "Calendario magnético 1998",
-			"categoria": "hogar",
+			"descripcion": "Calendario magnético promocional recibido por correo.",
+			"categoria": "papel",
 			"origen": "correo_postal",
 			"vendible": false,
 			"precio": 0,
