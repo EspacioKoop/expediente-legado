@@ -51,8 +51,8 @@ class VecinosEdificioTest(unittest.TestCase):
         self.assertIn('"bloquea_campana": false', self.vecinos)
         self.assertNotIn("Jornada.gastar", self.vecinos)
         self.assertNotIn('jornada["dinero"]', self.vecinos)
-        self.assertNotIn("afinidad", self.vecinos.lower())
-        self.assertNotIn("romance", self.vecinos.lower())
+        for campo_social in ('"afinidad"', '"reputacion"', '"romance"'):
+            self.assertNotIn(campo_social, self.vecinos.lower())
 
     def test_no_hardcodea_teclas_y_documenta_el_siguiente_corte(self):
         for patron in ("KEY_", "physical_keycode", "is_key_pressed"):
