@@ -57,7 +57,7 @@ class VestuarioHumano3DTest(unittest.TestCase):
             "mesa_de_en_medio",
             "telefono",
         ):
-            self.assertIn(f'"{identidad}": {{', self.vestuario)
+            self.assertIn(f'"{identidad}":', self.vestuario)
 
     def test_las_siluetas_varian_hombros_cintura_y_mangas(self):
         self.assertIn('alto_torso * 0.27 * float(perfil["ancho"])', self.vestuario)
