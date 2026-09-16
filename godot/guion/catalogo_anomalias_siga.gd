@@ -198,7 +198,9 @@ func _mostrar_vuelta_completa() -> void:
 func _mostrar_espera() -> void:
 	_titulo.text = "Seleccione una entrada"
 	_origen.text = ""
-	_descripcion.text = "El catálogo conserva observaciones reconocidas, no interpretaciones del sueño."
+	_descripcion.text = (
+		"El catálogo conserva observaciones reconocidas, no interpretaciones del sueño."
+	)
 	_representacion.text = ""
 
 
