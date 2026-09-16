@@ -124,8 +124,9 @@ func mostrar_portada(visible: bool) -> void:
 
 
 func _hay_portada() -> bool:
-	return (_sujeto != null and _sujeto.texture != null) or (
-		_portada != null and _portada.texture != null
+	return (
+		(_sujeto != null and _sujeto.texture != null)
+		or (_portada != null and _portada.texture != null)
 	)
 
 
