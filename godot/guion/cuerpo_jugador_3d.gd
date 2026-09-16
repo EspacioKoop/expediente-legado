@@ -2,8 +2,7 @@
 ##
 ## Es deliberadamente independiente de CharacterBody3D: no crea colisiones ni
 ## cambia la escala del caminante. Su trabajo es que mirar hacia abajo revele
-## una persona y no una cámara flotante, usando la configuración persistente de
-## PerfilJugador.
+## una persona y no una cámara flotante, usando el perfil guardado en Partida.
 class_name CuerpoJugador3D
 extends Node3D
 
@@ -15,7 +14,9 @@ var _camara: Camera3D
 
 func _ready() -> void:
 	_camara = get_parent().get_node_or_null("Camara") as Camera3D
-	aplicar(PerfilJugador.cargar())
+	var partida := Partida.new()
+	partida.cargar()
+	aplicar(partida.estado.get("perfil_jugador", {}))
 
 
 func aplicar(valor: Dictionary, persistir: bool = false) -> void:
@@ -24,7 +25,10 @@ func aplicar(valor: Dictionary, persistir: bool = false) -> void:
 		hijo.queue_free()
 	_construir()
 	if persistir:
-		PerfilJugador.guardar(perfil)
+		var partida := Partida.new()
+		partida.cargar()
+		partida.estado["perfil_jugador"] = perfil
+		partida.guardar()
 
 
 func _process(delta: float) -> void:
