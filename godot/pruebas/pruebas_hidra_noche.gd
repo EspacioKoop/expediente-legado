@@ -45,7 +45,7 @@ func _initialize() -> void:
 			int(estado.get("cabezas", 0)) > SuenoHidra.CABEZAS_INICIALES, "proliferación visible"
 		)
 		_comprobar(int(estado.get("regeneraciones", 0)) == 1, "regeneración arquitectónica")
-		_comprobar(bool(estado.get("nodo_legible", false)), "raíz deducible tras insistir")
+		_comprobar(estado.get("nodo_legible", false) == true, "raíz deducible tras insistir")
 		_comprobar(nodo.habilitado, "nodo común habilitado al ser legible")
 		_comprobar(nodo.interactuar(actor), "intervención explícita sobre el nodo")
 		_comprobar(encuentro.resuelta(), "Hidra resuelta por causa común")
