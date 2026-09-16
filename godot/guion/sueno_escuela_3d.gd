@@ -80,8 +80,12 @@ func _ocultar_arquitectura_base() -> void:
 
 
 func _montar_arquitectura(bloques: Array) -> void:
-	_montar_superficie_celdas(bloques, 0.035, false, "LinoleoEscolar", Color(0.29, 0.31, 0.25))
-	_montar_superficie_celdas(bloques, ALTURA - 0.02, true, "TechoEscolar", Color(0.69, 0.68, 0.59))
+	_montar_superficie_celdas(
+		bloques, 0.035, false, "LinoleoEscolar", Color(0.29, 0.31, 0.25)
+	)
+	_montar_superficie_celdas(
+		bloques, ALTURA - 0.02, true, "TechoEscolar", Color(0.69, 0.68, 0.59)
+	)
 
 	for dato in Planta.contorno(bloques):
 		var tramo: Dictionary = dato
@@ -148,7 +152,9 @@ func _montar_pano(
 	add_child(pano)
 
 
-func _anadir_triangulos(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3) -> void:
+func _anadir_triangulos(
+	st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3
+) -> void:
 	st.add_vertex(a)
 	st.add_vertex(b)
 	st.add_vertex(c)
@@ -227,7 +233,9 @@ func _montar_pupitres(espacio: Dictionary) -> void:
 
 	var interactivo := ESCENA_PUPITRE.instantiate() as Node3D
 	interactivo.name = "PupitreDelDibujo"
-	interactivo.position = espacio.get("escuela_pupitre_pos", SuenoEscuela.PUPITRE_INTERACCION)
+	interactivo.position = espacio.get(
+		"escuela_pupitre_pos", SuenoEscuela.PUPITRE_INTERACCION
+	)
 	interactivo.rotation_degrees.y = 90.0
 	add_child(interactivo)
 	_pupitres.append(interactivo)
@@ -249,7 +257,6 @@ func _montar_taquillas(espacio: Dictionary) -> void:
 	)
 	for desplazamiento in [-3.0, 0.0, 3.0]:
 		var taquillas := ESCENA_TAQUILLAS.instantiate() as Node3D
-		taq uillas = taquillas
 		taquillas.position = centro + Vector3(desplazamiento, 0.0, 1.7)
 		taquillas.rotation_degrees.y = 180.0
 		add_child(taquillas)
@@ -258,7 +265,9 @@ func _montar_taquillas(espacio: Dictionary) -> void:
 func _montar_reloj(espacio: Dictionary) -> void:
 	var reloj := ESCENA_RELOJ.instantiate() as Node3D
 	reloj.name = "RelojTresAgujas"
-	reloj.position = espacio.get("escuela_reloj_pos", SuenoEscuela.RELOJ_REFERENCIA)
+	reloj.position = espacio.get(
+		"escuela_reloj_pos", SuenoEscuela.RELOJ_REFERENCIA
+	)
 	add_child(reloj)
 	_reloj_fantasma = reloj.get_node_or_null("AgujaFantasma") as Node3D
 
@@ -312,8 +321,12 @@ func _aplicar_variante() -> void:
 	var posiciones := posiciones_a if _variante == 0 else posiciones_b
 	for i in _puertas.size():
 		_puertas[i].position = posiciones[i]
-		_puertas[i].rotation_degrees.y = 180.0 if posiciones[i].z > 0.0 else 0.0
-		_numeros[i].position = posiciones[i] + Vector3(0.0, 1.45, -0.025 if posiciones[i].z > 0.0 else 0.025)
+		_puertas[i].rotation_degrees.y = (
+			180.0 if posiciones[i].z > 0.0 else 0.0
+		)
+		_numeros[i].position = posiciones[i] + Vector3(
+			0.0, 1.45, -0.025 if posiciones[i].z > 0.0 else 0.025
+		)
 		_numeros[i].rotation_degrees.y = _puertas[i].rotation_degrees.y
 		_numeros[i].text = str(2 + i + _variante * 7)
 
@@ -324,7 +337,9 @@ func _aplicar_variante() -> void:
 		var material := _dibujo.material_override as StandardMaterial3D
 		if material != null:
 			material.albedo_color = (
-				Color(0.82, 0.76, 0.57) if _variante == 0 else Color(0.62, 0.72, 0.54)
+				Color(0.82, 0.76, 0.57)
+				if _variante == 0
+				else Color(0.62, 0.72, 0.54)
 			)
 
 
