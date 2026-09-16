@@ -143,17 +143,20 @@ func referencia_de_mensaje(mensaje_id: String) -> Dictionary:
 func recursos_web() -> Array[Dictionary]:
 	var resultado: Array[Dictionary] = []
 	for tablon in tablones_visibles():
-		resultado.append(
-			{
-				"id": String(tablon.get("id", "")),
-				"url": String(tablon.get("url", "")),
-				"titulo": String(tablon.get("nombre", "")),
-				"snippet": String(tablon.get("descripcion", "")),
-				"categoria": "comunidad",
-				"terminos": tablon.get("terminos_indexados", []).duplicate(true),
-				"tipo": "bbs",
-				"tablon_id": String(tablon.get("id", "")),
-			}
+		(
+			resultado
+			. append(
+				{
+					"id": String(tablon.get("id", "")),
+					"url": String(tablon.get("url", "")),
+					"titulo": String(tablon.get("nombre", "")),
+					"snippet": String(tablon.get("descripcion", "")),
+					"categoria": "comunidad",
+					"terminos": tablon.get("terminos_indexados", []).duplicate(true),
+					"tipo": "bbs",
+					"tablon_id": String(tablon.get("id", "")),
+				}
+			)
 		)
 	return resultado
 
