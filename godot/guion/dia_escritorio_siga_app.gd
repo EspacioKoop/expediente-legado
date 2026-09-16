@@ -1,4 +1,4 @@
-## Adaptador del puesto de trabajo al shell de escritorio (#534, #535, #536, #537, #538, #539, #663).
+## Adaptador del puesto de trabajo al shell de escritorio (#539).
 ##
 ## `Dia` sigue siendo dueño de entrar/salir del puesto y de persistir la partida.
 ## Este controller detecta únicamente la pantalla que contiene el visor histórico,
