@@ -57,7 +57,7 @@ func _ready() -> void:
 
 
 static func habilitada(semillas: Dictionary) -> bool:
-	return semillas.get(SEMILLA, false) == true
+	return semillas.has(SEMILLA)
 
 
 static func estado_nuevo(raiz_seed: int = 0) -> Dictionary:
