@@ -99,7 +99,8 @@ const CATALOGO := [
 		"categoria": "certificado",
 		"remitente": "SIGA · Personal",
 		"asunto": "Comunicación certificada",
-		"contenido": "Confirma una comunicación administrativa sin revelar expedientes desconocidos.",
+		"contenido":
+		"Confirma una comunicación administrativa sin revelar expedientes desconocidos.",
 		"desde": 3,
 		"min_cerrados_hoy": 1,
 	},
