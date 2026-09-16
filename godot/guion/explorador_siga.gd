@@ -236,10 +236,10 @@ func _abrir_paquete_software(entrada: Dictionary) -> void:
 	var paquete_id := String(entrada.get("paquete_id", ""))
 	var paquete := SoftwareSigaModelo.new().ficha(paquete_id)
 	if paquete.is_empty():
-		_mostrar_estado("Paquete de software no reconocido")
+		_mostrar_estado(tr("EXPLORADOR_MEDIO_PAQUETE_NO_RECONOCIDO"))
 		return
 	_visor.text = (
-		"PAQUETE DE SOFTWARE — %s %s\n\n%s\n\nOrigen: %s"
+		tr("EXPLORADOR_MEDIO_PAQUETE_FICHA")
 		% [
 			String(paquete.get("nombre", paquete_id)),
 			String(paquete.get("version", "")),
@@ -247,7 +247,9 @@ func _abrir_paquete_software(entrada: Dictionary) -> void:
 			String(entrada.get("procedencia_medio", "")),
 		]
 	)
-	_mostrar_estado("Software disponible desde el medio: %s" % String(paquete.get("nombre", "")))
+	_mostrar_estado(
+		tr("EXPLORADOR_MEDIO_SOFTWARE_DISPONIBLE") % String(paquete.get("nombre", ""))
+	)
 
 
 func _refrescar_medios() -> void:
@@ -267,7 +269,7 @@ func _refrescar_medios() -> void:
 
 	if _selector_medio.item_count == 0:
 		_boton_medio.disabled = true
-		_boton_medio.text = "Insertar"
+		_boton_medio.text = tr("EXPLORADOR_MEDIO_INSERTAR")
 		return
 	if _selector_medio.selected < 0:
 		_selector_medio.select(0)
@@ -285,10 +287,14 @@ func _actualizar_boton_medio() -> void:
 	var id := _id_medio_seleccionado()
 	if id.is_empty():
 		_boton_medio.disabled = true
-		_boton_medio.text = "Insertar"
+		_boton_medio.text = tr("EXPLORADOR_MEDIO_INSERTAR")
 		return
 	_boton_medio.disabled = false
-	_boton_medio.text = "Retirar" if _medios.esta_montado(id) else "Insertar"
+	_boton_medio.text = (
+		tr("EXPLORADOR_MEDIO_RETIRAR")
+		if _medios.esta_montado(id)
+		else tr("EXPLORADOR_MEDIO_INSERTAR")
+	)
 
 
 func _id_medio_seleccionado() -> String:
@@ -313,15 +319,15 @@ func _alternar_medio() -> void:
 		_medios.desmontar(id)
 		if dentro:
 			_navegar_a(destino, true)
-			_mostrar_estado("Medio retirado; la ventana permanece abierta")
+			_mostrar_estado(tr("EXPLORADOR_MEDIO_RETIRADO_VENTANA"))
 		else:
 			_refrescar()
-			_mostrar_estado("Medio retirado")
+			_mostrar_estado(tr("EXPLORADOR_MEDIO_RETIRADO"))
 		return
 
 	var ruta_unidad := _medios.ruta_de_medio(id)
 	if not _medios.montar(id):
-		_mostrar_estado("Medio no disponible")
+		_mostrar_estado(tr("EXPLORADOR_MEDIO_NO_DISPONIBLE"))
 		return
 	if _resolver_ruta(_ruta_actual).is_empty():
 		_navegar_a(
@@ -329,7 +335,7 @@ func _alternar_medio() -> void:
 		)
 	else:
 		_refrescar()
-		_mostrar_estado("Medio insertado")
+		_mostrar_estado(tr("EXPLORADOR_MEDIO_INSERTADO"))
 
 
 func _ir_atras() -> void:
@@ -391,9 +397,9 @@ func _descripcion_entrada(entrada: Dictionary, bloqueada: bool) -> String:
 		var procedencia := String(entrada.get("procedencia_medio", ""))
 		var capacidad := String(entrada.get("capacidad_medio", ""))
 		var modo := (
-			"solo lectura"
+			tr("EXPLORADOR_MEDIO_SOLO_LECTURA")
 			if bool(entrada.get("solo_lectura", true))
-			else "lectura/escritura simulada"
+			else tr("EXPLORADOR_MEDIO_LECTURA_ESCRITURA")
 		)
 		return "%s · %s · %s" % [capacidad, modo, procedencia]
 	var fecha := String(entrada.get("fecha_narrativa", ""))
