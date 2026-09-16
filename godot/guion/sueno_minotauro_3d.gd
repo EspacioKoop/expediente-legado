@@ -29,6 +29,7 @@ var _estado: Dictionary = {}
 var _arquitectura: Node3D
 var _ala_replegable: Node3D
 var _presencia: Node3D
+var _audio_presencia: AudioStreamPlayer3D
 var _bloqueo_visual: MeshInstance3D
 var _marcas := {}
 var _nodo_actual := SuenoMinotauro.ENTRADA
@@ -196,6 +197,14 @@ func _montar_presencia() -> void:
 	_crear_cuerno(_presencia, "CuernoIzquierdo", Vector3(-0.52, 0.55, 0.0), -22.0)
 	_crear_cuerno(_presencia, "CuernoDerecho", Vector3(0.52, 0.55, 0.0), 22.0)
 
+	_audio_presencia = AudioStreamPlayer3D.new()
+	_audio_presencia.name = "RespiracionMinotauro"
+	_audio_presencia.stream = SuenoMinotauroAudio.respiracion()
+	_audio_presencia.unit_size = 2.8
+	_audio_presencia.max_distance = 18.0
+	_presencia.add_child(_audio_presencia)
+	_audio_presencia.play()
+
 	_bloqueo_visual = _crear_caja(
 		_arquitectura,
 		"SombraBloqueo",
@@ -288,6 +297,9 @@ func _actualizar_presencia() -> void:
 		escala = 1.15
 	_presencia.position = destino
 	_presencia.scale = Vector3.ONE * escala
+	if _audio_presencia != null:
+		_audio_presencia.volume_db = SuenoMinotauroAudio.volumen_db(presencia)
+		_audio_presencia.pitch_scale = SuenoMinotauroAudio.pitch_scale(presencia)
 
 	var bloqueo := String(_estado.get("bloqueo", ""))
 	_bloqueo_visual.visible = not bloqueo.is_empty()
