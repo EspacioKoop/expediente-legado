@@ -28,8 +28,8 @@ func _probar() -> void:
 	_comprobar(lote.find_children("*", "Area3D", true, false).is_empty(), "sin interacción")
 	_comprobar(lote.find_children("*", "RigidBody3D", true, false).is_empty(), "sin dinámica")
 	_comprobar(
-		lote.find_children("*", "StaticBody3D", true, false).size() == 1,
-		"solo el contenedor bloquea el paso"
+		lote.find_children("*", "StaticBody3D", true, false).size() == 2,
+		"el contenedor y el bidón bloquean el paso"
 	)
 	var triangulos := 0
 	for ficha in Urbano.PIEZAS:

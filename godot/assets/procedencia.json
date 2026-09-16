@@ -926,6 +926,22 @@
       "sha256": "6b1047aa157c1d0ef329f1046722f55d73b81a4b1a67a61a4947aa3642a35512"
     },
     {
+      "ruta": "modelos/street_furniture/Barrel.glb",
+      "titulo": "Barrel (Street Furniture, Barrel/Barrel.fbx + barrel.png convertido a GLB)",
+      "autor": "Kkryy",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kkryy.itch.io/streetfurniture",
+      "sha256": "88e485072389f4b4775bc22d9b892d652c3d3dc97884db48ead4abe5e375462f"
+    },
+    {
+      "ruta": "modelos/street_furniture/Barrel_Barrel_albedo.png",
+      "titulo": "Textura embebida extraída por Godot de Barrel.glb",
+      "autor": "Kkryy",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kkryy.itch.io/streetfurniture",
+      "sha256": "146f539d2f3c765efe811aa0cf212cf705e750e26a0447b456eebe974d7f8c61"
+    },
+    {
       "ruta": "modelos/street_furniture/Cardboard.glb",
       "titulo": "Cardboard (Street Furniture, Сardboard/Сardboard.fbx + cardboard.png convertido a GLB)",
       "autor": "Kkryy",
