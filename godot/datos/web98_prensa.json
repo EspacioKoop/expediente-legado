@@ -4,7 +4,12 @@
     {
       "id": "la-plaza",
       "recurso_id": "prensa-la-plaza",
+      "url": "http://laplaza.red98/",
       "nombre": "La Plaza",
+      "snippet": "Edición digital de tarde con noticias de trabajo, barrio y servicios compartidos.",
+      "terminos": ["prensa", "noticias", "trabajo", "barrio", "actualidad"],
+      "prioridad": 76,
+      "orden_directorio": 30,
       "fila_cabecera": 0,
       "lema": "Trabajo, barrio y vida común",
       "prioridades": ["condiciones de trabajo", "organización colectiva", "servicios compartidos"]
@@ -12,7 +17,12 @@
     {
       "id": "diario-central",
       "recurso_id": "prensa-diario-central",
+      "url": "http://central.red98/",
       "nombre": "Diario Central",
+      "snippet": "Información general con seguimiento institucional, sociedad, cultura y deportes.",
+      "terminos": ["prensa", "noticias", "instituciones", "sociedad", "actualidad"],
+      "prioridad": 75,
+      "orden_directorio": 31,
       "fila_cabecera": 1,
       "lema": "Información general y seguimiento institucional",
       "prioridades": ["procedimiento", "continuidad institucional", "contraste de posiciones"]
@@ -20,7 +30,12 @@
     {
       "id": "el-horizonte",
       "recurso_id": "prensa-el-horizonte",
+      "url": "http://horizonte.red98/",
       "nombre": "El Horizonte",
+      "snippet": "Actualidad sobre trabajo, ciudad, ciencia, cultura y servicios públicos.",
+      "terminos": ["prensa", "noticias", "trabajo", "ciudad", "ciencia"],
+      "prioridad": 74,
+      "orden_directorio": 32,
       "fila_cabecera": 2,
       "lema": "Actualidad, trabajo, ciudad y ciencia",
       "prioridades": ["servicios públicos", "protección social", "negociación"]
@@ -28,7 +43,12 @@
     {
       "id": "gaceta-mercantil",
       "recurso_id": "prensa-gaceta-mercantil",
+      "url": "http://mercantil.red98/",
       "nombre": "Gaceta Mercantil",
+      "snippet": "Economía, empresas, mercados, política y actividad comercial.",
+      "terminos": ["prensa", "noticias", "economia", "empresas", "mercados"],
+      "prioridad": 73,
+      "orden_directorio": 33,
       "fila_cabecera": 3,
       "lema": "Economía, empresas, mercados y política",
       "prioridades": ["costes", "eficiencia", "actividad empresarial"]
