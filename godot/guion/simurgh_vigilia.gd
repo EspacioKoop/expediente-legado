@@ -70,12 +70,15 @@ func _al_examinar(_actor: Node) -> void:
 func _intentar_activar() -> bool:
 	if _activada or _jornada.is_empty():
 		return _activada
-	_activada = SuenoSimurgh.registrar_semilla(
-		_jornada,
-		_inspecciones,
-		_girada,
-		FUENTE,
-		2,
+	_activada = (
+		SuenoSimurgh
+		. registrar_semilla(
+			_jornada,
+			_inspecciones,
+			_girada,
+			FUENTE,
+			2,
+		)
 	)
 	_actualizar_feedback()
 	return _activada
@@ -100,7 +103,9 @@ func _montar() -> void:
 	add_child(colision)
 
 	_agregar_caja(_lamina, "Marco", Vector3(2.0, 1.45, 0.12), Vector3(0.0, 0.72, 0.0), COLOR_MARCO)
-	_agregar_caja(_lamina, "Papel", Vector3(1.74, 1.19, 0.05), Vector3(0.0, 0.72, -0.08), COLOR_PAPEL)
+	_agregar_caja(
+		_lamina, "Papel", Vector3(1.74, 1.19, 0.05), Vector3(0.0, 0.72, -0.08), COLOR_PAPEL
+	)
 	_pluma = _agregar_caja(
 		_lamina,
 		"MotivoPluma",
