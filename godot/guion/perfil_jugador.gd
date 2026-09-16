@@ -8,31 +8,14 @@ extends RefCounted
 
 const VERSION := 1
 
+const VESTUARIO := preload("res://guion/vestuario_humano_3d.gd")
+
+## Complexión de la ficha → perfil base del vestuario de #275. El protagonista
+## usa el mismo vocabulario de silueta que la oficina: no hay otras medidas.
 const CUERPOS := {
-	"delgado":
-	{
-		"ancho": 0.88,
-		"fondo": 0.88,
-		"hombros": 0.94,
-		"cintura": 0.88,
-		"extremidad": 0.90,
-	},
-	"medio":
-	{
-		"ancho": 1.00,
-		"fondo": 1.00,
-		"hombros": 1.00,
-		"cintura": 1.00,
-		"extremidad": 1.00,
-	},
-	"robusto":
-	{
-		"ancho": 1.10,
-		"fondo": 1.08,
-		"hombros": 1.08,
-		"cintura": 1.10,
-		"extremidad": 1.08,
-	},
+	"delgado": "estrecho",
+	"medio": "medio",
+	"robusto": "robusto",
 }
 
 ## Los trasfondos son pasado, no profesión actual ni alineamiento. Las etiquetas
@@ -78,6 +61,7 @@ const TRASFONDOS := [
 	},
 ]
 
+## Las tres prendas existen en el vocabulario de VestuarioHumano3D.
 const PRENDAS := ["camisa", "jersey", "chaqueta"]
 const PEINADOS := ["corto", "medio", "rapado", "recogido"]
 
@@ -141,8 +125,19 @@ static func esta_configurado(perfil: Dictionary) -> bool:
 	return bool(completar(perfil)["configurado"])
 
 
-static func perfil_cuerpo(id: String) -> Dictionary:
-	return Dictionary(CUERPOS.get(id, CUERPOS["medio"])).duplicate(true)
+## Perfil de vestuario para [param apariencia]: la base de su complexión con
+## hombros, cintura y prenda de la ficha. `nombre` marca la figura como jugador.
+static func perfil_vestuario(apariencia: Dictionary) -> Dictionary:
+	var base_id := String(CUERPOS.get(String(apariencia.get("cuerpo", "")), "medio"))
+	var perfil: Dictionary = {}
+	for candidato in VESTUARIO.PERFILES_BASE:
+		if String(candidato["nombre"]) == base_id:
+			perfil = Dictionary(candidato).duplicate(true)
+	perfil["nombre"] = "jugador_" + base_id
+	perfil["hombros"] = float(perfil["hombros"]) * float(apariencia.get("hombros", 1.0))
+	perfil["cintura"] = float(perfil["cintura"]) * float(apariencia.get("cintura", 1.0))
+	perfil["prenda"] = String(apariencia.get("prenda", "camisa"))
+	return perfil
 
 
 static func trasfondo_por_id(id: String) -> Dictionary:

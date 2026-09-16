@@ -116,6 +116,12 @@ def ejecutar():
                 30,
                 9,
             ),
+            (
+                "cuerpo-jugador",
+                ["--script", "pruebas/pruebas_cuerpo_jugador_3d.gd"],
+                30,
+                20,
+            ),
             ("recorrido", ["--script", "pruebas/recorrido.gd"], 60, 95),
             ("arranque", ["--quit-after", "90"], 30, None),
         ]

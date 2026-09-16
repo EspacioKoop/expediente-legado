@@ -28,6 +28,9 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
     def test_hay_tres_complexiones_reutilizables(self):
         for nombre in ("delgado", "medio", "robusto"):
             self.assertIn(f'"{nombre}"', self.perfil)
+        # Mismo vocabulario de silueta que el vestuario de la oficina (#275).
+        self.assertIn('"delgado": "estrecho"', self.perfil)
+        self.assertIn("VESTUARIO.PERFILES_BASE", self.perfil)
 
     def test_hay_seis_trasfondos_y_son_narrativos(self):
         ids = (
@@ -62,11 +65,12 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
         self.assertIn('clampf(float(apariencia.get("altura"', self.perfil)
 
     def test_cuerpo_es_visual_y_no_crea_colisiones(self):
+        # El detalle (figura, vestuario, gestos) lo verifica la prueba Godot
+        # pruebas_cuerpo_jugador_3d.gd sobre el árbol real.
         self.assertIn("extends Node3D", self.cuerpo)
-        self.assertIn("BoxMesh.new()", self.cuerpo)
-        self.assertIn("CapsuleMesh.new()", self.cuerpo)
-        self.assertIn("SphereMesh.new()", self.cuerpo)
-        self.assertIn("CylinderMesh.new()", self.cuerpo)
+        self.assertIn('Modelos.persona(soporte, "persona"', self.cuerpo)
+        self.assertIn("vestuario.vestir(", self.cuerpo)
+        self.assertIn('AnimacionesUAL.reproducir(_figura, "andar")', self.cuerpo)
         self.assertNotIn("CollisionShape3D.new()", self.cuerpo)
         self.assertNotIn("extends CharacterBody3D", self.cuerpo)
         self.assertNotIn("move_and_slide()", self.cuerpo)
