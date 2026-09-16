@@ -37,31 +37,36 @@ const ACCIONES_CLIMA := {
 ## El retorno permanece abierto en todos los estados. Las otras tres conexiones
 ## cambian de disponibilidad con el clima y expresan reglas distintas.
 const RUTAS_POR_CLIMA := {
-	CLIMA_CALMA: {
+	CLIMA_CALMA:
+	{
 		RUTA_RETORNO: true,
 		RUTA_CAUCE: false,
 		RUTA_CORNISA: false,
 		RUTA_CUEVA: false,
 	},
-	CLIMA_LLUVIA: {
+	CLIMA_LLUVIA:
+	{
 		RUTA_RETORNO: true,
 		RUTA_CAUCE: true,
 		RUTA_CORNISA: false,
 		RUTA_CUEVA: false,
 	},
-	CLIMA_VIENTO: {
+	CLIMA_VIENTO:
+	{
 		RUTA_RETORNO: true,
 		RUTA_CAUCE: false,
 		RUTA_CORNISA: true,
 		RUTA_CUEVA: false,
 	},
-	CLIMA_NIEBLA: {
+	CLIMA_NIEBLA:
+	{
 		RUTA_RETORNO: true,
 		RUTA_CAUCE: false,
 		RUTA_CORNISA: false,
 		RUTA_CUEVA: false,
 	},
-	CLIMA_TORMENTA: {
+	CLIMA_TORMENTA:
+	{
 		RUTA_RETORNO: true,
 		RUTA_CAUCE: true,
 		RUTA_CORNISA: true,
@@ -150,7 +155,10 @@ func referencias_visibles() -> Dictionary:
 
 
 func ruta_retorno_disponible() -> bool:
-	return bool(rutas_disponibles().get(RUTA_RETORNO, false)) and get_node_or_null("Rutas/RutaRetorno") != null
+	return (
+		bool(rutas_disponibles().get(RUTA_RETORNO, false))
+		and get_node_or_null("Rutas/RutaRetorno") != null
+	)
 
 
 ## Cambia el tiempo solo como respuesta a una acción declarada. El retorno y la
@@ -203,7 +211,9 @@ func _montar_arquitectura() -> void:
 	var cotidiano := Node3D.new()
 	cotidiano.name = "ArquitecturaCotidiana"
 	add_child(cotidiano)
-	_crear_caja(cotidiano, "SueloOficina", Vector3(15.0, 0.30, 11.0), Vector3(0.0, -0.18, 0.0), COLOR_SUELO)
+	_crear_caja(
+		cotidiano, "SueloOficina", Vector3(15.0, 0.30, 11.0), Vector3(0.0, -0.18, 0.0), COLOR_SUELO
+	)
 	for i in 4:
 		_crear_caja(
 			cotidiano,
@@ -212,25 +222,37 @@ func _montar_arquitectura() -> void:
 			Vector3(-5.0 + i * 1.55, 1.1, -3.7),
 			COLOR_ARCHIVO,
 		)
-	_crear_caja(cotidiano, "Fluorescente", Vector3(5.0, 0.12, 0.32), Vector3(1.0, 4.2, -1.8), COLOR_LUZ)
+	_crear_caja(
+		cotidiano, "Fluorescente", Vector3(5.0, 0.12, 0.32), Vector3(1.0, 4.2, -1.8), COLOR_LUZ
+	)
 
 	var cueva := Node3D.new()
 	cueva.name = "VolumenCueva"
 	cueva.position = Vector3(4.8, 0.0, -1.4)
 	add_child(cueva)
-	_crear_caja(cueva, "EstratoIzquierdo", Vector3(2.2, 5.0, 5.0), Vector3(-2.0, 2.5, 0.0), COLOR_ROCA)
+	_crear_caja(
+		cueva, "EstratoIzquierdo", Vector3(2.2, 5.0, 5.0), Vector3(-2.0, 2.5, 0.0), COLOR_ROCA
+	)
 	_crear_caja(cueva, "EstratoDerecho", Vector3(2.2, 5.0, 5.0), Vector3(2.0, 2.5, 0.0), COLOR_ROCA)
-	_crear_caja(cueva, "TechoRoca", Vector3(6.2, 1.2, 5.0), Vector3(0.0, 5.0, 0.0), COLOR_ROCA_CLARA)
-	_crear_caja(cueva, "LaderaInterior", Vector3(4.6, 0.35, 5.5), Vector3(0.0, 0.65, -2.0), COLOR_ROCA_CLARA)
+	_crear_caja(
+		cueva, "TechoRoca", Vector3(6.2, 1.2, 5.0), Vector3(0.0, 5.0, 0.0), COLOR_ROCA_CLARA
+	)
+	_crear_caja(
+		cueva, "LaderaInterior", Vector3(4.6, 0.35, 5.5), Vector3(0.0, 0.65, -2.0), COLOR_ROCA_CLARA
+	)
 
 
 func _montar_rutas() -> void:
 	var rutas := Node3D.new()
 	rutas.name = "Rutas"
 	add_child(rutas)
-	_crear_caja(rutas, "RutaRetorno", Vector3(2.2, 0.14, 2.2), Vector3(-5.6, 0.08, 3.5), COLOR_RETORNO)
+	_crear_caja(
+		rutas, "RutaRetorno", Vector3(2.2, 0.14, 2.2), Vector3(-5.6, 0.08, 3.5), COLOR_RETORNO
+	)
 	_crear_caja(rutas, "RutaCauce", Vector3(4.6, 0.12, 1.0), Vector3(-0.4, 0.08, 2.5), COLOR_AGUA)
-	_crear_caja(rutas, "RutaCornisa", Vector3(4.0, 0.18, 0.85), Vector3(2.1, 1.35, 0.3), COLOR_VIENTO)
+	_crear_caja(
+		rutas, "RutaCornisa", Vector3(4.0, 0.18, 0.85), Vector3(2.1, 1.35, 0.3), COLOR_VIENTO
+	)
 	_crear_caja(rutas, "RutaCueva", Vector3(1.5, 0.16, 4.1), Vector3(4.8, 0.95, -1.4), COLOR_CUEVA)
 
 
@@ -238,13 +260,31 @@ func _montar_indicios_climaticos() -> void:
 	var indicios := Node3D.new()
 	indicios.name = "IndiciosClimaticos"
 	add_child(indicios)
-	_crear_caja(indicios, "HuellaAgua", Vector3(2.6, 0.06, 0.38), Vector3(-1.2, 0.11, 1.8), COLOR_AGUA)
-	_crear_caja(indicios, "HojasViento", Vector3(2.8, 0.08, 0.25), Vector3(1.6, 0.80, 1.0), COLOR_VIENTO)
-	_crear_caja(indicios, "NieblaLejana", Vector3(6.0, 2.4, 0.12), Vector3(0.0, 1.2, -4.9), COLOR_NIEBLA)
-	_crear_caja(indicios, "FrenteTormenta", Vector3(7.0, 0.45, 3.0), Vector3(1.3, 5.5, -0.8), COLOR_TORMENTA)
-	_crear_caja(indicios, "ReferenciaLejana", Vector3(0.7, 3.6, 0.7), Vector3(0.0, 1.8, -4.4), COLOR_LUZ)
-	_crear_caja(indicios, "BalizaCercana", Vector3(0.55, 0.9, 0.55), Vector3(-4.4, 0.45, 2.8), COLOR_RETORNO)
-	_crear_caja(indicios, "PresenciaPaisaje", Vector3(0.24, 3.8, 5.2), Vector3(6.2, 2.1, -1.4), COLOR_TORMENTA)
+	_crear_caja(
+		indicios, "HuellaAgua", Vector3(2.6, 0.06, 0.38), Vector3(-1.2, 0.11, 1.8), COLOR_AGUA
+	)
+	_crear_caja(
+		indicios, "HojasViento", Vector3(2.8, 0.08, 0.25), Vector3(1.6, 0.80, 1.0), COLOR_VIENTO
+	)
+	_crear_caja(
+		indicios, "NieblaLejana", Vector3(6.0, 2.4, 0.12), Vector3(0.0, 1.2, -4.9), COLOR_NIEBLA
+	)
+	_crear_caja(
+		indicios, "FrenteTormenta", Vector3(7.0, 0.45, 3.0), Vector3(1.3, 5.5, -0.8), COLOR_TORMENTA
+	)
+	_crear_caja(
+		indicios, "ReferenciaLejana", Vector3(0.7, 3.6, 0.7), Vector3(0.0, 1.8, -4.4), COLOR_LUZ
+	)
+	_crear_caja(
+		indicios, "BalizaCercana", Vector3(0.55, 0.9, 0.55), Vector3(-4.4, 0.45, 2.8), COLOR_RETORNO
+	)
+	_crear_caja(
+		indicios,
+		"PresenciaPaisaje",
+		Vector3(0.24, 3.8, 5.2),
+		Vector3(6.2, 2.1, -1.4),
+		COLOR_TORMENTA
+	)
 
 
 func _montar_luz_y_camara() -> void:
@@ -271,13 +311,23 @@ func _aplicar_estado_visual() -> void:
 	(get_node("Rutas/RutaCornisa") as MeshInstance3D).visible = bool(rutas[RUTA_CORNISA])
 	(get_node("Rutas/RutaCueva") as MeshInstance3D).visible = bool(rutas[RUTA_CUEVA])
 
-	(get_node("IndiciosClimaticos/HuellaAgua") as MeshInstance3D).visible = _clima in [CLIMA_LLUVIA, CLIMA_TORMENTA]
-	(get_node("IndiciosClimaticos/HojasViento") as MeshInstance3D).visible = _clima in [CLIMA_VIENTO, CLIMA_TORMENTA]
+	(get_node("IndiciosClimaticos/HuellaAgua") as MeshInstance3D).visible = (
+		_clima in [CLIMA_LLUVIA, CLIMA_TORMENTA]
+	)
+	(get_node("IndiciosClimaticos/HojasViento") as MeshInstance3D).visible = (
+		_clima in [CLIMA_VIENTO, CLIMA_TORMENTA]
+	)
 	(get_node("IndiciosClimaticos/NieblaLejana") as MeshInstance3D).visible = _clima == CLIMA_NIEBLA
-	(get_node("IndiciosClimaticos/FrenteTormenta") as MeshInstance3D).visible = _clima == CLIMA_TORMENTA
-	(get_node("IndiciosClimaticos/ReferenciaLejana") as MeshInstance3D).visible = _clima != CLIMA_NIEBLA
+	(get_node("IndiciosClimaticos/FrenteTormenta") as MeshInstance3D).visible = (
+		_clima == CLIMA_TORMENTA
+	)
+	(get_node("IndiciosClimaticos/ReferenciaLejana") as MeshInstance3D).visible = (
+		_clima != CLIMA_NIEBLA
+	)
 	(get_node("IndiciosClimaticos/BalizaCercana") as MeshInstance3D).visible = true
-	(get_node("IndiciosClimaticos/PresenciaPaisaje") as MeshInstance3D).visible = _clima == CLIMA_TORMENTA
+	(get_node("IndiciosClimaticos/PresenciaPaisaje") as MeshInstance3D).visible = (
+		_clima == CLIMA_TORMENTA
+	)
 
 
 func _crear_caja(
