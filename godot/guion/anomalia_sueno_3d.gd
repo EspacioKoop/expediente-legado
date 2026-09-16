@@ -1,4 +1,4 @@
-## Objeto familiar del día devuelto deformado por el sueño (#400 / #149).
+## Objeto familiar del día devuelto deformado por el sueño (#400 / #149 / #87).
 ##
 ## Es una microinteracción local: no escribe Partida/Jornada ni concede progreso.
 ## Mirarlo y usar `interactuar` alterna una segunda deformación, mantiene la luz
@@ -53,7 +53,9 @@ func configurar(
 	_visual = Node3D.new()
 	_visual.name = "FormaDeformada"
 	add_child(_visual)
-	if not Modelos.mueble(_visual, modelo, tam, color):
+	if modelo == "tarotCard":
+		_montar_tarot(tam, color)
+	elif not Modelos.mueble(_visual, modelo, tam, color):
 		_montar_respaldo(tam, color)
 	_aplicar_estado_visual()
 
@@ -106,14 +108,53 @@ func _aplicar_estado_visual() -> void:
 	_visual.rotation_degrees = _giro_reaccion if _reactiva else _giro_base
 
 
+## Carta procedural reconocible incluso antes de deformarse: cuerpo fino,
+## marco frontal y medallón central. No intenta reproducir el arcano concreto;
+## esa identidad ya pertenece a la carta encontrada y viaja como metadato.
+## La anomalía deforma la FORMA sin convertirla en un cubo genérico (#87).
+func _montar_tarot(tam: Vector3, color: Color) -> void:
+	var cuerpo := MeshInstance3D.new()
+	cuerpo.name = "Carta"
+	var caja := BoxMesh.new()
+	caja.size = tam
+	cuerpo.mesh = caja
+	cuerpo.material_override = _material(color)
+	_visual.add_child(cuerpo)
+
+	var marco := MeshInstance3D.new()
+	marco.name = "Marco"
+	var placa := BoxMesh.new()
+	placa.size = Vector3(tam.x * 0.78, tam.y * 0.78, maxf(0.008, tam.z * 0.18))
+	marco.mesh = placa
+	marco.position = Vector3(0.0, 0.0, tam.z * 0.58)
+	marco.material_override = _material(color.lightened(0.22))
+	_visual.add_child(marco)
+
+	var sello := MeshInstance3D.new()
+	sello.name = "Medallon"
+	var disco := CylinderMesh.new()
+	disco.top_radius = tam.x * 0.15
+	disco.bottom_radius = tam.x * 0.15
+	disco.height = maxf(0.009, tam.z * 0.22)
+	sello.mesh = disco
+	sello.rotation_degrees = Vector3(90.0, 0.0, 0.0)
+	sello.position = Vector3(0.0, 0.0, tam.z * 0.72)
+	sello.material_override = _material(color.darkened(0.24))
+	_visual.add_child(sello)
+
+
 func _montar_respaldo(tam: Vector3, color: Color) -> void:
 	var malla := MeshInstance3D.new()
 	malla.name = "RespaldoGeometrico"
 	var caja := BoxMesh.new()
 	caja.size = tam
 	malla.mesh = caja
+	malla.material_override = _material(color)
+	_visual.add_child(malla)
+
+
+func _material(color: Color) -> StandardMaterial3D:
 	var material := StandardMaterial3D.new()
 	material.albedo_color = color
 	material.roughness = 1.0
-	malla.material_override = material
-	_visual.add_child(malla)
+	return material
