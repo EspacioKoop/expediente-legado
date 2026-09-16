@@ -11,6 +11,10 @@
     "tipo": "boceto",
     "ruta": "res://arte/catalogo_anomalias/archivador-torcido.svg"
   },
+  "tarot-geometria-viva": {
+    "tipo": "boceto",
+    "ruta": "res://arte/catalogo_anomalias/tarot-geometria-viva.svg"
+  },
   "@vuelta-completa": {
     "tipo": "sello",
     "ruta": "res://arte/catalogo_anomalias/vuelta-completa.svg"
