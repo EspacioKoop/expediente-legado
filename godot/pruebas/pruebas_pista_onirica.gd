@@ -116,7 +116,9 @@ func _probar_recompensa_dirigida_y_ambiguedad() -> void:
 	var desconocida := Pista.resolver(
 		caso, {"state": "completado", "source_ids": ["F-1"], "reward_id": "P-X"}
 	)
-	_comprobar(desconocida.is_empty(), "un reward_id inexistente no concede otra pista por fallback")
+	_comprobar(
+		desconocida.is_empty(), "un reward_id inexistente no concede otra pista por fallback"
+	)
 
 	var relacion_sin_fuente := Pista.resolver(
 		caso, {"state": "completado", "source_ids": ["F-1"], "reward_id": "P-3"}
@@ -126,10 +128,11 @@ func _probar_recompensa_dirigida_y_ambiguedad() -> void:
 		"la recompensa dirigida sigue exigiendo todos los documentos de origen"
 	)
 	var relacion := Pista.resolver(
-		caso,
-		{"state": "completado", "source_ids": ["F-2", "F-1"], "reward_id": "P-3"}
+		caso, {"state": "completado", "source_ids": ["F-2", "F-1"], "reward_id": "P-3"}
 	)
-	_comprobar(relacion.get("id", "") == "P-3", "una relación dirigida resuelve al cubrir ambos orígenes")
+	_comprobar(
+		relacion.get("id", "") == "P-3", "una relación dirigida resuelve al cubrir ambos orígenes"
+	)
 
 
 func _probar_catalogo_invalido() -> void:
