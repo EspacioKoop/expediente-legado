@@ -1,4 +1,4 @@
-## Modelo declarativo del Explorador corporativo del OS98 (#536).
+## Modelo declarativo del Explorador corporativo del OS98 (#536, #539).
 ##
 ## La jerarquía, visibilidad y acceso viven aquí; la UI solo consulta este modelo.
 ## Las condiciones reciben un contexto de campaña explícito y testeable para no
@@ -187,6 +187,25 @@ var _entradas: Array[Dictionary] = [
 		"persistencia": false,
 	},
 	{
+		"id": "memorandum_enlace13",
+		"ruta": "equipo/documentos/memorandum_acreditacion.txt",
+		"padre": "equipo/documentos",
+		"nombre": "Memorándum de acreditación especial.txt",
+		"tipo": "texto",
+		"contenido":
+		(
+			"Para: auditor en turno.\n\nHabiendo dado cierre a los cinco expedientes bajo su cargo,"
+			+ " se concede acceso temporal a los archivos del Comité Ad Honorem.\n\n"
+			+ "Usuario: enlace13\nClave de acceso: hastur-local-13\n\n"
+			+ "La acreditación no requiere renovación."
+		),
+		"fecha_narrativa": "1998",
+		"visible_si": {"clave": "memorandum_disponible", "op": "igual", "valor": true},
+		"acceso_si": {},
+		"accion": "mostrar_contenido",
+		"persistencia": false,
+	},
+	{
 		"id": "enlace13_reservado",
 		"ruta": "equipo/red/acreditaciones",
 		"padre": "equipo/red",
@@ -197,6 +216,42 @@ var _entradas: Array[Dictionary] = [
 		"visible_si": {"clave": "habilitar_enlace13", "op": "igual", "valor": true},
 		"acceso_si": {"clave": "credenciales", "op": "incluye", "valor": "enlace13"},
 		"accion": "navegar",
+		"persistencia": false,
+	},
+	{
+		"id": "diagnostico_enlace13",
+		"ruta": "equipo/red/acreditaciones/diag_13.txt",
+		"padre": "equipo/red/acreditaciones",
+		"nombre": "DIAG_13.TXT",
+		"tipo": "texto",
+		"contenido":
+		(
+			"DIAGNÓSTICO DE ENLACE\n\nEstado: autorizado.\nNivel: temporal.\n"
+			+ "Recurso asociado: http://intranet.dgai/diag/enlace13/\n\n"
+			+ "El recurso Web98 puede consultarse desde Buscar o introduciendo la dirección."
+		),
+		"fecha_narrativa": "1998",
+		"visible_si": {},
+		"acceso_si": {},
+		"accion": "mostrar_contenido",
+		"persistencia": false,
+	},
+	{
+		"id": "registro_imposible_13",
+		"ruta": "equipo/red/acreditaciones/registro_13.tmp",
+		"padre": "equipo/red/acreditaciones",
+		"nombre": "REGISTRO_13.TMP",
+		"tipo": "texto",
+		"contenido":
+		(
+			"VOLCADO LOCAL\n\nOrigen declarado: caché Web98.\n"
+			+ "URL: http://intranet.dgai/cache/diag-13/\n"
+			+ "Observación: el sello de captura es posterior a la jornada actual."
+		),
+		"fecha_narrativa": "04/01/1999",
+		"visible_si": {"clave": "fase_contaminacion", "op": ">=", "valor": 2},
+		"acceso_si": {},
+		"accion": "mostrar_contenido",
 		"persistencia": false,
 	},
 ]
