@@ -40,7 +40,7 @@ class ObjetosOniricosTest(unittest.TestCase):
         codigo = DRESSING.read_text(encoding="utf-8")
         self.assertRegex(codigo, r'"monitor CRT",\s*"monitor"')
         self.assertRegex(codigo, r'"silla",\s*"silla"')
-        self.assertIn('"archivador vintage", "archivador"', codigo)
+        self.assertRegex(codigo, r'"archivador vintage",\s*"archivador"')
         self.assertIn("ObjetosOniricos.registrar(dia.jornada, objeto_id)", codigo)
         self.assertIn('dia._guardar_o_avisar("")', codigo)
 
