@@ -18,9 +18,10 @@ class SuenoEscuelaRuntimeTest(unittest.TestCase):
         self.assertIn("static func es_forma(id: String) -> bool:", self.escuela)
         self.assertNotIn("Sueno.noche(", self.escuela)
 
-    def test_dibujo_reutiliza_contenido_ya_conocido(self):
+    def test_dibujo_reutiliza_contenido_ya_conocido_sin_consumirlo(self):
         self.assertIn('resultado.get("carteles", [])', self.escuela)
-        self.assertIn("carteles.pop_front()", self.escuela)
+        self.assertIn("var primero: Dictionary = carteles[0]", self.escuela)
+        self.assertNotIn("carteles.pop_front()", self.escuela)
         self.assertIn('frase_conocida = String(primero.get("texto", ""))', self.escuela)
         self.assertIn('"frase": frase_conocida', self.escuela)
         self.assertIn('"destino": ""', self.escuela)
