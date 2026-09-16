@@ -60,7 +60,7 @@ func _ejecutar() -> void:
 	escritorio.abrir_aplicacion("smoke-b")
 	escritorio._alternar_menu()
 	await process_frame
-	await process_frame
+	await RenderingServer.frame_post_draw
 
 	_comprobar(escritorio._ventanas.size() == 2, "el estado base contiene dos ventanas")
 	_comprobar(escritorio._menu.visible, "el menú del sistema está visible en la captura base")
@@ -93,7 +93,7 @@ func _ejecutar() -> void:
 	modal.add_child(aceptar)
 	escritorio.abrir_modal("smoke-modal", "Aviso", modal)
 	await process_frame
-	await process_frame
+	await RenderingServer.frame_post_draw
 
 	_comprobar(
 		escritorio._modal_id == "smoke-modal", "la segunda captura contiene una modal activa"
