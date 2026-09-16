@@ -28,7 +28,7 @@ func _process(_delta: float) -> void:
 	_montar_pared(dia, mundo)
 
 
-func _montar_pared(dia: Node, mundo: Node3D) -> void:
+func _montar_pared(dia, mundo: Node3D) -> void:
 	var pared := Interactuable3D.new()
 	pared.name = "ParedGolpeableOficina"
 	pared.position = POSICION_PARED
@@ -44,7 +44,7 @@ func _montar_pared(dia: Node, mundo: Node3D) -> void:
 	pared.add_child(colision)
 
 
-func _al_golpear(_actor: Node, dia: Node, pared: Interactuable3D) -> void:
+func _al_golpear(_actor: Node, dia, pared: Interactuable3D) -> void:
 	if _resolviendo or dia._pantalla != null or dia.partida.guardado_pendiente:
 		return
 	if String(dia.jornada.get("fase", "")) != "archivo":
@@ -81,13 +81,13 @@ func _al_golpear(_actor: Node, dia: Node, pared: Interactuable3D) -> void:
 		dia._guardar_o_avisar("")
 
 
-func _reaccionar_companeros(dia: Node, origen: Vector3) -> void:
+func _reaccionar_companeros(dia, origen: Vector3) -> void:
 	var controller := dia.get_node_or_null("CompanerosIdleController")
 	if controller != null and controller.has_method("huir_de"):
 		controller.huir_de(origen)
 
 
-func _despedir(dia: Node) -> void:
+func _despedir(dia) -> void:
 	# La reincidencia es despido directo, no una vida de daño. Se reutiliza la
 	# única ruta que ya reinicia Prometeo + Jornada para una nueva vida laboral.
 	var vidas := maxi(1, int(dia.partida.estado.get("vida", 1)))
