@@ -124,6 +124,64 @@ static func ordenar_compatible(caso: Dictionary, visibles: Array = []) -> Array:
 	return resultado
 
 
+## Conserva en el estado de Partida el mejor intento conocido para un caso.
+##
+## No guarda documentos ni una cronología paralela: solo ids de tarjetas y el
+## resumen derivado por `validar`. Así un cambio de texto en el catálogo fuente
+## no queda congelado dentro del save. La comparación prioriza coherencia y usa cobertura
+## como desempate, de modo que un orden parcial perfecto no sustituye a otro
+## igualmente coherente que reconstruye más documentos.
+static func guardar_mejor(
+	partida_estado: Dictionary, caso_id: String, caso: Dictionary, orden: Array
+) -> Dictionary:
+	var resultado := validar(caso, orden)
+	var id_caso := caso_id.strip_edges()
+	if id_caso.is_empty():
+		return {"actualizado": false, "resultado": resultado, "mejor": {}}
+
+	var reconstrucciones = partida_estado.get("reconstrucciones", {})
+	if typeof(reconstrucciones) != TYPE_DICTIONARY:
+		reconstrucciones = {}
+
+	var candidato := {
+		"orden": _normalizar_orden(orden),
+		"puntuacion": int(resultado.get("puntuacion", 0)),
+		"cobertura": float(resultado.get("cobertura", 0.0)),
+		"rango": String(resultado.get("rango", RANGO_INCOMPLETO)),
+	}
+	var actual = reconstrucciones.get(id_caso, {})
+	if typeof(actual) != TYPE_DICTIONARY or _es_mejor(candidato, actual):
+		reconstrucciones[id_caso] = candidato
+		partida_estado["reconstrucciones"] = reconstrucciones
+		return {"actualizado": true, "resultado": resultado, "mejor": candidato.duplicate(true)}
+
+	partida_estado["reconstrucciones"] = reconstrucciones
+	return {"actualizado": false, "resultado": resultado, "mejor": actual.duplicate(true)}
+
+
+static func mejor_guardado(partida_estado: Dictionary, caso_id: String) -> Dictionary:
+	var reconstrucciones = partida_estado.get("reconstrucciones", {})
+	if typeof(reconstrucciones) != TYPE_DICTIONARY:
+		return {}
+	var mejor = reconstrucciones.get(caso_id.strip_edges(), {})
+	return mejor.duplicate(true) if typeof(mejor) == TYPE_DICTIONARY else {}
+
+
+static func _normalizar_orden(orden: Array) -> Array:
+	var normalizado := []
+	for id in orden:
+		normalizado.append(String(id))
+	return normalizado
+
+
+static func _es_mejor(candidato: Dictionary, actual: Dictionary) -> bool:
+	var puntuacion_nueva := int(candidato.get("puntuacion", 0))
+	var puntuacion_actual := int(actual.get("puntuacion", -1))
+	if puntuacion_nueva != puntuacion_actual:
+		return puntuacion_nueva > puntuacion_actual
+	return float(candidato.get("cobertura", 0.0)) > float(actual.get("cobertura", -1.0))
+
+
 static func _puntuacion(cantidad: int, contradicciones: int, ausentes: int) -> int:
 	if cantidad == 0:
 		return 0

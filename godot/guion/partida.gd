@@ -93,6 +93,9 @@ static func nueva() -> Dictionary:
 		# escribe el día y las firmas, pero cargar los descarta silenciosamente.
 		"jornada": Jornada.nueva(),
 		"veredictos": {},
+		# #155: mejores reconstrucciones por expediente. Solo son estado
+		# derivado (ids/puntuación/cobertura/rango), nunca copias de documentos.
+		"reconstrucciones": {},
 		"logros": catalogos.get("logros", []),
 		"tarot": catalogos.get("tarot", []),
 		"vida": VIDA_MAXIMA,
@@ -279,7 +282,7 @@ static func validar(guardado) -> Array:
 	for clave in ["logros", "tarot"]:
 		if guardado.has(clave) and typeof(guardado[clave]) != TYPE_ARRAY:
 			errores.append("%s no es una lista" % clave)
-	for clave in ["veredictos", "historias_cartas", "cinematicas_vistas"]:
+	for clave in ["veredictos", "historias_cartas", "cinematicas_vistas", "reconstrucciones"]:
 		if guardado.has(clave) and typeof(guardado[clave]) != TYPE_DICTIONARY:
 			errores.append("%s no es un objeto" % clave)
 	for clave in CAMPOS_ENTEROS:
