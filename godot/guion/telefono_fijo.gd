@@ -20,7 +20,7 @@ const LLAMADAS := [
 		"remitente": "Compañero del archivo",
 		"hora": "18:42",
 		"dias": [1],
-		"texto": "Solo llamaba para decir que he dejado la carpeta gris donde siempre. Mañana te cuento.",
+		"texto": "He dejado la carpeta gris donde siempre. Mañana te cuento el resto.",
 		"mensaje": "He dejado la carpeta gris donde siempre. Mañana te cuento.",
 	},
 	{
@@ -42,7 +42,7 @@ const LLAMADAS := [
 		"resto": 9,
 		"requiere_alquiler_pendiente": true,
 		"texto": "Le recordamos que mañana vence el alquiler. Este aviso no realiza ningún cobro.",
-		"mensaje": "Recordatorio: mañana vence el alquiler. El pago se gestiona por la vía habitual.",
+		"mensaje": "Recordatorio: mañana vence el alquiler. Use la vía de pago habitual.",
 	},
 	{
 		"id": "comercial_enciclopedia",
@@ -51,7 +51,7 @@ const LLAMADAS := [
 		"desde": 3,
 		"cada": 6,
 		"resto": 3,
-		"texto": "Buenas tardes. Estamos realizando una encuesta sobre lectura en el hogar. No le robamos más tiempo.",
+		"texto": "Buenas tardes. Hacemos una encuesta sobre lectura en el hogar. No le robo más tiempo.",
 		"mensaje": "Encuestas Editorial Horizonte. Volveremos a intentarlo otro día.",
 	},
 	{
@@ -62,8 +62,8 @@ const LLAMADAS := [
 		"cada": 4,
 		"resto": 0,
 		"min_cerrados_hoy": 1,
-		"texto": "Vi que hoy cerraste varios expedientes. Te llamaba por una tontería del turno; nada urgente.",
-		"mensaje": "Te llamaba por una tontería del turno. No es urgente; mañana te lo digo en persona.",
+		"texto": "Vi que hoy cerraste expedientes. Te llamaba por una tontería; nada urgente.",
+		"mensaje": "Te llamaba por una tontería del turno. Mañana te lo digo en persona.",
 	},
 	{
 		"id": "centralita_interna",
@@ -258,7 +258,9 @@ static func llamar(jornada: Dictionary, contacto_id: String) -> Dictionary:
 	}
 
 
-static func _guardar_mensaje(telefono: Dictionary, jornada: Dictionary, llamada: Dictionary) -> Dictionary:
+static func _guardar_mensaje(
+	telefono: Dictionary, jornada: Dictionary, llamada: Dictionary
+) -> Dictionary:
 	var mensaje := {
 		"id": String(llamada.get("id", "")),
 		"remitente": String(llamada.get("remitente", "Número desconocido")),
@@ -273,16 +275,17 @@ static func _guardar_mensaje(telefono: Dictionary, jornada: Dictionary, llamada:
 	return mensaje
 
 
-static func _agregar_historial(telefono: Dictionary, jornada: Dictionary, tipo: String, item: Dictionary) -> void:
+static func _agregar_historial(
+	telefono: Dictionary, jornada: Dictionary, tipo: String, item: Dictionary
+) -> void:
 	var historial: Array = telefono[HISTORIAL]
-	historial.append(
-		{
-			"tipo": tipo,
-			"id": String(item.get("id", "")),
-			"dia": int(jornada.get("dia", 1)),
-			"hora": String(item.get("hora", "")),
-		}
-	)
+	var entrada := {
+		"tipo": tipo,
+		"id": String(item.get("id", "")),
+		"dia": int(jornada.get("dia", 1)),
+		"hora": String(item.get("hora", "")),
+	}
+	historial.append(entrada)
 	telefono[HISTORIAL] = historial
 
 
