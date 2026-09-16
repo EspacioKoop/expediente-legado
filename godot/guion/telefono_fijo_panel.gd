@@ -87,10 +87,6 @@ func _construir() -> void:
 	_colgar = _boton("Colgar", _al_colgar)
 	acciones.add_child(_colgar)
 
-	var titulo_contactos := Label.new()
-	titulo_contactos.text = "Llamadas salientes declaradas"
-	columna.add_child(titulo_contactos)
-
 	_contactos = VBoxContainer.new()
 	_contactos.add_theme_constant_override("separation", 6)
 	columna.add_child(_contactos)
@@ -224,7 +220,7 @@ func _al_colgar() -> void:
 	if not bool(resultado.get("ok", false)):
 		_mostrar_error(resultado)
 		return
-	_contenido.text = "Has colgado el auricular."
+	_contenido.text = ""
 	_estado_cambio()
 
 
