@@ -115,9 +115,12 @@ func _probar_orientacion_recorrido() -> void:
 	)
 
 	var rotacion_previa := encuentro.rotation
-	controller._orientar_segun_recorrido(
-		encuentro,
-		{"entrada": Vector3.ZERO, "salidas": []},
+	(
+		controller
+		. _orientar_segun_recorrido(
+			encuentro,
+			{"entrada": Vector3.ZERO, "salidas": []},
+		)
 	)
 	_comprobar(
 		encuentro.rotation.distance_to(rotacion_previa) < 0.0001,
