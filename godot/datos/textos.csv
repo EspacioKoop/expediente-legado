@@ -347,3 +347,4 @@ GATO_SIGA_CERRADO,Ese expediente ya está cerrado.
 GATO_SIGA_DESCUBRIMIENTO,Ha aparecido una pista nueva.
 GATO_SIGA_COMBINACION_FALLIDA,Esos documentos no justifican una relación.
 GATO_SIGA_COMBINACION_REPETIDA,Esa relación ya constaba.
+RESUMEN_PLANTILLA,Resumen de plantilla
