@@ -9,6 +9,7 @@ var partida := Partida.new()
 var _continuar: Button
 var _nueva: Button
 var _cargar: Button
+var _personaje: Button
 var _ventanilla: Button
 var _ajustes: Button
 var _salir: Button
@@ -72,7 +73,7 @@ func _construir_interfaz() -> void:
 
 	var marco := PanelBisel.new()
 	marco.name = "MarcoInicio"
-	marco.custom_minimum_size = Vector2(520, 500)
+	marco.custom_minimum_size = Vector2(520, 540)
 	marco.saliente = true
 	for lado in ["left", "top", "right", "bottom"]:
 		marco.add_theme_constant_override("margin_" + lado, 10)
@@ -91,6 +92,9 @@ func _construir_interfaz() -> void:
 	_cargar = _crear_boton(tr("INICIO_CARGAR"), _cargar_partida)
 	_cargar.tooltip_text = tr("INICIO_CARGAR_TOOLTIP")
 	caja.add_child(_cargar)
+	_personaje = _crear_boton(tr("INICIO_PERSONAJE"), _abrir_personaje)
+	_personaje.tooltip_text = tr("INICIO_PERSONAJE_TOOLTIP")
+	caja.add_child(_personaje)
 
 	var separador := HSeparator.new()
 	separador.name = "SeparadorInicio"
@@ -196,6 +200,11 @@ func _actualizar() -> void:
 func _seguir() -> void:
 	if _entrando or _reinicio_pendiente or not FileAccess.file_exists(ruta):
 		return
+	partida.cargar(ruta)
+	var perfil := PerfilJugador.completar(partida.estado.get("perfil_jugador", {}))
+	if not PerfilJugador.esta_configurado(perfil):
+		_abrir_personaje()
+		return
 	_entrar()
 
 
@@ -227,11 +236,24 @@ func _empezar() -> void:
 			return
 		_reinicio_pendiente = true
 	_actualizar()
+	var perfil := PerfilJugador.completar(partida.estado.get("perfil_jugador", {}))
+	perfil["configurado"] = false
+	partida.estado["perfil_jugador"] = perfil
 	if not partida.guardar(ruta):
 		_aviso.text = tr("ARCHIVO_ERROR_GUARDAR")
 		return
 	_reinicio_pendiente = false
-	_entrar()
+	_abrir_personaje()
+
+
+func _abrir_personaje() -> void:
+	if _entrando:
+		return
+	_entrando = true
+	var error := get_tree().change_scene_to_file("res://escenas/creador_personaje.tscn")
+	if error != OK:
+		_entrando = false
+		_aviso.text = tr("INICIO_ERROR_ENTRADA")
 
 
 func _abrir_ventanilla() -> void:
