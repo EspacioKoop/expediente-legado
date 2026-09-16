@@ -4,7 +4,8 @@ Starter pack de **assets 3D originales del proyecto** para las cuatro familias d
 
 ## Contenido
 
-- `cabana_nieve.tscn`: cabaña reconocible con tejado nevado, chimenea, puerta, ventanas cálidas, porche y carámbanos.
+- `cabana_nieve.tscn`: cabaña de montaña reutilizable; el pase de #284 sustituye el cuerpo de primitivas por la malla original `cabana_nieve_psx.obj`, mantiene nieve, ventanas cálidas y luz interior.
+- `cabana_nieve_psx.obj`: malla low-poly original y diffable con planta irregular, tejado a dos aguas, chimenea y porche; evita que la arquitectura final de montaña se lea como bloques genéricos.
 - `pupitre_escolar.tscn`: pupitre escolar completo con tablero, faldón y estructura metálica.
 - `taquillas_escolares.tscn`: módulo de tres taquillas con puertas, respiraderos y tiradores.
 - `reloj_escolar_anomalo.tscn`: reloj mural con doble juego de agujas para mutaciones del sueño.
@@ -23,7 +24,9 @@ Cada fichero es una pieza independiente. Puede instanciarse directamente o abrir
 
 `patio_castillo_onirico.tscn` sirve como corte de arte reconocible para integrar o validar el sueño de castillo: concentra arquitectura propia y la anomalía espacial en una sola escena sin modificar el runtime estabilizado del sueño.
 
-El feedback de playtest de `c2b4b714` descarta que la arquitectura final del sueño se lea como asset genérico estilo "Minecraft". Por eso `muro_torre_castillo.tscn` y `escalera_anular_castillo.tscn` conservan sus rutas públicas, pero dejan de construirse con bloques del motor y pasan a siluetas medievales propias. La escena final de #284 sigue teniendo que cumplir la regla de extrañeza y validar su lectura sin HUD.
+La montaña se compone en runtime desde `SuenoMontana3D`: la familia CONVERGENTE conserva la única colisión, mientras la presentación añade cima nevada, laderas, mar de nubes, huellas anticipadas, documento congelado y la cabaña de este directorio.
+
+El feedback de playtest de `c2b4b714` descarta que la arquitectura final del sueño se lea como asset genérico estilo "Minecraft". Por eso tanto el castillo como la cabaña de montaña pasan a siluetas originales antes de usarse como presentación final.
 
 ## Procedencia
 
