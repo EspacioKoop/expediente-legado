@@ -64,13 +64,16 @@ func portada(cabecera_id: String) -> Dictionary:
 		var hecho_datos := hecho_valor as Dictionary
 		if not _disponible_en_dia(hecho_datos):
 			continue
-		articulos.append(
-			{
-				"hecho_id": hecho_id,
-				"hecho": hecho_datos.duplicate(true),
-				"tratamiento": tratamiento.duplicate(true),
-				"datos_destacados": _proyectar_datos(hecho_datos, tratamiento),
-			}
+		(
+			articulos
+			. append(
+				{
+					"hecho_id": hecho_id,
+					"hecho": hecho_datos.duplicate(true),
+					"tratamiento": tratamiento.duplicate(true),
+					"datos_destacados": _proyectar_datos(hecho_datos, tratamiento),
+				}
+			)
 		)
 	articulos.sort_custom(_orden_articulos)
 	return {
@@ -96,7 +99,9 @@ func _proyectar_datos(hecho_datos: Dictionary, tratamiento: Dictionary) -> Array
 
 func _disponible_en_dia(hecho_datos: Dictionary) -> bool:
 	var dia := maxi(1, int(_contexto.get("dia", 1)))
-	var desde := maxi(1, int(hecho_datos.get("disponible_desde_dia", hecho_datos.get("jornada", 1))))
+	var desde := maxi(
+		1, int(hecho_datos.get("disponible_desde_dia", hecho_datos.get("jornada", 1)))
+	)
 	var hasta := int(hecho_datos.get("disponible_hasta_dia", 0))
 	if dia < desde:
 		return false
