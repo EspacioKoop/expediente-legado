@@ -1,0 +1,8 @@
+{
+  "titulo_app": "Correo interno",
+  "bandeja": "BANDEJA DE ENTRADA",
+  "seleccionar": "Seleccione un mensaje",
+  "espera": "El correo nuevo aparecerá aquí a medida que avance la jornada.",
+  "marca_nuevo": "[NUEVO] ",
+  "estado": "%d mensaje(s) · %d sin leer"
+}
