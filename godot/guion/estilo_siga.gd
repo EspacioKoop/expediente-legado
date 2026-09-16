@@ -118,9 +118,13 @@ static func _configurar_campos(tema: Theme) -> void:
 		tema.set_stylebox("focus", tipo, caja_foco())
 		tema.set_stylebox("read_only", tipo, caja_hundida(Color("e8e8e8")))
 		tema.set_color("font_color", tipo, NEGRO)
-		tema.set_color("font_readonly_color", tipo, GRIS_TEXTO)
+		tema.set_color("font_selected_color", tipo, BLANCO)
+		tema.set_color("font_placeholder_color", tipo, GRIS_OSCURO)
 		tema.set_color("caret_color", tipo, NEGRO)
 		tema.set_color("selection_color", tipo, AZUL_TITULO)
+	# Godot usa nombres distintos para el color no editable en ambos controles.
+	tema.set_color("font_uneditable_color", "LineEdit", GRIS_TEXTO)
+	tema.set_color("font_readonly_color", "TextEdit", GRIS_TEXTO)
 
 
 ## El tema de toda la interfaz.
