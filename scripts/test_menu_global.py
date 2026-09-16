@@ -56,6 +56,17 @@ class MenuGlobalTest(unittest.TestCase):
         self.assertIn("_volver_de_incidencias", self.menu)
         self.assertIn("_incidencias.grab_focus()", self.menu)
 
+    def test_metadatos_nativos_para_lector_de_pantalla(self):
+        self.assertIn("_volumen.accessibility_name = volumen_titulo.text", self.menu)
+        self.assertIn("slider.accessibility_name = etiqueta", self.menu)
+        self.assertIn(
+            "_estado_remapeo.accessibility_live = AccessibilityServer.LIVE_POLITE",
+            self.menu,
+        )
+        self.assertIn(
+            "restaurar.accessibility_name = restaurar.tooltip_text", self.menu
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
