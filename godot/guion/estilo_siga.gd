@@ -49,6 +49,84 @@ static func dibujar_bisel(lienzo: CanvasItem, rect: Rect2, fondo: Color, salient
 		)
 
 
+## Equivalente reutilizable del bisel saliente para controles del Theme.
+##
+## StyleBoxFlat no deja asignar un color distinto a cada lado. Combinamos un
+## borde claro con una sombra corta desplazada abajo/derecha: a tamaño real el
+## resultado conserva las dos masas de luz del bisel clásico sin necesitar un
+## recurso binario ni un shader por control.
+static func caja_saliente(fondo: Color = GRIS) -> StyleBoxFlat:
+	return _caja_retro(fondo, false)
+
+
+## Variante hundida: borde oscuro y luz desplazada arriba/izquierda.
+static func caja_hundida(fondo: Color = BLANCO) -> StyleBoxFlat:
+	return _caja_retro(fondo, true)
+
+
+## Anillo de foco deliberadamente independiente del relieve.
+## Se dibuja en negro/azul oscuro para no depender solo del cambio de volumen.
+static func caja_foco() -> StyleBoxFlat:
+	var caja := StyleBoxFlat.new()
+	caja.bg_color = Color.TRANSPARENT
+	caja.border_color = AZUL_TITULO
+	caja.set_border_width_all(1)
+	caja.set_corner_radius_all(0)
+	return caja
+
+
+static func _caja_retro(fondo: Color, hundida: bool) -> StyleBoxFlat:
+	var caja := StyleBoxFlat.new()
+	caja.bg_color = fondo
+	caja.set_corner_radius_all(0)
+	caja.set_border_width_all(GROSOR)
+	caja.content_margin_left = 7.0
+	caja.content_margin_top = 4.0
+	caja.content_margin_right = 7.0
+	caja.content_margin_bottom = 4.0
+	if hundida:
+		caja.border_color = GRIS_OSCURO
+		caja.shadow_color = GRIS_CLARO
+		caja.shadow_size = 1
+		caja.shadow_offset = Vector2(-1, -1)
+	else:
+		caja.border_color = GRIS_CLARO
+		caja.shadow_color = GRIS_OSCURO
+		caja.shadow_size = GROSOR
+		caja.shadow_offset = Vector2(1, 1)
+	return caja
+
+
+static func _configurar_botones(tema: Theme) -> void:
+	for tipo in ["Button", "OptionButton", "MenuButton"]:
+		tema.set_stylebox("normal", tipo, caja_saliente())
+		tema.set_stylebox("hover", tipo, caja_saliente(Color("d0d0d0")))
+		tema.set_stylebox("pressed", tipo, caja_hundida(GRIS))
+		tema.set_stylebox("disabled", tipo, caja_saliente(Color("b8b8b8")))
+		tema.set_stylebox("focus", tipo, caja_foco())
+		tema.set_color("font_color", tipo, NEGRO)
+		tema.set_color("font_hover_color", tipo, NEGRO)
+		tema.set_color("font_pressed_color", tipo, NEGRO)
+		tema.set_color("font_focus_color", tipo, NEGRO)
+		tema.set_color("font_disabled_color", tipo, GRIS_OSCURO)
+		tema.set_constant("outline_size", tipo, 0)
+
+
+static func _configurar_campos(tema: Theme) -> void:
+	for tipo in ["LineEdit", "TextEdit"]:
+		tema.set_stylebox("normal", tipo, caja_hundida(BLANCO))
+		tema.set_stylebox("focus", tipo, caja_foco())
+		tema.set_stylebox("read_only", tipo, caja_hundida(Color("e8e8e8")))
+		tema.set_color("font_color", tipo, NEGRO)
+		tema.set_color("font_selected_color", tipo, BLANCO)
+		tema.set_color("font_placeholder_color", tipo, GRIS_OSCURO)
+		tema.set_color("caret_color", tipo, NEGRO)
+		tema.set_color("selection_color", tipo, AZUL_TITULO)
+	# Godot usa nombres distintos para el color no editable en ambos controles.
+	tema.set_color("font_uneditable_color", "LineEdit", GRIS_TEXTO)
+	tema.set_color("font_readonly_color", "TextEdit", GRIS_TEXTO)
+
+
 ## El tema de toda la interfaz.
 ##
 ## Lo que delata la época no es tanto la forma de la letra como el SUAVIZADO:
@@ -91,4 +169,6 @@ static func tema() -> Theme:
 	tema.default_font = fuente
 	tema.default_font_size = 14
 	tema.set_font("mono_font", "RichTextLabel", mono)
+	_configurar_botones(tema)
+	_configurar_campos(tema)
 	return tema

@@ -120,6 +120,39 @@ No se registran enlaces temporales de descarga como fuente de licencia. La fuent
 - [ ] ejecutar importación Godot, suite, recorrido, arranque y pruebas Python;
 - [ ] capturar al menos una vista que demuestre lectura de fondo y ausencia de protagonismo excesivo.
 
+## Selección real importada (segundo corte)
+
+Descarga verificada desde el enlace oficial de Google Drive enlazado en la
+página de Quaternius (`https://drive.google.com/drive/folders/1RE3qXhbE5yGS3t-xGFJ8GmOtTgCUF3LQ`),
+carpeta "Models with Materials" (OBJ/FBX/Blend sin texturas, solo color
+plano por material). Correspondencia rol → fichero real:
+
+| Rol | Fichero | Formato de entrada |
+| --- | --- | --- |
+| bloque residencial bajo/medio | `2Story_Mat.obj` | OBJ oficial, descarga directa |
+| bloque residencial alto | `6Story_Stack_Mat.obj` | FBX oficial, exportado a OBJ con `assimp` |
+| edificio terciario/oficinas | `4Story_Mat.obj` | FBX oficial, exportado a OBJ con `assimp` |
+| pieza comercial o de esquina | `1Story_Sign_Mat.obj` | OBJ oficial, descarga directa |
+
+`4Story_Mat` y `6Story_Stack_Mat` no se pudieron descargar en OBJ: Google
+Drive bloqueó esos enlaces individuales por límite de accesos ("Cannot
+retrieve the public link of the file"), pero el FBX de la misma carpeta
+oficial sí se completó. Se exportaron a OBJ con `assimp` conforme a la
+cláusula de este documento que permite FBX cuando el OBJ directo no está
+disponible. El FBX de Quaternius exporta en centímetros y `assimp` no
+aplicó el factor de unidad de conversión: los vértices de esos dos ficheros
+se reescalaron ×0.01 antes de versionarlos, para que su altura quede en
+metros y sea coherente con `2Story_Mat`/`1Story_Sign_Mat`.
+
+Los cuatro ficheros están bajo `godot/assets/cc0/quaternius_ultimate_buildings/`,
+registrados con SHA-256 en `godot/assets/procedencia.json`. Son OBJ/MTL de
+texto: no requieren Git LFS. El montaje real (`godot/arte/edificios_cc0.gd`
++ `godot/guion/dia_edificios_cc0_app.gd`) instancia estas cuatro piezas como
+tercera línea de fondo, detrás del LOD procedural de `SkylineQuaternius`
+(#404), con el shader PSX común, sin sombra dinámica, `visibility_range_end`
+y sin colisión/interacción. No sustituye el LOD procedural existente: lo
+complementa con geometría real medible.
+
 ## Criterio de cierre
 
 Este documento no cierra #218 por sí solo. #218 puede cerrarse cuando exista al menos un montaje real del lote seleccionado que cumpla simultáneamente:

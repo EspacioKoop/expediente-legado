@@ -16,6 +16,7 @@ const TAM_SOFA := Vector3(1.9, 0.86, 0.87)
 const ALTO_TABIQUE := 2.8
 const GROSOR_TABIQUE := 0.18
 const NOMBRE_HABITACIONES := "HabitacionesCasa"
+const NOMBRE_TRANSICIONES := "TransicionesCasa"
 
 # El dormitorio ocupa el fondo izquierdo. La puerta queda centrada en el paso
 # histórico hacia la cama, de modo que la nueva arquitectura no invalida el
@@ -34,6 +35,19 @@ const TABIQUES := [
 	],
 	["DintelDormitorio", Vector3(0.0, 2.40, -0.65), Vector3(1.10, 0.80, GROSOR_TABIQUE)],
 ]
+
+# Acabados de lectura, no colisiones nuevas. El marco hace que el hueco del
+# dormitorio se entienda como puerta y no como pared incompleta. El umbral no
+# estrecha el paso histórico de 1,10 m. Todos quedan unos centímetros por delante
+# del tabique para evitar z-fighting con el gotelé.
+const MARCO_PUERTA_DORMITORIO := [
+	["JambaDormitorioIzquierda", Vector3(-0.60, 1.10, -0.55), Vector3(0.10, 2.20, 0.08)],
+	["JambaDormitorioDerecha", Vector3(0.60, 1.10, -0.55), Vector3(0.10, 2.20, 0.08)],
+	["MarcoSuperiorDormitorio", Vector3(0.0, 2.25, -0.55), Vector3(1.30, 0.10, 0.08)],
+	["UmbralDormitorio", Vector3(0.0, 0.015, -0.55), Vector3(1.10, 0.03, 0.18)],
+]
+const ALFOMBRA_SALON_POS := Vector3(-2.10, 0.015, 1.35)
+const ALFOMBRA_SALON_TAM := Vector3(2.85, 0.03, 1.95)
 
 # nombre, modelo, base en el suelo o superficie, caja de encaje (ejes del
 # modelo), giro Y (0 = frente hacia +Z), con colisión.
@@ -159,6 +173,7 @@ static func montar(raiz: Node3D) -> Node3D:
 	var existente := raiz.get_node_or_null("CasaHogarCC0") as Node3D
 	if existente != null:
 		_montar_habitaciones(raiz)
+		_montar_transiciones_domesticas(raiz)
 		_ordenar_rincon_television(raiz)
 		return existente
 	var lote := Node3D.new()
@@ -168,6 +183,7 @@ static func montar(raiz: Node3D) -> Node3D:
 		_crear_pieza(lote, ficha)
 	vestir_sofa(raiz.get_node_or_null("SofaCasa") as Node3D)
 	_montar_habitaciones(raiz)
+	_montar_transiciones_domesticas(raiz)
 	_ordenar_rincon_television(raiz)
 	return lote
 
@@ -233,6 +249,50 @@ static func _crear_tabique(habitaciones: Node3D, ficha: Array) -> StaticBody3D:
 	colision.shape = forma
 	cuerpo.add_child(colision)
 	return cuerpo
+
+
+## Acabados visuales para que la planta se entienda sin HUD. Deliberadamente no
+## tienen colisión: el marco no roba centímetros al paso y la alfombra no crea
+## escalón. Son agrupadores espaciales, no nuevos objetos interactivos.
+static func _montar_transiciones_domesticas(raiz: Node3D) -> Node3D:
+	var existente := raiz.get_node_or_null(NOMBRE_TRANSICIONES) as Node3D
+	if existente != null:
+		return existente
+	var transiciones := Node3D.new()
+	transiciones.name = NOMBRE_TRANSICIONES
+	raiz.add_child(transiciones)
+	for ficha in MARCO_PUERTA_DORMITORIO:
+		_crear_acabado(
+			transiciones,
+			String(ficha[0]),
+			ficha[1],
+			ficha[2],
+			Color(0.29, 0.21, 0.16),
+			"madera_domestica"
+		)
+	_crear_acabado(
+		transiciones,
+		"AlfombraSalon",
+		ALFOMBRA_SALON_POS,
+		ALFOMBRA_SALON_TAM,
+		Color(0.27, 0.20, 0.18),
+		"tejido_domestico"
+	)
+	return transiciones
+
+
+static func _crear_acabado(
+	raiz: Node3D, nombre: String, pos: Vector3, tam: Vector3, color: Color, textura: String
+) -> MeshInstance3D:
+	var malla := MeshInstance3D.new()
+	malla.name = nombre
+	var caja := BoxMesh.new()
+	caja.size = tam
+	malla.mesh = caja
+	malla.position = pos
+	Modelos._pintar(malla, color, textura)
+	raiz.add_child(malla)
+	return malla
 
 
 ## Tele, mesa baja y sofá quedan centrados en el mismo eje. La consola se gira

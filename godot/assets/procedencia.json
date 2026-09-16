@@ -1241,6 +1241,118 @@
       "sha256": "66bd734c14a5c6c44d1ae6ef26d7a7d73a1111b7dfa2276ab04353180f8996b7",
       "archivo_origen": "21_world.png",
       "sha256_fuente": "66bd734c14a5c6c44d1ae6ef26d7a7d73a1111b7dfa2276ab04353180f8996b7"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_buildings/2Story_Mat.obj",
+      "titulo": "2Story_Mat (OBJ) · Ultimate Buildings Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatetexturedbuildings.html",
+      "sha256": "ac71c13ad7a5b9f328a2f2d6cf0360bb6561182295bf7af494791cf17c6f4d21"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_buildings/2Story_Mat.mtl",
+      "titulo": "2Story_Mat (MTL) · Ultimate Buildings Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatetexturedbuildings.html",
+      "sha256": "915fcf2aeda6bb5a9c6cd7c8072c6df256d6822285e9c64fb61037e0b67716b6"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_buildings/6Story_Stack_Mat.obj",
+      "titulo": "6Story_Stack_Mat (OBJ) · Ultimate Buildings Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatetexturedbuildings.html",
+      "sha256": "7603fb874a8cc6cb4b355e0c6d3f26bdb07968cd724d6906c6358a6ba7cb112c"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_buildings/6Story_Stack_Mat.mtl",
+      "titulo": "6Story_Stack_Mat (MTL) · Ultimate Buildings Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatetexturedbuildings.html",
+      "sha256": "3bb9edc0805fcb0e4607b3c7b587f3a2011a6a1f7436d2370206d6539b53a48f"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_buildings/4Story_Mat.obj",
+      "titulo": "4Story_Mat (OBJ) · Ultimate Buildings Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatetexturedbuildings.html",
+      "sha256": "201078e0c89315b3d501504fd0e5e41740095931ce73d4530379c9bb7d520812"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_buildings/4Story_Mat.mtl",
+      "titulo": "4Story_Mat (MTL) · Ultimate Buildings Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatetexturedbuildings.html",
+      "sha256": "05bb8240734f74e4e800b7908203ed9ffe1894749ee0882290f3998f6fff712d"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_buildings/1Story_Sign_Mat.obj",
+      "titulo": "1Story_Sign_Mat (OBJ) · Ultimate Buildings Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatetexturedbuildings.html",
+      "sha256": "d7c514018a6034a3cec5f2c09be37bb40e280e4e96b959c2655a71fbbc515d17"
+    },
+    {
+      "ruta": "cc0/quaternius_ultimate_buildings/1Story_Sign_Mat.mtl",
+      "titulo": "1Story_Sign_Mat (MTL) · Ultimate Buildings Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/ultimatetexturedbuildings.html",
+      "sha256": "d2964227d93ec3cc0ae3ccb806a409ea03b39c8683456c516259f922d34ea0d0"
+    },
+    {
+      "ruta": "cc0/quaternius_stylized_tree/Tree_1.obj",
+      "titulo": "Tree_1 (OBJ) · Stylized Tree Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/stylizedtree.html",
+      "sha256": "7400c6741c7924408d29f61e8614b47ad5bd388430b068520f7e566c762a5653"
+    },
+    {
+      "ruta": "cc0/quaternius_stylized_tree/Tree_1.mtl",
+      "titulo": "Tree_1 (MTL) · Stylized Tree Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/stylizedtree.html",
+      "sha256": "1c3f6c7d55f6c73b1b0ba6827afed3da01135b33bf28e9043361ab6b7f0ef9b8"
+    },
+    {
+      "ruta": "cc0/quaternius_stylized_tree/Pine_2.obj",
+      "titulo": "Pine_2 (OBJ) · Stylized Tree Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/stylizedtree.html",
+      "sha256": "ae88a8082980c345796e31a00ae8998639253ea3118e38c0d928ead3e02a915a"
+    },
+    {
+      "ruta": "cc0/quaternius_stylized_tree/Pine_2.mtl",
+      "titulo": "Pine_2 (MTL) · Stylized Tree Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/stylizedtree.html",
+      "sha256": "27d6d3a3ae866fcc54444ea1e5667e86884d6fda7df0726eaac6a8c457419fb9"
+    },
+    {
+      "ruta": "cc0/quaternius_stylized_tree/DeadTree_5.obj",
+      "titulo": "DeadTree_5 (OBJ) · Stylized Tree Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/stylizedtree.html",
+      "sha256": "26676f4c0ce84f572955987354e32b6b78e327a80ff91a54d6bd7ea3fcff3a9a"
+    },
+    {
+      "ruta": "cc0/quaternius_stylized_tree/DeadTree_5.mtl",
+      "titulo": "DeadTree_5 (MTL) · Stylized Tree Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/stylizedtree.html",
+      "sha256": "9e21133bc5d3462c55e7c0411e5d9eb2a4c5701cf4641dfe078b03985acf2ee4"
     }
   ]
 }

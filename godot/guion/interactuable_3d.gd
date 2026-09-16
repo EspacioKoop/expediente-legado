@@ -17,6 +17,7 @@ enum Verbo {
 	LEER,
 	DAR,
 	ENCENDER,
+	GOLPEAR,
 }
 
 const NOMBRES_VERBO := {
@@ -28,6 +29,7 @@ const NOMBRES_VERBO := {
 	Verbo.LEER: "Leer",
 	Verbo.DAR: "Dar",
 	Verbo.ENCENDER: "Encender",
+	Verbo.GOLPEAR: "Golpear",
 }
 
 @export var verbo := Verbo.USAR

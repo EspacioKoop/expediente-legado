@@ -1,0 +1,18 @@
+{
+  "silla-demasiado-alta": {
+    "tipo": "boceto",
+    "ruta": "res://arte/catalogo_anomalias/silla-demasiado-alta.svg"
+  },
+  "monitor-estirado": {
+    "tipo": "boceto",
+    "ruta": "res://arte/catalogo_anomalias/monitor-estirado.svg"
+  },
+  "archivador-torcido": {
+    "tipo": "boceto",
+    "ruta": "res://arte/catalogo_anomalias/archivador-torcido.svg"
+  },
+  "@vuelta-completa": {
+    "tipo": "sello",
+    "ruta": "res://arte/catalogo_anomalias/vuelta-completa.svg"
+  }
+}
