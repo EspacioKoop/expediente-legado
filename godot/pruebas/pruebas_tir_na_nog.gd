@@ -120,9 +120,13 @@ func _probar_objetos_y_reflejos() -> void:
 	var taza := sueno.mover_objeto(SuenoTirNaNog.OBJ_TAZA)
 	_comprobar(taza["ok"], "taza se puede mover")
 	_comprobar(taza["version_origen"], SuenoTirNaNog.VERSION_RECIENTE, "acción conserva origen")
-	_comprobar(taza["version_reflejo"], SuenoTirNaNog.VERSION_ENVEJECIDA, "efecto aparece al otro lado")
+	_comprobar(
+		taza["version_reflejo"], SuenoTirNaNog.VERSION_ENVEJECIDA, "efecto aparece al otro lado"
+	)
 	_comprobar(taza["estado_origen"], "alfeizar", "posición reciente es explícita")
-	_comprobar(taza["estado_reflejo"], "marca_circular_alfeizar", "otra versión deja huella legible")
+	_comprobar(
+		taza["estado_reflejo"], "marca_circular_alfeizar", "otra versión deja huella legible"
+	)
 	_comprobar(taza["rastreable"], "feedback declara trazabilidad")
 
 	sueno.cruzar_umbral()
@@ -133,9 +137,17 @@ func _probar_objetos_y_reflejos() -> void:
 		"huella persiste al cruzar",
 	)
 	var silla := sueno.mover_objeto(SuenoTirNaNog.OBJ_SILLA)
-	_comprobar(silla["version_origen"], SuenoTirNaNog.VERSION_ENVEJECIDA, "también se actúa desde envejecida")
-	_comprobar(silla["version_reflejo"], SuenoTirNaNog.VERSION_RECIENTE, "reflejo puede volver a reciente")
-	_comprobar(silla["estado_reflejo"], "junto_puerta_desgastada", "reflejo inverso es determinista")
+	_comprobar(
+		silla["version_origen"],
+		SuenoTirNaNog.VERSION_ENVEJECIDA,
+		"también se actúa desde envejecida"
+	)
+	_comprobar(
+		silla["version_reflejo"], SuenoTirNaNog.VERSION_RECIENTE, "reflejo puede volver a reciente"
+	)
+	_comprobar(
+		silla["estado_reflejo"], "junto_puerta_desgastada", "reflejo inverso es determinista"
+	)
 	var archivador := sueno.mover_objeto(SuenoTirNaNog.OBJ_ARCHIVADOR)
 	_comprobar(archivador["rastreable"], "archivador usa la misma regla legible")
 
