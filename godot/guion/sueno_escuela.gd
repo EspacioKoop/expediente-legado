@@ -55,14 +55,17 @@ static func adaptar_espacio(
 
 	if not frase_conocida.is_empty():
 		var salidas: Array = resultado.get("salidas", []).duplicate(true)
-		salidas.append(
-			{
-				"pos": PUPITRE_INTERACCION + Vector3(0.0, 1.0, 0.0),
-				"destino": "",
-				"frase": frase_conocida,
-				"tam": Vector3(2.4, 2.0, 2.4),
-				"visible": false,
-			}
+		(
+			salidas
+			. append(
+				{
+					"pos": PUPITRE_INTERACCION + Vector3(0.0, 1.0, 0.0),
+					"destino": "",
+					"frase": frase_conocida,
+					"tam": Vector3(2.4, 2.0, 2.4),
+					"visible": false,
+				}
+			)
 		)
 		resultado["salidas"] = salidas
 
