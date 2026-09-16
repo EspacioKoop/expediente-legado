@@ -120,7 +120,9 @@ func _entrar_en(fase: String) -> void:
 	# Un cielo exterior legible no necesita otro WorldEnvironment: basta cambiar
 	# el fondo del ya existente antes de aplicar clima. Niebla puede sobrescribirlo.
 	_ambiente.background_color = FONDO_EXTERIOR
-	_aplicar_clima(Clima.estado(int(jornada.get("dia", 1))))
+	# La consola de pruebas (#770) puede fijar un clima; sin ella manda el día.
+	var forzado := String(jornada.get("clima_forzado", ""))
+	_aplicar_clima(forzado if not forzado.is_empty() else Clima.estado(int(jornada.get("dia", 1))))
 
 
 ## Sustituye los volúmenes automáticos de frase por objetos a los que hay que
