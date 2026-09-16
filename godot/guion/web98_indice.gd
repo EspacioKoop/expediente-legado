@@ -1,13 +1,14 @@
-## Índice declarativo de la web ficticia del OS98 (#660 / #667).
+## Índice declarativo de la web ficticia del OS98 (#660 / #667 / #661).
 ##
-## Este modelo no navega Internet ni toca el host. Resuelve un catálogo local con
+## Este modelo no navega Internet ni toca el host. Resuelve catálogos locales con
 ## estado explícito de campaña: día narrativo, conocimiento adquirido y URLs
-## simuladas que están caídas. El navegador de #537 puede consumirlo sin crear
-## otro renderer o protocolo.
+## simuladas que están caídas. El navegador de #537 lo consume sin crear otro
+## renderer o protocolo.
 class_name Web98Indice
 extends RefCounted
 
 const RUTA_CATALOGO := "res://datos/web98_indice.json"
+const RUTA_AMATEUR := "res://datos/web98_amateur.json"
 
 var _categorias: Array[Dictionary] = []
 var _recursos: Array[Dictionary] = []
@@ -36,7 +37,7 @@ func recursos_visibles() -> Array[Dictionary]:
 	var resultado: Array[Dictionary] = []
 	for recurso in _recursos:
 		if _es_visible(recurso):
-			resultado.append(recurso.duplicate(true))
+			resultado.append(_materializar_recurso(recurso))
 	return resultado
 
 
@@ -53,7 +54,7 @@ func buscar(consulta: String) -> Array[Dictionary]:
 		var puntuacion := _puntuacion(recurso, tokens)
 		if puntuacion < 0:
 			continue
-		var copia := recurso.duplicate(true)
+		var copia := _materializar_recurso(recurso)
 		copia["puntuacion_busqueda"] = puntuacion
 		resultado.append(copia)
 	resultado.sort_custom(_orden_busqueda)
@@ -66,7 +67,7 @@ func directorio(categoria: String) -> Array[Dictionary]:
 		if String(recurso.get("categoria", "")) != categoria:
 			continue
 		if _es_visible(recurso):
-			resultado.append(recurso.duplicate(true))
+			resultado.append(_materializar_recurso(recurso))
 	resultado.sort_custom(_orden_directorio)
 	return resultado
 
@@ -95,7 +96,7 @@ func resolver_url(url: String) -> Dictionary:
 		"url": url,
 		"url_origen": String((recurso as Dictionary).get("url", "")),
 		"via": String((referencia as Dictionary).get("via", "origen")),
-		"recurso": (recurso as Dictionary).duplicate(true),
+		"recurso": _materializar_recurso(recurso as Dictionary),
 	}
 
 
@@ -117,18 +118,156 @@ func cache_de(recurso_id: String) -> Dictionary:
 	}
 
 
-## Grafo local para páginas personales, webrings y directorios. Un destino puede
-## existir sin estar indexado y seguir siendo alcanzable mediante un enlace.
+## Grafo local para páginas personales, webrings y directorios. Además de los
+## enlaces históricos por id acepta enlaces rotulados y URLs deliberadamente
+## rotas. Estas últimas siguen siendo locales: el navegador las resuelve a su 404.
 func enlaces_desde(recurso_id: String) -> Array[Dictionary]:
 	var resultado: Array[Dictionary] = []
 	var origen: Variant = _por_id.get(recurso_id, {})
 	if not origen is Dictionary or not _es_visible(origen as Dictionary):
 		return resultado
 	for destino_id in (origen as Dictionary).get("enlaces", []):
-		var destino: Variant = _por_id.get(String(destino_id), {})
-		if destino is Dictionary and _es_visible(destino as Dictionary):
-			resultado.append((destino as Dictionary).duplicate(true))
+		_anadir_destino(resultado, String(destino_id), "")
+	for enlace_valor in (origen as Dictionary).get("enlaces_rotulados", []):
+		if not enlace_valor is Dictionary:
+			continue
+		var enlace := enlace_valor as Dictionary
+		_anadir_destino(
+			resultado,
+			String(enlace.get("destino_id", "")),
+			String(enlace.get("etiqueta", "")),
+		)
+	for enlace_valor in (origen as Dictionary).get("enlaces_url", []):
+		if not enlace_valor is Dictionary:
+			continue
+		var enlace := enlace_valor as Dictionary
+		var destino_url := String(enlace.get("url", ""))
+		if destino_url.is_empty():
+			continue
+		resultado.append(
+			{
+				"id": "",
+				"url": destino_url,
+				"titulo": String(enlace.get("titulo", destino_url)),
+				"categoria": "personal",
+				"tipo": "enlace_virtual",
+			}
+		)
 	return resultado
+
+
+func _anadir_destino(resultado: Array[Dictionary], destino_id: String, etiqueta: String) -> void:
+	var destino: Variant = _por_id.get(destino_id, {})
+	if not destino is Dictionary or not _es_visible(destino as Dictionary):
+		return
+	var copia := _materializar_recurso(destino as Dictionary)
+	if not etiqueta.is_empty():
+		copia["titulo"] = etiqueta
+	resultado.append(copia)
+
+
+func _materializar_recurso(recurso: Dictionary) -> Dictionary:
+	var copia := recurso.duplicate(true)
+	var dia := maxi(1, int(_contexto.get("dia", 1)))
+
+	for variante_valor in recurso.get("variantes", []):
+		if not variante_valor is Dictionary:
+			continue
+		var variante := variante_valor as Dictionary
+		if dia < maxi(1, int(variante.get("desde_dia", 1))):
+			continue
+		for clave in variante:
+			if String(clave) != "desde_dia":
+				copia[clave] = variante[clave]
+
+	if copia.has("contador_base"):
+		copia["contador_actual"] = (
+			int(copia.get("contador_base", 0))
+			+ maxi(0, dia - 1) * int(copia.get("contador_incremento_dia", 0))
+		)
+
+	var entradas_visibles: Array = []
+	for entrada_valor in copia.get("entradas_guestbook", []):
+		if not entrada_valor is Dictionary:
+			continue
+		var entrada := entrada_valor as Dictionary
+		if dia >= maxi(1, int(entrada.get("visible_desde_dia", 1))):
+			entradas_visibles.append(entrada.duplicate(true))
+	if copia.has("entradas_guestbook"):
+		copia["entradas_guestbook"] = entradas_visibles
+
+	if String(copia.get("tipo", "")) in ["amateur", "guestbook", "webring"]:
+		copia["snippet"] = _presentar_amateur(copia, dia)
+
+	return copia
+
+
+func _presentar_amateur(recurso: Dictionary, dia: int) -> String:
+	var bloques: Array[String] = []
+	var estilo: Dictionary = recurso.get("estilo", {})
+	var banner := String(estilo.get("banner", "")).strip_edges()
+	var icono := String(estilo.get("icono", "")).strip_edges()
+	var separador := String(estilo.get("separador", "")).strip_edges()
+	if not banner.is_empty():
+		bloques.append("[center][b]%s %s[/b][/center]" % [icono, banner])
+	var cuerpo := String(recurso.get("cuerpo", "")).strip_edges()
+	if not cuerpo.is_empty():
+		bloques.append(cuerpo)
+	if recurso.has("contador_actual"):
+		var formato_contador := String(recurso.get("contador_formato", "%05d"))
+		bloques.append(
+			"[center]%s[/center]"
+			% (formato_contador % int(recurso.get("contador_actual", 0)))
+		)
+	var entradas: Variant = recurso.get("entradas_guestbook", [])
+	if entradas is Array and not (entradas as Array).is_empty():
+		var firmas: Array[String] = []
+		var titulo_guestbook := String(recurso.get("guestbook_titulo", "")).strip_edges()
+		if not titulo_guestbook.is_empty():
+			firmas.append("[b]%s[/b]" % titulo_guestbook)
+		for entrada_valor in entradas as Array:
+			if not entrada_valor is Dictionary:
+				continue
+			var entrada := entrada_valor as Dictionary
+			firmas.append(
+				"%s · [b]%s[/b]\n%s"
+				% [
+					String(entrada.get("fecha", "")),
+					String(entrada.get("autor", "")),
+					String(entrada.get("texto", "")),
+				]
+			)
+		bloques.append("\n\n".join(firmas))
+	var firma := String(recurso.get("firma", "")).strip_edges()
+	if not firma.is_empty():
+		bloques.append(firma)
+	var actualizacion := String(recurso.get("ultima_actualizacion", "")).strip_edges()
+	if not actualizacion.is_empty():
+		var formato_actualizacion := String(recurso.get("actualizacion_formato", "%s"))
+		bloques.append(formato_actualizacion % actualizacion)
+
+	var movido_a := String(recurso.get("movido_a", ""))
+	var movido_desde := int(recurso.get("movido_desde_dia", 0))
+	if not movido_a.is_empty() and movido_desde > 0 and dia >= movido_desde:
+		var destino: Variant = _por_id.get(movido_a, {})
+		if destino is Dictionary and _es_visible(destino as Dictionary):
+			var mensaje := String(recurso.get("mensaje_mudanza", "")).strip_edges()
+			if not mensaje.is_empty():
+				bloques = [mensaje, String((destino as Dictionary).get("url", ""))]
+
+	var base := String(recurso.get("snippet", "")).strip_edges()
+	if not base.is_empty():
+		bloques.push_front(base)
+	var texto := "\n\n".join(bloques)
+	if not separador.is_empty():
+		texto = ("\n%s\n" % separador).join(bloques)
+	var color := String(estilo.get("texto", "")).strip_edges()
+	var fondo := String(estilo.get("fondo", "")).strip_edges()
+	if not color.is_empty():
+		texto = "[color=%s]%s[/color]" % [color, texto]
+	if not fondo.is_empty():
+		texto = "[bgcolor=%s]%s[/bgcolor]" % [fondo, texto]
+	return texto
 
 
 func _puntuacion(recurso: Dictionary, tokens: PackedStringArray) -> int:
@@ -255,11 +394,27 @@ func _cargar_catalogo(ruta: String) -> void:
 		if valor is Dictionary:
 			_categorias.append((valor as Dictionary).duplicate(true))
 	for valor in (datos as Dictionary).get("recursos", []):
-		if not valor is Dictionary:
-			continue
-		_registrar_recurso((valor as Dictionary).duplicate(true))
+		if valor is Dictionary:
+			_registrar_recurso((valor as Dictionary).duplicate(true))
+	if ruta == RUTA_CATALOGO:
+		_cargar_recursos_extra(RUTA_AMATEUR)
+		_anexar_enlaces(
+			"directorio-red98",
+			["ring-aficiones-index", "ring-caseras-index", "pagina-gatos"],
+		)
 	_cargar_cabeceras_prensa()
 	_anexar_enlaces_prensa()
+
+
+func _cargar_recursos_extra(ruta: String) -> void:
+	if not FileAccess.file_exists(ruta):
+		return
+	var datos: Variant = JSON.parse_string(FileAccess.get_file_as_string(ruta))
+	if not datos is Dictionary:
+		return
+	for valor in (datos as Dictionary).get("recursos", []):
+		if valor is Dictionary:
+			_registrar_recurso((valor as Dictionary).duplicate(true))
 
 
 func _cargar_cabeceras_prensa() -> void:
