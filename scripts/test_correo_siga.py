@@ -10,6 +10,7 @@ from scripts.godot_pruebas import importar_proyecto
 
 ROOT = Path(__file__).resolve().parents[1]
 CATALOGO = ROOT / "godot" / "datos" / "correo_corporativo.json"
+RESPUESTAS = ROOT / "godot" / "datos" / "correo_respuestas.json"
 TEXTOS = ROOT / "godot" / "datos" / "correo_siga_textos.json"
 MODELO = ROOT / "godot" / "guion" / "correo_siga_modelo.gd"
 CLIENTE = ROOT / "godot" / "guion" / "correo_siga.gd"
@@ -19,6 +20,10 @@ COMPANEROS = ROOT / "godot" / "guion" / "companeros.gd"
 
 def cargar_mensajes() -> list[dict]:
     return json.loads(CATALOGO.read_text(encoding="utf-8"))["mensajes"]
+
+
+def cargar_hilos() -> dict[str, dict]:
+    return json.loads(RESPUESTAS.read_text(encoding="utf-8"))["hilos"]
 
 
 def entregados(
@@ -65,6 +70,22 @@ class CorreoSigaTest(unittest.TestCase):
         self.assertIn("cunado", ids_correo)
         self.assertGreaterEqual(len(ids_correo), 8)
 
+    def test_respuestas_son_declarativas_y_solo_para_companeros(self) -> None:
+        mensajes = {mensaje["id"]: mensaje for mensaje in cargar_mensajes()}
+        hilos = cargar_hilos()
+        self.assertGreaterEqual(len(hilos), 5)
+        for mensaje_id, hilo in hilos.items():
+            self.assertIn(mensaje_id, mensajes)
+            self.assertEqual(mensajes[mensaje_id]["tipo"], "companero")
+            self.assertGreaterEqual(hilo["espera_acciones"], 1)
+            opciones = hilo["opciones"]
+            self.assertGreaterEqual(len(opciones), 2)
+            ids = [opcion["id"] for opcion in opciones]
+            self.assertEqual(len(ids), len(set(ids)))
+            for opcion in opciones:
+                self.assertTrue(opcion["texto"])
+                self.assertTrue(opcion["contestacion"])
+
     def test_el_correo_aparece_segun_avanza_la_jornada(self) -> None:
         mensajes = cargar_mensajes()
         presentes = {"cunado", "becario", "telefono"}
@@ -106,17 +127,23 @@ class CorreoSigaTest(unittest.TestCase):
         self.assertNotIn("Time.get_", fuente)
         self.assertNotIn("OS.get_", fuente)
         self.assertIn("_corresponde_a_plantilla", fuente)
+        self.assertIn("_objetivo_contestacion", fuente)
+        self.assertIn("configurar_respuestas_enviadas", fuente)
 
-    def test_cliente_marca_no_leidos_sin_depender_solo_del_color(self) -> None:
+    def test_cliente_marca_no_leidos_y_ofrece_respuestas_accesibles(self) -> None:
         fuente = CLIENTE.read_text(encoding="utf-8")
         textos = json.loads(TEXTOS.read_text(encoding="utf-8"))
         self.assertEqual(textos["marca_nuevo"], "[NUEVO] ")
         self.assertIn("item_selected.connect", fuente)
         self.assertIn("signal mensaje_leido", fuente)
+        self.assertIn("signal respuesta_enviada", fuente)
         self.assertIn("selection_enabled = true", fuente)
         self.assertIn('texto("marca_nuevo")', fuente)
+        self.assertIn('texto("responder")', fuente)
+        self.assertIn("Button.new()", fuente)
+        self.assertIn("_enviar_respuesta.bind", fuente)
 
-    def test_adaptador_registra_correo_y_persiste_por_partida(self) -> None:
+    def test_adaptador_persiste_lecturas_y_respuestas_por_partida(self) -> None:
         fuente = ADAPTADOR.read_text(encoding="utf-8")
         self.assertRegex(
             fuente,
@@ -128,11 +155,18 @@ class CorreoSigaTest(unittest.TestCase):
             '_correo_app.establecer_estado_local("leidos_por_partida", por_partida)',
             fuente,
         )
+        self.assertIn('obtener_estado_local("respuestas_por_partida", {})', fuente)
+        self.assertIn(
+            '_correo_app.establecer_estado_local("respuestas_por_partida", por_partida)',
+            fuente,
+        )
+        self.assertIn("correo.configurar_respuestas_enviadas", fuente)
+        self.assertIn("correo.respuesta_enviada.connect", fuente)
         self.assertIn('dia.jornada.get("raiz", 0)', fuente)
         self.assertIn("Companeros.plantilla", fuente)
         self.assertIn("correo.configurar_contexto(dia.jornada, presentes)", fuente)
 
-    def test_contrato_de_entrega_ejecutable_en_godot(self) -> None:
+    def test_contrato_de_entrega_y_respuestas_ejecutable_en_godot(self) -> None:
         motor = os.environ.get("GODOT_BIN", "godot4")
         importar_proyecto()
         resultado = subprocess.run(
@@ -151,7 +185,7 @@ class CorreoSigaTest(unittest.TestCase):
             check=False,
         )
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
-        self.assertIn("13 pasadas, 0 fallos", resultado.stdout)
+        self.assertIn("25 pasadas, 0 fallos", resultado.stdout)
         self.assertNotIn("ERROR:", resultado.stdout)
         self.assertNotIn("Parse Error:", resultado.stdout)
 
