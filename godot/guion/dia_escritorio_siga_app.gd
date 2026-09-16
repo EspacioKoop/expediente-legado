@@ -1,4 +1,4 @@
-## Adaptador del puesto de trabajo al shell de escritorio (#534, #535, #536).
+## Adaptador del puesto de trabajo al shell de escritorio (#534, #535, #536, #538).
 ##
 ## `Dia` sigue siendo dueño de entrar/salir del puesto y de persistir la partida.
 ## Este controller detecta únicamente la pantalla que contiene el visor histórico,
@@ -8,6 +8,7 @@ extends Node
 var _pantalla_envuelta_id := 0
 var _siga_app: EscritorioSigaApp
 var _explorador_app: EscritorioSigaApp
+var _correo_app: EscritorioSigaApp
 
 ## Todas las apps registradas en este puesto, para persistencia declarada
 ## (#535): quien guarde/cargue partida no necesita conocerlas una a una.
@@ -64,8 +65,21 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	_explorador_app.registrar_en(escritorio)
 	_apps.append(_explorador_app)
 
+	# Correo es otra app del contrato común: su contenido se resuelve contra la
+	# jornada viva y la plantilla real de esta vuelta. Solo persiste qué mensajes
+	# se leyeron; no guarda una copia de la campaña ni concede progreso.
+	_correo_app = EscritorioSigaApp.new(
+		"correo", "Correo interno", Callable(self, "_crear_correo"), "correo"
+	)
+	_correo_app.tamano_minimo = Vector2(620, 400)
+	_correo_app.tamano_preferido = Vector2(790, 540)
+	_correo_app.redimensionable = true
+	_correo_app.persistir_estado = true
+	_correo_app.registrar_en(escritorio)
+	_apps.append(_correo_app)
+
 	# Reponer el estado declarado ANTES de adoptar/abrir nada: así una app que
-	# lea su estado local al construir su contenido (como haría una real) ya
+	# lea su estado local al construir su contenido (como hace Correo) ya
 	# lo ve actualizado desde el primer fotograma.
 	EstadoAplicacionesSiga.cargar(_apps)
 
@@ -114,6 +128,41 @@ func _crear_explorador() -> Control:
 		)
 	)
 	return explorador
+
+
+func _crear_correo() -> Control:
+	var correo := CorreoSiga.new()
+	var dia := get_parent()
+	if dia == null:
+		return correo
+
+	var presentes: Array[String] = []
+	var semilla_plantilla := int(dia.jornada.get("plantilla", 0))
+	for valor in Companeros.plantilla(semilla_plantilla):
+		if valor is Dictionary:
+			var id := String((valor as Dictionary).get("id", ""))
+			if not id.is_empty():
+				presentes.append(id)
+	correo.configurar_contexto(dia.jornada, presentes)
+
+	if _correo_app != null:
+		var guardados: Variant = _correo_app.obtener_estado_local("leidos", [])
+		if guardados is Array:
+			correo.configurar_leidos(guardados as Array)
+	correo.mensaje_leido.connect(_registrar_correo_leido)
+	return correo
+
+
+func _registrar_correo_leido(id: String) -> void:
+	if _correo_app == null or id.is_empty():
+		return
+	var leidos: Array = []
+	var guardados: Variant = _correo_app.obtener_estado_local("leidos", [])
+	if guardados is Array:
+		leidos = (guardados as Array).duplicate()
+	if not leidos.has(id):
+		leidos.append(id)
+	_correo_app.establecer_estado_local("leidos", leidos)
 
 
 func _solicitar_salida() -> void:
