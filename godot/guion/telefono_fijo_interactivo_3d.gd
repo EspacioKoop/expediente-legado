@@ -61,15 +61,21 @@ func _montar_geometria() -> void:
 	if get_node_or_null("Carcasa") != null:
 		return
 	_crear_caja("Carcasa", Vector3(0.62, 0.16, 0.46), Vector3(0, 0.08, 0), COLOR_CARCASA)
-	_crear_caja("Frontal", Vector3(0.50, 0.06, 0.18), Vector3(0, 0.18, 0.08), Color(0.28, 0.25, 0.21))
+	_crear_caja(
+		"Frontal", Vector3(0.50, 0.06, 0.18), Vector3(0, 0.18, 0.08), Color(0.28, 0.25, 0.21)
+	)
 
 	_auricular = Node3D.new()
 	_auricular.name = "Auricular"
 	_auricular.position = Vector3(0, 0.10, -0.16)
 	add_child(_auricular)
 	_crear_caja_en(_auricular, "Mango", Vector3(0.40, 0.08, 0.10), Vector3.ZERO, COLOR_AURICULAR)
-	_crear_caja_en(_auricular, "Oido", Vector3(0.12, 0.12, 0.15), Vector3(-0.20, 0, 0), COLOR_AURICULAR)
-	_crear_caja_en(_auricular, "Boca", Vector3(0.12, 0.12, 0.15), Vector3(0.20, 0, 0), COLOR_AURICULAR)
+	_crear_caja_en(
+		_auricular, "Oido", Vector3(0.12, 0.12, 0.15), Vector3(-0.20, 0, 0), COLOR_AURICULAR
+	)
+	_crear_caja_en(
+		_auricular, "Boca", Vector3(0.12, 0.12, 0.15), Vector3(0.20, 0, 0), COLOR_AURICULAR
+	)
 
 	var teclado := Node3D.new()
 	teclado.name = "Teclado"
