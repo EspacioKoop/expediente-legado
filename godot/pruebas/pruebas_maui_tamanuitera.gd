@@ -76,7 +76,10 @@ func _probar_vigilia_deliberada() -> void:
 	)
 	libro.examinar()
 	_comprobar(
-		SemillasOniricas.obtener_semillas(jornada)["semilla_onirica_maui_tamanuitera"]["intensidad"],
+		(
+			SemillasOniricas
+			. obtener_semillas(jornada)["semilla_onirica_maui_tamanuitera"]["intensidad"]
+		),
 		intensidad,
 		"repetir la misma fuente es idempotente",
 	)
