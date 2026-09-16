@@ -59,7 +59,9 @@ func _probar_acumulacion_domestica() -> void:
 	_comprobar(ids.has("lampara_verde_usada"), "la compra real de lámpara de #676 se hace visible")
 	_comprobar(ids.has("marco_latón_usado"), "la compra real de marco de #676 se hace visible")
 	_comprobar(not ids.has("sello_oficina"), "un objeto llevado no aparece como recuerdo doméstico")
-	_comprobar(variantes.size() == 8, "hay ocho lecturas visuales para fuentes domésticas distintas")
+	_comprobar(
+		variantes.size() == 8, "hay ocho lecturas visuales para fuentes domésticas distintas"
+	)
 
 	var repetida := CasaAcumulacion.montar(casa, estado)
 	var ids_repetidos: Array[String] = []
@@ -82,9 +84,7 @@ func _probar_acumulacion_domestica() -> void:
 
 	for extra in ["objeto_extra_a", "objeto_extra_b"]:
 		_comprobar(
-			Inventario.recoger(
-				inventario, {"id": extra, "categoria": "hogar", "origen": "prueba"}
-			),
+			Inventario.recoger(inventario, {"id": extra, "categoria": "hogar", "origen": "prueba"}),
 			"recoge %s" % extra
 		)
 		_comprobar(Inventario.guardar_en_casa(inventario, extra), "guarda %s" % extra)
