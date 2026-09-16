@@ -128,7 +128,7 @@ func observar_conexiones() -> Dictionary:
 func accion_nodo_comun() -> bool:
 	if not _habilitada:
 		return false
-	var anterior := _estado.get("resuelta", false) == true
+	var anterior: bool = _estado.get("resuelta", false) == true
 	_estado = resolver_nodo_comun(_estado)
 	_sincronizar_visuales()
 	estado_cambiado.emit(estado_actual())
@@ -231,7 +231,7 @@ func _sincronizar_visuales() -> void:
 	_vaciar(_cabezas_3d)
 	_vaciar(_arquitectura_3d)
 
-	var resuelta := _estado.get("resuelta", false) == true
+	var resuelta: bool = _estado.get("resuelta", false) == true
 	_raiz_visual.visible = _habilitada
 	_raiz_visual.scale = Vector3.ONE * (0.35 if resuelta else 1.0)
 	_actualizar_material_raiz(resuelta)
