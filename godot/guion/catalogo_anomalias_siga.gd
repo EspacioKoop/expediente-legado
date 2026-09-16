@@ -6,8 +6,11 @@
 class_name CatalogoAnomaliasSiga
 extends HSplitContainer
 
+const RUTA_TEXTOS := "res://datos/catalogo_anomalias_textos.json"
+
 var _estado: Dictionary = {}
 var _firma_estado := ""
+var _textos: Dictionary = {}
 
 var _lista: ItemList
 var _progreso: Label
@@ -15,6 +18,17 @@ var _titulo: Label
 var _origen: Label
 var _descripcion: RichTextLabel
 var _representacion: Label
+
+
+static func texto(clave: String) -> String:
+	return String(_cargar_textos().get(clave, clave))
+
+
+static func _cargar_textos() -> Dictionary:
+	var datos: Variant = JSON.parse_string(FileAccess.get_file_as_string(RUTA_TEXTOS))
+	if datos is Dictionary:
+		return (datos as Dictionary).duplicate(true)
+	return {}
 
 
 func configurar_estado(estado: Dictionary) -> void:
@@ -25,6 +39,7 @@ func configurar_estado(estado: Dictionary) -> void:
 
 
 func _ready() -> void:
+	_textos = _cargar_textos()
 	custom_minimum_size = Vector2(560, 360)
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -38,6 +53,10 @@ func _process(_delta: float) -> void:
 		_refrescar()
 
 
+func _t(clave: String) -> String:
+	return String(_textos.get(clave, clave))
+
+
 func _construir_interfaz() -> void:
 	var izquierda := VBoxContainer.new()
 	izquierda.name = "Indice"
@@ -47,7 +66,7 @@ func _construir_interfaz() -> void:
 
 	var cabecera := Label.new()
 	cabecera.name = "TituloIndice"
-	cabecera.text = "CATÁLOGO DE ANOMALÍAS"
+	cabecera.text = _t("titulo_indice")
 	izquierda.add_child(cabecera)
 
 	_progreso = Label.new()
@@ -66,7 +85,7 @@ func _construir_interfaz() -> void:
 	var leyenda := Label.new()
 	leyenda.name = "Leyenda"
 	leyenda.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	leyenda.text = "● vista en esta vuelta   ◈ memoria anterior   □ sin registrar"
+	leyenda.text = _t("leyenda")
 	izquierda.add_child(leyenda)
 
 	var derecha := VBoxContainer.new()
@@ -106,7 +125,7 @@ func _refrescar() -> void:
 	var progreso := CatalogoAnomalias.progreso(_estado)
 	var total := int(progreso.get("catalogo", 0))
 	_progreso.text = (
-		"Memoria total: %d/%d\nVuelta actual: %d/%d"
+		_t("progreso")
 		% [
 			int(progreso.get("descubiertas_total", 0)),
 			total,
@@ -126,11 +145,11 @@ func _refrescar() -> void:
 			if id == seleccionado:
 				_lista.select(indice)
 		else:
-			var indice := _lista.add_item("□ Entrada no registrada")
+			var indice := _lista.add_item(_t("entrada_bloqueada"))
 			_lista.set_item_metadata(indice, {"tipo": "bloqueada"})
 
 	if bool(progreso.get("vuelta_completa", false)):
-		var especial := _lista.add_item("★ Registro de vuelta completa")
+		var especial := _lista.add_item(_t("entrada_vuelta_completa"))
 		_lista.set_item_metadata(especial, {"tipo": "vuelta-completa"})
 		if seleccionado == "@vuelta-completa":
 			_lista.select(especial)
@@ -166,41 +185,33 @@ func _seleccionar(indice: int) -> void:
 
 
 func _mostrar_ficha(entrada: Dictionary) -> void:
-	_titulo.text = String(entrada.get("titulo", "Anomalía registrada"))
-	_origen.text = "Origen material: %s" % String(entrada.get("origen_tipo", "no clasificado"))
-	_descripcion.text = String(entrada.get("descripcion", "Registro observacional sin comentario."))
+	_titulo.text = String(entrada.get("titulo", _t("titulo_fallback")))
+	_origen.text = _t("origen_material") % String(entrada.get("origen_tipo", _t("origen_fallback")))
+	_descripcion.text = String(entrada.get("descripcion", _t("descripcion_fallback")))
 	_representacion.text = (
-		"Representación archivada: %s"
-		% String(entrada.get("nota_visual", "sin miniatura disponible"))
+		_t("representacion_archivada")
+		% String(entrada.get("nota_visual", _t("representacion_fallback")))
 	)
 
 
 func _mostrar_bloqueada() -> void:
-	_titulo.text = "Entrada no registrada"
-	_origen.text = "Origen material: —"
-	_descripcion.text = (
-		"SIGA no dispone de una observación reconocida para esta entrada. "
-		+ "El índice no revela dónde ni cómo encontrarla."
-	)
-	_representacion.text = "Representación archivada: —"
+	_titulo.text = _t("titulo_bloqueada")
+	_origen.text = _t("origen_vacio")
+	_descripcion.text = _t("descripcion_bloqueada")
+	_representacion.text = _t("representacion_vacia")
 
 
 func _mostrar_vuelta_completa() -> void:
-	_titulo.text = "Registro de vuelta completa"
-	_origen.text = "Estado: observaciones de esta vida laboral completas"
-	_descripcion.text = (
-		"Todas las anomalías catalogables de esta vuelta fueron reconocidas. "
-		+ "Este apéndice es únicamente documental."
-	)
-	_representacion.text = "Representación archivada: índice sellado por SIGA"
+	_titulo.text = _t("titulo_vuelta_completa")
+	_origen.text = _t("origen_vuelta_completa")
+	_descripcion.text = _t("descripcion_vuelta_completa")
+	_representacion.text = _t("representacion_vuelta_completa")
 
 
 func _mostrar_espera() -> void:
-	_titulo.text = "Seleccione una entrada"
+	_titulo.text = _t("titulo_espera")
 	_origen.text = ""
-	_descripcion.text = (
-		"El catálogo conserva observaciones reconocidas, " + "no interpretaciones del sueño."
-	)
+	_descripcion.text = _t("descripcion_espera")
 	_representacion.text = ""
 
 
