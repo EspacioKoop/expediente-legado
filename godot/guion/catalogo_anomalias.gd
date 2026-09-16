@@ -3,13 +3,15 @@
 ## Esta capa no conoce Partida, Jornada ni objetivos: recibe un diccionario de
 ## estado y mantiene dos lecturas del mismo hallazgo. La colección total puede
 ## persistirse entre vidas laborales; la colección de vuelta se reinicia al
-## comenzar una nueva. El wiring con Partida se hace en un corte separado.
+## comenzar una nueva. Las variantes documentales viajan como registros opacos
+## dentro de la memoria total para no ampliar el formato de Partida.
 class_name CatalogoAnomalias
 extends RefCounted
 
 const RUTA_CATALOGO := "res://datos/anomalias_sueno.json"
 const CLAVE_TOTAL := "anomalias_descubiertas"
 const CLAVE_VUELTA := "anomalias_descubiertas_vuelta"
+const PREFIJO_VARIANTE := "@variante:"
 
 
 static func catalogo() -> Array:
@@ -68,6 +70,51 @@ static func registrar(estado: Dictionary, anomalia_id: String) -> Dictionary:
 	return {"resultado": "ya-reconocida", "id": anomalia_id}
 
 
+## Añade el folio real que originó esta aparición concreta.
+##
+## El folio debe venir de contenido ya leído. Esta capa no conoce `casos.json`
+## ni Jornada, así que solo acepta la asociación después de que la anomalía base
+## ya haya sido reconocida. Repetir la misma pareja anomalía+folio es idempotente.
+static func registrar_variante(
+	estado: Dictionary, anomalia_id: String, documento_origen: String
+) -> Dictionary:
+	if ficha(anomalia_id).is_empty():
+		return {"resultado": "desconocida", "id": anomalia_id}
+	if not conocida(estado, anomalia_id):
+		return {"resultado": "anomalia-no-registrada", "id": anomalia_id}
+
+	var folio := documento_origen.strip_edges()
+	if folio.is_empty():
+		return {"resultado": "sin-origen", "id": anomalia_id}
+
+	var token := _token_variante(anomalia_id, folio)
+	var total := _ids(estado, CLAVE_TOTAL)
+	if total.has(token):
+		return {"resultado": "variante-conocida", "id": anomalia_id, "documento": folio}
+	total.append(token)
+	estado[CLAVE_TOTAL] = total
+	return {"resultado": "variante-registrada", "id": anomalia_id, "documento": folio}
+
+
+## Folios ya observados para una anomalía. Los tokens internos nunca salen de
+## esta API, y los registros malformados se ignoran para conservar guardados.
+static func variantes(estado: Dictionary, anomalia_id: String) -> Array:
+	var resultado := []
+	for valor in _ids(estado, CLAVE_TOTAL):
+		var token := String(valor)
+		if not token.begins_with(PREFIJO_VARIANTE):
+			continue
+		var datos = JSON.parse_string(token.trim_prefix(PREFIJO_VARIANTE))
+		if typeof(datos) != TYPE_ARRAY or datos.size() != 2:
+			continue
+		if String(datos[0]) != anomalia_id:
+			continue
+		var folio := String(datos[1]).strip_edges()
+		if not folio.is_empty() and not resultado.has(folio):
+			resultado.append(folio)
+	return resultado
+
+
 ## Empieza una vida laboral sin borrar lo aprendido en las anteriores.
 static func reiniciar_vuelta(estado: Dictionary) -> void:
 	estado[CLAVE_VUELTA] = []
@@ -75,7 +122,8 @@ static func reiniciar_vuelta(estado: Dictionary) -> void:
 
 ## Datos suficientes para una futura pantalla de catálogo, sin ubicación ni
 ## condiciones de puzzle. Los contadores son derivados: no crean otra fuente de
-## verdad que pueda desincronizarse de las colecciones de ids.
+## verdad que pueda desincronizarse de las colecciones de ids. Los tokens de
+## variante se filtran y nunca cuentan como anomalías adicionales.
 static func progreso(estado: Dictionary) -> Dictionary:
 	var entradas := catalogo()
 	var ids_validos := []
@@ -89,6 +137,10 @@ static func progreso(estado: Dictionary) -> Dictionary:
 		"descubiertas_vuelta": vuelta.size(),
 		"vuelta_completa": not entradas.is_empty() and vuelta.size() == entradas.size(),
 	}
+
+
+static func _token_variante(anomalia_id: String, folio: String) -> String:
+	return PREFIJO_VARIANTE + JSON.stringify([anomalia_id, folio])
 
 
 static func _ids(estado: Dictionary, clave: String) -> Array:
