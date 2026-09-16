@@ -2,6 +2,8 @@
 ##
 ## Esta capa no conoce ninguna pantalla: mantiene acciones semánticas, convierte
 ## sus descriptores en eventos de Godot y guarda solo preferencias, nunca partida.
+## `ui_accept`/`ui_cancel` son únicamente adaptadores para los `Control` nativos:
+## su entrada real viene de `interactuar`/`cancelar`, también cuando se remapean.
 class_name PreferenciasSiga
 extends RefCounted
 
@@ -81,6 +83,32 @@ static func aplicar(preferencias: Dictionary) -> void:
 		var boton := InputEventJoypadButton.new()
 		boton.button_index = int(descripcion.get("mando", 0))
 		InputMap.action_add_event(accion, boton)
+	_sincronizar_acciones_ui()
+
+
+## Los controles de Godot escuchan `ui_accept` y varias pantallas antiguas aún
+## escuchan `ui_cancel`. Si esas acciones conservaran el mapa de fábrica, cambiar
+## Interactuar/Cancelar en Opciones solo afectaría al mundo 3D: un botón seguiría
+## usando A/Espacio y un modal seguiría cerrándose con B/Escape. Las reconstruimos
+## desde las acciones semánticas cada vez que se aplica un remapeo.
+static func _sincronizar_acciones_ui() -> void:
+	_copiar_accion_ui("interactuar", "ui_accept")
+	# Enter queda como confirmación de teclado convencional, pero el botón de
+	# mando procede exclusivamente de `interactuar`, así que sí se remapea.
+	var enter := InputEventKey.new()
+	enter.keycode = KEY_ENTER
+	InputMap.action_add_event("ui_accept", enter)
+	_copiar_accion_ui("cancelar", "ui_cancel")
+
+
+static func _copiar_accion_ui(origen: StringName, destino: StringName) -> void:
+	if not InputMap.has_action(destino):
+		InputMap.add_action(destino)
+	InputMap.action_erase_events(destino)
+	for evento in InputMap.action_get_events(origen):
+		var copia := evento.duplicate() as InputEvent
+		if copia != null:
+			InputMap.action_add_event(destino, copia)
 
 
 static func guardar(preferencias: Dictionary, ruta: String = RUTA) -> bool:
