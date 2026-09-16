@@ -1,4 +1,4 @@
-## Modelo declarativo del correo corporativo del OS98 (#538).
+## Modelo declarativo del correo corporativo del OS98 (#538, #665).
 ##
 ## La entrega depende solo de contexto explícito de partida: día, acciones que
 ## quedan y plantilla de compañeros. Nunca mira el reloj real ni inventa pistas.
@@ -8,6 +8,7 @@ class_name CorreoSigaModelo
 extends RefCounted
 
 const RUTA_CATALOGO := "res://datos/correo_corporativo.json"
+const RUTA_FOLKLORE := "res://datos/correo_folklore.json"
 const RUTA_RESPUESTAS := "res://datos/correo_respuestas.json"
 
 var _mensajes: Array[Dictionary] = []
@@ -18,6 +19,10 @@ var _respuestas_enviadas: Dictionary = {}
 
 func _init(ruta: String = RUTA_CATALOGO, ruta_respuestas: String = RUTA_RESPUESTAS) -> void:
 	_mensajes = _cargar_catalogo(ruta)
+	# El folklore es una extensión del buzón normal. Solo se añade al catálogo
+	# principal para que los catálogos de prueba/fixture sigan siendo aislados.
+	if ruta == RUTA_CATALOGO:
+		_mensajes.append_array(_cargar_catalogo(RUTA_FOLKLORE))
 	_hilos = _cargar_hilos(ruta_respuestas)
 
 
