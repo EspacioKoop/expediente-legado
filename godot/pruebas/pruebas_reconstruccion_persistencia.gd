@@ -4,7 +4,8 @@ const RUTA := "user://prueba_reconstruccion_persistencia_155.json"
 const RUTA_ANTIGUA := "user://prueba_reconstruccion_persistencia_155_antigua.json"
 const CASO_ID := "caso_prueba_155"
 const CASO := {
-	"registros": [
+	"registros":
+	[
 		{"id": "doc_a", "tipo": "informe", "folio": "1", "fecha": "1998-01-01"},
 		{"id": "doc_b", "tipo": "oficio", "folio": "2", "fecha": "1998-01-02"},
 	]
@@ -29,7 +30,9 @@ func _probar_mejor_resultado() -> void:
 	var estado := Partida.nueva()
 	var parcial := ReconstruccionExpediente.guardar_mejor(estado, CASO_ID, CASO, ["doc_a"])
 	_comprobar(parcial["actualizado"], "el primer intento queda registrado")
-	_comprobar(parcial["mejor"]["rango"] == "consistente", "un orden parcial compatible es consistente")
+	_comprobar(
+		parcial["mejor"]["rango"] == "consistente", "un orden parcial compatible es consistente"
+	)
 
 	var completo := ReconstruccionExpediente.guardar_mejor(
 		estado, CASO_ID, CASO, ["doc_a", "doc_b"]
@@ -46,9 +49,7 @@ func _probar_mejor_resultado() -> void:
 func _probar_guardado_y_recarga() -> void:
 	var partida := Partida.new()
 	partida.estado = Partida.nueva()
-	ReconstruccionExpediente.guardar_mejor(
-		partida.estado, CASO_ID, CASO, ["doc_a", "doc_b"]
-	)
+	ReconstruccionExpediente.guardar_mejor(partida.estado, CASO_ID, CASO, ["doc_a", "doc_b"])
 	_comprobar(partida.guardar(RUTA), "guarda una partida con reconstrucción")
 
 	var recargada := Partida.new()
@@ -63,12 +64,16 @@ func _probar_guardado_y_recarga() -> void:
 func _probar_migracion_partida_antigua() -> void:
 	var antigua := Partida.nueva()
 	antigua.erase("reconstrucciones")
-	_comprobar(_escribir_json(RUTA_ANTIGUA, antigua), "prepara una partida antigua sin reconstrucciones")
+	_comprobar(
+		_escribir_json(RUTA_ANTIGUA, antigua), "prepara una partida antigua sin reconstrucciones"
+	)
 
 	var migrada := Partida.new()
 	var carga := migrada.cargar(RUTA_ANTIGUA)
 	_comprobar(carga.get("resultado", "") == "cargada", "la partida antigua sigue cargando")
-	_comprobar(migrada.estado.has("reconstrucciones"), "la migración repone la clave reconstrucciones")
+	_comprobar(
+		migrada.estado.has("reconstrucciones"), "la migración repone la clave reconstrucciones"
+	)
 	_comprobar(migrada.estado["reconstrucciones"].is_empty(), "la migración no inventa resultados")
 
 
