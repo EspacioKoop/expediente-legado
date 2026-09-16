@@ -78,8 +78,6 @@ static func puede_entrar(estado: Dictionary) -> bool:
 	return bool(estado.get(CLAVE_SEMILLA, false))
 
 
-## La cinta puede estar presente sin contaminar el sueño. Solo completar una
-## escucha deliberada registra la semilla común de #442.
 static func registrar_semilla(
 	estado: Dictionary,
 	pasos_escuchados: int,
@@ -117,8 +115,8 @@ static func estado_inicial() -> Dictionary:
 	}
 
 
-## Devuelve una pista espacial, no un booleano oculto de gameplay. El señuelo
-## se detecta porque la orientación/tensión no continúa en el extremo remoto.
+## Devuelve una pista espacial, no un dato oculto de gameplay. El señuelo se
+## detecta porque la orientación/tensión no continúa en el extremo remoto.
 static func observar_conexion(estado: Dictionary, id_conexion: String) -> Dictionary:
 	var conexiones: Dictionary = estado.get("conexiones", {})
 	if not conexiones.has(id_conexion):
@@ -134,8 +132,8 @@ static func observar_conexion(estado: Dictionary, id_conexion: String) -> Dictio
 	}
 
 
-## Manipular una relación nunca destruye el estado. Cada acción registra justo
-## lo necesario para deshacerla y cortar siempre conserva reconexión explícita.
+## Toda acción guarda el estado anterior mínimo. Cortar nunca destruye la
+## conexión: siempre queda marcada como reconectable y puede deshacerse.
 static func manipular_conexion(
 	estado: Dictionary, id_conexion: String, accion: String
 ) -> Dictionary:
@@ -151,7 +149,8 @@ static func manipular_conexion(
 	var nodos: Dictionary = resultado.get("nodos", {})
 	var valor_destino_anterior := 0
 	if nodos.has(destino_id):
-		valor_destino_anterior = int((nodos[destino_id] as Dictionary).get("valor", 0))
+		var destino: Dictionary = nodos[destino_id]
+		valor_destino_anterior = int(destino.get("valor", 0))
 
 	var historial: Array = resultado.get("historial", [])
 	historial.append({
@@ -233,8 +232,7 @@ static func objetivo_resuelto(estado: Dictionary) -> bool:
 	return true
 
 
-## Accesibilidad cambia la animación, nunca la topología, el señuelo, las
-## polaridades ni la solución.
+## Accesibilidad cambia animación, nunca topología, pistas ni solución.
 static func plan_presentacion(movimiento_reducido: bool) -> Dictionary:
 	return {
 		"modo_efecto_remoto": "estado_discreto" if movimiento_reducido else "desplazamiento_breve",
@@ -284,10 +282,11 @@ func deshacer() -> Dictionary:
 
 
 func _al_usar_hilo(_actor: Node, id_conexion: String) -> void:
-	var conexion: Dictionary = _estado.get("conexiones", {}).get(id_conexion, {})
+	var conexiones: Dictionary = _estado.get("conexiones", {})
+	var conexion: Dictionary = conexiones.get(id_conexion, {})
 	var accion := "reconectar"
 	if bool(conexion.get("activa", true)):
-		action = "aflojar" if int(conexion.get("tension", 0)) > 0 else "tensar"
+		accion = "aflojar" if int(conexion.get("tension", 0)) > 0 else "tensar"
 	usar_conexion(id_conexion, accion)
 
 
@@ -307,8 +306,10 @@ func _montar_prototipo() -> void:
 	var conexiones: Dictionary = _estado["conexiones"]
 	for id_conexion in conexiones.keys():
 		var datos: Dictionary = conexiones[id_conexion]
-		var origen: Vector3 = (nodos[String(datos["origen"])] as Dictionary)["pos"]
-		var destino: Vector3 = (nodos[String(datos["destino"])] as Dictionary)["pos"]
+		var origen_datos: Dictionary = nodos[String(datos["origen"])]
+		var destino_datos: Dictionary = nodos[String(datos["destino"])]
+		var origen: Vector3 = origen_datos["pos"]
+		var destino: Vector3 = destino_datos["pos"]
 		var hilo := _crear_hilo(id_conexion, origen, destino, bool(datos.get("real", false)))
 		_hilos_visuales[id_conexion] = hilo
 
@@ -335,28 +336,26 @@ func _crear_hilo(
 	hilo.nombre_objeto = "hilo"
 	hilo.sonido = Interactuable3D.SIN_SONIDO
 	hilo.position = origen.lerp(destino, 0.5) + Vector3(0.0, 0.65, 0.0)
-	hilo.look_at(destino + Vector3(0.0, 0.65, 0.0), Vector3.UP)
 	hilo.set_meta("anansi_conexion", id_conexion)
 	hilo.set_meta("anansi_pista", String(CONEXIONES_BASE[id_conexion]["pista"]))
 	hilo.activado.connect(_al_usar_hilo.bind(id_conexion))
 	add_child(hilo)
+	hilo.look_at(destino + Vector3(0.0, 0.65, 0.0), Vector3.UP)
 
 	var largo := maxf(origen.distance_to(destino), 0.25)
-	var visual := _crear_caja(
+	_crear_caja(
 		hilo,
 		"Visual",
 		Vector3(0.10, 0.10, largo),
 		Vector3.ZERO,
 		COLOR_HILO if real else COLOR_SENUELO,
 	)
-	visual.position.z = -largo * 0.5
 
 	var colision := CollisionShape3D.new()
 	colision.name = "Colision"
 	var forma := BoxShape3D.new()
 	forma.size = Vector3(0.38, 0.38, largo)
 	colision.shape = forma
-	colision.position.z = -largo * 0.5
 	hilo.add_child(colision)
 
 	if not real:
@@ -364,7 +363,7 @@ func _crear_hilo(
 			hilo,
 			"PistaOrientacion",
 			Vector3(0.75, 0.08, 0.18),
-			Vector3(0.0, 0.22, -largo * 0.42),
+			Vector3(0.0, 0.22, 0.0),
 			COLOR_PISTA,
 		)
 	return hilo
