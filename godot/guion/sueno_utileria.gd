@@ -128,12 +128,15 @@ static func _plan_deformaciones(
 	var tarot := _tarot_del_dia(folios, cartas_recogidas)
 	if not tarot.is_empty():
 		var elegida: Dictionary = tarot[posmod(desplazamiento, tarot.size())]
-		plan.append(
-			{
-				"datos": PRESCRIPCION_TAROT,
-				"folio": elegida["folio"],
-				"carta": elegida["carta"],
-			}
+		(
+			plan
+			. append(
+				{
+					"datos": PRESCRIPCION_TAROT,
+					"folio": elegida["folio"],
+					"carta": elegida["carta"],
+				}
+			)
 		)
 
 	var faltan := 3 - plan.size()
