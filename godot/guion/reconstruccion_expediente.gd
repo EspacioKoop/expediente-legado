@@ -127,8 +127,8 @@ static func ordenar_compatible(caso: Dictionary, visibles: Array = []) -> Array:
 ## Conserva en el estado de Partida el mejor intento conocido para un caso.
 ##
 ## No guarda documentos ni una cronología paralela: solo ids de tarjetas y el
-## resumen derivado por `validar`. Así un cambio de texto en casos.json no queda
-## congelado dentro del save. La comparación prioriza coherencia y usa cobertura
+## resumen derivado por `validar`. Así un cambio de texto en el catálogo fuente
+## no queda congelado dentro del save. La comparación prioriza coherencia y usa cobertura
 ## como desempate, de modo que un orden parcial perfecto no sustituye a otro
 ## igualmente coherente que reconstruye más documentos.
 static func guardar_mejor(
