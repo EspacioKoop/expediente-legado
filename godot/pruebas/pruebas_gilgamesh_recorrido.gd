@@ -143,7 +143,9 @@ func _probar() -> void:
 	var techo := sueno.get_node_or_null("CiudadImposible/MurallaArchivoTecho") as Node3D
 	var puerta := sueno.get_node_or_null("CiudadImposible/PuertaBloqueada") as MeshInstance3D
 	var ruta := sueno.get_node_or_null("CiudadImposible/RutaFinal") as MeshInstance3D
-	_comprobar(techo != null and techo.visible, "resolver revela la continuidad imposible por techo")
+	_comprobar(
+		techo != null and techo.visible, "resolver revela la continuidad imposible por techo"
+	)
 	_comprobar(puerta != null and not puerta.visible, "resolver retira el bloqueo")
 	_comprobar(ruta != null and ruta.visible, "resolver hace visible la ruta final")
 
