@@ -69,7 +69,7 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	# jornada viva y la plantilla real de esta vuelta. Solo persiste qué mensajes
 	# se leyeron; no guarda una copia de la campaña ni concede progreso.
 	_correo_app = EscritorioSigaApp.new(
-		"correo", "Correo interno", Callable(self, "_crear_correo"), "correo"
+		"correo", CorreoSiga.texto("titulo_app"), Callable(self, "_crear_correo"), "correo"
 	)
 	_correo_app.tamano_minimo = Vector2(620, 400)
 	_correo_app.tamano_preferido = Vector2(790, 540)
