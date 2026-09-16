@@ -27,37 +27,31 @@ var _verbo_activo := Verbo.USAR
 var _tween: Tween
 
 
+## `inactivo` y `activo` describen cada extremo del estado con las claves
+## `pos`, `rot` (Vector3), `texto`, `sonido` (String) y `verbo` (Verbo).
 func configurar(
 	jornada: Dictionary,
 	clave: String,
 	visual: Node3D,
-	pos_inactiva: Vector3,
-	pos_activa: Vector3,
-	rot_inactiva: Vector3,
-	rot_activa: Vector3,
 	tamano_colision: Vector3,
-	texto_inactivo: String,
-	texto_activo: String,
-	sonido_inactivo: String,
-	sonido_activo: String,
+	inactivo: Dictionary,
+	activo: Dictionary,
 	estado_inicial: bool,
-	verbo_inactivo: int = Verbo.USAR,
-	verbo_activo: int = Verbo.USAR,
 	reduccion_movimiento: bool = false,
 ) -> void:
 	_jornada = jornada
 	_clave = clave
 	_visual = visual if visual != null else self
-	_pos_inactiva = pos_inactiva
-	_pos_activa = pos_activa
-	_rot_inactiva = rot_inactiva
-	_rot_activa = rot_activa
-	_texto_inactivo = texto_inactivo
-	_texto_activo = texto_activo
-	_sonido_inactivo = sonido_inactivo
-	_sonido_activo = sonido_activo
-	_verbo_inactivo = verbo_inactivo
-	_verbo_activo = verbo_activo
+	_pos_inactiva = inactivo.get("pos", Vector3.ZERO)
+	_pos_activa = activo.get("pos", Vector3.ZERO)
+	_rot_inactiva = inactivo.get("rot", Vector3.ZERO)
+	_rot_activa = activo.get("rot", Vector3.ZERO)
+	_texto_inactivo = inactivo.get("texto", "Usar")
+	_texto_activo = activo.get("texto", "Usar")
+	_sonido_inactivo = inactivo.get("sonido", "")
+	_sonido_activo = activo.get("sonido", "")
+	_verbo_inactivo = inactivo.get("verbo", Verbo.USAR)
+	_verbo_activo = activo.get("verbo", Verbo.USAR)
 	_reduccion_movimiento = reduccion_movimiento
 	_activo = estado_inicial
 
