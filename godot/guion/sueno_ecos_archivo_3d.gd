@@ -52,7 +52,7 @@ func _montar() -> void:
 
 	var regla := Label3D.new()
 	regla.name = "ReglaEcos"
-	regla.text = "Recompón los ecos en el orden del archivo"
+	regla.text = str(presentacion.vista(reduccion_movimiento).get("regla", ""))
 	regla.position = Vector3(0.0, 2.75, 0.0)
 	regla.font_size = 38
 	regla.pixel_size = 0.004
@@ -65,7 +65,7 @@ func _montar() -> void:
 		eco.name = "EcoArchivo_%d" % slot
 		eco.position = POSICIONES_ECOS[slot]
 		eco.verbo = Interactuable3D.Verbo.LEER
-		eco.nombre_objeto = "eco %d" % (slot + 1)
+		eco.nombre_objeto = "#%d" % (slot + 1)
 		eco.set_meta("slot", slot)
 		eco.activado.connect(_al_activar_eco.bind(slot))
 		add_child(eco)
@@ -179,7 +179,7 @@ func _sincronizar() -> void:
 
 	if _estado != null:
 		_estado.text = (
-			"Intentos %d/%d · %s"
+			"%d/%d · %s"
 			% [
 				int(vista.get("intentos", 0)),
 				int(vista.get("max_intentos", 3)),
