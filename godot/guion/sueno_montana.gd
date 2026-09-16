@@ -60,26 +60,32 @@ static func adaptar_espacio(
 
 	if not frase_conocida.is_empty():
 		var salidas: Array = resultado.get("salidas", []).duplicate(true)
-		salidas.append(
-			{
-				"pos": hielo_pos + Vector3(0, 1.0, 0),
-				"destino": "",
-				"frase": frase_conocida,
-				"tam": Vector3(2.5, 2.0, 2.5),
-				"visible": false,
-			}
+		(
+			salidas
+			. append(
+				{
+					"pos": hielo_pos + Vector3(0, 1.0, 0),
+					"destino": "",
+					"frase": frase_conocida,
+					"tam": Vector3(2.5, 2.0, 2.5),
+					"visible": false,
+				}
+			)
 		)
 		resultado["salidas"] = salidas
 
 		var luces: Array = resultado.get("luces", []).duplicate(true)
-		luces.append(
-			{
-				"pos": hielo_pos + Vector3(0, 1.15, 0),
-				"color": Color(0.46, 0.76, 0.94),
-				"energia": 0.75,
-				"alcance": 3.5,
-				"carcasa": false,
-			}
+		(
+			luces
+			. append(
+				{
+					"pos": hielo_pos + Vector3(0, 1.15, 0),
+					"color": Color(0.46, 0.76, 0.94),
+					"energia": 0.75,
+					"alcance": 3.5,
+					"carcasa": false,
+				}
+			)
 		)
 		resultado["luces"] = luces
 
