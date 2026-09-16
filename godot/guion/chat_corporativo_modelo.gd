@@ -205,7 +205,9 @@ func _usuario_en_canal(usuario: Dictionary, canal_id: String) -> bool:
 
 func _cumple_condiciones(elemento: Dictionary) -> bool:
 	return (
-		_contiene_todos(_contexto.get("conocimiento", []), elemento.get("requiere_conocimiento", []))
+		_contiene_todos(
+			_contexto.get("conocimiento", []), elemento.get("requiere_conocimiento", [])
+		)
 		and _contiene_todos(_contexto.get("eventos", []), elemento.get("requiere_eventos", []))
 	)
 
