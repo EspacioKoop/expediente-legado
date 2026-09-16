@@ -1,8 +1,8 @@
 ## Gestos de oficina de la Universal Animation Library de Quaternius (CC0).
 ##
 ## `persona.fbx` solo sabe respirar, andar, correr y teclear. UAL 1 y 2 traen
-## lo que una oficina hace de verdad —hablar por teléfono, sentarse, tomarse un
-## café— pero sobre otro esqueleto (el maniquí de Unreal, `pelvis`, `upperarm_l`).
+## lo que una oficina hace de verdad —hablar por teléfono, sentarse, conversar,
+## cruzarse de brazos— pero sobre otro esqueleto (el maniquí de Unreal, `pelvis`, `upperarm_l`).
 ##
 ## No se reimporta `persona.fbx`: caras (#275) y vestuario cuelgan de sus huesos
 ## por nombre (`Head`, `HeadTop_End`, `Spine2`), y un retarget de importación los
@@ -22,7 +22,6 @@ const CLIPS := {
 	"telefono": ["UAL2_Standard.glb", "Idle_TalkingPhone"],
 	"sentado": ["UAL1_Standard.glb", "Sitting_Idle"],
 	"conversar": ["UAL1_Standard.glb", "Idle_Talking"],
-	"cafe": ["UAL2_Standard.glb", "Consume"],
 	"brazos_cruzados": ["UAL2_Standard.glb", "Idle_FoldArms"],
 }
 
