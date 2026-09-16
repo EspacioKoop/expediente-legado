@@ -77,7 +77,7 @@ func estado_actual() -> Dictionary:
 
 
 func resuelta() -> bool:
-	return bool(estado_actual().get("resuelta", false))
+	return estado_actual().get("resuelta", false) == true
 
 
 func _al_sintoma(_actor: Node) -> void:
@@ -110,8 +110,8 @@ func _actualizar_hotspots() -> void:
 	if _sintoma == null or _conexiones == null or _nodo == null:
 		return
 	var estado := estado_actual()
-	var terminada := bool(estado.get("resuelta", false))
-	var nodo_legible := bool(estado.get("nodo_legible", false))
+	var terminada := estado.get("resuelta", false) == true
+	var nodo_legible := estado.get("nodo_legible", false) == true
 	_sintoma.habilitado = _habilitada and not terminada
 	_conexiones.habilitado = _habilitada and not terminada
 	_nodo.habilitado = _habilitada and nodo_legible and not terminada
