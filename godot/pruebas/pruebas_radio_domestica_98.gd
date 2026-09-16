@@ -19,9 +19,7 @@ func _probar_programacion_narrativa() -> void:
 	var emisoras := radio.emisoras()
 	_comprobar(emisoras.size(), 3, "hay tres emisoras declarativas")
 	_comprobar(
-		MinicadenaDomestica98.hora_narrativa(
-			{"dia": 1, "acciones": Jornada.ACCIONES_POR_DIA}
-		),
+		MinicadenaDomestica98.hora_narrativa({"dia": 1, "acciones": Jornada.ACCIONES_POR_DIA}),
 		"08:16",
 		"la programación parte de la hora narrativa de Jornada",
 	)
@@ -33,9 +31,7 @@ func _probar_programacion_narrativa() -> void:
 	var manana := MinicadenaDomestica98.seleccionar_programa(
 		emisoras[0], {"dia": 1, "acciones": Jornada.ACCIONES_POR_DIA}
 	)
-	var tarde := MinicadenaDomestica98.seleccionar_programa(
-		emisoras[0], {"dia": 1, "acciones": 0}
-	)
+	var tarde := MinicadenaDomestica98.seleccionar_programa(emisoras[0], {"dia": 1, "acciones": 0})
 	_comprobar(manana.get("id", ""), "boletin_barrio", "la mañana selecciona su boletín")
 	_comprobar(tarde.get("id", ""), "mesa_local", "la tarde selecciona otra programación")
 	radio.queue_free()
@@ -97,7 +93,9 @@ func _probar_cassette_deliberado() -> void:
 		"cara_a_2",
 		"completar un segmento avanza la cinta",
 	)
-	_comprobar(not radio.escuchar_actual(), "la pieza cultural de la cinta exige atención sostenida")
+	_comprobar(
+		not radio.escuchar_actual(), "la pieza cultural de la cinta exige atención sostenida"
+	)
 	_comprobar(
 		not SemillasOniricas.familias_activas(jornada).has("duat"),
 		"la escucha incompleta del cassette no activa Duat",
