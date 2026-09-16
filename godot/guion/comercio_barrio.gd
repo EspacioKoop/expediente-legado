@@ -110,7 +110,8 @@ static func listar(
 
 
 ## Una única puerta de compra para las superficies del issue. Videojuegos conserva
-## su contrato especializado (ROM propia, stock de artefacto y user://roms aparte).
+## su contrato especializado: ROM propia y stock de artefacto; las ROMs externas
+## siguen fuera de esta economía.
 static func comprar(
 	jornada: Dictionary, inventario: Dictionary, superficie_id: String, item_id: String
 ) -> Dictionary:
