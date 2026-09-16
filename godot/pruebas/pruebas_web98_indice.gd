@@ -1,4 +1,5 @@
-## Prueba headless aislada del índice, prensa y navegador web ficticio del OS98 (#537 / #660 / #667).
+## Prueba headless aislada del índice, prensa y navegador web ficticio del OS98.
+## Cubre #537 / #660 / #667.
 extends SceneTree
 
 var _pasadas := 0
