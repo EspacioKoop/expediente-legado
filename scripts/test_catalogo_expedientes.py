@@ -139,6 +139,19 @@ class CatalogoExpedientesTest(unittest.TestCase):
         self.assertGreaterEqual(sum("registroOrigen2" in pista for pista in caso["pistas"]), 2)
         self.assertIn("CASO_9_TITULO,", TEXTOS.read_text(encoding="utf-8"))
 
+    def test_caso10_empleado_adicional_fija_el_nuevo_corte(self):
+        casos_por_id = {caso["id"]: caso for caso in self.casos}
+        self.assertIn("caso10@10", casos_por_id)
+        caso = casos_por_id["caso10@10"]
+
+        self.assertEqual(caso["titulo"], "CASO_10_TITULO")
+        self.assertEqual(caso["anioSuceso"], 1996)
+        self.assertEqual(len(caso["registros"]), 6)
+        self.assertEqual(len(caso["sospechosos"]), 3)
+        self.assertGreaterEqual(sum("fraseGatillo" in pista for pista in caso["pistas"]), 3)
+        self.assertGreaterEqual(sum("registroOrigen2" in pista for pista in caso["pistas"]), 4)
+        self.assertIn("CASO_10_TITULO,", TEXTOS.read_text(encoding="utf-8"))
+
 
 if __name__ == "__main__":
     unittest.main()

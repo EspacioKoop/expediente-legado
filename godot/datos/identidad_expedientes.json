@@ -63,5 +63,12 @@
     "icono": "res://arte/siga_expedientes/caso_09_r17.svg",
     "lamina": "res://arte/siga_expedientes/lamina_09_r17.svg",
     "motivo": "serie inexistente reclasificada para mantener el circuito"
+  },
+  "caso10@10": {
+    "codigo": "86 + MESA 0",
+    "acento": "#6A4C61",
+    "icono": "res://arte/siga_expedientes/caso_10_mesa0.svg",
+    "lamina": "res://arte/siga_expedientes/lamina_10_mesa0.svg",
+    "motivo": "86 empleados y una presencia administrativa adicional"
   }
 }
