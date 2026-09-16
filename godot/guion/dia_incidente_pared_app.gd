@@ -74,15 +74,14 @@ func _al_golpear(_actor: Node, dia, pared: Interactuable3D) -> void:
 		_despedir(dia)
 		return
 	if bool(resultado.get("fin_jornada", false)):
-		# Deliberadamente NO llama a Jornada.fichar_salida: la expulsión no
-		# paga nómina ni gasta/concede acciones. Se entra en casa y se persiste
-		# el estado ya mutado por IncidentesConducta.
+		# La expulsión entra directamente en casa: no pasa por la salida laboral,
+		# no paga nómina y no gasta ni concede acciones.
 		dia._entrar_en("casa")
 		dia._guardar_o_avisar("")
 
 
 func _reaccionar_companeros(dia, origen: Vector3) -> void:
-	var controller := dia.get_node_or_null("CompanerosIdleController")
+	var controller: Node = dia.get_node_or_null("CompanerosIdleController")
 	if controller != null and controller.has_method("huir_de"):
 		controller.huir_de(origen)
 
