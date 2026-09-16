@@ -95,7 +95,9 @@ func _montar_tablero() -> void:
 	)
 
 
-func _montar_rotulo(nombre_nodo: String, texto: String, pos: Vector3, tam: Vector3, fuente: int) -> void:
+func _montar_rotulo(
+	nombre_nodo: String, texto: String, pos: Vector3, tam: Vector3, fuente: int
+) -> void:
 	var placa := MeshInstance3D.new()
 	placa.name = nombre_nodo
 	placa.position = pos
