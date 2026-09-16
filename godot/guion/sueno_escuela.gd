@@ -34,15 +34,13 @@ static func adaptar_espacio(
 	resultado["escuela_taquillas_pos"] = TAQUILLAS_REFERENCIA
 	resultado["escuela_reloj_pos"] = RELOJ_REFERENCIA
 
-	# El primer texto autorizado deja de ser un cartel literal y aparece como
-	# un dibujo infantil sobre un pupitre. La interacción sigue devolviendo la
-	# misma frase: cambia la forma del recuerdo, nunca su contenido factual.
+	# El dibujo reutiliza el primer texto autorizado como eco visual/interactivo,
+	# pero no lo consume: #87 sigue conservando íntegro su reparto de carteles.
 	var carteles: Array = resultado.get("carteles", []).duplicate(true)
 	var frase_conocida := ""
 	if not carteles.is_empty():
-		var primero: Dictionary = carteles.pop_front()
+		var primero: Dictionary = carteles[0]
 		frase_conocida = String(primero.get("texto", "")).strip_edges()
-		resultado["carteles"] = carteles
 
 	resultado["anomalias_oniricas"] = {
 		"aulas_reordenadas": {"activa": true},
