@@ -29,7 +29,6 @@ class GbcFixtureWorkflowTest(unittest.TestCase):
         self.assertIn("for fixture in joypad vblank", self.texto)
         self.assertIn("joypad.gb", self.texto)
         self.assertIn("vblank.gb", self.texto)
-        self.assertNotIn("ucity.gbc", self.texto)
         self.assertNotIn("BIOS", self.texto)
 
     def test_cgb_acid2_esta_fijado_y_se_compila_desde_fuente(self):
@@ -68,6 +67,29 @@ class GbcFixtureWorkflowTest(unittest.TestCase):
         )
         self.assertIn("byacc flex pkg-config libpng-dev", self.texto)
         self.assertIn("make -C gbc/fixtures/cgb_only_smoke clean all", self.texto)
+
+    def test_ucity_es_fixture_externo_completo_fijado(self):
+        self.assertIn("UCITY_TAG: v1.3", self.texto)
+        self.assertIn(
+            "UCITY_COMMIT: d1880a2a112d7c26f16c0fc06a15b6c32fdc9137",
+            self.texto,
+        )
+        self.assertIn(
+            "UCITY_SHA256: 9422ee2ca7b7ea1d46b58b2a429fff3f354dfd3e732dee1e7ae6220f148ce6e0",
+            self.texto,
+        )
+        self.assertIn("external-fixtures/ucity.gbc", self.texto)
+        self.assertIn('test "$tag_sha" = "$UCITY_COMMIT"', self.texto)
+        self.assertIn('test "$(stat -c %s external-fixtures/ucity.gbc)" -eq 131072', self.texto)
+        self.assertIn('= "c0"', self.texto)
+        self.assertIn('= "1b"', self.texto)
+        self.assertIn('= "02"', self.texto)
+        self.assertIn('= "04"', self.texto)
+
+    def test_ucity_no_se_redistribuye_en_el_artefacto(self):
+        upload = self.texto.split("- name: Upload ephemeral GBC ROMs", maxsplit=1)[1]
+        self.assertNotIn("ucity.gbc", upload)
+        self.assertNotIn("external-fixtures", upload)
 
     def test_fixture_cgb_only_es_propio_y_se_compila_desde_fuente(self):
         self.assertIn("gbc/fixtures/cgb_only_smoke/**", self.texto)
