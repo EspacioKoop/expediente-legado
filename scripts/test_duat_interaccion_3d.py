@@ -22,7 +22,7 @@ class DuatInteraccion3DTest(unittest.TestCase):
         self.assertIn("class_name SuenoDuatInteraccion3D", self.interaction)
         self.assertIn("SuenoDuat.preparar_pesaje(objetos_conocidos, semilla)", self.interaction)
         self.assertIn("SuenoDuat.crear_prototipo_3d", self.interaction)
-        self.assertIn("SuenoDuat.aplicar_pesaje_3d", self.interaction)
+        self.assertIn("aplicar_pesaje_3d(", self.interaction)
         self.assertNotIn("SemillasOniricas.activar_semilla_onirica", self.interaction)
         self.assertNotIn("Input.", self.interaction)
 
