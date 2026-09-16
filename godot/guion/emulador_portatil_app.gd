@@ -79,6 +79,7 @@ var _encendiendo := false
 var _tiempo_encendido := 0.0
 var _rom_pendiente := ""
 var _botones_previos := 0
+var _raton_anterior := Input.MOUSE_MODE_VISIBLE
 
 
 func abrir() -> void:
@@ -87,12 +88,17 @@ func abrir() -> void:
 	_textos = _cargar_textos()
 	_pausa_anterior = get_tree().paused
 	get_tree().paused = true
+	# Se abre desde el mundo 3D, que tiene el ratón capturado: sin soltarlo no
+	# hay cursor con el que elegir cartucho.
+	_raton_anterior = Input.mouse_mode
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_abierto = true
 	_tiempo_emulador = 0.0
 	_construir_ui()
 	_preparar_audio_fisico()
 	_preparar_nucleo()
 	_refrescar_roms()
+	_enfocar_primera_rom.call_deferred()
 	set_process(true)
 
 
@@ -141,6 +147,30 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
 		_cerrar()
 		get_viewport().set_input_as_handled()
+		return
+	if not event is InputEventJoypadButton or not event.pressed:
+		return
+	# Con un juego en marcha todos los botones son de la consola; salir pide
+	# Select + Start a la vez, que ningún juego usa como jugada.
+	if _jugando or _encendiendo:
+		var combinacion: bool = (
+			(event.button_index == JOY_BUTTON_START and _joy(JOY_BUTTON_BACK))
+			or (event.button_index == JOY_BUTTON_BACK and _joy(JOY_BUTTON_START))
+		)
+		if combinacion:
+			_cerrar()
+		# Que la cruceta y A no muevan ni pulsen los botones de la lista.
+		get_viewport().set_input_as_handled()
+	elif event.button_index == JOY_BUTTON_B:
+		_cerrar()
+		get_viewport().set_input_as_handled()
+
+
+func _enfocar_primera_rom() -> void:
+	for hijo in _lista.get_children():
+		if hijo is Button:
+			hijo.grab_focus()
+			return
 
 
 func _exit_tree() -> void:
@@ -204,10 +234,18 @@ func _construir_ui() -> void:
 	_estado.custom_minimum_size = Vector2(480, 52)
 	izquierda.add_child(_estado)
 
+	# La columna crece con cada cartucho comprado: sin desplazamiento, «Cerrar»
+	# acababa fuera de la ventana.
+	var desplazable := ScrollContainer.new()
+	desplazable.custom_minimum_size = Vector2(380, 0)
+	desplazable.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	desplazable.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	cuerpo.add_child(desplazable)
 	var derecha := VBoxContainer.new()
 	derecha.custom_minimum_size = Vector2(360, 0)
+	derecha.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	derecha.add_theme_constant_override("separation", 8)
-	cuerpo.add_child(derecha)
+	desplazable.add_child(derecha)
 
 	var carpeta := Label.new()
 	carpeta.text = _formatear("carpeta", [CatalogoRomsUsuario.ruta_absoluta()])
@@ -359,6 +397,9 @@ func _cargar_rom(ruta: String) -> void:
 	_guardar_sram()
 	_ruta_sram_actual = ""
 	_reproducir_sonido_fisico(&"cartucho")
+	# El foco se suelta: si no, A y la cruceta seguirían pulsando la lista
+	# mientras se juega.
+	get_viewport().gui_release_focus()
 	if not _efectos_presentacion:
 		_cargar_rom_ahora(ruta)
 		return
@@ -580,6 +621,7 @@ func _cerrar() -> void:
 		_audio_fisico.stop()
 	_abierto = false
 	get_tree().paused = _pausa_anterior
+	Input.mouse_mode = _raton_anterior
 	cerrado.emit()
 	queue_free()
 
