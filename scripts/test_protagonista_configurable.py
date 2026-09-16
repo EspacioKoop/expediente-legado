@@ -50,6 +50,7 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
         self.assertNotIn("user://perfil_jugador.json", self.perfil)
         self.assertNotIn("FileAccess", self.perfil)
         self.assertIn("static func completar", self.perfil)
+        self.assertIn('"configurado": true', self.perfil)
         self.assertIn('clampf(float(apariencia.get("altura"', self.perfil)
 
     def test_cuerpo_es_visual_y_no_crea_colisiones(self):
@@ -85,6 +86,14 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
         self.assertIn("PerfilJugador.TRASFONDOS", self.creador)
         self.assertIn('_partida.estado["perfil_jugador"]', self.creador)
         self.assertIn("_partida.guardar()", self.creador)
+
+    def test_nueva_partida_exige_ficha_y_guardarla_arranca_el_dia(self):
+        self.assertIn('perfil["configurado"] = false', self.inicio)
+        self.assertIn("not PerfilJugador.esta_configurado(perfil)", self.inicio)
+        self.assertIn("_abrir_personaje()", self.inicio)
+        self.assertIn('_perfil["configurado"] = true', self.creador)
+        self.assertIn("_alta_pendiente", self.creador)
+        self.assertIn('change_scene_to_file("res://escenas/dia.tscn")', self.creador)
 
     def test_cuerpo_lee_el_mismo_perfil_de_partida(self):
         self.assertIn("var partida := Partida.new()", self.cuerpo)
