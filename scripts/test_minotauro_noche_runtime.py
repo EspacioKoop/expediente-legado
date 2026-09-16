@@ -28,7 +28,7 @@ class MinotauroNocheRuntimeTest(unittest.TestCase):
         self.assertIn("SuenoMinotauro.poner_marca", self.vertical)
         self.assertIn("SuenoMinotauro.cruzar", self.vertical)
         self.assertIn("SuenoMinotauro.responder_minotauro", self.vertical)
-        self.assertIn("SuenoMinotauro.hay_ruta", self.core)
+        self.assertIn("static func hay_ruta(", self.core)
 
     def test_vertical_materializa_regla_espacial_y_marcas(self):
         self.assertIn('arquitectura.name = "LaberintoMinotauro"', self.vertical)
