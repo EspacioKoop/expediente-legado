@@ -51,7 +51,7 @@ const LLAMADAS := [
 		"desde": 3,
 		"cada": 6,
 		"resto": 3,
-		"texto": "Buenas tardes. Hacemos una encuesta sobre lectura en el hogar. No le robo más tiempo.",
+		"texto": "Buenas tardes. Hacemos una encuesta breve sobre lectura en el hogar.",
 		"mensaje": "Encuestas Editorial Horizonte. Volveremos a intentarlo otro día.",
 	},
 	{
