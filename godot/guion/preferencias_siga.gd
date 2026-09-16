@@ -37,6 +37,9 @@ static func nuevas() -> Dictionary:
 		"reduccion_movimiento": false,
 		"escala_ui": 1.0,
 		"volumen": 1.0,
+		"volumen_efectos": 1.0,
+		"volumen_ambiente": 1.0,
+		"volumen_musica": 1.0,
 		"sensibilidad_camara_raton": 1.0,
 		"sensibilidad_camara_mando": 1.0,
 		"invertir_camara_y": false,
@@ -143,6 +146,11 @@ static func cargar(ruta: String = RUTA) -> Dictionary:
 		float(datos.get("escala_ui", 1.0)), ESCALA_UI_MIN, ESCALA_UI_MAX
 	)
 	resultado["volumen"] = clampf(float(datos.get("volumen", 1.0)), 0.0, 1.0)
+	resultado["volumen_efectos"] = clampf(float(datos.get("volumen_efectos", 1.0)), 0.0, 1.0)
+	resultado["volumen_ambiente"] = clampf(
+		float(datos.get("volumen_ambiente", 1.0)), 0.0, 1.0
+	)
+	resultado["volumen_musica"] = clampf(float(datos.get("volumen_musica", 1.0)), 0.0, 1.0)
 	resultado["sensibilidad_camara_raton"] = clampf(
 		float(datos.get("sensibilidad_camara_raton", 1.0)),
 		SENSIBILIDAD_CAMARA_MIN,
