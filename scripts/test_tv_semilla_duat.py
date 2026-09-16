@@ -24,10 +24,10 @@ class TvSemillaDuatTest(unittest.TestCase):
         mando = self.tv.split("func alternar_desde_mando()", 1)[1].split(
             "func _interactuar_directo", 1
         )[0]
-        alternar = self.tv.split("func _alternar()", 1)[1].split(
+        alternar = self.tv.split("func _alternar(", 1)[1].split(
             "func _jornada_en_escena", 1
         )[0]
-        self.assertIn("_alternar()", mando)
+        self.assertIn("_alternar(null)", mando)
         self.assertNotIn("registrar_documental", mando)
         self.assertNotIn("SemillasOniricas", mando)
         self.assertNotIn("registrar_documental", alternar)
@@ -35,7 +35,7 @@ class TvSemillaDuatTest(unittest.TestCase):
 
     def test_fragmento_exige_seleccion_y_final_del_contenido(self):
         directo = self.tv.split("func _interactuar_directo", 1)[1].split(
-            "func _alternar()", 1
+            "func _alternar(", 1
         )[0]
         self.assertIn("if not _encendida:", directo)
         self.assertIn("if _paso_documental == 0:", directo)
@@ -46,7 +46,7 @@ class TvSemillaDuatTest(unittest.TestCase):
         )
 
     def test_apagar_interrumpe_fragmento_incompleto(self):
-        alternar = self.tv.split("func _alternar()", 1)[1].split(
+        alternar = self.tv.split("func _alternar(", 1)[1].split(
             "func _jornada_en_escena", 1
         )[0]
         self.assertIn("if not _encendida and not _documental_completado:", alternar)
