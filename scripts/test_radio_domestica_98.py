@@ -1,0 +1,76 @@
+import json
+from pathlib import Path
+import unittest
+
+
+RAIZ = Path(__file__).resolve().parents[1]
+CATALOGO = RAIZ / "godot/datos/radio_domestica_98.json"
+MINICADENA = RAIZ / "godot/guion/minicadena_domestica_98.gd"
+CASA = RAIZ / "godot/guion/casa_utileria.gd"
+VERIFICADOR = RAIZ / "scripts/verificar_godot.py"
+
+
+class RadioDomestica98Test(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.catalogo = json.loads(CATALOGO.read_text(encoding="utf-8"))
+        cls.minicadena = MINICADENA.read_text(encoding="utf-8")
+        cls.casa = CASA.read_text(encoding="utf-8")
+        cls.verificador = VERIFICADOR.read_text(encoding="utf-8")
+
+    def test_hay_tres_emisoras_con_programacion_local(self):
+        emisoras = self.catalogo["emisoras"]
+        self.assertGreaterEqual(len(emisoras), 3)
+        ids = {emisora["id"] for emisora in emisoras}
+        self.assertEqual(len(ids), len(emisoras))
+        for emisora in emisoras:
+            self.assertGreaterEqual(len(emisora["programas"]), 2)
+            for programa in emisora["programas"]:
+                self.assertTrue(programa["desde"])
+                self.assertTrue(programa["hasta"])
+                self.assertTrue(programa["transcripcion"])
+
+    def test_catalogo_no_contiene_red_ni_streaming(self):
+        bruto = CATALOGO.read_text(encoding="utf-8").lower()
+        self.assertNotIn("http://", bruto)
+        self.assertNotIn("https://", bruto)
+        self.assertNotIn("stream", bruto)
+
+    def test_cassette_es_fuente_alternativa_con_segmentos(self):
+        cassette = self.catalogo["cassette"]
+        self.assertGreaterEqual(len(cassette["segmentos"]), 3)
+        self.assertTrue(all(segmento["transcripcion"] for segmento in cassette["segmentos"]))
+
+    def test_semillas_declaran_fuentes_estables_del_contrato_comun(self):
+        semillas = []
+        for emisora in self.catalogo["emisoras"]:
+            semillas.extend(
+                programa["semilla"]
+                for programa in emisora["programas"]
+                if "semilla" in programa
+            )
+        semillas.extend(
+            segmento["semilla"]
+            for segmento in self.catalogo["cassette"]["segmentos"]
+            if "semilla" in segmento
+        )
+        self.assertGreaterEqual(len(semillas), 2)
+        self.assertTrue(all(semilla["id_mito"] in {"simurgh", "duat"} for semilla in semillas))
+        self.assertTrue(all(":" in semilla["fuente"] for semilla in semillas))
+
+    def test_gdscript_no_consulta_reloj_real_y_exige_atencion(self):
+        self.assertIn("Jornada.ACCIONES_POR_DIA", self.minicadena)
+        self.assertIn("func escuchar_actual", self.minicadena)
+        self.assertIn("atencion_requerida", self.minicadena)
+        self.assertIn("SemillasOniricas.activar_semilla_onirica", self.minicadena)
+        self.assertNotIn("Time.get_", self.minicadena)
+        self.assertNotIn("HTTPRequest", self.minicadena)
+
+    def test_casa_monta_la_minicadena_y_el_verificador_la_ejecuta(self):
+        self.assertIn("MinicadenaDomestica98.new()", self.casa)
+        self.assertIn("_montar_minicadena", self.casa)
+        self.assertIn("pruebas/pruebas_radio_domestica_98.gd", self.verificador)
+
+
+if __name__ == "__main__":
+    unittest.main()
