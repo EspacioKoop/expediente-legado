@@ -4,6 +4,7 @@ import unittest
 
 RAIZ = Path(__file__).resolve().parents[1]
 PERFIL = RAIZ / "godot/guion/perfil_jugador.gd"
+PARTIDA = RAIZ / "godot/guion/partida.gd"
 CUERPO = RAIZ / "godot/guion/cuerpo_jugador_3d.gd"
 CREADOR = RAIZ / "godot/guion/creador_personaje_app.gd"
 CAMINANTE = RAIZ / "godot/escenas/caminante.tscn"
@@ -14,6 +15,7 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.perfil = PERFIL.read_text()
+        cls.partida = PARTIDA.read_text()
         cls.cuerpo = CUERPO.read_text()
         cls.creador = CREADOR.read_text()
         cls.caminante = CAMINANTE.read_text()
@@ -38,10 +40,16 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
         self.assertNotIn('"bono"', self.perfil)
         self.assertNotIn('"bonus"', self.perfil)
 
-    def test_perfil_es_persistente_y_normalizado(self):
-        self.assertIn('user://perfil_jugador.json', self.perfil)
-        self.assertIn('static func completar', self.perfil)
-        self.assertIn('static func guardar', self.perfil)
+    def test_perfil_vive_en_partida_y_migra_guardados_antiguos(self):
+        self.assertIn('"perfil_jugador": PerfilJugador.nuevo()', self.partida)
+        self.assertIn(
+            'PerfilJugador.completar(fusionado["perfil_jugador"])',
+            self.partida,
+        )
+        self.assertIn('guardado.has("perfil_jugador")', self.partida)
+        self.assertNotIn("user://perfil_jugador.json", self.perfil)
+        self.assertNotIn("FileAccess", self.perfil)
+        self.assertIn("static func completar", self.perfil)
         self.assertIn('clampf(float(apariencia.get("altura"', self.perfil)
 
     def test_cuerpo_es_visual_y_no_crea_colisiones(self):
@@ -56,15 +64,31 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
 
     def test_caminante_monta_el_cuerpo_sin_cambiar_su_capsula(self):
         self.assertIn('path="res://guion/cuerpo_jugador_3d.gd"', self.caminante)
-        self.assertIn('[node name="CuerpoJugador3D" type="Node3D" parent="."]', self.caminante)
+        self.assertIn(
+            '[node name="CuerpoJugador3D" type="Node3D" parent="."]',
+            self.caminante,
+        )
         self.assertIn("radius = 0.35", self.caminante)
         self.assertIn("height = 1.7", self.caminante)
 
     def test_editor_expone_aspecto_y_trasfondo(self):
-        for texto in ("Complexión", "Altura visual", "Tono de piel", "Peinado", "Prenda", "Antes de SIGA"):
+        textos = (
+            "Complexión",
+            "Altura visual",
+            "Tono de piel",
+            "Peinado",
+            "Prenda",
+            "Antes de SIGA",
+        )
+        for texto in textos:
             self.assertIn(texto, self.creador)
         self.assertIn("PerfilJugador.TRASFONDOS", self.creador)
-        self.assertIn("PerfilJugador.guardar", self.creador)
+        self.assertIn('_partida.estado["perfil_jugador"]', self.creador)
+        self.assertIn("_partida.guardar()", self.creador)
+
+    def test_cuerpo_lee_el_mismo_perfil_de_partida(self):
+        self.assertIn("var partida := Partida.new()", self.cuerpo)
+        self.assertIn('partida.estado.get("perfil_jugador", {})', self.cuerpo)
 
     def test_editor_es_accesible_desde_inicio(self):
         self.assertIn("Crear / editar personaje", self.inicio)
