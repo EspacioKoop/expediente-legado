@@ -142,39 +142,39 @@ func _construir_interfaz() -> void:
 
 	_atras = Button.new()
 	_atras.text = "<"
-	_atras.tooltip_text = "Atrás"
+	_atras.tooltip_text = tr("NAVEGADOR_ATRAS")
 	_atras.pressed.connect(ir_atras)
 	barra.add_child(_atras)
 
 	_adelante = Button.new()
 	_adelante.text = ">"
-	_adelante.tooltip_text = "Adelante"
+	_adelante.tooltip_text = tr("NAVEGADOR_ADELANTE")
 	_adelante.pressed.connect(ir_adelante)
 	barra.add_child(_adelante)
 
 	var inicio := Button.new()
-	inicio.text = "Inicio"
+	inicio.text = tr("NAVEGADOR_INICIO")
 	inicio.pressed.connect(func() -> void: navegar(URL_INICIO))
 	barra.add_child(inicio)
 
 	_direccion = LineEdit.new()
-	_direccion.placeholder_text = "Dirección"
+	_direccion.placeholder_text = tr("NAVEGADOR_DIRECCION")
 	_direccion.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_direccion.text_submitted.connect(func(texto: String) -> void: navegar(texto))
 	barra.add_child(_direccion)
 
 	var ir := Button.new()
-	ir.text = "Ir"
+	ir.text = tr("NAVEGADOR_IR")
 	ir.pressed.connect(func() -> void: navegar(_direccion.text))
 	barra.add_child(ir)
 
 	_favorito = Button.new()
-	_favorito.text = "Favorito"
+	_favorito.text = tr("NAVEGADOR_FAVORITO")
 	_favorito.pressed.connect(alternar_favorito_actual)
 	barra.add_child(_favorito)
 
 	_cache = Button.new()
-	_cache.text = "Ver caché"
+	_cache.text = tr("NAVEGADOR_CACHE")
 	_cache.visible = false
 	_cache.pressed.connect(_abrir_cache_actual)
 	barra.add_child(_cache)
@@ -182,14 +182,14 @@ func _construir_interfaz() -> void:
 	var barra_busqueda := HBoxContainer.new()
 	add_child(barra_busqueda)
 	var etiqueta := Label.new()
-	etiqueta.text = "Buscar:"
+	etiqueta.text = tr("NAVEGADOR_BUSCAR_ETIQUETA")
 	barra_busqueda.add_child(etiqueta)
 	_busqueda = LineEdit.new()
 	_busqueda.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_busqueda.text_submitted.connect(_mostrar_busqueda)
 	barra_busqueda.add_child(_busqueda)
 	var boton_buscar := Button.new()
-	boton_buscar.text = "Buscar"
+	boton_buscar.text = tr("NAVEGADOR_BUSCAR")
 	boton_buscar.pressed.connect(func() -> void: _mostrar_busqueda(_busqueda.text))
 	barra_busqueda.add_child(boton_buscar)
 
@@ -210,7 +210,7 @@ func _construir_interfaz() -> void:
 	principal.add_child(_pagina)
 
 	var etiqueta_enlaces := Label.new()
-	etiqueta_enlaces.text = "Enlaces"
+	etiqueta_enlaces.text = tr("NAVEGADOR_ENLACES")
 	principal.add_child(etiqueta_enlaces)
 	_enlaces = ItemList.new()
 	_enlaces.custom_minimum_size = Vector2(0, 110)
@@ -221,14 +221,14 @@ func _construir_interfaz() -> void:
 	lateral.custom_minimum_size = Vector2(190, 0)
 	cuerpo.add_child(lateral)
 	var etiqueta_historial := Label.new()
-	etiqueta_historial.text = "Historial"
+	etiqueta_historial.text = tr("NAVEGADOR_HISTORIAL")
 	lateral.add_child(etiqueta_historial)
 	_historial_lista = ItemList.new()
 	_historial_lista.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_historial_lista.item_activated.connect(_activar_historial)
 	lateral.add_child(_historial_lista)
 	var etiqueta_favoritos := Label.new()
-	etiqueta_favoritos.text = "Favoritos"
+	etiqueta_favoritos.text = tr("NAVEGADOR_FAVORITOS")
 	lateral.add_child(etiqueta_favoritos)
 	_favoritos_lista = ItemList.new()
 	_favoritos_lista.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -248,18 +248,20 @@ func _renderizar(resultado: Dictionary) -> void:
 	_direccion.text = url
 	_atras.disabled = _indice_historial <= 0
 	_adelante.disabled = _indice_historial < 0 or _indice_historial + 1 >= _historial.size()
-	_favorito.text = "Quitar favorito" if _favoritos.has(url) else "Favorito"
+	_favorito.text = (
+		tr("NAVEGADOR_QUITAR_FAVORITO") if _favoritos.has(url) else tr("NAVEGADOR_FAVORITO")
+	)
 	_enlaces.clear()
 	_cache.visible = false
 
 	var estado := String(resultado.get("estado", "no_encontrado"))
 	if estado == "ok":
 		var recurso: Dictionary = resultado.get("recurso", {})
-		var titulo := String(recurso.get("titulo", "Sin título"))
+		var titulo := String(recurso.get("titulo", tr("NAVEGADOR_SIN_TITULO")))
 		var snippet := String(recurso.get("snippet", ""))
 		var via := String(resultado.get("via", "origen"))
 		_pagina.text = (
-			"[b]%s[/b]\n%s\n\n%s\n\nCategoría: %s · vía: %s"
+			tr("NAVEGADOR_PAGINA_OK")
 			% [
 				titulo,
 				url,
@@ -269,27 +271,21 @@ func _renderizar(resultado: Dictionary) -> void:
 			]
 		)
 		for destino in _indice.enlaces_desde(String(recurso.get("id", ""))):
-			var indice_item := _enlaces.add_item(String(destino.get("titulo", "Enlace")))
+			var indice_item := _enlaces.add_item(
+				String(destino.get("titulo", tr("NAVEGADOR_ENLACE")))
+			)
 			_enlaces.set_item_metadata(indice_item, String(destino.get("url", "")))
 		return
 	if estado == "caido":
-		_pagina.text = (
-			"[b]Servidor no disponible[/b]\n%s\n\nEl servidor simulado no responde." % url
-		)
+		_pagina.text = tr("NAVEGADOR_SERVIDOR_CAIDO") % url
 		_cache.visible = bool(resultado.get("cache_disponible", false))
 		return
-	_pagina.text = (
-		"[b]No se puede encontrar la página[/b]\n%s\n\nCompruebe la dirección o vuelva al portal interno."
-		% url
-	)
+	_pagina.text = tr("NAVEGADOR_NO_ENCONTRADO") % url
 
 
 func _mostrar_busqueda(consulta: String) -> void:
 	var resultados := buscar(consulta)
-	_pagina.text = (
-		"[b]Resultados para «%s»[/b]\n\n%d coincidencias en el índice local."
-		% [consulta, resultados.size()]
-	)
+	_pagina.text = tr("NAVEGADOR_RESULTADOS") % [consulta, resultados.size()]
 	_enlaces.clear()
 	for recurso in resultados:
 		var indice_item := _enlaces.add_item(
@@ -305,9 +301,9 @@ func _abrir_cache_actual() -> void:
 		return
 	var datos: Dictionary = cache.get("cache", {})
 	_pagina.text = (
-		"[b]%s[/b]\nCopia guardada · día %d\n\n%s\n\n%s"
+		tr("NAVEGADOR_CACHE_PAGINA")
 		% [
-			String(datos.get("titulo", "Copia en caché")),
+			String(datos.get("titulo", tr("NAVEGADOR_CACHE_TITULO"))),
 			int(datos.get("capturada_dia", 0)),
 			String(datos.get("snippet", "")),
 			String(datos.get("cuerpo_resumen", "")),
