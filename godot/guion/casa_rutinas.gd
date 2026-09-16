@@ -50,8 +50,20 @@ static func completar(jornada: Dictionary) -> Dictionary:
 	return estado
 
 
+## Snapshot de solo lectura para el contrato ambiental (#96). No inicializa ni
+## corrige el guardado; aplica defaults sobre una copia.
 static func estado(jornada: Dictionary) -> Dictionary:
-	return completar(jornada).duplicate(true)
+	var bruto = jornada.get(CLAVE, {})
+	var copia: Dictionary = bruto.duplicate(true) if typeof(bruto) == TYPE_DICTIONARY else {}
+	for clave in TODAS:
+		if not copia.has(clave):
+			copia[clave] = false
+	var dia := maxi(1, int(jornada.get("dia", 1)))
+	if int(copia.get(CLAVE_DIA, dia)) != dia:
+		for clave in DIARIAS:
+			copia[clave] = false
+	copia[CLAVE_DIA] = dia
+	return copia
 
 
 static func valor(jornada: Dictionary, clave: String) -> bool:
