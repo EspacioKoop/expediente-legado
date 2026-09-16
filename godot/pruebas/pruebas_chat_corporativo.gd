@@ -33,9 +33,9 @@ func _probar() -> void:
 	_comprobar(chat.estado_usuario("becario") == "conectado", "el becario empieza conectado")
 	_comprobar(chat.estado_usuario("telefono") == "conectado", "centralita empieza conectada")
 
-	contexto["acciones"] = 3
+	contexto["acciones"] = Jornada.ACCIONES_POR_DIA - 1
 	chat.configurar_contexto(contexto)
-	_comprobar(chat.hora_narrativa() == "10:16", "consumir una acción avanza la hora narrativa")
+	_comprobar(chat.hora_narrativa() == "10:56", "consumir una acción avanza la hora narrativa")
 	_comprobar(chat.estado_usuario("telefono") == "ausente", "centralita pasa a ausente")
 	_comprobar(chat.estado_usuario("becario") == "ausente", "el becario puede marcar AFK")
 	var mensajes_cafe := _ids(chat.mensajes_de_canal("cafe"))
@@ -52,11 +52,11 @@ func _probar() -> void:
 		"no existe entrada de respuesta arbitraria",
 	)
 
-	contexto["acciones"] = 2
+	contexto["acciones"] = Jornada.ACCIONES_POR_DIA - 2
 	chat.configurar_contexto(contexto)
-	_comprobar(chat.hora_narrativa() == "12:16", "dos acciones sitúan la jornada al mediodía")
+	_comprobar(chat.hora_narrativa() == "13:36", "dos acciones sitúan la jornada por la tarde")
 	_comprobar(chat.estado_usuario("becario") == "conectado", "el becario vuelve de AFK")
-	_comprobar(chat.estado_usuario("cunado") == "ausente", "el compañero está fuera por café")
+	_comprobar(chat.estado_usuario("cunado") == "conectado", "el compañero vuelve del café")
 	_comprobar(
 		chat.estado_usuario("correspondencia") == "ausente", "correspondencia refleja su reparto"
 	)
@@ -66,14 +66,17 @@ func _probar() -> void:
 		"un enlace normal apunta al recurso web conocido",
 	)
 
-	contexto["acciones"] = 1
+	contexto["acciones"] = 0
 	chat.configurar_contexto(contexto)
+	_comprobar(
+		chat.hora_narrativa() == "16:16", "agotar acciones alcanza el final de la jornada narrativa"
+	)
 	_comprobar(
 		chat.estado_usuario("jubilacion") == "desconectado",
 		"una persona puede desconectarse antes del cierre de jornada",
 	)
 
-	contexto["acciones"] = 2
+	contexto["acciones"] = Jornada.ACCIONES_POR_DIA - 2
 	contexto["companeros"] = ["becario", "cunado", "correspondencia", "jubilacion"]
 	chat.configurar_contexto(contexto)
 	_comprobar(
@@ -105,7 +108,7 @@ func _probar() -> void:
 	)
 
 	contexto["dia"] = 3
-	contexto["acciones"] = 2
+	contexto["acciones"] = Jornada.ACCIONES_POR_DIA - 2
 	chat.configurar_contexto(contexto)
 	var sistemas_bloqueado := _ids(chat.mensajes_de_canal("sistemas"))
 	_comprobar(
