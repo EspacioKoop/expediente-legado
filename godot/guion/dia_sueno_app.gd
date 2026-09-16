@@ -10,6 +10,16 @@ const ESCENA_CINEMATICA := preload("res://escenas/cinematica.tscn")
 var _entrada_sueno: Node3D = null
 
 
+## Las presentaciones específicas se montan DESPUÉS del espacio jugable. Así la
+## familia poligonal sigue siendo la única autoridad de navegación/colisión y el
+## arte puede vestirla sin duplicar reglas ni conocer el id de la sala aquí.
+func _entrar_en(fase: String) -> void:
+	super._entrar_en(fase)
+	if fase != "sueño" or _mundo == null:
+		return
+	SuenoCastillo3D.montar(_mundo, _espacio_actual)
+
+
 ## Mientras se ve la bisagra no corre el reloj onírico. La noche ya existe,
 ## pero no empieza a gastarse hasta que el jugador recupera el control.
 func _process(delta: float) -> void:
