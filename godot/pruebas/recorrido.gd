@@ -34,7 +34,7 @@ func _recorrer() -> void:
 		return
 	_comprobar("el puesto abre en el mismo día", visor.jornada["dia"], 5)
 	_comprobar("la plantilla no cambia al sentarse", visor.jornada["plantilla"], 427)
-	_comprobar("el archivo ofrece los nueve expedientes", visor._archivo.item_count, 9)
+	_comprobar("el archivo ofrece los diez expedientes", visor._archivo.item_count, 10)
 	for i in visor.contenido.casos.size():
 		visor._al_elegir_caso(i)
 		_comprobar(

@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3]
+[gd_scene load_steps=29 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -22,6 +22,12 @@
 [ext_resource type="Script" path="res://guion/dia_incidente_pared_app.gd" id="20"]
 [ext_resource type="Script" path="res://guion/dia_edificios_cc0_app.gd" id="21"]
 [ext_resource type="Script" path="res://guion/dia_acumulacion_casa_app.gd" id="22"]
+[ext_resource type="Script" path="res://guion/dia_arboles_cc0_app.gd" id="23"]
+[ext_resource type="Script" path="res://guion/dia_hidra_vigilia_app.gd" id="24"]
+[ext_resource type="Script" path="res://guion/dia_hidra_sueno_app.gd" id="25"]
+[ext_resource type="Script" path="res://guion/dia_correo_postal_app.gd" id="26"]
+[ext_resource type="Script" path="res://guion/dia_telefono_fijo_app.gd" id="27"]
+[ext_resource type="Script" path="res://guion/dia_anansi_akan_app.gd" id="28"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -88,3 +94,21 @@ script = ExtResource("21")
 
 [node name="AcumulacionCasaController" type="Node" parent="."]
 script = ExtResource("22")
+
+[node name="ArbolesCC0Controller" type="Node" parent="."]
+script = ExtResource("23")
+
+[node name="HidraVigiliaController" type="Node" parent="."]
+script = ExtResource("24")
+
+[node name="HidraSuenoController" type="Node" parent="."]
+script = ExtResource("25")
+
+[node name="CorreoPostalController" type="Node" parent="."]
+script = ExtResource("26")
+
+[node name="TelefonoFijoController" type="Node" parent="."]
+script = ExtResource("27")
+
+[node name="AnansiAkanController" type="Node" parent="."]
+script = ExtResource("28")

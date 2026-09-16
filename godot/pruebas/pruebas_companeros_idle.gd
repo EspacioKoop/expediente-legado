@@ -6,7 +6,14 @@ var _pasadas := 0
 var _fallos := 0
 
 
+## Restaurar escala y giro ocurre en `_exit_tree`, que no llega a correr si el
+## idle se libera durante `_initialize`: la raíz todavía no está en el árbol.
+## Por eso las comprobaciones esperan al primer fotograma.
 func _initialize() -> void:
+	process_frame.connect(_ejecutar, CONNECT_ONE_SHOT)
+
+
+func _ejecutar() -> void:
 	_probar_movimiento()
 	_probar_reduccion()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])

@@ -16,6 +16,7 @@ const ORDEN_ICONOS := ["siga", "equipo", "documentos", "red", "papelera", "ayuda
 const ORDEN_CURSORES := ["normal", "ayuda", "ocupado", "seleccionar", "texto", "no-disponible"]
 
 var _identidades_visuales: Dictionary = {}
+var _boton_menu_visual: Button
 
 
 func _ready() -> void:
@@ -54,11 +55,33 @@ func registrar_aplicacion(
 	_decorar_accesos(id)
 
 
+func minimizar(id: String) -> void:
+	super.minimizar(id)
+	_reparar_foco_si_oculto()
+
+
+func cerrar(id: String) -> void:
+	super.cerrar(id)
+	call_deferred("_reparar_foco_si_oculto")
+
+
 func _crear_ventana(
 	id: String, titulo: String, contenido: Control, es_modal: bool = false, id_app: String = ""
 ) -> void:
 	super._crear_ventana(id, titulo, contenido, es_modal, id_app)
 	_decorar_ventana(id)
+	var foco := _primer_control_enfocable(contenido)
+	if foco == null and _ventanas.has(id):
+		foco = _primer_control_enfocable(_ventanas[id]["panel"])
+	if foco != null:
+		foco.grab_focus()
+
+
+func _unhandled_key_input(evento: InputEvent) -> void:
+	var menu_estaba_visible := _menu != null and _menu.visible
+	super._unhandled_key_input(evento)
+	if menu_estaba_visible and _menu != null and not _menu.visible:
+		_reparar_foco_si_oculto()
 
 
 func _instalar_wallpaper() -> void:
@@ -94,8 +117,29 @@ func _decorar_boton_menu() -> void:
 	var candidato := _barra.find_child("BotonMenu", true, false)
 	if candidato is Button:
 		var boton := candidato as Button
+		_boton_menu_visual = boton
 		boton.icon = SYSTEM_MARK
 		boton.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		boton.pressed.connect(_al_cambiar_visibilidad_menu)
+
+
+func _al_cambiar_visibilidad_menu() -> void:
+	# El handler base alterna primero la visibilidad. Si acaba de cerrarse,
+	# el foco vuelve al botón del sistema en vez de quedarse en una entrada oculta.
+	if _menu != null and not _menu.visible:
+		_enfocar_boton_menu()
+
+
+func _reparar_foco_si_oculto() -> void:
+	var foco := get_viewport().gui_get_focus_owner()
+	if is_instance_valid(foco) and foco.is_visible_in_tree():
+		return
+	_enfocar_boton_menu()
+
+
+func _enfocar_boton_menu() -> void:
+	if is_instance_valid(_boton_menu_visual) and _boton_menu_visual.is_visible_in_tree():
+		_boton_menu_visual.grab_focus()
 
 
 func _instalar_cursor() -> void:

@@ -1,0 +1,97 @@
+{
+  "emisoras": [
+    {
+      "id": "onda_barrio_98",
+      "nombre": "Onda Barrio 98",
+      "programas": [
+        {
+          "id": "boletin_barrio",
+          "desde": "08:00",
+          "hasta": "15:59",
+          "titulo": "Boletín del barrio",
+          "transcripcion": "Tráfico lento junto al mercado, obras en la avenida y aviso de lluvia para la tarde."
+        },
+        {
+          "id": "mesa_local",
+          "desde": "16:00",
+          "hasta": "23:59",
+          "titulo": "Mesa local",
+          "transcripcion": "Vecinos, comercios y asociaciones repasan la jornada sin convertir la emisión en una misión."
+        }
+      ]
+    },
+    {
+      "id": "marcador_98",
+      "nombre": "Marcador 98",
+      "programas": [
+        {
+          "id": "previa_deportiva",
+          "desde": "08:00",
+          "hasta": "15:59",
+          "titulo": "Previa deportiva",
+          "transcripcion": "Resultados, convocatorias y horarios de competiciones ficticias de la ciudad."
+        },
+        {
+          "id": "tercer_tiempo",
+          "desde": "16:00",
+          "hasta": "23:59",
+          "titulo": "Tercer tiempo",
+          "transcripcion": "La mesa comenta la jornada deportiva y abre el teléfono a oyentes ficticios."
+        }
+      ]
+    },
+    {
+      "id": "frecuencia_cultural",
+      "nombre": "Frecuencia Cultural",
+      "programas": [
+        {
+          "id": "archivo_de_voces",
+          "desde": "08:00",
+          "hasta": "15:59",
+          "titulo": "Archivo de voces",
+          "transcripcion": "Una selección de entrevistas y pequeñas piezas documentales de producción propia."
+        },
+        {
+          "id": "alas_sobre_el_desierto",
+          "desde": "16:00",
+          "hasta": "23:59",
+          "titulo": "Alas sobre el desierto",
+          "transcripcion": "El programa relata un ave imposible que reúne a quienes buscan respuestas al otro lado de siete valles.",
+          "atencion_requerida": 2,
+          "semilla": {
+            "id_mito": "simurgh",
+            "fuente": "radio:frecuencia_cultural:alas_sobre_el_desierto",
+            "intensidad": 1
+          }
+        }
+      ]
+    }
+  ],
+  "cassette": {
+    "id": "cinta_viajes_98",
+    "nombre": "Cinta de viajes 98",
+    "segmentos": [
+      {
+        "id": "cara_a_1",
+        "titulo": "Cara A · Cuaderno de estaciones",
+        "transcripcion": "Una voz casera enumera estaciones, transbordos y hoteles baratos anotados durante un viaje."
+      },
+      {
+        "id": "cara_a_2",
+        "titulo": "Cara A · Río bajo la arena",
+        "transcripcion": "La grabación describe puertas, balanzas y un río nocturno como si fueran recuerdos de un documental oído a medias.",
+        "atencion_requerida": 2,
+        "semilla": {
+          "id_mito": "duat",
+          "fuente": "cassette:cinta_viajes_98:rio_bajo_la_arena",
+          "intensidad": 1
+        }
+      },
+      {
+        "id": "cara_b_1",
+        "titulo": "Cara B · Ruido de habitación",
+        "transcripcion": "Quedan unos segundos de habitación, tráfico lejano y el clic de quien detuvo la grabadora."
+      }
+    ]
+  }
+}

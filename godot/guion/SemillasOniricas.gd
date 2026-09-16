@@ -23,6 +23,11 @@ const MITOS_VALIDOS := [
 	"hidra",
 	"dragon_japones",
 	"duat",
+	"simurgh",
+	"yggdrasil",
+	"mari",
+	"anansi_akan",
+	"maui_tamanuitera",
 ]
 
 ## Mezclas excepcionales y declaradas. La existencia de dos semillas no inventa

@@ -99,6 +99,12 @@ def ejecutar():
                 30,
             ),
             (
+                "radio-domestica-98",
+                ["--script", "pruebas/pruebas_radio_domestica_98.gd"],
+                30,
+                25,
+            ),
+            (
                 "escritorio-modal",
                 ["--script", "pruebas/pruebas_escritorio_modal.gd"],
                 30,

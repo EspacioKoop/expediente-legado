@@ -1,4 +1,5 @@
-## Prueba headless aislada del índice web ficticio del OS98 (#660 / #667).
+## Prueba headless aislada del índice, prensa y navegador web ficticio del OS98.
+## Cubre #537 / #660 / #667.
 extends SceneTree
 
 var _pasadas := 0
@@ -13,7 +14,7 @@ func _probar() -> void:
 	var indice := Web98Indice.new()
 	indice.configurar_contexto({"dia": 1, "conocimiento": [], "urls_caidas": []})
 
-	_comprobar(indice.catalogo().size() >= 12, "el catálogo tiene una red pequeña pero no trivial")
+	_comprobar(indice.catalogo().size() >= 16, "el catálogo incorpora la red y cuatro cabeceras")
 	_comprobar(indice.categorias().size() >= 5, "existen categorías de directorio")
 	_comprobar(indice.buscar("").is_empty(), "una consulta vacía no devuelve toda la red")
 
@@ -25,6 +26,19 @@ func _probar() -> void:
 	_comprobar(
 		primera_busqueda == segunda_busqueda,
 		"la misma consulta y estado producen el mismo orden",
+	)
+
+	var prensa_ids := _ids(indice.buscar("prensa"))
+	_comprobar(prensa_ids.size() == 4, "las cuatro cabeceras son descubribles desde el índice")
+	_comprobar(
+		_ids(indice.enlaces_desde("portal-dgai")).has("prensa-la-plaza"),
+		"el portal institucional enlaza el ecosistema de prensa",
+	)
+	var portada_resuelta := indice.resolver_url("http://laplaza.red98/")
+	_comprobar(portada_resuelta["estado"] == "ok", "una cabecera tiene URL navegable")
+	_comprobar(
+		portada_resuelta["recurso"]["tipo"] == "prensa",
+		"el índice marca la cabecera para el renderer especializado",
 	)
 
 	_comprobar(indice.buscar("enlace13").is_empty(), "enlace13 no se filtra antes de conocerlo")
@@ -93,14 +107,124 @@ func _probar() -> void:
 		"las URLs desconocidas producen un 404 simulado",
 	)
 
+	_probar_prensa()
+	_probar_navegador()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
+
+
+func _probar_prensa() -> void:
+	var prensa := Web98Prensa.new()
+	_comprobar(prensa.cabeceras().size() == 4, "existen exactamente cuatro cabeceras")
+	_comprobar(prensa.hechos().size() >= 2, "la prensa tiene hechos para más de una jornada")
+
+	var hecho_id := "turnos-atencion-planta4"
+	var hecho := prensa.hecho(hecho_id)
+	var tratamientos := prensa.tratamientos_de(hecho_id)
+	_comprobar(tratamientos.size() == 4, "un mismo hecho tiene cuatro tratamientos editoriales")
+	var titulares: Array[String] = []
+	var datos_base := _ids_datos(hecho)
+	for tratamiento in tratamientos:
+		var titular := String(tratamiento.get("titular", ""))
+		_comprobar(not titular.is_empty(), "cada tratamiento declara titular")
+		_comprobar(not titulares.has(titular), "cada cabecera encuadra el hecho con titular propio")
+		titulares.append(titular)
+		for dato_id in tratamiento.get("datos_destacados", []):
+			_comprobar(
+				datos_base.has(String(dato_id)),
+				"todo dato destacado procede del hecho compartido",
+			)
+		for dato_id in tratamiento.get("omisiones", []):
+			_comprobar(
+				datos_base.has(String(dato_id)),
+				"toda omisión declarada referencia un dato real del hecho",
+			)
+
+	prensa.configurar_contexto({"dia": 1})
+	for cabecera in prensa.cabeceras():
+		var portada_dia1 := prensa.portada(String(cabecera.get("id", "")))
+		_comprobar(portada_dia1["estado"] == "ok", "cada cabecera produce portada")
+		_comprobar(portada_dia1["articulos"].size() == 1, "la portada del día 1 es temporal")
+		_comprobar(
+			portada_dia1["articulos"][0]["hecho_id"] == hecho_id,
+			"las cuatro cabeceras parten del mismo hecho el día 1",
+		)
+		_comprobar(
+			portada_dia1["articulos"][0]["hecho"]["datos"] == hecho["datos"],
+			"el tratamiento no sustituye la base factual compartida",
+		)
+
+	prensa.configurar_contexto({"dia": 2})
+	for cabecera in prensa.cabeceras():
+		var portada_dia2 := prensa.portada(String(cabecera.get("id", "")))
+		_comprobar(portada_dia2["articulos"].size() == 1, "la portada cambia con la jornada")
+		_comprobar(
+			portada_dia2["articulos"][0]["hecho_id"] == "licitacion-terminales-registro",
+			"el día 2 publica el hecho correspondiente sin usar reloj real",
+		)
+
+
+func _probar_navegador() -> void:
+	var navegador := NavegadorSiga.new()
+	navegador.configurar_contexto({"dia": 1, "conocimiento": [], "urls_caidas": []})
+	_comprobar(
+		navegador.navegar(NavegadorSiga.URL_INICIO)["estado"] == "ok",
+		"el navegador abre el portal de inicio mediante Web98Indice",
+	)
+	_comprobar(
+		navegador.buscar("shareware")[0]["id"] == "byte-local",
+		"la búsqueda del navegador delega en el índice",
+	)
+	var prensa := navegador.navegar("http://laplaza.red98/")
+	_comprobar(prensa["estado"] == "ok", "el navegador abre una cabecera declarativa")
+	_comprobar(prensa["recurso"]["tipo"] == "prensa", "conserva el tipo de renderer de prensa")
+	navegador.navegar("http://byte.local/")
+	_comprobar(navegador.historial().size() == 3, "registra navegación en historial")
+	_comprobar(navegador.url_actual() == "http://byte.local/", "expone la URL actual")
+	navegador.ir_atras()
+	_comprobar(
+		navegador.url_actual() == "http://laplaza.red98/", "Atrás recupera la visita anterior"
+	)
+	navegador.ir_adelante()
+	_comprobar(
+		navegador.url_actual() == "http://byte.local/", "Adelante recupera la visita siguiente"
+	)
+	navegador.alternar_favorito_actual()
+	_comprobar(navegador.favoritos().has("http://byte.local/"), "permite marcar favoritos")
+
+	var estado := navegador.exportar_estado()
+	var restaurado := NavegadorSiga.new()
+	restaurado.configurar_contexto({"dia": 1, "conocimiento": [], "urls_caidas": []})
+	restaurado.configurar_estado(estado)
+	_comprobar(restaurado.historial() == navegador.historial(), "restaura historial persistible")
+	_comprobar(restaurado.favoritos() == navegador.favoritos(), "restaura favoritos persistibles")
+	_comprobar(
+		restaurado.navegar("http://intranet.dgai/diag/enlace13/")["estado"] == "no_encontrado",
+		"el navegador no salta el gating de conocimiento",
+	)
+	restaurado.configurar_contexto(
+		{"dia": 1, "conocimiento": [], "urls_caidas": ["http://byte.local/"]}
+	)
+	_comprobar(
+		restaurado.navegar("http://byte.local/")["estado"] == "caido",
+		"propaga estados de servidor simulado sin tocar la red real",
+	)
+	navegador.free()
+	restaurado.free()
 
 
 func _ids(recursos: Array[Dictionary]) -> Array[String]:
 	var resultado: Array[String] = []
 	for recurso in recursos:
 		resultado.append(String(recurso.get("id", "")))
+	return resultado
+
+
+func _ids_datos(hecho: Dictionary) -> Array[String]:
+	var resultado: Array[String] = []
+	for dato_valor in hecho.get("datos", []):
+		if dato_valor is Dictionary:
+			resultado.append(String((dato_valor as Dictionary).get("id", "")))
 	return resultado
 
 

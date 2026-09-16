@@ -534,9 +534,20 @@ func _andar(delta: float) -> void:
 	if _desde_paso < METROS_POR_ZANCADA:
 		return
 	_desde_paso = 0.0
-	_pisada.stream = Sonido.paso()
+	_pisada.stream = Sonido.paso_sobre(_suelo_pisado())
 	_pisada.pitch_scale = randf_range(0.94, 1.06)
 	_pisada.play()
+
+
+## Qué se pisa: el suelo que declara el espacio, salvo que nieve en la calle. El
+## sueño no declara suelo y conserva los pasos genéricos.
+func _suelo_pisado() -> String:
+	if (
+		String(jornada.get("fase", "")) == "trayecto"
+		and Clima.estado(int(jornada.get("dia", 1))) == Clima.NIEVE
+	):
+		return Sonido.NIEVE
+	return String(_espacio_actual.get("textura_suelo", ""))
 
 
 func _sonar(nombre: String) -> void:

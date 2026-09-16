@@ -6,6 +6,8 @@ on:
     paths:
       - ".github/workflows/gbc-fixtures.yml"
       - "scripts/test_gbc_fixture_workflow.py"
+      - "scripts/inspect_gb_rom.py"
+      - "scripts/test_inspect_gb_rom.py"
       - "docs/gbc-fixtures.md"
       - "gbc/fixtures/cgb_only_smoke/**"
       - "gbc/minijuegos/caza_pixeles_98/**"
@@ -13,6 +15,9 @@ on:
       - "gbc/minijuegos/croc_riders_98/**"
       - "gbc/minijuegos/aquiles_98/**"
       - "gbc/minijuegos/ryu_flow_98/**"
+      - "gbc/minijuegos/hydra_loop_98/**"
+      - "gbc/minijuegos/hydra_loop/assets/**"
+      - "gbc/minijuegos/webkeeper_98/**"
 
 permissions:
   contents: read
@@ -28,6 +33,11 @@ env:
   CGB_ACID2_RGBDS_REPO: https://github.com/gbdev/rgbds.git
   CGB_ACID2_RGBDS_COMMIT: 0759c98d913e3d4d21207a8886a319c85add2041
   CGB_ACID2_SHA256: 197fb0bcec544f0400527fc707e0a94f55435974986e6986b424ace5de81720e
+  UCITY_REPO: https://github.com/AntonioND/ucity.git
+  UCITY_TAG: v1.3
+  UCITY_COMMIT: d1880a2a112d7c26f16c0fc06a15b6c32fdc9137
+  UCITY_URL: https://github.com/AntonioND/ucity/releases/download/v1.3/ucity.gbc
+  UCITY_SHA256: 9422ee2ca7b7ea1d46b58b2a429fff3f354dfd3e732dee1e7ae6220f148ce6e0
 
 jobs:
   build-fixtures:
@@ -38,7 +48,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Validate workflow contract
-        run: python -m unittest scripts.test_gbc_fixture_workflow
+        run: python -m unittest scripts.test_gbc_fixture_workflow scripts.test_inspect_gb_rom
 
       - name: Install pinned RGBDS
         shell: bash
@@ -114,6 +124,22 @@ jobs:
           PATH="$GITHUB_WORKSPACE/rgbds-legacy-src:$PATH" make -C cgb-acid2-src all
           cp cgb-acid2-src/build/cgb-acid2.gbc gbc-fixtures/
 
+      - name: Fetch and verify external uCity v1.3 fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag_sha="$(git ls-remote "$UCITY_REPO" "refs/tags/${UCITY_TAG}" | cut -f1)"
+          test "$tag_sha" = "$UCITY_COMMIT"
+          mkdir -p external-fixtures
+          curl --fail --location --retry 3 --output external-fixtures/ucity.gbc "$UCITY_URL"
+          echo "${UCITY_SHA256}  external-fixtures/ucity.gbc" | sha256sum --check --strict
+          test "$(stat -c %s external-fixtures/ucity.gbc)" -eq 131072
+          test "$(od -An -tx1 -j 323 -N 1 external-fixtures/ucity.gbc | tr -d ' \n')" = "c0"
+          test "$(od -An -tx1 -j 327 -N 1 external-fixtures/ucity.gbc | tr -d ' \n')" = "1b"
+          test "$(od -An -tx1 -j 328 -N 1 external-fixtures/ucity.gbc | tr -d ' \n')" = "02"
+          test "$(od -An -tx1 -j 329 -N 1 external-fixtures/ucity.gbc | tr -d ' \n')" = "04"
+          python scripts/inspect_gb_rom.py external-fixtures/ucity.gbc --expect-sha256 "$UCITY_SHA256" --compact | tee external-fixtures/ucity.metadata.json
+
       - name: Build CGB-only smoke fixture
         shell: bash
         run: |
@@ -156,23 +182,46 @@ jobs:
           make -C gbc/minijuegos/ryu_flow_98 clean test
           cp gbc/minijuegos/ryu_flow_98/build/ryu_flow_98.gbc gbc-fixtures/
 
+      - name: Prepare PyBoy for prototype play-tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m venv /tmp/pyboy
+          /tmp/pyboy/bin/python -m pip install --quiet pyboy==2.6.1
+
+      - name: Build and play-test HYDRA LOOP prototype
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C gbc/minijuegos/hydra_loop_98 clean test PYTHON=/tmp/pyboy/bin/python
+          cp gbc/minijuegos/hydra_loop_98/build/hydra_loop_98.gbc gbc-fixtures/
+
+      - name: Build and play-test WEBKEEPER 98 prototype
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C gbc/minijuegos/webkeeper_98 clean test PYTHON=/tmp/pyboy/bin/python
+          cp gbc/minijuegos/webkeeper_98/build/webkeeper_98.gbc gbc-fixtures/
+
       - name: Hash and inspect ROM headers
         shell: bash
         run: |
           set -euo pipefail
           (
             cd gbc-fixtures
-            sha256sum joypad.gb vblank.gb cgb-acid2.gbc cgb_only_smoke.gbc caza_pixeles_98.gbc paper_planes_98.gbc croc_riders_98.gbc aquiles_98.gbc ryu_flow_98.gbc | tee SHA256SUMS
+            sha256sum joypad.gb vblank.gb cgb-acid2.gbc cgb_only_smoke.gbc caza_pixeles_98.gbc paper_planes_98.gbc croc_riders_98.gbc aquiles_98.gbc ryu_flow_98.gbc hydra_loop_98.gbc webkeeper_98.gbc | tee SHA256SUMS
             echo "${CGB_ACID2_SHA256}  cgb-acid2.gbc" | sha256sum --check --strict
           )
+          : > gbc-fixtures/rom-metadata.jsonl
           for rom in gbc-fixtures/*.gb gbc-fixtures/*.gbc; do
             test -s "$rom"
             size=$(stat -c %s "$rom")
             test "$size" -ge 32768
             printf '%s: %s bytes\n' "$rom" "$size"
+            python scripts/inspect_gb_rom.py "$rom" --compact >> gbc-fixtures/rom-metadata.jsonl
           done
           test "$(od -An -tx1 -j 323 -N 1 gbc-fixtures/cgb-acid2.gbc | tr -d ' \n')" = "c0"
-          for rom in gbc-fixtures/caza_pixeles_98.gbc gbc-fixtures/paper_planes_98.gbc gbc-fixtures/croc_riders_98.gbc gbc-fixtures/aquiles_98.gbc gbc-fixtures/ryu_flow_98.gbc; do
+          for rom in gbc-fixtures/caza_pixeles_98.gbc gbc-fixtures/paper_planes_98.gbc gbc-fixtures/croc_riders_98.gbc gbc-fixtures/aquiles_98.gbc gbc-fixtures/ryu_flow_98.gbc gbc-fixtures/hydra_loop_98.gbc gbc-fixtures/webkeeper_98.gbc; do
             test "$(od -An -tx1 -j 323 -N 1 "$rom" | tr -d ' \n')" = "80"
           done
           test "$(od -An -tx1 -j 323 -N 1 gbc-fixtures/cgb_only_smoke.gbc | tr -d ' \n')" = "c0"
@@ -191,6 +240,9 @@ jobs:
             gbc-fixtures/croc_riders_98.gbc
             gbc-fixtures/aquiles_98.gbc
             gbc-fixtures/ryu_flow_98.gbc
+            gbc-fixtures/hydra_loop_98.gbc
+            gbc-fixtures/webkeeper_98.gbc
             gbc-fixtures/SHA256SUMS
+            gbc-fixtures/rom-metadata.jsonl
           if-no-files-found: error
           retention-days: 7

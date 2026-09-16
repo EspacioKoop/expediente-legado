@@ -17,15 +17,15 @@ class IdentidadExpedientesTest(unittest.TestCase):
         comprobar_contrato(
             self,
             "pruebas/pruebas_identidad_expedientes.gd",
-            "61 pasadas, 0 fallos",
+            "67 pasadas, 0 fallos",
         )
 
-    def test_hay_nueve_identidades_y_portadas_distintas(self):
+    def test_hay_diez_identidades_y_portadas_distintas(self):
         catalogo = json.loads(CATALOGO.read_text(encoding="utf-8"))
-        self.assertEqual(len(catalogo), 9)
-        self.assertEqual(len({ficha["icono"] for ficha in catalogo.values()}), 9)
-        self.assertEqual(len({ficha["lamina"] for ficha in catalogo.values()}), 9)
-        self.assertEqual(len({ficha["acento"] for ficha in catalogo.values()}), 9)
+        self.assertEqual(len(catalogo), 10)
+        self.assertEqual(len({ficha["icono"] for ficha in catalogo.values()}), 10)
+        self.assertEqual(len({ficha["lamina"] for ficha in catalogo.values()}), 10)
+        self.assertEqual(len({ficha["acento"] for ficha in catalogo.values()}), 10)
         for ficha in catalogo.values():
             self.assertTrue(ficha["codigo"])
             self.assertTrue(ficha["motivo"])

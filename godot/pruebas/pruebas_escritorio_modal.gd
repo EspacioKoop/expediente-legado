@@ -15,6 +15,7 @@ func _initialize() -> void:
 func _probar() -> void:
 	await _probar_ciclo_de_ventana()
 	await _probar_modal_bloquea_y_atrapa_foco()
+	await _probar_foco_visible_en_piel_real()
 	await _probar_escala_ui()
 	await _probar_capacidades_declaradas_de_app_sintetica()
 	await _probar_redimensionado_con_agarre()
@@ -105,6 +106,62 @@ func _probar_modal_bloquea_y_atrapa_foco() -> void:
 	_comprobar(escritorio._modal_id, "", "cerrar la modal libera el bloqueo")
 	_comprobar(
 		not is_instance_valid(escritorio._bloqueador_modal), "cerrar la modal retira el bloqueador"
+	)
+
+	escritorio.queue_free()
+
+
+## La piel real del OS98 añade el contrato que el shell visible necesita:
+## ninguna operación debe dejar el foco de teclado en un Control oculto.
+func _probar_foco_visible_en_piel_real() -> void:
+	var escritorio := await _crear_escritorio_visual()
+	var contenido := Button.new()
+	contenido.text = "Acción"
+	escritorio.registrar_aplicacion("foco", "Foco", func() -> Control: return contenido)
+
+	escritorio.abrir_aplicacion("foco")
+	_comprobar(
+		root.gui_get_focus_owner() == contenido,
+		"abrir una ventana enfoca su primer control interactivo",
+	)
+
+	escritorio.minimizar("foco")
+	_comprobar(
+		root.gui_get_focus_owner() == escritorio._boton_menu_visual,
+		"minimizar no deja el foco dentro de una ventana oculta",
+	)
+
+	escritorio.restaurar("foco")
+	escritorio._boton_menu_visual.emit_signal("pressed")
+	var entrada_programa := escritorio._programas_menu.get_child(0) as Control
+	_comprobar(
+		root.gui_get_focus_owner() == entrada_programa,
+		"abrir el menú lleva el foco al primer programa",
+	)
+	escritorio._boton_menu_visual.emit_signal("pressed")
+	_comprobar(
+		root.gui_get_focus_owner() == escritorio._boton_menu_visual,
+		"cerrar el menú devuelve el foco al botón del sistema",
+	)
+
+	# Si una modal se abre mientras el menú tenía el foco, el shell base guarda
+	# ese Control como foco previo. Al cerrar, la piel real debe detectar que ya
+	# está oculto y recuperar un objetivo visible.
+	escritorio._boton_menu_visual.emit_signal("pressed")
+	var aviso := Label.new()
+	aviso.text = "Aviso"
+	escritorio.abrir_modal("aviso-foco", "Aviso", aviso)
+	var foco_modal := root.gui_get_focus_owner()
+	_comprobar(
+		is_instance_valid(foco_modal) and foco_modal.is_visible_in_tree(),
+		"una modal sin controles propios conserva un foco visible en su marco",
+	)
+	escritorio.cerrar("aviso-foco")
+	await process_frame
+	var foco_recuperado := root.gui_get_focus_owner()
+	_comprobar(
+		is_instance_valid(foco_recuperado) and foco_recuperado.is_visible_in_tree(),
+		"cerrar la modal no restaura el foco a una entrada de menú oculta",
 	)
 
 	escritorio.queue_free()
@@ -264,6 +321,13 @@ func _probar_sin_varias_instancias_reenfoca() -> void:
 func _crear_escritorio(escala_ui: float = 1.0) -> EscritorioSiga:
 	var escritorio := EscritorioSiga.new()
 	escritorio.configurar_escala_ui(escala_ui)
+	root.add_child(escritorio)
+	await process_frame
+	return escritorio
+
+
+func _crear_escritorio_visual() -> EscritorioSigaVisual:
+	var escritorio := EscritorioSigaVisual.new()
 	root.add_child(escritorio)
 	await process_frame
 	return escritorio

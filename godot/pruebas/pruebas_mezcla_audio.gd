@@ -58,6 +58,32 @@ func _probar() -> void:
 	get_root().add_child(explicito)
 	comprobar("un bus explícito no se sobrescribe", explicito.bus, &"Ambiente")
 
+	var preferencias := PreferenciasSiga.nuevas()
+	preferencias["volumen"] = 0.8
+	preferencias["volumen_efectos"] = 0.5
+	preferencias["volumen_ambiente"] = 0.0
+	preferencias["volumen_musica"] = 0.25
+	router.call("aplicar_volumenes", preferencias)
+	var master := AudioServer.get_bus_index("Master")
+	comprobar(
+		"Master respeta el nivel",
+		is_equal_approx(AudioServer.get_bus_volume_db(master), linear_to_db(0.8)),
+		true
+	)
+	comprobar("Master no se mutea con nivel positivo", AudioServer.is_bus_mute(master), false)
+	comprobar(
+		"Efectos respeta el nivel",
+		is_equal_approx(AudioServer.get_bus_volume_db(efectos), linear_to_db(0.5)),
+		true
+	)
+	comprobar("Efectos no se mutea con nivel positivo", AudioServer.is_bus_mute(efectos), false)
+	comprobar("Ambiente a cero se mutea", AudioServer.is_bus_mute(ambiente), true)
+	comprobar(
+		"Musica respeta el nivel",
+		is_equal_approx(AudioServer.get_bus_volume_db(musica), linear_to_db(0.25)),
+		true
+	)
+
 	print("\n%d pasadas, %d fallos" % [pasadas, fallos])
 	quit(1 if fallos > 0 else 0)
 

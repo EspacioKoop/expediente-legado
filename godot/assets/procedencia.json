@@ -196,6 +196,46 @@
       "sha256": "6fc395be2ad1f99ce318a5d28f98fb76dbeb676d83a0b28239d8c1fb90736180"
     },
     {
+      "ruta": "audio/impactMetal_light_000.ogg",
+      "titulo": "Impact metal light 000 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "33b5e6e37c6e9d54e07bf5a89b12c76e879f40c1ea83cdd82714df1d6f9fec6d"
+    },
+    {
+      "ruta": "audio/impactMetal_light_001.ogg",
+      "titulo": "Impact metal light 001 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "fba69c467ddd85da7b1d82e259f936b876d9ba6a3d6f1b24bdd10468e46bfe08"
+    },
+    {
+      "ruta": "audio/impactMetal_medium_000.ogg",
+      "titulo": "Impact metal medium 000 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "a96f879fec0864a8938e0c745b6996a6c5679c16a234ce31a01cc995e8401003"
+    },
+    {
+      "ruta": "audio/impactSoft_medium_000.ogg",
+      "titulo": "Impact soft medium 000 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "7d3ba0bb5e60a11b5d3e558c141303dcf494256675fbf753c0d252d2cf0481e3"
+    },
+    {
+      "ruta": "audio/impactSoft_medium_001.ogg",
+      "titulo": "Impact soft medium 001 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "7642a4fd43e547afe4f7adfadb3dabb681c0ff512f52c1674bae30a726841faf"
+    },
+    {
       "ruta": "modelos/bookcaseClosed.glb",
       "titulo": "Bookcase closed (Furniture Kit)",
       "autor": "Kenney",
@@ -1305,6 +1345,202 @@
       "licencia": "CC0-1.0",
       "fuente": "https://quaternius.com/packs/ultimatetexturedbuildings.html",
       "sha256": "d2964227d93ec3cc0ae3ccb806a409ea03b39c8683456c516259f922d34ea0d0"
+    },
+    {
+      "ruta": "cc0/quaternius_stylized_tree/Tree_1.obj",
+      "titulo": "Tree_1 (OBJ) · Stylized Tree Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/stylizedtree.html",
+      "sha256": "7400c6741c7924408d29f61e8614b47ad5bd388430b068520f7e566c762a5653"
+    },
+    {
+      "ruta": "cc0/quaternius_stylized_tree/Tree_1.mtl",
+      "titulo": "Tree_1 (MTL) · Stylized Tree Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/stylizedtree.html",
+      "sha256": "1c3f6c7d55f6c73b1b0ba6827afed3da01135b33bf28e9043361ab6b7f0ef9b8"
+    },
+    {
+      "ruta": "cc0/quaternius_stylized_tree/Pine_2.obj",
+      "titulo": "Pine_2 (OBJ) · Stylized Tree Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/stylizedtree.html",
+      "sha256": "ae88a8082980c345796e31a00ae8998639253ea3118e38c0d928ead3e02a915a"
+    },
+    {
+      "ruta": "cc0/quaternius_stylized_tree/Pine_2.mtl",
+      "titulo": "Pine_2 (MTL) · Stylized Tree Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/stylizedtree.html",
+      "sha256": "27d6d3a3ae866fcc54444ea1e5667e86884d6fda7df0726eaac6a8c457419fb9"
+    },
+    {
+      "ruta": "cc0/quaternius_stylized_tree/DeadTree_5.obj",
+      "titulo": "DeadTree_5 (OBJ) · Stylized Tree Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/stylizedtree.html",
+      "sha256": "26676f4c0ce84f572955987354e32b6b78e327a80ff91a54d6bd7ea3fcff3a9a"
+    },
+    {
+      "ruta": "cc0/quaternius_stylized_tree/DeadTree_5.mtl",
+      "titulo": "DeadTree_5 (MTL) · Stylized Tree Pack",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/stylizedtree.html",
+      "sha256": "9e21133bc5d3462c55e7c0411e5d9eb2a4c5701cf4641dfe078b03985acf2ee4"
+    },
+    {
+      "ruta": "cc0/quaternius_ual/UAL1_Standard.glb",
+      "titulo": "Universal Animation Library (Standard, glTF) · animaciones humanoides",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/universalanimationlibrary.html",
+      "sha256": "69591853d817488edaa8fd9bf8fc1d821eaeaf789f8627b3cd23b41c4ed67997",
+      "archivo_origen": "Universal Animation Library[Standard]/Unreal-Godot/UAL1_Standard.glb",
+      "paquete_sha256": "cc73fc4e495b82958207316596317a3f40b9fa38065bde1027937452da537724"
+    },
+    {
+      "ruta": "cc0/quaternius_ual/UAL2_Standard.glb",
+      "titulo": "Universal Animation Library 2 (Standard, glTF) · animaciones humanoides",
+      "autor": "Quaternius",
+      "licencia": "CC0-1.0",
+      "fuente": "https://quaternius.com/packs/universalanimationlibrary2.html",
+      "sha256": "8cee20ab1bc55130092447e810e26df22dd2803eccc54f52137a7d54d7ab88a8",
+      "archivo_origen": "Universal Animation Library 2[Standard]/Unreal-Godot/UAL2_Standard.glb",
+      "paquete_sha256": "4008ea208a604773a2b2177d965f0f5d3195498b5bf838c3f5785d68e95f2a68"
+    },
+    {
+      "ruta": "audio/footstep_carpet_000.ogg",
+      "titulo": "Footstep carpet 000 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "b9524658b52a99a20590f8feefc103088637fd13ea8ec35811aee785e1f2f330"
+    },
+    {
+      "ruta": "audio/footstep_carpet_001.ogg",
+      "titulo": "Footstep carpet 001 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "9af3c3f76705107339e72036e4053bdca3eaa50ad31c8c929f42ce8d40e5d781"
+    },
+    {
+      "ruta": "audio/footstep_carpet_002.ogg",
+      "titulo": "Footstep carpet 002 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "9af3c3f76705107339e72036e4053bdca3eaa50ad31c8c929f42ce8d40e5d781"
+    },
+    {
+      "ruta": "audio/footstep_carpet_003.ogg",
+      "titulo": "Footstep carpet 003 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "4ae7454338d57c7d102145919ae653c7d010eb542797c4f25a1c7470be3a7e4c"
+    },
+    {
+      "ruta": "audio/footstep_carpet_004.ogg",
+      "titulo": "Footstep carpet 004 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "4ae7454338d57c7d102145919ae653c7d010eb542797c4f25a1c7470be3a7e4c"
+    },
+    {
+      "ruta": "audio/footstep_concrete_000.ogg",
+      "titulo": "Footstep concrete 000 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "d7267e183067757c92c169de2a379abea592cfca6b39bb2e8feea15221ad79fe"
+    },
+    {
+      "ruta": "audio/footstep_concrete_001.ogg",
+      "titulo": "Footstep concrete 001 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "507a75eb19b897087855a3be3cf11a12d7fa37d143ad535eeebe0b8031c7325d"
+    },
+    {
+      "ruta": "audio/footstep_concrete_002.ogg",
+      "titulo": "Footstep concrete 002 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "b21fa546d74941196b25da8a20b7010abd8c05c4fcf93545d1f344e66a664e13"
+    },
+    {
+      "ruta": "audio/footstep_concrete_003.ogg",
+      "titulo": "Footstep concrete 003 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "8b513c2f0316324060b9174b8f28df6c2147418c506e6a53b77f18e149a5547b"
+    },
+    {
+      "ruta": "audio/footstep_concrete_004.ogg",
+      "titulo": "Footstep concrete 004 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "24dd8db2413e5b81ad181e1205c12a1c7801da5f85715d471b92a4b2f632e45e"
+    },
+    {
+      "ruta": "audio/footstep_snow_000.ogg",
+      "titulo": "Footstep snow 000 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "c05fa4a9dc9a7aabc04996466fb589537e49af76de9998d8f9e6270ec92dcef7"
+    },
+    {
+      "ruta": "audio/footstep_snow_001.ogg",
+      "titulo": "Footstep snow 001 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "980fb9a1c9227aed7995067b0357f373053337f2416316db8ea0438418542fb4"
+    },
+    {
+      "ruta": "audio/footstep_snow_002.ogg",
+      "titulo": "Footstep snow 002 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "db52bafdc66304f3b999f2c29227826c65993916e630ac2ffbca17d07b263178"
+    },
+    {
+      "ruta": "audio/footstep_snow_003.ogg",
+      "titulo": "Footstep snow 003 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "68272e3f1cabcabd02d328fd344454d7c04cb58b5a86972fcdd858f845e3d007"
+    },
+    {
+      "ruta": "audio/footstep_snow_004.ogg",
+      "titulo": "Footstep snow 004 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "7fe9ce5f5732aaa0a50ef02bb1ac162c27f6bd85214e86aaea6e13e7a41dbc00"
+    },
+    {
+      "ruta": "audio/impactWood_heavy_000.ogg",
+      "titulo": "Impactwood heavy 000 (Impact Sounds)",
+      "autor": "Kenney",
+      "licencia": "CC0-1.0",
+      "fuente": "https://kenney.nl/assets/impact-sounds",
+      "sha256": "15ff82332f342c30e469215539e1cc57e11b221aa2cf7e11e811d313a9927f3d"
     }
   ]
 }

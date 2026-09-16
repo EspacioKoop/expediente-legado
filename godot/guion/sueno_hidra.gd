@@ -57,7 +57,7 @@ func _ready() -> void:
 
 
 static func habilitada(semillas: Dictionary) -> bool:
-	return bool(semillas.get(SEMILLA, false))
+	return semillas.has(SEMILLA)
 
 
 static func estado_nuevo(raiz_seed: int = 0) -> Dictionary:
@@ -128,18 +128,18 @@ func observar_conexiones() -> Dictionary:
 func accion_nodo_comun() -> bool:
 	if not _habilitada:
 		return false
-	var anterior := bool(_estado.get("resuelta", false))
+	var anterior: bool = _estado.get("resuelta", false) == true
 	_estado = resolver_nodo_comun(_estado)
 	_sincronizar_visuales()
 	estado_cambiado.emit(estado_actual())
-	if not anterior and bool(_estado.get("resuelta", false)):
+	if not anterior and _estado.get("resuelta", false) == true:
 		hidra_resuelta.emit()
-	return bool(_estado.get("resuelta", false))
+	return _estado.get("resuelta", false) == true
 
 
 static func cortar_sintoma(estado: Dictionary) -> Dictionary:
 	var siguiente := estado.duplicate(true)
-	if bool(siguiente.get("resuelta", false)):
+	if siguiente.get("resuelta", false) == true:
 		return siguiente
 
 	var cortes := int(siguiente.get("cortes_sintoma", 0)) + 1
@@ -162,7 +162,7 @@ static func cortar_sintoma(estado: Dictionary) -> Dictionary:
 
 static func observar_conexiones_estado(estado: Dictionary) -> Dictionary:
 	var siguiente := estado.duplicate(true)
-	if bool(siguiente.get("resuelta", false)):
+	if siguiente.get("resuelta", false) == true:
 		return siguiente
 	var pista_nivel := mini(3, int(siguiente.get("pista_nivel", 0)) + 1)
 	siguiente["pista_nivel"] = pista_nivel
@@ -173,7 +173,7 @@ static func observar_conexiones_estado(estado: Dictionary) -> Dictionary:
 
 static func resolver_nodo_comun(estado: Dictionary) -> Dictionary:
 	var siguiente := estado.duplicate(true)
-	if bool(siguiente.get("resuelta", false)):
+	if siguiente.get("resuelta", false) == true:
 		return siguiente
 	if int(siguiente.get("pista_nivel", 0)) < PISTA_NODO_LEGIBLE:
 		siguiente["pista"] = "La raíz aún no se distingue de los síntomas."
@@ -231,7 +231,7 @@ func _sincronizar_visuales() -> void:
 	_vaciar(_cabezas_3d)
 	_vaciar(_arquitectura_3d)
 
-	var resuelta := bool(_estado.get("resuelta", false))
+	var resuelta: bool = _estado.get("resuelta", false) == true
 	_raiz_visual.visible = _habilitada
 	_raiz_visual.scale = Vector3.ONE * (0.35 if resuelta else 1.0)
 	_actualizar_material_raiz(resuelta)

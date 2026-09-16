@@ -7,15 +7,20 @@ class_name CatalogoAnomaliasSiga
 extends HSplitContainer
 
 const RUTA_TEXTOS := "res://datos/catalogo_anomalias_textos.json"
+const RUTA_VISUALES := "res://datos/catalogo_anomalias_visuales.json"
 
 var _estado: Dictionary = {}
 var _firma_estado := ""
 var _textos: Dictionary = {}
+var _visuales: Dictionary = {}
+var _texturas_visuales: Dictionary = {}
 
 var _lista: ItemList
 var _progreso: Label
 var _titulo: Label
 var _origen: Label
+var _variantes: Label
+var _recompensa_visual: TextureRect
 var _descripcion: RichTextLabel
 var _representacion: Label
 
@@ -31,6 +36,13 @@ static func _cargar_textos() -> Dictionary:
 	return {}
 
 
+static func _cargar_visuales() -> Dictionary:
+	var datos: Variant = JSON.parse_string(FileAccess.get_file_as_string(RUTA_VISUALES))
+	if datos is Dictionary:
+		return (datos as Dictionary).duplicate(true)
+	return {}
+
+
 func configurar_estado(estado: Dictionary) -> void:
 	_estado = estado
 	_firma_estado = ""
@@ -40,6 +52,7 @@ func configurar_estado(estado: Dictionary) -> void:
 
 func _ready() -> void:
 	_textos = _cargar_textos()
+	_visuales = _cargar_visuales()
 	custom_minimum_size = Vector2(560, 360)
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -103,6 +116,21 @@ func _construir_interfaz() -> void:
 	_origen.name = "Origen"
 	_origen.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	derecha.add_child(_origen)
+
+	_variantes = Label.new()
+	_variantes.name = "Variantes"
+	_variantes.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	derecha.add_child(_variantes)
+
+	_recompensa_visual = TextureRect.new()
+	_recompensa_visual.name = "RecompensaVisual"
+	_recompensa_visual.custom_minimum_size = Vector2(0, 144)
+	_recompensa_visual.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_recompensa_visual.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_recompensa_visual.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_recompensa_visual.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_recompensa_visual.visible = false
+	derecha.add_child(_recompensa_visual)
 
 	_descripcion = RichTextLabel.new()
 	_descripcion.name = "Descripcion"
@@ -185,8 +213,16 @@ func _seleccionar(indice: int) -> void:
 
 
 func _mostrar_ficha(entrada: Dictionary) -> void:
+	var id := String(entrada.get("id", ""))
+	var variantes := CatalogoAnomalias.variantes(_estado, id)
 	_titulo.text = String(entrada.get("titulo", _t("titulo_fallback")))
 	_origen.text = _t("origen_material") % String(entrada.get("origen_tipo", _t("origen_fallback")))
+	_variantes.text = _t("variantes_documentales") % variantes.size()
+	if variantes.is_empty():
+		_variantes.text += "\n" + _t("variantes_ninguna")
+	else:
+		_variantes.text += "\n" + (_t("variantes_folios") % ", ".join(variantes))
+	_mostrar_recompensa(id)
 	_descripcion.text = String(entrada.get("descripcion", _t("descripcion_fallback")))
 	_representacion.text = (
 		_t("representacion_archivada")
@@ -197,6 +233,8 @@ func _mostrar_ficha(entrada: Dictionary) -> void:
 func _mostrar_bloqueada() -> void:
 	_titulo.text = _t("titulo_bloqueada")
 	_origen.text = _t("origen_vacio")
+	_variantes.text = ""
+	_ocultar_recompensa()
 	_descripcion.text = _t("descripcion_bloqueada")
 	_representacion.text = _t("representacion_vacia")
 
@@ -204,6 +242,8 @@ func _mostrar_bloqueada() -> void:
 func _mostrar_vuelta_completa() -> void:
 	_titulo.text = _t("titulo_vuelta_completa")
 	_origen.text = _t("origen_vuelta_completa")
+	_variantes.text = ""
+	_mostrar_recompensa("@vuelta-completa")
 	_descripcion.text = _t("descripcion_vuelta_completa")
 	_representacion.text = _t("representacion_vuelta_completa")
 
@@ -211,8 +251,34 @@ func _mostrar_vuelta_completa() -> void:
 func _mostrar_espera() -> void:
 	_titulo.text = _t("titulo_espera")
 	_origen.text = ""
+	_variantes.text = ""
+	_ocultar_recompensa()
 	_descripcion.text = _t("descripcion_espera")
 	_representacion.text = ""
+
+
+func _mostrar_recompensa(clave: String) -> void:
+	if _recompensa_visual == null:
+		return
+	var ficha: Variant = _visuales.get(clave, {})
+	if not ficha is Dictionary:
+		_ocultar_recompensa()
+		return
+	var ruta := String((ficha as Dictionary).get("ruta", ""))
+	if ruta.is_empty() or not ResourceLoader.exists(ruta):
+		_ocultar_recompensa()
+		return
+	if not _texturas_visuales.has(ruta):
+		_texturas_visuales[ruta] = load(ruta)
+	_recompensa_visual.texture = _texturas_visuales[ruta] as Texture2D
+	_recompensa_visual.visible = _recompensa_visual.texture != null
+
+
+func _ocultar_recompensa() -> void:
+	if _recompensa_visual == null:
+		return
+	_recompensa_visual.texture = null
+	_recompensa_visual.visible = false
 
 
 func _id_seleccionado() -> String:

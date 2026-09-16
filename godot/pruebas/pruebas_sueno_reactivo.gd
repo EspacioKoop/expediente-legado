@@ -1,15 +1,31 @@
 extends SceneTree
 
+const OBJETOS_TOCADOS := ["silla", "monitor", "archivador"]
+
 var _pasadas := 0
 var _fallos := 0
 var _observaciones: Array = []
 
 
 func _initialize() -> void:
+	_probar_sin_objetos_tocados()
 	_probar_todas_las_formas()
 	_probar_reproducibilidad()
+	_probar_tarot_no_filtra_pistas()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
+
+
+func _probar_sin_objetos_tocados() -> void:
+	var mundo := Node3D.new()
+	root.add_child(mundo)
+	var creadas := SuenoUtileria.montar(mundo, "crucero", 7, 400)
+	_comprobar(creadas.is_empty(), "sin objetos tocados no inventa anomalías")
+	_comprobar(
+		mundo.find_children("AnomaliaSueno*", "", true, false).is_empty(),
+		"sin objetos tocados no monta interactuables de relleno",
+	)
+	mundo.queue_free()
 
 
 func _probar_todas_las_formas() -> void:
@@ -17,11 +33,11 @@ func _probar_todas_las_formas() -> void:
 		var id := String(valor_id)
 		var mundo := Node3D.new()
 		root.add_child(mundo)
-		var creadas := SuenoUtileria.montar(mundo, id, 7, 400)
-		_comprobar(creadas.size() == 3, "%s recibe tres anomalías" % id)
+		var creadas := SuenoUtileria.montar(mundo, id, 7, 400, [], OBJETOS_TOCADOS)
+		_comprobar(creadas.size() == 3, "%s recibe tres anomalías tocadas" % id)
 		_comprobar(
 			mundo.find_children("AnomaliaSueno*", "", true, false).size() == 3,
-			"%s monta tres interactuables" % id,
+			"%s monta tres interactuables tocados" % id,
 		)
 
 		var forma := SuenoFormas.de(id)
@@ -85,8 +101,8 @@ func _probar_reproducibilidad() -> void:
 	var b := Node3D.new()
 	root.add_child(a)
 	root.add_child(b)
-	var primera := SuenoUtileria.montar(a, "crucero", 9, 12345)
-	var segunda := SuenoUtileria.montar(b, "crucero", 9, 12345)
+	var primera := SuenoUtileria.montar(a, "crucero", 9, 12345, [], OBJETOS_TOCADOS)
+	var segunda := SuenoUtileria.montar(b, "crucero", 9, 12345, [], OBJETOS_TOCADOS)
 	for i in range(3):
 		_comprobar(primera[i].position == segunda[i].position, "posición reproducible %d" % i)
 		_comprobar(
@@ -99,6 +115,69 @@ func _probar_reproducibilidad() -> void:
 		)
 	a.queue_free()
 	b.queue_free()
+
+
+func _probar_tarot_no_filtra_pistas() -> void:
+	var folio_luna := "F-1996-00187"
+
+	var sin_recoger := Node3D.new()
+	root.add_child(sin_recoger)
+	var ocultas := SuenoUtileria.montar(sin_recoger, "crucero", 4, 8700, [folio_luna], [], [])
+	_comprobar(ocultas.is_empty(), "leer el folio sin recoger la carta no fabrica utilería")
+	sin_recoger.queue_free()
+
+	var recogida := Node3D.new()
+	root.add_child(recogida)
+	var visibles := SuenoUtileria.montar(
+		recogida, "crucero", 4, 8700, [folio_luna], [], ["la-luna"]
+	)
+	_comprobar(visibles.size() == 1, "solo tarot válido produce una sola anomalía, sin relleno")
+	var tarot = _buscar_id(visibles, "tarot-geometria-viva")
+	_comprobar(tarot != null, "una carta recogida desde un folio de hoy sí puede deformarse")
+	if tarot != null:
+		_comprobar(
+			String(tarot.get_meta("documento_origen", "")) == folio_luna,
+			"la deformación conserva el folio real que la originó",
+		)
+		_comprobar(
+			String(tarot.get_meta("carta_origen", "")) == "la-luna",
+			"la deformación conserva el id de la carta reconocida",
+		)
+		_comprobar(
+			tarot.find_child("Carta", true, false) != null,
+			"el tarot mantiene silueta propia en vez de caer al cubo genérico",
+		)
+	recogida.queue_free()
+
+	var con_objetos := Node3D.new()
+	root.add_child(con_objetos)
+	var mixtas := SuenoUtileria.montar(
+		con_objetos, "crucero", 4, 8700, [folio_luna], OBJETOS_TOCADOS, ["la-luna"]
+	)
+	_comprobar(mixtas.size() == 3, "tarot y objetos tocados respetan el máximo de tres anomalías")
+	_comprobar(
+		_buscar_id(mixtas, "tarot-geometria-viva") != null,
+		"el tarot válido no se pierde cuando hay otros originales del día",
+	)
+	con_objetos.queue_free()
+
+	var otro_folio := Node3D.new()
+	root.add_child(otro_folio)
+	var ajenas := SuenoUtileria.montar(
+		otro_folio, "crucero", 4, 8700, ["ACTA-SIN-TAROT"], [], ["la-luna"]
+	)
+	_comprobar(
+		ajenas.is_empty(),
+		"una carta recogida no aparece si su documento no fue leído hoy",
+	)
+	otro_folio.queue_free()
+
+
+func _buscar_id(anomalias: Array, id: String):
+	for anomalia in anomalias:
+		if anomalia.id_catalogo() == id:
+			return anomalia
+	return null
 
 
 func _capturar_observacion(anomalia_id: String, actor: Node) -> void:

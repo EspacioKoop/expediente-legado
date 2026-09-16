@@ -34,27 +34,29 @@ const OFICINA := {
 		# La silla 4-B y las otras tres. Es el objeto que el sueño agranda
 		# (#87), así que tiene que ser una silla reconocible antes de que se
 		# deforme: una caja agrandada es una caja mayor.
+		# A la escala de una persona sentada (#134): a 0,95 m el cuerpo tapaba
+		# la silla entera y parecía flotar sobre un taburete.
 		{
-			"pos": Vector3(-4, 0.45, -0.9),
-			"tam": Vector3(0.62, 0.95, 0.62),
+			"pos": Vector3(-4, 0.57, -0.9),
+			"tam": Vector3(0.74, 1.14, 0.74),
 			"color": Color(0.34, 0.36, 0.38),
 			"modelo": "chairDesk"
 		},
 		{
-			"pos": Vector3(-4, 0.45, 2.1),
-			"tam": Vector3(0.62, 0.95, 0.62),
+			"pos": Vector3(-4, 0.57, 2.1),
+			"tam": Vector3(0.74, 1.14, 0.74),
 			"color": Color(0.34, 0.36, 0.38),
 			"modelo": "chairDesk"
 		},
 		{
-			"pos": Vector3(1, 0.45, -0.9),
-			"tam": Vector3(0.62, 0.95, 0.62),
+			"pos": Vector3(1, 0.57, -0.9),
+			"tam": Vector3(0.74, 1.14, 0.74),
 			"color": Color(0.34, 0.36, 0.38),
 			"modelo": "chairDesk"
 		},
 		{
-			"pos": Vector3(1, 0.45, 2.1),
-			"tam": Vector3(0.62, 0.95, 0.62),
+			"pos": Vector3(1, 0.57, 2.1),
+			"tam": Vector3(0.74, 1.14, 0.74),
 			"color": Color(0.34, 0.36, 0.38),
 			"modelo": "chairDesk"
 		},
@@ -315,7 +317,9 @@ const OFICINA := {
 		# puesto encima, te saludaba antes de que hubieras dado un paso.
 		Vector3(-1.9, 0, 0.4),
 		Vector3(-4, 0, -0.9),
-		Vector3(1, 0, -0.9),
+		# Al lado de su silla y no encima: es quien no trabaja y espera de pie
+		# con los brazos cruzados; sobre la silla, esta le atravesaba las piernas.
+		Vector3(1.75, 0, -0.9),
 		# En su silla, mirando a su mesa como todas las demás: de pie al otro
 		# lado, con la puerta a la espalda, su nombre te llegaba antes que su
 		# cara.
