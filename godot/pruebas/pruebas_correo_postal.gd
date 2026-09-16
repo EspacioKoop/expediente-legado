@@ -101,9 +101,7 @@ func _probar() -> void:
 		_contiene_id(CorreoPostal.disponibles(paquete), "paquete_calendario_magnetico"),
 		"el dia cuatro llega el paquete fisico",
 	)
-	var entrega := CorreoPostal.recoger(
-		paquete, inventario_paquete, "paquete_calendario_magnetico"
-	)
+	var entrega := CorreoPostal.recoger(paquete, inventario_paquete, "paquete_calendario_magnetico")
 	_comprobar(bool(entrega.get("ok", false)), "el paquete se recoge")
 	_comprobar(bool(entrega.get("objeto_agregado", false)), "el paquete declara objeto fisico")
 	_comprobar(
