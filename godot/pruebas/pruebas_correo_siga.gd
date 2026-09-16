@@ -51,7 +51,7 @@ func _probar() -> void:
 
 
 func _configurar(
-	modelo: RefCounted, dia: int, acciones: int, presentes: Array[String]
+	modelo: Variant, dia: int, acciones: int, presentes: Array[String]
 ) -> void:
 	modelo.configurar_contexto(
 		{
@@ -63,7 +63,7 @@ func _configurar(
 	)
 
 
-func _ids(modelo: RefCounted) -> Array[String]:
+func _ids(modelo: Variant) -> Array[String]:
 	var resultado: Array[String] = []
 	for mensaje in modelo.mensajes_disponibles():
 		resultado.append(String(mensaje.get("id", "")))
