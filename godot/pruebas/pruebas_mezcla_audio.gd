@@ -63,7 +63,7 @@ func _probar() -> void:
 	preferencias["volumen_efectos"] = 0.5
 	preferencias["volumen_ambiente"] = 0.0
 	preferencias["volumen_musica"] = 0.25
-	router.aplicar_volumenes(preferencias)
+	router.call("aplicar_volumenes", preferencias)
 	var master := AudioServer.get_bus_index("Master")
 	comprobar(
 		"Master respeta el nivel",
