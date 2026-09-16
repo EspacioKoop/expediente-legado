@@ -115,12 +115,18 @@ func actualizar(caso: Dictionary) -> void:
 		_portada.texture = _textura_de(identidad, "lamina")
 		_portada.visible = _portada.texture != null
 	if _portada_fila != null:
-		_portada_fila.visible = (_sujeto != null and _sujeto.texture != null) or (_portada != null and _portada.texture != null)
+		_portada_fila.visible = _hay_portada()
 
 
 func mostrar_portada(visible: bool) -> void:
 	if _portada_fila != null:
-		_portada_fila.visible = visible and ((_sujeto != null and _sujeto.texture != null) or (_portada != null and _portada.texture != null))
+		_portada_fila.visible = visible and _hay_portada()
+
+
+func _hay_portada() -> bool:
+	return (_sujeto != null and _sujeto.texture != null) or (
+		_portada != null and _portada.texture != null
+	)
 
 
 func _asegurar_identidades() -> void:
