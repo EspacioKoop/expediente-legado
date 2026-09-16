@@ -154,38 +154,29 @@ func ejecutar(id: String) -> Dictionary:
 
 	var numero := int(_ejecuciones.get(id, 0)) + 1
 	_ejecuciones[id] = numero
+	var mensaje := ""
 	match String(paquete.get("interaccion", "")):
 		"benchmark":
 			# Resultado deliberadamente ficticio y determinista: nunca inspecciona CPU/GPU.
 			var indice := 680 + numero * 13
-			return {
-				"ok": true,
-				"mensaje":
-				"Índice Administrativo Total: %d puntos. Archivo de sellos: EXCELENTE." % indice,
-			}
+			mensaje = (
+				"Índice Administrativo Total: %d puntos. Archivo de sellos: EXCELENTE." % indice
+			)
 		"banner":
-			return {"ok": true, "mensaje": "===  EXPEDIENTE  ===  · rótulo generado en memoria."}
+			mensaje = "===  EXPEDIENTE  ===  · rótulo generado en memoria."
 		"demo":
-			return {"ok": true, "mensaje": "Astro Topo: 3 tornillos encontrados. DEMO COMPLETADA."}
+			mensaje = "Astro Topo: 3 tornillos encontrados. DEMO COMPLETADA."
 		"reloj":
-			return {
-				"ok": true,
-				"mensaje": "Alarma ficticia programada para dentro de 15 minutos narrativos."
-			}
+			mensaje = "Alarma ficticia programada para dentro de 15 minutos narrativos."
 		"salvapantallas":
-			return {
-				"ok": true,
-				"mensaje": "Vista previa: 48 estrellas, estela corta, reloj desactivado."
-			}
+			mensaje = "Vista previa: 48 estrellas, estela corta, reloj desactivado."
 		"compresor":
-			return {
-				"ok": true,
-				"mensaje": "Simulación: 12 archivos → ARCHIVO.AZO (41% de ahorro ficticio)."
-			}
+			mensaje = "Simulación: 12 archivos → ARCHIVO.AZO (41% de ahorro ficticio)."
 		"iconos":
-			return {"ok": true, "mensaje": "Lienzo 32×32 abierto con paleta de 16 colores."}
+			mensaje = "Lienzo 32×32 abierto con paleta de 16 colores."
 		_:
-			return {"ok": true, "mensaje": "PixelVista muestra una imagen de ejemplo integrada."}
+			mensaje = "PixelVista muestra una imagen de ejemplo integrada."
+	return {"ok": true, "mensaje": mensaje}
 
 
 func exportar_estado() -> Dictionary:
