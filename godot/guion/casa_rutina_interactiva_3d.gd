@@ -40,6 +40,7 @@ func configurar(
 	texto_activo: String,
 	sonido_inactivo: String,
 	sonido_activo: String,
+	estado_inicial: bool,
 	verbo_inactivo: int = Verbo.USAR,
 	verbo_activo: int = Verbo.USAR,
 	reduccion_movimiento: bool = false,
@@ -58,7 +59,7 @@ func configurar(
 	_verbo_inactivo = verbo_inactivo
 	_verbo_activo = verbo_activo
 	_reduccion_movimiento = reduccion_movimiento
-	_activo = CasaRutinas.valor(_jornada, _clave)
+	_activo = estado_inicial
 
 	var colision := CollisionShape3D.new()
 	var forma := BoxShape3D.new()
