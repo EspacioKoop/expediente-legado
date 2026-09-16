@@ -64,7 +64,9 @@ func _probar() -> void:
 	var tablones_dia2 := _ids(bbs.tablones_visibles())
 	_comprobar(tablones_dia2.size() == 3, "el segundo día incorpora el tercer tablón")
 	_comprobar(tablones_dia2.has("tablon-norte"), "el tablón local aparece en su jornada")
-	_comprobar(_ids(bbs.buscar("monitor")).has("norte-monitor"), "su índice ya participa en búsqueda")
+	_comprobar(
+		_ids(bbs.buscar("monitor")).has("norte-monitor"), "su índice ya participa en búsqueda"
+	)
 	_comprobar(bbs.recursos_web().size() == 3, "el modelo expone destinos para Web98")
 
 	var movido := bbs.mensajes_de("radio-movido-soldador")
