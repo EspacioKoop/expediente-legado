@@ -83,11 +83,14 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	# El catálogo de #149 es una vista de la memoria de Partida: no guarda estado
 	# paralelo ni interpreta el sueño. Las entradas bloqueadas tampoco exponen
 	# metadata del catálogo declarativo.
-	_catalogo_anomalias_app = EscritorioSigaApp.new(
-		"catalogo-anomalias",
-		"Catálogo de anomalías",
-		Callable(self, "_crear_catalogo_anomalias"),
-		"siga",
+	_catalogo_anomalias_app = (
+		EscritorioSigaApp
+		. new(
+			"catalogo-anomalias",
+			"Catálogo de anomalías",
+			Callable(self, "_crear_catalogo_anomalias"),
+			"siga",
+		)
 	)
 	_catalogo_anomalias_app.tamano_minimo = Vector2(560, 360)
 	_catalogo_anomalias_app.tamano_preferido = Vector2(760, 500)
