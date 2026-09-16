@@ -67,4 +67,4 @@ func _al_cambiar_texto() -> void:
 
 func _actualizar_estado() -> void:
 	if _estado != null:
-		_estado.text = (tr("BLOC_NOTAS_ESTADO") % exportar_texto().length())
+		_estado.text = "%d %s" % [exportar_texto().length(), tr("BLOC_NOTAS_ESTADO")]

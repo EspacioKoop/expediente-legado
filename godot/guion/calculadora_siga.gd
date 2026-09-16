@@ -82,7 +82,7 @@ func _al_enviar(_texto: String) -> void:
 
 func _calcular() -> void:
 	var valor := resolver(_entrada.text)
-	_resultado.text = tr("CALCULADORA_RESULTADO") % valor
+	_resultado.text = "%s %s" % [tr("CALCULADORA_RESULTADO_VACIO"), valor]
 
 
 func _borrar() -> void:
