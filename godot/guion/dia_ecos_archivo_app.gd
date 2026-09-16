@@ -37,6 +37,10 @@ func _process(_delta: float) -> void:
 	var candidato := _candidato(dia)
 	if candidato.is_empty():
 		return
+	_montar_ecos(dia, mundo, candidato)
+
+
+func _montar_ecos(dia: Node, mundo: Node3D, candidato: Dictionary) -> void:
 	var raiz := (
 		Sueno
 		. semilla(
