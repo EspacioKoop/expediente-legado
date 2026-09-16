@@ -1,146 +1,70 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="ArrayMesh" path="res://escenas/suenos/props_284/cabana_nieve_psx.obj" id="1_cabana"]
 
 [sub_resource type="StandardMaterial3D" id="MatWood"]
 albedo_color = Color(0.20, 0.105, 0.055, 1)
 roughness = 0.92
 
-[sub_resource type="StandardMaterial3D" id="MatWoodDark"]
-albedo_color = Color(0.075, 0.045, 0.03, 1)
-roughness = 1.0
-
 [sub_resource type="StandardMaterial3D" id="MatSnow"]
 albedo_color = Color(0.82, 0.90, 0.95, 1)
 roughness = 0.72
 
-[sub_resource type="StandardMaterial3D" id="MatStone"]
-albedo_color = Color(0.19, 0.20, 0.21, 1)
-roughness = 0.96
+[sub_resource type="StandardMaterial3D" id="MatDark"]
+albedo_color = Color(0.055, 0.035, 0.025, 1)
+roughness = 1.0
 
 [sub_resource type="StandardMaterial3D" id="MatWarm"]
 albedo_color = Color(1, 0.48, 0.12, 1)
 emission_enabled = true
 emission = Color(1, 0.20, 0.035, 1)
+emission_energy_multiplier = 1.8
 
-[sub_resource type="StandardMaterial3D" id="MatIce"]
-albedo_color = Color(0.55, 0.82, 0.93, 0.82)
-transparency = 1
-roughness = 0.18
+[sub_resource type="PlaneMesh" id="SnowRoof"]
+size = Vector2(3.55, 5.25)
 
-[sub_resource type="BoxMesh" id="BoxBody"]
-size = Vector3(5.4, 2.8, 4.2)
+[sub_resource type="QuadMesh" id="Door"]
+size = Vector2(1.18, 2.28)
 
-[sub_resource type="BoxMesh" id="BoxRoof"]
-size = Vector3(3.85, 0.28, 4.8)
-
-[sub_resource type="BoxMesh" id="BoxThin"]
-size = Vector3(1, 1, 1)
-
-[sub_resource type="CylinderMesh" id="CylinderIcicle"]
-top_radius = 0.035
-bottom_radius = 0.12
-height = 0.72
-radial_segments = 7
+[sub_resource type="QuadMesh" id="Window"]
+size = Vector2(0.86, 0.86)
 
 [node name="CabanaNieve" type="Node3D"]
 
-[node name="Cuerpo" type="MeshInstance3D" parent="."]
-mesh = SubResource("BoxBody")
+[node name="CabanaPSX" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_cabana")
 material_override = SubResource("MatWood")
-position = Vector3(0, 1.4, 0)
 
-[node name="TejadoIzq" type="MeshInstance3D" parent="."]
-mesh = SubResource("BoxRoof")
-material_override = SubResource("MatWoodDark")
-position = Vector3(-1.42, 3.34, 0)
-rotation_degrees = Vector3(0, 0, -31)
-
-[node name="TejadoDer" type="MeshInstance3D" parent="."]
-mesh = SubResource("BoxRoof")
-material_override = SubResource("MatWoodDark")
-position = Vector3(1.42, 3.34, 0)
-rotation_degrees = Vector3(0, 0, 31)
-
-[node name="NieveIzq" type="MeshInstance3D" parent="."]
-mesh = SubResource("BoxRoof")
+[node name="NieveTejadoIzq" type="MeshInstance3D" parent="."]
+mesh = SubResource("SnowRoof")
 material_override = SubResource("MatSnow")
-position = Vector3(-1.42, 3.50, 0)
-rotation_degrees = Vector3(0, 0, -31)
-scale = Vector3(1.02, 0.28, 1.03)
+position = Vector3(-1.48, 3.56, 0)
+rotation_degrees = Vector3(0, 0, -27)
 
-[node name="NieveDer" type="MeshInstance3D" parent="."]
-mesh = SubResource("BoxRoof")
+[node name="NieveTejadoDer" type="MeshInstance3D" parent="."]
+mesh = SubResource("SnowRoof")
 material_override = SubResource("MatSnow")
-position = Vector3(1.42, 3.50, 0)
-rotation_degrees = Vector3(0, 0, 31)
-scale = Vector3(1.02, 0.28, 1.03)
+position = Vector3(1.48, 3.56, 0)
+rotation_degrees = Vector3(0, 0, 27)
 
-[node name="Puerta" type="MeshInstance3D" parent="."]
-mesh = SubResource("BoxThin")
-material_override = SubResource("MatWoodDark")
-position = Vector3(0, 1.12, 2.13)
-scale = Vector3(1.15, 2.25, 0.16)
-
-[node name="MarcoPuertaSuperior" type="MeshInstance3D" parent="."]
-mesh = SubResource("BoxThin")
-material_override = SubResource("MatStone")
-position = Vector3(0, 2.34, 2.23)
-scale = Vector3(1.46, 0.16, 0.16)
-
-[node name="MarcoPuertaIzq" type="MeshInstance3D" parent="."]
-mesh = SubResource("BoxThin")
-material_override = SubResource("MatStone")
-position = Vector3(-0.66, 1.16, 2.23)
-scale = Vector3(0.16, 2.52, 0.16)
-
-[node name="MarcoPuertaDer" type="MeshInstance3D" parent="."]
-mesh = SubResource("BoxThin")
-material_override = SubResource("MatStone")
-position = Vector3(0.66, 1.16, 2.23)
-scale = Vector3(0.16, 2.52, 0.16)
+[node name="PuertaOscura" type="MeshInstance3D" parent="."]
+mesh = SubResource("Door")
+material_override = SubResource("MatDark")
+position = Vector3(0, 1.18, 2.23)
 
 [node name="VentanaIzq" type="MeshInstance3D" parent="."]
-mesh = SubResource("BoxThin")
+mesh = SubResource("Window")
 material_override = SubResource("MatWarm")
-position = Vector3(-1.72, 1.55, 2.14)
-scale = Vector3(0.88, 0.88, 0.10)
+position = Vector3(-1.55, 1.55, 2.23)
 
 [node name="VentanaDer" type="MeshInstance3D" parent="."]
-mesh = SubResource("BoxThin")
+mesh = SubResource("Window")
 material_override = SubResource("MatWarm")
-position = Vector3(1.72, 1.55, 2.14)
-scale = Vector3(0.88, 0.88, 0.10)
+position = Vector3(1.55, 1.55, 2.23)
 
-[node name="Porche" type="MeshInstance3D" parent="."]
-mesh = SubResource("BoxThin")
-material_override = SubResource("MatWoodDark")
-position = Vector3(0, 0.15, 2.65)
-scale = Vector3(4.7, 0.28, 1.45)
-
-[node name="Chimenea" type="MeshInstance3D" parent="."]
-mesh = SubResource("BoxThin")
-material_override = SubResource("MatStone")
-position = Vector3(1.55, 4.2, -0.85)
-scale = Vector3(0.62, 2.3, 0.62)
-
-[node name="Carambano1" type="MeshInstance3D" parent="."]
-mesh = SubResource("CylinderIcicle")
-material_override = SubResource("MatIce")
-position = Vector3(-2.22, 2.93, 2.34)
-
-[node name="Carambano2" type="MeshInstance3D" parent="."]
-mesh = SubResource("CylinderIcicle")
-material_override = SubResource("MatIce")
-position = Vector3(-1.48, 2.93, 2.34)
-scale = Vector3(0.8, 1.35, 0.8)
-
-[node name="Carambano3" type="MeshInstance3D" parent="."]
-mesh = SubResource("CylinderIcicle")
-material_override = SubResource("MatIce")
-position = Vector3(1.58, 2.93, 2.34)
-scale = Vector3(0.9, 0.8, 0.9)
-
-[node name="Carambano4" type="MeshInstance3D" parent="."]
-mesh = SubResource("CylinderIcicle")
-material_override = SubResource("MatIce")
-position = Vector3(2.26, 2.93, 2.34)
-scale = Vector3(0.75, 1.55, 0.75)
+[node name="LuzInterior" type="OmniLight3D" parent="."]
+position = Vector3(0, 1.8, 1.75)
+light_color = Color(1, 0.48, 0.22, 1)
+light_energy = 0.72
+omni_range = 5.4
+shadow_enabled = true
