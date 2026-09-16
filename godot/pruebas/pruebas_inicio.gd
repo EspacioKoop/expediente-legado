@@ -10,12 +10,16 @@ var _ruta := ""
 class InicioPrueba:
 	extends "res://guion/inicio_app.gd"
 	var entradas := 0
+	var personajes := 0
 	var ventanillas := 0
 	var ajustes := 0
 	var salidas := 0
 
 	func _entrar() -> void:
 		entradas += 1
+
+	func _abrir_personaje() -> void:
+		personajes += 1
 
 	func _abrir_ventanilla() -> void:
 		ventanillas += 1
@@ -105,13 +109,15 @@ func _probar() -> void:
 	root.add_child(inicio)
 	inicio._empezar()
 	_comprobar(inicio.entradas == 0, "fallo de guardado impide entrar")
+	_comprobar(inicio.personajes == 0, "fallo de guardado impide abrir el creador")
 	_comprobar(inicio._reinicio_pendiente, "permite reintentar estado pendiente")
 	_comprobar(inicio._continuar.disabled, "no ofrece continuar sin guardado nuevo")
 	_comprobar(FileAccess.get_file_as_string(_ruta + ".roto") == original, "respalda original")
 	var semilla: int = fallida.estado.semilla
 	fallida.falla = false
 	inicio._pedir_nueva()
-	_comprobar(inicio.entradas == 1, "reintentar guardado entra una vez")
+	_comprobar(inicio.entradas == 0, "reintentar guardado aún no entra al mundo")
+	_comprobar(inicio.personajes == 1, "reintentar guardado abre el creador una vez")
 	_comprobar(fallida.estado.semilla == semilla, "reintento conserva semilla")
 	var nueva := Partida.new()
 	nueva.cargar(_ruta)
@@ -119,6 +125,10 @@ func _probar() -> void:
 	_comprobar(nueva.estado.jornada.dinero == Jornada.nueva().dinero, "dinero canónico")
 	_comprobar(nueva.estado.jornada.fase == "archivo", "nueva empieza en archivo")
 	_comprobar(nueva.estado.cinematicas_vistas.is_empty(), "entrada sin vistas anteriores")
+	_comprobar(
+		not PerfilJugador.esta_configurado(nueva.estado.perfil_jugador),
+		"nueva queda pendiente de completar la ficha"
+	)
 	inicio.free()
 	for sufijo in ["", ".roto", ".nuevo"]:
 		if FileAccess.file_exists(_ruta + sufijo):

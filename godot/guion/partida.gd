@@ -86,6 +86,9 @@ static func nueva() -> Dictionary:
 		"anomalias_descubiertas": [],
 		"anomalias_descubiertas_vuelta": [],
 		"inventario": Inventario.nuevo(),
+		# #701: la identidad pertenece a esta partida. No es una preferencia
+		# global: borrar o empezar otra partida debe producir otra ficha.
+		"perfil_jugador": PerfilJugador.nuevo(),
 		# La fusión solo recupera claves del molde. Si faltan aquí, guardar
 		# escribe el día y las firmas, pero cargar los descarta silenciosamente.
 		"jornada": Jornada.nueva(),
@@ -263,6 +266,8 @@ static func validar(guardado) -> Array:
 		else:
 			errores.append_array(_validar_inventario(guardado["inventario"]))
 
+	if guardado.has("perfil_jugador") and typeof(guardado["perfil_jugador"]) != TYPE_DICTIONARY:
+		errores.append("perfil_jugador no es un objeto")
 	if guardado.has("vida") and not _entero_valido(guardado["vida"], 0, VIDA_MAXIMA):
 		errores.append("vida inválida")
 	for clave in ["pistas_descubiertas", "cartas_conocidas", "sueno_vencidos", "sellos_obtenidos"]:
@@ -374,6 +379,7 @@ func _fusionar(guardado: Dictionary) -> Dictionary:
 	)
 	Jornada.completar(fusionado["jornada"])
 	Inventario.completar(fusionado["inventario"])
+	fusionado["perfil_jugador"] = PerfilJugador.completar(fusionado["perfil_jugador"])
 	return fusionado
 
 
