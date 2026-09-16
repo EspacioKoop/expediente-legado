@@ -45,42 +45,60 @@ const TRASFONDOS := [
 		"id": "auxiliar_administrativo",
 		"nombre": "Auxiliar administrativo",
 		"descripcion":
-		"Años de ventanillas, fotocopias y contratos temporales. Sabes cómo suena una oficina antes de saber quién manda en ella.",
+		(
+			"Años de ventanillas, fotocopias y contratos temporales. "
+			+ "Sabes cómo suena una oficina antes de saber quién manda en ella."
+		),
 		"etiquetas": ["oficina", "papel", "burocracia"],
 	},
 	{
 		"id": "almacen_fabrica",
 		"nombre": "Almacén y fábrica",
 		"descripcion":
-		"Turnos, inventarios, muelles de carga y encargados con prisa. Estás acostumbrado a leer un espacio por cómo trabaja la gente dentro.",
+		(
+			"Turnos, inventarios, muelles de carga y encargados con prisa. "
+			+ "Estás acostumbrado a leer un espacio por cómo trabaja la gente dentro."
+		),
 		"etiquetas": ["trabajo_manual", "almacen", "turnos"],
 	},
 	{
 		"id": "informatica_autodidacta",
 		"nombre": "Informática autodidacta",
 		"descripcion":
-		"Aprendiste con manuales, disquetes prestados y ordenadores que nadie quería tocar. Entiendes sistemas por insistencia, no por título.",
+		(
+			"Aprendiste con manuales, disquetes prestados y ordenadores que nadie quería tocar. "
+			+ "Entiendes sistemas por insistencia, no por título."
+		),
 		"etiquetas": ["tecnica", "ordenadores", "autodidacta"],
 	},
 	{
 		"id": "estudiante_nocturno",
 		"nombre": "Estudiante nocturno",
 		"descripcion":
-		"Trabajas de día y estudias cuando puedes. Tienes práctica reuniendo fragmentos, tomando notas y funcionando con horarios poco razonables.",
+		(
+			"Trabajas de día y estudias cuando puedes. Tienes práctica reuniendo fragmentos, "
+			+ "tomando notas y funcionando con horarios poco razonables."
+		),
 		"etiquetas": ["estudio", "biblioteca", "nocturno"],
 	},
 	{
 		"id": "cuidados_familiares",
 		"nombre": "Cuidados familiares",
 		"descripcion":
-		"Antes de SIGA ya organizabas citas, compras, papeles y días alrededor de otra persona. Conoces la logística invisible de sostener una casa.",
+		(
+			"Antes de SIGA ya organizabas citas, compras, papeles y días alrededor de otra persona. "
+			+ "Conoces la logística invisible de sostener una casa."
+		),
 		"etiquetas": ["cuidados", "casa", "responsabilidad"],
 	},
 	{
 		"id": "recien_llegado",
 		"nombre": "Recién llegado a la ciudad",
 		"descripcion":
-		"Todavía estás aprendiendo barrios, líneas, horarios y costumbres. Miras lugares cotidianos con la atención de quien aún no los da por hechos.",
+		(
+			"Todavía estás aprendiendo barrios, líneas, horarios y costumbres. "
+			+ "Miras lugares cotidianos con la atención de quien aún no los da por hechos."
+		),
 		"etiquetas": ["calle", "transporte", "forastero"],
 	},
 ]
