@@ -67,4 +67,6 @@ func _al_cambiar_texto() -> void:
 
 func _actualizar_estado() -> void:
 	if _estado != null:
-		_estado.text = "%d caracteres · guardado local al persistir la partida" % exportar_texto().length()
+		_estado.text = (
+			"%d caracteres · guardado local al persistir la partida" % exportar_texto().length()
+		)
