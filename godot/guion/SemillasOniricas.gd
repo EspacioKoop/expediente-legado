@@ -24,6 +24,7 @@ const MITOS_VALIDOS := [
 	"dragon_japones",
 	"duat",
 	"simurgh",
+	"anansi_akan",
 ]
 
 ## Mezclas excepcionales y declaradas. La existencia de dos semillas no inventa
