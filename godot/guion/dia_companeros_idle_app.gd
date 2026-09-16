@@ -44,6 +44,15 @@ func _montar(mundo: Node3D) -> void:
 		_idles.append(idle)
 
 
+## Reacción colectiva consumida por el incidente de pared (#209). Este
+## controller conoce qué cuerpos son compañeros; el incidente no necesita
+## buscar modelos ni duplicar la lógica de montaje de la plantilla.
+func huir_de(origen_global: Vector3) -> void:
+	for idle in _idles:
+		if is_instance_valid(idle):
+			idle.huir_de(origen_global)
+
+
 func _cuerpo_en(mundo: Node3D, posicion: Vector3) -> Node3D:
 	for hijo in mundo.get_children():
 		if not hijo is Node3D:
