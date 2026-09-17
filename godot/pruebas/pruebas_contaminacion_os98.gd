@@ -118,7 +118,9 @@ func _probar() -> void:
 		"el handoff queda en el contexto compartido sin duplicar lógica de clímax",
 	)
 	_comprobar(
-		not ContaminacionOs98.registrar_documento(partida, estado, ContaminacionOs98.DIAGNOSTICO_ID),
+		not ContaminacionOs98.registrar_documento(
+			partida, estado, ContaminacionOs98.DIAGNOSTICO_ID
+		),
 		"reabrir el diagnóstico en fase 4 es idempotente",
 	)
 
