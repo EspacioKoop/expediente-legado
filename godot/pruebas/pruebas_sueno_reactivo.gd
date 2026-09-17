@@ -158,8 +158,10 @@ func _probar_reproducibilidad() -> void:
 			"id de catálogo reproducible %d" % i,
 		)
 		_comprobar(
-			primera[i].get_meta("motivo_simbolico", "")
-			== segunda[i].get_meta("motivo_simbolico", ""),
+			(
+				primera[i].get_meta("motivo_simbolico", "")
+				== segunda[i].get_meta("motivo_simbolico", "")
+			),
 			"motivo simbólico reproducible %d" % i,
 		)
 	a.queue_free()
