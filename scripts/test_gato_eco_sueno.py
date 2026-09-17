@@ -47,7 +47,7 @@ class GatoEcoSuenoTest(unittest.TestCase):
             check=False,
         )
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
-        self.assertIn("15 pasadas, 0 fallos", resultado.stdout)
+        self.assertIn("16 pasadas, 0 fallos", resultado.stdout)
         self.assertNotIn("Parse Error:", resultado.stdout)
 
 
