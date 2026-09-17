@@ -34,13 +34,15 @@ const CATALOGO := [
 				"id": "dossier",
 				"tipo": "articulo",
 				"titulo": "El plano imposible",
-				"texto": "Compara relatos contradictorios y dibuja un recorrido que se repliega sobre sí mismo.",
+				"texto":
+				"Compara relatos contradictorios y dibuja un recorrido que se repliega sobre sí mismo.",
 			},
 			{
 				"id": "cartas",
 				"tipo": "correo_lectores",
 				"titulo": "Cartas desde el sótano",
-				"texto": "Tres lectores oyen ruidos tras los tabiques y recuerdan una puerta imposible.",
+				"texto":
+				"Tres lectores oyen ruidos tras los tabiques y recuerdan una puerta imposible.",
 			},
 		],
 	},
@@ -57,7 +59,8 @@ const CATALOGO := [
 				"id": "portada",
 				"tipo": "portada",
 				"titulo": "Obras, lluvia y una tarde de tráfico lento",
-				"texto": "La portada reúne obras, sucesos menores y una foto del centro bajo la lluvia.",
+				"texto":
+				"La portada reúne obras, sucesos menores y una foto del centro bajo la lluvia.",
 			},
 			{
 				"id": "local",
@@ -86,13 +89,15 @@ const CATALOGO := [
 				"id": "portada",
 				"tipo": "portada",
 				"titulo": "Ordena tu disco antes de que sea tarde",
-				"texto": "Una cubierta sobria promete mantenimiento, periféricos y redes domésticas.",
+				"texto":
+				"Una cubierta sobria promete mantenimiento, periféricos y redes domésticas.",
 			},
 			{
 				"id": "tutorial",
 				"tipo": "guia",
 				"titulo": "Copias de seguridad sin misterio",
-				"texto": "La guía separa documentos de programas y recomienda verificar cada copia.",
+				"texto":
+				"La guía separa documentos de programas y recomienda verificar cada copia.",
 			},
 		],
 	},
@@ -126,7 +131,8 @@ const CATALOGO := [
 				"id": "ensayo",
 				"tipo": "ensayo",
 				"titulo": "Cuando una calle tapa otra calle",
-				"texto": "Un ensayo explica cómo las reformas dejan capas de memoria bajo la ciudad.",
+				"texto":
+				"Un ensayo explica cómo las reformas dejan capas de memoria bajo la ciudad.",
 			},
 			{
 				"id": "lamina",
