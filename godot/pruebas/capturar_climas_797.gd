@@ -34,7 +34,7 @@ func _init() -> void:
 		quit(1)
 		return
 
-	var dia := load("res://escenas/dia.tscn").instantiate()
+	var dia = load("res://escenas/dia.tscn").instantiate()
 	root.add_child(dia)
 	await process_frame
 
