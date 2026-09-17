@@ -32,7 +32,9 @@ func _process(_delta: float) -> void:
 		return
 
 	var forzado := String(dia.jornada.get("clima_forzado", ""))
-	var estado := forzado if not forzado.is_empty() else Clima.estado(int(dia.jornada.get("dia", 1)))
+	var estado := (
+		forzado if not forzado.is_empty() else Clima.estado(int(dia.jornada.get("dia", 1)))
+	)
 	var mundo_id := mundo.get_instance_id()
 	if mundo_id != _mundo_id or estado != _estado:
 		_mundo_id = mundo_id
@@ -55,20 +57,44 @@ func _aplicar_estado(dia: Node, estado: String) -> void:
 		Clima.NUBLADO:
 			_configurar_niebla(ambiente, 0.012, Color(0.42, 0.45, 0.50), 0.012, 0.55)
 			ambiente.background_energy_multiplier = 0.78
-			_aplicar_cielo(ambiente, Color(0.045, 0.052, 0.068), Color(0.13, 0.14, 0.16), Color(0.17, 0.13, 0.12), 0.08)
+			_aplicar_cielo(
+				ambiente,
+				Color(0.045, 0.052, 0.068),
+				Color(0.13, 0.14, 0.16),
+				Color(0.17, 0.13, 0.12),
+				0.08
+			)
 		Clima.LLUVIA:
 			_configurar_niebla(ambiente, 0.022, Color(0.30, 0.34, 0.40), 0.020, 0.72)
 			ambiente.background_energy_multiplier = 0.62
-			_aplicar_cielo(ambiente, Color(0.022, 0.030, 0.046), Color(0.075, 0.09, 0.115), Color(0.10, 0.08, 0.08), 0.04)
+			_aplicar_cielo(
+				ambiente,
+				Color(0.022, 0.030, 0.046),
+				Color(0.075, 0.09, 0.115),
+				Color(0.10, 0.08, 0.08),
+				0.04
+			)
 		Clima.NIEBLA:
 			_configurar_niebla(ambiente, 0.085, Color(0.55, 0.57, 0.60), 0.060, 1.0)
 			ambiente.background_energy_multiplier = 0.70
-			_aplicar_cielo(ambiente, Color(0.22, 0.23, 0.24), Color(0.34, 0.35, 0.37), Color(0.29, 0.29, 0.30), 0.0)
+			_aplicar_cielo(
+				ambiente,
+				Color(0.22, 0.23, 0.24),
+				Color(0.34, 0.35, 0.37),
+				Color(0.29, 0.29, 0.30),
+				0.0
+			)
 			_configurar_volumetrica_si_disponible(ambiente)
 		Clima.NIEVE:
 			_configurar_niebla(ambiente, 0.030, Color(0.68, 0.72, 0.78), 0.030, 0.78)
 			ambiente.background_energy_multiplier = 1.08
-			_aplicar_cielo(ambiente, Color(0.085, 0.105, 0.14), Color(0.27, 0.29, 0.32), Color(0.22, 0.19, 0.20), 0.10)
+			_aplicar_cielo(
+				ambiente,
+				Color(0.085, 0.105, 0.14),
+				Color(0.27, 0.29, 0.32),
+				Color(0.22, 0.19, 0.20),
+				0.10
+			)
 		_:
 			pass
 
