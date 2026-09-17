@@ -108,6 +108,20 @@ func _probar() -> void:
 	if tele != null:
 		var base: float = tele.global_position.y - EspaciosCatalogo.CASA["bultos"][2]["tam"].y / 2.0
 		_comprobar(absf(base - mueble_tv.end.y) < 0.05, "la tele descansa sobre su mueble")
+	var armario := lote.get_node_or_null("ArmarioHogar") as Node3D
+	_comprobar(armario != null, "el armario CC0 sigue montado")
+	var examinar_armario: Interactuable3D = null
+	if armario != null:
+		examinar_armario = armario.get_node_or_null("ExaminarArmarioHogar") as Interactuable3D
+	_comprobar(examinar_armario != null, "el armario CC0 es examinable")
+	if examinar_armario != null:
+		_comprobar(examinar_armario.texto_accion() == "Examinar armario", "el prompt nombra el original")
+		_comprobar(examinar_armario.interactuar(root), "examinar el armario acepta interacción")
+		_comprobar(
+			ObjetosOniricos.del_dia(dia.jornada).has(Hogar.ARMARIO_OBJETO_ONIRICO),
+			"examinar el armario conserva su original para el sueño",
+		)
+
 	var sofa := mundo.get_node_or_null("SofaCasa") as Node3D
 	_comprobar(sofa != null and sofa.has_node("VisualHogar"), "el sofá usa el modelo CC0")
 	if sofa != null:
