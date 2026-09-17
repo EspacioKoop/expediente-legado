@@ -121,6 +121,41 @@ static func _gato(comprobar: Callable) -> void:
 	actor.free()
 	interactivo.free()
 
+	# Segundo corte de #787: con hambre y a distancia física, la acción cambia
+	# a dar de comer. El propio Gato no cobra ni reinicia Jornada: solo emite el
+	# verbo DAR para que la capa propietaria reutilice _dar_de_comer().
+	var hambriento_interactivo := Gato.new()
+	hambriento_interactivo.empezar(Vector3.ZERO, sitios)
+	hambriento_interactivo.avanzar(2, Vector3.ZERO, 0.0)
+	comprobar.call(
+		"con hambre ofrece dar de comer",
+		hambriento_interactivo.texto_accion(),
+		"Dar de comer al gato"
+	)
+	comprobar.call("dar de comer acepta la acción", hambriento_interactivo.interactuar(null), true)
+	comprobar.call(
+		"dar de comer usa el verbo común", hambriento_interactivo.verbo, Interactuable3D.Verbo.DAR
+	)
+	hambriento_interactivo.actualizar_hambre(0)
+	comprobar.call(
+		"tras comer vuelve a ofrecer contacto",
+		hambriento_interactivo.texto_accion(),
+		"Acariciar gato"
+	)
+	hambriento_interactivo.free()
+
+	var capa_gato := FileAccess.get_file_as_string("res://guion/dia_gato_app.gd")
+	comprobar.call(
+		"la capa de jornada escucha la activación del gato",
+		capa_gato.contains("_gato.activado.connect(_al_activar_gato.bind(_gato))"),
+		true
+	)
+	comprobar.call(
+		"la alimentación directa reutiliza el flujo del cuenco",
+		capa_gato.contains("_dar_de_comer()"),
+		true
+	)
+
 
 ## Darle de comer. Que la cuenta se reinicie y que sin dinero no se pueda ya se
 ## prueba con la jornada; lo de aquí es el PRECIO: que se cobre exacto, que no

@@ -15,6 +15,95 @@ static func catalogo(comprobar: Callable) -> void:
 		for opcion in pendiente["opciones"]:
 			comprobar.call("cada opción tiene texto", opcion["texto"].is_empty(), false)
 
+	_contrato_ideologico(comprobar)
+
+
+static func _contrato_ideologico(comprobar: Callable) -> void:
+	var estado := Partida.nueva()
+	estado["historias_cartas"] = {"la-luna": "centrista"}
+
+	comprobar.call(
+		"una decisión nueva entra en la huella",
+		Prometeo.registrar_eleccion_ideologica(
+			estado,
+			"expediente:caso9:resolucion",
+			"expediente",
+			"neoliberal",
+			"caso9",
+			1,
+			["riesgo", "laboral", "riesgo"]
+		),
+		true
+	)
+	comprobar.call(
+		"repetir el mismo evento no duplica la decisión",
+		Prometeo.registrar_eleccion_ideologica(
+			estado, "expediente:caso9:resolucion", "expediente", "comunismo"
+		),
+		false
+	)
+	comprobar.call(
+		"el prefijo de Tarot está reservado a historias_cartas",
+		Prometeo.registrar_eleccion_ideologica(estado, "tarot:la-luna", "expediente", "comunismo"),
+		false
+	)
+
+	comprobar.call(
+		"leer un medio registra exposición",
+		Prometeo.registrar_exposicion_ideologica(
+			estado, "prensa:diario-a:1", "prensa", "comunismo", 1, ["laboral"]
+		),
+		true
+	)
+	comprobar.call(
+		"un NPC puede registrar su lectura sin votar por el jugador",
+		Prometeo.registrar_lectura_social(
+			estado, "cunado", "expediente:caso9:resolucion", "desacuerdo", ["oficina"]
+		),
+		true
+	)
+
+	var elecciones := Prometeo.elecciones_ideologicas(estado)
+	comprobar.call("Tarot y decisiones nuevas comparten una vista", elecciones.size(), 2)
+	comprobar.call(
+		"las etiquetas de una decisión se normalizan",
+		elecciones[1]["etiquetas"],
+		["laboral", "riesgo"]
+	)
+	comprobar.call(
+		"exposición y lectura social no cuentan como elecciones",
+		Prometeo.conteo_elecciones_ideologicas(estado),
+		{"comunismo": 0, "socialdemocrata": 0, "centrista": 1, "neoliberal": 1}
+	)
+	comprobar.call(
+		"un empate transversal conserva la pluralidad",
+		Prometeo.ejes_dominantes(estado),
+		["centrista", "neoliberal"]
+	)
+
+	Prometeo.reiniciar_exposicion_ideologica_diaria(estado)
+	comprobar.call(
+		"cambiar de día limpia solo la exposición",
+		[
+			estado[Prometeo.CLAVE_EXPOSICION_IDEOLOGICA],
+			Prometeo.elecciones_ideologicas(estado).size(),
+			estado[Prometeo.CLAVE_LECTURAS_SOCIALES].size()
+		],
+		[[], 2, 1]
+	)
+
+	Prometeo.reiniciar_vuelta(estado, Partida.VIDA_MAXIMA)
+	comprobar.call(
+		"una nueva vuelta limpia las tres capas ideológicas activas",
+		[
+			estado[Prometeo.CLAVE_ELECCIONES_IDEOLOGICAS],
+			estado[Prometeo.CLAVE_EXPOSICION_IDEOLOGICA],
+			estado[Prometeo.CLAVE_LECTURAS_SOCIALES],
+			estado["historias_cartas"]
+		],
+		[[], [], [], {}]
+	)
+
 
 static func recorrer(arbol: SceneTree, comprobar: Callable) -> void:
 	var visor = load("res://escenas/visor.tscn").instantiate()

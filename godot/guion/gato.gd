@@ -85,6 +85,7 @@ var _reloj := 0.0
 var _desvio := Vector3.ZERO
 var _desvio_resto := 0.0
 var _puede_coger_resto := 0.0
+var _hambre_actual := 0
 
 
 func _init() -> void:
@@ -281,26 +282,34 @@ func empezar(donde: Vector3, por_donde: Array) -> void:
 	position = donde
 
 
-## Texto que ve el detector común. Lejos se le llama; cerca se le acaricia. Una
-## caricia abre una ventana breve para cogerlo, de modo que una sola acción
-## semántica siga sirviendo con teclado y mando.
+## Texto que ve el detector común. Lejos se le llama; cerca se le acaricia y,
+## si tiene hambre, la acción prioritaria es darle de comer. El gato solo conoce
+## cuántos días lleva sin comer para elegir el verbo: dinero y persistencia
+## siguen perteneciendo a Jornada.
 func texto_accion() -> String:
-	if _puede_coger_resto > 0.0 and _distancia_al_jugador() <= DISTANCIA_ACARICIAR:
+	var distancia := _distancia_al_jugador()
+	if _hambre_actual > 0 and distancia <= DISTANCIA_ACARICIAR:
+		verbo = Verbo.DAR
+		return "Dar de comer al gato"
+	if _puede_coger_resto > 0.0 and distancia <= DISTANCIA_ACARICIAR:
 		verbo = Verbo.COGER
-	elif _distancia_al_jugador() > DISTANCIA_ACARICIAR:
+	elif distancia > DISTANCIA_ACARICIAR:
 		verbo = Verbo.LLAMAR
 	else:
 		verbo = Verbo.ACARICIAR
 	return super.texto_accion()
 
 
-## Interacción directa del jugador. No toca hambre, dinero ni afinidad: esas
-## reglas siguen en Jornada. Aquí solo cambia conducta observable.
+## Interacción directa del jugador. Dar de comer solo emite el contrato común
+## `activado`: la capa que posee Jornada decide si hay dinero, cobra y guarda.
+## Llamar/acariciar/coger siguen siendo únicamente conducta observable.
 func interactuar(actor: Node) -> bool:
 	if not habilitado or estado.is_empty():
 		return false
 	var distancia := _distancia_a_actor(actor)
-	if _puede_coger_resto > 0.0 and distancia <= DISTANCIA_ACARICIAR:
+	if _hambre_actual > 0 and distancia <= DISTANCIA_ACARICIAR:
+		verbo = Verbo.DAR
+	elif _puede_coger_resto > 0.0 and distancia <= DISTANCIA_ACARICIAR:
 		verbo = Verbo.COGER
 		_coger()
 	elif distancia > DISTANCIA_ACARICIAR:
@@ -363,8 +372,15 @@ func _distancia_al_jugador() -> float:
 	return _distancia_a_actor(camara)
 
 
+## Refleja la fuente de verdad de Jornada sin poseerla. Sirve para refrescar el
+## prompt inmediatamente después de alimentar, antes del siguiente frame.
+func actualizar_hambre(hambre: int) -> void:
+	_hambre_actual = maxi(0, hambre)
+
+
 ## Un paso. [param hambre] son los días que lleva sin comer.
 func avanzar(hambre: int, jugador: Vector3, delta: float) -> void:
+	actualizar_hambre(hambre)
 	if estado.is_empty():
 		return
 	_reloj += delta
