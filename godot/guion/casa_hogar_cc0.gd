@@ -12,6 +12,8 @@ extends RefCounted
 
 const CARPETA := "household_goods/"
 const SOFA := "2_seat_sofa_01"
+const ARMARIO := "wardrobe_01"
+const ARMARIO_OBJETO_ONIRICO := "armario_hogar"
 const TAM_SOFA := Vector3(1.9, 0.86, 0.87)
 const ALTO_TABIQUE := 2.8
 const GROSOR_TABIQUE := 0.18
@@ -74,7 +76,7 @@ const PIEZAS := [
 	# izquierdo, sin invadir la cama ni la puerta nueva.
 	[
 		"ArmarioHogar",
-		"wardrobe_01",
+		ARMARIO,
 		Vector3(-3.55, 0.0, -2.45),
 		Vector3(0.99, 1.93, 0.63),
 		90.0,
@@ -320,6 +322,8 @@ static func _crear_pieza(lote: Node3D, ficha: Array) -> Node3D:
 	if not AssetCc0.sustituir(cuerpo, CARPETA + ficha[1], tam):
 		cuerpo.queue_free()
 		return null
+	if String(ficha[1]) == ARMARIO:
+		_montar_examinable_onirico(cuerpo, tam, "armario")
 	if ficha[5]:
 		# Caja simple a la medida real del modelo encajado, sin colisión por triángulo.
 		var modelo := cuerpo.get_node("AssetCc0") as Node3D
@@ -331,3 +335,41 @@ static func _crear_pieza(lote: Node3D, ficha: Array) -> Node3D:
 		colision.position = modelo.position + caja.get_center() * modelo.scale
 		cuerpo.add_child(colision)
 	return cuerpo
+
+
+## #227/#87: una pieza del pack deja de ser solo dressing. Examinar el armario
+## conserva un ID canónico del original visto durante esta jornada; el sueño
+## decide después si lo deforma. No hay inventario, pickup ni estado paralelo.
+static func _montar_examinable_onirico(cuerpo: Node3D, tam: Vector3, nombre_objeto: String) -> void:
+	if cuerpo.has_node("ExaminarArmarioHogar"):
+		return
+	var examinable := Interactuable3D.new()
+	examinable.name = "ExaminarArmarioHogar"
+	examinable.verbo = Interactuable3D.Verbo.EXAMINAR
+	examinable.nombre_objeto = nombre_objeto
+	examinable.set_meta("objeto_onirico_id", ARMARIO_OBJETO_ONIRICO)
+	cuerpo.add_child(examinable)
+
+	var colision := CollisionShape3D.new()
+	var forma := BoxShape3D.new()
+	forma.size = tam + Vector3(0.12, 0.12, 0.12)
+	colision.shape = forma
+	examinable.add_child(colision)
+	examinable.activado.connect(_registrar_armario_onirico.bind(examinable))
+
+
+static func _registrar_armario_onirico(_actor: Node, examinable: Interactuable3D) -> void:
+	var nodo: Node = examinable
+	while nodo != null:
+		for propiedad in nodo.get_property_list():
+			if String(propiedad.get("name", "")) != "jornada":
+				continue
+			var valor: Variant = nodo.get("jornada")
+			if typeof(valor) != TYPE_DICTIONARY:
+				return
+			var jornada: Dictionary = valor
+			if ObjetosOniricos.registrar(jornada, ARMARIO_OBJETO_ONIRICO):
+				if nodo.has_method("_guardar_o_avisar"):
+					nodo.call("_guardar_o_avisar", "")
+			return
+		nodo = nodo.get_parent()
