@@ -34,15 +34,13 @@ const CATALOGO := [
 				"id": "dossier",
 				"tipo": "articulo",
 				"titulo": "El plano imposible",
-				"texto":
-				"El artículo compara relatos contradictorios y dibuja un recorrido que se repliega sobre sí mismo.",
+				"texto": "Compara relatos contradictorios y dibuja un recorrido que se repliega sobre sí mismo.",
 			},
 			{
 				"id": "cartas",
 				"tipo": "correo_lectores",
 				"titulo": "Cartas desde el sótano",
-				"texto":
-				"Tres lectores describen ruidos detrás de tabiques y una puerta que ninguno recuerda haber usado.",
+				"texto": "Tres lectores oyen ruidos tras los tabiques y recuerdan una puerta imposible.",
 			},
 		],
 	},
@@ -59,22 +57,19 @@ const CATALOGO := [
 				"id": "portada",
 				"tipo": "portada",
 				"titulo": "Obras, lluvia y una tarde de tráfico lento",
-				"texto":
-				"La portada mezcla información municipal, sucesos menores y una fotografía genérica del centro bajo la lluvia.",
+				"texto": "La portada reúne obras, sucesos menores y una foto del centro bajo la lluvia.",
 			},
 			{
 				"id": "local",
 				"tipo": "noticia",
 				"titulo": "El mercado ampliará su horario los viernes",
-				"texto":
-				"Una pieza breve recoge opiniones enfrentadas de comerciantes y vecinos sobre el nuevo horario.",
+				"texto": "Vecinos y comerciantes discrepan sobre el nuevo horario del mercado.",
 			},
 			{
 				"id": "agenda",
 				"tipo": "agenda",
 				"titulo": "Cineclub, mercadillo y charla de barrio",
-				"texto":
-				"La agenda enumera actividades pequeñas que sitúan la fecha sin exigir al jugador conocer marcas reales.",
+				"texto": "La agenda reúne cineclub, mercadillo y una pequeña charla de barrio.",
 			},
 		],
 	},
@@ -91,15 +86,13 @@ const CATALOGO := [
 				"id": "portada",
 				"tipo": "portada",
 				"titulo": "Ordena tu disco antes de que sea tarde",
-				"texto":
-				"Una cubierta sobria promete trucos de mantenimiento, periféricos y redes domésticas de finales de los noventa.",
+				"texto": "Una cubierta sobria promete mantenimiento, periféricos y redes domésticas.",
 			},
 			{
 				"id": "tutorial",
 				"tipo": "guia",
 				"titulo": "Copias de seguridad sin misterio",
-				"texto":
-				"La guía recomienda separar documentos de programas y comprobar una copia antes de confiar en ella.",
+				"texto": "La guía separa documentos de programas y recomienda verificar cada copia.",
 			},
 		],
 	},
@@ -116,8 +109,7 @@ const CATALOGO := [
 				"id": "cronica",
 				"tipo": "cronica",
 				"titulo": "Noventa minutos bajo el barro",
-				"texto":
-				"La crónica se fija más en el campo pesado y en la grada que en nombres propios o resultados reales.",
+				"texto": "La crónica habla del barro, la grada y un partido sin nombres reales.",
 			},
 		],
 	},
@@ -134,15 +126,13 @@ const CATALOGO := [
 				"id": "ensayo",
 				"tipo": "ensayo",
 				"titulo": "Cuando una calle tapa otra calle",
-				"texto":
-				"Un texto divulgativo explica cómo reformas sucesivas dejan capas de uso, abandono y memoria bajo una ciudad moderna.",
+				"texto": "Un ensayo explica cómo las reformas dejan capas de memoria bajo la ciudad.",
 			},
 			{
 				"id": "lamina",
 				"tipo": "lamina",
 				"titulo": "Sección de un patio excavado",
-				"texto":
-				"Una lámina ficticia separa relleno reciente, cimentación y un muro anterior mediante tramas simples.",
+				"texto": "Una lámina separa relleno reciente, cimentación y un muro anterior.",
 			},
 		],
 	},
@@ -159,8 +149,7 @@ const CATALOGO := [
 				"id": "indice",
 				"tipo": "indice",
 				"titulo": "Antes de tocar nada",
-				"texto":
-				"El índice insiste en cortar corriente o agua, identificar el problema y no improvisar reparaciones peligrosas.",
+				"texto": "El índice aconseja cortar agua o corriente y no improvisar reparaciones.",
 			},
 		],
 	},
