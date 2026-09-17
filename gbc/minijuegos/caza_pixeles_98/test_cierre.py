@@ -46,6 +46,13 @@ class PixelExodusCierreTest(unittest.TestCase):
         self.assertIn("wFrames", pausa)
         self.assertNotIn("wTiempo", pausa)
 
+        tick = bloque("TickCinematica:", "; El onboarding sucede")
+        self.assertLess(
+            tick.index("call BloquearGameplayInstrucciones"),
+            tick.index("call ResolverObstaculosGameplay"),
+            "la posición segura debe resolverse después de rechazar la cruceta del onboarding",
+        )
+
     def test_fases_dos_y_tres_tienen_barreras_bg_con_colision_real(self):
         self.assertEqual(valor_def("OBSTACULO_ANCHO"), 16)
         self.assertEqual(valor_def("OBSTACULO_ALTO"), 8)
