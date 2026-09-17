@@ -6,6 +6,7 @@ RAIZ = Path(__file__).resolve().parents[1]
 CASTILLO = RAIZ / "godot" / "guion" / "sueno_castillo.gd"
 FORMAS = RAIZ / "godot" / "guion" / "sueno_formas.gd"
 SUENO = RAIZ / "godot" / "guion" / "sueno.gd"
+DIA = RAIZ / "godot" / "guion" / "dia_app.gd"
 
 
 class SuenoCastilloRuntimeTest(unittest.TestCase):
@@ -14,6 +15,7 @@ class SuenoCastilloRuntimeTest(unittest.TestCase):
         cls.texto = CASTILLO.read_text(encoding="utf-8")
         cls.formas = FORMAS.read_text(encoding="utf-8")
         cls.sueno = SUENO.read_text(encoding="utf-8")
+        cls.dia = DIA.read_text(encoding="utf-8")
 
     def test_expone_adaptador_sin_duplicar_seleccion_nocturna(self):
         self.assertIn("static func adaptar_espacio(", self.texto)
@@ -22,6 +24,12 @@ class SuenoCastilloRuntimeTest(unittest.TestCase):
         self.assertIn('resultado["altura_contorno"]', self.texto)
         self.assertNotIn("Sueno.noche(", self.texto)
         self.assertNotIn("SuenoFormas", self.texto)
+
+    def test_variante_castillo_es_determinista_y_no_cambia_la_fisica(self):
+        self.assertIn('const VARIANTES := ["patio", "scriptorium", "torre_capilla"]', self.texto)
+        self.assertIn("posmod(semilla + maxi(0, vuelta - 1), VARIANTES.size())", self.texto)
+        self.assertIn('resultado["variante_castillo"]', self.texto)
+        self.assertNotIn('resultado["familia_poligonal"] =', self.texto)
 
     def test_retorno_usa_solo_anclas_de_la_familia(self):
         self.assertIn('"retorno_patio"', self.texto)
@@ -41,12 +49,19 @@ class SuenoCastilloRuntimeTest(unittest.TestCase):
         for termino in ["Rect2i", "BoxMesh", "Jornada.", "Partida", "dinero", "veredicto"]:
             self.assertNotIn(termino, self.texto)
 
-    def test_mantiene_fuentes_y_seleccion_cc0_del_vertical_base(self):
-        self.assertIn("valsekamerplant.itch.io/psx-style-going-medieval", self.texto)
-        self.assertIn("quaternius.com/packs/fantasypropsmegakit.html", self.texto)
-        self.assertIn('LICENCIA := "CC0-1.0"', self.texto)
-        self.assertEqual(self.texto.count('"grupo": "arquitectura"'), 3)
-        self.assertEqual(self.texto.count('"grupo": "prop"'), 3)
+    def test_runtime_no_publica_deuda_de_assets_cc0(self):
+        self.assertNotIn("SELECCION_MINIMA", self.texto)
+        self.assertNotIn('"seleccion_onirica"', self.texto)
+        self.assertNotIn("valsekamerplant.itch.io", self.texto)
+        self.assertNotIn("quaternius.com/packs/fantasypropsmegakit.html", self.texto)
+
+    def test_runtime_deriva_variante_de_la_noche_sin_estado_persistente_extra(self):
+        self.assertIn("var semilla_noche := Sueno.semilla(", self.dia)
+        self.assertIn('forma_actual.get("identidad_onirica", "")', self.dia)
+        self.assertIn("== SuenoCastillo.ID", self.dia)
+        self.assertIn('estado_castillo["vuelta_castillo"] = cual + 1', self.dia)
+        self.assertIn('estado_castillo["semilla_castillo"] = semilla_noche', self.dia)
+        self.assertNotIn('if id == "patio"', self.dia)
 
     def test_patio_declara_castillo_sobre_familia_anular(self):
         self.assertIn('"familia_poligonal": SuenoFamilias.ANULAR', self.formas)

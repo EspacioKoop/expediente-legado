@@ -1,0 +1,62 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="PackedScene" path="res://escenas/suenos/props_284/muro_torre_castillo.tscn" id="1_muro"]
+[ext_resource type="PackedScene" path="res://escenas/suenos/props_284/escalera_anular_castillo.tscn" id="2_escalera"]
+[ext_resource type="PackedScene" path="res://escenas/suenos/props_284/estandarte_anular.tscn" id="3_estandarte"]
+
+[sub_resource type="StandardMaterial3D" id="MatGaleria"]
+albedo_color = Color(0.09, 0.082, 0.075, 1)
+roughness = 1.0
+
+[sub_resource type="PlaneMesh" id="SueloGaleria"]
+size = Vector2(16, 8)
+
+[sub_resource type="StandardMaterial3D" id="MatAtril"]
+albedo_color = Color(0.19, 0.13, 0.08, 1)
+roughness = 0.92
+
+[sub_resource type="PrismMesh" id="Atril"]
+size = Vector3(0.9, 1.15, 0.65)
+
+[node name="GaleriaScriptoriumCastillo" type="Node3D"]
+
+[node name="SueloScriptorium" type="MeshInstance3D" parent="."]
+mesh = SubResource("SueloGaleria")
+material_override = SubResource("MatGaleria")
+
+[node name="ArcadaNorteA" parent="." instance=ExtResource("1_muro")]
+position = Vector3(-4.9, 0, -3.3)
+
+[node name="ArcadaNorteB" parent="." instance=ExtResource("1_muro")]
+position = Vector3(4.9, 0, -3.3)
+
+[node name="ArcadaSurA" parent="." instance=ExtResource("1_muro")]
+position = Vector3(-4.9, 0, 3.3)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="ArcadaSurB" parent="." instance=ExtResource("1_muro")]
+position = Vector3(4.9, 0, 3.3)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="EscaleraArchivo" parent="." instance=ExtResource("2_escalera")]
+position = Vector3(5.2, 0.02, 0)
+rotation_degrees = Vector3(0, 88, 0)
+
+[node name="EstandarteArchivoA" parent="." instance=ExtResource("3_estandarte")]
+position = Vector3(-2.4, 4.2, -2.7)
+
+[node name="EstandarteArchivoB" parent="." instance=ExtResource("3_estandarte")]
+position = Vector3(2.4, 4.2, -2.7)
+
+[node name="AtrilCodice" type="MeshInstance3D" parent="."]
+position = Vector3(-1.9, 0.58, 0.0)
+rotation_degrees = Vector3(0, 90, 0)
+mesh = SubResource("Atril")
+material_override = SubResource("MatAtril")
+
+[node name="LuzCodice" type="OmniLight3D" parent="."]
+position = Vector3(-1.9, 1.55, 0)
+light_color = Color(0.72, 0.58, 0.32, 1)
+light_energy = 0.62
+omni_range = 4.5
+shadow_enabled = true

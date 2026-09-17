@@ -7,6 +7,10 @@ class_name SuenoCastillo3D
 extends RefCounted
 
 const ESCENA_PATIO := preload("res://escenas/suenos/props_284/patio_castillo_onirico.tscn")
+const ESCENA_SCRIPTORIUM := preload(
+	"res://escenas/suenos/props_284/galeria_scriptorium_castillo.tscn"
+)
+const ESCENA_TORRE_CAPILLA := preload("res://escenas/suenos/props_284/torre_capilla_castillo.tscn")
 
 
 static func montar(mundo: Node3D, espacio: Dictionary) -> Node3D:
@@ -17,12 +21,13 @@ static func montar(mundo: Node3D, espacio: Dictionary) -> Node3D:
 	presentacion.name = "PresentacionCastillo284"
 	mundo.add_child(presentacion)
 
-	# El patio ocupa el vacío central del anillo: se ve como arquitectura
-	# imposible al otro lado del recorrido, pero no suplanta la malla/colisión
-	# derivada del contorno ANULAR.
-	var patio := ESCENA_PATIO.instantiate() as Node3D
-	patio.name = "PatioMedieval"
-	presentacion.add_child(patio)
+	# La variante solo cambia la lectura del hueco central. Ninguna composición
+	# añade física: el contorno ANULAR sigue siendo la única navegación.
+	var variante := String(espacio.get("variante_castillo", "patio"))
+	var escena := _escena_para(variante)
+	var arquitectura := escena.instantiate() as Node3D
+	arquitectura.name = "ArquitecturaCastillo_" + variante
+	presentacion.add_child(arquitectura)
 
 	# La fuente no tiene campana visible. La posición alta y central hace que el
 	# sonido pertenezca al patio completo en lugar de delatar un objeto emisor.
@@ -37,3 +42,13 @@ static func montar(mundo: Node3D, espacio: Dictionary) -> Node3D:
 	campanas.play()
 
 	return presentacion
+
+
+static func _escena_para(variante: String) -> PackedScene:
+	match variante:
+		"scriptorium":
+			return ESCENA_SCRIPTORIUM
+		"torre_capilla":
+			return ESCENA_TORRE_CAPILLA
+		_:
+			return ESCENA_PATIO
