@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=3]
+[gd_scene load_steps=34 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -32,6 +32,7 @@
 [ext_resource type="Script" path="res://guion/dia_buscar_ejecutar_app.gd" id="30"]
 [ext_resource type="Script" path="res://guion/dia_contaminacion_gato_app.gd" id="31"]
 [ext_resource type="Script" path="res://guion/dia_climax_os98_app.gd" id="32"]
+[ext_resource type="Script" path="res://guion/dia_publicaciones_encontrables_app.gd" id="33"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -128,3 +129,6 @@ script = ExtResource("31")
 
 [node name="ClimaxOs98Controller" type="Node" parent="."]
 script = ExtResource("32")
+
+[node name="PublicacionesEncontrablesController" type="Node" parent="."]
+script = ExtResource("33")
