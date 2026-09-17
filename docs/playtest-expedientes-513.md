@@ -55,6 +55,25 @@ Después de leer los cuatro folios:
 - Comprobar que descubrir una frase gatillo sigue guardando la pista y que el texto ampliado no rompe el enlace interactivo.
 - Comprobar que las conclusiones que requieren relacionar dos registros siguen dependiendo del sistema de relación; el texto ampliado no debe desbloquearlas por sí solo.
 
+## Registrar evidencia reproducible
+
+Durante el recorrido puede usarse el registrador específico del gate:
+
+```bash
+python3 scripts/registrar_playtest_513.py --salida docs/playtests/playtest-513.md
+```
+
+El registrador fija en el informe:
+
+- build SHA, plataforma, fecha y viewport `1024×680`;
+- estado individual de cabecera, lectura completa, recorte y desplazamiento para los cuatro folios;
+- conservación de las dos frases gatillo;
+- carácter no concluyente del peritaje y del intervalo de cinco minutos;
+- relectura sin coste adicional y relaciones documentales no automáticas;
+- rutas o URLs de capturas y notas por folio cuando haga falta documentar una incidencia.
+
+El resumen `listo para valorar cierre de #513` solo queda en **SÍ** cuando todos esos checks están marcados como cumplidos. El script no interpreta la narrativa ni sustituye el playtest humano: convierte su resultado en evidencia trazable y revisable.
+
 ## Criterio de salida
 
 El corte puede considerarse validado cuando los cuatro documentos se leen completos en `1024×680`, las dos frases gatillo existentes siguen funcionando y el contenido añadido no produce una conclusión automática ni altera el coste de lectura.
