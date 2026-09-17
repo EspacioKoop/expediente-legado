@@ -170,9 +170,7 @@ func _agregar_jugadas(ronda: Dictionary) -> void:
 		veredicto == "gana_jugador"
 	)
 	_crear_ficha_jugada(
-		String(ronda.get("tipo_rival", "")),
-		Vector3(0.48, 0.735, 0.48),
-		veredicto == "gana_rival"
+		String(ronda.get("tipo_rival", "")), Vector3(0.48, 0.735, 0.48), veredicto == "gana_rival"
 	)
 
 
