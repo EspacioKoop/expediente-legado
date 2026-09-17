@@ -11,6 +11,10 @@ var _fallos := 0
 
 
 func _initialize() -> void:
+	call_deferred("_probar")
+
+
+func _probar() -> void:
 	_probar_catalogo_encontrable()
 	_probar_recogida_en_oficina()
 	_probar_manual_en_casa()
