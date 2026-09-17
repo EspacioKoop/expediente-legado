@@ -11,6 +11,9 @@ const ESCENA_SCRIPTORIUM := preload(
 	"res://escenas/suenos/props_284/galeria_scriptorium_castillo.tscn"
 )
 const ESCENA_TORRE_CAPILLA := preload("res://escenas/suenos/props_284/torre_capilla_castillo.tscn")
+const ESCENA_CLAUSTRO := preload(
+	"res://escenas/suenos/props_284/claustro_reflejado_castillo.tscn"
+)
 
 
 static func montar(mundo: Node3D, espacio: Dictionary) -> Node3D:
@@ -28,6 +31,8 @@ static func montar(mundo: Node3D, espacio: Dictionary) -> Node3D:
 	var arquitectura := escena.instantiate() as Node3D
 	arquitectura.name = "ArquitecturaCastillo_" + variante
 	presentacion.add_child(arquitectura)
+	var mutacion := String(espacio.get("mutacion_castillo", "estable"))
+	_aplicar_mutacion(arquitectura, mutacion)
 
 	# La fuente no tiene campana visible. La posición alta y central hace que el
 	# sonido pertenezca al patio completo en lugar de delatar un objeto emisor.
@@ -50,5 +55,22 @@ static func _escena_para(variante: String) -> PackedScene:
 			return ESCENA_SCRIPTORIUM
 		"torre_capilla":
 			return ESCENA_TORRE_CAPILLA
+		"claustro_reflejado":
+			return ESCENA_CLAUSTRO
 		_:
 			return ESCENA_PATIO
+
+
+static func _aplicar_mutacion(arquitectura: Node3D, mutacion: String) -> void:
+	match mutacion:
+		"desfase":
+			arquitectura.position += Vector3(0.65, 0.18, -0.45)
+			arquitectura.rotation_degrees.y += 7.0
+		"contraccion":
+			arquitectura.scale = Vector3(0.92, 1.12, 0.92)
+			arquitectura.position.y += 0.12
+		"giro":
+			arquitectura.rotation_degrees.y += 18.0
+			arquitectura.position.y += 0.35
+		_:
+			pass
