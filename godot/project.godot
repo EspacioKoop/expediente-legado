@@ -16,6 +16,7 @@ MezclaAudio="*res://guion/mezcla_audio.gd"
 MenuGlobal="*res://guion/menu_global.gd"
 MenuSalidaInicio="*res://guion/menu_salida_inicio.gd"
 VestuarioHumano3D="*res://guion/vestuario_humano_3d.gd"
+CorreccionVisualNPC275="*res://guion/correccion_visual_npc_275.gd"
 ConsolaDepuracion="*res://depuracion/consola_depuracion.gd"
 
 [rendering]
