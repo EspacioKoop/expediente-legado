@@ -73,6 +73,22 @@ func _probar() -> void:
 	_comprobar(inicio._continuar.disabled, "sin guardado no permite continuar")
 	_comprobar(inicio._cargar.disabled, "sin guardado no permite cargar")
 	_comprobar(not FileAccess.file_exists(_ruta), "abrir menú no crea partida")
+	_comprobar(inicio._extras != null, "#830: el nivel principal ofrece una entrada Extras")
+	_comprobar(
+		not inicio._extras_contenedor.visible,
+		"Extras empieza recogido para mantener limpia la jerarquía principal"
+	)
+	inicio._extras.pressed.emit()
+	_comprobar(
+		inicio._extras_contenedor.visible,
+		"Extras despliega los accesos secundarios sin cambiar de escena"
+	)
+	_comprobar(
+		inicio._personaje.visible and inicio._portatil.visible and inicio._ventanilla.visible,
+		"Personaje, portátil y ventanilla siguen accesibles dentro de Extras"
+	)
+	inicio._extras.pressed.emit()
+	_comprobar(not inicio._extras_contenedor.visible, "Extras puede volver a recogerse")
 	inicio._ventanilla.pressed.emit()
 	_comprobar(inicio.ventanillas == 1, "ventanilla es accesible desde inicio")
 	inicio._ajustes.pressed.emit()
