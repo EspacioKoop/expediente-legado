@@ -118,7 +118,11 @@ static func avanzar(
 		gato["espera"] = ESPERA_MINIMA
 		gato["mimos_pausa"] = PAUSA_MIMOS
 		return gato
-	elif hambre == 0 and gato["mimos_pausa"] <= 0.0:
+	elif (
+		hambre == 0
+		and gato["mimos_pausa"] <= 0.0
+		and not ESTADO_POR_RUTINA.values().has(String(gato["estado"]))
+	):
 		var distancia_jugador := Vector3(pos.x - jugador.x, 0, pos.z - jugador.z).length()
 		if gato["estado"] == "viene" or distancia_jugador < CERCA * 2.0:
 			# Mientras viene, el destino se actualiza: sigue a una persona, no al
@@ -161,7 +165,8 @@ static func avanzar(
 	var sitio: Variant = sitios[randi() % sitios.size()]
 	gato["destino"] = posicion_sitio(sitio, pos)
 	gato["rutina_destino"] = rutina_sitio(sitio)
-	if Vector3(gato["destino"]).distance_to(pos) > 0.35:
+	var destino_elegido: Vector3 = gato["destino"]
+	if destino_elegido.distance_to(pos) > 0.35:
 		gato["estado"] = "anda"
 	else:
 		_aplicar_rutina(gato)
