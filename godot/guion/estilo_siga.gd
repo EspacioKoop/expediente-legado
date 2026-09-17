@@ -21,6 +21,8 @@ const GRIS_TEXTO := Color("808080")
 
 const GROSOR := 2
 const RUTA_FUENTE_DOCUMENTO := "res://assets/fonts/MFBOldstyle-Regular.otf"
+const RUTA_FUENTE_INTERFAZ := "res://assets/fonts/AtkinsonHyperlegible-Regular.ttf"
+const RUTA_FUENTE_MONO := "res://assets/fonts/IBMPlexMono-Regular.ttf"
 
 
 ## Dibuja el bisel sobre un rectángulo. [param saliente] a false lo hunde.
@@ -137,27 +139,33 @@ static func fuente_documento() -> Font:
 	return load(RUTA_FUENTE_DOCUMENTO) as Font
 
 
-## Monoespaciada para terminales, volcados y rótulos técnicos. Sigue teniendo
-## degradación de sistema hasta que #298 entregue la familia mono empaquetada,
-## pero ya no se fuerza sin antialiasing: el fallo de legibilidad del playtest
-## no debe propagarse a estos consumidores.
-static func fuente_mono() -> SystemFont:
-	var tipo := SystemFont.new()
-	tipo.font_names = PackedStringArray(
-		["Courier New", "DejaVu Sans Mono", "Liberation Mono", "Monospace"]
-	)
-	tipo.allow_system_fallback = true
-	return tipo
+## Monoespaciada para terminales, volcados y rótulos técnicos: IBM Plex Mono,
+## empaquetada con licencia OFL-1.1 (ver `procedencia.json`). Reemplaza el
+## fallback de sistema: #298 sigue cubriendo la identidad propia de terminales,
+## pero la interfaz general ya no depende de qué monoespaciada tenga instalada
+## cada máquina. Carga diferida por el mismo motivo que `fuente_documento()`.
+static func fuente_mono() -> Font:
+	return load(RUTA_FUENTE_MONO) as Font
 
 
-## El Theme define relieve, color y tamaño, pero NO una fuente general. Al no
-## fijar `default_font`, los controles heredan la tipografía predeterminada que
-## Godot empaqueta con el motor: consistente y suavizada en todas las máquinas.
-## Los roles especializados se registran aparte para sus consumidores.
+## Interfaz general: Atkinson Hyperlegible, diseñada por el Braille Institute
+## para legibilidad a tamaño pequeño y con licencia OFL-1.1 empaquetada en el
+## juego. Sustituye la tipografía de respaldo del motor: esa ya era consistente
+## entre plataformas, pero no estaba pensada para leerse bien a 14px ni tenía
+## identidad propia. Carga diferida por el mismo motivo que `fuente_documento()`.
+static func fuente_interfaz() -> Font:
+	return load(RUTA_FUENTE_INTERFAZ) as Font
+
+
+## El Theme define relieve, color, tamaño y ahora también la fuente general:
+## una familia empaquetada y con licencia libre en vez del respaldo genérico
+## del motor. Los roles especializados (documento, mono) se registran aparte
+## para sus consumidores.
 static func tema() -> Theme:
 	var documento := fuente_documento()
 	var mono := fuente_mono()
 	var tema := Theme.new()
+	tema.default_font = fuente_interfaz()
 	tema.default_font_size = 14
 	tema.set_font("document_font", "RichTextLabel", documento)
 	tema.set_font("mono_font", "RichTextLabel", mono)
