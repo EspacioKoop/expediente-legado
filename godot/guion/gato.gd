@@ -10,9 +10,10 @@
 ## Lo que lo convierte en un gato tampoco es la malla: es que se mueva como
 ## uno, y eso lo decide `GatoConducta`. Aquí está el bicho, su sonda de
 ## obstáculos y las animaciones observables; hambre y afinidad siguen fuera de
-## esta clase.
+## esta clase. La raíz es un `Interactuable3D`: se puede enfocar sin convertir
+## al gato en un cuerpo sólido que bloquee el paso.
 class_name Gato
-extends Node3D
+extends Interactuable3D
 
 const COLOR := Color(0.30, 0.27, 0.25)
 const COLOR_CLARO := Color(0.62, 0.58, 0.53)
@@ -29,6 +30,12 @@ const ALTO := 0.26
 ## es suficiente para que una cama o una mesa no conviertan el paseo en un
 ## teletransporte a través de la caja ni en quedarse empotrado para siempre.
 const DURACION_DESVIO := 1.1
+
+## A esta distancia la interacción deja de ser una llamada y pasa a ser un
+## gesto físico. Tras acariciarlo, durante un instante se puede coger.
+const DISTANCIA_ACARICIAR := 1.15
+const VENTANA_COGER := 2.4
+const DURACION_COGIDO := 0.8
 
 ## Todo lo que tiene dentro el gato cabe en un solo lado: las piezas se
 ## describen en el sistema del cuerpo, con el morro hacia -Z y el suelo en 0.
@@ -77,13 +84,28 @@ var _orejas: Array[Node3D] = []
 var _reloj := 0.0
 var _desvio := Vector3.ZERO
 var _desvio_resto := 0.0
+var _puede_coger_resto := 0.0
 
 
 func _init() -> void:
-	# Una sonda consulta las mismas capas físicas que el mobiliario, pero el
-	# gato sigue siendo Node3D: no bloquea al jugador ni convierte su ciclo de
-	# vida en el de un cuerpo cinemático. La esfera no depende de hacia dónde
-	# mira y cabe dentro del volumen visible del torso.
+	# El volumen de interacción pertenece a un Area3D: el raycast común puede
+	# enfocarlo, pero el jugador lo atraviesa como antes. No se usa como cuerpo
+	# físico ni como sonda de movimiento.
+	verbo = Verbo.ACARICIAR
+	nombre_objeto = "gato"
+	sonido = "coger"
+	collision_layer = 1
+	collision_mask = 0
+	var zona_interaccion := CollisionShape3D.new()
+	zona_interaccion.position = Vector3(0, 0.20, 0)
+	var forma_interaccion := CapsuleShape3D.new()
+	forma_interaccion.radius = 0.14
+	forma_interaccion.height = 0.45
+	zona_interaccion.shape = forma_interaccion
+	add_child(zona_interaccion)
+
+	# Una sonda consulta las mismas capas físicas que el mobiliario. La esfera
+	# no depende de hacia dónde mira y cabe dentro del volumen visible del torso.
 	_sonda = ShapeCast3D.new()
 	_sonda.position = Vector3(0, 0.18, 0)
 	_sonda.collision_mask = 1
@@ -259,11 +281,89 @@ func empezar(donde: Vector3, por_donde: Array) -> void:
 	position = donde
 
 
+## Texto que ve el detector común. Lejos se le llama; cerca se le acaricia. Una
+## caricia abre una ventana breve para cogerlo, de modo que una sola acción
+## semántica siga sirviendo con teclado y mando.
+func texto_accion() -> String:
+	if _puede_coger_resto > 0.0 and _distancia_al_jugador() <= DISTANCIA_ACARICIAR:
+		verbo = Verbo.COGER
+	elif _distancia_al_jugador() > DISTANCIA_ACARICIAR:
+		verbo = Verbo.LLAMAR
+	else:
+		verbo = Verbo.ACARICIAR
+	return super.texto_accion()
+
+
+## Interacción directa del jugador. No toca hambre, dinero ni afinidad: esas
+## reglas siguen en Jornada. Aquí solo cambia conducta observable.
+func interactuar(actor: Node) -> bool:
+	if not habilitado or estado.is_empty():
+		return false
+	var distancia := _distancia_a_actor(actor)
+	if _puede_coger_resto > 0.0 and distancia <= DISTANCIA_ACARICIAR:
+		verbo = Verbo.COGER
+		_coger()
+	elif distancia > DISTANCIA_ACARICIAR:
+		verbo = Verbo.LLAMAR
+		_llamar(actor)
+	else:
+		verbo = Verbo.ACARICIAR
+		_acariciar()
+	return super.interactuar(actor)
+
+
+func _llamar(actor: Node) -> void:
+	if actor is not Node3D:
+		return
+	var destino := (actor as Node3D).global_position
+	estado["destino"] = Vector3(destino.x, position.y, destino.z)
+	estado["estado"] = "viene"
+	estado["mimos_resto"] = 0.0
+	estado["mimos_pausa"] = 0.0
+
+
+func _acariciar() -> void:
+	estado["estado"] = "mimos"
+	estado["destino"] = position
+	estado["mimos_resto"] = GatoConducta.DURACION_MIMOS
+	estado["mimos_pausa"] = 0.0
+	_puede_coger_resto = VENTANA_COGER
+
+
+func _coger() -> void:
+	estado["estado"] = "mimos"
+	estado["destino"] = position
+	estado["mimos_resto"] = DURACION_COGIDO
+	_puede_coger_resto = 0.0
+	if not is_inside_tree():
+		return
+	var elevacion := create_tween()
+	elevacion.tween_property(_cuerpo, "position:y", 0.18, DURACION_COGIDO * 0.45)
+	elevacion.tween_property(_cuerpo, "position:y", 0.0, DURACION_COGIDO * 0.55)
+
+
+func _distancia_a_actor(actor: Node) -> float:
+	if actor is not Node3D:
+		return 0.0
+	var destino := (actor as Node3D).global_position
+	return Vector2(destino.x - global_position.x, destino.z - global_position.z).length()
+
+
+func _distancia_al_jugador() -> float:
+	if not is_inside_tree():
+		return 0.0
+	var camara := get_viewport().get_camera_3d()
+	if camara == null:
+		return 0.0
+	return _distancia_a_actor(camara)
+
+
 ## Un paso. [param hambre] son los días que lleva sin comer.
 func avanzar(hambre: int, jugador: Vector3, delta: float) -> void:
 	if estado.is_empty():
 		return
 	_reloj += delta
+	_puede_coger_resto = maxf(0.0, _puede_coger_resto - delta)
 
 	# Conducta propone un paso y la sonda decide si ese paso cabe realmente en
 	# la casa. Al final se devuelve la posición visible a la conducta, para que
