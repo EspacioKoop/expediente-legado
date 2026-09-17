@@ -111,7 +111,9 @@ func _probar() -> void:
 		inicio._diorama.get("_exterior").get("_reduccion_movimiento"),
 		"reducir movimiento también congela la ventana exterior del diorama"
 	)
-	_comprobar(vapor != null and not vapor.visible, "reducir movimiento elimina el vapor no esencial")
+	_comprobar(
+		vapor != null and not vapor.visible, "reducir movimiento elimina el vapor no esencial"
+	)
 	_comprobar(
 		papel != null and is_zero_approx(papel.rotation.y),
 		"reducir movimiento devuelve el papel a una pose estable"

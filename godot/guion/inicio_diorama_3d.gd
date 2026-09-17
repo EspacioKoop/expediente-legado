@@ -139,14 +139,13 @@ func _actualizar_detalles_ambientales() -> void:
 	# protagonista, y desaparecen/se congelan con reducción de movimiento.
 	if _papel_bandeja != null:
 		_papel_bandeja.rotation.y = sin(_tiempo * 0.38) * AMPLITUD_PAPEL
-		_papel_bandeja.position = _papel_pos_base + Vector3(
-			0.0, absf(sin(_tiempo * 0.31)) * 0.002, 0.0
+		_papel_bandeja.position = (
+			_papel_pos_base + Vector3(0.0, absf(sin(_tiempo * 0.31)) * 0.002, 0.0)
 		)
 	if _vapor_taza != null:
-		_vapor_taza.position = _vapor_pos_base + Vector3(
-			sin(_tiempo * 0.29) * 0.008,
-			sin(_tiempo * 0.47) * AMPLITUD_VAPOR,
-			0.0
+		_vapor_taza.position = (
+			_vapor_pos_base
+			+ Vector3(sin(_tiempo * 0.29) * 0.008, sin(_tiempo * 0.47) * AMPLITUD_VAPOR, 0.0)
 		)
 		_vapor_taza.scale = Vector3(1.0, 0.92 + 0.08 * sin(_tiempo * 0.41), 1.0)
 
