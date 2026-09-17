@@ -1,6 +1,7 @@
 ; Cinematicas minimas de Pixel Exodus (#882).
-; Se dibujan en BG: no consumen OAM y avanzan de forma no bloqueante junto al
-; gameplay, sin introducir HALT ni alterar el temporizador de la partida.
+; Se dibujan en BG: no consumen OAM. Las transiciones avanzan junto al gameplay;
+; la intro funciona tambien como instrucciones y congela brevemente movimiento,
+; objetivo y cuenta atras antes de entregar el control.
 
 DEF TILE_CIN_CHROMIA_VIVO EQU 54
 DEF TILE_CIN_EXTRACTOR    EQU 55
@@ -11,6 +12,8 @@ DEF TILE_CIN_RETORNO      EQU 59
 DEF TILE_CIN_FAUNA        EQU 60
 DEF TILE_CIN_ALERTA       EQU 61
 DEF TILE_CIN_RESIDUO      EQU 62
+DEF TILE_CIN_CRUCETA      EQU 63
+DEF TILE_CIN_FLECHA       EQU 64
 DEF TILE_CIN_BASE         EQU TILE_CIN_CHROMIA_VIVO
 
 DEF CIN_TIPO_INTRO EQU 1
@@ -18,9 +21,20 @@ DEF CIN_TIPO_FASE2 EQU 2
 DEF CIN_TIPO_FASE3 EQU 3
 DEF CIN_TIPO_BOSS  EQU 4
 
-DEF CIN_INTRO_FRAMES EQU 72
+DEF CIN_INTRO_FRAMES EQU 150
 DEF CIN_BEAT_FRAMES  EQU 42
 DEF CIN_BOSS_FRAMES  EQU 48
+
+; Barreras de residuo dibujadas como BG. Las coordenadas estan expresadas en el
+; mismo espacio OAM que jugador/objetivos para reutilizar AABB sin sprites extra.
+DEF OBSTACULO_ANCHO EQU 16
+DEF OBSTACULO_ALTO  EQU 8
+DEF OBSTACULO_1_X   EQU 40
+DEF OBSTACULO_1_Y   EQU 56
+DEF OBSTACULO_2_X   EQU 96
+DEF OBSTACULO_2_Y   EQU 72
+DEF OBSTACULO_3_X   EQU 64
+DEF OBSTACULO_3_Y   EQU 96
 
 SECTION "CinematicasPixelExodus", ROM0
 
@@ -28,6 +42,10 @@ InicializarCinematicas:
     xor a
     ld [wCinematicaFrames], a
     ld [wCinematicaTipo], a
+    ld a, [wJugadorX]
+    ld [wJugadorSeguroX], a
+    ld a, [wJugadorY]
+    ld [wJugadorSeguroY], a
     call CargarTilesCinematicas
     ret
 
@@ -64,13 +82,41 @@ IniciarCinematicaBoss:
     ret
 
 TickCinematica:
+    ; Obstaculos y colision pertenecen al mismo pase BG: cero OAM adicional.
+    call ResolverObstaculosGameplay
+    call DibujarObstaculosGameplay
+
     ld a, [wCinematicaFrames]
     or a
     ret z
+    ld a, [wCinematicaTipo]
+    cp CIN_TIPO_INTRO
+    jr nz, .avanzar
+    call BloquearGameplayInstrucciones
+.avanzar:
+    ld a, [wCinematicaFrames]
     dec a
     ld [wCinematicaFrames], a
     ret nz
     call LimpiarCinematicaGameplay
+    ld a, [wCinematicaTipo]
+    cp CIN_TIPO_INTRO
+    ret nz
+    call LimpiarInstruccionesIntro
+    ret
+
+; El onboarding sucede tras Start/A pero antes del primer segundo efectivo.
+; MoverJugador ya se ejecuto en este frame, por eso se restaura la posicion
+; segura. MoverObjetivo y TickTiempo ocurren despues: reiniciar sus contadores
+; evita que el mundo avance mientras el jugador lee los iconos.
+BloquearGameplayInstrucciones:
+    ld a, [wJugadorSeguroX]
+    ld [wJugadorX], a
+    ld a, [wJugadorSeguroY]
+    ld [wJugadorY], a
+    xor a
+    ld [wObjetivoTick], a
+    ld [wFrames], a
     ret
 
 ; Cinco viñetas sin texto largo: la lectura nace de la secuencia de iconos y del
@@ -110,6 +156,7 @@ DibujarCinematicaGameplay:
     call EscribirTileCine
     ld c, TILE_CIN_FUGA
     call EscribirTileCine
+    call DibujarInstruccionesIntro
     ret
 
 .fase2:
@@ -138,6 +185,58 @@ DibujarCinematicaGameplay:
     call EscribirTileCine
     ret
 
+; Instrucciones iconicas integradas en la intro:
+;   cruceta -> nave -> croma
+;   semilla -> restauracion; foco -> restauracion a costa del combo x1.
+DibujarInstruccionesIntro:
+    ld hl, BG_MAP + (5 * 32) + 5
+    ld c, TILE_CIN_CRUCETA
+    call EscribirTileCine
+    ld c, TILE_CIN_FLECHA
+    call EscribirTileCine
+    ld c, TILE_JUGADOR
+    call EscribirTileCine
+    ld c, TILE_CIN_FLECHA
+    call EscribirTileCine
+    ld c, TILE_OBJETIVO
+    call EscribirTileCine
+
+    ld hl, BG_MAP + (7 * 32) + 5
+    ld c, TILE_SEMILLA
+    call EscribirTileCine
+    ld c, TILE_CIN_FLECHA
+    call EscribirTileCine
+    ld c, TILE_R
+    call EscribirTileCine
+    ld c, TILE_FOCO
+    call EscribirTileCine
+    ld c, TILE_CIN_FLECHA
+    call EscribirTileCine
+    ld c, TILE_R
+    call EscribirTileCine
+    ld c, TILE_X
+    call EscribirTileCine
+    ld c, TILE_DIGITO0 + 1
+    call EscribirTileCine
+    ret
+
+LimpiarInstruccionesIntro:
+    call EscenarioTileBaseFase
+    ld c, a
+    ld hl, BG_MAP + (5 * 32) + 5
+    ld b, 5
+.fila_movimiento:
+    call EscribirTileCine
+    dec b
+    jr nz, .fila_movimiento
+    ld hl, BG_MAP + (7 * 32) + 5
+    ld b, 8
+.fila_reglas:
+    call EscribirTileCine
+    dec b
+    jr nz, .fila_reglas
+    ret
+
 EscribirTileCine:
     call EsperarVRAM
     ld a, c
@@ -153,6 +252,137 @@ LimpiarCinematicaGameplay:
     call EscribirTileCine
     dec b
     jr nz, .loop
+    ret
+
+; ------------------------- Obstaculos jugables -------------------------
+; Dos barreras aparecen en la zona muerta; restauracion suma una tercera. Al
+; entrar el Behemoth se retiran para conservar legibilidad y la arena del boss.
+DibujarObstaculosGameplay:
+    ld a, [wBossActivo]
+    or a
+    jp nz, LimpiarObstaculosGameplay
+    ld a, [wFase]
+    cp 2
+    ret c
+
+    ld hl, BG_MAP + (5 * 32) + 4
+    call DibujarBarreraResiduo
+    ld hl, BG_MAP + (7 * 32) + 11
+    call DibujarBarreraResiduo
+
+    ld a, [wFase]
+    cp 3
+    ret c
+    ld hl, BG_MAP + (10 * 32) + 7
+    call DibujarBarreraResiduo
+    ret
+
+DibujarBarreraResiduo:
+    ld c, TILE_CIN_RESIDUO
+    call EscribirTileCine
+    ld c, TILE_CIN_EXTRACTOR
+    call EscribirTileCine
+    ret
+
+LimpiarObstaculosGameplay:
+    call EscenarioTileBaseFase
+    ld c, a
+    ld hl, BG_MAP + (5 * 32) + 4
+    call EscribirTileCine
+    call EscribirTileCine
+    ld hl, BG_MAP + (7 * 32) + 11
+    call EscribirTileCine
+    call EscribirTileCine
+    ld hl, BG_MAP + (10 * 32) + 7
+    call EscribirTileCine
+    call EscribirTileCine
+    ret
+
+ResolverObstaculosGameplay:
+    ld a, [wBossActivo]
+    or a
+    jr nz, .guardar_seguro
+    ld a, [wFase]
+    cp 2
+    jr c, .guardar_seguro
+
+    call JugadorChocaObstaculosActivos
+    jr nc, .guardar_seguro
+
+    ; Rechaza el movimiento del frame restaurando la ultima posicion valida.
+    ld a, [wJugadorSeguroX]
+    ld [wJugadorX], a
+    ld a, [wJugadorSeguroY]
+    ld [wJugadorY], a
+    call JugadorChocaObstaculosActivos
+    ret nc
+
+    ; Si una transicion hizo nacer una barrera justo bajo el jugador, usa un
+    ; punto de rescate conocido para evitar dejarlo atrapado.
+    ld a, 80
+    ld [wJugadorX], a
+    ld [wJugadorSeguroX], a
+    ld a, 88
+    ld [wJugadorY], a
+    ld [wJugadorSeguroY], a
+    ret
+
+.guardar_seguro:
+    ld a, [wJugadorX]
+    ld [wJugadorSeguroX], a
+    ld a, [wJugadorY]
+    ld [wJugadorSeguroY], a
+    ret
+
+JugadorChocaObstaculosActivos:
+    ld b, OBSTACULO_1_X
+    ld c, OBSTACULO_1_Y
+    call ColisionObstaculoBC
+    ret c
+    ld b, OBSTACULO_2_X
+    ld c, OBSTACULO_2_Y
+    call ColisionObstaculoBC
+    ret c
+    ld a, [wFase]
+    cp 3
+    jr c, .sin_colision
+    ld b, OBSTACULO_3_X
+    ld c, OBSTACULO_3_Y
+    call ColisionObstaculoBC
+    ret c
+.sin_colision:
+    and a
+    ret
+
+; B/C = X/Y superior izquierda en coordenadas OAM. Jugador y barrera usan AABB.
+ColisionObstaculoBC:
+    ld a, [wJugadorX]
+    add 8
+    cp b
+    jr c, .sin
+    jr z, .sin
+    ld a, b
+    add OBSTACULO_ANCHO
+    ld d, a
+    ld a, [wJugadorX]
+    cp d
+    jr nc, .sin
+
+    ld a, [wJugadorY]
+    add 8
+    cp c
+    jr c, .sin
+    jr z, .sin
+    ld a, c
+    add OBSTACULO_ALTO
+    ld d, a
+    ld a, [wJugadorY]
+    cp d
+    jr nc, .sin
+    scf
+    ret
+.sin:
+    and a
     ret
 
 ; Epilogo estatico en la pantalla de records. La victoria muestra el croma
@@ -206,8 +436,13 @@ TilesCinematicas:
     db $00,$00,$24,$24,$5A,$7E,$18,$3C,$24,$3C,$42,$42,$00,$00,$00,$00
     db $18,$18,$3C,$3C,$18,$18,$18,$18,$18,$18,$00,$00,$18,$18,$00,$00
     db $24,$24,$5A,$7E,$3C,$66,$7E,$5A,$18,$3C,$66,$7E,$3C,$5A,$24,$24
+    ; 63 cruceta; 64 flecha de flujo/instruccion.
+    db $18,$18,$18,$18,$7E,$66,$7E,$66,$7E,$66,$18,$18,$18,$18,$00,$00
+    db $00,$00,$10,$10,$18,$18,$FC,$84,$18,$18,$10,$10,$00,$00,$00,$00
 TilesCinematicasFin:
 
 SECTION "CinematicasPixelExodusVars", WRAM0
 wCinematicaFrames: ds 1
 wCinematicaTipo:   ds 1
+wJugadorSeguroX:   ds 1
+wJugadorSeguroY:   ds 1
