@@ -5,8 +5,8 @@
 ## termina por rendición (determinación a cero), no por muerte.
 ##
 ## La arena refleja un Arcano recogido/no gastado y una semilla mitológica activa
-## de la jornada. La mayoría son presencia visual; tres parejas declaradas por
-## `JuicioSimbolico` forman rituales pequeños, legibles y sin consumir progreso.
+## de la jornada. Seis parejas declaradas por `JuicioSimbolico` forman rituales
+## pequeños, legibles y sin consumir progreso.
 ##
 ## Controles semánticos ya existentes:
 ## - movimiento: mover_izquierda/derecha/adelante/atras;
@@ -41,12 +41,14 @@ var _acabado := false
 var _recarga_jugador := 0.0
 var _recarga_rival := 0.0
 var _esquiva := 0.0
+var _enredo := 0.0
 var _telegrafo_rival := 0.0
 var _ataque_rival_pendiente := false
 var _arcano: Dictionary = {}
 var _mito_id := ""
 var _ritual: Dictionary = {}
 var _contraataque := 0
+var _retornos_rival := 0
 var _radio_arena := RADIO_ARENA
 var _velocidad_rival := VELOCIDAD_RIVAL
 var _recarga_fuerte := RECARGA_FUERTE
@@ -75,6 +77,17 @@ static func resultado_ataque_rival(distancia: float, esquiva_restante: float) ->
 	return "impacto"
 
 
+static func interrumpe_ataque(fuerte: bool, ataque_pendiente: bool, ritual: Dictionary) -> bool:
+	return fuerte and ataque_pendiente and bool(ritual.get("interrumpe_telegrafo_fuerte", false))
+
+
+static func determinacion_retorno(ritual: Dictionary, retornos_usados: int) -> int:
+	var maximo := int(ritual.get("retornos_rival", 0))
+	if retornos_usados >= maximo:
+		return 0
+	return maxi(0, int(ritual.get("determinacion_retorno", 0)))
+
+
 func configurar(acusado: Dictionary, bono_documental: int, reducir_movimiento: bool) -> void:
 	_acusado = acusado.duplicate(true)
 	_bono_documental = bono_documental
@@ -95,6 +108,7 @@ func _process(delta: float) -> void:
 	_recarga_jugador = maxf(0.0, _recarga_jugador - delta)
 	_recarga_rival = maxf(0.0, _recarga_rival - delta)
 	_esquiva = maxf(0.0, _esquiva - delta)
+	_enredo = maxf(0.0, _enredo - delta)
 	_mover_jugador(delta)
 	_mover_rival(delta)
 	_actualizar_camara()
@@ -137,7 +151,10 @@ func _mover_rival(delta: float) -> void:
 	var distancia := hacia.length()
 	if distancia > ALCANCE_RIVAL:
 		var direccion := hacia.normalized()
-		_rival.position += direccion * _velocidad_rival * delta
+		var velocidad := _velocidad_rival
+		if _enredo > 0.0:
+			velocidad *= float(_ritual.get("velocidad_enredado_mul", 1.0))
+		_rival.position += direccion * velocidad * delta
 		_rival.position = _limitar(_rival.position)
 		_rival.rotation.y = atan2(direccion.x, direccion.z)
 	elif _recarga_rival <= 0.0:
@@ -173,10 +190,7 @@ func _actualizar_telegrafo_rival(delta: float) -> void:
 func _resolver_ataque_rival() -> void:
 	_ataque_rival_pendiente = false
 	_recarga_rival = RECARGA_RIVAL
-	if _aviso_ataque != null:
-		_aviso_ataque.visible = false
-	if _etiqueta_ataque != null:
-		_etiqueta_ataque.visible = false
+	_ocultar_aviso_ataque()
 
 	var hacia := _jugador.position - _rival.position
 	hacia.y = 0.0
@@ -195,6 +209,21 @@ func _resolver_ataque_rival() -> void:
 				_terminar(false)
 
 
+func _cancelar_ataque_rival() -> void:
+	_ataque_rival_pendiente = false
+	_telegrafo_rival = 0.0
+	_recarga_rival = maxf(_recarga_rival, RECARGA_RIVAL * 0.65)
+	_ocultar_aviso_ataque()
+	Sonido.sonar(self, "pulsar")
+
+
+func _ocultar_aviso_ataque() -> void:
+	if _aviso_ataque != null:
+		_aviso_ataque.visible = false
+	if _etiqueta_ataque != null:
+		_etiqueta_ataque.visible = false
+
+
 func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> void:
 	if _recarga_jugador > 0.0:
 		return
@@ -209,15 +238,36 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 	var dano := dano_base
 	if fuerte:
 		dano += int(_ritual.get("dano_fuerte_bonus", 0))
+	var interrupcion := interrumpe_ataque(fuerte, _ataque_rival_pendiente, _ritual)
+	if interrupcion:
+		dano += int(_ritual.get("dano_interrupcion_bonus", 0))
+		_cancelar_ataque_rival()
 	if _contraataque > 0:
 		dano += _contraataque
 		_contraataque = 0
 
 	_determinacion_rival = maxi(0, _determinacion_rival - dano)
+	if not fuerte:
+		var segundos_enredo := float(_ritual.get("enredo_ligero_segundos", 0.0))
+		if segundos_enredo > 0.0:
+			_enredo = maxf(_enredo, segundos_enredo)
 	_reaccion(_figura_rival, 0.25 + float(dano) * 0.08)
 	_actualizar_hud()
-	if _determinacion_rival <= 0:
+	if _determinacion_rival <= 0 and not _intentar_retorno_rival():
 		_terminar(true)
+
+
+func _intentar_retorno_rival() -> bool:
+	var determinacion := determinacion_retorno(_ritual, _retornos_rival)
+	if determinacion <= 0:
+		return false
+	_retornos_rival += 1
+	_determinacion_rival = determinacion
+	_recarga_rival = RECARGA_RIVAL * 0.50
+	_reaccion(_figura_rival, -0.30)
+	Sonido.sonar(self, "marcar")
+	_actualizar_hud()
+	return true
 
 
 func _esquivar() -> void:
@@ -243,10 +293,7 @@ func _terminar(gano: bool) -> void:
 		return
 	_acabado = true
 	_ataque_rival_pendiente = false
-	if _aviso_ataque != null:
-		_aviso_ataque.visible = false
-	if _etiqueta_ataque != null:
-		_etiqueta_ataque.visible = false
+	_ocultar_aviso_ataque()
 	terminado.emit(gano)
 
 
