@@ -15,7 +15,8 @@ func _ejecutar() -> void:
 	var contenido := Contenido.new()
 	contenido.casos = [
 		{
-			"pistas": [
+			"pistas":
+			[
 				{"id": "p_conocida", "descripcion": "dato conocido"},
 				{"id": "p_ajena", "descripcion": "dato ajeno"},
 			]
