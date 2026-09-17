@@ -9,7 +9,7 @@ extends VBoxContainer
 signal abrir_aplicacion(id: String)
 signal abrir_ruta(ruta: String)
 signal abrir_url(url: String)
-signal abrir_ayuda()
+signal abrir_ayuda
 
 var _modo := "buscar"
 var _apps: Array[Dictionary] = []
@@ -51,14 +51,13 @@ func buscar(consulta: String) -> Array[Dictionary]:
 		for alias in app.get("aliases", []):
 			alias_texto += " " + String(alias)
 		if _coincide(normalizada, "%s %s %s" % [titulo, id, alias_texto]):
-			resultado.append(
-				{
-					"tipo": "aplicacion",
-					"titulo": titulo,
-					"detalle": "Aplicación instalada",
-					"destino": id,
-				}
-			)
+			var resultado_app := {
+				"tipo": "aplicacion",
+				"titulo": titulo,
+				"detalle": "Aplicación instalada",
+				"destino": id,
+			}
+			resultado.append(resultado_app)
 
 	var explorador := ExploradorSigaModelo.new()
 	explorador.configurar_contexto(_contexto)
@@ -84,36 +83,33 @@ func buscar(consulta: String) -> Array[Dictionary]:
 			if tipo != "carpeta":
 				destino = explorador.ruta_padre(ruta_entrada)
 				accion = "Abrir ubicación"
-			resultado.append(
-				{
-					"tipo": "ruta",
-					"titulo": nombre,
-					"detalle": "%s · %s" % [accion, ruta_entrada],
-					"destino": destino,
-				}
-			)
+			var resultado_ruta := {
+				"tipo": "ruta",
+				"titulo": nombre,
+				"detalle": "%s · %s" % [accion, ruta_entrada],
+				"destino": destino,
+			}
+			resultado.append(resultado_ruta)
 
 	var web := Web98Indice.new()
 	web.configurar_contexto(_contexto)
 	for recurso in web.buscar(consulta):
-		resultado.append(
-			{
-				"tipo": "url",
-				"titulo": String(recurso.get("titulo", recurso.get("url", "Web98"))),
-				"detalle": String(recurso.get("url", "")),
-				"destino": String(recurso.get("url", "")),
-			}
-		)
+		var resultado_web := {
+			"tipo": "url",
+			"titulo": String(recurso.get("titulo", recurso.get("url", "Web98"))),
+			"detalle": String(recurso.get("url", "")),
+			"destino": String(recurso.get("url", "")),
+		}
+		resultado.append(resultado_web)
 
 	if _coincide(normalizada, "ayuda sistema comandos buscar ejecutar"):
-		resultado.append(
-			{
-				"tipo": "ayuda",
-				"titulo": "Ayuda del sistema",
-				"detalle": "Uso del escritorio y comandos disponibles",
-				"destino": "",
-			}
-		)
+		var resultado_ayuda := {
+			"tipo": "ayuda",
+			"titulo": "Ayuda del sistema",
+			"detalle": "Uso del escritorio y comandos disponibles",
+			"destino": "",
+		}
+		resultado.append(resultado_ayuda)
 	return resultado
 
 
@@ -139,7 +135,9 @@ func resolver_comando(comando: String) -> Dictionary:
 
 	for app in _apps:
 		var id := String(app.get("id", ""))
-		var candidatos: Array[String] = [_normalizar(id), _normalizar(String(app.get("titulo", "")))]
+		var candidatos: Array[String] = [
+			_normalizar(id), _normalizar(String(app.get("titulo", "")))
+		]
 		for alias in app.get("aliases", []):
 			candidatos.append(_normalizar(String(alias)))
 		if candidatos.has(normalizado):
