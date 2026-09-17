@@ -1,0 +1,93 @@
+name: NPC visual gate 275
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/npc-visual-gate-275.yml'
+      - 'godot/assets/modelos/**'
+      - 'godot/guion/companeros.gd'
+      - 'godot/guion/modelos.gd'
+      - 'godot/guion/vestuario_humano_3d.gd'
+      - 'godot/guion/correccion_visual_npc_275.gd'
+      - 'godot/pruebas/capturas_npc_275.gd'
+      - '.godot-version'
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/npc-visual-gate-275.yml'
+      - 'godot/assets/modelos/**'
+      - 'godot/guion/companeros.gd'
+      - 'godot/guion/modelos.gd'
+      - 'godot/guion/vestuario_humano_3d.gd'
+      - 'godot/guion/correccion_visual_npc_275.gd'
+      - 'godot/pruebas/capturas_npc_275.gd'
+      - '.godot-version'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  capturas:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Instalar Godot declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Importar proyecto
+        run: godot4 --headless --editor --path godot --quit
+
+      - name: Preparar display virtual
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb xauth
+          fi
+
+      - name: Generar capturas comparativas NPC #275
+        shell: bash
+        run: |
+          set -euo pipefail
+          salida="$GITHUB_WORKSPACE/dist/capturas-npc-275"
+          rm -rf "$salida"
+          mkdir -p "$salida"
+          xvfb-run -a godot4 --path godot \
+            --script res://pruebas/capturas_npc_275.gd -- "$salida"
+          test -f "$salida/README.md"
+          cantidad="$(find "$salida" -maxdepth 1 -type f -name '*.png' | wc -l)"
+          echo "Capturas generadas: $cantidad"
+          test "$cantidad" -ge 30
+
+      - name: Adjuntar capturas visuales NPC #275
+        uses: actions/upload-artifact@v4
+        with:
+          name: SIGA-98-npc-visual-gate-275-${{ github.sha }}
+          path: dist/capturas-npc-275
+          if-no-files-found: error
+          retention-days: 14
