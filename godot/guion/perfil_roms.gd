@@ -74,15 +74,15 @@ static func _normalizar(valor) -> Array[String]:
 
 static func _leer(ruta: String) -> Dictionary:
 	if not FileAccess.file_exists(ruta):
-		return {"version": VERSION, CLAVE_COMPRAS: []}
+		return {"version": VERSION, "roms_compradas": []}
 	var fichero := FileAccess.open(ruta, FileAccess.READ)
 	if fichero == null:
-		return {"version": VERSION, CLAVE_COMPRAS: []}
+		return {"version": VERSION, "roms_compradas": []}
 	var crudo = JSON.parse_string(fichero.get_as_text())
 	fichero.close()
 	if typeof(crudo) != TYPE_DICTIONARY:
 		push_warning("Perfil de ROMs ilegible: %s" % ruta)
-		return {"version": VERSION, CLAVE_COMPRAS: []}
+		return {"version": VERSION, "roms_compradas": []}
 	return crudo
 
 
@@ -92,7 +92,7 @@ static func _guardar(adquiridas: Array[String], ruta: String) -> bool:
 	if fichero == null:
 		push_error("No se pudo escribir %s" % temporal)
 		return false
-	var datos := {"version": VERSION, CLAVE_COMPRAS: adquiridas}
+	var datos := {"version": VERSION, "roms_compradas": adquiridas}
 	fichero.store_string(JSON.stringify(datos, "\t"))
 	fichero.close()
 	var error := DirAccess.rename_absolute(
