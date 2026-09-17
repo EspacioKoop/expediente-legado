@@ -2,8 +2,9 @@
 ##
 ## Recibe únicamente anomalías ya legitimadas por SuenoUtileria. Extrae de ellas
 ## un motivo ancla estable y lo repite como una firma baja de suelo, girada según
-## el índice de escena. No conoce SuenoFormas/Planta, no crea colisión ni UI y no
-## escribe estado: la misma noche solo parece recordar una forma que ya conocía.
+## el índice de escena. No conoce la topología ni los datos de composición, no
+## crea colisión ni UI y no escribe estado: la misma noche solo parece recordar
+## una forma que ya conocía.
 class_name SuenoRecurrenciaSimbolica
 extends RefCounted
 
