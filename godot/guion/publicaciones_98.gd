@@ -284,11 +284,9 @@ static func _buscar_pieza(entrada: Dictionary, pieza_id: String) -> Dictionary:
 
 
 static func _lecturas(jornada: Dictionary) -> Dictionary:
-	var crudo = jornada.get(CLAVE_LECTURAS, {})
-	if typeof(crudo) != TYPE_DICTIONARY:
+	if not jornada.has(CLAVE_LECTURAS) or typeof(jornada.get(CLAVE_LECTURAS)) != TYPE_DICTIONARY:
 		jornada[CLAVE_LECTURAS] = {}
-		return jornada[CLAVE_LECTURAS]
-	return crudo
+	return jornada[CLAVE_LECTURAS]
 
 
 static func _estado_mutable(jornada: Dictionary, item_id: String) -> Dictionary:
