@@ -1,4 +1,4 @@
-## Vertical slice de fachadas vivas (#861): profundidad, variantes, LOD y luz.
+## Vertical slice de fachadas vivas (#861): profundidad, variantes, LOD, luz y batching.
 extends SceneTree
 
 const DIA := preload("res://escenas/dia.tscn")
@@ -37,17 +37,25 @@ func _probar() -> void:
 	_comprobar(
 		CalleFachadasVivas.montar(calle) == vivas, "el montaje de fachadas vivas es idempotente"
 	)
+	var interiores := vivas.get_node_or_null("Interiores") as Node3D
+	var lotes := vivas.get_node_or_null("Lotes") as Node3D
+	_comprobar(interiores != null, "existe el contenedor lógico de interiores")
+	_comprobar(lotes != null, "existe el contenedor de lotes MultiMesh")
+	if interiores == null or lotes == null:
+		_terminar(dia)
+		return
 	_comprobar(
-		vivas.get_child_count() == CalleFachadasVivas.MAX_VENTANAS,
+		interiores.get_child_count() == CalleFachadasVivas.MAX_VENTANAS,
 		"la vertical slice limita el número de ventanas"
 	)
+	_comprobar(lotes.get_child_count() <= 17, "las 82 piezas se agrupan en un máximo de 17 lotes")
 
 	var pisos := calle.get_node("PisosFachada")
 	var variantes := {}
 	var estados_luz := {}
 	var props := {"Escritorio": false, "Estanteria": false, "Sofa": false}
 	var indice := 0
-	for interior in vivas.get_children():
+	for interior in interiores.get_children():
 		var variante := String(interior.get_meta("variante"))
 		variantes[variante] = int(variantes.get(variante, 0)) + 1
 		var estado_luz := String(interior.get_meta("estado_luz"))
@@ -76,49 +84,55 @@ func _probar() -> void:
 				material.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA,
 				"el cristal deja ver el interior"
 			)
-
-		var fondo := interior.get_node_or_null("Fondo") as MeshInstance3D
-		_comprobar(fondo != null, "cada ventana tiene fondo interior")
-		if fondo != null:
-			_comprobar(
-				absf(ventana.position.x - fondo.position.x) >= 0.05,
-				"hay profundidad visible entre cristal y fondo"
-			)
-			_comprobar(
-				is_equal_approx(fondo.visibility_range_end, CalleFachadasVivas.LOD_LEJOS_FIN),
-				"el fondo sobrevive hasta el LOD lejano"
-			)
-		for marco in ["MarcoSuperior", "MarcoInferior", "MarcoIzquierdo", "MarcoDerecho"]:
-			var pieza_marco := interior.get_node_or_null(marco) as MeshInstance3D
-			_comprobar(pieza_marco != null, "marco con volumen: " + marco)
-			if pieza_marco != null:
-				_comprobar(
-					is_equal_approx(
-						pieza_marco.visibility_range_end, CalleFachadasVivas.LOD_MEDIA_FIN
-					),
-					"el marco usa LOD medio: " + marco
-				)
+		var fondo_x := float(interior.get_meta("fondo_x"))
+		_comprobar(
+			absf(ventana.position.x - fondo_x) >= 0.05,
+			"hay profundidad visible entre cristal y fondo"
+		)
+		_comprobar(
+			bool(interior.get_meta("marco_volumen")), "cada ventana conserva marco con volumen"
+		)
+		var nombres_props := interior.get_meta("props") as Array
 		for prop in props:
-			var pieza_prop := interior.get_node_or_null(prop) as MeshInstance3D
-			if pieza_prop != null:
+			if nombres_props.has(prop):
 				props[prop] = true
-				_comprobar(
-					is_equal_approx(
-						pieza_prop.visibility_range_end, CalleFachadasVivas.LOD_CERCA_FIN
-					),
-					"el mobiliario 3D se limita al LOD cercano: " + prop
-				)
 		if estado_luz == "persiana":
-			var persiana := interior.get_node_or_null("Persiana") as MeshInstance3D
-			_comprobar(persiana != null, "el estado persiana añade detalle a una ventana apagada")
-			if persiana != null:
-				_comprobar(
-					is_equal_approx(
-						persiana.visibility_range_end, CalleFachadasVivas.LOD_MEDIA_FIN
-					),
-					"la persiana se conserva hasta el LOD medio"
-				)
+			_comprobar(
+				bool(interior.get_meta("tiene_persiana")),
+				"el estado persiana añade detalle a una ventana apagada"
+			)
 		indice += 1
+
+	var instancias := 0
+	var lotes_cerca := 0
+	var lotes_media := 0
+	var lotes_lejos := 0
+	for hijo in lotes.get_children():
+		var lote := hijo as MultiMeshInstance3D
+		_comprobar(lote != null, "cada lote visual es MultiMeshInstance3D")
+		if lote == null or lote.multimesh == null:
+			continue
+		instancias += lote.multimesh.instance_count
+		if is_equal_approx(lote.visibility_range_end, CalleFachadasVivas.LOD_CERCA_FIN):
+			lotes_cerca += 1
+		elif is_equal_approx(lote.visibility_range_end, CalleFachadasVivas.LOD_MEDIA_FIN):
+			lotes_media += 1
+		elif is_equal_approx(lote.visibility_range_end, CalleFachadasVivas.LOD_LEJOS_FIN):
+			lotes_lejos += 1
+		else:
+			_comprobar(false, "cada lote conserva uno de los tres rangos LOD")
+
+	_comprobar(instancias == 82, "el batching conserva las 82 piezas de la slice")
+	_comprobar(
+		int(vivas.get_meta("instancias_batcheadas")) == 82, "el montaje registra 82 instancias"
+	)
+	_comprobar(lotes_cerca == 9, "los nueve tipos de props usan LOD cercano")
+	_comprobar(lotes_media == 3, "marcos y persiana usan tres lotes de LOD medio")
+	_comprobar(lotes_lejos == 5, "los cinco estados de fondo usan LOD lejano")
+	_comprobar(
+		interiores.find_children("*", "MeshInstance3D", true, false).is_empty(),
+		"los grupos por ventana ya no crean draw calls individuales"
+	)
 
 	_comprobar(variantes.size() == 3, "hay tres composiciones interiores")
 	for variante in CalleFachadasVivas.VARIANTES:
