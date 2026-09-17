@@ -174,9 +174,7 @@ func _reforzar_precipitacion(nodo: Node3D, nieve: bool) -> void:
 
 	particulas.amount = 760 if nieve else 1100
 	particulas.position = Vector3(0.0, 5.6, -1.5)
-	particulas.visibility_aabb = AABB(
-		Vector3(-10.0, -7.0, -17.0), Vector3(20.0, 16.0, 34.0)
-	)
+	particulas.visibility_aabb = AABB(Vector3(-10.0, -7.0, -17.0), Vector3(20.0, 16.0, 34.0))
 
 	var malla := particulas.draw_pass_1 as QuadMesh
 	if malla == null:
