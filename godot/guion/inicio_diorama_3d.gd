@@ -29,6 +29,8 @@ const ZONAS := {
 }
 const VELOCIDAD_DERIVA := 1.8
 const AMPLITUD_DRIFT_AMBIENTAL := 0.018
+const AMPLITUD_PAPEL := 0.012
+const AMPLITUD_VAPOR := 0.018
 
 var _viewport: SubViewport
 var _camara: Camera3D
@@ -36,6 +38,10 @@ var _entorno: Environment
 var _luz_fluorescente: OmniLight3D
 var _material_crt: ShaderMaterial
 var _exterior: VentanaExterior3D
+var _papel_bandeja: Node3D
+var _vapor_taza: MeshInstance3D
+var _papel_pos_base := Vector3.ZERO
+var _vapor_pos_base := Vector3.ZERO
 
 var _reduccion_movimiento := false
 var _tiempo := 0.0
@@ -62,6 +68,14 @@ func configurar_reduccion_movimiento(activa: bool) -> void:
 		_exterior.configurar_reduccion_movimiento(activa)
 	if _material_crt != null:
 		_material_crt.set_shader_parameter("activo", not activa)
+	if _vapor_taza != null:
+		_vapor_taza.visible = not activa
+		if activa:
+			_vapor_taza.position = _vapor_pos_base
+			_vapor_taza.scale = Vector3.ONE
+	if _papel_bandeja != null and activa:
+		_papel_bandeja.position = _papel_pos_base
+		_papel_bandeja.rotation.y = 0.0
 	if activa:
 		_offset_pos = ZONAS.get(_zona_actual, ZONAS.continuar).pos
 		_offset_mira = ZONAS.get(_zona_actual, ZONAS.continuar).mira
@@ -87,6 +101,7 @@ func _process(delta: float) -> void:
 		_oscurecer = lerpf(_oscurecer, datos.oscurecer, minf(1.0, VELOCIDAD_DERIVA * delta))
 		_actualizar_ambiente()
 		_actualizar_fluorescente()
+		_actualizar_detalles_ambientales()
 	_actualizar_camara()
 
 
@@ -116,6 +131,23 @@ func _actualizar_fluorescente() -> void:
 		_siguiente_fallo_fluorescente = _tiempo + randf_range(7.0, 16.0) + 0.12
 	elif _tiempo >= _siguiente_fallo_fluorescente - 0.12:
 		_luz_fluorescente.light_energy = _energia_base
+
+
+func _actualizar_detalles_ambientales() -> void:
+	# Movimiento deliberadamente mínimo: el papel apenas vibra y el vapor sube
+	# unos píxeles a la resolución interna. Son textura ambiental, no animación
+	# protagonista, y desaparecen/se congelan con reducción de movimiento.
+	if _papel_bandeja != null:
+		_papel_bandeja.rotation.y = sin(_tiempo * 0.38) * AMPLITUD_PAPEL
+		_papel_bandeja.position = (
+			_papel_pos_base + Vector3(0.0, absf(sin(_tiempo * 0.31)) * 0.002, 0.0)
+		)
+	if _vapor_taza != null:
+		_vapor_taza.position = (
+			_vapor_pos_base
+			+ Vector3(sin(_tiempo * 0.29) * 0.008, sin(_tiempo * 0.47) * AMPLITUD_VAPOR, 0.0)
+		)
+		_vapor_taza.scale = Vector3(1.0, 0.92 + 0.08 * sin(_tiempo * 0.41), 1.0)
 
 
 func _construir() -> void:
@@ -210,6 +242,34 @@ func _construir_puesto(raiz: Node3D) -> void:
 		Color(0.24, 0.20, 0.15)
 	)
 	OficinaUtileria.montar_puesto_aislado(raiz, base, 0)
+
+	var puesto := raiz.get_node_or_null("PuestoUtileria1")
+	if puesto is Node3D:
+		# La variante 0 ya trae bandeja/papeles; se suma la taza mediante el
+		# helper compartido para cumplir la composición de #830 sin duplicarla.
+		OficinaUtileria.agregar_taza(puesto, Vector3(-0.35, 0.86, 0.20))
+		var papel := puesto.find_child("PapelBandeja", true, false)
+		if papel is Node3D:
+			_papel_bandeja = papel
+			_papel_pos_base = _papel_bandeja.position
+		_construir_vapor_taza(puesto, Vector3(-0.35, 1.07, 0.20))
+
+
+func _construir_vapor_taza(raiz: Node3D, pos: Vector3) -> void:
+	_vapor_taza = MeshInstance3D.new()
+	_vapor_taza.name = "VaporTaza"
+	var quad := QuadMesh.new()
+	quad.size = Vector2(0.07, 0.16)
+	var material := StandardMaterial3D.new()
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.albedo_color = Color(0.72, 0.76, 0.74, 0.16)
+	material.roughness = 1.0
+	quad.material = material
+	_vapor_taza.mesh = quad
+	_vapor_taza.position = pos
+	_vapor_pos_base = pos
+	raiz.add_child(_vapor_taza)
 
 
 func _construir_monitor(raiz: Node3D) -> void:
