@@ -127,19 +127,14 @@ static func _configurar_campos(tema: Theme) -> void:
 	tema.set_color("font_readonly_color", "TextEdit", GRIS_TEXTO)
 
 
-## El tema de toda la interfaz.
+## La fuente de interfaz debe ser idéntica en todas las plataformas y legible
+## a tamaños pequeños. Usamos la fuente del tema por defecto del motor, que va
+## embebida con Godot, en vez de pedir una familia del sistema operativo.
 ##
-## Lo que delata la época no es tanto la forma de la letra como el SUAVIZADO:
-## una tipografía moderna con antialiasing y posicionamiento subpíxel se ve
-## limpia y contemporánea aunque el marco sea gris con biseles. Apagando las
-## dos cosas y forzando el hinting, los trazos caen en la rejilla de píxeles y
-## el texto se lee como el de un programa de 1998 — sin traer al repositorio ni
-## un fichero de fuente.
-## La de la interfaz. Las de sistema de la época primero; en cualquier máquina
-## donde no estén, la que haya. Que la elección degrade es lo que evita traer un
-## binario al repositorio.
-static func fuente() -> SystemFont:
-	return _sin_suavizar(["MS Sans Serif", "Tahoma", "Verdana", "DejaVu Sans", "Sans-Serif"])
+## Esto también recupera el suavizado normal del motor: la estética de 1998 la
+## aportan los biseles y colores, no unos glifos dentados difíciles de leer.
+static func fuente() -> Font:
+	return ThemeDB.get_default_theme().default_font
 
 
 ## La del cuerpo de un documento: monoespaciada, porque es un volcado de un
@@ -148,6 +143,10 @@ static func fuente() -> SystemFont:
 ## Sale de dentro de `tema()` al llegar su segundo consumidor: las frases que el
 ## sueño escribe en las paredes (#87) van en la letra del documento del que
 ## salen, que es media parte de reconocerlas.
+##
+## Sigue siendo un fallback de sistema de forma temporal hasta que #780 añada
+## la familia mono empaquetada por Git LFS; mantenerlo aquí acota el trabajo
+## pendiente sin volver a contaminar la fuente de interfaz.
 static func fuente_mono() -> SystemFont:
 	return _sin_suavizar(["Courier New", "DejaVu Sans Mono", "Liberation Mono", "Monospace"])
 
