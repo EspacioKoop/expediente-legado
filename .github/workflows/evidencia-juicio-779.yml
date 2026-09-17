@@ -11,7 +11,7 @@ on:
       - 'godot/pruebas/capturar_juicio_779.gd'
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: evidencia-juicio-779-${{ github.event.pull_request.number }}
@@ -24,41 +24,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
           lfs: true
-          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
-      - name: Migrar aviso al catálogo de traducción
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          from pathlib import Path
-
-          script = Path('godot/guion/juicio_combate_3d.gd')
-          source = script.read_text(encoding='utf-8')
-          old = '_etiqueta_ataque.text = "ATAQUE INMINENTE"'
-          new = '_etiqueta_ataque.text = tr("VENTANILLA_ATAQUE_INMINENTE")'
-          if old in source:
-              source = source.replace(old, new, 1)
-              script.write_text(source, encoding='utf-8')
-          elif new not in source:
-              raise SystemExit('No se encontró la asignación esperada del aviso')
-
-          catalogo = Path('godot/datos/textos.csv')
-          texto = catalogo.read_text(encoding='utf-8')
-          fila = 'VENTANILLA_ATAQUE_INMINENTE,ATAQUE INMINENTE\n'
-          if 'VENTANILLA_ATAQUE_INMINENTE,' not in texto:
-              ancla = 'VENTANILLA_ATENDIDA,RECLAMACIÓN ATENDIDA. Racha: %d.\n'
-              if ancla not in texto:
-                  raise SystemExit('No se encontró el ancla de Ventanilla en textos.csv')
-              texto = texto.replace(ancla, fila + ancla, 1)
-              catalogo.write_text(texto, encoding='utf-8')
-          PY
 
       - name: Instalar RGBDS fijado
         shell: bash
@@ -114,17 +84,3 @@ jobs:
           name: evidencia-juicio-779
           path: ${{ runner.temp }}/juicio-779/*.png
           retention-days: 90
-
-      - name: Incorporar migración de texto si cambia
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ -z "$(git status --porcelain -- godot/guion/juicio_combate_3d.gd godot/datos/textos.csv)" ]]; then
-            echo 'El aviso ya usa el catálogo.'
-            exit 0
-          fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add godot/guion/juicio_combate_3d.gd godot/datos/textos.csv
-          git commit -m 'fix: localiza el aviso de ataque de #779'
-          git push origin "HEAD:${GITHUB_HEAD_REF}"
