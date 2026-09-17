@@ -1,0 +1,132 @@
+name: Evidencia clima #797
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/evidencia-clima-797.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: evidencia-clima-797-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  capturas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          lfs: true
+          fetch-depth: 0
+
+      - name: Comprobar si la evidencia ya está generada
+        id: evidencia
+        shell: bash
+        run: |
+          if [[ -f docs/evidencias/clima-797/despejado.svg ]]; then
+            echo 'lista=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'lista=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.evidencia.outputs.lista != 'true'
+        with:
+          python-version: '3.11'
+
+      - name: Instalar RGBDS fijado
+        if: steps.evidencia.outputs.lista != 'true'
+        shell: bash
+        env:
+          RGBDS_VERSION: v1.0.3
+          RGBDS_SHA256: 280a52061a0c516999bee75ac357628d6d50784309e0486cef25f7460e6f330b
+        run: |
+          set -euo pipefail
+          url="https://github.com/gbdev/rgbds/releases/download/${RGBDS_VERSION}/rgbds-linux-x86_64.tar.xz"
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/rgbds.tar.xz" "$url"
+          echo "${RGBDS_SHA256}  $RUNNER_TEMP/rgbds.tar.xz" | sha256sum --check --strict
+          mkdir "$RUNNER_TEMP/rgbds"
+          tar -xJf "$RUNNER_TEMP/rgbds.tar.xz" -C "$RUNNER_TEMP/rgbds"
+          (cd "$RUNNER_TEMP/rgbds" && sudo ./install.sh)
+
+      - name: Compilar GDExtension requerida por el proyecto
+        if: steps.evidencia.outputs.lista != 'true'
+        run: bash scripts/preparar_emulador_gb.sh linux-debug
+
+      - name: Instalar el motor declarado por el proyecto
+        if: steps.evidencia.outputs.lista != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Generar las cinco capturas desde el mismo punto
+        if: steps.evidencia.outputs.lista != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/climas-797"
+          xvfb-run -a godot4 --path godot --script res://pruebas/capturar_climas_797.gd -- "$RUNNER_TEMP/climas-797"
+          test -f "$RUNNER_TEMP/climas-797/despejado.png"
+          test -f "$RUNNER_TEMP/climas-797/nublado.png"
+          test -f "$RUNNER_TEMP/climas-797/lluvia.png"
+          test -f "$RUNNER_TEMP/climas-797/niebla.png"
+          test -f "$RUNNER_TEMP/climas-797/nieve.png"
+
+      - name: Publicar PNG originales como artifact
+        if: steps.evidencia.outputs.lista != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-clima-797
+          path: ${{ runner.temp }}/climas-797/*.png
+          retention-days: 90
+
+      - name: Incorporar capturas renderizables al PR
+        if: steps.evidencia.outputs.lista != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs/evidencias/clima-797
+          python - <<'PY'
+          from pathlib import Path
+          import base64
+
+          origen = Path('${{ runner.temp }}/climas-797')
+          destino = Path('docs/evidencias/clima-797')
+          estados = ['despejado', 'nublado', 'lluvia', 'niebla', 'nieve']
+          for estado in estados:
+              png = (origen / f'{estado}.png').read_bytes()
+              data = base64.b64encode(png).decode('ascii')
+              svg = (
+                  '<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="750" viewBox="0 0 1280 750">'
+                  '<rect width="1280" height="750" fill="#111"/>'
+                  f'<text x="16" y="24" fill="#fff" font-family="sans-serif" font-size="20">#797 — {estado.capitalize()}</text>'
+                  f'<image x="0" y="30" width="1280" height="720" href="data:image/png;base64,{data}"/>'
+                  '</svg>'
+              )
+              (destino / f'{estado}.svg').write_text(svg, encoding='utf-8')
+
+          (destino / 'README.md').write_text('''# Evidencia visual #797 — clima exterior\n\nCapturas generadas por GitHub Actions desde el mismo punto del trayecto usando `godot/pruebas/capturar_climas_797.gd`.\n\n- [Despejado](despejado.svg)\n- [Nublado](nublado.svg)\n- [Lluvia](lluvia.svg)\n- [Niebla](niebla.svg)\n- [Nieve](nieve.svg)\n\nLa comparación visual verifica diferencias claras de iluminación/cielo, suelo húmedo o nevado y densidad de niebla. Los PNG originales quedan además publicados como artifact `evidencia-clima-797`.\n''', encoding='utf-8')
+          PY
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/evidencias/clima-797
+          git commit -m 'docs: incorpora capturas comparables del clima (#797)'
+          git push origin "HEAD:${GITHUB_HEAD_REF}"
