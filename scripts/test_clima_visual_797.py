@@ -4,6 +4,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTROLADOR = ROOT / "godot" / "guion" / "dia_clima_visual_app.gd"
+CAPTURADOR = ROOT / "godot" / "pruebas" / "capturar_climas_797.gd"
 ESCENA = ROOT / "godot" / "escenas" / "dia.tscn"
 PROYECTO = ROOT / "godot" / "project.godot"
 
@@ -12,6 +13,7 @@ class ClimaVisual797Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.controlador = CONTROLADOR.read_text(encoding="utf-8")
+        cls.capturador = CAPTURADOR.read_text(encoding="utf-8")
         cls.escena = ESCENA.read_text(encoding="utf-8")
         cls.proyecto = PROYECTO.read_text(encoding="utf-8")
 
@@ -30,39 +32,63 @@ class ClimaVisual797Test(unittest.TestCase):
             self.escena,
         )
 
-    def test_niebla_usa_environment_real(self) -> None:
-        self.assertIn("ambiente.fog_enabled = true", self.controlador)
-        self.assertIn("ambiente.fog_density = densidad", self.controlador)
-        self.assertIn("ambiente.fog_height_density = densidad_altura", self.controlador)
-        self.assertIn("ambiente.fog_sky_affect = afecta_cielo", self.controlador)
+    def test_niebla_usa_environment_real_y_perfiles_distintos(self) -> None:
+        self.assertIn('"fog_density": 0.028', self.controlador)
+        self.assertIn('"fog_density": 0.100', self.controlador)
+        self.assertIn('"fog_density": 0.040', self.controlador)
+        self.assertIn('"background_energy": 0.54', self.controlador)
+        self.assertIn('"background_energy": 1.14', self.controlador)
+        self.assertIn("ambiente.fog_enabled = bool(perfil", self.controlador)
 
     def test_renderer_compatibility_no_activa_volumetrica(self) -> None:
         self.assertIn('renderer/rendering_method="gl_compatibility"', self.proyecto)
         self.assertIn('get_current_rendering_method()) != "forward_plus"', self.controlador)
         self.assertIn("ambiente.volumetric_fog_enabled = false", self.controlador)
 
-    def test_precipitacion_sigue_al_jugador_y_gana_lectura(self) -> None:
+    def test_precipitacion_sigue_al_jugador_y_tiene_viento(self) -> None:
         self.assertIn("nodo.global_position = caminante.global_position", self.controlador)
-        self.assertIn("particulas.amount = 760 if nieve else 1100", self.controlador)
+        self.assertIn("particulas.amount = 900 if nieve else 1450", self.controlador)
+        self.assertIn("particulas.randomness = 0.62 if nieve else 0.38", self.controlador)
+        self.assertIn("proceso.direction = (", self.controlador)
+        self.assertIn("Vector3(1.80 * viento, -3.0, 0.35 * viento)", self.controlador)
         self.assertIn(
-            "Vector2(0.060, 0.060) if nieve else Vector2(0.032, 0.46)",
+            "Vector2(0.070, 0.070) if nieve else Vector2(0.034, 0.54)",
             self.controlador,
         )
 
-    def test_cielo_cambia_por_estado_y_se_restaura(self) -> None:
-        self.assertIn('set_shader_parameter("cielo_alto", alto)', self.controlador)
-        self.assertIn('set_shader_parameter("horizonte", horizonte)', self.controlador)
-        self.assertIn("CIELO_BASE_ALTO", self.controlador)
-        self.assertIn("background_energy_multiplier = 0.62", self.controlador)
-        self.assertIn("background_energy_multiplier = 1.08", self.controlador)
+    def test_reduccion_movimiento_baja_densidad_y_deriva(self) -> None:
+        self.assertIn(
+            'PreferenciasSiga.cargar().get("reduccion_movimiento", false)',
+            self.controlador,
+        )
+        self.assertIn("particulas.amount = 360 if nieve else 620", self.controlador)
+        self.assertIn("var viento := 0.35 if _reduccion_movimiento else 1.0", self.controlador)
+        self.assertIn("material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED", self.controlador)
+        self.assertIn("material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED", self.controlador)
+        self.assertIn("transicion and not _reduccion_movimiento", self.controlador)
 
-    def test_lluvia_y_nieve_tienen_capa_de_suelo_sin_colision(self) -> None:
+    def test_cielo_cambia_por_estado_y_se_restaura(self) -> None:
+        self.assertIn('material.set_shader_parameter("cielo_alto"', self.controlador)
+        self.assertIn('material.set_shader_parameter("horizonte"', self.controlador)
+        self.assertIn("CIELO_BASE_ALTO", self.controlador)
+        self.assertIn("_perfil_ambiente(Clima.DESPEJADO)", self.controlador)
+
+    def test_suelo_climatico_usa_pelicula_y_acumulaciones_sin_colision(self) -> None:
         self.assertIn('NODO_SUELO_CLIMA := "ClimaSueloVisual"', self.controlador)
-        self.assertIn("caja.size = Vector3(9.0, 0.012, 34.0)", self.controlador)
-        self.assertIn("material.roughness = 0.14", self.controlador)
-        self.assertIn("material.roughness = 0.88", self.controlador)
+        self.assertIn('superficie.name = "Pelicula"', self.controlador)
+        self.assertIn('parche.name = "Acumulacion%02d" % indice', self.controlador)
+        self.assertIn("var disco := CylinderMesh.new()", self.controlador)
+        self.assertIn("disco.radial_segments = 12", self.controlador)
+        self.assertIn("var cantidad := 24 if nieve else 12", self.controlador)
         self.assertNotIn("StaticBody3D.new()", self.controlador)
         self.assertNotIn("CollisionShape3D.new()", self.controlador)
+
+    def test_cambio_runtime_interpola_atmosfera_y_cielo(self) -> None:
+        self.assertIn("TRANSICION_DURACION := 0.65", self.controlador)
+        self.assertIn("_tween_clima = create_tween()", self.controlador)
+        self.assertIn('_tween_clima.tween_property(', self.controlador)
+        self.assertIn("_transicionar_parametro_cielo", self.controlador)
+        self.assertIn("_cancelar_transicion()", self.controlador)
 
     def test_clima_tiene_cama_sonora_procedural_sin_assets_externos(self) -> None:
         self.assertIn('NODO_AUDIO_CLIMA := "ClimaAmbiente"', self.controlador)
@@ -70,8 +96,13 @@ class ClimaVisual797Test(unittest.TestCase):
         self.assertIn("AudioStreamWAV.new()", self.controlador)
         self.assertIn("AudioStreamWAV.LOOP_FORWARD", self.controlador)
         self.assertIn("func _muestra_audio", self.controlador)
-        self.assertIn("Clima.LLUVIA:", self.controlador)
-        self.assertIn("Clima.NIEVE:", self.controlador)
+        self.assertIn("var rafaga :=", self.controlador)
+
+    def test_capturador_sigue_comparando_los_cinco_estados(self) -> None:
+        for estado in ["DESPEJADO", "NUBLADO", "LLUVIA", "NIEBLA", "NIEVE"]:
+            self.assertIn(f"Clima.{estado}", self.capturador)
+        self.assertIn('dia._entrar_en("trayecto")', self.capturador)
+        self.assertIn("dia._caminante.situar(entrada, mirada)", self.capturador)
 
 
 if __name__ == "__main__":
