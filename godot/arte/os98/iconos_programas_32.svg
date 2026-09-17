@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="224" height="32" viewBox="0 0 224 32">
+  <defs>
+    <linearGradient id="g-folder" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd866"/><stop offset="1" stop-color="#e6a928"/></linearGradient>
+    <linearGradient id="g-blue" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#70c9ff"/><stop offset="1" stop-color="#277be8"/></linearGradient>
+    <linearGradient id="g-cyan" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9f4ff"/><stop offset="1" stop-color="#78baff"/></linearGradient>
+    <linearGradient id="g-paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dbe6f5"/></linearGradient>
+    <linearGradient id="g-dark" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#46576d"/><stop offset="1" stop-color="#1d2734"/></linearGradient>
+    <radialGradient id="g-violet"><stop offset="0" stop-color="#b56cff"/><stop offset="0.55" stop-color="#7a35e8"/><stop offset="1" stop-color="#2a1557"/></radialGradient>
+  </defs>
+
+  <!-- 0 · Explorador -->
+  <g id="programa-explorador" transform="translate(0 0)">
+    <path d="M4.5 9.2c0-1.5 1.2-2.7 2.7-2.7h6.1l2.3 2.4h9.2c1.5 0 2.7 1.2 2.7 2.7v11.8c0 1.7-1.3 3-3 3H7.5c-1.7 0-3-1.3-3-3z" fill="url(#g-folder)" stroke="#8d6518" stroke-width="1.2"/>
+    <path d="M5.5 12h21l-1.8 11.7c-.2 1.1-1.1 1.8-2.2 1.8H7.1c-1.1 0-2-.8-2.1-1.9z" fill="#f5c84e" opacity=".96"/>
+    <path d="M7 10.7h18" stroke="#fff1a7" stroke-width="1" opacity=".85"/>
+  </g>
+
+  <!-- 1 · Web98 -->
+  <g id="programa-web98" transform="translate(32 0)">
+    <circle cx="16" cy="16" r="11.2" fill="url(#g-blue)" stroke="#164d9a" stroke-width="1.2"/>
+    <path d="M5.8 16h20.4M16 4.8c3.3 3.1 5.2 7 5.2 11.2S19.3 24.1 16 27.2M16 4.8c-3.3 3.1-5.2 7-5.2 11.2s1.9 8.1 5.2 11.2" fill="none" stroke="#d8f1ff" stroke-width="1.15" opacity=".9"/>
+    <path d="M9.1 9.2c1.8-.8 4.2-.9 5.1.4.9 1.4-.3 2.3.8 3.4 1.2 1.2 3.3.4 4.7 1.8 1.2 1.2.3 2.7 1.5 4.2" fill="none" stroke="#8ee36f" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="12" cy="8" r="1.2" fill="#fff" opacity=".8"/>
+  </g>
+
+  <!-- 2 · Archivo de programas -->
+  <g id="programa-software" transform="translate(64 0)">
+    <rect x="5" y="5" width="22" height="22" rx="5" fill="url(#g-dark)" stroke="#101821" stroke-width="1.2"/>
+    <rect x="8" y="8" width="16" height="4.5" rx="1.5" fill="#8fd6ff"/>
+    <circle cx="21.2" cy="10.2" r="1" fill="#eaf7ff"/>
+    <rect x="8" y="15" width="7" height="4" rx="1.2" fill="#6577ff"/>
+    <rect x="17" y="15" width="7" height="4" rx="1.2" fill="#63cf8d"/>
+    <rect x="8" y="21" width="16" height="3" rx="1.2" fill="#aebbd0" opacity=".75"/>
+  </g>
+
+  <!-- 3 · Correo -->
+  <g id="programa-correo" transform="translate(96 0)">
+    <rect x="4.5" y="6" width="23" height="20" rx="5" fill="url(#g-cyan)" stroke="#2e73b9" stroke-width="1.2"/>
+    <path d="M6.8 9.2 16 17.1l9.2-7.9" fill="none" stroke="#266ccb" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="m6.8 23 6.7-6M25.2 23l-6.7-6" fill="none" stroke="#5796d9" stroke-width="1.2" stroke-linecap="round"/>
+    <circle cx="25.2" cy="7" r="3.2" fill="#ff5d57" stroke="#a9272b" stroke-width=".8"/>
+    <path d="M23.8 7h2.8M25.2 5.6v2.8" stroke="#fff" stroke-width="1" stroke-linecap="round"/>
+  </g>
+
+  <!-- 4 · Bloc de notas -->
+  <g id="programa-bloc-notas" transform="translate(128 0)">
+    <rect x="7" y="4.5" width="18" height="23" rx="3.2" fill="url(#g-paper)" stroke="#8392a7" stroke-width="1.1"/>
+    <rect x="10" y="3" width="2" height="5" rx="1" fill="#4e9ff2"/><rect x="15" y="3" width="2" height="5" rx="1" fill="#4e9ff2"/><rect x="20" y="3" width="2" height="5" rx="1" fill="#4e9ff2"/>
+    <path d="M11 12h10M11 16h10M11 20h7" stroke="#7d9bc1" stroke-width="1.25" stroke-linecap="round"/>
+    <path d="m19.2 24.7 6.5-6.5 2.1 2.1-6.5 6.5-3 .9z" fill="#f3bd36" stroke="#9b7118" stroke-width=".8" stroke-linejoin="round"/>
+  </g>
+
+  <!-- 5 · Calculadora -->
+  <g id="programa-calculadora" transform="translate(160 0)">
+    <rect x="6" y="3.5" width="20" height="25" rx="4.2" fill="url(#g-dark)" stroke="#111922" stroke-width="1.2"/>
+    <rect x="9" y="7" width="14" height="5.5" rx="1.5" fill="#9ce6ef" stroke="#1b4850" stroke-width=".8"/>
+    <path d="M11 10h8" stroke="#3d7780" stroke-width="1.1" stroke-linecap="round"/>
+    <g fill="#eef3f9"><rect x="9" y="15" width="4" height="3.6" rx="1"/><rect x="15" y="15" width="4" height="3.6" rx="1"/><rect x="9" y="20.5" width="4" height="3.6" rx="1"/><rect x="15" y="20.5" width="4" height="3.6" rx="1"/></g>
+    <rect x="21" y="15" width="3" height="3.6" rx="1" fill="#f6b64a"/><rect x="21" y="20.5" width="3" height="3.6" rx="1" fill="#5ca2ff"/>
+  </g>
+
+  <!-- 6 · Catálogo de anomalías -->
+  <g id="programa-catalogo-anomalias" transform="translate(192 0)">
+    <rect x="4.5" y="4.5" width="23" height="23" rx="6" fill="#151a2a" stroke="#080b12" stroke-width="1.2"/>
+    <circle cx="16" cy="16" r="8.3" fill="url(#g-violet)" opacity=".98"/>
+    <path d="M11.1 12.2c2.1-2.4 6.2-2.9 8.6-.7 2.1 1.9 1.6 5.5-.5 7.3-2.4 2-6.2 1.4-7.8-.8-1.3-1.8-.8-4.4.9-5.6 1.5-1 3.8-.6 4.7.8.8 1.2.2 2.9-1 3.4-1 .4-2.2-.2-2.3-1.2" fill="none" stroke="#e5c6ff" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="19.7" cy="10.6" r="1.1" fill="#fff" opacity=".75"/>
+  </g>
+</svg>
