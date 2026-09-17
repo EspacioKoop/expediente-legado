@@ -91,6 +91,34 @@ static func _gato(comprobar: Callable) -> void:
 	GatoConducta.avanzar(sin_sitios, [], 0, lejos, 0.1)
 	comprobar.call("sin sitios se queda donde está", sin_sitios["pos"], Vector3.ZERO)
 
+	# #787: el propio gato usa el contrato común de interacción, de modo que la
+	# misma instancia sirve en casa y en sueño. Cerca se acaricia y después se
+	# ofrece coger; desde más lejos se le llama y pasa al estado de acercarse.
+	var interactivo := Gato.new()
+	interactivo.empezar(Vector3.ZERO, sitios)
+	comprobar.call("el gato es un interactuable 3D", interactivo is Interactuable3D, true)
+	comprobar.call("de cerca ofrece acariciar", interactivo.texto_accion(), "Acariciar gato")
+	comprobar.call("la interacción física tiene sonido", interactivo.nombre_sonido(), "coger")
+	comprobar.call("acariciarlo acepta la acción", interactivo.interactuar(null), true)
+	comprobar.call(
+		"acariciarlo activa mimos y permite cogerlo",
+		[interactivo.estado["estado"], interactivo.texto_accion()],
+		["mimos", "Coger gato"]
+	)
+	comprobar.call("cogerlo acepta la acción", interactivo.interactuar(null), true)
+	comprobar.call("tras cogerlo vuelve a ofrecer mimos", interactivo.texto_accion(), "Acariciar gato")
+
+	var actor := Node3D.new()
+	actor.position = Vector3(2.0, 0, 0)
+	comprobar.call("llamarlo acepta la acción", interactivo.interactuar(actor), true)
+	comprobar.call(
+		"llamarlo lo pone en camino hacia el jugador",
+		[interactivo.estado["estado"], interactivo.estado["destino"]],
+		["viene", Vector3(2.0, 0, 0)]
+	)
+	actor.free()
+	interactivo.free()
+
 
 ## Darle de comer. Que la cuenta se reinicie y que sin dinero no se pueda ya se
 ## prueba con la jornada; lo de aquí es el PRECIO: que se cobre exacto, que no
@@ -200,11 +228,17 @@ static func _comida_propia(comprobar: Callable) -> void:
 ## está hecho de cajas: si esta geometría cambia, ha cambiado el gato y no un
 ## detalle de implementación.
 static func _malla(comprobar: Callable) -> void:
-	# #570: la raíz conserva el ciclo de vida ligero de siempre, pero lleva una
-	# sonda volumétrica que consulta el mobiliario antes de aceptar cada paso.
+	# #570/#787: la raíz sigue sin ser un cuerpo bloqueante, pero ahora es el
+	# Area3D que usa el detector común y mantiene su sonda volumétrica separada.
 	var codigo_gato := FileAccess.get_file_as_string("res://guion/gato.gd")
 	comprobar.call(
-		"el gato sigue siendo un nodo ligero", codigo_gato.contains("extends Node3D"), true
+		"el gato es interactuable sin cuerpo bloqueante",
+		codigo_gato.contains("extends Interactuable3D")
+		and not codigo_gato.contains("extends CharacterBody3D"),
+		true
+	)
+	comprobar.call(
+		"el gato tiene volumen de interacción", codigo_gato.contains("CollisionShape3D.new()"), true
 	)
 	comprobar.call(
 		"el gato tiene sonda volumétrica", codigo_gato.contains("ShapeCast3D.new()"), true
