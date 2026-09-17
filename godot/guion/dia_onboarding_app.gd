@@ -12,9 +12,42 @@ const TEXTO_ONBOARDING := (
 	+ "Acérquese al terminal verde para abrir su primer expediente.\n"
 	+ "Mayús corre, Ctrl agacha y Espacio salta (remapeable en el menú)."
 )
+const UMBRAL_RESCATE_CAIDA := -8.0
 
 var _pista_puesto: PanelContainer
 var _luz_puesto: OmniLight3D
+
+
+## Red de seguridad del playtest (#784). Se mantiene aquí para que la cadena
+## histórica `dia_calle_app.gd -> dia_onboarding_app.gd` permanezca intacta.
+func _process(_delta: float) -> void:
+	_rescatar_caida()
+
+
+## `body_entered` llega durante el paso de física. Las capas superiores pueden
+## preparar estado, pero desmontar `_mundo` desde ese callback deja Areas en uso
+## por el servidor físico. La transición base espera al siguiente frame normal.
+func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
+	if Engine.is_in_physics_frame():
+		_continuar_salida_fuera_de_fisica(cuerpo, salida)
+		return
+	super._al_pisar_salida(cuerpo, salida)
+
+
+func _continuar_salida_fuera_de_fisica(cuerpo: Node3D, salida: Area3D) -> void:
+	await get_tree().process_frame
+	if not is_instance_valid(cuerpo) or not is_instance_valid(salida):
+		return
+	super._al_pisar_salida(cuerpo, salida)
+
+
+func _rescatar_caida() -> void:
+	if not is_instance_valid(_caminante) or _espacio_actual.is_empty():
+		return
+	if _caminante.position.y >= UMBRAL_RESCATE_CAIDA:
+		return
+	var entrada: Vector3 = _espacio_actual.get("entrada", Vector3.ZERO)
+	_caminante.situar(entrada, _espacio_actual.get("mirada", NAN))
 
 
 func _entrar_en(fase: String) -> void:
