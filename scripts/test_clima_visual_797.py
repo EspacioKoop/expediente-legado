@@ -63,6 +63,8 @@ class ClimaVisual797Test(unittest.TestCase):
         )
         self.assertIn("particulas.amount = 360 if nieve else 620", self.controlador)
         self.assertIn("var viento := 0.35 if _reduccion_movimiento else 1.0", self.controlador)
+        self.assertIn("material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED", self.controlador)
+        self.assertIn("material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED", self.controlador)
         self.assertIn("transicion and not _reduccion_movimiento", self.controlador)
 
     def test_cielo_cambia_por_estado_y_se_restaura(self) -> None:
@@ -76,8 +78,8 @@ class ClimaVisual797Test(unittest.TestCase):
         self.assertIn('superficie.name = "Pelicula"', self.controlador)
         self.assertIn('parche.name = "Acumulacion%02d" % indice', self.controlador)
         self.assertIn("var disco := CylinderMesh.new()", self.controlador)
-        self.assertIn("disco.radial_segments = 8", self.controlador)
-        self.assertIn("var cantidad := 16 if nieve else 11", self.controlador)
+        self.assertIn("disco.radial_segments = 12", self.controlador)
+        self.assertIn("var cantidad := 24 if nieve else 12", self.controlador)
         self.assertNotIn("StaticBody3D.new()", self.controlador)
         self.assertNotIn("CollisionShape3D.new()", self.controlador)
 

@@ -375,6 +375,9 @@ func _reforzar_precipitacion(nodo: Node3D, nieve: bool) -> void:
 	malla.size = Vector2(0.070, 0.070) if nieve else Vector2(0.034, 0.54)
 	var material := malla.material as StandardMaterial3D
 	if material != null:
+		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+		material.cull_mode = BaseMaterial3D.CULL_DISABLED
 		material.albedo_color = (
 			Color(0.95, 0.97, 1.0, 0.94) if nieve else Color(0.62, 0.78, 0.98, 0.82)
 		)
@@ -418,7 +421,7 @@ func _crear_pelicula_suelo(raiz: Node3D, estado: String) -> void:
 	var material := StandardMaterial3D.new()
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	if estado == Clima.NIEVE:
-		material.albedo_color = Color(0.78, 0.84, 0.92, 0.24)
+		material.albedo_color = Color(0.78, 0.84, 0.92, 0.34)
 		material.roughness = 0.94
 	else:
 		material.albedo_color = Color(0.04, 0.075, 0.12, 0.08)
@@ -430,14 +433,14 @@ func _crear_pelicula_suelo(raiz: Node3D, estado: String) -> void:
 
 func _crear_parches_suelo(raiz: Node3D, estado: String) -> void:
 	var nieve := estado == Clima.NIEVE
-	var cantidad := 16 if nieve else 11
+	var cantidad := 24 if nieve else 12
 	var material := StandardMaterial3D.new()
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	if nieve:
-		material.albedo_color = Color(0.88, 0.92, 0.98, 0.62)
+		material.albedo_color = Color(0.86, 0.90, 0.96, 0.28)
 		material.roughness = 0.96
 	else:
-		material.albedo_color = Color(0.025, 0.055, 0.09, 0.24)
+		material.albedo_color = Color(0.025, 0.055, 0.09, 0.18)
 		material.roughness = 0.08
 		material.metallic = 0.10
 
@@ -451,16 +454,16 @@ func _crear_parches_suelo(raiz: Node3D, estado: String) -> void:
 		)
 		parche.rotation.y = deg_to_rad(float((indice * 29) % 180))
 		parche.scale = Vector3(
-			0.75 + float((indice * 17) % 12) / 10.0,
+			0.42 + float((indice * 17) % 10) / 20.0,
 			1.0,
-			0.70 + float((indice * 23) % 16) / 10.0,
+			0.36 + float((indice * 23) % 12) / 20.0,
 		)
 		parche.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var disco := CylinderMesh.new()
-		disco.top_radius = 0.50
-		disco.bottom_radius = 0.50
+		disco.top_radius = 0.36
+		disco.bottom_radius = 0.36
 		disco.height = 0.008
-		disco.radial_segments = 8
+		disco.radial_segments = 12
 		parche.mesh = disco
 		parche.material_override = material
 		raiz.add_child(parche)

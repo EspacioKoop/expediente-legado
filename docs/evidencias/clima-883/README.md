@@ -10,4 +10,4 @@ Capturas generadas por GitHub Actions desde el mismo punto, entrada y orientaci�
 | --- | --- | --- |
 | ![Lluvia](lluvia.png) | ![Niebla](niebla.png) | ![Nieve](nieve.png) |
 
-La revisión visual humana se incorpora después de inspeccionar los PNG originales del artifact `evidencia-clima-883`.
+La revisión visual humana se incorpora después de inspeccionar los PNG originales del artifact `evidencia-clima-883-pulida`.
