@@ -7,6 +7,11 @@
 ## rectángulos sobre un fondo), y aporta lo común: el rótulo, la voz, el salto
 ## y el acortado por repetición.
 ##
+## Un plano 3D puede optar por una trayectoria explícita con `camara_desde` y/o
+## `mira_desde`. Los planos antiguos conservan exactamente su acercamiento corto.
+## También puede declarar un `sonido` del catálogo común como acento al entrar
+## en el plano. Son extensiones de presentación: no cambian estado ni duración.
+##
 ## No sabe qué cinemática está poniendo. Recibe planos ya resueltos y emite
 ## `terminada` cuando acaba o cuando la saltan — quien la pidió decide qué pasa
 ## después.
@@ -120,6 +125,12 @@ func _siguiente() -> void:
 	_rotulo.add_theme_font_size_override("font_size", 34 if _rotulo.text.length() > 28 else 48)
 
 	plano_entrado.emit(_plano, plano)
+	# Un acento pertenece al beat, no al reloj de quien pidió la cinemática.
+	# Usar el catálogo común mantiene licencia/procedencia y evita rutas de audio
+	# desperdigadas. Una clave vacía conserva el comportamiento histórico.
+	var acento := String(plano.get("sonido", ""))
+	if not acento.is_empty():
+		Sonido.sonar(self, acento)
 
 	var es_2d: bool = plano["tipo"] == "2d"
 	_fondo.visible = es_2d
@@ -152,13 +163,32 @@ func _mover_camara(plano: Dictionary, avance: float) -> void:
 	if _camara == null or not (_plato.visible or _tiene_mundo_3d()):
 		return
 	var destino: Vector3 = plano["camara"]
+	var mira_destino: Vector3 = plano["mira"]
+
+	# #395/#856: los planos que necesitan contar una acción pueden declarar de
+	# dónde vienen. La interpolación suave evita el arranque/parada mecánicos de
+	# un lerp lineal. Con reducción de movimiento se usa la composición FINAL,
+	# quieta: conserva sujeto, información y duración sin hacer travelling.
+	if plano.has("camara_desde") or plano.has("mira_desde"):
+		if _reduccion_movimiento:
+			_camara.global_position = destino
+			_camara.look_at(mira_destino, Vector3.UP)
+			return
+		var origen: Vector3 = plano.get("camara_desde", destino)
+		var mira_origen: Vector3 = plano.get("mira_desde", mira_destino)
+		var suave := avance * avance * (3.0 - 2.0 * avance)
+		_camara.global_position = origen.lerp(destino, suave)
+		_camara.look_at(mira_origen.lerp(mira_destino, suave), Vector3.UP)
+		return
+
+	# Compatibilidad: los planos existentes sin trayectoria conservan el
+	# acercamiento corto que llevan usando desde el reproductor original.
 	# Con reducción de movimiento se conserva el plano y su duración, pero la
-	# cámara queda fija en la posición declarada. Sin ella mantiene el avance
-	# suave que diferencia una mirada cinematográfica de una captura estática.
+	# cámara queda fija en la posición declarada.
 	var factor_movimiento := 0.0 if _reduccion_movimiento else avance
 	var acercamiento: Vector3 = destino.normalized() * -0.25 * factor_movimiento
 	_camara.global_position = destino + acercamiento
-	_camara.look_at(plano["mira"], Vector3.UP)
+	_camara.look_at(mira_destino, Vector3.UP)
 
 
 ## Los planos 2D se dibujan aquí: la figura es una lista de rectángulos con
