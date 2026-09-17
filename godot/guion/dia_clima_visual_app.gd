@@ -16,6 +16,21 @@ const NODO_AUDIO_CLIMA := "ClimaAmbiente"
 const AUDIO_FRECUENCIA := 11_025
 const AUDIO_DURACION := 1.0
 const TRANSICION_DURACION := 0.65
+const PARAMETROS_CIELO_CLIMA := [
+	"cielo_alto",
+	"horizonte",
+	"ocaso",
+	"ocaso_mezcla",
+	"resplandor_fuerza",
+	"bruma_fuerza",
+	"nubes",
+	"cirros",
+	"luz_lunar_nubes",
+	"via_lactea",
+	"estrellas",
+	"estrellas_secundarias",
+	"luna_halo",
+]
 
 var _mundo_id := 0
 var _estado := ""
@@ -89,6 +104,15 @@ func _perfil_ambiente(estado: String) -> Dictionary:
 		"horizonte": CIELO_BASE_HORIZONTE,
 		"ocaso": CIELO_BASE_OCASO,
 		"ocaso_mezcla": CIELO_BASE_MEZCLA,
+		"resplandor_fuerza": 0.55,
+		"bruma_fuerza": 0.32,
+		"nubes": 0.28,
+		"cirros": 0.18,
+		"luz_lunar_nubes": 0.32,
+		"via_lactea": 0.08,
+		"estrellas": 0.50,
+		"estrellas_secundarias": 0.35,
+		"luna_halo": 0.09,
 	}
 	match estado:
 		Clima.NUBLADO:
@@ -109,6 +133,15 @@ func _perfil_ambiente(estado: String) -> Dictionary:
 						"horizonte": Color(0.13, 0.14, 0.16),
 						"ocaso": Color(0.16, 0.12, 0.115),
 						"ocaso_mezcla": 0.07,
+						"resplandor_fuerza": 0.62,
+						"bruma_fuerza": 0.44,
+						"nubes": 0.76,
+						"cirros": 0.56,
+						"luz_lunar_nubes": 0.18,
+						"via_lactea": 0.012,
+						"estrellas": 0.08,
+						"estrellas_secundarias": 0.04,
+						"luna_halo": 0.045,
 					},
 					true,
 				)
@@ -131,6 +164,15 @@ func _perfil_ambiente(estado: String) -> Dictionary:
 						"horizonte": Color(0.062, 0.078, 0.105),
 						"ocaso": Color(0.085, 0.067, 0.074),
 						"ocaso_mezcla": 0.025,
+						"resplandor_fuerza": 0.72,
+						"bruma_fuerza": 0.56,
+						"nubes": 0.92,
+						"cirros": 0.68,
+						"luz_lunar_nubes": 0.10,
+						"via_lactea": 0.0,
+						"estrellas": 0.015,
+						"estrellas_secundarias": 0.005,
+						"luna_halo": 0.025,
 					},
 					true,
 				)
@@ -153,6 +195,15 @@ func _perfil_ambiente(estado: String) -> Dictionary:
 						"horizonte": Color(0.36, 0.37, 0.39),
 						"ocaso": Color(0.30, 0.30, 0.31),
 						"ocaso_mezcla": 0.0,
+						"resplandor_fuerza": 0.46,
+						"bruma_fuerza": 0.86,
+						"nubes": 0.62,
+						"cirros": 0.44,
+						"luz_lunar_nubes": 0.06,
+						"via_lactea": 0.0,
+						"estrellas": 0.0,
+						"estrellas_secundarias": 0.0,
+						"luna_halo": 0.012,
 					},
 					true,
 				)
@@ -175,6 +226,15 @@ func _perfil_ambiente(estado: String) -> Dictionary:
 						"horizonte": Color(0.30, 0.32, 0.36),
 						"ocaso": Color(0.23, 0.20, 0.22),
 						"ocaso_mezcla": 0.09,
+						"resplandor_fuerza": 0.78,
+						"bruma_fuerza": 0.58,
+						"nubes": 0.68,
+						"cirros": 0.38,
+						"luz_lunar_nubes": 0.44,
+						"via_lactea": 0.01,
+						"estrellas": 0.12,
+						"estrellas_secundarias": 0.08,
+						"luna_halo": 0.12,
 					},
 					true,
 				)
@@ -239,10 +299,8 @@ func _aplicar_perfil_ambiente(ambiente: Environment, estado: String, animar: boo
 		)
 	)
 	if material != null:
-		_transicionar_parametro_cielo(material, "cielo_alto", perfil["cielo_alto"])
-		_transicionar_parametro_cielo(material, "horizonte", perfil["horizonte"])
-		_transicionar_parametro_cielo(material, "ocaso", perfil["ocaso"])
-		_transicionar_parametro_cielo(material, "ocaso_mezcla", perfil["ocaso_mezcla"])
+		for parametro in PARAMETROS_CIELO_CLIMA:
+			_transicionar_parametro_cielo(material, parametro, perfil[parametro])
 	_tween_clima.finished.connect(
 		Callable(self, "_finalizar_transicion").bind(ambiente, objetivo_niebla)
 	)
@@ -262,10 +320,8 @@ func _aplicar_perfil_inmediato(
 	ambiente.background_energy_multiplier = float(perfil["background_energy"])
 	if material == null:
 		return
-	material.set_shader_parameter("cielo_alto", perfil["cielo_alto"])
-	material.set_shader_parameter("horizonte", perfil["horizonte"])
-	material.set_shader_parameter("ocaso", perfil["ocaso"])
-	material.set_shader_parameter("ocaso_mezcla", perfil["ocaso_mezcla"])
+	for parametro in PARAMETROS_CIELO_CLIMA:
+		material.set_shader_parameter(parametro, perfil[parametro])
 
 
 func _transicionar_parametro_cielo(
