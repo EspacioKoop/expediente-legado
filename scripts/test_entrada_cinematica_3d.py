@@ -46,7 +46,19 @@ class EntradaCinematica3DTest(unittest.TestCase):
         for acento in ('"puerta_cierra"', '"pulsar"', '"cerrar"'):
             self.assertIn(acento, self.entrada)
         self.assertIn('plano.get("sonido", "")', self.reproductor)
-        self.assertIn("Sonido.sonar(self, acento)", self.reproductor)
+        self.assertIn("_sonar_acento(acento)", self.reproductor)
+        self.assertIn("_acento.stream = Sonido.stream(nombre)", self.reproductor)
+
+    def test_acento_se_libera_al_terminar_o_desmontar(self) -> None:
+        # Los runners que montan dia.tscn pueden desmontarlo mientras el sonido
+        # del primer plano sigue activo. El reproductor debe poseer y soltar la
+        # referencia al stream; no vale confiar solo en finished.queue_free().
+        self.assertIn("var _acento: AudioStreamPlayer", self.reproductor)
+        self.assertIn("func _exit_tree() -> void:", self.reproductor)
+        self.assertIn("_detener_acento()", self.reproductor)
+        self.assertIn("_acento.stop()", self.reproductor)
+        self.assertIn("_acento.stream = null", self.reproductor)
+        self.assertIn("_acento = AudioStreamPlayer.new()", self.reproductor)
 
     def test_reduccion_movimiento_usa_composicion_final_sin_travelling(self) -> None:
         trayectoria = self.reproductor.split(
