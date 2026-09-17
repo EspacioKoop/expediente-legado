@@ -35,6 +35,12 @@ static func montar_puesto_aislado(raiz: Node3D, base: Vector3, indice: int = 0) 
 	_montar_puesto(raiz, indice, base)
 
 
+## Expone la taza procedural como pieza reutilizable para composiciones ligeras
+## (p. ej. el diorama de inicio #830) sin duplicar geometría/materiales.
+static func agregar_taza(raiz: Node3D, pos: Vector3) -> MeshInstance3D:
+	return _agregar_taza(raiz, pos)
+
+
 static func _montar_puesto(raiz: Node3D, indice: int, base: Vector3) -> void:
 	var puesto := Node3D.new()
 	puesto.name = "PuestoUtileria%d" % (indice + 1)
@@ -83,7 +89,7 @@ static func _agregar_bandeja(raiz: Node3D, pos: Vector3) -> void:
 	)
 
 
-static func _agregar_taza(raiz: Node3D, pos: Vector3) -> void:
+static func _agregar_taza(raiz: Node3D, pos: Vector3) -> MeshInstance3D:
 	var taza := MeshInstance3D.new()
 	taza.name = "TazaPuesto"
 	var malla := CylinderMesh.new()
@@ -94,6 +100,7 @@ static func _agregar_taza(raiz: Node3D, pos: Vector3) -> void:
 	taza.position = pos
 	_aplicar_material(taza, COLOR_CAFE)
 	raiz.add_child(taza)
+	return taza
 
 
 static func _montar_maquina_cafe(raiz: Node3D) -> void:
