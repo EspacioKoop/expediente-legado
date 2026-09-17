@@ -26,6 +26,7 @@ class FachadasVivasTest(unittest.TestCase):
         self.assertIn('raiz.set_meta("ventanas_decoradas", decoradas)', self.fachadas)
         self.assertIn('raiz.set_meta("ventanas_detalle_3d", decoradas_detalle)', self.fachadas)
         self.assertIn('grupo.set_meta("detalle_3d", detalle_3d)', self.fachadas)
+        self.assertIn('grupo.set_meta("marco_volumen", detalle_3d)', self.fachadas)
         self.assertIn("if detalle_3d:", self.fachadas)
         for variante in ("escritorio", "estanteria", "salon_tv"):
             self.assertIn(f'"{variante}"', self.fachadas)
@@ -45,6 +46,7 @@ class FachadasVivasTest(unittest.TestCase):
         self.assertIn("instancia.visibility_range_end", self.fachadas)
         self.assertIn("PROFUNDIDAD_INTERIOR := 0.055", self.fachadas)
         self.assertIn("SALIENTE_EXTRA_CRISTAL := 0.05", self.fachadas)
+        self.assertNotIn('grupo.set_meta("marco_volumen", true)', self.fachadas)
         self.assertNotIn("no_depth_test", self.fachadas)
         self.assertNotIn("render_priority", self.fachadas)
         self.assertNotIn("load(", self.fachadas)
