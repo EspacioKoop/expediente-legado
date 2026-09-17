@@ -99,8 +99,12 @@ class VisorExpedientes513Test(unittest.TestCase):
         )
         self.assertIn("if not ya_visto:\n\t\tJornada.anotar_lectura", self.visor)
 
-    def test_el_texto_largo_mantiene_tipografia_de_lectura(self):
+    def test_el_texto_largo_usa_el_rol_documental_y_no_mono(self):
         self.assertIn(
+            '_documento.add_theme_font_override("normal_font", theme.get_font("document_font", "RichTextLabel"))',
+            self.visor,
+        )
+        self.assertNotIn(
             '_documento.add_theme_font_override("normal_font", theme.get_font("mono_font", "RichTextLabel"))',
             self.visor,
         )
