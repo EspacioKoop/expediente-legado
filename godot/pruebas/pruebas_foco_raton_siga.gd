@@ -86,9 +86,7 @@ func _probar_recuperacion_foco() -> void:
 	)
 	_comprobar(root.gui_get_focus_owner() == foco_valido, "se conserva el foco válido")
 
-	escritorio.registrar_aplicacion(
-		"prueba", "Prueba", Callable(self, "_crear_contenido_prueba")
-	)
+	escritorio.registrar_aplicacion("prueba", "Prueba", Callable(self, "_crear_contenido_prueba"))
 	escritorio.abrir_aplicacion("prueba")
 	await process_frame
 	_liberar_foco()
