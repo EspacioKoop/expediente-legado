@@ -21,9 +21,7 @@ func _ready() -> void:
 	add_child(_etiqueta)
 
 
-func mostrar_evento(
-	evento: Dictionary, conocimiento: Array = [], ahora_unix: int = -1
-) -> bool:
+func mostrar_evento(evento: Dictionary, conocimiento: Array = [], ahora_unix: int = -1) -> bool:
 	var ahora := ahora_unix
 	if ahora < 0:
 		ahora = int(Time.get_unix_time_from_system())
@@ -31,9 +29,7 @@ func mostrar_evento(
 	if not validacion["ok"]:
 		ocultar()
 		return false
-	var renderizado := SenalVocabulario.renderizar(
-		validacion["event"]["payload"], conocimiento
-	)
+	var renderizado := SenalVocabulario.renderizar(validacion["event"]["payload"], conocimiento)
 	if not renderizado["ok"]:
 		ocultar()
 		return false
