@@ -157,6 +157,7 @@ func _crear_estado(caja: VBoxContainer) -> void:
 	_aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_aviso.custom_minimum_size.x = 440
 	_aviso.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_aviso.add_theme_color_override("font_color", EstiloSiga.NEGRO)
 	estado.add_child(_aviso)
 
 
