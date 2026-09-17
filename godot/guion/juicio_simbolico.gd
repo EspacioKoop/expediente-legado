@@ -4,9 +4,9 @@
 ## - un Arcano recogido y todavía no gastado;
 ## - una familia mitológica activada deliberadamente durante la jornada.
 ##
-## Esta capa NO altera reglas ni consume progreso. Selecciona de forma estable lo
-## que se representa y describe el vocabulario visual de cada mito para que el
-## renderer 3D no tenga que conocer cómo se guarda Tarot o SemillasOniricas.
+## La selección nunca consume progreso. Algunas parejas concretas sí forman un
+## ritual jugable: la combinación, no cada símbolo por separado, define un
+## modificador pequeño y explícito que `JuicioCombate3D` puede interpretar.
 class_name JuicioSimbolico
 extends RefCounted
 
@@ -25,6 +25,32 @@ const MITOS := {
 	"mari": {"forma": "montana", "color": Color("6e7080")},
 	"anansi_akan": {"forma": "telarana", "color": Color("735b78")},
 	"maui_tamanuitera": {"forma": "sol", "color": Color("b87931")},
+}
+
+## Primer vocabulario mecánico del Juicio. Se mantiene cerrado a parejas con una
+## lectura clara para que descubrir dos símbolos no genere buffs procedurales
+## difíciles de explicar o balancear.
+const RITUALES := {
+	"la-luna|minotauro":
+	{
+		"id": "laberinto_lunar",
+		"nombre": "Laberinto lunar",
+		"radio_arena": 4.15,
+		"velocidad_rival_mul": 0.86,
+	},
+	"la-justicia|duat":
+	{
+		"id": "balanza_duat",
+		"nombre": "Balanza del Duat",
+		"contraataque_esquiva": 1,
+	},
+	"la-fuerza|aquiles":
+	{
+		"id": "talon_fuerza",
+		"nombre": "Talón de la Fuerza",
+		"dano_fuerte_bonus": 1,
+		"recarga_fuerte": 0.82,
+	},
 }
 
 
@@ -67,6 +93,19 @@ static func descriptor_mito(id_mito: String) -> Dictionary:
 	if not MITOS.has(id_mito):
 		return {}
 	return MITOS[id_mito].duplicate(true)
+
+
+## Solo una pareja declarada activa reglas. Un Arcano o mito sueltos siguen
+## siendo presencia visual y nunca modifican el combate por sí solos.
+static func ritual_para(carta: Dictionary, id_mito: String) -> Dictionary:
+	var id_arcano := String(carta.get("id", "")).strip_edges()
+	var mito := id_mito.strip_edges()
+	if id_arcano.is_empty() or mito.is_empty():
+		return {}
+	var clave := "%s|%s" % [id_arcano, mito]
+	if not RITUALES.has(clave):
+		return {}
+	return RITUALES[clave].duplicate(true)
 
 
 static func ruta_arcano(carta: Dictionary) -> String:

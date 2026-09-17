@@ -57,13 +57,20 @@ static func _montar_mito(raiz: Node3D, mito_id: String) -> void:
 		return
 	var mito := Node3D.new()
 	mito.name = "EcoMitologico"
-	mito.position = POS_MITO
-	mito.scale = Vector3.ONE * 0.72
+	var forma := String(descriptor["forma"])
+	if forma == "laberinto":
+		# El glifo necesita más superficie que los símbolos verticales para leerse
+		# desde la cámara alta del Juicio, sin invadir el centro jugable.
+		mito.position = Vector3(3.05, 0.0, -2.75)
+		mito.scale = Vector3.ONE * 0.92
+	else:
+		mito.position = POS_MITO
+		mito.scale = Vector3.ONE * 0.72
 	mito.set_meta("mito_id", mito_id)
 	raiz.add_child(mito)
 
 	var color: Color = descriptor["color"]
-	match String(descriptor["forma"]):
+	match forma:
 		"puerta":
 			_forma_puerta(mito, color)
 		"laberinto":
@@ -103,17 +110,24 @@ static func _forma_puerta(raiz: Node3D, color: Color) -> void:
 
 
 static func _forma_laberinto(raiz: Node3D, color: Color) -> void:
+	# Espiral ortogonal abierta: desde la cámara de juego debe leerse como
+	# laberinto y no como un simple sello angular en el suelo.
 	var puntos := [
-		Vector3(-1.0, 0.06, 0.9),
-		Vector3(0.75, 0.06, 0.9),
-		Vector3(0.75, 0.06, 0.3),
-		Vector3(-0.45, 0.06, 0.3),
-		Vector3(-0.45, 0.06, -0.35),
-		Vector3(0.35, 0.06, -0.35),
+		Vector3(-1.35, 0.07, 1.15),
+		Vector3(1.35, 0.07, 1.15),
+		Vector3(1.35, 0.07, -1.15),
+		Vector3(-1.35, 0.07, -1.15),
+		Vector3(-1.35, 0.07, 0.65),
+		Vector3(0.85, 0.07, 0.65),
+		Vector3(0.85, 0.07, -0.65),
+		Vector3(-0.75, 0.07, -0.65),
+		Vector3(-0.75, 0.07, 0.18),
+		Vector3(0.35, 0.07, 0.18),
+		Vector3(0.35, 0.07, -0.22),
 	]
 	for i in puntos.size() - 1:
-		raiz.add_child(_segmento(puntos[i], puntos[i + 1], 0.08, color, true))
-	var centro := _esfera(0.16, color, true)
+		raiz.add_child(_segmento(puntos[i], puntos[i + 1], 0.11, color, true))
+	var centro := _esfera(0.18, color.lightened(0.12), true)
 	centro.position = puntos[-1]
 	raiz.add_child(centro)
 
