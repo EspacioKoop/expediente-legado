@@ -247,7 +247,9 @@ func _construir_ejecutar() -> void:
 	add_child(titulo)
 
 	var ayuda := Label.new()
-	ayuda.text = tr("Abra una aplicación, carpeta o dirección Web98 conocida. «ayuda» muestra ejemplos.")
+	ayuda.text = tr(
+		"Abra una aplicación, carpeta o dirección Web98 conocida. «ayuda» muestra ejemplos."
+	)
 	ayuda.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(ayuda)
 
