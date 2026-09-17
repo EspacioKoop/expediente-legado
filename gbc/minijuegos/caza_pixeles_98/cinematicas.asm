@@ -21,9 +21,12 @@ DEF CIN_TIPO_FASE2 EQU 2
 DEF CIN_TIPO_FASE3 EQU 3
 DEF CIN_TIPO_BOSS  EQU 4
 
-DEF CIN_INTRO_FRAMES EQU 150
-DEF CIN_BEAT_FRAMES  EQU 42
-DEF CIN_BOSS_FRAMES  EQU 48
+; 72 frames conserva el contrato del beat narrativo introducido en #906. El
+; onboarding necesita algo mas de lectura y usa su propia duración total.
+DEF CIN_INTRO_FRAMES         EQU 72
+DEF CIN_INSTRUCCIONES_FRAMES EQU 150
+DEF CIN_BEAT_FRAMES          EQU 42
+DEF CIN_BOSS_FRAMES          EQU 48
 
 ; Barreras de residuo dibujadas como BG. Las coordenadas estan expresadas en el
 ; mismo espacio OAM que jugador/objetivos para reutilizar AABB sin sprites extra.
@@ -52,7 +55,7 @@ InicializarCinematicas:
 IniciarCinematicaIntro:
     ld a, CIN_TIPO_INTRO
     ld [wCinematicaTipo], a
-    ld a, CIN_INTRO_FRAMES
+    ld a, CIN_INSTRUCCIONES_FRAMES
     ld [wCinematicaFrames], a
     call DibujarCinematicaGameplay
     ret
