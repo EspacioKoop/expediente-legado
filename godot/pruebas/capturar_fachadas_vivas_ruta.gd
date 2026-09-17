@@ -13,7 +13,7 @@ const ESTACIONES := [
 	},
 	{
 		"id": "media",
-		"position": Vector3(0.0, 1.65, -1.0),
+		"position": Vector3(0.0, 1.65, 5.5),
 		"target": Vector3(-5.2, 5.8, -12.5),
 	},
 	{
