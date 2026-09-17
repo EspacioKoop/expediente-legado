@@ -62,11 +62,7 @@ func _probar_vocabulario_cerrado() -> void:
 		SenalVocabulario.validar_payload(bloqueado, ["simbolo_amarillo"])["ok"],
 		true
 	)
-	_comprobar(
-		"solo hay dos anchors en el primer vertical",
-		SenalVocabulario.ANCHORS.size(),
-		2
-	)
+	_comprobar("solo hay dos anchors en el primer vertical", SenalVocabulario.ANCHORS.size(), 2)
 
 
 func _probar_evento_y_ttl() -> void:
@@ -89,13 +85,7 @@ func _probar_evento_y_ttl() -> void:
 		false
 	)
 	var fuera_de_superficie := SenalDatos.crear_evento(
-		"siga",
-		"test-840",
-		"anon-01",
-		"calle_escaparate",
-		"cuidado_con",
-		["trampa"],
-		AHORA
+		"siga", "test-840", "anon-01", "calle_escaparate", "cuidado_con", ["trampa"], AHORA
 	)
 	_comprobar("SIGA queda fuera de la superficie de señales", fuera_de_superficie["ok"], false)
 
@@ -133,9 +123,7 @@ func _probar_fixture_y_conocimiento() -> void:
 	var servicio_bloqueado := SenalServicio.new(TransporteFixture.new([bloqueada["event"]]))
 	var sin_conocimiento := servicio_bloqueado.consultar("calle", [], AHORA + 1)
 	_comprobar("receptor sin conocimiento filtra la señal", sin_conocimiento["signals"].size(), 0)
-	var con_conocimiento := servicio_bloqueado.consultar(
-		"calle", ["simbolo_amarillo"], AHORA + 1
-	)
+	var con_conocimiento := servicio_bloqueado.consultar("calle", ["simbolo_amarillo"], AHORA + 1)
 	_comprobar("receptor con conocimiento ve la señal", con_conocimiento["signals"].size(), 1)
 	servicio_bloqueado.ocultar_evento("sig-locked")
 	var ocultada := servicio_bloqueado.consultar("calle", ["simbolo_amarillo"], AHORA + 1)
@@ -145,16 +133,12 @@ func _probar_fixture_y_conocimiento() -> void:
 func _probar_offline_y_rate_limit() -> void:
 	var offline := SenalServicio.new(TransporteNulo.new())
 	var publicacion_offline := offline.publicar(
-		"calle",
-		"test-840",
-		"anon-offline",
-		"calle_portal",
-		"sigue",
-		["norte"],
-		AHORA
+		"calle", "test-840", "anon-offline", "calle_portal", "sigue", ["norte"], AHORA
 	)
 	_comprobar("offline no bloquea publicación", publicacion_offline["ok"], true)
-	_comprobar("offline descarta explícitamente", publicacion_offline["status"], "discarded_offline")
+	_comprobar(
+		"offline descarta explícitamente", publicacion_offline["status"], "discarded_offline"
+	)
 
 	var online := SenalServicio.new(TransporteFixture.new())
 	var primera := online.publicar(
