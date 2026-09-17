@@ -14,6 +14,17 @@ const ICONOS_16: Texture2D = preload("res://arte/os98/iconos_16.svg")
 const CURSORES_32: Texture2D = preload("res://arte/os98/cursores_32.svg")
 const ORDEN_ICONOS := ["siga", "equipo", "documentos", "red", "papelera", "ayuda"]
 const ORDEN_CURSORES := ["normal", "ayuda", "ocupado", "seleccionar", "texto", "no-disponible"]
+## Si el foco desaparece por cerrar/reparentar un Control, una de estas acciones
+## es una señal inequívoca de que teclado/mando necesita un nuevo punto de partida.
+const ACCIONES_RECUPERAR_FOCO := [
+	"ui_up",
+	"ui_down",
+	"ui_left",
+	"ui_right",
+	"ui_accept",
+	"ui_focus_next",
+	"ui_focus_prev",
+]
 
 var _identidades_visuales: Dictionary = {}
 var _boton_menu_visual: Button
@@ -110,6 +121,88 @@ func _unhandled_key_input(evento: InputEvent) -> void:
 		_reparar_foco_si_oculto()
 
 
+## Con foco válido, Godot resuelve navegación normal y no intervenimos. Este
+## fallback solo actúa cuando un cierre/reparentado deja `gui_get_focus_owner()`
+## vacío o fuera de la superficie que manda (modal/menú/escritorio). Así el
+## siguiente gesto de teclado o mando siempre vuelve a tener desde dónde navegar.
+func _unhandled_input(evento: InputEvent) -> void:
+	if recuperar_foco(evento):
+		get_viewport().set_input_as_handled()
+
+
+func recuperar_foco(evento: InputEvent) -> bool:
+	if not _evento_recupera_foco(evento) or _foco_valido_en_escritorio():
+		return false
+	var objetivo := _objetivo_recuperacion_foco()
+	if objetivo == null:
+		return false
+	objetivo.grab_focus()
+	return true
+
+
+func _evento_recupera_foco(evento: InputEvent) -> bool:
+	for accion in ACCIONES_RECUPERAR_FOCO:
+		if evento.is_action_pressed(accion):
+			return true
+	return false
+
+
+func _foco_valido_en_escritorio() -> bool:
+	var foco := get_viewport().gui_get_focus_owner()
+	if not is_instance_valid(foco) or not foco.is_visible_in_tree():
+		return false
+	if not _modal_id.is_empty() and _ventanas.has(_modal_id):
+		var panel_modal: Control = _ventanas[_modal_id]["panel"]
+		return foco == panel_modal or panel_modal.is_ancestor_of(foco)
+	if _menu != null and _menu.visible:
+		return foco == _menu or _menu.is_ancestor_of(foco)
+	return foco == self or is_ancestor_of(foco)
+
+
+func _objetivo_recuperacion_foco() -> Control:
+	if not _modal_id.is_empty() and _ventanas.has(_modal_id):
+		var panel_modal: Control = _ventanas[_modal_id]["panel"]
+		var foco_modal := _primer_control_enfocable(panel_modal)
+		if foco_modal != null:
+			return foco_modal
+	if _menu != null and _menu.visible:
+		var foco_menu := _primer_control_enfocable(_menu)
+		if foco_menu != null:
+			return foco_menu
+	var foco_ventana := _foco_ventana_superior()
+	if foco_ventana != null:
+		return foco_ventana
+	if is_instance_valid(_boton_menu_visual) and _boton_menu_visual.is_visible_in_tree():
+		return _boton_menu_visual
+	return null
+
+
+func _foco_ventana_superior() -> Control:
+	var mayor := -1
+	var elegida: Control = null
+	for id in _ventanas:
+		var datos: Dictionary = _ventanas[id]
+		if bool(datos.get("minimizada", false)):
+			continue
+		var panel: Control = datos["panel"]
+		if (
+			not is_instance_valid(panel)
+			or not panel.is_visible_in_tree()
+			or panel.z_index <= mayor
+		):
+			continue
+		var contenido := panel.find_child("Contenido", true, false)
+		var candidato: Control = null
+		if contenido != null:
+			candidato = _primer_control_enfocable(contenido)
+		if candidato == null:
+			candidato = _primer_control_enfocable(panel)
+		if candidato != null:
+			mayor = panel.z_index
+			elegida = candidato
+	return elegida
+
+
 func _instalar_wallpaper() -> void:
 	var wallpaper := TextureRect.new()
 	wallpaper.name = "WallpaperCorporativo"
@@ -157,10 +250,11 @@ func _al_cambiar_visibilidad_menu() -> void:
 
 
 func _reparar_foco_si_oculto() -> void:
-	var foco := get_viewport().gui_get_focus_owner()
-	if is_instance_valid(foco) and foco.is_visible_in_tree():
+	if _foco_valido_en_escritorio():
 		return
-	_enfocar_boton_menu()
+	var objetivo := _objetivo_recuperacion_foco()
+	if objetivo != null:
+		objetivo.grab_focus()
 
 
 func _enfocar_boton_menu() -> void:
