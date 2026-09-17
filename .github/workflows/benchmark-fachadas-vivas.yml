@@ -11,7 +11,9 @@ on:
       - 'godot/guion/dia_calle_app.gd'
       - 'godot/guion/espacio_3d.gd'
       - 'godot/pruebas/benchmark_fachadas_vivas.gd'
+      - 'godot/pruebas/capturar_fachadas_vivas_ruta.gd'
       - 'scripts/test_benchmark_fachadas_vivas.py'
+      - 'scripts/test_capturas_fachadas_vivas.py'
       - 'docs/benchmark-fachadas-vivas.md'
   workflow_dispatch:
 
@@ -82,6 +84,30 @@ jobs:
           python3 scripts/test_benchmark_fachadas_vivas.py \
             --report benchmark-fachadas-vivas | tee /tmp/benchmark-fachadas-vivas.md
           cat /tmp/benchmark-fachadas-vivas.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Capturar ruta sin FachadasVivas
+        shell: bash
+        run: |
+          set -euo pipefail
+          xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+            --script res://pruebas/capturar_fachadas_vivas_ruta.gd -- \
+            --mode=baseline --output="$GITHUB_WORKSPACE/benchmark-fachadas-vivas"
+
+      - name: Capturar ruta con FachadasVivas
+        shell: bash
+        run: |
+          set -euo pipefail
+          xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+            --script res://pruebas/capturar_fachadas_vivas_ruta.gd -- \
+            --mode=full --output="$GITHUB_WORKSPACE/benchmark-fachadas-vivas"
+
+      - name: Validar evidencia visual de ruta
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/test_capturas_fachadas_vivas.py \
+            --report benchmark-fachadas-vivas | tee /tmp/capturas-fachadas-vivas.md
+          cat /tmp/capturas-fachadas-vivas.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Adjuntar comparación visual y métricas
         if: always()
