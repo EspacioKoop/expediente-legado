@@ -82,6 +82,17 @@ IniciarCinematicaBoss:
     ret
 
 TickCinematica:
+    ; La intro debe rechazar el movimiento antes de que el resolver actualice la
+    ; ultima posicion segura del jugador.
+    ld a, [wCinematicaFrames]
+    or a
+    jr z, .obstaculos
+    ld a, [wCinematicaTipo]
+    cp CIN_TIPO_INTRO
+    jr nz, .obstaculos
+    call BloquearGameplayInstrucciones
+
+.obstaculos:
     ; Obstaculos y colision pertenecen al mismo pase BG: cero OAM adicional.
     call ResolverObstaculosGameplay
     call DibujarObstaculosGameplay
@@ -89,12 +100,6 @@ TickCinematica:
     ld a, [wCinematicaFrames]
     or a
     ret z
-    ld a, [wCinematicaTipo]
-    cp CIN_TIPO_INTRO
-    jr nz, .avanzar
-    call BloquearGameplayInstrucciones
-.avanzar:
-    ld a, [wCinematicaFrames]
     dec a
     ld [wCinematicaFrames], a
     ret nz
