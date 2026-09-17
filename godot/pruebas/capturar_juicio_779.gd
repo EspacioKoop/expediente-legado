@@ -5,9 +5,9 @@
 ##   xvfb-run -a godot4 --path godot --script res://pruebas/capturar_juicio_779.gd \
 ##       -- /tmp/juicio-779
 ##
-## Genera tres arenas con una sola carta y una sola semilla cada una para que el
+## Genera seis arenas con una sola carta y una sola semilla cada una para que el
 ## ritual resultante sea determinista y comparable entre revisiones. Justicia +
-## Duat añade una cuarta captura con el aviso real de ataque rival activo.
+## Duat añade una séptima captura con el aviso real de ataque rival activo.
 extends SceneTree
 
 const CASOS := [
@@ -28,6 +28,24 @@ const CASOS := [
 		"arcano": "la-fuerza",
 		"nombre": "La Fuerza",
 		"mito": "aquiles",
+	},
+	{
+		"archivo": "sol-maui",
+		"arcano": "el-sol",
+		"nombre": "El Sol",
+		"mito": "maui_tamanuitera",
+	},
+	{
+		"archivo": "colgado-anansi",
+		"arcano": "el-colgado",
+		"nombre": "El Colgado",
+		"mito": "anansi_akan",
+	},
+	{
+		"archivo": "muerte-hidra",
+		"arcano": "la-muerte",
+		"nombre": "La Muerte",
+		"mito": "hidra",
 	},
 ]
 

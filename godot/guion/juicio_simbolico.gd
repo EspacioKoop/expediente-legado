@@ -27,7 +27,7 @@ const MITOS := {
 	"maui_tamanuitera": {"forma": "sol", "color": Color("b87931")},
 }
 
-## Primer vocabulario mecánico del Juicio. Se mantiene cerrado a parejas con una
+## Vocabulario mecánico del Juicio. Se mantiene cerrado a parejas con una
 ## lectura clara para que descubrir dos símbolos no genere buffs procedurales
 ## difíciles de explicar o balancear.
 const RITUALES := {
@@ -50,6 +50,27 @@ const RITUALES := {
 		"nombre": "Talón de la Fuerza",
 		"dano_fuerte_bonus": 1,
 		"recarga_fuerte": 0.82,
+	},
+	"el-sol|maui_tamanuitera":
+	{
+		"id": "robo_del_sol",
+		"nombre": "Robo del Sol",
+		"interrumpe_telegrafo_fuerte": true,
+		"dano_interrupcion_bonus": 1,
+	},
+	"el-colgado|anansi_akan":
+	{
+		"id": "nudo_suspendido",
+		"nombre": "Nudo suspendido",
+		"enredo_ligero_segundos": 1.10,
+		"velocidad_enredado_mul": 0.45,
+	},
+	"la-muerte|hidra":
+	{
+		"id": "retorno_hidra",
+		"nombre": "Retorno de la Hidra",
+		"retornos_rival": 1,
+		"determinacion_retorno": 2,
 	},
 }
 
