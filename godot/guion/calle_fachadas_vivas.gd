@@ -158,9 +158,7 @@ static func _decorar(
 				lotes, Vector3(x_prop, centro.y, centro.z), materiales, mallas, props
 			)
 		_:
-			_componer_salon(
-				lotes, Vector3(x_prop, centro.y, centro.z), materiales, mallas, props
-			)
+			_componer_salon(lotes, Vector3(x_prop, centro.y, centro.z), materiales, mallas, props)
 	grupo.set_meta("props", props)
 
 
