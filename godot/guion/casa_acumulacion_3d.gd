@@ -86,10 +86,10 @@ static func _objetos_ordenados(estado_ambiental: Dictionary) -> Array[Dictionary
 
 
 static func _montar_objeto(padre: Node3D, objeto: Dictionary, indice: int) -> void:
-	var nodo := Node3D.new()
+	var variante := _variante(objeto)
+	var nodo := _crear_nodo_objeto(objeto, variante)
 	nodo.name = "ObjetoCasa%02d" % indice
 	nodo.position = ANCLAS[indice]
-	var variante := _variante(objeto)
 	nodo.set_meta("objeto_id", String(objeto.get("id", "")))
 	nodo.set_meta("origen", String(objeto.get("origen", "")))
 	nodo.set_meta("variante", variante)
@@ -101,7 +101,7 @@ static func _montar_objeto(padre: Node3D, objeto: Dictionary, indice: int) -> vo
 		VAR_MARCO:
 			_marco(nodo)
 		VAR_PUBLICACION:
-			_publicacion(nodo)
+			_publicacion(nodo, objeto)
 		VAR_CINTA:
 			_cinta(nodo)
 		VAR_PAQUETE:
@@ -112,6 +112,49 @@ static func _montar_objeto(padre: Node3D, objeto: Dictionary, indice: int) -> vo
 			_recuerdo(nodo)
 		_:
 			_util(nodo)
+
+
+static func _crear_nodo_objeto(objeto: Dictionary, variante: String) -> Node3D:
+	if variante != VAR_PUBLICACION:
+		return Node3D.new()
+
+	var lectura := Interactuable3D.new()
+	lectura.verbo = Interactuable3D.Verbo.LEER
+	var item_id := String(objeto.get("id", ""))
+	var ficha := Publicaciones98.por_id(item_id)
+	lectura.nombre_objeto = String(
+		ficha.get("titulo", objeto.get("nombre", item_id.replace("_", " ")))
+	)
+	lectura.set_meta("publicacion_id", item_id)
+	lectura.set_meta("titulo_publicacion", lectura.nombre_objeto)
+	lectura.set_meta("categoria_publicacion", String(ficha.get("categoria", "publicacion")))
+	lectura.set_meta("portada_titulo", _titulo_portada(ficha))
+	lectura.set_meta("formato_publicacion", _formato_publicacion(ficha))
+	return lectura
+
+
+static func _titulo_portada(ficha: Dictionary) -> String:
+	var piezas = ficha.get("piezas", [])
+	if typeof(piezas) != TYPE_ARRAY:
+		return ""
+	for pieza in piezas:
+		if typeof(pieza) != TYPE_DICTIONARY:
+			continue
+		if String(pieza.get("tipo", "")) == "portada":
+			return String(pieza.get("titulo", ""))
+	if not piezas.is_empty() and typeof(piezas[0]) == TYPE_DICTIONARY:
+		return String(piezas[0].get("titulo", ""))
+	return ""
+
+
+static func _formato_publicacion(ficha: Dictionary) -> String:
+	match String(ficha.get("categoria", "")):
+		"prensa_general":
+			return "periodico"
+		"guia_practica":
+			return "libro"
+		_:
+			return "revista"
 
 
 static func _es_iman_calendario(objeto: Dictionary) -> bool:
@@ -188,10 +231,59 @@ static func _marco(raiz: Node3D) -> void:
 	_caja(raiz, Vector3(0, 0, -0.022), Vector3(0.16, 0.21, 0.012), Color(0.15, 0.13, 0.11))
 
 
-static func _publicacion(raiz: Node3D) -> void:
-	_caja(raiz, Vector3(0, -0.08, 0), Vector3(0.24, 0.035, 0.18), Color(0.42, 0.22, 0.18))
-	_caja(raiz, Vector3(0.01, -0.035, 0), Vector3(0.23, 0.032, 0.17), Color(0.58, 0.53, 0.36))
-	_caja(raiz, Vector3(-0.01, 0.008, 0), Vector3(0.22, 0.030, 0.16), Color(0.28, 0.36, 0.46))
+static func _publicacion(raiz: Node3D, objeto: Dictionary) -> void:
+	var item_id := String(objeto.get("id", ""))
+	var ficha := Publicaciones98.por_id(item_id)
+	var formato := _formato_publicacion(ficha)
+	var paleta := _paleta_publicacion(item_id)
+	var tam := Vector3(0.20, 0.025, 0.15)
+
+	match formato:
+		"periodico":
+			tam = Vector3(0.27, 0.020, 0.20)
+			_caja(raiz, Vector3.ZERO, tam, paleta[0])
+			_caja(raiz, Vector3(0, 0.013, 0.055), Vector3(0.24, 0.006, 0.055), paleta[1])
+			_caja(raiz, Vector3(-0.055, 0.014, -0.045), Vector3(0.10, 0.006, 0.065), paleta[2])
+		"libro":
+			tam = Vector3(0.18, 0.055, 0.14)
+			_caja(raiz, Vector3.ZERO, tam, paleta[0])
+			_caja(raiz, Vector3(-0.086, 0, 0), Vector3(0.016, 0.058, 0.14), paleta[1])
+			_caja(raiz, Vector3(0.012, 0.031, 0), Vector3(0.14, 0.008, 0.10), paleta[2])
+		_:
+			tam = Vector3(0.21, 0.026, 0.155)
+			_caja(raiz, Vector3.ZERO, tam, paleta[0])
+			_caja(raiz, Vector3(-0.098, 0, 0), Vector3(0.014, 0.030, 0.155), paleta[1])
+			_caja(raiz, Vector3(0.025, 0.016, -0.035), Vector3(0.13, 0.006, 0.045), paleta[2])
+
+	_colision_publicacion(raiz, tam)
+
+
+static func _paleta_publicacion(item_id: String) -> Array[Color]:
+	match item_id:
+		"revista_umbral_98":
+			return [Color(0.25, 0.14, 0.18), Color(0.68, 0.50, 0.24), Color(0.12, 0.13, 0.16)]
+		"periodico_tarde_98":
+			return [Color(0.68, 0.65, 0.56), Color(0.28, 0.32, 0.38), Color(0.48, 0.18, 0.16)]
+		"byte_domestico_42":
+			return [Color(0.18, 0.28, 0.38), Color(0.64, 0.62, 0.48), Color(0.20, 0.48, 0.45)]
+		"marcador_98_deportes":
+			return [Color(0.22, 0.42, 0.26), Color(0.75, 0.72, 0.54), Color(0.48, 0.18, 0.16)]
+		"estratos_ciudad_06":
+			return [Color(0.50, 0.38, 0.24), Color(0.25, 0.20, 0.17), Color(0.68, 0.58, 0.40)]
+		"manual_casa_98":
+			return [Color(0.50, 0.47, 0.32), Color(0.22, 0.30, 0.22), Color(0.72, 0.67, 0.48)]
+		_:
+			return [Color(0.42, 0.22, 0.18), Color(0.58, 0.53, 0.36), Color(0.28, 0.36, 0.46)]
+
+
+static func _colision_publicacion(raiz: Node3D, tam: Vector3) -> void:
+	if not raiz is Interactuable3D:
+		return
+	var colision := CollisionShape3D.new()
+	var forma := BoxShape3D.new()
+	forma.size = tam + Vector3(0.04, 0.06, 0.04)
+	colision.shape = forma
+	raiz.add_child(colision)
 
 
 static func _cinta(raiz: Node3D) -> void:
