@@ -54,6 +54,20 @@ const PRESCRIPCIONES := [
 		"giro_reaccion": Vector3(0.0, -76.0, -9.0),
 		"motivo_simbolico": "laberinto",
 	},
+	{
+		"objeto_id": "armario_hogar",
+		"anomalia_id": "armario-domestico-desencajado",
+		"modelo": "household_goods/wardrobe_01",
+		"tam": Vector3(0.99, 1.93, 0.63),
+		"color": Color(0.34, 0.28, 0.23),
+		"nombre": "armario doméstico desencajado",
+		"escala": Vector3(0.62, 1.80, 1.45),
+		"reaccion": Vector3(1.42, 0.78, 0.68),
+		"giro": Vector3(0.0, 28.0, 8.0),
+		"giro_reaccion": Vector3(0.0, -62.0, -11.0),
+		"motivo_simbolico": "laberinto",
+		"asset_cc0": true,
+	},
 ]
 
 const PRESCRIPCION_TAROT := {
@@ -141,6 +155,7 @@ static func montar(
 				datos["reaccion"],
 				datos["giro"],
 				datos["giro_reaccion"],
+				bool(datos.get("asset_cc0", false)),
 			)
 		)
 		_montar_eco_simbolico(anomalia, motivo)
