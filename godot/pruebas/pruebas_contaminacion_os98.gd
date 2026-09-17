@@ -21,6 +21,7 @@ func _probar() -> void:
 	_comprobar(not contexto["habilitar_enlace13"], "la superficie restringida no se anuncia antes")
 	_comprobar(contexto["credenciales"].is_empty(), "una partida nueva no conoce credenciales")
 	_comprobar(contexto["urls_caidas"].is_empty(), "una partida nueva no contamina Web98")
+	_comprobar(not contexto["climax_hastur_pendiente"], "una partida nueva no solicita clímax")
 	_comprobar(
 		not ContaminacionOs98.registrar_documento(partida, estado, ContaminacionOs98.MEMORANDUM_ID),
 		"no se puede adelantar enlace13 abriendo un id antes del hito",
@@ -94,11 +95,33 @@ func _probar() -> void:
 		contexto["urls_caidas"].has(ContaminacionOs98.URL_DIAGNOSTICO),
 		"la lectura en Explorador hace caer el diagnóstico en Web98",
 	)
+	_comprobar(not contexto["climax_hastur_pendiente"], "fase 3 todavía no entrega el clímax")
 	_comprobar(
 		not ContaminacionOs98.registrar_documento(
 			partida, estado, ContaminacionOs98.REGISTRO_IMPOSIBLE_ID
 		),
 		"releer la evidencia imposible no repite el hito",
+	)
+
+	_comprobar(
+		ContaminacionOs98.registrar_documento(partida, estado, ContaminacionOs98.DIAGNOSTICO_ID),
+		"volver al diagnóstico tras comprobar la caída activa el handoff",
+	)
+	contexto = ContaminacionOs98.contexto(partida, estado, 2)
+	_comprobar(
+		contexto["fase_contaminacion"] == ContaminacionOs98.FASE_CLIMAX,
+		"el retorno al origen avanza de forma determinista a fase 4",
+	)
+	_comprobar(contexto["climax_hastur_pendiente"], "fase 4 publica el handoff hacia Hastur")
+	_comprobar(
+		contexto["conocimiento"].has(ContaminacionOs98.CONOCIMIENTO_CLIMAX),
+		"el handoff queda en el contexto compartido sin duplicar lógica de clímax",
+	)
+	_comprobar(
+		not ContaminacionOs98.registrar_documento(
+			partida, estado, ContaminacionOs98.DIAGNOSTICO_ID
+		),
+		"reabrir el diagnóstico en fase 4 es idempotente",
 	)
 
 	var otra_vuelta := ContaminacionOs98.nuevo()
@@ -108,8 +131,9 @@ func _probar() -> void:
 			contexto_nuevo["credenciales"].is_empty()
 			and contexto_nuevo["fase_contaminacion"] == ContaminacionOs98.FASE_NORMALIDAD
 			and contexto_nuevo["urls_caidas"].is_empty()
+			and not contexto_nuevo["climax_hastur_pendiente"]
 		),
-		"un estado de vuelta nuevo no hereda contaminación",
+		"un estado de vuelta nuevo no hereda contaminación ni el handoff",
 	)
 
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
