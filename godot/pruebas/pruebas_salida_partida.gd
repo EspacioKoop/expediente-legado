@@ -80,7 +80,10 @@ func _probar_camino_canonico() -> void:
 	var correcto := Salida.guardar_desde(host)
 	_comprobar(bool(correcto.get("ok", false)), "la escena puede autorizar la salida")
 	_comprobar(host.llamadas == 1, "la salida llama al guardado canónico una sola vez")
-	_comprobar(String(correcto.get("motivo", "x")).is_empty(), "el camino canónico limpio no deja motivo")
+	_comprobar(
+		String(correcto.get("motivo", "x")).is_empty(),
+		"el camino canónico limpio no deja motivo"
+	)
 
 	host.permitir = false
 	var fallido := Salida.guardar_desde(host)
