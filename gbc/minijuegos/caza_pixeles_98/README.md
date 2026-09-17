@@ -8,25 +8,51 @@ Chromia está perdiendo su **croma**, la materia viva que da color a sus océano
 
 La nave del jugador empieza rescatando croma, pero durante la partida aparecen semillas de ecosistema y focos contaminantes. Cerrar estos focos restaura Chromia, aunque obliga a abandonar el combo: el juego contrapone de forma explícita la puntuación inmediata y la recuperación del planeta.
 
-Este primer vertical de #882 cuenta la trama mediante reglas y cambios de presentación; las cinemáticas completas, el Glitch Behemoth y el pase artístico final quedan para cortes posteriores.
+El cierre de la campaña enfrenta a la nave con el **Glitch Behemoth**, una masa de chatarra, maquinaria abandonada y croma corrompido. No se trata como una criatura natural “malvada”: sus cuatro puntos vulnerables representan focos de residuo industrial que hay que limpiar para deshacer la masa.
 
 ## Campaña actual
 
-Una partida dura **45 segundos** y se divide en tres fases consecutivas:
+Una partida dura hasta **45 segundos** y se divide en tres fases consecutivas:
 
 1. **El éxodo** — 45→30 s. Croma libre y semillas; ritmo de introducción.
 2. **La zona muerta** — 30→15 s. Entran focos contaminantes estacionarios y aumenta la velocidad.
-3. **Restauración** — 15→0 s. Ritmo máximo y mezcla de los tres tipos de objetivo.
+3. **Restauración** — 15→0 s. Ritmo máximo y mezcla de los tres tipos de objetivo. En los últimos **8 segundos** aparece el Glitch Behemoth.
 
-Cada fase cambia la paleta de fondo para reforzar el paso de Chromia vivo a la zona industrial y, después, a una restauración más luminosa. El HUD muestra `P` (fase) y `R` (restauración) además de puntuación, combo y tiempo.
+Si se limpian los cuatro núcleos del Behemoth antes de que se agote el tiempo, la partida termina inmediatamente como final completado y el récord de fase pasa a `P4`. Si el tiempo llega a cero con el Behemoth activo, se conserva el progreso y la restauración lograda, pero el residuo continúa visible en la pantalla final.
 
 ### Objetivos
 
 - **Croma libre**: rombo móvil. Mantiene el loop clásico de captura y combo.
 - **Semilla de ecosistema**: brote móvil más lento. Puntúa y añade restauración.
 - **Foco contaminante**: instalación fija. Cerrarla suma mucha restauración y un punto fijo, pero rompe el combo y devuelve el multiplicador a x1.
+- **Núcleo del Behemoth**: punto vulnerable que rota por cuatro esquinas del metasprite. Cada impacto restaura Chromia; existe un breve cooldown para impedir que un solapamiento sostenido cuente varios golpes.
 
 El combo conserva la ventana de **1,5 segundos**: desde 3 capturas puntúa x2 y desde 6 puntúa x3. La puntuación sigue saturada en 99 y la velocidad aumenta por puntuación y por fase.
+
+## Restauración visual de Chromia
+
+La restauración ya no es solo un número del HUD. El planeta aparece dentro del gameplay y cambia en cuatro escalones:
+
+- `0–24`: **seco**, rodeado por cuatro restos de basura orbital;
+- `25–49`: **agua**, desaparece parte del cinturón de residuos;
+- `50–74`: **bosque**, queda un único foco visible;
+- `75–99`: **vivo**, desaparecen los restos y la paleta recupera saturación.
+
+Chromia usa tiles propios y una **paleta BG CGB independiente mediante atributos en `rVBK`**, de modo que el planeta puede recuperar color sin recolorear el HUD. En la fase 3 también cambia gradualmente la paleta global del espacio al cruzar esos mismos umbrales.
+
+La pantalla final conserva el estado visual alcanzado. Además muestra una semilla si el Behemoth fue disuelto o un núcleo contaminado si el tiempo terminó antes.
+
+## Glitch Behemoth y presupuesto OAM
+
+El Behemoth es un metasprite **32×32** formado por una cuadrícula 4×4 de sprites de 8×8:
+
+- 16 sprites de cuerpo;
+- 1 sprite superpuesto para el núcleo vulnerable actual;
+- 1 sprite para la nave del jugador.
+
+El cuerpo ocupa como máximo **4 sprites en una misma scanline**. Sumando núcleo y jugador, el peor caso documentado es de **6 sprites por línea**, por debajo del límite hardware de 10. En total se usan 18 entradas OAM durante el boss, muy por debajo de las 40 disponibles.
+
+Los cuatro núcleos se recorren en posiciones diferentes del cuerpo; no es una barra de vida abstracta. Cada impacto limpia un residuo, suma restauración y mueve el siguiente punto vulnerable.
 
 ## Controles
 
@@ -41,7 +67,7 @@ La ROM usa la infraestructura MBC5 + 8 KiB RAM + batería introducida en #819. G
 
 - mejor puntuación;
 - mejor combo;
-- fase más alta alcanzada;
+- fase más alta alcanzada (`P4` indica final del Behemoth completado);
 - mejor nivel de restauración.
 
 El bloque de guardado empieza con la firma `PX98`, lleva versión y checksum. Si la SRAM está vacía, pertenece a otra versión o no supera la comprobación, los récords se inicializan de forma segura a cero.
@@ -54,12 +80,13 @@ La pantalla final muestra el resultado actual y los mejores valores persistidos.
 
 - pantalla de título CGB a pantalla completa procedente de la lámina aprobada de #810;
 - fallback de título de texto en DMG;
-- cuatro paletas OBJ: nave, croma, semilla y foco;
-- tres paletas de gameplay por fase;
-- sprites de 8×8 para el vertical actual;
-- sonido diferenciado para captura, restauración, cierre de foco, transición de fase y final.
+- cuatro paletas OBJ: nave, croma/núcleo, semilla y foco/Behemoth;
+- paletas de gameplay diferenciadas por fase y por nivel de restauración en la fase 3;
+- Chromia dibujado con tiles y atributos CGB propios;
+- metasprite 32×32 del Glitch Behemoth;
+- sonidos diferenciados para captura, restauración, cierre de foco, transición de fase, aparición del Behemoth, golpe de núcleo, victoria y derrota.
 
-El arte de gameplay todavía es deliberadamente un vertical: fondos completos, parallax, metasprites, fauna, animaciones, música y Glitch Behemoth siguen pendientes en #882.
+Todavía quedan en #882 el pase artístico completo de fondos/parallax, fauna pixelada, animaciones/cinemáticas más elaboradas y música de fase completa.
 
 ## Compilar
 
@@ -85,14 +112,17 @@ make clean test
 
 `test_rom.py` comprueba el contrato del combo y PRNG heredados y añade regresiones para:
 
-- las tres fases y sus transiciones;
+- las tres fases y la entrada al final del Behemoth;
 - los tres tipos de objetivo;
 - la decisión restauración vs. combo de los focos;
+- cuatro estados visuales de Chromia y sus atributos CGB;
+- aparición, cuatro núcleos, cooldown y resolución del Behemoth;
+- presupuesto OAM/scanline del metasprite;
 - HUD de fase/restauración;
 - formato y protección de SRAM;
 - cabecera CGB y cartucho con batería.
 
-El smoke común del repositorio sigue validando la ROM con `Siga98GB`, el mismo núcleo usado por la Portátil Color 98. Este README no afirma validación visual humana: las capturas y el playtest final forman parte del trabajo pendiente de #882.
+El smoke común del repositorio valida la ROM con `Siga98GB`, el mismo núcleo usado por la Portátil Color 98. Este README no afirma validación visual humana: las capturas comparativas y el playtest final forman parte del trabajo pendiente de #882.
 
 ## Integración
 
