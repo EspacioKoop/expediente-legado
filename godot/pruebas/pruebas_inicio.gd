@@ -115,9 +115,7 @@ func _probar() -> void:
 		"#888: los tableaux tienen IDs internos estables sin añadir texto a la UI"
 	)
 	_comprobar(
-		not is_equal_approx(
-			float(inicio._diorama.get("_fov_objetivo")), InicioDiorama3D.FOV_BASE
-		),
+		not is_equal_approx(float(inicio._diorama.get("_fov_objetivo")), InicioDiorama3D.FOV_BASE),
 		"#888: el tableau puede variar sutilmente el FOV sin crear otra escena"
 	)
 	_comprobar(
