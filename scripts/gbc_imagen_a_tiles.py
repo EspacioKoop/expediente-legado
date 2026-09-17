@@ -87,7 +87,7 @@ def error_tile(tile, paleta):
     return d.min(1).sum(), d.argmin(1)
 
 
-def paletas_por_tile(tiles, n_paletas=8, iteraciones=6, fijas=(), solo_fijas=None):
+def paletas_por_tile(tiles, n_paletas=8, iteraciones=6, fijas=(), solo_fijas=None, recortar=True):
     """Reparte 8 paletas de 4 colores entre los tiles.
 
     `fijas` son paletas RGB555 que no se ajustan y ocupan los primeros índices;
@@ -115,6 +115,8 @@ def paletas_por_tile(tiles, n_paletas=8, iteraciones=6, fijas=(), solo_fijas=Non
         errores = np.array([[error_tile(t, paletas[p])[0] for p in range(n_paletas)] for t in tiles])
         errores[solo_fijas, n_fijas:] = np.inf
         grupo = errores.argmin(1)
+    if not recortar:
+        return paletas, grupo
     return paletas.clip(0, 31).astype(np.int32), grupo
 
 
@@ -140,14 +142,23 @@ def _celdas(im):
             for y in range(FILAS) for x in range(COLS)]
 
 
+def a_luma_croma(peso_croma):
+    """Matriz RGB -> YCbCr con el croma multiplicado por `peso_croma`."""
+    m = np.array([[0.299, 0.587, 0.114], [-0.169, -0.331, 0.5], [0.5, -0.419, -0.081]])
+    m[1:] *= peso_croma
+    return m
+
+
 def convertir_con_variantes(base, variantes, salida, etiqueta="Pantalla", max_tiles=512,
-                            paletas_fijas=(), filas_fijas=()):
+                            paletas_fijas=(), filas_fijas=(), peso_croma=1.0):
     """Convierte una imagen 160x144 y sus variantes con paletas y tiles comunes.
 
     `variantes` es un dict ordenado nombre -> imagen 160x144. De cada variante
     solo se guardan las celdas que difieren de la base. `paletas_fijas` (colores
     RGB de 8 bits, 4 por paleta) se reservan para las filas de tiles de
-    `filas_fijas`, como un HUD que no debe perder sus colores.
+    `filas_fijas`, como un HUD que no debe perder sus colores. Con `peso_croma`
+    mayor que 1 las paletas se ajustan dando más peso al tono que al brillo:
+    detalles pequeños y saturados (un dragón dorado) no se pierden en grises.
     """
     celdas_base = _celdas(base)
     parches = {}
@@ -162,8 +173,15 @@ def convertir_con_variantes(base, variantes, salida, etiqueta="Pantalla", max_ti
 
     fila_de = list(range(COLS * FILAS)) + [i for pares in parches.values() for i, _ in pares]
     solo_fijas = [fila_de[k] // COLS in filas_fijas for k in range(len(celdas))]
-    paletas, grupo = paletas_por_tile(celdas, fijas=a555(paletas_fijas) if paletas_fijas else (),
-                                      solo_fijas=solo_fijas)
+    fijas = a555(paletas_fijas) if paletas_fijas else np.zeros((0, 4, 3))
+    if peso_croma == 1.0:
+        paletas, grupo = paletas_por_tile(celdas, fijas=fijas, solo_fijas=solo_fijas)
+    else:
+        m = a_luma_croma(peso_croma)
+        paletas, grupo = paletas_por_tile([c @ m.T for c in celdas], fijas=np.asarray(fijas, float) @ m.T,
+                                          solo_fijas=solo_fijas, recortar=False)
+        paletas = np.rint(paletas @ np.linalg.inv(m).T).clip(0, 31).astype(np.int32)
+        paletas[:len(fijas)] = fijas
     paletas = np.array([ordenar_paleta(p) for p in paletas])
 
     # Deduplicar tiles con volteos.

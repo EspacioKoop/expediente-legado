@@ -2,44 +2,44 @@
 ; <Etiqueta>_<variante> aplica la variante; ..._Base la deshace.
 JuegoCGB_Abierta1:
     db 6
-    db 6, 2, $5C, $0B
-    db 6, 3, $5D, $0B
-    db 6, 4, $5E, $0B
-    db 7, 2, $5F, $0A
-    db 7, 3, $60, $0F
-    db 7, 4, $8F, $03
+    db 6, 2, $5C, $0F
+    db 6, 3, $5D, $0F
+    db 6, 4, $5E, $0F
+    db 7, 2, $5F, $0F
+    db 7, 3, $60, $0E
+    db 7, 4, $8F, $07
 JuegoCGB_Abierta1_Base:
     db 6
-    db 6, 2, $79, $03
-    db 6, 3, $7A, $06
-    db 6, 4, $7B, $03
-    db 7, 2, $8D, $02
-    db 7, 3, $8E, $06
-    db 7, 4, $8F, $03
+    db 6, 2, $79, $07
+    db 6, 3, $7A, $07
+    db 6, 4, $7B, $07
+    db 7, 2, $8D, $07
+    db 7, 3, $8E, $05
+    db 7, 4, $8F, $07
 JuegoCGB_Abierta2:
     db 4
-    db 6, 8, $61, $0B
-    db 6, 9, $62, $0B
-    db 7, 8, $63, $0A
-    db 7, 9, $64, $0B
+    db 6, 8, $61, $0F
+    db 6, 9, $62, $0F
+    db 7, 8, $63, $0F
+    db 7, 9, $64, $0F
 JuegoCGB_Abierta2_Base:
     db 4
-    db 6, 8, $7F, $06
-    db 6, 9, $80, $06
-    db 7, 8, $93, $06
-    db 7, 9, $94, $06
+    db 6, 8, $7F, $07
+    db 6, 9, $80, $07
+    db 7, 8, $93, $07
+    db 7, 9, $94, $07
 JuegoCGB_Abierta3:
     db 4
-    db 6, 14, $65, $0B
-    db 6, 15, $66, $0E
-    db 7, 14, $67, $0A
-    db 7, 15, $68, $0B
+    db 6, 14, $65, $0F
+    db 6, 15, $66, $0F
+    db 7, 14, $67, $0C
+    db 7, 15, $68, $0F
 JuegoCGB_Abierta3_Base:
     db 4
-    db 6, 14, $85, $06
-    db 6, 15, $86, $06
-    db 7, 14, $99, $06
-    db 7, 15, $9A, $06
+    db 6, 14, $85, $05
+    db 6, 15, $86, $07
+    db 7, 14, $99, $05
+    db 7, 15, $9A, $05
 JuegoCGB_Correcta1:
     db 4
     db 16, 4, $69, $08

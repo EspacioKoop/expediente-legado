@@ -1,8 +1,8 @@
     dw $639D, $272B, $153A, $1C83 ; paleta 0
     dw $639D, $1ABC, $19A5, $1C83 ; paleta 1
-    dw $6FBD, $52B2, $41C8, $1CA2 ; paleta 2
-    dw $5F9D, $323C, $4E08, $18C6 ; paleta 3
-    dw $5F9E, $429F, $35F9, $1D19 ; paleta 4
-    dw $46D5, $362C, $2D65, $1881 ; paleta 5
-    dw $4696, $318B, $1D4F, $1882 ; paleta 6
-    dw $6FDE, $6315, $566D, $49E6 ; paleta 7
+    dw $3EF4, $362B, $2D65, $1881 ; paleta 2
+    dw $5F9E, $4F1E, $3A3C, $2119 ; paleta 3
+    dw $6FBD, $4E91, $49E7, $20C3 ; paleta 4
+    dw $46B6, $31AD, $2925, $1881 ; paleta 5
+    dw $6BBE, $5EF4, $524B, $49C6 ; paleta 6
+    dw $5F7C, $29D9, $45E7, $18C7 ; paleta 7

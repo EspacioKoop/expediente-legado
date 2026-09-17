@@ -69,6 +69,9 @@ VERDE = (88, 200, 72)
 ROJO = (208, 72, 40)
 DORADO = (224, 168, 48)
 VERDE_OSCURO = (40, 104, 48)
+# El croma pesa el doble al ajustar las paletas: sin ello el dragón perdía el
+# dorado y los torii el rojo.
+PESO_CROMA = 2.0
 PALETAS_HUD = [[CREMA, VERDE, ROJO, TINTA], [CREMA, DORADO, VERDE_OSCURO, TINTA]]
 
 FUENTE_3X5 = {
@@ -242,7 +245,7 @@ def main():
     base, variantes = escena_juego()
     n = convertir_con_variantes(base, variantes, ASSETS / "juego", etiqueta="JuegoCGB",
                                 max_tiles=256 + PRIMER_TILE_SPRITE,
-                                paletas_fijas=PALETAS_HUD, filas_fijas=FILAS_HUD)
+                                paletas_fijas=PALETAS_HUD, filas_fijas=FILAS_HUD, peso_croma=PESO_CROMA)
     print(f"juego: {n} tiles únicos")
     n = convertir_con_variantes(escena_victoria(), {}, ASSETS / "victoria", max_tiles=256 + PRIMER_TILE_SPRITE)
     print(f"victoria: {n} tiles únicos")
