@@ -115,7 +115,9 @@ func _probar() -> void:
 		examinar_armario = armario.get_node_or_null("ExaminarArmarioHogar") as Interactuable3D
 	_comprobar(examinar_armario != null, "el armario CC0 es examinable")
 	if examinar_armario != null:
-		_comprobar(examinar_armario.texto_accion() == "Examinar armario", "el prompt nombra el original")
+		_comprobar(
+			examinar_armario.texto_accion() == "Examinar armario", "el prompt nombra el original"
+		)
 		_comprobar(examinar_armario.interactuar(root), "examinar el armario acepta interacción")
 		_comprobar(
 			ObjetosOniricos.del_dia(dia.jornada).has(Hogar.ARMARIO_OBJETO_ONIRICO),
