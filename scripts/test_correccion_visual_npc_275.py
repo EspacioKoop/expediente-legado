@@ -34,6 +34,10 @@ class CorreccionVisualNpc275Test(unittest.TestCase):
         self.assertIn('"Cabello275"', self.script)
         self.assertIn('Modelos.PERFILES_FACIALES', self.script)
 
+    def test_cara_existente_puede_alcanzar_el_objetivo_sin_suelo_artificial(self):
+        self.assertIn('minf(alto_objetivo / alto_actual, 1.0)', self.script)
+        self.assertNotIn('clampf(alto_objetivo / alto_actual, 0.25, 1.0)', self.script)
+
     def test_malla_base_pasa_a_underlay_sin_tapar_el_vestuario_runtime(self):
         self.assertIn('_pintar_importado(pieza, color_base.darkened(0.38))', self.script)
         self.assertIn('nodo.owner != null', self.script)
