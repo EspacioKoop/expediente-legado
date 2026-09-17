@@ -139,43 +139,5 @@ static func _crear_recogible(
 	recogible.set_meta("publicacion_id", item_id)
 	recogible.set_meta("ancla_publicacion", String(definicion.get("ancla", "")))
 	recogible.set_meta("encontrable_1998", true)
-	_decorar(recogible, item_id)
+	PublicacionFisica3D.montar(recogible, item_id)
 	return recogible
-
-
-static func _decorar(raiz: Node3D, item_id: String) -> void:
-	var ficha := Publicaciones98.por_id(item_id)
-	var tam := Vector3(0.23, 0.026, 0.17)
-	if String(ficha.get("categoria", "")) == "guia_practica":
-		tam = Vector3(0.20, 0.055, 0.15)
-
-	var malla := MeshInstance3D.new()
-	malla.name = "CuerpoPublicacion"
-	var caja := BoxMesh.new()
-	caja.size = tam
-	malla.mesh = caja
-	Modelos._pintar(malla, _color(item_id))
-	raiz.add_child(malla)
-
-	var franja := MeshInstance3D.new()
-	franja.name = "FranjaPortada"
-	var franja_malla := BoxMesh.new()
-	franja_malla.size = Vector3(tam.x * 0.66, 0.008, tam.z * 0.28)
-	franja.mesh = franja_malla
-	franja.position = Vector3(tam.x * 0.08, tam.y * 0.58, -tam.z * 0.18)
-	Modelos._pintar(franja, Color(0.72, 0.67, 0.48))
-	raiz.add_child(franja)
-
-
-static func _color(item_id: String) -> Color:
-	match item_id:
-		"byte_domestico_42":
-			return Color(0.18, 0.28, 0.38)
-		"marcador_98_deportes":
-			return Color(0.22, 0.42, 0.26)
-		"estratos_ciudad_06":
-			return Color(0.50, 0.38, 0.24)
-		"manual_casa_98":
-			return Color(0.50, 0.47, 0.32)
-		_:
-			return Color(0.42, 0.22, 0.18)

@@ -80,6 +80,16 @@ Al recoger un ejemplar entra en `carried`; si después se guarda con `Inventario
 
 Ignorar cualquiera de estos props no consume acciones, no bloquea la campaña y no altera la economía. `DiaPublicacionesEncontrablesApp` solo monta los props cuando sus anclas de oficina/casa existen y pide al dueño de la jornada que guarde después de una recogida válida.
 
+## Portadas y lomos
+
+El quinto corte elimina la divergencia visual entre un ejemplar encontrado y el mismo ejemplar una vez guardado. `PublicacionFisica3D` es ahora la única representación editorial para ambos caminos: `PublicacionesEncontrables3D` y `CasaAcumulacion3D` delegan en el mismo renderer procedural.
+
+Cada una de las seis publicaciones conserva una cabecera ficticia y una edición corta propias. La portada física incorpora `Label3D` con cabecera y número/año; revistas y libros añaden un lomo rotulado, mientras que el periódico mantiene el pliego sin inventar un lomo que no tendría sentido. La misma representación añade cuerpos distintos para revista, periódico y guía, además de paletas estables ya usadas por el sistema doméstico.
+
+Los rótulos son texto del mundo, no HUD: usan la fuente monoespaciada de `EstiloSiga`, no siguen a la cámara y viven pegados a la geometría. Por tanto, examinar una portada/lomo exige acercarse al objeto como a cualquier otro prop de #283. El visor sigue siendo la única capa que muestra el contenido hojeable a tamaño accesible.
+
+El acabado no conoce `ComercioBarrio`, `Jornada`, `Inventario` ni `SemillasOniricas`; cambiar una portada no puede comprar, guardar, registrar progreso o alterar #442.
+
 ## Integración con #442
 
 `revista_umbral_98` es el primer vertical cultural conectado al contrato onírico existente:
@@ -121,13 +131,14 @@ La prensa general y el resto de publicaciones no tienen semilla por defecto: oci
 
 `godot/pruebas/pruebas_publicaciones_encontrables_3d.gd` verifica el cuarto corte: catálogo no comprable, anclas reales de puesto/café/sofá, `Recogible3D`, ausencia de respawn, no venta y el flujo completo encontrar → `carried` → `home_storage` → objeto doméstico `LEER`.
 
+`godot/pruebas/pruebas_publicacion_fisica_3d.gd` verifica el quinto corte: las seis cabeceras/ediciones, `Label3D` de portada, lomos solo donde corresponden, formatos diferenciados y colisión opcional para los ejemplares domésticos. `scripts/test_publicacion_fisica_674.py` además impide que casa y hallazgos vuelvan a bifurcar la representación.
+
 Los tests Python asociados ejecutan estos smokes con Godot headless y comprueban que las capas de presentación no compran, cobran ni mueven objetos por su cuenta.
 
 ## Alcance pendiente
 
 Este PR **no cierra #674**. Quedan fuera deliberadamente:
 
-- arte final de portada/lomo si se decide sustituir la representación procedural;
 - decidir si más publicaciones alimentan #442 sin saturar el sistema cultural;
 - validación humana de legibilidad, foco, tamaño físico y presentación con teclado/mando reales.
 
