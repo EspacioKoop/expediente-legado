@@ -61,8 +61,10 @@ func _corregir(pieza: Node) -> void:
 		return
 
 	var alto_torso := absf(
-		esqueleto.get_bone_global_pose(cabeza).origin.y
-		- esqueleto.get_bone_global_pose(cadera).origin.y
+		(
+			esqueleto.get_bone_global_pose(cabeza).origin.y
+			- esqueleto.get_bone_global_pose(cadera).origin.y
+		)
 	)
 	alto_torso = maxf(alto_torso, 0.01)
 	var alto_cabeza_objetivo := alto_torso * RATIO_CABEZA_TORSO
@@ -113,11 +115,7 @@ func _ajustar_cara(cara: BoneAttachment3D, alto_objetivo: float) -> void:
 
 
 func _cabeza_generica(
-	esqueleto: Skeleton3D,
-	hueso_cabeza: int,
-	alto: float,
-	piel: Color,
-	identidad: String
+	esqueleto: Skeleton3D, hueso_cabeza: int, alto: float, piel: Color, identidad: String
 ) -> void:
 	var enganche := BoneAttachment3D.new()
 	enganche.name = "CabezaHumana275"
