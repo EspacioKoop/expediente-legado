@@ -89,9 +89,9 @@ func _montar_mundo() -> void:
 
 	var camara := Camera3D.new()
 	camara.position = Vector3(0.0, 2.0, 4.0)
-	camara.look_at(Vector3(0.0, 1.0, -0.3), Vector3.UP)
 	camara.fov = 43.0
 	_mundo.add_child(camara)
+	camara.look_at(Vector3(0.0, 1.0, -0.3), Vector3.UP)
 
 	var suelo := MeshInstance3D.new()
 	var malla_suelo := BoxMesh.new()
