@@ -74,14 +74,7 @@ const PIEZAS := [
 	],
 	# Dormitorio: el armario deja de flotar en el salón y queda contra el muro
 	# izquierdo, sin invadir la cama ni la puerta nueva.
-	[
-		"ArmarioHogar",
-		ARMARIO,
-		Vector3(-3.55, 0.0, -2.45),
-		Vector3(0.99, 1.93, 0.63),
-		90.0,
-		true
-	],
+	["ArmarioHogar", ARMARIO, Vector3(-3.55, 0.0, -2.45), Vector3(0.99, 1.93, 0.63), 90.0, true],
 	# Comedor
 	[
 		"MesaComedorHogar",
