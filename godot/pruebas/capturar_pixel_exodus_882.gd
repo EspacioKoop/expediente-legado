@@ -166,13 +166,15 @@ func _init() -> void:
 		return
 
 	print(
-		"Pixel Exodus #882: OK · score=%d combo=%d restauración=%d · audio=%d bytes"
-		% [
-			_leer(emulador, W_PUNTOS),
-			_leer(emulador, W_COMBO),
-			_leer(emulador, W_RESTAURACION),
-			_audio_total,
-		]
+		(
+			"Pixel Exodus #882: OK · score=%d combo=%d restauración=%d · audio=%d bytes"
+			% [
+				_leer(emulador, W_PUNTOS),
+				_leer(emulador, W_COMBO),
+				_leer(emulador, W_RESTAURACION),
+				_audio_total,
+			]
+		)
 	)
 	quit(0)
 
@@ -481,19 +483,22 @@ func _escribir_manifest(emulador: Object) -> bool:
 		"issue": 882,
 		"rom": String(emulador.call("rom_title")),
 		"capturas": CAPTURAS,
-		"partida": {
+		"partida":
+		{
 			"score": _leer(emulador, W_PUNTOS),
 			"combo_actual": _leer(emulador, W_COMBO),
 			"restauracion": _leer(emulador, W_RESTAURACION),
 			"fase": _leer(emulador, W_FASE),
 			"boss_derrotado": _leer(emulador, W_BOSS_DERROTADO),
 		},
-		"audio": {
+		"audio":
+		{
 			"sample_rate": FRECUENCIA_AUDIO,
 			"bytes_pcm": _audio_total,
 			"checksums_por_tramo": _checksums_audio,
 		},
-		"sram": {
+		"sram":
+		{
 			"magic": "PX98",
 			"version": int(sram[4]),
 			"mejor_score": int(sram[5]),
@@ -515,7 +520,9 @@ func _escribir_audio() -> bool:
 	if _audio_muestra.is_empty():
 		_fallar("no hay muestra PCM para adjuntar")
 		return false
-	var archivo := FileAccess.open(_salida.path_join("audio-sample-s16le-stereo-48k.pcm"), FileAccess.WRITE)
+	var archivo := FileAccess.open(
+		_salida.path_join("audio-sample-s16le-stereo-48k.pcm"), FileAccess.WRITE
+	)
 	if archivo == null:
 		_fallar("no se pudo crear la muestra PCM")
 		return false
