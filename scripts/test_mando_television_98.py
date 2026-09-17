@@ -29,11 +29,20 @@ class MandoTelevision98Test(unittest.TestCase):
         self.assertIn("_alternar(null)", self.televisor)
         self.assertIn("_brillo.visible = _encendida", self.televisor)
 
-    def test_el_televisor_monta_el_mando_en_el_rincon_de_ocio(self):
+    def test_el_televisor_monta_el_mando_apoyado_en_la_mesa_baja(self):
         self.assertIn("MandoTelevision98.new()", self.televisor)
         self.assertIn('mando.name = "MandoTelevision98"', self.televisor)
-        self.assertIn("Vector3(1.25, 0.23, -1.18)", self.televisor)
+        self.assertIn("OFFSET_MANDO_MESA := Vector3(1.43, -0.56, -0.11)", self.televisor)
+        self.assertIn("mando.position = position + OFFSET_MANDO_MESA", self.televisor)
         self.assertIn("mando.configurar(self)", self.televisor)
+
+    def test_rincon_orienta_tele_y_hace_visible_la_portatil(self):
+        self.assertIn("_orientar_modelo_hacia_sofa()", self.televisor)
+        self.assertIn("pieza.rotation_degrees.y = 90.0", self.televisor)
+        self.assertIn("OFFSET_PORTATIL_MESA := Vector3(1.15, -0.56, 0.07)", self.televisor)
+        self.assertIn('get_node_or_null("ConsolaPortatil98")', self.televisor)
+        self.assertIn("portatil.position = position + OFFSET_PORTATIL_MESA", self.televisor)
+        self.assertIn("Vector3(90.0, 0.0, 0.0)", self.televisor)
 
     def test_no_inventa_funciones_que_la_tele_no_tiene(self):
         for termino in (
