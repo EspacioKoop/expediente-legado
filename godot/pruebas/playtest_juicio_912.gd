@@ -103,9 +103,7 @@ func _metricas(nombre: String, ritual: Dictionary) -> Dictionary:
 	var radio := float(ritual.get("radio_arena", JuicioCombate3D.RADIO_ARENA))
 	var velocidad_mul := float(ritual.get("velocidad_rival_mul", 1.0))
 	var velocidad_rival := JuicioCombate3D.VELOCIDAD_RIVAL * velocidad_mul
-	var recarga_fuerte := float(
-		ritual.get("recarga_fuerte", JuicioCombate3D.RECARGA_FUERTE)
-	)
+	var recarga_fuerte := float(ritual.get("recarga_fuerte", JuicioCombate3D.RECARGA_FUERTE))
 	var dano_fuerte := 2 + int(ritual.get("dano_fuerte_bonus", 0))
 	var retorno := JuicioCombate3D.determinacion_retorno(ritual, 0)
 	var determinacion := JuicioCombate3D.DETERMINACION_BASE + retorno
@@ -136,18 +134,20 @@ func _imprimir_matriz(escenarios: Array) -> void:
 	print("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | :---: |")
 	for fila in escenarios:
 		print(
-			"| %s | %d | %.2f | %.2f | %.2f | %.2f | %d | %.2f | %s |"
-			% [
-				fila["nombre"],
-				fila["determinacion"],
-				fila["radio"],
-				fila["velocidad_rival"],
-				fila["dps_ligero"],
-				fila["dps_fuerte"],
-				fila["contraataque"],
-				fila["cobertura_enredo_recargas"],
-				"sí" if fila["puede_cubrir_cada_telegrafo"] else "no",
-			]
+			(
+				"| %s | %d | %.2f | %.2f | %.2f | %.2f | %d | %.2f | %s |"
+				% [
+					fila["nombre"],
+					fila["determinacion"],
+					fila["radio"],
+					fila["velocidad_rival"],
+					fila["dps_ligero"],
+					fila["dps_fuerte"],
+					fila["contraataque"],
+					fila["cobertura_enredo_recargas"],
+					"sí" if fila["puede_cubrir_cada_telegrafo"] else "no",
+				]
+			)
 		)
 
 
