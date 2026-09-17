@@ -9,6 +9,8 @@ extends Interactuable3D
 const ID_MITO := "gilgamesh"
 const FUENTE := "libro:arqueologia_uruk_98"
 const PAGINAS_MINIMAS := 3
+const TAM_LIBRO := Vector3(0.25, 0.04, 0.18)
+const POS_CASA := Vector3(1.45, 0.763, -0.70)
 
 const COLOR_CUBIERTA := Color(0.24, 0.16, 0.10)
 const COLOR_PAPEL := Color(0.70, 0.64, 0.50)
@@ -33,6 +35,11 @@ func _ready() -> void:
 
 func configurar(jornada: Dictionary) -> void:
 	_jornada = jornada
+	# En la escena real de casa queda apoyado sobre la mesa de comedor (0,76 m),
+	# no como un volumen de suelo. La escena standalone conserva su origen neutro.
+	if name == "GilgameshVigiliaCasa":
+		position = POS_CASA
+		rotation_degrees.y = 8.0
 	_configurar_prompt()
 	if _libro == null:
 		_montar()
@@ -96,40 +103,42 @@ func _montar() -> void:
 	_libro.name = "LibroArqueologia"
 	add_child(_libro)
 
+	# Caja de foco algo más generosa que el volumen físico, pero del orden de un
+	# libro real y no del tamaño de una cama como antes de #783.
 	var colision := CollisionShape3D.new()
 	colision.name = "ColisionLibroGilgamesh"
 	var forma := BoxShape3D.new()
-	forma.size = Vector3(2.4, 0.38, 1.7)
+	forma.size = Vector3(0.29, 0.10, 0.22)
 	colision.shape = forma
-	colision.position = Vector3(0.0, 0.18, 0.0)
+	colision.position = Vector3(0.0, 0.045, 0.0)
 	add_child(colision)
 
 	_agregar_caja(
 		_libro,
 		"CubiertaInferior",
-		Vector3(2.45, 0.12, 1.72),
-		Vector3(0.0, 0.06, 0.0),
+		Vector3(TAM_LIBRO.x, 0.004, TAM_LIBRO.z),
+		Vector3(0.0, 0.002, 0.0),
 		COLOR_CUBIERTA,
 	)
 	_agregar_caja(
 		_libro,
 		"BloquePaginas",
-		Vector3(2.28, 0.20, 1.56),
-		Vector3(0.0, 0.20, 0.0),
+		Vector3(0.238, 0.032, 0.168),
+		Vector3(0.0, 0.020, 0.0),
 		COLOR_PAPEL,
 	)
 	_pagina_movil = _agregar_caja(
 		_libro,
 		"PaginaMovil",
-		Vector3(2.26, 0.035, 1.54),
-		Vector3(0.0, 0.33, 0.0),
+		Vector3(0.236, 0.002, 0.166),
+		Vector3(0.0, 0.037, 0.0),
 		COLOR_PAPEL,
 	)
 	_agregar_caja(
 		_libro,
 		"Lomo",
-		Vector3(0.16, 0.40, 1.76),
-		Vector3(-1.18, 0.20, 0.0),
+		Vector3(0.012, TAM_LIBRO.y, 0.184),
+		Vector3(-0.119, 0.020, 0.0),
 		COLOR_CUBIERTA,
 	)
 
@@ -138,8 +147,8 @@ func _montar() -> void:
 	_tablilla = _agregar_caja(
 		_libro,
 		"ReproduccionTablilla",
-		Vector3(0.92, 0.08, 0.68),
-		Vector3(0.48, 0.39, 0.08),
+		Vector3(0.092, 0.004, 0.068),
+		Vector3(0.050, 0.042, 0.018),
 		COLOR_TABLILLA,
 	)
 	_tablilla.visible = false
@@ -147,8 +156,8 @@ func _montar() -> void:
 		_agregar_caja(
 			_tablilla,
 			"Marca%d" % (i + 1),
-			Vector3(0.10 + i * 0.04, 0.025, 0.04),
-			Vector3(-0.24 + i * 0.22, 0.055, -0.12 + i * 0.10),
+			Vector3(0.012 + i * 0.003, 0.001, 0.006),
+			Vector3(-0.024 + i * 0.022, 0.003, -0.012 + i * 0.010),
 			COLOR_TINTA,
 		)
 	_actualizar_feedback()
@@ -158,7 +167,7 @@ func _actualizar_pagina() -> void:
 	if _pagina_movil == null:
 		return
 	_pagina_movil.rotation_degrees.z = -8.0 * float(_paginas_examinadas)
-	_pagina_movil.position.y = 0.33 + 0.015 * float(_paginas_examinadas)
+	_pagina_movil.position.y = 0.037 + 0.0015 * float(_paginas_examinadas)
 	if _paginas_examinadas >= PAGINAS_MINIMAS and _tablilla != null:
 		_tablilla.visible = true
 
