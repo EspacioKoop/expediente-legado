@@ -11,17 +11,11 @@ class SuenoCastilloTest(unittest.TestCase):
     def setUpClass(cls):
         cls.texto = CASTILLO.read_text(encoding="utf-8")
 
-    def test_registra_las_dos_fuentes_cc0_sin_importar_pack_entero(self):
-        self.assertIn("valsekamerplant.itch.io/psx-style-going-medieval", self.texto)
-        self.assertIn("quaternius.com/packs/fantasypropsmegakit.html", self.texto)
-        self.assertIn('LICENCIA := "CC0-1.0"', self.texto)
-        self.assertEqual(self.texto.count('"grupo": "arquitectura"'), 3)
-        self.assertEqual(self.texto.count('"grupo": "prop"'), 3)
-
-    def test_selecciona_categorias_confirmadas_y_no_armas_de_relleno(self):
-        for categoria in ["building_block", "door", "stairs", "book", "chest", "furniture"]:
-            self.assertIn(f'"categoria": "{categoria}"', self.texto)
-        self.assertNotIn('"categoria": "weapon"', self.texto)
+    def test_runtime_no_depende_de_packs_externos_reservados(self):
+        self.assertNotIn("valsekamerplant.itch.io/psx-style-going-medieval", self.texto)
+        self.assertNotIn("quaternius.com/packs/fantasypropsmegakit.html", self.texto)
+        self.assertNotIn("SELECCION_MINIMA", self.texto)
+        self.assertNotIn('"seleccion_onirica"', self.texto)
 
     def test_reutiliza_la_familia_anular_y_su_malla_poligonal(self):
         self.assertIn("SuenoFamilias.de(SuenoFamilias.ANULAR)", self.texto)
