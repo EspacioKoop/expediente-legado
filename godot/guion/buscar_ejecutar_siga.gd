@@ -206,11 +206,11 @@ func _resolver_url_comando(limpio: String) -> Dictionary:
 
 func _construir_buscar() -> void:
 	var titulo := Label.new()
-	titulo.text = "Buscar"
+	titulo.text = tr("Buscar")
 	add_child(titulo)
 
 	var ayuda := Label.new()
-	ayuda.text = "Busca aplicaciones, documentos visibles, sitios conocidos y ayuda."
+	ayuda.text = tr("Busca aplicaciones, documentos visibles, sitios conocidos y ayuda.")
 	ayuda.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(ayuda)
 
@@ -218,12 +218,12 @@ func _construir_buscar() -> void:
 	add_child(barra)
 	_entrada = LineEdit.new()
 	_entrada.name = "Consulta"
-	_entrada.placeholder_text = "Nombre o término…"
+	_entrada.placeholder_text = tr("Nombre o término…")
 	_entrada.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_entrada.text_submitted.connect(_al_buscar_texto)
 	barra.add_child(_entrada)
 	var boton := Button.new()
-	boton.text = "Buscar"
+	boton.text = tr("Buscar")
 	boton.pressed.connect(_realizar_busqueda)
 	barra.add_child(boton)
 
@@ -237,17 +237,17 @@ func _construir_buscar() -> void:
 	_detalle = Label.new()
 	_detalle.name = "Detalle"
 	_detalle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_detalle.text = "Escriba una consulta."
+	_detalle.text = tr("Escriba una consulta.")
 	add_child(_detalle)
 
 
 func _construir_ejecutar() -> void:
 	var titulo := Label.new()
-	titulo.text = "Ejecutar…"
+	titulo.text = tr("Ejecutar…")
 	add_child(titulo)
 
 	var ayuda := Label.new()
-	ayuda.text = "Abra una aplicación, carpeta o dirección Web98 conocida. «ayuda» muestra ejemplos."
+	ayuda.text = tr("Abra una aplicación, carpeta o dirección Web98 conocida. «ayuda» muestra ejemplos.")
 	ayuda.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(ayuda)
 
@@ -255,19 +255,19 @@ func _construir_ejecutar() -> void:
 	add_child(barra)
 	_entrada = LineEdit.new()
 	_entrada.name = "Comando"
-	_entrada.placeholder_text = "Ej.: correo, equipo/documentos, http://…"
+	_entrada.placeholder_text = tr("Ej.: correo, equipo/documentos, http://…")
 	_entrada.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_entrada.text_submitted.connect(_al_ejecutar_texto)
 	barra.add_child(_entrada)
 	var boton := Button.new()
-	boton.text = "Aceptar"
+	boton.text = tr("Aceptar")
 	boton.pressed.connect(_ejecutar_actual)
 	barra.add_child(boton)
 
 	_estado = Label.new()
 	_estado.name = "Estado"
 	_estado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_estado.text = "Solo se aceptan destinos declarados por el escritorio."
+	_estado.text = tr("Solo se aceptan destinos declarados por el escritorio.")
 	add_child(_estado)
 
 
@@ -282,7 +282,7 @@ func _realizar_busqueda() -> void:
 		var indice := _lista.add_item(String(resultado.get("titulo", "Resultado")))
 		_lista.set_item_metadata(indice, resultado)
 	if _resultados.is_empty():
-		_detalle.text = "No se encontraron resultados visibles."
+		_detalle.text = tr("No se encontraron resultados visibles.")
 		return
 	_lista.select(0)
 	_mostrar_detalle(0)
