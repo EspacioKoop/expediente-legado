@@ -112,8 +112,9 @@ def format_report(summary: dict[str, Any]) -> str:
             f"Presupuesto process_ms: **{status}** · Δ observado "
             f"{budget['observed_delta_ms']:+.3f} ms · permitido "
             f"{budget['allowed_delta_ms']:.3f} ms.",
-            f"Feature: {int(counts.get('grupos', 0))} grupos / "
-            f"{int(counts.get('mesh_instances', 0))} MeshInstance3D.",
+            f"Feature: {int(counts.get('grupos', 0))} ventanas / "
+            f"{int(counts.get('render_batches', 0))} lotes MultiMesh / "
+            f"{int(counts.get('batched_instances', 0))} instancias.",
             f"GPU frame time: {summary.get('gpu_frame_ms_note', 'N/D')}",
             "",
             "El runner usa render software; el gate compara únicamente ejecuciones del mismo entorno. "
@@ -154,7 +155,8 @@ class BenchmarkFachadasComparisonTest(unittest.TestCase):
             "components": ["trayecto", "calle_identidad"],
             "feature_counts": {
                 "grupos": 9 if mode == "full" else 0,
-                "mesh_instances": 50 if mode == "full" else 0,
+                "render_batches": 17 if mode == "full" else 0,
+                "batched_instances": 82 if mode == "full" else 0,
             },
             "metrics_avg": {
                 "draw_calls": 20.0 if mode == "baseline" else 25.0,
@@ -196,7 +198,7 @@ class BenchmarkFachadasComparisonTest(unittest.TestCase):
                 (directory / f"{mode}.png").write_bytes(b"png")
             summary, markdown = validate_artifacts(directory)
             self.assertIn("draw_calls", summary["deltas"])
-            self.assertIn("Benchmark fachadas vivas", markdown)
+            self.assertIn("17 lotes MultiMesh", markdown)
             self.assertTrue((directory / "summary.json").is_file())
             self.assertTrue((directory / "report.md").is_file())
 
