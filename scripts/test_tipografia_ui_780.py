@@ -1,3 +1,5 @@
+import hashlib
+import json
 from pathlib import Path
 import unittest
 
@@ -5,6 +7,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 ESTILO = ROOT / "godot" / "guion" / "estilo_siga.gd"
 PROJECT = ROOT / "godot" / "project.godot"
+PROVENANCE = ROOT / "godot" / "assets" / "procedencia.json"
 
 
 class TipografiaUi780Test(unittest.TestCase):
@@ -16,7 +19,14 @@ class TipografiaUi780Test(unittest.TestCase):
         self.assertNotIn("MS Sans Serif", self.estilo)
         self.assertNotIn("Tahoma", self.estilo)
         self.assertNotIn("Verdana", self.estilo)
-        self.assertNotIn("tema.default_font =", self.estilo)
+        self.assertNotIn("SystemFont", self.estilo)
+
+    def test_interfaz_usa_una_fuente_empaquetada_y_no_el_respaldo_del_motor(self):
+        self.assertIn(
+            'const RUTA_FUENTE_INTERFAZ := "res://assets/fonts/AtkinsonHyperlegible-Regular.ttf"',
+            self.estilo,
+        )
+        self.assertIn("tema.default_font = fuente_interfaz()", self.estilo)
 
     def test_interfaz_no_fuerza_texto_sin_antialiasing(self):
         self.assertNotIn("FONT_ANTIALIASING_NONE", self.estilo)
@@ -41,6 +51,22 @@ class TipografiaUi780Test(unittest.TestCase):
 
     def test_documento_no_es_la_fuente_global_del_proyecto(self):
         self.assertNotIn("theme/custom_font=", self.project)
+
+    def test_las_fuentes_empaquetadas_tienen_procedencia_libre_registrada(self):
+        registro = {
+            item["ruta"]: item
+            for item in json.loads(PROVENANCE.read_text(encoding="utf-8"))["assets"]
+        }
+        for ruta in (
+            "fonts/AtkinsonHyperlegible-Regular.ttf",
+            "fonts/IBMPlexMono-Regular.ttf",
+        ):
+            with self.subTest(ruta=ruta):
+                ficha = registro[ruta]
+                self.assertEqual(ficha["licencia"], "OFL-1.1")
+                fichero = ROOT / "godot" / "assets" / ruta
+                actual = hashlib.sha256(fichero.read_bytes()).hexdigest()
+                self.assertEqual(ficha["sha256"], actual)
 
 
 if __name__ == "__main__":
