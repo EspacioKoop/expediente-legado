@@ -14,6 +14,10 @@ func _ejecutar() -> void:
 	await _probar_interrupcion_solar()
 	await _probar_contraataque_duat()
 	await _probar_retorno_hidra()
+	# Reacciones y voces son efímeras del SceneTree; se deja que el motor drene
+	# esos objetos antes de cerrar para no convertir su teardown en un falso fallo.
+	await create_timer(1.0).timeout
+	await process_frame
 	print("playtest_juicio_telemetria_912: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
