@@ -58,6 +58,9 @@ class TipografiaUi780Test(unittest.TestCase):
         )
         self.assertIn('tema.set_font("mono_font", "RichTextLabel", mono)', self.estilo)
 
+    def test_titulo_se_propaga_a_ventanas_nativas_os98(self):
+        self.assertIn('tema.set_font("title_font", "Window", titulo)', self.estilo)
+
     def test_a7_aplica_el_rol_tipografico_de_titulo(self):
         self.assertIn(
             'etiqueta.add_theme_font_override("font", theme.get_font("title_font", "Label"))',
