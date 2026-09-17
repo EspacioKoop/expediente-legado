@@ -45,11 +45,7 @@ static func montar(calle: Node3D) -> Node3D:
 
 
 static func _decorar(
-	raiz: Node3D,
-	ventana: MeshInstance3D,
-	variante: int,
-	materiales: Dictionary,
-	mallas: Dictionary
+	raiz: Node3D, ventana: MeshInstance3D, variante: int, materiales: Dictionary, mallas: Dictionary
 ) -> void:
 	var hacia_calle := 1.0 if ventana.position.x < 0.0 else -1.0
 	ventana.position.x += hacia_calle * SALIENTE_EXTRA_CRISTAL
@@ -162,24 +158,14 @@ static func _componer_estanteria(
 			materiales["madera_clara"]
 		)
 	_pieza(
-		padre,
-		"Planta",
-		centro + Vector3(0.0, -0.17, 0.23),
-		mallas["planta"],
-		materiales["verde"]
+		padre, "Planta", centro + Vector3(0.0, -0.17, 0.23), mallas["planta"], materiales["verde"]
 	)
 
 
 static func _componer_salon(
 	padre: Node3D, centro: Vector3, materiales: Dictionary, mallas: Dictionary
 ) -> void:
-	_pieza(
-		padre,
-		"Sofa",
-		centro + Vector3(0.0, -0.30, -0.10),
-		mallas["sofa"],
-		materiales["tela"]
-	)
+	_pieza(padre, "Sofa", centro + Vector3(0.0, -0.30, -0.10), mallas["sofa"], materiales["tela"])
 	_pieza(
 		padre,
 		"PantallaInterior",
