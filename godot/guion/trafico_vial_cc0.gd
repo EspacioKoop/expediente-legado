@@ -41,6 +41,9 @@ static func _crear_pieza(ficha: Array, materiales: Dictionary) -> Node3D:
 	for malla in modelo.find_children("*", "MeshInstance3D", true, false):
 		var local: AABB = _transformacion_hasta(malla, modelo) * malla.get_aabb()
 		caja = local if caja.size == Vector3.ZERO else caja.merge(local)
+		# Dressing secundario: la calle ya tiene iluminación/sombras propias y
+		# estas cinco piezas no justifican una pasada de sombras adicional.
+		malla.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		_apagar_materiales(malla, materiales)
 	# Apoyar la base real sobre el asfalto, no el origen desplazado del GLB.
 	var medida: float = (
