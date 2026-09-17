@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="ArrayMesh" path="res://escenas/suenos/props_284/arcada_claustro_castillo_psx.obj" id="1_arcada"]
+
+[sub_resource type="StandardMaterial3D" id="MatStone"]
+albedo_color = Color(0.215, 0.205, 0.19, 1)
+roughness = 0.96
+metallic = 0.02
+
+[node name="ArcadaClaustroCastillo" type="Node3D"]
+
+[node name="ArcadaPSX" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_arcada")
+material_override = SubResource("MatStone")
