@@ -188,8 +188,9 @@ static func _forma_arbol(raiz: Node3D, color: Color) -> void:
 
 static func _forma_piedras(raiz: Node3D, color: Color) -> void:
 	for i in 3:
-		var piedra := _caja(Vector3(0.42, 1.5 + 0.25 * float(i % 2), 0.34), color, i == 1)
-		piedra.position = Vector3(-0.7 + 0.7 * float(i), piedra.mesh.size.y * 0.5, 0.0)
+		var alto := 1.5 + 0.25 * float(i % 2)
+		var piedra := _caja(Vector3(0.42, alto, 0.34), color, i == 1)
+		piedra.position = Vector3(-0.7 + 0.7 * float(i), alto * 0.5, 0.0)
 		piedra.rotation_degrees.y = -12.0 + 12.0 * float(i)
 		raiz.add_child(piedra)
 
@@ -274,7 +275,7 @@ static func _segmento(
 ) -> MeshInstance3D:
 	var instancia := _caja(Vector3(grosor, grosor, desde.distance_to(hasta)), color, emision)
 	instancia.position = (desde + hasta) * 0.5
-	instancia.look_at(hasta, Vector3.UP)
+	instancia.basis = Basis.looking_at(hasta - desde, Vector3.UP)
 	return instancia
 
 
