@@ -28,6 +28,13 @@ static func montar(raiz: Node3D) -> void:
 	_montar_maquina_cafe(raiz)
 
 
+## Monta un único puesto en coordenadas arbitrarias, sin la planta de #400 ni
+## la máquina de café. Lo usa el diorama del menú de inicio (#830), que solo
+## necesita un escritorio reconocible y no la oficina entera.
+static func montar_puesto_aislado(raiz: Node3D, base: Vector3, indice: int = 0) -> void:
+	_montar_puesto(raiz, indice, base)
+
+
 static func _montar_puesto(raiz: Node3D, indice: int, base: Vector3) -> void:
 	var puesto := Node3D.new()
 	puesto.name = "PuestoUtileria%d" % (indice + 1)

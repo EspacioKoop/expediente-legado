@@ -9,6 +9,9 @@ ROOT = Path(__file__).resolve().parents[1]
 MODELO = ROOT / "godot" / "guion" / "contaminacion_os98.gd"
 EXPLORADOR = ROOT / "godot" / "guion" / "explorador_siga_modelo.gd"
 ADAPTADOR = ROOT / "godot" / "guion" / "dia_escritorio_siga_app.gd"
+GATO_REACCION = ROOT / "godot" / "guion" / "dia_contaminacion_gato_app.gd"
+CLIMAX_HANDOFF = ROOT / "godot" / "guion" / "dia_climax_os98_app.gd"
+ESCENA_DIA = ROOT / "godot" / "escenas" / "dia.tscn"
 CATALOGO = ROOT / "godot" / "datos" / "web98_indice.json"
 PRUEBA_GODOT = ROOT / "godot" / "pruebas" / "pruebas_contaminacion_os98.gd"
 
@@ -21,9 +24,13 @@ def test_progresion_tiene_hitos_deterministas_y_no_toca_host() -> None:
     modelo = fuente(MODELO)
     assert "EXPEDIENTES_PRINCIPALES := 5" in modelo
     assert 'const CREDENCIAL := "enlace13"' in modelo
+    assert 'const REGISTRO_IMPOSIBLE_ID := "registro_imposible_13"' in modelo
+    assert 'const CONOCIMIENTO_CLIMAX := "os98_climax_pendiente"' in modelo
     assert "static func memorandum_disponible(" in modelo
     assert '"memorandum_leido"' in modelo
     assert '"diagnostico_restringido_leido"' in modelo
+    assert '"registro_imposible_leido"' in modelo
+    assert '"diagnostico_reabierto_climax"' in modelo
     assert "RandomNumberGenerator" not in modelo
     for prohibido in (
         "FileAccess",
@@ -48,6 +55,7 @@ def test_estado_se_persiste_por_partida_y_vuelta_y_se_comparte_entre_apps() -> N
 
 
 def test_incoherencia_cruza_explorador_y_web98_sin_icono_obvio() -> None:
+    modelo = fuente(MODELO)
     explorador = fuente(EXPLORADOR)
     datos = json.loads(CATALOGO.read_text(encoding="utf-8"))
     recursos = {recurso["id"]: recurso for recurso in datos["recursos"]}
@@ -61,6 +69,41 @@ def test_incoherencia_cruza_explorador_y_web98_sin_icono_obvio() -> None:
     assert imposible["cache"]["capturada_dia"] == 99
     assert "PROMETEO" not in imposible["titulo"].upper()
     assert "HASTUR" not in imposible["titulo"].upper()
+
+    diagnostico = recursos["diagnostico-enlace13"]
+    assert diagnostico["url"] == "http://intranet.dgai/diag/enlace13/"
+    assert 'const URL_DIAGNOSTICO := "http://intranet.dgai/diag/enlace13/"' in modelo
+    assert "fase >= FASE_CONTAMINACION_CRUZADA" in modelo
+    assert "urls_caidas.append(URL_DIAGNOSTICO)" in modelo
+
+
+def test_gato_reacciona_solo_a_contaminacion_real_y_sin_estado_paralelo() -> None:
+    reaccion = fuente(GATO_REACCION)
+    escena = fuente(ESCENA_DIA)
+    assert 'path="res://guion/dia_contaminacion_gato_app.gd"' in escena
+    assert 'name="ContaminacionGatoController"' in escena
+    assert 'controlador.has_method("_contexto_os98")' in reaccion
+    assert "ContaminacionOs98.FASE_CONTAMINACION_CRUZADA" in reaccion
+    assert "GatoAyuda.nivel(gato) == GatoAyuda.COMPLETA" in reaccion
+    assert 'tr("GATO_SIGA_DESCUBRIMIENTO")' in reaccion
+    assert "establecer_estado_local" not in reaccion
+    assert "RandomNumberGenerator" not in reaccion
+
+
+def test_fase4_expone_handoff_sin_duplicar_el_climax() -> None:
+    modelo = fuente(MODELO)
+    handoff = fuente(CLIMAX_HANDOFF)
+    escena = fuente(ESCENA_DIA)
+    assert '"climax_hastur_pendiente": fase >= FASE_CLIMAX' in modelo
+    assert "CONOCIMIENTO_CLIMAX" in modelo
+    assert 'signal climax_hastur_pendiente(contexto: Dictionary)' in handoff
+    assert 'escritorio.has_method("_contexto_os98")' in handoff
+    assert 'contexto.get("climax_hastur_pendiente", false)' in handoff
+    assert 'dia.jornada.get("vuelta", 1)' in handoff
+    assert 'path="res://guion/dia_climax_os98_app.gd"' in escena
+    assert 'name="ClimaxOs98Controller"' in escena
+    for prohibido in ("Combate.new", "SuenoCombate", "Acusacion", "final_verdadero_mostrado"):
+        assert prohibido not in handoff
 
 
 def test_contrato_ejecutable_en_godot() -> None:

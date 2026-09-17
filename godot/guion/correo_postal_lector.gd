@@ -113,6 +113,7 @@ func _construir() -> void:
 	_titulo = Label.new()
 	_titulo.name = "CorreoPostalTitulo"
 	_titulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_titulo.add_theme_font_override("font", theme.get_font("title_font", "Label"))
 	columna.add_child(_titulo)
 
 	_cabecera = Label.new()
@@ -129,6 +130,9 @@ func _construir() -> void:
 	_contenido.scroll_active = true
 	_contenido.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_contenido.custom_minimum_size.y = 250
+	_contenido.add_theme_font_override(
+		"normal_font", theme.get_font("document_font", "RichTextLabel")
+	)
 	columna.add_child(_contenido)
 
 	_detalle = Label.new()

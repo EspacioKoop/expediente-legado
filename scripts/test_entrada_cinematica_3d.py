@@ -28,6 +28,31 @@ class EntradaCinematica3DTest(unittest.TestCase):
         self.assertNotIn("MeshInstance3D", self.entrada)
         self.assertNotIn("BoxMesh", self.entrada)
 
+    def test_direccion_post_playtest_conecta_los_planos(self) -> None:
+        # #856: ya no son cuatro capturas independientes. Cada plano declara
+        # de dónde viene la cámara y la mirada; el reproductor interpola solo
+        # cuando esos campos están presentes, así el resto del catálogo no cambia.
+        self.assertEqual(self.entrada.count('"camara_desde": Vector3'), 4)
+        self.assertEqual(self.entrada.count('"mira_desde": Vector3'), 4)
+        self.assertIn('plano.has("camara_desde") or plano.has("mira_desde")', self.reproductor)
+        self.assertIn("origen.lerp(destino, suave)", self.reproductor)
+        self.assertIn("mira_origen.lerp(mira_destino, suave)", self.reproductor)
+        self.assertIn("avance * avance * (3.0 - 2.0 * avance)", self.reproductor)
+
+    def test_puesto_encuadra_el_terminal_real(self) -> None:
+        # El puesto del jugador está en (-4, 1); su pantalla real vive en
+        # (-4, 0.98, 0.68). El bloqueo anterior acababa mirando otra mesa.
+        self.assertIn('"mira": Vector3(-4.0, 0.98, 0.68)', self.entrada)
+
+    def test_reduccion_movimiento_usa_composicion_final_sin_travelling(self) -> None:
+        trayectoria = self.reproductor.split(
+            'if plano.has("camara_desde") or plano.has("mira_desde"):', 1
+        )[1].split("# Compatibilidad:", 1)[0]
+        self.assertIn("if _reduccion_movimiento:", trayectoria)
+        self.assertIn("_camara.global_position = destino", trayectoria)
+        self.assertIn("_camara.look_at(mira_destino, Vector3.UP)", trayectoria)
+        self.assertIn("return", trayectoria)
+
     def test_reproductor_usa_world3d_efectivo_sin_acoplarse_a_dia(self) -> None:
         self.assertIn("func _tiene_mundo_3d() -> bool:", self.reproductor)
         self.assertIn("get_world_3d() != null", self.reproductor)

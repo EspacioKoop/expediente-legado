@@ -7,6 +7,7 @@ PERFIL = RAIZ / "godot/guion/perfil_jugador.gd"
 PARTIDA = RAIZ / "godot/guion/partida.gd"
 CUERPO = RAIZ / "godot/guion/cuerpo_jugador_3d.gd"
 CREADOR = RAIZ / "godot/guion/creador_personaje_app.gd"
+PREVISUALIZADOR = RAIZ / "godot/guion/previsualizador_personaje_3d.gd"
 CAMINANTE = RAIZ / "godot/escenas/caminante.tscn"
 INICIO = RAIZ / "godot/guion/inicio_app.gd"
 DIA = RAIZ / "godot/guion/dia_app.gd"
@@ -20,6 +21,7 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
         cls.partida = PARTIDA.read_text()
         cls.cuerpo = CUERPO.read_text()
         cls.creador = CREADOR.read_text()
+        cls.previsualizador = PREVISUALIZADOR.read_text()
         cls.caminante = CAMINANTE.read_text()
         cls.inicio = INICIO.read_text()
         cls.dia = DIA.read_text()
@@ -99,6 +101,27 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
         self.assertIn("PerfilJugador.TRASFONDOS", self.creador)
         self.assertIn('_partida.estado["perfil_jugador"]', self.creador)
         self.assertIn("_partida.guardar()", self.creador)
+
+    def test_editor_previsualiza_en_vivo_la_misma_ficha(self):
+        self.assertIn("PrevisualizadorPersonaje3D.new()", self.creador)
+        self.assertIn("_previsualizacion.aplicar(candidato)", self.creador)
+        self.assertIn("extends SubViewportContainer", self.previsualizador)
+        self.assertIn("SubViewport.UPDATE_ALWAYS", self.previsualizador)
+        self.assertIn("CanvasItem.TEXTURE_FILTER_NEAREST", self.previsualizador)
+        self.assertIn("_cuerpo.primera_persona = false", self.previsualizador)
+        self.assertIn("_cuerpo.aplicar(_perfil)", self.previsualizador)
+        self.assertNotIn("Partida.new()", self.previsualizador)
+        self.assertNotIn(".guardar(", self.previsualizador)
+
+    def test_modo_exterior_muestra_cabeza_piel_cabello_y_peinado(self):
+        self.assertIn("@export var primera_persona := true", self.cuerpo)
+        self.assertIn("if primera_persona:", self.cuerpo)
+        self.assertIn("_rostro_exterior(", self.cuerpo)
+        self.assertIn('enganche.name = "RostroJugador"', self.cuerpo)
+        self.assertIn('"PielCabeza"', self.cuerpo)
+        self.assertIn('"Cabello"', self.cuerpo)
+        for peinado in ("rapado", "medio", "recogido"):
+            self.assertIn(f'"{peinado}"', self.cuerpo)
 
     def test_nueva_partida_exige_ficha_y_guardarla_arranca_el_dia(self):
         self.assertIn('perfil["configurado"] = false', self.inicio)

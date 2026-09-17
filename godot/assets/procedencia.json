@@ -100,6 +100,70 @@
       "sha256": "3fc8e4f6c4f2b5418f9e3e9370637343cf9b12dc07fd54902acd0b44f8c307a0"
     },
     {
+      "ruta": "fonts/AtkinsonHyperlegible-Regular.ttf",
+      "titulo": "Atkinson Hyperlegible Regular",
+      "autor": "Braille Institute of America",
+      "licencia": "OFL-1.1",
+      "fuente": "https://fonts.google.com/specimen/Atkinson+Hyperlegible",
+      "sha256": "7fb917c89019896d0b52ee84b7cbb3304c18cb90b19a62f5e32712bd23e97669"
+    },
+    {
+      "ruta": "fonts/AtkinsonHyperlegible-Bold.ttf",
+      "titulo": "Atkinson Hyperlegible Bold",
+      "autor": "Braille Institute of America",
+      "licencia": "OFL-1.1",
+      "fuente": "https://fonts.google.com/specimen/Atkinson+Hyperlegible",
+      "sha256": "5a3b0c8cc8ca545155150b4512a1fa248298df121c50d6557e651e61fbdab92f"
+    },
+    {
+      "ruta": "fonts/AtkinsonHyperlegible-Italic.ttf",
+      "titulo": "Atkinson Hyperlegible Italic",
+      "autor": "Braille Institute of America",
+      "licencia": "OFL-1.1",
+      "fuente": "https://fonts.google.com/specimen/Atkinson+Hyperlegible",
+      "sha256": "021beda4d3c6edfc78872e436d74009f9a1bcb294331908fe5747c61d3dcc514"
+    },
+    {
+      "ruta": "fonts/AtkinsonHyperlegible-BoldItalic.ttf",
+      "titulo": "Atkinson Hyperlegible Bold Italic",
+      "autor": "Braille Institute of America",
+      "licencia": "OFL-1.1",
+      "fuente": "https://fonts.google.com/specimen/Atkinson+Hyperlegible",
+      "sha256": "7a46f1b0ef2f64b61065c1a6b5a11fcb9b019b44062d88ba121a083cc39e86bf"
+    },
+    {
+      "ruta": "fonts/IBMPlexMono-Regular.ttf",
+      "titulo": "IBM Plex Mono Regular",
+      "autor": "IBM Corp.",
+      "licencia": "OFL-1.1",
+      "fuente": "https://fonts.google.com/specimen/IBM+Plex+Mono",
+      "sha256": "6a3412f058c7d8dfd9170c41e85ade48e5156ecb89356110ca57a0a27734af46"
+    },
+    {
+      "ruta": "fonts/IBMPlexMono-Bold.ttf",
+      "titulo": "IBM Plex Mono Bold",
+      "autor": "IBM Corp.",
+      "licencia": "OFL-1.1",
+      "fuente": "https://fonts.google.com/specimen/IBM+Plex+Mono",
+      "sha256": "ac27abd6450a64dd94467580a02fe6235156d5b92f2926ebbc8e7489df64e0be"
+    },
+    {
+      "ruta": "fonts/IBMPlexMono-Italic.ttf",
+      "titulo": "IBM Plex Mono Italic",
+      "autor": "IBM Corp.",
+      "licencia": "OFL-1.1",
+      "fuente": "https://fonts.google.com/specimen/IBM+Plex+Mono",
+      "sha256": "3362fc791b0652193328b862c1c5f23a789bc7288b1617fa63302f88689a2a34"
+    },
+    {
+      "ruta": "fonts/IBMPlexMono-BoldItalic.ttf",
+      "titulo": "IBM Plex Mono Bold Italic",
+      "autor": "IBM Corp.",
+      "licencia": "OFL-1.1",
+      "fuente": "https://fonts.google.com/specimen/IBM+Plex+Mono",
+      "sha256": "af4e05a761e98c1adf064c48a6352c9bec1a6ad70982cd2a544149323391f98e"
+    },
+    {
       "ruta": "audio/bookFlip1.ogg",
       "titulo": "Book flip 1 (RPG Audio)",
       "autor": "Kenney",

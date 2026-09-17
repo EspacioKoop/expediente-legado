@@ -54,6 +54,24 @@ class CalleIdentidadTest(unittest.TestCase):
         self.assertIn("SEPARACION_FACHADA + tam.x * 0.5", self.materiales)
         self.assertNotIn("2.59", self.materiales)
 
+    def test_ventanas_altas_no_solapan_la_piel_de_revoco(self):
+        def constante(texto, nombre):
+            coincidencia = re.search(rf"const {nombre} := ([0-9.]+)", texto)
+            self.assertIsNotNone(coincidencia, nombre)
+            return float(coincidencia.group(1))
+
+        separacion = constante(self.materiales, "SEPARACION_FACHADA")
+        grosor_piel = constante(self.materiales, "GROSOR_PIEL_FACHADA")
+        saliente_ventana = constante(self.identidad, "SALIENTE_VENTANA_FACHADA")
+        grosor_ventana = constante(self.identidad, "GROSOR_VENTANA_FACHADA")
+        borde_exterior_piel = separacion + grosor_piel
+        borde_interior_ventana = saliente_ventana - grosor_ventana / 2.0
+
+        self.assertGreaterEqual(borde_interior_ventana - borde_exterior_piel, 0.01)
+        self.assertIn("cara + hacia * SALIENTE_VENTANA_FACHADA", self.identidad)
+        self.assertIn("Vector3(GROSOR_VENTANA_FACHADA, 1.2, 0.9)", self.identidad)
+        self.assertNotIn("cara + hacia * 0.03", self.identidad)
+
     def test_el_cielo_es_una_noche_urbana_estatica(self):
         cielo = (ROOT / "godot/arte/cielo_siga.gdshader").read_text(encoding="utf-8")
         for uniforme in ("luna_direccion", "resplandor_ciudad", "estrellas"):

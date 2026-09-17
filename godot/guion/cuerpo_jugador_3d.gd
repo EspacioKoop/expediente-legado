@@ -1,11 +1,11 @@
-## Cuerpo visual del protagonista para primera persona.
+## Cuerpo visual del protagonista para primera persona y previsualización.
 ##
 ## Es la misma figura que los compañeros —`persona.fbx`, vestida por el pase de
 ## #275 y animada con UAL— para que mirar hacia abajo revele a una persona del
-## mismo mundo y no a un maniquí de cajas. Sigue siendo deliberadamente visual:
-## no crea colisiones ni cambia la escala del caminante. El perfil lo entrega
-## quien ya tiene la partida cargada (`DiaApp`): este nodo no lee ni escribe
-## guardados.
+## mismo mundo y el creador pueda enseñar esa misma silueta en 3D. Sigue siendo
+## deliberadamente visual: no crea colisiones ni cambia la escala del caminante.
+## El perfil lo entrega quien ya tiene la partida cargada (`DiaApp`) o el editor:
+## este nodo no lee ni escribe guardados.
 class_name CuerpoJugador3D
 extends Node3D
 
@@ -27,6 +27,12 @@ const ESCALA_BASE := 0.94
 ## La cámara agachada baja 0.35 m: el cuerpo baja lo mismo para no atravesarla.
 const BAJADA_AGACHADO := -0.35
 const IDENTIDAD := "jugador"
+const SHADER_PSX := preload("res://arte/psx.gdshader")
+
+## En juego se mantiene el recorte específico de primera persona. El creador lo
+## pone a `false`: la figura nace apoyada en el suelo, mirando a cámara y con una
+## cabeza/pelo procedurales que reflejan la ficha.
+@export var primera_persona := true
 
 var perfil: Dictionary = {}
 var estado := ""
@@ -73,7 +79,9 @@ func figura() -> Node3D:
 func _process(delta: float) -> void:
 	if _figura == null:
 		return
-	var objetivo := BAJADA_AGACHADO if _camara != null and _camara.position.y < 0.5 else 0.0
+	var objetivo := 0.0
+	if primera_persona and _camara != null and _camara.position.y < 0.5:
+		objetivo = BAJADA_AGACHADO
 	position.y = lerpf(position.y, objetivo, minf(1.0, delta * 12.0))
 	var cuerpo := get_parent() as CharacterBody3D
 	var velocidad := Vector2(cuerpo.velocity.x, cuerpo.velocity.z).length() if cuerpo else 0.0
@@ -107,15 +115,18 @@ func animar(velocidad: float) -> void:
 func _construir() -> void:
 	var apariencia: Dictionary = perfil["apariencia"]
 	var piel := Color.from_string(String(apariencia["piel"]), Color("c9916b"))
+	var cabello := Color.from_string(String(apariencia["cabello"]), Color("30251f"))
 	var ropa := Color.from_string(String(apariencia["ropa"]), Color("59616b"))
 
 	var soporte := Node3D.new()
 	soporte.name = "Figura"
-	# persona.fbx mira a +Z; el caminante, a -Z.
-	soporte.rotation.y = PI
-	soporte.position = Vector3(0.0, PIES_Y, RETRASO_Z)
+	# persona.fbx mira a +Z; el caminante, a -Z. En el editor se conserva +Z
+	# porque la cámara de ficha está delante del personaje.
+	soporte.rotation.y = PI if primera_persona else 0.0
+	soporte.position = Vector3(0.0, PIES_Y, RETRASO_Z) if primera_persona else Vector3.ZERO
 	var altura := float(apariencia["altura"])
-	soporte.scale = Vector3.ONE * ESCALA_BASE * altura
+	var escala_modo := ESCALA_BASE if primera_persona else 1.0
+	soporte.scale = Vector3.ONE * escala_modo * altura
 	add_child(soporte)
 
 	# Como en la oficina, el maniquí se tiñe del color de la ropa y el vestuario
@@ -131,21 +142,121 @@ func _construir() -> void:
 	var vestuario := get_node_or_null("/root/VestuarioHumano3D")
 	if vestuario != null:
 		vestuario.vestir(_figura, PerfilJugador.perfil_vestuario(apariencia), ropa, IDENTIDAD)
-		# La hombrera queda a la altura de la cámara: desde dentro es una losa.
-		var hombros := esqueleto.find_child("VestuarioHombros", true, false) as Node3D
-		if hombros != null:
-			hombros.visible = false
+		if primera_persona:
+			# La hombrera queda a la altura de la cámara: desde dentro es una losa.
+			var hombros := esqueleto.find_child("VestuarioHombros", true, false) as Node3D
+			if hombros != null:
+				hombros.visible = false
 	else:
 		# Sin el autoload (una escena suelta) se marca igual: nadie más la viste.
 		esqueleto.set_meta("vestuario_identidad_275", IDENTIDAD)
 
-	var oculta := OcultarCabeza.new()
-	oculta.name = "OcultarCabeza"
-	esqueleto.add_child(oculta)
+	if primera_persona:
+		var oculta := OcultarCabeza.new()
+		oculta.name = "OcultarCabeza"
+		esqueleto.add_child(oculta)
+	else:
+		_rostro_exterior(esqueleto, piel, cabello, String(apariencia["peinado"]))
 
 	for hueso in ["LeftHand", "RightHand"]:
 		_mano(esqueleto, hueso, piel)
 	animar(0.0)
+
+
+## Cabeza low-poly para la ficha y futuras vistas exteriores. No sustituye al
+## rig ni al asset: envuelve la cabeza importada igual que los rostros 3D del
+## roster, usa el shader PSX común y sigue el hueso `Head`. Los cuatro peinados
+## se distinguen por silueta, de modo que piel/cabello/peinado también son
+## legibles en la previsualización y no solo datos persistidos.
+func _rostro_exterior(esqueleto: Skeleton3D, piel: Color, cabello: Color, peinado: String) -> void:
+	var cabeza := esqueleto.find_bone("Head")
+	if cabeza < 0:
+		return
+	var coronilla := esqueleto.find_bone("HeadTop_End")
+	var alto := 0.012
+	if coronilla >= 0:
+		alto = maxf(
+			absf(
+				(
+					esqueleto.get_bone_global_pose(coronilla).origin.y
+					- esqueleto.get_bone_global_pose(cabeza).origin.y
+				)
+			),
+			alto,
+		)
+
+	var enganche := BoneAttachment3D.new()
+	enganche.name = "RostroJugador"
+	enganche.bone_idx = cabeza
+	esqueleto.add_child(enganche)
+
+	var radio_x := alto * 0.35
+	var radio_y := alto * 0.50
+	var radio_z := alto * 0.39
+	var centro_y := alto * 0.48
+	_esfera_psx(
+		enganche,
+		"PielCabeza",
+		Vector3(0.0, centro_y, 0.0),
+		Vector3(radio_x, radio_y, radio_z),
+		piel,
+		8,
+		5,
+	)
+
+	var pelo_y := centro_y + radio_y * 0.74
+	var pelo_escala := Vector3(radio_x * 1.04, alto * 0.15, radio_z * 0.90)
+	match peinado:
+		"rapado":
+			pelo_y = centro_y + radio_y * 0.82
+			pelo_escala = Vector3(radio_x * 1.01, alto * 0.055, radio_z * 0.86)
+		"medio":
+			pelo_y = centro_y + radio_y * 0.69
+			pelo_escala = Vector3(radio_x * 1.08, alto * 0.21, radio_z * 0.98)
+		"recogido":
+			pelo_y = centro_y + radio_y * 0.78
+			pelo_escala = Vector3(radio_x * 0.98, alto * 0.11, radio_z * 0.84)
+		_:
+			pass
+	_esfera_psx(
+		enganche, "Cabello", Vector3(0.0, pelo_y, -radio_z * 0.04), pelo_escala, cabello, 8, 4
+	)
+	if peinado == "recogido":
+		_esfera_psx(
+			enganche,
+			"Recogido",
+			Vector3(0.0, centro_y + radio_y * 0.55, -radio_z * 0.82),
+			Vector3(alto * 0.13, alto * 0.16, alto * 0.13),
+			cabello,
+			6,
+			4,
+		)
+
+
+func _esfera_psx(
+	padre: Node3D,
+	nombre: String,
+	posicion: Vector3,
+	escala: Vector3,
+	color: Color,
+	segmentos: int,
+	anillos: int,
+) -> void:
+	var instancia := MeshInstance3D.new()
+	instancia.name = nombre
+	var malla := SphereMesh.new()
+	malla.radius = 1.0
+	malla.height = 2.0
+	malla.radial_segments = segmentos
+	malla.rings = anillos
+	instancia.mesh = malla
+	instancia.position = posicion
+	instancia.scale = escala
+	var material := ShaderMaterial.new()
+	material.shader = SHADER_PSX
+	material.set_shader_parameter("color_base", color)
+	instancia.material_override = material
+	padre.add_child(instancia)
 
 
 ## Las manos son lo que más se ve en primera persona: van en su tono de piel.
@@ -167,7 +278,7 @@ func _mano(esqueleto: Skeleton3D, hueso: String, piel: Color) -> void:
 	instancia.mesh = malla
 	instancia.position = Vector3(0.0, 0.05, 0.0) / maxf(escala, 0.0001)
 	var material := ShaderMaterial.new()
-	material.shader = load("res://arte/psx.gdshader")
+	material.shader = SHADER_PSX
 	material.set_shader_parameter("color_base", piel)
 	instancia.material_override = material
 	enganche.add_child(instancia)

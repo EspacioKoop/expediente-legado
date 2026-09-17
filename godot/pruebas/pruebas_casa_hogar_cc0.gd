@@ -5,7 +5,7 @@ const Hogar := preload("res://guion/casa_hogar_cc0.gd")
 const DIA := preload("res://escenas/dia.tscn")
 
 ## Volúmenes en planta (x, z) que deben quedar libres para jugar.
-const ENTRADA := Rect2(-0.45, 2.05, 0.9, 0.9)
+const ENTRADA := Rect2(0.05, 2.95, 0.9, 0.9)
 const PASO_A_CAMA := Rect2(-0.45, -1.6, 0.9, 3.6)
 const PIE_DE_CAMA := Rect2(-1.55, -1.6, 1.1, 0.7)
 
@@ -39,6 +39,11 @@ func _probar() -> void:
 	_comprobar(lote.find_children("*", "Light3D", true, false).is_empty(), "sin luces nuevas")
 	_comprobar(lote.find_children("*", "RigidBody3D", true, false).is_empty(), "sin dinámica")
 
+	# La planta sale del catálogo: desde #785 la casa crece hacia la cocina y la
+	# entrada, así que los muros ya no son simétricos respecto al origen.
+	var medidas: Vector2 = EspaciosCatalogo.CASA["suelo"]
+	var centro: Vector2 = EspaciosCatalogo.CASA.get("centro_suelo", Vector2.ZERO)
+	var interior := Rect2(centro - medidas * 0.5, medidas)
 	var cajas := {}
 	var triangulos := 0
 	for pieza in lote.get_children():
@@ -54,8 +59,10 @@ func _probar() -> void:
 					"conserva la paleta del pack: " + str(pieza.name)
 				)
 		var nombre := str(pieza.name)
-		_comprobar(caja.position.x > -4.0 and caja.end.x < 4.0, "dentro de la casa: " + nombre)
-		_comprobar(caja.position.z > -3.5 and caja.end.z < 3.5, "dentro de la casa: " + nombre)
+		_comprobar(caja.position.x > interior.position.x, "dentro de la casa: " + nombre)
+		_comprobar(caja.end.x < interior.end.x, "dentro de la casa: " + nombre)
+		_comprobar(caja.position.z > interior.position.y, "dentro de la casa: " + nombre)
+		_comprobar(caja.end.z < interior.end.y, "dentro de la casa: " + nombre)
 		var planta := Rect2(caja.position.x, caja.position.z, caja.size.x, caja.size.z)
 		_comprobar(not planta.intersects(ENTRADA), "entrada despejada: " + nombre)
 		_comprobar(not planta.intersects(PASO_A_CAMA), "paso hacia la cama libre: " + nombre)

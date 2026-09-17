@@ -9,6 +9,9 @@ Parte de `referencia/lamina.png` y escribe en `assets/`:
   paletas de los niveles 1-2 y 1-3, con el color de los paneles de la lámina.
 - `victoria_*`: el panel de amanecer con el texto final.
 - `sprites_tiles.inc` y `sprites_paletas.inc`: cifras del HUD y cursor.
+- `dragon_*`: la cabeza del dragón (reposo y despertar) y su rugido de victoria,
+  sacados de `referencia/dragon_sprites.png`, una hoja de sprites GBC nativa. Los
+  tiles se deduplican y cada fotograma es una lista de (fila, columna, tile).
 
 El agua usa una paleta reservada (`PALETA_AGUA`) que ninguna otra celda comparte:
 la ROM la anima con `juego_agua.inc`, tres tonos de esa paleta por nivel, cada
@@ -32,6 +35,7 @@ sys.path.insert(0, str(AQUI.parents[2] / "scripts"))
 from gbc_imagen_a_tiles import convertir_con_variantes, preparar  # noqa: E402
 
 LAMINA = AQUI / "referencia" / "lamina.png"
+HOJA_DRAGON = AQUI / "referencia" / "dragon_sprites.png"
 ASSETS = AQUI / "assets"
 
 # La escena y el HUD se reducen por separado para que el HUD ocupe justo las
@@ -71,6 +75,16 @@ ICONO_TORII = [
 
 # Primer tile del banco 1 de VRAM reservado a los sprites.
 PRIMER_TILE_SPRITE = 240
+
+# Hoja del dragón: magenta = transparente, y sus tres colores.
+PALETA_HOJA_DRAGON = [(249, 3, 248), (0xE0, 0xA8, 0x30), (0x28, 0x68, 0x30), (0x18, 0x20, 0x38)]
+# Filas de la hoja: cabeza en reposo (4), despertar (3), cuerpo (4), cola (4), rugido (2).
+FILAS_HOJA_DRAGON = (4, 3, 4, 4, 2)
+CABEZA = (32, 24)   # ancho, alto en píxeles de Game Boy
+RUGIDO = (48, 40)
+# Del despertar se usan el ojo cerrado y el abierto: con el intermedio la
+# cabeza no cabe en VRAM junto a la escena.
+DESPERTAR = (0, 2)
 PALETA_AGUA = 2
 BRILLOS_AGUA = (0.0, 0.18, 0.36)
 
@@ -373,16 +387,141 @@ def sprites():
     (ASSETS / "sprites_paletas.inc").write_text("\n".join(texto) + "\n", encoding="utf-8")
 
 
+def _tramos(v, minimo=3, hueco=10):
+    res, ini, vacio, fin = [], None, 0, 0
+    for i, x in enumerate(v):
+        if x >= minimo:
+            ini = i if ini is None else ini
+            fin, vacio = i, 0
+        elif ini is not None:
+            vacio += 1
+            if vacio > hueco:
+                res.append((ini, fin + 1))
+                ini = None
+    if ini is not None:
+        res.append((ini, fin + 1))
+    return res
+
+
+def hoja_dragon():
+    """Índices de color (0 transparente) y cajas de cada sprite, fila a fila."""
+    rgb = np.asarray(Image.open(HOJA_DRAGON).convert("RGB")).astype(int)
+    paleta = np.array(PALETA_HOJA_DRAGON)
+    indices = ((rgb[..., None, :] - paleta[None, None]) ** 2).sum(-1).argmin(-1)
+    opaco = indices != 0
+    filas = []
+    for y0, y1 in _tramos(opaco.sum(1)):
+        cajas = []
+        for x0, x1 in _tramos(opaco[y0:y1].sum(0), hueco=12):
+            ys = np.where(opaco[y0:y1, x0:x1].any(1))[0]
+            cajas.append((x0, y0 + ys[0], x1, y0 + ys[-1] + 1))
+        filas.append(cajas)
+    if [len(f) for f in filas] != list(FILAS_HOJA_DRAGON):
+        raise SystemExit(f"hoja del dragón inesperada: {[len(f) for f in filas]} sprites por fila")
+    return indices, filas
+
+
+def reducir_sprite(indices, caja, ancho, alto, por_alto=False):
+    """Reduce por moda al ancho (o al alto) dado; arriba a la izquierda, recortando lo que sobre."""
+    sub = indices[caja[1]:caja[3], caja[0]:caja[2]]
+    h, w = sub.shape
+    esc = h / alto if por_alto else w / ancho
+    salida = np.zeros((alto, ancho), int)
+    for y in range(min(alto, int(h / esc))):
+        for x in range(min(ancho, int(w / esc))):
+            bloque = sub[int(y * esc):max(int((y + 1) * esc), int(y * esc) + 1),
+                         int(x * esc):max(int((x + 1) * esc), int(x * esc) + 1)]
+            cuenta = np.bincount(bloque.ravel(), minlength=4)
+            valor = cuenta.argmax()
+            # El contorno oscuro gana con poca presencia: si no, las líneas finas se pierden.
+            if valor != 3 and cuenta[3] >= 0.3 * bloque.size:
+                valor = 3
+            salida[y, x] = valor
+    return salida
+
+
+def exportar_fotogramas(fotogramas, nombre, etiqueta):
+    """Tiles únicos y, por fotograma, n y n veces (fila, columna, tile) de las celdas no vacías."""
+    unicos, claves, tablas = [], {}, []
+    for f in fotogramas:
+        entradas = []
+        for ty in range(f.shape[0] // 8):
+            for tx in range(f.shape[1] // 8):
+                bloque = f[ty * 8:ty * 8 + 8, tx * 8:tx * 8 + 8]
+                if not bloque.any():
+                    continue
+                clave = bloque.tobytes()
+                if clave not in claves:
+                    claves[clave] = len(unicos)
+                    unicos.append(bloque)
+                entradas.append((ty, tx, claves[clave]))
+        tablas.append(entradas)
+    lineas = [f"; {len(unicos)} tiles de sprite de {nombre} (generar_arte.py)"]
+    lineas += [tile_2bpp(t) for t in unicos]
+    (ASSETS / f"dragon_{nombre}_tiles.inc").write_text("\n".join(lineas) + "\n", encoding="utf-8")
+    lineas = [f"; {nombre}: por fotograma, n y n veces (fila, columna, tile)."]
+    for k, entradas in enumerate(tablas):
+        lineas.append(f"{etiqueta}{k}:")
+        lineas.append(f"    db {len(entradas)}")
+        lineas += [f"    db {ty}, {tx}, {t}" for ty, tx, t in entradas]
+    (ASSETS / f"dragon_{nombre}_fotogramas.inc").write_text("\n".join(lineas) + "\n", encoding="utf-8")
+    return len(unicos), max(len(e) for e in tablas)
+
+
+def sprites_dragon():
+    indices, filas = hoja_dragon()
+    cabezas = [reducir_sprite(indices, c, *CABEZA) for c in filas[0] + [filas[1][k] for k in DESPERTAR]]
+    rugidos = [reducir_sprite(indices, c, *RUGIDO, por_alto=True) for c in filas[4]]
+    n_cabeza, max_cabeza = exportar_fotogramas(cabezas, "cabeza", "DragonCabeza")
+    n_rugido, max_rugido = exportar_fotogramas(rugidos, "rugido", "DragonRugido")
+
+    # Colores del dragón con la luz de cada nivel, como la escena.
+    lamina = Image.open(LAMINA).convert("RGB")
+    escena = lamina.crop(RECORTE_ESCENA)
+    propios = PALETA_HOJA_DRAGON[1:]
+    lineas = ["; Paleta de sprite del dragón por luz: día, amanecer, noche."]
+    for nombre, recorte in (("dia", None), ("amanecer", RECORTE_AMANECER), ("noche", RECORTE_NOCHE)):
+        colores = propios if recorte is None else transferir_color(propios, escena, lamina.crop(recorte))
+        lineas.append("    dw " + ", ".join(f"${v:04X}" for v in a_bgr555([(255, 255, 255)] + list(colores)))
+                      + f" ; {nombre}")
+    (ASSETS / "dragon_paletas.inc").write_text("\n".join(lineas) + "\n", encoding="utf-8")
+
+    constantes = [
+        "; Generado por generar_arte.py: dónde van los tiles del dragón en el banco 1 de VRAM.",
+        f"DEF DRAGON_TILES_CABEZA EQU {n_cabeza}",
+        f"DEF DRAGON_TILES_RUGIDO EQU {n_rugido}",
+        f"DEF DRAGON_SPRITES_CABEZA EQU {max_cabeza}",
+        f"DEF DRAGON_SPRITES_RUGIDO EQU {max_rugido}",
+        f"DEF DRAGON_FOTOGRAMAS_CABEZA EQU {len(cabezas)}",
+    ]
+    (ASSETS / "dragon_constantes.inc").write_text("\n".join(constantes) + "\n", encoding="utf-8")
+
+    # Vista previa ampliada de todos los fotogramas.
+    colores = [(90, 120, 140)] + PALETA_HOJA_DRAGON[1:]
+    previa = Image.new("RGB", (len(cabezas) * 40 + len(rugidos) * 56, 48), colores[0])
+    x = 0
+    for f in cabezas + rugidos:
+        for (fy, fx), v in np.ndenumerate(f):
+            if v:
+                previa.putpixel((x + fx, fy), colores[v])
+        x += f.shape[1] + 8
+    previa.resize((previa.width * 4, previa.height * 4), Image.NEAREST).save(ASSETS / "dragon_previa.png")
+    return n_cabeza, n_rugido
+
+
 def main():
+    n_cabeza, n_rugido = sprites_dragon()
+    print(f"dragón: {n_cabeza} tiles de cabeza, {n_rugido} de rugido")
     base, variantes = escena_juego()
     n = convertir_con_variantes(base, variantes, ASSETS / "juego", etiqueta="JuegoCGB",
-                                max_tiles=256 + PRIMER_TILE_SPRITE,
+                                max_tiles=256 + PRIMER_TILE_SPRITE - n_cabeza,
                                 paletas_fijas=PALETAS_HUD, filas_fijas=FILAS_HUD, peso_croma=PESO_CROMA,
                                 variantes_fijas=[f"Dialogo{n + 1}" for n in range(len(DIALOGOS))],
                                 paleta_reservada=PALETA_AGUA, celdas_reservadas=celdas_de_agua(base))
     print(f"juego: {n} tiles únicos")
     paletas_de_nivel()
-    n = convertir_con_variantes(escena_victoria(), {}, ASSETS / "victoria", max_tiles=256 + PRIMER_TILE_SPRITE)
+    n = convertir_con_variantes(escena_victoria(), {}, ASSETS / "victoria",
+                                max_tiles=256 + PRIMER_TILE_SPRITE - n_rugido)
     print(f"victoria: {n} tiles únicos")
     sprites()
 

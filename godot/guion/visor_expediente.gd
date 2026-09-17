@@ -143,6 +143,7 @@ func _barra_titulo() -> Control:
 		),
 		EstiloSiga.BLANCO
 	)
+	titulo.add_theme_font_override("font", theme.get_font("title_font", "Label"))
 	barra.add_child(titulo)
 	_titulo_ventana = titulo
 	return barra
@@ -265,7 +266,9 @@ func _columna_documento() -> Control:
 	_documento.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_documento.add_theme_stylebox_override("normal", _caja_hundida(EstiloSiga.BLANCO))
 	_documento.add_theme_color_override("default_color", EstiloSiga.NEGRO)
-	_documento.add_theme_font_override("normal_font", theme.get_font("mono_font", "RichTextLabel"))
+	_documento.add_theme_font_override(
+		"normal_font", theme.get_font("document_font", "RichTextLabel")
+	)
 	_documento.add_theme_font_size_override("normal_font_size", 15)
 	_documento.meta_clicked.connect(_al_pulsar_marca)
 	columna.add_child(_documento)

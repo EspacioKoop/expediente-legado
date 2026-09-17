@@ -1,0 +1,12 @@
+{
+  "id": "calle_noche",
+  "tipo": "calle",
+  "semilla": 11903,
+  "muestras_por_segundo": 8000,
+  "duracion": 2.0,
+  "ganancia_objetivo": 0.72,
+  "rumble": [[41.0, 0.055, 0.0], [57.0, 0.027, 0.9]],
+  "lampara": [100.0, 0.010, 0.15],
+  "pasadas": [[0.65, 0.38, 74.0], [1.45, 0.32, 92.0]],
+  "salida": "ambiente_calle_noche_original.ogg"
+}

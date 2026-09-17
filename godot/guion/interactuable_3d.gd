@@ -18,6 +18,8 @@ enum Verbo {
 	DAR,
 	ENCENDER,
 	GOLPEAR,
+	ACARICIAR,
+	LLAMAR,
 }
 
 const NOMBRES_VERBO := {
@@ -30,6 +32,8 @@ const NOMBRES_VERBO := {
 	Verbo.DAR: "Dar",
 	Verbo.ENCENDER: "Encender",
 	Verbo.GOLPEAR: "Golpear",
+	Verbo.ACARICIAR: "Acariciar",
+	Verbo.LLAMAR: "Llamar",
 }
 
 ## Solo los gestos físicos suenan por defecto. `EXAMINAR` es mirar, `USAR` cubre
@@ -42,6 +46,7 @@ const SONIDO_POR_VERBO := {
 	Verbo.DAR: "coger",
 	Verbo.LEER: "documento",
 	Verbo.ENCENDER: "marcar",
+	Verbo.ACARICIAR: "coger",
 }
 ## Valor de [member sonido] que calla el objeto aunque su verbo suene.
 const SIN_SONIDO := "-"

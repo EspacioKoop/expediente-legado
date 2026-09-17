@@ -30,6 +30,14 @@ class Caidas784Test(unittest.TestCase):
         self.assertIn('_espacio_actual.get("entrada", Vector3.ZERO)', self.dia_onboarding)
         self.assertIn("_caminante.situar(entrada", self.dia_onboarding)
 
+    def test_rescate_conserva_el_process_base(self):
+        inicio = self.dia_onboarding.index("func _process(_delta: float) -> void:")
+        fin = self.dia_onboarding.index("\n\n", inicio)
+        proceso = self.dia_onboarding[inicio:fin]
+        self.assertIn("super(_delta)", proceso)
+        self.assertIn("_rescatar_caida()", proceso)
+        self.assertLess(proceso.index("super(_delta)"), proceso.index("_rescatar_caida()"))
+
     def test_salida_disparada_en_fisica_sale_del_callback_antes_de_transicionar(self):
         self.assertIn("Engine.is_in_physics_frame()", self.dia_onboarding)
         self.assertIn("await get_tree().process_frame", self.dia_onboarding)

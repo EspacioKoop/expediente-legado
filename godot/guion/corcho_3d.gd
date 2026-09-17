@@ -1,67 +1,86 @@
-## Tablón físico e interactivo del corcho de conceptos (#101).
+## Tablón físico del corcho de conceptos (#101).
 ##
 ## No deduce relaciones del contenido. Cada hilo existe únicamente porque el
-## jugador activó dos fichas; volver a activar el mismo par lo retira.
+## jugador unió dos fichas; volver a unir el mismo par lo retira.
+##
+## Desde #785 es un corcho de tamaño real colgado en el salón. En la pared solo
+## se ve: fichas e hilos se ordenan en la interfaz propia (`CorchoPanel`), que
+## se pide al usar el tablón, y al cerrarla la pared vuelve a dibujarse.
 class_name Corcho3D
 extends Node3D
 
 signal cambiado
+signal abrir_pedido
 
-const POSICION := Vector3(0.0, 1.55, -3.42)
-const TAM_TABLON := Vector3(2.65, 1.55, 0.07)
-const TAM_FICHA := Vector3(0.44, 0.25, 0.035)
-const MARGEN_FICHAS := Vector2(0.07, 0.08)
+## En la cara del tabique del dormitorio que da al salón, lejos de la ventana.
+const POSICION := Vector3(-2.3, 1.45, -0.52)
+## El tablón a escala única del área lógica: ≈ 0,90 × 0,53 m.
+const ESCALA := 0.34
+const TAM_TABLON := Vector3(Corcho.AREA.x * ESCALA, Corcho.AREA.y * ESCALA, 0.03)
+const MARCO := 0.035
+const GROSOR_FICHA := 0.004
 const COLOR_FICHA := Color(0.88, 0.84, 0.70)
-const COLOR_FICHA_SELECCIONADA := Color(0.97, 0.88, 0.48)
 
 var _jornada: Dictionary
 var _conceptos := {}
-var _seleccion := ""
+var _fichas: Node3D
 var _hilos: Node3D
-var _papeles := {}
 
 
 func configurar(jornada: Dictionary, conceptos: Array) -> void:
 	_jornada = jornada
 	_conceptos.clear()
-	_papeles.clear()
 	for concepto in conceptos:
 		var id := String(concepto.get("id", ""))
 		if not id.is_empty():
 			_conceptos[id] = concepto
 	var cambio := Corcho.sincronizar(_jornada, conceptos)
-	cambio = Corcho.limitar_posiciones(_jornada, _limite_fichas()) or cambio
+	cambio = Corcho.limitar_posiciones(_jornada, Corcho.limite()) or cambio
 	_montar()
 	if cambio:
 		cambiado.emit()
 
 
-func _montar() -> void:
-	position = POSICION
-	_montar_tablero()
-	_hilos = Node3D.new()
-	_hilos.name = "Hilos"
-	add_child(_hilos)
+func conceptos() -> Dictionary:
+	return _conceptos
+
+
+## Vuelve a clavar fichas e hilos según el estado guardado.
+func refrescar() -> void:
+	if _fichas == null:
+		return
+	for hijo in _fichas.get_children():
+		_fichas.remove_child(hijo)
+		hijo.queue_free()
+	for hijo in _hilos.get_children():
+		_hilos.remove_child(hijo)
+		hijo.queue_free()
 	var fichas: Dictionary = Corcho.estado(_jornada)["fichas"]
 	for id in fichas:
 		_montar_ficha(String(id), fichas[id])
 	_redibujar_hilos()
 
 
-func _limite_fichas() -> Vector2:
-	return Vector2(
-		TAM_TABLON.x * 0.5 - TAM_FICHA.x * 0.5 - MARGEN_FICHAS.x,
-		TAM_TABLON.y * 0.5 - TAM_FICHA.y * 0.5 - MARGEN_FICHAS.y,
-	)
+func _montar() -> void:
+	position = POSICION
+	if _fichas == null:
+		_montar_tablero()
+		_fichas = Node3D.new()
+		_fichas.name = "Fichas"
+		add_child(_fichas)
+		_hilos = Node3D.new()
+		_hilos.name = "Hilos"
+		add_child(_hilos)
+	refrescar()
 
 
 func _montar_tablero() -> void:
 	var marco := MeshInstance3D.new()
 	marco.name = "MarcoCorcho"
 	var caja_marco := BoxMesh.new()
-	caja_marco.size = TAM_TABLON + Vector3(0.14, 0.14, 0.035)
+	caja_marco.size = TAM_TABLON + Vector3(MARCO * 2.0, MARCO * 2.0, 0.02)
 	marco.mesh = caja_marco
-	marco.position.z = -0.025
+	marco.position.z = -0.01
 	var madera := StandardMaterial3D.new()
 	madera.albedo_color = Color(0.25, 0.14, 0.075)
 	madera.roughness = 0.86
@@ -79,137 +98,75 @@ func _montar_tablero() -> void:
 	fondo.material_override = material
 	add_child(fondo)
 
-	_montar_rotulo(
-		"EtiquetaCorcho",
-		"CORCHO DE CONCEPTOS",
-		Vector3(0.0, TAM_TABLON.y * 0.5 + 0.105, 0.05),
-		Vector3(1.18, 0.18, 0.025),
-		18,
-	)
-	_montar_rotulo(
-		"InstruccionCorcho",
-		"USA DOS FICHAS PARA PONER / QUITAR HILO",
-		Vector3(0.0, -TAM_TABLON.y * 0.5 - 0.09, 0.05),
-		Vector3(1.58, 0.15, 0.022),
-		11,
-	)
+	# Todo el tablón es el objeto: se usa entero, no ficha a ficha.
+	var uso := Interactuable3D.new()
+	uso.name = "UsarCorcho"
+	uso.verbo = Interactuable3D.Verbo.USAR
+	uso.nombre_objeto = "corcho de conceptos"
+	uso.activado.connect(func(_actor: Node) -> void: abrir_pedido.emit())
+	add_child(uso)
+	var colision := CollisionShape3D.new()
+	colision.name = "Colision"
+	var forma := BoxShape3D.new()
+	forma.size = caja_marco.size + Vector3(0.0, 0.0, 0.06)
+	colision.shape = forma
+	uso.add_child(colision)
 
 
-func _montar_rotulo(
-	nombre_nodo: String, texto: String, pos: Vector3, tam: Vector3, fuente: int
-) -> void:
-	var placa := MeshInstance3D.new()
-	placa.name = nombre_nodo
-	placa.position = pos
-	var caja := BoxMesh.new()
-	caja.size = tam
-	placa.mesh = caja
-	var papel := StandardMaterial3D.new()
-	papel.albedo_color = Color(0.83, 0.78, 0.63)
-	papel.roughness = 1.0
-	placa.material_override = papel
-	add_child(placa)
-
-	var etiqueta := Label3D.new()
-	etiqueta.name = "Texto"
-	etiqueta.text = texto
-	etiqueta.position = Vector3(0.0, 0.0, tam.z * 0.55)
-	etiqueta.font_size = fuente
-	etiqueta.pixel_size = 0.0027
-	etiqueta.modulate = Color(0.12, 0.10, 0.09)
-	placa.add_child(etiqueta)
+func _a_pared(pos: Vector2, z: float) -> Vector3:
+	return Vector3(pos.x * ESCALA, pos.y * ESCALA, z)
 
 
-func _montar_ficha(id: String, datos: Dictionary) -> void:
-	if not _conceptos.has(id):
+func _montar_ficha(id: String, datos) -> void:
+	if not _conceptos.has(id) or typeof(datos) != TYPE_DICTIONARY:
 		return
 	var pos = datos.get("pos", [0.0, 0.0])
 	if typeof(pos) != TYPE_ARRAY or pos.size() < 2:
 		pos = [0.0, 0.0]
 
-	var ficha := Interactuable3D.new()
+	var ficha := Node3D.new()
 	ficha.name = "Ficha_%s" % id.validate_node_name()
-	ficha.position = Vector3(float(pos[0]), float(pos[1]), 0.072)
-	ficha.verbo = Interactuable3D.Verbo.USAR
-	var nombre_visible := String(_conceptos[id].get("nombre", id))
-	ficha.nombre_objeto = "ficha «%s»" % nombre_visible
-	ficha.activado.connect(_activar_ficha.bind(id))
-	add_child(ficha)
-
-	var colision := CollisionShape3D.new()
-	colision.name = "Colision"
-	var forma := BoxShape3D.new()
-	forma.size = TAM_FICHA
-	colision.shape = forma
-	ficha.add_child(colision)
+	var base := TAM_TABLON.z * 0.5 + GROSOR_FICHA * 0.5
+	ficha.position = _a_pared(Vector2(float(pos[0]), float(pos[1])), base)
+	_fichas.add_child(ficha)
 
 	var papel := MeshInstance3D.new()
 	papel.name = "Papel"
 	var caja := BoxMesh.new()
-	caja.size = TAM_FICHA
+	caja.size = Vector3(Corcho.TAM_FICHA.x * ESCALA, Corcho.TAM_FICHA.y * ESCALA, GROSOR_FICHA)
 	papel.mesh = caja
 	var material := StandardMaterial3D.new()
 	material.albedo_color = COLOR_FICHA
 	material.roughness = 1.0
 	papel.material_override = material
 	ficha.add_child(papel)
-	_papeles[id] = papel
 
 	var nombre := Label3D.new()
 	nombre.name = "Nombre"
-	nombre.text = nombre_visible
-	nombre.position = Vector3(0, 0, 0.022)
-	nombre.font_size = 17
-	nombre.pixel_size = 0.0038
+	nombre.text = String(_conceptos[id].get("nombre", id))
+	nombre.position = Vector3(0, -0.008, GROSOR_FICHA * 0.5 + 0.001)
+	nombre.font_size = 16
+	nombre.pixel_size = 0.0011
+	nombre.width = Corcho.TAM_FICHA.x * ESCALA / nombre.pixel_size * 0.92
+	nombre.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	nombre.modulate = Color(0.12, 0.10, 0.09)
+	nombre.outline_size = 0
 	ficha.add_child(nombre)
 
 	var chincheta := MeshInstance3D.new()
 	chincheta.name = "Chincheta"
 	var esfera := SphereMesh.new()
-	esfera.radius = 0.026
-	esfera.height = 0.052
+	esfera.radius = 0.008
+	esfera.height = 0.016
 	chincheta.mesh = esfera
-	chincheta.position = Vector3(0, TAM_FICHA.y * 0.35, 0.043)
+	chincheta.position = Vector3(0, Corcho.TAM_FICHA.y * ESCALA * 0.32, 0.006)
 	var rojo := StandardMaterial3D.new()
 	rojo.albedo_color = Color(0.55, 0.08, 0.06)
 	chincheta.material_override = rojo
 	ficha.add_child(chincheta)
 
 
-func _activar_ficha(_actor: Node, id: String) -> void:
-	if _seleccion.is_empty():
-		_seleccion = id
-		_actualizar_seleccion()
-		return
-	if _seleccion == id:
-		_seleccion = ""
-		_actualizar_seleccion()
-		return
-	var anterior := _seleccion
-	_seleccion = ""
-	_actualizar_seleccion()
-	if Corcho.alternar_enlace(_jornada, anterior, id):
-		_redibujar_hilos()
-		cambiado.emit()
-
-
-func _actualizar_seleccion() -> void:
-	for id in _papeles:
-		var papel := _papeles[id] as MeshInstance3D
-		if papel == null:
-			continue
-		var material := papel.material_override as StandardMaterial3D
-		if material == null:
-			continue
-		material.albedo_color = COLOR_FICHA
-		if String(id) == _seleccion:
-			material.albedo_color = COLOR_FICHA_SELECCIONADA
-
-
 func _redibujar_hilos() -> void:
-	for hijo in _hilos.get_children():
-		hijo.queue_free()
 	var tablero := Corcho.estado(_jornada)
 	for enlace in tablero["enlaces"]:
 		if typeof(enlace) != TYPE_ARRAY or enlace.size() != 2:
@@ -222,13 +179,16 @@ func _redibujar_hilos() -> void:
 
 
 func _posicion_de(id: String):
+	if not _conceptos.has(id):
+		return null
 	var fichas: Dictionary = Corcho.estado(_jornada)["fichas"]
-	if not fichas.has(id):
+	if not fichas.has(id) or typeof(fichas[id]) != TYPE_DICTIONARY:
 		return null
 	var pos = fichas[id].get("pos", [])
 	if typeof(pos) != TYPE_ARRAY or pos.size() < 2:
 		return null
-	return Vector3(float(pos[0]), float(pos[1]), 0.118)
+	var altura_chincheta := Corcho.TAM_FICHA.y * 0.32
+	return _a_pared(Vector2(float(pos[0]), float(pos[1]) + altura_chincheta), 0.03)
 
 
 func _montar_hilo(a: Vector3, b: Vector3) -> void:
@@ -237,9 +197,10 @@ func _montar_hilo(a: Vector3, b: Vector3) -> void:
 		return
 	var hilo := MeshInstance3D.new()
 	var cilindro := CylinderMesh.new()
-	cilindro.top_radius = 0.009
-	cilindro.bottom_radius = 0.009
+	cilindro.top_radius = 0.0025
+	cilindro.bottom_radius = 0.0025
 	cilindro.height = delta.length()
+	cilindro.radial_segments = 6
 	hilo.mesh = cilindro
 	hilo.position = (a + b) * 0.5
 	hilo.quaternion = Quaternion(Vector3.UP, delta.normalized())

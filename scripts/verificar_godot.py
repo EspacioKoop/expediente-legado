@@ -93,6 +93,12 @@ def ejecutar():
             ("importación", ["--editor", "--import", "--quit"], 120, None),
             ("suite", ["--script", "pruebas/pruebas.gd"], 120, minimo),
             (
+                "enlaces-pistas",
+                ["--script", "pruebas/pruebas_enlaces_pistas.gd"],
+                30,
+                147,
+            ),
+            (
                 "semillas-oniricas",
                 ["--script", "pruebas/pruebas_semillas_oniricas.gd"],
                 30,

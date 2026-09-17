@@ -1,0 +1,13 @@
+{
+  "id": "teclado_oficina",
+  "tipo": "teclado",
+  "semilla": 11902,
+  "muestras_por_segundo": 8000,
+  "duracion": 2.0,
+  "ganancia_objetivo": 0.72,
+  "ventilador_hz": 83.0,
+  "ventilador_amplitud": 0.018,
+  "pitches": [930.0, 1120.0, 1360.0, 1580.0],
+  "cuerpos": [145.0, 176.0, 205.0],
+  "salida": "ambiente_teclado_oficina_original.ogg"
+}

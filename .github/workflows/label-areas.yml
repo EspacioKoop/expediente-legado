@@ -1,0 +1,23 @@
+name: Auto-label by area
+
+on:
+  issues:
+    types: [opened, edited]
+  pull_request:
+    types: [opened, edited, synchronize, ready_for_review]
+
+jobs:
+  label-areas:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run area labeling script
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ITEM_NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+        run: |
+          .github/scripts/label-areas.sh "$ITEM_NUMBER"

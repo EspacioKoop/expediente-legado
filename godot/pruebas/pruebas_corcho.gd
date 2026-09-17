@@ -2,6 +2,7 @@ extends SceneTree
 
 const CorchoScript := preload("res://guion/corcho.gd")
 const Corcho3DScript := preload("res://guion/corcho_3d.gd")
+const CorchoPanelScript := preload("res://guion/corcho_panel.gd")
 
 var _pasadas := 0
 var _fallos := 0
@@ -9,7 +10,9 @@ var _fallos := 0
 
 func _initialize() -> void:
 	_probar_layout_acotado()
-	_probar_presentacion_interactiva()
+	_probar_mover_acotado()
+	_probar_presentacion_pared()
+	_probar_panel()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
@@ -41,7 +44,27 @@ func _probar_layout_acotado() -> void:
 	_comprobar(not CorchoScript.limitar_posiciones(jornada, limite), "el saneado es idempotente")
 
 
-func _probar_presentacion_interactiva() -> void:
+func _probar_mover_acotado() -> void:
+	var jornada := {}
+	CorchoScript.sincronizar(jornada, [{"id": "a", "nombre": "Alpha"}])
+	var borde: Vector2 = CorchoScript.limite()
+	_comprobar(borde.is_equal_approx(Vector2(1.035, 0.57)), "el área útil lógica no cambia")
+	_comprobar(CorchoScript.mover(jornada, "a", Vector2(0.3, -0.2)), "mueve una ficha existente")
+	var pos: Array = CorchoScript.estado(jornada)["fichas"]["a"]["pos"]
+	_comprobar(is_equal_approx(pos[0], 0.3) and is_equal_approx(pos[1], -0.2), "guarda la posición")
+	_comprobar(
+		not CorchoScript.mover(jornada, "a", Vector2(0.3, -0.2)), "no marca cambio sin mover"
+	)
+	CorchoScript.mover(jornada, "a", Vector2(9.0, -9.0))
+	pos = CorchoScript.estado(jornada)["fichas"]["a"]["pos"]
+	_comprobar(
+		is_equal_approx(pos[0], borde.x) and is_equal_approx(pos[1], -borde.y),
+		"no deja sacar la ficha del tablón"
+	)
+	_comprobar(not CorchoScript.mover(jornada, "fantasma", Vector2.ZERO), "no crea fichas al mover")
+
+
+func _probar_presentacion_pared() -> void:
 	var jornada := {}
 	var conceptos := [
 		{"id": "a", "nombre": "Alpha"},
@@ -55,63 +78,132 @@ func _probar_presentacion_interactiva() -> void:
 	_comprobar(corcho.position == Corcho3DScript.POSICION, "usa la posición doméstica canónica")
 	var tablero := corcho.get_node_or_null("TablonCorcho") as MeshInstance3D
 	var marco := corcho.get_node_or_null("MarcoCorcho") as MeshInstance3D
-	var etiqueta := corcho.get_node_or_null("EtiquetaCorcho") as MeshInstance3D
-	var instruccion := corcho.get_node_or_null("InstruccionCorcho") as MeshInstance3D
 	_comprobar(tablero != null, "monta el tablero físico")
 	_comprobar(marco != null, "monta un marco reconocible")
-	_comprobar(etiqueta != null, "identifica el corcho físicamente")
-	_comprobar(instruccion != null, "explica el gesto de dos fichas en el mundo")
-	if tablero != null:
-		var caja := tablero.mesh as BoxMesh
-		_comprobar(caja != null and caja.size.x < 3.0, "el tablero deja de dominar la pared")
-	if etiqueta != null:
-		var texto_etiqueta := etiqueta.get_node_or_null("Texto") as Label3D
+	if marco != null:
+		var caja := marco.mesh as BoxMesh
 		_comprobar(
-			texto_etiqueta != null and texto_etiqueta.text == "CORCHO DE CONCEPTOS",
-			"la etiqueta aclara qué objeto es",
+			caja != null and caja.size.x <= 1.0 and caja.size.y <= 0.65,
+			"el corcho tiene tamaño real (≈0,9 × 0,6 m)"
 		)
-	if instruccion != null:
-		var texto_instruccion := instruccion.get_node_or_null("Texto") as Label3D
-		_comprobar(
-			texto_instruccion != null and texto_instruccion.text.contains("DOS FICHAS"),
-			"la instrucción aclara cómo acceder",
-		)
-
-	var ficha_a := corcho.get_node_or_null("Ficha_a") as Interactuable3D
-	var ficha_b := corcho.get_node_or_null("Ficha_b") as Interactuable3D
-	_comprobar(ficha_a != null and ficha_b != null, "materializa fichas interactuables")
-	if ficha_a == null or ficha_b == null:
-		corcho.queue_free()
-		return
+	# Detrás del tabique del dormitorio y lejos de la ventana (#785).
+	var ventana_x := Vector2(-3.0, -1.2)
+	var medio_ancho: float = Corcho3DScript.TAM_TABLON.x * 0.5 + Corcho3DScript.MARCO
+	_comprobar(Corcho3DScript.POSICION.z > -3.0, "no cuelga en el muro de la ventana")
 	_comprobar(
-		ficha_a.texto_accion() == "Usar ficha «Alpha»", "el prompt nombra la ficha como objeto"
+		Corcho3DScript.POSICION.x + medio_ancho < 0.55 - 0.09,
+		"no invade el tabique lateral ni otra habitación"
 	)
+	_comprobar(ventana_x.x < ventana_x.y, "rango de ventana coherente")
 
-	var papel_a := ficha_a.get_node_or_null("Papel") as MeshInstance3D
-	var material_a: StandardMaterial3D = null
-	if papel_a != null:
-		material_a = papel_a.material_override as StandardMaterial3D
-	_comprobar(material_a != null, "la ficha expone papel visible")
-	_comprobar(ficha_a.interactuar(root), "permite seleccionar la primera ficha")
-	if material_a != null:
-		_comprobar(
-			material_a.albedo_color == Corcho3DScript.COLOR_FICHA_SELECCIONADA,
-			"marca la primera selección",
-		)
-	_comprobar(ficha_b.interactuar(root), "permite completar el par")
+	var uso := corcho.get_node_or_null("UsarCorcho") as Interactuable3D
+	_comprobar(uso != null, "el tablón entero es interactuable")
+	if uso != null:
+		_comprobar(uso.texto_accion() == "Usar corcho de conceptos", "el prompt nombra el corcho")
+		var pedidos := [0]
+		corcho.abrir_pedido.connect(func() -> void: pedidos[0] += 1)
+		_comprobar(uso.interactuar(root), "usar el corcho se acepta")
+		_comprobar(pedidos[0] == 1, "usar el corcho pide su interfaz")
+
+	var ficha_a := corcho.find_child("Ficha_a", true, false) as Node3D
+	_comprobar(ficha_a != null, "clava las fichas en la pared")
 	_comprobar(
-		CorchoScript.estado(jornada)["enlaces"].size() == 1, "dos fichas crean un hilo manual"
+		not (ficha_a is Interactuable3D), "en la pared no se reordena: las fichas no son botones"
 	)
-	if material_a != null:
-		_comprobar(
-			material_a.albedo_color == Corcho3DScript.COLOR_FICHA,
-			"limpia el feedback al completar el par",
-		)
-
-	_comprobar(ficha_b.interactuar(root), "permite iniciar el mismo par en orden inverso")
-	_comprobar(ficha_a.interactuar(root), "permite completar el mismo par en orden inverso")
-	_comprobar(CorchoScript.estado(jornada)["enlaces"].is_empty(), "el mismo par retira el hilo")
+	CorchoScript.mover(jornada, "a", Vector2(0.5, 0.25))
+	CorchoScript.alternar_enlace(jornada, "a", "b")
+	corcho.refrescar()
+	ficha_a = corcho.find_child("Ficha_a", true, false) as Node3D
+	_comprobar(
+		(
+			ficha_a != null
+			and is_equal_approx(ficha_a.position.x, 0.5 * Corcho3DScript.ESCALA)
+			and is_equal_approx(ficha_a.position.y, 0.25 * Corcho3DScript.ESCALA)
+		),
+		"la pared refleja el nuevo orden al refrescar"
+	)
+	var hilos := corcho.get_node_or_null("Hilos")
+	_comprobar(hilos != null and hilos.get_child_count() == 1, "la pared dibuja el hilo manual")
 	corcho.queue_free()
+
+
+func _probar_panel() -> void:
+	var jornada := {}
+	var conceptos := {
+		"a": {"id": "a", "nombre": "Alpha"},
+		"b": {"id": "b", "nombre": "Beta"},
+		"c": {"id": "c", "nombre": "Gamma"},
+	}
+	CorchoScript.sincronizar(jornada, conceptos.values())
+	var panel := CorchoPanelScript.new()
+	panel.configurar(jornada, conceptos)
+	root.add_child(panel)
+	panel.size = Vector2(1280, 720)
+	var cambios := [0, 0]
+	panel.cambiado.connect(func() -> void: cambios[0] += 1)
+	panel.cerrado.connect(func() -> void: cambios[1] += 1)
+
+	var boton_a: Button = panel.boton_de("a")
+	var boton_b: Button = panel.boton_de("b")
+	_comprobar(boton_a != null and boton_b != null, "la interfaz monta una ficha por concepto")
+	if boton_a == null or boton_b == null:
+		panel.queue_free()
+		return
+	_comprobar(boton_a.focus_mode == Control.FOCUS_ALL, "las fichas se eligen con teclado y mando")
+
+	panel.pulsar("a")
+	_comprobar(panel.seleccion() == "a", "el primer toque marca la ficha")
+	panel.pulsar("b")
+	_comprobar(CorchoScript.estado(jornada)["enlaces"].size() == 1, "dos fichas crean un hilo")
+	_comprobar(panel.seleccion().is_empty(), "completar el par limpia la marca")
+	_comprobar(cambios[0] == 1, "poner hilo avisa del cambio")
+	panel.pulsar("b")
+	panel.pulsar("a")
+	_comprobar(CorchoScript.estado(jornada)["enlaces"].is_empty(), "el mismo par retira el hilo")
+
+	var antes: Vector2 = _pos(jornada, "a")
+	var coger := InputEventJoypadButton.new()
+	coger.button_index = JOY_BUTTON_X
+	coger.pressed = true
+	panel._entrada_ficha(coger, "a")
+	_comprobar(panel.cogida() == "a", "X del mando coge la ficha")
+	var derecha := InputEventAction.new()
+	derecha.action = "ui_right"
+	derecha.pressed = true
+	panel._entrada_ficha(derecha, "a")
+	var despues: Vector2 = _pos(jornada, "a")
+	_comprobar(
+		is_equal_approx(despues.x, antes.x + CorchoPanelScript.PASO_TECLADO),
+		"con la ficha cogida las direcciones la mueven"
+	)
+	var tecla := InputEventKey.new()
+	tecla.physical_keycode = KEY_M
+	tecla.pressed = true
+	panel._entrada_ficha(tecla, "a")
+	_comprobar(panel.cogida().is_empty(), "M del teclado suelta la ficha")
+	var aceptar := InputEventAction.new()
+	aceptar.action = "ui_accept"
+	aceptar.pressed = true
+	panel._entrada_ficha(aceptar, "c")
+	_comprobar(panel.seleccion() == "c", "Intro/A marca la ficha para el hilo")
+
+	var centro_a := boton_a.position + boton_a.size * 0.5
+	var logico: Vector2 = panel._a_logico(centro_a)
+	_comprobar(logico.distance_to(_pos(jornada, "a")) < 0.01, "la ficha se dibuja donde está")
+
+	var cancelar := InputEventAction.new()
+	cancelar.action = "ui_cancel"
+	cancelar.pressed = true
+	panel._input(cancelar)
+	_comprobar(panel.seleccion().is_empty() and cambios[1] == 0, "Esc/B primero deshace la marca")
+	panel._input(cancelar)
+	_comprobar(cambios[1] == 1, "Esc/B sin nada en curso cierra la interfaz")
+	panel.queue_free()
+
+
+func _pos(jornada: Dictionary, id: String) -> Vector2:
+	var pos: Array = CorchoScript.estado(jornada)["fichas"][id]["pos"]
+	return Vector2(pos[0], pos[1])
 
 
 func _conceptos(cantidad: int) -> Array:

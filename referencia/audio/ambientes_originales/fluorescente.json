@@ -1,0 +1,11 @@
+{
+  "id": "fluorescente",
+  "tipo": "fluorescente",
+  "semilla": 11901,
+  "muestras_por_segundo": 8000,
+  "duracion": 2.0,
+  "ganancia_objetivo": 0.72,
+  "tonos": [[50.0, 0.115, 0.0], [100.0, 0.052, 0.3], [150.0, 0.023, 1.1], [3950.0, 0.018, 0.5]],
+  "ruido": {"inicio": 37, "fin": 193, "paso": 13, "amplitud_min": 0.004, "amplitud_max": 0.011},
+  "salida": "ambiente_fluorescente_original.ogg"
+}

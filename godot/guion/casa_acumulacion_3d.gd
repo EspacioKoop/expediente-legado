@@ -86,10 +86,10 @@ static func _objetos_ordenados(estado_ambiental: Dictionary) -> Array[Dictionary
 
 
 static func _montar_objeto(padre: Node3D, objeto: Dictionary, indice: int) -> void:
-	var nodo := Node3D.new()
+	var variante := _variante(objeto)
+	var nodo := _crear_nodo_objeto(objeto, variante)
 	nodo.name = "ObjetoCasa%02d" % indice
 	nodo.position = ANCLAS[indice]
-	var variante := _variante(objeto)
 	nodo.set_meta("objeto_id", String(objeto.get("id", "")))
 	nodo.set_meta("origen", String(objeto.get("origen", "")))
 	nodo.set_meta("variante", variante)
@@ -101,7 +101,7 @@ static func _montar_objeto(padre: Node3D, objeto: Dictionary, indice: int) -> vo
 		VAR_MARCO:
 			_marco(nodo)
 		VAR_PUBLICACION:
-			_publicacion(nodo)
+			_publicacion(nodo, objeto)
 		VAR_CINTA:
 			_cinta(nodo)
 		VAR_PAQUETE:
@@ -112,6 +112,43 @@ static func _montar_objeto(padre: Node3D, objeto: Dictionary, indice: int) -> vo
 			_recuerdo(nodo)
 		_:
 			_util(nodo)
+
+
+static func _crear_nodo_objeto(objeto: Dictionary, variante: String) -> Node3D:
+	if variante != VAR_PUBLICACION:
+		return Node3D.new()
+
+	var lectura := Interactuable3D.new()
+	lectura.verbo = Interactuable3D.Verbo.LEER
+	var item_id := String(objeto.get("id", ""))
+	var ficha := Publicaciones98.por_id(item_id)
+	lectura.nombre_objeto = String(
+		ficha.get("titulo", objeto.get("nombre", item_id.replace("_", " ")))
+	)
+	lectura.set_meta("publicacion_id", item_id)
+	lectura.set_meta("titulo_publicacion", lectura.nombre_objeto)
+	lectura.set_meta("categoria_publicacion", String(ficha.get("categoria", "publicacion")))
+	lectura.set_meta("portada_titulo", _titulo_portada(ficha))
+	lectura.set_meta("formato_publicacion", _formato_publicacion(ficha))
+	return lectura
+
+
+static func _titulo_portada(ficha: Dictionary) -> String:
+	var piezas = ficha.get("piezas", [])
+	if typeof(piezas) != TYPE_ARRAY:
+		return ""
+	for pieza in piezas:
+		if typeof(pieza) != TYPE_DICTIONARY:
+			continue
+		if String(pieza.get("tipo", "")) == "portada":
+			return String(pieza.get("titulo", ""))
+	if not piezas.is_empty() and typeof(piezas[0]) == TYPE_DICTIONARY:
+		return String(piezas[0].get("titulo", ""))
+	return ""
+
+
+static func _formato_publicacion(ficha: Dictionary) -> String:
+	return PublicacionFisica3D.formato_de(ficha)
 
 
 static func _es_iman_calendario(objeto: Dictionary) -> bool:
@@ -188,10 +225,8 @@ static func _marco(raiz: Node3D) -> void:
 	_caja(raiz, Vector3(0, 0, -0.022), Vector3(0.16, 0.21, 0.012), Color(0.15, 0.13, 0.11))
 
 
-static func _publicacion(raiz: Node3D) -> void:
-	_caja(raiz, Vector3(0, -0.08, 0), Vector3(0.24, 0.035, 0.18), Color(0.42, 0.22, 0.18))
-	_caja(raiz, Vector3(0.01, -0.035, 0), Vector3(0.23, 0.032, 0.17), Color(0.58, 0.53, 0.36))
-	_caja(raiz, Vector3(-0.01, 0.008, 0), Vector3(0.22, 0.030, 0.16), Color(0.28, 0.36, 0.46))
+static func _publicacion(raiz: Node3D, objeto: Dictionary) -> void:
+	PublicacionFisica3D.montar(raiz, String(objeto.get("id", "")), true)
 
 
 static func _cinta(raiz: Node3D) -> void:

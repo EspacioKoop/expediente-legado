@@ -1,31 +1,21 @@
 ## La Ventanilla de Reclamaciones: la pantalla.
 ##
-## Aquí es donde el port deja de parecer un formulario. El resto de SIGA-98 es
-## deliberadamente quieto —un documento no se mueve—, y esta pantalla es lo
-## contrario: la réplica del rival **se escribe sola**, perder una vida
-## **sacude** el mostrador y el aviso parpadea. Nada de eso cambia una regla;
-## todo el juego está en `Combate`, que no sabe pintar.
+## #779 convierte el duelo en un careo documental: la elección de ronda sigue
+## resolviéndose en `Combate`, pero una pista ya descubierta y vinculada al
+## reclamante puede reforzar una lectura correcta. El reclamante se ve en 3D,
+## las pruebas quedan selladas sobre el mostrador y una derrota puede apelarse
+## mediante un Juicio por Combate 3D.
 ##
-## Tres cosas que el movimiento tiene que respetar para no mentir:
-##
-## - **La ronda ya está resuelta cuando empieza la animación.** Lo que se ve es
-##   el relato de algo decidido, no un sorteo en curso — si no, una animación
-##   interrumpida cambiaría el resultado.
-## - **Se puede saltar.** Pulsar durante el escrito lo completa de golpe. Un
-##   efecto de texto que obligue a esperar es lo que hace que la segunda
-##   partida se juegue con el sonido quitado.
-## - **Y se puede apagar.** `reduccion_movimiento` deja el mismo combate sin
-##   sacudidas ni escritura progresiva.
+## El movimiento sigue tres reglas: la ronda se resuelve antes de animarla, la
+## escritura puede saltarse y `reduccion_movimiento` conserva las reglas sin
+## sacudidas, reacciones ni desplazamientos decorativos.
 extends Control
 
 ## Cuando se abre desde la calle, la Ventanilla atiende con la MISMA partida del
 ## día: dos copias del estado guardando a la vez se pisarían la racha o la jornada.
 signal cerrada
 
-## Cuánto tarda en escribirse una réplica, por carácter.
 const SEGUNDOS_POR_CARACTER := 0.018
-
-## Cuánto se sacude el mostrador al encajar un golpe.
 const SACUDIDA := 7.0
 const SACUDIDA_SEGUNDOS := 0.28
 
@@ -44,15 +34,21 @@ var _escribiendo := ""
 var _escrito := 0.0
 var _sacudida := 0.0
 var _tablero: Control
+var _duelo_visual: HBoxContainer
+var _previsualizador: PrevisualizadorReclamante3D
 var _replica: RichTextLabel
 var _cronica: Label
-var _vidas: Label
+var _vida_jugador: ProgressBar
+var _vida_rival: ProgressBar
+var _nombre_rival: Label
 var _marcador: Label
 var _botones: HBoxContainer
 var _habilidades: HBoxContainer
 var _lista: ItemList
+var _evidencias: ItemList
 var _ficha: RichTextLabel
 var _habilidad_elegida_eje := ""
+var _juicio: JuicioCombate3D
 
 
 func _ready() -> void:
@@ -87,9 +83,24 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(evento: InputEvent) -> void:
-	# Saltar el escrito: quien ya ha leído la frase no tiene por qué esperarla.
+	if _juicio != null:
+		if evento.is_action_pressed("cancelar") or evento.is_action_pressed("ui_cancel"):
+			get_viewport().set_input_as_handled()
+			_juicio.abandonar()
+		return
+	if evento.is_action_pressed("cancelar") or evento.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		_salir_ventanilla()
+		return
 	if evento.is_pressed() and not _escribiendo.is_empty():
 		_escrito = float(_escribiendo.length())
+
+
+func _salir_ventanilla() -> void:
+	if partida_externa != null:
+		cerrada.emit()
+		return
+	get_tree().change_scene_to_file("res://escenas/inicio.tscn")
 
 
 func _draw() -> void:
@@ -101,11 +112,13 @@ func _draw() -> void:
 
 func _llenar_turno() -> void:
 	combate = {}
+	_habilidad_elegida_eje = ""
 	_lista.clear()
 	for reclamante in Ventanilla.disponibles(contenido, partida.estado["pistas_descubiertas"]):
 		_lista.add_item(tr(reclamante["nombre"]))
 		_lista.set_item_metadata(_lista.item_count - 1, reclamante)
 	_lista.visible = true
+	_duelo_visual.visible = false
 	_botones.visible = false
 	_habilidades.visible = false
 	_cronica.text = tr("VENTANILLA_LLAME")
@@ -116,21 +129,31 @@ func _llenar_turno() -> void:
 
 func _al_llamar(indice: int) -> void:
 	_rival = _lista.get_item_metadata(indice)
-	combate = Combate.nuevo("reactiva", _rival, historias.cargas(partida.estado))
+	var evidencias := CareoDocumental.evidencias_relevantes(
+		_rival, contenido, partida.estado["pistas_descubiertas"]
+	)
+	combate = CareoDocumental.nuevo(_rival, historias.cargas(partida.estado), evidencias)
 	_lista.visible = false
+	_duelo_visual.visible = true
 	_botones.visible = true
 	_habilidades.visible = true
 	_cronica.text = tr("VENTANILLA_SE_PRESENTA") % tr(_rival["nombre"])
 	_replica.text = ""
+	_previsualizador.reduccion_movimiento = reduccion_movimiento
+	_previsualizador.mostrar(_rival)
 	_pintar_ficha()
+	_pintar_botones_jugada()
 	_pintar_habilidades()
+	_pintar_evidencias()
 	_actualizar_marcador()
 
 
 func _al_jugar(tipo: String) -> void:
 	if combate.is_empty() or combate["terminado"]:
 		return
-	var ronda := Combate.jugar(combate, tipo, _habilidad_elegida(), _tirada())
+	var ronda := CareoDocumental.jugar(
+		combate, tipo, _evidencia_elegida(), _habilidad_elegida(), _tirada()
+	)
 	_habilidad_elegida_eje = ""
 	_contar(ronda)
 
@@ -147,17 +170,67 @@ func _contar(ronda: Dictionary) -> void:
 	)
 	if not ronda["revelada"].is_empty():
 		texto += "\n" + tr("VENTANILLA_ADELANTA") % ronda["revelada"]
+	var evidencia: Dictionary = ronda.get("evidencia", {})
+	if not evidencia.is_empty():
+		var resumen := String(evidencia.get("descripcion", evidencia.get("fraseGatillo", "")))
+		if not resumen.is_empty():
+			texto += "\n" + resumen
 	_cronica.text = texto
 
 	_decir(ronda["replica"])
 	if ronda["dano_al_jugador"] > 0 and not reduccion_movimiento:
 		_sacudida = SACUDIDA_SEGUNDOS
+	_previsualizador.reaccion(ronda)
 
 	_pintar_habilidades()
+	_pintar_evidencias()
 	_actualizar_marcador()
 
 	if ronda["terminado"]:
-		_cerrar(ronda["ganador"] == "jugador")
+		if ronda["ganador"] == "jugador":
+			_cerrar(true)
+		else:
+			_ofrecer_juicio()
+
+
+func _ofrecer_juicio() -> void:
+	_habilidades.visible = false
+	_evidencias.visible = false
+	_limpiar_hijos(_botones)
+	_botones.visible = true
+
+	# Reutiliza vocabulario ya presente: Objeción es la apelación extraordinaria
+	# y Silencio acepta el resultado. El icono deja claro qué opción abre acción.
+	var juicio := Button.new()
+	var texto_juicio := "⚔ " + Combate.etiqueta("objecion")
+	juicio.text = texto_juicio
+	juicio.pressed.connect(_abrir_juicio)
+	_botones.add_child(juicio)
+
+	var aceptar := Button.new()
+	var texto_aceptar := "✓ " + Combate.etiqueta("silencio")
+	aceptar.text = texto_aceptar
+	aceptar.pressed.connect(_cerrar.bind(false))
+	_botones.add_child(aceptar)
+
+
+func _abrir_juicio() -> void:
+	if _juicio != null:
+		return
+	_tablero.visible = false
+	_juicio = JuicioCombate3D.new()
+	_juicio.configurar(_rival, CareoDocumental.bono_juicio(combate), reduccion_movimiento)
+	_juicio.terminado.connect(_al_juicio_terminado)
+	add_child(_juicio)
+
+
+func _al_juicio_terminado(gano: bool) -> void:
+	var juicio_actual := _juicio
+	_juicio = null
+	if juicio_actual != null:
+		juicio_actual.queue_free()
+	_tablero.visible = true
+	_cerrar(gano)
 
 
 func _cerrar(gano: bool) -> void:
@@ -165,13 +238,11 @@ func _cerrar(gano: bool) -> void:
 	racha = cierre["racha"]
 	for id in cierre["logros"]:
 		Prometeo.desbloquear_carta(partida.estado["tarot"], id)
-	# La racha y las cartas ya están dadas en memoria. Si no se pudo escribir,
-	# se dice en la crónica y el botón de llamar al siguiente pasa a ser el
-	# reintento: vuelve a guardar lo mismo, no vuelve a cerrar este turno.
 	var se_guardo := partida.guardar()
 
 	_botones.visible = false
 	_habilidades.visible = false
+	_evidencias.visible = false
 	_cronica.text += (
 		"\n\n%s" % (tr("VENTANILLA_ATENDIDA") % racha if gano else tr("VENTANILLA_NO_ATENDIDA"))
 	)
@@ -179,8 +250,6 @@ func _cerrar(gano: bool) -> void:
 	if not se_guardo:
 		_cronica.text += "\n\n%s" % tr("ARCHIVO_ERROR_GUARDAR")
 
-	# Un botón para volver a la cola, en vez de saltar solo: el jugador decide
-	# cuándo llama al siguiente.
 	var siguiente := Button.new()
 	siguiente.text = tr("VENTANILLA_SIGUIENTE")
 	siguiente.pressed.connect(
@@ -202,9 +271,6 @@ func _cerrar(gano: bool) -> void:
 	_botones.get_parent().add_child(siguiente)
 
 
-## La ficha del reclamante: lo mismo que sabe el corcho de él. Un reclamante
-## de oficio no tiene expediente, y eso se DICE en vez de dejar el hueco en
-## blanco — que no tenga ficha es su rasgo, no un fallo de la pantalla.
 func _pintar_ficha() -> void:
 	var etiqueta := tr("FICHA_PERSONA") if _rival["tipo"] == "PERSONA" else tr("FICHA_COMITE")
 	var cuerpo: String = tr(_rival.get("resumen", ""))
@@ -233,13 +299,6 @@ func _veredicto(cual: String) -> String:
 			return tr("VEREDICTO_EMPATE")
 
 
-## De dónde salen las tiradas de este combate (#147).
-##
-## Antes era `randomize()`, o sea el reloj: el mismo combate salía distinto cada
-## vez y un careo que se torcía no se podía volver a ver. Ahora se deriva de la
-## semilla de la partida, la vuelta y el día, así que el combate de un día es
-## SIEMPRE el mismo combate — recargar la partida no vuelve a tirar los dados,
-## que es justo lo que permitía repetir un turno hasta que saliera bien.
 func _sembrar_tiradas() -> void:
 	var jornada: Dictionary = partida.estado.get("jornada", {})
 	_azar.seed = Azar.derivar(
@@ -249,13 +308,30 @@ func _sembrar_tiradas() -> void:
 	)
 
 
-## Las tiradas del combate salen de aquí, no de `randf` suelto: un solo sitio
-## que sortea es un solo sitio al que mirar cuando algo sale raro.
 func _tirada() -> Callable:
 	return func(): return _azar.randf()
 
 
-# --- Habilidades ------------------------------------------------------------
+# --- Evidencias y habilidades -----------------------------------------------
+
+
+func _evidencia_elegida() -> String:
+	var seleccion := _evidencias.get_selected_items()
+	if seleccion.is_empty():
+		return ""
+	return String(_evidencias.get_item_metadata(seleccion[0]))
+
+
+func _pintar_evidencias() -> void:
+	_evidencias.clear()
+	if combate.is_empty():
+		_evidencias.visible = false
+		return
+	for evidencia in CareoDocumental.evidencias_disponibles(combate):
+		var texto := String(evidencia.get("descripcion", evidencia.get("fraseGatillo", "")))
+		_evidencias.add_item(texto)
+		_evidencias.set_item_metadata(_evidencias.item_count - 1, evidencia.get("id", ""))
+	_evidencias.visible = _evidencias.item_count > 0 and not combate["terminado"]
 
 
 func _habilidad_elegida() -> String:
@@ -263,8 +339,9 @@ func _habilidad_elegida() -> String:
 
 
 func _pintar_habilidades() -> void:
-	for hijo in _habilidades.get_children():
-		hijo.queue_free()
+	_limpiar_hijos(_habilidades)
+	if combate.is_empty() or combate["terminado"]:
+		return
 	for eje in Combate.cargas_disponibles(combate):
 		var habilidad: Dictionary = Historias.HABILIDADES[eje]
 		var boton := Button.new()
@@ -273,8 +350,6 @@ func _pintar_habilidades() -> void:
 		boton.toggle_mode = true
 		boton.pressed.connect(
 			func():
-				# Se arma para la ronda siguiente y no se gasta al pulsar: una
-				# habilidad es una decisión DENTRO de la ronda.
 				_habilidad_elegida_eje = eje if boton.button_pressed else ""
 				for otro in _habilidades.get_children():
 					if otro != boton:
@@ -283,29 +358,27 @@ func _pintar_habilidades() -> void:
 		_habilidades.add_child(boton)
 
 
+func _pintar_botones_jugada() -> void:
+	_limpiar_hijos(_botones)
+	for tipo in Combate.TIPOS:
+		var boton := Button.new()
+		boton.text = Combate.etiqueta(tipo)
+		boton.pressed.connect(_al_jugar.bind(tipo))
+		_botones.add_child(boton)
+
+
 func _actualizar_marcador() -> void:
 	if combate.is_empty():
-		_vidas.text = ""
+		_vida_jugador.value = 0
+		_vida_rival.value = 0
+		_nombre_rival.text = ""
 	else:
-		_vidas.text = (
-			tr("COMBATE_VIDAS")
-			% [
-				_barra(combate["vida_jugador"]),
-				combate["vida_jugador"],
-				tr(_rival["nombre"]),
-				_barra(combate["vida_rival"]),
-				combate["vida_rival"]
-			]
-		)
+		_vida_jugador.value = maxi(0, int(combate["vida_jugador"]))
+		_vida_rival.value = maxi(0, int(combate["vida_rival"]))
+		_nombre_rival.text = tr(_rival["nombre"])
 	_marcador.text = (
 		tr("VENTANILLA_MARCADOR") % [racha, partida.estado.get("coliseo_racha_mejor", 0)]
 	)
-
-
-## Las vidas como bloques y no como un número: se leen de un vistazo y el
-## hueco que deja el que falta es lo que dice que has encajado un golpe.
-func _barra(vidas: int) -> String:
-	return "█".repeat(maxi(0, vidas)) + "░".repeat(maxi(0, Combate.VIDA_INICIAL - vidas))
 
 
 # --- Cajas ------------------------------------------------------------------
@@ -322,61 +395,107 @@ func _construir() -> void:
 	add_child(_tablero)
 
 	_tablero.add_child(_titulo(tr("VENTANILLA_TITULO")))
-
 	_marcador = _etiqueta("")
 	_tablero.add_child(_marcador)
 
 	_lista = ItemList.new()
 	_lista.custom_minimum_size.y = 150
+	_lista.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_lista.add_theme_stylebox_override("panel", _hundido(EstiloSiga.BLANCO))
 	_lista.add_theme_color_override("font_color", EstiloSiga.NEGRO)
 	_lista.item_activated.connect(_al_llamar)
 	_lista.item_selected.connect(_al_llamar)
 	_tablero.add_child(_lista)
 
-	_vidas = _etiqueta("")
-	_tablero.add_child(_vidas)
+	_duelo_visual = HBoxContainer.new()
+	_duelo_visual.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_duelo_visual.add_theme_constant_override("separation", 10)
+	_tablero.add_child(_duelo_visual)
+
+	_previsualizador = PrevisualizadorReclamante3D.new()
+	_previsualizador.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_previsualizador.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_duelo_visual.add_child(_previsualizador)
+
+	var informacion := VBoxContainer.new()
+	informacion.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	informacion.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	informacion.add_theme_constant_override("separation", 6)
+	_duelo_visual.add_child(informacion)
+
+	informacion.add_child(_construir_vidas())
 
 	_replica = RichTextLabel.new()
 	_replica.bbcode_enabled = false
-	_replica.custom_minimum_size.y = 120
+	_replica.custom_minimum_size.y = 72
 	_replica.add_theme_stylebox_override("normal", _hundido(EstiloSiga.BLANCO))
 	_replica.add_theme_color_override("default_color", EstiloSiga.NEGRO)
 	_replica.add_theme_font_override("normal_font", theme.get_font("mono_font", "RichTextLabel"))
-	_tablero.add_child(_replica)
+	informacion.add_child(_replica)
 
 	_cronica = _etiqueta("")
-	_cronica.custom_minimum_size.y = 54
+	_cronica.custom_minimum_size.y = 48
+	_cronica.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_cronica.vertical_alignment = VERTICAL_ALIGNMENT_TOP
-	_tablero.add_child(_cronica)
+	informacion.add_child(_cronica)
 
-	# El hueco de en medio se llena con quién tienes delante, que es un dato que
-	# ya existe en el corcho y que hacía falta: sin él, los reclamantes son
-	# nombres intercambiables y da igual a quién atiendas.
 	_ficha = RichTextLabel.new()
 	_ficha.bbcode_enabled = true
+	_ficha.custom_minimum_size.y = 72
 	_ficha.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_ficha.add_theme_stylebox_override("normal", _hundido(EstiloSiga.GRIS))
 	_ficha.add_theme_color_override("default_color", EstiloSiga.NEGRO)
-	_tablero.add_child(_ficha)
+	informacion.add_child(_ficha)
+
+	_evidencias = ItemList.new()
+	_evidencias.custom_minimum_size.y = 86
+	_evidencias.select_mode = ItemList.SELECT_SINGLE
+	_evidencias.allow_reselect = true
+	_evidencias.add_theme_stylebox_override("panel", _hundido(EstiloSiga.BLANCO))
+	_evidencias.add_theme_color_override("font_color", EstiloSiga.NEGRO)
+	informacion.add_child(_evidencias)
 
 	_botones = HBoxContainer.new()
-	for tipo in Combate.TIPOS:
-		var boton := Button.new()
-		boton.text = Combate.etiqueta(tipo)
-		boton.pressed.connect(_al_jugar.bind(tipo))
-		_botones.add_child(boton)
 	_tablero.add_child(_botones)
 
 	_habilidades = HBoxContainer.new()
 	_tablero.add_child(_habilidades)
 
-	if partida_externa != null:
-		var salir := Button.new()
-		salir.name = "SalirVentanilla"
-		salir.text = tr("VENTANILLA_SALIR")
-		salir.pressed.connect(func(): cerrada.emit())
-		_tablero.add_child(salir)
+	var salir := Button.new()
+	salir.name = "SalirVentanilla"
+	salir.text = tr("VENTANILLA_SALIR")
+	salir.pressed.connect(_salir_ventanilla)
+	_tablero.add_child(salir)
+
+
+func _construir_vidas() -> Control:
+	var fila := HBoxContainer.new()
+	fila.add_theme_constant_override("separation", 8)
+
+	_vida_jugador = ProgressBar.new()
+	_vida_jugador.max_value = Combate.VIDA_INICIAL
+	_vida_jugador.show_percentage = false
+	_vida_jugador.custom_minimum_size = Vector2(110, 18)
+	_vida_jugador.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	fila.add_child(_vida_jugador)
+
+	_nombre_rival = _etiqueta("")
+	_nombre_rival.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_nombre_rival.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	fila.add_child(_nombre_rival)
+
+	_vida_rival = ProgressBar.new()
+	_vida_rival.max_value = Combate.VIDA_INICIAL
+	_vida_rival.show_percentage = false
+	_vida_rival.custom_minimum_size = Vector2(110, 18)
+	_vida_rival.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	fila.add_child(_vida_rival)
+	return fila
+
+
+func _limpiar_hijos(nodo: Node) -> void:
+	for hijo in nodo.get_children():
+		hijo.queue_free()
 
 
 func _titulo(texto: String) -> Control:

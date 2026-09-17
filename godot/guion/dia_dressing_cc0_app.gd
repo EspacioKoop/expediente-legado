@@ -145,7 +145,7 @@ func _vestir_casa_cc0(mundo: Node3D) -> void:
 		mundo,
 		"EstanteriaCasaCC0",
 		"bookcaseClosed",
-		Vector3(-2.3, 0.90, 3.22),
+		Vector3(-2.3, 0.90, 4.22),
 		Vector3(0.80, 1.80, 0.48),
 		Color(0.34, 0.28, 0.23),
 		"estantería"
@@ -154,7 +154,7 @@ func _vestir_casa_cc0(mundo: Node3D) -> void:
 		mundo,
 		"SillaCasaCC0",
 		"chairDesk",
-		Vector3(-1.75, 0.48, 2.55),
+		Vector3(-1.75, 0.48, 3.55),
 		Vector3(0.62, 0.95, 0.62),
 		Color(0.30, 0.31, 0.30),
 		"silla",
@@ -164,7 +164,7 @@ func _vestir_casa_cc0(mundo: Node3D) -> void:
 		mundo,
 		"CajaCasaBaja",
 		"cardboardBoxClosed",
-		Vector3(-3.55, 0.20, 3.1),
+		Vector3(-3.55, 0.20, 4.1),
 		Vector3(0.50, 0.40, 0.70),
 		Color(0.56, 0.48, 0.35),
 		"caja doméstica"
@@ -173,7 +173,7 @@ func _vestir_casa_cc0(mundo: Node3D) -> void:
 		mundo,
 		"CajaCasaAlta",
 		"cardboardBoxClosed",
-		Vector3(-3.55, 0.61, 3.1),
+		Vector3(-3.55, 0.61, 4.1),
 		Vector3(0.50, 0.40, 0.70),
 		Color(0.52, 0.45, 0.34),
 		"caja doméstica"

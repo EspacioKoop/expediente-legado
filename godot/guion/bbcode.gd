@@ -14,18 +14,25 @@ static func escapar(texto: String) -> String:
 	return texto.replace("[", "[lb]")
 
 
+## Una pista conserva siempre su metadato clicable. El estado de descubierta
+## cambia el fondo, no la interacción: así hover y clic pasan por el mismo URL
+## antes y después de descubrirla.
+static func _pista(texto: String, id: Variant, descubierta: bool) -> String:
+	var visible := texto
+	if descubierta:
+		visible = "[bgcolor=#c8c800]%s[/bgcolor]" % visible
+	return "[url=pista:%s][color=#0000aa][u]%s[/u][/color][/url]" % [id, visible]
+
+
 static func render(segmentos: Array) -> String:
 	var salida := ""
 	for segmento in segmentos:
 		var texto: String = escapar(segmento["texto"])
 		match segmento["tipo"]:
 			"pista":
-				salida += (
-					"[url=pista:%s][color=#0000aa][u]%s[/u][/color][/url]"
-					% [segmento["meta"]["pista"], texto]
-				)
+				salida += _pista(texto, segmento["meta"]["pista"], false)
 			"pista_vista":
-				salida += "[bgcolor=#c8c800]%s[/bgcolor]" % texto
+				salida += _pista(texto, segmento["meta"]["pista"], true)
 			"carta":
 				salida += (
 					"[url=carta:%s][color=#0000aa][u]%s[/u][/color][/url]"

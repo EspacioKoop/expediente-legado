@@ -16,8 +16,11 @@ const EXPEDIENTES_PRINCIPALES := 5
 const CREDENCIAL := "enlace13"
 const MEMORANDUM_ID := "memorandum_enlace13"
 const DIAGNOSTICO_ID := "diagnostico_enlace13"
+const REGISTRO_IMPOSIBLE_ID := "registro_imposible_13"
 const RUTA_RESTRINGIDA := "equipo/red/acreditaciones"
 const CONOCIMIENTO_INCOHERENCIA := "os98_incoherencia"
+const CONOCIMIENTO_CLIMAX := "os98_climax_pendiente"
+const URL_DIAGNOSTICO := "http://intranet.dgai/diag/enlace13/"
 
 
 static func nuevo() -> Dictionary:
@@ -53,13 +56,26 @@ static func memorandum_disponible(partida: Dictionary) -> bool:
 static func contexto(partida: Dictionary, estado: Dictionary, dia: int) -> Dictionary:
 	completar(estado)
 	var memorandum := memorandum_disponible(partida)
+	var fase := int(estado.get("fase", FASE_NORMALIDAD))
 	var credenciales: Array[String] = []
 	var conocimiento: Array[String] = []
+	var urls_caidas: Array[String] = []
 	if bool(estado.get("credencial_descubierta", false)):
 		credenciales.append(CREDENCIAL)
 		conocimiento.append(CREDENCIAL)
-	if int(estado.get("fase", FASE_NORMALIDAD)) >= FASE_INCOHERENCIAS:
+	if fase >= FASE_INCOHERENCIAS:
 		conocimiento.append(CONOCIMIENTO_INCOHERENCIA)
+	# Fase 3: una acción en Explorador altera de forma verificable una superficie
+	# distinta. El diagnóstico que funcionaba en fase 1/2 deja de responder en
+	# Web98, mientras su volcado imposible sigue disponible como rastro. No hay
+	# azar ni red real: `Web98Indice` interpreta esta URL como caída simulada.
+	if fase >= FASE_CONTAMINACION_CRUZADA:
+		urls_caidas.append(URL_DIAGNOSTICO)
+	# Fase 4 no arranca aquí el combate ni el final de #9. Solo publica un handoff
+	# estable y persistente por vuelta para que la capa dueña del clímax pueda
+	# consumirlo sin volver a interpretar documentos, historial o credenciales.
+	if fase >= FASE_CLIMAX:
+		conocimiento.append(CONOCIMIENTO_CLIMAX)
 	return {
 		"jornada": maxi(1, dia),
 		"dia": maxi(1, dia),
@@ -69,14 +85,17 @@ static func contexto(partida: Dictionary, estado: Dictionary, dia: int) -> Dicti
 		"habilitar_enlace13": memorandum,
 		"credenciales": credenciales,
 		"conocimiento": conocimiento,
-		"urls_caidas": [],
-		"fase_contaminacion": int(estado.get("fase", FASE_NORMALIDAD)),
+		"urls_caidas": urls_caidas,
+		"fase_contaminacion": fase,
+		"climax_hastur_pendiente": fase >= FASE_CLIMAX,
 	}
 
 
 ## Leer el memorándum concede conocimiento; abrir después el diagnóstico
-## restringido activa la primera incoherencia verificable. Repetir cualquiera de
-## los dos hitos es idempotente.
+## restringido activa la primera incoherencia verificable. Leer esa evidencia
+## imposible hace avanzar a contaminación cruzada. Cuando el jugador vuelve al
+## diagnóstico después de comprobar que Web98 ya no puede resolverlo, se alcanza
+## fase 4 y queda publicado el handoff de clímax. Repetir hitos es idempotente.
 static func registrar_documento(
 	partida: Dictionary, estado: Dictionary, documento_id: String
 ) -> bool:
@@ -90,7 +109,17 @@ static func registrar_documento(
 		return cambio
 	if documento_id == DIAGNOSTICO_ID and bool(estado.get("credencial_descubierta", false)):
 		var fase_antes := int(estado.get("fase", FASE_NORMALIDAD))
-		_avanzar(estado, FASE_INCOHERENCIAS, "diagnostico_restringido_leido")
+		if fase_antes >= FASE_CONTAMINACION_CRUZADA:
+			_avanzar(estado, FASE_CLIMAX, "diagnostico_reabierto_climax")
+		else:
+			_avanzar(estado, FASE_INCOHERENCIAS, "diagnostico_restringido_leido")
+		return int(estado.get("fase", FASE_NORMALIDAD)) != fase_antes
+	if (
+		documento_id == REGISTRO_IMPOSIBLE_ID
+		and int(estado.get("fase", FASE_NORMALIDAD)) >= FASE_INCOHERENCIAS
+	):
+		var fase_antes := int(estado.get("fase", FASE_NORMALIDAD))
+		_avanzar(estado, FASE_CONTAMINACION_CRUZADA, "registro_imposible_leido")
 		return int(estado.get("fase", FASE_NORMALIDAD)) != fase_antes
 	return false
 
