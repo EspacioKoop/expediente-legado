@@ -38,6 +38,12 @@ Cambios respecto a la versión anterior:
 
 `CasaHogarCC0` monta las piezas desde `CasaUtileria.montar`. Cada pieza usa `AssetCc0.sustituir`, que aplica el shader PSX común conservando la paleta del pack, y lleva una única `BoxShape3D` a la medida real si es mueble de suelo. Si falta un GLB, esa pieza no aparece y el sofá mantiene su versión procedural.
 
+## Reutilización en el sueño
+
+#227 no termina en vestir la vivienda. El armario `wardrobe_01` es el primer vertical que conecta el pack con #87: al examinarlo en casa, `ObjetosOniricos` conserva únicamente el ID canónico `armario_hogar` de la jornada. Si el sueño lo selecciona, `SuenoUtileria` instancia una anomalía que vuelve a cargar **el mismo GLB CC0** mediante `AssetCc0`, conserva su paleta dentro del shader PSX y deforma escala/rotación sobre esa forma reconocible.
+
+La copia onírica no añade otro binario, no duplica procedencia, no crea inventario ni cambia objetivos. Sigue el contrato de #87: sin haber examinado el original durante el día, esa anomalía doméstica no aparece. El límite general de tres anomalías por sala permanece intacto.
+
 ## Pruebas
 
 `godot/pruebas/pruebas_casa_hogar_cc0.gd` (desde `scripts/test_household_goods_cc0.py`) monta la casa real y comprueba:
