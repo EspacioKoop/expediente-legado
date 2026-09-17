@@ -4,7 +4,8 @@
 ## ventanas del primer tramo residencial y construye una "caja de sombra" muy
 ## poco profunda por delante del revoco: marco con volumen, cristal translúcido,
 ## fondo oscuro y props 3D simples. La selección, la iluminación y el LOD son
-## deterministas.
+## deterministas. La geometría repetida se agrupa por malla/material/LOD mediante
+## MultiMesh para que el detalle no convierta cada pieza en un draw call propio.
 class_name CalleFachadasVivas
 extends RefCounted
 
@@ -34,9 +35,16 @@ static func montar(calle: Node3D) -> Node3D:
 	var raiz := Node3D.new()
 	raiz.name = "FachadasVivas"
 	calle.add_child(raiz)
+	var raiz_interiores := Node3D.new()
+	raiz_interiores.name = "Interiores"
+	raiz.add_child(raiz_interiores)
+	var raiz_lotes := Node3D.new()
+	raiz_lotes.name = "Lotes"
+	raiz.add_child(raiz_lotes)
 
 	var materiales := _materiales_compartidos()
 	var mallas := _mallas_compartidas()
+	var lotes := {}
 	var decoradas := 0
 	for hijo in pisos.get_children():
 		if decoradas >= MAX_VENTANAS:
@@ -44,13 +52,21 @@ static func montar(calle: Node3D) -> Node3D:
 		var ventana := hijo as MeshInstance3D
 		if ventana == null or not String(ventana.name).begins_with(PREFIJO_TRAMO):
 			continue
-		_decorar(raiz, ventana, decoradas, materiales, mallas)
+		_decorar(raiz_interiores, ventana, decoradas, materiales, mallas, lotes)
 		decoradas += 1
+	_crear_lotes(raiz_lotes, lotes)
+	raiz.set_meta("ventanas_decoradas", decoradas)
+	raiz.set_meta("instancias_batcheadas", _contar_instancias(lotes))
 	return raiz
 
 
 static func _decorar(
-	raiz: Node3D, ventana: MeshInstance3D, indice: int, materiales: Dictionary, mallas: Dictionary
+	raiz_interiores: Node3D,
+	ventana: MeshInstance3D,
+	indice: int,
+	materiales: Dictionary,
+	mallas: Dictionary,
+	lotes: Dictionary
 ) -> void:
 	var variante := indice % VARIANTES.size()
 	var estado_luz := String(ESTADOS_LUZ[indice % ESTADOS_LUZ.size()])
@@ -69,58 +85,63 @@ static func _decorar(
 	grupo.set_meta("variante", VARIANTES[variante])
 	grupo.set_meta("estado_luz", estado_luz)
 	grupo.set_meta("hacia_calle", hacia_calle)
-	raiz.add_child(grupo)
+	raiz_interiores.add_child(grupo)
 
 	var centro := ventana.position
 	var x_fondo := centro.x - hacia_calle * PROFUNDIDAD_INTERIOR
 	var x_marco := centro.x - hacia_calle * (PROFUNDIDAD_MARCO * 0.5)
 	var x_prop := centro.x - hacia_calle * 0.032
+	grupo.set_meta("fondo_x", x_fondo)
+	grupo.set_meta("marco_volumen", true)
 
-	_pieza(
-		grupo,
-		"Fondo",
+	_registrar_pieza(
+		lotes,
+		"fondo_" + estado_luz,
 		Vector3(x_fondo, centro.y, centro.z),
 		mallas["fondo"],
 		_material_fondo(materiales, estado_luz),
 		LOD_LEJOS_FIN
 	)
-	_pieza(
-		grupo,
-		"MarcoSuperior",
+	_registrar_pieza(
+		lotes,
+		"marco_h",
 		Vector3(x_marco, centro.y + 0.62, centro.z),
 		mallas["marco_h"],
 		materiales["marco"],
 		LOD_MEDIA_FIN
 	)
-	_pieza(
-		grupo,
-		"MarcoInferior",
+	_registrar_pieza(
+		lotes,
+		"marco_h",
 		Vector3(x_marco, centro.y - 0.62, centro.z),
 		mallas["marco_h"],
 		materiales["marco"],
 		LOD_MEDIA_FIN
 	)
-	_pieza(
-		grupo,
-		"MarcoIzquierdo",
+	_registrar_pieza(
+		lotes,
+		"marco_v",
 		Vector3(x_marco, centro.y, centro.z - 0.49),
 		mallas["marco_v"],
 		materiales["marco"],
 		LOD_MEDIA_FIN
 	)
-	_pieza(
-		grupo,
-		"MarcoDerecho",
+	_registrar_pieza(
+		lotes,
+		"marco_v",
 		Vector3(x_marco, centro.y, centro.z + 0.49),
 		mallas["marco_v"],
 		materiales["marco"],
 		LOD_MEDIA_FIN
 	)
 
-	if estado_luz == "persiana":
-		_pieza(
-			grupo,
-			"Persiana",
+	var props: Array[String] = []
+	var tiene_persiana := estado_luz == "persiana"
+	grupo.set_meta("tiene_persiana", tiene_persiana)
+	if tiene_persiana:
+		_registrar_pieza(
+			lotes,
+			"persiana",
 			Vector3(x_prop, centro.y, centro.z),
 			mallas["persiana"],
 			materiales["persiana"],
@@ -129,32 +150,49 @@ static func _decorar(
 
 	match variante:
 		0:
-			_componer_escritorio(grupo, Vector3(x_prop, centro.y, centro.z), materiales, mallas)
+			_componer_escritorio(
+				lotes, Vector3(x_prop, centro.y, centro.z), materiales, mallas, props
+			)
 		1:
-			_componer_estanteria(grupo, Vector3(x_prop, centro.y, centro.z), materiales, mallas)
+			_componer_estanteria(
+				lotes, Vector3(x_prop, centro.y, centro.z), materiales, mallas, props
+			)
 		_:
-			_componer_salon(grupo, Vector3(x_prop, centro.y, centro.z), materiales, mallas)
+			_componer_salon(
+				lotes, Vector3(x_prop, centro.y, centro.z), materiales, mallas, props
+			)
+	grupo.set_meta("props", props)
 
 
 static func _componer_escritorio(
-	padre: Node3D, centro: Vector3, materiales: Dictionary, mallas: Dictionary
+	lotes: Dictionary,
+	centro: Vector3,
+	materiales: Dictionary,
+	mallas: Dictionary,
+	props: Array[String]
 ) -> void:
-	_pieza(
-		padre,
+	_registrar_prop(
+		lotes,
+		props,
+		"mesa",
 		"Escritorio",
 		centro + Vector3(0.0, -0.34, 0.02),
 		mallas["mesa"],
 		materiales["madera"]
 	)
-	_pieza(
-		padre,
+	_registrar_prop(
+		lotes,
+		props,
+		"monitor",
 		"Monitor",
 		centro + Vector3(0.0, -0.05, -0.12),
 		mallas["monitor"],
 		materiales["pantalla"]
 	)
-	_pieza(
-		padre,
+	_registrar_prop(
+		lotes,
+		props,
+		"lampara",
 		"Lampara",
 		centro + Vector3(0.0, 0.18, 0.22),
 		mallas["lampara"],
@@ -163,53 +201,147 @@ static func _componer_escritorio(
 
 
 static func _componer_estanteria(
-	padre: Node3D, centro: Vector3, materiales: Dictionary, mallas: Dictionary
+	lotes: Dictionary,
+	centro: Vector3,
+	materiales: Dictionary,
+	mallas: Dictionary,
+	props: Array[String]
 ) -> void:
-	_pieza(
-		padre,
+	_registrar_prop(
+		lotes,
+		props,
+		"estanteria",
 		"Estanteria",
 		centro + Vector3(0.0, 0.0, -0.22),
 		mallas["estanteria"],
 		materiales["madera"]
 	)
 	for fila in 3:
-		_pieza(
-			padre,
+		_registrar_prop(
+			lotes,
+			props,
+			"balda",
 			"Balda%d" % fila,
 			centro + Vector3(0.0, -0.30 + fila * 0.30, -0.22),
 			mallas["balda"],
 			materiales["madera_clara"]
 		)
-	_pieza(
-		padre, "Planta", centro + Vector3(0.0, -0.17, 0.23), mallas["planta"], materiales["verde"]
+	_registrar_prop(
+		lotes,
+		props,
+		"planta",
+		"Planta",
+		centro + Vector3(0.0, -0.17, 0.23),
+		mallas["planta"],
+		materiales["verde"]
 	)
 
 
 static func _componer_salon(
-	padre: Node3D, centro: Vector3, materiales: Dictionary, mallas: Dictionary
+	lotes: Dictionary,
+	centro: Vector3,
+	materiales: Dictionary,
+	mallas: Dictionary,
+	props: Array[String]
 ) -> void:
-	_pieza(padre, "Sofa", centro + Vector3(0.0, -0.30, -0.10), mallas["sofa"], materiales["tela"])
-	_pieza(
-		padre,
+	_registrar_prop(
+		lotes,
+		props,
+		"sofa",
+		"Sofa",
+		centro + Vector3(0.0, -0.30, -0.10),
+		mallas["sofa"],
+		materiales["tela"]
+	)
+	_registrar_prop(
+		lotes,
+		props,
+		"televisor",
 		"PantallaInterior",
 		centro + Vector3(0.0, 0.05, 0.24),
 		mallas["televisor"],
 		materiales["pantalla"]
 	)
-	_pieza(
-		padre,
+	_registrar_prop(
+		lotes,
+		props,
+		"cortina",
 		"CortinaIzquierda",
 		centro + Vector3(0.0, 0.08, -0.36),
 		mallas["cortina"],
 		materiales["cortina"]
 	)
-	_pieza(
-		padre,
+	_registrar_prop(
+		lotes,
+		props,
+		"cortina",
 		"CortinaDerecha",
 		centro + Vector3(0.0, 0.08, 0.36),
 		mallas["cortina"],
 		materiales["cortina"]
 	)
+
+
+static func _registrar_prop(
+	lotes: Dictionary,
+	props: Array[String],
+	clave: String,
+	nombre: String,
+	posicion: Vector3,
+	malla: Mesh,
+	material: Material
+) -> void:
+	props.append(nombre)
+	_registrar_pieza(lotes, clave, posicion, malla, material, LOD_CERCA_FIN)
+
+
+static func _registrar_pieza(
+	lotes: Dictionary,
+	clave: String,
+	posicion: Vector3,
+	malla: Mesh,
+	material: Material,
+	rango_fin: float
+) -> void:
+	if not lotes.has(clave):
+		lotes[clave] = {
+			"malla": malla,
+			"material": material,
+			"rango_fin": rango_fin,
+			"transformaciones": [],
+		}
+	var datos := lotes[clave] as Dictionary
+	var transformaciones := datos["transformaciones"] as Array
+	transformaciones.append(Transform3D(Basis.IDENTITY, posicion))
+
+
+static func _crear_lotes(raiz_lotes: Node3D, lotes: Dictionary) -> void:
+	var claves := lotes.keys()
+	claves.sort()
+	for clave in claves:
+		var datos := lotes[clave] as Dictionary
+		var transformaciones := datos["transformaciones"] as Array
+		var instancia := MultiMeshInstance3D.new()
+		instancia.name = "Lote_" + String(clave)
+		var repetidos := MultiMesh.new()
+		repetidos.transform_format = MultiMesh.TRANSFORM_3D
+		repetidos.mesh = datos["malla"] as Mesh
+		repetidos.instance_count = transformaciones.size()
+		for indice in transformaciones.size():
+			repetidos.set_instance_transform(indice, transformaciones[indice] as Transform3D)
+		instancia.multimesh = repetidos
+		instancia.material_override = datos["material"] as Material
+		instancia.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		instancia.visibility_range_end = float(datos["rango_fin"])
+		instancia.set_meta("lote", String(clave))
+		raiz_lotes.add_child(instancia)
+
+
+static func _contar_instancias(lotes: Dictionary) -> int:
+	var total := 0
+	for datos in lotes.values():
+		total += (datos as Dictionary)["transformaciones"].size()
+	return total
 
 
 static func _material_fondo(materiales: Dictionary, estado_luz: String) -> Material:
@@ -262,25 +394,6 @@ static func _mallas_compartidas() -> Dictionary:
 		"televisor": _malla(Vector3(0.022, 0.28, 0.30)),
 		"cortina": _malla(Vector3(0.018, 0.84, 0.16)),
 	}
-
-
-static func _pieza(
-	padre: Node3D,
-	nombre: String,
-	posicion: Vector3,
-	malla: Mesh,
-	material: Material,
-	rango_fin: float = LOD_CERCA_FIN
-) -> MeshInstance3D:
-	var pieza := MeshInstance3D.new()
-	pieza.name = nombre
-	pieza.position = posicion
-	pieza.mesh = malla
-	pieza.material_override = material
-	pieza.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	pieza.visibility_range_end = rango_fin
-	padre.add_child(pieza)
-	return pieza
 
 
 static func _malla(tam: Vector3) -> BoxMesh:
