@@ -81,8 +81,8 @@ func _crear_ventana(
 	panel.clip_contents = true
 
 	var minimo_declarado: Vector2 = datos.get("tamano_minimo", Vector2.ONE)
-	var minimo_contenido := contenido.get_combined_minimum_size() + Vector2(
-		_esc(6.0), _alto_titulo + _esc(6.0)
+	var minimo_contenido := (
+		contenido.get_combined_minimum_size() + Vector2(_esc(6.0), _alto_titulo + _esc(6.0))
 	)
 	var limite_ancho := maxf(_area_ventanas.size.x, minimo_declarado.x)
 	var limite_alto := maxf(_area_ventanas.size.y, minimo_declarado.y)
