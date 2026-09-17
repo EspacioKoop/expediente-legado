@@ -21,6 +21,9 @@ DEF MUSICA_PASOS       EQU 8
 SECTION "MusicaPixelExodus", ROM0
 
 InicializarMusicaSistema:
+    ; Canal 1 (SFX) + canal 2 (musica) a ambos lados.
+    ld a, $33
+    ldh [rNR51], a
     xor a
     ld [wMusicaModo], a
     ld [wMusicaTick], a
@@ -63,6 +66,7 @@ SeleccionarMusica:
     xor a
     ld [wMusicaTick], a
     ld [wMusicaPaso], a
+    call TocarPasoMusicaActual
     ret
 
 SilenciarMusica:
@@ -86,7 +90,13 @@ TickMusica:
     jr c, .guardar_tick
     xor a
     ld [wMusicaTick], a
+    call TocarPasoMusicaActual
+    ret
+.guardar_tick:
+    ld [wMusicaTick], a
+    ret
 
+TocarPasoMusicaActual:
     call TablaMusicaActual
     ld a, [wMusicaPaso]
     add a
@@ -109,9 +119,6 @@ TickMusica:
     inc a
     and MUSICA_PASOS - 1
     ld [wMusicaPaso], a
-    ret
-.guardar_tick:
-    ld [wMusicaTick], a
     ret
 
 TablaMusicaActual:
