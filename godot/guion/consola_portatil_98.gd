@@ -70,6 +70,7 @@ func _alternar(_actor: Node) -> void:
 	_app.cerrado.connect(_al_cerrar_app)
 	get_tree().root.add_child(_app)
 	_app.abrir()
+	SelectorCartuchos3D.instalar(_app)
 
 
 ## PerfilRoms es la autoridad desde #800. Si la consola está montada dentro de
