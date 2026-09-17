@@ -35,8 +35,7 @@ func _probar() -> void:
 		return
 
 	_comprobar(
-		CalleFachadasVivas.montar(calle) == vivas,
-		"el montaje de fachadas vivas es idempotente"
+		CalleFachadasVivas.montar(calle) == vivas, "el montaje de fachadas vivas es idempotente"
 	)
 	_comprobar(
 		vivas.get_child_count() == CalleFachadasVivas.MAX_VENTANAS,
