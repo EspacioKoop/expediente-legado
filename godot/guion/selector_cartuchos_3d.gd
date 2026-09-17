@@ -13,11 +13,13 @@ const DURACION_INSERCION := 0.14
 var _app: Node
 var _entradas: Array[Dictionary] = []
 var _indice := 0
+var _marco: SubViewportContainer
 var _viewport: SubViewport
 var _modelos: Node3D
 var _cartucho_central: Node3D
 var _nombre: Label
 var _insertar: Button
+var _reduccion_movimiento := false
 
 
 static func instalar(app: Node) -> void:
@@ -83,6 +85,9 @@ static func _entradas_disponibles(app: Node) -> Array[Dictionary]:
 func configurar(app: Node, entradas: Array[Dictionary]) -> void:
 	_app = app
 	_entradas = entradas.duplicate(true)
+	_reduccion_movimiento = bool(
+		PreferenciasSiga.cargar().get("reduccion_movimiento", false)
+	)
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	add_theme_constant_override("separation", 6)
@@ -97,11 +102,7 @@ func enfocar() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if _app == null or not is_instance_valid(_app) or _entradas.is_empty():
-		return
-	if bool(_app.get("_jugando")) or bool(_app.get("_encendiendo")):
-		return
-	if bool(_app.get("_cambiando_cartucho")):
+	if not _puede_interactuar():
 		return
 
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -126,19 +127,57 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 
+func _puede_interactuar() -> bool:
+	if _app == null or not is_instance_valid(_app) or _entradas.is_empty():
+		return false
+	if bool(_app.get("_jugando")) or bool(_app.get("_encendiendo")):
+		return false
+	return not bool(_app.get("_cambiando_cartucho"))
+
+
+func _al_input_carrusel(event: InputEvent) -> void:
+	if not _puede_interactuar():
+		return
+	if not (event is InputEventMouseButton) or not event.pressed:
+		return
+
+	if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+		_mover(-1)
+		accept_event()
+		return
+	if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+		_mover(1)
+		accept_event()
+		return
+	if event.button_index != MOUSE_BUTTON_LEFT or _marco == null:
+		return
+
+	var ancho := maxf(_marco.size.x, 1.0)
+	var fraccion := event.position.x / ancho
+	if fraccion < 0.34:
+		_mover(-1)
+	elif fraccion > 0.66:
+		_mover(1)
+	else:
+		_insertar_actual()
+	accept_event()
+
+
 func _montar_escena() -> void:
-	var marco := SubViewportContainer.new()
-	marco.name = "CarruselCartuchos3D"
-	marco.custom_minimum_size = Vector2(340, 200)
-	marco.stretch = true
-	marco.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(marco)
+	_marco = SubViewportContainer.new()
+	_marco.name = "CarruselCartuchos3D"
+	_marco.custom_minimum_size = Vector2(340, 200)
+	_marco.stretch = true
+	_marco.mouse_filter = Control.MOUSE_FILTER_STOP
+	_marco.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	_marco.gui_input.connect(_al_input_carrusel)
+	add_child(_marco)
 
 	_viewport = SubViewport.new()
 	_viewport.size = TAMANO_VIEWPORT
 	_viewport.own_world_3d = true
 	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	marco.add_child(_viewport)
+	_marco.add_child(_viewport)
 
 	var entorno := WorldEnvironment.new()
 	entorno.environment = Environment.new()
@@ -332,11 +371,7 @@ func _titulo(entrada: Dictionary) -> String:
 
 
 func _insertar_actual() -> void:
-	if _app == null or not is_instance_valid(_app) or _entradas.is_empty():
-		return
-	if bool(_app.get("_jugando")) or bool(_app.get("_encendiendo")):
-		return
-	if bool(_app.get("_cambiando_cartucho")):
+	if not _puede_interactuar():
 		return
 	var ruta := String(_entradas[_indice].get("ruta", ""))
 	if ruta.is_empty():
@@ -349,6 +384,8 @@ func _animar_insercion() -> void:
 	if _cartucho_central == null or not is_instance_valid(_cartucho_central):
 		return
 	if _app == null or not bool(_app.get("_efectos_presentacion")):
+		return
+	if _reduccion_movimiento:
 		return
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_QUAD)
