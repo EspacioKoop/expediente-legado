@@ -265,20 +265,21 @@ func _montar_asistente_siga() -> void:
 	_asistente_siga_caja = null
 	_asistente_siga_conjunto = null
 	var gato: Dictionary = jornada.get("gato", {})
-	var visor: Node = _pantalla.get_node_or_null("Visor")
+	var visor := _pantalla.get_node_or_null("Visor") as Control
+	if visor == null:
+		return
 	var contexto := ""
-	if visor != null and visor.has_method("contexto_asistente"):
+	if visor.has_method("contexto_asistente"):
 		var estado: Dictionary = visor.call("contexto_asistente")
 		contexto = GatoAyuda.contexto_siga(estado)
 	var lineas := GatoAyuda.lineas_asistente(gato, contexto)
 	if lineas.is_empty():
 		return
 
-	# El conjunto no tiene fondo propio: gato y bocadillo son dos piezas
-	# visualmente independientes. El anclaje al borde inferior derecho escala con
-	# la ventana y deja el cuerpo del expediente libre en vez de ocupar la base;
-	# PASS (no IGNORE) porque el jugador puede arrastrar el conjunto para
-	# apartarlo, sin dejar de dejar pasar los clics que no lo tocan a él.
+	# El conjunto vive dentro del propio Visor: cuando OS98 adopta y reparenta
+	# el visor dentro de Ventana_siga-98, Prometeo viaja con él en vez de quedar
+	# como hermano por debajo del escritorio. El anclaje sigue siendo relativo
+	# al contenido real de SIGA y no al CanvasLayer exterior (#802).
 	var conjunto := HBoxContainer.new()
 	conjunto.name = "AsistenteSiga"
 	conjunto.theme = EstiloSiga.tema()
@@ -290,7 +291,7 @@ func _montar_asistente_siga() -> void:
 	conjunto.offset_bottom = -16
 	conjunto.add_theme_constant_override("separation", 18)
 	conjunto.gui_input.connect(_al_input_asistente_siga.bind(conjunto))
-	_pantalla.add_child(conjunto)
+	visor.add_child(conjunto)
 	_asistente_siga_conjunto = conjunto
 
 	var burbuja := PanelContainer.new()
@@ -326,7 +327,7 @@ func _montar_asistente_siga() -> void:
 
 	# Solo escuchamos la superficie pública del visor. El día no necesita saber
 	# qué botones, listas o etiquetas produjeron el cambio de contexto.
-	if visor != null and visor.has_signal("contexto_asistente_cambiado"):
+	if visor.has_signal("contexto_asistente_cambiado"):
 		visor.connect("contexto_asistente_cambiado", Callable(self, "_al_contexto_asistente_siga"))
 
 	# El layout del visor (botones, traducciones) no se conoce hasta que la
