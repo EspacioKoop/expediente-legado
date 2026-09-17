@@ -49,7 +49,7 @@ void sky() {
 	float bruma = (1.0 - smoothstep(0.02, 0.24, EYEDIR.y)) * step(0.0, EYEDIR.y);
 	base = mix(base, bruma_horizonte.rgb, bruma * bruma_fuerza);
 
-	// Nubes bajas estáticas: dos frecuencias amplias, sin TIME ni textura.
+	// Nubes bajas estáticas: dos frecuencias amplias, sin reloj ni textura.
 	float onda_a = sin(EYEDIR.x * 19.0 + EYEDIR.z * 13.0 + EYEDIR.y * 5.0);
 	float onda_b = sin(EYEDIR.x * -31.0 + EYEDIR.z * 23.0 - EYEDIR.y * 7.0);
 	float ruido_nube = onda_a * 0.34 + onda_b * 0.16 + 0.5;
