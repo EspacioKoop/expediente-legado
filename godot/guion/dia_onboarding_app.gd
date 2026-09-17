@@ -20,7 +20,10 @@ var _luz_puesto: OmniLight3D
 
 ## Red de seguridad del playtest (#784). Se mantiene aquí para que la cadena
 ## histórica `dia_calle_app.gd -> dia_onboarding_app.gd` permanezca intacta.
+## En Godot 4 los callbacks heredados no se encadenan solos: conservar el
+## `_process` base mantiene pasos, gato y reloj del sueño antes del rescate.
 func _process(_delta: float) -> void:
+	super(_delta)
 	_rescatar_caida()
 
 

@@ -7,6 +7,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 ACUMULACION = ROOT / "godot" / "guion" / "casa_acumulacion_3d.gd"
+FISICA = ROOT / "godot" / "guion" / "publicacion_fisica_3d.gd"
 CONTROLLER = ROOT / "godot" / "guion" / "dia_acumulacion_casa_app.gd"
 DOC = ROOT / "docs" / "publicaciones-98.md"
 PRUEBA_GODOT = "pruebas/pruebas_publicaciones_casa_3d.gd"
@@ -17,6 +18,7 @@ class PublicacionesCasa674Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.acumulacion = ACUMULACION.read_text(encoding="utf-8")
+        cls.fisica = FISICA.read_text(encoding="utf-8")
         cls.controller = CONTROLLER.read_text(encoding="utf-8")
         cls.doc = DOC.read_text(encoding="utf-8")
 
@@ -26,16 +28,19 @@ class PublicacionesCasa674Test(unittest.TestCase):
         self.assertIn('set_meta("publicacion_id"', self.acumulacion)
         self.assertIn('set_meta("titulo_publicacion"', self.acumulacion)
         self.assertIn('set_meta("portada_titulo"', self.acumulacion)
-        self.assertIn("CollisionShape3D.new()", self.acumulacion)
+        self.assertIn("PublicacionFisica3D.montar", self.acumulacion)
+        self.assertIn("CollisionShape3D.new()", self.fisica)
 
     def test_geometria_sale_del_catalogo_y_no_de_assets_nuevos(self):
         self.assertIn("Publicaciones98.por_id(item_id)", self.acumulacion)
-        self.assertIn('return "periodico"', self.acumulacion)
-        self.assertIn('return "libro"', self.acumulacion)
-        self.assertIn('return "revista"', self.acumulacion)
-        self.assertIn("_paleta_publicacion(item_id)", self.acumulacion)
+        self.assertIn("PublicacionFisica3D.formato_de(ficha)", self.acumulacion)
+        self.assertIn('return "periodico"', self.fisica)
+        self.assertIn('return "libro"', self.fisica)
+        self.assertIn('return "revista"', self.fisica)
+        self.assertIn("paleta_de(item_id)", self.fisica)
+        combinado = self.acumulacion + self.fisica
         for extension in (".glb", ".png", ".jpg", ".webp"):
-            self.assertNotIn(extension, self.acumulacion.lower())
+            self.assertNotIn(extension, combinado.lower())
 
     def test_controller_abre_el_visor_mergeado_y_guarda_lectura(self):
         self.assertIn("_conectar_publicaciones(acumulacion)", self.controller)
@@ -46,7 +51,7 @@ class PublicacionesCasa674Test(unittest.TestCase):
         self.assertIn('dia._guardar_o_avisar("")', self.controller)
 
     def test_no_duplica_inventario_ni_economia(self):
-        combinado = self.acumulacion + self.controller
+        combinado = self.acumulacion + self.fisica + self.controller
         self.assertNotIn("Inventario.recoger", combinado)
         self.assertNotIn("Inventario.guardar_en_casa", combinado)
         self.assertNotIn("Jornada.gastar", combinado)
