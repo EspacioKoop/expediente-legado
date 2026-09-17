@@ -11,6 +11,7 @@ signal objetivo_perdido
 @export var alcance := 2.4
 
 var _objetivo: Interactuable3D
+var _texto_objetivo := ""
 
 
 func _ready() -> void:
@@ -22,24 +23,36 @@ func _ready() -> void:
 func _physics_process(_delta: float) -> void:
 	var siguiente := _resolver_objetivo()
 	if siguiente == _objetivo:
+		_refrescar_texto()
 		return
 	_objetivo = siguiente
 	if _objetivo == null:
+		_texto_objetivo = ""
 		objetivo_perdido.emit()
 	else:
-		objetivo_cambiado.emit(_objetivo, _objetivo.texto_accion())
+		_refrescar_texto(true)
 
 
 func _unhandled_input(evento: InputEvent) -> void:
 	if _objetivo == null or not evento.is_action_pressed("interactuar"):
 		return
 	if _objetivo.interactuar(get_parent()):
-		objetivo_cambiado.emit(_objetivo, _objetivo.texto_accion())
+		_refrescar_texto(true)
 		get_viewport().set_input_as_handled()
 
 
 func objetivo_actual() -> Interactuable3D:
 	return _objetivo
+
+
+func _refrescar_texto(forzar := false) -> void:
+	if _objetivo == null:
+		return
+	var texto := _objetivo.texto_accion()
+	if not forzar and texto == _texto_objetivo:
+		return
+	_texto_objetivo = texto
+	objetivo_cambiado.emit(_objetivo, texto)
 
 
 func _resolver_objetivo() -> Interactuable3D:

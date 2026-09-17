@@ -13,7 +13,17 @@ def fuente(path: Path) -> str:
 
 def test_interactuable_declara_verbos_y_feedback_contextual() -> None:
     texto = fuente(INTERACTUABLE)
-    for verbo in ("EXAMINAR", "USAR", "ABRIR", "COGER", "LEER", "DAR", "ENCENDER"):
+    for verbo in (
+        "EXAMINAR",
+        "USAR",
+        "ABRIR",
+        "COGER",
+        "LEER",
+        "DAR",
+        "ENCENDER",
+        "ACARICIAR",
+        "LLAMAR",
+    ):
         assert verbo in texto
     assert "signal activado(actor: Node)" in texto
     assert "func texto_accion() -> String:" in texto
@@ -31,13 +41,27 @@ def test_detector_usa_raycast_alcance_y_solo_objetos_validos() -> None:
     assert "objetivo_perdido" in texto
 
 
-def test_interaccion_usa_accion_semantica_remapeable() -> None:
+def test_detector_refresca_prompt_si_cambia_el_verbo_del_mismo_objeto() -> None:
+    texto = fuente(DETECTOR)
+    assert 'var _texto_objetivo := ""' in texto
+    assert "if siguiente == _objetivo:" in texto
+    assert "_refrescar_texto()" in texto
+    assert "if not forzar and texto == _texto_objetivo:" in texto
+    assert "objetivo_cambiado.emit(_objetivo, texto)" in texto
+
+
+def test_interaccion_usa_accion_semantica_en_teclado_mando_y_raton() -> None:
     detector = fuente(DETECTOR)
     preferencias = fuente(PREFERENCIAS)
     assert 'evento.is_action_pressed("interactuar")' in detector
     assert '"interactuar": {"teclado": 69, "mando": JOY_BUTTON_A}' in preferencias
+    assert "InputEventMouseButton.new()" in preferencias
+    assert "raton.button_index = MOUSE_BUTTON_LEFT" in preferencias
+    assert 'InputMap.action_add_event("interactuar", raton)' in preferencias
+    assert "_sincronizar_acciones_ui()\n\t_asegurar_raton_interaccion()" in preferencias
     assert "KEY_E" not in detector
     assert "InputEventKey" not in detector
+    assert "MOUSE_BUTTON_LEFT" not in detector
 
 
 def test_nucleo_no_acopla_reglas_de_jornada_ni_inventario() -> None:
