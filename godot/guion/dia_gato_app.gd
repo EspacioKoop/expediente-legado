@@ -83,8 +83,8 @@ func _entrar_en(fase: String) -> void:
 		_montar_guia_sueno()
 
 
-## La interacción 3D del gato deja una huella concreta del día. No es afinidad:
-## se guarda qué gesto ocurrió para que el sueño pueda recordarlo sin puntuarlo.
+## La interacción 3D del gato deja una huella concreta del día: se guarda qué
+## gesto ocurrió para que el sueño pueda recordarlo sin convertirlo en puntos.
 func _al_activar_gato(_actor: Node, gato: Gato) -> void:
 	if jornada.get("fase", "") != "casa":
 		return
