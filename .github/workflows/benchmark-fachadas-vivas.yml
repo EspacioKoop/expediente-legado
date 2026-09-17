@@ -1,0 +1,96 @@
+name: Benchmark fachadas vivas
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/benchmark-fachadas-vivas.yml'
+      - '.godot-version'
+      - 'godot/guion/calle_fachadas_vivas.gd'
+      - 'godot/guion/calle_identidad.gd'
+      - 'godot/guion/dia_calle_app.gd'
+      - 'godot/guion/espacio_3d.gd'
+      - 'godot/pruebas/benchmark_fachadas_vivas.gd'
+      - 'scripts/test_benchmark_fachadas_vivas.py'
+      - 'docs/benchmark-fachadas-vivas.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      GALLIUM_DRIVER: llvmpipe
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar Godot declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Importar proyecto
+        run: godot4 --headless --editor --path godot --quit
+
+      - name: Ejecutar baseline sin FachadasVivas
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p benchmark-fachadas-vivas
+          xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+            --script res://pruebas/benchmark_fachadas_vivas.gd -- \
+            --mode=baseline --output="$GITHUB_WORKSPACE/benchmark-fachadas-vivas"
+
+      - name: Ejecutar tramo con FachadasVivas
+        shell: bash
+        run: |
+          set -euo pipefail
+          xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+            --script res://pruebas/benchmark_fachadas_vivas.gd -- \
+            --mode=full --output="$GITHUB_WORKSPACE/benchmark-fachadas-vivas"
+
+      - name: Comparar coste y presupuesto
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/test_benchmark_fachadas_vivas.py \
+            --report benchmark-fachadas-vivas | tee /tmp/benchmark-fachadas-vivas.md
+          cat /tmp/benchmark-fachadas-vivas.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Adjuntar comparación visual y métricas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-fachadas-vivas-${{ github.sha }}
+          path: |
+            benchmark-fachadas-vivas/*.json
+            benchmark-fachadas-vivas/*.png
+            benchmark-fachadas-vivas/*.md
+          if-no-files-found: warn
+          retention-days: 14
