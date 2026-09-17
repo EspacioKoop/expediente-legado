@@ -1,0 +1,134 @@
+name: Evidencia clima #398
+
+on:
+  push:
+    branches:
+      - feature/398-validacion-cielos-clima
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capturas:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar Godot declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Instalar analizador de imágenes
+        run: python -m pip install --disable-pip-version-check pillow==11.3.0
+
+      - name: Importar proyecto
+        run: godot4 --headless --editor --path godot --quit
+
+      - name: Capturar los cinco climas con renderer real
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/climas-398"
+          xvfb-run -a godot4 --path godot \
+            --script res://pruebas/capturar_climas_797.gd \
+            -- "$RUNNER_TEMP/climas-398"
+          ls -lh "$RUNNER_TEMP/climas-398"
+
+      - name: Crear contacto y métricas comparables
+        shell: python
+        env:
+          CLIMAS_DIR: ${{ runner.temp }}/climas-398
+        run: |
+          import itertools
+          import json
+          import math
+          import os
+          from pathlib import Path
+          from PIL import Image, ImageDraw, ImageStat
+
+          carpeta = Path(os.environ["CLIMAS_DIR"])
+          estados = ["despejado", "nublado", "lluvia", "niebla", "nieve"]
+          imagenes = {}
+          metricas = {}
+
+          for estado in estados:
+              ruta = carpeta / f"{estado}.png"
+              imagen = Image.open(ruta).convert("RGB")
+              imagenes[estado] = imagen
+              stat = ImageStat.Stat(imagen)
+              rgb = [round(v, 2) for v in stat.mean]
+              luminancia = round(
+                  stat.mean[0] * 0.2126 + stat.mean[1] * 0.7152 + stat.mean[2] * 0.0722,
+                  2,
+              )
+              metricas[estado] = {
+                  "mean_rgb": rgb,
+                  "mean_luminance": luminancia,
+              }
+
+          comparaciones = {}
+          for a, b in itertools.combinations(estados, 2):
+              ia = imagenes[a]
+              ib = imagenes[b]
+              if ia.size != ib.size:
+                  ib = ib.resize(ia.size)
+              datos_a = list(ia.getdata())
+              datos_b = list(ib.getdata())
+              total = len(datos_a) * 3
+              abs_sum = 0
+              sq_sum = 0
+              for pa, pb in zip(datos_a, datos_b):
+                  for va, vb in zip(pa, pb):
+                      d = int(va) - int(vb)
+                      abs_sum += abs(d)
+                      sq_sum += d * d
+              comparaciones[f"{a}__{b}"] = {
+                  "mae_rgb": round(abs_sum / total, 3),
+                  "rmse_rgb": round(math.sqrt(sq_sum / total), 3),
+              }
+
+          metricas["_comparaciones"] = comparaciones
+          (carpeta / "metricas.json").write_text(
+              json.dumps(metricas, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+
+          ancho, alto = imagenes[estados[0]].size
+          etiqueta = 34
+          contacto = Image.new("RGB", (ancho * len(estados), alto + etiqueta), "black")
+          dibujo = ImageDraw.Draw(contacto)
+          for i, estado in enumerate(estados):
+              contacto.paste(imagenes[estado], (i * ancho, etiqueta))
+              dibujo.text((i * ancho + 8, 8), estado.upper(), fill="white")
+          contacto.save(carpeta / "contacto.png")
+
+          print(json.dumps(metricas, ensure_ascii=False, indent=2))
+
+      - name: Adjuntar evidencia visual
+        uses: actions/upload-artifact@v4
+        with:
+          name: clima-398-post-942-${{ github.sha }}
+          path: ${{ runner.temp }}/climas-398/*
+          if-no-files-found: error
+          retention-days: 7
