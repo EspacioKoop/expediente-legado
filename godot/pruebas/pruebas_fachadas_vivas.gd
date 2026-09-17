@@ -89,7 +89,9 @@ func _probar() -> void:
 			absf(ventana.position.x - fondo_x) >= 0.05,
 			"hay profundidad visible entre cristal y fondo"
 		)
-		_comprobar(bool(interior.get_meta("marco_volumen")), "cada ventana conserva marco con volumen")
+		_comprobar(
+			bool(interior.get_meta("marco_volumen")), "cada ventana conserva marco con volumen"
+		)
 		var nombres_props := interior.get_meta("props") as Array
 		for prop in props:
 			if nombres_props.has(prop):
@@ -121,7 +123,9 @@ func _probar() -> void:
 			_comprobar(false, "cada lote conserva uno de los tres rangos LOD")
 
 	_comprobar(instancias == 82, "el batching conserva las 82 piezas de la slice")
-	_comprobar(int(vivas.get_meta("instancias_batcheadas")) == 82, "el montaje registra 82 instancias")
+	_comprobar(
+		int(vivas.get_meta("instancias_batcheadas")) == 82, "el montaje registra 82 instancias"
+	)
 	_comprobar(lotes_cerca == 9, "los nueve tipos de props usan LOD cercano")
 	_comprobar(lotes_media == 3, "marcos y persiana usan tres lotes de LOD medio")
 	_comprobar(lotes_lejos == 5, "los cinco estados de fondo usan LOD lejano")
