@@ -499,7 +499,9 @@ func _animar_reposo(ritmo: float) -> void:
 	var observando := modo == "observando"
 	var escondido := modo == "escondido"
 	var respiracion := sin(_reloj * 2.2) * 0.012
-	_cuerpo.scale.y = (0.64 if durmiendo else 1.08 if sentado else 0.80 if escondido else 1.0) + respiracion
+	_cuerpo.scale.y = (
+		(0.64 if durmiendo else 1.08 if sentado else 0.80 if escondido else 1.0) + respiracion
+	)
 	_cuerpo.scale.z = 1.12 if durmiendo else 1.0
 	_cuerpo.rotation.x = -0.12 if durmiendo else 0.0
 	_cuerpo.position.x = sin(_reloj * 4.2) * 0.028 if dando_mimos else 0.0
