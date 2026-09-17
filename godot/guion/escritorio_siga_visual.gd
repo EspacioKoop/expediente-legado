@@ -69,10 +69,36 @@ func _crear_ventana(
 	id: String, titulo: String, contenido: Control, es_modal: bool = false, id_app: String = ""
 ) -> void:
 	super._crear_ventana(id, titulo, contenido, es_modal, id_app)
+	if not _ventanas.has(id):
+		return
+
+	# #782: ninguna app puede pintar fuera del marco aunque su mínimo interno
+	# cambie después de registrarse. Además, si el contenido ya conoce un mínimo
+	# mayor que el declarado (caso del visor SIGA-98), la ventana adopta ese mínimo
+	# real hasta el tamaño disponible del escritorio en lugar de dejarlo desbordar.
+	var datos: Dictionary = _ventanas[id]
+	var panel: Control = datos["panel"]
+	panel.clip_contents = true
+
+	var minimo_declarado: Vector2 = datos.get("tamano_minimo", Vector2.ONE)
+	var minimo_contenido := (
+		contenido.get_combined_minimum_size() + Vector2(_esc(6.0), _alto_titulo + _esc(6.0))
+	)
+	var limite_ancho := maxf(_area_ventanas.size.x, minimo_declarado.x)
+	var limite_alto := maxf(_area_ventanas.size.y, minimo_declarado.y)
+	var minimo_real := Vector2(
+		maxf(minimo_declarado.x, minf(minimo_contenido.x, limite_ancho)),
+		maxf(minimo_declarado.y, minf(minimo_contenido.y, limite_alto))
+	)
+	datos["tamano_minimo"] = minimo_real
+	panel.size.x = maxf(panel.size.x, minimo_real.x)
+	panel.size.y = maxf(panel.size.y, minimo_real.y)
+	_limitar_ventana(panel, minimo_real)
+
 	_decorar_ventana(id)
 	var foco := _primer_control_enfocable(contenido)
-	if foco == null and _ventanas.has(id):
-		foco = _primer_control_enfocable(_ventanas[id]["panel"])
+	if foco == null:
+		foco = _primer_control_enfocable(panel)
 	if foco != null:
 		foco.grab_focus()
 
