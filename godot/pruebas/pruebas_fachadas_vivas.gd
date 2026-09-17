@@ -48,7 +48,10 @@ func _probar() -> void:
 	var pisos := calle.get_node("PisosFachada")
 	var ventanas_altas := 0
 	for hijo in pisos.get_children():
-		if hijo is MeshInstance3D and String(hijo.name).begins_with(CalleFachadasVivas.PREFIJO_VENTANA):
+		if (
+			hijo is MeshInstance3D
+			and String(hijo.name).begins_with(CalleFachadasVivas.PREFIJO_VENTANA)
+		):
 			ventanas_altas += 1
 	_comprobar(ventanas_altas == 61, "la calle declara 61 ventanas altas")
 	_comprobar(
