@@ -93,7 +93,7 @@ jobs:
           set -euo pipefail
           mkdir -p docs/evidencias/juicio-779
           cp "$RUNNER_TEMP/juicio-779/telegraph-ataque.png" docs/evidencias/juicio-779/telegraph-ataque.png
-          if git diff --quiet -- docs/evidencias/juicio-779/telegraph-ataque.png; then
+          if [[ -z "$(git status --porcelain -- docs/evidencias/juicio-779/telegraph-ataque.png)" ]]; then
             echo 'La captura del telegrafo ya está versionada.'
             exit 0
           fi
