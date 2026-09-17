@@ -58,6 +58,18 @@ func _ejecutar() -> void:
 	_comprobar(JuicioCombate3D.determinacion_rival(0) == 8, "juicio sin expediente parte entero")
 	_comprobar(JuicioCombate3D.determinacion_rival(3) == 5, "el expediente debilita al acusado")
 	_comprobar(JuicioCombate3D.determinacion_rival(99) == 4, "el juicio conserva un suelo jugable")
+	_comprobar(
+		JuicioCombate3D.resultado_ataque_rival(1.0, 0.0) == "impacto",
+		"un ataque a alcance impacta sin esquiva",
+	)
+	_comprobar(
+		JuicioCombate3D.resultado_ataque_rival(1.0, 0.12) == "esquiva",
+		"la ventana de esquiva evita el impacto",
+	)
+	_comprobar(
+		JuicioCombate3D.resultado_ataque_rival(2.0, 0.0) == "falla",
+		"salir del alcance durante el telegrafo hace fallar el ataque",
+	)
 
 	_comprobar(
 		PrevisualizadorReclamante3D.sonido_jugada("objecion") == "firmar",
@@ -144,6 +156,69 @@ func _ejecutar() -> void:
 		is_equal_approx(float(ritual_talon.get("recarga_fuerte", 0.0)), 0.82),
 		"Talon de la Fuerza aumenta la recuperacion del golpe fuerte",
 	)
+
+	var ritual_sol := JuicioSimbolico.ritual_para({"id": "el-sol"}, "maui_tamanuitera")
+	_comprobar(
+		ritual_sol.get("id", "") == "robo_del_sol",
+		"Sol y Maui activan Robo del Sol",
+	)
+	_comprobar(
+		bool(ritual_sol.get("interrumpe_telegrafo_fuerte", false)),
+		"Robo del Sol permite cortar un ataque anunciado",
+	)
+	_comprobar(
+		int(ritual_sol.get("dano_interrupcion_bonus", 0)) == 1,
+		"Robo del Sol premia la interrupcion",
+	)
+	_comprobar(
+		JuicioCombate3D.interrumpe_ataque(true, true, ritual_sol),
+		"el golpe fuerte interrumpe durante el telegrafo",
+	)
+	_comprobar(
+		not JuicioCombate3D.interrumpe_ataque(false, true, ritual_sol),
+		"el golpe ligero no roba el Sol",
+	)
+	_comprobar(
+		not JuicioCombate3D.interrumpe_ataque(true, false, ritual_sol),
+		"sin ataque rival pendiente no hay interrupcion",
+	)
+
+	var ritual_nudo := JuicioSimbolico.ritual_para({"id": "el-colgado"}, "anansi_akan")
+	_comprobar(
+		ritual_nudo.get("id", "") == "nudo_suspendido",
+		"Colgado y Anansi activan Nudo suspendido",
+	)
+	_comprobar(
+		is_equal_approx(float(ritual_nudo.get("enredo_ligero_segundos", 0.0)), 1.10),
+		"Nudo suspendido deja una ventana de enredo",
+	)
+	_comprobar(
+		is_equal_approx(float(ritual_nudo.get("velocidad_enredado_mul", 0.0)), 0.45),
+		"el enredo frena la persecucion rival",
+	)
+
+	var ritual_hidra := JuicioSimbolico.ritual_para({"id": "la-muerte"}, "hidra")
+	_comprobar(
+		ritual_hidra.get("id", "") == "retorno_hidra",
+		"Muerte e Hidra activan Retorno de la Hidra",
+	)
+	_comprobar(
+		int(ritual_hidra.get("retornos_rival", 0)) == 1,
+		"Retorno de la Hidra solo permite una segunda fase",
+	)
+	_comprobar(
+		int(ritual_hidra.get("determinacion_retorno", 0)) == 2,
+		"la segunda fase vuelve con dos puntos",
+	)
+	_comprobar(
+		JuicioCombate3D.determinacion_retorno(ritual_hidra, 0) == 2,
+		"la Hidra retorna la primera vez",
+	)
+	_comprobar(
+		JuicioCombate3D.determinacion_retorno(ritual_hidra, 1) == 0,
+		"la Hidra no encadena retornos infinitos",
+	)
+
 	_comprobar(
 		JuicioSimbolico.ritual_para({"id": "el-sol"}, "minotauro").is_empty(),
 		"una pareja no declarada no inventa bonificador",

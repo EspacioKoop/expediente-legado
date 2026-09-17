@@ -68,13 +68,13 @@ jobs:
         shell: bash
         run: godot4 --headless --language es --path godot --editor --import --quit
 
-      - name: Generar las tres capturas rituales
+      - name: Generar capturas del Juicio
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/juicio-779"
           xvfb-run -a godot4 --language es --path godot --script res://pruebas/capturar_juicio_779.gd -- "$RUNNER_TEMP/juicio-779"
-          for estado in luna-minotauro justicia-duat fuerza-aquiles; do
+          for estado in luna-minotauro justicia-duat fuerza-aquiles sol-maui colgado-anansi muerte-hidra telegraph-ataque; do
             test -s "$RUNNER_TEMP/juicio-779/$estado.png"
           done
 

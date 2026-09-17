@@ -7,9 +7,10 @@
 ## Cada prescripción enlaza además con un ID estable de CatalogoAnomalias.
 ##
 ## #888 añade una segunda lectura puramente visual: cada original puede proyectar
-## un eco geométrico estático ligado a una familia de la gramática simbólica.
-## El eco duplica solo FormaDeformada, no colisiones ni interacción, y por tanto
-## no altera objetivos #281, navegación, progreso ni persistencia.
+## un eco geométrico estático ligado a una familia de la gramática simbólica y,
+## después, una rima espacial no colisionable que extiende ese mismo motivo al
+## entorno cercano. Ninguna de las dos capas altera objetivos #281, navegación,
+## progreso ni persistencia.
 class_name SuenoUtileria
 extends RefCounted
 
@@ -144,6 +145,7 @@ static func montar(
 		)
 		_montar_eco_simbolico(anomalia, motivo)
 		creadas.append(anomalia)
+	SuenoEspacioSimbolico.montar(mundo, creadas)
 	return creadas
 
 

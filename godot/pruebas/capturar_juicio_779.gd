@@ -5,8 +5,9 @@
 ##   xvfb-run -a godot4 --path godot --script res://pruebas/capturar_juicio_779.gd \
 ##       -- /tmp/juicio-779
 ##
-## Genera tres arenas con una sola carta y una sola semilla cada una para que el
-## ritual resultante sea determinista y comparable entre revisiones.
+## Genera seis arenas con una sola carta y una sola semilla cada una para que el
+## ritual resultante sea determinista y comparable entre revisiones. Justicia +
+## Duat añade una séptima captura con el aviso real de ataque rival activo.
 extends SceneTree
 
 const CASOS := [
@@ -27,6 +28,24 @@ const CASOS := [
 		"arcano": "la-fuerza",
 		"nombre": "La Fuerza",
 		"mito": "aquiles",
+	},
+	{
+		"archivo": "sol-maui",
+		"arcano": "el-sol",
+		"nombre": "El Sol",
+		"mito": "maui_tamanuitera",
+	},
+	{
+		"archivo": "colgado-anansi",
+		"arcano": "el-colgado",
+		"nombre": "El Colgado",
+		"mito": "anansi_akan",
+	},
+	{
+		"archivo": "muerte-hidra",
+		"arcano": "la-muerte",
+		"nombre": "La Muerte",
+		"mito": "hidra",
 	},
 ]
 
@@ -94,14 +113,26 @@ func _capturar_caso(caso: Dictionary, salida: String) -> void:
 	for i in 12:
 		await process_frame
 
-	var destino := salida.path_join("%s.png" % String(caso["archivo"]))
+	_guardar_captura(salida, String(caso["archivo"]))
+
+	if String(caso["archivo"]) == "justicia-duat":
+		juicio._jugador.position = Vector3(0.0, 0.0, -1.1)
+		juicio._actualizar_camara()
+		juicio._iniciar_ataque_rival()
+		await process_frame
+		await process_frame
+		_guardar_captura(salida, "telegraph-ataque")
+
+	anfitrion.queue_free()
+	await process_frame
+
+
+func _guardar_captura(salida: String, archivo: String) -> void:
+	var destino := salida.path_join("%s.png" % archivo)
 	var imagen := root.get_texture().get_image()
 	var error_png := imagen.save_png(destino)
 	if error_png != OK:
 		printerr("No se pudo guardar %s (error %d)" % [destino, error_png])
 		quit(1)
 		return
-	print("juicio %s -> %s" % [caso["archivo"], destino])
-
-	anfitrion.queue_free()
-	await process_frame
+	print("juicio %s -> %s" % [archivo, destino])

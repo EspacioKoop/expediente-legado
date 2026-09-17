@@ -5,8 +5,8 @@
 ## termina por rendición (determinación a cero), no por muerte.
 ##
 ## La arena refleja un Arcano recogido/no gastado y una semilla mitológica activa
-## de la jornada. La mayoría son presencia visual; tres parejas declaradas por
-## `JuicioSimbolico` forman rituales pequeños, legibles y sin consumir progreso.
+## de la jornada. Seis parejas declaradas por `JuicioSimbolico` forman rituales
+## pequeños, legibles y sin consumir progreso.
 ##
 ## Controles semánticos ya existentes:
 ## - movimiento: mover_izquierda/derecha/adelante/atras;
@@ -29,6 +29,7 @@ const ALCANCE_RIVAL := 1.45
 const RECARGA_LIGERA := 0.28
 const RECARGA_FUERTE := 0.58
 const RECARGA_RIVAL := 1.15
+const TELEGRAFO_RIVAL := 0.45
 
 var reduccion_movimiento := false
 
@@ -40,10 +41,14 @@ var _acabado := false
 var _recarga_jugador := 0.0
 var _recarga_rival := 0.0
 var _esquiva := 0.0
+var _enredo := 0.0
+var _telegrafo_rival := 0.0
+var _ataque_rival_pendiente := false
 var _arcano: Dictionary = {}
 var _mito_id := ""
 var _ritual: Dictionary = {}
 var _contraataque := 0
+var _retornos_rival := 0
 var _radio_arena := RADIO_ARENA
 var _velocidad_rival := VELOCIDAD_RIVAL
 var _recarga_fuerte := RECARGA_FUERTE
@@ -53,13 +58,34 @@ var _rival: CharacterBody3D
 var _figura_jugador: Node3D
 var _figura_rival: Node3D
 var _camara: Camera3D
+var _aviso_ataque: MeshInstance3D
 var _barra_jugador: ProgressBar
 var _barra_rival: ProgressBar
 var _etiqueta_ritual: Label
+var _etiqueta_ataque: Label
 
 
 static func determinacion_rival(bono_documental: int) -> int:
 	return maxi(DETERMINACION_MINIMA_RIVAL, DETERMINACION_BASE - maxi(0, bono_documental))
+
+
+static func resultado_ataque_rival(distancia: float, esquiva_restante: float) -> String:
+	if distancia > ALCANCE_RIVAL:
+		return "falla"
+	if esquiva_restante > 0.0:
+		return "esquiva"
+	return "impacto"
+
+
+static func interrumpe_ataque(fuerte: bool, ataque_pendiente: bool, ritual: Dictionary) -> bool:
+	return fuerte and ataque_pendiente and bool(ritual.get("interrumpe_telegrafo_fuerte", false))
+
+
+static func determinacion_retorno(ritual: Dictionary, retornos_usados: int) -> int:
+	var maximo := int(ritual.get("retornos_rival", 0))
+	if retornos_usados >= maximo:
+		return 0
+	return maxi(0, int(ritual.get("determinacion_retorno", 0)))
 
 
 func configurar(acusado: Dictionary, bono_documental: int, reducir_movimiento: bool) -> void:
@@ -82,6 +108,7 @@ func _process(delta: float) -> void:
 	_recarga_jugador = maxf(0.0, _recarga_jugador - delta)
 	_recarga_rival = maxf(0.0, _recarga_rival - delta)
 	_esquiva = maxf(0.0, _esquiva - delta)
+	_enredo = maxf(0.0, _enredo - delta)
 	_mover_jugador(delta)
 	_mover_rival(delta)
 	_actualizar_camara()
@@ -115,24 +142,86 @@ func _mover_jugador(delta: float) -> void:
 
 
 func _mover_rival(delta: float) -> void:
+	if _ataque_rival_pendiente:
+		_actualizar_telegrafo_rival(delta)
+		return
+
 	var hacia := _jugador.position - _rival.position
 	hacia.y = 0.0
 	var distancia := hacia.length()
 	if distancia > ALCANCE_RIVAL:
 		var direccion := hacia.normalized()
-		_rival.position += direccion * _velocidad_rival * delta
+		var velocidad := _velocidad_rival
+		if _enredo > 0.0:
+			velocidad *= float(_ritual.get("velocidad_enredado_mul", 1.0))
+		_rival.position += direccion * velocidad * delta
 		_rival.position = _limitar(_rival.position)
 		_rival.rotation.y = atan2(direccion.x, direccion.z)
 	elif _recarga_rival <= 0.0:
-		_recarga_rival = RECARGA_RIVAL
-		if _esquiva <= 0.0:
+		_iniciar_ataque_rival()
+
+
+func _iniciar_ataque_rival() -> void:
+	if _ataque_rival_pendiente or _acabado:
+		return
+	_ataque_rival_pendiente = true
+	_telegrafo_rival = TELEGRAFO_RIVAL
+	if _aviso_ataque != null:
+		_aviso_ataque.position = _rival.position + Vector3(0.0, 0.02, 0.0)
+		_aviso_ataque.scale = Vector3.ONE
+		_aviso_ataque.visible = true
+	if _etiqueta_ataque != null:
+		_etiqueta_ataque.visible = true
+	Sonido.sonar(self, "marcar")
+
+
+func _actualizar_telegrafo_rival(delta: float) -> void:
+	_telegrafo_rival = maxf(0.0, _telegrafo_rival - delta)
+	if _aviso_ataque != null:
+		_aviso_ataque.position = _rival.position + Vector3(0.0, 0.02, 0.0)
+		if not reduccion_movimiento:
+			var progreso := 1.0 - _telegrafo_rival / TELEGRAFO_RIVAL
+			var escala := lerpf(0.72, 1.0, progreso)
+			_aviso_ataque.scale = Vector3(escala, 1.0, escala)
+	if _telegrafo_rival <= 0.0:
+		_resolver_ataque_rival()
+
+
+func _resolver_ataque_rival() -> void:
+	_ataque_rival_pendiente = false
+	_recarga_rival = RECARGA_RIVAL
+	_ocultar_aviso_ataque()
+
+	var hacia := _jugador.position - _rival.position
+	hacia.y = 0.0
+	match resultado_ataque_rival(hacia.length(), _esquiva):
+		"falla":
+			return
+		"esquiva":
+			Sonido.sonar(self, "pulsar")
+			_registrar_esquiva_ritual()
+		_:
+			Sonido.sonar(self, "error")
 			_determinacion_jugador = maxi(0, _determinacion_jugador - 1)
 			_reaccion(_figura_jugador, -0.18)
 			_actualizar_hud()
 			if _determinacion_jugador <= 0:
 				_terminar(false)
-		else:
-			_registrar_esquiva_ritual()
+
+
+func _cancelar_ataque_rival() -> void:
+	_ataque_rival_pendiente = false
+	_telegrafo_rival = 0.0
+	_recarga_rival = maxf(_recarga_rival, RECARGA_RIVAL * 0.65)
+	_ocultar_aviso_ataque()
+	Sonido.sonar(self, "pulsar")
+
+
+func _ocultar_aviso_ataque() -> void:
+	if _aviso_ataque != null:
+		_aviso_ataque.visible = false
+	if _etiqueta_ataque != null:
+		_etiqueta_ataque.visible = false
 
 
 func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> void:
@@ -149,15 +238,36 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 	var dano := dano_base
 	if fuerte:
 		dano += int(_ritual.get("dano_fuerte_bonus", 0))
+	var interrupcion := interrumpe_ataque(fuerte, _ataque_rival_pendiente, _ritual)
+	if interrupcion:
+		dano += int(_ritual.get("dano_interrupcion_bonus", 0))
+		_cancelar_ataque_rival()
 	if _contraataque > 0:
 		dano += _contraataque
 		_contraataque = 0
 
 	_determinacion_rival = maxi(0, _determinacion_rival - dano)
+	if not fuerte:
+		var segundos_enredo := float(_ritual.get("enredo_ligero_segundos", 0.0))
+		if segundos_enredo > 0.0:
+			_enredo = maxf(_enredo, segundos_enredo)
 	_reaccion(_figura_rival, 0.25 + float(dano) * 0.08)
 	_actualizar_hud()
-	if _determinacion_rival <= 0:
+	if _determinacion_rival <= 0 and not _intentar_retorno_rival():
 		_terminar(true)
+
+
+func _intentar_retorno_rival() -> bool:
+	var determinacion := determinacion_retorno(_ritual, _retornos_rival)
+	if determinacion <= 0:
+		return false
+	_retornos_rival += 1
+	_determinacion_rival = determinacion
+	_recarga_rival = RECARGA_RIVAL * 0.50
+	_reaccion(_figura_rival, -0.30)
+	Sonido.sonar(self, "marcar")
+	_actualizar_hud()
+	return true
 
 
 func _esquivar() -> void:
@@ -182,6 +292,8 @@ func _terminar(gano: bool) -> void:
 	if _acabado:
 		return
 	_acabado = true
+	_ataque_rival_pendiente = false
+	_ocultar_aviso_ataque()
 	terminado.emit(gano)
 
 
@@ -284,11 +396,33 @@ func _montar_arena() -> void:
 	var clave := String(_acusado.get("id", _acusado.get("nombre", "acusado")))
 	var matiz := 0.52 + float(absi(hash(clave)) % 14) / 100.0
 	_figura_rival = FiguraSilueta.construir(_rival, Vector3.ZERO, Color.from_hsv(matiz, 0.34, 0.72))
+	_montar_aviso_ataque()
 
 	_camara = Camera3D.new()
 	_camara.fov = 52.0
 	add_child(_camara)
 	_actualizar_camara()
+
+
+func _montar_aviso_ataque() -> void:
+	_aviso_ataque = MeshInstance3D.new()
+	_aviso_ataque.name = "AvisoAtaqueRival"
+	var malla := CylinderMesh.new()
+	malla.top_radius = ALCANCE_RIVAL
+	malla.bottom_radius = ALCANCE_RIVAL
+	malla.height = 0.025
+	malla.radial_segments = 32
+	_aviso_ataque.mesh = malla
+	var material := StandardMaterial3D.new()
+	material.albedo_color = Color(0.82, 0.10, 0.08, 0.34)
+	material.emission_enabled = true
+	material.emission = Color(0.82, 0.10, 0.08)
+	material.emission_energy_multiplier = 0.75
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_aviso_ataque.material_override = material
+	_aviso_ataque.visible = false
+	add_child(_aviso_ataque)
 
 
 func _montar_limite_ritual() -> void:
@@ -349,6 +483,13 @@ func _montar_hud() -> void:
 		_etiqueta_ritual = Label.new()
 		_etiqueta_ritual.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		bloque.add_child(_etiqueta_ritual)
+
+	_etiqueta_ataque = Label.new()
+	_etiqueta_ataque.text = tr("VENTANILLA_ATAQUE_INMINENTE")
+	_etiqueta_ataque.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_etiqueta_ataque.add_theme_color_override("font_color", Color(0.94, 0.28, 0.18))
+	_etiqueta_ataque.visible = false
+	bloque.add_child(_etiqueta_ataque)
 
 
 func _actualizar_hud() -> void:
