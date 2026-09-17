@@ -27,6 +27,7 @@ const ESCALA_BASE := 0.94
 ## La cámara agachada baja 0.35 m: el cuerpo baja lo mismo para no atravesarla.
 const BAJADA_AGACHADO := -0.35
 const IDENTIDAD := "jugador"
+const SHADER_PSX := preload("res://arte/psx.gdshader")
 
 ## En juego se mantiene el recorte específico de primera persona. El creador lo
 ## pone a `false`: la figura nace apoyada en el suelo, mirando a cámara y con una
@@ -252,7 +253,7 @@ func _esfera_psx(
 	instancia.position = posicion
 	instancia.scale = escala
 	var material := ShaderMaterial.new()
-	material.shader = load("res://arte/psx.gdshader")
+	material.shader = SHADER_PSX
 	material.set_shader_parameter("color_base", color)
 	instancia.material_override = material
 	padre.add_child(instancia)
@@ -277,7 +278,7 @@ func _mano(esqueleto: Skeleton3D, hueso: String, piel: Color) -> void:
 	instancia.mesh = malla
 	instancia.position = Vector3(0.0, 0.05, 0.0) / maxf(escala, 0.0001)
 	var material := ShaderMaterial.new()
-	material.shader = load("res://arte/psx.gdshader")
+	material.shader = SHADER_PSX
 	material.set_shader_parameter("color_base", piel)
 	instancia.material_override = material
 	enganche.add_child(instancia)
