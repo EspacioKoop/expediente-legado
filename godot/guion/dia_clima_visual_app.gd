@@ -237,7 +237,9 @@ func _retirar_suelo_clima(dia: Node) -> void:
 		return
 	var superficie := mundo.get_node_or_null(NODO_SUELO_CLIMA)
 	if superficie != null:
-		superficie.queue_free()
+		# El cambio forzado puede ocurrir dentro del mismo frame. `free()` evita
+		# que el nodo siguiente tenga que renombrarse por una baja aún en cola.
+		superficie.free()
 
 
 func _aplicar_sonido_clima(dia: Node, estado: String) -> void:
@@ -264,7 +266,8 @@ func _retirar_sonido_clima(dia: Node) -> void:
 	if voz == null:
 		return
 	voz.stop()
-	voz.queue_free()
+	# Igual que el suelo: el mismo `_process` puede sustituir la cama sonora.
+	voz.free()
 
 
 func _crear_pista_clima(estado: String) -> AudioStreamWAV:
