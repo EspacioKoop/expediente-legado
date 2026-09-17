@@ -186,7 +186,10 @@ func _resolver_ruta_comando(limpio: String) -> Dictionary:
 
 
 func _resolver_url_comando(limpio: String) -> Dictionary:
-	if not limpio.to_lower().begins_with("http://") and not limpio.to_lower().begins_with("https://"):
+	if (
+		not limpio.to_lower().begins_with("http://")
+		and not limpio.to_lower().begins_with("https://")
+	):
 		return {}
 	var web := Web98Indice.new()
 	web.configurar_contexto(_contexto)
