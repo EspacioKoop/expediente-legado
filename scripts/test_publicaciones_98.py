@@ -50,11 +50,14 @@ class Publicaciones98Test(unittest.TestCase):
         self.assertGreaterEqual(self.publicaciones.count('"texto":'), 12)
 
     def test_compra_delega_en_economia_ya_integrada(self):
+        cuerpo_compra = self.publicaciones.split("static func comprar", 1)[1].split(
+            "static func hojear", 1
+        )[0]
         self.assertIn(
             'ComercioBarrio.comprar(jornada, inventario, "quiosco", item_id)',
-            self.publicaciones,
+            cuerpo_compra,
         )
-        self.assertNotIn("Jornada.gastar", self.publicaciones)
+        self.assertNotIn("Jornada.gastar", cuerpo_compra)
         self.assertIn('"id": "revista_umbral_98"', self.comercio)
         self.assertIn('"id": "periodico_tarde_98"', self.comercio)
 
@@ -91,6 +94,8 @@ class Publicaciones98Test(unittest.TestCase):
                 "--headless",
                 "--path",
                 str(ROOT / "godot"),
+                "--quit-after",
+                "600",
                 "--script",
                 PRUEBA_GODOT,
             ],
@@ -100,12 +105,12 @@ class Publicaciones98Test(unittest.TestCase):
             timeout=30,
             check=False,
         )
+        self.assertNotIn("SCRIPT ERROR:", resultado.stdout, resultado.stdout)
+        self.assertNotIn("Parse Error:", resultado.stdout, resultado.stdout)
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
         resumen = RESUMEN_GODOT.search(resultado.stdout)
         self.assertIsNotNone(resumen, resultado.stdout)
         self.assertGreaterEqual(int(resumen.group(1)), 55, resultado.stdout)
-        self.assertNotIn("SCRIPT ERROR:", resultado.stdout)
-        self.assertNotIn("Parse Error:", resultado.stdout)
 
 
 if __name__ == "__main__":
