@@ -36,6 +36,10 @@ func _probar() -> void:
 		for malla in pieza.find_children("*", "MeshInstance3D", true, false):
 			var limites: AABB = malla.global_transform * malla.get_aabb()
 			caja = limites if caja.size == Vector3.ZERO else caja.merge(limites)
+			_comprobar(
+				malla.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF,
+				"mobiliario vial sin pasada de sombras",
+			)
 			for i in malla.mesh.get_surface_count():
 				triangulos += malla.mesh.surface_get_array_index_len(i) / 3
 				var mate: StandardMaterial3D = malla.get_active_material(i)
