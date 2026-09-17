@@ -54,5 +54,19 @@
       "rasgo": "pliegue-imposible"
     },
     "modo_observacion": "exploracion"
+  },
+  {
+    "id": "armario-domestico-desencajado",
+    "titulo": "Armario doméstico desencajado",
+    "descripcion": "El armario de casa reaparece reconocible, pero sus proporciones y ejes dejan de encajar entre sí.",
+    "nota_visual": "mueble familiar estrechado, alargado y girado fuera de escuadra",
+    "origen_tipo": "objeto",
+    "origen_id": "household_goods/wardrobe_01",
+    "representacion": {
+      "tipo": "asset-cc0",
+      "modelo": "household_goods/wardrobe_01",
+      "rasgo": "proporciones-inestables"
+    },
+    "modo_observacion": "exploracion"
   }
 ]
