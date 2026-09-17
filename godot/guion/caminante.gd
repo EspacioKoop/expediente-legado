@@ -246,13 +246,33 @@ func _ajustar_volumen_pisadas() -> void:
 			return
 
 
+## Solo un clic deliberado recupera la captura del mundo 3D. La rueda también
+## es `InputEventMouseButton`, pero nunca debe esconder el cursor al hacer scroll
+## en SIGA-98. Y si una pantalla ha desactivado la física del caminante, el mundo
+## tampoco puede reclamar el ratón aunque reciba un evento no gestionado.
+static func debe_recapturar_raton(
+	evento: InputEvent, fisica_activa: bool, arbol_pausado: bool
+) -> bool:
+	if not fisica_activa or arbol_pausado or not evento is InputEventMouseButton:
+		return false
+	var raton := evento as InputEventMouseButton
+	return raton.pressed and raton.button_index in [
+		MOUSE_BUTTON_LEFT,
+		MOUSE_BUTTON_RIGHT,
+		MOUSE_BUTTON_MIDDLE,
+	]
+
+
 func _unhandled_input(evento: InputEvent) -> void:
 	_registrar_dispositivo_entrada(evento)
 	# El menú global es el único dueño de `cancelar`: al abrirlo libera el ratón y
 	# al cerrarlo restaura el modo anterior. Si el sistema operativo lo soltó por
-	# otro motivo, un clic dentro del juego recupera la captura sin otra tecla.
-	if evento is InputEventMouseButton and evento.pressed:
-		if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED and not get_tree().paused:
+	# otro motivo, un clic deliberado dentro del mundo recupera la captura.
+	if evento is InputEventMouseButton:
+		if (
+			Input.mouse_mode != Input.MOUSE_MODE_CAPTURED
+			and debe_recapturar_raton(evento, is_physics_processing(), get_tree().paused)
+		):
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		return
 	if not evento is InputEventMouseMotion or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
