@@ -76,6 +76,49 @@ func _ejecutar() -> void:
 		"una jugada desconocida no inventa sonido",
 	)
 
+	var tarot := [
+		{"id": "la-luna", "nombre": "La Luna", "recogida": true, "gastada": false},
+		{"id": "el-sol", "nombre": "El Sol", "recogida": false, "gastada": false},
+		{"id": "la-justicia", "nombre": "La Justicia", "recogida": true, "gastada": true},
+	]
+	var arcano := JuicioSimbolico.arcano_para(tarot, "rival_prueba")
+	_comprobar(arcano.get("id", "") == "la-luna", "solo entra Tarot recogido y no gastado")
+	_comprobar(
+		JuicioSimbolico.arcano_para(
+			[{"id": "la-justicia", "recogida": true, "gastada": true}], "rival_prueba"
+		).is_empty(),
+		"una carta gastada no vuelve al combate",
+	)
+	_comprobar(
+		JuicioSimbolico.ruta_arcano(arcano).ends_with("/la-luna.png"),
+		"el Arcano usa el arte canónico por id",
+	)
+
+	var jornada := {"dia": 4}
+	SemillasOniricas.activar_semilla_onirica(jornada, "minotauro", "prueba:ventanilla")
+	var mito := JuicioSimbolico.mito_para(jornada, "rival_prueba")
+	_comprobar(mito == "minotauro", "el Juicio hereda una mitologia activada hoy")
+	_comprobar(
+		JuicioSimbolico.descriptor_mito(mito).get("forma", "") == "laberinto",
+		"Minotauro conserva vocabulario visual propio",
+	)
+
+	var raiz := Node3D.new()
+	var simbolos := JuicioSimbolico3D.montar(raiz, arcano, mito)
+	var arcano_3d := simbolos.get_node_or_null("ArcanoRector")
+	var mito_3d := simbolos.get_node_or_null("EcoMitologico")
+	_comprobar(arcano_3d != null, "el Arcano se materializa en la arena")
+	_comprobar(mito_3d != null, "el mito se materializa en la arena")
+	_comprobar(
+		arcano_3d != null and arcano_3d.get_meta("arcano_id", "") == "la-luna",
+		"la carta 3D conserva su id",
+	)
+	_comprobar(
+		mito_3d != null and mito_3d.get_meta("mito_id", "") == "minotauro",
+		"el eco 3D conserva su familia mitologica",
+	)
+	raiz.free()
+
 	print("issue_779: %d pasadas, %d fallos" % [pasadas, fallos])
 	quit(1 if fallos > 0 else 0)
 
