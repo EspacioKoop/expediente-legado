@@ -36,10 +36,13 @@ func _arrancar() -> void:
 		return
 
 	_juicio = JuicioCombatePlaytest912.new()
-	_juicio.configurar(
-		{"id": "playtest_912", "nombre": "PLAYTEST #912"},
-		0,
-		_reduccion_movimiento,
+	(
+		_juicio
+		. configurar(
+			{"id": "playtest_912", "nombre": "PLAYTEST #912"},
+			0,
+			_reduccion_movimiento,
+		)
 	)
 	_configurar_ritual(_juicio, ESCENARIOS[_escenario])
 	_juicio.terminado.connect(_al_terminar)
@@ -47,7 +50,9 @@ func _arrancar() -> void:
 	process_frame.connect(_vigilar_cancelacion)
 	print("PLAYTEST #912 · %s" % _escenario)
 	print("Movimiento: WASD/flechas · ligero: interactuar · fuerte: saltar · esquiva: agacharse")
-	print("Cancelar: acción cancelar/ui_cancel · reducción de movimiento: %s" % _reduccion_movimiento)
+	print(
+		"Cancelar: acción cancelar/ui_cancel · reducción de movimiento: %s" % _reduccion_movimiento
+	)
 
 
 func _leer_argumentos() -> void:
