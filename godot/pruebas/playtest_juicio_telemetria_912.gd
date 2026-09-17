@@ -14,9 +14,6 @@ func _ejecutar() -> void:
 	await _probar_interrupcion_solar()
 	await _probar_contraataque_duat()
 	await _probar_retorno_hidra()
-	# El último queue_free necesita ceder un frame antes de cerrar SceneTree;
-	# de lo contrario Godot informa objetos/recursos todavía pendientes al salir.
-	await process_frame
 	print("playtest_juicio_telemetria_912: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
@@ -48,7 +45,7 @@ func _probar_golpes_y_resumen() -> void:
 		String(juicio.resumen_playtest()["resultado"]) == "abandono",
 		"distingue abandono de derrota",
 	)
-	juicio.queue_free()
+	juicio.free()
 
 
 func _probar_esquiva_reducida_e_impacto() -> void:
@@ -69,7 +66,7 @@ func _probar_esquiva_reducida_e_impacto() -> void:
 	juicio._resolver_ataque_rival()
 	resumen = juicio.resumen_playtest()
 	_comprobar(int(resumen["determinacion_perdida"]) == 1, "cuenta determinación perdida")
-	juicio.queue_free()
+	juicio.free()
 
 
 func _probar_interrupcion_solar() -> void:
@@ -83,7 +80,7 @@ func _probar_interrupcion_solar() -> void:
 	_comprobar(int(resumen["interrupciones"]) == 1, "cuenta la interrupción solar")
 	_comprobar(int(resumen["fuertes_conectados"]) == 1, "interrupción también cuenta fuerte")
 	_comprobar(String(resumen["ritual_id"]) == "robo_del_sol", "expone el ritual activo")
-	juicio.queue_free()
+	juicio.free()
 
 
 func _probar_contraataque_duat() -> void:
@@ -97,7 +94,7 @@ func _probar_contraataque_duat() -> void:
 		int(juicio.resumen_playtest()["contraataques"]) == 1,
 		"cuenta la conversión de CONTRA en golpe",
 	)
-	juicio.queue_free()
+	juicio.free()
 
 
 func _probar_retorno_hidra() -> void:
@@ -117,7 +114,7 @@ func _probar_retorno_hidra() -> void:
 		String(juicio.resumen_playtest()["resultado"]) == "victoria",
 		"registra el resultado final tras agotar retornos",
 	)
-	juicio.queue_free()
+	juicio.free()
 
 
 func _nuevo(ritual: Dictionary, reducir: bool) -> JuicioCombatePlaytest912:
