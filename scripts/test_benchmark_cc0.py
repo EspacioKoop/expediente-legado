@@ -23,7 +23,7 @@ def load_report(path: Path) -> dict[str, Any]:
     data = json.loads(path.read_text(encoding="utf-8"))
     if data.get("schema") != 1:
         raise ValueError(f"{path}: schema inesperado")
-    if data.get("mode") not in {"baseline", "full"}:
+    if data.get("mode") not in {"baseline", "retro_urban", "full"}:
         raise ValueError(f"{path}: mode inválido")
     if data.get("resolution") != [1280, 720]:
         raise ValueError(f"{path}: resolución no canónica")
@@ -59,6 +59,7 @@ def compare_reports(baseline: dict[str, Any], full: dict[str, Any]) -> dict[str,
         }
     return {
         "schema": 1,
+        "target_mode": full.get("mode", "full"),
         "baseline_components": baseline.get("components", []),
         "full_components": full.get("components", []),
         "deltas": deltas,
@@ -68,6 +69,13 @@ def compare_reports(baseline: dict[str, Any], full: dict[str, Any]) -> dict[str,
 
 
 def format_report(summary: dict[str, Any]) -> str:
+    target_mode = summary.get("target_mode", "full")
+    target_label = "Retro Urban aislado" if target_mode == "retro_urban" else "CC0 completo"
+    title = (
+        "# Benchmark Retro Urban · trayecto"
+        if target_mode == "retro_urban"
+        else "# Benchmark CC0 · trayecto"
+    )
     rows = []
     for metric in REQUIRED_METRICS:
         item = summary["deltas"][metric]
@@ -78,11 +86,11 @@ def format_report(summary: dict[str, Any]) -> str:
         )
     return "\n".join(
         [
-            "# Benchmark CC0 · trayecto",
+            title,
             "",
             "Comparación reproducible sobre la misma cámara, resolución y número de frames.",
             "",
-            "| Métrica | Baseline | CC0 completo | Δ | Δ % |",
+            f"| Métrica | Baseline | {target_label} | Δ | Δ % |",
             "| --- | ---: | ---: | ---: | ---: |",
             *rows,
             "",
@@ -96,18 +104,26 @@ def format_report(summary: dict[str, Any]) -> str:
 
 def validate_artifacts(directory: Path) -> tuple[dict[str, Any], str]:
     baseline = load_report(directory / "baseline.json")
+    retro_urban = load_report(directory / "retro_urban.json")
     full = load_report(directory / "full.json")
-    for mode in ("baseline", "full"):
+    for mode in ("baseline", "retro_urban", "full"):
         screenshot = directory / f"{mode}.png"
         if not screenshot.is_file() or screenshot.stat().st_size <= 0:
             raise ValueError(f"captura ausente o vacía: {screenshot}")
+
     summary = compare_reports(baseline, full)
+    retro_summary = compare_reports(baseline, retro_urban)
     markdown = format_report(summary)
+    retro_markdown = format_report(retro_summary)
     (directory / "summary.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     (directory / "report.md").write_text(markdown, encoding="utf-8")
-    return summary, markdown
+    (directory / "retro_urban-summary.json").write_text(
+        json.dumps(retro_summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    (directory / "retro_urban-report.md").write_text(retro_markdown, encoding="utf-8")
+    return summary, markdown + "\n" + retro_markdown
 
 
 class BenchmarkComparisonTest(unittest.TestCase):
@@ -145,7 +161,7 @@ class BenchmarkComparisonTest(unittest.TestCase):
     def test_artifacts_are_materialized(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             directory = Path(temp)
-            for mode, draw_calls in (("baseline", 10), ("full", 15)):
+            for mode, draw_calls in (("baseline", 10), ("retro_urban", 12), ("full", 15)):
                 (directory / f"{mode}.json").write_text(
                     json.dumps(self._fixture(mode, draw_calls)), encoding="utf-8"
                 )
@@ -153,8 +169,11 @@ class BenchmarkComparisonTest(unittest.TestCase):
             summary, markdown = validate_artifacts(directory)
             self.assertIn("draw_calls", summary["deltas"])
             self.assertIn("Benchmark CC0", markdown)
+            self.assertIn("Benchmark Retro Urban", markdown)
             self.assertTrue((directory / "summary.json").is_file())
             self.assertTrue((directory / "report.md").is_file())
+            self.assertTrue((directory / "retro_urban-summary.json").is_file())
+            self.assertTrue((directory / "retro_urban-report.md").is_file())
 
 
 def main() -> int:
