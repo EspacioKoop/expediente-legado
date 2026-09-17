@@ -14,6 +14,9 @@ func _ejecutar() -> void:
 	await _probar_interrupcion_solar()
 	await _probar_contraataque_duat()
 	await _probar_retorno_hidra()
+	# El último queue_free necesita ceder un frame antes de cerrar SceneTree;
+	# de lo contrario Godot informa objetos/recursos todavía pendientes al salir.
+	await process_frame
 	print("playtest_juicio_telemetria_912: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
