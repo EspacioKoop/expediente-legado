@@ -42,9 +42,7 @@ func _sincronizar_siga(dia: Node, fase: int, ayuda_completa: bool) -> void:
 	var id_pantalla := (pantalla as Node).get_instance_id()
 	if id_pantalla == _pantalla_id and fase == _fase_aplicada:
 		return
-	var activa := (
-		fase >= ContaminacionOs98.FASE_CONTAMINACION_CRUZADA and ayuda_completa
-	)
+	var activa := fase >= ContaminacionOs98.FASE_CONTAMINACION_CRUZADA and ayuda_completa
 	if _sincronizar_reaccion(pantalla as Node, activa):
 		_pantalla_id = id_pantalla
 		_fase_aplicada = fase
