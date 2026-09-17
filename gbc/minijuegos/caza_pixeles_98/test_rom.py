@@ -6,6 +6,8 @@ import unittest
 ROOT = Path(__file__).resolve().parent
 SOURCE = ROOT / "main.asm"
 SCENARIO = ROOT / "escenario.asm"
+MUSIC = ROOT / "musica.asm"
+CINEMA = ROOT / "cinematicas.asm"
 MAKEFILE = ROOT / "Makefile"
 ROM = ROOT / "build" / "caza_pixeles_98.gbc"
 
@@ -15,6 +17,8 @@ class CazaPixeles98Test(unittest.TestCase):
     def setUpClass(cls):
         cls.source = SOURCE.read_text(encoding="utf-8")
         cls.scenario = SCENARIO.read_text(encoding="utf-8")
+        cls.music = MUSIC.read_text(encoding="utf-8")
+        cls.cinema = CINEMA.read_text(encoding="utf-8")
         cls.makefile = MAKEFILE.read_text(encoding="utf-8")
 
     def bloque(self, inicio, fin):
@@ -23,6 +27,12 @@ class CazaPixeles98Test(unittest.TestCase):
     def bloque_escenario(self, inicio, fin):
         return self.scenario.split(inicio, 1)[1].split(fin, 1)[0]
 
+    def bloque_musica(self, inicio, fin):
+        return self.music.split(inicio, 1)[1].split(fin, 1)[0]
+
+    def bloque_cinema(self, inicio, fin):
+        return self.cinema.split(inicio, 1)[1].split(fin, 1)[0]
+
     def valor_def(self, nombre):
         match = re.search(rf"DEF {re.escape(nombre)}\s+EQU\s+(\d+)", self.source)
         self.assertIsNotNone(match, f"falta DEF {nombre}")
@@ -30,6 +40,11 @@ class CazaPixeles98Test(unittest.TestCase):
 
     def valor_def_escenario(self, nombre):
         match = re.search(rf"DEF {re.escape(nombre)}\s+EQU\s+(\d+)", self.scenario)
+        self.assertIsNotNone(match, f"falta DEF {nombre}")
+        return int(match.group(1))
+
+    def valor_def_cinema(self, nombre):
+        match = re.search(rf"DEF {re.escape(nombre)}\s+EQU\s+(\d+)", self.cinema)
         self.assertIsNotNone(match, f"falta DEF {nombre}")
         return int(match.group(1))
 
@@ -189,6 +204,52 @@ class CazaPixeles98Test(unittest.TestCase):
         self.assertNotIn("halt", transicion)
         self.assertNotIn("wTiempo", transicion)
         self.assertIn("call DibujarEscenarioFinal", self.source)
+
+    def test_musica_tiene_identidad_por_fase_y_canal_separado_de_sfx(self):
+        self.assertIn('INCLUDE "musica.asm"', self.scenario)
+        self.assertIn("musica.asm", self.makefile)
+        self.assertIn("DEF rNR21 EQU $FF16", self.music)
+        self.assertIn("DEF rNR24 EQU $FF19", self.music)
+        self.assertIn("ld a, $33\n    ldh [rNR51], a", self.music)
+        self.assertNotIn("rNR11", self.music)
+        self.assertNotIn("rNR12", self.music)
+        self.assertNotIn("rNR13", self.music)
+        self.assertNotIn("rNR14", self.music)
+        for patron in (
+            "PatronFase1:",
+            "PatronFase2:",
+            "PatronFase3:",
+            "PatronBoss:",
+            "PatronFinalOK:",
+            "PatronFinalKO:",
+        ):
+            self.assertIn(patron, self.music)
+        self.assertIn("call TickMusica", self.scenario)
+        self.assertIn("call CambiarMusicaFase", self.scenario)
+        self.assertIn("call IniciarMusicaBoss", self.scenario)
+        self.assertIn("call IniciarMusicaFinal", self.scenario)
+
+    def test_cinematicas_cuentan_intro_fases_boss_y_final_sin_oam(self):
+        self.assertIn('INCLUDE "cinematicas.asm"', self.scenario)
+        self.assertIn("cinematicas.asm", self.makefile)
+        self.assertEqual(self.valor_def_cinema("CIN_INTRO_FRAMES"), 72)
+        self.assertEqual(self.valor_def_cinema("CIN_BEAT_FRAMES"), 42)
+        self.assertEqual(self.valor_def_cinema("CIN_BOSS_FRAMES"), 48)
+        self.assertIn("call IniciarCinematicaIntro", self.scenario)
+        self.assertIn("call IniciarCinematicaFase2", self.scenario)
+        self.assertIn("call IniciarCinematicaFase3", self.scenario)
+        self.assertIn("call IniciarCinematicaBoss", self.scenario)
+        self.assertIn("call DibujarCinematicaFinal", self.scenario)
+        self.assertNotIn("OAM_BASE", self.cinema)
+        tick = self.bloque_cinema("TickCinematica:", "DibujarCinematicaGameplay:")
+        self.assertNotIn("halt", tick)
+        self.assertNotIn("wTiempo", tick)
+        final = self.bloque_cinema("DibujarCinematicaFinal:", "CargarTilesCinematicas:")
+        self.assertIn("wBossDerrotado", final)
+        self.assertIn("TILE_CIN_RETORNO", final)
+        self.assertIn("TILE_CIN_FAUNA", final)
+        self.assertIn("TILE_CIN_FUGA", final)
+        self.assertIn("TILE_CIN_RESIDUO", final)
 
     def test_hud_expone_fase_restauracion_y_multiplicador(self):
         self.assertIn("ld hl, BG_MAP + 9", self.source)

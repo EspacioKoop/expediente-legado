@@ -40,13 +40,19 @@ InicializarEscenarioVisual:
     ld [wParallaxXLento], a
     call CargarTilesEscenario
     call DibujarFondoFaseVisual
+    call InicializarMusicaSistema
+    call IniciarMusicaFase1
+    call InicializarCinematicas
+    call IniciarCinematicaIntro
     ld a, 1
     call IniciarTransicionVisual
     ret
 
-; Se llama una vez por frame desde EstadoJuego. Las dos bandas usan cadencias
-; distintas: no desplazan HUD/Chromia porque animan tiles BG, no rSCX global.
+; Se llama una vez por frame desde EstadoJuego. Musica y narrativa comparten el
+; mismo tick del escenario: no crean interrupciones ni HALT adicionales.
 TickEscenarioVisual:
+    call TickMusica
+    call TickCinematica
     call TickTransicionVisual
     call TickParallaxVisual
     call TickFaunaVisual
@@ -129,12 +135,23 @@ EscenarioSumarXHL:
 TransicionEscenarioFase:
     call DesactivarLCD
     call DibujarFondoFaseVisual
+    call CambiarMusicaFase
+    ld a, [wFase]
+    cp 2
+    jr z, .cine_fase2
+    call IniciarCinematicaFase3
+    jr .cine_lista
+.cine_fase2:
+    call IniciarCinematicaFase2
+.cine_lista:
     ld a, [wFase]
     call IniciarTransicionVisual
     call ActivarLCD
     ret
 
 TransicionBehemothVisual:
+    call IniciarMusicaBoss
+    call IniciarCinematicaBoss
     ld a, 4
     call IniciarTransicionVisual
     ret
@@ -143,6 +160,8 @@ DibujarEscenarioFinal:
     call CargarTilesEscenario
     call DibujarFondoFaseVisual
     call DibujarFaunaVisual
+    call IniciarMusicaFinal
+    call DibujarCinematicaFinal
     ld hl, BG_MAP + (2 * 32) + 9
     ld a, [wBossDerrotado]
     or a
@@ -523,3 +542,6 @@ wFaunaTick:            ds 1
 wFaunaFrame:           ds 1
 wTransicionFrames:     ds 1
 wTransicionTipo:       ds 1
+
+INCLUDE "musica.asm"
+INCLUDE "cinematicas.asm"
