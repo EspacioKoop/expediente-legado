@@ -47,6 +47,21 @@ func _process(_delta: float) -> void:
 			cartas_recogidas,
 		)
 	)
+	var opciones: Dictionary = dia._opciones_sueno()
+	var total_escenas := clampi(
+		int(opciones.get("cantidad", Sueno.ESCENAS_POR_NOCHE)),
+		1,
+		SuenoFormas.ids().size(),
+	)
+	var indice_escena := MitologiasNoche.indice_escena_actual(total_escenas, escenas.size())
+	SuenoRecurrenciaSimbolica.montar(
+		mundo,
+		anomalias,
+		indice_escena,
+		total_escenas,
+		dia._raiz(),
+		int(dia.jornada.get("dia", 1)),
+	)
 	for anomalia in anomalias:
 		var documento_origen := String(anomalia.get_meta("documento_origen", ""))
 		anomalia.observada.connect(_al_observar_anomalia.bind(documento_origen))
