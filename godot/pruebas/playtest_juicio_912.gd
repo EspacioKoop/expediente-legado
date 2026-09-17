@@ -128,9 +128,10 @@ func _metricas(nombre: String, ritual: Dictionary) -> Dictionary:
 
 
 func _imprimir_matriz(escenarios: Array) -> void:
-	print(
-		"| escenario | det. | radio | vel. rival | DPS ligero | DPS fuerte | contra | enredo/recargas | cubre telegrafo |"
-	)
+	var cabecera := "| escenario | det. | radio | vel. rival |"
+	cabecera += " DPS ligero | DPS fuerte | contra |"
+	cabecera += " enredo/recargas | cubre telegrafo |"
+	print(cabecera)
 	print("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | :---: |")
 	for fila in escenarios:
 		print(
