@@ -10,6 +10,7 @@ MODELO = ROOT / "godot" / "guion" / "contaminacion_os98.gd"
 EXPLORADOR = ROOT / "godot" / "guion" / "explorador_siga_modelo.gd"
 ADAPTADOR = ROOT / "godot" / "guion" / "dia_escritorio_siga_app.gd"
 GATO_REACCION = ROOT / "godot" / "guion" / "dia_contaminacion_gato_app.gd"
+CLIMAX_HANDOFF = ROOT / "godot" / "guion" / "dia_climax_os98_app.gd"
 ESCENA_DIA = ROOT / "godot" / "escenas" / "dia.tscn"
 CATALOGO = ROOT / "godot" / "datos" / "web98_indice.json"
 PRUEBA_GODOT = ROOT / "godot" / "pruebas" / "pruebas_contaminacion_os98.gd"
@@ -24,10 +25,12 @@ def test_progresion_tiene_hitos_deterministas_y_no_toca_host() -> None:
     assert "EXPEDIENTES_PRINCIPALES := 5" in modelo
     assert 'const CREDENCIAL := "enlace13"' in modelo
     assert 'const REGISTRO_IMPOSIBLE_ID := "registro_imposible_13"' in modelo
+    assert 'const CONOCIMIENTO_CLIMAX := "os98_climax_pendiente"' in modelo
     assert "static func memorandum_disponible(" in modelo
     assert '"memorandum_leido"' in modelo
     assert '"diagnostico_restringido_leido"' in modelo
     assert '"registro_imposible_leido"' in modelo
+    assert '"diagnostico_reabierto_climax"' in modelo
     assert "RandomNumberGenerator" not in modelo
     for prohibido in (
         "FileAccess",
@@ -85,6 +88,22 @@ def test_gato_reacciona_solo_a_contaminacion_real_y_sin_estado_paralelo() -> Non
     assert 'tr("GATO_SIGA_DESCUBRIMIENTO")' in reaccion
     assert "establecer_estado_local" not in reaccion
     assert "RandomNumberGenerator" not in reaccion
+
+
+def test_fase4_expone_handoff_sin_duplicar_el_climax() -> None:
+    modelo = fuente(MODELO)
+    handoff = fuente(CLIMAX_HANDOFF)
+    escena = fuente(ESCENA_DIA)
+    assert '"climax_hastur_pendiente": fase >= FASE_CLIMAX' in modelo
+    assert "CONOCIMIENTO_CLIMAX" in modelo
+    assert 'signal climax_hastur_pendiente(contexto: Dictionary)' in handoff
+    assert 'escritorio.has_method("_contexto_os98")' in handoff
+    assert 'contexto.get("climax_hastur_pendiente", false)' in handoff
+    assert 'dia.jornada.get("vuelta", 1)' in handoff
+    assert 'path="res://guion/dia_climax_os98_app.gd"' in escena
+    assert 'name="ClimaxOs98Controller"' in escena
+    for prohibido in ("Combate.new", "SuenoCombate", "Acusacion", "final_verdadero_mostrado"):
+        assert prohibido not in handoff
 
 
 def test_contrato_ejecutable_en_godot() -> None:
