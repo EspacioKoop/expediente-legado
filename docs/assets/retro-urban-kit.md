@@ -36,7 +36,7 @@ Decisiones del corte:
 - una única construcción de malla en CPU por tipo de pieza, reutilizada por sus instancias;
 - presupuesto del pase base del dressing Retro Urban: **máximo 8 draw calls** (ocho instancias × una superficie/material).
 
-El número final de draw calls de un frame completo depende del renderer y del resto de la escena. El benchmark reproducible de `docs/benchmark-cc0.md` dispone ahora de un modo `retro_urban` que monta **solo** este controller sobre el mismo baseline/cámara y produce captura PNG + métricas JSON específicas.
+El número final de draw calls de un frame completo depende del renderer y del resto de la escena. El benchmark reproducible de `docs/benchmark-cc0.md` dispone ahora de un modo `retro_urban` que monta **solo** este controller sobre el mismo baseline/cámara y produce captura PNG + métricas JSON específicas. La primera ejecución aislada detectó que el controller también montaba `CalleMateriales` (#399), inflando el delta a 11 draw calls; #940 separa ambos controllers para que el coste atribuido a #295 sea medible sin esa contaminación.
 
 ## Estado frente a #295
 
