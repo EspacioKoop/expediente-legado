@@ -24,7 +24,9 @@ func _init() -> void:
 			for pista in pistas:
 				total += 1
 				var id := String(pista.get("id", ""))
-				var prefijo := "%s / %s / %s" % [caso.get("id", "?"), registro.get("folio", "?"), id]
+				var prefijo := (
+					"%s / %s / %s" % [caso.get("id", "?"), registro.get("folio", "?"), id]
+				)
 				var gatillo = pista.get("fraseGatillo")
 
 				comprobar(prefijo + ": tiene frase gatillo", gatillo != null, true)
@@ -37,10 +39,14 @@ func _init() -> void:
 				)
 
 				var meta := "[url=pista:%s]" % id
-				comprobar(prefijo + ": enlace activo sin descubrir", sin_descubrir.contains(meta), true)
+				comprobar(
+					prefijo + ": enlace activo sin descubrir", sin_descubrir.contains(meta), true
+				)
 
 				var descubierta := BBCode.render(Marcas.de_registro(registro, pistas, [id]))
-				comprobar(prefijo + ": enlace activo ya descubierta", descubierta.contains(meta), true)
+				comprobar(
+					prefijo + ": enlace activo ya descubierta", descubierta.contains(meta), true
+				)
 				comprobar(
 					prefijo + ": estado visual de descubierta",
 					descubierta.contains("[bgcolor=#c8c800]"),
