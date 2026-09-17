@@ -154,9 +154,9 @@ class BenchmarkFachadasComparisonTest(unittest.TestCase):
             },
             "components": ["trayecto", "calle_identidad"],
             "feature_counts": {
-                "grupos": 9 if mode == "full" else 0,
+                "grupos": 61 if mode == "full" else 0,
                 "render_batches": 17 if mode == "full" else 0,
-                "batched_instances": 82 if mode == "full" else 0,
+                "batched_instances": 145 if mode == "full" else 0,
             },
             "metrics_avg": {
                 "draw_calls": 20.0 if mode == "baseline" else 25.0,
@@ -198,7 +198,7 @@ class BenchmarkFachadasComparisonTest(unittest.TestCase):
                 (directory / f"{mode}.png").write_bytes(b"png")
             summary, markdown = validate_artifacts(directory)
             self.assertIn("draw_calls", summary["deltas"])
-            self.assertIn("17 lotes MultiMesh", markdown)
+            self.assertIn("61 ventanas / 17 lotes MultiMesh / 145 instancias", markdown)
             self.assertTrue((directory / "summary.json").is_file())
             self.assertTrue((directory / "report.md").is_file())
 
