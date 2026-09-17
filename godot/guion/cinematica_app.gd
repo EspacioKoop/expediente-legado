@@ -41,6 +41,7 @@ var _estado: Dictionary = {}
 var _reduccion_movimiento := false
 
 var _camara: Camera3D
+var _acento: AudioStreamPlayer
 ## El plató: un mundo 3D propio para los planos que traen `decorado`. Existe
 ## porque hay momentos —el sello, la carta— que ocurren dentro de una pantalla
 ## de interfaz, sin sala detrás por la que mover la cámara.
@@ -57,6 +58,14 @@ var _figuras: Node2D
 
 func _ready() -> void:
 	_montar()
+
+
+func _exit_tree() -> void:
+	# Una escena de QA puede desmontar `dia.tscn` mientras el primer acento
+	# todavía está sonando. El AudioServer puede conservar entonces el stream
+	# hasta el cierre del proceso. Soltarlo aquí mantiene el one-shot ligado al
+	# ciclo de vida real de la cinemática y evita recursos vivos al salir.
+	_detener_acento()
 
 
 ## Pone una cinemática ya resuelta (ver `Cinematica.resolver`).
@@ -126,11 +135,11 @@ func _siguiente() -> void:
 
 	plano_entrado.emit(_plano, plano)
 	# Un acento pertenece al beat, no al reloj de quien pidió la cinemática.
-	# Usar el catálogo común mantiene licencia/procedencia y evita rutas de audio
-	# desperdigadas. Una clave vacía conserva el comportamiento histórico.
+	# El reproductor lo posee para poder pararlo/soltar el stream si la escena se
+	# salta o se desmonta antes de que termine el sonido.
 	var acento := String(plano.get("sonido", ""))
 	if not acento.is_empty():
-		Sonido.sonar(self, acento)
+		_sonar_acento(acento)
 
 	var es_2d: bool = plano["tipo"] == "2d"
 	_fondo.visible = es_2d
@@ -147,12 +156,31 @@ func _terminar() -> void:
 	# exactamente lo que el acortado quiere premiar.
 	if not _id.is_empty() and not _estado.is_empty():
 		Cinematica.anotar_vista(_estado, _id)
+	_detener_acento()
 	_rotulo.text = ""
 	_voz.text = ""
 	_fondo.visible = false
 	_figuras.visible = false
 	_preparar_plato({})
 	terminada.emit()
+
+
+func _sonar_acento(nombre: String) -> void:
+	if _acento == null:
+		return
+	_acento.stop()
+	_acento.stream = Sonido.stream(nombre)
+	if _acento.stream != null:
+		_acento.play()
+
+
+func _detener_acento() -> void:
+	if _acento == null:
+		return
+	_acento.stop()
+	# No basta con parar: el reproductor de audio conserva una referencia al
+	# recurso. Soltarla hace que un desmontaje inmediato de `dia.tscn` sea limpio.
+	_acento.stream = null
 
 
 func _tiene_mundo_3d() -> bool:
@@ -247,6 +275,9 @@ func _preparar_plato(decorado: Dictionary) -> void:
 func _montar() -> void:
 	_camara = Camera3D.new()
 	add_child(_camara)
+
+	_acento = AudioStreamPlayer.new()
+	add_child(_acento)
 
 	var capa := CanvasLayer.new()
 	add_child(capa)
