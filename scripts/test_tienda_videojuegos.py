@@ -41,10 +41,11 @@ class TiendaVideojuegosTest(unittest.TestCase):
         self.assertIn('"ya_comprada": true', cuerpo_compra)
         self.assertIn('"importe": 0', cuerpo_compra)
 
-    def test_persistencia_queda_dentro_de_jornada(self):
-        self.assertIn('const CLAVE_COMPRAS := "roms_compradas"', self.tienda)
-        self.assertIn("jornada[CLAVE_COMPRAS] = adquiridas", self.tienda)
-        self.assertNotIn("Partida.", self.tienda)
+    def test_persistencia_es_permanente_del_perfil(self):
+        self.assertIn("PerfilRoms.migrar_desde_jornada(jornada)", self.tienda)
+        self.assertIn("PerfilRoms.registrar(id_rom)", self.tienda)
+        self.assertNotIn("jornada[CLAVE_COMPRAS] =", self.tienda)
+        self.assertIn('jornada["dinero"] = int(jornada.get("dinero", 0)) + precio', self.tienda)
 
     def test_no_comercializa_roms_del_usuario_ni_descarga_contenido(self):
         catalogo = self.tienda.split("static func catalogo", 1)[1].split(
@@ -57,7 +58,7 @@ class TiendaVideojuegosTest(unittest.TestCase):
         self.assertIn("user://roms", self.doc)
 
     def test_documenta_el_corte_y_sus_dependencias(self):
-        for referencia in ("#83", "#93", "#124", "#244", "#277"):
+        for referencia in ("#83", "#93", "#124", "#244", "#277", "#800"):
             self.assertIn(referencia, self.doc)
         self.assertIn("no modifica `espacios_catalogo.gd`", self.doc)
         self.assertIn("filtra el selector del emulador", self.doc)
