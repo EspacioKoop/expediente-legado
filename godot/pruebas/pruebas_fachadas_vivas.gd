@@ -53,7 +53,10 @@ func _probar() -> void:
 		var estado_luz := String(interior.get_meta("estado_luz"))
 		estados_luz[estado_luz] = int(estados_luz.get(estado_luz, 0)) + 1
 		_comprobar(
-			estado_luz == CalleFachadasVivas.ESTADOS_LUZ[indice % CalleFachadasVivas.ESTADOS_LUZ.size()],
+			(
+				estado_luz
+				== CalleFachadasVivas.ESTADOS_LUZ[indice % CalleFachadasVivas.ESTADOS_LUZ.size()]
+			),
 			"el estado de luz es determinista"
 		)
 		var nombre_ventana := String(interior.get_meta("ventana"))
