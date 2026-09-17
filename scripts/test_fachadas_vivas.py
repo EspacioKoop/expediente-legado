@@ -32,7 +32,12 @@ class FachadasVivasTest(unittest.TestCase):
             "LOD_LEJOS_FIN := 72.0",
         ):
             self.assertIn(contrato_lod, self.fachadas)
-        self.assertIn("visibility_range_end = rango_fin", self.fachadas)
+        self.assertIn("MultiMeshInstance3D.new()", self.fachadas)
+        self.assertIn("MultiMesh.TRANSFORM_3D", self.fachadas)
+        self.assertIn("set_instance_transform", self.fachadas)
+        self.assertIn('raiz_interiores.name = "Interiores"', self.fachadas)
+        self.assertIn('raiz_lotes.name = "Lotes"', self.fachadas)
+        self.assertIn("instancia.visibility_range_end", self.fachadas)
         self.assertIn("PROFUNDIDAD_INTERIOR := 0.055", self.fachadas)
         self.assertIn("SALIENTE_EXTRA_CRISTAL := 0.05", self.fachadas)
         self.assertNotIn("no_depth_test", self.fachadas)
