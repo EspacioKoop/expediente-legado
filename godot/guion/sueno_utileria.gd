@@ -155,7 +155,7 @@ static func montar(
 				datos["reaccion"],
 				datos["giro"],
 				datos["giro_reaccion"],
-				bool(datos.get("asset_cc0", false)),
+				datos.get("asset_cc0", false) == true,
 			)
 		)
 		_montar_eco_simbolico(anomalia, motivo)
