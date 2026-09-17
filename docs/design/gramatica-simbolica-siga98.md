@@ -107,7 +107,29 @@ Reglas específicas:
 - el sistema no altera `objetivos_requeridos`, detectores ni feedback de #281;
 - al ser estático, no introduce movimiento adicional que deba suprimirse con `reduccion_movimiento`.
 
-Este patrón permite escalar después a composiciones mayores —simetrías, corredores repetidos, ciclos o descensos— sin convertir cada referencia cultural en un asset nuevo.
+## Vertical slice: gramática espacial del sueño
+
+El tercer vertical de #888 extiende el motivo desde la anomalía hacia el **espacio inmediato** mediante `SuenoEspacioSimbolico`. La capa se monta después de `SuenoUtileria` y parte exclusivamente de anomalías que ya tienen un original legítimo y una familia simbólica conocida.
+
+No modifica `SuenoFormas`, `Planta` ni la navegación. Las nuevas estructuras son únicamente `MeshInstance3D`: no contienen `CollisionShape3D`, `Area3D`, interactuables, texto ni lógica de progreso. Visualmente parecen arquitectura; mecánicamente son composición atravesable.
+
+| Motivo interno | Rima espacial | Lectura estructural |
+| --- | --- | --- |
+| `umbral` | marco abierto detrás del original | paso, frontera, guía |
+| `doble` | dos pares de ejes verticales enfrentados | simetría imperfecta, sombra, reflejo |
+| `laberinto` | tres pórticos sucesivos con giros de 90° | ruta plegada, búsqueda, Ariadna/Minotauro |
+| `ciclo-centro` | ocho marcas radiales bajas alrededor del original | retorno, centro, Rueda |
+
+Restricciones de esta capa:
+
+- una anomalía válida produce como máximo una rima espacial;
+- el límite de tres anomalías de `SuenoUtileria` limita también la densidad de arquitectura simbólica;
+- un objeto desconocido, una carta no recogida o un tarot cuyo folio no se leyó hoy no alteran el espacio;
+- la rima conserva metadatos internos del motivo y del ID de catálogo de origen, pero nunca los expone al jugador;
+- todas las composiciones son estáticas, por lo que `reduccion_movimiento` mantiene su contrato sin rama especial;
+- las mallas se mantienen pequeñas y cercanas al original para no competir con la silueta principal de cada sala ni simular rutas falsas con colisión inexistente.
+
+Este patrón permite que el sueño empiece a sentirse espacialmente coherente con la gramática sin convertir todavía la planta, las salidas ni el pathfinding en simbología jugable. Si una futura iteración quiere alterar rutas reales, deberá hacerlo explícitamente sobre la lógica de navegación y con criterios de legibilidad propios.
 
 ## Límites
 
