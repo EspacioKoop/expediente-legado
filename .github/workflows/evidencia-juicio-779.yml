@@ -1,0 +1,128 @@
+name: Evidencia Juicio #779
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/evidencia-juicio-779.yml'
+      - 'godot/pruebas/capturar_juicio_779.gd'
+      - 'docs/evidencias/juicio-779/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: evidencia-juicio-779-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  capturas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          lfs: true
+          fetch-depth: 0
+
+      - name: Comprobar si la evidencia ya está generada
+        id: evidencia
+        shell: bash
+        run: |
+          if [[ -f docs/evidencias/juicio-779/luna-minotauro.png ]]; then
+            echo 'lista=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'lista=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.evidencia.outputs.lista != 'true'
+        with:
+          python-version: '3.11'
+
+      - name: Instalar RGBDS fijado
+        if: steps.evidencia.outputs.lista != 'true'
+        shell: bash
+        env:
+          RGBDS_VERSION: v1.0.3
+          RGBDS_SHA256: 280a52061a0c516999bee75ac357628d6d50784309e0486cef25f7460e6f330b
+        run: |
+          set -euo pipefail
+          url="https://github.com/gbdev/rgbds/releases/download/${RGBDS_VERSION}/rgbds-linux-x86_64.tar.xz"
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/rgbds.tar.xz" "$url"
+          echo "${RGBDS_SHA256}  $RUNNER_TEMP/rgbds.tar.xz" | sha256sum --check --strict
+          mkdir "$RUNNER_TEMP/rgbds"
+          tar -xJf "$RUNNER_TEMP/rgbds.tar.xz" -C "$RUNNER_TEMP/rgbds"
+          (cd "$RUNNER_TEMP/rgbds" && sudo ./install.sh)
+
+      - name: Compilar GDExtension requerida por el proyecto
+        if: steps.evidencia.outputs.lista != 'true'
+        run: bash scripts/preparar_emulador_gb.sh linux-debug
+
+      - name: Instalar el motor declarado por el proyecto
+        if: steps.evidencia.outputs.lista != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Importar proyecto y registrar clases globales
+        if: steps.evidencia.outputs.lista != 'true'
+        shell: bash
+        run: godot4 --headless --language es --path godot --editor --import --quit
+
+      - name: Generar las tres capturas rituales
+        if: steps.evidencia.outputs.lista != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/juicio-779"
+          xvfb-run -a godot4 --language es --path godot --script res://pruebas/capturar_juicio_779.gd -- "$RUNNER_TEMP/juicio-779"
+          for estado in luna-minotauro justicia-duat fuerza-aquiles; do
+            test -s "$RUNNER_TEMP/juicio-779/$estado.png"
+          done
+
+      - name: Publicar PNG originales como artifact
+        if: steps.evidencia.outputs.lista != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-juicio-779
+          path: ${{ runner.temp }}/juicio-779/*.png
+          retention-days: 90
+
+      - name: Incorporar capturas al PR
+        if: steps.evidencia.outputs.lista != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs/evidencias/juicio-779
+          cp "$RUNNER_TEMP"/juicio-779/*.png docs/evidencias/juicio-779/
+          cat > docs/evidencias/juicio-779/README.md <<'EOF'
+          # Evidencia visual #779 — rituales del Juicio
+
+          Capturas generadas por GitHub Actions mediante `godot/pruebas/capturar_juicio_779.gd`.
+
+          | La Luna + Minotauro | La Justicia + Duat | La Fuerza + Aquiles |
+          | --- | --- | --- |
+          | ![Laberinto lunar](luna-minotauro.png) | ![Balanza del Duat](justicia-duat.png) | ![Talón de la Fuerza](fuerza-aquiles.png) |
+
+          Las tres escenas parten del mismo acusado, cámara y bono documental. Solo cambian el Arcano y la semilla mitológica. La revisión humana de legibilidad se registra después de mirar estos PNG; su mera generación no cierra #779.
+          EOF
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/evidencias/juicio-779
+          git commit -m 'docs: incorpora capturas rituales del Juicio (#779)'
+          git push origin "HEAD:${GITHUB_HEAD_REF}"
