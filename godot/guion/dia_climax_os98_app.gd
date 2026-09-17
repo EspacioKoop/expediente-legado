@@ -21,10 +21,13 @@ func _process(_delta: float) -> void:
 	var contexto: Dictionary = escritorio.call("_contexto_os98", dia)
 	if not bool(contexto.get("climax_hastur_pendiente", false)):
 		return
-	var clave := "%s:%s" % [
-		str(int(dia.jornada.get("raiz", 0))),
-		str(int(dia.jornada.get("vuelta", 1))),
-	]
+	var clave := (
+		"%s:%s"
+		% [
+			str(int(dia.jornada.get("raiz", 0))),
+			str(int(dia.jornada.get("vuelta", 1))),
+		]
+	)
 	if clave == _emitido_para:
 		return
 	_emitido_para = clave
