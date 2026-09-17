@@ -49,9 +49,7 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 	var hacia := _rival.position - _jugador.position
 	hacia.y = 0.0
 	var conectado := not _acabado and _recarga_jugador <= 0.0 and hacia.length() <= alcance
-	var interrumpia := (
-		conectado and interrumpe_ataque(fuerte, _ataque_rival_pendiente, _ritual)
-	)
+	var interrumpia := conectado and interrumpe_ataque(fuerte, _ataque_rival_pendiente, _ritual)
 	var usaba_contra := conectado and _contraataque > 0
 	super._atacar(dano_base, alcance, recarga, fuerte)
 	if not conectado:
