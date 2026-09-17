@@ -47,20 +47,32 @@ func _probar() -> void:
 	var primera := Publicaciones98.hojear(jornada, "revista_umbral_98", "portada")
 	_comprobar(bool(primera.get("ok", false)), "primera pieza legible")
 	_comprobar(bool(primera.get("nueva", false)), "primera lectura cuenta")
-	_comprobar(not Publicaciones98.puede_sembrar(jornada, "revista_umbral_98"), "una pieza no basta")
+	_comprobar(
+		not Publicaciones98.puede_sembrar(jornada, "revista_umbral_98"), "una pieza no basta"
+	)
 	_comprobar(SemillasOniricas.familias_activas(jornada).is_empty(), "hojear una pieza no activa")
 	var repetida := Publicaciones98.hojear(jornada, "revista_umbral_98", "portada")
 	_comprobar(not bool(repetida.get("nueva", true)), "releer no infla progreso")
-	_comprobar(Publicaciones98.contenido_visto(jornada, "revista_umbral_98").size() == 1, "visto idempotente")
+	_comprobar(
+		Publicaciones98.contenido_visto(jornada, "revista_umbral_98").size() == 1,
+		"visto idempotente"
+	)
 	var cierre_pronto := Publicaciones98.cerrar_tras_lectura(jornada, "revista_umbral_98")
 	_comprobar(not bool(cierre_pronto.get("semilla_activada", true)), "cierre temprano no siembra")
 
 	Publicaciones98.hojear(jornada, "revista_umbral_98", "dossier")
-	_comprobar(Publicaciones98.puede_sembrar(jornada, "revista_umbral_98"), "dos piezas preparan semilla")
-	_comprobar(SemillasOniricas.familias_activas(jornada).is_empty(), "lectura suficiente aún requiere cierre")
+	_comprobar(
+		Publicaciones98.puede_sembrar(jornada, "revista_umbral_98"), "dos piezas preparan semilla"
+	)
+	_comprobar(
+		SemillasOniricas.familias_activas(jornada).is_empty(),
+		"lectura suficiente aún requiere cierre"
+	)
 	var cierre := Publicaciones98.cerrar_tras_lectura(jornada, "revista_umbral_98")
 	_comprobar(bool(cierre.get("semilla_activada", false)), "cierre deliberado activa semilla")
-	_comprobar(SemillasOniricas.familias_activas(jornada) == ["minotauro"], "activa familia declarada")
+	_comprobar(
+		SemillasOniricas.familias_activas(jornada) == ["minotauro"], "activa familia declarada"
+	)
 	var semillas := SemillasOniricas.obtener_semillas(jornada)
 	var entrada_semilla: Dictionary = semillas[SemillasOniricas.clave("minotauro")]
 	_comprobar(
@@ -68,14 +80,18 @@ func _probar() -> void:
 		"fuente cultural estable",
 	)
 	var cierre_repetido := Publicaciones98.cerrar_tras_lectura(jornada, "revista_umbral_98")
-	_comprobar(bool(cierre_repetido.get("semilla_activada", false)), "cierre repetido es idempotente")
+	_comprobar(
+		bool(cierre_repetido.get("semilla_activada", false)), "cierre repetido es idempotente"
+	)
 	_comprobar(int(entrada_semilla.get("intensidad", 0)) == 1, "misma fuente no suma intensidad")
 
 	var lectura_prensa := Publicaciones98.hojear(jornada, "periodico_tarde_98", "local")
 	_comprobar(bool(lectura_prensa.get("ok", false)), "segunda publicación se hojea")
 	var cierre_prensa := Publicaciones98.cerrar_tras_lectura(jornada, "periodico_tarde_98")
 	_comprobar(bool(cierre_prensa.get("ok", false)), "publicación sin semilla cierra normal")
-	_comprobar(not bool(cierre_prensa.get("semilla_activada", true)), "prensa normal no contamina sueño")
+	_comprobar(
+		not bool(cierre_prensa.get("semilla_activada", true)), "prensa normal no contamina sueño"
+	)
 
 	var desconocida := Publicaciones98.hojear(jornada, "no_existe", "portada")
 	_comprobar(not bool(desconocida.get("ok", true)), "rechaza publicación inexistente")
