@@ -6,9 +6,12 @@
 ## cuenta con cuatro tarjetas separadas: rueda dentro de la oficina real que el
 ## jugador va a recorrer inmediatamente después.
 ##
-## Los encuadres son deliberadamente de bloqueo. #398/#399 pueden mover arte,
-## materiales e identidad espacial sin cambiar este contrato: cuatro planos 3D,
-## mismo texto/voz, mismo contador de vistas, mismo skip y mismo estado final.
+## Tras el playtest humano del 17/09/2026 y la síntesis de #177/#856, los cuatro
+## planos dejan de ser coordenadas de bloqueo independientes. Forman una sola
+## frase visual: **orientar -> acercar al puesto -> identificar -> residuo**.
+## `camara_desde`/`mira_desde` solo describen el recorrido de cámara; con
+## reducción de movimiento el reproductor usa la composición final estática.
+## Los acentos son sonidos CC0 ya catalogados por `Sonido`, no assets nuevos.
 ##
 ## **Se ve cada vuelta** (decisión de #68). Cada reasignación vuelve a entrar
 ## por la puerta y la copia está un poco peor. El reproductor la acorta a partir
@@ -39,53 +42,69 @@ static func planos_de(vistas: int = 0) -> Array:
 
 ## Los cuatro momentos ocurren dentro de la oficina montada por gameplay. Las
 ## coordenadas apuntan a elementos que ya existen en `EspaciosCatalogo.OFICINA`:
-## entrada/puestos, terminal propio y pared de archivadores. No se duplica una
-## maqueta cinematográfica ni se añade geometría exclusiva para estos planos.
+## entrada, puesto propio, terminal real del puesto y pared de archivadores. No
+## se duplica una maqueta cinematográfica ni se añade geometría exclusiva.
 static func planos(vistas: int = 0) -> Array:
 	return [
 		{
-			# Primer contacto: desde el umbral se ve que se ha entrado en un
-			# archivo físico, no en otra tarjeta de carga.
+			# ORIENTAR. Empieza pegado al punto de entrada y avanza lo justo para
+			# que la oficina tenga profundidad. La puerta cerrándose detrás es el
+			# acento que convierte "aparecí aquí" en "acabo de entrar".
 			"tipo": "3d",
 			"nombre": "umbral",
-			"camara": Vector3(0.3, 1.70, 4.15),
-			"mira": Vector3(-2.4, 1.05, -0.6),
-			"segundos": 3.0,
+			"camara_desde": Vector3(0.05, 1.70, 3.35),
+			"mira_desde": Vector3(-0.8, 1.10, 0.4),
+			"camara": Vector3(-0.65, 1.68, 2.55),
+			"mira": Vector3(-3.8, 1.00, 0.75),
+			"segundos": 3.8,
 			"rotulo": "ENTRADA_RESTAURANDO",
 			"voz": registro_de(vistas),
+			"sonido": "puerta_cierra",
 		},
 		{
-			# El terminal SIGA del puesto propio. La máquina y la oficina son las
-			# mismas que quedan disponibles al recuperar el control.
+			# ACCIÓN. El plano recoge la dirección del anterior y termina sobre el
+			# ordenador REAL del puesto del jugador (-4, 1), no sobre el terminal
+			# de la mesa vecina que usaba el bloqueo antiguo.
 			"tipo": "3d",
 			"nombre": "terminal",
-			"camara": Vector3(-2.55, 1.42, -0.35),
-			"mira": Vector3(-4.30, 1.00, -2.10),
-			"segundos": 3.2,
+			"camara_desde": Vector3(-1.15, 1.62, 2.15),
+			"mira_desde": Vector3(-3.7, 1.00, 1.00),
+			"camara": Vector3(-2.70, 1.38, 1.55),
+			"mira": Vector3(-4.0, 0.98, 0.68),
+			"segundos": 3.4,
 			"rotulo": "ENTRADA_SISTEMA",
 			"voz": "ENTRADA_VOZ_VOLUMEN",
+			"sonido": "pulsar",
 		},
 		{
-			# Identidad: el mismo puesto, visto desde el pasillo de trabajo. No
-			# aparece una ficha flotante que rompa la continuidad espacial.
+			# IDENTIFICAR. Sin saltar a otro rincón de la sala: desde el terminal
+			# se abre un poco el encuadre para incluir silla + puesto mientras el
+			# sistema acredita al usuario. La continuidad espacial hace el trabajo
+			# que antes recaía en una tarjeta aislada.
 			"tipo": "3d",
 			"nombre": "auditor",
-			"camara": Vector3(-1.75, 1.65, 2.20),
-			"mira": Vector3(-4.15, 1.00, -1.65),
+			"camara_desde": Vector3(-2.70, 1.38, 1.55),
+			"mira_desde": Vector3(-4.0, 0.98, 0.68),
+			"camara": Vector3(-2.05, 1.58, 2.35),
+			"mira": Vector3(-4.0, 0.82, 1.05),
 			"segundos": 3.0,
 			"rotulo": "ENTRADA_AUDITOR",
 			"voz": "ENTRADA_VOZ_TURNO",
 		},
 		{
-			# Remate: el archivo y sus armarios ocupan el plano. La frase sigue
-			# hablando de acceso al volumen, no de que la oficina esté vacía.
+			# RESIDUO. Un desplazamiento lateral lento deja la masa de archivadores
+			# ocupando el final de la secuencia. El golpe metálico es un único
+			# microevento: después se devuelve el control, no se añade otra frase.
 			"tipo": "3d",
 			"nombre": "archivo",
-			"camara": Vector3(2.45, 1.65, 3.05),
-			"mira": Vector3(5.45, 1.00, -1.15),
-			"segundos": 3.4,
+			"camara_desde": Vector3(1.55, 1.62, 2.65),
+			"mira_desde": Vector3(5.45, 1.00, 0.75),
+			"camara": Vector3(2.55, 1.62, 2.95),
+			"mira": Vector3(5.45, 1.00, -1.10),
+			"segundos": 3.6,
 			"rotulo": "ENTRADA_NADIE_MIRA",
 			"voz": "ENTRADA_VOZ_SOLO",
+			"sonido": "cerrar",
 		},
 	]
 
