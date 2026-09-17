@@ -63,7 +63,9 @@ func _probar_guardado_fallido() -> void:
 	_comprobar(not bool(resultado.get("ok", true)), "un fallo de disco bloquea la salida")
 	_comprobar(not String(resultado.get("motivo", "")).is_empty(), "el fallo conserva su motivo")
 	_comprobar(partida.guardado_pendiente, "Partida mantiene pendiente el guardado fallido")
-	_comprobar(partida.estado.get("vida", 0) == 1, "fallar al guardar no altera el estado en memoria")
+	_comprobar(
+		partida.estado.get("vida", 0) == 1, "fallar al guardar no altera el estado en memoria"
+	)
 
 
 func _probar_partida_ausente() -> void:
@@ -81,8 +83,7 @@ func _probar_camino_canonico() -> void:
 	_comprobar(bool(correcto.get("ok", false)), "la escena puede autorizar la salida")
 	_comprobar(host.llamadas == 1, "la salida llama al guardado canónico una sola vez")
 	_comprobar(
-		String(correcto.get("motivo", "x")).is_empty(),
-		"el camino canónico limpio no deja motivo"
+		String(correcto.get("motivo", "x")).is_empty(), "el camino canónico limpio no deja motivo"
 	)
 
 	host.permitir = false
