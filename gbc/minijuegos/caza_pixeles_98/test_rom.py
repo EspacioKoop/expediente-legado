@@ -5,6 +5,8 @@ import unittest
 
 ROOT = Path(__file__).resolve().parent
 SOURCE = ROOT / "main.asm"
+SCENARIO = ROOT / "escenario.asm"
+MAKEFILE = ROOT / "Makefile"
 ROM = ROOT / "build" / "caza_pixeles_98.gbc"
 
 
@@ -12,12 +14,22 @@ class CazaPixeles98Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.source = SOURCE.read_text(encoding="utf-8")
+        cls.scenario = SCENARIO.read_text(encoding="utf-8")
+        cls.makefile = MAKEFILE.read_text(encoding="utf-8")
 
     def bloque(self, inicio, fin):
         return self.source.split(inicio, 1)[1].split(fin, 1)[0]
 
+    def bloque_escenario(self, inicio, fin):
+        return self.scenario.split(inicio, 1)[1].split(fin, 1)[0]
+
     def valor_def(self, nombre):
         match = re.search(rf"DEF {re.escape(nombre)}\s+EQU\s+(\d+)", self.source)
+        self.assertIsNotNone(match, f"falta DEF {nombre}")
+        return int(match.group(1))
+
+    def valor_def_escenario(self, nombre):
+        match = re.search(rf"DEF {re.escape(nombre)}\s+EQU\s+(\d+)", self.scenario)
         self.assertIsNotNone(match, f"falta DEF {nombre}")
         return int(match.group(1))
 
@@ -46,6 +58,7 @@ class CazaPixeles98Test(unittest.TestCase):
         self.assertIn("ld a, 2\n    ld [wFase], a", tick)
         self.assertIn("ld a, 3\n    ld [wFase], a", tick)
         self.assertIn("call IniciarBehemoth", tick)
+        self.assertEqual(tick.count("call TransicionEscenarioFase"), 2)
 
     def test_tres_tipos_de_objetivo_cambian_reglas_y_sprite(self):
         self.assertIn("DEF TIPO_CROMA   EQU 0", self.source)
@@ -76,6 +89,7 @@ class CazaPixeles98Test(unittest.TestCase):
         self.assertIn("cp 50", actualizar)
         self.assertIn("cp 25", actualizar)
         self.assertIn("wEtapaChromia", actualizar)
+        self.assertIn("call ActualizarFaunaVisual", actualizar)
         self.assertIn("TILE_PLANETA_SECO", self.source)
         self.assertIn("TILE_PLANETA_AGUA", self.source)
         self.assertIn("TILE_PLANETA_BOSQUE", self.source)
@@ -91,6 +105,7 @@ class CazaPixeles98Test(unittest.TestCase):
         self.assertIn("PuntosBehemoth:", self.source)
         self.assertIn("IniciarBehemoth:", self.source)
         self.assertIn("ComprobarPuntoBehemoth:", self.source)
+        self.assertIn("call TransicionBehemothVisual", self.source)
         golpe = self.bloque("GolpearBehemoth:", "ActualizarOAM:")
         self.assertIn("cp BEHEMOTH_PUNTOS", golpe)
         self.assertIn("RESTAURA_NUCLEO", golpe)
@@ -120,6 +135,60 @@ class CazaPixeles98Test(unittest.TestCase):
         final = self.bloque("DibujarResultadoBoss:", "DesactivarLCD:")
         self.assertIn("TILE_SEMILLA", final)
         self.assertIn("TILE_NUCLEO", final)
+
+    def test_escenario_tiene_fondo_completo_por_fase_y_paleta_cgb_propia(self):
+        self.assertIn('INCLUDE "escenario.asm"', self.source)
+        self.assertIn("escenario.asm", self.makefile)
+        self.assertIn("DibujarFondoFaseVisual:", self.scenario)
+        self.assertIn("TILE_ESC_ATMOSFERA", self.scenario)
+        self.assertIn("TILE_ESC_INDUSTRIA", self.scenario)
+        self.assertIn("TILE_ESC_NEBULOSA", self.scenario)
+        attrs = self.bloque_escenario(
+            "AplicarAtributosEscenarioVisual:", "CargarPaletaEscenarioVisual:"
+        )
+        self.assertIn("ldh [rVBK], a", attrs)
+        self.assertIn("ld a, 2 ; paleta BG 2", attrs)
+        self.assertIn("PaletaEscenarioF1:", self.scenario)
+        self.assertIn("PaletaEscenarioF2:", self.scenario)
+        self.assertIn("PaletaEscenarioF3:", self.scenario)
+
+    def test_parallax_tiene_dos_capas_con_velocidades_distintas_sin_scroll_global(self):
+        rapido = self.valor_def_escenario("PARALLAX_RAPIDO_FRAMES")
+        lento = self.valor_def_escenario("PARALLAX_LENTO_FRAMES")
+        self.assertLess(rapido, lento)
+        tick = self.bloque_escenario("TickParallaxVisual:", "MoverParallaxRapido:")
+        self.assertIn("call MoverParallaxRapido", tick)
+        self.assertIn("call MoverParallaxLento", tick)
+        self.assertNotRegex(self.scenario, r"ldh\s+\[rSCX\]")
+        self.assertNotRegex(self.scenario, r"ldh\s+\[rSCY\]")
+        self.assertIn("BG_MAP + (4 * 32)", self.scenario)
+        self.assertIn("BG_MAP + (8 * 32)", self.scenario)
+
+    def test_fauna_es_bg_reactiva_a_restauracion_y_no_consume_oam(self):
+        self.assertIn("TILE_ESC_AVE_A", self.scenario)
+        self.assertIn("TILE_ESC_AVE_B", self.scenario)
+        self.assertIn("TILE_ESC_PEZ_A", self.scenario)
+        self.assertIn("TILE_ESC_PEZ_B", self.scenario)
+        fauna = self.bloque_escenario("DibujarFaunaVisual:", "LimpiarFaunaVisual:")
+        self.assertIn("wEtapaChromia", fauna)
+        self.assertIn("cp 2", fauna)
+        self.assertIn("cp 3", fauna)
+        self.assertNotIn("OAM_BASE", self.scenario)
+        self.assertNotIn("DibujarBehemothOAM", self.scenario)
+        self.assertEqual(self.valor_def("MAX_SPRITES_LINEA_BEHEMOTH"), 6)
+
+    def test_transiciones_son_breves_no_bloqueantes_y_no_tocan_timer(self):
+        self.assertEqual(self.valor_def_escenario("TRANSICION_FRAMES"), 36)
+        self.assertIn("IniciarTransicionVisual:", self.scenario)
+        tick = self.bloque_escenario("TickTransicionVisual:", "DibujarBannerTransicionVisual:")
+        self.assertIn("wTransicionFrames", tick)
+        self.assertIn("call LimpiarBannerTransicionVisual", tick)
+        transicion = self.bloque_escenario(
+            "IniciarTransicionVisual:", "TickTransicionVisual:"
+        )
+        self.assertNotIn("halt", transicion)
+        self.assertNotIn("wTiempo", transicion)
+        self.assertIn("call DibujarEscenarioFinal", self.source)
 
     def test_hud_expone_fase_restauracion_y_multiplicador(self):
         self.assertIn("ld hl, BG_MAP + 9", self.source)
