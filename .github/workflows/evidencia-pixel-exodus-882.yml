@@ -1,0 +1,131 @@
+name: Evidencia Pixel Exodus #882
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/evidencia-pixel-exodus-882.yml'
+      - 'gbc/minijuegos/caza_pixeles_98/**'
+      - 'godot/pruebas/capturar_pixel_exodus_882.gd'
+      - 'godot/native/siga98_gb/**'
+      - 'scripts/preparar_emulador_gb.sh'
+      - 'docs/evidencia-pixel-exodus-882.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: evidencia-pixel-exodus-882-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  playtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar RGBDS fijado
+        shell: bash
+        env:
+          RGBDS_VERSION: v1.0.3
+          RGBDS_SHA256: 280a52061a0c516999bee75ac357628d6d50784309e0486cef25f7460e6f330b
+        run: |
+          set -euo pipefail
+          url="https://github.com/gbdev/rgbds/releases/download/${RGBDS_VERSION}/rgbds-linux-x86_64.tar.xz"
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/rgbds.tar.xz" "$url"
+          echo "${RGBDS_SHA256}  $RUNNER_TEMP/rgbds.tar.xz" | sha256sum --check --strict
+          mkdir "$RUNNER_TEMP/rgbds"
+          tar -xJf "$RUNNER_TEMP/rgbds.tar.xz" -C "$RUNNER_TEMP/rgbds"
+          (cd "$RUNNER_TEMP/rgbds" && sudo ./install.sh)
+          rgbasm --version
+
+      - name: Compilar núcleo y ROMs propias
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/preparar_emulador_gb.sh linux-debug
+          bash scripts/preparar_emulador_gb.sh rom
+
+      - name: Ejecutar regresiones de la ROM y del cierre
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C gbc/minijuegos/caza_pixeles_98 test
+          python3 gbc/minijuegos/caza_pixeles_98/test_cierre.py
+
+      - name: Instalar el motor declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Importar proyecto y registrar Siga98GB
+        shell: bash
+        run: godot4 --headless --language es --path godot --editor --import --quit
+
+      - name: Jugar y capturar Pixel Exodus con Siga98GB
+        shell: bash
+        run: |
+          set -euo pipefail
+          salida="$RUNNER_TEMP/pixel-exodus-882"
+          mkdir -p "$salida"
+          godot4 --headless --language es --path godot \
+            --script res://pruebas/capturar_pixel_exodus_882.gd -- "$salida"
+
+          for captura in \
+            titulo instrucciones fase1 fase2-obstaculos fase3-restauracion behemoth final-records; do
+            test -s "$salida/$captura.png"
+          done
+          test -s "$salida/manifest.json"
+          test -s "$salida/audio-sample-s16le-stereo-48k.pcm"
+
+      - name: Validar manifiesto de aceptación
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - "$RUNNER_TEMP/pixel-exodus-882/manifest.json" <<'PY'
+          import json
+          import sys
+
+          with open(sys.argv[1], encoding="utf-8") as fh:
+              data = json.load(fh)
+
+          assert data["issue"] == 882
+          assert data["partida"]["boss_derrotado"] == 1
+          assert data["partida"]["restauracion"] > 0
+          assert data["audio"]["bytes_pcm"] > 0
+          assert data["audio"]["sample_rate"] == 48000
+          assert data["sram"]["magic"] == "PX98"
+          assert data["sram"]["mejor_score"] > 0
+          assert data["sram"]["mejor_fase"] >= 4
+          assert data["sram"]["mejor_restauracion"] > 0
+          assert data["sram"]["reapertura_verificada"] is True
+          assert len(data["capturas"]) == 7
+          print(json.dumps(data, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Publicar evidencia audiovisual como artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-pixel-exodus-882-${{ github.sha }}
+          path: ${{ runner.temp }}/pixel-exodus-882/*
+          retention-days: 90
