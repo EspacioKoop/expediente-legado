@@ -60,9 +60,7 @@ func publicar(
 	return resultado
 
 
-func consultar(
-	scene_key: String, conocimiento: Array = [], ahora_unix: int = -1
-) -> Dictionary:
+func consultar(scene_key: String, conocimiento: Array = [], ahora_unix: int = -1) -> Dictionary:
 	var ahora := _ahora(ahora_unix)
 	var consulta = _transporte.call("consultar_eventos", scene_key, SenalDatos.KIND, ahora)
 	if typeof(consulta) != TYPE_DICTIONARY:
