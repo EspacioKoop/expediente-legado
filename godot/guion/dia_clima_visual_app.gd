@@ -1,4 +1,4 @@
-## Refuerzo visual y sonoro del clima exterior (#797).
+## Refuerzo visual y sonoro del clima exterior (#797, #883).
 ##
 ## `dia_clima_app.gd` sigue siendo dueño del estado y de la luz. Este controller
 ## se limita a hacer visibles y audibles sus consecuencias: niebla real del
@@ -15,10 +15,13 @@ const NODO_SUELO_CLIMA := "ClimaSueloVisual"
 const NODO_AUDIO_CLIMA := "ClimaAmbiente"
 const AUDIO_FRECUENCIA := 11_025
 const AUDIO_DURACION := 1.0
+const TRANSICION_DURACION := 0.65
 
 var _mundo_id := 0
 var _estado := ""
 var _activo := false
+var _reduccion_movimiento := false
+var _tween_clima: Tween = null
 
 
 func _process(_delta: float) -> void:
@@ -30,6 +33,7 @@ func _process(_delta: float) -> void:
 	var fase := String(dia.jornada.get("fase", ""))
 	if mundo == null or fase != "trayecto":
 		if _activo:
+			_cancelar_transicion()
 			_restaurar_ambiente(dia)
 			_retirar_suelo_clima(dia)
 			_retirar_sonido_clima(dia)
@@ -43,17 +47,23 @@ func _process(_delta: float) -> void:
 		forzado if not forzado.is_empty() else Clima.estado(int(dia.jornada.get("dia", 1)))
 	)
 	var mundo_id := mundo.get_instance_id()
-	if mundo_id != _mundo_id or estado != _estado:
+	var cambia_mundo := mundo_id != _mundo_id
+	var cambia_estado := estado != _estado
+	if cambia_mundo or cambia_estado:
+		var transicion := not cambia_mundo and not _estado.is_empty()
 		_mundo_id = mundo_id
 		_estado = estado
 		_activo = true
-		_aplicar_estado(dia, estado)
+		_reduccion_movimiento = bool(
+			PreferenciasSiga.cargar().get("reduccion_movimiento", false)
+		)
+		_aplicar_estado(dia, estado, transicion and not _reduccion_movimiento)
 
 	_seguir_precipitacion(dia)
 
 
-func _aplicar_estado(dia: Node, estado: String) -> void:
-	_restaurar_ambiente(dia)
+func _aplicar_estado(dia: Node, estado: String, transicion: bool) -> void:
+	_cancelar_transicion()
 	_retirar_suelo_clima(dia)
 	_retirar_sonido_clima(dia)
 	_asegurar_precipitacion(dia, estado)
@@ -63,68 +73,211 @@ func _aplicar_estado(dia: Node, estado: String) -> void:
 	var ambiente := dia._ambiente as Environment
 	if ambiente == null:
 		return
+	_aplicar_perfil_ambiente(ambiente, estado, transicion)
 
+
+func _perfil_ambiente(estado: String) -> Dictionary:
+	var perfil := {
+		"fog_enabled": false,
+		"fog_density": 0.01,
+		"fog_light_color": Color(0.518, 0.553, 0.608),
+		"fog_light_energy": 1.0,
+		"fog_height": 0.0,
+		"fog_height_density": 0.0,
+		"fog_sky_affect": 1.0,
+		"fog_aerial_perspective": 0.0,
+		"background_energy": 1.0,
+		"cielo_alto": CIELO_BASE_ALTO,
+		"horizonte": CIELO_BASE_HORIZONTE,
+		"ocaso": CIELO_BASE_OCASO,
+		"ocaso_mezcla": CIELO_BASE_MEZCLA,
+	}
 	match estado:
 		Clima.NUBLADO:
-			_configurar_niebla(ambiente, 0.012, Color(0.42, 0.45, 0.50), 0.012, 0.55)
-			ambiente.background_energy_multiplier = 0.78
-			_aplicar_cielo(
-				ambiente,
-				Color(0.045, 0.052, 0.068),
-				Color(0.13, 0.14, 0.16),
-				Color(0.17, 0.13, 0.12),
-				0.08
+			perfil.merge(
+				{
+					"fog_enabled": true,
+					"fog_density": 0.010,
+					"fog_light_color": Color(0.43, 0.46, 0.51),
+					"fog_light_energy": 0.80,
+					"fog_height": 1.5,
+					"fog_height_density": 0.010,
+					"fog_sky_affect": 0.52,
+					"fog_aerial_perspective": 0.12,
+					"background_energy": 0.74,
+					"cielo_alto": Color(0.040, 0.048, 0.064),
+					"horizonte": Color(0.13, 0.14, 0.16),
+					"ocaso": Color(0.16, 0.12, 0.115),
+					"ocaso_mezcla": 0.07,
+				},
+				true,
 			)
 		Clima.LLUVIA:
-			_configurar_niebla(ambiente, 0.022, Color(0.30, 0.34, 0.40), 0.020, 0.72)
-			ambiente.background_energy_multiplier = 0.62
-			_aplicar_cielo(
-				ambiente,
-				Color(0.022, 0.030, 0.046),
-				Color(0.075, 0.09, 0.115),
-				Color(0.10, 0.08, 0.08),
-				0.04
+			perfil.merge(
+				{
+					"fog_enabled": true,
+					"fog_density": 0.028,
+					"fog_light_color": Color(0.28, 0.33, 0.40),
+					"fog_light_energy": 0.75,
+					"fog_height": 1.35,
+					"fog_height_density": 0.023,
+					"fog_sky_affect": 0.76,
+					"fog_aerial_perspective": 0.08,
+					"background_energy": 0.54,
+					"cielo_alto": Color(0.016, 0.024, 0.040),
+					"horizonte": Color(0.062, 0.078, 0.105),
+					"ocaso": Color(0.085, 0.067, 0.074),
+					"ocaso_mezcla": 0.025,
+				},
+				true,
 			)
 		Clima.NIEBLA:
-			_configurar_niebla(ambiente, 0.085, Color(0.55, 0.57, 0.60), 0.060, 1.0)
-			ambiente.background_energy_multiplier = 0.70
-			_aplicar_cielo(
-				ambiente,
-				Color(0.22, 0.23, 0.24),
-				Color(0.34, 0.35, 0.37),
-				Color(0.29, 0.29, 0.30),
-				0.0
+			perfil.merge(
+				{
+					"fog_enabled": true,
+					"fog_density": 0.100,
+					"fog_light_color": Color(0.57, 0.59, 0.62),
+					"fog_light_energy": 0.90,
+					"fog_height": 1.1,
+					"fog_height_density": 0.070,
+					"fog_sky_affect": 1.0,
+					"fog_aerial_perspective": 0.0,
+					"background_energy": 0.76,
+					"cielo_alto": Color(0.23, 0.24, 0.25),
+					"horizonte": Color(0.36, 0.37, 0.39),
+					"ocaso": Color(0.30, 0.30, 0.31),
+					"ocaso_mezcla": 0.0,
+				},
+				true,
 			)
-			_configurar_volumetrica_si_disponible(ambiente)
 		Clima.NIEVE:
-			_configurar_niebla(ambiente, 0.030, Color(0.68, 0.72, 0.78), 0.030, 0.78)
-			ambiente.background_energy_multiplier = 1.08
-			_aplicar_cielo(
-				ambiente,
-				Color(0.085, 0.105, 0.14),
-				Color(0.27, 0.29, 0.32),
-				Color(0.22, 0.19, 0.20),
-				0.10
+			perfil.merge(
+				{
+					"fog_enabled": true,
+					"fog_density": 0.040,
+					"fog_light_color": Color(0.70, 0.75, 0.82),
+					"fog_light_energy": 0.92,
+					"fog_height": 1.6,
+					"fog_height_density": 0.034,
+					"fog_sky_affect": 0.82,
+					"fog_aerial_perspective": 0.10,
+					"background_energy": 1.14,
+					"cielo_alto": Color(0.085, 0.11, 0.15),
+					"horizonte": Color(0.30, 0.32, 0.36),
+					"ocaso": Color(0.23, 0.20, 0.22),
+					"ocaso_mezcla": 0.09,
+				},
+				true,
 			)
-		_:
-			pass
+	return perfil
 
 
-func _configurar_niebla(
-	ambiente: Environment,
-	densidad: float,
-	color: Color,
-	densidad_altura: float,
-	afecta_cielo: float,
+func _aplicar_perfil_ambiente(ambiente: Environment, estado: String, animar: bool) -> void:
+	var perfil := _perfil_ambiente(estado)
+	var material := _material_cielo(ambiente)
+	var objetivo_niebla := bool(perfil["fog_enabled"])
+
+	if estado == Clima.NIEBLA:
+		_configurar_volumetrica_si_disponible(ambiente)
+	else:
+		ambiente.volumetric_fog_enabled = false
+
+	if not animar:
+		_aplicar_perfil_inmediato(ambiente, material, perfil)
+		return
+
+	if objetivo_niebla and not ambiente.fog_enabled:
+		ambiente.fog_enabled = true
+		ambiente.fog_density = 0.0
+	elif not objetivo_niebla and not ambiente.fog_enabled:
+		_aplicar_perfil_inmediato(ambiente, material, perfil)
+		return
+
+	_tween_clima = create_tween()
+	_tween_clima.set_parallel(true)
+	_tween_clima.tween_property(
+		ambiente, "background_energy_multiplier", float(perfil["background_energy"]), TRANSICION_DURACION
+	)
+	_tween_clima.tween_property(
+		ambiente, "fog_density", float(perfil["fog_density"]), TRANSICION_DURACION
+	)
+	_tween_clima.tween_property(
+		ambiente, "fog_light_color", perfil["fog_light_color"], TRANSICION_DURACION
+	)
+	_tween_clima.tween_property(
+		ambiente, "fog_light_energy", float(perfil["fog_light_energy"]), TRANSICION_DURACION
+	)
+	_tween_clima.tween_property(
+		ambiente, "fog_height", float(perfil["fog_height"]), TRANSICION_DURACION
+	)
+	_tween_clima.tween_property(
+		ambiente, "fog_height_density", float(perfil["fog_height_density"]), TRANSICION_DURACION
+	)
+	_tween_clima.tween_property(
+		ambiente, "fog_sky_affect", float(perfil["fog_sky_affect"]), TRANSICION_DURACION
+	)
+	_tween_clima.tween_property(
+		ambiente,
+		"fog_aerial_perspective",
+		float(perfil["fog_aerial_perspective"]),
+		TRANSICION_DURACION,
+	)
+	if material != null:
+		_transicionar_parametro_cielo(material, "cielo_alto", perfil["cielo_alto"])
+		_transicionar_parametro_cielo(material, "horizonte", perfil["horizonte"])
+		_transicionar_parametro_cielo(material, "ocaso", perfil["ocaso"])
+		_transicionar_parametro_cielo(material, "ocaso_mezcla", perfil["ocaso_mezcla"])
+	_tween_clima.finished.connect(
+		Callable(self, "_finalizar_transicion").bind(ambiente, objetivo_niebla)
+	)
+
+
+func _aplicar_perfil_inmediato(
+	ambiente: Environment, material: ShaderMaterial, perfil: Dictionary
 ) -> void:
-	ambiente.fog_enabled = true
-	ambiente.fog_density = densidad
-	ambiente.fog_light_color = color
-	ambiente.fog_light_energy = 0.82
-	ambiente.fog_height = 1.4
-	ambiente.fog_height_density = densidad_altura
-	ambiente.fog_sky_affect = afecta_cielo
-	ambiente.fog_aerial_perspective = 0.12 if densidad < 0.05 else 0.0
+	ambiente.fog_enabled = bool(perfil["fog_enabled"])
+	ambiente.fog_density = float(perfil["fog_density"])
+	ambiente.fog_light_color = perfil["fog_light_color"]
+	ambiente.fog_light_energy = float(perfil["fog_light_energy"])
+	ambiente.fog_height = float(perfil["fog_height"])
+	ambiente.fog_height_density = float(perfil["fog_height_density"])
+	ambiente.fog_sky_affect = float(perfil["fog_sky_affect"])
+	ambiente.fog_aerial_perspective = float(perfil["fog_aerial_perspective"])
+	ambiente.background_energy_multiplier = float(perfil["background_energy"])
+	if material == null:
+		return
+	material.set_shader_parameter("cielo_alto", perfil["cielo_alto"])
+	material.set_shader_parameter("horizonte", perfil["horizonte"])
+	material.set_shader_parameter("ocaso", perfil["ocaso"])
+	material.set_shader_parameter("ocaso_mezcla", perfil["ocaso_mezcla"])
+
+
+func _transicionar_parametro_cielo(
+	material: ShaderMaterial, parametro: String, objetivo: Variant
+) -> void:
+	var actual := material.get_shader_parameter(parametro)
+	_tween_clima.tween_method(
+		Callable(self, "_poner_parametro_cielo").bind(material, parametro),
+		actual,
+		objetivo,
+		TRANSICION_DURACION,
+	)
+
+
+func _poner_parametro_cielo(valor: Variant, material: ShaderMaterial, parametro: String) -> void:
+	material.set_shader_parameter(parametro, valor)
+
+
+func _finalizar_transicion(ambiente: Environment, objetivo_niebla: bool) -> void:
+	if is_instance_valid(ambiente):
+		ambiente.fog_enabled = objetivo_niebla
+	_tween_clima = null
+
+
+func _cancelar_transicion() -> void:
+	if _tween_clima != null and _tween_clima.is_valid():
+		_tween_clima.kill()
+	_tween_clima = null
 
 
 func _configurar_volumetrica_si_disponible(ambiente: Environment) -> void:
@@ -134,11 +287,11 @@ func _configurar_volumetrica_si_disponible(ambiente: Environment) -> void:
 		ambiente.volumetric_fog_enabled = false
 		return
 	ambiente.volumetric_fog_enabled = true
-	ambiente.volumetric_fog_density = 0.045
-	ambiente.volumetric_fog_length = 36.0
+	ambiente.volumetric_fog_density = 0.050
+	ambiente.volumetric_fog_length = 38.0
 	ambiente.volumetric_fog_detail_spread = 1.6
 	ambiente.volumetric_fog_albedo = Color(0.74, 0.76, 0.80)
-	ambiente.volumetric_fog_sky_affect = 0.9
+	ambiente.volumetric_fog_sky_affect = 0.92
 
 
 func _asegurar_precipitacion(dia: Node, estado: String) -> void:
@@ -172,18 +325,39 @@ func _reforzar_precipitacion(nodo: Node3D, nieve: bool) -> void:
 	if particulas == null:
 		return
 
-	particulas.amount = 760 if nieve else 1100
-	particulas.position = Vector3(0.0, 5.6, -1.5)
-	particulas.visibility_aabb = AABB(Vector3(-10.0, -7.0, -17.0), Vector3(20.0, 16.0, 34.0))
+	if _reduccion_movimiento:
+		particulas.amount = 360 if nieve else 620
+	else:
+		particulas.amount = 900 if nieve else 1450
+	particulas.randomness = 0.62 if nieve else 0.38
+	particulas.position = Vector3(0.0, 5.8, -1.8)
+	particulas.visibility_aabb = AABB(Vector3(-11.0, -8.0, -19.0), Vector3(22.0, 18.0, 38.0))
+
+	var viento := 0.35 if _reduccion_movimiento else 1.0
+	var proceso := particulas.process_material as ParticleProcessMaterial
+	if proceso != null:
+		proceso.direction = (
+			Vector3(0.28 * viento, -1.0, -0.12 * viento).normalized()
+			if nieve
+			else Vector3(0.16 * viento, -1.0, 0.045 * viento).normalized()
+		)
+		proceso.spread = 15.0 if nieve else 4.0
+		proceso.initial_velocity_min = 0.9 if nieve else 8.5
+		proceso.initial_velocity_max = 2.5 if nieve else 13.0
+		proceso.gravity = (
+			Vector3(0.55 * viento, -0.55, -0.20 * viento)
+			if nieve
+			else Vector3(1.80 * viento, -3.0, 0.35 * viento)
+		)
 
 	var malla := particulas.draw_pass_1 as QuadMesh
 	if malla == null:
 		return
-	malla.size = Vector2(0.060, 0.060) if nieve else Vector2(0.032, 0.46)
+	malla.size = Vector2(0.070, 0.070) if nieve else Vector2(0.034, 0.54)
 	var material := malla.material as StandardMaterial3D
 	if material != null:
 		material.albedo_color = (
-			Color(0.94, 0.96, 1.0, 0.92) if nieve else Color(0.64, 0.78, 0.96, 0.78)
+			Color(0.95, 0.97, 1.0, 0.94) if nieve else Color(0.62, 0.78, 0.98, 0.82)
 		)
 
 
@@ -204,29 +378,73 @@ func _aplicar_suelo_clima(dia: Node, estado: String) -> void:
 	if mundo == null:
 		return
 
-	# Capa puramente visual sobre los 9x34 m del suelo jugable. No añade cuerpo,
-	# colisión ni navegación y queda por encima de las pieles PBR de #399.
+	# En #797 era una única placa. Se conserva una película muy tenue y se
+	# añaden manchas deterministas para que humedad/nieve no lean como overlay.
+	var raiz := Node3D.new()
+	raiz.name = NODO_SUELO_CLIMA
+	mundo.add_child(raiz)
+	_crear_pelicula_suelo(raiz, estado)
+	_crear_parches_suelo(raiz, estado)
+
+
+func _crear_pelicula_suelo(raiz: Node3D, estado: String) -> void:
 	var superficie := MeshInstance3D.new()
-	superficie.name = NODO_SUELO_CLIMA
+	superficie.name = "Pelicula"
 	superficie.position = Vector3(0.0, 0.028, 0.0)
 	var caja := BoxMesh.new()
-	caja.size = Vector3(9.0, 0.012, 34.0)
+	caja.size = Vector3(9.0, 0.010, 34.0)
 	superficie.mesh = caja
 	superficie.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 	var material := StandardMaterial3D.new()
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	if estado == Clima.NIEVE:
-		material.albedo_color = Color(0.80, 0.84, 0.90, 0.72)
-		material.roughness = 0.88
+		material.albedo_color = Color(0.78, 0.84, 0.92, 0.24)
+		material.roughness = 0.94
 	else:
-		# Película oscura y brillante: deja leer el asfalto/acera de debajo y
-		# aporta reflejo especular suficiente para distinguir lluvia de nublado.
-		material.albedo_color = Color(0.08, 0.12, 0.17, 0.26)
-		material.roughness = 0.14
-		material.metallic = 0.08
+		material.albedo_color = Color(0.04, 0.075, 0.12, 0.08)
+		material.roughness = 0.16
+		material.metallic = 0.06
 	superficie.material_override = material
-	mundo.add_child(superficie)
+	raiz.add_child(superficie)
+
+
+func _crear_parches_suelo(raiz: Node3D, estado: String) -> void:
+	var nieve := estado == Clima.NIEVE
+	var cantidad := 16 if nieve else 11
+	var material := StandardMaterial3D.new()
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	if nieve:
+		material.albedo_color = Color(0.88, 0.92, 0.98, 0.62)
+		material.roughness = 0.96
+	else:
+		material.albedo_color = Color(0.025, 0.055, 0.09, 0.24)
+		material.roughness = 0.08
+		material.metallic = 0.10
+
+	for indice in cantidad:
+		var parche := MeshInstance3D.new()
+		parche.name = "Acumulacion%02d" % indice
+		parche.position = Vector3(
+			-3.4 + float((indice * 37) % 68) / 10.0,
+			0.040,
+			-15.2 + float((indice * 53) % 304) / 10.0,
+		)
+		parche.rotation.y = deg_to_rad(float((indice * 29) % 180))
+		parche.scale = Vector3(
+			0.75 + float((indice * 17) % 12) / 10.0,
+			1.0,
+			0.70 + float((indice * 23) % 16) / 10.0,
+		)
+		parche.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var disco := CylinderMesh.new()
+		disco.top_radius = 0.50
+		disco.bottom_radius = 0.50
+		disco.height = 0.008
+		disco.radial_segments = 8
+		parche.mesh = disco
+		parche.material_override = material
+		raiz.add_child(parche)
 
 
 func _retirar_suelo_clima(dia: Node) -> void:
@@ -248,9 +466,9 @@ func _aplicar_sonido_clima(dia: Node, estado: String) -> void:
 	voz.stream = _crear_pista_clima(estado)
 	match estado:
 		Clima.LLUVIA:
-			voz.volume_db = -19.0
+			voz.volume_db = -18.0
 		Clima.NIEVE:
-			voz.volume_db = -29.0
+			voz.volume_db = -28.0
 		Clima.NIEBLA:
 			voz.volume_db = -31.0
 		_:
@@ -298,10 +516,11 @@ func _muestra_audio(estado: String, indice: int, t: float) -> float:
 	match estado:
 		Clima.LLUVIA:
 			var pulso := 0.74 + sin(TAU * 0.7 * t) * 0.12
-			return _ruido(indice, 47) * 0.32 * pulso + sin(TAU * 92.0 * t) * 0.018
+			var rafaga := sin(TAU * 0.17 * t) * 0.035
+			return _ruido(indice, 47) * 0.34 * pulso + sin(TAU * 92.0 * t) * 0.018 + rafaga
 		Clima.NIEVE:
 			var viento_nieve := 0.55 + sin(TAU * 0.22 * t) * 0.20
-			return _ruido(indice, 83) * 0.075 * viento_nieve + sin(TAU * 34.0 * t) * 0.014
+			return _ruido(indice, 83) * 0.080 * viento_nieve + sin(TAU * 34.0 * t) * 0.014
 		Clima.NIEBLA:
 			var deriva := 0.62 + sin(TAU * 0.18 * t) * 0.16
 			return _ruido(indice, 113) * 0.055 * deriva + sin(TAU * 27.0 * t) * 0.016
@@ -316,43 +535,12 @@ func _ruido(indice: int, semilla: int) -> float:
 	return float((valor >> 16) & 0x7FFF) / 16384.0 - 1.0
 
 
-func _aplicar_cielo(
-	ambiente: Environment,
-	alto: Color,
-	horizonte: Color,
-	ocaso: Color,
-	mezcla: float,
-) -> void:
-	var material := _material_cielo(ambiente)
-	if material == null:
-		return
-	material.set_shader_parameter("cielo_alto", alto)
-	material.set_shader_parameter("horizonte", horizonte)
-	material.set_shader_parameter("ocaso", ocaso)
-	material.set_shader_parameter("ocaso_mezcla", mezcla)
-
-
 func _restaurar_ambiente(dia: Node) -> void:
 	var ambiente := dia._ambiente as Environment
 	if ambiente == null:
 		return
-	ambiente.fog_enabled = false
-	ambiente.fog_density = 0.01
-	ambiente.fog_height = 0.0
-	ambiente.fog_height_density = 0.0
-	ambiente.fog_light_color = Color(0.518, 0.553, 0.608)
-	ambiente.fog_light_energy = 1.0
-	ambiente.fog_sky_affect = 1.0
-	ambiente.fog_aerial_perspective = 0.0
 	ambiente.volumetric_fog_enabled = false
-	ambiente.background_energy_multiplier = 1.0
-	_aplicar_cielo(
-		ambiente,
-		CIELO_BASE_ALTO,
-		CIELO_BASE_HORIZONTE,
-		CIELO_BASE_OCASO,
-		CIELO_BASE_MEZCLA,
-	)
+	_aplicar_perfil_inmediato(ambiente, _material_cielo(ambiente), _perfil_ambiente(Clima.DESPEJADO))
 
 
 func _material_cielo(ambiente: Environment) -> ShaderMaterial:
