@@ -30,6 +30,24 @@ def _parches():
     return parches
 
 
+def _constantes_dragon():
+    texto = (ROOT / "assets" / "dragon_constantes.inc").read_text(encoding="utf-8")
+    return {nombre: int(valor) for nombre, valor in re.findall(r"DEF (\w+) EQU (\d+)", texto)}
+
+
+def _fotogramas(nombre):
+    """dragon_<nombre>_fotogramas.inc: lista de fotogramas con sus (fila, columna, tile)."""
+    fotogramas = []
+    for linea in (ROOT / "assets" / f"dragon_{nombre}_fotogramas.inc").read_text(encoding="utf-8").splitlines():
+        if linea.endswith(":"):
+            fotogramas.append([])
+        elif linea.strip().startswith("db ") and fotogramas:
+            valores = [int(v) for v in linea.strip()[3:].split(",")]
+            if len(valores) == 3:
+                fotogramas[-1].append(tuple(valores))
+    return fotogramas
+
+
 def _niveles(source):
     """Tabla Niveles: por nivel, (siguiente, acoplado, inicial, solución)."""
     bloque = source.split("Niveles:", 1)[1].split("ColumnasCompuertaDMG:", 1)[0]
@@ -148,6 +166,24 @@ class ArteCGBTest(unittest.TestCase):
                     self.assertLessEqual(rojo - azul, 10)
         self.assertIn("    halt\n    call VolcarOAM\n    call AnimarAgua\n", self.source)
 
+    def test_el_dragon_cabe_en_vram_y_respeta_los_sprites_por_linea(self):
+        constantes = _constantes_dragon()
+        for pantalla, tiles_dragon in (("juego", "DRAGON_TILES_CABEZA"), ("victoria", "DRAGON_TILES_RUGIDO")):
+            with self.subTest(pantalla=pantalla):
+                banco1 = len(re.findall(r"^    db ", (ROOT / "assets" / f"{pantalla}_tiles1.inc").read_text(), re.M))
+                self.assertLessEqual(banco1, PRIMER_TILE_SPRITE - constantes[tiles_dragon])
+        # Cabeza (y 58) lejos del cursor y del HUD: basta con que cada fila de tiles
+        # no pase de 10 sprites. El rugido va solo en la victoria.
+        for nombre in ("cabeza", "rugido"):
+            for k, entradas in enumerate(_fotogramas(nombre)):
+                with self.subTest(sprite=nombre, fotograma=k):
+                    por_fila = {}
+                    for fila, _columna, _tile in entradas:
+                        por_fila[fila] = por_fila.get(fila, 0) + 1
+                    self.assertLessEqual(max(por_fila.values()), 10)
+        self.assertEqual(len(_fotogramas("cabeza")), constantes["DRAGON_FOTOGRAMAS_CABEZA"])
+        self.assertEqual(len(_fotogramas("rugido")), 2)
+
     def test_los_sprites_se_vuelcan_tras_despertar_en_vblank(self):
         self.assertIn("DEF OAM_BASE   EQU $C200", self.source)
         self.assertIn("    halt\n    call VolcarOAM\n", self.source)
@@ -221,10 +257,18 @@ class PartidaTest(unittest.TestCase):
         self.assert_parche(emulador, "Correcta1_Base")
         self.assertEqual(self.leer(emulador, "wCorrectas"), 0)
 
+        # La cabeza del dragón acompaña a la partida.
+        constantes = _constantes_dragon()
+        primer_cabeza = PRIMER_TILE_SPRITE - constantes["DRAGON_TILES_CABEZA"]
+        self.assertTrue(primer_cabeza <= emulador.memory[0xFE00 + 6 * 4 + 2] < PRIMER_TILE_SPRITE)
+        self.assertEqual(self.leer(emulador, "wReaccion"), 0)
+
         self.pulsar(emulador, "a")
         self.assert_parche(emulador, "Abierta1")
         self.assert_parche(emulador, "Correcta1")
         self.assertEqual(self.leer(emulador, "wCorrectas"), 1)
+        # Acertar despierta al dragón.
+        self.assertGreater(self.leer(emulador, "wReaccion"), 0)
         self.assertEqual([self.leer(emulador, "wMovimientos", i) for i in range(3)], [0, 0, 1])
         # Cursor, nivel y dragones en la OAM real.
         self.assertEqual(emulador.memory[0xFE00 + 2], PRIMER_TILE_SPRITE + 10)
@@ -255,7 +299,12 @@ class PartidaTest(unittest.TestCase):
         emulador.tick(10, False)
         self.assertEqual(self.leer(emulador, "wRyuFlowCompletado"), 0xA5)
         self.assertEqual(self.leer(emulador, "wPantallaCGB"), 1)
-        self.assertEqual(emulador.memory[0xFE00], 0)
+        # En la victoria ruge el dragón y no queda cursor ni cifras.
+        constantes = _constantes_dragon()
+        primer_rugido = PRIMER_TILE_SPRITE - constantes["DRAGON_TILES_RUGIDO"]
+        tiles = [emulador.memory[0xFE00 + 4 * k + 2] for k in range(40) if emulador.memory[0xFE00 + 4 * k]]
+        self.assertTrue(tiles)
+        self.assertTrue(all(primer_rugido <= t < PRIMER_TILE_SPRITE for t in tiles), tiles)
 
         self.pulsar(emulador, "a")
         self.assertEqual(self.leer(emulador, "wRyuFlowCompletado"), 0)

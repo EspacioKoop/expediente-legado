@@ -38,7 +38,7 @@ DEF BG_MAP     EQU $9800
 ; leer los controles.)
 DEF OAM_BASE   EQU $C200
 DEF OAM_REAL   EQU $FE00
-DEF SPRITES_VOLCADOS EQU 8
+DEF SPRITES_VOLCADOS EQU 28
 
 DEF ESTADO_TITULO EQU 0
 DEF ESTADO_JUEGO  EQU 1
@@ -94,6 +94,20 @@ DEF MARCA_COMPLETADO     EQU $A5
 
 ; Arte de la lámina en Game Boy Color (#808).
 DEF PRIMER_TILE_SPRITE EQU 240 ; banco 1 de VRAM, tras los tiles de la pantalla
+INCLUDE "assets/dragon_constantes.inc"
+; El dragón va justo antes de cifras y cursor; generar_arte.py deja la escena por
+; debajo de estos tiles.
+DEF PRIMER_TILE_CABEZA EQU PRIMER_TILE_SPRITE - DRAGON_TILES_CABEZA
+DEF PRIMER_TILE_RUGIDO EQU PRIMER_TILE_SPRITE - DRAGON_TILES_RUGIDO
+DEF ATRIB_DRAGON       EQU %00001010 ; banco 1, paleta 2
+DEF CABEZA_X           EQU 112
+DEF CABEZA_Y           EQU 58
+DEF RUGIDO_X           EQU 60
+DEF RUGIDO_Y           EQU 86
+DEF SPRITES_HUD        EQU 6
+DEF FOTOGRAMA_DORMIDO  EQU 4
+DEF FOTOGRAMA_DESPIERTO EQU 5
+DEF REACCION_DRAGON    EQU 40 ; fotogramas: mitad ojo cerrado, mitad abierto
 DEF TILE_SPRITE_CURSOR EQU PRIMER_TILE_SPRITE + 10
 DEF ATRIB_CIFRA        EQU %00001000 ; banco 1, paleta 0
 DEF ATRIB_CURSOR       EQU %00001001 ; banco 1, paleta 1
@@ -214,6 +228,9 @@ EstadoDialogo:
     jp Bucle
 
 EstadoFin:
+    ld a, [wModoCGB]
+    or a
+    call nz, ActualizarRugidoCGB
     ld a, [wTeclasNuevas]
     and KEY_A | KEY_START
     jp z, Bucle
@@ -446,6 +463,7 @@ CompletarFlujo:
     CARGAR_PANTALLA_CGB VictoriaCGB
     ld a, 1
     ld [wPantallaCGB], a
+    call CargarRugidoCGB
     jr .dibujado
 .texto:
     call DibujarFinal
@@ -685,8 +703,14 @@ DibujarJuegoCGB:
     ld de, SpritesCGB
     ld bc, SpritesCGBFin - SpritesCGB
     call CopiarCGB
+    ld hl, VRAM_TILES + PRIMER_TILE_CABEZA * 16
+    ld de, DragonCabezaTiles
+    ld bc, DragonCabezaTilesFin - DragonCabezaTiles
+    call CopiarCGB
     xor a
     ldh [rVBK], a
+    ld [wReaccion], a
+    ld [wCorrectasPrevias], a
 
     ld a, $80
     ldh [rOCPS], a
@@ -759,6 +783,17 @@ ActualizarCompuertasCGB:
     ld a, c
     cp 3
     jr nz, .compuerta
+
+    ; Una compuerta más en su sitio: el dragón abre el ojo.
+    ld a, [wCorrectasPrevias]
+    ld b, a
+    ld a, [wCorrectas]
+    ld [wCorrectasPrevias], a
+    cp b
+    ret z
+    ret c
+    ld a, REACCION_DRAGON
+    ld [wReaccion], a
     ret
 
 ; HL = tabla de punteros a parche, A = índice. Conserva HL.
@@ -799,6 +834,26 @@ CargarPaletasNivelCGB:
     xor a
     ld [wAguaCuenta], a
     ld [wAguaPaso], a
+    ld a, [wNivel]
+    jp CargarPaletaDragonCGB
+
+; A = luz (0 día, 1 amanecer, 2 noche): paleta de sprite 2, la del dragón.
+CargarPaletaDragonCGB:
+    add a
+    add a
+    add a
+    ld e, a
+    ld d, 0
+    ld hl, PaletasDragonCGB
+    add hl, de
+    ld a, $80 | (2 * 8)
+    ldh [rOCPS], a
+    ld b, 8
+.color:
+    ld a, [hli]
+    ldh [rOCPD], a
+    dec b
+    jr nz, .color
     ret
 
 ; Justo tras el halt, en VBlank: cada AGUA_FOTOGRAMAS el agua pasa al siguiente
@@ -937,7 +992,134 @@ ActualizarSpritesCGB:
     ld [hli], a
     dec b
     jr nz, .cifra
-    ret
+
+    ; Cabeza del dragón: al acertar, ojo cerrado y luego abierto; si no, reposo.
+    ld a, [wReaccion]
+    or a
+    jr z, .reposo
+    dec a
+    ld [wReaccion], a
+    cp REACCION_DRAGON / 2
+    ld a, FOTOGRAMA_DORMIDO
+    jr nc, .cabeza
+    ld a, FOTOGRAMA_DESPIERTO
+    jr .cabeza
+.reposo:
+    ld a, [wFrames]
+    swap a
+    and 3
+.cabeza:
+    ld de, DragonCabezaFotogramas
+    ld b, DRAGON_SPRITES_CABEZA
+    ld c, PRIMER_TILE_CABEZA
+    push hl
+    ld hl, wSpriteX
+    ld [hl], CABEZA_X
+    inc hl
+    ld [hl], CABEZA_Y
+    pop hl
+    jp DibujarFotogramaCGB
+
+; LCD apagada: tiles y paleta del rugido para la pantalla de victoria.
+CargarRugidoCGB:
+    ld a, 1
+    ldh [rVBK], a
+    ld hl, VRAM_TILES + PRIMER_TILE_RUGIDO * 16
+    ld de, DragonRugidoTiles
+    ld bc, DragonRugidoTilesFin - DragonRugidoTiles
+    call CopiarCGB
+    xor a
+    ldh [rVBK], a
+    ld [wFrames], a
+    ld a, 1
+    call CargarPaletaDragonCGB
+    jp ActualizarRugidoCGB
+
+; El dragón de la victoria ruge: dos fotogramas alternos.
+ActualizarRugidoCGB:
+    ld a, [wFrames]
+    inc a
+    ld [wFrames], a
+    swap a
+    rrca
+    and 1
+    ld hl, wSpriteX
+    ld [hl], RUGIDO_X
+    inc hl
+    ld [hl], RUGIDO_Y
+    ld hl, OAM_BASE
+    ld de, DragonRugidoFotogramas
+    ld b, DRAGON_SPRITES_RUGIDO
+    ld c, PRIMER_TILE_RUGIDO
+    ; sigue en DibujarFotogramaCGB
+
+; A = fotograma, DE = tabla de punteros a fotograma, HL = destino en la OAM en
+; sombra, B = sprites reservados, C = primer tile, wSpriteX/Y = esquina.
+; Escribe las entradas del fotograma y vacía el resto de sprites reservados.
+DibujarFotogramaCGB:
+    push hl
+    add a
+    ld l, a
+    ld h, 0
+    add hl, de
+    ld a, [hli]
+    ld d, [hl]
+    ld e, a
+    pop hl
+    ld a, [de]
+    inc de
+    ld [wSpritesFotograma], a
+    ld a, b
+    ld [wSpritesReservados], a
+.entrada:
+    ld a, [wSpritesFotograma]
+    or a
+    jr z, .vaciar
+    dec a
+    ld [wSpritesFotograma], a
+
+    ld a, [de]             ; fila
+    inc de
+    add a
+    add a
+    add a
+    ld b, a
+    ld a, [wSpriteY]
+    add b
+    add 16
+    ld [hli], a
+    ld a, [de]             ; columna
+    inc de
+    add a
+    add a
+    add a
+    ld b, a
+    ld a, [wSpriteX]
+    add b
+    add 8
+    ld [hli], a
+    ld a, [de]             ; tile
+    inc de
+    add c
+    ld [hli], a
+    ld a, ATRIB_DRAGON
+    ld [hli], a
+    ld a, [wSpritesReservados]
+    dec a
+    ld [wSpritesReservados], a
+    jr .entrada
+.vaciar:
+    ld a, [wSpritesReservados]
+    or a
+    ret z
+    dec a
+    ld [wSpritesReservados], a
+    xor a
+    ld [hli], a
+    ld [hli], a
+    ld [hli], a
+    ld [hli], a
+    jr .vaciar
 
 ; Movimientos en tres cifras decimales; se quedan en 999.
 SumarMovimiento:
@@ -1249,6 +1431,24 @@ PaletasSpritesCGB:
     INCLUDE "assets/sprites_paletas.inc"
 PaletasSpritesCGBFin:
 
+; Dragón (#808): hoja de sprites GBC nativa, ver generar_arte.py.
+DragonCabezaTiles:
+    INCLUDE "assets/dragon_cabeza_tiles.inc"
+DragonCabezaTilesFin:
+DragonRugidoTiles:
+    INCLUDE "assets/dragon_rugido_tiles.inc"
+DragonRugidoTilesFin:
+DragonCabezaFotogramas:
+    FOR N, DRAGON_FOTOGRAMAS_CABEZA
+    dw DragonCabeza{d:N}
+    ENDR
+DragonRugidoFotogramas:
+    dw DragonRugido0, DragonRugido1
+    INCLUDE "assets/dragon_cabeza_fotogramas.inc"
+    INCLUDE "assets/dragon_rugido_fotogramas.inc"
+PaletasDragonCGB:
+    INCLUDE "assets/dragon_paletas.inc"
+
 SECTION "Variables", WRAM0
 wEstado:        ds 1
 wSeleccion:     ds 1
@@ -1273,6 +1473,12 @@ wPantallaCGB:  ds 1
 SECTION "JuegoCGBVars", WRAM0
 wModoCGB:        ds 1
 wCorrectas:      ds 1
+wCorrectasPrevias: ds 1
+wReaccion:       ds 1
+wSpriteX:        ds 1
+wSpriteY:        ds 1
+wSpritesFotograma: ds 1
+wSpritesReservados: ds 1
 wFrames:         ds 1
 wMovimientos:    ds 3
 wPunteroSolucion: ds 2
