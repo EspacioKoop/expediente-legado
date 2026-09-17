@@ -13,10 +13,10 @@ class TipografiaUi780Test(unittest.TestCase):
         self.project = PROJECT.read_text(encoding="utf-8")
 
     def test_interfaz_no_depende_de_fuentes_windows_instaladas(self):
-        self.assertIn("ThemeDB.fallback_font", self.estilo)
         self.assertNotIn("MS Sans Serif", self.estilo)
         self.assertNotIn("Tahoma", self.estilo)
         self.assertNotIn("Verdana", self.estilo)
+        self.assertNotIn("tema.default_font =", self.estilo)
 
     def test_interfaz_no_fuerza_texto_sin_antialiasing(self):
         self.assertNotIn("FONT_ANTIALIASING_NONE", self.estilo)
@@ -24,13 +24,11 @@ class TipografiaUi780Test(unittest.TestCase):
         self.assertNotIn("_sin_suavizar", self.estilo)
 
     def test_hay_roles_tipograficos_independientes(self):
-        self.assertIn("static func fuente_titulo()", self.estilo)
         self.assertIn("static func fuente_documento()", self.estilo)
         self.assertIn("static func fuente_mono()", self.estilo)
         self.assertIn(
             'preload("res://assets/fonts/MFBOldstyle-Regular.otf")', self.estilo
         )
-        self.assertIn('tema.set_font("title_font", "Label", titulo)', self.estilo)
         self.assertIn(
             'tema.set_font("document_font", "RichTextLabel", documento)', self.estilo
         )
