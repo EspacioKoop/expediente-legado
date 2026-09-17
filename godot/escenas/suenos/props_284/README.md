@@ -26,7 +26,7 @@ Starter pack de **assets 3D originales del proyecto** para las cuatro familias d
 
 Cada fichero es una pieza independiente. Puede instanciarse directamente o abrirse y copiar sus nodos a una escena mayor. Los materiales siguen siendo editables para que el pase final pueda introducir texturas, desgaste o paleta específica sin rehacer la geometría.
 
-`patio_castillo_onirico.tscn` sirve como corte de arte reconocible para integrar o validar el sueño de castillo: concentra arquitectura propia y la anomalía espacial en una sola escena sin modificar el runtime estabilizado del sueño.
+`patio_castillo_onirico.tscn` sirve como corte de arte reconocible para integrar o validar el sueño de castillo: concentra arquitectura propia y la anomalía espacial en una sola escena sin modificar el runtime estabilizado del sueño. Tras #587 y #755, esta vertical cubre la necesidad que motivó #296; PSX Going Medieval y Fantasy Props MegaKit quedan como **reserva opcional**, no como dependencia ni deuda de importación.
 
 La montaña se compone en runtime desde `SuenoMontana3D`: la familia CONVERGENTE conserva la única colisión, mientras la presentación añade cima nevada, laderas, mar de nubes, huellas anticipadas, documento congelado y la cabaña de este directorio.
 
