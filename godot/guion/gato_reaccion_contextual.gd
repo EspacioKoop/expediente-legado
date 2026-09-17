@@ -1,6 +1,6 @@
 ## Traduce estados ya existentes a una reacción puramente presentacional (#787).
 ##
-## No recibe posiciones, pistas, objetivos ni Partida: solo la fase declarada de
+## No recibe posiciones, pistas, objetivos ni estado de campaña: solo la fase declarada de
 ## #539, cuántas anomalías 3D ya existen en la sala y si el gato está en estado
 ## de ayuda completa. La prioridad evita que varios sistemas peleen por la pose.
 class_name GatoReaccionContextual
