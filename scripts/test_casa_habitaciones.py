@@ -1,5 +1,6 @@
 """Regresión de #133: la casa tiene habitaciones físicas y rincón de TV accesible."""
 from pathlib import Path
+import re
 import unittest
 
 
@@ -49,7 +50,13 @@ class CasaHabitacionesTest(unittest.TestCase):
         self.assertIn('"tejido_domestico"', self.hogar)
 
     def test_el_armario_esta_en_el_dormitorio_y_no_en_el_salon(self):
-        self.assertIn('"ArmarioHogar",\n\t\t"wardrobe_01",\n\t\tVector3(-3.55, 0.0, -2.45)', self.hogar)
+        self.assertIn('const ARMARIO := "wardrobe_01"', self.hogar)
+        self.assertRegex(
+            self.hogar,
+            re.compile(
+                r'"ArmarioHogar",\s*ARMARIO,\s*Vector3\(-3\.55,\s*0\.0,\s*-2\.45\)'
+            ),
+        )
 
     def test_el_rincon_de_television_comparte_eje(self):
         self.assertIn('Vector3(-3.60, 0.0, 1.35)', self.hogar)
