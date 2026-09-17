@@ -57,7 +57,7 @@ El tercer corte conecta #674 con la acumulación doméstica ya existente de #96/
 
 Cuando un objeto de categoría `publicacion` está en `home_storage`, su nodo físico pasa a ser un `Interactuable3D` con verbo `LEER`. Conserva en metadatos el ID, título, categoría editorial y el título de portada/primera pieza del catálogo. El raycast común de #283 puede detectarlo mediante una colisión propia.
 
-La representación sigue siendo procedural y sin assets externos nuevos, pero ya distingue tres siluetas útiles:
+La materialización 3D sigue siendo procedural y sin assets externos nuevos, pero ya distingue tres siluetas útiles:
 
 - revista/cuaderno: cubierta fina, lomo y bloque de portada;
 - periódico: pliego más ancho y fino con cabecera y bloque de foto;
