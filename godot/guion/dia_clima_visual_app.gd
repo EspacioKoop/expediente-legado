@@ -1,15 +1,20 @@
-## Refuerzo visual del clima exterior (#797).
+## Refuerzo visual y sonoro del clima exterior (#797).
 ##
 ## `dia_clima_app.gd` sigue siendo dueño del estado y de la luz. Este controller
-## se limita a hacer visibles sus consecuencias: niebla real del Environment,
-## cielo diferenciado y precipitación centrada en el jugador. Se mantiene como
-## hijo para no añadir otra capa a la cadena histórica del día.
+## se limita a hacer visibles y audibles sus consecuencias: niebla real del
+## Environment, cielo diferenciado, precipitación centrada en el jugador,
+## lectura húmeda/nevada del suelo y una cama procedural por clima. Se mantiene
+## como hijo para no añadir otra capa a la cadena histórica del día.
 extends Node
 
 const CIELO_BASE_ALTO := Color(0.055, 0.075, 0.11)
 const CIELO_BASE_HORIZONTE := Color(0.18, 0.17, 0.17)
 const CIELO_BASE_OCASO := Color(0.30, 0.16, 0.10)
 const CIELO_BASE_MEZCLA := 0.18
+const NODO_SUELO_CLIMA := "ClimaSueloVisual"
+const NODO_AUDIO_CLIMA := "ClimaAmbiente"
+const AUDIO_FRECUENCIA := 11_025
+const AUDIO_DURACION := 1.0
 
 var _mundo_id := 0
 var _estado := ""
@@ -26,6 +31,8 @@ func _process(_delta: float) -> void:
 	if mundo == null or fase != "trayecto":
 		if _activo:
 			_restaurar_ambiente(dia)
+			_retirar_suelo_clima(dia)
+			_retirar_sonido_clima(dia)
 		_mundo_id = 0
 		_estado = ""
 		_activo = false
@@ -47,7 +54,11 @@ func _process(_delta: float) -> void:
 
 func _aplicar_estado(dia: Node, estado: String) -> void:
 	_restaurar_ambiente(dia)
+	_retirar_suelo_clima(dia)
+	_retirar_sonido_clima(dia)
 	_asegurar_precipitacion(dia, estado)
+	_aplicar_suelo_clima(dia, estado)
+	_aplicar_sonido_clima(dia, estado)
 
 	var ambiente := dia._ambiente as Environment
 	if ambiente == null:
@@ -163,7 +174,9 @@ func _reforzar_precipitacion(nodo: Node3D, nieve: bool) -> void:
 
 	particulas.amount = 760 if nieve else 1100
 	particulas.position = Vector3(0.0, 5.6, -1.5)
-	particulas.visibility_aabb = AABB(Vector3(-10.0, -7.0, -17.0), Vector3(20.0, 16.0, 34.0))
+	particulas.visibility_aabb = AABB(
+		Vector3(-10.0, -7.0, -17.0), Vector3(20.0, 16.0, 34.0)
+	)
 
 	var malla := particulas.draw_pass_1 as QuadMesh
 	if malla == null:
@@ -184,6 +197,122 @@ func _seguir_precipitacion(dia: Node) -> void:
 	# El emisor vive en el mundo para conservar la lógica histórica, pero su
 	# centro acompaña al jugador: nunca queda atrás al recorrer la calle.
 	nodo.global_position = caminante.global_position
+
+
+func _aplicar_suelo_clima(dia: Node, estado: String) -> void:
+	if estado != Clima.LLUVIA and estado != Clima.NIEVE:
+		return
+	var mundo := dia._mundo as Node3D
+	if mundo == null:
+		return
+
+	# Capa puramente visual sobre los 9x34 m del suelo jugable. No añade cuerpo,
+	# colisión ni navegación y queda por encima de las pieles PBR de #399.
+	var superficie := MeshInstance3D.new()
+	superficie.name = NODO_SUELO_CLIMA
+	superficie.position = Vector3(0.0, 0.028, 0.0)
+	var caja := BoxMesh.new()
+	caja.size = Vector3(9.0, 0.012, 34.0)
+	superficie.mesh = caja
+	superficie.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+
+	var material := StandardMaterial3D.new()
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	if estado == Clima.NIEVE:
+		material.albedo_color = Color(0.80, 0.84, 0.90, 0.72)
+		material.roughness = 0.88
+	else:
+		# Película oscura y brillante: deja leer el asfalto/acera de debajo y
+		# aporta reflejo especular suficiente para distinguir lluvia de nublado.
+		material.albedo_color = Color(0.08, 0.12, 0.17, 0.26)
+		material.roughness = 0.14
+		material.metallic = 0.08
+	superficie.material_override = material
+	mundo.add_child(superficie)
+
+
+func _retirar_suelo_clima(dia: Node) -> void:
+	var mundo := dia._mundo as Node3D
+	if mundo == null:
+		return
+	var superficie := mundo.get_node_or_null(NODO_SUELO_CLIMA)
+	if superficie != null:
+		superficie.queue_free()
+
+
+func _aplicar_sonido_clima(dia: Node, estado: String) -> void:
+	if estado == Clima.DESPEJADO:
+		return
+	var voz := AudioStreamPlayer.new()
+	voz.name = NODO_AUDIO_CLIMA
+	voz.stream = _crear_pista_clima(estado)
+	match estado:
+		Clima.LLUVIA:
+			voz.volume_db = -19.0
+		Clima.NIEVE:
+			voz.volume_db = -29.0
+		Clima.NIEBLA:
+			voz.volume_db = -31.0
+		_:
+			voz.volume_db = -34.0
+	dia.add_child(voz)
+	voz.play()
+
+
+func _retirar_sonido_clima(dia: Node) -> void:
+	var voz := dia.get_node_or_null(NODO_AUDIO_CLIMA) as AudioStreamPlayer
+	if voz == null:
+		return
+	voz.stop()
+	voz.queue_free()
+
+
+func _crear_pista_clima(estado: String) -> AudioStreamWAV:
+	# Cama procedural y determinista: evita sumar binarios/licencias solo para
+	# dar feedback de clima. La base urbana de Ambiente sigue sonando por debajo.
+	var pista := AudioStreamWAV.new()
+	pista.format = AudioStreamWAV.FORMAT_16_BITS
+	pista.mix_rate = AUDIO_FRECUENCIA
+	pista.stereo = false
+	pista.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	pista.loop_begin = 0
+
+	var muestras := int(AUDIO_FRECUENCIA * AUDIO_DURACION)
+	pista.loop_end = muestras
+	var datos := PackedByteArray()
+	datos.resize(muestras * 2)
+	for i in muestras:
+		var t := float(i) / AUDIO_FRECUENCIA
+		var muestra := _muestra_audio(estado, i, t)
+		var valor := int(clampf(muestra, -1.0, 1.0) * 32767.0)
+		if valor < 0:
+			valor += 65536
+		datos[i * 2] = valor & 0xFF
+		datos[i * 2 + 1] = (valor >> 8) & 0xFF
+	pista.data = datos
+	return pista
+
+
+func _muestra_audio(estado: String, indice: int, t: float) -> float:
+	match estado:
+		Clima.LLUVIA:
+			var pulso := 0.74 + sin(TAU * 0.7 * t) * 0.12
+			return _ruido(indice, 47) * 0.32 * pulso + sin(TAU * 92.0 * t) * 0.018
+		Clima.NIEVE:
+			var viento_nieve := 0.55 + sin(TAU * 0.22 * t) * 0.20
+			return _ruido(indice, 83) * 0.075 * viento_nieve + sin(TAU * 34.0 * t) * 0.014
+		Clima.NIEBLA:
+			var deriva := 0.62 + sin(TAU * 0.18 * t) * 0.16
+			return _ruido(indice, 113) * 0.055 * deriva + sin(TAU * 27.0 * t) * 0.016
+		Clima.NUBLADO:
+			return _ruido(indice, 137) * 0.040 + sin(TAU * 41.0 * t) * 0.012
+		_:
+			return 0.0
+
+
+func _ruido(indice: int, semilla: int) -> float:
+	var valor := ((indice + semilla) * 1103515245 + 12345) & 0x7FFFFFFF
+	return float((valor >> 16) & 0x7FFF) / 16384.0 - 1.0
 
 
 func _aplicar_cielo(
