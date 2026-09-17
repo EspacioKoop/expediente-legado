@@ -35,7 +35,7 @@ Los elementos de fondo deben seguir siendo secundarios: niebla, distancia, palet
 | Ultimate Buildings Pack | #218 | **integrado** | PR #693: 4 edificios reales OBJ/MTL, procedencia/SHA-256, shader PSX y 4 instancias lejanas medidas. |
 | Stylized Tree Pack | #219 | **integrado** | PR #704: 3 modelos, 6 instancias, procedencia/SHA-256, shader PSX y captura desde cámara del jugador. |
 | Chill Vibes Art Jam 4 | #220 | **pendiente / opcional** | Solo integrar si una escena de servicio/almacén necesita props que no cubran #228 u otros assets ya presentes. |
-| Downtown City MegaKit | #221 | **pendiente / despriorizado** | La calle ya tiene skyline, edificios reales, coches, naturaleza, tren y mobiliario. No importar el megakit salvo hueco visual demostrado. |
+| Downtown City MegaKit | #221 | **reserva / cerrado como no planificado** | El hueco urbano que motivó el issue ya está cubierto por skyline, edificios reales, coches, naturaleza, tren y mobiliario. Reabrir solo si una validación de #398 identifica un hueco concreto que no cubran #218/#295 y compañía. |
 | School Classrooms Asset Pack | #223 | **documentado** | PR #484 fija selección, licencia, época, LFS y procedencia. No importar si #294 cubre la oficina; reservar piezas escolares para una necesidad real. |
 | Office low poly pack | #226 | **suplido por #294** | La necesidad de oficina queda cubierta por PR #499 con 9 GLB del PSX Style Office Pack, procedencia/SHA-256, LFS y captura. |
 | Low poly household goods | #227 | **integrado** | PR #532: 13 GLB CC0 en casa, procedencia/SHA-256/LFS, shader PSX, colisiones simples y capturas antes/después. |
@@ -60,7 +60,8 @@ No completar porcentajes del catálogo por inercia. El orden útil a partir del 
 2. **cerrar o acotar sub-issues ya implementados** (#225, #228, #230, #295) según esa validación humana;
 3. **oficina y casa**: no importar más familias salvo hueco concreto; #499 y #532 ya cubren el gate funcional de #216;
 4. **materiales/desgaste**: #231 solo si mejora una superficie real bajo las reglas de #399;
-5. **packs aún pendientes** (#220/#221/#222/#223/#226): tratarlos como opciones, no como checklist obligatoria.
+5. **packs aún pendientes** (#220/#222/#223/#226): tratarlos como opciones, no como checklist obligatoria;
+6. **#221 Downtown City MegaKit**: queda como reserva cerrada; solo reabrir con evidencia visual concreta de #398, no para aumentar densidad por inercia.
 
 Esto evita convertir #216 en una colección de packs sin uso jugable.
 
