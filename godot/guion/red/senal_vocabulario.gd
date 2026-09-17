@@ -7,17 +7,20 @@ extends RefCounted
 const MAX_GESTO := 16
 
 const PLANTILLAS := {
-	"cuidado_con": {
+	"cuidado_con":
+	{
 		"clave": "signal.template.cuidado_con",
 		"texto": "Cuidado con {token0}",
 		"categorias": [["peligros", "objetos"]],
 	},
-	"mira": {
+	"mira":
+	{
 		"clave": "signal.template.mira",
 		"texto": "Mira {token0}",
 		"categorias": [["objetos", "lugares", "direcciones"]],
 	},
-	"sigue": {
+	"sigue":
+	{
 		"clave": "signal.template.sigue",
 		"texto": "Sigue {token0}",
 		"categorias": [["direcciones", "lugares"]],
@@ -25,49 +28,57 @@ const PLANTILLAS := {
 }
 
 const TOKENS := {
-	"trampa": {
+	"trampa":
+	{
 		"clave": "signal.token.trampa",
 		"texto": "trampa",
 		"categoria": "peligros",
 		"conocimiento": "",
 	},
-	"alarma": {
+	"alarma":
+	{
 		"clave": "signal.token.alarma",
 		"texto": "alarma",
 		"categoria": "peligros",
 		"conocimiento": "",
 	},
-	"llave": {
+	"llave":
+	{
 		"clave": "signal.token.llave",
 		"texto": "llave",
 		"categoria": "objetos",
 		"conocimiento": "",
 	},
-	"sobre": {
+	"sobre":
+	{
 		"clave": "signal.token.sobre",
 		"texto": "sobre",
 		"categoria": "objetos",
 		"conocimiento": "",
 	},
-	"norte": {
+	"norte":
+	{
 		"clave": "signal.token.norte",
 		"texto": "norte",
 		"categoria": "direcciones",
 		"conocimiento": "",
 	},
-	"derecha": {
+	"derecha":
+	{
 		"clave": "signal.token.derecha",
 		"texto": "derecha",
 		"categoria": "direcciones",
 		"conocimiento": "",
 	},
-	"portal": {
+	"portal":
+	{
 		"clave": "signal.token.portal",
 		"texto": "portal",
 		"categoria": "lugares",
 		"conocimiento": "",
 	},
-	"simbolo_amarillo": {
+	"simbolo_amarillo":
+	{
 		"clave": "signal.token.simbolo_amarillo",
 		"texto": "símbolo amarillo",
 		"categoria": "peligros",
@@ -76,11 +87,13 @@ const TOKENS := {
 }
 
 const ANCHORS := {
-	"calle_escaparate": {
+	"calle_escaparate":
+	{
 		"scene_key": "calle",
 		"categorias": ["peligros", "objetos"],
 	},
-	"calle_portal": {
+	"calle_portal":
+	{
 		"scene_key": "calle",
 		"categorias": ["direcciones", "lugares"],
 	},
