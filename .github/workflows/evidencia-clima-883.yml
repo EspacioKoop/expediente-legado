@@ -24,6 +24,83 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Pulir acumulaciones y legibilidad de precipitación
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('godot/guion/dia_clima_visual_app.gd')
+          text = path.read_text(encoding='utf-8')
+          text = text.replace(
+              'material.albedo_color = Color(0.78, 0.84, 0.92, 0.24)',
+              'material.albedo_color = Color(0.78, 0.84, 0.92, 0.34)',
+          )
+          marker = '''\tif material != null:\n\t\tmaterial.albedo_color = (\n'''
+          replacement = '''\tif material != null:\n\t\tmaterial.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED\n\t\tmaterial.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED\n\t\tmaterial.cull_mode = BaseMaterial3D.CULL_DISABLED\n\t\tmaterial.albedo_color = (\n'''
+          if marker not in text:
+              raise SystemExit('No se encontró el bloque de material de precipitación')
+          text = text.replace(marker, replacement, 1)
+
+          start = text.index('func _crear_parches_suelo(')
+          end = text.index('\n\nfunc _retirar_suelo_clima', start)
+          function = '''func _crear_parches_suelo(raiz: Node3D, estado: String) -> void:
+\tvar nieve := estado == Clima.NIEVE
+\tvar cantidad := 18 if nieve else 10
+\tvar material := StandardMaterial3D.new()
+\tmaterial.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+\tif nieve:
+\t\tmaterial.albedo_color = Color(0.86, 0.90, 0.96, 0.32)
+\t\tmaterial.roughness = 0.98
+\telse:
+\t\tmaterial.albedo_color = Color(0.025, 0.055, 0.09, 0.20)
+\t\tmaterial.roughness = 0.08
+\t\tmaterial.metallic = 0.10
+
+\tfor indice in cantidad:
+\t\tvar acumulacion := Node3D.new()
+\t\tacumulacion.name = "Acumulacion%02d" % indice
+\t\tacumulacion.position = Vector3(
+\t\t\t-3.2 + float((indice * 37) % 64) / 10.0,
+\t\t\t0.040,
+\t\t\t-14.8 + float((indice * 53) % 296) / 10.0,
+\t\t)
+\t\tacumulacion.rotation.y = deg_to_rad(float((indice * 29) % 180))
+\t\traiz.add_child(acumulacion)
+
+\t\tvar lobulos := 3 if nieve else 2
+\t\tfor lobulo in lobulos:
+\t\t\tvar parche := MeshInstance3D.new()
+\t\t\tparche.name = "Lobulo%02d" % lobulo
+\t\t\tvar signo := -1.0 if lobulo % 2 == 0 else 1.0
+\t\t\tparche.position = Vector3(
+\t\t\t\tsigno * (0.10 + float((indice * 11 + lobulo * 7) % 9) / 50.0),
+\t\t\t\tfloat(lobulo) * 0.002,
+\t\t\t\t(float(lobulo) - 1.0) * 0.11,
+\t\t\t)
+\t\t\tparche.scale = Vector3(
+\t\t\t\t0.62 + float((indice * 17 + lobulo * 5) % 7) / 10.0,
+\t\t\t\t1.0,
+\t\t\t\t0.46 + float((indice * 23 + lobulo * 3) % 8) / 10.0,
+\t\t\t)
+\t\t\tparche.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+\t\t\tvar disco := CylinderMesh.new()
+\t\t\tdisco.top_radius = 0.30 if nieve else 0.38
+\t\t\tdisco.bottom_radius = disco.top_radius
+\t\t\tdisco.height = 0.006
+\t\t\tdisco.radial_segments = 12
+\t\t\tparche.mesh = disco
+\t\t\tparche.material_override = material
+\t\t\tacumulacion.add_child(parche)
+'''
+          path.write_text(text[:start] + function + text[end:], encoding='utf-8')
+          PY
+          python -m pip install --disable-pip-version-check 'gdtoolkit==4.3.4'
+          gdformat godot/guion/dia_clima_visual_app.gd
+          gdformat --check godot/guion/dia_clima_visual_app.gd
+          gdlint godot/guion/dia_clima_visual_app.gd
+
       - name: Instalar RGBDS fijado
         shell: bash
         env:
@@ -75,11 +152,11 @@ jobs:
       - name: Publicar PNG originales como artifact
         uses: actions/upload-artifact@v4
         with:
-          name: evidencia-clima-883
+          name: evidencia-clima-883-pulida
           path: ${{ runner.temp }}/climas-883/*.png
           retention-days: 90
 
-      - name: Incorporar capturas al PR
+      - name: Incorporar código y capturas pulidas al PR
         shell: bash
         run: |
           set -euo pipefail
@@ -99,10 +176,10 @@ jobs:
           | --- | --- | --- |
           | ![Lluvia](lluvia.png) | ![Niebla](niebla.png) | ![Nieve](nieve.png) |
 
-          La revisión visual humana se incorpora después de inspeccionar los PNG originales del artifact `evidencia-clima-883`.
+          La revisión visual humana se incorpora después de inspeccionar los PNG originales del artifact `evidencia-clima-883-pulida`.
           EOF
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add "$destino"
-          git commit -m 'docs: incorpora evidencia visual del clima v2 (#883)'
+          git add godot/guion/dia_clima_visual_app.gd "$destino"
+          git commit -m 'fix(clima): suavizar acumulaciones y precipitación (#883)'
           git push origin HEAD:feat/883-clima-v2
