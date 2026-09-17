@@ -90,7 +90,9 @@ func _mover_jugador(delta: float) -> void:
 	if direccion.length_squared() > 1.0:
 		direccion = direccion.normalized()
 	var multiplicador := 2.25 if _esquiva > 0.0 else 1.0
-	_jugador.position += Vector3(direccion.x, 0.0, direccion.y) * VELOCIDAD_JUGADOR * multiplicador * delta
+	_jugador.position += (
+		Vector3(direccion.x, 0.0, direccion.y) * VELOCIDAD_JUGADOR * multiplicador * delta
+	)
 	_jugador.position = _limitar(_jugador.position)
 	if direccion.length_squared() > 0.01:
 		_jugador.rotation.y = atan2(direccion.x, direccion.y)
@@ -205,9 +207,7 @@ func _montar_arena() -> void:
 	add_child(_rival)
 	var clave := String(_acusado.get("id", _acusado.get("nombre", "acusado")))
 	var matiz := 0.52 + float(absi(hash(clave)) % 14) / 100.0
-	_figura_rival = FiguraSilueta.construir(
-		_rival, Vector3.ZERO, Color.from_hsv(matiz, 0.34, 0.72)
-	)
+	_figura_rival = FiguraSilueta.construir(_rival, Vector3.ZERO, Color.from_hsv(matiz, 0.34, 0.72))
 
 	_camara = Camera3D.new()
 	_camara.fov = 52.0
