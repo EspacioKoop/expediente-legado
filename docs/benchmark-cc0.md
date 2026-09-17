@@ -2,7 +2,7 @@
 
 Este benchmark cubre el criterio de rendimiento combinado de #493/#216 sin añadir assets ni modificar gameplay. Compara tres procesos de Godot aislados sobre el mismo `trayecto`, con cámara, resolución, calentamiento y número de frames fijos:
 
-- `baseline`: geometría actual del trayecto, sin dressing CC0 opcional;
+- `baseline`: geometría y materiales base actuales del trayecto (`CalleMateriales` incluido), sin dressing CC0 opcional;
 - `retro_urban`: el mismo trayecto añadiendo **solo** el controller Retro Urban de #295;
 - `full`: el trayecto con cielo CC0, tren/vía, DressingCC0, Retro Urban, skyline y naturaleza ya presentes en `main`.
 
