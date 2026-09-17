@@ -32,7 +32,7 @@ class MandoTelevision98Test(unittest.TestCase):
     def test_el_televisor_monta_el_mando_apoyado_en_la_mesa_baja(self):
         self.assertIn("MandoTelevision98.new()", self.televisor)
         self.assertIn('mando.name = "MandoTelevision98"', self.televisor)
-        self.assertIn("OFFSET_MANDO_MESA := Vector3(1.43, -0.56, -0.11)", self.televisor)
+        self.assertIn("OFFSET_MANDO_MESA := Vector3(1.43, -0.58, -0.11)", self.televisor)
         self.assertIn("mando.position = position + OFFSET_MANDO_MESA", self.televisor)
         self.assertIn("mando.configurar(self)", self.televisor)
 
