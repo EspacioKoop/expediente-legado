@@ -41,9 +41,13 @@ func _probar_catalogo_completo() -> void:
 		_comprobar(titulo != null, "%s tiene título físico de portada" % item_id)
 		_comprobar(edicion != null, "%s tiene edición física de portada" % item_id)
 		if titulo != null:
-			_comprobar(titulo.text == Fisica.cabecera_de(item_id), "%s rotula su cabecera" % item_id)
+			_comprobar(
+				titulo.text == Fisica.cabecera_de(item_id), "%s rotula su cabecera" % item_id
+			)
 		if edicion != null:
-			_comprobar(edicion.text == Fisica.edicion_de(item_id), "%s rotula su número/año" % item_id)
+			_comprobar(
+				edicion.text == Fisica.edicion_de(item_id), "%s rotula su número/año" % item_id
+			)
 		var formato := String(resultado.get("formato", ""))
 		var lomo := raiz.get_node_or_null("LomoPublicacion") as Label3D
 		if formato == "periodico":
