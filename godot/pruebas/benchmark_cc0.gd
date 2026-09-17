@@ -7,6 +7,7 @@ const MUESTRAS := 180
 const DIA_RAIZ := preload("res://guion/dia_clima_app.gd")
 const DRESSING_CC0 := preload("res://guion/dia_dressing_cc0_app.gd")
 const RETRO_URBAN := preload("res://guion/dia_retro_urban_app.gd")
+const CALLE_MATERIALES := preload("res://guion/dia_calle_materiales_app.gd")
 const SKYLINE_CC0 := preload("res://guion/dia_skyline_cc0_app.gd")
 const NATURALEZA_CC0 := preload("res://guion/dia_naturaleza_cc0_app.gd")
 const CIELO_SIGA := preload("res://arte/cielo_siga.tres")
@@ -59,23 +60,25 @@ func _ejecutar() -> void:
 	Espacio3D.construir(mundo, espacio)
 	_montar_iluminacion(mundo, espacio)
 
-	var componentes := ["trayecto"]
+	var dia := DiaHarness.new()
+	dia.name = "DiaHarness"
+	dia._mundo = mundo
+	escena.add_child(dia)
+
+	# CalleMateriales (#399) forma parte del baseline real de la calle. Mantenerlo
+	# en los tres modos evita atribuir sus superficies al coste del kit #295.
+	var materiales_calle = CALLE_MATERIALES.new()
+	dia.add_child(materiales_calle)
+	var componentes := ["trayecto", "calle_materiales"]
+
 	if _modo == "retro_urban":
-		var dia_retro := DiaHarness.new()
-		dia_retro.name = "DiaHarnessRetroUrban"
-		dia_retro._mundo = mundo
-		escena.add_child(dia_retro)
 		var controlador_retro = RETRO_URBAN.new()
-		dia_retro.add_child(controlador_retro)
+		dia.add_child(controlador_retro)
 		componentes.append("retro_urban")
 	elif _modo == "full":
 		_montar_cielo(mundo)
 		_montar_tren(mundo)
 		componentes.append_array(["cielo_cc0", "tren_cc0"])
-		var dia := DiaHarness.new()
-		dia.name = "DiaHarness"
-		dia._mundo = mundo
-		escena.add_child(dia)
 		for controlador_script in [DRESSING_CC0, RETRO_URBAN, SKYLINE_CC0, NATURALEZA_CC0]:
 			var controlador = controlador_script.new()
 			dia.add_child(controlador)
