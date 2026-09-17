@@ -108,11 +108,12 @@ func _probar() -> void:
 			absf(ventana.position.x - fondo_x) >= 0.05,
 			"hay profundidad visible entre cristal y fondo"
 		)
-		_comprobar(
-			bool(interior.get_meta("marco_volumen")), "cada ventana conserva marco con volumen"
-		)
 
 		var es_detalle := bool(interior.get_meta("detalle_3d"))
+		_comprobar(
+			bool(interior.get_meta("marco_volumen")) == es_detalle,
+			"solo las ventanas de detalle conservan marco con volumen"
+		)
 		var nombres_props := interior.get_meta("props") as Array
 		if es_detalle:
 			detalle_3d += 1
@@ -127,7 +128,9 @@ func _probar() -> void:
 			if nombres_props.has(prop):
 				props[prop] = true
 
-		piezas_esperadas += 5 + nombres_props.size()
+		piezas_esperadas += 1 + nombres_props.size()
+		if es_detalle:
+			piezas_esperadas += 4
 		if estado_luz == "persiana":
 			piezas_esperadas += 1
 			_comprobar(
@@ -157,7 +160,7 @@ func _probar() -> void:
 
 	_comprobar(detalle_3d == 9, "hay nueve ventanas de detalle 3D")
 	_comprobar(instancias == piezas_esperadas, "el batching conserva todas las piezas declaradas")
-	_comprobar(instancias == 353, "la cobertura completa usa 353 instancias batcheadas")
+	_comprobar(instancias == 145, "la cobertura completa usa 145 instancias batcheadas")
 	_comprobar(
 		int(vivas.get_meta("instancias_batcheadas")) == instancias,
 		"el montaje registra el total real de instancias"
