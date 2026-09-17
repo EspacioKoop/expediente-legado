@@ -30,24 +30,67 @@ def _parches():
     return parches
 
 
+def _niveles(source):
+    """Tabla Niveles: por nivel, (siguiente, acoplado, inicial, solución)."""
+    bloque = source.split("Niveles:", 1)[1].split("ColumnasCompuertaDMG:", 1)[0]
+    estados = {"ABIERTA": 0, "MEDIA": 1, "CERRADA": 2}
+    valores = []
+    for linea in bloque.splitlines():
+        linea = linea.split(";", 1)[0].strip()
+        if linea.startswith("db "):
+            valores += [estados.get(v.strip(), None) if v.strip() in estados else int(v) for v in linea[3:].split(",")]
+    return [(valores[k:k + 3], valores[k + 3], valores[k + 4:k + 7], valores[k + 7:k + 10])
+            for k in range(0, len(valores), 10)]
+
+
+def _pulsaciones_minimas(siguiente, acoplado, inicial, solucion):
+    """Búsqueda en anchura sobre los estados del nivel."""
+    from collections import deque
+
+    inicio = (tuple(inicial), 0)
+    vistos = {inicio: 0}
+    cola = deque([inicio])
+    while cola:
+        estado, tocados = cola.popleft()
+        if list(estado) == solucion and tocados == 0b111:
+            return vistos[(estado, tocados)]
+        for i in range(3):
+            nuevo = list(estado)
+            for j in {i, i + 1} if acoplado else {i}:
+                if j < 3:
+                    nuevo[j] = siguiente[nuevo[j]]
+            clave = (tuple(nuevo), tocados | 1 << i)
+            if clave not in vistos:
+                vistos[clave] = vistos[(estado, tocados)] + 1
+                cola.append(clave)
+    return None
+
+
 class RyuFlowTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.source = SOURCE.read_text(encoding="utf-8")
+        cls.niveles = _niveles(cls.source)
 
-    def test_arranca_con_tres_compuertas_incorrectas(self):
-        self.assertIn("DEF COMPUERTAS_INICIALES EQU %00000101", self.source)
-        self.assertIn("DEF SOLUCION_COMPUERTAS  EQU %00000010", self.source)
-        self.assertIn("ld a, COMPUERTAS_INICIALES", self.source)
+    def test_cada_nivel_arranca_con_las_tres_compuertas_incorrectas(self):
+        self.assertEqual(len(self.niveles), 3)
+        for n, (_siguiente, _acoplado, inicial, solucion) in enumerate(self.niveles, start=1):
+            with self.subTest(nivel=n):
+                self.assertTrue(all(a != b for a, b in zip(inicial, solucion)))
+
+    def test_los_niveles_tienen_solucion_y_crecen(self):
+        minimas = [_pulsaciones_minimas(*nivel) for nivel in self.niveles]
+        self.assertEqual(minimas, [3, 6, 6])
+        # El primero solo abre y cierra; el segundo añade la posición media; en
+        # el tercero cada compuerta arrastra a la de su derecha.
+        self.assertEqual([nivel[1] for nivel in self.niveles], [0, 0, 1])
+        self.assertNotIn(1, self.niveles[0][0][::2])
 
     def test_exige_manipular_las_tres_compuertas(self):
         self.assertIn("DEF TODAS_TOCADAS        EQU %00000111", self.source)
-        self.assertIn("or %00000001", self.source)
-        self.assertIn("or %00000010", self.source)
-        self.assertIn("or %00000100", self.source)
         bloque = self.source.split("ComprobarSolucion:", 1)[1].split("CompletarFlujo:", 1)[0]
         self.assertIn("cp TODAS_TOCADAS", bloque)
-        self.assertIn("cp SOLUCION_COMPUERTAS", bloque)
+        self.assertIn("ld de, NIVEL_SOLUCION", bloque)
 
     def test_completion_marker_es_estable_y_no_se_escribe_al_arrancar(self):
         self.assertIn('SECTION "Handshake", WRAM0[$C100]', self.source)
@@ -55,6 +98,9 @@ class RyuFlowTest(unittest.TestCase):
         bloque = self.source.split("CompletarFlujo:", 1)[1].split("DesactivarLCD:", 1)[0]
         self.assertIn("ld a, MARCA_COMPLETADO", bloque)
         self.assertIn("ld [wRyuFlowCompletado], a", bloque)
+        # Solo el último nivel lleva a CompletarFlujo.
+        bloque = self.source.split("ComprobarSolucion:", 1)[1].split("CompletarFlujo:", 1)[0]
+        self.assertIn("cp NUM_NIVELES - 1", bloque)
 
     def test_rom_compilada_es_dual_mode_y_tiene_titulo_propio(self):
         self.assertTrue(ROM.exists(), "falta compilar build/ryu_flow_98.gbc")
@@ -69,10 +115,11 @@ class ArteCGBTest(unittest.TestCase):
 
     def test_los_parches_caben_y_no_pisan_los_tiles_de_sprite(self):
         parches = _parches()
-        self.assertEqual(len(parches), 12)
+        self.assertEqual(len(parches), 24)
         banco1 = len(re.findall(r"^    db ", (ROOT / "assets" / "juego_tiles1.inc").read_text(), re.M))
         self.assertLessEqual(banco1, PRIMER_TILE_SPRITE)
-        for nombre in ("Abierta1", "Abierta2", "Abierta3", "Correcta1", "Correcta2", "Correcta3"):
+        nombres = [f"{tipo}{n}" for tipo in ("Abierta", "Media", "Correcta", "Dialogo") for n in (1, 2, 3)]
+        for nombre in nombres:
             with self.subTest(parche=nombre):
                 propio, base = parches[nombre], parches[nombre + "_Base"]
                 self.assertTrue(propio)
@@ -128,11 +175,24 @@ class PartidaTest(unittest.TestCase):
         for fila, columna, tile, _atributos in self.parches[nombre]:
             self.assertEqual(emulador.memory[0x9800 + fila * 32 + columna], tile, f"{nombre} ({fila},{columna})")
 
-    def test_gbc_abre_compuertas_cuenta_y_despierta_al_dragon(self):
+    def cerrar_dialogo(self, emulador, nivel):
+        self.assertEqual(self.leer(emulador, "wNivel"), nivel)
+        self.assert_parche(emulador, f"Dialogo{nivel + 1}")
+        # Con el cuadro abierto no hay cursor ni cifras.
+        self.assertEqual(emulador.memory[0xFE00], 0)
+        self.pulsar(emulador, "a")
+        self.assert_parche(emulador, f"Dialogo{nivel + 1}_Base")
+
+    def jugar(self, emulador, secuencia):
+        for boton in secuencia:
+            self.pulsar(emulador, boton)
+
+    def test_gbc_tres_niveles_con_dialogos_hasta_despertar_al_dragon(self):
         emulador = self.arrancar(cgb=True)
         self.pulsar(emulador, "start")
         self.assertEqual(self.leer(emulador, "wModoCGB"), 1)
-        # Arranque %101: la segunda abierta y ninguna en su sitio.
+        self.cerrar_dialogo(emulador, 0)
+        # Arranque del 1-1: la segunda abierta y ninguna en su sitio.
         self.assert_parche(emulador, "Abierta1_Base")
         self.assert_parche(emulador, "Abierta2")
         self.assert_parche(emulador, "Abierta3_Base")
@@ -144,25 +204,40 @@ class PartidaTest(unittest.TestCase):
         self.assert_parche(emulador, "Correcta1")
         self.assertEqual(self.leer(emulador, "wCorrectas"), 1)
         self.assertEqual([self.leer(emulador, "wMovimientos", i) for i in range(3)], [0, 0, 1])
-        # Cursor y cifras del HUD en la OAM real (copiada por DMA).
+        # Cursor, nivel y dragones en la OAM real.
         self.assertEqual(emulador.memory[0xFE00 + 2], PRIMER_TILE_SPRITE + 10)
-        self.assertEqual(emulador.memory[0xFE00 + 6], PRIMER_TILE_SPRITE + 1)
+        self.assertEqual(emulador.memory[0xFE04 + 2], PRIMER_TILE_SPRITE + 1)
+        self.assertEqual(emulador.memory[0xFE08 + 2], PRIMER_TILE_SPRITE + 1)
+
+        self.jugar(emulador, ["right", "a", "right", "a"])
+        emulador.tick(60, False)
         self.assertEqual(self.leer(emulador, "wRyuFlowCompletado"), 0)
 
-        self.pulsar(emulador, "right")
+        # 1-2, amanecer: la compuerta pasa por la posición media.
+        self.cerrar_dialogo(emulador, 1)
+        self.assertEqual(emulador.memory[0xFE04 + 2], PRIMER_TILE_SPRITE + 2)
+        # Ciclo abierta -> media -> cerrada: la primera, cerrada, pasa por abierta.
         self.pulsar(emulador, "a")
-        self.assert_parche(emulador, "Abierta2_Base")
-        self.pulsar(emulador, "right")
+        self.assert_parche(emulador, "Abierta1")
         self.pulsar(emulador, "a")
+        self.assert_parche(emulador, "Media1")
+        self.jugar(emulador, ["right", "a", "a", "right", "a", "a"])
+        emulador.tick(60, False)
+        self.assertEqual(self.leer(emulador, "wRyuFlowCompletado"), 0)
+
+        # 1-3, noche: pulsar la primera arrastra a la segunda.
+        self.cerrar_dialogo(emulador, 2)
+        self.pulsar(emulador, "a")
+        self.assertEqual([self.leer(emulador, "wEstados", i) for i in range(3)], [0, 0, 2])
+        self.jugar(emulador, ["a", "right", "a", "a", "right", "a", "a"])
         emulador.tick(10, False)
         self.assertEqual(self.leer(emulador, "wRyuFlowCompletado"), 0xA5)
         self.assertEqual(self.leer(emulador, "wPantallaCGB"), 1)
-        # Sin cursor ni cifras sobre la pantalla de victoria.
         self.assertEqual(emulador.memory[0xFE00], 0)
 
         self.pulsar(emulador, "a")
         self.assertEqual(self.leer(emulador, "wRyuFlowCompletado"), 0)
-        self.assertEqual(self.leer(emulador, "wCorrectas"), 0)
+        self.assertEqual(self.leer(emulador, "wNivel"), 0)
 
     def test_game_boy_clasica_conserva_la_version_de_texto(self):
         emulador = self.arrancar(cgb=False)

@@ -4,7 +4,9 @@ Parte de `referencia/lamina.png` y escribe en `assets/`:
 
 - `juego_*`: el panel de juego de la lámina a pantalla completa. Los torii
   empiezan cerrados y los iconos del HUD apagados; `juego_variantes.inc` trae
-  un parche por compuerta abierta y por icono encendido.
+  un parche por compuerta abierta o a medias, por icono encendido y por diálogo
+  del anciano. `juego_paletas_amanecer.inc` y `juego_paletas_noche.inc` son las
+  paletas de los niveles 1-2 y 1-3, con el color de los paneles de la lámina.
 - `victoria_*`: el panel de amanecer con el texto final.
 - `sprites_tiles.inc` y `sprites_paletas.inc`: cifras del HUD y cursor.
 
@@ -17,6 +19,7 @@ leía. Uso (numpy y Pillow):
 from pathlib import Path
 import sys
 
+import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
 AQUI = Path(__file__).resolve().parent
@@ -33,6 +36,8 @@ RECORTE_ESCENA = (467, 39, 977, 453)
 RECORTE_HUD = (467, 453, 977, 528)
 FILAS_HUD = (15, 16, 17)
 RECORTE_AMANECER = (990, 40, 1308, 268)
+RECORTE_NOCHE = (996, 312, 1304, 530)
+RECORTE_RETRATO = (486, 1000, 572, 1086)
 
 # Hueco entre las columnas de cada torii: ahí van los portones o el agua.
 SEPARACION_TORII = 45
@@ -68,11 +73,22 @@ TINTA = (28, 36, 56)
 VERDE = (88, 200, 72)
 ROJO = (208, 72, 40)
 DORADO = (224, 168, 48)
-VERDE_OSCURO = (40, 104, 48)
+MARRON = (136, 80, 48)
 # El croma pesa el doble al ajustar las paletas: sin ello el dragón perdía el
 # dorado y los torii el rojo.
 PESO_CROMA = 2.0
-PALETAS_HUD = [[CREMA, VERDE, ROJO, TINTA], [CREMA, DORADO, VERDE_OSCURO, TINTA]]
+# HUD y cuadro de diálogo. La segunda sirve también al retrato del anciano.
+PALETAS_HUD = [[CREMA, VERDE, ROJO, TINTA], [CREMA, DORADO, MARRON, TINTA]]
+
+# Diálogos del anciano al empezar cada nivel: 4 líneas de hasta 12 letras, una
+# por celda para que las letras se repitan como tiles.
+DIALOGOS = [
+    ["EL AGUA", "SIEMPRE", "ENCUENTRA SU", "CAMINO..."],
+    ["AL ALBA,", "CADA PUERTA", "PUEDE QUEDAR", "A MEDIAS."],
+    ["DE NOCHE,", "CADA PUERTA", "MUEVE LA DE", "SU DERECHA."],
+]
+FILA_DIALOGO = 12
+COLUMNA_TEXTO = 6
 
 FUENTE_3X5 = {
     "N": ["X..X", "XX.X", "X.XX", "X..X", "X..X"],
@@ -112,6 +128,14 @@ FUENTE_5X7 = {
     "U": ["X...X", "X...X", "X...X", "X...X", "X...X", "X...X", ".XXX."],
     "V": ["X...X", "X...X", "X...X", "X...X", "X...X", ".X.X.", "..X.."],
     "Z": ["XXXXX", "....X", "...X.", "..X..", ".X...", "X....", "XXXXX"],
+    "B": ["XXXX.", "X...X", "X...X", "XXXX.", "X...X", "X...X", "XXXX."],
+    "C": [".XXX.", "X...X", "X....", "X....", "X....", "X...X", ".XXX."],
+    "M": ["X...X", "XX.XX", "X.X.X", "X.X.X", "X...X", "X...X", "X...X"],
+    "Q": [".XXX.", "X...X", "X...X", "X...X", "X.X.X", "X..X.", ".XX.X"],
+    "H": ["X...X", "X...X", "X...X", "XXXXX", "X...X", "X...X", "X...X"],
+    ",": [".....", ".....", ".....", ".....", ".....", "..X..", ".X..."],
+    ".": [".....", ".....", ".....", ".....", ".....", ".....", "..X.."],
+    "v": [".....", "XXXXX", ".XXX.", "..X..", ".....", ".....", "....."],
 }
 
 # 0 transparente, 2 dorado, 3 contorno.
@@ -181,22 +205,92 @@ def escena_juego():
     d.rectangle((108, 127, 124, 139), fill=CREMA)
     d.rectangle((140, 127, 157, 139), fill=CREMA)
     escribir(base, 6, 125, "NIVEL", FUENTE_3X5, TINTA)
-    escribir(base, 7, 132, "1-3", FUENTE_5X7, TINTA)
+    # La cifra del nivel la pone la ROM con un sprite.
+    escribir(base, 7, 132, "1-", FUENTE_5X7, TINTA)
     escribir(base, 114, 130, "/3", FUENTE_5X7, TINTA)
     for i in range(3):
         base.paste(cerrada, (x0 + SEPARACION_TORII * i, y0))
         base.paste(icono_apagado, ICONOS_HUD[i])
 
+    # A medias: portones arriba y el agua asomando por debajo.
+    media = cerrada.copy()
+    mitad = (y1 - y0) // 2
+    media.paste(abierta.crop((0, mitad, x1 - x0, y1 - y0)), (0, mitad))
+    ImageDraw.Draw(media).line((0, mitad, x1 - x0 - 1, mitad), fill=MARRON)
+
     variantes = {}
-    for i in range(3):
-        im = base.copy()
-        im.paste(abierta, (x0 + SEPARACION_TORII * i, y0))
-        variantes[f"Abierta{i + 1}"] = im
+    for nombre, hueco in (("Abierta", abierta), ("Media", media)):
+        for i in range(3):
+            im = base.copy()
+            im.paste(hueco, (x0 + SEPARACION_TORII * i, y0))
+            variantes[f"{nombre}{i + 1}"] = im
     for i in range(3):
         im = base.copy()
         im.paste(icono_encendido, ICONOS_HUD[i])
         variantes[f"Correcta{i + 1}"] = im
+    for n, lineas in enumerate(DIALOGOS):
+        variantes[f"Dialogo{n + 1}"] = dialogo(base, lineas)
     return base, variantes
+
+
+def dialogo(base, lineas):
+    """Cuadro del anciano sobre las seis últimas filas, como en la lámina."""
+    im = base.copy()
+    d = ImageDraw.Draw(im)
+    y0 = FILA_DIALOGO * 8
+    d.rectangle((0, y0, 159, 143), fill=TINTA)
+    d.rectangle((3, y0 + 3, 156, 140), fill=CREMA, outline=TINTA)
+    d.rectangle((5, y0 + 5, 154, 138), outline=MARRON)
+    retrato = Image.open(LAMINA).convert("RGB").crop(RECORTE_RETRATO).resize((32, 32), Image.Resampling.BOX)
+    im.paste(retrato, (8, (FILA_DIALOGO + 1) * 8))
+    d.rectangle((7, (FILA_DIALOGO + 1) * 8 - 1, 40, (FILA_DIALOGO + 5) * 8), outline=TINTA)
+    for n, texto in enumerate(lineas):
+        for c, caracter in enumerate(texto):
+            escribir(im, (COLUMNA_TEXTO + c) * 8 + 1, (FILA_DIALOGO + 1 + n) * 8, caracter, FUENTE_5X7, TINTA)
+    escribir(im, 18 * 8 + 1, (FILA_DIALOGO + 4) * 8 + 1, "v", FUENTE_5X7, MARRON)
+    return im
+
+
+def transferir_color(colores, origen, destino):
+    """Lleva colores RGB al ambiente de otro panel (media y desviación por canal)."""
+    o = np.asarray(origen, float).reshape(-1, 3)
+    t = np.asarray(destino, float).reshape(-1, 3)
+    c = (np.asarray(colores, float) - o.mean(0)) / (o.std(0) + 1e-6) * t.std(0) + t.mean(0)
+    return c.clip(0, 255)
+
+
+def a_bgr555(colores):
+    return [(int(b) >> 3) << 10 | (int(g) >> 3) << 5 | (int(r) >> 3) for r, g, b in colores]
+
+
+def paletas_de_nivel():
+    """Paletas de amanecer y noche: mismas tiles, otra luz (paletas 2 y 3 de la lámina)."""
+    lamina = Image.open(LAMINA).convert("RGB")
+    escena = lamina.crop(RECORTE_ESCENA)
+    fijas = len(PALETAS_HUD)
+    paletas = []
+    for linea in (ASSETS / "juego_paletas.inc").read_text(encoding="utf-8").splitlines():
+        valores = [int(v.strip().lstrip("$"), 16) for v in linea.split(";")[0].replace("dw", "").split(",")]
+        paletas.append([((v & 31) << 3, (v >> 5 & 31) << 3, (v >> 10 & 31) << 3) for v in valores])
+    for nombre, recorte in (("amanecer", RECORTE_AMANECER), ("noche", RECORTE_NOCHE)):
+        destino = lamina.crop(recorte)
+        filas, mapa = [], {}
+        for p, colores in enumerate(paletas):
+            nuevos = colores if p < fijas else transferir_color(colores, escena, destino)
+            filas.append("    dw " + ", ".join(f"${v:04X}" for v in a_bgr555(nuevos)) + f" ; paleta {p}")
+            for antes, despues in zip(a_bgr555(colores), a_bgr555(nuevos)):
+                mapa.setdefault(antes, despues)
+        (ASSETS / f"juego_paletas_{nombre}.inc").write_text("\n".join(filas) + "\n", encoding="utf-8")
+        # Vista previa: la escena (no el HUD) con los colores cambiados.
+        previa = Image.open(ASSETS / "juego_previa.png").convert("RGB")
+        pix = previa.load()
+        for y in range(120):
+            for x in range(160):
+                r, g, b = (v >> 3 for v in pix[x, y])
+                nuevo = mapa.get(b << 10 | g << 5 | r)
+                if nuevo is not None:
+                    pix[x, y] = tuple(((nuevo >> k) & 31) << 3 | ((nuevo >> k) & 31) >> 2 for k in (0, 5, 10))
+        previa.save(ASSETS / f"juego_previa_{nombre}.png")
 
 
 def escena_victoria():
@@ -245,8 +339,10 @@ def main():
     base, variantes = escena_juego()
     n = convertir_con_variantes(base, variantes, ASSETS / "juego", etiqueta="JuegoCGB",
                                 max_tiles=256 + PRIMER_TILE_SPRITE,
-                                paletas_fijas=PALETAS_HUD, filas_fijas=FILAS_HUD, peso_croma=PESO_CROMA)
+                                paletas_fijas=PALETAS_HUD, filas_fijas=FILAS_HUD, peso_croma=PESO_CROMA,
+                                variantes_fijas=[f"Dialogo{n + 1}" for n in range(len(DIALOGOS))])
     print(f"juego: {n} tiles únicos")
+    paletas_de_nivel()
     n = convertir_con_variantes(escena_victoria(), {}, ASSETS / "victoria", max_tiles=256 + PRIMER_TILE_SPRITE)
     print(f"victoria: {n} tiles únicos")
     sprites()

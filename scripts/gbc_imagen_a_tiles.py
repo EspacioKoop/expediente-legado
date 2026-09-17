@@ -150,13 +150,14 @@ def a_luma_croma(peso_croma):
 
 
 def convertir_con_variantes(base, variantes, salida, etiqueta="Pantalla", max_tiles=512,
-                            paletas_fijas=(), filas_fijas=(), peso_croma=1.0):
+                            paletas_fijas=(), filas_fijas=(), peso_croma=1.0, variantes_fijas=()):
     """Convierte una imagen 160x144 y sus variantes con paletas y tiles comunes.
 
     `variantes` es un dict ordenado nombre -> imagen 160x144. De cada variante
     solo se guardan las celdas que difieren de la base. `paletas_fijas` (colores
     RGB de 8 bits, 4 por paleta) se reservan para las filas de tiles de
-    `filas_fijas`, como un HUD que no debe perder sus colores. Con `peso_croma`
+    `filas_fijas`, como un HUD que no debe perder sus colores, y para todas las
+    celdas de las variantes de `variantes_fijas` (un cuadro de diálogo). Con `peso_croma`
     mayor que 1 las paletas se ajustan dando más peso al tono que al brillo:
     detalles pequeños y saturados (un dragón dorado) no se pierden en grises.
     """
@@ -171,8 +172,9 @@ def convertir_con_variantes(base, variantes, salida, etiqueta="Pantalla", max_ti
         parches[nombre] = [(i, len(celdas) + k) for k, i in enumerate(distintas)]
         celdas += [propias[i] for i in distintas]
 
-    fila_de = list(range(COLS * FILAS)) + [i for pares in parches.values() for i, _ in pares]
-    solo_fijas = [fila_de[k] // COLS in filas_fijas for k in range(len(celdas))]
+    solo_fijas = [i // COLS in filas_fijas for i in range(COLS * FILAS)]
+    for nombre, pares in parches.items():
+        solo_fijas += [nombre in variantes_fijas or i // COLS in filas_fijas for i, _ in pares]
     fijas = a555(paletas_fijas) if paletas_fijas else np.zeros((0, 4, 3))
     if peso_croma == 1.0:
         paletas, grupo = paletas_por_tile(celdas, fijas=fijas, solo_fijas=solo_fijas)
