@@ -18,6 +18,8 @@ on:
       - "gbc/minijuegos/hydra_loop_98/**"
       - "gbc/minijuegos/hydra_loop/assets/**"
       - "gbc/minijuegos/webkeeper_98/**"
+      - "gbc/minijuegos/comun/**"
+      - "scripts/gbc_imagen_a_tiles.py"
 
 permissions:
   contents: read
@@ -175,19 +177,19 @@ jobs:
           make -C gbc/minijuegos/aquiles_98 test
           cp gbc/minijuegos/aquiles_98/build/aquiles_98.gbc gbc-fixtures/
 
-      - name: Build RYU_FLOW
-        shell: bash
-        run: |
-          set -euo pipefail
-          make -C gbc/minijuegos/ryu_flow_98 clean test
-          cp gbc/minijuegos/ryu_flow_98/build/ryu_flow_98.gbc gbc-fixtures/
-
       - name: Prepare PyBoy for prototype play-tests
         shell: bash
         run: |
           set -euo pipefail
           python -m venv /tmp/pyboy
           /tmp/pyboy/bin/python -m pip install --quiet pyboy==2.6.1
+
+      - name: Build and play-test RYU_FLOW
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C gbc/minijuegos/ryu_flow_98 clean test PYTHON=/tmp/pyboy/bin/python
+          cp gbc/minijuegos/ryu_flow_98/build/ryu_flow_98.gbc gbc-fixtures/
 
       - name: Build and play-test HYDRA LOOP prototype
         shell: bash
