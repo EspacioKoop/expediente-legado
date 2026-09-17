@@ -1,11 +1,12 @@
 # Benchmark CC0 del trayecto
 
-Este benchmark cubre el criterio de rendimiento combinado de #493/#216 sin añadir assets ni modificar gameplay. Compara dos procesos de Godot aislados sobre el mismo `trayecto`, con cámara, resolución, calentamiento y número de frames fijos:
+Este benchmark cubre el criterio de rendimiento combinado de #493/#216 sin añadir assets ni modificar gameplay. Compara tres procesos de Godot aislados sobre el mismo `trayecto`, con cámara, resolución, calentamiento y número de frames fijos:
 
 - `baseline`: geometría actual del trayecto, sin dressing CC0 opcional;
-- `full`: el mismo trayecto con cielo CC0, tren/vía, DressingCC0, Retro Urban, skyline y naturaleza ya presentes en `main`.
+- `retro_urban`: el mismo trayecto añadiendo **solo** el controller Retro Urban de #295;
+- `full`: el trayecto con cielo CC0, tren/vía, DressingCC0, Retro Urban, skyline y naturaleza ya presentes en `main`.
 
-Cada proceso produce un JSON y una captura PNG sin HUD. `scripts/test_benchmark_cc0.py` valida que ambos informes sean comparables y genera `summary.json` y `report.md` con el incremento del dressing respecto al baseline.
+Cada proceso produce un JSON y una captura PNG sin HUD. `scripts/test_benchmark_cc0.py` valida que los tres informes sean comparables, mantiene `summary.json`/`report.md` para el conjunto completo y genera además `retro_urban-summary.json`/`retro_urban-report.md` para aislar el coste y la imagen de #295 frente al baseline.
 
 ## Métricas
 
@@ -22,6 +23,8 @@ rm -rf benchmark-cc0
 mkdir -p benchmark-cc0
 xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
   --script res://pruebas/benchmark_cc0.gd -- --mode=baseline --output="$PWD/benchmark-cc0"
+xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+  --script res://pruebas/benchmark_cc0.gd -- --mode=retro_urban --output="$PWD/benchmark-cc0"
 xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
   --script res://pruebas/benchmark_cc0.gd -- --mode=full --output="$PWD/benchmark-cc0"
 python3 scripts/test_benchmark_cc0.py --report benchmark-cc0
