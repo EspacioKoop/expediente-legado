@@ -9,6 +9,8 @@ ROOT = Path(__file__).resolve().parents[1]
 MODELO = ROOT / "godot" / "guion" / "contaminacion_os98.gd"
 EXPLORADOR = ROOT / "godot" / "guion" / "explorador_siga_modelo.gd"
 ADAPTADOR = ROOT / "godot" / "guion" / "dia_escritorio_siga_app.gd"
+GATO_REACCION = ROOT / "godot" / "guion" / "dia_contaminacion_gato_app.gd"
+ESCENA_DIA = ROOT / "godot" / "escenas" / "dia.tscn"
 CATALOGO = ROOT / "godot" / "datos" / "web98_indice.json"
 PRUEBA_GODOT = ROOT / "godot" / "pruebas" / "pruebas_contaminacion_os98.gd"
 
@@ -70,6 +72,19 @@ def test_incoherencia_cruza_explorador_y_web98_sin_icono_obvio() -> None:
     assert 'const URL_DIAGNOSTICO := "http://intranet.dgai/diag/enlace13/"' in modelo
     assert "fase >= FASE_CONTAMINACION_CRUZADA" in modelo
     assert "urls_caidas.append(URL_DIAGNOSTICO)" in modelo
+
+
+def test_gato_reacciona_solo_a_contaminacion_real_y_sin_estado_paralelo() -> None:
+    reaccion = fuente(GATO_REACCION)
+    escena = fuente(ESCENA_DIA)
+    assert 'path="res://guion/dia_contaminacion_gato_app.gd"' in escena
+    assert 'name="ContaminacionGatoController"' in escena
+    assert 'controlador.has_method("_contexto_os98")' in reaccion
+    assert "ContaminacionOs98.FASE_CONTAMINACION_CRUZADA" in reaccion
+    assert "GatoAyuda.nivel(gato) == GatoAyuda.COMPLETA" in reaccion
+    assert 'tr("GATO_SIGA_DESCUBRIMIENTO")' in reaccion
+    assert "establecer_estado_local" not in reaccion
+    assert "RandomNumberGenerator" not in reaccion
 
 
 def test_contrato_ejecutable_en_godot() -> None:
