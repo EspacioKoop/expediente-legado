@@ -331,6 +331,7 @@ func _titulo(texto: String) -> Control:
 	barra.add_theme_stylebox_override("panel", caja)
 	var etiqueta := _linea(texto)
 	etiqueta.add_theme_color_override("font_color", EstiloSiga.BLANCO)
+	etiqueta.add_theme_font_override("font", theme.get_font("title_font", "Label"))
 	barra.add_child(etiqueta)
 	return barra
 
