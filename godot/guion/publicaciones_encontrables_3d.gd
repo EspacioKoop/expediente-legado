@@ -45,9 +45,7 @@ const DEFINICIONES := [
 ]
 
 
-static func montar(
-	mundo: Node3D, fase: String, dia: int, inventario: Dictionary
-) -> Node3D:
+static func montar(mundo: Node3D, fase: String, dia: int, inventario: Dictionary) -> Node3D:
 	limpiar(mundo)
 	var raiz := Node3D.new()
 	raiz.name = NOMBRE_RAIZ
