@@ -52,6 +52,8 @@ func _init() -> void:
 		for i in 12:
 			await process_frame
 		camara.look_at(Vector3(0.0, 2.2, 0.0), Vector3.UP)
+		for i in 2:
+			await process_frame
 		var destino := salida.path_join("%s.png" % caso["nombre"])
 		if not _guardar_captura(destino):
 			quit(1)
@@ -69,14 +71,14 @@ func _montar_entorno(mundo: Node3D) -> void:
 	entorno.background_color = Color(0.025, 0.022, 0.028)
 	entorno.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	entorno.ambient_light_color = Color(0.46, 0.43, 0.39)
-	entorno.ambient_light_energy = 0.54
+	entorno.ambient_light_energy = 0.72
 	world_environment.environment = entorno
 	mundo.add_child(world_environment)
 
 	var sol := DirectionalLight3D.new()
 	sol.rotation_degrees = Vector3(-48.0, -32.0, 0.0)
 	sol.light_color = Color(0.78, 0.70, 0.60)
-	sol.light_energy = 0.72
+	sol.light_energy = 0.96
 	sol.shadow_enabled = true
 	mundo.add_child(sol)
 
