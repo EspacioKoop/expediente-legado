@@ -1,12 +1,12 @@
-## Catálogo y compra diegética de cartuchos/ROMs en el trayecto (#93).
+## Catálogo y compra diegética de cartuchos/ROMs en el trayecto (#93/#800).
 ##
-## Este primer corte no monta todavía el local 3D: fija la frontera de economía,
-## persistencia y procedencia para que el escaparate de calle pueda consumirla
-## después sin meter reglas de compra dentro de Espacio3D ni del emulador.
+## La economía sigue perteneciendo a la jornada, pero la biblioteca comprada es
+## permanente del perfil. PerfilRoms absorbe además las compras de guardados
+## anteriores sin obligar a reescribirlos.
 class_name TiendaVideojuegos
 extends RefCounted
 
-const CLAVE_COMPRAS := "roms_compradas"
+const CLAVE_COMPRAS := PerfilRoms.CLAVE_COMPRAS
 
 
 ## El catálogo sale del índice de ROMs propias (RomsPropias): jugables con
@@ -30,14 +30,11 @@ static func catalogo() -> Array[Dictionary]:
 	return salida
 
 
-## Devuelve IDs válidos, únicos y conocidos. El estado vive dentro de jornada:
-## Partida ya serializa el diccionario completo y Jornada.completar conserva
-## claves adicionales, por lo que no hace falta modificar ninguno de los dos.
+## Devuelve IDs válidos, únicos y conocidos. La jornada solo se consulta como
+## fuente de migración del formato previo a #800; PerfilRoms es la autoridad.
 static func compras(jornada: Dictionary) -> Array[String]:
-	var bruto = jornada.get(CLAVE_COMPRAS, [])
+	var bruto := PerfilRoms.migrar_desde_jornada(jornada)
 	var salida: Array[String] = []
-	if typeof(bruto) != TYPE_ARRAY:
-		return salida
 	for valor in bruto:
 		var id_rom := String(valor)
 		if id_rom.is_empty() or _buscar(id_rom).is_empty() or salida.has(id_rom):
@@ -93,8 +90,11 @@ static func comprar(jornada: Dictionary, id_rom: String) -> Dictionary:
 	if not Jornada.gastar(jornada, precio):
 		return _fallo(id_rom, "sin_dinero")
 
-	adquiridas.append(id_rom)
-	jornada[CLAVE_COMPRAS] = adquiridas
+	# Cobro y propiedad forman una sola transacción lógica: si el perfil no se
+	# puede escribir, se devuelve el dinero para no vender un cartucho fantasma.
+	if not PerfilRoms.registrar(id_rom):
+		jornada["dinero"] = int(jornada.get("dinero", 0)) + precio
+		return _fallo(id_rom, "jornada_invalida")
 	return {
 		"ok": true,
 		"id": id_rom,
@@ -104,8 +104,8 @@ static func comprar(jornada: Dictionary, id_rom: String) -> Dictionary:
 	}
 
 
-## Contrato que podrá consumir #124: solo devuelve contenido comprado y cuyo
-## artefacto existe. No mezcla ni inspecciona user://roms.
+## Contrato que consume #124: solo devuelve contenido comprado y cuyo artefacto
+## existe. No mezcla ni inspecciona user://roms.
 static func roms_compradas(jornada: Dictionary) -> Array[Dictionary]:
 	var salida: Array[Dictionary] = []
 	for entrada in listar(jornada):

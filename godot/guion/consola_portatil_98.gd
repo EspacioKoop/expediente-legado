@@ -1,4 +1,4 @@
-## Portátil original de 1998 para la casa (#124/#133).
+## Portátil original de 1998 para la casa (#124/#133/#800).
 ##
 ## La carcasa es propia y no copia logos ni assets propietarios. Al usarla abre
 ## una superficie aislada que puede ejecutar ROMs compatibles mediante Siga98GB.
@@ -66,22 +66,22 @@ func _alternar(_actor: Node) -> void:
 	_actualizar_pantalla()
 
 	_app = EmuladorPortatilAudioApp.new()
-	_app.roms_compradas = _compradas_en_jornada()
+	_app.roms_compradas = _roms_compradas()
 	_app.cerrado.connect(_al_cerrar_app)
 	get_tree().root.add_child(_app)
 	_app.abrir()
 
 
-## Los cartuchos comprados en la tienda viven en la jornada del día que monta
-## esta consola; fuera de un día (pruebas, escena suelta) solo hay incluidas.
-func _compradas_en_jornada() -> Array:
+## PerfilRoms es la autoridad desde #800. Si la consola está montada dentro de
+## un día antiguo, la jornada se pasa una vez como fuente de migración.
+func _roms_compradas() -> Array:
 	var actual := get_parent()
 	while actual != null:
 		var jornada = actual.get("jornada")
 		if jornada is Dictionary:
 			return TiendaVideojuegos.compras(jornada)
 		actual = actual.get_parent()
-	return []
+	return TiendaVideojuegos.compras({})
 
 
 func _al_cerrar_app() -> void:
