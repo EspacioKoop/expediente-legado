@@ -492,20 +492,21 @@ func presentar_estado(modo: String) -> bool:
 
 
 func _ritmo_estado(modo: String) -> float:
+	var ritmo := 1.5
 	match modo:
 		"hambriento":
-			return 3.4
+			ritmo = 3.4
 		"mimos":
-			return 2.4
+			ritmo = 2.4
 		"durmiendo":
-			return 0.35
+			ritmo = 0.35
 		"sentado":
-			return 0.9
+			ritmo = 0.9
 		"observando":
-			return 0.65
+			ritmo = 0.65
 		"escondido":
-			return 0.5
-	return 1.5
+			ritmo = 0.5
+	return ritmo
 
 
 ## Lo que hace que no parezca una figura: respira, y de vez en cuando mueve
