@@ -61,7 +61,8 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 			espacio.get("textura_suelo", ""),
 			espacio.get("textura_muro", ""),
 			espacio.get("textura_techo", ""),
-			espacio.get("escala_textura", 1.2)
+			espacio.get("escala_textura", 1.2),
+			PoliticaTecho.debe_tener(espacio)
 		)
 	else:
 		# `centro_suelo` desplaza el rectángulo sin mover el origen del sitio:
@@ -70,7 +71,8 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 		var medidas: Vector2 = espacio.get("suelo", Vector2(10, 10))
 		var centro: Vector2 = espacio.get("centro_suelo", Vector2.ZERO)
 		_suelo(raiz, medidas, color_suelo, espacio.get("textura_suelo", ""), centro)
-		_techo(raiz, medidas, color_techo, espacio.get("textura_techo", ""), centro)
+		if PoliticaTecho.debe_tener(espacio):
+			_techo(raiz, medidas, color_techo, espacio.get("textura_techo", ""), centro)
 		_muros(raiz, medidas, color_muro, espacio.get("textura_muro", ""), centro)
 
 	for bulto in espacio.get("bultos", []):
@@ -337,7 +339,8 @@ static func _por_planta(
 	textura_suelo: String = "",
 	textura_muro: String = "",
 	textura_techo: String = "",
-	metros: float = 1.2
+	metros: float = 1.2,
+	con_techo: bool = true
 ) -> void:
 	for rect in Planta.rectangulos(bloques):
 		var esquina := Planta.esquina_en_metros(bloques, rect.position)
@@ -351,15 +354,16 @@ static func _por_planta(
 			textura_suelo,
 			metros
 		)
-		var techo := _caja(
-			raiz,
-			centro + Vector3(0, ALTURA_MURO + GROSOR_MURO / 2.0, 0),
-			tam,
-			color_techo,
-			textura_techo,
-			metros
-		)
-		_emisivo(techo, color_techo)
+		if con_techo:
+			var techo := _caja(
+				raiz,
+				centro + Vector3(0, ALTURA_MURO + GROSOR_MURO / 2.0, 0),
+				tam,
+				color_techo,
+				textura_techo,
+				metros
+			)
+			_emisivo(techo, color_techo)
 
 	for tramo in Planta.contorno(bloques):
 		var largo: float = (tramo["hasta"] - tramo["desde"]) * Planta.CELDA
