@@ -95,7 +95,7 @@ func _capturar_caso(caso: Dictionary, salida: String) -> void:
 	for i in 12:
 		await process_frame
 
-	await _guardar_captura(salida, String(caso["archivo"]))
+	_guardar_captura(salida, String(caso["archivo"]))
 
 	if String(caso["archivo"]) == "justicia-duat":
 		juicio._jugador.position = Vector3(0.0, 0.0, -1.1)
@@ -103,7 +103,7 @@ func _capturar_caso(caso: Dictionary, salida: String) -> void:
 		juicio._iniciar_ataque_rival()
 		await process_frame
 		await process_frame
-		await _guardar_captura(salida, "telegraph-ataque")
+		_guardar_captura(salida, "telegraph-ataque")
 
 	anfitrion.queue_free()
 	await process_frame
