@@ -106,7 +106,9 @@ static func _gato(comprobar: Callable) -> void:
 		["mimos", "Coger gato"]
 	)
 	comprobar.call("cogerlo acepta la acción", interactivo.interactuar(null), true)
-	comprobar.call("tras cogerlo vuelve a ofrecer mimos", interactivo.texto_accion(), "Acariciar gato")
+	comprobar.call(
+		"tras cogerlo vuelve a ofrecer mimos", interactivo.texto_accion(), "Acariciar gato"
+	)
 
 	var actor := Node3D.new()
 	actor.position = Vector3(2.0, 0, 0)
@@ -233,8 +235,10 @@ static func _malla(comprobar: Callable) -> void:
 	var codigo_gato := FileAccess.get_file_as_string("res://guion/gato.gd")
 	comprobar.call(
 		"el gato es interactuable sin cuerpo bloqueante",
-		codigo_gato.contains("extends Interactuable3D")
-		and not codigo_gato.contains("extends CharacterBody3D"),
+		(
+			codigo_gato.contains("extends Interactuable3D")
+			and not codigo_gato.contains("extends CharacterBody3D")
+		),
 		true
 	)
 	comprobar.call(
