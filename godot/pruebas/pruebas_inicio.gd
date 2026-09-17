@@ -100,10 +100,21 @@ func _probar() -> void:
 		inicio._diorama.get("_zona_actual") == "salir",
 		"enfocar una opción deriva el encuadre del diorama"
 	)
+	var taza := inicio._diorama.find_child("TazaPuesto", true, false) as MeshInstance3D
+	var papel := inicio._diorama.find_child("PapelBandeja", true, false) as Node3D
+	var vapor := inicio._diorama.find_child("VaporTaza", true, false) as MeshInstance3D
+	_comprobar(taza != null, "#830: la composición del escritorio incluye taza reutilizada")
+	_comprobar(papel != null, "#830: la bandeja mantiene papel visible en la composición")
+	_comprobar(vapor != null and vapor.visible, "#830: la taza aporta vapor ambiental sutil")
 	inicio._diorama.configurar_reduccion_movimiento(true)
 	_comprobar(
 		inicio._diorama.get("_exterior").get("_reduccion_movimiento"),
 		"reducir movimiento también congela la ventana exterior del diorama"
+	)
+	_comprobar(vapor != null and not vapor.visible, "reducir movimiento elimina el vapor no esencial")
+	_comprobar(
+		papel != null and is_zero_approx(papel.rotation.y),
+		"reducir movimiento devuelve el papel a una pose estable"
 	)
 	inicio.free()
 
