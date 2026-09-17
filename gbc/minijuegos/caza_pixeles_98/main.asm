@@ -90,7 +90,7 @@ Inicio:
     di
     ld sp, $DFFF
     xor a
-    ld [wTituloCGB], a
+    ld [wPantallaCGB], a
 
 .espera_vblank:
     ldh a, [rLY]
@@ -637,7 +637,7 @@ DibujarTitulo:
     ld hl, TituloCGB
     call CargarPantallaCGB
     ld a, 1
-    ld [wTituloCGB], a
+    ld [wPantallaCGB], a
     ret
 .texto:
     ld hl, BG_MAP + (2 * 32) + 2
@@ -754,11 +754,11 @@ CargarTiles:
 LimpiarFondo:
     ; Al salir del título a pantalla completa se recuperan tiles, paleta y
     ; atributos del juego antes de dibujar nada (#808).
-    ld a, [wTituloCGB]
+    ld a, [wPantallaCGB]
     or a
     jr z, .limpiar
     xor a
-    ld [wTituloCGB], a
+    ld [wPantallaCGB], a
     call DescargarPantallaCGB
     call CargarTiles
     call ConfigurarPaletas
@@ -981,10 +981,10 @@ wTeclas:            ds 1
 wTeclasPrevias:     ds 1
 wTeclasNuevas:      ds 1
 
-; Título a pantalla completa (#808): si el fondo la tiene cargada, para
-; devolverle sus tiles al juego al salir.
+; Pantalla completa CGB (#808): si el fondo la tiene cargada, para devolverle
+; sus tiles al juego al salir.
 SECTION "TituloCGBVars", WRAM0
-wTituloCGB:  ds 1
+wPantallaCGB:  ds 1
 
 SECTION "TituloCGB", ROMX
     PANTALLA_CGB TituloCGB, "assets/titulo"

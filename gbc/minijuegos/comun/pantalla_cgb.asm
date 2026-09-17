@@ -13,6 +13,11 @@
 ;     call CargarPantallaCGB     ; LCD apagada
 ;     ...
 ;     call DescargarPantallaCGB  ; antes de volver a sus tiles: limpia atributos
+;
+; Las variantes de una pantalla (gbc_imagen_a_tiles.convertir_con_variantes) son
+; parches de celdas que se aplican con la LCD encendida:
+;     ld hl, MiPantalla_Variante     ; o MiPantalla_Variante_Base para deshacerla
+;     call AplicarParcheCGB
 
 IF !DEF(rVBK)
 DEF rVBK EQU $FF4F
@@ -22,6 +27,9 @@ DEF rBCPS EQU $FF68
 ENDC
 IF !DEF(rBCPD)
 DEF rBCPD EQU $FF69
+ENDC
+IF !DEF(rSTAT)
+DEF rSTAT EQU $FF41
 ENDC
 
 ; PANTALLA_CGB etiqueta, "ruta/prefijo" — define el descriptor y los datos.
@@ -151,6 +159,59 @@ CargarPantallaCGB:
     dec b
     jr nz, .paletas
 
+    xor a
+    ldh [rVBK], a
+    ret
+
+; Espera a HBlank o VBlank (modos 0 y 1) sin llamada: la escritura que sigue
+; tiene que caer dentro de la ventana, que en HBlank dura unos 20 µs.
+MACRO ESPERAR_ESCRITURA_CGB
+.espera\1:
+    ldh a, [rSTAT]
+    and 2
+    jr nz, .espera\1
+ENDM
+
+; HL = parche: n y, n veces, fila, columna, tile y atributos. Sirve con la LCD
+; encendida o apagada. Deja el banco 0 de VRAM seleccionado.
+AplicarParcheCGB:
+    ld a, [hli]
+    ld b, a
+.celda:
+    push bc
+    ; DE = $9800 + fila * 32 + columna
+    ld a, [hli]
+    ld e, a
+    ld d, 0
+    REPT 5
+    sla e
+    rl d
+    ENDR
+    ld a, [hli]
+    add e
+    ld e, a
+    ld a, d
+    adc $98
+    ld d, a
+    ld a, [hli]
+    ld c, a
+    ld a, [hli]
+    ld b, a
+
+    xor a
+    ldh [rVBK], a
+    ESPERAR_ESCRITURA_CGB tile
+    ld a, c
+    ld [de], a
+    ld a, 1
+    ldh [rVBK], a
+    ESPERAR_ESCRITURA_CGB atributo
+    ld a, b
+    ld [de], a
+
+    pop bc
+    dec b
+    jr nz, .celda
     xor a
     ldh [rVBK], a
     ret

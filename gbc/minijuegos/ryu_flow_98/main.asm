@@ -30,7 +30,13 @@ DEF rIE    EQU $FFFF
 
 DEF VRAM_TILES EQU $8000
 DEF BG_MAP     EQU $9800
-DEF OAM_BASE   EQU $FE00
+; Los sprites se escriben en una OAM en sombra y el bucle principal la vuelca
+; nada más despertar en VBlank: así se pueden mover en cualquier momento del
+; fotograma. (Con DMA desde la interrupción el núcleo de la portátil dejaba de
+; leer los controles.)
+DEF OAM_BASE   EQU $C200
+DEF OAM_REAL   EQU $FE00
+DEF SPRITES_VOLCADOS EQU 8
 
 DEF ESTADO_TITULO EQU 0
 DEF ESTADO_JUEGO  EQU 1
@@ -76,6 +82,16 @@ DEF SOLUCION_COMPUERTAS  EQU %00000010
 DEF TODAS_TOCADAS        EQU %00000111
 DEF MARCA_COMPLETADO     EQU $A5
 
+; Arte de la lámina en Game Boy Color (#808).
+DEF PRIMER_TILE_SPRITE EQU 240 ; banco 1 de VRAM, tras los tiles de la pantalla
+DEF TILE_SPRITE_CURSOR EQU PRIMER_TILE_SPRITE + 10
+DEF ATRIB_CIFRA        EQU %00001000 ; banco 1, paleta 0
+DEF ATRIB_CURSOR       EQU %00001001 ; banco 1, paleta 1
+DEF CURSOR_Y           EQU 34 + 16
+DEF CIFRAS_Y           EQU 130 + 16
+DEF DRAGONES_X         EQU 108 + 8
+DEF MOVIMIENTOS_X      EQU 140 + 8
+
 
 INCLUDE "../comun/pantalla_cgb.asm"
 
@@ -96,7 +112,7 @@ Inicio:
     di
     ld sp, $DFFF
     xor a
-    ld [wTituloCGB], a
+    ld [wPantallaCGB], a
 
 .espera_vblank:
     ldh a, [rLY]
@@ -127,6 +143,7 @@ Inicio:
 
 Bucle:
     halt
+    call VolcarOAM
     call LeerControles
 
     ld a, [wEstado]
@@ -157,6 +174,7 @@ EstadoJuego:
     and KEY_A
     jr z, .cursor
     call ToggleCompuerta
+    call SumarMovimiento
     call SonidoCompuerta
     call ActualizarCompuertas
     call ComprobarSolucion
@@ -215,10 +233,20 @@ IniciarJuego:
     ld [wSeleccion], a
     ld [wTocados], a
     ld [wRyuFlowCompletado], a
+    ld [wModoCGB], a
+    ld [wMovimientos], a
+    ld [wMovimientos + 1], a
+    ld [wMovimientos + 2], a
     ld a, COMPUERTAS_INICIALES
     ld [wCompuertas], a
 
+    call EsCGB
+    jr nz, .texto
+    call DibujarJuegoCGB
+    jr .dibujado
+.texto:
     call DibujarJuego
+.dibujado:
     call ActualizarCompuertas
     call ActualizarCursor
 
@@ -303,7 +331,17 @@ CompletarFlujo:
     call DesactivarLCD
     call LimpiarOAM
     call LimpiarFondo
+    ld a, [wModoCGB]
+    or a
+    jr z, .texto
+    ld hl, VictoriaCGB
+    call CargarPantallaCGB
+    ld a, 1
+    ld [wPantallaCGB], a
+    jr .dibujado
+.texto:
     call DibujarFinal
+.dibujado:
 
     ld a, ESTADO_FIN
     ld [wEstado], a
@@ -331,6 +369,13 @@ ActivarLCD:
     ret
 
 ActualizarCursor:
+    ; Tras resolver el puzle no queda nada que señalar.
+    ld a, [wEstado]
+    cp ESTADO_JUEGO
+    ret nz
+    ld a, [wModoCGB]
+    or a
+    jp nz, ActualizarSpritesCGB
     ld hl, OAM_BASE
     ld a, 80
     ld [hli], a
@@ -352,6 +397,9 @@ ActualizarCursor:
     ret
 
 ActualizarCompuertas:
+    ld a, [wModoCGB]
+    or a
+    jp nz, ActualizarCompuertasCGB
     ; Compuerta 1: objetivo arriba (bit 0 = 0).
     ld hl, BG_MAP + (9 * 32) + 4
     call EsperarVRAM
@@ -398,7 +446,7 @@ DibujarTitulo:
     ld hl, TituloCGB
     call CargarPantallaCGB
     ld a, 1
-    ld [wTituloCGB], a
+    ld [wPantallaCGB], a
     ret
 .texto:
     ld hl, BG_MAP + (3 * 32) + 6
@@ -507,6 +555,172 @@ DibujarFinal:
     ld [hl], a
     ret
 
+; Pantalla de juego de la lámina: escena, HUD, sprites y sus paletas. LCD apagada.
+DibujarJuegoCGB:
+    ld hl, JuegoCGB
+    call CargarPantallaCGB
+    ld a, 1
+    ld [wPantallaCGB], a
+    ld [wModoCGB], a
+
+    ld a, 1
+    ldh [rVBK], a
+    ld hl, VRAM_TILES + PRIMER_TILE_SPRITE * 16
+    ld de, SpritesCGB
+    ld bc, SpritesCGBFin - SpritesCGB
+    call CopiarCGB
+    xor a
+    ldh [rVBK], a
+
+    ld a, $80
+    ldh [rOCPS], a
+    ld hl, PaletasSpritesCGB
+    ld b, PaletasSpritesCGBFin - PaletasSpritesCGB
+.obj:
+    ld a, [hli]
+    ldh [rOCPD], a
+    dec b
+    jr nz, .obj
+    ret
+
+; Cada compuerta abierta (bit a 0) muestra agua entre las columnas del torii y
+; cada compuerta en su posición final enciende su icono del HUD.
+ActualizarCompuertasCGB:
+    ld a, [wCompuertas]
+    ld [wBitsCompuertas], a
+    ld a, SOLUCION_COMPUERTAS
+    ld [wBitsSolucion], a
+    xor a
+    ld [wCorrectas], a
+    ld hl, ParchesCompuertasCGB
+    ld c, 3
+.compuerta:
+    push bc
+    ld a, [wBitsCompuertas]
+    and 1
+    call ElegirParcheCGB
+
+    ld a, [wBitsSolucion]
+    ld b, a
+    ld a, [wBitsCompuertas]
+    xor b
+    and 1
+    jr nz, .icono
+    ld a, [wCorrectas]
+    inc a
+    ld [wCorrectas], a
+    xor a
+.icono:
+    call ElegirParcheCGB
+
+    ld a, [wBitsCompuertas]
+    srl a
+    ld [wBitsCompuertas], a
+    ld a, [wBitsSolucion]
+    srl a
+    ld [wBitsSolucion], a
+    pop bc
+    dec c
+    jr nz, .compuerta
+    ret
+
+; HL = pareja de punteros a parche. A = 0 aplica el primero; si no, el segundo.
+; Devuelve HL en la pareja siguiente.
+ElegirParcheCGB:
+    push hl
+    or a
+    jr z, .leer
+    inc hl
+    inc hl
+.leer:
+    ld a, [hli]
+    ld h, [hl]
+    ld l, a
+    call AplicarParcheCGB
+    pop hl
+    ld de, 4
+    add hl, de
+    ret
+
+; Cursor que flota sobre la compuerta elegida, dragones despiertos y movimientos.
+ActualizarSpritesCGB:
+    ld a, [wFrames]
+    inc a
+    ld [wFrames], a
+    swap a
+    and 1
+    ld b, a
+
+    ld a, [wSeleccion]
+    ld e, a
+    ld d, 0
+    ld hl, CursorXCGB
+    add hl, de
+    ld c, [hl]
+
+    ld hl, OAM_BASE
+    ld a, CURSOR_Y
+    add b
+    ld [hli], a
+    ld a, c
+    ld [hli], a
+    ld a, TILE_SPRITE_CURSOR
+    ld [hli], a
+    ld a, ATRIB_CURSOR
+    ld [hli], a
+
+    ld a, CIFRAS_Y
+    ld [hli], a
+    ld a, DRAGONES_X
+    ld [hli], a
+    ld a, [wCorrectas]
+    add PRIMER_TILE_SPRITE
+    ld [hli], a
+    ld a, ATRIB_CIFRA
+    ld [hli], a
+
+    ld de, wMovimientos
+    ld c, MOVIMIENTOS_X
+    ld b, 3
+.cifra:
+    ld a, CIFRAS_Y
+    ld [hli], a
+    ld a, c
+    ld [hli], a
+    add 6
+    ld c, a
+    ld a, [de]
+    inc de
+    add PRIMER_TILE_SPRITE
+    ld [hli], a
+    ld a, ATRIB_CIFRA
+    ld [hli], a
+    dec b
+    jr nz, .cifra
+    ret
+
+; Movimientos en tres cifras decimales; se quedan en 999.
+SumarMovimiento:
+    ld hl, wMovimientos + 2
+    ld b, 3
+.cifra:
+    ld a, [hl]
+    inc a
+    cp 10
+    jr c, .guardar
+    xor a
+    ld [hld], a
+    dec b
+    jr nz, .cifra
+    ld a, 9
+    ld [wMovimientos], a
+    ld [wMovimientos + 1], a
+    ld [wMovimientos + 2], a
+    ret
+.guardar:
+    ld [hl], a
+    ret
+
 EscribirTexto:
 .loop:
     ld a, [de]
@@ -524,12 +738,29 @@ EsperarVRAM:
     jr z, .espera
     ret
 
+; LCD apagada: limpia la OAM en sombra y la real.
 LimpiarOAM:
     ld hl, OAM_BASE
+    call .limpiar
+    ld hl, OAM_REAL
+.limpiar:
     ld b, 160
     xor a
 .loop:
     ld [hli], a
+    dec b
+    jr nz, .loop
+    ret
+
+; Justo tras el halt, en VBlank: copia a la OAM los sprites que usa la ROM.
+VolcarOAM:
+    ld hl, OAM_BASE
+    ld de, OAM_REAL
+    ld b, SPRITES_VOLCADOS * 4
+.loop:
+    ld a, [hli]
+    ld [de], a
+    inc de
     dec b
     jr nz, .loop
     ret
@@ -551,11 +782,11 @@ CargarTiles:
 LimpiarFondo:
     ; Al salir del título a pantalla completa se recuperan tiles, paleta y
     ; atributos del juego antes de dibujar nada (#808).
-    ld a, [wTituloCGB]
+    ld a, [wPantallaCGB]
     or a
     jr z, .limpiar
     xor a
-    ld [wTituloCGB], a
+    ld [wPantallaCGB], a
     call DescargarPantallaCGB
     call CargarTiles
     call ConfigurarPaletas
@@ -724,6 +955,24 @@ PaletaObjeto:
     dw $7FFF, $7FE0, $03E0, $0000
 PaletaObjetoFin:
 
+; Posición X (OAM) del cursor sobre cada torii.
+CursorXCGB:
+    db 23 + 8, 23 + 45 + 8, 23 + 90 + 8
+
+; Por compuerta: abierta / cerrada e icono encendido / apagado.
+ParchesCompuertasCGB:
+    dw JuegoCGB_Abierta1, JuegoCGB_Abierta1_Base, JuegoCGB_Correcta1, JuegoCGB_Correcta1_Base
+    dw JuegoCGB_Abierta2, JuegoCGB_Abierta2_Base, JuegoCGB_Correcta2, JuegoCGB_Correcta2_Base
+    dw JuegoCGB_Abierta3, JuegoCGB_Abierta3_Base, JuegoCGB_Correcta3, JuegoCGB_Correcta3_Base
+
+SpritesCGB:
+    INCLUDE "assets/sprites_tiles.inc"
+SpritesCGBFin:
+
+PaletasSpritesCGB:
+    INCLUDE "assets/sprites_paletas.inc"
+PaletasSpritesCGBFin:
+
 SECTION "Variables", WRAM0
 wEstado:        ds 1
 wSeleccion:     ds 1
@@ -738,10 +987,29 @@ wTeclasNuevas:  ds 1
 SECTION "Handshake", WRAM0[$C100]
 wRyuFlowCompletado: ds 1
 
-; Título a pantalla completa (#808): si el fondo la tiene cargada, para
-; devolverle sus tiles al juego al salir.
+; Pantalla completa CGB (#808): si el fondo la tiene cargada, para devolverle
+; sus tiles al juego al salir.
 SECTION "TituloCGBVars", WRAM0
-wTituloCGB:  ds 1
+wPantallaCGB:  ds 1
+
+; Pantalla de juego y victoria con el arte de la lámina (#808).
+SECTION "JuegoCGBVars", WRAM0
+wModoCGB:        ds 1
+wCorrectas:      ds 1
+wBitsCompuertas: ds 1
+wBitsSolucion:   ds 1
+wFrames:         ds 1
+wMovimientos:    ds 3
+
+SECTION "OAMSombra", WRAM0[OAM_BASE]
+wOAMSombra:      ds 160
 
 SECTION "TituloCGB", ROMX
     PANTALLA_CGB TituloCGB, "assets/titulo"
+
+SECTION "JuegoCGB", ROM0
+    PANTALLA_CGB JuegoCGB, "assets/juego"
+    INCLUDE "assets/juego_variantes.inc"
+
+SECTION "VictoriaCGB", ROMX
+    PANTALLA_CGB VictoriaCGB, "assets/victoria"
