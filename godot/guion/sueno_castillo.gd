@@ -7,6 +7,7 @@ class_name SuenoCastillo
 extends RefCounted
 
 const ID := "castillo"
+const VARIANTES := ["patio", "scriptorium", "torre_capilla"]
 
 ## Señal local del códice. Es una anomalía deliberadamente abstracta: hace
 ## localizable una lectura sin introducir otro prop externo ni texto nuevo.
@@ -26,6 +27,7 @@ static func configuracion(estado_presentacion: Dictionary = {}) -> Dictionary:
 	var indice_codice := 0
 	if not anclas.is_empty():
 		indice_codice = posmod(semilla + vuelta, anclas.size())
+	var indice_variante := posmod(semilla + maxi(0, vuelta - 1), VARIANTES.size())
 
 	return {
 		"id": ID,
@@ -35,6 +37,7 @@ static func configuracion(estado_presentacion: Dictionary = {}) -> Dictionary:
 		"altura": familia.get("altura", 3.4),
 		"entrada": familia.get("entrada", Vector3.ZERO),
 		"anclas": anclas,
+		"variante": VARIANTES[indice_variante],
 		"anomalias":
 		# Al volver al mismo patio, la entrada reaparece en otra ancla conocida.
 		# La geometría no se teletransporta ni se inventan coordenadas fuera de
@@ -89,6 +92,7 @@ static func adaptar_espacio(
 	resultado["identidad_onirica"] = ID
 	resultado["contorno"] = configurada["contorno"]
 	resultado["altura_contorno"] = float(configurada.get("altura", 3.4))
+	resultado["variante_castillo"] = String(configurada.get("variante", "patio"))
 	resultado["anomalias_oniricas"] = configurada["anomalias"].duplicate(true)
 
 	var anomalias: Dictionary = configurada.get("anomalias", {})
