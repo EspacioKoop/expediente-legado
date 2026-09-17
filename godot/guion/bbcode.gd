@@ -15,14 +15,14 @@ static func escapar(texto: String) -> String:
 
 
 ## Una pista conserva siempre su metadato clicable. El estado de descubierta
-## cambia el fondo, no la interacción: así el hover y el clic responden igual
+## cambia el fondo, no la interacción: así hover y clic pasan por el mismo URL
 ## antes y después de descubrirla.
 static func _pista(texto: String, id: Variant, descubierta: bool) -> String:
 	var visible := texto
 	if descubierta:
 		visible = "[bgcolor=#c8c800]%s[/bgcolor]" % visible
 	return (
-		"[url=pista:%s underline=hover][color=#0000aa]%s[/color][/url]"
+		"[url=pista:%s][color=#0000aa][u]%s[/u][/color][/url]"
 		% [id, visible]
 	)
 
