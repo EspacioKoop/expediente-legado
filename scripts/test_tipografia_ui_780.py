@@ -27,6 +27,11 @@ class TipografiaUi780Test(unittest.TestCase):
         self.assertIn("static func fuente_documento()", self.estilo)
         self.assertIn("static func fuente_mono()", self.estilo)
         self.assertIn(
+            'const RUTA_FUENTE_DOCUMENTO := "res://assets/fonts/MFBOldstyle-Regular.otf"',
+            self.estilo,
+        )
+        self.assertIn("return load(RUTA_FUENTE_DOCUMENTO) as Font", self.estilo)
+        self.assertNotIn(
             'preload("res://assets/fonts/MFBOldstyle-Regular.otf")', self.estilo
         )
         self.assertIn(

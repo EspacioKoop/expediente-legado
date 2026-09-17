@@ -20,7 +20,7 @@ const AMARILLO_VISTO := Color("c8c800")  ## una frase gatillo ya leída
 const GRIS_TEXTO := Color("808080")
 
 const GROSOR := 2
-const FUENTE_DOCUMENTO := preload("res://assets/fonts/MFBOldstyle-Regular.otf")
+const RUTA_FUENTE_DOCUMENTO := "res://assets/fonts/MFBOldstyle-Regular.otf"
 
 
 ## Dibuja el bisel sobre un rectángulo. [param saliente] a false lo hunde.
@@ -130,9 +130,11 @@ static func _configurar_campos(tema: Theme) -> void:
 
 ## Texto de documento. MFB Oldstyle ya estaba empaquetada y registrada como
 ## CC0; ahora es un rol explícito en vez de la fuente global accidental de todo
-## el proyecto.
+## el proyecto. La carga es diferida a propósito: en un checkout limpio Godot
+## parsea este script antes de importar el OTF y `preload()` falla al no existir
+## todavía un ResourceLoader para esa extensión.
 static func fuente_documento() -> Font:
-	return FUENTE_DOCUMENTO
+	return load(RUTA_FUENTE_DOCUMENTO) as Font
 
 
 ## Monoespaciada para terminales, volcados y rótulos técnicos. Sigue teniendo
