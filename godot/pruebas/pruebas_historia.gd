@@ -44,9 +44,7 @@ static func _contrato_ideologico(comprobar: Callable) -> void:
 	)
 	comprobar.call(
 		"el prefijo de Tarot está reservado a historias_cartas",
-		Prometeo.registrar_eleccion_ideologica(
-			estado, "tarot:la-luna", "expediente", "comunismo"
-		),
+		Prometeo.registrar_eleccion_ideologica(estado, "tarot:la-luna", "expediente", "comunismo"),
 		false
 	)
 
@@ -60,11 +58,7 @@ static func _contrato_ideologico(comprobar: Callable) -> void:
 	comprobar.call(
 		"un NPC puede registrar su lectura sin votar por el jugador",
 		Prometeo.registrar_lectura_social(
-			estado,
-			"cunado",
-			"expediente:caso9:resolucion",
-			"desacuerdo",
-			["oficina"]
+			estado, "cunado", "expediente:caso9:resolucion", "desacuerdo", ["oficina"]
 		),
 		true
 	)
