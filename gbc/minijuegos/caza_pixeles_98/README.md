@@ -29,6 +29,31 @@ Si se limpian los cuatro núcleos del Behemoth antes de que se agote el tiempo, 
 
 El combo conserva la ventana de **1,5 segundos**: desde 3 capturas puntúa x2 y desde 6 puntúa x3. La puntuación sigue saturada en 99 y la velocidad aumenta por puntuación y por fase.
 
+## Narrativa visual
+
+La historia se cuenta con el escenario y pequeñas viñetas de BG, sin cajas de exposición largas:
+
+- **intro**: Chromia vivo → extractor → croma que empieza a escapar;
+- **1→2**: la extracción activa y los focos industriales se revelan como origen del éxodo;
+- **2→3**: instalaciones apagadas, semilla y croma de retorno anticipan la restauración;
+- **Behemoth**: residuo + masa glitch + núcleo vulnerable dejan claro que el boss nace de maquinaria y contaminación;
+- **final positivo**: croma regresando, Chromia vivo y fauna;
+- **derrota**: el croma sigue escapando y permanece un residuo activo.
+
+`cinematicas.asm` usa tiles BG propios (`54–62`) y no escribe OAM. Las viñetas de gameplay son **no bloqueantes**: duran 72 frames en la intro, 42 en cambios de fase y 48 al aparecer el Behemoth, mientras las reglas del juego siguen siendo las mismas. El epílogo queda integrado en la pantalla final de récords.
+
+## Música y sonido
+
+`musica.asm` añade una base musical original y pequeña, secuenciada en patrones de ocho pasos:
+
+- fase 1: motivo más abierto y luminoso;
+- fase 2: patrón más bajo, repetitivo e industrial;
+- fase 3: motivo ascendente/resolutivo;
+- Behemoth: patrón grave y mecánico;
+- remates distintos para victoria y derrota.
+
+La separación de canales evita que la música tape el feedback jugable: **canal 1 = SFX** existentes y **canal 2 = música**, ambos enviados a izquierda/derecha mediante `rNR51 = $33`. Captura, restauración, foco, cambio de fase, boss, golpes y final conservan sus efectos propios sobre la música.
+
 ## Escenario vivo, parallax y fauna
 
 El gameplay ya no se apoya en un fondo casi vacío. `escenario.asm` dibuja un campo completo por fase sin aumentar el coste OAM del juego:
@@ -52,7 +77,7 @@ Ave y pez alternan dos frames de animación cada 16 frames. Como todo esto son t
 
 ## Transiciones breves
 
-Los cambios de fase tienen una transición visual corta de **36 frames** con iconografía mínima y sin textos largos. El cambio de fondo se hace con LCD apagado para evitar tearing, se reactiva inmediatamente y el juego continúa; no se altera `wTiempo` ni se introduce un `halt` adicional.
+Los cambios de fase mantienen además la transición visual corta de **36 frames** del escenario. El cambio de fondo se hace con LCD apagado para evitar tearing, se reactiva inmediatamente y el juego continúa; no se altera `wTiempo` ni se introduce un `halt` adicional.
 
 También hay aviso visual propio para la aparición del Behemoth y una marca final distinta según se haya disuelto el residuo o haya quedado contaminación activa.
 
@@ -113,10 +138,10 @@ La pantalla final muestra el resultado actual y los mejores valores persistidos.
 - parallax de dos velocidades sin desplazar el HUD;
 - fauna animada y reactiva a restauración mediante tiles BG;
 - metasprite 32×32 del Glitch Behemoth;
-- transiciones visuales breves entre fases y aviso de boss;
-- sonidos diferenciados para captura, restauración, cierre de foco, transición de fase, aparición del Behemoth, golpe de núcleo, victoria y derrota.
+- transiciones visuales y viñetas narrativas breves;
+- música propia por fase/boss y finales, separada de los SFX por canal.
 
-Todavía quedan en #882 la **música de fase completa**, cinemáticas más elaboradas que las transiciones actuales y las capturas/playtest visual humano final.
+A partir de este corte, lo pendiente de #882 queda centrado en **capturas comparativas y playtest visual/auditivo humano final en `Siga98GB`**, más cualquier ajuste de pulido que salga de esa validación.
 
 ## Compilar
 
@@ -132,7 +157,7 @@ Salida:
 build/caza_pixeles_98.gbc
 ```
 
-El byte CGB del encabezado es `0x80`. `cartucho.mk` fija MBC5+RAM+BATTERY (`0x1B`) y 8 KiB de SRAM (`0x02`). `Makefile` declara `escenario.asm` como dependencia explícita para que los cambios visuales fuercen recompilación incremental.
+El byte CGB del encabezado es `0x80`. `cartucho.mk` fija MBC5+RAM+BATTERY (`0x1B`) y 8 KiB de SRAM (`0x02`). `Makefile` declara `escenario.asm`, `musica.asm` y `cinematicas.asm` como dependencias explícitas para que sus cambios fuercen recompilación incremental.
 
 ## Pruebas de regresión
 
@@ -152,11 +177,13 @@ make clean test
 - dos capas de parallax con cadencias diferentes y sin scroll global;
 - fauna BG animada/reactiva que no consume OAM;
 - transiciones temporizadas sin bloquear ni modificar el timer;
+- música por fase/boss/final en canal 2 sin invadir los registros de SFX del canal 1;
+- intro, beats de fase, aparición del boss y epílogos positivo/derrota mediante BG sin OAM;
 - HUD de fase/restauración;
 - formato y protección de SRAM;
 - cabecera CGB y cartucho con batería.
 
-El smoke común del repositorio valida la ROM con `Siga98GB`, el mismo núcleo usado por la Portátil Color 98. Este README no afirma validación visual humana: las capturas comparativas y el playtest final forman parte del trabajo pendiente de #882.
+El smoke común del repositorio valida la ROM con `Siga98GB`, el mismo núcleo usado por la Portátil Color 98. Este README todavía no afirma validación visual/auditiva humana: las capturas comparativas y el playtest final forman parte del último trabajo pendiente de #882.
 
 ## Integración
 
