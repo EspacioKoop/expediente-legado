@@ -35,7 +35,9 @@ func _init() -> void:
 				continue
 			enlazables += 1
 
-			var prefijo := "%s / %s / %s" % [caso.get("id", "?"), registro.get("folio", "?"), id]
+			var prefijo := (
+				"%s / %s / %s" % [caso.get("id", "?"), registro.get("folio", "?"), id]
+			)
 			comprobar(
 				prefijo + ": la frase existe en el folio",
 				String(registro.get("contenido", "")).find(String(gatillo)) >= 0,
