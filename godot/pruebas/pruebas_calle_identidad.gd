@@ -2,6 +2,7 @@
 extends SceneTree
 
 const DIA := preload("res://escenas/dia.tscn")
+const VENTANILLA := preload("res://escenas/ventanilla.tscn")
 const GRUPOS := [
 	"EdificioOficina",
 	"BloqueCasa",
@@ -54,6 +55,7 @@ func _probar() -> void:
 		await process_frame
 		var montada = dia._mundo.get_node_or_null("CalleIdentidad")
 		_comprobar((montada != null) == (fase == "trayecto"), "hook real de fase " + fase)
+	await _probar_ventanilla_suelta()
 	_terminar(dia)
 
 
@@ -190,6 +192,37 @@ func _probar_coliseo(dia, calle: Node3D) -> void:
 		await process_frame
 	_comprobar(dia._pantalla == null, "al salir se vuelve a la calle")
 	_comprobar(dia._caminante.is_physics_processing(), "se vuelve a andar")
+
+	entrada.interactuar(dia._caminante)
+	await process_frame
+	pantalla = dia._pantalla
+	_comprobar(pantalla != null, "se puede reabrir el Coliseo")
+	if pantalla == null:
+		return
+	ventanilla = pantalla.get_child(0)
+	var cancelar := InputEventAction.new()
+	cancelar.action = "cancelar"
+	cancelar.pressed = true
+	ventanilla._unhandled_input(cancelar)
+	await process_frame
+	_comprobar(dia._pantalla == null, "cancelar cierra el Coliseo y vuelve a la calle")
+	_comprobar(dia._caminante.is_physics_processing(), "cancelar devuelve el control al jugador")
+
+
+func _probar_ventanilla_suelta() -> void:
+	var ventanilla = VENTANILLA.instantiate()
+	root.add_child(ventanilla)
+	await process_frame
+	var salir := ventanilla.find_child("SalirVentanilla", true, false) as Button
+	_comprobar(salir != null, "la Ventanilla suelta también muestra Salir")
+	var escape := InputEventAction.new()
+	escape.action = "ui_cancel"
+	escape.pressed = true
+	ventanilla._unhandled_input(escape)
+	await process_frame
+	await process_frame
+	_comprobar(current_scene != null and current_scene.name == "Inicio", "Esc vuelve al menú de inicio")
+	ventanilla.queue_free()
 
 
 func _terminar(dia) -> void:
