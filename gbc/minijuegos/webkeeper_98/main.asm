@@ -800,8 +800,10 @@ ActivarLCD:
 LimpiarFondo:
     ld hl, BG_MAP
     ld bc, 32 * 32
-    xor a
 .loop:
+    ; El OR del contador modifica A: sin repetir el xor, cada celda recibía el
+    ; contador y el mapa se llenaba de tiles de letras (#805).
+    xor a
     ld [hli], a
     dec bc
     ld a, b

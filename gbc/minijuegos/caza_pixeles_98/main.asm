@@ -741,8 +741,10 @@ CargarTiles:
 LimpiarFondo:
     ld hl, BG_MAP
     ld bc, 32 * 32
-    xor a
 .loop:
+    ; El OR del contador modifica A: sin repetir el xor, cada celda recibía el
+    ; contador y el mapa se llenaba de tiles de letras (#805).
+    xor a
     ld [hli], a
     dec bc
     ld a, b
@@ -752,8 +754,10 @@ LimpiarFondo:
 
 ConfigurarPaletas:
     ; Fallback DMG y emuladores que expongan paletas clasicas.
-    ld a, %11100100
+    ; DMG: el índice 1 del fondo (tinta) pasa a negro para que se lea (#805).
+    ld a, %11101100
     ldh [rBGP], a
+    ld a, %11100100
     ldh [rOBP0], a
 
     ; Fondo GBC 0: crema, verde grisaceo, verde oscuro, negro.
@@ -921,7 +925,9 @@ Tiles:
 TilesFin:
 
 PaletaFondo:
-    dw $7FFF, $5AD6, $318C, $0000
+    ; El color 1 es la tinta de letras, cifras y figuras (#805): en gris claro
+    ; no se leía. Crema, tinta verde muy oscura, verde oscuro, negro.
+    dw $63BE, $10C4, $1986, $0000
 PaletaFondoFin:
 
 PaletasObjetos:
