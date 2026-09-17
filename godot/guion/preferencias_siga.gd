@@ -161,6 +161,19 @@ static func aplicar(preferencias: Dictionary) -> void:
 			InputMap.action_add_event(accion, eje)
 			InputMap.action_set_deadzone(accion, ZONA_MUERTA_MOVIMIENTO)
 	_sincronizar_acciones_ui()
+	_asegurar_raton_interaccion()
+
+
+## El clic izquierdo es una vía fija del verbo semántico `interactuar`: no se
+## guarda ni se remapea, así que también aparece en partidas con preferencias v1
+## o v2 ya persistidas. Se añade DESPUÉS de copiar `interactuar` a `ui_accept`
+## para que el clic normal de un Control no active además el botón con foco.
+static func _asegurar_raton_interaccion() -> void:
+	if not InputMap.has_action("interactuar"):
+		InputMap.add_action("interactuar")
+	var raton := InputEventMouseButton.new()
+	raton.button_index = MOUSE_BUTTON_LEFT
+	InputMap.action_add_event("interactuar", raton)
 
 
 ## Familia del mando conectado, para nombrar sus botones como están impresos.
