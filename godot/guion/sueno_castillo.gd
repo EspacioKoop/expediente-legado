@@ -14,6 +14,7 @@ const COLOR_CODICE := Color(0.72, 0.58, 0.32)
 const ENERGIA_CODICE := 0.9
 const ALCANCE_CODICE := 3.2
 
+
 static func configuracion(estado_presentacion: Dictionary = {}) -> Dictionary:
 	var familia := SuenoFamilias.de(SuenoFamilias.ANULAR)
 	if familia.is_empty():
