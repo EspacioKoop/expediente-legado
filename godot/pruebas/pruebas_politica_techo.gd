@@ -17,6 +17,16 @@ func _init() -> void:
 	comprobar("marcar exterior conserva el tamaño", exterior["suelo"], original["suelo"])
 	comprobar("marcar exterior no muta el original", original.has("techo"), false)
 
+	var interior := Node3D.new()
+	get_root().add_child(interior)
+	Espacio3D.construir(interior, {"suelo": Vector2(2, 2)})
+	comprobar("interior rectangular crea seis cuerpos", _cuerpos(interior), 6)
+
+	var exterior_raiz := Node3D.new()
+	get_root().add_child(exterior_raiz)
+	Espacio3D.construir(exterior_raiz, {"suelo": Vector2(2, 2), "techo": false})
+	comprobar("exterior rectangular omite solo el techo", _cuerpos(exterior_raiz), 5)
+
 	print("\n%d pasadas, %d fallos" % [pasadas, fallos])
 	quit(1 if fallos > 0 else 0)
 
@@ -27,3 +37,11 @@ func comprobar(nombre: String, obtenido, esperado) -> void:
 	else:
 		fallos += 1
 		printerr("FALLO %s\n  esperado: %s\n  obtenido: %s" % [nombre, esperado, obtenido])
+
+
+func _cuerpos(raiz: Node3D) -> int:
+	var total := 0
+	for hijo in raiz.get_children():
+		if hijo is StaticBody3D:
+			total += 1
+	return total
