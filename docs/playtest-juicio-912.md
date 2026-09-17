@@ -27,8 +27,49 @@ No se modifica ningún valor en este corte. La matriz señala dos escenarios pri
 
 También deben observarse Luna + Minotauro por cámara/espacio y Justicia + Duat por frecuencia real de contraataques. Aquiles e Hidra quedan como referencias útiles: actualmente representan, respectivamente, una mejora ofensiva moderada (~6,1 % de throughput fuerte) y una extensión de resistencia acotada (+25 %).
 
+## Runner de sesiones manuales
+
+`playtest_juicio_sesion_912.gd` instancia una subclase exclusiva de pruebas que hereda `JuicioCombate3D`. La subclase no se usa desde la Ventanilla y no escribe en `Partida` ni `Jornada`; únicamente observa eventos del combate real y mantiene contadores en memoria.
+
+Ejemplo:
+
+```bash
+godot4 --path godot --script res://pruebas/playtest_juicio_sesion_912.gd -- --escenario=sol-maui
+```
+
+Escenarios disponibles:
+
+- `base`
+- `luna-minotauro`
+- `justicia-duat`
+- `fuerza-aquiles`
+- `sol-maui`
+- `colgado-anansi`
+- `muerte-hidra`
+
+Para repetir la matriz con accesibilidad dinámica desactivada:
+
+```bash
+godot4 --path godot --script res://pruebas/playtest_juicio_sesion_912.gd -- --escenario=base --reduccion-movimiento
+```
+
+Al terminar por victoria, derrota o cancelación, el proceso imprime una línea `PLAYTEST_912_JSON=...` con:
+
+- duración de la sesión;
+- determinación perdida por el jugador;
+- ligeros y fuertes conectados;
+- esquivas útiles;
+- interrupciones solares;
+- contraataques consumidos;
+- retornos de Hidra;
+- resultado y ritual activo;
+- determinación final de ambos contendientes;
+- escenario y estado de reducción de movimiento.
+
+El resumen es una copia: herramientas externas pueden transformarlo o agregarlo sin mutar los contadores internos del combate de prueba.
+
 ## Qué falta para cerrar #912
 
-Este baseline cubre la parte reproducible previa al playtest, pero **no autoriza por sí solo ajustes numéricos ni el cierre del issue**. El siguiente paso sigue siendo ejecutar los siete escenarios desde controles reales y registrar duración, determinación perdida, ligeros/fuertes conectados, esquivas útiles, interrupciones/contraataques/retornos y problemas de cámara o lectura visual.
+El baseline y el runner cubren la preparación reproducible, pero **no autorizan por sí solos ajustes numéricos ni el cierre del issue**. El siguiente paso sigue siendo ejecutar los siete escenarios desde controles reales y comparar las líneas `PLAYTEST_912_JSON` junto a observaciones de cámara, alcance, telegráfico y feedback.
 
 Cualquier cambio posterior de números debe citar esa observación y añadir una regresión que impida volver al extremo que motivó el ajuste.
