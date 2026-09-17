@@ -6,6 +6,8 @@ RAIZ = Path(__file__).resolve().parents[1]
 AUDIO = RAIZ / "godot" / "guion" / "sueno_castillo_audio.gd"
 PRESENTACION = RAIZ / "godot" / "guion" / "sueno_castillo_3d.gd"
 DIA_SUENO = RAIZ / "godot" / "guion" / "dia_sueno_app.gd"
+SCRIPTORIUM = RAIZ / "godot" / "escenas" / "suenos" / "props_284" / "galeria_scriptorium_castillo.tscn"
+TORRE = RAIZ / "godot" / "escenas" / "suenos" / "props_284" / "torre_capilla_castillo.tscn"
 
 
 class SuenoCastilloPresentacionTest(unittest.TestCase):
@@ -14,6 +16,8 @@ class SuenoCastilloPresentacionTest(unittest.TestCase):
         cls.audio = AUDIO.read_text(encoding="utf-8")
         cls.presentacion = PRESENTACION.read_text(encoding="utf-8")
         cls.dia = DIA_SUENO.read_text(encoding="utf-8")
+        cls.scriptorium = SCRIPTORIUM.read_text(encoding="utf-8")
+        cls.torre = TORRE.read_text(encoding="utf-8")
 
     def test_campanas_son_procedurales_deterministas_y_sin_binarios(self):
         self.assertIn("AudioStreamWAV.new()", self.audio)
@@ -28,6 +32,25 @@ class SuenoCastilloPresentacionTest(unittest.TestCase):
         self.assertIn("AudioStreamPlayer3D.new()", self.presentacion)
         self.assertIn("SuenoCastilloAudio.campanadas()", self.presentacion)
         self.assertIn('campanas.name = "CampanasSinFuente"', self.presentacion)
+
+    def test_presentacion_selecciona_tres_composiciones_propias(self):
+        self.assertIn("galeria_scriptorium_castillo.tscn", self.presentacion)
+        self.assertIn("torre_capilla_castillo.tscn", self.presentacion)
+        self.assertIn('espacio.get("variante_castillo", "patio")', self.presentacion)
+        self.assertIn('"scriptorium":', self.presentacion)
+        self.assertIn('"torre_capilla":', self.presentacion)
+
+    def test_composiciones_reutilizan_piezas_sin_fisica_paralela(self):
+        for escena in (self.scriptorium, self.torre):
+            self.assertIn("muro_torre_castillo.tscn", escena)
+            self.assertIn("escalera_anular_castillo.tscn", escena)
+            self.assertNotIn("StaticBody3D", escena)
+            self.assertNotIn("CollisionShape3D", escena)
+            self.assertNotIn("BoxMesh", escena)
+            self.assertNotIn("CylinderMesh", escena)
+        self.assertIn("AtrilCodice", self.scriptorium)
+        self.assertIn("EscaleraAlta", self.torre)
+        self.assertIn("LuzAltaImposible", self.torre)
 
     def test_presentacion_solo_se_activa_por_identidad_de_datos(self):
         self.assertIn('espacio.get("identidad_onirica", "")', self.presentacion)
