@@ -23,12 +23,13 @@ Starter pack de **assets 3D originales del proyecto** para las cuatro familias d
 - `patio_castillo_onirico.tscn`: composición base con tres portadas, escalera imposible, dos estandartes y una iluminación de patio contenida.
 - `galeria_scriptorium_castillo.tscn`: ala de archivo/scriptorium compuesta con las mismas portadas y escalera; concentra el códice conocido sin añadir narrativa nueva.
 - `torre_capilla_castillo.tscn`: lectura vertical imposible que apila umbrales y dos escaleras a distinta altura sin crear una segunda navegación.
+- `claustro_reflejado_castillo.tscn`: claustro de arcadas repetidas con una portada elevada, dos escaleras enfrentadas y un estandarte invertido; funciona como ala de transición sin añadir colisión propia.
 
 ## Uso
 
 Cada fichero es una pieza independiente. Puede instanciarse directamente o abrirse y copiar sus nodos a una escena mayor. Los materiales siguen siendo editables para que el pase final pueda introducir texturas, desgaste o paleta específica sin rehacer la geometría.
 
-El castillo dispone ahora de tres composiciones sobre el mismo lenguaje arquitectónico: patio, scriptorium y torre/capilla. `SuenoCastillo` selecciona la lectura de forma determinista y `SuenoCastillo3D` la monta solo como presentación; la familia ANULAR mantiene toda la física. Tras #587 y #755, esta vertical cubre la necesidad que motivó #296; PSX Going Medieval y Fantasy Props MegaKit quedan como **reserva opcional**, no como dependencia ni deuda de importación.
+El castillo dispone ahora de cuatro composiciones sobre el mismo lenguaje arquitectónico: patio, scriptorium, torre/capilla y claustro reflejado. `SuenoCastillo` selecciona la lectura y una mutación secundaria de forma determinista; `SuenoCastillo3D` puede desfazar, contraer/estirar o girar la composición sin tocar la física ANULAR. Así una misma ala puede reaparecer con pequeñas contradicciones espaciales, en vez de funcionar como un preset fijo. Tras #587 y #755, esta vertical cubre la necesidad que motivó #296; PSX Going Medieval y Fantasy Props MegaKit quedan como **reserva opcional**, no como dependencia ni deuda de importación.
 
 La montaña se compone en runtime desde `SuenoMontana3D`: la familia CONVERGENTE conserva la única colisión, mientras la presentación añade cima nevada, laderas, mar de nubes, huellas anticipadas, documento congelado y la cabaña de este directorio.
 
