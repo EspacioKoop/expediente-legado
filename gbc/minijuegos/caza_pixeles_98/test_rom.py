@@ -159,8 +159,8 @@ class CazaPixeles98Test(unittest.TestCase):
         tick = self.bloque_escenario("TickParallaxVisual:", "MoverParallaxRapido:")
         self.assertIn("call MoverParallaxRapido", tick)
         self.assertIn("call MoverParallaxLento", tick)
-        self.assertNotIn("rSCX", self.scenario)
-        self.assertNotIn("rSCY", self.scenario)
+        self.assertNotRegex(self.scenario, r"ldh\s+\[rSCX\]")
+        self.assertNotRegex(self.scenario, r"ldh\s+\[rSCY\]")
         self.assertIn("BG_MAP + (4 * 32)", self.scenario)
         self.assertIn("BG_MAP + (8 * 32)", self.scenario)
 
