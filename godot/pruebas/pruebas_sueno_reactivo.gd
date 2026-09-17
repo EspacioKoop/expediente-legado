@@ -193,7 +193,7 @@ func _probar_espacio_simbolico() -> void:
 			var distancia_max := 0.0
 			for valor_malla in mallas:
 				var malla := valor_malla as Node3D
-				var delta := malla.global_position - rima.global_position
+				var delta := _posicion_relativa(malla, rima)
 				distancia_max = maxf(distancia_max, Vector2(delta.x, delta.z).length())
 			_comprobar(
 				distancia_max > 0.75,
@@ -358,6 +358,16 @@ func _esta_en_planta(posicion: Vector3, bloques: Array) -> bool:
 		if _cerca_xz(posicion, Planta.centro_en_metros(bloques, celda)):
 			return true
 	return false
+
+
+func _posicion_relativa(nodo: Node3D, ancestro: Node3D) -> Vector3:
+	var acumulada := nodo.transform
+	var padre := nodo.get_parent()
+	while padre != null and padre != ancestro:
+		if padre is Node3D:
+			acumulada = (padre as Node3D).transform * acumulada
+		padre = padre.get_parent()
+	return acumulada.origin
 
 
 func _cerca_xz(a: Vector3, b: Vector3) -> bool:
