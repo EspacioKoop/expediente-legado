@@ -8,11 +8,33 @@ var _pasadas := 0
 var _fallos := 0
 
 
+class HostGuardado:
+	extends Node
+
+	var partida := Partida.new()
+	var llamadas := 0
+	var permitir := true
+
+	func _init() -> void:
+		partida.estado = Partida.nueva()
+
+	func _guardar_o_avisar(_destino: String) -> bool:
+		llamadas += 1
+		if permitir:
+			partida.guardado_pendiente = false
+			partida.fallo_de_guardado = ""
+			return true
+		partida.guardado_pendiente = true
+		partida.fallo_de_guardado = "fallo canónico"
+		return false
+
+
 func _initialize() -> void:
 	_limpiar()
 	_probar_guardado_correcto()
 	_probar_guardado_fallido()
 	_probar_partida_ausente()
+	_probar_camino_canonico()
 	_limpiar()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -51,6 +73,21 @@ func _probar_partida_ausente() -> void:
 		resultado.get("motivo", "") == Salida.MOTIVO_PARTIDA_NO_DISPONIBLE,
 		"la ausencia de partida tiene un motivo estable"
 	)
+
+
+func _probar_camino_canonico() -> void:
+	var host := HostGuardado.new()
+	var correcto := Salida.guardar_desde(host)
+	_comprobar(bool(correcto.get("ok", false)), "la escena puede autorizar la salida")
+	_comprobar(host.llamadas == 1, "la salida llama al guardado canónico una sola vez")
+	_comprobar(String(correcto.get("motivo", "x")).is_empty(), "el camino canónico limpio no deja motivo")
+
+	host.permitir = false
+	var fallido := Salida.guardar_desde(host)
+	_comprobar(not bool(fallido.get("ok", true)), "el fallo canónico bloquea la salida")
+	_comprobar(host.llamadas == 2, "reintentar vuelve a guardar sin rehacer estado")
+	_comprobar(fallido.get("motivo", "") == "fallo canónico", "el motivo canónico llega a la UI")
+	host.free()
 
 
 func _limpiar() -> void:
