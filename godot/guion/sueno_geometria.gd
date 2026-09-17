@@ -44,7 +44,12 @@ static func cuerpo_sala(contorno: PackedVector2Array, altura: float = 3.2) -> St
 
 	var colision := CollisionShape3D.new()
 	colision.name = "Colision"
-	colision.shape = malla.create_trimesh_shape()
+	var forma := malla.create_trimesh_shape()
+	# El trimesh es hueco y por defecto solo colisiona por la cara de su normal.
+	# En las salas cerradas el jugador debe poder pisar el suelo desde dentro
+	# con independencia del winding de la triangulación del contorno.
+	forma.backface_collision = true
+	colision.shape = forma
 	cuerpo.add_child(colision)
 	return cuerpo
 
