@@ -189,9 +189,7 @@ static func _texto_mundo(texto: String, color: Color, tamano: int) -> Label3D:
 	return etiqueta
 
 
-static func _caja(
-	raiz: Node3D, nombre: String, pos: Vector3, tam: Vector3, color: Color
-) -> void:
+static func _caja(raiz: Node3D, nombre: String, pos: Vector3, tam: Vector3, color: Color) -> void:
 	var malla := MeshInstance3D.new()
 	malla.name = nombre
 	var caja := BoxMesh.new()
