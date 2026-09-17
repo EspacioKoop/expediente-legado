@@ -17,6 +17,7 @@ const ZONAS_POR_BOTON := {
 	"_continuar": "continuar",
 	"_nueva": "nueva",
 	"_cargar": "cargar",
+	"_extras": "extras",
 	"_personaje": "extras",
 	"_portatil": "extras",
 	"_ventanilla": "extras",
@@ -30,6 +31,8 @@ var _diorama: InicioDiorama3D
 var _continuar: Button
 var _nueva: Button
 var _cargar: Button
+var _extras: Button
+var _extras_contenedor: VBoxContainer
 var _personaje: Button
 var _portatil: Button
 var _ventanilla: Button
@@ -105,13 +108,25 @@ func _construir_interfaz() -> void:
 	_cargar = _crear_boton(tr("INICIO_CARGAR"), _cargar_partida)
 	_cargar.tooltip_text = tr("INICIO_CARGAR_TOOLTIP")
 	caja.add_child(_cargar)
+
+	# #830: el nivel principal del menú conserva la jerarquía propuesta en el
+	# issue. Las utilidades que ya existían siguen disponibles dentro de Extras
+	# sin duplicar escenas ni alterar sus contratos funcionales.
+	_extras = _crear_boton("Extras", _alternar_extras)
+	caja.add_child(_extras)
+	_extras_contenedor = VBoxContainer.new()
+	_extras_contenedor.name = "OpcionesExtras"
+	_extras_contenedor.visible = false
+	_extras_contenedor.add_theme_constant_override("separation", 2)
+	caja.add_child(_extras_contenedor)
 	_personaje = _crear_boton(tr("INICIO_PERSONAJE"), _abrir_personaje)
 	_personaje.tooltip_text = tr("INICIO_PERSONAJE_TOOLTIP")
-	caja.add_child(_personaje)
+	_extras_contenedor.add_child(_personaje)
 	_portatil = _crear_boton("Portátil Color 98", _abrir_portatil)
-	caja.add_child(_portatil)
+	_extras_contenedor.add_child(_portatil)
 	_ventanilla = _crear_boton(tr("INICIO_VENTANILLA"), _abrir_ventanilla)
-	caja.add_child(_ventanilla)
+	_extras_contenedor.add_child(_ventanilla)
+
 	_ajustes = _crear_boton(tr("MENU_GLOBAL_OPCIONES"), _abrir_ajustes)
 	caja.add_child(_ajustes)
 	_salir = _crear_boton(tr("MENU_GLOBAL_SALIR"), _salir_del_juego)
@@ -177,6 +192,15 @@ func _aplicar_contraste(control: Control) -> void:
 	control.add_theme_color_override("font_focus_color", COLOR_TEXTO)
 	control.add_theme_color_override("font_outline_color", COLOR_CONTORNO)
 	control.add_theme_constant_override("outline_size", 5)
+
+
+func _alternar_extras() -> void:
+	var abrir := not _extras_contenedor.visible
+	_extras_contenedor.visible = abrir
+	if abrir:
+		_personaje.grab_focus()
+	else:
+		_extras.grab_focus()
 
 
 func _actualizar() -> void:
