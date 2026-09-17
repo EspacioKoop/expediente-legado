@@ -397,6 +397,7 @@ ColisionObstaculoBC:
 ; regresando con fauna; la derrota conserva el exodo y el residuo activo.
 DibujarCinematicaFinal:
     call CargarTilesCinematicas
+    call LimpiarPanelRecords
     ld hl, BG_MAP + (2 * 32) + 6
     ld a, [wBossDerrotado]
     or a
@@ -415,6 +416,47 @@ DibujarCinematicaFinal:
     call EscribirTileCine
     ld c, TILE_CIN_RESIDUO
     call EscribirTileCine
+    ret
+
+; El escenario final conserva la nebulosa alrededor, pero los récords necesitan
+; un panel de lectura estable. Limpia tiles y fuerza paleta BG 0 sólo en filas
+; 3..10 / columnas 2..17, exactamente donde MostrarFin escribe TIME/SCORE/R/X.
+LimpiarPanelRecords:
+    ld hl, BG_MAP + (3 * 32) + 2
+    ld b, 8
+.fila_tiles:
+    ld c, 16
+.columna_tiles:
+    call EsperarVRAM
+    xor a
+    ld [hli], a
+    dec c
+    jr nz, .columna_tiles
+    ld de, 16
+    add hl, de
+    dec b
+    jr nz, .fila_tiles
+
+    call EsCGB
+    ret nz
+    ld a, 1
+    ldh [rVBK], a
+    ld hl, BG_MAP + (3 * 32) + 2
+    ld b, 8
+.fila_attrs:
+    ld c, 16
+.columna_attrs:
+    call EsperarVRAM
+    xor a
+    ld [hli], a
+    dec c
+    jr nz, .columna_attrs
+    ld de, 16
+    add hl, de
+    dec b
+    jr nz, .fila_attrs
+    xor a
+    ldh [rVBK], a
     ret
 
 CargarTilesCinematicas:
