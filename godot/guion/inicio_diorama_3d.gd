@@ -13,6 +13,7 @@ const CRT_SHADER: Shader = preload("res://arte/crt_menu_inicio.gdshader")
 
 const CAMARA_POS := Vector3(0.0, 1.56, 2.55)
 const CAMARA_MIRA := Vector3(0.05, 1.18, -1.4)
+const FOV_BASE := 48.0
 
 ## Deriva sutil de encuadre por opción enfocada: nunca cambia de escena, solo
 ## corrige cámara/mirada unos centímetros y, en "salir", oscurece el ambiente.
@@ -32,12 +33,18 @@ const AMPLITUD_DRIFT_AMBIENTAL := 0.018
 const AMPLITUD_PAPEL := 0.012
 const AMPLITUD_VAPOR := 0.018
 
-## #830: primera fase de attract mode. Reutiliza los encuadres ya existentes
-## del mismo diorama para no cargar escenas ni viewports adicionales.
+## #830/#888: el attract mode reutiliza la misma oficina y expresa la gramática
+## simbólica mediante composición, no mediante cartas, glifos o texto visible.
+## Los IDs solo sirven a dirección/tests; nunca llegan a la UI.
 const SEGUNDOS_INACTIVIDAD_ATTRACT := 45.0
 const SEGUNDOS_PLANO_ATTRACT := 10.0
 const VELOCIDAD_DERIVA_ATTRACT := 0.35
-const ZONAS_ATTRACT := ["cargar", "opciones", "extras", "continuar"]
+const TABLEAUX_ATTRACT := [
+	{"id": "balanza", "zona": "cargar", "fov": 47.6, "luz": 0.92},
+	{"id": "vigilia", "zona": "opciones", "fov": 46.8, "luz": 0.74},
+	{"id": "reflejo", "zona": "continuar", "fov": 48.8, "luz": 0.62},
+	{"id": "umbral", "zona": "extras", "fov": 49.4, "luz": 0.80},
+]
 
 var _viewport: SubViewport
 var _camara: Camera3D
@@ -63,6 +70,8 @@ var _inactividad := 0.0
 var _attract_activo := false
 var _tiempo_plano_attract := 0.0
 var _indice_plano_attract := 0
+var _fov_objetivo := FOV_BASE
+var _multiplicador_luz_attract := 1.0
 
 
 func _ready() -> void:
@@ -94,6 +103,7 @@ func configurar_reduccion_movimiento(activa: bool) -> void:
 		_offset_pos = ZONAS.get(_zona_actual, ZONAS.continuar).pos
 		_offset_mira = ZONAS.get(_zona_actual, ZONAS.continuar).mira
 		_oscurecer = ZONAS.get(_zona_actual, ZONAS.continuar).oscurecer
+		_camara.fov = FOV_BASE
 		_actualizar_camara()
 		_actualizar_ambiente()
 
@@ -122,6 +132,7 @@ func _process(delta: float) -> void:
 		_offset_pos = _offset_pos.lerp(datos.pos, minf(1.0, velocidad * delta))
 		_offset_mira = _offset_mira.lerp(datos.mira, minf(1.0, velocidad * delta))
 		_oscurecer = lerpf(_oscurecer, datos.oscurecer, minf(1.0, velocidad * delta))
+		_camara.fov = lerpf(_camara.fov, _fov_objetivo, minf(1.0, velocidad * delta))
 		_actualizar_ambiente()
 		_actualizar_fluorescente()
 		_actualizar_detalles_ambientales()
@@ -135,21 +146,30 @@ func _procesar_attract(delta: float) -> void:
 		_tiempo_plano_attract += delta
 		if _tiempo_plano_attract >= SEGUNDOS_PLANO_ATTRACT:
 			_tiempo_plano_attract = 0.0
-			_indice_plano_attract = (_indice_plano_attract + 1) % ZONAS_ATTRACT.size()
-			_zona_actual = ZONAS_ATTRACT[_indice_plano_attract]
+			_indice_plano_attract = (_indice_plano_attract + 1) % TABLEAUX_ATTRACT.size()
+			_aplicar_tableau_attract()
 		return
 	_inactividad += delta
 	if _inactividad >= SEGUNDOS_INACTIVIDAD_ATTRACT:
 		_attract_activo = true
 		_indice_plano_attract = 0
 		_tiempo_plano_attract = 0.0
-		_zona_actual = ZONAS_ATTRACT[_indice_plano_attract]
+		_aplicar_tableau_attract()
+
+
+func _aplicar_tableau_attract() -> void:
+	var tableau: Dictionary = TABLEAUX_ATTRACT[_indice_plano_attract]
+	_zona_actual = String(tableau.get("zona", "continuar"))
+	_fov_objetivo = float(tableau.get("fov", FOV_BASE))
+	_multiplicador_luz_attract = float(tableau.get("luz", 1.0))
 
 
 func _registrar_actividad() -> void:
 	_inactividad = 0.0
 	_tiempo_plano_attract = 0.0
 	_indice_plano_attract = 0
+	_fov_objetivo = FOV_BASE
+	_multiplicador_luz_attract = 1.0
 	if _attract_activo:
 		_attract_activo = false
 		_zona_actual = _zona_usuario
@@ -189,7 +209,9 @@ func _actualizar_camara() -> void:
 func _actualizar_ambiente() -> void:
 	if _entorno == null:
 		return
-	_entorno.ambient_light_energy = maxf(0.05, 0.30 * (1.0 - _oscurecer))
+	_entorno.ambient_light_energy = maxf(
+		0.05, 0.30 * (1.0 - _oscurecer) * _multiplicador_luz_attract
+	)
 
 
 func _actualizar_fluorescente() -> void:
@@ -244,7 +266,7 @@ func _construir() -> void:
 	mundo.add_child(world_environment)
 
 	_camara = Camera3D.new()
-	_camara.fov = 48.0
+	_camara.fov = FOV_BASE
 	_camara.near = 0.05
 	_camara.far = 60.0
 	_camara.current = true
