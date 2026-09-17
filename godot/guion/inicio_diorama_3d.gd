@@ -32,6 +32,13 @@ const AMPLITUD_DRIFT_AMBIENTAL := 0.018
 const AMPLITUD_PAPEL := 0.012
 const AMPLITUD_VAPOR := 0.018
 
+## #830: primera fase de attract mode. Reutiliza los encuadres ya existentes
+## del mismo diorama para no cargar escenas ni viewports adicionales.
+const SEGUNDOS_INACTIVIDAD_ATTRACT := 45.0
+const SEGUNDOS_PLANO_ATTRACT := 10.0
+const VELOCIDAD_DERIVA_ATTRACT := 0.35
+const ZONAS_ATTRACT := ["cargar", "opciones", "extras", "continuar"]
+
 var _viewport: SubViewport
 var _camara: Camera3D
 var _entorno: Environment
@@ -46,11 +53,16 @@ var _vapor_pos_base := Vector3.ZERO
 var _reduccion_movimiento := false
 var _tiempo := 0.0
 var _zona_actual := "continuar"
+var _zona_usuario := "continuar"
 var _offset_pos := Vector3.ZERO
 var _offset_mira := Vector3.ZERO
 var _oscurecer := 0.0
 var _energia_base := 0.0
 var _siguiente_fallo_fluorescente := 0.0
+var _inactividad := 0.0
+var _attract_activo := false
+var _tiempo_plano_attract := 0.0
+var _indice_plano_attract := 0
 
 
 func _ready() -> void:
@@ -64,6 +76,8 @@ func obtener_textura() -> ViewportTexture:
 
 func configurar_reduccion_movimiento(activa: bool) -> void:
 	_reduccion_movimiento = activa
+	if activa:
+		_registrar_actividad()
 	if _exterior != null:
 		_exterior.configurar_reduccion_movimiento(activa)
 	if _material_crt != null:
@@ -87,22 +101,74 @@ func configurar_reduccion_movimiento(activa: bool) -> void:
 ## Deriva de encuadre según la opción de menú enfocada. `zona` es una clave de
 ## `ZONAS`; una desconocida cae en "continuar" (composición general).
 func enfocar(zona: String) -> void:
-	_zona_actual = zona if ZONAS.has(zona) else "continuar"
+	_zona_usuario = zona if ZONAS.has(zona) else "continuar"
+	_registrar_actividad()
+	_zona_actual = _zona_usuario
 	if _reduccion_movimiento:
 		configurar_reduccion_movimiento(true)
 
 
+func _input(event: InputEvent) -> void:
+	if _es_actividad_usuario(event):
+		_registrar_actividad()
+
+
 func _process(delta: float) -> void:
 	_tiempo += delta
+	_procesar_attract(delta)
 	var datos: Dictionary = ZONAS.get(_zona_actual, ZONAS.continuar)
+	var velocidad := VELOCIDAD_DERIVA_ATTRACT if _attract_activo else VELOCIDAD_DERIVA
 	if not _reduccion_movimiento:
-		_offset_pos = _offset_pos.lerp(datos.pos, minf(1.0, VELOCIDAD_DERIVA * delta))
-		_offset_mira = _offset_mira.lerp(datos.mira, minf(1.0, VELOCIDAD_DERIVA * delta))
-		_oscurecer = lerpf(_oscurecer, datos.oscurecer, minf(1.0, VELOCIDAD_DERIVA * delta))
+		_offset_pos = _offset_pos.lerp(datos.pos, minf(1.0, velocidad * delta))
+		_offset_mira = _offset_mira.lerp(datos.mira, minf(1.0, velocidad * delta))
+		_oscurecer = lerpf(_oscurecer, datos.oscurecer, minf(1.0, velocidad * delta))
 		_actualizar_ambiente()
 		_actualizar_fluorescente()
 		_actualizar_detalles_ambientales()
 	_actualizar_camara()
+
+
+func _procesar_attract(delta: float) -> void:
+	if _reduccion_movimiento:
+		return
+	if _attract_activo:
+		_tiempo_plano_attract += delta
+		if _tiempo_plano_attract >= SEGUNDOS_PLANO_ATTRACT:
+			_tiempo_plano_attract = 0.0
+			_indice_plano_attract = (_indice_plano_attract + 1) % ZONAS_ATTRACT.size()
+			_zona_actual = ZONAS_ATTRACT[_indice_plano_attract]
+		return
+	_inactividad += delta
+	if _inactividad >= SEGUNDOS_INACTIVIDAD_ATTRACT:
+		_attract_activo = true
+		_indice_plano_attract = 0
+		_tiempo_plano_attract = 0.0
+		_zona_actual = ZONAS_ATTRACT[_indice_plano_attract]
+
+
+func _registrar_actividad() -> void:
+	_inactividad = 0.0
+	_tiempo_plano_attract = 0.0
+	_indice_plano_attract = 0
+	if _attract_activo:
+		_attract_activo = false
+		_zona_actual = _zona_usuario
+
+
+func _es_actividad_usuario(event: InputEvent) -> bool:
+	if event is InputEventKey:
+		return event.pressed and not event.echo
+	if event is InputEventMouseButton:
+		return event.pressed
+	if event is InputEventMouseMotion:
+		return event.relative.length_squared() >= 4.0
+	if event is InputEventJoypadButton:
+		return event.pressed
+	if event is InputEventJoypadMotion:
+		return absf(event.axis_value) >= 0.25
+	if event is InputEventScreenTouch:
+		return event.pressed
+	return event is InputEventScreenDrag
 
 
 func _actualizar_camara() -> void:
