@@ -63,6 +63,24 @@ class SelectorCartuchos3DTest(unittest.TestCase):
         ):
             self.assertIn(termino, self.selector)
 
+    def test_carrusel_es_superficie_de_raton_directa(self):
+        for termino in (
+            "Control.MOUSE_FILTER_STOP",
+            "Control.CURSOR_POINTING_HAND",
+            "gui_input.connect(_al_input_carrusel)",
+            "MOUSE_BUTTON_WHEEL_UP",
+            "MOUSE_BUTTON_WHEEL_DOWN",
+            "MOUSE_BUTTON_LEFT",
+            "event.position.x / ancho",
+            "fraccion < 0.34",
+            "fraccion > 0.66",
+        ):
+            self.assertIn(termino, self.selector)
+        cuerpo = self.selector.split("func _al_input_carrusel", 1)[1].split("func ", 1)[0]
+        self.assertIn("_mover(-1)", cuerpo)
+        self.assertIn("_mover(1)", cuerpo)
+        self.assertIn("_insertar_actual()", cuerpo)
+
     def test_insertar_anima_hacia_la_ranura_y_delega_la_carga(self):
         self.assertIn("DURACION_INSERCION := 0.14", self.selector)
         self.assertIn("func _animar_insercion()", self.selector)
@@ -71,6 +89,23 @@ class SelectorCartuchos3DTest(unittest.TestCase):
         self.assertIn('_app.call("_cargar_rom", ruta)', self.selector)
         self.assertNotIn("load_rom", self.selector)
         self.assertNotIn("save_ram", self.selector)
+
+    def test_reduccion_movimiento_salta_animacion_no_la_carga(self):
+        self.assertIn("PreferenciasSiga.cargar()", self.selector)
+        self.assertIn('get("reduccion_movimiento", false)', self.selector)
+        cuerpo_animacion = self.selector.split("func _animar_insercion()", 1)[1].split(
+            "func ", 1
+        )[0]
+        self.assertIn("if _reduccion_movimiento:", cuerpo_animacion)
+        self.assertLess(
+            cuerpo_animacion.index("if _reduccion_movimiento:"),
+            cuerpo_animacion.index("create_tween()"),
+        )
+        cuerpo_insertar = self.selector.split("func _insertar_actual()", 1)[1].split(
+            "func ", 1
+        )[0]
+        self.assertIn("_animar_insercion()", cuerpo_insertar)
+        self.assertIn('_app.call("_cargar_rom", ruta)', cuerpo_insertar)
 
     def test_textos_del_selector_estan_en_el_catalogo(self):
         self.assertEqual(self.textos["selector_anterior"], "Cartucho anterior")
