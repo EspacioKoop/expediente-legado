@@ -185,6 +185,7 @@ static func _semilla(comprobar: Callable) -> void:
 		"sonido.gd",  # qué variación de una pisada suena
 		"dia_app.gd",  # el tono de esa pisada
 		"textura_procedural.gd",  # el grano de una textura
+		"inicio_diorama_3d.gd",  # cuándo falla el fluorescente del menú (#830)
 	]
 	var con_azar_global := []
 	for fichero in DirAccess.get_files_at("res://guion"):

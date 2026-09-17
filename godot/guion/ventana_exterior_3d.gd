@@ -24,6 +24,7 @@ var _nubes: Node3D
 var _suelo_nieve: Node3D
 var _estado := ""
 var _tiempo := 0.0
+var _reduccion_movimiento := false
 
 
 func _ready() -> void:
@@ -41,7 +42,17 @@ func configurar(estado_clima: String) -> void:
 	_aplicar_clima()
 
 
+## El diorama del menú de inicio (#830) reutiliza este exterior y debe
+## congelar la deriva de nubes/niebla cuando el jugador pide menos movimiento.
+## La lluvia sigue el mismo patrón que un fuego o un reloj: un bucle ya
+## estable, no un desplazamiento nuevo en pantalla, así que se deja intacta.
+func configurar_reduccion_movimiento(activa: bool) -> void:
+	_reduccion_movimiento = activa
+
+
 func _process(delta: float) -> void:
+	if _reduccion_movimiento:
+		return
 	_tiempo += delta
 	if _nubes != null and is_instance_valid(_nubes):
 		_nubes.position.x = fposmod(_tiempo * 0.12 + 8.0, 16.0) - 8.0

@@ -38,6 +38,8 @@ func _init() -> void:
 		ruta = "res://escenas/dia.tscn"
 	elif destino.contains("ventanilla"):
 		ruta = "res://escenas/ventanilla.tscn"
+	elif destino.contains("inicio"):
+		ruta = "res://escenas/inicio.tscn"
 	elif destino.contains("dia"):
 		ruta = "res://escenas/dia.tscn"
 	elif destino.contains("careo"):
@@ -148,6 +150,17 @@ func _init() -> void:
 			await process_frame
 		var imagen_d := root.get_texture().get_image()
 		imagen_d.save_png(destino)
+		print("captura en %s" % destino)
+		quit(0)
+		return
+
+	if ruta.contains("inicio"):
+		# El diorama del menú (#830) tarda unos fotogramas en asentar cámara y
+		# luces; sin esperar se captura el primer fotograma con todo a cero.
+		for i in 20:
+			await process_frame
+		var imagen_m := root.get_texture().get_image()
+		imagen_m.save_png(destino)
 		print("captura en %s" % destino)
 		quit(0)
 		return
