@@ -8,6 +8,9 @@
 class_name TelevisionInteractiva3D
 extends Interactuable3D
 
+const OFFSET_MANDO_MESA := Vector3(1.43, -0.58, -0.11)
+const OFFSET_PORTATIL_MESA := Vector3(1.15, -0.56, 0.07)
+
 var _encendida := false
 var _brillo: OmniLight3D
 var _paso_documental := 0
@@ -33,6 +36,7 @@ func configurar(tam: Vector3) -> void:
 	_brillo.visible = false
 	add_child(_brillo)
 
+	_orientar_modelo_hacia_sofa()
 	activado.connect(_interactuar_directo)
 	_montar_mando_domestico()
 
@@ -102,15 +106,38 @@ func _jornada_en_escena() -> Dictionary:
 	return {}
 
 
+## El bulto y esta capa interactiva son hermanos en `_mundo` y comparten la
+## posición exacta del catálogo. El sofá queda a +X: el giro corrige la TV que
+## se veía de canto en el playtest y deja la pantalla orientada hacia el asiento.
+func _orientar_modelo_hacia_sofa() -> void:
+	var contenedor := get_parent()
+	if contenedor == null:
+		return
+	for hijo in contenedor.get_children():
+		if hijo == self or not (hijo is Node3D):
+			continue
+		var pieza := hijo as Node3D
+		if not pieza.position.is_equal_approx(position):
+			continue
+		pieza.rotation_degrees.y = 90.0
+		return
+
+
 func _montar_mando_domestico() -> void:
 	var contenedor := get_parent()
 	if contenedor == null:
 		return
 	var mando := MandoTelevision98.new()
 	mando.name = "MandoTelevision98"
-	# Queda sobre la mesita del rincón de ocio, junto a la portátil pero sin
-	# solaparla. La posición parte del televisor para viajar con el conjunto.
-	mando.position = position + Vector3(1.25, 0.23, -1.18)
+	# Mesa baja: y=0,30 m. El mando queda apoyado y no flotando contra la pared.
+	mando.position = position + OFFSET_MANDO_MESA
 	mando.rotation_degrees = Vector3(0.0, 14.0, 0.0)
 	contenedor.add_child(mando)
 	mando.configurar(self)
+
+	# La Color 98 comparte la mesa baja: es visible al entrar en el salón y su
+	# pantalla queda hacia arriba, sin perder el nodo que observa RYU FLOW.
+	var portatil := contenedor.get_node_or_null("ConsolaPortatil98") as Node3D
+	if portatil != null:
+		portatil.position = position + OFFSET_PORTATIL_MESA
+		portatil.rotation_degrees = Vector3(90.0, 0.0, 0.0)

@@ -70,23 +70,25 @@ func _montar_carcasa() -> void:
 
 	# Los tres minijuegos propios ya existentes en #95 tienen ahora presencia
 	# material junto a la consola. Son cartuchos decorativos: no cargan ROMs,
-	# no mutan campaña y solo usan arte original del proyecto.
+	# no mutan campaña y solo usan arte original del proyecto. La cota local
+	# negativa compensa el origen elevado de la consola: la base queda justo
+	# sobre la tapa del mueble TV (0,52 m), en vez de varios centímetros al aire.
 	_montar_cartuchos_expositor()
 
 
 func _montar_cartuchos_expositor() -> void:
 	_agregar_cartucho(
-		Vector3(0.34, 0.018, -0.10),
+		Vector3(0.34, -0.006, -0.10),
 		-8.0,
 		ETIQUETA_CAZA_PIXELES,
 	)
 	_agregar_cartucho(
-		Vector3(0.37, 0.020, 0.00),
+		Vector3(0.37, -0.006, 0.00),
 		5.0,
 		ETIQUETA_PAPER_PLANES,
 	)
 	_agregar_cartucho(
-		Vector3(0.33, 0.022, 0.10),
+		Vector3(0.33, -0.006, 0.10),
 		-3.0,
 		ETIQUETA_CROC_RIDERS,
 	)
