@@ -1,4 +1,4 @@
-## Vertical slice de fachadas vivas (#861): profundidad, variantes y props.
+## Vertical slice de fachadas vivas (#861): profundidad, variantes, LOD y luz.
 extends SceneTree
 
 const DIA := preload("res://escenas/dia.tscn")
@@ -44,10 +44,18 @@ func _probar() -> void:
 
 	var pisos := calle.get_node("PisosFachada")
 	var variantes := {}
+	var estados_luz := {}
 	var props := {"Escritorio": false, "Estanteria": false, "Sofa": false}
+	var indice := 0
 	for interior in vivas.get_children():
 		var variante := String(interior.get_meta("variante"))
 		variantes[variante] = int(variantes.get(variante, 0)) + 1
+		var estado_luz := String(interior.get_meta("estado_luz"))
+		estados_luz[estado_luz] = int(estados_luz.get(estado_luz, 0)) + 1
+		_comprobar(
+			estado_luz == CalleFachadasVivas.ESTADOS_LUZ[indice % CalleFachadasVivas.ESTADOS_LUZ.size()],
+			"el estado de luz es determinista"
+		)
 		var nombre_ventana := String(interior.get_meta("ventana"))
 		_comprobar(
 			nombre_ventana.begins_with(CalleFachadasVivas.PREFIJO_TRAMO),
@@ -56,6 +64,7 @@ func _probar() -> void:
 		var ventana := pisos.get_node_or_null(nombre_ventana) as MeshInstance3D
 		_comprobar(ventana != null, "la ventana decorada sigue existiendo")
 		if ventana == null:
+			indice += 1
 			continue
 		var material := ventana.material_override as StandardMaterial3D
 		_comprobar(material != null, "la ventana decorada usa cristal compartido")
@@ -72,15 +81,51 @@ func _probar() -> void:
 				absf(ventana.position.x - fondo.position.x) >= 0.05,
 				"hay profundidad visible entre cristal y fondo"
 			)
+			_comprobar(
+				is_equal_approx(fondo.visibility_range_end, CalleFachadasVivas.LOD_LEJOS_FIN),
+				"el fondo sobrevive hasta el LOD lejano"
+			)
 		for marco in ["MarcoSuperior", "MarcoInferior", "MarcoIzquierdo", "MarcoDerecho"]:
-			_comprobar(interior.get_node_or_null(marco) != null, "marco con volumen: " + marco)
+			var pieza_marco := interior.get_node_or_null(marco) as MeshInstance3D
+			_comprobar(pieza_marco != null, "marco con volumen: " + marco)
+			if pieza_marco != null:
+				_comprobar(
+					is_equal_approx(
+						pieza_marco.visibility_range_end, CalleFachadasVivas.LOD_MEDIA_FIN
+					),
+					"el marco usa LOD medio: " + marco
+				)
 		for prop in props:
-			if interior.get_node_or_null(prop) != null:
+			var pieza_prop := interior.get_node_or_null(prop) as MeshInstance3D
+			if pieza_prop != null:
 				props[prop] = true
+				_comprobar(
+					is_equal_approx(
+						pieza_prop.visibility_range_end, CalleFachadasVivas.LOD_CERCA_FIN
+					),
+					"el mobiliario 3D se limita al LOD cercano: " + prop
+				)
+		if estado_luz == "persiana":
+			var persiana := interior.get_node_or_null("Persiana") as MeshInstance3D
+			_comprobar(persiana != null, "el estado persiana añade detalle a una ventana apagada")
+			if persiana != null:
+				_comprobar(
+					is_equal_approx(
+						persiana.visibility_range_end, CalleFachadasVivas.LOD_MEDIA_FIN
+					),
+					"la persiana se conserva hasta el LOD medio"
+				)
+		indice += 1
 
 	_comprobar(variantes.size() == 3, "hay tres composiciones interiores")
 	for variante in CalleFachadasVivas.VARIANTES:
 		_comprobar(int(variantes.get(variante, 0)) == 3, "variante equilibrada: " + variante)
+	_comprobar(
+		estados_luz.size() == CalleFachadasVivas.ESTADOS_LUZ.size(),
+		"la slice contiene todos los estados de luz"
+	)
+	for estado_luz in CalleFachadasVivas.ESTADOS_LUZ:
+		_comprobar(estados_luz.has(estado_luz), "aparece el estado de luz " + estado_luz)
 	for prop in props:
 		_comprobar(props[prop], "aparece el prop 3D " + prop)
 
