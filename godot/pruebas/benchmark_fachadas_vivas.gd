@@ -121,9 +121,8 @@ func _ejecutar() -> void:
 		"resolution": [ANCHO, ALTO],
 		"warmup_frames": CALENTAMIENTO,
 		"sample_frames": MUESTRAS,
-		"rendering_method": ProjectSettings.get_setting(
-			"rendering/renderer/rendering_method", "unknown"
-		),
+		"rendering_method":
+		ProjectSettings.get_setting("rendering/renderer/rendering_method", "unknown"),
 		"camera":
 		{
 			"position": [camara.position.x, camara.position.y, camara.position.z],
