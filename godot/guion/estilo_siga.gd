@@ -176,7 +176,11 @@ static func tema() -> Theme:
 	var tema := Theme.new()
 	tema.default_font = fuente_interfaz()
 	tema.default_font_size = 14
+	# `title_font` es un rol manual en Label y, a la vez, el nombre nativo que
+	# Godot consulta para las barras de título de Window. Así los diálogos y
+	# lectores OS98 heredan la misma jerarquía sin repetir overrides por programa.
 	tema.set_font("title_font", "Label", titulo)
+	tema.set_font("title_font", "Window", titulo)
 	tema.set_font("document_font", "RichTextLabel", documento)
 	tema.set_font("mono_font", "RichTextLabel", mono)
 	_configurar_botones(tema)
