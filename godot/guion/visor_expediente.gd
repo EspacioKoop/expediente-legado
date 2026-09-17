@@ -143,6 +143,7 @@ func _barra_titulo() -> Control:
 		),
 		EstiloSiga.BLANCO
 	)
+	titulo.add_theme_font_override("font", theme.get_font("title_font", "Label"))
 	barra.add_child(titulo)
 	_titulo_ventana = titulo
 	return barra
