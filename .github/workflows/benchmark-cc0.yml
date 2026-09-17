@@ -68,6 +68,14 @@ jobs:
             --script res://pruebas/benchmark_cc0.gd -- \
             --mode=baseline --output="$GITHUB_WORKSPACE/benchmark-cc0"
 
+      - name: Ejecutar Retro Urban aislado
+        shell: bash
+        run: |
+          set -euo pipefail
+          xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+            --script res://pruebas/benchmark_cc0.gd -- \
+            --mode=retro_urban --output="$GITHUB_WORKSPACE/benchmark-cc0"
+
       - name: Ejecutar vertical CC0 combinada
         shell: bash
         run: |

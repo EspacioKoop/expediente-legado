@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3]
+[gd_scene load_steps=36 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -34,6 +34,7 @@
 [ext_resource type="Script" path="res://guion/dia_climax_os98_app.gd" id="32"]
 [ext_resource type="Script" path="res://guion/dia_publicaciones_encontrables_app.gd" id="33"]
 [ext_resource type="Script" path="res://guion/dia_clima_visual_app.gd" id="34"]
+[ext_resource type="Script" path="res://guion/dia_calle_materiales_app.gd" id="35"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -46,6 +47,9 @@ script = ExtResource("3")
 
 [node name="RetroUrbanController" type="Node" parent="."]
 script = ExtResource("4")
+
+[node name="CalleMaterialesController" type="Node" parent="."]
+script = ExtResource("35")
 
 [node name="SkylineCC0Controller" type="Node" parent="."]
 script = ExtResource("5")

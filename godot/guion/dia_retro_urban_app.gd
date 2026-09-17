@@ -31,7 +31,6 @@ func _process(_delta: float) -> void:
 	_montar_banco(mundo)
 	_montar_farolas(mundo)
 	_montar_barreras(mundo)
-	CalleMateriales.montar(mundo)
 
 
 func _montar_toldos(mundo: Node3D) -> void:

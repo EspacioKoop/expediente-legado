@@ -5,7 +5,8 @@ import unittest
 RAIZ = Path(__file__).resolve().parents[1]
 TEXTURAS = RAIZ / "godot" / "guion" / "textura_procedural.gd"
 CALLE = RAIZ / "godot" / "guion" / "calle_materiales.gd"
-CONTROLADOR = RAIZ / "godot" / "guion" / "dia_retro_urban_app.gd"
+CONTROLADOR = RAIZ / "godot" / "guion" / "dia_calle_materiales_app.gd"
+ESCENA = RAIZ / "godot" / "escenas" / "dia.tscn"
 CATALOGO = RAIZ / "godot" / "guion" / "espacios_catalogo.gd"
 
 
@@ -48,6 +49,13 @@ class MaterialesCalleTest(unittest.TestCase):
     def test_el_controller_solo_monta_el_material_en_trayecto(self):
         self.assertIn('!= "trayecto"', self.controlador)
         self.assertIn("CalleMateriales.montar(mundo)", self.controlador)
+
+    def test_el_controller_de_materiales_esta_separado_de_retro_urban(self):
+        escena = ESCENA.read_text(encoding="utf-8")
+        retro = (RAIZ / "godot" / "guion" / "dia_retro_urban_app.gd").read_text(encoding="utf-8")
+        self.assertIn('path="res://guion/dia_calle_materiales_app.gd"', escena)
+        self.assertIn('[node name="CalleMaterialesController" type="Node" parent="."]', escena)
+        self.assertNotIn("CalleMateriales.montar(mundo)", retro)
 
 
 if __name__ == "__main__":

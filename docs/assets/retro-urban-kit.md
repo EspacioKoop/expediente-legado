@@ -36,12 +36,12 @@ Decisiones del corte:
 - una única construcción de malla en CPU por tipo de pieza, reutilizada por sus instancias;
 - presupuesto del pase base del dressing Retro Urban: **máximo 8 draw calls** (ocho instancias × una superficie/material).
 
-El número final de draw calls de un frame completo depende del renderer y del resto de la escena; este presupuesto sólo acota el aporte de este dressing y debe contrastarse con el profiler cuando se haga la captura visual del corte.
+El número final de draw calls de un frame completo depende del renderer y del resto de la escena. El benchmark reproducible de `docs/benchmark-cc0.md` dispone ahora de un modo `retro_urban` que monta **solo** este controller sobre el mismo baseline/cámara y produce captura PNG + métricas JSON específicas. La primera ejecución aislada detectó que el controller también montaba `CalleMateriales` (#399), inflando el delta a 11 draw calls; #940 separa ambos controllers para que el coste atribuido a #295 sea medible sin esa contaminación.
 
 ## Estado frente a #295
 
-Este vertical mejora trazabilidad y coste, pero **no cierra #295**. El objetivo del issue pide un primer corte de 6–10 piezas representativas y una captura antes/después. A día de hoy hay **4 piezas fuente** (`detail-awning-small.glb`, `detail-bench.glb`, `detail-light-single.glb`, `detail-barrier-type-a.glb`) montadas en ocho posiciones.
+El corte actual usa **4 piezas fuente** (`detail-awning-small.glb`, `detail-bench.glb`, `detail-light-single.glb`, `detail-barrier-type-a.glb`) montadas en ocho posiciones. El rango inicial de 6–10 piezas era un objetivo de exploración, no un motivo para añadir geometría sin necesidad: tras #603 el gate útil de cierre es demostrar visualmente y medir el aporte real del kit.
 
-Próximo incremento recomendado: valorar 2–6 piezas adicionales pequeñas y neutras si el corte actual resulta insuficiente en la captura visual (remates de fachada, masas lejanas), manteniendo procedencia/hash por pieza y un presupuesto explícito por grupo. Después, capturar la misma vista antes/después y medir el frame con el profiler — sigue pendiente y es el criterio de cierre real de #295, no el número de piezas.
+El modo `retro_urban` del benchmark cubre ese gate de forma aislada y reproducible: `baseline.png` frente a `retro_urban.png`, más `retro_urban-summary.json` y `retro_urban-report.md`. Solo si esa comparación o el playtest de #398 detectan un hueco concreto tiene sentido añadir más piezas del pack.
 
 — Odiseo (GPT-5.6 Sol), Claude Sonnet 5
