@@ -64,21 +64,14 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 			espacio.get("escala_textura", 1.2)
 		)
 	else:
-		_suelo(
-			raiz,
-			espacio.get("suelo", Vector2(10, 10)),
-			color_suelo,
-			espacio.get("textura_suelo", "")
-		)
-		_techo(
-			raiz,
-			espacio.get("suelo", Vector2(10, 10)),
-			color_techo,
-			espacio.get("textura_techo", "")
-		)
-		_muros(
-			raiz, espacio.get("suelo", Vector2(10, 10)), color_muro, espacio.get("textura_muro", "")
-		)
+		# `centro_suelo` desplaza el rectángulo sin mover el origen del sitio:
+		# así una vivienda puede crecer por un lado sin recolocar todo lo que
+		# ya estaba anclado al otro (#785).
+		var medidas: Vector2 = espacio.get("suelo", Vector2(10, 10))
+		var centro: Vector2 = espacio.get("centro_suelo", Vector2.ZERO)
+		_suelo(raiz, medidas, color_suelo, espacio.get("textura_suelo", ""), centro)
+		_techo(raiz, medidas, color_techo, espacio.get("textura_techo", ""), centro)
+		_muros(raiz, medidas, color_muro, espacio.get("textura_muro", ""), centro)
 
 	for bulto in espacio.get("bultos", []):
 		var pieza := _caja(
@@ -390,10 +383,12 @@ static func _por_planta(
 		_caja(raiz, centro, tam, color_muro, textura_muro, metros)
 
 
-static func _suelo(raiz: Node3D, medidas: Vector2, color: Color, textura: String = "") -> void:
+static func _suelo(
+	raiz: Node3D, medidas: Vector2, color: Color, textura: String = "", centro := Vector2.ZERO
+) -> void:
 	_caja(
 		raiz,
-		Vector3(0, -GROSOR_MURO / 2.0, 0),
+		Vector3(centro.x, -GROSOR_MURO / 2.0, centro.y),
 		Vector3(medidas.x, GROSOR_MURO, medidas.y),
 		color,
 		textura
@@ -405,10 +400,12 @@ static func _suelo(raiz: Node3D, medidas: Vector2, color: Color, textura: String
 ## construcción — mirar arriba en cualquiera de estas salas era mirar a un
 ## agujero. Un techo que se pinta a sí mismo es además lo que hay: en 1998 esa
 ## superficie eran paneles de fluorescente.
-static func _techo(raiz: Node3D, medidas: Vector2, color: Color, textura: String = "") -> void:
+static func _techo(
+	raiz: Node3D, medidas: Vector2, color: Color, textura: String = "", centro := Vector2.ZERO
+) -> void:
 	var cuerpo := _caja(
 		raiz,
-		Vector3(0, ALTURA_MURO + GROSOR_MURO / 2.0, 0),
+		Vector3(centro.x, ALTURA_MURO + GROSOR_MURO / 2.0, centro.y),
 		Vector3(medidas.x, GROSOR_MURO, medidas.y),
 		color,
 		textura
@@ -437,34 +434,36 @@ static func _emisivo(cuerpo: StaticBody3D, color: Color) -> void:
 
 ## Los cuatro muros salen de lo que mide el suelo, no escritos uno a uno: un
 ## espacio no puede quedarse con un lado abierto por un descuido.
-static func _muros(raiz: Node3D, medidas: Vector2, color: Color, textura: String = "") -> void:
+static func _muros(
+	raiz: Node3D, medidas: Vector2, color: Color, textura: String = "", centro := Vector2.ZERO
+) -> void:
 	var mitad_x := medidas.x / 2.0
 	var mitad_z := medidas.y / 2.0
 	var alto := ALTURA_MURO / 2.0
 	_caja(
 		raiz,
-		Vector3(0, alto, -mitad_z),
+		Vector3(centro.x, alto, centro.y - mitad_z),
 		Vector3(medidas.x, ALTURA_MURO, GROSOR_MURO),
 		color,
 		textura
 	)
 	_caja(
 		raiz,
-		Vector3(0, alto, mitad_z),
+		Vector3(centro.x, alto, centro.y + mitad_z),
 		Vector3(medidas.x, ALTURA_MURO, GROSOR_MURO),
 		color,
 		textura
 	)
 	_caja(
 		raiz,
-		Vector3(-mitad_x, alto, 0),
+		Vector3(centro.x - mitad_x, alto, centro.y),
 		Vector3(GROSOR_MURO, ALTURA_MURO, medidas.y),
 		color,
 		textura
 	)
 	_caja(
 		raiz,
-		Vector3(mitad_x, alto, 0),
+		Vector3(centro.x + mitad_x, alto, centro.y),
 		Vector3(GROSOR_MURO, ALTURA_MURO, medidas.y),
 		color,
 		textura

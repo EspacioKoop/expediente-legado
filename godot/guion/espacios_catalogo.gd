@@ -454,14 +454,18 @@ const CALLE := {
 
 const CASA := {
 	"rotulo": "SITIO_CASA",
-	"suelo": Vector2(8, 7),
+	# Crece hacia la cocina y la entrada (#785): el dormitorio, la ventana y el
+	# muro izquierdo siguen donde estaban, así que sus anclas no se mueven.
+	# Paredes: x de -4 a 5,5 y z de -3,5 a 4,5.
+	"suelo": Vector2(9.5, 8),
+	"centro_suelo": Vector2(0.75, 0.5),
 	"color_suelo": Color(0.32, 0.27, 0.22),
 	"color_muro": Color(0.52, 0.47, 0.42),
 	# En casa la luz es de bombilla, no de fluorescente: más cálida y más floja.
 	"color_techo": Color(0.62, 0.54, 0.42),
 	"textura_suelo": "moqueta",
 	"textura_muro": "gotele",
-	"entrada": Vector3(0, 0, 2.5),
+	"entrada": Vector3(0.5, 0, 3.4),
 	"bultos":
 	[
 		# La cama, que es la salida del día.
@@ -486,7 +490,7 @@ const CASA := {
 			"modelo": "televisionVintage"
 		},
 		{
-			"pos": Vector3(3.55, 0.22, 3.15),
+			"pos": Vector3(5.05, 0.22, 4.15),
 			"tam": Vector3(0.34, 0.45, 0.34),
 			"color": Color(0.40, 0.38, 0.34),
 			"modelo": "trashcan"
@@ -499,10 +503,10 @@ const CASA := {
 	"luces":
 	[
 		{
-			"pos": Vector3(0, 2.5, 0),
+			"pos": Vector3(0.75, 2.5, 0.5),
 			"color": Color(1.0, 0.84, 0.62),
 			"energia": 2.6,
-			"alcance": 9.0,
+			"alcance": 10.0,
 			"tam": Vector3(0.22, 0.22, 0.22)
 		},
 	],

@@ -18,6 +18,9 @@ const TOALLA_TENDIDA := "toalla_tendida"
 
 const PERSISTENTES := [PERSIANA_ABIERTA, PLATOS_RECOGIDOS, TOALLA_TENDIDA]
 const DIARIAS := [VENTANA_ABIERTA, NEVERA_ABIERTA]
+## Una casa nueva amanece con la persiana subida: bajada por defecto tapaba la
+## calle de la ventana (#566) hasta que alguien pensara en abrirla (#785).
+const INICIALES := {PERSIANA_ABIERTA: true}
 const TODAS := [
 	PERSIANA_ABIERTA,
 	VENTANA_ABIERTA,
@@ -38,7 +41,7 @@ static func completar(jornada: Dictionary) -> Dictionary:
 
 	for clave in TODAS:
 		if not estado.has(clave):
-			estado[clave] = false
+			estado[clave] = INICIALES.get(clave, false)
 
 	var dia := maxi(1, int(jornada.get("dia", 1)))
 	if not estado.has(CLAVE_DIA):
@@ -57,7 +60,7 @@ static func estado(jornada: Dictionary) -> Dictionary:
 	var copia: Dictionary = bruto.duplicate(true) if typeof(bruto) == TYPE_DICTIONARY else {}
 	for clave in TODAS:
 		if not copia.has(clave):
-			copia[clave] = false
+			copia[clave] = INICIALES.get(clave, false)
 	var dia := maxi(1, int(jornada.get("dia", 1)))
 	if int(copia.get(CLAVE_DIA, dia)) != dia:
 		for clave in DIARIAS:

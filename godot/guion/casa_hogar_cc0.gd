@@ -114,11 +114,11 @@ const PIEZAS := [
 		true
 	],
 	# Cocina
-	["HornoHogar", "stove_01", Vector3(3.33, 0.0, 2.25), Vector3(0.92, 1.01, 0.66), -90.0, true],
+	["HornoHogar", "stove_01", Vector3(4.83, 0.0, 2.25), Vector3(0.92, 1.01, 0.66), -90.0, true],
 	[
 		"LavadoraHogar",
 		"washing_machine_01",
-		Vector3(3.40, 0.0, -2.45),
+		Vector3(4.90, 0.0, -2.45),
 		Vector3(0.69, 0.87, 0.77),
 		-90.0,
 		true
@@ -126,7 +126,7 @@ const PIEZAS := [
 	[
 		"MicroondasHogar",
 		"microwave_01",
-		Vector3(3.42, 0.97, -0.75),
+		Vector3(4.92, 0.97, -0.75),
 		Vector3(0.48, 0.28, 0.27),
 		-90.0,
 		false
@@ -134,7 +134,7 @@ const PIEZAS := [
 	[
 		"TostadoraHogar",
 		"toaster_01",
-		Vector3(3.40, 0.97, -0.30),
+		Vector3(4.90, 0.97, -0.30),
 		Vector3(0.15, 0.19, 0.32),
 		-90.0,
 		false
@@ -142,7 +142,7 @@ const PIEZAS := [
 	[
 		"HervidorHogar",
 		"kettle_01",
-		Vector3(3.38, 0.97, 0.62),
+		Vector3(4.88, 0.97, 0.62),
 		Vector3(0.28, 0.32, 0.21),
 		-90.0,
 		false
@@ -151,7 +151,7 @@ const PIEZAS := [
 	[
 		"AparadorHogar",
 		"cupboard_01",
-		Vector3(1.40, 0.0, 3.22),
+		Vector3(1.40, 0.0, 4.22),
 		Vector3(0.9, 0.93, 0.45),
 		180.0,
 		true
@@ -159,7 +159,7 @@ const PIEZAS := [
 	[
 		"LamparaMesaHogar",
 		"table_lamp_01",
-		Vector3(1.62, 0.93, 3.22),
+		Vector3(1.62, 0.93, 4.22),
 		Vector3(0.3, 0.55, 0.3),
 		180.0,
 		false

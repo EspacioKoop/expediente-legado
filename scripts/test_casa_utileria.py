@@ -57,7 +57,7 @@ class CasaUtileriaTest(unittest.TestCase):
         self.assertIn("_ancla_cuenco(", self.utileria)
         self.assertIn("_agregar_cilindro_truncado(", self.utileria)
         self.assertIn("Vector3(-0.95, 0.0, 1.4)", self.utileria)
-        self.assertIn("Vector3(3.30, 0.0, -0.15)", self.utileria)
+        self.assertIn("Vector3(4.80, 0.0, -0.15)", self.utileria)
         self.assertIn("Vector3(-2.10, 1.65, -3.42)", self.utileria)
 
     def test_cama_y_cuenco_reutilizan_anclas_de_gameplay(self):

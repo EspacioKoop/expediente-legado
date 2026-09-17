@@ -6,7 +6,10 @@
 ## Aquiles al alcanzar su estado real de victoria.
 extends Node
 
-const POSICION_ESTAMPA := Vector3(-2.6, 1.35, -3.2)
+# La estampa mide 2,6 × 1,9 m: colgada en el muro del dormitorio tapaba la
+# ventana (#785). Va en el muro de la entrada, de cara a la casa.
+const POSICION_ESTAMPA := Vector3(3.4, 1.35, 4.3)
+const GIRO_ESTAMPA := 180.0
 
 var _mundo_montado_id := 0
 var _rom_observador_mundo_id := 0
@@ -39,6 +42,7 @@ func _montar_estampa(mundo: Node3D, jornada: Dictionary) -> void:
 	var estampa := AquilesVigilia.new()
 	estampa.name = "AquilesVigiliaCasa"
 	estampa.position = POSICION_ESTAMPA
+	estampa.rotation_degrees.y = GIRO_ESTAMPA
 	mundo.add_child(estampa)
 	estampa.configurar(jornada)
 

@@ -20,31 +20,41 @@ class CorchoConceptosTest(unittest.TestCase):
         cls.estado = CORCHO.read_text(encoding="utf-8")
         cls.vista = CORCHO_3D.read_text(encoding="utf-8")
 
-    def test_tablero_es_mas_compacto_y_reconocible(self):
-        self.assertIn("const TAM_TABLON := Vector3(2.65, 1.55, 0.07)", self.vista)
+    def test_tablero_de_tamano_real_fuera_de_la_ventana(self):
+        self.assertIn("const ESCALA := 0.34", self.vista)
+        self.assertIn("const POSICION := Vector3(-2.3, 1.45, -0.52)", self.vista)
         self.assertIn('"MarcoCorcho"', self.vista)
-        self.assertIn('"CORCHO DE CONCEPTOS"', self.vista)
-        self.assertIn('"USA DOS FICHAS PARA PONER / QUITAR HILO"', self.vista)
-        self.assertNotIn("Vector3(3.7, 2.15, 0.08)", self.vista)
+        self.assertIn('uso.nombre_objeto = "corcho de conceptos"', self.vista)
+        self.assertNotIn("Vector3(2.65, 1.55, 0.07)", self.vista)
+        self.assertNotIn("Vector3(0.0, 1.55, -3.42)", self.vista)
 
-    def test_fichas_explican_la_interaccion_y_marcan_seleccion(self):
-        self.assertIn('ficha.nombre_objeto = "ficha «%s»" % nombre_visible', self.vista)
-        self.assertIn("COLOR_FICHA_SELECCIONADA", self.vista)
-        self.assertIn("_actualizar_seleccion()", self.vista)
-        self.assertIn('papel.name = "Papel"', self.vista)
+    def test_se_reordena_en_una_interfaz_propia(self):
+        panel = (ROOT / "godot" / "guion" / "corcho_panel.gd").read_text(encoding="utf-8")
+        controlador = (ROOT / "godot" / "guion" / "dia_corcho_app.gd").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("class_name CorchoPanel", panel)
+        self.assertIn("Corcho.mover(_jornada, id, pos)", panel)
+        self.assertIn("Corcho.alternar_enlace(_jornada, anterior, id)", panel)
+        self.assertIn("JOY_BUTTON_X", panel)
+        self.assertIn("_corcho_3d.abrir_pedido.connect(abrir_panel)", controlador)
+        self.assertIn("_corcho_3d.refrescar()", controlador)
+        self.assertNotIn("Interactuable3D.new()", self.vista.split("func _montar_ficha")[1])
 
     def test_posiciones_persistidas_se_sanean_al_area_util(self):
         self.assertIn("static func limitar_posiciones", self.estado)
+        self.assertIn("static func mover", self.estado)
         self.assertIn("clampf", self.estado)
-        self.assertIn("Corcho.limitar_posiciones(_jornada, _limite_fichas())", self.vista)
+        self.assertIn("Corcho.limitar_posiciones(_jornada, Corcho.limite())", self.vista)
         self.assertIn("const COLUMNAS_INICIALES := 5", self.estado)
         self.assertIn("const PASO_INICIAL := Vector2(0.48, 0.32)", self.estado)
 
     def test_sigue_sin_inferir_relaciones_del_grafo(self):
-        combinado = self.estado + self.vista
+        panel = (ROOT / "godot" / "guion" / "corcho_panel.gd").read_text(encoding="utf-8")
+        combinado = self.estado + self.vista + panel
         self.assertNotIn('get("referencias"', combinado)
         self.assertNotIn("Marcas.referencias", combinado)
-        self.assertIn("Corcho.alternar_enlace", self.vista)
+        self.assertIn("Corcho.alternar_enlace", panel)
 
     def test_corte_funciona_en_godot_headless(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
