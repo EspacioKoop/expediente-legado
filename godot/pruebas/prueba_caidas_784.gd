@@ -18,6 +18,12 @@ func _probar() -> void:
 	TranslationServer.set_locale("es")
 	await _probar_suelos_sueno()
 	await _probar_rescate_y_reentrada()
+	# La prueba crea mundos físicos y una escena completa. Darles varios ciclos
+	# de proceso antes de cerrar evita confundir recursos pendientes de liberar
+	# con un fallo funcional del contrato que se acaba de comprobar.
+	for frame in 3:
+		await process_frame
+		await physics_frame
 	if _fallos == 0:
 		print("Caídas #784: OK")
 		quit(0)
@@ -47,7 +53,8 @@ func _probar_suelos_sueno() -> void:
 				"el suelo de %s está a cota jugable" % id,
 			)
 
-		mundo.queue_free()
+		root.remove_child(mundo)
+		mundo.free()
 		await process_frame
 		await physics_frame
 
@@ -96,9 +103,13 @@ func _probar_rescate_y_reentrada() -> void:
 		dia._caminante.velocity.length() <= 0.001, "el rescate cancela la velocidad de caída"
 	)
 
-	dia.queue_free()
-	await process_frame
-	await physics_frame
+	salida = null
+	root.remove_child(dia)
+	dia.free()
+	dia = null
+	for frame in 3:
+		await process_frame
+		await physics_frame
 
 
 func _buscar_salida(nodo: Node, destino: String) -> Area3D:
