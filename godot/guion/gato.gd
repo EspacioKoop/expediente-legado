@@ -315,7 +315,9 @@ func interactuar(actor: Node) -> bool:
 func _llamar(actor: Node) -> void:
 	if actor is not Node3D:
 		return
-	var destino := (actor as Node3D).global_position
+	var actor_3d := actor as Node3D
+	var usar_global := is_inside_tree() and actor_3d.is_inside_tree()
+	var destino := actor_3d.global_position if usar_global else actor_3d.position
 	estado["destino"] = Vector3(destino.x, position.y, destino.z)
 	estado["estado"] = "viene"
 	estado["mimos_resto"] = 0.0
@@ -345,8 +347,11 @@ func _coger() -> void:
 func _distancia_a_actor(actor: Node) -> float:
 	if actor is not Node3D:
 		return 0.0
-	var destino := (actor as Node3D).global_position
-	return Vector2(destino.x - global_position.x, destino.z - global_position.z).length()
+	var actor_3d := actor as Node3D
+	var usar_global := is_inside_tree() and actor_3d.is_inside_tree()
+	var destino := actor_3d.global_position if usar_global else actor_3d.position
+	var origen := global_position if usar_global else position
+	return Vector2(destino.x - origen.x, destino.z - origen.z).length()
 
 
 func _distancia_al_jugador() -> float:
