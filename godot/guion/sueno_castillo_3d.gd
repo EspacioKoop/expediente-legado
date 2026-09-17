@@ -7,7 +7,9 @@ class_name SuenoCastillo3D
 extends RefCounted
 
 const ESCENA_PATIO := preload("res://escenas/suenos/props_284/patio_castillo_onirico.tscn")
-const ESCENA_SCRIPTORIUM := preload(\n\t"res://escenas/suenos/props_284/galeria_scriptorium_castillo.tscn"\n)
+const ESCENA_SCRIPTORIUM := preload(
+	"res://escenas/suenos/props_284/galeria_scriptorium_castillo.tscn"
+)
 const ESCENA_TORRE_CAPILLA := preload("res://escenas/suenos/props_284/torre_capilla_castillo.tscn")
 
 
