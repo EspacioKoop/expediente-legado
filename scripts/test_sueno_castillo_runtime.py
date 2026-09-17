@@ -41,12 +41,11 @@ class SuenoCastilloRuntimeTest(unittest.TestCase):
         for termino in ["Rect2i", "BoxMesh", "Jornada.", "Partida", "dinero", "veredicto"]:
             self.assertNotIn(termino, self.texto)
 
-    def test_mantiene_fuentes_y_seleccion_cc0_del_vertical_base(self):
-        self.assertIn("valsekamerplant.itch.io/psx-style-going-medieval", self.texto)
-        self.assertIn("quaternius.com/packs/fantasypropsmegakit.html", self.texto)
-        self.assertIn('LICENCIA := "CC0-1.0"', self.texto)
-        self.assertEqual(self.texto.count('"grupo": "arquitectura"'), 3)
-        self.assertEqual(self.texto.count('"grupo": "prop"'), 3)
+    def test_runtime_no_publica_deuda_de_assets_cc0(self):
+        self.assertNotIn("SELECCION_MINIMA", self.texto)
+        self.assertNotIn('"seleccion_onirica"', self.texto)
+        self.assertNotIn("valsekamerplant.itch.io", self.texto)
+        self.assertNotIn("quaternius.com/packs/fantasypropsmegakit.html", self.texto)
 
     def test_patio_declara_castillo_sobre_familia_anular(self):
         self.assertIn('"familia_poligonal": SuenoFamilias.ANULAR', self.formas)
