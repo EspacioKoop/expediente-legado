@@ -33,9 +33,7 @@ func _probar_publicaciones_fisicas() -> void:
 	var publicaciones := _publicaciones(acumulacion)
 	_comprobar(publicaciones.size() == 3, "tres publicaciones coexisten físicamente en casa")
 	_comprobar(_ids(publicaciones).has("revista_umbral_98"), "Umbral aparece como objeto físico")
-	_comprobar(
-		_ids(publicaciones).has("periodico_tarde_98"), "La Tarde aparece como objeto físico"
-	)
+	_comprobar(_ids(publicaciones).has("periodico_tarde_98"), "La Tarde aparece como objeto físico")
 	_comprobar(_ids(publicaciones).has("manual_casa_98"), "el manual aparece como objeto físico")
 
 	for publicacion in publicaciones:
@@ -57,11 +55,12 @@ func _probar_publicaciones_fisicas() -> void:
 			"%s conserva texto de portada o primera pieza" % item_id
 		)
 		_comprobar(_tiene_colision(publicacion), "%s puede recibir el raycast común" % item_id)
-		_comprobar(publicacion.get_child_count() >= 4, "%s tiene cuerpo, cubierta y colisión" % item_id)
+		_comprobar(
+			publicacion.get_child_count() >= 4, "%s tiene cuerpo, cubierta y colisión" % item_id
+		)
 
 	_comprobar(
-		_formato(publicaciones, "revista_umbral_98") == "revista",
-		"Umbral se presenta como revista"
+		_formato(publicaciones, "revista_umbral_98") == "revista", "Umbral se presenta como revista"
 	)
 	_comprobar(
 		_formato(publicaciones, "periodico_tarde_98") == "periodico",
