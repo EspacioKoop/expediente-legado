@@ -27,7 +27,7 @@ Los elementos de fondo deben seguir siendo secundarios: niebla, distancia, palet
 | --- | ---: | --- | --- |
 | Modular Train Pack | #217 | **integrado** | PR #236: vagón + vía originales de Quaternius, procedencia/SHA-256 y montaje lejano sin colisión/IA/interacción. |
 | Godot Skies | #224 | **integrado** | PR #235: shader CC0 adaptado, preset propio y montaje real en la escena diaria. |
-| Retro Urban Kit | #295 | **parcial avanzado** | PRs #402, #415 y #603: toldo, banco, farola y barrera como geometría adaptada; 8 instancias en el trayecto. Sigue pendiente la validación visual humana/captura específica que cierre #295. |
+| Retro Urban Kit | #295 | **integrado / cerrado** | PRs #402, #415, #603 y #940: 4 piezas fuente / 8 instancias, procedencia CC0/SHA-256, captura aislada y benchmark específico. Coste medido: +8 draw calls, +376 primitivas y +83.352 B de memoria estática frente al baseline. |
 | Ultimate Nature Pack | #229 | **integrado / cerrado** | PR #418: 4 OBJ/MTL originales, procedencia/SHA-256, shader PSX y 8 instancias de periferia. |
 | Retro PSX Street Furniture | #222 | **pendiente / opcional** | Ya no es requisito automático para #216: usar solo si una captura/playtest detecta un hueco concreto que #295/#225 no cubren. |
 | Traffic Road Assets | #225 | **integrado, pendiente aceptación visual** | PR #507: conos, barrera y tapas CC0 con GLB/atlas en LFS, procedencia, captura y coste medido. |
@@ -47,7 +47,7 @@ Los elementos de fondo deben seguir siendo secundarios: niebla, distancia, palet
 #216 ha crecido más allá de la lista original. Los siguientes issues son alternativas o extensiones preferentes cuando resuelven mejor un hueco real:
 
 - #294 — PSX Style Office Pack: **integrado** mediante PR #499; es la familia principal de oficina.
-- #295 — Retro Urban Kit: integración urbana principal de bajo coste; falta validación visual final del corte.
+- #295 — Retro Urban Kit: **integrado y cerrado**; #940 deja captura aislada y coste medido del corte.
 - #296 — PSX Going Medieval / Fantasy Props: soporte del castillo onírico de #284; no es requisito de cierre de #216.
 - #297 — Kenney UI Audio: extensión sonora CC0, cerrada; comparte política de procedencia pero no cuenta como ambientación 3D.
 - #298 — Kubasta: fuente CC0 para terminales; complemento tipográfico, no sustituto del criterio visual 3D.
@@ -57,7 +57,7 @@ Los elementos de fondo deben seguir siendo secundarios: niebla, distancia, palet
 No completar porcentajes del catálogo por inercia. El orden útil a partir del estado actual es:
 
 1. **validación visual de calle**: revisar una captura/playtest con tren, skyline/edificios, árboles/naturaleza, Retro Urban, Traffic Road y coches simultáneos;
-2. **cerrar o acotar sub-issues ya implementados** (#225, #228, #230, #295) según esa validación humana;
+2. **cerrar o acotar sub-issues ya implementados** (#225, #228, #230) según esa validación humana; #295 ya queda cerrado con evidencia aislada;
 3. **oficina y casa**: no importar más familias salvo hueco concreto; #499 y #532 ya cubren el gate funcional de #216;
 4. **materiales/desgaste**: #231 solo si mejora una superficie real bajo las reglas de #399;
 5. **packs aún pendientes** (#220/#222/#223/#226): tratarlos como opciones, no como checklist obligatoria;
@@ -82,7 +82,7 @@ Estado actual del gate:
 
 - [x] existe al menos una integración real de fondo con geometría externa y procedencia: #217/#236;
 - [x] existe un cielo/preset CC0 adaptado y montado: #224/#235;
-- [x] existe una integración urbana PSX real y suficientemente variada como para evaluarla: #295/#402/#415/#603, #225/#507, #230/#526, #218/#693;
+- [x] existe una integración urbana PSX real y suficientemente variada como para evaluarla: #295/#402/#415/#603/#940, #225/#507, #230/#526, #218/#693;
 - [x] oficina y casa tienen al menos una familia CC0 realmente integrada: #294/#499 y #227/#532;
 - [x] existe benchmark combinado reproducible: #493/#524;
 - [x] existen capturas comparables de integraciones reales: benchmark combinado, casa antes/después y capturas específicas de tráfico/coches/arbolado;
