@@ -107,6 +107,48 @@ func _ejecutar() -> void:
 		"Minotauro conserva vocabulario visual propio",
 	)
 
+	var ritual_laberinto := JuicioSimbolico.ritual_para(arcano, mito)
+	_comprobar(
+		ritual_laberinto.get("id", "") == "laberinto_lunar",
+		"Luna y Minotauro activan Laberinto lunar",
+	)
+	_comprobar(
+		is_equal_approx(float(ritual_laberinto.get("radio_arena", 0.0)), 4.15),
+		"Laberinto lunar estrecha la arena",
+	)
+	_comprobar(
+		is_equal_approx(float(ritual_laberinto.get("velocidad_rival_mul", 0.0)), 0.86),
+		"Laberinto lunar ralentiza la persecucion",
+	)
+
+	var ritual_balanza := JuicioSimbolico.ritual_para({"id": "la-justicia"}, "duat")
+	_comprobar(
+		ritual_balanza.get("id", "") == "balanza_duat",
+		"Justicia y Duat activan Balanza del Duat",
+	)
+	_comprobar(
+		int(ritual_balanza.get("contraataque_esquiva", 0)) == 1,
+		"Balanza del Duat premia la esquiva sincronizada",
+	)
+
+	var ritual_talon := JuicioSimbolico.ritual_para({"id": "la-fuerza"}, "aquiles")
+	_comprobar(
+		ritual_talon.get("id", "") == "talon_fuerza",
+		"Fuerza y Aquiles activan Talon de la Fuerza",
+	)
+	_comprobar(
+		int(ritual_talon.get("dano_fuerte_bonus", 0)) == 1,
+		"Talon de la Fuerza potencia el golpe fuerte",
+	)
+	_comprobar(
+		is_equal_approx(float(ritual_talon.get("recarga_fuerte", 0.0)), 0.82),
+		"Talon de la Fuerza aumenta la recuperacion del golpe fuerte",
+	)
+	_comprobar(
+		JuicioSimbolico.ritual_para({"id": "el-sol"}, "minotauro").is_empty(),
+		"una pareja no declarada no inventa bonificador",
+	)
+
 	var raiz := Node3D.new()
 	var simbolos := JuicioSimbolico3D.montar(raiz, arcano, mito)
 	var arcano_3d := simbolos.get_node_or_null("ArcanoRector")
