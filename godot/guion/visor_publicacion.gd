@@ -223,11 +223,14 @@ func _mostrar_actual() -> void:
 	_tipo.text = String(pieza.get("titulo", pieza_id))
 	_contenido.text = String(pieza.get("texto", ""))
 	_contenido.scroll_to_line(0)
-	_pagina.text = "%d / %d · %s" % [
-		_indice_pieza + 1,
-		piezas.size(),
-		"contenido nuevo" if bool(lectura.get("nueva", false)) else "ya visto",
-	]
+	_pagina.text = (
+		"%d / %d · %s"
+		% [
+			_indice_pieza + 1,
+			piezas.size(),
+			"contenido nuevo" if bool(lectura.get("nueva", false)) else "ya visto",
+		]
+	)
 	_anterior.disabled = _indice_pieza <= 0
 	_siguiente.disabled = _indice_pieza >= piezas.size() - 1
 
