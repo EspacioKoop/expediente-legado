@@ -125,6 +125,22 @@ func resolver_comando(comando: String) -> Dictionary:
 			normalizado = _normalizar(limpio)
 			break
 
+	var resolucion := _resolver_alias_o_ayuda(normalizado)
+	if not resolucion.is_empty():
+		return resolucion
+	resolucion = _resolver_ruta_comando(limpio)
+	if not resolucion.is_empty():
+		return resolucion
+	resolucion = _resolver_url_comando(limpio)
+	if not resolucion.is_empty():
+		return resolucion
+	return {
+		"estado": "no_encontrado",
+		"mensaje": "Comando no reconocido. Escriba «ayuda» para ver las opciones permitidas.",
+	}
+
+
+func _resolver_alias_o_ayuda(normalizado: String) -> Dictionary:
 	if normalizado in ["help", "ayuda", "?"]:
 		return {
 			"estado": "ok",
@@ -132,7 +148,6 @@ func resolver_comando(comando: String) -> Dictionary:
 			"destino": "",
 			"mensaje": "Comandos: alias de aplicación, ruta conocida o URL Web98 conocida.",
 		}
-
 	for app in _apps:
 		var id := String(app.get("id", ""))
 		var candidatos: Array[String] = [
@@ -147,41 +162,43 @@ func resolver_comando(comando: String) -> Dictionary:
 				"destino": id,
 				"mensaje": "Abriendo %s…" % String(app.get("titulo", id)),
 			}
+	return {}
 
+
+func _resolver_ruta_comando(limpio: String) -> Dictionary:
 	var explorador := ExploradorSigaModelo.new()
 	explorador.configurar_contexto(_contexto)
 	var entrada := explorador.resolver_ruta(limpio)
-	if not entrada.is_empty():
-		if (
-			explorador.es_visible(entrada)
-			and explorador.puede_acceder(entrada)
-			and String(entrada.get("tipo", "")) == "carpeta"
-		):
-			return {
-				"estado": "ok",
-				"tipo": "ruta",
-				"destino": String(entrada.get("ruta", "")),
-				"mensaje": "Abriendo %s…" % String(entrada.get("nombre", "carpeta")),
-			}
-		return {"estado": "denegado", "mensaje": "La ruta no está disponible."}
+	if entrada.is_empty():
+		return {}
+	if (
+		explorador.es_visible(entrada)
+		and explorador.puede_acceder(entrada)
+		and String(entrada.get("tipo", "")) == "carpeta"
+	):
+		return {
+			"estado": "ok",
+			"tipo": "ruta",
+			"destino": String(entrada.get("ruta", "")),
+			"mensaje": "Abriendo %s…" % String(entrada.get("nombre", "carpeta")),
+		}
+	return {"estado": "denegado", "mensaje": "La ruta no está disponible."}
 
-	if limpio.to_lower().begins_with("http://") or limpio.to_lower().begins_with("https://"):
-		var web := Web98Indice.new()
-		web.configurar_contexto(_contexto)
-		var resolucion := web.resolver_url(limpio)
-		if String(resolucion.get("estado", "no_encontrado")) != "no_encontrado":
-			return {
-				"estado": "ok",
-				"tipo": "url",
-				"destino": limpio,
-				"mensaje": "Abriendo destino Web98…",
-			}
-		return {"estado": "no_encontrado", "mensaje": "La dirección no figura en Web98."}
 
-	return {
-		"estado": "no_encontrado",
-		"mensaje": "Comando no reconocido. Escriba «ayuda» para ver las opciones permitidas.",
-	}
+func _resolver_url_comando(limpio: String) -> Dictionary:
+	if not limpio.to_lower().begins_with("http://") and not limpio.to_lower().begins_with("https://"):
+		return {}
+	var web := Web98Indice.new()
+	web.configurar_contexto(_contexto)
+	var resolucion := web.resolver_url(limpio)
+	if String(resolucion.get("estado", "no_encontrado")) != "no_encontrado":
+		return {
+			"estado": "ok",
+			"tipo": "url",
+			"destino": limpio,
+			"mensaje": "Abriendo destino Web98…",
+		}
+	return {"estado": "no_encontrado", "mensaje": "La dirección no figura en Web98."}
 
 
 func _construir_buscar() -> void:
