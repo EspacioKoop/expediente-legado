@@ -44,7 +44,9 @@ class CatalogoAnomaliasTest(unittest.TestCase):
             self.assertTrue(entrada["nota_visual"].strip())
             representacion = entrada["representacion"]
             self.assertEqual(representacion["modelo"], entrada["origen_id"])
-            self.assertEqual(representacion["tipo"], "modelo-procedural")
+            self.assertIn(representacion["tipo"], {"modelo-procedural", "asset-cc0"})
+            if representacion["tipo"] == "asset-cc0":
+                self.assertTrue(representacion["modelo"].startswith("household_goods/"))
 
     def test_catalogo_no_contiene_ubicaciones_soluciones_ni_recompensas(self):
         permitidas = {
