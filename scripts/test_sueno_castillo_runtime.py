@@ -23,6 +23,12 @@ class SuenoCastilloRuntimeTest(unittest.TestCase):
         self.assertNotIn("Sueno.noche(", self.texto)
         self.assertNotIn("SuenoFormas", self.texto)
 
+    def test_variante_castillo_es_determinista_y_no_cambia_la_fisica(self):
+        self.assertIn('const VARIANTES := ["patio", "scriptorium", "torre_capilla"]', self.texto)
+        self.assertIn("posmod(semilla + maxi(0, vuelta - 1), VARIANTES.size())", self.texto)
+        self.assertIn('resultado["variante_castillo"]', self.texto)
+        self.assertNotIn('resultado["familia_poligonal"] =', self.texto)
+
     def test_retorno_usa_solo_anclas_de_la_familia(self):
         self.assertIn('"retorno_patio"', self.texto)
         self.assertIn("anclas[posmod(vuelta, anclas.size())]", self.texto)
