@@ -48,11 +48,7 @@ static func evidencias_disponibles(careo: Dictionary) -> Array:
 
 
 static func jugar(
-	careo: Dictionary,
-	tipo_jugador: String,
-	evidencia_id: String,
-	habilidad: String,
-	azar: Callable
+	careo: Dictionary, tipo_jugador: String, evidencia_id: String, habilidad: String, azar: Callable
 ) -> Dictionary:
 	var evidencia := _evidencia_disponible(careo, evidencia_id)
 	var ronda := Combate.jugar(careo, tipo_jugador, habilidad, azar)
