@@ -78,10 +78,13 @@ func _capturar_caso(caso: Dictionary, salida: String) -> void:
 	root.add_child(anfitrion)
 
 	var juicio := JuicioCombate3D.new()
-	juicio.configurar(
-		{"id": "reclamante_captura", "nombre": "RECLAMANTE DE ARCHIVO"},
-		1,
-		false,
+	(
+		juicio
+		. configurar(
+			{"id": "reclamante_captura", "nombre": "RECLAMANTE DE ARCHIVO"},
+			1,
+			false,
+		)
 	)
 	anfitrion.add_child(juicio)
 	await process_frame
