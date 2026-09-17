@@ -85,9 +85,7 @@ static func _entradas_disponibles(app: Node) -> Array[Dictionary]:
 func configurar(app: Node, entradas: Array[Dictionary]) -> void:
 	_app = app
 	_entradas = entradas.duplicate(true)
-	_reduccion_movimiento = bool(
-		PreferenciasSiga.cargar().get("reduccion_movimiento", false)
-	)
+	_reduccion_movimiento = bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false))
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	add_theme_constant_override("separation", 6)
