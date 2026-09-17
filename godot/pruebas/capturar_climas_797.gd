@@ -5,9 +5,10 @@
 ##   xvfb-run -a godot4 --path godot --script res://pruebas/capturar_climas_797.gd \
 ##       -- /tmp/climas-797
 ##
-## Genera despejado/nublado/lluvia/niebla/nieve desde la misma entrada y con
-## la misma orientación del trayecto. Es una ayuda de revisión: las imágenes
-## deben MIRARSE antes de considerar resuelto un cambio visual.
+## Genera despejado/nublado/lluvia/niebla/nieve desde la misma entrada con dos
+## encuadres: calle al frente y cielo 35 grados hacia arriba. Es una ayuda de
+## revisión: las imágenes deben MIRARSE antes de considerar resuelto un cambio
+## visual.
 extends SceneTree
 
 const ESTADOS := [
@@ -59,12 +60,31 @@ func _init() -> void:
 			await process_frame
 
 		var destino := salida.path_join("%s.png" % estado)
-		var imagen := root.get_texture().get_image()
-		var error_png := imagen.save_png(destino)
-		if error_png != OK:
-			printerr("No se pudo guardar %s (error %d)" % [destino, error_png])
+		if not _guardar_captura(destino):
 			quit(1)
 			return
-		print("clima %s -> %s" % [estado, destino])
+
+		# Segunda toma: misma posición y rumbo, solo se inclina la cámara para
+		# que las capas de cielo puedan compararse sin confundirlas con fachada,
+		# suelo, precipitación o profundidad de calle.
+		var camara := dia._caminante.get_node("Camara") as Camera3D
+		camara.rotation.x = deg_to_rad(35.0)
+		for i in 8:
+			await process_frame
+		var destino_cielo := salida.path_join("%s_cielo.png" % estado)
+		if not _guardar_captura(destino_cielo):
+			quit(1)
+			return
+		camara.rotation.x = 0.0
+		print("clima %s -> %s + %s" % [estado, destino, destino_cielo])
 
 	quit(0)
+
+
+func _guardar_captura(destino: String) -> bool:
+	var imagen := root.get_texture().get_image()
+	var error_png := imagen.save_png(destino)
+	if error_png != OK:
+		printerr("No se pudo guardar %s (error %d)" % [destino, error_png])
+		return false
+	return true

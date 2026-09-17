@@ -83,14 +83,29 @@ func _entrar_en(fase: String) -> void:
 		_montar_guia_sueno()
 
 
-## La interacción 3D pide alimentar; esta capa posee la jornada y delega en el
-## flujo histórico del cuenco. Así no existen dos precios, dos guardados ni dos
-## contadores de hambre.
+## La interacción 3D del gato deja una huella concreta del día: se guarda qué
+## gesto ocurrió para que el sueño pueda recordarlo sin convertirlo en puntos.
 func _al_activar_gato(_actor: Node, gato: Gato) -> void:
-	if gato.verbo != Interactuable3D.Verbo.DAR or jornada.get("fase", "") != "casa":
+	if jornada.get("fase", "") != "casa":
 		return
-	_dar_de_comer()
-	gato.actualizar_hambre(int(jornada.get("gato", {}).get("dias_sin_comer", 0)))
+	if gato.verbo == Interactuable3D.Verbo.DAR:
+		_dar_de_comer()
+		gato.actualizar_hambre(int(jornada.get("gato", {}).get("dias_sin_comer", 0)))
+		return
+	var accion := GatoEcoSueno.accion_de_verbo(gato.verbo)
+	GatoEcoSueno.registrar(jornada.get("gato", {}), int(jornada.get("dia", 0)), accion)
+
+
+## Intercepta también el cuenco histórico: alimentar desde el gato o pisando el
+## cuenco es la misma acción y solo se registra si el hambre realmente pasa a 0.
+func _dar_de_comer() -> void:
+	var hambre_antes := int(jornada.get("gato", {}).get("dias_sin_comer", 0))
+	super._dar_de_comer()
+	var hambre_despues := int(jornada.get("gato", {}).get("dias_sin_comer", 0))
+	if hambre_antes > 0 and hambre_despues == 0:
+		GatoEcoSueno.registrar(
+			jornada.get("gato", {}), int(jornada.get("dia", 0)), GatoEcoSueno.ALIMENTAR
+		)
 
 
 func _posiciones_objetivo(espacio: Dictionary, foco: Vector3) -> Array:
@@ -463,11 +478,16 @@ func _montar_guia_sueno() -> void:
 		return
 
 	var direccion := rumbo.normalized()
-	var posicion := _entrada_guia + direccion * 1.4
+	var eco := GatoEcoSueno.efecto(gato, int(jornada.get("dia", 0)))
+	var distancia := float(eco.get("distancia", 1.4))
+	var posicion := _entrada_guia + direccion * distancia
 	_gato_guia = Gato.new()
 	_mundo.add_child(_gato_guia)
 	_gato_guia.empezar(posicion, [posicion])
+	if not eco.is_empty():
+		_gato_guia.presentar_estado(String(eco.get("estado", "parado")))
 
 	# Bien cuidado funciona como una brújula viva hacia el primer objetivo
-	# pendiente, no hacia la antigua salida física.
+	# pendiente, no hacia la antigua salida física. El eco solo cambia pose y
+	# cercanía: jamás el rumbo ni la selección del objetivo.
 	_orientar_gato_guia()
