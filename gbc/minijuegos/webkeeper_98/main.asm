@@ -62,6 +62,9 @@ DEF TILE_PUNTO   EQU 43
 DEF TILE_DOSPT   EQU 44
 DEF TILE_GUION   EQU 45
 
+
+INCLUDE "../comun/pantalla_cgb.asm"
+
 SECTION "VBlank", ROM0[$0040]
     reti
 
@@ -78,6 +81,7 @@ Inicio:
     di
     ld sp, $DFFF
     xor a
+    ld [wTituloCGB], a
     ld [wWebkeeperCompletado], a
     ld [wEstado], a
     ld [wPartido], a
@@ -197,6 +201,14 @@ MostrarTitulo:
     call LimpiarFondo
     call LimpiarOAM
 
+    call EsCGB
+    jr nz, .texto
+    ld hl, TituloCGB
+    call CargarPantallaCGB
+    ld a, 1
+    ld [wTituloCGB], a
+    jr .estado
+.texto:
     ld hl, BG_MAP + 4 * 32 + 4
     ld de, TextoTitulo
     call EscribirTexto
@@ -207,6 +219,7 @@ MostrarTitulo:
     ld de, TextoPulsaA
     call EscribirTexto
 
+.estado:
     ld a, ESTADO_TITULO
     ld [wEstado], a
     call ActivarLCD
@@ -798,6 +811,17 @@ ActivarLCD:
     ret
 
 LimpiarFondo:
+    ; Al salir del título a pantalla completa se recuperan tiles, paleta y
+    ; atributos del juego antes de dibujar nada (#808).
+    ld a, [wTituloCGB]
+    or a
+    jr z, .limpiar
+    xor a
+    ld [wTituloCGB], a
+    call DescargarPantallaCGB
+    call CargarTiles
+    call ConfigurarPaletas
+.limpiar:
     ld hl, BG_MAP
     ld bc, 32 * 32
 .loop:
@@ -836,8 +860,10 @@ CargarTiles:
     ret
 
 ConfigurarPaletas:
-    ld a, %11100100
+    ; DMG: el índice 1 del fondo (tinta) pasa a negro para que se lea (#805).
+    ld a, %11101100
     ldh [rBGP], a
+    ld a, %11100100
     ldh [rOBP0], a
 
     ld a, $80
@@ -1014,7 +1040,9 @@ Tiles:
 TilesFin:
 
 PaletaBG:
-    dw $7FFF, $56B5, $294A, $0000
+    ; El color 1 es la tinta del texto y la portería (#805): en gris claro no se
+    ; leía. Blanco, azul noche, gris oscuro, negro.
+    dw $7FFF, $3084, $294A, $0000
 PaletaOBJ:
     dw $7FFF, $03FF, $001F, $0000
 
@@ -1042,3 +1070,11 @@ wVentanaRed:           ds 1
 wRecargaRed:           ds 1
 wUltimoFueParada:      ds 1
 FinWRAM:
+
+; Título a pantalla completa (#808): si el fondo la tiene cargada, para
+; devolverle sus tiles al juego al salir.
+SECTION "TituloCGBVars", WRAM0
+wTituloCGB:  ds 1
+
+SECTION "TituloCGB", ROMX
+    PANTALLA_CGB TituloCGB, "assets/titulo"

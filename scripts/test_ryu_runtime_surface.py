@@ -101,7 +101,7 @@ class RyuRuntimeSurfaceTest(unittest.TestCase):
         self.assertIn("ld [wRyuFlowCompletado], a", completar)
 
     def test_documentacion_refleja_promocion_y_handshake_conectado(self):
-        self.assertIn("| `ryu_flow_98` | RYU FLOW |", self.docs)
+        self.assertIn("| `ryu_flow_98` | River of the Dragon |", self.docs)
         self.assertIn("tienda de videojuegos | 45", self.docs)
         self.assertIn("`0xA5` en WRAM `$C100`", self.docs)
         self.assertIn("`RyuFlowVigilia`", self.docs)

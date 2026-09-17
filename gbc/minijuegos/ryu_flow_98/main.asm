@@ -76,6 +76,9 @@ DEF SOLUCION_COMPUERTAS  EQU %00000010
 DEF TODAS_TOCADAS        EQU %00000111
 DEF MARCA_COMPLETADO     EQU $A5
 
+
+INCLUDE "../comun/pantalla_cgb.asm"
+
 SECTION "VBlank", ROM0[$0040]
 VBlank:
     reti
@@ -92,6 +95,8 @@ SECTION "Juego", ROM0[$0150]
 Inicio:
     di
     ld sp, $DFFF
+    xor a
+    ld [wTituloCGB], a
 
 .espera_vblank:
     ldh a, [rLY]
@@ -388,6 +393,14 @@ ActualizarCompuertas:
     ret
 
 DibujarTitulo:
+    call EsCGB
+    jr nz, .texto
+    ld hl, TituloCGB
+    call CargarPantallaCGB
+    ld a, 1
+    ld [wTituloCGB], a
+    ret
+.texto:
     ld hl, BG_MAP + (3 * 32) + 6
     ld de, TextoTitulo
     call EscribirTexto
@@ -536,6 +549,17 @@ CargarTiles:
     ret
 
 LimpiarFondo:
+    ; Al salir del título a pantalla completa se recuperan tiles, paleta y
+    ; atributos del juego antes de dibujar nada (#808).
+    ld a, [wTituloCGB]
+    or a
+    jr z, .limpiar
+    xor a
+    ld [wTituloCGB], a
+    call DescargarPantallaCGB
+    call CargarTiles
+    call ConfigurarPaletas
+.limpiar:
     ld hl, BG_MAP
     ld bc, 32 * 32
 .loop:
@@ -713,3 +737,11 @@ wTeclasNuevas:  ds 1
 ; completar la interaccion; este corte no conecta aun ese byte con Godot.
 SECTION "Handshake", WRAM0[$C100]
 wRyuFlowCompletado: ds 1
+
+; Título a pantalla completa (#808): si el fondo la tiene cargada, para
+; devolverle sus tiles al juego al salir.
+SECTION "TituloCGBVars", WRAM0
+wTituloCGB:  ds 1
+
+SECTION "TituloCGB", ROMX
+    PANTALLA_CGB TituloCGB, "assets/titulo"

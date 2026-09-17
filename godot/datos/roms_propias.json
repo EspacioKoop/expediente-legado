@@ -7,7 +7,7 @@
   "roms": [
     {
       "id": "caza_pixeles_98",
-      "titulo": "Caza Píxeles 98",
+      "titulo": "Pixel Exodus",
       "estado": "jugable",
       "genero": "arcade de 30 segundos",
       "resumen": "Perseguir un rombo con el cursor antes de que acabe el tiempo.",
@@ -52,7 +52,7 @@
     },
     {
       "id": "ariadna_labertinto_98",
-      "titulo": "ARIADNA",
+      "titulo": "Ariadne, el hilo del laberinto",
       "estado": "en_proyecto",
       "genero": "laberinto",
       "resumen": "Completar un recorrido o marcar una ruta en un laberinto de archivo; contraparte de vigilia del sueño del Minotauro.",
@@ -97,7 +97,7 @@
     },
     {
       "id": "webkeeper_98",
-      "titulo": "WEBKEEPER 98",
+      "titulo": "Kwaku, el guardameta",
       "estado": "en_proyecto",
       "genero": "deportivo / portero arcade",
       "resumen": "Kwaku, una araña suplente, defiende Web United en tres partidos breves: leer tiros y amagos, cubrir seis zonas y reservar la telaraña para emergencias. Solo ganar la final publica el handshake WRAM.",
@@ -112,7 +112,7 @@
     },
     {
       "id": "ryu_flow_98",
-      "titulo": "RYU FLOW",
+      "titulo": "River of the Dragon",
       "estado": "jugable",
       "genero": "puzle de flujo",
       "resumen": "Desviar tres compuertas para recomponer un cauce y guiar a una criatura serpentina. Solo la solución completa publica el handshake WRAM que activa la semilla Ryū.",
