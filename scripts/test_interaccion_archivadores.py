@@ -36,10 +36,8 @@ class InteraccionArchivadoresTest(unittest.TestCase):
     def test_contrato_declara_cerrar_y_refresca_prompt(self):
         self.assertIn("CERRAR", self.interactuable)
         self.assertIn('Verbo.CERRAR: "Cerrar"', self.interactuable)
-        self.assertIn(
-            "objetivo_cambiado.emit(_objetivo, _objetivo.texto_accion())",
-            self.detector,
-        )
+        self.assertIn("_refrescar_texto(true)", self.detector)
+        self.assertIn("objetivo_cambiado.emit(_objetivo, texto)", self.detector)
 
     def test_no_introduce_estado_de_jornada_ni_inventario(self):
         combinado = self.archivador + self.detector
