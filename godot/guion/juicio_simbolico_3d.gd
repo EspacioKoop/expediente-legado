@@ -221,7 +221,9 @@ static func _forma_telarana(raiz: Node3D, color: Color) -> void:
 		exterior.append(punto)
 		raiz.add_child(_segmento(centro, punto, 0.035, color, true))
 	for i in exterior.size():
-		raiz.add_child(_segmento(exterior[i], exterior[(i + 1) % exterior.size()], 0.035, color, true))
+		raiz.add_child(
+			_segmento(exterior[i], exterior[(i + 1) % exterior.size()], 0.035, color, true)
+		)
 
 
 static func _forma_sol(raiz: Node3D, color: Color) -> void:
