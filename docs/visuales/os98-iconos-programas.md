@@ -9,26 +9,32 @@ Primer corte de arte para #781. El objetivo es que las aplicaciones reales del e
 
 Orden canónico de celdas:
 
-1. `explorador` — carpeta con vista de equipo.
-2. `web98` — ventana de navegador con globo.
-3. `software` — pila de disquetes/programas.
-4. `correo` — sobre con aviso.
-5. `bloc-notas` — hoja y lápiz.
-6. `calculadora` — calculadora con display y teclas diferenciadas.
-7. `catalogo-anomalias` — archivador oscuro con ojo/anomalía púrpura.
+1. `explorador` — carpeta amarilla limpia y reconocible.
+2. `web98` — globo azul con meridianos y acento verde.
+3. `software` — panel de aplicaciones con módulos de color.
+4. `correo` — sobre azul claro con aviso rojo.
+5. `bloc-notas` — libreta clara con espiral y lápiz.
+6. `calculadora` — calculadora oscura con display cian y teclas diferenciadas.
+7. `catalogo-anomalias` — tile oscuro con remolino/anomalía púrpura.
 
 ## Dirección visual
 
-- píxel duro mediante `shape-rendering="crispEdges"`;
-- misma familia de grises, azules y amarillos del shell ya integrado;
-- acentos de color solo para mejorar reconocimiento a baja resolución;
+Tras la revisión humana del primer pase, se abandona el aspecto de píxel duro. La versión actual sigue siendo compacta y propia del escritorio ficticio, pero busca una lectura más pulida:
+
+- centrado óptico consistente dentro de cada celda;
+- siluetas suaves y esquinas redondeadas;
+- degradados discretos y volumen ligero, sin fotorealismo;
+- colores limpios y contrastados para reconocer cada app de un vistazo;
+- detalles simplificados específicamente a 16×16;
 - sin texto horneado, logos ni iconos copiados de software comercial real;
-- el atlas de 16 px no es un simple reescalado: simplifica siluetas y detalle para conservar lectura.
+- sin `shape-rendering="crispEdges"`: el SVG puede aprovechar antialiasing normal.
+
+La referencia visual aprobada se acerca más a iconografía de escritorio tardía/early-2000s reinterpretada que a pixel-art estricto de 1998. OS98 sigue siendo ficticio: se conserva la personalidad retro del shell, pero no se fuerza toda su iconografía a una cuadrícula de píxel duro.
 
 ## Integración pendiente
 
-Este corte es deliberadamente `asset-only`: no modifica `escritorio_siga_visual.gd` ni `dia_escritorio_siga_app.gd`. El siguiente corte puede ampliar el resolver de iconos para aceptar el atlas base y este atlas de programas, asignando las siete identidades a las aplicaciones que ya existen.
+Este corte sigue siendo `asset-only`: no modifica `escritorio_siga_visual.gd` ni `dia_escritorio_siga_app.gd`. El siguiente corte puede ampliar el resolver de iconos para aceptar el atlas base y este atlas de programas, asignando las siete identidades a las aplicaciones que ya existen.
 
-La captura en juego exigida por #781 queda para ese wiring; este PR solo fija arte versionable y su regresión estructural.
+La captura en juego exigida por #781 queda para ese wiring; este PR fija el arte versionable y su regresión estructural.
 
 — Odiseo (GPT-5.6 Sol)
