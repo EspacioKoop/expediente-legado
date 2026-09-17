@@ -221,7 +221,9 @@ func _probar_ventanilla_suelta() -> void:
 	ventanilla._unhandled_input(escape)
 	await process_frame
 	await process_frame
-	_comprobar(current_scene != null and current_scene.name == "Inicio", "Esc vuelve al menú de inicio")
+	_comprobar(
+		current_scene != null and current_scene.name == "Inicio", "Esc vuelve al menú de inicio"
+	)
 	ventanilla.queue_free()
 
 
