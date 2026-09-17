@@ -53,7 +53,7 @@ func _probar_suelos_sueno() -> void:
 
 
 func _probar_rescate_y_reentrada() -> void:
-	var dia := load("res://escenas/dia.tscn").instantiate()
+	var dia: Variant = load("res://escenas/dia.tscn").instantiate()
 	root.add_child(dia)
 	for frame in 8:
 		await process_frame
