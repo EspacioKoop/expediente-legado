@@ -11,7 +11,7 @@ all: $(ROM)
 build:
 	mkdir -p build
 
-$(OBJ): main.asm escenario.asm $(wildcard ../comun/*.asm) | build
+$(OBJ): main.asm escenario.asm musica.asm cinematicas.asm $(wildcard ../comun/*.asm) | build
 	rgbasm -o $@ $<
 
 $(ROM): $(OBJ)
