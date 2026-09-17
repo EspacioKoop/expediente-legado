@@ -58,10 +58,13 @@ func _aplicar_cielo_sueno() -> void:
 		SuenoFormas.ids().size(),
 	)
 	var pendientes: Array = jornada.get("sueno_escenas", [])
-	var familia := SuenoCielos.familia_para_escena(
-		familias,
-		cantidad,
-		pendientes.size(),
+	var familia := (
+		SuenoCielos
+		. familia_para_escena(
+			familias,
+			cantidad,
+			pendientes.size(),
+		)
 	)
 	var perfil := SuenoCielos.componer(familia, _modificadores_cielo_sueno())
 	SuenoCielos.aplicar(material, perfil)
