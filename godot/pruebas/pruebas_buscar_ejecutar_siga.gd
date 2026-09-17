@@ -30,7 +30,7 @@ func _probar() -> void:
 	buscar.configurar("buscar", apps, contexto_base)
 	get_root().add_child(buscar)
 	await process_frame
-	_comprobar(buscar.get_node_or_null("Consulta") is LineEdit, "Buscar expone entrada de teclado")
+	_comprobar(buscar.find_child("Consulta", true, false) is LineEdit, "Buscar expone entrada de teclado")
 	_comprobar(buscar.get_node_or_null("Resultados") is ItemList, "Buscar expone lista activable")
 	_comprobar(
 		_contiene_titulo(buscar.buscar("correo"), "Correo corporativo"), "encuentra aplicaciones"
@@ -50,7 +50,7 @@ func _probar() -> void:
 	get_root().add_child(ejecutar)
 	await process_frame
 	_comprobar(
-		ejecutar.get_node_or_null("Comando") is LineEdit, "Ejecutar expone entrada de teclado"
+		ejecutar.find_child("Comando", true, false) is LineEdit, "Ejecutar expone entrada de teclado"
 	)
 	var alias := ejecutar.resolver_comando("mail")
 	_comprobar(
