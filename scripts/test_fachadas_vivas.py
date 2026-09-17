@@ -1,4 +1,4 @@
-"""Vertical slice de fachadas vivas: contrato estático y prueba real en Godot (#861)."""
+"""Fachadas vivas: contrato estático y prueba real en Godot (#861)."""
 from pathlib import Path
 import os
 import subprocess
@@ -24,6 +24,15 @@ class FachadasVivasTest(unittest.TestCase):
         self.assertIn('const PREFIJO_TRAMO := "Ventana0_"', self.fachadas)
         for variante in ("escritorio", "estanteria", "salon_tv"):
             self.assertIn(f'"{variante}"', self.fachadas)
+        for estado in ("calida", "apagada", "fria_tv", "tenue", "persiana"):
+            self.assertIn(f'"{estado}"', self.fachadas)
+        for contrato_lod in (
+            "LOD_CERCA_FIN := 18.0",
+            "LOD_MEDIA_FIN := 36.0",
+            "LOD_LEJOS_FIN := 72.0",
+        ):
+            self.assertIn(contrato_lod, self.fachadas)
+        self.assertIn("visibility_range_end = rango_fin", self.fachadas)
         self.assertIn("PROFUNDIDAD_INTERIOR := 0.055", self.fachadas)
         self.assertIn("SALIENTE_EXTRA_CRISTAL := 0.05", self.fachadas)
         self.assertNotIn("no_depth_test", self.fachadas)
