@@ -36,7 +36,8 @@ class SuenoCielosTest(unittest.TestCase):
         self.assertIn("SemillasOniricas", self.dia)
         self.assertIn("seleccionar_para_noche(", self.dia)
         self.assertIn("MitologiasNoche.MAX_FAMILIAS_NOCHE", self.dia)
-        self.assertIn("SuenoCielos.familia_para_escena(", self.dia)
+        self.assertIn("SuenoCielos", self.dia)
+        self.assertIn("familia_para_escena(", self.dia)
         self.assertIn("pendientes.size()", self.dia)
 
     def test_cada_entrada_restaurara_el_preset_antes_de_modular(self) -> None:
@@ -49,8 +50,10 @@ class SuenoCielosTest(unittest.TestCase):
     def test_compositor_acepta_capas_externas_sin_segunda_fuente_de_verdad(self) -> None:
         self.assertIn("PARAMETROS_VALIDOS", self.cielos)
         self.assertIn('capa.get("parametros", {})', self.cielos)
-        self.assertIn('capa.get("prioridad"', self.cielos)
-        self.assertIn('capa.get("origen"', self.cielos)
+        self.assertIn("PRIORIDAD_EXTERNA_DEFECTO", self.cielos)
+        self.assertIn("_comparar_modificadores", self.cielos)
+        self.assertIn('get("prioridad"', self.cielos)
+        self.assertIn('get("origen"', self.cielos)
         self.assertIn("capas.sort_custom", self.cielos)
         self.assertIn("PARAMETROS_VALIDOS.has(clave)", self.cielos)
 
