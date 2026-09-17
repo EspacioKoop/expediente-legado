@@ -71,9 +71,18 @@ static func _anomalia_del_motivo(anomalias: Array, motivo: String) -> AnomaliaSu
 static func _montar_motivo(raiz: Node3D, motivo: String) -> void:
 	match motivo:
 		"umbral":
-			_caja(raiz, "HuellaIzquierda", Vector3(-0.72, ALTURA, 0.0), Vector3(0.12, ALTURA * 2.0, 1.45))
-			_caja(raiz, "HuellaDerecha", Vector3(0.72, ALTURA, 0.0), Vector3(0.12, ALTURA * 2.0, 1.45))
-			_caja(raiz, "HuellaDintel", Vector3(0.0, ALTURA, -0.68), Vector3(1.56, ALTURA * 2.0, 0.12))
+			_caja(
+				raiz,
+				"HuellaIzquierda",
+				Vector3(-0.72, ALTURA, 0.0),
+				Vector3(0.12, ALTURA * 2.0, 1.45)
+			)
+			_caja(
+				raiz, "HuellaDerecha", Vector3(0.72, ALTURA, 0.0), Vector3(0.12, ALTURA * 2.0, 1.45)
+			)
+			_caja(
+				raiz, "HuellaDintel", Vector3(0.0, ALTURA, -0.68), Vector3(1.56, ALTURA * 2.0, 0.12)
+			)
 		"doble":
 			_caja(raiz, "ParA1", Vector3(-0.62, ALTURA, -0.42), Vector3(0.18, ALTURA * 2.0, 0.82))
 			_caja(raiz, "ParA2", Vector3(-0.62, ALTURA, 0.42), Vector3(0.18, ALTURA * 2.0, 0.82))
