@@ -129,22 +129,18 @@ static func _configurar_campos(tema: Theme) -> void:
 
 
 ## La interfaz usa la fuente de respaldo que empaqueta Godot en vez de buscar
-## tipografías instaladas por nombre. Así la UI deja de cambiar porque una
-## máquina tenga Tahoma/MS Sans Serif y otra no, y conserva el suavizado normal
+## tipografías instaladas por nombre. Así la UI deja de cambiar según las
+## fuentes Windows disponibles en cada máquina y conserva el suavizado normal
 ## del motor para que el texto pequeño sea legible.
 static func fuente() -> Font:
 	return ThemeDB.fallback_font
 
 
-## Títulos: misma base legible, con algo más de peso y aire. FontVariation no
-## depende de una segunda fuente instalada y permite que cada programa tenga
-## una jerarquía visible sin sacrificar consistencia entre plataformas.
-static func fuente_titulo() -> FontVariation:
-	var tipo := FontVariation.new()
-	tipo.base_font = fuente()
-	tipo.variation_embolden = 0.5
-	tipo.spacing_glyph = 1
-	return tipo
+## El título ya es un rol separado aunque, hasta que entre la familia
+## empaquetada de #780, comparte la base legible de la interfaz. Separar el rol
+## ahora evita volver a acoplar todos los programas a una única tipografía.
+static func fuente_titulo() -> Font:
+	return fuente()
 
 
 ## Texto de documento. MFB Oldstyle ya estaba empaquetada y registrada como
