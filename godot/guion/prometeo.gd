@@ -148,15 +148,18 @@ static func registrar_eleccion_ideologica(
 		if evento.get("id", "") == id_evento:
 			return false
 
-	elecciones.append(
-		{
-			"id": id_evento,
-			"fuente": fuente,
-			"eje": eje,
-			"contexto": contexto,
-			"jornada": jornada,
-			"etiquetas": _etiquetas_normalizadas(etiquetas),
-		}
+	(
+		elecciones
+		. append(
+			{
+				"id": id_evento,
+				"fuente": fuente,
+				"eje": eje,
+				"contexto": contexto,
+				"jornada": jornada,
+				"etiquetas": _etiquetas_normalizadas(etiquetas),
+			}
+		)
 	)
 	estado[CLAVE_ELECCIONES_IDEOLOGICAS] = elecciones
 	return true
@@ -181,15 +184,18 @@ static func elecciones_ideologicas(estado: Dictionary) -> Array:
 			if not EJES.has(eje):
 				continue
 			var id_evento := PREFIJO_HISTORIA + String(carta)
-			resultado.append(
-				{
-					"id": id_evento,
-					"fuente": "tarot",
-					"eje": eje,
-					"contexto": String(carta),
-					"jornada": -1,
-					"etiquetas": ["prometeo", "tarot"],
-				}
+			(
+				resultado
+				. append(
+					{
+						"id": id_evento,
+						"fuente": "tarot",
+						"eje": eje,
+						"contexto": String(carta),
+						"jornada": -1,
+						"etiquetas": ["prometeo", "tarot"],
+					}
+				)
 			)
 			ids[id_evento] = true
 
@@ -221,14 +227,17 @@ static func registrar_exposicion_ideologica(
 		if evento.get("id", "") == id_evento:
 			return false
 
-	exposicion.append(
-		{
-			"id": id_evento,
-			"fuente": fuente,
-			"eje": eje,
-			"jornada": jornada,
-			"etiquetas": _etiquetas_normalizadas(etiquetas),
-		}
+	(
+		exposicion
+		. append(
+			{
+				"id": id_evento,
+				"fuente": fuente,
+				"eje": eje,
+				"jornada": jornada,
+				"etiquetas": _etiquetas_normalizadas(etiquetas),
+			}
+		)
 	)
 	estado[CLAVE_EXPOSICION_IDEOLOGICA] = exposicion
 	return true
@@ -255,13 +264,16 @@ static func registrar_lectura_social(
 		):
 			return false
 
-	lecturas.append(
-		{
-			"actor": actor,
-			"evento_observado": evento_observado,
-			"reaccion": reaccion,
-			"etiquetas": _etiquetas_normalizadas(etiquetas),
-		}
+	(
+		lecturas
+		. append(
+			{
+				"actor": actor,
+				"evento_observado": evento_observado,
+				"reaccion": reaccion,
+				"etiquetas": _etiquetas_normalizadas(etiquetas),
+			}
+		)
 	)
 	estado[CLAVE_LECTURAS_SOCIALES] = lecturas
 	return true
