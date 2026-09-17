@@ -31,6 +31,7 @@ func configurar(
 	escala_reaccion: Vector3,
 	giro_base: Vector3,
 	giro_reaccion: Vector3,
+	usar_asset_cc0: bool = false,
 ) -> void:
 	verbo = Verbo.EXAMINAR
 	nombre_objeto = nombre
@@ -55,6 +56,10 @@ func configurar(
 	add_child(_visual)
 	if modelo == "tarotCard":
 		_montar_tarot(tam, color)
+	elif usar_asset_cc0:
+		# Conserva la misma malla y paleta PSX que el original de vigilia.
+		if not AssetCc0.sustituir(_visual, modelo, tam):
+			_montar_respaldo(tam, color)
 	elif not Modelos.mueble(_visual, modelo, tam, color):
 		_montar_respaldo(tam, color)
 	_aplicar_estado_visual()
