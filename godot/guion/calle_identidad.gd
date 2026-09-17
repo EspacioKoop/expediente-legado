@@ -35,6 +35,12 @@ const TAM_TELE := Vector3(0.62, 0.56, 0.5)
 
 const FAROLAS_Z := [-10.0, 0.0, 10.0]
 
+## Las ventanas altas deben quedar por delante de la piel de revoco de #582.
+## Esa piel termina a 4,5 cm de la cara; una ventana de 2 cm centrada a 7 cm
+## empieza a 6 cm y conserva 1,5 cm de aire, evitando el solape de #563.
+const SALIENTE_VENTANA_FACHADA := 0.07
+const GROSOR_VENTANA_FACHADA := 0.02
+
 ## Qué dice la puerta de la tienda cuando TiendaVideojuegos no vende.
 const AVISOS_TIENDA := {
 	"sin_dinero": "CALLE_TIENDA_FALLO_SIN_DINERO",
@@ -665,12 +671,24 @@ static func _pisos_de_fachada(calle: Node3D) -> void:
 			var y := 4.4 + planta * 2.7
 			for i in cuantas:
 				var z: float = tramo[1] + 0.95 + i * 1.9
-				var posicion := Vector3(cara + hacia * 0.03, y, z)
+				var posicion := Vector3(cara + hacia * SALIENTE_VENTANA_FACHADA, y, z)
 				var nombre := "Ventana%d_%d_%d" % [t, planta, i]
 				if _azar(t * 97 + planta * 13 + i) < 0.3:
-					_luz(raiz, nombre, posicion, Vector3(0.02, 1.2, 0.9), LUZ_CALIDA)
+					_luz(
+						raiz,
+						nombre,
+						posicion,
+						Vector3(GROSOR_VENTANA_FACHADA, 1.2, 0.9),
+						LUZ_CALIDA
+					)
 				else:
-					_caja(raiz, nombre, posicion, Vector3(0.02, 1.2, 0.9), CRISTAL_APAGADO)
+					_caja(
+						raiz,
+						nombre,
+						posicion,
+						Vector3(GROSOR_VENTANA_FACHADA, 1.2, 0.9),
+						CRISTAL_APAGADO
+					)
 
 
 ## Ventanas encendidas en el fondo urbano: el skyline deja de ser un recorte negro.
