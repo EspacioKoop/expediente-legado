@@ -1,0 +1,77 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://escenas/suenos/props_284/muro_torre_castillo.tscn" id="1_muro"]
+[ext_resource type="PackedScene" path="res://escenas/suenos/props_284/escalera_anular_castillo.tscn" id="2_escalera"]
+[ext_resource type="PackedScene" path="res://escenas/suenos/props_284/estandarte_anular.tscn" id="3_estandarte"]
+
+[sub_resource type="StandardMaterial3D" id="MatClaustro"]
+albedo_color = Color(0.082, 0.078, 0.071, 1)
+roughness = 1.0
+
+[sub_resource type="PlaneMesh" id="SueloClaustro"]
+size = Vector2(15, 15)
+
+[node name="ClaustroReflejadoCastillo" type="Node3D"]
+
+[node name="SueloClaustro" type="MeshInstance3D" parent="."]
+mesh = SubResource("SueloClaustro")
+material_override = SubResource("MatClaustro")
+
+[node name="ArcadaNorteA" parent="." instance=ExtResource("1_muro")]
+position = Vector3(-3.6, 0, -5.25)
+scale = Vector3(0.62, 0.62, 0.62)
+
+[node name="ArcadaNorteB" parent="." instance=ExtResource("1_muro")]
+position = Vector3(3.6, 0, -5.25)
+scale = Vector3(0.62, 0.62, 0.62)
+
+[node name="ArcadaSurA" parent="." instance=ExtResource("1_muro")]
+position = Vector3(-3.6, 0, 5.25)
+rotation_degrees = Vector3(0, 180, 0)
+scale = Vector3(0.62, 0.62, 0.62)
+
+[node name="ArcadaSurB" parent="." instance=ExtResource("1_muro")]
+position = Vector3(3.6, 0, 5.25)
+rotation_degrees = Vector3(0, 180, 0)
+scale = Vector3(0.62, 0.62, 0.62)
+
+[node name="ArcadaEste" parent="." instance=ExtResource("1_muro")]
+position = Vector3(5.25, 0, 0)
+rotation_degrees = Vector3(0, -90, 0)
+scale = Vector3(0.62, 0.62, 0.62)
+
+[node name="ArcadaOesteElevada" parent="." instance=ExtResource("1_muro")]
+position = Vector3(-5.25, 1.25, 0)
+rotation_degrees = Vector3(0, 90, 0)
+scale = Vector3(0.62, 0.62, 0.62)
+
+[node name="EscaleraReflejoA" parent="." instance=ExtResource("2_escalera")]
+position = Vector3(-1.55, 0.02, 0.85)
+rotation_degrees = Vector3(0, 32, 0)
+scale = Vector3(0.82, 0.82, 0.82)
+
+[node name="EscaleraReflejoB" parent="." instance=ExtResource("2_escalera")]
+position = Vector3(1.55, 2.75, -0.85)
+rotation_degrees = Vector3(180, 212, 0)
+scale = Vector3(0.82, 0.82, 0.82)
+
+[node name="EstandarteNorte" parent="." instance=ExtResource("3_estandarte")]
+position = Vector3(0, 4.7, -4.85)
+
+[node name="EstandarteSurInvertido" parent="." instance=ExtResource("3_estandarte")]
+position = Vector3(0, 2.1, 4.85)
+rotation_degrees = Vector3(180, 180, 0)
+
+[node name="LuzClaustroBaja" type="OmniLight3D" parent="."]
+position = Vector3(0, 1.75, 0)
+light_color = Color(0.43, 0.34, 0.25, 1)
+light_energy = 0.48
+omni_range = 8.0
+shadow_enabled = true
+
+[node name="LuzClaustroAlta" type="OmniLight3D" parent="."]
+position = Vector3(0, 6.6, 0)
+light_color = Color(0.58, 0.5, 0.37, 1)
+light_energy = 0.36
+omni_range = 10.5
+shadow_enabled = true
