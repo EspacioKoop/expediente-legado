@@ -151,7 +151,7 @@ func _al_input_carrusel(event: InputEvent) -> void:
 		return
 
 	var ancho := maxf(_marco.size.x, 1.0)
-	var fraccion := event.position.x / ancho
+	var fraccion: float = event.position.x / ancho
 	if fraccion < 0.34:
 		_mover(-1)
 	elif fraccion > 0.66:
