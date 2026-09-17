@@ -5,8 +5,10 @@ on:
     branches: [ main ]
     paths:
       - '.github/workflows/evidencia-juicio-779.yml'
+      - 'godot/guion/juicio_simbolico.gd'
+      - 'godot/guion/juicio_simbolico_3d.gd'
+      - 'godot/guion/juicio_combate_3d.gd'
       - 'godot/pruebas/capturar_juicio_779.gd'
-      - 'docs/evidencias/juicio-779/**'
 
 permissions:
   contents: write
@@ -26,23 +28,11 @@ jobs:
           lfs: true
           fetch-depth: 0
 
-      - name: Comprobar si la evidencia ya está generada
-        id: evidencia
-        shell: bash
-        run: |
-          if [[ -f docs/evidencias/juicio-779/luna-minotauro.png ]]; then
-            echo 'lista=true' >> "$GITHUB_OUTPUT"
-          else
-            echo 'lista=false' >> "$GITHUB_OUTPUT"
-          fi
-
       - uses: actions/setup-python@v5
-        if: steps.evidencia.outputs.lista != 'true'
         with:
           python-version: '3.11'
 
       - name: Instalar RGBDS fijado
-        if: steps.evidencia.outputs.lista != 'true'
         shell: bash
         env:
           RGBDS_VERSION: v1.0.3
@@ -57,11 +47,9 @@ jobs:
           (cd "$RUNNER_TEMP/rgbds" && sudo ./install.sh)
 
       - name: Compilar GDExtension requerida por el proyecto
-        if: steps.evidencia.outputs.lista != 'true'
         run: bash scripts/preparar_emulador_gb.sh linux-debug
 
       - name: Instalar el motor declarado por el proyecto
-        if: steps.evidencia.outputs.lista != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -79,12 +67,10 @@ jobs:
           echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
 
       - name: Importar proyecto y registrar clases globales
-        if: steps.evidencia.outputs.lista != 'true'
         shell: bash
         run: godot4 --headless --language es --path godot --editor --import --quit
 
       - name: Generar las tres capturas rituales
-        if: steps.evidencia.outputs.lista != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -95,15 +81,13 @@ jobs:
           done
 
       - name: Publicar PNG originales como artifact
-        if: steps.evidencia.outputs.lista != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: evidencia-juicio-779
           path: ${{ runner.temp }}/juicio-779/*.png
           retention-days: 90
 
-      - name: Incorporar capturas al PR
-        if: steps.evidencia.outputs.lista != 'true'
+      - name: Incorporar capturas al PR si cambian
         shell: bash
         run: |
           set -euo pipefail
@@ -121,8 +105,13 @@ jobs:
           Las tres escenas parten del mismo acusado, cámara y bono documental. Solo cambian el Arcano y la semilla mitológica. La revisión humana de legibilidad se registra después de mirar estos PNG; su mera generación no cierra #779.
           EOF
 
+          if git diff --quiet -- docs/evidencias/juicio-779; then
+            echo 'Las capturas ya coinciden con el renderer actual.'
+            exit 0
+          fi
+
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add docs/evidencias/juicio-779
-          git commit -m 'docs: incorpora capturas rituales del Juicio (#779)'
+          git commit -m 'docs: actualiza capturas rituales del Juicio (#779)'
           git push origin "HEAD:${GITHUB_HEAD_REF}"
