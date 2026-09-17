@@ -129,6 +129,25 @@ class ArteCGBTest(unittest.TestCase):
                     self.assertLess(columna, 20)
                     self.assertEqual(atributos & 0b10010000, 0)
 
+    def test_el_agua_tiene_paleta_propia_y_tres_brillos_por_nivel(self):
+        def palabras(ruta):
+            return [int(v, 16) for v in re.findall(r"\$([0-9A-Fa-f]{4})", ruta.read_text().split("\n", 1)[-1]
+                    if ruta.name == "juego_agua.inc" else ruta.read_text())]
+
+        agua = palabras(ROOT / "assets" / "juego_agua.inc")
+        self.assertEqual(len(agua), 3 * 3 * 4)
+        for n, nombre in enumerate(("juego_paletas", "juego_paletas_amanecer", "juego_paletas_noche")):
+            with self.subTest(nivel=nombre):
+                paletas = palabras(ROOT / "assets" / f"{nombre}.inc")
+                # El primer brillo de cada nivel es su paleta del agua sin tocar.
+                self.assertEqual(agua[n * 12:n * 12 + 4], paletas[2 * 4:3 * 4])
+                # Nada del rojo de los torii colado en la paleta: la espuma del
+                # amanecer es crema (31,28,23), el naranja que se coló era (24,15,9).
+                for color in agua[n * 12:(n + 1) * 12]:
+                    rojo, azul = color & 31, color >> 10 & 31
+                    self.assertLessEqual(rojo - azul, 10)
+        self.assertIn("    halt\n    call VolcarOAM\n    call AnimarAgua\n", self.source)
+
     def test_los_sprites_se_vuelcan_tras_despertar_en_vblank(self):
         self.assertIn("DEF OAM_BASE   EQU $C200", self.source)
         self.assertIn("    halt\n    call VolcarOAM\n", self.source)
@@ -191,6 +210,9 @@ class PartidaTest(unittest.TestCase):
         emulador = self.arrancar(cgb=True)
         self.pulsar(emulador, "start")
         self.assertEqual(self.leer(emulador, "wModoCGB"), 1)
+        paso = self.leer(emulador, "wAguaPaso")
+        emulador.tick(25, False)  # 4 pasos de 10 fotogramas volverían al mismo brillo
+        self.assertNotEqual(self.leer(emulador, "wAguaPaso"), paso, "el agua no se anima")
         self.cerrar_dialogo(emulador, 0)
         # Arranque del 1-1: la segunda abierta y ninguna en su sitio.
         self.assert_parche(emulador, "Abierta1_Base")

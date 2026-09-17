@@ -101,6 +101,8 @@ DEF CURSOR_Y           EQU 34 + 16
 DEF CIFRAS_Y           EQU 130 + 16
 DEF DRAGONES_X         EQU 108 + 8
 DEF NIVEL_X            EQU 19 + 8
+DEF PALETA_AGUA        EQU 2  ; reservada al agua por generar_arte.py
+DEF AGUA_FOTOGRAMAS    EQU 10
 DEF NIVEL_Y            EQU 132 + 16
 DEF MOVIMIENTOS_X      EQU 140 + 8
 
@@ -156,6 +158,7 @@ Inicio:
 Bucle:
     halt
     call VolcarOAM
+    call AnimarAgua
     call LeerControles
 
     ld a, [wEstado]
@@ -781,6 +784,7 @@ CargarPaletasNivelCGB:
     ld a, [hli]
     ld h, [hl]
     ld l, a
+    push hl
     ld a, $80
     ldh [rBCPS], a
     ld b, 8 * 4 * 2
@@ -789,6 +793,65 @@ CargarPaletasNivelCGB:
     ldh [rBCPD], a
     dec b
     jr nz, .paleta
+    pop hl
+    xor a
+    ld [wAguaCuenta], a
+    ld [wAguaPaso], a
+    ret
+
+; Justo tras el halt, en VBlank: cada AGUA_FOTOGRAMAS el agua pasa al siguiente
+; brillo (0, 1, 2, 1...) de su paleta reservada en este nivel.
+AnimarAgua:
+    ld a, [wModoCGB]
+    or a
+    ret z
+    ld a, [wEstado]
+    cp ESTADO_JUEGO
+    jr z, .animar
+    cp ESTADO_DIALOGO
+    ret nz
+.animar:
+    ld a, [wAguaCuenta]
+    inc a
+    cp AGUA_FOTOGRAMAS
+    jr c, .guardar
+    xor a
+.guardar:
+    ld [wAguaCuenta], a
+    ret nz
+
+    ld a, [wAguaPaso]
+    inc a
+    and 3
+    ld [wAguaPaso], a
+    ld e, a
+    ld d, 0
+    ld hl, SecuenciaBrilloAgua
+    add hl, de
+    ld c, [hl]
+
+    ; HL = AguaCGB + (nivel * 3 + brillo) * 8
+    ld a, [wNivel]
+    ld b, a
+    add a
+    add b
+    add c
+    ld l, a
+    ld h, 0
+    add hl, hl
+    add hl, hl
+    add hl, hl
+    ld de, AguaCGB
+    add hl, de
+
+    ld a, $80 | (PALETA_AGUA * 8)
+    ldh [rBCPS], a
+    ld b, 8
+.color:
+    ld a, [hli]
+    ldh [rBCPD], a
+    dec b
+    jr nz, .color
     ret
 
 AbrirDialogo:
@@ -1173,6 +1236,9 @@ DialogosCGBBase:
 PaletasNivelCGB:
     dw JuegoCGB_Paletas, PaletasAmanecerCGB, PaletasNocheCGB
 
+SecuenciaBrilloAgua:
+    db 0, 1, 2, 1
+
 SpritesCGB:
     INCLUDE "assets/sprites_tiles.inc"
 SpritesCGBFin:
@@ -1209,6 +1275,8 @@ wFrames:         ds 1
 wMovimientos:    ds 3
 wPunteroSolucion: ds 2
 wEstadoActual:   ds 1
+wAguaCuenta:     ds 1
+wAguaPaso:       ds 1
 wSolucionActual: ds 1
 
 SECTION "OAMSombra", WRAM0[OAM_BASE]
@@ -1224,6 +1292,8 @@ PaletasAmanecerCGB:
     INCLUDE "assets/juego_paletas_amanecer.inc"
 PaletasNocheCGB:
     INCLUDE "assets/juego_paletas_noche.inc"
+AguaCGB:
+    INCLUDE "assets/juego_agua.inc"
 
 SECTION "VictoriaCGB", ROMX
     PANTALLA_CGB VictoriaCGB, "assets/victoria"

@@ -87,33 +87,50 @@ def error_tile(tile, paleta):
     return d.min(1).sum(), d.argmin(1)
 
 
-def paletas_por_tile(tiles, n_paletas=8, iteraciones=6, fijas=(), solo_fijas=None, recortar=True):
+def paletas_por_tile(tiles, n_paletas=8, iteraciones=6, fijas=(), solo_fijas=None, recortar=True,
+                     reservadas=None):
     """Reparte 8 paletas de 4 colores entre los tiles.
 
     `fijas` son paletas RGB555 que no se ajustan y ocupan los primeros índices;
-    los tiles marcados en `solo_fijas` solo pueden usar esas.
+    los tiles marcados en `solo_fijas` solo pueden usar esas. `reservadas` asigna
+    a algunos tiles un índice de paleta propio que ningún otro tile puede usar
+    (por ejemplo, el agua que la ROM anima rotando colores).
     """
     fijas = np.asarray(fijas, dtype=np.float64).reshape(-1, 4, 3)
     n_fijas = len(fijas)
-    solo_fijas = np.zeros(len(tiles), bool) if solo_fijas is None else np.asarray(solo_fijas, bool)
-    libres = [i for i in range(len(tiles)) if not solo_fijas[i]]
-    n_libres = n_paletas - n_fijas
+    n = len(tiles)
+    solo_fijas = np.zeros(n, bool) if solo_fijas is None else np.asarray(solo_fijas, bool)
+    reservadas = np.full(n, -1) if reservadas is None else np.asarray(reservadas)
+    indices_reservados = sorted(set(int(r) for r in reservadas if r >= 0))
+
+    permitidas = np.ones((n, n_paletas), bool)
+    permitidas[:, indices_reservados] = False
+    permitidas[solo_fijas, n_fijas:] = False
+    for k in range(n):
+        if reservadas[k] >= 0:
+            permitidas[k] = False
+            permitidas[k, reservadas[k]] = True
+
+    generales = [p for p in range(n_fijas, n_paletas) if p not in indices_reservados]
+    libres = [k for k in range(n) if not solo_fijas[k] and reservadas[k] < 0]
     # Semilla: agrupar tiles por su color medio y su dispersión.
-    rasgos = np.array([np.concatenate([tiles[i].mean(0), tiles[i].std(0)]) for i in libres])
-    centros = kmeans(rasgos, n_libres, iter_=20)
-    grupo = np.zeros(len(tiles), int)
-    grupo[libres] = n_fijas + ((rasgos[:, None, :] - centros[None]) ** 2).sum(-1).argmin(1)
+    rasgos = np.array([np.concatenate([tiles[k].mean(0), tiles[k].std(0)]) for k in libres])
+    centros = kmeans(rasgos, len(generales), iter_=20)
+    grupo = np.zeros(n, int)
+    grupo[libres] = np.array(generales)[((rasgos[:, None, :] - centros[None]) ** 2).sum(-1).argmin(1)]
+    grupo[reservadas >= 0] = reservadas[reservadas >= 0]
     paletas = np.zeros((n_paletas, 4, 3))
     paletas[:n_fijas] = fijas
     for it in range(iteraciones):
         for p in range(n_fijas, n_paletas):
-            miembros = [tiles[i] for i in libres if grupo[i] == p]
+            miembros = [tiles[k] for k in range(n) if grupo[k] == p]
             if not miembros:
-                miembros = [tiles[libres[np.random.default_rng(it + p).integers(len(libres))]]]
+                candidatos = [k for k in range(n) if permitidas[k, p]]
+                miembros = [tiles[candidatos[np.random.default_rng(it + p).integers(len(candidatos))]]]
             puntos = np.vstack(miembros)
             paletas[p] = np.round(kmeans(puntos, 4, iter_=10, semilla=it + p))
         errores = np.array([[error_tile(t, paletas[p])[0] for p in range(n_paletas)] for t in tiles])
-        errores[solo_fijas, n_fijas:] = np.inf
+        errores[~permitidas] = np.inf
         grupo = errores.argmin(1)
     if not recortar:
         return paletas, grupo
@@ -150,14 +167,17 @@ def a_luma_croma(peso_croma):
 
 
 def convertir_con_variantes(base, variantes, salida, etiqueta="Pantalla", max_tiles=512,
-                            paletas_fijas=(), filas_fijas=(), peso_croma=1.0, variantes_fijas=()):
+                            paletas_fijas=(), filas_fijas=(), peso_croma=1.0, variantes_fijas=(),
+                            paleta_reservada=None, celdas_reservadas=()):
     """Convierte una imagen 160x144 y sus variantes con paletas y tiles comunes.
 
     `variantes` es un dict ordenado nombre -> imagen 160x144. De cada variante
     solo se guardan las celdas que difieren de la base. `paletas_fijas` (colores
     RGB de 8 bits, 4 por paleta) se reservan para las filas de tiles de
     `filas_fijas`, como un HUD que no debe perder sus colores, y para todas las
-    celdas de las variantes de `variantes_fijas` (un cuadro de diálogo). Con `peso_croma`
+    celdas de las variantes de `variantes_fijas` (un cuadro de diálogo). Las celdas
+    de `celdas_reservadas` (índice fila * 20 + columna) usan solo la paleta
+    `paleta_reservada`, que nadie más usa. Con `peso_croma`
     mayor que 1 las paletas se ajustan dando más peso al tono que al brillo:
     detalles pequeños y saturados (un dragón dorado) no se pierden en grises.
     """
@@ -173,17 +193,25 @@ def convertir_con_variantes(base, variantes, salida, etiqueta="Pantalla", max_ti
         celdas += [propias[i] for i in distintas]
 
     solo_fijas = [i // COLS in filas_fijas for i in range(COLS * FILAS)]
+    celda_de = list(range(COLS * FILAS))
     for nombre, pares in parches.items():
         solo_fijas += [nombre in variantes_fijas or i // COLS in filas_fijas for i, _ in pares]
+        celda_de += [None if nombre in variantes_fijas else i for i, _ in pares]
+    celdas_reservadas = set(celdas_reservadas)
+    reservadas = [paleta_reservada if c in celdas_reservadas and not fija else -1
+                  for c, fija in zip(celda_de, solo_fijas)]
     fijas = a555(paletas_fijas) if paletas_fijas else np.zeros((0, 4, 3))
     if peso_croma == 1.0:
-        paletas, grupo = paletas_por_tile(celdas, fijas=fijas, solo_fijas=solo_fijas)
+        paletas, grupo = paletas_por_tile(celdas, fijas=fijas, solo_fijas=solo_fijas, reservadas=reservadas)
     else:
         m = a_luma_croma(peso_croma)
         paletas, grupo = paletas_por_tile([c @ m.T for c in celdas], fijas=np.asarray(fijas, float) @ m.T,
-                                          solo_fijas=solo_fijas, recortar=False)
+                                          solo_fijas=solo_fijas, recortar=False, reservadas=reservadas)
         paletas = np.rint(paletas @ np.linalg.inv(m).T).clip(0, 31).astype(np.int32)
         paletas[:len(fijas)] = fijas
+    if paleta_reservada is not None:
+        # La ROM rota los tres colores claros de esta paleta: se quedan en orden.
+        paletas[paleta_reservada] = ordenar_paleta(paletas[paleta_reservada])
     paletas = np.array([ordenar_paleta(p) for p in paletas])
 
     # Deduplicar tiles con volteos.

@@ -10,6 +10,10 @@ Parte de `referencia/lamina.png` y escribe en `assets/`:
 - `victoria_*`: el panel de amanecer con el texto final.
 - `sprites_tiles.inc` y `sprites_paletas.inc`: cifras del HUD y cursor.
 
+El agua usa una paleta reservada (`PALETA_AGUA`) que ninguna otra celda comparte:
+la ROM la anima con `juego_agua.inc`, tres tonos de esa paleta por nivel, cada
+uno más aclarado hacia la espuma.
+
 El texto se redibuja con fuentes de píxel propias: reducido desde la lámina no se
 leía. Uso (numpy y Pillow):
 
@@ -67,6 +71,8 @@ ICONO_TORII = [
 
 # Primer tile del banco 1 de VRAM reservado a los sprites.
 PRIMER_TILE_SPRITE = 240
+PALETA_AGUA = 2
+BRILLOS_AGUA = (0.0, 0.18, 0.36)
 
 CREMA = (238, 226, 196)
 TINTA = (28, 36, 56)
@@ -272,6 +278,7 @@ def paletas_de_nivel():
     for linea in (ASSETS / "juego_paletas.inc").read_text(encoding="utf-8").splitlines():
         valores = [int(v.strip().lstrip("$"), 16) for v in linea.split(";")[0].replace("dw", "").split(",")]
         paletas.append([((v & 31) << 3, (v >> 5 & 31) << 3, (v >> 10 & 31) << 3) for v in valores])
+    agua = {"dia": np.asarray(paletas[PALETA_AGUA], float)}
     for nombre, recorte in (("amanecer", RECORTE_AMANECER), ("noche", RECORTE_NOCHE)):
         destino = lamina.crop(recorte)
         filas, mapa = [], {}
@@ -281,6 +288,7 @@ def paletas_de_nivel():
             for antes, despues in zip(a_bgr555(colores), a_bgr555(nuevos)):
                 mapa.setdefault(antes, despues)
         (ASSETS / f"juego_paletas_{nombre}.inc").write_text("\n".join(filas) + "\n", encoding="utf-8")
+        agua[nombre] = transferir_color(paletas[PALETA_AGUA], escena, destino)
         # Vista previa: la escena (no el HUD) con los colores cambiados.
         previa = Image.open(ASSETS / "juego_previa.png").convert("RGB")
         pix = previa.load()
@@ -291,6 +299,36 @@ def paletas_de_nivel():
                 if nuevo is not None:
                     pix[x, y] = tuple(((nuevo >> k) & 31) << 3 | ((nuevo >> k) & 31) >> 2 for k in (0, 5, 10))
         previa.save(ASSETS / f"juego_previa_{nombre}.png")
+
+    # Brillo del agua: cada color claro se acerca al anterior (la espuma, al blanco).
+    filas = ["; Paleta del agua por nivel (día, amanecer, noche) en tres brillos."]
+    for nombre in ("dia", "amanecer", "noche"):
+        colores = np.asarray(agua[nombre], float)
+        for brillo in BRILLOS_AGUA:
+            nuevos = colores.copy()
+            nuevos[0] = colores[0] + (255 - colores[0]) * brillo
+            nuevos[1] = colores[1] + (colores[0] - colores[1]) * brillo
+            nuevos[2] = colores[2] + (colores[1] - colores[2]) * brillo
+            filas.append("    dw " + ", ".join(f"${v:04X}" for v in a_bgr555(nuevos.clip(0, 255)))
+                         + f" ; {nombre} {brillo}")
+    (ASSETS / "juego_agua.inc").write_text("\n".join(filas) + "\n", encoding="utf-8")
+
+
+def celdas_de_agua(base):
+    """Celdas de la escena que son sobre todo agua o espuma (el monte no cuenta)."""
+    px = np.asarray(base).astype(int)
+    r, g, b = px[..., 0], px[..., 1], px[..., 2]
+    agua = ((b > r + 25) & (b >= g - 10) & (b > 70)) | ((r > 185) & (g > 195) & (b > 200) & (b >= r))
+    celdas = []
+    for y in range(15):
+        for x in range(20):
+            if y < 2 or (y < 3 and x < 17) or (y < 5 and 5 <= x <= 12):
+                continue
+            # Fuera las celdas con rojo de torii: la paleta rota y se verían naranjas.
+            rojizo = (r > g + 40)[y * 8:y * 8 + 8, x * 8:x * 8 + 8].mean()
+            if agua[y * 8:y * 8 + 8, x * 8:x * 8 + 8].mean() >= 0.4 and rojizo <= 0.05:
+                celdas.append(y * 20 + x)
+    return celdas
 
 
 def escena_victoria():
@@ -340,7 +378,8 @@ def main():
     n = convertir_con_variantes(base, variantes, ASSETS / "juego", etiqueta="JuegoCGB",
                                 max_tiles=256 + PRIMER_TILE_SPRITE,
                                 paletas_fijas=PALETAS_HUD, filas_fijas=FILAS_HUD, peso_croma=PESO_CROMA,
-                                variantes_fijas=[f"Dialogo{n + 1}" for n in range(len(DIALOGOS))])
+                                variantes_fijas=[f"Dialogo{n + 1}" for n in range(len(DIALOGOS))],
+                                paleta_reservada=PALETA_AGUA, celdas_reservadas=celdas_de_agua(base))
     print(f"juego: {n} tiles únicos")
     paletas_de_nivel()
     n = convertir_con_variantes(escena_victoria(), {}, ASSETS / "victoria", max_tiles=256 + PRIMER_TILE_SPRITE)
