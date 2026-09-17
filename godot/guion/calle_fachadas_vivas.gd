@@ -1,16 +1,17 @@
-## Fachadas vivas: una vertical slice de interiores aparentes para #861.
+## Fachadas vivas: profundidad aparente para las ventanas altas de la calle (#861).
 ##
-## Esta capa no perfora la geometría jugable ni añade colisiones. Toma nueve
-## ventanas del primer tramo residencial y construye una "caja de sombra" muy
-## poco profunda por delante del revoco: marco con volumen, cristal translúcido,
-## fondo oscuro y props 3D simples. La selección, la iluminación y el LOD son
-## deterministas. La geometría repetida se agrupa por malla/material/LOD mediante
-## MultiMesh para que el detalle no convierta cada pieza en un draw call propio.
+## Esta capa no perfora la geometría jugable ni añade colisiones. Todas las
+## ventanas altas reciben cristal, marco y fondo aparente; el mobiliario 3D se
+## reserva al tramo de detalle para que el escalado no multiplique el coste.
+## Selección, iluminación y LOD son deterministas. La geometría repetida se
+## agrupa por malla/material/LOD mediante MultiMesh para evitar un draw call por
+## pieza.
 class_name CalleFachadasVivas
 extends RefCounted
 
-const MAX_VENTANAS := 9
-const PREFIJO_TRAMO := "Ventana0_"
+const MAX_VENTANAS_DETALLE := 9
+const PREFIJO_VENTANA := "Ventana"
+const PREFIJO_TRAMO_DETALLE := "Ventana0_"
 const SALIENTE_EXTRA_CRISTAL := 0.05
 const GROSOR_CRISTAL := 0.008
 const PROFUNDIDAD_INTERIOR := 0.055
@@ -46,16 +47,22 @@ static func montar(calle: Node3D) -> Node3D:
 	var mallas := _mallas_compartidas()
 	var lotes := {}
 	var decoradas := 0
+	var decoradas_detalle := 0
 	for hijo in pisos.get_children():
-		if decoradas >= MAX_VENTANAS:
-			break
 		var ventana := hijo as MeshInstance3D
-		if ventana == null or not String(ventana.name).begins_with(PREFIJO_TRAMO):
+		if ventana == null or not String(ventana.name).begins_with(PREFIJO_VENTANA):
 			continue
-		_decorar(raiz_interiores, ventana, decoradas, materiales, mallas, lotes)
+		var detalle_3d := (
+			String(ventana.name).begins_with(PREFIJO_TRAMO_DETALLE)
+			and decoradas_detalle < MAX_VENTANAS_DETALLE
+		)
+		_decorar(raiz_interiores, ventana, decoradas, detalle_3d, materiales, mallas, lotes)
 		decoradas += 1
+		if detalle_3d:
+			decoradas_detalle += 1
 	_crear_lotes(raiz_lotes, lotes)
 	raiz.set_meta("ventanas_decoradas", decoradas)
+	raiz.set_meta("ventanas_detalle_3d", decoradas_detalle)
 	raiz.set_meta("instancias_batcheadas", _contar_instancias(lotes))
 	return raiz
 
@@ -64,6 +71,7 @@ static func _decorar(
 	raiz_interiores: Node3D,
 	ventana: MeshInstance3D,
 	indice: int,
+	detalle_3d: bool,
 	materiales: Dictionary,
 	mallas: Dictionary,
 	lotes: Dictionary
@@ -85,6 +93,7 @@ static func _decorar(
 	grupo.set_meta("variante", VARIANTES[variante])
 	grupo.set_meta("estado_luz", estado_luz)
 	grupo.set_meta("hacia_calle", hacia_calle)
+	grupo.set_meta("detalle_3d", detalle_3d)
 	raiz_interiores.add_child(grupo)
 
 	var centro := ventana.position
@@ -148,17 +157,20 @@ static func _decorar(
 			LOD_MEDIA_FIN
 		)
 
-	match variante:
-		0:
-			_componer_escritorio(
-				lotes, Vector3(x_prop, centro.y, centro.z), materiales, mallas, props
-			)
-		1:
-			_componer_estanteria(
-				lotes, Vector3(x_prop, centro.y, centro.z), materiales, mallas, props
-			)
-		_:
-			_componer_salon(lotes, Vector3(x_prop, centro.y, centro.z), materiales, mallas, props)
+	if detalle_3d:
+		match variante:
+			0:
+				_componer_escritorio(
+					lotes, Vector3(x_prop, centro.y, centro.z), materiales, mallas, props
+				)
+			1:
+				_componer_estanteria(
+					lotes, Vector3(x_prop, centro.y, centro.z), materiales, mallas, props
+				)
+			_:
+				_componer_salon(
+					lotes, Vector3(x_prop, centro.y, centro.z), materiales, mallas, props
+				)
 	grupo.set_meta("props", props)
 
 
