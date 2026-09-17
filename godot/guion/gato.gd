@@ -411,20 +411,7 @@ func avanzar(hambre: int, jugador: Vector3, delta: float) -> void:
 	# La cola. Más deprisa con hambre, que es la otra mitad de la señal: si no
 	# viene y además está tensa, algo pasa. Durante los mimos vuelve a moverse
 	# con intención, pero sin parecer la tensión del hambre.
-	var ritmo := 1.5
-	match String(estado["estado"]):
-		"hambriento":
-			ritmo = 3.4
-		"mimos":
-			ritmo = 2.4
-		"durmiendo":
-			ritmo = 0.35
-		"sentado":
-			ritmo = 0.9
-		"observando":
-			ritmo = 0.65
-		"escondido":
-			ritmo = 0.5
+	var ritmo := _ritmo_estado(String(estado["estado"]))
 	_cola.rotation.y = sin(_reloj * ritmo) * 0.35
 	_cola.rotation.x = sin(_reloj * ritmo * 0.6) * 0.12
 	_animar_reposo(ritmo)
@@ -485,6 +472,40 @@ func _puede_mover(movimiento: Vector3) -> bool:
 	_sonda.target_position = movimiento
 	_sonda.force_shapecast_update()
 	return not _sonda.is_colliding()
+
+
+## Aplica una pose observable sin mover al gato ni alterar hambre, destino o
+## objetivos. La usa #787 para que el sueño recuerde un gesto de la casa.
+func presentar_estado(modo: String) -> bool:
+	if estado.is_empty():
+		return false
+	estado["estado"] = modo
+	if modo == "mimos":
+		# En reposo normal el seno empieza en cero; este desfase hace legible el
+		# roce inmediatamente al aparecer, incluso si el guía queda estático.
+		_reloj = maxf(_reloj, 0.55)
+	var ritmo := _ritmo_estado(modo)
+	_cola.rotation.y = sin(_reloj * ritmo) * 0.35
+	_cola.rotation.x = sin(_reloj * ritmo * 0.6) * 0.12
+	_animar_reposo(ritmo)
+	return true
+
+
+func _ritmo_estado(modo: String) -> float:
+	match modo:
+		"hambriento":
+			return 3.4
+		"mimos":
+			return 2.4
+		"durmiendo":
+			return 0.35
+		"sentado":
+			return 0.9
+		"observando":
+			return 0.65
+		"escondido":
+			return 0.5
+	return 1.5
 
 
 ## Lo que hace que no parezca una figura: respira, y de vez en cuando mueve
