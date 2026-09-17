@@ -93,6 +93,12 @@ def ejecutar():
             ("importación", ["--editor", "--import", "--quit"], 120, None),
             ("suite", ["--script", "pruebas/pruebas.gd"], 120, minimo),
             (
+                "senales-multiplayer",
+                ["--script", "pruebas/pruebas_senales_multiplayer.gd"],
+                30,
+                12,
+            ),
+            (
                 "enlaces-pistas",
                 ["--script", "pruebas/pruebas_enlaces_pistas.gd"],
                 30,
