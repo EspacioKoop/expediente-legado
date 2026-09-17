@@ -68,10 +68,67 @@ class ClimaVisual797Test(unittest.TestCase):
         self.assertIn("transicion and not _reduccion_movimiento", self.controlador)
 
     def test_cielo_cambia_por_estado_y_se_restaura(self) -> None:
-        self.assertIn('material.set_shader_parameter("cielo_alto"', self.controlador)
-        self.assertIn('material.set_shader_parameter("horizonte"', self.controlador)
+        self.assertIn("PARAMETROS_CIELO_CLIMA", self.controlador)
+        for parametro in (
+            "cielo_alto",
+            "horizonte",
+            "ocaso",
+            "ocaso_mezcla",
+            "resplandor_fuerza",
+            "bruma_fuerza",
+            "nubes",
+            "cirros",
+            "luz_lunar_nubes",
+            "via_lactea",
+            "estrellas",
+            "estrellas_secundarias",
+            "luna_halo",
+        ):
+            self.assertIn(f'"{parametro}"', self.controlador)
         self.assertIn("CIELO_BASE_ALTO", self.controlador)
         self.assertIn("_perfil_ambiente(Clima.DESPEJADO)", self.controlador)
+        self.assertIn(
+            "material.set_shader_parameter(parametro, perfil[parametro])",
+            self.controlador,
+        )
+
+    def test_capas_nuevas_del_cielo_reaccionan_a_los_cinco_climas(self) -> None:
+        perfiles = {
+            "despejado": (
+                '"nubes": 0.28',
+                '"via_lactea": 0.08',
+                '"estrellas": 0.50',
+                '"luna_halo": 0.09',
+            ),
+            "nublado": (
+                '"nubes": 0.76',
+                '"cirros": 0.56',
+                '"via_lactea": 0.012',
+                '"estrellas": 0.08',
+            ),
+            "lluvia": (
+                '"nubes": 0.92',
+                '"cirros": 0.68',
+                '"via_lactea": 0.0',
+                '"luna_halo": 0.025',
+            ),
+            "niebla": (
+                '"bruma_fuerza": 0.86',
+                '"estrellas": 0.0',
+                '"estrellas_secundarias": 0.0',
+                '"luna_halo": 0.012',
+            ),
+            "nieve": (
+                '"resplandor_fuerza": 0.78',
+                '"luz_lunar_nubes": 0.44',
+                '"estrellas": 0.12',
+                '"luna_halo": 0.12',
+            ),
+        }
+        for estado, fragmentos in perfiles.items():
+            with self.subTest(estado=estado):
+                for fragmento in fragmentos:
+                    self.assertIn(fragmento, self.controlador)
 
     def test_suelo_climatico_usa_pelicula_y_acumulaciones_sin_colision(self) -> None:
         self.assertIn('NODO_SUELO_CLIMA := "ClimaSueloVisual"', self.controlador)
