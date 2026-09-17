@@ -41,13 +41,40 @@ find_gd() {
     -not -path 'godot/native/siga98_gb/.deps/*' -print0
 }
 
+huella_gd() {
+  "$PYTHON_BIN" - <<'PY'
+from hashlib import sha256
+from pathlib import Path
+
+huella = sha256()
+for ruta in sorted(Path("godot").rglob("*.gd")):
+    normalizada = ruta.as_posix()
+    if normalizada.startswith("godot/native/siga98_gb/.deps/"):
+        continue
+    huella.update(normalizada.encode("utf-8"))
+    huella.update(b"\0")
+    huella.update(ruta.read_bytes())
+    huella.update(b"\0")
+print(huella.hexdigest())
+PY
+}
+
 # En local formateamos antes de probar para que los tests vean exactamente el
-# código que se va a subir. En CI no mutamos el checkout: exigimos que ya llegue
-# formateado y mostramos el diff si no es así.
+# código que se va a subir. Si gdformat toca algo, el preflight falla a propósito:
+# así el agente debe revisar el diff y repetirlo antes de commit/push. En CI no
+# mutamos el checkout: exigimos que el GDScript ya llegue formateado.
 if [[ "${CI:-}" == "true" ]]; then
   find_gd | xargs -0 --no-run-if-empty gdformat --check --diff
 else
+  huella_antes="$(huella_gd)"
   find_gd | xargs -0 --no-run-if-empty gdformat
+  huella_despues="$(huella_gd)"
+  if [[ "$huella_antes" != "$huella_despues" ]]; then
+    echo >&2
+    echo "gdformat modificó uno o más archivos .gd." >&2
+    echo "Revisa y conserva el diff de formato; después ejecuta este preflight otra vez." >&2
+    exit 3
+  fi
 fi
 
 find_gd | xargs -0 --no-run-if-empty gdlint
