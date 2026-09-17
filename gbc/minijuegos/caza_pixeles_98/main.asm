@@ -190,6 +190,7 @@ EstadoJuego:
     call ActualizarHUD
     call MoverJugador
     call TickBehemoth
+    call TickEscenarioVisual
     call MoverObjetivo
     call TickCombo
     call ComprobarCaptura
@@ -296,6 +297,7 @@ IniciarPartida:
 
     call AplicarPaletaFase
     call DibujarHUD
+    call InicializarEscenarioVisual
     call DibujarChromia
     call SiguienteObjetivo
     call ActualizarOAM
@@ -310,6 +312,7 @@ MostrarFin:
     call DesactivarLCD
     call LimpiarOAM
     call LimpiarFondo
+    call DibujarEscenarioFinal
     call DibujarChromia
     call DibujarResultadoBoss
 
@@ -803,6 +806,7 @@ TickTiempo:
     ld a, 3
     ld [wIntervaloObjetivo], a
     call AplicarPaletaFase
+    call TransicionEscenarioFase
     call SonidoFase
     ret
 .fase3:
@@ -811,6 +815,7 @@ TickTiempo:
     ld a, 2
     ld [wIntervaloObjetivo], a
     call AplicarPaletaFase
+    call TransicionEscenarioFase
     call SonidoFase
     ret
 .behemoth:
@@ -840,6 +845,7 @@ IniciarBehemoth:
     inc a
     ld [wMultiplicador], a
     call ActualizarPuntoBehemoth
+    call TransicionBehemothVisual
     call SonidoBehemoth
     ret
 
@@ -1079,6 +1085,7 @@ ActualizarChromia:
     ld a, b
     ld [wEtapaChromia], a
     call DibujarChromia
+    call ActualizarFaunaVisual
     ld a, [wFase]
     cp 3
     ret nz
@@ -1914,3 +1921,5 @@ wPantallaCGB: ds 1
 
 SECTION "TituloCGB", ROMX
     PANTALLA_CGB TituloCGB, "assets/titulo"
+
+INCLUDE "escenario.asm"
