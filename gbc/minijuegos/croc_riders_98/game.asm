@@ -89,6 +89,9 @@ DEF TILE_FLAME      EQU 48
 DEF TILE_TROPHY     EQU 50
 DEF TILE_CRASH      EQU 51
 
+
+INCLUDE "../comun/cartucho.asm"
+
 SECTION "VBlank", ROM0[$0040]
 VBlank:
     reti
@@ -105,6 +108,7 @@ SECTION "Juego", ROM0[$0150]
 Inicio:
     di
     ld sp, $DFFF
+    call IniciarCartucho
     call ApagarLCDSeguro
     call BorrarOAMParcial
     call CargarTiles

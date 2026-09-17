@@ -69,7 +69,7 @@ class TitulosCGBTest(unittest.TestCase):
                 fuente = (carpeta / "main.asm").read_text(encoding="utf-8")
                 self.assertIn('INCLUDE "../comun/pantalla_cgb.asm"', fuente)
                 self.assertIn('PANTALLA_CGB TituloCGB, "assets/titulo"', fuente)
-                self.assertRegex(fuente, r"call EsCGB\n    jr nz, \.texto\n    ld hl, TituloCGB\n    call CargarPantallaCGB")
+                self.assertRegex(fuente, r"call EsCGB\n    jr nz, \.texto\n    CARGAR_PANTALLA_CGB TituloCGB\n")
                 limpiar = fuente.split("LimpiarFondo:", 1)[1].split("\n.loop:", 1)[0]
                 for paso in ("call DescargarPantallaCGB", "call CargarTiles", "call ConfigurarPaletas"):
                     self.assertIn(paso, limpiar)

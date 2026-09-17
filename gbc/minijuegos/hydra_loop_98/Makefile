@@ -4,6 +4,8 @@ OBJ := build/hydra_loop_98.o
 ASSETS := ../hydra_loop/
 PYTHON ?= python3
 
+include ../comun/cartucho.mk
+
 .PHONY: all clean test
 
 all: $(ROM)
@@ -11,12 +13,12 @@ all: $(ROM)
 build:
 	mkdir -p build
 
-$(OBJ): main.asm $(wildcard $(ASSETS)assets/*) | build
+$(OBJ): main.asm $(wildcard $(ASSETS)assets/*) $(wildcard ../comun/*.asm) | build
 	rgbasm -I $(ASSETS) -o $@ $<
 
 $(ROM): $(OBJ)
 	rgblink -n build/hydra_loop_98.sym -o $@ $<
-	rgbfix -p 255 -v $@
+	rgbfix $(RGBFIX_CARTUCHO) $@
 
 test: $(ROM)
 	$(PYTHON) test_rom.py

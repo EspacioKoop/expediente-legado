@@ -63,6 +63,7 @@ DEF TILE_DOSPT   EQU 44
 DEF TILE_GUION   EQU 45
 
 
+INCLUDE "../comun/cartucho.asm"
 INCLUDE "../comun/pantalla_cgb.asm"
 
 SECTION "VBlank", ROM0[$0040]
@@ -80,6 +81,7 @@ SECTION "Juego", ROM0[$0150]
 Inicio:
     di
     ld sp, $DFFF
+    call IniciarCartucho
     xor a
     ld [wPantallaCGB], a
     ld [wWebkeeperCompletado], a
@@ -203,8 +205,7 @@ MostrarTitulo:
 
     call EsCGB
     jr nz, .texto
-    ld hl, TituloCGB
-    call CargarPantallaCGB
+    CARGAR_PANTALLA_CGB TituloCGB
     ld a, 1
     ld [wPantallaCGB], a
     jr .estado

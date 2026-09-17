@@ -8,9 +8,8 @@
 ; banco 1 pisarían los del banco 0, así que cada ROM pregunta antes a EsCGB y,
 ; si no, usa su título de texto.
 ;
-; Uso desde una ROM:
-;     ld hl, MiPantalla          ; descriptor definido con PANTALLA_CGB
-;     call CargarPantallaCGB     ; LCD apagada
+; Necesita comun/cartucho.asm. Uso desde una ROM:
+;     CARGAR_PANTALLA_CGB MiPantalla ; descriptor de PANTALLA_CGB, en cualquier banco; LCD apagada
 ;     ...
 ;     call DescargarPantallaCGB  ; antes de volver a sus tiles: limpia atributos
 ;
@@ -52,7 +51,26 @@ MACRO PANTALLA_CGB
     INCLUDE STRCAT(\2, "_paletas.inc")
 ENDM
 
+; CARGAR_PANTALLA_CGB etiqueta: mapea el banco de la pantalla, la carga y
+; devuelve el banco que hubiera. LCD apagada.
+MACRO CARGAR_PANTALLA_CGB
+    ld a, BANK(\1)
+    ld hl, \1
+    call CargarPantallaCGBEnBanco
+ENDM
+
 SECTION "PantallaCGB", ROM0
+
+; A = banco, HL = descriptor.
+CargarPantallaCGBEnBanco:
+    ld b, a
+    ld a, [wBancoROM]
+    push af
+    ld a, b
+    call CambiarBanco
+    call CargarPantallaCGB
+    pop af
+    jp CambiarBanco
 
 ; Z si es una Game Boy Color. Se mira el hardware y no el registro A del
 ; arranque: rVBK se lee $FE|banco en GBC y $FF en una Game Boy clásica, donde no

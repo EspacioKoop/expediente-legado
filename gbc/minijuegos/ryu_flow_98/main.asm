@@ -107,6 +107,7 @@ DEF NIVEL_Y            EQU 132 + 16
 DEF MOVIMIENTOS_X      EQU 140 + 8
 
 
+INCLUDE "../comun/cartucho.asm"
 INCLUDE "../comun/pantalla_cgb.asm"
 
 SECTION "VBlank", ROM0[$0040]
@@ -125,6 +126,7 @@ SECTION "Juego", ROM0[$0150]
 Inicio:
     di
     ld sp, $DFFF
+    call IniciarCartucho
     xor a
     ld [wPantallaCGB], a
 
@@ -441,8 +443,7 @@ CompletarFlujo:
     ld a, [wModoCGB]
     or a
     jr z, .texto
-    ld hl, VictoriaCGB
-    call CargarPantallaCGB
+    CARGAR_PANTALLA_CGB VictoriaCGB
     ld a, 1
     ld [wPantallaCGB], a
     jr .dibujado
@@ -557,8 +558,7 @@ ActualizarCompuertas:
 DibujarTitulo:
     call EsCGB
     jr nz, .texto
-    ld hl, TituloCGB
-    call CargarPantallaCGB
+    CARGAR_PANTALLA_CGB TituloCGB
     ld a, 1
     ld [wPantallaCGB], a
     ret
@@ -671,8 +671,10 @@ DibujarFinal:
 
 ; Pantalla de juego de la lámina: escena, HUD, sprites y sus paletas. LCD apagada.
 DibujarJuegoCGB:
-    ld hl, JuegoCGB
-    call CargarPantallaCGB
+    CARGAR_PANTALLA_CGB JuegoCGB
+    ; Durante la partida queda mapeado el banco del juego: parches, paletas de
+    ; nivel y brillos del agua se leen de ahí.
+    CAMBIAR_BANCO JuegoCGB
     ld a, 1
     ld [wPantallaCGB], a
     ld [wModoCGB], a
@@ -1285,7 +1287,7 @@ wOAMSombra:      ds 160
 SECTION "TituloCGB", ROMX
     PANTALLA_CGB TituloCGB, "assets/titulo"
 
-SECTION "JuegoCGB", ROM0
+SECTION "JuegoCGB", ROMX
     PANTALLA_CGB JuegoCGB, "assets/juego"
     INCLUDE "assets/juego_variantes.inc"
 PaletasAmanecerCGB:

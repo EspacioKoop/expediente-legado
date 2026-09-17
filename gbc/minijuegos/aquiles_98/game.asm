@@ -76,6 +76,9 @@ DEF LECTURA_COMPLETA EQU $0F
 DEF IMPACTOS_META    EQU 3
 DEF FALLO_FRAMES     EQU 12
 
+
+INCLUDE "../comun/cartucho.asm"
+
 SECTION "VBlank", ROM0[$0040]
 VBlank:
     reti
@@ -92,6 +95,7 @@ SECTION "Juego", ROM0[$0150]
 Inicio:
     di
     ld sp, $DFFF
+    call IniciarCartucho
 
 .espera_vblank:
     ldh a, [rLY]
