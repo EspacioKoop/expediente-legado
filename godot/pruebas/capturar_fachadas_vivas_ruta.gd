@@ -97,14 +97,17 @@ func _ejecutar() -> void:
 		if error_png != OK:
 			_fallar("no se pudo guardar %s (error %d)" % [png, error_png])
 			return
-		capturas.append(
-			{
-				"id": id,
-				"position": [posicion.x, posicion.y, posicion.z],
-				"target": [objetivo.x, objetivo.y, objetivo.z],
-				"distance_m": posicion.distance_to(objetivo),
-				"screenshot": nombre_png,
-			}
+		(
+			capturas
+			. append(
+				{
+					"id": id,
+					"position": [posicion.x, posicion.y, posicion.z],
+					"target": [objetivo.x, objetivo.y, objetivo.z],
+					"distance_m": posicion.distance_to(objetivo),
+					"screenshot": nombre_png,
+				}
+			)
 		)
 
 	var manifiesto := {
