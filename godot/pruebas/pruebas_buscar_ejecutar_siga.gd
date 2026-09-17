@@ -32,18 +32,31 @@ func _probar() -> void:
 	await process_frame
 	_comprobar(buscar.get_node_or_null("Consulta") is LineEdit, "Buscar expone entrada de teclado")
 	_comprobar(buscar.get_node_or_null("Resultados") is ItemList, "Buscar expone lista activable")
-	_comprobar(_contiene_titulo(buscar.buscar("correo"), "Correo corporativo"), "encuentra aplicaciones")
-	_comprobar(_contiene_titulo(buscar.buscar("formulario"), "Formulario de incidencia"), "encuentra documentos visibles")
-	_comprobar(not _contiene_texto(buscar.buscar("acreditacion"), "Memorándum"), "no revela documentos ocultos")
+	_comprobar(
+		_contiene_titulo(buscar.buscar("correo"), "Correo corporativo"), "encuentra aplicaciones"
+	)
+	_comprobar(
+		_contiene_titulo(buscar.buscar("formulario"), "Formulario de incidencia"),
+		"encuentra documentos visibles"
+	)
+	_comprobar(
+		not _contiene_texto(buscar.buscar("acreditacion"), "Memorándum"),
+		"no revela documentos ocultos"
+	)
 	buscar.queue_free()
 
 	var ejecutar := Superficie.new()
 	ejecutar.configurar("ejecutar", apps, contexto_base)
 	get_root().add_child(ejecutar)
 	await process_frame
-	_comprobar(ejecutar.get_node_or_null("Comando") is LineEdit, "Ejecutar expone entrada de teclado")
+	_comprobar(
+		ejecutar.get_node_or_null("Comando") is LineEdit, "Ejecutar expone entrada de teclado"
+	)
 	var alias := ejecutar.resolver_comando("mail")
-	_comprobar(alias.get("tipo") == "aplicacion" and alias.get("destino") == "correo", "resuelve alias declarados")
+	_comprobar(
+		alias.get("tipo") == "aplicacion" and alias.get("destino") == "correo",
+		"resuelve alias declarados"
+	)
 	var ruta := ejecutar.resolver_comando("equipo/documentos")
 	_comprobar(ruta.get("tipo") == "ruta", "abre rutas conocidas y visibles")
 	var secreta := ejecutar.resolver_comando("equipo/red/acreditaciones")
