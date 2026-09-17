@@ -21,10 +21,7 @@ static func _pista(texto: String, id: Variant, descubierta: bool) -> String:
 	var visible := texto
 	if descubierta:
 		visible = "[bgcolor=#c8c800]%s[/bgcolor]" % visible
-	return (
-		"[url=pista:%s][color=#0000aa][u]%s[/u][/color][/url]"
-		% [id, visible]
-	)
+	return "[url=pista:%s][color=#0000aa][u]%s[/u][/color][/url]" % [id, visible]
 
 
 static func render(segmentos: Array) -> String:
