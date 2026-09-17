@@ -63,9 +63,7 @@ static func validar_evento(
 	var normalizado: Dictionary = validacion_evento["event"]
 	if normalizado["kind"] != KIND:
 		return _invalido("wrong_kind")
-	var validacion_payload := SenalVocabulario.validar_payload(
-		normalizado["payload"], conocimiento
-	)
+	var validacion_payload := SenalVocabulario.validar_payload(normalizado["payload"], conocimiento)
 	if not validacion_payload["ok"]:
 		return _invalido(validacion_payload["reason"])
 	var payload: Dictionary = validacion_payload["payload"]
