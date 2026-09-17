@@ -4,9 +4,9 @@
 ## efecto en el careo reducen la determinación inicial del acusado. El combate
 ## termina por rendición (determinación a cero), no por muerte.
 ##
-## Si el anfitrión es la Ventanilla con una `Partida` viva, la arena refleja dos
-## memorias que ya existen: un Arcano recogido/no gastado y una semilla mitológica
-## activa de la jornada. Son presencia visual; no alteran daño, vida ni recargas.
+## La arena refleja un Arcano recogido/no gastado y una semilla mitológica activa
+## de la jornada. La mayoría son presencia visual; tres parejas declaradas por
+## `JuicioSimbolico` forman rituales pequeños, legibles y sin consumir progreso.
 ##
 ## Controles semánticos ya existentes:
 ## - movimiento: mover_izquierda/derecha/adelante/atras;
@@ -26,6 +26,9 @@ const RADIO_ARENA := 5.0
 const ALCANCE_LIGERO := 1.75
 const ALCANCE_FUERTE := 2.15
 const ALCANCE_RIVAL := 1.45
+const RECARGA_LIGERA := 0.28
+const RECARGA_FUERTE := 0.58
+const RECARGA_RIVAL := 1.15
 
 var reduccion_movimiento := false
 
@@ -39,6 +42,11 @@ var _recarga_rival := 0.0
 var _esquiva := 0.0
 var _arcano: Dictionary = {}
 var _mito_id := ""
+var _ritual: Dictionary = {}
+var _contraataque := 0
+var _radio_arena := RADIO_ARENA
+var _velocidad_rival := VELOCIDAD_RIVAL
+var _recarga_fuerte := RECARGA_FUERTE
 
 var _jugador: CharacterBody3D
 var _rival: CharacterBody3D
@@ -47,6 +55,7 @@ var _figura_rival: Node3D
 var _camara: Camera3D
 var _barra_jugador: ProgressBar
 var _barra_rival: ProgressBar
+var _etiqueta_ritual: Label
 
 
 static func determinacion_rival(bono_documental: int) -> int:
@@ -78,9 +87,9 @@ func _process(delta: float) -> void:
 	_actualizar_camara()
 
 	if Input.is_action_just_pressed("interactuar"):
-		_atacar(1, ALCANCE_LIGERO, 0.28)
+		_atacar(1, ALCANCE_LIGERO, RECARGA_LIGERA, false)
 	if Input.is_action_just_pressed("saltar"):
-		_atacar(2, ALCANCE_FUERTE, 0.58)
+		_atacar(2, ALCANCE_FUERTE, _recarga_fuerte, true)
 	if Input.is_action_just_pressed("agacharse"):
 		_esquivar()
 
@@ -111,20 +120,22 @@ func _mover_rival(delta: float) -> void:
 	var distancia := hacia.length()
 	if distancia > ALCANCE_RIVAL:
 		var direccion := hacia.normalized()
-		_rival.position += direccion * VELOCIDAD_RIVAL * delta
+		_rival.position += direccion * _velocidad_rival * delta
 		_rival.position = _limitar(_rival.position)
 		_rival.rotation.y = atan2(direccion.x, direccion.z)
 	elif _recarga_rival <= 0.0:
-		_recarga_rival = 1.15
+		_recarga_rival = RECARGA_RIVAL
 		if _esquiva <= 0.0:
 			_determinacion_jugador = maxi(0, _determinacion_jugador - 1)
 			_reaccion(_figura_jugador, -0.18)
 			_actualizar_hud()
 			if _determinacion_jugador <= 0:
 				_terminar(false)
+		else:
+			_registrar_esquiva_ritual()
 
 
-func _atacar(dano: int, alcance: float, recarga: float) -> void:
+func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> void:
 	if _recarga_jugador > 0.0:
 		return
 	_recarga_jugador = recarga
@@ -134,6 +145,14 @@ func _atacar(dano: int, alcance: float, recarga: float) -> void:
 		_jugador.rotation.y = atan2(hacia.x, hacia.z)
 	if hacia.length() > alcance:
 		return
+
+	var dano := dano_base
+	if fuerte:
+		dano += int(_ritual.get("dano_fuerte_bonus", 0))
+	if _contraataque > 0:
+		dano += _contraataque
+		_contraataque = 0
+
 	_determinacion_rival = maxi(0, _determinacion_rival - dano)
 	_reaccion(_figura_rival, 0.25 + float(dano) * 0.08)
 	_actualizar_hud()
@@ -150,6 +169,15 @@ func _esquivar() -> void:
 	_reaccion(_figura_jugador, 0.12)
 
 
+func _registrar_esquiva_ritual() -> void:
+	var bono := int(_ritual.get("contraataque_esquiva", 0))
+	if bono <= 0:
+		return
+	_contraataque = maxi(_contraataque, bono)
+	_reaccion(_figura_rival, 0.10)
+	_actualizar_hud()
+
+
 func _terminar(gano: bool) -> void:
 	if _acabado:
 		return
@@ -159,8 +187,8 @@ func _terminar(gano: bool) -> void:
 
 func _limitar(posicion: Vector3) -> Vector3:
 	var plano := Vector2(posicion.x, posicion.z)
-	if plano.length() > RADIO_ARENA:
-		plano = plano.normalized() * RADIO_ARENA
+	if plano.length() > _radio_arena:
+		plano = plano.normalized() * _radio_arena
 	return Vector3(plano.x, 0.0, plano.y)
 
 
@@ -175,6 +203,14 @@ func _resolver_capa_simbolica() -> void:
 	var jornada = estado.get("jornada", {})
 	if typeof(jornada) == TYPE_DICTIONARY:
 		_mito_id = JuicioSimbolico.mito_para(jornada, clave)
+	_ritual = JuicioSimbolico.ritual_para(_arcano, _mito_id)
+	_aplicar_configuracion_ritual()
+
+
+func _aplicar_configuracion_ritual() -> void:
+	_radio_arena = float(_ritual.get("radio_arena", RADIO_ARENA))
+	_velocidad_rival = VELOCIDAD_RIVAL * float(_ritual.get("velocidad_rival_mul", 1.0))
+	_recarga_fuerte = float(_ritual.get("recarga_fuerte", RECARGA_FUERTE))
 
 
 func _estado_partida_anfitrion() -> Dictionary:
@@ -235,6 +271,7 @@ func _montar_arena() -> void:
 		add_child(archivador)
 
 	JuicioSimbolico3D.montar(self, _arcano, _mito_id)
+	_montar_limite_ritual()
 
 	_jugador = CharacterBody3D.new()
 	_jugador.position = Vector3(0.0, 0.0, 2.4)
@@ -254,6 +291,22 @@ func _montar_arena() -> void:
 	_actualizar_camara()
 
 
+func _montar_limite_ritual() -> void:
+	if String(_ritual.get("id", "")) != "laberinto_lunar":
+		return
+	var color := Color(0.42, 0.48, 0.68)
+	for i in 20:
+		var angulo := TAU * float(i) / 20.0
+		var marca := MeshInstance3D.new()
+		var caja := BoxMesh.new()
+		caja.size = Vector3(0.08, 0.10, 0.42)
+		marca.mesh = caja
+		marca.position = Vector3(sin(angulo) * _radio_arena, 0.03, cos(angulo) * _radio_arena)
+		marca.rotation.y = angulo
+		marca.material_override = _material(color, true)
+		add_child(marca)
+
+
 func _montar_hud() -> void:
 	var capa := CanvasLayer.new()
 	capa.layer = 5
@@ -266,9 +319,13 @@ func _montar_hud() -> void:
 	margen.add_theme_constant_override("margin_top", 18)
 	capa.add_child(margen)
 
+	var bloque := VBoxContainer.new()
+	bloque.add_theme_constant_override("separation", 6)
+	margen.add_child(bloque)
+
 	var columnas := HBoxContainer.new()
 	columnas.add_theme_constant_override("separation", 32)
-	margen.add_child(columnas)
+	bloque.add_child(columnas)
 
 	_barra_jugador = ProgressBar.new()
 	_barra_jugador.max_value = DETERMINACION_BASE
@@ -288,12 +345,28 @@ func _montar_hud() -> void:
 	_barra_rival.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	columnas.add_child(_barra_rival)
 
+	if not _ritual.is_empty():
+		_etiqueta_ritual = Label.new()
+		_etiqueta_ritual.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		bloque.add_child(_etiqueta_ritual)
+
 
 func _actualizar_hud() -> void:
 	if _barra_jugador == null or _barra_rival == null:
 		return
 	_barra_jugador.value = _determinacion_jugador
 	_barra_rival.value = _determinacion_rival
+	if _etiqueta_ritual != null:
+		_etiqueta_ritual.text = _texto_ritual()
+
+
+func _texto_ritual() -> String:
+	if _ritual.is_empty():
+		return ""
+	var texto := "RITUAL · %s" % String(_ritual.get("nombre", ""))
+	if _contraataque > 0:
+		texto += " · CONTRA +%d" % _contraataque
+	return texto
 
 
 func _actualizar_camara() -> void:
@@ -313,8 +386,12 @@ func _reaccion(figura: Node3D, desplazamiento: float) -> void:
 	tween.tween_property(figura, "position:z", origen.z, 0.16)
 
 
-func _material(color: Color) -> StandardMaterial3D:
+func _material(color: Color, emision: bool = false) -> StandardMaterial3D:
 	var material := StandardMaterial3D.new()
 	material.albedo_color = color
 	material.roughness = 0.9
+	if emision:
+		material.emission_enabled = true
+		material.emission = color
+		material.emission_energy_multiplier = 0.8
 	return material

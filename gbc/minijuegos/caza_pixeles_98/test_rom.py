@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import unittest
 
 
@@ -14,6 +15,11 @@ class CazaPixeles98Test(unittest.TestCase):
 
     def bloque(self, inicio, fin):
         return self.source.split(inicio, 1)[1].split(fin, 1)[0]
+
+    def valor_def(self, nombre):
+        match = re.search(rf"DEF {re.escape(nombre)}\s+EQU\s+(\d+)", self.source)
+        self.assertIsNotNone(match, f"falta DEF {nombre}")
+        return int(match.group(1))
 
     def test_combo_tiene_ventana_tres_multiplicadores_y_record(self):
         self.assertIn("DEF COMBO_DURACION   EQU 90", self.source)
@@ -31,16 +37,15 @@ class CazaPixeles98Test(unittest.TestCase):
         self.assertIn("call AvanzarRng", bloque)
         self.assertIn("cp b\n    jr nz, .indice_listo", bloque)
 
-    def test_campana_tiene_tres_fases_con_presentacion_distinta(self):
+    def test_campana_tiene_tres_fases_y_final_de_boss(self):
         self.assertIn("DEF SEGUNDOS_PARTIDA EQU 45", self.source)
         self.assertIn("DEF FASE2_TIEMPO     EQU 30", self.source)
         self.assertIn("DEF FASE3_TIEMPO     EQU 15", self.source)
-        tick = self.bloque("TickTiempo:", "ActualizarOAM:")
+        self.assertIn("DEF FASE_FINAL       EQU 4", self.source)
+        tick = self.bloque("TickTiempo:", "; -------------------------- Glitch Behemoth")
         self.assertIn("ld a, 2\n    ld [wFase], a", tick)
         self.assertIn("ld a, 3\n    ld [wFase], a", tick)
-        self.assertIn("call AplicarPaletaFase", tick)
-        self.assertIn("PaletaFase2:", self.source)
-        self.assertIn("PaletaFase3:", self.source)
+        self.assertIn("call IniciarBehemoth", tick)
 
     def test_tres_tipos_de_objetivo_cambian_reglas_y_sprite(self):
         self.assertIn("DEF TIPO_CROMA   EQU 0", self.source)
@@ -49,13 +54,13 @@ class CazaPixeles98Test(unittest.TestCase):
         mover = self.bloque("MoverObjetivo:", "ComprobarCaptura:")
         self.assertIn("cp TIPO_FOCO\n    ret z", mover)
         self.assertIn("cp TIPO_SEMILLA", mover)
-        oam = self.bloque("ActualizarOAM:", "ActualizarHUD:")
+        oam = self.bloque("ActualizarOAM:", "; HL llega al segundo sprite OAM")
         self.assertIn("TILE_OBJETIVO", oam)
         self.assertIn("TILE_SEMILLA", oam)
         self.assertIn("TILE_FOCO", oam)
 
     def test_restaurar_compite_con_combo_y_modifica_estado(self):
-        foco = self.bloque("CerrarFocoContaminante:", "SumarRestauracion:")
+        foco = self.bloque("CerrarFocoContaminante:", "; A = incremento de restauracion")
         self.assertIn("ld [wCombo], a", foco)
         self.assertIn("ld [wComboFrames], a", foco)
         self.assertIn("ld [wMultiplicador], a", foco)
@@ -65,10 +70,61 @@ class CazaPixeles98Test(unittest.TestCase):
         self.assertIn("RESTAURA_SEMILLA", semilla)
         self.assertIn("call SumarRestauracion", semilla)
 
+    def test_chromia_tiene_cuatro_estados_visuales_y_atributos_cgb(self):
+        actualizar = self.bloque("ActualizarChromia:", "DibujarChromia:")
+        self.assertIn("cp 75", actualizar)
+        self.assertIn("cp 50", actualizar)
+        self.assertIn("cp 25", actualizar)
+        self.assertIn("wEtapaChromia", actualizar)
+        self.assertIn("TILE_PLANETA_SECO", self.source)
+        self.assertIn("TILE_PLANETA_AGUA", self.source)
+        self.assertIn("TILE_PLANETA_BOSQUE", self.source)
+        self.assertIn("TILE_PLANETA_VIVO", self.source)
+        attrs = self.bloque("AplicarAtributosChromia:", "CargarPaletaPlaneta:")
+        self.assertIn("ldh [rVBK], a", attrs)
+        self.assertIn("ld d, 1", attrs)
+        self.assertIn("PaletaPlanetaVivo:", self.source)
+
+    def test_behemoth_aparece_en_ultimos_segundos_y_tiene_cuatro_nucleos(self):
+        self.assertIn("DEF BEHEMOTH_TIEMPO  EQU 8", self.source)
+        self.assertEqual(self.valor_def("BEHEMOTH_PUNTOS"), 4)
+        self.assertIn("PuntosBehemoth:", self.source)
+        self.assertIn("IniciarBehemoth:", self.source)
+        self.assertIn("ComprobarPuntoBehemoth:", self.source)
+        golpe = self.bloque("GolpearBehemoth:", "ActualizarOAM:")
+        self.assertIn("cp BEHEMOTH_PUNTOS", golpe)
+        self.assertIn("RESTAURA_NUCLEO", golpe)
+        self.assertIn("RESTAURA_BOSS", golpe)
+        self.assertIn("ld a, FASE_FINAL", golpe)
+
+    def test_behemoth_es_metasprite_32x32_con_presupuesto_oam_seguro(self):
+        self.assertEqual(self.valor_def("BOSS_SPRITES_CUERPO"), 16)
+        self.assertEqual(self.valor_def("BOSS_SPRITES_LINEA"), 4)
+        max_linea = self.valor_def("MAX_SPRITES_LINEA_BEHEMOTH")
+        self.assertLessEqual(max_linea, 10)
+        self.assertEqual(max_linea, 6)
+        oam = self.bloque("DibujarBehemothOAM:", "; ---------------------------- HUD / Chromia")
+        self.assertIn("ld e, 4", oam)
+        self.assertIn("cp 4", oam)
+        self.assertIn("TILE_BEHEMOTH_A", oam)
+        self.assertIn("TILE_BEHEMOTH_B", oam)
+        self.assertIn("TILE_NUCLEO", oam)
+
+    def test_behemoth_tiene_cooldown_entre_puntos_y_final_diferenciado(self):
+        self.assertIn("DEF BEHEMOTH_INVULN_FRAMES", self.source)
+        tick = self.bloque("TickBehemoth:", "ActualizarPuntoBehemoth:")
+        self.assertIn("wBossInvuln", tick)
+        golpe = self.bloque("GolpearBehemoth:", "ActualizarOAM:")
+        self.assertIn("BEHEMOTH_INVULN_FRAMES", golpe)
+        self.assertIn("wBossDerrotado", golpe)
+        final = self.bloque("DibujarResultadoBoss:", "DesactivarLCD:")
+        self.assertIn("TILE_SEMILLA", final)
+        self.assertIn("TILE_NUCLEO", final)
+
     def test_hud_expone_fase_restauracion_y_multiplicador(self):
         self.assertIn("ld hl, BG_MAP + 9", self.source)
         self.assertIn("ld a, TILE_X", self.source)
-        actualizar = self.bloque("ActualizarHUD:", "DibujarTitulo:")
+        actualizar = self.bloque("ActualizarHUD:", "ActualizarChromia:")
         self.assertIn("wFase", actualizar)
         self.assertIn("wRestauracion", actualizar)
         self.assertIn("BG_MAP + 32 + 7", actualizar)
