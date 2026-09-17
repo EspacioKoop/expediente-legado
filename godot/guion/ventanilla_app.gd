@@ -87,9 +87,20 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(evento: InputEvent) -> void:
+	if evento.is_action_pressed("cancelar") or evento.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		_salir_ventanilla()
+		return
 	# Saltar el escrito: quien ya ha leído la frase no tiene por qué esperarla.
 	if evento.is_pressed() and not _escribiendo.is_empty():
 		_escrito = float(_escribiendo.length())
+
+
+func _salir_ventanilla() -> void:
+	if partida_externa != null:
+		cerrada.emit()
+		return
+	get_tree().change_scene_to_file("res://escenas/inicio.tscn")
 
 
 func _draw() -> void:
@@ -371,12 +382,11 @@ func _construir() -> void:
 	_habilidades = HBoxContainer.new()
 	_tablero.add_child(_habilidades)
 
-	if partida_externa != null:
-		var salir := Button.new()
-		salir.name = "SalirVentanilla"
-		salir.text = tr("VENTANILLA_SALIR")
-		salir.pressed.connect(func(): cerrada.emit())
-		_tablero.add_child(salir)
+	var salir := Button.new()
+	salir.name = "SalirVentanilla"
+	salir.text = tr("VENTANILLA_SALIR")
+	salir.pressed.connect(_salir_ventanilla)
+	_tablero.add_child(salir)
 
 
 func _titulo(texto: String) -> Control:
