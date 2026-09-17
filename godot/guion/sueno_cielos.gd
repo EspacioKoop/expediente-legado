@@ -222,9 +222,7 @@ const PERFILES_MITO := {
 
 ## Devuelve qué familia corresponde a la escena actual según la misma asignación
 ## que usan los controllers 3D. Si no toca familia, el cielo base sigue solo.
-static func familia_para_escena(
-	familias: Array, cantidad_escenas: int, pendientes: int
-) -> String:
+static func familia_para_escena(familias: Array, cantidad_escenas: int, pendientes: int) -> String:
 	var indice := MitologiasNoche.indice_escena_actual(cantidad_escenas, pendientes)
 	var asignacion := MitologiasNoche.asignar(familias, cantidad_escenas)
 	for familia_cruda in familias:
