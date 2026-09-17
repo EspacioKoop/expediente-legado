@@ -18,7 +18,7 @@ La única diferencia es:
 
 Se ejecutan en procesos separados para que las mutaciones visuales de las ventanas del modo `full` no contaminen el baseline.
 
-## Cámara y muestreo
+## Cámara y muestreo de rendimiento
 
 - resolución: 1280×720;
 - posición: `(0.0, 1.65, -7.4)`;
@@ -27,7 +27,19 @@ Se ejecutan en procesos separados para que las mutaciones visuales de las ventan
 - calentamiento: 90 frames;
 - muestreo: 180 frames.
 
-La cámara está situada a altura de jugador en el eje central de la calle y mira hacia el primer tramo residencial. Las capturas sirven para comparar la misma toma automatizada; no sustituyen una validación visual humana desde la ruta jugable.
+La cámara está situada a altura de jugador en el eje central de la calle y mira hacia el primer tramo residencial. Esta toma se mantiene estable para que el coste sea comparable entre runs.
+
+## Evidencia visual desde la ruta
+
+La comparación visual se ejecuta en un proceso separado del benchmark de rendimiento. `capturar_fachadas_vivas_ruta.gd` genera baseline/full desde tres estaciones del eje jugable, todas mirando al mismo tramo `Ventana0_*`:
+
+- **cerca**: cámara `(0.0, 1.65, -12.0)`, distancia aproximada al objetivo **6,7 m**; permite revisar marco, cristal y mobiliario 3D;
+- **media**: cámara `(0.0, 1.65, 5.5)`, distancia aproximada **19,2 m**; cruza el LOD de props de 18 m y permite comprobar que desaparece el mobiliario sin perder lectura interior;
+- **lejos**: cámara `(0.0, 1.65, 14.5)`, distancia aproximada **27,8 m**; permite revisar repetición, iluminación, persianas y lectura del tramo desde el extremo opuesto del trayecto.
+
+Cada estación espera 12 frames después de mover la cámara y guarda una captura 1280×720. Baseline y full deben declarar exactamente las mismas posiciones, objetivos, FOV y distancias; `scripts/test_capturas_fachadas_vivas.py` falla si las parejas dejan de ser comparables o falta una imagen.
+
+Estas capturas son evidencia automatizada y reproducible. Sirven para detectar regresiones visuales y facilitar una revisión humana, pero no equivalen por sí solas a un playtest visual completo.
 
 ## Métricas
 
@@ -99,14 +111,13 @@ El criterio de optimización es por tanto explícito: cubrir toda la calle con p
 
 El workflow `Benchmark fachadas vivas` genera durante 14 días:
 
-- `baseline.png`;
-- `full.png`;
-- `baseline.json`;
-- `full.json`;
-- `summary.json`;
-- `report.md`.
-
-Las dos imágenes constituyen la comparación automatizada sin HUD; los JSON y el Markdown documentan el coste antes/después con la misma cámara.
+- `baseline.png` y `full.png` para la toma fija del benchmark;
+- `baseline.json`, `full.json`, `summary.json` y `report.md` para métricas;
+- `baseline-ruta.json` y `full-ruta.json` para el contrato de las tres estaciones;
+- `baseline-ruta-cerca.png` / `full-ruta-cerca.png`;
+- `baseline-ruta-media.png` / `full-ruta-media.png`;
+- `baseline-ruta-lejos.png` / `full-ruta-lejos.png`;
+- `ruta-report.md` con el emparejado de capturas y distancias.
 
 ## Ejecución local
 
@@ -123,6 +134,16 @@ xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
   --mode=full --output="$PWD/benchmark-fachadas-vivas"
 
 python3 scripts/test_benchmark_fachadas_vivas.py --report benchmark-fachadas-vivas
+
+xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+  --script res://pruebas/capturar_fachadas_vivas_ruta.gd -- \
+  --mode=baseline --output="$PWD/benchmark-fachadas-vivas"
+
+xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+  --script res://pruebas/capturar_fachadas_vivas_ruta.gd -- \
+  --mode=full --output="$PWD/benchmark-fachadas-vivas"
+
+python3 scripts/test_capturas_fachadas_vivas.py --report benchmark-fachadas-vivas
 ```
 
-El corte no modifica gameplay, navegación, colisiones ni incorpora assets externos. La cobertura, el número de ventanas de detalle, el batching, los estados de iluminación, la profundidad y los rangos LOD quedan cubiertos por regresiones ejecutables.
+El corte no modifica gameplay, navegación, colisiones ni incorpora assets externos. La cobertura, el número de ventanas de detalle, el batching, los estados de iluminación, la profundidad, los rangos LOD y la comparabilidad de las capturas quedan cubiertos por regresiones ejecutables.
