@@ -185,7 +185,11 @@ func _foco_ventana_superior() -> Control:
 		if bool(datos.get("minimizada", false)):
 			continue
 		var panel: Control = datos["panel"]
-		if not is_instance_valid(panel) or not panel.is_visible_in_tree() or panel.z_index <= mayor:
+		if (
+			not is_instance_valid(panel)
+			or not panel.is_visible_in_tree()
+			or panel.z_index <= mayor
+		):
 			continue
 		var contenido := panel.find_child("Contenido", true, false)
 		var candidato: Control = null
