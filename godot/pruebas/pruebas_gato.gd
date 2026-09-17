@@ -91,6 +91,46 @@ static func _gato(comprobar: Callable) -> void:
 	GatoConducta.avanzar(sin_sitios, [], 0, lejos, 0.1)
 	comprobar.call("sin sitios se queda donde está", sin_sitios["pos"], Vector3.ZERO)
 
+	# Tercer corte de #787: los sitios de casa ya son affordances declarativas.
+	# La misma conducta sigue aceptando Vector3 simples (todos los tests previos)
+	# y traduce las affordances a estados que la malla puede mostrar.
+	var sitios_casa: Array = EspaciosCatalogo.CASA["sitios_gato"]
+	(
+		comprobar
+		. call(
+			"el primer sitio declarativo sigue siendo el cuenco",
+			[
+				GatoConducta.posicion_sitio(sitios_casa[0]),
+				GatoConducta.rutina_sitio(sitios_casa[0]),
+			],
+			[Vector3(2.8, 0, 1.5), "cuenco"]
+		)
+	)
+	var rutinas: Array = sitios_casa.map(func(sitio): return GatoConducta.rutina_sitio(sitio))
+	for rutina in ["dormir", "sentarse", "observar", "esconderse"]:
+		comprobar.call("la casa declara rutina " + rutina, rutinas.has(rutina), true)
+
+	var estados_rutina := {
+		"dormir": "durmiendo",
+		"sentarse": "sentado",
+		"observar": "observando",
+	}
+	for rutina in estados_rutina:
+		var candidatos: Array = sitios_casa.filter(
+			func(sitio): return GatoConducta.rutina_sitio(sitio) == rutina
+		)
+		var pos_rutina := GatoConducta.posicion_sitio(candidatos[0])
+		var en_rutina := GatoConducta.nuevo(pos_rutina)
+		en_rutina["estado"] = "anda"
+		en_rutina["destino"] = pos_rutina
+		en_rutina["rutina_destino"] = rutina
+		GatoConducta.avanzar(en_rutina, candidatos, 0, lejos, 0.05)
+		comprobar.call(
+			"la affordance " + rutina + " produce estado observable",
+			en_rutina["estado"],
+			estados_rutina[rutina]
+		)
+
 	# #787: el propio gato usa el contrato común de interacción, de modo que la
 	# misma instancia sirve en casa y en sueño. Cerca se acaricia y después se
 	# ofrece coger; desde más lejos se le llama y pasa al estado de acercarse.
@@ -206,7 +246,7 @@ static func _cuenco(comprobar: Callable) -> void:
 		func(s): return s["destino"] == "cuenco"
 	)
 	comprobar.call("la casa tiene cuenco", cuenco.size(), 1)
-	var sitio_cuenco: Vector3 = EspaciosCatalogo.CASA["sitios_gato"][0]
+	var sitio_cuenco := GatoConducta.posicion_sitio(EspaciosCatalogo.CASA["sitios_gato"][0])
 	comprobar.call(
 		"y el gato hambriento se planta en él",
 		(

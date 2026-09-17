@@ -511,16 +511,17 @@ const CASA := {
 			"tam": Vector3(0.22, 0.22, 0.22)
 		},
 	],
-	# Por dónde anda el gato. El PRIMERO es el cuenco: es donde se queda cuando
-	# lleva días sin comer, y verlo ahí desde la puerta es toda la señal que da
-	# el juego (#92) — no hay barra ni aviso.
+	# Por dónde anda el gato. El PRIMERO sigue siendo el cuenco: es donde se
+	# queda cuando lleva días sin comer (#92). Desde #787 cada punto puede
+	# declarar además una affordance; GatoConducta conserva compatibilidad con
+	# Vector3 simples para que el mismo gato siga funcionando en el sueño.
 	"sitios_gato":
 	[
-		Vector3(2.8, 0, 1.5),
-		Vector3(-2.4, 0, -0.6),
-		Vector3(0.6, 0, 2.1),
-		Vector3(2.9, 0, -2.9),
-		Vector3(-3.2, 0, 2.4),
+		{"pos": Vector3(2.8, 0, 1.5), "rutina": "cuenco"},
+		{"pos": Vector3(-2.4, 0, -0.6), "rutina": "dormir"},
+		{"pos": Vector3(0.6, 0, 2.1), "rutina": "sentarse"},
+		{"pos": Vector3(2.9, 0, -2.9), "rutina": "esconderse"},
+		{"pos": Vector3(-3.2, 0, 2.4), "rutina": "observar"},
 	],
 	# El de casa está en la mesa del comedor, encendido y solo. Nadie lo ha apagado.
 	"cigarros": [Vector3(1.7, 0.77, -1.0)],

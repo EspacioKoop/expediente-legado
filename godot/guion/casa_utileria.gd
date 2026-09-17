@@ -57,7 +57,7 @@ static func _ancla_cuenco(fallback: Vector3) -> Vector3:
 	var sitios: Array = EspaciosCatalogo.CASA.get("sitios_gato", [])
 	if sitios.is_empty():
 		return fallback
-	var pos: Vector3 = sitios[0]
+	var pos := GatoConducta.posicion_sitio(sitios[0], fallback)
 	return Vector3(pos.x, 0.0, pos.z)
 
 
