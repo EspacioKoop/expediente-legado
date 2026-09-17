@@ -18,10 +18,15 @@ class FachadasVivasTest(unittest.TestCase):
         cls.fachadas = (GUION / "calle_fachadas_vivas.gd").read_text(encoding="utf-8")
         cls.calle = (GUION / "dia_calle_app.gd").read_text(encoding="utf-8")
 
-    def test_contrato_de_vertical_slice(self):
+    def test_contrato_de_cobertura_completa(self):
         self.assertIn("CalleFachadasVivas.montar(calle)", self.calle)
-        self.assertIn("const MAX_VENTANAS := 9", self.fachadas)
-        self.assertIn('const PREFIJO_TRAMO := "Ventana0_"', self.fachadas)
+        self.assertIn("const MAX_VENTANAS_DETALLE := 9", self.fachadas)
+        self.assertIn('const PREFIJO_VENTANA := "Ventana"', self.fachadas)
+        self.assertIn('const PREFIJO_TRAMO_DETALLE := "Ventana0_"', self.fachadas)
+        self.assertIn('raiz.set_meta("ventanas_decoradas", decoradas)', self.fachadas)
+        self.assertIn('raiz.set_meta("ventanas_detalle_3d", decoradas_detalle)', self.fachadas)
+        self.assertIn('grupo.set_meta("detalle_3d", detalle_3d)', self.fachadas)
+        self.assertIn("if detalle_3d:", self.fachadas)
         for variante in ("escritorio", "estanteria", "salon_tv"):
             self.assertIn(f'"{variante}"', self.fachadas)
         for estado in ("calida", "apagada", "fria_tv", "tenue", "persiana"):
