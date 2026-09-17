@@ -53,23 +53,29 @@ static func _entradas_disponibles(app: Node) -> Array[Dictionary]:
 	for rom in RomsPropias.en_consola(compradas):
 		var titulo := String(rom.get("titulo", ""))
 		var clave := "rom_propia" if bool(rom.get("incluida", false)) else "rom_comprada"
-		entradas.append(
-			{
-				"id": String(rom.get("id", "")),
-				"titulo": titulo,
-				"nombre": String(app.call("_formatear", clave, [titulo])),
-				"ruta": String(rom.get("rom", "")),
-			}
+		(
+			entradas
+			. append(
+				{
+					"id": String(rom.get("id", "")),
+					"titulo": titulo,
+					"nombre": String(app.call("_formatear", clave, [titulo])),
+					"ruta": String(rom.get("rom", "")),
+				}
+			)
 		)
 	for local in CatalogoRomsUsuario.listar():
 		var ruta := String(local.get("ruta", ""))
-		entradas.append(
-			{
-				"id": ruta.get_file().get_basename(),
-				"titulo": String(local.get("nombre", "")),
-				"nombre": String(local.get("nombre", "")),
-				"ruta": ruta,
-			}
+		(
+			entradas
+			. append(
+				{
+					"id": ruta.get_file().get_basename(),
+					"titulo": String(local.get("nombre", "")),
+					"nombre": String(local.get("nombre", "")),
+					"ruta": ruta,
+				}
+			)
 		)
 	return entradas
 
@@ -347,11 +353,14 @@ func _animar_insercion() -> void:
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_QUAD)
 	tween.set_ease(Tween.EASE_IN)
-	tween.tween_property(
-		_cartucho_central,
-		"position",
-		Vector3(0.0, -0.43, 0.08),
-		DURACION_INSERCION,
+	(
+		tween
+		. tween_property(
+			_cartucho_central,
+			"position",
+			Vector3(0.0, -0.43, 0.08),
+			DURACION_INSERCION,
+		)
 	)
 	tween.tween_callback(_reconstruir_carrusel)
 
