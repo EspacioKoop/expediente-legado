@@ -96,7 +96,7 @@ def ejecutar():
                 "enlaces-pistas",
                 ["--script", "pruebas/pruebas_enlaces_pistas.gd"],
                 30,
-                200,
+                147,
             ),
             (
                 "semillas-oniricas",
