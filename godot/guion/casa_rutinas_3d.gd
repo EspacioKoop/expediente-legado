@@ -80,7 +80,8 @@ static func _montar_persiana(
 				"verbo": Interactuable3D.Verbo.ABRIR,
 			},
 			{
-				"pos": Vector3(0, 0.78, 0.10),
+				# Enrollada en el cajón, por encima del cristal y no delante (#785).
+				"pos": Vector3(0, 1.0, 0.10),
 				"rot": Vector3.ZERO,
 				"texto": "Cerrar persiana",
 				"sonido": "cerrar",
@@ -101,7 +102,7 @@ static func _montar_ventana(
 	var hoja := Node3D.new()
 	hoja.name = "HojaVentanaRutina"
 	ventana.add_child(hoja)
-	_caja(hoja, Vector3(-0.42, 0, 0), Vector3(0.82, 1.02, 0.035), Color(0.12, 0.16, 0.20))
+	# Solo el marco de la hoja: un cristal opaco aquí tapaba medio exterior (#785).
 	_caja(hoja, Vector3(-0.42, 0.50, 0), Vector3(0.86, 0.055, 0.06), Color(0.31, 0.27, 0.23))
 	_caja(hoja, Vector3(-0.42, -0.50, 0), Vector3(0.86, 0.055, 0.06), Color(0.31, 0.27, 0.23))
 	_caja(hoja, Vector3(-0.82, 0, 0), Vector3(0.055, 1.05, 0.06), Color(0.31, 0.27, 0.23))

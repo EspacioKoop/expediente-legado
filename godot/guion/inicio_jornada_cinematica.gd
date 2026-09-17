@@ -12,7 +12,7 @@ const ID := "inicio-jornada"
 ## El corcho de conceptos (`Corcho3D.POSICION`) y el terminal SIGA del puesto
 ## propio (`EspaciosCatalogo.OFICINA`). Se repiten aquí como datos del plano:
 ## el reproductor no sabe qué es un corcho.
-const CORCHO := Vector3(0.0, 1.55, -3.42)
+const CORCHO := Vector3(-2.3, 1.45, -0.52)
 const TERMINAL := Vector3(-4.3, 1.0, -2.1)
 
 
@@ -59,7 +59,7 @@ static func planos() -> Array:
 			# del archivo sigue clavado donde se dejó ayer.
 			"tipo": "3d",
 			"nombre": "corcho",
-			"camara": Vector3(-0.2, 1.9, 3.3),
+			"camara": Vector3(-1.9, 1.65, 1.6),
 			"mira": CORCHO,
 			"segundos": 1.6,
 		},

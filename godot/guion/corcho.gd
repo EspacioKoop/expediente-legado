@@ -7,6 +7,13 @@ class_name Corcho
 extends RefCounted
 
 const CLAVE := "corcho"
+## Espacio lógico donde viven las posiciones guardadas. Es el del tablón
+## histórico de 2,65 × 1,55: desde #785 el corcho de la pared es de tamaño real
+## y lo dibuja a escala, y la interfaz lo dibuja a la de la pantalla, así que
+## ninguna de las dos vistas obliga a migrar partidas.
+const AREA := Vector2(2.65, 1.55)
+const TAM_FICHA := Vector2(0.44, 0.25)
+const MARGEN_FICHAS := Vector2(0.07, 0.08)
 const COLUMNAS_INICIALES := 5
 const PASO_INICIAL := Vector2(0.48, 0.32)
 const ORIGEN_INICIAL := Vector2(-0.96, 0.48)
@@ -82,6 +89,31 @@ static func limitar_posiciones(jornada: Dictionary, limite: Vector2) -> bool:
 			cambio = true
 
 	return cambio
+
+
+## Semiejes del rectángulo donde puede estar el centro de una ficha.
+static func limite() -> Vector2:
+	return AREA * 0.5 - TAM_FICHA * 0.5 - MARGEN_FICHAS
+
+
+## Coloca una ficha donde la deja el jugador, dentro del área útil. Devuelve si
+## ha cambiado algo; una ficha que no está en el tablón no se crea al moverla.
+static func mover(jornada: Dictionary, id: String, pos: Vector2) -> bool:
+	var fichas: Dictionary = estado(jornada)["fichas"]
+	if not fichas.has(id) or typeof(fichas[id]) != TYPE_DICTIONARY:
+		return false
+	var borde := limite()
+	var nueva := Vector2(clampf(pos.x, -borde.x, borde.x), clampf(pos.y, -borde.y, borde.y))
+	var actual = fichas[id].get("pos", [])
+	if (
+		typeof(actual) == TYPE_ARRAY
+		and actual.size() >= 2
+		and is_equal_approx(float(actual[0]), nueva.x)
+		and is_equal_approx(float(actual[1]), nueva.y)
+	):
+		return false
+	fichas[id]["pos"] = [nueva.x, nueva.y]
+	return true
 
 
 ## Dos pulsaciones sobre fichas alternan el hilo entre ellas. El orden no crea

@@ -39,7 +39,7 @@ static func montar_zonas_domesticas(raiz: Node3D) -> void:
 	_montar_cama(raiz, _ancla_salida("sueño", Vector3(-2.4, 0.0, -2.0)))
 	_montar_cuenco_gato(raiz, _ancla_cuenco(Vector3(2.8, 0.0, 1.5)))
 	_montar_sofa(raiz, Vector3(-0.95, 0.0, 1.4), 90.0)
-	_montar_cocina(raiz, Vector3(3.30, 0.0, -0.15))
+	_montar_cocina(raiz, Vector3(4.80, 0.0, -0.15))
 	_montar_ventana(raiz, Vector3(-2.10, 1.65, -3.42))
 	_montar_estanteria_compras(raiz, Vector3(1.25, 0.0, -3.22))
 
