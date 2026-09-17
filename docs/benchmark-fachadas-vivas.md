@@ -1,6 +1,6 @@
 # Benchmark de fachadas vivas (#861)
 
-Este benchmark mide de forma aislada el coste de la capa `CalleFachadasVivas` sobre el mismo tramo y la misma cámara. Su objetivo es convertir el criterio de aceptación de #861 (comparación antes/después y degradación aproximada máxima del 10 %) en una medición reproducible.
+Este benchmark mide de forma aislada el coste de la capa `CalleFachadasVivas` sobre el mismo tramo y la misma cámara. Su objetivo es convertir el criterio de aceptación de #861 (comparación antes/después y degradación aproximada máxima del 10 %) en una medición reproducible y utilizarla como gate de optimización.
 
 ## Escena comparada
 
@@ -39,7 +39,7 @@ Cada modo genera un JSON con promedios y máximos de:
 - tiempo de proceso (`process_ms`);
 - memoria estática.
 
-También se registra el número de grupos y `MeshInstance3D` aportados por la capa.
+También se registran las nueve ventanas lógicas, el número de lotes `MultiMesh` y el total de instancias conservadas por la capa.
 
 Godot no expone un tiempo GPU portable mediante `Performance` para este runner, por lo que el informe lo marca explícitamente como no disponible. Las cifras se obtienen con render software y sirven para comparar ambos modos en el mismo entorno, no como objetivo de FPS para hardware real.
 
@@ -50,7 +50,20 @@ El gate principal usa `process_ms`:
 - incremento permitido: 10 % respecto al baseline;
 - tolerancia absoluta mínima: 0,20 ms para evitar falsos negativos cuando el baseline es muy pequeño.
 
-El límite efectivo es el mayor de ambos valores. Si el modo `full` lo supera, el workflow falla y conserva igualmente los artefactos para diagnóstico.
+El límite efectivo es el mayor de ambos valores. Si el modo `full` lo supera, el workflow falla y conserva igualmente los artefactos para diagnóstico. El presupuesto no se relaja para poner verde una regresión.
+
+## Optimización guiada por el benchmark
+
+La primera ejecución del benchmark sobre la implementación previa al batching midió:
+
+- `process_ms`: 27,684 → 33,498 ms, **+21,00 %**;
+- draw calls: 50 → 132, **+82**;
+- objetos: 50 → 132, **+82**;
+- primitivas: 1276 → 2260, **+984**.
+
+Ese resultado activó una optimización dentro de la misma vertical slice: las 82 piezas visuales siguen existiendo, pero se agrupan por malla/material/LOD en un máximo de 17 `MultiMeshInstance3D` (cinco fondos, tres lotes de marco/persiana y nueve tipos de props). Los nueve nodos `Interior_*` quedan como metadatos lógicos y ya no generan geometría individual.
+
+La comparación posterior usa exactamente el mismo workflow y cámara; por tanto, el efecto del batching se mide con el mismo instrumento que detectó la regresión original.
 
 ## Artefactos
 
@@ -82,4 +95,4 @@ xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
 python3 scripts/test_benchmark_fachadas_vivas.py --report benchmark-fachadas-vivas
 ```
 
-El benchmark no modifica gameplay, navegación, colisiones ni la implementación de las fachadas; únicamente observa su coste y produce evidencia reproducible.
+El corte no modifica gameplay, navegación ni colisiones. La única modificación funcional es el batching interno de la misma geometría visual ya integrada; variantes, estados, profundidad y rangos LOD se conservan mediante regresiones ejecutables.
