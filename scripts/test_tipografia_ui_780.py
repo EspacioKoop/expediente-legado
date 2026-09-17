@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ESTILO = ROOT / "godot" / "guion" / "estilo_siga.gd"
 ACUSACION = ROOT / "godot" / "guion" / "acusacion_app.gd"
 RECONSTRUCCION = ROOT / "godot" / "guion" / "reconstruccion_expediente_app.gd"
+VENTANILLA = ROOT / "godot" / "guion" / "ventanilla_app.gd"
 PROJECT = ROOT / "godot" / "project.godot"
 PROVENANCE = ROOT / "godot" / "assets" / "procedencia.json"
 
@@ -17,6 +18,7 @@ class TipografiaUi780Test(unittest.TestCase):
         self.estilo = ESTILO.read_text(encoding="utf-8")
         self.acusacion = ACUSACION.read_text(encoding="utf-8")
         self.reconstruccion = RECONSTRUCCION.read_text(encoding="utf-8")
+        self.ventanilla = VENTANILLA.read_text(encoding="utf-8")
         self.project = PROJECT.read_text(encoding="utf-8")
 
     def test_interfaz_no_depende_de_fuentes_windows_instaladas(self):
@@ -73,6 +75,12 @@ class TipografiaUi780Test(unittest.TestCase):
         self.assertIn(
             'etiqueta.add_theme_font_override("font", theme.get_font("title_font", "Label"))',
             self.reconstruccion,
+        )
+
+    def test_ventanilla_aplica_el_rol_tipografico_de_titulo(self):
+        self.assertIn(
+            'etiqueta.add_theme_font_override("font", theme.get_font("title_font", "Label"))',
+            self.ventanilla,
         )
 
     def test_documento_no_es_la_fuente_global_del_proyecto(self):
