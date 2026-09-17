@@ -42,6 +42,7 @@ La selección final debe hacerse mirando los modelos reales, no por el nombre de
 - materiales apagados y compatibles con el tratamiento PSX/low-poly del proyecto;
 - reducir saturación del atlas si compite con elementos interactivos;
 - evitar brillo PBR fuerte;
+- desactivar sombras propias en este dressing secundario: la calle ya resuelve iluminación y no compensa una pasada adicional para cinco piezas;
 - sin logos añadidos ni señalización inventada para justificar la fuente;
 - mezclar estas piezas con el asfalto/fachadas/vehículos de otras fuentes CC0 para que el pack no se lea como bloque reconocible;
 - priorizar silueta y masa en elementos lejanos.
@@ -54,6 +55,7 @@ Este pack entra como escenografía. En el primer corte:
 - sin colisión detallada para piezas fuera del recorrido;
 - colisión simple únicamente si una barrera invade físicamente una zona alcanzable;
 - máximo orientativo de 4–8 piezas visibles de este pack en una misma vista;
+- las `MeshInstance3D` del lote no proyectan sombras y el contrato runtime lo verifica;
 - luces de farola, si se usan, deben resolverse con presupuesto explícito: preferir material/emisión o iluminación compartida antes que una luz dinámica por farola.
 
 El **tráfico lejano en movimiento no lo proporciona este pack**. Si se añade, debe reutilizar los coches de #230 y una ruta simple, sin navegación, avoidance ni física de vehículo. Ese movimiento debe quedar visualmente al fondo y no cruzar la ruta del jugador en el primer corte.
@@ -83,7 +85,7 @@ Los `.glb`, `.fbx` y texturas raster deben entrar mediante **Git LFS real**, con
 - [x] adaptar materiales al look SIGA-98 sin introducir señalética nueva;
 - [x] colocar las piezas fuera de objetivos interactivos y del paso principal;
 - [x] medir el coste con varias instancias simultáneas;
-- [ ] ejecutar importación Godot, suite, arranque y Alpha;
+- [x] ejecutar importación Godot, suite, arranque y Alpha (PR #507: CI `34903760016` y Alpha `34903759979`, ambas en `success`);
 - [ ] validación visual humana de época, escala, clipping y legibilidad.
 
 ## Relación con otros issues
@@ -157,7 +159,12 @@ para hardware objetivo. No se introducen procesos por fotograma.
 Verificación local: 626 unittest Python (incluyen 58 comprobaciones de este
 lote en Godot), suite principal 662, semillas 34, recorrido 153 y arranque;
 50 pruebas Java, 28 Vitest, Checkstyle, PMD, SpotBugs, gdlint y gdformat verdes.
-No hay cobertura instrumentada GDScript configurada. La CI y Alpha del SHA de
-la PR son la referencia de entrega; la aceptación visual humana sigue abierta.
+No hay cobertura instrumentada GDScript configurada. La CI `34903760016` y la
+Alpha `34903759979` del SHA de #507 terminaron en `success`; la aceptación visual
+humana sigue abierta.
+
+Pulido posterior: el lote desactiva también `cast_shadow` en todas sus mallas,
+igual que otros elementos de dressing de calle, y la regresión lo fija para
+impedir que vuelva a aparecer una pasada de sombras accidental.
 
 SHA-256 del ZIP oficial inspeccionado: `8401078c95231677c07e1eb1639f8d2f0e222f62f9c1463c3999bdb2a0814237`.
