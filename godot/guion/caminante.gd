@@ -256,11 +256,17 @@ static func debe_recapturar_raton(
 	if not fisica_activa or arbol_pausado or not evento is InputEventMouseButton:
 		return false
 	var raton := evento as InputEventMouseButton
-	return raton.pressed and raton.button_index in [
-		MOUSE_BUTTON_LEFT,
-		MOUSE_BUTTON_RIGHT,
-		MOUSE_BUTTON_MIDDLE,
-	]
+	return (
+		raton.pressed
+		and (
+			raton.button_index
+			in [
+				MOUSE_BUTTON_LEFT,
+				MOUSE_BUTTON_RIGHT,
+				MOUSE_BUTTON_MIDDLE,
+			]
+		)
+	)
 
 
 func _unhandled_input(evento: InputEvent) -> void:
