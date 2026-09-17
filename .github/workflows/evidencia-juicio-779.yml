@@ -11,7 +11,7 @@ on:
       - 'godot/pruebas/capturar_juicio_779.gd'
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: evidencia-juicio-779-${{ github.event.pull_request.number }}
@@ -24,21 +24,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
           lfs: true
-          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
-      - name: Aplicar gdformat canónico al Juicio
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m venv "$RUNNER_TEMP/gdtoolkit"
-          "$RUNNER_TEMP/gdtoolkit/bin/python" -m pip install --disable-pip-version-check --quiet 'gdtoolkit==4.3.4'
-          "$RUNNER_TEMP/gdtoolkit/bin/gdformat" godot/guion/juicio_combate_3d.gd
 
       - name: Instalar RGBDS fijado
         shell: bash
@@ -94,17 +84,3 @@ jobs:
           name: evidencia-juicio-779
           path: ${{ runner.temp }}/juicio-779/*.png
           retention-days: 90
-
-      - name: Incorporar formato canónico si cambia
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ -z "$(git status --porcelain -- godot/guion/juicio_combate_3d.gd)" ]]; then
-            echo 'El Juicio ya está en formato canónico.'
-            exit 0
-          fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add godot/guion/juicio_combate_3d.gd
-          git commit -m 'style: aplica gdformat al telegrafo de #779'
-          git push origin "HEAD:${GITHUB_HEAD_REF}"
