@@ -15,18 +15,14 @@ func _init() -> void:
 	)
 	_comprobar(not bool(sol_sin_dano["sol"]), "resolver sin dano no finge una interrupcion")
 
-	var anansi := JuicioFeedbackRitual.estado_visual(
-		"nudo_suspendido", 0.7, 0, 6, false, false, 6
-	)
+	var anansi := JuicioFeedbackRitual.estado_visual("nudo_suspendido", 0.7, 0, 6, false, false, 6)
 	_comprobar(bool(anansi["anansi"]), "el enredo activo muestra la telarana")
 	var anansi_agotado := JuicioFeedbackRitual.estado_visual(
 		"nudo_suspendido", 0.0, 0, 6, false, false, 6
 	)
 	_comprobar(not bool(anansi_agotado["anansi"]), "el enredo agotado oculta la telarana")
 
-	var hidra := JuicioFeedbackRitual.estado_visual(
-		"retorno_hidra", 0.0, 1, 2, false, false, 2
-	)
+	var hidra := JuicioFeedbackRitual.estado_visual("retorno_hidra", 0.0, 1, 2, false, false, 2)
 	_comprobar(bool(hidra["hidra"]), "la segunda fase de Hidra queda marcada")
 	var hidra_inicial := JuicioFeedbackRitual.estado_visual(
 		"retorno_hidra", 0.0, 0, 8, false, false, 8
