@@ -20,7 +20,10 @@ def valor_def(nombre: str) -> int:
 
 class PixelExodusCierreTest(unittest.TestCase):
     def test_intro_es_instruccion_legible_antes_del_primer_segundo(self):
-        self.assertGreaterEqual(valor_def("CIN_INTRO_FRAMES"), 120)
+        self.assertEqual(valor_def("CIN_INTRO_FRAMES"), 72)
+        self.assertGreaterEqual(valor_def("CIN_INSTRUCCIONES_FRAMES"), 120)
+        inicio = bloque("IniciarCinematicaIntro:", "IniciarCinematicaFase2:")
+        self.assertIn("CIN_INSTRUCCIONES_FRAMES", inicio)
         self.assertIn("TILE_CIN_CRUCETA", CINEMA)
         self.assertIn("TILE_CIN_FLECHA", CINEMA)
 
