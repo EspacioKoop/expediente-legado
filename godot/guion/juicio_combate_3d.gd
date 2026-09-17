@@ -4,6 +4,10 @@
 ## efecto en el careo reducen la determinación inicial del acusado. El combate
 ## termina por rendición (determinación a cero), no por muerte.
 ##
+## Si el anfitrión es la Ventanilla con una `Partida` viva, la arena refleja dos
+## memorias que ya existen: un Arcano recogido/no gastado y una semilla mitológica
+## activa de la jornada. Son presencia visual; no alteran daño, vida ni recargas.
+##
 ## Controles semánticos ya existentes:
 ## - movimiento: mover_izquierda/derecha/adelante/atras;
 ## - interactuar: ataque ligero;
@@ -33,6 +37,8 @@ var _acabado := false
 var _recarga_jugador := 0.0
 var _recarga_rival := 0.0
 var _esquiva := 0.0
+var _arcano: Dictionary = {}
+var _mito_id := ""
 
 var _jugador: CharacterBody3D
 var _rival: CharacterBody3D
@@ -55,6 +61,7 @@ func configurar(acusado: Dictionary, bono_documental: int, reducir_movimiento: b
 
 
 func _ready() -> void:
+	_resolver_capa_simbolica()
 	_montar_arena()
 	_montar_hud()
 	_actualizar_hud()
@@ -157,6 +164,36 @@ func _limitar(posicion: Vector3) -> Vector3:
 	return Vector3(plano.x, 0.0, plano.y)
 
 
+func _resolver_capa_simbolica() -> void:
+	var estado := _estado_partida_anfitrion()
+	if estado.is_empty():
+		return
+	var clave := String(_acusado.get("id", _acusado.get("nombre", "acusado")))
+	var tarot = estado.get("tarot", [])
+	if typeof(tarot) == TYPE_ARRAY:
+		_arcano = JuicioSimbolico.arcano_para(tarot, clave)
+	var jornada = estado.get("jornada", {})
+	if typeof(jornada) == TYPE_DICTIONARY:
+		_mito_id = JuicioSimbolico.mito_para(jornada, clave)
+
+
+func _estado_partida_anfitrion() -> Dictionary:
+	var anfitrion := get_parent()
+	if anfitrion == null:
+		return {}
+	var tiene_partida := false
+	for bruto in anfitrion.get_property_list():
+		if typeof(bruto) == TYPE_DICTIONARY and String(bruto.get("name", "")) == "partida":
+			tiene_partida = true
+			break
+	if not tiene_partida:
+		return {}
+	var partida_actual = anfitrion.get("partida")
+	if partida_actual is Partida:
+		return partida_actual.estado
+	return {}
+
+
 func _montar_arena() -> void:
 	var mundo := WorldEnvironment.new()
 	var entorno := Environment.new()
@@ -196,6 +233,8 @@ func _montar_arena() -> void:
 		archivador.rotation.y = angulo
 		archivador.material_override = _material(Color(0.28, 0.31, 0.28))
 		add_child(archivador)
+
+	JuicioSimbolico3D.montar(self, _arcano, _mito_id)
 
 	_jugador = CharacterBody3D.new()
 	_jugador.position = Vector3(0.0, 0.0, 2.4)
