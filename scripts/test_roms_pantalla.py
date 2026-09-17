@@ -17,11 +17,13 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 MINIJUEGOS = ROOT / "gbc" / "minijuegos"
 
-# ROM, fuente y color de la paleta de fondo que hace de tinta.
+# ROM, fuente, color de la paleta de fondo que hace de tinta y etiquetas que
+# delimitan esa paleta.
 TINTA = {
-    "caza_pixeles_98": ("main.asm", 1),
-    "ryu_flow_98": ("main.asm", 1),
-    "aquiles_98": ("game.asm", 1),
+    "caza_pixeles_98": ("main.asm", 1, "PaletaFondo:", "PaletaFondoFin:"),
+    "ryu_flow_98": ("main.asm", 1, "PaletaFondo:", "PaletaFondoFin:"),
+    "aquiles_98": ("game.asm", 1, "PaletaFondo:", "PaletaFondoFin:"),
+    "webkeeper_98": ("main.asm", 1, "PaletaBG:", "PaletaOBJ:"),
 }
 
 
@@ -69,9 +71,9 @@ class RomsPantallaTest(unittest.TestCase):
         self.assertEqual(rotos, [])
 
     def test_la_tinta_contrasta_con_el_fondo(self):
-        for rom, (nombre, indice_tinta) in TINTA.items():
+        for rom, (nombre, indice_tinta, inicio, fin) in TINTA.items():
             texto = (MINIJUEGOS / rom / nombre).read_text(encoding="utf-8")
-            bloque = texto.split("PaletaFondo:", 1)[1].split("PaletaFondoFin:", 1)[0]
+            bloque = texto.split(inicio, 1)[1].split(fin, 1)[0]
             colores = [int(v, 16) for v in re.findall(r"\$([0-9A-Fa-f]{4})", bloque)]
             with self.subTest(rom=rom):
                 self.assertGreaterEqual(_contraste(colores[0], colores[indice_tinta]), 4.5)

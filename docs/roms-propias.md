@@ -8,13 +8,13 @@ Solo entran ROMs **propias**: código de este repositorio bajo `gbc/minijuegos/<
 
 | id | Título | Género | Dónde se consigue | Precio | Issues |
 |---|---|---|---|---|---|
-| `caza_pixeles_98` | Caza Píxeles 98 | arcade de 30 s | incluida con la consola | — | #124 #95 #384 #386 |
+| `caza_pixeles_98` | Pixel Exodus | arcade de 30 s | incluida con la consola | — | #124 #95 #384 #386 |
 | `paper_planes_98` | Paper Planes 98 | vuelo; ruta Nueva York 1998 | tienda de videojuegos | 45 | #95 #388 |
 | `croc_riders_98` | Croc Riders 98 | carreras; El Cairo → Giza | tienda de videojuegos | 45 | #95 #389 |
 | `aquiles_98` | MYRMIDON 98 | duelo de observación; leer guardia y talón vulnerable | tienda de videojuegos | 45 | #438 #442 |
-| `ryu_flow_98` | RYU FLOW | puzle de flujo; tres compuertas y cauce determinista | tienda de videojuegos | 45 | #440 #442 #542 #609 #622 #627 |
+| `ryu_flow_98` | River of the Dragon | puzle de flujo; tres compuertas y cauce determinista | tienda de videojuegos | 45 | #440 #442 #542 #609 #622 #627 |
 
-Todas son ROMs propias de 32 KiB y modo dual CGB (`0x80`). `RYU FLOW` es la primera que expone además un handshake de finalización para integración diegética: completar realmente el cauce deja `0xA5` en WRAM `$C100`; arrancar, jugar a medias o salir no lo hace.
+Todas son ROMs propias de 32 KiB y modo dual CGB (`0x80`). Tras #808, Pixel Exodus, River of the Dragon y Kwaku, el guardameta muestran en Game Boy Color una pantalla de título a pantalla completa convertida de su lámina de concept art (`referencia/PROCEDENCIA.md`); en Game Boy clásica conservan el título de texto. Los ids y las cabeceras de ROM no cambian. `RYU FLOW` es la primera que expone además un handshake de finalización para integración diegética: completar realmente el cauce deja `0xA5` en WRAM `$C100`; arrancar, jugar a medias o salir no lo hace.
 
 ## En proyecto
 
@@ -22,10 +22,10 @@ Contrapartes de vigilia de los sueños mitológicos (#435, #442). Permanecen fue
 
 | id | Título | Sueño | Idea / estado | Issues |
 |---|---|---|---|---|
-| `ariadna_labertinto_98` | ARIADNA | Minotauro | laberinto de archivo; ya existe su cartucho 3D en casa | #437 #512 |
+| `ariadna_labertinto_98` | Ariadne, el hilo del laberinto | Minotauro | laberinto de archivo; ya existe su cartucho 3D en casa | #437 #512 |
 | `uruk_98` | URUK 98 | Gilgamesh | ciudad mínima y tablilla que reconstruir | #436 |
 | `hydra_loop_98` | HYDRA LOOP | Hidra | **fuente prototipo jugable**: cortar hace brotar dos cabezas; sellar un nodo exige haber leído dos cabezas suyas; tres niveles y handshake `$C100 = 0xA5` al romper el bucle | #439 #600 |
-| `webkeeper_98` | WEBKEEPER 98 | Anansi akan | **fuente prototipo jugable**: Kwaku, una araña-portero, disputa tres partidos breves; amagos legibles, telaraña de emergencia, reintento local y handshake solo al ganar la final | #748 #656 #442 |
+| `webkeeper_98` | Kwaku, el guardameta | Anansi akan | **fuente prototipo jugable**: Kwaku, una araña-portero, disputa tres partidos breves; amagos legibles, telaraña de emergencia, reintento local y handshake solo al ganar la final | #748 #656 #442 |
 | `duat_98` | DUAT 98 | Duat | cámaras y contrapesos | #441 |
 
 `HYDRA LOOP` tiene ya fuente prototipo en `gbc/minijuegos/hydra_loop_98` (portada de `gbc/minijuegos/hydra_loop`) y se compila y prueba con PyBoy en el workflow GBC. Sigue fuera del runtime: `HidraVigilia` no lee todavía su handshake.
