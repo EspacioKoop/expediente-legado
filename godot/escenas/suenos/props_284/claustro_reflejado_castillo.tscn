@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3]
 
-[ext_resource type="PackedScene" path="res://escenas/suenos/props_284/muro_torre_castillo.tscn" id="1_muro"]
+[ext_resource type="PackedScene" path="res://escenas/suenos/props_284/arcada_claustro_castillo.tscn" id="1_arcada"]
 [ext_resource type="PackedScene" path="res://escenas/suenos/props_284/escalera_anular_castillo.tscn" id="2_escalera"]
 [ext_resource type="PackedScene" path="res://escenas/suenos/props_284/estandarte_anular.tscn" id="3_estandarte"]
 
@@ -17,33 +17,33 @@ size = Vector2(15, 15)
 mesh = SubResource("SueloClaustro")
 material_override = SubResource("MatClaustro")
 
-[node name="ArcadaNorteA" parent="." instance=ExtResource("1_muro")]
-position = Vector3(-3.6, 0, -5.25)
-scale = Vector3(0.62, 0.62, 0.62)
+[node name="ArcadaNorteA" parent="." instance=ExtResource("1_arcada")]
+position = Vector3(-3.2, 0, -5.0)
+scale = Vector3(0.74, 0.74, 0.74)
 
-[node name="ArcadaNorteB" parent="." instance=ExtResource("1_muro")]
-position = Vector3(3.6, 0, -5.25)
-scale = Vector3(0.62, 0.62, 0.62)
+[node name="ArcadaNorteB" parent="." instance=ExtResource("1_arcada")]
+position = Vector3(3.2, 0, -5.0)
+scale = Vector3(0.74, 0.74, 0.74)
 
-[node name="ArcadaSurA" parent="." instance=ExtResource("1_muro")]
-position = Vector3(-3.6, 0, 5.25)
+[node name="ArcadaSurA" parent="." instance=ExtResource("1_arcada")]
+position = Vector3(-3.2, 0, 5.0)
 rotation_degrees = Vector3(0, 180, 0)
-scale = Vector3(0.62, 0.62, 0.62)
+scale = Vector3(0.74, 0.74, 0.74)
 
-[node name="ArcadaSurB" parent="." instance=ExtResource("1_muro")]
-position = Vector3(3.6, 0, 5.25)
+[node name="ArcadaSurB" parent="." instance=ExtResource("1_arcada")]
+position = Vector3(3.2, 0, 5.0)
 rotation_degrees = Vector3(0, 180, 0)
-scale = Vector3(0.62, 0.62, 0.62)
+scale = Vector3(0.74, 0.74, 0.74)
 
-[node name="ArcadaEste" parent="." instance=ExtResource("1_muro")]
-position = Vector3(5.25, 0, 0)
+[node name="ArcadaEste" parent="." instance=ExtResource("1_arcada")]
+position = Vector3(5.0, 0, 0)
 rotation_degrees = Vector3(0, -90, 0)
-scale = Vector3(0.62, 0.62, 0.62)
+scale = Vector3(0.74, 0.74, 0.74)
 
-[node name="ArcadaOesteElevada" parent="." instance=ExtResource("1_muro")]
-position = Vector3(-5.25, 1.25, 0)
+[node name="ArcadaOesteElevada" parent="." instance=ExtResource("1_arcada")]
+position = Vector3(-5.0, 0.85, 0)
 rotation_degrees = Vector3(0, 90, 0)
-scale = Vector3(0.62, 0.62, 0.62)
+scale = Vector3(0.74, 0.74, 0.74)
 
 [node name="EscaleraReflejoA" parent="." instance=ExtResource("2_escalera")]
 position = Vector3(-1.55, 0.02, 0.85)
