@@ -97,6 +97,18 @@ class PixelExodusCierreTest(unittest.TestCase):
         resolver = bloque("ResolverObstaculosGameplay:", "JugadorChocaObstaculosActivos:")
         self.assertIn("wBossActivo", resolver)
 
+    def test_records_finales_usan_panel_limpio_y_paleta_de_texto(self):
+        final = bloque("DibujarCinematicaFinal:", "LimpiarPanelRecords:")
+        self.assertIn("call LimpiarPanelRecords", final)
+        panel = bloque("LimpiarPanelRecords:", "CargarTilesCinematicas:")
+        self.assertIn("BG_MAP + (3 * 32) + 2", panel)
+        self.assertIn("ld b, 8", panel)
+        self.assertIn("ld c, 16", panel)
+        self.assertIn("call EsCGB", panel)
+        self.assertIn("ldh [rVBK], a", panel)
+        # XOR A escribe TILE_VACIO en banco 0 y atributo/paleta 0 en banco 1.
+        self.assertGreaterEqual(panel.count("xor a"), 3)
+
 
 if __name__ == "__main__":
     unittest.main()
