@@ -35,9 +35,7 @@ func _init() -> void:
 				continue
 			enlazables += 1
 
-			var prefijo := (
-				"%s / %s / %s" % [caso.get("id", "?"), registro.get("folio", "?"), id]
-			)
+			var prefijo := "%s / %s / %s" % [caso.get("id", "?"), registro.get("folio", "?"), id]
 			comprobar(
 				prefijo + ": la frase existe en el folio",
 				String(registro.get("contenido", "")).find(String(gatillo)) >= 0,
@@ -47,14 +45,10 @@ func _init() -> void:
 			var pistas := contenido.pistas_de_registro(caso, origen)
 			var meta := "[url=pista:%s]" % id
 			var sin_descubrir := BBCode.render(Marcas.de_registro(registro, pistas, []))
-			comprobar(
-				prefijo + ": enlace activo sin descubrir", sin_descubrir.contains(meta), true
-			)
+			comprobar(prefijo + ": enlace activo sin descubrir", sin_descubrir.contains(meta), true)
 
 			var descubierta := BBCode.render(Marcas.de_registro(registro, pistas, [id]))
-			comprobar(
-				prefijo + ": enlace activo ya descubierta", descubierta.contains(meta), true
-			)
+			comprobar(prefijo + ": enlace activo ya descubierta", descubierta.contains(meta), true)
 			comprobar(
 				prefijo + ": estado visual de descubierta",
 				descubierta.contains("[bgcolor=#c8c800]"),
