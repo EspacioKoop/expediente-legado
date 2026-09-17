@@ -128,21 +128,6 @@ static func _configurar_campos(tema: Theme) -> void:
 	tema.set_color("font_readonly_color", "TextEdit", GRIS_TEXTO)
 
 
-## La interfaz usa la fuente de respaldo que empaqueta Godot en vez de buscar
-## tipografías instaladas por nombre. Así la UI deja de cambiar según las
-## fuentes Windows disponibles en cada máquina y conserva el suavizado normal
-## del motor para que el texto pequeño sea legible.
-static func fuente() -> Font:
-	return ThemeDB.fallback_font
-
-
-## El título ya es un rol separado aunque, hasta que entre la familia
-## empaquetada de #780, comparte la base legible de la interfaz. Separar el rol
-## ahora evita volver a acoplar todos los programas a una única tipografía.
-static func fuente_titulo() -> Font:
-	return fuente()
-
-
 ## Texto de documento. MFB Oldstyle ya estaba empaquetada y registrada como
 ## CC0; ahora es un rol explícito en vez de la fuente global accidental de todo
 ## el proyecto.
@@ -163,16 +148,15 @@ static func fuente_mono() -> SystemFont:
 	return tipo
 
 
+## El Theme define relieve, color y tamaño, pero NO una fuente general. Al no
+## fijar `default_font`, los controles heredan la tipografía predeterminada que
+## Godot empaqueta con el motor: consistente y suavizada en todas las máquinas.
+## Los roles especializados se registran aparte para sus consumidores.
 static func tema() -> Theme:
-	var interfaz := fuente()
-	var titulo := fuente_titulo()
 	var documento := fuente_documento()
 	var mono := fuente_mono()
 	var tema := Theme.new()
-	tema.default_font = interfaz
 	tema.default_font_size = 14
-	# Roles explícitos: los consumidores no tienen que conocer rutas ni familias.
-	tema.set_font("title_font", "Label", titulo)
 	tema.set_font("document_font", "RichTextLabel", documento)
 	tema.set_font("mono_font", "RichTextLabel", mono)
 	_configurar_botones(tema)
