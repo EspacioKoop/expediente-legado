@@ -20,13 +20,15 @@ Starter pack de **assets 3D originales del proyecto** para las cuatro familias d
 - `escalera_anular_castillo.tscn`: versión reutilizable de la escalera imposible basada en la malla original `escalera_anular_castillo_psx.obj`.
 - `escalera_anular_castillo_psx.obj`: escalera anular low-poly original; asciende alrededor de un núcleo octogonal y, sin cambiar de sentido, empieza a descender en los últimos peldaños.
 - `estandarte_anular.tscn`: estandarte rojo con emblema anular 3D separado.
-- `patio_castillo_onirico.tscn`: composición lista para pase visual con tres portadas, escalera imposible, dos estandartes y una iluminación de patio contenida.
+- `patio_castillo_onirico.tscn`: composición base con tres portadas, escalera imposible, dos estandartes y una iluminación de patio contenida.
+- `galeria_scriptorium_castillo.tscn`: ala de archivo/scriptorium compuesta con las mismas portadas y escalera; concentra el códice conocido sin añadir narrativa nueva.
+- `torre_capilla_castillo.tscn`: lectura vertical imposible que apila umbrales y dos escaleras a distinta altura sin crear una segunda navegación.
 
 ## Uso
 
 Cada fichero es una pieza independiente. Puede instanciarse directamente o abrirse y copiar sus nodos a una escena mayor. Los materiales siguen siendo editables para que el pase final pueda introducir texturas, desgaste o paleta específica sin rehacer la geometría.
 
-`patio_castillo_onirico.tscn` sirve como corte de arte reconocible para integrar o validar el sueño de castillo: concentra arquitectura propia y la anomalía espacial en una sola escena sin modificar el runtime estabilizado del sueño. Tras #587 y #755, esta vertical cubre la necesidad que motivó #296; PSX Going Medieval y Fantasy Props MegaKit quedan como **reserva opcional**, no como dependencia ni deuda de importación.
+El castillo dispone ahora de tres composiciones sobre el mismo lenguaje arquitectónico: patio, scriptorium y torre/capilla. `SuenoCastillo` selecciona la lectura de forma determinista y `SuenoCastillo3D` la monta solo como presentación; la familia ANULAR mantiene toda la física. Tras #587 y #755, esta vertical cubre la necesidad que motivó #296; PSX Going Medieval y Fantasy Props MegaKit quedan como **reserva opcional**, no como dependencia ni deuda de importación.
 
 La montaña se compone en runtime desde `SuenoMontana3D`: la familia CONVERGENTE conserva la única colisión, mientras la presentación añade cima nevada, laderas, mar de nubes, huellas anticipadas, documento congelado y la cabaña de este directorio.
 
@@ -42,4 +44,4 @@ El feedback de playtest de `c2b4b714` descarta que la arquitectura final del sue
 
 Contenido original creado específicamente para `EspacioKoop/expediente-legado`; no deriva de packs externos. Por eso vive fuera de `godot/assets/`, cuyo registro `procedencia.json` está reservado al material de terceros.
 
-Refs #284 #87 #223 #279 #296
+Refs #284 #87 #223 #279 #296 #947
