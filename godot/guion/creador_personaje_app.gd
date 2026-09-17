@@ -122,15 +122,9 @@ func _construir() -> void:
 	vista.custom_minimum_size.x = 250.0
 	vista.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	vista.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	vista.add_theme_constant_override("separation", 8)
 	columnas.add_child(vista)
-	_cabecera(vista, "PERSONAJE_PREVISUALIZACION")
 	_previsualizacion = PrevisualizadorPersonaje3D.new()
 	vista.add_child(_previsualizacion)
-	var ayuda_vista := Label.new()
-	ayuda_vista.text = tr("PERSONAJE_PREVISUALIZACION_AYUDA")
-	ayuda_vista.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vista.add_child(ayuda_vista)
 
 	var pasado := VBoxContainer.new()
 	pasado.size_flags_horizontal = Control.SIZE_EXPAND_FILL
