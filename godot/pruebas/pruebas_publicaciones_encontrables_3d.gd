@@ -31,7 +31,10 @@ func _probar_catalogo_encontrable() -> void:
 		var objeto := Encontrables.objeto_inventario(item_id)
 		_comprobar(not ficha.is_empty(), "%s existe en el catálogo" % item_id)
 		_comprobar(not bool(ficha.get("comprable", true)), "%s no compite con el quiosco" % item_id)
-		_comprobar(String(objeto.get("categoria", "")) == "publicacion", "%s entra como publicación" % item_id)
+		_comprobar(
+			String(objeto.get("categoria", "")) == "publicacion",
+			"%s entra como publicación" % item_id
+		)
 		_comprobar(not bool(objeto.get("vendible", true)), "%s no permite farmear dinero" % item_id)
 		_comprobar(bool(objeto.get("permite_casa", false)), "%s se puede guardar en casa" % item_id)
 
@@ -42,12 +45,17 @@ func _probar_recogida_en_oficina() -> void:
 	Oficina.montar(mundo)
 	var inventario := Inventario.nuevo()
 
-	_comprobar(Encontrables.listo_para_montar(mundo, "archivo", 1, inventario), "las anclas de oficina existen")
+	_comprobar(
+		Encontrables.listo_para_montar(mundo, "archivo", 1, inventario),
+		"las anclas de oficina existen"
+	)
 	var dia_uno := Encontrables.montar(mundo, "archivo", 1, inventario)
 	var encontrados_dia_uno := _recogibles(dia_uno)
 	_comprobar(encontrados_dia_uno.size() == 2, "día 1 ofrece dos lecturas ambientales")
 	_comprobar(_ids(encontrados_dia_uno).has("byte_domestico_42"), "Byte aparece en un puesto")
-	_comprobar(_ids(encontrados_dia_uno).has("marcador_98_deportes"), "Marcador aparece junto al café")
+	_comprobar(
+		_ids(encontrados_dia_uno).has("marcador_98_deportes"), "Marcador aparece junto al café"
+	)
 	_comprobar(not _ids(encontrados_dia_uno).has("estratos_ciudad_06"), "Estratos espera al día 2")
 
 	var dia_dos := Encontrables.montar(mundo, "archivo", 2, inventario)
@@ -61,19 +69,34 @@ func _probar_recogida_en_oficina() -> void:
 		mundo.queue_free()
 		return
 	_comprobar(byte.verbo == Interactuable3D.Verbo.COGER, "el ejemplar reutiliza el verbo COGER")
-	_comprobar(byte.find_child("VolumenInteraccion", true, false) != null, "el recogible tiene volumen de interacción")
-	_comprobar(String(byte.get_meta("ancla_publicacion", "")) == "PuestoUtileria1", "Byte conserva ancla real")
+	_comprobar(
+		byte.find_child("VolumenInteraccion", true, false) != null,
+		"el recogible tiene volumen de interacción"
+	)
+	_comprobar(
+		String(byte.get_meta("ancla_publicacion", "")) == "PuestoUtileria1",
+		"Byte conserva ancla real"
+	)
 
 	var actor := Node.new()
 	mundo.add_child(actor)
 	_comprobar(byte.interactuar(actor), "recoger Byte usa Recogible3D")
 	_comprobar(Inventario.contiene(inventario, "byte_domestico_42"), "Byte entra en Inventario")
 	_comprobar(inventario[Inventario.CARRIED].size() == 1, "la recogida termina en carried")
-	_comprobar(not bool(Inventario.vender(inventario, "byte_domestico_42").get("vendido", true)), "el hallazgo no se vende")
+	_comprobar(
+		not bool(Inventario.vender(inventario, "byte_domestico_42").get("vendido", true)),
+		"el hallazgo no se vende"
+	)
 
 	var remontado := Encontrables.montar(mundo, "archivo", 2, inventario)
-	_comprobar(not _ids(_recogibles(remontado)).has("byte_domestico_42"), "un ejemplar poseído no respawnea")
-	_comprobar(Inventario.guardar_en_casa(inventario, "byte_domestico_42"), "el hallazgo usa almacenamiento normal")
+	_comprobar(
+		not _ids(_recogibles(remontado)).has("byte_domestico_42"),
+		"un ejemplar poseído no respawnea"
+	)
+	_comprobar(
+		Inventario.guardar_en_casa(inventario, "byte_domestico_42"),
+		"el hallazgo usa almacenamiento normal"
+	)
 
 	var casa := Node3D.new()
 	root.add_child(casa)
@@ -94,13 +117,18 @@ func _probar_manual_en_casa() -> void:
 	root.add_child(mundo)
 	Casa.montar_zonas_domesticas(mundo)
 	var inventario := Inventario.nuevo()
-	_comprobar(Encontrables.listo_para_montar(mundo, "casa", 1, inventario), "el sofá es un ancla válida")
+	_comprobar(
+		Encontrables.listo_para_montar(mundo, "casa", 1, inventario), "el sofá es un ancla válida"
+	)
 	var raiz := Encontrables.montar(mundo, "casa", 1, inventario)
 	var recogibles := _recogibles(raiz)
 	_comprobar(recogibles.size() == 1, "casa solo ofrece el Manual encontrable")
 	_comprobar(_ids(recogibles) == ["manual_casa_98"], "Manual de Casa aparece en el sofá")
 	if not recogibles.is_empty():
-		_comprobar(String(recogibles[0].get_meta("ancla_publicacion", "")) == "SofaCasa", "Manual conserva su ancla doméstica")
+		_comprobar(
+			String(recogibles[0].get_meta("ancla_publicacion", "")) == "SofaCasa",
+			"Manual conserva su ancla doméstica"
+		)
 	mundo.queue_free()
 
 
