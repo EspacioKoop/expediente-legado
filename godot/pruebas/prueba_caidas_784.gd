@@ -91,6 +91,11 @@ func _probar_rescate_y_reentrada() -> void:
 	_comprobar(dia.jornada["fase"] == "archivo", "se puede volver a la oficina")
 	_comprobar(is_instance_valid(dia._mundo), "la oficina remontada conserva mundo")
 
+	# #813 añadió un `_process` para el rescate. En Godot 4 ese callback sustituye
+	# al heredado si no llama a `super`, lo que congelaría reloj del sueño, pasos
+	# y avance del gato. Verificarlo en runtime evita una falsa solución del P0.
+	_probar_process_heredado(dia)
+
 	var entrada: Vector3 = dia._espacio_actual["entrada"]
 	dia._caminante.position = Vector3(entrada.x, -20.0, entrada.z)
 	dia._caminante.velocity = Vector3(1.0, -30.0, 1.0)
@@ -110,6 +115,23 @@ func _probar_rescate_y_reentrada() -> void:
 	for frame in 3:
 		await process_frame
 		await physics_frame
+
+
+func _probar_process_heredado(dia: Variant) -> void:
+	var fase_antes := String(dia.jornada.get("fase", "archivo"))
+	var resto_antes := float(dia.jornada.get("sueno_resto", 0.0))
+	var total_antes := float(dia.jornada.get("sueno_total", 0.0))
+	dia.jornada["fase"] = "sueño"
+	dia.jornada["sueno_total"] = 10.0
+	dia.jornada["sueno_resto"] = 10.0
+	dia._process(0.25)
+	_comprobar(
+		is_equal_approx(float(dia.jornada["sueno_resto"]), 9.75),
+		"el rescate conserva el _process base y el reloj del sueño",
+	)
+	dia.jornada["fase"] = fase_antes
+	dia.jornada["sueno_total"] = total_antes
+	dia.jornada["sueno_resto"] = resto_antes
 
 
 func _buscar_salida(nodo: Node, destino: String) -> Area3D:
