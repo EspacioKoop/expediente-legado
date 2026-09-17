@@ -128,13 +128,13 @@ static func _gato(comprobar: Callable) -> void:
 	hambriento_interactivo.empezar(Vector3.ZERO, sitios)
 	hambriento_interactivo.avanzar(2, Vector3.ZERO, 0.0)
 	comprobar.call(
-		"con hambre ofrece dar de comer", hambriento_interactivo.texto_accion(), "Dar de comer al gato"
+		"con hambre ofrece dar de comer",
+		hambriento_interactivo.texto_accion(),
+		"Dar de comer al gato"
 	)
 	comprobar.call("dar de comer acepta la acción", hambriento_interactivo.interactuar(null), true)
 	comprobar.call(
-		"dar de comer usa el verbo común",
-		hambriento_interactivo.verbo,
-		Interactuable3D.Verbo.DAR
+		"dar de comer usa el verbo común", hambriento_interactivo.verbo, Interactuable3D.Verbo.DAR
 	)
 	hambriento_interactivo.actualizar_hambre(0)
 	comprobar.call(
