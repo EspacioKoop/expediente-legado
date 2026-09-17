@@ -35,6 +35,16 @@ const UTILIDAD_CARTAS := {
 ## ronda, no una tabla que memorizar.
 const TENDENCIA_REACTIVA := 0.7
 
+## Contrato transversal de #919. Las historias de Tarot siguen viviendo en
+## `historias_cartas` durante la migración; estas claves contienen únicamente
+## decisiones nuevas, exposición consumida y lecturas sociales. Nunca se
+## mezclan porque leer una idea no equivale a elegirla, y la interpretación de
+## un NPC tampoco define al personaje jugador.
+const CLAVE_ELECCIONES_IDEOLOGICAS := "elecciones_ideologicas_run"
+const CLAVE_EXPOSICION_IDEOLOGICA := "exposicion_ideologica_hoy"
+const CLAVE_LECTURAS_SOCIALES := "lecturas_sociales"
+const PREFIJO_HISTORIA := "tarot:"
+
 
 ## Combina lo guardado en esta máquina con la lista vigente de logros o cartas:
 ## conserva el estado de lo ya guardado (buscándolo también por alias, para ids
@@ -111,6 +121,201 @@ static func eje_ganador(historias: Dictionary, resueltas: Array, orden: Array = 
 	return ganador
 
 
+## Registra una decisión ideológica nueva fuera del corpus heredado de Tarot.
+##
+## `id_evento` es estable e idempotente dentro de la vuelta. El prefijo
+## `tarot:` queda reservado al adaptador de `historias_cartas`: duplicar una
+## historia como evento nuevo crearía dos fuentes de verdad.
+static func registrar_eleccion_ideologica(
+	estado: Dictionary,
+	id_evento: String,
+	fuente: String,
+	eje: String,
+	contexto: String = "",
+	jornada: int = 0,
+	etiquetas: Array = []
+) -> bool:
+	if (
+		id_evento.strip_edges().is_empty()
+		or id_evento.begins_with(PREFIJO_HISTORIA)
+		or fuente.strip_edges().is_empty()
+		or not EJES.has(eje)
+	):
+		return false
+
+	var elecciones := _lista_estado(estado, CLAVE_ELECCIONES_IDEOLOGICAS)
+	for evento in elecciones:
+		if evento.get("id", "") == id_evento:
+			return false
+
+	(
+		elecciones
+		. append(
+			{
+				"id": id_evento,
+				"fuente": fuente,
+				"eje": eje,
+				"contexto": contexto,
+				"jornada": jornada,
+				"etiquetas": _etiquetas_normalizadas(etiquetas),
+			}
+		)
+	)
+	estado[CLAVE_ELECCIONES_IDEOLOGICAS] = elecciones
+	return true
+
+
+## Vista unificada de las elecciones de la vuelta.
+##
+## Durante la migración, las ocho historias siguen siendo la fuente de verdad
+## de Tarot y se adaptan en lectura como eventos `tarot:<carta>`. Las decisiones
+## nuevas viven en su propia lista. No se escribe de vuelta en
+## `historias_cartas`, así que no se altera persistencia, cargas ni finales
+## heredados antes de que sus verticales migren explícitamente.
+static func elecciones_ideologicas(estado: Dictionary) -> Array:
+	var resultado := []
+	var ids := {}
+	var historias = estado.get("historias_cartas", {})
+	if typeof(historias) == TYPE_DICTIONARY:
+		var cartas: Array = historias.keys()
+		cartas.sort()
+		for carta in cartas:
+			var eje = historias[carta]
+			if not EJES.has(eje):
+				continue
+			var id_evento := PREFIJO_HISTORIA + String(carta)
+			(
+				resultado
+				. append(
+					{
+						"id": id_evento,
+						"fuente": "tarot",
+						"eje": eje,
+						"contexto": String(carta),
+						"jornada": -1,
+						"etiquetas": ["prometeo", "tarot"],
+					}
+				)
+			)
+			ids[id_evento] = true
+
+	for evento in _lista_estado(estado, CLAVE_ELECCIONES_IDEOLOGICAS):
+		var id_evento := String(evento.get("id", ""))
+		var eje := String(evento.get("eje", ""))
+		if id_evento.is_empty() or ids.has(id_evento) or not EJES.has(eje):
+			continue
+		resultado.append(evento.duplicate(true))
+		ids[id_evento] = true
+	return resultado
+
+
+## Exposición es lo que se leyó, vio o escuchó. Se registra aparte a propósito:
+## nunca suma puntos de elección ni concede por sí sola una doctrina de combate.
+static func registrar_exposicion_ideologica(
+	estado: Dictionary,
+	id_evento: String,
+	fuente: String,
+	eje: String,
+	jornada: int = 0,
+	etiquetas: Array = []
+) -> bool:
+	if id_evento.strip_edges().is_empty() or fuente.strip_edges().is_empty() or not EJES.has(eje):
+		return false
+
+	var exposicion := _lista_estado(estado, CLAVE_EXPOSICION_IDEOLOGICA)
+	for evento in exposicion:
+		if evento.get("id", "") == id_evento:
+			return false
+
+	(
+		exposicion
+		. append(
+			{
+				"id": id_evento,
+				"fuente": fuente,
+				"eje": eje,
+				"jornada": jornada,
+				"etiquetas": _etiquetas_normalizadas(etiquetas),
+			}
+		)
+	)
+	estado[CLAVE_EXPOSICION_IDEOLOGICA] = exposicion
+	return true
+
+
+## Registra qué cree un actor haber observado. Una lectura social se vincula a
+## un evento real conocido por ese actor, pero no añade votos ni reescribe la
+## elección original.
+static func registrar_lectura_social(
+	estado: Dictionary,
+	actor: String,
+	evento_observado: String,
+	reaccion: String = "",
+	etiquetas: Array = []
+) -> bool:
+	if actor.strip_edges().is_empty() or evento_observado.strip_edges().is_empty():
+		return false
+
+	var lecturas := _lista_estado(estado, CLAVE_LECTURAS_SOCIALES)
+	for lectura in lecturas:
+		if (
+			lectura.get("actor", "") == actor
+			and lectura.get("evento_observado", "") == evento_observado
+		):
+			return false
+
+	(
+		lecturas
+		. append(
+			{
+				"actor": actor,
+				"evento_observado": evento_observado,
+				"reaccion": reaccion,
+				"etiquetas": _etiquetas_normalizadas(etiquetas),
+			}
+		)
+	)
+	estado[CLAVE_LECTURAS_SOCIALES] = lecturas
+	return true
+
+
+## Recuento transversal: consume elecciones heredadas + nuevas y, de forma
+## deliberada, ignora exposición y lectura social.
+static func conteo_elecciones_ideologicas(estado: Dictionary) -> Dictionary:
+	var conteo := {}
+	for eje in EJES:
+		conteo[eje] = 0
+	for evento in elecciones_ideologicas(estado):
+		var eje: String = evento["eje"]
+		conteo[eje] += 1
+	return conteo
+
+
+## Devuelve TODOS los ejes empatados en cabeza. Sin elecciones devuelve [].
+## Es el contrato nuevo para #925: pluralidad es un estado real y no cae por
+## posición en EJES. `eje_ganador()` conserva por ahora el comportamiento
+## legado para no cambiar finales existentes dentro de este corte.
+static func ejes_dominantes(estado: Dictionary) -> Array:
+	var conteo := conteo_elecciones_ideologicas(estado)
+	var maximo := 0
+	for eje in EJES:
+		maximo = maxi(maximo, conteo[eje])
+	if maximo == 0:
+		return []
+
+	var dominantes := []
+	for eje in EJES:
+		if conteo[eje] == maximo:
+			dominantes.append(eje)
+	return dominantes
+
+
+## La exposición es diaria. Quien gobierne el cambio de jornada puede limpiar
+## solo este canal sin tocar decisiones ni reacciones de la vuelta.
+static func reiniciar_exposicion_ideologica_diaria(estado: Dictionary) -> void:
+	estado[CLAVE_EXPOSICION_IDEOLOGICA] = []
+
+
 static func clasificar_eleccion(carta_id: String, eje: String) -> String:
 	var utiles: Array = UTILIDAD_CARTAS.get(carta_id, [])
 	return "pista" if utiles.has(eje) else "confusion"
@@ -160,6 +365,9 @@ static func reiniciar_vuelta(estado: Dictionary, vida_maxima: int) -> Dictionary
 	estado["final_politico_mostrado"] = false
 	estado["final_verdadero_mostrado"] = false
 	estado["perdio_vida_en_esta_vuelta"] = false
+	estado[CLAVE_ELECCIONES_IDEOLOGICAS] = []
+	estado[CLAVE_EXPOSICION_IDEOLOGICA] = []
+	estado[CLAVE_LECTURAS_SOCIALES] = []
 	# El catálogo conserva la memoria total, pero una nueva vida laboral debe
 	# empezar sin hallazgos atribuidos a la vuelta anterior (#149).
 	CatalogoAnomalias.reiniciar_vuelta(estado)
@@ -173,3 +381,18 @@ static func reiniciar_vuelta(estado: Dictionary, vida_maxima: int) -> Dictionary
 			logro["desbloqueado"] = false
 
 	return estado
+
+
+static func _lista_estado(estado: Dictionary, clave: String) -> Array:
+	var valor = estado.get(clave, [])
+	return valor.duplicate(true) if typeof(valor) == TYPE_ARRAY else []
+
+
+static func _etiquetas_normalizadas(etiquetas: Array) -> Array:
+	var normalizadas := []
+	for etiqueta in etiquetas:
+		var texto := String(etiqueta).strip_edges()
+		if not texto.is_empty() and not normalizadas.has(texto):
+			normalizadas.append(texto)
+	normalizadas.sort()
+	return normalizadas
