@@ -64,6 +64,22 @@ class CorreoPostalTest(unittest.TestCase):
         self.assertEqual(len(textos["categorias"]), 8)
         self.assertTrue(textos["cuerpo_vacio"])
 
+    def test_lector_distingue_titulo_y_cuerpo_documental(self):
+        lector = (ROOT / "godot" / "guion" / "correo_postal_lector.gd").read_text()
+
+        self.assertIn(
+            '_titulo.add_theme_font_override("font", theme.get_font("title_font", "Label"))',
+            lector,
+        )
+        self.assertIn(
+            '"normal_font", theme.get_font("document_font", "RichTextLabel")',
+            lector,
+        )
+        self.assertNotIn(
+            '"normal_font", theme.get_font("mono_font", "RichTextLabel")',
+            lector,
+        )
+
     def test_paquete_encaja_en_contrato_visual_de_casa(self):
         correo = (ROOT / "godot" / "guion" / "correo_postal.gd").read_text()
         casa = (ROOT / "godot" / "guion" / "casa_acumulacion_3d.gd").read_text()
