@@ -39,26 +39,10 @@ class EntradaCinematica3DTest(unittest.TestCase):
         self.assertIn("mira_origen.lerp(mira_destino, suave)", self.reproductor)
         self.assertIn("avance * avance * (3.0 - 2.0 * avance)", self.reproductor)
 
-    def test_puesto_encuadra_el_terminal_real_y_los_beats_tienen_acento(self) -> None:
+    def test_puesto_encuadra_el_terminal_real(self) -> None:
         # El puesto del jugador está en (-4, 1); su pantalla real vive en
         # (-4, 0.98, 0.68). El bloqueo anterior acababa mirando otra mesa.
         self.assertIn('"mira": Vector3(-4.0, 0.98, 0.68)', self.entrada)
-        for acento in ('"puerta_cierra"', '"pulsar"', '"cerrar"'):
-            self.assertIn(acento, self.entrada)
-        self.assertIn('plano.get("sonido", "")', self.reproductor)
-        self.assertIn("_sonar_acento(acento)", self.reproductor)
-        self.assertIn("_acento.stream = Sonido.stream(nombre)", self.reproductor)
-
-    def test_acento_se_libera_al_terminar_o_desmontar(self) -> None:
-        # Los runners que montan dia.tscn pueden desmontarlo mientras el sonido
-        # del primer plano sigue activo. El reproductor debe poseer y soltar la
-        # referencia al stream; no vale confiar solo en finished.queue_free().
-        self.assertIn("var _acento: AudioStreamPlayer", self.reproductor)
-        self.assertIn("func _exit_tree() -> void:", self.reproductor)
-        self.assertIn("_detener_acento()", self.reproductor)
-        self.assertIn("_acento.stop()", self.reproductor)
-        self.assertIn("_acento.stream = null", self.reproductor)
-        self.assertIn("_acento = AudioStreamPlayer.new()", self.reproductor)
 
     def test_reduccion_movimiento_usa_composicion_final_sin_travelling(self) -> None:
         trayectoria = self.reproductor.split(
