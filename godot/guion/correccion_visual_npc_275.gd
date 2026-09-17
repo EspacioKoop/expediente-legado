@@ -109,7 +109,10 @@ func _ajustar_cara(cara: BoneAttachment3D, alto_objetivo: float) -> void:
 			alto_actual = maxf(alto_actual, absf(malla.scale.y) * esfera.height)
 	if alto_actual <= 0.0001:
 		return
-	var factor := clampf(alto_objetivo / alto_actual, 0.25, 1.0)
+	# El objetivo ya está expresado en la escala real del rig. El mínimo 0.25
+	# previo impedía alcanzarlo justo en las caras históricas grandes que motivan
+	# este pase: si necesitan reducirse más, deben poder hacerlo.
+	var factor := minf(alto_objetivo / alto_actual, 1.0)
 	cara.scale = cara.scale * factor
 	cara.set_meta("ratio_cabeza_275", factor)
 
