@@ -276,10 +276,11 @@ static func _relativa(espina: Array, origen: Vector3) -> Array:
 
 ## Lo pone en marcha. [param sitios] son los rincones por los que se mueve, y
 ## el primero es el cuenco: es donde se queda cuando tiene hambre.
-func empezar(donde: Vector3, por_donde: Array) -> void:
+func empezar(donde: Variant, por_donde: Array) -> void:
 	sitios = por_donde
-	estado = GatoConducta.nuevo(donde)
-	position = donde
+	var posicion := GatoConducta.posicion_sitio(donde)
+	estado = GatoConducta.nuevo(posicion)
+	position = posicion
 
 
 ## Texto que ve el detector común. Lejos se le llama; cerca se le acaricia y,
@@ -411,10 +412,19 @@ func avanzar(hambre: int, jugador: Vector3, delta: float) -> void:
 	# viene y además está tensa, algo pasa. Durante los mimos vuelve a moverse
 	# con intención, pero sin parecer la tensión del hambre.
 	var ritmo := 1.5
-	if estado["estado"] == "hambriento":
-		ritmo = 3.4
-	elif estado["estado"] == "mimos":
-		ritmo = 2.4
+	match String(estado["estado"]):
+		"hambriento":
+			ritmo = 3.4
+		"mimos":
+			ritmo = 2.4
+		"durmiendo":
+			ritmo = 0.35
+		"sentado":
+			ritmo = 0.9
+		"observando":
+			ritmo = 0.65
+		"escondido":
+			ritmo = 0.5
 	_cola.rotation.y = sin(_reloj * ritmo) * 0.35
 	_cola.rotation.x = sin(_reloj * ritmo * 0.6) * 0.12
 	_animar_reposo(ritmo)
@@ -478,14 +488,24 @@ func _puede_mover(movimiento: Vector3) -> bool:
 
 
 ## Lo que hace que no parezca una figura: respira, y de vez en cuando mueve
-## una oreja. Con hambre, las orejas se echan un poco atrás. En `mimos` el
-## cuerpo se frota lateralmente y la cabeza acompaña el gesto.
+## una oreja. Con hambre, las orejas se echan un poco atrás. #787 añade poses
+## legibles para dormir, sentarse, observar y esconderse sin animaciones ni
+## contadores paralelos.
 func _animar_reposo(ritmo: float) -> void:
-	_cuerpo.scale.y = 1.0 + sin(_reloj * 2.2) * 0.012
-	var dando_mimos: bool = estado.get("estado", "") == "mimos"
+	var modo := String(estado.get("estado", ""))
+	var dando_mimos := modo == "mimos"
+	var durmiendo := modo == "durmiendo"
+	var sentado := modo == "sentado"
+	var observando := modo == "observando"
+	var escondido := modo == "escondido"
+	var respiracion := sin(_reloj * 2.2) * 0.012
+	_cuerpo.scale.y = (0.64 if durmiendo else 1.08 if sentado else 0.80 if escondido else 1.0) + respiracion
+	_cuerpo.scale.z = 1.12 if durmiendo else 1.0
+	_cuerpo.rotation.x = -0.12 if durmiendo else 0.0
 	_cuerpo.position.x = sin(_reloj * 4.2) * 0.028 if dando_mimos else 0.0
 	_cuerpo.rotation.z = sin(_reloj * 3.1) * 0.045 if dando_mimos else 0.0
-	_cabeza.rotation.y = sin(_reloj * 0.45) * 0.18
+	_cabeza.rotation.x = 0.24 if durmiendo else -0.10 if observando else 0.0
+	_cabeza.rotation.y = 0.26 if observando else sin(_reloj * 0.45) * 0.18
 	_cabeza.rotation.z = -0.12 if dando_mimos else 0.0
 	var atras := 0.25 if ritmo > 3.0 else 0.0
 	for i in _orejas.size():

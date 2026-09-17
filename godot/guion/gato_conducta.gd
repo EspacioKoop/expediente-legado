@@ -4,8 +4,8 @@
 ## comporta, y de ahí se deduce cómo le has tratado (#92). Aquí no hay barras
 ## ni avisos — hay un bicho que se acerca o no se acerca.
 ##
-## Los estados son observables. Añadir uno («mimos», «durmiendo en el
-## alféizar») no toca el dibujo ni el estado de hambre de la jornada.
+## Los estados son observables. Añadir uno («mimos», «durmiendo junto a la
+## cama») no toca el dibujo ni el estado de hambre de la jornada.
 class_name GatoConducta
 extends RefCounted
 
@@ -31,6 +31,21 @@ const CERCA := 2.2
 const DURACION_MIMOS := 1.8
 const PAUSA_MIMOS := 5.0
 
+## #787: las affordances de casa se traducen a estados observables. El catálogo
+## decide qué significa cada sitio; la conducta solo conoce este vocabulario.
+const ESTADO_POR_RUTINA := {
+	"dormir": "durmiendo",
+	"sentarse": "sentado",
+	"observar": "observando",
+	"esconderse": "escondido",
+}
+const ESPERA_POR_RUTINA := {
+	"dormir": 6.0,
+	"sentarse": 4.0,
+	"observar": 4.5,
+	"esconderse": 3.0,
+}
+
 
 ## El gato al empezar el día.
 static func nuevo(donde: Vector3) -> Dictionary:
@@ -39,9 +54,28 @@ static func nuevo(donde: Vector3) -> Dictionary:
 		"destino": donde,
 		"espera": ESPERA_MINIMA,
 		"estado": "parado",
+		"rutina_destino": "",
 		"mimos_resto": 0.0,
 		"mimos_pausa": 0.0,
 	}
+
+
+## Compatibilidad del contrato: un sitio histórico puede seguir siendo Vector3,
+## mientras que uno nuevo declara {"pos": Vector3, "rutina": "..."}.
+static func posicion_sitio(sitio: Variant, fallback: Vector3 = Vector3.ZERO) -> Vector3:
+	if sitio is Vector3:
+		return sitio
+	if sitio is Dictionary:
+		var pos: Variant = sitio.get("pos", fallback)
+		if pos is Vector3:
+			return pos
+	return fallback
+
+
+static func rutina_sitio(sitio: Variant) -> String:
+	if sitio is Dictionary:
+		return String(sitio.get("rutina", ""))
+	return ""
 
 
 ## Un paso de tiempo. [param sitios] son los sitios por los que se mueve —el
@@ -65,12 +99,19 @@ static func avanzar(
 	# la puerta sin que nadie lo diga. Tiene prioridad incluso sobre los mimos:
 	# la jornada sigue siendo la única fuente de verdad del hambre.
 	if desconfia:
-		gato["destino"] = sitios[0]
+		gato["destino"] = posicion_sitio(sitios[0], pos)
+		gato["rutina_destino"] = ""
 		gato["estado"] = "hambriento"
 		gato["mimos_resto"] = 0.0
+	elif gato["estado"] == "hambriento":
+		# Al comer se nota en el acto: no arrastra durante varios segundos la
+		# postura de hambre mientras la jornada ya dice otra cosa.
+		gato["estado"] = "parado"
+		gato["espera"] = 0.0
 	elif gato["estado"] == "mimos":
 		gato["mimos_resto"] = maxf(0.0, float(gato.get("mimos_resto", 0.0)) - delta)
 		gato["destino"] = pos
+		gato["rutina_destino"] = ""
 		if gato["mimos_resto"] > 0.0:
 			return gato
 		gato["estado"] = "parado"
@@ -83,6 +124,7 @@ static func avanzar(
 			# Mientras viene, el destino se actualiza: sigue a una persona, no al
 			# punto del suelo donde estaba cuando la vio.
 			gato["destino"] = jugador
+			gato["rutina_destino"] = ""
 			gato["estado"] = "viene"
 
 	var hacia: Vector3 = gato["destino"]
@@ -90,7 +132,7 @@ static func avanzar(
 	if falta.length() > 0.35:
 		var paso := minf(VELOCIDAD * delta, falta.length())
 		gato["pos"] = pos + falta.normalized() * paso
-		if gato["estado"] == "parado":
+		if gato["estado"] != "viene" and gato["estado"] != "hambriento":
 			gato["estado"] = "anda"
 		return gato
 
@@ -101,19 +143,40 @@ static func avanzar(
 		gato["estado"] = "mimos"
 		gato["mimos_resto"] = DURACION_MIMOS
 		gato["destino"] = pos
+		gato["rutina_destino"] = ""
 		return gato
 
+	# Llegar a una affordance cambia la postura durante un rato. Un Vector3
+	# histórico no declara rutina y conserva exactamente el viejo «parado».
+	if gato["estado"] == "anda" or gato["estado"] == "parado":
+		_aplicar_rutina(gato)
+
 	# Ha llegado. Espera, y luego elige otro sitio — salvo que esté esperando
-	# junto al cuenco, que ahí se queda.
+	# junto al cuenco con hambre, que ahí se queda.
 	gato["espera"] -= delta
-	if gato["estado"] == "anda":
-		gato["estado"] = "parado"
 	if gato["espera"] > 0.0 or desconfia:
 		return gato
 
 	gato["espera"] = randf_range(ESPERA_MINIMA, ESPERA_MAXIMA)
-	gato["destino"] = sitios[randi() % sitios.size()]
+	var sitio: Variant = sitios[randi() % sitios.size()]
+	gato["destino"] = posicion_sitio(sitio, pos)
+	gato["rutina_destino"] = rutina_sitio(sitio)
+	if Vector3(gato["destino"]).distance_to(pos) > 0.35:
+		gato["estado"] = "anda"
+	else:
+		_aplicar_rutina(gato)
 	return gato
+
+
+static func _aplicar_rutina(gato: Dictionary) -> void:
+	var rutina := String(gato.get("rutina_destino", ""))
+	var estado_rutina := String(ESTADO_POR_RUTINA.get(rutina, ""))
+	if estado_rutina.is_empty():
+		if gato["estado"] == "anda":
+			gato["estado"] = "parado"
+		return
+	gato["estado"] = estado_rutina
+	gato["espera"] = float(ESPERA_POR_RUTINA.get(rutina, ESPERA_MINIMA))
 
 
 ## Si está lo bastante cerca para que se le pueda dar de comer.
