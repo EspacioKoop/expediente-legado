@@ -156,19 +156,22 @@ func _registrar_actividad() -> void:
 
 
 func _es_actividad_usuario(event: InputEvent) -> bool:
+	var activa := false
 	if event is InputEventKey:
-		return event.pressed and not event.echo
-	if event is InputEventMouseButton:
-		return event.pressed
-	if event is InputEventMouseMotion:
-		return event.relative.length_squared() >= 4.0
-	if event is InputEventJoypadButton:
-		return event.pressed
-	if event is InputEventJoypadMotion:
-		return absf(event.axis_value) >= 0.25
-	if event is InputEventScreenTouch:
-		return event.pressed
-	return event is InputEventScreenDrag
+		activa = event.pressed and not event.echo
+	elif event is InputEventMouseButton:
+		activa = event.pressed
+	elif event is InputEventMouseMotion:
+		activa = event.relative.length_squared() >= 4.0
+	elif event is InputEventJoypadButton:
+		activa = event.pressed
+	elif event is InputEventJoypadMotion:
+		activa = absf(event.axis_value) >= 0.25
+	elif event is InputEventScreenTouch:
+		activa = event.pressed
+	else:
+		activa = event is InputEventScreenDrag
+	return activa
 
 
 func _actualizar_camara() -> void:
