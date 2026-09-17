@@ -21,7 +21,7 @@ El contenido evita cabeceras, logos, artículos, personajes o portadas reales. L
 
 Las publicaciones comprables no conocen precios ni modifican saldo directamente. `Publicaciones98.comprar()` delega en `ComercioBarrio.comprar(..., "quiosco", ...)` de #676, que ya usa `Jornada.gastar()` e `Inventario` conforme a #93.
 
-Esto mantiene una sola fuente de verdad para precio, saldo y adquisición. Los ejemplares declaran `permite_casa`, de modo que el inventario existente puede llevarlos a almacenamiento doméstico; la representación física específica sigue perteneciendo a #96/#677.
+Esto mantiene una sola fuente de verdad para precio, saldo y adquisición. Los ejemplares declaran `permite_casa`, de modo que el inventario existente puede llevarlos a almacenamiento doméstico mediante `Inventario.guardar_en_casa()`.
 
 Comprar nunca registra una semilla cultural.
 
@@ -50,6 +50,22 @@ Controles explícitos del segundo corte:
 Los botones siguen siendo controles nativos de Godot, por lo que tabulador/D-pad pueden recorrer el foco sin una ruta de navegación paralela. El cuerpo es un `RichTextLabel` con scroll y selección habilitados.
 
 Mostrar una pieza llama a `Publicaciones98.hojear()`. Cerrar llama a `Publicaciones98.cerrar_tras_lectura()`. El visor no conoce `SemillasOniricas`, precios, saldo ni `Partida`: la presentación no puede inventar progreso, cobrar ni activar una familia por su cuenta.
+
+## Publicaciones físicas en casa
+
+El tercer corte conecta #674 con la acumulación doméstica ya existente de #96/#677 sin crear una segunda lista de objetos. La fuente de verdad sigue siendo `Inventario.HOME_STORAGE`: `CasaEstadoAmbiental` deriva de ahí `objetos_casa` y `CasaAcumulacion3D` materializa únicamente lo que realmente quedó guardado.
+
+Cuando un objeto de categoría `publicacion` está en `home_storage`, su nodo físico pasa a ser un `Interactuable3D` con verbo `LEER`. Conserva en metadatos el ID, título, categoría editorial y el título de portada/primera pieza del catálogo. El raycast común de #283 puede detectarlo mediante una colisión propia.
+
+La representación sigue siendo procedural y sin assets externos nuevos, pero ya distingue tres siluetas útiles:
+
+- revista/cuaderno: cubierta fina, lomo y bloque de portada;
+- periódico: pliego más ancho y fino con cabecera y bloque de foto;
+- libro/guía: cuerpo más grueso, lomo y cubierta diferenciada.
+
+Las seis publicaciones tienen una paleta propia estable. Por tanto, varios ejemplares pueden coexistir en los ocho anchors domésticos de #677 y conservar una lectura visual reproducible sin inventario paralelo ni contador de colección.
+
+`DiaAcumulacionCasaApp` conecta los `Interactuable3D` recién materializados con el `VisorPublicacion` ya mergeado. Apuntar a un ejemplar guardado y usar la interacción común abre ese mismo contenido; cerrar el visor guarda la lectura mediante el dueño de la jornada. Leer desde la estantería no cobra dinero, no mueve inventario y no activa semillas fuera de las reglas de `Publicaciones98`.
 
 ## Integración con #442
 
@@ -81,17 +97,24 @@ La prensa general y el resto de publicaciones no tienen semilla por defecto: oci
 - cierre con `B` en una publicación sin semilla;
 - rechazo de IDs inexistentes.
 
-`scripts/test_publicaciones_98.py` y `scripts/test_visor_publicacion_674.py` añaden regresión estructural y ejecutan los smokes con Godot headless.
+`godot/pruebas/pruebas_publicaciones_casa_3d.gd` verifica el tercer corte:
+
+- tres publicaciones simultáneas derivadas de `home_storage`;
+- `Interactuable3D.Verbo.LEER` y colisión para el detector común;
+- identidad, portada y formato conservados por ejemplar;
+- revista, periódico y libro con geometría diferenciada;
+- colocación determinista;
+- retirada física cuando `Inventario.sacar_de_casa()` cambia la fuente de verdad.
+
+Los tests Python asociados ejecutan estos smokes con Godot headless y comprueban que la capa doméstica no compra, cobra ni mueve objetos por su cuenta.
 
 ## Alcance pendiente
 
 Este PR **no cierra #674**. Quedan fuera deliberadamente:
 
-- materialización 3D específica de varios ejemplares sobre mesa/estante para #96/#677;
 - wiring de los cuatro ejemplares encontrables en escenas reales;
-- portada/lomo visual final como objeto físico antes de abrir el visor;
-- integración del visor desde los interactuables 3D reales;
+- arte final de portada/lomo si se decide sustituir la representación procedural;
 - decidir si más publicaciones alimentan #442 sin saturar el sistema cultural;
-- validación humana de legibilidad, foco y presentación con teclado/mando físicos.
+- validación humana de legibilidad, foco, tamaño físico y presentación con teclado/mando reales.
 
-Refs #93 #96 #133 #181 #442 #674 #676 #677.
+Refs #93 #96 #97 #133 #181 #283 #442 #674 #676 #677.
