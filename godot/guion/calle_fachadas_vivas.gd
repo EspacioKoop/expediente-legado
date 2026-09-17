@@ -3,7 +3,8 @@
 ## Esta capa no perfora la geometría jugable ni añade colisiones. Toma nueve
 ## ventanas del primer tramo residencial y construye una "caja de sombra" muy
 ## poco profunda por delante del revoco: marco con volumen, cristal translúcido,
-## fondo oscuro y props 3D simples. La selección y la variante son deterministas.
+## fondo oscuro y props 3D simples. La selección, la iluminación y el LOD son
+## deterministas.
 class_name CalleFachadasVivas
 extends RefCounted
 
@@ -13,7 +14,11 @@ const SALIENTE_EXTRA_CRISTAL := 0.05
 const GROSOR_CRISTAL := 0.008
 const PROFUNDIDAD_INTERIOR := 0.055
 const PROFUNDIDAD_MARCO := 0.065
+const LOD_CERCA_FIN := 18.0
+const LOD_MEDIA_FIN := 36.0
+const LOD_LEJOS_FIN := 72.0
 const VARIANTES := ["escritorio", "estanteria", "salon_tv"]
+const ESTADOS_LUZ := ["calida", "apagada", "fria_tv", "tenue", "persiana"]
 
 
 static func montar(calle: Node3D) -> Node3D:
@@ -39,14 +44,16 @@ static func montar(calle: Node3D) -> Node3D:
 		var ventana := hijo as MeshInstance3D
 		if ventana == null or not String(ventana.name).begins_with(PREFIJO_TRAMO):
 			continue
-		_decorar(raiz, ventana, decoradas % VARIANTES.size(), materiales, mallas)
+		_decorar(raiz, ventana, decoradas, materiales, mallas)
 		decoradas += 1
 	return raiz
 
 
 static func _decorar(
-	raiz: Node3D, ventana: MeshInstance3D, variante: int, materiales: Dictionary, mallas: Dictionary
+	raiz: Node3D, ventana: MeshInstance3D, indice: int, materiales: Dictionary, mallas: Dictionary
 ) -> void:
+	var variante := indice % VARIANTES.size()
+	var estado_luz := String(ESTADOS_LUZ[indice % ESTADOS_LUZ.size()])
 	var hacia_calle := 1.0 if ventana.position.x < 0.0 else -1.0
 	ventana.position.x += hacia_calle * SALIENTE_EXTRA_CRISTAL
 	var cristal := ventana.mesh as BoxMesh
@@ -60,6 +67,7 @@ static func _decorar(
 	grupo.name = "Interior_" + String(ventana.name)
 	grupo.set_meta("ventana", String(ventana.name))
 	grupo.set_meta("variante", VARIANTES[variante])
+	grupo.set_meta("estado_luz", estado_luz)
 	grupo.set_meta("hacia_calle", hacia_calle)
 	raiz.add_child(grupo)
 
@@ -73,36 +81,51 @@ static func _decorar(
 		"Fondo",
 		Vector3(x_fondo, centro.y, centro.z),
 		mallas["fondo"],
-		_material_fondo(materiales, variante)
+		_material_fondo(materiales, estado_luz),
+		LOD_LEJOS_FIN
 	)
 	_pieza(
 		grupo,
 		"MarcoSuperior",
 		Vector3(x_marco, centro.y + 0.62, centro.z),
 		mallas["marco_h"],
-		materiales["marco"]
+		materiales["marco"],
+		LOD_MEDIA_FIN
 	)
 	_pieza(
 		grupo,
 		"MarcoInferior",
 		Vector3(x_marco, centro.y - 0.62, centro.z),
 		mallas["marco_h"],
-		materiales["marco"]
+		materiales["marco"],
+		LOD_MEDIA_FIN
 	)
 	_pieza(
 		grupo,
 		"MarcoIzquierdo",
 		Vector3(x_marco, centro.y, centro.z - 0.49),
 		mallas["marco_v"],
-		materiales["marco"]
+		materiales["marco"],
+		LOD_MEDIA_FIN
 	)
 	_pieza(
 		grupo,
 		"MarcoDerecho",
 		Vector3(x_marco, centro.y, centro.z + 0.49),
 		mallas["marco_v"],
-		materiales["marco"]
+		materiales["marco"],
+		LOD_MEDIA_FIN
 	)
+
+	if estado_luz == "persiana":
+		_pieza(
+			grupo,
+			"Persiana",
+			Vector3(x_prop, centro.y, centro.z),
+			mallas["persiana"],
+			materiales["persiana"],
+			LOD_MEDIA_FIN
+		)
 
 	match variante:
 		0:
@@ -189,14 +212,18 @@ static func _componer_salon(
 	)
 
 
-static func _material_fondo(materiales: Dictionary, variante: int) -> Material:
-	match variante:
-		0:
+static func _material_fondo(materiales: Dictionary, estado_luz: String) -> Material:
+	match estado_luz:
+		"calida":
 			return materiales["fondo_calido"]
-		1:
-			return materiales["fondo_apagado"]
-		_:
+		"fria_tv":
 			return materiales["fondo_frio"]
+		"tenue":
+			return materiales["fondo_tenue"]
+		"persiana":
+			return materiales["fondo_persiana"]
+		_:
+			return materiales["fondo_apagado"]
 
 
 static func _materiales_compartidos() -> Dictionary:
@@ -206,6 +233,9 @@ static func _materiales_compartidos() -> Dictionary:
 		"fondo_calido": _material(Color(0.30, 0.20, 0.12)),
 		"fondo_apagado": _material(Color(0.055, 0.06, 0.07)),
 		"fondo_frio": _material(Color(0.08, 0.11, 0.22)),
+		"fondo_tenue": _material(Color(0.14, 0.10, 0.07)),
+		"fondo_persiana": _material(Color(0.07, 0.065, 0.06)),
+		"persiana": _material(Color(0.20, 0.18, 0.15)),
 		"madera": _material(Color(0.30, 0.20, 0.13)),
 		"madera_clara": _material(Color(0.42, 0.31, 0.20)),
 		"pantalla": _material(Color(0.18, 0.42, 0.58)),
@@ -221,6 +251,7 @@ static func _mallas_compartidas() -> Dictionary:
 		"fondo": _malla(Vector3(0.010, 1.02, 0.78)),
 		"marco_h": _malla(Vector3(PROFUNDIDAD_MARCO, 0.08, 0.98)),
 		"marco_v": _malla(Vector3(PROFUNDIDAD_MARCO, 1.20, 0.08)),
+		"persiana": _malla(Vector3(0.016, 0.96, 0.74)),
 		"mesa": _malla(Vector3(0.028, 0.12, 0.58)),
 		"monitor": _malla(Vector3(0.022, 0.26, 0.30)),
 		"lampara": _malla(Vector3(0.025, 0.32, 0.12)),
@@ -234,7 +265,12 @@ static func _mallas_compartidas() -> Dictionary:
 
 
 static func _pieza(
-	padre: Node3D, nombre: String, posicion: Vector3, malla: Mesh, material: Material
+	padre: Node3D,
+	nombre: String,
+	posicion: Vector3,
+	malla: Mesh,
+	material: Material,
+	rango_fin: float = LOD_CERCA_FIN
 ) -> MeshInstance3D:
 	var pieza := MeshInstance3D.new()
 	pieza.name = nombre
@@ -242,6 +278,7 @@ static func _pieza(
 	pieza.mesh = malla
 	pieza.material_override = material
 	pieza.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	pieza.visibility_range_end = rango_fin
 	padre.add_child(pieza)
 	return pieza
 
