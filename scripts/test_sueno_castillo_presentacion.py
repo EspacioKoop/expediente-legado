@@ -10,6 +10,7 @@ SCRIPTORIUM = RAIZ / "godot" / "escenas" / "suenos" / "props_284" / "galeria_scr
 TORRE = RAIZ / "godot" / "escenas" / "suenos" / "props_284" / "torre_capilla_castillo.tscn"
 CLAUSTRO = RAIZ / "godot" / "escenas" / "suenos" / "props_284" / "claustro_reflejado_castillo.tscn"
 ARCADA = RAIZ / "godot" / "escenas" / "suenos" / "props_284" / "arcada_claustro_castillo_psx.obj"
+TORRE_OBJ = RAIZ / "godot" / "escenas" / "suenos" / "props_284" / "torre_castillo_psx.obj"
 
 
 class SuenoCastilloPresentacionTest(unittest.TestCase):
@@ -22,6 +23,7 @@ class SuenoCastilloPresentacionTest(unittest.TestCase):
         cls.torre = TORRE.read_text(encoding="utf-8")
         cls.claustro = CLAUSTRO.read_text(encoding="utf-8")
         cls.arcada = ARCADA.read_text(encoding="utf-8")
+        cls.torre_obj = TORRE_OBJ.read_text(encoding="utf-8")
 
     def test_campanas_son_procedurales_deterministas_y_sin_binarios(self):
         self.assertIn("AudioStreamWAV.new()", self.audio)
@@ -47,9 +49,11 @@ class SuenoCastilloPresentacionTest(unittest.TestCase):
         self.assertIn('"claustro_reflejado":', self.presentacion)
 
     def test_composiciones_reutilizan_piezas_sin_fisica_paralela(self):
-        for escena in (self.scriptorium, self.torre):
-            self.assertIn("muro_torre_castillo.tscn", escena)
-            self.assertIn("escalera_anular_castillo.tscn", escena)
+        self.assertIn("muro_torre_castillo.tscn", self.scriptorium)
+        self.assertIn("escalera_anular_castillo.tscn", self.scriptorium)
+        self.assertIn("arcada_claustro_castillo.tscn", self.torre)
+        self.assertIn("torre_castillo.tscn", self.torre)
+        self.assertIn("escalera_anular_castillo.tscn", self.torre)
         self.assertIn("arcada_claustro_castillo.tscn", self.claustro)
         self.assertIn("escalera_anular_castillo.tscn", self.claustro)
         for escena in (self.scriptorium, self.torre, self.claustro):
@@ -60,6 +64,9 @@ class SuenoCastilloPresentacionTest(unittest.TestCase):
         self.assertIn("AtrilCodice", self.scriptorium)
         self.assertIn("EscaleraAlta", self.torre)
         self.assertIn("LuzAltaImposible", self.torre)
+        self.assertIn("TorreCampanario", self.torre)
+        self.assertIn("TorreEco", self.torre)
+        self.assertNotIn("muro_torre_castillo.tscn", self.torre)
         self.assertIn("ArcadaOesteElevada", self.claustro)
         self.assertIn("EscaleraReflejoB", self.claustro)
 
@@ -69,6 +76,14 @@ class SuenoCastilloPresentacionTest(unittest.TestCase):
         self.assertIn("g Arch_10", self.arcada)
         for grupo in ("g Tower_L", "g Roof_L", "g Tower_R", "g Roof_R", "g ButtressL", "g ButtressR"):
             self.assertNotIn(grupo, self.arcada)
+
+    def test_torre_autonoma_deriva_del_modelo_propio_sin_portal(self):
+        self.assertIn("o TorreCastilloPSX", self.torre_obj)
+        self.assertIn("g Tower", self.torre_obj)
+        self.assertIn("g Roof", self.torre_obj)
+        self.assertIn("g ArrowSlit", self.torre_obj)
+        for grupo in ("g WallLeft", "g WallRight", "g WallCrown", "g Arch_00", "g ButtressL"):
+            self.assertNotIn(grupo, self.torre_obj)
 
     def test_mutacion_secundaria_deforma_presentacion_sin_tocar_fisica(self):
         self.assertIn('espacio.get("mutacion_castillo", "estable")', self.presentacion)
