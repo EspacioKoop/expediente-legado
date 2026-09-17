@@ -35,7 +35,9 @@ func _ejecutar() -> void:
 	_comprobar(salir != null, "se conserva Salir al escritorio")
 	if salir != null:
 		_comprobar(boton.get_parent() == salir.get_parent(), "ambas salidas comparten navegación")
-		_comprobar(boton.get_index() < salir.get_index(), "volver al inicio aparece antes de cerrar")
+		_comprobar(
+			boton.get_index() < salir.get_index(), "volver al inicio aparece antes de cerrar"
+		)
 	_comprobar(not boton.visible, "fuera de una partida no se ofrece volver al inicio")
 	_comprobar(boton.accessibility_name == boton.text, "el botón tiene nombre accesible")
 	_comprobar(
