@@ -2,7 +2,8 @@
 ##
 ## No es un editor escultórico: ofrece diferencias grandes y legibles a baja
 ## resolución, coherentes con el estilo PSX, y mantiene separado el pasado del
-## aspecto físico.
+## aspecto físico. La previsualización 3D consume el mismo perfil que se guarda,
+## de modo que los controles nunca describen una silueta distinta a la jugable.
 extends Control
 
 ## Cada opción es [clave de textos.csv, valor guardado en el perfil].
@@ -57,6 +58,7 @@ var _cabello: OptionButton
 var _peinado: OptionButton
 var _prenda: OptionButton
 var _ropa: OptionButton
+var _previsualizacion: PrevisualizadorPersonaje3D
 var _trasfondo: OptionButton
 var _descripcion: Label
 var _resumen: Label
@@ -97,7 +99,7 @@ func _construir() -> void:
 
 	var columnas := HBoxContainer.new()
 	columnas.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	columnas.add_theme_constant_override("separation", 24)
+	columnas.add_theme_constant_override("separation", 20)
 	raiz.add_child(columnas)
 
 	var aspecto := VBoxContainer.new()
@@ -115,6 +117,14 @@ func _construir() -> void:
 	_peinado = _opcion(aspecto, "PERSONAJE_PEINADO", PEINADOS)
 	_prenda = _opcion(aspecto, "PERSONAJE_PRENDA", PRENDAS)
 	_ropa = _opcion(aspecto, "PERSONAJE_ROPA", ROPAS)
+
+	var vista := VBoxContainer.new()
+	vista.custom_minimum_size.x = 250.0
+	vista.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vista.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	columnas.add_child(vista)
+	_previsualizacion = PrevisualizadorPersonaje3D.new()
+	vista.add_child(_previsualizacion)
 
 	var pasado := VBoxContainer.new()
 	pasado.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -263,6 +273,8 @@ func _refrescar() -> void:
 	if _trasfondo == null:
 		return
 	var candidato := _desde_controles()
+	if _previsualizacion != null:
+		_previsualizacion.aplicar(candidato)
 	var pasado := PerfilJugador.trasfondo_por_id(String(candidato["trasfondo"]))
 	_descripcion.text = tr(String(pasado.get("descripcion", "")))
 	var etiquetas := Array(pasado.get("etiquetas", []))
