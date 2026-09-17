@@ -1,9 +1,9 @@
-; Caza Pixeles 98 - minijuego GBC para SIGA-98
+; Pixel Exodus (id estable: caza_pixeles_98) - minijuego GBC para SIGA-98
 ; Codigo original del proyecto, licencia MIT (LICENSE en la raiz del repositorio).
 ;
-; Partida arcade de 30 segundos: mueve el cursor con la cruceta y captura
-; el objetivo movil. La puntuacion solo existe dentro de la ROM y desaparece
-; al apagar o salir: no concede dinero, pistas ni progreso en SIGA-98.
+; Campana arcade ecologista en tres fases. La puntuacion, restauracion y records
+; viven exclusivamente dentro de la ROM; no conceden dinero, pistas ni progreso
+; en SIGA-98.
 
 DEF rP1    EQU $FF00
 DEF rDIV   EQU $FF04
@@ -63,13 +63,36 @@ DEF TILE_R        EQU 24
 DEF TILE_O        EQU 25
 DEF TILE_M        EQU 26
 DEF TILE_EXCL     EQU 27
+DEF TILE_SEMILLA  EQU 28
+DEF TILE_FOCO     EQU 29
 
-DEF SEGUNDOS_PARTIDA EQU 30
+DEF TIPO_CROMA   EQU 0
+DEF TIPO_SEMILLA EQU 1
+DEF TIPO_FOCO    EQU 2
+
+DEF SEGUNDOS_PARTIDA EQU 45
+DEF FASE2_TIEMPO     EQU 30
+DEF FASE3_TIEMPO     EQU 15
 DEF FRAMES_SEGUNDO   EQU 60
-DEF COMBO_DURACION    EQU 90
-DEF COMBO_X2          EQU 3
-DEF COMBO_X3          EQU 6
+DEF COMBO_DURACION   EQU 90
+DEF COMBO_X2         EQU 3
+DEF COMBO_X3         EQU 6
+DEF RESTAURA_SEMILLA EQU 4
+DEF RESTAURA_FOCO    EQU 12
 
+; Formato SRAM privado de la ROM. La RAM con bateria la aporta el cartucho
+; comun MBC5 de #819 y la Portatil Color 98 la persiste por cartucho.
+DEF SRAM_MAGIC0              EQU $A000
+DEF SRAM_MAGIC1              EQU $A001
+DEF SRAM_MAGIC2              EQU $A002
+DEF SRAM_MAGIC3              EQU $A003
+DEF SRAM_VERSION             EQU $A004
+DEF SRAM_MEJOR_PUNTOS        EQU $A005
+DEF SRAM_MEJOR_COMBO         EQU $A006
+DEF SRAM_MEJOR_FASE          EQU $A007
+DEF SRAM_MEJOR_RESTAURACION  EQU $A008
+DEF SRAM_CHECKSUM            EQU $A009
+DEF SRAM_VERSION_ACTUAL      EQU 1
 
 INCLUDE "../comun/cartucho.asm"
 INCLUDE "../comun/pantalla_cgb.asm"
@@ -91,6 +114,7 @@ Inicio:
     di
     ld sp, $DFFF
     call IniciarCartucho
+    call CargarRecords
     xor a
     ld [wPantallaCGB], a
 
@@ -140,7 +164,8 @@ EstadoTitulo:
     jr Bucle
 
 EstadoJuego:
-    ; El HUD se actualiza al principio del VBlank, antes de la logica del frame.
+    ; Se entra aqui justo despues del VBlank. El HUD y los sprites se mantienen
+    ; pequenos para dejar la mayor parte de las 160x144 a la accion.
     call ActualizarHUD
     call MoverJugador
     call MoverObjetivo
@@ -203,7 +228,6 @@ IniciarPartida:
     call DesactivarLCD
     call LimpiarOAM
     call LimpiarFondo
-    call DibujarHUD
 
     ld a, 80
     ld [wJugadorX], a
@@ -219,13 +243,16 @@ IniciarPartida:
     ld [wDirY], a
     ld [wCombo], a
     ld [wComboFrames], a
+    ld [wMejorComboPartida], a
+    ld [wRestauracion], a
+    ld [wFocosCerrados], a
 
     ld a, 1
     ld [wMultiplicador], a
+    ld [wFase], a
 
     ; La semilla depende del reloj hardware en el instante de empezar. Evita
-    ; que cada partida repita la misma secuencia de 16 posiciones sin meter
-    ; estado externo ni afectar a la reproducibilidad del binario.
+    ; que cada partida repita la misma secuencia sin meter estado externo.
     ldh a, [rDIV]
     or a
     jr nz, .semilla_lista
@@ -238,6 +265,8 @@ IniciarPartida:
     ld a, 5
     ld [wIntervaloObjetivo], a
 
+    call AplicarPaletaFase
+    call DibujarHUD
     call SiguienteObjetivo
     call ActualizarOAM
 
@@ -247,22 +276,57 @@ IniciarPartida:
     ret
 
 MostrarFin:
+    ; El record se consolida antes de pintar la pantalla final. La persistencia
+    ; es privada de esta ROM y no toca Partida/Jornada ni ningun reward externo.
+    call GuardarRecords
     call DesactivarLCD
     call LimpiarOAM
     call LimpiarFondo
 
-    ld hl, BG_MAP + (5 * 32) + 7
+    ld hl, BG_MAP + (3 * 32) + 7
     ld de, TextoTiempoFin
     call EscribirTexto
 
-    ld hl, BG_MAP + (8 * 32) + 5
+    ld hl, BG_MAP + (5 * 32) + 5
     ld de, TextoScore
     call EscribirTexto
     ld a, [wPuntos]
-    ld hl, BG_MAP + (8 * 32) + 11
+    ld hl, BG_MAP + (5 * 32) + 11
     call EscribirNumero2
 
-    ld hl, BG_MAP + (12 * 32) + 7
+    ld hl, BG_MAP + (7 * 32) + 3
+    ld de, TextoMejorScore
+    call EscribirTexto
+    ld a, [wMejorPuntos]
+    ld hl, BG_MAP + (7 * 32) + 11
+    call EscribirNumero2
+
+    ; R = mejor restauracion. X = mejor combo. P = fase maxima.
+    ld hl, BG_MAP + (9 * 32) + 4
+    ld a, TILE_R
+    ld [hli], a
+    inc hl
+    ld a, [wMejorRestauracion]
+    call EscribirNumero2
+    ld hl, BG_MAP + (9 * 32) + 10
+    ld a, TILE_X
+    ld [hli], a
+    ld a, [wMejorCombo]
+    cp 10
+    jr c, .combo_final_listo
+    ld a, 9
+.combo_final_listo:
+    add TILE_DIGITO0
+    ld [hl], a
+
+    ld hl, BG_MAP + (11 * 32) + 8
+    ld a, TILE_P
+    ld [hli], a
+    ld a, [wMejorFase]
+    add TILE_DIGITO0
+    ld [hl], a
+
+    ld hl, BG_MAP + (14 * 32) + 7
     ld de, TextoStart
     call EscribirTexto
 
@@ -333,11 +397,26 @@ MoverJugador:
     ret
 
 MoverObjetivo:
+    ; Los focos contaminantes son instalaciones: permanecen fijos hasta que la
+    ; nave se desvia de su ruta para cerrarlos. Las semillas se mueven mas lento.
+    ld a, [wTipoObjetivo]
+    cp TIPO_FOCO
+    ret z
+
     ld a, [wObjetivoTick]
     inc a
     ld [wObjetivoTick], a
     ld b, a
+
     ld a, [wIntervaloObjetivo]
+    ld c, a
+    ld a, [wTipoObjetivo]
+    cp TIPO_SEMILLA
+    jr nz, .intervalo_listo
+    inc c
+    inc c
+.intervalo_listo:
+    ld a, c
     cp b
     ret nc
     xor a
@@ -422,46 +501,77 @@ ComprobarCaptura:
     ld b, a
     ld a, [wObjetivoX]
     cp b
-    jr nc, .no_captura
+    jp nc, .no_captura
 
     ld a, [wObjetivoX]
     add 8
     ld b, a
     ld a, [wJugadorX]
     cp b
-    jr nc, .no_captura
+    jp nc, .no_captura
 
     ld a, [wJugadorY]
     add 8
     ld b, a
     ld a, [wObjetivoY]
     cp b
-    jr nc, .no_captura
+    jp nc, .no_captura
 
     ld a, [wObjetivoY]
     add 8
     ld b, a
     ld a, [wJugadorY]
     cp b
-    jr nc, .no_captura
+    jp nc, .no_captura
 
+    ld a, [wTipoObjetivo]
+    cp TIPO_FOCO
+    jr z, .foco
+    cp TIPO_SEMILLA
+    jr z, .semilla
+
+.croma:
     call RegistrarCaptura
     call AjustarDificultad
     call SiguienteObjetivo
     call SonidoCaptura
+    ret
+
+.semilla:
+    call RegistrarCaptura
+    ld a, RESTAURA_SEMILLA
+    call SumarRestauracion
+    call AjustarDificultad
+    call SiguienteObjetivo
+    call SonidoRestauracion
+    ret
+
+.foco:
+    call CerrarFocoContaminante
+    call AjustarDificultad
+    call SiguienteObjetivo
+    call SonidoFoco
 
 .no_captura:
     ret
 
 RegistrarCaptura:
     ; Encadenar capturas antes de que expire el contador sube el multiplicador.
-    ; El combo se capa en 9 porque el HUD solo necesita comunicar x1/x2/x3.
+    ; El combo se capa en 9 porque el HUD comunica x1/x2/x3 y el record cabe
+    ; en una cifra sin ampliar el HUD.
     ld a, [wCombo]
     cp 9
     jr nc, .combo_listo
     inc a
     ld [wCombo], a
 .combo_listo:
+    ld b, a
+    ld a, [wMejorComboPartida]
+    cp b
+    jr nc, .record_combo_listo
+    ld a, b
+    ld [wMejorComboPartida], a
+.record_combo_listo:
     ld a, COMBO_DURACION
     ld [wComboFrames], a
 
@@ -493,6 +603,44 @@ RegistrarCaptura:
     ld [wPuntos], a
     ret
 
+CerrarFocoContaminante:
+    ; Cerrar una fuente de dano es deliberadamente incompatible con mantener
+    ; el combo: obliga a elegir entre puntuacion inmediata y restauracion.
+    xor a
+    ld [wCombo], a
+    ld [wComboFrames], a
+    ld a, 1
+    ld [wMultiplicador], a
+
+    ld a, [wFocosCerrados]
+    cp 99
+    jr nc, .focos_listos
+    inc a
+    ld [wFocosCerrados], a
+.focos_listos:
+    ld a, RESTAURA_FOCO
+    call SumarRestauracion
+
+    ; El cierre aporta un punto fijo, nunca multiplicado.
+    ld a, [wPuntos]
+    cp 99
+    ret nc
+    inc a
+    ld [wPuntos], a
+    ret
+
+; A = incremento de restauracion. Satura a 99.
+SumarRestauracion:
+    ld b, a
+    ld a, [wRestauracion]
+    add b
+    cp 100
+    jr c, .guardar
+    ld a, 99
+.guardar:
+    ld [wRestauracion], a
+    ret
+
 TickCombo:
     ld a, [wComboFrames]
     or a
@@ -509,7 +657,13 @@ TickCombo:
 
 AjustarDificultad:
     ; Usa rangos, no igualdad: con multiplicadores el score puede saltar
-    ; directamente por encima de 5/10/20.
+    ; directamente por encima de 5/10/20. Cada fase tambien baja el techo.
+    ld a, [wFase]
+    cp 3
+    jr z, .nivel3
+    cp 2
+    jr z, .nivel2
+
     ld a, [wPuntos]
     cp 20
     jr nc, .nivel3
@@ -568,10 +722,28 @@ SiguienteObjetivo:
     ld a, [hl]
     ld [wObjetivoY], a
 
-    ld a, b
+    ; Fase 1: croma y semillas. Fases 2/3: aparece la contaminacion activa.
+    ld a, [wFase]
+    cp 1
+    jr nz, .tipos_avanzados
+    ld a, [wRng]
+    and 1
+    ld [wTipoObjetivo], a
+    jr .direccion
+.tipos_avanzados:
+    ld a, [wRng]
+    and 3
+    cp 3
+    jr nz, .tipo_listo
+    ld a, TIPO_FOCO
+.tipo_listo:
+    ld [wTipoObjetivo], a
+
+.direccion:
+    ld a, [wObjetivoIndice]
     and 1
     ld [wDirX], a
-    ld a, b
+    ld a, [wObjetivoIndice]
     and 2
     srl a
     ld [wDirY], a
@@ -583,7 +755,7 @@ TickTiempo:
     ld a, [wFrames]
     inc a
     cp FRAMES_SEGUNDO
-    jr c, .guardar
+    jr c, .guardar_frame
     xor a
     ld [wFrames], a
     ld a, [wTiempo]
@@ -591,8 +763,30 @@ TickTiempo:
     ret z
     dec a
     ld [wTiempo], a
+
+    cp FASE2_TIEMPO
+    jr z, .fase2
+    cp FASE3_TIEMPO
+    jr z, .fase3
     ret
-.guardar:
+
+.fase2:
+    ld a, 2
+    ld [wFase], a
+    ld a, 3
+    ld [wIntervaloObjetivo], a
+    call AplicarPaletaFase
+    call SonidoFase
+    ret
+.fase3:
+    ld a, 3
+    ld [wFase], a
+    ld a, 2
+    ld [wIntervaloObjetivo], a
+    call AplicarPaletaFase
+    call SonidoFase
+    ret
+.guardar_frame:
     ld [wFrames], a
     ret
 
@@ -611,9 +805,25 @@ ActualizarOAM:
     ld [hli], a
     ld a, [wObjetivoX]
     ld [hli], a
+
+    ld a, [wTipoObjetivo]
+    or a
+    jr z, .croma
+    cp TIPO_SEMILLA
+    jr z, .semilla
+    ld a, TILE_FOCO
+    ld c, 3
+    jr .tipo_listo
+.croma:
     ld a, TILE_OBJETIVO
+    ld c, 1
+    jr .tipo_listo
+.semilla:
+    ld a, TILE_SEMILLA
+    ld c, 2
+.tipo_listo:
     ld [hli], a
-    ld a, 1 ; paleta OBJ 1 para el objetivo.
+    ld a, c
     ld [hl], a
     ret
 
@@ -630,6 +840,16 @@ ActualizarHUD:
 
     ld a, [wTiempo]
     ld hl, BG_MAP + 17
+    call EscribirNumero2
+
+    ld hl, BG_MAP + 32 + 3
+    call EsperarVRAM
+    ld a, [wFase]
+    add TILE_DIGITO0
+    ld [hl], a
+
+    ld a, [wRestauracion]
+    ld hl, BG_MAP + 32 + 7
     call EscribirNumero2
     ret
 
@@ -677,8 +897,17 @@ DibujarHUD:
     ld hl, BG_MAP + 17
     call EscribirNumero2
 
+    ; Segunda fila: P = fase; R = restauracion de Chromia.
     ld hl, BG_MAP + 32 + 2
-    call DibujarLinea16
+    ld a, TILE_P
+    ld [hli], a
+    ld a, TILE_DIGITO0 + 1
+    ld [hl], a
+    ld hl, BG_MAP + 32 + 6
+    ld a, TILE_R
+    ld [hli], a
+    xor a
+    call EscribirNumero2
     ret
 
 DibujarLinea16:
@@ -753,7 +982,7 @@ CargarTiles:
     ret
 
 LimpiarFondo:
-    ; Al salir del título a pantalla completa se recuperan tiles, paleta y
+    ; Al salir del titulo a pantalla completa se recuperan tiles, paleta y
     ; atributos del juego antes de dibujar nada (#808).
     ld a, [wPantallaCGB]
     or a
@@ -767,7 +996,7 @@ LimpiarFondo:
     ld hl, BG_MAP
     ld bc, 32 * 32
 .loop:
-    ; El OR del contador modifica A: sin repetir el xor, cada celda recibía el
+    ; El OR del contador modifica A: sin repetir el xor, cada celda recibia el
     ; contador y el mapa se llenaba de tiles de letras (#805).
     xor a
     ld [hli], a
@@ -778,25 +1007,17 @@ LimpiarFondo:
     ret
 
 ConfigurarPaletas:
-    ; Fallback DMG y emuladores que expongan paletas clasicas.
-    ; DMG: el índice 1 del fondo (tinta) pasa a negro para que se lea (#805).
+    ; Fallback DMG. La tinta permanece oscura y legible (#805).
     ld a, %11101100
     ldh [rBGP], a
     ld a, %11100100
     ldh [rOBP0], a
 
-    ; Fondo GBC 0: crema, verde grisaceo, verde oscuro, negro.
-    ld a, $80
-    ldh [rBCPS], a
-    ld hl, PaletaFondo
-    ld b, PaletaFondoFin - PaletaFondo
-.bg:
-    ld a, [hli]
-    ldh [rBCPD], a
-    dec b
-    jr nz, .bg
+    ld a, 1
+    ld [wFase], a
+    call AplicarPaletaFase
 
-    ; OBJ 0 = cursor verde/cian; OBJ 1 = objetivo rojo/naranja.
+    ; OBJ 0 = nave; 1 = croma; 2 = semilla; 3 = foco contaminante.
     ld a, $80
     ldh [rOCPS], a
     ld hl, PaletasObjetos
@@ -806,6 +1027,31 @@ ConfigurarPaletas:
     ldh [rOCPD], a
     dec b
     jr nz, .obj
+    ret
+
+AplicarPaletaFase:
+    ld a, [wFase]
+    cp 3
+    jr z, .fase3
+    cp 2
+    jr z, .fase2
+    ld hl, PaletaFondo
+    jr .cargar
+.fase2:
+    ld hl, PaletaFase2
+    jr .cargar
+.fase3:
+    ld hl, PaletaFase3
+.cargar:
+    ld a, $80
+    ldh [rBCPS], a
+    ld b, 8
+.loop:
+    call EsperarVRAM
+    ld a, [hli]
+    ldh [rBCPD], a
+    dec b
+    jr nz, .loop
     ret
 
 ConfigurarAudio:
@@ -857,6 +1103,45 @@ SonidoCaptura:
     ldh [rNR14], a
     ret
 
+SonidoRestauracion:
+    xor a
+    ldh [rNR10], a
+    ld a, $40
+    ldh [rNR11], a
+    ld a, $D2
+    ldh [rNR12], a
+    ld a, $C0
+    ldh [rNR13], a
+    ld a, $87
+    ldh [rNR14], a
+    ret
+
+SonidoFoco:
+    xor a
+    ldh [rNR10], a
+    ld a, $C0
+    ldh [rNR11], a
+    ld a, $B3
+    ldh [rNR12], a
+    ld a, $18
+    ldh [rNR13], a
+    ld a, $82
+    ldh [rNR14], a
+    ret
+
+SonidoFase:
+    xor a
+    ldh [rNR10], a
+    ld a, $80
+    ldh [rNR11], a
+    ld a, $D2
+    ldh [rNR12], a
+    ld a, $E0
+    ldh [rNR13], a
+    ld a, $86
+    ldh [rNR14], a
+    ret
+
 SonidoFin:
     xor a
     ldh [rNR10], a
@@ -870,6 +1155,139 @@ SonidoFin:
     ldh [rNR14], a
     ret
 
+; ---------------------------- SRAM / records ----------------------------
+HabilitarSRAM:
+    ld a, $0A
+    ld [rRAMG], a
+    xor a
+    ld [rRAMB], a
+    ret
+
+ProtegerSRAM:
+    xor a
+    ld [rRAMG], a
+    ret
+
+CargarRecords:
+    call HabilitarSRAM
+    ld a, [SRAM_MAGIC0]
+    cp $50 ; P
+    jr nz, .inicializar
+    ld a, [SRAM_MAGIC1]
+    cp $58 ; X
+    jr nz, .inicializar
+    ld a, [SRAM_MAGIC2]
+    cp $39 ; 9
+    jr nz, .inicializar
+    ld a, [SRAM_MAGIC3]
+    cp $38 ; 8
+    jr nz, .inicializar
+    ld a, [SRAM_VERSION]
+    cp SRAM_VERSION_ACTUAL
+    jr nz, .inicializar
+
+    ld a, [SRAM_MEJOR_PUNTOS]
+    ld [wMejorPuntos], a
+    ld a, [SRAM_MEJOR_COMBO]
+    ld [wMejorCombo], a
+    ld a, [SRAM_MEJOR_FASE]
+    ld [wMejorFase], a
+    ld a, [SRAM_MEJOR_RESTAURACION]
+    ld [wMejorRestauracion], a
+
+    call CalcularChecksumRecords
+    ld b, a
+    ld a, [SRAM_CHECKSUM]
+    cp b
+    jr nz, .inicializar
+    call ProtegerSRAM
+    ret
+
+.inicializar:
+    xor a
+    ld [wMejorPuntos], a
+    ld [wMejorCombo], a
+    ld [wMejorFase], a
+    ld [wMejorRestauracion], a
+    call EscribirRecords
+    ret
+
+GuardarRecords:
+    ld a, [wMejorPuntos]
+    ld b, a
+    ld a, [wPuntos]
+    cp b
+    jr c, .combo
+    jr z, .combo
+    ld [wMejorPuntos], a
+.combo:
+    ld a, [wMejorCombo]
+    ld b, a
+    ld a, [wMejorComboPartida]
+    cp b
+    jr c, .fase
+    jr z, .fase
+    ld [wMejorCombo], a
+.fase:
+    ld a, [wMejorFase]
+    ld b, a
+    ld a, [wFase]
+    cp b
+    jr c, .restauracion
+    jr z, .restauracion
+    ld [wMejorFase], a
+.restauracion:
+    ld a, [wMejorRestauracion]
+    ld b, a
+    ld a, [wRestauracion]
+    cp b
+    jr c, .escribir
+    jr z, .escribir
+    ld [wMejorRestauracion], a
+.escribir:
+    call EscribirRecords
+    ret
+
+EscribirRecords:
+    call HabilitarSRAM
+    ld a, $50
+    ld [SRAM_MAGIC0], a
+    ld a, $58
+    ld [SRAM_MAGIC1], a
+    ld a, $39
+    ld [SRAM_MAGIC2], a
+    ld a, $38
+    ld [SRAM_MAGIC3], a
+    ld a, SRAM_VERSION_ACTUAL
+    ld [SRAM_VERSION], a
+
+    ld a, [wMejorPuntos]
+    ld [SRAM_MEJOR_PUNTOS], a
+    ld a, [wMejorCombo]
+    ld [SRAM_MEJOR_COMBO], a
+    ld a, [wMejorFase]
+    ld [SRAM_MEJOR_FASE], a
+    ld a, [wMejorRestauracion]
+    ld [SRAM_MEJOR_RESTAURACION], a
+    call CalcularChecksumRecords
+    ld [SRAM_CHECKSUM], a
+    call ProtegerSRAM
+    ret
+
+CalcularChecksumRecords:
+    ld a, [wMejorPuntos]
+    ld b, a
+    ld a, [wMejorCombo]
+    xor b
+    ld b, a
+    ld a, [wMejorFase]
+    xor b
+    ld b, a
+    ld a, [wMejorRestauracion]
+    xor b
+    xor $A5
+    ret
+
 SECTION "Datos", ROM0
 TextoTitulo:
     db TILE_C, TILE_A, TILE_Z, TILE_A, TILE_VACIO
@@ -879,6 +1297,8 @@ TextoStart:
     db TILE_S, TILE_T, TILE_A, TILE_R, TILE_T, $FF
 TextoScore:
     db TILE_S, TILE_C, TILE_O, TILE_R, TILE_E, $FF
+TextoMejorScore:
+    db TILE_M, TILE_VACIO, TILE_S, TILE_C, TILE_O, TILE_R, TILE_E, $FF
 TextoTime:
     db TILE_T, TILE_I, TILE_M, TILE_E, $FF
 TextoTiempoFin:
@@ -903,8 +1323,8 @@ PosicionesObjetivo:
     db 64, 120
 
 ; Tile 0: vacio.
-; Tile 1: cursor/jugador.
-; Tile 2: objetivo en forma de rombo.
+; Tile 1: nave/cursor.
+; Tile 2: croma libre (rombo).
 ; Tile 3: separador horizontal.
 Tiles:
     rept 8
@@ -947,45 +1367,75 @@ Tiles:
     db $3C,$00,$66,$00,$66,$00,$66,$00,$66,$00,$66,$00,$3C,$00,$00,$00
     db $63,$00,$77,$00,$7F,$00,$6B,$00,$63,$00,$63,$00,$63,$00,$00,$00
     db $18,$00,$18,$00,$18,$00,$18,$00,$18,$00,$00,$00,$18,$00,$00,$00
+
+; Tile 28: semilla de ecosistema (brote/pixel vivo).
+    db $00,$00,$18,$18,$3C,$24,$18,$18,$3C,$24,$66,$42,$24,$24,$00,$00
+; Tile 29: foco contaminante / instalacion extractiva.
+    db $7E,$7E,$42,$7E,$5A,$66,$5A,$66,$42,$7E,$66,$5A,$3C,$3C,$18,$18
 TilesFin:
 
+; PaletaFondo conserva estas etiquetas porque el smoke comun de #805 mide el
+; contraste de su color de tinta. Fase 1: Chromia aun vivo.
 PaletaFondo:
-    ; El color 1 es la tinta de letras, cifras y figuras (#805): en gris claro
-    ; no se leía. Crema, tinta verde muy oscura, verde oscuro, negro.
     dw $63BE, $10C4, $1986, $0000
 PaletaFondoFin:
 
+; Fase 2: zona muerta, mas fria e industrial pero con tinta de alto contraste.
+PaletaFase2:
+    dw $6739, $14A5, $2D2B, $0000
+PaletaFase2Fin:
+
+; Fase 3: restauracion, vuelve una gama mas viva de agua y vegetacion.
+PaletaFase3:
+    dw $7FDE, $0D27, $22AC, $0000
+PaletaFase3Fin:
+
 PaletasObjetos:
+    ; Nave verde/cian.
     dw $7FFF, $7FE0, $03E0, $0000
+    ; Croma libre: rojo/naranja.
     dw $7FFF, $421F, $001F, $0000
+    ; Semilla: verde vivo.
+    dw $7FFF, $2FE0, $03A0, $0000
+    ; Foco: magenta/metal contaminado.
+    dw $7FFF, $7C1F, $4010, $0000
 PaletasObjetosFin:
 
 SECTION "Variables", WRAM0
-wEstado:            ds 1
-wJugadorX:          ds 1
-wJugadorY:          ds 1
-wObjetivoX:         ds 1
-wObjetivoY:         ds 1
-wObjetivoIndice:    ds 1
-wDirX:              ds 1
-wDirY:              ds 1
-wObjetivoTick:      ds 1
-wIntervaloObjetivo: ds 1
-wPuntos:            ds 1
-wCombo:             ds 1
-wComboFrames:       ds 1
-wMultiplicador:     ds 1
-wRng:               ds 1
-wTiempo:            ds 1
-wFrames:            ds 1
-wTeclas:            ds 1
-wTeclasPrevias:     ds 1
-wTeclasNuevas:      ds 1
+wEstado:               ds 1
+wJugadorX:             ds 1
+wJugadorY:             ds 1
+wObjetivoX:            ds 1
+wObjetivoY:            ds 1
+wObjetivoIndice:       ds 1
+wTipoObjetivo:         ds 1
+wDirX:                 ds 1
+wDirY:                 ds 1
+wObjetivoTick:         ds 1
+wIntervaloObjetivo:    ds 1
+wPuntos:               ds 1
+wCombo:                ds 1
+wComboFrames:          ds 1
+wMultiplicador:        ds 1
+wMejorComboPartida:    ds 1
+wRestauracion:         ds 1
+wFocosCerrados:        ds 1
+wFase:                 ds 1
+wRng:                  ds 1
+wTiempo:               ds 1
+wFrames:               ds 1
+wTeclas:               ds 1
+wTeclasPrevias:        ds 1
+wTeclasNuevas:         ds 1
+wMejorPuntos:          ds 1
+wMejorCombo:           ds 1
+wMejorFase:            ds 1
+wMejorRestauracion:    ds 1
 
 ; Pantalla completa CGB (#808): si el fondo la tiene cargada, para devolverle
 ; sus tiles al juego al salir.
 SECTION "TituloCGBVars", WRAM0
-wPantallaCGB:  ds 1
+wPantallaCGB: ds 1
 
 SECTION "TituloCGB", ROMX
     PANTALLA_CGB TituloCGB, "assets/titulo"
