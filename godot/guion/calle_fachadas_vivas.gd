@@ -1,11 +1,11 @@
 ## Fachadas vivas: profundidad aparente para las ventanas altas de la calle (#861).
 ##
 ## Esta capa no perfora la geometría jugable ni añade colisiones. Todas las
-## ventanas altas reciben cristal, marco y fondo aparente; el mobiliario 3D se
-## reserva al tramo de detalle para que el escalado no multiplique el coste.
-## Selección, iluminación y LOD son deterministas. La geometría repetida se
-## agrupa por malla/material/LOD mediante MultiMesh para evitar un draw call por
-## pieza.
+## ventanas altas reciben cristal, fondo aparente y estado de luz; el marco con
+## volumen y el mobiliario 3D se reservan al tramo de detalle para que el
+## escalado no multiplique el coste. Selección, iluminación y LOD son
+## deterministas. La geometría repetida se agrupa por malla/material/LOD mediante
+## MultiMesh para evitar un draw call por pieza.
 class_name CalleFachadasVivas
 extends RefCounted
 
@@ -101,7 +101,7 @@ static func _decorar(
 	var x_marco := centro.x - hacia_calle * (PROFUNDIDAD_MARCO * 0.5)
 	var x_prop := centro.x - hacia_calle * 0.032
 	grupo.set_meta("fondo_x", x_fondo)
-	grupo.set_meta("marco_volumen", true)
+	grupo.set_meta("marco_volumen", detalle_3d)
 
 	_registrar_pieza(
 		lotes,
@@ -111,38 +111,39 @@ static func _decorar(
 		_material_fondo(materiales, estado_luz),
 		LOD_LEJOS_FIN
 	)
-	_registrar_pieza(
-		lotes,
-		"marco_h",
-		Vector3(x_marco, centro.y + 0.62, centro.z),
-		mallas["marco_h"],
-		materiales["marco"],
-		LOD_MEDIA_FIN
-	)
-	_registrar_pieza(
-		lotes,
-		"marco_h",
-		Vector3(x_marco, centro.y - 0.62, centro.z),
-		mallas["marco_h"],
-		materiales["marco"],
-		LOD_MEDIA_FIN
-	)
-	_registrar_pieza(
-		lotes,
-		"marco_v",
-		Vector3(x_marco, centro.y, centro.z - 0.49),
-		mallas["marco_v"],
-		materiales["marco"],
-		LOD_MEDIA_FIN
-	)
-	_registrar_pieza(
-		lotes,
-		"marco_v",
-		Vector3(x_marco, centro.y, centro.z + 0.49),
-		mallas["marco_v"],
-		materiales["marco"],
-		LOD_MEDIA_FIN
-	)
+	if detalle_3d:
+		_registrar_pieza(
+			lotes,
+			"marco_h",
+			Vector3(x_marco, centro.y + 0.62, centro.z),
+			mallas["marco_h"],
+			materiales["marco"],
+			LOD_MEDIA_FIN
+		)
+		_registrar_pieza(
+			lotes,
+			"marco_h",
+			Vector3(x_marco, centro.y - 0.62, centro.z),
+			mallas["marco_h"],
+			materiales["marco"],
+			LOD_MEDIA_FIN
+		)
+		_registrar_pieza(
+			lotes,
+			"marco_v",
+			Vector3(x_marco, centro.y, centro.z - 0.49),
+			mallas["marco_v"],
+			materiales["marco"],
+			LOD_MEDIA_FIN
+		)
+		_registrar_pieza(
+			lotes,
+			"marco_v",
+			Vector3(x_marco, centro.y, centro.z + 0.49),
+			mallas["marco_v"],
+			materiales["marco"],
+			LOD_MEDIA_FIN
+		)
 
 	var props: Array[String] = []
 	var tiene_persiana := estado_luz == "persiana"
