@@ -12,14 +12,10 @@ func _initialize() -> void:
 
 
 func _probar() -> void:
-	var normal := GatoReaccionContextual.decidir(
-		ContaminacionOs98.FASE_NORMALIDAD, 0, true
-	)
+	var normal := GatoReaccionContextual.decidir(ContaminacionOs98.FASE_NORMALIDAD, 0, true)
 	_comprobar(normal.is_empty(), "normalidad no fabrica reacción")
 
-	var anomalia := GatoReaccionContextual.decidir(
-		ContaminacionOs98.FASE_NORMALIDAD, 1, true
-	)
+	var anomalia := GatoReaccionContextual.decidir(ContaminacionOs98.FASE_NORMALIDAD, 1, true)
 	_comprobar(
 		anomalia.get("id", "") == GatoReaccionContextual.ANOMALIA_SUENO,
 		"una anomalía ya montada produce reacción",
@@ -49,9 +45,7 @@ func _probar() -> void:
 		"la contaminación tiene prioridad determinista",
 	)
 
-	var escasa := GatoReaccionContextual.decidir(
-		ContaminacionOs98.FASE_CLIMAX, 4, false
-	)
+	var escasa := GatoReaccionContextual.decidir(ContaminacionOs98.FASE_CLIMAX, 4, false)
 	_comprobar(escasa.is_empty(), "un gato sin ayuda completa no reaparece por la reacción")
 
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
