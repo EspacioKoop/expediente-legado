@@ -113,6 +113,12 @@ class VisorExpedientes513Test(unittest.TestCase):
             self.visor,
         )
 
+    def test_la_barra_manual_del_visor_usa_el_rol_de_titulo(self):
+        self.assertIn(
+            'titulo.add_theme_font_override("font", theme.get_font("title_font", "Label"))',
+            self.visor,
+        )
+
     def test_el_playtest_documentado_usa_el_viewport_real_del_proyecto(self):
         self.assertIn("window/size/viewport_width=1024", self.proyecto)
         self.assertIn("window/size/viewport_height=680", self.proyecto)
