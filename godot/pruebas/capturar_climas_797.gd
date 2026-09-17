@@ -1,4 +1,4 @@
-## Capturas comparables para el criterio visual de #797.
+## Capturas comparables para el criterio visual de #797 y su segunda pasada #883.
 ##
 ## Ejecutar con renderer real, no `--headless`:
 ##
@@ -7,7 +7,7 @@
 ##
 ## Genera despejado/nublado/lluvia/niebla/nieve desde la misma entrada y con
 ## la misma orientación del trayecto. Es una ayuda de revisión: las imágenes
-## deben MIRARSE antes de considerar resuelto el bug.
+## deben MIRARSE antes de considerar resuelto un cambio visual.
 extends SceneTree
 
 const ESTADOS := [
@@ -53,8 +53,9 @@ func _init() -> void:
 		var mirada = dia._espacio_actual.get("mirada", NAN)
 		dia._caminante.situar(entrada, mirada)
 
-		# Da tiempo a controllers, partículas y renderer antes de leer el viewport.
-		for i in 24:
+		# Da tiempo a controllers, partículas y renderer. #883 aumenta la densidad
+		# y añade viento/acumulaciones, así que se estabiliza un poco más que #797.
+		for i in 48:
 			await process_frame
 
 		var destino := salida.path_join("%s.png" % estado)
