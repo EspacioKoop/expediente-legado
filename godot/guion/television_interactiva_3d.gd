@@ -8,7 +8,7 @@
 class_name TelevisionInteractiva3D
 extends Interactuable3D
 
-const OFFSET_MANDO_MESA := Vector3(1.43, -0.56, -0.11)
+const OFFSET_MANDO_MESA := Vector3(1.43, -0.58, -0.11)
 const OFFSET_PORTATIL_MESA := Vector3(1.15, -0.56, 0.07)
 
 var _encendida := false
@@ -107,14 +107,14 @@ func _jornada_en_escena() -> Dictionary:
 
 
 ## El bulto y esta capa interactiva son hermanos en `_mundo` y comparten la
-## posición exacta del catálogo. El modelo de Kenney mira a +Z de origen; en el
-## salón la persona está a +X, así que 90 grados lo orientan hacia el sofá.
+## posición exacta del catálogo. El sofá queda a +X: el giro corrige la TV que
+## se veía de canto en el playtest y deja la pantalla orientada hacia el asiento.
 func _orientar_modelo_hacia_sofa() -> void:
 	var contenedor := get_parent()
 	if contenedor == null:
 		return
 	for hijo in contenedor.get_children():
-		if hijo == self or not hijo is Node3D:
+		if hijo == self or not (hijo is Node3D):
 			continue
 		var pieza := hijo as Node3D
 		if not pieza.position.is_equal_approx(position):
