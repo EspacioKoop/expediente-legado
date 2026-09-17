@@ -101,7 +101,6 @@ func _construir_interfaz() -> void:
 	_personaje.tooltip_text = tr("INICIO_PERSONAJE_TOOLTIP")
 	caja.add_child(_personaje)
 	_portatil = _crear_boton("Portátil Color 98", _abrir_portatil)
-	_portatil.tooltip_text = "ROMs incluidas, compradas y aportadas por el jugador."
 	caja.add_child(_portatil)
 
 	var separador := HSeparator.new()
