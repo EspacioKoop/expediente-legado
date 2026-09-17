@@ -59,6 +59,23 @@ func _ejecutar() -> void:
 	_comprobar(JuicioCombate3D.determinacion_rival(3) == 5, "el expediente debilita al acusado")
 	_comprobar(JuicioCombate3D.determinacion_rival(99) == 4, "el juicio conserva un suelo jugable")
 
+	_comprobar(
+		PrevisualizadorReclamante3D.sonido_jugada("objecion") == "firmar",
+		"objecion tiene sonido propio",
+	)
+	_comprobar(
+		PrevisualizadorReclamante3D.sonido_jugada("silencio") == "pulsar",
+		"silencio tiene sonido propio",
+	)
+	_comprobar(
+		PrevisualizadorReclamante3D.sonido_jugada("insistencia") == "marcar",
+		"insistencia tiene sonido propio",
+	)
+	_comprobar(
+		PrevisualizadorReclamante3D.sonido_jugada("desconocida").is_empty(),
+		"una jugada desconocida no inventa sonido",
+	)
+
 	print("issue_779: %d pasadas, %d fallos" % [pasadas, fallos])
 	quit(1 if fallos > 0 else 0)
 
