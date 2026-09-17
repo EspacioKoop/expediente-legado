@@ -53,9 +53,7 @@ func _probar_retorno_entre_tres_salas() -> void:
 		]
 		for anomalia in anomalias:
 			mundo.add_child(anomalia)
-		var firma := SuenoRecurrenciaSimbolica.montar(
-			mundo, anomalias, indice, 3, 1200, 9
-		)
+		var firma := SuenoRecurrenciaSimbolica.montar(mundo, anomalias, indice, 3, 1200, 9)
 		_comprobar(firma != null, "#888: cada sala de la secuencia recibe la firma")
 		if firma != null:
 			_comprobar(
@@ -87,8 +85,10 @@ func _probar_retorno_entre_tres_salas() -> void:
 	_comprobar(giros.size() == 3, "#888: se observan tres fases de la misma firma")
 	if giros.size() == 3:
 		_comprobar(
-			not is_equal_approx(float(giros[0]), float(giros[1]))
-			and not is_equal_approx(float(giros[1]), float(giros[2])),
+			(
+				not is_equal_approx(float(giros[0]), float(giros[1]))
+				and not is_equal_approx(float(giros[1]), float(giros[2]))
+			),
 			"#888: cada sala transforma el retorno sin cambiar su identidad",
 		)
 
