@@ -101,13 +101,19 @@ func _ejecutar() -> void:
 
 	var conteo_fachadas := {
 		"grupos": 0,
-		"mesh_instances": 0,
+		"render_batches": 0,
+		"batched_instances": 0,
 	}
 	if fachadas != null:
-		conteo_fachadas["grupos"] = fachadas.get_child_count()
-		conteo_fachadas["mesh_instances"] = fachadas.find_children(
-			"*", "MeshInstance3D", true, false
-		).size()
+		var interiores := fachadas.get_node_or_null("Interiores") as Node3D
+		if interiores != null:
+			conteo_fachadas["grupos"] = interiores.get_child_count()
+		for nodo in fachadas.find_children("*", "MultiMeshInstance3D", true, false):
+			var lote := nodo as MultiMeshInstance3D
+			if lote == null or lote.multimesh == null:
+				continue
+			conteo_fachadas["render_batches"] += 1
+			conteo_fachadas["batched_instances"] += lote.multimesh.instance_count
 
 	var informe := {
 		"schema": 1,
