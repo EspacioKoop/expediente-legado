@@ -8,7 +8,8 @@ from scripts.godot_pruebas import importar_proyecto
 
 ROOT = Path(__file__).resolve().parents[1]
 SUPERFICIE = ROOT / "godot" / "guion" / "buscar_ejecutar_siga.gd"
-ADAPTADOR = ROOT / "godot" / "guion" / "dia_escritorio_siga_app.gd"
+CONTROLADOR = ROOT / "godot" / "guion" / "dia_buscar_ejecutar_app.gd"
+DIA = ROOT / "godot" / "escenas" / "dia.tscn"
 
 
 class BuscarEjecutarSigaTest(unittest.TestCase):
@@ -28,8 +29,9 @@ class BuscarEjecutarSigaTest(unittest.TestCase):
         for api in ("FileAccess", "DirAccess", "OS.", "JavaScriptBridge", "create_process"):
             self.assertNotIn(api, fuente)
 
-    def test_adaptador_registra_ambas_superficies(self) -> None:
-        fuente = ADAPTADOR.read_text(encoding="utf-8")
+    def test_controlador_registra_y_conecta_ambas_superficies(self) -> None:
+        fuente = CONTROLADOR.read_text(encoding="utf-8")
+        escena = DIA.read_text(encoding="utf-8")
         self.assertIn('"buscar", "Buscar"', fuente)
         self.assertIn('Callable(self, "_crear_buscar")', fuente)
         self.assertIn('"ejecutar", "Ejecutar…"', fuente)
@@ -37,6 +39,8 @@ class BuscarEjecutarSigaTest(unittest.TestCase):
         self.assertIn("abrir_aplicacion.connect(_abrir_aplicacion_lanzador)", fuente)
         self.assertIn("abrir_ruta.connect(_abrir_ruta_lanzador)", fuente)
         self.assertIn("abrir_url.connect(_abrir_url_lanzador)", fuente)
+        self.assertIn("dia_buscar_ejecutar_app.gd", escena)
+        self.assertIn('node name="BuscarEjecutarController"', escena)
 
     def test_superficies_ejecutables_en_godot(self) -> None:
         motor = os.environ.get("GODOT_BIN", "godot4")
