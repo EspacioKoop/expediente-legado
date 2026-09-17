@@ -10,6 +10,7 @@ var _observaciones: Array = []
 func _initialize() -> void:
 	_probar_sin_objetos_tocados()
 	_probar_todas_las_formas()
+	_probar_gramatica_simbolica()
 	_probar_reproducibilidad()
 	_probar_tarot_no_filtra_pistas()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
@@ -96,6 +97,49 @@ func _probar_todas_las_formas() -> void:
 		mundo.queue_free()
 
 
+func _probar_gramatica_simbolica() -> void:
+	var motivos := {
+		"silla": "umbral",
+		"monitor": "doble",
+		"archivador": "laberinto",
+	}
+	for objeto_id in motivos:
+		var mundo := Node3D.new()
+		root.add_child(mundo)
+		var creadas := SuenoUtileria.montar(mundo, "crucero", 8, 888, [], [objeto_id])
+		_comprobar(creadas.size() == 1, "#888: un original produce una anomalía simbólica")
+		if creadas.size() == 1:
+			var anomalia: AnomaliaSueno3D = creadas[0]
+			var motivo := String(anomalia.get_meta("motivo_simbolico", ""))
+			_comprobar(
+				motivo == motivos[objeto_id],
+				"#888: %s conserva su familia simbólica interna" % objeto_id,
+			)
+			var original := anomalia.find_child("FormaDeformada", false, false) as Node3D
+			var eco := anomalia.find_child("EcoSimbolico", false, false) as Node3D
+			_comprobar(eco != null, "#888: %s proyecta un eco geométrico" % objeto_id)
+			if eco != null:
+				_comprobar(
+					String(eco.get_meta("motivo_simbolico", "")) == motivo,
+					"#888: el eco comparte el motivo del original",
+				)
+				_comprobar(
+					eco.find_children("*", "CollisionShape3D", true, false).is_empty(),
+					"#888: el eco no añade colisión ni objetivo oculto",
+				)
+				_comprobar(
+					original != null and eco.transform != original.transform,
+					"#888: el eco deforma composición sin tapar el original",
+				)
+		mundo.queue_free()
+
+	var desconocido := Node3D.new()
+	root.add_child(desconocido)
+	var inventadas := SuenoUtileria.montar(desconocido, "crucero", 8, 888, [], ["objeto-ajeno"])
+	_comprobar(inventadas.is_empty(), "#888: la gramática no fabrica originales desconocidos")
+	desconocido.queue_free()
+
+
 func _probar_reproducibilidad() -> void:
 	var a := Node3D.new()
 	var b := Node3D.new()
@@ -112,6 +156,11 @@ func _probar_reproducibilidad() -> void:
 		_comprobar(
 			primera[i].id_catalogo() == segunda[i].id_catalogo(),
 			"id de catálogo reproducible %d" % i,
+		)
+		_comprobar(
+			primera[i].get_meta("motivo_simbolico", "")
+			== segunda[i].get_meta("motivo_simbolico", ""),
+			"motivo simbólico reproducible %d" % i,
 		)
 	a.queue_free()
 	b.queue_free()
@@ -146,6 +195,14 @@ func _probar_tarot_no_filtra_pistas() -> void:
 		_comprobar(
 			tarot.find_child("Carta", true, false) != null,
 			"el tarot mantiene silueta propia en vez de caer al cubo genérico",
+		)
+		_comprobar(
+			String(tarot.get_meta("motivo_simbolico", "")) == "ciclo-centro",
+			"#888: el tarot recogido usa ciclo/centro sin rotular el arcano",
+		)
+		_comprobar(
+			tarot.find_child("EcoSimbolico", false, false) != null,
+			"#888: el tarot conocido puede proyectar un eco estructural",
 		)
 	recogida.queue_free()
 
