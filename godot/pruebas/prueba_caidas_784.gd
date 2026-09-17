@@ -37,8 +37,7 @@ func _probar_suelos_sueno() -> void:
 
 		var entrada: Vector3 = espacio["entrada"]
 		var consulta := PhysicsRayQueryParameters3D.create(
-			entrada + Vector3(0.0, 1.6, 0.0),
-			entrada + Vector3(0.0, -2.0, 0.0)
+			entrada + Vector3(0.0, 1.6, 0.0), entrada + Vector3(0.0, -2.0, 0.0)
 		)
 		var golpe := mundo.get_world_3d().direct_space_state.intersect_ray(consulta)
 		_comprobar(not golpe.is_empty(), "hay suelo bajo la entrada de %s" % id)
@@ -93,7 +92,9 @@ func _probar_rescate_y_reentrada() -> void:
 		dia._caminante.position.is_equal_approx(entrada + Vector3(0.0, 1.0, 0.0)),
 		"una caída profunda vuelve a la entrada actual",
 	)
-	_comprobar(dia._caminante.velocity.length() <= 0.001, "el rescate cancela la velocidad de caída")
+	_comprobar(
+		dia._caminante.velocity.length() <= 0.001, "el rescate cancela la velocidad de caída"
+	)
 
 	dia.queue_free()
 	await process_frame
