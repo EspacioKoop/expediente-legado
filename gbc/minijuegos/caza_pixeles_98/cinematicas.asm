@@ -1,6 +1,6 @@
 ; Cinematicas minimas de Pixel Exodus (#882).
-; Se dibujan en BG: no consumen OAM y, mientras estan activas, el loop de
-; gameplay pausa movimiento/colisiones/timer sin introducir HALT adicional.
+; Se dibujan en BG: no consumen OAM y avanzan de forma no bloqueante junto al
+; gameplay, sin introducir HALT ni alterar el temporizador de la partida.
 
 DEF TILE_CIN_CHROMIA_VIVO EQU 54
 DEF TILE_CIN_EXTRACTOR    EQU 55
