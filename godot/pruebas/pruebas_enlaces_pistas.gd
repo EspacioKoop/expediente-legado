@@ -36,7 +36,7 @@ func _init() -> void:
 					true
 				)
 
-				var meta := "[url=pista:%s underline=hover]" % id
+				var meta := "[url=pista:%s]" % id
 				comprobar(prefijo + ": enlace activo sin descubrir", sin_descubrir.contains(meta), true)
 
 				var descubierta := BBCode.render(Marcas.de_registro(registro, pistas, [id]))
