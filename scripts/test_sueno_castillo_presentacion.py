@@ -9,6 +9,7 @@ DIA_SUENO = RAIZ / "godot" / "guion" / "dia_sueno_app.gd"
 SCRIPTORIUM = RAIZ / "godot" / "escenas" / "suenos" / "props_284" / "galeria_scriptorium_castillo.tscn"
 TORRE = RAIZ / "godot" / "escenas" / "suenos" / "props_284" / "torre_capilla_castillo.tscn"
 CLAUSTRO = RAIZ / "godot" / "escenas" / "suenos" / "props_284" / "claustro_reflejado_castillo.tscn"
+ARCADA = RAIZ / "godot" / "escenas" / "suenos" / "props_284" / "arcada_claustro_castillo_psx.obj"
 
 
 class SuenoCastilloPresentacionTest(unittest.TestCase):
@@ -20,6 +21,7 @@ class SuenoCastilloPresentacionTest(unittest.TestCase):
         cls.scriptorium = SCRIPTORIUM.read_text(encoding="utf-8")
         cls.torre = TORRE.read_text(encoding="utf-8")
         cls.claustro = CLAUSTRO.read_text(encoding="utf-8")
+        cls.arcada = ARCADA.read_text(encoding="utf-8")
 
     def test_campanas_son_procedurales_deterministas_y_sin_binarios(self):
         self.assertIn("AudioStreamWAV.new()", self.audio)
@@ -45,9 +47,12 @@ class SuenoCastilloPresentacionTest(unittest.TestCase):
         self.assertIn('"claustro_reflejado":', self.presentacion)
 
     def test_composiciones_reutilizan_piezas_sin_fisica_paralela(self):
-        for escena in (self.scriptorium, self.torre, self.claustro):
+        for escena in (self.scriptorium, self.torre):
             self.assertIn("muro_torre_castillo.tscn", escena)
             self.assertIn("escalera_anular_castillo.tscn", escena)
+        self.assertIn("arcada_claustro_castillo.tscn", self.claustro)
+        self.assertIn("escalera_anular_castillo.tscn", self.claustro)
+        for escena in (self.scriptorium, self.torre, self.claustro):
             self.assertNotIn("StaticBody3D", escena)
             self.assertNotIn("CollisionShape3D", escena)
             self.assertNotIn("BoxMesh", escena)
@@ -57,6 +62,13 @@ class SuenoCastilloPresentacionTest(unittest.TestCase):
         self.assertIn("LuzAltaImposible", self.torre)
         self.assertIn("ArcadaOesteElevada", self.claustro)
         self.assertIn("EscaleraReflejoB", self.claustro)
+
+    def test_arcada_de_claustro_deriva_del_modelo_propio_sin_torres(self):
+        self.assertIn("o ArcadaClaustroPSX", self.arcada)
+        self.assertIn("g Arch_00", self.arcada)
+        self.assertIn("g Arch_10", self.arcada)
+        for grupo in ("g Tower_L", "g Roof_L", "g Tower_R", "g Roof_R", "g ButtressL", "g ButtressR"):
+            self.assertNotIn(grupo, self.arcada)
 
     def test_mutacion_secundaria_deforma_presentacion_sin_tocar_fisica(self):
         self.assertIn('espacio.get("mutacion_castillo", "estable")', self.presentacion)
