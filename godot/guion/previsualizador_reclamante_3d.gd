@@ -3,11 +3,17 @@
 ## El reclamante deja de ser solo un nombre: está al otro lado del mostrador y
 ## reacciona a cada resolución. Las pruebas presentadas quedan físicamente sobre
 ## la mesa como sellos; no cambian reglas aquí, solo cuentan lo ya resuelto por
-## `CareoDocumental`.
+## `CareoDocumental`. Cada ronda deja además las dos jugadas como fichas físicas
+## sobre el mostrador y usa el catálogo común de sonido para distinguirlas.
 class_name PrevisualizadorReclamante3D
 extends SubViewportContainer
 
 const TAM_VIEWPORT := Vector2i(360, 250)
+const SONIDOS_JUGADA := {
+	"objecion": "firmar",
+	"silencio": "pulsar",
+	"insistencia": "marcar",
+}
 
 var reduccion_movimiento := false
 
@@ -15,6 +21,7 @@ var _viewport: SubViewport
 var _mundo: Node3D
 var _figura: Node3D
 var _sellos: Node3D
+var _jugadas: Node3D
 var _tween: Tween
 var _cantidad_sellos := 0
 
@@ -38,11 +45,14 @@ func mostrar(rival: Dictionary) -> void:
 	)
 	_figura.rotation.y = PI
 	_limpiar_sellos()
+	_limpiar_jugadas()
 
 
 func reaccion(ronda: Dictionary) -> void:
 	if _figura == null:
 		return
+	_agregar_jugadas(ronda)
+	_reproducir_jugada(String(ronda.get("tipo_jugador", "")))
 	if not ronda.get("evidencia", {}).is_empty():
 		_agregar_sello(int(ronda.get("impacto_evidencia", 0)) > 0)
 	if reduccion_movimiento:
@@ -60,6 +70,17 @@ func reaccion(ronda: Dictionary) -> void:
 		_tween.tween_property(_figura, "position:z", -0.56, 0.10)
 	_tween.tween_property(_figura, "position:z", -0.75, 0.16)
 	_tween.parallel().tween_property(_figura, "rotation:z", 0.0, 0.16)
+
+
+static func sonido_jugada(tipo: String) -> String:
+	return String(SONIDOS_JUGADA.get(tipo, ""))
+
+
+func _reproducir_jugada(tipo: String) -> void:
+	var nombre := sonido_jugada(tipo)
+	if nombre.is_empty():
+		return
+	Sonido.sonar(self, nombre)
 
 
 func _montar_mundo() -> void:
@@ -113,6 +134,10 @@ func _montar_mundo() -> void:
 	_sellos.name = "SellosEvidencia"
 	_mundo.add_child(_sellos)
 
+	_jugadas = Node3D.new()
+	_jugadas.name = "JugadasRonda"
+	_mundo.add_child(_jugadas)
+
 
 func _agregar_sello(acierto: bool) -> void:
 	if _sellos == null:
@@ -134,11 +159,70 @@ func _agregar_sello(acierto: bool) -> void:
 	_cantidad_sellos += 1
 
 
+func _agregar_jugadas(ronda: Dictionary) -> void:
+	if _jugadas == null:
+		return
+	_limpiar_jugadas()
+	var veredicto := String(ronda.get("veredicto", "empate"))
+	_crear_ficha_jugada(
+		String(ronda.get("tipo_jugador", "")),
+		Vector3(-0.48, 0.735, 0.48),
+		veredicto == "gana_jugador"
+	)
+	_crear_ficha_jugada(
+		String(ronda.get("tipo_rival", "")), Vector3(0.48, 0.735, 0.48), veredicto == "gana_rival"
+	)
+
+
+func _crear_ficha_jugada(tipo: String, posicion: Vector3, destacada: bool) -> void:
+	if tipo.is_empty():
+		return
+	var ficha := MeshInstance3D.new()
+	ficha.name = "Jugada_%s" % tipo
+	ficha.mesh = _malla_jugada(tipo)
+	ficha.position = posicion
+	ficha.material_override = _material(_color_jugada(tipo))
+	if destacada:
+		ficha.scale = Vector3(1.28, 1.0, 1.28)
+		ficha.position.y += 0.025
+	_jugadas.add_child(ficha)
+
+
+func _malla_jugada(tipo: String) -> PrimitiveMesh:
+	if tipo == "objecion":
+		var caja := BoxMesh.new()
+		caja.size = Vector3(0.28, 0.035, 0.28)
+		return caja
+	var ficha := CylinderMesh.new()
+	ficha.top_radius = 0.15
+	ficha.bottom_radius = 0.15
+	ficha.height = 0.035
+	ficha.radial_segments = 16 if tipo == "silencio" else 3
+	return ficha
+
+
+func _color_jugada(tipo: String) -> Color:
+	match tipo:
+		"objecion":
+			return Color(0.62, 0.11, 0.08)
+		"silencio":
+			return Color(0.18, 0.36, 0.58)
+		_:
+			return Color(0.70, 0.52, 0.08)
+
+
 func _limpiar_sellos() -> void:
 	_cantidad_sellos = 0
 	if _sellos == null:
 		return
 	for hijo in _sellos.get_children():
+		hijo.queue_free()
+
+
+func _limpiar_jugadas() -> void:
+	if _jugadas == null:
+		return
+	for hijo in _jugadas.get_children():
 		hijo.queue_free()
 
 

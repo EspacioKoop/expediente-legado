@@ -8,7 +8,7 @@ class Issue779Test(unittest.TestCase):
         comprobar_contrato(
             self,
             "pruebas/issue_779_smoke.gd",
-            "issue_779: 12 pasadas, 0 fallos",
+            "issue_779: 16 pasadas, 0 fallos",
         )
 
 
