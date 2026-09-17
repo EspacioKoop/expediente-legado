@@ -156,6 +156,15 @@ static func fuente_mono() -> Font:
 	return load(RUTA_FUENTE_MONO) as Font
 
 
+## Rol específico de terminal (#298). Mientras Kubasta no esté incorporada con
+## su binario real, procedencia, SHA-256 y LFS, conserva IBM Plex Mono como
+## fallback reproducible. Separar el rol ahora evita que el futuro cambio de
+## identidad de terminal altere rótulos técnicos, publicaciones o texto 3D que
+## usan deliberadamente la monoespaciada genérica.
+static func fuente_terminal() -> Font:
+	return fuente_mono()
+
+
 ## Interfaz general: Atkinson Hyperlegible, diseñada por el Braille Institute
 ## para legibilidad a tamaño pequeño y con licencia OFL-1.1 empaquetada en el
 ## juego. Sustituye la tipografía de respaldo del motor: esa ya era consistente
@@ -173,6 +182,7 @@ static func tema() -> Theme:
 	var documento := fuente_documento()
 	var titulo := fuente_titulo()
 	var mono := fuente_mono()
+	var terminal := fuente_terminal()
 	var tema := Theme.new()
 	tema.default_font = fuente_interfaz()
 	tema.default_font_size = 14
@@ -183,6 +193,10 @@ static func tema() -> Theme:
 	tema.set_font("title_font", "Window", titulo)
 	tema.set_font("document_font", "RichTextLabel", documento)
 	tema.set_font("mono_font", "RichTextLabel", mono)
+	# Rol manual para superficies terminal/diagnóstico. Se registra para los dos
+	# controles de texto que más lo necesitan sin convertirlo en fuente global.
+	tema.set_font("terminal_font", "RichTextLabel", terminal)
+	tema.set_font("terminal_font", "LineEdit", terminal)
 	_configurar_botones(tema)
 	_configurar_campos(tema)
 	return tema
