@@ -74,8 +74,20 @@ class CalleIdentidadTest(unittest.TestCase):
 
     def test_el_cielo_es_una_noche_urbana_estatica(self):
         cielo = (ROOT / "godot/arte/cielo_siga.gdshader").read_text(encoding="utf-8")
-        for uniforme in ("luna_direccion", "resplandor_ciudad", "estrellas"):
+        preset = (ROOT / "godot/arte/cielo_siga.tres").read_text(encoding="utf-8")
+        for uniforme in (
+            "luna_direccion",
+            "luna_halo",
+            "resplandor_ciudad",
+            "bruma_horizonte",
+            "nubes",
+            "estrellas",
+            "estrellas_secundarias",
+        ):
             self.assertIn(uniforme, cielo)
+        for parametro in ("luna_halo", "bruma_fuerza", "nubes", "estrellas_secundarias"):
+            self.assertIn(f"shader_parameter/{parametro}", preset)
+        self.assertIn("mascara_nube", cielo)
         self.assertNotIn("TIME", cielo)
 
     def test_calle_real_en_godot(self):
