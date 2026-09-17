@@ -246,7 +246,9 @@ func _probar_reproducibilidad() -> void:
 		for i in range(capa_a.get_child_count()):
 			var rima_a := capa_a.get_child(i) as Node3D
 			var rima_b := capa_b.get_child(i) as Node3D
-			_comprobar(rima_a.transform == rima_b.transform, "#888: rima espacial reproducible %d" % i)
+			_comprobar(
+				rima_a.transform == rima_b.transform, "#888: rima espacial reproducible %d" % i
+			)
 	a.queue_free()
 	b.queue_free()
 
