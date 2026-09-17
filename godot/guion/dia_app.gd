@@ -281,16 +281,20 @@ func _espacio_de(fase: String) -> Dictionary:
 			SuenoCombate.vencidos(partida.estado),
 		)
 	)
-	var reparto := (
-		SuenoContenido
-		. repartir(
-			fuentes,
-			cantidad,
-			Sueno.semilla(jornada["dia"], jornada["leido_hoy"], _raiz()),
-		)
-	)
+	var semilla_noche := Sueno.semilla(jornada["dia"], jornada["leido_hoy"], _raiz())
+	var reparto := SuenoContenido.repartir(fuentes, cantidad, semilla_noche)
 	var cual: int = cantidad - jornada["sueno_escenas"].size()
 	var trozo: Dictionary = reparto[clampi(cual, 0, reparto.size() - 1)]
+
+	# #947: el castillo cambia de lectura entre noches/posiciones sin guardar un
+	# segundo estado de progreso. La misma noche recargada conserva semilla y
+	# posición, por lo que patio/scriptorium/torre siguen siendo reproducibles.
+	var forma_actual := SuenoFormas.de(id)
+	if String(forma_actual.get("identidad_onirica", "")) == SuenoCastillo.ID:
+		var estado_castillo: Dictionary = trozo.get("estado_presentacion", {}).duplicate(true)
+		estado_castillo["vuelta_castillo"] = cual + 1
+		estado_castillo["semilla_castillo"] = semilla_noche
+		trozo["estado_presentacion"] = estado_castillo
 	# Quién se deja pelear en ESTA escena (#88). Se calcula al montarla y no al
 	# pisarla: la zona de reto solo lleva un id, y quien la pise tiene que poder
 	# saber contra quién sin volver a repartir el sueño.
