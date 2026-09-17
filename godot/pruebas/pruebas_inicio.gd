@@ -105,9 +105,24 @@ func _probar() -> void:
 		inicio._diorama.get("_attract_activo"),
 		"#830: la inactividad prolongada activa el attract mode ligero"
 	)
+	var primer_tableau: Dictionary = InicioDiorama3D.TABLEAUX_ATTRACT[0]
 	_comprobar(
-		inicio._diorama.get("_zona_actual") == InicioDiorama3D.ZONAS_ATTRACT[0],
-		"attract mode reutiliza un encuadre seguro del diorama existente"
+		inicio._diorama.get("_zona_actual") == String(primer_tableau.get("zona", "")),
+		"#888: attract mode aplica el encuadre del primer tableau simbólico"
+	)
+	_comprobar(
+		String(primer_tableau.get("id", "")) == "balanza",
+		"#888: los tableaux tienen IDs internos estables sin añadir texto a la UI"
+	)
+	_comprobar(
+		not is_equal_approx(
+			float(inicio._diorama.get("_fov_objetivo")), InicioDiorama3D.FOV_BASE
+		),
+		"#888: el tableau puede variar sutilmente el FOV sin crear otra escena"
+	)
+	_comprobar(
+		float(inicio._diorama.get("_multiplicador_luz_attract")) < 1.0,
+		"#888: el tableau modula la luz como composición y no como iconografía"
 	)
 	_comprobar(inicio._salir.has_focus(), "attract mode no roba el foco de navegación")
 	inicio._diorama._registrar_actividad()
@@ -117,6 +132,14 @@ func _probar() -> void:
 	_comprobar(
 		inicio._diorama.get("_zona_actual") == "salir",
 		"salir de attract mode restaura el encuadre elegido por el jugador"
+	)
+	_comprobar(
+		is_equal_approx(float(inicio._diorama.get("_fov_objetivo")), InicioDiorama3D.FOV_BASE),
+		"salir de attract mode restaura el FOV objetivo normal"
+	)
+	_comprobar(
+		is_equal_approx(float(inicio._diorama.get("_multiplicador_luz_attract")), 1.0),
+		"salir de attract mode restaura la iluminación normal"
 	)
 	var taza := inicio._diorama.find_child("TazaPuesto", true, false) as MeshInstance3D
 	var papel := inicio._diorama.find_child("PapelBandeja", true, false) as Node3D
