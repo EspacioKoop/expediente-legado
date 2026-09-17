@@ -31,7 +31,7 @@ func _initialize() -> void:
 		elif argumento.begins_with("--output="):
 			_salida = argumento.trim_prefix("--output=")
 
-	if _modo not in ["baseline", "full"]:
+	if _modo not in ["baseline", "retro_urban", "full"]:
 		_fallar("modo inválido: %s" % _modo)
 		return
 	if _salida.is_empty():
@@ -60,7 +60,15 @@ func _ejecutar() -> void:
 	_montar_iluminacion(mundo, espacio)
 
 	var componentes := ["trayecto"]
-	if _modo == "full":
+	if _modo == "retro_urban":
+		var dia_retro := DiaHarness.new()
+		dia_retro.name = "DiaHarnessRetroUrban"
+		dia_retro._mundo = mundo
+		escena.add_child(dia_retro)
+		var controlador_retro = RETRO_URBAN.new()
+		dia_retro.add_child(controlador_retro)
+		componentes.append("retro_urban")
+	elif _modo == "full":
 		_montar_cielo(mundo)
 		_montar_tren(mundo)
 		componentes.append_array(["cielo_cc0", "tren_cc0"])
