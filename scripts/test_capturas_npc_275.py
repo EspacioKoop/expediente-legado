@@ -4,7 +4,7 @@ import unittest
 
 RAIZ = Path(__file__).resolve().parents[1]
 CAPTURAS = RAIZ / "godot/pruebas/capturas_npc_275.gd"
-WORKFLOW = RAIZ / ".github/workflows/alpha-playtest.yml"
+WORKFLOW = RAIZ / ".github/workflows/npc-visual-gate-275.yml"
 
 
 class CapturasNpc275Test(unittest.TestCase):
@@ -31,12 +31,13 @@ class CapturasNpc275Test(unittest.TestCase):
         self.assertIn("imagen.save_png(ruta)", self.capturas)
         self.assertIn('"README.md"', self.capturas)
 
-    def test_alpha_publica_artefacto_para_revision_humana(self):
+    def test_workflow_publica_artefacto_para_revision_humana(self):
         self.assertIn("Generar capturas comparativas NPC #275", self.workflow)
         self.assertIn("xvfb-run -a godot4", self.workflow)
         self.assertIn("res://pruebas/capturas_npc_275.gd", self.workflow)
         self.assertIn("SIGA-98-npc-visual-gate-275-${{ github.sha }}", self.workflow)
         self.assertIn("dist/capturas-npc-275", self.workflow)
+        self.assertIn("retention-days: 14", self.workflow)
 
 
 if __name__ == "__main__":
