@@ -81,48 +81,72 @@ func _init() -> void:
 	var emulador := _crear_emulador()
 	if emulador == null or not _cargar_rom(emulador):
 		return
+	if not _ejecutar_playtest(emulador):
+		return
 
+	_imprimir_resumen(emulador)
+	quit(0)
+
+
+func _ejecutar_playtest(emulador: Object) -> bool:
+	if not _capturar_arranque(emulador):
+		return false
+	_audio_activo = true
+	if not _capturar_intro_y_fase1(emulador):
+		return false
+	if not _capturar_fases_2_y_3(emulador):
+		return false
+	if not _capturar_boss_y_final(emulador):
+		return false
+	if not _validar_cierre(emulador):
+		return false
+	return true
+
+
+func _capturar_arranque(emulador: Object) -> bool:
 	var frame := PackedByteArray()
 	for _i in range(FRAMES_ARRANQUE):
 		frame = _step(emulador, 0)
 		if _fallo:
-			return
+			return false
 	if not _capturar(frame, "titulo.png"):
-		return
+		return false
 	if _leer(emulador, W_ESTADO) != ESTADO_TITULO:
 		_fallar("ABI WRAM inesperado: wEstado no está en título tras el arranque")
-		return
+		return false
+	return _iniciar_partida(emulador)
 
-	if not _iniciar_partida(emulador):
-		return
-	_audio_activo = true
 
+func _capturar_intro_y_fase1(emulador: Object) -> bool:
+	var frame := PackedByteArray()
 	# La intro/instrucciones dura 150 frames y congela el primer segundo real.
 	for _i in range(12):
 		frame = _step(emulador, 0)
 	if not _capturar(frame, "instrucciones.png"):
-		return
+		return false
 	if _leer(emulador, W_TIEMPO) != 45:
 		_fallar("las instrucciones consumieron tiempo de partida")
-		return
+		return false
 
 	for _i in range(155):
 		frame = _step(emulador, 0)
 	if _leer(emulador, W_FASE) != 1 or _leer(emulador, W_TIEMPO) != 45:
 		_fallar("la intro no entregó el control con fase 1 / 45 s")
-		return
-	if not _capturar(frame, "fase1.png"):
-		return
+		return false
+	return _capturar(frame, "fase1.png")
 
+
+func _capturar_fases_2_y_3(emulador: Object) -> bool:
 	if not _esperar_fase(emulador, 2, 1100):
-		return
+		return false
+	var frame := PackedByteArray()
 	for _i in range(55):
 		frame = _step_autoplay(emulador)
 	if not _capturar(frame, "fase2-obstaculos.png"):
-		return
+		return false
 
 	if not _esperar_fase(emulador, 3, 1100):
-		return
+		return false
 	for _i in range(55):
 		frame = _step_autoplay(emulador)
 	var intentos_restauracion := 0
@@ -135,36 +159,42 @@ func _init() -> void:
 		intentos_restauracion += 1
 	if _leer(emulador, W_RESTAURACION) <= 0:
 		_fallar("el autoplayer no logró restaurar Chromia")
-		return
-	if not _capturar(frame, "fase3-restauracion.png"):
-		return
+		return false
+	return _capturar(frame, "fase3-restauracion.png")
 
+
+func _capturar_boss_y_final(emulador: Object) -> bool:
 	if not _esperar_boss(emulador, 650):
-		return
+		return false
+	var frame := PackedByteArray()
 	for _i in range(12):
 		frame = _step_autoplay(emulador)
 	if not _capturar(frame, "behemoth.png"):
-		return
+		return false
 
 	if not _esperar_final(emulador, 650):
-		return
+		return false
 	for _i in range(60):
 		frame = _step(emulador, 0)
-	if not _capturar(frame, "final-records.png"):
-		return
+	return _capturar(frame, "final-records.png")
 
+
+func _validar_cierre(emulador: Object) -> bool:
 	if _leer(emulador, W_BOSS_DERROTADO) != 1:
 		_fallar("la partida de evidencia terminó sin limpiar el Glitch Behemoth")
-		return
+		return false
 	if not _validar_audio(emulador):
-		return
+		return false
 	if not _validar_sram_persistente(emulador):
-		return
+		return false
 	if not _escribir_manifest(emulador):
-		return
+		return false
 	if not _escribir_audio():
-		return
+		return false
+	return true
 
+
+func _imprimir_resumen(emulador: Object) -> void:
 	print(
 		(
 			"Pixel Exodus #882: OK · score=%d combo=%d restauración=%d · audio=%d bytes"
@@ -176,7 +206,6 @@ func _init() -> void:
 			]
 		)
 	)
-	quit(0)
 
 
 func _resolver_salida() -> String:
@@ -431,20 +460,19 @@ func _validar_sram_persistente(emulador: Object) -> bool:
 	if int(sram[5]) <= 0 or int(sram[7]) < 4 or int(sram[8]) <= 0:
 		_fallar("los récords persistidos no reflejan la partida completada")
 		return false
+	return _validar_reapertura_sram(sram)
 
+
+func _validar_reapertura_sram(sram: PackedByteArray) -> bool:
 	var reabierto := _crear_emulador()
 	if reabierto == null or not _cargar_rom(reabierto):
 		return false
 	if not bool(reabierto.call("load_save_ram", sram)):
 		_fallar("una segunda instancia rechazó la SRAM PX98")
 		return false
-	for _i in range(FRAMES_ARRANQUE):
-		reabierto.call("set_buttons", 0)
-		var frame = reabierto.call("run_frame_rgba")
-		if not (frame is PackedByteArray) or frame.size() != TAM_FRAME:
-			_fallar("la reapertura con SRAM no produjo framebuffer válido")
-			return false
-		reabierto.call("drain_audio_pcm16")
+	if not _arrancar_reapertura_sram(reabierto):
+		return false
+
 	var sram_reabierta = reabierto.call("save_ram")
 	if not (sram_reabierta is PackedByteArray):
 		_fallar("save_ram falló tras reabrir")
@@ -452,6 +480,17 @@ func _validar_sram_persistente(emulador: Object) -> bool:
 	if sram_reabierta.slice(0, 10) != sram.slice(0, 10):
 		_fallar("los récords PX98 cambiaron al cerrar/reabrir")
 		return false
+	return true
+
+
+func _arrancar_reapertura_sram(reabierto: Object) -> bool:
+	for _i in range(FRAMES_ARRANQUE):
+		reabierto.call("set_buttons", 0)
+		var frame = reabierto.call("run_frame_rgba")
+		if not (frame is PackedByteArray) or frame.size() != TAM_FRAME:
+			_fallar("la reapertura con SRAM no produjo framebuffer válido")
+			return false
+		reabierto.call("drain_audio_pcm16")
 	return true
 
 
