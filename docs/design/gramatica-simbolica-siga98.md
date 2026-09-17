@@ -85,6 +85,30 @@ El attract mode de #830 usa cuatro **tableaux internos**. Sus IDs solo existen e
 
 Las diferencias deben permanecer pequeñas. No se crean escenas, viewports, modelos, cartas ni texto adicional. Cualquier input abandona el attract mode y `reduccion_movimiento` impide que se active.
 
+## Vertical slice: ecos del sueño
+
+El segundo vertical de #888 vive en `SuenoUtileria`, que ya cumple la regla de #79/#87: solo monta anomalías a partir de originales que el jugador tocó, leyó o recogió realmente ese día.
+
+Sobre esos originales puede aparecer un **eco geométrico estático**. No es otro objeto jugable: duplica únicamente la forma visual ya deformada, sin colisión, prompt, objetivo ni persistencia propia.
+
+| Original reconocido | Motivo interno | Construcción del eco | Lecturas posibles |
+| --- | --- | --- | --- |
+| silla de oficina | `umbral` | repetición alineada un poco más al fondo | paso, guía, psicopompo |
+| monitor/CRT | `doble` | copia desplazada y ligeramente desfasada | sombra, reflejo, Luna |
+| archivador | `laberinto` | copia parcial girada a 90° | Minotauro, Ariadna, búsqueda |
+| tarot válido del día | `ciclo-centro` | copia reducida y vuelta sobre el centro | Rueda, retorno, integración |
+
+Reglas específicas:
+
+- el nombre del motivo nunca aparece en UI;
+- el eco no añade una segunda interacción ni una colisión invisible;
+- si el original no está legitimado por el estado del día, tampoco existe el eco;
+- la misma noche/semilla conserva el mismo motivo y el mismo original;
+- el sistema no altera `objetivos_requeridos`, detectores ni feedback de #281;
+- al ser estático, no introduce movimiento adicional que deba suprimirse con `reduccion_movimiento`.
+
+Este patrón permite escalar después a composiciones mayores —simetrías, corredores repetidos, ciclos o descensos— sin convertir cada referencia cultural en un asset nuevo.
+
 ## Límites
 
 - Nada simbólico introduce hechos nuevos de un expediente.

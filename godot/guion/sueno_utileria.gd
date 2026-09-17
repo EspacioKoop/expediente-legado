@@ -5,6 +5,11 @@
 ## Una carta de tarot cuenta únicamente si su folio se leyó hoy y ya fue recogida;
 ## si no hay originales compatibles, la sala no inventa utilería.
 ## Cada prescripción enlaza además con un ID estable de CatalogoAnomalias.
+##
+## #888 añade una segunda lectura puramente visual: cada original puede proyectar
+## un eco geométrico estático ligado a una familia de la gramática simbólica.
+## El eco duplica solo FormaDeformada, no colisiones ni interacción, y por tanto
+## no altera objetivos #281, navegación, progreso ni persistencia.
 class_name SuenoUtileria
 extends RefCounted
 
@@ -20,6 +25,7 @@ const PRESCRIPCIONES := [
 		"reaccion": Vector3(0.72, 1.35, 1.85),
 		"giro": Vector3(0.0, 18.0, -7.0),
 		"giro_reaccion": Vector3(0.0, 112.0, 8.0),
+		"motivo_simbolico": "umbral",
 	},
 	{
 		"objeto_id": "monitor",
@@ -32,6 +38,7 @@ const PRESCRIPCIONES := [
 		"reaccion": Vector3(0.88, 1.95, 1.30),
 		"giro": Vector3(-6.0, -24.0, -10.0),
 		"giro_reaccion": Vector3(9.0, 42.0, 13.0),
+		"motivo_simbolico": "doble",
 	},
 	{
 		"objeto_id": "archivador",
@@ -44,6 +51,7 @@ const PRESCRIPCIONES := [
 		"reaccion": Vector3(1.42, 0.72, 0.74),
 		"giro": Vector3(0.0, 14.0, 6.0),
 		"giro_reaccion": Vector3(0.0, -76.0, -9.0),
+		"motivo_simbolico": "laberinto",
 	},
 ]
 
@@ -57,6 +65,7 @@ const PRESCRIPCION_TAROT := {
 	"reaccion": Vector3(0.72, 0.88, 4.80),
 	"giro": Vector3(-5.0, 23.0, 7.0),
 	"giro_reaccion": Vector3(18.0, 117.0, -13.0),
+	"motivo_simbolico": "ciclo-centro",
 }
 
 
@@ -114,6 +123,9 @@ static func montar(
 		var carta := String(paso.get("carta", ""))
 		if not carta.is_empty():
 			anomalia.set_meta("carta_origen", carta)
+		var motivo := String(datos.get("motivo_simbolico", ""))
+		if not motivo.is_empty():
+			anomalia.set_meta("motivo_simbolico", motivo)
 
 		mundo.add_child(anomalia)
 		(
@@ -130,8 +142,43 @@ static func montar(
 				datos["giro_reaccion"],
 			)
 		)
+		_montar_eco_simbolico(anomalia, motivo)
 		creadas.append(anomalia)
 	return creadas
+
+
+static func _montar_eco_simbolico(anomalia: AnomaliaSueno3D, motivo: String) -> void:
+	if motivo.is_empty():
+		return
+	var original := anomalia.find_child("FormaDeformada", false, false) as Node3D
+	if original == null:
+		return
+	var eco := original.duplicate() as Node3D
+	if eco == null:
+		return
+
+	eco.name = "EcoSimbolico"
+	eco.set_meta("motivo_simbolico", motivo)
+	match motivo:
+		"doble":
+			eco.position = Vector3(0.32, 0.05, -0.22)
+			eco.scale = original.scale * Vector3(0.82, 0.82, 0.82)
+			eco.rotation_degrees = original.rotation_degrees + Vector3(0.0, -18.0, 0.0)
+		"laberinto":
+			eco.position = Vector3(0.38, 0.0, -0.30)
+			eco.scale = original.scale * Vector3(0.72, 0.88, 0.72)
+			eco.rotation_degrees = original.rotation_degrees + Vector3(0.0, 90.0, 0.0)
+		"umbral":
+			eco.position = Vector3(0.0, 0.0, -0.42)
+			eco.scale = original.scale * Vector3(0.84, 0.84, 0.84)
+			eco.rotation_degrees = original.rotation_degrees + Vector3(0.0, 8.0, 0.0)
+		"ciclo-centro":
+			eco.position = Vector3(0.0, 0.08, -0.12)
+			eco.scale = original.scale * Vector3(0.62, 0.62, 0.62)
+			eco.rotation_degrees = original.rotation_degrees + Vector3(0.0, 180.0, 0.0)
+		_:
+			return
+	anomalia.add_child(eco)
 
 
 static func _plan_deformaciones(
