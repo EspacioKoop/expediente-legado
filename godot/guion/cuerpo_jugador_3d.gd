@@ -217,7 +217,9 @@ func _rostro_exterior(esqueleto: Skeleton3D, piel: Color, cabello: Color, peinad
 			pelo_escala = Vector3(radio_x * 0.98, alto * 0.11, radio_z * 0.84)
 		_:
 			pass
-	_esfera_psx(enganche, "Cabello", Vector3(0.0, pelo_y, -radio_z * 0.04), pelo_escala, cabello, 8, 4)
+	_esfera_psx(
+		enganche, "Cabello", Vector3(0.0, pelo_y, -radio_z * 0.04), pelo_escala, cabello, 8, 4
+	)
 	if peinado == "recogido":
 		_esfera_psx(
 			enganche,
