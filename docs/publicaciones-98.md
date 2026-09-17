@@ -67,6 +67,19 @@ Las seis publicaciones tienen una paleta propia estable. Por tanto, varios ejemp
 
 `DiaAcumulacionCasaApp` conecta los `Interactuable3D` recién materializados con el `VisorPublicacion` ya mergeado. Apuntar a un ejemplar guardado y usar la interacción común abre ese mismo contenido; cerrar el visor guarda la lectura mediante el dueño de la jornada. Leer desde la estantería no cobra dinero, no mueve inventario y no activa semillas fuera de las reglas de `Publicaciones98`.
 
+## Ejemplares encontrables
+
+El cuarto corte coloca los cuatro títulos no comprables en espacios reales sin abrir un sistema de coleccionables paralelo. Todos usan `Recogible3D` y el `Inventario` persistente de #97/#283:
+
+- `byte_domestico_42` aparece en el primer puesto de la oficina desde el día 1;
+- `marcador_98_deportes` aparece junto a la máquina de café desde el día 1;
+- `estratos_ciudad_06` aparece en otro puesto de oficina desde el día 2;
+- `manual_casa_98` aparece sobre el sofá de casa desde el día 1.
+
+Al recoger un ejemplar entra en `carried`; si después se guarda con `Inventario.guardar_en_casa()`, el tercer corte lo materializa en la estantería doméstica como objeto `LEER`. Un ID ya presente en `carried` o `home_storage` no respawnea. Los cuatro hallazgos son no vendibles y no activan semillas al recogerlos.
+
+Ignorar cualquiera de estos props no consume acciones, no bloquea la campaña y no altera la economía. `DiaPublicacionesEncontrablesApp` solo monta los props cuando sus anclas de oficina/casa existen y pide al dueño de la jornada que guarde después de una recogida válida.
+
 ## Integración con #442
 
 `revista_umbral_98` es el primer vertical cultural conectado al contrato onírico existente:
@@ -106,13 +119,14 @@ La prensa general y el resto de publicaciones no tienen semilla por defecto: oci
 - colocación determinista;
 - retirada física cuando `Inventario.sacar_de_casa()` cambia la fuente de verdad.
 
-Los tests Python asociados ejecutan estos smokes con Godot headless y comprueban que la capa doméstica no compra, cobra ni mueve objetos por su cuenta.
+`godot/pruebas/pruebas_publicaciones_encontrables_3d.gd` verifica el cuarto corte: catálogo no comprable, anclas reales de puesto/café/sofá, `Recogible3D`, ausencia de respawn, no venta y el flujo completo encontrar → `carried` → `home_storage` → objeto doméstico `LEER`.
+
+Los tests Python asociados ejecutan estos smokes con Godot headless y comprueban que las capas de presentación no compran, cobran ni mueven objetos por su cuenta.
 
 ## Alcance pendiente
 
 Este PR **no cierra #674**. Quedan fuera deliberadamente:
 
-- wiring de los cuatro ejemplares encontrables en escenas reales;
 - arte final de portada/lomo si se decide sustituir la representación procedural;
 - decidir si más publicaciones alimentan #442 sin saturar el sistema cultural;
 - validación humana de legibilidad, foco, tamaño físico y presentación con teclado/mando reales.
