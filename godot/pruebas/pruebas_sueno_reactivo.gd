@@ -11,6 +11,7 @@ func _initialize() -> void:
 	_probar_sin_objetos_tocados()
 	_probar_todas_las_formas()
 	_probar_gramatica_simbolica()
+	_probar_espacio_simbolico()
 	_probar_reproducibilidad()
 	_probar_tarot_no_filtra_pistas()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
@@ -25,6 +26,10 @@ func _probar_sin_objetos_tocados() -> void:
 	_comprobar(
 		mundo.find_children("AnomaliaSueno*", "", true, false).is_empty(),
 		"sin objetos tocados no monta interactuables de relleno",
+	)
+	_comprobar(
+		mundo.find_child("EspacioSimbolico", false, false) == null,
+		"sin original conocido tampoco inventa gramática espacial",
 	)
 	mundo.queue_free()
 
@@ -140,6 +145,72 @@ func _probar_gramatica_simbolica() -> void:
 	desconocido.queue_free()
 
 
+func _probar_espacio_simbolico() -> void:
+	var motivos := {
+		"silla": "umbral",
+		"monitor": "doble",
+		"archivador": "laberinto",
+	}
+	var mallas_esperadas := {
+		"silla": 3,
+		"monitor": 4,
+		"archivador": 9,
+	}
+	for objeto_id in motivos:
+		var mundo := Node3D.new()
+		root.add_child(mundo)
+		var creadas := SuenoUtileria.montar(mundo, "crucero", 8, 888, [], [objeto_id])
+		var capa := mundo.find_child("EspacioSimbolico", false, false) as Node3D
+		_comprobar(capa != null, "#888: %s extiende su motivo al espacio" % objeto_id)
+		if capa != null:
+			_comprobar(capa.get_child_count() == 1, "#888: un original crea una sola rima espacial")
+			var rima := capa.get_child(0) as Node3D
+			_comprobar(
+				String(rima.get_meta("motivo_simbolico", "")) == motivos[objeto_id],
+				"#888: la rima espacial conserva la familia de su original",
+			)
+			_comprobar(
+				String(rima.get_meta("catalogo_origen", "")) == creadas[0].id_catalogo(),
+				"#888: la rima espacial conserva el origen catalogado",
+			)
+			_comprobar(
+				_cerca_xz(rima.position, creadas[0].position),
+				"#888: la composición espacial nace alrededor del original",
+			)
+			_comprobar(
+				rima.find_children("*", "CollisionShape3D", true, false).is_empty(),
+				"#888: la capa espacial no modifica colisiones",
+			)
+			_comprobar(
+				rima.find_children("*", "Control", true, false).is_empty(),
+				"#888: la capa espacial no añade HUD ni rótulos",
+			)
+			var mallas := rima.find_children("*", "MeshInstance3D", true, false)
+			_comprobar(
+				mallas.size() == int(mallas_esperadas[objeto_id]),
+				"#888: %s usa una composición espacial acotada" % objeto_id,
+			)
+			var distancia_max := 0.0
+			for valor_malla in mallas:
+				var malla := valor_malla as Node3D
+				var delta := malla.global_position - rima.global_position
+				distancia_max = maxf(distancia_max, Vector2(delta.x, delta.z).length())
+			_comprobar(
+				distancia_max > 0.75,
+				"#888: el motivo modifica lectura del espacio, no solo el objeto",
+			)
+		mundo.queue_free()
+
+	var desconocido := Node3D.new()
+	root.add_child(desconocido)
+	SuenoUtileria.montar(desconocido, "crucero", 8, 888, [], ["objeto-ajeno"])
+	_comprobar(
+		desconocido.find_child("EspacioSimbolico", false, false) == null,
+		"#888: un original desconocido tampoco fabrica arquitectura simbólica",
+	)
+	desconocido.queue_free()
+
+
 func _probar_reproducibilidad() -> void:
 	var a := Node3D.new()
 	var b := Node3D.new()
@@ -164,6 +235,18 @@ func _probar_reproducibilidad() -> void:
 			),
 			"motivo simbólico reproducible %d" % i,
 		)
+	var capa_a := a.find_child("EspacioSimbolico", false, false) as Node3D
+	var capa_b := b.find_child("EspacioSimbolico", false, false) as Node3D
+	_comprobar(capa_a != null and capa_b != null, "#888: ambas semillas montan capa espacial")
+	if capa_a != null and capa_b != null:
+		_comprobar(
+			capa_a.get_child_count() == capa_b.get_child_count(),
+			"#888: la cantidad de rimas espaciales es reproducible",
+		)
+		for i in range(capa_a.get_child_count()):
+			var rima_a := capa_a.get_child(i) as Node3D
+			var rima_b := capa_b.get_child(i) as Node3D
+			_comprobar(rima_a.transform == rima_b.transform, "#888: rima espacial reproducible %d" % i)
 	a.queue_free()
 	b.queue_free()
 
@@ -175,6 +258,10 @@ func _probar_tarot_no_filtra_pistas() -> void:
 	root.add_child(sin_recoger)
 	var ocultas := SuenoUtileria.montar(sin_recoger, "crucero", 4, 8700, [folio_luna], [], [])
 	_comprobar(ocultas.is_empty(), "leer el folio sin recoger la carta no fabrica utilería")
+	_comprobar(
+		sin_recoger.find_child("EspacioSimbolico", false, false) == null,
+		"#888: tarot no recogido tampoco deja huella espacial",
+	)
 	sin_recoger.queue_free()
 
 	var recogida := Node3D.new()
@@ -206,6 +293,18 @@ func _probar_tarot_no_filtra_pistas() -> void:
 			tarot.find_child("EcoSimbolico", false, false) != null,
 			"#888: el tarot conocido puede proyectar un eco estructural",
 		)
+		var capa_tarot := recogida.find_child("EspacioSimbolico", false, false) as Node3D
+		_comprobar(capa_tarot != null, "#888: tarot conocido puede rimar con el espacio")
+		if capa_tarot != null:
+			var rima_tarot := capa_tarot.get_child(0) as Node3D
+			_comprobar(
+				String(rima_tarot.get_meta("motivo_simbolico", "")) == "ciclo-centro",
+				"#888: la rima del tarot conserva ciclo/centro",
+			)
+			_comprobar(
+				rima_tarot.find_children("*", "MeshInstance3D", true, false).size() == 8,
+				"#888: ciclo/centro se expresa como ocho marcas radiales bajas",
+			)
 	recogida.queue_free()
 
 	var con_objetos := Node3D.new()
@@ -218,6 +317,11 @@ func _probar_tarot_no_filtra_pistas() -> void:
 		_buscar_id(mixtas, "tarot-geometria-viva") != null,
 		"el tarot válido no se pierde cuando hay otros originales del día",
 	)
+	var capa_mixta := con_objetos.find_child("EspacioSimbolico", false, false) as Node3D
+	_comprobar(
+		capa_mixta != null and capa_mixta.get_child_count() == 3,
+		"#888: el límite de tres anomalías limita también sus tres rimas espaciales",
+	)
 	con_objetos.queue_free()
 
 	var otro_folio := Node3D.new()
@@ -228,6 +332,10 @@ func _probar_tarot_no_filtra_pistas() -> void:
 	_comprobar(
 		ajenas.is_empty(),
 		"una carta recogida no aparece si su documento no fue leído hoy",
+	)
+	_comprobar(
+		otro_folio.find_child("EspacioSimbolico", false, false) == null,
+		"#888: tarot ajeno a lo leído hoy no altera el espacio",
 	)
 	otro_folio.queue_free()
 
