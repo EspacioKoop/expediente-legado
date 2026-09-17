@@ -84,9 +84,13 @@ func _ejecutar() -> void:
 	var arcano := JuicioSimbolico.arcano_para(tarot, "rival_prueba")
 	_comprobar(arcano.get("id", "") == "la-luna", "solo entra Tarot recogido y no gastado")
 	_comprobar(
-		JuicioSimbolico.arcano_para(
-			[{"id": "la-justicia", "recogida": true, "gastada": true}], "rival_prueba"
-		).is_empty(),
+		(
+			JuicioSimbolico
+			. arcano_para(
+				[{"id": "la-justicia", "recogida": true, "gastada": true}], "rival_prueba"
+			)
+			. is_empty()
+		),
 		"una carta gastada no vuelve al combate",
 	)
 	_comprobar(
