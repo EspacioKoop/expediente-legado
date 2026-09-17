@@ -10,11 +10,13 @@ var _continuar: Button
 var _nueva: Button
 var _cargar: Button
 var _personaje: Button
+var _portatil: Button
 var _ventanilla: Button
 var _ajustes: Button
 var _salir: Button
 var _aviso: Label
 var _confirmacion: ConfirmationDialog
+var _portatil_app: EmuladorPortatilApp = null
 var _reinicio_pendiente := false
 var _entrando := false
 
@@ -48,6 +50,9 @@ func _ready() -> void:
 	_confirmacion.confirmed.connect(_empezar)
 	_confirmacion.canceled.connect(func(): _nueva.grab_focus())
 	add_child(_confirmacion)
+	# #800: importar compras antiguas no debe cargar Partida ni alterar un save
+	# corrupto antes de que el jugador decida abrirlo.
+	PerfilRoms.migrar_desde_partida(ruta)
 	_actualizar()
 	if _continuar.disabled:
 		_nueva.grab_focus()
@@ -73,7 +78,7 @@ func _construir_interfaz() -> void:
 
 	var marco := PanelBisel.new()
 	marco.name = "MarcoInicio"
-	marco.custom_minimum_size = Vector2(520, 540)
+	marco.custom_minimum_size = Vector2(520, 588)
 	marco.saliente = true
 	for lado in ["left", "top", "right", "bottom"]:
 		marco.add_theme_constant_override("margin_" + lado, 10)
@@ -95,6 +100,9 @@ func _construir_interfaz() -> void:
 	_personaje = _crear_boton(tr("INICIO_PERSONAJE"), _abrir_personaje)
 	_personaje.tooltip_text = tr("INICIO_PERSONAJE_TOOLTIP")
 	caja.add_child(_personaje)
+	_portatil = _crear_boton("Portátil Color 98", _abrir_portatil)
+	_portatil.tooltip_text = "ROMs incluidas, compradas y aportadas por el jugador."
+	caja.add_child(_portatil)
 
 	var separador := HSeparator.new()
 	separador.name = "SeparadorInicio"
@@ -254,6 +262,27 @@ func _abrir_personaje() -> void:
 	if error != OK:
 		_entrando = false
 		_aviso.text = tr("INICIO_ERROR_ENTRADA")
+
+
+func _abrir_portatil() -> void:
+	if _entrando or _portatil_app != null:
+		return
+	# Repetir la migración es barato e idempotente y cubre una partida copiada a
+	# la carpeta del usuario mientras el menú ya estaba abierto.
+	PerfilRoms.migrar_desde_partida(ruta)
+	CatalogoRomsUsuario.asegurar_carpeta()
+	var app := EmuladorPortatilAudioApp.new()
+	app.roms_compradas = TiendaVideojuegos.compras({})
+	app.cerrado.connect(_al_cerrar_portatil)
+	_portatil_app = app
+	get_tree().root.add_child(app)
+	app.abrir()
+
+
+func _al_cerrar_portatil() -> void:
+	_portatil_app = null
+	if is_instance_valid(_portatil):
+		_portatil.grab_focus()
 
 
 func _abrir_ventanilla() -> void:
