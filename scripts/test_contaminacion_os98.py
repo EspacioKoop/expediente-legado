@@ -21,9 +21,11 @@ def test_progresion_tiene_hitos_deterministas_y_no_toca_host() -> None:
     modelo = fuente(MODELO)
     assert "EXPEDIENTES_PRINCIPALES := 5" in modelo
     assert 'const CREDENCIAL := "enlace13"' in modelo
+    assert 'const REGISTRO_IMPOSIBLE_ID := "registro_imposible_13"' in modelo
     assert "static func memorandum_disponible(" in modelo
     assert '"memorandum_leido"' in modelo
     assert '"diagnostico_restringido_leido"' in modelo
+    assert '"registro_imposible_leido"' in modelo
     assert "RandomNumberGenerator" not in modelo
     for prohibido in (
         "FileAccess",
@@ -48,6 +50,7 @@ def test_estado_se_persiste_por_partida_y_vuelta_y_se_comparte_entre_apps() -> N
 
 
 def test_incoherencia_cruza_explorador_y_web98_sin_icono_obvio() -> None:
+    modelo = fuente(MODELO)
     explorador = fuente(EXPLORADOR)
     datos = json.loads(CATALOGO.read_text(encoding="utf-8"))
     recursos = {recurso["id"]: recurso for recurso in datos["recursos"]}
@@ -61,6 +64,12 @@ def test_incoherencia_cruza_explorador_y_web98_sin_icono_obvio() -> None:
     assert imposible["cache"]["capturada_dia"] == 99
     assert "PROMETEO" not in imposible["titulo"].upper()
     assert "HASTUR" not in imposible["titulo"].upper()
+
+    diagnostico = recursos["diagnostico-enlace13"]
+    assert diagnostico["url"] == "http://intranet.dgai/diag/enlace13/"
+    assert 'const URL_DIAGNOSTICO := "http://intranet.dgai/diag/enlace13/"' in modelo
+    assert "fase >= FASE_CONTAMINACION_CRUZADA" in modelo
+    assert "urls_caidas.append(URL_DIAGNOSTICO)" in modelo
 
 
 def test_contrato_ejecutable_en_godot() -> None:
