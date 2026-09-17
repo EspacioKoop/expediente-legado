@@ -168,10 +168,8 @@ func _construir() -> void:
 	estado.add_child(_pagina)
 
 	_menos = _boton("PublicacionTextoMenos", "A−", reducir_texto)
-	_menos.tooltip_text = "Reducir tamaño de lectura"
 	estado.add_child(_menos)
 	_mas = _boton("PublicacionTextoMas", "A+", ampliar_texto)
-	_mas.tooltip_text = "Ampliar tamaño de lectura"
 	estado.add_child(_mas)
 	columna.add_child(estado)
 
