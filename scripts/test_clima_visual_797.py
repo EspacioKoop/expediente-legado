@@ -160,6 +160,10 @@ class ClimaVisual797Test(unittest.TestCase):
             self.assertIn(f"Clima.{estado}", self.capturador)
         self.assertIn('dia._entrar_en("trayecto")', self.capturador)
         self.assertIn("dia._caminante.situar(entrada, mirada)", self.capturador)
+        self.assertIn('get_node("Camara") as Camera3D', self.capturador)
+        self.assertIn("camara.rotation.x = deg_to_rad(35.0)", self.capturador)
+        self.assertIn('"%s_cielo.png" % estado', self.capturador)
+        self.assertIn("func _guardar_captura", self.capturador)
 
 
 if __name__ == "__main__":
