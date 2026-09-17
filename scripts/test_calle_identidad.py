@@ -79,15 +79,37 @@ class CalleIdentidadTest(unittest.TestCase):
             "luna_direccion",
             "luna_halo",
             "resplandor_ciudad",
+            "resplandor_direccion",
+            "resplandor_asimetria",
             "bruma_horizonte",
             "nubes",
+            "cirros",
+            "luz_lunar_nubes",
+            "via_lactea",
             "estrellas",
             "estrellas_secundarias",
         ):
             self.assertIn(uniforme, cielo)
-        for parametro in ("luna_halo", "bruma_fuerza", "nubes", "estrellas_secundarias"):
+        for parametro in (
+            "luna_halo",
+            "resplandor_direccion",
+            "resplandor_asimetria",
+            "bruma_fuerza",
+            "nubes",
+            "cirros",
+            "luz_lunar_nubes",
+            "via_lactea",
+            "estrellas_secundarias",
+        ):
             self.assertIn(f"shader_parameter/{parametro}", preset)
-        self.assertIn("mascara_nube", cielo)
+        for rasgo in (
+            "foco_ciudad",
+            "mascara_nube",
+            "mascara_cirro",
+            "banda_via",
+            "color_estrella",
+        ):
+            self.assertIn(rasgo, cielo)
         self.assertNotIn("TIME", cielo)
 
     def test_calle_real_en_godot(self):
