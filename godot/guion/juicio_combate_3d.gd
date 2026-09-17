@@ -438,7 +438,7 @@ func _montar_hud() -> void:
 		bloque.add_child(_etiqueta_ritual)
 
 	_etiqueta_ataque = Label.new()
-	_etiqueta_ataque.text = "ATAQUE INMINENTE"
+	_etiqueta_ataque.text = tr("VENTANILLA_ATAQUE_INMINENTE")
 	_etiqueta_ataque.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_etiqueta_ataque.add_theme_color_override("font_color", Color(0.94, 0.28, 0.18))
 	_etiqueta_ataque.visible = false
