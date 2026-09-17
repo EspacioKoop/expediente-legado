@@ -68,15 +68,21 @@ func _probar() -> void:
 		_comprobar(not planta.intersects(PASO_A_CAMA), "paso hacia la cama libre: " + nombre)
 		_comprobar(not planta.intersects(PIE_DE_CAMA), "acceso a la cama libre: " + nombre)
 		if pieza is StaticBody3D:
-			var colision: CollisionShape3D = (
-				pieza.find_children("*", "CollisionShape3D", true, false)[0]
-			)
-			var volumen: AABB = (
-				colision.global_transform * AABB(-colision.shape.size / 2, colision.shape.size)
-			)
-			_comprobar(
-				volumen.position.is_equal_approx(caja.position), "colisión alineada: " + nombre
-			)
+			# Solo la colisión física DIRECTA del mueble. Un Area3D interactiva
+			# puede tener su propia forma y no define el volumen sólido del prop.
+			var colision: CollisionShape3D = null
+			for hijo in pieza.get_children():
+				if hijo is CollisionShape3D:
+					colision = hijo
+					break
+			_comprobar(colision != null, "colisión física presente: " + nombre)
+			if colision != null:
+				var volumen: AABB = (
+					colision.global_transform * AABB(-colision.shape.size / 2, colision.shape.size)
+				)
+				_comprobar(
+					volumen.position.is_equal_approx(caja.position), "colisión alineada: " + nombre
+				)
 			_comprobar(absf(caja.position.y) < 0.01, "apoyado en el suelo: " + nombre)
 	print("Casa CC0: %d piezas, %d triángulos" % [lote.get_child_count(), triangulos])
 	_comprobar(triangulos <= 5000, "presupuesto geométrico acotado")
