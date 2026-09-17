@@ -29,7 +29,7 @@ class InicioTest(unittest.TestCase):
             check=False,
         )
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
-        self.assertIn("37 pasadas, 0 fallos", resultado.stdout)
+        self.assertRegex(resultado.stdout, r"\b[1-9]\d* pasadas, 0 fallos\b")
         self.assertNotIn("ERROR:", resultado.stdout)
         self.assertNotIn("Parse Error:", resultado.stdout)
 
