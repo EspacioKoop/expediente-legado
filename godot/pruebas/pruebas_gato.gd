@@ -95,13 +95,16 @@ static func _gato(comprobar: Callable) -> void:
 	# La misma conducta sigue aceptando Vector3 simples (todos los tests previos)
 	# y traduce las affordances a estados que la malla puede mostrar.
 	var sitios_casa: Array = EspaciosCatalogo.CASA["sitios_gato"]
-	comprobar.call(
-		"el primer sitio declarativo sigue siendo el cuenco",
-		[
-			GatoConducta.posicion_sitio(sitios_casa[0]),
-			GatoConducta.rutina_sitio(sitios_casa[0]),
-		],
-		[Vector3(2.8, 0, 1.5), "cuenco"]
+	(
+		comprobar
+		. call(
+			"el primer sitio declarativo sigue siendo el cuenco",
+			[
+				GatoConducta.posicion_sitio(sitios_casa[0]),
+				GatoConducta.rutina_sitio(sitios_casa[0]),
+			],
+			[Vector3(2.8, 0, 1.5), "cuenco"]
+		)
 	)
 	var rutinas: Array = sitios_casa.map(func(sitio): return GatoConducta.rutina_sitio(sitio))
 	for rutina in ["dormir", "sentarse", "observar", "esconderse"]:
