@@ -31,18 +31,21 @@ const MITOS := {
 ## lectura clara para que descubrir dos símbolos no genere buffs procedurales
 ## difíciles de explicar o balancear.
 const RITUALES := {
-	"la-luna|minotauro": {
+	"la-luna|minotauro":
+	{
 		"id": "laberinto_lunar",
 		"nombre": "Laberinto lunar",
 		"radio_arena": 4.15,
 		"velocidad_rival_mul": 0.86,
 	},
-	"la-justicia|duat": {
+	"la-justicia|duat":
+	{
 		"id": "balanza_duat",
 		"nombre": "Balanza del Duat",
 		"contraataque_esquiva": 1,
 	},
-	"la-fuerza|aquiles": {
+	"la-fuerza|aquiles":
+	{
 		"id": "talon_fuerza",
 		"nombre": "Talón de la Fuerza",
 		"dano_fuerte_bonus": 1,
