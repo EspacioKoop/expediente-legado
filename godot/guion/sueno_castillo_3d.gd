@@ -11,9 +11,7 @@ const ESCENA_SCRIPTORIUM := preload(
 	"res://escenas/suenos/props_284/galeria_scriptorium_castillo.tscn"
 )
 const ESCENA_TORRE_CAPILLA := preload("res://escenas/suenos/props_284/torre_capilla_castillo.tscn")
-const ESCENA_CLAUSTRO := preload(
-	"res://escenas/suenos/props_284/claustro_reflejado_castillo.tscn"
-)
+const ESCENA_CLAUSTRO := preload("res://escenas/suenos/props_284/claustro_reflejado_castillo.tscn")
 
 
 static func montar(mundo: Node3D, espacio: Dictionary) -> Node3D:
