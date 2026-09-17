@@ -100,6 +100,24 @@ func _probar() -> void:
 		inicio._diorama.get("_zona_actual") == "salir",
 		"enfocar una opción deriva el encuadre del diorama"
 	)
+	inicio._diorama._procesar_attract(InicioDiorama3D.SEGUNDOS_INACTIVIDAD_ATTRACT + 0.1)
+	_comprobar(
+		inicio._diorama.get("_attract_activo"),
+		"#830: la inactividad prolongada activa el attract mode ligero"
+	)
+	_comprobar(
+		inicio._diorama.get("_zona_actual") == InicioDiorama3D.ZONAS_ATTRACT[0],
+		"attract mode reutiliza un encuadre seguro del diorama existente"
+	)
+	_comprobar(inicio._salir.has_focus(), "attract mode no roba el foco de navegación")
+	inicio._diorama._registrar_actividad()
+	_comprobar(
+		not inicio._diorama.get("_attract_activo"), "cualquier actividad abandona attract mode"
+	)
+	_comprobar(
+		inicio._diorama.get("_zona_actual") == "salir",
+		"salir de attract mode restaura el encuadre elegido por el jugador"
+	)
 	var taza := inicio._diorama.find_child("TazaPuesto", true, false) as MeshInstance3D
 	var papel := inicio._diorama.find_child("PapelBandeja", true, false) as Node3D
 	var vapor := inicio._diorama.find_child("VaporTaza", true, false) as MeshInstance3D
@@ -107,6 +125,11 @@ func _probar() -> void:
 	_comprobar(papel != null, "#830: la bandeja mantiene papel visible en la composición")
 	_comprobar(vapor != null and vapor.visible, "#830: la taza aporta vapor ambiental sutil")
 	inicio._diorama.configurar_reduccion_movimiento(true)
+	inicio._diorama._procesar_attract(InicioDiorama3D.SEGUNDOS_INACTIVIDAD_ATTRACT + 1.0)
+	_comprobar(
+		not inicio._diorama.get("_attract_activo"),
+		"reducir movimiento impide arrancar attract mode"
+	)
 	_comprobar(
 		inicio._diorama.get("_exterior").get("_reduccion_movimiento"),
 		"reducir movimiento también congela la ventana exterior del diorama"
