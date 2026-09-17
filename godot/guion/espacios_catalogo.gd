@@ -351,9 +351,10 @@ const OFICINA := {
 const CALLE := {
 	"rotulo": "SITIO_CALLE",
 	"suelo": Vector2(9, 34),
+	# Exterior real: el fondo superior lo pinta el cielo, no una losa oscura.
+	"techo": false,
 	"color_suelo": Color(0.22, 0.22, 0.23),
 	"color_muro": Color(0.30, 0.29, 0.30),
-	"color_techo": Color(0.10, 0.10, 0.13),
 	"textura_suelo": "asfalto",
 	"textura_muro": "gotele",
 	"entrada": Vector3(0, 0, -15),
