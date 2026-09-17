@@ -54,9 +54,7 @@ func _process(_delta: float) -> void:
 		_mundo_id = mundo_id
 		_estado = estado
 		_activo = true
-		_reduccion_movimiento = bool(
-			PreferenciasSiga.cargar().get("reduccion_movimiento", false)
-		)
+		_reduccion_movimiento = bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false))
 		_aplicar_estado(dia, estado, transicion and not _reduccion_movimiento)
 
 	_seguir_precipitacion(dia)
@@ -94,80 +92,92 @@ func _perfil_ambiente(estado: String) -> Dictionary:
 	}
 	match estado:
 		Clima.NUBLADO:
-			perfil.merge(
-				{
-					"fog_enabled": true,
-					"fog_density": 0.010,
-					"fog_light_color": Color(0.43, 0.46, 0.51),
-					"fog_light_energy": 0.80,
-					"fog_height": 1.5,
-					"fog_height_density": 0.010,
-					"fog_sky_affect": 0.52,
-					"fog_aerial_perspective": 0.12,
-					"background_energy": 0.74,
-					"cielo_alto": Color(0.040, 0.048, 0.064),
-					"horizonte": Color(0.13, 0.14, 0.16),
-					"ocaso": Color(0.16, 0.12, 0.115),
-					"ocaso_mezcla": 0.07,
-				},
-				true,
+			(
+				perfil
+				. merge(
+					{
+						"fog_enabled": true,
+						"fog_density": 0.010,
+						"fog_light_color": Color(0.43, 0.46, 0.51),
+						"fog_light_energy": 0.80,
+						"fog_height": 1.5,
+						"fog_height_density": 0.010,
+						"fog_sky_affect": 0.52,
+						"fog_aerial_perspective": 0.12,
+						"background_energy": 0.74,
+						"cielo_alto": Color(0.040, 0.048, 0.064),
+						"horizonte": Color(0.13, 0.14, 0.16),
+						"ocaso": Color(0.16, 0.12, 0.115),
+						"ocaso_mezcla": 0.07,
+					},
+					true,
+				)
 			)
 		Clima.LLUVIA:
-			perfil.merge(
-				{
-					"fog_enabled": true,
-					"fog_density": 0.028,
-					"fog_light_color": Color(0.28, 0.33, 0.40),
-					"fog_light_energy": 0.75,
-					"fog_height": 1.35,
-					"fog_height_density": 0.023,
-					"fog_sky_affect": 0.76,
-					"fog_aerial_perspective": 0.08,
-					"background_energy": 0.54,
-					"cielo_alto": Color(0.016, 0.024, 0.040),
-					"horizonte": Color(0.062, 0.078, 0.105),
-					"ocaso": Color(0.085, 0.067, 0.074),
-					"ocaso_mezcla": 0.025,
-				},
-				true,
+			(
+				perfil
+				. merge(
+					{
+						"fog_enabled": true,
+						"fog_density": 0.028,
+						"fog_light_color": Color(0.28, 0.33, 0.40),
+						"fog_light_energy": 0.75,
+						"fog_height": 1.35,
+						"fog_height_density": 0.023,
+						"fog_sky_affect": 0.76,
+						"fog_aerial_perspective": 0.08,
+						"background_energy": 0.54,
+						"cielo_alto": Color(0.016, 0.024, 0.040),
+						"horizonte": Color(0.062, 0.078, 0.105),
+						"ocaso": Color(0.085, 0.067, 0.074),
+						"ocaso_mezcla": 0.025,
+					},
+					true,
+				)
 			)
 		Clima.NIEBLA:
-			perfil.merge(
-				{
-					"fog_enabled": true,
-					"fog_density": 0.100,
-					"fog_light_color": Color(0.57, 0.59, 0.62),
-					"fog_light_energy": 0.90,
-					"fog_height": 1.1,
-					"fog_height_density": 0.070,
-					"fog_sky_affect": 1.0,
-					"fog_aerial_perspective": 0.0,
-					"background_energy": 0.76,
-					"cielo_alto": Color(0.23, 0.24, 0.25),
-					"horizonte": Color(0.36, 0.37, 0.39),
-					"ocaso": Color(0.30, 0.30, 0.31),
-					"ocaso_mezcla": 0.0,
-				},
-				true,
+			(
+				perfil
+				. merge(
+					{
+						"fog_enabled": true,
+						"fog_density": 0.100,
+						"fog_light_color": Color(0.57, 0.59, 0.62),
+						"fog_light_energy": 0.90,
+						"fog_height": 1.1,
+						"fog_height_density": 0.070,
+						"fog_sky_affect": 1.0,
+						"fog_aerial_perspective": 0.0,
+						"background_energy": 0.76,
+						"cielo_alto": Color(0.23, 0.24, 0.25),
+						"horizonte": Color(0.36, 0.37, 0.39),
+						"ocaso": Color(0.30, 0.30, 0.31),
+						"ocaso_mezcla": 0.0,
+					},
+					true,
+				)
 			)
 		Clima.NIEVE:
-			perfil.merge(
-				{
-					"fog_enabled": true,
-					"fog_density": 0.040,
-					"fog_light_color": Color(0.70, 0.75, 0.82),
-					"fog_light_energy": 0.92,
-					"fog_height": 1.6,
-					"fog_height_density": 0.034,
-					"fog_sky_affect": 0.82,
-					"fog_aerial_perspective": 0.10,
-					"background_energy": 1.14,
-					"cielo_alto": Color(0.085, 0.11, 0.15),
-					"horizonte": Color(0.30, 0.32, 0.36),
-					"ocaso": Color(0.23, 0.20, 0.22),
-					"ocaso_mezcla": 0.09,
-				},
-				true,
+			(
+				perfil
+				. merge(
+					{
+						"fog_enabled": true,
+						"fog_density": 0.040,
+						"fog_light_color": Color(0.70, 0.75, 0.82),
+						"fog_light_energy": 0.92,
+						"fog_height": 1.6,
+						"fog_height_density": 0.034,
+						"fog_sky_affect": 0.82,
+						"fog_aerial_perspective": 0.10,
+						"background_energy": 1.14,
+						"cielo_alto": Color(0.085, 0.11, 0.15),
+						"horizonte": Color(0.30, 0.32, 0.36),
+						"ocaso": Color(0.23, 0.20, 0.22),
+						"ocaso_mezcla": 0.09,
+					},
+					true,
+				)
 			)
 	return perfil
 
@@ -196,7 +206,10 @@ func _aplicar_perfil_ambiente(ambiente: Environment, estado: String, animar: boo
 	_tween_clima = create_tween()
 	_tween_clima.set_parallel(true)
 	_tween_clima.tween_property(
-		ambiente, "background_energy_multiplier", float(perfil["background_energy"]), TRANSICION_DURACION
+		ambiente,
+		"background_energy_multiplier",
+		float(perfil["background_energy"]),
+		TRANSICION_DURACION
 	)
 	_tween_clima.tween_property(
 		ambiente, "fog_density", float(perfil["fog_density"]), TRANSICION_DURACION
@@ -216,11 +229,14 @@ func _aplicar_perfil_ambiente(ambiente: Environment, estado: String, animar: boo
 	_tween_clima.tween_property(
 		ambiente, "fog_sky_affect", float(perfil["fog_sky_affect"]), TRANSICION_DURACION
 	)
-	_tween_clima.tween_property(
-		ambiente,
-		"fog_aerial_perspective",
-		float(perfil["fog_aerial_perspective"]),
-		TRANSICION_DURACION,
+	(
+		_tween_clima
+		. tween_property(
+			ambiente,
+			"fog_aerial_perspective",
+			float(perfil["fog_aerial_perspective"]),
+			TRANSICION_DURACION,
+		)
 	)
 	if material != null:
 		_transicionar_parametro_cielo(material, "cielo_alto", perfil["cielo_alto"])
@@ -255,12 +271,15 @@ func _aplicar_perfil_inmediato(
 func _transicionar_parametro_cielo(
 	material: ShaderMaterial, parametro: String, objetivo: Variant
 ) -> void:
-	var actual := material.get_shader_parameter(parametro)
-	_tween_clima.tween_method(
-		Callable(self, "_poner_parametro_cielo").bind(material, parametro),
-		actual,
-		objetivo,
-		TRANSICION_DURACION,
+	var actual = material.get_shader_parameter(parametro)
+	(
+		_tween_clima
+		. tween_method(
+			Callable(self, "_poner_parametro_cielo").bind(material, parametro),
+			actual,
+			objetivo,
+			TRANSICION_DURACION,
+		)
 	)
 
 
@@ -540,7 +559,9 @@ func _restaurar_ambiente(dia: Node) -> void:
 	if ambiente == null:
 		return
 	ambiente.volumetric_fog_enabled = false
-	_aplicar_perfil_inmediato(ambiente, _material_cielo(ambiente), _perfil_ambiente(Clima.DESPEJADO))
+	_aplicar_perfil_inmediato(
+		ambiente, _material_cielo(ambiente), _perfil_ambiente(Clima.DESPEJADO)
+	)
 
 
 func _material_cielo(ambiente: Environment) -> ShaderMaterial:
