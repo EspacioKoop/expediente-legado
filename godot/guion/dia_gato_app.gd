@@ -75,9 +75,22 @@ func _entrar_en(fase: String) -> void:
 	_resolviendo_objetivos = false
 	super._entrar_en(fase)
 	_gato_guia = null
+	if fase == "casa" and is_instance_valid(_gato):
+		_gato.actualizar_hambre(int(jornada.get("gato", {}).get("dias_sin_comer", 0)))
+		_gato.activado.connect(_al_activar_gato.bind(_gato))
 	if fase == "sueño":
 		_montar_objetivos_sueno()
 		_montar_guia_sueno()
+
+
+## La interacción 3D pide alimentar; esta capa posee la jornada y delega en el
+## flujo histórico del cuenco. Así no existen dos precios, dos guardados ni dos
+## contadores de hambre.
+func _al_activar_gato(_actor: Node, gato: Gato) -> void:
+	if gato.verbo != Interactuable3D.Verbo.DAR or jornada.get("fase", "") != "casa":
+		return
+	_dar_de_comer()
+	gato.actualizar_hambre(int(jornada.get("gato", {}).get("dias_sin_comer", 0)))
 
 
 func _posiciones_objetivo(espacio: Dictionary, foco: Vector3) -> Array:
