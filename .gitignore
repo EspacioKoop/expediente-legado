@@ -1,5 +1,7 @@
 # Compilados y artefactos de build
 **/target/
+# Salida de make de las ROMs propias: se regenera y CI la compila
+gbc/minijuegos/*/build/
 backend/target/
 *.class
 node_modules/
