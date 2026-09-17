@@ -225,6 +225,9 @@ jobs:
           test "$(od -An -tx1 -j 323 -N 1 gbc-fixtures/cgb-acid2.gbc | tr -d ' \n')" = "c0"
           for rom in gbc-fixtures/caza_pixeles_98.gbc gbc-fixtures/paper_planes_98.gbc gbc-fixtures/croc_riders_98.gbc gbc-fixtures/aquiles_98.gbc gbc-fixtures/ryu_flow_98.gbc gbc-fixtures/hydra_loop_98.gbc gbc-fixtures/webkeeper_98.gbc; do
             test "$(od -An -tx1 -j 323 -N 1 "$rom" | tr -d ' \n')" = "80"
+            # Cartucho estándar (#808): MBC5+RAM+BATTERY con 8 KiB de RAM.
+            test "$(od -An -tx1 -j 327 -N 1 "$rom" | tr -d ' \n')" = "1b"
+            test "$(od -An -tx1 -j 329 -N 1 "$rom" | tr -d ' \n')" = "02"
           done
           test "$(od -An -tx1 -j 323 -N 1 gbc-fixtures/cgb_only_smoke.gbc | tr -d ' \n')" = "c0"
 

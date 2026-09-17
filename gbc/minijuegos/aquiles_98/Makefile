@@ -3,6 +3,8 @@ OBJ := build/aquiles_98.o
 SRC := game.asm
 PYTHON ?= python3
 
+include ../comun/cartucho.mk
+
 .PHONY: all clean test
 
 all: $(ROM)
@@ -10,12 +12,12 @@ all: $(ROM)
 build:
 	mkdir -p build
 
-$(OBJ): $(SRC) | build
+$(OBJ): $(SRC) $(wildcard ../comun/*.asm) | build
 	rgbasm -o $@ $<
 
 $(ROM): $(OBJ)
 	rgblink -n build/aquiles_98.sym -o $@ $<
-	rgbfix -p 255 -v $@
+	rgbfix $(RGBFIX_CARTUCHO) $@
 
 clean:
 	rm -rf build

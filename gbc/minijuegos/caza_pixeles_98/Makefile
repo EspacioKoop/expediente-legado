@@ -2,6 +2,8 @@ ROM := build/caza_pixeles_98.gbc
 OBJ := build/caza_pixeles_98.o
 PYTHON ?= python3
 
+include ../comun/cartucho.mk
+
 .PHONY: all clean test
 
 all: $(ROM)
@@ -9,12 +11,12 @@ all: $(ROM)
 build:
 	mkdir -p build
 
-$(OBJ): main.asm | build
+$(OBJ): main.asm $(wildcard ../comun/*.asm) | build
 	rgbasm -o $@ $<
 
 $(ROM): $(OBJ)
 	rgblink -o $@ $<
-	rgbfix -p 255 -v $@
+	rgbfix $(RGBFIX_CARTUCHO) $@
 
 test: $(ROM)
 	$(PYTHON) test_rom.py

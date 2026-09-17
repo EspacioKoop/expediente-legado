@@ -71,6 +71,9 @@ DEF TILE_BARRA      EQU FONT_BASE + 38
 DEF TILE_PUNTO      EQU FONT_BASE + 39
 DEF TILE_MAYOR      EQU FONT_BASE + 40
 
+
+INCLUDE "../comun/cartucho.asm"
+
 SECTION "VBlank", ROM0[$0040]
 VBlank:
     reti
@@ -87,6 +90,7 @@ SECTION "Juego", ROM0[$0150]
 Inicio:
     di
     ld sp, $DFFF
+    call IniciarCartucho
     call ApagarLCDSeguro
     call LimpiarOAM
     call CargarTiles

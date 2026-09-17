@@ -71,6 +71,7 @@ DEF COMBO_X2          EQU 3
 DEF COMBO_X3          EQU 6
 
 
+INCLUDE "../comun/cartucho.asm"
 INCLUDE "../comun/pantalla_cgb.asm"
 
 SECTION "VBlank", ROM0[$0040]
@@ -89,6 +90,7 @@ SECTION "Juego", ROM0[$0150]
 Inicio:
     di
     ld sp, $DFFF
+    call IniciarCartucho
     xor a
     ld [wPantallaCGB], a
 
@@ -634,8 +636,7 @@ ActualizarHUD:
 DibujarTitulo:
     call EsCGB
     jr nz, .texto
-    ld hl, TituloCGB
-    call CargarPantallaCGB
+    CARGAR_PANTALLA_CGB TituloCGB
     ld a, 1
     ld [wPantallaCGB], a
     ret

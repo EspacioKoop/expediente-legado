@@ -78,6 +78,9 @@ DEF TILE_R              EQU 52
 DEF TILE_T              EQU 53
 DEF TILE_RELOJ_OFF      EQU 56
 
+
+INCLUDE "../comun/cartucho.asm"
+
 SECTION "VBlank", ROM0[$0040]
     reti
 
@@ -93,6 +96,7 @@ SECTION "Juego", ROM0[$0150]
 Inicio:
     di
     ld sp, $DFFF
+    call IniciarCartucho
     ; El handshake nunca queda marcado por arrancar.
     xor a
     ld [wHydraCompletado], a
