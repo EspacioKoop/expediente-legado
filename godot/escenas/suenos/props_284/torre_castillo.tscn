@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="ArrayMesh" path="res://escenas/suenos/props_284/torre_castillo_psx.obj" id="1_torre"]
+
+[sub_resource type="StandardMaterial3D" id="MatStone"]
+albedo_color = Color(0.205, 0.195, 0.18, 1)
+roughness = 0.96
+metallic = 0.02
+
+[node name="TorreCastillo" type="Node3D"]
+
+[node name="TorrePSX" type="MeshInstance3D" parent="."]
+mesh = ExtResource("1_torre")
+material_override = SubResource("MatStone")
