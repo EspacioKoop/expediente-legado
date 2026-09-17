@@ -1,15 +1,16 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
-[ext_resource type="PackedScene" path="res://escenas/suenos/props_284/muro_torre_castillo.tscn" id="1_muro"]
-[ext_resource type="PackedScene" path="res://escenas/suenos/props_284/escalera_anular_castillo.tscn" id="2_escalera"]
-[ext_resource type="PackedScene" path="res://escenas/suenos/props_284/estandarte_anular.tscn" id="3_estandarte"]
+[ext_resource type="PackedScene" path="res://escenas/suenos/props_284/arcada_claustro_castillo.tscn" id="1_arcada"]
+[ext_resource type="PackedScene" path="res://escenas/suenos/props_284/torre_castillo.tscn" id="2_torre"]
+[ext_resource type="PackedScene" path="res://escenas/suenos/props_284/escalera_anular_castillo.tscn" id="3_escalera"]
+[ext_resource type="PackedScene" path="res://escenas/suenos/props_284/estandarte_anular.tscn" id="4_estandarte"]
 
 [sub_resource type="StandardMaterial3D" id="MatCapilla"]
 albedo_color = Color(0.075, 0.072, 0.068, 1)
 roughness = 1.0
 
 [sub_resource type="PlaneMesh" id="SueloCapilla"]
-size = Vector2(12, 12)
+size = Vector2(14, 16)
 
 [node name="TorreCapillaCastillo" type="Node3D"]
 
@@ -17,41 +18,69 @@ size = Vector2(12, 12)
 mesh = SubResource("SueloCapilla")
 material_override = SubResource("MatCapilla")
 
-[node name="UmbralNorte" parent="." instance=ExtResource("1_muro")]
-position = Vector3(0, 0, -5.3)
+[node name="ArcadaCabecera" parent="." instance=ExtResource("1_arcada")]
+position = Vector3(0, 0, -5.8)
 
-[node name="UmbralEste" parent="." instance=ExtResource("1_muro")]
-position = Vector3(5.3, 0, 0)
+[node name="ArcadaEsteA" parent="." instance=ExtResource("1_arcada")]
+position = Vector3(4.55, 0, -2.0)
 rotation_degrees = Vector3(0, -90, 0)
+scale = Vector3(0.72, 0.72, 0.72)
 
-[node name="UmbralOesteElevado" parent="." instance=ExtResource("1_muro")]
-position = Vector3(-5.3, 2.6, 0)
+[node name="ArcadaEsteB" parent="." instance=ExtResource("1_arcada")]
+position = Vector3(4.55, 0, 2.4)
+rotation_degrees = Vector3(0, -90, 0)
+scale = Vector3(0.72, 0.72, 0.72)
+
+[node name="ArcadaOesteA" parent="." instance=ExtResource("1_arcada")]
+position = Vector3(-4.55, 0, -2.0)
 rotation_degrees = Vector3(0, 90, 0)
-scale = Vector3(0.78, 0.78, 0.78)
+scale = Vector3(0.72, 0.72, 0.72)
 
-[node name="EscaleraBaja" parent="." instance=ExtResource("2_escalera")]
-position = Vector3(-1.8, 0.02, 1.1)
-rotation_degrees = Vector3(0, -24, 0)
+[node name="ArcadaOesteElevada" parent="." instance=ExtResource("1_arcada")]
+position = Vector3(-4.55, 1.1, 2.4)
+rotation_degrees = Vector3(0, 90, 0)
+scale = Vector3(0.72, 0.72, 0.72)
 
-[node name="EscaleraAlta" parent="." instance=ExtResource("2_escalera")]
-position = Vector3(1.4, 3.0, -1.1)
-rotation_degrees = Vector3(180, 156, 0)
-scale = Vector3(0.78, 0.78, 0.78)
+[node name="TorreCampanario" parent="." instance=ExtResource("2_torre")]
+position = Vector3(0, 0, 5.25)
+scale = Vector3(1.08, 1.08, 1.08)
 
-[node name="EstandarteAlto" parent="." instance=ExtResource("3_estandarte")]
-position = Vector3(0, 6.4, -4.6)
+[node name="TorreEco" parent="." instance=ExtResource("2_torre")]
+position = Vector3(0, 4.35, -2.0)
+rotation_degrees = Vector3(180, 22, 0)
+scale = Vector3(0.48, 0.48, 0.48)
+
+[node name="EscaleraBaja" parent="." instance=ExtResource("3_escalera")]
+position = Vector3(-1.65, 0.02, 1.15)
+rotation_degrees = Vector3(0, -22, 0)
+scale = Vector3(0.86, 0.86, 0.86)
+
+[node name="EscaleraAlta" parent="." instance=ExtResource("3_escalera")]
+position = Vector3(1.45, 3.0, -1.05)
+rotation_degrees = Vector3(180, 158, 0)
+scale = Vector3(0.72, 0.72, 0.72)
+
+[node name="EstandarteAlto" parent="." instance=ExtResource("4_estandarte")]
+position = Vector3(0, 6.45, -5.25)
 scale = Vector3(1.35, 1.35, 1.35)
 
-[node name="LuzBaja" type="OmniLight3D" parent="."]
-position = Vector3(0, 2.5, 0)
+[node name="LuzNave" type="OmniLight3D" parent="."]
+position = Vector3(0, 2.35, -1.1)
 light_color = Color(0.42, 0.31, 0.24, 1)
-light_energy = 0.5
+light_energy = 0.54
+omni_range = 8.5
+shadow_enabled = true
+
+[node name="LuzCampanario" type="OmniLight3D" parent="."]
+position = Vector3(0, 6.0, 4.8)
+light_color = Color(0.57, 0.49, 0.36, 1)
+light_energy = 0.46
 omni_range = 8.0
 shadow_enabled = true
 
 [node name="LuzAltaImposible" type="OmniLight3D" parent="."]
-position = Vector3(0, 7.2, 0)
-light_color = Color(0.55, 0.48, 0.36, 1)
-light_energy = 0.42
-omni_range = 7.0
+position = Vector3(0, 7.5, -1.8)
+light_color = Color(0.50, 0.44, 0.35, 1)
+light_energy = 0.32
+omni_range = 6.5
 shadow_enabled = true
