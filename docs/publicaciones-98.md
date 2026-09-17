@@ -36,7 +36,7 @@ El estado vive en `jornada["publicaciones_98_lecturas"]` y conserva, por publica
 
 ## Visor de publicaciones
 
-`VisorPublicacion` (`escenas/visor_publicacion.tscn`) presenta cualquier entrada del catálogo sin copiar su estado. Es una ventana modal y desplazable con foco inicial sobre el texto, botones navegables y cuatro tamaños de lectura acotados: 18, 22, 26 y 30 px.
+La interfaz de lectura ya tiene un primer vertical reusable: `VisorPublicacion` (`escenas/visor_publicacion.tscn`) presenta cualquier entrada del catálogo sin copiar su estado. Es una ventana modal y desplazable con foco inicial sobre el texto, botones navegables y cuatro tamaños de lectura acotados: 18, 22, 26 y 30 px.
 
 Controles explícitos del segundo corte:
 
