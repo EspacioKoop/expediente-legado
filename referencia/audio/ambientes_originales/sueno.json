@@ -1,0 +1,11 @@
+{
+  "id": "sueno",
+  "tipo": "sueno",
+  "semilla": 11904,
+  "muestras_por_segundo": 8000,
+  "duracion": 2.0,
+  "ganancia_objetivo": 0.72,
+  "drone": [[46.0, 0.10, 0.0], [47.0, 0.075, 0.8], [69.0, 0.040, 1.5]],
+  "pulso": [3.0, 211.0, 0.025],
+  "salida": "ambiente_sueno_original.ogg"
+}
