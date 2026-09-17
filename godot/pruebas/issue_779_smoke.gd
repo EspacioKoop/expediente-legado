@@ -58,6 +58,18 @@ func _ejecutar() -> void:
 	_comprobar(JuicioCombate3D.determinacion_rival(0) == 8, "juicio sin expediente parte entero")
 	_comprobar(JuicioCombate3D.determinacion_rival(3) == 5, "el expediente debilita al acusado")
 	_comprobar(JuicioCombate3D.determinacion_rival(99) == 4, "el juicio conserva un suelo jugable")
+	_comprobar(
+		JuicioCombate3D.resultado_ataque_rival(1.0, 0.0) == "impacto",
+		"un ataque a alcance impacta sin esquiva",
+	)
+	_comprobar(
+		JuicioCombate3D.resultado_ataque_rival(1.0, 0.12) == "esquiva",
+		"la ventana de esquiva evita el impacto",
+	)
+	_comprobar(
+		JuicioCombate3D.resultado_ataque_rival(2.0, 0.0) == "falla",
+		"salir del alcance durante el telegrafo hace fallar el ataque",
+	)
 
 	_comprobar(
 		PrevisualizadorReclamante3D.sonido_jugada("objecion") == "firmar",

@@ -270,6 +270,7 @@ TRABAJILLO_COBRADO,"Termina el lote. Le pagan %d. Tiene %d."
 TRABAJILLO_TRANSCRIPCION,Transcribir un lote
 TRABAJILLO_YA_HECHO,No queda otro lote para esta noche.
 VENTANILLA_ADELANTA,La comisión adelanta que la próxima réplica será: %s.
+VENTANILLA_ATAQUE_INMINENTE,ATAQUE INMINENTE
 VENTANILLA_ATENDIDA,RECLAMACIÓN ATENDIDA. Racha: %d.
 VENTANILLA_HABILIDAD,%s (%d)
 VENTANILLA_LLAME,Llame al siguiente turno.

@@ -29,6 +29,7 @@ const ALCANCE_RIVAL := 1.45
 const RECARGA_LIGERA := 0.28
 const RECARGA_FUERTE := 0.58
 const RECARGA_RIVAL := 1.15
+const TELEGRAFO_RIVAL := 0.45
 
 var reduccion_movimiento := false
 
@@ -40,6 +41,8 @@ var _acabado := false
 var _recarga_jugador := 0.0
 var _recarga_rival := 0.0
 var _esquiva := 0.0
+var _telegrafo_rival := 0.0
+var _ataque_rival_pendiente := false
 var _arcano: Dictionary = {}
 var _mito_id := ""
 var _ritual: Dictionary = {}
@@ -53,13 +56,23 @@ var _rival: CharacterBody3D
 var _figura_jugador: Node3D
 var _figura_rival: Node3D
 var _camara: Camera3D
+var _aviso_ataque: MeshInstance3D
 var _barra_jugador: ProgressBar
 var _barra_rival: ProgressBar
 var _etiqueta_ritual: Label
+var _etiqueta_ataque: Label
 
 
 static func determinacion_rival(bono_documental: int) -> int:
 	return maxi(DETERMINACION_MINIMA_RIVAL, DETERMINACION_BASE - maxi(0, bono_documental))
+
+
+static func resultado_ataque_rival(distancia: float, esquiva_restante: float) -> String:
+	if distancia > ALCANCE_RIVAL:
+		return "falla"
+	if esquiva_restante > 0.0:
+		return "esquiva"
+	return "impacto"
 
 
 func configurar(acusado: Dictionary, bono_documental: int, reducir_movimiento: bool) -> void:
@@ -115,6 +128,10 @@ func _mover_jugador(delta: float) -> void:
 
 
 func _mover_rival(delta: float) -> void:
+	if _ataque_rival_pendiente:
+		_actualizar_telegrafo_rival(delta)
+		return
+
 	var hacia := _jugador.position - _rival.position
 	hacia.y = 0.0
 	var distancia := hacia.length()
@@ -124,15 +141,58 @@ func _mover_rival(delta: float) -> void:
 		_rival.position = _limitar(_rival.position)
 		_rival.rotation.y = atan2(direccion.x, direccion.z)
 	elif _recarga_rival <= 0.0:
-		_recarga_rival = RECARGA_RIVAL
-		if _esquiva <= 0.0:
+		_iniciar_ataque_rival()
+
+
+func _iniciar_ataque_rival() -> void:
+	if _ataque_rival_pendiente or _acabado:
+		return
+	_ataque_rival_pendiente = true
+	_telegrafo_rival = TELEGRAFO_RIVAL
+	if _aviso_ataque != null:
+		_aviso_ataque.position = _rival.position + Vector3(0.0, 0.02, 0.0)
+		_aviso_ataque.scale = Vector3.ONE
+		_aviso_ataque.visible = true
+	if _etiqueta_ataque != null:
+		_etiqueta_ataque.visible = true
+	Sonido.sonar(self, "marcar")
+
+
+func _actualizar_telegrafo_rival(delta: float) -> void:
+	_telegrafo_rival = maxf(0.0, _telegrafo_rival - delta)
+	if _aviso_ataque != null:
+		_aviso_ataque.position = _rival.position + Vector3(0.0, 0.02, 0.0)
+		if not reduccion_movimiento:
+			var progreso := 1.0 - _telegrafo_rival / TELEGRAFO_RIVAL
+			var escala := lerpf(0.72, 1.0, progreso)
+			_aviso_ataque.scale = Vector3(escala, 1.0, escala)
+	if _telegrafo_rival <= 0.0:
+		_resolver_ataque_rival()
+
+
+func _resolver_ataque_rival() -> void:
+	_ataque_rival_pendiente = false
+	_recarga_rival = RECARGA_RIVAL
+	if _aviso_ataque != null:
+		_aviso_ataque.visible = false
+	if _etiqueta_ataque != null:
+		_etiqueta_ataque.visible = false
+
+	var hacia := _jugador.position - _rival.position
+	hacia.y = 0.0
+	match resultado_ataque_rival(hacia.length(), _esquiva):
+		"falla":
+			return
+		"esquiva":
+			Sonido.sonar(self, "pulsar")
+			_registrar_esquiva_ritual()
+		_:
+			Sonido.sonar(self, "error")
 			_determinacion_jugador = maxi(0, _determinacion_jugador - 1)
 			_reaccion(_figura_jugador, -0.18)
 			_actualizar_hud()
 			if _determinacion_jugador <= 0:
 				_terminar(false)
-		else:
-			_registrar_esquiva_ritual()
 
 
 func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> void:
@@ -182,6 +242,11 @@ func _terminar(gano: bool) -> void:
 	if _acabado:
 		return
 	_acabado = true
+	_ataque_rival_pendiente = false
+	if _aviso_ataque != null:
+		_aviso_ataque.visible = false
+	if _etiqueta_ataque != null:
+		_etiqueta_ataque.visible = false
 	terminado.emit(gano)
 
 
@@ -284,11 +349,33 @@ func _montar_arena() -> void:
 	var clave := String(_acusado.get("id", _acusado.get("nombre", "acusado")))
 	var matiz := 0.52 + float(absi(hash(clave)) % 14) / 100.0
 	_figura_rival = FiguraSilueta.construir(_rival, Vector3.ZERO, Color.from_hsv(matiz, 0.34, 0.72))
+	_montar_aviso_ataque()
 
 	_camara = Camera3D.new()
 	_camara.fov = 52.0
 	add_child(_camara)
 	_actualizar_camara()
+
+
+func _montar_aviso_ataque() -> void:
+	_aviso_ataque = MeshInstance3D.new()
+	_aviso_ataque.name = "AvisoAtaqueRival"
+	var malla := CylinderMesh.new()
+	malla.top_radius = ALCANCE_RIVAL
+	malla.bottom_radius = ALCANCE_RIVAL
+	malla.height = 0.025
+	malla.radial_segments = 32
+	_aviso_ataque.mesh = malla
+	var material := StandardMaterial3D.new()
+	material.albedo_color = Color(0.82, 0.10, 0.08, 0.34)
+	material.emission_enabled = true
+	material.emission = Color(0.82, 0.10, 0.08)
+	material.emission_energy_multiplier = 0.75
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_aviso_ataque.material_override = material
+	_aviso_ataque.visible = false
+	add_child(_aviso_ataque)
 
 
 func _montar_limite_ritual() -> void:
@@ -349,6 +436,13 @@ func _montar_hud() -> void:
 		_etiqueta_ritual = Label.new()
 		_etiqueta_ritual.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		bloque.add_child(_etiqueta_ritual)
+
+	_etiqueta_ataque = Label.new()
+	_etiqueta_ataque.text = tr("VENTANILLA_ATAQUE_INMINENTE")
+	_etiqueta_ataque.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_etiqueta_ataque.add_theme_color_override("font_color", Color(0.94, 0.28, 0.18))
+	_etiqueta_ataque.visible = false
+	bloque.add_child(_etiqueta_ataque)
 
 
 func _actualizar_hud() -> void:
