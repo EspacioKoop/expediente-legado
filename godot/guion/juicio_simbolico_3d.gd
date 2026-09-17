@@ -19,6 +19,7 @@ static func montar(raiz: Node3D, arcano: Dictionary, mito_id: String) -> Node3D:
 		_montar_arcano(simbolos, arcano)
 	if not mito_id.is_empty():
 		_montar_mito(simbolos, mito_id)
+	JuicioFeedbackRitual.montar(raiz)
 	return simbolos
 
 
