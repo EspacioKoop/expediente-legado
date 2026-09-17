@@ -51,17 +51,21 @@ func _probar() -> void:
 	inicio.ruta = _ruta
 	root.add_child(inicio)
 	var fondo := inicio.get_node_or_null("FondoInicio")
-	_comprobar(fondo is TextureRect and fondo.texture != null, "inicio usa wallpaper 2D propio")
+	_comprobar(
+		fondo is TextureRect and fondo.texture != null, "inicio pinta el diorama 3D como fondo"
+	)
+	_comprobar(
+		inicio._diorama is InicioDiorama3D and inicio._diorama.obtener_textura() == fondo.texture,
+		"el fondo es la textura en vivo del diorama, no una lámina estática"
+	)
+	_comprobar(
+		inicio.find_child("MarcoInicio", true, false) == null,
+		"#830: ya no hay bloque OS98 centrado como superficie principal"
+	)
 	var marca := inicio.find_child("MarcaInicio", true, false)
 	_comprobar(marca is TextureRect and marca.texture != null, "cabecera usa marca visual propia")
-	var marco := inicio.find_child("MarcoInicio", true, false)
-	_comprobar(
-		marco != null and marco.get("saliente") == true, "marco principal conserva relieve saliente"
-	)
 	var estado := inicio.find_child("EstadoInicio", true, false)
-	_comprobar(
-		estado != null and estado.get("saliente") == false, "estado queda hundido respecto al marco"
-	)
+	_comprobar(estado != null, "el aviso de estado sigue presente sobre el diorama")
 	_comprobar(
 		inicio._continuar.custom_minimum_size.y >= 36.0,
 		"acciones tienen presencia visual suficiente"
@@ -75,6 +79,16 @@ func _probar() -> void:
 	_comprobar(inicio.ajustes == 1, "ajustes son accesibles desde inicio")
 	inicio._salir.pressed.emit()
 	_comprobar(inicio.salidas == 1, "salir es accesible desde inicio")
+	inicio._salir.grab_focus()
+	_comprobar(
+		inicio._diorama.get("_zona_actual") == "salir",
+		"enfocar una opción deriva el encuadre del diorama"
+	)
+	inicio._diorama.configurar_reduccion_movimiento(true)
+	_comprobar(
+		inicio._diorama.get("_exterior").get("_reduccion_movimiento"),
+		"reducir movimiento también congela la ventana exterior del diorama"
+	)
 	inicio.free()
 
 	var anterior := Partida.new()
