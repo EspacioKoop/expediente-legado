@@ -112,7 +112,7 @@ func _comprobar_limite(actor_public_id: String, scene_key: String, ahora: int) -
 			vigentes.append(int(timestamp))
 	_publicaciones[clave] = vigentes
 	if not vigentes.is_empty():
-		var transcurrido := ahora - vigentes.back()
+		var transcurrido: int = ahora - int(vigentes.back())
 		if transcurrido < INTERVALO_MINIMO_SEGUNDOS:
 			return {
 				"ok": false,
