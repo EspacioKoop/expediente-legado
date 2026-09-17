@@ -143,6 +143,7 @@ func _barra_titulo() -> Control:
 		),
 		EstiloSiga.BLANCO
 	)
+	titulo.add_theme_font_override("font", theme.get_font("title_font", "Label"))
 	barra.add_child(titulo)
 	_titulo_ventana = titulo
 	return barra
@@ -162,6 +163,8 @@ func _columna_indice() -> Control:
 	columna.add_child(_archivo)
 	_refrescar_archivo()
 	_archivo.select(0)
+	columna.add_child(_etiqueta(tr("ARCHIVO_TITULO"), EstiloSiga.NEGRO))
+	columna.remove_child(columna.get_child(columna.get_child_count() - 1))
 	columna.add_child(_etiqueta(tr("VISOR_DOCUMENTOS"), EstiloSiga.NEGRO))
 	columna.add_child(_etiqueta(tr("VISOR_COSTE_REGLA"), EstiloSiga.NEGRO))
 
