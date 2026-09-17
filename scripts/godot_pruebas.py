@@ -63,7 +63,10 @@ def importar_proyecto() -> None:
         timeout=300,
         check=False,
     )
-    validar(importacion.stdout, importacion.returncode, importando=True)
+    try:
+        validar(importacion.stdout, importacion.returncode, importando=True)
+    except ValueError as error:
+        raise ValueError(f"{error}\n{importacion.stdout}") from error
 
 
 def ejecutar_script(guion: str, timeout: int = 30) -> subprocess.CompletedProcess[str]:

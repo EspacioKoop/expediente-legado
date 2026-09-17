@@ -22,10 +22,6 @@ ConsolaDepuracion="*res://depuracion/consola_depuracion.gd"
 
 renderer/rendering_method="gl_compatibility"
 
-[gui]
-
-theme/custom_font="res://assets/fonts/MFBOldstyle-Regular.otf"
-
 [display]
 
 window/size/viewport_width=1024
