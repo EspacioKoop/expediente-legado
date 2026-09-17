@@ -11,7 +11,6 @@
 ## frase visual: **orientar -> acercar al puesto -> identificar -> residuo**.
 ## `camara_desde`/`mira_desde` solo describen el recorrido de cámara; con
 ## reducción de movimiento el reproductor usa la composición final estática.
-## Los acentos son sonidos CC0 ya catalogados por `Sonido`, no assets nuevos.
 ##
 ## **Se ve cada vuelta** (decisión de #68). Cada reasignación vuelve a entrar
 ## por la puerta y la copia está un poco peor. El reproductor la acorta a partir
@@ -48,8 +47,7 @@ static func planos(vistas: int = 0) -> Array:
 	return [
 		{
 			# ORIENTAR. Empieza pegado al punto de entrada y avanza lo justo para
-			# que la oficina tenga profundidad. La puerta cerrándose detrás es el
-			# acento que convierte "aparecí aquí" en "acabo de entrar".
+			# que la oficina tenga profundidad antes de dirigir la mirada al puesto.
 			"tipo": "3d",
 			"nombre": "umbral",
 			"camara_desde": Vector3(0.05, 1.70, 3.35),
@@ -59,7 +57,6 @@ static func planos(vistas: int = 0) -> Array:
 			"segundos": 3.8,
 			"rotulo": "ENTRADA_RESTAURANDO",
 			"voz": registro_de(vistas),
-			"sonido": "puerta_cierra",
 		},
 		{
 			# ACCIÓN. El plano recoge la dirección del anterior y termina sobre el
@@ -74,7 +71,6 @@ static func planos(vistas: int = 0) -> Array:
 			"segundos": 3.4,
 			"rotulo": "ENTRADA_SISTEMA",
 			"voz": "ENTRADA_VOZ_VOLUMEN",
-			"sonido": "pulsar",
 		},
 		{
 			# IDENTIFICAR. Sin saltar a otro rincón de la sala: desde el terminal
@@ -93,8 +89,7 @@ static func planos(vistas: int = 0) -> Array:
 		},
 		{
 			# RESIDUO. Un desplazamiento lateral lento deja la masa de archivadores
-			# ocupando el final de la secuencia. El golpe metálico es un único
-			# microevento: después se devuelve el control, no se añade otra frase.
+			# ocupando el final de la secuencia antes de devolver el control.
 			"tipo": "3d",
 			"nombre": "archivo",
 			"camara_desde": Vector3(1.55, 1.62, 2.65),
@@ -104,7 +99,6 @@ static func planos(vistas: int = 0) -> Array:
 			"segundos": 3.6,
 			"rotulo": "ENTRADA_NADIE_MIRA",
 			"voz": "ENTRADA_VOZ_SOLO",
-			"sonido": "cerrar",
 		},
 	]
 
