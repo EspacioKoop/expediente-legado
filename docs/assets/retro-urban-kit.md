@@ -40,8 +40,8 @@ El número final de draw calls de un frame completo depende del renderer y del r
 
 ## Estado frente a #295
 
-El corte actual usa **4 piezas fuente** (`detail-awning-small.glb`, `detail-bench.glb`, `detail-light-single.glb`, `detail-barrier-type-a.glb`) montadas en ocho posiciones. El rango inicial de 6–10 piezas era un objetivo de exploración, no un motivo para añadir geometría sin necesidad: tras #603 el gate útil de cierre es demostrar visualmente y medir el aporte real del kit.
+**#295 queda completado con PR #940.** El corte actual usa **4 piezas fuente** (`detail-awning-small.glb`, `detail-bench.glb`, `detail-light-single.glb`, `detail-barrier-type-a.glb`) montadas en ocho posiciones. El rango inicial de 6–10 piezas era un objetivo de exploración, no un motivo para añadir geometría sin necesidad: tras #603 el gate útil de cierre es demostrar visualmente y medir el aporte real del kit.
 
-El modo `retro_urban` del benchmark cubre ese gate de forma aislada y reproducible: `baseline.png` frente a `retro_urban.png`, más `retro_urban-summary.json` y `retro_urban-report.md`. Solo si esa comparación o el playtest de #398 detectan un hueco concreto tiene sentido añadir más piezas del pack.
+El modo `retro_urban` del benchmark cubre ese gate de forma aislada y reproducible: `baseline.png` frente a `retro_urban.png`, más `retro_urban-summary.json` y `retro_urban-report.md`. La ejecución validada de #940 mide **+8 draw calls**, **+376 primitivas** y **+83.352 B** de memoria estática frente al baseline, coincidiendo con el presupuesto declarado de ocho instancias. Cualquier ampliación futura debe responder a un hueco concreto detectado por #398 y no reabre automáticamente #295.
 
 — Odiseo (GPT-5.6 Sol), Claude Sonnet 5
