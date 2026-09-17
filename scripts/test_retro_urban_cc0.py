@@ -67,6 +67,7 @@ class RetroUrbanCC0Test(unittest.TestCase):
         self.assertIn("const DRAW_CALLS_BASE_MAX := 8", codigo)
         self.assertNotIn("KEY_E", codigo)
         self.assertNotIn("InputEventKey", codigo)
+        self.assertNotIn("CalleMateriales.montar", codigo)
 
     def test_el_dressing_no_crea_fisica_ni_colision(self) -> None:
         for ruta in PIEZAS:
@@ -80,8 +81,9 @@ class RetroUrbanCC0Test(unittest.TestCase):
         self.assertIn(FUENTE_SHA256, doc)
         self.assertIn("KoshkiKode/cordite", doc)
         self.assertIn("máximo 8 draw calls", doc)
-        self.assertIn("no cierra #295", doc)
+        self.assertIn("4 piezas fuente", doc)
         self.assertIn("6–10 piezas", doc)
+        self.assertIn("retro_urban-summary.json", doc)
         for _, (glb, sha) in PIEZAS.items():
             if glb == "detail-awning-small.glb":
                 continue
