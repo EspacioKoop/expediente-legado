@@ -30,6 +30,12 @@ class CalleEscaparateTest(unittest.TestCase):
         self.assertIn("const TELES_Y := [0.74, 1.64]", identidad)
         self.assertIn('Modelos.mueble(tele, "televisionVintage"', identidad)
         self.assertIn('"CristalEscaparate"', identidad)
+        self.assertIn("const EMISIONES_ESCAPARATE := [", identidad)
+        self.assertEqual(identidad.count('"contenido": "emision_crt"'), 6)
+        self.assertIn('"contenido": "media_luna"', identidad)
+        self.assertIn('"contenido": ""', identidad)
+        self.assertIn("var pantalla := Pantalla.montar(raiz, declaracion)", identidad)
+        self.assertNotIn("pantalla.material_override = emision", identidad)
         self.assertTrue(MODELO_TV.exists())
 
     def test_conserva_el_destino_hacia_casa_en_la_cadena_base(self):
