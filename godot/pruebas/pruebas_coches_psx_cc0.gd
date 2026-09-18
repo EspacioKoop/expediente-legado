@@ -34,6 +34,8 @@ func _probar() -> void:
 	)
 	var trafico := lote.get_node("TraficoFondo") as Node3D
 	_comprobar(trafico != null, "tráfico lejano presente")
+	var tween_trafico := trafico.get_meta("siga98_trafico_tween") as Tween
+	_comprobar(tween_trafico != null and tween_trafico.is_valid(), "tween de tráfico accesible")
 	_comprobar(
 		trafico.find_children("*", "CollisionShape3D", true, false).is_empty(),
 		"tráfico lejano sin colisión",
@@ -104,6 +106,11 @@ func _probar() -> void:
 	var ranchera := lote.get_node("RancheraSur") as Node3D
 	var mate_ranchera := _material_carroceria(ranchera)
 	var nieve_ranchera := ranchera.get_node("NieveClima") as MeshInstance3D
+	Coches.aplicar_clima(lote, Clima.NUBLADO)
+	_comprobar(
+		is_equal_approx(float(trafico.get_meta("siga98_trafico_clima_escala")), 0.88),
+		"nublado modera la cadencia del tráfico",
+	)
 	Coches.aplicar_clima(lote, Clima.LLUVIA)
 	_comprobar(mate_ranchera.roughness < 0.30, "lluvia reduce rugosidad")
 	_comprobar(mate_ranchera.metallic > 0.0, "lluvia añade respuesta húmeda")
@@ -112,9 +119,17 @@ func _probar() -> void:
 		"lluvia activa especular húmedo",
 	)
 	_comprobar(not nieve_ranchera.visible, "lluvia no muestra nieve")
+	_comprobar(
+		is_equal_approx(float(trafico.get_meta("siga98_trafico_clima_escala")), 0.72),
+		"lluvia ralentiza el tráfico lejano",
+	)
 	Coches.aplicar_clima(lote, Clima.NIEBLA)
 	_comprobar(mate_ranchera.roughness == 1.0, "niebla vuelve a acabado difuso")
 	_comprobar(not nieve_ranchera.visible, "niebla no muestra nieve")
+	_comprobar(
+		is_equal_approx(float(trafico.get_meta("siga98_trafico_clima_escala")), 0.58),
+		"niebla espacia el tráfico lejano",
+	)
 	Coches.aplicar_clima(lote, Clima.NIEVE)
 	_comprobar(nieve_ranchera.visible, "nieve activa acumulación superior")
 	_comprobar(is_equal_approx(mate_ranchera.roughness, 0.90), "nieve conserva lectura mate")
@@ -124,10 +139,18 @@ func _probar() -> void:
 		if nieve.visible:
 			acumulaciones += 1
 	_comprobar(acumulaciones == 4, "nieve afecta a aparcados y tráfico lejano")
+	_comprobar(
+		is_equal_approx(float(trafico.get_meta("siga98_trafico_clima_escala")), 0.52),
+		"nieve deja el tráfico en cadencia prudente",
+	)
 	Coches.aplicar_clima(lote, Clima.DESPEJADO)
 	_comprobar(not nieve_ranchera.visible, "despejado retira acumulación")
 	_comprobar(mate_ranchera.roughness == 1.0, "despejado restaura rugosidad")
 	_comprobar(mate_ranchera.metallic == 0.0, "despejado restaura metalicidad")
+	_comprobar(
+		is_equal_approx(float(trafico.get_meta("siga98_trafico_clima_escala")), 1.0),
+		"despejado restaura la cadencia base",
+	)
 	_comprobar(
 		mate_ranchera.specular_mode == BaseMaterial3D.SPECULAR_DISABLED,
 		"despejado restaura especular",
