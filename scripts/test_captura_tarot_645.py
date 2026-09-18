@@ -36,18 +36,29 @@ class CapturaTarot645Test(unittest.TestCase):
         self.assertIn('preferencias["reduccion_movimiento"] = true', self.capturar)
         self.assertIn("PreferenciasSiga.guardar(preferencias)", self.capturar)
 
-    def test_preparador_genera_24_recorridos_aislables(self) -> None:
+    def test_preparador_genera_ocultas_y_progreso_aislables(self) -> None:
         modulo = _cargar_preparador()
         with tempfile.TemporaryDirectory() as temporal:
             manifiesto = modulo.preparar(Path(temporal), "godot4", ejecutar=False)
-        self.assertEqual(manifiesto["total"], 24)
-        self.assertEqual(manifiesto["esperadas"], 24)
+        self.assertEqual(manifiesto["total"], 26)
+        self.assertEqual(manifiesto["esperadas"], 26)
         capturas = {entrada["captura"] for entrada in manifiesto["entradas"]}
-        self.assertEqual(len(capturas), 24)
+        self.assertEqual(len(capturas), 26)
+        self.assertTrue(all(nombre.startswith("tarot-") for nombre in capturas))
+        ocultas = [e for e in manifiesto["entradas"] if e["tipo"] == "oculta"]
+        progreso = [e for e in manifiesto["entradas"] if e["tipo"] == "progreso"]
+        self.assertEqual(len(ocultas), 24)
+        self.assertEqual(len(progreso), 2)
         self.assertEqual(
-            {entrada["recorrido"] for entrada in manifiesto["entradas"]},
+            {entrada["recorrido"] for entrada in ocultas},
             {"normal", "reducido", "skip"},
         )
+        self.assertEqual(
+            {entrada["recorrido"] for entrada in progreso},
+            {"normal", "reducido"},
+        )
+        self.assertTrue(all("progreso" in entrada["captura"] for entrada in progreso))
+        self.assertTrue(all(entrada["carta"] == "el-mago" for entrada in progreso))
         self.assertTrue(all(entrada["ok"] is None for entrada in manifiesto["entradas"]))
 
     def test_documenta_las_ocho_cartas_y_no_finge_la_progresion(self) -> None:
