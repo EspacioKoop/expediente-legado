@@ -6,6 +6,7 @@
 extends "res://guion/dia_app.gd"
 
 const ESCENA_CINEMATICA := preload("res://escenas/cinematica.tscn")
+const PREPARACION_SUENO := preload("res://guion/preparacion_sueno.gd")
 
 var _entrada_sueno: Node3D = null
 
@@ -84,9 +85,56 @@ func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
 		and frase.is_empty()
 		and destino == "sueño"
 	):
-		_dormir_con_entrada()
+		_abrir_preparacion_sueno()
 		return
 	super._al_pisar_salida(cuerpo, salida)
+
+
+## Antes de dormir, #162 deja elegir qué lecturas se lleva la memoria. La capa
+## no modifica la jornada todavía: abrir/cancelar es una UI reversible y solo
+## confirmar llama al contrato persistente de SeleccionNocturna.
+func _abrir_preparacion_sueno() -> void:
+	if _pantalla != null:
+		return
+	_caminante.set_physics_process(false)
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	_hud.visible = false
+	_mostrar_prioridades(false)
+
+	_pantalla = CanvasLayer.new()
+	_pantalla.layer = 30
+	add_child(_pantalla)
+	var panel := PREPARACION_SUENO.new()
+	_pantalla.add_child(panel)
+	panel.confirmada.connect(_confirmar_preparacion_sueno)
+	panel.cancelada.connect(_cancelar_preparacion_sueno)
+	panel.configurar(
+		jornada.get("leido_hoy", []),
+		jornada.get("seleccion_nocturna", []),
+	)
+
+
+func _confirmar_preparacion_sueno(seleccion: Array) -> void:
+	if not Jornada.preparar_sueno(jornada, seleccion):
+		return
+	_cerrar_preparacion_sueno(false)
+	_dormir_con_entrada()
+
+
+func _cancelar_preparacion_sueno() -> void:
+	_cerrar_preparacion_sueno(true)
+
+
+func _cerrar_preparacion_sueno(restaurar_control: bool) -> void:
+	if _pantalla != null:
+		_pantalla.queue_free()
+		_pantalla = null
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	if not restaurar_control:
+		return
+	_caminante.set_physics_process(true)
+	_hud.visible = true
+	_mostrar_prioridades(true)
 
 
 ## La regla ocurre primero: pagar el día, actualizar el gato, seleccionar la

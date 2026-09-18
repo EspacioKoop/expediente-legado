@@ -277,6 +277,17 @@ SUENO_DUELO_SE_QUEDA,%s no se aparta.
 SUENO_DUELO_SIN_VIDA,"Ha descansado, aunque no le hacía falta."
 SUENO_DUELO_VIDA,"Ha descansado. Le quedan %d."
 SUENO_ROTULO,…
+SUENO_PREPARAR_TITULO,MEMORIA NOCTURNA
+SUENO_PREPARAR_AYUDA,"Elija hasta tres documentos leídos hoy. Puede repetirlos o dejar los huecos vacíos. Intro/A activa; Esc/B vuelve."
+SUENO_PREPARAR_HUECOS,Tres huecos
+SUENO_PREPARAR_DOCUMENTOS,Documentos leídos hoy
+SUENO_PREPARAR_HUECO_VACIO,%d · vacío
+SUENO_PREPARAR_HUECO,%d · %s
+SUENO_PREPARAR_REPETIDA,%s · ×%d
+SUENO_PREPARAR_CONFIRMAR,Dormir
+SUENO_PREPARAR_CANCELAR,Volver
+SUENO_PREPARAR_SIN_DOCUMENTOS,Hoy no hay documentos que llevarse.
+SUENO_PREPARAR_COMPLETA,Los tres huecos están ocupados. Quite uno para añadir otro.
 TAROT_ROTULO,{carta}
 TAROT_SIN_NOMBRE,Una carta sin nombre
 TAROT_VOZ,"Estaba dentro del expediente, escrita como si nada."
