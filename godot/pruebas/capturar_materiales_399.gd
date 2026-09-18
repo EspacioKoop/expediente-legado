@@ -88,6 +88,7 @@ func _init() -> void:
 			dia._espacio_actual.get("color_muro", Color.WHITE),
 			contraste
 		)
+		var diagnostico_material := _diagnostico_materiales(dia)
 		if not _guardar_captura(destino):
 			quit(1)
 			return
@@ -107,6 +108,10 @@ func _init() -> void:
 					"contraste_textura": contraste,
 					"contraste_cambia_textura_suelo": contraste_suelo_cambia,
 					"contraste_cambia_textura_muro": contraste_muro_cambia,
+					"materiales_psx": diagnostico_material["materiales_psx"],
+					"materiales_texturados": diagnostico_material["materiales_texturados"],
+					"materiales_deformados": diagnostico_material["materiales_deformados"],
+					"rango_luminancia_deformados": diagnostico_material["rango_luminancia_deformados"],
 					"deformacion_textura": [deformacion.x, deformacion.y, deformacion.z],
 					"sha256": FileAccess.get_sha256(destino),
 				}
@@ -171,3 +176,53 @@ func _contraste_cambia_textura(nombre: String, base: Color, contraste: float) ->
 	if imagen_normal == null or imagen_reforzada == null:
 		return false
 	return imagen_normal.get_data() != imagen_reforzada.get_data()
+
+
+func _diagnostico_materiales(dia) -> Dictionary:
+	var materiales_psx := 0
+	var materiales_texturados := 0
+	var materiales_deformados := 0
+	var rango_luminancia_deformados := 0.0
+	for nodo in dia.find_children("*", "MeshInstance3D", true, false):
+		var malla := nodo as MeshInstance3D
+		if malla == null:
+			continue
+		var material := malla.material_override as ShaderMaterial
+		if material == null or material.shader == null:
+			continue
+		if material.shader.resource_path != "res://arte/psx.gdshader":
+			continue
+		materiales_psx += 1
+		if not bool(material.get_shader_parameter("con_textura")):
+			continue
+		materiales_texturados += 1
+		var deformacion = material.get_shader_parameter("deformacion_textura")
+		if deformacion is Vector3 and not (deformacion as Vector3).is_equal_approx(Vector3.ONE):
+			materiales_deformados += 1
+			var textura = material.get_shader_parameter("textura") as Texture2D
+			if textura != null:
+				rango_luminancia_deformados = maxf(
+					rango_luminancia_deformados, _rango_luminancia(textura.get_image())
+				)
+	return {
+		"materiales_psx": materiales_psx,
+		"materiales_texturados": materiales_texturados,
+		"materiales_deformados": materiales_deformados,
+		"rango_luminancia_deformados": rango_luminancia_deformados,
+	}
+
+
+func _rango_luminancia(imagen: Image) -> float:
+	if imagen == null or imagen.is_empty():
+		return 0.0
+	var paso_x := maxi(imagen.get_width() / 32, 1)
+	var paso_y := maxi(imagen.get_height() / 32, 1)
+	var minimo := 1.0
+	var maximo := 0.0
+	for x in range(0, imagen.get_width(), paso_x):
+		for y in range(0, imagen.get_height(), paso_y):
+			var p := imagen.get_pixel(x, y)
+			var luminancia := (p.r + p.g + p.b) / 3.0
+			minimo = minf(minimo, luminancia)
+			maximo = maxf(maximo, luminancia)
+	return maximo - minimo
