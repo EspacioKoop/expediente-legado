@@ -88,7 +88,7 @@ class OficinaStylooCc0Test(unittest.TestCase):
                 self.assertEqual(resultado.returncode, 0, resultado.stdout)
                 self.assertNotRegex(resultado.stdout, r"SCRIPT ERROR:|Parse Error:")
             self.assertNotIn("ERROR:", resultado.stdout)
-            self.assertRegex(resultado.stdout, re.compile(r"\\d+ pasadas, 0 fallos"))
+            self.assertRegex(resultado.stdout, re.compile(r"\d+ pasadas, 0 fallos"))
 
 
 if __name__ == "__main__":
