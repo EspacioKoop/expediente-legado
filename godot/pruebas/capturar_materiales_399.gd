@@ -99,9 +99,8 @@ func _init() -> void:
 					"textura_muro": String(dia._espacio_actual.get("textura_muro", "")),
 					"escala_textura": float(dia._espacio_actual.get("escala_textura", 1.0)),
 					"contraste_textura": contraste,
-					"preservar_detalle_textura": dia._espacio_actual.get(
-						"preservar_detalle_textura", false
-					),
+					"preservar_detalle_textura":
+					dia._espacio_actual.get("preservar_detalle_textura", false),
 					"materiales_psx": diagnostico_material["materiales_psx"],
 					"materiales_texturados": diagnostico_material["materiales_texturados"],
 					"materiales_deformados": diagnostico_material["materiales_deformados"],
