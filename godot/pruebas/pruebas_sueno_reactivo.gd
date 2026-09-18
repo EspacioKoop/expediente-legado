@@ -11,6 +11,7 @@ func _initialize() -> void:
 	_probar_sin_objetos_tocados()
 	_probar_todas_las_formas()
 	_probar_gramatica_simbolica()
+	_probar_armario_domestico_cc0()
 	_probar_espacio_simbolico()
 	_probar_reproducibilidad()
 	_probar_tarot_no_filtra_pistas()
@@ -143,6 +144,46 @@ func _probar_gramatica_simbolica() -> void:
 	var inventadas := SuenoUtileria.montar(desconocido, "crucero", 8, 888, [], ["objeto-ajeno"])
 	_comprobar(inventadas.is_empty(), "#888: la gramática no fabrica originales desconocidos")
 	desconocido.queue_free()
+
+
+func _probar_armario_domestico_cc0() -> void:
+	var mundo := Node3D.new()
+	root.add_child(mundo)
+	var creadas := SuenoUtileria.montar(mundo, "crucero", 8, 227, [], ["armario_hogar"])
+	_comprobar(creadas.size() == 1, "#227: un armario examinado produce una sola anomalía")
+	if creadas.size() == 1:
+		var armario: AnomaliaSueno3D = creadas[0]
+		_comprobar(
+			armario.id_catalogo() == "armario-domestico-desencajado",
+			"#227: el armario enlaza su entrada estable del catálogo",
+		)
+		_comprobar(
+			String(armario.get_meta("objeto_origen", "")) == "armario_hogar",
+			"#227: la deformación conserva el original doméstico tocado",
+		)
+		_comprobar(
+			String(armario.get_meta("motivo_simbolico", "")) == "laberinto",
+			"#227: el armario reutiliza la familia laberinto sin inventar otra gramática",
+		)
+		var visual := armario.find_child("FormaDeformada", false, false) as Node3D
+		var asset: Node3D = null
+		if visual != null:
+			asset = visual.get_node_or_null("AssetCc0") as Node3D
+		_comprobar(asset != null, "#227: el sueño reutiliza el GLB CC0 del armario")
+		_comprobar(
+			visual != null and visual.find_child("RespaldoGeometrico", true, false) == null,
+			"#227: el armario no cae al cubo genérico",
+		)
+		var conserva_paleta := false
+		if asset != null:
+			for valor_malla in asset.find_children("*", "MeshInstance3D", true, false):
+				var malla := valor_malla as MeshInstance3D
+				for superficie in malla.mesh.get_surface_count():
+					var material := malla.get_active_material(superficie) as ShaderMaterial
+					if material != null and material.get_shader_parameter("con_textura"):
+						conserva_paleta = true
+		_comprobar(conserva_paleta, "#227: la copia onírica conserva la paleta PSX del pack")
+	mundo.queue_free()
 
 
 func _probar_espacio_simbolico() -> void:

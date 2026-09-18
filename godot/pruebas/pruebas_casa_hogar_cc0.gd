@@ -68,15 +68,21 @@ func _probar() -> void:
 		_comprobar(not planta.intersects(PASO_A_CAMA), "paso hacia la cama libre: " + nombre)
 		_comprobar(not planta.intersects(PIE_DE_CAMA), "acceso a la cama libre: " + nombre)
 		if pieza is StaticBody3D:
-			var colision: CollisionShape3D = (
-				pieza.find_children("*", "CollisionShape3D", true, false)[0]
-			)
-			var volumen: AABB = (
-				colision.global_transform * AABB(-colision.shape.size / 2, colision.shape.size)
-			)
-			_comprobar(
-				volumen.position.is_equal_approx(caja.position), "colisión alineada: " + nombre
-			)
+			# Solo la colisión física DIRECTA del mueble. Un Area3D interactiva
+			# puede tener su propia forma y no define el volumen sólido del prop.
+			var colision: CollisionShape3D = null
+			for hijo in pieza.get_children():
+				if hijo is CollisionShape3D:
+					colision = hijo
+					break
+			_comprobar(colision != null, "colisión física presente: " + nombre)
+			if colision != null:
+				var volumen: AABB = (
+					colision.global_transform * AABB(-colision.shape.size / 2, colision.shape.size)
+				)
+				_comprobar(
+					volumen.position.is_equal_approx(caja.position), "colisión alineada: " + nombre
+				)
 			_comprobar(absf(caja.position.y) < 0.01, "apoyado en el suelo: " + nombre)
 	print("Casa CC0: %d piezas, %d triángulos" % [lote.get_child_count(), triangulos])
 	_comprobar(triangulos <= 5000, "presupuesto geométrico acotado")
@@ -108,6 +114,22 @@ func _probar() -> void:
 	if tele != null:
 		var base: float = tele.global_position.y - EspaciosCatalogo.CASA["bultos"][2]["tam"].y / 2.0
 		_comprobar(absf(base - mueble_tv.end.y) < 0.05, "la tele descansa sobre su mueble")
+	var armario := lote.get_node_or_null("ArmarioHogar") as Node3D
+	_comprobar(armario != null, "el armario CC0 sigue montado")
+	var examinar_armario: Interactuable3D = null
+	if armario != null:
+		examinar_armario = armario.get_node_or_null("ExaminarArmarioHogar") as Interactuable3D
+	_comprobar(examinar_armario != null, "el armario CC0 es examinable")
+	if examinar_armario != null:
+		_comprobar(
+			examinar_armario.texto_accion() == "Examinar armario", "el prompt nombra el original"
+		)
+		_comprobar(examinar_armario.interactuar(root), "examinar el armario acepta interacción")
+		_comprobar(
+			ObjetosOniricos.del_dia(dia.jornada).has(Hogar.ARMARIO_OBJETO_ONIRICO),
+			"examinar el armario conserva su original para el sueño",
+		)
+
 	var sofa := mundo.get_node_or_null("SofaCasa") as Node3D
 	_comprobar(sofa != null and sofa.has_node("VisualHogar"), "el sofá usa el modelo CC0")
 	if sofa != null:

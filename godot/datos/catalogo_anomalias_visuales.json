@@ -18,5 +18,9 @@
   "@vuelta-completa": {
     "tipo": "sello",
     "ruta": "res://arte/catalogo_anomalias/vuelta-completa.svg"
+  },
+  "armario-domestico-desencajado": {
+    "tipo": "boceto",
+    "ruta": "res://arte/catalogo_anomalias/armario-domestico-desencajado.svg"
   }
 }
