@@ -11,6 +11,8 @@ SCENE = ROOT / "godot" / "escenas" / "bolos_pasillo.tscn"
 DIA_SCENE = ROOT / "godot" / "escenas" / "dia.tscn"
 GODOT_TEST = ROOT / "godot" / "pruebas" / "pruebas_bolos_pasillo_3d.gd"
 SELLOS = ROOT / "godot" / "datos" / "sellos.json"
+PLAYTEST_MANDO = ROOT / "docs" / "playtest-bolos-mando-159.md"
+REGISTRADOR_MANDO = ROOT / "scripts" / "registrar_playtest_159.py"
 
 
 class BolosPasillo3DTest(unittest.TestCase):
@@ -21,6 +23,8 @@ class BolosPasillo3DTest(unittest.TestCase):
         self.dia_scene = DIA_SCENE.read_text(encoding="utf-8")
         self.godot_test = GODOT_TEST.read_text(encoding="utf-8")
         self.sellos = json.loads(SELLOS.read_text(encoding="utf-8"))
+        self.playtest_mando = PLAYTEST_MANDO.read_text(encoding="utf-8")
+        self.registrador_mando = REGISTRADOR_MANDO.read_text(encoding="utf-8")
 
     def test_vertical_consumidor_del_nucleo_sin_partida(self):
         self.assertIn("class_name BolosPasillo3D", self.source)
@@ -78,6 +82,23 @@ class BolosPasillo3DTest(unittest.TestCase):
         self.assertIn('Input.is_action_just_pressed("cancelar")', self.source)
         self.assertIn("PreferenciasSiga.aplicar(PreferenciasSiga.cargar())", self.source)
         self.assertNotRegex(self.source, r"KEY_[A-Z0-9_]+")
+
+    def test_mando_tiene_contrato_runtime_y_gate_fisico(self):
+        for texto in (
+            "responde al stick izquierdo",
+            "responde a cruceta",
+            "interactuar usa el botón principal del mando",
+            "cancelar usa el botón secundario del mando",
+        ):
+            self.assertIn(texto, self.godot_test)
+        self.assertIn("InputEventJoypadMotion", self.godot_test)
+        self.assertIn("InputEventJoypadButton", self.godot_test)
+        self.assertIn("JOY_AXIS_LEFT_X", self.godot_test)
+        self.assertIn("JOY_BUTTON_A", self.godot_test)
+        self.assertIn("JOY_BUTTON_B", self.godot_test)
+        self.assertIn("mando físico real", self.playtest_mando)
+        self.assertIn("python3 scripts/registrar_playtest_159.py", self.playtest_mando)
+        self.assertIn("listo_para_cerrar_mando", self.registrador_mando)
 
     def test_escena_y_regresion_ejecutable_quedan_versionadas(self):
         self.assertIn('path="res://guion/bolos_pasillo_3d.gd"', self.scene)
