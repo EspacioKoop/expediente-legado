@@ -3,6 +3,8 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
+CORE = ROOT / "godot" / "guion" / "ecos_archivo.gd"
+PRESENTACION = ROOT / "godot" / "guion" / "ecos_archivo_presentacion.gd"
 VERTICAL = ROOT / "godot" / "guion" / "sueno_ecos_archivo_3d.gd"
 CONTROLLER = ROOT / "godot" / "guion" / "dia_ecos_archivo_app.gd"
 DIA = ROOT / "godot" / "escenas" / "dia.tscn"
@@ -11,10 +13,20 @@ DIA = ROOT / "godot" / "escenas" / "dia.tscn"
 class EcosArchivoRuntimeTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls.core = CORE.read_text(encoding="utf-8")
+        cls.presentacion = PRESENTACION.read_text(encoding="utf-8")
         cls.vertical = VERTICAL.read_text(encoding="utf-8")
         cls.controller = CONTROLLER.read_text(encoding="utf-8")
         cls.controller_compact = "".join(cls.controller.split())
         cls.dia = DIA.read_text(encoding="utf-8")
+
+    def test_una_secuencia_completa_es_definitiva(self):
+        self.assertIn("const MAX_INTENTOS := 1", self.core)
+        self.assertIn('nucleo.fallar()', self.core)
+        self.assertIn('return "dispersado"', self.core)
+        self.assertNotIn('return "incorrecto"', self.core)
+        self.assertIn("Puedes deshacer antes del tercero", self.presentacion)
+        self.assertIn('vista.get("max_intentos", 1)', self.vertical)
 
     def test_vertical_es_3d_visible_y_usa_interaccion_comun(self):
         self.assertIn("class_name SuenoEcosArchivo3D", self.vertical)
