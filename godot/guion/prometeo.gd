@@ -82,6 +82,46 @@ static func desbloquear_carta(tarot: Array, id: String) -> bool:
 	return false
 
 
+## Frontera común de adquisición de Tarot (#46/#1029): posesión de esta vuelta
+## y memoria fantasma se escriben juntas. Los emisores deciden CUÁNDO se gana
+## una carta; esta función solo garantiza que todas las fuentes persistan igual.
+##
+## Devuelve true únicamente para una adquisición nueva. Repetir el mismo
+## evento no vuelve a escribir la memoria ni convierte una carga de partida en
+## un desbloqueo.
+static func desbloquear_carta_en_estado(estado: Dictionary, id: String) -> bool:
+	var tarot_bruto = estado.get("tarot", [])
+	if typeof(tarot_bruto) != TYPE_ARRAY:
+		return false
+	var tarot: Array = tarot_bruto
+	if not desbloquear_carta(tarot, id):
+		return false
+
+	var conocidas_bruto = estado.get("cartas_conocidas", [])
+	var conocidas: Array = conocidas_bruto if typeof(conocidas_bruto) == TYPE_ARRAY else []
+	if not conocidas.has(id):
+		conocidas.append(id)
+		estado["cartas_conocidas"] = conocidas
+	return true
+
+
+## Familia de progreso que nace de descubrir una pista REAL. Se llama desde el
+## evento de descubrimiento, nunca al cargar una partida ni al abrir una UI.
+## Así conserva la semántica del legado sin convertir el estado guardado en un
+## emisor de recompensas.
+static func sincronizar_tarot_por_pistas(estado: Dictionary) -> Array:
+	var pistas_bruto = estado.get("pistas_descubiertas", [])
+	if typeof(pistas_bruto) != TYPE_ARRAY:
+		return []
+	var pistas: Array = pistas_bruto
+	var nuevas := []
+	if pistas.size() >= 1 and desbloquear_carta_en_estado(estado, "el-mago"):
+		nuevas.append("el-mago")
+	if pistas.size() >= 20 and desbloquear_carta_en_estado(estado, "la-estrella"):
+		nuevas.append("la-estrella")
+	return nuevas
+
+
 ## Una acusación es precipitada cuando se ha descubierto menos proporción de
 ## pistas que el umbral de la dificultad. Sin pistas totales no hay ratio que
 ## evaluar, así que nunca es precipitada — y de paso no se divide por cero.
