@@ -200,6 +200,8 @@ static func tema() -> Theme:
 	tema.set_font("mono_font", "RichTextLabel", mono)
 	# Rol manual para superficies terminal/diagnóstico. Se registra para los dos
 	# controles de texto que más lo necesitan sin convertirlo en fuente global.
+	# Label se registra para cabeceras/estado técnico que lo solicitan explícitamente.
+	tema.set_font("terminal_font", "Label", terminal)
 	tema.set_font("terminal_font", "RichTextLabel", terminal)
 	tema.set_font("terminal_font", "LineEdit", terminal)
 	_configurar_botones(tema)
