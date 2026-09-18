@@ -10,7 +10,10 @@ extends SceneTree
 
 const TAMANO := Vector2i(1280, 720)
 const FOV := 70.0
-const FRAMES_ESTABILIZACION := 24
+## La escena queda estática (`dia.set_process(false)`). Dos frames bastan para
+## propagar fase/cámara antes de `frame_post_draw` sin multiplicar el coste del
+## sampler onírico en el renderer software de CI.
+const FRAMES_ESTABILIZACION := 2
 
 const CASOS := [
 	{"id": "oficina", "fase": "archivo", "mirada": 0.0, "inclinacion": -8.0},
@@ -76,6 +79,9 @@ func _init() -> void:
 
 		var archivo := "%s.png" % String(caso["id"])
 		var destino := salida.path_join(archivo)
+		var deformacion: Vector3 = dia._espacio_actual.get("deformacion_textura", Vector3.ONE)
+		var contraste := float(dia._espacio_actual.get("contraste_textura", 1.0))
+		var diagnostico_material := _diagnostico_materiales(dia)
 		if not _guardar_captura(destino):
 			quit(1)
 			return
@@ -89,6 +95,17 @@ func _init() -> void:
 					"captura": archivo,
 					"mirada": float(caso["mirada"]),
 					"inclinacion": float(caso["inclinacion"]),
+					"textura_suelo": String(dia._espacio_actual.get("textura_suelo", "")),
+					"textura_muro": String(dia._espacio_actual.get("textura_muro", "")),
+					"escala_textura": float(dia._espacio_actual.get("escala_textura", 1.0)),
+					"contraste_textura": contraste,
+					"preservar_detalle_textura":
+					dia._espacio_actual.get("preservar_detalle_textura", false),
+					"materiales_psx": diagnostico_material["materiales_psx"],
+					"materiales_texturados": diagnostico_material["materiales_texturados"],
+					"materiales_deformados": diagnostico_material["materiales_deformados"],
+					"materiales_detalle": diagnostico_material["materiales_detalle"],
+					"deformacion_textura": [deformacion.x, deformacion.y, deformacion.z],
 					"sha256": FileAccess.get_sha256(destino),
 				}
 			)
@@ -138,3 +155,34 @@ func _guardar_captura(destino: String) -> bool:
 		return false
 	print("captura -> %s" % destino)
 	return true
+
+
+func _diagnostico_materiales(dia) -> Dictionary:
+	var materiales_psx := 0
+	var materiales_texturados := 0
+	var materiales_deformados := 0
+	var materiales_detalle := 0
+	for nodo in dia.find_children("*", "MeshInstance3D", true, false):
+		var malla := nodo as MeshInstance3D
+		if malla == null:
+			continue
+		var material := malla.material_override as ShaderMaterial
+		if material == null or material.shader == null:
+			continue
+		if material.shader.resource_path != "res://arte/psx.gdshader":
+			continue
+		materiales_psx += 1
+		if not material.get_shader_parameter("con_textura"):
+			continue
+		materiales_texturados += 1
+		if material.get_shader_parameter("preservar_detalle_textura"):
+			materiales_detalle += 1
+		var deformacion = material.get_shader_parameter("deformacion_textura")
+		if deformacion is Vector3 and not (deformacion as Vector3).is_equal_approx(Vector3.ONE):
+			materiales_deformados += 1
+	return {
+		"materiales_psx": materiales_psx,
+		"materiales_texturados": materiales_texturados,
+		"materiales_deformados": materiales_deformados,
+		"materiales_detalle": materiales_detalle,
+	}

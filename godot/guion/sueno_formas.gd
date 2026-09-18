@@ -47,6 +47,14 @@ extends RefCounted
 ## celda a dos metros son unos 240 m²: una nave, no un despacho.
 const MINIMO_GRANDE := 60
 
+## La única fuente espacial de cada forma debe alcanzar suficiente superficie
+## para revelar la trama conocida sin eliminar el gradiente de oscuridad.
+const ENERGIA_LUZ_MATERIAL := 4.4
+const ALCANCE_LUZ_MATERIAL := 19.0
+## La trama procedural de vigilia es sutil a propósito. Deformada y filtrada
+## necesita más separación antes de caer en los 32 niveles del shader PSX.
+const CONTRASTE_MATERIAL_ONIRICO := 2.0
+
 const FORMAS := {
 	# Dos naves cruzadas. Desde el centro se ven cuatro fondos y ninguno dice
 	# nada; desde un brazo no se ve el resto.
@@ -58,6 +66,8 @@ const FORMAS := {
 		"textura_muro": "gotele",
 		"escala_textura": 7.5,
 		"deformacion_textura": Vector3(3.6, 0.45, 0.72),
+		"contraste_textura": CONTRASTE_MATERIAL_ONIRICO,
+		"preservar_detalle_textura": true,
 		"ambiente": Color(0.20, 0.19, 0.26),
 		"ambiente_energia": 0.42,
 		"sol": 0.05,
@@ -66,8 +76,8 @@ const FORMAS := {
 			{
 				"pos": Vector3(0, 2.4, -12),
 				"color": Color(0.55, 0.52, 0.78),
-				"energia": 3.4,
-				"alcance": 16.0,
+				"energia": ENERGIA_LUZ_MATERIAL,
+				"alcance": ALCANCE_LUZ_MATERIAL,
 				"tam": Vector3(0.5, 0.1, 0.5)
 			}
 		],
@@ -99,6 +109,8 @@ const FORMAS := {
 		"textura_muro": "gotele",
 		"escala_textura": 0.55,
 		"deformacion_textura": Vector3(-0.65, 2.8, 1.35),
+		"contraste_textura": CONTRASTE_MATERIAL_ONIRICO,
+		"preservar_detalle_textura": true,
 		"ambiente": Color(0.22, 0.21, 0.20),
 		"ambiente_energia": 0.42,
 		"sol": 0.04,
@@ -110,8 +122,8 @@ const FORMAS := {
 			{
 				"pos": Vector3(-15, 2.4, 6),
 				"color": Color(0.78, 0.74, 0.62),
-				"energia": 3.4,
-				"alcance": 15.0,
+				"energia": ENERGIA_LUZ_MATERIAL,
+				"alcance": ALCANCE_LUZ_MATERIAL,
 				"tam": Vector3(0.6, 0.1, 0.6)
 			}
 		],
@@ -136,6 +148,8 @@ const FORMAS := {
 		"textura_muro": "linoleo",
 		"escala_textura": 3.2,
 		"deformacion_textura": Vector3(0.38, 0.62, 4.4),
+		"contraste_textura": CONTRASTE_MATERIAL_ONIRICO,
+		"preservar_detalle_textura": true,
 		"ambiente": Color(0.22, 0.20, 0.17),
 		"ambiente_energia": 0.42,
 		"sol": 0.05,
@@ -144,8 +158,8 @@ const FORMAS := {
 			{
 				"pos": Vector3(-20, 2.4, 0),
 				"color": Color(0.85, 0.70, 0.45),
-				"energia": 3.2,
-				"alcance": 15.0,
+				"energia": ENERGIA_LUZ_MATERIAL,
+				"alcance": ALCANCE_LUZ_MATERIAL,
 				"tam": Vector3(0.4, 0.1, 0.4)
 			}
 		],
@@ -163,6 +177,8 @@ const FORMAS := {
 		"textura_muro": "gotele",
 		"escala_textura": 5.0,
 		"deformacion_textura": Vector3(2.7, 0.33, -1.15),
+		"contraste_textura": CONTRASTE_MATERIAL_ONIRICO,
+		"preservar_detalle_textura": true,
 		"ambiente": Color(0.17, 0.20, 0.24),
 		"ambiente_energia": 0.42,
 		"sol": 0.06,
@@ -171,8 +187,8 @@ const FORMAS := {
 			{
 				"pos": Vector3(10, 2.4, 8),
 				"color": Color(0.55, 0.75, 0.85),
-				"energia": 3.0,
-				"alcance": 14.0,
+				"energia": ENERGIA_LUZ_MATERIAL,
+				"alcance": ALCANCE_LUZ_MATERIAL,
 				"tam": Vector3(0.5, 0.1, 0.5)
 			}
 		],
@@ -195,6 +211,8 @@ const FORMAS := {
 		"textura_muro": "gotele",
 		"escala_textura": 0.35,
 		"deformacion_textura": Vector3(-0.52, 3.1, 4.2),
+		"contraste_textura": CONTRASTE_MATERIAL_ONIRICO,
+		"preservar_detalle_textura": true,
 		"ambiente": Color(0.24, 0.18, 0.18),
 		"ambiente_energia": 0.42,
 		"sol": 0.05,
@@ -203,8 +221,8 @@ const FORMAS := {
 			{
 				"pos": Vector3(0, 2.4, 6),
 				"color": Color(0.90, 0.45, 0.35),
-				"energia": 3.2,
-				"alcance": 14.0,
+				"energia": ENERGIA_LUZ_MATERIAL,
+				"alcance": ALCANCE_LUZ_MATERIAL,
 				"tam": Vector3(0.5, 0.1, 0.5)
 			}
 		],
@@ -227,6 +245,8 @@ const FORMAS := {
 		"textura_muro": "gotele",
 		"escala_textura": 7.5,
 		"deformacion_textura": Vector3(5.2, 0.28, -0.58),
+		"contraste_textura": CONTRASTE_MATERIAL_ONIRICO,
+		"preservar_detalle_textura": true,
 		"ambiente": Color(0.20, 0.19, 0.26),
 		"ambiente_energia": 0.42,
 		"sol": 0.05,
@@ -235,8 +255,8 @@ const FORMAS := {
 			{
 				"pos": Vector3(0, 2.4, -12),
 				"color": Color(0.55, 0.52, 0.78),
-				"energia": 3.4,
-				"alcance": 16.0,
+				"energia": ENERGIA_LUZ_MATERIAL,
+				"alcance": ALCANCE_LUZ_MATERIAL,
 				"tam": Vector3(0.5, 0.1, 0.5)
 			}
 		],

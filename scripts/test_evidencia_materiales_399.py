@@ -44,6 +44,23 @@ class EvidenciaMateriales399Test(unittest.TestCase):
         self.assertIn('camara.rotation.x = deg_to_rad(float(caso["inclinacion"]))', self.captura)
         self.assertIn('"mirada": float(caso["mirada"])', self.captura)
 
+    def test_manifiesto_registra_el_material_que_realmente_se_renderiza(self):
+        for campo in (
+            '"textura_suelo"',
+            '"textura_muro"',
+            '"escala_textura"',
+            '"contraste_textura"',
+            '"preservar_detalle_textura"',
+            '"materiales_detalle"',
+            '"deformacion_textura"',
+        ):
+            self.assertIn(campo, self.captura)
+        self.assertIn('dia._espacio_actual.get("contraste_textura", 1.0)', self.captura)
+        self.assertIn(
+            'material.get_shader_parameter("preservar_detalle_textura")',
+            self.captura,
+        )
+
     def test_workflow_publica_png_y_manifiesto_sin_versionarlos(self):
         self.assertIn("xvfb-run -a godot4", self.workflow)
         self.assertIn("for captura in oficina calle casa sueno; do", self.workflow)
