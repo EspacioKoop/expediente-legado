@@ -127,7 +127,9 @@ static func nivel_para_noche(
 		nivel = clampi(1 + int(round(progreso * 2.0)), NIVEL_MIN, NIVEL_MAX)
 
 	for figura in espacio.get("figuras", []):
-		if figura is Dictionary and not String(figura.get("duelo", "")).is_empty():
+		if typeof(figura) != TYPE_DICTIONARY:
+			continue
+		if not String(figura.get("duelo", "")).is_empty():
 			nivel = mini(nivel + 1, NIVEL_MAX)
 			break
 	return nivel
