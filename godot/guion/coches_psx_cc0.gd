@@ -65,7 +65,11 @@ static func aplicar_clima(lote: Node3D, estado: String) -> void:
 				)
 				mate.roughness = float(perfil["roughness"])
 				mate.metallic = float(perfil["metallic"])
-				mate.specular_mode = int(perfil["specular"])
+				mate.specular_mode = (
+					BaseMaterial3D.SPECULAR_SCHLICK_GGX
+					if bool(perfil["humedo"])
+					else BaseMaterial3D.SPECULAR_DISABLED
+				)
 
 
 static func _perfil_clima(estado: String) -> Dictionary:
@@ -73,7 +77,7 @@ static func _perfil_clima(estado: String) -> Dictionary:
 		"tinte": Color.WHITE,
 		"roughness": 1.0,
 		"metallic": 0.0,
-		"specular": BaseMaterial3D.SPECULAR_DISABLED,
+		"humedo": false,
 		"nieve": false,
 	}
 	match estado:
@@ -96,7 +100,7 @@ static func _perfil_clima(estado: String) -> Dictionary:
 						"tinte": Color(0.82, 0.88, 0.96),
 						"roughness": 0.24,
 						"metallic": 0.03,
-						"specular": BaseMaterial3D.SPECULAR_SCHLICK_GGX,
+						"humedo": true,
 					},
 					true,
 				)
