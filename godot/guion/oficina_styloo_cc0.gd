@@ -38,11 +38,7 @@ static func montar(mundo: Node3D) -> bool:
 	var bulto_escritorio := _bulto_prioritario("desk")
 	var bulto_silla := _bulto_prioritario("chairDesk")
 	var bulto_estanteria := _bulto_prioritario("bookcaseClosed")
-	if (
-		bulto_escritorio.is_empty()
-		or bulto_silla.is_empty()
-		or bulto_estanteria.is_empty()
-	):
+	if bulto_escritorio.is_empty() or bulto_silla.is_empty() or bulto_estanteria.is_empty():
 		return false
 	var escritorio := _cuerpo_en_pos(mundo, bulto_escritorio.pos)
 	var silla := _cuerpo_en_pos(mundo, bulto_silla.pos)
@@ -61,35 +57,27 @@ static func montar(mundo: Node3D) -> bool:
 		sustituciones += 1
 	if AssetCc0.sustituir(estanteria, String(MODELOS.shelf), bulto_estanteria.tam):
 		sustituciones += 1
-	if AssetCc0.sustituir(
-		telefono, String(MODELOS.telephone), Vector3(0.42, 0.20, 0.30)
-	):
+	if AssetCc0.sustituir(telefono, String(MODELOS.telephone), Vector3(0.42, 0.20, 0.30)):
 		sustituciones += 1
 		var auricular := puesto.get_node_or_null("Auricular") as Node3D
 		if auricular != null:
 			auricular.hide()
 	if _agregar_prop(
-		puesto,
-		"TorrePcStyloo",
-		String(MODELOS.old_pc),
-		Vector3(0.72, 0.30, -0.25),
-		TAM_PC
+		puesto, "TorrePcStyloo", String(MODELOS.old_pc), Vector3(0.72, 0.30, -0.25), TAM_PC
 	):
 		sustituciones += 1
 
 	if _agregar_prop(
-		mundo,
-		"PrinterStyloo",
-		String(MODELOS.printer),
-		Vector3(5.5, 2.05, 3.5),
-		TAM_PRINTER
+		mundo, "PrinterStyloo", String(MODELOS.printer), Vector3(5.5, 2.05, 3.5), TAM_PRINTER
 	):
 		sustituciones += 1
 
 	if sustituciones != MODELOS.size():
 		push_warning(
-			"Styloo disponible pero el montaje administrativo quedó incompleto: %d/%d"
-			% [sustituciones, MODELOS.size()]
+			(
+				"Styloo disponible pero el montaje administrativo quedó incompleto: %d/%d"
+				% [sustituciones, MODELOS.size()]
+			)
 		)
 		return false
 
