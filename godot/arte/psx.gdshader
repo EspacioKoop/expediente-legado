@@ -26,10 +26,10 @@ uniform vec4 color_base : source_color = vec4(1.0);
 // cada paso. El aspecto de la máquina lo siguen dando el temblor de
 // vértices, la luz por vértice, el color cortado y el dithering.
 uniform sampler2D textura : source_color, filter_linear_mipmap_anisotropic, repeat_enable, hint_default_white;
-// El segundo sampler apunta al MISMO recurso, pero sin mipmaps. Solo se usa
-// en espacios que lo piden: el mundo normal conserva el filtrado estable.
-uniform sampler2D textura_detalle : source_color, filter_linear, repeat_enable, hint_default_white;
+// El sueño puede pedir un mip algo más nítido sin renunciar a mipmaps.
+// El mundo normal deja el sesgo en 0 y conserva exactamente el filtrado base.
 uniform bool preservar_detalle_textura = false;
+uniform float sesgo_detalle_textura = -1.0;
 uniform bool con_textura = false;
 // Los assets con atlas conservan sus UV; el escenario sigue siendo triplanar.
 uniform bool usar_uv = false;
@@ -68,10 +68,8 @@ void vertex() {
 }
 
 vec3 muestra_2d(vec2 uv) {
-	if (preservar_detalle_textura) {
-		return texture(textura_detalle, uv).rgb;
-	}
-	return texture(textura, uv).rgb;
+	float sesgo = preservar_detalle_textura ? sesgo_detalle_textura : 0.0;
+	return texture(textura, uv, sesgo).rgb;
 }
 
 // Triplanar a mano: tres muestras y mezcla por la normal. Lo hace el material
