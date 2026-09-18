@@ -34,7 +34,7 @@ class RelacionOniricaTest(unittest.TestCase):
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
         resumen = RESUMEN.search(resultado.stdout)
         self.assertIsNotNone(resumen, resultado.stdout)
-        self.assertGreaterEqual(int(resumen.group(1)), 24, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 34, resultado.stdout)
         self.assertNotIn("SCRIPT ERROR:", resultado.stdout)
         self.assertNotIn("Parse Error:", resultado.stdout)
 
@@ -47,6 +47,16 @@ class RelacionOniricaTest(unittest.TestCase):
         self.assertIn("RelacionOnirica.crear(", compacto)
         self.assertIn("dia.conectar_recompensa_onirica(relacion.nucleo,caso)", compacto)
         self.assertIn('mundo.set_meta("puzzle_onirico_montado","relacion")', compacto)
+
+
+    def test_relacion_restaurada_no_rerollear_tablero_ni_intento(self):
+        codigo = CONTROLLER.read_text(encoding="utf-8")
+        compacto = "".join(codigo.split())
+        self.assertIn("SuenoPuzzleSesion.actual(dia.jornada)", codigo)
+        self.assertIn("RelacionOnirica.restaurar(", compacto)
+        self.assertIn("SuenoPuzzleSesion.guardar(", compacto)
+        self.assertIn("estado_cambiado.connect(", codigo)
+        self.assertIn('dia.call("_guardar_o_avisar", "")', codigo)
 
     def test_ecos_respeta_la_reserva_de_un_puzzle_por_sala(self):
         codigo = "".join(ECOS.read_text(encoding="utf-8").split())
