@@ -8,6 +8,7 @@ extends Node
 const CasaAcumulacion := preload("res://guion/casa_acumulacion_3d.gd")
 const CasaConsecuencias := preload("res://guion/casa_consecuencias_3d.gd")
 const CasaHuellaVida := preload("res://guion/casa_huella_vida_3d.gd")
+const LinternaCasa := preload("res://guion/linterna_casa_680.gd")
 const CasaEstadoAmbientalScript := preload("res://guion/casa_estado_ambiental.gd")
 
 var _mundo_id := 0
@@ -24,6 +25,7 @@ func _process(_delta: float) -> void:
 	var mundo_id := mundo.get_instance_id()
 	var fase := String(dia.jornada.get("fase", ""))
 	if fase != "casa":
+		LinternaCasa.limpiar(dia._caminante)
 		_mundo_id = mundo_id
 		_firma = ""
 		return
@@ -38,6 +40,8 @@ func _process(_delta: float) -> void:
 		+ CasaConsecuencias.firma(estado)
 		+ "#"
 		+ CasaHuellaVida.firma(estado)
+		+ "#"
+		+ LinternaCasa.firma(estado, inventario)
 	)
 	if mundo_id == _mundo_id and firma == _firma:
 		return
@@ -47,6 +51,7 @@ func _process(_delta: float) -> void:
 	var acumulacion := CasaAcumulacion.montar(mundo, estado)
 	var consecuencias := CasaConsecuencias.montar(mundo, estado, dia.jornada, inventario)
 	CasaHuellaVida.montar(mundo, estado)
+	LinternaCasa.refrescar(dia._caminante, estado, inventario)
 	_conectar_publicaciones(acumulacion)
 	_conectar_reparaciones(consecuencias)
 
