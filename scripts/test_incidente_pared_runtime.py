@@ -27,7 +27,7 @@ class IncidenteParedRuntimeContractTest(unittest.TestCase):
         for token in (
             "Interactuable3D.new()",
             "Interactuable3D.Verbo.GOLPEAR",
-            'pared.name = "ParedGolpeableOficina"',
+            '"ParedGolpeableOficina"',
             "CollisionShape3D.new()",
             "BoxShape3D.new()",
         ):
@@ -69,6 +69,52 @@ class IncidenteParedRuntimeContractTest(unittest.TestCase):
         self.assertIn("pared.habilitado = false", self.controller)
         self.assertIn("dia._caminante.set_physics_process(false)", self.controller)
         self.assertIn("DEMORA_TRANSICION", self.controller)
+
+    def test_casa_reutiliza_el_gesto_sin_consecuencia_laboral(self):
+        for token in (
+            '"ParedGolpeableCasa"',
+            "IncidentesConducta.CASA",
+            "_marca_domestica(pared)",
+            '"MarcaGolpePared"',
+        ):
+            self.assertIn(token, self.controller)
+
+        locales = self.controller[
+            self.controller.index("if lugar == IncidentesConducta.CASA:")
+            : self.controller.index('if String(resultado.get("reaccion", ""))')
+        ]
+        self.assertNotIn("_guardar_o_avisar", locales)
+        self.assertNotIn("Acusacion.perder_vida", locales)
+        self.assertNotIn("_reasignar", locales)
+
+    def test_sueno_coloca_pared_segun_planta_y_no_por_coordenada_fija(self):
+        for token in (
+            '"ParedGolpeableSueno"',
+            "IncidentesConducta.SUENO",
+            "SuenoFormas.de(",
+            "Planta.paredes(",
+            "Planta.en_pared(",
+            "_feedback_onirico(pared)",
+        ):
+            self.assertIn(token, self.controller)
+        self.assertNotIn("POSICION_PARED_SUENO", self.controller)
+
+    def test_respuesta_onirica_es_efimera_y_sin_progreso(self):
+        for token in (
+            '"EcoGolpeParedOnirico"',
+            'tween_property(eco, "scale"',
+            'tween_callback(Callable(eco, "queue_free"))',
+        ):
+            self.assertIn(token, self.controller)
+
+        for forbidden in (
+            "SuenoObjetivos",
+            "completar(",
+            "recordar(",
+            "pistas_descubiertas",
+            "veredictos",
+        ):
+            self.assertNotIn(forbidden, self.controller)
 
 
 if __name__ == "__main__":
