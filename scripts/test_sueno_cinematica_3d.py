@@ -26,9 +26,25 @@ class SuenoCinematica3DTest(unittest.TestCase):
         self.assertNotIn('"figura":', self.cinematica)
         self.assertEqual(self.cinematica.count('"camara": Vector3'), 3)
         self.assertEqual(self.cinematica.count('"mira": Vector3'), 3)
+        self.assertEqual(self.cinematica.count('"camara_desde": Vector3'), 3)
+        self.assertEqual(self.cinematica.count('"mira_desde": Vector3'), 3)
         self.assertIn("EspaciosCatalogo.CASA", self.cinematica)
         self.assertNotIn("MeshInstance3D", self.cinematica)
         self.assertNotIn("BoxMesh", self.cinematica)
+
+    def test_post_playtest_tiene_accion_y_residuo_visual(self) -> None:
+        self.assertIn('"nombre": "orientar-habitacion"', self.cinematica)
+        self.assertIn('"nombre": "acostarse"', self.cinematica)
+        self.assertIn('"nombre": "residuo-cama"', self.cinematica)
+        self.assertIn('"fundido_desde": 0.0', self.cinematica)
+        self.assertIn('"fundido_hasta": 0.92', self.cinematica)
+        self.assertIn("func _actualizar_fundido(", self.reproductor)
+        self.assertIn('plano.get("fundido_desde", 0.0)', self.reproductor)
+        self.assertIn('plano.get("fundido_hasta", desde)', self.reproductor)
+        self.assertIn("lerpf(desde, hasta, suave)", self.reproductor)
+        self.assertIn(
+            "_fundido.color = Color(0.0, 0.0, 0.0, 0.0)", self.reproductor
+        )
 
     def test_controller_dedicado_no_cambia_la_cadena_historica(self) -> None:
         self.assertIn('extends "res://guion/dia_onboarding_app.gd"', self.calle)
