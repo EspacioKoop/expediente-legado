@@ -64,12 +64,15 @@ func _probar_guardado_real_de_partida() -> void:
 	jornada["dia"] = 11
 	jornada["fase"] = "sueño"
 	_comprobar(
-		Sesion.guardar(
-			jornada,
-			Sesion.TIPO_ECOS,
-			"caso-real",
-			"pista-real",
-			{"nucleo": {"state": "pendiente"}, "intentos": 2},
+		(
+			Sesion
+			. guardar(
+				jornada,
+				Sesion.TIPO_ECOS,
+				"caso-real",
+				"pista-real",
+				{"nucleo": {"state": "pendiente"}, "intentos": 2},
+			)
 		),
 		"la sesión se integra en la Jornada real de Partida",
 	)
@@ -124,22 +127,28 @@ func _probar_rechazos() -> void:
 	)
 	var fijada := _jornada()
 	_comprobar(
-		Sesion.guardar(
-			fijada,
-			Sesion.TIPO_RELACION,
-			"caso1",
-			"pista1",
-			{"nucleo": {"state": "pendiente"}},
+		(
+			Sesion
+			. guardar(
+				fijada,
+				Sesion.TIPO_RELACION,
+				"caso1",
+				"pista1",
+				{"nucleo": {"state": "pendiente"}},
+			)
 		),
 		"acepta la primera identidad de puzzle de la noche",
 	)
 	_comprobar(
-		not Sesion.guardar(
-			fijada,
-			Sesion.TIPO_ECOS,
-			"caso2",
-			"pista2",
-			{"nucleo": {"state": "pendiente"}},
+		not (
+			Sesion
+			. guardar(
+				fijada,
+				Sesion.TIPO_ECOS,
+				"caso2",
+				"pista2",
+				{"nucleo": {"state": "pendiente"}},
+			)
 		),
 		"una sesión ya fijada no puede convertirse en otro puzzle",
 	)
