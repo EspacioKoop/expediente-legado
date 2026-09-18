@@ -2,7 +2,10 @@
 
 Este gate produce cuatro capturas comparables del recorrido real de `dia.tscn`:
 **oficina**, **calle**, **casa** y **sueño**. Todas usan la cámara del jugador a
-1280×720, FOV 70 y HUD oculto. Las PNG se publican como artifact del workflow
+1280×720, FOV 70 y HUD oculto. El harness fija además un rumbo e inclinación de
+QA por fase: la toma no hereda la orientación de la fase anterior, porque eso
+puede convertir una captura de materiales en una foto de la pared de entrada.
+Las PNG se publican como artifact del workflow
 `Evidencia materiales 399`; no se versionan en Git porque los binarios de
 imagen están sujetos a Git LFS.
 
