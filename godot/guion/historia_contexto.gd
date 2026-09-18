@@ -1,9 +1,10 @@
 ## Contrato de maduración narrativa para las decisiones políticas (#287).
 ##
 ## Al aparecer una carta se congela el contexto que el jugador ya conocía. La
-## decisión madura cuando después aparece información real nueva: otro documento
-## leído o una pista/conclusión descubierta. No hay temporizador ni umbral
-## numérico arbitrario, y una partida antigua sin instantánea no queda bloqueada.
+## decisión madura cuando después aparece contexto real nuevo: otro documento,
+## una pista/conclusión, un expediente cerrado o el avance de la jornada. No hay
+## temporizador ni umbral numérico arbitrario, y una partida antigua sin
+## instantánea no queda bloqueada.
 extends RefCounted
 
 const CLAVE := "historias_contexto"
@@ -16,6 +17,9 @@ static func registrar(estado: Dictionary, carta_id: String) -> bool:
 	registros[carta_id] = {
 		"leidos": _leidos(estado),
 		"pistas": _pistas(estado),
+		"veredictos": _veredictos(estado),
+		"dia": _dia(estado),
+		"fase": _fase(estado),
 	}
 	estado[CLAVE] = registros
 	return true
@@ -38,6 +42,14 @@ static func maduro(estado: Dictionary, carta_id: String) -> bool:
 	return (
 		_hay_nuevo(_leidos(estado), contexto.get("leidos", []))
 		or _hay_nuevo(_pistas(estado), contexto.get("pistas", []))
+		# Los snapshots previos a esta ampliación no guardaban veredictos,
+		# día ni fase. Esas dimensiones solo cuentan si ya existían al congelar
+		# el contexto, evitando desbloqueos retroactivos al actualizar.
+		or (
+			contexto.has("veredictos")
+			and _hay_nuevo(_veredictos(estado), contexto.get("veredictos", []))
+		)
+		or _jornada_avanzada(estado, contexto)
 	)
 
 
@@ -55,6 +67,41 @@ static func _leidos(estado: Dictionary) -> Array:
 
 static func _pistas(estado: Dictionary) -> Array:
 	return _ids(estado.get("pistas_descubiertas", []))
+
+
+static func _veredictos(estado: Dictionary) -> Array:
+	var valor: Variant = estado.get("veredictos", {})
+	if typeof(valor) != TYPE_DICTIONARY:
+		return []
+	var veredictos: Dictionary = valor
+	return _ids(veredictos.keys())
+
+
+static func _dia(estado: Dictionary) -> int:
+	var jornada: Variant = estado.get("jornada", {})
+	if typeof(jornada) != TYPE_DICTIONARY:
+		return 1
+	return int(jornada.get("dia", 1))
+
+
+static func _fase(estado: Dictionary) -> String:
+	var jornada: Variant = estado.get("jornada", {})
+	if typeof(jornada) != TYPE_DICTIONARY:
+		return ""
+	return String(jornada.get("fase", ""))
+
+
+static func _jornada_avanzada(estado: Dictionary, contexto: Dictionary) -> bool:
+	if not contexto.has("dia") and not contexto.has("fase"):
+		return false
+	if contexto.has("dia") and _dia(estado) != int(contexto.get("dia", _dia(estado))):
+		return true
+	if contexto.has("fase"):
+		var fase_anterior := String(contexto.get("fase", ""))
+		var fase_actual := _fase(estado)
+		if fase_anterior == "archivo" and fase_actual != "archivo":
+			return true
+	return false
 
 
 static func _ids(valor: Variant) -> Array:
