@@ -10,7 +10,7 @@ Desde #836, `main` ya empaqueta **IBM Plex Mono** y
 sistema. #945 separó además el rol semántico de terminal para que Kubasta pueda
 entrar sin alterar la monoespaciada genérica.
 
-Este corte avanza #298 con el paquete aportado y auditado:
+#1041 dejó integrado en `main` el paquete auditado, el fallback y el materializador reproducible:
 
 - ZIP: **41.483 bytes**;
 - SHA-256 del ZIP:
@@ -38,6 +38,23 @@ La auditoría estática confirma los caracteres del contrato:
 
 Por tanto, mergear este corte **no cambia visualmente** un checkout que aún no
 contenga el TTF LFS.
+
+## Consumidores reales
+
+El rol ya no queda como una entrada de `Theme` sin uso:
+
+- el visor SIGA aplica `terminal_font` a la cabecera técnica del registro
+  (folio/tipo/fecha) y a la barra de estado;
+- el cuerpo del documento conserva `document_font` (MFB Oldstyle), por lo que
+  Kubasta no invade la lectura de expedientes;
+- la consola de playtest aplica `fuente_terminal()` tanto al registro
+  `RichTextLabel` como a la línea de comandos `LineEdit`;
+- mientras `Kubasta.ttf` no exista, esos consumidores reciben IBM Plex Mono
+  mediante el fallback ya integrado.
+
+Esto convierte #298 en una integración funcional y acotada: cuando el objeto
+LFS real entre en el repositorio, las superficies anteriores cambiarán de
+identidad sin modificar la tipografía global ni el texto documental.
 
 ## Materialización reproducible
 
