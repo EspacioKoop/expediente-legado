@@ -26,7 +26,7 @@ func refrescar(host) -> void:
 
 	var caso := ArchivadoBandeja.siguiente_pendiente(_estado_archivado)
 	if caso.is_empty():
-		if not _estado_archivado.get("cerrada", false) and not _estado_archivado.get("casos", []).is_empty():
+		if (\n\t\t\tnot _estado_archivado.get("cerrada", false)\n\t\t\tand not _estado_archivado.get("casos", []).is_empty()\n\t\t):
 			var resumen := ArchivadoBandeja.cerrar(_estado_archivado)
 			_persistir(host)
 			_mostrar_resultado(host, resumen)
