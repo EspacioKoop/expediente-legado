@@ -24,8 +24,14 @@ class SuenoFeedbackObjetivosTest(unittest.TestCase):
         bloque = self.codigo.split("func _al_pisar_objetivo", 1)[1].split(
             "func _actualizar_feedback_objetivos", 1
         )[0]
+        self.assertIn("_tras_cambio_objetivo(estado, true)", bloque)
         self.assertIn("_actualizar_rumbo_guia_pendiente(estado)", bloque)
         self.assertIn("_orientar_gato_guia()", bloque)
+
+    def test_puzzle_refresca_el_mismo_feedback_sin_doble_guardado(self):
+        self.assertIn("_tras_cambio_objetivo(estado, false)", self.codigo)
+        self.assertIn("_actualizar_feedback_objetivos(SuenoObjetivos.progreso(estado))", self.codigo)
+        self.assertIn("_actualizar_rumbo_guia_pendiente(estado)", self.codigo)
 
     def test_guia_ignora_objetivos_ya_completados(self):
         bloque = self.codigo.split("func _actualizar_rumbo_guia_pendiente", 1)[1].split(
