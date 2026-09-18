@@ -55,6 +55,8 @@ const COLOR_UMBRAL := Color(0.43, 0.55, 0.47)
 const COLOR_ARROYO := Color(0.18, 0.42, 0.48)
 const COLOR_RETORNO := Color(0.30, 0.50, 0.38)
 
+@export var reduccion_movimiento := false
+
 var _version_actual := VERSION_RECIENTE
 var _estado_objetos := {
 	OBJ_TAZA: {VERSION_RECIENTE: "mesa", VERSION_ENVEJECIDA: "mesa_envejecida"},
@@ -132,7 +134,7 @@ func estado_reproducible() -> Dictionary:
 ## Cruza entre dos versiones del mismo lugar. Nunca toca inventario/progreso:
 ## únicamente cambia qué representación temporal está visible.
 func cruzar_umbral(
-	umbral: String = UMBRAL_PRINCIPAL, reduccion_movimiento: bool = false
+	umbral: String = UMBRAL_PRINCIPAL, reducir_movimiento: Variant = null
 ) -> Dictionary:
 	preparar()
 	if umbral != UMBRAL_PRINCIPAL:
@@ -146,7 +148,8 @@ func cruzar_umbral(
 	var desde := _version_actual
 	_version_actual = _otra_version(_version_actual)
 	_aplicar_estado_visual()
-	var salida := plan_presentacion(reduccion_movimiento)
+	var reducir := reduccion_movimiento if reducir_movimiento == null else bool(reducir_movimiento)
+	var salida := plan_presentacion(reducir)
 	(
 		salida
 		. merge(
