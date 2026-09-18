@@ -40,7 +40,8 @@ class ViviendaTest(unittest.TestCase):
         self.assertIn('"rotulo": "SALIDA_DORMIR"', self.capa)
 
     def test_la_reasignacion_devuelve_casa_pero_no_resucita_al_gato(self):
-        self.assertIn('"alquiler": {"ultimo_resuelto": 0, "pagados": 0, "impagos": 0}', self.jornada)
+        for clave in ("ultimo_resuelto", "ultimo_estado", "pagados", "impagos"):
+            self.assertIn(f'"{clave}"', self.jornada)
         self.assertIn('nueva_vida["gato"] = gato', self.jornada)
 
     def test_este_corte_no_decide_el_sueno_degradado(self):

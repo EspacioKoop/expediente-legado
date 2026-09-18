@@ -11,12 +11,19 @@ extends RefCounted
 const GATO_AUSENTE := "ausente"
 const GATO_ALIMENTADO := "alimentado"
 const GATO_SIN_COMER := "sin_comer"
+const COMIDA_RECIENTE := "comido"
+const COMIDA_FALTA := "sin_comer"
+const ALQUILER_SIN_HISTORIAL := "sin_historial"
+const ALQUILER_PAGADO := "pagado"
+const ALQUILER_IMPAGO := "impago"
 
 
 static func derivar(jornada: Dictionary, inventario: Dictionary = {}) -> Dictionary:
 	var objetos_casa := _objetos_de_casa(inventario)
 	return {
 		"gato_estado": _estado_gato(jornada),
+		"comida_estado": _estado_comida(jornada),
+		"alquiler_estado": _estado_alquiler(jornada),
 		"objetos_casa": objetos_casa,
 		"objetos_casa_ids": _ids(objetos_casa),
 		"rutinas_casa": CasaRutinas.estado(jornada),
@@ -59,6 +66,38 @@ static func _consecuencias_domesticas(jornada: Dictionary) -> Array[String]:
 			salida.append(consecuencia)
 	salida.sort()
 	return salida
+
+
+static func _estado_comida(jornada: Dictionary) -> String:
+	if not jornada.has("comida_propia"):
+		return COMIDA_FALTA
+	var comida = jornada.get("comida_propia", {})
+	if typeof(comida) != TYPE_DICTIONARY:
+		return COMIDA_FALTA
+	if int(comida.get("dias_sin_comer", 0)) > 0:
+		return COMIDA_FALTA
+	return COMIDA_RECIENTE
+
+
+static func _estado_alquiler(jornada: Dictionary) -> String:
+	var alquiler = jornada.get("alquiler", {})
+	if typeof(alquiler) != TYPE_DICTIONARY:
+		return ALQUILER_SIN_HISTORIAL
+	if int(alquiler.get("ultimo_resuelto", 0)) <= 0:
+		return ALQUILER_SIN_HISTORIAL
+	var estado := String(alquiler.get("ultimo_estado", ""))
+	if estado == ALQUILER_PAGADO or estado == ALQUILER_IMPAGO:
+		return estado
+
+	# Compatibilidad limitada con guardados anteriores: solo se infiere cuando
+	# el histórico permite saber el resultado sin ambigüedad.
+	var pagados := int(alquiler.get("pagados", 0))
+	var impagos := int(alquiler.get("impagos", 0))
+	if pagados > 0 and impagos == 0:
+		return ALQUILER_PAGADO
+	if impagos > 0 and pagados == 0:
+		return ALQUILER_IMPAGO
+	return ALQUILER_SIN_HISTORIAL
 
 
 static func _estado_gato(jornada: Dictionary) -> String:
