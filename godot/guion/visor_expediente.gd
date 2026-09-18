@@ -118,6 +118,7 @@ func _construir() -> void:
 	raiz.add_child(acciones)
 
 	_estado = _etiqueta("", EstiloSiga.NEGRO)
+	_aplicar_fuente_terminal(_estado)
 	var barra_estado := _hueco()
 	barra_estado.custom_minimum_size.y = 26
 	barra_estado.add_child(_centrado(_estado))
@@ -257,6 +258,7 @@ func _columna_documento() -> Control:
 	columna.add_theme_constant_override("separation", 4)
 
 	_cabecera = _etiqueta("", EstiloSiga.NEGRO)
+	_aplicar_fuente_terminal(_cabecera)
 	columna.add_child(_cabecera)
 
 	_documento = RichTextLabel.new()
@@ -589,6 +591,10 @@ func _refrescar_estado() -> void:
 
 
 # --- Cajas ------------------------------------------------------------------
+
+
+func _aplicar_fuente_terminal(etiqueta: Label) -> void:
+	etiqueta.add_theme_font_override("font", theme.get_font("terminal_font", "Label"))
 
 
 func _etiqueta(texto: String, color: Color) -> Label:
