@@ -112,6 +112,33 @@ static func revoco_urbano(base: Color, semilla: int) -> ImageTexture:
 	return ImageTexture.create_from_image(imagen)
 
 
+## Loseta de acera: piezas rectangulares trabadas y juntas oscuras. Frente al
+## asfalto, la regularidad y las juntas hacen legible el borde peatonal incluso
+## cuando los masters PBR de #560 no están disponibles por Git LFS.
+static func loseta_acera(base: Color, semilla: int) -> ImageTexture:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = semilla
+	var imagen := Image.create(LADO, LADO, false, Image.FORMAT_RGB8)
+	for x in LADO:
+		for y in LADO:
+			var grano := rng.randf_range(-0.025, 0.025)
+			var tono := base.lightened(grano) if grano >= 0.0 else base.darkened(-grano)
+			imagen.set_pixel(x, y, tono)
+
+	var junta := base.darkened(0.18)
+	for y in range(0, LADO, 8):
+		for x in LADO:
+			imagen.set_pixel(x, y, junta)
+	for fila in 8:
+		var y_inicio := fila * 8
+		var desfase := 0 if fila % 2 == 0 else 8
+		for x in range(desfase, LADO, 16):
+			for dy in 8:
+				if y_inicio + dy < LADO:
+					imagen.set_pixel(x, y_inicio + dy, junta)
+	return ImageTexture.create_from_image(imagen)
+
+
 ## Moqueta de casa: trama regular con hilo suelto. La regularidad es lo que la
 ## separa del asfalto, que es ruido puro.
 static func moqueta(base: Color, semilla: int) -> ImageTexture:
@@ -274,6 +301,8 @@ static func calculada(nombre: String, base: Color, semilla: int) -> ImageTexture
 			return asfalto(base, semilla)
 		"revoco_urbano":
 			return revoco_urbano(base, semilla)
+		"loseta_acera":
+			return loseta_acera(base, semilla)
 		"moqueta":
 			return moqueta(base, semilla)
 		"melamina":

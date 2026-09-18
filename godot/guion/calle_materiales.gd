@@ -44,38 +44,45 @@ const FACHADAS := [
 
 ## El suelo jugable sigue siendo el rectángulo 9x34 del catálogo. Estas tres
 ## piezas son solo la piel, a 6 mm por encima: 1.8 m de acera a cada lado y
-## 5.4 m de calzada. Si falta el set PBR no se crea la pieza, de modo que un
-## checkout sin LFS conserva exactamente el asfalto procedural anterior.
+## 5.4 m de calzada. Los sets PBR mandan cuando existen; sin LFS se conserva
+## la misma separación visual mediante fallbacks procedurales, sin colisión.
 const SUPERFICIES_SUELO := [
 	{
-		"nombre": "CalzadaPBR",
+		"nombre": "CalzadaMaterial",
 		"pos": Vector3(0.0, 0.006, 0.0),
 		"tam": Vector3(5.4, 0.012, 34.0),
 		"material_pbr": "asfalto_urbano",
 		"escala": 12.0,
+		"fallback_textura": "asfalto",
+		"fallback_color": Color(0.20, 0.20, 0.21),
+		"fallback_metros": 1.2,
 	},
 	{
-		"nombre": "AceraOestePBR",
+		"nombre": "AceraOesteMaterial",
 		"pos": Vector3(-3.6, 0.006, 0.0),
 		"tam": Vector3(1.8, 0.012, 34.0),
 		"material_pbr": "acera_barcelona",
 		"escala": 14.0,
+		"fallback_textura": "loseta_acera",
+		"fallback_color": Color(0.46, 0.45, 0.42),
+		"fallback_metros": 0.8,
 	},
 	{
-		"nombre": "AceraEstePBR",
+		"nombre": "AceraEsteMaterial",
 		"pos": Vector3(3.6, 0.006, 0.0),
 		"tam": Vector3(1.8, 0.012, 34.0),
 		"material_pbr": "acera_barcelona",
 		"escala": 14.0,
+		"fallback_textura": "loseta_acera",
+		"fallback_color": Color(0.46, 0.45, 0.42),
+		"fallback_metros": 0.8,
 	},
 ]
 
 
 static func montar(mundo: Node3D) -> void:
 	for ficha in SUPERFICIES_SUELO:
-		var superficie := _superficie_suelo(ficha)
-		if superficie != null:
-			mundo.add_child(superficie)
+		mundo.add_child(_superficie_suelo(ficha))
 	for ficha in FACHADAS:
 		mundo.add_child(_fachada(ficha))
 
@@ -85,7 +92,7 @@ static func _superficie_suelo(ficha: Dictionary) -> MeshInstance3D:
 		String(ficha["material_pbr"]), Color.WHITE, float(ficha["escala"]), true
 	)
 	if material == null:
-		return null
+		material = _material_fallback_suelo(ficha)
 
 	var superficie := MeshInstance3D.new()
 	superficie.name = String(ficha["nombre"])
@@ -96,6 +103,20 @@ static func _superficie_suelo(ficha: Dictionary) -> MeshInstance3D:
 	superficie.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	superficie.material_override = material
 	return superficie
+
+
+static func _material_fallback_suelo(ficha: Dictionary) -> ShaderMaterial:
+	var color: Color = ficha["fallback_color"]
+	var textura := String(ficha["fallback_textura"])
+	var material := ShaderMaterial.new()
+	material.shader = load(Espacio3D.SHADER_PSX)
+	material.set_shader_parameter("color_base", color)
+	material.set_shader_parameter(
+		"textura", TexturaProcedural.por_nombre(textura, color, hash(ficha["nombre"]))
+	)
+	material.set_shader_parameter("con_textura", true)
+	material.set_shader_parameter("escala_textura", 1.0 / float(ficha["fallback_metros"]))
+	return material
 
 
 static func _fachada(ficha: Dictionary) -> MeshInstance3D:
