@@ -89,6 +89,7 @@ class OficinaUtileriaTest(unittest.TestCase):
         self.assertIn("Jornada.BONUS_ACCIONES_MAX_POR_DIA", self.controlador)
         self.assertIn("maquina.servir()", self.controlador)
         self.assertIn("maquina.retirar_taza()", self.controlador)
+        self.assertIn("maquina.activado.is_connected(callback)", self.controlador)
         self.assertIn('dia._guardar_o_avisar("")', self.controlador)
         self.assertNotIn('dia.jornada["dinero"] -=', self.controlador)
         self.assertNotIn('dia.jornada["acciones"] +=', self.controlador)
