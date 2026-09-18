@@ -202,8 +202,12 @@ func _probar_tienda(dia, calle: Node3D) -> void:
 		)
 		_comprobar(int(dia.jornada["dinero"]) == saldo_inicial - gastado, "no cobra dos veces")
 		_comprobar(
-			puerta.nombre_objeto == TranslationServer.translate("CALLE_TIENDA_TODO_COMPRADO"),
-			"avisa de que ya lo tiene"
+			TiendaVideojuegos.consola_trucos_desbloqueada(dia.jornada),
+			"completar el catálogo desbloquea el manual de servicio"
+		)
+		_comprobar(
+			puerta.nombre_objeto == TranslationServer.translate("CALLE_TIENDA_MANUAL_SERVICIO"),
+			"Bit 98 anuncia el manual de servicio"
 		)
 	else:
 		_comprobar(compradas.is_empty(), "sin existencias no se compra")
