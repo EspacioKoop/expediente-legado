@@ -7,11 +7,10 @@
 extends "res://guion/dia_gato_app.gd"
 
 const POS_PUESTO := Vector3(-4.0, 1.45, 1.0)
-const TEXTO_ONBOARDING := (
-	"PUESTO 4-B · SIGA-98\n"
-	+ "Acérquese al terminal verde para abrir su primer expediente.\n"
-	+ "Mayús corre, Ctrl agacha y Espacio salta (remapeable en el menú)."
-)
+const CLAVE_ROL_ONBOARDING := "ONBOARDING_OBJETIVO_INICIAL"
+const CLAVE_PUESTO_ONBOARDING := "ONBOARDING_PUESTO_SIGA"
+const CLAVE_ACCION_ONBOARDING := "ONBOARDING_ACCION_SIGA"
+const COLOR_FONDO_TUTORIAL := Color("e8edf7")
 const UMBRAL_RESCATE_CAIDA := -8.0
 
 var _pista_puesto: PanelContainer
@@ -86,20 +85,38 @@ func _montar_onboarding_archivo() -> void:
 	_pista_puesto.name = "PistaPuestoPropio"
 	_pista_puesto.theme = EstiloSiga.tema()
 	_pista_puesto.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_pista_puesto.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
-	_pista_puesto.offset_left = -290
-	_pista_puesto.offset_top = -92
-	_pista_puesto.offset_right = 290
-	_pista_puesto.offset_bottom = -18
+	# El diálogo vive abajo. El objetivo inicial ocupa una banda superior y,
+	# cuando HUDLayer lo arbitra, nunca compite con fase/diálogo/modal.
+	_pista_puesto.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	_pista_puesto.offset_left = -310
+	_pista_puesto.offset_top = 96
+	_pista_puesto.offset_right = 310
+	_pista_puesto.offset_bottom = 180
+	_pista_puesto.add_theme_stylebox_override(
+		"panel", EstiloSiga.caja_saliente(COLOR_FONDO_TUTORIAL)
+	)
 	_hud.add_child(_pista_puesto)
 
+	var contenido := VBoxContainer.new()
+	contenido.name = "ContenidoPistaPuesto"
+	contenido.add_theme_constant_override("separation", 3)
+	_pista_puesto.add_child(contenido)
+
+	var rol := Label.new()
+	rol.name = "RolPistaPuesto"
+	rol.text = tr(CLAVE_ROL_ONBOARDING)
+	rol.add_theme_font_override("font", EstiloSiga.fuente_titulo())
+	rol.add_theme_color_override("font_color", EstiloSiga.AZUL_TITULO)
+	contenido.add_child(rol)
+
 	var texto := Label.new()
-	texto.text = TEXTO_ONBOARDING
+	texto.name = "TextoPistaPuesto"
+	texto.text = "%s\n%s" % [tr(CLAVE_PUESTO_ONBOARDING), tr(CLAVE_ACCION_ONBOARDING)]
 	texto.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	texto.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	texto.custom_minimum_size.x = 560
+	texto.custom_minimum_size.x = 580
 	texto.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_pista_puesto.add_child(texto)
+	contenido.add_child(texto)
 
 
 func _abrir_expediente() -> void:

@@ -46,6 +46,10 @@ func _montar_onboarding_archivo() -> void:
 	super._montar_onboarding_archivo()
 	if _hud_prioridades == null or not is_instance_valid(_pista_puesto):
 		return
+	# #304 nació antes del árbitro global: además de registrar la superficie,
+	# la movemos al mismo CanvasLayer para que composición y z-order sean únicos.
+	if _pista_puesto.get_parent() != _hud_prioridades:
+		_pista_puesto.reparent(_hud_prioridades, false)
 	_hud_prioridades.registrar(HUDLayer.TUTORIAL, _pista_puesto)
 	_hud_prioridades.activar(HUDLayer.TUTORIAL)
 
