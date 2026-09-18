@@ -7,12 +7,12 @@ extends CanvasLayer
 const ESCENA_DIA := "res://escenas/dia.tscn"
 const CLIMAS := ["auto", "despejado", "nublado", "lluvia", "niebla", "nieve"]
 const COMANDOS := {
-	"ayuda": "lista los comandos del manual de servicio",
-	"clima": "clima auto|despejado|nublado|lluvia|niebla|nieve",
-	"desatascar": "vuelve a la entrada del espacio actual",
-	"portatil": "abre la Portátil Color 98",
-	"diagnostico": "muestra semilla/día/vuelta/versión para reportar bugs",
-	"limpiar": "borra el registro",
+	"ayuda": "CONSOLA_SERVICIO_AYUDA_DESC",
+	"clima": "CONSOLA_SERVICIO_CLIMA_DESC",
+	"desatascar": "CONSOLA_SERVICIO_DESATASCAR_DESC",
+	"portatil": "CONSOLA_SERVICIO_PORTATIL_DESC",
+	"diagnostico": "CONSOLA_SERVICIO_DIAGNOSTICO_DESC",
+	"limpiar": "CONSOLA_SERVICIO_LIMPIAR_DESC",
 }
 
 var _abierta := false
@@ -63,7 +63,7 @@ func _alternar() -> void:
 		_linea.clear()
 		_linea.grab_focus.call_deferred()
 		if _registro.get_parsed_text().is_empty():
-			_escribir("MANUAL DE SERVICIO BIT 98 · escribe ayuda")
+			_escribir(_tr("CONSOLA_SERVICIO_INICIO"))
 	else:
 		_linea.release_focus()
 		get_tree().paused = _pausa_previa
@@ -81,7 +81,7 @@ func ejecutar(texto: String) -> void:
 	match comando:
 		"ayuda", "help", "?":
 			for nombre in COMANDOS:
-				_escribir("  [b]%s[/b]  %s" % [nombre, COMANDOS[nombre]])
+				_escribir("  [b]%s[/b]  %s" % [nombre, _tr(COMANDOS[nombre])])
 		"limpiar", "clear":
 			_registro.clear()
 		"clima":
@@ -93,7 +93,7 @@ func ejecutar(texto: String) -> void:
 		"diagnostico", "diagnóstico":
 			_cmd_diagnostico()
 		_:
-			_error("Ese comando no figura en el manual de servicio.")
+			_error(_tr("CONSOLA_SERVICIO_DESCONOCIDO"))
 
 
 func _cmd_clima(args: Array) -> void:
@@ -101,14 +101,14 @@ func _cmd_clima(args: Array) -> void:
 	if dia == null:
 		return
 	if args.is_empty() or args[0] not in CLIMAS:
-		_error("Uso: clima %s" % "|".join(CLIMAS))
+		_error(_tr("CONSOLA_SERVICIO_USO_CLIMA") % "|".join(CLIMAS))
 		return
 	if args[0] == "auto":
 		dia.jornada.erase("clima_forzado")
 	else:
 		dia.jornada["clima_forzado"] = args[0]
 	_cerrar_y(func(): dia._entrar_en(dia.jornada["fase"]))
-	_ok("Clima: %s" % args[0])
+	_ok(_tr("CONSOLA_SERVICIO_CLIMA_OK") % args[0])
 
 
 func _cmd_desatascar() -> void:
@@ -117,7 +117,7 @@ func _cmd_desatascar() -> void:
 		return
 	var espacio: Dictionary = dia._espacio_actual
 	dia._caminante.situar(espacio["entrada"], espacio.get("mirada", NAN))
-	_ok("De vuelta en la entrada")
+	_ok(_tr("CONSOLA_SERVICIO_DESATASCADO"))
 
 
 func _cmd_portatil() -> void:
@@ -125,14 +125,14 @@ func _cmd_portatil() -> void:
 	if dia == null:
 		return
 	if dia.jornada["fase"] != "casa":
-		_error("La portátil solo puede abrirse cuando ya estás en casa.")
+		_error(_tr("CONSOLA_SERVICIO_PORTATIL_SOLO_CASA"))
 		return
 	var consola := dia._mundo.find_child("ConsolaPortatil98", true, false) as Interactuable3D
 	if consola == null:
-		_error("No encuentro la portátil en esta escena.")
+		_error(_tr("CONSOLA_SERVICIO_PORTATIL_AUSENTE"))
 		return
 	_cerrar_y(func(): consola.interactuar(dia._caminante))
-	_ok("Abriendo la portátil")
+	_ok(_tr("CONSOLA_SERVICIO_PORTATIL_ABRIENDO"))
 
 
 func _cmd_diagnostico() -> void:
@@ -146,7 +146,7 @@ func _dia(mostrar_error: bool = true) -> Node:
 	var escena := get_tree().current_scene
 	if escena == null or escena.scene_file_path != ESCENA_DIA:
 		if mostrar_error:
-			_error("Solo funciona dentro de una partida.")
+			_error(_tr("CONSOLA_SERVICIO_SOLO_PARTIDA"))
 		return null
 	return escena
 
@@ -169,6 +169,10 @@ func _escribir(texto: String) -> void:
 	_registro.append_text(texto + "\n")
 
 
+func _tr(clave: String) -> String:
+	return TranslationServer.translate(clave)
+
+
 func _montar() -> void:
 	_panel = PanelContainer.new()
 	_panel.set_anchors_preset(Control.PRESET_TOP_WIDE)
@@ -185,7 +189,7 @@ func _montar() -> void:
 	_panel.add_child(caja)
 
 	var titulo := Label.new()
-	titulo.text = "BIT 98 · MANUAL DE SERVICIO"
+	titulo.text = _tr("CONSOLA_SERVICIO_TITULO")
 	titulo.add_theme_color_override("font_color", Color(0.35, 0.75, 1.0))
 	caja.add_child(titulo)
 
@@ -200,7 +204,7 @@ func _montar() -> void:
 	caja.add_child(_registro)
 
 	_linea = LineEdit.new()
-	_linea.placeholder_text = "ayuda · clima lluvia · diagnostico"
+	_linea.placeholder_text = _tr("CONSOLA_SERVICIO_PLACEHOLDER")
 	_linea.add_theme_font_override("font", fuente_terminal)
 	_linea.text_submitted.connect(
 		func(valor: String):
