@@ -43,6 +43,21 @@ class BolosPasillo3DTest(unittest.TestCase):
         self.assertIn("const TIEMPO_MAXIMO_TIRO := 4.0", self.source)
         self.assertIn("simular_hasta_reposo", self.source)
 
+    def test_variantes_rotan_sin_estado_persistente_ni_texto_nuevo(self):
+        for variante in ("estrecho", "mesa", "rebote", "absurdo", "nocturno"):
+            self.assertIn(f'VARIANTE_{variante.upper() if variante != "absurdo" else "ABSURDO"}', self.source)
+        self.assertIn("static func ancho_de", self.source)
+        self.assertIn("static func posiciones_de", self.source)
+        self.assertIn("static func obstaculo_de", self.source)
+        self.assertIn("static func energia_luz_de", self.source)
+        self.assertIn("static func variante_para_dia", self.controller)
+        self.assertIn("sesion.configurar_variante", self.controller)
+        self.assertNotIn("partida.estado[\"variante_bolos\"]", self.controller)
+        self.assertIn("la mesa bloquea un lanzamiento", self.godot_test)
+        self.assertIn("el archivador devuelve la bola", self.godot_test)
+        self.assertIn("el cuñado desplaza un bolo a una posición absurda", self.godot_test)
+        self.assertIn("la ronda nocturna reduce la iluminación", self.godot_test)
+
     def test_companeros_reutilizan_animacion_de_134_sin_entrar_en_fisica(self):
         self.assertIn("CompaneroIdle3D.new()", self.source)
         self.assertIn('Modelos.persona(cuerpo, "persona"', self.source)
