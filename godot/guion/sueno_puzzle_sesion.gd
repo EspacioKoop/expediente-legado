@@ -16,9 +16,12 @@ static func registrada_esta_noche(jornada: Dictionary) -> bool:
 	if String(jornada.get("fase", "")) != "sueño" or not jornada.has(CLAVE):
 		return false
 	var valor: Variant = jornada.get(CLAVE)
-	if not valor is Dictionary or not valor.has("dia"):
+	if not valor is Dictionary:
 		return true
-	return int(valor.get("dia", -1)) == int(jornada.get("dia", 0))
+	var sesion := valor as Dictionary
+	if not sesion.has("dia"):
+		return true
+	return int(sesion.get("dia", -1)) == int(jornada.get("dia", 0))
 
 
 static func actual(jornada: Dictionary) -> Dictionary:
@@ -27,7 +30,7 @@ static func actual(jornada: Dictionary) -> Dictionary:
 	var valor: Variant = jornada.get(CLAVE, {})
 	if not valor is Dictionary:
 		return {}
-	var sesion: Dictionary = valor
+	var sesion := valor as Dictionary
 	if not _sesion_valida(sesion, jornada):
 		return {}
 	return sesion.duplicate(true)
@@ -35,13 +38,13 @@ static func actual(jornada: Dictionary) -> Dictionary:
 
 static func _sesion_valida(sesion: Dictionary, jornada: Dictionary) -> bool:
 	var datos: Variant = sesion.get("datos", {})
+	var datos_validos := datos is Dictionary and not (datos as Dictionary).is_empty()
 	return (
 		int(sesion.get("dia", -1)) == int(jornada.get("dia", 0))
 		and TIPOS.has(String(sesion.get("tipo", "")))
 		and not String(sesion.get("caso_id", "")).is_empty()
 		and not String(sesion.get("reward_id", "")).is_empty()
-		and datos is Dictionary
-		and not datos.is_empty()
+		and datos_validos
 	)
 
 
@@ -76,8 +79,11 @@ static func terminal(sesion: Dictionary) -> bool:
 	var datos: Variant = sesion.get("datos", {})
 	if not datos is Dictionary:
 		return true
-	var nucleo: Variant = datos.get("nucleo", {})
-	return not nucleo is Dictionary or String(nucleo.get("state", "")) != "pendiente"
+	var datos_dict := datos as Dictionary
+	var nucleo: Variant = datos_dict.get("nucleo", {})
+	if not nucleo is Dictionary:
+		return true
+	return String((nucleo as Dictionary).get("state", "")) != "pendiente"
 
 
 static func _misma_identidad(
