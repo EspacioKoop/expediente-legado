@@ -36,7 +36,7 @@ jobs:
           set -euo pipefail
           command -v ffmpeg
           command -v ffprobe
-          ffmpeg -version | head -n 1
+          ffmpeg -version > "$RUNNER_TEMP/ffmpeg-version.txt"\n          head -n 1 "$RUNNER_TEMP/ffmpeg-version.txt"
 
       - name: Validar fuentes y herramienta de cata
         run: |
