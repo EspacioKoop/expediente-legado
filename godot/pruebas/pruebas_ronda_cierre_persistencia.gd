@@ -37,8 +37,13 @@ func _probar_guardado_y_recarga() -> void:
 	var releida := Partida.new()
 	var carga := releida.cargar(ruta)
 	_comprobar(carga.get("resultado", "") == "cargada", "la partida se recarga")
-	var cargada: Dictionary = releida.estado["jornada"]["ronda_cierre"]
+	var jornada_releida: Dictionary = Jornada.completar(
+		releida.estado["jornada"], int(releida.estado["semilla"])
+	)
+	releida.estado["jornada"] = jornada_releida
+	var cargada: Dictionary = Jornada.asegurar_ronda_cierre(jornada_releida, false)
 	_comprobar(cargada["completados"].has(punto), "la recarga conserva el punto")
+	_comprobar(cargada["ruta"] == ronda["ruta"], "la recarga conserva la misma ruta")
 	_comprobar(RondaCierre.validar(cargada).is_empty(), "la ronda recargada es válida")
 
 	_borrar_si_existe(ruta)
@@ -71,7 +76,14 @@ func _probar_validacion() -> void:
 	}
 	_comprobar(
 		RondaCierre.validar(invalida).has("ruta contiene duplicados"),
-		"el guardado detecta rutas duplicadas",
+		"el contrato detecta rutas duplicadas",
+	)
+	var estado := Partida.nueva()
+	estado["jornada"]["ronda_cierre"] = invalida
+	var errores := Partida.validar(estado)
+	_comprobar(
+		errores.any(func(error): return String(error).contains("ronda_cierre.ruta contiene duplicados")),
+		"Partida rechaza una ronda corrupta",
 	)
 
 
