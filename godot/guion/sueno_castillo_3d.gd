@@ -36,6 +36,11 @@ static func montar(mundo: Node3D, espacio: Dictionary) -> Node3D:
 	# arquitectura propia. Son presentación pura y no cambian la navegación.
 	SuenoCastilloUmbrales3D.montar(arquitectura, variante)
 
+	# La evidencia comparativa de #1011 dejó las torres casi en silueta negra.
+	# Dos luces locales pertenecen a esta presentación y conservan el carácter
+	# nocturno sin tocar el Environment global ni la física ANULAR.
+	_montar_luz_identidad(presentacion)
+
 	# La fuente no tiene campana visible. La posición alta y central hace que el
 	# sonido pertenezca al patio completo en lugar de delatar un objeto emisor.
 	var campanas := AudioStreamPlayer3D.new()
@@ -98,3 +103,22 @@ static func _aplicar_mutacion(arquitectura: Node3D, mutacion: String) -> void:
 			arquitectura.position.y += 0.35
 		_:
 			pass
+
+
+static func _montar_luz_identidad(presentacion: Node3D) -> void:
+	var patio := OmniLight3D.new()
+	patio.name = "LuzPatioCalida"
+	patio.position = Vector3(-2.0, 3.6, 1.5)
+	patio.light_color = Color(0.92, 0.58, 0.31)
+	patio.light_energy = 2.15
+	patio.omni_range = 17.0
+	patio.shadow_enabled = true
+	presentacion.add_child(patio)
+
+	var torres := OmniLight3D.new()
+	torres.name = "ContraluzTorres"
+	torres.position = Vector3(7.5, 7.2, -7.0)
+	torres.light_color = Color(0.38, 0.46, 0.58)
+	torres.light_energy = 1.35
+	torres.omni_range = 24.0
+	presentacion.add_child(torres)

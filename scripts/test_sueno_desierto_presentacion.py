@@ -46,6 +46,11 @@ class SuenoDesiertoPresentacionTest(unittest.TestCase):
         ):
             self.assertIn(contrato, self.presentacion)
 
+    def test_horizonte_es_visible_desde_el_interior_del_anillo(self):
+        self.assertIn("material_dunas.cull_mode = BaseMaterial3D.CULL_DISABLED", self.presentacion)
+        self.assertIn("dunas.material_override = material_dunas", self.presentacion)
+        self.assertIn("Color(0.42, 0.25, 0.12)", self.presentacion)
+
     def test_horizonte_retrocede_y_hay_zona_de_silencio(self):
         self.assertIn("get_viewport().get_camera_3d()", self.presentacion)
         self.assertIn("direccion * RADIO_HORIZONTE", self.presentacion)
