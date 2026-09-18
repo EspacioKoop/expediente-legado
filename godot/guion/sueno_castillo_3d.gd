@@ -32,6 +32,10 @@ static func montar(mundo: Node3D, espacio: Dictionary) -> Node3D:
 	var mutacion := String(espacio.get("mutacion_castillo", "estable"))
 	_aplicar_mutacion(arquitectura, mutacion)
 
+	# Los umbrales ya existentes insinúan la siguiente ala mediante ecos de
+	# arquitectura propia. Son presentación pura y no cambian la navegación.
+	SuenoCastilloUmbrales3D.montar(arquitectura, variante)
+
 	# La fuente no tiene campana visible. La posición alta y central hace que el
 	# sonido pertenezca al patio completo en lugar de delatar un objeto emisor.
 	var campanas := AudioStreamPlayer3D.new()
