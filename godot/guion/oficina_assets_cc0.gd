@@ -14,6 +14,10 @@ static func montar(mundo: Node3D) -> void:
 	if mundo.has_meta("oficina_assets_cc0"):
 		return
 	mundo.set_meta("oficina_assets_cc0", true)
+	# Styloo es una mejora opcional y atómica. Se monta antes del lote base:
+	# AssetCc0 no reemplaza un visual ya sustituido, así que las piezas que
+	# entren aquí quedan preferidas y el resto conserva el fallback probado.
+	OficinaStylooCc0.montar(mundo)
 	for bulto in EspaciosCatalogo.OFICINA.bultos:
 		var tipo: String = bulto.get("modelo", "")
 		if not MODELOS.has(tipo):
