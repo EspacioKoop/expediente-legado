@@ -36,6 +36,7 @@ class SuenoObjetivosTest(unittest.TestCase):
         self.assertIn("registrar_objetivo_puzzle_onirico", self.gato)
         self.assertIn('"tipo": "pista_onirica"', self.gato)
         self.assertIn("_retirar_objetivo_espacial", self.gato)
+        self.assertIn("not _objetivo_puntuable(estado, objetivo_id)", self.gato)
         self.assertIn("PuzzleOnirico.ESTADO_COMPLETADO", self.gato)
         self.assertIn("SuenoObjetivos.completar(estado, objetivo_id)", self.gato)
         self.assertIn("SuenoObjetivos.fallar(estado, objetivo_id)", self.gato)
