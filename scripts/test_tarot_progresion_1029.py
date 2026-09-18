@@ -4,6 +4,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 VISOR = ROOT / "godot" / "guion" / "visor_expediente.gd"
+PROMETEO = ROOT / "godot" / "guion" / "prometeo.gd"
 CAPTURAR = ROOT / "godot" / "pruebas" / "capturar.gd"
 
 
@@ -11,6 +12,7 @@ class TarotProgresion1029Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.visor = VISOR.read_text(encoding="utf-8")
+        cls.prometeo = PROMETEO.read_text(encoding="utf-8")
         cls.capturar = CAPTURAR.read_text(encoding="utf-8")
 
     def test_primera_pista_sincroniza_antes_del_guardado(self) -> None:
