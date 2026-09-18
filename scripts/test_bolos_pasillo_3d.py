@@ -76,6 +76,17 @@ class BolosPasillo3DTest(unittest.TestCase):
         self.assertIn("abandonar restaura el mundo", self.godot_test)
         self.assertIn("terminar devuelve a la oficina", self.godot_test)
 
+    def test_marcador_final_es_visual_breve_y_no_bloquea(self):
+        self.assertIn("DURACION_MARCADOR := 3.5", self.controller)
+        self.assertIn("func _mostrar_marcador(resultado: Dictionary)", self.controller)
+        self.assertIn('if bool(resultado.get("completa", false)):', self.controller)
+        self.assertIn('etiqueta.text = "%02d" % int(puntuaciones[indice])', self.controller)
+        self.assertIn("ColorRect.new()", self.controller)
+        self.assertIn("Control.MOUSE_FILTER_IGNORE", self.controller)
+        self.assertIn("temporizador.one_shot = true", self.controller)
+        self.assertIn("abandonar no muestra marcador final", self.godot_test)
+        self.assertIn("el marcador enseña las cuatro puntuaciones", self.godot_test)
+
     def test_dia_monta_el_controller_sin_tocar_la_raiz(self):
         self.assertIn(
             'path="res://guion/dia_bolos_pasillo_app.gd"',
