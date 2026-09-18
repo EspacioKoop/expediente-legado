@@ -12,6 +12,8 @@ func _initialize() -> void:
 	_probar_determinismo_y_contenido()
 	_probar_acierto()
 	_probar_fallo_unico()
+	_probar_restauracion_pendiente()
+	_probar_restauracion_terminal_y_manipulada()
 	_probar_abandono_y_serializacion()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -143,6 +145,84 @@ func _probar_fallo_unico() -> void:
 		"no hay segundo intento"
 	)
 	_comprobar(relacion.salir(), "fallar no bloquea la salida segura")
+
+
+func _probar_restauracion_pendiente() -> void:
+	var caso := _caso()
+	var pista: Dictionary = caso["pistas"][0]
+	var leidos := ["F-1", "F-2", "F-3", "F-4"]
+	var relacion = Relacion.crear(caso, pista, leidos, 811)
+	var ids_antes: Array = relacion.documentos.map(func(d): return d["id"])
+	_comprobar(
+		relacion.seleccionar(_indice(relacion.documentos, "r1")) == "seleccionado",
+		"puede guardar una relación después de la primera elección",
+	)
+	var texto := JSON.stringify(relacion.serializar())
+	var datos: Dictionary = JSON.parse_string(texto)
+	var restaurada = Relacion.restaurar(datos, caso, pista, leidos)
+	_comprobar(restaurada != null, "restaura una relación pendiente tras pasar por JSON")
+	_comprobar(
+		restaurada.documentos.map(func(d): return d["id"]) == ids_antes,
+		"la recarga conserva exactamente el tablero derivado de la semilla",
+	)
+	_comprobar(restaurada.seleccion == ["r1"], "la recarga conserva la primera elección")
+	_comprobar(not restaurada.cerrada, "la selección parcial sigue pendiente")
+	_comprobar(
+		restaurada.seleccionar(_indice(restaurada.documentos, "r2")) == "completado",
+		"puede terminar correctamente desde la selección restaurada",
+	)
+
+
+func _probar_restauracion_terminal_y_manipulada() -> void:
+	var caso := _caso()
+	var pista: Dictionary = caso["pistas"][0]
+	var leidos := ["F-1", "F-2", "F-3"]
+	var fallida = Relacion.crear(caso, pista, leidos, 912)
+	fallida.seleccionar(_indice(fallida.documentos, "r1"))
+	fallida.seleccionar(_indice(fallida.documentos, "r3"))
+	var datos: Dictionary = JSON.parse_string(JSON.stringify(fallida.serializar()))
+	var restaurada = Relacion.restaurar(datos, caso, pista, leidos)
+	_comprobar(restaurada != null, "restaura un fallo terminal válido")
+	_comprobar(
+		restaurada.nucleo.state == Puzzle.ESTADO_FALLADO,
+		"recargar no devuelve un fallo al estado pendiente",
+	)
+	_comprobar(restaurada.cerrada, "un fallo restaurado permanece cerrado")
+	_comprobar(
+		restaurada.seleccionar(_indice(restaurada.documentos, "r2")) == "cerrado",
+		"recargar no concede un segundo intento",
+	)
+
+	var abierta := datos.duplicate(true)
+	abierta["cerrada"] = false
+	_comprobar(
+		Relacion.restaurar(abierta, caso, pista, leidos) == null,
+		"rechaza reabrir a mano un resultado terminal",
+	)
+	var falsa := datos.duplicate(true)
+	falsa["seleccion"] = ["r1", "r2"]
+	_comprobar(
+		Relacion.restaurar(falsa, caso, pista, leidos) == null,
+		"rechaza cambiar la pareja después de conocer el fallo",
+	)
+	var mal_tipo := datos.duplicate(true)
+	mal_tipo["seleccion"] = "r1"
+	_comprobar(
+		Relacion.restaurar(mal_tipo, caso, pista, leidos) == null,
+		"rechaza una selección serializada con tipo inválido",
+	)
+
+	var completada = Relacion.crear(caso, pista, leidos, 913)
+	completada.seleccionar(_indice(completada.documentos, "r1"))
+	completada.seleccionar(_indice(completada.documentos, "r2"))
+	var restaurada_ok = Relacion.restaurar(completada.serializar(), caso, pista, leidos)
+	var resultados: Array = []
+	restaurada_ok.nucleo.resultado.connect(func(resultado): resultados.append(resultado))
+	_comprobar(
+		restaurada_ok.seleccionar(_indice(restaurada_ok.documentos, "r1")) == "cerrado",
+		"un acierto restaurado tampoco puede ejecutarse otra vez",
+	)
+	_comprobar(resultados.is_empty(), "restaurar no reemite la recompensa ya consumida")
 
 
 func _probar_abandono_y_serializacion() -> void:
