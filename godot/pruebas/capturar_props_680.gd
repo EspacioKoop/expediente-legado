@@ -58,6 +58,7 @@ func _init() -> void:
 		"fov": FOV,
 		"hud": false,
 		"criterio": "evidencia_reproducible_no_sustituye_revision_humana",
+		"archivos": CAPTURAS.duplicate(),
 		"presupuesto":
 		{
 			"triangulos_props_max": MAX_TRIANGULOS_PROPS,
@@ -179,7 +180,7 @@ func _init() -> void:
 	quit(0)
 
 
-func _configurar_estado(dia, inventario: Dictionary, consecuencias: Array[String]) -> void:
+func _configurar_estado(dia, inventario: Dictionary, consecuencias: Array) -> void:
 	dia.partida.estado["inventario"] = inventario
 	dia.jornada[Imprevistos.CLAVE_ESTADO] = {
 		"version": Imprevistos.VERSION,
