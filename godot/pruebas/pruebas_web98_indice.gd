@@ -209,7 +209,7 @@ func _probar_navegador() -> void:
 		),
 		"el navegador permite ampliar el texto",
 	)
-	for paso in range(10):
+	for _paso in range(10):
 		navegador.ajustar_escala_texto(NavegadorSiga.ESCALA_TEXTO_PASO)
 	_comprobar(
 		is_equal_approx(navegador.escala_texto(), NavegadorSiga.ESCALA_TEXTO_MAX),
