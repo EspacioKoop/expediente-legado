@@ -125,7 +125,9 @@ func _probar_acierto() -> void:
 		relacion.nucleo.state == Puzzle.ESTADO_PENDIENTE,
 		"la pareja correcta sigue pendiente antes de confirmar",
 	)
-	_comprobar(relacion.confirmar() == "completado", "confirmar la pareja correcta completa el puzzle")
+	_comprobar(
+		relacion.confirmar() == "completado", "confirmar la pareja correcta completa el puzzle"
+	)
 	_comprobar(
 		relacion.nucleo.state == Puzzle.ESTADO_COMPLETADO,
 		"el acierto deja el núcleo en completado",
@@ -140,7 +142,9 @@ func _probar_fallo_unico() -> void:
 	var i1 := _indice(relacion.documentos, "r1")
 	var i3 := _indice(relacion.documentos, "r3")
 	_comprobar(relacion.seleccionar(i1) == "seleccionado", "puede fijar un primer documento")
-	_comprobar(relacion.seleccionar(i3) == "seleccionado", "la pareja incorrecta se puede preparar")
+	_comprobar(
+		relacion.seleccionar(i3) == "seleccionado", "la pareja incorrecta se puede preparar"
+	)
 	_comprobar(
 		relacion.seleccionar(i3) == "deseleccionado",
 		"puede corregir la segunda elección antes de confirmar",
@@ -150,7 +154,9 @@ func _probar_fallo_unico() -> void:
 		relacion.nucleo.state == Puzzle.ESTADO_PENDIENTE,
 		"preparar una pareja incorrecta no consume el intento",
 	)
-	_comprobar(relacion.confirmar() == "fallado", "confirmar una pareja incorrecta termina el intento")
+	_comprobar(
+		relacion.confirmar() == "fallado", "confirmar una pareja incorrecta termina el intento"
+	)
 	_comprobar(
 		relacion.nucleo.state == Puzzle.ESTADO_FALLADO,
 		"el error confirmado deja estado terminal y evita fuerza bruta",
