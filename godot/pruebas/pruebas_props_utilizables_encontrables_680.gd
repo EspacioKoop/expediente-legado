@@ -83,6 +83,9 @@ func _probar() -> void:
 		capa_carried.get_node_or_null("PropEncontrable_palanca_kkryy") == null,
 		"la palanca no respawnea mientras está en carried"
 	)
+	# montar() retira la capa anterior con queue_free(); dejamos que Godot
+	# libere nodos y recursos antes de encadenar otro remontaje en el mismo test.
+	await process_frame
 
 	_comprobar(
 		Inventario.guardar_en_casa(inventario, "palanca_kkryy"),
@@ -93,13 +96,15 @@ func _probar() -> void:
 		capa_casa.get_node_or_null("PropEncontrable_palanca_kkryy") == null,
 		"la palanca tampoco respawnea desde home_storage"
 	)
-	_comprobar(
-		Encontrables.montar(mundo, "archivo", 1, Inventario.nuevo()).get_child_count() == 0,
-		"el pickup no aparece fuera de la casa"
-	)
+	await process_frame
+
+	var capa_archivo := Encontrables.montar(mundo, "archivo", 1, Inventario.nuevo())
+	_comprobar(capa_archivo.get_child_count() == 0, "el pickup no aparece fuera de la casa")
+	await process_frame
 
 	mundo.queue_free()
 	await process_frame
+	await create_timer(0.1).timeout
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
