@@ -105,9 +105,12 @@ func _abrir_preparacion_sueno() -> void:
 	_pantalla.layer = 30
 	add_child(_pantalla)
 	var panel := PREPARACION_SUENO.new()
-	panel.configurar(
-		jornada.get("leido_hoy", []),
-		jornada.get("seleccion_nocturna", []),
+	(
+		panel
+		. configurar(
+			jornada.get("leido_hoy", []),
+			jornada.get("seleccion_nocturna", []),
+		)
 	)
 	_pantalla.add_child(panel)
 	panel.confirmada.connect(_confirmar_preparacion_sueno)
