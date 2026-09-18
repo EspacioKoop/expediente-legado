@@ -305,6 +305,19 @@ func _espacio_de(fase: String) -> Dictionary:
 	return Sueno.espacio(id, jornada["sueno_escenas"].size() - 1, trozo)
 
 
+## El coste inesperado se cuenta al cerrar el día, sin abrir otro HUD ni otro
+## medidor. La consecuencia impagada queda además en Jornada para que #96 pueda
+## hacerla visible físicamente en la casa.
+func _aviso_imprevisto(noche: Dictionary) -> String:
+	var evento: Dictionary = noche.get("imprevisto", {})
+	if evento.is_empty():
+		return ""
+	var nombre := tr(String(evento.get("nombre", "")))
+	if bool(evento.get("pagado", false)):
+		return tr("DIA_IMPREVISTO_PAGADO") % [nombre, int(evento.get("importe", 0))]
+	return tr("DIA_IMPREVISTO_IMPAGADO") % nombre
+
+
 ## El reloj de la noche. Solo corre dentro del sueño: el día no tiene prisa y
 ## el sueño sí, que es media parte de la diferencia entre los dos.
 func _process(delta: float) -> void:
@@ -433,7 +446,10 @@ func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
 				% [
 					noche["coste"],
 					noche["dinero"],
-					tr("DIA_SIN_GATO_AVISO") if noche["gato_se_fue"] else ""
+					(
+						(tr("DIA_SIN_GATO_AVISO") if noche["gato_se_fue"] else "")
+						+ _aviso_imprevisto(noche)
+					)
 				]
 			)
 		"sueño":

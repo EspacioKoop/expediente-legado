@@ -134,6 +134,8 @@ DIA_NOMINA,Nómina del día %d: %d (base %d + %d por %d expediente(s)).  Tiene %
 DIA_NUEVO,Día %d.
 INICIO_JORNADA_ESTADO,"%d en el bolsillo  ·  %d acciones por delante%s"
 INICIO_JORNADA_GATO,"  ·  el gato espera en casa"
+DIA_IMPREVISTO_IMPAGADO,  Imprevisto: %s. No había para resolverlo.
+DIA_IMPREVISTO_PAGADO,  Imprevisto: %s. Se han ido %d.
 DIA_ROTULO,Día %d  ·  %s  ·  %d en el bolsillo%s
 DIA_SIN_GATO,  ·  sin gato
 DIA_SIN_GATO_AVISO,  El gato no está.
@@ -448,3 +450,10 @@ CALCULADORA_ENTRADA_NO_VALIDA,Entrada no válida
 CALCULADORA_EXPRESION_NO_VALIDA,Expresión no válida
 CALCULADORA_NO_SE_PUDO,No se pudo calcular
 CALCULADORA_NO_NUMERICO,Resultado no numérico
+IMPREVISTO_BOMBILLA,Bombilla fundida
+IMPREVISTO_CALENTADOR,Calentador averiado
+IMPREVISTO_ELECTRODOMESTICO,Electrodoméstico roto
+IMPREVISTO_GRIFO,Grifo que no deja de gotear
+IMPREVISTO_MULTA,Multa de transporte
+IMPREVISTO_PERSIANA,Persiana atascada
+IMPREVISTO_RECIBO,Recibo inesperado

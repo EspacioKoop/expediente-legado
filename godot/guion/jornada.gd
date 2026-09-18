@@ -95,6 +95,9 @@ static func nueva(raiz: int = 0, vuelta: int = 1) -> Dictionary:
 		"comida_propia": {"dias_sin_comer": 0},
 		# Último vencimiento resuelto: pagado o registrado como impago.
 		"alquiler": {"ultimo_resuelto": 0, "pagados": 0, "impagos": 0},
+		# Lo inesperado se decide una vez por vida laboral. La misma semilla y
+		# vuelta conservan el plan al recargar; al reasignar se genera otro.
+		"imprevistos": Imprevistos.planificar(raiz, vuelta),
 		# Lo leído hoy: es lo que alimenta el sueño de esta noche. Se vacía al
 		# despertar, porque un sueño es de su día.
 		"leido_hoy": [],
@@ -159,6 +162,10 @@ static func completar(jornada: Dictionary, raiz: int = 0) -> Dictionary:
 	# vaciarle la oficina a quien va por el día quince.
 	if int(jornada.get("raiz", 0)) == 0 and raiz != 0:
 		jornada["raiz"] = raiz
+	# Partida.nueva() construye primero una Jornada con raíz 0 y añade la
+	# semilla después. Completar es el punto donde el plan de #93 ya puede
+	# derivarse de la raíz real sin volver a sortear en cada carga.
+	Imprevistos.completar(jornada)
 	if jornada["fase"] == "sueño":
 		# Solo las partidas anteriores al reloj necesitan recibir tiempo.
 		if sin_reloj:
@@ -329,6 +336,20 @@ static func resolver_impago_alquiler(jornada: Dictionary) -> bool:
 	return true
 
 
+## Resuelve el imprevisto que toca hoy al cerrar la casa. Es un gasto que no se
+## elige (#93): si cabe en el saldo se paga; si no, queda una consecuencia para
+## que #96 la haga visible. Nunca se pide crédito ni se baja de cero.
+static func resolver_imprevisto_del_dia(jornada: Dictionary) -> Dictionary:
+	if jornada.get("fase", "") != "casa":
+		return {}
+	var evento := Imprevistos.pendiente(jornada)
+	if evento.is_empty():
+		return {}
+	var coste := int(evento.get("coste", 0))
+	var pagado := coste > 0 and gastar(jornada, coste)
+	return Imprevistos.resolver(jornada, pagado)
+
+
 ## Dormir: cierra el día, cobra la vida y decide qué queda por la mañana.
 ##
 ## Devuelve lo que hay que contar al despertar. El gato que se va no se anuncia
@@ -337,6 +358,7 @@ static func dormir(jornada: Dictionary) -> Dictionary:
 	if jornada["fase"] != "casa":
 		return {}
 
+	var imprevisto := resolver_imprevisto_del_dia(jornada)
 	jornada["dinero"] = maxi(0, jornada["dinero"] - COSTE_DIARIO)
 
 	var impago := resolver_impago_alquiler(jornada)
@@ -366,6 +388,7 @@ static func dormir(jornada: Dictionary) -> Dictionary:
 		"dinero": jornada["dinero"],
 		"gato_se_fue": se_fue,
 		"alquiler_impago": impago,
+		"imprevisto": imprevisto,
 	}
 
 
