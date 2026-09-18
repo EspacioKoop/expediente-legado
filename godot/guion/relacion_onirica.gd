@@ -83,7 +83,10 @@ static func restaurar(
 	var relacion = _construir(caso, pista, leido_hoy, base)
 	if relacion == null:
 		return null
-	var seleccion: Array = datos.get("seleccion", [])
+	var seleccion_guardada: Variant = datos.get("seleccion", [])
+	if not seleccion_guardada is Array:
+		return null
+	var seleccion: Array = seleccion_guardada
 	if not _seleccion_valida(seleccion, relacion.documentos):
 		return null
 	relacion.seleccion = seleccion.duplicate()
