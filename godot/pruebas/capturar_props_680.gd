@@ -129,7 +129,7 @@ func _init() -> void:
 	inventario = Inventario.nuevo()
 	_configurar_estado(dia, inventario, ["casa_luz_reducida"])
 	await _estabilizar()
-	_enfocar(dia, "LamparaPieCasa", Vector3(1.45, 0.35, 1.65), Vector3.UP * 0.25)
+	_enfocar(dia, "LamparaPieCasa", Vector3(1.60, 0.55, -1.50), Vector3.UP * 0.45)
 	await _estabilizar()
 	_registrar_captura(
 		manifiesto,
@@ -288,7 +288,7 @@ func _metricas_props(dia) -> Dictionary:
 			continue
 		mallas += 1
 		superficies += instancia.mesh.get_surface_count()
-		triangulos += instancia.mesh.get_faces().size() / 3
+		triangulos += int(instancia.mesh.get_faces().size() / 3)
 	for nodo in raiz.get_children():
 		if not nodo is Recogible3D:
 			continue
