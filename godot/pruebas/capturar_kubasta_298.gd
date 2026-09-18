@@ -167,6 +167,7 @@ func _crear_superficie(fuente: Font, contraste: Dictionary, escala: float) -> Co
 	superficie.add_child(panel)
 
 	var margen := MarginContainer.new()
+	margen.name = "Margen"
 	margen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for lado in ["left", "top", "right", "bottom"]:
 		margen.add_theme_constant_override("margin_" + lado, 18)
@@ -211,7 +212,6 @@ func _crear_superficie(fuente: Font, contraste: Dictionary, escala: float) -> Co
 
 	var linea := LineEdit.new()
 	linea.name = "Entrada"
-	linea.editable = false
 	linea.text = ENTRADA
 	linea.add_theme_font_override("font", fuente)
 	linea.add_theme_font_size_override("font_size", 16)
@@ -243,7 +243,7 @@ func _caja_linea(contraste: Dictionary) -> StyleBoxFlat:
 
 func _validar_layout(superficie: Control, fuente: Font) -> bool:
 	var panel := superficie.get_node("PanelTerminal") as PanelContainer
-	var columna := panel.get_node("MarginContainer/Columna") as VBoxContainer
+	var columna := panel.get_node("Margen/Columna") as VBoxContainer
 	var ok := true
 	for tamano in TAMANOS:
 		var muestra := columna.get_node("Muestra%d" % int(tamano)) as Label
