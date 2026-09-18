@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Prepara la matriz reproducible de validación humana del tarot (#645).
 
-Genera 8 cartas × 3 recorridos:
-- frontal normal (plano 2),
-- frontal con reducción de movimiento (plano 2),
-- salto de cinemática (plano -1).
+Genera:
+- 8 cartas ocultas × 3 recorridos: frontal normal, frontal con reducción de
+  movimiento y skip;
+- El Mago × 2 recorridos (normal/reducido) obtenido primero por progreso real.
 
 Cada ejecución usa directorios XDG aislados para no leer ni modificar la partida
 personal. Las capturas son evidencia de preflight; no sustituyen el pase humano
@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parents[1]
 GODOT_DIR = ROOT / "godot"
 CAPTURADOR = "pruebas/capturar.gd"
 
-CARTAS = (
+CARTAS_OCULTAS = (
     ("ACTA-1999-014", "la-justicia"),
     ("OF-1990-114", "la-rueda"),
     ("MEMO-1993-201", "el-juicio"),
@@ -37,10 +37,15 @@ CARTAS = (
     ("ACTA-1998-427B", "la-sacerdotisa"),
 )
 
-RECORRIDOS = (
+RECORRIDOS_OCULTAS = (
     ("normal", "2", "normal"),
     ("reducido", "2", "reducido"),
     ("skip", "-1", "normal"),
+)
+
+RECORRIDOS_PROGRESO = (
+    ("normal", "2", "normal"),
+    ("reducido", "2", "reducido"),
 )
 
 
@@ -52,33 +57,82 @@ def _ejecutable_godot(preferido: str | None) -> str:
     raise SystemExit("No se encontró Godot. Use --godot /ruta/al/ejecutable.")
 
 
-def _comando(godot: str, salida: Path, folio: str, plano: str, modo: str) -> list[str]:
-    base = [
-        godot,
-        "--path",
-        str(GODOT_DIR),
-        "--script",
-        CAPTURADOR,
-        "--",
-        str(salida),
-        folio,
-        plano,
-        modo,
-    ]
+def _envolver_xvfb(base: list[str]) -> list[str]:
     if os.name != "nt" and shutil.which("xvfb-run"):
         return ["xvfb-run", "-a", *base]
     return base
+
+
+def _comando_oculta(
+    godot: str, salida: Path, folio: str, plano: str, modo: str
+) -> list[str]:
+    return _envolver_xvfb(
+        [
+            godot,
+            "--path",
+            str(GODOT_DIR),
+            "--script",
+            CAPTURADOR,
+            "--",
+            str(salida),
+            folio,
+            plano,
+            modo,
+        ]
+    )
+
+
+def _comando_progreso(godot: str, salida: Path, plano: str, modo: str) -> list[str]:
+    return _envolver_xvfb(
+        [
+            godot,
+            "--path",
+            str(GODOT_DIR),
+            "--script",
+            CAPTURADOR,
+            "--",
+            str(salida),
+            plano,
+            modo,
+        ]
+    )
+
+
+def _ejecutar(comando: list[str], salida: Path) -> dict:
+    with tempfile.TemporaryDirectory(prefix="tarot-645-") as temporal:
+        temporal = Path(temporal)
+        env = os.environ.copy()
+        env["XDG_DATA_HOME"] = str(temporal / "data")
+        env["XDG_CONFIG_HOME"] = str(temporal / "config")
+        env["XDG_CACHE_HOME"] = str(temporal / "cache")
+        proceso = subprocess.run(
+            comando,
+            cwd=ROOT,
+            env=env,
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+    return {
+        "ok": proceso.returncode == 0 and salida.is_file(),
+        "returncode": proceso.returncode,
+        "stdout": proceso.stdout[-4000:],
+        "stderr": proceso.stderr[-4000:],
+    }
 
 
 def preparar(destino: Path, godot: str, ejecutar: bool = True) -> dict:
     destino.mkdir(parents=True, exist_ok=True)
     entradas: list[dict] = []
 
-    for folio, carta in CARTAS:
-        for nombre, plano, modo in RECORRIDOS:
-            salida = destino / f"{carta}-{nombre}.png"
-            comando = _comando(godot, salida, folio, plano, modo)
+    for folio, carta in CARTAS_OCULTAS:
+        for nombre, plano, modo in RECORRIDOS_OCULTAS:
+            # El propio nombre contiene "tarot": así un --output personalizado
+            # no desactiva por accidente el dispatcher especial del capturador.
+            salida = destino / f"tarot-{carta}-{nombre}.png"
+            comando = _comando_oculta(godot, salida, folio, plano, modo)
             entrada = {
+                "tipo": "oculta",
                 "folio": folio,
                 "carta": carta,
                 "recorrido": nombre,
@@ -88,28 +142,33 @@ def preparar(destino: Path, godot: str, ejecutar: bool = True) -> dict:
                 "comando": comando,
                 "ok": None,
             }
-
             if ejecutar:
-                with tempfile.TemporaryDirectory(prefix="tarot-645-") as temporal:
-                    temporal = Path(temporal)
-                    env = os.environ.copy()
-                    env["XDG_DATA_HOME"] = str(temporal / "data")
-                    env["XDG_CONFIG_HOME"] = str(temporal / "config")
-                    env["XDG_CACHE_HOME"] = str(temporal / "cache")
-                    proceso = subprocess.run(
-                        comando,
-                        cwd=ROOT,
-                        env=env,
-                        check=False,
-                        text=True,
-                        capture_output=True,
-                    )
-                    entrada["ok"] = proceso.returncode == 0 and salida.is_file()
-                    entrada["returncode"] = proceso.returncode
-                    entrada["stdout"] = proceso.stdout[-4000:]
-                    entrada["stderr"] = proceso.stderr[-4000:]
+                entrada.update(_ejecutar(comando, salida))
             entradas.append(entrada)
 
+    for nombre, plano, modo in RECORRIDOS_PROGRESO:
+        # "tarot" y "progreso" deben vivir en el fichero, no depender del
+        # directorio: capturar.gd usa ambas palabras para escoger esta ruta.
+        salida = destino / f"tarot-el-mago-progreso-{nombre}.png"
+        comando = _comando_progreso(godot, salida, plano, modo)
+        entrada = {
+            "tipo": "progreso",
+            "folio": None,
+            "carta": "el-mago",
+            "recorrido": nombre,
+            "plano": int(plano),
+            "modo": modo,
+            "captura": salida.name,
+            "comando": comando,
+            "ok": None,
+        }
+        if ejecutar:
+            entrada.update(_ejecutar(comando, salida))
+        entradas.append(entrada)
+
+    esperadas = (
+        len(CARTAS_OCULTAS) * len(RECORRIDOS_OCULTAS) + len(RECORRIDOS_PROGRESO)
+    )
     manifiesto = {
         "issue": 645,
         "nota": (
@@ -117,7 +176,7 @@ def preparar(destino: Path, godot: str, ejecutar: bool = True) -> dict:
             "revisión humana sobre un export candidato."
         ),
         "total": len(entradas),
-        "esperadas": len(CARTAS) * len(RECORRIDOS),
+        "esperadas": esperadas,
         "entradas": entradas,
     }
     (destino / "manifest.json").write_text(
