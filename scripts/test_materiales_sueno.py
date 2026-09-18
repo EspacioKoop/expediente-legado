@@ -133,9 +133,18 @@ class MaterialesSuenoTest(unittest.TestCase):
             self.procedural.index('if nombre.begins_with("res://")'),
             self.procedural.index("return calculada(nombre, base, semilla, contraste)"),
         )
+        self.assertIn(
+            "ResourceLoader.exists(ruta) and not _es_puntero_lfs(ruta)",
+            self.procedural,
+        )
         self.assertLess(
             self.procedural.index("if ResourceLoader.exists(ruta)"),
             self.procedural.index("return calculada(nombre, base, semilla, contraste)"),
+        )
+        self.assertIn("static func _es_puntero_lfs(", self.procedural)
+        self.assertIn(
+            '"version https://git-lfs.github.com/spec/v1"',
+            self.procedural,
         )
         self.assertIn("return traida", self.procedural)
         self.assertLess(
