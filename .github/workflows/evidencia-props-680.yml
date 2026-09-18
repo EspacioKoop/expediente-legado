@@ -1,0 +1,156 @@
+name: Evidencia props 680
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/evidencia-props-680.yml'
+      - '.godot-version'
+      - 'godot/assets/modelos/street_furniture/**'
+      - 'godot/assets/procedencia.json'
+      - 'godot/guion/props_utilizables_cc0.gd'
+      - 'godot/guion/props_utilizables_encontrables_3d.gd'
+      - 'godot/guion/linterna_casa_680.gd'
+      - 'godot/guion/persiana_atascada_3d.gd'
+      - 'godot/guion/casa_consecuencias_3d.gd'
+      - 'godot/guion/dia_*app.gd'
+      - 'godot/guion/inventario.gd'
+      - 'godot/escenas/dia.tscn'
+      - 'godot/pruebas/capturar_props_680.gd'
+      - 'scripts/test_evidencia_props_680.py'
+      - 'docs/evidencias/props-680/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidencia:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      GALLIUM_DRIVER: llvmpipe
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar Godot declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Importar proyecto
+        run: godot4 --headless --editor --path godot --quit
+
+      - name: Validar contrato de evidencia
+        run: python3 -m unittest -v scripts/test_evidencia_props_680.py
+
+      - name: Renderizar props e interacciones de 680
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidencia-props-680
+          xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+            --script res://pruebas/capturar_props_680.gd -- \
+            "$GITHUB_WORKSPACE/evidencia-props-680"
+          for captura in \
+            pickups_casa \
+            persiana_atascada \
+            persiana_reparada \
+            luz_reducida_sin_linterna \
+            luz_reducida_con_linterna; do
+            test -s "evidencia-props-680/${captura}.png"
+          done
+          test -s evidencia-props-680/manifest.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(Path("evidencia-props-680/manifest.json").read_text())
+          casos = {caso["id"]: caso for caso in manifest["capturas"]}
+          esperados = {
+              "pickups_casa",
+              "persiana_atascada",
+              "persiana_reparada",
+              "luz_reducida_sin_linterna",
+              "luz_reducida_con_linterna",
+          }
+          if set(casos) != esperados:
+              raise SystemExit("faltan estados de evidencia de #680")
+
+          hashes = [caso["sha256"] for caso in manifest["capturas"]]
+          if len(hashes) != 5 or len(set(hashes)) != 5:
+              raise SystemExit("las cinco capturas deben existir y ser distintas")
+
+          pickups = casos["pickups_casa"]
+          if pickups["ids_visibles"] != ["linterna_kkryy", "palanca_kkryy"]:
+              raise SystemExit("los dos props deben estar visibles en la captura inicial")
+          props = pickups["props"]
+          if props["visuales_glb"] + props["visuales_proxy"] != 2:
+              raise SystemExit("cada prop debe tener exactamente un visual")
+          if props["triangulos"] <= 0 or props["mallas"] <= 0:
+              raise SystemExit("la evidencia no midió geometría de props")
+
+          antes = casos["persiana_atascada"]
+          despues = casos["persiana_reparada"]
+          if antes["reparada"] or not despues["reparada"]:
+              raise SystemExit("la pareja de persiana no representa antes/después")
+          if despues["consecuencia_presente"]:
+              raise SystemExit("la reparación debe retirar la consecuencia de persiana")
+
+          sin_luz = casos["luz_reducida_sin_linterna"]["luces_680"]
+          con_luz = casos["luz_reducida_con_linterna"]["luces_680"]
+          if sin_luz["luces"] != 0:
+              raise SystemExit("sin linterna carried no debe existir haz #680")
+          if con_luz["luces"] != 1 or con_luz["sombras"] != 0:
+              raise SystemExit("la linterna debe añadir un único haz sin sombras")
+
+          if not manifest["presupuesto_cumplido"]:
+              raise SystemExit("los props exceden el presupuesto fijado de #680")
+
+          presupuesto = manifest["presupuesto"]
+          if props["triangulos"] > presupuesto["triangulos_props_max"]:
+              raise SystemExit("triángulos de props fuera de presupuesto")
+          if props["mallas"] > presupuesto["mallas_props_max"]:
+              raise SystemExit("mallas de props fuera de presupuesto")
+          if props["superficies"] > presupuesto["superficies_props_max"]:
+              raise SystemExit("superficies de props fuera de presupuesto")
+
+          print(
+              "5/5 capturas #680 válidas; "
+              f"{props['triangulos']} triángulos, "
+              f"{props['mallas']} mallas, "
+              f"{props['superficies']} superficies"
+          )
+          PY
+
+      - name: Adjuntar evidencia visual y presupuesto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-props-680-${{ github.sha }}
+          path: evidencia-props-680/
+          if-no-files-found: error
+          retention-days: 14
