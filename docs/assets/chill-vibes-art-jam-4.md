@@ -97,6 +97,39 @@ python3 scripts/preparar_chill_vibes_cc0.py /tmp/chill-vibes \
   --lote infraestructura_servicio
 ```
 
+
+## Materialización local con Git LFS real
+
+Tras #1039, el paso binario queda automatizado por `scripts/materializar_chill_vibes_cc0.py`. El comando es deliberadamente conservador: por defecto hace *dry-run*; con `--aplicar` exige un checkout Git real, instala LFS solo en ese checkout, comprueba `filter=lfs` para cada destino, rechaza rutas con cambios locales/staged y no hace commit, push ni merge.
+
+Dry-run del lote pasivo:
+
+```bash
+python3 scripts/materializar_chill_vibes_cc0.py /tmp/chill-vibes --repo .
+```
+
+Materialización real, después de revisar el plan:
+
+```bash
+python3 scripts/materializar_chill_vibes_cc0.py /tmp/chill-vibes \
+  --archivo "Common game assets [Chill Vibes Art Jam 4].7z" \
+  --repo . \
+  --aplicar
+```
+
+La operación:
+
+- copia únicamente los GLB del allowlist a `godot/assets/modelos/chill_vibes/`;
+- vuelve a verificar el SHA-256 después de copiar;
+- fusiona las fichas en `godot/assets/procedencia.json` sin duplicar rutas;
+- conserva `archivo_origen` y `paquete_sha256`;
+- ejecuta `git add` solo sobre los GLB elegidos y procedencia;
+- lee cada blob desde el índice y exige el puntero LFS canónico con el mismo OID SHA-256 y tamaño;
+- ante un fallo posterior a la escritura, intenta retirar el staging y restaurar los ficheros afectados.
+
+Esto **no autoriza por sí solo a importar el lote completo**: la selección final sigue ligada a una escena concreta y al gate de #181.
+
+
 ## Integración real cuando una escena lo justifique
 
 #181 sigue priorizando validar el saneamiento P0 antes de expandir decoración opcional. Por eso este corte **audita y prepara**, pero no versiona todavía GLB ni cambia escenas.
