@@ -1,8 +1,8 @@
 ## Capa de #94 sobre casa y sueño.
 ##
-## Un único trabajillo deliberadamente pequeño: transcribir un lote en la mesa.
-## Se cobra al terminar, una sola vez por noche, y el precio real se paga en el
-## sueño: esa noche pierde una escena. No toca acciones del archivo ni pistas.
+## La mesa ofrece un trabajillo nocturno determinista entre transcripción,
+## sobres y encuestas. Todos pagan lo mismo y solo una vez por noche: la variedad
+## es tonal, no una vía de arbitraje económico. Encadenar noches empeora el sueño.
 extends "res://guion/dia_alquiler_app.gd"
 
 const DESTINO_TRABAJILLO := "trabajillo"
@@ -15,9 +15,10 @@ func _espacio_de(fase: String) -> Dictionary:
 	if fase != "casa" or _vivienda() != "casa":
 		return espacio
 
+	var oferta := Trabajillos.oferta_del_dia(jornada)
 	# La mesa ya existe. Solo se deja encima un pequeño lote de papel y una zona
-	# de interacción; no hace falta inventar otra pantalla para un trabajo que
-	# precisamente debe sentirse rutinario y barato.
+	# de interacción; no hace falta inventar otra pantalla para trabajos que deben
+	# sentirse rutinarios, baratos e intercambiables.
 	espacio["bultos"].append(
 		{
 			"pos": Vector3(2.45, 0.96, -2.4),
@@ -29,7 +30,7 @@ func _espacio_de(fase: String) -> Dictionary:
 		{
 			"pos": Vector3(2.6, 1.0, -2.4),
 			"destino": DESTINO_TRABAJILLO,
-			"rotulo": "TRABAJILLO_TRANSCRIPCION",
+			"rotulo": String(oferta["rotulo"]),
 			"tam": Vector3(1.7, 1.6, 1.4)
 		}
 	)
@@ -50,7 +51,7 @@ func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
 
 func _hacer_trabajillo() -> void:
 	_hablando = false
-	var resultado := Trabajillos.hacer_transcripcion(jornada)
+	var resultado := Trabajillos.hacer(jornada)
 	if resultado.is_empty():
 		_sonar("error")
 		_nomina.text = tr("TRABAJILLO_YA_HECHO")
@@ -61,11 +62,17 @@ func _hacer_trabajillo() -> void:
 	# guardado, la siguiente interacción reintenta escribir sin volver a cobrar.
 	if not _guardar_o_avisar(""):
 		return
-	_nomina.text = tr("TRABAJILLO_COBRADO") % [resultado["importe"], resultado["dinero"]]
+	var mensaje := (
+		tr(String(resultado["cobrado"])) % [resultado["importe"], resultado["dinero"]]
+	)
+	if int(resultado["racha"]) >= 2:
+		mensaje += "\n" + tr("TRABAJILLO_RACHA")
+	_nomina.text = mensaje
 
 
-## Combina costes en vez de reemplazarlos. Con casa, trabajar reduce 3 -> 2;
-## sin casa, la política de #84 ya da 1 y este trabajo nunca está disponible.
+## Combina costes en vez de reemplazarlos. Una noche aislada reduce 3 -> 2;
+## encadenar dos o más noches reduce 3 -> 1. Sin casa, la política de #84 ya da
+## 1 y este trabajo nunca está disponible.
 func _opciones_sueno() -> Dictionary:
 	var opciones: Dictionary = super._opciones_sueno().duplicate(true)
 	if not Trabajillos.hecho_hoy(jornada):
