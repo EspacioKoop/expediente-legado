@@ -44,9 +44,9 @@ static func montar(mundo: Node3D) -> bool:
 	var silla := _cuerpo_en_pos(mundo, bulto_silla.pos)
 	var estanteria := _cuerpo_en_pos(mundo, bulto_estanteria.pos)
 	var puesto := mundo.get_node_or_null("PuestoUtileria2") as Node3D
-	var telefono := (
-		puesto.get_node_or_null("TelefonoBase") as Node3D if puesto != null else null
-	)
+	var telefono: Node3D = null
+	if puesto != null:
+		telefono = puesto.get_node_or_null("TelefonoBase") as Node3D
 	if escritorio == null or silla == null or estanteria == null or telefono == null:
 		return false
 
@@ -111,14 +111,6 @@ static func _cuerpo_en_pos(mundo: Node3D, posicion: Vector3) -> Node3D:
 		if cuerpo is StaticBody3D and cuerpo.position.is_equal_approx(posicion):
 			return cuerpo
 	return null
-
-static func _sustituir_bulto(
-	mundo: Node3D, posicion: Vector3, modelo: String, tam: Vector3
-) -> bool:
-	for cuerpo in mundo.get_children():
-		if cuerpo is StaticBody3D and cuerpo.position.is_equal_approx(posicion):
-			return AssetCc0.sustituir(cuerpo, modelo, tam)
-	return false
 
 
 static func _agregar_prop(
