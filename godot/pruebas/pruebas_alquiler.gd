@@ -82,6 +82,9 @@ static func todo(comprobar: Callable) -> void:
 		[Jornada.PRECIO_ALQUILER, 100, acciones_antes - 1]
 	)
 	comprobar.call("el pago queda registrado", pago["alquiler"]["pagados"], 1)
+	comprobar.call(
+		"el último alquiler recuerda que fue pagado", pago["alquiler"]["ultimo_estado"], "pagado"
+	)
 	comprobar.call("el vencimiento queda resuelto", Jornada.alquiler_pendiente(pago), false)
 
 	var dinero_despues: int = pago["dinero"]
@@ -115,7 +118,21 @@ static func todo(comprobar: Callable) -> void:
 	comprobar.call("dormir sin pagar registra un impago", noche["alquiler_impago"], true)
 	comprobar.call("el impago no crea deuda negativa", impago["dinero"] >= 0, true)
 	comprobar.call("el impago se registra una sola vez", impago["alquiler"]["impagos"], 1)
+	comprobar.call(
+		"el último alquiler recuerda que fue impagado",
+		impago["alquiler"]["ultimo_estado"],
+		"impago"
+	)
 	comprobar.call("la vivienda no cobra automáticamente", impago["alquiler"]["pagados"], 0)
+
+	var alquiler_antiguo := Jornada.nueva()
+	alquiler_antiguo["alquiler"] = {"ultimo_resuelto": 10, "pagados": 1, "impagos": 0}
+	Jornada.completar(alquiler_antiguo)
+	comprobar.call(
+		"un guardado antiguo completa el resultado del alquiler",
+		alquiler_antiguo["alquiler"]["ultimo_estado"],
+		""
+	)
 
 	# --- Trabajillos de casa (#94) -------------------------------------------
 	# Esta suite es de contratos puros. La composición de la capa `dia_*` se

@@ -93,8 +93,15 @@ static func nueva(raiz: int = 0, vuelta: int = 1) -> Dictionary:
 		# hambres. No lleva barra visible (#93): la cuenta es interna hasta
 		# que #96 decida cómo se nota en la casa.
 		"comida_propia": {"dias_sin_comer": 0},
-		# Último vencimiento resuelto: pagado o registrado como impago.
-		"alquiler": {"ultimo_resuelto": 0, "pagados": 0, "impagos": 0},
+		# Último vencimiento resuelto y cómo terminó. El estado textual conserva
+		# un hecho real para que #96 pueda dejar su papel físico en casa.
+		"alquiler":
+		{
+			"ultimo_resuelto": 0,
+			"ultimo_estado": "",
+			"pagados": 0,
+			"impagos": 0,
+		},
 		# Lo inesperado se decide una vez por vida laboral. La misma semilla y
 		# vuelta conservan el plan al recargar; al reasignar se genera otro.
 		"imprevistos": Imprevistos.planificar(raiz, vuelta),
@@ -155,6 +162,7 @@ static func completar(jornada: Dictionary, raiz: int = 0) -> Dictionary:
 	jornada["acciones_bonus_hoy"] = int(jornada.get("acciones_bonus_hoy", 0))
 	for clave in ["ultimo_resuelto", "pagados", "impagos"]:
 		jornada["alquiler"][clave] = int(jornada["alquiler"].get(clave, 0))
+	jornada["alquiler"]["ultimo_estado"] = String(jornada["alquiler"].get("ultimo_estado", ""))
 	# Una jornada guardada antes de que existiera la semilla (#147) trae un
 	# cero: se le pone la de la partida, y de ahí en adelante ya es
 	# reproducible. Lo que NO se toca es su plantilla — los compañeros de esa
@@ -315,6 +323,7 @@ static func pagar_alquiler(jornada: Dictionary) -> Dictionary:
 		return {}
 	jornada["acciones"] -= 1
 	jornada["alquiler"]["ultimo_resuelto"] = vencimiento
+	jornada["alquiler"]["ultimo_estado"] = "pagado"
 	jornada["alquiler"]["pagados"] += 1
 	return {
 		"vencimiento": vencimiento,
@@ -332,6 +341,7 @@ static func resolver_impago_alquiler(jornada: Dictionary) -> bool:
 	if int(jornada["dia"]) != vencimiento or not alquiler_pendiente(jornada):
 		return false
 	jornada["alquiler"]["ultimo_resuelto"] = vencimiento
+	jornada["alquiler"]["ultimo_estado"] = "impago"
 	jornada["alquiler"]["impagos"] += 1
 	return true
 

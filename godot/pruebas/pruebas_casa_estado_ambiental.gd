@@ -30,6 +30,13 @@ func _probar() -> void:
 
 	var inicial := CasaEstadoAmbiental.derivar(jornada, inventario)
 	_comprobar(inicial["gato_estado"] == CasaEstadoAmbiental.GATO_ALIMENTADO, "gato alimentado")
+	_comprobar(
+		inicial["comida_estado"] == CasaEstadoAmbiental.COMIDA_RECIENTE, "comida propia reciente"
+	)
+	_comprobar(
+		inicial["alquiler_estado"] == CasaEstadoAmbiental.ALQUILER_SIN_HISTORIAL,
+		"sin vencimientos no inventa recibos"
+	)
 	_comprobar(inicial["objetos_casa"].is_empty(), "casa empieza sin almacen materializable")
 	_comprobar(inicial["vuelta"] == 1, "expone la vuelta persistida")
 	_comprobar(inicial["consecuencias_casa"].is_empty(), "sin hechos no inventa averias")
@@ -62,6 +69,37 @@ func _probar() -> void:
 	con_objetos["objetos_casa"][0]["nombre"] = "Mutada"
 	_comprobar(
 		inventario[Inventario.HOME_STORAGE][0]["nombre"] == "Taza", "derivar no muta inventario"
+	)
+
+	jornada["comida_propia"]["dias_sin_comer"] = 2
+	_comprobar(
+		(
+			CasaEstadoAmbiental.derivar(jornada, inventario)["comida_estado"]
+			== CasaEstadoAmbiental.COMIDA_FALTA
+		),
+		"no comer cambia la señal doméstica"
+	)
+	jornada["alquiler"] = {
+		"ultimo_resuelto": 10,
+		"ultimo_estado": "pagado",
+		"pagados": 1,
+		"impagos": 0,
+	}
+	_comprobar(
+		(
+			CasaEstadoAmbiental.derivar(jornada, inventario)["alquiler_estado"]
+			== CasaEstadoAmbiental.ALQUILER_PAGADO
+		),
+		"el último alquiler pagado se expone como hecho"
+	)
+	jornada["alquiler"]["ultimo_estado"] = "impago"
+	jornada["alquiler"]["impagos"] = 1
+	_comprobar(
+		(
+			CasaEstadoAmbiental.derivar(jornada, inventario)["alquiler_estado"]
+			== CasaEstadoAmbiental.ALQUILER_IMPAGO
+		),
+		"el último alquiler impagado se expone como hecho"
 	)
 
 	jornada["gato"]["dias_sin_comer"] = 1
@@ -129,6 +167,17 @@ func _probar() -> void:
 	)
 	_comprobar(
 		CasaEstadoAmbiental.derivar({}, {})["vuelta"] == 1, "jornada antigua usa vuelta minima"
+	)
+	_comprobar(
+		CasaEstadoAmbiental.derivar({}, {})["comida_estado"] == CasaEstadoAmbiental.COMIDA_FALTA,
+		"jornada antigua no inventa comida"
+	)
+	_comprobar(
+		(
+			CasaEstadoAmbiental.derivar({}, {})["alquiler_estado"]
+			== CasaEstadoAmbiental.ALQUILER_SIN_HISTORIAL
+		),
+		"jornada antigua no inventa alquiler"
 	)
 
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])

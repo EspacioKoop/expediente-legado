@@ -8,12 +8,14 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 ACUMULACION = ROOT / "godot" / "guion" / "casa_acumulacion_3d.gd"
 CONSECUENCIAS = ROOT / "godot" / "guion" / "casa_consecuencias_3d.gd"
+HUELLA_VIDA = ROOT / "godot" / "guion" / "casa_huella_vida_3d.gd"
 AMBIENTAL = ROOT / "godot" / "guion" / "casa_estado_ambiental.gd"
 LAMPARA = ROOT / "godot" / "guion" / "lampara_interactiva_3d.gd"
 CONTROLLER = ROOT / "godot" / "guion" / "dia_acumulacion_casa_app.gd"
 ESCENA = ROOT / "godot" / "escenas" / "dia.tscn"
 PRUEBA_GODOT = "pruebas/pruebas_casa_acumulacion.gd"
 PRUEBA_CONSECUENCIAS = "pruebas/pruebas_casa_consecuencias.gd"
+PRUEBA_HUELLA_VIDA = "pruebas/pruebas_casa_huella_vida.gd"
 RESUMEN_GODOT = re.compile(r"(\d+) pasadas, 0 fallos")
 
 
@@ -22,6 +24,7 @@ class CasaAcumulacionTest(unittest.TestCase):
     def setUpClass(cls):
         cls.acumulacion = ACUMULACION.read_text(encoding="utf-8")
         cls.consecuencias = CONSECUENCIAS.read_text(encoding="utf-8")
+        cls.huella_vida = HUELLA_VIDA.read_text(encoding="utf-8")
         cls.ambiental = AMBIENTAL.read_text(encoding="utf-8")
         cls.lampara = LAMPARA.read_text(encoding="utf-8")
         cls.controller = CONTROLLER.read_text(encoding="utf-8")
@@ -75,6 +78,19 @@ class CasaAcumulacionTest(unittest.TestCase):
         self.assertNotIn("porcentaje", self.consecuencias.lower())
         self.assertNotIn("nivel_pobreza", self.consecuencias.lower())
 
+    def test_huella_vida_deriva_de_hechos_reales(self):
+        self.assertIn('"comida_estado": _estado_comida(jornada)', self.ambiental)
+        self.assertIn('"alquiler_estado": _estado_alquiler(jornada)', self.ambiental)
+        self.assertIn('estado_ambiental.get("vuelta", 1)', self.huella_vida)
+        self.assertIn('"DespensaConComida"', self.huella_vida)
+        self.assertIn('"DespensaEscasa"', self.huella_vida)
+        self.assertIn('"ReciboAlquilerPagado"', self.huella_vida)
+        self.assertIn('"AvisoAlquilerImpagado"', self.huella_vida)
+        self.assertIn('"VueltasCasa"', self.huella_vida)
+        self.assertNotIn("Label.new()", self.huella_vida)
+        self.assertNotIn("porcentaje", self.huella_vida.lower())
+        self.assertNotIn("nivel_economico", self.huella_vida.lower())
+
     def test_bombilla_fundida_bloquea_la_lampara_real(self):
         self.assertIn("func establecer_averiada(valor: bool)", self.lampara)
         self.assertIn("if _averiada:", self.lampara)
@@ -89,6 +105,8 @@ class CasaAcumulacionTest(unittest.TestCase):
         self.assertIn("CasaAcumulacion.firma", self.controller)
         self.assertIn("CasaConsecuencias.firma", self.controller)
         self.assertIn("CasaConsecuencias.montar", self.controller)
+        self.assertIn("CasaHuellaVida.firma", self.controller)
+        self.assertIn("CasaHuellaVida.montar", self.controller)
         self.assertNotIn("Inventario.recoger", self.controller)
         self.assertNotIn("Inventario.guardar_en_casa", self.controller)
 
@@ -118,7 +136,11 @@ class CasaAcumulacionTest(unittest.TestCase):
         )
         self.assertEqual(importacion.returncode, 0, importacion.stdout)
 
-        for prueba, minimo in ((PRUEBA_GODOT, 40), (PRUEBA_CONSECUENCIAS, 15)):
+        for prueba, minimo in (
+            (PRUEBA_GODOT, 40),
+            (PRUEBA_CONSECUENCIAS, 15),
+            (PRUEBA_HUELLA_VIDA, 15),
+        ):
             resultado = subprocess.run(
                 [
                     motor,
