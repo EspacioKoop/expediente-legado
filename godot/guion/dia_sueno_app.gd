@@ -101,8 +101,7 @@ func _dormir_con_entrada() -> void:
 		% [
 			noche["coste"],
 			noche["dinero"],
-			(tr("DIA_SIN_GATO_AVISO") if noche["gato_se_fue"] else "")
-			+ _aviso_imprevisto(noche)
+			(tr("DIA_SIN_GATO_AVISO") if noche["gato_se_fue"] else "") + _aviso_imprevisto(noche)
 		]
 	)
 
