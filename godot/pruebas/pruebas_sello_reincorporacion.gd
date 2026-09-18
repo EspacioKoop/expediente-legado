@@ -14,7 +14,7 @@ func _initialize() -> void:
 	quit(1 if _fallos else 0)
 
 
-func _nuevo_dia() -> Node:
+func _nuevo_dia():
 	var dia := DiaApp.new()
 	dia.partida = Partida.new()
 	dia.partida.estado = Partida.nueva()
