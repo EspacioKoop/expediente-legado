@@ -307,21 +307,27 @@ static func por_nombre(
 	if ResourceLoader.exists(ruta) and not _es_puntero_lfs(ruta):
 		var traida := ResourceLoader.load(ruta, "Texture2D") as Texture2D
 		if traida != null:
-			return traida
+			return _contrastar_textura(traida, base, contraste)
 	return calculada(nombre, base, semilla, contraste)
 
 
 ## Un checkout sin objetos LFS conserva un fichero de texto en la ruta del
-## JPG. Godot puede llegar a verlo como recurso importable aunque el JPEG real
-## no exista; en ese caso la única fuente válida es el fallback calculado.
+## JPG. Se compara la cabecera como bytes: intentar decodificar un JPEG real
+## como UTF-8 ensucia el log y convierte una detección inocua en un error.
 static func _es_puntero_lfs(ruta: String) -> bool:
 	if not FileAccess.file_exists(ruta):
 		return false
 	var archivo := FileAccess.open(ruta, FileAccess.READ)
 	if archivo == null:
 		return false
-	var cabecera := archivo.get_buffer(64).get_string_from_utf8()
-	return cabecera.begins_with("version https://git-lfs.github.com/spec/v1")
+	var esperada := "version https://git-lfs.github.com/spec/v1".to_utf8_buffer()
+	var cabecera := archivo.get_buffer(esperada.size())
+	if cabecera.size() != esperada.size():
+		return false
+	for i in esperada.size():
+		if cabecera[i] != esperada[i]:
+			return false
+	return true
 
 
 static func calculada(
@@ -362,9 +368,10 @@ static func calculada(
 	return _contrastar_textura(textura, base, contraste)
 
 
-## Refuerza el fallback calculado ANTES de que el sampler lineal pierda la
-## trama bajo iluminación baja y cuantización. Los assets traídos —ruta
-## explícita o JPG canónico— salen antes de aquí y conservan su presentación.
+## Crea una copia runtime contrastada ANTES de que el sampler lineal pierda
+## la trama bajo iluminación baja y cuantización. Se usa para el fallback y
+## para el JPG canónico nombrado; una ruta explícita res:// sale antes y queda
+## intacta. El default 1.0 devuelve el recurso original sin trabajo extra.
 static func _contrastar_textura(textura: Texture2D, base: Color, contraste: float) -> Texture2D:
 	if is_equal_approx(contraste, 1.0):
 		return textura
