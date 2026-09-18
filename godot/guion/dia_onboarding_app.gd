@@ -7,9 +7,8 @@
 extends "res://guion/dia_gato_app.gd"
 
 const POS_PUESTO := Vector3(-4.0, 1.45, 1.0)
-const TEXTO_ONBOARDING := (
-	"PUESTO 4-B · SIGA-98\n" + "Acérquese al terminal verde para abrir su primer expediente."
-)
+const CLAVE_ROL_ONBOARDING := "ONBOARDING_OBJETIVO_INICIAL"
+const CLAVE_TEXTO_ONBOARDING := "ONBOARDING_PUESTO_SIGA"
 const COLOR_FONDO_TUTORIAL := Color("e8edf7")
 const UMBRAL_RESCATE_CAIDA := -8.0
 
@@ -104,14 +103,14 @@ func _montar_onboarding_archivo() -> void:
 
 	var rol := Label.new()
 	rol.name = "RolPistaPuesto"
-	rol.text = "OBJETIVO INICIAL"
+	rol.text = tr(CLAVE_ROL_ONBOARDING)
 	rol.add_theme_font_override("font", EstiloSiga.fuente_titulo())
 	rol.add_theme_color_override("font_color", EstiloSiga.AZUL_TITULO)
 	contenido.add_child(rol)
 
 	var texto := Label.new()
 	texto.name = "TextoPistaPuesto"
-	texto.text = TEXTO_ONBOARDING
+	texto.text = tr(CLAVE_TEXTO_ONBOARDING)
 	texto.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	texto.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	texto.custom_minimum_size.x = 580
