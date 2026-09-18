@@ -162,7 +162,9 @@ func _recorrer_archivo_trayecto(saltar: bool) -> Dictionary:
 		"ascensor: pisar la salida real asienta trayecto antes de la presentación",
 	)
 	_comprobar(dia._selector_ruta != null, "ascensor: la salida real abre el selector de ruta")
-	_comprobar(\n\t\tnot dia._caminante.is_physics_processing(), "ascensor: el selector bloquea movimiento"\n\t)
+	_comprobar(
+		not dia._caminante.is_physics_processing(), "ascensor: el selector bloquea movimiento"
+	)
 	_comprobar(not dia._hud.visible, "ascensor: el selector oculta el HUD")
 
 	# ConfirmationDialog ya está cubierto por UI; aquí seguimos la misma callback
