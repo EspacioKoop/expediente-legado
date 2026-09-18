@@ -98,8 +98,8 @@ func _probar_determinismo_y_contenido() -> void:
 	var a = Relacion.crear(caso, pista, leidos, 991)
 	var b = Relacion.crear(caso, pista, leidos, 991)
 	_comprobar(a != null and b != null, "crea la misma relación con cuatro documentos leídos")
-	var ids_a := a.documentos.map(func(d): return d["id"])
-	var ids_b := b.documentos.map(func(d): return d["id"])
+	var ids_a: Array = a.documentos.map(func(d): return d["id"])
+	var ids_b: Array = b.documentos.map(func(d): return d["id"])
 	_comprobar(ids_a == ids_b, "misma semilla conserva distractores y presentación")
 	_comprobar(
 		a.documentos.size() == Relacion.MAX_DOCUMENTOS, "limita la presentación a cuatro documentos"
@@ -153,7 +153,7 @@ func _probar_abandono_y_serializacion() -> void:
 		relacion.nucleo.state == Puzzle.ESTADO_ABANDONADO,
 		"abandonar queda distinguido de fallar",
 	)
-	var datos := relacion.serializar()
+	var datos: Dictionary = relacion.serializar()
 	_comprobar(datos.get("cerrada", false), "serializa que la relación ya está cerrada")
 	_comprobar(
 		datos.get("nucleo", {}).get("reward_id", "") == "P-REL",
