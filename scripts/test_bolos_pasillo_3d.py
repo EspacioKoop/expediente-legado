@@ -1,8 +1,5 @@
-import os
 from pathlib import Path
 import re
-import shutil
-import subprocess
 import unittest
 
 
@@ -24,7 +21,8 @@ class BolosPasillo3DTest(unittest.TestCase):
         self.assertIn("Bolos.nueva(LANZADORES)", self.source)
         self.assertIn("Bolos.derribar(estado, nuevos)", self.source)
         self.assertNotIn("Partida", self.source)
-        self.assertNotRegex(self.source, r"RigidBody3D\\.new\\(|extends\\s+RigidBody3D")
+        self.assertNotIn("RigidBody3D.new(", self.source)
+        self.assertNotIn("extends RigidBody3D", self.source)
 
     def test_pista_tiene_diez_bolos_y_simulacion_acotada(self):
         bloque = re.search(
@@ -55,31 +53,13 @@ class BolosPasillo3DTest(unittest.TestCase):
         self.assertIn("fallar no bloquea el turno", self.godot_test)
         self.assertIn("abandonar devuelve resultado válido", self.godot_test)
 
-    def test_smoke_headless_si_hay_godot(self):
-        motor = os.environ.get("GODOT_BIN") or shutil.which("godot4")
-        if not motor:
-            self.skipTest("Godot no está disponible en PATH")
-        resultado = subprocess.run(
-            [
-                motor,
-                "--headless",
-                "--language",
-                "es",
-                "--path",
-                str(ROOT / "godot"),
-                "--script",
-                "pruebas/pruebas_bolos_pasillo_3d.gd",
-            ],
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            timeout=120,
-            check=False,
+    def test_regresion_queda_en_verificador_canonico(self):
+        verificador = (ROOT / "scripts" / "verificar_godot.py").read_text(encoding="utf-8")
+        self.assertIn('"bolos-pasillo"', verificador)
+        self.assertIn(
+            '["--script", "pruebas/pruebas_bolos_pasillo_3d.gd"]',
+            verificador,
         )
-        self.assertEqual(0, resultado.returncode, resultado.stdout)
-        self.assertRegex(resultado.stdout, r"\d+ pasadas, 0 fallos")
-        self.assertNotIn("SCRIPT ERROR:", resultado.stdout)
-        self.assertNotIn("Parse Error:", resultado.stdout)
 
 
 if __name__ == "__main__":
