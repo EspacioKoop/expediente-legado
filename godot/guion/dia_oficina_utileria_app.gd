@@ -31,7 +31,9 @@ func _conectar_cafe(dia, mundo: Node3D) -> void:
 		return
 	if int(dia.jornada.get("acciones_bonus_hoy", 0)) >= Jornada.BONUS_ACCIONES_MAX_POR_DIA:
 		maquina.marcar_agotado()
-	maquina.activado.connect(_al_usar_cafe.bind(dia, maquina))
+	var callback := _al_usar_cafe.bind(dia, maquina)
+	if not maquina.activado.is_connected(callback):
+		maquina.activado.connect(callback)
 
 
 func _al_usar_cafe(_actor: Node, dia, maquina: MaquinaCafeInteractiva3D) -> void:
