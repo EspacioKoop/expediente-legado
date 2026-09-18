@@ -12,7 +12,10 @@ WORKFLOW = RAIZ / ".github/workflows/alpha-playtest.yml"
 class ExportacionGodotTest(unittest.TestCase):
     def test_hay_dos_presets_publicos_y_dos_qa(self):
         texto = PRESETS.read_text(encoding="utf-8")
-        self.assertEqual(4, len(re.findall(r"^\[preset\.\d+\]$", texto, re.MULTILINE)))
+        self.assertEqual(
+            4,
+            len(re.findall(r"^\[preset\.\d+\]$", texto, re.MULTILINE)),
+        )
         for nombre in (
             "Linux x86_64",
             "Windows x86_64",
@@ -37,7 +40,11 @@ class ExportacionGodotTest(unittest.TestCase):
         self.assertEqual(2, texto.count('custom_features=""'))
         self.assertEqual(2, texto.count('custom_features="qa_tools"'))
 
-        bloques = re.split(r"(?=^\[preset\.\d+\]$)", texto, flags=re.MULTILINE)
+        bloques = re.split(
+            r"(?=^\[preset\.\d+\]$)",
+            texto,
+            flags=re.MULTILINE,
+        )
         por_nombre = {}
         for bloque in bloques:
             nombre = re.search(r'^name="([^"]+)"$', bloque, re.MULTILINE)
@@ -69,11 +76,12 @@ class ExportacionGodotTest(unittest.TestCase):
         script = SCRIPT.read_text(encoding="utf-8")
         workflow = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn('QA_TOOLS="${SIGA98_QA_TOOLS:-0}"'.replace("\\", ""), script)
-        self.assertIn('qa_tools=$QA_TOOLS', script)
-        self.assertIn(
-            "SIGA98_QA_TOOLS: ${{ startsWith(github.ref, 'refs/tags/v') && '0' || '1' }}".replace("\\", ""),
-            workflow,
-        )
+        self.assertIn("qa_tools=$QA_TOOLS", script)
+        expresion = (
+            "SIGA98_QA_TOOLS: "
+            "${{ startsWith(github.ref, 'refs/tags/v') && '0' || '1' }}"
+        ).replace("\\", "")
+        self.assertIn(expresion, workflow)
 
 
 if __name__ == "__main__":
