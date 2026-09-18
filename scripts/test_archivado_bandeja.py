@@ -34,7 +34,8 @@ class ArchivadoBandejaTest(unittest.TestCase):
 
     def test_error_no_elimina_la_carpeta_y_no_rearchiva_duplicados(self):
         self.assertIn("Una colocación incorrecta no destruye el caso", self.source)
-        self.assertIn('estado["colocaciones"].append', self.source)
+        self.assertIn('estado["colocaciones"]', self.source)
+        self.assertIn("append(colocacion)", self.source)
         self.assertIn('_contiene_id(estado.get("pendientes", []), caso_id)', self.source)
 
     def test_resultado_cuenta_las_carpetas_fisicamente_pendientes(self):
