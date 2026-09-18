@@ -269,7 +269,9 @@ func _cmd_dibujo(args: Array) -> void:
 	if dia == null:
 		return
 	var actual := dia.get_node_or_null(NOMBRE_DIBUJO_3D)
-	var accion := String(args[0]).to_lower() if not args.is_empty() else ("off" if actual != null else "on")
+	var accion := (
+		String(args[0]).to_lower() if not args.is_empty() else ("off" if actual != null else "on")
+	)
 	if accion not in ["on", "off", "refrescar"]:
 		_error("Uso: dibujo on|off|refrescar")
 		return
@@ -296,21 +298,25 @@ func _cmd_dibujo(args: Array) -> void:
 
 	var resumen: Dictionary = actual.call("resumen")
 	_ok(
-		"Dibujo 3D: %d celdas · %d muros · %d aristas físicas · %d salidas · %d figuras"
-		% [
-			int(resumen.get("celdas", 0)),
-			int(resumen.get("muros", 0)),
-			int(resumen.get("contorno_fisico", 0)),
-			int(resumen.get("salidas", 0)),
-			int(resumen.get("figuras", 0)),
-		]
+		(
+			"Dibujo 3D: %d celdas · %d muros · %d aristas físicas · %d salidas · %d figuras"
+			% [
+				int(resumen.get("celdas", 0)),
+				int(resumen.get("muros", 0)),
+				int(resumen.get("contorno_fisico", 0)),
+				int(resumen.get("salidas", 0)),
+				int(resumen.get("figuras", 0)),
+			]
+		)
 	)
 	_escribir(
-		"[color=#8cdfff]cian=celdas[/color] · "
-		+ "[color=#ffa31a]naranja=muros[/color] · "
-		+ "[color=#ff33db]magenta=contorno físico[/color] · "
-		+ "[color=#38ff59]verde=entrada[/color] · "
-		+ "[color=#ff3330]rojo=salidas[/color] · blanco=figuras"
+		(
+			"[color=#8cdfff]cian=celdas[/color] · "
+			+ "[color=#ffa31a]naranja=muros[/color] · "
+			+ "[color=#ff33db]magenta=contorno físico[/color] · "
+			+ "[color=#38ff59]verde=entrada[/color] · "
+			+ "[color=#ff3330]rojo=salidas[/color] · blanco=figuras"
+		)
 	)
 
 
