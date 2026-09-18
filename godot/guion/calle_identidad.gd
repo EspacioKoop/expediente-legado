@@ -134,12 +134,14 @@ static func _edificio_oficina(calle: Node3D) -> void:
 					LUZ_FRIA
 				)
 	# Vestíbulo de cristal, puertas, marquesina y rótulo.
-	_luz(
+	_cristal(
 		raiz,
 		"Vestibulo",
 		Vector3(0, 1.4, z + 0.09),
 		Vector3(6.2, 2.6, 0.02),
-		Color(0.30, 0.36, 0.35)
+		Color(0.30, 0.36, 0.35),
+		0.26,
+		0.12
 	)
 	for x in [-3.15, -0.02, 3.15]:
 		_caja(
@@ -147,21 +149,26 @@ static func _edificio_oficina(calle: Node3D) -> void:
 			"Montante%.0f" % (x * 10),
 			Vector3(x, 1.4, z + 0.12),
 			Vector3(0.1, 2.7, 0.08),
-			METAL
+			METAL,
+			"metal_pintado"
 		)
-	_caja(
+	_cristal(
 		raiz,
 		"PuertaIzquierda",
 		Vector3(-0.58, 1.1, z + 0.13),
 		Vector3(1.05, 2.2, 0.03),
-		Color(0.40, 0.46, 0.44)
+		Color(0.40, 0.46, 0.44),
+		0.30,
+		0.10
 	)
-	_caja(
+	_cristal(
 		raiz,
 		"PuertaDerecha",
 		Vector3(0.58, 1.1, z + 0.13),
 		Vector3(1.05, 2.2, 0.03),
-		Color(0.40, 0.46, 0.44)
+		Color(0.40, 0.46, 0.44),
+		0.30,
+		0.10
 	)
 	_caja(
 		raiz,
