@@ -22,10 +22,10 @@ const PUESTOS := [
 ]
 
 
-static func montar(raiz: Node3D) -> void:
+static func montar(raiz: Node3D, precio_cafe: int = 0) -> void:
 	for i in PUESTOS.size():
 		_montar_puesto(raiz, i, PUESTOS[i])
-	_montar_maquina_cafe(raiz)
+	_montar_maquina_cafe(raiz, precio_cafe)
 
 
 ## Monta un único puesto en coordenadas arbitrarias, sin la planta de #400 ni
@@ -103,13 +103,13 @@ static func _agregar_taza(raiz: Node3D, pos: Vector3) -> MeshInstance3D:
 	return taza
 
 
-static func _montar_maquina_cafe(raiz: Node3D) -> void:
+static func _montar_maquina_cafe(raiz: Node3D, precio_cafe: int) -> void:
 	var maquina := MaquinaCafeInteractiva3D.new()
 	maquina.name = "MaquinaCafeInteractuable"
 	# Coincide con el bulto de la máquina ya declarado en EspaciosCatalogo.
 	maquina.position = Vector3(-6.0, 0.75, 4.2)
 	raiz.add_child(maquina)
-	maquina.configurar()
+	maquina.configurar(precio_cafe)
 
 
 static func _agregar_caja(
