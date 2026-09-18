@@ -72,6 +72,20 @@ class CalleIdentidadTest(unittest.TestCase):
         self.assertIn("Vector3(GROSOR_VENTANA_FACHADA, 1.2, 0.9)", self.identidad)
         self.assertNotIn("cara + hacia * 0.03", self.identidad)
 
+    def test_cristal_urbano_no_se_resuelve_como_placa_opaca(self):
+        self.assertIn("static func _cristal(", self.identidad)
+        self.assertIn("BaseMaterial3D.TRANSPARENCY_ALPHA", self.identidad)
+        self.assertIn("Color(color.r, color.g, color.b, alpha)", self.identidad)
+        self.assertIn('"CristalEscaparate"', self.identidad)
+        for nombre in (
+            '"Vestibulo"',
+            '"PuertaCristal"',
+            '"Escaparate"',
+            '"VentanillaPago"',
+        ):
+            self.assertIn(nombre, self.identidad)
+        self.assertIn('"metal_pintado"', self.identidad)
+
     def test_el_cielo_es_una_noche_urbana_estatica(self):
         cielo = (ROOT / "godot/arte/cielo_siga.gdshader").read_text(encoding="utf-8")
         preset = (ROOT / "godot/arte/cielo_siga.tres").read_text(encoding="utf-8")
