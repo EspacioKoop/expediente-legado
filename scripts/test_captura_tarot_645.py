@@ -1,10 +1,21 @@
+import importlib.util
 from pathlib import Path
+import tempfile
 import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
 CAPTURAR = ROOT / "godot" / "pruebas" / "capturar.gd"
 DOC = ROOT / "docs" / "assets" / "tarot-major-arcana.md"
+PREPARAR = ROOT / "scripts" / "preparar_validacion_tarot_645.py"
+
+
+def _cargar_preparador():
+    spec = importlib.util.spec_from_file_location("preparar_validacion_tarot_645", PREPARAR)
+    assert spec is not None and spec.loader is not None
+    modulo = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(modulo)
+    return modulo
 
 
 class CapturaTarot645Test(unittest.TestCase):
@@ -24,6 +35,20 @@ class CapturaTarot645Test(unittest.TestCase):
         self.assertIn('modo not in ["normal", "reducido"]', self.capturar)
         self.assertIn('preferencias["reduccion_movimiento"] = true', self.capturar)
         self.assertIn("PreferenciasSiga.guardar(preferencias)", self.capturar)
+
+    def test_preparador_genera_24_recorridos_aislables(self) -> None:
+        modulo = _cargar_preparador()
+        with tempfile.TemporaryDirectory() as temporal:
+            manifiesto = modulo.preparar(Path(temporal), "godot4", ejecutar=False)
+        self.assertEqual(manifiesto["total"], 24)
+        self.assertEqual(manifiesto["esperadas"], 24)
+        capturas = {entrada["captura"] for entrada in manifiesto["entradas"]}
+        self.assertEqual(len(capturas), 24)
+        self.assertEqual(
+            {entrada["recorrido"] for entrada in manifiesto["entradas"]},
+            {"normal", "reducido", "skip"},
+        )
+        self.assertTrue(all(entrada["ok"] is None for entrada in manifiesto["entradas"]))
 
     def test_documenta_las_ocho_cartas_y_no_finge_la_progresion(self) -> None:
         for folio in (
