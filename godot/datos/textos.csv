@@ -268,7 +268,12 @@ SUENO_ROTULO,…
 TAROT_ROTULO,{carta}
 TAROT_SIN_NOMBRE,Una carta sin nombre
 TAROT_VOZ,"Estaba dentro del expediente, escrita como si nada."
-TRABAJILLO_COBRADO,"Termina el lote. Le pagan %d. Tiene %d."
+TRABAJILLO_COBRADO_ENCUESTAS,"Cuelga la última llamada. Le pagan %d. Tiene %d."
+TRABAJILLO_COBRADO_SOBRES,"Cierra el último sobre. Le pagan %d. Tiene %d."
+TRABAJILLO_COBRADO_TRANSCRIPCION,"Termina el lote. Le pagan %d. Tiene %d."
+TRABAJILLO_ENCUESTAS,Hacer encuestas telefónicas
+TRABAJILLO_RACHA,Otra noche seguida. Esta vez el sueño será todavía más corto.
+TRABAJILLO_SOBRES,Rellenar sobres
 TRABAJILLO_TRANSCRIPCION,Transcribir un lote
 TRABAJILLO_YA_HECHO,No queda otro lote para esta noche.
 VENTANILLA_ADELANTA,La comisión adelanta que la próxima réplica será: %s.

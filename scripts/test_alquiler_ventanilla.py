@@ -56,9 +56,11 @@ class VentanillaAlquilerTest(unittest.TestCase):
     def test_trabajillo_solo_aparece_con_vivienda_y_reduce_sueno(self):
         self.assertIn('fase != "casa" or _vivienda() != "casa"', self.capa_trabajillos)
         self.assertIn('"destino": DESTINO_TRABAJILLO', self.capa_trabajillos)
-        self.assertIn("Trabajillos.hacer_transcripcion(jornada)", self.capa_trabajillos)
+        self.assertIn("Trabajillos.oferta_del_dia(jornada)", self.capa_trabajillos)
+        self.assertIn("Trabajillos.hacer(jornada)", self.capa_trabajillos)
         self.assertIn("Trabajillos.escenas_de_sueno", self.capa_trabajillos)
         self.assertIn('opciones["cantidad"] = mini(', self.capa_trabajillos)
+        self.assertIn('TRABAJILLO_RACHA', self.capa_trabajillos)
 
 
 if __name__ == "__main__":
