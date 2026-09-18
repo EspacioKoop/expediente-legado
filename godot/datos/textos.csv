@@ -407,6 +407,15 @@ TRASFONDO_CUIDADOS_DESCRIPCION,"Antes de SIGA ya organizabas citas, compras, pap
 TRASFONDO_RECIEN_LLEGADO,Recién llegado a la ciudad
 TRASFONDO_RECIEN_LLEGADO_DESCRIPCION,"Todavía estás aprendiendo barrios, líneas, horarios y costumbres. Miras lugares cotidianos con la atención de quien aún no los da por hechos."
 
+CORCHO_TITULO,Corcho de conceptos
+CORCHO_AYUDA_RATON,Arrastra una ficha para moverla · Pulsa dos fichas para poner o quitar hilo
+CORCHO_AYUDA_MANDO,Flechas: elegir · Intro/A: hilo · M/X: coger y soltar · Esc/B: cerrar
+CORCHO_VACIO,Aún no hay fichas. Los conceptos que descubras en el archivo acabarán aquí.
+CORCHO_CERRAR,Cerrar
+CORCHO_DETALLE_TITULO,Ficha seleccionada
+CORCHO_DETALLE_VACIO,Enfoca o pulsa una ficha para consultar lo que ya sabes de ese concepto.
+CORCHO_DETALLE_SIN_RESUMEN,No consta información adicional sobre este concepto.
+CORCHO_DATO_OCULTO,[dato aún no descubierto]
 MENU_GLOBAL_TITULO,Menú
 MENU_GLOBAL_CONTINUAR,Continuar
 MENU_GLOBAL_OPCIONES,Opciones

@@ -10,6 +10,8 @@ from scripts.godot_pruebas import importar_proyecto
 ROOT = Path(__file__).resolve().parents[1]
 CORCHO = ROOT / "godot" / "guion" / "corcho.gd"
 CORCHO_3D = ROOT / "godot" / "guion" / "corcho_3d.gd"
+CORCHO_PANEL = ROOT / "godot" / "guion" / "corcho_panel.gd"
+TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
 PRUEBA_GODOT = "pruebas/pruebas_corcho.gd"
 RESUMEN_GODOT = re.compile(r"(\d+) pasadas, 0 fallos")
 
@@ -19,6 +21,8 @@ class CorchoConceptosTest(unittest.TestCase):
     def setUpClass(cls):
         cls.estado = CORCHO.read_text(encoding="utf-8")
         cls.vista = CORCHO_3D.read_text(encoding="utf-8")
+        cls.panel = CORCHO_PANEL.read_text(encoding="utf-8")
+        cls.textos = TEXTOS.read_text(encoding="utf-8")
 
     def test_tablero_de_tamano_real_fuera_de_la_ventana(self):
         self.assertIn("const ESCALA := 0.34", self.vista)
@@ -40,6 +44,23 @@ class CorchoConceptosTest(unittest.TestCase):
         self.assertIn("_corcho_3d.abrir_pedido.connect(abrir_panel)", controlador)
         self.assertIn("_corcho_3d.refrescar()", controlador)
         self.assertNotIn("Interactuable3D.new()", self.vista.split("func _montar_ficha")[1])
+
+    def test_lectura_ampliada_no_filtra_conceptos_ocultos_y_esta_localizada(self):
+        self.assertIn("func inspeccionar(id: String)", self.panel)
+        self.assertIn("Marcas.REFERENCIA", self.panel)
+        self.assertIn("visibles.has(nombre)", self.panel)
+        self.assertIn("tr(DATO_OCULTO)", self.panel)
+        for clave in (
+            "CORCHO_TITULO",
+            "CORCHO_AYUDA_RATON",
+            "CORCHO_AYUDA_MANDO",
+            "CORCHO_DETALLE_TITULO",
+            "CORCHO_DETALLE_VACIO",
+            "CORCHO_DETALLE_SIN_RESUMEN",
+            "CORCHO_DATO_OCULTO",
+        ):
+            self.assertIn(clave + ",", self.textos)
+        self.assertNotIn('const TITULO := "Corcho de conceptos"', self.panel)
 
     def test_posiciones_persistidas_se_sanean_al_area_util(self):
         self.assertIn("static func limitar_posiciones", self.estado)
