@@ -38,8 +38,16 @@ class SuenoFeedbackObjetivosTest(unittest.TestCase):
             "func _orientar_gato_guia", 1
         )[0]
         self.assertIn('completados: Array = estado.get("completados", [])', bloque)
-        self.assertIn('if completados.has(objetivo["id"]):', bloque)
+        self.assertIn("not _objetivo_puntuable(estado, objetivo_id)", bloque)
         self.assertIn('_salida_guia = objetivo.get("pos", _entrada_guia)', bloque)
+
+    def test_recarga_no_remonta_la_ruta_sustituida(self):
+        montaje = self.codigo.split("func _montar_objetivos_sueno()", 1)[1].split(
+            "func _al_pisar_objetivo", 1
+        )[0]
+        self.assertIn("not _objetivo_puntuable(estado, objetivo_id)", montaje)
+        self.assertIn("func _objetivo_puntuable(", self.codigo)
+        self.assertIn('objetivo.get("cuenta", true)', self.codigo)
 
     def test_no_reintroduce_salida_fisica(self):
         self.assertIn('espacio["salidas"] = []', self.codigo)
