@@ -170,6 +170,8 @@ func _sincronizar() -> void:
 		return
 	var vista: Dictionary = presentacion.vista(reduccion_movimiento)
 	var elementos: Array = vista.get("elementos", [])
+	var seleccion: Array = vista.get("seleccion", [])
+	var ultimo_seleccionado := int(seleccion.back()) if not seleccion.is_empty() else -1
 	for slot in range(mini(elementos.size(), _ecos_3d.size())):
 		var dato: Dictionary = elementos[slot]
 		var eco: Interactuable3D = _ecos_3d[slot]
@@ -178,8 +180,11 @@ func _sincronizar() -> void:
 		var panel := eco.get_node("Panel") as MeshInstance3D
 		texto.text = str(dato.get("texto", ""))
 		var posicion := int(dato.get("posicion_seleccion", -1))
+		var eco_id := int(dato.get("id", -1))
 		orden.text = "" if posicion < 0 else "%d" % (posicion + 1)
-		eco.habilitado = posicion < 0 and not presentacion.cerrada
+		eco.habilitado = (
+			not presentacion.cerrada and (posicion < 0 or eco_id == ultimo_seleccionado)
+		)
 		var material := StandardMaterial3D.new()
 		material.albedo_color = COLOR_SELECCION if posicion >= 0 else COLOR_BASE
 		material.roughness = 0.88
@@ -196,7 +201,7 @@ func _sincronizar() -> void:
 				"%d/%d · %s"
 				% [
 					int(vista.get("intentos", 0)),
-					int(vista.get("max_intentos", 3)),
+					int(vista.get("max_intentos", 1)),
 					str(vista.get("estado", "activo")),
 				]
 			)

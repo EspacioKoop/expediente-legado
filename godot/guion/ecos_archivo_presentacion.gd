@@ -60,7 +60,11 @@ func seleccionar() -> String:
 	var eco: Dictionary = presentados[foco]
 	var id := int(eco.get("id", -1))
 	if seleccion.has(id):
-		ultimo_evento = EVENTO_DUPLICADO
+		if not seleccion.is_empty() and seleccion.back() == id:
+			seleccion.pop_back()
+			ultimo_evento = EVENTO_DESHECHO
+		else:
+			ultimo_evento = EVENTO_DUPLICADO
 		return ultimo_evento
 	seleccion.append(id)
 	ultimo_evento = EVENTO_SELECCIONADO
@@ -69,9 +73,7 @@ func seleccionar() -> String:
 
 	var resultado: String = str(ecos.probar(seleccion))
 	ultimo_evento = resultado
-	if resultado == EVENTO_INCORRECTO:
-		seleccion.clear()
-	elif resultado == EVENTO_COMPLETADO or resultado == EVENTO_DISPERSADO:
+	if resultado == EVENTO_COMPLETADO or resultado == EVENTO_DISPERSADO:
 		cerrada = true
 	return ultimo_evento
 
@@ -121,7 +123,8 @@ func vista(reduccion_movimiento: bool) -> Dictionary:
 		}
 		elementos.append(elemento)
 	return {
-		"regla": "Recompón los tres ecos en el orden en que aparecían en el archivo.",
+		"regla":
+		"Recompón los tres ecos. Puedes deshacer antes del tercero; la secuencia completa es definitiva.",
 		"elementos": elementos,
 		"foco": foco,
 		"seleccion": seleccion.duplicate(),
