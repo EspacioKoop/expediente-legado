@@ -40,7 +40,6 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 	var color_muro: Color = espacio.get("color_muro", Color(0.55, 0.54, 0.5))
 	var deformacion_textura: Vector3 = espacio.get("deformacion_textura", Vector3.ONE)
 	var contraste_textura := float(espacio.get("contraste_textura", 1.0))
-	var realce_textura := float(espacio.get("realce_textura", 0.0))
 
 	# Tres formas de declarar un sitio. `contorno` es la generalización 3D no
 	# ortogonal; `planta` conserva celdas arbitrarias y `suelo`, el rectángulo.
@@ -54,8 +53,7 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 			espacio.get("textura_muro", ""),
 			espacio.get("escala_textura", 1.2),
 			deformacion_textura,
-			contraste_textura,
-			realce_textura
+			contraste_textura
 		)
 	elif espacio.has("planta"):
 		_por_planta(
@@ -70,7 +68,6 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 			espacio.get("escala_textura", 1.2),
 			deformacion_textura,
 			contraste_textura,
-			realce_textura,
 			PoliticaTecho.debe_tener(espacio)
 		)
 	else:
@@ -322,8 +319,7 @@ static func _por_contorno(
 	textura: String = "",
 	metros: float = 1.2,
 	deformacion: Vector3 = Vector3.ONE,
-	contraste: float = 1.0,
-	realce_textura: float = 0.0
+	contraste: float = 1.0
 ) -> void:
 	var cuerpo := SuenoGeometria.cuerpo_sala(contorno, altura)
 	var malla := _malla_de(cuerpo)
@@ -338,7 +334,6 @@ static func _por_contorno(
 				material.set_shader_parameter("con_textura", true)
 				material.set_shader_parameter("escala_textura", 1.0 / metros)
 				material.set_shader_parameter("deformacion_textura", deformacion)
-				material.set_shader_parameter("realce_textura", realce_textura)
 		malla.material_override = material
 	raiz.add_child(cuerpo)
 
@@ -360,7 +355,6 @@ static func _por_planta(
 	metros: float = 1.2,
 	deformacion: Vector3 = Vector3.ONE,
 	contraste: float = 1.0,
-	realce_textura: float = 0.0,
 	con_techo: bool = true
 ) -> void:
 	for rect in Planta.rectangulos(bloques):
@@ -375,8 +369,7 @@ static func _por_planta(
 			textura_suelo,
 			metros,
 			deformacion,
-			contraste,
-			realce_textura
+			contraste
 		)
 		if con_techo:
 			var techo := _caja(
@@ -418,8 +411,7 @@ static func _por_planta(
 			textura_muro,
 			metros,
 			deformacion,
-			contraste,
-			realce_textura
+			contraste
 		)
 
 
@@ -518,8 +510,7 @@ static func _caja(
 	textura: String = "",
 	metros: float = 1.2,
 	deformacion: Vector3 = Vector3.ONE,
-	contraste: float = 1.0,
-	realce_textura: float = 0.0
+	contraste: float = 1.0
 ) -> StaticBody3D:
 	var cuerpo := StaticBody3D.new()
 	cuerpo.position = pos
@@ -550,7 +541,6 @@ static func _caja(
 			# la caja, cada pared contaría una escala distinta.
 			material.set_shader_parameter("escala_textura", 1.0 / metros)
 			material.set_shader_parameter("deformacion_textura", deformacion)
-			material.set_shader_parameter("realce_textura", realce_textura)
 	malla.material_override = material
 	cuerpo.add_child(malla)
 
