@@ -49,6 +49,14 @@ func _probar() -> void:
 	]:
 		_comprobar(capa.get_node_or_null(nombre) != null, "materializa " + nombre)
 
+	var goteo := capa.get_node_or_null("GrifoGoteando/GoteoGrifo") as AudioStreamPlayer3D
+	_comprobar(goteo != null, "grifo averiado tiene fuente sonora localizada")
+	if goteo != null:
+		_comprobar(goteo.stream != null, "goteo usa stream procedural")
+		_comprobar(goteo.bus == &"Ambiente", "goteo entra por bus de ambiente")
+		_comprobar(goteo.max_distance <= 7.0, "goteo no se oye desde toda la casa")
+		_comprobar(goteo.playing, "goteo arranca con la consecuencia")
+
 	var lampara := casa.find_child("LamparaPieCasa", true, false) as LamparaInteractiva3D
 	_comprobar(lampara != null, "usa la lampara real")
 	lampara._alternar(null)
@@ -68,6 +76,10 @@ func _probar() -> void:
 	var sin_averias := CasaEstadoAmbiental.derivar(Jornada.nueva(9397, 1), Inventario.nuevo())
 	var limpia := CasaConsecuencias.montar(casa, sin_averias)
 	_comprobar(limpia.get_child_count() == 0, "sin hechos no inventa degradacion")
+	_comprobar(
+		casa.find_child("GoteoGrifo", true, false) == null,
+		"resolver la consecuencia retira también su fuente sonora"
+	)
 	_comprobar(CasaConsecuencias.firma(sin_averias).is_empty(), "sin hechos no hay firma")
 
 	casa.queue_free()

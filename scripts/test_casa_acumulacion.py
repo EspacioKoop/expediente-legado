@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ACUMULACION = ROOT / "godot" / "guion" / "casa_acumulacion_3d.gd"
 CONSECUENCIAS = ROOT / "godot" / "guion" / "casa_consecuencias_3d.gd"
 HUELLA_VIDA = ROOT / "godot" / "guion" / "casa_huella_vida_3d.gd"
+AUDIO_CONSECUENCIAS = ROOT / "godot" / "guion" / "casa_consecuencias_audio.gd"
 AMBIENTAL = ROOT / "godot" / "guion" / "casa_estado_ambiental.gd"
 LAMPARA = ROOT / "godot" / "guion" / "lampara_interactiva_3d.gd"
 CONTROLLER = ROOT / "godot" / "guion" / "dia_acumulacion_casa_app.gd"
@@ -25,6 +26,7 @@ class CasaAcumulacionTest(unittest.TestCase):
         cls.acumulacion = ACUMULACION.read_text(encoding="utf-8")
         cls.consecuencias = CONSECUENCIAS.read_text(encoding="utf-8")
         cls.huella_vida = HUELLA_VIDA.read_text(encoding="utf-8")
+        cls.audio_consecuencias = AUDIO_CONSECUENCIAS.read_text(encoding="utf-8")
         cls.ambiental = AMBIENTAL.read_text(encoding="utf-8")
         cls.lampara = LAMPARA.read_text(encoding="utf-8")
         cls.controller = CONTROLLER.read_text(encoding="utf-8")
@@ -77,6 +79,17 @@ class CasaAcumulacionTest(unittest.TestCase):
         self.assertNotIn("Label.new()", self.consecuencias)
         self.assertNotIn("porcentaje", self.consecuencias.lower())
         self.assertNotIn("nivel_pobreza", self.consecuencias.lower())
+
+    def test_grifo_averiado_tiene_sonido_3d_fisico(self):
+        self.assertIn("AudioStreamPlayer3D.new()", self.consecuencias)
+        self.assertIn('audio.name = "GoteoGrifo"', self.consecuencias)
+        self.assertIn("CasaConsecuenciasAudioScript.goteo()", self.consecuencias)
+        self.assertIn('audio.bus = &"Ambiente"', self.consecuencias)
+        self.assertIn("audio.max_distance = 7.0", self.consecuencias)
+        self.assertIn("AudioStreamWAV.LOOP_FORWARD", self.audio_consecuencias)
+        self.assertIn("1103515245", self.audio_consecuencias)
+        self.assertNotIn("randf()", self.audio_consecuencias)
+        self.assertNotIn("res://assets/audio/", self.audio_consecuencias)
 
     def test_huella_vida_deriva_de_hechos_reales(self):
         self.assertIn('"comida_estado": _estado_comida(jornada)', self.ambiental)

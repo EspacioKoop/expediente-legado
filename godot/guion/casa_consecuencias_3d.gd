@@ -6,6 +6,7 @@
 class_name CasaConsecuencias3D
 extends RefCounted
 
+const CasaConsecuenciasAudioScript := preload("res://guion/casa_consecuencias_audio.gd")
 const NOMBRE_RAIZ := "ConsecuenciasCasa"
 const CONSECUENCIAS := [
 	"casa_luz_reducida",
@@ -91,6 +92,16 @@ static func _montar_goteo(capa: Node3D, casa: Node3D) -> void:
 			0.025 - float(i) * 0.004,
 			Color(0.28, 0.46, 0.56)
 		)
+
+	var audio := AudioStreamPlayer3D.new()
+	audio.name = "GoteoGrifo"
+	audio.stream = CasaConsecuenciasAudioScript.goteo()
+	audio.volume_db = CasaConsecuenciasAudioScript.VOLUMEN_GOTEO_DB
+	audio.unit_size = 1.4
+	audio.max_distance = 7.0
+	audio.bus = &"Ambiente"
+	marca.add_child(audio)
+	audio.play()
 
 
 static func _montar_persiana(capa: Node3D, casa: Node3D) -> void:
