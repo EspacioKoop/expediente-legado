@@ -377,27 +377,13 @@ func _al_pulsar_marca(meta: Variant) -> void:
 			_estado.text = tr("VISOR_CONCEPTO") % partes[1]
 
 
-## Primer vertical de #1029: una pista real vuelve a ganar El Mago en esta
-## vuelta. No pasa por _al_encontrar_carta(): esa ruta pertenece a las ocho
-## cartas ocultas y abre inmediatamente su historia política (#71).
+## Familia de progreso por pistas de #1029. No pasa por
+## _al_encontrar_carta(): esa ruta pertenece a las ocho cartas ocultas y abre
+## inmediatamente su historia política (#71). Prometeo devuelve solo las
+## adquisiciones nuevas, así que el hook también es idempotente.
 func _sincronizar_tarot_por_pista() -> void:
-	if descubiertas.is_empty():
-		return
-	var tarot: Array = partida.estado.get("tarot", [])
-	var carta := _carta_de(tarot, "el-mago")
-	if carta.is_empty():
-		return
-	var nueva := Prometeo.desbloquear_carta(tarot, "el-mago")
-	if not carta.get("recogida", false):
-		return
-	if nueva:
-		_al_carta_desbloqueada("el-mago")
-
-	# #46 separa posesión per-run de memoria fantasma permanente.
-	var conocidas: Array = partida.estado.get("cartas_conocidas", [])
-	if not conocidas.has("el-mago"):
-		conocidas.append("el-mago")
-		partida.estado["cartas_conocidas"] = conocidas
+	for carta_id in Prometeo.sincronizar_tarot_por_pistas(partida.estado):
+		_al_carta_desbloqueada(carta_id)
 
 
 ## Encontrar una carta escondida: se descubre, se guarda y se ve voltearse.
@@ -409,7 +395,9 @@ func _sincronizar_tarot_por_pista() -> void:
 func _al_encontrar_carta(carta_id: String) -> void:
 	var tarot: Array = partida.estado.get("tarot", [])
 	# Una carta ya encontrada no se vuelve a revelar: el momento es uno.
-	if not Prometeo.desbloquear_carta(tarot, carta_id):
+	# La memoria fantasma se registra en la misma frontera que cualquier otra
+	# adquisición, pero el trigger oculto sigue siendo exclusivamente esta ruta.
+	if not Prometeo.desbloquear_carta_en_estado(partida.estado, carta_id):
 		_abrir_historia(carta_id)
 		return
 
@@ -430,7 +418,7 @@ func _al_encontrar_carta(carta_id: String) -> void:
 
 
 ## Hook de dominio para capas que reaccionan a un hallazgo real de Tarot.
-## Se invoca solo cuando `Prometeo.desbloquear_carta` cambia una carta de
+## Se invoca solo cuando `Prometeo.desbloquear_carta_en_estado` adquiere una carta de
 ## no recogida a recogida y siempre antes del guardado que persiste el hallazgo.
 func _al_carta_desbloqueada(_carta_id: String) -> void:
 	pass
