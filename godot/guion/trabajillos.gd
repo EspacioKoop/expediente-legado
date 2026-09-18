@@ -46,7 +46,7 @@ static func _estado(jornada: Dictionary) -> Dictionary:
 	estado["racha"] = int(estado.get("racha", 0))
 	estado["racha_maxima"] = int(estado.get("racha_maxima", estado["racha"]))
 	estado["ultimo_tipo"] = String(estado.get("ultimo_tipo", ""))
-	if typeof(estado.get("por_tipo", {})) != TYPE_DICTIONARY:
+	if not estado.has("por_tipo") or typeof(estado["por_tipo"]) != TYPE_DICTIONARY:
 		estado["por_tipo"] = {}
 	return estado
 
