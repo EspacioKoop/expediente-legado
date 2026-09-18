@@ -19,7 +19,10 @@ var _pronostico_tipo: OptionButton
 var _pronostico_valor: OptionButton
 var _pronostico_confirmar: Button
 var _pronostico_abandonar: Button
+var _pronostico_historial_boton: Button
 var _pronostico_estado: Label
+var _ventana_historial: Window
+var _pronostico_historial_lista: ItemList
 
 
 func _ready() -> void:
@@ -64,6 +67,10 @@ func _columna_indice() -> Control:
 	_pronostico_abandonar.text = tr("VISOR_PRONOSTICO_ABANDONAR")
 	_pronostico_abandonar.pressed.connect(_al_abandonar_pronostico)
 	acciones.add_child(_pronostico_abandonar)
+	_pronostico_historial_boton = Button.new()
+	_pronostico_historial_boton.text = tr("VISOR_PRONOSTICO_HISTORIAL")
+	_pronostico_historial_boton.pressed.connect(_abrir_historial_pronosticos)
+	acciones.add_child(_pronostico_historial_boton)
 	columna.add_child(acciones)
 
 	_rellenar_valores_pronostico()
@@ -169,6 +176,85 @@ func _al_abandonar_pronostico() -> void:
 		Sonido.sonar(self, "pulsar")
 		_guardar_o_avisar()
 	_actualizar_pronostico()
+
+
+func _abrir_historial_pronosticos() -> void:
+	if _ventana_historial != null and is_instance_valid(_ventana_historial):
+		_ventana_historial.popup_centered()
+		if _pronostico_historial_lista != null:
+			_pronostico_historial_lista.grab_focus()
+		return
+
+	var ventana := Window.new()
+	ventana.title = tr("VISOR_PRONOSTICO_HISTORIAL_TITULO")
+	ventana.size = Vector2i(760, 420)
+	ventana.min_size = Vector2i(520, 300)
+	ventana.transient = true
+	ventana.exclusive = true
+	ventana.close_requested.connect(_cerrar_historial_pronosticos)
+	add_child(ventana)
+	_ventana_historial = ventana
+
+	var margen := MarginContainer.new()
+	margen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	for lado in ["margin_left", "margin_top", "margin_right", "margin_bottom"]:
+		margen.add_theme_constant_override(lado, 8)
+	ventana.add_child(margen)
+
+	var caja := VBoxContainer.new()
+	caja.add_theme_constant_override("separation", 6)
+	margen.add_child(caja)
+
+	var cabecera := Label.new()
+	cabecera.text = tr("VISOR_PRONOSTICO_HISTORIAL_AYUDA")
+	cabecera.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	caja.add_child(cabecera)
+
+	_pronostico_historial_lista = ItemList.new()
+	_pronostico_historial_lista.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	caja.add_child(_pronostico_historial_lista)
+
+	var estado_pronosticos: Dictionary = partida.estado.get("pronosticos", {})
+	var filas := Pronosticos.historial(estado_pronosticos)
+	if filas.is_empty():
+		_pronostico_historial_lista.add_item(tr("VISOR_PRONOSTICO_HISTORIAL_VACIO"))
+		_pronostico_historial_lista.set_item_disabled(0, true)
+	else:
+		for fila in filas:
+			var indice := _pronostico_historial_lista.item_count
+			_pronostico_historial_lista.add_item(_texto_historial_pronostico(fila))
+			_pronostico_historial_lista.set_item_metadata(indice, String(fila["expediente"]))
+
+	ventana.popup_centered()
+	_pronostico_historial_lista.grab_focus()
+
+
+func _cerrar_historial_pronosticos() -> void:
+	if _ventana_historial != null and is_instance_valid(_ventana_historial):
+		_ventana_historial.queue_free()
+	_ventana_historial = null
+	_pronostico_historial_lista = null
+	if _pronostico_historial_boton != null:
+		_pronostico_historial_boton.grab_focus()
+
+
+func _texto_historial_pronostico(fila: Dictionary) -> String:
+	return (
+		tr("VISOR_PRONOSTICO_HISTORIAL_FILA")
+		% [
+			_titulo_expediente(String(fila.get("expediente", ""))),
+			_nombre_tipo(String(fila.get("tipo", ""))),
+			_texto_valor(fila.get("valor")),
+			_nombre_estado(String(fila.get("estado", ""))),
+		]
+	)
+
+
+func _titulo_expediente(expediente_id: String) -> String:
+	for ficha in contenido.casos:
+		if String(ficha.get("id", "")) == expediente_id:
+			return tr(String(ficha.get("titulo", expediente_id)))
+	return expediente_id
 
 
 func _actualizar_pronostico() -> void:
