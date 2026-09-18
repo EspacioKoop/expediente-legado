@@ -1,4 +1,4 @@
-"""La consola de pruebas (#116/#770) existe en desarrollo y no viaja en release."""
+"""La consola (#116/#770) vive en debug: editor/alpha QA sí, release por tag no."""
 
 from pathlib import Path
 import re
@@ -27,6 +27,7 @@ class ConsolaDepuracionTest(unittest.TestCase):
             proyecto,
         )
         self.assertIn("OS.is_debug_build()", self.cargador)
+        self.assertIn('OS.has_feature("qa_tools")', self.cargador)
         self.assertIn('res://debug/consola_depuracion.gd', self.cargador)
         self.assertNotIn("func ejecutar(", self.cargador)
 
