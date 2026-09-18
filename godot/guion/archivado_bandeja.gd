@@ -113,11 +113,14 @@ static func serializar(estado: Dictionary) -> Dictionary:
 		var caso_id := String(caso.get("id", ""))
 		if caso_id.is_empty():
 			continue
-		colocaciones.append(
-			{
-				"caso_id": caso_id,
-				"destino": String(colocacion.get("destino", "")),
-			}
+		(
+			colocaciones
+			. append(
+				{
+					"caso_id": caso_id,
+					"destino": String(colocacion.get("destino", "")),
+				}
+			)
 		)
 	return {
 		"version": VERSION_GUARDADO,
@@ -148,12 +151,15 @@ static func restaurar(guardado: Dictionary, catalogo: Array, folios_leidos: Arra
 		var caso_id := String(colocacion.get("caso_id", ""))
 		if not por_id.has(caso_id):
 			continue
-		estado["colocaciones"].append(
-			{
-				"caso": por_id[caso_id].duplicate(true),
-				"destino": String(colocacion.get("destino", "")),
-				"folios_leidos": folios_leidos.duplicate(),
-			}
+		(
+			estado["colocaciones"]
+			. append(
+				{
+					"caso": por_id[caso_id].duplicate(true),
+					"destino": String(colocacion.get("destino", "")),
+					"folios_leidos": folios_leidos.duplicate(),
+				}
+			)
 		)
 
 	return sincronizar(estado, catalogo, folios_leidos)
