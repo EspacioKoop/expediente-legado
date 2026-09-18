@@ -31,6 +31,7 @@ func _initialize() -> void:
 
 func _probar() -> void:
 	PreferenciasSiga.aplicar(PreferenciasSiga.nuevas())
+	_probar_mando()
 	var escena: BolosPasillo3D = load("res://escenas/bolos_pasillo.tscn").instantiate()
 	root.add_child(escena)
 	await process_frame
@@ -86,6 +87,43 @@ func _probar() -> void:
 
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
+
+
+func _probar_mando() -> void:
+	var eventos_de := func(accion: String, clase: String) -> Array:
+		return InputMap.action_get_events(accion).filter(func(e): return e.is_class(clase))
+
+	for accion in ["mover_izquierda", "mover_derecha"]:
+		var ejes: Array = eventos_de.call(accion, "InputEventJoypadMotion")
+		_comprobar(ejes.size() == 1, "%s responde al stick izquierdo" % accion)
+		if ejes.size() == 1:
+			_comprobar(ejes[0].axis == JOY_AXIS_LEFT_X, "%s usa el eje X izquierdo" % accion)
+		_comprobar(
+			InputMap.action_get_deadzone(accion) <= 0.25,
+			"%s conserva zona muerta utilizable" % accion,
+		)
+
+	var izquierda: Array = eventos_de.call("mover_izquierda", "InputEventJoypadButton")
+	var derecha: Array = eventos_de.call("mover_derecha", "InputEventJoypadButton")
+	_comprobar(
+		izquierda.any(func(e): return e.button_index == JOY_BUTTON_DPAD_LEFT),
+		"apuntar a la izquierda responde a cruceta",
+	)
+	_comprobar(
+		derecha.any(func(e): return e.button_index == JOY_BUTTON_DPAD_RIGHT),
+		"apuntar a la derecha responde a cruceta",
+	)
+
+	var aceptar: Array = eventos_de.call("interactuar", "InputEventJoypadButton")
+	var cancelar: Array = eventos_de.call("cancelar", "InputEventJoypadButton")
+	_comprobar(
+		aceptar.any(func(e): return e.button_index == JOY_BUTTON_A),
+		"interactuar usa el botón principal del mando",
+	)
+	_comprobar(
+		cancelar.any(func(e): return e.button_index == JOY_BUTTON_B),
+		"cancelar usa el botón secundario del mando",
+	)
 
 
 func _probar_variantes() -> void:
