@@ -37,6 +37,7 @@ func _probar() -> void:
 
 	_comprobar(escena.estado.get("lanzadores", []).size() == 4, "jugador y tres compañeros")
 	_comprobar(escena.total_bolos_en_pie() == 10, "la pista monta diez bolos")
+	_probar_variantes()
 	_comprobar(escena._companeros_visual.size() == 3, "los tres compañeros son visibles")
 	_comprobar(escena._idles_companeros.size() == 3, "los compañeros reutilizan idle de oficina")
 	var todos_fuera := true
@@ -87,6 +88,50 @@ func _probar() -> void:
 	quit(1 if _fallos else 0)
 
 
+func _probar_variantes() -> void:
+	var dias := [2, 5, 8, 11, 14]
+	for indice in dias.size():
+		_comprobar(
+			Controller.variante_para_dia({"fase": "archivo", "dia": dias[indice]})
+			== BolosPasillo3D.VARIANTES[indice],
+			"los días elegibles rotan variantes sin azar",
+		)
+	_comprobar(
+		Controller.variante_para_dia({"fase": "archivo", "dia": 17})
+		== BolosPasillo3D.VARIANTE_ESTRECHO,
+		"la rotación de variantes vuelve al inicio",
+	)
+	_comprobar(
+		BolosPasillo3D.ancho_de(BolosPasillo3D.VARIANTE_ESTRECHO) < BolosPasillo3D.CARRIL_ANCHO,
+		"la variante estrecha reduce el ancho jugable",
+	)
+	var posiciones_absurdas := BolosPasillo3D.posiciones_de(BolosPasillo3D.VARIANTE_ABSURDO)
+	_comprobar(
+		absf(posiciones_absurdas[-1].x) > 0.9,
+		"el cuñado desplaza un bolo a una posición absurda",
+	)
+	_comprobar(
+		BolosPasillo3D.energia_luz_de(BolosPasillo3D.VARIANTE_NOCTURNO) < 0.5,
+		"la ronda nocturna reduce la iluminación",
+	)
+
+	var mesa := BolosPasillo3D.new()
+	mesa.configurar_variante(BolosPasillo3D.VARIANTE_MESA)
+	mesa._bola_posicion = mesa._obstaculo_variante["posicion"]
+	mesa._bola_velocidad = Vector3(0.2, 0.0, -3.0)
+	mesa._resolver_obstaculo_variante()
+	_comprobar(mesa._bola_velocidad == Vector3.ZERO, "la mesa bloquea un lanzamiento")
+	mesa.free()
+
+	var rebote := BolosPasillo3D.new()
+	rebote.configurar_variante(BolosPasillo3D.VARIANTE_REBOTE)
+	rebote._bola_posicion = rebote._obstaculo_variante["posicion"]
+	rebote._bola_velocidad = Vector3(1.0, 0.0, -3.0)
+	rebote._resolver_obstaculo_variante()
+	_comprobar(rebote._bola_velocidad.x < 0.0, "el archivador devuelve la bola")
+	rebote.free()
+
+
 func _probar_integracion_oficina() -> void:
 	_comprobar(
 		not Controller.disponible({"fase": "archivo", "dia": 1}),
@@ -134,6 +179,10 @@ func _probar_integracion_oficina() -> void:
 	var menu_previo := menu.is_processing_unhandled_input() if menu != null else true
 	_comprobar(oferta.interactuar(camara_previa), "interactuar abre la actividad")
 	_comprobar(is_instance_valid(controller._bolos), "se instancia la sesión de bolos")
+	_comprobar(
+		controller._bolos.variante == BolosPasillo3D.VARIANTE_ESTRECHO,
+		"el día 2 abre la variante estrecha",
+	)
 	_comprobar(not dia._mundo.visible, "el mundo de oficina se oculta durante la partida")
 	_comprobar(
 		dia._caminante.process_mode == Node.PROCESS_MODE_DISABLED,
