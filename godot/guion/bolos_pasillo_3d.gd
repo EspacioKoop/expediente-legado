@@ -22,6 +22,17 @@ const LIMITE_PASOS_PRUEBA := 2400
 const POSICION_BOLA := Vector3(0.0, 0.20, 3.25)
 const LANZADORES := ["jugador", "prudente", "agresiva", "absurda"]
 const PLAN_COMPANEROS := [[4, 3], [7, 2], [0, 1]]
+## Fuera del ancho jugable: presencia social, nunca obstáculos de la física.
+const POSICIONES_COMPANEROS := [
+	Vector3(-1.72, 0.0, 1.85),
+	Vector3(1.72, 0.0, 0.35),
+	Vector3(-1.72, 0.0, -1.15),
+]
+const COLORES_COMPANEROS := [
+	Color(0.48, 0.60, 0.70),
+	Color(0.66, 0.48, 0.52),
+	Color(0.52, 0.62, 0.46),
+]
 const POSICIONES_BOLOS := [
 	Vector3(0.00, 0.28, -2.10),
 	Vector3(-0.22, 0.28, -2.52),
@@ -38,6 +49,8 @@ const POSICIONES_BOLOS := [
 var estado: Dictionary = {}
 var _bolos_en_pie: Array[bool] = []
 var _nodos_bolos: Array[Node3D] = []
+var _companeros_visual: Array[Node3D] = []
+var _idles_companeros: Array[CompaneroIdle3D] = []
 var _bola: MeshInstance3D
 var _bola_posicion := POSICION_BOLA
 var _bola_velocidad := Vector3.ZERO
@@ -289,6 +302,8 @@ func _montar_presentacion() -> void:
 	_bola.material_override = material_bola
 	add_child(_bola)
 
+	_montar_companeros()
+
 	var camara := Camera3D.new()
 	camara.name = "Camara"
 	camara.position = Vector3(0.0, 4.7, 6.4)
@@ -300,6 +315,42 @@ func _montar_presentacion() -> void:
 	luz.rotation_degrees = Vector3(-58.0, -24.0, 0.0)
 	luz.shadow_enabled = true
 	add_child(luz)
+
+
+func _montar_companeros() -> void:
+	var preferencias := PreferenciasSiga.cargar()
+	var reducir := bool(preferencias.get("reduccion_movimiento", false))
+	for indice in POSICIONES_COMPANEROS.size():
+		var cuerpo := Node3D.new()
+		cuerpo.name = "CompaneroBolos%d" % (indice + 1)
+		cuerpo.position = POSICIONES_COMPANEROS[indice]
+		# Desde ambos laterales miran hacia el carril, no hacia cámara.
+		cuerpo.rotation.y = -PI / 2.0 if cuerpo.position.x < 0.0 else PI / 2.0
+		add_child(cuerpo)
+		if not Modelos.persona(cuerpo, "persona", COLORES_COMPANEROS[indice]):
+			cuerpo.queue_free()
+			continue
+
+		var idle := CompaneroIdle3D.new()
+		idle.name = "IdleBolos%d" % (indice + 1)
+		add_child(idle)
+		# Un compañero reutiliza el gesto de espera de #134; los otros respiran.
+		# Todos comparten la preferencia de reducción de movimiento del juego.
+		var brazos := indice == 0
+		(
+			idle
+			. configurar(
+				cuerpo,
+				hash("bolos-%s" % LANZADORES[indice + 1]),
+				false,
+				reducir,
+				false,
+				brazos,
+				false,
+			)
+		)
+		_companeros_visual.append(cuerpo)
+		_idles_companeros.append(idle)
 
 
 func _caja(posicion: Vector3, tamano: Vector3) -> MeshInstance3D:

@@ -37,6 +37,21 @@ func _probar() -> void:
 
 	_comprobar(escena.estado.get("lanzadores", []).size() == 4, "jugador y tres compañeros")
 	_comprobar(escena.total_bolos_en_pie() == 10, "la pista monta diez bolos")
+	_comprobar(escena._companeros_visual.size() == 3, "los tres compañeros son visibles")
+	_comprobar(escena._idles_companeros.size() == 3, "los compañeros reutilizan idle de oficina")
+	var todos_fuera := true
+	for cuerpo in escena._companeros_visual:
+		if absf(cuerpo.position.x) <= escena.CARRIL_ANCHO * 0.5:
+			todos_fuera = false
+	_comprobar(todos_fuera, "los compañeros quedan fuera de la física del carril")
+	_comprobar(
+		escena._idles_companeros[0].actividad_brazos,
+		"un compañero reutiliza el gesto de espera de la oficina",
+	)
+	_comprobar(
+		escena._idles_companeros.all(func(idle): return idle.objetivo in escena._companeros_visual),
+		"cada idle anima su figura de bolos",
+	)
 	_comprobar(escena.lanzar(0.0, 1.0), "un tiro recto puede comenzar")
 	var pasos_recto := escena.simular_hasta_reposo()
 	_comprobar(pasos_recto > 0, "el tiro avanza con paso fijo")
