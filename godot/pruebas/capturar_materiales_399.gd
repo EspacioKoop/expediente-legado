@@ -74,13 +74,16 @@ func _init() -> void:
 			quit(1)
 			return
 
-		manifiesto["casos"].append(
-			{
-				"id": String(caso["id"]),
-				"fase": String(caso["fase"]),
-				"captura": archivo,
-				"sha256": FileAccess.get_sha256(destino),
-			}
+		(
+			manifiesto["casos"]
+			. append(
+				{
+					"id": String(caso["id"]),
+					"fase": String(caso["fase"]),
+					"captura": archivo,
+					"sha256": FileAccess.get_sha256(destino),
+				}
+			)
 		)
 
 	var ruta_manifiesto := salida.path_join("manifest.json")
