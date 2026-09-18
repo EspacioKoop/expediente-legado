@@ -99,8 +99,9 @@ func _init() -> void:
 					"textura_muro": String(dia._espacio_actual.get("textura_muro", "")),
 					"escala_textura": float(dia._espacio_actual.get("escala_textura", 1.0)),
 					"contraste_textura": contraste,
-					"preservar_detalle_textura":
-					bool(dia._espacio_actual.get("preservar_detalle_textura", false)),
+					"preservar_detalle_textura": dia._espacio_actual.get(
+						"preservar_detalle_textura", false
+					),
 					"materiales_psx": diagnostico_material["materiales_psx"],
 					"materiales_texturados": diagnostico_material["materiales_texturados"],
 					"materiales_deformados": diagnostico_material["materiales_deformados"],
@@ -172,10 +173,10 @@ func _diagnostico_materiales(dia) -> Dictionary:
 		if material.shader.resource_path != "res://arte/psx.gdshader":
 			continue
 		materiales_psx += 1
-		if not bool(material.get_shader_parameter("con_textura")):
+		if not material.get_shader_parameter("con_textura"):
 			continue
 		materiales_texturados += 1
-		if bool(material.get_shader_parameter("preservar_detalle_textura")):
+		if material.get_shader_parameter("preservar_detalle_textura"):
 			materiales_detalle += 1
 		var deformacion = material.get_shader_parameter("deformacion_textura")
 		if deformacion is Vector3 and not (deformacion as Vector3).is_equal_approx(Vector3.ONE):
