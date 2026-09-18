@@ -22,11 +22,11 @@ var intentos := 0
 
 
 ## Construye los tres ecos únicamente desde un folio leído hoy.
-static func crear(folio: String, frase: String, leido_hoy: Array, raiz: int):
+static func crear(\n\tfolio: String, frase: String, leido_hoy: Array, raiz: int, reward_id: String = ""\n):
 	var partes := _fragmentar(frase)
 	if partes.size() != CANTIDAD_FRAGMENTOS:
 		return null
-	var base = Puzzle.crear("ecos:" + folio, [folio], leido_hoy, raiz)
+	var base = Puzzle.crear("ecos:" + folio, [folio], leido_hoy, raiz, reward_id)
 	if base == null:
 		return null
 
