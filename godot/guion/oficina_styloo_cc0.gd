@@ -38,19 +38,16 @@ static func montar(mundo: Node3D) -> bool:
 		var tipo := String(bulto.get("modelo", ""))
 		var pos: Vector3 = bulto.get("pos", Vector3.ZERO)
 		if tipo == "desk" and pos.x < 0.0 and pos.z > 0.0:
-			sustituciones += int(
-				_sustituir_bulto(mundo, pos, String(MODELOS.desk), bulto.tam)
-			)
+			if _sustituir_bulto(mundo, pos, String(MODELOS.desk), bulto.tam):
+				sustituciones += 1
 		elif tipo == "chairDesk" and pos.x < 0.0 and pos.z > 0.0:
-			sustituciones += int(
-				_sustituir_bulto(
-					mundo, pos, String(MODELOS.principal_chair), bulto.tam
-				)
-			)
+			if _sustituir_bulto(
+				mundo, pos, String(MODELOS.principal_chair), bulto.tam
+			):
+				sustituciones += 1
 		elif tipo == "bookcaseClosed" and pos.z > 3.0:
-			sustituciones += int(
-				_sustituir_bulto(mundo, pos, String(MODELOS.shelf), bulto.tam)
-			)
+			if _sustituir_bulto(mundo, pos, String(MODELOS.shelf), bulto.tam):
+				sustituciones += 1
 
 	var puesto := mundo.get_node_or_null("PuestoUtileria2") as Node3D
 	if puesto != null:
