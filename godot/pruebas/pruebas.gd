@@ -32,6 +32,7 @@ func _init() -> void:
 	PruebasPrometeoYCombate._ventanilla(comprobar_cb)
 	PruebasPrometeoYCombate._jornada(comprobar_cb)
 	PruebasAlquiler.todo(comprobar_cb)
+	PruebasImprevistos.todo(comprobar_cb)
 	PruebasPrometeoYCombate._procedencia(comprobar_cb)
 
 	PruebasEspaciosYSueno._espacios(comprobar_cb)
