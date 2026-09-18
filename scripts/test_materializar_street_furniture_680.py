@@ -107,6 +107,14 @@ class MaterializarStreetFurniture680Test(unittest.TestCase):
         with self.assertRaisesRegex(mod.MaterializacionError, "debe ser glTF 2"):
             mod.validar_glb_autocontenido(antiguo)
 
+    def test_preparado_rechaza_png_que_no_pertenece_al_glb(self):
+        seleccion = mod.seleccionar(["crowbar"])
+        (self.preparado / "Crowbar_Crowbar_albedo.png").write_bytes(
+            b"\x89PNG\r\n\x1a\notra"
+        )
+        with self.assertRaisesRegex(mod.MaterializacionError, "no coincide"):
+            mod.validar_preparados(self.preparado, seleccion)
+
     def test_preparados_fijan_hash_y_tamano_reales(self):
         seleccion = mod.seleccionar(["crowbar"])
         preparados = mod.validar_preparados(self.preparado, seleccion)
