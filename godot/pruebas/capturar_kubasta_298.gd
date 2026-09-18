@@ -30,11 +30,9 @@ const CONTRASTES := [
 	},
 ]
 const MUESTRA := "áéíóúüñ¿¡ ÁÉÍÓÚÜÑ 0123456789 []{}:/\\-_+*=#"
-const REGISTRO := (
-	"SIGA-98 // diagnóstico\n"
-	+ "FOLIO 13-B  ESTADO: REVISIÓN\n"
-	+ "> verificar_hash --modo seguro"
-)
+const REGISTRO := """SIGA-98 // diagnóstico
+FOLIO 13-B  ESTADO: REVISIÓN
+> verificar_hash --modo seguro"""
 const ENTRADA := "verificar_hash --folio 13-B"
 
 var _viewport: SubViewport
