@@ -30,6 +30,15 @@ const SUPERFICIES := [
 
 const CATALOGO := [
 	{
+		"id": "paquete_cigarrillos_98",
+		"superficie": "quiosco",
+		"nombre": "Paquete de cigarrillos",
+		"precio": 8,
+		"categoria": "consumo",
+		"repetible": true,
+		"vendible": false,
+	},
+	{
 		"id": "revista_umbral_98",
 		"superficie": "quiosco",
 		"nombre": "Umbral — nº 17",
@@ -104,7 +113,13 @@ static func listar(
 			continue
 		var entrada: Dictionary = base.duplicate(true)
 		var id_item := String(entrada["id"])
-		entrada["comprada"] = adquiridas.has(id_item) or Inventario.contiene(inventario, id_item)
+		var repetible := bool(entrada.get("repetible", false))
+		if repetible:
+			entrada["comprada"] = false
+		else:
+			entrada["comprada"] = (
+				adquiridas.has(id_item) or Inventario.contiene(inventario, id_item)
+			)
 		salida.append(entrada)
 	return salida
 
@@ -126,23 +141,38 @@ static func comprar(
 	if entrada.is_empty() or String(entrada.get("superficie", "")) != superficie_id:
 		return _fallo(superficie_id, item_id, "item_desconocido")
 
-	Inventario.completar(inventario)
+	var repetible := bool(entrada.get("repetible", false))
 	var adquiridas := compras(jornada)
-	if adquiridas.has(item_id) or Inventario.contiene(inventario, item_id):
-		return {
-			"ok": true,
-			"superficie": superficie_id,
-			"id": item_id,
-			"ya_comprado": true,
-			"importe": 0,
-			"dinero": int(jornada.get("dinero", 0)),
-		}
+	if not repetible:
+		Inventario.completar(inventario)
+		if adquiridas.has(item_id) or Inventario.contiene(inventario, item_id):
+			return {
+				"ok": true,
+				"superficie": superficie_id,
+				"id": item_id,
+				"ya_comprado": true,
+				"importe": 0,
+				"dinero": int(jornada.get("dinero", 0)),
+			}
 
 	var precio := int(entrada.get("precio", 0))
 	if precio <= 0:
 		return _fallo(superficie_id, item_id, "precio_invalido")
 	if not Jornada.gastar(jornada, precio):
 		return _fallo(superficie_id, item_id, "sin_dinero")
+
+	if repetible:
+		return {
+			"ok": true,
+			"superficie": superficie_id,
+			"id": item_id,
+			"ya_comprado": false,
+			"repetible": true,
+			"consumido": true,
+			"importe": precio,
+			"dinero": int(jornada["dinero"]),
+			"destino": "consumido",
+		}
 
 	var objeto := _objeto_inventario(entrada)
 	if not Inventario.recoger(inventario, objeto):
