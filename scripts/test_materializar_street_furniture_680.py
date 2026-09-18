@@ -48,18 +48,25 @@ class MaterializarStreetFurniture680Test(unittest.TestCase):
             fbx.parent.mkdir(parents=True, exist_ok=True)
             fbx.write_bytes(b"fbx-fixture")
             png.write_bytes(b"\x89PNG\r\n\x1a\nsource")
+            preparada = b"\x89PNG\r\n\x1a\nprepared"
             (self.preparado / asset["glb"]).write_bytes(
                 glb2(
                     {
                         "asset": {"version": "2.0"},
-                        "buffers": [{"byteLength": 4}],
+                        "buffers": [{"byteLength": len(preparada)}],
+                        "bufferViews": [
+                            {
+                                "buffer": 0,
+                                "byteOffset": 0,
+                                "byteLength": len(preparada),
+                            }
+                        ],
                         "images": [{"bufferView": 0, "mimeType": "image/png"}],
-                    }
+                    },
+                    preparada,
                 )
             )
-            (self.preparado / asset["png"]).write_bytes(
-                b"\x89PNG\r\n\x1a\nprepared"
-            )
+            (self.preparado / asset["png"]).write_bytes(preparada)
 
     def tearDown(self):
         self.tmp.cleanup()
