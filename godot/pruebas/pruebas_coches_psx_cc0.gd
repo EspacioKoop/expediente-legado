@@ -117,9 +117,7 @@ func _probar() -> void:
 	_comprobar(not nieve_ranchera.visible, "niebla no muestra nieve")
 	Coches.aplicar_clima(lote, Clima.NIEVE)
 	_comprobar(nieve_ranchera.visible, "nieve activa acumulación superior")
-	_comprobar(
-		is_equal_approx(mate_ranchera.roughness, 0.90), "nieve conserva lectura mate"
-	)
+	_comprobar(is_equal_approx(mate_ranchera.roughness, 0.90), "nieve conserva lectura mate")
 	var acumulaciones := 0
 	for coche in lote.get_children():
 		var nieve := coche.get_node("NieveClima") as MeshInstance3D
