@@ -50,6 +50,16 @@ class RelacionOniricaTest(unittest.TestCase):
         self.assertIn('mundo.set_meta("puzzle_onirico_montado","relacion")', compacto)
 
 
+    def test_relacion_registra_objetivo_despues_de_montar_vertical(self):
+        codigo = CONTROLLER.read_text(encoding="utf-8")
+        montar = codigo.index("mundo.add_child(vertical)")
+        registrar = codigo.index("registrar_objetivo_puzzle_onirico")
+        self.assertGreater(registrar, montar)
+        self.assertIn(
+            'dia.call("registrar_objetivo_puzzle_onirico", relacion.nucleo)',
+            codigo,
+        )
+
     def test_relacion_restaurada_no_rerollear_tablero_ni_intento(self):
         codigo = CONTROLLER.read_text(encoding="utf-8")
         compacto = "".join(codigo.split())

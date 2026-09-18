@@ -76,6 +76,15 @@ class EcosArchivoRuntimeTest(unittest.TestCase):
         self.assertIn("dia.conectar_recompensa_onirica(ecos.nucleo,caso)", self.controller_compact)
         self.assertIn('candidato.get("descripcion","")', self.controller_compact)
 
+    def test_controller_registra_el_puzzle_como_objetivo_despues_de_montarlo(self):
+        montar = self.controller.index("mundo.add_child(vertical)")
+        registrar = self.controller.index("registrar_objetivo_puzzle_onirico")
+        self.assertGreater(registrar, montar)
+        self.assertIn(
+            'dia.call("registrar_objetivo_puzzle_onirico", ecos.nucleo)',
+            self.controller,
+        )
+
     def test_determinismo_y_reduccion_movimiento_vienen_de_contratos_existentes(self):
         self.assertIn("Sueno.semilla(", self.controller_compact)
         self.assertIn('candidatos.sort_custom(Callable(self,"_candidato_antes"))', self.controller_compact)

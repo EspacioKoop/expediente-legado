@@ -114,6 +114,8 @@ func _montar_relacion(
 	var reward_id := String(pista.get("id", ""))
 	vertical.estado_cambiado.connect(_al_cambiar_relacion.bind(dia, relacion, caso_id, reward_id))
 	mundo.add_child(vertical)
+	if dia.has_method("registrar_objetivo_puzzle_onirico"):
+		dia.call("registrar_objetivo_puzzle_onirico", relacion.nucleo)
 	mundo.set_meta("puzzle_onirico_montado", "relacion")
 	_relacion_activa = vertical
 	_montado_esta_noche = true
