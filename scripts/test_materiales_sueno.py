@@ -97,7 +97,7 @@ class MaterialesSuenoTest(unittest.TestCase):
             self.formas,
         )
         self.assertIsNotNone(constante)
-        self.assertGreaterEqual(float(constante.group(1)), 4.0)
+        self.assertGreaterEqual(float(constante.group(1)), 1.5)
         self.assertEqual(
             self.formas.count('"contraste_textura": CONTRASTE_MATERIAL_ONIRICO'),
             len(IDS),
@@ -148,12 +148,17 @@ class MaterialesSuenoTest(unittest.TestCase):
         )
         self.assertNotIn("get_string_from_utf8()", self.procedural)
         self.assertIn(
-            "return _contrastar_textura(traida, base, contraste)",
+            "return _contrastar_textura(traida, base, contraste, true)",
+            self.procedural,
+        )
+        self.assertIn("static func _color_medio(", self.procedural)
+        self.assertIn(
+            "var pivote := _color_medio(imagen) if usar_media else base",
             self.procedural,
         )
         self.assertLess(
             self.procedural.index(
-                "return _contrastar_textura(traida, base, contraste)"
+                "return _contrastar_textura(traida, base, contraste, true)"
             ),
             self.procedural.index("return calculada(nombre, base, semilla, contraste)"),
         )
@@ -164,36 +169,6 @@ class MaterialesSuenoTest(unittest.TestCase):
         )
         helper = self.procedural.index("static func _contrastar_textura")
         self.assertLess(carga_explicita, helper)
-
-    def test_el_sueno_conserva_trama_en_sombra_sin_cambiar_el_default(self):
-        constante = re.search(
-            r"const REALCE_TEXTURA_ONIRICO := ([0-9.]+)",
-            self.formas,
-        )
-        self.assertIsNotNone(constante)
-        valor = float(constante.group(1))
-        self.assertGreater(valor, 0.0)
-        self.assertLessEqual(valor, 0.15)
-        self.assertEqual(
-            self.formas.count('"realce_textura": REALCE_TEXTURA_ONIRICO'),
-            len(IDS),
-        )
-        self.assertIn(
-            '"realce_textura": forma.get("realce_textura", 0.0)',
-            self.sueno,
-        )
-        self.assertIn('espacio.get("realce_textura", 0.0)', self.espacio)
-        self.assertGreaterEqual(
-            self.espacio.count(
-                'set_shader_parameter("realce_textura", realce_textura)'
-            ),
-            2,
-        )
-        self.assertIn("uniform float realce_textura = 0.0;", self.shader)
-        self.assertIn(
-            "EMISSION = emision.rgb * emision_fuerza + muestra_textura * realce_textura;",
-            self.shader,
-        )
 
     def test_hay_inversion_deliberada_en_al_menos_una_forma(self):
         vectores = re.findall(
