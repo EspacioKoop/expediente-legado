@@ -446,8 +446,10 @@ func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
 				% [
 					noche["coste"],
 					noche["dinero"],
-					(tr("DIA_SIN_GATO_AVISO") if noche["gato_se_fue"] else "")
-					+ _aviso_imprevisto(noche)
+					(
+						(tr("DIA_SIN_GATO_AVISO") if noche["gato_se_fue"] else "")
+						+ _aviso_imprevisto(noche)
+					)
 				]
 			)
 		"sueño":
