@@ -59,7 +59,7 @@ No modifica `godot/assets/procedencia.json` y **no crea punteros LFS**. Los PNG 
 
 `TexturaProcedural` admite rutas `res://` directas además de los alias JPG históricos. Así un espacio puede declarar una textura importada sin crear un segundo sistema de materiales, manteniendo fallback cuando el pack no está instalado.
 
-`Sueno.espacio()` aplica un perfil conservador por forma solo cuando los PNG correspondientes existen. La ausencia de los binarios deja el aspecto actual intacto. Esto permite que el mismo código funcione antes y después del corte LFS y evita que #231 bloquee el arranque.
+`HorrorTexturas` aplica el pack **después** de que la forma haya adquirido su identidad onírica final. Escuela, castillo, desierto y montaña reciben perfiles distintos; las formas sin identidad fuerte caen en un perfil de archivo. La intensidad progresa dentro de la misma noche (suave → media → alta) y puede subir un grado cuando la sala ya contiene un acusado retable. El primer nivel conserva el suelo conocido; a partir del segundo el desgaste invade también el suelo. Las manchas se anclan únicamente junto a carteles ya legitimados por #87 y nunca usan Stain 01–05. La ausencia de los binarios deja el aspecto actual intacto y sin warnings.
 
 `Espacio3D` monta además la colección opcional `decals` mediante `DecalCompat`, por lo que paredes, suelo o props pueden declarar manchas transparentes sin acoplarse al renderer ni duplicar colisión.
 
