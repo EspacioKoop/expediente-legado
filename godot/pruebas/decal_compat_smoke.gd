@@ -43,6 +43,27 @@ func _init() -> void:
 	comprobar("un recurso ausente no crea nodo", inexistente == null)
 	comprobar("un recurso ausente no ensucia el árbol", raiz.get_child_count() == antes)
 
+	var mundo := Node3D.new()
+	get_root().add_child(mundo)
+	Espacio3D.construir(
+		mundo,
+		{
+			"suelo": Vector2(2.0, 2.0),
+			"techo": false,
+			"decals":
+			[
+				{
+					"textura": textura,
+					"pos": Vector3(0.0, 1.0, -1.0),
+					"ancho": 1.0,
+				}
+			],
+		}
+	)
+	var montados := mundo.find_children("*", "Sprite3D", true, false)
+	comprobar("Espacio3D consume la colección decals", montados.size() == 1)
+	mundo.free()
+
 	raiz.free()
 	print("decal_compat_smoke: %d fallos" % fallos)
 	quit(1 if fallos > 0 else 0)
