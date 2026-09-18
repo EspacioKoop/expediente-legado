@@ -39,7 +39,7 @@ class OficinaVisualGate126Test(unittest.TestCase):
         self.assertIn("xvfb-run -a godot4", self.workflow)
         self.assertIn("res://pruebas/capturas_oficina_126.gd", self.workflow)
         self.assertIn("actions/upload-artifact@v4", self.workflow)
-        self.assertIn("SIGA-98-oficina-visual-gate-126-\${{ github.sha }}", self.workflow)
+        self.assertIn("SIGA-98-oficina-visual-gate-126-${{ github.sha }}", self.workflow)
         self.assertIn("puestos-archivo.png", self.workflow)
         self.assertIn("acceso-ventanas.png", self.workflow)
 
