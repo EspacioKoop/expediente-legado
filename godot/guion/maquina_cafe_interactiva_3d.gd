@@ -1,8 +1,8 @@
 ## Máquina de café física de la oficina (#400/#93).
 ##
 ## El nodo no decide economía: expone la interacción, el precio contextual y el
-## feedback de taza/piloto. El controller propietario decide si Jornada permite
-## comprar el café y solo entonces llama a servir().
+## feedback de taza/piloto. El controller propietario decide si la compra procede
+## y solo entonces llama a servir().
 class_name MaquinaCafeInteractiva3D
 extends Interactuable3D
 
