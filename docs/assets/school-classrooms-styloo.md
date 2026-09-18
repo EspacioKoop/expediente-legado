@@ -83,6 +83,39 @@ python3 scripts/preparar_school_classrooms_styloo.py \
 
 La salida por defecto es `dist/.cache/styloo-classrooms/` e incluye `styloo-classrooms-staging.json` con fichas de procedencia sugeridas. Si el ZIP fue reempaquetado pero conserva exactamente los GLB auditados, `--aceptar-reempaquetado` permite validar por fichero en vez de confiar en el hash del contenedor.
 
+## Materialización local con Git LFS real
+
+Tras la auditoría de #971, el paso binario queda automatizado por `scripts/materializar_school_classrooms_styloo.py`. El comando es deliberadamente conservador: por defecto hace *dry-run*; con `--aplicar` exige un checkout Git real, instala la configuración LFS solo en ese checkout, comprueba `filter=lfs` para cada destino, rechaza rutas con cambios locales/staged y no hace commit, push ni merge.
+
+Dry-run del lote administrativo:
+
+```bash
+python3 scripts/materializar_school_classrooms_styloo.py \
+  "/ruta/StylooClassroomAssetPack GLTF & FBX.zip" \
+  --repo .
+```
+
+Materialización real, después de revisar el plan:
+
+```bash
+python3 scripts/materializar_school_classrooms_styloo.py \
+  "/ruta/StylooClassroomAssetPack GLTF & FBX.zip" \
+  --repo . \
+  --aplicar
+```
+
+La operación:
+
+- copia solo los GLB del allowlist a `godot/assets/modelos/styloo_school/`;
+- vuelve a verificar el SHA-256 después de copiar;
+- fusiona las fichas en `godot/assets/procedencia.json` sin duplicar entradas;
+- registra también `archivo_origen` y `paquete_sha256`;
+- ejecuta `git add` únicamente sobre esos GLB y procedencia;
+- lee cada blob desde el índice y exige el puntero LFS canónico con el mismo OID SHA-256 y tamaño del GLB;
+- si falla después de escribir, intenta deshacer el staging y restaura los ficheros afectados.
+
+No debe ejecutarse `--aplicar` sobre un checkout con cambios pendientes en las rutas afectadas. Esa negativa es intencionada: evita que una automatización de assets pise o desstagee trabajo paralelo.
+
 ## Integración real: procedencia y Git LFS
 
 Cuando se haga el PR binario, cada fichero que entre bajo `godot/assets/` debe tener una entrada propia en `godot/assets/procedencia.json` con ruta, título, autor `styloo`, licencia `CC0-1.0`, la URL de fuente y el SHA-256 del GLB exacto.
