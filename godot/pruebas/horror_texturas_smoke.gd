@@ -27,8 +27,10 @@ func _init() -> void:
 	comprobar("nivel tres puede usar tres marcas", intenso["decals"].size() == 3)
 	comprobar(
 		"la opacidad escala sin hacerse opaca",
-		float(suave["decals"][0]["opacidad"]) < float(intenso["decals"][0]["opacidad"])
-		and float(intenso["decals"][0]["opacidad"]) < 0.5,
+		(
+			float(suave["decals"][0]["opacidad"]) < float(intenso["decals"][0]["opacidad"])
+			and float(intenso["decals"][0]["opacidad"]) < 0.5
+		),
 	)
 
 	for entrada in intenso["decals"]:
