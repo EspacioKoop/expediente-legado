@@ -131,17 +131,13 @@ static func todo(comprobar: Callable) -> void:
 	comprobar.call("la primera oferta es transcripción", oferta_1["id"], "transcripcion")
 	comprobar.call("el trabajillo paga veinte", cobro["importe"], 20)
 	comprobar.call(
-		"el trabajillo suma dinero",
-		trabajo["dinero"],
-		saldo_trabajo + Trabajillos.PAGO_TRABAJILLO
+		"el trabajillo suma dinero", trabajo["dinero"], saldo_trabajo + Trabajillos.PAGO_TRABAJILLO
 	)
 	comprobar.call(
 		"el trabajillo no consume acciones del archivo", trabajo["acciones"], acciones_trabajo
 	)
 	var tras_cobro: int = trabajo["dinero"]
-	comprobar.call(
-		"el trabajillo solo se cobra una vez por noche", Trabajillos.hacer(trabajo), {}
-	)
+	comprobar.call("el trabajillo solo se cobra una vez por noche", Trabajillos.hacer(trabajo), {})
 	comprobar.call("repetir no imprime dinero", trabajo["dinero"], tras_cobro)
 	comprobar.call(
 		"una noche aislada recorta una escena del sueño",
@@ -165,9 +161,7 @@ static func todo(comprobar: Callable) -> void:
 	var cobro_4 := Trabajillos.hacer(trabajo)
 	comprobar.call("la oferta sigue rotando sin azar", oferta_4["id"], "transcripcion")
 	comprobar.call("saltar una noche reinicia la racha", cobro_4["racha"], 1)
-	comprobar.call(
-		"la racha máxima conserva el abuso anterior", cobro_4["racha_maxima"], 2
-	)
+	comprobar.call("la racha máxima conserva el abuso anterior", cobro_4["racha_maxima"], 2)
 
 	var legado := Jornada.nueva()
 	legado["fase"] = "casa"
@@ -177,7 +171,9 @@ static func todo(comprobar: Callable) -> void:
 		"una partida antigua completa el estado de trabajillos", cobro_legado["hechos"], 4
 	)
 	comprobar.call(
-		"la partida antigua registra el tipo sin romper", legado["trabajillos"]["por_tipo"].size(), 1
+		"la partida antigua registra el tipo sin romper",
+		legado["trabajillos"]["por_tipo"].size(),
+		1
 	)
 
 	# Antes del primer alquiler solo caben nueve noches de trabajo: el día diez
