@@ -8,6 +8,7 @@ extends Node3D
 ## Lo que se anda entre paso y paso. Una zancada de persona son unos setenta
 ## centímetros.
 const METROS_POR_ZANCADA := 0.72
+const SELLO_FIRMA_SIN_PRISA := "firma-sin-prisa"
 
 var partida := Partida.new()
 var contenido := Contenido.new()
@@ -480,12 +481,11 @@ func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
 ## no corrige veredictos y no fuerza guardado: las rutas archivo→trayecto ya
 ## guardan después de fichar. Cero cierres no cuenta como mérito.
 func _registrar_firma_sin_prisa() -> Dictionary:
-	const SELLO_ID := "firma-sin-prisa"
 	if int(jornada.get("cerrados_hoy", 0)) <= 0:
-		return {"resultado": "no-cumplido", "id": SELLO_ID}
+		return {"resultado": "no-cumplido", "id": SELLO_FIRMA_SIN_PRISA}
 	if int(jornada.get("acusaciones_precipitadas_hoy", 0)) != 0:
-		return {"resultado": "no-cumplido", "id": SELLO_ID}
-	return Sellos.registrar_sello(partida.estado, SELLO_ID)
+		return {"resultado": "no-cumplido", "id": SELLO_FIRMA_SIN_PRISA}
+	return Sellos.registrar_sello(partida.estado, SELLO_FIRMA_SIN_PRISA)
 
 
 ## Hook de presentación para variantes de sueño. La jornada sigue resolviendo
