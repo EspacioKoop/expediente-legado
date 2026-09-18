@@ -27,6 +27,8 @@ class EcosArchivoRuntimeTest(unittest.TestCase):
         self.assertNotIn('return "incorrecto"', self.core)
         self.assertIn("func confirmar() -> String:", self.presentacion)
         self.assertIn('"confirmacion_disponible"', self.presentacion)
+        self.assertIn('"seleccion": seleccion.duplicate()', self.core)
+        self.assertIn('datos.get("seleccion", [])', self.core)
         self.assertIn("seleccion.back() == id", self.presentacion)
         self.assertIn("ultimo_seleccionado", self.vertical)
         self.assertIn("eco_id == ultimo_seleccionado", self.vertical)
