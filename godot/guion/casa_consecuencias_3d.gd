@@ -80,7 +80,9 @@ static func _montar_goteo(capa: Node3D, casa: Node3D) -> void:
 	var fregadero := casa.find_child("FregaderoCasa", true, false)
 	var marca := Node3D.new()
 	marca.name = "GrifoGoteando"
-	marca.position = _posicion(capa, fregadero, Vector3(0.08, 0.19, 0.12), Vector3(4.85, 1.18, 0.20))
+	marca.position = _posicion(
+		capa, fregadero, Vector3(0.08, 0.19, 0.12), Vector3(4.85, 1.18, 0.20)
+	)
 	capa.add_child(marca)
 	for i in 3:
 		_agregar_esfera(
@@ -120,7 +122,9 @@ static func _montar_papel_pendiente(
 	marca.rotation_degrees.y = 8.0 if nombre == "ReciboPendiente" else -13.0
 	capa.add_child(marca)
 	_agregar_caja(marca, Vector3.ZERO, Vector3(0.30, 0.012, 0.21), Color(0.70, 0.67, 0.57))
-	_agregar_caja(marca, Vector3(0.0, 0.008, -0.055), Vector3(0.20, 0.006, 0.025), Color(0.18, 0.17, 0.15))
+	_agregar_caja(
+		marca, Vector3(0.0, 0.008, -0.055), Vector3(0.20, 0.006, 0.025), Color(0.18, 0.17, 0.15)
+	)
 
 
 static func _montar_calentador(capa: Node3D, casa: Node3D) -> void:
@@ -139,16 +143,16 @@ static func _montar_electrodomestico(capa: Node3D, casa: Node3D) -> void:
 	var televisor := casa.find_child("TelevisorCasaInteractuable", true, false)
 	var marca := Node3D.new()
 	marca.name = "ElectrodomesticoRoto"
-	marca.position = _posicion(capa, televisor, Vector3(0.48, -0.32, 0.18), Vector3(-3.15, 0.25, 2.15))
+	marca.position = _posicion(
+		capa, televisor, Vector3(0.48, -0.32, 0.18), Vector3(-3.15, 0.25, 2.15)
+	)
 	marca.rotation_degrees = Vector3(0.0, -18.0, 7.0)
 	capa.add_child(marca)
 	_agregar_caja(marca, Vector3.ZERO, Vector3(0.52, 0.30, 0.38), Color(0.15, 0.15, 0.14))
 	_agregar_cilindro(marca, Vector3(0.34, -0.08, 0.02), 0.018, 0.42, Color(0.08, 0.08, 0.07))
 
 
-static func _posicion(
-	capa: Node3D, ancla: Node, local: Vector3, fallback: Vector3
-) -> Vector3:
+static func _posicion(capa: Node3D, ancla: Node, local: Vector3, fallback: Vector3) -> Vector3:
 	if ancla is Node3D and ancla.is_inside_tree() and capa.is_inside_tree():
 		var ancla_3d := ancla as Node3D
 		return capa.to_local(ancla_3d.to_global(local))
