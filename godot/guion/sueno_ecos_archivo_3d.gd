@@ -22,15 +22,19 @@ const COLOR_TEXTO := Color(0.82, 0.84, 0.88)
 
 var presentacion
 var reduccion_movimiento := false
+var _recompensa_texto := ""
 var _ecos_3d: Array = []
 var _estado: Label3D
 
 
-func configurar(una_presentacion, reducir_movimiento: bool = false) -> bool:
+func configurar(
+	una_presentacion, reducir_movimiento: bool = false, recompensa_texto: String = ""
+) -> bool:
 	if una_presentacion == null or una_presentacion.ecos == null:
 		return false
 	presentacion = una_presentacion
 	reduccion_movimiento = reducir_movimiento
+	_recompensa_texto = recompensa_texto.strip_edges()
 	_montar()
 	_sincronizar()
 	return true
@@ -178,11 +182,17 @@ func _sincronizar() -> void:
 		panel.material_override = material
 
 	if _estado != null:
-		_estado.text = (
-			"%d/%d · %s"
-			% [
-				int(vista.get("intentos", 0)),
-				int(vista.get("max_intentos", 3)),
-				str(vista.get("estado", "activo")),
-			]
-		)
+		if (
+			str(vista.get("estado", "")) == EcosArchivoPresentacion.EVENTO_COMPLETADO
+			and not _recompensa_texto.is_empty()
+		):
+			_estado.text = _recompensa_texto
+		else:
+			_estado.text = (
+				"%d/%d · %s"
+				% [
+					int(vista.get("intentos", 0)),
+					int(vista.get("max_intentos", 3)),
+					str(vista.get("estado", "activo")),
+				]
+			)
