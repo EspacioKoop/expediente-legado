@@ -24,32 +24,38 @@ const CARPETA := "res://assets/texturas/%s.jpg"
 ## convierte un checkout sin LFS en una colección de errores de carga.
 const HORROR_RAIZ := "res://assets/texturas/horror_sbs/128x128/"
 const HORROR_PERFILES_SUENO := {
-	"crucero": {
+	"crucero":
+	{
 		"suelo": "Floor/Horror_Floor_12",
 		"muro": "Wall/Horror_Wall_09",
 		"escala": 1.35,
 	},
-	"patio": {
+	"patio":
+	{
 		"suelo": "Stone/Horror_Stone_07",
 		"muro": "Brick/Horror_Brick_11",
 		"escala": 1.10,
 	},
-	"peine": {
+	"peine":
+	{
 		"suelo": "Stone/Horror_Stone_13",
 		"muro": "Wall/Horror_Wall_05",
 		"escala": 1.50,
 	},
-	"escalera": {
+	"escalera":
+	{
 		"suelo": "Floor/Horror_Floor_14",
 		"muro": "Wall/Horror_Wall_08",
 		"escala": 1.20,
 	},
-	"embudo": {
+	"embudo":
+	{
 		"suelo": "Stone/Horror_Stone_10",
 		"muro": "Stone/Horror_Stone_14",
 		"escala": 1.60,
 	},
-	"gilgamesh": {
+	"gilgamesh":
+	{
 		"suelo": "Stone/Horror_Stone_09",
 		"muro": "Brick/Horror_Brick_10",
 		"escala": 1.30,
@@ -325,9 +331,7 @@ static func aplicar_horror_sueno(espacio: Dictionary, forma_id: String) -> Dicti
 
 	if not aplicado:
 		return espacio
-	resultado["escala_textura"] = float(
-		perfil.get("escala", resultado.get("escala_textura", 1.2))
-	)
+	resultado["escala_textura"] = float(perfil.get("escala", resultado.get("escala_textura", 1.2)))
 	return resultado
 
 
