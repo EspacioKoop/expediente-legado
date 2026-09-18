@@ -71,13 +71,16 @@ func _probar_folio_real_con_id_de_registro() -> void:
 			}
 		],
 	}
-	var resultado := Pista.resolver(
-		caso,
-		{
-			"state": "completado",
-			"source_ids": ["MEMO-1999-088"],
-			"reward_id": "pista1@1",
-		}
+	var resultado := (
+		Pista
+		. resolver(
+			caso,
+			{
+				"state": "completado",
+				"source_ids": ["MEMO-1999-088"],
+				"reward_id": "pista1@1",
+			}
+		)
 	)
 	_comprobar(
 		resultado.get("id", "") == "pista1@1",
