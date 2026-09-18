@@ -86,10 +86,8 @@ static func crear(caso: Dictionary, pista: Dictionary, leido_hoy: Array, raiz: i
 func seleccionar(indice: int) -> String:
 	if nucleo == null or cerrada or not nucleo.pendiente():
 		return "cerrado"
-	if indice < 0 or indice >= documentos.size():
-		return "invalido"
 
-	var registro_id := String(documentos[indice].get("id", ""))
+	var registro_id := _id_seleccionable(indice)
 	if registro_id.is_empty():
 		return "invalido"
 	if seleccion.has(registro_id):
@@ -107,6 +105,12 @@ func seleccionar(indice: int) -> String:
 		return "completado"
 	nucleo.fallar()
 	return "fallado"
+
+
+func _id_seleccionable(indice: int) -> String:
+	if indice < 0 or indice >= documentos.size():
+		return ""
+	return String(documentos[indice].get("id", ""))
 
 
 func salir() -> bool:
