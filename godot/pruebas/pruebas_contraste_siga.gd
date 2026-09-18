@@ -16,13 +16,9 @@ func _probar() -> void:
 
 	_comprobar_par("label/gris", tema.get_color("font_color", "Label"), EstiloSiga.GRIS)
 	_comprobar_par(
-		"richtext/blanco",
-		tema.get_color("default_color", "RichTextLabel"),
-		EstiloSiga.BLANCO
+		"richtext/blanco", tema.get_color("default_color", "RichTextLabel"), EstiloSiga.BLANCO
 	)
-	_comprobar_par(
-		"itemlist/blanco", tema.get_color("font_color", "ItemList"), EstiloSiga.BLANCO
-	)
+	_comprobar_par("itemlist/blanco", tema.get_color("font_color", "ItemList"), EstiloSiga.BLANCO)
 	_comprobar_par(
 		"itemlist seleccionado/azul",
 		tema.get_color("font_selected_color", "ItemList"),
@@ -34,14 +30,10 @@ func _probar() -> void:
 		EstiloSiga.BLANCO
 	)
 	_comprobar_par(
-		"readonly/gris claro",
-		tema.get_color("font_readonly_color", "TextEdit"),
-		Color("e8e8e8")
+		"readonly/gris claro", tema.get_color("font_readonly_color", "TextEdit"), Color("e8e8e8")
 	)
 	_comprobar_par(
-		"boton deshabilitado",
-		tema.get_color("font_disabled_color", "Button"),
-		Color("b8b8b8")
+		"boton deshabilitado", tema.get_color("font_disabled_color", "Button"), Color("b8b8b8")
 	)
 
 	_comprobar(
