@@ -80,6 +80,9 @@ static func nueva(raiz: int = 0, vuelta: int = 1) -> Dictionary:
 		"fase": "archivo",
 		"dinero": 120,
 		"cerrados_hoy": 0,
+		# Señal factual para reconocimientos diegéticos: cuántas firmas del día
+		# fueron precipitadas. Se reinicia al despertar y no concede nada por sí sola.
+		"acusaciones_precipitadas_hoy": 0,
 		"acciones": ACCIONES_POR_DIA,
 		# Cuántas acciones extra ha dado ya el café hoy. Vive separado de
 		# "acciones" para poder aplicar el tope sin depender de cuánto quede
@@ -409,6 +412,7 @@ static func despertar(jornada: Dictionary) -> int:
 	jornada["dia"] += 1
 	jornada["fase"] = "archivo"
 	jornada["cerrados_hoy"] = 0
+	jornada["acusaciones_precipitadas_hoy"] = 0
 	jornada["acciones"] = ACCIONES_POR_DIA
 	jornada["acciones_bonus_hoy"] = 0
 	jornada["leido_hoy"] = []
