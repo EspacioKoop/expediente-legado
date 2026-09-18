@@ -1,0 +1,2 @@
+DEF MARCADOR_SRAM EQU $42
+INCLUDE "main.asm"
