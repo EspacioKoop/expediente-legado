@@ -7,6 +7,7 @@ class_name CasaConsecuencias3D
 extends RefCounted
 
 const CasaConsecuenciasAudioScript := preload("res://guion/casa_consecuencias_audio.gd")
+const PersianaAtascadaScript := preload("res://guion/persiana_atascada_3d.gd")
 const NOMBRE_RAIZ := "ConsecuenciasCasa"
 const CONSECUENCIAS := [
 	"casa_luz_reducida",
@@ -24,7 +25,12 @@ static func firma(estado_ambiental: Dictionary) -> String:
 	return "|".join(consecuencias)
 
 
-static func montar(raiz: Node3D, estado_ambiental: Dictionary) -> Node3D:
+static func montar(
+	raiz: Node3D,
+	estado_ambiental: Dictionary,
+	jornada: Dictionary = {},
+	inventario: Dictionary = {},
+) -> Node3D:
 	var anterior := raiz.get_node_or_null(NOMBRE_RAIZ)
 	if anterior != null:
 		raiz.remove_child(anterior)
@@ -41,7 +47,7 @@ static func montar(raiz: Node3D, estado_ambiental: Dictionary) -> Node3D:
 			"casa_grifo_averiado":
 				_montar_goteo(capa, raiz)
 			"casa_persiana_atascada":
-				_montar_persiana(capa, raiz)
+				_montar_persiana(capa, raiz, jornada, inventario)
 			"casa_recibo_pendiente":
 				_montar_papel_pendiente(capa, raiz, "ReciboPendiente", Vector3(-0.08, 0.0, 0.0))
 			"casa_multa_pendiente":
@@ -104,12 +110,18 @@ static func _montar_goteo(capa: Node3D, casa: Node3D) -> void:
 	audio.play()
 
 
-static func _montar_persiana(capa: Node3D, casa: Node3D) -> void:
+static func _montar_persiana(
+	capa: Node3D,
+	casa: Node3D,
+	jornada: Dictionary,
+	inventario: Dictionary,
+) -> void:
 	var ventana := casa.find_child("VentanaCasa", true, false)
-	var marca := Node3D.new()
+	var marca := PersianaAtascadaScript.new()
 	marca.name = "PersianaAtascada"
 	marca.position = _posicion(capa, ventana, Vector3(0.0, 0.0, 0.03), Vector3(-2.10, 1.65, -3.31))
 	capa.add_child(marca)
+	marca.configurar(jornada, inventario)
 	for i in 5:
 		var lama := MeshInstance3D.new()
 		var caja := BoxMesh.new()

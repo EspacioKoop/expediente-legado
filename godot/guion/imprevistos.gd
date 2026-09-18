@@ -207,6 +207,27 @@ static func resolver(jornada: Dictionary, pagado: bool) -> Dictionary:
 	}
 
 
+## Retira una consecuencia ya materializada sin reabrir el evento ni devolver
+## dinero. Sirve para reparaciones diegéticas posteriores al imprevisto.
+static func reparar_consecuencia(jornada: Dictionary, consecuencia: String) -> bool:
+	if consecuencia.is_empty() or not _consecuencia_catalogada(consecuencia):
+		return false
+	var estado := completar(jornada)
+	var consecuencias_actuales = estado.get("consecuencias", [])
+	if typeof(consecuencias_actuales) != TYPE_ARRAY or not consecuencias_actuales.has(consecuencia):
+		return false
+	consecuencias_actuales.erase(consecuencia)
+	estado["consecuencias"] = consecuencias_actuales
+	return true
+
+
+static func _consecuencia_catalogada(consecuencia: String) -> bool:
+	for evento in CATALOGO:
+		if String(evento.get("consecuencia", "")) == consecuencia:
+			return true
+	return false
+
+
 static func consecuencias(jornada: Dictionary) -> Array[String]:
 	var estado := completar(jornada)
 	var salida: Array[String] = []
