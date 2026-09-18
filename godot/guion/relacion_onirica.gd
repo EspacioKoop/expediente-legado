@@ -10,7 +10,8 @@ extends RefCounted
 const Puzzle := preload("res://guion/puzzle_onirico.gd")
 const MIN_DOCUMENTOS := 3
 const MAX_DOCUMENTOS := 4
-const MAX_EXTRACTO := 190
+const MAX_EXTRACTO := 140
+const ANCHO_LINEA := 34
 const _RUTA_SCRIPT := "res://guion/relacion_onirica.gd"
 
 var nucleo
@@ -144,6 +145,7 @@ static func _vista_registro(registro: Dictionary) -> Dictionary:
 		contenido = contenido.replace("  ", " ")
 	if contenido.length() > MAX_EXTRACTO:
 		contenido = contenido.substr(0, MAX_EXTRACTO).strip_edges() + "…"
+	contenido = _envolver(contenido)
 	return {
 		"id": String(registro.get("id", "")),
 		"folio": String(registro.get("folio", "")),
@@ -151,6 +153,22 @@ static func _vista_registro(registro: Dictionary) -> Dictionary:
 		"fecha": String(registro.get("fecha", "")),
 		"extracto": contenido,
 	}
+
+
+static func _envolver(texto: String) -> String:
+	var lineas: Array = []
+	var linea := ""
+	for palabra in texto.split(" ", false):
+		var candidata := String(palabra) if linea.is_empty() else linea + " " + String(palabra)
+		if candidata.length() <= ANCHO_LINEA:
+			linea = candidata
+			continue
+		if not linea.is_empty():
+			lineas.append(linea)
+		linea = String(palabra)
+	if not linea.is_empty():
+		lineas.append(linea)
+	return "\n".join(lineas)
 
 
 static func _barajar(lista: Array, rng: RandomNumberGenerator) -> void:
