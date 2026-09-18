@@ -160,7 +160,12 @@ func _montar_dunas_lejanas() -> void:
 	var dunas := MeshInstance3D.new()
 	dunas.name = "HorizonteDeDunas"
 	dunas.mesh = st.commit()
-	dunas.material_override = _material(Color(0.46, 0.29, 0.15), 1.0)
+	var material_dunas := _material(Color(0.42, 0.25, 0.12), 1.0)
+	# El jugador observa el cinturón desde dentro. Con culling por defecto, gran
+	# parte del anillo quedaba invisible y la captura de #1011 parecía un vacío
+	# beige sin horizonte. Aquí no hay física: solo hacemos visible ambas caras.
+	material_dunas.cull_mode = BaseMaterial3D.CULL_DISABLED
+	dunas.material_override = material_dunas
 	add_child(dunas)
 
 
