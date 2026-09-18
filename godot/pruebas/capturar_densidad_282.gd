@@ -83,27 +83,30 @@ func _init() -> void:
 
 		var auditoria := Densidad.auditar(dia._espacio_actual)
 		var diagnostico := _diagnostico_runtime(dia)
-		manifiesto["casos"].append(
-			{
-				"id": String(caso["id"]),
-				"fase": String(caso["fase"]),
-				"captura": archivo,
-				"mirada": float(caso["mirada"]),
-				"inclinacion": float(caso["inclinacion"]),
-				"bultos_total": int(auditoria["total"]),
-				"bultos_modelados": int(auditoria["modelados"]),
-				"bultos_proxy": int(auditoria["proxies"]),
-				"ratio_bultos_modelados": float(auditoria["ratio_modelado"]),
-				"mallas_total": diagnostico["mallas_total"],
-				"mallas_caja": diagnostico["mallas_caja"],
-				"mallas_planas": diagnostico["mallas_planas"],
-				"mallas_array": diagnostico["mallas_array"],
-				"mallas_primitivas_otras": diagnostico["mallas_primitivas_otras"],
-				"lotes_multimesh": diagnostico["lotes_multimesh"],
-				"interactuables": diagnostico["interactuables"],
-				"interactuables_habilitados": diagnostico["interactuables_habilitados"],
-				"sha256": FileAccess.get_sha256(destino),
-			}
+		(
+			manifiesto["casos"]
+			. append(
+				{
+					"id": String(caso["id"]),
+					"fase": String(caso["fase"]),
+					"captura": archivo,
+					"mirada": float(caso["mirada"]),
+					"inclinacion": float(caso["inclinacion"]),
+					"bultos_total": int(auditoria["total"]),
+					"bultos_modelados": int(auditoria["modelados"]),
+					"bultos_proxy": int(auditoria["proxies"]),
+					"ratio_bultos_modelados": float(auditoria["ratio_modelado"]),
+					"mallas_total": diagnostico["mallas_total"],
+					"mallas_caja": diagnostico["mallas_caja"],
+					"mallas_planas": diagnostico["mallas_planas"],
+					"mallas_array": diagnostico["mallas_array"],
+					"mallas_primitivas_otras": diagnostico["mallas_primitivas_otras"],
+					"lotes_multimesh": diagnostico["lotes_multimesh"],
+					"interactuables": diagnostico["interactuables"],
+					"interactuables_habilitados": diagnostico["interactuables_habilitados"],
+					"sha256": FileAccess.get_sha256(destino),
+				}
+			)
 		)
 
 	var ruta_manifiesto := salida.path_join("manifest.json")
