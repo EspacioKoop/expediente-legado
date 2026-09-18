@@ -30,6 +30,10 @@ uniform bool con_textura = false;
 // Los assets con atlas conservan sus UV; el escenario sigue siendo triplanar.
 uniform bool usar_uv = false;
 uniform float escala_textura = 1.0;
+// Warp opt-in por ejes. El mundo ordinario deja este vector en 1,1,1;
+// el sueño puede estirar o invertir una superficie reconocible sin necesitar
+// otra textura ni romper el contrato triplanar.
+uniform vec3 deformacion_textura = vec3(1.0);
 uniform vec4 emision : source_color = vec4(0.0);
 uniform float emision_fuerza = 0.0;
 
@@ -64,7 +68,7 @@ void vertex() {
 vec3 muestra_triplanar(vec3 punto, vec3 normal) {
 	vec3 peso = abs(normal);
 	peso /= max(peso.x + peso.y + peso.z, 0.0001);
-	vec3 p = punto * escala_textura;
+	vec3 p = punto * escala_textura * deformacion_textura;
 	return texture(textura, p.zy).rgb * peso.x
 		+ texture(textura, p.xz).rgb * peso.y
 		+ texture(textura, p.xy).rgb * peso.z;
