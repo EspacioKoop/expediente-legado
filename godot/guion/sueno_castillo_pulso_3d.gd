@@ -14,6 +14,7 @@ var _posiciones: Array[Vector3] = []
 var _rotaciones: Array[Vector3] = []
 var _escalas: Array[Vector3] = []
 var _ultimo_pulso := -2
+var _lectura_activa := false
 
 
 func configurar(arquitectura: Node3D, campanas: AudioStreamPlayer3D) -> void:
@@ -37,6 +38,7 @@ func configurar(arquitectura: Node3D, campanas: AudioStreamPlayer3D) -> void:
 		_escalas.append(nodo.scale)
 
 	_ultimo_pulso = -2
+	_lectura_activa = false
 	aplicar_pulso(-1)
 	set_process(not _nodos.is_empty() and _campanas != null)
 
@@ -55,6 +57,15 @@ func _process(_delta: float) -> void:
 		aplicar_pulso(pulso)
 
 
+## La lectura del códice deja una tensión estable sobre las piezas anómalas.
+## No se persiste: desaparece al desmontar la presentación de esta sala.
+func activar_lectura() -> void:
+	if _lectura_activa:
+		return
+	_lectura_activa = true
+	aplicar_pulso(_ultimo_pulso)
+
+
 ## Expuesto para la evidencia visual reproducible. Un índice negativo restaura
 ## el estado base; 0..2 corresponden a las tres campanadas del bucle.
 func aplicar_pulso(indice: int) -> void:
@@ -64,28 +75,28 @@ func aplicar_pulso(indice: int) -> void:
 		if not is_instance_valid(nodo):
 			continue
 
-		nodo.position = _posiciones[i]
-		nodo.rotation_degrees = _rotaciones[i]
-		nodo.scale = _escalas[i]
-		if indice < 0:
-			continue
-
 		var signo := 1.0 if i % 2 == 0 else -1.0
 		var posicion := _posiciones[i]
 		var rotacion := _rotaciones[i]
 		var escala := _escalas[i]
-		match indice:
-			0:
-				posicion.y += 0.08
-				rotacion.y += 1.5 * signo
-			1:
-				posicion += Vector3(0.12 * signo, 0.16, -0.08 * signo)
-				rotacion.y += 4.0 * signo
-				escala = Vector3(escala.x * 0.98, escala.y * 1.04, escala.z * 0.98)
-			_:
-				posicion += Vector3(-0.14 * signo, 0.24, 0.12 * signo)
-				rotacion.y -= 5.0 * signo
-				escala = Vector3(escala.x * 1.02, escala.y * 0.97, escala.z * 1.02)
+		if indice >= 0:
+			match indice:
+				0:
+					posicion.y += 0.08
+					rotacion.y += 1.5 * signo
+				1:
+					posicion += Vector3(0.12 * signo, 0.16, -0.08 * signo)
+					rotacion.y += 4.0 * signo
+					escala = Vector3(escala.x * 0.98, escala.y * 1.04, escala.z * 0.98)
+				_:
+					posicion += Vector3(-0.14 * signo, 0.24, 0.12 * signo)
+					rotacion.y -= 5.0 * signo
+					escala = Vector3(escala.x * 1.02, escala.y * 0.97, escala.z * 1.02)
+
+		if _lectura_activa:
+			posicion.y += 0.14
+			rotacion.z += 2.25 * signo
+			escala = Vector3(escala.x * 0.97, escala.y * 1.03, escala.z * 0.97)
 
 		nodo.position = posicion
 		nodo.rotation_degrees = rotacion

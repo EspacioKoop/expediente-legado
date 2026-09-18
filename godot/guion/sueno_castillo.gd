@@ -121,6 +121,7 @@ static func adaptar_espacio(
 					"pos": ancla_codice + Vector3(0, 1.0, 0),
 					"destino": "",
 					"frase": frases[0],
+					"evento": "codice_castillo",
 					"tam": Vector3(2.4, 2.0, 2.4),
 					"visible": false,
 				}

@@ -42,6 +42,19 @@ static func montar(arquitectura: Node3D, variante: String) -> Node3D:
 	return raiz
 
 
+## La lectura refuerza únicamente las luces de continuidad ya montadas.
+static func activar_lectura(presentacion: Node3D) -> void:
+	if presentacion == null:
+		return
+	for candidato in presentacion.find_children("LuzUmbral", "OmniLight3D", true, false):
+		var luz := candidato as OmniLight3D
+		if luz == null:
+			continue
+		luz.light_energy = 0.34
+		luz.omni_range = 4.1
+		luz.light_color = Color(0.62, 0.49, 0.30, 1.0)
+
+
 static func _montar_motivo(eco: Node3D, destino: String) -> void:
 	match destino:
 		"torre_capilla":

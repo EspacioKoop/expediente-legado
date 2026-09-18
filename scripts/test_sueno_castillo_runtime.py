@@ -7,6 +7,8 @@ CASTILLO = RAIZ / "godot" / "guion" / "sueno_castillo.gd"
 FORMAS = RAIZ / "godot" / "guion" / "sueno_formas.gd"
 SUENO = RAIZ / "godot" / "guion" / "sueno.gd"
 DIA = RAIZ / "godot" / "guion" / "dia_app.gd"
+DIA_SUENO = RAIZ / "godot" / "guion" / "dia_sueno_app.gd"
+ESPACIO_3D = RAIZ / "godot" / "guion" / "espacio_3d.gd"
 
 
 class SuenoCastilloRuntimeTest(unittest.TestCase):
@@ -16,6 +18,8 @@ class SuenoCastilloRuntimeTest(unittest.TestCase):
         cls.formas = FORMAS.read_text(encoding="utf-8")
         cls.sueno = SUENO.read_text(encoding="utf-8")
         cls.dia = DIA.read_text(encoding="utf-8")
+        cls.dia_sueno = DIA_SUENO.read_text(encoding="utf-8")
+        cls.espacio_3d = ESPACIO_3D.read_text(encoding="utf-8")
 
     def test_expone_adaptador_sin_duplicar_seleccion_nocturna(self):
         self.assertIn("static func adaptar_espacio(", self.texto)
@@ -50,6 +54,15 @@ class SuenoCastilloRuntimeTest(unittest.TestCase):
         self.assertIn('"destino": ""', self.texto)
         self.assertIn('"visible": false', self.texto)
         self.assertIn('"carcasa": false', self.texto)
+        self.assertIn('"evento": "codice_castillo"', self.texto)
+
+    def test_evento_del_codice_viaja_por_la_interaccion_comun(self):
+        self.assertIn('zona.set_meta("evento", salida.get("evento", ""))', self.espacio_3d)
+        self.assertNotIn("codice_castillo", self.espacio_3d)
+        self.assertIn('salida.get_meta("evento", "")', self.dia_sueno)
+        self.assertIn('evento == "codice_castillo"', self.dia_sueno)
+        self.assertIn("SuenoCastillo3D.reaccionar_a_lectura(_mundo)", self.dia_sueno)
+        self.assertIn('salida.set_meta("reaccion_castillo", true)', self.dia_sueno)
 
     def test_no_introduce_greybox_ni_estado_de_juego(self):
         for termino in ["Rect2i", "BoxMesh", "Jornada.", "Partida", "dinero", "veredicto"]:

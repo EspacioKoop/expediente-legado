@@ -58,6 +58,21 @@ static func montar(mundo: Node3D, espacio: Dictionary) -> Node3D:
 	return presentacion
 
 
+## La lectura del códice no cambia la sala ni el progreso: solo pone la
+## presentación ya montada en un estado visual de respuesta durante esta visita.
+static func reaccionar_a_lectura(mundo: Node3D) -> bool:
+	if mundo == null:
+		return false
+	var presentacion := mundo.get_node_or_null("PresentacionCastillo284") as Node3D
+	if presentacion == null:
+		return false
+	var pulso := presentacion.get_node_or_null("PulsoArquitectonico") as SuenoCastilloPulso3D
+	if pulso != null:
+		pulso.activar_lectura()
+	SuenoCastilloUmbrales3D.activar_lectura(presentacion)
+	return pulso != null
+
+
 static func _escena_para(variante: String) -> PackedScene:
 	match variante:
 		"scriptorium":

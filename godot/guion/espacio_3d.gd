@@ -536,6 +536,7 @@ static func _salida(raiz: Node3D, salida: Dictionary) -> Area3D:
 	zona.set_meta("rotulo", salida.get("rotulo", ""))
 	zona.set_meta("frase", salida.get("frase", ""))
 	zona.set_meta("duelo", salida.get("duelo", ""))
+	zona.set_meta("evento", salida.get("evento", ""))
 
 	var forma := CollisionShape3D.new()
 	var caja := BoxShape3D.new()

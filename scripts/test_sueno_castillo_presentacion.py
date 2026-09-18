@@ -137,6 +137,20 @@ class SuenoCastilloPresentacionTest(unittest.TestCase):
         for termino in ("StaticBody3D", "CollisionShape3D", "teleport", "Jornada.", "Partida"):
             self.assertNotIn(termino, self.umbrales)
 
+    def test_lectura_del_codice_recompone_presentacion_sin_estado_persistente(self):
+        self.assertIn("static func reaccionar_a_lectura(mundo: Node3D) -> bool:", self.presentacion)
+        self.assertIn("pulso.activar_lectura()", self.presentacion)
+        self.assertIn("SuenoCastilloUmbrales3D.activar_lectura(presentacion)", self.presentacion)
+        self.assertIn("func activar_lectura() -> void:", self.pulso)
+        self.assertIn("_lectura_activa = true", self.pulso)
+        self.assertIn("if indice >= 0:", self.pulso)
+        self.assertIn("static func activar_lectura(presentacion: Node3D) -> void:", self.umbrales)
+        self.assertIn('find_children("LuzUmbral", "OmniLight3D", true, false)', self.umbrales)
+        self.assertIn('evento == "codice_castillo"', self.dia)
+        for termino in ("partida.estado", "Jornada.", "_guardar_o_avisar"):
+            self.assertNotIn(termino, self.pulso)
+            self.assertNotIn(termino, self.umbrales)
+
     def test_presentacion_solo_se_activa_por_identidad_de_datos(self):
         self.assertIn('espacio.get("identidad_onirica", "")', self.presentacion)
         self.assertIn("SuenoCastillo.ID", self.presentacion)

@@ -51,6 +51,17 @@ func _process(delta: float) -> void:
 func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
 	var destino := String(salida.get_meta("destino", ""))
 	var frase := String(salida.get_meta("frase", ""))
+	var evento := String(salida.get_meta("evento", ""))
+	if (
+		jornada.get("fase", "") == "sueño"
+		and cuerpo == _caminante
+		and _pantalla == null
+		and evento == "codice_castillo"
+		and not frase.is_empty()
+		and not bool(salida.get_meta("reaccion_castillo", false))
+	):
+		salida.set_meta("reaccion_castillo", true)
+		SuenoCastillo3D.reaccionar_a_lectura(_mundo)
 	if (
 		jornada.get("fase", "") == "casa"
 		and cuerpo == _caminante
