@@ -390,7 +390,8 @@ static func _por_planta(
 				textura_techo,
 				metros,
 				deformacion,
-				contraste
+				contraste,
+				preservar_detalle_textura
 			)
 			_emisivo(techo, color_techo)
 
