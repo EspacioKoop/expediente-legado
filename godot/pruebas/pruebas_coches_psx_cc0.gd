@@ -50,10 +50,13 @@ func _probar() -> void:
 			"acumulación sin sombra",
 		)
 		for malla in coche.find_children("*", "MeshInstance3D", true, false):
+			if str(malla.name) == "NieveClima":
+				# BoxMesh genera 12 triángulos, pero no expone la API de
+				# índices de ArrayMesh usada por los GLB importados.
+				triangulos += 12
+				continue
 			for i in malla.mesh.get_surface_count():
 				triangulos += malla.mesh.surface_get_array_index_len(i) / 3
-			if str(malla.name) == "NieveClima":
-				continue
 			var limites: AABB = malla.global_transform * malla.get_aabb()
 			caja = limites if caja.size == Vector3.ZERO else caja.merge(limites)
 			_comprobar(
