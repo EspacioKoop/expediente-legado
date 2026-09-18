@@ -44,9 +44,7 @@ func configurar(precio: int) -> void:
 	_comida.position = Vector3(0.0, 0.07, 0.0)
 	add_child(_comida)
 	_agregar_caja(_comida, Vector3(-0.08, 0.03, 0.0), Vector3(0.20, 0.07, 0.24), COLOR_PAN)
-	_agregar_caja(
-		_comida, Vector3(0.08, 0.035, 0.0), Vector3(0.18, 0.075, 0.22), COLOR_RELLENO
-	)
+	_agregar_caja(_comida, Vector3(0.08, 0.035, 0.0), Vector3(0.18, 0.075, 0.22), COLOR_RELLENO)
 
 
 func disponible() -> bool:
