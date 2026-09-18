@@ -254,8 +254,29 @@ func _recorrer_casa_sueno(saltar: bool) -> Dictionary:
 		Cinematica.vistas_de(dia.partida.estado, SuenoCinematica.ID) == 1,
 		"sueño: terminar la cama anota su primera vista",
 	)
+	_comprobar(dia._pantalla != null, "sueño: terminar la cama abre la preparación nocturna")
 	_comprobar(
-		dia.jornada.get("fase", "") == "sueño", "sueño: el callback real ejecuta la regla de dormir"
+		dia.jornada.get("fase", "") == "casa",
+		"sueño: la preparación mantiene la jornada en casa hasta confirmar",
+	)
+	_comprobar(
+		dia._entrada_sueno == null,
+		"sueño: la entrada onírica no empieza antes de confirmar la preparación",
+	)
+
+	var preparacion = null
+	if dia._pantalla != null and dia._pantalla.get_child_count() > 0:
+		preparacion = dia._pantalla.get_child(0)
+	_comprobar(
+		preparacion != null and preparacion.has_signal("confirmada"),
+		"sueño: la pantalla expone la confirmación de memoria nocturna",
+	)
+	if preparacion != null:
+		preparacion.call("_emitir_confirmacion")
+
+	_comprobar(
+		dia.jornada.get("fase", "") == "sueño",
+		"sueño: confirmar la preparación ejecuta la regla de dormir",
 	)
 	_comprobar(dia._entrada_sueno != null, "sueño: dormir encadena la entrada a la sala onírica")
 	_comprobar(
