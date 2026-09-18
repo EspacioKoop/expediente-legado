@@ -15,6 +15,8 @@
 class_name CalleIdentidad
 extends RefCounted
 
+const SHADER_CRISTAL_PSX := "res://arte/psx_cristal.gdshader"
+
 const OFICINA_FACHADA_Z := -17.3
 const CASA_FACHADA_Z := 16.3
 const CARA_OESTE_SUR := -5.2
@@ -227,12 +229,14 @@ static func _bloque_casa(calle: Node3D) -> void:
 		Color(0.30, 0.20, 0.13),
 		"madera_domestica"
 	)
-	_luz(
+	_cristal(
 		raiz,
 		"CristalPortal",
 		Vector3(0, 1.95, z - 0.11),
 		Vector3(0.9, 0.55, 0.02),
-		Color(0.55, 0.44, 0.26)
+		Color(0.55, 0.44, 0.26),
+		0.38,
+		0.20
 	)
 	_luz(raiz, "LamparaPortal", Vector3(0, 3.35, z - 0.12), Vector3(0.3, 0.2, 0.12), LUZ_CALIDA)
 	_rotulo(raiz, "7", Vector3(0.0, 2.55, z - 0.12), 180.0, Color(0.95, 0.85, 0.55), 72)
@@ -327,19 +331,23 @@ static func _ventanilla_reclamaciones(calle: Node3D) -> void:
 		Color(0.40, 0.39, 0.37),
 		"revoco_urbano"
 	)
-	_luz(
+	_cristal(
 		raiz,
 		"PuertaCristal",
 		Vector3(x + 0.11, 1.15, -14.4),
 		Vector3(0.02, 2.3, 1.5),
-		Color(0.28, 0.33, 0.35)
+		Color(0.28, 0.33, 0.35),
+		0.30,
+		0.18
 	)
-	_luz(
+	_cristal(
 		raiz,
 		"Mostrador",
 		Vector3(x + 0.11, 1.5, -12.9),
 		Vector3(0.02, 1.1, 0.9),
-		Color(0.36, 0.40, 0.38)
+		Color(0.36, 0.40, 0.38),
+		0.34,
+		0.14
 	)
 	_caja(
 		raiz,
@@ -408,19 +416,15 @@ static func _electrodomesticos(calle: Node3D) -> void:
 		Color(1.0, 0.95, 0.82),
 		56
 	)
-	var cristal := MeshInstance3D.new()
-	cristal.name = "CristalEscaparate"
-	var lamina := BoxMesh.new()
-	lamina.size = Vector3(0.03, 2.0, 6.45)
-	cristal.mesh = lamina
-	cristal.position = Vector3(-5.70, 1.62, -1.5)
-	var vidrio := StandardMaterial3D.new()
-	vidrio.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	vidrio.albedo_color = Color(0.55, 0.65, 0.72, 0.16)
-	vidrio.roughness = 0.1
-	cristal.material_override = vidrio
-	cristal.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	raiz.add_child(cristal)
+	_cristal(
+		raiz,
+		"CristalEscaparate",
+		Vector3(-5.70, 1.62, -1.5),
+		Vector3(0.03, 2.0, 6.45),
+		Color(0.55, 0.65, 0.72),
+		0.16,
+		0.0
+	)
 	_luz(
 		raiz,
 		"InteriorTienda",
@@ -476,19 +480,23 @@ static func _videojuegos(calle: Node3D) -> void:
 		Vector3(0.08, 3.0, 3.9),
 		Color(0.08, 0.08, 0.10)
 	)
-	_luz(
+	_cristal(
 		raiz,
 		"Escaparate",
 		Vector3(x - 0.09, 1.45, -7.2),
 		Vector3(0.02, 1.6, 2.2),
-		Color(0.12, 0.16, 0.34)
+		Color(0.12, 0.16, 0.34),
+		0.28,
+		0.35
 	)
-	_luz(
+	_cristal(
 		raiz,
 		"Puerta",
 		Vector3(x - 0.09, 1.1, -5.15),
 		Vector3(0.02, 2.2, 0.9),
-		Color(0.42, 0.36, 0.24)
+		Color(0.42, 0.36, 0.24),
+		0.34,
+		0.18
 	)
 	_caja(
 		raiz,
@@ -561,12 +569,14 @@ static func _alquileres(calle: Node3D) -> void:
 		Color(0.16, 0.22, 0.18),
 		"madera_domestica"
 	)
-	_luz(
+	_cristal(
 		raiz,
 		"VentanillaPago",
 		Vector3(x - 0.09, 1.45, 9.6),
 		Vector3(0.02, 1.1, 1.6),
-		Color(0.40, 0.38, 0.30)
+		Color(0.40, 0.38, 0.30),
+		0.34,
+		0.12
 	)
 	_caja(
 		raiz,
@@ -576,12 +586,14 @@ static func _alquileres(calle: Node3D) -> void:
 		Color(0.30, 0.24, 0.18),
 		"madera_domestica"
 	)
-	_luz(
+	_cristal(
 		raiz,
 		"Puerta",
 		Vector3(x - 0.09, 1.1, 11.45),
 		Vector3(0.02, 2.2, 0.9),
-		Color(0.30, 0.27, 0.20)
+		Color(0.30, 0.27, 0.20),
+		0.34,
+		0.10
 	)
 	_caja(
 		raiz,
@@ -835,6 +847,42 @@ static func _material_luz(color: Color) -> StandardMaterial3D:
 	var material := StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.albedo_color = color
+	return material
+
+
+static func _cristal(
+	padre: Node3D,
+	nombre: String,
+	centro: Vector3,
+	tam: Vector3,
+	color: Color,
+	opacidad: float = 0.30,
+	emision_fuerza: float = 0.10
+) -> MeshInstance3D:
+	var malla := MeshInstance3D.new()
+	malla.name = nombre
+	var caja := BoxMesh.new()
+	caja.size = tam
+	malla.mesh = caja
+	malla.position = centro
+	malla.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	malla.material_override = _material_cristal(color, hash(nombre), opacidad, emision_fuerza)
+	padre.add_child(malla)
+	return malla
+
+
+static func _material_cristal(
+	color: Color, semilla: int, opacidad: float, emision_fuerza: float
+) -> ShaderMaterial:
+	var material := ShaderMaterial.new()
+	material.shader = load(SHADER_CRISTAL_PSX)
+	material.set_shader_parameter("color_base", Color(color.r, color.g, color.b, opacidad))
+	material.set_shader_parameter(
+		"textura", TexturaProcedural.por_nombre("cristal_urbano", Color.WHITE, semilla)
+	)
+	material.set_shader_parameter("con_textura", true)
+	material.set_shader_parameter("escala_textura", 1.4)
+	material.set_shader_parameter("emision_fuerza", emision_fuerza)
 	return material
 
 
