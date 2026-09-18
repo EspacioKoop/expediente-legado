@@ -69,7 +69,8 @@ class BolosPasillo3DTest(unittest.TestCase):
 
     def test_integracion_suspende_y_restaura_el_mundo(self):
         self.assertIn("Node.PROCESS_MODE_DISABLED", self.controller)
-        self.assertIn("MenuGlobal.set_process_unhandled_input(false)", self.controller)
+        self.assertIn('get_node_or_null("/root/MenuGlobal")', self.controller)
+        self.assertIn("set_process_unhandled_input(false)", self.controller)
         self.assertIn("ultimo_resultado_bolos", self.controller)
         self.assertIn("_restaurar_presentacion()", self.controller)
         self.assertIn("abandonar restaura el mundo", self.godot_test)
