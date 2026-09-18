@@ -11,8 +11,6 @@
 class_name EmuladorPortatilAudioApp
 extends EmuladorPortatilApp
 
-var link_cable: LinkCablePortatil = null
-
 const AUDIO_SAMPLE_RATE := 48000.0
 const AUDIO_BUFFER_LENGTH := 0.12
 const AUDIO_BYTES_PER_FRAME := 4
@@ -23,6 +21,7 @@ const DURACION_EXPULSION_CARTUCHO := 0.12
 const DURACION_RANURA_VACIA := 0.06
 const DURACION_INSERCION_CARTUCHO := 0.14
 
+var link_cable: LinkCablePortatil = null
 var _audio_emulado: AudioStreamPlayer
 var _audio_playback: AudioStreamGeneratorPlayback
 var _audio_pendiente := PackedVector2Array()
