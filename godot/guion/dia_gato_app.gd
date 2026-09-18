@@ -150,12 +150,13 @@ func _montar_objetivos_sueno() -> void:
 	_actualizar_feedback_objetivos(SuenoObjetivos.progreso(estado))
 	_actualizar_rumbo_guia_pendiente(estado)
 	for objetivo in _objetivos_espacio:
-		if completados.has(objetivo["id"]):
+		var objetivo_id := String(objetivo.get("id", ""))
+		if completados.has(objetivo_id) or not _objetivo_puntuable(estado, objetivo_id):
 			continue
 		var zona := Area3D.new()
-		zona.name = "ObjetivoSueno_%s" % objetivo["id"]
+		zona.name = "ObjetivoSueno_%s" % objetivo_id
 		zona.position = objetivo["pos"]
-		zona.set_meta("objetivo", objetivo["id"])
+		zona.set_meta("objetivo", objetivo_id)
 		var colision := CollisionShape3D.new()
 		var caja := BoxShape3D.new()
 		caja.size = TAM_OBJETIVO
@@ -208,11 +209,19 @@ func _actualizar_rumbo_guia_pendiente(estado: Dictionary) -> void:
 	var completados: Array = estado.get("completados", [])
 	_hay_rumbo_guia = false
 	for objetivo in _objetivos_espacio:
-		if completados.has(objetivo["id"]):
+		var objetivo_id := String(objetivo.get("id", ""))
+		if completados.has(objetivo_id) or not _objetivo_puntuable(estado, objetivo_id):
 			continue
 		_salida_guia = objetivo.get("pos", _entrada_guia)
 		_hay_rumbo_guia = true
 		return
+
+
+func _objetivo_puntuable(estado: Dictionary, objetivo_id: String) -> bool:
+	for objetivo in estado.get("objetivos", []):
+		if String(objetivo.get("id", "")) == objetivo_id:
+			return bool(objetivo.get("cuenta", true))
+	return true
 
 
 func _orientar_gato_guia() -> void:
@@ -314,7 +323,7 @@ func _retirar_objetivo_espacial(objetivo_id: String) -> void:
 	if not is_instance_valid(_mundo):
 		return
 	for hijo in _mundo.get_children():
-		if not hijo is Area3D:
+		if not (hijo is Area3D):
 			continue
 		if String(hijo.get_meta("objetivo", "")) != objetivo_id:
 			continue
