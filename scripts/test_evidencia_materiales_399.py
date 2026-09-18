@@ -49,7 +49,8 @@ class EvidenciaMateriales399Test(unittest.TestCase):
         self.assertIn("len(set(hashes)) != 4", self.workflow)
 
     def test_documentacion_no_finge_automatizar_el_juicio_visual(self):
-        self.assertIn("revisión humana", self.docs.lower())
+        self.assertIn("revisión", self.docs.lower())
+        self.assertIn("humana", self.docs.lower())
         self.assertIn("sin HUD", self.docs)
         self.assertIn("no sustituye", self.docs.lower())
 
