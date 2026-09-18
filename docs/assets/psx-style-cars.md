@@ -41,7 +41,7 @@ Primer PR con binarios:
 - no bloquear portal, escaparate ni señalización del trayecto;
 - máximo 3–5 coches visibles simultáneamente para no convertir el fondo en ruido.
 
-Movimiento simple queda para un segundo corte y solo si mejora claramente la lectura de calle. Un coche que cruza el plano del jugador exige además resolver seguridad de colisión y ritmo del recorrido, por lo que no entra en la importación inicial.
+El movimiento simple solo entra si queda claramente separado del espacio jugable: sin navegación, avoidance, física de vehículo ni colisión con el jugador.
 
 ## Procedencia y LFS
 
@@ -56,12 +56,12 @@ Todo fichero finalmente incorporado debe tener entrada real en `godot/assets/pro
 
 Los `.glb`, `.blend` y `.png` deben entrar mediante **Git LFS real**, conforme a `.gitattributes`. No se deben subir como blobs normales mediante la API de contenidos de GitHub.
 
-## Primer lote importado (#230)
+## Primer lote importado (#526)
 
 Descarga oficial: `PSX_Style_Cars_by_GGBot_(August2023).zip`, `sha256` `db67b0b0fbaa02454a5d000dc9ec1cc53f360e8f41ab44f3fb1c7e8f71e699e4`.
 
 | GLB | Origen en el ZIP | Textura (un color por familia) | Triángulos | Largo | Posición en `trayecto` |
-|---|---|---|---|---|---|
+|---|---|---|---:|---:|---|
 | `Car01.glb` | `Car 01/Car.obj` | `car.png` (verde) | 438 | 4,60 m | acera izquierda, z −11 |
 | `Car04.glb` | `Car 04/Car4.obj` | `car4.png` (azul) | 476 | 4,30 m | acera derecha, z −3,5 |
 | `Car03.glb` | `Car 03/Car3.obj` | `car3_red.png` (rojo) | 448 | 4,00 m | acera izquierda, z 9,5 |
@@ -70,25 +70,43 @@ Conversión: cada `.obj` se empaqueta a `.glb` con su textura embebida sin tocar
 
 El monovolumen se queda en 4,30 m porque el modelo es muy ancho en proporción: a 4,7 m sobresalía del bordillo.
 
-`godot/guion/coches_psx_cc0.gd` monta el lote desde `dia_calle_app.gd` al entrar en `trayecto`. Cada coche calcula su propio factor de escala sobre la malla importada, apoya las ruedas en el asfalto, lleva material mate sin especular ni sombra proyectada y usa una única `BoxShape3D` estática. Los coches aparcan orientados según la circulación por la derecha, fuera del paso central (|x| < 1,6), sin tapar el escaparate y lejos de los conos/barrera de #225, la entrada y el portal. `godot/pruebas/pruebas_coches_psx_cc0.gd` comprueba todo eso y el hook real entre fases.
+`godot/guion/coches_psx_cc0.gd` monta el lote desde `dia_calle_app.gd` al entrar en `trayecto`. Cada coche calcula su propio factor de escala sobre la malla importada, apoya las ruedas en el asfalto, lleva material mate sin especular ni sombra proyectada y los tres aparcados usan una única `BoxShape3D` estática. Los coches aparcan orientados según la circulación por la derecha, fuera del paso central (|x| < 1,6), sin tapar el escaparate y lejos de los conos/barrera de #225, la entrada y el portal.
 
 Capturas: `docs/capturas/coches-psx-230.png` (desde el punto de entrada) y `docs/capturas/coches-psx-230-monovolumen.png`.
 
-## Checklist del PR binario
+CI del lote binario: PR #526, `CI` #34932588049, `Alpha playtest` #34932587938 y `Benchmark CC0` #34932587954 terminaron en `success`.
+
+## Segundo corte — tráfico lejano reutilizando el lote
+
+No se añaden modelos ni texturas. Se reutiliza `Car03` como una cuarta instancia `TraficoFondo`:
+
+- cruza lateralmente **detrás del cierre norte** de la calle, en `z = 16,8`;
+- empieza y reaparece fuera de plano lateral, de `x = -7` a `x = 7`;
+- movimiento lineal de 7 s y pausa de 5 s entre pasadas;
+- un único `Tween` ligado al nodo; sin `_process` propio;
+- **sin colisión**, `VehicleBody3D`, `RigidBody3D`, `NavigationAgent`, luces, sonido ni interacción;
+- conserva el mismo material mate y la misma normalización de escala;
+- al abandonar `trayecto`, el nodo y su tween desaparecen con el mundo; al volver se reconstruyen de forma limpia.
+
+La intención es añadir una señal mínima de ciudad viva sin convertir el trayecto en tráfico jugable ni introducir riesgo de atropello, bloqueo o decisiones de navegación.
+
+## Checklist técnico
 
 - [x] descargar `PSX_Style_Cars_by_GGBot_(August2023).zip` desde la fuente oficial;
 - [x] seleccionar Car 01, Car 03 y Car 04;
 - [x] normalizar escala individualmente;
 - [x] exportar/importar solo los ficheros necesarios;
-- [x] `git lfs track` ya cubre los formatos binarios usados;
+- [x] `git lfs track` cubre los formatos binarios usados;
 - [x] comprobar que el commit contiene punteros LFS donde corresponde;
 - [x] calcular SHA-256 de cada asset final y registrar procedencia;
-- [x] colocar 3–5 instancias en calle/aparcamiento sin bloquear el recorrido;
-- [ ] ejecutar importación Godot, suite, recorrido, arranque y Alpha (CI);
-- [ ] validación visual humana de escala, clipping y lectura desde el punto de entrada.
+- [x] colocar tres coches aparcados sin bloquear recorrido, escaparate ni portal;
+- [x] ejecutar importación Godot, suite, Alpha y benchmark del lote binario (#526);
+- [x] añadir un único tráfico lejano barato reutilizando un GLB ya versionado;
+- [x] mantener el tráfico móvil fuera de colisión, navegación y física de vehículo;
+- [ ] validación visual humana de escala, clipping, frecuencia del cruce y lectura desde el punto de entrada.
 
 ## Fuera de alcance
 
-Movimiento, sonido y el resto de modelos del pack siguen fuera de este corte.
+Sonido de motor, tráfico interactivo, semáforos, peatones reactivos y el resto de modelos del pack siguen fuera de este corte. Si el cruce lejano no mejora visualmente la calle en revisión humana, debe retirarse sin afectar a los tres coches aparcados.
 
 — Odiseo (GPT-5.6 Sol)

@@ -13,6 +13,7 @@ from verificar_godot import validar
 ROOT = Path(__file__).resolve().parents[1]
 DOC = ROOT / "docs" / "assets" / "psx-style-cars.md"
 GITATTRIBUTES = ROOT / ".gitattributes"
+RUNTIME = ROOT / "godot" / "guion" / "coches_psx_cc0.gd"
 
 
 class TestPsxStyleCarsContract(unittest.TestCase):
@@ -45,6 +46,16 @@ class TestPsxStyleCarsContract(unittest.TestCase):
         self.assertIn("godot/assets/procedencia.json", texto)
         self.assertIn("sha256", texto)
         self.assertIn("Git LFS real", texto)
+
+    def test_trafico_lejano_es_barato_y_no_jugable(self):
+        texto = DOC.read_text(encoding="utf-8")
+        runtime = RUNTIME.read_text(encoding="utf-8")
+        self.assertIn("Segundo corte — tráfico lejano", texto)
+        self.assertIn("sin colisión", texto)
+        self.assertIn("TRAFICO_FONDO", runtime)
+        self.assertIn("create_tween().set_loops()", runtime)
+        self.assertNotIn("VehicleBody3D.new", runtime)
+        self.assertNotIn("NavigationAgent3D.new", runtime)
 
 
 class TestPsxStyleCarsRuntime(unittest.TestCase):
@@ -83,7 +94,7 @@ class TestPsxStyleCarsRuntime(unittest.TestCase):
             base = [motor, "--headless", "--language", "es", "--path", str(ROOT / "godot")]
             for argumentos, minimo in [
                 (["--editor", "--import", "--quit"], None),
-                (["--script", "res://pruebas/pruebas_coches_psx_cc0.gd"], 60),
+                (["--script", "res://pruebas/pruebas_coches_psx_cc0.gd"], 65),
             ]:
                 resultado = subprocess.run(
                     base + argumentos, env=entorno, text=True, stdout=subprocess.PIPE,
