@@ -99,7 +99,11 @@ static func resolver(estado: Dictionary, expediente_id: String, resultado) -> St
 
 static func estado_de(estado: Dictionary, expediente_id: String) -> String:
 	var pronostico := _obtener(estado, expediente_id)
-	return ESTADO_SIN_RESOLVER if pronostico.is_empty() else String(pronostico.get("estado", ESTADO_SIN_RESOLVER))
+	return (
+		ESTADO_SIN_RESOLVER
+		if pronostico.is_empty()
+		else String(pronostico.get("estado", ESTADO_SIN_RESOLVER))
+	)
 
 
 static func historial(estado: Dictionary) -> Array:
