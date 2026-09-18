@@ -32,7 +32,9 @@ class AscensorTest(unittest.TestCase):
     def test_la_bajada_es_breve_y_tiene_remate(self):
         segundos = [float(valor) for valor in re.findall(r'"segundos":\s*([0-9.]+)', self.cinematica)]
         self.assertEqual(len(segundos), 3)
-        self.assertLessEqual(sum(segundos), 3.5)
+        self.assertGreaterEqual(sum(segundos), 4.0)
+        self.assertLessEqual(sum(segundos), 5.0)
+        self.assertIn('"nombre": "salida-archivo"', self.cinematica)
         self.assertIn('"nombre": "portal"', self.cinematica)
 
     def test_la_presentacion_ya_no_es_placeholder_2d(self):
@@ -41,6 +43,8 @@ class AscensorTest(unittest.TestCase):
         self.assertNotIn('"figura"', self.cinematica)
         self.assertIn('"camara": ORIGEN + Vector3', self.cinematica)
         self.assertIn('"mira": ORIGEN + Vector3', self.cinematica)
+        self.assertEqual(self.cinematica.count('"camara_desde": ORIGEN + Vector3'), 3)
+        self.assertEqual(self.cinematica.count('"mira_desde": ORIGEN + Vector3'), 3)
 
     def test_cabina_3d_tiene_volumen_panel_y_apertura(self):
         self.assertIn('extends "res://guion/cinematica_app.gd"', self.app_3d)
@@ -53,6 +57,18 @@ class AscensorTest(unittest.TestCase):
         self.assertIn("func _abrir_puertas()", self.app_3d)
         self.assertIn('tween_property(_puerta_izquierda, "position:x"', self.app_3d)
         self.assertIn('tween_property(_puerta_derecha, "position:x"', self.app_3d)
+
+    def test_salida_conserva_referentes_del_archivo_hasta_cerrar_puertas(self):
+        self.assertIn('"salida-archivo"', self.app_3d)
+        self.assertIn("_mostrar_planta4()", self.app_3d)
+        self.assertIn("_abrir_puertas_inmediato()", self.app_3d)
+        self.assertIn("espera.tween_callback(_cerrar_puertas_animado)", self.app_3d)
+        self.assertIn('"desk"', self.app_3d)
+        self.assertIn('"computerScreen"', self.app_3d)
+        self.assertIn('"bookcaseClosed"', self.app_3d)
+        self.assertIn("Modelos.mueble", self.app_3d)
+        self.assertIn("_salida_exterior.visible = false", self.app_3d)
+        self.assertIn("_salida_exterior.visible = true", self.app_3d)
 
     def test_escena_especializada_se_usa_en_lugar_del_lienzo_generico(self):
         self.assertIn('path="res://guion/ascensor_3d_app.gd"', self.escena_ascensor)

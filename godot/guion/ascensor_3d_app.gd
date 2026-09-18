@@ -20,8 +20,12 @@ const EXTERIOR := Color("111317")
 var _cabina: Node3D
 var _puerta_izquierda: MeshInstance3D
 var _puerta_derecha: MeshInstance3D
+var _junta_puerta: MeshInstance3D
+var _salida_exterior: MeshInstance3D
 var _luces_panel: Array[MeshInstance3D] = []
+var _referentes_planta4: Array[Node3D] = []
 var _luz_techo: OmniLight3D
+var _luz_destino: OmniLight3D
 
 
 func _ready() -> void:
@@ -60,7 +64,9 @@ func _montar_cabina() -> void:
 	_puerta_derecha = _caja(
 		"PuertaDerecha", Vector3(0.82, -0.02, -1.84), Vector3(1.62, 2.68, 0.10), ACERO, 0.72, 0.30
 	)
-	_caja("JuntaPuerta", Vector3(0, -0.02, -1.78), Vector3(0.035, 2.62, 0.025), ACERO_OSCURO)
+	_junta_puerta = _caja(
+		"JuntaPuerta", Vector3(0, -0.02, -1.78), Vector3(0.035, 2.62, 0.025), ACERO_OSCURO
+	)
 
 	# Pasamanos y zócalos rompen las superficies planas; siguen siendo geometría
 	# muy barata y no añaden assets ni procedencia externa.
@@ -90,7 +96,7 @@ func _montar_cabina() -> void:
 	_caja("RellanoDer", Vector3(1.82, 0, -3.15), Vector3(0.12, 3.0, 2.5), PORTAL)
 	_caja("RellanoTecho", Vector3(0, 1.52, -3.15), Vector3(3.6, 0.12, 2.5), PORTAL)
 	_caja("FondoPortal", Vector3(0, 0, -4.36), Vector3(3.6, 3.0, 0.10), PORTAL)
-	_caja(
+	_salida_exterior = _caja(
 		"SalidaExterior",
 		Vector3(0, -0.05, -4.28),
 		Vector3(1.85, 2.40, 0.04),
@@ -99,6 +105,8 @@ func _montar_cabina() -> void:
 		1.0,
 		true
 	)
+	_salida_exterior.visible = false
+	_montar_referentes_planta4()
 
 	_luz_techo = OmniLight3D.new()
 	_luz_techo.name = "FluorescenteCabina"
@@ -108,27 +116,99 @@ func _montar_cabina() -> void:
 	_luz_techo.omni_range = 5.5
 	_cabina.add_child(_luz_techo)
 
-	var luz_portal := OmniLight3D.new()
-	luz_portal.name = "LuzRellano"
-	luz_portal.position = Vector3(0, 1.05, -3.30)
-	luz_portal.light_color = Color("d8bf96")
-	luz_portal.light_energy = 1.3
-	luz_portal.omni_range = 4.0
-	_cabina.add_child(luz_portal)
+	_luz_destino = OmniLight3D.new()
+	_luz_destino.name = "LuzRellano"
+	_luz_destino.position = Vector3(0, 1.05, -3.30)
+	_luz_destino.light_color = Color("dfe8eb")
+	_luz_destino.light_energy = 1.7
+	_luz_destino.omni_range = 4.0
+	_cabina.add_child(_luz_destino)
 
 	_marcar_planta(4)
 
 
 func _al_entrar_plano(_indice: int, plano: Dictionary) -> void:
 	match String(plano.get("nombre", "")):
-		"planta-4":
-			_cerrar_puertas()
+		"salida-archivo":
+			_mostrar_planta4()
+			_abrir_puertas_inmediato()
 			_marcar_planta(4)
+			var espera := create_tween()
+			espera.tween_interval(0.78)
+			espera.tween_callback(_cerrar_puertas_animado)
 		"bajada":
+			_ocultar_planta4()
+			_cerrar_puertas()
 			_animar_bajada()
 		"portal":
+			_mostrar_portal()
 			_marcar_planta(0)
 			_abrir_puertas()
+
+
+func _montar_referentes_planta4() -> void:
+	# Un recorte reconocible del archivo al otro lado de las puertas: reutiliza
+	# los mismos modelos del espacio jugable en vez de inventar un decorado nuevo.
+	_referentes_planta4.append(
+		_mueble_referencia(
+			"MesaArchivo",
+			Vector3(-0.92, -1.08, -3.45),
+			Vector3(1.45, 0.75, 0.82),
+			"desk",
+			Color(0.43, 0.40, 0.35)
+		)
+	)
+	_referentes_planta4.append(
+		_mueble_referencia(
+			"ArchivadorArchivo",
+			Vector3(1.18, -0.55, -3.55),
+			Vector3(0.82, 1.75, 0.58),
+			"bookcaseClosed",
+			Color(0.40, 0.39, 0.36)
+		)
+	)
+	_referentes_planta4.append(
+		_mueble_referencia(
+			"TerminalArchivo",
+			Vector3(-0.92, -0.48, -3.50),
+			Vector3(0.42, 0.34, 0.34),
+			"computerScreen",
+			Color(0.52, 0.54, 0.50)
+		)
+	)
+
+
+func _mueble_referencia(
+	nombre: String, posicion: Vector3, tamano: Vector3, modelo: String, color: Color
+) -> Node3D:
+	var raiz := Node3D.new()
+	raiz.name = nombre
+	raiz.position = posicion
+	_cabina.add_child(raiz)
+	if not Modelos.mueble(raiz, modelo, tamano, color):
+		raiz.queue_free()
+		return _caja("%sFallback" % nombre, posicion, tamano, color)
+	return raiz
+
+
+func _mostrar_planta4() -> void:
+	for referencia in _referentes_planta4:
+		referencia.visible = true
+	_salida_exterior.visible = false
+	_luz_destino.light_color = Color("dfe8eb")
+	_luz_destino.light_energy = 1.7
+
+
+func _ocultar_planta4() -> void:
+	for referencia in _referentes_planta4:
+		referencia.visible = false
+
+
+func _mostrar_portal() -> void:
+	_ocultar_planta4()
+	_salida_exterior.visible = true
+	_luz_destino.light_color = Color("d8bf96")
+	_luz_destino.light_energy = 1.3
 
 
 func _animar_bajada() -> void:
@@ -146,14 +226,34 @@ func _animar_bajada() -> void:
 
 
 func _abrir_puertas() -> void:
+	_junta_puerta.visible = false
 	var puertas := create_tween().set_parallel(true)
-	puertas.tween_property(_puerta_izquierda, "position:x", -1.58, 0.55)
-	puertas.tween_property(_puerta_derecha, "position:x", 1.58, 0.55)
+	puertas.tween_property(_puerta_izquierda, "position:x", -1.58, 0.62)
+	puertas.tween_property(_puerta_derecha, "position:x", 1.58, 0.62)
+
+
+func _abrir_puertas_inmediato() -> void:
+	_junta_puerta.visible = false
+	_puerta_izquierda.position.x = -1.58
+	_puerta_derecha.position.x = 1.58
+
+
+func _cerrar_puertas_animado() -> void:
+	_junta_puerta.visible = false
+	var puertas := create_tween().set_parallel(true)
+	puertas.tween_property(_puerta_izquierda, "position:x", -0.82, 0.58)
+	puertas.tween_property(_puerta_derecha, "position:x", 0.82, 0.58)
+	puertas.chain().tween_callback(_mostrar_junta)
+
+
+func _mostrar_junta() -> void:
+	_junta_puerta.visible = true
 
 
 func _cerrar_puertas() -> void:
 	_puerta_izquierda.position.x = -0.82
 	_puerta_derecha.position.x = 0.82
+	_junta_puerta.visible = true
 
 
 func _marcar_planta(planta: int) -> void:
