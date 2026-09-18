@@ -16,6 +16,14 @@
     "disponible": true
   },
   {
+    "id": "firma-sin-prisa",
+    "titulo": "SELLO_FIRMA_SIN_PRISA_TITULO",
+    "descripcion": "SELLO_FIRMA_SIN_PRISA_DESCRIPCION",
+    "origen": "cierre-expedientes",
+    "icono": "sello-firma",
+    "disponible": true
+  },
+  {
     "id": "pasillo-en-regla",
     "titulo": "SELLO_PASILLO_EN_REGLA_TITULO",
     "descripcion": "SELLO_PASILLO_EN_REGLA_DESCRIPCION",
