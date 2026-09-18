@@ -127,6 +127,10 @@ func _probar_reentrada() -> void:
 	_comprobar(restaurado.intentos == 0, "un pendiente restaurado conserva el intento intacto")
 	_comprobar(restaurado.seleccion == [2, 1, 0], "reentrar conserva la secuencia preparada")
 	_comprobar(
+		typeof(restaurado.seleccion[0]) == TYPE_INT,
+		"reentrar normaliza los ids de selección al tipo canónico entero",
+	)
+	_comprobar(
 		restaurado.nucleo.state == Puzzle.ESTADO_PENDIENTE,
 		"una secuencia completa sin confirmar sigue pendiente tras recargar",
 	)
