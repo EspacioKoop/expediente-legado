@@ -11,8 +11,8 @@ func _initialize() -> void:
 
 func _probar() -> void:
 	var panel := PreparacionSueno.new()
-	root.add_child(panel)
 	panel.configurar(["A", "B"], ["B"])
+	root.add_child(panel)
 	await process_frame
 	await process_frame
 
@@ -28,7 +28,7 @@ func _probar() -> void:
 	var cancelar := panel.find_child("Cancelar", true, false) as Button
 	comprobar(documento_a != null, "lista solo documentos leídos")
 	comprobar(confirmar != null and cancelar != null, "confirmar y cancelar existen")
-	comprobar(get_viewport().gui_get_focus_owner() is Button, "la pantalla entrega foco")
+	comprobar(root.gui_get_focus_owner() is Button, "la pantalla entrega foco")
 
 	documento_a.pressed.emit()
 	documento_a.pressed.emit()
