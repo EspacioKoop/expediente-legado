@@ -36,6 +36,7 @@ func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
 ## de cualquiera de las dos rutas hace que cerrar el juego durante el tránsito
 ## reabra ya en la calle.
 func _salir_por_ascensor() -> void:
+	_registrar_firma_sin_prisa()
 	var paga := Jornada.fichar_salida(jornada)
 	_sonar("nomina")
 	_hablando = false
