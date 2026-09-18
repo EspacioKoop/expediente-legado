@@ -1,0 +1,155 @@
+## Presentación 3D de Relación documental onírica (#89).
+##
+## No lee Input directamente: cada documento es un Interactuable3D y reutiliza
+## el raycast/acción semántica común. La pareja solo puede cerrarse una vez.
+class_name SuenoRelacionOnirica3D
+extends Node3D
+
+signal terminado(estado: String)
+
+const POSICIONES := [
+	Vector3(-3.3, 0.0, 0.7),
+	Vector3(-1.1, 0.0, -0.7),
+	Vector3(1.1, 0.0, -0.7),
+	Vector3(3.3, 0.0, 0.7),
+]
+const COLOR_BASE := Color(0.12, 0.14, 0.19)
+const COLOR_SELECCION := Color(0.30, 0.34, 0.45)
+const COLOR_TEXTO := Color(0.84, 0.85, 0.88)
+
+var relacion: RelacionOnirica
+var recompensa_texto := ""
+var _documentos_3d: Array = []
+var _estado: Label3D
+
+
+func configurar(una_relacion: RelacionOnirica, recompensa: String = "") -> bool:
+	if una_relacion == null or una_relacion.nucleo == null:
+		return false
+	relacion = una_relacion
+	recompensa_texto = recompensa.strip_edges()
+	_montar()
+	_sincronizar()
+	return true
+
+
+func abandonar() -> bool:
+	if relacion == null:
+		return false
+	var seguro := relacion.salir()
+	_sincronizar()
+	if seguro:
+		terminado.emit("abandonado")
+	return seguro
+
+
+func _montar() -> void:
+	var regla := Label3D.new()
+	regla.name = "ReglaRelacion"
+	regla.text = "Relaciona dos documentos. Solo puedes cerrar una pareja."
+	regla.position = Vector3(0.0, 2.85, 0.0)
+	regla.font_size = 36
+	regla.pixel_size = 0.004
+	regla.modulate = COLOR_TEXTO
+	regla.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	add_child(regla)
+
+	for indice in range(relacion.documentos.size()):
+		var dato: Dictionary = relacion.documentos[indice]
+		var documento := Interactuable3D.new()
+		documento.name = "DocumentoRelacion_%d" % indice
+		documento.position = POSICIONES[indice]
+		documento.verbo = Interactuable3D.Verbo.LEER
+		documento.nombre_objeto = String(dato.get("folio", ""))
+		documento.activado.connect(_al_activar_documento.bind(indice))
+		add_child(documento)
+		_montar_panel(documento)
+		_documentos_3d.append(documento)
+
+	_estado = Label3D.new()
+	_estado.name = "EstadoRelacion"
+	_estado.position = Vector3(0.0, 2.05, 0.15)
+	_estado.font_size = 28
+	_estado.pixel_size = 0.004
+	_estado.modulate = COLOR_TEXTO
+	_estado.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	add_child(_estado)
+
+
+func _montar_panel(documento: Interactuable3D) -> void:
+	var panel := MeshInstance3D.new()
+	panel.name = "Panel"
+	var caja := BoxMesh.new()
+	caja.size = Vector3(2.05, 1.65, 0.12)
+	panel.mesh = caja
+	panel.position = Vector3(0.0, 1.15, 0.0)
+	documento.add_child(panel)
+
+	var material := StandardMaterial3D.new()
+	material.albedo_color = COLOR_BASE
+	material.roughness = 0.9
+	panel.material_override = material
+
+	var titulo := Label3D.new()
+	titulo.name = "Titulo"
+	titulo.position = Vector3(0.0, 1.63, -0.08)
+	titulo.font_size = 24
+	titulo.pixel_size = 0.0032
+	titulo.modulate = COLOR_TEXTO
+	titulo.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	documento.add_child(titulo)
+
+	var texto := Label3D.new()
+	texto.name = "Texto"
+	texto.position = Vector3(0.0, 1.05, -0.08)
+	texto.font_size = 20
+	texto.pixel_size = 0.0028
+	texto.modulate = COLOR_TEXTO
+	texto.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	documento.add_child(texto)
+
+	var colision := CollisionShape3D.new()
+	var forma := BoxShape3D.new()
+	forma.size = Vector3(2.15, 1.8, 0.45)
+	colision.shape = forma
+	colision.position = Vector3(0.0, 1.15, 0.0)
+	documento.add_child(colision)
+
+
+func _al_activar_documento(_actor: Node, indice: int) -> void:
+	if relacion == null:
+		return
+	var evento := relacion.seleccionar(indice)
+	_sincronizar()
+	if evento == "completado" or evento == "fallado":
+		terminado.emit(evento)
+
+
+func _sincronizar() -> void:
+	if relacion == null:
+		return
+	for indice in range(mini(relacion.documentos.size(), _documentos_3d.size())):
+		var dato: Dictionary = relacion.documentos[indice]
+		var documento: Interactuable3D = _documentos_3d[indice]
+		var titulo := documento.get_node("Titulo") as Label3D
+		var texto := documento.get_node("Texto") as Label3D
+		var panel := documento.get_node("Panel") as MeshInstance3D
+		var seleccionado := relacion.seleccion.has(String(dato.get("id", "")))
+		titulo.text = "%s · %s" % [dato.get("folio", ""), dato.get("fecha", "")]
+		texto.text = String(dato.get("extracto", ""))
+		documento.habilitado = not relacion.cerrada and not seleccionado
+		var material := StandardMaterial3D.new()
+		material.albedo_color = COLOR_SELECCION if seleccionado else COLOR_BASE
+		material.roughness = 0.9
+		panel.material_override = material
+
+	if _estado == null:
+		return
+	if relacion.nucleo.state == PuzzleOnirico.ESTADO_COMPLETADO:
+		_estado.text = recompensa_texto
+	elif relacion.nucleo.state == PuzzleOnirico.ESTADO_FALLADO:
+		_estado.text = "Los documentos se separan. No hay segundo intento."
+	elif relacion.nucleo.state == PuzzleOnirico.ESTADO_ABANDONADO:
+		_estado.text = "Relación abandonada."
+	else:
+		_estado.text = "%d/2 documentos" % relacion.seleccion.size()
