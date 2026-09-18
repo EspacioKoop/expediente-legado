@@ -95,6 +95,16 @@ class SuenoTirNaNogTest(unittest.TestCase):
         self.assertIn('"rastreable": true', self.sueno)
         self.assertIn("_estado_objetos[objeto][otra] = estado_reflejo", self.sueno)
 
+    def test_puzzle_reutiliza_interaccion_3d_comun(self):
+        self.assertIn("Interactuable3D.new()", self.sueno)
+        self.assertIn("Interactuable3D.Verbo.USAR", self.sueno)
+        self.assertIn("CollisionShape3D.new()", self.sueno)
+        self.assertIn("hotspot.activado.connect", self.sueno)
+        self.assertIn("cruce.activado.connect", self.sueno)
+        self.assertIn("hotspot.monitorable = version_visible", self.sueno)
+        self.assertIn("hotspot.collision_layer = 1 if version_visible else 0", self.sueno)
+        self.assertNotIn("Input.", self.sueno)
+
     def test_reduccion_movimiento_no_cambia_reglas(self):
         self.assertIn('"corte_fundido" if reduccion_movimiento', self.sueno)
         self.assertIn('"duracion": 0.0 if reduccion_movimiento', self.sueno)
