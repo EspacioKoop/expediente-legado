@@ -77,9 +77,7 @@ static func fallar(estado: Dictionary, id: String) -> bool:
 ## Sustituye una plaza puntuable pendiente por otro objetivo sin cambiar el
 ## umbral. El objetivo reemplazado sigue registrado como opcional, pero deja de
 ## contar. Es idempotente para soportar recargas de la misma escena.
-static func sustituir_puntuable(
-	estado: Dictionary, objetivo_nuevo, reemplazo_id: String
-) -> bool:
+static func sustituir_puntuable(estado: Dictionary, objetivo_nuevo, reemplazo_id: String) -> bool:
 	if bool(estado.get("resuelto", false)):
 		return false
 	var nuevo := _normalizar(objetivo_nuevo)
