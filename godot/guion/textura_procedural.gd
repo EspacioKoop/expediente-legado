@@ -307,7 +307,7 @@ static func por_nombre(
 	if ResourceLoader.exists(ruta) and not _es_puntero_lfs(ruta):
 		var traida := ResourceLoader.load(ruta, "Texture2D") as Texture2D
 		if traida != null:
-			return _contrastar_textura(traida, base, contraste)
+			return _contrastar_textura(traida, base, contraste, true)
 	return calculada(nombre, base, semilla, contraste)
 
 
@@ -372,25 +372,46 @@ static func calculada(
 ## la trama bajo iluminación baja y cuantización. Se usa para el fallback y
 ## para el JPG canónico nombrado; una ruta explícita res:// sale antes y queda
 ## intacta. El default 1.0 devuelve el recurso original sin trabajo extra.
-static func _contrastar_textura(textura: Texture2D, base: Color, contraste: float) -> Texture2D:
+static func _contrastar_textura(
+	textura: Texture2D, base: Color, contraste: float, usar_media: bool = false
+) -> Texture2D:
 	if is_equal_approx(contraste, 1.0):
 		return textura
 	var imagen := textura.get_image()
+	if imagen == null or imagen.is_empty():
+		return textura
+	var pivote := _color_medio(imagen) if usar_media else base
 	var factor := maxf(contraste, 0.0)
 	for x in imagen.get_width():
 		for y in imagen.get_height():
 			var pixel := imagen.get_pixel(x, y)
-			(
-				imagen
-				. set_pixel(
-					x,
-					y,
-					Color(
-						clampf(base.r + (pixel.r - base.r) * factor, 0.0, 1.0),
-						clampf(base.g + (pixel.g - base.g) * factor, 0.0, 1.0),
-						clampf(base.b + (pixel.b - base.b) * factor, 0.0, 1.0),
-						pixel.a,
-					)
+			imagen.set_pixel(
+				x,
+				y,
+				Color(
+					clampf(pivote.r + (pixel.r - pivote.r) * factor, 0.0, 1.0),
+					clampf(pivote.g + (pixel.g - pivote.g) * factor, 0.0, 1.0),
+					clampf(pivote.b + (pixel.b - pivote.b) * factor, 0.0, 1.0),
+					pixel.a,
 				)
 			)
 	return ImageTexture.create_from_image(imagen)
+
+
+## El color propio de un JPG no coincide necesariamente con el tinte narrativo
+## del espacio. Una cuadrícula estable da un pivote representativo sin hacer
+## otro recorrido completo de la imagen antes del contraste.
+static func _color_medio(imagen: Image) -> Color:
+	var paso_x := maxi(imagen.get_width() / 32, 1)
+	var paso_y := maxi(imagen.get_height() / 32, 1)
+	var suma := Vector3.ZERO
+	var muestras := 0
+	for x in range(0, imagen.get_width(), paso_x):
+		for y in range(0, imagen.get_height(), paso_y):
+			var pixel := imagen.get_pixel(x, y)
+			suma += Vector3(pixel.r, pixel.g, pixel.b)
+			muestras += 1
+	if muestras == 0:
+		return Color.WHITE
+	var divisor := float(muestras)
+	return Color(suma.x / divisor, suma.y / divisor, suma.z / divisor, 1.0)
