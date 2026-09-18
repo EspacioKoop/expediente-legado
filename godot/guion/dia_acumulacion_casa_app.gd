@@ -51,8 +51,6 @@ func _process(_delta: float) -> void:
 	_conectar_reparaciones(consecuencias)
 
 
-
-
 func _conectar_reparaciones(consecuencias: Node3D) -> void:
 	if consecuencias == null:
 		return
