@@ -51,6 +51,9 @@ const MINIMO_GRANDE := 60
 ## para revelar la trama conocida sin eliminar el gradiente de oscuridad.
 const ENERGIA_LUZ_MATERIAL := 4.4
 const ALCANCE_LUZ_MATERIAL := 19.0
+## La trama procedural de vigilia es sutil a propósito. Deformada y filtrada
+## necesita más separación antes de caer en los 32 niveles del shader PSX.
+const CONTRASTE_MATERIAL_ONIRICO := 1.8
 
 const FORMAS := {
 	# Dos naves cruzadas. Desde el centro se ven cuatro fondos y ninguno dice
@@ -63,6 +66,7 @@ const FORMAS := {
 		"textura_muro": "gotele",
 		"escala_textura": 7.5,
 		"deformacion_textura": Vector3(3.6, 0.45, 0.72),
+		"contraste_textura": CONTRASTE_MATERIAL_ONIRICO,
 		"ambiente": Color(0.20, 0.19, 0.26),
 		"ambiente_energia": 0.42,
 		"sol": 0.05,
@@ -104,6 +108,7 @@ const FORMAS := {
 		"textura_muro": "gotele",
 		"escala_textura": 0.55,
 		"deformacion_textura": Vector3(-0.65, 2.8, 1.35),
+		"contraste_textura": CONTRASTE_MATERIAL_ONIRICO,
 		"ambiente": Color(0.22, 0.21, 0.20),
 		"ambiente_energia": 0.42,
 		"sol": 0.04,
@@ -141,6 +146,7 @@ const FORMAS := {
 		"textura_muro": "linoleo",
 		"escala_textura": 3.2,
 		"deformacion_textura": Vector3(0.38, 0.62, 4.4),
+		"contraste_textura": CONTRASTE_MATERIAL_ONIRICO,
 		"ambiente": Color(0.22, 0.20, 0.17),
 		"ambiente_energia": 0.42,
 		"sol": 0.05,
@@ -168,6 +174,7 @@ const FORMAS := {
 		"textura_muro": "gotele",
 		"escala_textura": 5.0,
 		"deformacion_textura": Vector3(2.7, 0.33, -1.15),
+		"contraste_textura": CONTRASTE_MATERIAL_ONIRICO,
 		"ambiente": Color(0.17, 0.20, 0.24),
 		"ambiente_energia": 0.42,
 		"sol": 0.06,
@@ -200,6 +207,7 @@ const FORMAS := {
 		"textura_muro": "gotele",
 		"escala_textura": 0.35,
 		"deformacion_textura": Vector3(-0.52, 3.1, 4.2),
+		"contraste_textura": CONTRASTE_MATERIAL_ONIRICO,
 		"ambiente": Color(0.24, 0.18, 0.18),
 		"ambiente_energia": 0.42,
 		"sol": 0.05,
@@ -232,6 +240,7 @@ const FORMAS := {
 		"textura_muro": "gotele",
 		"escala_textura": 7.5,
 		"deformacion_textura": Vector3(5.2, 0.28, -0.58),
+		"contraste_textura": CONTRASTE_MATERIAL_ONIRICO,
 		"ambiente": Color(0.20, 0.19, 0.26),
 		"ambiente_energia": 0.42,
 		"sol": 0.05,
