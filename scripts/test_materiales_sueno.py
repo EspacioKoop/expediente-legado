@@ -109,12 +109,23 @@ class MaterialesSuenoTest(unittest.TestCase):
             self.espacio,
         )
         self.assertGreaterEqual(
-            self.espacio.count('set_shader_parameter('),
+            len(
+                re.findall(
+                    r'set_shader_parameter\(\s*"contraste_textura"',
+                    self.espacio,
+                )
+            ),
             2,
         )
-        self.assertIn(
-            '"contraste_textura", 1.0 if textura.begins_with("res://") else contraste',
-            self.espacio,
+        self.assertGreaterEqual(
+            len(
+                re.findall(
+                    r'"contraste_textura"\s*,\s*'
+                    r'1\.0\s+if\s+textura\.begins_with\("res://"\)\s+else\s+contraste',
+                    self.espacio,
+                )
+            ),
+            2,
         )
 
     def test_hay_inversion_deliberada_en_al_menos_una_forma(self):
