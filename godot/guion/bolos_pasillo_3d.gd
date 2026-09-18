@@ -172,12 +172,12 @@ func _detectar_impactos() -> void:
 	for indice in POSICIONES_BOLOS.size():
 		if not _bolos_en_pie[indice]:
 			continue
-		var posicion := POSICIONES_BOLOS[indice]
+		var posicion: Vector3 = POSICIONES_BOLOS[indice]
 		var bolo_2d := Vector2(posicion.x, posicion.z)
 		if bola_2d.distance_to(bolo_2d) > RADIO_BOLA + RADIO_BOLO:
 			continue
 		_bolos_en_pie[indice] = false
-		var desviacion := _bola_posicion.x - posicion.x
+		var desviacion: float = _bola_posicion.x - posicion.x
 		if absf(desviacion) < 0.02:
 			desviacion = 0.02
 		_bola_velocidad.x += clampf(desviacion * 0.8, -0.22, 0.22)
