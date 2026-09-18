@@ -51,18 +51,25 @@ func _probar_resolucion_y_fallo() -> void:
 	var ecos = Ecos.crear("F-3", frase, ["F-3"], 91)
 	_comprobar(ecos.probar([0, 1]) == "invalido", "una secuencia incompleta no consume intento")
 	_comprobar(ecos.intentos == 0, "la entrada inválida deja los intentos intactos")
-	_comprobar(ecos.probar([2, 1, 0]) == "incorrecto", "un orden completo incorrecto cuenta")
-	_comprobar(ecos.intentos == 1, "el primer fallo incrementa el contador")
 	_comprobar(ecos.probar([0, 1, 2]) == "completado", "el orden original completa el puzzle")
 	_comprobar(ecos.nucleo.state == Puzzle.ESTADO_COMPLETADO, "completar deja el núcleo terminal")
 	_comprobar(ecos.probar([0, 1, 2]) == "cerrado", "un puzzle completado no vuelve a resolverse")
 
 	var fallido = Ecos.crear("F-4", frase, ["F-4"], 92)
-	_comprobar(fallido.probar([2, 1, 0]) == "incorrecto", "el primer fallo permite continuar")
-	_comprobar(fallido.probar([1, 0, 2]) == "incorrecto", "el segundo fallo permite continuar")
-	_comprobar(fallido.probar([1, 2, 0]) == "dispersado", "el tercer fallo dispersa los ecos")
-	_comprobar(fallido.intentos == Ecos.MAX_INTENTOS, "la dispersión ocurre en el límite declarado")
+	_comprobar(
+		fallido.probar([2, 1, 0]) == "dispersado",
+		"el primer orden completo incorrecto dispersa los ecos",
+	)
+	_comprobar(fallido.intentos == 1, "solo existe una secuencia completa comprometida")
+	_comprobar(
+		fallido.intentos == Ecos.MAX_INTENTOS,
+		"la dispersión ocurre en el único intento declarado",
+	)
 	_comprobar(fallido.nucleo.state == Puzzle.ESTADO_FALLADO, "dispersarse registra fallo terminal")
+	_comprobar(
+		fallido.probar([0, 1, 2]) == "cerrado",
+		"tras fallar no puede probar la permutación correcta",
+	)
 	_comprobar(fallido.salir(), "tras dispersarse sigue existiendo salida segura")
 
 
@@ -87,13 +94,12 @@ func _probar_salida_y_foco() -> void:
 func _probar_reentrada() -> void:
 	var frase := "el rótulo conserva una palabra incluso después de romperse"
 	var ecos = Ecos.crear("F-6", frase, ["F-6"], 555, "P-6")
-	ecos.probar([2, 0, 1])
 	var antes: Array = ecos.presentacion.duplicate()
 	var texto := JSON.stringify(ecos.serializar())
 	var datos: Dictionary = JSON.parse_string(texto)
 	var restaurado = Ecos.restaurar(datos, frase, ["F-6"])
 	_comprobar(restaurado != null, "reentra después de serializar por JSON")
-	_comprobar(restaurado.intentos == 1, "reentrar conserva los intentos consumidos")
+	_comprobar(restaurado.intentos == 0, "un pendiente restaurado conserva el intento intacto")
 	_comprobar(restaurado.presentacion == antes, "reentrar conserva el orden deformado")
 	_comprobar(restaurado.nucleo.reward_id == "P-6", "reentrar conserva la recompensa dirigida")
 	_comprobar(restaurado.probar([0, 1, 2]) == "completado", "se puede completar tras reentrar")
@@ -105,18 +111,28 @@ func _probar_reentrada() -> void:
 	manipulado["intentos"] = Ecos.MAX_INTENTOS
 	_comprobar(
 		Ecos.restaurar(manipulado, frase, ["F-6"]) == null,
-		"rechaza un pendiente manipulado que agotó todos los intentos"
+		"rechaza un pendiente manipulado que ya consumió su única respuesta",
 	)
 
 	var fallido = Ecos.crear("F-7", frase, ["F-7"], 777)
 	fallido.probar([2, 1, 0])
-	fallido.probar([1, 0, 2])
-	fallido.probar([1, 2, 0])
-	var datos_fallido: Dictionary = fallido.serializar()
-	datos_fallido["intentos"] = 1
+	var datos_fallido: Dictionary = JSON.parse_string(JSON.stringify(fallido.serializar()))
+	var restaurado_fallido = Ecos.restaurar(datos_fallido, frase, ["F-7"])
+	_comprobar(restaurado_fallido != null, "restaura un fallo terminal coherente")
 	_comprobar(
-		Ecos.restaurar(datos_fallido, frase, ["F-7"]) == null,
-		"rechaza un fallo terminal con contador contradictorio"
+		restaurado_fallido.nucleo.state == Puzzle.ESTADO_FALLADO,
+		"el fallo sigue siendo terminal tras recargar",
+	)
+	_comprobar(
+		restaurado_fallido.probar([0, 1, 2]) == "cerrado",
+		"recargar no abre una segunda permutación",
+	)
+
+	var contador_falso := datos_fallido.duplicate(true)
+	contador_falso["intentos"] = 0
+	_comprobar(
+		Ecos.restaurar(contador_falso, frase, ["F-7"]) == null,
+		"rechaza un fallo terminal con contador contradictorio",
 	)
 
 
