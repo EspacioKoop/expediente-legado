@@ -46,6 +46,7 @@ class SuenoPuzzlePersistenciaTest(unittest.TestCase):
             (relacion, "TIPO_RELACION"),
             (ecos, "TIPO_ECOS"),
         ):
+            self.assertIn("SuenoPuzzleSesion.registrada_esta_noche(dia.jornada)", codigo)
             self.assertIn("SuenoPuzzleSesion.actual(dia.jornada)", codigo)
             self.assertIn(f"SuenoPuzzleSesion.{tipo}", codigo)
             self.assertIn('sesion.get("datos",{})', codigo)
@@ -79,6 +80,9 @@ class SuenoPuzzlePersistenciaTest(unittest.TestCase):
         self.assertIn("jornada[CLAVE]", codigo)
         self.assertNotIn("FileAccess", codigo)
         self.assertNotIn("user://", codigo)
+        self.assertIn("registrada_esta_noche", codigo)
+        self.assertIn("_misma_identidad", codigo)
+        self.assertIn("terminal(sesion", codigo)
 
     def test_runner_cubre_guardado_real_de_partida(self):
         prueba = (ROOT / "godot" / "pruebas" / "pruebas_sueno_puzzle_sesion.gd").read_text(
