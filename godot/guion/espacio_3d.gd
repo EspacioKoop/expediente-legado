@@ -328,15 +328,12 @@ static func _por_contorno(
 		material.shader = load(SHADER_PSX)
 		material.set_shader_parameter("color_base", color)
 		if not textura.is_empty():
-			var imagen := TexturaProcedural.por_nombre(textura, color, hash(textura))
+			var imagen := TexturaProcedural.por_nombre(textura, color, hash(textura), contraste)
 			if imagen != null:
 				material.set_shader_parameter("textura", imagen)
 				material.set_shader_parameter("con_textura", true)
 				material.set_shader_parameter("escala_textura", 1.0 / metros)
 				material.set_shader_parameter("deformacion_textura", deformacion)
-				material.set_shader_parameter(
-					"contraste_textura", 1.0 if textura.begins_with("res://") else contraste
-				)
 		malla.material_override = material
 	raiz.add_child(cuerpo)
 
@@ -526,7 +523,7 @@ static func _caja(
 	material.shader = load(SHADER_PSX)
 	material.set_shader_parameter("color_base", color)
 	if not textura.is_empty():
-		var imagen := TexturaProcedural.por_nombre(textura, color, hash(textura))
+		var imagen := TexturaProcedural.por_nombre(textura, color, hash(textura), contraste)
 		if imagen != null:
 			material.set_shader_parameter("textura", imagen)
 			material.set_shader_parameter("con_textura", true)
@@ -535,9 +532,6 @@ static func _caja(
 			# la caja, cada pared contaría una escala distinta.
 			material.set_shader_parameter("escala_textura", 1.0 / metros)
 			material.set_shader_parameter("deformacion_textura", deformacion)
-			material.set_shader_parameter(
-				"contraste_textura", 1.0 if textura.begins_with("res://") else contraste
-			)
 	malla.material_override = material
 	cuerpo.add_child(malla)
 
