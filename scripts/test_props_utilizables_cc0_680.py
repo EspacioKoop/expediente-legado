@@ -63,6 +63,12 @@ class PropsUtilizablesCc0Test(unittest.TestCase):
         except ValueError as error:
             self.fail(str(error))
 
+    def test_linterna_mitiga_bombilla_fundida(self):
+        try:
+            ejecutar_godot("res://pruebas/pruebas_linterna_casa_680.gd", 18)
+        except ValueError as error:
+            self.fail(str(error))
+
     def test_runtime_monta_controller_en_dia(self):
         escena = (ROOT / "godot/escenas/dia.tscn").read_text(encoding="utf-8")
         controller = (
