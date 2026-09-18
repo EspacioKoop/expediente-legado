@@ -5,12 +5,15 @@ ROOT = Path(__file__).resolve().parents[1]
 CAPA = ROOT / "godot" / "guion" / "visor_anexos_app.gd"
 CATALOGO = ROOT / "godot" / "datos" / "anexos_documentales.json"
 ESCENA = ROOT / "godot" / "escenas" / "visor.tscn"
+PRONOSTICOS = ROOT / "godot" / "guion" / "visor_pronosticos_app.gd"
 
 
 def test_la_escena_activa_la_capa_de_anexos() -> None:
     escena = ESCENA.read_text(encoding="utf-8")
     capa = CAPA.read_text(encoding="utf-8")
-    assert 'res://guion/visor_anexos_app.gd' in escena
+    superior = PRONOSTICOS.read_text(encoding="utf-8")
+    assert 'res://guion/visor_pronosticos_app.gd' in escena
+    assert 'extends "res://guion/visor_anexos_app.gd"' in superior
     assert 'extends "res://guion/visor_metadatos_app.gd"' in capa
 
 

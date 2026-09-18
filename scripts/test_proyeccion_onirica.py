@@ -9,6 +9,7 @@ CAPA_COMBINACIONES = RAIZ / "godot" / "guion" / "visor_combinaciones_app.gd"
 CAPA_ANOTACIONES = RAIZ / "godot" / "guion" / "visor_anotaciones_app.gd"
 CAPA_METADATOS = RAIZ / "godot" / "guion" / "visor_metadatos_app.gd"
 CAPA_ANEXOS = RAIZ / "godot" / "guion" / "visor_anexos_app.gd"
+CAPA_PRONOSTICOS = RAIZ / "godot" / "guion" / "visor_pronosticos_app.gd"
 ESCENA_VISOR = RAIZ / "godot" / "escenas" / "visor.tscn"
 
 
@@ -20,6 +21,7 @@ class ProyeccionOniricaTest(unittest.TestCase):
         self.capa_anotaciones = CAPA_ANOTACIONES.read_text(encoding="utf-8")
         self.capa_metadatos = CAPA_METADATOS.read_text(encoding="utf-8")
         self.capa_anexos = CAPA_ANEXOS.read_text(encoding="utf-8")
+        self.capa_pronosticos = CAPA_PRONOSTICOS.read_text(encoding="utf-8")
         self.escena = ESCENA_VISOR.read_text(encoding="utf-8")
 
     def test_estados_tienen_identidad_estable(self):
@@ -59,7 +61,8 @@ class ProyeccionOniricaTest(unittest.TestCase):
         # Las capas posteriores pueden convertirse en raíz siempre que mantengan
         # la proyección en su cadena de herencia. No fijamos el contrato a una
         # implementación intermedia concreta.
-        self.assertIn('path="res://guion/visor_anexos_app.gd"', self.escena)
+        self.assertIn('path="res://guion/visor_pronosticos_app.gd"', self.escena)
+        self.assertIn('extends "res://guion/visor_anexos_app.gd"', self.capa_pronosticos)
         self.assertIn(
             'extends "res://guion/visor_metadatos_app.gd"', self.capa_anexos
         )
