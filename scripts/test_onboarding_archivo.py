@@ -37,10 +37,14 @@ class OnboardingArchivoTest(unittest.TestCase):
         self.assertNotIn('NavigationAgent', self.capa)
 
     def test_el_objetivo_es_una_superficie_tutorial_inequivoca(self):
-        self.assertIn('"OBJETIVO INICIAL"', self.capa)
+        self.assertIn('"ONBOARDING_OBJETIVO_INICIAL"', self.capa)
+        self.assertIn('"ONBOARDING_PUESTO_SIGA"', self.capa)
+        self.assertIn("rol.text = tr(CLAVE_ROL_ONBOARDING)", self.capa)
+        self.assertIn("texto.text = tr(CLAVE_TEXTO_ONBOARDING)", self.capa)
         self.assertIn("Control.PRESET_CENTER_TOP", self.capa)
         self.assertIn("EstiloSiga.caja_saliente(COLOR_FONDO_TUTORIAL)", self.capa)
         self.assertNotIn("Control.PRESET_CENTER_BOTTOM", self.capa)
+        self.assertNotIn('rol.text = "OBJETIVO INICIAL"', self.capa)
         self.assertNotIn("Mayús corre", self.capa)
         self.assertNotIn("Ctrl agacha", self.capa)
         self.assertNotIn("Espacio salta", self.capa)
