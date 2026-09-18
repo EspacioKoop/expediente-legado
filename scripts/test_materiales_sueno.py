@@ -91,7 +91,7 @@ class MaterialesSuenoTest(unittest.TestCase):
         )
         self.assertEqual(self.formas.count('"ambiente_energia": 0.42'), len(IDS))
 
-    def test_el_contraste_onirico_refuerza_material_nombrado_sin_tocar_ruta_explicita(self):
+    def test_el_contraste_onirico_refuerza_solo_el_fallback_procedural(self):
         constante = re.search(
             r"const CONTRASTE_MATERIAL_ONIRICO := ([0-9.]+)",
             self.formas,
@@ -106,10 +106,7 @@ class MaterialesSuenoTest(unittest.TestCase):
             '"contraste_textura": forma.get("contraste_textura", 1.0)',
             self.sueno,
         )
-        self.assertIn(
-            'espacio.get("contraste_textura", 1.0)',
-            self.espacio,
-        )
+        self.assertIn('espacio.get("contraste_textura", 1.0)', self.espacio)
         self.assertGreaterEqual(
             len(
                 re.findall(
@@ -129,16 +126,13 @@ class MaterialesSuenoTest(unittest.TestCase):
             self.procedural,
         )
         self.assertIn("_contrastar_textura(textura, base, contraste)", self.procedural)
-        self.assertLess(
-            self.procedural.index('if nombre.begins_with("res://")'),
-            self.procedural.index("return calculada(nombre, base, semilla, contraste)"),
-        )
         self.assertIn(
             "ResourceLoader.exists(ruta) and not _es_puntero_lfs(ruta)",
             self.procedural,
         )
+        self.assertIn("return traida", self.procedural)
         self.assertLess(
-            self.procedural.index("if ResourceLoader.exists(ruta)"),
+            self.procedural.index("return traida"),
             self.procedural.index("return calculada(nombre, base, semilla, contraste)"),
         )
         self.assertIn("static func _es_puntero_lfs(", self.procedural)
@@ -147,21 +141,6 @@ class MaterialesSuenoTest(unittest.TestCase):
             self.procedural,
         )
         self.assertNotIn("get_string_from_utf8()", self.procedural)
-        self.assertIn(
-            "return _contrastar_textura(traida, base, contraste, true)",
-            self.procedural,
-        )
-        self.assertIn("static func _color_medio(", self.procedural)
-        self.assertIn(
-            "var pivote := _color_medio(imagen) if usar_media else base",
-            self.procedural,
-        )
-        self.assertLess(
-            self.procedural.index(
-                "return _contrastar_textura(traida, base, contraste, true)"
-            ),
-            self.procedural.index("return calculada(nombre, base, semilla, contraste)"),
-        )
         explicita = self.procedural.index('if nombre.begins_with("res://")')
         carga_explicita = self.procedural.index(
             'return ResourceLoader.load(nombre, "Texture2D") as Texture2D',
@@ -169,6 +148,44 @@ class MaterialesSuenoTest(unittest.TestCase):
         )
         helper = self.procedural.index("static func _contrastar_textura")
         self.assertLess(carga_explicita, helper)
+
+    def test_el_sueno_conserva_detalle_sin_cambiar_el_filtrado_normal(self):
+        self.assertEqual(
+            self.formas.count('"preservar_detalle_textura": true'),
+            len(IDS),
+        )
+        self.assertIn(
+            '"preservar_detalle_textura": forma.get("preservar_detalle_textura", false)',
+            self.sueno,
+        )
+        self.assertIn(
+            'espacio.get("preservar_detalle_textura", false)',
+            self.espacio,
+        )
+        self.assertGreaterEqual(
+            self.espacio.count(
+                'set_shader_parameter("preservar_detalle_textura", preservar_detalle_textura)'
+            ),
+            1,
+        )
+        self.assertGreaterEqual(
+            self.espacio.count('set_shader_parameter("textura_detalle", imagen)'),
+            2,
+        )
+        self.assertIn(
+            "filter_linear_mipmap_anisotropic",
+            self.shader,
+        )
+        self.assertIn(
+            "uniform sampler2D textura_detalle : source_color, filter_linear, repeat_enable",
+            self.shader,
+        )
+        self.assertIn(
+            "uniform bool preservar_detalle_textura = false;",
+            self.shader,
+        )
+        self.assertIn("vec3 muestra_2d(vec2 uv)", self.shader)
+        self.assertIn("return texture(textura_detalle, uv).rgb;", self.shader)
 
     def test_hay_inversion_deliberada_en_al_menos_una_forma(self):
         vectores = re.findall(
