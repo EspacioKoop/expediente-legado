@@ -24,6 +24,7 @@ const RUTA_FUENTE_DOCUMENTO := "res://assets/fonts/MFBOldstyle-Regular.otf"
 const RUTA_FUENTE_INTERFAZ := "res://assets/fonts/AtkinsonHyperlegible-Regular.ttf"
 const RUTA_FUENTE_TITULO := "res://assets/fonts/AtkinsonHyperlegible-Bold.ttf"
 const RUTA_FUENTE_MONO := "res://assets/fonts/IBMPlexMono-Regular.ttf"
+const RUTA_FUENTE_TERMINAL := "res://assets/fonts/Kubasta.ttf"
 
 
 ## Dibuja el bisel sobre un rectángulo. [param saliente] a false lo hunde.
@@ -156,12 +157,16 @@ static func fuente_mono() -> Font:
 	return load(RUTA_FUENTE_MONO) as Font
 
 
-## Rol específico de terminal (#298). Mientras Kubasta no esté incorporada con
-## su binario real, procedencia, SHA-256 y LFS, conserva IBM Plex Mono como
-## fallback reproducible. Separar el rol ahora evita que el futuro cambio de
-## identidad de terminal altere rótulos técnicos, publicaciones o texto 3D que
-## usan deliberadamente la monoespaciada genérica.
+## Rol específico de terminal (#298). Kubasta se usa únicamente cuando el
+## recurso materializado está disponible; IBM Plex Mono sigue siendo fallback
+## reproducible para checkouts sin el objeto LFS o antes de la importación.
+## Mantener este rol separado evita que la identidad de terminal altere rótulos
+## técnicos, publicaciones o texto 3D que usan la monoespaciada genérica.
 static func fuente_terminal() -> Font:
+	if ResourceLoader.exists(RUTA_FUENTE_TERMINAL):
+		var kubasta := load(RUTA_FUENTE_TERMINAL) as Font
+		if kubasta != null:
+			return kubasta
 	return fuente_mono()
 
 
