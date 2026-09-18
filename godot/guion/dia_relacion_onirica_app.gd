@@ -38,20 +38,29 @@ func _process(_delta: float) -> void:
 	if _montado_esta_noche or mundo.has_meta("puzzle_onirico_montado"):
 		return
 
-	var sesion := SuenoPuzzleSesion.actual(dia.jornada)
-	if not sesion.is_empty():
-		if String(sesion.get("tipo", "")) != SuenoPuzzleSesion.TIPO_RELACION:
-			return
-		var guardado := _candidato_guardado(dia, sesion)
-		if guardado.is_empty():
-			return
-		_montar_relacion(dia, mundo, guardado, sesion.get("datos", {}))
+	if _atender_sesion_relacion(dia, mundo):
 		return
 
 	var candidato := _candidato(dia)
 	if candidato.is_empty():
 		return
 	_montar_relacion(dia, mundo, candidato)
+
+
+func _atender_sesion_relacion(dia: Node, mundo: Node3D) -> bool:
+	if not SuenoPuzzleSesion.registrada_esta_noche(dia.jornada):
+		return false
+	var sesion := SuenoPuzzleSesion.actual(dia.jornada)
+	if sesion.is_empty() or String(sesion.get("tipo", "")) != SuenoPuzzleSesion.TIPO_RELACION:
+		return true
+	if SuenoPuzzleSesion.terminal(sesion):
+		_montado_esta_noche = true
+		return true
+	var guardado := _candidato_guardado(dia, sesion)
+	if guardado.is_empty():
+		return true
+	_montar_relacion(dia, mundo, guardado, sesion.get("datos", {}))
+	return true
 
 
 func _montar_relacion(
