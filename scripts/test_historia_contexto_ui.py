@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -54,7 +55,10 @@ def test_cerrar_expediente_o_avanzar_jornada_cuentan_como_contexto() -> None:
     assert "return _ids(veredictos.keys())" in codigo
     assert 'fase_anterior == "archivo"' in codigo
     assert 'fase_actual != "archivo"' in codigo
-    assert '_dia(estado) != int(contexto.get("dia", _dia(estado)))' in codigo
+    assert re.search(
+        r'_dia\(estado\)\s*!=\s*int\(contexto\.get\("dia",\s*_dia\(estado\)\)\)',
+        codigo,
+    )
 
 
 def test_la_primera_exposicion_guarda_contexto_y_oculta_opciones() -> None:
