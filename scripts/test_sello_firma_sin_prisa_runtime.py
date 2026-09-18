@@ -9,7 +9,7 @@ from scripts.godot_pruebas import importar_proyecto
 
 ROOT = Path(__file__).resolve().parents[1]
 PRUEBA_GODOT = "pruebas/pruebas_sello_firma_sin_prisa.gd"
-RESUMEN = re.compile(r"(\\d+) pasadas, 0 fallos")
+RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 
 
 class SelloFirmaSinPrisaRuntimeTest(unittest.TestCase):
