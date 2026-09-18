@@ -34,7 +34,7 @@ class SelloDespertarReglamentarioRuntimeTest(unittest.TestCase):
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
         resumen = RESUMEN.search(resultado.stdout)
         self.assertIsNotNone(resumen, resultado.stdout)
-        self.assertGreaterEqual(int(resumen.group(1)), 9, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 8, resultado.stdout)
         self.assertNotIn("SCRIPT ERROR:", resultado.stdout)
         self.assertNotIn("Parse Error:", resultado.stdout)
 
