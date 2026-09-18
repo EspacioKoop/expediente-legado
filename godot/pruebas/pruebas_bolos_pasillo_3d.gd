@@ -138,6 +138,10 @@ func _probar_integracion_oficina() -> void:
 	_comprobar(
 		bool(resultado_abandono.get("abandonada", false)), "el resultado efímero registra abandono"
 	)
+	_comprobar(
+		not is_instance_valid(controller._marcador_resultado),
+		"abandonar no muestra marcador final",
+	)
 
 	_comprobar(oferta.interactuar(camara_previa), "la actividad se puede repetir")
 	var sesion: BolosPasillo3D = controller._bolos
@@ -150,6 +154,24 @@ func _probar_integracion_oficina() -> void:
 	_comprobar(bool(resultado_completo.get("completa", false)), "terminar deja resultado completo")
 	_comprobar(not is_instance_valid(controller._bolos), "terminar cierra la sesión integrada")
 	_comprobar(dia._mundo.visible, "terminar devuelve a la oficina")
+	_comprobar(
+		is_instance_valid(controller._marcador_resultado),
+		"una partida completa muestra marcador final",
+	)
+	if is_instance_valid(controller._marcador_resultado):
+		var etiquetas := controller._marcador_resultado.find_children(
+			"Puntos*", "Label", true, false
+		)
+		var marcas := controller._marcador_resultado.find_children(
+			"Marca*", "ColorRect", true, false
+		)
+		_comprobar(etiquetas.size() == 4, "el marcador enseña las cuatro puntuaciones")
+		_comprobar(marcas.size() == 4, "el marcador distingue visualmente los cuatro turnos")
+	_comprobar(
+		dia._caminante.process_mode == modo_previo and dia._hud_prioridades.visible,
+		"el marcador no bloquea la jornada restaurada",
+	)
+	controller._retirar_marcador_resultado()
 
 	dia.queue_free()
 	await process_frame
