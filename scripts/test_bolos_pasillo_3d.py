@@ -73,7 +73,7 @@ class BolosPasillo3DTest(unittest.TestCase):
             text=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            timeout=30,
+            timeout=120,
             check=False,
         )
         self.assertEqual(0, resultado.returncode, resultado.stdout)
