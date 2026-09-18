@@ -75,6 +75,9 @@ static func acusar(
 
 	var castigo := {}
 	if precipitada:
+		jornada["acusaciones_precipitadas_hoy"] = (
+			int(jornada.get("acusaciones_precipitadas_hoy", 0)) + 1
+		)
 		castigo = perder_vida(estado, jornada, 1)
 
 	return {
