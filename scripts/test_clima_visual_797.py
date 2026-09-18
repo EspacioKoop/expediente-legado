@@ -140,6 +140,11 @@ class ClimaVisual797Test(unittest.TestCase):
                 for fragmento in fragmentos:
                     self.assertIn(fragmento, self.controlador)
 
+    def test_coches_psx_reaccionan_al_clima_canonico(self) -> None:
+        self.assertIn("_aplicar_coches_clima(dia, estado)", self.controlador)
+        self.assertIn('get_node_or_null("CochesPsxCC0")', self.controlador)
+        self.assertIn("CochesPsxCC0.aplicar_clima(lote, estado)", self.controlador)
+
     def test_suelo_climatico_usa_pelicula_y_acumulaciones_sin_colision(self) -> None:
         self.assertIn('NODO_SUELO_CLIMA := "ClimaSueloVisual"', self.controlador)
         self.assertIn('superficie.name = "Pelicula"', self.controlador)
