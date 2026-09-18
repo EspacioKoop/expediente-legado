@@ -182,8 +182,8 @@ func _sincronizar() -> void:
 		var posicion := int(dato.get("posicion_seleccion", -1))
 		var eco_id := int(dato.get("id", -1))
 		orden.text = "" if posicion < 0 else "%d" % (posicion + 1)
-		eco.habilitado = (
-			not presentacion.cerrada and (posicion < 0 or eco_id == ultimo_seleccionado)
+		eco.habilitado = not presentacion.cerrada and (
+			posicion < 0 or eco_id == ultimo_seleccionado
 		)
 		var material := StandardMaterial3D.new()
 		material.albedo_color = COLOR_SELECCION if posicion >= 0 else COLOR_BASE
