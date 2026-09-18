@@ -9,6 +9,7 @@ func _initialize() -> void:
 	_probar_radio_deliberada()
 	_probar_umbral_reversible()
 	_probar_objetos_y_reflejos()
+	_probar_interacciones_fisicas()
 	_probar_accesibilidad_y_reproduccion()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -159,6 +160,73 @@ func _probar_objetos_y_reflejos() -> void:
 	sueno.queue_free()
 
 
+func _probar_interacciones_fisicas() -> void:
+	var sueno := SuenoTirNaNog.new()
+	get_root().add_child(sueno)
+	sueno.preparar()
+
+	for objeto in SuenoTirNaNog.OBJETOS:
+		var reciente := (
+			sueno.get_node_or_null("Version_reciente/Interactuar_%s" % objeto) as Interactuable3D
+		)
+		var envejecida := (
+			sueno.get_node_or_null("Version_envejecida/Interactuar_%s" % objeto) as Interactuable3D
+		)
+		_comprobar(reciente != null, "%s reciente tiene hotspot físico" % objeto)
+		_comprobar(envejecida != null, "%s envejecido tiene hotspot físico" % objeto)
+		_comprobar(_tiene_colision(reciente), "%s recibe el raycast común" % objeto)
+
+	var taza_reciente := (
+		sueno.get_node_or_null("Version_reciente/Interactuar_taza") as Interactuable3D
+	)
+	var taza_envejecida := (
+		sueno.get_node_or_null("Version_envejecida/Interactuar_taza") as Interactuable3D
+	)
+	var umbral := sueno.get_node_or_null("UmbralPrincipal/CruzarUmbral") as Interactuable3D
+	_comprobar(umbral != null, "el umbral tiene hotspot físico")
+	_comprobar(_tiene_colision(umbral), "el umbral recibe el raycast común")
+	_comprobar(taza_reciente.habilitado, "solo la versión visible empieza interactuable")
+	_comprobar(not taza_envejecida.habilitado, "la versión oculta no ofrece interacción")
+	_comprobar(taza_reciente.collision_layer, 1, "la versión visible conserva superficie física")
+	_comprobar(taza_envejecida.collision_layer, 0, "la versión oculta no intercepta el raycast")
+
+	_comprobar(taza_reciente.interactuar(null), "el hotspot de taza acepta la interacción")
+	_comprobar(
+		sueno.estado_reproducible()["objetos"][SuenoTirNaNog.OBJ_TAZA][
+			SuenoTirNaNog.VERSION_RECIENTE
+		],
+		"alfeizar",
+		"usar la taza ejecuta la misma regla determinista",
+	)
+	_comprobar(umbral.interactuar(null), "el hotspot del umbral acepta la interacción")
+	_comprobar(
+		sueno.version_actual(),
+		SuenoTirNaNog.VERSION_ENVEJECIDA,
+		"usar el umbral cruza físicamente de versión",
+	)
+	_comprobar(not taza_reciente.habilitado, "la versión anterior se desactiva tras cruzar")
+	_comprobar(taza_envejecida.habilitado, "la nueva versión activa sus hotspots")
+	_comprobar(taza_reciente.collision_layer, 0, "el hotspot anterior deja de interceptar")
+	_comprobar(taza_envejecida.collision_layer, 1, "el hotspot visible entra en el raycast")
+	var visual_envejecida := (
+		sueno.get_node_or_null("Version_envejecida/Objeto_taza") as MeshInstance3D
+	)
+	_comprobar(
+		taza_envejecida.position,
+		visual_envejecida.position,
+		"el volumen interactivo sigue la huella temporal visible",
+	)
+	_comprobar(taza_envejecida.interactuar(null), "también se puede actuar desde envejecida")
+	_comprobar(
+		sueno.estado_reproducible()["objetos"][SuenoTirNaNog.OBJ_TAZA][
+			SuenoTirNaNog.VERSION_RECIENTE
+		],
+		"alfeizar_desgastado",
+		"la interacción física conserva el reflejo inverso",
+	)
+	sueno.queue_free()
+
+
 func _probar_accesibilidad_y_reproduccion() -> void:
 	var sueno := SuenoTirNaNog.new()
 	get_root().add_child(sueno)
@@ -204,6 +272,15 @@ func _probar_accesibilidad_y_reproduccion() -> void:
 	sueno.queue_free()
 	copia.queue_free()
 	configurada.queue_free()
+
+
+func _tiene_colision(nodo: Node) -> bool:
+	if nodo == null:
+		return false
+	for hijo in nodo.get_children():
+		if hijo is CollisionShape3D:
+			return true
+	return false
 
 
 func _comprobar(actual, esperado = true, nombre: String = "") -> void:

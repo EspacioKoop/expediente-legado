@@ -260,6 +260,43 @@ func _crear_objeto(version: Node3D, objeto: String, posicion: Vector3, color: Co
 	elif objeto == OBJ_ARCHIVADOR:
 		tam = Vector3(1.20, 2.40, 0.90)
 	_crear_caja(version, "Objeto_%s" % objeto, tam, posicion, color)
+	_crear_hotspot_objeto(version, objeto, posicion, tam)
+
+
+func _crear_hotspot_objeto(
+	version: Node3D, objeto: String, posicion: Vector3, tam: Vector3
+) -> void:
+	var hotspot := Interactuable3D.new()
+	hotspot.name = "Interactuar_%s" % objeto
+	hotspot.position = posicion
+	hotspot.verbo = Interactuable3D.Verbo.USAR
+	hotspot.nombre_objeto = _nombre_interaccion_objeto(objeto)
+	hotspot.sonido = Interactuable3D.SIN_SONIDO
+	hotspot.collision_mask = 0
+	hotspot.activado.connect(_al_mover_objeto.bind(objeto))
+	version.add_child(hotspot)
+
+	var colision := CollisionShape3D.new()
+	var forma := BoxShape3D.new()
+	forma.size = tam + Vector3(0.24, 0.24, 0.24)
+	colision.shape = forma
+	hotspot.add_child(colision)
+
+
+func _nombre_interaccion_objeto(objeto: String) -> String:
+	if objeto == OBJ_TAZA:
+		return "taza desincronizada"
+	if objeto == OBJ_SILLA:
+		return "silla desincronizada"
+	return "archivador desincronizado"
+
+
+func _al_mover_objeto(_actor: Node, objeto: String) -> void:
+	mover_objeto(objeto)
+
+
+func _al_cruzar_umbral(_actor: Node) -> void:
+	cruzar_umbral()
 
 
 func _montar_umbral() -> void:
@@ -274,6 +311,22 @@ func _montar_umbral() -> void:
 		marco, "JambaDerecha", Vector3(0.25, 2.8, 0.25), Vector3(1.05, 1.4, 0.0), COLOR_UMBRAL
 	)
 	_crear_caja(marco, "Dintel", Vector3(2.35, 0.25, 0.25), Vector3(0.0, 2.72, 0.0), COLOR_UMBRAL)
+
+	var cruce := Interactuable3D.new()
+	cruce.name = "CruzarUmbral"
+	cruce.position = Vector3(0.0, 1.3, 0.0)
+	cruce.verbo = Interactuable3D.Verbo.USAR
+	cruce.nombre_objeto = "umbral temporal"
+	cruce.sonido = Interactuable3D.SIN_SONIDO
+	cruce.collision_mask = 0
+	cruce.activado.connect(_al_cruzar_umbral)
+	marco.add_child(cruce)
+
+	var colision := CollisionShape3D.new()
+	var forma := BoxShape3D.new()
+	forma.size = Vector3(1.9, 2.5, 0.70)
+	colision.shape = forma
+	cruce.add_child(colision)
 
 
 func _montar_retorno() -> void:
@@ -305,11 +358,20 @@ func _aplicar_estado_visual() -> void:
 			if hijo is VisualInstance3D:
 				(hijo as VisualInstance3D).visible = version_visible
 		for objeto in OBJETOS:
-			var nodo_objeto := nodo_version.get_node_or_null("Objeto_%s" % objeto) as MeshInstance3D
-			if nodo_objeto == null:
-				continue
 			var estado := String(_estado_objetos[objeto][version_id])
-			nodo_objeto.position = _posicion_para_estado(objeto, estado)
+			var posicion := _posicion_para_estado(objeto, estado)
+			var nodo_objeto := nodo_version.get_node_or_null("Objeto_%s" % objeto) as MeshInstance3D
+			if nodo_objeto != null:
+				nodo_objeto.position = posicion
+			var hotspot := (
+				nodo_version.get_node_or_null("Interactuar_%s" % objeto) as Interactuable3D
+			)
+			if hotspot == null:
+				continue
+			hotspot.position = posicion
+			hotspot.habilitado = version_visible
+			hotspot.monitorable = version_visible
+			hotspot.collision_layer = 1 if version_visible else 0
 
 
 func _posicion_para_estado(objeto: String, estado: String) -> Vector3:
