@@ -32,6 +32,24 @@ func _probar() -> void:
 	_comprobar(inicial["gato_estado"] == CasaEstadoAmbiental.GATO_ALIMENTADO, "gato alimentado")
 	_comprobar(inicial["objetos_casa"].is_empty(), "casa empieza sin almacen materializable")
 	_comprobar(inicial["vuelta"] == 1, "expone la vuelta persistida")
+	_comprobar(inicial["consecuencias_casa"].is_empty(), "sin hechos no inventa averias")
+
+	jornada["imprevistos"]["consecuencias"] = [
+		"casa_persiana_atascada",
+		"externa",
+		"casa_luz_reducida",
+		"casa_persiana_atascada",
+	]
+	var con_consecuencias := CasaEstadoAmbiental.derivar(jornada, inventario)
+	_comprobar(
+		con_consecuencias["consecuencias_casa"] == ["casa_luz_reducida", "casa_persiana_atascada"],
+		"expone solo consecuencias domesticas reales"
+	)
+	con_consecuencias["consecuencias_casa"].clear()
+	_comprobar(
+		jornada["imprevistos"]["consecuencias"].size() == 4,
+		"la señal de consecuencias no muta jornada"
+	)
 
 	_comprobar(Inventario.recoger(inventario, taza), "recoge taza")
 	_comprobar(Inventario.guardar_en_casa(inventario, "taza"), "guarda taza en casa")

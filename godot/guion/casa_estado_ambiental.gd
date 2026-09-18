@@ -20,6 +20,7 @@ static func derivar(jornada: Dictionary, inventario: Dictionary = {}) -> Diction
 		"objetos_casa": objetos_casa,
 		"objetos_casa_ids": _ids(objetos_casa),
 		"rutinas_casa": CasaRutinas.estado(jornada),
+		"consecuencias_casa": _consecuencias_domesticas(jornada),
 		"vuelta": maxi(1, int(jornada.get("vuelta", 1))),
 	}
 
@@ -42,6 +43,22 @@ static func _ids(objetos: Array) -> Array[String]:
 		if not id.is_empty():
 			ids.append(id)
 	return ids
+
+
+static func _consecuencias_domesticas(jornada: Dictionary) -> Array[String]:
+	var salida: Array[String] = []
+	var imprevistos = jornada.get("imprevistos", {})
+	if typeof(imprevistos) != TYPE_DICTIONARY:
+		return salida
+	var consecuencias = imprevistos.get("consecuencias", [])
+	if typeof(consecuencias) != TYPE_ARRAY:
+		return salida
+	for valor in consecuencias:
+		var consecuencia := String(valor)
+		if consecuencia.begins_with("casa_") and not salida.has(consecuencia):
+			salida.append(consecuencia)
+	salida.sort()
+	return salida
 
 
 static func _estado_gato(jornada: Dictionary) -> String:
