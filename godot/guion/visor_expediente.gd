@@ -363,15 +363,37 @@ func _al_pulsar_marca(meta: Variant) -> void:
 		"pista":
 			if not descubiertas.has(partes[1]):
 				descubiertas.append(partes[1])
+				_sincronizar_tarot_por_pista()
 				_refrescar_archivo()
-				# Se guarda al descubrir y no al salir: este juego se cierra
-				# leyendo un documento, no desde un menú.
+				# La pista y cualquier carta de progreso que nazca de ella se
+				# guardan juntas: reintentar un fallo de disco no repite la jugada.
 				_guardar_o_avisar()
 				_mostrar_registro(registro_actual)
 		"carta":
 			_al_encontrar_carta(partes[1])
 		"concepto":
 			_estado.text = tr("VISOR_CONCEPTO") % partes[1]
+
+
+## Primer vertical de #1029: una pista real vuelve a ganar El Mago en esta
+## vuelta. No pasa por _al_encontrar_carta(): esa ruta pertenece a las ocho
+## cartas ocultas y abre inmediatamente su historia política (#71).
+func _sincronizar_tarot_por_pista() -> void:
+	if descubiertas.is_empty():
+		return
+	var tarot: Array = partida.estado.get("tarot", [])
+	var carta := _carta_de(tarot, "el-mago")
+	if carta.is_empty():
+		return
+	Prometeo.desbloquear_carta(tarot, "el-mago")
+	if not carta.get("recogida", false):
+		return
+
+	# #46 separa posesión per-run de memoria fantasma permanente.
+	var conocidas: Array = partida.estado.get("cartas_conocidas", [])
+	if not conocidas.has("el-mago"):
+		conocidas.append("el-mago")
+		partida.estado["cartas_conocidas"] = conocidas
 
 
 ## Encontrar una carta escondida: se descubre, se guarda y se ve voltearse.
