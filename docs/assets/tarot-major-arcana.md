@@ -162,4 +162,4 @@ XDG_DATA_HOME="$tmp/data" XDG_CONFIG_HOME="$tmp/config" XDG_CACHE_HOME="$tmp/cac
   ../dist/qa/tarot-645/el-mago-progreso-reducido.png 2 reducido
 ```
 
-Estas capturas prueban el **camino de obtención** y preparan la imagen a revisar; no sustituyen la aprobación visual humana de #645. #1029 sigue abierto para portar el resto de triggers no ocultos del legado.
+Estas capturas prueban el **camino de obtención** y preparan la imagen a revisar; no sustituyen la aprobación visual humana de #645, que **permanece pendiente**. #1029 sigue abierto para portar el resto de triggers no ocultos del legado.
