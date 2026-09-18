@@ -269,7 +269,7 @@ func _espacio_de(fase: String) -> Dictionary:
 		sitio["figuras"] = _plantilla_en(sitio)
 		return sitio
 
-	var opciones := _opciones_sueno()
+	var opciones := SeleccionNocturna.opciones_sueno(jornada, _opciones_sueno())
 	var cantidad := clampi(
 		int(opciones.get("cantidad", Sueno.ESCENAS_POR_NOCHE)), 1, SuenoFormas.ids().size()
 	)
@@ -297,7 +297,9 @@ func _espacio_de(fase: String) -> Dictionary:
 			SuenoCombate.vencidos(partida.estado),
 		)
 	)
-	var semilla_noche := Sueno.semilla(jornada["dia"], jornada["leido_hoy"], _raiz())
+	var semilla_noche := Sueno.semilla(
+		jornada["dia"], jornada["leido_hoy"], _raiz(), opciones.get("seleccion_nocturna", [])
+	)
 	var reparto := SuenoContenido.repartir(fuentes, cantidad, semilla_noche)
 	var cual: int = cantidad - jornada["sueno_escenas"].size()
 	var trozo: Dictionary = reparto[clampi(cual, 0, reparto.size() - 1)]
@@ -526,6 +528,7 @@ func _aplicar_politica_sueno() -> void:
 	var opciones := _opciones_sueno()
 	if opciones.is_empty():
 		return
+	opciones = SeleccionNocturna.opciones_sueno(jornada, opciones)
 	jornada["sueno_escenas"] = Sueno.noche(
 		jornada["dia"], jornada["leido_hoy"], jornada["mapa"], int(jornada.get("raiz", 0)), opciones
 	)

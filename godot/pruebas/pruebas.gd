@@ -60,6 +60,7 @@ func _init() -> void:
 	PruebasGato._malla(comprobar_cb)
 
 	PruebasSemilla._semilla(comprobar_cb)
+	load("res://pruebas/pruebas_seleccion_nocturna.gd").todo(comprobar_cb)
 	PruebasHistoria.catalogo(comprobar_cb)
 	_archivado(comprobar_cb)
 

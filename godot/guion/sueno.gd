@@ -90,12 +90,19 @@ static func segundos_de_noche(escenas: Array) -> float:
 ## [param raiz] es la semilla de la partida (#147): entra para que dos partidas
 ## distintas con el mismo día y la misma lectura no sueñen lo mismo. Sin ella
 ## el sueño sería una función del contenido y no de quien lo soñó.
-static func semilla(dia: int, leido_hoy: Array, raiz: int = 0) -> int:
+static func semilla(
+	dia: int, leido_hoy: Array, raiz: int = 0, seleccion_nocturna: Array = []
+) -> int:
 	var texto := str(dia)
 	var folios := leido_hoy.duplicate()
 	folios.sort()
 	for folio in folios:
 		texto += "|" + str(folio)
+	# La lectura diaria se ordena porque es un conjunto de hechos; la memoria
+	# nocturna NO: orden y repetición son decisiones de #162 y deben producir
+	# una noche reproducible distinta sin introducir documentos nuevos.
+	for folio in seleccion_nocturna:
+		texto += "|memoria:" + str(folio)
 	# Por Azar y no por `hash()`: `hash()` puede cambiar de una versión de
 	# Godot a otra, y una noche que cambia al actualizar el motor no se puede
 	# volver a ver cuando alguien informa de que salió rara.
@@ -116,8 +123,9 @@ static func semilla(dia: int, leido_hoy: Array, raiz: int = 0) -> int:
 static func noche(
 	dia: int, leido_hoy: Array, mapa: Array, raiz: int = 0, opciones: Dictionary = {}
 ) -> Array:
+	var seleccion_nocturna: Array = opciones.get("seleccion_nocturna", [])
 	var rng := RandomNumberGenerator.new()
-	rng.seed = semilla(dia, leido_hoy, raiz)
+	rng.seed = semilla(dia, leido_hoy, raiz, seleccion_nocturna)
 
 	var nuevas := SuenoFormas.ids().filter(func(id): return not mapa.has(id))
 	var vistas := SuenoFormas.ids().filter(func(id): return mapa.has(id))

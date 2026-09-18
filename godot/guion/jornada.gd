@@ -111,6 +111,10 @@ static func nueva(raiz: int = 0, vuelta: int = 1) -> Dictionary:
 		# Lo leído hoy: es lo que alimenta el sueño de esta noche. Se vacía al
 		# despertar, porque un sueño es de su día.
 		"leido_hoy": [],
+		# #162: hasta tres folios leídos que el jugador decide llevarse a la
+		# noche. Vive en Jornada para que guardar/recargar conserve la misma
+		# preparación y se borra al despertar o al empezar otra vida laboral.
+		"seleccion_nocturna": [],
 		# Tarjeta diaria del Bingo SIGA y su histórico de esta vida laboral.
 		# Va en Jornada para usar el mismo guardado y reiniciarse al reasignar.
 		"bingo_siga": {"actual": {}, "historial": []},
@@ -188,7 +192,8 @@ static func completar(jornada: Dictionary, raiz: int = 0) -> Dictionary:
 					jornada["dia"],
 					jornada["leido_hoy"],
 					jornada["mapa"],
-					int(jornada.get("raiz", 0))
+					int(jornada.get("raiz", 0)),
+					SeleccionNocturna.opciones_sueno(jornada)
 				)
 			jornada["sueno_resto"] = Sueno.segundos_de_noche(jornada["sueno_escenas"])
 			jornada["mapa_anoche"] = jornada["mapa"].duplicate()
@@ -382,6 +387,18 @@ static func asegurar_ronda_cierre(jornada: Dictionary, cunado_presente: bool = t
 	return creada
 
 
+## Fija la memoria que se llevará a la noche (#162).
+##
+## Solo se prepara en casa y únicamente con folios realmente leídos hoy. La
+## selección puede estar vacía y puede repetir un folio: tres huecos son tres
+## recuerdos, no un conjunto. Si algo no cumple el contrato no se modifica la
+## selección anterior.
+static func preparar_sueno(jornada: Dictionary, seleccion: Array) -> bool:
+	if String(jornada.get("fase", "")) != "casa":
+		return false
+	return SeleccionNocturna.establecer(jornada, seleccion)
+
+
 ## Dormir: cierra el día, cobra la vida y decide qué queda por la mañana.
 ##
 ## Devuelve lo que hay que contar al despertar. El gato que se va no se anuncia
@@ -408,9 +425,16 @@ static func dormir(jornada: Dictionary) -> Dictionary:
 	# pero antes de que el sueño/despertar pueda limpiar sus contadores.
 	BingoSiga.cerrar_jornada(jornada)
 
+	jornada["seleccion_nocturna"] = SeleccionNocturna.normalizar(
+		jornada["leido_hoy"], jornada.get("seleccion_nocturna", [])
+	)
 	jornada["fase"] = "sueño"
 	jornada["sueno_escenas"] = Sueno.noche(
-		jornada["dia"], jornada["leido_hoy"], jornada["mapa"], int(jornada.get("raiz", 0))
+		jornada["dia"],
+		jornada["leido_hoy"],
+		jornada["mapa"],
+		int(jornada.get("raiz", 0)),
+		SeleccionNocturna.opciones_sueno(jornada)
 	)
 	jornada["sueno_total"] = Sueno.segundos_de_noche(jornada["sueno_escenas"])
 	jornada["sueno_resto"] = jornada["sueno_total"]
@@ -421,6 +445,7 @@ static func dormir(jornada: Dictionary) -> Dictionary:
 		"gato_se_fue": se_fue,
 		"alquiler_impago": impago,
 		"imprevisto": imprevisto,
+		"seleccion_nocturna": jornada["seleccion_nocturna"].duplicate(),
 	}
 
 
@@ -435,6 +460,7 @@ static func despertar(jornada: Dictionary) -> int:
 	jornada["acciones"] = ACCIONES_POR_DIA
 	jornada["acciones_bonus_hoy"] = 0
 	jornada["leido_hoy"] = []
+	jornada["seleccion_nocturna"] = []
 	# La noche se acabó aunque queden escenas: despertar de golpe (#90) no
 	# puede dejar media noche esperando a la siguiente.
 	jornada["sueno_escenas"] = []
