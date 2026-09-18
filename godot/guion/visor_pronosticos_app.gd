@@ -119,6 +119,12 @@ func _valor_seleccionado():
 	return _pronostico_valor.get_item_metadata(_pronostico_valor.selected)
 
 
+func _al_firmar(resultado: Dictionary, formulario: Control) -> void:
+	PronosticosAuditoria.resolver_cierre(partida.estado, caso, resultado)
+	_actualizar_pronostico()
+	super._al_firmar(resultado, formulario)
+
+
 func _al_confirmar_pronostico() -> void:
 	if _hay_guardado_a_medias() or caso.is_empty() or _caso_expuesto():
 		_actualizar_pronostico()
