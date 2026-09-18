@@ -96,7 +96,7 @@ def validar_fuentes_extraidas(extraido: Path, seleccion: list[tuple[str, dict]])
                 raise MaterializacionError(f"Falta fuente esperada: {asset[campo].as_posix()}")
 
 
-def _json_glb(ruta: Path) -> dict:
+def _leer_glb(ruta: Path) -> tuple[dict, bytes]:
     datos = ruta.read_bytes()
     if len(datos) < 20 or datos[:4] != b"glTF":
         raise MaterializacionError(f"{ruta.name} no es un GLB")
@@ -105,26 +105,67 @@ def _json_glb(ruta: Path) -> dict:
         raise MaterializacionError(f"{ruta.name} debe ser glTF 2; versión encontrada: {version}")
     if total != len(datos):
         raise MaterializacionError(f"{ruta.name} declara tamaño GLB inconsistente")
-    largo_json, tipo_json = struct.unpack_from("<II", datos, 12)
-    if tipo_json != 0x4E4F534A:
-        raise MaterializacionError(f"{ruta.name} no empieza por chunk JSON")
-    fin = 20 + largo_json
-    if fin > len(datos):
-        raise MaterializacionError(f"{ruta.name} tiene chunk JSON truncado")
-    try:
-        return json.loads(datos[20:fin].rstrip(b" \t\r\n\x00").decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise MaterializacionError(f"{ruta.name} contiene JSON glTF inválido") from exc
+
+    offset = 12
+    gltf: dict | None = None
+    binario = b""
+    while offset + 8 <= len(datos):
+        largo, tipo = struct.unpack_from("<II", datos, offset)
+        inicio = offset + 8
+        fin = inicio + largo
+        if fin > len(datos):
+            raise MaterializacionError(f"{ruta.name} contiene un chunk truncado")
+        chunk = datos[inicio:fin]
+        if tipo == 0x4E4F534A and gltf is None:
+            try:
+                gltf = json.loads(chunk.rstrip(b" \t\r\n\x00").decode("utf-8"))
+            except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+                raise MaterializacionError(f"{ruta.name} contiene JSON glTF inválido") from exc
+        elif tipo == 0x004E4942 and not binario:
+            binario = chunk
+        offset = fin
+
+    if gltf is None:
+        raise MaterializacionError(f"{ruta.name} no contiene chunk JSON")
+    return gltf, binario
 
 
-def validar_glb_autocontenido(ruta: Path) -> None:
-    gltf = _json_glb(ruta)
+def validar_glb_autocontenido(ruta: Path) -> tuple[dict, bytes]:
+    gltf, binario = _leer_glb(ruta)
     for buffer in gltf.get("buffers", []):
         if isinstance(buffer, dict) and buffer.get("uri"):
             raise MaterializacionError(f"{ruta.name} referencia un buffer externo")
     for image in gltf.get("images", []):
         if isinstance(image, dict) and image.get("uri"):
             raise MaterializacionError(f"{ruta.name} referencia una imagen externa")
+    return gltf, binario
+
+
+def validar_textura_embebida(ruta: Path, gltf: dict, binario: bytes, png: Path) -> None:
+    imagenes = gltf.get("images", [])
+    buffer_views = gltf.get("bufferViews", [])
+    candidatas: list[bytes] = []
+    for image in imagenes:
+        if not isinstance(image, dict) or "bufferView" not in image:
+            continue
+        indice = int(image["bufferView"])
+        if indice < 0 or indice >= len(buffer_views):
+            raise MaterializacionError(f"{ruta.name} referencia un bufferView de imagen inválido")
+        vista = buffer_views[indice]
+        if not isinstance(vista, dict):
+            raise MaterializacionError(f"{ruta.name} contiene un bufferView inválido")
+        inicio = int(vista.get("byteOffset", 0))
+        largo = int(vista.get("byteLength", 0))
+        fin = inicio + largo
+        if largo <= 0 or fin > len(binario):
+            raise MaterializacionError(f"{ruta.name} contiene una imagen embebida truncada")
+        candidatas.append(binario[inicio:fin])
+
+    png_bytes = png.read_bytes()
+    if png_bytes not in candidatas:
+        raise MaterializacionError(
+            f"{png.name} no coincide con ninguna imagen embebida en {ruta.name}"
+        )
 
 
 def validar_png(ruta: Path) -> None:
@@ -141,8 +182,9 @@ def validar_preparados(preparado: Path, seleccion: list[tuple[str, dict]]) -> di
         png = preparado / asset["png"]
         if not glb.is_file():
             raise MaterializacionError(f"Falta GLB preparado: {asset['glb']}")
-        validar_glb_autocontenido(glb)
+        gltf, binario = validar_glb_autocontenido(glb)
         validar_png(png)
+        validar_textura_embebida(glb, gltf, binario, png)
         salida[asset_id] = {
             "glb": glb,
             "png": png,
