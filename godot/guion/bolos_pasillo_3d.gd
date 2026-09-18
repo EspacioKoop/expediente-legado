@@ -337,14 +337,17 @@ func _montar_companeros() -> void:
 		# Un compañero reutiliza el gesto de espera de #134; los otros respiran.
 		# Todos comparten la preferencia de reducción de movimiento del juego.
 		var brazos := indice == 0
-		idle.configurar(
-			cuerpo,
-			hash("bolos-%s" % LANZADORES[indice + 1]),
-			false,
-			reducir,
-			false,
-			brazos,
-			false,
+		(
+			idle
+			. configurar(
+				cuerpo,
+				hash("bolos-%s" % LANZADORES[indice + 1]),
+				false,
+				reducir,
+				false,
+				brazos,
+				false,
+			)
 		)
 		_companeros_visual.append(cuerpo)
 		_idles_companeros.append(idle)
