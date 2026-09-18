@@ -131,7 +131,7 @@ func _probar_integracion_oficina() -> void:
 		"abandonar restaura el menú global",
 	)
 	_comprobar(
-		get_viewport().get_camera_3d() == camara_previa,
+		root.get_camera_3d() == camara_previa,
 		"abandonar devuelve la cámara anterior",
 	)
 	var resultado_abandono: Dictionary = dia.get_meta("ultimo_resultado_bolos", {})
