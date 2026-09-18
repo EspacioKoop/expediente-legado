@@ -2,6 +2,7 @@ extends SceneTree
 
 const Ecos := preload("res://guion/ecos_archivo.gd")
 const Puzzle := preload("res://guion/puzzle_onirico.gd")
+const Presentacion := preload("res://guion/ecos_archivo_presentacion.gd")
 
 var _pasadas := 0
 var _fallos := 0
@@ -11,6 +12,7 @@ func _initialize() -> void:
 	_probar_fuentes_y_fragmentos()
 	_probar_determinismo()
 	_probar_resolucion_y_fallo()
+	_probar_deshacer_antes_de_comprometer()
 	_probar_salida_y_foco()
 	_probar_reentrada()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
@@ -71,6 +73,26 @@ func _probar_resolucion_y_fallo() -> void:
 		"tras fallar no puede probar la permutación correcta",
 	)
 	_comprobar(fallido.salir(), "tras dispersarse sigue existiendo salida segura")
+
+
+func _probar_deshacer_antes_de_comprometer() -> void:
+	var frase := "una nota rota conserva todavía el orden de sus palabras"
+	var ecos = Ecos.crear("F-UNDO", frase, ["F-UNDO"], 123)
+	var presentacion = Presentacion.crear(ecos)
+	_comprobar(presentacion != null, "crea presentación para una respuesta reversible")
+	presentacion.foco = 0
+	_comprobar(
+		presentacion.seleccionar() == Presentacion.EVENTO_SELECCIONADO,
+		"el primer eco queda seleccionado sin comprometer respuesta",
+	)
+	_comprobar(presentacion.seleccion.size() == 1, "la selección parcial queda visible")
+	_comprobar(
+		presentacion.seleccionar() == Presentacion.EVENTO_DESHECHO,
+		"volver a activar el último eco lo retira",
+	)
+	_comprobar(presentacion.seleccion.is_empty(), "deshacer limpia la selección parcial")
+	_comprobar(ecos.intentos == 0, "deshacer antes del tercero no consume el intento")
+	_comprobar(ecos.nucleo.state == Puzzle.ESTADO_PENDIENTE, "deshacer mantiene el núcleo pendiente")
 
 
 func _probar_salida_y_foco() -> void:
