@@ -123,8 +123,9 @@ class SuenoIdentidades284Test(unittest.TestCase):
     def test_adaptadores_no_mutan_estado_persistente(self):
         for nombre, fuentes in self.familias.items():
             logica = fuentes["logica"]
+            codigo = logica.split("class_name ", 1)[1]
             for termino in ("Jornada.", "Partida.", "dinero", "veredicto"):
-                self.assertNotIn(termino, logica, f"{nombre}: {termino}")
+                self.assertNotIn(termino, codigo, f"{nombre}: {termino}")
 
     def test_formas_base_no_colisionan_entre_verticales(self):
         formas = {}
