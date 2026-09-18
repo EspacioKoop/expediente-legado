@@ -104,7 +104,13 @@ static func validar(estado: Dictionary) -> Array:
 	if estado.is_empty():
 		return []
 	var errores := []
-	if typeof(estado.get("dia")) != TYPE_INT or int(estado.get("dia", 0)) < 1:
+	var dia = estado.get("dia")
+	if (
+		typeof(dia) not in [TYPE_INT, TYPE_FLOAT]
+		or not is_finite(float(dia))
+		or floor(float(dia)) != float(dia)
+		or float(dia) < 1.0
+	):
 		errores.append("dia inválido")
 	for clave in ["ruta", "completados"]:
 		if typeof(estado.get(clave)) != TYPE_ARRAY:
