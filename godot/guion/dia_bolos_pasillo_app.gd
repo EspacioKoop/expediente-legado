@@ -12,10 +12,12 @@ const POSICION_OFERTA := Vector3(3.35, 0.22, 2.65)
 const RADIO_OFERTA := 0.52
 const PERIODO_DIAS := 3
 const DIA_INICIAL := 2
+const DURACION_MARCADOR := 3.5
 
 var _mundo_id := 0
 var _oferta: Interactuable3D
 var _bolos: BolosPasillo3D
+var _marcador_resultado: CanvasLayer
 var _cerrando := false
 
 var _mundo_sesion: Node3D
@@ -191,7 +193,88 @@ func _cerrar_sesion(resultado: Dictionary) -> void:
 		_bolos.queue_free()
 	_bolos = null
 	_restaurar_presentacion()
+	if bool(resultado.get("completa", false)):
+		_mostrar_marcador(resultado)
 	_cerrando = false
+
+
+func _mostrar_marcador(resultado: Dictionary) -> void:
+	_retirar_marcador_resultado()
+	var puntuaciones: Array = resultado.get("puntuaciones", [])
+	if puntuaciones.is_empty():
+		return
+
+	var mayor := 0
+	for puntos in puntuaciones:
+		mayor = maxi(mayor, int(puntos))
+
+	var capa := CanvasLayer.new()
+	capa.name = "BolosResultado"
+	capa.layer = 40
+	add_child(capa)
+	_marcador_resultado = capa
+
+	var panel := PanelContainer.new()
+	panel.name = "Panel"
+	panel.theme = EstiloSiga.tema()
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	panel.offset_left = -286.0
+	panel.offset_top = 24.0
+	panel.offset_right = -24.0
+	panel.offset_bottom = 128.0
+	capa.add_child(panel)
+
+	var fila := HBoxContainer.new()
+	fila.name = "Puntuaciones"
+	fila.alignment = BoxContainer.ALIGNMENT_CENTER
+	fila.add_theme_constant_override("separation", 18)
+	fila.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(fila)
+
+	var colores := [
+		Color(0.86, 0.83, 0.72),
+		Color(0.48, 0.67, 0.76),
+		Color(0.72, 0.48, 0.55),
+		Color(0.55, 0.66, 0.45),
+	]
+	for indice in puntuaciones.size():
+		var columna := VBoxContainer.new()
+		columna.name = "Turno%d" % indice
+		columna.alignment = BoxContainer.ALIGNMENT_CENTER
+		columna.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		fila.add_child(columna)
+
+		var marcador := ColorRect.new()
+		marcador.name = "Marca%d" % indice
+		var lado := 28.0 if indice == 0 else 20.0
+		marcador.custom_minimum_size = Vector2(lado, lado)
+		marcador.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		marcador.color = colores[indice % colores.size()]
+		if int(puntuaciones[indice]) < mayor:
+			marcador.modulate.a = 0.45
+		columna.add_child(marcador)
+
+		var etiqueta := Label.new()
+		etiqueta.name = "Puntos%d" % indice
+		etiqueta.text = "%02d" % int(puntuaciones[indice])
+		etiqueta.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		etiqueta.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		columna.add_child(etiqueta)
+
+	var temporizador := Timer.new()
+	temporizador.name = "Ocultar"
+	temporizador.wait_time = DURACION_MARCADOR
+	temporizador.one_shot = true
+	temporizador.timeout.connect(_retirar_marcador_resultado)
+	capa.add_child(temporizador)
+	temporizador.start()
+
+
+func _retirar_marcador_resultado() -> void:
+	if is_instance_valid(_marcador_resultado):
+		_marcador_resultado.queue_free()
+	_marcador_resultado = null
 
 
 func _restaurar_presentacion() -> void:
