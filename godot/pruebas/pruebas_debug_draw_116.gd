@@ -38,6 +38,8 @@ static func todo(comprobar: Callable) -> void:
 		],
 	}
 
+	dia.add_child(dia._mundo)
+
 	var script := load("res://debug/dibujo_3d.gd") as Script
 	comprobar.call("el dibujo QA carga desde debug", script != null, true)
 	if script == null:
