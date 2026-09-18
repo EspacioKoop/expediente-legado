@@ -91,7 +91,7 @@ class MaterialesSuenoTest(unittest.TestCase):
         )
         self.assertEqual(self.formas.count('"ambiente_energia": 0.42'), len(IDS))
 
-    def test_el_contraste_onirico_refuerza_solo_la_trama_procedural(self):
+    def test_el_contraste_onirico_refuerza_material_nombrado_sin_tocar_ruta_explicita(self):
         constante = re.search(
             r"const CONTRASTE_MATERIAL_ONIRICO := ([0-9.]+)",
             self.formas,
@@ -143,12 +143,18 @@ class MaterialesSuenoTest(unittest.TestCase):
         )
         self.assertIn("static func _es_puntero_lfs(", self.procedural)
         self.assertIn(
-            '"version https://git-lfs.github.com/spec/v1"',
+            '"version https://git-lfs.github.com/spec/v1".to_utf8_buffer()',
             self.procedural,
         )
-        self.assertIn("return traida", self.procedural)
+        self.assertNotIn("get_string_from_utf8()", self.procedural)
+        self.assertIn(
+            "return _contrastar_textura(traida, base, contraste)",
+            self.procedural,
+        )
         self.assertLess(
-            self.procedural.index("return traida"),
+            self.procedural.index(
+                "return _contrastar_textura(traida, base, contraste)"
+            ),
             self.procedural.index("return calculada(nombre, base, semilla, contraste)"),
         )
         explicita = self.procedural.index('if nombre.begins_with("res://")')
