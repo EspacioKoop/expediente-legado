@@ -13,10 +13,8 @@ class DiaFalso:
 	var _hud_prioridades: CanvasLayer
 	var _pantalla: Control
 
-
 	func _init() -> void:
 		partida.estado = Partida.nueva()
-
 
 	func _guardar_o_avisar(_destino: String) -> bool:
 		guardados += 1
