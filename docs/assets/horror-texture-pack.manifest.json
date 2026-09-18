@@ -1,0 +1,42 @@
+{
+  "fuente": "https://screamingbrainstudios.itch.io/horror-texture-pack",
+  "autor": "Screaming Brain Studios",
+  "licencia": "CC0-1.0",
+  "resolucion_runtime": 128,
+  "archivos_fuente": {
+    "128": {"nombre": "SBS - Horror Texture Pack 128x128.rar", "sha256": "1fee483ce0253e64096442a2c16833ec9da90bdfa2836e5d54a061f293abf6fb"},
+    "256": {"nombre": "SBS - Horror Texture Pack 256x256.rar", "sha256": "6c78d279ce669d548ce77adf6dd768e40e1436498326a0bbce578f82cab6e9f0"},
+    "512": {"nombre": "SBS - Horror Texture Pack 512x512.rar", "sha256": "29feed70b77a17b974cce79a4f343f5f4fdf8f56cec0af91335083bf4cceaae4"}
+  },
+  "categorias": {"Brick": 14, "Floor": 14, "Metal": 14, "Misc": 15, "Stains": 15, "Stone": 14, "Wall": 14},
+  "perfiles": {
+    "sutil": [
+      "Stains/Horror_Stain_06", "Stains/Horror_Stain_07", "Stains/Horror_Stain_08", "Stains/Horror_Stain_09",
+      "Wall/Horror_Wall_02", "Wall/Horror_Wall_09", "Metal/Horror_Metal_06", "Metal/Horror_Metal_11"
+    ],
+    "sueno_archivo": [
+      "Metal/Horror_Metal_05", "Metal/Horror_Metal_06", "Metal/Horror_Metal_11", "Metal/Horror_Metal_13",
+      "Misc/Horror_Misc_13", "Stains/Horror_Stain_10", "Stains/Horror_Stain_11", "Stains/Horror_Stain_12"
+    ],
+    "sueno_escuela": [
+      "Floor/Horror_Floor_12", "Floor/Horror_Floor_14", "Wall/Horror_Wall_08", "Wall/Horror_Wall_09",
+      "Wall/Horror_Wall_10", "Wall/Horror_Wall_14", "Stains/Horror_Stain_07", "Stains/Horror_Stain_10",
+      "Stains/Horror_Stain_13"
+    ],
+    "sueno_castillo": [
+      "Brick/Horror_Brick_07", "Brick/Horror_Brick_10", "Brick/Horror_Brick_11", "Brick/Horror_Brick_14",
+      "Stone/Horror_Stone_03", "Stone/Horror_Stone_07", "Stone/Horror_Stone_10", "Stone/Horror_Stone_14",
+      "Stains/Horror_Stain_13", "Stains/Horror_Stain_14"
+    ],
+    "sueno_desierto": [
+      "Stone/Horror_Stone_09", "Stone/Horror_Stone_13", "Wall/Horror_Wall_04", "Wall/Horror_Wall_05",
+      "Stains/Horror_Stain_15"
+    ],
+    "sueno_pesadilla": [
+      "Stains/Horror_Stain_10", "Stains/Horror_Stain_11", "Stains/Horror_Stain_12", "Stains/Horror_Stain_13",
+      "Stains/Horror_Stain_14", "Stains/Horror_Stain_15", "Wall/Horror_Wall_11", "Wall/Horror_Wall_12",
+      "Wall/Horror_Wall_13", "Wall/Horror_Wall_14", "Metal/Horror_Metal_09", "Metal/Horror_Metal_14"
+    ]
+  },
+  "excluidos_automaticos": ["Stains/Horror_Stain_01", "Stains/Horror_Stain_02", "Stains/Horror_Stain_03"]
+}
