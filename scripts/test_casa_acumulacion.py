@@ -64,12 +64,13 @@ class CasaAcumulacionTest(unittest.TestCase):
             "BombillaFundida",
             "GrifoGoteando",
             "PersianaAtascada",
-            "ReciboPendiente",
-            "MultaPendiente",
             "CalentadorAveriado",
             "ElectrodomesticoRoto",
         ):
             self.assertIn(f'marca.name = "{nombre}"', self.consecuencias)
+        self.assertIn('"ReciboPendiente", Vector3(', self.consecuencias)
+        self.assertIn('"MultaPendiente", Vector3(', self.consecuencias)
+        self.assertIn("marca.name = nombre", self.consecuencias)
         self.assertNotIn("Label.new()", self.consecuencias)
         self.assertNotIn("porcentaje", self.consecuencias.lower())
         self.assertNotIn("nivel_pobreza", self.consecuencias.lower())
