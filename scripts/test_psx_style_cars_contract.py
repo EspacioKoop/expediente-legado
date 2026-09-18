@@ -103,14 +103,20 @@ class TestPsxStyleCarsRuntime(unittest.TestCase):
             for variable in ("XDG_DATA_HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME"):
                 entorno[variable] = str(Path(temporal) / variable)
             base = [motor, "--headless", "--language", "es", "--path", str(ROOT / "godot")]
-            for argumentos, minimo in [
-                (["--editor", "--import", "--quit"], None),
-                (["--script", "res://pruebas/pruebas_coches_psx_cc0.gd"], 80),
+            for argumentos, minimo, timeout in [
+                (["--editor", "--import", "--quit"], None, 120),
+                (["--script", "res://pruebas/pruebas_coches_psx_cc0.gd"], 80, 30),
             ]:
-                resultado = subprocess.run(
-                    base + argumentos, env=entorno, text=True, stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT, timeout=120, check=False,
-                )
+                try:
+                    resultado = subprocess.run(
+                        base + argumentos, env=entorno, text=True, stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT, timeout=timeout, check=False,
+                    )
+                except subprocess.TimeoutExpired as error:
+                    salida = error.stdout or ""
+                    if isinstance(salida, bytes):
+                        salida = salida.decode("utf-8", errors="replace")
+                    self.fail(f"Godot agotó {timeout}s\n{salida}")
                 try:
                     validar(resultado.stdout, resultado.returncode, minimo, minimo is None)
                 except ValueError as error:
