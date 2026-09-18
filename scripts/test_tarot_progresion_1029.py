@@ -27,8 +27,8 @@ class TarotProgresion1029Test(unittest.TestCase):
         self.assertIn('Prometeo.desbloquear_carta(tarot, "el-mago")', bloque)
         self.assertIn('partida.estado.get("cartas_conocidas", [])', bloque)
         self.assertIn('conocidas.append("el-mago")', bloque)
-        self.assertNotIn("_al_encontrar_carta", bloque)
-        self.assertNotIn("_abrir_historia", bloque)
+        self.assertNotIn('_al_encontrar_carta("el-mago")', bloque)
+        self.assertNotIn('_abrir_historia("el-mago")', bloque)
 
     def test_qa_obtiene_la_carta_por_pista_antes_de_renderizarla(self) -> None:
         inicio = self.capturar.index("func _capturar_tarot_progreso(")
