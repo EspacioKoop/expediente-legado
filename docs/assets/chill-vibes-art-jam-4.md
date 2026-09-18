@@ -130,6 +130,31 @@ La operación:
 Esto **no autoriza por sí solo a importar el lote completo**: la selección final sigue ligada a una escena concreta y al gate de #181.
 
 
+## Primer vertical runtime preparado: zona de servicio de la calle
+
+La zona secundaria creada por #228 ya tiene bobina, cuadro eléctrico, trolley y foco de obra. Es un lugar mejor para probar #220 que añadir props nuevos al archivo o sustituir el contenedor urbano de #222: el shipping container de Chill Vibes mide unos 6,20 m y no es equivalente al contenedor de basura existente.
+
+El primer corte queda por tanto fijado en **shipping pallet + crate**:
+
+- `godot/arte/chill_vibes_cc0.gd` usa las medidas auditadas y `Modelos.mueble()`, de modo que la forma viene del GLB pero materiales/encaje siguen el contrato visual del proyecto;
+- solo se activa si están disponibles **ambos** GLB;
+- cuando están presentes sustituyen únicamente el trolley procedural dentro de la zona de servicio;
+- si falta uno o ambos, #228 conserva su trolley actual y la calle funciona igual;
+- no se añaden colisiones, interacciones, progreso ni una segunda zona de servicio.
+
+El corte binario exacto puede prepararse sin materializar las otras cuatro piezas del lote:
+
+```bash
+python3 scripts/materializar_chill_vibes_cc0.py /tmp/chill-vibes \
+  --archivo "Common game assets [Chill Vibes Art Jam 4].7z" \
+  --asset pallet \
+  --asset crate \
+  --repo . \
+  --aplicar
+```
+
+La PR que active los binarios debe contener exactamente `shipping_pallet.glb`, `crate.glb` y sus fichas de procedencia, además de evidencia visual de la zona de servicio. No necesita reabrir la arquitectura runtime.
+
 ## Integración real cuando una escena lo justifique
 
 #181 sigue priorizando validar el saneamiento P0 antes de expandir decoración opcional. Por eso este corte **audita y prepara**, pero no versiona todavía GLB ni cambia escenas.

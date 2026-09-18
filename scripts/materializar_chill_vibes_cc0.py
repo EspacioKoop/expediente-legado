@@ -50,6 +50,22 @@ class MaterializacionError(RuntimeError):
     """El checkout no permite materializar el lote sin romper sus contratos."""
 
 
+def seleccionar_assets_individuales(manifiesto: dict, ids: list[str]) -> list[dict]:
+    por_id = {asset["id"]: asset for asset in manifiesto["assets"]}
+    desconocidos = [asset_id for asset_id in ids if asset_id not in por_id]
+    if desconocidos:
+        raise MaterializacionError(
+            "Assets desconocidos: " + ", ".join(sorted(set(desconocidos)))
+        )
+    seleccion: list[dict] = []
+    vistos: set[str] = set()
+    for asset_id in ids:
+        if asset_id not in vistos:
+            seleccion.append(por_id[asset_id])
+            vistos.add(asset_id)
+    return seleccion
+
+
 def sha256_fichero(ruta: Path) -> str:
     digest = hashlib.sha256()
     with ruta.open("rb") as fh:
@@ -259,6 +275,12 @@ def ejecutar(argv: list[str] | None = None) -> int:
         help="Lote a materializar; repetible. Por defecto: dressing_servicio.",
     )
     parser.add_argument(
+        "--asset",
+        action="append",
+        dest="assets",
+        help="ID exacto de asset a materializar. Repetible; no se combina con --lote.",
+    )
+    parser.add_argument(
         "--aplicar",
         action="store_true",
         help="Escribe, fusiona procedencia y deja los cambios staged tras verificar LFS.",
@@ -270,7 +292,12 @@ def ejecutar(argv: list[str] | None = None) -> int:
         manifiesto = cargar_manifiesto(args.manifest)
         validar_archivo_fuente(args.archivo, manifiesto)
         raiz = resolver_raiz_extraida(args.extraido)
-        seleccion = seleccionar_assets(manifiesto, args.lotes or ["dressing_servicio"])
+        if args.assets and args.lotes:
+            raise MaterializacionError("--asset y --lote son alternativas; no se combinan")
+        if args.assets:
+            seleccion = seleccionar_assets_individuales(manifiesto, args.assets)
+        else:
+            seleccion = seleccionar_assets(manifiesto, args.lotes or ["dressing_servicio"])
         encontrados = validar_extraidos(raiz, seleccion)
 
         destinos = [DESTINO_REL / asset["destino_sugerido"] for asset in seleccion]

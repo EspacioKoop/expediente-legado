@@ -71,6 +71,22 @@ class MaterializarChillVibesCc0Test(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
+    def test_seleccion_individual_es_ordenada_idempotente_y_estricta(self):
+        crate = {
+            **self.asset,
+            "id": "crate",
+            "titulo": "Crate",
+            "destino_sugerido": "crate.glb",
+            "miembro_extraido": "3D/Crate/crate.glb",
+        }
+        manifiesto = {**self.manifiesto, "assets": [self.asset, crate]}
+        seleccion = mod.seleccionar_assets_individuales(
+            manifiesto, ["crate", "pallet", "crate"]
+        )
+        self.assertEqual([asset["id"] for asset in seleccion], ["crate", "pallet"])
+        with self.assertRaisesRegex(mod.MaterializacionError, "Assets desconocidos"):
+            mod.seleccionar_assets_individuales(manifiesto, ["radio"])
+
     def test_ficha_incluye_origen_y_hash_del_paquete(self):
         entrada = mod.entrada_procedencia(self.asset, self.manifiesto)
         self.assertEqual(

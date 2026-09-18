@@ -28,7 +28,11 @@ static func crear_zona_servicio() -> Node3D:
 	raiz.name = "IndustrialCC0"
 	_bobina(raiz)
 	_cuadro_electrico(raiz)
-	_carro_plataforma(raiz)
+	# #220 no crea otra isla de props: pallet + crate sustituyen el trolley
+	# procedural cuando ambos GLB auditados están realmente disponibles.
+	# Si falta cualquiera, se conserva exactamente el fallback ligero de #228.
+	if not ChillVibesCC0.montar_lote_servicio(raiz):
+		_carro_plataforma(raiz)
 	_foco_obra(raiz)
 	return raiz
 
