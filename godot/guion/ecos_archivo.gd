@@ -11,7 +11,7 @@ class_name EcosArchivo
 extends RefCounted
 
 const Puzzle := preload("res://guion/puzzle_onirico.gd")
-const MAX_INTENTOS := 3
+const MAX_INTENTOS := 1
 const CANTIDAD_FRAGMENTOS := 3
 const _RUTA_SCRIPT := "res://guion/ecos_archivo.gd"
 
@@ -81,9 +81,10 @@ func ecos_presentados() -> Array:
 ## Prueba una secuencia de ids canónicos.
 ##
 ## Una entrada mal formada no gasta intento: pulsar dos veces por rebote o un
-## estado incompleto de UI no debe acercar al jugador al castigo. Una secuencia
-## completa pero incorrecta sí cuenta; al tercer fallo los ecos se dispersan y
-## PuzzleOnirico queda terminal, de modo que la salida nunca se bloquea.
+## estado incompleto de UI no debe acercar al jugador al castigo. La UI permite
+## deshacer mientras la secuencia esté incompleta, pero elegir el tercer eco
+## compromete la respuesta: un orden incorrecto dispersa los ecos de inmediato.
+## Así el puzzle recompensa reconstruir la frase, no enumerar permutaciones.
 func probar(orden: Array) -> String:
 	if nucleo == null or not nucleo.pendiente():
 		return "cerrado"
@@ -94,10 +95,8 @@ func probar(orden: Array) -> String:
 		return "completado"
 
 	intentos += 1
-	if intentos >= MAX_INTENTOS:
-		nucleo.fallar()
-		return "dispersado"
-	return "incorrecto"
+	nucleo.fallar()
+	return "dispersado"
 
 
 ## Salir siempre es seguro. Si el puzzle sigue pendiente, salir equivale a
