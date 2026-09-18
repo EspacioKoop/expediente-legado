@@ -60,7 +60,11 @@ func seleccionar() -> String:
 	var eco: Dictionary = presentados[foco]
 	var id := int(eco.get("id", -1))
 	if seleccion.has(id):
-		ultimo_evento = EVENTO_DUPLICADO
+		if not seleccion.is_empty() and seleccion.back() == id:
+			seleccion.pop_back()
+			ultimo_evento = EVENTO_DESHECHO
+		else:
+			ultimo_evento = EVENTO_DUPLICADO
 		return ultimo_evento
 	seleccion.append(id)
 	ultimo_evento = EVENTO_SELECCIONADO
