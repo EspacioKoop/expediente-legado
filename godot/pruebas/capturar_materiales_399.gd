@@ -106,11 +106,15 @@ func _init() -> void:
 					"textura_muro": String(dia._espacio_actual.get("textura_muro", "")),
 					"escala_textura": float(dia._espacio_actual.get("escala_textura", 1.0)),
 					"contraste_textura": contraste,
+					"preservar_detalle_textura": bool(
+						dia._espacio_actual.get("preservar_detalle_textura", false)
+					),
 					"contraste_cambia_textura_suelo": contraste_suelo_cambia,
 					"contraste_cambia_textura_muro": contraste_muro_cambia,
 					"materiales_psx": diagnostico_material["materiales_psx"],
 					"materiales_texturados": diagnostico_material["materiales_texturados"],
 					"materiales_deformados": diagnostico_material["materiales_deformados"],
+					"materiales_detalle": diagnostico_material["materiales_detalle"],
 					"rango_luminancia_deformados":
 					diagnostico_material["rango_luminancia_deformados"],
 					"deformacion_textura": [deformacion.x, deformacion.y, deformacion.z],
@@ -183,6 +187,7 @@ func _diagnostico_materiales(dia) -> Dictionary:
 	var materiales_psx := 0
 	var materiales_texturados := 0
 	var materiales_deformados := 0
+	var materiales_detalle := 0
 	var rango_luminancia_deformados := 0.0
 	for nodo in dia.find_children("*", "MeshInstance3D", true, false):
 		var malla := nodo as MeshInstance3D
@@ -197,6 +202,8 @@ func _diagnostico_materiales(dia) -> Dictionary:
 		if not bool(material.get_shader_parameter("con_textura")):
 			continue
 		materiales_texturados += 1
+		if bool(material.get_shader_parameter("preservar_detalle_textura")):
+			materiales_detalle += 1
 		var deformacion = material.get_shader_parameter("deformacion_textura")
 		if deformacion is Vector3 and not (deformacion as Vector3).is_equal_approx(Vector3.ONE):
 			materiales_deformados += 1
@@ -208,6 +215,7 @@ func _diagnostico_materiales(dia) -> Dictionary:
 		"materiales_psx": materiales_psx,
 		"materiales_texturados": materiales_texturados,
 		"materiales_deformados": materiales_deformados,
+		"materiales_detalle": materiales_detalle,
 		"rango_luminancia_deformados": rango_luminancia_deformados,
 	}
 
