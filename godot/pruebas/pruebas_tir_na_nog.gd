@@ -38,7 +38,9 @@ func _probar_gate_y_semilla() -> void:
 	var entrada: Dictionary = (
 		SemillasOniricas.obtener_semillas(jornada)["semilla_onirica_tir_na_nog"]
 	)
-	_comprobar(entrada["fuentes"], ["radio:radio_oeste_98:islas_fuera_del_tiempo"], "fuente estable")
+	_comprobar(
+		entrada["fuentes"], ["radio:radio_oeste_98:islas_fuera_del_tiempo"], "fuente estable"
+	)
 	_comprobar(entrada["intensidad"], 2, "intensidad conservada")
 	jornada["dia"] = 7
 	_comprobar(not SuenoTirNaNog.puede_entrar(jornada), "semilla no cruza de jornada")
@@ -174,7 +176,9 @@ func _probar_accesibilidad_y_reproduccion() -> void:
 	configurada.reduccion_movimiento = true
 	get_root().add_child(configurada)
 	var por_preferencia := configurada.cruzar_umbral()
-	_comprobar(por_preferencia["modo"], "corte_fundido", "la preferencia del runtime se hereda por defecto")
+	_comprobar(
+		por_preferencia["modo"], "corte_fundido", "la preferencia del runtime se hereda por defecto"
+	)
 	_comprobar(
 		reducida["hacia"],
 		SuenoTirNaNog.VERSION_RECIENTE,
