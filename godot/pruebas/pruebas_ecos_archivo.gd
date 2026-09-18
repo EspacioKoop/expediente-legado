@@ -92,7 +92,9 @@ func _probar_deshacer_antes_de_comprometer() -> void:
 	)
 	_comprobar(presentacion.seleccion.is_empty(), "deshacer limpia la selección parcial")
 	_comprobar(ecos.intentos == 0, "deshacer antes del tercero no consume el intento")
-	_comprobar(ecos.nucleo.state == Puzzle.ESTADO_PENDIENTE, "deshacer mantiene el núcleo pendiente")
+	_comprobar(
+		ecos.nucleo.state == Puzzle.ESTADO_PENDIENTE, "deshacer mantiene el núcleo pendiente"
+	)
 
 
 func _probar_salida_y_foco() -> void:
