@@ -52,6 +52,7 @@ var _rotulo: Label
 var _voz: Label
 var _fondo: ColorRect
 var _figuras: Node2D
+var _fundido: ColorRect
 
 
 func _ready() -> void:
@@ -94,6 +95,7 @@ func _process(delta: float) -> void:
 			_mover_camara(plano, avance)
 		"2d":
 			_figuras.queue_redraw()
+	_actualizar_fundido(plano, avance)
 
 	if _transcurrido >= duracion:
 		_siguiente()
@@ -123,6 +125,7 @@ func _siguiente() -> void:
 	# nombre y quiere presencia.
 	_rotulo.add_theme_font_size_override("font_size", 34 if _rotulo.text.length() > 28 else 48)
 
+	_actualizar_fundido(plano, 0.0)
 	plano_entrado.emit(_plano, plano)
 
 	var es_2d: bool = plano["tipo"] == "2d"
@@ -144,6 +147,8 @@ func _terminar() -> void:
 	_voz.text = ""
 	_fondo.visible = false
 	_figuras.visible = false
+	if _fundido != null:
+		_fundido.color = Color(0.0, 0.0, 0.0, 0.0)
 	_preparar_plato({})
 	terminada.emit()
 
@@ -182,6 +187,18 @@ func _mover_camara(plano: Dictionary, avance: float) -> void:
 	var acercamiento: Vector3 = destino.normalized() * -0.25 * factor_movimiento
 	_camara.global_position = destino + acercamiento
 	_camara.look_at(mira_destino, Vector3.UP)
+
+
+## Fundido opt-in para transiciones donde la acción es perder continuidad visual,
+## no mover más la cámara. Usa la misma curva suave que los travellings y se
+## reinicia en cada plano, así no contamina escenas que no declaran fundido.
+func _actualizar_fundido(plano: Dictionary, avance: float) -> void:
+	if _fundido == null:
+		return
+	var desde := clampf(float(plano.get("fundido_desde", 0.0)), 0.0, 1.0)
+	var hasta := clampf(float(plano.get("fundido_hasta", desde)), 0.0, 1.0)
+	var suave := avance * avance * (3.0 - 2.0 * avance)
+	_fundido.color = Color(0.0, 0.0, 0.0, lerpf(desde, hasta, suave))
 
 
 ## Los planos 2D se dibujan aquí: la figura es una lista de rectángulos con
@@ -277,6 +294,12 @@ func _montar() -> void:
 	_figuras.draw.connect(_dibujar_figuras)
 	_figuras.visible = false
 	_lienzo.add_child(_figuras)
+
+	_fundido = ColorRect.new()
+	_fundido.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_fundido.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_fundido.color = Color(0.0, 0.0, 0.0, 0.0)
+	_lienzo.add_child(_fundido)
 
 	_rotulo = _texto(48)
 	_rotulo.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
