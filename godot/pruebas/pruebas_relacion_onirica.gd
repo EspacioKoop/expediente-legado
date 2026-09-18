@@ -34,7 +34,8 @@ func _caso() -> Dictionary:
 				"folio": "F-2",
 				"tipo": "ACTA",
 				"fecha": "1999-01-02",
-				"contenido": "El acta afirma que la revisión ya estaba completada al aprobar el pago.",
+				"contenido":
+				"El acta afirma que la revisión ya estaba completada al aprobar el pago.",
 			},
 			{
 				"id": "r3",
@@ -81,7 +82,9 @@ func _probar_fuentes_y_distractor() -> void:
 	var relacion = Relacion.crear(caso, pista, ["F-1", "F-2", "F-3"], 17)
 	_comprobar(relacion != null, "crea la relación al leer dos orígenes y un distractor")
 	_comprobar(relacion.documentos.size() == 3, "presenta tres documentos cuando hay un distractor")
-	_comprobar(relacion.nucleo.reward_id == "P-REL", "dirige la recompensa a la relación catalogada")
+	_comprobar(
+		relacion.nucleo.reward_id == "P-REL", "dirige la recompensa a la relación catalogada"
+	)
 	_comprobar(
 		relacion.nucleo.source_ids == ["F-1", "F-2"],
 		"el núcleo solo declara como fuentes los dos documentos relacionados",
@@ -98,7 +101,9 @@ func _probar_determinismo_y_contenido() -> void:
 	var ids_a := a.documentos.map(func(d): return d["id"])
 	var ids_b := b.documentos.map(func(d): return d["id"])
 	_comprobar(ids_a == ids_b, "misma semilla conserva distractores y presentación")
-	_comprobar(a.documentos.size() == Relacion.MAX_DOCUMENTOS, "limita la presentación a cuatro documentos")
+	_comprobar(
+		a.documentos.size() == Relacion.MAX_DOCUMENTOS, "limita la presentación a cuatro documentos"
+	)
 	for documento in a.documentos:
 		_comprobar(
 			not String(documento.get("extracto", "")).contains("no encajan entre sí"),
@@ -133,7 +138,10 @@ func _probar_fallo_unico() -> void:
 		relacion.nucleo.state == Puzzle.ESTADO_FALLADO,
 		"el error deja estado terminal y evita fuerza bruta",
 	)
-	_comprobar(relacion.seleccionar(_indice(relacion.documentos, "r2")) == "cerrado", "no hay segundo intento")
+	_comprobar(
+		relacion.seleccionar(_indice(relacion.documentos, "r2")) == "cerrado",
+		"no hay segundo intento"
+	)
 	_comprobar(relacion.salir(), "fallar no bloquea la salida segura")
 
 
