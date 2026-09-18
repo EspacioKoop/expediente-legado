@@ -46,6 +46,10 @@ class DebugExportTest(unittest.TestCase):
                 }
                 self.assertIn(RUTA_DEBUG, exclusiones)
 
+    def test_autoload_no_apunta_directamente_a_un_recurso_excluido(self):
+        proyecto = (ROOT / "godot" / "project.godot").read_text(encoding="utf-8")
+        self.assertNotIn('="*res://debug/', proyecto)
+
     def test_debug_no_se_reintroduce_por_include_filter(self):
         for nombre in PUBLICADOS:
             with self.subTest(preset=nombre):
