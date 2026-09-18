@@ -36,7 +36,10 @@ def ejecutar_godot(script: str, minimo: int) -> None:
             timeout=120,
             check=False,
         )
-        validar(resultado.stdout, resultado.returncode, minimo, False)
+        try:
+            validar(resultado.stdout, resultado.returncode, minimo, False)
+        except ValueError as error:
+            raise ValueError(f"{error}\n{resultado.stdout}") from error
 
 
 class PropsUtilizablesCc0Test(unittest.TestCase):
