@@ -192,12 +192,40 @@ func _probar_navegador() -> void:
 	navegador.alternar_favorito_actual()
 	_comprobar(navegador.favoritos().has("http://byte.local/"), "permite marcar favoritos")
 
+	var historial_antes_recarga := navegador.historial()
+	var recargado := navegador.recargar()
+	_comprobar(recargado["estado"] == "ok", "recargar vuelve a resolver la página actual")
+	_comprobar(
+		navegador.historial() == historial_antes_recarga,
+		"recargar no contamina el historial de navegación",
+	)
+
+	var escala_inicial := navegador.escala_texto()
+	navegador.ajustar_escala_texto(NavegadorSiga.ESCALA_TEXTO_PASO)
+	_comprobar(
+		is_equal_approx(
+			navegador.escala_texto(),
+			escala_inicial + NavegadorSiga.ESCALA_TEXTO_PASO,
+		),
+		"el navegador permite ampliar el texto",
+	)
+	for paso in range(10):
+		navegador.ajustar_escala_texto(NavegadorSiga.ESCALA_TEXTO_PASO)
+	_comprobar(
+		is_equal_approx(navegador.escala_texto(), NavegadorSiga.ESCALA_TEXTO_MAX),
+		"el escalado de texto respeta un máximo legible",
+	)
+
 	var estado := navegador.exportar_estado()
 	var restaurado := NavegadorSiga.new()
 	restaurado.configurar_contexto({"dia": 1, "conocimiento": [], "urls_caidas": []})
 	restaurado.configurar_estado(estado)
 	_comprobar(restaurado.historial() == navegador.historial(), "restaura historial persistible")
 	_comprobar(restaurado.favoritos() == navegador.favoritos(), "restaura favoritos persistibles")
+	_comprobar(
+		is_equal_approx(restaurado.escala_texto(), navegador.escala_texto()),
+		"restaura la escala de texto persistible",
+	)
 	_comprobar(
 		restaurado.navegar("http://intranet.dgai/diag/enlace13/")["estado"] == "no_encontrado",
 		"el navegador no salta el gating de conocimiento",
