@@ -42,7 +42,7 @@ static func crear(
 	return ecos
 
 
-## Restaura estado e intentos, pero reconstruye el contenido desde la frase
+## Restaura estado, selección e intentos, pero reconstruye el contenido desde la frase
 ## original y vuelve a validar el folio mediante PuzzleOnirico.
 static func restaurar(datos: Dictionary, frase: String, leido_hoy: Array):
 	var base = Puzzle.restaurar(datos.get("nucleo", {}), leido_hoy)
@@ -90,10 +90,9 @@ func ecos_presentados() -> Array:
 ## Prueba una secuencia de ids canónicos.
 ##
 ## Una entrada mal formada no gasta intento: pulsar dos veces por rebote o un
-## estado incompleto de UI no debe acercar al jugador al castigo. La UI permite
-## deshacer mientras la secuencia esté incompleta, pero elegir el tercer eco
-## compromete la respuesta: un orden incorrecto dispersa los ecos de inmediato.
-## Así el puzzle recompensa reconstruir la frase, no enumerar permutaciones.
+## estado incompleto de UI no debe acercar al jugador al castigo. Solo una
+## secuencia completa llega aquí desde la confirmación explícita; un orden
+## incorrecto dispersa los ecos de inmediato, sin permitir enumerar permutaciones.
 func probar(orden: Array) -> String:
 	if nucleo == null or not nucleo.pendiente():
 		return "cerrado"
