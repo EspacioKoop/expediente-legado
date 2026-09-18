@@ -32,9 +32,41 @@ static func resolver_cierre(estado: Dictionary, caso: Dictionary, acusacion: Dic
 			resultado = false
 		"documento_clave":
 			resultado = tipo_documento_clave(caso, estado.get("pistas_descubiertas", []))
+		"tarot":
+			var vistos_bruto = actual.get("tarot_vistos", [])
+			var vistos: Array = vistos_bruto if typeof(vistos_bruto) == TYPE_ARRAY else []
+			resultado = null if vistos.is_empty() else String(vistos[0])
 		_:
 			resultado = null
 	return Pronosticos.resolver(pronosticos, expediente_id, resultado)
+
+
+## Un pronóstico de Tarot se decide solo por un hallazgo nuevo producido
+## mientras se audita ese expediente. Cartas que ya estaban recogidas no pasan
+## por este método, y una apuesta de otro tipo queda intacta.
+static func resolver_tarot(estado: Dictionary, expediente_id: String, carta_id: String) -> String:
+	var pronosticos: Dictionary = estado.get("pronosticos", {})
+	Pronosticos.completar(pronosticos)
+	estado["pronosticos"] = pronosticos
+
+	var actual := _actual(pronosticos, expediente_id)
+	if (
+		expediente_id.is_empty()
+		or carta_id.is_empty()
+		or actual.is_empty()
+		or String(actual.get("estado", "")) != Pronosticos.ESTADO_ABIERTO
+		or String(actual.get("tipo", "")) != "tarot"
+	):
+		return Pronosticos.estado_de(pronosticos, expediente_id)
+
+	var vistos_bruto = actual.get("tarot_vistos", [])
+	var vistos: Array = vistos_bruto if typeof(vistos_bruto) == TYPE_ARRAY else []
+	if not vistos.has(carta_id):
+		vistos.append(carta_id)
+		actual["tarot_vistos"] = vistos
+	if String(actual.get("valor", "")) == carta_id:
+		return Pronosticos.resolver(pronosticos, expediente_id, carta_id)
+	return Pronosticos.ESTADO_ABIERTO
 
 
 ## Al abandonar la oficina ya no puede ocurrir ningún cierre más ese día.

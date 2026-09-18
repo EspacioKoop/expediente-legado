@@ -385,9 +385,11 @@ func _sincronizar_tarot_por_pista() -> void:
 	var carta := _carta_de(tarot, "el-mago")
 	if carta.is_empty():
 		return
-	Prometeo.desbloquear_carta(tarot, "el-mago")
+	var nueva := Prometeo.desbloquear_carta(tarot, "el-mago")
 	if not carta.get("recogida", false):
 		return
+	if nueva:
+		_al_carta_desbloqueada("el-mago")
 
 	# #46 separa posesión per-run de memoria fantasma permanente.
 	var conocidas: Array = partida.estado.get("cartas_conocidas", [])
@@ -409,6 +411,7 @@ func _al_encontrar_carta(carta_id: String) -> void:
 		_abrir_historia(carta_id)
 		return
 
+	_al_carta_desbloqueada(carta_id)
 	_guardar_o_avisar()
 	_estado.text = tr("VISOR_CARTA") % carta_id
 	_refrescar_estado()
@@ -422,6 +425,13 @@ func _al_encontrar_carta(carta_id: String) -> void:
 		TarotCinematica.ID,
 		partida.estado
 	)
+
+
+## Hook de dominio para capas que reaccionan a un hallazgo real de Tarot.
+## Se invoca solo cuando `Prometeo.desbloquear_carta` cambia una carta de
+## no recogida a recogida y siempre antes del guardado que persiste el hallazgo.
+func _al_carta_desbloqueada(_carta_id: String) -> void:
+	pass
 
 
 func _carta_de(tarot: Array, carta_id: String) -> Dictionary:

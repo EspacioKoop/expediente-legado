@@ -12,6 +12,7 @@ const TIPOS := [
 	{"id": "cierre_hoy", "texto": "VISOR_PRONOSTICO_CIERRE"},
 	{"id": "arrastra_manana", "texto": "VISOR_PRONOSTICO_ARRASTRA"},
 	{"id": "documento_clave", "texto": "VISOR_PRONOSTICO_DOCUMENTO"},
+	{"id": "tarot", "texto": "VISOR_PRONOSTICO_TAROT"},
 ]
 
 var _pronostico_tipo: OptionButton
@@ -100,6 +101,19 @@ func _rellenar_valores_pronostico() -> void:
 			_pronostico_valor.add_item(nombre.capitalize())
 			_pronostico_valor.set_item_metadata(_pronostico_valor.item_count - 1, nombre)
 		return
+	if tipo == "tarot":
+		for carta in partida.estado.get("tarot", []):
+			if carta.get("recogida", false):
+				continue
+			var carta_id := String(carta.get("id", "")).strip_edges()
+			var nombre_carta := String(carta.get("nombre", "")).strip_edges()
+			if carta_id.is_empty():
+				continue
+			_pronostico_valor.add_item(
+				nombre_carta if not nombre_carta.is_empty() else carta_id.capitalize()
+			)
+			_pronostico_valor.set_item_metadata(_pronostico_valor.item_count - 1, carta_id)
+		return
 
 	_pronostico_valor.add_item(tr("VISOR_PRONOSTICO_SI"))
 	_pronostico_valor.set_item_metadata(0, true)
@@ -117,6 +131,12 @@ func _valor_seleccionado():
 	if _pronostico_valor == null or _pronostico_valor.item_count == 0:
 		return null
 	return _pronostico_valor.get_item_metadata(_pronostico_valor.selected)
+
+
+func _al_carta_desbloqueada(carta_id: String) -> void:
+	PronosticosAuditoria.resolver_tarot(partida.estado, String(caso.get("id", "")), carta_id)
+	_actualizar_pronostico()
+	super._al_carta_desbloqueada(carta_id)
 
 
 func _al_firmar(resultado: Dictionary, formulario: Control) -> void:
@@ -212,7 +232,11 @@ func _nombre_tipo(tipo: String) -> String:
 func _texto_valor(valor) -> String:
 	if typeof(valor) == TYPE_BOOL:
 		return tr("VISOR_PRONOSTICO_SI") if valor else tr("VISOR_PRONOSTICO_NO")
-	return String(valor).capitalize()
+	var texto := String(valor)
+	for carta in partida.estado.get("tarot", []):
+		if String(carta.get("id", "")) == texto:
+			return String(carta.get("nombre", texto.capitalize()))
+	return texto.capitalize()
 
 
 func _nombre_estado(estado: String) -> String:
