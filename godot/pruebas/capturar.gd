@@ -231,9 +231,7 @@ func _init() -> void:
 ## haya ganado El Mago antes de construir una vista 3D de inspección. Esa vista
 ## es solo evidencia visual; no abre la historia política porque las cartas de
 ## progreso no son los ocho hallazgos documentales de #71.
-func _capturar_tarot_progreso(
-	escena: Node, destino: String, argumentos: PackedStringArray
-) -> int:
+func _capturar_tarot_progreso(escena: Node, destino: String, argumentos: PackedStringArray) -> int:
 	if OS.get_environment("XDG_DATA_HOME").is_empty():
 		printerr("La captura tarot exige XDG_DATA_HOME temporal para no tocar una partida real")
 		return 1
