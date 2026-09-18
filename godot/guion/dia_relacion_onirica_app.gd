@@ -112,9 +112,7 @@ func _montar_relacion(
 		return
 	var caso_id := String(caso.get("id", ""))
 	var reward_id := String(pista.get("id", ""))
-	vertical.estado_cambiado.connect(
-		_al_cambiar_relacion.bind(dia, relacion, caso_id, reward_id)
-	)
+	vertical.estado_cambiado.connect(_al_cambiar_relacion.bind(dia, relacion, caso_id, reward_id))
 	mundo.add_child(vertical)
 	mundo.set_meta("puzzle_onirico_montado", "relacion")
 	_relacion_activa = vertical
