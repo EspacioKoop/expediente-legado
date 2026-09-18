@@ -10,6 +10,9 @@ signal estado_cambiado(estado: Dictionary)
 
 const URL_INICIO := "http://intranet.dgai/"
 const TEXTURA_CABECERAS_PRENSA := preload("res://arte/os98/prensa_cabeceras_98.svg")
+const ESCALA_TEXTO_MIN := 0.8
+const ESCALA_TEXTO_MAX := 1.6
+const ESCALA_TEXTO_PASO := 0.2
 
 var _indice := Web98Indice.new()
 var _prensa := Web98Prensa.new()
@@ -18,6 +21,7 @@ var _historial: Array[String] = []
 var _indice_historial := -1
 var _favoritos: Array[String] = []
 var _resultado_actual: Dictionary = {}
+var _escala_texto := 1.0
 
 var _atras: Button
 var _adelante: Button
@@ -46,7 +50,11 @@ func configurar_estado(estado: Dictionary) -> void:
 	_indice_historial = clampi(
 		int(estado.get("indice_historial", _historial.size() - 1)), -1, _historial.size() - 1
 	)
+	_escala_texto = clampf(
+		float(estado.get("escala_texto", 1.0)), ESCALA_TEXTO_MIN, ESCALA_TEXTO_MAX
+	)
 	if is_node_ready():
+		_aplicar_escala_texto()
 		_refrescar_laterales()
 		if _indice_historial >= 0:
 			_resolver_sin_historial(_historial[_indice_historial])
@@ -57,6 +65,7 @@ func exportar_estado() -> Dictionary:
 		"historial": _historial.duplicate(),
 		"indice_historial": _indice_historial,
 		"favoritos": _favoritos.duplicate(),
+		"escala_texto": _escala_texto,
 	}
 
 
@@ -66,6 +75,29 @@ func historial() -> Array[String]:
 
 func favoritos() -> Array[String]:
 	return _favoritos.duplicate()
+
+
+func escala_texto() -> float:
+	return _escala_texto
+
+
+func ajustar_escala_texto(delta: float) -> void:
+	_escala_texto = clampf(
+		snappedf(_escala_texto + delta, ESCALA_TEXTO_PASO),
+		ESCALA_TEXTO_MIN,
+		ESCALA_TEXTO_MAX,
+	)
+	if is_node_ready():
+		_aplicar_escala_texto()
+	_emitir_estado()
+
+
+func recargar() -> Dictionary:
+	var url := url_actual()
+	if url.is_empty():
+		return {}
+	_resolver_sin_historial(url)
+	return _resultado_actual.duplicate(true)
 
 
 func url_actual() -> String:
@@ -134,6 +166,7 @@ func _ready() -> void:
 	_indice.configurar_contexto(_contexto)
 	_prensa.configurar_contexto(_contexto)
 	_construir_interfaz()
+	_aplicar_escala_texto()
 	if _indice_historial >= 0 and _indice_historial < _historial.size():
 		_resolver_sin_historial(_historial[_indice_historial])
 	else:
@@ -157,6 +190,12 @@ func _construir_interfaz() -> void:
 	_adelante.pressed.connect(ir_adelante)
 	barra.add_child(_adelante)
 
+	var boton_recargar := Button.new()
+	boton_recargar.text = tr("NAVEGADOR_RECARGAR")
+	boton_recargar.tooltip_text = tr("NAVEGADOR_ATAJO_RECARGAR")
+	boton_recargar.pressed.connect(recargar)
+	barra.add_child(boton_recargar)
+
 	var inicio := Button.new()
 	inicio.text = tr("NAVEGADOR_INICIO")
 	inicio.pressed.connect(func() -> void: navegar(URL_INICIO))
@@ -164,6 +203,7 @@ func _construir_interfaz() -> void:
 
 	_direccion = LineEdit.new()
 	_direccion.placeholder_text = tr("NAVEGADOR_DIRECCION")
+	_direccion.tooltip_text = tr("NAVEGADOR_ATAJO_DIRECCION")
 	_direccion.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_direccion.text_submitted.connect(func(texto: String) -> void: navegar(texto))
 	barra.add_child(_direccion)
@@ -178,6 +218,16 @@ func _construir_interfaz() -> void:
 	_favorito.pressed.connect(alternar_favorito_actual)
 	barra.add_child(_favorito)
 
+	var texto_menos := Button.new()
+	texto_menos.text = tr("NAVEGADOR_TEXTO_MENOS")
+	texto_menos.pressed.connect(func() -> void: ajustar_escala_texto(-ESCALA_TEXTO_PASO))
+	barra.add_child(texto_menos)
+
+	var texto_mas := Button.new()
+	texto_mas.text = tr("NAVEGADOR_TEXTO_MAS")
+	texto_mas.pressed.connect(func() -> void: ajustar_escala_texto(ESCALA_TEXTO_PASO))
+	barra.add_child(texto_mas)
+
 	_cache = Button.new()
 	_cache.text = tr("NAVEGADOR_CACHE")
 	_cache.visible = false
@@ -190,6 +240,7 @@ func _construir_interfaz() -> void:
 	etiqueta.text = tr("NAVEGADOR_BUSCAR_ETIQUETA")
 	barra_busqueda.add_child(etiqueta)
 	_busqueda = LineEdit.new()
+	_busqueda.tooltip_text = tr("NAVEGADOR_ATAJO_BUSCAR")
 	_busqueda.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_busqueda.text_submitted.connect(_mostrar_busqueda)
 	barra_busqueda.add_child(_busqueda)
@@ -217,6 +268,7 @@ func _construir_interfaz() -> void:
 	_pagina.bbcode_enabled = true
 	_pagina.fit_content = false
 	_pagina.selection_enabled = true
+	_pagina.focus_mode = Control.FOCUS_ALL
 	_pagina.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	principal.add_child(_pagina)
 
@@ -326,9 +378,7 @@ func _texto_portada_prensa(portada: Dictionary) -> String:
 			continue
 		var articulo := articulo_valor as Dictionary
 		var tratamiento: Dictionary = articulo.get("tratamiento", {})
-		bloques.append(
-			"[b][font_size=18]%s[/font_size][/b]" % String(tratamiento.get("titular", ""))
-		)
+		bloques.append("[b]%s[/b]" % String(tratamiento.get("titular", "")))
 		bloques.append(String(tratamiento.get("entradilla", "")))
 		var datos: Variant = articulo.get("datos_destacados", [])
 		if datos is Array:
@@ -407,6 +457,52 @@ func _refrescar_laterales() -> void:
 	for url in _favoritos:
 		var indice_item := _favoritos_lista.add_item(url)
 		_favoritos_lista.set_item_metadata(indice_item, url)
+
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	if not event is InputEventKey:
+		return
+	var tecla := event as InputEventKey
+	if not tecla.pressed or tecla.echo:
+		return
+	if tecla.ctrl_pressed and tecla.keycode == KEY_L and is_instance_valid(_direccion):
+		_direccion.grab_focus()
+		_direccion.select_all()
+		get_viewport().set_input_as_handled()
+		return
+	if tecla.ctrl_pressed and tecla.keycode == KEY_F and is_instance_valid(_busqueda):
+		_busqueda.grab_focus()
+		_busqueda.select_all()
+		get_viewport().set_input_as_handled()
+		return
+	if tecla.alt_pressed and tecla.keycode == KEY_LEFT:
+		ir_atras()
+		get_viewport().set_input_as_handled()
+		return
+	if tecla.alt_pressed and tecla.keycode == KEY_RIGHT:
+		ir_adelante()
+		get_viewport().set_input_as_handled()
+		return
+	if tecla.keycode == KEY_F5:
+		recargar()
+		get_viewport().set_input_as_handled()
+
+
+func _aplicar_escala_texto() -> void:
+	if _pagina == null:
+		return
+	var cuerpo := roundi(16.0 * _escala_texto)
+	var lista := roundi(14.0 * _escala_texto)
+	_pagina.add_theme_font_size_override("normal_font_size", cuerpo)
+	_pagina.add_theme_font_size_override("bold_font_size", cuerpo)
+	_pagina.add_theme_font_size_override("italics_font_size", cuerpo)
+	_pagina.add_theme_font_size_override("bold_italics_font_size", cuerpo)
+	_pagina.add_theme_font_size_override("mono_font_size", cuerpo)
+	_enlaces.add_theme_font_size_override("font_size", lista)
+	_historial_lista.add_theme_font_size_override("font_size", lista)
+	_favoritos_lista.add_theme_font_size_override("font_size", lista)
+	_direccion.add_theme_font_size_override("font_size", lista)
+	_busqueda.add_theme_font_size_override("font_size", lista)
 
 
 func _emitir_estado() -> void:

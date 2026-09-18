@@ -170,6 +170,9 @@ ESCRITORIO_RELOJ_VACIO,DÍA --
 ESCRITORIO_SIGA_TITULO,SIGA-98
 NAVEGADOR_ADELANTE,Adelante
 NAVEGADOR_ATRAS,Atrás
+NAVEGADOR_ATAJO_BUSCAR,Buscar en Web98 (Ctrl+F)
+NAVEGADOR_ATAJO_DIRECCION,Ir a la barra de dirección (Ctrl+L)
+NAVEGADOR_ATAJO_RECARGAR,Recargar la página actual (F5)
 NAVEGADOR_BUSCAR,Buscar
 NAVEGADOR_BUSCAR_ETIQUETA,Buscar:
 NAVEGADOR_CACHE,Ver caché
@@ -190,9 +193,12 @@ NAVEGADOR_PRENSA_EDICION,Edición Web98 · jornada %d
 NAVEGADOR_PRENSA_OPINION,[i]Opinión · %s[/i]
 NAVEGADOR_PRENSA_SIN_ARTICULOS,No hay artículos disponibles para esta jornada.
 NAVEGADOR_QUITAR_FAVORITO,Quitar favorito
+NAVEGADOR_RECARGAR,Recargar
 NAVEGADOR_RESULTADOS,[b]Resultados para «%s»[/b]\n\n%d coincidencias en el índice local.
 NAVEGADOR_SERVIDOR_CAIDO,[b]Servidor no disponible[/b]\n%s\n\nEl servidor simulado no responde.
 NAVEGADOR_SIN_TITULO,Sin título
+NAVEGADOR_TEXTO_MAS,Texto +
+NAVEGADOR_TEXTO_MENOS,Texto −
 EXPLORADOR_ATRAS,Atrás
 EXPLORADOR_ADELANTE,Adelante
 EXPLORADOR_SUBIR,Subir un nivel
