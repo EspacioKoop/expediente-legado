@@ -12,6 +12,12 @@ const FUENTE_VIGILIA := "libro:arqueologia_uruk_98"
 const PAGINAS_MINIMAS := 3
 const FRAGMENTOS_NECESARIOS := 4
 const TRANSFORMACION_FINAL := "muralla_archivo_continua_por_techo"
+const TEXTURAS_FRAGMENTOS := {
+	"fragmento_puerta": preload("res://arte/gilgamesh/fragmento_puerta.svg"),
+	"fragmento_sello": preload("res://arte/gilgamesh/fragmento_sello.svg"),
+	"fragmento_ola": preload("res://arte/gilgamesh/fragmento_ola.svg"),
+	"fragmento_archivo": preload("res://arte/gilgamesh/fragmento_archivo.svg"),
+}
 
 ## Las parejas son explícitas para que el puzzle no dependa de ensayo ciego.
 ## En la escena cada fragmento y su ancla comparten silueta/proporción y color.
@@ -267,17 +273,47 @@ func _montar_puzzle(ciudad: Node3D) -> void:
 			color,
 			true,
 		)
+		_montar_motivo_visual(pieza, fragmento, tam)
 		_fragmentos[fragmento] = pieza
 
 		var ancla_id: String = ENCAJES[fragmento]
+		var tam_ancla := tam + Vector3(0.16, 0.10, 0.16)
 		var ancla := _crear_caja(
 			puzzle,
 			ancla_id,
-			tam + Vector3(0.16, 0.10, 0.16),
+			tam_ancla,
 			Vector3(-5.4 + i * 3.6, 0.48, 1.8),
 			color.darkened(0.42),
 		)
+		_montar_motivo_visual(ancla, fragmento, tam_ancla, true)
 		_anclas[fragmento] = ancla
+
+
+## Las piezas y sus anclas comparten el mismo motivo propio. La lámina cuelga
+## del MeshInstance3D dinámico: al ocultarse una pieza resuelta desaparece con
+## ella y no puede quedar desincronizada del estado lógico del puzzle.
+func _montar_motivo_visual(
+	soporte: MeshInstance3D,
+	fragmento: String,
+	tam: Vector3,
+	ancla: bool = false,
+) -> void:
+	if not TEXTURAS_FRAGMENTOS.has(fragmento):
+		return
+	var lamina := MeshInstance3D.new()
+	lamina.name = "MotivoVisual"
+	var malla := QuadMesh.new()
+	malla.size = Vector2(max(0.26, tam.x * 0.78), max(0.26, tam.y * 0.78))
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	material.albedo_texture = TEXTURAS_FRAGMENTOS[fragmento]
+	material.albedo_color = Color(1.0, 1.0, 1.0, 0.38 if ancla else 1.0)
+	malla.material = material
+	lamina.mesh = malla
+	lamina.position = Vector3(0.0, 0.0, tam.z * 0.5 + 0.012)
+	soporte.add_child(lamina)
 
 
 func _montar_salida(ciudad: Node3D) -> void:

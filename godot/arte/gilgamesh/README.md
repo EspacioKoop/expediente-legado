@@ -10,7 +10,7 @@ Assets vectoriales creados para el sueño de Gilgamesh y su contraparte de vigil
 
 ## Integración
 
-`res://escenas/sueno_gilgamesh.tscn` usa ya la muralla híbrida, los sellos y el cielo mecanografiado como capa ambiental. Los cuatro fragmentos y la lámina de vigilia se mantienen fuera de la lógica interactiva para no desincronizar visibilidad/progreso; pueden revisarse juntos en `res://escenas/gilgamesh_arte_preview.tscn` antes de conectarlos a los materiales dinámicos del puzzle.
+`res://escenas/sueno_gilgamesh.tscn` usa la muralla híbrida, los sellos y el cielo mecanografiado como capa ambiental. `SuenoGilgamesh` conecta además los cuatro `fragmento_*.svg` a las piezas y a sus anclas dinámicas: cada motivo cuelga del mismo `MeshInstance3D` que gobierna el puzzle, así que al resolver una pieza su lámina desaparece con ella y no puede quedar desincronizada del progreso. `res://escenas/gilgamesh_arte_preview.tscn` se conserva como vista de revisión del paquete gráfico. La lámina de vigilia sigue siendo únicamente material de revisión hasta que el libro necesite un pase visual específico.
 
 ## Origen y licencia
 

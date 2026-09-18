@@ -170,23 +170,33 @@ func _probar_vertical_3d() -> void:
 	var techo := sueno.get_node_or_null("CiudadImposible/MurallaArchivoTecho") as Node3D
 	_comprobar(techo != null, "existe la continuidad imposible por el techo")
 	_comprobar(not techo.visible, "la continuidad cenital empieza oculta")
-	_comprobar(
-		sueno.get_node_or_null("CiudadImposible/PuzzleTablilla") != null,
-		"el puzzle vive dentro de la escena 3D y no en HUD",
-	)
+	var puzzle := sueno.get_node_or_null("CiudadImposible/PuzzleTablilla") as Node3D
+	_comprobar(puzzle != null, "el puzzle vive dentro de la escena 3D y no en HUD")
 
 	var ids: Array = SuenoGilgamesh.ENCAJES.keys()
 	ids.sort()
 	for fragmento in ids:
+		var pieza := puzzle.get_node(fragmento) as MeshInstance3D
+		var ancla_id := String(SuenoGilgamesh.ENCAJES[fragmento])
+		var ancla := puzzle.get_node(ancla_id) as MeshInstance3D
+		var motivo_pieza := pieza.get_node_or_null("MotivoVisual") as MeshInstance3D
+		var motivo_ancla := ancla.get_node_or_null("MotivoVisual") as MeshInstance3D
+		_comprobar(motivo_pieza != null, "%s lleva su motivo visual propio" % fragmento)
+		_comprobar(motivo_ancla != null, "%s comparte motivo con su ancla" % fragmento)
 		var resultado := (
 			sueno
 			. colocar_fragmento(
 				fragmento,
-				SuenoGilgamesh.ENCAJES[fragmento],
+				ancla_id,
 				true,
 			)
 		)
 		_comprobar(resultado["aceptada"], "la instancia acepta %s" % fragmento)
+		_comprobar(not pieza.visible, "%s desaparece al resolverse" % fragmento)
+		_comprobar(
+			motivo_pieza.get_parent() == pieza,
+			"%s mantiene el motivo ligado a la pieza que gobierna su visibilidad" % fragmento,
+		)
 
 	_comprobar(sueno.resuelto(), "los cuatro aciertos resuelven la instancia")
 	_comprobar(techo.visible, "resolver revela la muralla que continúa por el techo")
