@@ -12,6 +12,10 @@ const ESCENA_TAQUILLAS := preload("res://escenas/suenos/props_284/taquillas_esco
 const ESCENA_RELOJ := preload("res://escenas/suenos/props_284/reloj_escolar_anomalo.tscn")
 const ALTURA := 2.8
 const INTERVALO_TIMBRE := 7.5
+# La entrada de `crucero` cae junto al último fluorescente (z=10). La evidencia
+# sin HUD de #282 mostró que dejarlo solo como quad autoiluminado hunde los
+# pupitres/taquillas cercanos en sombra y hace leer la sala como vacío.
+const FLUORESCENTES_CON_LUZ := [0, 2, 4, 5]
 
 var _puertas: Array[Node3D] = []
 var _numeros: Array[Label3D] = []
@@ -178,7 +182,7 @@ func _montar_fluorescentes() -> void:
 		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		lampara.material_override = material
 		add_child(lampara)
-		if i % 2 == 0:
+		if FLUORESCENTES_CON_LUZ.has(i):
 			var luz := OmniLight3D.new()
 			luz.name = "LuzFluorescente%02d" % (i + 1)
 			luz.position = posiciones[i] + Vector3(0.0, -0.18, 0.0)
