@@ -19,18 +19,21 @@ static func actual(jornada: Dictionary) -> Dictionary:
 	if not valor is Dictionary:
 		return {}
 	var sesion: Dictionary = valor
-	if int(sesion.get("dia", -1)) != int(jornada.get("dia", 0)):
-		return {}
-	if not TIPOS.has(String(sesion.get("tipo", ""))):
-		return {}
-	if String(sesion.get("caso_id", "")).is_empty():
-		return {}
-	if String(sesion.get("reward_id", "")).is_empty():
-		return {}
-	var datos: Variant = sesion.get("datos", {})
-	if not datos is Dictionary or datos.is_empty():
+	if not _sesion_valida(sesion, jornada):
 		return {}
 	return sesion.duplicate(true)
+
+
+static func _sesion_valida(sesion: Dictionary, jornada: Dictionary) -> bool:
+	var datos: Variant = sesion.get("datos", {})
+	return (
+		int(sesion.get("dia", -1)) == int(jornada.get("dia", 0))
+		and TIPOS.has(String(sesion.get("tipo", "")))
+		and not String(sesion.get("caso_id", "")).is_empty()
+		and not String(sesion.get("reward_id", "")).is_empty()
+		and datos is Dictionary
+		and not datos.is_empty()
+	)
 
 
 static func guardar(
