@@ -48,7 +48,7 @@ func abandonar() -> bool:
 func _montar() -> void:
 	var regla := Label3D.new()
 	regla.name = "ReglaRelacion"
-	regla.text = tr("SUENO_RELACION_REGLA")
+	regla.text = tr("VISOR_ELIJA")
 	regla.position = Vector3(0.0, 2.85, 0.0)
 	regla.font_size = 36
 	regla.pixel_size = 0.004
@@ -150,8 +150,10 @@ func _sincronizar() -> void:
 	if relacion.nucleo.state == Puzzle.ESTADO_COMPLETADO:
 		_estado.text = recompensa_texto
 	elif relacion.nucleo.state == Puzzle.ESTADO_FALLADO:
-		_estado.text = tr("SUENO_RELACION_FALLO")
+		_estado.text = tr("GATO_SIGA_COMBINACION_FALLIDA")
 	elif relacion.nucleo.state == Puzzle.ESTADO_ABANDONADO:
-		_estado.text = tr("SUENO_RELACION_ABANDONADA")
+		_estado.visible = false
+	elif relacion.seleccion.is_empty():
+		_estado.text = tr("VISOR_ELIJA")
 	else:
-		_estado.text = tr("SUENO_RELACION_PROGRESO") % relacion.seleccion.size()
+		_estado.text = tr("VISOR_RELACION_DISTINTO")
