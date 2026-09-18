@@ -10,9 +10,12 @@
 ## que tengas un expediente firmado para que la captura enseñe otra cosa.
 ##
 ## Con un destino que contenga "tarot", el segundo argumento es el folio que
-## esconde la carta y el tercero el plano. Ojo: una carta se revela **una sola
-## vez**, así que cada plano necesita su propio temporal; reutilizarlo hace que
-## a partir del segundo no se abra ninguna cinemática.
+## esconde la carta, el tercero el plano y el cuarto modo opcional
+## (`normal`/`reducido`). El capturador localiza automáticamente el expediente
+## que contiene el folio: así la matriz de #645 no queda limitada al primer caso.
+## Ojo: una carta se revela **una sola vez**, así que cada plano necesita su propio
+## temporal; reutilizarlo hace que a partir del segundo no se abra ninguna
+## cinemática.
 ##
 ## Con un destino que contenga "dia", el segundo argumento es la FASE, y para
 ## la fase "sueño" el tercero es la sala que se quiere mirar.
@@ -226,21 +229,14 @@ func _init() -> void:
 ## existen para no cometer.
 func _capturar_tarot(escena: Node, destino: String, argumentos: PackedStringArray) -> int:
 	var folio_carta := String(argumentos[1]) if argumentos.size() > 1 else "ACTA-1999-014"
-	var oculta := CartasOcultas.en_folio(folio_carta)
-	if oculta.is_empty():
-		printerr("El folio %s no esconde ninguna carta" % folio_carta)
+	var modo := String(argumentos[3]) if argumentos.size() > 3 else "normal"
+	var preparada: Dictionary = await _preparar_captura_tarot(escena, folio_carta, modo)
+	if preparada.has("error"):
+		printerr(preparada["error"])
 		return 1
 
-	var registros: Array = escena.caso["registros"]
-	var cual := -1
-	for i in registros.size():
-		if registros[i]["folio"] == folio_carta:
-			cual = i
-			break
-	if cual < 0:
-		printerr("El folio %s no está en el expediente abierto" % folio_carta)
-		return 1
-
+	var oculta: Dictionary = preparada["oculta"]
+	var cual: int = preparada["documento"]
 	escena._lista.select(cual)
 	escena._al_elegir_documento(cual)
 	await process_frame
@@ -278,3 +274,57 @@ func _capturar_tarot(escena: Node, destino: String, argumentos: PackedStringArra
 	root.get_texture().get_image().save_png(destino)
 	print("captura en %s" % destino)
 	return 0
+
+
+## Resuelve el folio por el catálogo completo y prepara la preferencia de
+## movimiento. Devuelve datos o un único mensaje de error para que el camino de
+## captura tenga una sola responsabilidad y siga dentro del límite de lint.
+func _preparar_captura_tarot(escena: Node, folio_carta: String, modo: String) -> Dictionary:
+	var oculta := CartasOcultas.en_folio(folio_carta)
+	if oculta.is_empty():
+		return {"error": "El folio %s no esconde ninguna carta" % folio_carta}
+	if OS.get_environment("XDG_DATA_HOME").is_empty():
+		return {
+			"error": "La captura tarot exige XDG_DATA_HOME temporal para no tocar una partida real"
+		}
+
+	var indice_caso := -1
+	for i in escena.contenido.casos.size():
+		for registro in escena.contenido.casos[i].get("registros", []):
+			if registro.get("folio") == folio_carta:
+				indice_caso = i
+				break
+		if indice_caso >= 0:
+			break
+	if indice_caso < 0:
+		return {"error": "El folio %s no existe en ningún expediente" % folio_carta}
+
+	if escena.caso.get("id") != escena.contenido.casos[indice_caso].get("id"):
+		escena._archivo.select(indice_caso)
+		escena._al_elegir_caso(indice_caso)
+		await process_frame
+
+	var registros: Array = escena.caso["registros"]
+	var cual := -1
+	for i in registros.size():
+		if registros[i]["folio"] == folio_carta:
+			cual = i
+			break
+	if cual < 0:
+		return {"error": "El folio %s no está en el expediente abierto" % folio_carta}
+
+	var error_modo := _configurar_modo_tarot(modo)
+	if not error_modo.is_empty():
+		return {"error": error_modo}
+	return {"oculta": oculta, "documento": cual}
+
+
+func _configurar_modo_tarot(modo: String) -> String:
+	if modo not in ["normal", "reducido"]:
+		return "Modo tarot desconocido: %s (use normal o reducido)" % modo
+	if modo == "reducido":
+		var preferencias := PreferenciasSiga.cargar()
+		preferencias["reduccion_movimiento"] = true
+		if not PreferenciasSiga.guardar(preferencias):
+			return "No se pudo preparar reducción de movimiento en el temporal de QA"
+	return ""
