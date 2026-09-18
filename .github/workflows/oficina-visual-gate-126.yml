@@ -1,0 +1,98 @@
+name: Oficina visual gate 126
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/oficina-visual-gate-126.yml'
+      - 'godot/guion/espacios_catalogo.gd'
+      - 'godot/guion/oficina_*.gd'
+      - 'godot/guion/dia_dressing_cc0_app.gd'
+      - 'godot/guion/posters_oficina.gd'
+      - 'godot/guion/cuadros_oficina.gd'
+      - 'godot/arte/vintage_wooden_drawer.gd'
+      - 'godot/assets/modelos/**'
+      - 'godot/pruebas/capturas_oficina_126.gd'
+      - 'scripts/test_oficina_visual_gate_126.py'
+      - '.godot-version'
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/oficina-visual-gate-126.yml'
+      - 'godot/guion/espacios_catalogo.gd'
+      - 'godot/guion/oficina_*.gd'
+      - 'godot/guion/dia_dressing_cc0_app.gd'
+      - 'godot/guion/posters_oficina.gd'
+      - 'godot/guion/cuadros_oficina.gd'
+      - 'godot/arte/vintage_wooden_drawer.gd'
+      - 'godot/assets/modelos/**'
+      - 'godot/pruebas/capturas_oficina_126.gd'
+      - 'scripts/test_oficina_visual_gate_126.py'
+      - '.godot-version'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  capturas:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Instalar Godot declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Importar proyecto
+        run: godot4 --headless --editor --path godot --quit
+
+      - name: Preparar display virtual
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb xauth
+          fi
+
+      - name: Generar capturas de oficina #126
+        shell: bash
+        run: |
+          set -euo pipefail
+          salida="$GITHUB_WORKSPACE/dist/capturas-oficina-126"
+          rm -rf "$salida"
+          mkdir -p "$salida"
+          xvfb-run -a godot4 --path godot \
+            --script res://pruebas/capturas_oficina_126.gd -- "$salida"
+          test -f "$salida/README.md"
+          test -s "$salida/puestos-archivo.png"
+          test -s "$salida/acceso-ventanas.png"
+
+      - name: Adjuntar gate visual de oficina #126
+        uses: actions/upload-artifact@v4
+        with:
+          name: SIGA-98-oficina-visual-gate-126-${{ github.sha }}
+          path: dist/capturas-oficina-126
+          if-no-files-found: error
+          retention-days: 14
