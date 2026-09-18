@@ -66,7 +66,6 @@ class MaterialesSuenoTest(unittest.TestCase):
                 self.assertEqual(len(valores), 3)
                 self.assertGreater(len({round(abs(v), 3) for v in valores}), 1)
 
-
     def test_la_luz_espacial_preserva_legibilidad_material(self):
         energia = re.search(
             r"const ENERGIA_LUZ_MATERIAL := ([0-9.]+)",
@@ -89,6 +88,34 @@ class MaterialesSuenoTest(unittest.TestCase):
             len(IDS),
         )
         self.assertEqual(self.formas.count('"ambiente_energia": 0.42'), len(IDS))
+
+    def test_el_contraste_onirico_refuerza_solo_la_trama_procedural(self):
+        constante = re.search(
+            r"const CONTRASTE_MATERIAL_ONIRICO := ([0-9.]+)",
+            self.formas,
+        )
+        self.assertIsNotNone(constante)
+        self.assertGreaterEqual(float(constante.group(1)), 1.5)
+        self.assertEqual(
+            self.formas.count('"contraste_textura": CONTRASTE_MATERIAL_ONIRICO'),
+            len(IDS),
+        )
+        self.assertIn(
+            '"contraste_textura": forma.get("contraste_textura", 1.0)',
+            self.sueno,
+        )
+        self.assertIn(
+            'espacio.get("contraste_textura", 1.0)',
+            self.espacio,
+        )
+        self.assertGreaterEqual(
+            self.espacio.count('set_shader_parameter('),
+            2,
+        )
+        self.assertIn(
+            '"contraste_textura", 1.0 if textura.begins_with("res://") else contraste',
+            self.espacio,
+        )
 
     def test_hay_inversion_deliberada_en_al_menos_una_forma(self):
         vectores = re.findall(
@@ -119,6 +146,14 @@ class MaterialesSuenoTest(unittest.TestCase):
     def test_el_shader_mantiene_el_mundo_normal_por_defecto(self):
         self.assertIn(
             "uniform vec3 deformacion_textura = vec3(1.0);",
+            self.shader,
+        )
+        self.assertIn(
+            "uniform float contraste_textura = 1.0;",
+            self.shader,
+        )
+        self.assertIn(
+            "color_base.rgb + (muestra - color_base.rgb) * contraste_textura",
             self.shader,
         )
         self.assertIn(
