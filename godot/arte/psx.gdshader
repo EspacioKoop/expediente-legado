@@ -34,10 +34,6 @@ uniform float escala_textura = 1.0;
 // el sueño puede estirar o invertir una superficie reconocible sin necesitar
 // otra textura ni romper el contrato triplanar.
 uniform vec3 deformacion_textura = vec3(1.0);
-// Realce opt-in de la textura en la contribución emisiva. Cero conserva el
-// mundo normal; el sueño usa una fracción baja para que la trama no desaparezca
-// al quedar bajo el suelo de iluminación y cuantización.
-uniform float realce_textura = 0.0;
 uniform vec4 emision : source_color = vec4(0.0);
 uniform float emision_fuerza = 0.0;
 
@@ -104,19 +100,17 @@ float bayer_4x4(vec2 pixel) {
 
 void fragment() {
 	vec3 color = color_base.rgb;
-	vec3 muestra_textura = vec3(0.0);
 	if (con_textura) {
 		if (usar_uv) {
-			muestra_textura = texture(textura, UV).rgb * color_base.rgb;
+			color = texture(textura, UV).rgb * color_base.rgb;
 		} else {
-			muestra_textura = muestra_triplanar(mundo, NORMAL);
+			color = muestra_triplanar(mundo, NORMAL);
 		}
-		color = muestra_textura;
 	}
 
 	float niveles = max(tonos, 1.0);
 	float error_ordenado = (bayer_4x4(FRAGCOORD.xy) - 0.5) * dithering / niveles;
 	color = clamp(color + vec3(error_ordenado), vec3(0.0), vec3(1.0));
 	ALBEDO = floor(color * niveles) / niveles;
-	EMISSION = emision.rgb * emision_fuerza + muestra_textura * realce_textura;
+	EMISSION = emision.rgb * emision_fuerza;
 }
