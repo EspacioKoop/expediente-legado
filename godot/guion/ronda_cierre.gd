@@ -99,6 +99,50 @@ static func finalizar(estado: Dictionary) -> String:
 	return rango
 
 
+## Valida el fragmento persistido antes de que Partida lo acepte.
+static func validar(estado: Dictionary) -> Array:
+	if estado.is_empty():
+		return []
+	var errores := []
+	var dia = estado.get("dia")
+	if (
+		typeof(dia) not in [TYPE_INT, TYPE_FLOAT]
+		or not is_finite(float(dia))
+		or floor(float(dia)) != float(dia)
+		or float(dia) < 1.0
+	):
+		errores.append("dia inválido")
+	for clave in ["ruta", "completados"]:
+		if typeof(estado.get(clave)) != TYPE_ARRAY:
+			errores.append("%s no es una lista" % clave)
+	for clave in ["abandonada", "finalizada"]:
+		if typeof(estado.get(clave)) != TYPE_BOOL:
+			errores.append("%s inválido" % clave)
+	var rango := String(estado.get("rango", ""))
+	if not [INCOMPLETA, CORRECTA, IMPECABLE, ABANDONADA].has(rango):
+		errores.append("rango inválido")
+	if errores.is_empty():
+		var ruta: Array = estado["ruta"]
+		var completados: Array = estado["completados"]
+		if ruta.size() < 3 or ruta.size() > 5:
+			errores.append("ruta inválida")
+		var permitidos := PUNTOS_BASE + [PUNTO_CUNADO]
+		var vistos := {}
+		for punto in ruta:
+			if typeof(punto) != TYPE_STRING or not permitidos.has(punto):
+				errores.append("ruta contiene punto inválido")
+				break
+			if vistos.has(punto):
+				errores.append("ruta contiene duplicados")
+				break
+			vistos[punto] = true
+		for punto in completados:
+			if typeof(punto) != TYPE_STRING or not ruta.has(punto):
+				errores.append("completados contiene punto inválido")
+				break
+	return errores
+
+
 static func progreso(estado: Dictionary) -> Dictionary:
 	var ruta: Array = estado.get("ruta", [])
 	var completados: Array = estado.get("completados", [])

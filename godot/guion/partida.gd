@@ -334,6 +334,12 @@ static func _validar_jornada(jornada: Dictionary) -> Array:
 			and not _entero_valido(gato["dias_sin_comer"], 0, Jornada.PACIENCIA_GATO + 1)
 		):
 			errores.append("gato.dias_sin_comer inválido")
+	if jornada.has("ronda_cierre"):
+		if typeof(jornada["ronda_cierre"]) != TYPE_DICTIONARY:
+			errores.append("jornada.ronda_cierre no es un objeto")
+		else:
+			for error in RondaCierre.validar(jornada["ronda_cierre"]):
+				errores.append("jornada.ronda_cierre.%s" % error)
 	for clave in ["leido_hoy", "mapa", "sueno_escenas", "mapa_anoche"]:
 		if jornada.has(clave) and typeof(jornada[clave]) != TYPE_ARRAY:
 			errores.append("jornada.%s no es una lista" % clave)
