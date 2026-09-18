@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class CinematicaFasesRealesTest(unittest.TestCase):
-    def test_casa_sueno_usa_enganches_reales_y_equivale_skip_fin(self):
+    def test_entrada_trayecto_y_sueno_usan_enganches_reales(self):
         importar_proyecto()
         with tempfile.TemporaryDirectory(prefix="legado-cinematica-280-") as temporal:
             entorno = os.environ.copy()
