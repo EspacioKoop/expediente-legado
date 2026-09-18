@@ -19,6 +19,7 @@ const LADO := 64
 ## superficie es el nombre del fichero: añadir un material es dejarlo aquí.
 const CARPETA := "res://assets/texturas/%s.jpg"
 
+
 ## Linóleo de oficina: un tono plano con motas. Es el suelo de cualquier
 ## edificio público de los 90 y lo que lo identifica son las manchas, no el
 ## color.
