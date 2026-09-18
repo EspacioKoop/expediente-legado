@@ -32,6 +32,19 @@ const METAL := Color(0.16, 0.17, 0.18)
 const TELES_Z := [-3.75, -2.25, -0.75, 0.75]
 const TELES_Y := [0.74, 1.64]
 const TAM_TELE := Vector3(0.62, 0.56, 0.5)
+# El escaparate real terminó creciendo a 2x4 en #398. #142 conserva seis
+# familias CRT y usa los dos aparatos extra para los estados históricos válidos:
+# media luna procedural y nieve.
+const EMISIONES_ESCAPARATE := [
+	{"contenido": "emision_crt", "canal": 0, "semilla": 1.0},
+	{"contenido": "emision_crt", "canal": 1, "semilla": 2.0},
+	{"contenido": "emision_crt", "canal": 2, "semilla": 3.0},
+	{"contenido": "emision_crt", "canal": 3, "semilla": 4.0},
+	{"contenido": "emision_crt", "canal": 4, "semilla": 5.0},
+	{"contenido": "emision_crt", "canal": 5, "semilla": 6.0},
+	{"contenido": "media_luna", "semilla": 7.0},
+	{"contenido": "", "semilla": 8.0},
+]
 
 const FAROLAS_Z := [-10.0, 0.0, 10.0]
 
@@ -415,8 +428,8 @@ static func _electrodomesticos(calle: Node3D) -> void:
 		Vector3(0.02, 2.0, 6.4),
 		Color(0.09, 0.08, 0.08)
 	)
-	# Dos baldas y cuatro televisores en cada una, todos con la misma emisión.
-	var emision: Material = null
+	# Dos baldas y cuatro televisores en cada una. Cada aparato monta su propia
+	# superficie para que el escaparate no vuelva a leerse como una imagen clonada.
 	for fila in TELES_Y.size():
 		var y: float = TELES_Y[fila]
 		_caja(
@@ -435,26 +448,18 @@ static func _electrodomesticos(calle: Node3D) -> void:
 			tele.rotation_degrees.y = 90.0
 			raiz.add_child(tele)
 			Modelos.mueble(tele, "televisionVintage", TAM_TELE, Color(0.30, 0.28, 0.26))
-			var pantalla: MeshInstance3D
+			var indice := fila * TELES_Z.size() + columna
+			var programa: Dictionary = EMISIONES_ESCAPARATE[indice]
 			var declaracion := {
 				"pos": Vector3(-5.84, y + 0.30, z),
 				"tam": Vector2(0.40, 0.30),
 				"giro": 90.0,
-				"contenido": "media_luna",
-				"semilla": 3.0,
+				"contenido": String(programa.get("contenido", "")),
+				"semilla": float(programa.get("semilla", indice + 1)),
 			}
-			if emision == null:
-				pantalla = Pantalla.montar(raiz, declaracion)
-				emision = pantalla.material_override
-			else:
-				pantalla = MeshInstance3D.new()
-				var plano := QuadMesh.new()
-				plano.size = declaracion["tam"]
-				pantalla.mesh = plano
-				pantalla.position = declaracion["pos"]
-				pantalla.rotation_degrees.y = 90.0
-				pantalla.material_override = emision
-				raiz.add_child(pantalla)
+			if programa.has("canal"):
+				declaracion["canal"] = int(programa["canal"])
+			var pantalla := Pantalla.montar(raiz, declaracion)
 			pantalla.name = "Pantalla%d_%d" % [fila, columna]
 
 
