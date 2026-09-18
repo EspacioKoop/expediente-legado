@@ -12,6 +12,9 @@ class TexturasPBRRuntimeTest(unittest.TestCase):
         cls.shader_psx = (ROOT / "godot/arte/psx.gdshader").read_text(encoding="utf-8")
         cls.loader = (ROOT / "godot/guion/texturas_pbr.gd").read_text(encoding="utf-8")
         cls.calle = (ROOT / "godot/guion/calle_materiales.gd").read_text(encoding="utf-8")
+        cls.texturas = (ROOT / "godot/guion/textura_procedural.gd").read_text(
+            encoding="utf-8"
+        )
 
     def test_shader_pbr_conserva_senales_psx(self):
         self.assertIn("rejilla", self.shader_pbr)
@@ -44,15 +47,22 @@ class TexturasPBRRuntimeTest(unittest.TestCase):
         self.assertIn('"revoco_urbano"', self.calle)
         self.assertIn("Color.WHITE", self.calle)
 
-    def test_calzada_y_aceras_solo_existen_con_pbr(self):
+    def test_calzada_y_aceras_tienen_fallback_sin_pbr(self):
         self.assertIn('"asfalto_urbano"', self.calle)
         self.assertIn('"acera_barcelona"', self.calle)
-        self.assertIn('"CalzadaPBR"', self.calle)
-        self.assertIn('"AceraOestePBR"', self.calle)
-        self.assertIn('"AceraEstePBR"', self.calle)
-        self.assertIn("var superficie := _superficie_suelo(ficha)", self.calle)
-        self.assertIn("if superficie != null:", self.calle)
-        self.assertIn("if material == null:\n\t\treturn null", self.calle)
+        self.assertIn('"CalzadaMaterial"', self.calle)
+        self.assertIn('"AceraOesteMaterial"', self.calle)
+        self.assertIn('"AceraEsteMaterial"', self.calle)
+        self.assertIn('"fallback_textura": "asfalto"', self.calle)
+        self.assertEqual(self.calle.count('"fallback_textura": "loseta_acera"'), 2)
+        self.assertIn("material = _material_fallback_suelo(ficha)", self.calle)
+        self.assertNotIn("if material == null:\n\t\treturn null", self.calle)
+
+    def test_fallback_de_acera_es_distinto_del_asfalto(self):
+        self.assertIn("static func loseta_acera", self.texturas)
+        self.assertIn('"loseta_acera":', self.texturas)
+        self.assertIn("range(0, LADO, 8)", self.texturas)
+        self.assertIn('"fallback_metros": 0.8', self.calle)
 
     def test_pieles_de_suelo_no_crean_colision(self):
         bloque = self.calle.split("static func _superficie_suelo", 1)[1].split(
