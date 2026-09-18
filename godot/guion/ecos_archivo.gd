@@ -18,6 +18,7 @@ const _RUTA_SCRIPT := "res://guion/ecos_archivo.gd"
 var nucleo
 var fragmentos: Array = []
 var presentacion: Array = []
+var seleccion: Array = []
 var intentos := 0
 
 
@@ -59,12 +60,20 @@ static func restaurar(datos: Dictionary, frase: String, leido_hoy: Array):
 	if base.state == Puzzle.ESTADO_FALLADO and usados != MAX_INTENTOS:
 		return null
 
+	var seleccion_guardada: Variant = datos.get("seleccion", [])
+	if not seleccion_guardada is Array:
+		return null
+	var seleccion := seleccion_guardada as Array
+	if not _seleccion_valida(seleccion):
+		return null
+
 	var ecos = _nueva_instancia()
 	if ecos == null:
 		return null
 	ecos.nucleo = base
 	ecos.fragmentos = partes
 	ecos.presentacion = _orden_presentacion(base.seed)
+	ecos.seleccion = seleccion.duplicate()
 	ecos.intentos = usados
 	return ecos
 
@@ -131,7 +140,11 @@ func politica_presentacion(reduccion_movimiento: bool) -> Dictionary:
 func serializar() -> Dictionary:
 	if nucleo == null:
 		return {}
-	return {"nucleo": nucleo.serializar(), "intentos": intentos}
+	return {
+		"nucleo": nucleo.serializar(),
+		"seleccion": seleccion.duplicate(),
+		"intentos": intentos,
+	}
 
 
 static func _fragmentar(frase: String) -> Array:
@@ -164,6 +177,20 @@ static func _orden_presentacion(semilla: int) -> Array:
 	if orden == [0, 1, 2]:
 		orden = [1, 2, 0]
 	return orden
+
+
+static func _seleccion_valida(valores: Array) -> bool:
+	if valores.size() > CANTIDAD_FRAGMENTOS:
+		return false
+	var vistos: Array = []
+	for valor in valores:
+		if typeof(valor) != TYPE_INT:
+			return false
+		var id := int(valor)
+		if id < 0 or id >= CANTIDAD_FRAGMENTOS or vistos.has(id):
+			return false
+		vistos.append(id)
+	return true
 
 
 static func _es_permutacion(orden: Array) -> bool:
