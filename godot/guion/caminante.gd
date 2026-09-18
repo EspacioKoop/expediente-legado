@@ -125,9 +125,7 @@ func enfocar_conversacion(objetivo: Node3D) -> void:
 
 	_tween_camara_dialogo = create_tween()
 	_tween_camara_dialogo.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	_tween_camara_dialogo.tween_property(
-		camara, "rotation", destino, DURACION_ENFOQUE_DIALOGO
-	)
+	_tween_camara_dialogo.tween_property(camara, "rotation", destino, DURACION_ENFOQUE_DIALOGO)
 
 
 func terminar_enfoque_conversacion() -> void:
