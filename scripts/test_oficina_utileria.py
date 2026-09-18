@@ -31,7 +31,7 @@ class OficinaUtileriaTest(unittest.TestCase):
         self.assertIn('path="res://guion/dia_oficina_utileria_app.gd" id="7"', self.escena)
         self.assertIn('[node name="OficinaUtileriaController"', self.escena)
         self.assertIn('String(dia.jornada.get("fase", "")) == "archivo"', self.controlador)
-        self.assertIn("OficinaUtileria.montar(mundo)", self.controlador)
+        self.assertIn("OficinaUtileria.montar(mundo, Jornada.PRECIO_CAFE)", self.controlador)
         self.assertNotIn('== "casa"', self.controlador)
         self.assertNotIn('== "trayecto"', self.controlador)
         self.assertNotIn('== "sueño"', self.controlador)
@@ -68,21 +68,31 @@ class OficinaUtileriaTest(unittest.TestCase):
         self.assertIn("_taza.visible = _taza_visible", self.cafe)
         self.assertIn("emission_enabled = _taza_visible", self.cafe)
         self.assertIn('maquina.name = "MaquinaCafeInteractuable"', self.utileria)
-        self.assertIn("maquina.configurar()", self.utileria)
+        self.assertIn("maquina.configurar(precio_cafe)", self.utileria)
 
-    def test_microinteraccion_no_toca_estado_persistente(self):
-        combinado = self.utileria + self.cafe + self.controlador
+    def test_maquina_y_utileria_no_deciden_economia(self):
+        combinado = self.utileria + self.cafe
         for termino in (
             "Partida",
             "Jornada",
             "inventario",
-            "dinero",
+            'jornada["dinero"]',
             "guardar(",
             "FileAccess",
             "InputEventKey",
             "KEY_",
         ):
             self.assertNotIn(termino, combinado)
+
+    def test_controller_es_el_unico_dueno_del_cafe_economico(self):
+        self.assertIn("Jornada.tomar_cafe(dia.jornada, Jornada.PRECIO_CAFE)", self.controlador)
+        self.assertIn("Jornada.BONUS_ACCIONES_MAX_POR_DIA", self.controlador)
+        self.assertIn("maquina.servir()", self.controlador)
+        self.assertIn("maquina.retirar_taza()", self.controlador)
+        self.assertIn("maquina.activado.is_connected(callback)", self.controlador)
+        self.assertIn('dia._guardar_o_avisar("")', self.controlador)
+        self.assertNotIn('dia.jornada["dinero"] -=', self.controlador)
+        self.assertNotIn('dia.jornada["acciones"] +=', self.controlador)
 
     def test_no_introduce_assets_externos(self):
         combinado = self.utileria + self.cafe + self.controlador

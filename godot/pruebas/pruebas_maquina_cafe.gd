@@ -17,12 +17,12 @@ func _initialize() -> void:
 func _probar_maquina() -> void:
 	var maquina := MaquinaCafe.new()
 	root.add_child(maquina)
-	maquina.configurar()
+	maquina.configurar(12)
 	var taza := maquina.get_node("TazaServida") as MeshInstance3D
 	var piloto := maquina.get_node("PilotoCafe") as MeshInstance3D
 	var material := piloto.material_override as StandardMaterial3D
 
-	_comprobar(maquina.texto_accion() == "Usar máquina de café", "prompt semántico")
+	_comprobar(maquina.texto_accion() == "Comprar café (12)", "el prompt enseña el coste")
 	_comprobar(not maquina.taza_visible(), "empieza sin taza servida")
 	_comprobar(taza != null, "tiene taza visible de feedback")
 	_comprobar(piloto != null, "tiene piloto visible")
@@ -31,22 +31,38 @@ func _probar_maquina() -> void:
 		"expone un único volumen de interacción"
 	)
 
-	_comprobar(maquina.interactuar(root), "acepta la acción interactuar")
-	_comprobar(maquina.taza_visible(), "usar sirve una taza")
+	# Interactuar solo solicita la compra. El nodo físico no puede concederse a sí
+	# mismo dinero/acciones: eso pertenece al controller de Jornada.
+	_comprobar(maquina.interactuar(root), "acepta la solicitud de café")
+	_comprobar(not maquina.taza_visible(), "solicitar no sirve una taza por sí solo")
+
+	maquina.servir()
+	_comprobar(maquina.taza_visible(), "el dueño puede servir la taza aprobada")
 	_comprobar(taza.visible, "el feedback físico se hace visible")
 	_comprobar(material != null and material.emission_enabled, "el piloto se enciende")
+	_comprobar(maquina.texto_accion() == "Coger café", "la taza servida se puede recoger")
 
-	_comprobar(maquina.interactuar(root), "acepta un segundo uso")
-	_comprobar(not maquina.taza_visible(), "segundo uso limpia el feedback")
+	maquina.retirar_taza()
+	_comprobar(not maquina.taza_visible(), "recoger limpia el feedback")
 	_comprobar(not taza.visible, "la taza vuelve a ocultarse")
 	_comprobar(not material.emission_enabled, "el piloto vuelve a apagarse")
+
+	maquina.marcar_agotado()
+	_comprobar(
+		maquina.texto_accion() == "Ya has tomado café hoy", "el tope diario se explica en el objeto"
+	)
+	maquina.marcar_sin_dinero()
+	_comprobar(
+		maquina.texto_accion() == "No te alcanza para el café (12)",
+		"la falta de saldo se explica en el objeto"
+	)
 	maquina.queue_free()
 
 
 func _probar_puestos() -> void:
 	var mundo := Node3D.new()
 	root.add_child(mundo)
-	UtileriaOficina.montar(mundo)
+	UtileriaOficina.montar(mundo, 12)
 
 	for i in range(1, 5):
 		var puesto := mundo.get_node_or_null("PuestoUtileria%d" % i)
@@ -71,10 +87,9 @@ func _probar_puestos() -> void:
 	_comprobar(
 		mundo.get_node_or_null("PuestoUtileria4/TazaPuesto") != null, "cuarto puesto alterna taza"
 	)
-	_comprobar(
-		mundo.get_node_or_null("MaquinaCafeInteractuable") != null,
-		"la máquina se integra en la oficina"
-	)
+	var maquina := mundo.get_node_or_null("MaquinaCafeInteractuable") as MaquinaCafeInteractiva3D
+	_comprobar(maquina != null, "la máquina se integra en la oficina")
+	_comprobar(maquina.texto_accion() == "Comprar café (12)", "la oficina inyecta el precio real")
 	mundo.queue_free()
 
 
