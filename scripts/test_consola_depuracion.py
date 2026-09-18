@@ -55,6 +55,8 @@ class ConsolaDepuracionTest(unittest.TestCase):
             self.assertIn(f'"{comando}":', self.release)
         for handler in ("_cmd_fase", "_cmd_sala", "_cmd_dia", "_cmd_dinero", "_cmd_pistas", "_cmd_gato"):
             self.assertNotIn(handler, self.release)
+        self.assertNotIn('_entrar_en("casa")', self.release)
+        self.assertIn('dia.jornada["fase"] != "casa"', self.release)
 
     def test_release_expone_manifiesto_reproducible(self):
         self.assertIn("Azar.manifiesto_en_texto(dia.partida.estado)", self.release)
