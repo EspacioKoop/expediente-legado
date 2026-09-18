@@ -118,13 +118,18 @@ static func validar(estado: Dictionary) -> Array:
 	if errores.is_empty():
 		var ruta: Array = estado["ruta"]
 		var completados: Array = estado["completados"]
-		if ruta.size() < 3 or ruta.size() > 5 or ruta.duplicate().size() != ruta.size():
+		if ruta.size() < 3 or ruta.size() > 5:
 			errores.append("ruta inválida")
 		var permitidos := PUNTOS_BASE + [PUNTO_CUNADO]
+		var vistos := {}
 		for punto in ruta:
 			if typeof(punto) != TYPE_STRING or not permitidos.has(punto):
 				errores.append("ruta contiene punto inválido")
 				break
+			if vistos.has(punto):
+				errores.append("ruta contiene duplicados")
+				break
+			vistos[punto] = true
 		for punto in completados:
 			if typeof(punto) != TYPE_STRING or not ruta.has(punto):
 				errores.append("completados contiene punto inválido")
