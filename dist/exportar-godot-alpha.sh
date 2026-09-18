@@ -11,18 +11,666 @@ DECLARADA="$(tr -d '\r\n' < "$RAIZ/.godot-version")"
 ACTUAL="$($MOTOR --version | tr -d '\r\n')"
 CONFIG_INCIDENCIAS="$GODOT_DIR/datos/incidencias.json"
 NOTAS_ALPHA="$RAIZ/docs/alpha-playtest-2026-09-15.md"
+PRESETS_EXPORT="$GODOT_DIR/export_presets.cfg"
+QA_TOOLS="${SIGA98_QA_TOOLS:-0}"
 RESPALDO_INCIDENCIAS="$(mktemp)"
+RESPALDO_PRESETS="$(mktemp)"
 cp "$CONFIG_INCIDENCIAS" "$RESPALDO_INCIDENCIAS"
+cp "$PRESETS_EXPORT" "$RESPALDO_PRESETS"
 
-restaurar_config_incidencias() {
+restaurar_config_temporal() {
     cp "$RESPALDO_INCIDENCIAS" "$CONFIG_INCIDENCIAS"
-    rm -f "$RESPALDO_INCIDENCIAS"
+    cp "$RESPALDO_PRESETS" "$PRESETS_EXPORT"
+    rm -f "$RESPALDO_INCIDENCIAS" "$RESPALDO_PRESETS"
 }
-trap restaurar_config_incidencias EXIT
+trap restaurar_config_temporal EXIT
 
 if [ ! -f "$NOTAS_ALPHA" ]; then
     echo "ERROR: faltan las notas de la alpha: $NOTAS_ALPHA" >&2
     exit 1
+fi
+
+case "$QA_TOOLS" in
+    0|1) ;;
+    *)
+        echo "ERROR: SIGA98_QA_TOOLS debe ser 0 o 1" >&2
+        exit 1
+        ;;
+esac
+
+# Los presets versionados son siempre los de publicación y excluyen debug/**.
+# Para una alpha de QA hacemos una copia temporal lógica del preset: habilitamos
+# la feature qa_tools y retiramos solo esa exclusión. El trap restaura el archivo
+# antes de salir, así un tag v* sigue empaquetando exactamente el preset estricto.
+if [ "$QA_TOOLS" = "1" ]; then
+    python3 - "$PRESETS_EXPORT" <<'PY'
+from pathlib import Path
+import re
+import sys
+
+ruta = Path(sys.argv[1])
+texto = ruta.read_text(encoding="utf-8")
+publicados = {"Linux x86_64", "Windows x86_64"}
+patron = re.compile(
+    r"(?ms)^\[preset\.\d+\]\n.*?(?=^\[preset\.\d+(?:\.options)?\]|\Z)"
+)
+vistos = set()
+
+
+def parchear(coincidencia):
+    bloque = coincidencia.group(0)
+    nombre = re.search(r'^name="([^"]+)"
+# El formulario de feedback se configura al empaquetar, no queda hardcodeado
+# en GDScript. La URL es pública dentro de la build y solo se aceptan HTTP(S).
+python3 - "$CONFIG_INCIDENCIAS" "${SIGA98_FEEDBACK_URL:-}" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+ruta = Path(sys.argv[1])
+url = sys.argv[2].strip()
+if url and not url.startswith(("https://", "http://")):
+    raise SystemExit("ERROR: SIGA98_FEEDBACK_URL debe usar http:// o https://")
+datos = json.loads(ruta.read_text(encoding="utf-8"))
+datos["feedback_url"] = url
+ruta.write_text(json.dumps(datos, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+PY
+
+python3 - "$DECLARADA" "$ACTUAL" <<'PY'
+import re
+import sys
+
+declarada, actual = sys.argv[1:]
+linea, sep, canal = declarada.partition("-")
+if not sep or not linea or not canal:
+    raise SystemExit(f"ERROR: .godot-version mal escrito: {declarada!r}")
+patron = rf"^{re.escape(linea)}(?:\.\d+)*\.{re.escape(canal)}\b"
+if not re.match(patron, actual):
+    raise SystemExit(
+        f"ERROR: se requiere Godot de la línea {declarada}; encontrado {actual}"
+    )
+PY
+
+rm -rf "$SALIDA/godot-linux" "$SALIDA/godot-windows"
+mkdir -p "$SALIDA/godot-linux" "$SALIDA/godot-windows"
+
+exportar() {
+    local preset="$1"
+    local destino="$2"
+    local registro
+    registro="$(mktemp)"
+    if ! "$MOTOR" --headless --path "$GODOT_DIR" --export-release "$preset" "$destino" >"$registro" 2>&1; then
+        cat "$registro" >&2
+        rm -f "$registro"
+        cat >&2 <<'EOF'
+
+ERROR: Godot no pudo exportar la alpha.
+Comprueba que las Export Templates de la misma versión de Godot están instaladas:
+Editor -> Manage Export Templates -> Download and Install.
+Después vuelve a ejecutar este script.
+EOF
+        exit 1
+    fi
+    cat "$registro"
+    rm -f "$registro"
+    if [ ! -f "$destino" ]; then
+        echo "ERROR: Godot terminó sin crear $destino" >&2
+        exit 1
+    fi
+}
+
+exportar "Linux x86_64" "$SALIDA/godot-linux/SIGA-98.x86_64"
+chmod +x "$SALIDA/godot-linux/SIGA-98.x86_64"
+exportar "Windows x86_64" "$SALIDA/godot-windows/SIGA-98.exe"
+
+# La alpha se distribuye con su propio contexto de playtest. Así cada ZIP deja
+# claro qué contiene y qué sigue pendiente de validar aunque se comparta fuera
+# de la página de Actions donde se generó.
+cp "$NOTAS_ALPHA" "$SALIDA/godot-linux/NOTAS-ALPHA.md"
+cp "$NOTAS_ALPHA" "$SALIDA/godot-windows/NOTAS-ALPHA.md"
+
+# Identificación mínima del paquete para que un parte de incidencias pueda
+# apuntar al artefacto exacto incluso si el ZIP se descarga fuera de Actions.
+BUILD_SHA="${GITHUB_SHA:-$(git -C "$RAIZ" rev-parse HEAD 2>/dev/null || printf 'desconocido')}"
+BUILD_REF="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME:-local}}"
+BUILD_UTC="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+NOTAS_NOMBRE="$(basename "$NOTAS_ALPHA")"
+for plataforma in linux windows; do
+    cat > "$SALIDA/godot-$plataforma/BUILD-INFO.txt" <<EOF
+SIGA-98 alpha playtest
+build_sha=$BUILD_SHA
+source_ref=$BUILD_REF
+godot=$DECLARADA
+notes=$NOTAS_NOMBRE
+qa_tools=$QA_TOOLS
+built_utc=$BUILD_UTC
+EOF
+done
+
+python3 - "$SALIDA" <<'PY'
+from pathlib import Path
+import shutil
+import sys
+
+salida = Path(sys.argv[1])
+for plataforma in ("linux", "windows"):
+    carpeta = salida / f"godot-{plataforma}"
+    base = salida / f"SIGA-98-godot-alpha-{plataforma}"
+    zip_path = base.with_suffix(".zip")
+    if zip_path.exists():
+        zip_path.unlink()
+    shutil.make_archive(str(base), "zip", root_dir=carpeta)
+PY
+
+(
+    cd "$SALIDA"
+    sha256sum SIGA-98-godot-alpha-linux.zip SIGA-98-godot-alpha-windows.zip \
+        > SIGA-98-godot-alpha-SHA256SUMS.txt
+)
+
+echo
+echo "Alpha Godot lista en dist/salida/:"
+ls -lh \
+    "$SALIDA/SIGA-98-godot-alpha-linux.zip" \
+    "$SALIDA/SIGA-98-godot-alpha-windows.zip" \
+    "$SALIDA/SIGA-98-godot-alpha-SHA256SUMS.txt"
+, bloque, re.MULTILINE)
+    if nombre is None or nombre.group(1) not in publicados:
+        return bloque
+    vistos.add(nombre.group(1))
+
+    features_match = re.search(r'^custom_features="([^"]*)"
+# El formulario de feedback se configura al empaquetar, no queda hardcodeado
+# en GDScript. La URL es pública dentro de la build y solo se aceptan HTTP(S).
+python3 - "$CONFIG_INCIDENCIAS" "${SIGA98_FEEDBACK_URL:-}" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+ruta = Path(sys.argv[1])
+url = sys.argv[2].strip()
+if url and not url.startswith(("https://", "http://")):
+    raise SystemExit("ERROR: SIGA98_FEEDBACK_URL debe usar http:// o https://")
+datos = json.loads(ruta.read_text(encoding="utf-8"))
+datos["feedback_url"] = url
+ruta.write_text(json.dumps(datos, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+PY
+
+python3 - "$DECLARADA" "$ACTUAL" <<'PY'
+import re
+import sys
+
+declarada, actual = sys.argv[1:]
+linea, sep, canal = declarada.partition("-")
+if not sep or not linea or not canal:
+    raise SystemExit(f"ERROR: .godot-version mal escrito: {declarada!r}")
+patron = rf"^{re.escape(linea)}(?:\.\d+)*\.{re.escape(canal)}\b"
+if not re.match(patron, actual):
+    raise SystemExit(
+        f"ERROR: se requiere Godot de la línea {declarada}; encontrado {actual}"
+    )
+PY
+
+rm -rf "$SALIDA/godot-linux" "$SALIDA/godot-windows"
+mkdir -p "$SALIDA/godot-linux" "$SALIDA/godot-windows"
+
+exportar() {
+    local preset="$1"
+    local destino="$2"
+    local registro
+    registro="$(mktemp)"
+    if ! "$MOTOR" --headless --path "$GODOT_DIR" --export-release "$preset" "$destino" >"$registro" 2>&1; then
+        cat "$registro" >&2
+        rm -f "$registro"
+        cat >&2 <<'EOF'
+
+ERROR: Godot no pudo exportar la alpha.
+Comprueba que las Export Templates de la misma versión de Godot están instaladas:
+Editor -> Manage Export Templates -> Download and Install.
+Después vuelve a ejecutar este script.
+EOF
+        exit 1
+    fi
+    cat "$registro"
+    rm -f "$registro"
+    if [ ! -f "$destino" ]; then
+        echo "ERROR: Godot terminó sin crear $destino" >&2
+        exit 1
+    fi
+}
+
+exportar "Linux x86_64" "$SALIDA/godot-linux/SIGA-98.x86_64"
+chmod +x "$SALIDA/godot-linux/SIGA-98.x86_64"
+exportar "Windows x86_64" "$SALIDA/godot-windows/SIGA-98.exe"
+
+# La alpha se distribuye con su propio contexto de playtest. Así cada ZIP deja
+# claro qué contiene y qué sigue pendiente de validar aunque se comparta fuera
+# de la página de Actions donde se generó.
+cp "$NOTAS_ALPHA" "$SALIDA/godot-linux/NOTAS-ALPHA.md"
+cp "$NOTAS_ALPHA" "$SALIDA/godot-windows/NOTAS-ALPHA.md"
+
+# Identificación mínima del paquete para que un parte de incidencias pueda
+# apuntar al artefacto exacto incluso si el ZIP se descarga fuera de Actions.
+BUILD_SHA="${GITHUB_SHA:-$(git -C "$RAIZ" rev-parse HEAD 2>/dev/null || printf 'desconocido')}"
+BUILD_REF="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME:-local}}"
+BUILD_UTC="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+NOTAS_NOMBRE="$(basename "$NOTAS_ALPHA")"
+for plataforma in linux windows; do
+    cat > "$SALIDA/godot-$plataforma/BUILD-INFO.txt" <<EOF
+SIGA-98 alpha playtest
+build_sha=$BUILD_SHA
+source_ref=$BUILD_REF
+godot=$DECLARADA
+notes=$NOTAS_NOMBRE
+built_utc=$BUILD_UTC
+EOF
+done
+
+python3 - "$SALIDA" <<'PY'
+from pathlib import Path
+import shutil
+import sys
+
+salida = Path(sys.argv[1])
+for plataforma in ("linux", "windows"):
+    carpeta = salida / f"godot-{plataforma}"
+    base = salida / f"SIGA-98-godot-alpha-{plataforma}"
+    zip_path = base.with_suffix(".zip")
+    if zip_path.exists():
+        zip_path.unlink()
+    shutil.make_archive(str(base), "zip", root_dir=carpeta)
+PY
+
+(
+    cd "$SALIDA"
+    sha256sum SIGA-98-godot-alpha-linux.zip SIGA-98-godot-alpha-windows.zip \
+        > SIGA-98-godot-alpha-SHA256SUMS.txt
+)
+
+echo
+echo "Alpha Godot lista en dist/salida/:"
+ls -lh \
+    "$SALIDA/SIGA-98-godot-alpha-linux.zip" \
+    "$SALIDA/SIGA-98-godot-alpha-windows.zip" \
+    "$SALIDA/SIGA-98-godot-alpha-SHA256SUMS.txt"
+, bloque, re.MULTILINE)
+    if features_match is None:
+        raise SystemExit(f"ERROR: preset {nombre.group(1)} sin custom_features")
+    features = [f.strip() for f in features_match.group(1).split(",") if f.strip()]
+    if "qa_tools" not in features:
+        features.append("qa_tools")
+    bloque = re.sub(
+        r'^custom_features="[^"]*"
+# El formulario de feedback se configura al empaquetar, no queda hardcodeado
+# en GDScript. La URL es pública dentro de la build y solo se aceptan HTTP(S).
+python3 - "$CONFIG_INCIDENCIAS" "${SIGA98_FEEDBACK_URL:-}" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+ruta = Path(sys.argv[1])
+url = sys.argv[2].strip()
+if url and not url.startswith(("https://", "http://")):
+    raise SystemExit("ERROR: SIGA98_FEEDBACK_URL debe usar http:// o https://")
+datos = json.loads(ruta.read_text(encoding="utf-8"))
+datos["feedback_url"] = url
+ruta.write_text(json.dumps(datos, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+PY
+
+python3 - "$DECLARADA" "$ACTUAL" <<'PY'
+import re
+import sys
+
+declarada, actual = sys.argv[1:]
+linea, sep, canal = declarada.partition("-")
+if not sep or not linea or not canal:
+    raise SystemExit(f"ERROR: .godot-version mal escrito: {declarada!r}")
+patron = rf"^{re.escape(linea)}(?:\.\d+)*\.{re.escape(canal)}\b"
+if not re.match(patron, actual):
+    raise SystemExit(
+        f"ERROR: se requiere Godot de la línea {declarada}; encontrado {actual}"
+    )
+PY
+
+rm -rf "$SALIDA/godot-linux" "$SALIDA/godot-windows"
+mkdir -p "$SALIDA/godot-linux" "$SALIDA/godot-windows"
+
+exportar() {
+    local preset="$1"
+    local destino="$2"
+    local registro
+    registro="$(mktemp)"
+    if ! "$MOTOR" --headless --path "$GODOT_DIR" --export-release "$preset" "$destino" >"$registro" 2>&1; then
+        cat "$registro" >&2
+        rm -f "$registro"
+        cat >&2 <<'EOF'
+
+ERROR: Godot no pudo exportar la alpha.
+Comprueba que las Export Templates de la misma versión de Godot están instaladas:
+Editor -> Manage Export Templates -> Download and Install.
+Después vuelve a ejecutar este script.
+EOF
+        exit 1
+    fi
+    cat "$registro"
+    rm -f "$registro"
+    if [ ! -f "$destino" ]; then
+        echo "ERROR: Godot terminó sin crear $destino" >&2
+        exit 1
+    fi
+}
+
+exportar "Linux x86_64" "$SALIDA/godot-linux/SIGA-98.x86_64"
+chmod +x "$SALIDA/godot-linux/SIGA-98.x86_64"
+exportar "Windows x86_64" "$SALIDA/godot-windows/SIGA-98.exe"
+
+# La alpha se distribuye con su propio contexto de playtest. Así cada ZIP deja
+# claro qué contiene y qué sigue pendiente de validar aunque se comparta fuera
+# de la página de Actions donde se generó.
+cp "$NOTAS_ALPHA" "$SALIDA/godot-linux/NOTAS-ALPHA.md"
+cp "$NOTAS_ALPHA" "$SALIDA/godot-windows/NOTAS-ALPHA.md"
+
+# Identificación mínima del paquete para que un parte de incidencias pueda
+# apuntar al artefacto exacto incluso si el ZIP se descarga fuera de Actions.
+BUILD_SHA="${GITHUB_SHA:-$(git -C "$RAIZ" rev-parse HEAD 2>/dev/null || printf 'desconocido')}"
+BUILD_REF="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME:-local}}"
+BUILD_UTC="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+NOTAS_NOMBRE="$(basename "$NOTAS_ALPHA")"
+for plataforma in linux windows; do
+    cat > "$SALIDA/godot-$plataforma/BUILD-INFO.txt" <<EOF
+SIGA-98 alpha playtest
+build_sha=$BUILD_SHA
+source_ref=$BUILD_REF
+godot=$DECLARADA
+notes=$NOTAS_NOMBRE
+built_utc=$BUILD_UTC
+EOF
+done
+
+python3 - "$SALIDA" <<'PY'
+from pathlib import Path
+import shutil
+import sys
+
+salida = Path(sys.argv[1])
+for plataforma in ("linux", "windows"):
+    carpeta = salida / f"godot-{plataforma}"
+    base = salida / f"SIGA-98-godot-alpha-{plataforma}"
+    zip_path = base.with_suffix(".zip")
+    if zip_path.exists():
+        zip_path.unlink()
+    shutil.make_archive(str(base), "zip", root_dir=carpeta)
+PY
+
+(
+    cd "$SALIDA"
+    sha256sum SIGA-98-godot-alpha-linux.zip SIGA-98-godot-alpha-windows.zip \
+        > SIGA-98-godot-alpha-SHA256SUMS.txt
+)
+
+echo
+echo "Alpha Godot lista en dist/salida/:"
+ls -lh \
+    "$SALIDA/SIGA-98-godot-alpha-linux.zip" \
+    "$SALIDA/SIGA-98-godot-alpha-windows.zip" \
+    "$SALIDA/SIGA-98-godot-alpha-SHA256SUMS.txt"
+,
+        'custom_features="' + ",".join(features) + '"',
+        bloque,
+        count=1,
+        flags=re.MULTILINE,
+    )
+
+    exclude_match = re.search(r'^exclude_filter="([^"]*)"
+# El formulario de feedback se configura al empaquetar, no queda hardcodeado
+# en GDScript. La URL es pública dentro de la build y solo se aceptan HTTP(S).
+python3 - "$CONFIG_INCIDENCIAS" "${SIGA98_FEEDBACK_URL:-}" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+ruta = Path(sys.argv[1])
+url = sys.argv[2].strip()
+if url and not url.startswith(("https://", "http://")):
+    raise SystemExit("ERROR: SIGA98_FEEDBACK_URL debe usar http:// o https://")
+datos = json.loads(ruta.read_text(encoding="utf-8"))
+datos["feedback_url"] = url
+ruta.write_text(json.dumps(datos, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+PY
+
+python3 - "$DECLARADA" "$ACTUAL" <<'PY'
+import re
+import sys
+
+declarada, actual = sys.argv[1:]
+linea, sep, canal = declarada.partition("-")
+if not sep or not linea or not canal:
+    raise SystemExit(f"ERROR: .godot-version mal escrito: {declarada!r}")
+patron = rf"^{re.escape(linea)}(?:\.\d+)*\.{re.escape(canal)}\b"
+if not re.match(patron, actual):
+    raise SystemExit(
+        f"ERROR: se requiere Godot de la línea {declarada}; encontrado {actual}"
+    )
+PY
+
+rm -rf "$SALIDA/godot-linux" "$SALIDA/godot-windows"
+mkdir -p "$SALIDA/godot-linux" "$SALIDA/godot-windows"
+
+exportar() {
+    local preset="$1"
+    local destino="$2"
+    local registro
+    registro="$(mktemp)"
+    if ! "$MOTOR" --headless --path "$GODOT_DIR" --export-release "$preset" "$destino" >"$registro" 2>&1; then
+        cat "$registro" >&2
+        rm -f "$registro"
+        cat >&2 <<'EOF'
+
+ERROR: Godot no pudo exportar la alpha.
+Comprueba que las Export Templates de la misma versión de Godot están instaladas:
+Editor -> Manage Export Templates -> Download and Install.
+Después vuelve a ejecutar este script.
+EOF
+        exit 1
+    fi
+    cat "$registro"
+    rm -f "$registro"
+    if [ ! -f "$destino" ]; then
+        echo "ERROR: Godot terminó sin crear $destino" >&2
+        exit 1
+    fi
+}
+
+exportar "Linux x86_64" "$SALIDA/godot-linux/SIGA-98.x86_64"
+chmod +x "$SALIDA/godot-linux/SIGA-98.x86_64"
+exportar "Windows x86_64" "$SALIDA/godot-windows/SIGA-98.exe"
+
+# La alpha se distribuye con su propio contexto de playtest. Así cada ZIP deja
+# claro qué contiene y qué sigue pendiente de validar aunque se comparta fuera
+# de la página de Actions donde se generó.
+cp "$NOTAS_ALPHA" "$SALIDA/godot-linux/NOTAS-ALPHA.md"
+cp "$NOTAS_ALPHA" "$SALIDA/godot-windows/NOTAS-ALPHA.md"
+
+# Identificación mínima del paquete para que un parte de incidencias pueda
+# apuntar al artefacto exacto incluso si el ZIP se descarga fuera de Actions.
+BUILD_SHA="${GITHUB_SHA:-$(git -C "$RAIZ" rev-parse HEAD 2>/dev/null || printf 'desconocido')}"
+BUILD_REF="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME:-local}}"
+BUILD_UTC="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+NOTAS_NOMBRE="$(basename "$NOTAS_ALPHA")"
+for plataforma in linux windows; do
+    cat > "$SALIDA/godot-$plataforma/BUILD-INFO.txt" <<EOF
+SIGA-98 alpha playtest
+build_sha=$BUILD_SHA
+source_ref=$BUILD_REF
+godot=$DECLARADA
+notes=$NOTAS_NOMBRE
+built_utc=$BUILD_UTC
+EOF
+done
+
+python3 - "$SALIDA" <<'PY'
+from pathlib import Path
+import shutil
+import sys
+
+salida = Path(sys.argv[1])
+for plataforma in ("linux", "windows"):
+    carpeta = salida / f"godot-{plataforma}"
+    base = salida / f"SIGA-98-godot-alpha-{plataforma}"
+    zip_path = base.with_suffix(".zip")
+    if zip_path.exists():
+        zip_path.unlink()
+    shutil.make_archive(str(base), "zip", root_dir=carpeta)
+PY
+
+(
+    cd "$SALIDA"
+    sha256sum SIGA-98-godot-alpha-linux.zip SIGA-98-godot-alpha-windows.zip \
+        > SIGA-98-godot-alpha-SHA256SUMS.txt
+)
+
+echo
+echo "Alpha Godot lista en dist/salida/:"
+ls -lh \
+    "$SALIDA/SIGA-98-godot-alpha-linux.zip" \
+    "$SALIDA/SIGA-98-godot-alpha-windows.zip" \
+    "$SALIDA/SIGA-98-godot-alpha-SHA256SUMS.txt"
+, bloque, re.MULTILINE)
+    if exclude_match is None:
+        raise SystemExit(f"ERROR: preset {nombre.group(1)} sin exclude_filter")
+    exclusiones = [p.strip() for p in exclude_match.group(1).split(",") if p.strip()]
+    if "debug/**" not in exclusiones:
+        raise SystemExit(f"ERROR: preset {nombre.group(1)} no protege debug/**")
+    exclusiones = [p for p in exclusiones if p != "debug/**"]
+    bloque = re.sub(
+        r'^exclude_filter="[^"]*"
+# El formulario de feedback se configura al empaquetar, no queda hardcodeado
+# en GDScript. La URL es pública dentro de la build y solo se aceptan HTTP(S).
+python3 - "$CONFIG_INCIDENCIAS" "${SIGA98_FEEDBACK_URL:-}" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+ruta = Path(sys.argv[1])
+url = sys.argv[2].strip()
+if url and not url.startswith(("https://", "http://")):
+    raise SystemExit("ERROR: SIGA98_FEEDBACK_URL debe usar http:// o https://")
+datos = json.loads(ruta.read_text(encoding="utf-8"))
+datos["feedback_url"] = url
+ruta.write_text(json.dumps(datos, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+PY
+
+python3 - "$DECLARADA" "$ACTUAL" <<'PY'
+import re
+import sys
+
+declarada, actual = sys.argv[1:]
+linea, sep, canal = declarada.partition("-")
+if not sep or not linea or not canal:
+    raise SystemExit(f"ERROR: .godot-version mal escrito: {declarada!r}")
+patron = rf"^{re.escape(linea)}(?:\.\d+)*\.{re.escape(canal)}\b"
+if not re.match(patron, actual):
+    raise SystemExit(
+        f"ERROR: se requiere Godot de la línea {declarada}; encontrado {actual}"
+    )
+PY
+
+rm -rf "$SALIDA/godot-linux" "$SALIDA/godot-windows"
+mkdir -p "$SALIDA/godot-linux" "$SALIDA/godot-windows"
+
+exportar() {
+    local preset="$1"
+    local destino="$2"
+    local registro
+    registro="$(mktemp)"
+    if ! "$MOTOR" --headless --path "$GODOT_DIR" --export-release "$preset" "$destino" >"$registro" 2>&1; then
+        cat "$registro" >&2
+        rm -f "$registro"
+        cat >&2 <<'EOF'
+
+ERROR: Godot no pudo exportar la alpha.
+Comprueba que las Export Templates de la misma versión de Godot están instaladas:
+Editor -> Manage Export Templates -> Download and Install.
+Después vuelve a ejecutar este script.
+EOF
+        exit 1
+    fi
+    cat "$registro"
+    rm -f "$registro"
+    if [ ! -f "$destino" ]; then
+        echo "ERROR: Godot terminó sin crear $destino" >&2
+        exit 1
+    fi
+}
+
+exportar "Linux x86_64" "$SALIDA/godot-linux/SIGA-98.x86_64"
+chmod +x "$SALIDA/godot-linux/SIGA-98.x86_64"
+exportar "Windows x86_64" "$SALIDA/godot-windows/SIGA-98.exe"
+
+# La alpha se distribuye con su propio contexto de playtest. Así cada ZIP deja
+# claro qué contiene y qué sigue pendiente de validar aunque se comparta fuera
+# de la página de Actions donde se generó.
+cp "$NOTAS_ALPHA" "$SALIDA/godot-linux/NOTAS-ALPHA.md"
+cp "$NOTAS_ALPHA" "$SALIDA/godot-windows/NOTAS-ALPHA.md"
+
+# Identificación mínima del paquete para que un parte de incidencias pueda
+# apuntar al artefacto exacto incluso si el ZIP se descarga fuera de Actions.
+BUILD_SHA="${GITHUB_SHA:-$(git -C "$RAIZ" rev-parse HEAD 2>/dev/null || printf 'desconocido')}"
+BUILD_REF="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME:-local}}"
+BUILD_UTC="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+NOTAS_NOMBRE="$(basename "$NOTAS_ALPHA")"
+for plataforma in linux windows; do
+    cat > "$SALIDA/godot-$plataforma/BUILD-INFO.txt" <<EOF
+SIGA-98 alpha playtest
+build_sha=$BUILD_SHA
+source_ref=$BUILD_REF
+godot=$DECLARADA
+notes=$NOTAS_NOMBRE
+built_utc=$BUILD_UTC
+EOF
+done
+
+python3 - "$SALIDA" <<'PY'
+from pathlib import Path
+import shutil
+import sys
+
+salida = Path(sys.argv[1])
+for plataforma in ("linux", "windows"):
+    carpeta = salida / f"godot-{plataforma}"
+    base = salida / f"SIGA-98-godot-alpha-{plataforma}"
+    zip_path = base.with_suffix(".zip")
+    if zip_path.exists():
+        zip_path.unlink()
+    shutil.make_archive(str(base), "zip", root_dir=carpeta)
+PY
+
+(
+    cd "$SALIDA"
+    sha256sum SIGA-98-godot-alpha-linux.zip SIGA-98-godot-alpha-windows.zip \
+        > SIGA-98-godot-alpha-SHA256SUMS.txt
+)
+
+echo
+echo "Alpha Godot lista en dist/salida/:"
+ls -lh \
+    "$SALIDA/SIGA-98-godot-alpha-linux.zip" \
+    "$SALIDA/SIGA-98-godot-alpha-windows.zip" \
+    "$SALIDA/SIGA-98-godot-alpha-SHA256SUMS.txt"
+,
+        'exclude_filter="' + ",".join(exclusiones) + '"',
+        bloque,
+        count=1,
+        flags=re.MULTILINE,
+    )
+    return bloque
+
+
+texto = patron.sub(parchear, texto)
+if vistos != publicados:
+    raise SystemExit(f"ERROR: presets QA incompletos: {sorted(vistos)}")
+ruta.write_text(texto, encoding="utf-8")
+PY
 fi
 
 # El formulario de feedback se configura al empaquetar, no queda hardcodeado
