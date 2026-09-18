@@ -38,6 +38,7 @@ static func crear(ecos_instancia):
 	if presentacion == null:
 		return null
 	presentacion.ecos = ecos_instancia
+	presentacion.seleccion = ecos_instancia.seleccion
 	presentacion.cerrada = not ecos_instancia.nucleo.pendiente()
 	return presentacion
 
