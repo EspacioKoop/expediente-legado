@@ -73,9 +73,7 @@ func _probar_completar() -> void:
 	_seleccionar_id(presentacion, 0)
 	_seleccionar_id(presentacion, 1)
 	var resultado := _seleccionar_id(presentacion, 2)
-	_comprobar(
-		resultado == Presentacion.EVENTO_LISTO, "el tercer eco solo deja la secuencia lista"
-	)
+	_comprobar(resultado == Presentacion.EVENTO_LISTO, "el tercer eco solo deja la secuencia lista")
 	_comprobar(
 		presentacion.ecos.nucleo.state == Puzzle.ESTADO_PENDIENTE,
 		"la secuencia completa sigue pendiente antes de confirmar",
