@@ -4,7 +4,7 @@ extends SceneTree
 ## La escena del día se carga una vez: los tres recorridos la instancian, y
 ## cargarla en cada uno es pedirle lo mismo tres veces al gestor de recursos.
 const ESCENA_DIA := preload("res://escenas/dia.tscn")
-const SCRIPT_VISOR := preload("res://guion/visor_anexos_app.gd")
+const SCRIPT_VISOR := preload("res://guion/visor_pronosticos_app.gd")
 
 var pasadas := 0
 var fallos := 0
