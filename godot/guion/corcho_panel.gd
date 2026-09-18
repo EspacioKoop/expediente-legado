@@ -15,11 +15,15 @@ extends Control
 signal cambiado
 signal cerrado
 
-const TITULO := "Corcho de conceptos"
-const AYUDA_RATON := "Arrastra una ficha para moverla · Pulsa dos fichas para poner o quitar hilo"
-const AYUDA_MANDO := "Flechas: elegir · Intro/A: hilo · M/X: coger y soltar · Esc/B: cerrar"
-const VACIO := "Aún no hay fichas. Los conceptos que descubras en el archivo acabarán aquí."
-const CERRAR := "Cerrar"
+const TITULO := "CORCHO_TITULO"
+const AYUDA_RATON := "CORCHO_AYUDA_RATON"
+const AYUDA_MANDO := "CORCHO_AYUDA_MANDO"
+const VACIO := "CORCHO_VACIO"
+const CERRAR := "CORCHO_CERRAR"
+const DETALLE_TITULO := "CORCHO_DETALLE_TITULO"
+const DETALLE_VACIO := "CORCHO_DETALLE_VACIO"
+const DETALLE_SIN_RESUMEN := "CORCHO_DETALLE_SIN_RESUMEN"
+const DATO_OCULTO := "CORCHO_DATO_OCULTO"
 const PASO_TECLADO := 0.05
 const UMBRAL_ARRASTRE := 6.0
 const COLOR_CORCHO := Color(0.55, 0.36, 0.21)
@@ -40,11 +44,15 @@ var _arrastre := ""
 var _origen_arrastre := Vector2.ZERO
 var _desplazamiento_arrastre := Vector2.ZERO
 var _arrastrando := false
+var _detalle_id := ""
 
 var _tablon: Control
 var _hilos: Control
 var _vacio: Label
 var _cerrar: Button
+var _detalle: PanelContainer
+var _detalle_nombre: Label
+var _detalle_resumen: RichTextLabel
 
 
 func configurar(jornada: Dictionary, conceptos: Dictionary) -> void:
@@ -74,6 +82,57 @@ func boton_de(id: String) -> Button:
 	return _botones.get(id) as Button
 
 
+func detalle_id() -> String:
+	return _detalle_id
+
+
+func detalle_texto() -> String:
+	if _detalle_resumen == null:
+		return ""
+	return _detalle_resumen.text
+
+
+## Muestra únicamente información del concepto ya descubierto. Las referencias
+## wiki a conceptos que todavía no están en el corcho se redactan para que la
+## lectura ampliada no convierta el tablón en una fuente de spoilers.
+func inspeccionar(id: String) -> void:
+	if not _conceptos.has(id):
+		_detalle_id = ""
+		if _detalle_nombre != null:
+			_detalle_nombre.text = ""
+		if _detalle_resumen != null:
+			_detalle_resumen.text = tr(DETALLE_VACIO)
+		return
+	var concepto: Dictionary = _conceptos[id]
+	_detalle_id = id
+	if _detalle_nombre != null:
+		_detalle_nombre.text = tr(String(concepto.get("nombre", id)))
+	if _detalle_resumen != null:
+		_detalle_resumen.text = _resumen_visible(String(concepto.get("resumen", "")))
+
+
+func _resumen_visible(texto: String) -> String:
+	if texto.strip_edges().is_empty():
+		return tr(DETALLE_SIN_RESUMEN)
+	var visibles := {}
+	for concepto in _conceptos.values():
+		var nombre := String(concepto.get("nombre", "")).strip_edges()
+		if not nombre.is_empty():
+			visibles[nombre] = true
+	var expresion := RegEx.new()
+	if expresion.compile(Marcas.REFERENCIA) != OK:
+		return texto
+	var resultado := ""
+	var cursor := 0
+	for coincidencia in expresion.search_all(texto):
+		resultado += texto.substr(cursor, coincidencia.get_start() - cursor)
+		var nombre := coincidencia.get_string(1)
+		resultado += nombre if visibles.has(nombre) else tr(DATO_OCULTO)
+		cursor = coincidencia.get_end()
+	resultado += texto.substr(cursor)
+	return resultado
+
+
 func cerrar() -> void:
 	cerrado.emit()
 
@@ -91,7 +150,7 @@ func _montar() -> void:
 
 	var titulo := Label.new()
 	titulo.name = "Titulo"
-	titulo.text = TITULO
+	titulo.text = tr(TITULO)
 	titulo.add_theme_font_size_override("font_size", 26)
 	titulo.add_theme_color_override("font_color", Color(0.95, 0.90, 0.78))
 	titulo.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
@@ -103,7 +162,7 @@ func _montar() -> void:
 	_cerrar = Button.new()
 	_cerrar.name = "Cerrar"
 	_cerrar.theme = EstiloSiga.tema()
-	_cerrar.text = CERRAR
+	_cerrar.text = tr(CERRAR)
 	_cerrar.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	_cerrar.offset_left = -130
 	_cerrar.offset_top = 12
@@ -111,6 +170,45 @@ func _montar() -> void:
 	_cerrar.focus_mode = Control.FOCUS_NONE
 	_cerrar.pressed.connect(cerrar)
 	add_child(_cerrar)
+
+	_detalle = PanelContainer.new()
+	_detalle.name = "DetalleFicha"
+	var papel_detalle := StyleBoxFlat.new()
+	papel_detalle.bg_color = Color(0.90, 0.86, 0.72, 0.98)
+	papel_detalle.border_color = COLOR_MARCO
+	papel_detalle.set_border_width_all(5)
+	papel_detalle.content_margin_left = 16
+	papel_detalle.content_margin_right = 16
+	papel_detalle.content_margin_top = 14
+	papel_detalle.content_margin_bottom = 14
+	_detalle.add_theme_stylebox_override("panel", papel_detalle)
+	add_child(_detalle)
+
+	var detalle_caja := VBoxContainer.new()
+	detalle_caja.add_theme_constant_override("separation", 8)
+	_detalle.add_child(detalle_caja)
+	var detalle_rotulo := Label.new()
+	detalle_rotulo.text = tr(DETALLE_TITULO)
+	detalle_rotulo.add_theme_font_size_override("font_size", 13)
+	detalle_rotulo.add_theme_color_override("font_color", COLOR_TINTA.lightened(0.18))
+	detalle_caja.add_child(detalle_rotulo)
+	_detalle_nombre = Label.new()
+	_detalle_nombre.name = "DetalleNombre"
+	_detalle_nombre.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_detalle_nombre.add_theme_font_size_override("font_size", 22)
+	_detalle_nombre.add_theme_color_override("font_color", COLOR_TINTA)
+	detalle_caja.add_child(_detalle_nombre)
+	_detalle_resumen = RichTextLabel.new()
+	_detalle_resumen.name = "DetalleResumen"
+	_detalle_resumen.bbcode_enabled = false
+	_detalle_resumen.fit_content = false
+	_detalle_resumen.scroll_active = true
+	_detalle_resumen.mouse_filter = Control.MOUSE_FILTER_STOP
+	_detalle_resumen.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_detalle_resumen.add_theme_font_size_override("normal_font_size", 16)
+	_detalle_resumen.add_theme_color_override("default_color", COLOR_TINTA)
+	detalle_caja.add_child(_detalle_resumen)
+	inspeccionar("")
 
 	_tablon = Control.new()
 	_tablon.name = "Tablon"
@@ -125,7 +223,7 @@ func _montar() -> void:
 
 	_vacio = Label.new()
 	_vacio.name = "Vacio"
-	_vacio.text = VACIO
+	_vacio.text = tr(VACIO)
 	_vacio.add_theme_color_override("font_color", Color(0.95, 0.90, 0.78))
 	_vacio.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_vacio.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -141,9 +239,9 @@ func _montar() -> void:
 	ayuda.offset_bottom = -12
 	ayuda.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(ayuda)
-	for texto in [AYUDA_RATON, AYUDA_MANDO]:
+	for clave in [AYUDA_RATON, AYUDA_MANDO]:
 		var linea := Label.new()
-		linea.text = texto
+		linea.text = tr(clave)
 		linea.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		linea.add_theme_color_override("font_color", Color(0.86, 0.80, 0.68))
 		ayuda.add_child(linea)
@@ -163,11 +261,11 @@ func _montar_fichas() -> void:
 	for id in ids:
 		var boton := Button.new()
 		boton.name = "Ficha_%s" % id.validate_node_name()
-		boton.tooltip_text = String(_conceptos[id].get("nombre", id))
+		boton.tooltip_text = tr(String(_conceptos[id].get("nombre", id)))
 		boton.clip_contents = true
 		boton.focus_mode = Control.FOCUS_ALL
 		boton.gui_input.connect(_entrada_ficha.bind(id))
-		boton.focus_entered.connect(_actualizar_estilos)
+		boton.focus_entered.connect(_al_enfocar_ficha.bind(id))
 		boton.focus_exited.connect(_actualizar_estilos)
 		# El nombre va en una etiqueta propia: el texto de un Button hace crecer
 		# el botón con cada línea y una ficha larga pisaba a la de debajo.
@@ -200,12 +298,23 @@ func _montar_fichas() -> void:
 func _colocar_todo() -> void:
 	if _tablon == null:
 		return
-	var disponible := size - Vector2(80, 190)
+	var ancho_detalle := clampf(size.x * 0.27, 220.0, 320.0)
+	var region_tablon := maxf(360.0, size.x - ancho_detalle - 40.0)
+	var disponible := Vector2(
+		maxf(320.0, region_tablon - 60.0),
+		maxf(220.0, size.y - 190.0),
+	)
 	var escala_px := minf(disponible.x / Corcho.AREA.x, disponible.y / Corcho.AREA.y)
 	escala_px = maxf(escala_px, 120.0)
 	var tam := Corcho.AREA * escala_px
 	_tablon.size = tam
-	_tablon.position = Vector2((size.x - tam.x) * 0.5, 70.0 + (disponible.y - tam.y) * 0.5)
+	_tablon.position = Vector2(
+		maxf(20.0, (region_tablon - tam.x) * 0.5),
+		70.0 + (disponible.y - tam.y) * 0.5,
+	)
+	if _detalle != null:
+		_detalle.position = Vector2(size.x - ancho_detalle - 20.0, 70.0)
+		_detalle.size = Vector2(ancho_detalle, minf(360.0, maxf(220.0, size.y - 150.0)))
 	_hilos.size = tam
 	_vacio.size = tam
 	var fuente := clampi(int(escala_px * 0.045), 10, 20)
@@ -247,6 +356,11 @@ func _enfocar_inicial() -> void:
 	if _botones.is_empty():
 		return
 	(_botones.values()[0] as Button).grab_focus()
+
+
+func _al_enfocar_ficha(id: String) -> void:
+	inspeccionar(id)
+	_actualizar_estilos()
 
 
 ## Esc/B se atiende antes que la GUI y que el menú global: dentro del corcho
@@ -373,6 +487,7 @@ func mover(id: String, pos: Vector2) -> bool:
 func pulsar(id: String) -> void:
 	if not _botones.has(id):
 		return
+	inspeccionar(id)
 	if _seleccion.is_empty():
 		_seleccion = id
 	elif _seleccion == id:

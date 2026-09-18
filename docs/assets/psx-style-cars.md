@@ -106,6 +106,18 @@ La acumulación de nieve es un `BoxMesh` sin colisión ni sombra, oculto en los 
 
 `dia_clima_visual_app.gd` aplica el perfil cuando cambia el estado o se reconstruye el mundo de `trayecto`. Al volver a despejado se restauran rugosidad, metalicidad, especular y tinte base, evitando residuos entre climas.
 
+## Cuarto corte — cadencia del tráfico según clima
+
+El coche de fondo deja de cruzar con la misma frecuencia en cualquier condición. Se conserva el mismo `Tween` y el mismo estado climático canónico; únicamente cambia su `speed_scale`, lo que afecta tanto al cruce como a la pausa entre pasadas:
+
+- **despejado**: `1.00x`, cadencia base;
+- **nublado**: `0.88x`, moderación ligera;
+- **lluvia**: `0.72x`, menos velocidad y más separación;
+- **niebla**: `0.58x`, tráfico más esporádico;
+- **nieve**: `0.52x`, cadencia más prudente.
+
+No se añade un segundo temporizador, rutas, navegación, avoidance, física, señales ni IA. El `Tween` creado al montar `TraficoFondo` se guarda como metadato del nodo y `aplicar_clima()` ajusta su escala cuando cambia el tiempo. Así la calle responde también en comportamiento ambiental sin convertir el vehículo en tráfico jugable.
+
 ## Checklist técnico
 
 - [x] descargar `PSX_Style_Cars_by_GGBot_(August2023).zip` desde la fuente oficial;
@@ -119,6 +131,7 @@ La acumulación de nieve es un `BoxMesh` sin colisión ni sombra, oculto en los 
 - [x] ejecutar importación Godot, suite, Alpha y benchmark del lote binario (#526);
 - [x] añadir un único tráfico lejano barato reutilizando un GLB ya versionado;
 - [x] mantener el tráfico móvil fuera de colisión, navegación y física de vehículo;
+- [x] adaptar la cadencia del tráfico lejano al clima reutilizando el mismo `Tween`;
 - [ ] validación visual humana de escala, clipping, frecuencia del cruce y lectura desde el punto de entrada.
 
 ## Fuera de alcance
