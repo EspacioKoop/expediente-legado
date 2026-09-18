@@ -1,5 +1,6 @@
 extends SceneTree
 
+
 class ConsolaRomPrueba:
 	extends "res://guion/consola_portatil_98.gd"
 
@@ -31,17 +32,20 @@ func _probar_handshake_deliberado() -> void:
 
 	var observador := SemillaRomVigilia.new()
 	root.add_child(observador)
-	observador.configurar_contrato(
-		jornada,
-		consola,
-		{
-			"id_rom": "ryu_flow_98",
-			"id_mito": "dragon_japones",
-			"titulo_rom": "RYUFLOW98",
-			"direccion": 0xC100,
-			"valor": 0xA5,
-			"intensidad": 2,
-		},
+	(
+		observador
+		. configurar_contrato(
+			jornada,
+			consola,
+			{
+				"id_rom": "ryu_flow_98",
+				"id_mito": "dragon_japones",
+				"titulo_rom": "RYUFLOW98",
+				"direccion": 0xC100,
+				"valor": 0xA5,
+				"intensidad": 2,
+			},
+		)
 	)
 	_comprobar(observador.is_processing(), "un contrato válido queda observando")
 
@@ -81,17 +85,20 @@ func _probar_contrato_invalido() -> void:
 	root.add_child(consola)
 	var observador := SemillaRomVigilia.new()
 	root.add_child(observador)
-	observador.configurar_contrato(
-		{"dia": 2},
-		consola,
-		{
-			"id_rom": "ryu_flow_98",
-			"id_mito": "dragon_japones",
-			"titulo_rom": "RYUFLOW98",
-			"direccion": -1,
-			"valor": 0xA5,
-			"intensidad": 2,
-		},
+	(
+		observador
+		. configurar_contrato(
+			{"dia": 2},
+			consola,
+			{
+				"id_rom": "ryu_flow_98",
+				"id_mito": "dragon_japones",
+				"titulo_rom": "RYUFLOW98",
+				"direccion": -1,
+				"valor": 0xA5,
+				"intensidad": 2,
+			},
+		)
 	)
 	_comprobar(not observador.is_processing(), "una dirección inválida no inicia polling")
 
@@ -104,6 +111,4 @@ func _comprobar(actual, esperado = true, nombre: String = "") -> void:
 		_pasadas += 1
 		return
 	_fallos += 1
-	push_error(
-		"FALLO Semilla ROM vigilia: %s (actual=%s esperado=%s)" % [nombre, actual, esperado]
-	)
+	push_error("FALLO Semilla ROM vigilia: %s (actual=%s esperado=%s)" % [nombre, actual, esperado])
