@@ -8,6 +8,7 @@ extends Interactuable3D
 const ENERGIA_ENCENDIDA := 1.1
 
 var _encendida := false
+var _averiada := false
 var _luz: OmniLight3D
 
 
@@ -38,13 +39,25 @@ func esta_encendida() -> bool:
 	return _encendida
 
 
+func establecer_averiada(valor: bool) -> void:
+	_averiada = valor
+	if _averiada:
+		_encendida = false
+		_luz.light_energy = 0.0
+		_luz.visible = false
+
+
 func texto_accion() -> String:
+	if _averiada:
+		return "La bombilla está fundida"
 	if _encendida:
 		return "Apagar lámpara"
 	return super.texto_accion()
 
 
 func _alternar(_actor: Node) -> void:
+	if _averiada:
+		return
 	_encendida = not _encendida
 	_luz.light_energy = ENERGIA_ENCENDIDA if _encendida else 0.0
 	_luz.visible = _encendida

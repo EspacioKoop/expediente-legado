@@ -7,9 +7,13 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 ACUMULACION = ROOT / "godot" / "guion" / "casa_acumulacion_3d.gd"
+CONSECUENCIAS = ROOT / "godot" / "guion" / "casa_consecuencias_3d.gd"
+AMBIENTAL = ROOT / "godot" / "guion" / "casa_estado_ambiental.gd"
+LAMPARA = ROOT / "godot" / "guion" / "lampara_interactiva_3d.gd"
 CONTROLLER = ROOT / "godot" / "guion" / "dia_acumulacion_casa_app.gd"
 ESCENA = ROOT / "godot" / "escenas" / "dia.tscn"
 PRUEBA_GODOT = "pruebas/pruebas_casa_acumulacion.gd"
+PRUEBA_CONSECUENCIAS = "pruebas/pruebas_casa_consecuencias.gd"
 RESUMEN_GODOT = re.compile(r"(\d+) pasadas, 0 fallos")
 
 
@@ -17,6 +21,9 @@ class CasaAcumulacionTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.acumulacion = ACUMULACION.read_text(encoding="utf-8")
+        cls.consecuencias = CONSECUENCIAS.read_text(encoding="utf-8")
+        cls.ambiental = AMBIENTAL.read_text(encoding="utf-8")
+        cls.lampara = LAMPARA.read_text(encoding="utf-8")
         cls.controller = CONTROLLER.read_text(encoding="utf-8")
         cls.escena = ESCENA.read_text(encoding="utf-8")
 
@@ -48,12 +55,40 @@ class CasaAcumulacionTest(unittest.TestCase):
         self.assertIn("if _es_iman_calendario(objeto) and nevera != null", self.acumulacion)
         self.assertNotIn("Inventario.guardar_en_casa", self.acumulacion)
 
+    def test_consecuencias_derivan_de_hechos_y_no_de_medidores(self):
+        self.assertIn('"consecuencias_casa": _consecuencias_domesticas(jornada)', self.ambiental)
+        self.assertIn('consecuencia.begins_with("casa_")', self.ambiental)
+        self.assertIn('estado_ambiental.get("consecuencias_casa", [])', self.consecuencias)
+        self.assertIn('const NOMBRE_RAIZ := "ConsecuenciasCasa"', self.consecuencias)
+        for nombre in (
+            "BombillaFundida",
+            "GrifoGoteando",
+            "PersianaAtascada",
+            "CalentadorAveriado",
+            "ElectrodomesticoRoto",
+        ):
+            self.assertIn(f'marca.name = "{nombre}"', self.consecuencias)
+        self.assertIn('"ReciboPendiente", Vector3(', self.consecuencias)
+        self.assertIn('"MultaPendiente", Vector3(', self.consecuencias)
+        self.assertIn("marca.name = nombre", self.consecuencias)
+        self.assertNotIn("Label.new()", self.consecuencias)
+        self.assertNotIn("porcentaje", self.consecuencias.lower())
+        self.assertNotIn("nivel_pobreza", self.consecuencias.lower())
+
+    def test_bombilla_fundida_bloquea_la_lampara_real(self):
+        self.assertIn("func establecer_averiada(valor: bool)", self.lampara)
+        self.assertIn("if _averiada:", self.lampara)
+        self.assertIn('lampara.has_method("establecer_averiada")', self.consecuencias)
+        self.assertIn("lampara.establecer_averiada(true)", self.consecuencias)
+
     def test_controller_deriva_desde_estado_oficial(self):
         self.assertIn('fase != "casa"', self.controller)
         self.assertIn('partida.estado.get("inventario", {})', self.controller)
         self.assertIn("CasaEstadoAmbientalScript.derivar", self.controller)
         self.assertIn("CasaAcumulacion.montar", self.controller)
         self.assertIn("CasaAcumulacion.firma", self.controller)
+        self.assertIn("CasaConsecuencias.firma", self.controller)
+        self.assertIn("CasaConsecuencias.montar", self.controller)
         self.assertNotIn("Inventario.recoger", self.controller)
         self.assertNotIn("Inventario.guardar_en_casa", self.controller)
 
@@ -83,27 +118,28 @@ class CasaAcumulacionTest(unittest.TestCase):
         )
         self.assertEqual(importacion.returncode, 0, importacion.stdout)
 
-        resultado = subprocess.run(
-            [
-                motor,
-                "--headless",
-                "--path",
-                str(ROOT / "godot"),
-                "--script",
-                PRUEBA_GODOT,
-            ],
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            timeout=30,
-            check=False,
-        )
-        self.assertEqual(resultado.returncode, 0, resultado.stdout)
-        resumen = RESUMEN_GODOT.search(resultado.stdout)
-        self.assertIsNotNone(resumen, resultado.stdout)
-        self.assertGreaterEqual(int(resumen.group(1)), 40, resultado.stdout)
-        self.assertNotIn("SCRIPT ERROR:", resultado.stdout)
-        self.assertNotIn("Parse Error:", resultado.stdout)
+        for prueba, minimo in ((PRUEBA_GODOT, 40), (PRUEBA_CONSECUENCIAS, 15)):
+            resultado = subprocess.run(
+                [
+                    motor,
+                    "--headless",
+                    "--path",
+                    str(ROOT / "godot"),
+                    "--script",
+                    prueba,
+                ],
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                timeout=30,
+                check=False,
+            )
+            self.assertEqual(resultado.returncode, 0, resultado.stdout)
+            resumen = RESUMEN_GODOT.search(resultado.stdout)
+            self.assertIsNotNone(resumen, resultado.stdout)
+            self.assertGreaterEqual(int(resumen.group(1)), minimo, resultado.stdout)
+            self.assertNotIn("SCRIPT ERROR:", resultado.stdout)
+            self.assertNotIn("Parse Error:", resultado.stdout)
 
 
 if __name__ == "__main__":

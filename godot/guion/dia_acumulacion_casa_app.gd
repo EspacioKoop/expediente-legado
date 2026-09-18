@@ -6,6 +6,7 @@
 extends Node
 
 const CasaAcumulacion := preload("res://guion/casa_acumulacion_3d.gd")
+const CasaConsecuencias := preload("res://guion/casa_consecuencias_3d.gd")
 const CasaEstadoAmbientalScript := preload("res://guion/casa_estado_ambiental.gd")
 
 var _mundo_id := 0
@@ -30,13 +31,14 @@ func _process(_delta: float) -> void:
 	if typeof(inventario) != TYPE_DICTIONARY:
 		inventario = {}
 	var estado := CasaEstadoAmbientalScript.derivar(dia.jornada, inventario)
-	var firma := CasaAcumulacion.firma(estado)
+	var firma := CasaAcumulacion.firma(estado) + "#" + CasaConsecuencias.firma(estado)
 	if mundo_id == _mundo_id and firma == _firma:
 		return
 
 	_mundo_id = mundo_id
 	_firma = firma
 	var acumulacion := CasaAcumulacion.montar(mundo, estado)
+	CasaConsecuencias.montar(mundo, estado)
 	_conectar_publicaciones(acumulacion)
 
 
