@@ -167,15 +167,18 @@ static func planificar(espacio: Dictionary, forma_id: String, nivel: int) -> Dic
 			+ lateral * 0.62 * lado
 			+ Vector3(0.0, 0.62 + 0.14 * float(i), 0.0)
 		)
-		decals.append(
-			{
-				"ruta": ruta(String(manchas[i])),
-				"pos": posicion,
-				"rot": Vector3(0.0, giro, 0.0),
-				"ancho": 0.9 + 0.24 * float(nivel_seguro) + 0.08 * float(i),
-				"opacidad": 0.14 + 0.10 * float(nivel_seguro),
-				"separacion": 0.006 + 0.001 * float(i),
-			}
+		(
+			decals
+			. append(
+				{
+					"ruta": ruta(String(manchas[i])),
+					"pos": posicion,
+					"rot": Vector3(0.0, giro, 0.0),
+					"ancho": 0.9 + 0.24 * float(nivel_seguro) + 0.08 * float(i),
+					"opacidad": 0.14 + 0.10 * float(nivel_seguro),
+					"separacion": 0.006 + 0.001 * float(i),
+				}
+			)
 		)
 	plan["decals"] = decals
 	return plan
