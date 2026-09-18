@@ -73,10 +73,7 @@ func _probar() -> void:
 		Imprevistos.consecuencias(jornada).has("casa_grifo_averiado"),
 		"la reparación no borra otras consecuencias"
 	)
-	_comprobar(
-		Inventario.contiene(inventario, "palanca_kkryy"),
-		"usar la palanca no la consume"
-	)
+	_comprobar(Inventario.contiene(inventario, "palanca_kkryy"), "usar la palanca no la consume")
 	_comprobar(
 		String(persiana.get_meta("herramienta_usada", "")) == "palanca_kkryy",
 		"la interacción registra qué herramienta resolvió la avería"
