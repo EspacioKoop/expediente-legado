@@ -54,8 +54,10 @@ func _ejecutar() -> void:
 		var fila: Dictionary = esperado[i]
 		estados.append(String(fila["estado"]))
 		_comprobar(
-			String(visor._pronostico_historial_lista.get_item_metadata(i))
-			== String(fila["expediente"]),
+			(
+				String(visor._pronostico_historial_lista.get_item_metadata(i))
+				== String(fila["expediente"])
+			),
 			"el historial visible conserva el orden determinista",
 		)
 	_comprobar(estados.has(Pronosticos.ESTADO_ACERTADO), "el historial incluye aciertos")
