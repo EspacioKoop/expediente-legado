@@ -21,7 +21,7 @@ func _probar() -> void:
 	var mundo := Node3D.new()
 	root.add_child(mundo)
 	var lote := Coches.montar(mundo)
-	_comprobar(lote.get_child_count() == 3, "tres coches del lote mínimo")
+	_comprobar(lote.get_child_count() == 4, "tres aparcados y un coche de fondo")
 	_comprobar(Coches.montar(mundo) == lote, "montaje idempotente")
 	_comprobar(mundo.get_child_count() == 1, "sin duplicación al repetir")
 	_comprobar(lote.find_children("*", "Light3D", true, false).is_empty(), "sin luces")
@@ -29,7 +29,14 @@ func _probar() -> void:
 	_comprobar(lote.find_children("*", "VehicleBody3D", true, false).is_empty(), "sin vehículo")
 	_comprobar(lote.find_children("*", "RigidBody3D", true, false).is_empty(), "sin dinámica")
 	_comprobar(
-		lote.find_children("*", "StaticBody3D", true, false).size() == 3, "una caja por coche"
+		lote.find_children("*", "StaticBody3D", true, false).size() == 3,
+		"solo los tres aparcados tienen caja",
+	)
+	var trafico := lote.get_node("TraficoFondo") as Node3D
+	_comprobar(trafico != null, "tráfico lejano presente")
+	_comprobar(
+		trafico.find_children("*", "CollisionShape3D", true, false).is_empty(),
+		"tráfico lejano sin colisión",
 	)
 	var largos := {"RancheraSur": 4.60, "MonovolumenCentro": 4.30, "UtilitarioNorte": 4.00}
 	var triangulos := 0
@@ -38,6 +45,10 @@ func _probar() -> void:
 		for malla in coche.find_children("*", "MeshInstance3D", true, false):
 			var limites: AABB = malla.global_transform * malla.get_aabb()
 			caja = limites if caja.size == Vector3.ZERO else caja.merge(limites)
+			_comprobar(
+				malla.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF,
+				"coches sin pasada de sombras",
+			)
 			for i in malla.mesh.get_surface_count():
 				triangulos += malla.mesh.surface_get_array_index_len(i) / 3
 				var mate: StandardMaterial3D = malla.get_active_material(i)
@@ -51,8 +62,16 @@ func _probar() -> void:
 				_comprobar(mate.specular_mode == BaseMaterial3D.SPECULAR_DISABLED, "sin brillo")
 		var nombre := str(coche.name)
 		_comprobar(absf(caja.position.y) < 0.001, "ruedas apoyadas en el asfalto: " + nombre)
-		_comprobar(absf(caja.size.z - largos[nombre]) < 0.001, "largo normalizado: " + nombre)
 		_comprobar(caja.size.y > 1.2 and caja.size.y < 2.2, "altura verosímil: " + nombre)
+		if nombre == "TraficoFondo":
+			_comprobar(
+				absf(maxf(caja.size.x, caja.size.z) - 4.00) < 0.001,
+				"largo normalizado del tráfico lejano",
+			)
+			_comprobar(caja.position.z > 14.0, "tráfico detrás del cierre jugable")
+			_comprobar(caja.end.z < 19.0, "tráfico contenido en el fondo urbano")
+			continue
+		_comprobar(absf(caja.size.z - largos[nombre]) < 0.001, "largo normalizado: " + nombre)
 		_comprobar(caja.end.x < -1.6 or caja.position.x > 1.6, "paso central libre: " + nombre)
 		_comprobar(caja.position.x > -4.0 and caja.end.x < 4.0, "dentro de la calzada: " + nombre)
 		_comprobar(caja.position.z > -14.0 and caja.end.z < 14.0, "lejos de entrada y portal")
@@ -66,8 +85,11 @@ func _probar() -> void:
 		)
 		_comprobar(volumen.position.is_equal_approx(caja.position), "colisión alineada: " + nombre)
 		_comprobar(volumen.size.is_equal_approx(caja.size), "colisión del tamaño del coche")
-	print("Lote: 3 coches, %d triángulos" % triangulos)
-	_comprobar(triangulos <= 1500, "presupuesto geométrico acotado")
+	print("Lote: 4 instancias, %d triángulos" % triangulos)
+	_comprobar(triangulos <= 1900, "presupuesto geométrico acotado")
+	var x_inicial := trafico.position.x
+	await create_timer(0.20).timeout
+	_comprobar(trafico.position.x > x_inicial + 0.01, "tráfico lejano se mueve")
 	mundo.free()
 
 	var dia = DIA.instantiate()
@@ -79,7 +101,11 @@ func _probar() -> void:
 		var montado = dia._mundo.get_node_or_null("CochesPsxCC0")
 		_comprobar((montado != null) == (fase == "trayecto"), "hook real de fase " + fase)
 		if montado != null:
-			_comprobar(montado.get_child_count() == 3, "lote completo al regresar")
+			_comprobar(montado.get_child_count() == 4, "lote completo al regresar")
+			_comprobar(
+				montado.get_node_or_null("TraficoFondo") != null,
+				"tráfico lejano se reconstruye con trayecto",
+			)
 	dia.queue_free()
 	await process_frame
 	await create_timer(0.25).timeout

@@ -1,4 +1,4 @@
-## Tres coches aparcados de GGBotNet / PSX Style Cars (CC0-1.0, #230).
+## Tres coches aparcados y un cruce lejano de GGBotNet / PSX Style Cars (CC0-1.0, #230).
 ## El autor avisa de que la escala no es coherente entre modelos: cada ficha
 ## fija su propio largo real y el factor se calcula sobre la malla importada.
 class_name CochesPsxCC0
@@ -12,6 +12,12 @@ const COCHES := [
 	["MonovolumenCentro", "Car04", Vector3(2.8, 0.0, -3.5), 4.30, 180.0],
 	["UtilitarioNorte", "Car03", Vector3(-3.0, 0.0, 9.5), 4.00, 0.0],
 ]
+# Reutiliza Car03 detrás del cierre norte. No ocupa la zona jugable: cruza de
+# izquierda a derecha en z=16,8, sin cuerpo físico, y reaparece fuera de plano.
+const TRAFICO_FONDO := ["TraficoFondo", "Car03", Vector3(-7.0, 0.0, 16.8), 4.00, 90.0]
+const DESPLAZAMIENTO_FONDO := 14.0
+const DURACION_CRUCE := 7.0
+const PAUSA_CRUCE := 5.0
 
 
 static func montar(mundo: Node3D) -> Node3D:
@@ -24,12 +30,15 @@ static func montar(mundo: Node3D) -> Node3D:
 	lote.name = "CochesPsxCC0"
 	var materiales: Dictionary = {}
 	for ficha in COCHES:
-		lote.add_child(_crear_coche(ficha, materiales))
+		lote.add_child(_crear_coche(ficha, materiales, true))
+	var trafico := _crear_coche(TRAFICO_FONDO, materiales, false)
+	lote.add_child(trafico)
 	mundo.add_child(lote)
+	_animar_trafico_fondo(trafico)
 	return lote
 
 
-static func _crear_coche(ficha: Array, materiales: Dictionary) -> Node3D:
+static func _crear_coche(ficha: Array, materiales: Dictionary, con_colision: bool) -> Node3D:
 	var coche := Node3D.new()
 	coche.name = ficha[0]
 	coche.position = ficha[2]
@@ -43,21 +52,32 @@ static func _crear_coche(ficha: Array, materiales: Dictionary) -> Node3D:
 		caja = local if caja.size == Vector3.ZERO else caja.merge(local)
 		malla.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		_apagar_materiales(malla, materiales)
-	# Largo sobre Z; se apoya la base real de las ruedas en el asfalto.
+	# Largo sobre Z antes de aplicar el giro del nodo; se apoya la base real de
+	# las ruedas en el asfalto tanto para aparcados como para el coche lejano.
 	var factor: float = ficha[3] / caja.size.z
 	modelo.scale = Vector3.ONE * factor
 	modelo.position = -Vector3(caja.get_center().x, caja.position.y, caja.get_center().z) * factor
-	# Estáticos y sin física de vehículo: una envolvente simple impide
-	# atravesar la carrocería sin colisión por triángulo.
-	var cuerpo := StaticBody3D.new()
-	var colision := CollisionShape3D.new()
-	var forma := BoxShape3D.new()
-	forma.size = caja.size * factor
-	colision.shape = forma
-	colision.position.y = forma.size.y / 2.0
-	cuerpo.add_child(colision)
-	coche.add_child(cuerpo)
+	if con_colision:
+		# Los coches aparcados sí son volumen urbano alcanzable: una envolvente
+		# simple impide atravesar la carrocería sin física de vehículo.
+		var cuerpo := StaticBody3D.new()
+		var colision := CollisionShape3D.new()
+		var forma := BoxShape3D.new()
+		forma.size = caja.size * factor
+		colision.shape = forma
+		colision.position.y = forma.size.y / 2.0
+		cuerpo.add_child(colision)
+		coche.add_child(cuerpo)
 	return coche
+
+
+static func _animar_trafico_fondo(coche: Node3D) -> void:
+	# Un solo Tween ligado al nodo: sin NavigationAgent, VehicleBody ni _process
+	# propio. El salto de vuelta sucede fuera del encuadre lateral.
+	var tween := coche.create_tween().set_loops()
+	tween.tween_property(coche, "position:x", DESPLAZAMIENTO_FONDO, DURACION_CRUCE).as_relative()
+	tween.tween_interval(PAUSA_CRUCE)
+	tween.tween_callback(func() -> void: coche.position.x -= DESPLAZAMIENTO_FONDO)
 
 
 static func _transformacion_hasta(nodo: Node3D, raiz: Node3D) -> Transform3D:
