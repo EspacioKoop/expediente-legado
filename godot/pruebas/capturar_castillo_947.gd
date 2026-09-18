@@ -54,7 +54,9 @@ func _init() -> void:
 		for i in 12:
 			await process_frame
 		if caso.has("pulso"):
-			var controlador := presentacion.get_node_or_null("PulsoArquitectonico") as SuenoCastilloPulso3D
+			var controlador := (
+				presentacion.get_node_or_null("PulsoArquitectonico") as SuenoCastilloPulso3D
+			)
 			if controlador != null:
 				controlador.set_process(false)
 				controlador.aplicar_pulso(int(caso["pulso"]))
