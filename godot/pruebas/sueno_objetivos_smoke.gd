@@ -12,6 +12,7 @@ var fallos := 0
 func _init() -> void:
 	_comprobar_vertical_0_1_2()
 	_comprobar_objetivo_no_puntuable()
+	_comprobar_sustitucion_puzzle()
 	_comprobar_fallo_opcional()
 	if fallos == 0:
 		print("Sueño objetivos smoke: OK")
@@ -59,6 +60,49 @@ func _comprobar_objetivo_no_puntuable() -> void:
 	_comprobar(Regla.completar(estado, "a"), "primer puntuable progresa")
 	_comprobar(Regla.completar(estado, "b"), "segundo puntuable progresa")
 	_comprobar(Regla.resuelto(estado), "dos puntuables resuelven")
+
+
+func _comprobar_sustitucion_puzzle() -> void:
+	var estado := Regla.nuevo(["ruta-a", "ruta-b", "ruta-c"], 2)
+	var puzzle := {
+		"id": "pista:ecos:P-1",
+		"tipo": "pista_onirica",
+		"condicion": "resolver",
+		"feedback": "pista",
+		"cuenta": true,
+	}
+	_comprobar(
+		Regla.sustituir_puntuable(estado, puzzle, "ruta-c"),
+		"el puzzle sustituye una plaza puntuable pendiente",
+	)
+	_comprobar(
+		Regla.sustituir_puntuable(estado, puzzle, "ruta-c"),
+		"registrar el mismo puzzle otra vez es idempotente",
+	)
+	_comprobar(estado["ids"].count("pista:ecos:P-1") == 1, "el puzzle no se duplica al recargar")
+	_comprobar(Regla.completar(estado, "ruta-c"), "la ruta sustituida puede quedar registrada")
+	_comprobar(Regla.progreso(estado) == Vector2i(0, 2), "la ruta sustituida ya no puntúa")
+	_comprobar(Regla.completar(estado, "pista:ecos:P-1"), "resolver el puzzle suma su plaza")
+	_comprobar(Regla.progreso(estado) == Vector2i(1, 2), "el puzzle resuelto deja progreso 1/2")
+	_comprobar(Regla.completar(estado, "ruta-a"), "una ruta espacial completa el umbral")
+	_comprobar(Regla.resuelto(estado), "puzzle más una ruta resuelven la escena")
+
+	var fallido := Regla.nuevo(["ruta-a", "ruta-b", "ruta-c"], 2)
+	_comprobar(
+		Regla.sustituir_puntuable(fallido, puzzle, "ruta-c"),
+		"el puzzle fallable ocupa la misma plaza",
+	)
+	_comprobar(Regla.fallar(fallido, "pista:ecos:P-1"), "el puzzle puede fallar sin puntuar")
+	_comprobar(Regla.completar(fallido, "ruta-a"), "primera ruta alternativa progresa")
+	_comprobar(Regla.completar(fallido, "ruta-b"), "segunda ruta alternativa progresa")
+	_comprobar(Regla.resuelto(fallido), "fallar el puzzle no bloquea las dos rutas restantes")
+
+	var tarde := Regla.nuevo(["ruta-a", "ruta-b", "ruta-c"], 2)
+	_comprobar(Regla.completar(tarde, "ruta-c"), "la ruta puede completarse antes del puzzle")
+	_comprobar(
+		not Regla.sustituir_puntuable(tarde, puzzle, "ruta-c"),
+		"no se roba progreso ya conseguido al integrar tarde",
+	)
 
 
 func _comprobar_fallo_opcional() -> void:
