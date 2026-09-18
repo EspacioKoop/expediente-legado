@@ -8,6 +8,7 @@ FORMAS = RAIZ / "godot" / "guion" / "sueno_formas.gd"
 SUENO = RAIZ / "godot" / "guion" / "sueno.gd"
 ESPACIO = RAIZ / "godot" / "guion" / "espacio_3d.gd"
 SHADER = RAIZ / "godot" / "arte" / "psx.gdshader"
+PROCEDURAL = RAIZ / "godot" / "guion" / "textura_procedural.gd"
 
 IDS = ("crucero", "patio", "peine", "escalera", "embudo", "gilgamesh")
 MATERIALES_DESPIERTOS = {
@@ -33,6 +34,7 @@ class MaterialesSuenoTest(unittest.TestCase):
         cls.sueno = SUENO.read_text(encoding="utf-8")
         cls.espacio = ESPACIO.read_text(encoding="utf-8")
         cls.shader = SHADER.read_text(encoding="utf-8")
+        cls.procedural = PROCEDURAL.read_text(encoding="utf-8")
 
     def _bloque(self, indice):
         inicio = self.formas.index(f'\t"{IDS[indice]}":')
@@ -111,21 +113,29 @@ class MaterialesSuenoTest(unittest.TestCase):
         self.assertGreaterEqual(
             len(
                 re.findall(
-                    r'set_shader_parameter\(\s*"contraste_textura"',
+                    r"TexturaProcedural\.por_nombre\("
+                    r"\s*textura\s*,\s*color\s*,\s*hash\(textura\)\s*,\s*contraste",
                     self.espacio,
                 )
             ),
             2,
         )
-        self.assertGreaterEqual(
-            len(
-                re.findall(
-                    r'"contraste_textura"\s*,\s*'
-                    r'1\.0\s+if\s+textura\.begins_with\("res://"\)\s+else\s+contraste',
-                    self.espacio,
-                )
-            ),
-            2,
+        self.assertRegex(
+            self.procedural,
+            r"static func por_nombre\([\s\S]*?contraste: float = 1\.0",
+        )
+        self.assertIn(
+            "return calculada(nombre, base, semilla, contraste)",
+            self.procedural,
+        )
+        self.assertIn("_contrastar_calculada(textura, base, contraste)", self.procedural)
+        self.assertLess(
+            self.procedural.index('if nombre.begins_with("res://")'),
+            self.procedural.index("return calculada(nombre, base, semilla, contraste)"),
+        )
+        self.assertLess(
+            self.procedural.index("if ResourceLoader.exists(ruta)"),
+            self.procedural.index("return calculada(nombre, base, semilla, contraste)"),
         )
 
     def test_hay_inversion_deliberada_en_al_menos_una_forma(self):
@@ -157,14 +167,6 @@ class MaterialesSuenoTest(unittest.TestCase):
     def test_el_shader_mantiene_el_mundo_normal_por_defecto(self):
         self.assertIn(
             "uniform vec3 deformacion_textura = vec3(1.0);",
-            self.shader,
-        )
-        self.assertIn(
-            "uniform float contraste_textura = 1.0;",
-            self.shader,
-        )
-        self.assertIn(
-            "color_base.rgb + (muestra - color_base.rgb) * contraste_textura",
             self.shader,
         )
         self.assertIn(
