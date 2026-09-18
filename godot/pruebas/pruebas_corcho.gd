@@ -130,7 +130,8 @@ func _probar_presentacion_pared() -> void:
 func _probar_panel() -> void:
 	var jornada := {}
 	var conceptos := {
-		"a": {
+		"a":
+		{
 			"id": "a",
 			"nombre": "Alpha",
 			"resumen": "Alpha enlaza con [[Beta]] y con [[Secreto]].",
