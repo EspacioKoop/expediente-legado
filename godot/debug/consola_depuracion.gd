@@ -2,7 +2,7 @@
 ## del 1.
 ##
 ## Es herramienta de playtest, no juego: vive bajo `debug/`, fuera del export público,
-## en `textos.csv`. Cada botón escribe el mismo comando que se podría teclear, así
+## y no necesita `textos.csv`. Cada botón escribe el mismo comando que se podría teclear, así
 ## que el registro enseña los comandos sin tener que leer la ayuda.
 ##
 ## Solo toca la partida en curso (`dia.tscn`). Fuera de ella lo dice y no hace
