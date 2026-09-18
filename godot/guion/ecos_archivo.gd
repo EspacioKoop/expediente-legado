@@ -183,9 +183,11 @@ static func _seleccion_valida(valores: Array) -> bool:
 		return false
 	var vistos: Array = []
 	for valor in valores:
-		if typeof(valor) != TYPE_INT:
+		if typeof(valor) != TYPE_INT and typeof(valor) != TYPE_FLOAT:
 			return false
 		var id := int(valor)
+		if float(valor) != float(id):
+			return false
 		if id < 0 or id >= CANTIDAD_FRAGMENTOS or vistos.has(id):
 			return false
 		vistos.append(id)
