@@ -31,6 +31,19 @@ static func todo(comprobar: Callable) -> void:
 			fuertes += 1
 	comprobar.call("como máximo un imprevisto fuerte", fuertes <= Imprevistos.MAX_FUERTES, true)
 
+	var estado_json = JSON.parse_string(JSON.stringify(primera["imprevistos"]))
+	var jornada_recargada := {
+		"raiz": int(primera["raiz"]),
+		"vuelta": int(primera["vuelta"]),
+		"imprevistos": estado_json,
+	}
+	Imprevistos.completar(jornada_recargada)
+	comprobar.call(
+		"recargar normaliza el plan",
+		jornada_recargada["imprevistos"],
+		primera["imprevistos"]
+	)
+
 	var cobro := _con_plan(9401)
 	var primero: Dictionary = cobro["imprevistos"]["plan"][0]
 	var detalle := Imprevistos.detalle(String(primero["id"]))
