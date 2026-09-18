@@ -186,7 +186,7 @@ func _init() -> void:
 
 	if destino.contains("tarot"):
 		var codigo_tarot := 0
-		if destino.contains("tarot-progreso"):
+		if destino.contains("progreso"):
 			codigo_tarot = await _capturar_tarot_progreso(escena, destino, argumentos)
 		else:
 			codigo_tarot = await _capturar_tarot(escena, destino, argumentos)
