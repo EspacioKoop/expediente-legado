@@ -17,7 +17,7 @@ No se incluye BIOS de Nintendo ni ROM comercial. La boot ROM que necesita el mod
 
 SameBoy ejecuta hardware Game Boy Color real:
 
-- ROM Game Boy clásica: arranca en un CGB con la paleta de compatibilidad que asigna la boot ROM;
+- ROM Game Boy clásica: arranca en un CGB con la paleta de compatibilidad que asigna la boot ROM; `dmg_only_smoke.gb` (flag CGB `0x00`) lo verifica de forma explícita en CI;
 - cartucho dual-mode con byte CGB `0x80`: corre en modo Color con sus propias paletas;
 - ROM CGB-only con byte `0xC0`: se admite (`LOAD_CGB_ONLY` se conserva en la API por estabilidad, pero ya no se devuelve);
 - cabecera con checksum incorrecto: se rechaza con `LOAD_INVALID_ROM`, como ya hacía el núcleo anterior.
@@ -171,9 +171,13 @@ bash scripts/preparar_emulador_gb.sh windows-release
 
 El runner Windows no tiene RGBDS: la alpha compila la boot ROM en Linux (`preparar_emulador_gb.sh boot-rom`), la pasa como artefacto y `SConstruct` vuelve a verificar su SHA-256 antes de incrustarla.
 
-CI ejecuta dos smoke:
+CI ejecuta tres gates de compatibilidad:
 
-- `godot/pruebas/emulador_gb_smoke.gd`: carga `Caza Píxeles 98`, prueba SRAM, framebuffer y PCM nativo a 48 kHz, y exige `supports_audio() == true`;
-- `godot/pruebas/emulador_gbc_smoke.gd -- <rom>`: carga `cgb_only_smoke.gbc` y exige píxeles rojos y verdes puros de la paleta CGB, imposibles en un núcleo DMG.
+- `godot/pruebas/emulador_dmg_smoke.gd -- <rom>`: compila y carga `dmg_only_smoke.gb`, exige flag CGB `0x00`, núcleo SameBoy y framebuffer 160×144 no uniforme;
+- `godot/pruebas/emulador_gb_smoke.gd`: carga `Caza Píxeles 98` (dual-mode, flag `0x80`), prueba SRAM, framebuffer y PCM nativo a 48 kHz, y exige `supports_audio() == true`;
+- `godot/pruebas/emulador_gbc_smoke.gd -- <rom>`: carga `cgb_only_smoke.gbc` (flag `0xC0`) y exige píxeles rojos y verdes puros de la paleta CGB, imposibles en un núcleo DMG.
+
+Así, el CI de #456 cubre explícitamente los tres modos exigidos: GB clásico, dual-mode y CGB-only.
+El fixture DMG usa solo registros clásicos (LCDC/BGP), de modo que el gate no depende accidentalmente de una ruta exclusiva de CGB.
 
 — Odiseo (GPT-5.6 Sol)
