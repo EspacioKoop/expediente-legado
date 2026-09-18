@@ -21,7 +21,7 @@ class TestOficinaZonaClasificacion(unittest.TestCase):
     def test_la_zona_explica_un_flujo_sin_texto_legible(self):
         self.assertEqual(self.oficina.count('"rol": "bandeja_clasificacion"'), 2)
         self.assertEqual(self.oficina.count('"rol": "lote_clasificacion_sin_texto"'), 2)
-        inicio = self.oficina.index('"rol": "mesa_clasificacion"')
+        inicio = self.oficina.index('"pos": Vector3(3.6, 0.37, 0.0)')
         fin = self.oficina.index("# La silla 4-B", inicio)
         zona = self.oficina[inicio:fin]
         self.assertNotIn('"texto"', zona)
@@ -36,7 +36,7 @@ class TestOficinaZonaClasificacion(unittest.TestCase):
         ):
             self.assertIn(posicion, self.oficina)
 
-        inicio = self.oficina.index('"rol": "mesa_clasificacion"')
+        inicio = self.oficina.index('"pos": Vector3(3.6, 0.37, 0.0)')
         fin = self.oficina.index("# La silla 4-B", inicio)
         zona = self.oficina[inicio:fin]
         self.assertIn('"modelo": "desk"', zona)
@@ -44,7 +44,7 @@ class TestOficinaZonaClasificacion(unittest.TestCase):
         self.assertNotIn('"modelo": "computerScreen"', zona)
 
     def test_reutiliza_assets_existentes(self):
-        inicio = self.oficina.index('"rol": "mesa_clasificacion"')
+        inicio = self.oficina.index('"pos": Vector3(3.6, 0.37, 0.0)')
         fin = self.oficina.index("# La silla 4-B", inicio)
         zona = self.oficina[inicio:fin]
         self.assertNotIn(".glb", zona)
