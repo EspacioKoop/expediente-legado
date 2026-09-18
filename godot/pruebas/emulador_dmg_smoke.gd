@@ -26,10 +26,7 @@ func _init() -> void:
 	if frame.is_empty():
 		return
 
-	print(
-		"Emulador DMG smoke: OK · %s · %d bytes/frame"
-		% [emulador.call("rom_title"), TAM_FRAME]
-	)
+	print("Emulador DMG smoke: OK · %s · %d bytes/frame" % [emulador.call("rom_title"), TAM_FRAME])
 	quit(0)
 
 
