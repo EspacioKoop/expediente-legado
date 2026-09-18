@@ -146,4 +146,20 @@ Matriz mínima de folios/cartas:
 
 Para cada carta hay que revisar el frontal del plano 2 en modo normal y reducido, y comprobar que `-1` salta la cinemática y desemboca en la historia sin perder el hallazgo.
 
-La comprobación de «al menos una carta obtenida por progresión normal» **no debe fabricarse desde QA**. El frontend legado tiene triggers de progreso como primera pista → `el-mago`, pero esa sincronización general aún no está portada a Godot; queda separada en #1029. Hasta que #1029 proporcione un camino jugable real, esa casilla de #645 permanece pendiente.
+La comprobación de «al menos una carta obtenida por progresión normal» **no debe fabricarse desde QA**. #1029 porta como primer vertical la regla heredada primera pista → `el-mago`: el visor desbloquea la carta y su memoria fantasma en el mismo guardado de la pista, sin reutilizar la ruta de las ocho cartas ocultas ni abrir una historia política.
+
+El capturador puede preparar evidencia visual de ese vertical. Primero abre un documento real y descubre una pista por `_al_pulsar_marca`; solo después exige que `el-mago` esté recogido y conocido, y entonces usa `TarotCinematica` como visor de QA del frontal:
+
+```bash
+tmp="$(mktemp -d)"
+XDG_DATA_HOME="$tmp/data" XDG_CONFIG_HOME="$tmp/config" XDG_CACHE_HOME="$tmp/cache" \
+  xvfb-run -a godot4 --path godot --script pruebas/capturar.gd -- \
+  ../dist/qa/tarot-645/el-mago-progreso-normal.png 2 normal
+
+tmp="$(mktemp -d)"
+XDG_DATA_HOME="$tmp/data" XDG_CONFIG_HOME="$tmp/config" XDG_CACHE_HOME="$tmp/cache" \
+  xvfb-run -a godot4 --path godot --script pruebas/capturar.gd -- \
+  ../dist/qa/tarot-645/el-mago-progreso-reducido.png 2 reducido
+```
+
+Estas capturas prueban el **camino de obtención** y preparan la imagen a revisar; no sustituyen la aprobación visual humana de #645. #1029 sigue abierto para portar el resto de triggers no ocultos del legado.
