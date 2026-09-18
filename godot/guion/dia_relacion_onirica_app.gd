@@ -38,32 +38,65 @@ func _process(_delta: float) -> void:
 	if _montado_esta_noche or mundo.has_meta("puzzle_onirico_montado"):
 		return
 
+	if _atender_sesion_relacion(dia, mundo):
+		return
+
 	var candidato := _candidato(dia)
 	if candidato.is_empty():
 		return
 	_montar_relacion(dia, mundo, candidato)
 
 
-func _montar_relacion(dia: Node, mundo: Node3D, candidato: Dictionary) -> void:
-	var raiz := (
-		Sueno
-		. semilla(
-			int(dia.jornada.get("dia", 1)),
-			dia.jornada.get("leido_hoy", []),
-			dia._raiz(),
-		)
-	)
+func _atender_sesion_relacion(dia: Node, mundo: Node3D) -> bool:
+	if not SuenoPuzzleSesion.registrada_esta_noche(dia.jornada):
+		return false
+	var sesion := SuenoPuzzleSesion.actual(dia.jornada)
+	if sesion.is_empty() or String(sesion.get("tipo", "")) != SuenoPuzzleSesion.TIPO_RELACION:
+		return true
+	if SuenoPuzzleSesion.terminal(sesion):
+		_montado_esta_noche = true
+		return true
+	var guardado := _candidato_guardado(dia, sesion)
+	if guardado.is_empty():
+		return true
+	_montar_relacion(dia, mundo, guardado, sesion.get("datos", {}))
+	return true
+
+
+func _montar_relacion(
+	dia: Node, mundo: Node3D, candidato: Dictionary, datos_guardados: Dictionary = {}
+) -> void:
 	var caso: Dictionary = candidato.get("caso", {})
 	var pista: Dictionary = candidato.get("pista", {})
-	var relacion = (
-		RelacionOnirica
-		. crear(
-			caso,
-			pista,
-			dia.jornada.get("leido_hoy", []),
-			raiz,
+	var relacion: Variant = null
+	if datos_guardados.is_empty():
+		var raiz := (
+			Sueno
+			. semilla(
+				int(dia.jornada.get("dia", 1)),
+				dia.jornada.get("leido_hoy", []),
+				dia._raiz(),
+			)
 		)
-	)
+		relacion = (
+			RelacionOnirica
+			. crear(
+				caso,
+				pista,
+				dia.jornada.get("leido_hoy", []),
+				raiz,
+			)
+		)
+	else:
+		relacion = (
+			RelacionOnirica
+			. restaurar(
+				datos_guardados,
+				caso,
+				pista,
+				dia.jornada.get("leido_hoy", []),
+			)
+		)
 	if relacion == null:
 		return
 	if not dia.has_method("conectar_recompensa_onirica"):
@@ -77,10 +110,15 @@ func _montar_relacion(dia: Node, mundo: Node3D, candidato: Dictionary) -> void:
 	if not vertical.configurar(relacion, String(pista.get("descripcion", ""))):
 		vertical.free()
 		return
+	var caso_id := String(caso.get("id", ""))
+	var reward_id := String(pista.get("id", ""))
+	vertical.estado_cambiado.connect(_al_cambiar_relacion.bind(dia, relacion, caso_id, reward_id))
 	mundo.add_child(vertical)
 	mundo.set_meta("puzzle_onirico_montado", "relacion")
 	_relacion_activa = vertical
 	_montado_esta_noche = true
+	if datos_guardados.is_empty():
+		_persistir_relacion(dia, relacion, caso_id, reward_id)
 
 
 ## Una relación solo es jugable si ambos orígenes y al menos un tercer documento
@@ -145,8 +183,56 @@ func _candidato(dia: Node) -> Dictionary:
 	return elegido
 
 
+func _candidato_guardado(dia: Node, sesion: Dictionary) -> Dictionary:
+	var caso_id := String(sesion.get("caso_id", ""))
+	var reward_id := String(sesion.get("reward_id", ""))
+	for caso in dia.contenido.casos:
+		if String(caso.get("id", "")) != caso_id:
+			continue
+		for pista in caso.get("pistas", []):
+			if String(pista.get("id", "")) != reward_id:
+				continue
+			if not pista.has("registroOrigen2"):
+				return {}
+			return {"caso": caso, "pista": pista}
+	return {}
+
+
 func _candidato_antes(a: Dictionary, b: Dictionary) -> bool:
 	return String(a.get("_orden", "")) < String(b.get("_orden", ""))
+
+
+func _al_cambiar_relacion(
+	_evento: String,
+	dia: Node,
+	relacion,
+	caso_id: String,
+	reward_id: String,
+) -> void:
+	_persistir_relacion(dia, relacion, caso_id, reward_id)
+
+
+func _persistir_relacion(
+	dia: Node,
+	relacion,
+	caso_id: String,
+	reward_id: String,
+) -> void:
+	if relacion == null:
+		return
+	if not (
+		SuenoPuzzleSesion
+		. guardar(
+			dia.jornada,
+			SuenoPuzzleSesion.TIPO_RELACION,
+			caso_id,
+			reward_id,
+			relacion.serializar(),
+		)
+	):
+		return
+	if dia.has_method("_guardar_o_avisar"):
+		dia.call("_guardar_o_avisar", "")
 
 
 func _ancla(espacio: Dictionary) -> Vector3:

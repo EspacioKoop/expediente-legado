@@ -34,32 +34,73 @@ func _process(_delta: float) -> void:
 	if _montado_esta_noche or mundo.has_meta("puzzle_onirico_montado"):
 		return
 
+	if _atender_sesion_ecos(dia, mundo):
+		return
+
 	var candidato := _candidato(dia)
 	if candidato.is_empty():
 		return
 	_montar_ecos(dia, mundo, candidato)
 
 
-func _montar_ecos(dia: Node, mundo: Node3D, candidato: Dictionary) -> void:
-	var raiz := (
-		Sueno
-		. semilla(
-			int(dia.jornada.get("dia", 1)),
-			dia.jornada.get("leido_hoy", []),
-			dia._raiz(),
+func _atender_sesion_ecos(dia: Node, mundo: Node3D) -> bool:
+	if not SuenoPuzzleSesion.registrada_esta_noche(dia.jornada):
+		return false
+	var sesion := SuenoPuzzleSesion.actual(dia.jornada)
+	if sesion.is_empty() or String(sesion.get("tipo", "")) != SuenoPuzzleSesion.TIPO_ECOS:
+		return true
+	if SuenoPuzzleSesion.terminal(sesion):
+		_montado_esta_noche = true
+		return true
+	var guardado := _candidato_guardado(dia, sesion)
+	if guardado.is_empty():
+		return true
+	_montar_ecos(dia, mundo, guardado, sesion.get("datos", {}))
+	return true
+
+
+func _montar_ecos(
+	dia: Node, mundo: Node3D, candidato: Dictionary, datos_guardados: Dictionary = {}
+) -> void:
+	var folio := String(candidato.get("folio", ""))
+	var frase := String(candidato.get("frase", ""))
+	var reward_id := String(candidato.get("reward_id", ""))
+	var ecos: Variant = null
+	if datos_guardados.is_empty():
+		var raiz := (
+			Sueno
+			. semilla(
+				int(dia.jornada.get("dia", 1)),
+				dia.jornada.get("leido_hoy", []),
+				dia._raiz(),
+			)
 		)
-	)
-	var ecos = (
-		EcosArchivo
-		. crear(
-			String(candidato.get("folio", "")),
-			String(candidato.get("frase", "")),
-			dia.jornada.get("leido_hoy", []),
-			raiz,
-			String(candidato.get("reward_id", "")),
+		ecos = (
+			EcosArchivo
+			. crear(
+				folio,
+				frase,
+				dia.jornada.get("leido_hoy", []),
+				raiz,
+				reward_id,
+			)
 		)
-	)
+	else:
+		ecos = (
+			EcosArchivo
+			. restaurar(
+				datos_guardados,
+				frase,
+				dia.jornada.get("leido_hoy", []),
+			)
+		)
 	if ecos == null:
+		return
+	if (
+		String(ecos.nucleo.reward_id) != reward_id
+		or String(ecos.nucleo.puzzle_id) != "ecos:" + folio
+		or ecos.nucleo.source_ids != [folio]
+	):
 		return
 	var caso: Dictionary = candidato.get("caso", {})
 	if caso.is_empty() or not dia.has_method("conectar_recompensa_onirica"):
@@ -83,10 +124,14 @@ func _montar_ecos(dia: Node, mundo: Node3D, candidato: Dictionary) -> void:
 	):
 		vertical.free()
 		return
+	var caso_id := String(caso.get("id", ""))
+	vertical.estado_cambiado.connect(_al_cambiar_ecos.bind(dia, ecos, caso_id, reward_id))
 	mundo.add_child(vertical)
 	mundo.set_meta("puzzle_onirico_montado", "ecos")
 	_ecos_activos = vertical
 	_montado_esta_noche = true
+	if datos_guardados.is_empty():
+		_persistir_ecos(dia, ecos, caso_id, reward_id)
 
 
 ## #89 sí puede recontextualizar una pista aún no descubierta, pero únicamente
@@ -159,8 +204,73 @@ func _candidato(dia: Node) -> Dictionary:
 	return elegido
 
 
+func _candidato_guardado(dia: Node, sesion: Dictionary) -> Dictionary:
+	var caso_id := String(sesion.get("caso_id", ""))
+	var reward_id := String(sesion.get("reward_id", ""))
+	var leido_hoy: Array = dia.jornada.get("leido_hoy", [])
+	for caso in dia.contenido.casos:
+		if String(caso.get("id", "")) != caso_id:
+			continue
+		for pista in caso.get("pistas", []):
+			if String(pista.get("id", "")) != reward_id or pista.has("registroOrigen2"):
+				continue
+			var origen := String(pista.get("registroOrigen", ""))
+			var frase := String(pista.get("fraseGatillo", ""))
+			if frase.strip_edges().split(" ", false).size() < EcosArchivo.CANTIDAD_FRAGMENTOS:
+				return {}
+			for registro in caso.get("registros", []):
+				if String(registro.get("id", "")) != origen:
+					continue
+				var folio := String(registro.get("folio", ""))
+				if not leido_hoy.has(folio):
+					return {}
+				if not String(registro.get("contenido", "")).contains(frase):
+					return {}
+				return {
+					"folio": folio,
+					"frase": frase,
+					"reward_id": reward_id,
+					"descripcion": String(pista.get("descripcion", "")),
+					"caso": caso,
+				}
+	return {}
+
+
 func _candidato_antes(a: Dictionary, b: Dictionary) -> bool:
 	return String(a.get("_orden", "")) < String(b.get("_orden", ""))
+
+
+func _al_cambiar_ecos(
+	_evento: String,
+	dia: Node,
+	ecos,
+	caso_id: String,
+	reward_id: String,
+) -> void:
+	_persistir_ecos(dia, ecos, caso_id, reward_id)
+
+
+func _persistir_ecos(
+	dia: Node,
+	ecos,
+	caso_id: String,
+	reward_id: String,
+) -> void:
+	if ecos == null:
+		return
+	if not (
+		SuenoPuzzleSesion
+		. guardar(
+			dia.jornada,
+			SuenoPuzzleSesion.TIPO_ECOS,
+			caso_id,
+			reward_id,
+			ecos.serializar(),
+		)
+	):
+		return
+	if dia.has_method("_guardar_o_avisar"):
+		dia.call("_guardar_o_avisar", "")
 
 
 ## El vertical queda cerca del centro del recorrido, elevado lo justo para leer

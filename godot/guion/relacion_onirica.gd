@@ -59,27 +59,36 @@ static func crear(caso: Dictionary, pista: Dictionary, leido_hoy: Array, raiz: i
 	)
 	if base == null:
 		return null
+	return _construir(caso, pista, leido_hoy, base)
 
-	distractores.sort_custom(
-		func(a: Dictionary, b: Dictionary): return String(a.get("id", "")) < String(b.get("id", ""))
-	)
-	var rng := RandomNumberGenerator.new()
-	rng.seed = base.seed
-	_barajar(distractores, rng)
 
-	var elegidos: Array = [registro_a, registro_b]
-	for i in range(mini(MAX_DOCUMENTOS - 2, distractores.size())):
-		elegidos.append(distractores[i])
-	_barajar(elegidos, rng)
+## Restaura el mismo tablero y valida que selección/estado no contradigan al
+## núcleo terminal. Un guardado manipulado no puede reabrir un fallo ni cambiar
+## la pareja correcta después de haber visto el resultado.
+static func restaurar(
+	datos: Dictionary,
+	caso: Dictionary,
+	pista: Dictionary,
+	leido_hoy: Array,
+):
+	var base = Puzzle.restaurar(datos.get("nucleo", {}), leido_hoy)
+	var pista_id := String(pista.get("id", "")).strip_edges()
+	if not _base_restaurable(base, pista_id):
+		return null
 
-	var relacion = _nueva_instancia()
+	var relacion = _construir(caso, pista, leido_hoy, base)
 	if relacion == null:
 		return null
-	relacion.nucleo = base
-	relacion.origenes = [origen_a, origen_b]
-	relacion.origenes.sort()
-	for registro in elegidos:
-		relacion.documentos.append(_vista_registro(registro))
+	var seleccion_guardada: Variant = datos.get("seleccion", [])
+	if not seleccion_guardada is Array:
+		return null
+	var seleccion := seleccion_guardada as Array
+	if not _seleccion_valida(seleccion, relacion.documentos):
+		return null
+	relacion.seleccion = seleccion.duplicate()
+	relacion.cerrada = bool(datos.get("cerrada", false))
+	if not _estado_restaurado_valido(relacion):
+		return null
 	return relacion
 
 
@@ -131,6 +140,92 @@ func serializar() -> Dictionary:
 		"seleccion": seleccion.duplicate(),
 		"cerrada": cerrada,
 	}
+
+
+static func _base_restaurable(base, pista_id: String) -> bool:
+	return (
+		base != null
+		and not pista_id.is_empty()
+		and String(base.puzzle_id) == "relacion:" + pista_id
+		and String(base.reward_id) == pista_id
+	)
+
+
+static func _construir(caso: Dictionary, pista: Dictionary, leido_hoy: Array, base):
+	var origen_a := String(pista.get("registroOrigen", ""))
+	var origen_b := String(pista.get("registroOrigen2", ""))
+	var registro_a := _registro_por_id(caso, origen_a)
+	var registro_b := _registro_por_id(caso, origen_b)
+	if registro_a.is_empty() or registro_b.is_empty():
+		return null
+	if not _leido_hoy(registro_a, leido_hoy) or not _leido_hoy(registro_b, leido_hoy):
+		return null
+
+	var folios := [String(registro_a.get("folio", "")), String(registro_b.get("folio", ""))]
+	folios.sort()
+	if base.source_ids != folios:
+		return null
+
+	var distractores: Array = []
+	for registro in caso.get("registros", []):
+		var registro_id := String(registro.get("id", ""))
+		if registro_id == origen_a or registro_id == origen_b:
+			continue
+		if _leido_hoy(registro, leido_hoy):
+			distractores.append(registro)
+	if distractores.is_empty():
+		return null
+	distractores.sort_custom(
+		func(a: Dictionary, b: Dictionary): return String(a.get("id", "")) < String(b.get("id", ""))
+	)
+
+	var rng := RandomNumberGenerator.new()
+	rng.seed = base.seed
+	_barajar(distractores, rng)
+	var elegidos: Array = [registro_a, registro_b]
+	for i in range(mini(MAX_DOCUMENTOS - 2, distractores.size())):
+		elegidos.append(distractores[i])
+	_barajar(elegidos, rng)
+
+	var relacion = _nueva_instancia()
+	if relacion == null:
+		return null
+	relacion.nucleo = base
+	relacion.origenes = [origen_a, origen_b]
+	relacion.origenes.sort()
+	for registro in elegidos:
+		relacion.documentos.append(_vista_registro(registro))
+	return relacion
+
+
+static func _seleccion_valida(seleccion: Array, documentos: Array) -> bool:
+	if seleccion.size() > 2:
+		return false
+	var ids: Array = documentos.map(func(documento): return String(documento.get("id", "")))
+	var vistos: Array = []
+	for valor in seleccion:
+		var registro_id := String(valor)
+		if registro_id.is_empty() or not ids.has(registro_id) or vistos.has(registro_id):
+			return false
+		vistos.append(registro_id)
+	return true
+
+
+static func _estado_restaurado_valido(relacion) -> bool:
+	var estado := String(relacion.nucleo.state)
+	var elegida: Array = relacion.seleccion.duplicate()
+	elegida.sort()
+	if estado == Puzzle.ESTADO_PENDIENTE:
+		return not relacion.cerrada and relacion.seleccion.size() <= 1
+	if not relacion.cerrada:
+		return false
+	if estado == Puzzle.ESTADO_COMPLETADO:
+		return relacion.seleccion.size() == 2 and elegida == relacion.origenes
+	if estado == Puzzle.ESTADO_FALLADO:
+		return relacion.seleccion.size() == 2 and elegida != relacion.origenes
+	if estado == Puzzle.ESTADO_ABANDONADO:
+		return relacion.seleccion.size() <= 1
+	return false
 
 
 static func _registro_por_id(caso: Dictionary, registro_id: String) -> Dictionary:
