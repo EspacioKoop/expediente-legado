@@ -40,6 +40,7 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 	var color_muro: Color = espacio.get("color_muro", Color(0.55, 0.54, 0.5))
 	var deformacion_textura: Vector3 = espacio.get("deformacion_textura", Vector3.ONE)
 	var contraste_textura := float(espacio.get("contraste_textura", 1.0))
+	var preservar_detalle_textura := bool(espacio.get("preservar_detalle_textura", false))
 
 	# Tres formas de declarar un sitio. `contorno` es la generalización 3D no
 	# ortogonal; `planta` conserva celdas arbitrarias y `suelo`, el rectángulo.
@@ -53,7 +54,8 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 			espacio.get("textura_muro", ""),
 			espacio.get("escala_textura", 1.2),
 			deformacion_textura,
-			contraste_textura
+			contraste_textura,
+			preservar_detalle_textura
 		)
 	elif espacio.has("planta"):
 		_por_planta(
@@ -68,6 +70,7 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 			espacio.get("escala_textura", 1.2),
 			deformacion_textura,
 			contraste_textura,
+			preservar_detalle_textura,
 			PoliticaTecho.debe_tener(espacio)
 		)
 	else:
@@ -319,7 +322,8 @@ static func _por_contorno(
 	textura: String = "",
 	metros: float = 1.2,
 	deformacion: Vector3 = Vector3.ONE,
-	contraste: float = 1.0
+	contraste: float = 1.0,
+	preservar_detalle_textura: bool = false
 ) -> void:
 	var cuerpo := SuenoGeometria.cuerpo_sala(contorno, altura)
 	var malla := _malla_de(cuerpo)
@@ -331,6 +335,10 @@ static func _por_contorno(
 			var imagen := TexturaProcedural.por_nombre(textura, color, hash(textura), contraste)
 			if imagen != null:
 				material.set_shader_parameter("textura", imagen)
+				material.set_shader_parameter("textura_detalle", imagen)
+				material.set_shader_parameter(
+					"preservar_detalle_textura", preservar_detalle_textura
+				)
 				material.set_shader_parameter("con_textura", true)
 				material.set_shader_parameter("escala_textura", 1.0 / metros)
 				material.set_shader_parameter("deformacion_textura", deformacion)
@@ -355,6 +363,7 @@ static func _por_planta(
 	metros: float = 1.2,
 	deformacion: Vector3 = Vector3.ONE,
 	contraste: float = 1.0,
+	preservar_detalle_textura: bool = false,
 	con_techo: bool = true
 ) -> void:
 	for rect in Planta.rectangulos(bloques):
@@ -369,7 +378,8 @@ static func _por_planta(
 			textura_suelo,
 			metros,
 			deformacion,
-			contraste
+			contraste,
+			preservar_detalle_textura
 		)
 		if con_techo:
 			var techo := _caja(
@@ -411,7 +421,8 @@ static func _por_planta(
 			textura_muro,
 			metros,
 			deformacion,
-			contraste
+			contraste,
+			preservar_detalle_textura
 		)
 
 
@@ -510,7 +521,8 @@ static func _caja(
 	textura: String = "",
 	metros: float = 1.2,
 	deformacion: Vector3 = Vector3.ONE,
-	contraste: float = 1.0
+	contraste: float = 1.0,
+	preservar_detalle_textura: bool = false
 ) -> StaticBody3D:
 	var cuerpo := StaticBody3D.new()
 	cuerpo.position = pos
@@ -535,6 +547,8 @@ static func _caja(
 		var imagen := TexturaProcedural.por_nombre(textura, color, hash(textura), contraste)
 		if imagen != null:
 			material.set_shader_parameter("textura", imagen)
+			material.set_shader_parameter("textura_detalle", imagen)
+			material.set_shader_parameter("preservar_detalle_textura", preservar_detalle_textura)
 			material.set_shader_parameter("con_textura", true)
 			# La textura se pega a las coordenadas del MUNDO: un muro de
 			# catorce metros y uno de dos tienen así el mismo grano. Pegada a
