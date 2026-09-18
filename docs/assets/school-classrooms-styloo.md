@@ -1,103 +1,105 @@
 # School Classrooms Asset Pack — contrato de integración (#223)
 
-Fuente verificada: **styloo — School Classrooms Asset Pack**  
+Fuente canónica: **styloo — School Classrooms Asset Pack**  
 Página: https://styloo.itch.io/classroom-asset-pack  
-Licencia publicada por el autor: **Creative Commons Zero v1.0 Universal (CC0-1.0)**.  
-El autor declara además que el pack no usa IA generativa.
+Licencia publicada por el autor: **Creative Commons Zero v1.0 Universal (CC0-1.0)**.
 
-La distribución oficial incluye modelos en **FBX y GLTF/GLB** y separa ficheros individuales de escenas de demostración. Para Godot se prioriza GLB: el propio autor recomienda este formato porque conserva los materiales configurados.
+La página pública de Styloo declara sus assets como CC0. El ZIP aportado para este corte incluye `read me .txt`, pero ese **README interno no declara la licencia**: solo contiene notas técnicas de importación. Por tanto, la página del autor sigue siendo la fuente de licencia que debe quedar registrada en procedencia.
 
-## Alcance del primer corte
+## Auditoría del ZIP real aportado
 
-No importar el pack completo ni ninguna demo scene. El primer corte de #223 se limita a seis piezas reutilizables que cubren despacho administrativo, archivo y sala de formación sin obligar a que el proyecto adopte una escena escolar prefabricada:
+Se auditó `StylooClassroomAssetPack GLTF & FBX.zip`, no una lista inferida desde la web:
 
-1. **`desk`** — mesa de despacho del bloque *Principal's Office*.
-2. **`principal's chair`** — silla de despacho con una silueta distinta de la silla escolar básica.
-3. **`shelf`** — almacenamiento reutilizable en oficina, archivo o aula.
-4. **`telephone`** — teléfono de sobremesa para despacho/recepción.
-5. **`old pc`** — ordenador del bloque *Computer Room*; candidato deliberado frente a `new pc`.
-6. **`printer`** — periférico administrativo reutilizable en despacho o sala informática.
+- **409 entradas**;
+- SHA-256 del contenedor: `f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954`;
+- bloques presentes: `principal office`, `computer`, `classroom`, `ArtRoom`, `catferia`, `chemestry lab`, `toilet` y `walls`;
+- hay GLB y FBX individuales, además de `demoscene` que quedan explícitamente fuera;
+- el README recomienda GLB/GLTF porque conserva mejor los materiales y avisa de que FBX puede requerir reconectar/ajustar metallic, roughness y alpha.
 
-Los nombres anteriores son los nombres publicados por el autor. **No se inventarán rutas de archivo**: al descargar el ZIP oficial se conservará el nombre/ruta real del fichero individual seleccionado y esa ruta será la que entre en procedencia.
+Los nombres, tamaños, SHA-256 y medidas auditadas de cada candidato viven en `docs/assets/school-classrooms-styloo.manifest.json`. Así #223 deja de depender de nombres aproximados o de volver a inspeccionar el ZIP manualmente.
+
+## Primer lote: seis piezas administrativas
+
+No importar el pack completo ni ninguna demo scene. El lote `administrativo` conserva el alcance pequeño del primer corte, ahora con rutas exactas:
+
+| ID | Miembro exacto dentro del ZIP | Tamaño | Complejidad auditada |
+| --- | --- | ---: | ---: |
+| `desk` | `principal office/GLTF/PRINCIPALOFFICEdesk.glb` | 139.060 B | 3.738 vértices / 3.452 caras |
+| `principal_chair` | `principal office/GLTF/PRINCIPALOFFICEprincipalchair.glb` | 298.200 B | 7.429 / 8.800 |
+| `shelf` | `principal office/GLTF/PRINCIPALOFFICEshelf.glb` | 279.404 B | 7.546 / 5.412 |
+| `telephone` | `principal office/GLTF/PRINCIPALOFFICEtelephone.glb` | 862.604 B | 22.588 / 21.362 |
+| `old_pc` | `computer/GLTF/COMPUTERpcold.glb` | 62.848 B | 1.504 / 1.026 |
+| `printer` | `computer/GLTF/COMPUTERprinter.glb` | 132.296 B | 3.411 / 2.420 |
+
+El teléfono es de disco y la familia informática `old` usa silueta de torre/CRT, por lo que son candidatos visualmente coherentes con 1998. Esto sigue siendo una **preselección**: la lectura definitiva de materiales, escala y encaje artístico se hace dentro de Godot, no a partir del nombre del fichero.
+
+### Contexto informático opcional
+
+Un PC de 1998 no se lee bien si solo aparece la torre. El manifiesto separa un lote `contexto_informatico_1998` con `COMPUTERscreenold.glb`, `COMPUTERkeyboard.glb` y `COMPUTERmouse.glb`. No se añaden por defecto al staging para que el PR binario pueda seguir siendo pequeño.
+
+Se mantienen fuera `COMPUTERpc.glb`, `COMPUTERscreen.glb`, `COMPUTERrouter.glb` y las memorias USB: no hacen falta para este corte y son temporalmente más ambiguos.
 
 ## Corte escolar posterior ligado a #284
 
-`lockers` y `blackboardbig` quedan como siguientes candidatos para la pesadilla escolar de #284. No forman parte del primer lote administrativo para mantener el PR binario pequeño y revisable.
+El lote `escuela_sueno` fija dos piezas separadas del lote administrativo:
 
-El montaje onírico debe componerse en Godot con geometría, iluminación, sonido e interacciones propias. No se reutilizará la *classroom demo scene* ni otra escena completa del pack como solución final.
+- `classroom/GLTF/locker.glb`;
+- `classroom/GLTF/blackboardbig.glb`.
 
-## Coherencia temporal con 1998
+Sirven para reforzar la identidad escolar de #284, pero #284 debe **componer la escena escolar propia** en Godot con geometría, iluminación, sonido e interacciones propias. No se reutilizará `classroom_demoscene` ni ninguna otra escena completa del pack; #284 ya tiene lógica y composición propias y estos assets solo pueden sustituir o enriquecer presentación concreta.
 
-El filtro temporal se aplica por **lectura visual**, no solo por el nombre del fichero.
+## Hallazgos de escala y coste
 
-- `old pc`, `telephone` y `printer` deben inspeccionarse antes de integración para descartar rasgos claramente posteriores al entorno de 1998.
-- `new pc`, `new monitor`, `router` y las distintas `usb keys` quedan fuera del primer corte por ser innecesarios y/o temporalmente ambiguos para esta ambientación.
-- mobiliario genérico (`desk`, `principal's chair`, `shelf`) se acepta solo si materiales, proporciones y silueta no introducen una estética contemporánea evidente.
-- cualquier duda temporal bloquea esa pieza concreta, no todo el pack.
+La auditoría geométrica confirma que **no hay que asumir importación 1:1**. Los extents crudos obtenidos del GLB son, entre otros:
 
-## Formato, escala y materiales
+- `desk`: `5.302 × 2.248 × 2.367`;
+- `principal_chair`: `1.267 × 2.163 × 1.164`;
+- `shelf`: `4.808 × 3.838 × 1.165`.
 
-### Formato
+Si se interpretan como metros, son demasiado grandes para mobiliario normal. No se fija un factor global porque las proporciones auditadas tampoco justifican aplicar uno a ciegas. Cada pieza debe medirse en Godot contra personaje, puertas, techo y mobiliario ya integrado.
 
-- preferir el **GLB individual** publicado por el autor;
-- usar FBX solo como alternativa si el GLB concreto presenta un problema real de importación;
-- no convertir una demo scene en fuente de piezas cuando existe el fichero individual;
-- no introducir `.blend` en runtime si no es necesario para reproducir la importación.
+También hay props pequeños con bastante geometría: `telephone` tiene **22.588 vértices**, `old_monitor` 12.064 y `keyboard` 14.953. Para el acabado PSX conviene evitar duplicarlos masivamente. Si se usan como fondo repetido, el siguiente corte debería evaluar simplificación/LOD o reservarlos para primeros planos.
 
-### Escala
+## Preparación reproducible sin tocar runtime
 
-La página del pack no fija aquí una escala de trabajo para el proyecto. Por tanto, cada pieza se valida dentro de Godot contra referencias existentes:
+El script `scripts/preparar_school_classrooms_styloo.py` valida el ZIP por SHA-256 y, después, cada GLB permitido por tamaño y hash. Solo escribe en staging; nunca escribe directamente en `godot/assets` ni fabrica punteros LFS.
 
-- altura del `Caminante`/personaje;
-- mesa y silla ya usadas por la oficina;
-- puertas y altura de techo;
-- alcance de interacción si la pieza termina siendo interactuable.
+Validación del lote administrativo:
 
-No se fijará un factor común sin medir primero los modelos reales.
+```bash
+python3 scripts/preparar_school_classrooms_styloo.py \
+  "/ruta/StylooClassroomAssetPack GLTF & FBX.zip" \
+  --dry-run
+```
 
-### Materiales
+Preparar además el conjunto mínimo de PC de 1998:
 
-- conservar como punto de partida los materiales incluidos en GLB;
-- adaptar únicamente lo necesario al pipeline visual del proyecto;
-- evitar brillo/metallic excesivo que haga leer plástico moderno donde no corresponde;
-- no modificar destructivamente el binario fuente para hacer la adaptación: los overrides/materiales del proyecto deben vivir aparte cuando sea posible;
-- el tratamiento PSX puede aplicarse después de que volumen, textura y época sean legibles; no sustituye esa validación.
+```bash
+python3 scripts/preparar_school_classrooms_styloo.py \
+  "/ruta/StylooClassroomAssetPack GLTF & FBX.zip" \
+  --lote administrativo \
+  --lote contexto_informatico_1998
+```
 
-## Procedencia y Git LFS
+La salida por defecto es `dist/.cache/styloo-classrooms/` e incluye `styloo-classrooms-staging.json` con fichas de procedencia sugeridas. Si el ZIP fue reempaquetado pero conserva exactamente los GLB auditados, `--aceptar-reempaquetado` permite validar por fichero en vez de confiar en el hash del contenedor.
 
-Cada fichero que finalmente entre bajo `godot/assets/` debe tener una entrada propia en `godot/assets/procedencia.json` con:
+## Integración real: procedencia y Git LFS
 
-- ruta exacta dentro del repositorio;
-- título/nombre del modelo;
-- autor `styloo`;
-- licencia `CC0-1.0`;
-- fuente `https://styloo.itch.io/classroom-asset-pack`;
-- `sha256` calculado sobre **el fichero exacto que entra** al repositorio.
+Cuando se haga el PR binario, cada fichero que entre bajo `godot/assets/` debe tener una entrada propia en `godot/assets/procedencia.json` con ruta, título, autor `styloo`, licencia `CC0-1.0`, la URL de fuente y el SHA-256 del GLB exacto.
 
-Los `.glb` y `.fbx`, y cualquier textura binaria añadida, deben entrar mediante **Git LFS real** conforme a `.gitattributes`. No se deben subir como blobs normales mediante la API de contenidos de GitHub.
+Los `.glb`/`.fbx` y texturas binarias deben entrar mediante **Git LFS real** conforme a `.gitattributes`. El staging no sustituye ese paso. No se debe crear un puntero LFS si no se puede subir también el objeto al almacén LFS.
 
-La fuente registrada es la página que declara la licencia, no un enlace temporal de descarga ni una copia de terceros.
+Antes de integrar cada pieza:
 
-## Checklist del PR binario
+- validar escala desde cámara jugable;
+- revisar materiales y backface culling según las notas del README;
+- comprobar coherencia con 1998;
+- decidir si la complejidad geométrica encaja con el rol del prop;
+- usar overrides/materiales del proyecto antes que modificar destructivamente el GLB fuente;
+- ejecutar importación Godot, suite, recorrido, arranque y pruebas Python;
+- validar visualmente clipping y legibilidad.
 
-- [ ] descargar `StylooClassroomAssetPack GLTF & FBX.zip` desde la página oficial;
-- [ ] localizar los ficheros individuales reales de `desk`, `principal's chair`, `shelf`, `telephone`, `old pc` y `printer`;
-- [ ] inspeccionar visualmente cada pieza para 1998 antes de copiarla al árbol runtime;
-- [ ] preferir GLB individual y descartar demo scenes;
-- [ ] importar solo las seis piezas aprobadas y las dependencias estrictamente necesarias;
-- [ ] comprobar escala en Godot contra personaje, puertas y mobiliario existente;
-- [ ] aplicar ajustes de material mediante recursos/overrides del proyecto cuando sea posible;
-- [ ] comprobar que los binarios del commit son punteros Git LFS reales;
-- [ ] calcular SHA-256 de cada fichero final y registrar una ficha por fichero en `godot/assets/procedencia.json`;
-- [ ] ejecutar importación Godot, suite, recorrido, arranque y pruebas Python;
-- [ ] validar visualmente clipping, escala, legibilidad y coherencia temporal;
-- [ ] si el lote se usa en #284, componer la escena escolar propia sin importar la demo scene.
-
-## Fuera de alcance de este corte
-
-Este documento no entrega #223 por sí solo. Fija una selección reproducible y evita que el siguiente PR tenga que decidir otra vez qué importar o cómo justificarlo.
-
-#223 permanece abierto hasta que al menos el lote administrativo aprobado se haya incorporado con Git LFS y procedencia/hash reales y se haya validado visualmente en Godot.
+#223 permanece abierto hasta que el lote administrativo aprobado se incorpore con Git LFS + procedencia real y pase validación visual en Godot. Este corte elimina la incertidumbre sobre qué hay en el ZIP y cómo preparar exactamente esos binarios, pero no finge que ya estén integrados.
 
 Refs #216 #223 #284 #399
 
