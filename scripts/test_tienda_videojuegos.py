@@ -5,6 +5,8 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 TIENDA = ROOT / "godot" / "guion" / "tienda_videojuegos.gd"
 DOC = ROOT / "docs" / "tienda-videojuegos.md"
+CALLE = ROOT / "godot" / "guion" / "calle_identidad.gd"
+TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
 
 
 class TiendaVideojuegosTest(unittest.TestCase):
@@ -12,6 +14,8 @@ class TiendaVideojuegosTest(unittest.TestCase):
     def setUpClass(cls):
         cls.tienda = TIENDA.read_text(encoding="utf-8")
         cls.doc = DOC.read_text(encoding="utf-8")
+        cls.calle = CALLE.read_text(encoding="utf-8")
+        cls.textos = TEXTOS.read_text(encoding="utf-8")
 
     def test_catalogo_sale_del_indice_de_roms_propias(self):
         self.assertIn("RomsPropias.a_la_venta()", self.tienda)
@@ -63,6 +67,23 @@ class TiendaVideojuegosTest(unittest.TestCase):
         self.assertIn("no modifica `espacios_catalogo.gd`", self.doc)
         self.assertIn("filtra el selector del emulador", self.doc)
 
+
+    def test_completar_catalogo_desbloquea_manual_de_servicio(self):
+        self.assertIn("static func consola_trucos_desbloqueada", self.tienda)
+        self.assertIn("PerfilRoms.migrar_desde_jornada(jornada)", self.tienda)
+        self.assertIn("FileAccess.file_exists(ruta)", self.tienda)
+        self.assertIn("exigidas.is_empty()", self.tienda)
+        self.assertIn("adquiridas.has(id_rom)", self.tienda)
+
+    def test_la_calle_anuncia_el_desbloqueo_diegético(self):
+        self.assertIn("TiendaVideojuegos.consola_trucos_desbloqueada(jornada)", self.calle)
+        self.assertIn("CALLE_TIENDA_MANUAL_SERVICIO", self.calle)
+        self.assertIn('CALLE_TIENDA_MANUAL_SERVICIO,Bit 98 · manual de servicio desbloqueado · tecla º', self.textos)
+
+    def test_documenta_que_release_no_recibe_los_comandos_qa(self):
+        self.assertIn("## Manual de servicio de Bit 98", self.doc)
+        self.assertIn("debug/**", self.doc)
+        self.assertIn("día, dinero, pistas, gato, fase ni sala", self.doc)
 
 if __name__ == "__main__":
     unittest.main()
