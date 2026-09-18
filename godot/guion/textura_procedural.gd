@@ -365,9 +365,7 @@ static func calculada(
 ## Refuerza el fallback calculado ANTES de que el sampler lineal pierda la
 ## trama bajo iluminación baja y cuantización. Los assets traídos —ruta
 ## explícita o JPG canónico— salen antes de aquí y conservan su presentación.
-static func _contrastar_textura(
-	textura: Texture2D, base: Color, contraste: float
-) -> Texture2D:
+static func _contrastar_textura(textura: Texture2D, base: Color, contraste: float) -> Texture2D:
 	if is_equal_approx(contraste, 1.0):
 		return textura
 	var imagen := textura.get_image()
@@ -375,14 +373,17 @@ static func _contrastar_textura(
 	for x in imagen.get_width():
 		for y in imagen.get_height():
 			var pixel := imagen.get_pixel(x, y)
-			imagen.set_pixel(
-				x,
-				y,
-				Color(
-					clampf(base.r + (pixel.r - base.r) * factor, 0.0, 1.0),
-					clampf(base.g + (pixel.g - base.g) * factor, 0.0, 1.0),
-					clampf(base.b + (pixel.b - base.b) * factor, 0.0, 1.0),
-					pixel.a,
+			(
+				imagen
+				. set_pixel(
+					x,
+					y,
+					Color(
+						clampf(base.r + (pixel.r - base.r) * factor, 0.0, 1.0),
+						clampf(base.g + (pixel.g - base.g) * factor, 0.0, 1.0),
+						clampf(base.b + (pixel.b - base.b) * factor, 0.0, 1.0),
+						pixel.a,
+					)
 				)
 			)
 	return ImageTexture.create_from_image(imagen)
