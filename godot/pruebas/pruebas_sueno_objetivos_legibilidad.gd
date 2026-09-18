@@ -16,6 +16,7 @@ func _probar_eco_local_no_intrusivo() -> void:
 	root.add_child(mundo)
 	var zona := Area3D.new()
 	zona.name = "ObjetivoSueno_Prueba_0"
+	zona.set_meta("objetivo", "prueba:0")
 	mundo.add_child(zona)
 	var caminante := CharacterBody3D.new()
 	mundo.add_child(caminante)
@@ -47,25 +48,35 @@ func _probar_idempotencia_y_objetivo_completado() -> void:
 	root.add_child(mundo)
 	var pendiente := Area3D.new()
 	pendiente.name = "ObjetivoSueno_Prueba_1"
+	pendiente.set_meta("objetivo", "prueba:1")
 	mundo.add_child(pendiente)
 	var completado := Area3D.new()
 	completado.name = "ObjetivoSueno_Prueba_2"
+	completado.set_meta("objetivo", "prueba:1")
 	completado.monitoring = false
 	mundo.add_child(completado)
+	var foco_legado := Area3D.new()
+	foco_legado.name = "ObjetivoSueno_Prueba_Foco"
+	foco_legado.set_meta("objetivo", "prueba:2")
+	mundo.add_child(foco_legado)
 
 	var controlador := SuenoObjetivosLegibilidad.new()
 	root.add_child(controlador)
 	var primero := controlador.montar_en(mundo)
 	var segundo := controlador.montar_en(mundo)
-	_comprobar(primero.size() == 1, "ignora zonas ya desactivadas por progreso")
+	_comprobar(primero.size() == 1, "ignora objetivo completado y foco legado")
 	_comprobar(segundo.size() == 1, "remontar no duplica ecos")
 	_comprobar(
 		pendiente.find_children("EcoLegibilidadObjetivo", "OmniLight3D", false, false).size() == 1,
-		"cada objetivo conserva una única señal",
+		"cada objetivo visible conserva una única señal",
 	)
 	_comprobar(
 		completado.get_node_or_null("EcoLegibilidadObjetivo") == null,
 		"un objetivo ya completado no recupera señal",
+	)
+	_comprobar(
+		foco_legado.get_node_or_null("EcoLegibilidadObjetivo") == null,
+		"el antiguo foco de salida no recupera baliza",
 	)
 
 	controlador.queue_free()
