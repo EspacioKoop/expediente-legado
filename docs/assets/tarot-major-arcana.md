@@ -110,6 +110,16 @@ La presencia del asset, el hash, la importación de Godot y el cableado 3D sí s
 
 El capturador de `godot/pruebas/capturar.gd` permite generar evidencia reproducible de las ocho cartas ocultas por el camino jugable real. Localiza automáticamente el expediente que contiene cada folio y admite un cuarto argumento `normal` o `reducido`.
 
+La forma recomendada es generar la matriz completa (8 cartas × frontal normal × frontal reducido × skip) con un solo comando:
+
+```bash
+python3 scripts/preparar_validacion_tarot_645.py
+```
+
+La salida queda en `dist/qa/tarot-645/` junto a un `manifest.json` con los 24 recorridos y su resultado. También existe `--dry-run` para revisar comandos sin abrir Godot.
+
+Estas capturas sirven como **preflight visual reproducible**, no sustituyen el pase humano sobre el export candidato exigido por el criterio de cierre.
+
 Cada ejecución debe usar un temporal XDG distinto. La carta se revela una sola vez y el capturador rechaza ejecutar Tarot sin `XDG_DATA_HOME`, para evitar que una prueba modifique la partida personal:
 
 ```bash
