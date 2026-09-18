@@ -143,7 +143,9 @@ func _abrir(_actor: Node) -> void:
 		_caminante_sesion.process_mode = Node.PROCESS_MODE_DISABLED
 	if is_instance_valid(_hud_sesion):
 		_hud_sesion.visible = false
-	MenuGlobal.set_process_unhandled_input(false)
+	var menu := _menu_global()
+	if menu != null:
+		menu.set_process_unhandled_input(false)
 
 	var camara := _bolos.get_node_or_null("Camara") as Camera3D
 	if camara != null:
@@ -158,7 +160,8 @@ func _guardar_presentacion(dia: Node) -> void:
 	if is_instance_valid(_caminante_sesion):
 		_modo_caminante_previo = _caminante_sesion.process_mode
 	_camara_previa = get_viewport().get_camera_3d()
-	_menu_unhandled_previo = MenuGlobal.is_processing_unhandled_input()
+	var menu := _menu_global()
+	_menu_unhandled_previo = menu.is_processing_unhandled_input() if menu != null else true
 	_mouse_previo = Input.mouse_mode
 
 	var hud: Variant = dia.get("_hud_prioridades")
@@ -200,7 +203,9 @@ func _restaurar_presentacion() -> void:
 		_caminante_sesion.process_mode = _modo_caminante_previo
 	if is_instance_valid(_hud_sesion):
 		_hud_sesion.visible = _hud_visible_previo
-	MenuGlobal.set_process_unhandled_input(_menu_unhandled_previo)
+	var menu := _menu_global()
+	if menu != null:
+		menu.set_process_unhandled_input(_menu_unhandled_previo)
 	if is_instance_valid(_camara_previa):
 		_camara_previa.make_current()
 	Input.mouse_mode = _mouse_previo
@@ -210,3 +215,7 @@ func _restaurar_presentacion() -> void:
 	_camara_previa = null
 	_hud_sesion = null
 	_presentacion_guardada = false
+
+
+func _menu_global() -> Node:
+	return get_node_or_null("/root/MenuGlobal")
