@@ -21,12 +21,16 @@ const DURACION_EXPULSION_CARTUCHO := 0.12
 const DURACION_RANURA_VACIA := 0.06
 const DURACION_INSERCION_CARTUCHO := 0.14
 
+var link_cable: LinkCablePortatil = null
 var _audio_emulado: AudioStreamPlayer
 var _audio_playback: AudioStreamGeneratorPlayback
 var _audio_pendiente := PackedVector2Array()
 var _audio_emulado_muted := false
 var _audio_emulado_volumen := 0.80
 var _cartucho_visual: Label
+var _link_cable_panel: VBoxContainer
+var _link_cable_estado: Label
+var _link_cable_boton: Button
 var _ruta_cartucho_actual := ""
 var _rom_cartucho_pendiente := ""
 var _cambiando_cartucho := false
@@ -37,6 +41,7 @@ func abrir() -> void:
 	super.abrir()
 	_preparar_audio_emulado()
 	_preparar_cartucho_visual()
+	_preparar_link_cable()
 
 
 func _process(delta: float) -> void:
@@ -183,6 +188,63 @@ func _cancelar_cambio_cartucho() -> void:
 	_cambio_cartucho_token += 1
 	_cambiando_cartucho = false
 	_rom_cartucho_pendiente = ""
+
+
+func _preparar_link_cable() -> void:
+	if _lista == null:
+		return
+	if link_cable == null:
+		link_cable = LinkCablePortatil.new()
+
+	_link_cable_panel = VBoxContainer.new()
+	_link_cable_panel.name = "PanelLinkCablePortatil"
+	_link_cable_panel.add_theme_constant_override("separation", 4)
+
+	var titulo := Label.new()
+	titulo.text = _texto("link_cable_titulo")
+	_link_cable_panel.add_child(titulo)
+
+	_link_cable_estado = Label.new()
+	_link_cable_estado.name = "EstadoLinkCablePortatil"
+	_link_cable_estado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_link_cable_panel.add_child(_link_cable_estado)
+
+	_link_cable_boton = Button.new()
+	_link_cable_boton.name = "BotonLinkCablePortatil"
+	_link_cable_boton.pressed.connect(_alternar_link_cable)
+	_link_cable_panel.add_child(_link_cable_boton)
+
+	var aviso := Label.new()
+	aviso.text = _texto("link_cable_aviso")
+	aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_link_cable_panel.add_child(aviso)
+
+	_lista.add_child(_link_cable_panel)
+	_lista.move_child(_link_cable_panel, mini(1, _lista.get_child_count() - 1))
+	link_cable.estado_cambiado.connect(_al_cambiar_estado_link_cable)
+	_actualizar_link_cable_ui()
+
+
+func _alternar_link_cable() -> void:
+	if link_cable == null:
+		return
+	link_cable.alternar()
+	_reproducir_sonido_fisico(&"cable")
+
+
+func _al_cambiar_estado_link_cable(_conectado: bool) -> void:
+	_actualizar_link_cable_ui()
+
+
+func _actualizar_link_cable_ui() -> void:
+	if link_cable == null or _link_cable_estado == null or _link_cable_boton == null:
+		return
+	if link_cable.esta_conectado():
+		_link_cable_estado.text = _texto("link_cable_esperando")
+		_link_cable_boton.text = _texto("link_cable_desconectar")
+	else:
+		_link_cable_estado.text = _texto("link_cable_desconectado")
+		_link_cable_boton.text = _texto("link_cable_conectar")
 
 
 func _preparar_audio_emulado() -> void:
