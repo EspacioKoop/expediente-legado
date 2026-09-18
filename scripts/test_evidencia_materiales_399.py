@@ -50,6 +50,8 @@ class EvidenciaMateriales399Test(unittest.TestCase):
             '"textura_muro"',
             '"escala_textura"',
             '"contraste_textura"',
+            '"preservar_detalle_textura"',
+            '"materiales_detalle"',
             '"contraste_cambia_textura_suelo"',
             '"contraste_cambia_textura_muro"',
             '"deformacion_textura"',
@@ -57,6 +59,10 @@ class EvidenciaMateriales399Test(unittest.TestCase):
             self.assertIn(campo, self.captura)
         self.assertIn('dia._espacio_actual.get("contraste_textura", 1.0)', self.captura)
         self.assertIn("func _contraste_cambia_textura(", self.captura)
+        self.assertIn(
+            'material.get_shader_parameter("preservar_detalle_textura")',
+            self.captura,
+        )
         self.assertIn(
             "TexturaProcedural.por_nombre(nombre, base, hash(nombre), contraste)",
             self.captura,
