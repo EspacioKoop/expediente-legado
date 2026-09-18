@@ -50,7 +50,7 @@ class EvidenciaMateriales399Test(unittest.TestCase):
             '"textura_muro"',
             '"escala_textura"',
             '"contraste_textura"',
-            '"sesgo_mipmap"',
+            '"realce_textura"',
             '"contraste_cambia_textura_suelo"',
             '"contraste_cambia_textura_muro"',
             '"deformacion_textura"',

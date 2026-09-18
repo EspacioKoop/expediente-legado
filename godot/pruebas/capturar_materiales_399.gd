@@ -105,7 +105,7 @@ func _init() -> void:
 					"textura_muro": String(dia._espacio_actual.get("textura_muro", "")),
 					"escala_textura": float(dia._espacio_actual.get("escala_textura", 1.0)),
 					"contraste_textura": contraste,
-					"sesgo_mipmap": float(dia._espacio_actual.get("sesgo_mipmap", 0.0)),
+					"realce_textura": float(dia._espacio_actual.get("realce_textura", 0.0)),
 					"contraste_cambia_textura_suelo": contraste_suelo_cambia,
 					"contraste_cambia_textura_muro": contraste_muro_cambia,
 					"deformacion_textura": [deformacion.x, deformacion.y, deformacion.z],

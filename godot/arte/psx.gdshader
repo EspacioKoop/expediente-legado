@@ -34,9 +34,10 @@ uniform float escala_textura = 1.0;
 // el sueño puede estirar o invertir una superficie reconocible sin necesitar
 // otra textura ni romper el contrato triplanar.
 uniform vec3 deformacion_textura = vec3(1.0);
-// Sesgo LOD opt-in. Cero conserva la selección automática del mundo normal;
-// un valor negativo permite al sueño retener detalle que el mipmap borraría.
-uniform float sesgo_mipmap = 0.0;
+// Realce opt-in de la textura en la contribución emisiva. Cero conserva el
+// mundo normal; el sueño usa una fracción baja para que la trama no desaparezca
+// al quedar bajo el suelo de iluminación y cuantización.
+uniform float realce_textura = 0.0;
 uniform vec4 emision : source_color = vec4(0.0);
 uniform float emision_fuerza = 0.0;
 
@@ -72,9 +73,9 @@ vec3 muestra_triplanar(vec3 punto, vec3 normal) {
 	vec3 peso = abs(normal);
 	peso /= max(peso.x + peso.y + peso.z, 0.0001);
 	vec3 p = punto * escala_textura * deformacion_textura;
-	return texture(textura, p.zy, sesgo_mipmap).rgb * peso.x
-		+ texture(textura, p.xz, sesgo_mipmap).rgb * peso.y
-		+ texture(textura, p.xy, sesgo_mipmap).rgb * peso.z;
+	return texture(textura, p.zy).rgb * peso.x
+		+ texture(textura, p.xz).rgb * peso.y
+		+ texture(textura, p.xy).rgb * peso.z;
 }
 
 // Índice Bayer 2x2: 0 2 / 3 1. Componiéndolo consigo mismo se obtiene un
@@ -103,17 +104,19 @@ float bayer_4x4(vec2 pixel) {
 
 void fragment() {
 	vec3 color = color_base.rgb;
+	vec3 muestra_textura = vec3(0.0);
 	if (con_textura) {
 		if (usar_uv) {
-			color = texture(textura, UV).rgb * color_base.rgb;
+			muestra_textura = texture(textura, UV).rgb * color_base.rgb;
 		} else {
-			color = muestra_triplanar(mundo, NORMAL);
+			muestra_textura = muestra_triplanar(mundo, NORMAL);
 		}
+		color = muestra_textura;
 	}
 
 	float niveles = max(tonos, 1.0);
 	float error_ordenado = (bayer_4x4(FRAGCOORD.xy) - 0.5) * dithering / niveles;
 	color = clamp(color + vec3(error_ordenado), vec3(0.0), vec3(1.0));
 	ALBEDO = floor(color * niveles) / niveles;
-	EMISSION = emision.rgb * emision_fuerza;
+	EMISSION = emision.rgb * emision_fuerza + muestra_textura * realce_textura;
 }
