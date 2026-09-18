@@ -305,9 +305,9 @@ static func por_nombre(
 
 	var ruta := CARPETA % nombre
 	if ResourceLoader.exists(ruta):
-		var traida := ResourceLoader.load(ruta, "Texture2D")
+		var traida := ResourceLoader.load(ruta, "Texture2D") as Texture2D
 		if traida != null:
-			return traida
+			return _contrastar_textura(traida, base, contraste)
 	return calculada(nombre, base, semilla, contraste)
 
 
@@ -346,17 +346,18 @@ static func calculada(
 			textura = acero_cocina(base, semilla)
 		_:
 			return null
+	return _contrastar_textura(textura, base, contraste)
+
+
+## Crea una copia runtime con más contraste ANTES de que el sampler lineal
+## genere/seleccione mipmaps. Sirve tanto para el fallback calculado como para
+## el JPG canónico de una superficie nombrada; nunca modifica el recurso fuente.
+## Una ruta explícita res:// sale antes de aquí y conserva su presentación.
+static func _contrastar_textura(
+	textura: Texture2D, base: Color, contraste: float
+) -> Texture2D:
 	if is_equal_approx(contraste, 1.0):
 		return textura
-	return _contrastar_calculada(textura, base, contraste)
-
-
-## Refuerza la desviación respecto al color base ANTES de que el sampler lineal
-## genere/seleccione mipmaps. Aplicarlo después del muestreo no puede recuperar
-## motas que ya fueron promediadas hasta el tono base.
-static func _contrastar_calculada(
-	textura: ImageTexture, base: Color, contraste: float
-) -> ImageTexture:
 	var imagen := textura.get_image()
 	var factor := maxf(contraste, 0.0)
 	for x in imagen.get_width():
