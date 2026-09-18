@@ -82,7 +82,9 @@ func _probar_validacion() -> void:
 	estado["jornada"]["ronda_cierre"] = invalida
 	var errores := Partida.validar(estado)
 	_comprobar(
-		errores.any(func(error): return String(error).contains("ronda_cierre.ruta contiene duplicados")),
+		errores.any(
+			func(error): return String(error).contains("ronda_cierre.ruta contiene duplicados")
+		),
 		"Partida rechaza una ronda corrupta",
 	)
 
