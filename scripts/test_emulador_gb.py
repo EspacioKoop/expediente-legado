@@ -238,6 +238,23 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn("const FRAMES_ARRANQUE := 60", self.smoke)
         self.assertIn("range(FRAMES_ARRANQUE)", self.smoke)
 
+    def test_ci_arranca_rom_dmg_only_y_mantiene_los_tres_modos(self):
+        self.assertIn("make -C gbc/fixtures/dmg_only_smoke clean all", self.ci)
+        self.assertIn("res://pruebas/emulador_dmg_smoke.gd", self.ci)
+        dmg = (ROOT / "godot" / "pruebas" / "emulador_dmg_smoke.gd").read_text(encoding="utf-8")
+        fixture = (ROOT / "gbc" / "fixtures" / "dmg_only_smoke" / "main.asm").read_text(
+            encoding="utf-8"
+        )
+        caza = (ROOT / "gbc" / "minijuegos" / "caza_pixeles_98" / "main.asm").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("rom[0x143]) != 0x00", dmg)
+        self.assertIn('emulador.call("core_name")', dmg)
+        self.assertIn("_frame_tiene_variacion(frame)", dmg)
+        self.assertIn("db $00 ; DMG-only", fixture)
+        self.assertIn("db $80 ; ROM compatible con Game Boy Color.", caza)
+        self.assertIn("make -C gbc/fixtures/cgb_only_smoke clean all", self.ci)
+
     def test_ci_arranca_rom_cgb_only(self):
         self.assertIn("make -C gbc/fixtures/cgb_only_smoke clean all", self.ci)
         self.assertIn("res://pruebas/emulador_gbc_smoke.gd", self.ci)
