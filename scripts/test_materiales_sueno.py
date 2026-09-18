@@ -186,6 +186,14 @@ class MaterialesSuenoTest(unittest.TestCase):
         )
         self.assertIn("vec3 muestra_2d(vec2 uv)", self.shader)
         self.assertIn("return texture(textura_detalle, uv).rgb;", self.shader)
+        bloque_planta = self.espacio[
+            self.espacio.index("static func _por_planta(") : self.espacio.index("static func _suelo(")
+        ]
+        self.assertEqual(
+            bloque_planta.count("preservar_detalle_textura"),
+            4,
+            "suelo, techo y muros deben heredar el sampler opt-in del espacio",
+        )
 
     def test_hay_inversion_deliberada_en_al_menos_una_forma(self):
         vectores = re.findall(
