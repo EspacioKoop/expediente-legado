@@ -139,6 +139,26 @@ static func loseta_acera(base: Color, semilla: int) -> ImageTexture:
 	return ImageTexture.create_from_image(imagen)
 
 
+## Cristal urbano: casi neutro, con velos verticales y pequeñas marcas de agua.
+## El color y la transparencia los decide el shader de vidrio; esta textura solo
+## aporta materia para que un escaparate no sea un plano perfectamente limpio.
+static func cristal_urbano(base: Color, semilla: int) -> ImageTexture:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = semilla
+	var imagen := Image.create(LADO, LADO, false, Image.FORMAT_RGB8)
+	imagen.fill(base)
+	for x in LADO:
+		var velo := rng.randf_range(-0.035, 0.02)
+		for y in LADO:
+			var tono := base.lightened(velo) if velo >= 0.0 else base.darkened(-velo)
+			imagen.set_pixel(x, y, tono)
+	for i in LADO * LADO / 36:
+		var x := rng.randi() % LADO
+		var y := rng.randi() % LADO
+		imagen.set_pixel(x, y, base.darkened(rng.randf_range(0.04, 0.11)))
+	return ImageTexture.create_from_image(imagen)
+
+
 ## Moqueta de casa: trama regular con hilo suelto. La regularidad es lo que la
 ## separa del asfalto, que es ruido puro.
 static func moqueta(base: Color, semilla: int) -> ImageTexture:
@@ -303,6 +323,8 @@ static func calculada(nombre: String, base: Color, semilla: int) -> ImageTexture
 			return revoco_urbano(base, semilla)
 		"loseta_acera":
 			return loseta_acera(base, semilla)
+		"cristal_urbano":
+			return cristal_urbano(base, semilla)
 		"moqueta":
 			return moqueta(base, semilla)
 		"melamina":
