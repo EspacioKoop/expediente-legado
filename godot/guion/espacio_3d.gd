@@ -335,7 +335,6 @@ static func _por_contorno(
 			var imagen := TexturaProcedural.por_nombre(textura, color, hash(textura), contraste)
 			if imagen != null:
 				material.set_shader_parameter("textura", imagen)
-				material.set_shader_parameter("textura_detalle", imagen)
 				material.set_shader_parameter(
 					"preservar_detalle_textura", preservar_detalle_textura
 				)
@@ -548,7 +547,6 @@ static func _caja(
 		var imagen := TexturaProcedural.por_nombre(textura, color, hash(textura), contraste)
 		if imagen != null:
 			material.set_shader_parameter("textura", imagen)
-			material.set_shader_parameter("textura_detalle", imagen)
 			material.set_shader_parameter("preservar_detalle_textura", preservar_detalle_textura)
 			material.set_shader_parameter("con_textura", true)
 			# La textura se pega a las coordenadas del MUNDO: un muro de
