@@ -17,7 +17,8 @@ const BLANCO := Color("ffffff")
 const AZUL_TITULO := Color("000080")  ## la barra de título activa
 const AZUL_ENLACE := Color("0000aa")
 const AMARILLO_VISTO := Color("c8c800")  ## una frase gatillo ya leída
-const GRIS_TEXTO := Color("808080")
+const GRIS_TEXTO := Color("595959")  ## texto secundario AA sobre blanco/gris claro
+const GRIS_TEXTO_DESHABILITADO := Color("404040")  ## AA incluso sobre el gris disabled
 
 const GROSOR := 2
 const RUTA_FUENTE_DOCUMENTO := "res://assets/fonts/MFBOldstyle-Regular.otf"
@@ -113,7 +114,7 @@ static func _configurar_botones(tema: Theme) -> void:
 		tema.set_color("font_hover_color", tipo, NEGRO)
 		tema.set_color("font_pressed_color", tipo, NEGRO)
 		tema.set_color("font_focus_color", tipo, NEGRO)
-		tema.set_color("font_disabled_color", tipo, GRIS_OSCURO)
+		tema.set_color("font_disabled_color", tipo, GRIS_TEXTO_DESHABILITADO)
 		tema.set_constant("outline_size", tipo, 0)
 
 
@@ -124,12 +125,50 @@ static func _configurar_campos(tema: Theme) -> void:
 		tema.set_stylebox("read_only", tipo, caja_hundida(Color("e8e8e8")))
 		tema.set_color("font_color", tipo, NEGRO)
 		tema.set_color("font_selected_color", tipo, BLANCO)
-		tema.set_color("font_placeholder_color", tipo, GRIS_OSCURO)
+		tema.set_color("font_placeholder_color", tipo, GRIS_TEXTO)
 		tema.set_color("caret_color", tipo, NEGRO)
 		tema.set_color("selection_color", tipo, AZUL_TITULO)
 	# Godot usa nombres distintos para el color no editable en ambos controles.
 	tema.set_color("font_uneditable_color", "LineEdit", GRIS_TEXTO)
 	tema.set_color("font_readonly_color", "TextEdit", GRIS_TEXTO)
+
+
+static func caja_seleccion() -> StyleBoxFlat:
+	var caja := StyleBoxFlat.new()
+	caja.bg_color = AZUL_TITULO
+	caja.set_corner_radius_all(0)
+	caja.content_margin_left = 4.0
+	caja.content_margin_top = 2.0
+	caja.content_margin_right = 4.0
+	caja.content_margin_bottom = 2.0
+	return caja
+
+
+## Contraste base WCAG AA para texto normal del tema común (#792).
+##
+## Godot trae ItemList y RichTextLabel con grises/blancos pensados para temas
+## oscuros. En OS98 esos defaults caían sobre GRIS y dejaban historial,
+## favoritos, resultados y entradas bloqueadas casi ilegibles. Definimos aquí
+## los pares de color y sus fondos para que todas las apps hereden el contrato.
+static func _configurar_texto_y_listas(tema: Theme) -> void:
+	tema.set_color("font_color", "Label", NEGRO)
+
+	tema.set_stylebox("normal", "RichTextLabel", caja_hundida(BLANCO))
+	tema.set_stylebox("focus", "RichTextLabel", caja_foco())
+	tema.set_color("default_color", "RichTextLabel", NEGRO)
+	tema.set_color("font_selected_color", "RichTextLabel", BLANCO)
+	tema.set_color("selection_color", "RichTextLabel", AZUL_TITULO)
+
+	var seleccion := caja_seleccion()
+	tema.set_stylebox("panel", "ItemList", caja_hundida(BLANCO))
+	tema.set_stylebox("focus", "ItemList", caja_foco())
+	tema.set_stylebox("hovered", "ItemList", caja_saliente(Color("f0f0f0")))
+	for estado in ["selected", "selected_focus", "hovered_selected", "hovered_selected_focus"]:
+		tema.set_stylebox(estado, "ItemList", seleccion)
+	tema.set_color("font_color", "ItemList", NEGRO)
+	tema.set_color("font_hovered_color", "ItemList", NEGRO)
+	tema.set_color("font_selected_color", "ItemList", BLANCO)
+	tema.set_color("font_hovered_selected_color", "ItemList", BLANCO)
 
 
 ## Texto de documento. MFB Oldstyle ya estaba empaquetada y registrada como
@@ -206,4 +245,5 @@ static func tema() -> Theme:
 	tema.set_font("terminal_font", "LineEdit", terminal)
 	_configurar_botones(tema)
 	_configurar_campos(tema)
+	_configurar_texto_y_listas(tema)
 	return tema
