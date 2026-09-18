@@ -1,6 +1,10 @@
 """Contrato de integración runtime del lote administrativo Styloo (#223)."""
 import json
+import os
 from pathlib import Path
+import re
+import subprocess
+import tempfile
 import unittest
 
 
@@ -60,6 +64,31 @@ class OficinaStylooCc0Test(unittest.TestCase):
         self.assertNotIn("preload(\"res://assets/modelos/styloo_school", self.runtime)
         self.assertNotIn("load(\"res://assets/modelos/styloo_school", self.runtime)
         self.assertIn("Modelos.hay", self.runtime)
+
+    def test_regresion_godot_sobre_escena_real(self):
+        with tempfile.TemporaryDirectory(prefix="styloo-qa-") as temporal:
+            env = os.environ.copy()
+            env["LEGADO_PRUEBAS_AISLADAS"] = "1"
+            for var in ("XDG_DATA_HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME"):
+                env[var] = str(Path(temporal) / var)
+            motor = env.get("GODOT_BIN", "godot4")
+            for args in (
+                ["--editor", "--import", "--quit"],
+                ["--script", "res://pruebas/pruebas_oficina_styloo_cc0.gd"],
+            ):
+                resultado = subprocess.run(
+                    [motor, "--headless", "--path", str(ROOT / "godot"), *args],
+                    env=env,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    timeout=120,
+                    check=False,
+                )
+                self.assertEqual(resultado.returncode, 0, resultado.stdout)
+                self.assertNotRegex(resultado.stdout, r"SCRIPT ERROR:|Parse Error:")
+            self.assertNotIn("ERROR:", resultado.stdout)
+            self.assertRegex(resultado.stdout, re.compile(r"\\d+ pasadas, 0 fallos"))
 
 
 if __name__ == "__main__":
