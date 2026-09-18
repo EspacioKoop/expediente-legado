@@ -48,10 +48,13 @@ class OficinaStylooCc0Test(unittest.TestCase):
         self.assertIn('"TorrePcStyloo"', self.runtime)
         self.assertIn('"PrinterStyloo"', self.runtime)
         self.assertIn('"TelefonoBase"', self.runtime)
-        self.assertIn('tipo == "desk"', self.runtime)
-        self.assertIn('tipo == "chairDesk"', self.runtime)
-        self.assertIn('tipo == "bookcaseClosed"', self.runtime)
+        self.assertIn('_bulto_prioritario("desk")', self.runtime)
+        self.assertIn('_bulto_prioritario("chairDesk")', self.runtime)
+        self.assertIn('_bulto_prioritario("bookcaseClosed")', self.runtime)
         self.assertIn("sustituciones != MODELOS.size()", self.runtime)
+        preflight = self.runtime.index("if escritorio == null")
+        primera_sustitucion = self.runtime.index("AssetCc0.sustituir(escritorio")
+        self.assertLess(preflight, primera_sustitucion)
 
     def test_no_depende_de_binarios_en_tiempo_de_parseo(self):
         self.assertNotIn("preload(\"res://assets/modelos/styloo_school", self.runtime)
