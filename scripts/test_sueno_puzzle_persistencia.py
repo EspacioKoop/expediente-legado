@@ -35,7 +35,7 @@ class SuenoPuzzlePersistenciaTest(unittest.TestCase):
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
         resumen = RESUMEN.search(resultado.stdout)
         self.assertIsNotNone(resumen, resultado.stdout)
-        self.assertGreaterEqual(int(resumen.group(1)), 14, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 20, resultado.stdout)
         self.assertNotIn("SCRIPT ERROR:", resultado.stdout)
         self.assertNotIn("Parse Error:", resultado.stdout)
 
@@ -79,6 +79,15 @@ class SuenoPuzzlePersistenciaTest(unittest.TestCase):
         self.assertIn("jornada[CLAVE]", codigo)
         self.assertNotIn("FileAccess", codigo)
         self.assertNotIn("user://", codigo)
+
+    def test_runner_cubre_guardado_real_de_partida(self):
+        prueba = (ROOT / "godot" / "pruebas" / "pruebas_sueno_puzzle_sesion.gd").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("PartidaModelo.new()", prueba)
+        self.assertIn("partida.guardar(ruta)", prueba)
+        self.assertIn("recargada.cargar(ruta)", prueba)
+        self.assertIn('get("intentos", -1)', prueba)
 
 
 if __name__ == "__main__":
