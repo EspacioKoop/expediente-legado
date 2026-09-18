@@ -48,7 +48,7 @@ func abandonar() -> bool:
 func _montar() -> void:
 	var regla := Label3D.new()
 	regla.name = "ReglaRelacion"
-	regla.text = "Relaciona dos documentos. Solo puedes cerrar una pareja."
+	regla.text = tr("SUENO_RELACION_REGLA")
 	regla.position = Vector3(0.0, 2.85, 0.0)
 	regla.font_size = 36
 	regla.pixel_size = 0.004
@@ -150,8 +150,8 @@ func _sincronizar() -> void:
 	if relacion.nucleo.state == Puzzle.ESTADO_COMPLETADO:
 		_estado.text = recompensa_texto
 	elif relacion.nucleo.state == Puzzle.ESTADO_FALLADO:
-		_estado.text = "Los documentos se separan. No hay segundo intento."
+		_estado.text = tr("SUENO_RELACION_FALLO")
 	elif relacion.nucleo.state == Puzzle.ESTADO_ABANDONADO:
-		_estado.text = "Relación abandonada."
+		_estado.text = tr("SUENO_RELACION_ABANDONADA")
 	else:
-		_estado.text = "%d/2 documentos" % relacion.seleccion.size()
+		_estado.text = tr("SUENO_RELACION_PROGRESO") % relacion.seleccion.size()
