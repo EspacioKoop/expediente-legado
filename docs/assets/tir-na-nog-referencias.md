@@ -49,4 +49,4 @@ No se fija una cronología literal de “X años”, ni una cosmología completa
 
 ## Estado del corte
 
-Se implementa la semilla `tir_na_nog`, una radio de vigilia deliberada y un vertical standalone con un umbral reversible entre dos versiones temporales del mismo lugar. La colocación definitiva de la radio en una escena doméstica/trayecto real y la selección nocturna dentro del ciclo completo quedan como integración posterior.
+El prototipo standalone de #760 queda conectado al ciclo real: la minicadena doméstica de #670 incluye `Radio Oeste 98` y la pieza `islas_fuera_del_tiempo`, que exige dos acciones de atención antes de registrar `tir_na_nog` mediante `SemillasOniricas`. Durante la fase de sueño, `dia_tir_na_nog_app.gd` consulta la selección común y `MitologiasNoche` antes de montar el vertical en la escena asignada; sin semilla o sin asignación, no aparece. La escena standalone se conserva como harness aislado de pruebas, no como segunda ruta de gameplay.
