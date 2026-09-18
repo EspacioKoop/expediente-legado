@@ -38,14 +38,14 @@ rotation_degrees = Vector3(0, 180, 0)
 position = Vector3(4.9, 0, 3.3)
 rotation_degrees = Vector3(0, 180, 0)
 
-[node name="EscaleraArchivo" parent="." instance=ExtResource("2_escalera")]
+[node name="EscaleraArchivo" parent="." groups=["castillo_anomalia"] instance=ExtResource("2_escalera")]
 position = Vector3(5.2, 0.02, 0)
 rotation_degrees = Vector3(0, 88, 0)
 
 [node name="EstandarteArchivoA" parent="." instance=ExtResource("3_estandarte")]
 position = Vector3(-2.4, 4.2, -2.7)
 
-[node name="EstandarteArchivoB" parent="." instance=ExtResource("3_estandarte")]
+[node name="EstandarteArchivoB" parent="." groups=["castillo_anomalia"] instance=ExtResource("3_estandarte")]
 position = Vector3(2.4, 4.2, -2.7)
 
 [node name="AtrilCodice" type="MeshInstance3D" parent="."]
