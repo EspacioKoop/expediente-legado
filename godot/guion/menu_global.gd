@@ -281,6 +281,8 @@ func _sellos_contenido(caja: VBoxContainer) -> void:
 		var fila := Label.new()
 		fila.name = "Sello_%s" % String(entrada.get("id", "sin-id"))
 		fila.text = _texto_sello(entrada)
+		fila.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		fila.custom_minimum_size.x = 560
 		caja.add_child(fila)
 
 	_sellos_volver = Button.new()
@@ -306,8 +308,16 @@ func _texto_sello(entrada: Dictionary) -> String:
 	var sello_id := String(entrada.get("id", ""))
 	var obtenido := Sellos.tiene_sello(_estado_partida_actual(), sello_id)
 	var marca := "◆" if obtenido else "◇"
-	var nombre := sello_id.replace("-", " ").capitalize()
-	return "%s  %s" % [marca, nombre]
+	var clave_titulo := String(entrada.get("titulo", ""))
+	var titulo := tr(clave_titulo) if not clave_titulo.is_empty() else ""
+	if titulo.is_empty() or titulo == clave_titulo:
+		titulo = sello_id.replace("-", " ").capitalize()
+
+	var clave_descripcion := String(entrada.get("descripcion", ""))
+	var descripcion := tr(clave_descripcion) if not clave_descripcion.is_empty() else ""
+	if descripcion.is_empty() or descripcion == clave_descripcion:
+		return "%s  %s" % [marca, titulo]
+	return "%s  %s\n    %s" % [marca, titulo, descripcion]
 
 
 func _estado_partida_actual() -> Dictionary:
