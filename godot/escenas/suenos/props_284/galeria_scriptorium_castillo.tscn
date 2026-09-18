@@ -27,7 +27,7 @@ material_override = SubResource("MatGaleria")
 [node name="ArcadaNorteA" parent="." instance=ExtResource("1_muro")]
 position = Vector3(-4.9, 0, -3.3)
 
-[node name="ArcadaNorteB" parent="." instance=ExtResource("1_muro")]
+[node name="ArcadaNorteB" parent="." groups=["castillo_umbral"] instance=ExtResource("1_muro")]
 position = Vector3(4.9, 0, -3.3)
 
 [node name="ArcadaSurA" parent="." instance=ExtResource("1_muro")]

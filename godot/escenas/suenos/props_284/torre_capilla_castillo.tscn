@@ -18,7 +18,7 @@ size = Vector2(14, 16)
 mesh = SubResource("SueloCapilla")
 material_override = SubResource("MatCapilla")
 
-[node name="ArcadaCabecera" parent="." instance=ExtResource("1_arcada")]
+[node name="ArcadaCabecera" parent="." groups=["castillo_umbral"] instance=ExtResource("1_arcada")]
 position = Vector3(0, 0, -5.8)
 
 [node name="ArcadaEsteA" parent="." instance=ExtResource("1_arcada")]

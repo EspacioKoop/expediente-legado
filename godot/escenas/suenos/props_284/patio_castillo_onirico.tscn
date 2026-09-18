@@ -24,7 +24,7 @@ position = Vector3(0, 0, -6.1)
 position = Vector3(0, 0, 6.1)
 rotation_degrees = Vector3(0, 180, 0)
 
-[node name="PortadaEste" parent="." instance=ExtResource("1_muro")]
+[node name="PortadaEste" parent="." groups=["castillo_umbral"] instance=ExtResource("1_muro")]
 position = Vector3(6.1, 0, 0)
 rotation_degrees = Vector3(0, -90, 0)
 
