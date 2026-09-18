@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 CONTROLLER = ROOT / "godot" / "guion" / "dia_relacion_onirica_app.gd"
 ECOS = ROOT / "godot" / "guion" / "dia_ecos_archivo_app.gd"
+CORE = ROOT / "godot" / "guion" / "relacion_onirica.gd"
 VERTICAL = ROOT / "godot" / "guion" / "sueno_relacion_onirica_3d.gd"
 DIA = ROOT / "godot" / "escenas" / "dia.tscn"
 
@@ -65,8 +66,14 @@ class RelacionOniricaTest(unittest.TestCase):
 
     def test_vertical_usa_interaccion_comun_y_no_crea_barrera(self):
         codigo = VERTICAL.read_text(encoding="utf-8")
+        core = CORE.read_text(encoding="utf-8")
+        self.assertIn("func confirmar() -> String:", core)
+        self.assertIn('return "deseleccionado"', core)
         self.assertIn("Interactuable3D.new()", codigo)
         self.assertIn("activado.connect(_al_activar_documento.bind(indice))", codigo)
+        self.assertIn("activado.connect(_al_confirmar)", codigo)
+        self.assertIn('_confirmar.name = "ConfirmarRelacion"', codigo)
+        self.assertIn("_confirmar.habilitado", codigo)
         self.assertIn("CollisionShape3D.new()", codigo)
         for cuerpo in ("StaticBody3D", "CharacterBody3D", "NavigationObstacle3D"):
             self.assertNotIn(cuerpo, codigo)

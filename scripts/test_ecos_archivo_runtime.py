@@ -25,10 +25,15 @@ class EcosArchivoRuntimeTest(unittest.TestCase):
         self.assertIn('nucleo.fallar()', self.core)
         self.assertIn('return "dispersado"', self.core)
         self.assertNotIn('return "incorrecto"', self.core)
-        self.assertIn("Puedes deshacer antes del tercero", self.presentacion)
+        self.assertIn("func confirmar() -> String:", self.presentacion)
+        self.assertIn('"confirmacion_disponible"', self.presentacion)
+        self.assertIn('"seleccion": seleccion.duplicate()', self.core)
+        self.assertIn('datos.get("seleccion", [])', self.core)
         self.assertIn("seleccion.back() == id", self.presentacion)
         self.assertIn("ultimo_seleccionado", self.vertical)
         self.assertIn("eco_id == ultimo_seleccionado", self.vertical)
+        self.assertIn("activado.connect(_al_confirmar)", self.vertical)
+        self.assertIn('_confirmar.name = "ConfirmarEcos"', self.vertical)
         self.assertIn('vista.get("max_intentos", 1)', self.vertical)
 
     def test_vertical_es_3d_visible_y_usa_interaccion_comun(self):

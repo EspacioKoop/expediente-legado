@@ -120,7 +120,14 @@ func _probar_acierto() -> void:
 	var i2 := _indice(relacion.documentos, "r2")
 	_comprobar(i1 >= 0 and i2 >= 0, "los dos orígenes están presentes")
 	_comprobar(relacion.seleccionar(i1) == "seleccionado", "la primera elección no resuelve sola")
-	_comprobar(relacion.seleccionar(i2) == "completado", "la pareja correcta completa el puzzle")
+	_comprobar(relacion.seleccionar(i2) == "seleccionado", "la segunda elección prepara la pareja")
+	_comprobar(
+		relacion.nucleo.state == Puzzle.ESTADO_PENDIENTE,
+		"la pareja correcta sigue pendiente antes de confirmar",
+	)
+	_comprobar(
+		relacion.confirmar() == "completado", "confirmar la pareja correcta completa el puzzle"
+	)
 	_comprobar(
 		relacion.nucleo.state == Puzzle.ESTADO_COMPLETADO,
 		"el acierto deja el núcleo en completado",
@@ -135,10 +142,22 @@ func _probar_fallo_unico() -> void:
 	var i1 := _indice(relacion.documentos, "r1")
 	var i3 := _indice(relacion.documentos, "r3")
 	_comprobar(relacion.seleccionar(i1) == "seleccionado", "puede fijar un primer documento")
-	_comprobar(relacion.seleccionar(i3) == "fallado", "una pareja incorrecta termina el intento")
+	_comprobar(relacion.seleccionar(i3) == "seleccionado", "la pareja incorrecta se puede preparar")
+	_comprobar(
+		relacion.seleccionar(i3) == "deseleccionado",
+		"puede corregir la segunda elección antes de confirmar",
+	)
+	_comprobar(relacion.seleccionar(i3) == "seleccionado", "puede volver a preparar la pareja")
+	_comprobar(
+		relacion.nucleo.state == Puzzle.ESTADO_PENDIENTE,
+		"preparar una pareja incorrecta no consume el intento",
+	)
+	_comprobar(
+		relacion.confirmar() == "fallado", "confirmar una pareja incorrecta termina el intento"
+	)
 	_comprobar(
 		relacion.nucleo.state == Puzzle.ESTADO_FALLADO,
-		"el error deja estado terminal y evita fuerza bruta",
+		"el error confirmado deja estado terminal y evita fuerza bruta",
 	)
 	_comprobar(
 		relacion.seleccionar(_indice(relacion.documentos, "r2")) == "cerrado",
@@ -155,7 +174,11 @@ func _probar_restauracion_pendiente() -> void:
 	var ids_antes: Array = relacion.documentos.map(func(d): return d["id"])
 	_comprobar(
 		relacion.seleccionar(_indice(relacion.documentos, "r1")) == "seleccionado",
-		"puede guardar una relación después de la primera elección",
+		"puede preparar el primer documento antes de guardar",
+	)
+	_comprobar(
+		relacion.seleccionar(_indice(relacion.documentos, "r2")) == "seleccionado",
+		"puede guardar una pareja completa todavía no confirmada",
 	)
 	var texto := JSON.stringify(relacion.serializar())
 	var datos: Dictionary = JSON.parse_string(texto)
@@ -165,12 +188,13 @@ func _probar_restauracion_pendiente() -> void:
 		restaurada.documentos.map(func(d): return d["id"]) == ids_antes,
 		"la recarga conserva exactamente el tablero derivado de la semilla",
 	)
-	_comprobar(restaurada.seleccion == ["r1"], "la recarga conserva la primera elección")
-	_comprobar(not restaurada.cerrada, "la selección parcial sigue pendiente")
+	_comprobar(restaurada.seleccion == ["r1", "r2"], "la recarga conserva la pareja preparada")
+	_comprobar(not restaurada.cerrada, "la pareja completa sigue pendiente hasta confirmar")
 	_comprobar(
-		restaurada.seleccionar(_indice(restaurada.documentos, "r2")) == "completado",
-		"puede terminar correctamente desde la selección restaurada",
+		restaurada.nucleo.state == Puzzle.ESTADO_PENDIENTE,
+		"recargar no convierte una selección completa en resultado",
 	)
+	_comprobar(restaurada.confirmar() == "completado", "puede confirmar la pareja restaurada")
 
 
 func _probar_restauracion_terminal_y_manipulada() -> void:
@@ -180,6 +204,7 @@ func _probar_restauracion_terminal_y_manipulada() -> void:
 	var fallida = Relacion.crear(caso, pista, leidos, 912)
 	fallida.seleccionar(_indice(fallida.documentos, "r1"))
 	fallida.seleccionar(_indice(fallida.documentos, "r3"))
+	fallida.confirmar()
 	var datos: Dictionary = JSON.parse_string(JSON.stringify(fallida.serializar()))
 	var restaurada = Relacion.restaurar(datos, caso, pista, leidos)
 	_comprobar(restaurada != null, "restaura un fallo terminal válido")
@@ -215,6 +240,7 @@ func _probar_restauracion_terminal_y_manipulada() -> void:
 	var completada = Relacion.crear(caso, pista, leidos, 913)
 	completada.seleccionar(_indice(completada.documentos, "r1"))
 	completada.seleccionar(_indice(completada.documentos, "r2"))
+	completada.confirmar()
 	var restaurada_ok = Relacion.restaurar(completada.serializar(), caso, pista, leidos)
 	var resultados: Array = []
 	restaurada_ok.nucleo.resultado.connect(func(resultado): resultados.append(resultado))

@@ -119,11 +119,21 @@ func _probar_reentrada() -> void:
 	var frase := "el rótulo conserva una palabra incluso después de romperse"
 	var ecos = Ecos.crear("F-6", frase, ["F-6"], 555, "P-6")
 	var antes: Array = ecos.presentacion.duplicate()
+	ecos.seleccion = [2, 1, 0]
 	var texto := JSON.stringify(ecos.serializar())
 	var datos: Dictionary = JSON.parse_string(texto)
 	var restaurado = Ecos.restaurar(datos, frase, ["F-6"])
 	_comprobar(restaurado != null, "reentra después de serializar por JSON")
 	_comprobar(restaurado.intentos == 0, "un pendiente restaurado conserva el intento intacto")
+	_comprobar(restaurado.seleccion == [2, 1, 0], "reentrar conserva la secuencia preparada")
+	_comprobar(
+		typeof(restaurado.seleccion[0]) == TYPE_INT,
+		"reentrar normaliza los ids de selección al tipo canónico entero",
+	)
+	_comprobar(
+		restaurado.nucleo.state == Puzzle.ESTADO_PENDIENTE,
+		"una secuencia completa sin confirmar sigue pendiente tras recargar",
+	)
 	_comprobar(restaurado.presentacion == antes, "reentrar conserva el orden deformado")
 	_comprobar(restaurado.nucleo.reward_id == "P-6", "reentrar conserva la recompensa dirigida")
 	_comprobar(restaurado.probar([0, 1, 2]) == "completado", "se puede completar tras reentrar")
@@ -136,6 +146,34 @@ func _probar_reentrada() -> void:
 	_comprobar(
 		Ecos.restaurar(manipulado, frase, ["F-6"]) == null,
 		"rechaza un pendiente manipulado que ya consumió su única respuesta",
+	)
+
+	var seleccion_duplicada := datos.duplicate(true)
+	seleccion_duplicada["seleccion"] = [0, 0]
+	_comprobar(
+		Ecos.restaurar(seleccion_duplicada, frase, ["F-6"]) == null,
+		"rechaza una selección restaurada con ecos duplicados",
+	)
+
+	var seleccion_fuera := datos.duplicate(true)
+	seleccion_fuera["seleccion"] = [0, 3]
+	_comprobar(
+		Ecos.restaurar(seleccion_fuera, frase, ["F-6"]) == null,
+		"rechaza una selección restaurada fuera del rango canónico",
+	)
+
+	var seleccion_fraccionaria := datos.duplicate(true)
+	seleccion_fraccionaria["seleccion"] = [0, 1.5]
+	_comprobar(
+		Ecos.restaurar(seleccion_fraccionaria, frase, ["F-6"]) == null,
+		"rechaza una selección restaurada con ids fraccionarios",
+	)
+
+	var seleccion_mal_tipo := datos.duplicate(true)
+	seleccion_mal_tipo["seleccion"] = "0,1,2"
+	_comprobar(
+		Ecos.restaurar(seleccion_mal_tipo, frase, ["F-6"]) == null,
+		"rechaza una selección restaurada con tipo inválido",
 	)
 
 	var fallido = Ecos.crear("F-7", frase, ["F-7"], 777)

@@ -26,6 +26,7 @@ var reduccion_movimiento := false
 var _recompensa_texto := ""
 var _ecos_3d: Array = []
 var _estado: Label3D
+var _confirmar: Interactuable3D
 
 
 func configurar(
@@ -88,6 +89,14 @@ func _montar() -> void:
 	_estado.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	add_child(_estado)
 
+	_confirmar = Interactuable3D.new()
+	_confirmar.name = "ConfirmarEcos"
+	_confirmar.position = Vector3(0.0, 0.0, 2.35)
+	_confirmar.verbo = Interactuable3D.Verbo.USAR
+	_confirmar.activado.connect(_al_confirmar)
+	add_child(_confirmar)
+	_montar_confirmacion(_confirmar)
+
 
 func _montar_panel(eco: Interactuable3D) -> void:
 	var panel := MeshInstance3D.new()
@@ -134,6 +143,33 @@ func _montar_panel(eco: Interactuable3D) -> void:
 	_crear_jamba(eco, Vector3(1.12, 1.15, -0.05), -0.11)
 
 
+func _montar_confirmacion(confirmar: Interactuable3D) -> void:
+	var base := MeshInstance3D.new()
+	base.name = "Base"
+	var caja := BoxMesh.new()
+	caja.size = Vector3(1.2, 0.22, 0.8)
+	base.mesh = caja
+	base.position = Vector3(0.0, 0.35, 0.0)
+	confirmar.add_child(base)
+
+	var etiqueta := Label3D.new()
+	etiqueta.name = "Indicador"
+	etiqueta.text = "✓"
+	etiqueta.position = Vector3(0.0, 0.58, -0.18)
+	etiqueta.font_size = 42
+	etiqueta.pixel_size = 0.004
+	etiqueta.modulate = COLOR_TEXTO
+	etiqueta.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	confirmar.add_child(etiqueta)
+
+	var colision := CollisionShape3D.new()
+	var forma := BoxShape3D.new()
+	forma.size = Vector3(1.3, 0.7, 0.9)
+	colision.shape = forma
+	colision.position = Vector3(0.0, 0.35, 0.0)
+	confirmar.add_child(colision)
+
+
 func _crear_jamba(padre: Node3D, posicion_local: Vector3, giro_z: float) -> void:
 	var jamba := MeshInstance3D.new()
 	var caja := BoxMesh.new()
@@ -153,6 +189,14 @@ func _al_activar_eco(_actor: Node, slot: int) -> void:
 		return
 	presentacion.foco = slot
 	var evento: String = str(presentacion.seleccionar())
+	_sincronizar()
+	estado_cambiado.emit(evento)
+
+
+func _al_confirmar(_actor: Node) -> void:
+	if presentacion == null:
+		return
+	var evento: String = str(presentacion.confirmar())
 	_sincronizar()
 	estado_cambiado.emit(evento)
 	if (
@@ -189,6 +233,9 @@ func _sincronizar() -> void:
 		material.albedo_color = COLOR_SELECCION if posicion >= 0 else COLOR_BASE
 		material.roughness = 0.88
 		panel.material_override = material
+
+	if _confirmar != null:
+		_confirmar.habilitado = bool(vista.get("confirmacion_disponible", false))
 
 	if _estado != null:
 		if (

@@ -18,6 +18,7 @@ const _RUTA_SCRIPT := "res://guion/ecos_archivo.gd"
 var nucleo
 var fragmentos: Array = []
 var presentacion: Array = []
+var seleccion: Array = []
 var intentos := 0
 
 
@@ -41,7 +42,7 @@ static func crear(
 	return ecos
 
 
-## Restaura estado e intentos, pero reconstruye el contenido desde la frase
+## Restaura estado, selección e intentos, pero reconstruye el contenido desde la frase
 ## original y vuelve a validar el folio mediante PuzzleOnirico.
 static func restaurar(datos: Dictionary, frase: String, leido_hoy: Array):
 	var base = Puzzle.restaurar(datos.get("nucleo", {}), leido_hoy)
@@ -59,12 +60,22 @@ static func restaurar(datos: Dictionary, frase: String, leido_hoy: Array):
 	if base.state == Puzzle.ESTADO_FALLADO and usados != MAX_INTENTOS:
 		return null
 
+	var seleccion_guardada: Variant = datos.get("seleccion", [])
+	if not seleccion_guardada is Array:
+		return null
+	var seleccion := (seleccion_guardada as Array).duplicate()
+	if not _seleccion_valida(seleccion):
+		return null
+	for indice in range(seleccion.size()):
+		seleccion[indice] = int(seleccion[indice])
+
 	var ecos = _nueva_instancia()
 	if ecos == null:
 		return null
 	ecos.nucleo = base
 	ecos.fragmentos = partes
 	ecos.presentacion = _orden_presentacion(base.seed)
+	ecos.seleccion = seleccion.duplicate()
 	ecos.intentos = usados
 	return ecos
 
@@ -81,10 +92,9 @@ func ecos_presentados() -> Array:
 ## Prueba una secuencia de ids canónicos.
 ##
 ## Una entrada mal formada no gasta intento: pulsar dos veces por rebote o un
-## estado incompleto de UI no debe acercar al jugador al castigo. La UI permite
-## deshacer mientras la secuencia esté incompleta, pero elegir el tercer eco
-## compromete la respuesta: un orden incorrecto dispersa los ecos de inmediato.
-## Así el puzzle recompensa reconstruir la frase, no enumerar permutaciones.
+## estado incompleto de UI no debe acercar al jugador al castigo. Solo una
+## secuencia completa llega aquí desde la confirmación explícita; un orden
+## incorrecto dispersa los ecos de inmediato, sin permitir enumerar permutaciones.
 func probar(orden: Array) -> String:
 	if nucleo == null or not nucleo.pendiente():
 		return "cerrado"
@@ -131,7 +141,11 @@ func politica_presentacion(reduccion_movimiento: bool) -> Dictionary:
 func serializar() -> Dictionary:
 	if nucleo == null:
 		return {}
-	return {"nucleo": nucleo.serializar(), "intentos": intentos}
+	return {
+		"nucleo": nucleo.serializar(),
+		"seleccion": seleccion.duplicate(),
+		"intentos": intentos,
+	}
 
 
 static func _fragmentar(frase: String) -> Array:
@@ -164,6 +178,22 @@ static func _orden_presentacion(semilla: int) -> Array:
 	if orden == [0, 1, 2]:
 		orden = [1, 2, 0]
 	return orden
+
+
+static func _seleccion_valida(valores: Array) -> bool:
+	if valores.size() > CANTIDAD_FRAGMENTOS:
+		return false
+	var vistos: Array = []
+	for valor in valores:
+		if typeof(valor) != TYPE_INT and typeof(valor) != TYPE_FLOAT:
+			return false
+		var id := int(valor)
+		if float(valor) != float(id):
+			return false
+		if id < 0 or id >= CANTIDAD_FRAGMENTOS or vistos.has(id):
+			return false
+		vistos.append(id)
+	return true
 
 
 static func _es_permutacion(orden: Array) -> bool:

@@ -1,9 +1,9 @@
 ## Relación documental onírica (#89).
 ##
 ## Presenta entre tres y cuatro documentos leídos hoy. Dos de ellos son los
-## orígenes de una relación ya catalogada; el jugador solo puede cerrar una
-## pareja una vez. Así comprender el contenido importa y probar combinaciones
-## sucesivas no puede convertirse en la estrategia óptima.
+## orígenes de una relación ya catalogada; el jugador puede preparar y corregir
+## una pareja, pero solo confirmarla la evalúa. Tras confirmar no hay segundo
+## intento, así que comprender el contenido sigue siendo la estrategia necesaria.
 class_name RelacionOnirica
 extends RefCounted
 
@@ -100,11 +100,21 @@ func seleccionar(indice: int) -> String:
 	if registro_id.is_empty():
 		return "invalido"
 	if seleccion.has(registro_id):
-		return "duplicado"
+		seleccion.erase(registro_id)
+		return "deseleccionado"
+	if seleccion.size() >= 2:
+		return "lleno"
 
 	seleccion.append(registro_id)
-	if seleccion.size() < 2:
-		return "seleccionado"
+	return "seleccionado"
+
+
+## La pareja preparada no consume la respuesta hasta este gesto explícito.
+func confirmar() -> String:
+	if nucleo == null or cerrada or not nucleo.pendiente():
+		return "cerrado"
+	if seleccion.size() != 2:
+		return "incompleto"
 
 	var elegida := seleccion.duplicate()
 	elegida.sort()
@@ -216,7 +226,7 @@ static func _estado_restaurado_valido(relacion) -> bool:
 	var elegida: Array = relacion.seleccion.duplicate()
 	elegida.sort()
 	if estado == Puzzle.ESTADO_PENDIENTE:
-		return not relacion.cerrada and relacion.seleccion.size() <= 1
+		return not relacion.cerrada and relacion.seleccion.size() <= 2
 	if not relacion.cerrada:
 		return false
 	if estado == Puzzle.ESTADO_COMPLETADO:
@@ -224,7 +234,7 @@ static func _estado_restaurado_valido(relacion) -> bool:
 	if estado == Puzzle.ESTADO_FALLADO:
 		return relacion.seleccion.size() == 2 and elegida != relacion.origenes
 	if estado == Puzzle.ESTADO_ABANDONADO:
-		return relacion.seleccion.size() <= 1
+		return relacion.seleccion.size() <= 2
 	return false
 
 

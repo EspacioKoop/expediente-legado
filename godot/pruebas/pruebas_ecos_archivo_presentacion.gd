@@ -46,6 +46,10 @@ func _probar_seleccion_y_correccion() -> void:
 	)
 	_comprobar(presentacion.seleccion == [primer_id], "la selección guarda ids canónicos")
 	_comprobar(
+		presentacion.ecos.seleccion == [primer_id],
+		"la selección visual muta el estado serializable del puzzle",
+	)
+	_comprobar(
 		presentacion.seleccionar() == Presentacion.EVENTO_DESHECHO,
 		"reactivar el último eco deshace la elección"
 	)
@@ -57,6 +61,11 @@ func _probar_seleccion_y_correccion() -> void:
 	_comprobar(presentacion.deshacer(), "la operación semántica deshacer sigue disponible")
 	_comprobar(presentacion.seleccion.is_empty(), "deshacer elimina la última elección")
 	_comprobar(not presentacion.deshacer(), "deshacer vacío es inocuo")
+	_comprobar(
+		presentacion.confirmar() == Presentacion.EVENTO_INCOMPLETO,
+		"confirmar una secuencia incompleta no consume respuesta",
+	)
+	_comprobar(presentacion.ecos.intentos == 0, "confirmar incompleto no gasta intento")
 
 
 func _probar_completar() -> void:
@@ -64,10 +73,18 @@ func _probar_completar() -> void:
 	_seleccionar_id(presentacion, 0)
 	_seleccionar_id(presentacion, 1)
 	var resultado := _seleccionar_id(presentacion, 2)
-	_comprobar(resultado == Presentacion.EVENTO_COMPLETADO, "orden canónico completa el puzzle")
+	_comprobar(resultado == Presentacion.EVENTO_LISTO, "el tercer eco solo deja la secuencia lista")
+	_comprobar(
+		presentacion.ecos.nucleo.state == Puzzle.ESTADO_PENDIENTE,
+		"la secuencia completa sigue pendiente antes de confirmar",
+	)
+	_comprobar(
+		presentacion.confirmar() == Presentacion.EVENTO_COMPLETADO,
+		"confirmar el orden canónico completa el puzzle",
+	)
 	_comprobar(
 		presentacion.ecos.nucleo.state == Puzzle.ESTADO_COMPLETADO,
-		"la presentación delega el cierre al núcleo reusable"
+		"la confirmación delega el cierre al núcleo reusable"
 	)
 	_comprobar(
 		presentacion.seleccionar() == Presentacion.EVENTO_CERRADO,
@@ -78,10 +95,19 @@ func _probar_completar() -> void:
 
 func _probar_fallo_y_salida() -> void:
 	var presentacion = _nuevo("F-P4", 404)
-	var final := _seleccionar_orden(presentacion, [2, 1, 0])
+	var listo := _seleccionar_orden(presentacion, [2, 1, 0])
+	_comprobar(
+		listo == Presentacion.EVENTO_LISTO,
+		"un orden completo incorrecto todavía puede corregirse antes de confirmar",
+	)
+	_comprobar(
+		presentacion.ecos.nucleo.state == Puzzle.ESTADO_PENDIENTE,
+		"preparar una secuencia incorrecta no consume el intento",
+	)
+	var final: String = str(presentacion.confirmar())
 	_comprobar(
 		final == Presentacion.EVENTO_DISPERSADO,
-		"el primer orden completo incorrecto dispersa los ecos"
+		"confirmar el primer orden completo incorrecto dispersa los ecos"
 	)
 	_comprobar(
 		presentacion.seleccion == [2, 1, 0],

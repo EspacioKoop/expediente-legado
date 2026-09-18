@@ -24,6 +24,7 @@ var relacion: RelacionOnirica
 var recompensa_texto := ""
 var _documentos_3d: Array = []
 var _estado: Label3D
+var _confirmar: Interactuable3D
 
 
 func configurar(una_relacion: RelacionOnirica, recompensa: String = "") -> bool:
@@ -79,6 +80,14 @@ func _montar() -> void:
 	_estado.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	add_child(_estado)
 
+	_confirmar = Interactuable3D.new()
+	_confirmar.name = "ConfirmarRelacion"
+	_confirmar.position = Vector3(0.0, 0.0, 2.45)
+	_confirmar.verbo = Interactuable3D.Verbo.USAR
+	_confirmar.activado.connect(_al_confirmar)
+	add_child(_confirmar)
+	_montar_confirmacion(_confirmar)
+
 
 func _montar_panel(documento: Interactuable3D) -> void:
 	var panel := MeshInstance3D.new()
@@ -120,10 +129,45 @@ func _montar_panel(documento: Interactuable3D) -> void:
 	documento.add_child(colision)
 
 
+func _montar_confirmacion(confirmar: Interactuable3D) -> void:
+	var base := MeshInstance3D.new()
+	base.name = "Base"
+	var caja := BoxMesh.new()
+	caja.size = Vector3(1.2, 0.22, 0.8)
+	base.mesh = caja
+	base.position = Vector3(0.0, 0.35, 0.0)
+	confirmar.add_child(base)
+
+	var etiqueta := Label3D.new()
+	etiqueta.name = "Indicador"
+	etiqueta.text = "✓"
+	etiqueta.position = Vector3(0.0, 0.58, -0.18)
+	etiqueta.font_size = 42
+	etiqueta.pixel_size = 0.004
+	etiqueta.modulate = COLOR_TEXTO
+	etiqueta.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	confirmar.add_child(etiqueta)
+
+	var colision := CollisionShape3D.new()
+	var forma := BoxShape3D.new()
+	forma.size = Vector3(1.3, 0.7, 0.9)
+	colision.shape = forma
+	colision.position = Vector3(0.0, 0.35, 0.0)
+	confirmar.add_child(colision)
+
+
 func _al_activar_documento(_actor: Node, indice: int) -> void:
 	if relacion == null:
 		return
 	var evento := relacion.seleccionar(indice)
+	_sincronizar()
+	estado_cambiado.emit(evento)
+
+
+func _al_confirmar(_actor: Node) -> void:
+	if relacion == null:
+		return
+	var evento := relacion.confirmar()
 	_sincronizar()
 	estado_cambiado.emit(evento)
 	if evento == "completado" or evento == "fallado":
@@ -140,13 +184,19 @@ func _sincronizar() -> void:
 		var texto := documento.get_node("Texto") as Label3D
 		var panel := documento.get_node("Panel") as MeshInstance3D
 		var seleccionado := relacion.seleccion.has(String(dato.get("id", "")))
+		var seleccion_completa := relacion.seleccion.size() >= 2
 		titulo.text = "%s · %s" % [dato.get("folio", ""), dato.get("fecha", "")]
 		texto.text = String(dato.get("extracto", ""))
-		documento.habilitado = not relacion.cerrada and not seleccionado
+		documento.habilitado = (not relacion.cerrada and (not seleccion_completa or seleccionado))
 		var material := StandardMaterial3D.new()
 		material.albedo_color = COLOR_SELECCION if seleccionado else COLOR_BASE
 		material.roughness = 0.9
 		panel.material_override = material
+
+	if _confirmar != null:
+		_confirmar.habilitado = (
+			not relacion.cerrada and relacion.nucleo.pendiente() and relacion.seleccion.size() == 2
+		)
 
 	if _estado == null:
 		return

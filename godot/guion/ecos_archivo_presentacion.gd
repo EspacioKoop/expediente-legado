@@ -16,6 +16,8 @@ const EVENTO_NINGUNO := "ninguno"
 const EVENTO_SELECCIONADO := "seleccionado"
 const EVENTO_DESHECHO := "deshecho"
 const EVENTO_DUPLICADO := "duplicado"
+const EVENTO_LISTO := "listo"
+const EVENTO_INCOMPLETO := "incompleto"
 const EVENTO_INCORRECTO := "incorrecto"
 const EVENTO_COMPLETADO := "completado"
 const EVENTO_DISPERSADO := "dispersado"
@@ -36,6 +38,7 @@ static func crear(ecos_instancia):
 	if presentacion == null:
 		return null
 	presentacion.ecos = ecos_instancia
+	presentacion.seleccion = ecos_instancia.seleccion
 	presentacion.cerrada = not ecos_instancia.nucleo.pendiente()
 	return presentacion
 
@@ -67,8 +70,19 @@ func seleccionar() -> String:
 			ultimo_evento = EVENTO_DUPLICADO
 		return ultimo_evento
 	seleccion.append(id)
-	ultimo_evento = EVENTO_SELECCIONADO
-	if seleccion.size() < Ecos.CANTIDAD_FRAGMENTOS:
+	ultimo_evento = (
+		EVENTO_LISTO if seleccion.size() == Ecos.CANTIDAD_FRAGMENTOS else EVENTO_SELECCIONADO
+	)
+	return ultimo_evento
+
+
+## Evaluar la secuencia es un gesto separado de construirla. Hasta confirmar,
+## el jugador puede deshacer sin consumir la única respuesta del puzzle.
+func confirmar() -> String:
+	if _terminal():
+		return EVENTO_CERRADO
+	if seleccion.size() != Ecos.CANTIDAD_FRAGMENTOS:
+		ultimo_evento = EVENTO_INCOMPLETO
 		return ultimo_evento
 
 	var resultado: String = str(ecos.probar(seleccion))
@@ -124,7 +138,7 @@ func vista(reduccion_movimiento: bool) -> Dictionary:
 		elementos.append(elemento)
 	return {
 		"regla":
-		"Recompón los tres ecos. Puedes deshacer antes del tercero; la secuencia completa es definitiva.",
+		"Recompón los tres ecos. Corrige el orden; confirmar hace definitiva la respuesta.",
 		"elementos": elementos,
 		"foco": foco,
 		"seleccion": seleccion.duplicate(),
@@ -132,6 +146,7 @@ func vista(reduccion_movimiento: bool) -> Dictionary:
 		"max_intentos": Ecos.MAX_INTENTOS,
 		"estado": _estado_visual(),
 		"ultimo_evento": ultimo_evento,
+		"confirmacion_disponible": seleccion.size() == Ecos.CANTIDAD_FRAGMENTOS and not _terminal(),
 		"salida_disponible": true,
 		"movimiento": ecos.politica_presentacion(reduccion_movimiento),
 	}
