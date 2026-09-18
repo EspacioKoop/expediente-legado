@@ -22,7 +22,9 @@ var intentos := 0
 
 
 ## Construye los tres ecos únicamente desde un folio leído hoy.
-static func crear(\n\tfolio: String, frase: String, leido_hoy: Array, raiz: int, reward_id: String = ""\n):
+static func crear(
+	folio: String, frase: String, leido_hoy: Array, raiz: int, reward_id: String = ""
+):
 	var partes := _fragmentar(frase)
 	if partes.size() != CANTIDAD_FRAGMENTOS:
 		return null
