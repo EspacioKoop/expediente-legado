@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "issue": 228,
+  "source": {
+    "name": "Free CC0 Industrial 3D Models",
+    "url": "https://3dmodelscc0.itch.io/free-cc0-industrial-3d-models",
+    "license": "CC0-1.0 / public domain",
+    "provided_archive": "IndustrialPack.rar",
+    "archive_size_bytes": 67986593,
+    "archive_sha256": "48821008e7c2e62cd8b7050d57fd372e2aeae038987fe1dd249ae2e0ef33af78"
+  },
+  "inventory": {
+    "asset_count": 12,
+    "file_count": 68,
+    "fbx_count": 12,
+    "png_count": 56,
+    "uncompressed_bytes": 68416874
+  },
+  "runtime_selection": [
+    "CableDrum",
+    "ElectricalBox",
+    "Platform_Trolley",
+    "WorkLight"
+  ],
+  "assets": [
+    {
+      "id": "CableDrum",
+      "fbx": "IndustrialPack/CableDrum/CableDrum.fbx",
+      "fbx_size_bytes": 82752,
+      "fbx_crc32": "11e3a3e8",
+      "maps": ["base_color", "metallic", "normal_directx", "roughness"]
+    },
+    {
+      "id": "Car_Jack",
+      "fbx": "IndustrialPack/Car_Jack/CarJack.fbx",
+      "fbx_size_bytes": 80160,
+      "fbx_crc32": "a0e22db0",
+      "maps": ["base_color", "metallic", "normal_directx", "roughness"]
+    },
+    {
+      "id": "ElectricalBox",
+      "fbx": "IndustrialPack/ElectricalBox/ElectricalBox.fbx",
+      "fbx_size_bytes": 90256,
+      "fbx_crc32": "2e511786",
+      "maps": ["base_color", "metallic", "normal_directx", "roughness"]
+    },
+    {
+      "id": "ElectricalBox02",
+      "fbx": "IndustrialPack/ElectricalBox02/ElectricalBox02.fbx",
+      "fbx_size_bytes": 61968,
+      "fbx_crc32": "c4841012",
+      "maps": ["base_color", "metallic", "normal_directx", "roughness"]
+    },
+    {
+      "id": "ExplosiveBarrel",
+      "fbx": "IndustrialPack/ExplosiveBarrel/ExplosiveBarrel.fbx",
+      "fbx_size_bytes": 52640,
+      "fbx_crc32": "f6eebe9b",
+      "maps": ["base_color", "metallic", "normal_directx", "roughness"]
+    },
+    {
+      "id": "Gas_can",
+      "fbx": "IndustrialPack/Gas_can/Gas_Canister.fbx",
+      "fbx_size_bytes": 84240,
+      "fbx_crc32": "7addbd39",
+      "maps": ["base_color", "height", "metallic", "normal", "roughness"]
+    },
+    {
+      "id": "Gas_Cylinder",
+      "fbx": "IndustrialPack/Gas_Cylinder/Gas_Cylinder.fbx",
+      "fbx_size_bytes": 65936,
+      "fbx_crc32": "e6be6491",
+      "maps": ["base_color", "metallic", "normal", "roughness"]
+    },
+    {
+      "id": "PalletTruck",
+      "fbx": "IndustrialPack/PalletTruck/PalletTruck.fbx",
+      "fbx_size_bytes": 152336,
+      "fbx_crc32": "ee2fb350",
+      "maps": ["base_color", "height", "metallic", "normal", "roughness"]
+    },
+    {
+      "id": "Platform_Trolley",
+      "fbx": "IndustrialPack/Platform_Trolley/Platform_Trolley.fbx",
+      "fbx_size_bytes": 61104,
+      "fbx_crc32": "01b3ecf5",
+      "maps": ["base_color", "height", "metallic", "normal_directx", "roughness"]
+    },
+    {
+      "id": "Water_Barrel",
+      "fbx": "IndustrialPack/Water_Barrel/Water_Barrel.fbx",
+      "fbx_size_bytes": 32976,
+      "fbx_crc32": "7d6fc2a7",
+      "maps": ["base_color", "height", "metallic", "normal_directx", "roughness"]
+    },
+    {
+      "id": "WorkLight",
+      "fbx": "IndustrialPack/WorkLight/WorkLight.fbx",
+      "fbx_size_bytes": 77728,
+      "fbx_crc32": "f1ddd206",
+      "maps": ["base_color", "emissive", "height", "metallic", "normal_directx", "roughness"]
+    },
+    {
+      "id": "Worklight02",
+      "fbx": "IndustrialPack/Worklight02/WorkLight02.fbx",
+      "fbx_size_bytes": 166736,
+      "fbx_crc32": "e4785e4f",
+      "maps": ["base_color", "emissive", "height", "metallic", "normal_directx", "roughness"]
+    }
+  ],
+  "policy": {
+    "archive_vendored": false,
+    "source_binaries_imported_by_this_change": false,
+    "future_fbx_and_png_must_use_lfs": true,
+    "selection_rule": "Import only a small prop subset when a concrete scene needs it; prefer the existing procedural fallback for background dressing."
+  }
+}

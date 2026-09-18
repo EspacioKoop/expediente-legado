@@ -2,7 +2,7 @@
 
 Seguimiento principal: #216.
 
-Última comprobación del estado: **2026-09-17**.
+Última comprobación del estado: **2026-09-18**.
 
 Este documento es la fuente de verdad **versionada** del catálogo de ambientación CC0. El issue #216 conserva decisiones, discusión y descubrimiento; aquí se registra qué está realmente integrado, qué está solo documentado y qué falta para considerar cerrada la épica.
 
@@ -39,7 +39,7 @@ Los elementos de fondo deben seguir siendo secundarios: niebla, distancia, palet
 | School Classrooms Asset Pack | #223 | **documentado** | PR #484 fija selección, licencia, época, LFS y procedencia. No importar si #294 cubre la oficina; reservar piezas escolares para una necesidad real. |
 | Office low poly pack | #226 | **suplido por #294** | La necesidad de oficina queda cubierta por PR #499 con 9 GLB del PSX Style Office Pack, procedencia/SHA-256, LFS y captura. |
 | Low poly household goods | #227 | **integrado** | PR #532: 13 GLB CC0 en casa, procedencia/SHA-256/LFS, shader PSX, colisiones simples y capturas antes/después. |
-| Free Industrial 3D Models | #228 | **parcial integrado** | PR #430: 4 referencias reconstruidas como geometría low-poly, shader PSX y zona de servicio real; falta validación visual humana si se quiere cerrar el sub-issue. |
+| Free Industrial 3D Models | #228 | **integrado, pendiente aceptación visual** | PR #430: 4 referencias reconstruidas como geometría low-poly, shader PSX y zona de servicio real. El RAR aportado queda auditado en `industrial-pack.manifest.json`: 12 FBX, 56 PNG y SHA-256 del archivo fuente; no se versiona el pack completo. |
 | Horror Texture Pack | #231 | **infraestructura preparada** | PR #479 añade `DecalCompat`; todavía no se ha importado una textura concreta del pack porque faltaba un binario verificable con hash. |
 
 ## Fuentes posteriores que ya forman parte de la estrategia
