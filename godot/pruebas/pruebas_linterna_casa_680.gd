@@ -67,8 +67,7 @@ func _probar() -> void:
 	var luz := LinternaCasa.refrescar(caminante, averia, inventario)
 	_comprobar(luz != null, "con avería y carried aparece el haz")
 	_comprobar(
-		luz != null and luz.get_parent() == camara,
-		"el haz sigue la cámara de primera persona"
+		luz != null and luz.get_parent() == camara, "el haz sigue la cámara de primera persona"
 	)
 	_comprobar(
 		luz != null and String(luz.get_meta("prop_utilizable_id", "")) == "linterna_kkryy",
@@ -78,10 +77,7 @@ func _probar() -> void:
 		luz != null and String(luz.get_meta("mitiga_consecuencia", "")) == "casa_luz_reducida",
 		"el haz declara la consecuencia que mitiga"
 	)
-	_comprobar(
-		luz != null and not luz.shadow_enabled,
-		"la mitigación portátil evita sombras caras"
-	)
+	_comprobar(luz != null and not luz.shadow_enabled, "la mitigación portátil evita sombras caras")
 
 	_comprobar(
 		Inventario.guardar_en_casa(inventario, "linterna_kkryy"),
@@ -94,8 +90,7 @@ func _probar() -> void:
 	await process_frame
 
 	_comprobar(
-		Inventario.sacar_de_casa(inventario, "linterna_kkryy"),
-		"la linterna vuelve a carried"
+		Inventario.sacar_de_casa(inventario, "linterna_kkryy"), "la linterna vuelve a carried"
 	)
 	_comprobar(
 		LinternaCasa.refrescar(caminante, averia, inventario) != null,
