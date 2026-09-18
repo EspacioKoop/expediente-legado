@@ -46,6 +46,10 @@ func _probar_seleccion_y_correccion() -> void:
 	)
 	_comprobar(presentacion.seleccion == [primer_id], "la selección guarda ids canónicos")
 	_comprobar(
+		presentacion.ecos.seleccion == [primer_id],
+		"la selección visual muta el estado serializable del puzzle",
+	)
+	_comprobar(
 		presentacion.seleccionar() == Presentacion.EVENTO_DESHECHO,
 		"reactivar el último eco deshace la elección"
 	)
