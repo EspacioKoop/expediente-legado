@@ -126,6 +126,7 @@ static func _perfil_clima(estado: String) -> Dictionary:
 			)
 	return perfil
 
+
 static func _crear_coche(ficha: Array, materiales: Dictionary, con_colision: bool) -> Node3D:
 	var coche := Node3D.new()
 	coche.name = ficha[0]
