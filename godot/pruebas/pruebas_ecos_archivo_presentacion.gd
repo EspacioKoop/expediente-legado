@@ -46,11 +46,15 @@ func _probar_seleccion_y_correccion() -> void:
 	)
 	_comprobar(presentacion.seleccion == [primer_id], "la selección guarda ids canónicos")
 	_comprobar(
-		presentacion.seleccionar() == Presentacion.EVENTO_DUPLICADO,
-		"seleccionar dos veces el mismo eco no duplica la secuencia"
+		presentacion.seleccionar() == Presentacion.EVENTO_DESHECHO,
+		"reactivar el último eco deshace la elección"
 	)
-	_comprobar(presentacion.seleccion.size() == 1, "un duplicado no altera la selección")
-	_comprobar(presentacion.deshacer(), "se puede deshacer sin gastar intento")
+	_comprobar(presentacion.seleccion.is_empty(), "reactivar limpia la última elección")
+	_comprobar(
+		presentacion.seleccionar() == Presentacion.EVENTO_SELECCIONADO,
+		"se puede volver a seleccionar después de corregir"
+	)
+	_comprobar(presentacion.deshacer(), "la operación semántica deshacer sigue disponible")
 	_comprobar(presentacion.seleccion.is_empty(), "deshacer elimina la última elección")
 	_comprobar(not presentacion.deshacer(), "deshacer vacío es inocuo")
 
@@ -74,20 +78,23 @@ func _probar_completar() -> void:
 
 func _probar_fallo_y_salida() -> void:
 	var presentacion = _nuevo("F-P4", 404)
-	for intento in range(2):
-		var resultado := _seleccionar_orden(presentacion, [2, 1, 0])
-		_comprobar(
-			resultado == Presentacion.EVENTO_INCORRECTO, "un fallo temprano permite reintentar"
-		)
-		_comprobar(presentacion.seleccion.is_empty(), "un fallo limpia la secuencia visual")
-		_comprobar(
-			presentacion.ecos.intentos == intento + 1, "el fallo consume exactamente un intento"
-		)
 	var final := _seleccionar_orden(presentacion, [2, 1, 0])
-	_comprobar(final == Presentacion.EVENTO_DISPERSADO, "el tercer fallo dispersa los ecos")
+	_comprobar(
+		final == Presentacion.EVENTO_DISPERSADO,
+		"el primer orden completo incorrecto dispersa los ecos"
+	)
+	_comprobar(
+		presentacion.seleccion == [2, 1, 0],
+		"la secuencia fallida permanece visible como feedback terminal"
+	)
+	_comprobar(presentacion.ecos.intentos == 1, "el fallo consume la única respuesta")
 	_comprobar(
 		presentacion.ecos.nucleo.state == Puzzle.ESTADO_FALLADO,
 		"la dispersión queda como fallo terminal"
+	)
+	_comprobar(
+		presentacion.seleccionar() == Presentacion.EVENTO_CERRADO,
+		"un fallo no permite probar otra permutación"
 	)
 	_comprobar(presentacion.abandonar(), "un terminal sigue devolviendo control a la sala")
 
