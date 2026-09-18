@@ -307,7 +307,7 @@ static func por_nombre(
 	if ResourceLoader.exists(ruta):
 		var traida := ResourceLoader.load(ruta, "Texture2D") as Texture2D
 		if traida != null:
-			return _contrastar_textura(traida, base, contraste)
+			return traida
 	return calculada(nombre, base, semilla, contraste)
 
 
@@ -349,10 +349,9 @@ static func calculada(
 	return _contrastar_textura(textura, base, contraste)
 
 
-## Crea una copia runtime con más contraste ANTES de que el sampler lineal
-## genere/seleccione mipmaps. Sirve tanto para el fallback calculado como para
-## el JPG canónico de una superficie nombrada; nunca modifica el recurso fuente.
-## Una ruta explícita res:// sale antes de aquí y conserva su presentación.
+## Refuerza el fallback calculado ANTES de que el sampler lineal pierda la
+## trama bajo iluminación baja y cuantización. Los assets traídos —ruta
+## explícita o JPG canónico— salen antes de aquí y conservan su presentación.
 static func _contrastar_textura(
 	textura: Texture2D, base: Color, contraste: float
 ) -> Texture2D:
