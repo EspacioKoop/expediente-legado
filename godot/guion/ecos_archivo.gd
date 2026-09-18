@@ -63,9 +63,11 @@ static func restaurar(datos: Dictionary, frase: String, leido_hoy: Array):
 	var seleccion_guardada: Variant = datos.get("seleccion", [])
 	if not seleccion_guardada is Array:
 		return null
-	var seleccion := seleccion_guardada as Array
+	var seleccion := (seleccion_guardada as Array).duplicate()
 	if not _seleccion_valida(seleccion):
 		return null
+	for indice in range(seleccion.size()):
+		seleccion[indice] = int(seleccion[indice])
 
 	var ecos = _nueva_instancia()
 	if ecos == null:
