@@ -2,8 +2,9 @@
 ##
 ## Renderiza las cuatro composiciones con la misma cámara e iluminación y añade
 ## una quinta toma del claustro con mutación de giro, una sexta de la capilla
-## tras la tercera campanada y una séptima del scriptorium tras leer el códice. No sustituye el pase humano
-## de #398: sirve para comparar silueta, profundidad y regresiones.
+## tras la tercera campanada y una séptima del scriptorium tras leer el códice.
+## No sustituye el pase humano de #398: sirve para comparar silueta, profundidad
+## y regresiones.
 extends SceneTree
 
 const CASOS := [
