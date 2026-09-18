@@ -100,8 +100,15 @@ func _probar_escaparate(calle: Node3D) -> void:
 	var cristal := tienda.get_node_or_null("CristalEscaparate") as MeshInstance3D
 	_comprobar(cristal != null, "el escaparate tiene cristal")
 	if cristal != null:
-		var vidrio := cristal.material_override as StandardMaterial3D
-		_comprobar(vidrio.albedo_color.a < 0.5, "el cristal deja ver las teles")
+		var vidrio := cristal.material_override as ShaderMaterial
+		_comprobar(vidrio != null, "el cristal usa material shader")
+		if vidrio != null:
+			_comprobar(
+				vidrio.shader.resource_path.ends_with("psx_cristal.gdshader"),
+				"el cristal conserva el tratamiento PSX"
+			)
+			var color_base: Color = vidrio.get_shader_parameter("color_base")
+			_comprobar(color_base.a < 0.5, "el cristal deja ver las teles")
 		for tele in teles:
 			_comprobar(
 				tele.global_position.x < cristal.global_position.x, "tele detrás del cristal"
