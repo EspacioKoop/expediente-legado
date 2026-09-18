@@ -29,8 +29,13 @@ class SelloFirmaSinPrisaTests(unittest.TestCase):
         )
 
     def test_las_dos_salidas_de_oficina_emiten_antes_del_guardado(self):
-        self.assertIn("_registrar_firma_sin_prisa()\n\t\t\tvar paga := Jornada.fichar_salida", DIA)
-        self.assertIn("_registrar_firma_sin_prisa()\n\tvar paga := Jornada.fichar_salida", ASCENSOR)
+        resolver = "PronosticosAuditoria.resolver_fin_jornada(partida.estado)"
+        for codigo in (DIA, ASCENSOR):
+            sello = codigo.index("_registrar_firma_sin_prisa()")
+            pronosticos = codigo.index(resolver, sello)
+            fichar = codigo.index("Jornada.fichar_salida(jornada)", pronosticos)
+            self.assertLess(sello, pronosticos)
+            self.assertLess(pronosticos, fichar)
         self.assertIn('const SELLO_FIRMA_SIN_PRISA := "firma-sin-prisa"', DIA)
         self.assertIn('int(jornada.get("cerrados_hoy", 0)) <= 0', DIA)
         self.assertIn('int(jornada.get("acusaciones_precipitadas_hoy", 0)) != 0', DIA)
