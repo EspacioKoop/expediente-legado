@@ -165,6 +165,20 @@ func _probar_interacciones_fisicas() -> void:
 	get_root().add_child(sueno)
 	sueno.preparar()
 
+	for objeto in SuenoTirNaNog.OBJETOS:
+		var reciente := (
+			sueno.get_node_or_null("Version_reciente/Interactuar_%s" % objeto) as Interactuable3D
+		)
+		var envejecida := (
+			sueno.get_node_or_null("Version_envejecida/Interactuar_%s" % objeto) as Interactuable3D
+		)
+		_comprobar(reciente != null, "%s reciente tiene hotspot físico" % objeto)
+		_comprobar(envejecida != null, "%s envejecido tiene hotspot físico" % objeto)
+		_comprobar(
+			reciente.get_node_or_null("CollisionShape3D") is CollisionShape3D,
+			"%s recibe el raycast común" % objeto,
+		)
+
 	var taza_reciente := (
 		sueno.get_node_or_null("Version_reciente/Interactuar_taza") as Interactuable3D
 	)
@@ -172,13 +186,7 @@ func _probar_interacciones_fisicas() -> void:
 		sueno.get_node_or_null("Version_envejecida/Interactuar_taza") as Interactuable3D
 	)
 	var umbral := sueno.get_node_or_null("UmbralPrincipal/CruzarUmbral") as Interactuable3D
-	_comprobar(taza_reciente != null, "la taza reciente tiene hotspot físico")
-	_comprobar(taza_envejecida != null, "la taza envejecida tiene hotspot físico")
 	_comprobar(umbral != null, "el umbral tiene hotspot físico")
-	_comprobar(
-		taza_reciente.get_node_or_null("CollisionShape3D") is CollisionShape3D,
-		"la taza recibe el raycast común",
-	)
 	_comprobar(
 		umbral.get_node_or_null("CollisionShape3D") is CollisionShape3D,
 		"el umbral recibe el raycast común",
