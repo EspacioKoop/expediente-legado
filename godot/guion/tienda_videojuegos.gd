@@ -104,6 +104,25 @@ static func comprar(jornada: Dictionary, id_rom: String) -> Dictionary:
 	}
 
 
+## El "manual de servicio" de Bit 98 se entrega al completar el catálogo que
+## realmente existe en esta build. Es un desbloqueo de perfil: PerfilRoms ya es
+## permanente y por tanto no hace falta otra bandera de campaña.
+static func consola_trucos_desbloqueada(jornada: Dictionary = {}) -> bool:
+	var adquiridas := compras(jornada)
+	var exigidas: Array[String] = []
+	for entrada in catalogo():
+		var ruta := String(entrada.get("ruta", ""))
+		if ruta.is_empty() or not FileAccess.file_exists(ruta):
+			continue
+		exigidas.append(String(entrada.get("id", "")))
+	if exigidas.is_empty():
+		return false
+	for id_rom in exigidas:
+		if not adquiridas.has(id_rom):
+			return false
+	return true
+
+
 ## Contrato que consume #124: solo devuelve contenido comprado y cuyo artefacto
 ## existe. No mezcla ni inspecciona user://roms.
 static func roms_compradas(jornada: Dictionary) -> Array[Dictionary]:
