@@ -1,6 +1,7 @@
 extends SceneTree
 
 const Sesion := preload("res://guion/sueno_puzzle_sesion.gd")
+const PartidaModelo := preload("res://guion/partida.gd")
 
 var _pasadas := 0
 var _fallos := 0
@@ -8,6 +9,7 @@ var _fallos := 0
 
 func _initialize() -> void:
 	_probar_guardado_y_json()
+	_probar_guardado_real_de_partida()
 	_probar_aislamiento_por_dia_y_fase()
 	_probar_rechazos()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
@@ -53,6 +55,40 @@ func _probar_guardado_y_json() -> void:
 	)
 
 
+func _probar_guardado_real_de_partida() -> void:
+	var ruta := "user://prueba-sesion-onirica-%d.json" % Time.get_ticks_usec()
+	_limpiar(ruta)
+	var partida := PartidaModelo.new()
+	partida.estado = PartidaModelo.nueva()
+	var jornada: Dictionary = partida.estado["jornada"]
+	jornada["dia"] = 11
+	jornada["fase"] = "sueño"
+	_comprobar(
+		Sesion.guardar(
+			jornada,
+			Sesion.TIPO_ECOS,
+			"caso-real",
+			"pista-real",
+			{"nucleo": {"state": "pendiente"}, "intentos": 2},
+		),
+		"la sesión se integra en la Jornada real de Partida",
+	)
+	_comprobar(partida.guardar(ruta), "Partida guarda la Jornada con sesión onírica")
+
+	var recargada := PartidaModelo.new()
+	var carga := recargada.cargar(ruta)
+	_comprobar(carga.get("resultado", "") == "cargada", "Partida recarga el guardado de prueba")
+	var sesion := Sesion.actual(recargada.estado["jornada"])
+	_comprobar(sesion.get("tipo", "") == Sesion.TIPO_ECOS, "el tipo sobrevive al disco")
+	_comprobar(sesion.get("caso_id", "") == "caso-real", "el caso sobrevive al disco")
+	_comprobar(sesion.get("reward_id", "") == "pista-real", "la recompensa sobrevive al disco")
+	_comprobar(
+		int(sesion.get("datos", {}).get("intentos", -1)) == 2,
+		"los intentos consumidos sobreviven al disco",
+	)
+	_limpiar(ruta)
+
+
 func _probar_aislamiento_por_dia_y_fase() -> void:
 	var jornada := _jornada()
 	Sesion.guardar(jornada, Sesion.TIPO_ECOS, "caso1", "pista1", {"nucleo": {"seed": 4}})
@@ -95,6 +131,12 @@ func _probar_rechazos() -> void:
 		"datos": "no-es-diccionario",
 	}
 	_comprobar(Sesion.actual(corrupta).is_empty(), "ignora una sesión manipulada")
+
+
+func _limpiar(ruta: String) -> void:
+	for candidata in [ruta, ruta + ".nuevo", ruta + ".roto"]:
+		if FileAccess.file_exists(candidata):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(candidata))
 
 
 func _comprobar(condicion: bool, nombre: String) -> void:
