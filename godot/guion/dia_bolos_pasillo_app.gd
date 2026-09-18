@@ -27,6 +27,7 @@ var _hud_sesion: CanvasLayer
 var _hud_visible_previo := true
 var _menu_unhandled_previo := true
 var _mouse_previo := Input.MOUSE_MODE_CAPTURED
+var _presentacion_guardada := false
 
 
 func _process(_delta: float) -> void:
@@ -56,7 +57,8 @@ func _process(_delta: float) -> void:
 
 
 func _exit_tree() -> void:
-	_restaurar_presentacion()
+	if _presentacion_guardada:
+		_restaurar_presentacion()
 
 
 static func disponible(jornada: Dictionary) -> bool:
@@ -98,13 +100,14 @@ func _montar_oferta(mundo: Node3D) -> void:
 	material_bolo.albedo_color = Color(0.82, 0.80, 0.72)
 	material_bolo.roughness = 0.72
 	for x in [-0.06, 0.18]:
+		var posicion_x := float(x)
 		var bolo := MeshInstance3D.new()
 		var malla := CapsuleMesh.new()
 		malla.radius = 0.07
 		malla.height = 0.30
 		bolo.mesh = malla
 		bolo.material_override = material_bolo
-		bolo.position = Vector3(x, 0.05, -0.12)
+		bolo.position = Vector3(posicion_x, 0.05, -0.12)
 		oferta.add_child(bolo)
 
 	oferta.activado.connect(_abrir)
@@ -151,6 +154,7 @@ func _abrir(_actor: Node) -> void:
 
 
 func _guardar_presentacion(dia: Node) -> void:
+	_presentacion_guardada = true
 	_mundo_sesion = dia._mundo
 	_mundo_visible_previo = _mundo_sesion.visible
 	_caminante_sesion = dia.get("_caminante")
@@ -191,6 +195,8 @@ func _cerrar_sesion(resultado: Dictionary) -> void:
 
 
 func _restaurar_presentacion() -> void:
+	if not _presentacion_guardada:
+		return
 	if is_instance_valid(_mundo_sesion):
 		_mundo_sesion.visible = _mundo_visible_previo
 	if is_instance_valid(_caminante_sesion):
@@ -206,3 +212,4 @@ func _restaurar_presentacion() -> void:
 	_caminante_sesion = null
 	_camara_previa = null
 	_hud_sesion = null
+	_presentacion_guardada = false
