@@ -162,7 +162,19 @@ func _vuelta_entera() -> void:
 
 	var en_el_bolsillo: int = dia.jornada["dinero"]
 	_pisar(dia, "sueño")
-	_comprobar("acostarse lleva al sueño", dia.jornada["fase"], "sueño")
+	_comprobar("acostarse abre la preparación nocturna", dia.jornada["fase"], "casa")
+	_comprobar("la preparación nocturna bloquea el paso", dia._pantalla != null, true)
+	var preparacion = null
+	if dia._pantalla != null and dia._pantalla.get_child_count() > 0:
+		preparacion = dia._pantalla.get_child(0)
+	_comprobar(
+		"la preparación expone una confirmación real",
+		preparacion != null and preparacion.has_signal("confirmada"),
+		true,
+	)
+	if preparacion != null:
+		preparacion.call("_emitir_confirmacion")
+	_comprobar("confirmar la preparación lleva al sueño", dia.jornada["fase"], "sueño")
 	_comprobar(
 		"y vivir el día cuesta", dia.jornada["dinero"], en_el_bolsillo - Jornada.COSTE_DIARIO
 	)
