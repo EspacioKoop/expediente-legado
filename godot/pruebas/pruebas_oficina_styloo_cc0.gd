@@ -20,8 +20,7 @@ func _probar() -> void:
 		"preflight no deja nodos parciales en un mundo inválido"
 	)
 	_comprobar(
-		not vacio.has_meta("oficina_styloo_cc0"),
-		"preflight fallido no marca el mundo como vestido"
+		not vacio.has_meta("oficina_styloo_cc0"), "preflight fallido no marca el mundo como vestido"
 	)
 	vacio.queue_free()
 
