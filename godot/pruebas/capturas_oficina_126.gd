@@ -19,9 +19,11 @@ const VISTAS := [
 	},
 	{
 		"nombre": "acceso-ventanas",
-		"pos": Vector3(3.7, 1.55, -1.2),
-		"objetivo": Vector3(-2.6, 1.35, 4.35),
-		"fov": 68.0,
+		# Desde el pasillo central, suficientemente lejos de los compañeros para
+		# que ninguna cabeza tape el acceso, el café o las ventanas.
+		"pos": Vector3(0.0, 1.60, -3.80),
+		"objetivo": Vector3(-2.8, 1.30, 4.20),
+		"fov": 76.0,
 	},
 ]
 
