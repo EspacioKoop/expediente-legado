@@ -74,7 +74,19 @@ class Archivado3DTest(unittest.TestCase):
         )[0]
         self.assertIn("ArchivadoBandeja.abandonar", bloque)
         self.assertIn("_persistir(host)", bloque)
+        self.assertIn("guardar: bool = true", bloque)
+        self.assertIn("if guardar:", bloque)
+        self.assertIn("ArchivadoBandeja.siguiente_pendiente", bloque)
         self.assertNotIn('host.jornada["fase"]', bloque)
+
+    def test_salida_real_de_oficina_registra_abandono(self):
+        bloque = self.dia.split("func _al_pisar_salida", 1)[1].split(
+            "func _registrar_noche_improductiva", 1
+        )[0]
+        self.assertIn('jornada.get("fase", "") == "archivo"', bloque)
+        self.assertIn('destino == "trayecto"', bloque)
+        self.assertIn("_archivado_sesion.abandonar(self, false)", bloque)
+        self.assertIn("super._al_pisar_salida(cuerpo, salida)", bloque)
 
     def test_no_introduce_recompensas(self):
         texto = (self.controlador + self.carpeta).lower()
