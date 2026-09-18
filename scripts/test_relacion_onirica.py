@@ -11,6 +11,7 @@ CONTROLLER = ROOT / "godot" / "guion" / "dia_relacion_onirica_app.gd"
 ECOS = ROOT / "godot" / "guion" / "dia_ecos_archivo_app.gd"
 VERTICAL = ROOT / "godot" / "guion" / "sueno_relacion_onirica_3d.gd"
 DIA = ROOT / "godot" / "escenas" / "dia.tscn"
+TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
 
 
 class RelacionOniricaTest(unittest.TestCase):
@@ -61,7 +62,14 @@ class RelacionOniricaTest(unittest.TestCase):
         for cuerpo in ("StaticBody3D", "CharacterBody3D", "NavigationObstacle3D"):
             self.assertNotIn(cuerpo, codigo)
         self.assertNotIn("Input.", codigo)
-        self.assertIn("No hay segundo intento.", codigo)
+        for clave in (
+            "SUENO_RELACION_REGLA",
+            "SUENO_RELACION_FALLO",
+            "SUENO_RELACION_ABANDONADA",
+            "SUENO_RELACION_PROGRESO",
+        ):
+            self.assertIn(f'tr("{clave}")', codigo)
+            self.assertIn(clave + ",", TEXTOS.read_text(encoding="utf-8"))
 
     def test_controller_esta_montado_antes_de_ecos(self):
         escena = DIA.read_text(encoding="utf-8")
