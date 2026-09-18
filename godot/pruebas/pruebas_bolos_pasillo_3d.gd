@@ -1,5 +1,17 @@
 extends SceneTree
 
+const Controller := preload("res://guion/dia_bolos_pasillo_app.gd")
+
+
+class DiaFalso:
+	extends Node3D
+	var jornada := {"fase": "archivo", "dia": 2}
+	var _mundo: Node3D
+	var _caminante: Node3D
+	var _hud_prioridades: CanvasLayer
+	var _pantalla: Control
+
+
 var _pasadas := 0
 var _fallos := 0
 
@@ -43,10 +55,101 @@ func _probar() -> void:
 	_comprobar(int(escena.estado.get("puntuaciones", [1])[0]) == 0, "repetir empieza desde cero")
 	_comprobar(escena.total_bolos_en_pie() == 10, "repetir restaura los bolos")
 
-	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	escena.queue_free()
 	await process_frame
+	await _probar_integracion_oficina()
+
+	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
+
+
+func _probar_integracion_oficina() -> void:
+	_comprobar(
+		not Controller.disponible({"fase": "archivo", "dia": 1}),
+		"los bolos no aparecen todos los días",
+	)
+	_comprobar(
+		Controller.disponible({"fase": "archivo", "dia": 2}),
+		"el día elegible ofrece la pausa",
+	)
+	_comprobar(
+		not Controller.disponible({"fase": "trayecto", "dia": 2}),
+		"la actividad solo pertenece al archivo",
+	)
+
+	var dia := DiaFalso.new()
+	dia._mundo = Node3D.new()
+	dia._mundo.name = "MundoFalso"
+	dia._caminante = Node3D.new()
+	dia._caminante.name = "CaminanteFalso"
+	dia._hud_prioridades = CanvasLayer.new()
+	dia._hud_prioridades.name = "HUDFalso"
+	root.add_child(dia)
+	dia.add_child(dia._mundo)
+	dia._mundo.add_child(dia._caminante)
+	dia.add_child(dia._hud_prioridades)
+
+	var camara_previa := Camera3D.new()
+	camara_previa.name = "CamaraPrevia"
+	dia._caminante.add_child(camara_previa)
+	camara_previa.make_current()
+
+	var controller: DiaBolosPasilloApp = Controller.new()
+	dia.add_child(controller)
+	controller._process(0.0)
+	var oferta := dia._mundo.get_node_or_null("BolosPasilloOferta") as Interactuable3D
+	_comprobar(oferta != null, "el controller monta una oferta interactuable")
+	controller._process(0.0)
+	_comprobar(
+		dia._mundo.find_children("BolosPasilloOferta", "Area3D", true, false).size() == 1,
+		"la oferta no se duplica",
+	)
+
+	var modo_previo := dia._caminante.process_mode
+	var menu_previo := MenuGlobal.is_processing_unhandled_input()
+	_comprobar(oferta.interactuar(camara_previa), "interactuar abre la actividad")
+	_comprobar(is_instance_valid(controller._bolos), "se instancia la sesión de bolos")
+	_comprobar(not dia._mundo.visible, "el mundo de oficina se oculta durante la partida")
+	_comprobar(
+		dia._caminante.process_mode == Node.PROCESS_MODE_DISABLED,
+		"el caminante no se mueve durante la partida",
+	)
+	_comprobar(not dia._hud_prioridades.visible, "el HUD de jornada no compite con los bolos")
+	_comprobar(
+		not MenuGlobal.is_processing_unhandled_input(),
+		"cancelar queda en manos del minijuego mientras está abierto",
+	)
+
+	controller._bolos.abandonar()
+	await process_frame
+	_comprobar(dia._mundo.visible, "abandonar restaura el mundo")
+	_comprobar(dia._caminante.process_mode == modo_previo, "abandonar restaura el caminante")
+	_comprobar(dia._hud_prioridades.visible, "abandonar restaura el HUD")
+	_comprobar(
+		MenuGlobal.is_processing_unhandled_input() == menu_previo,
+		"abandonar restaura el menú global",
+	)
+	_comprobar(
+		get_viewport().get_camera_3d() == camara_previa,
+		"abandonar devuelve la cámara anterior",
+	)
+	var resultado_abandono: Dictionary = dia.get_meta("ultimo_resultado_bolos", {})
+	_comprobar(bool(resultado_abandono.get("abandonada", false)), "el resultado efímero registra abandono")
+
+	_comprobar(oferta.interactuar(camara_previa), "la actividad se puede repetir")
+	var sesion: BolosPasillo3D = controller._bolos
+	_comprobar(sesion.lanzar(1.0, 0.45), "la repetición acepta el primer tiro")
+	sesion.simular_hasta_reposo()
+	_comprobar(sesion.lanzar(-1.0, 0.45), "la repetición acepta el segundo tiro")
+	sesion.simular_hasta_reposo()
+	await process_frame
+	var resultado_completo: Dictionary = dia.get_meta("ultimo_resultado_bolos", {})
+	_comprobar(bool(resultado_completo.get("completa", false)), "terminar deja resultado completo")
+	_comprobar(not is_instance_valid(controller._bolos), "terminar cierra la sesión integrada")
+	_comprobar(dia._mundo.visible, "terminar devuelve a la oficina")
+
+	dia.queue_free()
+	await process_frame
 
 
 func _comprobar(condicion: bool, nombre: String) -> void:
