@@ -265,10 +265,6 @@ SUENO_DUELO_SE_QUEDA,%s no se aparta.
 SUENO_DUELO_SIN_VIDA,"Ha descansado, aunque no le hacía falta."
 SUENO_DUELO_VIDA,"Ha descansado. Le quedan %d."
 SUENO_ROTULO,…
-SUENO_RELACION_ABANDONADA,Relación abandonada.
-SUENO_RELACION_FALLO,"Los documentos se separan. No hay segundo intento."
-SUENO_RELACION_PROGRESO,%d/2 documentos
-SUENO_RELACION_REGLA,"Relaciona dos documentos. Solo puedes cerrar una pareja."
 TAROT_ROTULO,{carta}
 TAROT_SIN_NOMBRE,Una carta sin nombre
 TAROT_VOZ,"Estaba dentro del expediente, escrita como si nada."
