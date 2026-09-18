@@ -10,6 +10,7 @@ extends Node3D
 const METROS_POR_ZANCADA := 0.72
 const SELLO_FIRMA_SIN_PRISA := "firma-sin-prisa"
 const SELLO_REINCORPORACION := "reincorporacion-administrativa"
+const SELLO_DESPERTAR_REGLAMENTARIO := "despertar-reglamentario"
 
 var partida := Partida.new()
 var contenido := Contenido.new()
@@ -474,6 +475,7 @@ func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
 			# salida ya lo decía.
 			jornada["sueno_escenas"].pop_front()
 			if jornada["sueno_escenas"].is_empty():
+				_registrar_despertar_reglamentario()
 				var dia := Jornada.despertar(jornada)
 				_hablando = false
 				_nomina.text = tr("DIA_NUEVO") % dia
@@ -487,6 +489,20 @@ func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
 	# tránsito pendiente se queda vacío: ya se ha entrado, y lo único que falta
 	# por hacer es escribirlo.
 	_guardar_o_avisar("")
+
+
+## Reconoce una noche completada por su cauce normal, no por agotamiento o derrota.
+##
+## Se llama después de consumir la última escena y antes de Jornada.despertar.
+## El estado ya distingue ese caso de despertar_de_golpe, así que no hace falta
+## guardar otra bandera de éxito.
+func _registrar_despertar_reglamentario() -> Dictionary:
+	if String(jornada.get("fase", "")) != "sueño":
+		return {"resultado": "no-cumplido", "id": SELLO_DESPERTAR_REGLAMENTARIO}
+	var pendientes: Array = jornada.get("sueno_escenas", [])
+	if not pendientes.is_empty() or float(jornada.get("sueno_total", 0.0)) <= 0.0:
+		return {"resultado": "no-cumplido", "id": SELLO_DESPERTAR_REGLAMENTARIO}
+	return Sellos.registrar_sello(partida.estado, SELLO_DESPERTAR_REGLAMENTARIO)
 
 
 ## Reconoce una jornada con trabajo real pero sin ninguna acusación precipitada.
