@@ -23,7 +23,7 @@ func _nuevo_dia():
 
 
 func _probar_primera_vuelta() -> void:
-	var dia := _nuevo_dia()
+	var dia = _nuevo_dia()
 	var resultado: Dictionary = dia._registrar_reincorporacion()
 	_comprobar(resultado.get("resultado", "") == "no-cumplido", "primera vuelta no concede")
 	_comprobar(
@@ -34,7 +34,7 @@ func _probar_primera_vuelta() -> void:
 
 
 func _probar_reincorporacion() -> void:
-	var dia := _nuevo_dia()
+	var dia = _nuevo_dia()
 	Jornada.reiniciar_vuelta(dia.jornada)
 	_comprobar(int(dia.jornada.get("vuelta", 1)) == 2, "reasignar incrementa la vuelta")
 	var resultado: Dictionary = dia._registrar_reincorporacion()
@@ -47,7 +47,7 @@ func _probar_reincorporacion() -> void:
 
 
 func _probar_idempotencia() -> void:
-	var dia := _nuevo_dia()
+	var dia = _nuevo_dia()
 	dia.jornada["vuelta"] = 3
 	var primera: Dictionary = dia._registrar_reincorporacion()
 	var segunda: Dictionary = dia._registrar_reincorporacion()
