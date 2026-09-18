@@ -53,8 +53,8 @@ class ConsolaDepuracionTest(unittest.TestCase):
         self.assertIn("TiendaVideojuegos.consola_trucos_desbloqueada()", self.release)
         for comando in ("clima", "desatascar", "portatil", "diagnostico"):
             self.assertIn(f'"{comando}":', self.release)
-        for handler in ("_cmd_fase", "_cmd_sala", "_cmd_dia", "_cmd_dinero", "_cmd_pistas", "_cmd_gato"):
-            self.assertNotIn(handler, self.release)
+        for handler in ("fase", "sala", "dia", "dinero", "pistas", "gato"):
+            self.assertNotIn(f"func _cmd_{handler}(", self.release)
         self.assertNotIn('_entrar_en("casa")', self.release)
         self.assertIn('dia.jornada["fase"] != "casa"', self.release)
 
