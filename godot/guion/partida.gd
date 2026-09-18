@@ -96,6 +96,9 @@ static func nueva() -> Dictionary:
 		# #155: mejores reconstrucciones por expediente. Solo son estado
 		# derivado (ids/puntuación/cobertura/rango), nunca copias de documentos.
 		"reconstrucciones": {},
+		# #153: historial de pronósticos del auditor. Es de la partida, no de la
+		# jornada, para sobrevivir a cambios de día y reasignaciones.
+		"pronosticos": Pronosticos.nuevo(),
 		"logros": catalogos.get("logros", []),
 		"tarot": catalogos.get("tarot", []),
 		"vida": VIDA_MAXIMA,
@@ -271,6 +274,12 @@ static func validar(guardado) -> Array:
 
 	if guardado.has("perfil_jugador") and typeof(guardado["perfil_jugador"]) != TYPE_DICTIONARY:
 		errores.append("perfil_jugador no es un objeto")
+	if guardado.has("pronosticos"):
+		if typeof(guardado["pronosticos"]) != TYPE_DICTIONARY:
+			errores.append("pronosticos no es un objeto")
+		else:
+			for error in Pronosticos.validar(guardado["pronosticos"]):
+				errores.append("pronosticos.%s" % error)
 	if guardado.has("vida") and not _entero_valido(guardado["vida"], 0, VIDA_MAXIMA):
 		errores.append("vida inválida")
 	for clave in ["pistas_descubiertas", "cartas_conocidas", "sueno_vencidos", "sellos_obtenidos"]:
@@ -383,6 +392,7 @@ func _fusionar(guardado: Dictionary) -> Dictionary:
 	Jornada.completar(fusionado["jornada"])
 	Inventario.completar(fusionado["inventario"])
 	fusionado["perfil_jugador"] = PerfilJugador.completar(fusionado["perfil_jugador"])
+	Pronosticos.completar(fusionado["pronosticos"])
 	return fusionado
 
 
