@@ -114,6 +114,9 @@ static func nueva(raiz: int = 0, vuelta: int = 1) -> Dictionary:
 		# Tarjeta diaria del Bingo SIGA y su histórico de esta vida laboral.
 		# Va en Jornada para usar el mismo guardado y reiniciarse al reasignar.
 		"bingo_siga": {"actual": {}, "historial": []},
+		# #156: progreso de la ronda opcional del día. Vacío hasta que una capa
+		# física la abra; al vivir dentro de Jornada viaja con el guardado normal.
+		"ronda_cierre": {},
 		# Las salas del sueño ya vistas. Es de la VUELTA y no de por vida
 		# (#86): cada vida laboral sueña lo suyo, así que el mapa se lo lleva
 		# el despido igual que el dinero — sin borrarlo en ningún sitio, porque
@@ -363,6 +366,22 @@ static func resolver_imprevisto_del_dia(jornada: Dictionary) -> Dictionary:
 	return Imprevistos.resolver(jornada, pagado)
 
 
+## Devuelve la ronda del día, creándola una sola vez cuando la capa física la necesite.
+##
+## La ruta se deriva de los datos ya persistidos en Jornada. Recargar o volver a
+## pedirla conserva exactamente el mismo progreso; un día nuevo empieza vacío.
+static func asegurar_ronda_cierre(jornada: Dictionary, cunado_presente: bool = true) -> Dictionary:
+	var actual = jornada.get("ronda_cierre", {})
+	if actual is Dictionary and not actual.is_empty():
+		if int(actual.get("dia", 0)) == int(jornada.get("dia", 1)):
+			return actual
+	var creada := RondaCierre.nueva(
+		int(jornada.get("dia", 1)), int(jornada.get("raiz", 0)), cunado_presente
+	)
+	jornada["ronda_cierre"] = creada
+	return creada
+
+
 ## Dormir: cierra el día, cobra la vida y decide qué queda por la mañana.
 ##
 ## Devuelve lo que hay que contar al despertar. El gato que se va no se anuncia
@@ -422,6 +441,7 @@ static func despertar(jornada: Dictionary) -> int:
 	jornada["sueno_resto"] = 0.0
 	jornada["sueno_total"] = 0.0
 	jornada["mapa_anoche"] = []
+	jornada["ronda_cierre"] = {}
 	return jornada["dia"]
 
 
