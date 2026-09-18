@@ -267,7 +267,8 @@ func _recorrer_casa_sueno(saltar: bool) -> Dictionary:
 		"sueño: el mundo queda congelado durante la entrada"
 	)
 	_comprobar(
-		not dia._caminante.is_physics_processing(), "sueño: la entrada mantiene bloqueado al jugador"
+		not dia._caminante.is_physics_processing(),
+		"sueño: la entrada mantiene bloqueado al jugador"
 	)
 
 	var entrada = dia._entrada_sueno
