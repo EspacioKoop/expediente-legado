@@ -14,6 +14,9 @@ VIGILIA = ROOT / "godot" / "guion" / "tir_na_nog_vigilia.gd"
 ESCENA_SUENO = ROOT / "godot" / "escenas" / "sueno_tir_na_nog.tscn"
 ESCENA_VIGILIA = ROOT / "godot" / "escenas" / "tir_na_nog_vigilia.tscn"
 REFERENCIAS = ROOT / "docs" / "assets" / "tir-na-nog-referencias.md"
+CONTROLLER = ROOT / "godot" / "guion" / "dia_tir_na_nog_app.gd"
+DIA = ROOT / "godot" / "escenas" / "dia.tscn"
+RADIO = ROOT / "godot" / "datos" / "radio_domestica_98.json"
 PRUEBA_GODOT = "res://pruebas/pruebas_tir_na_nog.gd"
 RESUMEN_GODOT = re.compile(r"(\d+) pasadas, 0 fallos")
 
@@ -27,6 +30,9 @@ class SuenoTirNaNogTest(unittest.TestCase):
         cls.escena_sueno = ESCENA_SUENO.read_text(encoding="utf-8")
         cls.escena_vigilia = ESCENA_VIGILIA.read_text(encoding="utf-8")
         cls.referencias = REFERENCIAS.read_text(encoding="utf-8")
+        cls.controller = CONTROLLER.read_text(encoding="utf-8")
+        cls.dia = DIA.read_text(encoding="utf-8")
+        cls.radio = RADIO.read_text(encoding="utf-8")
 
     def test_semilla_usa_catalogo_comun(self):
         self.assertIn('"tir_na_nog",', self.semillas)
@@ -50,6 +56,26 @@ class SuenoTirNaNogTest(unittest.TestCase):
         combinado = self.sueno + self.vigilia
         self.assertNotIn("Label.new()", combinado)
         self.assertNotIn("CanvasLayer", combinado)
+
+
+    def test_radio_domestica_real_puede_sembrar_tir_na_nog(self):
+        self.assertIn('"id_mito": "tir_na_nog"', self.radio)
+        self.assertIn('"id": "islas_fuera_del_tiempo"', self.radio)
+        self.assertIn('"atencion_requerida": 2', self.radio)
+        self.assertIn("radio:radio_oeste_98:islas_fuera_del_tiempo", self.radio)
+
+    def test_controller_nocturno_usa_selector_y_asignacion_comunes(self):
+        self.assertIn("SemillasOniricas", self.controller)
+        self.assertIn(". seleccionar_para_noche(", self.controller)
+        self.assertIn("MitologiasNoche", self.controller)
+        self.assertIn(". corresponde_a_escena(", self.controller)
+        self.assertIn("SuenoTirNaNog.ID_MITO", self.controller)
+        self.assertIn("PreferenciasSiga.cargar()", self.controller)
+        self.assertNotIn("activar_semilla_onirica", self.controller)
+
+    def test_controller_esta_montado_en_dia_real(self):
+        self.assertIn('path="res://guion/dia_tir_na_nog_app.gd"', self.dia)
+        self.assertIn('[node name="TirNaNogController" type="Node" parent="."]', self.dia)
 
     def test_umbral_conecta_dos_estados_del_mismo_lugar(self):
         self.assertIn('VERSION_RECIENTE := "reciente"', self.sueno)

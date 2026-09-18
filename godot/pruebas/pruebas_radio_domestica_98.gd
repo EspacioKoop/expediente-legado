@@ -7,6 +7,7 @@ var _fallos := 0
 func _initialize() -> void:
 	_probar_programacion_narrativa()
 	_probar_radio_deliberada()
+	_probar_tir_na_nog_deliberado()
 	_probar_cassette_deliberado()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -17,7 +18,7 @@ func _probar_programacion_narrativa() -> void:
 	root.add_child(radio)
 	radio.configurar({"dia": 1, "acciones": Jornada.ACCIONES_POR_DIA})
 	var emisoras := radio.emisoras()
-	_comprobar(emisoras.size(), 3, "hay tres emisoras declarativas")
+	_comprobar(emisoras.size(), 4, "hay cuatro emisoras declarativas")
 	_comprobar(
 		MinicadenaDomestica98.hora_narrativa({"dia": 1, "acciones": Jornada.ACCIONES_POR_DIA}),
 		"08:16",
@@ -69,6 +70,37 @@ func _probar_radio_deliberada() -> void:
 	_comprobar(
 		SemillasOniricas.familias_activas(jornada).has("simurgh"),
 		"la escucha deliberada usa el contrato común de semillas",
+	)
+	radio.queue_free()
+
+
+func _probar_tir_na_nog_deliberado() -> void:
+	var jornada := {"dia": 4, "acciones": 0}
+	var radio := MinicadenaDomestica98.new()
+	root.add_child(radio)
+	radio.configurar(jornada)
+	radio.alternar_encendido()
+	for _paso in range(3):
+		radio.cambiar_emisora()
+	_comprobar(
+		radio.emisora_actual().get("id", ""),
+		"radio_oeste_98",
+		"el sintonizador alcanza la emisora cultural atlántica",
+	)
+	_comprobar(
+		radio.contenido_actual().get("id", ""),
+		"islas_fuera_del_tiempo",
+		"la franja de tarde expone la pieza que siembra Tír na nÓg",
+	)
+	_comprobar(not radio.escuchar_actual(), "una escucha breve no activa Tír na nÓg")
+	_comprobar(
+		not SemillasOniricas.familias_activas(jornada).has("tir_na_nog"),
+		"la presencia del programa no activa la familia por sí sola",
+	)
+	_comprobar(radio.escuchar_actual(), "la segunda atención completa la pieza")
+	_comprobar(
+		SemillasOniricas.familias_activas(jornada).has("tir_na_nog"),
+		"la escucha deliberada activa Tír na nÓg por el contrato común",
 	)
 	radio.queue_free()
 

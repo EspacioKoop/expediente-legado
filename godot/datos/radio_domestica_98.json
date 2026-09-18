@@ -65,6 +65,32 @@
           }
         }
       ]
+    },
+    {
+      "id": "radio_oeste_98",
+      "nombre": "Radio Oeste 98",
+      "programas": [
+        {
+          "id": "cartas_del_atlantico",
+          "desde": "08:00",
+          "hasta": "15:59",
+          "titulo": "Cartas del Atlántico",
+          "transcripcion": "Crónicas culturales, música de archivo ficticia y correspondencia de oyentes sobre viajes, islas y memoria."
+        },
+        {
+          "id": "islas_fuera_del_tiempo",
+          "desde": "16:00",
+          "hasta": "23:59",
+          "titulo": "Islas fuera del tiempo",
+          "transcripcion": "Una pieza de producción propia compara relatos de viajeros que regresan y descubren que el lugar conocido ya no conserva el mismo tiempo.",
+          "atencion_requerida": 2,
+          "semilla": {
+            "id_mito": "tir_na_nog",
+            "fuente": "radio:radio_oeste_98:islas_fuera_del_tiempo",
+            "intensidad": 2
+          }
+        }
+      ]
     }
   ],
   "cassette": {

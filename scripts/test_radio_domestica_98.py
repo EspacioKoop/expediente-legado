@@ -55,7 +55,8 @@ class RadioDomestica98Test(unittest.TestCase):
             if "semilla" in segmento
         )
         self.assertGreaterEqual(len(semillas), 2)
-        self.assertTrue(all(semilla["id_mito"] in {"simurgh", "duat"} for semilla in semillas))
+        self.assertTrue(all(semilla["id_mito"] in {"simurgh", "duat", "tir_na_nog"} for semilla in semillas))
+        self.assertIn("tir_na_nog", {semilla["id_mito"] for semilla in semillas})
         self.assertTrue(all(":" in semilla["fuente"] for semilla in semillas))
 
     def test_gdscript_no_consulta_reloj_real_y_exige_atencion(self):

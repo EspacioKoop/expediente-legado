@@ -38,7 +38,9 @@ func _probar_gate_y_semilla() -> void:
 	var entrada: Dictionary = (
 		SemillasOniricas.obtener_semillas(jornada)["semilla_onirica_tir_na_nog"]
 	)
-	_comprobar(entrada["fuentes"], ["radio:tir_na_nog_98"], "fuente estable")
+	_comprobar(
+		entrada["fuentes"], ["radio:radio_oeste_98:islas_fuera_del_tiempo"], "fuente estable"
+	)
 	_comprobar(entrada["intensidad"], 2, "intensidad conservada")
 	jornada["dia"] = 7
 	_comprobar(not SuenoTirNaNog.puede_entrar(jornada), "semilla no cruza de jornada")
@@ -170,6 +172,13 @@ func _probar_accesibilidad_y_reproduccion() -> void:
 	var reducida := sueno.cruzar_umbral(SuenoTirNaNog.UMBRAL_PRINCIPAL, true)
 	_comprobar(reducida["modo"], "corte_fundido", "movimiento reducido usa corte/fundido")
 	_comprobar(reducida["duracion"], 0.0, "movimiento reducido no interpola")
+	var configurada := SuenoTirNaNog.new()
+	configurada.reduccion_movimiento = true
+	get_root().add_child(configurada)
+	var por_preferencia := configurada.cruzar_umbral()
+	_comprobar(
+		por_preferencia["modo"], "corte_fundido", "la preferencia del runtime se hereda por defecto"
+	)
 	_comprobar(
 		reducida["hacia"],
 		SuenoTirNaNog.VERSION_RECIENTE,
@@ -194,6 +203,7 @@ func _probar_accesibilidad_y_reproduccion() -> void:
 	_comprobar(copia.ruta_retorno_disponible(), "estado corrupto tampoco elimina retorno")
 	sueno.queue_free()
 	copia.queue_free()
+	configurada.queue_free()
 
 
 func _comprobar(actual, esperado = true, nombre: String = "") -> void:
