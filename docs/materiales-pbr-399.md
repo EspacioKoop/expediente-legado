@@ -39,9 +39,11 @@ godot/assets/texturas/pbr/<nombre>/
 
 La primera integración real está en `CalleMateriales`. Las tres masas de fachada intentan cargar `fachada_edificio`; además, el suelo 9×34 del trayecto se puede vestir con una calzada central de `asfalto_urbano` y dos aceras de `acera_barcelona`. Estas tres pieles de suelo son `MeshInstance3D` sin colisión, colocadas unos milímetros por encima de la geometría jugable existente: no cambian navegación, triggers ni medidas del catálogo.
 
-Las pieles de calzada/acera **solo se crean si existe el set PBR correspondiente**. En un checkout sin objetos Git LFS no aparece geometría adicional y sigue viéndose el asfalto procedural actual. Las fachadas, por su parte, vuelven automáticamente a `revoco_urbano`. Los albedos PBR se aplican con `Color.WHITE` para no destruir el color fotográfico multiplicándolo por el tinte oscuro del fallback procedural.
+Las pieles de calzada/acera se crean siempre desde #1005. Cuando falta LFS, la calzada usa `asfalto` procedural y las dos aceras `loseta_acera`, manteniendo la separación material mínima exigida por #399; cuando aparece el set PBR correspondiente, este sustituye automáticamente al fallback. Las fachadas vuelven del mismo modo a `revoco_urbano`. Los albedos PBR se aplican con `Color.WHITE` para no destruir el color fotográfico multiplicándolo por el tinte oscuro del fallback procedural.
 
-El mapa normal se aplica únicamente cuando el material usa UV de malla; roughness y AO funcionan tanto en UV como en el muestreo triplanar de la variante PBR. Este primer corte evita fingir un normal triplanar correcto sin transformar el espacio tangente de cada proyección.
+El vidrio urbano tiene una ruta propia porque `psx_pbr.gdshader` es opaco. `psx_cristal.gdshader` conserva temblor de vértices, cuantización y dithering, añade transparencia con prepass de profundidad y consume `cristal_urbano` como fallback procedural. Se usa en escaparates, ventanillas y puertas acristaladas de la calle. Los marcos comerciales usan `metal_pintado` mientras no exista el master final `metal_puerta`.
+
+El mapa normal se aplica únicamente cuando el material PBR usa UV de malla; roughness y AO funcionan tanto en UV como en el muestreo triplanar de la variante PBR. Este primer corte evita fingir un normal triplanar correcto sin transformar el espacio tangente de cada proyección.
 
 Ejemplo de preparación:
 
