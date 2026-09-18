@@ -25,8 +25,9 @@ func _probar_fuentes_y_fragmentos() -> void:
 	var demasiado_corta = Ecos.crear("F-1", "dos palabras", ["F-1"], 17)
 	_comprobar(demasiado_corta == null, "rechaza frases que no pueden formar tres ecos")
 
-	var ecos = Ecos.crear("F-1", frase, ["F-1"], 17)
+	var ecos = Ecos.crear("F-1", frase, ["F-1"], 17, "P-1")
 	_comprobar(ecos != null, "crea ecos desde una frase de un folio leído")
+	_comprobar(ecos.nucleo.reward_id == "P-1", "transporta la recompensa catalogada del puzzle")
 	_comprobar(ecos.fragmentos.size() == 3, "genera exactamente tres fragmentos")
 	_comprobar(
 		" ".join(ecos.fragmentos) == frase,
@@ -85,7 +86,7 @@ func _probar_salida_y_foco() -> void:
 
 func _probar_reentrada() -> void:
 	var frase := "el rótulo conserva una palabra incluso después de romperse"
-	var ecos = Ecos.crear("F-6", frase, ["F-6"], 555)
+	var ecos = Ecos.crear("F-6", frase, ["F-6"], 555, "P-6")
 	ecos.probar([2, 0, 1])
 	var antes: Array = ecos.presentacion.duplicate()
 	var texto := JSON.stringify(ecos.serializar())
@@ -94,6 +95,7 @@ func _probar_reentrada() -> void:
 	_comprobar(restaurado != null, "reentra después de serializar por JSON")
 	_comprobar(restaurado.intentos == 1, "reentrar conserva los intentos consumidos")
 	_comprobar(restaurado.presentacion == antes, "reentrar conserva el orden deformado")
+	_comprobar(restaurado.nucleo.reward_id == "P-6", "reentrar conserva la recompensa dirigida")
 	_comprobar(restaurado.probar([0, 1, 2]) == "completado", "se puede completar tras reentrar")
 
 	var sin_folio = Ecos.restaurar(datos, frase, [])
