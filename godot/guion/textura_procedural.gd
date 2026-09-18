@@ -304,11 +304,23 @@ static func por_nombre(
 		return ResourceLoader.load(nombre, "Texture2D") as Texture2D
 
 	var ruta := CARPETA % nombre
-	if ResourceLoader.exists(ruta):
+	if ResourceLoader.exists(ruta) and not _es_puntero_lfs(ruta):
 		var traida := ResourceLoader.load(ruta, "Texture2D") as Texture2D
 		if traida != null:
 			return traida
 	return calculada(nombre, base, semilla, contraste)
+
+
+## Un checkout sin objetos LFS conserva un fichero de texto en la ruta del
+## JPG. Godot puede llegar a verlo como recurso importable aunque el JPEG real
+## no exista; en ese caso la única fuente válida es el fallback calculado.
+static func _es_puntero_lfs(ruta: String) -> bool:
+	if not FileAccess.file_exists(ruta):
+		return false
+	var archivo := FileAccess.open(ruta, FileAccess.READ)
+	if archivo == null:
+		return false
+	return archivo.get_line().strip_edges() == "version https://git-lfs.github.com/spec/v1"
 
 
 static func calculada(
