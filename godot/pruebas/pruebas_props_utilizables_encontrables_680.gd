@@ -33,7 +33,10 @@ func _probar() -> void:
 		"el pickup conserva el ID canónico"
 	)
 	_comprobar(
-		palanca != null and String(palanca.get_meta("ancla_prop_utilizable", "")) == "AlmacenamientoCasa",
+		(
+			palanca != null
+			and String(palanca.get_meta("ancla_prop_utilizable", "")) == "AlmacenamientoCasa"
+		),
 		"la ubicación queda anclada al almacenamiento doméstico"
 	)
 	_comprobar(
@@ -59,10 +62,12 @@ func _probar() -> void:
 		"el visual declarado existe"
 	)
 	_comprobar(
-		palanca.global_position.distance_to(
-			ancla.to_global(Encontrables.DEFINICIONES[0]["offset"])
-		)
-		< 0.001,
+		(
+			palanca.global_position.distance_to(
+				ancla.to_global(Encontrables.DEFINICIONES[0]["offset"])
+			)
+			< 0.001
+		),
 		"el pickup se coloca respecto al ancla y no con coordenadas duplicadas"
 	)
 	_comprobar(not firma_inicial.ends_with("|"), "la firma incluye la palanca disponible")
