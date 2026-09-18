@@ -15,10 +15,13 @@ const ANGULO := 28.0
 
 
 static func firma(estado_ambiental: Dictionary, inventario: Dictionary) -> String:
-	return "%d|%d" % [
-		int(_luz_reducida(estado_ambiental)),
-		int(_en_carried(inventario)),
-	]
+	return (
+		"%d|%d"
+		% [
+			int(_luz_reducida(estado_ambiental)),
+			int(_en_carried(inventario)),
+		]
+	)
 
 
 static func activa(estado_ambiental: Dictionary, inventario: Dictionary) -> bool:
