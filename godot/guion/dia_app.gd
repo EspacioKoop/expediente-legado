@@ -9,6 +9,7 @@ extends Node3D
 ## centímetros.
 const METROS_POR_ZANCADA := 0.72
 const SELLO_FIRMA_SIN_PRISA := "firma-sin-prisa"
+const SELLO_REINCORPORACION := "reincorporacion-administrativa"
 
 var partida := Partida.new()
 var contenido := Contenido.new()
@@ -102,6 +103,8 @@ func _abrir_vuelta() -> void:
 	if jornada["acciones"] != Jornada.ACCIONES_POR_DIA:
 		return
 
+	_registrar_reincorporacion()
+
 	# El cuerpo se queda quieto mientras dura: la cinemática se salta con
 	# cualquier tecla, y sin esto esa misma tecla sería también un paso.
 	_caminante.set_physics_process(false)
@@ -117,6 +120,17 @@ func _abrir_vuelta() -> void:
 	_entrada.terminada.connect(_cerrar_vuelta)
 	var vistas := Cinematica.vistas_de(partida.estado, EntradaCinematica.ID)
 	_entrada.reproducir(EntradaCinematica.planos_de(vistas), EntradaCinematica.ID, partida.estado)
+
+
+## La segunda vida laboral y siguientes ya son una reincorporación administrativa.
+##
+## Se deriva del contador de vuelta existente: no hace falta una bandera paralela
+## y recargar el día 1 sigue siendo idempotente. El guardado ocurre al cerrar la
+## misma entrada de vuelta.
+func _registrar_reincorporacion() -> Dictionary:
+	if int(jornada.get("vuelta", 1)) <= 1:
+		return {"resultado": "no-cumplido", "id": SELLO_REINCORPORACION}
+	return Sellos.registrar_sello(partida.estado, SELLO_REINCORPORACION)
 
 
 ## Al acabar la entrada se guarda, y no por costumbre: lo que hay que conservar
