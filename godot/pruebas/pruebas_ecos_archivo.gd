@@ -158,6 +158,13 @@ func _probar_reentrada() -> void:
 		"rechaza una selección restaurada fuera del rango canónico",
 	)
 
+	var seleccion_fraccionaria := datos.duplicate(true)
+	seleccion_fraccionaria["seleccion"] = [0, 1.5]
+	_comprobar(
+		Ecos.restaurar(seleccion_fraccionaria, frase, ["F-6"]) == null,
+		"rechaza una selección restaurada con ids fraccionarios",
+	)
+
 	var seleccion_mal_tipo := datos.duplicate(true)
 	seleccion_mal_tipo["seleccion"] = "0,1,2"
 	_comprobar(
