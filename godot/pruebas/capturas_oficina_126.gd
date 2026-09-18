@@ -124,15 +124,18 @@ func _plantilla_visual() -> Array:
 	var sitios: Array = EspaciosCatalogo.OFICINA.get("sitios_companeros", [])
 	for i in mini(quienes.size(), sitios.size()):
 		var quien: Dictionary = quienes[i]
-		figuras.append(
-			{
-				"pos": sitios[i],
-				"color": quien.get("color", Color(0.3, 0.3, 0.3)),
-				"modelo": Companeros.cuerpo_de(quien),
-				"retrato": quien.get("retrato", ""),
-				"rotulo": "",
-				"frase": "",
-			}
+		(
+			figuras
+			. append(
+				{
+					"pos": sitios[i],
+					"color": quien.get("color", Color(0.3, 0.3, 0.3)),
+					"modelo": Companeros.cuerpo_de(quien),
+					"retrato": quien.get("retrato", ""),
+					"rotulo": "",
+					"frase": "",
+				}
+			)
 		)
 	return figuras
 
@@ -164,8 +167,10 @@ func _guardar_manifest() -> void:
 	if archivo == null:
 		_fallar("no se pudo escribir %s" % ruta)
 		return
-	archivo.store_string(
-		"""# Gate visual de oficina #126
+	(
+		archivo
+		. store_string(
+			"""# Gate visual de oficina #126
 
 Capturas deterministas del espacio real sin HUD.
 
@@ -175,6 +180,7 @@ Capturas deterministas del espacio real sin HUD.
 La revisión humana debe comprobar que el lugar se reconoce como oficina/archivo
 habitado y funcional sin depender de rótulos.
 """
+		)
 	)
 	archivo.close()
 
