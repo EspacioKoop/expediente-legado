@@ -1,13 +1,15 @@
 ## Capa diegética de legibilidad para los objetivos oníricos (#281).
 ##
 ## No decide ni concede progreso. Observa las Area3D creadas por dia_gato_app.gd
-## y añade una luz local, pequeña y estática a cada objetivo pendiente. La señal
-## desaparece cuando el caminante entra en la zona; el handler dueño del objetivo
-## sigue siendo el único que actualiza SuenoObjetivos.
+## y añade una luz local, pequeña y estática a los objetivos pendientes anclados
+## a contenido significativo. La señal desaparece cuando el caminante entra en
+## la zona; el handler dueño del objetivo sigue siendo el único que actualiza
+## SuenoObjetivos.
 class_name SuenoObjetivosLegibilidad
 extends Node
 
 const NOMBRE_ECO := "EcoLegibilidadObjetivo"
+const SUFIJO_FOCO_LEGADO := ":2"
 const RANGO_ECO := 3.4
 const ENERGIA_ECO := 0.42
 const ALTURA_ECO := 0.35
@@ -37,7 +39,7 @@ func montar_en(mundo: Node3D, caminante: Node3D = null) -> Array:
 	var ecos: Array = []
 	for nodo in mundo.find_children("ObjetivoSueno_*", "Area3D", true, false):
 		var zona := nodo as Area3D
-		if zona == null or not zona.monitoring:
+		if zona == null or not zona.monitoring or _es_foco_legado(zona):
 			continue
 		var luz := zona.get_node_or_null(NOMBRE_ECO) as OmniLight3D
 		if luz == null:
@@ -45,6 +47,11 @@ func montar_en(mundo: Node3D, caminante: Node3D = null) -> Array:
 			zona.body_entered.connect(_al_entrar_objetivo.bind(zona, luz, caminante))
 		ecos.append(luz)
 	return ecos
+
+
+func _es_foco_legado(zona: Area3D) -> bool:
+	var objetivo_id := String(zona.get_meta("objetivo", ""))
+	return objetivo_id.ends_with(SUFIJO_FOCO_LEGADO)
 
 
 func _crear_eco(zona: Area3D) -> OmniLight3D:
