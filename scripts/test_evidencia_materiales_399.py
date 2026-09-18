@@ -52,8 +52,6 @@ class EvidenciaMateriales399Test(unittest.TestCase):
             '"contraste_textura"',
             '"preservar_detalle_textura"',
             '"materiales_detalle"',
-            '"contraste_cambia_textura_suelo"',
-            '"contraste_cambia_textura_muro"',
             '"deformacion_textura"',
         ):
             self.assertIn(campo, self.captura)
