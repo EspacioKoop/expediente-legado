@@ -105,6 +105,22 @@ La persistencia de #456 está activa desde #458:
 
 La SRAM no se escribe junto a la ROM ni dentro del repositorio y no forma parte del guardado de campaña.
 
+
+## Link Cable diegético (#245)
+
+La primera versión del Link Cable es deliberadamente local y modular:
+
+- `LinkCablePortatil` mantiene únicamente el estado conectado/desconectado de la sesión;
+- la portátil muestra un cable procedural junto a la carcasa y mueve el conector al enchufarlo;
+- la UI permite conectar/desconectar y muestra «esperando otra consola»;
+- el gesto tiene un clic físico procedural separado del audio de la ROM;
+- no hay networking, `PacketPeer`, ENet ni emulación del puerto serie en este corte;
+- el módulo no conoce `Siga98GB`, `Partida`, `Jornada`, pistas, economía ni guardados.
+
+El objetivo es fijar primero el objeto, el ritual y el contrato. Un backend serie real puede
+sustituir el estado local más adelante sin reescribir la representación 3D ni la UI.
+
+
 ## Aislamiento
 
 El wrapper nativo recibe únicamente:

@@ -25,5 +25,11 @@
   "error_rom": "No se pudo arrancar la ROM: %s",
   "error_runtime": "La emulación se detuvo de forma controlada: %s",
   "aviso": "Las ROMs locales son opcionales y responsabilidad de quien las aporta. No se descargan ni redistribuyen.",
-  "audio": "SRAM por ROM y audio emulado activos. El PCM de SameBoy se reproduce aparte de los sonidos físicos de carcasa."
+  "audio": "SRAM por ROM y audio emulado activos. El PCM de SameBoy se reproduce aparte de los sonidos físicos de carcasa.",
+  "link_cable_titulo": "LINK CABLE",
+  "link_cable_conectar": "Conectar cable",
+  "link_cable_desconectar": "Desconectar cable",
+  "link_cable_desconectado": "Link Cable: desconectado",
+  "link_cable_esperando": "Link Cable conectado · esperando otra consola",
+  "link_cable_aviso": "Estado local y diegético: todavía no emula el puerto serie ni usa red."
 }

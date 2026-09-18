@@ -9,6 +9,8 @@ var _encendida := false
 var _material_pantalla: StandardMaterial3D
 var _roms_detectadas: Array[Dictionary] = []
 var _app: EmuladorPortatilApp = null
+var _link_cable := LinkCablePortatil.new()
+var _conector_link_cable: MeshInstance3D = null
 
 
 func configurar() -> void:
@@ -16,6 +18,8 @@ func configurar() -> void:
 	nombre_objeto = "consola portátil"
 	_montar_colision()
 	_montar_carcasa()
+	_montar_link_cable()
+	_link_cable.estado_cambiado.connect(_al_cambiar_link_cable)
 	activado.connect(_alternar)
 
 
@@ -67,6 +71,7 @@ func _alternar(_actor: Node) -> void:
 
 	_app = EmuladorPortatilAudioApp.new()
 	_app.roms_compradas = _roms_compradas()
+	_app.set("link_cable", _link_cable)
 	_app.cerrado.connect(_al_cerrar_app)
 	get_tree().root.add_child(_app)
 	_app.abrir()
@@ -153,6 +158,46 @@ func _montar_carcasa() -> void:
 		Vector3(0.13, 0.018, 0.045),
 		Color(0.07, 0.09, 0.10),
 	)
+
+
+func _montar_link_cable() -> void:
+	var cable := MeshInstance3D.new()
+	cable.name = "CableLinkPortatil"
+	var cilindro := CylinderMesh.new()
+	cilindro.top_radius = 0.006
+	cilindro.bottom_radius = 0.006
+	cilindro.height = 0.24
+	cable.mesh = cilindro
+	cable.position = Vector3(0.17, 0.13, 0.035)
+	cable.rotation_degrees = Vector3(0.0, 0.0, -8.0)
+	var material := StandardMaterial3D.new()
+	material.albedo_color = Color(0.055, 0.055, 0.06)
+	material.roughness = 0.82
+	cable.material_override = material
+	add_child(cable)
+
+	_conector_link_cable = _agregar_caja(
+		Vector3(0.17, 0.025, 0.028),
+		Vector3(0.035, 0.022, 0.020),
+		Color(0.10, 0.10, 0.11),
+	)
+	_conector_link_cable.name = "ConectorLinkCable"
+	_actualizar_link_cable_3d(_link_cable.esta_conectado())
+
+
+func _al_cambiar_link_cable(conectado: bool) -> void:
+	_actualizar_link_cable_3d(conectado)
+
+
+func _actualizar_link_cable_3d(conectado: bool) -> void:
+	if _conector_link_cable == null:
+		return
+	if conectado:
+		_conector_link_cable.position = Vector3(0.126, 0.205, 0.016)
+		_conector_link_cable.rotation_degrees = Vector3(0.0, 0.0, 90.0)
+	else:
+		_conector_link_cable.position = Vector3(0.17, 0.025, 0.028)
+		_conector_link_cable.rotation_degrees = Vector3.ZERO
 
 
 func _actualizar_pantalla() -> void:

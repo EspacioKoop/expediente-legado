@@ -312,6 +312,7 @@ func _preparar_audio_fisico() -> void:
 	_sonidos_fisicos_cache = {
 		&"encendido": _crear_sonido_fisico(95.0, 230.0, 0.055, 0.52),
 		&"cartucho": _crear_sonido_fisico(170.0, 65.0, 0.070, 0.58),
+		&"cable": _crear_sonido_fisico(240.0, 105.0, 0.050, 0.36),
 		&"boton": _crear_sonido_fisico(760.0, 420.0, 0.028, 0.30),
 	}
 
