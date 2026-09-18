@@ -43,7 +43,7 @@ python3 scripts/preparar_horror_texture_pack.py \
   --perfil sueno_escuela
 ```
 
-También acepta una carpeta ya extraída. Si recibe un RAR, verifica su SHA-256 contra el manifiesto antes de extraerlo. Por defecto usa 128×128 y, sin `--perfil`, prepara la unión de los perfiles curados. `--todos` permite auditar/preparar los 100 diseños de una resolución, pero no convierte esa importación masiva en recomendación artística.
+También acepta una carpeta ya extraída. Si recibe un RAR, verifica su SHA-256 contra el manifiesto antes de extraerlo. Por defecto usa 128×128 y, sin `--perfil`, prepara la unión de los perfiles curados. `--todos --permitir-gore` permite auditar/preparar los 100 diseños de una resolución; el segundo flag es deliberadamente obligatorio porque el lote completo contiene Stain 01–03. Esa importación masiva no es una recomendación artística.
 
 El script:
 
