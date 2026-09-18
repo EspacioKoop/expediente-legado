@@ -243,7 +243,11 @@ func _cerrar_puertas_animado() -> void:
 	var puertas := create_tween().set_parallel(true)
 	puertas.tween_property(_puerta_izquierda, "position:x", -0.82, 0.58)
 	puertas.tween_property(_puerta_derecha, "position:x", 0.82, 0.58)
-	puertas.chain().tween_callback(func(): _junta_puerta.visible = true)
+	puertas.chain().tween_callback(_mostrar_junta)
+
+
+func _mostrar_junta() -> void:
+	_junta_puerta.visible = true
 
 
 func _cerrar_puertas() -> void:
