@@ -36,7 +36,7 @@ position = Vector3(-4.55, 0, -2.0)
 rotation_degrees = Vector3(0, 90, 0)
 scale = Vector3(0.72, 0.72, 0.72)
 
-[node name="ArcadaOesteElevada" parent="." instance=ExtResource("1_arcada")]
+[node name="ArcadaOesteElevada" parent="." groups=["castillo_anomalia"] instance=ExtResource("1_arcada")]
 position = Vector3(-4.55, 1.1, 2.4)
 rotation_degrees = Vector3(0, 90, 0)
 scale = Vector3(0.72, 0.72, 0.72)
@@ -45,7 +45,7 @@ scale = Vector3(0.72, 0.72, 0.72)
 position = Vector3(0, 0, 5.25)
 scale = Vector3(1.08, 1.08, 1.08)
 
-[node name="TorreEco" parent="." instance=ExtResource("2_torre")]
+[node name="TorreEco" parent="." groups=["castillo_anomalia"] instance=ExtResource("2_torre")]
 position = Vector3(0, 4.35, -2.0)
 rotation_degrees = Vector3(180, 22, 0)
 scale = Vector3(0.48, 0.48, 0.48)
@@ -55,7 +55,7 @@ position = Vector3(-1.65, 0.02, 1.15)
 rotation_degrees = Vector3(0, -22, 0)
 scale = Vector3(0.86, 0.86, 0.86)
 
-[node name="EscaleraAlta" parent="." instance=ExtResource("3_escalera")]
+[node name="EscaleraAlta" parent="." groups=["castillo_anomalia"] instance=ExtResource("3_escalera")]
 position = Vector3(1.45, 3.0, -1.05)
 rotation_degrees = Vector3(180, 158, 0)
 scale = Vector3(0.72, 0.72, 0.72)
