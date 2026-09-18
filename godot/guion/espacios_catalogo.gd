@@ -31,6 +31,41 @@ const OFICINA := {
 		{"pos": Vector3(-4, 0.37, 1), "tam": Vector3(2.0, 0.75, 1.0), "modelo": "desk"},
 		{"pos": Vector3(1, 0.37, -2), "tam": Vector3(2.0, 0.75, 1.0), "modelo": "desk"},
 		{"pos": Vector3(1, 0.37, 1), "tam": Vector3(2.0, 0.75, 1.0), "modelo": "desk"},
+		# Entre los puestos y la batería de archivadores hay una mesa de
+		# clasificación. No es otro puesto: no tiene silla, teléfono ni terminal.
+		# Obliga a rodearla y hace visible el flujo físico del archivo — sacar,
+		# separar y devolver expedientes — sin escribir ni una sola etiqueta.
+		{
+			"pos": Vector3(3.6, 0.37, 0.0),
+			"tam": Vector3(1.3, 0.75, 0.9),
+			"color": Color(0.43, 0.40, 0.35),
+			"modelo": "desk",
+			"rol": "mesa_clasificacion"
+		},
+		{
+			"pos": Vector3(3.32, 0.79, -0.12),
+			"tam": Vector3(0.48, 0.06, 0.34),
+			"color": Color(0.28, 0.27, 0.24),
+			"rol": "bandeja_clasificacion"
+		},
+		{
+			"pos": Vector3(3.88, 0.79, 0.12),
+			"tam": Vector3(0.48, 0.06, 0.34),
+			"color": Color(0.28, 0.27, 0.24),
+			"rol": "bandeja_clasificacion"
+		},
+		{
+			"pos": Vector3(3.32, 0.845, -0.12),
+			"tam": Vector3(0.38, 0.05, 0.26),
+			"color": Color(0.80, 0.78, 0.70),
+			"rol": "lote_clasificacion_sin_texto"
+		},
+		{
+			"pos": Vector3(3.88, 0.855, 0.12),
+			"tam": Vector3(0.36, 0.07, 0.24),
+			"color": Color(0.76, 0.74, 0.66),
+			"rol": "lote_clasificacion_sin_texto"
+		},
 		# La silla 4-B y las otras tres. Es el objeto que el sueño agranda
 		# (#87), así que tiene que ser una silla reconocible antes de que se
 		# deforme: una caja agrandada es una caja mayor.
