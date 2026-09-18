@@ -14,7 +14,12 @@ class SellosPersistenciaTests(unittest.TestCase):
         self.assertIn("typeof(guardado[clave]) != TYPE_ARRAY", PARTIDA)
 
     def test_noche_improductiva_se_decide_antes_de_dormir(self):
-        self.assertIn('String(salida.get_meta("destino", "")) == "sueño"', DIA)
+        bloque = DIA.split("func _al_pisar_salida", 1)[1].split(
+            "func _registrar_noche_improductiva", 1
+        )[0]
+        self.assertIn('salida.get_meta("destino", "")', bloque)
+        self.assertIn('destino == "sueño"', bloque)
+        self.assertIn("_registrar_noche_improductiva()", bloque)
         self.assertIn('jornada.get("leido_hoy", []).is_empty()', DIA)
         self.assertIn('int(jornada.get("cerrados_hoy", 0)) != 0', DIA)
         self.assertIn(

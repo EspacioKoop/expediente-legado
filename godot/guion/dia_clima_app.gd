@@ -70,11 +70,17 @@ func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
 		super._al_pisar_salida(cuerpo, salida)
 		return
 
+	var destino := String(salida.get_meta("destino", ""))
+	if jornada.get("fase", "") == "archivo" and destino == "trayecto":
+		# El tránsito base guarda después de fichar y cambiar de fase. Aquí solo
+		# asentamos la bandeja para que esa misma escritura incluya el abandono.
+		_archivado_sesion.abandonar(self, false)
+
 	# El sello se decide con el día todavía intacto. Al dormir se limpian los
 	# contadores diarios al preparar la noche, así que después ya no sería
 	# posible distinguir una jornada deliberadamente improductiva. El registro
 	# es idempotente y el guardado normal del tránsito casa→sueño lo persiste.
-	if jornada.get("fase", "") == "casa" and String(salida.get_meta("destino", "")) == "sueño":
+	if jornada.get("fase", "") == "casa" and destino == "sueño":
 		_registrar_noche_improductiva()
 
 	# Las frases de compañeros ya no se disparan al pisar un volumen invisible.
