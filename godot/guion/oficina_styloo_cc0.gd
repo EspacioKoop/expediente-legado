@@ -38,7 +38,11 @@ static func montar(mundo: Node3D) -> bool:
 	var bulto_escritorio := _bulto_prioritario("desk")
 	var bulto_silla := _bulto_prioritario("chairDesk")
 	var bulto_estanteria := _bulto_prioritario("bookcaseClosed")
-	if bulto_escritorio.is_empty() or bulto_silla.is_empty() or bulto_estanteria.is_empty():
+	if (
+		bulto_escritorio.is_empty()
+		or bulto_silla.is_empty()
+		or bulto_estanteria.is_empty()
+	):
 		return false
 	var escritorio := _cuerpo_en_pos(mundo, bulto_escritorio.pos)
 	var silla := _cuerpo_en_pos(mundo, bulto_silla.pos)
@@ -94,7 +98,8 @@ static func montar(mundo: Node3D) -> bool:
 
 
 static func _bulto_prioritario(tipo_buscado: String) -> Dictionary:
-	for bulto in EspaciosCatalogo.OFICINA.bultos:
+	for dato in EspaciosCatalogo.OFICINA.bultos:
+		var bulto: Dictionary = dato
 		var tipo := String(bulto.get("modelo", ""))
 		if tipo != tipo_buscado:
 			continue
