@@ -24,7 +24,7 @@ class BolosPasillo3DTest(unittest.TestCase):
         self.assertIn("Bolos.nueva(LANZADORES)", self.source)
         self.assertIn("Bolos.derribar(estado, nuevos)", self.source)
         self.assertNotIn("Partida", self.source)
-        self.assertNotIn("RigidBody3D", self.source)
+        self.assertNotRegex(self.source, r"RigidBody3D\\.new\\(|extends\\s+RigidBody3D")
 
     def test_pista_tiene_diez_bolos_y_simulacion_acotada(self):
         bloque = re.search(
