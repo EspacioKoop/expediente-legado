@@ -293,7 +293,9 @@ static func acero_cocina(base: Color, semilla: int) -> ImageTexture:
 ## depender de que los binarios de LFS hayan bajado. Pero donde hay material de
 ## verdad manda el material: un tono plano con motas dice "caja", por bonita que
 ## sea la mota.
-static func por_nombre(nombre: String, base: Color, semilla: int) -> Texture2D:
+static func por_nombre(
+	nombre: String, base: Color, semilla: int, contraste: float = 1.0
+) -> Texture2D:
 	# Una ruta explícita es ya la fuente de verdad. No se le añade ".jpg" ni
 	# se intenta traducir a una procedural con un nombre que no existe.
 	if nombre.begins_with("res://"):
@@ -306,38 +308,68 @@ static func por_nombre(nombre: String, base: Color, semilla: int) -> Texture2D:
 		var traida := ResourceLoader.load(ruta, "Texture2D")
 		if traida != null:
 			return traida
-	return calculada(nombre, base, semilla)
+	return calculada(nombre, base, semilla, contraste)
 
 
-static func calculada(nombre: String, base: Color, semilla: int) -> ImageTexture:
+static func calculada(
+	nombre: String, base: Color, semilla: int, contraste: float = 1.0
+) -> ImageTexture:
+	var textura: ImageTexture
 	match nombre:
 		"linoleo":
-			return linoleo(base, semilla)
+			textura = linoleo(base, semilla)
 		"gotele":
-			return gotele(base, semilla)
+			textura = gotele(base, semilla)
 		"techo":
-			return plancha_techo(base, semilla)
+			textura = plancha_techo(base, semilla)
 		"asfalto":
-			return asfalto(base, semilla)
+			textura = asfalto(base, semilla)
 		"revoco_urbano":
-			return revoco_urbano(base, semilla)
+			textura = revoco_urbano(base, semilla)
 		"loseta_acera":
-			return loseta_acera(base, semilla)
+			textura = loseta_acera(base, semilla)
 		"cristal_urbano":
-			return cristal_urbano(base, semilla)
+			textura = cristal_urbano(base, semilla)
 		"moqueta":
-			return moqueta(base, semilla)
+			textura = moqueta(base, semilla)
 		"melamina":
-			return melamina(base, semilla)
+			textura = melamina(base, semilla)
 		"metal_pintado":
-			return metal_pintado(base, semilla)
+			textura = metal_pintado(base, semilla)
 		"plastico_abs":
-			return plastico_abs(base, semilla)
+			textura = plastico_abs(base, semilla)
 		"madera_domestica":
-			return madera_domestica(base, semilla)
+			textura = madera_domestica(base, semilla)
 		"tejido_domestico":
-			return tejido_domestico(base, semilla)
+			textura = tejido_domestico(base, semilla)
 		"acero_cocina":
-			return acero_cocina(base, semilla)
+			textura = acero_cocina(base, semilla)
 		_:
 			return null
+	if is_equal_approx(contraste, 1.0):
+		return textura
+	return _contrastar_calculada(textura, base, contraste)
+
+
+## Refuerza la desviación respecto al color base ANTES de que el sampler lineal
+## genere/seleccione mipmaps. Aplicarlo después del muestreo no puede recuperar
+## motas que ya fueron promediadas hasta el tono base.
+static func _contrastar_calculada(
+	textura: ImageTexture, base: Color, contraste: float
+) -> ImageTexture:
+	var imagen := textura.get_image()
+	var factor := maxf(contraste, 0.0)
+	for x in imagen.get_width():
+		for y in imagen.get_height():
+			var pixel := imagen.get_pixel(x, y)
+			imagen.set_pixel(
+				x,
+				y,
+				Color(
+					clampf(base.r + (pixel.r - base.r) * factor, 0.0, 1.0),
+					clampf(base.g + (pixel.g - base.g) * factor, 0.0, 1.0),
+					clampf(base.b + (pixel.b - base.b) * factor, 0.0, 1.0),
+					pixel.a,
+				)
+			)
+	return ImageTexture.create_from_image(imagen)
