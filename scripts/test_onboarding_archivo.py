@@ -6,6 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CAPA = ROOT / "godot" / "guion" / "dia_onboarding_app.gd"
 CAPA_CLIMA = ROOT / "godot" / "guion" / "dia_clima_app.gd"
 ESCENA = ROOT / "godot" / "escenas" / "dia.tscn"
+TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
 
 
 class OnboardingArchivoTest(unittest.TestCase):
@@ -14,6 +15,7 @@ class OnboardingArchivoTest(unittest.TestCase):
         cls.capa = CAPA.read_text(encoding="utf-8")
         cls.capa_clima = CAPA_CLIMA.read_text(encoding="utf-8")
         cls.escena = ESCENA.read_text(encoding="utf-8")
+        cls.textos = TEXTOS.read_text(encoding="utf-8")
 
     def test_la_escena_activa_una_capa_fina_sobre_el_dia_existente(self):
         self.assertIn('path="res://guion/dia_clima_app.gd"', self.escena)
@@ -31,16 +33,22 @@ class OnboardingArchivoTest(unittest.TestCase):
     def test_el_puesto_real_queda_destacado_sin_waypoint_permanente(self):
         self.assertIn('Vector3(-4.0, 1.45, 1.0)', self.capa)
         self.assertIn('OmniLight3D.new()', self.capa)
-        self.assertIn('PUESTO 4-B · SIGA-98', self.capa)
-        self.assertIn('terminal verde', self.capa)
+        self.assertIn('"ONBOARDING_PUESTO_SIGA"', self.capa)
+        self.assertIn('"ONBOARDING_ACCION_SIGA"', self.capa)
+        self.assertIn("PUESTO 4-B · SIGA-98", self.textos)
+        self.assertIn("terminal verde", self.textos)
         self.assertNotIn('Label3D', self.capa)
         self.assertNotIn('NavigationAgent', self.capa)
 
     def test_el_objetivo_es_una_superficie_tutorial_inequivoca(self):
         self.assertIn('"ONBOARDING_OBJETIVO_INICIAL"', self.capa)
         self.assertIn('"ONBOARDING_PUESTO_SIGA"', self.capa)
+        self.assertIn('"ONBOARDING_ACCION_SIGA"', self.capa)
         self.assertIn("rol.text = tr(CLAVE_ROL_ONBOARDING)", self.capa)
-        self.assertIn("texto.text = tr(CLAVE_TEXTO_ONBOARDING)", self.capa)
+        self.assertIn(
+            'texto.text = "%s\\n%s" % [tr(CLAVE_PUESTO_ONBOARDING), tr(CLAVE_ACCION_ONBOARDING)]',
+            self.capa,
+        )
         self.assertIn("Control.PRESET_CENTER_TOP", self.capa)
         self.assertIn("EstiloSiga.caja_saliente(COLOR_FONDO_TUTORIAL)", self.capa)
         self.assertNotIn("Control.PRESET_CENTER_BOTTOM", self.capa)
