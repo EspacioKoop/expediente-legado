@@ -784,9 +784,11 @@ static func _comprar_cartucho(_actor: Node, puerta: Interactuable3D) -> void:
 			break
 	if pendiente.is_empty():
 		puerta.nombre_objeto = tr_clave(
-			"CALLE_TIENDA_MANUAL_SERVICIO"
-			if TiendaVideojuegos.consola_trucos_desbloqueada(jornada)
-			else "CALLE_TIENDA_TODO_COMPRADO"
+			(
+				"CALLE_TIENDA_MANUAL_SERVICIO"
+				if TiendaVideojuegos.consola_trucos_desbloqueada(jornada)
+				else "CALLE_TIENDA_TODO_COMPRADO"
+			)
 		)
 		return
 	var resultado := TiendaVideojuegos.comprar(jornada, pendiente)
