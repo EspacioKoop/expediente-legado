@@ -36,10 +36,7 @@ func _process(_delta: float) -> void:
 		return
 
 	if is_instance_valid(_bolos):
-		if (
-			String(dia.jornada.get("fase", "")) != "archivo"
-			or dia._mundo != _mundo_sesion
-		):
+		if String(dia.jornada.get("fase", "")) != "archivo" or dia._mundo != _mundo_sesion:
 			_abandonar_sesion()
 		return
 
