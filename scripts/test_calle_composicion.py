@@ -23,19 +23,31 @@ class CalleComposicionTest(unittest.TestCase):
         self.assertIn("COLOR_FONDO", self.codigo)
         self.assertGreaterEqual(self.codigo.count('"tam": Vector3('), 5)
 
-    def test_asigna_medias_lunas_a_las_seis_pantallas(self):
-        self.assertIn('pantallas[i]["contenido"] = "media_luna"', self.codigo)
+    def test_asigna_seis_emisiones_crt_distintas(self):
+        self.assertIn("CANALES_CRT", self.codigo)
+        self.assertIn('pantallas[i]["contenido"] = "emision_crt"', self.codigo)
+        self.assertIn('pantallas[i]["canal"] = i', self.codigo)
+        self.assertIn('pantallas[i]["canal_id"] = CANALES_CRT[i]', self.codigo)
+        for canal in (
+            "informativo",
+            "deporte",
+            "institucional",
+            "tecnica",
+            "anomalia",
+            "ocio",
+        ):
+            self.assertIn(f'"{canal}"', self.codigo)
         self.assertNotIn("VideoStream", self.codigo)
         self.assertNotIn("AudioStream", self.codigo)
 
     def test_no_toca_reglas_de_fase(self):
         for prohibido in (
             '"destino"',
-            'SALIDA_PORTAL',
-            'Jornada',
-            'dinero',
-            'acciones',
-            'Partida',
+            "SALIDA_PORTAL",
+            "Jornada",
+            "dinero",
+            "acciones",
+            "Partida",
         ):
             self.assertNotIn(prohibido, self.codigo)
 
