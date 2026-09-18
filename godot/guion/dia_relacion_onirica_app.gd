@@ -55,11 +55,14 @@ func _montar_relacion(dia: Node, mundo: Node3D, candidato: Dictionary) -> void:
 	)
 	var caso: Dictionary = candidato.get("caso", {})
 	var pista: Dictionary = candidato.get("pista", {})
-	var relacion = RelacionOnirica.crear(
-		caso,
-		pista,
-		dia.jornada.get("leido_hoy", []),
-		raiz,
+	var relacion = (
+		RelacionOnirica
+		. crear(
+			caso,
+			pista,
+			dia.jornada.get("leido_hoy", []),
+			raiz,
+		)
 	)
 	if relacion == null:
 		return
