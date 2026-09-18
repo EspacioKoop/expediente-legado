@@ -6,10 +6,19 @@ const Controller := preload("res://guion/dia_bolos_pasillo_app.gd")
 class DiaFalso:
 	extends Node3D
 	var jornada := {"fase": "archivo", "dia": 2}
+	var partida := Partida.new()
+	var guardados := 0
 	var _mundo: Node3D
 	var _caminante: Node3D
 	var _hud_prioridades: CanvasLayer
 	var _pantalla: Control
+
+	func _init() -> void:
+		partida.estado = Partida.nueva()
+
+	func _guardar_o_avisar(_destino: String) -> bool:
+		guardados += 1
+		return true
 
 
 var _pasadas := 0
@@ -142,6 +151,11 @@ func _probar_integracion_oficina() -> void:
 		not is_instance_valid(controller._marcador_resultado),
 		"abandonar no muestra marcador final",
 	)
+	_comprobar(
+		not Sellos.tiene_sello(dia.partida.estado, Controller.SELLO_RECOMPENSA),
+		"abandonar no concede el sello",
+	)
+	_comprobar(dia.guardados == 0, "abandonar no fuerza guardado")
 
 	_comprobar(oferta.interactuar(camara_previa), "la actividad se puede repetir")
 	var sesion: BolosPasillo3D = controller._bolos
@@ -171,6 +185,46 @@ func _probar_integracion_oficina() -> void:
 		dia._caminante.process_mode == modo_previo and dia._hud_prioridades.visible,
 		"el marcador no bloquea la jornada restaurada",
 	)
+	_comprobar(
+		Sellos.tiene_sello(dia.partida.estado, Controller.SELLO_RECOMPENSA),
+		"completar concede el sello cosmético",
+	)
+	_comprobar(dia.guardados == 1, "la primera concesión pide guardado")
+	controller._retirar_marcador_resultado()
+
+	var ruta_guardado := "user://bolos-sello-prueba.json"
+	if FileAccess.file_exists(ruta_guardado):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(ruta_guardado))
+	_comprobar(dia.partida.guardar(ruta_guardado), "el sello se escribe en la partida")
+	var recargada := Partida.new()
+	var carga := recargada.cargar(ruta_guardado)
+	_comprobar(String(carga.get("resultado", "")) == "cargada", "la partida con sello recarga")
+	_comprobar(
+		Sellos.tiene_sello(recargada.estado, Controller.SELLO_RECOMPENSA),
+		"recargar conserva el sello",
+	)
+	Sellos.registrar_sello(recargada.estado, Controller.SELLO_RECOMPENSA)
+	var sellos_recargados: Array = recargada.estado.get(Sellos.CLAVE_ESTADO, [])
+	_comprobar(
+		sellos_recargados.count(Controller.SELLO_RECOMPENSA) == 1,
+		"registrar tras recargar no duplica el sello",
+	)
+	if FileAccess.file_exists(ruta_guardado):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(ruta_guardado))
+
+	_comprobar(oferta.interactuar(camara_previa), "repetir tras premio vuelve a abrir")
+	var sesion_repetida: BolosPasillo3D = controller._bolos
+	_comprobar(sesion_repetida.lanzar(1.0, 0.45), "repetir acepta primer tiro")
+	sesion_repetida.simular_hasta_reposo()
+	_comprobar(sesion_repetida.lanzar(-1.0, 0.45), "repetir acepta segundo tiro")
+	sesion_repetida.simular_hasta_reposo()
+	await process_frame
+	var sellos_repetidos: Array = dia.partida.estado.get(Sellos.CLAVE_ESTADO, [])
+	_comprobar(
+		sellos_repetidos.count(Controller.SELLO_RECOMPENSA) == 1,
+		"repetir la actividad no duplica el sello",
+	)
+	_comprobar(dia.guardados == 2, "repetir conserva el camino de guardado idempotente")
 	controller._retirar_marcador_resultado()
 
 	dia.queue_free()

@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import re
 import unittest
 
@@ -9,6 +10,7 @@ CONTROLLER = ROOT / "godot" / "guion" / "dia_bolos_pasillo_app.gd"
 SCENE = ROOT / "godot" / "escenas" / "bolos_pasillo.tscn"
 DIA_SCENE = ROOT / "godot" / "escenas" / "dia.tscn"
 GODOT_TEST = ROOT / "godot" / "pruebas" / "pruebas_bolos_pasillo_3d.gd"
+SELLOS = ROOT / "godot" / "datos" / "sellos.json"
 
 
 class BolosPasillo3DTest(unittest.TestCase):
@@ -18,6 +20,7 @@ class BolosPasillo3DTest(unittest.TestCase):
         self.scene = SCENE.read_text(encoding="utf-8")
         self.dia_scene = DIA_SCENE.read_text(encoding="utf-8")
         self.godot_test = GODOT_TEST.read_text(encoding="utf-8")
+        self.sellos = json.loads(SELLOS.read_text(encoding="utf-8"))
 
     def test_vertical_consumidor_del_nucleo_sin_partida(self):
         self.assertIn("class_name BolosPasillo3D", self.source)
@@ -57,15 +60,25 @@ class BolosPasillo3DTest(unittest.TestCase):
         self.assertIn("fallar no bloquea el turno", self.godot_test)
         self.assertIn("abandonar devuelve resultado válido", self.godot_test)
 
-    def test_integracion_es_opcional_y_no_crea_estado_de_partida(self):
+    def test_integracion_es_opcional_y_premia_sin_acoplar_el_vertical(self):
         self.assertIn("class_name DiaBolosPasilloApp", self.controller)
         self.assertIn('String(jornada.get("fase", "")) != "archivo"', self.controller)
         self.assertIn("PERIODO_DIAS := 3", self.controller)
         self.assertIn("posmod(dia - DIA_INICIAL, PERIODO_DIAS)", self.controller)
         self.assertIn("Interactuable3D.new()", self.controller)
-        self.assertNotIn("Partida", self.controller)
-        self.assertNotIn("_guardar_o_avisar", self.controller)
-        self.assertNotIn("partida.estado", self.controller)
+        self.assertNotIn("Partida", self.source)
+        self.assertIn('SELLO_RECOMPENSA := "pasillo-en-regla"', self.controller)
+        self.assertIn("Sellos.registrar_sello", self.controller)
+        self.assertIn('dia.call("_guardar_o_avisar", "")', self.controller)
+        self.assertNotIn("Economia.", self.controller)
+        self.assertNotIn("Acusacion.", self.controller)
+
+    def test_sello_de_bolos_esta_catalogado_y_la_regresion_cubre_idempotencia(self):
+        ids = [entrada["id"] for entrada in self.sellos]
+        self.assertIn("pasillo-en-regla", ids)
+        self.assertIn("abandonar no concede el sello", self.godot_test)
+        self.assertIn("recargar conserva el sello", self.godot_test)
+        self.assertIn("repetir la actividad no duplica el sello", self.godot_test)
 
     def test_integracion_suspende_y_restaura_el_mundo(self):
         self.assertIn("Node.PROCESS_MODE_DISABLED", self.controller)

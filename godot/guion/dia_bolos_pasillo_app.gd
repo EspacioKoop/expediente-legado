@@ -1,9 +1,9 @@
 ## Integra los bolos de pasillo (#159) como pausa opcional de oficina.
 ##
-## Este controller solo decide cuándo y cómo se entra/sale del vertical. El
-## tanteo sigue en Bolos y la simulación en BolosPasillo3D. No persiste estado:
-## el resultado queda como metadata efímera de Dia hasta que #114 defina el
-## premio cosmético idempotente.
+## Este controller decide cuándo y cómo se entra/sale del vertical. El tanteo
+## sigue en Bolos y la simulación en BolosPasillo3D. La única persistencia que
+## puentea es el sello cosmético de participación, delegando registro en Sellos
+## y escritura en el guardado canónico de Dia.
 class_name DiaBolosPasilloApp
 extends Node
 
@@ -13,6 +13,7 @@ const RADIO_OFERTA := 0.52
 const PERIODO_DIAS := 3
 const DIA_INICIAL := 2
 const DURACION_MARCADOR := 3.5
+const SELLO_RECOMPENSA := "pasillo-en-regla"
 
 var _mundo_id := 0
 var _oferta: Interactuable3D
@@ -194,8 +195,26 @@ func _cerrar_sesion(resultado: Dictionary) -> void:
 	_bolos = null
 	_restaurar_presentacion()
 	if bool(resultado.get("completa", false)):
+		_registrar_recompensa(dia)
 		_mostrar_marcador(resultado)
 	_cerrando = false
+
+
+func _registrar_recompensa(dia: Node) -> Dictionary:
+	if dia == null:
+		return {}
+	var partida: Variant = dia.get("partida")
+	if partida == null:
+		return {}
+	var estado: Variant = partida.get("estado")
+	if typeof(estado) != TYPE_DICTIONARY:
+		return {}
+
+	var registro := Sellos.registrar_sello(estado, SELLO_RECOMPENSA)
+	var resultado := String(registro.get("resultado", ""))
+	if resultado in ["registrado", "ya-obtenido"] and dia.has_method("_guardar_o_avisar"):
+		dia.call("_guardar_o_avisar", "")
+	return registro
 
 
 func _mostrar_marcador(resultado: Dictionary) -> void:
