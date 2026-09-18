@@ -7,6 +7,7 @@ AUDIO = RAIZ / "godot" / "guion" / "sueno_castillo_audio.gd"
 PRESENTACION = RAIZ / "godot" / "guion" / "sueno_castillo_3d.gd"
 PULSO = RAIZ / "godot" / "guion" / "sueno_castillo_pulso_3d.gd"
 DIA_SUENO = RAIZ / "godot" / "guion" / "dia_sueno_app.gd"
+PATIO = RAIZ / "godot" / "escenas" / "suenos" / "props_284" / "patio_castillo_onirico.tscn"
 SCRIPTORIUM = RAIZ / "godot" / "escenas" / "suenos" / "props_284" / "galeria_scriptorium_castillo.tscn"
 TORRE = RAIZ / "godot" / "escenas" / "suenos" / "props_284" / "torre_capilla_castillo.tscn"
 CLAUSTRO = RAIZ / "godot" / "escenas" / "suenos" / "props_284" / "claustro_reflejado_castillo.tscn"
@@ -21,6 +22,7 @@ class SuenoCastilloPresentacionTest(unittest.TestCase):
         cls.presentacion = PRESENTACION.read_text(encoding="utf-8")
         cls.pulso = PULSO.read_text(encoding="utf-8")
         cls.dia = DIA_SUENO.read_text(encoding="utf-8")
+        cls.patio = PATIO.read_text(encoding="utf-8")
         cls.scriptorium = SCRIPTORIUM.read_text(encoding="utf-8")
         cls.torre = TORRE.read_text(encoding="utf-8")
         cls.claustro = CLAUSTRO.read_text(encoding="utf-8")
@@ -106,8 +108,9 @@ class SuenoCastilloPresentacionTest(unittest.TestCase):
             self.assertNotIn(termino, self.pulso)
 
     def test_cada_composicion_declara_anomalias_sin_marcar_el_suelo(self):
-        for escena in (self.scriptorium, self.torre, self.claustro):
+        for escena in (self.patio, self.scriptorium, self.torre, self.claustro):
             self.assertIn('groups=["castillo_anomalia"]', escena)
+        self.assertNotIn('[node name="SueloPatio" type="MeshInstance3D" parent="." groups=', self.patio)
         self.assertNotIn('[node name="SueloScriptorium" type="MeshInstance3D" parent="." groups=', self.scriptorium)
         self.assertNotIn('[node name="SueloCapilla" type="MeshInstance3D" parent="." groups=', self.torre)
         self.assertNotIn('[node name="SueloClaustro" type="MeshInstance3D" parent="." groups=', self.claustro)
