@@ -10,9 +10,12 @@
 ## que tengas un expediente firmado para que la captura enseñe otra cosa.
 ##
 ## Con un destino que contenga "tarot", el segundo argumento es el folio que
-## esconde la carta y el tercero el plano. Ojo: una carta se revela **una sola
-## vez**, así que cada plano necesita su propio temporal; reutilizarlo hace que
-## a partir del segundo no se abra ninguna cinemática.
+## esconde la carta, el tercero el plano y el cuarto modo opcional
+## (`normal`/`reducido`). El capturador localiza automáticamente el expediente
+## que contiene el folio: así la matriz de #645 no queda limitada al primer caso.
+## Ojo: una carta se revela **una sola vez**, así que cada plano necesita su propio
+## temporal; reutilizarlo hace que a partir del segundo no se abra ninguna
+## cinemática.
 ##
 ## Con un destino que contenga "dia", el segundo argumento es la FASE, y para
 ## la fase "sueño" el tercero es la sala que se quiere mirar.
@@ -230,6 +233,28 @@ func _capturar_tarot(escena: Node, destino: String, argumentos: PackedStringArra
 	if oculta.is_empty():
 		printerr("El folio %s no esconde ninguna carta" % folio_carta)
 		return 1
+	if OS.get_environment("XDG_DATA_HOME").is_empty():
+		printerr("La captura tarot exige XDG_DATA_HOME temporal para no tocar una partida real")
+		return 1
+
+	# #645 no puede validarse si el capturador solo sabe mirar el primer caso.
+	# Busca el folio en el catálogo y cambia de expediente por el mismo handler
+	# que usa la UI, antes de elegir el documento.
+	var indice_caso := -1
+	for i in escena.contenido.casos.size():
+		for registro in escena.contenido.casos[i].get("registros", []):
+			if registro.get("folio") == folio_carta:
+				indice_caso = i
+				break
+		if indice_caso >= 0:
+			break
+	if indice_caso < 0:
+		printerr("El folio %s no existe en ningún expediente" % folio_carta)
+		return 1
+	if escena.caso.get("id") != escena.contenido.casos[indice_caso].get("id"):
+		escena._archivo.select(indice_caso)
+		escena._al_elegir_caso(indice_caso)
+		await process_frame
 
 	var registros: Array = escena.caso["registros"]
 	var cual := -1
@@ -240,6 +265,17 @@ func _capturar_tarot(escena: Node, destino: String, argumentos: PackedStringArra
 	if cual < 0:
 		printerr("El folio %s no está en el expediente abierto" % folio_carta)
 		return 1
+
+	var modo := String(argumentos[3]) if argumentos.size() > 3 else "normal"
+	if modo not in ["normal", "reducido"]:
+		printerr("Modo tarot desconocido: %s (use normal o reducido)" % modo)
+		return 1
+	if modo == "reducido":
+		var preferencias := PreferenciasSiga.cargar()
+		preferencias["reduccion_movimiento"] = true
+		if not PreferenciasSiga.guardar(preferencias):
+			printerr("No se pudo preparar reducción de movimiento en el temporal de QA")
+			return 1
 
 	escena._lista.select(cual)
 	escena._al_elegir_documento(cual)
