@@ -45,6 +45,15 @@ class SuenoCastilloPresentacionTest(unittest.TestCase):
         self.assertIn("SuenoCastilloAudio.campanadas()", self.presentacion)
         self.assertIn('campanas.name = "CampanasSinFuente"', self.presentacion)
 
+    def test_iluminacion_propiedad_del_castillo_conserva_silueta_legible(self):
+        self.assertIn("_montar_luz_identidad(presentacion)", self.presentacion)
+        self.assertIn('patio.name = "LuzPatioCalida"', self.presentacion)
+        self.assertIn('torres.name = "ContraluzTorres"', self.presentacion)
+        self.assertIn("OmniLight3D.new()", self.presentacion)
+        self.assertIn("patio.omni_range = 17.0", self.presentacion)
+        self.assertIn("torres.omni_range = 24.0", self.presentacion)
+        self.assertNotIn("WorldEnvironment", self.presentacion)
+
     def test_presentacion_selecciona_cuatro_composiciones_propias(self):
         self.assertIn("galeria_scriptorium_castillo.tscn", self.presentacion)
         self.assertIn("torre_capilla_castillo.tscn", self.presentacion)
