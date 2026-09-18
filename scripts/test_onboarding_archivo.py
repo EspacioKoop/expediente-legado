@@ -36,6 +36,30 @@ class OnboardingArchivoTest(unittest.TestCase):
         self.assertNotIn('Label3D', self.capa)
         self.assertNotIn('NavigationAgent', self.capa)
 
+    def test_el_objetivo_es_una_superficie_tutorial_inequivoca(self):
+        self.assertIn('"OBJETIVO INICIAL"', self.capa)
+        self.assertIn("Control.PRESET_CENTER_TOP", self.capa)
+        self.assertIn("EstiloSiga.caja_saliente(COLOR_FONDO_TUTORIAL)", self.capa)
+        self.assertNotIn("Control.PRESET_CENTER_BOTTOM", self.capa)
+        self.assertNotIn("Mayús corre", self.capa)
+        self.assertNotIn("Ctrl agacha", self.capa)
+        self.assertNotIn("Espacio salta", self.capa)
+
+    def test_el_tutorial_vive_en_el_arbitro_comun_del_hud(self):
+        self.assertIn(
+            "_pista_puesto.reparent(_hud_prioridades, false)", self.capa_clima
+        )
+        self.assertIn(
+            "_hud_prioridades.registrar(HUDLayer.TUTORIAL, _pista_puesto)",
+            self.capa_clima,
+        )
+        self.assertIn(
+            "_hud_prioridades.activar(HUDLayer.TUTORIAL)", self.capa_clima
+        )
+        self.assertIn(
+            "_hud_prioridades.desactivar(HUDLayer.TUTORIAL)", self.capa_clima
+        )
+
     def test_la_pista_solo_desaparece_si_siga_llega_a_abrirse(self):
         self.assertIn('func _abrir_expediente() -> void:', self.capa)
         self.assertIn('super._abrir_expediente()', self.capa)
