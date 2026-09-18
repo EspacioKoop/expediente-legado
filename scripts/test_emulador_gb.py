@@ -264,6 +264,29 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn("_contiene(frame, 0)", gbc)
         self.assertIn("_contiene(frame, 1)", gbc)
 
+    def test_ci_persiste_y_aisla_sram_end_to_end(self):
+        self.assertIn("make -C gbc/fixtures/sram_persist_smoke clean all", self.ci)
+        self.assertIn("res://pruebas/emulador_sram_smoke.gd", self.ci)
+        smoke = (ROOT / "godot" / "pruebas" / "emulador_sram_smoke.gd").read_text(
+            encoding="utf-8"
+        )
+        fixture = (
+            ROOT / "gbc" / "fixtures" / "sram_persist_smoke" / "main.asm"
+        ).read_text(encoding="utf-8")
+        makefile = (
+            ROOT / "gbc" / "fixtures" / "sram_persist_smoke" / "Makefile"
+        ).read_text(encoding="utf-8")
+        self.assertIn("EmuladorPortatilApp.new()", smoke)
+        self.assertIn("app.abrir()", smoke)
+        self.assertIn('app.call("_cerrar")', smoke)
+        self.assertIn("MARCADOR_A := 0x31", smoke)
+        self.assertIn("MARCADOR_B := 0x42", smoke)
+        self.assertIn("save_a == save_b", smoke)
+        self.assertIn("reabrir la portátil no restauró la SRAM", smoke)
+        self.assertIn("guardar la ROM B modificó la SRAM de la ROM A", smoke)
+        self.assertIn("MARCADOR_SRAM", fixture)
+        self.assertIn("RGBFIX_CARTUCHO := -m 0x1B -r 0x02 -p 255 -v", makefile)
+
     def test_alpha_importa_antes_del_smoke(self):
         importar = "godot4 --headless --editor --path godot --quit"
         smoke = "godot4 --headless --path godot --script res://pruebas/emulador_gb_smoke.gd"

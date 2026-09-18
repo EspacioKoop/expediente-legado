@@ -1,4 +1,4 @@
-[gd_scene load_steps=40 format=3]
+[gd_scene load_steps=41 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -39,6 +39,7 @@
 [ext_resource type="Script" path="res://guion/dia_bolos_pasillo_app.gd" id="37"]
 [ext_resource type="Script" path="res://guion/dia_relacion_onirica_app.gd" id="38"]
 [ext_resource type="Script" path="res://guion/dia_tir_na_nog_app.gd" id="39"]
+[ext_resource type="Script" path="res://guion/dia_props_utilizables_680_app.gd" id="40"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -156,3 +157,6 @@ script = ExtResource("34")
 
 [node name="BolosPasilloController" type="Node" parent="."]
 script = ExtResource("37")
+
+[node name="PropsUtilizables680Controller" type="Node" parent="."]
+script = ExtResource("40")

@@ -55,6 +55,35 @@ class PropsUtilizablesCc0Test(unittest.TestCase):
         except ValueError as error:
             self.fail(str(error))
 
+    def test_palanca_es_encontrable_y_no_respawnea(self):
+        try:
+            ejecutar_godot(
+                "res://pruebas/pruebas_props_utilizables_encontrables_680.gd", 14
+            )
+        except ValueError as error:
+            self.fail(str(error))
+
+    def test_linterna_mitiga_bombilla_fundida(self):
+        try:
+            ejecutar_godot("res://pruebas/pruebas_linterna_casa_680.gd", 18)
+        except ValueError as error:
+            self.fail(str(error))
+
+    def test_runtime_monta_controller_en_dia(self):
+        escena = (ROOT / "godot/escenas/dia.tscn").read_text(encoding="utf-8")
+        controller = (
+            ROOT / "godot/guion/dia_props_utilizables_680_app.gd"
+        ).read_text(encoding="utf-8")
+        self.assertIn("dia_props_utilizables_680_app.gd", escena)
+        self.assertIn("PropsUtilizables680Controller", escena)
+        self.assertIn("AlmacenamientoCasa", (
+            ROOT / "godot/guion/casa_utileria.gd"
+        ).read_text(encoding="utf-8"))
+        self.assertIn("PropsUtilizablesEncontrables3D", (
+            ROOT / "godot/guion/props_utilizables_encontrables_3d.gd"
+        ).read_text(encoding="utf-8"))
+        self.assertIn("_guardar_o_avisar", controller)
+
     def test_no_activa_modelos_ausentes(self):
         codigo = (ROOT / "godot/guion/props_utilizables_cc0.gd").read_text(encoding="utf-8")
         self.assertNotIn("load(", codigo)

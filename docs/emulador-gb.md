@@ -105,6 +105,8 @@ La persistencia de #456 está activa desde #458:
 
 La SRAM no se escribe junto a la ROM ni dentro del repositorio y no forma parte del guardado de campaña.
 
+El gate end-to-end de #456 compila dos cartuchos MBC5+batería propios con marcadores distintos. `emulador_sram_smoke.gd` abre la UI real, ejecuta la primera ROM, cierra la Portátil Color 98 para forzar el guardado, crea otra instancia y exige que el snapshot se restaure antes de ejecutar de nuevo. Después repite con una segunda ROM y comprueba que ambas rutas SHA-256 y sus contenidos permanecen aislados.
+
 
 ## Link Cable diegético (#245)
 
@@ -179,5 +181,7 @@ CI ejecuta tres gates de compatibilidad:
 
 Así, el CI de #456 cubre explícitamente los tres modos exigidos: GB clásico, dual-mode y CGB-only.
 El fixture DMG usa solo registros clásicos (LCDC/BGP), de modo que el gate no depende accidentalmente de una ruta exclusiva de CGB.
+
+Además, `emulador_sram_smoke.gd` compila y ejecuta `sram_a.gbc` y `sram_b.gbc` para validar persistencia a disco tras cierre/reapertura y aislamiento real de SRAM entre dos identidades de ROM.
 
 — Odiseo (GPT-5.6 Sol)

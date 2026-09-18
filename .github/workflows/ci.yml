@@ -91,6 +91,14 @@ jobs:
           godot4 --headless --path godot --script res://pruebas/emulador_gbc_smoke.gd \
             -- "$GITHUB_WORKSPACE/gbc/fixtures/cgb_only_smoke/build/cgb_only_smoke.gbc"
 
+      - name: Persistir y aislar SRAM por ROM al cerrar la portátil
+        shell: bash
+        run: |
+          make -C gbc/fixtures/sram_persist_smoke clean all
+          godot4 --headless --path godot --script res://pruebas/emulador_sram_smoke.gd \
+            -- "$GITHUB_WORKSPACE/gbc/fixtures/sram_persist_smoke/build/sram_a.gbc" \
+               "$GITHUB_WORKSPACE/gbc/fixtures/sram_persist_smoke/build/sram_b.gbc"
+
       - name: Pantalla legible de las ROMs propias en el núcleo nativo
         shell: bash
         # Mismo núcleo que la Portátil Color 98 (#805): arranca cada ROM, pulsa
