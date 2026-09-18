@@ -255,6 +255,7 @@ static func espacio(id: String, quedan: int, contenido: Dictionary = {}) -> Dict
 		"textura_suelo": forma.get("textura_suelo", ""),
 		"textura_muro": forma.get("textura_muro", ""),
 		"escala_textura": forma.get("escala_textura", 1.2),
+		"deformacion_textura": forma.get("deformacion_textura", Vector3.ONE),
 		"ambiente": forma.get("ambiente", Color(0.20, 0.19, 0.24)),
 		"ambiente_energia": forma.get("ambiente_energia", 0.32),
 		"sol": forma.get("sol", 0.05),
