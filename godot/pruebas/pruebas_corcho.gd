@@ -130,8 +130,12 @@ func _probar_presentacion_pared() -> void:
 func _probar_panel() -> void:
 	var jornada := {}
 	var conceptos := {
-		"a": {"id": "a", "nombre": "Alpha"},
-		"b": {"id": "b", "nombre": "Beta"},
+		"a": {
+			"id": "a",
+			"nombre": "Alpha",
+			"resumen": "Alpha enlaza con [[Beta]] y con [[Secreto]].",
+		},
+		"b": {"id": "b", "nombre": "Beta", "resumen": "Beta confirma el expediente."},
 		"c": {"id": "c", "nombre": "Gamma"},
 	}
 	CorchoScript.sincronizar(jornada, conceptos.values())
@@ -150,6 +154,15 @@ func _probar_panel() -> void:
 		panel.queue_free()
 		return
 	_comprobar(boton_a.focus_mode == Control.FOCUS_ALL, "las fichas se eligen con teclado y mando")
+
+	panel.inspeccionar("a")
+	_comprobar(panel.detalle_id() == "a", "inspeccionar fija la ficha de lectura")
+	var detalle := panel.detalle_texto()
+	_comprobar(detalle.contains("Beta"), "la lectura conserva referencias ya descubiertas")
+	_comprobar(not detalle.contains("Secreto"), "la lectura no filtra conceptos aún ocultos")
+	_comprobar(not detalle.contains("[["), "la lectura no expone sintaxis wiki")
+	panel.inspeccionar("c")
+	_comprobar(not panel.detalle_texto().is_empty(), "una ficha sin resumen muestra estado legible")
 
 	panel.pulsar("a")
 	_comprobar(panel.seleccion() == "a", "el primer toque marca la ficha")
