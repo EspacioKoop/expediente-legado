@@ -184,11 +184,13 @@ func _init() -> void:
 		quit(0)
 		return
 
-	if destino.contains("tarot-progreso"):
-		quit(await _capturar_tarot_progreso(escena, destino, argumentos))
-		return
 	if destino.contains("tarot"):
-		quit(await _capturar_tarot(escena, destino, argumentos))
+		var codigo_tarot := (
+			await _capturar_tarot_progreso(escena, destino, argumentos)
+			if destino.contains("tarot-progreso")
+			else await _capturar_tarot(escena, destino, argumentos)
+		)
+		quit(codigo_tarot)
 		return
 
 	var indice := int(argumentos[1]) if argumentos.size() > 1 else 0
