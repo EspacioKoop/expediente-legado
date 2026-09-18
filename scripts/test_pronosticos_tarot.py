@@ -7,6 +7,7 @@ from scripts.godot_pruebas import ejecutar_script
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = (ROOT / "godot/guion/visor_expediente.gd").read_text(encoding="utf-8")
+PROMETEO = (ROOT / "godot/guion/prometeo.gd").read_text(encoding="utf-8")
 VISOR = (ROOT / "godot/guion/visor_pronosticos_app.gd").read_text(encoding="utf-8")
 RESOLVER = (ROOT / "godot/guion/pronosticos_auditoria.gd").read_text(encoding="utf-8")
 PRUEBA_GODOT = "res://pruebas/pruebas_pronosticos_tarot.gd"
@@ -18,8 +19,20 @@ class PronosticosTarotTests(unittest.TestCase):
         inicio = BASE.index("func _sincronizar_tarot_por_pista()")
         fin = BASE.index("## Encontrar una carta escondida", inicio)
         bloque = BASE[inicio:fin]
-        self.assertIn('var nueva := Prometeo.desbloquear_carta(tarot, "el-mago")', bloque)
-        self.assertIn('if nueva:\n\t\t_al_carta_desbloqueada("el-mago")', bloque)
+        self.assertIn(
+            "for carta_id in Prometeo.sincronizar_tarot_por_pistas(partida.estado):",
+            bloque,
+        )
+        self.assertIn("_al_carta_desbloqueada(carta_id)", bloque)
+
+        inicio = PROMETEO.index("static func sincronizar_tarot_por_pistas(")
+        fin = PROMETEO.index("## Una acusación es precipitada", inicio)
+        regla = PROMETEO[inicio:fin]
+        self.assertIn(
+            'if pistas.size() >= 1 and desbloquear_carta_en_estado(estado, "el-mago"):',
+            regla,
+        )
+        self.assertIn('nuevas.append("el-mago")', regla)
 
     def test_carta_oculta_notifica_antes_de_guardar(self):
         inicio = BASE.index("func _al_encontrar_carta(")
