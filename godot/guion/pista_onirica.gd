@@ -32,13 +32,13 @@ static func resolver(caso: Dictionary, resultado_puzzle: Dictionary) -> Dictiona
 		if not objetivo.is_empty() and pista_id != objetivo:
 			continue
 		var a := str(pista.get("registroOrigen", ""))
-		if pista_id.is_empty() or a.is_empty() or not fuentes.has(a):
+		if pista_id.is_empty() or a.is_empty() or not origenes_permitidos.has(a):
 			continue
 
 		var origenes := [a]
 		if pista.has("registroOrigen2"):
 			var b := str(pista.get("registroOrigen2", ""))
-			if b.is_empty() or b == a or not fuentes.has(b):
+			if b.is_empty() or b == a or not origenes_permitidos.has(b):
 				continue
 			origenes.append(b)
 
