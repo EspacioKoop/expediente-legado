@@ -350,9 +350,7 @@ func _refrescar_bola() -> void:
 
 
 func _montar_presentacion() -> void:
-	var suelo := _caja(
-		Vector3(0.0, -0.06, -0.15), Vector3(ancho_de(variante), 0.12, CARRIL_LARGO)
-	)
+	var suelo := _caja(Vector3(0.0, -0.06, -0.15), Vector3(ancho_de(variante), 0.12, CARRIL_LARGO))
 	var material_suelo := StandardMaterial3D.new()
 	material_suelo.albedo_color = Color(0.20, 0.18, 0.15)
 	material_suelo.roughness = 0.92
