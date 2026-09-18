@@ -187,9 +187,7 @@ func _sincronizar() -> void:
 		var seleccion_completa := relacion.seleccion.size() >= 2
 		titulo.text = "%s · %s" % [dato.get("folio", ""), dato.get("fecha", "")]
 		texto.text = String(dato.get("extracto", ""))
-		documento.habilitado = (
-			not relacion.cerrada and (not seleccion_completa or seleccionado)
-		)
+		documento.habilitado = (not relacion.cerrada and (not seleccion_completa or seleccionado))
 		var material := StandardMaterial3D.new()
 		material.albedo_color = COLOR_SELECCION if seleccionado else COLOR_BASE
 		material.roughness = 0.9
