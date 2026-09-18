@@ -13,8 +13,8 @@ var _leidos: Array = []
 var _seleccion: Array = []
 var _huecos: Array[Button] = []
 var _documentos: Array[Button] = []
-var _confirmar: Button
-var _cancelar: Button
+var _boton_confirmar: Button
+var _boton_cancelar: Button
 var _aviso: Label
 var _sin_documentos: Label
 
@@ -107,17 +107,17 @@ func _construir() -> void:
 	acciones.add_theme_constant_override("separation", 8)
 	columna.add_child(acciones)
 
-	_cancelar = Button.new()
-	_cancelar.name = "Cancelar"
-	_cancelar.text = tr("SUENO_PREPARAR_CANCELAR")
-	_cancelar.pressed.connect(_cancelar)
-	acciones.add_child(_cancelar)
+	_boton_cancelar = Button.new()
+	_boton_cancelar.name = "Cancelar"
+	_boton_cancelar.text = tr("SUENO_PREPARAR_CANCELAR")
+	_boton_cancelar.pressed.connect(_emitir_cancelacion)
+	acciones.add_child(_boton_cancelar)
 
-	_confirmar = Button.new()
-	_confirmar.name = "Confirmar"
-	_confirmar.text = tr("SUENO_PREPARAR_CONFIRMAR")
-	_confirmar.pressed.connect(_confirmar)
-	acciones.add_child(_confirmar)
+	_boton_confirmar = Button.new()
+	_boton_confirmar.name = "Confirmar"
+	_boton_confirmar.text = tr("SUENO_PREPARAR_CONFIRMAR")
+	_boton_confirmar.pressed.connect(_emitir_confirmacion)
+	acciones.add_child(_boton_confirmar)
 
 
 func _agregar_boton_documento(lista: VBoxContainer, indice: int, folio: String) -> void:
@@ -146,11 +146,11 @@ func _quitar_hueco(indice: int) -> void:
 	_refrescar()
 
 
-func _confirmar() -> void:
+func _emitir_confirmacion() -> void:
 	confirmada.emit(_seleccion.duplicate())
 
 
-func _cancelar() -> void:
+func _emitir_cancelacion() -> void:
 	cancelada.emit()
 
 
@@ -203,8 +203,8 @@ func _recalcular_foco() -> void:
 	for boton in _huecos:
 		if not boton.disabled:
 			botones.append(boton)
-	botones.append(_confirmar)
-	botones.append(_cancelar)
+	botones.append(_boton_confirmar)
+	botones.append(_boton_cancelar)
 
 	for i in botones.size():
 		var boton := botones[i]
