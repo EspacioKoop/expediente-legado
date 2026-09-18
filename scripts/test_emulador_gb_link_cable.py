@@ -45,7 +45,7 @@ class EmuladorGBLinkCableTest(unittest.TestCase):
         self.assertIn('cable.name = "CableLinkPortatil"', self.consola)
         self.assertIn("CylinderMesh.new()", self.consola)
         self.assertIn('name = "ConectorLinkCable"', self.consola)
-        self.assertIn("_app.link_cable = _link_cable", self.consola)
+        self.assertIn('_app.set("link_cable", _link_cable)', self.consola)
         self.assertIn("_actualizar_link_cable_3d(conectado)", self.consola)
 
     def test_ui_conecta_sin_hablar_con_emulador(self):
