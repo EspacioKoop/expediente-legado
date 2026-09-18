@@ -110,13 +110,13 @@ La presencia del asset, el hash, la importación de Godot y el cableado 3D sí s
 
 El capturador de `godot/pruebas/capturar.gd` permite generar evidencia reproducible de las ocho cartas ocultas por el camino jugable real. Localiza automáticamente el expediente que contiene cada folio y admite un cuarto argumento `normal` o `reducido`.
 
-La forma recomendada es generar la matriz completa (8 cartas × frontal normal × frontal reducido × skip) con un solo comando:
+La forma recomendada es generar con un solo comando la matriz de cierre: **8 cartas ocultas × normal/reducido/skip + El Mago por progreso real × normal/reducido**:
 
 ```bash
 python3 scripts/preparar_validacion_tarot_645.py
 ```
 
-La salida queda en `dist/qa/tarot-645/` junto a un `manifest.json` con los 24 recorridos y su resultado. También existe `--dry-run` para revisar comandos sin abrir Godot.
+La salida queda en `dist/qa/tarot-645/` junto a un `manifest.json` con los **26 recorridos** y su resultado. Cada nombre empieza por `tarot-`, así que `--output` puede apuntar a cualquier directorio sin romper el dispatcher de QA. También existe `--dry-run` para revisar comandos sin abrir Godot.
 
 Estas capturas sirven como **preflight visual reproducible**, no sustituyen el pase humano sobre el export candidato exigido por el criterio de cierre.
 
@@ -158,7 +158,7 @@ Para cada carta hay que revisar el frontal del plano 2 en modo normal y reducido
 
 La comprobación de «al menos una carta obtenida por progresión normal» **no debe fabricarse desde QA**. #1029 porta como primer vertical la regla heredada primera pista → `el-mago`: el visor desbloquea la carta y su memoria fantasma en el mismo guardado de la pista, sin reutilizar la ruta de las ocho cartas ocultas ni abrir una historia política.
 
-El capturador puede preparar evidencia visual de ese vertical. Primero abre un documento real y descubre una pista por `_al_pulsar_marca`; solo después exige que `el-mago` esté recogido y conocido, y entonces usa `TarotCinematica` como visor de QA del frontal:
+El generador anterior incluye ya las dos capturas de `el-mago` (`normal` y `reducido`). El capturador también puede prepararlas de forma aislada. Primero abre un documento real y descubre una pista por `_al_pulsar_marca`; solo después exige que `el-mago` esté recogido y conocido, y entonces usa `TarotCinematica` como visor de QA del frontal:
 
 ```bash
 tmp="$(mktemp -d)"
