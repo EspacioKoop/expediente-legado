@@ -25,13 +25,14 @@ class Archivado3DTest(unittest.TestCase):
         self.assertIn("ArchivadoSesion3D.new()", self.dia)
         self.assertIn("_archivado_sesion.refrescar(self)", self.dia)
 
-    def test_solo_aparece_una_carpeta_conocida(self):
-        self.assertIn("Archivado.es_clasificable", self.controlador)
-        self.assertIn('jornada.get("leido_hoy", [])', self.controlador)
-        self.assertIn("_primer_caso_clasificable", self.controlador)
+    def test_reune_todos_los_casos_conocidos_y_no_solo_el_primero(self):
+        self.assertIn("func _casos_clasificables", self.controlador)
+        self.assertIn("casos.append(caso)", self.controlador)
+        self.assertNotIn("_primer_caso_clasificable", self.controlador)
 
     def test_reutiliza_el_motor_de_archivado(self):
         self.assertIn("ArchivadoBandeja.nueva", self.controlador)
+        self.assertIn("ArchivadoBandeja.sincronizar", self.controlador)
         self.assertIn("ArchivadoBandeja.colocar", self.controlador)
         self.assertIn("Archivado.destino_de", self.controlador)
 
@@ -47,6 +48,33 @@ class Archivado3DTest(unittest.TestCase):
         self.assertNotIn("queue_free", bloque)
         self.assertIn('_texto("destino_incorrecto")', bloque)
         self.assertIn("sigue en tu mano", self.textos["destino_incorrecto"])
+
+    def test_estado_se_persiste_en_jornada_y_se_rehidrata(self):
+        self.assertIn('const CLAVE_JORNADA := "archivado_bandeja"', self.controlador)
+        self.assertIn("ArchivadoBandeja.serializar", self.controlador)
+        self.assertIn("ArchivadoBandeja.restaurar", self.controlador)
+        self.assertIn('host.call("_guardar_o_avisar", "")', self.controlador)
+        self.assertIn('"dia": int(host.jornada.get("dia", 1))', self.controlador)
+
+    def test_archivar_una_carpeta_avanza_a_la_siguiente(self):
+        bloque = self.controlador.split("func _archivar_en", 1)[1].split(
+            "func _mostrar_resultado", 1
+        )[0]
+        self.assertIn("_carpeta_archivado = null", bloque)
+        self.assertIn("refrescar(host)", bloque)
+
+    def test_completar_muestra_precision_y_rango(self):
+        self.assertIn("ArchivadoBandeja.cerrar", self.controlador)
+        self.assertIn('_texto("bandeja_completa")', self.controlador)
+        self.assertIn("%d%% de precisión", self.textos["bandeja_completa"])
+
+    def test_abandono_tiene_superficie_sin_bloquear_la_jornada(self):
+        bloque = self.controlador.split("func abandonar", 1)[1].split(
+            "func _casos_clasificables", 1
+        )[0]
+        self.assertIn("ArchivadoBandeja.abandonar", bloque)
+        self.assertIn("_persistir(host)", bloque)
+        self.assertNotIn('host.jornada["fase"]', bloque)
 
     def test_no_introduce_recompensas(self):
         texto = (self.controlador + self.carpeta).lower()

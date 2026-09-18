@@ -8,6 +8,7 @@ class_name ArchivadoSesion3D
 extends RefCounted
 
 const RUTA_TEXTOS := "res://datos/archivado_textos.json"
+const CLAVE_JORNADA := "archivado_bandeja"
 
 var _estado_archivado: Dictionary = {}
 var _carpeta_archivado: CarpetaArchivable3D = null
@@ -15,24 +16,71 @@ var _textos: Dictionary = {}
 
 
 func refrescar(host) -> void:
-	var caso := _primer_caso_clasificable(host)
-	if caso.is_empty():
-		return
+	var folios_leidos: Array = host.jornada.get("leido_hoy", [])
+	var casos := _casos_clasificables(host, folios_leidos)
 	if _estado_archivado.is_empty():
-		_estado_archivado = ArchivadoBandeja.nueva([caso], host.jornada.get("leido_hoy", []))
+		_estado_archivado = _restaurar_o_crear(host, casos, folios_leidos)
+	else:
+		ArchivadoBandeja.sincronizar(_estado_archivado, casos, folios_leidos)
+	_persistir(host)
+
+	var caso := ArchivadoBandeja.siguiente_pendiente(_estado_archivado)
+	if caso.is_empty():
+		if (
+			not _estado_archivado.get("cerrada", false)
+			and not _estado_archivado.get("casos", []).is_empty()
+		):
+			var resumen := ArchivadoBandeja.cerrar(_estado_archivado)
+			_persistir(host)
+			_mostrar_resultado(host, resumen)
+			_guardar(host)
+		return
+
 	_configurar_archivadores(host, caso)
 	if is_instance_valid(_carpeta_archivado):
-		return
-	if _estado_archivado.get("pendientes", []).is_empty():
 		return
 	_montar_carpeta(host, caso)
 
 
-func _primer_caso_clasificable(host) -> Dictionary:
+func abandonar(host) -> Dictionary:
+	if _estado_archivado.is_empty():
+		return {}
+	var resumen := ArchivadoBandeja.abandonar(_estado_archivado)
+	_persistir(host)
+	_guardar(host)
+	return resumen
+
+
+func _casos_clasificables(host, folios_leidos: Array) -> Array:
+	var casos := []
 	for caso in host.contenido.casos:
-		if Archivado.es_clasificable(caso, host.jornada.get("leido_hoy", [])):
-			return caso
-	return {}
+		if Archivado.es_clasificable(caso, folios_leidos):
+			casos.append(caso)
+	return casos
+
+
+func _restaurar_o_crear(host, casos: Array, folios_leidos: Array) -> Dictionary:
+	var guardado = host.jornada.get(CLAVE_JORNADA, {})
+	if (
+		typeof(guardado) == TYPE_DICTIONARY
+		and int(guardado.get("dia", -1)) == int(host.jornada.get("dia", 1))
+	):
+		var estado_guardado = guardado.get("estado", {})
+		if typeof(estado_guardado) == TYPE_DICTIONARY:
+			return ArchivadoBandeja.restaurar(estado_guardado, host.contenido.casos, folios_leidos)
+	return ArchivadoBandeja.nueva(casos, folios_leidos)
+
+
+func _persistir(host) -> void:
+	host.jornada[CLAVE_JORNADA] = {
+		"dia": int(host.jornada.get("dia", 1)),
+		"estado": ArchivadoBandeja.serializar(_estado_archivado),
+	}
+
+
+func _guardar(host) -> void:
+	if host.has_method("_guardar_o_avisar"):
+		host.call("_guardar_o_avisar", "")
 
 
 func _montar_carpeta(host, caso: Dictionary) -> void:
@@ -120,6 +168,8 @@ func _archivar_en(actor: Node, host, archivador: ArchivadorInteractivo3D) -> voi
 		return
 	var destino := String(archivador.get_meta("destino_archivado", ""))
 	var correcta := ArchivadoBandeja.colocar(_estado_archivado, _carpeta_archivado.caso, destino)
+	_persistir(host)
+	_guardar(host)
 	if not correcta:
 		host._nomina.text = _texto("destino_incorrecto")
 		_marcar_archivador(archivador, false)
@@ -131,6 +181,18 @@ func _archivar_en(actor: Node, host, archivador: ArchivadorInteractivo3D) -> voi
 	host._sonar("documento")
 	_carpeta_archivado.queue_free()
 	_carpeta_archivado = null
+	refrescar(host)
+
+
+func _mostrar_resultado(host, resumen: Dictionary) -> void:
+	var porcentaje := int(round(float(resumen.get("precision", 0.0)) * 100.0))
+	host._nomina.text = (
+		_texto("bandeja_completa")
+		% [
+			porcentaje,
+			String(resumen.get("rango", "sin-datos")),
+		]
+	)
 
 
 func _texto(clave: String) -> String:
