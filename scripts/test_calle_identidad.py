@@ -82,7 +82,9 @@ class CalleIdentidadTest(unittest.TestCase):
         self.assertIn("static func cristal_urbano", self.texturas)
         for rasgo in ("depth_prepass_alpha", "rejilla", "tonos", "bayer_4x4", "ALPHA ="):
             self.assertIn(rasgo, self.shader_cristal)
-        self.assertGreaterEqual(self.identidad.count("_cristal("), 7)
+        self.assertGreaterEqual(self.identidad.count("_cristal("), 11)
+        for nombre in ('"Vestibulo"', '"PuertaIzquierda"', '"PuertaDerecha"'):
+            self.assertIn(nombre, self.identidad)
 
     def test_marco_del_escaparate_es_metal_y_no_color_plano(self):
         self.assertGreaterEqual(self.calle.count('"textura": "metal_pintado"'), 4)
