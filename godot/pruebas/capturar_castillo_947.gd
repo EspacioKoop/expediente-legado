@@ -1,14 +1,20 @@
 ## Evidencia visual reproducible del castillo onírico (#947).
 ##
 ## Renderiza las cuatro composiciones con la misma cámara e iluminación y añade
-## una quinta toma del claustro con mutación de giro y una sexta de la capilla
-## tras la tercera campanada. No sustituye el pase humano
+## una quinta toma del claustro con mutación de giro, una sexta de la capilla
+## tras la tercera campanada y una séptima del scriptorium tras leer el códice. No sustituye el pase humano
 ## de #398: sirve para comparar silueta, profundidad y regresiones.
 extends SceneTree
 
 const CASOS := [
 	{"nombre": "patio", "variante": "patio", "mutacion": "estable"},
 	{"nombre": "scriptorium", "variante": "scriptorium", "mutacion": "estable"},
+	{
+		"nombre": "scriptorium_lectura",
+		"variante": "scriptorium",
+		"mutacion": "estable",
+		"lectura": true
+	},
 	{"nombre": "torre_capilla", "variante": "torre_capilla", "mutacion": "estable"},
 	{
 		"nombre": "torre_capilla_pulso",
@@ -58,6 +64,14 @@ func _init() -> void:
 			return
 		for i in 12:
 			await process_frame
+		if bool(caso.get("lectura", false)):
+			var controlador_lectura := (
+				presentacion.get_node_or_null("PulsoArquitectonico") as SuenoCastilloPulso3D
+			)
+			if controlador_lectura != null:
+				controlador_lectura.set_process(false)
+				controlador_lectura.aplicar_pulso(-1)
+			SuenoCastillo3D.reaccionar_a_lectura(mundo)
 		if caso.has("pulso"):
 			var controlador := (
 				presentacion.get_node_or_null("PulsoArquitectonico") as SuenoCastilloPulso3D
