@@ -67,9 +67,9 @@ class RyuRuntimeSurfaceTest(unittest.TestCase):
         self.assertIn('"intensidad": INTENSIDAD_SEMILLA', self.vigilia)
         self.assertIn("configurar_contrato(", self.vigilia)
         self.assertIn("RomsPropias.fuente_semilla(id_rom)", self.adaptador)
-        self.assertIn(
-            "SemillasOniricas.activar_semilla_onirica(",
+        self.assertRegex(
             self.adaptador,
+            r"SemillasOniricas\\s*\\.\\s*activar_semilla_onirica\\s*\\(",
         )
 
     def test_observer_comun_funciona_mientras_emulador_pausa_mundo(self):
