@@ -181,9 +181,7 @@ func _refrescar() -> void:
 		var repeticiones := _seleccion.count(folio)
 		boton.disabled = _seleccion.size() >= SeleccionNocturna.MAX_DOCUMENTOS
 		boton.text = (
-			folio
-			if repeticiones == 0
-			else tr("SUENO_PREPARAR_REPETIDA") % [folio, repeticiones]
+			folio if repeticiones == 0 else tr("SUENO_PREPARAR_REPETIDA") % [folio, repeticiones]
 		)
 
 	_sin_documentos.visible = _documentos.is_empty()
