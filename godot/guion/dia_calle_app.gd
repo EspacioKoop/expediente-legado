@@ -156,21 +156,25 @@ func _bultos_calle() -> Array:
 			"pos": Vector3(-5.58, 0.35, -1.5),
 			"tam": Vector3(0.22, 0.70, 7.0),
 			"color": Color(0.18, 0.17, 0.18),
+			"textura": "metal_pintado",
 		},
 		{
 			"pos": Vector3(-5.58, 2.85, -1.5),
 			"tam": Vector3(0.22, 0.55, 7.0),
 			"color": Color(0.18, 0.17, 0.18),
+			"textura": "metal_pintado",
 		},
 		{
 			"pos": Vector3(-5.58, 1.60, -4.9),
 			"tam": Vector3(0.22, 2.0, 0.22),
 			"color": Color(0.18, 0.17, 0.18),
+			"textura": "metal_pintado",
 		},
 		{
 			"pos": Vector3(-5.58, 1.60, 1.9),
 			"tam": Vector3(0.22, 2.0, 0.22),
 			"color": Color(0.18, 0.17, 0.18),
+			"textura": "metal_pintado",
 		},
 		# Portal de destino: marco alto y separado del resto de fachadas para que
 		# desde el spawn exista una composición clara hacia casa.

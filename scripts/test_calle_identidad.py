@@ -22,6 +22,10 @@ class CalleIdentidadTest(unittest.TestCase):
         cls.alquiler = (GUION / "dia_alquiler_app.gd").read_text(encoding="utf-8")
         cls.materiales = (GUION / "calle_materiales.gd").read_text(encoding="utf-8")
         cls.ventanilla = (GUION / "ventanilla_app.gd").read_text(encoding="utf-8")
+        cls.texturas = (GUION / "textura_procedural.gd").read_text(encoding="utf-8")
+        cls.shader_cristal = (ROOT / "godot/arte/psx_cristal.gdshader").read_text(
+            encoding="utf-8"
+        )
         with (ROOT / "godot/datos/textos.csv").open(encoding="utf-8") as fichero:
             cls.textos = {fila[0]: fila[1] for fila in csv.reader(fichero) if len(fila) >= 2}
 
@@ -71,6 +75,21 @@ class CalleIdentidadTest(unittest.TestCase):
         self.assertIn("cara + hacia * SALIENTE_VENTANA_FACHADA", self.identidad)
         self.assertIn("Vector3(GROSOR_VENTANA_FACHADA, 1.2, 0.9)", self.identidad)
         self.assertNotIn("cara + hacia * 0.03", self.identidad)
+
+    def test_cristal_urbano_conserva_senales_psx(self):
+        self.assertIn("SHADER_CRISTAL_PSX", self.identidad)
+        self.assertIn('"cristal_urbano"', self.identidad)
+        self.assertIn("static func cristal_urbano", self.texturas)
+        for rasgo in ("depth_prepass_alpha", "rejilla", "tonos", "bayer_4x4", "ALPHA ="):
+            self.assertIn(rasgo, self.shader_cristal)
+        self.assertGreaterEqual(self.identidad.count("_cristal("), 11)
+        for nombre in ('"Vestibulo"', '"PuertaIzquierda"', '"PuertaDerecha"'):
+            self.assertIn(nombre, self.identidad)
+
+    def test_marco_del_escaparate_es_metal_y_no_color_plano(self):
+        self.assertGreaterEqual(self.calle.count('"textura": "metal_pintado"'), 4)
+        for z in ("-4.9", "1.9"):
+            self.assertIn(f'Vector3(-5.58, 1.60, {z})', self.calle)
 
     def test_el_cielo_es_una_noche_urbana_estatica(self):
         cielo = (ROOT / "godot/arte/cielo_siga.gdshader").read_text(encoding="utf-8")
