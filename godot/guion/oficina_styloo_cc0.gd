@@ -33,40 +33,45 @@ static func montar(mundo: Node3D) -> bool:
 	if not disponible():
 		return false
 
-	var sustituciones := 0
-	for bulto in EspaciosCatalogo.OFICINA.bultos:
-		var tipo := String(bulto.get("modelo", ""))
-		var pos: Vector3 = bulto.get("pos", Vector3.ZERO)
-		if tipo == "desk" and pos.x < 0.0 and pos.z > 0.0:
-			if _sustituir_bulto(mundo, pos, String(MODELOS.desk), bulto.tam):
-				sustituciones += 1
-		elif tipo == "chairDesk" and pos.x < 0.0 and pos.z > 0.0:
-			if _sustituir_bulto(
-				mundo, pos, String(MODELOS.principal_chair), bulto.tam
-			):
-				sustituciones += 1
-		elif tipo == "bookcaseClosed" and pos.z > 3.0:
-			if _sustituir_bulto(mundo, pos, String(MODELOS.shelf), bulto.tam):
-				sustituciones += 1
-
+	# Preflight antes de ocultar una sola malla: si la planta cambió, Styloo no
+	# deja media oficina sustituida y el lote base conserva toda la presentación.
+	var bulto_escritorio := _bulto_prioritario("desk")
+	var bulto_silla := _bulto_prioritario("chairDesk")
+	var bulto_estanteria := _bulto_prioritario("bookcaseClosed")
+	if bulto_escritorio.is_empty() or bulto_silla.is_empty() or bulto_estanteria.is_empty():
+		return false
+	var escritorio := _cuerpo_en_pos(mundo, bulto_escritorio.pos)
+	var silla := _cuerpo_en_pos(mundo, bulto_silla.pos)
+	var estanteria := _cuerpo_en_pos(mundo, bulto_estanteria.pos)
 	var puesto := mundo.get_node_or_null("PuestoUtileria2") as Node3D
-	if puesto != null:
-		var telefono := puesto.get_node_or_null("TelefonoBase") as Node3D
-		if telefono != null and AssetCc0.sustituir(
-			telefono, String(MODELOS.telephone), Vector3(0.42, 0.20, 0.30)
-		):
-			sustituciones += 1
-			var auricular := puesto.get_node_or_null("Auricular") as Node3D
-			if auricular != null:
-				auricular.hide()
-		if _agregar_prop(
-			puesto,
-			"TorrePcStyloo",
-			String(MODELOS.old_pc),
-			Vector3(0.72, 0.30, -0.25),
-			TAM_PC
-		):
-			sustituciones += 1
+	var telefono := (
+		puesto.get_node_or_null("TelefonoBase") as Node3D if puesto != null else null
+	)
+	if escritorio == null or silla == null or estanteria == null or telefono == null:
+		return false
+
+	var sustituciones := 0
+	if AssetCc0.sustituir(escritorio, String(MODELOS.desk), bulto_escritorio.tam):
+		sustituciones += 1
+	if AssetCc0.sustituir(silla, String(MODELOS.principal_chair), bulto_silla.tam):
+		sustituciones += 1
+	if AssetCc0.sustituir(estanteria, String(MODELOS.shelf), bulto_estanteria.tam):
+		sustituciones += 1
+	if AssetCc0.sustituir(
+		telefono, String(MODELOS.telephone), Vector3(0.42, 0.20, 0.30)
+	):
+		sustituciones += 1
+		var auricular := puesto.get_node_or_null("Auricular") as Node3D
+		if auricular != null:
+			auricular.hide()
+	if _agregar_prop(
+		puesto,
+		"TorrePcStyloo",
+		String(MODELOS.old_pc),
+		Vector3(0.72, 0.30, -0.25),
+		TAM_PC
+	):
+		sustituciones += 1
 
 	if _agregar_prop(
 		mundo,
@@ -87,6 +92,25 @@ static func montar(mundo: Node3D) -> bool:
 	mundo.set_meta("oficina_styloo_cc0", true)
 	return true
 
+
+static func _bulto_prioritario(tipo_buscado: String) -> Dictionary:
+	for bulto in EspaciosCatalogo.OFICINA.bultos:
+		var tipo := String(bulto.get("modelo", ""))
+		if tipo != tipo_buscado:
+			continue
+		var pos: Vector3 = bulto.get("pos", Vector3.ZERO)
+		if tipo_buscado in ["desk", "chairDesk"] and pos.x < 0.0 and pos.z > 0.0:
+			return bulto
+		if tipo_buscado == "bookcaseClosed" and pos.z > 3.0:
+			return bulto
+	return {}
+
+
+static func _cuerpo_en_pos(mundo: Node3D, posicion: Vector3) -> Node3D:
+	for cuerpo in mundo.get_children():
+		if cuerpo is StaticBody3D and cuerpo.position.is_equal_approx(posicion):
+			return cuerpo
+	return null
 
 static func _sustituir_bulto(
 	mundo: Node3D, posicion: Vector3, modelo: String, tam: Vector3
