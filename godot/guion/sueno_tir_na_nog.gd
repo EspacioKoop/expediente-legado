@@ -8,7 +8,7 @@ extends Node3D
 
 const ID_MITO := "tir_na_nog"
 const CLAVE_SEMILLA := "semilla_onirica_tir_na_nog"
-const FUENTE_VIGILIA := "radio:tir_na_nog_98"
+const FUENTE_VIGILIA := "radio:radio_oeste_98:islas_fuera_del_tiempo"
 
 const VERSION_RECIENTE := "reciente"
 const VERSION_ENVEJECIDA := "envejecida"
