@@ -22,6 +22,7 @@ const DURACION_RANURA_VACIA := 0.06
 const DURACION_INSERCION_CARTUCHO := 0.14
 
 var link_cable: LinkCablePortatil = null
+var puerto_ir: PuertoIRPortatil = null
 var _audio_emulado: AudioStreamPlayer
 var _audio_playback: AudioStreamGeneratorPlayback
 var _audio_pendiente := PackedVector2Array()
@@ -31,6 +32,9 @@ var _cartucho_visual: Label
 var _link_cable_panel: VBoxContainer
 var _link_cable_estado: Label
 var _link_cable_boton: Button
+var _puerto_ir_panel: VBoxContainer
+var _puerto_ir_estado: Label
+var _puerto_ir_boton: Button
 var _ruta_cartucho_actual := ""
 var _rom_cartucho_pendiente := ""
 var _cambiando_cartucho := false
@@ -42,6 +46,7 @@ func abrir() -> void:
 	_preparar_audio_emulado()
 	_preparar_cartucho_visual()
 	_preparar_link_cable()
+	_preparar_puerto_ir()
 
 
 func _process(delta: float) -> void:
@@ -245,6 +250,61 @@ func _actualizar_link_cable_ui() -> void:
 	else:
 		_link_cable_estado.text = _texto("link_cable_desconectado")
 		_link_cable_boton.text = _texto("link_cable_conectar")
+
+
+func _preparar_puerto_ir() -> void:
+	if _lista == null:
+		return
+	if puerto_ir == null:
+		puerto_ir = PuertoIRPortatil.new()
+
+	_puerto_ir_panel = VBoxContainer.new()
+	_puerto_ir_panel.name = "PanelPuertoIRPortatil"
+	_puerto_ir_panel.add_theme_constant_override("separation", 4)
+
+	var titulo := Label.new()
+	titulo.text = _texto("ir_titulo")
+	_puerto_ir_panel.add_child(titulo)
+
+	_puerto_ir_estado = Label.new()
+	_puerto_ir_estado.name = "EstadoPuertoIRPortatil"
+	_puerto_ir_estado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_puerto_ir_panel.add_child(_puerto_ir_estado)
+
+	_puerto_ir_boton = Button.new()
+	_puerto_ir_boton.name = "BotonPuertoIRPortatil"
+	_puerto_ir_boton.text = _texto("ir_emitir")
+	_puerto_ir_boton.pressed.connect(_emitir_pulso_ir)
+	_puerto_ir_panel.add_child(_puerto_ir_boton)
+
+	var aviso := Label.new()
+	aviso.text = _texto("ir_aviso")
+	aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_puerto_ir_panel.add_child(aviso)
+
+	_lista.add_child(_puerto_ir_panel)
+	_lista.move_child(_puerto_ir_panel, mini(2, _lista.get_child_count() - 1))
+	puerto_ir.pulso_emitido.connect(_al_pulso_ir)
+	_actualizar_puerto_ir_ui(puerto_ir.pulsos_emitidos())
+
+
+func _emitir_pulso_ir() -> void:
+	if puerto_ir == null:
+		return
+	puerto_ir.emitir_pulso()
+
+
+func _al_pulso_ir(secuencia: int) -> void:
+	_actualizar_puerto_ir_ui(secuencia)
+
+
+func _actualizar_puerto_ir_ui(secuencia: int) -> void:
+	if _puerto_ir_estado == null:
+		return
+	if secuencia <= 0:
+		_puerto_ir_estado.text = _texto("ir_listo")
+	else:
+		_puerto_ir_estado.text = _formatear("ir_pulso_emitido", [secuencia])
 
 
 func _preparar_audio_emulado() -> void:
