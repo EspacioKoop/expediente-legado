@@ -32,7 +32,9 @@ func _probar() -> void:
 	var estado := CasaEstadoAmbiental.derivar(jornada, Inventario.nuevo())
 	_comprobar(estado["consecuencias_casa"].size() == 7, "filtra y deduplica consecuencias casa")
 	_comprobar(not estado["consecuencias_casa"].has("no_domestica"), "ignora consecuencias ajenas")
-	_comprobar(CasaConsecuencias.firma(estado).contains("casa_grifo_averiado"), "firma incluye averias")
+	_comprobar(
+		CasaConsecuencias.firma(estado).contains("casa_grifo_averiado"), "firma incluye averias"
+	)
 
 	var capa := CasaConsecuencias.montar(casa, estado)
 	_comprobar(capa != null, "monta capa de consecuencias")
@@ -55,8 +57,13 @@ func _probar() -> void:
 	var firma := CasaConsecuencias.firma(estado)
 	var repetida := CasaConsecuencias.montar(casa, estado)
 	_comprobar(CasaConsecuencias.firma(estado) == firma, "firma estable")
-	_comprobar(repetida.name == CasaConsecuencias.NOMBRE_RAIZ, "montaje idempotente conserva nombre")
-	_comprobar(casa.find_children(CasaConsecuencias.NOMBRE_RAIZ, "Node3D", false, false).size() == 1, "una sola capa")
+	_comprobar(
+		repetida.name == CasaConsecuencias.NOMBRE_RAIZ, "montaje idempotente conserva nombre"
+	)
+	_comprobar(
+		casa.find_children(CasaConsecuencias.NOMBRE_RAIZ, "Node3D", false, false).size() == 1,
+		"una sola capa"
+	)
 
 	var sin_averias := CasaEstadoAmbiental.derivar(Jornada.nueva(9397, 1), Inventario.nuevo())
 	var limpia := CasaConsecuencias.montar(casa, sin_averias)
