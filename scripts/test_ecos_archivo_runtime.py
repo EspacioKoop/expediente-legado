@@ -65,6 +65,14 @@ class EcosArchivoRuntimeTest(unittest.TestCase):
             self.controller_compact,
         )
 
+
+    def test_intentos_se_restauran_y_persisten_por_el_guardado_canonico(self):
+        self.assertIn("SuenoPuzzleSesion.actual(dia.jornada)", self.controller)
+        self.assertIn("EcosArchivo.restaurar(", self.controller_compact)
+        self.assertIn("SuenoPuzzleSesion.guardar(", self.controller_compact)
+        self.assertIn("estado_cambiado.connect(", self.controller)
+        self.assertIn('dia.call("_guardar_o_avisar", "")', self.controller)
+
     def test_abandona_al_salir_de_la_sala_y_no_toca_veredicto(self):
         self.assertIn("_abandonar_si_procede()", self.controller)
         self.assertIn("_ecos_activos.abandonar()", self.controller)
