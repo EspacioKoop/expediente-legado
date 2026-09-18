@@ -39,9 +39,7 @@ static func todo(comprobar: Callable) -> void:
 	}
 	Imprevistos.completar(jornada_recargada)
 	comprobar.call(
-		"recargar normaliza el plan",
-		jornada_recargada["imprevistos"],
-		primera["imprevistos"]
+		"recargar normaliza el plan", jornada_recargada["imprevistos"], primera["imprevistos"]
 	)
 
 	var cobro := _con_plan(9401)
