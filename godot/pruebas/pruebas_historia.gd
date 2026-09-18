@@ -3,6 +3,7 @@ class_name PruebasHistoria
 extends RefCounted
 
 const ESCENA := preload("res://escenas/historia.tscn")
+const HISTORIA_CONTEXTO := preload("res://guion/historia_contexto.gd")
 
 
 static func catalogo(comprobar: Callable) -> void:
@@ -16,6 +17,61 @@ static func catalogo(comprobar: Callable) -> void:
 			comprobar.call("cada opción tiene texto", opcion["texto"].is_empty(), false)
 
 	_contrato_ideologico(comprobar)
+	_contexto_narrativo(comprobar)
+
+
+static func _contexto_narrativo(comprobar: Callable) -> void:
+	var por_cierre := Partida.nueva()
+	por_cierre["jornada"]["dia"] = 3
+	por_cierre["jornada"]["fase"] = "archivo"
+	por_cierre["jornada"]["leidos_total"] = ["folio-previo"]
+	por_cierre["pistas_descubiertas"] = ["pista-previa"]
+	por_cierre["veredictos"] = {"caso-previo": "sospechoso"}
+	HISTORIA_CONTEXTO.registrar(por_cierre, "la-justicia")
+	comprobar.call(
+		"sin hechos posteriores la decisión sigue inmadura",
+		HISTORIA_CONTEXTO.maduro(por_cierre, "la-justicia"),
+		false
+	)
+	por_cierre["veredictos"]["caso-nuevo"] = "otro-sospechoso"
+	comprobar.call(
+		"cerrar otro expediente recontextualiza la decisión",
+		HISTORIA_CONTEXTO.maduro(por_cierre, "la-justicia"),
+		true
+	)
+
+	var por_fase := Partida.nueva()
+	por_fase["jornada"]["dia"] = 4
+	por_fase["jornada"]["fase"] = "archivo"
+	HISTORIA_CONTEXTO.registrar(por_fase, "el-carro")
+	por_fase["jornada"]["fase"] = "trayecto"
+	comprobar.call(
+		"fichar y dejar el archivo recontextualiza la decisión",
+		HISTORIA_CONTEXTO.maduro(por_fase, "el-carro"),
+		true
+	)
+
+	var por_dia := Partida.nueva()
+	por_dia["jornada"]["dia"] = 5
+	por_dia["jornada"]["fase"] = "archivo"
+	HISTORIA_CONTEXTO.registrar(por_dia, "la-luna")
+	por_dia["jornada"]["dia"] = 6
+	comprobar.call(
+		"un día nuevo recontextualiza la decisión",
+		HISTORIA_CONTEXTO.maduro(por_dia, "la-luna"),
+		true
+	)
+
+	var legado := Partida.nueva()
+	legado[HISTORIA_CONTEXTO.CLAVE] = {"la-estrella": {"leidos": [], "pistas": []}}
+	legado["veredictos"] = {"caso-viejo": "sospechoso"}
+	legado["jornada"]["dia"] = 9
+	legado["jornada"]["fase"] = "trayecto"
+	comprobar.call(
+		"un snapshot antiguo no madura por dimensiones que no registró",
+		HISTORIA_CONTEXTO.maduro(legado, "la-estrella"),
+		false
+	)
 
 
 static func _contrato_ideologico(comprobar: Callable) -> void:
