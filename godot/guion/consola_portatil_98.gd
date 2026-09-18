@@ -71,7 +71,7 @@ func _alternar(_actor: Node) -> void:
 
 	_app = EmuladorPortatilAudioApp.new()
 	_app.roms_compradas = _roms_compradas()
-	_app.link_cable = _link_cable
+	_app.set("link_cable", _link_cable)
 	_app.cerrado.connect(_al_cerrar_app)
 	get_tree().root.add_child(_app)
 	_app.abrir()
