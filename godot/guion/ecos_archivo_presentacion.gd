@@ -137,7 +137,7 @@ func vista(reduccion_movimiento: bool) -> Dictionary:
 		elementos.append(elemento)
 	return {
 		"regla":
-		"Recompón los tres ecos. Puedes corregir el orden; solo confirmar hace definitiva la respuesta.",
+		"Recompón los tres ecos. Corrige el orden; confirmar hace definitiva la respuesta.",
 		"elementos": elementos,
 		"foco": foco,
 		"seleccion": seleccion.duplicate(),
