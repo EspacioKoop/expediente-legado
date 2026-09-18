@@ -1,4 +1,4 @@
 {
-  "pendiente": "La carta queda registrada. Antes de decidir, vuelve al expediente y contrasta información nueva.",
-  "tooltip": "Las opciones se habilitarán cuando hayas leído otro documento o descubierto una pista o conclusión nueva."
+  "pendiente": "La carta queda registrada. Antes de decidir, vuelve al expediente y deja que aparezca contexto nuevo.",
+  "tooltip": "Las opciones se habilitarán cuando hayas leído otro documento, descubierto una pista o conclusión, cerrado otro expediente o avanzado la jornada."
 }
