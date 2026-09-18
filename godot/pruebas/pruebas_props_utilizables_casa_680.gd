@@ -5,7 +5,6 @@ const Props := preload("res://guion/props_utilizables_cc0.gd")
 const CasaConsecuencias := preload("res://guion/casa_consecuencias_3d.gd")
 const CasaEstadoAmbiental := preload("res://guion/casa_estado_ambiental.gd")
 const CasaUtileriaScript := preload("res://guion/casa_utileria.gd")
-const PersianaScript := preload("res://guion/persiana_atascada_3d.gd")
 
 var _pasadas := 0
 var _fallos := 0
@@ -28,7 +27,7 @@ func _probar() -> void:
 	var inventario := Inventario.nuevo()
 	var estado := CasaEstadoAmbiental.derivar(jornada, inventario)
 	var capa := CasaConsecuencias.montar(casa, estado, jornada, inventario)
-	var persiana := capa.get_node_or_null("PersianaAtascada") as PersianaScript
+	var persiana := capa.get_node_or_null("PersianaAtascada") as PersianaAtascada3D
 
 	_comprobar(persiana != null, "la avería monta una persiana interactuable")
 	_comprobar(
