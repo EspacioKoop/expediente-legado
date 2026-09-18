@@ -169,6 +169,17 @@ static func todo(comprobar: Callable) -> void:
 		"la racha máxima conserva el abuso anterior", cobro_4["racha_maxima"], 2
 	)
 
+	var legado := Jornada.nueva()
+	legado["fase"] = "casa"
+	legado["trabajillos"] = {"ultimo_dia": 0, "hechos": 3}
+	var cobro_legado := Trabajillos.hacer(legado)
+	comprobar.call(
+		"una partida antigua completa el estado de trabajillos", cobro_legado["hechos"], 4
+	)
+	comprobar.call(
+		"la partida antigua registra el tipo sin romper", legado["trabajillos"]["por_tipo"].size(), 1
+	)
+
 	# Antes del primer alquiler solo caben nueve noches de trabajo: el día diez
 	# se paga en el trayecto, antes de llegar a casa. Incluso haciendo todos los
 	# lotes, el salario base sin cerrar expedientes no alcanza los 700.
