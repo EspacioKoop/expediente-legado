@@ -45,6 +45,7 @@ func _probar() -> void:
 
 	_probar_orden_del_recorrido()
 	_probar_escaparate(calle)
+	_probar_cristales(calle)
 	_probar_rotulos(calle)
 	_probar_farolas(calle)
 	await _probar_tienda(dia, calle)
@@ -106,6 +107,34 @@ func _probar_escaparate(calle: Node3D) -> void:
 			_comprobar(
 				tele.global_position.x < cristal.global_position.x, "tele detrás del cristal"
 			)
+
+
+func _probar_cristales(calle: Node3D) -> void:
+	for ruta in [
+		"EdificioOficina/Vestibulo",
+		"EdificioOficina/PuertaIzquierda",
+		"EdificioOficina/PuertaDerecha",
+		"BloqueCasa/CristalPortal",
+		"VentanillaReclamaciones/PuertaCristal",
+		"Electrodomesticos/CristalEscaparate",
+		"TiendaVideojuegos/Escaparate",
+		"TiendaVideojuegos/Puerta",
+		"Alquileres/VentanillaPago",
+		"Alquileres/Puerta",
+	]:
+		var cristal := calle.get_node_or_null(ruta) as MeshInstance3D
+		_comprobar(cristal != null, "existe vidrio real " + ruta)
+		if cristal == null:
+			continue
+		var vidrio := cristal.material_override as StandardMaterial3D
+		_comprobar(vidrio != null, "el vidrio usa material dedicado " + ruta)
+		if vidrio == null:
+			continue
+		_comprobar(
+			vidrio.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA,
+			"el vidrio usa transparencia alfa " + ruta
+		)
+		_comprobar(vidrio.albedo_color.a < 0.5, "el vidrio deja ver el interior " + ruta)
 
 
 func _probar_rotulos(calle: Node3D) -> void:
