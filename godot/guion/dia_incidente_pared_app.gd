@@ -157,8 +157,7 @@ func _al_golpear(_actor: Node, dia, pared: Interactuable3D, lugar: String) -> vo
 
 	if bool(resultado.get("despido", false)):
 		_despedir(dia)
-		return
-	if bool(resultado.get("fin_jornada", false)):
+	elif bool(resultado.get("fin_jornada", false)):
 		# La expulsión entra directamente en casa: no pasa por la salida laboral,
 		# no paga nómina y no gasta ni concede acciones.
 		dia._entrar_en("casa")
