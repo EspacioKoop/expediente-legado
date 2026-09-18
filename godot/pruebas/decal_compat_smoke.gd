@@ -45,20 +45,23 @@ func _init() -> void:
 
 	var mundo := Node3D.new()
 	get_root().add_child(mundo)
-	Espacio3D.construir(
-		mundo,
-		{
-			"suelo": Vector2(2.0, 2.0),
-			"techo": false,
-			"decals":
-			[
-				{
-					"textura": textura,
-					"pos": Vector3(0.0, 1.0, -1.0),
-					"ancho": 1.0,
-				}
-			],
-		}
+	(
+		Espacio3D
+		. construir(
+			mundo,
+			{
+				"suelo": Vector2(2.0, 2.0),
+				"techo": false,
+				"decals":
+				[
+					{
+						"textura": textura,
+						"pos": Vector3(0.0, 1.0, -1.0),
+						"ancho": 1.0,
+					}
+				],
+			}
+		)
 	)
 	var montados := mundo.find_children("*", "Sprite3D", true, false)
 	comprobar("Espacio3D consume la colección decals", montados.size() == 1)
