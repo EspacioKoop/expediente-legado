@@ -58,9 +58,9 @@ func interactuar(actor: Node) -> bool:
 	var herramienta_id := String(herramienta.get("id", ""))
 	set_meta("ultimo_resultado", "reparada")
 	set_meta("herramienta_usada", herramienta_id)
-	habilitado = false
 	if not super.interactuar(actor):
 		return false
+	habilitado = false
 	reparada.emit(herramienta_id)
 	return true
 
