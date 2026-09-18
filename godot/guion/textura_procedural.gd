@@ -320,7 +320,8 @@ static func _es_puntero_lfs(ruta: String) -> bool:
 	var archivo := FileAccess.open(ruta, FileAccess.READ)
 	if archivo == null:
 		return false
-	return archivo.get_line().strip_edges() == "version https://git-lfs.github.com/spec/v1"
+	var cabecera := archivo.get_buffer(64).get_string_from_utf8()
+	return cabecera.begins_with("version https://git-lfs.github.com/spec/v1")
 
 
 static func calculada(
