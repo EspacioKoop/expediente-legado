@@ -196,7 +196,7 @@ func _sincronizar() -> void:
 				"%d/%d · %s"
 				% [
 					int(vista.get("intentos", 0)),
-					int(vista.get("max_intentos", 3)),
+					int(vista.get("max_intentos", 1)),
 					str(vista.get("estado", "activo")),
 				]
 			)
