@@ -29,6 +29,17 @@ class SuenoObjetivosTest(unittest.TestCase):
         self.assertIn('completados.has(id)', self.regla)
         self.assertIn('estado["resuelto"] = true', self.regla)
 
+    def test_puzzle_puede_ocupar_una_plaza_sin_cambiar_el_umbral(self):
+        self.assertIn("static func sustituir_puntuable(", self.regla)
+        self.assertIn('nuevo["cuenta"] = true', self.regla)
+        self.assertIn('reemplazo["cuenta"] = false', self.regla)
+        self.assertIn("registrar_objetivo_puzzle_onirico", self.gato)
+        self.assertIn('"tipo": "pista_onirica"', self.gato)
+        self.assertIn("_retirar_objetivo_espacial", self.gato)
+        self.assertIn("PuzzleOnirico.ESTADO_COMPLETADO", self.gato)
+        self.assertIn("SuenoObjetivos.completar(estado, objetivo_id)", self.gato)
+        self.assertIn("SuenoObjetivos.fallar(estado, objetivo_id)", self.gato)
+
     def test_contrato_real_se_ejecuta_en_godot(self):
         comprobar_contrato(
             self,
