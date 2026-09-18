@@ -45,6 +45,7 @@ func _probar() -> void:
 
 	_probar_orden_del_recorrido()
 	_probar_escaparate(calle)
+	_probar_cristales_psx(calle)
 	_probar_rotulos(calle)
 	_probar_farolas(calle)
 	await _probar_tienda(dia, calle)
@@ -113,6 +114,36 @@ func _probar_escaparate(calle: Node3D) -> void:
 			_comprobar(
 				tele.global_position.x < cristal.global_position.x, "tele detrás del cristal"
 			)
+
+
+func _probar_cristales_psx(calle: Node3D) -> void:
+	for ruta in [
+		"EdificioOficina/Vestibulo",
+		"EdificioOficina/PuertaIzquierda",
+		"EdificioOficina/PuertaDerecha",
+		"BloqueCasa/CristalPortal",
+		"VentanillaReclamaciones/PuertaCristal",
+		"VentanillaReclamaciones/Mostrador",
+		"Electrodomesticos/CristalEscaparate",
+		"TiendaVideojuegos/Escaparate",
+		"TiendaVideojuegos/Puerta",
+		"Alquileres/VentanillaPago",
+		"Alquileres/Puerta",
+	]:
+		var cristal := calle.get_node_or_null(ruta) as MeshInstance3D
+		_comprobar(cristal != null, "existe vidrio PSX " + ruta)
+		if cristal == null:
+			continue
+		var vidrio := cristal.material_override as ShaderMaterial
+		_comprobar(vidrio != null, "el vidrio usa ShaderMaterial " + ruta)
+		if vidrio == null:
+			continue
+		_comprobar(
+			vidrio.shader.resource_path.ends_with("psx_cristal.gdshader"),
+			"el vidrio conserva shader PSX " + ruta
+		)
+		var color_base: Color = vidrio.get_shader_parameter("color_base")
+		_comprobar(color_base.a < 0.5, "el vidrio deja leer el interior " + ruta)
 
 
 func _probar_rotulos(calle: Node3D) -> void:
