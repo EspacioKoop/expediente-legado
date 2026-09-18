@@ -19,7 +19,7 @@ const CASOS := [
 	{
 		"id": "sueno",
 		"fase": "sueño",
-		"escena": "patio",
+		"escena": "crucero",
 		"mirada": 0.0,
 		"inclinacion": -8.0,
 	},
