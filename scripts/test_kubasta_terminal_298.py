@@ -71,7 +71,8 @@ class KubastaTerminal298Test(unittest.TestCase):
     def test_no_se_promete_cambio_global(self):
         self.assertIn("no cambia visualmente", self.doc.lower())
         self.assertIn("IBM Plex Mono", self.doc)
-        self.assertIn("no se convierte Kubasta en fuente global", self.doc)
+        doc_normalizado = " ".join(self.doc.split())
+        self.assertIn("no se convierte Kubasta en fuente global", doc_normalizado)
 
 
 if __name__ == "__main__":
