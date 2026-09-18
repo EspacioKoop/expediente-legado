@@ -1,12 +1,20 @@
 ## Recomposición visual del trayecto para #277 y contenido del escaparate #142.
 ##
 ## Toma la calle ya declarada, concentra sus seis aparatos en un único escaparate
-## reconocible y les asigna el motivo ligero de medias lunas acordado en #142.
+## reconocible y les asigna seis familias CRT ligeras, una por pantalla.
 class_name CalleComposicion
 extends RefCounted
 
 const COLOR_MARCO := Color(0.18, 0.17, 0.16)
 const COLOR_FONDO := Color(0.24, 0.22, 0.20)
+const CANALES_CRT := [
+	"informativo",
+	"deporte",
+	"institucional",
+	"tecnica",
+	"anomalia",
+	"ocio",
+]
 
 
 static func aplicar(calle: Dictionary) -> Dictionary:
@@ -21,7 +29,9 @@ static func aplicar(calle: Dictionary) -> Dictionary:
 		var columna := i % 3
 		pantallas[i]["pos"] = Vector3(-2.56, 1.25 + fila * 0.92, z_columnas[columna])
 		pantallas[i]["giro"] = 90.0
-		pantallas[i]["contenido"] = "media_luna"
+		pantallas[i]["contenido"] = "emision_crt"
+		pantallas[i]["canal"] = i
+		pantallas[i]["canal_id"] = CANALES_CRT[i]
 	resultado["pantallas"] = pantallas
 
 	var bultos: Array = resultado.get("bultos", []).duplicate(true)
