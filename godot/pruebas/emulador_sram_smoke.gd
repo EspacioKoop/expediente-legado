@@ -142,7 +142,7 @@ func _ruta_sram(rom: PackedByteArray) -> String:
 
 func _limpiar_save(ruta: String) -> void:
 	for sufijo in ["", ".nuevo", ".anterior", ".roto"]:
-		var candidata := ruta + sufijo
+		var candidata: String = ruta + String(sufijo)
 		if FileAccess.file_exists(candidata):
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(candidata))
 
