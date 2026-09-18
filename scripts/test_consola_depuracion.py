@@ -46,15 +46,27 @@ class ConsolaDepuracionTest(unittest.TestCase):
             self.assertIn("debug/**", {p.strip() for p in filtro.split(",")})
 
     def test_qa_conserva_los_comandos_de_playtest(self):
-        for comando in ("fase", "sala", "dia", "dinero", "pistas", "gato", "clima", "desatascar"):
+        for comando in (
+            "fase",
+            "sala",
+            "dia",
+            "dinero",
+            "pistas",
+            "gato",
+            "clima",
+            "desatascar",
+            "dibujo",
+        ):
             self.assertIn(f'"{comando}":', self.qa)
+        self.assertIn('res://debug/dibujo_3d.gd', self.qa)
 
     def test_release_exige_desbloqueo_y_solo_tiene_utilidades_seguras(self):
         self.assertIn("TiendaVideojuegos.consola_trucos_desbloqueada()", self.release)
         for comando in ("clima", "desatascar", "portatil", "diagnostico"):
             self.assertIn(f'"{comando}":', self.release)
-        for handler in ("fase", "sala", "dia", "dinero", "pistas", "gato"):
+        for handler in ("fase", "sala", "dia", "dinero", "pistas", "gato", "dibujo"):
             self.assertNotIn(f"func _cmd_{handler}(", self.release)
+        self.assertNotIn("dibujo_3d.gd", self.release)
         self.assertNotIn('_entrar_en("casa")', self.release)
         self.assertIn('dia.jornada["fase"] != "casa"', self.release)
 

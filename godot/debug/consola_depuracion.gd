@@ -2,7 +2,7 @@
 ## del 1.
 ##
 ## Es herramienta de playtest, no juego: vive bajo `debug/`, fuera del export público,
-## en `textos.csv`. Cada botón escribe el mismo comando que se podría teclear, así
+## y no necesita `textos.csv`. Cada botón escribe el mismo comando que se podría teclear, así
 ## que el registro enseña los comandos sin tener que leer la ayuda.
 ##
 ## Solo toca la partida en curso (`dia.tscn`). Fuera de ella lo dice y no hace
@@ -12,6 +12,8 @@ extends CanvasLayer
 const ESCENA_DIA := "res://escenas/dia.tscn"
 const FASES := ["archivo", "trayecto", "casa", "sueño"]
 const CLIMAS := ["auto", "despejado", "nublado", "lluvia", "niebla", "nieve"]
+const RUTA_DIBUJO_3D := "res://debug/dibujo_3d.gd"
+const NOMBRE_DIBUJO_3D := "DibujoDebug3D"
 const COMANDOS := {
 	"ayuda": "lista los comandos",
 	"fase": "fase archivo|trayecto|casa|sueño — cambia de espacio",
@@ -23,6 +25,7 @@ const COMANDOS := {
 	"clima": "clima auto|despejado|nublado|lluvia|niebla|nieve",
 	"desatascar": "desatascar — vuelve a la entrada del espacio actual",
 	"portatil": "portatil — abre la Portátil Color 98",
+	"dibujo": "dibujo [on|off|refrescar] — geometría 3D deducida",
 	"limpiar": "limpiar — borra el registro",
 }
 
@@ -128,6 +131,8 @@ func ejecutar(texto: String) -> void:
 			_cmd_desatascar()
 		"portatil", "portátil":
 			_cmd_portatil()
+		"dibujo", "debugdraw":
+			_cmd_dibujo(args)
 		_:
 			_error("No conozco «%s». Escribe ayuda." % comando)
 
@@ -259,6 +264,62 @@ func _cmd_portatil() -> void:
 	_ok("Abriendo la portátil")
 
 
+func _cmd_dibujo(args: Array) -> void:
+	var dia := _dia()
+	if dia == null:
+		return
+	var actual := dia.get_node_or_null(NOMBRE_DIBUJO_3D)
+	var accion := (
+		String(args[0]).to_lower() if not args.is_empty() else ("off" if actual != null else "on")
+	)
+	if accion not in ["on", "off", "refrescar"]:
+		_error("Uso: dibujo on|off|refrescar")
+		return
+	if accion == "off":
+		if actual != null:
+			actual.queue_free()
+		_ok("Dibujo 3D: desactivado")
+		return
+
+	if actual == null:
+		var script := load(RUTA_DIBUJO_3D) as Script
+		if script == null:
+			_error("No se pudo cargar el dibujo 3D de QA")
+			return
+		actual = script.new() as Node3D
+		if actual == null:
+			_error("No se pudo instanciar el dibujo 3D de QA")
+			return
+		actual.name = NOMBRE_DIBUJO_3D
+		dia.add_child(actual)
+		actual.call("configurar", dia)
+	else:
+		actual.call("redibujar")
+
+	var resumen: Dictionary = actual.call("resumen")
+	_ok(
+		(
+			"Dibujo 3D: %d celdas · %d muros · %d aristas físicas · %d salidas · %d figuras"
+			% [
+				int(resumen.get("celdas", 0)),
+				int(resumen.get("muros", 0)),
+				int(resumen.get("contorno_fisico", 0)),
+				int(resumen.get("salidas", 0)),
+				int(resumen.get("figuras", 0)),
+			]
+		)
+	)
+	_escribir(
+		(
+			"[color=#8cdfff]cian=celdas[/color] · "
+			+ "[color=#ffa31a]naranja=muros[/color] · "
+			+ "[color=#ff33db]magenta=contorno físico[/color] · "
+			+ "[color=#38ff59]verde=entrada[/color] · "
+			+ "[color=#ff3330]rojo=salidas[/color] · blanco=figuras"
+		)
+	)
+
+
 # --- Apoyo --------------------------------------------------------------------
 
 
@@ -306,6 +367,8 @@ func _autocompletar() -> void:
 				candidatos = CLIMAS
 			"gato":
 				candidatos = ["comer", "hambre"]
+			"dibujo", "debugdraw":
+				candidatos = ["on", "off", "refrescar"]
 	var prefijo: String = partes[partes.size() - 1]
 	var encajan := candidatos.filter(func(c): return String(c).begins_with(prefijo))
 	if encajan.size() == 1:
@@ -370,6 +433,7 @@ func _montar() -> void:
 		[
 			["desatascar", "Desatascar"],
 			["portatil", "Portátil 98"],
+			["dibujo", "Dibujo 3D"],
 			["ayuda", "Ayuda"],
 			["limpiar", "Limpiar"],
 		]
