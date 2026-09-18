@@ -78,42 +78,53 @@ static func _perfil_clima(estado: String) -> Dictionary:
 	}
 	match estado:
 		Clima.NUBLADO:
-			perfil.merge(
-				{
-					"tinte": Color(0.91, 0.93, 0.96),
-					"roughness": 0.92,
-				},
-				true,
+			(
+				perfil
+				. merge(
+					{
+						"tinte": Color(0.91, 0.93, 0.96),
+						"roughness": 0.92,
+					},
+					true,
+				)
 			)
 		Clima.LLUVIA:
-			perfil.merge(
-				{
-					"tinte": Color(0.82, 0.88, 0.96),
-					"roughness": 0.24,
-					"metallic": 0.03,
-					"specular": BaseMaterial3D.SPECULAR_SCHLICK_GGX,
-				},
-				true,
+			(
+				perfil
+				. merge(
+					{
+						"tinte": Color(0.82, 0.88, 0.96),
+						"roughness": 0.24,
+						"metallic": 0.03,
+						"specular": BaseMaterial3D.SPECULAR_SCHLICK_GGX,
+					},
+					true,
+				)
 			)
 		Clima.NIEBLA:
-			perfil.merge(
-				{
-					"tinte": Color(0.79, 0.81, 0.84),
-					"roughness": 1.0,
-				},
-				true,
+			(
+				perfil
+				. merge(
+					{
+						"tinte": Color(0.79, 0.81, 0.84),
+						"roughness": 1.0,
+					},
+					true,
+				)
 			)
 		Clima.NIEVE:
-			perfil.merge(
-				{
-					"tinte": Color(0.88, 0.93, 1.0),
-					"roughness": 0.90,
-					"nieve": true,
-				},
-				true,
+			(
+				perfil
+				. merge(
+					{
+						"tinte": Color(0.88, 0.93, 1.0),
+						"roughness": 0.90,
+						"nieve": true,
+					},
+					true,
+				)
 			)
 	return perfil
-
 
 static func _crear_coche(ficha: Array, materiales: Dictionary, con_colision: bool) -> Node3D:
 	var coche := Node3D.new()
