@@ -276,11 +276,7 @@ func _resolver_objetivos_sueno() -> void:
 ## de las tres plazas espaciales por el puzzle, manteniendo el umbral 2/3. Si
 ## falla o se abandona, quedan dos rutas espaciales puntuables y nunca bloquea.
 func registrar_objetivo_puzzle_onirico(nucleo) -> bool:
-	if (
-		nucleo == null
-		or String(jornada.get("fase", "")) != "sueño"
-		or _objetivo_escena.is_empty()
-	):
+	if nucleo == null or String(jornada.get("fase", "")) != "sueño" or _objetivo_escena.is_empty():
 		return false
 	var puzzle_id := String(nucleo.puzzle_id)
 	var reward_id := String(nucleo.reward_id)
