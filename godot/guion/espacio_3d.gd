@@ -75,6 +75,10 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 			_techo(raiz, medidas, color_techo, espacio.get("textura_techo", ""), centro)
 		_muros(raiz, medidas, color_muro, espacio.get("textura_muro", ""), centro)
 
+	# #231 / #479: una mancha es dressing visual del espacio. Se monta después
+	# de la arquitectura para que pueda separarse de ella, pero no crea física.
+	DecalCompat.montar_todos(raiz, espacio)
+
 	for bulto in espacio.get("bultos", []):
 		var pieza := _caja(
 			raiz,
