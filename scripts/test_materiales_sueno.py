@@ -66,6 +66,20 @@ class MaterialesSuenoTest(unittest.TestCase):
                 self.assertEqual(len(valores), 3)
                 self.assertGreater(len({round(abs(v), 3) for v in valores}), 1)
 
+
+    def test_la_luz_ambiente_preserva_legibilidad_material(self):
+        constante = re.search(
+            r"const ENERGIA_AMBIENTE_LEGIBLE := ([0-9.]+)",
+            self.formas,
+        )
+        self.assertIsNotNone(constante)
+        self.assertGreaterEqual(float(constante.group(1)), 0.5)
+        usos = re.findall(
+            r'"ambiente_energia":\s*ENERGIA_AMBIENTE_LEGIBLE',
+            self.formas,
+        )
+        self.assertEqual(len(usos), len(IDS))
+
     def test_hay_inversion_deliberada_en_al_menos_una_forma(self):
         vectores = re.findall(
             r'"deformacion_textura": Vector3\(([^)]+)\)',
