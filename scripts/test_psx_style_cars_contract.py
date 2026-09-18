@@ -47,6 +47,17 @@ class TestPsxStyleCarsContract(unittest.TestCase):
         self.assertIn("sha256", texto)
         self.assertIn("Git LFS real", texto)
 
+    def test_variantes_climaticas_no_anaden_assets_ni_fisica(self):
+        runtime = RUNTIME.read_text(encoding="utf-8")
+        self.assertIn("static func aplicar_clima", runtime)
+        self.assertIn("Clima.LLUVIA", runtime)
+        self.assertIn("SPECULAR_SCHLICK_GGX", runtime)
+        self.assertIn('NOMBRE_NIEVE := "NieveClima"', runtime)
+        self.assertIn("BoxMesh.new()", runtime)
+        self.assertIn("nieve.visible = bool(perfil", runtime)
+        self.assertNotIn("GPUParticles3D.new()", runtime)
+        self.assertNotIn("VehicleBody3D.new", runtime)
+
     def test_trafico_lejano_es_barato_y_no_jugable(self):
         texto = DOC.read_text(encoding="utf-8")
         runtime = RUNTIME.read_text(encoding="utf-8")
@@ -94,7 +105,7 @@ class TestPsxStyleCarsRuntime(unittest.TestCase):
             base = [motor, "--headless", "--language", "es", "--path", str(ROOT / "godot")]
             for argumentos, minimo in [
                 (["--editor", "--import", "--quit"], None),
-                (["--script", "res://pruebas/pruebas_coches_psx_cc0.gd"], 65),
+                (["--script", "res://pruebas/pruebas_coches_psx_cc0.gd"], 80),
             ]:
                 resultado = subprocess.run(
                     base + argumentos, env=entorno, text=True, stdout=subprocess.PIPE,
