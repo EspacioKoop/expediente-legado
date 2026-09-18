@@ -6,6 +6,7 @@ class_name SuenoRelacionOnirica3D
 extends Node3D
 
 signal terminado(estado: String)
+signal estado_cambiado(estado: String)
 
 const Puzzle := preload("res://guion/puzzle_onirico.gd")
 
@@ -41,6 +42,7 @@ func abandonar() -> bool:
 	var seguro := relacion.salir()
 	_sincronizar()
 	if seguro:
+		estado_cambiado.emit("abandonado")
 		terminado.emit("abandonado")
 	return seguro
 
@@ -123,6 +125,7 @@ func _al_activar_documento(_actor: Node, indice: int) -> void:
 		return
 	var evento := relacion.seleccionar(indice)
 	_sincronizar()
+	estado_cambiado.emit(evento)
 	if evento == "completado" or evento == "fallado":
 		terminado.emit(evento)
 
