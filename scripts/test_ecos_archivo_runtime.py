@@ -24,6 +24,7 @@ class EcosArchivoRuntimeTest(unittest.TestCase):
         self.assertIn("BoxMesh.new()", self.vertical)
         self.assertIn("activado.connect(_al_activar_eco.bind(slot))", self.vertical)
         self.assertIn("EcosArchivoPresentacion.EVENTO_COMPLETADO", self.vertical)
+        self.assertIn("_recompensa_texto", self.vertical)
         self.assertNotIn("Input.", self.vertical)
         self.assertNotIn("JOY_BUTTON_", self.vertical)
         self.assertNotIn("KEY_", self.vertical)
@@ -38,19 +39,27 @@ class EcosArchivoRuntimeTest(unittest.TestCase):
         self.assertIn("CollisionShape3D.new()", self.vertical)
         self.assertIn("var eco := Interactuable3D.new()", self.vertical)
 
-    def test_controller_solo_deriva_contenido_leido_y_descubierto(self):
-        self.assertIn("SuenoContenido.fuentes(", self.controller_compact)
+    def test_controller_solo_deriva_recompensas_de_documentos_leidos(self):
         self.assertIn('dia.jornada.get("leido_hoy",[])', self.controller_compact)
         self.assertIn('dia.partida.estado.get("pistas_descubiertas",[])', self.controller_compact)
         self.assertIn('pista.get("registroOrigen","")', self.controller_compact)
         self.assertIn('pista.get("fraseGatillo","")', self.controller_compact)
+        self.assertIn('registro.get("contenido","")', self.controller_compact)
+        self.assertIn(".contains(frase)", self.controller_compact)
+        self.assertIn('pista.has("registroOrigen2")', self.controller_compact)
+        self.assertIn('candidato.get("reward_id","")', self.controller_compact)
         self.assertIn("EcosArchivo.crear(", self.controller_compact)
         self.assertIn("EcosArchivoPresentacion.crear(ecos)", self.controller_compact)
 
+    def test_controller_conecta_recompensa_real_y_prioriza_pendientes(self):
+        self.assertIn("pendientesifnotpendientes.is_empty()elseconocidas", self.controller_compact)
+        self.assertIn("dia.conectar_recompensa_onirica(ecos.nucleo,caso)", self.controller_compact)
+        self.assertIn('candidato.get("descripcion","")', self.controller_compact)
+
     def test_determinismo_y_reduccion_movimiento_vienen_de_contratos_existentes(self):
         self.assertIn("Sueno.semilla(", self.controller_compact)
-        self.assertIn("frases.sort()", self.controller_compact)
-        self.assertIn("posmod(semilla,frases.size())", self.controller_compact)
+        self.assertIn('candidatos.sort_custom(Callable(self,"_candidato_antes"))', self.controller_compact)
+        self.assertIn("posmod(semilla,candidatos.size())", self.controller_compact)
         self.assertIn(
             'PreferenciasSiga.cargar().get("reduccion_movimiento",false)',
             self.controller_compact,

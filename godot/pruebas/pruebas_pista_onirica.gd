@@ -9,6 +9,7 @@ var _fallos := 0
 func _initialize() -> void:
 	_probar_estado_y_fuentes()
 	_probar_pista_de_un_origen()
+	_probar_folio_real_con_id_de_registro()
 	_probar_relacion_de_dos_origenes()
 	_probar_recompensa_dirigida_y_ambiguedad()
 	_probar_catalogo_invalido()
@@ -56,6 +57,39 @@ func _probar_pista_de_un_origen() -> void:
 		caso, {"state": "completado", "source_ids": ["F-1", "F-1", ""]}
 	)
 	_comprobar(duplicadas.get("id", "") == "P-1", "normaliza fuentes duplicadas y vacías")
+
+
+func _probar_folio_real_con_id_de_registro() -> void:
+	var caso := {
+		"registros": [{"id": "memo1@1", "folio": "MEMO-1999-088"}],
+		"pistas":
+		[
+			{
+				"id": "pista1@1",
+				"descripcion": "detalle ya contenido en el memo",
+				"registroOrigen": "memo1@1",
+			}
+		],
+	}
+	var resultado := (
+		Pista
+		. resolver(
+			caso,
+			{
+				"state": "completado",
+				"source_ids": ["MEMO-1999-088"],
+				"reward_id": "pista1@1",
+			}
+		)
+	)
+	_comprobar(
+		resultado.get("id", "") == "pista1@1",
+		"un folio visible del puzzle resuelve contra el id interno del registro",
+	)
+	_comprobar(
+		resultado.get("fuentes", []) == ["memo1@1"],
+		"la recompensa conserva como procedencia el registro catalogado",
+	)
 
 
 func _probar_relacion_de_dos_origenes() -> void:
