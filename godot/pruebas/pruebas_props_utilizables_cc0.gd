@@ -61,7 +61,7 @@ func _probar() -> void:
 	palanca.free()
 	await process_frame
 
-	print("Props utilizables CC0 #680: %d pasadas, %d fallos" % [_pasadas, _fallos])
+	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
 
 
