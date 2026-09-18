@@ -47,12 +47,15 @@ static func crear(caso: Dictionary, pista: Dictionary, leido_hoy: Array, raiz: i
 
 	var folio_a := String(registro_a.get("folio", ""))
 	var folio_b := String(registro_b.get("folio", ""))
-	var base = Puzzle.crear(
-		"relacion:" + pista_id,
-		[folio_a, folio_b],
-		leido_hoy,
-		raiz,
-		pista_id,
+	var base = (
+		Puzzle
+		. crear(
+			"relacion:" + pista_id,
+			[folio_a, folio_b],
+			leido_hoy,
+			raiz,
+			pista_id,
+		)
 	)
 	if base == null:
 		return null
