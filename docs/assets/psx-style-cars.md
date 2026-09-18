@@ -90,6 +90,22 @@ No se añaden modelos ni texturas. Se reutiliza `Car03` como una cuarta instanci
 
 La intención es añadir una señal mínima de ciudad viva sin convertir el trayecto en tráfico jugable ni introducir riesgo de atropello, bloqueo o decisiones de navegación.
 
+## Tercer corte — respuesta visual al clima
+
+Los cuatro vehículos reutilizan ahora el **mismo estado climático canónico** que gobierna cielo, niebla, precipitación y suelo. No existe clima propio de coches ni temporizador adicional.
+
+Perfiles:
+
+- **despejado**: material base mate del lote;
+- **nublado**: ligera pérdida de contraste y tinte frío, manteniendo lectura seca;
+- **lluvia**: carrocería algo más oscura/fría, rugosidad reducida y especular Schlick-GGX para sugerir superficie mojada;
+- **niebla**: color desaturado y difuso; la profundidad real sigue resolviéndola el `Environment`;
+- **nieve**: tinte frío más una única acumulación procedural muy fina sobre la parte alta de cada coche.
+
+La acumulación de nieve es un `BoxMesh` sin colisión ni sombra, oculto en los otros cuatro estados. Se crea junto al vehículo y solo cambia `visible`; no añade texturas, partículas, procesos por coche ni nuevos binarios.
+
+`dia_clima_visual_app.gd` aplica el perfil cuando cambia el estado o se reconstruye el mundo de `trayecto`. Al volver a despejado se restauran rugosidad, metalicidad, especular y tinte base, evitando residuos entre climas.
+
 ## Checklist técnico
 
 - [x] descargar `PSX_Style_Cars_by_GGBot_(August2023).zip` desde la fuente oficial;
