@@ -1,4 +1,4 @@
-## Integración del lote de coches PSX y del hook real de trayecto (#230).
+## Integración del lote de coches PSX, clima y hook real de trayecto (#230).
 extends SceneTree
 
 const Coches := preload("res://guion/coches_psx_cc0.gd")
@@ -42,7 +42,18 @@ func _probar() -> void:
 	var triangulos := 0
 	for coche in lote.get_children():
 		var caja := AABB()
+		var nieve := coche.get_node_or_null("NieveClima") as MeshInstance3D
+		_comprobar(nieve != null, "cada coche prepara acumulación climática")
+		_comprobar(not nieve.visible, "nieve oculta por defecto")
+		_comprobar(
+			nieve.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF,
+			"acumulación sin sombra",
+		)
 		for malla in coche.find_children("*", "MeshInstance3D", true, false):
+			for i in malla.mesh.get_surface_count():
+				triangulos += malla.mesh.surface_get_array_index_len(i) / 3
+			if str(malla.name) == "NieveClima":
+				continue
 			var limites: AABB = malla.global_transform * malla.get_aabb()
 			caja = limites if caja.size == Vector3.ZERO else caja.merge(limites)
 			_comprobar(
@@ -50,7 +61,6 @@ func _probar() -> void:
 				"coches sin pasada de sombras",
 			)
 			for i in malla.mesh.get_surface_count():
-				triangulos += malla.mesh.surface_get_array_index_len(i) / 3
 				var mate: StandardMaterial3D = malla.get_active_material(i)
 				var original: StandardMaterial3D = malla.mesh.surface_get_material(i)
 				_comprobar(mate.albedo_texture != null, "textura original visible")
@@ -85,8 +95,41 @@ func _probar() -> void:
 		)
 		_comprobar(volumen.position.is_equal_approx(caja.position), "colisión alineada: " + nombre)
 		_comprobar(volumen.size.is_equal_approx(caja.size), "colisión del tamaño del coche")
-	print("Lote: 4 instancias, %d triángulos" % triangulos)
+	print("Lote climático: 4 instancias, %d triángulos" % triangulos)
 	_comprobar(triangulos <= 1900, "presupuesto geométrico acotado")
+
+	var ranchera := lote.get_node("RancheraSur") as Node3D
+	var mate_ranchera := _material_carroceria(ranchera)
+	var nieve_ranchera := ranchera.get_node("NieveClima") as MeshInstance3D
+	Coches.aplicar_clima(lote, Clima.LLUVIA)
+	_comprobar(mate_ranchera.roughness < 0.30, "lluvia reduce rugosidad")
+	_comprobar(mate_ranchera.metallic > 0.0, "lluvia añade respuesta húmeda")
+	_comprobar(
+		mate_ranchera.specular_mode == BaseMaterial3D.SPECULAR_SCHLICK_GGX,
+		"lluvia activa especular húmedo",
+	)
+	_comprobar(not nieve_ranchera.visible, "lluvia no muestra nieve")
+	Coches.aplicar_clima(lote, Clima.NIEBLA)
+	_comprobar(mate_ranchera.roughness == 1.0, "niebla vuelve a acabado difuso")
+	_comprobar(not nieve_ranchera.visible, "niebla no muestra nieve")
+	Coches.aplicar_clima(lote, Clima.NIEVE)
+	_comprobar(nieve_ranchera.visible, "nieve activa acumulación superior")
+	_comprobar(mate_ranchera.roughness >= 0.90, "nieve conserva lectura mate")
+	var acumulaciones := 0
+	for coche in lote.get_children():
+		var nieve := coche.get_node("NieveClima") as MeshInstance3D
+		if nieve.visible:
+			acumulaciones += 1
+	_comprobar(acumulaciones == 4, "nieve afecta a aparcados y tráfico lejano")
+	Coches.aplicar_clima(lote, Clima.DESPEJADO)
+	_comprobar(not nieve_ranchera.visible, "despejado retira acumulación")
+	_comprobar(mate_ranchera.roughness == 1.0, "despejado restaura rugosidad")
+	_comprobar(mate_ranchera.metallic == 0.0, "despejado restaura metalicidad")
+	_comprobar(
+		mate_ranchera.specular_mode == BaseMaterial3D.SPECULAR_DISABLED,
+		"despejado restaura especular",
+	)
+
 	var x_inicial := trafico.position.x
 	await create_timer(0.20).timeout
 	_comprobar(trafico.position.x > x_inicial + 0.01, "tráfico lejano se mueve")
@@ -111,6 +154,15 @@ func _probar() -> void:
 	await create_timer(0.25).timeout
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
+
+
+func _material_carroceria(coche: Node3D) -> StandardMaterial3D:
+	for malla in coche.find_children("*", "MeshInstance3D", true, false):
+		if str(malla.name) == "NieveClima":
+			continue
+		if malla.mesh.get_surface_count() > 0:
+			return malla.get_active_material(0) as StandardMaterial3D
+	return null
 
 
 ## Barrera y conos de TraficoVialCC0 ocupan el carril derecho entre z 4 y 8.
