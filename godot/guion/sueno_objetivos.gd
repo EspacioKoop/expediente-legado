@@ -74,6 +74,60 @@ static func fallar(estado: Dictionary, id: String) -> bool:
 	return true
 
 
+## Sustituye una plaza puntuable pendiente por otro objetivo sin cambiar el
+## umbral. El objetivo reemplazado sigue registrado como opcional, pero deja de
+## contar. Es idempotente para soportar recargas de la misma escena.
+static func sustituir_puntuable(
+	estado: Dictionary, objetivo_nuevo, reemplazo_id: String
+) -> bool:
+	if bool(estado.get("resuelto", false)):
+		return false
+	var nuevo := _normalizar(objetivo_nuevo)
+	var nuevo_id := String(nuevo.get("id", ""))
+	if nuevo_id.is_empty() or reemplazo_id.is_empty() or nuevo_id == reemplazo_id:
+		return false
+
+	var ids: Array = estado.get("ids", [])
+	var objetivos: Array = estado.get("objetivos", [])
+	var reemplazo_indice := -1
+	var nuevo_indice := -1
+	for indice in range(objetivos.size()):
+		var objetivo: Dictionary = objetivos[indice]
+		var objetivo_id := String(objetivo.get("id", ""))
+		if objetivo_id == reemplazo_id:
+			reemplazo_indice = indice
+		if objetivo_id == nuevo_id:
+			nuevo_indice = indice
+
+	if nuevo_indice >= 0:
+		if reemplazo_indice < 0:
+			return false
+		return (
+			not bool(objetivos[reemplazo_indice].get("cuenta", true))
+			and bool(objetivos[nuevo_indice].get("cuenta", true))
+		)
+
+	var completados: Array = estado.get("completados", [])
+	var fallidos: Array = estado.get("fallidos", [])
+	if (
+		reemplazo_indice < 0
+		or completados.has(reemplazo_id)
+		or fallidos.has(reemplazo_id)
+		or not bool(objetivos[reemplazo_indice].get("cuenta", true))
+	):
+		return false
+
+	var reemplazo: Dictionary = objetivos[reemplazo_indice]
+	reemplazo["cuenta"] = false
+	objetivos[reemplazo_indice] = reemplazo
+	nuevo["cuenta"] = true
+	objetivos.append(nuevo)
+	ids.append(nuevo_id)
+	estado["ids"] = ids
+	estado["objetivos"] = objetivos
+	return true
+
+
 static func progreso(estado: Dictionary) -> Vector2i:
 	return Vector2i(
 		_completados_puntuables(estado).size(),
