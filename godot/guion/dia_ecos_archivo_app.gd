@@ -125,9 +125,7 @@ func _montar_ecos(
 		vertical.free()
 		return
 	var caso_id := String(caso.get("id", ""))
-	vertical.estado_cambiado.connect(
-		_al_cambiar_ecos.bind(dia, ecos, caso_id, reward_id)
-	)
+	vertical.estado_cambiado.connect(_al_cambiar_ecos.bind(dia, ecos, caso_id, reward_id))
 	mundo.add_child(vertical)
 	mundo.set_meta("puzzle_onirico_montado", "ecos")
 	_ecos_activos = vertical
