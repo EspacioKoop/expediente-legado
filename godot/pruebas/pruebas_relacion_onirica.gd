@@ -142,9 +142,7 @@ func _probar_fallo_unico() -> void:
 	var i1 := _indice(relacion.documentos, "r1")
 	var i3 := _indice(relacion.documentos, "r3")
 	_comprobar(relacion.seleccionar(i1) == "seleccionado", "puede fijar un primer documento")
-	_comprobar(
-		relacion.seleccionar(i3) == "seleccionado", "la pareja incorrecta se puede preparar"
-	)
+	_comprobar(relacion.seleccionar(i3) == "seleccionado", "la pareja incorrecta se puede preparar")
 	_comprobar(
 		relacion.seleccionar(i3) == "deseleccionado",
 		"puede corregir la segunda elección antes de confirmar",
