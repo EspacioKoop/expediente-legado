@@ -282,6 +282,10 @@ static func espacio(id: String, quedan: int, contenido: Dictionary = {}) -> Dict
 		resultado["contorno"] = familia["contorno"]
 		resultado["altura_contorno"] = float(familia.get("altura", 3.2))
 
+	# #231: el desgaste del pack es una deformación del material conocido, no
+	# una nueva familia de sueño. Solo se activa cuando el PNG real existe.
+	resultado = TexturaProcedural.aplicar_horror_sueno(resultado, id)
+
 	# #284: la forma decide si tiene una identidad onírica fuerte. `Sueno`
 	# termina primero el contrato espacial genérico y solo después delega la
 	# presentación, de modo que visual y colisión siguen naciendo del mismo
