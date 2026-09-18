@@ -7,6 +7,8 @@ extends Node3D
 
 signal terminado(estado: String)
 
+const Puzzle := preload("res://guion/puzzle_onirico.gd")
+
 const POSICIONES := [
 	Vector3(-3.3, 0.0, 0.7),
 	Vector3(-1.1, 0.0, -0.7),
@@ -145,11 +147,11 @@ func _sincronizar() -> void:
 
 	if _estado == null:
 		return
-	if relacion.nucleo.state == PuzzleOnirico.ESTADO_COMPLETADO:
+	if relacion.nucleo.state == Puzzle.ESTADO_COMPLETADO:
 		_estado.text = recompensa_texto
-	elif relacion.nucleo.state == PuzzleOnirico.ESTADO_FALLADO:
+	elif relacion.nucleo.state == Puzzle.ESTADO_FALLADO:
 		_estado.text = "Los documentos se separan. No hay segundo intento."
-	elif relacion.nucleo.state == PuzzleOnirico.ESTADO_ABANDONADO:
+	elif relacion.nucleo.state == Puzzle.ESTADO_ABANDONADO:
 		_estado.text = "Relación abandonada."
 	else:
 		_estado.text = "%d/2 documentos" % relacion.seleccion.size()
