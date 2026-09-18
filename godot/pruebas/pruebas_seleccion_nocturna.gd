@@ -16,14 +16,10 @@ static func todo(comprobar: Callable) -> void:
 	comprobar.call("conserva orden y repetición", jornada["seleccion_nocturna"], ["B", "B", "A"])
 
 	var anterior: Array = jornada["seleccion_nocturna"].duplicate()
-	comprobar.call(
-		"rechaza documento no leído", Jornada.preparar_sueno(jornada, ["B", "X"]), false
-	)
+	comprobar.call("rechaza documento no leído", Jornada.preparar_sueno(jornada, ["B", "X"]), false)
 	comprobar.call("un rechazo no pisa selección válida", jornada["seleccion_nocturna"], anterior)
 	comprobar.call(
-		"rechaza más de tres huecos",
-		Jornada.preparar_sueno(jornada, ["A", "B", "C", "D"]),
-		false
+		"rechaza más de tres huecos", Jornada.preparar_sueno(jornada, ["A", "B", "C", "D"]), false
 	)
 
 	var sin_memoria := Sueno.semilla(4, jornada["leido_hoy"], 17)
@@ -31,8 +27,10 @@ static func todo(comprobar: Callable) -> void:
 	comprobar.call("la selección cambia la semilla nocturna", con_memoria == sin_memoria, false)
 	comprobar.call(
 		"repetir cambia la semilla",
-		Sueno.semilla(4, jornada["leido_hoy"], 17, ["B"])
-		== Sueno.semilla(4, jornada["leido_hoy"], 17, ["B", "B"]),
+		(
+			Sueno.semilla(4, jornada["leido_hoy"], 17, ["B"])
+			== Sueno.semilla(4, jornada["leido_hoy"], 17, ["B", "B"])
+		),
 		false
 	)
 
@@ -45,7 +43,9 @@ static func todo(comprobar: Callable) -> void:
 	)
 
 	var resultado := Jornada.dormir(jornada)
-	comprobar.call("dormir expone la selección persistida", resultado["seleccion_nocturna"], anterior)
+	comprobar.call(
+		"dormir expone la selección persistida", resultado["seleccion_nocturna"], anterior
+	)
 	var recargada: Dictionary = JSON.parse_string(JSON.stringify(jornada))
 	Jornada.completar(recargada, 17)
 	comprobar.call("recarga conserva selección", recargada["seleccion_nocturna"], anterior)
@@ -57,4 +57,6 @@ static func todo(comprobar: Callable) -> void:
 	vacia["leido_hoy"] = ["A"]
 	Jornada.preparar_sueno(vacia, [])
 	Jornada.dormir(vacia)
-	comprobar.call("cero documentos mantiene salida segura", vacia["sueno_escenas"].is_empty(), false)
+	comprobar.call(
+		"cero documentos mantiene salida segura", vacia["sueno_escenas"].is_empty(), false
+	)
