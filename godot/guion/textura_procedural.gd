@@ -289,7 +289,7 @@ static func por_nombre(nombre: String, base: Color, semilla: int) -> Texture2D:
 	if nombre.begins_with("res://"):
 		if not ResourceLoader.exists(nombre):
 			return null
-		return ResourceLoader.load(nombre, "Texture2D")
+		return ResourceLoader.load(nombre, "Texture2D") as Texture2D
 
 	var ruta := CARPETA % nombre
 	if ResourceLoader.exists(ruta):
