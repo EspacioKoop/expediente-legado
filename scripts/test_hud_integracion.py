@@ -30,6 +30,34 @@ class HUDIntegracionTest(unittest.TestCase):
         self.assertIn("DialogoDiegetico.mostrar(", self.dia)
         self.assertIn("_hud_prioridades, _caminante, companero, tr(clave_dialogo)", self.dia)
 
+    def test_dialogo_centra_camara_en_npc_y_la_restaura(self):
+        self.assertIn("_caminante.enfocar_conversacion(companero)", self.dia)
+        self.assertIn("_caminante.terminar_enfoque_conversacion()", self.dia)
+        self.assertIn("func enfocar_conversacion(objetivo: Node3D)", self.caminante)
+        self.assertIn('camara.name = "CamaraConversacion"', self.caminante)
+        self.assertIn("camara.look_at(_punto_enfoque_dialogo(), Vector3.UP)", self.caminante)
+        self.assertIn("func terminar_enfoque_conversacion()", self.caminante)
+        self.assertIn("_camara.current = true", self.caminante)
+
+    def test_enfoque_no_gira_cuerpo_y_respeta_reduccion_movimiento(self):
+        enfoque = self.caminante.split("func enfocar_conversacion", 1)[1].split(
+            "func terminar_enfoque_conversacion", 1
+        )[0]
+        self.assertIn('get("reduccion_movimiento", false)', enfoque)
+        self.assertIn("DURACION_ENFOQUE_DIALOGO", enfoque)
+        self.assertNotIn("rotate_y(", enfoque)
+        self.assertNotIn("rotation.y =", enfoque)
+        self.assertNotIn("set_physics_process(false)", enfoque)
+
+    def test_dialogo_reserva_mirada_pero_no_movimiento(self):
+        self.assertIn("if is_instance_valid(_camara_dialogo):\n\t\treturn", self.caminante)
+        fisica = self.caminante.split("func _physics_process", 1)[1].split(
+            "func _actualizar_agachado", 1
+        )[0]
+        self.assertIn("move_and_slide()", fisica)
+        self.assertIn("_actualizar_enfoque_conversacion()", fisica)
+        self.assertNotIn("set_physics_process(false)", fisica)
+
     def test_prompt_vive_en_arbitro_y_muestra_remapeo_real(self):
         self.assertIn("func conectar_hud(hud: HUDLayer)", self.caminante)
         self.assertIn("hud.registrar(HUDLayer.INTERACCION, _prompt_interaccion)", self.caminante)

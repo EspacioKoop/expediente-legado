@@ -49,6 +49,11 @@ const UMBRAL_CAMBIO_DISPOSITIVO := 0.35
 ## Cuánto se puede mirar arriba y abajo. Sin tope, la cámara se da la vuelta.
 const TOPE_VERTICAL := deg_to_rad(85.0)
 
+## El encuadre de conversación usa una cámara hermana: no gira el cuerpo ni
+## cambia la dirección de movimiento del jugador. #276
+const DURACION_ENFOQUE_DIALOGO := 0.22
+const ALTURA_ENFOQUE_DIALOGO := 0.35
+
 var _detector_interaccion: DetectorInteraccion3D
 var _prompt_interaccion: Label
 var _hud_prioridades: HUDLayer
@@ -57,6 +62,9 @@ var _preferencias_camara: Dictionary = {}
 var _ultimo_dispositivo := DispositivoEntrada.TECLADO_RATON
 var _texto_interaccion_actual := ""
 var _agachado := false
+var _camara_dialogo: Camera3D
+var _objetivo_dialogo: Node3D
+var _tween_camara_dialogo: Tween
 
 @onready var _camara: Camera3D = $Camara
 @onready var _colision: CollisionShape3D = $Colision
@@ -76,6 +84,78 @@ func _ready() -> void:
 
 func recargar_preferencias_camara() -> void:
 	_preferencias_camara = PreferenciasSiga.cargar()
+
+
+## Centra temporalmente la vista en el interlocutor sin apropiarse del movimiento.
+## La cámara normal queda intacta debajo: al terminar no hay que reconstruir yaw
+## ni pitch y el jugador recupera exactamente el encuadre que tenía al hablar.
+func enfocar_conversacion(objetivo: Node3D) -> void:
+	terminar_enfoque_conversacion()
+	if not is_instance_valid(objetivo) or not is_instance_valid(_camara):
+		return
+	var padre := _camara.get_parent() as Node3D
+	if padre == null:
+		return
+
+	var camara := Camera3D.new()
+	camara.name = "CamaraConversacion"
+	camara.fov = _camara.fov
+	camara.near = _camara.near
+	camara.far = _camara.far
+	camara.keep_aspect = _camara.keep_aspect
+	camara.cull_mask = _camara.cull_mask
+	padre.add_child(camara)
+	camara.transform = _camara.transform
+
+	_camara.current = false
+	camara.current = true
+	_camara_dialogo = camara
+	_objetivo_dialogo = objetivo
+
+	var origen := camara.rotation
+	camara.look_at(_punto_enfoque_dialogo(), Vector3.UP)
+	var destino := camara.rotation
+	camara.rotation = origen
+
+	# Reducción de movimiento conserva la atribución visual pero elimina el giro
+	# animado de cámara. No se crea un tween de duración artificialmente corta.
+	if bool(_preferencias_camara.get("reduccion_movimiento", false)):
+		camara.rotation = destino
+		return
+
+	_tween_camara_dialogo = create_tween()
+	_tween_camara_dialogo.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_tween_camara_dialogo.tween_property(camara, "rotation", destino, DURACION_ENFOQUE_DIALOGO)
+
+
+func terminar_enfoque_conversacion() -> void:
+	if _tween_camara_dialogo != null:
+		_tween_camara_dialogo.kill()
+	_tween_camara_dialogo = null
+	_objetivo_dialogo = null
+	if is_instance_valid(_camara_dialogo):
+		_camara.current = true
+		_camara_dialogo.queue_free()
+	_camara_dialogo = null
+
+
+func _punto_enfoque_dialogo() -> Vector3:
+	if not is_instance_valid(_objetivo_dialogo):
+		return global_position - global_transform.basis.z
+	return _objetivo_dialogo.global_position + Vector3.UP * ALTURA_ENFOQUE_DIALOGO
+
+
+func _actualizar_enfoque_conversacion() -> void:
+	if not is_instance_valid(_camara_dialogo):
+		return
+	if not is_instance_valid(_objetivo_dialogo):
+		terminar_enfoque_conversacion()
+		return
+	if _tween_camara_dialogo != null and _tween_camara_dialogo.is_running():
+		return
+	# Si el jugador camina durante la línea, la cámara acompaña su posición y
+	# mantiene al emisor centrado. El movimiento físico nunca se desactiva.
+	_camara_dialogo.look_at(_punto_enfoque_dialogo(), Vector3.UP)
 
 
 func _montar_interaccion() -> void:
@@ -283,6 +363,10 @@ func _unhandled_input(evento: InputEvent) -> void:
 		return
 	if not evento is InputEventMouseMotion or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		return
+	# Mientras habla un NPC solo se reserva la mirada; caminar, correr, saltar y
+	# agacharse siguen procesándose en _physics_process.
+	if is_instance_valid(_camara_dialogo):
+		return
 	var sensibilidad := SENSIBILIDAD_RATON_BASE * _sensibilidad_raton()
 	rotate_y(-evento.relative.x * sensibilidad)
 	_camara.rotation.x = clampf(
@@ -317,6 +401,7 @@ func _physics_process(delta: float) -> void:
 	velocity.x = move_toward(velocity.x, objetivo.x, respuesta * delta)
 	velocity.z = move_toward(velocity.z, objetivo.z, respuesta * delta)
 	move_and_slide()
+	_actualizar_enfoque_conversacion()
 
 
 ## Agacharse encoge la cápsula y baja la cámara; levantarse solo ocurre si hay
@@ -352,6 +437,8 @@ func _ajustar_altura(altura: float, camara_y: float) -> void:
 ## eventos mientras está quieto en una posición: manda su posición, y hay que
 ## leerla cada paso. El ratón es al revés, y por eso siguen siendo dos caminos.
 func _mirar_con_mando(delta: float) -> void:
+	if is_instance_valid(_camara_dialogo):
+		return
 	var mirada := Input.get_vector(
 		"mirar_izquierda", "mirar_derecha", "mirar_arriba", "mirar_abajo"
 	)

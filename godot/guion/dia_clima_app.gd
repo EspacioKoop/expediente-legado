@@ -178,16 +178,19 @@ func _iniciar_conversacion(
 	_dialogo_actual = DialogoDiegetico.mostrar(
 		_hud_prioridades, _caminante, companero, tr(clave_dialogo)
 	)
+	_caminante.enfocar_conversacion(companero)
 	_dialogo_actual.tree_exited.connect(_al_cerrar_dialogo)
 
 
 func _al_cerrar_dialogo() -> void:
+	_caminante.terminar_enfoque_conversacion()
 	_dialogo_actual = null
 	if _hud_prioridades != null:
 		_hud_prioridades.desactivar(HUDLayer.DIALOGO)
 
 
 func _cerrar_dialogo_actual() -> void:
+	_caminante.terminar_enfoque_conversacion()
 	if is_instance_valid(_dialogo_actual):
 		_dialogo_actual.queue_free()
 	_dialogo_actual = null
