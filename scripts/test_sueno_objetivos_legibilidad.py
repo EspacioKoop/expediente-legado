@@ -24,6 +24,7 @@ class SuenoObjetivosLegibilidadTest(unittest.TestCase):
         self.assertIn('find_children("ObjetivoSueno_*", "Area3D"', codigo)
         self.assertIn("OmniLight3D.new()", codigo)
         self.assertIn("luz.visible = false", codigo)
+        self.assertIn("objetivo_id.ends_with(SUFIJO_FOCO_LEGADO)", codigo)
 
         self.assertNotIn("SuenoObjetivos.completar", codigo)
         self.assertNotIn("_guardar_o_avisar", codigo)
@@ -50,7 +51,7 @@ class SuenoObjetivosLegibilidadTest(unittest.TestCase):
             check=False,
         )
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
-        self.assertIn("12 pasadas, 0 fallos", resultado.stdout)
+        self.assertIn("13 pasadas, 0 fallos", resultado.stdout)
         self.assertNotIn("Parse Error:", resultado.stdout)
 
 
