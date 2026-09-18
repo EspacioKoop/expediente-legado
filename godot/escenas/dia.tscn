@@ -1,4 +1,4 @@
-[gd_scene load_steps=39 format=3]
+[gd_scene load_steps=40 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -38,6 +38,7 @@
 [ext_resource type="Script" path="res://guion/sueno_objetivos_legibilidad.gd" id="36"]
 [ext_resource type="Script" path="res://guion/dia_bolos_pasillo_app.gd" id="37"]
 [ext_resource type="Script" path="res://guion/dia_relacion_onirica_app.gd" id="38"]
+[ext_resource type="Script" path="res://guion/dia_tir_na_nog_app.gd" id="39"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -131,6 +132,9 @@ script = ExtResource("27")
 
 [node name="AnansiAkanController" type="Node" parent="."]
 script = ExtResource("28")
+
+[node name="TirNaNogController" type="Node" parent="."]
+script = ExtResource("39")
 
 [node name="RutinasCasaController" type="Node" parent="."]
 script = ExtResource("29")
