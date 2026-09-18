@@ -42,9 +42,8 @@ class EvidenciaMateriales399Test(unittest.TestCase):
 
     def test_workflow_publica_png_y_manifiesto_sin_versionarlos(self):
         self.assertIn("xvfb-run -a godot4", self.workflow)
-        for nombre in ("oficina", "calle", "casa", "sueno"):
-            self.assertIn(f'evidencia-materiales-399/[object Object].png', self.workflow)
-            self.assertIn(nombre, self.workflow)
+        self.assertIn("for captura in oficina calle casa sueno; do", self.workflow)
+        self.assertIn('test -s "evidencia-materiales-399/${captura}.png"', self.workflow)
         self.assertIn("manifest.json", self.workflow)
         self.assertIn("actions/upload-artifact@v4", self.workflow)
         self.assertIn("len(set(hashes)) != 4", self.workflow)
