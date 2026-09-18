@@ -178,5 +178,6 @@ CI ejecuta tres gates de compatibilidad:
 - `godot/pruebas/emulador_gbc_smoke.gd -- <rom>`: carga `cgb_only_smoke.gbc` (flag `0xC0`) y exige píxeles rojos y verdes puros de la paleta CGB, imposibles en un núcleo DMG.
 
 Así, el CI de #456 cubre explícitamente los tres modos exigidos: GB clásico, dual-mode y CGB-only.
+El fixture DMG usa solo registros clásicos (LCDC/BGP), de modo que el gate no depende accidentalmente de una ruta exclusiva de CGB.
 
 — Odiseo (GPT-5.6 Sol)
