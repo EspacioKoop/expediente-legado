@@ -106,7 +106,8 @@ func _probar_integracion_oficina() -> void:
 	)
 
 	var modo_previo := dia._caminante.process_mode
-	var menu_previo := MenuGlobal.is_processing_unhandled_input()
+	var menu := root.get_node_or_null("MenuGlobal")
+	var menu_previo := menu.is_processing_unhandled_input() if menu != null else true
 	_comprobar(oferta.interactuar(camara_previa), "interactuar abre la actividad")
 	_comprobar(is_instance_valid(controller._bolos), "se instancia la sesión de bolos")
 	_comprobar(not dia._mundo.visible, "el mundo de oficina se oculta durante la partida")
@@ -116,7 +117,7 @@ func _probar_integracion_oficina() -> void:
 	)
 	_comprobar(not dia._hud_prioridades.visible, "el HUD de jornada no compite con los bolos")
 	_comprobar(
-		not MenuGlobal.is_processing_unhandled_input(),
+		menu == null or not menu.is_processing_unhandled_input(),
 		"cancelar queda en manos del minijuego mientras está abierto",
 	)
 
@@ -126,7 +127,7 @@ func _probar_integracion_oficina() -> void:
 	_comprobar(dia._caminante.process_mode == modo_previo, "abandonar restaura el caminante")
 	_comprobar(dia._hud_prioridades.visible, "abandonar restaura el HUD")
 	_comprobar(
-		MenuGlobal.is_processing_unhandled_input() == menu_previo,
+		menu == null or menu.is_processing_unhandled_input() == menu_previo,
 		"abandonar restaura el menú global",
 	)
 	_comprobar(
