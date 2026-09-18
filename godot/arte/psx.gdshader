@@ -34,6 +34,9 @@ uniform float escala_textura = 1.0;
 // el sueño puede estirar o invertir una superficie reconocible sin necesitar
 // otra textura ni romper el contrato triplanar.
 uniform vec3 deformacion_textura = vec3(1.0);
+// 1.0 conserva el mundo ordinario. El sueño puede separar la trama de su
+// color base antes de la cuantización, sin cambiar textura ni iluminación.
+uniform float contraste_textura = 1.0;
 uniform vec4 emision : source_color = vec4(0.0);
 uniform float emision_fuerza = 0.0;
 
@@ -104,7 +107,8 @@ void fragment() {
 		if (usar_uv) {
 			color = texture(textura, UV).rgb * color_base.rgb;
 		} else {
-			color = muestra_triplanar(mundo, NORMAL);
+			vec3 muestra = muestra_triplanar(mundo, NORMAL);
+			color = color_base.rgb + (muestra - color_base.rgb) * contraste_textura;
 		}
 	}
 
