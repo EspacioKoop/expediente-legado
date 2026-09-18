@@ -62,8 +62,9 @@ func _ejecutar() -> void:
 	var kubasta_materializada := ResourceLoader.exists(EstiloSiga.RUTA_FUENTE_TERMINAL)
 	var terminal := EstiloSiga.fuente_terminal()
 	var fallback := EstiloSiga.fuente_mono()
-	if _exigir_kubasta and (
-		not kubasta_materializada or terminal.resource_path != EstiloSiga.RUTA_FUENTE_TERMINAL
+	if (
+		_exigir_kubasta
+		and (not kubasta_materializada or terminal.resource_path != EstiloSiga.RUTA_FUENTE_TERMINAL)
 	):
 		_fallar("se exigió Kubasta pero fuente_terminal() no resuelve al TTF materializado")
 		_guardar_manifest(kubasta_materializada, terminal, fallback)
@@ -87,8 +88,10 @@ func _ejecutar() -> void:
 
 	_guardar_manifest(kubasta_materializada, terminal, fallback)
 	print(
-		"Gate visual #298: %d capturas, %d fallos, Kubasta=%s -> %s"
-		% [_casos.size(), _fallos, kubasta_materializada, _salida]
+		(
+			"Gate visual #298: %d capturas, %d fallos, Kubasta=%s -> %s"
+			% [_casos.size(), _fallos, kubasta_materializada, _salida]
+		)
 	)
 	quit(1 if _fallos else 0)
 
@@ -255,9 +258,7 @@ func _validar_layout(superficie: Control, fuente: Font) -> bool:
 		_fallar("clipping vertical en RichTextLabel de diagnóstico")
 		ok = false
 	var linea := columna.get_node("Entrada") as LineEdit
-	var ancho_texto := fuente.get_string_size(
-		ENTRADA, HORIZONTAL_ALIGNMENT_LEFT, -1, 16
-	).x
+	var ancho_texto := fuente.get_string_size(ENTRADA, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
 	if ancho_texto > linea.size.x - 16.0:
 		_fallar("clipping horizontal en LineEdit de diagnóstico")
 		ok = false
@@ -292,11 +293,20 @@ func _guardar_manifest(
 	if readme == null:
 		_fallar("no se pudo escribir README del gate")
 		return
-	readme.store_string(
-		"# Gate visual Kubasta #298\n\n"
-		+ "Comparar terminal vs IBM Plex Mono en claro/oscuro, 1x/1.25x y 10/12/14/16 px.\n"
-		+ "La revisión humana debe comprobar legibilidad de español/símbolos, clipping, blur y ritmo.\n"
-		+ ("Kubasta está materializada en esta ejecución.\n" if kubasta_materializada else "Kubasta aún no está materializada: la columna terminal usa el fallback.\n")
+	(
+		readme
+		. store_string(
+			(
+				"# Gate visual Kubasta #298\n\n"
+				+ "Comparar terminal vs IBM Plex Mono en claro/oscuro, 1x/1.25x y 10/12/14/16 px.\n"
+				+ "La revisión humana debe comprobar legibilidad de español/símbolos, clipping, blur y ritmo.\n"
+				+ (
+					"Kubasta está materializada en esta ejecución.\n"
+					if kubasta_materializada
+					else "Kubasta aún no está materializada: la columna terminal usa el fallback.\n"
+				)
+			)
+		)
 	)
 	readme.close()
 
