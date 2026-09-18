@@ -84,6 +84,7 @@ func _aplicar_estado(dia: Node, estado: String, transicion: bool) -> void:
 	_asegurar_precipitacion(dia, estado)
 	_aplicar_suelo_clima(dia, estado)
 	_aplicar_sonido_clima(dia, estado)
+	_aplicar_coches_clima(dia, estado)
 
 	var ambiente := dia._ambiente as Environment
 	if ambiente == null:
@@ -459,6 +460,14 @@ func _seguir_precipitacion(dia: Node) -> void:
 	# El emisor vive en el mundo para conservar la lógica histórica, pero su
 	# centro acompaña al jugador: nunca queda atrás al recorrer la calle.
 	nodo.global_position = caminante.global_position
+
+
+func _aplicar_coches_clima(dia: Node, estado: String) -> void:
+	var mundo := dia._mundo as Node3D
+	if mundo == null:
+		return
+	var lote := mundo.get_node_or_null("CochesPsxCC0") as Node3D
+	CochesPsxCC0.aplicar_clima(lote, estado)
 
 
 func _aplicar_suelo_clima(dia: Node, estado: String) -> void:
