@@ -78,7 +78,10 @@ func _probar_reasignacion() -> void:
 	Prometeo.reiniciar_vuelta(estado, Partida.VIDA_MAXIMA)
 	Jornada.reiniciar_vuelta(estado["jornada"])
 	_comprobar(
-		Pronosticos.estado_de(estado["pronosticos"], "caso@reasignado") == Pronosticos.ESTADO_ABIERTO,
+		(
+			Pronosticos.estado_de(estado["pronosticos"], "caso@reasignado")
+			== Pronosticos.ESTADO_ABIERTO
+		),
 		"la reasignación conserva el historial del auditor",
 	)
 
@@ -96,9 +99,7 @@ func _probar_validacion() -> void:
 			"pronosticos":
 			{
 				"por_expediente":
-				{
-					"caso@1": {"tipo": "habra_duelo", "valor": true, "estado": "inventado"}
-				}
+				{"caso@1": {"tipo": "habra_duelo", "valor": true, "estado": "inventado"}}
 			}
 		}
 	)
