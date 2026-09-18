@@ -75,9 +75,7 @@ func _probar_senal_de_acusacion() -> void:
 
 	var estado_limpio := Partida.nueva()
 	var jornada_limpia := Jornada.nueva()
-	var limpia := Acusacion.acusar(
-		estado_limpio, jornada_limpia, caso, sospechoso, ["p1"]
-	)
+	var limpia := Acusacion.acusar(estado_limpio, jornada_limpia, caso, sospechoso, ["p1"])
 	_comprobar(not bool(limpia.get("precipitada", true)), "evidencia suficiente no precipita")
 	_comprobar(
 		int(jornada_limpia.get("acusaciones_precipitadas_hoy", 0)) == 0,
