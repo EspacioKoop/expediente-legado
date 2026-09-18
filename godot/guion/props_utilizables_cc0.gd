@@ -10,17 +10,21 @@ const ORIGEN := "street_furniture_cc0"
 const FUENTE := "https://kkryy.itch.io/streetfurniture"
 
 const DEFINICIONES := {
-	"palanca_kkryy": {
+	"palanca_kkryy":
+	{
 		"modelo": "Crowbar",
 		"nombre": "palanca",
-		"descripcion": "Una palanca de acero. Parece útil para hacer fuerza donde las manos no bastan.",
+		"descripcion":
+		"Una palanca de acero. Parece útil para hacer fuerza donde las manos no bastan.",
 		"usos": ["forzar"],
 		"categoria": "herramienta",
 	},
-	"linterna_kkryy": {
+	"linterna_kkryy":
+	{
 		"modelo": "Flashlight",
 		"nombre": "linterna",
-		"descripcion": "Una linterna de mano. Puede servir cuando la iluminación normal no alcanza.",
+		"descripcion":
+		"Una linterna de mano. Puede servir cuando la iluminación normal no alcanza.",
 		"usos": ["iluminar"],
 		"categoria": "herramienta",
 	},
