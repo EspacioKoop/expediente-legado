@@ -122,6 +122,28 @@ func _probar_rechazos() -> void:
 		not Sesion.guardar(jornada, Sesion.TIPO_ECOS, "caso1", "pista1", {}),
 		"rechaza sesión sin estado serializado",
 	)
+	var fijada := _jornada()
+	_comprobar(
+		Sesion.guardar(
+			fijada,
+			Sesion.TIPO_RELACION,
+			"caso1",
+			"pista1",
+			{"nucleo": {"state": "pendiente"}},
+		),
+		"acepta la primera identidad de puzzle de la noche",
+	)
+	_comprobar(
+		not Sesion.guardar(
+			fijada,
+			Sesion.TIPO_ECOS,
+			"caso2",
+			"pista2",
+			{"nucleo": {"state": "pendiente"}},
+		),
+		"una sesión ya fijada no puede convertirse en otro puzzle",
+	)
+
 	var corrupta := _jornada()
 	corrupta[Sesion.CLAVE] = {
 		"dia": 7,
@@ -130,7 +152,8 @@ func _probar_rechazos() -> void:
 		"reward_id": "pista1",
 		"datos": "no-es-diccionario",
 	}
-	_comprobar(Sesion.actual(corrupta).is_empty(), "ignora una sesión manipulada")
+	_comprobar(Sesion.registrada_esta_noche(corrupta), "detecta una entrada corrupta de esta noche")
+	_comprobar(Sesion.actual(corrupta).is_empty(), "no entrega una sesión manipulada como válida")
 
 
 func _limpiar(ruta: String) -> void:
