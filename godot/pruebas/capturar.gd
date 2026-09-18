@@ -184,6 +184,9 @@ func _init() -> void:
 		quit(0)
 		return
 
+	if destino.contains("tarot-progreso"):
+		quit(await _capturar_tarot_progreso(escena, destino, argumentos))
+		return
 	if destino.contains("tarot"):
 		quit(await _capturar_tarot(escena, destino, argumentos))
 		return
@@ -219,6 +222,90 @@ func _init() -> void:
 	else:
 		print("captura en %s (%dx%d)" % [destino, imagen.get_width(), imagen.get_height()])
 	quit(0 if error == OK else 1)
+
+
+## Evidencia de #645/#1029 para una carta ganada por progreso REAL.
+##
+## No escribe `recogida` ni llama a Prometeo desde QA: abre un documento,
+## descubre una pista por el mismo callback de la interfaz y exige que ese acto
+## haya ganado El Mago antes de construir una vista 3D de inspección. Esa vista
+## es solo evidencia visual; no abre la historia política porque las cartas de
+## progreso no son los ocho hallazgos documentales de #71.
+func _capturar_tarot_progreso(
+	escena: Node, destino: String, argumentos: PackedStringArray
+) -> int:
+	if OS.get_environment("XDG_DATA_HOME").is_empty():
+		printerr("La captura tarot exige XDG_DATA_HOME temporal para no tocar una partida real")
+		return 1
+
+	var plano := int(argumentos[1]) if argumentos.size() > 1 else 2
+	var modo := String(argumentos[2]) if argumentos.size() > 2 else "normal"
+	var error_modo := _configurar_modo_tarot(modo)
+	if not error_modo.is_empty():
+		printerr(error_modo)
+		return 1
+
+	var hallazgo := _primera_pista_capturable(escena)
+	if hallazgo.is_empty():
+		printerr("No hay ninguna pista con frase gatillo para probar el progreso de El Mago")
+		return 1
+
+	if int(hallazgo["caso"]) != 0:
+		escena._archivo.select(int(hallazgo["caso"]))
+		escena._al_elegir_caso(int(hallazgo["caso"]))
+		await process_frame
+	escena._lista.select(int(hallazgo["documento"]))
+	escena._al_elegir_documento(int(hallazgo["documento"]))
+	await process_frame
+	escena._al_pulsar_marca("pista:%s" % hallazgo["pista"])
+	await process_frame
+
+	var carta: Dictionary = escena._carta_de(escena.partida.estado.get("tarot", []), "el-mago")
+	var conocidas: Array = escena.partida.estado.get("cartas_conocidas", [])
+	if carta.is_empty() or not carta.get("recogida", false) or not conocidas.has("el-mago"):
+		printerr("La primera pista no desbloqueó El Mago con memoria fantasma")
+		return 1
+
+	# El render usa exactamente TarotCinematica, pero se instancia aquí porque
+	# el desbloqueo por progreso no debe secuestrar la lectura para abrir una
+	# historia política. La obtención anterior sí ha ocurrido por gameplay real.
+	var reproductor: Node = load("res://escenas/cinematica.tscn").instantiate()
+	escena.add_child(reproductor)
+	reproductor.reproducir(
+		TarotCinematica.planos_de(
+			carta, Cinematica.vistas_de(escena.partida.estado, TarotCinematica.ID)
+		),
+		TarotCinematica.ID,
+		escena.partida.estado
+	)
+	for i in 3:
+		await process_frame
+	for i in plano:
+		reproductor._siguiente()
+	for i in 2:
+		await process_frame
+
+	var error := root.get_texture().get_image().save_png(destino)
+	if error != OK:
+		printerr("No se pudo guardar %s (error %d)" % [destino, error])
+		return 1
+	print("captura en %s" % destino)
+	return 0
+
+
+func _primera_pista_capturable(escena: Node) -> Dictionary:
+	for indice_caso in escena.contenido.casos.size():
+		var ficha: Dictionary = escena.contenido.casos[indice_caso]
+		for indice_documento in ficha["registros"].size():
+			var registro: Dictionary = ficha["registros"][indice_documento]
+			for pista in escena.contenido.pistas_de_registro(ficha, registro["id"]):
+				if pista.get("fraseGatillo") != null:
+					return {
+						"caso": indice_caso,
+						"documento": indice_documento,
+						"pista": pista["id"],
+					}
+	return {}
 
 
 ## La cinemática de encontrar una carta (#71), plano a plano.
