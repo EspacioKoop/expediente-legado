@@ -8,7 +8,13 @@ const MARCADOR_B := 0x42
 const SRAM_DIR := "user://sram/gb"
 
 
-func _init() -> void:
+func _initialize() -> void:
+	# SceneTree todavía no ha terminado de montar su root durante _initialize().
+	# Diferimos el gate para que EmuladorPortatilApp.abrir() tenga get_tree().
+	call_deferred("_ejecutar")
+
+
+func _ejecutar() -> void:
 	var argumentos := OS.get_cmdline_user_args()
 	if argumentos.size() != 2:
 		_fallar("se esperaban las rutas de sram_a.gbc y sram_b.gbc")
