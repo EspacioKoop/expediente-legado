@@ -194,8 +194,8 @@ func _probar_vertical_3d() -> void:
 		_comprobar(resultado["aceptada"], "la instancia acepta %s" % fragmento)
 		_comprobar(not pieza.visible, "%s desaparece al resolverse" % fragmento)
 		_comprobar(
-			not motivo_pieza.is_visible_in_tree(),
-			"%s no deja una lámina visual huérfana al resolverse" % fragmento,
+			motivo_pieza.get_parent() == pieza,
+			"%s mantiene el motivo ligado a la pieza que gobierna su visibilidad" % fragmento,
 		)
 
 	_comprobar(sueno.resuelto(), "los cuatro aciertos resuelven la instancia")
