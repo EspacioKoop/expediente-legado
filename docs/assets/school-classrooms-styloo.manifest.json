@@ -1,0 +1,151 @@
+{
+  "fuente": "https://styloo.itch.io/classroom-asset-pack",
+  "autor": "styloo",
+  "licencia": "CC0-1.0",
+  "archivo_fuente": "StylooClassroomAssetPack GLTF & FBX.zip",
+  "archivo_sha256": "f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954",
+  "archivo_entradas": 409,
+  "readme_interno": "StylooClassroomAssetPack GLTF & FBX/read me .txt",
+  "lotes": {
+    "administrativo": [
+      "desk",
+      "principal_chair",
+      "shelf",
+      "telephone",
+      "old_pc",
+      "printer"
+    ],
+    "contexto_informatico_1998": [
+      "old_monitor",
+      "keyboard",
+      "mouse"
+    ],
+    "escuela_sueno": [
+      "locker",
+      "blackboardbig"
+    ]
+  },
+  "assets": [
+    {
+      "id": "desk",
+      "titulo": "Principal Office desk",
+      "miembro_zip": "StylooClassroomAssetPack GLTF & FBX/principal office/GLTF/PRINCIPALOFFICEdesk.glb",
+      "destino_sugerido": "principal_office_desk.glb",
+      "bytes": 139060,
+      "sha256": "0e45b95827adc2b911b3db2a534af137650f97c1eb5f132cf38689096714d466",
+      "vertices_auditados": 3738,
+      "caras_auditadas": 3452,
+      "extents_crudos": [5.302008, 2.247818, 2.367318]
+    },
+    {
+      "id": "principal_chair",
+      "titulo": "Principal Office principal chair",
+      "miembro_zip": "StylooClassroomAssetPack GLTF & FBX/principal office/GLTF/PRINCIPALOFFICEprincipalchair.glb",
+      "destino_sugerido": "principal_office_chair.glb",
+      "bytes": 298200,
+      "sha256": "a68ba2b7575558a233c75eb6814d3a1098b70f218e3e941f049ffce573248acc",
+      "vertices_auditados": 7429,
+      "caras_auditadas": 8800,
+      "extents_crudos": [1.267408, 2.162786, 1.163924]
+    },
+    {
+      "id": "shelf",
+      "titulo": "Principal Office shelf",
+      "miembro_zip": "StylooClassroomAssetPack GLTF & FBX/principal office/GLTF/PRINCIPALOFFICEshelf.glb",
+      "destino_sugerido": "principal_office_shelf.glb",
+      "bytes": 279404,
+      "sha256": "c96c576a3f40e334520795dcda74244e943463dcca4af4ea51f8ed35bb1710c5",
+      "vertices_auditados": 7546,
+      "caras_auditadas": 5412,
+      "extents_crudos": [4.807731, 3.838428, 1.164573]
+    },
+    {
+      "id": "telephone",
+      "titulo": "Principal Office telephone",
+      "miembro_zip": "StylooClassroomAssetPack GLTF & FBX/principal office/GLTF/PRINCIPALOFFICEtelephone.glb",
+      "destino_sugerido": "principal_office_telephone.glb",
+      "bytes": 862604,
+      "sha256": "9a5b1fff02e2aabc7a340a9b77c6ce4c319f8e0164958e0b845c2a2efb27c3a5",
+      "vertices_auditados": 22588,
+      "caras_auditadas": 21362,
+      "extents_crudos": [0.602822, 0.318002, 0.445631]
+    },
+    {
+      "id": "old_pc",
+      "titulo": "Computer Room old PC",
+      "miembro_zip": "StylooClassroomAssetPack GLTF & FBX/computer/GLTF/COMPUTERpcold.glb",
+      "destino_sugerido": "computer_pc_old.glb",
+      "bytes": 62848,
+      "sha256": "46a697251a34e9ae18defc8cfac09db17a536576fd6f8c771be194d555b36af3",
+      "vertices_auditados": 1504,
+      "caras_auditadas": 1026,
+      "extents_crudos": [0.150753, 0.558825, 0.558825]
+    },
+    {
+      "id": "printer",
+      "titulo": "Computer Room printer",
+      "miembro_zip": "StylooClassroomAssetPack GLTF & FBX/computer/GLTF/COMPUTERprinter.glb",
+      "destino_sugerido": "computer_printer.glb",
+      "bytes": 132296,
+      "sha256": "3ae9b7509226e9d5a09b21d8487450fec6c80a690fd96f83a2d66825d5566b1c",
+      "vertices_auditados": 3411,
+      "caras_auditadas": 2420,
+      "extents_crudos": [0.773643, 0.506519, 0.8646]
+    },
+    {
+      "id": "old_monitor",
+      "titulo": "Computer Room old screen",
+      "miembro_zip": "StylooClassroomAssetPack GLTF & FBX/computer/GLTF/COMPUTERscreenold.glb",
+      "destino_sugerido": "computer_screen_old.glb",
+      "bytes": 465144,
+      "sha256": "a2cdb10c8f2f62197592b83e40342e1f0777df9b05df459c02da39a566ddfc8e",
+      "vertices_auditados": 12064,
+      "caras_auditadas": 11902,
+      "extents_crudos": [0.609548, 0.615759, 0.499875]
+    },
+    {
+      "id": "keyboard",
+      "titulo": "Computer Room keyboard",
+      "miembro_zip": "StylooClassroomAssetPack GLTF & FBX/computer/GLTF/COMPUTERkeyboard.glb",
+      "destino_sugerido": "computer_keyboard.glb",
+      "bytes": 540588,
+      "sha256": "ed0501473c8d9ec413670eb910e4d0fa157c5dbe964515120411e9d9b876b278",
+      "vertices_auditados": 14953,
+      "caras_auditadas": 8746,
+      "extents_crudos": [0.779772, 0.279111, 0.057329]
+    },
+    {
+      "id": "mouse",
+      "titulo": "Computer Room mouse",
+      "miembro_zip": "StylooClassroomAssetPack GLTF & FBX/computer/GLTF/COMPUTERmouse.glb",
+      "destino_sugerido": "computer_mouse.glb",
+      "bytes": 77680,
+      "sha256": "5a92f663e65d058f05edb6c1aab832077bce6c964d9e5d361ac65772d83164e0",
+      "vertices_auditados": 1806,
+      "caras_auditadas": 1890,
+      "extents_crudos": [0.137604, 0.063219, 0.085845]
+    },
+    {
+      "id": "locker",
+      "titulo": "Classroom locker",
+      "miembro_zip": "StylooClassroomAssetPack GLTF & FBX/classroom/GLTF/locker.glb",
+      "destino_sugerido": "classroom_locker.glb",
+      "bytes": 81788,
+      "sha256": "b152e324e32eb1a612cca239c1c44d73033bea70c7dff34fe4eb42868b58f7d6",
+      "vertices_auditados": 1881,
+      "caras_auditadas": 2178,
+      "extents_crudos": [0.295749, 0.733984, 0.313721]
+    },
+    {
+      "id": "blackboardbig",
+      "titulo": "Classroom blackboard big",
+      "miembro_zip": "StylooClassroomAssetPack GLTF & FBX/classroom/GLTF/blackboardbig.glb",
+      "destino_sugerido": "classroom_blackboard_big.glb",
+      "bytes": 15552,
+      "sha256": "bd4b4a494efbc51b0e622fc26af3363e6dfa6df96c875b8f074bde67527e7692",
+      "vertices_auditados": 216,
+      "caras_auditadas": 176,
+      "extents_crudos": [4.546377, 1.327497, 0.275828]
+    }
+  ]
+}
