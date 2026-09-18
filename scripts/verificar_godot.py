@@ -134,6 +134,12 @@ def ejecutar():
                 30,
                 20,
             ),
+            (
+                "bolos-pasillo",
+                ["--script", "pruebas/pruebas_bolos_pasillo_3d.gd"],
+                30,
+                17,
+            ),
             ("recorrido", ["--script", "pruebas/recorrido.gd"], 60, 95),
             ("arranque", ["--quit-after", "90"], 30, None),
         ]
