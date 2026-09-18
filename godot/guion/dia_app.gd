@@ -298,10 +298,7 @@ func _espacio_de(fase: String) -> Dictionary:
 		)
 	)
 	var semilla_noche := Sueno.semilla(
-		jornada["dia"],
-		jornada["leido_hoy"],
-		_raiz(),
-		opciones.get("seleccion_nocturna", [])
+		jornada["dia"], jornada["leido_hoy"], _raiz(), opciones.get("seleccion_nocturna", [])
 	)
 	var reparto := SuenoContenido.repartir(fuentes, cantidad, semilla_noche)
 	var cual: int = cantidad - jornada["sueno_escenas"].size()
