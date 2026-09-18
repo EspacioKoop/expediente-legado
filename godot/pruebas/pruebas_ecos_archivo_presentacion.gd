@@ -104,7 +104,7 @@ func _probar_fallo_y_salida() -> void:
 		presentacion.ecos.nucleo.state == Puzzle.ESTADO_PENDIENTE,
 		"preparar una secuencia incorrecta no consume el intento",
 	)
-	var final := presentacion.confirmar()
+	var final: String = str(presentacion.confirmar())
 	_comprobar(
 		final == Presentacion.EVENTO_DISPERSADO,
 		"confirmar el primer orden completo incorrecto dispersa los ecos"
