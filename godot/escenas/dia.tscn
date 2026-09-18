@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=3]
+[gd_scene load_steps=39 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -37,6 +37,7 @@
 [ext_resource type="Script" path="res://guion/dia_calle_materiales_app.gd" id="35"]
 [ext_resource type="Script" path="res://guion/sueno_objetivos_legibilidad.gd" id="36"]
 [ext_resource type="Script" path="res://guion/dia_bolos_pasillo_app.gd" id="37"]
+[ext_resource type="Script" path="res://guion/dia_relacion_onirica_app.gd" id="38"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -97,6 +98,9 @@ script = ExtResource("17")
 
 [node name="MinotauroSuenoController" type="Node" parent="."]
 script = ExtResource("18")
+
+[node name="RelacionOniricaController" type="Node" parent="."]
+script = ExtResource("38")
 
 [node name="EcosArchivoController" type="Node" parent="."]
 script = ExtResource("19")
