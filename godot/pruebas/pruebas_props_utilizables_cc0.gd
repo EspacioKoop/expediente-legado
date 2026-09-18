@@ -55,6 +55,12 @@ func _probar() -> void:
 		"un ID desconocido no crea un recogible"
 	)
 
+	# Recogible3D hereda Area3D y reserva un RID aunque no llegue a entrar al árbol.
+	# Liberarlo explícitamente evita que el runner interprete el teardown como
+	# error de motor pese a que todas las aserciones hayan pasado.
+	palanca.free()
+	await process_frame
+
 	print("Props utilizables CC0 #680: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
 
