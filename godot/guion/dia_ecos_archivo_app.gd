@@ -31,7 +31,7 @@ func _process(_delta: float) -> void:
 		return
 	_abandonar_si_procede()
 	_mundo_montado_id = mundo_id
-	if _montado_esta_noche:
+	if _montado_esta_noche or mundo.has_meta("puzzle_onirico_montado"):
 		return
 
 	var candidato := _candidato(dia)
@@ -84,6 +84,7 @@ func _montar_ecos(dia: Node, mundo: Node3D, candidato: Dictionary) -> void:
 		vertical.free()
 		return
 	mundo.add_child(vertical)
+	mundo.set_meta("puzzle_onirico_montado", "ecos")
 	_ecos_activos = vertical
 	_montado_esta_noche = true
 
