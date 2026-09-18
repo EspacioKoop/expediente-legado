@@ -52,7 +52,9 @@ static func _montar_motivo(eco: Node3D, destino: String) -> void:
 		"patio":
 			_instanciar(eco, ESCENA_PORTADA, "PortadaLejana", Vector3(0.0, 0.0, -0.9), 0.22)
 		_:
-			_instanciar(eco, ESCENA_ESCALERA, "EscaleraArchivoLejana", Vector3(0.0, 0.0, -0.75), 0.27)
+			_instanciar(
+				eco, ESCENA_ESCALERA, "EscaleraArchivoLejana", Vector3(0.0, 0.0, -0.75), 0.27
+			)
 			var estandarte := _instanciar(
 				eco,
 				ESCENA_ESTANTARTE,
