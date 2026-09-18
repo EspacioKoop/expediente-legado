@@ -174,10 +174,7 @@ func _probar_interacciones_fisicas() -> void:
 		)
 		_comprobar(reciente != null, "%s reciente tiene hotspot físico" % objeto)
 		_comprobar(envejecida != null, "%s envejecido tiene hotspot físico" % objeto)
-		_comprobar(
-			reciente.get_node_or_null("CollisionShape3D") is CollisionShape3D,
-			"%s recibe el raycast común" % objeto,
-		)
+		_comprobar(_tiene_colision(reciente), "%s recibe el raycast común" % objeto)
 
 	var taza_reciente := (
 		sueno.get_node_or_null("Version_reciente/Interactuar_taza") as Interactuable3D
@@ -187,10 +184,7 @@ func _probar_interacciones_fisicas() -> void:
 	)
 	var umbral := sueno.get_node_or_null("UmbralPrincipal/CruzarUmbral") as Interactuable3D
 	_comprobar(umbral != null, "el umbral tiene hotspot físico")
-	_comprobar(
-		umbral.get_node_or_null("CollisionShape3D") is CollisionShape3D,
-		"el umbral recibe el raycast común",
-	)
+	_comprobar(_tiene_colision(umbral), "el umbral recibe el raycast común")
 	_comprobar(taza_reciente.habilitado, "solo la versión visible empieza interactuable")
 	_comprobar(not taza_envejecida.habilitado, "la versión oculta no ofrece interacción")
 	_comprobar(taza_reciente.collision_layer, 1, "la versión visible conserva superficie física")
@@ -278,6 +272,15 @@ func _probar_accesibilidad_y_reproduccion() -> void:
 	sueno.queue_free()
 	copia.queue_free()
 	configurada.queue_free()
+
+
+func _tiene_colision(nodo: Node) -> bool:
+	if nodo == null:
+		return false
+	for hijo in nodo.get_children():
+		if hijo is CollisionShape3D:
+			return true
+	return false
 
 
 func _comprobar(actual, esperado = true, nombre: String = "") -> void:
