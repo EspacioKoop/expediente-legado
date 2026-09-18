@@ -55,6 +55,9 @@ class TestPsxStyleCarsContract(unittest.TestCase):
         self.assertIn('NOMBRE_NIEVE := "NieveClima"', runtime)
         self.assertIn("BoxMesh.new()", runtime)
         self.assertIn("nieve.visible = bool(perfil", runtime)
+        self.assertIn('"trafico_velocidad"', runtime)
+        self.assertIn("META_TWEEN_TRAFICO", runtime)
+        self.assertIn("set_speed_scale", runtime)
         self.assertNotIn("GPUParticles3D.new()", runtime)
         self.assertNotIn("VehicleBody3D.new", runtime)
 

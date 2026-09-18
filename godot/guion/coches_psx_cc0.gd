@@ -7,6 +7,8 @@ extends RefCounted
 const CARPETA := "res://assets/modelos/psx_cars/"
 const NOMBRE_NIEVE := "NieveClima"
 const META_ALBEDO_BASE := "siga98_clima_albedo_base"
+const META_TWEEN_TRAFICO := "siga98_trafico_tween"
+const META_ESCALA_TRAFICO := "siga98_trafico_clima_escala"
 # nombre, modelo, posición, largo en metros, giro Y en grados. Circulación por
 # la derecha: en la acera izquierda (x<0) el morro apunta a +Z; en la derecha, a -Z.
 const COCHES := [
@@ -70,6 +72,18 @@ static func aplicar_clima(lote: Node3D, estado: String) -> void:
 					if bool(perfil["humedo"])
 					else BaseMaterial3D.SPECULAR_DISABLED
 				)
+	_aplicar_cadencia_trafico(lote, perfil)
+
+
+static func _aplicar_cadencia_trafico(lote: Node3D, perfil: Dictionary) -> void:
+	var trafico := lote.get_node_or_null("TraficoFondo") as Node3D
+	if trafico == null:
+		return
+	var escala := float(perfil["trafico_velocidad"])
+	trafico.set_meta(META_ESCALA_TRAFICO, escala)
+	var tween := trafico.get_meta(META_TWEEN_TRAFICO) as Tween
+	if tween != null and tween.is_valid():
+		tween.set_speed_scale(escala)
 
 
 static func _perfil_clima(estado: String) -> Dictionary:
@@ -79,6 +93,7 @@ static func _perfil_clima(estado: String) -> Dictionary:
 		"metallic": 0.0,
 		"humedo": false,
 		"nieve": false,
+		"trafico_velocidad": 1.0,
 	}
 	match estado:
 		Clima.NUBLADO:
@@ -88,6 +103,7 @@ static func _perfil_clima(estado: String) -> Dictionary:
 					{
 						"tinte": Color(0.91, 0.93, 0.96),
 						"roughness": 0.92,
+						"trafico_velocidad": 0.88,
 					},
 					true,
 				)
@@ -101,6 +117,7 @@ static func _perfil_clima(estado: String) -> Dictionary:
 						"roughness": 0.24,
 						"metallic": 0.03,
 						"humedo": true,
+						"trafico_velocidad": 0.72,
 					},
 					true,
 				)
@@ -112,6 +129,7 @@ static func _perfil_clima(estado: String) -> Dictionary:
 					{
 						"tinte": Color(0.79, 0.81, 0.84),
 						"roughness": 1.0,
+						"trafico_velocidad": 0.58,
 					},
 					true,
 				)
@@ -124,6 +142,7 @@ static func _perfil_clima(estado: String) -> Dictionary:
 						"tinte": Color(0.88, 0.93, 1.0),
 						"roughness": 0.90,
 						"nieve": true,
+						"trafico_velocidad": 0.52,
 					},
 					true,
 				)
@@ -190,6 +209,8 @@ static func _animar_trafico_fondo(coche: Node3D) -> void:
 	# Un solo Tween ligado al nodo: sin NavigationAgent, VehicleBody ni _process
 	# propio. El salto de vuelta sucede fuera del encuadre lateral.
 	var tween := coche.create_tween().set_loops()
+	coche.set_meta(META_TWEEN_TRAFICO, tween)
+	coche.set_meta(META_ESCALA_TRAFICO, 1.0)
 	tween.tween_property(coche, "position:x", DESPLAZAMIENTO_FONDO, DURACION_CRUCE).as_relative()
 	tween.tween_interval(PAUSA_CRUCE)
 	tween.tween_callback(func() -> void: coche.position.x -= DESPLAZAMIENTO_FONDO)
