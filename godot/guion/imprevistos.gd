@@ -137,7 +137,21 @@ static func completar(jornada: Dictionary) -> Dictionary:
 	):
 		estado = planificar(raiz, vuelta)
 	else:
+		# JSON vuelve los números anidados float. Normalizarlos aquí mantiene la
+		# jornada idéntica tras guardar/cargar y evita que el plan se regenere.
 		estado["version"] = VERSION
+		estado["raiz_plan"] = raiz
+		estado["vuelta_plan"] = vuelta
+		var plan_normalizado: Array = []
+		for programado in estado["plan"]:
+			if typeof(programado) != TYPE_DICTIONARY:
+				continue
+			var id_evento := String(programado.get("id", ""))
+			var dia_evento := int(programado.get("dia", -1))
+			if id_evento.is_empty() or dia_evento < 1:
+				continue
+			plan_normalizado.append({"id": id_evento, "dia": dia_evento})
+		estado["plan"] = plan_normalizado
 		if typeof(estado.get("resueltos", null)) != TYPE_ARRAY:
 			estado["resueltos"] = []
 		if typeof(estado.get("consecuencias", null)) != TYPE_ARRAY:
