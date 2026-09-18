@@ -62,9 +62,7 @@ func _hacer_trabajillo() -> void:
 	# guardado, la siguiente interacción reintenta escribir sin volver a cobrar.
 	if not _guardar_o_avisar(""):
 		return
-	var mensaje := (
-		tr(String(resultado["cobrado"])) % [resultado["importe"], resultado["dinero"]]
-	)
+	var mensaje := tr(String(resultado["cobrado"])) % [resultado["importe"], resultado["dinero"]]
 	if int(resultado["racha"]) >= 2:
 		mensaje += "\n" + tr("TRABAJILLO_RACHA")
 	_nomina.text = mensaje
