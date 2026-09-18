@@ -111,6 +111,12 @@ def ejecutar():
                 30,
             ),
             (
+                "semilla-rom-vigilia",
+                ["--script", "pruebas/pruebas_semilla_rom_vigilia.gd"],
+                30,
+                9,
+            ),
+            (
                 "radio-domestica-98",
                 ["--script", "pruebas/pruebas_radio_domestica_98.gd"],
                 30,
