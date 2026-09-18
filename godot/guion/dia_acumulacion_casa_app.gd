@@ -45,9 +45,30 @@ func _process(_delta: float) -> void:
 	_mundo_id = mundo_id
 	_firma = firma
 	var acumulacion := CasaAcumulacion.montar(mundo, estado)
-	CasaConsecuencias.montar(mundo, estado)
+	var consecuencias := CasaConsecuencias.montar(mundo, estado, dia.jornada, inventario)
 	CasaHuellaVida.montar(mundo, estado)
 	_conectar_publicaciones(acumulacion)
+	_conectar_reparaciones(consecuencias)
+
+
+func _conectar_reparaciones(consecuencias: Node3D) -> void:
+	if consecuencias == null:
+		return
+	var persiana := consecuencias.get_node_or_null("PersianaAtascada") as PersianaAtascada3D
+	if persiana == null:
+		return
+	if not persiana.reparada.is_connected(_al_reparar_persiana):
+		persiana.reparada.connect(_al_reparar_persiana)
+
+
+func _al_reparar_persiana(_herramienta_id: String) -> void:
+	var dia := get_parent()
+	if dia == null:
+		return
+	# La firma cambia en el siguiente _process porque la consecuencia ya salió
+	# de Imprevistos; no destruimos la capa desde dentro de su propia señal.
+	if dia.has_method("_guardar_o_avisar"):
+		dia._guardar_o_avisar("")
 
 
 func _conectar_publicaciones(acumulacion: Node3D) -> void:
