@@ -6,6 +6,7 @@ RAIZ = Path(__file__).resolve().parents[1]
 AUDIO = RAIZ / "godot" / "guion" / "sueno_castillo_audio.gd"
 PRESENTACION = RAIZ / "godot" / "guion" / "sueno_castillo_3d.gd"
 PULSO = RAIZ / "godot" / "guion" / "sueno_castillo_pulso_3d.gd"
+UMBRALES = RAIZ / "godot" / "guion" / "sueno_castillo_umbrales_3d.gd"
 DIA_SUENO = RAIZ / "godot" / "guion" / "dia_sueno_app.gd"
 PATIO = RAIZ / "godot" / "escenas" / "suenos" / "props_284" / "patio_castillo_onirico.tscn"
 SCRIPTORIUM = RAIZ / "godot" / "escenas" / "suenos" / "props_284" / "galeria_scriptorium_castillo.tscn"
@@ -21,6 +22,7 @@ class SuenoCastilloPresentacionTest(unittest.TestCase):
         cls.audio = AUDIO.read_text(encoding="utf-8")
         cls.presentacion = PRESENTACION.read_text(encoding="utf-8")
         cls.pulso = PULSO.read_text(encoding="utf-8")
+        cls.umbrales = UMBRALES.read_text(encoding="utf-8")
         cls.dia = DIA_SUENO.read_text(encoding="utf-8")
         cls.patio = PATIO.read_text(encoding="utf-8")
         cls.scriptorium = SCRIPTORIUM.read_text(encoding="utf-8")
@@ -114,6 +116,26 @@ class SuenoCastilloPresentacionTest(unittest.TestCase):
         self.assertNotIn('[node name="SueloScriptorium" type="MeshInstance3D" parent="." groups=', self.scriptorium)
         self.assertNotIn('[node name="SueloCapilla" type="MeshInstance3D" parent="." groups=', self.torre)
         self.assertNotIn('[node name="SueloClaustro" type="MeshInstance3D" parent="." groups=', self.claustro)
+
+    def test_umbrales_insinuan_otra_ala_sin_crear_navegacion(self):
+        self.assertIn('const GRUPO_UMBRAL := "castillo_umbral"', self.umbrales)
+        self.assertIn('"patio": "scriptorium"', self.umbrales)
+        self.assertIn('"scriptorium": "claustro_reflejado"', self.umbrales)
+        self.assertIn('"claustro_reflejado": "torre_capilla"', self.umbrales)
+        self.assertIn('"torre_capilla": "patio"', self.umbrales)
+        self.assertIn("SuenoCastilloUmbrales3D.montar(arquitectura, variante)", self.presentacion)
+        for escena in (self.patio, self.scriptorium, self.torre, self.claustro):
+            self.assertIn('groups=["castillo_umbral"]', escena)
+        for pieza in (
+            "muro_torre_castillo.tscn",
+            "arcada_claustro_castillo.tscn",
+            "torre_castillo.tscn",
+            "escalera_anular_castillo.tscn",
+            "estandarte_anular.tscn",
+        ):
+            self.assertIn(pieza, self.umbrales)
+        for termino in ("StaticBody3D", "CollisionShape3D", "teleport", "Jornada.", "Partida"):
+            self.assertNotIn(termino, self.umbrales)
 
     def test_presentacion_solo_se_activa_por_identidad_de_datos(self):
         self.assertIn('espacio.get("identidad_onirica", "")', self.presentacion)
