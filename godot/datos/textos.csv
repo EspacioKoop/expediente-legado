@@ -262,6 +262,7 @@ CALLE_ROTULO_FINCAS,ADMINISTRACIÓN DE FINCAS
 CALLE_ROTULO_PAGO_ALQUILER,PAGO DEL ALQUILER
 CALLE_TIENDA_COMPRADO,tienda de videojuegos · %s comprado
 CALLE_TIENDA_TODO_COMPRADO,tienda de videojuegos · ya tienes todo
+CALLE_TIENDA_MANUAL_SERVICIO,Bit 98 · manual de servicio desbloqueado · tecla º
 CALLE_TIENDA_FALLO_SIN_DINERO,tienda de videojuegos · no llega el dinero
 CALLE_TIENDA_FALLO_SIN_STOCK,tienda de videojuegos · sin existencias
 CALLE_TIENDA_FALLO_FUERA_DEL_TRAYECTO,tienda de videojuegos · cerrada
