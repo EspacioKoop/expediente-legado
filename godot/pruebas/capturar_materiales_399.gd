@@ -114,8 +114,6 @@ func _init() -> void:
 					"materiales_texturados": diagnostico_material["materiales_texturados"],
 					"materiales_deformados": diagnostico_material["materiales_deformados"],
 					"materiales_detalle": diagnostico_material["materiales_detalle"],
-					"rango_luminancia_deformados":
-					diagnostico_material["rango_luminancia_deformados"],
 					"deformacion_textura": [deformacion.x, deformacion.y, deformacion.z],
 					"sha256": FileAccess.get_sha256(destino),
 				}
@@ -187,7 +185,6 @@ func _diagnostico_materiales(dia) -> Dictionary:
 	var materiales_texturados := 0
 	var materiales_deformados := 0
 	var materiales_detalle := 0
-	var rango_luminancia_deformados := 0.0
 	for nodo in dia.find_children("*", "MeshInstance3D", true, false):
 		var malla := nodo as MeshInstance3D
 		if malla == null:
@@ -206,30 +203,9 @@ func _diagnostico_materiales(dia) -> Dictionary:
 		var deformacion = material.get_shader_parameter("deformacion_textura")
 		if deformacion is Vector3 and not (deformacion as Vector3).is_equal_approx(Vector3.ONE):
 			materiales_deformados += 1
-			if materiales_deformados == 1:
-				var textura = material.get_shader_parameter("textura") as Texture2D
-				if textura != null:
-					rango_luminancia_deformados = _rango_luminancia(textura.get_image())
 	return {
 		"materiales_psx": materiales_psx,
 		"materiales_texturados": materiales_texturados,
 		"materiales_deformados": materiales_deformados,
 		"materiales_detalle": materiales_detalle,
-		"rango_luminancia_deformados": rango_luminancia_deformados,
 	}
-
-
-func _rango_luminancia(imagen: Image) -> float:
-	if imagen == null or imagen.is_empty():
-		return 0.0
-	var paso_x := maxi(imagen.get_width() / 32, 1)
-	var paso_y := maxi(imagen.get_height() / 32, 1)
-	var minimo := 1.0
-	var maximo := 0.0
-	for x in range(0, imagen.get_width(), paso_x):
-		for y in range(0, imagen.get_height(), paso_y):
-			var p := imagen.get_pixel(x, y)
-			var luminancia := (p.r + p.g + p.b) / 3.0
-			minimo = minf(minimo, luminancia)
-			maximo = maxf(maximo, luminancia)
-	return maximo - minimo
