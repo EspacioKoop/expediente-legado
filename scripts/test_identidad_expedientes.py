@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CATALOGO = ROOT / "godot" / "datos" / "identidad_expedientes.json"
 VISOR = ROOT / "godot" / "guion" / "visor_identidad_app.gd"
 ANEXOS = ROOT / "godot" / "guion" / "visor_anexos_app.gd"
+PRONOSTICOS = ROOT / "godot" / "guion" / "visor_pronosticos_app.gd"
 ESCENA = ROOT / "godot" / "escenas" / "visor.tscn"
 
 
@@ -63,11 +64,13 @@ class IdentidadExpedientesTest(unittest.TestCase):
     def test_portada_cede_el_espacio_al_abrir_un_folio(self):
         anexos = ANEXOS.read_text(encoding="utf-8")
         escena = ESCENA.read_text(encoding="utf-8")
+        pronosticos = PRONOSTICOS.read_text(encoding="utf-8")
         self.assertIn('extends "res://guion/visor_metadatos_app.gd"', anexos)
         self.assertIn('preload("res://guion/visor_identidad_app.gd")', anexos)
         self.assertIn("_identidad_expedientes.mostrar_portada(false)", anexos)
         self.assertIn("_identidad_expedientes.mostrar_portada(true)", anexos)
-        self.assertIn('path="res://guion/visor_anexos_app.gd"', escena)
+        self.assertIn('path="res://guion/visor_pronosticos_app.gd"', escena)
+        self.assertIn('extends "res://guion/visor_anexos_app.gd"', pronosticos)
 
 
 if __name__ == "__main__":
