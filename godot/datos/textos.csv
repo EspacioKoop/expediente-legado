@@ -230,6 +230,18 @@ OFICIO_ATAQUE_4,¿Es esta la ventanilla?
 OFICIO_NOMBRE,Reclamante sin expediente asignado
 OFICIO_RESUMEN,Se presenta cada mañana. No consta quién es ni qué reclama; el sistema le asigna un turno igualmente.
 PUESTO_LEVANTARSE,Levantarse del puesto
+SELLO_PLANTA_EN_ORDEN_TITULO,Planta en orden
+SELLO_PLANTA_EN_ORDEN_DESCRIPCION,Inspección de cierre completada conforme al recorrido asignado.
+SELLO_NOCHE_IMPRODUCTIVA_TITULO,Noche improductiva
+SELLO_NOCHE_IMPRODUCTIVA_DESCRIPCION,Consta una noche sin documentos revisados ni expedientes cerrados.
+SELLO_FIRMA_SIN_PRISA_TITULO,Firma sin prisa
+SELLO_FIRMA_SIN_PRISA_DESCRIPCION,Jornada con expedientes cerrados sin imputaciones precipitadas.
+SELLO_REINCORPORACION_ADMINISTRATIVA_TITULO,Reincorporación administrativa
+SELLO_REINCORPORACION_ADMINISTRATIVA_DESCRIPCION,Consta reincorporación tras una reasignación de vida laboral.
+SELLO_DESPERTAR_REGLAMENTARIO_TITULO,Despertar reglamentario
+SELLO_DESPERTAR_REGLAMENTARIO_DESCRIPCION,Noche recorrida hasta su cierre ordinario sin despertar forzado.
+SELLO_PASILLO_EN_REGLA_TITULO,Pasillo en regla
+SELLO_PASILLO_EN_REGLA_DESCRIPCION,Actividad de bolos asentada en el registro interno del pasillo.
 SALIDA_CUENCO,El cuenco
 SALIDA_DESPERTAR,Despertar
 SALIDA_DORMIR,Dormir

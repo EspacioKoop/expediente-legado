@@ -9,7 +9,11 @@ class_name PruebasEspaciosYSueno
 extends RefCounted
 
 ## Los ficheros de datos que pueden nombrar una clave de traducción.
-const CATALOGOS := ["res://datos/casos.json", "res://datos/prometeo.json"]
+const CATALOGOS := [
+	"res://datos/casos.json",
+	"res://datos/prometeo.json",
+	"res://datos/sellos.json",
+]
 
 # --- Los espacios del día ----------------------------------------------------
 
