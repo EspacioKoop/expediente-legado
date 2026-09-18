@@ -57,6 +57,21 @@ class AmbienteArchivoTest(unittest.TestCase):
         self.assertIn("AudioStreamPlayer.new()", self.texto)
         self.assertIn("get_node_or_null(NODO)", self.texto)
 
+    def test_cambio_de_fase_hace_crossfade_y_no_reinicia_la_misma(self):
+        self.assertIn("const FUNDIDO_SEGUNDOS := 0.35", self.texto)
+        self.assertIn("const VOLUMEN_SILENCIO_DB := -60.0", self.texto)
+        self.assertIn("get_meta(META_FASE", self.texto)
+        self.assertIn("== fase", self.texto)
+        self.assertIn('voz.name = "%sSaliente" % NODO', self.texto)
+        self.assertIn(
+            'salida.tween_property(voz, "volume_db", VOLUMEN_SILENCIO_DB, FUNDIDO_SEGUNDOS)',
+            self.texto,
+        )
+        self.assertIn(
+            'entrada.tween_property(voz, "volume_db", volumen_db, FUNDIDO_SEGUNDOS)',
+            self.texto,
+        )
+
     def test_no_finge_assets_ni_procedencia(self):
         self.assertNotIn("res://assets/audio/", self.texto)
         self.assertNotIn("ResourceLoader", self.texto)

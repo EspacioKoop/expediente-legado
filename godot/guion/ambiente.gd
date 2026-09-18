@@ -11,6 +11,9 @@ const NODO := "AmbienteContinuo"
 const FRECUENCIA := 22_050
 const DURACION_CORTA := 1.0
 const DURACION_LARGA := 4.0
+const FUNDIDO_SEGUNDOS := 0.35
+const VOLUMEN_SILENCIO_DB := -60.0
+const META_FASE := &"fase_ambiente"
 const FASES := ["archivo", "trayecto", "casa", "sueño"]
 
 static var _pistas: Dictionary = {}
@@ -107,13 +110,22 @@ static func reproducir(nodo: Node, fase: String, volumen_db: float = -24.0) -> A
 		detener(nodo)
 		return null
 
-	detener(nodo)
+	var anterior := nodo.get_node_or_null(NODO) as AudioStreamPlayer
+	if anterior != null and String(anterior.get_meta(META_FASE, "")) == fase:
+		return anterior
+	if anterior != null:
+		_fundir_salida(nodo, anterior)
+
 	var voz := AudioStreamPlayer.new()
 	voz.name = NODO
 	voz.stream = pista
-	voz.volume_db = volumen_db
+	voz.volume_db = VOLUMEN_SILENCIO_DB
+	voz.set_meta(META_FASE, fase)
 	nodo.add_child(voz)
 	voz.play()
+
+	var entrada := nodo.create_tween()
+	entrada.tween_property(voz, "volume_db", volumen_db, FUNDIDO_SEGUNDOS)
 	return voz
 
 
@@ -123,5 +135,11 @@ static func detener(nodo: Node) -> void:
 	var voz := nodo.get_node_or_null(NODO) as AudioStreamPlayer
 	if voz == null:
 		return
-	voz.stop()
-	voz.queue_free()
+	_fundir_salida(nodo, voz)
+
+
+static func _fundir_salida(nodo: Node, voz: AudioStreamPlayer) -> void:
+	voz.name = "%sSaliente" % NODO
+	var salida := nodo.create_tween()
+	salida.tween_property(voz, "volume_db", VOLUMEN_SILENCIO_DB, FUNDIDO_SEGUNDOS)
+	salida.tween_callback(voz.queue_free)
