@@ -56,8 +56,16 @@ func _montar_ecos(dia: Node, mundo: Node3D, candidato: Dictionary) -> void:
 			String(candidato.get("frase", "")),
 			dia.jornada.get("leido_hoy", []),
 			raiz,
+			String(candidato.get("reward_id", "")),
 		)
 	)
+	if ecos == null:
+		return
+	var caso: Dictionary = candidato.get("caso", {})
+	if caso.is_empty() or not dia.has_method("conectar_recompensa_onirica"):
+		return
+	if not dia.conectar_recompensa_onirica(ecos.nucleo, caso):
+		return
 	var presentacion = EcosArchivoPresentacion.crear(ecos)
 	if presentacion == null:
 		return
@@ -70,6 +78,7 @@ func _montar_ecos(dia: Node, mundo: Node3D, candidato: Dictionary) -> void:
 		. configurar(
 			presentacion,
 			bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false)),
+			String(candidato.get("descripcion", "")),
 		)
 	):
 		vertical.free()
@@ -79,28 +88,63 @@ func _montar_ecos(dia: Node, mundo: Node3D, candidato: Dictionary) -> void:
 	_montado_esta_noche = true
 
 
-## La lista de frases elegibles sigue siendo propiedad de SuenoContenido: solo
-## después de aplicar sus reglas resolvemos de qué folio leído provenía la frase
-## escogida. Ordenar antes de derivar el índice evita depender del orden de carga.
+## #89 sí puede recontextualizar una pista aún no descubierta, pero únicamente
+## cuando su frase gatillo está literalmente dentro de un registro leído hoy.
+## Se priorizan esas recompensas pendientes; si ya no quedan, el mismo vertical
+## puede volver a usar una pista conocida sin duplicarla al persistir.
 func _candidato(dia: Node) -> Dictionary:
 	var leido_hoy: Array = dia.jornada.get("leido_hoy", [])
 	if leido_hoy.is_empty():
 		return {}
 	var descubiertas: Array = dia.partida.estado.get("pistas_descubiertas", [])
-	var fuentes := (
-		SuenoContenido
-		. fuentes(
-			leido_hoy,
-			dia.contenido.casos,
-			descubiertas,
-			dia.partida.estado.get("veredictos", {}),
-			SuenoCombate.vencidos(dia.partida.estado),
-		)
-	)
-	var frases: Array = fuentes.get("frases", []).duplicate()
-	if frases.is_empty():
+	var pendientes: Array = []
+	var conocidas: Array = []
+
+	for caso in dia.contenido.casos:
+		var registros := {}
+		for registro in caso.get("registros", []):
+			var folio := String(registro.get("folio", ""))
+			var registro_id := String(registro.get("id", ""))
+			if folio.is_empty() or registro_id.is_empty() or not leido_hoy.has(folio):
+				continue
+			registros[registro_id] = registro
+
+		for pista in caso.get("pistas", []):
+			# EcosArchivo usa un único documento. Las relaciones de dos registros
+			# necesitan otro tipo de puzzle y se mantienen fuera de este vertical.
+			if pista.has("registroOrigen2"):
+				continue
+			var pista_id := String(pista.get("id", ""))
+			var origen := String(pista.get("registroOrigen", ""))
+			var frase := String(pista.get("fraseGatillo", ""))
+			if pista_id.is_empty() or origen.is_empty() or frase.is_empty():
+				continue
+			if not registros.has(origen):
+				continue
+			if frase.strip_edges().split(" ", false).size() < EcosArchivo.CANTIDAD_FRAGMENTOS:
+				continue
+
+			var registro: Dictionary = registros[origen]
+			# El sueño no puede introducir texto que el documento leído no contuviera.
+			if not String(registro.get("contenido", "")).contains(frase):
+				continue
+			var candidato := {
+				"folio": String(registro.get("folio", "")),
+				"frase": frase,
+				"reward_id": pista_id,
+				"descripcion": String(pista.get("descripcion", "")),
+				"caso": caso,
+				"_orden": "%s|%s|%s" % [pista_id, registro.get("folio", ""), frase],
+			}
+			if descubiertas.has(pista_id):
+				conocidas.append(candidato)
+			else:
+				pendientes.append(candidato)
+
+	var candidatos: Array = pendientes if not pendientes.is_empty() else conocidas
+	if candidatos.is_empty():
 		return {}
-	frases.sort()
+	candidatos.sort_custom(Callable(self, "_candidato_antes"))
 	var semilla := (
 		Sueno
 		. semilla(
@@ -109,29 +153,13 @@ func _candidato(dia: Node) -> Dictionary:
 			dia._raiz(),
 		)
 	)
-	var frase := String(frases[posmod(semilla, frases.size())])
-	var folio := _folio_de_frase(frase, leido_hoy, descubiertas, dia.contenido.casos)
-	if folio.is_empty():
-		return {}
-	return {"folio": folio, "frase": frase}
+	var elegido: Dictionary = candidatos[posmod(semilla, candidatos.size())].duplicate()
+	elegido.erase("_orden")
+	return elegido
 
 
-func _folio_de_frase(frase: String, leido_hoy: Array, descubiertas: Array, casos: Array) -> String:
-	for caso in casos:
-		var origenes := {}
-		for registro in caso.get("registros", []):
-			var folio := String(registro.get("folio", ""))
-			if leido_hoy.has(folio):
-				origenes[String(registro.get("id", ""))] = folio
-		for pista in caso.get("pistas", []):
-			if not descubiertas.has(pista.get("id", "")):
-				continue
-			if String(pista.get("fraseGatillo", "")) != frase:
-				continue
-			var origen := String(pista.get("registroOrigen", ""))
-			if origenes.has(origen):
-				return String(origenes[origen])
-	return ""
+func _candidato_antes(a: Dictionary, b: Dictionary) -> bool:
+	return String(a.get("_orden", "")) < String(b.get("_orden", ""))
 
 
 ## El vertical queda cerca del centro del recorrido, elevado lo justo para leer
