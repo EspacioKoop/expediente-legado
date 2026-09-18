@@ -159,16 +159,10 @@ func _probar_integracion_oficina() -> void:
 		"una partida completa muestra marcador final",
 	)
 	if is_instance_valid(controller._marcador_resultado):
-		_comprobar(
-			controller._marcador_resultado.find_children("Puntos*", "Label", true, false).size()
-			== 4,
-			"el marcador enseña las cuatro puntuaciones",
-		)
-		_comprobar(
-			controller._marcador_resultado.find_children("Marca*", "ColorRect", true, false).size()
-			== 4,
-			"el marcador distingue visualmente los cuatro turnos",
-		)
+		var etiquetas := controller._marcador_resultado.find_children("Puntos*", "Label", true, false)
+		var marcas := controller._marcador_resultado.find_children("Marca*", "ColorRect", true, false)
+		_comprobar(etiquetas.size() == 4, "el marcador enseña las cuatro puntuaciones")
+		_comprobar(marcas.size() == 4, "el marcador distingue visualmente los cuatro turnos")
 	_comprobar(
 		dia._caminante.process_mode == modo_previo and dia._hud_prioridades.visible,
 		"el marcador no bloquea la jornada restaurada",
