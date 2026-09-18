@@ -72,12 +72,8 @@ static func restaurar(
 	leido_hoy: Array,
 ):
 	var base = Puzzle.restaurar(datos.get("nucleo", {}), leido_hoy)
-	if base == null:
-		return null
 	var pista_id := String(pista.get("id", "")).strip_edges()
-	if pista_id.is_empty():
-		return null
-	if String(base.puzzle_id) != "relacion:" + pista_id or String(base.reward_id) != pista_id:
+	if not _base_restaurable(base, pista_id):
 		return null
 
 	var relacion = _construir(caso, pista, leido_hoy, base)
@@ -144,6 +140,15 @@ func serializar() -> Dictionary:
 		"seleccion": seleccion.duplicate(),
 		"cerrada": cerrada,
 	}
+
+
+static func _base_restaurable(base, pista_id: String) -> bool:
+	return (
+		base != null
+		and not pista_id.is_empty()
+		and String(base.puzzle_id) == "relacion:" + pista_id
+		and String(base.reward_id) == pista_id
+	)
 
 
 static func _construir(caso: Dictionary, pista: Dictionary, leido_hoy: Array, base):
