@@ -8,7 +8,8 @@ extends "res://guion/dia_gato_app.gd"
 
 const POS_PUESTO := Vector3(-4.0, 1.45, 1.0)
 const CLAVE_ROL_ONBOARDING := "ONBOARDING_OBJETIVO_INICIAL"
-const CLAVE_TEXTO_ONBOARDING := "ONBOARDING_PUESTO_SIGA"
+const CLAVE_PUESTO_ONBOARDING := "ONBOARDING_PUESTO_SIGA"
+const CLAVE_ACCION_ONBOARDING := "ONBOARDING_ACCION_SIGA"
 const COLOR_FONDO_TUTORIAL := Color("e8edf7")
 const UMBRAL_RESCATE_CAIDA := -8.0
 
@@ -110,7 +111,7 @@ func _montar_onboarding_archivo() -> void:
 
 	var texto := Label.new()
 	texto.name = "TextoPistaPuesto"
-	texto.text = tr(CLAVE_TEXTO_ONBOARDING)
+	texto.text = "%s\n%s" % [tr(CLAVE_PUESTO_ONBOARDING), tr(CLAVE_ACCION_ONBOARDING)]
 	texto.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	texto.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	texto.custom_minimum_size.x = 580
