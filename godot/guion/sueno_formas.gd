@@ -53,7 +53,7 @@ const ENERGIA_LUZ_MATERIAL := 4.4
 const ALCANCE_LUZ_MATERIAL := 19.0
 ## La trama procedural de vigilia es sutil a propósito. Deformada y filtrada
 ## necesita más separación antes de caer en los 32 niveles del shader PSX.
-const CONTRASTE_MATERIAL_ONIRICO := 1.8
+const CONTRASTE_MATERIAL_ONIRICO := 4.0
 
 const FORMAS := {
 	# Dos naves cruzadas. Desde el centro se ven cuatro fondos y ninguno dice
