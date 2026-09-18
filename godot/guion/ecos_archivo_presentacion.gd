@@ -123,7 +123,8 @@ func vista(reduccion_movimiento: bool) -> Dictionary:
 		}
 		elementos.append(elemento)
 	return {
-		"regla": "Recompón los tres ecos. Puedes deshacer antes del tercero; la secuencia completa es definitiva.",
+		"regla":
+		"Recompón los tres ecos. Puedes deshacer antes del tercero; la secuencia completa es definitiva.",
 		"elementos": elementos,
 		"foco": foco,
 		"seleccion": seleccion.duplicate(),
