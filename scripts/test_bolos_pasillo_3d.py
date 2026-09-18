@@ -43,6 +43,17 @@ class BolosPasillo3DTest(unittest.TestCase):
         self.assertIn("const TIEMPO_MAXIMO_TIRO := 4.0", self.source)
         self.assertIn("simular_hasta_reposo", self.source)
 
+    def test_companeros_reutilizan_animacion_de_134_sin_entrar_en_fisica(self):
+        self.assertIn("CompaneroIdle3D.new()", self.source)
+        self.assertIn('Modelos.persona(cuerpo, "persona"', self.source)
+        self.assertIn('get("reduccion_movimiento", false)', self.source)
+        self.assertIn("POSICIONES_COMPANEROS", self.source)
+        self.assertIn("los compañeros reutilizan idle de oficina", self.godot_test)
+        self.assertIn("los compañeros quedan fuera de la física del carril", self.godot_test)
+        self.assertNotIn("AnimacionesUAL.reproducir", self.source)
+        for tipo_fisico in ("CharacterBody3D.new(", "StaticBody3D.new(", "RigidBody3D.new("):
+            self.assertNotIn(tipo_fisico, self.source)
+
     def test_entrada_es_semantica_y_valida_para_mando(self):
         self.assertIn(
             'Input.get_axis("mover_izquierda", "mover_derecha")',
