@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import re
 import subprocess
 import unittest
 
@@ -29,7 +30,9 @@ class CasaEstadoAmbientalTest(unittest.TestCase):
             check=False,
         )
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
-        self.assertIn("22 pasadas, 0 fallos", resultado.stdout)
+        resumen = re.search(r"(\d+) pasadas, 0 fallos", resultado.stdout)
+        self.assertIsNotNone(resumen, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 25, resultado.stdout)
 
 
 if __name__ == "__main__":
