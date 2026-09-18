@@ -423,6 +423,7 @@ func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
 	# día y el gato cuenta una noche más.
 	match jornada["fase"]:
 		"archivo":
+			_registrar_firma_sin_prisa()
 			var paga := Jornada.fichar_salida(jornada)
 			_sonar("nomina")
 			_hablando = false
@@ -471,6 +472,20 @@ func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
 	# tránsito pendiente se queda vacío: ya se ha entrado, y lo único que falta
 	# por hacer es escribirlo.
 	_guardar_o_avisar("")
+
+
+## Reconoce una jornada con trabajo real pero sin ninguna acusación precipitada.
+##
+## La condición solo observa hechos ya resueltos por Jornada/Acusacion. No paga,
+## no corrige veredictos y no fuerza guardado: las rutas archivo→trayecto ya
+## guardan después de fichar. Cero cierres no cuenta como mérito.
+func _registrar_firma_sin_prisa() -> Dictionary:
+	const SELLO_ID := "firma-sin-prisa"
+	if int(jornada.get("cerrados_hoy", 0)) <= 0:
+		return {"resultado": "no-cumplido", "id": SELLO_ID}
+	if int(jornada.get("acusaciones_precipitadas_hoy", 0)) != 0:
+		return {"resultado": "no-cumplido", "id": SELLO_ID}
+	return Sellos.registrar_sello(partida.estado, SELLO_ID)
 
 
 ## Hook de presentación para variantes de sueño. La jornada sigue resolviendo
