@@ -78,18 +78,24 @@ func _montar_relacion(
 				dia._raiz(),
 			)
 		)
-		relacion = RelacionOnirica.crear(
-			caso,
-			pista,
-			dia.jornada.get("leido_hoy", []),
-			raiz,
+		relacion = (
+			RelacionOnirica
+			. crear(
+				caso,
+				pista,
+				dia.jornada.get("leido_hoy", []),
+				raiz,
+			)
 		)
 	else:
-		relacion = RelacionOnirica.restaurar(
-			datos_guardados,
-			caso,
-			pista,
-			dia.jornada.get("leido_hoy", []),
+		relacion = (
+			RelacionOnirica
+			. restaurar(
+				datos_guardados,
+				caso,
+				pista,
+				dia.jornada.get("leido_hoy", []),
+			)
 		)
 	if relacion == null:
 		return
@@ -216,12 +222,15 @@ func _persistir_relacion(
 ) -> void:
 	if relacion == null:
 		return
-	if not SuenoPuzzleSesion.guardar(
-		dia.jornada,
-		SuenoPuzzleSesion.TIPO_RELACION,
-		caso_id,
-		reward_id,
-		relacion.serializar(),
+	if not (
+		SuenoPuzzleSesion
+		. guardar(
+			dia.jornada,
+			SuenoPuzzleSesion.TIPO_RELACION,
+			caso_id,
+			reward_id,
+			relacion.serializar(),
+		)
 	):
 		return
 	if dia.has_method("_guardar_o_avisar"):
