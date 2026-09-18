@@ -177,16 +177,23 @@ func _al_pisar_objetivo(cuerpo: Node3D, zona: Area3D) -> void:
 	# body_entered se emite durante físicas; diferir permite desactivar la zona.
 	zona.set_deferred("monitoring", false)
 
+	_tras_cambio_objetivo(estado, true)
+
+
+func _tras_cambio_objetivo(estado: Dictionary, guardar_si_pendiente: bool) -> void:
 	var progreso: Vector2i = SuenoObjetivos.progreso(estado)
-	_ambiente.ambient_light_energy = minf(_ambiente.ambient_light_energy + 0.14, 1.5)
+	if _ambiente != null:
+		_ambiente.ambient_light_energy = minf(_ambiente.ambient_light_energy + 0.14, 1.5)
 	_actualizar_feedback_objetivos(progreso)
 	_actualizar_rumbo_guia_pendiente(estado)
 	_orientar_gato_guia()
 	if not SuenoObjetivos.resuelto(estado):
-		_guardar_o_avisar("")
+		if guardar_si_pendiente:
+			_guardar_o_avisar("")
 		return
 
-	_caminante.set_physics_process(false)
+	if is_instance_valid(_caminante):
+		_caminante.set_physics_process(false)
 	get_tree().create_timer(DEMORA_RESOLUCION).timeout.connect(_resolver_objetivos_sueno)
 
 
@@ -256,6 +263,92 @@ func _resolver_objetivos_sueno() -> void:
 	_caminante.set_physics_process(true)
 
 
+## Integra un puzzle ya montado en la progresión normal de #281. Sustituye una
+## de las tres plazas espaciales por el puzzle, manteniendo el umbral 2/3. Si
+## falla o se abandona, quedan dos rutas espaciales puntuables y nunca bloquea.
+func registrar_objetivo_puzzle_onirico(nucleo) -> bool:
+	if (
+		nucleo == null
+		or String(jornada.get("fase", "")) != "sueño"
+		or _objetivo_escena.is_empty()
+	):
+		return false
+	var puzzle_id := String(nucleo.puzzle_id)
+	var reward_id := String(nucleo.reward_id)
+	if puzzle_id.is_empty() or reward_id.is_empty() or _objetivos_espacio.is_empty():
+		return false
+
+	var estado: Dictionary = _estado_objetivos_actual()
+	var objetivo_id := _id_objetivo_puzzle_onirico(puzzle_id, reward_id)
+	for indice in range(_objetivos_espacio.size() - 1, -1, -1):
+		var reemplazo_id := String(_objetivos_espacio[indice].get("id", ""))
+		if reemplazo_id.is_empty():
+			continue
+		if not (
+			SuenoObjetivos
+			. sustituir_puntuable(
+				estado,
+				{
+					"id": objetivo_id,
+					"tipo": "pista_onirica",
+					"condicion": "resolver",
+					"feedback": "pista",
+					"cuenta": true,
+				},
+				reemplazo_id,
+			)
+		):
+			continue
+		_retirar_objetivo_espacial(reemplazo_id)
+		_actualizar_feedback_objetivos(SuenoObjetivos.progreso(estado))
+		_actualizar_rumbo_guia_pendiente(estado)
+		_orientar_gato_guia()
+		return true
+	return false
+
+
+func _retirar_objetivo_espacial(objetivo_id: String) -> void:
+	for indice in range(_objetivos_espacio.size() - 1, -1, -1):
+		if String(_objetivos_espacio[indice].get("id", "")) == objetivo_id:
+			_objetivos_espacio.remove_at(indice)
+	if not is_instance_valid(_mundo):
+		return
+	for hijo in _mundo.get_children():
+		if not hijo is Area3D:
+			continue
+		if String(hijo.get_meta("objetivo", "")) != objetivo_id:
+			continue
+		hijo.set_deferred("monitoring", false)
+		hijo.queue_free()
+
+
+func _id_objetivo_puzzle_onirico(puzzle_id: String, reward_id: String) -> String:
+	return "pista:%s:%s" % [puzzle_id, reward_id]
+
+
+func _actualizar_objetivo_puzzle_onirico(resultado: Dictionary) -> bool:
+	if String(jornada.get("fase", "")) != "sueño" or _objetivo_escena.is_empty():
+		return false
+	var puzzle_id := String(resultado.get("puzzle_id", ""))
+	var reward_id := String(resultado.get("reward_id", ""))
+	if puzzle_id.is_empty() or reward_id.is_empty():
+		return false
+	var estado: Dictionary = _estado_objetivos_actual()
+	var objetivo_id := _id_objetivo_puzzle_onirico(puzzle_id, reward_id)
+	var resultado_estado := String(resultado.get("state", ""))
+	if resultado_estado == PuzzleOnirico.ESTADO_COMPLETADO:
+		if not SuenoObjetivos.completar(estado, objetivo_id):
+			return false
+		_tras_cambio_objetivo(estado, false)
+		return true
+	if (
+		resultado_estado == PuzzleOnirico.ESTADO_FALLADO
+		or resultado_estado == PuzzleOnirico.ESTADO_ABANDONADO
+	):
+		return SuenoObjetivos.fallar(estado, objetivo_id)
+	return false
+
+
 ## Enlaza un núcleo de puzzle concreto con la recompensa persistente de #89.
 ## La UI decide cuándo crear/mostrar el puzzle; esta capa solo posee el estado y
 ## el guardado. Conectar dos veces el mismo núcleo no duplica el callback.
@@ -274,12 +367,19 @@ func conectar_recompensa_onirica(nucleo, caso: Dictionary) -> bool:
 ## `_guardar_o_avisar` deja el mismo estado pendiente para que el mecanismo
 ## normal de reintento lo escriba sin volver a conceder la pista.
 func _al_resultado_puzzle_onirico(resultado: Dictionary, caso: Dictionary) -> void:
+	var resultado_estado := String(resultado.get("state", ""))
+	if resultado_estado != PuzzleOnirico.ESTADO_COMPLETADO:
+		if _actualizar_objetivo_puzzle_onirico(resultado):
+			_guardar_o_avisar("")
+		return
+
 	var pista := PistaOnirica.resolver(caso, resultado)
 	if pista.is_empty():
 		return
-	if not PistaOnirica.registrar(partida.estado, pista):
-		return
-	_guardar_o_avisar("")
+	var progreso_nuevo := _actualizar_objetivo_puzzle_onirico(resultado)
+	var pista_nueva := PistaOnirica.registrar(partida.estado, pista)
+	if progreso_nuevo or pista_nueva:
+		_guardar_o_avisar("")
 
 
 func _abrir_expediente() -> void:
