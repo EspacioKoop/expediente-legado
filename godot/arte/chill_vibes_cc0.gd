@@ -42,13 +42,7 @@ static func montar_lote_servicio(raiz: Node3D) -> bool:
 		lote.free()
 		return false
 	if not _pieza(
-		lote,
-		"Crate",
-		CRATE,
-		Vector3(1.20, TAM_CRATE.y * 0.5, 0.18),
-		TAM_CRATE,
-		MADERA_CAJA,
-		7.0
+		lote, "Crate", CRATE, Vector3(1.20, TAM_CRATE.y * 0.5, 0.18), TAM_CRATE, MADERA_CAJA, 7.0
 	):
 		lote.free()
 		return false
