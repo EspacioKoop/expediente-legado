@@ -102,3 +102,48 @@ Plantilla de procedencia **sin hash inventado**:
 ```
 
 La integración final no debe cambiar desbloqueos, canje, persistencia, historias políticas ni el resultado de saltar/reducir movimiento en la cinemática; este trabajo solo sustituye el frontal provisional por arte con procedencia verificable.
+
+
+## Validación humana de cierre (#645)
+
+La presencia del asset, el hash, la importación de Godot y el cableado 3D sí se pueden comprobar automáticamente. La **legibilidad y correspondencia visual** de la carta en un export real siguen requiriendo revisión humana.
+
+El capturador de `godot/pruebas/capturar.gd` permite generar evidencia reproducible de las ocho cartas ocultas por el camino jugable real. Localiza automáticamente el expediente que contiene cada folio y admite un cuarto argumento `normal` o `reducido`.
+
+Cada ejecución debe usar un temporal XDG distinto. La carta se revela una sola vez y el capturador rechaza ejecutar Tarot sin `XDG_DATA_HOME`, para evitar que una prueba modifique la partida personal:
+
+```bash
+mkdir -p dist/qa/tarot-645
+
+tmp="$(mktemp -d)"
+XDG_DATA_HOME="$tmp/data" XDG_CONFIG_HOME="$tmp/config" XDG_CACHE_HOME="$tmp/cache" \
+  xvfb-run -a godot4 --path godot --script pruebas/capturar.gd -- \
+  ../dist/qa/tarot-645/la-justicia-normal.png ACTA-1999-014 2 normal
+
+tmp="$(mktemp -d)"
+XDG_DATA_HOME="$tmp/data" XDG_CONFIG_HOME="$tmp/config" XDG_CACHE_HOME="$tmp/cache" \
+  xvfb-run -a godot4 --path godot --script pruebas/capturar.gd -- \
+  ../dist/qa/tarot-645/la-justicia-reducido.png ACTA-1999-014 2 reducido
+
+tmp="$(mktemp -d)"
+XDG_DATA_HOME="$tmp/data" XDG_CONFIG_HOME="$tmp/config" XDG_CACHE_HOME="$tmp/cache" \
+  xvfb-run -a godot4 --path godot --script pruebas/capturar.gd -- \
+  ../dist/qa/tarot-645/la-justicia-skip.png ACTA-1999-014 -1 normal
+```
+
+Matriz mínima de folios/cartas:
+
+| Folio | Carta |
+| --- | --- |
+| `ACTA-1999-014` | `la-justicia` |
+| `OF-1990-114` | `la-rueda` |
+| `MEMO-1993-201` | `el-juicio` |
+| `F-1996-00187` | `la-luna` |
+| `ACTA-2007-002` | `el-carro` |
+| `FAX-1996-077` | `el-sol` |
+| `OF-1998-077` | `la-emperatriz` |
+| `ACTA-1998-427B` | `la-sacerdotisa` |
+
+Para cada carta hay que revisar el frontal del plano 2 en modo normal y reducido, y comprobar que `-1` salta la cinemática y desemboca en la historia sin perder el hallazgo.
+
+La comprobación de «al menos una carta obtenida por progresión normal» **no debe fabricarse desde QA**. El frontend legado tiene triggers de progreso como primera pista → `el-mago`, pero esa sincronización general aún no está portada a Godot; queda separada en #1029. Hasta que #1029 proporcione un camino jugable real, esa casilla de #645 permanece pendiente.
