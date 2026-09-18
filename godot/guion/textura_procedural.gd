@@ -19,49 +19,6 @@ const LADO := 64
 ## superficie es el nombre del fichero: añadir un material es dejarlo aquí.
 const CARPETA := "res://assets/texturas/%s.jpg"
 
-## #231: el pack de Screaming Brain entra a 128 px por defecto. Los perfiles
-## solo sustituyen una superficie cuando el PNG real existe; así el código no
-## convierte un checkout sin LFS en una colección de errores de carga.
-const HORROR_RAIZ := "res://assets/texturas/horror_sbs/128x128/"
-const HORROR_PERFILES_SUENO := {
-	"crucero":
-	{
-		"suelo": "Floor/Horror_Floor_12",
-		"muro": "Wall/Horror_Wall_09",
-		"escala": 1.35,
-	},
-	"patio":
-	{
-		"suelo": "Stone/Horror_Stone_07",
-		"muro": "Brick/Horror_Brick_11",
-		"escala": 1.10,
-	},
-	"peine":
-	{
-		"suelo": "Stone/Horror_Stone_13",
-		"muro": "Wall/Horror_Wall_05",
-		"escala": 1.50,
-	},
-	"escalera":
-	{
-		"suelo": "Floor/Horror_Floor_14",
-		"muro": "Wall/Horror_Wall_08",
-		"escala": 1.20,
-	},
-	"embudo":
-	{
-		"suelo": "Stone/Horror_Stone_10",
-		"muro": "Stone/Horror_Stone_14",
-		"escala": 1.60,
-	},
-	"gilgamesh":
-	{
-		"suelo": "Stone/Horror_Stone_09",
-		"muro": "Brick/Horror_Brick_10",
-		"escala": 1.30,
-	},
-}
-
 
 ## Linóleo de oficina: un tono plano con motas. Es el suelo de cualquier
 ## edificio público de los 90 y lo que lo identifica son las manchas, no el
@@ -303,36 +260,6 @@ static func por_nombre(nombre: String, base: Color, semilla: int) -> Texture2D:
 		if traida != null:
 			return traida
 	return calculada(nombre, base, semilla)
-
-
-## Convierte el id estable del manifiesto de #231 en la ruta runtime 128×128.
-static func horror_ruta(identificador: String) -> String:
-	return HORROR_RAIZ + identificador + "-128x128.png"
-
-
-## Deforma materiales del sueño solo cuando el objeto LFS está disponible.
-## Falta de assets = mismo espacio que antes del PR, no un material roto.
-static func aplicar_horror_sueno(espacio: Dictionary, forma_id: String) -> Dictionary:
-	var perfil: Dictionary = HORROR_PERFILES_SUENO.get(forma_id, {})
-	if perfil.is_empty():
-		return espacio
-
-	var resultado := espacio.duplicate(true)
-	var aplicado := false
-	for superficie in ["suelo", "muro"]:
-		var identificador := String(perfil.get(superficie, ""))
-		if identificador.is_empty():
-			continue
-		var ruta := horror_ruta(identificador)
-		if not ResourceLoader.exists(ruta):
-			continue
-		resultado["textura_" + superficie] = ruta
-		aplicado = true
-
-	if not aplicado:
-		return espacio
-	resultado["escala_textura"] = float(perfil.get("escala", resultado.get("escala_textura", 1.2)))
-	return resultado
 
 
 static func calculada(nombre: String, base: Color, semilla: int) -> ImageTexture:

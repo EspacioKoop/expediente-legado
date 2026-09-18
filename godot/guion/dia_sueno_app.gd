@@ -19,12 +19,26 @@ func _espacio_de(fase: String) -> Dictionary:
 		return espacio
 	var id := String(jornada["sueno_escenas"][0])
 	if SuenoEscuela.es_forma(id):
-		return SuenoEscuela.adaptar_espacio(espacio, {"variante_aulas": 0})
-	if SuenoMontana.es_forma(id):
-		return SuenoMontana.adaptar_espacio(espacio, {"variante_cabana": 0})
-	if SuenoDesierto.es_forma(id):
-		return SuenoDesierto.adaptar_espacio(espacio, {"variante_horizonte": 0})
-	return espacio
+		espacio = SuenoEscuela.adaptar_espacio(espacio, {"variante_aulas": 0})
+	elif SuenoMontana.es_forma(id):
+		espacio = SuenoMontana.adaptar_espacio(espacio, {"variante_cabana": 0})
+	elif SuenoDesierto.es_forma(id):
+		espacio = SuenoDesierto.adaptar_espacio(espacio, {"variante_horizonte": 0})
+
+	# #231: primero sabemos QUÉ sueño es; después decidimos cuánto se degrada.
+	# Así escuela/montaña/desierto/castillo reciben su perfil semántico real y
+	# las salas posteriores de la misma noche pueden volverse más agresivas sin
+	# reseleccionar escenas ni tocar progreso.
+	var opciones := _opciones_sueno()
+	var total_escenas := clampi(
+		int(opciones.get("cantidad", Sueno.ESCENAS_POR_NOCHE)),
+		1,
+		SuenoFormas.ids().size(),
+	)
+	var nivel_horror := HorrorTexturas.nivel_para_noche(
+		total_escenas, jornada["sueno_escenas"].size(), espacio
+	)
+	return HorrorTexturas.aplicar(espacio, id, nivel_horror)
 
 
 ## Las presentaciones específicas se montan DESPUÉS del espacio jugable. Así la
