@@ -67,18 +67,28 @@ class MaterialesSuenoTest(unittest.TestCase):
                 self.assertGreater(len({round(abs(v), 3) for v in valores}), 1)
 
 
-    def test_la_luz_ambiente_preserva_legibilidad_material(self):
-        constante = re.search(
-            r"const ENERGIA_AMBIENTE_LEGIBLE := ([0-9.]+)",
+    def test_la_luz_espacial_preserva_legibilidad_material(self):
+        energia = re.search(
+            r"const ENERGIA_LUZ_MATERIAL := ([0-9.]+)",
             self.formas,
         )
-        self.assertIsNotNone(constante)
-        self.assertGreaterEqual(float(constante.group(1)), 0.5)
-        usos = re.findall(
-            r'"ambiente_energia":\s*ENERGIA_AMBIENTE_LEGIBLE',
+        alcance = re.search(
+            r"const ALCANCE_LUZ_MATERIAL := ([0-9.]+)",
             self.formas,
         )
-        self.assertEqual(len(usos), len(IDS))
+        self.assertIsNotNone(energia)
+        self.assertIsNotNone(alcance)
+        self.assertGreaterEqual(float(energia.group(1)), 4.0)
+        self.assertGreaterEqual(float(alcance.group(1)), 18.0)
+        self.assertEqual(
+            len(re.findall(r'"energia":\s*ENERGIA_LUZ_MATERIAL', self.formas)),
+            len(IDS),
+        )
+        self.assertEqual(
+            len(re.findall(r'"alcance":\s*ALCANCE_LUZ_MATERIAL', self.formas)),
+            len(IDS),
+        )
+        self.assertEqual(self.formas.count('"ambiente_energia": 0.42'), len(IDS))
 
     def test_hay_inversion_deliberada_en_al_menos_una_forma(self):
         vectores = re.findall(
