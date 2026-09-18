@@ -1,7 +1,8 @@
 ## Evidencia visual reproducible del castillo onírico (#947).
 ##
 ## Renderiza las cuatro composiciones con la misma cámara e iluminación y añade
-## una quinta toma del claustro con mutación de giro. No sustituye el pase humano
+## una quinta toma del claustro con mutación de giro y una sexta de la capilla
+## tras la tercera campanada. No sustituye el pase humano
 ## de #398: sirve para comparar silueta, profundidad y regresiones.
 extends SceneTree
 
@@ -9,6 +10,12 @@ const CASOS := [
 	{"nombre": "patio", "variante": "patio", "mutacion": "estable"},
 	{"nombre": "scriptorium", "variante": "scriptorium", "mutacion": "estable"},
 	{"nombre": "torre_capilla", "variante": "torre_capilla", "mutacion": "estable"},
+	{
+		"nombre": "torre_capilla_pulso",
+		"variante": "torre_capilla",
+		"mutacion": "estable",
+		"pulso": 2
+	},
 	{"nombre": "claustro", "variante": "claustro_reflejado", "mutacion": "estable"},
 	{"nombre": "claustro_giro", "variante": "claustro_reflejado", "mutacion": "giro"},
 ]
@@ -51,6 +58,13 @@ func _init() -> void:
 			return
 		for i in 12:
 			await process_frame
+		if caso.has("pulso"):
+			var controlador := (
+				presentacion.get_node_or_null("PulsoArquitectonico") as SuenoCastilloPulso3D
+			)
+			if controlador != null:
+				controlador.set_process(false)
+				controlador.aplicar_pulso(int(caso["pulso"]))
 		camara.look_at(Vector3(0.0, 2.2, 0.0), Vector3.UP)
 		for i in 2:
 			await process_frame

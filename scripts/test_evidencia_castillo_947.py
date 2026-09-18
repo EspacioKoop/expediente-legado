@@ -19,6 +19,9 @@ class EvidenciaCastillo947Test(unittest.TestCase):
         for variante in ("patio", "scriptorium", "torre_capilla", "claustro_reflejado"):
             self.assertIn(f'"variante": "{variante}"', self.capturador)
         self.assertIn('{"nombre": "claustro_giro"', self.capturador)
+        self.assertIn('"nombre": "torre_capilla_pulso"', self.capturador)
+        self.assertIn('"pulso": 2', self.capturador)
+        self.assertIn("controlador.aplicar_pulso(int(caso[\"pulso\"]))", self.capturador)
         self.assertIn("Vector3(13.5, 8.2, 15.5)", self.capturador)
         self.assertIn("camara.fov = 58.0", self.capturador)
         self.assertIn("root.size = TAMANO", self.capturador)

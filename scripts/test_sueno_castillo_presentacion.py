@@ -5,7 +5,9 @@ import unittest
 RAIZ = Path(__file__).resolve().parents[1]
 AUDIO = RAIZ / "godot" / "guion" / "sueno_castillo_audio.gd"
 PRESENTACION = RAIZ / "godot" / "guion" / "sueno_castillo_3d.gd"
+PULSO = RAIZ / "godot" / "guion" / "sueno_castillo_pulso_3d.gd"
 DIA_SUENO = RAIZ / "godot" / "guion" / "dia_sueno_app.gd"
+PATIO = RAIZ / "godot" / "escenas" / "suenos" / "props_284" / "patio_castillo_onirico.tscn"
 SCRIPTORIUM = RAIZ / "godot" / "escenas" / "suenos" / "props_284" / "galeria_scriptorium_castillo.tscn"
 TORRE = RAIZ / "godot" / "escenas" / "suenos" / "props_284" / "torre_capilla_castillo.tscn"
 CLAUSTRO = RAIZ / "godot" / "escenas" / "suenos" / "props_284" / "claustro_reflejado_castillo.tscn"
@@ -18,7 +20,9 @@ class SuenoCastilloPresentacionTest(unittest.TestCase):
     def setUpClass(cls):
         cls.audio = AUDIO.read_text(encoding="utf-8")
         cls.presentacion = PRESENTACION.read_text(encoding="utf-8")
+        cls.pulso = PULSO.read_text(encoding="utf-8")
         cls.dia = DIA_SUENO.read_text(encoding="utf-8")
+        cls.patio = PATIO.read_text(encoding="utf-8")
         cls.scriptorium = SCRIPTORIUM.read_text(encoding="utf-8")
         cls.torre = TORRE.read_text(encoding="utf-8")
         cls.claustro = CLAUSTRO.read_text(encoding="utf-8")
@@ -91,6 +95,25 @@ class SuenoCastilloPresentacionTest(unittest.TestCase):
         for mutacion in ('"desfase":', '"contraccion":', '"giro":'):
             self.assertIn(mutacion, self.presentacion)
         self.assertIn("arquitectura.scale = Vector3(0.92, 1.12, 0.92)", self.presentacion)
+
+    def test_pulsos_solo_transforman_piezas_marcadas_y_reutilizan_campanadas(self):
+        self.assertIn('const GRUPO_ANOMALIA := "castillo_anomalia"', self.pulso)
+        self.assertIn('is_in_group(GRUPO_ANOMALIA)', self.pulso)
+        self.assertIn("SuenoCastilloAudio.CAMPANADAS", self.pulso)
+        self.assertIn("SuenoCastilloAudio.DURACION", self.pulso)
+        self.assertIn("func aplicar_pulso(indice: int) -> void:", self.pulso)
+        self.assertIn('pulso.name = "PulsoArquitectonico"', self.presentacion)
+        self.assertIn("pulso.configurar(arquitectura, campanas)", self.presentacion)
+        for termino in ("StaticBody3D", "CollisionShape3D", "Jornada.", "Partida"):
+            self.assertNotIn(termino, self.pulso)
+
+    def test_cada_composicion_declara_anomalias_sin_marcar_el_suelo(self):
+        for escena in (self.patio, self.scriptorium, self.torre, self.claustro):
+            self.assertIn('groups=["castillo_anomalia"]', escena)
+        self.assertNotIn('[node name="SueloPatio" type="MeshInstance3D" parent="." groups=', self.patio)
+        self.assertNotIn('[node name="SueloScriptorium" type="MeshInstance3D" parent="." groups=', self.scriptorium)
+        self.assertNotIn('[node name="SueloCapilla" type="MeshInstance3D" parent="." groups=', self.torre)
+        self.assertNotIn('[node name="SueloClaustro" type="MeshInstance3D" parent="." groups=', self.claustro)
 
     def test_presentacion_solo_se_activa_por_identidad_de_datos(self):
         self.assertIn('espacio.get("identidad_onirica", "")', self.presentacion)

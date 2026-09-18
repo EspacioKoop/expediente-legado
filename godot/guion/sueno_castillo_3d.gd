@@ -42,6 +42,13 @@ static func montar(mundo: Node3D, espacio: Dictionary) -> Node3D:
 	campanas.unit_size = 7.0
 	campanas.max_distance = 52.0
 	presentacion.add_child(campanas)
+
+	# Solo las piezas etiquetadas como anomalía responden a las campanadas. La
+	# arquitectura principal, el suelo y la física ANULAR permanecen inmóviles.
+	var pulso := SuenoCastilloPulso3D.new()
+	pulso.name = "PulsoArquitectonico"
+	presentacion.add_child(pulso)
+	pulso.configurar(arquitectura, campanas)
 	campanas.play()
 
 	return presentacion

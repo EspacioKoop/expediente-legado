@@ -28,7 +28,7 @@ rotation_degrees = Vector3(0, 180, 0)
 position = Vector3(6.1, 0, 0)
 rotation_degrees = Vector3(0, -90, 0)
 
-[node name="EscaleraImposible" parent="." instance=ExtResource("2_escalera")]
+[node name="EscaleraImposible" parent="." groups=["castillo_anomalia"] instance=ExtResource("2_escalera")]
 position = Vector3(-1.2, 0.02, 0.7)
 rotation_degrees = Vector3(0, 18, 0)
 
@@ -36,7 +36,7 @@ rotation_degrees = Vector3(0, 18, 0)
 position = Vector3(-2.35, 4.1, -5.45)
 rotation_degrees = Vector3(0, 0, 0)
 
-[node name="EstandarteEste" parent="." instance=ExtResource("3_estandarte")]
+[node name="EstandarteEste" parent="." groups=["castillo_anomalia"] instance=ExtResource("3_estandarte")]
 position = Vector3(5.45, 4.1, 2.35)
 rotation_degrees = Vector3(0, -90, 0)
 
