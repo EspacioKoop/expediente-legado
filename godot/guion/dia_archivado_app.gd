@@ -42,12 +42,15 @@ func refrescar(host) -> void:
 	_montar_carpeta(host, caso)
 
 
-func abandonar(host) -> Dictionary:
+func abandonar(host, guardar: bool = true) -> Dictionary:
 	if _estado_archivado.is_empty():
 		return {}
+	if ArchivadoBandeja.siguiente_pendiente(_estado_archivado).is_empty():
+		return ArchivadoBandeja.resultado(_estado_archivado)
 	var resumen := ArchivadoBandeja.abandonar(_estado_archivado)
 	_persistir(host)
-	_guardar(host)
+	if guardar:
+		_guardar(host)
 	return resumen
 
 
