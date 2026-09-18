@@ -7,7 +7,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 ESTILO = ROOT / "godot" / "guion" / "estilo_siga.gd"
 VISOR = ROOT / "godot" / "guion" / "visor_expediente.gd"
-CONSOLA = ROOT / "godot" / "depuracion" / "consola_depuracion.gd"
+CONSOLA = ROOT / "godot" / "debug" / "consola_depuracion.gd"
 
 
 class KubastaConsumidores298Test(unittest.TestCase):

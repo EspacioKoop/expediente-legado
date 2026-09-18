@@ -11,6 +11,7 @@ DECLARADA="$(tr -d '\r\n' < "$RAIZ/.godot-version")"
 ACTUAL="$($MOTOR --version | tr -d '\r\n')"
 CONFIG_INCIDENCIAS="$GODOT_DIR/datos/incidencias.json"
 NOTAS_ALPHA="$RAIZ/docs/alpha-playtest-2026-09-15.md"
+QA_TOOLS="${SIGA98_QA_TOOLS:-0}"
 RESPALDO_INCIDENCIAS="$(mktemp)"
 cp "$CONFIG_INCIDENCIAS" "$RESPALDO_INCIDENCIAS"
 
@@ -22,6 +23,11 @@ trap restaurar_config_incidencias EXIT
 
 if [ ! -f "$NOTAS_ALPHA" ]; then
     echo "ERROR: faltan las notas de la alpha: $NOTAS_ALPHA" >&2
+    exit 1
+fi
+
+if [ "$QA_TOOLS" != "0" ] && [ "$QA_TOOLS" != "1" ]; then
+    echo "ERROR: SIGA98_QA_TOOLS debe ser 0 o 1" >&2
     exit 1
 fi
 
@@ -84,9 +90,16 @@ EOF
     fi
 }
 
-exportar "Linux x86_64" "$SALIDA/godot-linux/SIGA-98.x86_64"
+LINUX_PRESET="Linux x86_64"
+WINDOWS_PRESET="Windows x86_64"
+if [ "$QA_TOOLS" = "1" ]; then
+    LINUX_PRESET="Linux x86_64 QA"
+    WINDOWS_PRESET="Windows x86_64 QA"
+fi
+
+exportar "$LINUX_PRESET" "$SALIDA/godot-linux/SIGA-98.x86_64"
 chmod +x "$SALIDA/godot-linux/SIGA-98.x86_64"
-exportar "Windows x86_64" "$SALIDA/godot-windows/SIGA-98.exe"
+exportar "$WINDOWS_PRESET" "$SALIDA/godot-windows/SIGA-98.exe"
 
 # La alpha se distribuye con su propio contexto de playtest. Así cada ZIP deja
 # claro qué contiene y qué sigue pendiente de validar aunque se comparta fuera
@@ -107,6 +120,7 @@ build_sha=$BUILD_SHA
 source_ref=$BUILD_REF
 godot=$DECLARADA
 notes=$NOTAS_NOMBRE
+qa_tools=$QA_TOOLS
 built_utc=$BUILD_UTC
 EOF
 done

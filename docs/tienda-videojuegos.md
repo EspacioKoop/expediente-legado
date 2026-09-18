@@ -34,6 +34,15 @@ Nuevas ROMs comprables deben cumplir la misma frontera de #244: código y assets
 
 Recomprar un título no vuelve a cobrarlo. Comprar fuera del trayecto, sin dinero, con ID desconocido o sin artefacto devuelve un resultado fallido sin mutar la economía.
 
+
+## Manual de servicio de Bit 98
+
+Completar el catálogo **disponible en la build** desbloquea de forma permanente el manual de servicio de Bit 98. El desbloqueo reutiliza `PerfilRoms`: no introduce otra moneda, otra partida ni un fichero de progreso paralelo.
+
+En una build publicada, la tecla **º** abre entonces una consola limitada con `ayuda`, `clima`, `desatascar`, `portatil`, `diagnostico` y `limpiar`. Es deliberadamente distinta de la consola QA: no contiene comandos para cambiar día, dinero, pistas, gato, fase ni sala del sueño. Esos comandos siguen viviendo exclusivamente bajo `debug/**` y no entran en los presets públicos.
+
+La condición usa solo cartuchos presentes en la build. Un título temporalmente sin artefacto no hace imposible conseguir el manual. Una futura misión puede conceder el mismo acceso como ruta alternativa sin ampliar los permisos de esta consola.
+
 ## Portátil Color 98
 
 La consola doméstica de #124 y la nueva entrada **Portátil Color 98** del menú principal consumen la misma biblioteca de `PerfilRoms`. Ambas muestran las ROMs incluidas mediante `RomsPropias.en_consola`, las compradas permanentemente y, por la vía independiente de `CatalogoRomsUsuario`, las aportadas por el jugador.

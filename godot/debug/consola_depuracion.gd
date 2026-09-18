@@ -1,7 +1,7 @@
-## Consola de pruebas (#770). Se abre y se cierra con º, la tecla a la izquierda
+## Consola de pruebas (#116, #770). Se abre y se cierra con º, la tecla a la izquierda
 ## del 1.
 ##
-## Es herramienta de playtest, no juego: vive fuera de `guion/` y no tiene textos
+## Es herramienta de playtest, no juego: vive bajo `debug/`, fuera del export público,
 ## en `textos.csv`. Cada botón escribe el mismo comando que se podría teclear, así
 ## que el registro enseña los comandos sin tener que leer la ayuda.
 ##
