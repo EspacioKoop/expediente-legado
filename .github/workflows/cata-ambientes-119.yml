@@ -31,12 +31,14 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Verificar FFmpeg
+      - name: Instalar FFmpeg
         run: |
           set -euo pipefail
-          command -v ffmpeg
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          ffmpeg -version > "$RUNNER_TEMP/ffmpeg-version.txt"
+          head -n 1 "$RUNNER_TEMP/ffmpeg-version.txt"
           command -v ffprobe
-          ffmpeg -version > "$RUNNER_TEMP/ffmpeg-version.txt"\n          head -n 1 "$RUNNER_TEMP/ffmpeg-version.txt"
 
       - name: Validar fuentes y herramienta de cata
         run: |
@@ -59,7 +61,6 @@ jobs:
           done
 
       - name: Adjuntar cata para revisión humana
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cata-ambientes-119-${{ github.sha }}
