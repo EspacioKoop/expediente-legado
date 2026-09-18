@@ -80,7 +80,7 @@ class BolosPasillo3DTest(unittest.TestCase):
         self.assertIn("DURACION_MARCADOR := 3.5", self.controller)
         self.assertIn("func _mostrar_marcador(resultado: Dictionary)", self.controller)
         self.assertIn('if bool(resultado.get("completa", false)):', self.controller)
-        self.assertIn('etiqueta.text = "%02d" % int(puntuaciones[indice])', self.controller)
+        self.assertIn("etiqueta.text = str(int(puntuaciones[indice])).pad_zeros(2)", self.controller)
         self.assertIn("ColorRect.new()", self.controller)
         self.assertIn("Control.MOUSE_FILTER_IGNORE", self.controller)
         self.assertIn("temporizador.one_shot = true", self.controller)
