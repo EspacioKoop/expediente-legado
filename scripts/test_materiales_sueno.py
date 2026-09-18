@@ -97,7 +97,7 @@ class MaterialesSuenoTest(unittest.TestCase):
             self.formas,
         )
         self.assertIsNotNone(constante)
-        self.assertGreaterEqual(float(constante.group(1)), 1.5)
+        self.assertGreaterEqual(float(constante.group(1)), 4.0)
         self.assertEqual(
             self.formas.count('"contraste_textura": CONTRASTE_MATERIAL_ONIRICO'),
             len(IDS),
@@ -137,9 +137,10 @@ class MaterialesSuenoTest(unittest.TestCase):
             self.procedural.index("if ResourceLoader.exists(ruta)"),
             self.procedural.index("return calculada(nombre, base, semilla, contraste)"),
         )
-        self.assertIn(
-            "return _contrastar_textura(traida, base, contraste)",
-            self.procedural,
+        self.assertIn("return traida", self.procedural)
+        self.assertLess(
+            self.procedural.index("return traida"),
+            self.procedural.index("return calculada(nombre, base, semilla, contraste)"),
         )
         explicita = self.procedural.index('if nombre.begins_with("res://")')
         carga_explicita = self.procedural.index(
