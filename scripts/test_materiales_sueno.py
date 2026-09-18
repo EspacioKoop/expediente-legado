@@ -128,7 +128,7 @@ class MaterialesSuenoTest(unittest.TestCase):
             "return calculada(nombre, base, semilla, contraste)",
             self.procedural,
         )
-        self.assertIn("_contrastar_calculada(textura, base, contraste)", self.procedural)
+        self.assertIn("_contrastar_textura(textura, base, contraste)", self.procedural)
         self.assertLess(
             self.procedural.index('if nombre.begins_with("res://")'),
             self.procedural.index("return calculada(nombre, base, semilla, contraste)"),
@@ -137,6 +137,17 @@ class MaterialesSuenoTest(unittest.TestCase):
             self.procedural.index("if ResourceLoader.exists(ruta)"),
             self.procedural.index("return calculada(nombre, base, semilla, contraste)"),
         )
+        self.assertIn(
+            "return _contrastar_textura(traida, base, contraste)",
+            self.procedural,
+        )
+        explicita = self.procedural.index('if nombre.begins_with("res://")')
+        carga_explicita = self.procedural.index(
+            'return ResourceLoader.load(nombre, "Texture2D") as Texture2D',
+            explicita,
+        )
+        helper = self.procedural.index("static func _contrastar_textura")
+        self.assertLess(carga_explicita, helper)
 
     def test_hay_inversion_deliberada_en_al_menos_una_forma(self):
         vectores = re.findall(
