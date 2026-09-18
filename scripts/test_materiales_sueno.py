@@ -168,24 +168,26 @@ class MaterialesSuenoTest(unittest.TestCase):
             ),
             1,
         )
-        self.assertGreaterEqual(
-            self.espacio.count('set_shader_parameter("textura_detalle", imagen)'),
-            2,
-        )
+        self.assertNotIn('set_shader_parameter("textura_detalle"', self.espacio)
         self.assertIn(
             "filter_linear_mipmap_anisotropic",
             self.shader,
         )
-        self.assertIn(
-            "uniform sampler2D textura_detalle : source_color, filter_linear, repeat_enable",
-            self.shader,
-        )
+        self.assertNotIn("uniform sampler2D textura_detalle", self.shader)
         self.assertIn(
             "uniform bool preservar_detalle_textura = false;",
             self.shader,
         )
+        self.assertIn(
+            "uniform float sesgo_detalle_textura = -1.0;",
+            self.shader,
+        )
         self.assertIn("vec3 muestra_2d(vec2 uv)", self.shader)
-        self.assertIn("return texture(textura_detalle, uv).rgb;", self.shader)
+        self.assertIn(
+            "float sesgo = preservar_detalle_textura ? sesgo_detalle_textura : 0.0;",
+            self.shader,
+        )
+        self.assertIn("return texture(textura, uv, sesgo).rgb;", self.shader)
         bloque_planta = self.espacio[
             self.espacio.index("static func _por_planta(") : self.espacio.index("static func _suelo(")
         ]
