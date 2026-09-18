@@ -11,7 +11,7 @@ const Props := preload("res://guion/props_utilizables_cc0.gd")
 
 const NOMBRE_RAIZ := "PropsUtilizablesEncontrables680"
 const RUTA_MODELOS := "res://assets/modelos/street_furniture/"
-const LARGO_PALANCA := 0.72
+const LARGOS_VISUALES := {"Crowbar": 0.72, "Flashlight": 0.26}
 
 const DEFINICIONES := [
 	{
@@ -21,6 +21,14 @@ const DEFINICIONES := [
 		"ancla": "AlmacenamientoCasa",
 		"offset": Vector3(0.30, 0.98, -0.08),
 		"rotacion": Vector3(-8.0, 18.0, 72.0),
+	},
+	{
+		"id": "linterna_kkryy",
+		"fase": "casa",
+		"dia_min": 1,
+		"ancla": "AlmacenamientoCasa",
+		"offset": Vector3(-0.31, 0.96, 0.02),
+		"rotacion": Vector3(84.0, -12.0, -18.0),
 	},
 ]
 
@@ -101,12 +109,19 @@ static func _montar_visual(recogible: Recogible3D, modelo: String) -> void:
 			if visual != null:
 				visual.name = "VisualStreetFurniture"
 				recogible.add_child(visual)
-				_encajar_visual(visual, LARGO_PALANCA)
+				_encajar_visual(visual, float(LARGOS_VISUALES.get(modelo, 0.32)))
 				Modelos._pintar(visual, Color(0.34, 0.35, 0.34), "metal_pintado")
 				recogible.set_meta("visual_prop_utilizable", "glb")
 				return
-	_montar_proxy_palanca(recogible)
+	_montar_proxy(recogible, modelo)
 	recogible.set_meta("visual_prop_utilizable", "proxy")
+
+
+static func _montar_proxy(recogible: Node3D, modelo: String) -> void:
+	if modelo == "Flashlight":
+		_montar_proxy_linterna(recogible)
+		return
+	_montar_proxy_palanca(recogible)
 
 
 static func _montar_proxy_palanca(recogible: Node3D) -> void:
@@ -126,6 +141,41 @@ static func _montar_proxy_palanca(recogible: Node3D) -> void:
 		Vector3(0.055, 0.055, 0.15),
 		Vector3(deg_to_rad(-24.0), 0.0, 0.0)
 	)
+
+
+static func _montar_proxy_linterna(recogible: Node3D) -> void:
+	var proxy := Node3D.new()
+	proxy.name = "ProxyLinterna"
+	recogible.add_child(proxy)
+
+	var cuerpo := MeshInstance3D.new()
+	var cilindro := CylinderMesh.new()
+	cilindro.top_radius = 0.045
+	cilindro.bottom_radius = 0.045
+	cilindro.height = 0.19
+	cuerpo.mesh = cilindro
+	proxy.add_child(cuerpo)
+	Modelos._pintar(cuerpo, Color(0.16, 0.17, 0.17), "metal_pintado")
+
+	var cabeza := MeshInstance3D.new()
+	var cono := CylinderMesh.new()
+	cono.top_radius = 0.07
+	cono.bottom_radius = 0.048
+	cono.height = 0.07
+	cabeza.mesh = cono
+	cabeza.position.y = 0.13
+	proxy.add_child(cabeza)
+	Modelos._pintar(cabeza, Color(0.29, 0.30, 0.29), "metal_pintado")
+
+	var lente := MeshInstance3D.new()
+	var disco := CylinderMesh.new()
+	disco.top_radius = 0.058
+	disco.bottom_radius = 0.058
+	disco.height = 0.012
+	lente.mesh = disco
+	lente.position.y = 0.171
+	proxy.add_child(lente)
+	Modelos._pintar(lente, Color(0.68, 0.67, 0.52))
 
 
 static func _barra(padre: Node3D, posicion: Vector3, tam: Vector3, rotacion: Vector3) -> void:
