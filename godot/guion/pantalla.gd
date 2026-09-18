@@ -1,14 +1,15 @@
 ## Pantalla encendida del escaparate (#142).
 ##
 ## El contenido está separado de la geometría: un vídeo válido tiene prioridad;
-## una imagen estática válida se muestra como textura UV; una declaración
-## `contenido = "media_luna"` usa un gráfico procedural ligero; cualquier otro
-## caso conserva la nieve histórica como fallback.
+## una imagen estática válida se muestra como textura UV; las emisiones CRT
+## procedurales y la media luna usan shaders ligeros; cualquier otro caso
+## conserva la nieve histórica como fallback.
 class_name Pantalla
 extends RefCounted
 
 const SHADER_NIEVE := "res://arte/nieve.gdshader"
 const SHADER_MEDIA_LUNA := "res://arte/media_luna.gdshader"
+const SHADER_EMISION_CRT := "res://arte/emision_crt.gdshader"
 const RESOLUCION := Vector2i(256, 192)
 
 
@@ -23,10 +24,13 @@ static func montar(raiz: Node3D, declaracion: Dictionary) -> Node3D:
 	var fichero := String(declaracion.get("fichero", ""))
 	if not _montar_video(vista, fichero) and not _montar_imagen(vista, fichero):
 		var contenido := String(declaracion.get("contenido", ""))
-		if contenido == "media_luna":
-			_montar_media_luna(vista, float(declaracion.get("semilla", 0.0)))
+		var semilla := float(declaracion.get("semilla", 0.0))
+		if contenido == "emision_crt":
+			_montar_emision_crt(vista, int(declaracion.get("canal", 0)), semilla)
+		elif contenido == "media_luna":
+			_montar_media_luna(vista, semilla)
 		else:
-			_montar_nieve(vista, float(declaracion.get("semilla", 0.0)))
+			_montar_nieve(vista, semilla)
 
 	var cristal := MeshInstance3D.new()
 	var plano := QuadMesh.new()
@@ -81,6 +85,20 @@ static func _montar_imagen(vista: SubViewport, fichero: String) -> bool:
 	vista.add_child(imagen)
 	vista.render_target_update_mode = SubViewport.UPDATE_ONCE
 	return true
+
+
+static func _montar_emision_crt(vista: SubViewport, canal: int, semilla: float) -> void:
+	var lienzo := ColorRect.new()
+	lienzo.name = "EmisionCRT"
+	lienzo.size = Vector2(vista.size)
+	var material := ShaderMaterial.new()
+	material.shader = load(SHADER_EMISION_CRT)
+	material.set_shader_parameter("canal", clampi(canal, 0, 5))
+	material.set_shader_parameter("semilla", semilla)
+	lienzo.material = material
+	vista.add_child(lienzo)
+	# Las seis familias son composiciones estáticas: un render por aparato.
+	vista.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 
 static func _montar_media_luna(vista: SubViewport, semilla: float) -> void:
