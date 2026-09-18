@@ -31,5 +31,10 @@
   "link_cable_desconectar": "Desconectar cable",
   "link_cable_desconectado": "Link Cable: desconectado",
   "link_cable_esperando": "Link Cable conectado · esperando otra consola",
-  "link_cable_aviso": "Estado local y diegético: todavía no emula el puerto serie ni usa red."
+  "link_cable_aviso": "Estado local y diegético: todavía no emula el puerto serie ni usa red.",
+  "ir_titulo": "PUERTO IR",
+  "ir_emitir": "Emitir pulso IR de prueba",
+  "ir_listo": "IR listo · sin receptor local",
+  "ir_pulso_emitido": "Pulso IR local #%d · sin receptor",
+  "ir_aviso": "Respuesta visual local: todavía no emula el protocolo IR ni comunica con periféricos."
 }

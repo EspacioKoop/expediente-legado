@@ -121,6 +121,22 @@ El objetivo es fijar primero el objeto, el ritual y el contrato. Un backend seri
 sustituir el estado local más adelante sin reescribir la representación 3D ni la UI.
 
 
+## Puerto IR ambiental/local (#245)
+
+El primer corte de infrarrojos mantiene el mismo enfoque modular del Link Cable:
+
+- `PuertoIRPortatil` solo cuenta pulsos locales de la sesión y emite una señal Godot;
+- la carcasa incorpora una lente IR procedural propia con un destello breve al emitir;
+- la UI ofrece un pulso de prueba y muestra que no existe receptor local;
+- no se llama a `Siga98GB` ni se intenta simular tráfico de una ROM;
+- no hay protocolo IR, networking, recompensas, pistas ni persistencia;
+- la representación queda lista para conectar más adelante un backend compatible o
+  receptores ambientales de la casa sin mezclarlo con campaña.
+
+Este corte es deliberadamente visual/ambiental. No afirma compatibilidad con accesorios
+o juegos reales y no inventa semántica de protocolo.
+
+
 ## Aislamiento
 
 El wrapper nativo recibe únicamente:

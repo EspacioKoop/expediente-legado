@@ -11,6 +11,9 @@ var _roms_detectadas: Array[Dictionary] = []
 var _app: EmuladorPortatilApp = null
 var _link_cable := LinkCablePortatil.new()
 var _conector_link_cable: MeshInstance3D = null
+var _puerto_ir := PuertoIRPortatil.new()
+var _material_ir: StandardMaterial3D = null
+var _pulso_ir_visual := 0
 
 
 func configurar() -> void:
@@ -20,6 +23,8 @@ func configurar() -> void:
 	_montar_carcasa()
 	_montar_link_cable()
 	_link_cable.estado_cambiado.connect(_al_cambiar_link_cable)
+	_montar_puerto_ir()
+	_puerto_ir.pulso_emitido.connect(_al_pulso_ir)
 	activado.connect(_alternar)
 
 
@@ -72,6 +77,7 @@ func _alternar(_actor: Node) -> void:
 	_app = EmuladorPortatilAudioApp.new()
 	_app.roms_compradas = _roms_compradas()
 	_app.set("link_cable", _link_cable)
+	_app.set("puerto_ir", _puerto_ir)
 	_app.cerrado.connect(_al_cerrar_app)
 	get_tree().root.add_child(_app)
 	_app.abrir()
@@ -198,6 +204,37 @@ func _actualizar_link_cable_3d(conectado: bool) -> void:
 	else:
 		_conector_link_cable.position = Vector3(0.17, 0.025, 0.028)
 		_conector_link_cable.rotation_degrees = Vector3.ZERO
+
+
+func _montar_puerto_ir() -> void:
+	var lente := MeshInstance3D.new()
+	lente.name = "LenteIRPortatil"
+	var esfera := SphereMesh.new()
+	esfera.radius = 0.010
+	esfera.height = 0.020
+	lente.mesh = esfera
+	lente.position = Vector3(0.100, 0.356, -0.030)
+	_material_ir = StandardMaterial3D.new()
+	_material_ir.albedo_color = Color(0.11, 0.025, 0.025)
+	_material_ir.roughness = 0.48
+	_material_ir.emission_enabled = true
+	_material_ir.emission = Color(0.10, 0.0, 0.0)
+	_material_ir.emission_energy_multiplier = 0.18
+	lente.material_override = _material_ir
+	add_child(lente)
+
+
+func _al_pulso_ir(secuencia: int) -> void:
+	_pulso_ir_visual = secuencia
+	if _material_ir == null:
+		return
+	_material_ir.emission = Color(0.85, 0.05, 0.03)
+	_material_ir.emission_energy_multiplier = 1.8
+	await get_tree().create_timer(0.12, true).timeout
+	if secuencia != _pulso_ir_visual or _material_ir == null:
+		return
+	_material_ir.emission = Color(0.10, 0.0, 0.0)
+	_material_ir.emission_energy_multiplier = 0.18
 
 
 func _actualizar_pantalla() -> void:
