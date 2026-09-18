@@ -10,7 +10,12 @@ const CASOS := [
 	{"nombre": "patio", "variante": "patio", "mutacion": "estable"},
 	{"nombre": "scriptorium", "variante": "scriptorium", "mutacion": "estable"},
 	{"nombre": "torre_capilla", "variante": "torre_capilla", "mutacion": "estable"},
-	{"nombre": "torre_capilla_pulso", "variante": "torre_capilla", "mutacion": "estable", "pulso": 2},
+	{
+		"nombre": "torre_capilla_pulso",
+		"variante": "torre_capilla",
+		"mutacion": "estable",
+		"pulso": 2
+	},
 	{"nombre": "claustro", "variante": "claustro_reflejado", "mutacion": "estable"},
 	{"nombre": "claustro_giro", "variante": "claustro_reflejado", "mutacion": "giro"},
 ]
