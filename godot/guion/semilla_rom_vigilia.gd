@@ -48,11 +48,14 @@ func _process(_delta: float) -> void:
 	if fuente.is_empty():
 		return
 
-	_registrada = SemillasOniricas.activar_semilla_onirica(
-		_jornada,
-		String(_contrato.get("id_mito", "")),
-		fuente,
-		int(_contrato.get("intensidad", 1)),
+	_registrada = (
+		SemillasOniricas
+		. activar_semilla_onirica(
+			_jornada,
+			String(_contrato.get("id_mito", "")),
+			fuente,
+			int(_contrato.get("intensidad", 1)),
+		)
 	)
 	if _registrada:
 		set_process(false)
