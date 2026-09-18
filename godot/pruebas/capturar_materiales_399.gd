@@ -10,9 +10,10 @@ extends SceneTree
 
 const TAMANO := Vector2i(1280, 720)
 const FOV := 70.0
-## La escena queda estática (`dia.set_process(false)`); ocho frames bastan para
-## propagar montaje/cámara sin pagar 24 renders software con el sampler onírico.
-const FRAMES_ESTABILIZACION := 8
+## La escena queda estática (`dia.set_process(false)`). Dos frames bastan para
+## propagar fase/cámara antes de `frame_post_draw` sin multiplicar el coste del
+## sampler onírico en el renderer software de CI.
+const FRAMES_ESTABILIZACION := 2
 
 const CASOS := [
 	{"id": "oficina", "fase": "archivo", "mirada": 0.0, "inclinacion": -8.0},
