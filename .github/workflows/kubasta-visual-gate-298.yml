@@ -1,0 +1,155 @@
+name: Gate visual Kubasta 298
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/kubasta-visual-gate-298.yml'
+      - '.godot-version'
+      - 'godot/assets/fonts/Kubasta.ttf'
+      - 'godot/assets/fonts/IBMPlexMono-Regular.ttf'
+      - 'godot/assets/procedencia.json'
+      - 'godot/guion/estilo_siga.gd'
+      - 'godot/guion/visor_expediente.gd'
+      - 'godot/depuracion/consola_depuracion.gd'
+      - 'godot/pruebas/capturar_kubasta_298.gd'
+      - 'scripts/test_kubasta_visual_gate_298.py'
+      - 'docs/assets/kubasta-terminal-298.md'
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/kubasta-visual-gate-298.yml'
+      - '.godot-version'
+      - 'godot/assets/fonts/Kubasta.ttf'
+      - 'godot/assets/fonts/IBMPlexMono-Regular.ttf'
+      - 'godot/assets/procedencia.json'
+      - 'godot/guion/estilo_siga.gd'
+      - 'godot/guion/visor_expediente.gd'
+      - 'godot/depuracion/consola_depuracion.gd'
+      - 'godot/pruebas/capturar_kubasta_298.gd'
+      - 'scripts/test_kubasta_visual_gate_298.py'
+      - 'docs/assets/kubasta-terminal-298.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  capturas:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validar contrato del gate
+        run: python3 -m unittest -v scripts/test_kubasta_visual_gate_298.py
+
+      - name: Instalar Godot declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Importar proyecto
+        run: godot4 --headless --editor --path godot --quit
+
+      - name: Preparar display virtual
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb xauth
+          fi
+
+      - name: Generar matriz visual Kubasta #298
+        shell: bash
+        run: |
+          set -euo pipefail
+          salida="$GITHUB_WORKSPACE/dist/capturas-kubasta-298"
+          rm -rf "$salida"
+          mkdir -p "$salida"
+          extra=()
+          if test -f godot/assets/fonts/Kubasta.ttf; then
+            extra+=(--exigir-kubasta)
+          fi
+          xvfb-run -a godot4 --path godot \
+            --script res://pruebas/capturar_kubasta_298.gd -- \
+            "$salida" "${extra[@]}"
+
+      - name: Validar manifiesto y ocho capturas
+        shell: bash
+        run: |
+          set -euo pipefail
+          salida="$GITHUB_WORKSPACE/dist/capturas-kubasta-298"
+          test -s "$salida/manifest.json"
+          test -s "$salida/README.md"
+          test "$(find "$salida" -maxdepth 1 -name '*.png' -type f | wc -l)" -eq 8
+          python3 - "$salida/manifest.json" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          manifest = Path(sys.argv[1])
+          data = json.loads(manifest.read_text(encoding="utf-8"))
+
+          assert data["issue"] == 298
+          assert data["tamanos_px"] == [10, 12, 14, 16]
+          assert data["escalas"] == [1.0, 1.25]
+          assert data["contrastes"] == ["oscuro", "claro"]
+          assert len(data["casos"]) == 8
+          assert all(caso["layout_ok"] for caso in data["casos"])
+
+          combinaciones = {
+              (caso["fuente"], caso["contraste"], caso["escala"])
+              for caso in data["casos"]
+          }
+          esperadas = {
+              (fuente, contraste, escala)
+              for fuente in ("terminal", "ibm-plex-mono")
+              for contraste in ("oscuro", "claro")
+              for escala in (1.0, 1.25)
+          }
+          assert combinaciones == esperadas
+
+          kubasta = Path("godot/assets/fonts/Kubasta.ttf")
+          if kubasta.is_file():
+              assert data["kubasta_materializada"] is True
+              assert data["modo_estricto"] is True
+              assert data["terminal_resource_path"].endswith("Kubasta.ttf")
+          else:
+              assert data["kubasta_materializada"] is False
+              assert data["terminal_resource_path"].endswith("IBMPlexMono-Regular.ttf")
+
+          print("Gate #298: 8/8 casos con layout válido")
+          PY
+
+      - name: Adjuntar matriz visual Kubasta #298
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: SIGA-98-kubasta-visual-gate-298-${{ github.sha }}
+          path: dist/capturas-kubasta-298
+          if-no-files-found: error
+          retention-days: 14

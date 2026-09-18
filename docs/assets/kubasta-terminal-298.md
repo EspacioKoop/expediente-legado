@@ -83,10 +83,36 @@ El materializador:
    y tamaño `150820`;
 9. restaura fichero/procedencia y deshace staging si la operación falla.
 
+## Gate visual reproducible
+
+Este corte añade `godot/pruebas/capturar_kubasta_298.gd` y el workflow
+`Gate visual Kubasta 298`. El gate genera ocho capturas comparables:
+
+- rol `terminal` frente a IBM Plex Mono;
+- contraste oscuro y claro;
+- escala 1,0x y 1,25x;
+- muestras de **10/12/14/16 px** en cada captura;
+- un `RichTextLabel` de diagnóstico y un `LineEdit` equivalentes a los
+  consumidores reales del rol.
+
+Además de publicar las imágenes, el gate comprueba automáticamente que las
+muestras, el registro y la línea de comandos no sufran clipping. El manifiesto
+`manifest.json` deja registrado qué recurso resolvió el rol terminal.
+
+Mientras `Kubasta.ttf` no exista, la matriz documenta el fallback y las dos
+columnas usan IBM Plex Mono. Cuando el TTF esté materializado, el workflow activa
+`--exigir-kubasta`: si `fuente_terminal()` no resuelve al recurso real, el
+gate falla antes de aceptar la evidencia.
+
+El artifact sigue necesitando revisión humana para valorar nitidez, ritmo,
+legibilidad y blur del escalado no entero; CI no puede convertir esas decisiones
+visuales en una afirmación automática.
+
 ## Matriz de validación pendiente
 
-La cobertura de glifos ya está comprobada estáticamente. La aceptación visual
-sigue requiriendo el TTF materializado y debe cubrir:
+La cobertura de glifos ya está comprobada estáticamente y el harness visual ya
+está automatizado. La aceptación final sigue requiriendo el TTF materializado y
+revisión humana de la matriz:
 
 - tamaños **10/12/14/16 px**;
 - alto contraste claro/oscuro;
