@@ -34,6 +34,9 @@ uniform float escala_textura = 1.0;
 // el sueño puede estirar o invertir una superficie reconocible sin necesitar
 // otra textura ni romper el contrato triplanar.
 uniform vec3 deformacion_textura = vec3(1.0);
+// Sesgo LOD opt-in. Cero conserva la selección automática del mundo normal;
+// un valor negativo permite al sueño retener detalle que el mipmap borraría.
+uniform float sesgo_mipmap = 0.0;
 uniform vec4 emision : source_color = vec4(0.0);
 uniform float emision_fuerza = 0.0;
 
@@ -69,9 +72,9 @@ vec3 muestra_triplanar(vec3 punto, vec3 normal) {
 	vec3 peso = abs(normal);
 	peso /= max(peso.x + peso.y + peso.z, 0.0001);
 	vec3 p = punto * escala_textura * deformacion_textura;
-	return texture(textura, p.zy).rgb * peso.x
-		+ texture(textura, p.xz).rgb * peso.y
-		+ texture(textura, p.xy).rgb * peso.z;
+	return texture(textura, p.zy, sesgo_mipmap).rgb * peso.x
+		+ texture(textura, p.xz, sesgo_mipmap).rgb * peso.y
+		+ texture(textura, p.xy, sesgo_mipmap).rgb * peso.z;
 }
 
 // Índice Bayer 2x2: 0 2 / 3 1. Componiéndolo consigo mismo se obtiene un
