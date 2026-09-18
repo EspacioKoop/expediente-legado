@@ -124,18 +124,14 @@ func _cmd_portatil() -> void:
 	var dia := _dia()
 	if dia == null:
 		return
-	var abrir := func():
-		var consola := dia._mundo.find_child("ConsolaPortatil98", true, false) as Interactuable3D
-		if consola != null:
-			consola.interactuar(dia._caminante)
 	if dia.jornada["fase"] != "casa":
-		_cerrar_y(
-			func():
-				dia._entrar_en("casa")
-				abrir.call_deferred()
-		)
-	else:
-		_cerrar_y(abrir)
+		_error("La portátil solo puede abrirse cuando ya estás en casa.")
+		return
+	var consola := dia._mundo.find_child("ConsolaPortatil98", true, false) as Interactuable3D
+	if consola == null:
+		_error("No encuentro la portátil en esta escena.")
+		return
+	_cerrar_y(func(): consola.interactuar(dia._caminante))
 	_ok("Abriendo la portátil")
 
 
