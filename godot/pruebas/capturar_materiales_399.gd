@@ -111,7 +111,8 @@ func _init() -> void:
 					"materiales_psx": diagnostico_material["materiales_psx"],
 					"materiales_texturados": diagnostico_material["materiales_texturados"],
 					"materiales_deformados": diagnostico_material["materiales_deformados"],
-					"rango_luminancia_deformados": diagnostico_material["rango_luminancia_deformados"],
+					"rango_luminancia_deformados":
+					diagnostico_material["rango_luminancia_deformados"],
 					"deformacion_textura": [deformacion.x, deformacion.y, deformacion.z],
 					"sha256": FileAccess.get_sha256(destino),
 				}
