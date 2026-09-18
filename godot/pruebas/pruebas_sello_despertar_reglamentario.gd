@@ -24,7 +24,10 @@ func _probar_noche_pendiente() -> void:
 
 	_comprobar(not dia.jornada["sueno_escenas"].is_empty(), "la noche tiene escenas")
 	var resultado: Dictionary = dia._registrar_despertar_reglamentario()
-	_comprobar(resultado.get("resultado", "") == "no-cumplido", "una noche pendiente no concede")
+	_comprobar(
+		resultado.get("resultado", "") == "no-cumplido",
+		"una noche pendiente no concede",
+	)
 	_comprobar(
 		not Sellos.tiene_sello(dia.partida.estado, DiaApp.SELLO_DESPERTAR_REGLAMENTARIO),
 		"la colección sigue intacta",
@@ -59,7 +62,10 @@ func _probar_despertar_forzado() -> void:
 	Jornada.despertar_de_golpe(dia.jornada)
 
 	var resultado: Dictionary = dia._registrar_despertar_reglamentario()
-	_comprobar(resultado.get("resultado", "") == "no-cumplido", "despertar de golpe no concede")
+	_comprobar(
+		resultado.get("resultado", "") == "no-cumplido",
+		"despertar de golpe no concede",
+	)
 	_comprobar(
 		not Sellos.tiene_sello(dia.partida.estado, DiaApp.SELLO_DESPERTAR_REGLAMENTARIO),
 		"un despertar forzado no toca la colección",
