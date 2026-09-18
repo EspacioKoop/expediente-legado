@@ -30,6 +30,11 @@ class TarotProgresion1029Test(unittest.TestCase):
         self.assertNotIn('_al_encontrar_carta("el-mago")', bloque)
         self.assertNotIn('_abrir_historia("el-mago")', bloque)
 
+    def test_dispatch_reconoce_el_nombre_documentado_de_progreso(self) -> None:
+        self.assertIn('destino.contains("tarot")', self.capturar)
+        self.assertIn('destino.contains("progreso")', self.capturar)
+        self.assertNotIn('destino.contains("tarot-progreso")', self.capturar)
+
     def test_qa_obtiene_la_carta_por_pista_antes_de_renderizarla(self) -> None:
         inicio = self.capturar.index("func _capturar_tarot_progreso(")
         fin = self.capturar.index("func _primera_pista_capturable", inicio)
