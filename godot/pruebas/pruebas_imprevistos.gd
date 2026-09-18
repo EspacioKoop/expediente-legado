@@ -42,9 +42,7 @@ static func todo(comprobar: Callable) -> void:
 	comprobar.call("imprevisto pagable se paga", resultado.get("pagado", false), true)
 	comprobar.call("imprevisto descuenta su coste", cobro["dinero"], antes - int(detalle["coste"]))
 	comprobar.call(
-		"resolver dos veces es idempotente",
-		Jornada.resolver_imprevisto_del_dia(cobro),
-		{}
+		"resolver dos veces es idempotente", Jornada.resolver_imprevisto_del_dia(cobro), {}
 	)
 
 	var pobre := _con_plan(9501)
