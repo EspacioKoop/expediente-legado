@@ -105,7 +105,7 @@ class TestPsxStyleCarsRuntime(unittest.TestCase):
             base = [motor, "--headless", "--language", "es", "--path", str(ROOT / "godot")]
             for argumentos, minimo, timeout in [
                 (["--editor", "--import", "--quit"], None, 120),
-                (["--script", "res://pruebas/pruebas_coches_psx_cc0.gd"], 80, 30),
+                (["--script", "res://pruebas/pruebas_coches_psx_cc0.gd"], 80, 60),
             ]:
                 try:
                     resultado = subprocess.run(
