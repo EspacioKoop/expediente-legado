@@ -134,7 +134,9 @@ func _probar_integracion_oficina() -> void:
 		"abandonar devuelve la cámara anterior",
 	)
 	var resultado_abandono: Dictionary = dia.get_meta("ultimo_resultado_bolos", {})
-	_comprobar(bool(resultado_abandono.get("abandonada", false)), "el resultado efímero registra abandono")
+	_comprobar(
+		bool(resultado_abandono.get("abandonada", false)), "el resultado efímero registra abandono"
+	)
 
 	_comprobar(oferta.interactuar(camara_previa), "la actividad se puede repetir")
 	var sesion: BolosPasillo3D = controller._bolos
