@@ -93,15 +93,18 @@ func _init() -> void:
 			quit(1)
 			return
 
-		manifiesto["casos"].append(
-			{
-				"id": String(caso["id"]),
-				"forma": String(caso["forma"]),
-				"captura": archivo,
-				"camara": _vector_a_array(Vector3(caso["camara"])),
-				"objetivo": _vector_a_array(Vector3(caso["objetivo"])),
-				"identidad_onirica": String(espacio.get("identidad_onirica", "")),
-			}
+		(
+			manifiesto["casos"]
+			. append(
+				{
+					"id": String(caso["id"]),
+					"forma": String(caso["forma"]),
+					"captura": archivo,
+					"camara": _vector_a_array(Vector3(caso["camara"])),
+					"objetivo": _vector_a_array(Vector3(caso["objetivo"])),
+					"identidad_onirica": String(espacio.get("identidad_onirica", "")),
+				}
+			)
 		)
 
 		mundo.queue_free()
