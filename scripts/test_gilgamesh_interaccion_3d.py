@@ -4,6 +4,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 INTERACCION = ROOT / "godot" / "guion" / "gilgamesh_interaccion_3d.gd"
+SUENO = ROOT / "godot" / "guion" / "sueno_gilgamesh.gd"
 ESCENA = ROOT / "godot" / "escenas" / "sueno_gilgamesh.tscn"
 
 
@@ -11,6 +12,7 @@ class GilgameshInteraccion3DTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.interaccion = INTERACCION.read_text(encoding="utf-8")
+        cls.sueno = SUENO.read_text(encoding="utf-8")
         cls.escena = ESCENA.read_text(encoding="utf-8")
 
     def test_controller_esta_montado_en_la_escena_standalone(self):
@@ -50,6 +52,18 @@ class GilgameshInteraccion3DTest(unittest.TestCase):
         self.assertIn("_anclas_interactivas.get(ancla_id)", self.interaccion)
         self.assertIn("zona.habilitado = false", self.interaccion)
         self.assertIn('_fragmento_seleccionado = ""', self.interaccion)
+
+    def test_fragmentos_y_anclas_usan_las_laminas_propias(self):
+        for motivo in ("puerta", "sello", "ola", "archivo"):
+            ruta = f'res://arte/gilgamesh/fragmento_{motivo}.svg'
+            self.assertIn(ruta, self.sueno)
+        self.assertIn("_montar_motivo_visual(pieza, fragmento, tam)", self.sueno)
+        self.assertIn(
+            "_montar_motivo_visual(ancla, fragmento, tam_ancla, true)",
+            self.sueno,
+        )
+        self.assertIn('lamina.name = "MotivoVisual"', self.sueno)
+        self.assertNotIn("gilgamesh_arte_preview.tscn", self.sueno)
 
     def test_reduccion_movimiento_viene_de_preferencias(self):
         self.assertIn("PreferenciasSiga.cargar()", self.interaccion)
