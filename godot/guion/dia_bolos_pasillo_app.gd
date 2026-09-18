@@ -74,7 +74,7 @@ static func variante_para_dia(jornada: Dictionary) -> String:
 	if not disponible(jornada):
 		return BolosPasillo3D.VARIANTE_ESTRECHO
 	var dia := int(jornada.get("dia", DIA_INICIAL))
-	var turno_variante := (dia - DIA_INICIAL) / PERIODO_DIAS
+	var turno_variante := int((dia - DIA_INICIAL) / PERIODO_DIAS)
 	return BolosPasillo3D.VARIANTES[posmod(turno_variante, BolosPasillo3D.VARIANTES.size())]
 
 
