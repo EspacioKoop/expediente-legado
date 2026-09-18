@@ -92,13 +92,17 @@ func _probar_variantes() -> void:
 	var dias := [2, 5, 8, 11, 14]
 	for indice in dias.size():
 		_comprobar(
-			Controller.variante_para_dia({"fase": "archivo", "dia": dias[indice]})
-			== BolosPasillo3D.VARIANTES[indice],
+			(
+				Controller.variante_para_dia({"fase": "archivo", "dia": dias[indice]})
+				== BolosPasillo3D.VARIANTES[indice]
+			),
 			"los días elegibles rotan variantes sin azar",
 		)
 	_comprobar(
-		Controller.variante_para_dia({"fase": "archivo", "dia": 17})
-		== BolosPasillo3D.VARIANTE_ESTRECHO,
+		(
+			Controller.variante_para_dia({"fase": "archivo", "dia": 17})
+			== BolosPasillo3D.VARIANTE_ESTRECHO
+		),
 		"la rotación de variantes vuelve al inicio",
 	)
 	_comprobar(
