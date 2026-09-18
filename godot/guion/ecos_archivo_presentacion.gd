@@ -69,9 +69,7 @@ func seleccionar() -> String:
 
 	var resultado: String = str(ecos.probar(seleccion))
 	ultimo_evento = resultado
-	if resultado == EVENTO_INCORRECTO:
-		seleccion.clear()
-	elif resultado == EVENTO_COMPLETADO or resultado == EVENTO_DISPERSADO:
+	if resultado == EVENTO_COMPLETADO or resultado == EVENTO_DISPERSADO:
 		cerrada = true
 	return ultimo_evento
 
@@ -121,7 +119,7 @@ func vista(reduccion_movimiento: bool) -> Dictionary:
 		}
 		elementos.append(elemento)
 	return {
-		"regla": "Recompón los tres ecos en el orden en que aparecían en el archivo.",
+		"regla": "Recompón los tres ecos. Puedes deshacer antes del tercero; la secuencia completa es definitiva.",
 		"elementos": elementos,
 		"foco": foco,
 		"seleccion": seleccion.duplicate(),
