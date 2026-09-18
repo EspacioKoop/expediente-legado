@@ -45,6 +45,60 @@ Decisiones para el resto del pack:
 - `Hammer`: fuera mientras no aporte un verbo distinto de la palanca.
 - `Box`: fuera mientras duplique cajas ya existentes.
 
+## Materialización segura de Crowbar / Flashlight (#680)
+
+El tercer corte prepara la importación binaria sin añadir todavía los modelos al repositorio.
+
+`scripts/materializar_street_furniture_680.py` separa dos fases:
+
+1. **Preparación fuera del repo**: convertir `Crowbar/Crowbar.fbx` y `Flashlight/Flashlight.fbx` a GLB2 autocontenido siguiendo el patrón de #679, y conservar el PNG extraído por Godot como `<Nombre>_<Nombre>_albedo.png`.
+2. **Materialización**: validar fuente + resultado y dejar únicamente los binarios elegidos y `procedencia.json` en el índice Git.
+
+Dry-run del lote completo:
+
+```bash
+python3 scripts/materializar_street_furniture_680.py \
+  /tmp/street-furniture-extraido \
+  /tmp/street-furniture-preparado \
+  --repo .
+```
+
+Dry-run solo de la palanca:
+
+```bash
+python3 scripts/materializar_street_furniture_680.py \
+  /tmp/street-furniture-extraido \
+  /tmp/street-furniture-preparado \
+  --repo . \
+  --asset crowbar
+```
+
+Aplicación real:
+
+```bash
+python3 scripts/materializar_street_furniture_680.py \
+  /tmp/street-furniture-extraido \
+  /tmp/street-furniture-preparado \
+  --archivo "/ruta/Street Furniture.zip" \
+  --repo . \
+  --asset crowbar \
+  --aplicar
+```
+
+Con `--aplicar` el script:
+
+- exige el ZIP original con SHA-256 `f0750ab44a7edc705ff351509c74065f103a6abeddd3974ceb44f660e971d7e3`;
+- exige el FBX y PNG originales del asset dentro del árbol extraído;
+- rechaza GLB que no sean glTF 2 o que dependan de buffers/imágenes externas;
+- comprueba que el PNG preparado coincide con una imagen realmente embebida en el GLB;
+- calcula SHA-256 de los artefactos materializados y añade `archivo_origen` + `paquete_sha256` a procedencia;
+- no pisa una ruta con otro contenido/procedencia;
+- ejecuta `git add` solo sobre GLB/PNG elegidos y `procedencia.json`;
+- verifica que el **índice**, no solo el working tree, contiene punteros Git LFS con OID y tamaño exactos;
+- deja el cambio staged para revisión, sin commit ni push automáticos.
+
+Esto convierte el bloqueo de #680 en un paso mecánico y auditable cuando estén disponibles los binarios preparados, sin volver a improvisar el proceso de #679.
+
 ## Conversión
 
 Los FBX no comparten escala (la bolsa llega a 2 cm y el contenedor a 6 m) y Godot no enlaza sus texturas. Cada FBX se abre en Godot 4.7.2, se le asigna su PNG original como `albedo_texture` y se exporta con `GLTFDocument` a un `.glb` autocontenido, sin tocar vértices ni UV. Los FBX no se versionan. Godot extrae la textura como `*_albedo.png`, que también tiene ficha en `godot/assets/procedencia.json`, con `sha256` y Git LFS.
