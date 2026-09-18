@@ -25,9 +25,7 @@ const DEFINICIONES := [
 ]
 
 
-static func montar(
-	mundo: Node3D, fase: String, dia: int, inventario: Dictionary
-) -> Node3D:
+static func montar(mundo: Node3D, fase: String, dia: int, inventario: Dictionary) -> Node3D:
 	limpiar(mundo)
 	var raiz := Node3D.new()
 	raiz.name = NOMBRE_RAIZ
@@ -49,10 +47,9 @@ static func montar(
 		var offset: Vector3 = definicion["offset"]
 		var rotacion: Vector3 = definicion["rotacion"]
 		recogible.global_position = ancla.to_global(offset)
-		recogible.global_rotation = ancla.global_rotation + Vector3(
-			deg_to_rad(rotacion.x),
-			deg_to_rad(rotacion.y),
-			deg_to_rad(rotacion.z)
+		recogible.global_rotation = (
+			ancla.global_rotation
+			+ Vector3(deg_to_rad(rotacion.x), deg_to_rad(rotacion.y), deg_to_rad(rotacion.z))
 		)
 	return raiz
 
@@ -81,9 +78,7 @@ static func firma(fase: String, dia: int, inventario: Dictionary) -> String:
 	return "%s|%d|%s" % [fase, dia, ",".join(ids)]
 
 
-static func _disponibles(
-	fase: String, dia: int, inventario: Dictionary
-) -> Array[Dictionary]:
+static func _disponibles(fase: String, dia: int, inventario: Dictionary) -> Array[Dictionary]:
 	var salida: Array[Dictionary] = []
 	for valor in DEFINICIONES:
 		var definicion: Dictionary = valor
@@ -133,9 +128,7 @@ static func _montar_proxy_palanca(recogible: Node3D) -> void:
 	)
 
 
-static func _barra(
-	padre: Node3D, posicion: Vector3, tam: Vector3, rotacion: Vector3
-) -> void:
+static func _barra(padre: Node3D, posicion: Vector3, tam: Vector3, rotacion: Vector3) -> void:
 	var malla := MeshInstance3D.new()
 	var caja := BoxMesh.new()
 	caja.size = tam
