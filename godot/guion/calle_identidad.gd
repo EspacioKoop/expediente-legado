@@ -132,7 +132,7 @@ static func _edificio_oficina(calle: Node3D) -> void:
 					LUZ_FRIA
 				)
 	# Vestíbulo de cristal, puertas, marquesina y rótulo.
-	_luz(
+	_cristal(
 		raiz,
 		"Vestibulo",
 		Vector3(0, 1.4, z + 0.09),
@@ -145,16 +145,17 @@ static func _edificio_oficina(calle: Node3D) -> void:
 			"Montante%.0f" % (x * 10),
 			Vector3(x, 1.4, z + 0.12),
 			Vector3(0.1, 2.7, 0.08),
-			METAL
+			METAL,
+			"metal_pintado"
 		)
-	_caja(
+	_cristal(
 		raiz,
 		"PuertaIzquierda",
 		Vector3(-0.58, 1.1, z + 0.13),
 		Vector3(1.05, 2.2, 0.03),
 		Color(0.40, 0.46, 0.44)
 	)
-	_caja(
+	_cristal(
 		raiz,
 		"PuertaDerecha",
 		Vector3(0.58, 1.1, z + 0.13),
@@ -227,7 +228,7 @@ static func _bloque_casa(calle: Node3D) -> void:
 		Color(0.30, 0.20, 0.13),
 		"madera_domestica"
 	)
-	_luz(
+	_cristal(
 		raiz,
 		"CristalPortal",
 		Vector3(0, 1.95, z - 0.11),
@@ -327,7 +328,7 @@ static func _ventanilla_reclamaciones(calle: Node3D) -> void:
 		Color(0.40, 0.39, 0.37),
 		"revoco_urbano"
 	)
-	_luz(
+	_cristal(
 		raiz,
 		"PuertaCristal",
 		Vector3(x + 0.11, 1.15, -14.4),
@@ -408,19 +409,15 @@ static func _electrodomesticos(calle: Node3D) -> void:
 		Color(1.0, 0.95, 0.82),
 		56
 	)
-	var cristal := MeshInstance3D.new()
-	cristal.name = "CristalEscaparate"
-	var lamina := BoxMesh.new()
-	lamina.size = Vector3(0.03, 2.0, 6.45)
-	cristal.mesh = lamina
-	cristal.position = Vector3(-5.70, 1.62, -1.5)
-	var vidrio := StandardMaterial3D.new()
-	vidrio.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	vidrio.albedo_color = Color(0.55, 0.65, 0.72, 0.16)
-	vidrio.roughness = 0.1
-	cristal.material_override = vidrio
-	cristal.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	raiz.add_child(cristal)
+	_cristal(
+		raiz,
+		"CristalEscaparate",
+		Vector3(-5.70, 1.62, -1.5),
+		Vector3(0.03, 2.0, 6.45),
+		Color(0.55, 0.65, 0.72),
+		0.16,
+		0.1
+	)
 	_luz(
 		raiz,
 		"InteriorTienda",
@@ -476,14 +473,14 @@ static func _videojuegos(calle: Node3D) -> void:
 		Vector3(0.08, 3.0, 3.9),
 		Color(0.08, 0.08, 0.10)
 	)
-	_luz(
+	_cristal(
 		raiz,
 		"Escaparate",
 		Vector3(x - 0.09, 1.45, -7.2),
 		Vector3(0.02, 1.6, 2.2),
 		Color(0.12, 0.16, 0.34)
 	)
-	_luz(
+	_cristal(
 		raiz,
 		"Puerta",
 		Vector3(x - 0.09, 1.1, -5.15),
@@ -561,7 +558,7 @@ static func _alquileres(calle: Node3D) -> void:
 		Color(0.16, 0.22, 0.18),
 		"madera_domestica"
 	)
-	_luz(
+	_cristal(
 		raiz,
 		"VentanillaPago",
 		Vector3(x - 0.09, 1.45, 9.6),
@@ -576,7 +573,7 @@ static func _alquileres(calle: Node3D) -> void:
 		Color(0.30, 0.24, 0.18),
 		"madera_domestica"
 	)
-	_luz(
+	_cristal(
 		raiz,
 		"Puerta",
 		Vector3(x - 0.09, 1.1, 11.45),
@@ -836,6 +833,34 @@ static func _material_luz(color: Color) -> StandardMaterial3D:
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.albedo_color = color
 	return material
+
+
+## Vidrio urbano común: conserva un tinte legible de noche, pero deja ver la
+## geometría que hay detrás. No es una luz ni una placa opaca.
+static func _cristal(
+	padre: Node3D,
+	nombre: String,
+	centro: Vector3,
+	tam: Vector3,
+	color: Color,
+	alpha: float = 0.28,
+	rugosidad: float = 0.18
+) -> MeshInstance3D:
+	var malla := MeshInstance3D.new()
+	malla.name = nombre
+	var caja := BoxMesh.new()
+	caja.size = tam
+	malla.mesh = caja
+	malla.position = centro
+	malla.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var vidrio := StandardMaterial3D.new()
+	vidrio.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	vidrio.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	vidrio.albedo_color = Color(color.r, color.g, color.b, alpha)
+	vidrio.roughness = rugosidad
+	malla.material_override = vidrio
+	padre.add_child(malla)
+	return malla
 
 
 static func _rotulo(
