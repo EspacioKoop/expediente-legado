@@ -1,7 +1,7 @@
 ## Interacción física de comida propia para #93.
 ##
 ## No decide hambre ni economía: solo representa una cena sobre la encimera y
-## expone feedback local. El controller de la casa es quien llama a Jornada.
+## expone feedback local. El controller de la casa es quien aplica la regla económica.
 class_name ComidaPropiaInteractiva3D
 extends Interactuable3D
 
