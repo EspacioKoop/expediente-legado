@@ -56,7 +56,7 @@ func _probar() -> void:
 	var repetida := CasaConsecuencias.montar(casa, estado)
 	_comprobar(CasaConsecuencias.firma(estado) == firma, "firma estable")
 	_comprobar(repetida.name == CasaConsecuencias.NOMBRE_RAIZ, "montaje idempotente conserva nombre")
-	_comprobar(casa.find_children(CasaConsecuencias.NOMBRE_RAIZ, "Node3D", false).size() == 1, "una sola capa")
+	_comprobar(casa.find_children(CasaConsecuencias.NOMBRE_RAIZ, "Node3D", false, false).size() == 1, "una sola capa")
 
 	var sin_averias := CasaEstadoAmbiental.derivar(Jornada.nueva(9397, 1), Inventario.nuevo())
 	var limpia := CasaConsecuencias.montar(casa, sin_averias)
