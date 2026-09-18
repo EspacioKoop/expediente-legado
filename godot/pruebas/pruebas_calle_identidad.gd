@@ -88,9 +88,15 @@ func _probar_escaparate(calle: Node3D) -> void:
 	_comprobar(filas.size() == 2, "dos hileras de televisores")
 	for y in filas:
 		_comprobar(filas[y] == 4, "cuatro televisores por hilera")
-	var emision: Material = pantallas[0].material_override
+	var materiales := {}
 	for pantalla in pantallas:
-		_comprobar(pantalla.material_override == emision, "todas emiten el mismo programa")
+		materiales[pantalla.material_override.get_instance_id()] = true
+	_comprobar(materiales.size() == 8, "cada tele tiene su propia emisión")
+	var vistas := []
+	for hijo in tienda.get_children():
+		if hijo is SubViewport:
+			vistas.append(hijo)
+	_comprobar(vistas.size() == 8, "cada emisión conserva su viewport independiente")
 	var cristal := tienda.get_node_or_null("CristalEscaparate") as MeshInstance3D
 	_comprobar(cristal != null, "el escaparate tiene cristal")
 	if cristal != null:
