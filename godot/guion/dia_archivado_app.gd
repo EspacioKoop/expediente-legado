@@ -26,7 +26,10 @@ func refrescar(host) -> void:
 
 	var caso := ArchivadoBandeja.siguiente_pendiente(_estado_archivado)
 	if caso.is_empty():
-		if (\n\t\t\tnot _estado_archivado.get("cerrada", false)\n\t\t\tand not _estado_archivado.get("casos", []).is_empty()\n\t\t):
+		if (
+			not _estado_archivado.get("cerrada", false)
+			and not _estado_archivado.get("casos", []).is_empty()
+		):
 			var resumen := ArchivadoBandeja.cerrar(_estado_archivado)
 			_persistir(host)
 			_mostrar_resultado(host, resumen)
@@ -64,9 +67,7 @@ func _restaurar_o_crear(host, casos: Array, folios_leidos: Array) -> Dictionary:
 	):
 		var estado_guardado = guardado.get("estado", {})
 		if typeof(estado_guardado) == TYPE_DICTIONARY:
-			return ArchivadoBandeja.restaurar(
-				estado_guardado, host.contenido.casos, folios_leidos
-			)
+			return ArchivadoBandeja.restaurar(estado_guardado, host.contenido.casos, folios_leidos)
 	return ArchivadoBandeja.nueva(casos, folios_leidos)
 
 
@@ -185,10 +186,13 @@ func _archivar_en(actor: Node, host, archivador: ArchivadorInteractivo3D) -> voi
 
 func _mostrar_resultado(host, resumen: Dictionary) -> void:
 	var porcentaje := int(round(float(resumen.get("precision", 0.0)) * 100.0))
-	host._nomina.text = _texto("bandeja_completa") % [
-		porcentaje,
-		String(resumen.get("rango", "sin-datos")),
-	]
+	host._nomina.text = (
+		_texto("bandeja_completa")
+		% [
+			porcentaje,
+			String(resumen.get("rango", "sin-datos")),
+		]
+	)
 
 
 func _texto(clave: String) -> String:
