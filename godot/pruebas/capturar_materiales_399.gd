@@ -13,10 +13,16 @@ const FOV := 70.0
 const FRAMES_ESTABILIZACION := 24
 
 const CASOS := [
-	{"id": "oficina", "fase": "archivo"},
-	{"id": "calle", "fase": "trayecto"},
-	{"id": "casa", "fase": "casa"},
-	{"id": "sueno", "fase": "sueño", "escena": "patio"},
+	{"id": "oficina", "fase": "archivo", "mirada": 0.0, "inclinacion": -8.0},
+	{"id": "calle", "fase": "trayecto", "mirada": 180.0, "inclinacion": -6.0},
+	{"id": "casa", "fase": "casa", "mirada": 0.0, "inclinacion": -10.0},
+	{
+		"id": "sueno",
+		"fase": "sueño",
+		"escena": "crucero",
+		"mirada": 0.0,
+		"inclinacion": -8.0,
+	},
 ]
 
 
@@ -61,7 +67,7 @@ func _init() -> void:
 		if String(caso["fase"]) == "sueño":
 			dia.jornada["sueno_escenas"] = [String(caso["escena"])]
 		dia._entrar_en(String(caso["fase"]))
-		_estabilizar_camara(dia)
+		_estabilizar_camara(dia, caso)
 
 		for i in FRAMES_ESTABILIZACION:
 			await process_frame
@@ -81,6 +87,8 @@ func _init() -> void:
 					"id": String(caso["id"]),
 					"fase": String(caso["fase"]),
 					"captura": archivo,
+					"mirada": float(caso["mirada"]),
+					"inclinacion": float(caso["inclinacion"]),
 					"sha256": FileAccess.get_sha256(destino),
 				}
 			)
@@ -98,14 +106,17 @@ func _init() -> void:
 	quit(0)
 
 
-func _estabilizar_camara(dia) -> void:
+func _estabilizar_camara(dia, caso: Dictionary) -> void:
 	var entrada: Vector3 = dia._espacio_actual["entrada"]
-	var mirada = dia._espacio_actual.get("mirada", NAN)
+	# El gameplay puede conservar el rumbo entre fases que no declaran `mirada`.
+	# La evidencia no: cada toma necesita un encuadre fijo que enseñe el espacio,
+	# no la pared que casualmente quedaba detrás del jugador en la fase anterior.
+	var mirada := float(caso["mirada"])
 	dia._caminante.situar(entrada, mirada)
 	dia._caminante.set_physics_process(false)
 	var camara := dia._caminante.get_node("Camara") as Camera3D
 	camara.fov = FOV
-	camara.rotation.x = 0.0
+	camara.rotation.x = deg_to_rad(float(caso["inclinacion"]))
 
 
 func _ocultar_hud(dia) -> void:
