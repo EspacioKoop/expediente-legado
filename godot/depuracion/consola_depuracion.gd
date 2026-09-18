@@ -384,18 +384,23 @@ func _montar() -> void:
 	titulo.add_theme_color_override("font_color", Color(0.35, 0.75, 1.0))
 	derecha.add_child(titulo)
 
+	var fuente_terminal := EstiloSiga.fuente_terminal()
+
 	_registro = RichTextLabel.new()
 	_registro.bbcode_enabled = true
 	_registro.scroll_following = true
 	_registro.selection_enabled = true
 	_registro.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_registro.add_theme_color_override("default_color", Color(0.9, 0.92, 0.95))
+	_registro.add_theme_font_override("normal_font", fuente_terminal)
+	_registro.add_theme_font_override("bold_font", fuente_terminal)
 	_registro.add_theme_font_size_override("normal_font_size", 16)
 	_registro.add_theme_font_size_override("bold_font_size", 16)
 	derecha.add_child(_registro)
 
 	_linea = LineEdit.new()
 	_linea.placeholder_text = "fase casa · sala patio · dinero +500 · clima lluvia · ayuda"
+	_linea.add_theme_font_override("font", fuente_terminal)
 	_linea.add_theme_font_size_override("font_size", 18)
 	_linea.text_submitted.connect(
 		func(texto: String):
