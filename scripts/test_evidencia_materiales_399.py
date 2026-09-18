@@ -39,6 +39,10 @@ class EvidenciaMateriales399Test(unittest.TestCase):
         self.assertIn("camara.fov = FOV", self.captura)
         self.assertIn('dia._caminante.situar(entrada, mirada)', self.captura)
         self.assertIn("root.size = TAMANO", self.captura)
+        self.assertIn('"casa", "fase": "casa", "mirada": 0.0', self.captura)
+        self.assertIn('"mirada": 0.0,', self.captura)
+        self.assertIn('camara.rotation.x = deg_to_rad(float(caso["inclinacion"]))', self.captura)
+        self.assertIn('"mirada": float(caso["mirada"])', self.captura)
 
     def test_workflow_publica_png_y_manifiesto_sin_versionarlos(self):
         self.assertIn("xvfb-run -a godot4", self.workflow)
