@@ -6,7 +6,7 @@ Primer corte ejecutable de #676. El objetivo es fijar la frontera de datos y eco
 
 El contrato `ComercioBarrio` expone tres superficies diferenciadas:
 
-- **Quiosco Avenida**: prensa/publicaciones pequeñas. El primer catálogo incluye una revista ficticia y un periódico local.
+- **Quiosco Avenida**: prensa/publicaciones pequeñas. El catálogo incluye una revista ficticia, un periódico local y, desde #93, un paquete de cigarrillos como consumo recurrente.
 - **Bit 98**: adapta la tienda de videojuegos ya implementada por #93 mediante `TiendaVideojuegos`; no replica catálogo, stock ni reglas de ROMs.
 - **El Trastero**: segunda mano para pequeños objetos domésticos. El primer catálogo incluye una lámpara y un marco usados.
 
@@ -16,7 +16,9 @@ Este corte no necesita interiores 3D: la futura integración puede resolverse de
 
 Toda compra normal pasa por `Jornada.gastar()`, por lo que reutiliza la economía de #83/#93. No añade crédito, deuda, puntos, moneda secundaria ni acciones extra. La compra solo es válida en fase `trayecto`.
 
-Las compras del comercio se registran en `jornada["comercio_barrio_compras"]` y son idempotentes: volver a comprar el mismo objeto no vuelve a cobrar. La superficie de videojuegos mantiene su persistencia especializada en `TiendaVideojuegos`.
+Las compras de objetos se registran en `jornada["comercio_barrio_compras"]` y son idempotentes: volver a comprar el mismo objeto no vuelve a cobrar. La superficie de videojuegos mantiene su persistencia especializada en `TiendaVideojuegos`.
+
+El paquete de cigarrillos es la excepción deliberada: cuesta **8**, se marca `repetible`, se consume en el acto y puede volver a comprarse. No entra en inventario, no concede acciones, no aumenta ingresos y no activa contenido cultural u onírico. Su única consecuencia es gastar parte del mismo saldo que compite con comida propia, comida del gato, café, alquiler e imprevistos.
 
 ## Inventario y casa
 
@@ -54,7 +56,7 @@ Este PR es **standalone first** y no modifica:
 Cuando las reservas visuales lo permitan:
 
 1. montar fachadas reconocibles de quiosco y segunda mano en la calle;
-2. añadir una superficie de interacción accesible por teclado/mando que consuma `listar()/comprar()`;
+2. añadir una superficie de interacción accesible por teclado/mando que consuma `listar()/comprar()`, incluido el tabaco repetible;
 3. hacer que la lámpara/marco de `home_storage` tenga representación visible mediante #96;
 4. conectar la revista a una interacción hojeable de #674 y solo entonces activar #442.
 
