@@ -378,9 +378,7 @@ func _texto_portada_prensa(portada: Dictionary) -> String:
 			continue
 		var articulo := articulo_valor as Dictionary
 		var tratamiento: Dictionary = articulo.get("tratamiento", {})
-		bloques.append(
-			"[b]%s[/b]" % String(tratamiento.get("titular", ""))
-		)
+		bloques.append("[b]%s[/b]" % String(tratamiento.get("titular", "")))
 		bloques.append(String(tratamiento.get("entradilla", "")))
 		var datos: Variant = articulo.get("datos_destacados", [])
 		if datos is Array:
