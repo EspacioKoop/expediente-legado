@@ -10,6 +10,7 @@ class_name SuenoEcosArchivo3D
 extends Node3D
 
 signal terminado(estado: String)
+signal estado_cambiado(estado: String)
 
 const POSICIONES_ECOS := [
 	Vector3(-2.5, 0.0, 0.7),
@@ -46,7 +47,9 @@ func abandonar() -> bool:
 	var seguro: bool = bool(presentacion.abandonar())
 	_sincronizar()
 	if seguro:
-		terminado.emit(str(presentacion.vista(reduccion_movimiento).get("estado", "cerrado")))
+		var estado := str(presentacion.vista(reduccion_movimiento).get("estado", "cerrado"))
+		estado_cambiado.emit(estado)
+		terminado.emit(estado)
 	return seguro
 
 
@@ -151,6 +154,7 @@ func _al_activar_eco(_actor: Node, slot: int) -> void:
 	presentacion.foco = slot
 	var evento: String = str(presentacion.seleccionar())
 	_sincronizar()
+	estado_cambiado.emit(evento)
 	if (
 		evento
 		in [
