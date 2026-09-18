@@ -199,11 +199,10 @@ func _diagnostico_materiales(dia) -> Dictionary:
 		var deformacion = material.get_shader_parameter("deformacion_textura")
 		if deformacion is Vector3 and not (deformacion as Vector3).is_equal_approx(Vector3.ONE):
 			materiales_deformados += 1
-			var textura = material.get_shader_parameter("textura") as Texture2D
-			if textura != null:
-				rango_luminancia_deformados = maxf(
-					rango_luminancia_deformados, _rango_luminancia(textura.get_image())
-				)
+			if materiales_deformados == 1:
+				var textura = material.get_shader_parameter("textura") as Texture2D
+				if textura != null:
+					rango_luminancia_deformados = _rango_luminancia(textura.get_image())
 	return {
 		"materiales_psx": materiales_psx,
 		"materiales_texturados": materiales_texturados,
