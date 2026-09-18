@@ -42,11 +42,7 @@ func configurar(arquitectura: Node3D, campanas: AudioStreamPlayer3D) -> void:
 
 
 func _process(_delta: float) -> void:
-	if (
-		_campanas == null
-		or not is_instance_valid(_campanas)
-		or not _campanas.playing
-	):
+	if _campanas == null or not is_instance_valid(_campanas) or not _campanas.playing:
 		return
 
 	var posicion := fmod(_campanas.get_playback_position(), SuenoCastilloAudio.DURACION)
