@@ -257,7 +257,7 @@ func _mostrar_marcador(resultado: Dictionary) -> void:
 
 		var etiqueta := Label.new()
 		etiqueta.name = "Puntos%d" % indice
-		etiqueta.text = "%02d" % int(puntuaciones[indice])
+		etiqueta.text = str(int(puntuaciones[indice])).pad_zeros(2)
 		etiqueta.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		etiqueta.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		columna.add_child(etiqueta)
