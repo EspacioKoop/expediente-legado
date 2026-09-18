@@ -75,18 +75,24 @@ func _montar_ecos(
 				dia._raiz(),
 			)
 		)
-		ecos = EcosArchivo.crear(
-			folio,
-			frase,
-			dia.jornada.get("leido_hoy", []),
-			raiz,
-			reward_id,
+		ecos = (
+			EcosArchivo
+			. crear(
+				folio,
+				frase,
+				dia.jornada.get("leido_hoy", []),
+				raiz,
+				reward_id,
+			)
 		)
 	else:
-		ecos = EcosArchivo.restaurar(
-			datos_guardados,
-			frase,
-			dia.jornada.get("leido_hoy", []),
+		ecos = (
+			EcosArchivo
+			. restaurar(
+				datos_guardados,
+				frase,
+				dia.jornada.get("leido_hoy", []),
+			)
 		)
 	if ecos == null:
 		return
@@ -119,7 +125,9 @@ func _montar_ecos(
 		vertical.free()
 		return
 	var caso_id := String(caso.get("id", ""))
-	vertical.estado_cambiado.connect(_al_cambiar_ecos.bind(dia, ecos, caso_id, reward_id))
+	vertical.estado_cambiado.connect(
+		_al_cambiar_ecos.bind(dia, ecos, caso_id, reward_id)
+	)
 	mundo.add_child(vertical)
 	mundo.set_meta("puzzle_onirico_montado", "ecos")
 	_ecos_activos = vertical
@@ -252,12 +260,15 @@ func _persistir_ecos(
 ) -> void:
 	if ecos == null:
 		return
-	if not SuenoPuzzleSesion.guardar(
-		dia.jornada,
-		SuenoPuzzleSesion.TIPO_ECOS,
-		caso_id,
-		reward_id,
-		ecos.serializar(),
+	if not (
+		SuenoPuzzleSesion
+		. guardar(
+			dia.jornada,
+			SuenoPuzzleSesion.TIPO_ECOS,
+			caso_id,
+			reward_id,
+			ecos.serializar(),
+		)
 	):
 		return
 	if dia.has_method("_guardar_o_avisar"):
