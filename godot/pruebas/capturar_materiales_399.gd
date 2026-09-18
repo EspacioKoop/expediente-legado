@@ -76,6 +76,7 @@ func _init() -> void:
 
 		var archivo := "%s.png" % String(caso["id"])
 		var destino := salida.path_join(archivo)
+		var deformacion: Vector3 = dia._espacio_actual.get("deformacion_textura", Vector3.ONE)
 		if not _guardar_captura(destino):
 			quit(1)
 			return
@@ -89,6 +90,11 @@ func _init() -> void:
 					"captura": archivo,
 					"mirada": float(caso["mirada"]),
 					"inclinacion": float(caso["inclinacion"]),
+					"textura_suelo": String(dia._espacio_actual.get("textura_suelo", "")),
+					"textura_muro": String(dia._espacio_actual.get("textura_muro", "")),
+					"escala_textura": float(dia._espacio_actual.get("escala_textura", 1.0)),
+					"contraste_textura": float(dia._espacio_actual.get("contraste_textura", 1.0)),
+					"deformacion_textura": [deformacion.x, deformacion.y, deformacion.z],
 					"sha256": FileAccess.get_sha256(destino),
 				}
 			)
