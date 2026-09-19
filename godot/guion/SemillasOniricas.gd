@@ -30,6 +30,7 @@ const MITOS_VALIDOS := [
 	"baba_yaga",
 	"anansi_akan",
 	"maui_tamanuitera",
+	"popol_wuj",
 ]
 
 ## Mezclas excepcionales y declaradas. La existencia de dos semillas no inventa

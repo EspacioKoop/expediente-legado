@@ -233,6 +233,23 @@ const PERFILES_MITO := {
 		"via_lactea": 0.015,
 		"estrellas": 0.10,
 	},
+	"popol_wuj":
+	# Dirección propia SIGA-98: contraste entre dos corredores y vacío.
+	{
+		# No pretende reconstruir Xibalbá ni codificar iconografía k’iche’.
+		"cielo_alto": Color(0.018, 0.030, 0.042),
+		"horizonte": Color(0.12, 0.10, 0.075),
+		"ocaso": Color(0.30, 0.20, 0.085),
+		"ocaso_mezcla": 0.18,
+		"luna_color": Color(0.78, 0.72, 0.55),
+		"luna_halo": 0.08,
+		"bruma_horizonte": Color(0.09, 0.11, 0.11),
+		"bruma_fuerza": 0.58,
+		"nube_color": Color(0.07, 0.09, 0.10),
+		"nubes": 0.48,
+		"via_lactea": 0.035,
+		"estrellas": 0.32,
+	},
 }
 
 
