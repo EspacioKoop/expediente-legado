@@ -39,9 +39,9 @@ func _probar_gate_y_semilla() -> void:
 		["baba_yaga"],
 		"Baba Yaga usa catálogo común",
 	)
-	var entrada: Dictionary = SemillasOniricas.obtener_semillas(jornada)[
-		"semilla_onirica_baba_yaga"
-	]
+	var entrada: Dictionary = (
+		SemillasOniricas.obtener_semillas(jornada)["semilla_onirica_baba_yaga"]
+	)
 	_comprobar(entrada["fuentes"], ["libro:cuentos_eslavos_98"], "procedencia estable")
 	_comprobar(entrada["intensidad"], 2, "intensidad declarada conservada")
 	jornada["dia"] = 16
@@ -111,8 +111,7 @@ func _probar_umbral_y_marcas() -> void:
 		"cabaña-ancla cambia al cruzar umbral",
 	)
 	_comprobar(
-		despues[SuenoBabaYaga.OBJETO_ARCHIVADOR]
-		== inicial[SuenoBabaYaga.OBJETO_ARCHIVADOR],
+		despues[SuenoBabaYaga.OBJETO_ARCHIVADOR] == inicial[SuenoBabaYaga.OBJETO_ARCHIVADOR],
 		"archivador no usa la regla del umbral",
 	)
 	_comprobar(
@@ -140,8 +139,10 @@ func _probar_fuera_de_campo() -> void:
 	var oculto := sueno.aplicar_evento(SuenoBabaYaga.EVENTO_FUERA_CAMPO, true)
 	_comprobar(oculto["ok"], "fuera de campo habilita la regla")
 	_comprobar(
-		oculto["posiciones"][SuenoBabaYaga.OBJETO_ARCHIVADOR]
-		!= inicial[SuenoBabaYaga.OBJETO_ARCHIVADOR],
+		(
+			oculto["posiciones"][SuenoBabaYaga.OBJETO_ARCHIVADOR]
+			!= inicial[SuenoBabaYaga.OBJETO_ARCHIVADOR]
+		),
 		"archivador cambia fuera de campo",
 	)
 	_comprobar(
