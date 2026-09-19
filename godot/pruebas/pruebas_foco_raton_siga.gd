@@ -9,6 +9,7 @@ extends SceneTree
 const CAMINANTE_SCRIPT := preload("res://guion/caminante.gd")
 const CONTROLADOR_ESCRITORIO_SCRIPT := preload("res://guion/dia_escritorio_siga_app.gd")
 
+
 class DiaPrueba:
 	extends Node
 	var _pantalla: CanvasLayer
