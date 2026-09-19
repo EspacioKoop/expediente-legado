@@ -64,7 +64,7 @@ class CasaHabitacionesTest(unittest.TestCase):
         self.assertIn('sofa.position.z = 1.35', self.hogar)
 
     def test_la_consola_mira_al_interior_y_tiene_objetivo_de_foco_mayor(self):
-        self.assertIn('consola.position = Vector3(-3.58, 0.54, 1.82)', self.hogar)
+        self.assertIn('consola.position = Vector3(-3.58, 0.54, 2.00)', self.hogar)
         self.assertIn('consola.rotation_degrees.y = -90.0', self.hogar)
         self.assertIn('forma.size = Vector3(0.68, 0.38, 0.52)', self.consola)
         self.assertIn('colision.position = Vector3(0, 0.20, 0)', self.consola)
