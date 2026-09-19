@@ -305,6 +305,34 @@ static func _acusacion(comprobar: Callable) -> void:
 		[]
 	)
 
+	# Si la primera firma agota la última vida, Hierofante pertenece a la vuelta
+	# que acaba de terminar: su memoria queda, pero la nueva vuelta no lo posee.
+	var firma_limite := Partida.nueva()
+	firma_limite["vida"] = 1
+	var dia_limite := Jornada.nueva()
+	var cierre_limite := Acusacion.acusar(
+		firma_limite, dia_limite, caso, caso["sospechosos"][0], []
+	)
+	comprobar.call("la firma límite provoca reasignación", cierre_limite["despido"], true)
+	comprobar.call(
+		"el reset no anuncia Hierofante como poseído",
+		cierre_limite.get("cartas_desbloqueadas", []),
+		[]
+	)
+	var hierofante_reset: Dictionary = firma_limite["tarot"].filter(
+		func(carta): return carta.get("id", "") == "el-hierofante"
+	)[0]
+	comprobar.call(
+		"la nueva vuelta no conserva Hierofante",
+		hierofante_reset.get("recogida", false),
+		false
+	)
+	comprobar.call(
+		"la memoria fantasma sí recuerda Hierofante",
+		firma_limite.get("cartas_conocidas", []).has("el-hierofante"),
+		true
+	)
+
 	# --- El despido ---
 	var ultimo := Partida.nueva()
 	var dia4 := Jornada.nueva()
