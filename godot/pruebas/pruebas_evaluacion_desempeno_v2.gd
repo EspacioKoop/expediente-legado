@@ -43,8 +43,10 @@ func _probar() -> void:
 		"los sellos nuevos declaran la versión actual",
 	)
 	_comprobar(
-		String(sello.get("evaluacion", {}).get("dependencia_dinero", ""))
-		== EvaluacionDesempeno.ALTA,
+		(
+			String(sello.get("evaluacion", {}).get("dependencia_dinero", ""))
+			== EvaluacionDesempeno.ALTA
+		),
 		"el sello conserva la dependencia calculada",
 	)
 
