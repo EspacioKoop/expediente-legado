@@ -155,11 +155,54 @@ func _recorrer_archivo_trayecto(saltar: bool) -> Dictionary:
 		"ascensor: una partida preparada no trae la bajada premarcada",
 	)
 
-	# Es el mismo body_entered que produciría el CharacterBody3D al cruzar la puerta.
-	salida.emit_signal("body_entered", dia._caminante)
+	# #790: cruzar el umbral ya no dispara nada. El Area3D conserva el contrato
+	# de destino para las capas existentes, pero deja de monitorizar cuerpos y de
+	# bloquear el raycast que apunta al Interactuable3D de la puerta.
+	_comprobar(not salida.monitoring, "ascensor: el umbral ya no sale por proximidad")
+	_comprobar(not salida.monitorable, "ascensor: el trigger antiguo no tapa la interacción")
+
+	var puerta: Interactuable3D = dia._puerta_salida_oficina
+	_comprobar(puerta != null, "ascensor: la oficina monta una puerta interactuable")
+	if puerta == null:
+		dia.queue_free()
+		await process_frame
+		return {}
+
+	_comprobar(puerta.habilitado, "ascensor: la puerta empieza disponible")
+	puerta.interactuar(dia._caminante)
+	_comprobar(
+		dia.jornada.get("fase", "") == "archivo",
+		"ascensor: interactuar todavía no cambia de fase sin confirmar",
+	)
+	_comprobar(dia._confirmacion_salida != null, "ascensor: interactuar abre confirmación")
+	_comprobar(not puerta.habilitado, "ascensor: el modal evita reabrir la misma puerta")
+	_comprobar(
+		not dia._caminante.is_physics_processing(),
+		"ascensor: confirmar salida bloquea movimiento",
+	)
+
+	var confirmacion: ConfirmationDialog = dia._confirmacion_salida
+	if confirmacion != null:
+		confirmacion.emit_signal("canceled")
+	_comprobar(
+		dia.jornada.get("fase", "") == "archivo",
+		"ascensor: quedarse conserva la fase de oficina",
+	)
+	_comprobar(dia._confirmacion_salida == null, "ascensor: cancelar retira el modal")
+	_comprobar(puerta.habilitado, "ascensor: cancelar vuelve a habilitar la puerta")
+	_comprobar(
+		dia._caminante.is_physics_processing(),
+		"ascensor: cancelar devuelve movimiento",
+	)
+
+	puerta.interactuar(dia._caminante)
+	confirmacion = dia._confirmacion_salida
+	_comprobar(confirmacion != null, "ascensor: la puerta puede confirmarse tras cancelar")
+	if confirmacion != null:
+		confirmacion.emit_signal("confirmed")
 	_comprobar(
 		dia.jornada.get("fase", "") == "trayecto",
-		"ascensor: pisar la salida real asienta trayecto antes de la presentación",
+		"ascensor: confirmar la puerta asienta trayecto antes de la presentación",
 	)
 	_comprobar(dia._selector_ruta != null, "ascensor: la salida real abre el selector de ruta")
 	_comprobar(

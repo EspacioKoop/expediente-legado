@@ -248,10 +248,15 @@ SELLO_DESPERTAR_REGLAMENTARIO_TITULO,Despertar reglamentario
 SELLO_DESPERTAR_REGLAMENTARIO_DESCRIPCION,Noche recorrida hasta su cierre ordinario sin despertar forzado.
 SELLO_PASILLO_EN_REGLA_TITULO,Pasillo en regla
 SELLO_PASILLO_EN_REGLA_DESCRIPCION,Actividad de bolos asentada en el registro interno del pasillo.
+SALIDA_CONFIRMAR_ACEPTAR,Salir
+SALIDA_CONFIRMAR_CANCELAR,Quedarse
+SALIDA_CONFIRMAR_OFICINA,¿Salir de la oficina?
+SALIDA_CONFIRMAR_TITULO,Confirmar salida
 SALIDA_CUENCO,El cuenco
 SALIDA_DESPERTAR,Despertar
 SALIDA_DORMIR,Dormir
 SALIDA_OFICINA,Salida
+SALIDA_PUERTA_OFICINA,puerta de la oficina
 SALIDA_PORTAL,Portal
 SALIDA_PUESTO,Su puesto
 SIN_FECHA_CORTA,s/f

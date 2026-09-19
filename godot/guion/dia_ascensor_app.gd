@@ -3,7 +3,7 @@
 ## Intercepta únicamente archivo -> trayecto. La jornada ficha, monta la calle y
 ## se guarda antes de abrir la presentación; ascensor y escaleras no pueden
 ## cobrar una nómina, avanzar el calendario ni dejar al jugador entre fases.
-extends "res://guion/dia_jornada_app.gd"
+extends "res://guion/dia_salidas_confirmadas_app.gd"
 
 const ESCENA_ASCENSOR := preload("res://escenas/ascensor_3d.tscn")
 const ESCENA_ESCALERAS := preload("res://escenas/escaleras_3d.tscn")
