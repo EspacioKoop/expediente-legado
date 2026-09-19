@@ -112,8 +112,10 @@ func _reproducir_despido(acusacion: Dictionary, duelo: Dictionary = {}) -> void:
 	# recarga esta transición, el cuñado conserva exactamente la misma frase.
 	var voz_cunado := Cunado.clave_despido(int(jornada.get("vuelta", 1)))
 	reproductor.reproducir(
-		DespidoCinematica.planos_de(
-			gato_presente, Cinematica.vistas_de(partida.estado, DespidoCinematica.ID), voz_cunado
+		DespidoCinematica.planos_con_remate(
+			partida.estado,
+			Cinematica.vistas_de(partida.estado, DespidoCinematica.ID),
+			voz_cunado
 		),
 		DespidoCinematica.ID,
 		partida.estado
