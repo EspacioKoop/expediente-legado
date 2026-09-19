@@ -31,6 +31,10 @@ class TarotProgresion1029Test(unittest.TestCase):
         fin = self.visor.index("## Encontrar una carta escondida", inicio)
         bloque = self.visor[inicio:fin]
         self.assertIn("Prometeo.sincronizar_tarot_por_pistas(partida.estado)", bloque)
+        self.assertIn(
+            "Prometeo.sincronizar_tarot_por_caso_resuelto(partida.estado, caso)",
+            bloque,
+        )
         self.assertIn("_al_carta_desbloqueada(carta_id)", bloque)
         self.assertNotIn("cartas_conocidas", bloque)
         self.assertNotIn("_al_encontrar_carta", bloque)
@@ -46,6 +50,19 @@ class TarotProgresion1029Test(unittest.TestCase):
         self.assertIn('desbloquear_carta_en_estado(estado, "la-estrella")', bloque)
         self.assertEqual(bloque.count('nuevas.append("el-mago")'), 1)
         self.assertEqual(bloque.count('nuevas.append("la-estrella")'), 1)
+
+    def test_caso_resuelto_delega_en_progreso_y_desbloquea_enamorados(self) -> None:
+        inicio = self.prometeo.index(
+            "static func sincronizar_tarot_por_caso_resuelto("
+        )
+        fin = self.prometeo.index("## Una acusación es precipitada", inicio)
+        bloque = self.prometeo[inicio:fin]
+        self.assertIn("Progreso.caso_resuelto(caso, pistas)", bloque)
+        self.assertIn(
+            'desbloquear_carta_en_estado(estado, "los-enamorados")',
+            bloque,
+        )
+        self.assertIn('return ["los-enamorados"]', bloque)
 
     def test_veredicto_real_emite_hierofante_en_el_evento(self) -> None:
         inicio = self.acusacion.index("static func acusar(")
@@ -116,7 +133,9 @@ class TarotProgresion1029Test(unittest.TestCase):
     def test_no_sincroniza_por_pistas_al_cargar_ni_abrir_ui(self) -> None:
         inicio = self.visor.index("func _ready()")
         fin = self.visor.index("func _draw()", inicio)
-        self.assertNotIn("sincronizar_tarot_por_pistas", self.visor[inicio:fin])
+        bloque = self.visor[inicio:fin]
+        self.assertNotIn("sincronizar_tarot_por_pistas", bloque)
+        self.assertNotIn("sincronizar_tarot_por_caso_resuelto", bloque)
 
     def test_dispatch_reconoce_el_nombre_documentado_de_progreso(self) -> None:
         self.assertIn('destino.contains("tarot")', self.capturar)
