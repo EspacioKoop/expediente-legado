@@ -54,6 +54,8 @@ func _montar(mundo: Node3D) -> void:
 	var reducir := bool(preferencias.get("reduccion_movimiento", false))
 	_reducir = reducir
 	var sitios: Array = EspaciosCatalogo.OFICINA.get("sitios_companeros", [])
+	var dia := get_parent()
+	var actor: Node3D = dia.get("_caminante") as Node3D if dia != null else null
 	for indice in sitios.size():
 		var cuerpo := _cuerpo_en(mundo, sitios[indice])
 		if cuerpo == null:
@@ -71,7 +73,12 @@ func _montar(mundo: Node3D) -> void:
 		# Quien trabaja lo hace sentado en su puesto; el cuñado y quien espera
 		# con los brazos cruzados siguen de pie.
 		var en_silla := trabajo
-		idle.configurar(cuerpo, semilla, telefono, reducir, trabajo, brazos, en_silla)
+		# Solo una figura no telefónica reacciona al paso del jugador. Elegir la
+		# última posición mantiene el gesto estable aunque crezca el roster.
+		var atencion := indice > 0 and indice == sitios.size() - 1
+		idle.configurar(
+			cuerpo, semilla, telefono, reducir, trabajo, brazos, en_silla, atencion, actor
+		)
 		_idles.append(idle)
 	_conectar_conversaciones(mundo)
 	_reloj_recados = 0.0
