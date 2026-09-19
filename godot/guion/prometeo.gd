@@ -131,7 +131,10 @@ static func sincronizar_tarot_por_caso_resuelto(estado: Dictionary, caso: Dictio
 	var pistas_bruto = estado.get("pistas_descubiertas", [])
 	if typeof(pistas_bruto) == TYPE_ARRAY:
 		var pistas: Array = pistas_bruto
-		if Progreso.caso_resuelto(caso, pistas) and desbloquear_carta_en_estado(estado, "los-enamorados"):
+		if (
+			Progreso.caso_resuelto(caso, pistas)
+			and desbloquear_carta_en_estado(estado, "los-enamorados")
+		):
 			nuevas.append("los-enamorados")
 	return nuevas
 
