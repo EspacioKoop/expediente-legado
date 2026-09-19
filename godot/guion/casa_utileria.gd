@@ -23,7 +23,7 @@ static func montar(raiz: Node3D) -> void:
 	# sobremesa va sobre el mueble de la tele y la lámpara de pie, tras el sofá.
 	_montar_mesita(raiz, Vector3(-1.1, 0.0, -3.05))
 	_montar_portatil(raiz, Vector3(-1.1, 0.68, -3.05))
-	_montar_consola_sobremesa(raiz, Vector3(-3.6, 0.54, 1.95))
+	_montar_consola_sobremesa(raiz, Vector3(-3.58, 0.54, 2.00))
 	_montar_lampara_pie(raiz, Vector3(-1.0, 0.0, 2.85))
 	_montar_almacenamiento(raiz, Vector3(0.0, 0.0, -3.05))
 	_montar_minicadena(raiz, Vector3(1.25, 1.66, -3.12))
