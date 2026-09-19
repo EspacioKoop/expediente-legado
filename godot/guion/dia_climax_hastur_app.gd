@@ -165,7 +165,11 @@ func _al_continuar() -> void:
 	if fase != ClimaxHastur.FASE_DERROTA:
 		return
 	var consecuencia := ClimaxHastur.aplicar_derrota(partida_actual.estado, jornada)
-	var accion := "derrota_despido" if bool(consecuencia.get("despido", false)) else "derrota_reintento"
+	var accion := (
+		"derrota_despido"
+		if bool(consecuencia.get("despido", false))
+		else "derrota_reintento"
+	)
 	_guardar_y_luego(dia, accion)
 
 
