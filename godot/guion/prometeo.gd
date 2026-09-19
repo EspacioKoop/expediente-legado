@@ -122,6 +122,23 @@ static func sincronizar_tarot_por_pistas(estado: Dictionary) -> Array:
 	return nuevas
 
 
+## Progreso por expediente (#1029): Los Enamorados nace exactamente cuando
+## una pista real completa la investigación del caso que se está mirando.
+## Recibe el caso explícitamente para no recorrer el catálogo ni convertir una
+## carga de partida en un emisor de recompensas.
+static func sincronizar_tarot_por_caso_resuelto(estado: Dictionary, caso: Dictionary) -> Array:
+	var nuevas := []
+	var pistas_bruto = estado.get("pistas_descubiertas", [])
+	if typeof(pistas_bruto) == TYPE_ARRAY:
+		var pistas: Array = pistas_bruto
+		if (
+			Progreso.caso_resuelto(caso, pistas)
+			and desbloquear_carta_en_estado(estado, "los-enamorados")
+		):
+			nuevas.append("los-enamorados")
+	return nuevas
+
+
 ## Una acusación es precipitada cuando se ha descubierto menos proporción de
 ## pistas que el umbral de la dificultad. Sin pistas totales no hay ratio que
 ## evaluar, así que nunca es precipitada — y de paso no se divide por cero.
