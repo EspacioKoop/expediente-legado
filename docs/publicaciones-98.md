@@ -4,9 +4,10 @@ La implementación se divide en contratos pequeños: catálogo/lectura persisten
 
 ## Qué queda implementado
 
-`Publicaciones98` declara seis publicaciones originales y ficticias:
+`Publicaciones98` declara siete publicaciones originales y ficticias:
 
 - `revista_umbral_98`: misterio barato, comprable en el quiosco;
+- `libro_popol_wuj_98`: cuaderno cultural k’iche’/Popol Wuj, comprable en el quiosco;
 - `periodico_tarde_98`: prensa local general, comprable en el quiosco;
 - `byte_domestico_42`: informática doméstica;
 - `marcador_98_deportes`: prensa deportiva;
@@ -63,7 +64,7 @@ La materialización 3D sigue siendo procedural y sin assets externos nuevos, per
 - periódico: pliego más ancho y fino con cabecera y bloque de foto;
 - libro/guía: cuerpo más grueso, lomo y cubierta diferenciada.
 
-Las seis publicaciones tienen una paleta propia estable. Por tanto, varios ejemplares pueden coexistir en los ocho anchors domésticos de #677 y conservar una lectura visual reproducible sin inventario paralelo ni contador de colección.
+Las siete publicaciones tienen una paleta propia estable. Por tanto, varios ejemplares pueden coexistir en los ocho anchors domésticos de #677 y conservar una lectura visual reproducible sin inventario paralelo ni contador de colección.
 
 `DiaAcumulacionCasaApp` conecta los `Interactuable3D` recién materializados con el `VisorPublicacion` ya mergeado. Apuntar a un ejemplar guardado y usar la interacción común abre ese mismo contenido; cerrar el visor guarda la lectura mediante el dueño de la jornada. Leer desde la estantería no cobra dinero, no mueve inventario y no activa semillas fuera de las reglas de `Publicaciones98`.
 
@@ -84,7 +85,7 @@ Ignorar cualquiera de estos props no consume acciones, no bloquea la campaña y 
 
 El quinto corte elimina la divergencia visual entre un ejemplar encontrado y el mismo ejemplar una vez guardado. `PublicacionFisica3D` es ahora la única representación editorial para ambos caminos: `PublicacionesEncontrables3D` y `CasaAcumulacion3D` delegan en el mismo renderer procedural.
 
-Cada una de las seis publicaciones conserva una cabecera ficticia y una edición corta propias. La portada física incorpora `Label3D` con cabecera y número/año; revistas y libros añaden un lomo rotulado, mientras que el periódico mantiene el pliego sin inventar un lomo que no tendría sentido. La misma representación añade cuerpos distintos para revista, periódico y guía, además de paletas estables ya usadas por el sistema doméstico.
+Cada una de las siete publicaciones conserva una cabecera ficticia y una edición corta propias. La portada física incorpora `Label3D` con cabecera y número/año; revistas y libros añaden un lomo rotulado, mientras que el periódico mantiene el pliego sin inventar un lomo que no tendría sentido. La misma representación añade cuerpos distintos para revista, periódico y guía, además de paletas estables ya usadas por el sistema doméstico.
 
 Los rótulos son texto del mundo, no HUD: usan la fuente monoespaciada de `EstiloSiga`, no siguen a la cámara y viven pegados a la geometría. Por tanto, examinar una portada/lomo exige acercarse al objeto como a cualquier otro prop de #283. El visor sigue siendo la única capa que muestra el contenido hojeable a tamaño accesible.
 
@@ -101,6 +102,18 @@ El acabado no conoce `ComercioBarrio`, `Jornada`, `Inventario` ni `SemillasOniri
 5. cerrar deliberadamente tras esa lectura llama a `SemillasOniricas.activar_semilla_onirica()` con `minotauro` y la fuente estable `publicacion:revista_umbral_98`.
 
 La misma fuente es idempotente, por lo que cerrar varias veces no incrementa intensidad artificialmente.
+
+El segundo vertical cultural es `libro_popol_wuj_98`, un cuaderno ficticio comprable en **Quiosco Avenida** durante `fase=trayecto`. Su contenido sigue los límites y fuentes documentados en [`docs/assets/popol-wuj-referencias.md`](assets/popol-wuj-referencias.md): identifica explícitamente el Popol Wuj como tradición k’iche’ y evita iconografía histórica copiada o una etiqueta «maya» genérica.
+
+Su handshake es el mismo y no abre una vía especial:
+
+1. comprar el cuaderno en el trayecto: **no activa nada**;
+2. leer solo `portada`: **no activa nada**;
+3. cerrar con una única pieza: **no activa nada**;
+4. leer dos piezas distintas y cerrar deliberadamente: activa `popol_wuj` mediante #442;
+5. la fuente estable es `libro:popol_wuj_98`, la misma que usa el vertical standalone de #655, por lo que una futura convivencia de ambas representaciones seguirá siendo idempotente.
+
+El ejemplar usa el mismo `Inventario`, `VisorPublicacion`, almacenamiento doméstico y `PublicacionFisica3D` que el resto. Se materializa como cuaderno/libro con cabecera ficticia «CUADERNO CULTURAL»; no importa portadas, glifos ni ilustraciones externas.
 
 La prensa general y el resto de publicaciones no tienen semilla por defecto: ocio y ambientación no equivalen automáticamente a contenido onírico.
 
