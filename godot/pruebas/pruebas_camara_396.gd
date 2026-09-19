@@ -7,6 +7,7 @@
 extends SceneTree
 
 const CAMINANTE_ESCENA := preload("res://escenas/caminante.tscn")
+const CAMINANTE_SCRIPT := preload("res://guion/caminante.gd")
 
 
 class ConsumidorMouse:
@@ -46,31 +47,31 @@ func _probar() -> void:
 	movimiento.position = Vector2(512.0, 340.0)
 
 	_comprobar(
-		CAMINANTE_ESCENA.instantiate().get_script().debe_procesar_movimiento_raton(
+		CAMINANTE_SCRIPT.debe_procesar_movimiento_raton(
 			true, true, false, false
 		),
 		"captura activa permite MouseMotion de gameplay",
 	)
 	_comprobar(
-		not CAMINANTE_ESCENA.instantiate().get_script().debe_procesar_movimiento_raton(
+		not CAMINANTE_SCRIPT.debe_procesar_movimiento_raton(
 			false, true, false, false
 		),
 		"ratón visible bloquea MouseMotion de gameplay",
 	)
 	_comprobar(
-		not CAMINANTE_ESCENA.instantiate().get_script().debe_procesar_movimiento_raton(
+		not CAMINANTE_SCRIPT.debe_procesar_movimiento_raton(
 			true, false, false, false
 		),
 		"física inactiva bloquea MouseMotion de gameplay",
 	)
 	_comprobar(
-		not CAMINANTE_ESCENA.instantiate().get_script().debe_procesar_movimiento_raton(
+		not CAMINANTE_SCRIPT.debe_procesar_movimiento_raton(
 			true, true, true, false
 		),
 		"árbol pausado bloquea MouseMotion de gameplay",
 	)
 	_comprobar(
-		not CAMINANTE_ESCENA.instantiate().get_script().debe_procesar_movimiento_raton(
+		not CAMINANTE_SCRIPT.debe_procesar_movimiento_raton(
 			true, true, false, true
 		),
 		"cámara de diálogo bloquea MouseMotion de gameplay",
