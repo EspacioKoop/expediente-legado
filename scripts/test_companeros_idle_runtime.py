@@ -29,7 +29,7 @@ class CompanerosIdleRuntimeTest(unittest.TestCase):
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
         resumen = RESUMEN_GODOT.search(resultado.stdout)
         self.assertIsNotNone(resumen, resultado.stdout)
-        self.assertEqual(resumen.group(1), "6", resultado.stdout)
+        self.assertEqual(resumen.group(1), "9", resultado.stdout)
 
 
 if __name__ == "__main__":
