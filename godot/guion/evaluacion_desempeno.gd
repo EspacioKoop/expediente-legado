@@ -93,7 +93,10 @@ static func validar_historial(historial_crudo: Array) -> Array:
 			errores.append("%d.vuelta duplicada" % i)
 		else:
 			vueltas[int(registro["vuelta"])] = true
-		if typeof(registro.get("motivo")) != TYPE_STRING or String(registro["motivo"]).strip_edges().is_empty():
+		if (
+			typeof(registro.get("motivo")) != TYPE_STRING
+			or String(registro["motivo"]).strip_edges().is_empty()
+		):
 			errores.append("%d.motivo inválido" % i)
 		if not _entero_no_negativo(registro.get("veredictos_total", -1)):
 			errores.append("%d.veredictos_total inválido" % i)
