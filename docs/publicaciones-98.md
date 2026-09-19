@@ -115,6 +115,8 @@ Su handshake es el mismo y no abre una vía especial:
 
 El ejemplar usa el mismo `Inventario`, `VisorPublicacion`, almacenamiento doméstico y `PublicacionFisica3D` que el resto. Se materializa como cuaderno/libro con cabecera ficticia «CUADERNO CULTURAL»; no importa portadas, glifos ni ilustraciones externas.
 
+Además, el `PublicacionesEncontrablesController` ya presente en `dia.tscn` monta durante `trayecto` un **punto de lectura** exterior con una copia de consulta del mismo cuaderno. Ese atril abre `VisorPublicacion` directamente en la calle, por lo que la secuencia de dos piezas + cierre puede registrar `popol_wuj` antes de llegar a casa. Comprar una copia en el catálogo del quiosco es opcional y **no activa** la semilla: compra y lectura comparten ID/fuente, pero solo `Publicaciones98.cerrar_tras_lectura()` decide la activación.
+
 La prensa general y el resto de publicaciones no tienen semilla por defecto: ocio y ambientación no equivalen automáticamente a contenido onírico.
 
 ## Pruebas
