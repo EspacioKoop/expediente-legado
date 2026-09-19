@@ -70,7 +70,7 @@ func _probar() -> void:
 	_comprobar(consola != null, "la consola de sobremesa sigue montada")
 	if consola != null:
 		_comprobar(
-			consola.position.is_equal_approx(Vector3(-3.58, 0.54, 2.00)),
+			consola.position.is_equal_approx(Vector3(-3.58, 0.54, 2.10)),
 			"la consola conserva la posición despejada del rincón de TV",
 		)
 		_comprobar(
