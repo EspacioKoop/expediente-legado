@@ -258,7 +258,7 @@ func _guardar_captura(destino: String) -> bool:
 
 func _ids_props_visibles(dia) -> Array[String]:
 	var ids: Array[String] = []
-	var raiz := dia._mundo.get_node_or_null("PropsUtilizablesEncontrables680")
+	var raiz: Node = dia._mundo.get_node_or_null("PropsUtilizablesEncontrables680")
 	if raiz == null:
 		return ids
 	for nodo in raiz.get_children():
