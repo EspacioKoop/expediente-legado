@@ -23,7 +23,7 @@ func _process(_delta: float) -> void:
 	var fase := String(dia.jornada.get("fase", ""))
 	if fase == "trayecto":
 		_limpiar_si_toca(mundo)
-		_montar_popol_wuj_trayecto(dia, mundo)
+		_montar_popol_wuj_trayecto(mundo)
 		return
 
 	PopolTrayecto.limpiar(mundo)
@@ -53,7 +53,7 @@ func _process(_delta: float) -> void:
 			nodo.recogido.connect(_al_recoger)
 
 
-func _montar_popol_wuj_trayecto(dia: Node, mundo: Node3D) -> void:
+func _montar_popol_wuj_trayecto(mundo: Node3D) -> void:
 	var lectura := PopolTrayecto.montar(mundo)
 	if lectura == null:
 		return
