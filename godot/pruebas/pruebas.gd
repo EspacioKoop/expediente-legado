@@ -34,6 +34,7 @@ func _init() -> void:
 	PruebasAlquiler.todo(comprobar_cb)
 	PruebasImprevistos.todo(comprobar_cb)
 	PruebasPrometeoYCombate._procedencia(comprobar_cb)
+	load("res://pruebas/pruebas_tarot_progresion_1029.gd").todo(comprobar_cb)
 
 	PruebasEspaciosYSueno._espacios(comprobar_cb)
 	PruebasEspaciosYSueno._acciones_y_vuelta(comprobar_cb)
