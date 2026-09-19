@@ -134,15 +134,18 @@ func _plantilla_visual() -> Array:
 	var sitios: Array = EspaciosCatalogo.OFICINA.get("sitios_companeros", [])
 	for i in mini(quienes.size(), sitios.size()):
 		var quien: Dictionary = quienes[i]
-		figuras.append(
-			{
-				"pos": sitios[i],
-				"color": quien.get("color", Color(0.3, 0.3, 0.3)),
-				"modelo": Companeros.cuerpo_de(quien),
-				"retrato": quien.get("retrato", ""),
-				"rotulo": "",
-				"frase": "",
-			}
+		(
+			figuras
+			. append(
+				{
+					"pos": sitios[i],
+					"color": quien.get("color", Color(0.3, 0.3, 0.3)),
+					"modelo": Companeros.cuerpo_de(quien),
+					"retrato": quien.get("retrato", ""),
+					"rotulo": "",
+					"frase": "",
+				}
+			)
 		)
 	return figuras
 
@@ -240,8 +243,11 @@ func _guardar_manifest(giro: float) -> void:
 	if archivo == null:
 		_fallar("no se pudo escribir %s" % ruta)
 		return
-	archivo.store_string(
-		"""# Gate visual de movimiento #134
+	(
+		archivo
+		. store_string(
+			(
+				"""# Gate visual de movimiento #134
 
 Dos capturas del mismo encuadre de la oficina real:
 
@@ -256,7 +262,9 @@ La revisión humana debe confirmar que el movimiento se lee como presencia
 ambiental y no como vigilancia colectiva, y que el gesto del teléfono sigue
 siendo distinguible.
 """
-		% rad_to_deg(giro)
+				% rad_to_deg(giro)
+			)
+		)
 	)
 	archivo.close()
 
