@@ -6,6 +6,7 @@ var _fallos := 0
 
 func _initialize() -> void:
 	_probar_programacion_narrativa()
+	_probar_audio_y_transporte()
 	_probar_radio_deliberada()
 	_probar_tir_na_nog_deliberado()
 	_probar_cassette_deliberado()
@@ -18,7 +19,12 @@ func _probar_programacion_narrativa() -> void:
 	root.add_child(radio)
 	radio.configurar({"dia": 1, "acciones": Jornada.ACCIONES_POR_DIA})
 	var emisoras := radio.emisoras()
+	var audio := radio.get_node_or_null("MusicaPuntual") as AudioStreamPlayer3D
 	_comprobar(emisoras.size(), 4, "hay cuatro emisoras declarativas")
+	_comprobar(audio != null, "la minicadena monta una salida de audio 3D")
+	if audio != null:
+		_comprobar(audio.bus, &"Musica", "la salida reutiliza el bus común de música")
+		_comprobar(audio.stream is AudioStreamWAV, "la cama audible es procedural y local")
 	_comprobar(
 		MinicadenaDomestica98.hora_narrativa({"dia": 1, "acciones": Jornada.ACCIONES_POR_DIA}),
 		"08:16",
@@ -35,6 +41,47 @@ func _probar_programacion_narrativa() -> void:
 	var tarde := MinicadenaDomestica98.seleccionar_programa(emisoras[0], {"dia": 1, "acciones": 0})
 	_comprobar(manana.get("id", ""), "boletin_barrio", "la mañana selecciona su boletín")
 	_comprobar(tarde.get("id", ""), "mesa_local", "la tarde selecciona otra programación")
+	radio.queue_free()
+
+
+func _probar_audio_y_transporte() -> void:
+	var radio := MinicadenaDomestica98.new()
+	root.add_child(radio)
+	radio.configurar({"dia": 1, "acciones": Jornada.ACCIONES_POR_DIA})
+	var volumen_inicial := radio.volumen_local_db()
+	radio.cambiar_volumen()
+	_comprobar(
+		radio.volumen_local_db() != volumen_inicial,
+		"el volumen físico cambia la ganancia local del aparato",
+	)
+	var audio := radio.get_node_or_null("MusicaPuntual") as AudioStreamPlayer3D
+	if audio != null:
+		_comprobar(
+			audio.volume_db,
+			radio.volumen_local_db(),
+			"la ganancia local se aplica al reproductor sin tocar preferencias globales",
+		)
+
+	radio.alternar_encendido()
+	_comprobar(radio.esta_reproduciendo(), "encender inicia reproducción diegética")
+	radio.alternar_reproduccion()
+	_comprobar(not radio.esta_reproduciendo(), "el transporte puede pausar")
+	_comprobar(not radio.escuchar_actual(), "una escucha pausada no cuenta como atención")
+	radio.alternar_reproduccion()
+	_comprobar(radio.esta_reproduciendo(), "el transporte puede reanudar")
+
+	radio.alternar_cassette()
+	_comprobar(
+		radio.contenido_actual().get("id", ""),
+		"cara_a_1",
+		"la cinta entra por el primer segmento",
+	)
+	radio.cambiar_emisora()
+	_comprobar(
+		radio.contenido_actual().get("id", ""),
+		"cara_a_2",
+		"el sintonizador actúa como avance de pista cuando hay cassette",
+	)
 	radio.queue_free()
 
 
