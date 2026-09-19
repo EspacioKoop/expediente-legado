@@ -22,9 +22,10 @@ class Publicaciones98Test(unittest.TestCase):
         cls.comercio = COMERCIO.read_text(encoding="utf-8")
         cls.doc = DOC.read_text(encoding="utf-8")
 
-    def test_catalogo_declara_seis_publicaciones_originales(self):
+    def test_catalogo_declara_siete_publicaciones_originales(self):
         for item_id in (
             "revista_umbral_98",
+            "libro_popol_wuj_98",
             "periodico_tarde_98",
             "byte_domestico_42",
             "marcador_98_deportes",
@@ -34,6 +35,7 @@ class Publicaciones98Test(unittest.TestCase):
             self.assertIn(f'"id": "{item_id}"', self.publicaciones)
         for categoria in (
             "misterio",
+            "cultura_kiche",
             "prensa_general",
             "informatica",
             "deportes",
@@ -60,6 +62,7 @@ class Publicaciones98Test(unittest.TestCase):
         self.assertNotIn("Jornada.gastar", cuerpo_compra)
         self.assertIn('"id": "revista_umbral_98"', self.comercio)
         self.assertIn('"id": "periodico_tarde_98"', self.comercio)
+        self.assertIn('"id": "libro_popol_wuj_98"', self.comercio)
 
     def test_lectura_es_persistente_e_idempotente(self):
         self.assertIn('const CLAVE_LECTURAS := "publicaciones_98_lecturas"', self.publicaciones)
@@ -70,6 +73,8 @@ class Publicaciones98Test(unittest.TestCase):
     def test_semilla_exige_lectura_y_cierre_deliberado(self):
         self.assertIn('"semilla_onirica": "minotauro"', self.publicaciones)
         self.assertIn('"fuente_semilla": "publicacion:revista_umbral_98"', self.publicaciones)
+        self.assertIn('"semilla_onirica": "popol_wuj"', self.publicaciones)
+        self.assertIn('"fuente_semilla": "libro:popol_wuj_98"', self.publicaciones)
         self.assertIn("static func puede_sembrar", self.publicaciones)
         self.assertIn("static func cerrar_tras_lectura", self.publicaciones)
         self.assertIn("SemillasOniricas.activar_semilla_onirica", self.publicaciones)
