@@ -253,9 +253,7 @@ func _actualizar_atencion(delta: float) -> void:
 			var relativo := wrapf(angulo_objetivo - _rotacion_base, -PI, PI)
 			if absf(relativo) <= ANGULO_ATENCION:
 				destino = clampf(relativo, -GIRO_ATENCION_MAX, GIRO_ATENCION_MAX)
-	_giro_atencion = move_toward(
-		_giro_atencion, destino, VELOCIDAD_ATENCION * maxf(delta, 0.0)
-	)
+	_giro_atencion = move_toward(_giro_atencion, destino, VELOCIDAD_ATENCION * maxf(delta, 0.0))
 
 
 func _aplicar(angulo: float) -> void:
