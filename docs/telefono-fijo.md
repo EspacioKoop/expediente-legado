@@ -14,6 +14,7 @@ El jugador puede:
 - dejarla explícitamente al contestador;
 - ignorarla por completo: al abandonar `casa`, el controller la deriva al contestador antes de guardar;
 - escuchar el siguiente mensaje nuevo;
+- consultar la cinta y repetir cualquier mensaje ya almacenado, sin volver a marcarlo como nuevo;
 - descolgar sin llamada entrante para obtener línea y llamar solo a contactos declarados;
 - colgar el auricular.
 
@@ -24,7 +25,7 @@ No hay temporizador de segundos. Una llamada ignorada no bloquea el ciclo y su c
 `jornada.telefono_fijo` conserva únicamente:
 
 - `procesadas`: IDs de llamadas entrantes ya resueltas;
-- `mensajes`: cinta del contestador, con día, hora narrativa, remitente, texto y flag `escuchado`;
+- `mensajes`: cinta del contestador, con día, hora narrativa, remitente, texto y flag `escuchado`; el panel trabaja con copias y solo muta el mensaje elegido mediante la API de `TelefonoFijo`;
 - `historial`: eventos mínimos de llamadas atendidas, contestador y salientes;
 - `llamada_activa`: ID pendiente durante la visita a casa;
 - `dia_preparado`: evita duplicar llamadas al reconstruir la escena;
@@ -49,7 +50,7 @@ Además hay tres números salientes ficticios y explícitamente permitidos: cent
 
 `TelefonoFijoInteractivo3D` construye carcasa, auricular, teclado y dos pilotos con primitivas del motor. Es `Interactuable3D`, por lo que usa la acción semántica común en vez de teclas hardcodeadas.
 
-`TelefonoFijoPanel` es una ventana modal transitoria con transcript, botones enfocables, `cancelar`/`ui_cancel` y fallback A/B de mando. El contenido narrativo no depende del audio.
+`TelefonoFijoPanel` es una ventana modal transitoria con transcript, botones enfocables, `cancelar`/`ui_cancel` y fallback A/B de mando. La cinta almacenada se materializa como botones reproducibles; al repetir un mensaje el foco vuelve a ese elemento. El contenido narrativo no depende del audio.
 
 ## Límites del corte
 

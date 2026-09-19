@@ -224,17 +224,32 @@ static func mensajes_nuevos(jornada: Dictionary) -> int:
 	return total
 
 
-static func escuchar_siguiente(jornada: Dictionary) -> Dictionary:
+static func mensajes_guardados(jornada: Dictionary) -> Array[Dictionary]:
+	var salida: Array[Dictionary] = []
+	for mensaje in estado(jornada)[MENSAJES]:
+		if mensaje is Dictionary:
+			salida.append(mensaje.duplicate(true))
+	return salida
+
+
+static func escuchar_mensaje(jornada: Dictionary, indice: int) -> Dictionary:
 	var telefono := estado(jornada)
 	var mensajes: Array = telefono[MENSAJES]
+	if indice < 0 or indice >= mensajes.size() or not mensajes[indice] is Dictionary:
+		return _fallo("mensaje_no_disponible")
+	var mensaje: Dictionary = mensajes[indice]
+	mensaje["escuchado"] = true
+	mensajes[indice] = mensaje
+	telefono[MENSAJES] = mensajes
+	return {"ok": true, "mensaje": mensaje.duplicate(true), "indice": indice}
+
+
+static func escuchar_siguiente(jornada: Dictionary) -> Dictionary:
+	var mensajes: Array = estado(jornada)[MENSAJES]
 	for indice in range(mensajes.size()):
 		var mensaje = mensajes[indice]
-		if not mensaje is Dictionary or bool(mensaje.get("escuchado", false)):
-			continue
-		mensaje["escuchado"] = true
-		mensajes[indice] = mensaje
-		telefono[MENSAJES] = mensajes
-		return {"ok": true, "mensaje": mensaje.duplicate(true)}
+		if mensaje is Dictionary and not bool(mensaje.get("escuchado", false)):
+			return escuchar_mensaje(jornada, indice)
 	return _fallo("sin_mensajes_nuevos")
 
 

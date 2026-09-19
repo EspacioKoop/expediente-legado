@@ -16,6 +16,7 @@ var _descolgar: Button
 var _contestador: Button
 var _escuchar: Button
 var _colgar: Button
+var _mensajes: HFlowContainer
 var _contactos: VBoxContainer
 var _cerrar: Button
 
@@ -28,7 +29,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	theme = EstiloSiga.tema()
 	title = "Teléfono fijo"
-	size = Vector2i(760, 560)
+	size = Vector2i(760, 620)
 	exclusive = true
 	transient = true
 	close_requested.connect(_cerrar_panel)
@@ -87,6 +88,12 @@ func _construir() -> void:
 	_colgar = _boton("Colgar", _al_colgar)
 	acciones.add_child(_colgar)
 
+	_mensajes = HFlowContainer.new()
+	_mensajes.name = "MensajesGuardados"
+	_mensajes.add_theme_constant_override("h_separation", 6)
+	_mensajes.add_theme_constant_override("v_separation", 4)
+	columna.add_child(_mensajes)
+
 	_contactos = VBoxContainer.new()
 	_contactos.add_theme_constant_override("separation", 6)
 	columna.add_child(_contactos)
@@ -141,6 +148,32 @@ func _refrescar() -> void:
 	for hijo in _contactos.get_children():
 		if hijo is Button:
 			hijo.disabled = not descolgado
+	_refrescar_mensajes()
+
+
+func _refrescar_mensajes() -> void:
+	if not is_instance_valid(_mensajes):
+		return
+	for hijo in _mensajes.get_children():
+		_mensajes.remove_child(hijo)
+		hijo.queue_free()
+	var cinta := TelefonoFijo.mensajes_guardados(jornada)
+	for indice in range(cinta.size()):
+		var mensaje := cinta[indice]
+		var marca := " · nuevo" if not bool(mensaje.get("escuchado", false)) else ""
+		var boton := Button.new()
+		boton.name = "Mensaje_%d" % indice
+		boton.text = (
+			"%s · %d · %s%s"
+			% [
+				mensaje.get("remitente", "Número desconocido"),
+				mensaje.get("dia", 1),
+				mensaje.get("hora", ""),
+				marca,
+			]
+		)
+		boton.pressed.connect(_al_escuchar_guardado.bind(indice))
+		_mensajes.add_child(boton)
 
 
 func _al_descolgar() -> void:
@@ -185,7 +218,21 @@ func _al_escuchar() -> void:
 	if not bool(resultado.get("ok", false)):
 		_mostrar_error(resultado)
 		return
-	var mensaje = resultado.get("mensaje", {})
+	_mostrar_mensaje(resultado.get("mensaje", {}))
+	_estado_cambio()
+
+
+func _al_escuchar_guardado(indice: int) -> void:
+	var resultado := TelefonoFijo.escuchar_mensaje(jornada, indice)
+	if not bool(resultado.get("ok", false)):
+		_mostrar_error(resultado)
+		return
+	_mostrar_mensaje(resultado.get("mensaje", {}))
+	_estado_cambio()
+	_enfocar_mensaje.call_deferred(indice)
+
+
+func _mostrar_mensaje(mensaje: Dictionary) -> void:
 	_contenido.text = (
 		"Contestador · día %d · %s\n%s\n\n%s"
 		% [
@@ -195,7 +242,6 @@ func _al_escuchar() -> void:
 			mensaje.get("texto", ""),
 		]
 	)
-	_estado_cambio()
 
 
 func _al_llamar(contacto_id: String) -> void:
@@ -243,6 +289,14 @@ func _enfocar() -> void:
 		_escuchar.grab_focus()
 	elif is_instance_valid(_cerrar):
 		_cerrar.grab_focus()
+
+
+func _enfocar_mensaje(indice: int) -> void:
+	if not is_instance_valid(_mensajes):
+		return
+	var boton := _mensajes.get_node_or_null("Mensaje_%d" % indice) as Button
+	if is_instance_valid(boton):
+		boton.grab_focus()
 
 
 func _cerrar_panel() -> void:

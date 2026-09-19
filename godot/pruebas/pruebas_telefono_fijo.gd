@@ -40,6 +40,19 @@ func _probar() -> void:
 	_comprobar(TelefonoFijo.mensajes_nuevos(dia_dos) == 0, "mensaje escuchado")
 	var mensajes_dos: Array = TelefonoFijo.estado(dia_dos)["mensajes"]
 	_comprobar(mensajes_dos.size() == 1, "mensaje persistente")
+	var cinta := TelefonoFijo.mensajes_guardados(dia_dos)
+	_comprobar(cinta.size() == 1, "la cinta expone mensajes guardados")
+	_comprobar(bool(cinta[0].get("escuchado", false)), "la cinta conserva el estado escuchado")
+	var repetido := TelefonoFijo.escuchar_mensaje(dia_dos, 0)
+	_comprobar(bool(repetido.get("ok", false)), "repetir mensaje ya escuchado")
+	_comprobar(TelefonoFijo.mensajes_nuevos(dia_dos) == 0, "repetir no recrea mensaje nuevo")
+	var inexistente := TelefonoFijo.escuchar_mensaje(dia_dos, 99)
+	_comprobar(not bool(inexistente.get("ok", false)), "rechaza índice de cinta inexistente")
+	cinta[0]["texto"] = "alterado fuera"
+	_comprobar(
+		String(TelefonoFijo.mensajes_guardados(dia_dos)[0].get("texto", "")) != "alterado fuera",
+		"consultar la cinta devuelve copias",
+	)
 
 	var dia_tres := _jornada(3)
 	var comercial := TelefonoFijo.preparar_casa(dia_tres)
