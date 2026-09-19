@@ -49,9 +49,26 @@ func _probar() -> void:
 	_comprobar(not alimentado.has("pista"), "el eco no contiene pista")
 
 	var visual := Gato.new()
+	root.add_child(visual)
 	visual.empezar(Vector3.ZERO, [Vector3.ZERO])
 	_comprobar(visual.presentar_estado("durmiendo"), "el gato acepta una pose presentacional")
 	_comprobar(visual.estado.get("estado", "") == "durmiendo", "la pose queda observable")
+
+	visual.configurar_reduccion_movimiento(true)
+	visual.presentar_estado("mimos")
+	_comprobar(
+		is_zero_approx(visual._cola.rotation.y),
+		"reducción de movimiento congela el vaivén decorativo de la cola",
+	)
+	_comprobar(
+		not is_zero_approx(visual._cuerpo.position.x),
+		"reducción de movimiento conserva una pose estática legible para mimos",
+	)
+	visual.interactuar(null)
+	visual.interactuar(null)
+	_comprobar(visual._cuerpo.position.y > 0.0, "coger conserva una respuesta estática visible")
+	visual.avanzar(0, Vector3.ZERO, Gato.DURACION_COGIDO + 0.1)
+	_comprobar(is_zero_approx(visual._cuerpo.position.y), "la pose de coger termina sin tween")
 	visual.free()
 
 	for i in 10:
