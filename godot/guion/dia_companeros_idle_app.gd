@@ -55,7 +55,9 @@ func _montar(mundo: Node3D) -> void:
 	_reducir = reducir
 	var sitios: Array = EspaciosCatalogo.OFICINA.get("sitios_companeros", [])
 	var dia := get_parent()
-	var actor: Node3D = dia.get("_caminante") as Node3D if dia != null else null
+	var actor: Node3D = null
+	if dia != null:
+		actor = dia.get("_caminante") as Node3D
 	for indice in sitios.size():
 		var cuerpo := _cuerpo_en(mundo, sitios[indice])
 		if cuerpo == null:
