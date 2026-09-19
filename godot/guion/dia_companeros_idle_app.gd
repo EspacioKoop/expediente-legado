@@ -77,7 +77,7 @@ func _montar(mundo: Node3D) -> void:
 		var en_silla := trabajo
 		# Solo una figura no telefónica reacciona al paso del jugador. Elegir la
 		# última posición mantiene el gesto estable aunque crezca el roster.
-		var atencion := indice > 0 and indice == sitios.size() - 1
+		var atencion := actor != null and indice > 0 and indice == sitios.size() - 1
 		idle.configurar(
 			cuerpo, semilla, telefono, reducir, trabajo, brazos, en_silla, atencion, actor
 		)
