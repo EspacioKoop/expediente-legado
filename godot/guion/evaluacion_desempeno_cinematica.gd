@@ -23,6 +23,7 @@ const CATEGORIAS := [
 	"cuidado_gato",
 	"liquidez",
 	"exploracion_onirica",
+	"dependencia_dinero",
 ]
 
 
@@ -63,12 +64,14 @@ static func _figura(evaluacion: Dictionary) -> Array:
 		{"rect": Rect2(-142, -78, 284, 156), "color": PAPEL},
 		{"rect": Rect2(-112, -56, 224, 8), "color": TINTA},
 	]
-	var y := -30.0
+	var y := -34.0
 	for categoria in CATEGORIAS:
+		if not evaluacion.has(categoria):
+			continue
 		var rango := String(evaluacion.get(categoria, ""))
 		figura.append({"rect": Rect2(-105, y, 210, 8), "color": GUIA})
 		figura.append({"rect": Rect2(-105, y, _ancho_de(rango), 8), "color": TINTA})
-		y += 23.0
+		y += 19.0
 	return figura
 
 
@@ -101,4 +104,9 @@ static func _frase_de(evaluacion: Dictionary) -> String:
 		and String(evaluacion.get("productividad", "")) == EvaluacionDesempeno.BAJA
 	):
 		return "EVALUACION_REMATE_SUENO_PRODUCTIVIDAD"
+	if (
+		String(evaluacion.get("dependencia_dinero", "")) == EvaluacionDesempeno.ALTA
+		and String(evaluacion.get("liquidez", "")) == EvaluacionDesempeno.ALTA
+	):
+		return "EVALUACION_REMATE_DEPENDENCIA_LIQUIDEZ"
 	return "EVALUACION_REMATE_NEUTRA"

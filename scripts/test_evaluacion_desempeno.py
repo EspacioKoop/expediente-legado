@@ -23,6 +23,8 @@ class EvaluacionDesempenoContractTest(unittest.TestCase):
             'jornada.get("mapa", [])',
             'jornada.get("dinero", 0)',
             'gato.get("dias_sin_comer", 0)',
+            'jornada.get("trabajillos", {})',
+            'trabajillos.get("hechos", 0)',
         ]:
             self.assertIn(token, self.source)
 
@@ -33,6 +35,7 @@ class EvaluacionDesempenoContractTest(unittest.TestCase):
             '"cuidado_gato"',
             '"liquidez"',
             '"exploracion_onirica"',
+            '"dependencia_dinero"',
         ]:
             self.assertIn(category, self.source)
         self.assertNotIn('"puntuacion_total"', self.source)
@@ -57,6 +60,7 @@ class EvaluacionDesempenoContractTest(unittest.TestCase):
         self.assertIn("var existente := _registro_de_vuelta(partida, vuelta)", self.source)
         self.assertIn("if not existente.is_empty():", self.source)
         self.assertIn('"veredictos_total": veredictos.size()', self.source)
+        self.assertIn('"version_evaluacion": VERSION_EVALUACION_ACTUAL', self.source)
         self.assertIn('partida[CLAVE_HISTORIAL] = historial', self.source)
 
     def test_productivity_uses_only_verdicts_from_current_life(self):

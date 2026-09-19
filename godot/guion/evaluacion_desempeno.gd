@@ -11,13 +11,15 @@ const BAJA := "BAJA"
 const MEDIA := "MEDIA"
 const ALTA := "ALTA"
 const RANGOS := [BAJA, MEDIA, ALTA]
-const CATEGORIAS := [
+const VERSION_EVALUACION_ACTUAL := 2
+const CATEGORIAS_V1 := [
 	"productividad",
 	"precipitacion",
 	"cuidado_gato",
 	"liquidez",
 	"exploracion_onirica",
 ]
+const CATEGORIAS := CATEGORIAS_V1 + ["dependencia_dinero"]
 const CLAVE_HISTORIAL := "evaluaciones_desempeno"
 
 
@@ -35,6 +37,8 @@ static func calcular(partida: Dictionary, jornada_override: Dictionary = {}) -> 
 	var mapa: Array = jornada.get("mapa", [])
 	var dinero := int(jornada.get("dinero", 0))
 	var dias_sin_comer := int(gato.get("dias_sin_comer", 0))
+	var trabajillos: Dictionary = jornada.get("trabajillos", {})
+	var trabajos_extra := maxi(0, int(trabajillos.get("hechos", 0)))
 	var cerrados_vuelta := maxi(0, veredictos.size() - _veredictos_antes_de(partida, vuelta))
 
 	return {
@@ -43,6 +47,7 @@ static func calcular(partida: Dictionary, jornada_override: Dictionary = {}) -> 
 		"cuidado_gato": _rango_invertido(dias_sin_comer, 1, Jornada.PACIENCIA_GATO),
 		"liquidez": _rango(dinero, Jornada.PRECIO_COMIDA_GATO, Jornada.PRECIO_ALQUILER),
 		"exploracion_onirica": _rango(mapa.size(), 2, 6),
+		"dependencia_dinero": _rango(trabajos_extra, 1, 3),
 	}
 
 
@@ -64,6 +69,7 @@ static func sellar(
 	var registro := {
 		"vuelta": vuelta,
 		"motivo": motivo.strip_edges() if not motivo.strip_edges().is_empty() else "otro",
+		"version_evaluacion": VERSION_EVALUACION_ACTUAL,
 		"veredictos_total": veredictos.size(),
 		"evaluacion": calcular(partida, jornada),
 	}
@@ -100,12 +106,19 @@ static func validar_historial(historial_crudo: Array) -> Array:
 			errores.append("%d.motivo inválido" % i)
 		if not _entero_no_negativo(registro.get("veredictos_total", -1)):
 			errores.append("%d.veredictos_total inválido" % i)
+		var version_evaluacion := int(registro.get("version_evaluacion", 1))
+		if version_evaluacion < 1 or version_evaluacion > VERSION_EVALUACION_ACTUAL:
+			errores.append("%d.version_evaluacion inválida" % i)
 		var evaluacion = registro.get("evaluacion")
 		if typeof(evaluacion) != TYPE_DICTIONARY:
 			errores.append("%d.evaluacion no es un objeto" % i)
 			continue
-		for categoria in CATEGORIAS:
+		var requeridas := CATEGORIAS_V1 if version_evaluacion == 1 else CATEGORIAS
+		for categoria in requeridas:
 			if not evaluacion.has(categoria) or not RANGOS.has(evaluacion[categoria]):
+				errores.append("%d.evaluacion.%s inválida" % [i, categoria])
+		for categoria in CATEGORIAS:
+			if evaluacion.has(categoria) and not RANGOS.has(evaluacion[categoria]):
 				errores.append("%d.evaluacion.%s inválida" % [i, categoria])
 	return errores
 

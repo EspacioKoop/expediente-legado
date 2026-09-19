@@ -46,6 +46,7 @@ class EvaluacionDesempenoRemateTest(unittest.TestCase):
             "EVALUACION_REMATE_PRODUCTIVA_PRECIPITADA",
             "EVALUACION_REMATE_CUIDADOS_LIQUIDEZ",
             "EVALUACION_REMATE_SUENO_PRODUCTIVIDAD",
+            "EVALUACION_REMATE_DEPENDENCIA_LIQUIDEZ",
             "EVALUACION_REMATE_NEUTRA",
         ):
             self.assertIn(clave, self.presentacion)
