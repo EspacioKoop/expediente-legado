@@ -4,7 +4,7 @@ Este corte documenta fuentes **antes de cerrar arte o iconografía**. El prototi
 
 ## Alcance cultural
 
-El issue habla de folclore eslavo, pero este primer vertical toma como base **fuentes rusas de cuento tradicional y estudios sobre Baba Yaga**. No se presenta como tradición pan-eslava uniforme ni se mezclan automáticamente variantes rusas, ucranianas, bielorrusas, polacas u otras.
+El issue habla de folclore eslavo, pero este primer vertical toma como base **fuentes rusas de cuento tradicional y estudios sobre Baba Yaga**. Este corte no se presenta como tradición pan-eslava uniforme ni mezcla automáticamente variantes rusas, ucranianas, bielorrusas, polacas u otras.
 
 La mecánica de arquitectura móvil es una traducción jugable de SIGA-98. No pretende reconstruir una práctica ritual ni afirmar que exista una versión única del personaje.
 
