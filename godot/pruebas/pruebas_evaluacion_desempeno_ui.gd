@@ -32,7 +32,8 @@ func _probar() -> void:
 				"vuelta": 2,
 				"motivo": "final_narrativo",
 				"veredictos_total": 8,
-				"evaluacion": {
+				"evaluacion":
+				{
 					"productividad": EvaluacionDesempeno.ALTA,
 					"precipitacion": EvaluacionDesempeno.BAJA,
 					"cuidado_gato": EvaluacionDesempeno.MEDIA,
