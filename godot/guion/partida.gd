@@ -285,21 +285,15 @@ static func validar(guardado) -> Array:
 				errores.append("pronosticos.%s" % error)
 	if guardado.has("vida") and not _entero_valido(guardado["vida"], 0, VIDA_MAXIMA):
 		errores.append("vida inválida")
-	for clave in [
-		"pistas_descubiertas",
-		"cartas_conocidas",
-		"sueno_vencidos",
-		"sellos_obtenidos",
-		"evaluaciones_desempeno",
-	]:
+	for clave in ["pistas_descubiertas", "cartas_conocidas", "sueno_vencidos", "sellos_obtenidos"]:
 		if guardado.has(clave) and typeof(guardado[clave]) != TYPE_ARRAY:
 			errores.append("%s no es una lista" % clave)
-	if (
-		guardado.has("evaluaciones_desempeno")
-		and typeof(guardado["evaluaciones_desempeno"]) == TYPE_ARRAY
-	):
-		for error in EvaluacionDesempeno.validar_historial(guardado["evaluaciones_desempeno"]):
-			errores.append("evaluaciones_desempeno.%s" % error)
+	if guardado.has("evaluaciones_desempeno"):
+		if typeof(guardado["evaluaciones_desempeno"]) != TYPE_ARRAY:
+			errores.append("evaluaciones_desempeno no es una lista")
+		else:
+			for error in EvaluacionDesempeno.validar_historial(guardado["evaluaciones_desempeno"]):
+				errores.append("evaluaciones_desempeno.%s" % error)
 	for clave in ["anomalias_descubiertas", "anomalias_descubiertas_vuelta"]:
 		if guardado.has(clave) and typeof(guardado[clave]) != TYPE_ARRAY:
 			errores.append("%s no es una lista" % clave)
