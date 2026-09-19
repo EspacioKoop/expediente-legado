@@ -85,7 +85,9 @@ var _reloj := 0.0
 var _desvio := Vector3.ZERO
 var _desvio_resto := 0.0
 var _puede_coger_resto := 0.0
+var _cogido_resto := 0.0
 var _hambre_actual := 0
+var _reduccion_movimiento := false
 
 
 func _init() -> void:
@@ -349,6 +351,11 @@ func _coger() -> void:
 	_puede_coger_resto = 0.0
 	if not is_inside_tree():
 		return
+	if _reduccion_movimiento:
+		# La elevación sigue siendo legible, pero deja de ser un barrido.
+		_cogido_resto = DURACION_COGIDO
+		_cuerpo.position.y = 0.08
+		return
 	var elevacion := create_tween()
 	elevacion.tween_property(_cuerpo, "position:y", 0.18, DURACION_COGIDO * 0.45)
 	elevacion.tween_property(_cuerpo, "position:y", 0.0, DURACION_COGIDO * 0.55)
@@ -379,6 +386,14 @@ func actualizar_hambre(hambre: int) -> void:
 	_hambre_actual = maxi(0, hambre)
 
 
+## Reduce únicamente movimiento decorativo. La locomoción y las poses que
+## comunican hambre, descanso, observación o interacción siguen presentes.
+func configurar_reduccion_movimiento(reducir: bool) -> void:
+	_reduccion_movimiento = reducir
+	if not estado.is_empty():
+		_presentar_movimiento_estado(String(estado.get("estado", "parado")))
+
+
 ## Un paso. [param hambre] son los días que lleva sin comer.
 func avanzar(hambre: int, jugador: Vector3, delta: float) -> void:
 	actualizar_hambre(hambre)
@@ -386,6 +401,9 @@ func avanzar(hambre: int, jugador: Vector3, delta: float) -> void:
 		return
 	_reloj += delta
 	_puede_coger_resto = maxf(0.0, _puede_coger_resto - delta)
+	_cogido_resto = maxf(0.0, _cogido_resto - delta)
+	if _reduccion_movimiento:
+		_cuerpo.position.y = 0.08 if _cogido_resto > 0.0 else 0.0
 
 	# Conducta propone un paso y la sonda decide si ese paso cabe realmente en
 	# la casa. Al final se devuelve la posición visible a la conducta, para que
@@ -411,10 +429,7 @@ func avanzar(hambre: int, jugador: Vector3, delta: float) -> void:
 	# La cola. Más deprisa con hambre, que es la otra mitad de la señal: si no
 	# viene y además está tensa, algo pasa. Durante los mimos vuelve a moverse
 	# con intención, pero sin parecer la tensión del hambre.
-	var ritmo := _ritmo_estado(String(estado["estado"]))
-	_cola.rotation.y = sin(_reloj * ritmo) * 0.35
-	_cola.rotation.x = sin(_reloj * ritmo * 0.6) * 0.12
-	_animar_reposo(ritmo)
+	_presentar_movimiento_estado(String(estado["estado"]))
 
 
 ## Aplica el paso propuesto contra las mismas colisiones que usan los muebles.
@@ -484,11 +499,18 @@ func presentar_estado(modo: String) -> bool:
 		# En reposo normal el seno empieza en cero; este desfase hace legible el
 		# roce inmediatamente al aparecer, incluso si el guía queda estático.
 		_reloj = maxf(_reloj, 0.55)
-	var ritmo := _ritmo_estado(modo)
-	_cola.rotation.y = sin(_reloj * ritmo) * 0.35
-	_cola.rotation.x = sin(_reloj * ritmo * 0.6) * 0.12
-	_animar_reposo(ritmo)
+	_presentar_movimiento_estado(modo)
 	return true
+
+
+func _presentar_movimiento_estado(modo: String) -> void:
+	var ritmo := _ritmo_estado(modo)
+	if _reduccion_movimiento:
+		_cola.rotation = Vector3.ZERO
+	else:
+		_cola.rotation.y = sin(_reloj * ritmo) * 0.35
+		_cola.rotation.x = sin(_reloj * ritmo * 0.6) * 0.12
+	_animar_reposo(ritmo)
 
 
 func _ritmo_estado(modo: String) -> float:
@@ -520,18 +542,30 @@ func _animar_reposo(ritmo: float) -> void:
 	var sentado := modo == "sentado"
 	var observando := modo == "observando"
 	var escondido := modo == "escondido"
-	var respiracion := sin(_reloj * 2.2) * 0.012
+	var respiracion := 0.0 if _reduccion_movimiento else sin(_reloj * 2.2) * 0.012
 	_cuerpo.scale.y = (
 		(0.64 if durmiendo else 1.08 if sentado else 0.80 if escondido else 1.0) + respiracion
 	)
 	_cuerpo.scale.z = 1.12 if durmiendo else 1.0
 	_cuerpo.rotation.x = -0.12 if durmiendo else 0.0
-	_cuerpo.position.x = sin(_reloj * 4.2) * 0.028 if dando_mimos else 0.0
-	_cuerpo.rotation.z = sin(_reloj * 3.1) * 0.045 if dando_mimos else 0.0
+	_cuerpo.position.x = (
+		(0.018 if _reduccion_movimiento else sin(_reloj * 4.2) * 0.028) if dando_mimos else 0.0
+	)
+	_cuerpo.rotation.z = (
+		(-0.035 if _reduccion_movimiento else sin(_reloj * 3.1) * 0.045)
+		if dando_mimos
+		else 0.0
+	)
 	_cabeza.rotation.x = 0.24 if durmiendo else -0.10 if observando else 0.0
-	_cabeza.rotation.y = 0.26 if observando else sin(_reloj * 0.45) * 0.18
+	_cabeza.rotation.y = (
+		0.26 if observando else 0.0 if _reduccion_movimiento else sin(_reloj * 0.45) * 0.18
+	)
 	_cabeza.rotation.z = -0.12 if dando_mimos else 0.0
 	var atras := 0.25 if ritmo > 3.0 else 0.0
 	for i in _orejas.size():
-		var tic := pow(maxf(sin(_reloj * 0.9 + i * 2.3), 0.0), 24.0) * 0.3
+		var tic := (
+			0.0
+			if _reduccion_movimiento
+			else pow(maxf(sin(_reloj * 0.9 + i * 2.3), 0.0), 24.0) * 0.3
+		)
 		_orejas[i].rotation.x = -0.15 - atras - tic
