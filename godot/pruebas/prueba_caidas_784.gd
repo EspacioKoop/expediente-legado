@@ -2,8 +2,8 @@
 ##
 ## Cubre los tres fallos observados en el mismo runtime que juega `dia.tscn`:
 ## todas las salas oníricas tienen suelo bajo su entrada, una caída profunda
-## vuelve a la entrada y la salida física oficina→trayecto permite remontar la
-## oficina sin liberar Areas durante el callback de física.
+## vuelve a la entrada y la salida oficina→trayecto permite remontar la oficina
+## sin volver a introducir la salida accidental por proximidad corregida en #790.
 extends SceneTree
 
 var _pasadas := 0
@@ -74,13 +74,31 @@ func _probar_rescate_y_reentrada() -> void:
 	var salida := _buscar_salida(dia._mundo, "trayecto")
 	_comprobar(salida != null, "la oficina conserva su salida al trayecto")
 	if salida != null:
-		# Esto dispara `body_entered` desde el servidor de física: es la ruta que
-		# antes desmontaba `_mundo` dentro del callback y provocaba _body_exit_tree.
+		# #790 invalida el gesto antiguo de esta regresión: colocarse sobre el
+		# Area3D ya no puede cambiar de fase. Se conserva el mismo umbral para
+		# comprobar reentrada, pero el tránsito exige puerta + confirmación.
 		dia._caminante.global_position = salida.global_position
 		for frame in 3:
 			await physics_frame
 			await process_frame
-		_comprobar(dia.jornada["fase"] == "trayecto", "la salida física entra al trayecto")
+		_comprobar(
+			dia.jornada["fase"] == "archivo",
+			"pisar la salida de oficina ya no cambia de fase",
+		)
+		_comprobar(not salida.monitoring, "el umbral automático queda desactivado")
+
+		var puerta: Interactuable3D = dia._puerta_salida_oficina
+		_comprobar(puerta != null, "la reentrada conserva la puerta interactuable")
+		if puerta != null:
+			puerta.interactuar(dia._caminante)
+			var confirmar: ConfirmationDialog = dia._confirmacion_salida
+			_comprobar(confirmar != null, "la puerta pide confirmación")
+			if confirmar != null:
+				confirmar.emit_signal("confirmed")
+			_comprobar(
+				dia.jornada["fase"] == "trayecto",
+				"confirmar la salida física entra al trayecto",
+			)
 
 	# Reentrada explícita en oficina tras haber desmontado el exterior. Además de
 	# cubrir el caso informado, deja que Godot procese un ciclo completo de baja
