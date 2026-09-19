@@ -169,7 +169,7 @@ func _probar_salida_menu_global() -> void:
 	root.add_child(controlador)
 	await process_frame
 
-	var boton: Button = controlador._boton_salida_menu_global
+	var boton := controlador.get("_boton_salida_menu_global") as Button
 	_comprobar(is_instance_valid(boton), "el menú global recibe la salida de rescate")
 	if not is_instance_valid(boton):
 		root.remove_child(controlador)
@@ -190,9 +190,9 @@ func _probar_salida_menu_global() -> void:
 		"la salida usa el mismo recorrido del menú global",
 	)
 
-	controlador._actualizar_salida_menu_global(true)
+	controlador.call("_actualizar_salida_menu_global", true)
 	_comprobar(boton.visible, "la salida aparece mientras SIGA está activo")
-	controlador._actualizar_salida_menu_global(false)
+	controlador.call("_actualizar_salida_menu_global", false)
 	_comprobar(not boton.visible, "la salida vuelve a ocultarse al dejar el puesto")
 
 	root.remove_child(controlador)
