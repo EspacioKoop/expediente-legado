@@ -38,6 +38,7 @@ func _entrar_en(fase: String) -> void:
 		MobiliarioUrbanoCC0.montar(_mundo)
 		var calle := CalleIdentidad.montar(_mundo)
 		CalleFachadasVivas.montar(calle)
+		CalleLocalesComerciales3D.montar(self, calle)
 		var ventanilla := calle.find_child("EntrarVentanillaReclamaciones", true, false)
 		if (
 			ventanilla != null
