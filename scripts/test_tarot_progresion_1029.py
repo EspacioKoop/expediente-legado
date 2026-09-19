@@ -42,7 +42,7 @@ class TarotProgresion1029Test(unittest.TestCase):
 
     def test_regla_por_pistas_cubre_mago_y_estrella_idempotentes(self) -> None:
         inicio = self.prometeo.index("static func sincronizar_tarot_por_pistas(")
-        fin = self.prometeo.index("## Una acusación es precipitada", inicio)
+        fin = self.prometeo.index("## Progreso por expediente", inicio)
         bloque = self.prometeo[inicio:fin]
         self.assertIn('pistas.size() >= 1', bloque)
         self.assertIn('desbloquear_carta_en_estado(estado, "el-mago")', bloque)
@@ -62,7 +62,8 @@ class TarotProgresion1029Test(unittest.TestCase):
             'desbloquear_carta_en_estado(estado, "los-enamorados")',
             bloque,
         )
-        self.assertIn('return ["los-enamorados"]', bloque)
+        self.assertIn('nuevas.append("los-enamorados")', bloque)
+        self.assertEqual(bloque.count("return nuevas"), 1)
 
     def test_veredicto_real_emite_hierofante_en_el_evento(self) -> None:
         inicio = self.acusacion.index("static func acusar(")
