@@ -70,8 +70,8 @@ static func _prometeo(comprobar: Callable) -> void:
 		["el-ermitanio"]
 	)
 	var es_ermitanio := func(carta): return carta.get("id", "") == "el-ermitanio"
-	var ermitaño: Dictionary = estado_ermitanio["tarot"].filter(es_ermitanio)[0]
-	comprobar.call("Ermitaño queda recogido", ermitaño.get("recogida", false), true)
+	var ermitanio: Dictionary = estado_ermitanio["tarot"].filter(es_ermitanio)[0]
+	comprobar.call("Ermitaño queda recogido", ermitanio.get("recogida", false), true)
 	comprobar.call(
 		"Ermitaño entra en memoria fantasma",
 		estado_ermitanio.get("cartas_conocidas", []).has("el-ermitanio"),
@@ -94,7 +94,7 @@ static func _prometeo(comprobar: Callable) -> void:
 	var estado_fatal := Partida.nueva()
 	estado_fatal["vida"] = 1
 	var perdida_fatal := Acusacion.perder_vida(estado_fatal, Jornada.nueva(), 1)
-	var ermitaño_fatal: Dictionary = estado_fatal["tarot"].filter(es_ermitanio)[0]
+	var ermitanio_fatal: Dictionary = estado_fatal["tarot"].filter(es_ermitanio)[0]
 	comprobar.call("la pérdida fatal reasigna", perdida_fatal.get("despido", false), true)
 	comprobar.call(
 		"el reset conserva la memoria de Ermitaño",
@@ -103,7 +103,7 @@ static func _prometeo(comprobar: Callable) -> void:
 	)
 	comprobar.call(
 		"la nueva vuelta no posee Ermitaño",
-		ermitaño_fatal.get("recogida", false),
+		ermitanio_fatal.get("recogida", false),
 		false
 	)
 	comprobar.call(
