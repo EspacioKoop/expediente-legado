@@ -51,29 +51,39 @@ func _probar() -> void:
 	var lista := vista.find_child("Vidas", true, false) as ItemList
 	_comprobar(lista != null, "la vista crea el índice de vidas")
 	_comprobar(lista.item_count == 2, "muestra las dos vidas selladas")
-	_comprobar(lista.get_selected_items() == PackedInt32Array([0]), "selecciona la vida más reciente")
+	_comprobar(
+		lista.get_selected_items() == PackedInt32Array([0]), "selecciona la vida más reciente"
+	)
 	_comprobar(lista.get_item_text(0).contains("2"), "la vida más reciente aparece primero")
 	_comprobar(
 		(vista.find_child("VidaSeleccionada", true, false) as Label).text.contains("2"),
 		"el detalle corresponde a la vida seleccionada",
 	)
 	_comprobar(
-		(vista.find_child("MotivoCierre", true, false) as Label).text.to_lower().contains("narrativo"),
+		(vista.find_child("MotivoCierre", true, false) as Label).text.to_lower().contains(
+			"narrativo"
+		),
 		"el detalle explica el motivo del cierre",
 	)
 	_comprobar(
-		(vista.find_child("Rango_productividad", true, false) as Label).text
-		== tr("EVALUACION_RANGO_ALTA"),
+		(
+			(vista.find_child("Rango_productividad", true, false) as Label).text
+			== tr("EVALUACION_RANGO_ALTA")
+		),
 		"muestra la productividad sellada",
 	)
 	_comprobar(
-		(vista.find_child("Rango_precipitacion", true, false) as Label).text
-		== tr("EVALUACION_RANGO_BAJA"),
+		(
+			(vista.find_child("Rango_precipitacion", true, false) as Label).text
+			== tr("EVALUACION_RANGO_BAJA")
+		),
 		"muestra la precipitación sellada",
 	)
 	_comprobar(
-		(vista.find_child("Rango_cuidado_gato", true, false) as Label).text
-		== tr("EVALUACION_RANGO_MEDIA"),
+		(
+			(vista.find_child("Rango_cuidado_gato", true, false) as Label).text
+			== tr("EVALUACION_RANGO_MEDIA")
+		),
 		"muestra el cuidado del gato sellado",
 	)
 	_comprobar(JSON.stringify(estado) == antes, "consultar el historial no modifica Partida")
