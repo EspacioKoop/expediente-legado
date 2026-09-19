@@ -93,7 +93,7 @@ static func nueva() -> Dictionary:
 		# escribe el día y las firmas, pero cargar los descarta silenciosamente.
 		"jornada": Jornada.nueva(),
 		"veredictos": {},
-		# #155: mejores reconstrucciones por expediente. Solo son estado
+		# #150: historial inmutable de evaluaciones ya selladas. Vive en Partida\n		# para sobrevivir a reasignaciones; nunca sustituye el estado vivo de Jornada.\n		"evaluaciones_desempeno": [],\n		# #155: mejores reconstrucciones por expediente. Solo son estado
 		# derivado (ids/puntuación/cobertura/rango), nunca copias de documentos.
 		"reconstrucciones": {},
 		# #153: historial de pronósticos del auditor. Es de la partida, no de la
@@ -282,10 +282,10 @@ static func validar(guardado) -> Array:
 				errores.append("pronosticos.%s" % error)
 	if guardado.has("vida") and not _entero_valido(guardado["vida"], 0, VIDA_MAXIMA):
 		errores.append("vida inválida")
-	for clave in ["pistas_descubiertas", "cartas_conocidas", "sueno_vencidos", "sellos_obtenidos"]:
+	for clave in [\n		"pistas_descubiertas",\n		"cartas_conocidas",\n		"sueno_vencidos",\n		"sellos_obtenidos",\n		"evaluaciones_desempeno",\n	]:
 		if guardado.has(clave) and typeof(guardado[clave]) != TYPE_ARRAY:
 			errores.append("%s no es una lista" % clave)
-	for clave in ["anomalias_descubiertas", "anomalias_descubiertas_vuelta"]:
+	if guardado.has("evaluaciones_desempeno") and typeof(guardado["evaluaciones_desempeno"]) == TYPE_ARRAY:\n		for error in EvaluacionDesempeno.validar_historial(guardado["evaluaciones_desempeno"]):\n			errores.append("evaluaciones_desempeno.%s" % error)\n	for clave in ["anomalias_descubiertas", "anomalias_descubiertas_vuelta"]:
 		if guardado.has(clave) and typeof(guardado[clave]) != TYPE_ARRAY:
 			errores.append("%s no es una lista" % clave)
 	for clave in ["logros", "tarot"]:
