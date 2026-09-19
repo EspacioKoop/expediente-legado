@@ -8,6 +8,7 @@ extends RefCounted
 
 const IDENTIDAD := {
 	"revista_umbral_98": {"cabecera": "UMBRAL", "edicion": "Nº 17 · 1998"},
+	"libro_popol_wuj_98": {"cabecera": "CUADERNO CULTURAL", "edicion": "POPOL WUJ · 1998"},
 	"periodico_tarde_98": {"cabecera": "LA TARDE LOCAL", "edicion": "EDICIÓN DE TARDE · 1998"},
 	"byte_domestico_42": {"cabecera": "BYTE DOMÉSTICO", "edicion": "Nº 42 · 1998"},
 	"marcador_98_deportes": {"cabecera": "MARCADOR 98", "edicion": "JORNADA 9"},
@@ -47,7 +48,7 @@ static func formato_de(ficha: Dictionary) -> String:
 	match String(ficha.get("categoria", "")):
 		"prensa_general":
 			return "periodico"
-		"guia_practica":
+		"guia_practica", "cultura_kiche":
 			return "libro"
 		_:
 			return "revista"
@@ -70,6 +71,8 @@ static func paleta_de(item_id: String) -> Array[Color]:
 	match item_id:
 		"revista_umbral_98":
 			return [Color(0.25, 0.14, 0.18), Color(0.68, 0.50, 0.24), Color(0.12, 0.13, 0.16)]
+		"libro_popol_wuj_98":
+			return [Color(0.24, 0.20, 0.14), Color(0.69, 0.58, 0.35), Color(0.18, 0.30, 0.29)]
 		"periodico_tarde_98":
 			return [Color(0.68, 0.65, 0.56), Color(0.28, 0.32, 0.38), Color(0.48, 0.18, 0.16)]
 		"byte_domestico_42":

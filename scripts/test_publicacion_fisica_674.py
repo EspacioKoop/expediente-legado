@@ -22,9 +22,10 @@ class PublicacionFisica674Test(unittest.TestCase):
         cls.encontrables = ENCONTRABLES.read_text(encoding="utf-8")
         cls.doc = DOC.read_text(encoding="utf-8")
 
-    def test_acabado_cubre_las_seis_cabeceras(self):
+    def test_acabado_cubre_las_siete_cabeceras(self):
         for item_id in (
             "revista_umbral_98",
+            "libro_popol_wuj_98",
             "periodico_tarde_98",
             "byte_domestico_42",
             "marcador_98_deportes",
@@ -33,6 +34,8 @@ class PublicacionFisica674Test(unittest.TestCase):
         ):
             self.assertIn(f'"{item_id}"', self.fisica)
         self.assertIn('"cabecera": "UMBRAL"', self.fisica)
+        self.assertIn('"cabecera": "CUADERNO CULTURAL"', self.fisica)
+        self.assertIn('"edicion": "POPOL WUJ · 1998"', self.fisica)
         self.assertIn('"cabecera": "LA TARDE LOCAL"', self.fisica)
         self.assertIn('"cabecera": "BYTE DOMÉSTICO"', self.fisica)
         self.assertIn('"cabecera": "MARCADOR 98"', self.fisica)

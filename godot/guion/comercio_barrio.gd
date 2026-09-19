@@ -50,6 +50,17 @@ const CATALOGO := [
 		"fuente_semilla": "publicacion:revista_umbral_98",
 	},
 	{
+		"id": "libro_popol_wuj_98",
+		"superficie": "quiosco",
+		"nombre": "Cuaderno cultural — Popol Wuj",
+		"precio": 10,
+		"destino": "carried",
+		"categoria": "publicacion",
+		"vendible": false,
+		"semilla_onirica": "popol_wuj",
+		"fuente_semilla": "libro:popol_wuj_98",
+	},
+	{
 		"id": "periodico_tarde_98",
 		"superficie": "quiosco",
 		"nombre": "La Tarde Local",

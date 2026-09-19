@@ -20,7 +20,7 @@ func _probar() -> void:
 
 func _probar_catalogo_completo() -> void:
 	var catalogo := Publicaciones98.catalogo()
-	_comprobar(catalogo.size() == 6, "el acabado cubre las seis publicaciones")
+	_comprobar(catalogo.size() == 7, "el acabado cubre las siete publicaciones")
 	for ficha in catalogo:
 		var item_id := String(ficha.get("id", ""))
 		var raiz := Node3D.new()
@@ -65,6 +65,10 @@ func _probar_formatos() -> void:
 	_comprobar(
 		Fisica.formato_de(Publicaciones98.por_id("manual_casa_98")) == "libro",
 		"Manual conserva formato libro"
+	)
+	_comprobar(
+		Fisica.formato_de(Publicaciones98.por_id("libro_popol_wuj_98")) == "libro",
+		"Popol Wuj conserva formato de cuaderno/libro"
 	)
 	_comprobar(
 		Fisica.formato_de(Publicaciones98.por_id("revista_umbral_98")) == "revista",
