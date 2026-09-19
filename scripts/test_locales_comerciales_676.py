@@ -86,6 +86,9 @@ class LocalesComerciales676Test(unittest.TestCase):
         ):
             self.assertIn(rasgo, bloque_video)
         self.assertNotIn('"Cartucho%d"', bloque_video)
+        self.assertNotIn('"pos": Vector3(6.5, 5.0, -10.65)', self.calle)
+        self.assertIn('"pos": Vector3(6.5, 6.5, -10.65)', self.calle)
+        self.assertIn("hueco real en planta baja para Bit 98", self.calle)
 
     def test_textos_de_puerta_existen(self):
         for clave in (
