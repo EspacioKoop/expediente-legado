@@ -18,6 +18,7 @@ FOLIOS = (
     ("EMP-0456", "Ficha de personal"),
     ("ACTA-1999-014", "Acta de Contraloría"),
 )
+FOLIO_IDS = frozenset(folio for folio, _tipo in FOLIOS)
 
 
 def preguntar(prompt: str) -> str:
@@ -46,13 +47,19 @@ def _estado(valor: bool) -> str:
     return "CUMPLE" if valor else "PENDIENTE"
 
 
+def _tiene_evidencia(registro: object) -> bool:
+    return isinstance(registro, dict) and bool(str(registro.get("captura", "")).strip())
+
+
 def evaluar_gate(datos: dict[str, object]) -> dict[str, bool]:
     folios = datos["folios"]
     assert isinstance(folios, dict)
 
-    folios_ok = all(
-        all(
-            bool(registro[clave])
+    conjunto_completo = set(folios) == FOLIO_IDS
+    folios_ok = conjunto_completo and all(
+        isinstance(folios.get(folio), dict)
+        and all(
+            bool(folios[folio][clave])
             for clave in (
                 "cabecera_visible",
                 "lectura_completa",
@@ -60,7 +67,10 @@ def evaluar_gate(datos: dict[str, object]) -> dict[str, bool]:
                 "desplazamiento_ok",
             )
         )
-        for registro in folios.values()
+        for folio, _tipo in FOLIOS
+    )
+    evidencias_ok = conjunto_completo and all(
+        _tiene_evidencia(folios.get(folio)) for folio, _tipo in FOLIOS
     )
 
     gatillos_ok = bool(datos["gatillo_memo_ok"]) and bool(datos["gatillo_ficha_ok"])
@@ -72,12 +82,20 @@ def evaluar_gate(datos: dict[str, object]) -> dict[str, bool]:
 
     return {
         "folios_ok": folios_ok,
+        "evidencias_ok": evidencias_ok,
         "gatillos_ok": gatillos_ok,
         "semantica_ok": semantica_ok,
         "economia_ok": economia_ok,
         "relaciones_ok": relaciones_ok,
         "listo_para_cerrar": all(
-            (folios_ok, gatillos_ok, semantica_ok, economia_ok, relaciones_ok)
+            (
+                folios_ok,
+                evidencias_ok,
+                gatillos_ok,
+                semantica_ok,
+                economia_ok,
+                relaciones_ok,
+            )
         ),
     }
 
@@ -90,7 +108,7 @@ def render_markdown(datos: dict[str, object]) -> str:
     bloques: list[str] = []
     for folio, tipo in FOLIOS:
         registro = folios[folio]
-        captura = str(registro.get("captura", "")).strip() or "No indicada."
+        captura = str(registro.get("captura", "")).strip() or "PENDIENTE: no indicada."
         notas = str(registro.get("notas", "")).strip() or "Sin observaciones."
         bloques.append(
             f"""### {folio} · {tipo}
@@ -130,6 +148,7 @@ def render_markdown(datos: dict[str, object]) -> str:
 ## Resumen del gate
 
 - cuatro folios legibles y recorribles: **{_estado(gate['folios_ok'])}**
+- evidencia visual adjunta para los cuatro folios: **{_estado(gate['evidencias_ok'])}**
 - frases gatillo conservadas: **{_estado(gate['gatillos_ok'])}**
 - semántica editorial no concluyente: **{_estado(gate['semantica_ok'])}**
 - relectura sin coste adicional: **{_estado(gate['economia_ok'])}**
@@ -168,7 +187,7 @@ def recoger_datos() -> dict[str, object]:
             "desplazamiento_ok": preguntar_si_no(
                 "¿El scroll/desplazamiento funciona correctamente cuando el cuerpo lo requiere?"
             ),
-            "captura": input("Captura/evidencia (ruta o URL, opcional): ").strip(),
+            "captura": preguntar("Captura/evidencia (ruta o URL, obligatoria): "),
             "notas": input("Notas del folio (opcional): ").strip(),
         }
         folios[folio] = registro

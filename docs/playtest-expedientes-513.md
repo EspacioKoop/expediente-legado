@@ -70,12 +70,13 @@ El registrador fija en el informe:
 - conservación de las dos frases gatillo;
 - carácter no concluyente del peritaje y del intervalo de cinco minutos;
 - relectura sin coste adicional y relaciones documentales no automáticas;
-- rutas o URLs de capturas y notas por folio cuando haga falta documentar una incidencia.
+- una ruta o URL de captura obligatoria por cada uno de los cuatro folios;
+- notas por folio cuando haga falta documentar una incidencia.
 
-El resumen `listo para valorar cierre de #513` solo queda en **SÍ** cuando todos esos checks están marcados como cumplidos. El script no interpreta la narrativa ni sustituye el playtest humano: convierte su resultado en evidencia trazable y revisable.
+El resumen `listo para valorar cierre de #513` solo queda en **SÍ** cuando están presentes exactamente los cuatro folios esperados, todos los checks están marcados como cumplidos y cada folio aporta evidencia visual. El script no interpreta la narrativa ni sustituye el playtest humano: convierte su resultado en evidencia trazable y revisable.
 
 ## Criterio de salida
 
-El corte puede considerarse validado cuando los cuatro documentos se leen completos en `1024×680`, las dos frases gatillo existentes siguen funcionando y el contenido añadido no produce una conclusión automática ni altera el coste de lectura.
+El corte puede considerarse validado cuando los cuatro documentos se leen completos en `1024×680`, cada folio queda respaldado por una captura, las dos frases gatillo existentes siguen funcionando y el contenido añadido no produce una conclusión automática ni altera el coste de lectura.
 
 Si aparece un fallo visual, registrar al menos: folio, resolución, posición aproximada del scroll y una captura. Si aparece un fallo de lógica, abrirlo separado del contenido editorial para no mezclar texto, economía de jornada y descubrimiento de pistas en el mismo parche.
