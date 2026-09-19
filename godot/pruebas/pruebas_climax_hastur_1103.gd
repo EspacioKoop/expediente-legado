@@ -84,10 +84,13 @@ func _dificultad() -> void:
 		estado["dificultad"] = caso[0]
 		var jornada: Dictionary = estado["jornada"]
 		jornada["raiz"] = 99
-		ClimaxHastur.iniciar(
-			estado,
-			jornada,
-			{"climax_hastur_pendiente": true},
+		(
+			ClimaxHastur
+			. iniciar(
+				estado,
+				jornada,
+				{"climax_hastur_pendiente": true},
+			)
 		)
 		_comprobar(
 			int(estado[ClimaxHastur.CLAVE_ESTADO]["combate"]["vida_rival"]) == caso[1],
@@ -104,10 +107,13 @@ func _victoria_determinista() -> void:
 		"b": "comunismo",
 		"c": "centrista",
 	}
-	ClimaxHastur.iniciar(
-		estado,
-		jornada,
-		{"climax_hastur_pendiente": true},
+	(
+		ClimaxHastur
+		. iniciar(
+			estado,
+			jornada,
+			{"climax_hastur_pendiente": true},
+		)
 	)
 
 	for jugada in ["insistencia", "objecion", "silencio"]:
