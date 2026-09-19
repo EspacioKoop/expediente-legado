@@ -27,12 +27,15 @@ static func resumen(estado: Dictionary, contrato: Dictionary = {}) -> Dictionary
 	for evento in elecciones:
 		if ejemplos.size() >= 4:
 			break
-		ejemplos.append(
-			{
-				"contexto": String(evento.get("contexto", evento.get("id", ""))),
-				"eje": String(evento.get("eje", "")),
-				"fuente": String(evento.get("fuente", "")),
-			}
+		(
+			ejemplos
+			. append(
+				{
+					"contexto": String(evento.get("contexto", evento.get("id", ""))),
+					"eje": String(evento.get("eje", "")),
+					"fuente": String(evento.get("fuente", "")),
+				}
+			)
 		)
 
 	return {
