@@ -113,9 +113,7 @@ func posiciones_actuales() -> Dictionary:
 	return {
 		OBJETO_ARBOL: POSICIONES_ARBOL[_fase_umbral % POSICIONES_ARBOL.size()],
 		OBJETO_VALLA: POSICIONES_VALLA[_fase_umbral % POSICIONES_VALLA.size()],
-		OBJETO_ARCHIVADOR: POSICIONES_ARCHIVADOR[
-			_fase_fuera_campo % POSICIONES_ARCHIVADOR.size()
-		],
+		OBJETO_ARCHIVADOR: POSICIONES_ARCHIVADOR[_fase_fuera_campo % POSICIONES_ARCHIVADOR.size()],
 		OBJETO_CABANA: POSICIONES_CABANA[_fase_umbral % POSICIONES_CABANA.size()],
 	}
 
@@ -214,9 +212,7 @@ func estado_reproducible() -> Dictionary:
 
 func restaurar_estado(estado: Dictionary) -> void:
 	_fase_umbral = posmod(int(estado.get("fase_umbral", 0)), POSICIONES_CABANA.size())
-	_fase_fuera_campo = posmod(
-		int(estado.get("fase_fuera_campo", 0)), POSICIONES_ARCHIVADOR.size()
-	)
+	_fase_fuera_campo = posmod(int(estado.get("fase_fuera_campo", 0)), POSICIONES_ARCHIVADOR.size())
 	var marcas = estado.get("marcas", {})
 	_marcas = marcas.duplicate(true) if typeof(marcas) == TYPE_DICTIONARY else {}
 	if _montado:
@@ -240,8 +236,12 @@ func _montar_bosque() -> void:
 	var arbol := Node3D.new()
 	arbol.name = "ArbolTabique"
 	bosque.add_child(arbol)
-	_crear_caja(arbol, "TroncoTabique", Vector3(1.0, 4.2, 0.8), Vector3(0.0, 2.1, 0.0), COLOR_BOSQUE)
-	_crear_caja(arbol, "PanelOficina", Vector3(2.8, 1.5, 0.18), Vector3(0.0, 2.2, 0.0), COLOR_ARCHIVO)
+	_crear_caja(
+		arbol, "TroncoTabique", Vector3(1.0, 4.2, 0.8), Vector3(0.0, 2.1, 0.0), COLOR_BOSQUE
+	)
+	_crear_caja(
+		arbol, "PanelOficina", Vector3(2.8, 1.5, 0.18), Vector3(0.0, 2.2, 0.0), COLOR_ARCHIVO
+	)
 
 	var valla := Node3D.new()
 	valla.name = "VallaArchivo"
@@ -282,8 +282,12 @@ func _montar_cabana() -> void:
 
 	_crear_caja(cabana, "Cuerpo", Vector3(3.0, 2.4, 2.6), Vector3(0.0, 2.2, 0.0), COLOR_CABANA)
 	_crear_caja(cabana, "Techo", Vector3(3.5, 0.35, 3.1), Vector3(0.0, 3.55, 0.0), COLOR_MADERA)
-	_crear_caja(cabana, "PataIndustrialA", Vector3(0.45, 1.8, 0.45), Vector3(-0.8, 0.9, 0.0), COLOR_ARCHIVO)
-	_crear_caja(cabana, "PataIndustrialB", Vector3(0.45, 1.8, 0.45), Vector3(0.8, 0.9, 0.0), COLOR_ARCHIVO)
+	_crear_caja(
+		cabana, "PataIndustrialA", Vector3(0.45, 1.8, 0.45), Vector3(-0.8, 0.9, 0.0), COLOR_ARCHIVO
+	)
+	_crear_caja(
+		cabana, "PataIndustrialB", Vector3(0.45, 1.8, 0.45), Vector3(0.8, 0.9, 0.0), COLOR_ARCHIVO
+	)
 
 	var interior := Node3D.new()
 	interior.name = "InteriorImposible"
