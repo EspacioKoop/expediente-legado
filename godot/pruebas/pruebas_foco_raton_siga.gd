@@ -9,6 +9,11 @@ extends SceneTree
 const CAMINANTE_SCRIPT := preload("res://guion/caminante.gd")
 const CONTROLADOR_ESCRITORIO_SCRIPT := preload("res://guion/dia_escritorio_siga_app.gd")
 
+class DiaPrueba:
+	extends Node
+	var _pantalla: CanvasLayer
+
+
 var _pasadas := 0
 var _fallos := 0
 
@@ -161,19 +166,21 @@ func _probar_recuperacion_foco() -> void:
 
 
 func _probar_salida_menu_global() -> void:
+	var dia := DiaPrueba.new()
+	root.add_child(dia)
 	var controlador := CONTROLADOR_ESCRITORIO_SCRIPT.new()
-	# Esta regresión prueba la integración del botón, no el wrapping del puesto.
-	# Evitamos que _process() consulte un Dia real y ejercitamos directamente el
-	# contrato aislado que debe seguir disponible aunque OS98 haya perdido foco.
-	controlador.set_process(false)
-	root.add_child(controlador)
+	# El controller de producción vive siempre bajo Dia y consulta su _pantalla.
+	# El fixture conserva esa jerarquía real sin construir la escena completa.
+	dia.add_child(controlador)
 	await process_frame
 
 	var boton := controlador.get("_boton_salida_menu_global") as Button
 	_comprobar(is_instance_valid(boton), "el menú global recibe la salida de rescate")
 	if not is_instance_valid(boton):
-		root.remove_child(controlador)
+		dia.remove_child(controlador)
 		controlador.free()
+		root.remove_child(dia)
+		dia.free()
 		return
 
 	_comprobar(not boton.visible, "la salida de rescate se oculta fuera de SIGA")
@@ -195,8 +202,10 @@ func _probar_salida_menu_global() -> void:
 	controlador.call("_actualizar_salida_menu_global", false)
 	_comprobar(not boton.visible, "la salida vuelve a ocultarse al dejar el puesto")
 
-	root.remove_child(controlador)
+	dia.remove_child(controlador)
 	controlador.free()
+	root.remove_child(dia)
+	dia.free()
 	await process_frame
 	_comprobar(
 		not is_instance_valid(boton),
