@@ -218,8 +218,8 @@ const PERFILES_MITO := {
 		"estrellas": 0.10,
 	},
 	"popol_wuj":
+	# Dirección propia SIGA-98: contraste entre dos corredores y vacío.
 	{
-		# Dirección propia SIGA-98: contraste entre dos corredores y vacío.
 		# No pretende reconstruir Xibalbá ni codificar iconografía k’iche’.
 		"cielo_alto": Color(0.018, 0.030, 0.042),
 		"horizonte": Color(0.12, 0.10, 0.075),
