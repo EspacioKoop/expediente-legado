@@ -63,21 +63,21 @@ const CATALOGO := [
 				"tipo": "portada",
 				"titulo": "Popol Wuj: relato k’iche’",
 				"texto":
-				"Un cuaderno cultural presenta el Popol Wuj como relato k’iche’ y evita tratar tradiciones mesoamericanas distintas como una sola.",
+				"Un cuaderno presenta el Popol Wuj como relato k’iche’ y distingue otras tradiciones.",
 			},
 			{
 				"id": "gemelos",
 				"tipo": "articulo",
 				"titulo": "Los Gemelos Héroes",
 				"texto":
-				"Una doble página resume el ciclo de los Gemelos Héroes y su confrontación con los Señores del Inframundo mediante un esquema editorial propio.",
+				"Una doble página resume a los Gemelos Héroes y su choque con los Señores del Inframundo.",
 			},
 			{
 				"id": "correspondencias",
 				"tipo": "comentario",
 				"titulo": "Parejas y consecuencias",
 				"texto":
-				"El comentario propone observar correspondencias entre escenas y consecuencias de las acciones sin convertir nombres o prácticas culturales en un examen.",
+				"El comentario invita a observar correspondencias sin convertir la cultura en un examen.",
 			},
 		],
 	},
