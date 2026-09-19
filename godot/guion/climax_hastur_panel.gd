@@ -7,7 +7,7 @@ class_name ClimaxHasturPanel
 extends Control
 
 signal jugada_solicitada(tipo: String, habilidad: String)
-signal continuar_solicitado()
+signal continuar_solicitado
 
 var estado_climax: Dictionary = {}
 
