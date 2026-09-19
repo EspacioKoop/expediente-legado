@@ -38,7 +38,7 @@ Lee también el issue concreto, sus comentarios, PRs relacionadas, reviews y CI.
 6. Trabaja en rama propia desde `main` actualizado: `feature/NN-slug`, `fix/NN-slug` o `docs/NN-slug`.
 7. Mantén el corte pequeño. Un paraguas como #279/#282/#283 se ejecuta por verticales, no con una reescritura total.
 8. Añade regresión ejecutable cuando cambie comportamiento. La inspección textual puede complementar, no sustituir, una prueba del contrato real cuando Godot pueda ejecutarlo.
-9. Pasa las pruebas canónicas y revisa el diff final.
+9. Ejecuta las pruebas canónicas cuando el entorno local disponga de la toolchain necesaria y revisa el diff final. Si no puede ejecutarse el preflight local, documenta la limitación y deja que CI valide el SHA del PR antes de marcarlo `PR_READY`.
 10. Abre PR a `main` y registra en #182:
 
    ```text
@@ -75,15 +75,17 @@ Una reserva de un issue no concede automáticamente todos los archivos que ese i
 
 Si una herramienta escribe por error en `main`, revierte inmediatamente sin force-push, deja constancia en #182 y continúa únicamente desde una rama propia.
 
-## GDScript: preflight obligatorio
+## GDScript: preflight local y CI
 
-Si modificas cualquier archivo `*.gd`, ejecuta **antes de abrir o dar por listo el PR**:
+Si modificas cualquier archivo `*.gd`, ejecuta preferentemente antes de abrir el PR:
 
 ```bash
 bash scripts/check_gdscript.sh
 ```
 
 En local el script aplica `gdformat` primero, después ejecuta `gdlint`, la suite Python y un `gdformat --check --diff` final. En CI usa el mismo script, pero no modifica el checkout: exige que el GDScript ya llegue formateado. La versión canónica es `gdtoolkit==4.3.4`, y el propio script la instala en un venv si no la encuentra en el PATH.
+
+Si el entorno local no dispone de Godot, `gdtoolkit` o las dependencias necesarias y no puede prepararlas, **eso no bloquea la apertura del PR**. En ese caso deja constancia de la limitación y usa el workflow del PR como preflight autoritativo. Lo que sí sigue bloqueado es declarar `PR_READY` o fusionar mientras los gates requeridos no estén verdes.
 
 La suite necesita la GDExtension GB/GBC y las ROMs propias compiladas; sin ellas, las pruebas que arrancan Godot se saltan diciéndolo. `bash scripts/preparar_entorno.sh` deja ambas listas y es idempotente. Con `SIGA98_EXIGIR_EXTENSION=1` esos saltos pasan a ser fallos: CI lo define siempre, y conviene usarlo en local antes de dar un verde por bueno.
 
@@ -92,7 +94,7 @@ Reglas para evitar falsos fallos:
 - no escribas tests que dependan de espacios, saltos de línea o encadenamientos exactos que `gdformat` pueda reescribir;
 - si un test Python inspecciona una llamada GDScript, usa una regex tolerante a whitespace o, mejor, una prueba del comportamiento/contrato;
 - si el preflight local modifica un `.gd`, revisa y conserva ese formato antes de ejecutar el resto de validaciones o crear el commit;
-- no omitas este paso porque el cambio parezca documental o pequeño: si toca `*.gd`, el preflight es obligatorio.
+- no declares `PR_READY` sin un preflight válido: puede ser local o el workflow equivalente del PR; si solo CI puede ejecutarlo, espera a su resultado y corrige allí cualquier fallo.
 
 ## Pruebas canónicas
 
