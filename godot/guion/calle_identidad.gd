@@ -432,6 +432,60 @@ static func _electrodomesticos(calle: Node3D) -> void:
 		0.16,
 		0.0
 	)
+	# El escaparate gana suelo, fondo y laterales: las CRT dejan de flotar en
+	# una lámina negra y pasan a ocupar una vitrina con profundidad reconocible.
+	_caja(
+		raiz,
+		"SueloExposicion",
+		Vector3(-6.15, 0.16, -1.5),
+		Vector3(0.92, 0.18, 6.35),
+		Color(0.30, 0.25, 0.20),
+		"madera_domestica"
+	)
+	_caja(
+		raiz,
+		"FondoEscaparate",
+		Vector3(-6.52, 1.58, -1.5),
+		Vector3(0.05, 2.65, 6.2),
+		Color(0.16, 0.15, 0.16),
+		"gotele"
+	)
+	for z_marco in [-4.55, 1.55]:
+		_caja(
+			raiz,
+			"RetornoEscaparate%.0f" % (z_marco * 10.0),
+			Vector3(-6.12, 1.55, z_marco),
+			Vector3(0.82, 2.75, 0.08),
+			Color(0.20, 0.19, 0.20),
+			"metal_pintado"
+		)
+	# Acceso lateral: el vidrio del escaparate sigue siendo exposición y la
+	# puerta se distingue como una pieza propia, con marco y tirador.
+	_cristal(
+		raiz,
+		"PuertaEntrada",
+		Vector3(-5.70, 1.15, 2.45),
+		Vector3(0.03, 2.30, 0.90),
+		Color(0.40, 0.46, 0.44),
+		0.28,
+		0.08
+	)
+	_caja(
+		raiz,
+		"MarcoPuertaEntrada",
+		Vector3(-5.67, 2.38, 2.45),
+		Vector3(0.08, 0.12, 1.05),
+		Color(0.18, 0.18, 0.19),
+		"metal_pintado"
+	)
+	_caja(
+		raiz,
+		"TiradorPuertaEntrada",
+		Vector3(-5.62, 1.12, 2.72),
+		Vector3(0.06, 0.42, 0.05),
+		Color(0.62, 0.59, 0.48),
+		"metal_pintado"
+	)
 	_luz(
 		raiz,
 		"InteriorTienda",
@@ -440,7 +494,7 @@ static func _electrodomesticos(calle: Node3D) -> void:
 		Color(0.09, 0.08, 0.08)
 	)
 	# Dos baldas y cuatro televisores en cada una. Cada aparato monta su propia
-	# superficie para que el escaparate no vuelva a leerse como una imagen clonada.
+	# superficie y una pequeña cartela física: exposición, no pared de monitores.
 	for fila in TELES_Y.size():
 		var y: float = TELES_Y[fila]
 		_caja(
@@ -459,6 +513,13 @@ static func _electrodomesticos(calle: Node3D) -> void:
 			tele.rotation_degrees.y = 90.0
 			raiz.add_child(tele)
 			Modelos.mueble(tele, "televisionVintage", TAM_TELE, Color(0.30, 0.28, 0.26))
+			_caja(
+				raiz,
+				"Cartela%d_%d" % [fila, columna],
+				Vector3(-5.80, y - 0.18, z),
+				Vector3(0.03, 0.13, 0.42),
+				Color(0.78, 0.76, 0.68)
+			)
 			var indice := fila * TELES_Z.size() + columna
 			var programa: Dictionary = EMISIONES_ESCAPARATE[indice]
 			var declaracion := {
@@ -473,6 +534,15 @@ static func _electrodomesticos(calle: Node3D) -> void:
 			var pantalla := Pantalla.montar(raiz, declaracion)
 			pantalla.name = "Pantalla%d_%d" % [fila, columna]
 
+	_interactuable(
+		raiz,
+		"EntrarElectrodomesticos",
+		Vector3(-5.05, 1.1, 2.45),
+		Vector3(1.1, 2.2, 1.05),
+		Interactuable3D.Verbo.ABRIR,
+		tr_clave("CALLE_PUERTA_ELECTRODOMESTICOS")
+	)
+
 
 # --- Acera derecha -------------------------------------------------------------
 
@@ -480,13 +550,16 @@ static func _electrodomesticos(calle: Node3D) -> void:
 static func _videojuegos(calle: Node3D) -> void:
 	var x := CARA_ESTE_SUR
 	var raiz := _grupo(calle, "TiendaVideojuegos")
-	_caja(
-		raiz,
-		"Frente",
-		Vector3(x - 0.04, 1.5, -6.5),
-		Vector3(0.08, 3.0, 3.9),
-		Color(0.08, 0.08, 0.10)
-	)
+	# El frente deja de ser una placa opaca completa. Zócalo, dintel y jambas
+	# enmarcan cristal y puerta, y el fondo queda casi un metro más atrás.
+	for ficha in [
+		["Zocalo", Vector3(x - 0.04, 0.30, -6.5), Vector3(0.08, 0.60, 3.9)],
+		["Dintel", Vector3(x - 0.04, 2.72, -6.5), Vector3(0.08, 0.56, 3.9)],
+		["JambaSur", Vector3(x - 0.04, 1.50, -8.40), Vector3(0.08, 2.45, 0.12)],
+		["JambaCentro", Vector3(x - 0.04, 1.50, -5.85), Vector3(0.08, 2.45, 0.12)],
+		["JambaNorte", Vector3(x - 0.04, 1.50, -4.62), Vector3(0.08, 2.45, 0.12)],
+	]:
+		_caja(raiz, ficha[0], ficha[1], ficha[2], Color(0.08, 0.08, 0.10))
 	_cristal(
 		raiz,
 		"Escaparate",
@@ -505,6 +578,23 @@ static func _videojuegos(calle: Node3D) -> void:
 		0.34,
 		0.18
 	)
+	_caja(
+		raiz,
+		"FondoEscaparate",
+		Vector3(x + 0.68, 1.45, -7.2),
+		Vector3(0.05, 2.30, 2.25),
+		Color(0.11, 0.09, 0.15),
+		"gotele"
+	)
+	for fila in 2:
+		_caja(
+			raiz,
+			"BaldaEscaparate%d" % fila,
+			Vector3(x + 0.30, 0.78 + fila * 0.66, -7.2),
+			Vector3(0.72, 0.07, 2.15),
+			Color(0.17, 0.16, 0.20),
+			"metal_pintado"
+		)
 	_caja(
 		raiz,
 		"Rotulo",
@@ -528,7 +618,7 @@ static func _videojuegos(calle: Node3D) -> void:
 		Color(0.35, 0.95, 1.0),
 		30
 	)
-	# Cajas de cartucho en el escaparate: color de portada, sin marcas reales.
+	# Cajas con grosor real, apoyadas en dos baldas y separadas del cristal.
 	var portadas := [
 		Color(0.85, 0.20, 0.18),
 		Color(0.20, 0.45, 0.85),
@@ -540,12 +630,13 @@ static func _videojuegos(calle: Node3D) -> void:
 	for i in 12:
 		var fila := i / 6
 		var z := -8.05 + (i % 6) * 0.34
-		_luz(
+		_caja(
 			raiz,
-			"Cartucho%d" % i,
-			Vector3(x - 0.11, 0.95 + fila * 0.62, z),
-			Vector3(0.02, 0.36, 0.26),
-			portadas[(i + fila) % portadas.size()]
+			"CajaCartucho%d" % i,
+			Vector3(x + 0.22, 0.95 + fila * 0.62, z),
+			Vector3(0.16, 0.36, 0.26),
+			portadas[(i + fila) % portadas.size()],
+			"plastico_domestico"
 		)
 	var neon := OmniLight3D.new()
 	neon.name = "NeonVideojuegos"
@@ -554,15 +645,14 @@ static func _videojuegos(calle: Node3D) -> void:
 	neon.omni_range = 4.0
 	neon.position = Vector3(x - 0.8, 2.9, -6.5)
 	raiz.add_child(neon)
-	var puerta := _interactuable(
+	_interactuable(
 		raiz,
-		"ComprarCartuchos",
+		"EntrarTiendaVideojuegos",
 		Vector3(x - 0.55, 1.1, -5.15),
 		Vector3(0.9, 2.2, 1.2),
-		Interactuable3D.Verbo.USAR,
-		"tienda de videojuegos"
+		Interactuable3D.Verbo.ABRIR,
+		tr_clave("CALLE_PUERTA_VIDEOJUEGOS")
 	)
-	puerta.activado.connect(_comprar_cartucho.bind(puerta))
 
 
 static func _alquileres(calle: Node3D) -> void:
