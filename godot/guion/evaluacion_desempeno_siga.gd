@@ -135,13 +135,18 @@ func _refrescar() -> void:
 	for indice_historial in range(historial.size() - 1, -1, -1):
 		var registro: Dictionary = historial[indice_historial]
 		var evaluacion: Dictionary = registro.get("evaluacion", {})
-		var indice := _lista.add_item(
-			tr("EVALUACION_FILA")
-			% [
-				int(registro.get("vuelta", 0)),
-				_texto_rango(String(evaluacion.get("productividad", ""))),
-				_texto_rango(String(evaluacion.get("precipitacion", ""))),
-			]
+		var indice := (
+			_lista
+			. add_item(
+				(
+					tr("EVALUACION_FILA")
+					% [
+						int(registro.get("vuelta", 0)),
+						_texto_rango(String(evaluacion.get("productividad", ""))),
+						_texto_rango(String(evaluacion.get("precipitacion", ""))),
+					]
+				)
+			)
 		)
 		_lista.set_item_metadata(indice, registro.duplicate(true))
 		if int(registro.get("vuelta", 0)) == vuelta_seleccionada:
@@ -170,10 +175,7 @@ func _seleccionar(indice: int) -> void:
 		return
 
 	_vida.text = tr("EVALUACION_VIDA") % int(registro.get("vuelta", 0))
-	_motivo.text = (
-		tr("EVALUACION_MOTIVO")
-		% _texto_motivo(String(registro.get("motivo", "otro")))
-	)
+	_motivo.text = (tr("EVALUACION_MOTIVO") % _texto_motivo(String(registro.get("motivo", "otro"))))
 	for categoria in CATEGORIAS:
 		var id := String(categoria["id"])
 		var etiqueta: Label = _rangos[id]
