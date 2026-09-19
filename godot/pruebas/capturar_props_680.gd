@@ -48,7 +48,7 @@ func _init() -> void:
 		dia._entrada.saltar()
 		await process_frame
 
-	var detector := dia._caminante.find_child("DetectorInteraccion3D", true, false)
+	var detector: Node = dia._caminante.find_child("DetectorInteraccion3D", true, false)
 	if detector != null:
 		detector.set_physics_process(false)
 	dia._entrar_en("casa")
