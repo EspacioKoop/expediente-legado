@@ -89,6 +89,11 @@ static func acusar(
 			int(jornada.get("acusaciones_precipitadas_hoy", 0)) + 1
 		)
 		castigo = perder_vida(estado, jornada, 1)
+		# Si esta firma agotó la última vida, reiniciar_vuelta() ya retiró la
+		# posesión per-run. La memoria fantasma permanece, pero la UI no debe
+		# anunciar como poseída una carta que pertenece a la vuelta terminada.
+		if castigo.get("despido", false):
+			cartas_desbloqueadas.clear()
 
 	return {
 		"resultado": "cerrado",
