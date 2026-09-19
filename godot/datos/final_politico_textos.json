@@ -1,0 +1,24 @@
+{
+  "ribbon": "CIERRE POLÍTICO · EXPEDIENTE DE TRAYECTORIA",
+  "titulo_sin_registro": "No consta una trayectoria suficiente",
+  "texto_sin_registro": "El cierre registra el desenlace de Hastur, pero no hay elecciones políticas suficientes para sintetizar un patrón.",
+  "titulo_consistente": "Una línea sostenida",
+  "texto_consistente": "Tus decisiones registradas se concentraron en un único eje. El archivo describe esa continuidad; no la convierte en una identidad permanente.",
+  "titulo_plural": "Pluralidad sin desempate administrativo",
+  "texto_plural": "Dos o más ejes terminaron empatados en cabeza. El cierre conserva el empate en vez de elegir el primero por orden interno.",
+  "titulo_contextual": "Una trayectoria contextual",
+  "texto_contextual": "Cambiaste de enfoque entre decisiones registradas y un eje terminó por delante. El cierre muestra la mezcla antes de resumirla.",
+  "dominantes_vacio": "Ejes dominantes: sin registro",
+  "dominante_uno": "Eje más elegido: %s",
+  "dominante_plural": "Ejes empatados en cabeza: %s",
+  "hechos_titulo": "Decisiones registradas:",
+  "hechos_vacio": "— No constan decisiones políticas en esta vuelta.",
+  "hecho_formato": "• %s → %s",
+  "continuar": "Cerrar expediente de trayectoria",
+  "ejes": {
+    "comunismo": "comunismo de lujo automatizado",
+    "centrista": "centrismo radical del término medio",
+    "socialdemocrata": "socialdemocracia de catálogo",
+    "neoliberal": "neoliberalismo disruptivo"
+  }
+}
