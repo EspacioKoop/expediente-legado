@@ -347,14 +347,10 @@ static func _acusacion(comprobar: Callable) -> void:
 		true
 	)
 	comprobar.call(
-		"la nueva vuelta no posee Ermitaño",
-		ermitanio_reset.get("recogida", false),
-		false
+		"la nueva vuelta no posee Ermitaño", ermitanio_reset.get("recogida", false), false
 	)
 	comprobar.call(
-		"el despido no notifica una carta ya reseteada",
-		caida.get("cartas_desbloqueadas", []),
-		[]
+		"el despido no notifica una carta ya reseteada", caida.get("cartas_desbloqueadas", []), []
 	)
 
 	# Una pérdida no fatal sí concede y propaga El Ermitaño en ESTA vuelta.
@@ -380,9 +376,7 @@ static func _acusacion(comprobar: Callable) -> void:
 	)
 	var segunda_derrota := Acusacion.resolver_duelo(golpeado, dia_golpe, false)
 	comprobar.call(
-		"otra pérdida no reemite Ermitaño",
-		segunda_derrota.get("cartas_desbloqueadas", []),
-		[]
+		"otra pérdida no reemite Ermitaño", segunda_derrota.get("cartas_desbloqueadas", []), []
 	)
 
 	var historial_despido: Array = ultimo.get("evaluaciones_desempeno", [])
