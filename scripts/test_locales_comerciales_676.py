@@ -1,0 +1,142 @@
+"""Locales físicos y accesibles del comercio de barrio (#676)."""
+
+from pathlib import Path
+import csv
+import os
+import subprocess
+import tempfile
+import unittest
+
+from verificar_godot import validar
+
+
+ROOT = Path(__file__).resolve().parents[1]
+GUION = ROOT / "godot/guion"
+
+
+class LocalesComerciales676Test(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.locales = (GUION / "calle_locales_comerciales_3d.gd").read_text(
+            encoding="utf-8"
+        )
+        cls.identidad = (GUION / "calle_identidad.gd").read_text(encoding="utf-8")
+        cls.calle = (GUION / "dia_calle_app.gd").read_text(encoding="utf-8")
+        with (ROOT / "godot/datos/textos.csv").open(encoding="utf-8") as fichero:
+            cls.textos = {
+                fila[0]: fila[1] for fila in csv.reader(fichero) if len(fila) >= 2
+            }
+
+    def test_dia_monta_los_locales_sobre_la_calle_real(self):
+        self.assertIn("CalleLocalesComerciales3D.montar(self, calle)", self.calle)
+        self.assertIn('const NOMBRE := "LocalesComerciales"', self.locales)
+        self.assertIn('interior.name = "InteriorElectrodomesticos"', self.locales)
+        self.assertIn('interior.name = "InteriorBit98"', self.locales)
+
+    def test_entrar_no_crea_otra_fase_ni_economia(self):
+        self.assertNotIn('jornada["fase"]', self.locales)
+        self.assertNotIn("Jornada.gastar", self.locales)
+        self.assertNotIn("Partida.", self.locales)
+        self.assertIn('dia._entrar_en("trayecto")', (
+            ROOT / "godot/pruebas/pruebas_locales_comerciales_676.gd"
+        ).read_text(encoding="utf-8"))
+        self.assertIn('String(dia.jornada["fase"]) == fase_inicial', (
+            ROOT / "godot/pruebas/pruebas_locales_comerciales_676.gd"
+        ).read_text(encoding="utf-8"))
+
+    def test_las_puertas_exteriores_entran_y_no_compran(self):
+        self.assertIn('"EntrarElectrodomesticos"', self.identidad)
+        self.assertIn('"EntrarTiendaVideojuegos"', self.identidad)
+        bloque_video = self.identidad.split(
+            "static func _videojuegos", 1
+        )[1].split("static func _alquileres", 1)[0]
+        self.assertNotIn('"ComprarCartuchos"', bloque_video)
+        self.assertIn("Interactuable3D.Verbo.ABRIR", bloque_video)
+
+    def test_compra_de_videojuegos_vive_en_mostrador_interior(self):
+        self.assertIn('"ComprarCartuchos"', self.locales)
+        self.assertIn(
+            "CalleIdentidad._comprar_cartucho.bind(compra)",
+            self.locales,
+        )
+        self.assertIn('"MostradorBit98"', self.locales)
+        self.assertIn('"CajaJuego_%d_%d_%d"', self.locales)
+        self.assertIn("for juego in 5:", self.locales)
+
+    def test_electrodomesticos_gana_exposicion_y_variedad(self):
+        for rasgo in (
+            '"SueloExposicion"',
+            '"FondoEscaparate"',
+            '"PuertaEntrada"',
+            '"Cartela%d_%d"',
+        ):
+            self.assertIn(rasgo, self.identidad)
+        self.assertIn('"Frigorifico%d"', self.locales)
+        self.assertIn('"Lavadora%d"', self.locales)
+        self.assertIn('"TeleInterior%d"', self.locales)
+
+    def test_bit98_gana_profundidad_de_escaparate(self):
+        bloque_video = self.identidad.split(
+            "static func _videojuegos", 1
+        )[1].split("static func _alquileres", 1)[0]
+        for rasgo in (
+            '"FondoEscaparate"',
+            '"BaldaEscaparate%d"',
+            '"CajaCartucho%d"',
+        ):
+            self.assertIn(rasgo, bloque_video)
+        self.assertNotIn('"Cartucho%d"', bloque_video)
+
+    def test_textos_de_puerta_existen(self):
+        for clave in (
+            "CALLE_PUERTA_ELECTRODOMESTICOS",
+            "CALLE_PUERTA_VIDEOJUEGOS",
+            "CALLE_PUERTA_SALIDA",
+        ):
+            self.assertIn(clave, self.textos)
+            self.assertTrue(self.textos[clave].strip())
+
+    def test_locales_reales_en_godot(self):
+        motor = os.environ.get("GODOT_BIN", "godot4")
+        with tempfile.TemporaryDirectory(prefix="locales-676-qa-") as temporal:
+            entorno = os.environ.copy()
+            entorno["LEGADO_PRUEBAS_AISLADAS"] = "1"
+            for variable in ("XDG_DATA_HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME"):
+                entorno[variable] = str(Path(temporal) / variable)
+            base = [
+                motor,
+                "--headless",
+                "--language",
+                "es",
+                "--path",
+                str(ROOT / "godot"),
+            ]
+            for argumentos, minimo in [
+                (["--editor", "--import", "--quit"], None),
+                (
+                    ["--script", "res://pruebas/pruebas_locales_comerciales_676.gd"],
+                    20,
+                ),
+            ]:
+                resultado = subprocess.run(
+                    base + argumentos,
+                    env=entorno,
+                    text=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    timeout=240,
+                    check=False,
+                )
+                try:
+                    validar(
+                        resultado.stdout,
+                        resultado.returncode,
+                        minimo,
+                        minimo is None,
+                    )
+                except ValueError as error:
+                    self.fail(f"{error}\n{resultado.stdout}")
+
+
+if __name__ == "__main__":
+    unittest.main()
