@@ -42,20 +42,154 @@ static func montar(dia: Node, calle: Node3D) -> CalleLocalesComerciales3D:
 
 func _configurar(dia: Node, calle: Node3D) -> void:
 	_dia = dia
+	var puerta_electro := _mejorar_electrodomesticos(calle)
+	var puerta_bit98 := _mejorar_bit98(calle)
+
 	_interior_electrodomesticos = _montar_electrodomesticos()
 	_interior_bit98 = _montar_bit98()
 	_interior_electrodomesticos.visible = false
 	_interior_bit98.visible = false
 
-	var puerta_electro := (
-		calle.find_child("EntrarElectrodomesticos", true, false) as Interactuable3D
-	)
 	if puerta_electro != null:
 		puerta_electro.activado.connect(_entrar_electrodomesticos)
-
-	var puerta_bit98 := calle.find_child("EntrarTiendaVideojuegos", true, false) as Interactuable3D
 	if puerta_bit98 != null:
 		puerta_bit98.activado.connect(_entrar_bit98)
+
+
+func _mejorar_electrodomesticos(calle: Node3D) -> Interactuable3D:
+	var fachada := calle.get_node_or_null("Electrodomesticos") as Node3D
+	if fachada == null:
+		return null
+	var plano_viejo := fachada.get_node_or_null("InteriorTienda") as MeshInstance3D
+	if plano_viejo != null:
+		plano_viejo.visible = false
+
+	var dressing := Node3D.new()
+	dressing.name = "EscaparateProfundo"
+	fachada.add_child(dressing)
+	_caja_visual(
+		dressing,
+		"SueloExposicion",
+		Vector3(-6.15, 0.16, -1.5),
+		Vector3(0.92, 0.18, 6.35),
+		COLOR_MADERA,
+		"madera_domestica",
+	)
+	_caja_visual(
+		dressing,
+		"FondoEscaparate",
+		Vector3(-6.52, 1.58, -1.5),
+		Vector3(0.05, 2.65, 6.2),
+		Color(0.16, 0.15, 0.16),
+		"gotele",
+	)
+	for z_marco in [-4.55, 1.55]:
+		_caja_visual(
+			dressing,
+			"RetornoEscaparate%.0f" % (z_marco * 10.0),
+			Vector3(-6.12, 1.55, z_marco),
+			Vector3(0.82, 2.75, 0.08),
+			COLOR_METAL,
+			"metal_pintado",
+		)
+	for fila in 2:
+		for columna in 4:
+			_caja_visual(
+				dressing,
+				"Cartela%d_%d" % [fila, columna],
+				Vector3(-5.80, 0.56 + fila * 0.90, -3.75 + columna * 1.50),
+				Vector3(0.03, 0.13, 0.42),
+				Color(0.78, 0.76, 0.68),
+			)
+
+	_caja_visual(
+		dressing,
+		"MarcoPuertaEntrada",
+		Vector3(-5.67, 2.38, 2.45),
+		Vector3(0.08, 0.12, 1.05),
+		COLOR_METAL,
+		"metal_pintado",
+	)
+	_caja_visual(
+		dressing,
+		"TiradorPuertaEntrada",
+		Vector3(-5.62, 1.12, 2.72),
+		Vector3(0.06, 0.42, 0.05),
+		Color(0.62, 0.59, 0.48),
+		"metal_pintado",
+	)
+	return _interactuable(
+		dressing,
+		"EntrarElectrodomesticos",
+		Vector3(-5.05, 1.1, 2.45),
+		Vector3(1.1, 2.2, 1.05),
+		Interactuable3D.Verbo.ABRIR,
+		_tr("CALLE_PUERTA_ELECTRODOMESTICOS"),
+	)
+
+
+func _mejorar_bit98(calle: Node3D) -> Interactuable3D:
+	var fachada := calle.get_node_or_null("TiendaVideojuegos") as Node3D
+	if fachada == null:
+		return null
+	var frente := fachada.get_node_or_null("Frente") as Node3D
+	if frente != null:
+		frente.visible = false
+	for i in 12:
+		var cartucho_plano := fachada.get_node_or_null("Cartucho%d" % i) as MeshInstance3D
+		if cartucho_plano != null:
+			cartucho_plano.visible = false
+
+	var dressing := Node3D.new()
+	dressing.name = "EscaparateProfundo"
+	fachada.add_child(dressing)
+	for ficha in [
+		["Zocalo", Vector3(5.46, 0.30, -6.5), Vector3(0.08, 0.60, 3.9)],
+		["Dintel", Vector3(5.46, 2.72, -6.5), Vector3(0.08, 0.56, 3.9)],
+		["JambaSur", Vector3(5.46, 1.50, -8.40), Vector3(0.08, 2.45, 0.12)],
+		["JambaCentro", Vector3(5.46, 1.50, -5.85), Vector3(0.08, 2.45, 0.12)],
+		["JambaNorte", Vector3(5.46, 1.50, -4.62), Vector3(0.08, 2.45, 0.12)],
+	]:
+		_caja_visual(dressing, ficha[0], ficha[1], ficha[2], Color(0.08, 0.08, 0.10))
+	_caja_visual(
+		dressing,
+		"FondoEscaparate",
+		Vector3(6.18, 1.45, -7.2),
+		Vector3(0.05, 2.30, 2.25),
+		Color(0.11, 0.09, 0.15),
+		"gotele",
+	)
+	for fila in 2:
+		_caja_visual(
+			dressing,
+			"BaldaEscaparate%d" % fila,
+			Vector3(5.80, 0.78 + fila * 0.66, -7.2),
+			Vector3(0.72, 0.07, 2.15),
+			Color(0.17, 0.16, 0.20),
+			"metal_pintado",
+		)
+	for i in 12:
+		var fila := i / 6
+		var z := -8.05 + (i % 6) * 0.34
+		_caja_visual(
+			dressing,
+			"CajaCartucho%d" % i,
+			Vector3(5.72, 0.95 + fila * 0.62, z),
+			Vector3(0.16, 0.36, 0.26),
+			_color_portada(i),
+			"plastico_domestico",
+		)
+
+	var puerta := fachada.get_node_or_null("ComprarCartuchos") as Interactuable3D
+	if puerta == null:
+		return null
+	for conexion in puerta.activado.get_connections():
+		var llamada: Callable = conexion["callable"]
+		puerta.activado.disconnect(llamada)
+	puerta.name = "EntrarTiendaVideojuegos"
+	puerta.verbo = Interactuable3D.Verbo.ABRIR
+	puerta.nombre_objeto = _tr("CALLE_PUERTA_VIDEOJUEGOS")
+	return puerta
 
 
 func _montar_electrodomesticos() -> Node3D:
