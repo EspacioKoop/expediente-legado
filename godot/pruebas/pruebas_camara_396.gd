@@ -47,33 +47,23 @@ func _probar() -> void:
 	movimiento.position = Vector2(512.0, 340.0)
 
 	_comprobar(
-		CAMINANTE_SCRIPT.debe_procesar_movimiento_raton(
-			true, true, false, false
-		),
+		CAMINANTE_SCRIPT.debe_procesar_movimiento_raton(true, true, false, false),
 		"captura activa permite MouseMotion de gameplay",
 	)
 	_comprobar(
-		not CAMINANTE_SCRIPT.debe_procesar_movimiento_raton(
-			false, true, false, false
-		),
+		not CAMINANTE_SCRIPT.debe_procesar_movimiento_raton(false, true, false, false),
 		"ratón visible bloquea MouseMotion de gameplay",
 	)
 	_comprobar(
-		not CAMINANTE_SCRIPT.debe_procesar_movimiento_raton(
-			true, false, false, false
-		),
+		not CAMINANTE_SCRIPT.debe_procesar_movimiento_raton(true, false, false, false),
 		"física inactiva bloquea MouseMotion de gameplay",
 	)
 	_comprobar(
-		not CAMINANTE_SCRIPT.debe_procesar_movimiento_raton(
-			true, true, true, false
-		),
+		not CAMINANTE_SCRIPT.debe_procesar_movimiento_raton(true, true, true, false),
 		"árbol pausado bloquea MouseMotion de gameplay",
 	)
 	_comprobar(
-		not CAMINANTE_SCRIPT.debe_procesar_movimiento_raton(
-			true, true, false, true
-		),
+		not CAMINANTE_SCRIPT.debe_procesar_movimiento_raton(true, true, false, true),
 		"cámara de diálogo bloquea MouseMotion de gameplay",
 	)
 
@@ -118,6 +108,7 @@ func _probar() -> void:
 		return
 	push_error("Camara #396 runtime: %d fallos" % _fallos)
 	quit(1)
+
 
 func _comprobar(condicion: bool, nombre: String) -> void:
 	if condicion:
