@@ -44,6 +44,15 @@ class CompanerosIdleTest(unittest.TestCase):
         self.assertIn("if gesto_telefono else 0.0", self.idle)
         self.assertIn("trabajo and not telefono", self.idle)
 
+    def test_atencion_al_jugador_es_selectiva_y_acotada(self):
+        self.assertIn("DISTANCIA_ATENCION", self.idle)
+        self.assertIn("ANGULO_ATENCION", self.idle)
+        self.assertIn("GIRO_ATENCION_MAX", self.idle)
+        self.assertIn("not _conversando", self.idle)
+        self.assertIn("indice == sitios.size() - 1", self.controller)
+        self.assertIn("atencion_jugador = mirar_jugador and not telefono", self.idle)
+        self.assertNotIn("for idle in _idles:\n\t\tidle.atencion_jugador = true", self.controller)
+
     def test_actividad_trabajo_es_selectiva_e_intermitente(self):
         self.assertIn("indice > 0 and indice % 2 == 1", self.controller)
         self.assertIn("DURACION_TRABAJO", self.idle)
