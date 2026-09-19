@@ -493,6 +493,11 @@ EVALUACION_VACIO,Aún no constan vidas laborales evaluadas.
 EVALUACION_VACIO_AYUDA,El informe aparece cuando una vida laboral queda cerrada.
 EVALUACION_SIN_SELECCION,SIN INFORME ARCHIVADO
 EVALUACION_NOTA_COMPARACION,Las categorías son independientes. SIGA no calcula una nota total ni declara una vida correcta o incorrecta.
+EVALUACION_REMATE_ROTULO,INFORME ARCHIVADO · VIDA {vuelta}
+EVALUACION_REMATE_PRODUCTIVA_PRECIPITADA,Productividad alta y precipitación alta. SIGA archiva ambos datos sin compensarlos.
+EVALUACION_REMATE_CUIDADOS_LIQUIDEZ,Cuidado registrado alto con liquidez baja. Las categorías permanecen separadas.
+EVALUACION_REMATE_SUENO_PRODUCTIVIDAD,Exploración onírica alta con productividad baja. Ninguna categoría sustituye a la otra.
+EVALUACION_REMATE_NEUTRA,La evaluación queda archivada por categorías independientes. No consta una calificación total.
 BLOC_NOTAS_TITULO,Bloc de notas
 BLOC_NOTAS_AYUDA,Anotaciones locales de trabajo. Se guardan con el estado de esta partida.
 BLOC_NOTAS_PLACEHOLDER,Escriba aquí sus notas...
