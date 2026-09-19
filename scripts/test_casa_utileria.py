@@ -91,6 +91,12 @@ class CasaUtileriaTest(unittest.TestCase):
         self.assertIn("OmniLight3D.new()", self.televisor)
         self.assertIn('return "Apagar televisor"', self.televisor)
         self.assertIn("_brillo.visible = _encendida", self.televisor)
+        self.assertIn('cristal_pantalla.name = "CristalPantallaTV"', self.televisor)
+        self.assertIn("Pantalla.montar(", self.televisor)
+        self.assertIn('emision_pantalla.name = "EmisionPantallaTV"', self.televisor)
+        self.assertIn("_cristal_pantalla.visible = not _encendida", self.televisor)
+        self.assertIn("_emision_pantalla.visible = _encendida", self.televisor)
+        self.assertIn('"cristal_urbano"', self.televisor)
 
     def test_portatil_es_interactiva_y_tiene_controles_visibles(self):
         self.assertIn("extends Interactuable3D", self.portatil)
