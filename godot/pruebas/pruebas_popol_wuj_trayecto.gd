@@ -56,7 +56,10 @@ func _probar() -> void:
 	var segunda := PopolWujTrayecto3D.montar(mundo)
 	_comprobar(segunda == lectura, "montaje es idempotente")
 	_comprobar(
-		Publicaciones98.por_id(PopolWujTrayecto3D.ITEM_ID).get("semilla_onirica", "") == "popol_wuj",
+		(
+			Publicaciones98.por_id(PopolWujTrayecto3D.ITEM_ID).get("semilla_onirica", "")
+			== "popol_wuj"
+		),
 		"la regla sigue declarada en Publicaciones98",
 	)
 
