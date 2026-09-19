@@ -12,6 +12,8 @@ const Props := preload("res://guion/props_utilizables_cc0.gd")
 const NOMBRE_RAIZ := "PropsUtilizablesEncontrables680"
 const RUTA_MODELOS := "res://assets/modelos/street_furniture/"
 const LARGOS_VISUALES := {"Crowbar": 0.72, "Flashlight": 0.26}
+const SEGMENTOS_PROXY_LINTERNA := 8
+const ANILLOS_PROXY_LINTERNA := 1
 
 const DEFINICIONES := [
 	{
@@ -153,6 +155,8 @@ static func _montar_proxy_linterna(recogible: Node3D) -> void:
 	cilindro.top_radius = 0.045
 	cilindro.bottom_radius = 0.045
 	cilindro.height = 0.19
+	cilindro.radial_segments = SEGMENTOS_PROXY_LINTERNA
+	cilindro.rings = ANILLOS_PROXY_LINTERNA
 	cuerpo.mesh = cilindro
 	proxy.add_child(cuerpo)
 	Modelos._pintar(cuerpo, Color(0.16, 0.17, 0.17), "metal_pintado")
@@ -162,6 +166,8 @@ static func _montar_proxy_linterna(recogible: Node3D) -> void:
 	cono.top_radius = 0.07
 	cono.bottom_radius = 0.048
 	cono.height = 0.07
+	cono.radial_segments = SEGMENTOS_PROXY_LINTERNA
+	cono.rings = ANILLOS_PROXY_LINTERNA
 	cabeza.mesh = cono
 	cabeza.position.y = 0.13
 	proxy.add_child(cabeza)
@@ -172,6 +178,8 @@ static func _montar_proxy_linterna(recogible: Node3D) -> void:
 	disco.top_radius = 0.058
 	disco.bottom_radius = 0.058
 	disco.height = 0.012
+	disco.radial_segments = SEGMENTOS_PROXY_LINTERNA
+	disco.rings = ANILLOS_PROXY_LINTERNA
 	lente.mesh = disco
 	lente.position.y = 0.171
 	proxy.add_child(lente)
