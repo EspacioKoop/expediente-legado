@@ -343,6 +343,34 @@ func _progreso() -> void:
 		[1, 1, true]
 	)
 
+	# #1029: completar la investigación de un expediente concede Los Enamorados
+	# desde el evento real de la última pista, nunca desde carga o UI.
+	var estado_tarot := Partida.nueva()
+	var caso_tarot := {"id": "tarot", "pistas": [{"id": "tp1"}, {"id": "tp2"}]}
+	estado_tarot["pistas_descubiertas"] = ["tp1"]
+	var tarot_parcial := Prometeo.sincronizar_tarot_por_caso_resuelto(estado_tarot, caso_tarot)
+	comprobar("caso incompleto no concede Enamorados", tarot_parcial, [])
+
+	estado_tarot["pistas_descubiertas"].append("tp2")
+	var tarot_completo := Prometeo.sincronizar_tarot_por_caso_resuelto(estado_tarot, caso_tarot)
+	comprobar("última pista concede Enamorados", tarot_completo, ["los-enamorados"])
+	var es_enamorados := func(carta): return carta.get("id", "") == "los-enamorados"
+	var enamorados: Dictionary = estado_tarot["tarot"].filter(es_enamorados)[0]
+	comprobar("Enamorados queda recogida", enamorados.get("recogida", false), true)
+	comprobar(
+		"Enamorados entra en memoria fantasma",
+		estado_tarot.get("cartas_conocidas", []).has("los-enamorados"),
+		true
+	)
+
+	var tarot_repetido := Prometeo.sincronizar_tarot_por_caso_resuelto(estado_tarot, caso_tarot)
+	comprobar("resolver otra vez no reemite Enamorados", tarot_repetido, [])
+	var estado_recargado: Dictionary = JSON.parse_string(JSON.stringify(estado_tarot))
+	var tarot_recargado := Prometeo.sincronizar_tarot_por_caso_resuelto(
+		estado_recargado, caso_tarot
+	)
+	comprobar("estado ya adquirido sigue siendo idempotente", tarot_recargado, [])
+
 
 # --- El contenido de verdad -------------------------------------------------
 
