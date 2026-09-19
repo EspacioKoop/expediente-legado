@@ -366,7 +366,9 @@ func _progreso() -> void:
 	var tarot_repetido := Prometeo.sincronizar_tarot_por_caso_resuelto(estado_tarot, caso_tarot)
 	comprobar("resolver otra vez no reemite Enamorados", tarot_repetido, [])
 	var estado_recargado: Dictionary = JSON.parse_string(JSON.stringify(estado_tarot))
-	var tarot_recargado := Prometeo.sincronizar_tarot_por_caso_resuelto(estado_recargado, caso_tarot)
+	var tarot_recargado := Prometeo.sincronizar_tarot_por_caso_resuelto(
+		estado_recargado, caso_tarot
+	)
 	comprobar("estado ya adquirido sigue siendo idempotente", tarot_recargado, [])
 
 
