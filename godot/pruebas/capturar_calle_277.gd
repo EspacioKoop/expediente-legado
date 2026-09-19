@@ -24,7 +24,8 @@ const CASOS := [
 		"id": "escaparate_crt",
 		"posicion": Vector3(0.0, 0.0, -1.5),
 		"objetivo": Vector3(-5.7, 1.55, -1.5),
-		"criterio": "las CRT se leen como escaparate de electrodomesticos y no como pantallas arbitrarias",
+		"criterio":
+		"las CRT se leen como escaparate de electrodomesticos y no como pantallas arbitrarias",
 	},
 	{
 		"id": "portal_casa",
