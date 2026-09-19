@@ -384,7 +384,10 @@ func _al_resultado_puzzle_onirico(resultado: Dictionary, caso: Dictionary) -> vo
 		return
 	var progreso_nuevo := _actualizar_objetivo_puzzle_onirico(resultado)
 	var pista_nueva := PistaOnirica.registrar(partida.estado, pista)
-	if progreso_nuevo or pista_nueva:
+	# La recompensa física pertenece al mismo guardado que la pista, pero no
+	# sustituye su función: es una herramienta contextual y no información.
+	var objeto_nuevo := RecompensaOnirica.conceder(partida.estado)
+	if progreso_nuevo or pista_nueva or objeto_nuevo:
 		_guardar_o_avisar("")
 
 
