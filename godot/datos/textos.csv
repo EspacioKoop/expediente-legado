@@ -471,6 +471,28 @@ GATO_SIGA_DESCUBRIMIENTO,Ha aparecido una pista nueva.
 GATO_SIGA_COMBINACION_FALLIDA,Esos documentos no justifican una relación.
 GATO_SIGA_COMBINACION_REPETIDA,Esa relación ya constaba.
 RESUMEN_PLANTILLA,Resumen de plantilla
+EVALUACION_APP_TITULO,Evaluaciones
+EVALUACION_CABECERA,SIGA-98 · EVALUACIÓN DE DESEMPEÑO
+EVALUACION_AYUDA,Historial de vidas laborales cerradas. Seleccione una para consultar el informe archivado.
+EVALUACION_FILA,Vida %d · productividad %s · precipitación %s
+EVALUACION_VIDA,VIDA LABORAL %d
+EVALUACION_MOTIVO,Cierre administrativo: %s
+EVALUACION_MOTIVO_REASIGNACION,reasignación
+EVALUACION_MOTIVO_FINAL,final narrativo
+EVALUACION_MOTIVO_OTRO,otra causa registrada
+EVALUACION_CATEGORIA_PRODUCTIVIDAD,Productividad
+EVALUACION_CATEGORIA_PRECIPITACION,Precipitación
+EVALUACION_CATEGORIA_GATO,Cuidado del gato
+EVALUACION_CATEGORIA_LIQUIDEZ,Liquidez
+EVALUACION_CATEGORIA_SUENO,Exploración onírica
+EVALUACION_RANGO_BAJA,BAJA
+EVALUACION_RANGO_MEDIA,MEDIA
+EVALUACION_RANGO_ALTA,ALTA
+EVALUACION_RANGO_SIN_DATOS,SIN DATOS
+EVALUACION_VACIO,Aún no constan vidas laborales evaluadas.
+EVALUACION_VACIO_AYUDA,El informe aparece cuando una vida laboral queda cerrada.
+EVALUACION_SIN_SELECCION,SIN INFORME ARCHIVADO
+EVALUACION_NOTA_COMPARACION,Las categorías son independientes. SIGA no calcula una nota total ni declara una vida correcta o incorrecta.
 BLOC_NOTAS_TITULO,Bloc de notas
 BLOC_NOTAS_AYUDA,Anotaciones locales de trabajo. Se guardan con el estado de esta partida.
 BLOC_NOTAS_PLACEHOLDER,Escriba aquí sus notas...
