@@ -13,6 +13,8 @@ const OFFSET_PORTATIL_MESA := Vector3(1.15, -0.56, 0.07)
 
 var _encendida := false
 var _brillo: OmniLight3D
+var _cristal_pantalla: MeshInstance3D
+var _emision_pantalla: Node3D
 var _paso_documental := 0
 var _documental_completado := false
 
@@ -27,9 +29,13 @@ func configurar(tam: Vector3) -> void:
 	colision.shape = forma
 	add_child(colision)
 
+	_montar_superficie_pantalla(tam)
+
 	_brillo = OmniLight3D.new()
 	_brillo.name = "BrilloTelevisor"
-	_brillo.position = Vector3(0.0, tam.y * 0.08, -tam.z * 0.42)
+	# El modelo se gira 90° para mirar al sofá: la pantalla queda hacia +X.
+	# La luz debe salir del tubo, no del lateral original -Z del asset.
+	_brillo.position = Vector3(tam.z * 0.42, tam.y * 0.08, 0.0)
 	_brillo.omni_range = 2.6
 	_brillo.light_energy = 0.75
 	_brillo.light_color = Color(0.58, 0.70, 0.82)
@@ -85,8 +91,47 @@ func _interactuar_directo(_actor: Node) -> void:
 func _alternar(_actor: Node) -> void:
 	_encendida = not _encendida
 	_brillo.visible = _encendida
+	if _cristal_pantalla != null:
+		_cristal_pantalla.visible = not _encendida
+	if _emision_pantalla != null:
+		_emision_pantalla.visible = _encendida
 	if not _encendida and not _documental_completado:
 		_paso_documental = 0
+
+
+## El modelo CC0 aporta la carcasa, pero el shader doméstico unifica demasiado
+## marco y tubo. Esta superficie devuelve al CRT una pantalla legible sin añadir
+## programa, texto ni UI: apagada es cristal oscuro; encendida muestra la nieve
+## procedural que ya usa `Pantalla` como fallback neutro.
+func _montar_superficie_pantalla(tam: Vector3) -> void:
+	var pos_frente := Vector3(tam.z * 0.5 + 0.012, tam.y * 0.03, 0.0)
+	var tam_pantalla := Vector2(tam.x * 0.66, tam.y * 0.56)
+
+	_cristal_pantalla = MeshInstance3D.new()
+	_cristal_pantalla.name = "CristalPantallaTV"
+	var plano := QuadMesh.new()
+	plano.size = tam_pantalla
+	_cristal_pantalla.mesh = plano
+	_cristal_pantalla.position = pos_frente
+	_cristal_pantalla.rotation_degrees.y = 90.0
+	Modelos._pintar(_cristal_pantalla, Color(0.045, 0.060, 0.070), "cristal_urbano")
+	add_child(_cristal_pantalla)
+
+	_emision_pantalla = (
+		Pantalla
+		. montar(
+			self,
+			{
+				"pos": pos_frente + Vector3(0.004, 0.0, 0.0),
+				"tam": tam_pantalla,
+				"giro": 90.0,
+				"contenido": "",
+				"semilla": 133.0,
+			},
+		)
+	)
+	_emision_pantalla.name = "EmisionPantallaTV"
+	_emision_pantalla.visible = false
 
 
 ## `TelevisionInteractiva3D` vive bajo `_mundo`, que se recrea al entrar en casa.

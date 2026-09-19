@@ -33,7 +33,7 @@ class ConsolaSobremesa98Test(unittest.TestCase):
         self.assertIn("_montar_consola_sobremesa(raiz", self.utileria)
         self.assertIn("ConsolaSobremesa98.new()", self.utileria)
         self.assertIn('consola.name = "ConsolaSobremesa98"', self.utileria)
-        self.assertIn("Vector3(-3.6, 0.54, 1.95)", self.utileria)
+        self.assertIn("Vector3(-3.58, 0.54, 2.10)", self.utileria)
 
     def test_ocio_sigue_sin_tocar_estado_de_campana(self):
         combinado = self.consola + self.portatil

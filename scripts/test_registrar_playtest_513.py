@@ -17,7 +17,7 @@ def datos_base(valor: bool = True) -> dict[str, object]:
             "lectura_completa": valor,
             "sin_recorte": valor,
             "desplazamiento_ok": valor,
-            "captura": "",
+            "captura": f"docs/playtests/capturas/{folio}.png",
             "notas": "",
         }
         for folio, _tipo in modulo.FOLIOS
@@ -43,6 +43,7 @@ class RegistrarPlaytest513Test(unittest.TestCase):
     def test_gate_cumple_solo_si_todos_los_checks_cumplen(self):
         gate = modulo.evaluar_gate(datos_base(True))
         self.assertTrue(gate["folios_ok"])
+        self.assertTrue(gate["evidencias_ok"])
         self.assertTrue(gate["gatillos_ok"])
         self.assertTrue(gate["semantica_ok"])
         self.assertTrue(gate["economia_ok"])
@@ -56,6 +57,22 @@ class RegistrarPlaytest513Test(unittest.TestCase):
         self.assertFalse(gate["folios_ok"])
         self.assertFalse(gate["listo_para_cerrar"])
 
+    def test_folio_ausente_bloquea_el_cierre(self):
+        datos = datos_base(True)
+        del datos["folios"]["ACTA-1999-014"]
+        gate = modulo.evaluar_gate(datos)
+        self.assertFalse(gate["folios_ok"])
+        self.assertFalse(gate["evidencias_ok"])
+        self.assertFalse(gate["listo_para_cerrar"])
+
+    def test_captura_ausente_bloquea_el_cierre(self):
+        datos = datos_base(True)
+        datos["folios"]["F-1999-00231"]["captura"] = "   "
+        gate = modulo.evaluar_gate(datos)
+        self.assertTrue(gate["folios_ok"])
+        self.assertFalse(gate["evidencias_ok"])
+        self.assertFalse(gate["listo_para_cerrar"])
+
     def test_una_relacion_automatica_bloquea_el_cierre(self):
         datos = datos_base(True)
         datos["relaciones_no_automaticas"] = False
@@ -67,6 +84,7 @@ class RegistrarPlaytest513Test(unittest.TestCase):
         texto = modulo.render_markdown(datos_base(True))
         self.assertIn("build SHA: `abc1234`", texto)
         self.assertIn("viewport: `1024×680`", texto)
+        self.assertIn("evidencia visual adjunta para los cuatro folios: **CUMPLE**", texto)
         for folio, _tipo in modulo.FOLIOS:
             self.assertIn(folio, texto)
         self.assertIn("listo para valorar cierre de #513: **SÍ**", texto)
