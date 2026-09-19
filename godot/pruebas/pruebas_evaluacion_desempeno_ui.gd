@@ -10,7 +10,7 @@ func _initialize() -> void:
 
 
 func _probar() -> void:
-	var estado := {
+	# Los runners aislados no pasan por Inicio; fijamos el catálogo igual que los demás smokes UI.\n	TranslationServer.set_locale("es")\n	var estado := {
 		"evaluaciones_desempeno":
 		[
 			{
