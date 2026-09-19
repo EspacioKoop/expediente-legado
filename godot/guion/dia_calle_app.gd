@@ -125,9 +125,24 @@ func _bultos_calle() -> Array:
 			"color": Color(0.27, 0.28, 0.31),
 			"textura": "gotele",
 		},
+		# La fachada derecha deja un hueco real en planta baja para Bit 98.
+		# El volumen alto conserva el edificio; los dos paños bajos enmarcan el
+		# local sin poner un muro opaco detrás de su cristal.
 		{
-			"pos": Vector3(6.5, 5.0, -10.65),
-			"tam": Vector3(2.0, 10.0, 13.3),
+			"pos": Vector3(6.5, 6.5, -10.65),
+			"tam": Vector3(2.0, 7.0, 13.3),
+			"color": Color(0.30, 0.29, 0.27),
+			"textura": "gotele",
+		},
+		{
+			"pos": Vector3(6.5, 1.5, -12.9),
+			"tam": Vector3(2.0, 3.0, 8.8),
+			"color": Color(0.30, 0.29, 0.27),
+			"textura": "gotele",
+		},
+		{
+			"pos": Vector3(6.5, 1.5, -4.25),
+			"tam": Vector3(2.0, 3.0, 0.5),
 			"color": Color(0.30, 0.29, 0.27),
 			"textura": "gotele",
 		},
