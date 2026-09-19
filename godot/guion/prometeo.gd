@@ -127,15 +127,16 @@ static func sincronizar_tarot_por_pistas(estado: Dictionary) -> Array:
 ## Recibe el caso explícitamente para no recorrer el catálogo ni convertir una
 ## carga de partida en un emisor de recompensas.
 static func sincronizar_tarot_por_caso_resuelto(estado: Dictionary, caso: Dictionary) -> Array:
+	var nuevas := []
 	var pistas_bruto = estado.get("pistas_descubiertas", [])
-	if typeof(pistas_bruto) != TYPE_ARRAY:
-		return []
-	var pistas: Array = pistas_bruto
-	if not Progreso.caso_resuelto(caso, pistas):
-		return []
-	if desbloquear_carta_en_estado(estado, "los-enamorados"):
-		return ["los-enamorados"]
-	return []
+	if typeof(pistas_bruto) == TYPE_ARRAY:
+		var pistas: Array = pistas_bruto
+		if (
+			Progreso.caso_resuelto(caso, pistas)
+			and desbloquear_carta_en_estado(estado, "los-enamorados")
+		):
+			nuevas.append("los-enamorados")
+	return nuevas
 
 
 ## Una acusación es precipitada cuando se ha descubierto menos proporción de
