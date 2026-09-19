@@ -132,9 +132,7 @@ func _probar() -> void:
 		SemillasOniricas.familias_activas(jornada_popol).is_empty(),
 		"leer dos piezas Popol Wuj aún exige cierre",
 	)
-	var cierre_popol := Publicaciones98.cerrar_tras_lectura(
-		jornada_popol, "libro_popol_wuj_98"
-	)
+	var cierre_popol := Publicaciones98.cerrar_tras_lectura(jornada_popol, "libro_popol_wuj_98")
 	_comprobar(bool(cierre_popol.get("semilla_activada", false)), "cierre activa Popol Wuj")
 	_comprobar(
 		SemillasOniricas.familias_activas(jornada_popol) == ["popol_wuj"],
