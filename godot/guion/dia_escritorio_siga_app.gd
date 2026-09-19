@@ -27,6 +27,20 @@ var _apps: Array[EscritorioSigaApp] = []
 
 func _ready() -> void:
 	call_deferred("_integrar_salida_menu_global")
+	call_deferred("_integrar_climax_hastur")
+
+
+## #1103: el escritorio solo compone el owner. Las reglas del clímax viven
+## fuera de OS98 y consumen exclusivamente la señal pública del handoff.
+func _integrar_climax_hastur() -> void:
+	var dia := get_parent()
+	if dia == null or dia.get_node_or_null("ClimaxHasturOwnerController") != null:
+		return
+	var controlador := load("res://guion/dia_climax_hastur_app.gd").new() as Node
+	if controlador == null:
+		return
+	controlador.name = "ClimaxHasturOwnerController"
+	dia.add_child(controlador)
 
 
 func _exit_tree() -> void:
