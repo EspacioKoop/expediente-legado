@@ -64,6 +64,34 @@ func _probar() -> void:
 		"una partida sin evaluación sellada no inventa un informe",
 	)
 
+	var estado_v2 := {
+		"evaluaciones_desempeno":
+		[
+			{
+				"vuelta": 3,
+				"motivo": "final_narrativo",
+				"version_evaluacion": 2,
+				"veredictos_total": 9,
+				"evaluacion":
+				{
+					"productividad": EvaluacionDesempeno.MEDIA,
+					"precipitacion": EvaluacionDesempeno.BAJA,
+					"cuidado_gato": EvaluacionDesempeno.MEDIA,
+					"liquidez": EvaluacionDesempeno.ALTA,
+					"exploracion_onirica": EvaluacionDesempeno.MEDIA,
+					"dependencia_dinero": EvaluacionDesempeno.ALTA,
+				},
+			}
+		]
+	}
+	var planos_v2 := EvaluacionDesempenoCinematica.planos_de(estado_v2)
+	var figura_v2: Array = planos_v2[0].get("figura", [])
+	_comprobar(figura_v2.size() == 15, "un informe v2 dibuja seis barras independientes")
+	_comprobar(
+		String(planos_v2[0].get("voz", "")).to_lower().contains("dependencia económica"),
+		"liquidez y dependencia altas conservan su contradicción narrativa",
+	)
+
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
