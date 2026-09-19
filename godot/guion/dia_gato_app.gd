@@ -77,10 +77,15 @@ func _entrar_en(fase: String) -> void:
 	_gato_guia = null
 	if fase == "casa" and is_instance_valid(_gato):
 		_gato.actualizar_hambre(int(jornada.get("gato", {}).get("dias_sin_comer", 0)))
+		_gato.configurar_reduccion_movimiento(_reduccion_movimiento_gato())
 		_gato.activado.connect(_al_activar_gato.bind(_gato))
 	if fase == "sueño":
 		_montar_objetivos_sueno()
 		_montar_guia_sueno()
+
+
+func _reduccion_movimiento_gato() -> bool:
+	return bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false))
 
 
 ## La interacción 3D del gato deja una huella concreta del día: se guarda qué
@@ -593,6 +598,7 @@ func _montar_guia_sueno() -> void:
 	_gato_guia = Gato.new()
 	_mundo.add_child(_gato_guia)
 	_gato_guia.empezar(posicion, [posicion])
+	_gato_guia.configurar_reduccion_movimiento(_reduccion_movimiento_gato())
 	if not eco.is_empty():
 		_gato_guia.presentar_estado(String(eco.get("estado", "parado")))
 
