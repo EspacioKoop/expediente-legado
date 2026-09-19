@@ -39,6 +39,7 @@ func _init() -> void:
 		quit(1)
 		return
 
+	TranslationServer.set_locale("es")
 	root.size = TAMANO
 	var dia = load("res://escenas/dia.tscn").instantiate()
 	root.add_child(dia)
@@ -47,6 +48,9 @@ func _init() -> void:
 		dia._entrada.saltar()
 		await process_frame
 
+	var detector := dia._caminante.find_child("DetectorInteraccion3D", true, false)
+	if detector != null:
+		detector.set_physics_process(false)
 	dia._entrar_en("casa")
 	dia._caminante.set_physics_process(false)
 	_ocultar_hud(dia)
@@ -170,12 +174,14 @@ func _init() -> void:
 	archivo.store_string(JSON.stringify(manifiesto, "\t") + "\n")
 	archivo.close()
 	print(
-		"evidencia #680 -> %s | %d triángulos | presupuesto=%s"
-		% [
-			salida,
-			int(metricas_props["triangulos"]),
-			str(bool(manifiesto["presupuesto_cumplido"])),
-		]
+		(
+			"evidencia #680 -> %s | %d triángulos | presupuesto=%s"
+			% [
+				salida,
+				int(metricas_props["triangulos"]),
+				str(bool(manifiesto["presupuesto_cumplido"])),
+			]
+		)
 	)
 	quit(0)
 
@@ -198,9 +204,7 @@ func _estabilizar() -> void:
 	await RenderingServer.frame_post_draw
 
 
-func _enfocar(
-	dia, ancla_nombre: String, offset: Vector3, objetivo_offset: Vector3
-) -> void:
+func _enfocar(dia, ancla_nombre: String, offset: Vector3, objetivo_offset: Vector3) -> void:
 	var ancla := dia._mundo.find_child(ancla_nombre, true, false) as Node3D
 	if ancla == null:
 		printerr("No existe ancla de captura: %s" % ancla_nombre)
@@ -223,11 +227,7 @@ func _ocultar_hud(dia) -> void:
 
 
 func _registrar_captura(
-	manifiesto: Dictionary,
-	salida: String,
-	id_caso: String,
-	archivo: String,
-	extra: Dictionary
+	manifiesto: Dictionary, salida: String, id_caso: String, archivo: String, extra: Dictionary
 ) -> void:
 	var destino := salida.path_join(archivo)
 	if not _guardar_captura(destino):
