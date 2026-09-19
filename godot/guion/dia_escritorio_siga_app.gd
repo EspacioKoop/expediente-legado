@@ -17,17 +17,37 @@ var _catalogo_anomalias_app: EscritorioSigaApp
 var _evaluaciones_app: EscritorioSigaApp
 var _explorador_vista: ExploradorSiga
 var _navegador_vista: NavegadorSiga
+var _menu_global: Node
+var _boton_salida_menu_global: Button
 
 ## Todas las apps registradas en este puesto, para persistencia declarada
 ## (#535): quien guarde/cargue partida no necesita conocerlas una a una.
 var _apps: Array[EscritorioSigaApp] = []
 
 
+func _ready() -> void:
+	call_deferred("_integrar_salida_menu_global")
+
+
+func _exit_tree() -> void:
+	if is_instance_valid(_boton_salida_menu_global):
+		_boton_salida_menu_global.queue_free()
+	_boton_salida_menu_global = null
+	_menu_global = null
+
+
 func _process(_delta: float) -> void:
 	var dia := get_parent()
 	if dia == null:
+		_actualizar_salida_menu_global(false)
 		return
 	var pantalla: Variant = dia._pantalla
+	var puesto_activo := (
+		pantalla != null
+		and is_instance_valid(pantalla)
+		and (pantalla as Node).get_node_or_null("EscritorioSiga") != null
+	)
+	_actualizar_salida_menu_global(puesto_activo)
 	if pantalla == null or not is_instance_valid(pantalla):
 		_pantalla_envuelta_id = 0
 		return
@@ -39,6 +59,50 @@ func _process(_delta: float) -> void:
 		return
 	_pantalla_envuelta_id = id
 	_envolver_puesto(dia, pantalla as CanvasLayer, visor as Control)
+
+
+## Salida de rescate de #793. Vive en el menú global, no dentro de OS98:
+## Escape/Start reconstruyen allí un foco propio y liberan el ratón aunque el
+## escritorio haya perdido ambos. El botón entra en el VBox normal del menú,
+## así que ratón, teclado y mando comparten exactamente la misma ruta de salida.
+func _integrar_salida_menu_global() -> void:
+	if is_instance_valid(_boton_salida_menu_global):
+		return
+	var menu := get_node_or_null("/root/MenuGlobal")
+	if menu == null:
+		call_deferred("_integrar_salida_menu_global")
+		return
+	var salir := menu.get("_salir") as Button
+	if salir == null or salir.get_parent() == null:
+		call_deferred("_integrar_salida_menu_global")
+		return
+	var caja := salir.get_parent() as VBoxContainer
+	if caja == null:
+		return
+
+	_menu_global = menu
+	_boton_salida_menu_global = Button.new()
+	_boton_salida_menu_global.name = "SalirPuestoSiga"
+	_boton_salida_menu_global.text = tr("PUESTO_LEVANTARSE")
+	_boton_salida_menu_global.tooltip_text = _boton_salida_menu_global.text
+	_boton_salida_menu_global.accessibility_name = _boton_salida_menu_global.text
+	_boton_salida_menu_global.visible = false
+	_boton_salida_menu_global.pressed.connect(_salir_desde_menu_global)
+	caja.add_child(_boton_salida_menu_global)
+	caja.move_child(_boton_salida_menu_global, salir.get_index())
+
+
+func _actualizar_salida_menu_global(activa: bool) -> void:
+	if is_instance_valid(_boton_salida_menu_global):
+		_boton_salida_menu_global.visible = activa
+
+
+func _salir_desde_menu_global() -> void:
+	if is_instance_valid(_boton_salida_menu_global):
+		_boton_salida_menu_global.visible = false
+	if is_instance_valid(_menu_global):
+		_menu_global.call("_cerrar")
+	_solicitar_salida()
 
 
 func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
