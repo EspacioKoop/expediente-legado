@@ -45,13 +45,17 @@ func _probar() -> void:
 	var figura: Array = planos[0].get("figura", [])
 	_comprobar(figura.size() == 13, "la hoja contiene cinco barras independientes")
 	_comprobar(
-		EvaluacionDesempenoCinematica._ancho_de(EvaluacionDesempeno.BAJA)
-		< EvaluacionDesempenoCinematica._ancho_de(EvaluacionDesempeno.MEDIA),
+		(
+			EvaluacionDesempenoCinematica._ancho_de(EvaluacionDesempeno.BAJA)
+			< EvaluacionDesempenoCinematica._ancho_de(EvaluacionDesempeno.MEDIA)
+		),
 		"el rango medio se representa con más longitud que el bajo",
 	)
 	_comprobar(
-		EvaluacionDesempenoCinematica._ancho_de(EvaluacionDesempeno.MEDIA)
-		< EvaluacionDesempenoCinematica._ancho_de(EvaluacionDesempeno.ALTA),
+		(
+			EvaluacionDesempenoCinematica._ancho_de(EvaluacionDesempeno.MEDIA)
+			< EvaluacionDesempenoCinematica._ancho_de(EvaluacionDesempeno.ALTA)
+		),
 		"el rango alto se representa con más longitud que el medio",
 	)
 	_comprobar(JSON.stringify(estado) == antes, "presentar el informe no modifica Partida")
