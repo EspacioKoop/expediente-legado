@@ -49,9 +49,7 @@ func _probar() -> void:
 	var entrar_electro := (
 		fachada_electro.get_node_or_null("EntrarElectrodomesticos") as Interactuable3D
 	)
-	var entrar_bit98 := (
-		fachada_bit98.get_node_or_null("EntrarTiendaVideojuegos") as Interactuable3D
-	)
+	var entrar_bit98 := fachada_bit98.get_node_or_null("EntrarTiendaVideojuegos") as Interactuable3D
 	_comprobar(entrar_electro != null, "Electrodomesticos tiene puerta interactuable")
 	_comprobar(entrar_bit98 != null, "Bit 98 tiene puerta interactuable")
 	_comprobar(
@@ -66,8 +64,7 @@ func _probar() -> void:
 		"la puerta de Electrodomesticos usa el verbo Abrir"
 	)
 	_comprobar(
-		entrar_bit98.verbo == Interactuable3D.Verbo.ABRIR,
-		"la puerta de Bit 98 usa el verbo Abrir"
+		entrar_bit98.verbo == Interactuable3D.Verbo.ABRIR, "la puerta de Bit 98 usa el verbo Abrir"
 	)
 
 	var fase_inicial := String(dia.jornada["fase"])
@@ -109,13 +106,17 @@ func _probar() -> void:
 	var cajas_juego := bit98.find_children("CajaJuego_*", "MeshInstance3D", true, false)
 	_comprobar(cajas_juego.size() == 30, "Bit 98 expone treinta cajas 3D en baldas")
 	_comprobar(
-		electro.get_node_or_null("Frigorifico0") != null
-		and electro.get_node_or_null("Frigorifico1") != null,
+		(
+			electro.get_node_or_null("Frigorifico0") != null
+			and electro.get_node_or_null("Frigorifico1") != null
+		),
 		"Electrodomesticos expone frigorificos"
 	)
 	_comprobar(
-		electro.get_node_or_null("Lavadora0") != null
-		and electro.get_node_or_null("Lavadora1") != null,
+		(
+			electro.get_node_or_null("Lavadora0") != null
+			and electro.get_node_or_null("Lavadora1") != null
+		),
 		"Electrodomesticos expone lavadoras"
 	)
 
