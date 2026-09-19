@@ -95,6 +95,11 @@ func _probar() -> void:
 		"el pitch conserva el límite inferior",
 	)
 
+	# En producción el HUD adopta este Label. El fixture monta solo Caminante,
+	# así que queda huérfano y hay que liberarlo explícitamente antes de salir.
+	var prompt := caminante.get("_prompt_interaccion") as Label
+	if is_instance_valid(prompt) and prompt.get_parent() == null:
+		prompt.free()
 	root.remove_child(consumidor)
 	consumidor.free()
 	root.remove_child(caminante)
