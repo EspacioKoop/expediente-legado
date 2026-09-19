@@ -47,6 +47,41 @@ const CATALOGO := [
 		],
 	},
 	{
+		"id": "libro_popol_wuj_98",
+		"titulo": "Cuaderno cultural — Popol Wuj",
+		"categoria": "cultura_kiche",
+		"procedencia": "quiosco",
+		"comprable": true,
+		"permite_casa": true,
+		"semilla_onirica": "popol_wuj",
+		"fuente_semilla": "libro:popol_wuj_98",
+		"piezas_semilla": 2,
+		"piezas":
+		[
+			{
+				"id": "portada",
+				"tipo": "portada",
+				"titulo": "Popol Wuj: relato k’iche’",
+				"texto":
+				"Un cuaderno cultural presenta el Popol Wuj como relato k’iche’ y evita tratar tradiciones mesoamericanas distintas como una sola.",
+			},
+			{
+				"id": "gemelos",
+				"tipo": "articulo",
+				"titulo": "Los Gemelos Héroes",
+				"texto":
+				"Una doble página resume el ciclo de los Gemelos Héroes y su confrontación con los Señores del Inframundo mediante un esquema editorial propio.",
+			},
+			{
+				"id": "correspondencias",
+				"tipo": "comentario",
+				"titulo": "Parejas y consecuencias",
+				"texto":
+				"El comentario propone observar correspondencias entre escenas y consecuencias de las acciones sin convertir nombres o prácticas culturales en un examen.",
+			},
+		],
+	},
+	{
 		"id": "periodico_tarde_98",
 		"titulo": "La Tarde Local",
 		"categoria": "prensa_general",
