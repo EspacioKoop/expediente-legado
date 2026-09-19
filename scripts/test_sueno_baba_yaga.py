@@ -16,7 +16,7 @@ ESCENA_SUENO = ROOT / "godot" / "escenas" / "sueno_baba_yaga.tscn"
 ESCENA_VIGILIA = ROOT / "godot" / "escenas" / "baba_yaga_vigilia.tscn"
 REFERENCIAS = ROOT / "docs" / "assets" / "baba-yaga-referencias.md"
 PRUEBA_GODOT = "res://pruebas/pruebas_baba_yaga.gd"
-RESUMEN_GODOT = re.compile(r"(\\d+) pasadas, 0 fallos")
+RESUMEN_GODOT = re.compile(r"(\d+) pasadas, 0 fallos")
 
 
 class SuenoBabaYagaTest(unittest.TestCase):
@@ -37,11 +37,11 @@ class SuenoBabaYagaTest(unittest.TestCase):
         self.assertIn("SemillasOniricas.familias_activas(estado)", self.sueno)
         self.assertRegex(
             self.sueno,
-            r"SemillasOniricas\\s*\\.\\s*activar_semilla_onirica\\s*\\(",
+            r"SemillasOniricas\s*\.\s*activar_semilla_onirica\s*\(",
         )
 
     def test_familia_tiene_perfil_de_cielo(self):
-        self.assertRegex(self.sueno_cielos, r'(?m)^\\s*"baba_yaga":\\s*$')
+        self.assertRegex(self.sueno_cielos, r'(?m)^\s*"baba_yaga":\s*$')
         self.assertIn('"bruma_fuerza": 0.66', self.sueno_cielos)
         self.assertIn('"nubes": 0.62', self.sueno_cielos)
 
@@ -52,7 +52,7 @@ class SuenoBabaYagaTest(unittest.TestCase):
         self.assertIn("_comparo_versiones = true", self.vigilia)
         self.assertRegex(
             self.vigilia,
-            r"SuenoBabaYaga\\s*\\.\\s*registrar_semilla\\s*\\(",
+            r"SuenoBabaYaga\s*\.\s*registrar_semilla\s*\(",
         )
         combinado = self.sueno + self.vigilia
         self.assertNotIn("Label.new()", combinado)
