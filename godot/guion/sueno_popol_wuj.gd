@@ -233,7 +233,7 @@ func _crear_tramo(padre: Node3D, nombre: String, a: Vector3, b: Vector3) -> void
 	var centro := (inicio + fin) * 0.5
 	var longitud := inicio.distance_to(fin)
 	var tramo := _crear_caja(padre, nombre, Vector3(0.16, 0.12, longitud), centro, COLOR_ECO)
-	tramo.look_at(fin, Vector3.UP)
+	tramo.look_at_from_position(centro, fin, Vector3.UP)
 
 
 func _montar_retorno_y_puerta() -> void:
