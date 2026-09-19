@@ -182,7 +182,9 @@ func _probar_salida_menu_global() -> void:
 		"la salida de rescate participa en navegación de teclado/mando",
 	)
 	var menu := root.get_node_or_null("MenuGlobal")
-	var salir: Button = menu.get("_salir") if menu != null else null
+	var salir: Button = null
+	if menu != null:
+		salir = menu.get("_salir") as Button
 	_comprobar(
 		is_instance_valid(salir) and boton.get_parent() == salir.get_parent(),
 		"la salida usa el mismo recorrido del menú global",
