@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import unittest
 
 
@@ -31,9 +32,12 @@ class TarotProgresion1029Test(unittest.TestCase):
         fin = self.visor.index("## Encontrar una carta escondida", inicio)
         bloque = self.visor[inicio:fin]
         self.assertIn("Prometeo.sincronizar_tarot_por_pistas(partida.estado)", bloque)
-        self.assertIn(
-            "Prometeo.sincronizar_tarot_por_caso_resuelto(partida.estado, caso)",
+        self.assertRegex(
             bloque,
+            re.compile(
+                r"sincronizar_tarot_por_caso_resuelto\s*\(\s*"
+                r"partida\.estado\s*,\s*caso\s*\)"
+            ),
         )
         self.assertIn("_al_carta_desbloqueada(carta_id)", bloque)
         self.assertNotIn("cartas_conocidas", bloque)
