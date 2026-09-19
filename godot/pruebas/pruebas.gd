@@ -424,9 +424,7 @@ func _progreso() -> void:
 		true
 	)
 	comprobar(
-		"Mundo es idempotente",
-		Prometeo.sincronizar_tarot_mundo(estado_mundo, casos_mundo),
-		[]
+		"Mundo es idempotente", Prometeo.sincronizar_tarot_mundo(estado_mundo, casos_mundo), []
 	)
 
 
