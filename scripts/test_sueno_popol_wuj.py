@@ -16,7 +16,7 @@ ESCENA_SUENO = ROOT / "godot" / "escenas" / "sueno_popol_wuj.tscn"
 ESCENA_VIGILIA = ROOT / "godot" / "escenas" / "popol_wuj_vigilia.tscn"
 REFERENCIAS = ROOT / "docs" / "assets" / "popol-wuj-referencias.md"
 PRUEBA_GODOT = "res://pruebas/pruebas_popol_wuj.gd"
-RESUMEN_GODOT = re.compile(r"(\\d+) pasadas, 0 fallos")
+RESUMEN_GODOT = re.compile(r"(\d+) pasadas, 0 fallos")
 
 
 class SuenoPopolWujTest(unittest.TestCase):
