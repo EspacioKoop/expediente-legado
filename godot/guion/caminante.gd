@@ -349,19 +349,18 @@ static func debe_recapturar_raton(
 	)
 
 
-func _unhandled_input(evento: InputEvent) -> void:
-	_registrar_dispositivo_entrada(evento)
-	# El menú global es el único dueño de `cancelar`: al abrirlo libera el ratón y
-	# al cerrarlo restaura el modo anterior. Si el sistema operativo lo soltó por
-	# otro motivo, un clic deliberado dentro del mundo recupera la captura.
-	if evento is InputEventMouseButton:
-		if (
-			Input.mouse_mode != Input.MOUSE_MODE_CAPTURED
-			and debe_recapturar_raton(evento, is_physics_processing(), get_tree().paused)
-		):
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+## El giro de ratón entra por `_input`, antes del filtrado de GUI. Un `Control`
+## a pantalla completa puede consumir MouseMotion y hacer que `_unhandled_input`
+## nunca lo vea; eso deja el cursor capturado pero la cámara inmóvil.
+func _input(evento: InputEvent) -> void:
+	if not evento is InputEventMouseMotion:
 		return
-	if not evento is InputEventMouseMotion or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+	_registrar_dispositivo_entrada(evento)
+	if (
+		Input.mouse_mode != Input.MOUSE_MODE_CAPTURED
+		or not is_physics_processing()
+		or get_tree().paused
+	):
 		return
 	# Mientras habla un NPC solo se reserva la mirada; caminar, correr, saltar y
 	# agacharse siguen procesándose en _physics_process.
@@ -374,6 +373,23 @@ func _unhandled_input(evento: InputEvent) -> void:
 		-TOPE_VERTICAL,
 		TOPE_VERTICAL
 	)
+
+
+func _unhandled_input(evento: InputEvent) -> void:
+	# MouseMotion ya se atendió en `_input`; aquí quedan los eventos que deben
+	# respetar que una GUI los haya consumido, especialmente el clic de recaptura.
+	if evento is InputEventMouseMotion:
+		return
+	_registrar_dispositivo_entrada(evento)
+	# El menú global es el único dueño de `cancelar`: al abrirlo libera el ratón y
+	# al cerrarlo restaura el modo anterior. Si el sistema operativo lo soltó por
+	# otro motivo, un clic deliberado dentro del mundo recupera la captura.
+	if (
+		evento is InputEventMouseButton
+		and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED
+		and debe_recapturar_raton(evento, is_physics_processing(), get_tree().paused)
+	):
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
 func _physics_process(delta: float) -> void:
@@ -433,7 +449,7 @@ func _ajustar_altura(altura: float, camara_y: float) -> void:
 
 ## Mirar con el stick derecho, además de con el ratón.
 ##
-## Va en `_physics_process` y no en `_unhandled_input` porque un stick no manda
+## Va en `_physics_process` y no en `_input` porque un stick no manda
 ## eventos mientras está quieto en una posición: manda su posición, y hay que
 ## leerla cada paso. El ratón es al revés, y por eso siguen siendo dos caminos.
 func _mirar_con_mando(delta: float) -> void:
