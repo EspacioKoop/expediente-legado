@@ -56,15 +56,16 @@ static func planos_de(gato_presente: bool, vistas: int = 0, voz_cunado: String =
 	)
 
 
-## Variante de cierre para #100. Conserva `planos_de()` intacta para llamadas
-## antiguas y añade, después del despido, el plano común derivado de la vida.
-## El estado solo se lee: ni el veredicto ni la jornada se resuelven aquí.
+## Variante de cierre para #100/#150. Conserva `planos_de()` para llamadas
+## antiguas y añade el informe que EvaluacionDesempeno selló ANTES del reset.
+## No usa el resto de RemateVidaCinematica aquí: dinero, alquiler y mapa ya
+## pertenecen a la vida nueva. El gato sí es continuidad real entre vueltas.
 static func planos_con_remate(
 	estado: Dictionary, vistas: int = 0, voz_cunado: String = ""
 ) -> Array:
 	var resumen := RemateVida.resumir(estado)
 	var planos := planos_de(bool(resumen["gato_presente"]), vistas, voz_cunado)
-	planos.append_array(RemateVidaCinematica.planos_de(estado, vistas))
+	planos.append_array(EvaluacionDesempenoCinematica.planos_de(estado, vistas))
 	return planos
 
 

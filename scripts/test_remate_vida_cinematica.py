@@ -35,14 +35,18 @@ class RemateVidaCinematicaTest(unittest.TestCase):
         self.assertNotIn('estado[', self.presentacion)
         self.assertNotIn("Partida.guardar", self.presentacion)
 
-    def test_despido_conserva_api_y_puede_anexar_el_remate(self):
+    def test_despido_conserva_api_y_anexa_el_informe_sellado(self):
         self.assertIn(
             "static func planos_de(gato_presente: bool, vistas: int = 0, voz_cunado: String = \"\")",
             self.despido,
         )
         self.assertIn("static func planos_con_remate(", self.despido)
         self.assertIn("RemateVida.resumir(estado)", self.despido)
-        self.assertIn("RemateVidaCinematica.planos_de(estado, vistas)", self.despido)
+        self.assertIn(
+            "EvaluacionDesempenoCinematica.planos_de(estado, vistas)",
+            self.despido,
+        )
+        self.assertNotIn("RemateVidaCinematica.planos_de(estado, vistas)", self.despido)
         self.assertIn("planos.append_array", self.despido)
 
 
