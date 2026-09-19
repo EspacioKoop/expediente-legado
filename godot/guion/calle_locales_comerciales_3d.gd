@@ -53,9 +53,7 @@ func _configurar(dia: Node, calle: Node3D) -> void:
 	if puerta_electro != null:
 		puerta_electro.activado.connect(_entrar_electrodomesticos)
 
-	var puerta_bit98 := (
-		calle.find_child("EntrarTiendaVideojuegos", true, false) as Interactuable3D
-	)
+	var puerta_bit98 := calle.find_child("EntrarTiendaVideojuegos", true, false) as Interactuable3D
 	if puerta_bit98 != null:
 		puerta_bit98.activado.connect(_entrar_bit98)
 
@@ -65,34 +63,37 @@ func _montar_electrodomesticos() -> Node3D:
 	interior.name = "InteriorElectrodomesticos"
 	interior.position = POS_ELECTRODOMESTICOS
 	add_child(interior)
-	Espacio3D.construir(
-		interior,
-		{
-			"suelo": Vector2(7.0, 8.0),
-			"color_suelo": COLOR_SUELO_ELECTRO,
-			"color_muro": COLOR_PARED_ELECTRO,
-			"color_techo": Color(0.68, 0.67, 0.63),
-			"textura_suelo": "linoleo",
-			"textura_muro": "gotele",
-			"textura_techo": "techo",
-			"bultos": [],
-			"luces":
-			[
-				{
-					"pos": Vector3(-1.8, 2.65, -1.2),
-					"color": Color(0.90, 0.92, 0.88),
-					"energia": 1.9,
-					"alcance": 7.0,
-				},
-				{
-					"pos": Vector3(1.8, 2.65, 1.0),
-					"color": Color(0.90, 0.92, 0.88),
-					"energia": 1.9,
-					"alcance": 7.0,
-				},
-			],
-			"salidas": [],
-		},
+	(
+		Espacio3D
+		. construir(
+			interior,
+			{
+				"suelo": Vector2(7.0, 8.0),
+				"color_suelo": COLOR_SUELO_ELECTRO,
+				"color_muro": COLOR_PARED_ELECTRO,
+				"color_techo": Color(0.68, 0.67, 0.63),
+				"textura_suelo": "linoleo",
+				"textura_muro": "gotele",
+				"textura_techo": "techo",
+				"bultos": [],
+				"luces":
+				[
+					{
+						"pos": Vector3(-1.8, 2.65, -1.2),
+						"color": Color(0.90, 0.92, 0.88),
+						"energia": 1.9,
+						"alcance": 7.0,
+					},
+					{
+						"pos": Vector3(1.8, 2.65, 1.0),
+						"color": Color(0.90, 0.92, 0.88),
+						"energia": 1.9,
+						"alcance": 7.0,
+					},
+				],
+				"salidas": [],
+			},
+		)
 	)
 
 	_caja_fisica(
@@ -127,34 +128,37 @@ func _montar_bit98() -> Node3D:
 	interior.name = "InteriorBit98"
 	interior.position = POS_BIT98
 	add_child(interior)
-	Espacio3D.construir(
-		interior,
-		{
-			"suelo": Vector2(6.4, 8.0),
-			"color_suelo": COLOR_SUELO_BIT98,
-			"color_muro": COLOR_PARED_BIT98,
-			"color_techo": Color(0.24, 0.22, 0.27),
-			"textura_suelo": "moqueta",
-			"textura_muro": "gotele",
-			"textura_techo": "techo",
-			"bultos": [],
-			"luces":
-			[
-				{
-					"pos": Vector3(0.0, 2.55, -0.8),
-					"color": Color(0.78, 0.62, 0.94),
-					"energia": 1.8,
-					"alcance": 7.0,
-				},
-				{
-					"pos": Vector3(0.0, 2.35, 2.0),
-					"color": Color(0.32, 0.78, 0.94),
-					"energia": 1.2,
-					"alcance": 6.0,
-				},
-			],
-			"salidas": [],
-		},
+	(
+		Espacio3D
+		. construir(
+			interior,
+			{
+				"suelo": Vector2(6.4, 8.0),
+				"color_suelo": COLOR_SUELO_BIT98,
+				"color_muro": COLOR_PARED_BIT98,
+				"color_techo": Color(0.24, 0.22, 0.27),
+				"textura_suelo": "moqueta",
+				"textura_muro": "gotele",
+				"textura_techo": "techo",
+				"bultos": [],
+				"luces":
+				[
+					{
+						"pos": Vector3(0.0, 2.55, -0.8),
+						"color": Color(0.78, 0.62, 0.94),
+						"energia": 1.8,
+						"alcance": 7.0,
+					},
+					{
+						"pos": Vector3(0.0, 2.35, 2.0),
+						"color": Color(0.32, 0.78, 0.94),
+						"energia": 1.2,
+						"alcance": 6.0,
+					},
+				],
+				"salidas": [],
+			},
+		)
 	)
 
 	_caja_fisica(
@@ -193,11 +197,14 @@ func _montar_bit98() -> Node3D:
 		tele.position = Vector3(x, 1.12, -2.5)
 		tele.rotation_degrees.y = 180.0
 		interior.add_child(tele)
-		Modelos.mueble(
-			tele,
-			"televisionVintage",
-			Vector3(0.62, 0.56, 0.50),
-			Color(0.26, 0.24, 0.28),
+		(
+			Modelos
+			. mueble(
+				tele,
+				"televisionVintage",
+				Vector3(0.62, 0.56, 0.50),
+				Color(0.26, 0.24, 0.28),
+			)
 		)
 
 	var compra := _interactuable(
@@ -268,11 +275,14 @@ func _montar_televisor_interior(padre: Node3D, indice: int, pos: Vector3) -> voi
 	tele.position = Vector3(0.0, 0.42, 0.0)
 	tele.rotation_degrees.y = -90.0
 	base.add_child(tele)
-	Modelos.mueble(
-		tele,
-		"televisionVintage",
-		Vector3(0.68, 0.58, 0.52),
-		Color(0.30, 0.28, 0.26),
+	(
+		Modelos
+		. mueble(
+			tele,
+			"televisionVintage",
+			Vector3(0.68, 0.58, 0.52),
+			Color(0.30, 0.28, 0.26),
+		)
 	)
 
 
