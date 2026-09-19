@@ -77,9 +77,13 @@ func _init() -> void:
 	var inventario := Inventario.nuevo()
 	_configurar_estado(dia, inventario, [])
 	await _estabilizar()
-	_enfocar(dia, "AlmacenamientoCasa", Vector3(1.45, 0.80, 1.55), Vector3.UP * 0.55)
+	_enfocar(dia, "AlmacenamientoCasa", Vector3(0.0, 0.35, -1.45), Vector3(0.0, 0.98, 0.0))
 	await _estabilizar()
 	var metricas_props := _metricas_props(dia)
+	if not _props_en_encuadre(dia):
+		printerr("Los dos pickups de #680 no quedan dentro del encuadre de evidencia")
+		quit(1)
+		return
 	_registrar_captura(
 		manifiesto,
 		salida,
@@ -211,11 +215,11 @@ func _enfocar(dia, ancla_nombre: String, offset: Vector3, objetivo_offset: Vecto
 		quit(1)
 		return
 	var camara := dia._caminante.get_node("Camara") as Camera3D
-	dia._caminante.global_position = ancla.global_position + offset
+	dia._caminante.global_position = ancla.to_global(offset)
 	dia._caminante.rotation = Vector3.ZERO
 	camara.rotation = Vector3.ZERO
 	camara.fov = FOV
-	camara.look_at(ancla.global_position + objetivo_offset, Vector3.UP)
+	camara.look_at(ancla.to_global(objetivo_offset), Vector3.UP)
 
 
 func _ocultar_hud(dia) -> void:
@@ -254,6 +258,29 @@ func _guardar_captura(destino: String) -> bool:
 		return false
 	print("captura -> %s" % destino)
 	return true
+
+
+func _props_en_encuadre(dia) -> bool:
+	var raiz: Node = dia._mundo.get_node_or_null("PropsUtilizablesEncontrables680")
+	if raiz == null:
+		return false
+	var camara := dia._caminante.get_node("Camara") as Camera3D
+	var margen := Vector2(float(TAMANO.x), float(TAMANO.y)) * 0.08
+	var minimo := margen
+	var maximo := Vector2(float(TAMANO.x), float(TAMANO.y)) - margen
+	var encontrados := 0
+	for nodo in raiz.get_children():
+		if not nodo is Recogible3D:
+			continue
+		encontrados += 1
+		if camara.is_position_behind(nodo.global_position):
+			return false
+		var pantalla := camara.unproject_position(nodo.global_position)
+		if pantalla.x < minimo.x or pantalla.x > maximo.x:
+			return false
+		if pantalla.y < minimo.y or pantalla.y > maximo.y:
+			return false
+	return encontrados == 2
 
 
 func _ids_props_visibles(dia) -> Array[String]:
