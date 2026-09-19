@@ -7,6 +7,7 @@
 extends SceneTree
 
 const CAMINANTE_SCRIPT := preload("res://guion/caminante.gd")
+const CONTROLADOR_ESCRITORIO_SCRIPT := preload("res://guion/dia_escritorio_siga_app.gd")
 
 var _pasadas := 0
 var _fallos := 0
@@ -19,6 +20,7 @@ func _initialize() -> void:
 func _probar() -> void:
 	_probar_recaptura_raton()
 	await _probar_recuperacion_foco()
+	await _probar_salida_menu_global()
 	for frame in 2:
 		await process_frame
 	if _fallos == 0:
@@ -156,6 +158,48 @@ func _probar_recuperacion_foco() -> void:
 	_liberar_foco()
 	root.remove_child(escritorio)
 	escritorio.free()
+
+
+func _probar_salida_menu_global() -> void:
+	var controlador := CONTROLADOR_ESCRITORIO_SCRIPT.new()
+	# Esta regresión prueba la integración del botón, no el wrapping del puesto.
+	# Evitamos que _process() consulte un Dia real y ejercitamos directamente el
+	# contrato aislado que debe seguir disponible aunque OS98 haya perdido foco.
+	controlador.set_process(false)
+	root.add_child(controlador)
+	await process_frame
+
+	var boton: Button = controlador._boton_salida_menu_global
+	_comprobar(is_instance_valid(boton), "el menú global recibe la salida de rescate")
+	if not is_instance_valid(boton):
+		root.remove_child(controlador)
+		controlador.free()
+		return
+
+	_comprobar(not boton.visible, "la salida de rescate se oculta fuera de SIGA")
+	_comprobar(
+		boton.focus_mode != Control.FOCUS_NONE,
+		"la salida de rescate participa en navegación de teclado/mando",
+	)
+	var menu := root.get_node_or_null("MenuGlobal")
+	var salir: Button = menu.get("_salir") if menu != null else null
+	_comprobar(
+		is_instance_valid(salir) and boton.get_parent() == salir.get_parent(),
+		"la salida usa el mismo recorrido del menú global",
+	)
+
+	controlador._actualizar_salida_menu_global(true)
+	_comprobar(boton.visible, "la salida aparece mientras SIGA está activo")
+	controlador._actualizar_salida_menu_global(false)
+	_comprobar(not boton.visible, "la salida vuelve a ocultarse al dejar el puesto")
+
+	root.remove_child(controlador)
+	controlador.free()
+	await process_frame
+	_comprobar(
+		not is_instance_valid(boton),
+		"el controlador limpia la extensión del menú al abandonar la escena",
+	)
 
 
 func _crear_contenido_prueba() -> Control:
