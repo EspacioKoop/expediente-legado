@@ -74,9 +74,7 @@ static func acusar(
 	)
 
 	var castigo := {}
-	if precipitada:
-		jornada["acusaciones_precipitadas_hoy"] = (
-			int(jornada.get("acusaciones_precipitadas_hoy", 0)) + 1
+	if precipitada:\n		# Señal ya prevista por #150: pertenece a toda la vida laboral, no al día.\n		estado["perdio_vida_en_esta_vuelta"] = true\n		jornada["acusaciones_precipitadas_hoy"] = (\n			int(jornada.get("acusaciones_precipitadas_hoy", 0)) + 1
 		)
 		castigo = perder_vida(estado, jornada, 1)
 
@@ -106,7 +104,7 @@ static func perder_vida(estado: Dictionary, jornada: Dictionary, cuantas: int) -
 	if estado["vida"] > 0:
 		return {"despido": false, "vida": estado["vida"]}
 
-	Prometeo.reiniciar_vuelta(estado, ajustes(estado)["vidas"])
+	# Hay que sellar ANTES del reset: Jornada contiene todavía el mapa, dinero y gato\n	# de la vida que acaba. La operación es idempotente si esta ruta se reintenta.\n	EvaluacionDesempeno.sellar(estado, "reasignacion", jornada)\n	Prometeo.reiniciar_vuelta(estado, ajustes(estado)["vidas"])
 	Jornada.reiniciar_vuelta(jornada)
 	return {"despido": true, "vida": estado["vida"]}
 
