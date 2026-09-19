@@ -55,8 +55,7 @@ siguen siendo las fuentes de evidencia para coste global.
 
 ## Qué debe revisar una persona
 
-Las capturas hacen comparables los estados, pero **no sustituyen la revisión
-humana**. Al entrar los GLB reales hay que comprobar:
+Las capturas hacen comparables los estados, pero **no sustituyen la revisión humana** final. Al entrar los GLB reales hay que comprobar:
 
 - que palanca y linterna se reconocen desde la cámara normal sin dominar la casa;
 - que la escala sigue siendo creíble junto al almacenamiento;
