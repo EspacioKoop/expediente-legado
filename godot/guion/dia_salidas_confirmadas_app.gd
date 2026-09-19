@@ -127,6 +127,9 @@ func _cancelar_salida_oficina() -> void:
 func _cerrar_confirmacion_salida() -> void:
 	var estaba_abierta := _confirmacion_salida != null
 	if _confirmacion_salida != null:
+		# ConfirmationDialog es Window exclusivo. Ocultarlo antes de queue_free
+		# libera el slot modal en este mismo frame para el selector de ascensor.
+		_confirmacion_salida.hide()
 		_confirmacion_salida.queue_free()
 		_confirmacion_salida = null
 	if is_instance_valid(_puerta_salida_oficina):
