@@ -14,6 +14,7 @@ const POSICION := Vector3(4.55, 0.0, 2.40)
 const COLOR_ATRIL := Color(0.27, 0.24, 0.20)
 const COLOR_METAL := Color(0.17, 0.18, 0.19)
 const COLOR_ROTULO := Color(0.86, 0.76, 0.52)
+const TEXTO_ROTULO := "QUIOSCO · CUADERNO CULTURAL"
 
 
 static func montar(mundo: Node3D) -> Interactuable3D:
@@ -79,7 +80,7 @@ static func limpiar(mundo: Node3D) -> void:
 static func _rotulo(raiz: Node3D) -> void:
 	var etiqueta := Label3D.new()
 	etiqueta.name = "RotuloQuioscoCultural"
-	etiqueta.text = "QUIOSCO · CUADERNO CULTURAL"
+	etiqueta.text = TEXTO_ROTULO
 	etiqueta.font = EstiloSiga.fuente_mono()
 	etiqueta.font_size = 28
 	etiqueta.pixel_size = 0.0022
