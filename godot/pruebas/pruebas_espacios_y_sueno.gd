@@ -205,9 +205,7 @@ static func _acusacion(comprobar: Callable) -> void:
 		precipitada.get("cartas_desbloqueadas", []),
 		["el-hierofante"]
 	)
-	var hierofante: Dictionary = estado["tarot"].filter(
-		func(carta): return carta.get("id", "") == "el-hierofante"
-	)[0]
+	var hierofante: Dictionary = estado["tarot"].filter(func(carta): return carta.get("id", "") == "el-hierofante")[0]
 	comprobar.call("El Hierofante queda recogido", hierofante.get("recogida", false), true)
 	comprobar.call(
 		"El Hierofante entra en memoria fantasma",
@@ -229,9 +227,7 @@ static func _acusacion(comprobar: Callable) -> void:
 	var repetida := Acusacion.acusar(estado, dia, caso, caso["sospechosos"][1], [])
 	comprobar.call("no se puede volver a firmar", repetida["resultado"], "ya_cerrado")
 	comprobar.call(
-		"reintentar la firma no vuelve a emitir Tarot",
-		repetida.get("cartas_desbloqueadas", []),
-		[]
+		"reintentar la firma no vuelve a emitir Tarot", repetida.get("cartas_desbloqueadas", []), []
 	)
 	comprobar.call(
 		"y no gasta acción por intentarlo", dia["acciones"], Jornada.ACCIONES_POR_DIA - 1
@@ -289,9 +285,7 @@ static func _acusacion(comprobar: Callable) -> void:
 		victoria.get("cartas_desbloqueadas", []),
 		["el-colgado"]
 	)
-	var colgado: Dictionary = ganador["tarot"].filter(
-		func(carta): return carta.get("id", "") == "el-colgado"
-	)[0]
+	var colgado: Dictionary = ganador["tarot"].filter(func(carta): return carta.get("id", "") == "el-colgado")[0]
 	comprobar.call("El Colgado queda recogido", colgado.get("recogida", false), true)
 	comprobar.call(
 		"El Colgado entra en memoria fantasma",
@@ -319,13 +313,9 @@ static func _acusacion(comprobar: Callable) -> void:
 		cierre_limite.get("cartas_desbloqueadas", []),
 		[]
 	)
-	var hierofante_reset: Dictionary = firma_limite["tarot"].filter(
-		func(carta): return carta.get("id", "") == "el-hierofante"
-	)[0]
+	var hierofante_reset: Dictionary = firma_limite["tarot"].filter(func(carta): return carta.get("id", "") == "el-hierofante")[0]
 	comprobar.call(
-		"la nueva vuelta no conserva Hierofante",
-		hierofante_reset.get("recogida", false),
-		false
+		"la nueva vuelta no conserva Hierofante", hierofante_reset.get("recogida", false), false
 	)
 	comprobar.call(
 		"la memoria fantasma sí recuerda Hierofante",
