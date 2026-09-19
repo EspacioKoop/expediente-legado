@@ -382,7 +382,9 @@ func _al_pulsar_marca(meta: Variant) -> void:
 ## inmediatamente su historia política (#71). Prometeo devuelve solo las
 ## adquisiciones nuevas, así que el hook también es idempotente.
 func _sincronizar_tarot_por_pista() -> void:
-	for carta_id in Prometeo.sincronizar_tarot_por_pistas(partida.estado):
+	var nuevas := Prometeo.sincronizar_tarot_por_pistas(partida.estado)
+	nuevas.append_array(Prometeo.sincronizar_tarot_por_caso_resuelto(partida.estado, caso))
+	for carta_id in nuevas:
 		_al_carta_desbloqueada(carta_id)
 
 
