@@ -68,6 +68,15 @@ class RadioDomestica98Test(unittest.TestCase):
         self.assertNotIn("Time.get_", self.minicadena)
         self.assertNotIn("HTTPRequest", self.minicadena)
 
+    def test_audio_reutiliza_mixer_comun_y_no_assets_externos(self):
+        self.assertIn('const BUS_AUDIO := &"Musica"', self.minicadena)
+        self.assertIn("AudioStreamPlayer3D.new()", self.minicadena)
+        self.assertIn("AudioStreamWAV.new()", self.minicadena)
+        self.assertIn("func alternar_reproduccion", self.minicadena)
+        self.assertIn("func cambiar_volumen", self.minicadena)
+        self.assertIn("_sincronizar_audio(true)", self.minicadena)
+        self.assertNotIn("res://assets/audio/", self.minicadena)
+
     def test_casa_monta_la_minicadena_y_el_verificador_la_ejecuta(self):
         self.assertIn("MinicadenaDomestica98.new()", self.casa)
         self.assertIn("_montar_minicadena", self.casa)
