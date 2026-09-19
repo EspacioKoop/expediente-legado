@@ -168,13 +168,25 @@ func restaurar_estado(estado: Dictionary) -> void:
 
 func _montar_arquitectura() -> void:
 	_crear_caja(
-		self, "CorredorOeste", Vector3(4.2, 0.18, 8.5), Vector3(-5.2, 0.0, 0.0), COLOR_OESTE.darkened(0.45)
+		self,
+		"CorredorOeste",
+		Vector3(4.2, 0.18, 8.5),
+		Vector3(-5.2, 0.0, 0.0),
+		COLOR_OESTE.darkened(0.45)
 	)
 	_crear_caja(
-		self, "CorredorEste", Vector3(4.2, 0.18, 8.5), Vector3(5.2, 0.0, 0.0), COLOR_ESTE.darkened(0.45)
+		self,
+		"CorredorEste",
+		Vector3(4.2, 0.18, 8.5),
+		Vector3(5.2, 0.0, 0.0),
+		COLOR_ESTE.darkened(0.45)
 	)
 	_crear_caja(
-		self, "VacioCentral", Vector3(3.6, 0.08, 8.5), Vector3(0.0, -0.18, 0.0), Color(0.04, 0.04, 0.05)
+		self,
+		"VacioCentral",
+		Vector3(3.6, 0.08, 8.5),
+		Vector3(0.0, -0.18, 0.0),
+		Color(0.04, 0.04, 0.05)
 	)
 	_crear_caja(
 		self, "ReflejoArchivadores", Vector3(0.12, 2.8, 2.2), Vector3(0.0, 1.4, -2.8), COLOR_REFLEJO
@@ -225,11 +237,13 @@ func _crear_tramo(padre: Node3D, nombre: String, a: Vector3, b: Vector3) -> void
 
 
 func _montar_retorno_y_puerta() -> void:
-	_crear_caja(
-		self, "Retorno", Vector3(2.2, 0.20, 2.2), Vector3(-5.2, 0.12, 4.6), COLOR_RETORNO
-	)
+	_crear_caja(self, "Retorno", Vector3(2.2, 0.20, 2.2), Vector3(-5.2, 0.12, 4.6), COLOR_RETORNO)
 	_puerta = _crear_caja(
-		self, "PuertaEquivalencia", Vector3(2.4, 3.4, 0.35), Vector3(5.2, 1.7, -4.35), COLOR_PUERTA_CERRADA
+		self,
+		"PuertaEquivalencia",
+		Vector3(2.4, 3.4, 0.35),
+		Vector3(5.2, 1.7, -4.35),
+		COLOR_PUERTA_CERRADA
 	)
 
 
