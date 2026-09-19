@@ -155,11 +155,14 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	# #150: el informe ya sellado se consulta como otra aplicación del terminal.
 	# La vista recibe Partida en directo pero es estrictamente de solo lectura:
 	# no duplica historial en EstadoAplicacionesSiga ni recalcula vidas cerradas.
-	_evaluaciones_app = EscritorioSigaApp.new(
-		"evaluaciones-desempeno",
-		tr("EVALUACION_APP_TITULO"),
-		Callable(self, "_crear_evaluaciones"),
-		"siga",
+	_evaluaciones_app = (
+		EscritorioSigaApp
+		. new(
+			"evaluaciones-desempeno",
+			tr("EVALUACION_APP_TITULO"),
+			Callable(self, "_crear_evaluaciones"),
+			"siga",
+		)
 	)
 	_evaluaciones_app.tamano_minimo = Vector2(560, 360)
 	_evaluaciones_app.tamano_preferido = Vector2(780, 500)
