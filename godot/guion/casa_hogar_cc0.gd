@@ -299,7 +299,7 @@ static func _ordenar_rincon_television(raiz: Node3D) -> void:
 		sofa.position.z = 1.35
 	var consola := raiz.get_node_or_null("ConsolaSobremesa98") as Node3D
 	if consola != null:
-		consola.position = Vector3(-3.58, 0.54, 2.00)
+		consola.position = Vector3(-3.58, 0.54, 2.10)
 		consola.rotation_degrees.y = -90.0
 
 
