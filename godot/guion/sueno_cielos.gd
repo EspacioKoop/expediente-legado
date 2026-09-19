@@ -190,6 +190,22 @@ const PERFILES_MITO := {
 		"via_lactea": 0.0,
 		"estrellas": 0.0,
 	},
+	"baba_yaga":
+	{
+		"cielo_alto": Color(0.018, 0.030, 0.034),
+		"horizonte": Color(0.08, 0.12, 0.09),
+		"ocaso": Color(0.17, 0.11, 0.07),
+		"luna_color": Color(0.76, 0.78, 0.66),
+		"luna_halo": 0.08,
+		"bruma_horizonte": Color(0.10, 0.15, 0.12),
+		"bruma_fuerza": 0.66,
+		"nube_color": Color(0.06, 0.09, 0.08),
+		"nubes": 0.62,
+		"cirro_color": Color(0.12, 0.16, 0.13),
+		"cirros": 0.28,
+		"via_lactea": 0.03,
+		"estrellas": 0.20,
+	},
 	"anansi_akan":
 	{
 		"cielo_alto": Color(0.035, 0.025, 0.100),
