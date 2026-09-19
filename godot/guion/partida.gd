@@ -294,7 +294,10 @@ static func validar(guardado) -> Array:
 	]:
 		if guardado.has(clave) and typeof(guardado[clave]) != TYPE_ARRAY:
 			errores.append("%s no es una lista" % clave)
-	if guardado.has("evaluaciones_desempeno") and typeof(guardado["evaluaciones_desempeno"]) == TYPE_ARRAY:
+	if (
+		guardado.has("evaluaciones_desempeno")
+		and typeof(guardado["evaluaciones_desempeno"]) == TYPE_ARRAY
+	):
 		for error in EvaluacionDesempeno.validar_historial(guardado["evaluaciones_desempeno"]):
 			errores.append("evaluaciones_desempeno.%s" % error)
 	for clave in ["anomalias_descubiertas", "anomalias_descubiertas_vuelta"]:
