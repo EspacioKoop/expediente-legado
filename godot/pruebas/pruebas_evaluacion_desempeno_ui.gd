@@ -13,12 +13,14 @@ func _probar() -> void:
 	# Los runners aislados no pasan por Inicio; fijamos el catálogo igual que los demás smokes UI.
 	TranslationServer.set_locale("es")
 	var estado := {
-		"evaluaciones_desempeno": [
+		"evaluaciones_desempeno":
+		[
 			{
 				"vuelta": 1,
 				"motivo": "reasignacion",
 				"veredictos_total": 3,
-				"evaluacion": {
+				"evaluacion":
+				{
 					"productividad": EvaluacionDesempeno.MEDIA,
 					"precipitacion": EvaluacionDesempeno.ALTA,
 					"cuidado_gato": EvaluacionDesempeno.ALTA,
