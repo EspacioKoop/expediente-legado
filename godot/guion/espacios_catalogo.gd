@@ -274,10 +274,10 @@ const OFICINA := {
 			"tam": Vector3(0.44, 0.04, 0.16),
 			"color": Color(0.72, 0.70, 0.64)
 		},
-		# La salida deja de ser una caja de interacción flotante: detrás del
-		# trigger hay una hoja de puerta física, con marco y manilla. Al caminar
-		# hacia ella se entra primero en el Area3D existente y la transición se
-		# mantiene, pero el límite del archivo ya se entiende sin leer el HUD.
+		# La salida deja de ser una caja de interacción flotante: hay una hoja de
+		# puerta física, con marco y manilla. El Area3D conserva destino y rótulo
+		# como contrato de tránsito, pero #790 desactiva su proximidad en runtime
+		# y coloca sobre él la interacción deliberada que pide confirmación.
 		{
 			"pos": Vector3(-6.88, 1.05, 3.5),
 			"tam": Vector3(0.12, 2.10, 1.28),
