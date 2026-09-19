@@ -71,6 +71,10 @@ func _probar_rescate_y_reentrada() -> void:
 	dia._entrar_en("archivo")
 	await process_frame
 	await physics_frame
+	# Esta prueba fuerza la fase por debajo del flujo normal y puede conservar el
+	# bloqueo de la cinemática inicial. Para probar la reentrada como estado
+	# jugable, restituye explícitamente el control antes de usar la puerta.
+	dia._caminante.set_physics_process(true)
 	var salida := _buscar_salida(dia._mundo, "trayecto")
 	_comprobar(salida != null, "la oficina conserva su salida al trayecto")
 	if salida != null:
