@@ -349,6 +349,14 @@ static func _acusacion(comprobar: Callable) -> void:
 	comprobar.call(
 		"la nueva vuelta no posee Ermitaño", ermitanio_reset.get("recogida", false), false
 	)
+	var es_muerte := func(carta): return carta.get("id", "") == "la-muerte"
+	var muerte_reset: Dictionary = ultimo["tarot"].filter(es_muerte)[0]
+	comprobar.call(
+		"el despido registra La Muerte en memoria fantasma",
+		ultimo.get("cartas_conocidas", []).has("la-muerte"),
+		true
+	)
+	comprobar.call("la nueva vuelta no posee La Muerte", muerte_reset.get("recogida", false), false)
 	comprobar.call(
 		"el despido no notifica una carta ya reseteada", caida.get("cartas_desbloqueadas", []), []
 	)

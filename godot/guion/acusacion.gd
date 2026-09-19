@@ -134,6 +134,11 @@ static func perder_vida(estado: Dictionary, jornada: Dictionary, cuantas: int) -
 			"cartas_desbloqueadas": cartas_desbloqueadas,
 		}
 
+	# #1029/#46: La Muerte pertenece al evento de despido de ESTA vuelta.
+	# Se adquiere antes del reset para que la memoria fantasma sobreviva; la
+	# posesión se limpia inmediatamente al comenzar la nueva vida laboral.
+	Prometeo.desbloquear_carta_en_estado(estado, "la-muerte")
+
 	# Hay que sellar ANTES del reset: Jornada contiene todavía el mapa, dinero y gato
 	# de la vida que acaba. La operación es idempotente si esta ruta se reintenta.
 	EvaluacionDesempeno.sellar(estado, "reasignacion", jornada)
