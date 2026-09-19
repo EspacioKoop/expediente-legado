@@ -70,7 +70,7 @@ func _probar() -> void:
 	_comprobar(consola != null, "la consola de sobremesa sigue montada")
 	if consola != null:
 		_comprobar(
-			consola.position.is_equal_approx(Vector3(-3.58, 0.54, 1.82)),
+			consola.position.is_equal_approx(Vector3(-3.58, 0.54, 2.00)),
 			"la consola conserva la posición despejada del rincón de TV",
 		)
 		_comprobar(
@@ -182,6 +182,18 @@ func _probar() -> void:
 	if tele != null:
 		var base: float = tele.global_position.y - EspaciosCatalogo.CASA["bultos"][2]["tam"].y / 2.0
 		_comprobar(absf(base - mueble_tv.end.y) < 0.05, "la tele descansa sobre su mueble")
+		var cristal := tele.get_node_or_null("CristalPantallaTV") as MeshInstance3D
+		var emision := tele.get_node_or_null("EmisionPantallaTV") as Node3D
+		_comprobar(cristal != null, "la carcasa conserva una pantalla apagada distinguible")
+		_comprobar(emision != null, "la tele monta una superficie encendida separada")
+		if cristal != null and emision != null:
+			_comprobar(cristal.visible, "la pantalla apagada se ve como cristal oscuro")
+			_comprobar(not emision.visible, "la emisión permanece oculta con la tele apagada")
+			var tele_interactiva := tele as TelevisionInteractiva3D
+			tele_interactiva.alternar_desde_mando()
+			_comprobar(not cristal.visible, "al encender se oculta el cristal apagado")
+			_comprobar(emision.visible, "al encender aparece la superficie CRT")
+			tele_interactiva.alternar_desde_mando()
 	var armario := lote.get_node_or_null("ArmarioHogar") as Node3D
 	_comprobar(armario != null, "el armario CC0 sigue montado")
 	var examinar_armario: Interactuable3D = null
