@@ -139,6 +139,33 @@ static func sincronizar_tarot_por_caso_resuelto(estado: Dictionary, caso: Dictio
 	return nuevas
 
 
+## Cierre perfecto de #46/#1029. La Templanza queda fuera del conjunto
+## exigido porque obtenerla requiere gastar una carta y El Mundo exige que
+## ninguna de las cartas válidas se haya gastado. Los casos recibidos son los
+## principales del catálogo; una lista vacía nunca concede victoria.
+static func sincronizar_tarot_mundo(estado: Dictionary, casos_principales: Array) -> Array:
+	var tarot_bruto = estado.get("tarot", [])
+	var pistas_bruto = estado.get("pistas_descubiertas", [])
+	if typeof(tarot_bruto) != TYPE_ARRAY or typeof(pistas_bruto) != TYPE_ARRAY:
+		return []
+
+	var validas := 0
+	for carta in tarot_bruto:
+		var carta_id := String(carta.get("id", ""))
+		if carta_id in ["el-mundo", "la-templanza"]:
+			continue
+		validas += 1
+		if not carta.get("recogida", false) or carta.get("gastada", false):
+			return []
+
+	var pistas: Array = pistas_bruto
+	if validas == 0 or not Progreso.todos_resueltos(casos_principales, pistas):
+		return []
+	if desbloquear_carta_en_estado(estado, "el-mundo"):
+		return ["el-mundo"]
+	return []
+
+
 ## Una acusación es precipitada cuando se ha descubierto menos proporción de
 ## pistas que el umbral de la dificultad. Sin pistas totales no hay ratio que
 ## evaluar, así que nunca es precipitada — y de paso no se divide por cero.
