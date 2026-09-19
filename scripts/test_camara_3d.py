@@ -81,8 +81,11 @@ class Camara3DTest(unittest.TestCase):
         self.assertIn("InputEventMouseMotion", entrada)
         self.assertIn("Input.MOUSE_MODE_CAPTURED", entrada)
         self.assertIn("is_physics_processing()", entrada)
-        self.assertIn("rotate_y(", entrada)
-        self.assertIn("_camara.rotation.x", entrada)
+        self.assertIn("debe_procesar_movimiento_raton(", entrada)
+        self.assertIn("_aplicar_movimiento_raton(evento)", entrada)
+        self.assertIn("func _aplicar_movimiento_raton", self.caminante)
+        self.assertIn("rotate_y(", self.caminante)
+        self.assertIn("_camara.rotation.x", self.caminante)
         self.assertNotIn("rotate_y(", no_gestionado)
 
     def test_movimiento_tiene_aceleracion_frenado_y_analogico_real(self) -> None:
