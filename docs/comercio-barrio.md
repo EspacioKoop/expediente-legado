@@ -20,6 +20,20 @@ Las compras de objetos se registran en `jornada["comercio_barrio_compras"]` y so
 
 El paquete de cigarrillos es la excepción deliberada: cuesta **8**, se marca `repetible`, se consume en el acto y puede volver a comprarse. No entra en inventario, no concede acciones, no aumenta ingresos y no activa contenido cultural u onírico. Su única consecuencia es gastar parte del mismo saldo que compite con comida propia, comida del gato, café, alquiler e imprevistos.
 
+### Reventa e inventario — #61 / #97
+
+`ComercioBarrio.vender()` conecta por primera vez la venta de `Inventario` con el saldo real de `Jornada`, sin introducir otra economía:
+
+- solo **El Trastero** admite reventa;
+- solo se vende durante `trayecto`;
+- la tienda solo puede vender un objeto presente en `carried`;
+- un objeto guardado en `home_storage` debe sacarse físicamente en casa antes de llevarlo a la tienda;
+- `Inventario.vender()` sigue siendo la autoridad sobre vendibilidad y precio;
+- si el objeto es onírico, la venta falla y el saldo no cambia, aunque el objeto traiga un precio erróneo;
+- vender no concede acciones, no altera expedientes cerrados y no toca el histórico de compras.
+
+Esto convierte “vender cosas para llegar a fin de mes” en una costura real entre casa, inventario y economía sin permitir vender a distancia ni monetizar el sueño.
+
 ## Inventario y casa
 
 Los objetos se materializan mediante el contrato de `Inventario` de #97:
@@ -27,13 +41,17 @@ Los objetos se materializan mediante el contrato de `Inventario` de #97:
 - publicaciones del quiosco quedan en `carried`;
 - objetos voluminosos/decorativos de segunda mano usan `Inventario.recoger()` y después `Inventario.guardar_en_casa()` para quedar en `home_storage`.
 
-Esto da a #96 una fuente de verdad real para representar una compra doméstica más adelante. No se crea un booleano estético paralelo ni se toca `casa_utileria.gd` en este corte.
+Esto da a #96 una fuente de verdad real para representar una compra doméstica. No se crea un booleano estético paralelo ni se toca `casa_utileria.gd` en este corte.
+
+La reventa respeta la misma frontera: fuera de casa solo existe lo que se lleva encima. Para vender una lámpara o un marco guardado, primero debe pasar `home_storage → carried` mediante el almacenamiento doméstico ya integrado.
 
 ## Cultura y sueños
 
 La revista ficticia `Umbral — nº 17` declara metadatos compatibles con #442 (`id_semilla` + `fuente`) a través de `fuente_cultural()`.
 
 **Comprar no activa ninguna semilla onírica.** El consumidor debe activar #442 únicamente después de una interacción deliberada posterior, por ejemplo abrir/leer contenido suficiente de la publicación. Así se mantiene la regla de #442: gastar dinero no equivale a haber prestado atención a una fuente cultural.
+
+La reventa tampoco abre una ruta económica desde el sueño: cualquier objeto con `origen == "sueno"` permanece bloqueado por el contrato central de `Inventario`. El siguiente corte de #97 puede permitir sacar recompensas físicas del sueño sin convertirlas en dinero o acciones.
 
 La conexión de páginas hojeables pertenece a #674 y queda fuera de este corte.
 
@@ -49,19 +67,21 @@ Este PR es **standalone first** y no modifica:
 - `godot/guion/casa_utileria.gd` — #96 ya tiene su propio contrato ambiental y materialización;
 - `godot/datos/textos.csv` — evitamos reservar un fichero compartido hasta que exista una UI física concreta;
 - escenas, geometría o interiores 3D;
-- precios/calibración global fuera de los importes pequeños del primer catálogo.
+- precios/calibración global fuera de los importes pequeños del primer catálogo;
+- la UI de inventario: sigue siendo de consulta y no vende a distancia.
 
 ## Siguiente corte
 
 Cuando las reservas visuales lo permitan:
 
 1. montar fachadas reconocibles de quiosco y segunda mano en la calle;
-2. añadir una superficie de interacción accesible por teclado/mando que consuma `listar()/comprar()`, incluido el tabaco repetible;
+2. añadir una superficie de interacción accesible por teclado/mando que consuma `listar()/comprar()/vender()`, incluido el tabaco repetible;
 3. hacer que la lámpara/marco de `home_storage` tenga representación visible mediante #96;
-4. conectar la revista a una interacción hojeable de #674 y solo entonces activar #442.
+4. conectar la revista a una interacción hojeable de #674 y solo entonces activar #442;
+5. completar #97 con una recompensa onírica física que pueda salir del sueño pero no venderse ni conceder acciones.
 
-Con eso #676 podrá cubrir tres superficies reales sin convertir la calle en un mundo abierto comercial.
+Con eso #676 podrá cubrir tres superficies reales sin convertir la calle en un mundo abierto comercial, y #61 gana una costura económica real entre trayecto, casa e inventario.
 
-Refs #83 #93 #96 #97 #124 #244 #442 #674 #676.
+Refs #61 #83 #93 #96 #97 #124 #244 #442 #674 #676.
 
 — Odiseo (GPT-5.6 Sol)
