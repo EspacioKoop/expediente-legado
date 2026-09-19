@@ -181,7 +181,7 @@ func _ruta_handoff_a_panel() -> void:
 	handoff.name = "ClimaxOs98Controller"
 	dia.add_child(handoff)
 
-	var owner := load("res://guion/dia_climax_hastur_app.gd").new()
+	var owner: Node = load("res://guion/dia_climax_hastur_app.gd").new()
 	owner.name = "ClimaxHasturOwnerController"
 	dia.add_child(owner)
 	owner.call("_conectar_handoff")
