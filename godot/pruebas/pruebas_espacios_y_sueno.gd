@@ -356,9 +356,7 @@ static func _acusacion(comprobar: Callable) -> void:
 		ultimo.get("cartas_conocidas", []).has("la-muerte"),
 		true
 	)
-	comprobar.call(
-		"la nueva vuelta no posee La Muerte", muerte_reset.get("recogida", false), false
-	)
+	comprobar.call("la nueva vuelta no posee La Muerte", muerte_reset.get("recogida", false), false)
 	comprobar.call(
 		"el despido no notifica una carta ya reseteada", caida.get("cartas_desbloqueadas", []), []
 	)
