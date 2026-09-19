@@ -8,6 +8,7 @@ on:
       - 'godot/**'
       - 'gbc/minijuegos/caza_pixeles_98/**'
       - 'scripts/preparar_emulador_gb.sh'
+      - 'scripts/auditar_frontera_qa.py'
       - 'dist/exportar-godot-alpha.sh'
       - '.godot-version'
   push:
@@ -152,11 +153,33 @@ jobs:
       - name: Smoke de Caza Píxeles 98 antes de exportar
         run: godot4 --headless --path godot --script res://pruebas/emulador_gb_smoke.gd
 
+      - name: Auditar contraste QA/release de recursos
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/frontera-qa"
+          godot4 --headless --path godot --export-pack "Linux x86_64 QA" "$RUNNER_TEMP/frontera-qa/qa.pck"
+          godot4 --headless --path godot --export-pack "Linux x86_64" "$RUNNER_TEMP/frontera-qa/publico.pck"
+          python3 scripts/auditar_frontera_qa.py qa "$RUNNER_TEMP/frontera-qa/qa.pck"
+          python3 scripts/auditar_frontera_qa.py publico "$RUNNER_TEMP/frontera-qa/publico.pck"
+
       - name: Exportar alpha Linux y Windows
         env:
           GODOT_BIN: godot4
           SIGA98_QA_TOOLS: ${{ startsWith(github.ref, 'refs/tags/v') && '0' || '1' }}
         run: bash dist/exportar-godot-alpha.sh
+
+      - name: Auditar los ejecutables que se van a adjuntar
+        shell: bash
+        env:
+          SIGA98_ARTEFACTO_PUBLICO: ${{ startsWith(github.ref, 'refs/tags/v') && '1' || '0' }}
+        run: |
+          set -euo pipefail
+          modo=qa
+          if [ "$SIGA98_ARTEFACTO_PUBLICO" = "1" ]; then
+            modo=publico
+          fi
+          python3 scripts/auditar_frontera_qa.py "$modo"             dist/salida/godot-linux/SIGA-98.x86_64             dist/salida/godot-windows/SIGA-98.exe
 
       - name: Adjuntar alpha Linux
         uses: actions/upload-artifact@v4
