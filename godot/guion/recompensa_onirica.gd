@@ -16,8 +16,10 @@ static func objeto() -> Dictionary:
 		"id": ID,
 		"nombre": "Cuña imposible",
 		"descripcion":
-		"Una pieza translúcida con un ángulo que no termina de encajar. "
-		+ "Hace palanca mejor de lo que debería.",
+		(
+			"Una pieza translúcida con un ángulo que no termina de encajar. "
+			+ "Hace palanca mejor de lo que debería."
+		),
 		"usos": [USO],
 		"categoria": "reliquia_onirica",
 		"origen": "sueno",
