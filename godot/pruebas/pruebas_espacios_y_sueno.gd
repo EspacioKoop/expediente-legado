@@ -205,7 +205,8 @@ static func _acusacion(comprobar: Callable) -> void:
 		precipitada.get("cartas_desbloqueadas", []),
 		["el-hierofante"]
 	)
-	var hierofante: Dictionary = estado["tarot"].filter(func(carta): return carta.get("id", "") == "el-hierofante")[0]
+	var es_hierofante := func(carta): return carta.get("id", "") == "el-hierofante"
+	var hierofante: Dictionary = estado["tarot"].filter(es_hierofante)[0]
 	comprobar.call("El Hierofante queda recogido", hierofante.get("recogida", false), true)
 	comprobar.call(
 		"El Hierofante entra en memoria fantasma",
@@ -285,7 +286,8 @@ static func _acusacion(comprobar: Callable) -> void:
 		victoria.get("cartas_desbloqueadas", []),
 		["el-colgado"]
 	)
-	var colgado: Dictionary = ganador["tarot"].filter(func(carta): return carta.get("id", "") == "el-colgado")[0]
+	var es_colgado := func(carta): return carta.get("id", "") == "el-colgado"
+	var colgado: Dictionary = ganador["tarot"].filter(es_colgado)[0]
 	comprobar.call("El Colgado queda recogido", colgado.get("recogida", false), true)
 	comprobar.call(
 		"El Colgado entra en memoria fantasma",
@@ -313,7 +315,7 @@ static func _acusacion(comprobar: Callable) -> void:
 		cierre_limite.get("cartas_desbloqueadas", []),
 		[]
 	)
-	var hierofante_reset: Dictionary = firma_limite["tarot"].filter(func(carta): return carta.get("id", "") == "el-hierofante")[0]
+	var hierofante_reset: Dictionary = firma_limite["tarot"].filter(es_hierofante)[0]
 	comprobar.call(
 		"la nueva vuelta no conserva Hierofante", hierofante_reset.get("recogida", false), false
 	)
