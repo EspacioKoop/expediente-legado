@@ -60,6 +60,58 @@ static func _prometeo(comprobar: Callable) -> void:
 		"carta inexistente: no hay novedad", Prometeo.desbloquear_carta(tarot, "no-existe"), false
 	)
 
+	# #1029/#46: perder vida en ESTA vuelta re-gana El Ermitaño.
+	var estado_ermitanio := Partida.nueva()
+	var jornada_ermitanio := Jornada.nueva()
+	var derrota_careo := Acusacion.resolver_duelo(estado_ermitanio, jornada_ermitanio, false)
+	comprobar.call(
+		"perder un careo concede Ermitaño",
+		derrota_careo.get("cartas_desbloqueadas", []),
+		["el-ermitanio"]
+	)
+	var es_ermitanio := func(carta): return carta.get("id", "") == "el-ermitanio"
+	var ermitaño: Dictionary = estado_ermitanio["tarot"].filter(es_ermitanio)[0]
+	comprobar.call("Ermitaño queda recogido", ermitaño.get("recogida", false), true)
+	comprobar.call(
+		"Ermitaño entra en memoria fantasma",
+		estado_ermitanio.get("cartas_conocidas", []).has("el-ermitanio"),
+		true
+	)
+	comprobar.call(
+		"la pérdida queda marcada en esta vuelta",
+		estado_ermitanio.get("perdio_vida_en_esta_vuelta", false),
+		true
+	)
+	var segunda_derrota := Acusacion.resolver_duelo(estado_ermitanio, jornada_ermitanio, false)
+	comprobar.call(
+		"otra pérdida no reemite Ermitaño",
+		segunda_derrota.get("cartas_desbloqueadas", []),
+		[]
+	)
+
+	# Si la pérdida agota la última vida, la memoria sobrevive al reset, pero
+	# la nueva vuelta no hereda posesión ni una notificación fantasma.
+	var estado_fatal := Partida.nueva()
+	estado_fatal["vida"] = 1
+	var perdida_fatal := Acusacion.perder_vida(estado_fatal, Jornada.nueva(), 1)
+	var ermitaño_fatal: Dictionary = estado_fatal["tarot"].filter(es_ermitanio)[0]
+	comprobar.call("la pérdida fatal reasigna", perdida_fatal.get("despido", false), true)
+	comprobar.call(
+		"el reset conserva la memoria de Ermitaño",
+		estado_fatal.get("cartas_conocidas", []).has("el-ermitanio"),
+		true
+	)
+	comprobar.call(
+		"la nueva vuelta no posee Ermitaño",
+		ermitaño_fatal.get("recogida", false),
+		false
+	)
+	comprobar.call(
+		"la pérdida fatal no notifica una carta ya reseteada",
+		perdida_fatal.get("cartas_desbloqueadas", []),
+		[]
+	)
+
 	# esAcusacionPrecipitada
 	comprobar.call(
 		"acusar con poca evidencia es precipitado", Prometeo.acusacion_precipitada(1, 5, 0.5), true
