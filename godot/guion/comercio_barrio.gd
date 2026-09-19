@@ -198,6 +198,46 @@ static func comprar(
 	}
 
 
+## Reventa del inventario en El Trastero (#61/#97).
+##
+## La superficie no teletransporta objetos desde casa: fuera de casa solo existe
+## lo que el jugador lleva encima. Para vender home_storage hay que sacarlo antes
+## mediante el almacenamiento doméstico. Inventario sigue siendo la autoridad que
+## decide si un objeto es vendible y bloquea siempre los de origen onírico.
+static func vender(
+	jornada: Dictionary, inventario: Dictionary, superficie_id: String, item_id: String
+) -> Dictionary:
+	if superficie_id != "segunda_mano":
+		return _fallo_reventa(jornada, superficie_id, item_id, "superficie_sin_reventa")
+	if String(jornada.get("fase", "")) != "trayecto":
+		return _fallo_reventa(jornada, superficie_id, item_id, "fuera_del_trayecto")
+	if not jornada.has("dinero"):
+		return _fallo_reventa(jornada, superficie_id, item_id, "jornada_invalida")
+
+	Inventario.completar(inventario)
+	if not _llevado(inventario, item_id):
+		return _fallo_reventa(jornada, superficie_id, item_id, "no_llevado")
+
+	var venta := Inventario.vender(inventario, item_id)
+	if not bool(venta.get("vendido", false)):
+		return _fallo_reventa(
+			jornada,
+			superficie_id,
+			item_id,
+			String(venta.get("motivo", "reventa_rechazada")),
+		)
+
+	var importe := maxi(0, int(venta.get("dinero", 0)))
+	jornada["dinero"] = int(jornada.get("dinero", 0)) + importe
+	return {
+		"ok": true,
+		"superficie": superficie_id,
+		"id": item_id,
+		"importe": importe,
+		"dinero": int(jornada["dinero"]),
+	}
+
+
 ## Metadatos para #442. El consumidor debe llamarlo únicamente tras una
 ## interacción cultural deliberada (leer/jugar), nunca al comprar.
 static func fuente_cultural(item_id: String) -> Dictionary:
@@ -207,6 +247,13 @@ static func fuente_cultural(item_id: String) -> Dictionary:
 	if id_semilla.is_empty() or fuente.is_empty():
 		return {}
 	return {"id_semilla": id_semilla, "fuente": fuente}
+
+
+static func _llevado(inventario: Dictionary, item_id: String) -> bool:
+	for objeto in inventario[Inventario.CARRIED]:
+		if objeto is Dictionary and String(objeto.get("id", "")) == item_id:
+			return true
+	return false
 
 
 static func _buscar(item_id: String) -> Dictionary:
@@ -225,6 +272,14 @@ static func _objeto_inventario(entrada: Dictionary) -> Dictionary:
 		"vendible": bool(entrada.get("vendible", false)),
 		"precio": int(entrada.get("precio_reventa", 0)),
 	}
+
+
+static func _fallo_reventa(
+	jornada: Dictionary, superficie_id: String, item_id: String, motivo: String
+) -> Dictionary:
+	var fallo := _fallo(superficie_id, item_id, motivo)
+	fallo["dinero"] = int(jornada.get("dinero", 0))
+	return fallo
 
 
 static func _fallo(superficie_id: String, item_id: String, motivo: String) -> Dictionary:
