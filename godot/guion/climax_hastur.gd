@@ -29,10 +29,13 @@ const VIDAS_RIVAL := {
 
 
 static func clave_vuelta(jornada: Dictionary) -> String:
-	return "%d:%d" % [
-		int(jornada.get("raiz", 0)),
-		int(jornada.get("vuelta", 1)),
-	]
+	return (
+		"%d:%d"
+		% [
+			int(jornada.get("raiz", 0)),
+			int(jornada.get("vuelta", 1)),
+		]
+	)
 
 
 static func estado_actual(estado: Dictionary, jornada: Dictionary) -> Dictionary:
@@ -101,9 +104,7 @@ static func jugar(
 
 	if bool(ronda.get("terminado", false)):
 		actual["fase"] = (
-			FASE_VICTORIA
-			if String(ronda.get("ganador", "")) == "jugador"
-			else FASE_DERROTA
+			FASE_VICTORIA if String(ronda.get("ganador", "")) == "jugador" else FASE_DERROTA
 		)
 
 	return {
