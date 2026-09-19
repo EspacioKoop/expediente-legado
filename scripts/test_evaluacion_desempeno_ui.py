@@ -43,6 +43,7 @@ class EvaluacionDesempenoUiTests(unittest.TestCase):
             "cuidado_gato",
             "liquidez",
             "exploracion_onirica",
+            "dependencia_dinero",
         ):
             self.assertIn(f'"{categoria}"', UI)
         self.assertNotIn("puntuacion_total", UI)
@@ -61,6 +62,7 @@ class EvaluacionDesempenoUiTests(unittest.TestCase):
             "EVALUACION_CATEGORIA_GATO,",
             "EVALUACION_CATEGORIA_LIQUIDEZ,",
             "EVALUACION_CATEGORIA_SUENO,",
+            "EVALUACION_CATEGORIA_DEPENDENCIA_DINERO,",
             "EVALUACION_RANGO_BAJA,",
             "EVALUACION_RANGO_MEDIA,",
             "EVALUACION_RANGO_ALTA,",
@@ -73,7 +75,7 @@ class EvaluacionDesempenoUiTests(unittest.TestCase):
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
         resumen = RESUMEN.search(resultado.stdout)
         self.assertIsNotNone(resumen, resultado.stdout)
-        self.assertGreaterEqual(int(resumen.group(1)), 12, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 14, resultado.stdout)
 
 
 if __name__ == "__main__":
