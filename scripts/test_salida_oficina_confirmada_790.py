@@ -53,7 +53,6 @@ class SalidaOficinaConfirmada790Tests(unittest.TestCase):
         self.assertIn("dialogo.get_cancel_button().grab_focus.call_deferred()", self.capa)
         self.assertIn("_confirmacion_salida.hide()", self.capa)
         self.assertIn("_confirmacion_salida.exclusive = false", self.capa)
-        self.assertIn("_confirmacion_salida.hide()", self.capa)
         confirmar = self.capa.split("func _confirmar_salida_oficina()", 1)[1].split(
             "func _cancelar_salida_oficina()", 1
         )[0]
