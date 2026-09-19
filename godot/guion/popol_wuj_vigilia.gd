@@ -110,10 +110,18 @@ func _montar() -> void:
 		_libro, "PaginaDerecha", Vector3(0.98, 0.06, 1.34), Vector3(0.52, 0.15, 0.0), COLOR_PAPEL
 	)
 	_marca_izquierda = _agregar_caja(
-		_libro, "MarcaParejaIzquierda", Vector3(0.34, 0.08, 0.34), Vector3(-0.52, 0.21, 0.0), COLOR_PAREJA
+		_libro,
+		"MarcaParejaIzquierda",
+		Vector3(0.34, 0.08, 0.34),
+		Vector3(-0.52, 0.21, 0.0),
+		COLOR_PAREJA
 	)
 	_marca_derecha = _agregar_caja(
-		_libro, "MarcaParejaDerecha", Vector3(0.34, 0.08, 0.34), Vector3(0.52, 0.21, 0.0), COLOR_PAREJA
+		_libro,
+		"MarcaParejaDerecha",
+		Vector3(0.34, 0.08, 0.34),
+		Vector3(0.52, 0.21, 0.0),
+		COLOR_PAREJA
 	)
 	_actualizar_feedback()
 
