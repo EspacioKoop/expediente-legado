@@ -14,6 +14,10 @@ on:
       - 'godot/assets/modelos/**'
       - 'godot/pruebas/capturas_oficina_126.gd'
       - 'scripts/test_oficina_visual_gate_126.py'
+      - 'godot/guion/companero_idle_3d.gd'
+      - 'godot/guion/dia_companeros_idle_app.gd'
+      - 'godot/pruebas/capturas_movimiento_134.gd'
+      - 'scripts/test_movimiento_visual_gate_134.py'
       - '.godot-version'
   push:
     branches: [ main ]
@@ -28,6 +32,10 @@ on:
       - 'godot/assets/modelos/**'
       - 'godot/pruebas/capturas_oficina_126.gd'
       - 'scripts/test_oficina_visual_gate_126.py'
+      - 'godot/guion/companero_idle_3d.gd'
+      - 'godot/guion/dia_companeros_idle_app.gd'
+      - 'godot/pruebas/capturas_movimiento_134.gd'
+      - 'scripts/test_movimiento_visual_gate_134.py'
       - '.godot-version'
   workflow_dispatch:
 
@@ -94,5 +102,26 @@ jobs:
         with:
           name: SIGA-98-oficina-visual-gate-126-${{ github.sha }}
           path: dist/capturas-oficina-126
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Generar capturas de movimiento #134
+        shell: bash
+        run: |
+          set -euo pipefail
+          salida="$GITHUB_WORKSPACE/dist/capturas-movimiento-134"
+          rm -rf "$salida"
+          mkdir -p "$salida"
+          xvfb-run -a godot4 --path godot \
+            --script res://pruebas/capturas_movimiento_134.gd -- "$salida"
+          test -f "$salida/README.md"
+          test -s "$salida/momento-a.png"
+          test -s "$salida/momento-b.png"
+
+      - name: Adjuntar gate visual de movimiento #134
+        uses: actions/upload-artifact@v4
+        with:
+          name: SIGA-98-oficina-movimiento-134-${{ github.sha }}
+          path: dist/capturas-movimiento-134
           if-no-files-found: error
           retention-days: 14
