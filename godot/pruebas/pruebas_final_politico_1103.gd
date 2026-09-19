@@ -29,16 +29,18 @@ func _historias(ejes: Array) -> Dictionary:
 
 func _consistente() -> void:
 	var estado := _estado_base()
-	estado["historias_cartas"] = _historias([
-		"comunismo",
-		"comunismo",
-		"comunismo",
-		"comunismo",
-		"comunismo",
-		"comunismo",
-		"comunismo",
-		"comunismo",
-	])
+	estado["historias_cartas"] = _historias(
+		[
+			"comunismo",
+			"comunismo",
+			"comunismo",
+			"comunismo",
+			"comunismo",
+			"comunismo",
+			"comunismo",
+			"comunismo",
+		]
+	)
 	var resumen := FinalPolitico.resumen(estado, {"veredicto": "hastur_confrontado"})
 	_comprobar(resumen["patron"] == FinalPolitico.PATRON_CONSISTENTE, "run mono-eje consistente")
 	_comprobar(resumen["dominantes"] == ["comunismo"], "consistente conserva eje dominante")
@@ -47,16 +49,18 @@ func _consistente() -> void:
 
 func _plural() -> void:
 	var estado := _estado_base()
-	estado["historias_cartas"] = _historias([
-		"comunismo",
-		"comunismo",
-		"comunismo",
-		"comunismo",
-		"centrista",
-		"centrista",
-		"centrista",
-		"centrista",
-	])
+	estado["historias_cartas"] = _historias(
+		[
+			"comunismo",
+			"comunismo",
+			"comunismo",
+			"comunismo",
+			"centrista",
+			"centrista",
+			"centrista",
+			"centrista",
+		]
+	)
 	var resumen := FinalPolitico.resumen(estado)
 	_comprobar(resumen["patron"] == FinalPolitico.PATRON_PLURAL, "empate real queda plural")
 	_comprobar(resumen["dominantes"].size() == 2, "pluralidad conserva todos los dominantes")
@@ -64,16 +68,18 @@ func _plural() -> void:
 
 func _contextual() -> void:
 	var estado := _estado_base()
-	estado["historias_cartas"] = _historias([
-		"socialdemocrata",
-		"socialdemocrata",
-		"socialdemocrata",
-		"socialdemocrata",
-		"socialdemocrata",
-		"neoliberal",
-		"neoliberal",
-		"centrista",
-	])
+	estado["historias_cartas"] = _historias(
+		[
+			"socialdemocrata",
+			"socialdemocrata",
+			"socialdemocrata",
+			"socialdemocrata",
+			"socialdemocrata",
+			"neoliberal",
+			"neoliberal",
+			"centrista",
+		]
+	)
 	var resumen := FinalPolitico.resumen(estado)
 	_comprobar(
 		resumen["patron"] == FinalPolitico.PATRON_CONTEXTUAL,
@@ -87,16 +93,18 @@ func _contextual() -> void:
 
 func _logros_idempotentes() -> void:
 	var estado := _estado_base()
-	estado["historias_cartas"] = _historias([
-		"comunismo",
-		"comunismo",
-		"comunismo",
-		"comunismo",
-		"comunismo",
-		"comunismo",
-		"comunismo",
-		"comunismo",
-	])
+	estado["historias_cartas"] = _historias(
+		[
+			"comunismo",
+			"comunismo",
+			"comunismo",
+			"comunismo",
+			"comunismo",
+			"comunismo",
+			"comunismo",
+			"comunismo",
+		]
+	)
 	var nuevos := FinalPolitico.confirmar_cierre(estado)
 	_comprobar(bool(estado["final_politico_mostrado"]), "cerrar persiste la presentación")
 	_comprobar(nuevos.has("papeleta-depositada"), "llegar al final concede papeleta")
