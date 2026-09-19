@@ -23,9 +23,15 @@ func _ready() -> void:
 
 func _exit_tree() -> void:
 	var callback := Callable(self, "_al_handoff")
-	if is_instance_valid(_handoff) and _handoff.is_connected(
-		"climax_hastur_pendiente",
-		callback,
+	if (
+		is_instance_valid(_handoff)
+		and (
+			_handoff
+			. is_connected(
+				"climax_hastur_pendiente",
+				callback,
+			)
+		)
 	):
 		_handoff.disconnect("climax_hastur_pendiente", callback)
 
@@ -75,11 +81,14 @@ func _al_handoff(contexto: Dictionary) -> void:
 	if historias_actual is Historias:
 		cargas = historias_actual.cargas(partida_actual.estado)
 
-	var resultado := ClimaxHastur.iniciar(
-		partida_actual.estado,
-		dia.get("jornada"),
-		contexto,
-		cargas,
+	var resultado := (
+		ClimaxHastur
+		. iniciar(
+			partida_actual.estado,
+			dia.get("jornada"),
+			contexto,
+			cargas,
+		)
 	)
 	if String(resultado.get("resultado", "")) == "sin_handoff":
 		return
@@ -137,11 +146,14 @@ func _al_jugada(tipo: String, habilidad: String) -> void:
 	var partida_actual := _partida(dia)
 	if dia == null or partida_actual == null:
 		return
-	var resultado := ClimaxHastur.jugar(
-		partida_actual.estado,
-		dia.get("jornada"),
-		tipo,
-		habilidad,
+	var resultado := (
+		ClimaxHastur
+		. jugar(
+			partida_actual.estado,
+			dia.get("jornada"),
+			tipo,
+			habilidad,
+		)
 	)
 	if is_instance_valid(_panel):
 		_panel.refrescar(resultado.get("ronda", {}))
@@ -166,9 +178,7 @@ func _al_continuar() -> void:
 		return
 	var consecuencia := ClimaxHastur.aplicar_derrota(partida_actual.estado, jornada)
 	var accion := (
-		"derrota_despido"
-		if bool(consecuencia.get("despido", false))
-		else "derrota_reintento"
+		"derrota_despido" if bool(consecuencia.get("despido", false)) else "derrota_reintento"
 	)
 	_guardar_y_luego(dia, accion)
 
@@ -199,9 +209,12 @@ func _despues_de_guardar(accion: String) -> void:
 			var partida_actual := _partida(dia)
 			_cerrar_panel()
 			if dia != null and partida_actual != null:
-				var actual := ClimaxHastur.estado_actual(
-					partida_actual.estado,
-					dia.get("jornada"),
+				var actual := (
+					ClimaxHastur
+					. estado_actual(
+						partida_actual.estado,
+						dia.get("jornada"),
+					)
 				)
 				_mostrar_panel(dia, actual)
 		"derrota_despido":
@@ -214,9 +227,12 @@ func _publicar_final(dia: Node) -> void:
 	if dia == null or partida_actual == null:
 		return
 	_habilitar_movimiento(dia, true)
-	var contrato := ClimaxHastur.contrato_final(
-		partida_actual.estado,
-		dia.get("jornada"),
+	var contrato := (
+		ClimaxHastur
+		. contrato_final(
+			partida_actual.estado,
+			dia.get("jornada"),
+		)
 	)
 	dia.set_meta("climax_hastur_final_politico", contrato.duplicate(true))
 	final_politico_pendiente.emit(contrato.duplicate(true))
