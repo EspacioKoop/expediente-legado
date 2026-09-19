@@ -4,6 +4,8 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 VISOR = ROOT / "godot" / "guion" / "visor_expediente.gd"
+VISOR_SELLO = ROOT / "godot" / "guion" / "visor_sello_app.gd"
+ACUSACION = ROOT / "godot" / "guion" / "acusacion.gd"
 PROMETEO = ROOT / "godot" / "guion" / "prometeo.gd"
 CAPTURAR = ROOT / "godot" / "pruebas" / "capturar.gd"
 
@@ -12,6 +14,8 @@ class TarotProgresion1029Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.visor = VISOR.read_text(encoding="utf-8")
+        cls.visor_sello = VISOR_SELLO.read_text(encoding="utf-8")
+        cls.acusacion = ACUSACION.read_text(encoding="utf-8")
         cls.prometeo = PROMETEO.read_text(encoding="utf-8")
         cls.capturar = CAPTURAR.read_text(encoding="utf-8")
 
@@ -42,6 +46,50 @@ class TarotProgresion1029Test(unittest.TestCase):
         self.assertIn('desbloquear_carta_en_estado(estado, "la-estrella")', bloque)
         self.assertEqual(bloque.count('nuevas.append("el-mago")'), 1)
         self.assertEqual(bloque.count('nuevas.append("la-estrella")'), 1)
+
+    def test_veredicto_real_emite_hierofante_en_el_evento(self) -> None:
+        inicio = self.acusacion.index("static func acusar(")
+        fin = self.acusacion.index("## Quita vidas", inicio)
+        bloque = self.acusacion[inicio:fin]
+        self.assertLess(
+            bloque.index('estado["veredictos"] = veredictos'),
+            bloque.index(
+                'Prometeo.desbloquear_carta_en_estado(estado, "el-hierofante")'
+            ),
+        )
+        self.assertIn('cartas_desbloqueadas.append("el-hierofante")', bloque)
+        self.assertIn('"cartas_desbloqueadas": cartas_desbloqueadas', bloque)
+
+    def test_victoria_de_careo_emite_colgado_solo_al_ganar(self) -> None:
+        inicio = self.acusacion.index("static func resolver_duelo(")
+        fin = self.acusacion.index("## A quién se puede acusar", inicio)
+        bloque = self.acusacion[inicio:fin]
+        gana = bloque.index("if gano:")
+        desbloqueo = bloque.index(
+            'Prometeo.desbloquear_carta_en_estado(estado, "el-colgado")'
+        )
+        derrota = bloque.index("return perder_vida")
+        self.assertLess(gana, desbloqueo)
+        self.assertLess(desbloqueo, derrota)
+        self.assertIn('cartas_desbloqueadas.append("el-colgado")', bloque)
+
+    def test_visores_notifican_evento_antes_del_guardado(self) -> None:
+        for fuente in (self.visor, self.visor_sello):
+            firma_inicio = fuente.index("func _al_firmar(")
+            firma_fin = fuente.index("\n\nfunc ", firma_inicio)
+            firma = fuente[firma_inicio:firma_fin]
+            self.assertLess(
+                firma.index("_notificar_cartas_desbloqueadas(resultado)"),
+                firma.index("_guardar_o_avisar()"),
+            )
+
+            careo_inicio = fuente.index("func _al_terminar_careo(")
+            careo_fin = fuente.index("\n\nfunc ", careo_inicio)
+            careo = fuente[careo_inicio:careo_fin]
+            self.assertLess(
+                careo.index("_notificar_cartas_desbloqueadas(duelo)"),
+                careo.index("_guardar_o_avisar()"),
+            )
 
     def test_memoria_fantasma_vive_en_frontera_comun(self) -> None:
         inicio = self.prometeo.index("static func desbloquear_carta_en_estado(")

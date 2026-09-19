@@ -21,6 +21,9 @@ class GatoEcoSuenoTest(unittest.TestCase):
         self.assertIn("hambre_antes > 0 and hambre_despues == 0", dia)
         self.assertIn("var eco := GatoEcoSueno.efecto", dia)
         self.assertIn('_gato_guia.presentar_estado(String(eco.get("estado", "parado")))', dia)
+        self.assertIn("_gato.configurar_reduccion_movimiento", dia)
+        self.assertIn("_gato_guia.configurar_reduccion_movimiento", dia)
+        self.assertIn('PreferenciasSiga.cargar().get("reduccion_movimiento", false)', dia)
         self.assertIn("_orientar_gato_guia()", dia)
 
         self.assertNotIn("SuenoObjetivos", eco)
@@ -47,7 +50,7 @@ class GatoEcoSuenoTest(unittest.TestCase):
             check=False,
         )
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
-        self.assertIn("16 pasadas, 0 fallos", resultado.stdout)
+        self.assertIn("20 pasadas, 0 fallos", resultado.stdout)
         self.assertNotIn("Parse Error:", resultado.stdout)
 
 

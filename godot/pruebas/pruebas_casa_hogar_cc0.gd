@@ -36,6 +36,74 @@ func _probar() -> void:
 		return
 	_comprobar(lote.get_child_count() == Hogar.PIEZAS.size(), "todas las piezas cargan su GLB")
 	_comprobar(Hogar.montar(mundo) == lote, "montaje idempotente")
+
+	# #133: la distribución doméstica y el acceso a la consola se validan sobre
+	# la escena real, no solo buscando literales en los scripts.
+	var habitaciones := mundo.get_node_or_null(Hogar.NOMBRE_HABITACIONES) as Node3D
+	_comprobar(habitaciones != null, "la casa monta habitaciones físicas")
+	if habitaciones != null:
+		var frente := habitaciones.get_node_or_null("TabiqueDormitorioFrente") as StaticBody3D
+		var lateral := habitaciones.get_node_or_null("TabiqueDormitorioLateral") as StaticBody3D
+		var dintel := habitaciones.get_node_or_null("DintelDormitorio") as StaticBody3D
+		_comprobar(frente != null, "tabique frontal del dormitorio presente")
+		_comprobar(lateral != null, "tabique lateral del dormitorio presente")
+		_comprobar(dintel != null, "dintel del dormitorio presente")
+		if frente != null and lateral != null:
+			var caja_frente := _caja_colision(frente)
+			var caja_lateral := _caja_colision(lateral)
+			var paso_util := caja_lateral.position.x - caja_frente.end.x
+			_comprobar(paso_util >= 0.90, "la puerta conserva al menos 90 cm de paso físico")
+
+	var transiciones := mundo.get_node_or_null(Hogar.NOMBRE_TRANSICIONES) as Node3D
+	_comprobar(transiciones != null, "la casa monta transiciones domésticas")
+	if transiciones != null:
+		for nombre in [
+			"JambaDormitorioIzquierda",
+			"JambaDormitorioDerecha",
+			"MarcoSuperiorDormitorio",
+			"UmbralDormitorio",
+			"AlfombraSalon",
+		]:
+			_comprobar(transiciones.has_node(nombre), "acabado doméstico presente: " + nombre)
+
+	var consola := mundo.get_node_or_null("ConsolaSobremesa98") as ConsolaSobremesa98
+	_comprobar(consola != null, "la consola de sobremesa sigue montada")
+	if consola != null:
+		_comprobar(
+			consola.position.is_equal_approx(Vector3(-3.58, 0.54, 1.82)),
+			"la consola conserva la posición despejada del rincón de TV",
+		)
+		_comprobar(
+			is_equal_approx(consola.rotation_degrees.y, -90.0),
+			"la consola mira hacia el interior del salón",
+		)
+		var enfoque: CollisionShape3D = null
+		for hijo in consola.get_children():
+			if hijo is CollisionShape3D:
+				enfoque = hijo
+				break
+		_comprobar(enfoque != null, "la consola conserva volumen de foco")
+		if enfoque != null and enfoque.shape is BoxShape3D:
+			var caja_enfoque := enfoque.shape as BoxShape3D
+			_comprobar(
+				caja_enfoque.size.is_equal_approx(Vector3(0.68, 0.38, 0.52)),
+				"el volumen de foco sigue ampliado para el playtest",
+			)
+
+		# Simula una mirada desde el espacio libre delante del rincón de TV con el
+		# detector real del jugador. La distancia queda por debajo de sus 2,4 m.
+		var observador := Node3D.new()
+		observador.name = "ObservadorConsolaPrueba"
+		observador.position = Vector3(-1.45, 1.55, 2.35)
+		mundo.add_child(observador)
+		observador.look_at(consola.global_position + Vector3(0.0, 0.20, 0.0), Vector3.UP)
+		var detector := DetectorInteraccion3D.new()
+		observador.add_child(detector)
+		await physics_frame
+		detector.force_raycast_update()
+		_comprobar(detector.is_colliding(), "el detector real alcanza un objetivo desde el salón")
+		_comprobar(detector.get_collider() == consola, "la consola se adquiere desde el salón")
+		observador.queue_free()
 	_comprobar(lote.find_children("*", "Light3D", true, false).is_empty(), "sin luces nuevas")
 	_comprobar(lote.find_children("*", "RigidBody3D", true, false).is_empty(), "sin dinámica")
 
@@ -147,6 +215,14 @@ func _probar() -> void:
 	await create_timer(0.25).timeout
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
+
+
+func _caja_colision(cuerpo: StaticBody3D) -> AABB:
+	for hijo in cuerpo.get_children():
+		if hijo is CollisionShape3D and hijo.shape is BoxShape3D:
+			var caja := hijo.shape as BoxShape3D
+			return hijo.global_transform * AABB(-caja.size / 2.0, caja.size)
+	return AABB()
 
 
 func _caja_global(pieza: Node3D) -> AABB:

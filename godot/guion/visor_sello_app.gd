@@ -12,6 +12,7 @@ var _duelo_resuelto := false
 
 func _al_firmar(resultado: Dictionary, formulario: Control) -> void:
 	formulario.queue_free()
+	_notificar_cartas_desbloqueadas(resultado)
 	if not _guardar_o_avisar():
 		return
 	_reproducir_sello(resultado)
@@ -70,6 +71,7 @@ func _al_terminar_careo(gano: bool, careo: Node3D, acusacion: Dictionary) -> voi
 	_duelo_resuelto = true
 	careo.queue_free()
 	var duelo := Acusacion.resolver_duelo(partida.estado, jornada, gano)
+	_notificar_cartas_desbloqueadas(duelo)
 	if not _guardar_o_avisar():
 		return
 	_reproducir_remate(gano, acusacion, duelo)

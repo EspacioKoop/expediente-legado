@@ -65,6 +65,23 @@ def test_raton_y_stick_comparten_pitch_acotado_y_deadzone() -> None:
     assert "(magnitud - ZONA_MUERTA) / (1.0 - ZONA_MUERTA)" in texto
 
 
+def test_raton_gira_antes_de_que_la_gui_pueda_consumir_mousemotion() -> None:
+    texto = CAMINANTE.read_text(encoding="utf-8")
+    entrada = texto.split("func _input(evento: InputEvent) -> void:", 1)[1].split(
+        "func _unhandled_input(evento: InputEvent) -> void:", 1
+    )[0]
+    no_gestionado = texto.split(
+        "func _unhandled_input(evento: InputEvent) -> void:", 1
+    )[1].split("func _physics_process", 1)[0]
+
+    assert "InputEventMouseMotion" in entrada
+    assert "Input.MOUSE_MODE_CAPTURED" in entrada
+    assert "is_physics_processing()" in entrada
+    assert "rotate_y(" in entrada
+    assert "_camara.rotation.x" in entrada
+    assert "rotate_y(" not in no_gestionado
+
+
 def test_movimiento_tiene_aceleracion_frenado_y_analogico_real() -> None:
     texto = CAMINANTE.read_text(encoding="utf-8")
 
