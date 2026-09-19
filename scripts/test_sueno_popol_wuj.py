@@ -48,8 +48,8 @@ class SuenoPopolWujTest(unittest.TestCase):
         )
         combinado = self.sueno + self.vigilia
         self.assertNotIn("Label.new()", combinado)
-        self.assertNotIn("pregunta", combinado.lower())
-        self.assertNotIn("respuesta correcta", combinado.lower())
+        self.assertNotIn("CanvasLayer", combinado)
+        self.assertNotIn("LineEdit.new()", combinado)
 
     def test_dos_pares_y_eco_causal(self):
         self.assertIn("const ARCHIVO_OESTE", self.sueno)
