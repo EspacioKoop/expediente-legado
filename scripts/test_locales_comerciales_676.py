@@ -45,13 +45,15 @@ class LocalesComerciales676Test(unittest.TestCase):
         ).read_text(encoding="utf-8"))
 
     def test_las_puertas_exteriores_entran_y_no_compran(self):
-        self.assertIn('"EntrarElectrodomesticos"', self.identidad)
-        self.assertIn('"EntrarTiendaVideojuegos"', self.identidad)
-        bloque_video = self.identidad.split(
-            "static func _videojuegos", 1
-        )[1].split("static func _alquileres", 1)[0]
-        self.assertNotIn('"ComprarCartuchos"', bloque_video)
-        self.assertIn("Interactuable3D.Verbo.ABRIR", bloque_video)
+        self.assertIn('"EntrarElectrodomesticos"', self.locales)
+        self.assertIn('"EntrarTiendaVideojuegos"', self.locales)
+        self.assertIn(
+            'fachada.get_node_or_null("ComprarCartuchos") as Interactuable3D',
+            self.locales,
+        )
+        self.assertIn('puerta.name = "EntrarTiendaVideojuegos"', self.locales)
+        self.assertIn("puerta.activado.disconnect(llamada)", self.locales)
+        self.assertIn("puerta.verbo = Interactuable3D.Verbo.ABRIR", self.locales)
 
     def test_compra_de_videojuegos_vive_en_mostrador_interior(self):
         self.assertIn('"ComprarCartuchos"', self.locales)
@@ -67,25 +69,23 @@ class LocalesComerciales676Test(unittest.TestCase):
         for rasgo in (
             '"SueloExposicion"',
             '"FondoEscaparate"',
-            '"PuertaEntrada"',
+            '"EscaparateProfundo"',
             '"Cartela%d_%d"',
         ):
-            self.assertIn(rasgo, self.identidad)
+            self.assertIn(rasgo, self.locales)
         self.assertIn('"Frigorifico%d"', self.locales)
         self.assertIn('"Lavadora%d"', self.locales)
         self.assertIn('"TeleInterior%d"', self.locales)
 
     def test_bit98_gana_profundidad_de_escaparate(self):
-        bloque_video = self.identidad.split(
-            "static func _videojuegos", 1
-        )[1].split("static func _alquileres", 1)[0]
         for rasgo in (
             '"FondoEscaparate"',
             '"BaldaEscaparate%d"',
             '"CajaCartucho%d"',
         ):
-            self.assertIn(rasgo, bloque_video)
-        self.assertNotIn('"Cartucho%d"', bloque_video)
+            self.assertIn(rasgo, self.locales)
+        self.assertIn('frente.visible = false', self.locales)
+        self.assertIn('cartucho_plano.visible = false', self.locales)
         self.assertNotIn('"pos": Vector3(6.5, 5.0, -10.65)', self.calle)
         self.assertIn('"pos": Vector3(6.5, 6.5, -10.65)', self.calle)
         self.assertIn("hueco real en planta baja para Bit 98", self.calle)
