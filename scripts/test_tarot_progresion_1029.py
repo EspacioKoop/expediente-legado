@@ -104,10 +104,13 @@ class TarotProgresion1029Test(unittest.TestCase):
             '"cartas_desbloqueadas": cartas_desbloqueadas',
             bloque,
         )
-        self.assertIn(
-            'return {"despido": true, "vida": estado["vida"], '
-            '"cartas_desbloqueadas": []}',
+        self.assertRegex(
             bloque,
+            re.compile(
+                r'return\s*\{\s*"despido"\s*:\s*true\s*,\s*'
+                r'"vida"\s*:\s*estado\["vida"\]\s*,\s*'
+                r'"cartas_desbloqueadas"\s*:\s*\[\]\s*\}'
+            ),
         )
 
     def test_acusacion_propaga_cartas_de_la_perdida_antes_del_reset(self) -> None:
@@ -119,9 +122,13 @@ class TarotProgresion1029Test(unittest.TestCase):
             bloque,
         )
         castigo = bloque.index("castigo = perder_vida(estado, jornada, 1)")
-        propaga = bloque.index(
-            'for carta_id in castigo.get("cartas_desbloqueadas", []):'
+        propaga_match = re.search(
+            r'for\s+carta_id\s+in\s+castigo\.get\(\s*'
+            r'"cartas_desbloqueadas"\s*,\s*\[\]\s*\)\s*:',
+            bloque,
         )
+        self.assertIsNotNone(propaga_match)
+        propaga = propaga_match.start()
         limpia = bloque.index("cartas_desbloqueadas.clear()")
         self.assertLess(castigo, propaga)
         self.assertLess(propaga, limpia)
