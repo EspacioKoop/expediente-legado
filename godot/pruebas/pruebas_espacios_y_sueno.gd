@@ -200,6 +200,19 @@ static func _acusacion(comprobar: Callable) -> void:
 	# Acusar sin haber leído nada: se puede, y por eso duele.
 	var precipitada := Acusacion.acusar(estado, dia, caso, caso["sospechosos"][0], [])
 	comprobar.call("se puede firmar sin evidencia", precipitada["resultado"], "cerrado")
+	comprobar.call(
+		"el primer veredicto desbloquea El Hierofante",
+		precipitada.get("cartas_desbloqueadas", []),
+		["el-hierofante"]
+	)
+	var es_hierofante := func(carta): return carta.get("id", "") == "el-hierofante"
+	var hierofante: Dictionary = estado["tarot"].filter(es_hierofante)[0]
+	comprobar.call("El Hierofante queda recogido", hierofante.get("recogida", false), true)
+	comprobar.call(
+		"El Hierofante entra en memoria fantasma",
+		estado.get("cartas_conocidas", []).has("el-hierofante"),
+		true
+	)
 	comprobar.call("y el sistema lo apunta", precipitada["precipitada"], true)
 	comprobar.call("cuesta una vida", precipitada["vida"], Partida.VIDA_MAXIMA - 1)
 	comprobar.call("pero cuenta como cerrado igual: la nómina no distingue", dia["cerrados_hoy"], 1)
@@ -214,6 +227,9 @@ static func _acusacion(comprobar: Callable) -> void:
 	comprobar.call("el expediente queda cerrado", Acusacion.esta_cerrado(estado, caso["id"]), true)
 	var repetida := Acusacion.acusar(estado, dia, caso, caso["sospechosos"][1], [])
 	comprobar.call("no se puede volver a firmar", repetida["resultado"], "ya_cerrado")
+	comprobar.call(
+		"reintentar la firma no vuelve a emitir Tarot", repetida.get("cartas_desbloqueadas", []), []
+	)
 	comprobar.call(
 		"y no gasta acción por intentarlo", dia["acciones"], Jornada.ACCIONES_POR_DIA - 1
 	)
@@ -263,8 +279,51 @@ static func _acusacion(comprobar: Callable) -> void:
 	)
 	var ganador := Partida.nueva()
 	var vida_intacta: int = ganador["vida"]
-	Acusacion.resolver_duelo(ganador, Jornada.nueva(), true)
+	var victoria := Acusacion.resolver_duelo(ganador, Jornada.nueva(), true)
 	comprobar.call("ganarlo no cuesta nada", ganador["vida"], vida_intacta)
+	comprobar.call(
+		"ganar el careo desbloquea El Colgado",
+		victoria.get("cartas_desbloqueadas", []),
+		["el-colgado"]
+	)
+	var es_colgado := func(carta): return carta.get("id", "") == "el-colgado"
+	var colgado: Dictionary = ganador["tarot"].filter(es_colgado)[0]
+	comprobar.call("El Colgado queda recogido", colgado.get("recogida", false), true)
+	comprobar.call(
+		"El Colgado entra en memoria fantasma",
+		ganador.get("cartas_conocidas", []).has("el-colgado"),
+		true
+	)
+	var victoria_repetida := Acusacion.resolver_duelo(ganador, Jornada.nueva(), true)
+	comprobar.call(
+		"otra victoria no vuelve a emitir El Colgado",
+		victoria_repetida.get("cartas_desbloqueadas", []),
+		[]
+	)
+
+	# Si la primera firma agota la última vida, Hierofante pertenece a la vuelta
+	# que acaba de terminar: su memoria queda, pero la nueva vuelta no lo posee.
+	var firma_limite := Partida.nueva()
+	firma_limite["vida"] = 1
+	var dia_limite := Jornada.nueva()
+	var cierre_limite := Acusacion.acusar(
+		firma_limite, dia_limite, caso, caso["sospechosos"][0], []
+	)
+	comprobar.call("la firma límite provoca reasignación", cierre_limite["despido"], true)
+	comprobar.call(
+		"el reset no anuncia Hierofante como poseído",
+		cierre_limite.get("cartas_desbloqueadas", []),
+		[]
+	)
+	var hierofante_reset: Dictionary = firma_limite["tarot"].filter(es_hierofante)[0]
+	comprobar.call(
+		"la nueva vuelta no conserva Hierofante", hierofante_reset.get("recogida", false), false
+	)
+	comprobar.call(
+		"la memoria fantasma sí recuerda Hierofante",
+		firma_limite.get("cartas_conocidas", []).has("el-hierofante"),
+		true
+	)
 
 	# --- El despido ---
 	var ultimo := Partida.nueva()

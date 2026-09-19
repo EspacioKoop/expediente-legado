@@ -417,6 +417,15 @@ func _al_encontrar_carta(carta_id: String) -> void:
 	)
 
 
+## Propaga únicamente adquisiciones nacidas del evento que acaba de ocurrir.
+## Acusacion devuelve ids nuevos para que las capas superiores (pronósticos,
+## telemetría de QA, etc.) reaccionen antes del mismo guardado que persiste el
+## veredicto o el resultado del careo.
+func _notificar_cartas_desbloqueadas(resultado: Dictionary) -> void:
+	for carta_id in resultado.get("cartas_desbloqueadas", []):
+		_al_carta_desbloqueada(String(carta_id))
+
+
 ## Hook de dominio para capas que reaccionan a un hallazgo real de Tarot.
 ## Se invoca solo cuando `Prometeo.desbloquear_carta_en_estado` adquiere una carta de
 ## no recogida a recogida y siempre antes del guardado que persiste el hallazgo.
@@ -521,6 +530,7 @@ func _abrir_formulario() -> void:
 ## el esqueleto del día (#61) tiene que garantizar.
 func _al_firmar(resultado: Dictionary, formulario: Control) -> void:
 	formulario.queue_free()
+	_notificar_cartas_desbloqueadas(resultado)
 	if not _guardar_o_avisar():
 		return
 
@@ -544,6 +554,7 @@ func _al_firmar(resultado: Dictionary, formulario: Control) -> void:
 func _al_terminar_careo(gano: bool, careo: Node3D, acusacion: Dictionary) -> void:
 	careo.queue_free()
 	var duelo := Acusacion.resolver_duelo(partida.estado, jornada, gano)
+	_notificar_cartas_desbloqueadas(duelo)
 	if not _guardar_o_avisar():
 		return
 	_mostrar_cierre(acusacion, duelo)

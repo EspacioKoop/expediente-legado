@@ -65,6 +65,14 @@ static func acusar(
 	var veredictos: Dictionary = estado.get("veredictos", {})
 	veredictos[caso_id] = sospechoso["id"]
 	estado["veredictos"] = veredictos
+
+	# #1029: el primer veredicto real re-gana El Hierofante en esta vuelta.
+	# Vive aquí, junto a la firma irreversible, para que cargar/abrir UI nunca
+	# fabrique la recompensa a posteriori.
+	var cartas_desbloqueadas := []
+	if Prometeo.desbloquear_carta_en_estado(estado, "el-hierofante"):
+		cartas_desbloqueadas.append("el-hierofante")
+
 	jornada["cerrados_hoy"] += 1
 
 	var pistas: Array = caso.get("pistas", [])
@@ -81,6 +89,11 @@ static func acusar(
 			int(jornada.get("acusaciones_precipitadas_hoy", 0)) + 1
 		)
 		castigo = perder_vida(estado, jornada, 1)
+		# Si esta firma agotó la última vida, reiniciar_vuelta() ya retiró la
+		# posesión per-run. La memoria fantasma permanece, pero la UI no debe
+		# anunciar como poseída una carta que pertenece a la vuelta terminada.
+		if castigo.get("despido", false):
+			cartas_desbloqueadas.clear()
 
 	return {
 		"resultado": "cerrado",
@@ -90,6 +103,7 @@ static func acusar(
 		"evidencia": [encontradas, pistas.size()],
 		"vida": estado["vida"],
 		"despido": castigo.get("despido", false),
+		"cartas_desbloqueadas": cartas_desbloqueadas,
 		# Un sospechoso con réplicas escritas no se deja acusar sin más: hay
 		# careo. El duelo NO cambia el veredicto —ya está firmado— pero perderlo
 		# cuesta una vida, así que es una escena con algo en juego.
@@ -120,7 +134,16 @@ static func perder_vida(estado: Dictionary, jornada: Dictionary, cuantas: int) -
 ## se toca.
 static func resolver_duelo(estado: Dictionary, jornada: Dictionary, gano: bool) -> Dictionary:
 	if gano:
-		return {"despido": false, "vida": estado.get("vida", 3)}
+		var cartas_desbloqueadas := []
+		# #1029/#46: El Colgado se re-gana por una victoria de ESTA vuelta.
+		# El resultado del careo es el emisor; no se deriva de memoria histórica.
+		if Prometeo.desbloquear_carta_en_estado(estado, "el-colgado"):
+			cartas_desbloqueadas.append("el-colgado")
+		return {
+			"despido": false,
+			"vida": estado.get("vida", 3),
+			"cartas_desbloqueadas": cartas_desbloqueadas,
+		}
 	return perder_vida(estado, jornada, 1)
 
 
