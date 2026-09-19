@@ -117,15 +117,18 @@ func _montar_superficie_pantalla(tam: Vector3) -> void:
 	Modelos._pintar(_cristal_pantalla, Color(0.045, 0.060, 0.070), "cristal_urbano")
 	add_child(_cristal_pantalla)
 
-	_emision_pantalla = Pantalla.montar(
-		self,
-		{
-			"pos": pos_frente + Vector3(0.004, 0.0, 0.0),
-			"tam": tam_pantalla,
-			"giro": 90.0,
-			"contenido": "",
-			"semilla": 133.0,
-		},
+	_emision_pantalla = (
+		Pantalla
+		. montar(
+			self,
+			{
+				"pos": pos_frente + Vector3(0.004, 0.0, 0.0),
+				"tam": tam_pantalla,
+				"giro": 90.0,
+				"contenido": "",
+				"semilla": 133.0,
+			},
+		)
 	)
 	_emision_pantalla.name = "EmisionPantallaTV"
 	_emision_pantalla.visible = false
