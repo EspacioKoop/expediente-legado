@@ -280,6 +280,43 @@ static func _acusacion(comprobar: Callable) -> void:
 	)
 	comprobar.call("el gato sigue siendo tuyo", dia4["gato"]["dias_sin_comer"], 2)
 
+	var historial_despido: Array = ultimo.get("evaluaciones_desempeno", [])
+	comprobar.call("el despido sella una evaluación", historial_despido.size(), 1)
+	comprobar.call("el sello recuerda la vuelta terminada", historial_despido[0]["vuelta"], 1)
+	comprobar.call(
+		"el sello explica la reasignación", historial_despido[0]["motivo"], "reasignacion"
+	)
+
+	# Sellar es una frontera de ciclo de vida, no una escena: sirve igual para un
+	# final narrativo y repetir la llamada no duplica historial.
+	var finalizado := Partida.nueva()
+	for i in 6:
+		finalizado["veredictos"]["caso-%d" % i] = "firma"
+	var primer_sello := EvaluacionDesempeno.sellar(finalizado, "final_narrativo")
+	var segundo_sello := EvaluacionDesempeno.sellar(finalizado, "final_narrativo")
+	comprobar.call("sellar dos veces no duplica", finalizado["evaluaciones_desempeno"].size(), 1)
+	comprobar.call("el reintento devuelve el mismo sello", segundo_sello, primer_sello)
+	comprobar.call(
+		"el motivo no depende de una cinemática", primer_sello["motivo"], "final_narrativo"
+	)
+	comprobar.call(
+		"seis cierres en la primera vida son productividad alta",
+		primer_sello["evaluacion"]["productividad"],
+		EvaluacionDesempeno.ALTA
+	)
+	Jornada.reiniciar_vuelta(finalizado["jornada"])
+	comprobar.call(
+		"la segunda vida no hereda la productividad anterior",
+		EvaluacionDesempeno.calcular(finalizado)["productividad"],
+		EvaluacionDesempeno.BAJA
+	)
+	var recargado = JSON.parse_string(JSON.stringify(finalizado))
+	comprobar.call(
+		"el historial serializado sigue siendo válido",
+		EvaluacionDesempeno.validar_historial(recargado["evaluaciones_desempeno"]),
+		[]
+	)
+
 	comprobar.call(
 		"en fácil se exige menos evidencia",
 		Acusacion.DIFICULTADES["facil"]["umbral"] < Acusacion.DIFICULTADES["dificil"]["umbral"],

@@ -93,6 +93,9 @@ static func nueva() -> Dictionary:
 		# escribe el día y las firmas, pero cargar los descarta silenciosamente.
 		"jornada": Jornada.nueva(),
 		"veredictos": {},
+		# #150: historial inmutable de evaluaciones ya selladas. Vive en Partida
+		# para sobrevivir a reasignaciones; nunca sustituye el estado vivo de Jornada.
+		"evaluaciones_desempeno": [],
 		# #155: mejores reconstrucciones por expediente. Solo son estado
 		# derivado (ids/puntuación/cobertura/rango), nunca copias de documentos.
 		"reconstrucciones": {},
@@ -285,6 +288,12 @@ static func validar(guardado) -> Array:
 	for clave in ["pistas_descubiertas", "cartas_conocidas", "sueno_vencidos", "sellos_obtenidos"]:
 		if guardado.has(clave) and typeof(guardado[clave]) != TYPE_ARRAY:
 			errores.append("%s no es una lista" % clave)
+	if guardado.has("evaluaciones_desempeno"):
+		if typeof(guardado["evaluaciones_desempeno"]) != TYPE_ARRAY:
+			errores.append("evaluaciones_desempeno no es una lista")
+		else:
+			for error in EvaluacionDesempeno.validar_historial(guardado["evaluaciones_desempeno"]):
+				errores.append("evaluaciones_desempeno.%s" % error)
 	for clave in ["anomalias_descubiertas", "anomalias_descubiertas_vuelta"]:
 		if guardado.has(clave) and typeof(guardado[clave]) != TYPE_ARRAY:
 			errores.append("%s no es una lista" % clave)
