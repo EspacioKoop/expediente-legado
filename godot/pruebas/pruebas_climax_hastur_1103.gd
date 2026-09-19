@@ -144,10 +144,13 @@ func _derrota_idempotente() -> void:
 	var estado := Partida.nueva()
 	var jornada: Dictionary = estado["jornada"]
 	jornada["raiz"] = 8
-	ClimaxHastur.iniciar(
-		estado,
-		jornada,
-		{"climax_hastur_pendiente": true},
+	(
+		ClimaxHastur
+		. iniciar(
+			estado,
+			jornada,
+			{"climax_hastur_pendiente": true},
+		)
 	)
 
 	for jugada in ["silencio", "insistencia", "objecion"]:
