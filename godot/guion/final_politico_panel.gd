@@ -25,6 +25,11 @@ func _ready() -> void:
 	_construir()
 
 
+func bloquear(bloqueado: bool) -> void:
+	if is_instance_valid(_boton):
+		_boton.disabled = bloqueado
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("cancelar"):
 		get_viewport().set_input_as_handled()
