@@ -160,6 +160,24 @@ class TarotProgresion1029Test(unittest.TestCase):
             ),
         )
 
+    def test_despido_registra_muerte_antes_del_reset(self) -> None:
+        inicio = self.acusacion.index("static func perder_vida(")
+        fin = self.acusacion.index("## Cierra el careo", inicio)
+        bloque = self.acusacion[inicio:fin]
+        muerte = bloque.index(
+            'Prometeo.desbloquear_carta_en_estado(estado, "la-muerte")'
+        )
+        reset = bloque.index("Prometeo.reiniciar_vuelta")
+        self.assertLess(muerte, reset)
+        self.assertRegex(
+            bloque,
+            re.compile(
+                r'return\s*\{\s*"despido"\s*:\s*true\s*,\s*'
+                r'"vida"\s*:\s*estado\["vida"\]\s*,\s*'
+                r'"cartas_desbloqueadas"\s*:\s*\[\]\s*\}'
+            ),
+        )
+
     def test_acusacion_propaga_cartas_de_la_perdida_antes_del_reset(self) -> None:
         inicio = self.acusacion.index("static func acusar(")
         fin = self.acusacion.index("## Quita vidas", inicio)
