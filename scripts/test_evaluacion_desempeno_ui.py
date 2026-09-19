@@ -10,7 +10,7 @@ UI = (ROOT / "godot/guion/evaluacion_desempeno_siga.gd").read_text(encoding="utf
 ADAPTADOR = (ROOT / "godot/guion/dia_escritorio_siga_app.gd").read_text(encoding="utf-8")
 TEXTOS = (ROOT / "godot/datos/textos.csv").read_text(encoding="utf-8")
 PRUEBA_GODOT = "res://pruebas/pruebas_evaluacion_desempeno_ui.gd"
-RESUMEN = re.compile(r"(\\d+) pasadas, 0 fallos")
+RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 
 
 class EvaluacionDesempenoUiTests(unittest.TestCase):
