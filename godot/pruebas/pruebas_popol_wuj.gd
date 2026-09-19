@@ -34,7 +34,9 @@ func _probar_gate_y_semilla() -> void:
 		["popol_wuj"],
 		"Popol Wuj participa en catálogo común",
 	)
-	var entrada: Dictionary = SemillasOniricas.obtener_semillas(jornada)["semilla_onirica_popol_wuj"]
+	var entrada: Dictionary = (
+		SemillasOniricas.obtener_semillas(jornada)["semilla_onirica_popol_wuj"]
+	)
 	_comprobar(entrada["fuentes"], ["libro:popol_wuj_98"], "la procedencia es estable")
 	_comprobar(entrada["intensidad"], 2, "intensidad declarada conservada")
 	jornada["dia"] = 9
@@ -83,7 +85,9 @@ func _probar_parejas_eco_y_equivalencia() -> void:
 		SuenoPopolWuj.TELEFONO_ESTE,
 		"teléfonos forman segunda pareja",
 	)
-	_comprobar(sueno.get_node_or_null("EcosCausales") != null, "los ecos tienen representación física")
+	_comprobar(
+		sueno.get_node_or_null("EcosCausales") != null, "los ecos tienen representación física"
+	)
 	_comprobar(
 		sueno.get_node("EcosCausales").get_child_count(),
 		2,
@@ -113,7 +117,9 @@ func _probar_parejas_eco_y_equivalencia() -> void:
 	_comprobar(not primer_eco["equivalencias"]["archivadores"], "un eco no fuerza éxito automático")
 
 	var segundo_eco := sueno.intervenir(SuenoPopolWuj.ARCHIVO_OESTE)
-	_comprobar(segundo_eco["equivalencias"]["archivadores"], "archivadores pueden quedar equivalentes")
+	_comprobar(
+		segundo_eco["equivalencias"]["archivadores"], "archivadores pueden quedar equivalentes"
+	)
 	_comprobar(not segundo_eco["puerta_abierta"], "una sola pareja resuelta no abre la puerta")
 
 	sueno.intervenir(SuenoPopolWuj.TELEFONO_OESTE)
@@ -162,13 +168,16 @@ func _probar_accesibilidad_y_reproduccion() -> void:
 	copia.preparar()
 	copia.restaurar_estado(guardado)
 	_comprobar(copia.estado_reproducible(), guardado, "estado se reproduce exactamente")
-	copia.restaurar_estado(
-		{
-			SuenoPopolWuj.ARCHIVO_OESTE: 99,
-			SuenoPopolWuj.ARCHIVO_ESTE: -4,
-			SuenoPopolWuj.TELEFONO_OESTE: 1,
-			SuenoPopolWuj.TELEFONO_ESTE: 1,
-		}
+	(
+		copia
+		. restaurar_estado(
+			{
+				SuenoPopolWuj.ARCHIVO_OESTE: 99,
+				SuenoPopolWuj.ARCHIVO_ESTE: -4,
+				SuenoPopolWuj.TELEFONO_OESTE: 1,
+				SuenoPopolWuj.TELEFONO_ESTE: 1,
+			}
+		)
 	)
 	_comprobar(
 		copia.estado_reproducible()[SuenoPopolWuj.ARCHIVO_OESTE],
