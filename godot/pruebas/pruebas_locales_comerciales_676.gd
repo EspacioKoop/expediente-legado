@@ -47,7 +47,7 @@ func _probar() -> void:
 	var fachada_electro := calle.get_node("Electrodomesticos")
 	var fachada_bit98 := calle.get_node("TiendaVideojuegos")
 	var entrar_electro := (
-		fachada_electro.get_node_or_null("EntrarElectrodomesticos") as Interactuable3D
+		fachada_electro.find_child("EntrarElectrodomesticos", true, false) as Interactuable3D
 	)
 	var entrar_bit98 := fachada_bit98.get_node_or_null("EntrarTiendaVideojuegos") as Interactuable3D
 	_comprobar(entrar_electro != null, "Electrodomesticos tiene puerta interactuable")
