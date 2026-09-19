@@ -1,8 +1,9 @@
 ## Regresión runtime de la cámara libre (#396).
 ##
 ## El caso reproduce la condición que escapaba a la cobertura estática: una GUI
-## capaz de consumir MouseMotion convive con el caminante. La cámara debe girar
-## en _input antes de que esa GUI procese el mismo evento.
+## capaz de consumir MouseMotion convive con el caminante. El backend headless
+## no puede capturar un puntero real, así que el contrato separa los guardas de
+## entrada de la aplicación del delta y prueba ambas piezas sin fingir hardware.
 extends SceneTree
 
 const CAMINANTE_ESCENA := preload("res://escenas/caminante.tscn")
@@ -38,66 +39,77 @@ func _probar() -> void:
 	await process_frame
 
 	var camara := caminante.get_node("Camara") as Camera3D
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	await process_frame
-
 	var yaw_inicial := caminante.rotation.y
 	var pitch_inicial := camara.rotation.x
 	var movimiento := InputEventMouseMotion.new()
 	movimiento.relative = Vector2(120.0, -48.0)
 	movimiento.position = Vector2(512.0, 340.0)
 
-	# Orden real de Godot: _input precede a _gui_input. La GUI acepta después el
-	# evento para demostrar que consumirlo no puede deshacer el giro ya aplicado.
-	caminante.call("_input", movimiento)
-	consumidor.call("_gui_input", movimiento)
+	_comprobar(
+		CAMINANTE_ESCENA.instantiate().get_script().debe_procesar_movimiento_raton(
+			true, true, false, false
+		),
+		"captura activa permite MouseMotion de gameplay",
+	)
+	_comprobar(
+		not CAMINANTE_ESCENA.instantiate().get_script().debe_procesar_movimiento_raton(
+			false, true, false, false
+		),
+		"ratón visible bloquea MouseMotion de gameplay",
+	)
+	_comprobar(
+		not CAMINANTE_ESCENA.instantiate().get_script().debe_procesar_movimiento_raton(
+			true, false, false, false
+		),
+		"física inactiva bloquea MouseMotion de gameplay",
+	)
+	_comprobar(
+		not CAMINANTE_ESCENA.instantiate().get_script().debe_procesar_movimiento_raton(
+			true, true, true, false
+		),
+		"árbol pausado bloquea MouseMotion de gameplay",
+	)
+	_comprobar(
+		not CAMINANTE_ESCENA.instantiate().get_script().debe_procesar_movimiento_raton(
+			true, true, false, true
+		),
+		"cámara de diálogo bloquea MouseMotion de gameplay",
+	)
 
-	_comprobar(consumidor.movimientos == 1, "la GUI consume MouseMotion")
+	# La aplicación del delta es independiente del backend de ventana. En juego
+	# _input la invoca antes de que una GUI pueda consumir el mismo MouseMotion.
+	caminante.call("_aplicar_movimiento_raton", movimiento)
+	consumidor.call("_gui_input", movimiento)
+	_comprobar(consumidor.movimientos == 1, "la GUI consume MouseMotion después")
 	_comprobar(
 		not is_equal_approx(caminante.rotation.y, yaw_inicial),
-		"MouseMotion cambia yaw antes de la GUI",
+		"el delta cambia yaw",
 	)
 	_comprobar(
 		not is_equal_approx(camara.rotation.x, pitch_inicial),
-		"MouseMotion cambia pitch antes de la GUI",
+		"el delta cambia pitch",
 	)
 
-	var yaw_tras_giro := caminante.rotation.y
-	caminante.set_physics_process(false)
-	caminante.call("_input", movimiento)
-	_comprobar(
-		is_equal_approx(caminante.rotation.y, yaw_tras_giro),
-		"una pantalla que desactiva la física bloquea el giro",
-	)
-	caminante.set_physics_process(true)
-
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	caminante.call("_input", movimiento)
-	_comprobar(
-		is_equal_approx(caminante.rotation.y, yaw_tras_giro),
-		"ratón visible no mueve la cámara de gameplay",
-	)
-
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	var extremo := InputEventMouseMotion.new()
 	extremo.relative = Vector2(0.0, -100000.0)
-	caminante.call("_input", extremo)
+	caminante.call("_aplicar_movimiento_raton", extremo)
 	_comprobar(
 		camara.rotation.x <= deg_to_rad(85.0) + 0.0001,
 		"el pitch conserva el límite superior",
 	)
 	extremo.relative = Vector2(0.0, 100000.0)
-	caminante.call("_input", extremo)
+	caminante.call("_aplicar_movimiento_raton", extremo)
 	_comprobar(
 		camara.rotation.x >= -deg_to_rad(85.0) - 0.0001,
 		"el pitch conserva el límite inferior",
 	)
 
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	root.remove_child(consumidor)
 	consumidor.free()
 	root.remove_child(caminante)
 	caminante.free()
+	for _frame in 2:
+		await process_frame
 
 	if _fallos == 0:
 		print("Camara #396 runtime: OK (%d comprobaciones)" % _pasadas)
@@ -105,7 +117,6 @@ func _probar() -> void:
 		return
 	push_error("Camara #396 runtime: %d fallos" % _fallos)
 	quit(1)
-
 
 func _comprobar(condicion: bool, nombre: String) -> void:
 	if condicion:
