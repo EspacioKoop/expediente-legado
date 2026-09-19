@@ -94,13 +94,16 @@ func _init() -> void:
 		if not _guardar_captura(destino):
 			quit(1)
 			return
-		manifiesto["casos"].append(
-			{
-				"id": String(caso["id"]),
-				"captura": archivo,
-				"criterio": String(caso["criterio"]),
-				"sha256": FileAccess.get_sha256(destino),
-			}
+		(
+			manifiesto["casos"]
+			. append(
+				{
+					"id": String(caso["id"]),
+					"captura": archivo,
+					"criterio": String(caso["criterio"]),
+					"sha256": FileAccess.get_sha256(destino),
+				}
+			)
 		)
 
 	var ruta_manifiesto := salida.path_join("manifest.json")
