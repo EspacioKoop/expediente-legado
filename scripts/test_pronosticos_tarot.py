@@ -19,10 +19,14 @@ class PronosticosTarotTests(unittest.TestCase):
         inicio = BASE.index("func _sincronizar_tarot_por_pista()")
         fin = BASE.index("## Encontrar una carta escondida", inicio)
         bloque = BASE[inicio:fin]
-        self.assertIn(
-            "for carta_id in Prometeo.sincronizar_tarot_por_pistas(partida.estado):",
+        self.assertRegex(
             bloque,
+            re.compile(
+                r"nuevas\s*:=\s*Prometeo\.sincronizar_tarot_por_pistas\s*\(\s*"
+                r"partida\.estado\s*\)"
+            ),
         )
+        self.assertRegex(bloque, re.compile(r"for\s+carta_id\s+in\s+nuevas\s*:"))
         self.assertIn("_al_carta_desbloqueada(carta_id)", bloque)
 
         inicio = PROMETEO.index("static func sincronizar_tarot_por_pistas(")
