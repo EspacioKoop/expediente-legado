@@ -1,4 +1,7 @@
 import re
+import subprocess
+import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -7,6 +10,8 @@ RAIZ = Path(__file__).resolve().parents[1]
 PRESETS = RAIZ / "godot/export_presets.cfg"
 SCRIPT = RAIZ / "dist/exportar-godot-alpha.sh"
 WORKFLOW = RAIZ / ".github/workflows/alpha-playtest.yml"
+AUDITOR = RAIZ / "scripts/auditar_frontera_qa.py"
+MARCADOR_QA = RAIZ / "godot/debug/qa_export_marker_116.tres"
 
 
 class ExportacionGodotTest(unittest.TestCase):
@@ -82,6 +87,44 @@ class ExportacionGodotTest(unittest.TestCase):
             "${{ startsWith(github.ref, 'refs/tags/v') && '0' || '1' }}"
         ).replace("\\", "")
         self.assertIn(expresion, workflow)
+
+    def test_el_workflow_demuestra_la_frontera_sobre_paquetes_y_ejecutables(self):
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        self.assertTrue(AUDITOR.is_file())
+        self.assertTrue(MARCADOR_QA.is_file())
+        self.assertIn('--export-pack "Linux x86_64 QA"', workflow)
+        self.assertIn('--export-pack "Linux x86_64"', workflow)
+        self.assertIn("auditar_frontera_qa.py qa", workflow)
+        self.assertIn("auditar_frontera_qa.py publico", workflow)
+        self.assertIn("SIGA98_ARTEFACTO_PUBLICO:", workflow)
+        self.assertIn("dist/salida/godot-linux/SIGA-98.x86_64", workflow)
+        self.assertIn("dist/salida/godot-windows/SIGA-98.exe", workflow)
+
+    def test_el_auditor_distingue_un_artefacto_qa_de_uno_publico(self):
+        with tempfile.TemporaryDirectory(prefix="frontera-qa-") as temporal:
+            qa = Path(temporal) / "qa.bin"
+            publico = Path(temporal) / "publico.bin"
+            qa.write_bytes(b"cabecera qa_export_marker_116 cola")
+            publico.write_bytes(b"cabecera sin herramientas internas")
+
+            for modo, artefacto in (("qa", qa), ("publico", publico)):
+                resultado = subprocess.run(
+                    [sys.executable, str(AUDITOR), modo, str(artefacto)],
+                    text=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    check=False,
+                )
+                self.assertEqual(0, resultado.returncode, resultado.stdout)
+
+            fallo = subprocess.run(
+                [sys.executable, str(AUDITOR), "publico", str(qa)],
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                check=False,
+            )
+            self.assertNotEqual(0, fallo.returncode)
 
 
 if __name__ == "__main__":
