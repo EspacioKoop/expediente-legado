@@ -95,9 +95,7 @@ func _probar_reventa_segunda_mano() -> void:
 	)
 	_comprobar(Inventario.contiene(inventario, "taza-reventa"), "rechazo no consume el objeto")
 
-	var guardado := ComercioBarrio.vender(
-		jornada, inventario, "segunda_mano", "marco-guardado"
-	)
+	var guardado := ComercioBarrio.vender(jornada, inventario, "segunda_mano", "marco-guardado")
 	_comprobar(String(guardado.get("motivo", "")) == "no_llevado", "no vende desde home_storage")
 	_comprobar(Inventario.contiene(inventario, "marco-guardado"), "home_storage sigue intacto")
 
@@ -108,12 +106,12 @@ func _probar_reventa_segunda_mano() -> void:
 	_comprobar(not Inventario.contiene(inventario, "taza-reventa"), "vender consume el objeto")
 
 	var saldo_antes_onirico := int(jornada["dinero"])
-	var onirica := ComercioBarrio.vender(
-		jornada, inventario, "segunda_mano", "llave-imposible"
-	)
+	var onirica := ComercioBarrio.vender(jornada, inventario, "segunda_mano", "llave-imposible")
 	_comprobar(String(onirica.get("motivo", "")) == "onirico", "el origen onírico bloquea reventa")
 	_comprobar(int(jornada["dinero"]) == saldo_antes_onirico, "lo onírico no da dinero")
-	_comprobar(Inventario.contiene(inventario, "llave-imposible"), "rechazo onírico conserva objeto")
+	_comprobar(
+		Inventario.contiene(inventario, "llave-imposible"), "rechazo onírico conserva objeto"
+	)
 	_comprobar(int(jornada["acciones"]) == acciones_antes, "reventa no concede acciones")
 	_comprobar(int(jornada["cerrados_hoy"]) == cierres_antes, "reventa no altera trabajo")
 
