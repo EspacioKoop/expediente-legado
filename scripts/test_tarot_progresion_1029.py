@@ -82,6 +82,57 @@ class TarotProgresion1029Test(unittest.TestCase):
         self.assertIn('cartas_desbloqueadas.append("el-hierofante")', bloque)
         self.assertIn('"cartas_desbloqueadas": cartas_desbloqueadas', bloque)
 
+    def test_perder_vida_emite_ermitanio_desde_la_frontera_comun(self) -> None:
+        inicio = self.acusacion.index("static func perder_vida(")
+        fin = self.acusacion.index("## Cierra el careo", inicio)
+        bloque = self.acusacion[inicio:fin]
+        self.assertIn("vida_anterior", bloque)
+        self.assertIn('estado["vida"] < vida_anterior', bloque)
+        self.assertIn('estado["perdio_vida_en_esta_vuelta"] = true', bloque)
+        self.assertIn(
+            'Prometeo.desbloquear_carta_en_estado(estado, "el-ermitanio")',
+            bloque,
+        )
+        self.assertIn('cartas_desbloqueadas.append("el-ermitanio")', bloque)
+        self.assertLess(
+            bloque.index(
+                'Prometeo.desbloquear_carta_en_estado(estado, "el-ermitanio")'
+            ),
+            bloque.index("Prometeo.reiniciar_vuelta"),
+        )
+        self.assertIn(
+            '"cartas_desbloqueadas": cartas_desbloqueadas',
+            bloque,
+        )
+        self.assertRegex(
+            bloque,
+            re.compile(
+                r'return\s*\{\s*"despido"\s*:\s*true\s*,\s*'
+                r'"vida"\s*:\s*estado\["vida"\]\s*,\s*'
+                r'"cartas_desbloqueadas"\s*:\s*\[\]\s*\}'
+            ),
+        )
+
+    def test_acusacion_propaga_cartas_de_la_perdida_antes_del_reset(self) -> None:
+        inicio = self.acusacion.index("static func acusar(")
+        fin = self.acusacion.index("## Quita vidas", inicio)
+        bloque = self.acusacion[inicio:fin]
+        self.assertNotIn(
+            'estado["perdio_vida_en_esta_vuelta"] = true',
+            bloque,
+        )
+        castigo = bloque.index("castigo = perder_vida(estado, jornada, 1)")
+        propaga_match = re.search(
+            r'for\s+carta_id\s+in\s+castigo\.get\(\s*'
+            r'"cartas_desbloqueadas"\s*,\s*\[\]\s*\)\s*:',
+            bloque,
+        )
+        self.assertIsNotNone(propaga_match)
+        propaga = propaga_match.start()
+        limpia = bloque.index("cartas_desbloqueadas.clear()")
+        self.assertLess(castigo, propaga)
+        self.assertLess(propaga, limpia)
+
     def test_victoria_de_careo_emite_colgado_solo_al_ganar(self) -> None:
         inicio = self.acusacion.index("static func resolver_duelo(")
         fin = self.acusacion.index("## A quién se puede acusar", inicio)

@@ -83,12 +83,12 @@ static func acusar(
 
 	var castigo := {}
 	if precipitada:
-		# Señal ya prevista por #150: pertenece a toda la vida laboral, no al día.
-		estado["perdio_vida_en_esta_vuelta"] = true
 		jornada["acusaciones_precipitadas_hoy"] = (
 			int(jornada.get("acusaciones_precipitadas_hoy", 0)) + 1
 		)
 		castigo = perder_vida(estado, jornada, 1)
+		for carta_id in castigo.get("cartas_desbloqueadas", []):
+			cartas_desbloqueadas.append(carta_id)
 		# Si esta firma agotó la última vida, reiniciar_vuelta() ya retiró la
 		# posesión per-run. La memoria fantasma permanece, pero la UI no debe
 		# anunciar como poseída una carta que pertenece a la vuelta terminada.
@@ -118,16 +118,30 @@ static func acusar(
 ## ahí, porque son del sistema y no tuyos. Otra persona en el mismo puesto
 ## hereda tu trabajo, incluidos tus errores.
 static func perder_vida(estado: Dictionary, jornada: Dictionary, cuantas: int) -> Dictionary:
-	estado["vida"] = maxi(0, int(estado.get("vida", 3)) - cuantas)
+	var vida_anterior := int(estado.get("vida", 3))
+	estado["vida"] = maxi(0, vida_anterior - cuantas)
+	var cartas_desbloqueadas := []
+	if estado["vida"] < vida_anterior:
+		# #1029/#46: El Ermitaño se re-gana por perder vida en ESTA vuelta.
+		# La pérdida real es el emisor común para acusación, careo y otros daños.
+		estado["perdio_vida_en_esta_vuelta"] = true
+		if Prometeo.desbloquear_carta_en_estado(estado, "el-ermitanio"):
+			cartas_desbloqueadas.append("el-ermitanio")
 	if estado["vida"] > 0:
-		return {"despido": false, "vida": estado["vida"]}
+		return {
+			"despido": false,
+			"vida": estado["vida"],
+			"cartas_desbloqueadas": cartas_desbloqueadas,
+		}
 
 	# Hay que sellar ANTES del reset: Jornada contiene todavía el mapa, dinero y gato
 	# de la vida que acaba. La operación es idempotente si esta ruta se reintenta.
 	EvaluacionDesempeno.sellar(estado, "reasignacion", jornada)
 	Prometeo.reiniciar_vuelta(estado, ajustes(estado)["vidas"])
 	Jornada.reiniciar_vuelta(jornada)
-	return {"despido": true, "vida": estado["vida"]}
+	# La memoria fantasma conserva el evento, pero la nueva vuelta ya no posee
+	# El Ermitaño y por tanto no debe recibir una notificación de la vuelta anterior.
+	return {"despido": true, "vida": estado["vida"], "cartas_desbloqueadas": []}
 
 
 ## Cierra el careo. Perder cuesta una vida; el veredicto ya está firmado y no
