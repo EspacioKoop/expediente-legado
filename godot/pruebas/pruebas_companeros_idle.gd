@@ -55,14 +55,18 @@ func _probar_atencion_selectiva() -> void:
 	root.add_child(idle)
 	idle.configurar(cuerpo, 134, false, false, false, false, false, true, actor)
 	idle._process(0.2)
-	_comprobar(not is_zero_approx(cuerpo.rotation.y), "una figura seleccionada reacciona al paso frontal")
+	_comprobar(
+		not is_zero_approx(cuerpo.rotation.y), "una figura seleccionada reacciona al paso frontal"
+	)
 	_comprobar(
 		absf(cuerpo.rotation.y) <= Idle.GIRO_ATENCION_MAX + 0.001,
 		"la atención nunca supera el giro corporal permitido"
 	)
 	actor.position = Vector3(0.0, 0.0, 2.0)
 	idle._process(0.5)
-	_comprobar(is_zero_approx(cuerpo.rotation.y), "al quedar detrás recupera suavemente su orientación")
+	_comprobar(
+		is_zero_approx(cuerpo.rotation.y), "al quedar detrás recupera suavemente su orientación"
+	)
 	idle.free()
 	escenario.free()
 
