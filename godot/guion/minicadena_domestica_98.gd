@@ -34,6 +34,10 @@ var _reproduciendo := false
 var _audio: AudioStreamPlayer3D
 
 
+func _ready() -> void:
+	_sincronizar_audio()
+
+
 func configurar(jornada: Dictionary = {}) -> void:
 	_jornada = jornada
 	if _catalogo.is_empty():
@@ -321,7 +325,7 @@ func _sincronizar_audio(regenerar_stream: bool = false) -> void:
 			_audio.stop()
 		_audio.stream = _crear_textura_audio()
 	if _encendida and _reproduciendo:
-		if not _audio.playing:
+		if _audio.is_inside_tree() and not _audio.playing:
 			_audio.play()
 	elif _audio.playing:
 		_audio.stop()
