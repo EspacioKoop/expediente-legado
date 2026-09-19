@@ -34,6 +34,9 @@ class EvidenciaProps680Test(unittest.TestCase):
         self.assertIn("persiana.interactuar(dia._caminante)", self.captura)
         self.assertIn('Props.objeto_inventario("palanca_kkryy")', self.captura)
         self.assertIn('Props.objeto_inventario("linterna_kkryy")', self.captura)
+        self.assertIn("_props_en_encuadre(dia)", self.captura)
+        self.assertIn("camara.unproject_position", self.captura)
+        self.assertIn("camara.is_position_behind", self.captura)
 
     def test_presupuesto_incremental_esta_fijado(self):
         for contrato in (
