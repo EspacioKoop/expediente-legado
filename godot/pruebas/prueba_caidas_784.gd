@@ -66,6 +66,13 @@ func _probar_rescate_y_reentrada() -> void:
 		await process_frame
 	await physics_frame
 
+	# Esta regresión prueba rescate/reentrada, no la cinemática inicial. Con #790
+	# la puerta solo acepta interacción cuando el jugador tiene control, así que
+	# se termina explícitamente la entrada igual que hacen los gates visuales.
+	if dia._entrada != null:
+		dia._entrada.saltar()
+		await process_frame
+
 	# Fuerza la oficina para que la prueba no dependa del progreso persistente
 	# que pueda existir en user:// durante un playtest o una ejecución local.
 	dia._entrar_en("archivo")
