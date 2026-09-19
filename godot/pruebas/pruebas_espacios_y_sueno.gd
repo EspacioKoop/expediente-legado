@@ -201,9 +201,9 @@ static func _acusacion(comprobar: Callable) -> void:
 	var precipitada := Acusacion.acusar(estado, dia, caso, caso["sospechosos"][0], [])
 	comprobar.call("se puede firmar sin evidencia", precipitada["resultado"], "cerrado")
 	comprobar.call(
-		"el primer veredicto desbloquea El Hierofante",
+		"el primer veredicto precipitado emite Hierofante y Ermitaño",
 		precipitada.get("cartas_desbloqueadas", []),
-		["el-hierofante"]
+		["el-hierofante", "el-ermitanio"]
 	)
 	var es_hierofante := func(carta): return carta.get("id", "") == "el-hierofante"
 	var hierofante: Dictionary = estado["tarot"].filter(es_hierofante)[0]
