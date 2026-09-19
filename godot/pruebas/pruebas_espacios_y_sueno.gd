@@ -201,9 +201,9 @@ static func _acusacion(comprobar: Callable) -> void:
 	var precipitada := Acusacion.acusar(estado, dia, caso, caso["sospechosos"][0], [])
 	comprobar.call("se puede firmar sin evidencia", precipitada["resultado"], "cerrado")
 	comprobar.call(
-		"el primer veredicto desbloquea El Hierofante",
+		"el primer veredicto precipitado emite Hierofante y Ermitaño",
 		precipitada.get("cartas_desbloqueadas", []),
-		["el-hierofante"]
+		["el-hierofante", "el-ermitanio"]
 	)
 	var es_hierofante := func(carta): return carta.get("id", "") == "el-hierofante"
 	var hierofante: Dictionary = estado["tarot"].filter(es_hierofante)[0]
@@ -338,6 +338,46 @@ static func _acusacion(comprobar: Callable) -> void:
 		"con las vidas de la dificultad", ultimo["vida"], Acusacion.DIFICULTADES["normal"]["vidas"]
 	)
 	comprobar.call("el gato sigue siendo tuyo", dia4["gato"]["dias_sin_comer"], 2)
+
+	var es_ermitanio := func(carta): return carta.get("id", "") == "el-ermitanio"
+	var ermitanio_reset: Dictionary = ultimo["tarot"].filter(es_ermitanio)[0]
+	comprobar.call(
+		"el despido conserva la memoria de Ermitaño",
+		ultimo.get("cartas_conocidas", []).has("el-ermitanio"),
+		true
+	)
+	comprobar.call(
+		"la nueva vuelta no posee Ermitaño", ermitanio_reset.get("recogida", false), false
+	)
+	comprobar.call(
+		"el despido no notifica una carta ya reseteada", caida.get("cartas_desbloqueadas", []), []
+	)
+
+	# Una pérdida no fatal sí concede y propaga El Ermitaño en ESTA vuelta.
+	var golpeado := Partida.nueva()
+	var dia_golpe := Jornada.nueva()
+	var derrota := Acusacion.resolver_duelo(golpeado, dia_golpe, false)
+	comprobar.call(
+		"perder un careo concede Ermitaño",
+		derrota.get("cartas_desbloqueadas", []),
+		["el-ermitanio"]
+	)
+	var ermitanio: Dictionary = golpeado["tarot"].filter(es_ermitanio)[0]
+	comprobar.call("Ermitaño queda recogido", ermitanio.get("recogida", false), true)
+	comprobar.call(
+		"Ermitaño entra en memoria fantasma",
+		golpeado.get("cartas_conocidas", []).has("el-ermitanio"),
+		true
+	)
+	comprobar.call(
+		"la pérdida queda marcada en esta vuelta",
+		golpeado.get("perdio_vida_en_esta_vuelta", false),
+		true
+	)
+	var segunda_derrota := Acusacion.resolver_duelo(golpeado, dia_golpe, false)
+	comprobar.call(
+		"otra pérdida no reemite Ermitaño", segunda_derrota.get("cartas_desbloqueadas", []), []
+	)
 
 	var historial_despido: Array = ultimo.get("evaluaciones_desempeno", [])
 	comprobar.call("el despido sella una evaluación", historial_despido.size(), 1)

@@ -69,6 +69,53 @@ class TarotProgresion1029Test(unittest.TestCase):
         self.assertIn('nuevas.append("los-enamorados")', bloque)
         self.assertEqual(bloque.count("return nuevas"), 1)
 
+    def test_mundo_excluye_templanza_y_exige_archivo_completo(self) -> None:
+        inicio = self.prometeo.index("static func sincronizar_tarot_mundo(")
+        fin = self.prometeo.index("## Una acusación es precipitada", inicio)
+        bloque = self.prometeo[inicio:fin]
+        self.assertIn('["el-mundo", "la-templanza"]', bloque)
+        self.assertIn('carta.get("recogida", false)', bloque)
+        self.assertIn('carta.get("gastada", false)', bloque)
+        self.assertIn(
+            "Progreso.todos_resueltos(casos_principales, pistas)",
+            bloque,
+        )
+        self.assertIn(
+            'desbloquear_carta_en_estado(estado, "el-mundo")',
+            bloque,
+        )
+        self.assertNotIn("cartas_conocidas", bloque)
+
+    def test_mundo_se_evalua_solo_tras_eventos_reales(self) -> None:
+        ready_inicio = self.visor.index("func _ready()")
+        ready_fin = self.visor.index("func _draw()", ready_inicio)
+        ready = self.visor[ready_inicio:ready_fin]
+        self.assertNotIn("sincronizar_tarot_mundo", ready)
+
+        pistas_inicio = self.visor.index("func _sincronizar_tarot_por_pista()")
+        pistas_fin = self.visor.index("## Encontrar una carta escondida", pistas_inicio)
+        pistas = self.visor[pistas_inicio:pistas_fin]
+        self.assertIn("sincronizar_tarot_mundo", pistas)
+
+        oculta_inicio = self.visor.index("func _al_encontrar_carta(")
+        oculta_fin = self.visor.index("## Propaga únicamente", oculta_inicio)
+        oculta = self.visor[oculta_inicio:oculta_fin]
+        self.assertIn("sincronizar_tarot_mundo", oculta)
+        self.assertLess(
+            oculta.index("desbloquear_carta_en_estado"),
+            oculta.index("sincronizar_tarot_mundo"),
+        )
+        self.assertLess(
+            oculta.index("sincronizar_tarot_mundo"),
+            oculta.index("_guardar_o_avisar()"),
+        )
+
+        eventos_inicio = self.visor.index("func _notificar_cartas_desbloqueadas(")
+        eventos_fin = self.visor.index("## Hook de dominio", eventos_inicio)
+        eventos = self.visor[eventos_inicio:eventos_fin]
+        self.assertIn("if nuevas.is_empty()", eventos)
+        self.assertIn("sincronizar_tarot_mundo", eventos)
+
     def test_veredicto_real_emite_hierofante_en_el_evento(self) -> None:
         inicio = self.acusacion.index("static func acusar(")
         fin = self.acusacion.index("## Quita vidas", inicio)
@@ -81,6 +128,57 @@ class TarotProgresion1029Test(unittest.TestCase):
         )
         self.assertIn('cartas_desbloqueadas.append("el-hierofante")', bloque)
         self.assertIn('"cartas_desbloqueadas": cartas_desbloqueadas', bloque)
+
+    def test_perder_vida_emite_ermitanio_desde_la_frontera_comun(self) -> None:
+        inicio = self.acusacion.index("static func perder_vida(")
+        fin = self.acusacion.index("## Cierra el careo", inicio)
+        bloque = self.acusacion[inicio:fin]
+        self.assertIn("vida_anterior", bloque)
+        self.assertIn('estado["vida"] < vida_anterior', bloque)
+        self.assertIn('estado["perdio_vida_en_esta_vuelta"] = true', bloque)
+        self.assertIn(
+            'Prometeo.desbloquear_carta_en_estado(estado, "el-ermitanio")',
+            bloque,
+        )
+        self.assertIn('cartas_desbloqueadas.append("el-ermitanio")', bloque)
+        self.assertLess(
+            bloque.index(
+                'Prometeo.desbloquear_carta_en_estado(estado, "el-ermitanio")'
+            ),
+            bloque.index("Prometeo.reiniciar_vuelta"),
+        )
+        self.assertIn(
+            '"cartas_desbloqueadas": cartas_desbloqueadas',
+            bloque,
+        )
+        self.assertRegex(
+            bloque,
+            re.compile(
+                r'return\s*\{\s*"despido"\s*:\s*true\s*,\s*'
+                r'"vida"\s*:\s*estado\["vida"\]\s*,\s*'
+                r'"cartas_desbloqueadas"\s*:\s*\[\]\s*\}'
+            ),
+        )
+
+    def test_acusacion_propaga_cartas_de_la_perdida_antes_del_reset(self) -> None:
+        inicio = self.acusacion.index("static func acusar(")
+        fin = self.acusacion.index("## Quita vidas", inicio)
+        bloque = self.acusacion[inicio:fin]
+        self.assertNotIn(
+            'estado["perdio_vida_en_esta_vuelta"] = true',
+            bloque,
+        )
+        castigo = bloque.index("castigo = perder_vida(estado, jornada, 1)")
+        propaga_match = re.search(
+            r'for\s+carta_id\s+in\s+castigo\.get\(\s*'
+            r'"cartas_desbloqueadas"\s*,\s*\[\]\s*\)\s*:',
+            bloque,
+        )
+        self.assertIsNotNone(propaga_match)
+        propaga = propaga_match.start()
+        limpia = bloque.index("cartas_desbloqueadas.clear()")
+        self.assertLess(castigo, propaga)
+        self.assertLess(propaga, limpia)
 
     def test_victoria_de_careo_emite_colgado_solo_al_ganar(self) -> None:
         inicio = self.acusacion.index("static func resolver_duelo(")

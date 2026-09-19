@@ -384,6 +384,7 @@ func _al_pulsar_marca(meta: Variant) -> void:
 func _sincronizar_tarot_por_pista() -> void:
 	var nuevas := Prometeo.sincronizar_tarot_por_pistas(partida.estado)
 	nuevas.append_array(Prometeo.sincronizar_tarot_por_caso_resuelto(partida.estado, caso))
+	nuevas.append_array(Prometeo.sincronizar_tarot_mundo(partida.estado, contenido.principales()))
 	for carta_id in nuevas:
 		_al_carta_desbloqueada(carta_id)
 
@@ -403,7 +404,10 @@ func _al_encontrar_carta(carta_id: String) -> void:
 		_abrir_historia(carta_id)
 		return
 
-	_al_carta_desbloqueada(carta_id)
+	var nuevas := [carta_id]
+	nuevas.append_array(Prometeo.sincronizar_tarot_mundo(partida.estado, contenido.principales()))
+	for nueva_id in nuevas:
+		_al_carta_desbloqueada(String(nueva_id))
 	_guardar_o_avisar()
 	_estado.text = tr("VISOR_CARTA") % carta_id
 	_refrescar_estado()
@@ -424,7 +428,11 @@ func _al_encontrar_carta(carta_id: String) -> void:
 ## telemetría de QA, etc.) reaccionen antes del mismo guardado que persiste el
 ## veredicto o el resultado del careo.
 func _notificar_cartas_desbloqueadas(resultado: Dictionary) -> void:
-	for carta_id in resultado.get("cartas_desbloqueadas", []):
+	var nuevas: Array = resultado.get("cartas_desbloqueadas", []).duplicate()
+	if nuevas.is_empty():
+		return
+	nuevas.append_array(Prometeo.sincronizar_tarot_mundo(partida.estado, contenido.principales()))
+	for carta_id in nuevas:
 		_al_carta_desbloqueada(String(carta_id))
 
 

@@ -112,6 +112,8 @@ static func nueva() -> Dictionary:
 		"despido_mostrado": false,
 		"epilogo_avisado": false,
 		"final_politico_mostrado": false,
+		# #1103: progreso reanudable del clímax, aislado por raíz+vuelta.
+		"climax_hastur": {},
 		"final_verdadero_mostrado": false,
 		"perdio_vida_en_esta_vuelta": false,
 		# Cuántas veces se ha visto cada cinemática, para que se acorten solas

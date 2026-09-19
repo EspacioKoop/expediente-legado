@@ -371,6 +371,62 @@ func _progreso() -> void:
 	)
 	comprobar("estado ya adquirido sigue siendo idempotente", tarot_recargado, [])
 
+	# #46/#1029: El Mundo exige el resto válido intacto y el archivo principal
+	# completo; La Templanza queda fuera porque solo existe tras gastar una carta.
+	var casos_mundo := [
+		{"id": "mundo-a", "pistas": [{"id": "m1"}]},
+		{"id": "mundo-b", "pistas": [{"id": "m2"}]},
+	]
+	var estado_mundo := Partida.nueva()
+	estado_mundo["pistas_descubiertas"] = ["m1", "m2"]
+	for carta in estado_mundo["tarot"]:
+		if carta.get("id", "") not in ["el-mundo", "la-templanza"]:
+			carta["recogida"] = true
+			carta["gastada"] = false
+
+	var sin_archivo: Dictionary = estado_mundo.duplicate(true)
+	sin_archivo["pistas_descubiertas"] = ["m1"]
+	comprobar(
+		"archivo incompleto no concede Mundo",
+		Prometeo.sincronizar_tarot_mundo(sin_archivo, casos_mundo),
+		[]
+	)
+
+	var con_gastada: Dictionary = estado_mundo.duplicate(true)
+	var es_mago := func(carta): return carta.get("id", "") == "el-mago"
+	con_gastada["tarot"].filter(es_mago)[0]["gastada"] = true
+	comprobar(
+		"una carta válida gastada bloquea Mundo",
+		Prometeo.sincronizar_tarot_mundo(con_gastada, casos_mundo),
+		[]
+	)
+
+	var con_faltante: Dictionary = estado_mundo.duplicate(true)
+	var es_diablo := func(carta): return carta.get("id", "") == "el-diablo"
+	con_faltante["tarot"].filter(es_diablo)[0]["recogida"] = false
+	comprobar(
+		"una carta válida ausente bloquea Mundo",
+		Prometeo.sincronizar_tarot_mundo(con_faltante, casos_mundo),
+		[]
+	)
+
+	var mundo_nuevo := Prometeo.sincronizar_tarot_mundo(estado_mundo, casos_mundo)
+	comprobar("colección perfecta concede Mundo", mundo_nuevo, ["el-mundo"])
+	var es_mundo := func(carta): return carta.get("id", "") == "el-mundo"
+	var mundo: Dictionary = estado_mundo["tarot"].filter(es_mundo)[0]
+	var es_templanza := func(carta): return carta.get("id", "") == "la-templanza"
+	var templanza: Dictionary = estado_mundo["tarot"].filter(es_templanza)[0]
+	comprobar("Mundo queda recogido", mundo.get("recogida", false), true)
+	comprobar("Templanza no es requisito de Mundo", templanza.get("recogida", false), false)
+	comprobar(
+		"Mundo entra en memoria fantasma",
+		estado_mundo.get("cartas_conocidas", []).has("el-mundo"),
+		true
+	)
+	comprobar(
+		"Mundo es idempotente", Prometeo.sincronizar_tarot_mundo(estado_mundo, casos_mundo), []
+	)
+
 
 # --- El contenido de verdad -------------------------------------------------
 
