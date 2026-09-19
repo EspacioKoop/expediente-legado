@@ -12,6 +12,8 @@ const REINTENTO_GUARDADO := 0.5
 var _handoff: Node
 var _capa: CanvasLayer
 var _panel: ClimaxHasturPanel
+var _capa_final: CanvasLayer
+var _panel_final: FinalPoliticoPanel
 var _esperando_guardado := false
 var _accion_despues_guardar := ""
 var _reintento_restante := 0.0
@@ -193,11 +195,15 @@ func _guardar_y_luego(dia: Node, accion: String) -> void:
 	_reintento_restante = REINTENTO_GUARDADO
 	if is_instance_valid(_panel):
 		_panel.bloquear(true)
+	if is_instance_valid(_panel_final) and is_instance_valid(_panel_final._boton):
+		_panel_final._boton.disabled = true
 
 
 func _despues_de_guardar(accion: String) -> void:
 	if is_instance_valid(_panel):
 		_panel.bloquear(false)
+	if is_instance_valid(_panel_final) and is_instance_valid(_panel_final._boton):
+		_panel_final._boton.disabled = false
 	match accion:
 		"activar":
 			_activar_estado()
@@ -220,13 +226,14 @@ func _despues_de_guardar(accion: String) -> void:
 		"derrota_despido":
 			_cerrar_panel()
 			_reconstruir_vuelta(get_parent())
+		"final_cerrado":
+			_cerrar_final()
 
 
 func _publicar_final(dia: Node) -> void:
 	var partida_actual := _partida(dia)
 	if dia == null or partida_actual == null:
 		return
-	_habilitar_movimiento(dia, true)
 	var contrato := (
 		ClimaxHastur
 		. contrato_final(
@@ -236,6 +243,54 @@ func _publicar_final(dia: Node) -> void:
 	)
 	dia.set_meta("climax_hastur_final_politico", contrato.duplicate(true))
 	final_politico_pendiente.emit(contrato.duplicate(true))
+	if not bool(contrato.get("pendiente", false)):
+		_habilitar_movimiento(dia, true)
+		return
+	if bool(partida_actual.estado.get("final_politico_mostrado", false)):
+		_habilitar_movimiento(dia, true)
+		return
+	_mostrar_final(dia, contrato)
+
+
+func _mostrar_final(dia: Node, contrato: Dictionary) -> void:
+	if is_instance_valid(_capa_final):
+		return
+	var partida_actual := _partida(dia)
+	if partida_actual == null:
+		return
+	_habilitar_movimiento(dia, false)
+
+	_capa_final = CanvasLayer.new()
+	_capa_final.name = "FinalPoliticoCapa"
+	_capa_final.layer = 81
+	dia.add_child(_capa_final)
+
+	_panel_final = FinalPoliticoPanel.new()
+	_panel_final.name = "FinalPoliticoPanel"
+	_panel_final.configurar(FinalPolitico.resumen(partida_actual.estado, contrato))
+	_panel_final.continuar_solicitado.connect(_al_cerrar_final)
+	_capa_final.add_child(_panel_final)
+
+
+func _al_cerrar_final() -> void:
+	var dia := get_parent()
+	var partida_actual := _partida(dia)
+	if dia == null or partida_actual == null:
+		return
+	FinalPolitico.confirmar_cierre(partida_actual.estado)
+	var actual := ClimaxHastur.estado_actual(partida_actual.estado, dia.get("jornada"))
+	if not actual.is_empty():
+		actual["final_politico_pendiente"] = false
+	_guardar_y_luego(dia, "final_cerrado")
+
+
+func _cerrar_final() -> void:
+	var dia := get_parent()
+	if is_instance_valid(_capa_final):
+		_capa_final.queue_free()
+	_capa_final = null
+	_panel_final = null
+	_habilitar_movimiento(dia, true)
 
 
 func _reconstruir_vuelta(dia: Node) -> void:
