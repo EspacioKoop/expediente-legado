@@ -356,16 +356,23 @@ func _input(evento: InputEvent) -> void:
 	if not evento is InputEventMouseMotion:
 		return
 	_registrar_dispositivo_entrada(evento)
-	if (
-		Input.mouse_mode != Input.MOUSE_MODE_CAPTURED
-		or not is_physics_processing()
-		or get_tree().paused
+	if not debe_procesar_movimiento_raton(
+		Input.mouse_mode == Input.MOUSE_MODE_CAPTURED,
+		is_physics_processing(),
+		get_tree().paused,
+		is_instance_valid(_camara_dialogo),
 	):
 		return
-	# Mientras habla un NPC solo se reserva la mirada; caminar, correr, saltar y
-	# agacharse siguen procesándose en _physics_process.
-	if is_instance_valid(_camara_dialogo):
-		return
+	_aplicar_movimiento_raton(evento)
+
+
+static func debe_procesar_movimiento_raton(
+	capturado: bool, fisica_activa: bool, arbol_pausado: bool, dialogo_activo: bool
+) -> bool:
+	return capturado and fisica_activa and not arbol_pausado and not dialogo_activo
+
+
+func _aplicar_movimiento_raton(evento: InputEventMouseMotion) -> void:
 	var sensibilidad := SENSIBILIDAD_RATON_BASE * _sensibilidad_raton()
 	rotate_y(-evento.relative.x * sensibilidad)
 	_camara.rotation.x = clampf(
