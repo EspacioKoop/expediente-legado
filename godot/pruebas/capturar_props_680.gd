@@ -269,7 +269,7 @@ func _ids_props_visibles(dia) -> Array[String]:
 
 
 func _metricas_props(dia) -> Dictionary:
-	var raiz := dia._mundo.get_node_or_null("PropsUtilizablesEncontrables680")
+	var raiz: Node = dia._mundo.get_node_or_null("PropsUtilizablesEncontrables680")
 	var mallas := 0
 	var superficies := 0
 	var triangulos := 0
