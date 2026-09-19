@@ -195,15 +195,15 @@ func _guardar_y_luego(dia: Node, accion: String) -> void:
 	_reintento_restante = REINTENTO_GUARDADO
 	if is_instance_valid(_panel):
 		_panel.bloquear(true)
-	if is_instance_valid(_panel_final) and is_instance_valid(_panel_final._boton):
-		_panel_final._boton.disabled = true
+	if is_instance_valid(_panel_final):
+		_panel_final.bloquear(true)
 
 
 func _despues_de_guardar(accion: String) -> void:
 	if is_instance_valid(_panel):
 		_panel.bloquear(false)
-	if is_instance_valid(_panel_final) and is_instance_valid(_panel_final._boton):
-		_panel_final._boton.disabled = false
+	if is_instance_valid(_panel_final):
+		_panel_final.bloquear(false)
 	match accion:
 		"activar":
 			_activar_estado()
