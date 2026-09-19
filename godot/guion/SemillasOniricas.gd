@@ -27,6 +27,7 @@ const MITOS_VALIDOS := [
 	"yggdrasil",
 	"tir_na_nog",
 	"mari",
+	"baba_yaga",
 	"anansi_akan",
 	"maui_tamanuitera",
 	"popol_wuj",
