@@ -113,9 +113,7 @@ func _reproducir_despido(acusacion: Dictionary, duelo: Dictionary = {}) -> void:
 	var voz_cunado := Cunado.clave_despido(int(jornada.get("vuelta", 1)))
 	reproductor.reproducir(
 		DespidoCinematica.planos_con_remate(
-			partida.estado,
-			Cinematica.vistas_de(partida.estado, DespidoCinematica.ID),
-			voz_cunado
+			partida.estado, Cinematica.vistas_de(partida.estado, DespidoCinematica.ID), voz_cunado
 		),
 		DespidoCinematica.ID,
 		partida.estado
