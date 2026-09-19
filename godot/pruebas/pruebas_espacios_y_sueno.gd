@@ -283,7 +283,9 @@ static func _acusacion(comprobar: Callable) -> void:
 	var historial_despido: Array = ultimo.get("evaluaciones_desempeno", [])
 	comprobar.call("el despido sella una evaluación", historial_despido.size(), 1)
 	comprobar.call("el sello recuerda la vuelta terminada", historial_despido[0]["vuelta"], 1)
-	comprobar.call("el sello explica la reasignación", historial_despido[0]["motivo"], "reasignacion")
+	comprobar.call(
+		"el sello explica la reasignación", historial_despido[0]["motivo"], "reasignacion"
+	)
 
 	# Sellar es una frontera de ciclo de vida, no una escena: sirve igual para un
 	# final narrativo y repetir la llamada no duplica historial.
@@ -294,7 +296,9 @@ static func _acusacion(comprobar: Callable) -> void:
 	var segundo_sello := EvaluacionDesempeno.sellar(finalizado, "final_narrativo")
 	comprobar.call("sellar dos veces no duplica", finalizado["evaluaciones_desempeno"].size(), 1)
 	comprobar.call("el reintento devuelve el mismo sello", segundo_sello, primer_sello)
-	comprobar.call("el motivo no depende de una cinemática", primer_sello["motivo"], "final_narrativo")
+	comprobar.call(
+		"el motivo no depende de una cinemática", primer_sello["motivo"], "final_narrativo"
+	)
 	comprobar.call(
 		"seis cierres en la primera vida son productividad alta",
 		primer_sello["evaluacion"]["productividad"],
