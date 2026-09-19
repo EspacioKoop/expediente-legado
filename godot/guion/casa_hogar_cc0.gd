@@ -291,15 +291,15 @@ static func _crear_acabado(
 
 
 ## Tele, mesa baja y sofá quedan centrados en el mismo eje. La consola se gira
-## hacia el interior de la estancia y se desplaza al extremo libre del mueble,
-## de modo que pueda enfocarse sin que la propia tele la tape (#133/#95).
+## hacia el interior y queda físicamente separada del CRT: el playtest visual de
+## #133 mostró que a z=1,82 ambas siluetas se fusionaban aunque el foco funcionase.
 static func _ordenar_rincon_television(raiz: Node3D) -> void:
 	var sofa := raiz.get_node_or_null("SofaCasa") as Node3D
 	if sofa != null:
 		sofa.position.z = 1.35
 	var consola := raiz.get_node_or_null("ConsolaSobremesa98") as Node3D
 	if consola != null:
-		consola.position = Vector3(-3.58, 0.54, 1.82)
+		consola.position = Vector3(-3.58, 0.54, 2.00)
 		consola.rotation_degrees.y = -90.0
 
 
