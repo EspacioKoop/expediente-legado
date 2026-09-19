@@ -1,0 +1,111 @@
+name: Evidencia calle 277
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/evidencia-calle-277.yml'
+      - '.godot-version'
+      - 'godot/arte/**'
+      - 'godot/assets/modelos/**'
+      - 'godot/datos/textos.csv'
+      - 'godot/guion/calle*.gd'
+      - 'godot/guion/dia_*app.gd'
+      - 'godot/guion/espacio_3d.gd'
+      - 'godot/guion/espacios_catalogo.gd'
+      - 'godot/guion/modelos.gd'
+      - 'godot/escenas/dia.tscn'
+      - 'godot/pruebas/capturar_calle_277.gd'
+      - 'scripts/test_evidencia_calle_277.py'
+      - 'docs/evidencias/calle-277/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidencia:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      GALLIUM_DRIVER: llvmpipe
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar Godot declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Importar proyecto
+        run: godot4 --headless --editor --path godot --quit
+
+      - name: Validar contrato de evidencia
+        run: python3 -m unittest -v scripts/test_evidencia_calle_277.py
+
+      - name: Renderizar gate visual de la calle sin HUD
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidencia-calle-277
+          xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+            --script res://pruebas/capturar_calle_277.gd -- \
+            "$GITHUB_WORKSPACE/evidencia-calle-277"
+          for captura in spawn_exterior escaparate_crt portal_casa; do
+            test -s "evidencia-calle-277/${captura}.png"
+          done
+          test -s evidencia-calle-277/manifest.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(Path("evidencia-calle-277/manifest.json").read_text())
+          if manifest["issue"] != 277 or manifest["fase"] != "trayecto":
+              raise SystemExit("manifiesto fuera del gate #277")
+          if manifest["locale"] != "es" or manifest["hud"] is not False:
+              raise SystemExit("la evidencia debe usar locale es y HUD oculto")
+          if manifest["camara"] != "jugable" or manifest["veredicto_automatico"] is not False:
+              raise SystemExit("la evidencia debe usar cámara jugable sin autoaprobar")
+          casos = {caso["id"]: caso for caso in manifest["casos"]}
+          esperados = {"spawn_exterior", "escaparate_crt", "portal_casa"}
+          if set(casos) != esperados:
+              raise SystemExit("faltan encuadres del gate #277")
+          hashes = [caso["sha256"] for caso in manifest["casos"]]
+          if len(hashes) != 3 or len(set(hashes)) != 3:
+              raise SystemExit("las tres capturas deben existir y ser distintas")
+          if any(not caso["criterio"].strip() for caso in manifest["casos"]):
+              raise SystemExit("cada captura debe declarar el criterio que permite juzgar")
+          print("3/3 encuadres de #277 capturados y manifiesto coherente")
+          PY
+
+      - name: Adjuntar evidencia visual de #277
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-calle-277-${{ github.sha }}
+          path: evidencia-calle-277/
+          if-no-files-found: error
+          retention-days: 14
