@@ -14,6 +14,7 @@ var _correo_app: EscritorioSigaApp
 var _bloc_notas_app: EscritorioSigaApp
 var _calculadora_app: EscritorioSigaApp
 var _catalogo_anomalias_app: EscritorioSigaApp
+var _evaluaciones_app: EscritorioSigaApp
 var _explorador_vista: ExploradorSiga
 var _navegador_vista: NavegadorSiga
 
@@ -151,6 +152,21 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	_catalogo_anomalias_app.registrar_en(escritorio)
 	_apps.append(_catalogo_anomalias_app)
 
+	# #150: el informe ya sellado se consulta como otra aplicación del terminal.
+	# La vista recibe Partida en directo pero es estrictamente de solo lectura:
+	# no duplica historial en EstadoAplicacionesSiga ni recalcula vidas cerradas.
+	_evaluaciones_app = EscritorioSigaApp.new(
+		"evaluaciones-desempeno",
+		tr("EVALUACION_APP_TITULO"),
+		Callable(self, "_crear_evaluaciones"),
+		"siga",
+	)
+	_evaluaciones_app.tamano_minimo = Vector2(560, 360)
+	_evaluaciones_app.tamano_preferido = Vector2(780, 500)
+	_evaluaciones_app.redimensionable = true
+	_evaluaciones_app.registrar_en(escritorio)
+	_apps.append(_evaluaciones_app)
+
 	# Reponer el estado declarado ANTES de adoptar/abrir nada: así una app que
 	# lea su estado local al construir su contenido (como hacen Correo y #539) ya
 	# lo ve actualizado desde el primer fotograma.
@@ -272,6 +288,17 @@ func _crear_catalogo_anomalias() -> Control:
 	if partida_actual is Partida:
 		catalogo.configurar_estado(partida_actual.estado)
 	return catalogo
+
+
+func _crear_evaluaciones() -> Control:
+	var evaluaciones := EvaluacionDesempenoSiga.new()
+	var dia := get_parent()
+	if dia == null:
+		return evaluaciones
+	var partida_actual: Variant = dia.get("partida")
+	if partida_actual is Partida:
+		evaluaciones.configurar_estado(partida_actual.estado)
+	return evaluaciones
 
 
 func _registrar_documento_os98(documento_id: String) -> void:
