@@ -62,6 +62,7 @@ class MarcadoresMundo957Test(unittest.TestCase):
             escena,
         )
         self.assertIn('script = ExtResource("1")', escena)
+        self.assertIn('script = ExtResource("41")', escena)
 
     def test_contrato_ejecutable_en_godot(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
