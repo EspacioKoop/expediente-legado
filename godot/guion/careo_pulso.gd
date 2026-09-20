@@ -59,6 +59,28 @@ static func iniciativa_lista(racha: int) -> bool:
 	return racha >= META_INICIATIVA
 
 
+static func aplicar_iniciativa(
+	combate: Dictionary, ronda: Dictionary, racha: int, calidad: String, azar: Callable
+) -> int:
+	var nueva := racha_siguiente(racha, calidad)
+	if not iniciativa_lista(nueva):
+		return nueva
+	if bool(ronda.get("terminado", false)):
+		return 0
+	if int(combate.get("revelada", -1)) >= 0:
+		return META_INICIATIVA - 1
+	var indice := Prometeo.jugada_rival(
+		String(combate["modo"]),
+		int(combate["ronda"]),
+		Combate.TIPOS.size(),
+		azar,
+		int(combate["ultima_jugada_jugador"]),
+	)
+	combate["revelada"] = indice
+	ronda["revelada"] = Combate.etiqueta(Combate.TIPOS[indice])
+	return 0
+
+
 func _ready() -> void:
 	add_theme_constant_override("separation", 4)
 
