@@ -1,6 +1,7 @@
 ## Regresión standalone del primer vertical de huellas ambientales (#959).
 extends SceneTree
 
+
 class DiaDoble:
 	extends Node
 	var _mundo: Node3D
@@ -26,16 +27,15 @@ func _initialize() -> void:
 
 func _probar() -> void:
 	var estado := Partida.nueva()
-	_comprobar(typeof(estado.get("huellas_ambientales")) == TYPE_DICTIONARY, "Partida crea el estado de huellas")
-
-	var primera := HuellasAmbientales.registrar(
-		estado, "archivo:terminal_siga", "uso", "archivo"
+	_comprobar(
+		typeof(estado.get("huellas_ambientales")) == TYPE_DICTIONARY,
+		"Partida crea el estado de huellas"
 	)
+
+	var primera := HuellasAmbientales.registrar(estado, "archivo:terminal_siga", "uso", "archivo")
 	_comprobar(int(primera["usos"]) == 1, "el primer uso queda registrado")
 	_comprobar(float(primera["intensidad"]) > 0.0, "la primera marca ya es sutilmente visible")
-	var segunda := HuellasAmbientales.registrar(
-		estado, "archivo:terminal_siga", "uso", "archivo"
-	)
+	var segunda := HuellasAmbientales.registrar(estado, "archivo:terminal_siga", "uso", "archivo")
 	_comprobar(int(segunda["usos"]) == 2, "repetir incrementa uso")
 	_comprobar(
 		float(segunda["intensidad"]) > float(primera["intensidad"]),
@@ -44,20 +44,29 @@ func _probar() -> void:
 	for _i in range(20):
 		HuellasAmbientales.registrar(estado, "archivo:terminal_siga", "uso", "archivo")
 	_comprobar(
-		int(estado["huellas_ambientales"]["archivo:terminal_siga"]["usos"])
-		== HuellasAmbientales.USOS_MAX,
+		(
+			int(estado["huellas_ambientales"]["archivo:terminal_siga"]["usos"])
+			== HuellasAmbientales.USOS_MAX
+		),
 		"el desgaste queda acotado",
 	)
 	_comprobar(
-		HuellasAmbientales.intensidad_de(estado, "archivo:terminal_siga")
-		<= HuellasAmbientales.INTENSIDAD_MAX,
+		(
+			HuellasAmbientales.intensidad_de(estado, "archivo:terminal_siga")
+			<= HuellasAmbientales.INTENSIDAD_MAX
+		),
 		"la intensidad queda acotada",
 	)
 	HuellasAmbientales.registrar(estado, "casa:silla", "roce", "casa")
 	_comprobar(HuellasAmbientales.de_fase(estado, "archivo").size() == 1, "filtra por espacio")
 	_comprobar(HuellasAmbientales.de_fase(estado, "casa").size() == 1, "conserva otras fases")
-	_comprobar(HuellasAmbientales.registrar(estado, "", "uso", "archivo").is_empty(), "rechaza id vacío")
-	_comprobar(HuellasAmbientales.validar(estado["huellas_ambientales"]).is_empty(), "el estado generado valida")
+	_comprobar(
+		HuellasAmbientales.registrar(estado, "", "uso", "archivo").is_empty(), "rechaza id vacío"
+	)
+	_comprobar(
+		HuellasAmbientales.validar(estado["huellas_ambientales"]).is_empty(),
+		"el estado generado valida"
+	)
 
 	var invalido := estado["huellas_ambientales"].duplicate(true)
 	invalido["rota"] = {"tipo": "laser", "fase": "archivo", "usos": 1, "intensidad": 0.2}
@@ -73,8 +82,10 @@ func _probar() -> void:
 	var recargada := Partida.new()
 	_comprobar(recargada.cargar(ruta)["resultado"] == "cargada", "Partida recarga el vertical")
 	_comprobar(
-		int(recargada.estado["huellas_ambientales"]["archivo:terminal_siga"]["usos"])
-		== HuellasAmbientales.USOS_MAX,
+		(
+			int(recargada.estado["huellas_ambientales"]["archivo:terminal_siga"]["usos"])
+			== HuellasAmbientales.USOS_MAX
+		),
 		"la recarga conserva intensidad acumulada",
 	)
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(ruta))
