@@ -129,15 +129,10 @@ static func iniciativa_lista(racha: int) -> bool:
 
 
 static func aplicar_iniciativa(
-	combate: Dictionary,
-	ronda: Dictionary,
-	racha: int,
-	calidad: String,
-	azar: Callable,
-	tipo := ""
+	combate: Dictionary, ronda: Dictionary, racha: int, calidad: String, azar: Callable, tipo := ""
 ) -> int:
-	var nueva := racha_de(tipo, racha, calidad) if not tipo.is_empty() else racha_siguiente(
-		racha, calidad
+	var nueva := (
+		racha_de(tipo, racha, calidad) if not tipo.is_empty() else racha_siguiente(racha, calidad)
 	)
 	if not iniciativa_lista(nueva):
 		return nueva
