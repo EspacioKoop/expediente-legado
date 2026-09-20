@@ -39,7 +39,8 @@
 [ext_resource type="Script" path="res://guion/dia_bolos_pasillo_app.gd" id="37"]
 [ext_resource type="Script" path="res://guion/dia_relacion_onirica_app.gd" id="38"]
 [ext_resource type="Script" path="res://guion/dia_tir_na_nog_app.gd" id="39"]
-[ext_resource type="Script" path="res://guion/dia_props_utilizables_680_app.gd" id="40"]\n[ext_resource type="Script" path="res://guion/dia_marcadores_mundo_app.gd" id="41"]
+[ext_resource type="Script" path="res://guion/dia_props_utilizables_680_app.gd" id="40"]
+[ext_resource type="Script" path="res://guion/dia_marcadores_mundo_app.gd" id="41"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
