@@ -268,6 +268,10 @@ func _probar_runtime_doctrinas() -> void:
 
 	var base := await _nuevo_juicio({})
 	_acercar(base)
+	_comprobar(
+		not base.activar_doctrina("comunismo"),
+		"sin cargas ninguna doctrina se activa por defecto",
+	)
 	base._recarga_jugador = 0.0
 	base._atacar(
 		1, JuicioCombate3D.ALCANCE_LIGERO, JuicioCombate3D.RECARGA_LIGERA, false
