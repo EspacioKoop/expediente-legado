@@ -10,6 +10,7 @@ import unittest
 RAIZ = Path(__file__).resolve().parents[1]
 EVENTOS = RAIZ / "godot/guion/religion_eventos.gd"
 CONFLICTO = RAIZ / "godot/guion/religion_conflicto.gd"
+PRUEBA = RAIZ / "godot/pruebas/pruebas_religion_conflicto_936.gd"
 PRUEBA_GODOT = "res://pruebas/pruebas_religion_conflicto_936.gd"
 
 
@@ -36,6 +37,19 @@ class ReligionConflicto936Test(unittest.TestCase):
         self.assertNotIn("ReligionEventos.CANAL_VINCULO,", conflicto)
         self.assertIn('evento.get("publico", false)', conflicto)
         self.assertIn('evento.get("conocido_por", [])', conflicto)
+
+    def test_corte_permanece_aislado_de_las_reservas_activas(self) -> None:
+        prueba = PRUEBA.read_text(encoding="utf-8")
+        conjunto = "\n".join(
+            (
+                EVENTOS.read_text(encoding="utf-8"),
+                CONFLICTO.read_text(encoding="utf-8"),
+                prueba,
+            )
+        )
+
+        for simbolo in ("Prometeo", "JuicioCombate3D", "Historias.cargas"):
+            self.assertNotIn(simbolo, conjunto)
 
     def test_regresion_runtime_standalone(self) -> None:
         motor = os.environ.get("GODOT_BIN") or shutil.which("godot4")
