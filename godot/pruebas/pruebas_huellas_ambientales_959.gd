@@ -4,10 +4,10 @@ extends SceneTree
 
 class DiaDoble:
 	extends Node
-	var _mundo: Node3D
 	var jornada := {"fase": "archivo", "dia": 1}
 	var partida := Partida.new()
 	var guardados := 0
+	var _mundo: Node3D
 
 	func _init() -> void:
 		partida.estado = Partida.nueva()
