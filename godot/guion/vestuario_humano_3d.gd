@@ -183,7 +183,17 @@ func _ready() -> void:
 
 func _al_agregar_nodo(nodo: Node) -> void:
 	if String(nodo.scene_file_path) == RUTA_PERSONA:
-		call_deferred("_vestir_si_persona", nodo)
+		_vestir_diferido.call_deferred(nodo.get_instance_id())
+
+
+## Se difiere el id y no la referencia. Entre el aviso de `node_added` y el
+## volcado diferido la figura puede haber desaparecido —un cambio de fase o de
+## sala libera el árbol entero—, y en ese caso `MessageQueue` descarta la
+## llamada con un error antes de que `is_instance_valid` llegue a mirarla.
+func _vestir_diferido(id: int) -> void:
+	var pieza := instance_from_id(id)
+	if pieza is Node:
+		_vestir_si_persona(pieza)
 
 
 func _revisar_arbol(nodo: Node) -> void:

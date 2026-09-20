@@ -70,8 +70,73 @@ func _probar() -> void:
 		"el pase visual no introduce colisiones de gameplay",
 	)
 
+	await _probar_figura_liberada(cuerpo)
+
 	cuerpo.queue_free()
 	_terminar()
+
+
+## Regresión: una figura que desaparece entre `node_added` y el volcado diferido
+## no puede romper el pase. Antes se difería la referencia al nodo, y
+## `MessageQueue` rechazaba el argumento de una figura ya liberada antes de que
+## `is_instance_valid` llegara a mirarlo. El pase entra ahora por id, que es
+## justamente lo que sobrevive a la liberación.
+func _probar_figura_liberada(cuerpo: Node3D) -> void:
+	var efimero := Node3D.new()
+	cuerpo.add_child(efimero)
+	_comprobar(
+		Modelos.persona(efimero, "persona", Color(0.4, 0.4, 0.45)),
+		"la figura efímera se instancia con la misma ruta que el juego",
+	)
+	var caducado := efimero.get_child(0).get_instance_id()
+	# Liberada en el mismo fotograma: el volcado diferido llega cuando ya no existe.
+	efimero.free()
+
+	var vestuario := root.get_node_or_null("VestuarioHumano3D")
+	var correccion := root.get_node_or_null("CorreccionVisualNPC275")
+	_comprobar(vestuario != null, "el autoload de vestuario está montado")
+	_comprobar(correccion != null, "el autoload de corrección de rostro está montado")
+	if vestuario == null or correccion == null:
+		return
+	_comprobar(
+		vestuario.has_method("_vestir_diferido"),
+		"el pase se difiere por id, que es lo que sobrevive a liberar la figura",
+	)
+	_comprobar(
+		correccion.has_method("_corregir_diferido"),
+		"la corrección de rostro también se difiere por id",
+	)
+	_comprobar(
+		instance_from_id(caducado) == null,
+		"el id de la figura liberada ya no resuelve a ningún objeto",
+	)
+	if vestuario.has_method("_vestir_diferido"):
+		vestuario._vestir_diferido(caducado)
+	if correccion.has_method("_corregir_diferido"):
+		await correccion._corregir_diferido(caducado)
+	_comprobar(true, "un id caducado atraviesa ambos pases sin efecto y sin error")
+
+	await process_frame
+	await process_frame
+
+	var superviviente := Node3D.new()
+	cuerpo.add_child(superviviente)
+	var siguiente: Dictionary = Companeros.ROSTER[1]
+	_comprobar(
+		Modelos.persona(superviviente, "persona", siguiente["color"]),
+		"tras la figura liberada se puede instanciar otra",
+	)
+	await process_frame
+	await process_frame
+
+	var esqueleto := _buscar_esqueleto(superviviente)
+	_comprobar(esqueleto != null, "la figura posterior conserva Skeleton3D")
+	if esqueleto != null:
+		_comprobar(
+			esqueleto.has_meta("vestuario_humano_275"),
+			"una figura liberada antes del volcado no deja sin vestir a la siguiente",
+		)
+	superviviente.queue_free()
 
 
 func _buscar_esqueleto(nodo: Node) -> Skeleton3D:
