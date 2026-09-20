@@ -162,17 +162,15 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 		if cuerpo == null:
 			cuerpo = FiguraSilueta.construir(raiz, figura["pos"], color_figura)
 		if not figura.get("rotulo", "").is_empty():
-			# El nombre va sobre la cabeza, y dónde está la cabeza depende de
-			# dónde tenga el nodo su origen: en los pies si es silueta, a media
-			# altura si es un modelo encajado en un bulto. Sin esta cuenta el
-			# rótulo se iba al techo y los compañeros aparecían anónimos.
-			# Sobre la cabeza, y la cabeza está más alta o más baja según se sea
-			# una silueta o una persona de verdad.
+			# El nombre va SOBRE la cabeza, y la cabeza está más alta o más baja
+			# según se sea una silueta o una persona de verdad. Silueta y modelo
+			# llegan los dos con los pies en su origen, así que la altura de cada
+			# uno basta: hubo aquí una resta de media silueta que suponía un
+			# origen a media altura, y con ella el nombre caía a la altura del
+			# pecho, donde el mobiliario lo parte a media palabra.
 			var alto_rotulo := (
 				(Modelos.ALTO_PERSONA if not modelo.is_empty() else FiguraSilueta.altura()) + 0.35
 			)
-			if not modelo.is_empty():
-				alto_rotulo -= FiguraSilueta.altura() / 2.0
 			var nombre := _cartel(
 				cuerpo,
 				figura["rotulo"],

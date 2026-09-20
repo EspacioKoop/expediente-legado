@@ -122,7 +122,18 @@ func _ajustar_cara(cara: BoneAttachment3D, alto_objetivo: float) -> void:
 	# previo impedía alcanzarlo justo en las caras históricas grandes que motivan
 	# este pase: si necesitan reducirse más, deben poder hacerlo.
 	var factor := minf(alto_objetivo / alto_actual, 1.0)
-	cara.scale = cara.scale * factor
+	# Se encogen los rasgos, NO el enganche. Un `BoneAttachment3D` reescribe su
+	# propia transformación desde la pose del hueso en cada fotograma, así que
+	# la escala que se le ponía aquí desaparecía al siguiente y la cabeza de las
+	# caras con retrato seguía midiendo media persona. Escalar posición y tamaño
+	# de cada rasgo encoge el conjunto alrededor del mismo origen, que es lo que
+	# la escala del enganche pretendía hacer.
+	for rasgo in cara.get_children():
+		if not rasgo is Node3D:
+			continue
+		var pieza := rasgo as Node3D
+		pieza.position = pieza.position * factor
+		pieza.scale = pieza.scale * factor
 	cara.set_meta("ratio_cabeza_275", factor)
 
 
