@@ -23,6 +23,39 @@ func _ejecutar() -> void:
 		"la ronda desplaza la ventana",
 	)
 
+	var objecion := CareoPulso.perfil_para("objecion")
+	var silencio := CareoPulso.perfil_para("silencio")
+	var insistencia := CareoPulso.perfil_para("insistencia")
+	_comprobar(
+		(
+			float(objecion["periodo"]) < float(insistencia["periodo"])
+			and float(insistencia["periodo"]) < float(silencio["periodo"])
+		),
+		"objecion es rapida, insistencia media y silencio lento",
+	)
+	_comprobar(
+		(
+			float(objecion["perfecta"]) < float(insistencia["perfecta"])
+			and float(insistencia["perfecta"]) < float(silencio["perfecta"])
+		),
+		"las ventanas perfectas distinguen precision, presion y control",
+	)
+	_comprobar(
+		(
+			float(objecion["cursor"]) != float(insistencia["cursor"])
+			and float(insistencia["cursor"]) != float(silencio["cursor"])
+		),
+		"el grosor del cursor hace legible el perfil activo",
+	)
+	var muestra := 0.28
+	_comprobar(
+		not is_equal_approx(
+			CareoPulso.posicion_para(muestra, float(objecion["periodo"])),
+			CareoPulso.posicion_para(muestra, float(silencio["periodo"])),
+		),
+		"la velocidad produce posiciones distintas con el mismo tiempo",
+	)
+
 	_comprobar(is_zero_approx(CareoPulso.posicion_para(0.0)), "el cursor parte del borde")
 	_comprobar(
 		is_equal_approx(CareoPulso.posicion_para(CareoPulso.PERIODO_SEGUNDOS), 1.0),
@@ -49,6 +82,25 @@ func _ejecutar() -> void:
 		CareoPulso.calidad_para(0.0, centro, true) == "perfecto",
 		"reduccion de movimiento conserva la recompensa sin timing",
 	)
+	_comprobar(
+		(
+			CareoPulso.calidad_de("objecion", centro + 0.08, centro) == "bien"
+			and CareoPulso.calidad_de("silencio", centro + 0.08, centro) == "perfecto"
+		),
+		"el mismo error exige precision en objecion y cabe en silencio",
+	)
+	_comprobar(
+		CareoPulso.calidad_de("insistencia", centro + 0.08, centro) == "bien",
+		"insistencia deja una corona util para sostener la presion",
+	)
+	_comprobar(
+		(
+			CareoPulso.calidad_de("objecion", 0.0, centro, true) == "perfecto"
+			and CareoPulso.calidad_de("silencio", 0.0, centro, true) == "perfecto"
+			and CareoPulso.calidad_de("insistencia", 0.0, centro, true) == "perfecto"
+		),
+		"reduccion de movimiento iguala el techo de los tres perfiles",
+	)
 
 	var racha := CareoPulso.racha_siguiente(0, "perfecto")
 	_comprobar(racha == 1, "un perfecto arma media iniciativa")
@@ -57,6 +109,22 @@ func _ejecutar() -> void:
 	_comprobar(
 		CareoPulso.racha_siguiente(racha, "normal") == 0,
 		"una ejecucion normal corta la racha",
+	)
+	_comprobar(
+		CareoPulso.racha_de("objecion", 0, "perfecto") == CareoPulso.META_INICIATIVA,
+		"objecion premia una precision dificil con iniciativa inmediata",
+	)
+	_comprobar(
+		CareoPulso.racha_de("silencio", 0, "perfecto") == 1,
+		"silencio necesita encadenar dos ejecuciones",
+	)
+	_comprobar(
+		CareoPulso.racha_de("insistencia", 1, "bien") == 1,
+		"insistencia conserva presion con una ejecucion buena",
+	)
+	_comprobar(
+		CareoPulso.racha_de("silencio", 1, "bien") == 0,
+		"silencio no conserva racha fuera de perfecto",
 	)
 
 	var combate := {
@@ -69,6 +137,26 @@ func _ejecutar() -> void:
 	var restante := CareoPulso.aplicar_iniciativa(combate, ronda, 1, "perfecto", func(): return 0.0)
 	_comprobar(restante == 0 and combate["revelada"] == 1, "la racha gana iniciativa real")
 	_comprobar(not String(ronda["revelada"]).is_empty(), "la iniciativa se comunica a la cronica")
+
+	var combate_objecion := {
+		"modo": "ciclo",
+		"ronda": 2,
+		"ultima_jugada_jugador": 1,
+		"revelada": -1,
+	}
+	var ronda_objecion := {"terminado": false, "revelada": ""}
+	var restante_objecion := CareoPulso.aplicar_iniciativa(
+		combate_objecion,
+		ronda_objecion,
+		0,
+		"perfecto",
+		func(): return 0.0,
+		"objecion",
+	)
+	_comprobar(
+		restante_objecion == 0 and combate_objecion["revelada"] >= 0,
+		"un perfecto de objecion convierte el riesgo en iniciativa",
+	)
 
 	var pulso := CareoPulso.new()
 	root.add_child(pulso)

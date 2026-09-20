@@ -19,6 +19,8 @@ var _activo := false
 var _reduccion_movimiento := false
 var _tiempo := 0.0
 var _centro := 0.5
+var _tipo := ""
+var _perfil: Dictionary = {}
 
 var _area: Control
 var _objetivo: ColorRect
@@ -36,26 +38,90 @@ static func centro_para(tipo: String, ronda: int, rival_id: String) -> float:
 	return lerpf(0.26, 0.74, unidad)
 
 
-static func posicion_para(segundos: float) -> float:
-	var fase := fposmod(maxf(0.0, segundos) / PERIODO_SEGUNDOS, 2.0)
+static func perfil_para(tipo: String) -> Dictionary:
+	match tipo:
+		"objecion":
+			return {
+				"periodo": 0.56,
+				"perfecta": 0.055,
+				"buena": 0.13,
+				"avance_perfecto": 2,
+				"mantiene_bien": false,
+				"cursor": 3.0,
+			}
+		"silencio":
+			return {
+				"periodo": 0.92,
+				"perfecta": 0.105,
+				"buena": 0.24,
+				"avance_perfecto": 1,
+				"mantiene_bien": false,
+				"cursor": 7.0,
+			}
+		_:
+			return {
+				"periodo": 0.70,
+				"perfecta": 0.075,
+				"buena": 0.17,
+				"avance_perfecto": 1,
+				"mantiene_bien": true,
+				"cursor": 4.0,
+			}
+
+
+static func posicion_para(segundos: float, periodo := PERIODO_SEGUNDOS) -> float:
+	var fase := fposmod(maxf(0.0, segundos) / maxf(0.01, periodo), 2.0)
 	return fase if fase <= 1.0 else 2.0 - fase
 
 
-static func calidad_para(posicion: float, centro: float, reduccion_movimiento := false) -> String:
+static func calidad_para(
+	posicion: float,
+	centro: float,
+	reduccion_movimiento := false,
+	media_perfecta := MEDIA_VENTANA_PERFECTA,
+	media_buena := MEDIA_VENTANA_BUENA
+) -> String:
 	if reduccion_movimiento:
 		return "perfecto"
 	var distancia := absf(clampf(posicion, 0.0, 1.0) - clampf(centro, 0.0, 1.0))
-	if distancia <= MEDIA_VENTANA_PERFECTA:
+	if distancia <= media_perfecta:
 		return "perfecto"
-	if distancia <= MEDIA_VENTANA_BUENA:
+	if distancia <= media_buena:
 		return "bien"
 	return "normal"
 
 
-static func racha_siguiente(actual: int, calidad: String) -> int:
+static func calidad_de(
+	tipo: String, posicion: float, centro: float, reduccion_movimiento := false
+) -> String:
+	var perfil := perfil_para(tipo)
+	return calidad_para(
+		posicion,
+		centro,
+		reduccion_movimiento,
+		float(perfil["perfecta"]),
+		float(perfil["buena"]),
+	)
+
+
+static func racha_siguiente(
+	actual: int, calidad: String, avance_perfecto := 1, mantiene_bien := false
+) -> int:
+	if calidad == "bien" and mantiene_bien:
+		return maxi(0, actual)
 	if calidad != "perfecto":
 		return 0
-	return mini(META_INICIATIVA, maxi(0, actual) + 1)
+	return mini(META_INICIATIVA, maxi(0, actual) + maxi(1, avance_perfecto))
+
+
+static func racha_de(tipo: String, actual: int, calidad: String) -> int:
+	var perfil := perfil_para(tipo)
+	return racha_siguiente(
+		actual,
+		calidad,
+		int(perfil["avance_perfecto"]),
+		bool(perfil["mantiene_bien"]),
+	)
 
 
 static func iniciativa_lista(racha: int) -> bool:
@@ -63,9 +129,11 @@ static func iniciativa_lista(racha: int) -> bool:
 
 
 static func aplicar_iniciativa(
-	combate: Dictionary, ronda: Dictionary, racha: int, calidad: String, azar: Callable
+	combate: Dictionary, ronda: Dictionary, racha: int, calidad: String, azar: Callable, tipo := ""
 ) -> int:
-	var nueva := racha_siguiente(racha, calidad)
+	var nueva := (
+		racha_de(tipo, racha, calidad) if not tipo.is_empty() else racha_siguiente(racha, calidad)
+	)
 	if not iniciativa_lista(nueva):
 		return nueva
 	if bool(ronda.get("terminado", false)):
@@ -126,6 +194,8 @@ func _ready() -> void:
 
 
 func armar(tipo: String, ronda: int, rival_id: String, reduccion: bool, racha: int) -> void:
+	_tipo = tipo
+	_perfil = perfil_para(tipo)
 	_centro = centro_para(tipo, ronda, rival_id)
 	_reduccion_movimiento = reduccion
 	_tiempo = 0.0
@@ -170,8 +240,9 @@ func _unhandled_input(evento: InputEvent) -> void:
 func _confirmar_actual() -> void:
 	if not _activo:
 		return
-	var posicion := _centro if _reduccion_movimiento else posicion_para(_tiempo)
-	_resolver(calidad_para(posicion, _centro, _reduccion_movimiento))
+	var periodo := float(_perfil.get("periodo", PERIODO_SEGUNDOS))
+	var posicion := _centro if _reduccion_movimiento else posicion_para(_tiempo, periodo)
+	_resolver(calidad_de(_tipo, posicion, _centro, _reduccion_movimiento))
 
 
 func _resolver(calidad: String) -> void:
@@ -188,9 +259,15 @@ func _actualizar_visual() -> void:
 		return
 	var ancho := maxf(1.0, _area.size.x)
 	var alto := maxf(1.0, _area.size.y)
-	var ancho_objetivo := ancho * MEDIA_VENTANA_PERFECTA * 2.0
+	var media_perfecta := float(_perfil.get("perfecta", MEDIA_VENTANA_PERFECTA))
+	var ancho_objetivo := ancho * media_perfecta * 2.0
 	_objetivo.position = Vector2(_centro * ancho - ancho_objetivo * 0.5, 0.0)
 	_objetivo.size = Vector2(ancho_objetivo, alto)
-	var posicion := _centro if _reduccion_movimiento else posicion_para(_tiempo)
-	_cursor.position = Vector2(clampf(posicion * ancho - 2.0, 0.0, ancho - 4.0), 0.0)
-	_cursor.size = Vector2(4.0, alto)
+	var periodo := float(_perfil.get("periodo", PERIODO_SEGUNDOS))
+	var posicion := _centro if _reduccion_movimiento else posicion_para(_tiempo, periodo)
+	var grosor := float(_perfil.get("cursor", 4.0))
+	_cursor.position = Vector2(
+		clampf(posicion * ancho - grosor * 0.5, 0.0, ancho - grosor),
+		0.0,
+	)
+	_cursor.size = Vector2(grosor, alto)
