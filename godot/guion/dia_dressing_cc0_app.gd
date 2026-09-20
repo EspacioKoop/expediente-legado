@@ -217,6 +217,8 @@ func _montar_examinable(
 	examinable.verbo = Interactuable3D.Verbo.EXAMINAR
 	examinable.nombre_objeto = nombre_objeto
 	examinable.set_meta("objeto_onirico_id", objeto_onirico_id)
+	examinable.set_meta("huella_ambiental_id", "dressing:%s" % String(cuerpo.name))
+	examinable.set_meta("huella_ambiental_tipo", "roce")
 	cuerpo.add_child(examinable)
 
 	var colision := CollisionShape3D.new()
