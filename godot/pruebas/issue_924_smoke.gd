@@ -174,11 +174,10 @@ func _probar_lectura_social() -> void:
 	)
 	var conteo := Prometeo.conteo_elecciones_ideologicas(estado)
 	_comprobar(conteo.get("centrista"), 1, "la elección cuenta una vez")
-	_comprobar(
-		conteo.values().reduce(func(total, valor): return total + int(valor), 0),
-		1,
-		"la reacción del NPC no añade un segundo voto",
-	)
+	var total := 0
+	for valor in conteo.values():
+		total += int(valor)
+	_comprobar(total, 1, "la reacción del NPC no añade un segundo voto")
 
 
 func _probar_contrato_transversal() -> void:
