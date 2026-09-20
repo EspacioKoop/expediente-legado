@@ -22,6 +22,10 @@ const GROSOR_MURO := 0.2
 ## que tocarlo se toca una vez.
 const SHADER_PSX := "res://arte/psx.gdshader"
 
+## Nombre de las lámparas generales de un sitio. Godot le añade sufijo a los
+## repetidos, así que se reconocen por prefijo.
+const NOMBRE_LUZ_SALA := "LuzDeSala"
+
 ## Cada cuántos metros se pone un vértice de más. Es el mando que decide si una
 ## lámpara da un charco de luz o tiñe la pared entera.
 const METROS_POR_VERTICE := 1.4
@@ -255,13 +259,27 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 ## viene de ninguna parte, y eso se nota antes de saber por qué.
 static func _luz(raiz: Node3D, luz: Dictionary) -> void:
 	var punto := OmniLight3D.new()
+	# Con nombre para poder distinguirla: una sala tiene lámparas generales y
+	# además puntos de luz diminutos —la brasa de un cigarro— que no alumbran
+	# la sala ni deben proyectar sombra. Sin nombre no hay forma de exigirle
+	# nada a unas sin exigírselo a las otras.
+	punto.name = NOMBRE_LUZ_SALA
 	punto.position = luz["pos"]
 	punto.light_color = luz.get("color", Color(1, 1, 1))
 	punto.light_energy = luz.get("energia", 1.0)
 	punto.omni_range = luz.get("alcance", 8.0)
-	# Sin sombras: son caras, y en un sitio de cajas planas lo único que
-	# enseñan es que son cajas. Es el mismo argumento que ya llevaba el sol.
-	punto.shadow_enabled = false
+	# Con sombra desde #275. El argumento para apagarlas —«en un sitio de cajas
+	# planas lo único que enseñan es que son cajas»— valía cuando la oficina era
+	# cajas; hoy hay mesas, sillas y figuras humanas, y sin sombra de contacto
+	# nada apoya en el suelo: la sala entera se lee como calcomanías pegadas.
+	# El sesgo evita el acné de sombra en superficies casi paralelas a la luz.
+	punto.shadow_enabled = true
+	punto.shadow_bias = 0.04
+	punto.shadow_normal_bias = 1.4
+	# Paraboloide dual en vez de cubo: dos pasadas de sombra por lámpara en vez
+	# de seis. Un fluorescente pegado al techo alumbra hacia abajo, así que las
+	# caras que el cubo dedicaría al techo no describen nada que se vea.
+	punto.omni_shadow_mode = OmniLight3D.SHADOW_DUAL_PARABOLOID
 	raiz.add_child(punto)
 
 	if not luz.get("carcasa", true):
@@ -270,6 +288,19 @@ static func _luz(raiz: Node3D, luz: Dictionary) -> void:
 		raiz, luz["pos"], luz.get("tam", Vector3(1.2, 0.08, 0.3)), luz.get("color", Color(1, 1, 1))
 	)
 	_emisivo(cuerpo, luz.get("color", Color(1, 1, 1)))
+	# La carcasa envuelve a su propia lámpara: va en la misma posición. Mientras
+	# no hubo sombras daba igual, pero en cuanto las hay el fluorescente se tapa
+	# a sí mismo y la sala se queda a oscuras. Una lámpara no se hace sombra.
+	_no_proyecta_sombra(cuerpo)
+
+
+## Deja de proyectar sombra sin dejar de verse. Es para lo que está DENTRO de
+## una luz o pegado a ella, donde la sombra propia no describe nada.
+static func _no_proyecta_sombra(nodo: Node) -> void:
+	if nodo is GeometryInstance3D:
+		(nodo as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	for hijo in nodo.get_children():
+		_no_proyecta_sombra(hijo)
 
 
 ## Un texto en el mundo, no en la interfaz.
@@ -427,13 +458,16 @@ static func _por_planta(
 static func _suelo(
 	raiz: Node3D, medidas: Vector2, color: Color, textura: String = "", centro := Vector2.ZERO
 ) -> void:
-	_caja(
+	var cuerpo := _caja(
 		raiz,
 		Vector3(centro.x, -GROSOR_MURO / 2.0, centro.y),
 		Vector3(medidas.x, GROSOR_MURO, medidas.y),
 		color,
 		textura
 	)
+	# El suelo recibe sombra pero no la proyecta: debajo no hay nada que mirar,
+	# y es la superficie más grande de la sala. Sale gratis de cada pasada.
+	_no_proyecta_sombra(cuerpo)
 
 
 ## El techo va EMISIVO, no solo claro. La luz del motor viene de arriba, así
@@ -452,6 +486,9 @@ static func _techo(
 		textura
 	)
 	_emisivo(cuerpo, color)
+	# Un techo emisivo que además tapara la luz de sus propias lámparas dejaría
+	# la sala a oscuras por el mismo motivo que la carcasa del fluorescente.
+	_no_proyecta_sombra(cuerpo)
 
 
 ## La malla de la caja de un bulto. Es su primer hijo por construcción, pero se

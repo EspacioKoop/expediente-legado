@@ -148,8 +148,12 @@ func _cerrar_vuelta() -> void:
 	_guardar_o_avisar("")
 
 
-## Luz y ambiente. Una sola direccional y bastante ambiente: en un sitio de
-## cajas planas, las sombras duras solo enseñan que son cajas.
+## Luz y ambiente. Una sola direccional, ahora con sombra, y oclusión.
+##
+## Desde #275 el proyecto usa Forward+, que trae sombra real y oclusión de
+## contacto: son ellas las que asientan un objeto contra el suelo, y antes no
+## había ninguna. El relleno ambiental no se toca aquí —cada espacio fija el
+## suyo al entrar con `ambiente_energia`, y este valor es solo el inicial—.
 func _montar_entorno() -> void:
 	var entorno := WorldEnvironment.new()
 	var ajustes := Environment.new()
@@ -158,13 +162,25 @@ func _montar_entorno() -> void:
 	ajustes.background_color = Color(0.05, 0.05, 0.06)
 	ajustes.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	ajustes.ambient_light_color = Color(0.55, 0.55, 0.58)
+	# El relleno real lo fija cada espacio al entrar; este es solo el inicial.
 	ajustes.ambient_light_energy = 0.7
+	# Oclusión ambiental y su equivalente para luz indirecta. Las dos son de
+	# Forward+ y son lo que asienta un objeto contra el suelo y contra el muro
+	# cuando la sombra proyectada no llega.
+	ajustes.ssao_enabled = true
+	ajustes.ssao_radius = 0.8
+	ajustes.ssao_intensity = 2.0
+	ajustes.ssil_enabled = true
+	ajustes.ssil_intensity = 0.7
 	entorno.environment = ajustes
 	add_child(entorno)
 
 	var sol := DirectionalLight3D.new()
 	sol.rotation_degrees = Vector3(-55, -35, 0)
 	sol.light_energy = 0.7
+	sol.shadow_enabled = true
+	sol.shadow_bias = 0.03
+	sol.shadow_normal_bias = 1.4
 	add_child(sol)
 	_sol = sol
 

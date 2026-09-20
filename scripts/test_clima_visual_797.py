@@ -40,10 +40,14 @@ class ClimaVisual797Test(unittest.TestCase):
         self.assertIn('"background_energy": 1.14', self.controlador)
         self.assertIn("ambiente.fog_enabled = bool(perfil", self.controlador)
 
-    def test_renderer_compatibility_no_activa_volumetrica(self) -> None:
-        self.assertIn('renderer/rendering_method="gl_compatibility"', self.proyecto)
+    def test_la_volumetrica_sigue_al_renderer_y_no_al_proyecto(self) -> None:
+        # El contrato no es qué renderer usa el proyecto hoy —desde #275 es
+        # Forward+—, sino que la niebla volumétrica se decida por la capacidad
+        # real del renderer en ejecución. Así el guion sirve igual si un día se
+        # vuelve a Compatibility o si se exporta a un objetivo que no lo admita.
         self.assertIn('get_current_rendering_method()) != "forward_plus"', self.controlador)
         self.assertIn("ambiente.volumetric_fog_enabled = false", self.controlador)
+        self.assertIn('renderer/rendering_method="forward_plus"', self.proyecto)
 
     def test_precipitacion_sigue_al_jugador_y_tiene_viento(self) -> None:
         self.assertIn("nodo.global_position = caminante.global_position", self.controlador)
