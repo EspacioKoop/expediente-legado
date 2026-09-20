@@ -66,9 +66,7 @@ func _ejecutar() -> void:
 		"revelada": -1,
 	}
 	var ronda := {"terminado": false, "revelada": ""}
-	var restante := CareoPulso.aplicar_iniciativa(
-		combate, ronda, 1, "perfecto", func(): return 0.0
-	)
+	var restante := CareoPulso.aplicar_iniciativa(combate, ronda, 1, "perfecto", func(): return 0.0)
 	_comprobar(restante == 0 and combate["revelada"] == 1, "la racha gana iniciativa real")
 	_comprobar(not String(ronda["revelada"]).is_empty(), "la iniciativa se comunica a la cronica")
 
