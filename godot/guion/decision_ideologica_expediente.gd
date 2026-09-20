@@ -25,19 +25,16 @@ const DECISIONES := {
 			{
 				"id": "responsabilidad_compartida",
 				"eje": "comunismo",
-				"texto": "IDEOLOGIA_CASO1_RESPONSABILIDAD_COMPARTIDA",
 				"etiquetas": ["responsabilidad_colectiva", "control_interno"],
 			},
 			{
 				"id": "revision_procedimental",
 				"eje": "socialdemocrata",
-				"texto": "IDEOLOGIA_CASO1_REVISION_PROCEDIMENTAL",
 				"etiquetas": ["garantias_procedimiento", "revision_institucional"],
 			},
 			{
 				"id": "conciliacion_interna",
 				"eje": "centrista",
-				"texto": "IDEOLOGIA_CASO1_CONCILIACION_INTERNA",
 				"etiquetas": ["conciliacion", "acuerdo_interno"],
 			},
 		],
