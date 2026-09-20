@@ -16,6 +16,9 @@ func _ejecutar() -> void:
 	_probar_tags_rituales()
 	_probar_identidad_funcional()
 	await _probar_runtime_doctrinas()
+	# Sonidos, tweens y queue_free del HUD son efímeros del SceneTree.
+	# Se drenan como en la telemetría #912 para no convertir teardown en fallo.
+	await create_timer(1.0).timeout
 	await process_frame
 	print("issue_921: %d pasadas, %d fallos" % [pasadas, fallos])
 	quit(1 if fallos > 0 else 0)
