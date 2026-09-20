@@ -44,15 +44,11 @@ func _probar_disponibilidad() -> void:
 	for opcion in opciones:
 		ejes.append(String(opcion.get("eje", "")))
 	_comprobar(ejes.has("comunismo"), true, "el corte puede expresar responsabilidad colectiva")
-	_comprobar(
-		ejes.has("socialdemocrata"), true, "el corte puede expresar revisión institucional"
-	)
+	_comprobar(ejes.has("socialdemocrata"), true, "el corte puede expresar revisión institucional")
 	_comprobar(ejes.has("centrista"), true, "el corte puede expresar conciliación")
 	_comprobar(ejes.has("neoliberal"), false, "un caso no necesita forzar los cuatro ejes")
 	_comprobar(
-		DecisionIdeologicaExpediente.disponible(
-			estado, DecisionIdeologicaExpediente.CASO_VERTICAL
-		),
+		DecisionIdeologicaExpediente.disponible(estado, DecisionIdeologicaExpediente.CASO_VERTICAL),
 		false,
 		"sin un cierre real no aparece la decisión",
 	)
