@@ -166,12 +166,15 @@ func _al_jugar(tipo: String) -> void:
 	for boton in _habilidades.get_children():
 		boton.disabled = true
 	_evidencias.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_pulso.armar(
-		tipo,
-		int(combate["ronda"]),
-		String(_rival.get("id", _rival.get("nombre", ""))),
-		reduccion_movimiento,
-		_pulso_racha,
+	(
+		_pulso
+		. armar(
+			tipo,
+			int(combate["ronda"]),
+			String(_rival.get("id", _rival.get("nombre", ""))),
+			reduccion_movimiento,
+			_pulso_racha,
+		)
 	)
 
 
@@ -180,9 +183,7 @@ func _al_pulso_confirmado(calidad: String) -> void:
 		combate, _jugada_pendiente, _evidencia_pendiente, _habilidad_pendiente, _tirada()
 	)
 	_habilidad_elegida_eje = ""
-	_pulso_racha = CareoPulso.aplicar_iniciativa(
-		combate, ronda, _pulso_racha, calidad, _tirada()
-	)
+	_pulso_racha = CareoPulso.aplicar_iniciativa(combate, ronda, _pulso_racha, calidad, _tirada())
 	if calidad == "perfecto":
 		Sonido.sonar(self, "marcar" if not ronda["revelada"].is_empty() else "pulsar")
 	_jugada_pendiente = ""
