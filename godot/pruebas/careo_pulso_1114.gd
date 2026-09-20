@@ -27,18 +27,24 @@ func _ejecutar() -> void:
 	var silencio := CareoPulso.perfil_para("silencio")
 	var insistencia := CareoPulso.perfil_para("insistencia")
 	_comprobar(
-		float(objecion["periodo"]) < float(insistencia["periodo"])
-		and float(insistencia["periodo"]) < float(silencio["periodo"]),
+		(
+			float(objecion["periodo"]) < float(insistencia["periodo"])
+			and float(insistencia["periodo"]) < float(silencio["periodo"])
+		),
 		"objecion es rapida, insistencia media y silencio lento",
 	)
 	_comprobar(
-		float(objecion["perfecta"]) < float(insistencia["perfecta"])
-		and float(insistencia["perfecta"]) < float(silencio["perfecta"]),
+		(
+			float(objecion["perfecta"]) < float(insistencia["perfecta"])
+			and float(insistencia["perfecta"]) < float(silencio["perfecta"])
+		),
 		"las ventanas perfectas distinguen precision, presion y control",
 	)
 	_comprobar(
-		float(objecion["cursor"]) != float(insistencia["cursor"])
-		and float(insistencia["cursor"]) != float(silencio["cursor"]),
+		(
+			float(objecion["cursor"]) != float(insistencia["cursor"])
+			and float(insistencia["cursor"]) != float(silencio["cursor"])
+		),
 		"el grosor del cursor hace legible el perfil activo",
 	)
 	var muestra := 0.28
@@ -77,8 +83,10 @@ func _ejecutar() -> void:
 		"reduccion de movimiento conserva la recompensa sin timing",
 	)
 	_comprobar(
-		CareoPulso.calidad_de("objecion", centro + 0.08, centro) == "bien"
-		and CareoPulso.calidad_de("silencio", centro + 0.08, centro) == "perfecto",
+		(
+			CareoPulso.calidad_de("objecion", centro + 0.08, centro) == "bien"
+			and CareoPulso.calidad_de("silencio", centro + 0.08, centro) == "perfecto"
+		),
 		"el mismo error exige precision en objecion y cabe en silencio",
 	)
 	_comprobar(
@@ -86,9 +94,11 @@ func _ejecutar() -> void:
 		"insistencia deja una corona util para sostener la presion",
 	)
 	_comprobar(
-		CareoPulso.calidad_de("objecion", 0.0, centro, true) == "perfecto"
-		and CareoPulso.calidad_de("silencio", 0.0, centro, true) == "perfecto"
-		and CareoPulso.calidad_de("insistencia", 0.0, centro, true) == "perfecto",
+		(
+			CareoPulso.calidad_de("objecion", 0.0, centro, true) == "perfecto"
+			and CareoPulso.calidad_de("silencio", 0.0, centro, true) == "perfecto"
+			and CareoPulso.calidad_de("insistencia", 0.0, centro, true) == "perfecto"
+		),
 		"reduccion de movimiento iguala el techo de los tres perfiles",
 	)
 
