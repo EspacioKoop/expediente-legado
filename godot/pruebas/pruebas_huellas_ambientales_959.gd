@@ -68,7 +68,7 @@ func _probar() -> void:
 		"el estado generado valida"
 	)
 
-	var invalido := estado["huellas_ambientales"].duplicate(true)
+	var invalido: Dictionary = estado["huellas_ambientales"].duplicate(true)
 	invalido["rota"] = {"tipo": "laser", "fase": "archivo", "usos": 1, "intensidad": 0.2}
 	_comprobar(not HuellasAmbientales.validar(invalido).is_empty(), "rechaza tipos inventados")
 	var guardado_roto := Partida.nueva()
