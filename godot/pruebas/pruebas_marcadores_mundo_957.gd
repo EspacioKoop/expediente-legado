@@ -15,38 +15,47 @@ func _initialize() -> void:
 
 	_comprobar(MarcadoresMundo.listar(jornada, "archivo").is_empty(), "empieza sin marcadores")
 
-	var invalido := MarcadoresMundo.colocar(
-		jornada,
-		"archivo",
-		"spray",
-		MarcadoresMundo.COLOR_BLANCO,
-		"",
-		Vector3.ZERO,
-		Vector3.UP,
+	var invalido := (
+		MarcadoresMundo
+		. colocar(
+			jornada,
+			"archivo",
+			"spray",
+			MarcadoresMundo.COLOR_BLANCO,
+			"",
+			Vector3.ZERO,
+			Vector3.UP,
+		)
 	)
 	_comprobar(not bool(invalido["ok"]), "rechaza tipos fuera del vocabulario")
 	_comprobar(MarcadoresMundo.listar(jornada, "archivo").is_empty(), "un tipo inválido no muta")
 
-	var color_invalido := MarcadoresMundo.colocar(
-		jornada,
-		"archivo",
-		MarcadoresMundo.TIPO_NOTA,
-		"neon",
-		"",
-		Vector3.ZERO,
-		Vector3.UP,
+	var color_invalido := (
+		MarcadoresMundo
+		. colocar(
+			jornada,
+			"archivo",
+			MarcadoresMundo.TIPO_NOTA,
+			"neon",
+			"",
+			Vector3.ZERO,
+			Vector3.UP,
+		)
 	)
 	_comprobar(not bool(color_invalido["ok"]), "rechaza colores fuera de paleta")
 
 	var texto_largo := "012345678901234567890123456789"
-	var primera := MarcadoresMundo.colocar(
-		jornada,
-		"archivo",
-		MarcadoresMundo.TIPO_NOTA,
-		MarcadoresMundo.COLOR_AMARILLO,
-		texto_largo,
-		Vector3(1.0, 0.8, -2.0),
-		Vector3(0.0, 0.0, 2.0),
+	var primera := (
+		MarcadoresMundo
+		. colocar(
+			jornada,
+			"archivo",
+			MarcadoresMundo.TIPO_NOTA,
+			MarcadoresMundo.COLOR_AMARILLO,
+			texto_largo,
+			Vector3(1.0, 0.8, -2.0),
+			Vector3(0.0, 0.0, 2.0),
+		)
 	)
 	_comprobar(bool(primera["ok"]), "coloca una nota válida")
 	var primera_marca: Dictionary = primera["marcador"]
@@ -60,26 +69,32 @@ func _initialize() -> void:
 		"la normal se guarda normalizada",
 	)
 
-	var tiza := MarcadoresMundo.colocar(
-		jornada,
-		"archivo",
-		MarcadoresMundo.TIPO_TIZA,
-		MarcadoresMundo.COLOR_BLANCO,
-		"esto no se pinta",
-		Vector3(0.0, 0.01, 0.0),
-		Vector3.UP,
+	var tiza := (
+		MarcadoresMundo
+		. colocar(
+			jornada,
+			"archivo",
+			MarcadoresMundo.TIPO_TIZA,
+			MarcadoresMundo.COLOR_BLANCO,
+			"esto no se pinta",
+			Vector3(0.0, 0.01, 0.0),
+			Vector3.UP,
+		)
 	)
 	_comprobar(String(tiza["marcador"]["texto"]).is_empty(), "la tiza no conserva texto ajeno")
 
 	for indice in range(3):
-		var extra := MarcadoresMundo.colocar(
-			jornada,
-			"archivo",
-			MarcadoresMundo.TIPO_CARBON,
-			MarcadoresMundo.COLOR_ROJO,
-			"",
-			Vector3(float(indice), 0.01, 1.0),
-			Vector3.UP,
+		var extra := (
+			MarcadoresMundo
+			. colocar(
+				jornada,
+				"archivo",
+				MarcadoresMundo.TIPO_CARBON,
+				MarcadoresMundo.COLOR_ROJO,
+				"",
+				Vector3(float(indice), 0.01, 1.0),
+				Vector3.UP,
+			)
 		)
 		_comprobar(bool(extra["ok"]), "acepta marca hasta completar el límite %d" % indice)
 
@@ -87,25 +102,31 @@ func _initialize() -> void:
 		MarcadoresMundo.listar(jornada, "archivo").size() == MarcadoresMundo.LIMITE_POR_ZONA,
 		"la zona llega exactamente al límite",
 	)
-	var sexta := MarcadoresMundo.colocar(
-		jornada,
-		"archivo",
-		MarcadoresMundo.TIPO_OBJETO,
-		MarcadoresMundo.COLOR_AZUL,
-		"",
-		Vector3.ZERO,
-		Vector3.UP,
+	var sexta := (
+		MarcadoresMundo
+		. colocar(
+			jornada,
+			"archivo",
+			MarcadoresMundo.TIPO_OBJETO,
+			MarcadoresMundo.COLOR_AZUL,
+			"",
+			Vector3.ZERO,
+			Vector3.UP,
+		)
 	)
 	_comprobar(String(sexta["motivo"]) == "limite_zona", "la sexta marca se rechaza")
 
-	var otra_zona := MarcadoresMundo.colocar(
-		jornada,
-		"casa",
-		MarcadoresMundo.TIPO_CINTA,
-		MarcadoresMundo.COLOR_VERDE,
-		"nevera",
-		Vector3(0.5, 1.1, 0.5),
-		Vector3.FORWARD,
+	var otra_zona := (
+		MarcadoresMundo
+		. colocar(
+			jornada,
+			"casa",
+			MarcadoresMundo.TIPO_CINTA,
+			MarcadoresMundo.COLOR_VERDE,
+			"nevera",
+			Vector3(0.5, 1.1, 0.5),
+			Vector3.FORWARD,
+		)
 	)
 	_comprobar(bool(otra_zona["ok"]), "el límite es independiente por zona")
 	_comprobar(MarcadoresMundo.listar(jornada, "casa").size() == 1, "casa conserva su propia lista")
@@ -125,33 +146,41 @@ func _initialize() -> void:
 		MarcadoresMundo.listar(jornada, "archivo").size() == MarcadoresMundo.LIMITE_POR_ZONA - 1,
 		"el borrado libera una plaza",
 	)
-	var reemplazo := MarcadoresMundo.colocar(
-		jornada,
-		"archivo",
-		MarcadoresMundo.TIPO_OBJETO,
-		MarcadoresMundo.COLOR_AZUL,
-		"",
-		Vector3(2.0, 0.02, 2.0),
-		Vector3.UP,
+	var reemplazo := (
+		MarcadoresMundo
+		. colocar(
+			jornada,
+			"archivo",
+			MarcadoresMundo.TIPO_OBJETO,
+			MarcadoresMundo.COLOR_AZUL,
+			"",
+			Vector3(2.0, 0.02, 2.0),
+			Vector3.UP,
+		)
 	)
 	_comprobar(bool(reemplazo["ok"]), "se puede reutilizar la plaza liberada")
 	_comprobar(
 		String(reemplazo["marcador"]["id"]) != String(primera_marca["id"]),
 		"los ids no se reciclan al borrar",
 	)
-	_comprobar(not MarcadoresMundo.eliminar(jornada, "archivo", "m999999"), "borrar ausente es seguro")
+	_comprobar(
+		not MarcadoresMundo.eliminar(jornada, "archivo", "m999999"), "borrar ausente es seguro"
+	)
 	_comprobar(MarcadoresMundo.eliminar_zona(jornada, "casa") == 1, "puede limpiar una zona")
 	_comprobar(MarcadoresMundo.listar(jornada, "casa").is_empty(), "la zona queda vacía")
 
-	var solo_sueno := MarcadoresMundo.colocar(
-		jornada,
-		"sueño",
-		MarcadoresMundo.TIPO_NOTA,
-		MarcadoresMundo.COLOR_ROJO,
-		"eco",
-		Vector3.ZERO,
-		Vector3.UP,
-		true,
+	var solo_sueno := (
+		MarcadoresMundo
+		. colocar(
+			jornada,
+			"sueño",
+			MarcadoresMundo.TIPO_NOTA,
+			MarcadoresMundo.COLOR_ROJO,
+			"eco",
+			Vector3.ZERO,
+			Vector3.UP,
+			true,
+		)
 	)
 	_comprobar(
 		not MarcadoresMundo.visible_en(solo_sueno["marcador"], false),
@@ -202,8 +231,10 @@ func _initialize() -> void:
 	_comprobar(String(carga.get("resultado", "")) == "cargada", "la partida vuelve a cargar")
 	var jornada_recargada: Dictionary = recargada.estado["jornada"]
 	_comprobar(
-		MarcadoresMundo.listar(jornada_recargada, "archivo").size()
-		== MarcadoresMundo.LIMITE_POR_ZONA,
+		(
+			MarcadoresMundo.listar(jornada_recargada, "archivo").size()
+			== MarcadoresMundo.LIMITE_POR_ZONA
+		),
 		"guardar y cargar conserva el límite lleno",
 	)
 	_comprobar(
