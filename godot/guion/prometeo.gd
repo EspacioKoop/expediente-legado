@@ -375,6 +375,19 @@ static func conteo_elecciones_ideologicas(estado: Dictionary) -> Dictionary:
 	return conteo
 
 
+## Cargas de doctrina que puede consumir cualquier vertical de combate.
+##
+## Solo cuentan elecciones explícitas de la vuelta. Exposición y lecturas
+## sociales quedan fuera por contrato, y el tope evita acumulación ilimitada.
+static func cargas_ideologicas(estado: Dictionary, tope_por_eje: int = 2) -> Dictionary:
+	var conteo := conteo_elecciones_ideologicas(estado)
+	var cargas := {}
+	var tope := maxi(0, tope_por_eje)
+	for eje in EJES:
+		cargas[eje] = mini(tope, int(conteo.get(eje, 0)))
+	return cargas
+
+
 ## Devuelve TODOS los ejes empatados en cabeza. Sin elecciones devuelve [].
 ## Es el contrato nuevo para #925: pluralidad es un estado real y no cae por
 ## posición en EJES. `eje_ganador()` conserva por ahora el comportamiento
