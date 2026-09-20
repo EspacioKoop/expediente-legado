@@ -72,12 +72,15 @@ static func aplicar_iniciativa(
 		return 0
 	if int(combate.get("revelada", -1)) >= 0:
 		return META_INICIATIVA - 1
-	var indice := Prometeo.jugada_rival(
-		String(combate["modo"]),
-		int(combate["ronda"]),
-		Combate.TIPOS.size(),
-		azar,
-		int(combate["ultima_jugada_jugador"]),
+	var indice := (
+		Prometeo
+		. jugada_rival(
+			String(combate["modo"]),
+			int(combate["ronda"]),
+			Combate.TIPOS.size(),
+			azar,
+			int(combate["ultima_jugada_jugador"]),
+		)
 	)
 	combate["revelada"] = indice
 	ronda["revelada"] = Combate.etiqueta(Combate.TIPOS[indice])
