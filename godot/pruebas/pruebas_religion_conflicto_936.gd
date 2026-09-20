@@ -30,8 +30,7 @@ func _init() -> void:
 	)
 	_comprobar(Eventos.registrar(registro, exposicion), "la exposición se registra")
 	_comprobar(
-		Eventos.eventos(registro, Eventos.CANAL_PRACTICA).is_empty(),
-		"exposición no crea práctica"
+		Eventos.eventos(registro, Eventos.CANAL_PRACTICA).is_empty(), "exposición no crea práctica"
 	)
 	_comprobar(
 		Eventos.eventos(registro, Eventos.CANAL_CONVICCION).is_empty(),
@@ -61,10 +60,7 @@ func _init() -> void:
 		not Eventos.registrar(
 			registro,
 			Eventos.crear_evento(
-				"practica-voto",
-				Eventos.CANAL_CONVICCION,
-				"dialogo:fixture",
-				"juicio:caso-1"
+				"practica-voto", Eventos.CANAL_CONVICCION, "dialogo:fixture", "juicio:caso-1"
 			)
 		),
 		"un mismo hecho no puede reaparecer en otro canal"
@@ -190,22 +186,26 @@ func _init() -> void:
 	var regla_a: Dictionary = Conflicto.compromisos_disponibles(registro_a, "juicio:equidad")[0]
 	var regla_b: Dictionary = Conflicto.compromisos_disponibles(registro_b, "juicio:equidad")[0]
 	_comprobar(
-		[
-			regla_a["regla"],
-			regla_a["alcance"],
-			regla_a["etiquetas"],
-		]
-		== [
-			regla_b["regla"],
-			regla_b["alcance"],
-			regla_b["etiquetas"],
-		],
+		(
+			[
+				regla_a["regla"],
+				regla_a["alcance"],
+				regla_a["etiquetas"],
+			]
+			== [
+				regla_b["regla"],
+				regla_b["alcance"],
+				regla_b["etiquetas"],
+			]
+		),
 		"cambiar la tradición no cambia la potencia de la regla"
 	)
 
 	var serializado := JSON.stringify(registro)
 	_comprobar(not serializado.contains('"fe"'), "el contrato no crea una barra de fe")
-	_comprobar(not serializado.contains('"religion"'), "el contrato no asigna una religión al jugador")
+	_comprobar(
+		not serializado.contains('"religion"'), "el contrato no asigna una religión al jugador"
+	)
 
 	print("%d pasadas, %d fallos" % [pasadas, fallos])
 	quit(1 if fallos > 0 else 0)
