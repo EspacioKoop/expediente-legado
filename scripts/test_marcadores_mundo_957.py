@@ -49,6 +49,7 @@ class MarcadoresMundo957Test(unittest.TestCase):
         self.assertIn("MarcadoresMundo.listar(_host.jornada, zona)", codigo)
         self.assertIn('String(_host.jornada.get("fase", ""))', codigo)
         self.assertIn('if _host.has_method("_guardar_o_avisar")', codigo)
+        self.assertIn("mundo.remove_child(anterior)", codigo)
         self.assertNotIn("Input.", codigo)
         self.assertNotIn("SuenoObjetivos", codigo)
         self.assertNotIn("Economia.", codigo)
