@@ -222,9 +222,7 @@ func _aplicar_mesa_dialogo() -> void:
 	separacion.y = 0.0
 	if separacion.length_squared() < 0.001:
 		separacion = Vector3(0.0, 0.0, -1.0)
-	_rival.position = _limitar(
-		_jugador.position + separacion.normalized() * DISTANCIA_MESA
-	)
+	_rival.position = _limitar(_jugador.position + separacion.normalized() * DISTANCIA_MESA)
 
 
 func _activar_comision() -> void:
@@ -381,12 +379,8 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 	var dano := dano_base
 	if fuerte:
 		dano += int(_ritual.get("dano_fuerte_bonus", 0))
-	var interrupcion_ritual := interrumpe_ataque(
-		fuerte, _ataque_rival_pendiente, _ritual
-	)
-	var interrupcion_asamblea := asamblea_interrumpe(
-		_doctrina_activa, _ataque_rival_pendiente
-	)
+	var interrupcion_ritual := interrumpe_ataque(fuerte, _ataque_rival_pendiente, _ritual)
+	var interrupcion_asamblea := asamblea_interrumpe(_doctrina_activa, _ataque_rival_pendiente)
 	if interrupcion_ritual:
 		dano += int(_ritual.get("dano_interrupcion_bonus", 0))
 	if interrupcion_ritual or interrupcion_asamblea:
