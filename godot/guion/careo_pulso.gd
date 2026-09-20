@@ -28,8 +28,11 @@ var _confirmar: Button
 
 
 static func centro_para(tipo: String, ronda: int, rival_id: String) -> float:
-	var clave := "%s|%d|%s" % [tipo, ronda, rival_id]
-	var unidad := float(posmod(hash(clave), 1001)) / 1000.0
+	var clave := "%s|%s" % [tipo, rival_id]
+	var suma := ronda * 17
+	for i in clave.length():
+		suma += clave.unicode_at(i) * (i + 1)
+	var unidad := float(posmod(suma, 1001)) / 1000.0
 	return lerpf(0.26, 0.74, unidad)
 
 
