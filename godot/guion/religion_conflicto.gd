@@ -46,9 +46,7 @@ static func compromisos_disponibles(
 ## Regla táctica del primer vertical: mientras el compromiso esté vigente, el
 ## jugador cede la iniciativa. Puede responder cuando el rival ya inició la
 ## acción. Sin compromiso, la regla base permanece intacta.
-static func puede_iniciar_accion_ofensiva(
-	compromiso: Dictionary, rival_ya_inicio: bool
-) -> bool:
+static func puede_iniciar_accion_ofensiva(compromiso: Dictionary, rival_ya_inicio: bool) -> bool:
 	if String(compromiso.get("regla", "")) != REGLA_NO_INICIAR:
 		return true
 	return rival_ya_inicio
