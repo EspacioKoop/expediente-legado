@@ -21,7 +21,7 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if _host == null or not is_instance_valid(_host):
 		return
-	if _host.jornada.is_empty() or _host._mundo == null:
+	if _host.jornada.is_empty() or not is_instance_valid(_host._mundo):
 		return
 
 	var mundo: Node3D = _host._mundo
