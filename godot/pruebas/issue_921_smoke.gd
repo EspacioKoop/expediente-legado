@@ -23,7 +23,8 @@ func _ejecutar() -> void:
 
 func _probar_cargas_transversales() -> void:
 	var estado := {
-		"historias_cartas": {
+		"historias_cartas":
+		{
 			"la-luna": "centrista",
 			"la-justicia": "centrista",
 		}
@@ -47,9 +48,7 @@ func _probar_cargas_transversales() -> void:
 		"una tercera decision sigue registrada aunque luego haya tope",
 	)
 	_comprobar(
-		Prometeo.registrar_exposicion_ideologica(
-			estado, "prensa:1", "prensa", "comunismo"
-		),
+		Prometeo.registrar_exposicion_ideologica(estado, "prensa:1", "prensa", "comunismo"),
 		"la exposicion puede registrarse por separado",
 	)
 
@@ -71,9 +70,7 @@ func _probar_cargas_transversales() -> void:
 
 func _probar_tags_rituales() -> void:
 	var laberinto := JuicioSimbolico.ritual_para({"id": "la-luna"}, "minotauro")
-	var robo_sol := JuicioSimbolico.ritual_para(
-		{"id": "el-sol"}, "maui_tamanuitera"
-	)
+	var robo_sol := JuicioSimbolico.ritual_para({"id": "el-sol"}, "maui_tamanuitera")
 	var talon := JuicioSimbolico.ritual_para({"id": "la-fuerza"}, "aquiles")
 
 	_comprobar(
@@ -93,13 +90,17 @@ func _probar_tags_rituales() -> void:
 		"Talon de la Fuerza declara riesgo",
 	)
 	_comprobar(
-		JuicioCombate3D.duracion_doctrina("comunismo", laberinto)
-		> JuicioCombate3D.DURACION_DOCTRINA,
+		(
+			JuicioCombate3D.duracion_doctrina("comunismo", laberinto)
+			> JuicioCombate3D.DURACION_DOCTRINA
+		),
 		"Asamblea cruza genericamente con control de espacio",
 	)
 	_comprobar(
-		JuicioCombate3D.duracion_telegrafo(true, robo_sol)
-		> JuicioCombate3D.duracion_telegrafo(true, {}),
+		(
+			JuicioCombate3D.duracion_telegrafo(true, robo_sol)
+			> JuicioCombate3D.duracion_telegrafo(true, {})
+		),
 		"Comision cruza genericamente con telegraph",
 	)
 	_comprobar(
@@ -107,8 +108,7 @@ func _probar_tags_rituales() -> void:
 		"Mesa cruza genericamente con neutralizar",
 	)
 	_comprobar(
-		JuicioCombate3D.duracion_doctrina("neoliberal", talon)
-		> JuicioCombate3D.DURACION_DOCTRINA,
+		JuicioCombate3D.duracion_doctrina("neoliberal", talon) > JuicioCombate3D.DURACION_DOCTRINA,
 		"Externalizar cruza genericamente con riesgo",
 	)
 
@@ -132,19 +132,26 @@ func _probar_identidad_funcional() -> void:
 	)
 	_comprobar(
 		is_equal_approx(
-			JuicioCombate3D.duracion_telegrafo(
-				false,
-				JuicioSimbolico.ritual_para({"id": "el-sol"}, "maui_tamanuitera"),
+			(
+				JuicioCombate3D
+				. duracion_telegrafo(
+					false,
+					JuicioSimbolico.ritual_para({"id": "el-sol"}, "maui_tamanuitera"),
+				)
 			),
 			JuicioCombate3D.TELEGRAFO_RIVAL,
 		),
 		"el ritual no activa Comision de forma pasiva",
 	)
 	_comprobar(
-		JuicioCombate3D.modificadores_doctrina_ritual(
-			"comunismo",
-			JuicioSimbolico.ritual_para({"id": "la-fuerza"}, "aquiles"),
-		).is_empty(),
+		(
+			JuicioCombate3D
+			. modificadores_doctrina_ritual(
+				"comunismo",
+				JuicioSimbolico.ritual_para({"id": "la-fuerza"}, "aquiles"),
+			)
+			. is_empty()
+		),
 		"un tag no relacionado no inventa una combinacion especial",
 	)
 
@@ -193,9 +200,7 @@ func _probar_runtime_doctrinas() -> void:
 	)
 	mesa.free()
 
-	var robo_sol := JuicioSimbolico.ritual_para(
-		{"id": "el-sol"}, "maui_tamanuitera"
-	)
+	var robo_sol := JuicioSimbolico.ritual_para({"id": "el-sol"}, "maui_tamanuitera")
 	var comision := await _nuevo_juicio(robo_sol)
 	_acercar(comision)
 	comision._cargas_doctrina = {"socialdemocrata": 1}
