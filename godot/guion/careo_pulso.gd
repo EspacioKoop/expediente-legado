@@ -245,8 +245,9 @@ func _unhandled_input(evento: InputEvent) -> void:
 func _confirmar_actual() -> void:
 	if not _activo:
 		return
-	var posicion := _centro if _reduccion_movimiento else posicion_para(_tiempo)
-	_resolver(calidad_para(posicion, _centro, _reduccion_movimiento))
+	var periodo := float(_perfil.get("periodo", PERIODO_SEGUNDOS))
+	var posicion := _centro if _reduccion_movimiento else posicion_para(_tiempo, periodo)
+	_resolver(calidad_de(_tipo, posicion, _centro, _reduccion_movimiento))
 
 
 func _resolver(calidad: String) -> void:
