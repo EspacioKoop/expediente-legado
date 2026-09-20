@@ -355,6 +355,8 @@ func _cancelar_ataque_rival() -> void:
 	_telegrafo_rival_total = TELEGRAFO_RIVAL
 	_recarga_rival = maxf(_recarga_rival, RECARGA_RIVAL * 0.65)
 	_ocultar_aviso_ataque()
+	if _doctrina_activa == "socialdemocrata":
+		_cerrar_doctrina()
 	Sonido.sonar(self, "pulsar")
 
 
