@@ -8,7 +8,7 @@ class CareoPulso1114Test(unittest.TestCase):
         comprobar_contrato(
             self,
             "pruebas/careo_pulso_1114.gd",
-            "careo_pulso_1114: 17 pasadas, 0 fallos",
+            "careo_pulso_1114: 29 pasadas, 0 fallos",
         )
 
 
