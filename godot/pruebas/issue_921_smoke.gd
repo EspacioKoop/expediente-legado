@@ -168,9 +168,7 @@ func _probar_runtime_doctrinas() -> void:
 		"Asamblea consume exactamente una carga",
 	)
 	asamblea._recarga_jugador = 0.0
-	asamblea._atacar(
-		1, JuicioCombate3D.ALCANCE_LIGERO, JuicioCombate3D.RECARGA_LIGERA, false
-	)
+	asamblea._atacar(1, JuicioCombate3D.ALCANCE_LIGERO, JuicioCombate3D.RECARGA_LIGERA, false)
 	_comprobar(not asamblea._ataque_rival_pendiente, "Asamblea corta la iniciativa rival")
 	_comprobar(
 		asamblea._determinacion_rival == 7,
@@ -238,9 +236,7 @@ func _probar_runtime_doctrinas() -> void:
 	externaliza._pintar_doctrinas()
 	_comprobar(externaliza.activar_doctrina("neoliberal"), "Externalizar se activa con carga")
 	externaliza._recarga_jugador = 0.0
-	externaliza._atacar(
-		1, JuicioCombate3D.ALCANCE_LIGERO, JuicioCombate3D.RECARGA_LIGERA, false
-	)
+	externaliza._atacar(1, JuicioCombate3D.ALCANCE_LIGERO, JuicioCombate3D.RECARGA_LIGERA, false)
 	_comprobar(
 		externaliza._determinacion_rival == 6,
 		"Externalizar duplica el primer impacto saliente",
@@ -278,9 +274,7 @@ func _probar_runtime_doctrinas() -> void:
 		"sin cargas ninguna doctrina se activa por defecto",
 	)
 	base._recarga_jugador = 0.0
-	base._atacar(
-		1, JuicioCombate3D.ALCANCE_LIGERO, JuicioCombate3D.RECARGA_LIGERA, false
-	)
+	base._atacar(1, JuicioCombate3D.ALCANCE_LIGERO, JuicioCombate3D.RECARGA_LIGERA, false)
 	_comprobar(
 		base._determinacion_rival == 7,
 		"sin cargas el combate base conserva su dano normal",
