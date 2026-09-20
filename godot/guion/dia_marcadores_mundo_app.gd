@@ -58,15 +58,18 @@ func colocar(
 ) -> Dictionary:
 	if _host == null or not is_instance_valid(_host):
 		return {"ok": false, "motivo": "dia_no_disponible"}
-	var resultado := MarcadoresMundo.colocar(
-		_host.jornada,
-		zona_actual(),
-		tipo,
-		color,
-		texto,
-		posicion,
-		normal,
-		solo_sueno,
+	var resultado := (
+		MarcadoresMundo
+		. colocar(
+			_host.jornada,
+			zona_actual(),
+			tipo,
+			color,
+			texto,
+			posicion,
+			normal,
+			solo_sueno,
+		)
 	)
 	if bool(resultado.get("ok", false)):
 		_firma = ""
