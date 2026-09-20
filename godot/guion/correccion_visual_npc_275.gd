@@ -33,14 +33,23 @@ func _ready() -> void:
 
 func _al_agregar_nodo(nodo: Node) -> void:
 	if String(nodo.scene_file_path) == RUTA_PERSONA:
-		_corregir_despues.call_deferred(nodo)
+		_corregir_diferido.call_deferred(nodo.get_instance_id())
 
 
 func _revisar_arbol(nodo: Node) -> void:
 	if String(nodo.scene_file_path) == RUTA_PERSONA:
-		_corregir_despues.call_deferred(nodo)
+		_corregir_diferido.call_deferred(nodo.get_instance_id())
 	for hijo in nodo.get_children():
 		_revisar_arbol(hijo)
+
+
+## Igual que en el pase de vestuario: entre el aviso y el volcado la figura
+## puede haberse liberado, y `MessageQueue` rechaza el argumento con un error
+## antes de que la comprobación de validez pueda evitarlo.
+func _corregir_diferido(id: int) -> void:
+	var pieza := instance_from_id(id)
+	if pieza is Node:
+		await _corregir_despues(pieza)
 
 
 func _corregir_despues(pieza: Node) -> void:
