@@ -274,6 +274,9 @@ func _montar_terminal_interactivo() -> void:
 	terminal.position = zona.position
 	terminal.verbo = Interactuable3D.Verbo.USAR
 	terminal.nombre_objeto = tr(String(zona.get_meta("rotulo", "SALIDA_PUESTO")))
+	terminal.set_meta("huella_ambiental_id", "archivo:terminal_siga")
+	terminal.set_meta("huella_ambiental_tipo", "uso")
+	terminal.set_meta("huella_ambiental_offset", Vector3(0.0, 0.0, -0.38))
 	terminal.activado.connect(_activar_terminal_siga)
 	_mundo.add_child(terminal)
 
@@ -295,6 +298,9 @@ func _montar_archivadores_interactivos(espacio: Dictionary) -> void:
 		var archivador := ArchivadorInteractivo3D.new()
 		archivador.name = "ArchivadorInteractuable%d" % indice
 		archivador.position = bulto["pos"]
+		archivador.set_meta("huella_ambiental_id", "archivo:archivador_%d" % indice)
+		archivador.set_meta("huella_ambiental_tipo", "apertura")
+		archivador.set_meta("huella_ambiental_offset", Vector3(-0.42, 0.0, 0.0))
 		_mundo.add_child(archivador)
 		archivador.configurar(bulto["tam"])
 
