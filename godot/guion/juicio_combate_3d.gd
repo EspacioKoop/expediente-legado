@@ -30,6 +30,9 @@ const RECARGA_LIGERA := 0.28
 const RECARGA_FUERTE := 0.58
 const RECARGA_RIVAL := 1.15
 const TELEGRAFO_RIVAL := 0.45
+const DURACION_DOCTRINA := 4.0
+const BONUS_TELEGRAFO_COMISION := 0.55
+const DISTANCIA_MESA := 3.0
 
 var reduccion_movimiento := false
 
@@ -43,6 +46,7 @@ var _recarga_rival := 0.0
 var _esquiva := 0.0
 var _enredo := 0.0
 var _telegrafo_rival := 0.0
+var _telegrafo_rival_total := TELEGRAFO_RIVAL
 var _ataque_rival_pendiente := false
 var _arcano: Dictionary = {}
 var _mito_id := ""
@@ -52,6 +56,10 @@ var _retornos_rival := 0
 var _radio_arena := RADIO_ARENA
 var _velocidad_rival := VELOCIDAD_RIVAL
 var _recarga_fuerte := RECARGA_FUERTE
+var _cargas_doctrina: Dictionary = {}
+var _doctrina_activa := ""
+var _doctrina_tiempo := 0.0
+var _comision_pendiente := false
 
 var _jugador: CharacterBody3D
 var _rival: CharacterBody3D
@@ -63,6 +71,7 @@ var _barra_jugador: ProgressBar
 var _barra_rival: ProgressBar
 var _etiqueta_ritual: Label
 var _etiqueta_ataque: Label
+var _botones_doctrina: HBoxContainer
 
 
 static func determinacion_rival(bono_documental: int) -> int:
@@ -79,6 +88,56 @@ static func resultado_ataque_rival(distancia: float, esquiva_restante: float) ->
 
 static func interrumpe_ataque(fuerte: bool, ataque_pendiente: bool, ritual: Dictionary) -> bool:
 	return fuerte and ataque_pendiente and bool(ritual.get("interrumpe_telegrafo_fuerte", false))
+
+
+static func modificadores_doctrina_ritual(eje: String, ritual: Dictionary) -> Dictionary:
+	var etiquetas = ritual.get("tags", [])
+	if typeof(etiquetas) != TYPE_ARRAY:
+		return {}
+	var modificadores := {}
+	match eje:
+		"comunismo":
+			if etiquetas.has("control_espacio"):
+				modificadores["duracion_mul"] = 1.25
+		"centrista":
+			if etiquetas.has("neutralizar"):
+				modificadores["recarga_rival_mul"] = 1.25
+		"socialdemocrata":
+			if etiquetas.has("telegraph"):
+				modificadores["telegraph_bonus"] = 0.25
+		"neoliberal":
+			if etiquetas.has("riesgo"):
+				modificadores["duracion_mul"] = 1.25
+	return modificadores
+
+
+static func duracion_doctrina(eje: String, ritual: Dictionary) -> float:
+	var modificadores := modificadores_doctrina_ritual(eje, ritual)
+	return DURACION_DOCTRINA * float(modificadores.get("duracion_mul", 1.0))
+
+
+static func duracion_telegrafo(comision: bool, ritual: Dictionary) -> float:
+	if not comision:
+		return TELEGRAFO_RIVAL
+	var modificadores := modificadores_doctrina_ritual("socialdemocrata", ritual)
+	return (
+		TELEGRAFO_RIVAL
+		+ BONUS_TELEGRAFO_COMISION
+		+ float(modificadores.get("telegraph_bonus", 0.0))
+	)
+
+
+static func recarga_mesa(ritual: Dictionary) -> float:
+	var modificadores := modificadores_doctrina_ritual("centrista", ritual)
+	return RECARGA_RIVAL * float(modificadores.get("recarga_rival_mul", 1.0))
+
+
+static func asamblea_interrumpe(eje_activo: String, ataque_pendiente: bool) -> bool:
+	return eje_activo == "comunismo" and ataque_pendiente
+
+
+static func dano_externalizado(dano_base: int, eje_activo: String) -> int:
+	return dano_base * 2 if eje_activo == "neoliberal" else dano_base
 
 
 static func determinacion_retorno(ritual: Dictionary, retornos_usados: int) -> int:
@@ -109,6 +168,10 @@ func _process(delta: float) -> void:
 	_recarga_rival = maxf(0.0, _recarga_rival - delta)
 	_esquiva = maxf(0.0, _esquiva - delta)
 	_enredo = maxf(0.0, _enredo - delta)
+	if _doctrina_tiempo > 0.0:
+		_doctrina_tiempo = maxf(0.0, _doctrina_tiempo - delta)
+		if is_zero_approx(_doctrina_tiempo):
+			_cerrar_doctrina()
 	_mover_jugador(delta)
 	_mover_rival(delta)
 	_actualizar_camara()
@@ -121,8 +184,68 @@ func _process(delta: float) -> void:
 		_esquivar()
 
 
+func activar_doctrina(eje: String) -> bool:
+	if _acabado or not Historias.HABILIDADES.has(eje):
+		return false
+	if int(_cargas_doctrina.get(eje, 0)) <= 0:
+		return false
+	if not _doctrina_activa.is_empty() or _comision_pendiente:
+		return false
+
+	_cargas_doctrina[eje] = int(_cargas_doctrina[eje]) - 1
+	match eje:
+		"comunismo", "neoliberal":
+			_doctrina_activa = eje
+			_doctrina_tiempo = duracion_doctrina(eje, _ritual)
+		"centrista":
+			_aplicar_mesa_dialogo()
+		"socialdemocrata":
+			_activar_comision()
+
+	Sonido.sonar(self, "marcar")
+	_actualizar_hud()
+	_pintar_doctrinas()
+	return true
+
+
 func abandonar() -> void:
 	_terminar(false)
+
+
+func _aplicar_mesa_dialogo() -> void:
+	if _ataque_rival_pendiente:
+		_cancelar_ataque_rival()
+	_recarga_rival = maxf(_recarga_rival, recarga_mesa(_ritual))
+	if _jugador == null or _rival == null:
+		return
+	var separacion := _rival.position - _jugador.position
+	separacion.y = 0.0
+	if separacion.length_squared() < 0.001:
+		separacion = Vector3(0.0, 0.0, -1.0)
+	_rival.position = _limitar(
+		_jugador.position + separacion.normalized() * DISTANCIA_MESA
+	)
+
+
+func _activar_comision() -> void:
+	if not _ataque_rival_pendiente:
+		_comision_pendiente = true
+		return
+	var total_nuevo := duracion_telegrafo(true, _ritual)
+	var extra := maxf(0.0, total_nuevo - TELEGRAFO_RIVAL)
+	_telegrafo_rival += extra
+	_telegrafo_rival_total += extra
+	_doctrina_activa = "socialdemocrata"
+	_doctrina_tiempo = _telegrafo_rival
+
+
+func _cerrar_doctrina() -> void:
+	if _doctrina_activa.is_empty():
+		return
+	_doctrina_activa = ""
+	_doctrina_tiempo = 0.0
+	_actualizar_hud()
+	_pintar_doctrinas()
 
 
 func _mover_jugador(delta: float) -> void:
@@ -165,7 +288,15 @@ func _iniciar_ataque_rival() -> void:
 	if _ataque_rival_pendiente or _acabado:
 		return
 	_ataque_rival_pendiente = true
-	_telegrafo_rival = TELEGRAFO_RIVAL
+	var usar_comision := _comision_pendiente
+	_telegrafo_rival_total = duracion_telegrafo(usar_comision, _ritual)
+	_telegrafo_rival = _telegrafo_rival_total
+	if usar_comision:
+		_comision_pendiente = false
+		_doctrina_activa = "socialdemocrata"
+		_doctrina_tiempo = _telegrafo_rival_total
+		_actualizar_hud()
+		_pintar_doctrinas()
 	if _aviso_ataque != null:
 		_aviso_ataque.position = _rival.position + Vector3(0.0, 0.02, 0.0)
 		_aviso_ataque.scale = Vector3.ONE
@@ -180,7 +311,8 @@ func _actualizar_telegrafo_rival(delta: float) -> void:
 	if _aviso_ataque != null:
 		_aviso_ataque.position = _rival.position + Vector3(0.0, 0.02, 0.0)
 		if not reduccion_movimiento:
-			var progreso := 1.0 - _telegrafo_rival / TELEGRAFO_RIVAL
+			var total := maxf(_telegrafo_rival_total, 0.001)
+			var progreso := 1.0 - _telegrafo_rival / total
 			var escala := lerpf(0.72, 1.0, progreso)
 			_aviso_ataque.scale = Vector3(escala, 1.0, escala)
 	if _telegrafo_rival <= 0.0:
@@ -192,26 +324,35 @@ func _resolver_ataque_rival() -> void:
 	_recarga_rival = RECARGA_RIVAL
 	_ocultar_aviso_ataque()
 
+	var comision_activa := _doctrina_activa == "socialdemocrata"
+	var externaliza_activa := _doctrina_activa == "neoliberal"
 	var hacia := _jugador.position - _rival.position
 	hacia.y = 0.0
 	match resultado_ataque_rival(hacia.length(), _esquiva):
 		"falla":
-			return
+			pass
 		"esquiva":
 			Sonido.sonar(self, "pulsar")
 			_registrar_esquiva_ritual()
 		_:
 			Sonido.sonar(self, "error")
-			_determinacion_jugador = maxi(0, _determinacion_jugador - 1)
+			var dano := dano_externalizado(1, _doctrina_activa)
+			_determinacion_jugador = maxi(0, _determinacion_jugador - dano)
+			if externaliza_activa:
+				_cerrar_doctrina()
 			_reaccion(_figura_jugador, -0.18)
 			_actualizar_hud()
 			if _determinacion_jugador <= 0:
 				_terminar(false)
 
+	if comision_activa:
+		_cerrar_doctrina()
+
 
 func _cancelar_ataque_rival() -> void:
 	_ataque_rival_pendiente = false
 	_telegrafo_rival = 0.0
+	_telegrafo_rival_total = TELEGRAFO_RIVAL
 	_recarga_rival = maxf(_recarga_rival, RECARGA_RIVAL * 0.65)
 	_ocultar_aviso_ataque()
 	Sonido.sonar(self, "pulsar")
@@ -238,13 +379,24 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 	var dano := dano_base
 	if fuerte:
 		dano += int(_ritual.get("dano_fuerte_bonus", 0))
-	var interrupcion := interrumpe_ataque(fuerte, _ataque_rival_pendiente, _ritual)
-	if interrupcion:
+	var interrupcion_ritual := interrumpe_ataque(
+		fuerte, _ataque_rival_pendiente, _ritual
+	)
+	var interrupcion_asamblea := asamblea_interrumpe(
+		_doctrina_activa, _ataque_rival_pendiente
+	)
+	if interrupcion_ritual:
 		dano += int(_ritual.get("dano_interrupcion_bonus", 0))
+	if interrupcion_ritual or interrupcion_asamblea:
 		_cancelar_ataque_rival()
+	if interrupcion_asamblea:
+		_cerrar_doctrina()
 	if _contraataque > 0:
 		dano += _contraataque
 		_contraataque = 0
+	if _doctrina_activa == "neoliberal":
+		dano = dano_externalizado(dano, _doctrina_activa)
+		_cerrar_doctrina()
 
 	_determinacion_rival = maxi(0, _determinacion_rival - dano)
 	if not fuerte:
@@ -308,6 +460,7 @@ func _resolver_capa_simbolica() -> void:
 	var estado := _estado_partida_anfitrion()
 	if estado.is_empty():
 		return
+	_cargas_doctrina = Prometeo.cargas_ideologicas(estado, Historias.TOPE_CARGAS)
 	var clave := String(_acusado.get("id", _acusado.get("nombre", "acusado")))
 	var tarot = estado.get("tarot", [])
 	if typeof(tarot) == TYPE_ARRAY:
@@ -479,10 +632,16 @@ func _montar_hud() -> void:
 	_barra_rival.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	columnas.add_child(_barra_rival)
 
-	if not _ritual.is_empty():
+	if not _ritual.is_empty() or _hay_cargas_doctrina():
 		_etiqueta_ritual = Label.new()
 		_etiqueta_ritual.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		bloque.add_child(_etiqueta_ritual)
+
+	_botones_doctrina = HBoxContainer.new()
+	_botones_doctrina.alignment = BoxContainer.ALIGNMENT_CENTER
+	_botones_doctrina.add_theme_constant_override("separation", 6)
+	bloque.add_child(_botones_doctrina)
+	_pintar_doctrinas()
 
 	_etiqueta_ataque = Label.new()
 	_etiqueta_ataque.text = tr("VENTANILLA_ATAQUE_INMINENTE")
@@ -502,12 +661,48 @@ func _actualizar_hud() -> void:
 
 
 func _texto_ritual() -> String:
-	if _ritual.is_empty():
-		return ""
-	var texto := "RITUAL · %s" % String(_ritual.get("nombre", ""))
+	var texto := ""
+	if not _ritual.is_empty():
+		texto = "RITUAL · %s" % String(_ritual.get("nombre", ""))
 	if _contraataque > 0:
-		texto += " · CONTRA +%d" % _contraataque
+		texto += (" · " if not texto.is_empty() else "") + "CONTRA +%d" % _contraataque
+	var eje_estado := _doctrina_activa
+	if eje_estado.is_empty() and _comision_pendiente:
+		eje_estado = "socialdemocrata"
+	if not eje_estado.is_empty():
+		var habilidad: Dictionary = Historias.HABILIDADES[eje_estado]
+		var nombre := tr(String(habilidad["nombre"]))
+		texto += (" · " if not texto.is_empty() else "") + nombre
 	return texto
+
+
+func _hay_cargas_doctrina() -> bool:
+	for eje in Prometeo.EJES:
+		if int(_cargas_doctrina.get(eje, 0)) > 0:
+			return true
+	return false
+
+
+func _pintar_doctrinas() -> void:
+	if _botones_doctrina == null:
+		return
+	for hijo in _botones_doctrina.get_children():
+		_botones_doctrina.remove_child(hijo)
+		hijo.queue_free()
+
+	var bloqueadas := not _doctrina_activa.is_empty() or _comision_pendiente
+	for eje in Prometeo.EJES:
+		var cantidad := int(_cargas_doctrina.get(eje, 0))
+		if cantidad <= 0:
+			continue
+		var habilidad: Dictionary = Historias.HABILIDADES[eje]
+		var boton := Button.new()
+		boton.text = "%s ×%d" % [tr(String(habilidad["nombre"])), cantidad]
+		boton.tooltip_text = tr(String(habilidad["efecto"]))
+		boton.disabled = bloqueadas
+		boton.pressed.connect(activar_doctrina.bind(eje))
+		_botones_doctrina.add_child(boton)
+	_botones_doctrina.visible = _botones_doctrina.get_child_count() > 0
 
 
 func _actualizar_camara() -> void:
