@@ -49,6 +49,11 @@ var _evidencias: ItemList
 var _ficha: RichTextLabel
 var _habilidad_elegida_eje := ""
 var _juicio: JuicioCombate3D
+var _pulso: CareoPulso
+var _jugada_pendiente := ""
+var _evidencia_pendiente := ""
+var _habilidad_pendiente := ""
+var _pulso_racha := 0
 
 
 func _ready() -> void:
@@ -113,6 +118,8 @@ func _draw() -> void:
 func _llenar_turno() -> void:
 	combate = {}
 	_habilidad_elegida_eje = ""
+	_pulso_racha = 0
+	_pulso.cancelar()
 	_lista.clear()
 	for reclamante in Ventanilla.disponibles(contenido, partida.estado["pistas_descubiertas"]):
 		_lista.add_item(tr(reclamante["nombre"]))
@@ -149,12 +156,40 @@ func _al_llamar(indice: int) -> void:
 
 
 func _al_jugar(tipo: String) -> void:
-	if combate.is_empty() or combate["terminado"]:
+	if combate.is_empty() or combate["terminado"] or _pulso.activo():
 		return
+	_jugada_pendiente = tipo
+	_evidencia_pendiente = _evidencia_elegida()
+	_habilidad_pendiente = _habilidad_elegida()
+	for boton in _botones.get_children():
+		boton.disabled = true
+	for boton in _habilidades.get_children():
+		boton.disabled = true
+	_evidencias.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_pulso.armar(
+		tipo,
+		int(combate["ronda"]),
+		String(_rival.get("id", _rival.get("nombre", ""))),
+		reduccion_movimiento,
+		_pulso_racha,
+	)
+
+
+func _al_pulso_confirmado(calidad: String) -> void:
 	var ronda := CareoDocumental.jugar(
-		combate, tipo, _evidencia_elegida(), _habilidad_elegida(), _tirada()
+		combate, _jugada_pendiente, _evidencia_pendiente, _habilidad_pendiente, _tirada()
 	)
 	_habilidad_elegida_eje = ""
+	_pulso_racha = CareoPulso.aplicar_iniciativa(
+		combate, ronda, _pulso_racha, calidad, _tirada()
+	)
+	if calidad == "perfecto":
+		Sonido.sonar(self, "marcar" if not ronda["revelada"].is_empty() else "pulsar")
+	_jugada_pendiente = ""
+	_evidencia_pendiente = ""
+	_habilidad_pendiente = ""
+	_evidencias.mouse_filter = Control.MOUSE_FILTER_STOP
+	_pintar_botones_jugada()
 	_contar(ronda)
 
 
@@ -454,6 +489,10 @@ func _construir() -> void:
 	_evidencias.add_theme_stylebox_override("panel", _hundido(EstiloSiga.BLANCO))
 	_evidencias.add_theme_color_override("font_color", EstiloSiga.NEGRO)
 	informacion.add_child(_evidencias)
+
+	_pulso = CareoPulso.new()
+	_pulso.confirmado.connect(_al_pulso_confirmado)
+	_tablero.add_child(_pulso)
 
 	_botones = HBoxContainer.new()
 	_tablero.add_child(_botones)
