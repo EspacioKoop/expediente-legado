@@ -50,11 +50,7 @@ static func desplazamiento_estres(marcador_id: String, estres: float) -> Vector3
 	if intensidad <= 0.0:
 		return Vector3.ZERO
 	var fase := float(posmod(marcador_id.hash(), 1009)) / 1009.0 * TAU
-	return (
-		Vector3(sin(fase), 0.0, cos(fase * 1.71))
-		* DESPLAZAMIENTO_ESTRES_MAX
-		* intensidad
-	)
+	return Vector3(sin(fase), 0.0, cos(fase * 1.71)) * DESPLAZAMIENTO_ESTRES_MAX * intensidad
 
 
 func _montar_cruz(color: Color, largo: float, ancho: float) -> void:
