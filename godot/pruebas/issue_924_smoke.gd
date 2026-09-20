@@ -55,9 +55,7 @@ func _probar_disponibilidad() -> void:
 
 	_cerrar_caso(estado)
 	_comprobar(
-		DecisionIdeologicaExpediente.disponible(
-			estado, DecisionIdeologicaExpediente.CASO_VERTICAL
-		),
+		DecisionIdeologicaExpediente.disponible(estado, DecisionIdeologicaExpediente.CASO_VERTICAL),
 		true,
 		"el veredicto real habilita la consecuencia postcierre",
 	)
