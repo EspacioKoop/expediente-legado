@@ -22,7 +22,11 @@ const OFICINA := {
 	"textura_suelo": "linoleo",
 	"textura_muro": "gotele",
 	"textura_techo": "techo",
-	"entrada": Vector3(0, 0, 3),
+	# Apartada del cuarto sitio de compañero, que está en la silla de (1, 2,1):
+	# desde (0, 0, 3) se entraba a 1,35 m de alguien sentado, y su cabeza ocupaba
+	# un cuarto de la primera pantalla jugable de la partida. Es la misma regla
+	# que ya obliga al cuñado a no estar encima de la entrada.
+	"entrada": Vector3(-1.6, 0, 3.6),
 	"bultos":
 	# Cuatro puestos idénticos: la planta es la misma para todos, que es
 	[
