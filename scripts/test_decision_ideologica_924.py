@@ -19,8 +19,8 @@ class DecisionIdeologica924Test(unittest.TestCase):
         cls.codigo = MODELO.read_text(encoding="utf-8")
 
     def test_reutiliza_el_contrato_transversal(self) -> None:
-        self.assertIn("Prometeo.registrar_eleccion_ideologica", self.codigo)
-        self.assertIn("Prometeo.registrar_lectura_social", self.codigo)
+        self.assertIn("registrar_eleccion_ideologica(", self.codigo)
+        self.assertIn("registrar_lectura_social(", self.codigo)
         self.assertIn("Prometeo.elecciones_ideologicas", self.codigo)
         self.assertIn('"expediente"', self.codigo)
 
