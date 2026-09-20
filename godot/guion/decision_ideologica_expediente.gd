@@ -95,14 +95,17 @@ static func resolver(
 	var etiquetas: Array = opcion.get("etiquetas", []).duplicate()
 	etiquetas.append("expediente")
 	etiquetas.append(PREFIJO_OPCION + opcion_id)
-	var registrada := Prometeo.registrar_eleccion_ideologica(
-		estado,
-		evento_id,
-		"expediente",
-		String(opcion.get("eje", "")),
-		caso_id,
-		_jornada_actual(estado),
-		etiquetas,
+	var registrada := (
+		Prometeo
+		. registrar_eleccion_ideologica(
+			estado,
+			evento_id,
+			"expediente",
+			String(opcion.get("eje", "")),
+			caso_id,
+			_jornada_actual(estado),
+			etiquetas,
+		)
 	)
 	if not registrada:
 		return {"resultado": "rechazada"}
@@ -162,12 +165,15 @@ static func registrar_lectura_social(
 	if _evento(estado, evento_id).is_empty():
 		return false
 	var opcion_id := opcion_registrada(estado, caso_id)
-	return Prometeo.registrar_lectura_social(
-		estado,
-		actor,
-		evento_id,
-		reaccion,
-		["expediente", "postcierre", PREFIJO_OPCION + opcion_id],
+	return (
+		Prometeo
+		. registrar_lectura_social(
+			estado,
+			actor,
+			evento_id,
+			reaccion,
+			["expediente", "postcierre", PREFIJO_OPCION + opcion_id],
+		)
 	)
 
 
