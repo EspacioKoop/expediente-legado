@@ -110,6 +110,7 @@ func establecer_estres_presentacion(valor: float) -> void:
 func _remontar(mundo: Node3D, marcadores: Array) -> void:
 	var anterior := mundo.get_node_or_null(NOMBRE_RAIZ)
 	if anterior != null:
+		mundo.remove_child(anterior)
 		anterior.queue_free()
 
 	var raiz := Node3D.new()
