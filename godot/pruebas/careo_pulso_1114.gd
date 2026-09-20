@@ -59,6 +59,19 @@ func _ejecutar() -> void:
 		"una ejecucion normal corta la racha",
 	)
 
+	var combate := {
+		"modo": "ciclo",
+		"ronda": 1,
+		"ultima_jugada_jugador": 0,
+		"revelada": -1,
+	}
+	var ronda := {"terminado": false, "revelada": ""}
+	var restante := CareoPulso.aplicar_iniciativa(
+		combate, ronda, 1, "perfecto", func(): return 0.0
+	)
+	_comprobar(restante == 0 and combate["revelada"] == 1, "la racha gana iniciativa real")
+	_comprobar(not String(ronda["revelada"]).is_empty(), "la iniciativa se comunica a la cronica")
+
 	var pulso := CareoPulso.new()
 	root.add_child(pulso)
 	await process_frame
