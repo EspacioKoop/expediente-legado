@@ -369,8 +369,10 @@ func _cancelar_transicion() -> void:
 
 
 func _configurar_volumetrica_si_disponible(ambiente: Environment) -> void:
-	# El proyecto usa GL Compatibility. Godot solo soporta niebla volumétrica en
-	# Forward+, de modo que aquí se activa únicamente si el renderer cambia.
+	# Godot solo soporta niebla volumétrica en Forward+. Se pregunta por el
+	# renderer en ejecución y no por el ajuste del proyecto: desde #275 es
+	# Forward+, pero una exportación puede caer a Compatibility y entonces
+	# encenderla sería pedirle al motor algo que no sabe dibujar.
 	if String(RenderingServer.get_current_rendering_method()) != "forward_plus":
 		ambiente.volumetric_fog_enabled = false
 		return

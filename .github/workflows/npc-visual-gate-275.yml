@@ -11,6 +11,13 @@ on:
       - 'godot/guion/vestuario_humano_3d.gd'
       - 'godot/guion/correccion_visual_npc_275.gd'
       - 'godot/pruebas/capturas_npc_275.gd'
+      # Cómo se ve un NPC no depende solo de su modelo y su ropa: depende de la
+      # luz que le da y del renderer que la dibuja. Sin estas rutas, un cambio
+      # de sombras o de método de render pasaba por delante de este gate sin
+      # que llegara a mirarlo.
+      - 'godot/guion/espacio_3d.gd'
+      - 'godot/guion/dia_app.gd'
+      - 'godot/project.godot'
       - '.godot-version'
   push:
     branches: [ main ]
@@ -22,6 +29,13 @@ on:
       - 'godot/guion/vestuario_humano_3d.gd'
       - 'godot/guion/correccion_visual_npc_275.gd'
       - 'godot/pruebas/capturas_npc_275.gd'
+      # Cómo se ve un NPC no depende solo de su modelo y su ropa: depende de la
+      # luz que le da y del renderer que la dibuja. Sin estas rutas, un cambio
+      # de sombras o de método de render pasaba por delante de este gate sin
+      # que llegara a mirarlo.
+      - 'godot/guion/espacio_3d.gd'
+      - 'godot/guion/dia_app.gd'
+      - 'godot/project.godot'
       - '.godot-version'
   workflow_dispatch:
 

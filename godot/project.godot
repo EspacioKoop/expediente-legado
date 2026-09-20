@@ -21,7 +21,17 @@ ConsolaDepuracion="*res://guion/cargador_consola_depuracion.gd"
 
 [rendering]
 
-renderer/rendering_method="gl_compatibility"
+; Forward+ a partir de #275: el tratamiento visual de los NPC y de la luz
+; necesita sombras, SSAO y SSIL, que Compatibility no ofrece. El precio está
+; medido: bajo rasterización por software —el perfil de los runners— Forward+
+; cuesta cerca del doble por cuadro. En hardware real el perfil es otro.
+;
+; Pendiente del cambio: once workflows y documentos siguen fijando
+; `--rendering-method gl_compatibility` por línea de órdenes, así que esos
+; gates miden todavía el renderer anterior. Y `decal_compat.gd` existe porque
+; Compatibility no dibuja el nodo `Decal`: con Forward+ deja de ser necesario,
+; aunque sigue funcionando y no se toca aquí.
+renderer/rendering_method="forward_plus"
 
 [display]
 
