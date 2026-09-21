@@ -378,12 +378,16 @@ func _texto_evento_historial(evento: Dictionary) -> String:
 	var carta_id := String(evento.get("carta", ""))
 	var nombre := _nombre_carta(carta_id)
 	var legado := bool(evento.get("legado", false))
-	var contexto := tr("MENU_GLOBAL_HISTORIAL_LEGADO") if legado else (
-		tr("MENU_GLOBAL_HISTORIAL_CONTEXTO")
-		% [
-			int(evento.get("dia", 0)),
-			String(evento.get("fase", "")).replace("_", " ").capitalize(),
-		]
+	var contexto := (
+		tr("MENU_GLOBAL_HISTORIAL_LEGADO")
+		if legado
+		else (
+			tr("MENU_GLOBAL_HISTORIAL_CONTEXTO")
+			% [
+				int(evento.get("dia", 0)),
+				String(evento.get("fase", "")).replace("_", " ").capitalize(),
+			]
+		)
 	)
 	var tipo := String(evento.get("tipo", ""))
 	if tipo == "pospuesta":
