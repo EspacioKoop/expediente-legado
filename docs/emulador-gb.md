@@ -125,7 +125,19 @@ El apagado físico también permanece fuera del núcleo:
 
 No se introducen fallos aleatorios de contacto ni retrasos artificiales del audio de ROM en este
 corte. Si se representan más adelante, deberán activarse como estados de presentación explícitos
-y seguir sin mutar el núcleo. Tampoco se recolorean ROMs CGB nativas.
+y seguir sin mutar el núcleo.
+
+### Paletas para GB clásico
+
+Las ROMs con flag CGB `0x00` pueden elegir entre el resultado normal de SameBoy y tres paletas
+propias pequeñas: ámbar tenue, salvia LCD y azul humo. La selección es un postproceso de la
+`TextureRect`; nunca modifica el framebuffer RGBA producido por el núcleo.
+
+La preferencia se guarda por SHA-256 de ROM en `user://portatil_color_98.cfg` mediante
+`ConfigFile`. El selector queda deshabilitado para cartuchos dual-mode (`0x80`) y CGB-only
+(`0xC0`), y en esos casos el shader fuerza `paleta_gb_activa = false`. La opción
+«Núcleo (normal)» vuelve explícitamente al comportamiento original. Las tablas de color son
+originales del proyecto y no reproducen firmware ni branding propietario.
 
 ## Link Cable diegético (#245)
 

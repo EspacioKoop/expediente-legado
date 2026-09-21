@@ -11,6 +11,8 @@
   "encendiendo": "Encendiendo…",
   "efectos_presentacion": "Efectos físicos / LCD",
   "efectos_aviso": "Capa visual opcional: no modifica los píxeles ni la emulación.",
+  "paleta_gb_titulo": "Paleta para GB clásico",
+  "paleta_gb_aviso": "Solo se habilita para ROMs GB con flag CGB 0x00. «Núcleo (normal)» conserva los colores de SameBoy; las demás son paletas propias de presentación.",
   "sonidos_fisicos": "Sonidos físicos de carcasa",
   "sonidos_fisicos_aviso": "Clics originales y procedurales de cartucho, interruptor y botones. Son una capa aparte del audio de la ROM.",
   "cartucho_ranura_vacia": "Ranura de cartucho: vacía",
