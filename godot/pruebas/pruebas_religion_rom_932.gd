@@ -21,6 +21,9 @@ var fallos := 0
 func _initialize() -> void:
 	_probar_handshake_y_exposicion()
 	_probar_consumidor_posterior()
+	_probar_segundo_contrato_vitral()
+	_probar_tercer_contrato_sarnath()
+	_probar_registro_compartido()
 	print("%d pasadas, %d fallos" % [pasadas, fallos])
 	quit(1 if fallos > 0 else 0)
 
@@ -125,6 +128,159 @@ func _probar_consumidor_posterior() -> void:
 		"el mismo mundo no duplica el recuerdo",
 	)
 	mundo.free()
+
+
+func _probar_segundo_contrato_vitral() -> void:
+	var registro := ReligionEventos.nuevo()
+	var jornada := {"dia": 8}
+	var consola := ConsolaRomPrueba.new()
+	root.add_child(consola)
+
+	var observador := Vitral98Vigilia.new()
+	root.add_child(observador)
+	observador.configurar(registro, jornada, consola)
+
+	consola.titulo_prueba = "VITRAL98"
+	consola.memoria_prueba[0xC100] = 0
+	observador._process(0.0)
+	_comprobar(not observador.registrada(), "VITRAL 98 parcial no registra exposición")
+
+	consola.memoria_prueba[0xC100] = 0xA5
+	observador._process(0.0)
+	_comprobar(observador.registrada(), "VITRAL 98 completo usa el observer común")
+
+	var exposiciones := ReligionEventos.eventos(registro, ReligionEventos.CANAL_EXPOSICION)
+	_comprobar(exposiciones.size() == 1, "VITRAL 98 registra un único hecho")
+	var evento: Dictionary = exposiciones[0]
+	_comprobar(String(evento["fuente"]) == "rom:vitral_98", "la segunda ROM conserva su fuente")
+	_comprobar(
+		String(evento["tradicion"]) == "cristianismo",
+		"la procedencia cristiana queda explícita sin asignarla al jugador",
+	)
+	_comprobar(
+		String(evento["contexto"]) == "europa_cristiana:vidriera_taller:ca_1375",
+		"la segunda ROM conserva medio y periodo",
+	)
+	_comprobar(evento["etiquetas"].has("red_plomo"), "la exposición conserva la materialidad")
+	_comprobar(
+		ReligionEventos.eventos(registro, ReligionEventos.CANAL_PRACTICA).is_empty(),
+		"VITRAL 98 tampoco convierte juego en práctica",
+	)
+	_comprobar(
+		ReligionEventos.eventos(registro, ReligionEventos.CANAL_CONVICCION).is_empty(),
+		"VITRAL 98 tampoco infiere convicción",
+	)
+
+	observador.free()
+	consola.free()
+
+
+func _probar_tercer_contrato_sarnath() -> void:
+	var registro := ReligionEventos.nuevo()
+	var jornada := {"dia": 11}
+	var consola := ConsolaRomPrueba.new()
+	root.add_child(consola)
+
+	var observador := Sarnath98Vigilia.new()
+	root.add_child(observador)
+	observador.configurar(registro, jornada, consola)
+
+	consola.titulo_prueba = "SARNATH98"
+	consola.memoria_prueba[0xC100] = 0
+	observador._process(0.0)
+	_comprobar(not observador.registrada(), "SARNATH 98 parcial no registra exposición")
+
+	consola.memoria_prueba[0xC100] = 0xA5
+	observador._process(0.0)
+	_comprobar(observador.registrada(), "SARNATH 98 completo usa el observer común")
+
+	var exposiciones := ReligionEventos.eventos(registro, ReligionEventos.CANAL_EXPOSICION)
+	_comprobar(exposiciones.size() == 1, "SARNATH 98 registra un único hecho")
+	var evento: Dictionary = exposiciones[0]
+	_comprobar(
+		String(evento["fuente"]) == "rom:sarnath_98",
+		"la tercera ROM conserva su fuente",
+	)
+	_comprobar(
+		String(evento["tradicion"]) == "budismo",
+		"la procedencia budista queda explícita sin asignarla al jugador",
+	)
+	_comprobar(
+		String(evento["contexto"]) == "india:varanasi:sarnath:sitio_arqueologico:unesco_2026",
+		"SARNATH 98 conserva lugar y marco patrimonial",
+	)
+	_comprobar(
+		evento["etiquetas"].has("memoria_espacial"),
+		"la tercera exposición conserva su mecánica no doctrinal",
+	)
+	_comprobar(
+		ReligionEventos.eventos(registro, ReligionEventos.CANAL_PRACTICA).is_empty(),
+		"orientarse en SARNATH 98 no se registra como práctica",
+	)
+	_comprobar(
+		ReligionEventos.eventos(registro, ReligionEventos.CANAL_CONVICCION).is_empty(),
+		"SARNATH 98 no infiere convicción",
+	)
+
+	observador.free()
+	consola.free()
+
+
+func _probar_registro_compartido() -> void:
+	var registro := ReligionEventos.nuevo()
+	var jornada := {"dia": 13}
+	var consola := ConsolaRomPrueba.new()
+	root.add_child(consola)
+
+	var jali := Jali98Vigilia.new()
+	var vitral := Vitral98Vigilia.new()
+	var sarnath := Sarnath98Vigilia.new()
+	root.add_child(jali)
+	root.add_child(vitral)
+	root.add_child(sarnath)
+	jali.configurar(registro, jornada, consola)
+	vitral.configurar(registro, jornada, consola)
+	sarnath.configurar(registro, jornada, consola)
+
+	consola.memoria_prueba[0xC100] = 0xA5
+
+	consola.titulo_prueba = "JALI98"
+	jali._process(0.0)
+	consola.titulo_prueba = "VITRAL98"
+	vitral._process(0.0)
+	consola.titulo_prueba = "SARNATH98"
+	sarnath._process(0.0)
+
+	var exposiciones := ReligionEventos.eventos(registro, ReligionEventos.CANAL_EXPOSICION)
+	_comprobar(exposiciones.size() == 3, "un registro común conserva las tres exposiciones")
+	var fuentes: Array[String] = []
+	var tradiciones: Array[String] = []
+	for evento_bruto in exposiciones:
+		var evento: Dictionary = evento_bruto
+		fuentes.append(String(evento.get("fuente", "")))
+		tradiciones.append(String(evento.get("tradicion", "")))
+	_comprobar(fuentes.has("rom:jali_98"), "el registro común conserva JALI 98")
+	_comprobar(fuentes.has("rom:vitral_98"), "el registro común conserva VITRAL 98")
+	_comprobar(fuentes.has("rom:sarnath_98"), "el registro común conserva SARNATH 98")
+	_comprobar(tradiciones.has("islam"), "el registro común no pierde procedencia islámica")
+	_comprobar(
+		tradiciones.has("cristianismo"),
+		"el registro común no pierde procedencia cristiana",
+	)
+	_comprobar(tradiciones.has("budismo"), "el registro común no pierde procedencia budista")
+	_comprobar(
+		ReligionEventos.eventos(registro, ReligionEventos.CANAL_PRACTICA).is_empty(),
+		"agrupar exposiciones no crea práctica",
+	)
+	_comprobar(
+		ReligionEventos.eventos(registro, ReligionEventos.CANAL_CONVICCION).is_empty(),
+		"agrupar exposiciones no crea convicción",
+	)
+
+	jali.free()
+	vitral.free()
+	sarnath.free()
+	consola.free()
 
 
 func _comprobar(condicion: bool, nombre: String) -> void:

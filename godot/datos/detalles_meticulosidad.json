@@ -1,0 +1,88 @@
+{
+  "factura1@1": [
+    {
+      "id": "factura1-perforaciones",
+      "evento": "lectura_completa",
+      "motivo": "margen",
+      "texto": "VISOR_DETALLE_961_FACTURA1_PERFORACIONES",
+      "critico": false
+    }
+  ],
+  "memo1@1": [
+    {
+      "id": "memo1-cinta-fecha",
+      "evento": "relectura",
+      "motivo": "fecha",
+      "texto": "VISOR_DETALLE_961_MEMO1_CINTA_FECHA",
+      "critico": false
+    },
+    {
+      "id": "memo1-cotejo-margen",
+      "evento": "lectura_completa",
+      "motivo": "margen",
+      "texto": "VISOR_DETALLE_961_MEMO1_COTEJO_MARGEN",
+      "critico": false
+    }
+  ],
+  "empleado1@1": [
+    {
+      "id": "empleado1-lapiz-pestana",
+      "evento": "marcador",
+      "motivo": "folio",
+      "texto": "VISOR_DETALLE_961_EMPLEADO1_LAPIZ_PESTANA",
+      "critico": false
+    }
+  ],
+  "actaContraloria1@1": [
+    {
+      "id": "acta1-papel-cotejo",
+      "evento": "relacion",
+      "motivo": "relacion",
+      "texto": "VISOR_DETALLE_961_ACTA1_PAPEL_COTEJO",
+      "critico": false
+    }
+  ],
+  "oficio2@2": [
+    {
+      "id": "oficio2-clip-margen",
+      "evento": "lectura_completa",
+      "motivo": "margen",
+      "texto": "VISOR_DETALLE_961_OFICIO2_CLIP_MARGEN",
+      "critico": false
+    },
+    {
+      "id": "oficio2-anexo-folio",
+      "evento": "marcador",
+      "motivo": "folio",
+      "texto": "VISOR_DETALLE_961_OFICIO2_ANEXO_FOLIO",
+      "critico": false
+    }
+  ],
+  "circular2@2": [
+    {
+      "id": "circular2-sello-fecha",
+      "evento": "relectura",
+      "motivo": "fecha",
+      "texto": "VISOR_DETALLE_961_CIRCULAR2_SELLO_FECHA",
+      "critico": false
+    }
+  ],
+  "memo3@3": [
+    {
+      "id": "memo3-tinta-sello",
+      "evento": "relacion",
+      "motivo": "relacion",
+      "texto": "VISOR_DETALLE_961_MEMO3_TINTA_SELLO",
+      "critico": false
+    }
+  ],
+  "factura4@4": [
+    {
+      "id": "factura4-halo-sello",
+      "evento": "marcador",
+      "motivo": "folio",
+      "texto": "VISOR_DETALLE_961_FACTURA4_HALO_SELLO",
+      "critico": false
+    }
+  ]
+}

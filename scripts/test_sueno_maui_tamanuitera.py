@@ -14,6 +14,8 @@ VIGILIA = ROOT / "godot" / "guion" / "maui_tamanuitera_vigilia.gd"
 ESCENA_SUENO = ROOT / "godot" / "escenas" / "sueno_maui_tamanuitera.tscn"
 ESCENA_VIGILIA = ROOT / "godot" / "escenas" / "maui_tamanuitera_vigilia.tscn"
 REFERENCIAS = ROOT / "docs" / "assets" / "maui-tamanuitera-referencias.md"
+CONTROLLER = ROOT / "godot" / "guion" / "dia_maui_tamanuitera_app.gd"
+DIA = ROOT / "godot" / "escenas" / "dia.tscn"
 PRUEBA_GODOT = "res://pruebas/pruebas_maui_tamanuitera.gd"
 RESUMEN_GODOT = re.compile(r"(\d+) pasadas, 0 fallos")
 
@@ -27,6 +29,8 @@ class SuenoMauiTamanuiteraTest(unittest.TestCase):
         cls.escena_sueno = ESCENA_SUENO.read_text(encoding="utf-8")
         cls.escena_vigilia = ESCENA_VIGILIA.read_text(encoding="utf-8")
         cls.referencias = REFERENCIAS.read_text(encoding="utf-8")
+        cls.controller = CONTROLLER.read_text(encoding="utf-8")
+        cls.dia = DIA.read_text(encoding="utf-8")
 
     def test_semilla_usa_catalogo_comun(self):
         self.assertIn('"maui_tamanuitera",', self.semillas)
@@ -70,6 +74,40 @@ class SuenoMauiTamanuiteraTest(unittest.TestCase):
         self.assertIn('"mover_camara": false', self.sueno)
         self.assertIn('"timing_precision": false', self.sueno)
         self.assertIn("resolver_geometria", self.sueno)
+
+    def test_tensores_exponen_interaccion_3d_semantica(self):
+        self.assertIn("Interactuable3D.new()", self.sueno)
+        self.assertIn("Interactuable3D.Verbo.USAR", self.sueno)
+        self.assertIn("hotspot.activado.connect", self.sueno)
+        self.assertIn("_al_usar_tensor", self.sueno)
+        self.assertNotIn("Input.", self.sueno)
+
+    def test_recorrido_real_monta_vigilia_y_sueno_sin_selector_paralelo(self):
+        self.assertIn('fase == "casa"', self.controller)
+        self.assertIn('String(dia._vivienda()) != "casa"', self.controller)
+        self.assertIn("MauiTamanuiteraVigilia.new()", self.controller)
+        self.assertRegex(
+            self.controller,
+            r"SemillasOniricas\s*\.\s*seleccionar_para_noche\s*\(",
+        )
+        self.assertRegex(
+            self.controller,
+            r"MitologiasNoche\s*\.\s*corresponde_a_escena\s*\(",
+        )
+        self.assertIn("SuenoMauiTamanuitera.ID_MITO", self.controller)
+        self.assertIn("SuenoMauiTamanuitera.new()", self.controller)
+        self.assertIn("CamaraStandalone", self.controller)
+        self.assertNotIn("activar_semilla_onirica", self.controller)
+
+    def test_controller_esta_montado_en_dia_real(self):
+        self.assertIn(
+            'path="res://guion/dia_maui_tamanuitera_app.gd"',
+            self.dia,
+        )
+        self.assertIn(
+            '[node name="MauiTamanuiteraController" type="Node" parent="."]',
+            self.dia,
+        )
 
     def test_documentacion_identifica_tradicion_concreta(self):
         self.assertIn("relato māori", self.referencias)
