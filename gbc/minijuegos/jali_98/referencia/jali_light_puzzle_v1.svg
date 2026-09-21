@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="144" viewBox="0 0 160 144" shape-rendering="crispEdges">
+<title>LUZ_JALI_98 — referencia 160x144</title>
+<desc>Prototipo original de geometría perforada y luz para #932; sin texto sagrado ni símbolos como pickups.</desc>
+<rect width="160" height="144" fill="#181f2e"/>
+<g fill="#374d52">
+  <rect x="0" y="0" width="160" height="8"/><rect x="0" y="136" width="160" height="8"/>
+  <rect x="0" y="0" width="8" height="144"/><rect x="152" y="0" width="8" height="144"/>
+</g>
+<g stroke="#b88943" stroke-width="3" fill="none">
+  <rect x="48" y="24" width="64" height="72"/>
+  <path d="M48 24l64 72M112 24L48 96M80 24v72M48 60h64"/>
+  <path d="M48 42h64M48 78h64M64 24v72M96 24v72"/>
+</g>
+<g fill="#eedca6">
+  <rect x="76" y="56" width="8" height="40"/>
+  <rect x="72" y="96" width="16" height="24"/>
+  <rect x="64" y="112" width="32" height="8"/>
+</g>
+<g fill="#b88943">
+  <rect x="68" y="96" width="8" height="24"/><rect x="84" y="96" width="8" height="24"/>
+  <rect x="56" y="120" width="48" height="8"/>
+</g>
+<g fill="#374d52">
+  <rect x="24" y="24" width="8" height="88"/><rect x="128" y="24" width="8" height="88"/>
+  <rect x="20" y="40" width="16" height="4"/><rect x="124" y="40" width="16" height="4"/>
+  <rect x="20" y="72" width="16" height="4"/><rect x="124" y="72" width="16" height="4"/>
+</g>
+</svg>
