@@ -68,8 +68,12 @@ func texto_accion() -> String:
 func interactuar(actor: Node) -> bool:
 	if not habilitado:
 		return false
+	# El sonido pertenece al gesto que el jugador acaba de pedir, no al estado
+	# resultante. Varios interactuables cambian verbo dentro de `activado`
+	# (ABRIR -> CERRAR y viceversa); resolverlo antes evita invertir ambos ruidos.
+	var sonido_actual := nombre_sonido()
+	Sonido.sonar_en(self, sonido_actual)
 	activado.emit(actor)
-	Sonido.sonar_en(self, nombre_sonido())
 	return true
 
 
