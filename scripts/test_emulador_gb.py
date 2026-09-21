@@ -7,6 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 NATIVE = ROOT / "godot" / "native" / "siga98_gb"
 UI = ROOT / "godot" / "guion" / "emulador_portatil_app.gd"
 AUDIO_UI = ROOT / "godot" / "guion" / "emulador_portatil_audio_app.gd"
+AFTERGLOW = ROOT / "godot" / "guion" / "efecto_apagado_portatil.gd"
 PORTATIL = ROOT / "godot" / "guion" / "consola_portatil_98.gd"
 EXTENSION = ROOT / "godot" / "addons" / "siga98_gb" / "siga98_gb.gdextension"
 LOCK = NATIVE / "deps.lock.json"
@@ -22,6 +23,7 @@ class EmuladorGBTest(unittest.TestCase):
         cls.cpp = (NATIVE / "src" / "siga98_gb.cpp").read_text(encoding="utf-8")
         cls.ui = UI.read_text(encoding="utf-8")
         cls.audio_ui = AUDIO_UI.read_text(encoding="utf-8")
+        cls.afterglow = AFTERGLOW.read_text(encoding="utf-8")
         cls.portatil = PORTATIL.read_text(encoding="utf-8")
         cls.extension = EXTENSION.read_text(encoding="utf-8")
         cls.lock = json.loads(LOCK.read_text(encoding="utf-8"))
@@ -172,6 +174,48 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn('var resultado := int(_emulador.call("load_rom", rom))', self.ui)
         self.assertNotIn("Partida", self.ui)
         self.assertNotIn("Jornada", self.ui)
+
+    def test_apagado_fisico_es_capa_externa_y_no_bloquea_la_salida(self):
+        self.assertIn("class_name EfectoApagadoPortatil", self.afterglow)
+        self.assertIn("extends CanvasLayer", self.afterglow)
+        self.assertIn("DURACION_AFTERGLOW := 0.18", self.afterglow)
+        self.assertIn("Node.PROCESS_MODE_ALWAYS", self.afterglow)
+        self.assertIn("Control.MOUSE_FILTER_IGNORE", self.afterglow)
+        self.assertNotIn("Siga98GB", self.afterglow)
+        self.assertNotIn("SRAM", self.afterglow)
+        self.assertIn("get_tree().root.add_child(efecto)", self.ui)
+        cuerpo = self.ui.split("func _cerrar() -> void:", 1)[1].split("func ", 1)[0]
+        self.assertIn("_lanzar_apagado_fisico()", cuerpo)
+        self.assertIn("get_tree().paused = _pausa_anterior", cuerpo)
+        self.assertIn("cerrado.emit()", cuerpo)
+        self.assertIn("queue_free()", cuerpo)
+        self.assertLess(
+            cuerpo.index("get_tree().paused = _pausa_anterior"),
+            cuerpo.index("queue_free()"),
+        )
+
+    def test_variacion_lcd_es_pequena_determinista_y_desactivable(self):
+        self.assertIn("uniform float variacion_brillo = 0.0", self.ui)
+        self.assertIn("rgb *= 1.0 + variacion_brillo", self.ui)
+        self.assertIn("sin(_tiempo_presentacion * 1.7) * 0.012", self.ui)
+        self.assertIn(
+            'set_shader_parameter("variacion_brillo", 0.0)',
+            self.ui,
+        )
+        cuerpo = self.ui.split(
+            "func _actualizar_variacion_lcd(delta: float) -> void:", 1
+        )[1].split("func ", 1)[0]
+        self.assertNotIn("rand", cuerpo)
+        self.assertNotIn("_emulador.call", cuerpo)
+
+    def test_apagado_tiene_click_fisico_separado_del_audio_de_rom(self):
+        self.assertIn(
+            '&"apagado": _crear_sonido_fisico(230.0, 72.0, 0.065, 0.50)',
+            self.ui,
+        )
+        self.assertIn('get(&"apagado")', self.ui)
+        self.assertIn('name = "ClickApagadoPortatil"', self.afterglow)
+        self.assertIn("AudioStreamPlayer.new()", self.afterglow)
 
     def test_sonido_fisico_es_procedural_separable_y_desactivable(self):
         self.assertIn("FRECUENCIA_SONIDO_FISICO := 22050", self.ui)
