@@ -85,13 +85,13 @@ func _probar() -> void:
 		"El Trastero tiene rotulo propio",
 	)
 	var texto_quiosco := quiosco.get_node_or_null("TextoQuioscoAvenida") as Label3D
-	var texto_trastero := trastero.get_node_or_null("TextoElTrastero") as Label3D
+	var rotulo_texto_trastero := trastero.get_node_or_null("TextoElTrastero") as Label3D
 	_comprobar(
 		texto_quiosco != null and texto_quiosco.text == "QUIOSCO AVENIDA",
 		"el quiosco conserva nombre legible en runtime",
 	)
 	_comprobar(
-		texto_trastero != null and texto_trastero.text == "EL TRASTERO",
+		rotulo_texto_trastero != null and rotulo_texto_trastero.text == "EL TRASTERO",
 		"la segunda mano conserva nombre legible en runtime",
 	)
 	var atrezzo_trastero := trastero.get_node_or_null("AtrezzoTrastero") as Node3D
