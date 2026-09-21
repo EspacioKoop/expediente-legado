@@ -63,15 +63,9 @@ static func marcar_paquete_resuelto(raiz: Node3D) -> void:
 
 static func _montar_portal(raiz: Node3D, ambiente: Dictionary) -> void:
 	var estado_felpudo := String(ambiente.get("felpudo", "centrado"))
-	var color_felpudo := (
-		COLOR_FELPUDO_HUMEDO if estado_felpudo == "humedo" else COLOR_FELPUDO
-	)
+	var color_felpudo := COLOR_FELPUDO_HUMEDO if estado_felpudo == "humedo" else COLOR_FELPUDO
 	var felpudo := _caja(
-		raiz,
-		"FelpudoPortal",
-		Vector3(1.15, 0.035, 0.55),
-		Vector3(0.0, 0.08, 15.05),
-		color_felpudo
+		raiz, "FelpudoPortal", Vector3(1.15, 0.035, 0.55), Vector3(0.0, 0.08, 15.05), color_felpudo
 	)
 	felpudo.set_meta("estado", estado_felpudo)
 	if estado_felpudo == "torcido":
@@ -106,11 +100,7 @@ static func _montar_portal(raiz: Node3D, ambiente: Dictionary) -> void:
 
 	var estado_puerta := String(ambiente.get("puerta_2a", "cerrada"))
 	var puerta := _caja(
-		raiz,
-		"Puerta2A",
-		Vector3(0.88, 1.85, 0.10),
-		Vector3(-2.05, 1.02, 15.48),
-		COLOR_PUERTA
+		raiz, "Puerta2A", Vector3(0.88, 1.85, 0.10), Vector3(-2.05, 1.02, 15.48), COLOR_PUERTA
 	)
 	puerta.set_meta("estado", estado_puerta)
 	if estado_puerta == "entornada":
@@ -139,9 +129,11 @@ static func _montar_presencia(raiz: Node3D, presencia: Dictionary) -> void:
 				"BrilloVentana",
 				Vector3(0.10, 0.62, 0.92),
 				Vector3(5.43, 1.55, 6.20),
-				Color(0.31, 0.40, 0.29)
-				if estado_tv == "partido_lejano"
-				else Color(0.42, 0.34, 0.24)
+				(
+					Color(0.31, 0.40, 0.29)
+					if estado_tv == "partido_lejano"
+					else Color(0.42, 0.34, 0.24)
+				)
 			)
 		"pasos_4a":
 			nodo = Node3D.new()
@@ -194,13 +186,7 @@ static func _montar_paquete_interactivo(raiz: Node3D, interaccion: Dictionary) -
 	paquete.set_meta("correo_postal", String(interaccion.get("correo_postal", "")))
 	raiz.add_child(paquete)
 
-	_caja(
-		paquete,
-		"Caja",
-		Vector3(0.46, 0.28, 0.34),
-		Vector3(0.0, 0.16, 0.0),
-		COLOR_PAQUETE
-	)
+	_caja(paquete, "Caja", Vector3(0.46, 0.28, 0.34), Vector3(0.0, 0.16, 0.0), COLOR_PAQUETE)
 	var colision := CollisionShape3D.new()
 	colision.name = "VolumenInteraccion"
 	var forma := BoxShape3D.new()
@@ -230,13 +216,7 @@ static func _figura(
 	figura.name = nombre
 	figura.position = posicion
 	raiz.add_child(figura)
-	_caja(
-		figura,
-		"Cuerpo",
-		Vector3(0.42, 1.12, 0.30),
-		Vector3(0.0, 0.78, 0.0),
-		ropa
-	)
+	_caja(figura, "Cuerpo", Vector3(0.42, 1.12, 0.30), Vector3(0.0, 0.78, 0.0), ropa)
 	var cabeza := MeshInstance3D.new()
 	cabeza.name = "Cabeza"
 	var esfera := SphereMesh.new()
@@ -250,11 +230,7 @@ static func _figura(
 
 
 static func _caja(
-	padre: Node3D,
-	nombre: String,
-	tam: Vector3,
-	posicion: Vector3,
-	color: Color
+	padre: Node3D, nombre: String, tam: Vector3, posicion: Vector3, color: Color
 ) -> MeshInstance3D:
 	var malla := MeshInstance3D.new()
 	malla.name = nombre
