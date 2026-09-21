@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-import re
 import subprocess
 import unittest
 
@@ -9,7 +8,7 @@ from scripts.godot_pruebas import importar_proyecto
 
 ROOT = Path(__file__).resolve().parents[1]
 ESTADO = ROOT / "godot" / "guion" / "meticulosidad.gd"
-CAPA = ROOT / "godot" / "guion" / "visor_meticulosidad_app.gd"
+CAPA = ROOT / "godot" / "guion" / "visor_metadatos_app.gd"
 ANEXOS = ROOT / "godot" / "guion" / "visor_anexos_app.gd"
 SUENO = ROOT / "godot" / "guion" / "sueno_atencion_documental.gd"
 CONTROLADOR = ROOT / "godot" / "guion" / "dia_sueno_reactivo_app.gd"
@@ -26,7 +25,7 @@ class Meticulosidad961Test(unittest.TestCase):
         cls.controlador = CONTROLADOR.read_text(encoding="utf-8")
 
     def test_el_visor_registra_gestos_existentes_sin_barra(self):
-        self.assertIn('extends "res://guion/visor_metadatos_app.gd"', self.capa)
+        self.assertIn('extends "res://guion/visor_anotaciones_app.gd"', self.capa)
         for evento in ("relectura", "lectura_completa", "marcador", "relacion"):
             self.assertIn(f'"{evento}"', self.capa + self.estado)
         self.assertIn("get_v_scroll_bar()", self.capa)
@@ -35,7 +34,7 @@ class Meticulosidad961Test(unittest.TestCase):
 
     def test_la_capa_queda_en_la_cadena_real_del_visor(self):
         self.assertIn(
-            'extends "res://guion/visor_meticulosidad_app.gd"',
+            'extends "res://guion/visor_metadatos_app.gd"',
             self.anexos,
         )
 
