@@ -19,15 +19,11 @@ func _ejecutar() -> void:
 
 func _probar_clasificacion_por_fecha() -> void:
 	_comprobar(
-		is_equal_approx(
-			VISOR.tono_documento({"fecha": "1958-03-03"}), VISOR.TONO_PAPEL_ANTIGUO
-		),
+		is_equal_approx(VISOR.tono_documento({"fecha": "1958-03-03"}), VISOR.TONO_PAPEL_ANTIGUO),
 		"un documento de 1958 usa el tono antiguo",
 	)
 	_comprobar(
-		is_equal_approx(
-			VISOR.tono_documento({"fecha": "1989-12-31"}), VISOR.TONO_PAPEL_ANTIGUO
-		),
+		is_equal_approx(VISOR.tono_documento({"fecha": "1989-12-31"}), VISOR.TONO_PAPEL_ANTIGUO),
 		"1989 sigue dentro de la textura antigua",
 	)
 	_comprobar(
@@ -52,9 +48,7 @@ func _probar_tono_en_voz_real() -> void:
 	_comprobar(voces.size() == 1, "la lectura crea una única voz")
 	if voces.size() == 1:
 		var voz := voces[0] as AudioStreamPlayer
-		_comprobar(
-			voz.stream == Sonido.stream("documento"), "reutiliza la misma toma CC0 de papel"
-		)
+		_comprobar(voz.stream == Sonido.stream("documento"), "reutiliza la misma toma CC0 de papel")
 		_comprobar(
 			is_equal_approx(voz.pitch_scale, VISOR.TONO_PAPEL_ANTIGUO),
 			"la voz aplica el tono antiguo solicitado",
