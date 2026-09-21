@@ -63,9 +63,12 @@ func _probar_desbloqueo_por_motivo() -> void:
 
 	var jornada_oficio := {"dia": 4, "vuelta": 1}
 	Meticulosidad.registrar(jornada_oficio, "oficio2@2", "marcador", "folio")
-	var detalles_oficio := DetallesMeticulosos.detalles_para(
-		"oficio2@2",
-		Meticulosidad.motivos_documento(jornada_oficio, "oficio2@2"),
+	var detalles_oficio := (
+		DetallesMeticulosos
+		. detalles_para(
+			"oficio2@2",
+			Meticulosidad.motivos_documento(jornada_oficio, "oficio2@2"),
+		)
 	)
 	_comprobar(detalles_oficio.size(), 1, "marcar el oficio habilita su detalle de folio")
 
@@ -78,9 +81,12 @@ func _probar_estado_sin_progreso() -> void:
 	var antes := estado.duplicate(true)
 	var jornada := {"dia": 7, "vuelta": 2}
 	Meticulosidad.registrar(jornada, "memo1@1", "lectura_completa", "margen")
-	DetallesMeticulosos.detalles_para(
-		"memo1@1",
-		Meticulosidad.motivos_documento(jornada, "memo1@1"),
+	(
+		DetallesMeticulosos
+		. detalles_para(
+			"memo1@1",
+			Meticulosidad.motivos_documento(jornada, "memo1@1"),
+		)
 	)
 	_comprobar(estado, antes, "consultar detalles no toca pistas ni veredictos")
 
