@@ -11,6 +11,8 @@ RECONSTRUCCION = ROOT / "godot" / "guion" / "reconstruccion_expediente_app.gd"
 VENTANILLA = ROOT / "godot" / "guion" / "ventanilla_app.gd"
 PROJECT = ROOT / "godot" / "project.godot"
 PROVENANCE = ROOT / "godot" / "assets" / "procedencia.json"
+GODOT_TEXT_EXTENSIONS = {".gd", ".godot", ".tres", ".tscn"}
+FUENTES_SISTEMA_PROHIBIDAS = ("SystemFont", "MS Sans Serif", "Tahoma", "Verdana")
 
 
 class TipografiaUi780Test(unittest.TestCase):
@@ -21,11 +23,21 @@ class TipografiaUi780Test(unittest.TestCase):
         self.ventanilla = VENTANILLA.read_text(encoding="utf-8")
         self.project = PROJECT.read_text(encoding="utf-8")
 
-    def test_interfaz_no_depende_de_fuentes_windows_instaladas(self):
-        self.assertNotIn("MS Sans Serif", self.estilo)
-        self.assertNotIn("Tahoma", self.estilo)
-        self.assertNotIn("Verdana", self.estilo)
-        self.assertNotIn("SystemFont", self.estilo)
+    def test_codigo_godot_no_reintroduce_fuentes_del_sistema(self):
+        incidencias = []
+        for ruta in sorted((ROOT / "godot").rglob("*")):
+            if not ruta.is_file() or ruta.suffix not in GODOT_TEXT_EXTENSIONS:
+                continue
+            texto = ruta.read_text(encoding="utf-8")
+            for marcador in FUENTES_SISTEMA_PROHIBIDAS:
+                if marcador in texto:
+                    incidencias.append(f"{ruta.relative_to(ROOT)}: {marcador}")
+
+        self.assertEqual(
+            [],
+            incidencias,
+            "La UI de Godot debe usar fuentes empaquetadas; se reintrodujo una fuente del sistema.",
+        )
 
     def test_interfaz_usa_una_fuente_empaquetada_y_no_el_respaldo_del_motor(self):
         self.assertIn(
