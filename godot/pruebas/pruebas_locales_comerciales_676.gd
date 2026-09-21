@@ -43,6 +43,8 @@ func _probar() -> void:
 		_terminar(dia)
 		return
 	_comprobar(not electro.visible and not bit98.visible, "los interiores empiezan ocultos")
+	var arte_bit98 := calle.get_node_or_null("ArteBit98") as Node3D
+	_comprobar(arte_bit98 != null, "Bit 98 monta su capa visual propia")
 
 	var fachada_electro := calle.get_node("Electrodomesticos")
 	var fachada_bit98 := calle.get_node("TiendaVideojuegos")
@@ -50,6 +52,13 @@ func _probar() -> void:
 		fachada_electro.find_child("EntrarElectrodomesticos", true, false) as Interactuable3D
 	)
 	var entrar_bit98 := fachada_bit98.get_node_or_null("EntrarTiendaVideojuegos") as Interactuable3D
+	var identidad_fachada := fachada_bit98.get_node_or_null("IdentidadBit98") as Node3D
+	_comprobar(identidad_fachada != null, "la fachada de Bit 98 tiene identidad propia")
+	if identidad_fachada != null:
+		_comprobar(
+			identidad_fachada.get_node_or_null("RotuloBit98Exterior") != null,
+			"el rotulo Bit 98 existe en fachada",
+		)
 	_comprobar(entrar_electro != null, "Electrodomesticos tiene puerta interactuable")
 	_comprobar(entrar_bit98 != null, "Bit 98 tiene puerta interactuable")
 	_comprobar(
@@ -102,6 +111,18 @@ func _probar() -> void:
 			compra.activado.get_connections().size() > 0,
 			"el mostrador interior conserva el contrato de compra"
 		)
+
+	var identidad_interior := bit98.get_node_or_null("IdentidadBit98") as Node3D
+	_comprobar(identidad_interior != null, "el interior de Bit 98 tiene identidad propia")
+	if identidad_interior != null:
+		_comprobar(
+			identidad_interior.get_node_or_null("RotuloBit98Interior") != null,
+			"el rotulo interior de Bit 98 existe",
+		)
+		var portadas := identidad_interior.find_children(
+			"PortadaPropia_*", "MeshInstance3D", true, false
+		)
+		_comprobar(portadas.size() == 6, "se reutilizan seis portadas propias en expositor")
 
 	var cajas_juego := bit98.find_children("CajaJuego_*", "MeshInstance3D", true, false)
 	_comprobar(cajas_juego.size() == 30, "Bit 98 expone treinta cajas 3D en baldas")
