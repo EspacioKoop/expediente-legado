@@ -10,7 +10,7 @@
 extends SceneTree
 
 const TAMANO := Vector2i(1280, 720)
-const FOV := 70.0
+const FOV := 56.0
 const FRAMES_ESTABILIZACION := 4
 
 const ID_COMERCIO := "lampara_verde_usada"
@@ -45,6 +45,28 @@ const CASOS := [
 
 
 func _init() -> void:
+	var salida := _resolver_salida()
+	if not _asegurar_directorio(salida):
+		return
+
+	TranslationServer.set_locale("es")
+	root.size = TAMANO
+	var dia = await _crear_dia()
+	var inventario := _inventario(dia)
+
+	if not await _capturar_trayecto(dia, salida):
+		return
+	var resultado_casa := await _capturar_casa(dia, salida, inventario)
+	if resultado_casa.is_empty():
+		return
+	if not _escribir_manifiesto(salida, resultado_casa["fuentes"]):
+		return
+
+	print("evidencia #672/#674/#677 -> %s" % salida)
+	quit(0)
+
+
+func _resolver_salida() -> String:
 	var argumentos := OS.get_cmdline_user_args()
 	var salida := (
 		String(argumentos[0])
@@ -53,97 +75,135 @@ func _init() -> void:
 	)
 	if not salida.is_absolute_path():
 		salida = ProjectSettings.globalize_path("res://").path_join(salida)
+	return salida
+
+
+func _asegurar_directorio(salida: String) -> bool:
 	var error_dir := DirAccess.make_dir_recursive_absolute(salida)
 	if error_dir != OK:
 		_fallar("No se pudo crear %s (error %d)" % [salida, error_dir])
-		return
+		return false
+	return true
 
-	TranslationServer.set_locale("es")
-	root.size = TAMANO
+
+func _crear_dia():
 	var dia = load("res://escenas/dia.tscn").instantiate()
 	root.add_child(dia)
 	await process_frame
-
 	if dia._entrada != null:
 		dia._entrada.saltar()
 		await process_frame
 	dia.set_process(false)
-
 	dia.jornada["dia"] = 4
 	dia.jornada["dinero"] = maxi(200, int(dia.jornada.get("dinero", 0)))
+	return dia
+
+
+func _inventario(dia) -> Dictionary:
 	var inventario = dia.partida.estado.get("inventario", {})
 	if typeof(inventario) != TYPE_DICTIONARY:
 		inventario = Inventario.nuevo()
 		dia.partida.estado["inventario"] = inventario
 	Inventario.completar(inventario)
+	return inventario
 
+
+func _capturar_trayecto(dia, salida: String) -> bool:
 	dia._entrar_en("trayecto")
 	if not await _esperar_nodo(dia, "BuzonPostal"):
 		_fallar("El trayecto no montó BuzonPostal")
-		return
+		return false
 	var buzon := dia._mundo.get_node_or_null("BuzonPostal") as Node3D
 	if buzon == null:
 		_fallar("BuzonPostal no es Node3D")
-		return
-	if not await _capturar_objetivo(
+		return false
+	return await _capturar_objetivo(
 		dia,
 		salida,
 		CASOS[0],
-		Vector3(0.15, 0.0, 12.7),
+		Vector3(1.50, 0.0, 13.75),
 		buzon.global_position + Vector3(0.0, 0.12, 0.0)
-	):
-		return
+	)
 
+
+func _capturar_casa(dia, salida: String, inventario: Dictionary) -> Dictionary:
+	if not _preparar_productores(dia, inventario):
+		return {}
+
+	dia._entrar_en("casa")
+	var publicacion := await _capturar_publicacion_encontrable(dia, salida)
+	if publicacion == null:
+		return {}
+	if not _guardar_publicacion(inventario):
+		return {}
+	if not await _capturar_acumulacion(dia, salida):
+		return {}
+
+	var fuentes := _fuentes_home_storage(inventario)
+	if fuentes.size() != 3:
+		_fallar("Se esperaban tres productores reales en home_storage")
+		return {}
+	return {"fuentes": fuentes}
+
+
+func _preparar_productores(dia, inventario: Dictionary) -> bool:
 	var compra := ComercioBarrio.comprar(dia.jornada, inventario, "segunda_mano", ID_COMERCIO)
 	if not bool(compra.get("ok", false)):
 		_fallar("No se pudo preparar objeto de comercio: %s" % String(compra.get("motivo", "")))
-		return
+		return false
 
 	var postal := CorreoPostal.recoger(dia.jornada, inventario, "paquete_calendario_magnetico")
 	if not bool(postal.get("ok", false)):
 		_fallar("No se pudo preparar objeto postal: %s" % String(postal.get("motivo", "")))
-		return
+		return false
 	if not Inventario.guardar_en_casa(inventario, ID_POSTAL):
 		_fallar("El calendario postal no pudo pasar a home_storage")
-		return
+		return false
+	return true
 
-	dia._entrar_en("casa")
-	if not await _esperar_nodo(dia, "PublicacionEncontrable_%s" % ID_PUBLICACION, true):
+
+func _capturar_publicacion_encontrable(dia, salida: String) -> Node3D:
+	var nombre := "PublicacionEncontrable_%s" % ID_PUBLICACION
+	if not await _esperar_nodo(dia, nombre, true):
 		_fallar("La casa no montó la publicación encontrable de #674")
-		return
-	var publicacion_mundo := (
-		dia._mundo.find_child("PublicacionEncontrable_%s" % ID_PUBLICACION, true, false) as Node3D
-	)
-	if publicacion_mundo == null:
+		return null
+	var publicacion := dia._mundo.find_child(nombre, true, false) as Node3D
+	if publicacion == null:
 		_fallar("La publicación encontrable no es Node3D")
-		return
+		return null
 	if not await _capturar_objetivo(
 		dia,
 		salida,
 		CASOS[1],
-		Vector3(0.55, 0.0, 2.35),
-		publicacion_mundo.global_position + Vector3(0.0, 0.08, 0.0)
+		Vector3(-2.25, 0.0, 1.30),
+		publicacion.global_position + Vector3(0.0, 0.08, 0.0)
 	):
-		return
+		return null
+	return publicacion
 
-	var objeto_publicacion := PublicacionesEncontrables3D.objeto_inventario(ID_PUBLICACION)
-	if objeto_publicacion.is_empty() or not Inventario.recoger(inventario, objeto_publicacion):
+
+func _guardar_publicacion(inventario: Dictionary) -> bool:
+	var objeto := PublicacionesEncontrables3D.objeto_inventario(ID_PUBLICACION)
+	if objeto.is_empty() or not Inventario.recoger(inventario, objeto):
 		_fallar("No se pudo preparar la publicación en Inventario")
-		return
+		return false
 	if not Inventario.guardar_en_casa(inventario, ID_PUBLICACION):
 		_fallar("La publicación no pudo pasar a home_storage")
-		return
+		return false
+	return true
 
+
+func _capturar_acumulacion(dia, salida: String) -> bool:
 	if not await _esperar_nodo(dia, "AcumulacionCasa", true):
 		_fallar("La casa no refrescó AcumulacionCasa")
-		return
+		return false
 	for _i in FRAMES_ESTABILIZACION:
 		await process_frame
 
 	var estanteria := dia._mundo.get_node_or_null("EstanteriaComprasCasa") as Node3D
 	if estanteria == null:
 		_fallar("Falta EstanteriaComprasCasa")
-		return
+		return false
 	if not await _capturar_objetivo(
 		dia,
 		salida,
@@ -151,31 +211,32 @@ func _init() -> void:
 		Vector3(1.25, 0.0, -0.90),
 		estanteria.global_position + Vector3(0.0, 0.88, 0.0)
 	):
-		return
+		return false
+	if not await _capturar_calendario(dia, salida):
+		return false
+	return true
 
+
+func _capturar_calendario(dia, salida: String) -> bool:
 	if not await _esperar_nodo(dia, CasaAcumulacion3D.NOMBRE_IMAN_CALENDARIO, true):
 		_fallar("El calendario postal no se materializó en la nevera")
-		return
+		return false
 	var calendario := (
 		dia._mundo.find_child(CasaAcumulacion3D.NOMBRE_IMAN_CALENDARIO, true, false) as Node3D
 	)
 	if calendario == null:
 		_fallar("El calendario postal materializado no es Node3D")
-		return
-	if not await _capturar_objetivo(
+		return false
+	return await _capturar_objetivo(
 		dia,
 		salida,
 		CASOS[3],
-		Vector3(2.85, 0.0, -1.55),
-		calendario.global_position + Vector3(0.0, 0.08, 0.0)
-	):
-		return
+		Vector3(3.35, 0.0, -1.53),
+		calendario.global_position + Vector3(0.0, 0.03, 0.0)
+	)
 
-	var fuentes := _fuentes_home_storage(inventario)
-	if fuentes.size() != 3:
-		_fallar("Se esperaban tres productores reales en home_storage")
-		return
 
+func _escribir_manifiesto(salida: String, fuentes: Array) -> bool:
 	var manifiesto := {
 		"issues": [672, 674, 677],
 		"escena": "res://escenas/dia.tscn",
@@ -205,15 +266,14 @@ func _init() -> void:
 			)
 		)
 
-	var ruta_manifiesto := salida.path_join("manifest.json")
-	var archivo_manifiesto := FileAccess.open(ruta_manifiesto, FileAccess.WRITE)
-	if archivo_manifiesto == null:
-		_fallar("No se pudo crear %s" % ruta_manifiesto)
-		return
-	archivo_manifiesto.store_string(JSON.stringify(manifiesto, "\t") + "\n")
-	archivo_manifiesto.close()
-	print("evidencia #672/#674/#677 -> %s" % salida)
-	quit(0)
+	var ruta := salida.path_join("manifest.json")
+	var archivo := FileAccess.open(ruta, FileAccess.WRITE)
+	if archivo == null:
+		_fallar("No se pudo crear %s" % ruta)
+		return false
+	archivo.store_string(JSON.stringify(manifiesto, "\t") + "\n")
+	archivo.close()
+	return true
 
 
 func _esperar_nodo(dia, nombre: String, recursivo := false) -> bool:
