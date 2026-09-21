@@ -3,7 +3,7 @@
     {
       "id": "odisea",
       "titulo": "La Odisea",
-      "autor": "homero",
+      "autor": "Homero",
       "epoca": "Antigua Grecia",
       "genero": "Epopea",
       "efecto": {
@@ -14,84 +14,12 @@
     {
       "id": "donquijote",
       "titulo": "Don Quijote de la Mancha",
-      "autor": "cervantes",
+      "autor": "Miguel de Cervantes",
       "epoca": "Siglo de Oro",
       "genero": "Novela",
       "efecto": {
         "bonus_momentum": 5,
         "descripcion": "Aumenta ganancia de momentum ligeramente"
-      }
-    },
-    {
-      "id": "divina_comedia",
-      "titulo": "La Divina Comedia",
-      "autor": "dante",
-      "epoca": "Edad Media",
-      "genero": "Poesia",
-      "efecto": {
-        "bonus_insight": 15,
-        "bonus_momentum": 3,
-        "descripcion": "Obra compleja que otorga insight y momentum"
-      }
-    },
-    {
-      "id": "hamlet",
-      "titulo": "Hamlet",
-      "autor": "shakespeare",
-      "epoca": "Renacimiento",
-      "genero": "Teatro",
-      "efecto": {
-        "bonus_insight": 12,
-        "efecto_especial": "revelacion",
-        "descripcion": "Desbloquea dialogos internos"
-      }
-    },
-    {
-      "id": "cien_anos_soledad",
-      "titulo": "Cien a\u00f1os de soledad",
-      "autor": "marquez",
-      "epoca": "Siglo XX",
-      "genero": "Realismo Magico",
-      "efecto": {
-        "bonus_insight": 8,
-        "bonus_momentum": 8,
-        "descripcion": "Ciclos temporales en el combate"
-      }
-    },
-    {
-      "id": "metamorfosis",
-      "titulo": "La Metamorfosis",
-      "autor": "kafka",
-      "epoca": "Siglo XX",
-      "genero": "Novela",
-      "efecto": {
-        "bonus_insight": 10,
-        "efecto_especial": "transformacion",
-        "descripcion": "Alteracion de la percepcion"
-      }
-    },
-    {
-      "id": "ulises",
-      "titulo": "Ulises",
-      "autor": "joyce",
-      "epoca": "Siglo XX",
-      "genero": "Modernismo",
-      "efecto": {
-        "bonus_insight": 20,
-        "descripcion": "Corriente de conciencia, maximo insight"
-      }
-    },
-    {
-      "id": "rayuela",
-      "titulo": "Rayuela",
-      "autor": "cortazar",
-      "epoca": "Siglo XX",
-      "genero": "Novela Experimental",
-      "efecto": {
-        "bonus_insight": 12,
-        "bonus_momentum": 5,
-        "efecto_especial": "no_linealidad",
-        "descripcion": "Lectura no lineal, orden libre"
       }
     }
   ],
@@ -107,42 +35,6 @@
       "nombre": "Miguel de Cervantes",
       "epoca": "Siglo de Oro",
       "escuela": "Novela"
-    },
-    {
-      "id": "dante",
-      "nombre": "Dante Alighieri",
-      "epoca": "Edad Media",
-      "escuela": "Poesia"
-    },
-    {
-      "id": "shakespeare",
-      "nombre": "William Shakespeare",
-      "epoca": "Renacimiento",
-      "escuela": "Teatro"
-    },
-    {
-      "id": "marquez",
-      "nombre": "Gabriel Garcia Marquez",
-      "epoca": "Siglo XX",
-      "escuela": "Realismo Magico"
-    },
-    {
-      "id": "kafka",
-      "nombre": "Franz Kafka",
-      "epoca": "Siglo XX",
-      "escuela": "Existencialismo"
-    },
-    {
-      "id": "joyce",
-      "nombre": "James Joyce",
-      "epoca": "Siglo XX",
-      "escuela": "Modernismo"
-    },
-    {
-      "id": "cortazar",
-      "nombre": "Julio Cortazar",
-      "epoca": "Siglo XX",
-      "escuela": "Boom Latinoamericano"
     }
   ]
 }

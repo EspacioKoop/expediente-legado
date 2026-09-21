@@ -12,7 +12,6 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [autoload]
 GestorLiteratura=res://godot/literatura/gestor_literatura.gd
-
 GestorArquetipos=
 GestorMomentum=
 GestorCombos=res://godot/combate/combos.gd
