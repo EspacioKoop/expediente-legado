@@ -425,10 +425,13 @@ func _montar_ticket(puesto: Node3D, posicion: Vector3) -> void:
 
 func _mostrar_ticket(superficie: String, resultado: Dictionary, operacion: String) -> void:
 	var puesto := (
-		get_node_or_null("QuioscoAvenida")
-		if superficie == "quiosco"
-		else get_node_or_null("ElTrastero")
-	) as Node3D
+		(
+			get_node_or_null("QuioscoAvenida")
+			if superficie == "quiosco"
+			else get_node_or_null("ElTrastero")
+		)
+		as Node3D
+	)
 	if puesto == null:
 		return
 	var ticket := puesto.get_node_or_null("TicketTransaccion") as Node3D
@@ -439,9 +442,7 @@ func _mostrar_ticket(superficie: String, resultado: Dictionary, operacion: Strin
 		return
 	texto.text = _texto_ticket(resultado, operacion)
 	texto.modulate = (
-		Color(0.18, 0.35, 0.22)
-		if bool(resultado.get("ok", false))
-		else Color(0.52, 0.16, 0.15)
+		Color(0.18, 0.35, 0.22) if bool(resultado.get("ok", false)) else Color(0.52, 0.16, 0.15)
 	)
 	ticket.visible = true
 
