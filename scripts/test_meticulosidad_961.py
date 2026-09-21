@@ -1,3 +1,4 @@
+import csv
 import json
 import os
 from pathlib import Path
@@ -16,6 +17,7 @@ CONTROLADOR = ROOT / "godot" / "guion" / "dia_sueno_reactivo_app.gd"
 DETALLES = ROOT / "godot" / "guion" / "detalles_meticulosidad.gd"
 CATALOGO_DETALLES = ROOT / "godot" / "datos" / "detalles_meticulosidad.json"
 CASOS = ROOT / "godot" / "datos" / "casos.json"
+TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
 SMOKE = "pruebas/issue_961_smoke.gd"
 
 
@@ -30,6 +32,8 @@ class Meticulosidad961Test(unittest.TestCase):
         cls.detalles = DETALLES.read_text(encoding="utf-8")
         cls.catalogo_detalles = json.loads(CATALOGO_DETALLES.read_text(encoding="utf-8"))
         cls.casos = json.loads(CASOS.read_text(encoding="utf-8"))["casos"]
+        with TEXTOS.open(encoding="utf-8", newline="") as archivo:
+            cls.claves_texto = {fila["clave"] for fila in csv.DictReader(archivo)}
 
     def test_el_visor_registra_gestos_existentes_sin_barra(self):
         self.assertIn('extends "res://guion/visor_anotaciones_app.gd"', self.capa)
@@ -71,12 +75,14 @@ class Meticulosidad961Test(unittest.TestCase):
                 self.assertIn(detalle["evento"], eventos, detalle["id"])
                 self.assertIn(detalle["motivo"], motivos, detalle["id"])
                 self.assertFalse(detalle["critico"], detalle["id"])
-                self.assertTrue(detalle["texto"].strip(), detalle["id"])
+                self.assertIn(detalle["texto"], self.claves_texto, detalle["id"])
 
     def test_el_visor_revela_detalles_sin_convertirlos_en_pistas(self):
         self.assertIn("RUTA_DETALLES_METICULOSIDAD", self.capa)
         self.assertIn("_actualizar_detalles_meticulosidad()", self.capa)
         self.assertRegex(self.capa, r"DetallesMeticulosidadCatalogo\s*\.\s*visibles\(")
+        self.assertIn('tr("VISOR_DETALLE_961_OBSERVACION")', self.capa)
+        self.assertIn("textos.append(tr(clave))", self.capa)
         combinado = self.capa + self.detalles
         self.assertNotIn("pistas_descubiertas", combinado)
         self.assertNotIn("Acusacion", combinado)
@@ -89,6 +95,9 @@ class Meticulosidad961Test(unittest.TestCase):
         self.assertIn("eventos.has(evento)", self.estado)
         self.assertIn('int(jornada.get("dia", 0))', self.estado)
         self.assertIn("PUNTOS_MAX", self.estado)
+        self.assertIn('ficha["motivos"] = motivos_documento', self.estado)
+        self.assertIn("static func motivos_documento", self.estado)
+        self.assertIn("static func motivo_de_evento", self.estado)
 
     def test_smoke_godot(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
