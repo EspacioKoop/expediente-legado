@@ -7,25 +7,29 @@ const MAX_BUFFER := 6
 const TIEMPO_BUFFER := 2.0
 
 var combos_disponibles: Dictionary = {
-	"golpe_sombra": {
+	"golpe_sombra":
+	{
 		"nombre": "Golpe de la Sombra",
 		"requisitos": {"momentum_min": 30.0, "arquetipo": "sombra"},
 		"secuencia": ["ataque_ligero", "ataque_ligero", "ataque_pesado"],
 		"efectos": {"dano_multiplier": 2.0, "aplicar_sombra": true, "area": 2.0},
 	},
-	"abrazo_anima": {
+	"abrazo_anima":
+	{
 		"nombre": "Abrazo del Anima",
 		"requisitos": {"momentum_min": 40.0, "arquetipo": "anima"},
 		"secuencia": ["ataque_pesado", "esquivar", "ataque_ligero"],
 		"efectos": {"curacion": 2, "resistencia_temporal": 0.2},
 	},
-	"danza_persona": {
+	"danza_persona":
+	{
 		"nombre": "Danza de la Persona",
 		"requisitos": {"momentum_min": 35.0, "arquetipo": "persona"},
 		"secuencia": ["esquivar", "ataque_ligero", "esquivar", "ataque_pesado"],
 		"efectos": {"evasion_temporal": 0.5, "duracion": 1.0, "contragolpe": true},
 	},
-	"despertar_self": {
+	"despertar_self":
+	{
 		"nombre": "Despertar del Self",
 		"requisitos": {"momentum_min": 100.0, "arquetipo": "self"},
 		"secuencia": ["ataque_pesado", "ataque_pesado", "ataque_pesado", "ataque_pesado"],
@@ -34,14 +38,16 @@ var combos_disponibles: Dictionary = {
 }
 
 var finishers: Dictionary = {
-	"sombra_desatada": {
+	"sombra_desatada":
+	{
 		"nombre": "Desatamiento de la Sombra",
 		"arquetipo": "sombra",
 		"costo_momentum": 75.0,
 		"es_super": false,
 		"efectos": {"dano": 3, "miedo": 1.0},
 	},
-	"furia_self": {
+	"furia_self":
+	{
 		"nombre": "Conjunción del Self",
 		"arquetipo": "self",
 		"costo_momentum": 100.0,
@@ -115,8 +121,7 @@ func _verificar_combos() -> void:
 			and _cumple_requisitos(combo.get("requisitos", {}))
 		):
 			combo_ejecutado.emit(
-				String(combo.get("nombre", combo_id)),
-				combo.get("efectos", {}).duplicate(true)
+				String(combo.get("nombre", combo_id)), combo.get("efectos", {}).duplicate(true)
 			)
 			buffer_entradas.clear()
 			return
