@@ -12,11 +12,7 @@ var _tiempo_restante := 0.0
 
 
 func iniciar(
-	textura: Texture2D,
-	material_lcd: Material,
-	rect: Rect2,
-	sonido: AudioStream,
-	volumen_db: float
+	textura: Texture2D, material_lcd: Material, rect: Rect2, sonido: AudioStream, volumen_db: float
 ) -> void:
 	layer = 101
 	process_mode = Node.PROCESS_MODE_ALWAYS
