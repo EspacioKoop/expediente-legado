@@ -14,7 +14,8 @@ func _ready() -> void:
 
 func _registrar_eventos() -> void:
 	eventos_activos = {
-		"noches_poesia": {
+		"noches_poesia":
+		{
 			"id": "noches_poesia",
 			"nombre": "Noches de Poesía",
 			"descripcion": "Recita versos bajo la luna para ganar insight y momentum",
@@ -23,12 +24,14 @@ func _registrar_eventos() -> void:
 			"periodicidad": "semanal",
 			"activo": true,
 		},
-		"debate_cervantino": {
+		"debate_cervantino":
+		{
 			"id": "debate_cervantino",
 			"nombre": "Debate Cervantino",
 			"descripcion": "Defiende tu visión del Quijote contra otros eruditos",
 			"requisitos": {"obra": "donquijote", "arquetipo": "persona", "min_insight": 100},
-			"recompensas": {
+			"recompensas":
+			{
 				"insight": 100,
 				"habilidad": "escudo_idealismo",
 				"autor": "cervantes",
@@ -36,7 +39,8 @@ func _registrar_eventos() -> void:
 			"periodicidad": "mensual",
 			"activo": true,
 		},
-		"rito_kafka": {
+		"rito_kafka":
+		{
 			"id": "rito_kafka",
 			"nombre": "Rito de la Metamorfosis",
 			"descripcion": "Transforma tu momentum en insight puro mediante la cita correcta",
