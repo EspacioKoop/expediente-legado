@@ -40,12 +40,15 @@ func _probar_catalogo() -> void:
 func _probar_lectura_significativa() -> void:
 	var registro := LiteraturaEventos.nuevo()
 
-	var parcial := LiteraturaLectura.registrar_interaccion(
-		registro,
-		"vida_es_sueno_1635",
-		"documento:biblioteca:estante_03",
-		2,
-		0.45,
+	var parcial := (
+		LiteraturaLectura
+		. registrar_interaccion(
+			registro,
+			"vida_es_sueno_1635",
+			"documento:biblioteca:estante_03",
+			2,
+			0.45,
+		)
 	)
 	_comprobar(not bool(parcial["completa"]), "hojear no completa la lectura")
 	_comprobar(
@@ -65,12 +68,15 @@ func _probar_lectura_significativa() -> void:
 		"leer no concede posesion",
 	)
 
-	var completa := LiteraturaLectura.registrar_interaccion(
-		registro,
-		"vida_es_sueno_1635",
-		"documento:biblioteca:estante_03",
-		2,
-		1.0,
+	var completa := (
+		LiteraturaLectura
+		. registrar_interaccion(
+			registro,
+			"vida_es_sueno_1635",
+			"documento:biblioteca:estante_03",
+			2,
+			1.0,
+		)
 	)
 	_comprobar(bool(completa["completa"]), "alcanzar el umbral completa la lectura")
 	_comprobar(bool(completa["conocimiento_nuevo"]), "la primera lectura registra conocimiento")
@@ -84,9 +90,12 @@ func _probar_lectura_significativa() -> void:
 		"conocer sigue sin equivaler a poseer",
 	)
 
-	var conocimientos := LiteraturaEventos.eventos(
-		registro,
-		LiteraturaEventos.CANAL_CONOCIMIENTO,
+	var conocimientos := (
+		LiteraturaEventos
+		. eventos(
+			registro,
+			LiteraturaEventos.CANAL_CONOCIMIENTO,
+		)
 	)
 	var insights := LiteraturaEventos.eventos(registro, LiteraturaEventos.CANAL_INSIGHT)
 	_comprobar(conocimientos.size() == 1, "solo hay un evento de conocimiento")
@@ -106,12 +115,15 @@ func _probar_lectura_significativa() -> void:
 			"el insight transporta el efecto declarado sin aplicarlo",
 		)
 
-	var repetida := LiteraturaLectura.registrar_interaccion(
-		registro,
-		"vida_es_sueno_1635",
-		"documento:biblioteca:estante_03",
-		3,
-		1.0,
+	var repetida := (
+		LiteraturaLectura
+		. registrar_interaccion(
+			registro,
+			"vida_es_sueno_1635",
+			"documento:biblioteca:estante_03",
+			3,
+			1.0,
+		)
 	)
 	_comprobar(not bool(repetida["conocimiento_nuevo"]), "releer no duplica conocimiento")
 	_comprobar(not bool(repetida["insight_nuevo"]), "releer no duplica insight")
@@ -128,14 +140,17 @@ func _probar_lectura_significativa() -> void:
 
 func _probar_separacion_posesion() -> void:
 	var registro := LiteraturaEventos.nuevo()
-	var posesion := LiteraturaEventos.crear_evento(
-		"posesion:obra:vida_es_sueno_1635:ejemplar:oficina_01",
-		LiteraturaEventos.CANAL_POSESION,
-		"vida_es_sueno_1635",
-		"inventario:oficina_01",
-		"ejemplar_fisico",
-		1,
-		["libro"],
+	var posesion := (
+		LiteraturaEventos
+		. crear_evento(
+			"posesion:obra:vida_es_sueno_1635:ejemplar:oficina_01",
+			LiteraturaEventos.CANAL_POSESION,
+			"vida_es_sueno_1635",
+			"inventario:oficina_01",
+			"ejemplar_fisico",
+			1,
+			["libro"],
+		)
 	)
 	_comprobar(LiteraturaEventos.registrar(registro, posesion), "la posesion se registra aparte")
 	_comprobar(
@@ -151,11 +166,14 @@ func _probar_separacion_posesion() -> void:
 		"el mismo evento de posesion es idempotente",
 	)
 
-	var colision := LiteraturaEventos.crear_evento(
-		String(posesion["id"]),
-		LiteraturaEventos.CANAL_CONOCIMIENTO,
-		"vida_es_sueno_1635",
-		"documento:otro",
+	var colision := (
+		LiteraturaEventos
+		. crear_evento(
+			String(posesion["id"]),
+			LiteraturaEventos.CANAL_CONOCIMIENTO,
+			"vida_es_sueno_1635",
+			"documento:otro",
+		)
 	)
 	_comprobar(
 		not LiteraturaEventos.registrar(registro, colision),
