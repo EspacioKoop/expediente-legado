@@ -29,7 +29,8 @@ func _registrar_eventos() -> void:
 			"nombre": "Debate Cervantino",
 			"descripcion": "Defiende tu visión del Quijote contra otros eruditos",
 			"requisitos": {"obra": "donquijote", "arquetipo": "persona", "min_insight": 100},
-			"recompensas": {
+			"recompensas":
+			{
 				"insight": 100,
 				"habilidad": "escudo_idealismo",
 				"autor": "cervantes",
@@ -146,7 +147,10 @@ func _sumar_bonus_sombra(arquetipos: Node, cantidad: float) -> void:
 func obtener_eventos_disponibles() -> Array:
 	var disponibles: Array = []
 	for evento in eventos_activos.values():
-		if typeof(evento) == TYPE_DICTIONARY and _verificar_requisitos(evento.get("requisitos", {})):
+		if (
+			typeof(evento) == TYPE_DICTIONARY
+			and _verificar_requisitos(evento.get("requisitos", {}))
+		):
 			disponibles.append(evento)
 	return disponibles
 
