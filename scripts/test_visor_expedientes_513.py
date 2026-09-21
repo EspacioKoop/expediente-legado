@@ -82,6 +82,8 @@ class VisorExpedientes513Test(unittest.TestCase):
     def test_el_visor_acota_el_cuerpo_y_activa_scroll(self):
         self.assertIn("_documento = RichTextLabel.new()", self.visor)
         self.assertIn("_documento.fit_content = false", self.visor)
+        self.assertIn("_lista.custom_minimum_size.y = 280", self.visor)
+        self.assertIn("columnas.split_offset = 420", self.visor)
         self.assertIn("_documento.scroll_active = true", self.visor)
         self.assertIn(
             "_documento.size_flags_vertical = Control.SIZE_EXPAND_FILL",
