@@ -22,6 +22,7 @@ func _initialize() -> void:
 	_probar_handshake_y_exposicion()
 	_probar_consumidor_posterior()
 	_probar_segundo_contrato_vitral()
+	_probar_tercer_contrato_sarnath()
 	print("%d pasadas, %d fallos" % [pasadas, fallos])
 	quit(1 if fallos > 0 else 0)
 
@@ -167,6 +168,57 @@ func _probar_segundo_contrato_vitral() -> void:
 	_comprobar(
 		ReligionEventos.eventos(registro, ReligionEventos.CANAL_CONVICCION).is_empty(),
 		"VITRAL 98 tampoco infiere convicción",
+	)
+
+	observador.free()
+	consola.free()
+
+
+func _probar_tercer_contrato_sarnath() -> void:
+	var registro := ReligionEventos.nuevo()
+	var jornada := {"dia": 11}
+	var consola := ConsolaRomPrueba.new()
+	root.add_child(consola)
+
+	var observador := Sarnath98Vigilia.new()
+	root.add_child(observador)
+	observador.configurar(registro, jornada, consola)
+
+	consola.titulo_prueba = "SARNATH98"
+	consola.memoria_prueba[0xC100] = 0
+	observador._process(0.0)
+	_comprobar(not observador.registrada(), "SARNATH 98 parcial no registra exposición")
+
+	consola.memoria_prueba[0xC100] = 0xA5
+	observador._process(0.0)
+	_comprobar(observador.registrada(), "SARNATH 98 completo usa el observer común")
+
+	var exposiciones := ReligionEventos.eventos(registro, ReligionEventos.CANAL_EXPOSICION)
+	_comprobar(exposiciones.size() == 1, "SARNATH 98 registra un único hecho")
+	var evento: Dictionary = exposiciones[0]
+	_comprobar(
+		String(evento["fuente"]) == "rom:sarnath_98",
+		"la tercera ROM conserva su fuente",
+	)
+	_comprobar(
+		String(evento["tradicion"]) == "budismo",
+		"la procedencia budista queda explícita sin asignarla al jugador",
+	)
+	_comprobar(
+		String(evento["contexto"]) == "india:varanasi:sarnath:sitio_arqueologico:unesco_2026",
+		"SARNATH 98 conserva lugar y marco patrimonial",
+	)
+	_comprobar(
+		evento["etiquetas"].has("memoria_espacial"),
+		"la tercera exposición conserva su mecánica no doctrinal",
+	)
+	_comprobar(
+		ReligionEventos.eventos(registro, ReligionEventos.CANAL_PRACTICA).is_empty(),
+		"orientarse en SARNATH 98 no se registra como práctica",
+	)
+	_comprobar(
+		ReligionEventos.eventos(registro, ReligionEventos.CANAL_CONVICCION).is_empty(),
+		"SARNATH 98 no infiere convicción",
 	)
 
 	observador.free()
