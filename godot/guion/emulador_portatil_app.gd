@@ -96,6 +96,7 @@ var _ruta_sram_actual := ""
 var _huella_rom_actual := ""
 var _rom_gb_clasica_actual := false
 var _efectos_presentacion := true
+var _imperfecciones_controladas := false
 var _sonidos_fisicos := true
 var _encendiendo := false
 var _tiempo_encendido := 0.0
@@ -286,6 +287,18 @@ func _construir_ui() -> void:
 	efectos_aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	derecha.add_child(efectos_aviso)
 
+	var imperfecciones := CheckButton.new()
+	imperfecciones.name = "ImperfeccionesControladasPortatil"
+	imperfecciones.text = _texto("imperfecciones_controladas")
+	imperfecciones.button_pressed = _imperfecciones_controladas
+	imperfecciones.toggled.connect(_al_cambiar_imperfecciones)
+	derecha.add_child(imperfecciones)
+
+	var imperfecciones_aviso := Label.new()
+	imperfecciones_aviso.text = _texto("imperfecciones_aviso")
+	imperfecciones_aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	derecha.add_child(imperfecciones_aviso)
+
 	_preparar_selector_paleta(derecha)
 
 	var sonidos := CheckButton.new()
@@ -404,6 +417,23 @@ func _al_cambiar_sonidos(activos: bool) -> void:
 	_sonidos_fisicos = activos
 	if not activos and _audio_fisico != null:
 		_audio_fisico.stop()
+
+
+func _al_cambiar_imperfecciones(activos: bool) -> void:
+	_imperfecciones_controladas = activos
+
+
+func _mostrar_ruido_contacto() -> void:
+	if (
+		not _efectos_presentacion
+		or not _imperfecciones_controladas
+		or _vista == null
+		or not is_instance_valid(_vista)
+	):
+		return
+	var efecto := EfectoContactoCartucho.new()
+	_vista.add_child(efecto)
+	efecto.iniciar()
 
 
 func _preparar_nucleo() -> void:
