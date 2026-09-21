@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">
+  <rect width="600" height="800" fill="#121827"/>
+  <rect x="22" y="22" width="556" height="756" fill="none" stroke="#d7bd79" stroke-width="8"/>
+  <g font-family="Arial,sans-serif" font-weight="900" font-size="70" fill="#f1eee2">
+    <text x="300" y="145" text-anchor="middle">JUEGA</text>
+    <text x="300" y="235" text-anchor="middle">EXPLORA</text>
+    <text x="300" y="325" text-anchor="middle">COLECCIONA</text>
+    <text x="300" y="415" text-anchor="middle">COMPARTE</text>
+  </g>
+  <g transform="translate(204 495)" fill="#ece8dc" shape-rendering="crispEdges">
+    <rect x="48" y="0" width="96" height="24"/><rect x="24" y="24" width="144" height="24"/>
+    <rect x="0" y="48" width="192" height="96"/><rect x="24" y="144" width="40" height="40"/>
+    <rect x="128" y="144" width="40" height="40"/><rect x="48" y="84" width="24" height="24" fill="#121827"/>
+    <rect x="120" y="84" width="24" height="24" fill="#121827"/>
+  </g>
+  <text x="300" y="735" text-anchor="middle" font-family="monospace" font-size="25" fill="#bd3d39">BIT 98 · JUEGOS QUE TE LLEVAN MÁS LEJOS</text>
+</svg>

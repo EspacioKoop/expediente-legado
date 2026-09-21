@@ -12,6 +12,7 @@ from verificar_godot import validar
 
 ROOT = Path(__file__).resolve().parents[1]
 GUION = ROOT / "godot/guion"
+ARTE_BIT98 = ROOT / "godot/arte/bit98"
 
 
 class LocalesComerciales676Test(unittest.TestCase):
@@ -22,6 +23,7 @@ class LocalesComerciales676Test(unittest.TestCase):
         )
         cls.identidad = (GUION / "calle_identidad.gd").read_text(encoding="utf-8")
         cls.calle = (GUION / "dia_calle_app.gd").read_text(encoding="utf-8")
+        cls.bit98 = (GUION / "bit98_dressing.gd").read_text(encoding="utf-8")
         with (ROOT / "godot/datos/textos.csv").open(encoding="utf-8") as fichero:
             cls.textos = {
                 fila[0]: fila[1] for fila in csv.reader(fichero) if len(fila) >= 2
@@ -89,6 +91,28 @@ class LocalesComerciales676Test(unittest.TestCase):
         self.assertNotIn('"pos": Vector3(6.5, 5.0, -10.65)', self.calle)
         self.assertIn('"pos": Vector3(6.5, 6.5, -10.65)', self.calle)
         self.assertIn("hueco real en planta baja para Bit 98", self.calle)
+
+    def test_bit98_usa_identidad_original_y_portadas_existentes(self):
+        self.assertIn("Bit98Dressing.montar(calle)", self.calle)
+        for asset in (
+            "rotulo_bit98.svg",
+            "cartel_juega.svg",
+            "cartel_segunda_mano.svg",
+            "cartel_novedades.svg",
+            "PROCEDENCIA.md",
+        ):
+            self.assertTrue((ARTE_BIT98 / asset).exists(), asset)
+        for portada in (
+            "caza_pixeles_98.jpg",
+            "paper_planes_98.jpg",
+            "croc_riders_98.jpg",
+        ):
+            self.assertIn(portada, self.bit98)
+        self.assertIn('"RotuloBit98Exterior"', self.bit98)
+        self.assertIn('"RotuloBit98Interior"', self.bit98)
+        self.assertIn('"ExpositorPortadasPropias"', self.bit98)
+        self.assertNotIn("TiendaVideojuegos.comprar", self.bit98)
+        self.assertNotIn("Jornada.gastar", self.bit98)
 
     def test_textos_de_puerta_existen(self):
         for clave in (

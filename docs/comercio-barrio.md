@@ -10,7 +10,7 @@ El contrato `ComercioBarrio` expone tres superficies diferenciadas:
 - **Bit 98**: adapta la tienda de videojuegos ya implementada por #93 mediante `TiendaVideojuegos`; no replica catálogo, stock ni reglas de ROMs.
 - **El Trastero**: segunda mano para pequeños objetos domésticos. El primer catálogo incluye una lámpara y un marco usados.
 
-Este corte no necesita interiores 3D: la futura integración puede resolverse desde escaparate/mostrador en el trayecto.
+La base de datos nació sin exigir interiores 3D. La implementación actual ya materializa Electrodomésticos y Bit 98 como microinteriores accesibles dentro de `trayecto`, sin crear una fase ni una economía nuevas.
 
 ## Economía
 
@@ -69,6 +69,17 @@ Este PR es **standalone first** y no modifica:
 - escenas, geometría o interiores 3D;
 - precios/calibración global fuera de los importes pequeños del primer catálogo;
 - la UI de inventario: sigue siendo de consulta y no vende a distancia.
+
+## Bit 98: identidad visual integrada — 2026-09-21
+
+Bit 98 ya no depende solo de cajas coloreadas para leerse como tienda. La capa
+`Bit98Dressing` añade rótulo exterior/interior, cartelería de novedades y segunda
+mano y un expositor físico que **reutiliza** las portadas ya versionadas de
+`caza_pixeles_98`, `paper_planes_98` y `croc_riders_98`.
+
+Los SVG de `godot/arte/bit98/` son originales del proyecto y no introducen
+marcas reales ni títulos nuevos en `RomsPropias`. Esta capa es estrictamente
+visual: no conoce precios, inventario, compras, desbloqueos ni semillas oníricas.
 
 ## Siguiente corte
 
