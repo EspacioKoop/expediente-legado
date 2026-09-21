@@ -137,6 +137,13 @@ func _probar() -> void:
 			"PortadaPropia_*", "MeshInstance3D", true, false
 		)
 		_comprobar(portadas.size() == 6, "se reutilizan seis portadas propias en expositor")
+		var destacadas := identidad_interior.find_children(
+			"PortadaDestacada_*", "MeshInstance3D", true, false
+		)
+		_comprobar(
+			destacadas.size() == 3,
+			"las tres portadas propias tienen presencia destacada en pared",
+		)
 
 	var cajas_juego := bit98.find_children("CajaJuego_*", "MeshInstance3D", true, false)
 	_comprobar(cajas_juego.size() == 30, "Bit 98 expone treinta cajas 3D en baldas")
