@@ -26,7 +26,7 @@ const CASOS_CALLE := [
 	},
 	{
 		"id": "el_trastero",
-		"posicion": Vector3(-4.05, 0.0, 9.20),
+		"posicion": Vector3(-3.82, 0.0, 11.15),
 		"objetivo": Vector3(-4.80, 1.45, 11.15),
 		"criterio": "El Trastero se reconoce como segunda mano sin bloquear la lectura de la calle",
 	},
