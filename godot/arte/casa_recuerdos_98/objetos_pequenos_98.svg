@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <title>Pequeños objetos domésticos de 1998</title>
+  <desc>Asset original sin marcas ni texto SVG. Fondo transparente.</desc>
+
+  <g id="cassette_transparente" transform="translate(45 45)">
+    <rect width="280" height="175" rx="12" fill="#b5aaa0" fill-opacity=".65" stroke="#45413d" stroke-width="7"/>
+    <rect x="24" y="22" width="232" height="112" rx="7" fill="#e2d2ad" fill-opacity=".85"/>
+    <circle cx="88" cy="78" r="30" fill="#31373a"/><circle cx="192" cy="78" r="30" fill="#31373a"/>
+    <circle cx="88" cy="78" r="12" fill="#c9b98f"/><circle cx="192" cy="78" r="12" fill="#c9b98f"/>
+    <path d="M116 130h48l28 26H88z" fill="#676f70"/>
+  </g>
+
+  <g id="cassette_rojo" transform="translate(365 45)">
+    <rect width="280" height="175" rx="12" fill="#7e3a3a" stroke="#3c2525" stroke-width="7"/>
+    <rect x="24" y="22" width="232" height="112" rx="7" fill="#d7c89e"/>
+    <circle cx="88" cy="78" r="30" fill="#2d3235"/><circle cx="192" cy="78" r="30" fill="#2d3235"/>
+    <circle cx="88" cy="78" r="11" fill="#d0c19b"/><circle cx="192" cy="78" r="11" fill="#d0c19b"/>
+    <rect x="54" y="142" width="172" height="12" rx="5" fill="#2c3032"/>
+  </g>
+
+  <g id="disquete_35" transform="translate(720 45)">
+    <rect width="210" height="210" rx="12" fill="#35404a" stroke="#1c2226" stroke-width="7"/>
+    <rect x="48" y="0" width="114" height="82" rx="4" fill="#9ca1a0"/>
+    <rect x="70" y="12" width="48" height="56" fill="#444c50"/>
+    <rect x="26" y="112" width="158" height="72" rx="7" fill="#d6d1bd"/>
+    <rect x="46" y="132" width="118" height="8" rx="4" fill="#777267"/>
+    <rect x="46" y="152" width="84" height="7" rx="3" fill="#979083"/>
+  </g>
+
+  <g id="llavero_plastico" transform="translate(990 45)">
+    <circle cx="70" cy="34" r="28" fill="none" stroke="#8e8e85" stroke-width="9"/>
+    <path d="M70 62v52" stroke="#8e8e85" stroke-width="9"/>
+    <rect x="20" y="104" width="100" height="120" rx="22" fill="#49716a" stroke="#263f3a" stroke-width="7"/>
+    <circle cx="70" cy="160" r="24" fill="#d0b568"/>
+  </g>
+
+  <g id="camara_desechable" transform="translate(45 330)">
+    <rect width="300" height="180" rx="22" fill="#4f665b" stroke="#26352f" stroke-width="8"/>
+    <rect x="28" y="24" width="82" height="48" rx="8" fill="#c9b873"/>
+    <circle cx="180" cy="100" r="56" fill="#2a3331" stroke="#82918b" stroke-width="8"/>
+    <circle cx="180" cy="100" r="30" fill="#162224"/>
+    <circle cx="260" cy="42" r="14" fill="#d3b35d"/>
+    <rect x="42" y="105" width="50" height="18" rx="5" fill="#303b37"/>
+  </g>
+
+  <g id="reloj_digital" transform="translate(405 350)">
+    <rect width="260" height="150" rx="30" fill="#343a3a" stroke="#1b2020" stroke-width="8"/>
+    <rect x="34" y="34" width="160" height="74" rx="10" fill="#15201f"/>
+    <g fill="#d58045">
+      <rect x="62" y="55" width="26" height="8" rx="3"/><rect x="62" y="82" width="26" height="8" rx="3"/>
+      <rect x="102" y="55" width="26" height="8" rx="3"/><rect x="102" y="82" width="26" height="8" rx="3"/>
+      <circle cx="142" cy="62" r="4"/><circle cx="142" cy="84" r="4"/>
+      <rect x="156" y="55" width="26" height="8" rx="3"/><rect x="156" y="82" width="26" height="8" rx="3"/>
+    </g>
+    <circle cx="222" cy="56" r="13" fill="#7b807d"/><circle cx="222" cy="98" r="13" fill="#7b807d"/>
+  </g>
+
+  <g id="cenicero_vacio" transform="translate(735 350)">
+    <ellipse cx="115" cy="100" rx="105" ry="70" fill="#8a9b9a" fill-opacity=".75" stroke="#455352" stroke-width="8"/>
+    <ellipse cx="115" cy="100" rx="70" ry="38" fill="#4e5f5e" fill-opacity=".5"/>
+    <path d="M20 70h48M162 70h48M42 145l36-30M188 145l-36-30" stroke="#455352" stroke-width="9" stroke-linecap="round"/>
+  </g>
+
+  <g id="figurita_gato" transform="translate(1015 335)">
+    <ellipse cx="70" cy="165" rx="58" ry="24" fill="#3e403c"/>
+    <path d="M35 152c-6-50 8-84 35-97 29 13 43 47 35 97z" fill="#8a6f54" stroke="#4b3b2e" stroke-width="6"/>
+    <circle cx="70" cy="54" r="42" fill="#9b7a5a" stroke="#4b3b2e" stroke-width="6"/>
+    <path d="M38 30l10-28 18 22M102 30L92 2 74 24" fill="#9b7a5a" stroke="#4b3b2e" stroke-width="6"/>
+    <circle cx="56" cy="54" r="4" fill="#272521"/><circle cx="84" cy="54" r="4" fill="#272521"/>
+  </g>
+
+  <g id="mechero_generico" transform="translate(55 640)">
+    <rect x="20" y="34" width="95" height="170" rx="18" fill="#9b493b" stroke="#4f2923" stroke-width="7"/>
+    <rect x="30" y="0" width="75" height="52" rx="10" fill="#737875" stroke="#3c413f" stroke-width="6"/>
+    <circle cx="68" cy="23" r="13" fill="#3b403e"/>
+  </g>
+
+  <g id="monedas_sueltas" transform="translate(220 660)">
+    <circle cx="50" cy="50" r="42" fill="#b8a268" stroke="#61563a" stroke-width="6"/>
+    <circle cx="130" cy="70" r="36" fill="#a6a39a" stroke="#5c5c57" stroke-width="6"/>
+    <circle cx="205" cy="42" r="32" fill="#b8a268" stroke="#61563a" stroke-width="6"/>
+    <circle cx="50" cy="50" r="18" fill="none" stroke="#766842" stroke-width="4"/>
+    <circle cx="130" cy="70" r="14" fill="none" stroke="#686863" stroke-width="4"/>
+  </g>
+
+  <g id="caja_cerillas" transform="translate(520 650)">
+    <rect width="210" height="130" rx="12" fill="#d4b36a" stroke="#684f30" stroke-width="7"/>
+    <rect x="18" y="18" width="174" height="94" fill="#6f3b32"/>
+    <circle cx="105" cy="65" r="34" fill="#d9c37a"/>
+    <path d="M90 82c6-34 24-44 30-66 18 29 8 55-8 70z" fill="#b7523c"/>
+  </g>
+
+  <g id="vaso_portalapices" transform="translate(810 625)">
+    <path d="M30 50h140l-18 190H48z" fill="#5d7775" stroke="#2e4442" stroke-width="7"/>
+    <path d="M62 65L42 0M92 65L84 2M122 65l12-62M146 65l26-58" stroke="#5c4434" stroke-width="10" stroke-linecap="round"/>
+    <path d="M42 0l-6 20 16-4zM84 2l-6 20 16-4zM134 3l-8 20 17-4zM172 7l-10 18 18-2z" fill="#d0b36d"/>
+  </g>
+</svg>
