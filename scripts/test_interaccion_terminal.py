@@ -34,8 +34,11 @@ class InteraccionTerminalTest(unittest.TestCase):
         self.assertIn("terminal.activado.connect(_activar_terminal_siga)", self.capa)
         self.assertIn("_abrir_expediente()", self.capa)
         self.assertIn('_sonar("documento")', self.capa)
+        callback = self.capa.split("func _activar_terminal_siga", 1)[1].split(
+            "func _buscar_zona_destino", 1
+        )[0]
         for prohibido in ("Partida.new()", "Jornada.", "pistas_descubiertas", "visor.tscn"):
-            self.assertNotIn(prohibido, self.capa)
+            self.assertNotIn(prohibido, callback)
 
     def test_solo_se_monta_en_archivo(self):
         bloque = self.capa.split("func _entrar_en(fase: String) -> void:", 1)[1].split(

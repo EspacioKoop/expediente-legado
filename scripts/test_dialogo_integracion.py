@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import unittest
 
 
@@ -32,12 +33,17 @@ class DialogoIntegracionTest(unittest.TestCase):
     def test_no_duplica_contenido_ni_estado(self):
         for prohibido in (
             "Companeros.frase_de",
-            "Jornada.",
             "Partida.guardar",
             "pistas_descubiertas",
             "_nomina.text",
         ):
             self.assertNotIn(prohibido, self.clima)
+
+        # #963 integra aquí únicamente el reloj transversal; no debe convertir
+        # esta capa en propietaria de las demás reglas de Jornada.
+        usos_jornada = set(re.findall(r"\bJornada\.([A-Za-z_]\w*)", self.clima))
+        self.assertIn("hora_decimal", usos_jornada)
+        self.assertLessEqual(usos_jornada, {"hora_decimal", "sincronizar_reloj_fase"})
 
 
 if __name__ == "__main__":

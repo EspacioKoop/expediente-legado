@@ -116,7 +116,8 @@ func _entrar_en(fase: String) -> void:
 	_cerrar_dialogo_actual()
 	_retirar_clima()
 	super._entrar_en(fase)
-	Ambiente.reproducir(self, fase)
+	Jornada.sincronizar_reloj_fase(jornada, fase)
+	Ambiente.reproducir(self, fase, -24.0, {"hora": Jornada.hora_decimal(jornada)})
 	if fase == "archivo":
 		_montar_companeros_conversables()
 		_montar_terminal_interactivo()
@@ -250,6 +251,9 @@ func _cerrar_expediente() -> void:
 		_hud_prioridades.desactivar(HUDLayer.MODAL)
 	if jornada.get("fase", "") == "archivo" and _pantalla == null:
 		_archivado_sesion.refrescar(self)
+		# El visor puede haber consumido una acción y avanzado #963. Al volver a
+		# la oficina se cruza a la cama acústica de la nueva franja, si cambió.
+		Ambiente.reproducir(self, "archivo", -24.0, {"hora": Jornada.hora_decimal(jornada)})
 
 
 func _abrir_duelo(quien: Dictionary, zona: Area3D) -> void:

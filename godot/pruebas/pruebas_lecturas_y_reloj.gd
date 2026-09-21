@@ -1,4 +1,4 @@
-## Regresiones de #163. Las llama recorrido.gd dentro de datos aislados.
+## Regresiones de #163/#963. Las llama recorrido.gd dentro de datos aislados.
 class_name PruebasLecturasYReloj
 extends RefCounted
 
@@ -63,6 +63,8 @@ static func lecturas(archivo, comprobar: Callable) -> void:
 
 ## El itinerario se consume, pero no debe encoger la duración de la noche.
 static func reloj(comprobar: Callable) -> void:
+	_reloj_laboral(comprobar)
+
 	var partida := Partida.new()
 	partida.estado = Partida.nueva()
 	var noche: Dictionary = partida.estado["jornada"]
@@ -121,6 +123,78 @@ static func reloj(comprobar: Callable) -> void:
 	comprobar.call("fuera del sueño la proporción es cero", Jornada.noche_restante(cargada), 0.0)
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(ruta))
 	_migracion(comprobar)
+
+
+## #963: el día avanza por acciones significativas, nunca por tiempo real.
+static func _reloj_laboral(comprobar: Callable) -> void:
+	var partida := Partida.new()
+	partida.estado = Partida.nueva()
+	var laboral: Dictionary = partida.estado["jornada"]
+
+	comprobar.call("la jornada empieza a las nueve", Jornada.hora_minutos(laboral), 9 * 60)
+	comprobar.call("la mañana es una franja estable", Jornada.franja_horaria(laboral), "manana")
+	comprobar.call("el jefe está al comenzar", Jornada.servicio_disponible(laboral, "jefe"), true)
+	comprobar.call(
+		"la cafetería todavía no ha abierto",
+		Jornada.servicio_disponible(laboral, "cafeteria"),
+		false
+	)
+
+	Jornada.gastar_accion(laboral)
+	comprobar.call(
+		"una acción adelanta dos horas y media", Jornada.hora_minutos(laboral), 11 * 60 + 30
+	)
+	comprobar.call(
+		"la cafetería abre por horario", Jornada.servicio_disponible(laboral, "cafeteria"), true
+	)
+	comprobar.call("la franja cambia a mediodía", Jornada.franja_horaria(laboral), "mediodia")
+
+	Jornada.gastar_accion(laboral)
+	comprobar.call("dos acciones llevan a las catorce", Jornada.hora_minutos(laboral), 14 * 60)
+	comprobar.call(
+		"el archivo físico puede cerrar sin cerrar la jornada",
+		Jornada.servicio_disponible(laboral, "archivo_fisico"),
+		false
+	)
+
+	var antes_cafe := Jornada.hora_minutos(laboral)
+	comprobar.call(
+		"el café opcional sigue disponible", Jornada.tomar_cafe(laboral, Jornada.PRECIO_CAFE), true
+	)
+	comprobar.call(
+		"tomar café no rebobina ni adelanta el reloj", Jornada.hora_minutos(laboral), antes_cafe
+	)
+	Jornada.gastar_accion(laboral)
+	Jornada.gastar_accion(laboral)
+	comprobar.call("las horas extra no bloquean acciones", Jornada.hora_minutos(laboral), 19 * 60)
+	comprobar.call(
+		"agotarse acciones sigue siendo la regla laboral", Jornada.jornada_agotada(laboral), true
+	)
+
+	Jornada.fichar_salida(laboral)
+	comprobar.call("fichar no rebobina unas horas extra", Jornada.hora_minutos(laboral), 19 * 60)
+	comprobar.call("el reloj no cambia la transición normal", laboral["fase"], "trayecto")
+
+	var ruta := "user://regresion-reloj-laboral.json"
+	comprobar.call("el reloj laboral se guarda", partida.guardar(ruta), true)
+	var releida := Partida.new()
+	comprobar.call("el reloj laboral se recupera", releida.cargar(ruta)["resultado"], "cargada")
+	comprobar.call(
+		"recargar conserva la hora laboral",
+		Jornada.hora_minutos(releida.estado["jornada"]),
+		19 * 60
+	)
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(ruta))
+
+	var antigua := Jornada.nueva()
+	antigua.erase("hora_minutos")
+	antigua["acciones"] = 1
+	Jornada.completar(antigua)
+	comprobar.call(
+		"migrar una jornada antigua infiere el avance sin reiniciarla",
+		Jornada.hora_minutos(antigua),
+		14 * 60
+	)
 
 
 ## Sin el itinerario completo antiguo no se inventa su duración original:
