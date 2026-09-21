@@ -6,10 +6,14 @@
 extends "res://guion/visor_anotaciones_app.gd"
 
 const MeticulosidadEstado := preload("res://guion/meticulosidad.gd")
+const DetallesMeticulosidadCatalogo := preload("res://guion/detalles_meticulosidad.gd")
+const RUTA_DETALLES_METICULOSIDAD := "res://datos/detalles_meticulosidad.json"
 
 var _metadatos: Label
+var _detalle_meticulosidad: Label
 var _scroll_meticulosidad: VScrollBar
 var _documento_meticulosidad_id := ""
+var _catalogo_detalles_meticulosidad: Dictionary = {}
 
 
 func _columna_documento() -> Control:
@@ -18,6 +22,13 @@ func _columna_documento() -> Control:
 	_metadatos.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_metadatos.text = ""
 	columna.add_child(_metadatos)
+
+	_detalle_meticulosidad = Label.new()
+	_detalle_meticulosidad.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_detalle_meticulosidad.visible = false
+	_detalle_meticulosidad.text = ""
+	columna.add_child(_detalle_meticulosidad)
+
 	_conectar_scroll_meticulosidad()
 	return columna
 
@@ -76,6 +87,49 @@ func _actualizar_metadatos() -> void:
 	if _metadatos == null:
 		return
 	_metadatos.text = _texto_metadatos(registro_actual)
+	_actualizar_detalles_meticulosidad()
+
+
+func _actualizar_detalles_meticulosidad() -> void:
+	if _detalle_meticulosidad == null:
+		return
+	var detalles := _detalles_meticulosidad_actuales()
+	if detalles.is_empty():
+		_detalle_meticulosidad.text = ""
+		_detalle_meticulosidad.visible = false
+		return
+
+	var textos: Array[String] = []
+	for detalle in detalles:
+		var texto := String(detalle.get("texto", "")).strip_edges()
+		if not texto.is_empty():
+			textos.append(texto)
+	_detalle_meticulosidad.text = "\n".join(textos)
+	_detalle_meticulosidad.visible = not textos.is_empty()
+
+
+func _detalles_meticulosidad_actuales() -> Array[Dictionary]:
+	if registro_actual.is_empty():
+		return []
+	if _catalogo_detalles_meticulosidad.is_empty():
+		_catalogo_detalles_meticulosidad = _cargar_catalogo_detalles_meticulosidad()
+	var registro_id := String(registro_actual.get("id", "")).strip_edges()
+	return DetallesMeticulosidadCatalogo.visibles(
+		_catalogo_detalles_meticulosidad,
+		jornada,
+		registro_id,
+	)
+
+
+static func _cargar_catalogo_detalles_meticulosidad() -> Dictionary:
+	if not FileAccess.file_exists(RUTA_DETALLES_METICULOSIDAD):
+		return {}
+	var datos: Variant = JSON.parse_string(
+		FileAccess.get_file_as_string(RUTA_DETALLES_METICULOSIDAD)
+	)
+	if datos is Dictionary:
+		return datos
+	return {}
 
 
 func _conectar_scroll_meticulosidad() -> void:
@@ -108,6 +162,7 @@ func _registrar_meticulosidad(registro: Dictionary, evento: String, motivo: Stri
 		return
 	if MeticulosidadEstado.registrar(jornada, registro_id, evento, motivo):
 		_guardar_o_avisar()
+		_actualizar_detalles_meticulosidad()
 
 
 func _registrar_meticulosidad_por_id(registro_id: String, evento: String, motivo: String) -> void:
