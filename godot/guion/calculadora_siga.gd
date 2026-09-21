@@ -56,9 +56,7 @@ func _construir_interfaz() -> void:
 	var pantalla := PanelContainer.new()
 	pantalla.name = "Pantalla"
 	pantalla.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	pantalla.add_theme_stylebox_override(
-		"panel", _caja(Color("#17271d"), Color("#68766c"), 2, 3)
-	)
+	pantalla.add_theme_stylebox_override("panel", _caja(Color("#17271d"), Color("#68766c"), 2, 3))
 	add_child(pantalla)
 
 	var contenido_pantalla := VBoxContainer.new()
@@ -72,12 +70,8 @@ func _construir_interfaz() -> void:
 	_entrada.add_theme_color_override("font_color", Color("#d7f4c8"))
 	_entrada.add_theme_color_override("font_placeholder_color", Color("#8ca786"))
 	_entrada.add_theme_color_override("caret_color", Color("#d7f4c8"))
-	_entrada.add_theme_stylebox_override(
-		"normal", _caja(Color("#17271d"), Color("#17271d"), 0, 0)
-	)
-	_entrada.add_theme_stylebox_override(
-		"focus", _caja(Color("#17271d"), Color("#a6c89a"), 1, 2)
-	)
+	_entrada.add_theme_stylebox_override("normal", _caja(Color("#17271d"), Color("#17271d"), 0, 0))
+	_entrada.add_theme_stylebox_override("focus", _caja(Color("#17271d"), Color("#a6c89a"), 1, 2))
 	contenido_pantalla.add_child(_entrada)
 
 	_resultado = Label.new()
