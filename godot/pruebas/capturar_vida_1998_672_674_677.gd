@@ -21,7 +21,8 @@ const CASOS := [
 	{
 		"id": "buzon_portal",
 		"fase": "trayecto",
-		"criterio": "el buzón se localiza junto al portal, se reconoce como objeto interactivo y no bloquea el paso",
+		"criterio":
+		"el buzón se localiza junto al portal, se reconoce como objeto interactivo y no bloquea el paso",
 	},
 	{
 		"id": "publicacion_encontrable",
@@ -31,12 +32,14 @@ const CASOS := [
 	{
 		"id": "acumulacion_tres_fuentes",
 		"fase": "casa",
-		"criterio": "la estantería presenta objetos persistentes sin clipping ni lectura de colección puntuable",
+		"criterio":
+		"la estantería presenta objetos persistentes sin clipping ni lectura de colección puntuable",
 	},
 	{
 		"id": "calendario_nevera",
 		"fase": "casa",
-		"criterio": "el calendario recibido por correo se lee como papel o imán colocado sobre la nevera",
+		"criterio":
+		"el calendario recibido por correo se lee como papel o imán colocado sobre la nevera",
 	},
 ]
 
@@ -189,14 +192,17 @@ func _init() -> void:
 	for caso in CASOS:
 		var archivo := "%s.png" % String(caso["id"])
 		var destino := salida.path_join(archivo)
-		manifiesto["capturas"].append(
-			{
-				"id": String(caso["id"]),
-				"fase": String(caso["fase"]),
-				"captura": archivo,
-				"criterio": String(caso["criterio"]),
-				"sha256": FileAccess.get_sha256(destino),
-			}
+		(
+			manifiesto["capturas"]
+			. append(
+				{
+					"id": String(caso["id"]),
+					"fase": String(caso["fase"]),
+					"captura": archivo,
+					"criterio": String(caso["criterio"]),
+					"sha256": FileAccess.get_sha256(destino),
+				}
+			)
 		)
 
 	var ruta_manifiesto := salida.path_join("manifest.json")
@@ -269,13 +275,16 @@ func _fuentes_home_storage(inventario: Dictionary) -> Array[Dictionary]:
 		var objeto_id := String(objeto.get("id", ""))
 		if not esperados.has(objeto_id):
 			continue
-		salida.append(
-			{
-				"id": objeto_id,
-				"origen": String(objeto.get("origen", "")),
-				"origen_esperado": String(esperados[objeto_id]),
-				"ubicacion": Inventario.HOME_STORAGE,
-			}
+		(
+			salida
+			. append(
+				{
+					"id": objeto_id,
+					"origen": String(objeto.get("origen", "")),
+					"origen_esperado": String(esperados[objeto_id]),
+					"ubicacion": Inventario.HOME_STORAGE,
+				}
+			)
 		)
 	salida.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["id"] < b["id"])
 	return salida
