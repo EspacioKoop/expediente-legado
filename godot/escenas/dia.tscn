@@ -1,4 +1,4 @@
-[gd_scene load_steps=46 format=3]
+[gd_scene load_steps=47 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -45,6 +45,7 @@
 [ext_resource type="Script" path="res://guion/dia_reloj_horario_app.gd" id="43"]
 [ext_resource type="Script" path="res://guion/dia_vecinos_edificio_app.gd" id="44"]
 [ext_resource type="Script" path="res://guion/dia_jali_98_app.gd" id="45"]
+[ext_resource type="Script" path="res://guion/dia_vitral_98_app.gd" id="46"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -180,3 +181,6 @@ script = ExtResource("43")
 
 [node name="Jali98Controller" type="Node" parent="."]
 script = ExtResource("45")
+
+[node name="Vitral98Controller" type="Node" parent="."]
+script = ExtResource("46")

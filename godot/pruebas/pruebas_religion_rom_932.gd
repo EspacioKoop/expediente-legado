@@ -21,6 +21,7 @@ var fallos := 0
 func _initialize() -> void:
 	_probar_handshake_y_exposicion()
 	_probar_consumidor_posterior()
+	_probar_segundo_contrato_vitral()
 	print("%d pasadas, %d fallos" % [pasadas, fallos])
 	quit(1 if fallos > 0 else 0)
 
@@ -125,6 +126,51 @@ func _probar_consumidor_posterior() -> void:
 		"el mismo mundo no duplica el recuerdo",
 	)
 	mundo.free()
+
+
+func _probar_segundo_contrato_vitral() -> void:
+	var registro := ReligionEventos.nuevo()
+	var jornada := {"dia": 8}
+	var consola := ConsolaRomPrueba.new()
+	root.add_child(consola)
+
+	var observador := Vitral98Vigilia.new()
+	root.add_child(observador)
+	observador.configurar(registro, jornada, consola)
+
+	consola.titulo_prueba = "VITRAL98"
+	consola.memoria_prueba[0xC100] = 0
+	observador._process(0.0)
+	_comprobar(not observador.registrada(), "VITRAL 98 parcial no registra exposición")
+
+	consola.memoria_prueba[0xC100] = 0xA5
+	observador._process(0.0)
+	_comprobar(observador.registrada(), "VITRAL 98 completo usa el observer común")
+
+	var exposiciones := ReligionEventos.eventos(registro, ReligionEventos.CANAL_EXPOSICION)
+	_comprobar(exposiciones.size() == 1, "VITRAL 98 registra un único hecho")
+	var evento: Dictionary = exposiciones[0]
+	_comprobar(String(evento["fuente"]) == "rom:vitral_98", "la segunda ROM conserva su fuente")
+	_comprobar(
+		String(evento["tradicion"]) == "cristianismo",
+		"la procedencia cristiana queda explícita sin asignarla al jugador",
+	)
+	_comprobar(
+		String(evento["contexto"]) == "europa_cristiana:vidriera_taller:ca_1375",
+		"la segunda ROM conserva medio y periodo",
+	)
+	_comprobar(evento["etiquetas"].has("red_plomo"), "la exposición conserva la materialidad")
+	_comprobar(
+		ReligionEventos.eventos(registro, ReligionEventos.CANAL_PRACTICA).is_empty(),
+		"VITRAL 98 tampoco convierte juego en práctica",
+	)
+	_comprobar(
+		ReligionEventos.eventos(registro, ReligionEventos.CANAL_CONVICCION).is_empty(),
+		"VITRAL 98 tampoco infiere convicción",
+	)
+
+	observador.free()
+	consola.free()
 
 
 func _comprobar(condicion: bool, nombre: String) -> void:

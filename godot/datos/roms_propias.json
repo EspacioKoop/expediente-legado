@@ -169,6 +169,21 @@
       "precio": 45,
       "issues": [932, 916, 931],
       "mito": ""
+    },
+    {
+      "id": "vitral_98",
+      "titulo": "VITRAL 98",
+      "estado": "jugable",
+      "genero": "puzle de composición y luz",
+      "resumen": "Reconstruir cuatro piezas abstractas de una vidriera a partir de un diseño de taller; solo la composición completa publica el handshake cultural.",
+      "fuente": "gbc/minijuegos/vitral_98",
+      "rom": "res://roms/vitral_98.gbc",
+      "cabecera": "VITRAL98",
+      "cgb": "dual",
+      "incluida": false,
+      "precio": 45,
+      "issues": [932, 916, 931],
+      "mito": ""
     }
   ]
 }

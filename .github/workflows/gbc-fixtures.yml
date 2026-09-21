@@ -16,6 +16,7 @@ on:
       - "gbc/minijuegos/aquiles_98/**"
       - "gbc/minijuegos/ryu_flow_98/**"
       - "gbc/minijuegos/jali_98/**"
+      - "gbc/minijuegos/vitral_98/**"
       - "gbc/minijuegos/hydra_loop_98/**"
       - "gbc/minijuegos/hydra_loop/assets/**"
       - "gbc/minijuegos/webkeeper_98/**"
@@ -199,6 +200,13 @@ jobs:
           make -C gbc/minijuegos/jali_98 clean test PYTHON=/tmp/pyboy/bin/python
           cp gbc/minijuegos/jali_98/build/jali_98.gbc gbc-fixtures/
 
+      - name: Build and play-test VITRAL 98
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C gbc/minijuegos/vitral_98 clean test PYTHON=/tmp/pyboy/bin/python
+          cp gbc/minijuegos/vitral_98/build/vitral_98.gbc gbc-fixtures/
+
       - name: Build and play-test HYDRA LOOP prototype
         shell: bash
         run: |
@@ -219,7 +227,7 @@ jobs:
           set -euo pipefail
           (
             cd gbc-fixtures
-            sha256sum joypad.gb vblank.gb cgb-acid2.gbc cgb_only_smoke.gbc caza_pixeles_98.gbc paper_planes_98.gbc croc_riders_98.gbc aquiles_98.gbc ryu_flow_98.gbc jali_98.gbc hydra_loop_98.gbc webkeeper_98.gbc | tee SHA256SUMS
+            sha256sum joypad.gb vblank.gb cgb-acid2.gbc cgb_only_smoke.gbc caza_pixeles_98.gbc paper_planes_98.gbc croc_riders_98.gbc aquiles_98.gbc ryu_flow_98.gbc jali_98.gbc vitral_98.gbc hydra_loop_98.gbc webkeeper_98.gbc | tee SHA256SUMS
             echo "${CGB_ACID2_SHA256}  cgb-acid2.gbc" | sha256sum --check --strict
           )
           : > gbc-fixtures/rom-metadata.jsonl
@@ -231,7 +239,7 @@ jobs:
             python scripts/inspect_gb_rom.py "$rom" --compact >> gbc-fixtures/rom-metadata.jsonl
           done
           test "$(od -An -tx1 -j 323 -N 1 gbc-fixtures/cgb-acid2.gbc | tr -d ' \n')" = "c0"
-          for rom in gbc-fixtures/caza_pixeles_98.gbc gbc-fixtures/paper_planes_98.gbc gbc-fixtures/croc_riders_98.gbc gbc-fixtures/aquiles_98.gbc gbc-fixtures/ryu_flow_98.gbc gbc-fixtures/jali_98.gbc gbc-fixtures/hydra_loop_98.gbc gbc-fixtures/webkeeper_98.gbc; do
+          for rom in gbc-fixtures/caza_pixeles_98.gbc gbc-fixtures/paper_planes_98.gbc gbc-fixtures/croc_riders_98.gbc gbc-fixtures/aquiles_98.gbc gbc-fixtures/ryu_flow_98.gbc gbc-fixtures/jali_98.gbc gbc-fixtures/vitral_98.gbc gbc-fixtures/hydra_loop_98.gbc gbc-fixtures/webkeeper_98.gbc; do
             test "$(od -An -tx1 -j 323 -N 1 "$rom" | tr -d ' \n')" = "80"
             # Cartucho estándar (#808): MBC5+RAM+BATTERY con 8 KiB de RAM.
             test "$(od -An -tx1 -j 327 -N 1 "$rom" | tr -d ' \n')" = "1b"
@@ -254,6 +262,7 @@ jobs:
             gbc-fixtures/aquiles_98.gbc
             gbc-fixtures/ryu_flow_98.gbc
             gbc-fixtures/jali_98.gbc
+            gbc-fixtures/vitral_98.gbc
             gbc-fixtures/hydra_loop_98.gbc
             gbc-fixtures/webkeeper_98.gbc
             gbc-fixtures/SHA256SUMS
