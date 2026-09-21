@@ -99,6 +99,9 @@ static func nueva() -> Dictionary:
 		# #155: mejores reconstrucciones por expediente. Solo son estado
 		# derivado (ids/puntuación/cobertura/rango), nunca copias de documentos.
 		"reconstrucciones": {},
+		# #959: marcas diegéticas producidas por uso reiterado del entorno. Solo
+		# ids y estado visual; no guardamos nodos, posiciones ni contenido.
+		"huellas_ambientales": {},
 		# #153: historial de pronósticos del auditor. Es de la partida, no de la
 		# jornada, para sobrevivir a cambios de día y reasignaciones.
 		"pronosticos": Pronosticos.nuevo(),
@@ -305,6 +308,12 @@ static func validar(guardado) -> Array:
 	for clave in ["veredictos", "historias_cartas", "cinematicas_vistas", "reconstrucciones"]:
 		if guardado.has(clave) and typeof(guardado[clave]) != TYPE_DICTIONARY:
 			errores.append("%s no es un objeto" % clave)
+	if guardado.has("huellas_ambientales"):
+		if typeof(guardado["huellas_ambientales"]) != TYPE_DICTIONARY:
+			errores.append("huellas_ambientales no es un objeto")
+		else:
+			for error in HuellasAmbientales.validar(guardado["huellas_ambientales"]):
+				errores.append("huellas_ambientales.%s" % error)
 	for clave in CAMPOS_ENTEROS:
 		if guardado.has(clave) and not _entero_valido(guardado[clave], 0, 9223372036854775807):
 			errores.append("%s inválido" % clave)

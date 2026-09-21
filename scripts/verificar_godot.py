@@ -146,6 +146,12 @@ def ejecutar():
                 30,
                 17,
             ),
+            (
+                "huellas-ambientales",
+                ["--script", "pruebas/pruebas_huellas_ambientales_959.gd"],
+                30,
+                18,
+            ),
             ("recorrido", ["--script", "pruebas/recorrido.gd"], 60, 95),
             ("arranque", ["--quit-after", "90"], 30, None),
         ]
