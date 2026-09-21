@@ -3,6 +3,7 @@ extends Node
 signal obra_conocida(obra_id)
 var obras_conocidas: Array = []
 var insight_total: int = 0
+var momentum_bonus: float = 0.0  # acumulativo temporal
 
 func _ready() -> void:
     var f = FileAccess.open("res://datos/literatura/obras.json", FileAccess.READ)
@@ -17,12 +18,30 @@ func conocer_obra(obra_id: String) -> bool:
         return false
     obras_conocidas.append(obra_id)
     # otorgar insight basado en efecto
-    for o in obras:
-        if o.id == obra_id:
-            insight_total += int(o.efecto.get("bonus_insight", 0))
-            break
+    var efecto = _obtener_efecto_obra(obra_id)
+    if efecto.has("bonus_insight"):
+        insight_total += int(efecto.bonus_insight)
+    if efecto.has("bonus_momentum"):
+        momentum_bonus += float(efecto.momentum_bonus)
+        # aplicar momentum bonus inmediatamente al gestor de momentum
+        GestorMomentum.momentum_actual = min(GestorMomentum.momentum_max, GestorMomentum.momentum_actual + efecto.bonus_monmentum)
     obra_conocida.emit(obra_id)
     return true
 
-def obtener_insight_total():
+func obtener_insight_total():
     return insight_total
+
+func obtener_momentum_bonus():
+    return momentum_bonus
+
+func _obtener_efecto_obra(obra_id: String) -> Dictionary:
+    var file = FileAccess.open("res://datos/literatura/obras.json", FileAccess.READ)
+    if file:
+        var data = JSON.parse_string(file.get_as_text())
+        if data.error == OK:
+            for o in data.obras:
+                if o.id == obra_id:
+                    file.close()
+                    return o.efecto
+        file.close()
+    return {}
