@@ -53,8 +53,8 @@ func _probar_franjas() -> void:
 
 
 func _probar_discretizacion() -> void:
-	var media_a := Ambiente.stream_adaptativo("archivo", {"estres": 0.40})
-	var media_b := Ambiente.stream_adaptativo("archivo", {"estres": 0.60})
+	var media_a := Ambiente.stream_adaptativo("archivo", {"estres": 0.40}) as AudioStreamWAV
+	var media_b := Ambiente.stream_adaptativo("archivo", {"estres": 0.60}) as AudioStreamWAV
 	_comprobar(media_a == media_b, "dos valores de la misma banda reutilizan stream")
 
 	var alta := Ambiente.stream_adaptativo("archivo", {"estres": 0.90}) as AudioStreamWAV
