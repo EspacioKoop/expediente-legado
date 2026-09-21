@@ -66,9 +66,7 @@ func _actualizar_decision() -> void:
 
 	var registrada := DecisionIdeologicaExpediente.opcion_registrada(partida.estado, caso_id)
 	if not registrada.is_empty():
-		_decision_estado.text = (
-			tr("VISOR_DECISION_924_REGISTRADA") % _texto_opcion(registrada)
-		)
+		_decision_estado.text = (tr("VISOR_DECISION_924_REGISTRADA") % _texto_opcion(registrada))
 		return
 
 	if not DecisionIdeologicaExpediente.disponible(partida.estado, caso_id):
