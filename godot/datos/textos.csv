@@ -583,3 +583,14 @@ CONSOLA_SERVICIO_PORTATIL_SOLO_CASA,La portátil solo puede abrirse cuando ya es
 CONSOLA_SERVICIO_PORTATIL_AUSENTE,No encuentro la portátil en esta escena.
 CONSOLA_SERVICIO_PORTATIL_ABRIENDO,Abriendo la portátil
 CONSOLA_SERVICIO_SOLO_PARTIDA,Solo funciona dentro de una partida.
+MENU_GLOBAL_HISTORIAL_DECISIONES,Historial de decisiones
+MENU_GLOBAL_HISTORIAL_SUBTITULO,"El archivo conserva cuándo decidió y cuándo dejó una decisión pendiente."
+MENU_GLOBAL_HISTORIAL_RESUMEN,"%d aplazamientos registrados · %d decisiones con reiteración."
+MENU_GLOBAL_HISTORIAL_PRESION_0,No constan demoras reiteradas.
+MENU_GLOBAL_HISTORIAL_PRESION_1,El archivo empieza a acumular demoras reiteradas.
+MENU_GLOBAL_HISTORIAL_PRESION_2,Las demoras ya dejan una huella visible en el expediente.
+MENU_GLOBAL_HISTORIAL_VACIO,Todavía no hay decisiones registradas.
+MENU_GLOBAL_HISTORIAL_LEGADO,"Registro anterior a este sistema; el contexto original no está disponible."
+MENU_GLOBAL_HISTORIAL_CONTEXTO,"Día %d · %s"
+MENU_GLOBAL_HISTORIAL_POSPUESTA,"%s · aplazada (%d)\n%s"
+MENU_GLOBAL_HISTORIAL_RESUELTA,"%s · decidida\n%s\n%s"
