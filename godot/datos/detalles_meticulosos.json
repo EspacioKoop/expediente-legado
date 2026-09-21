@@ -1,0 +1,16 @@
+{
+  "memo1@1": [
+    {
+      "id": "memo1-cotejo-margen",
+      "motivo": "margen",
+      "texto": "VISOR_DETALLE_961_MEMO1_MARGEN"
+    }
+  ],
+  "oficio2@2": [
+    {
+      "id": "oficio2-anexo-folio",
+      "motivo": "folio",
+      "texto": "VISOR_DETALLE_961_OFICIO2_FOLIO"
+    }
+  ]
+}
