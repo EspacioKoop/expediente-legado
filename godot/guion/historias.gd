@@ -183,31 +183,37 @@ func historial(estado: Dictionary) -> Array:
 	var ids: Array = resueltas.keys()
 	ids.sort()
 	for carta_id in ids:
-		legado.append(
-			{
-				"tipo": "resuelta",
-				"carta": String(carta_id),
-				"eleccion": String(resueltas[carta_id]),
-				"posposiciones": veces_pospuesta(estado, String(carta_id)),
-				"dia": 0,
-				"vuelta": 0,
-				"fase": "",
-				"legado": true,
-			}
+		(
+			legado
+			. append(
+				{
+					"tipo": "resuelta",
+					"carta": String(carta_id),
+					"eleccion": String(resueltas[carta_id]),
+					"posposiciones": veces_pospuesta(estado, String(carta_id)),
+					"dia": 0,
+					"vuelta": 0,
+					"fase": "",
+					"legado": true,
+				}
+			)
 		)
 	for carta_id in _pospuestas(estado):
 		if resueltas.has(carta_id):
 			continue
-		legado.append(
-			{
-				"tipo": "pospuesta",
-				"carta": String(carta_id),
-				"posposiciones": veces_pospuesta(estado, String(carta_id)),
-				"dia": 0,
-				"vuelta": 0,
-				"fase": "",
-				"legado": true,
-			}
+		(
+			legado
+			. append(
+				{
+					"tipo": "pospuesta",
+					"carta": String(carta_id),
+					"posposiciones": veces_pospuesta(estado, String(carta_id)),
+					"dia": 0,
+					"vuelta": 0,
+					"fase": "",
+					"legado": true,
+				}
+			)
 		)
 	return legado
 
@@ -228,9 +234,7 @@ func resolver(estado: Dictionary, carta_id: String, eje: String) -> Dictionary:
 	if not historias.has(carta_id):
 		historias[carta_id] = eje
 		estado["historias_cartas"] = historias
-		_registrar_historial(
-			estado, carta_id, "resuelta", eje, veces_pospuesta(estado, carta_id)
-		)
+		_registrar_historial(estado, carta_id, "resuelta", eje, veces_pospuesta(estado, carta_id))
 		_quitar_pospuesta(estado, carta_id)
 
 	return vista(estado, carta_id)
@@ -280,7 +284,9 @@ func _registrar_historial(
 	estado: Dictionary, carta_id: String, tipo: String, eleccion: String, conteo: int
 ) -> void:
 	var historial_crudo = estado.get(CLAVE_HISTORIAL, [])
-	var eventos: Array = historial_crudo.duplicate(true) if typeof(historial_crudo) == TYPE_ARRAY else []
+	var eventos: Array = (
+		historial_crudo.duplicate(true) if typeof(historial_crudo) == TYPE_ARRAY else []
+	)
 	var jornada = estado.get("jornada", {})
 	var contexto: Dictionary = jornada if typeof(jornada) == TYPE_DICTIONARY else {}
 	var evento := {
