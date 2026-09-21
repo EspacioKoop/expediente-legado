@@ -42,6 +42,13 @@ func _probar() -> void:
 	_comprobar(
 		calculadora.get_node_or_null("Entrada") is LineEdit, "la entrada es accesible por teclado"
 	)
+	_comprobar(
+		calculadora.get_node_or_null("Pantalla") is PanelContainer,
+		"la calculadora usa un display visual propio"
+	)
+	var teclado := calculadora.get_node_or_null("Teclado") as GridContainer
+	_comprobar(teclado != null, "la calculadora expone un teclado propio")
+	_comprobar(teclado != null and teclado.get_child_count() == 20, "el teclado ofrece veinte teclas")
 	calculadora.queue_free()
 
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
