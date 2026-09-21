@@ -30,8 +30,8 @@ class ComercioBarrio676FisicoTest(unittest.TestCase):
         self.assertNotIn("Espacio3D.construir", self.helper)
 
     def test_no_duplica_catalogo_ni_economia(self):
-        self.assertIn("ComercioBarrio.listar(", self.helper)
-        self.assertIn("ComercioBarrio.comprar(", self.helper)
+        self.assertRegex(self.helper, r"ComercioBarrio\s*\.\s*listar\s*\(")
+        self.assertRegex(self.helper, r"ComercioBarrio\s*\.\s*comprar\s*\(")
         self.assertNotIn("Jornada.gastar", self.helper)
         self.assertNotIn("const CATALOGO", self.helper)
         self.assertNotIn("precio_reventa", self.helper)
