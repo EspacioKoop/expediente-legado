@@ -55,10 +55,7 @@ func _ejecutar_cita(obra_id: String) -> void:
 			GestorMomentum.momentum_max,
 			GestorMomentum.momentum_actual + 10,
 		)
-	print(
-		"Citado %s, momentum restante: %s"
-		% [obra_id, GestorMomentum.momentum_actual]
-	)
+	print("Citado %s, momentum restante: %s" % [obra_id, GestorMomentum.momentum_actual])
 
 
 func _aplicar_cita_especial(_obra_id: String, efecto: String) -> void:
