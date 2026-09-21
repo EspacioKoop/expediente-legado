@@ -195,19 +195,25 @@ func _clave_conversacion_contextual(
 	if companero.nombre_visible != tr("COMPA_CUNADO"):
 		return clave_dialogo
 
-	var reaccion := DecisionIdeologicaExpediente.reaccion_para(
-		partida.estado,
-		DecisionIdeologicaExpediente.CASO_VERTICAL,
-		DecisionIdeologicaExpediente.ACTOR_CUNADO,
+	var reaccion := (
+		DecisionIdeologicaExpediente
+		. reaccion_para(
+			partida.estado,
+			DecisionIdeologicaExpediente.CASO_VERTICAL,
+			DecisionIdeologicaExpediente.ACTOR_CUNADO,
+		)
 	)
 	var clave_reaccion := String(REACCIONES_CUNADO_924.get(reaccion, ""))
 	if clave_reaccion.is_empty():
 		return clave_dialogo
 
-	if DecisionIdeologicaExpediente.registrar_lectura_social(
-		partida.estado,
-		DecisionIdeologicaExpediente.CASO_VERTICAL,
-		DecisionIdeologicaExpediente.ACTOR_CUNADO,
+	if (
+		DecisionIdeologicaExpediente
+		. registrar_lectura_social(
+			partida.estado,
+			DecisionIdeologicaExpediente.CASO_VERTICAL,
+			DecisionIdeologicaExpediente.ACTOR_CUNADO,
+		)
 	):
 		_guardar_o_avisar("")
 	return clave_reaccion
