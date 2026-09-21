@@ -61,6 +61,17 @@ func texto_accion() -> String:
 	return "Seguir viendo documental"
 
 
+## El mismo botón no representa siempre el mismo gesto. Potencia usa el switch
+## físico; navegar por el contenido usa el clic corto de pulsación. Se resuelve
+## antes de emitir `activado`, por el contrato común de Interactuable3D.
+func nombre_sonido() -> String:
+	if not sonido.is_empty():
+		return super.nombre_sonido()
+	if not _encendida or _documental_completado:
+		return "marcar"
+	return "pulsar"
+
+
 ## Punto público mínimo para accesorios domésticos como el mando IR.
 ## El mando conserva una única fuente de verdad para el estado visual, pero no
 ## avanza contenido: dejar la TV encendida de fondo no activa semillas.
