@@ -354,8 +354,14 @@ func _al_elegir_documento(indice: int) -> void:
 	# Si el guardado falla, el documento se enseña IGUAL: la acción ya está
 	# gastada y cobrarla sin dar nada a cambio sería el peor de los dos males.
 	# Lo que no se borra es el aviso, que es lo que queda por arreglar.
+	#
+	# #959: abrir físicamente el mismo folio acumula una huella material separada
+	# del progreso. También una relectura desgasta el papel, por eso esa ruta pasa
+	# a guardar aunque no consuma acción ni añada otra entrada a leido_hoy.
+	var huella_mutada := _registrar_huella_lectura(registro)
 	if not ya_visto:
 		Jornada.anotar_lectura(jornada, registro["folio"])
+	if not ya_visto or huella_mutada:
 		_guardar_o_avisar()
 
 	# La primera lectura del día suena a papel, también si es gratuita.
@@ -381,8 +387,39 @@ func _mostrar_registro(registro: Dictionary) -> void:
 	)
 
 	var pistas := contenido.pistas_de_registro(caso, registro["id"])
+	_documento.add_theme_stylebox_override(
+		"normal", _caja_hundida(_color_papel_documento(registro))
+	)
 	_documento.text = BBCode.render(Marcas.de_registro(registro, pistas, descubiertas))
 	_refrescar_estado()
+
+
+## Una huella usa ids de dominio ya estables; no serializa nodos ni coordenadas.
+## La intensidad pertenece a HuellasAmbientales y la UI solo la interpreta.
+func _registrar_huella_lectura(registro: Dictionary) -> bool:
+	var huella := (
+		HuellasAmbientales
+		. registrar(
+			partida.estado,
+			_id_huella_documento(registro),
+			"lectura",
+			"archivo",
+		)
+	)
+	return not huella.is_empty()
+
+
+func _id_huella_documento(registro: Dictionary) -> String:
+	return "archivo:documento:%s:%s" % [String(caso.get("id", "")), String(registro.get("id", ""))]
+
+
+## El desgaste es deliberadamente leve: incluso al tope del contrato de #959
+## el fondo solo se desplaza alrededor de un 12 % hacia papel envejecido.
+func _color_papel_documento(registro: Dictionary) -> Color:
+	var intensidad := HuellasAmbientales.intensidad_de(
+		partida.estado, _id_huella_documento(registro)
+	)
+	return EstiloSiga.BLANCO.lerp(Color(0.88, 0.84, 0.72), intensidad * 0.22)
 
 
 func _al_pulsar_marca(meta: Variant) -> void:
