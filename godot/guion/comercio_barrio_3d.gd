@@ -15,7 +15,7 @@ const TEX_TRASTERO: Texture2D = preload(
 )
 
 const POS_QUIOSCO := Vector3(4.95, 0.0, 3.75)
-const POS_TRASTERO := Vector3(-5.05, 0.0, 7.10)
+const POS_TRASTERO := Vector3(-5.05, 0.0, 11.15)
 
 const COLOR_MADERA := Color(0.34, 0.25, 0.18)
 const COLOR_METAL := Color(0.17, 0.18, 0.19)
