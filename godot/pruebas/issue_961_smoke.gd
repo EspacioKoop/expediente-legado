@@ -65,12 +65,15 @@ func _probar_ecos_oniricos() -> void:
 		return
 	var mundo := Node3D.new()
 	root.add_child(mundo)
-	var ecos := SuenoAtencionDocumental.montar(
-		mundo,
-		String(ids[0]),
-		4,
-		961,
-		["fecha", "relacion", "fecha"],
+	var ecos := (
+		SuenoAtencionDocumental
+		. montar(
+			mundo,
+			String(ids[0]),
+			4,
+			961,
+			["fecha", "relacion", "fecha"],
+		)
 	)
 	_comprobar(ecos.size(), 2, "como máximo dos motivos visten una sala")
 	for eco in ecos:
