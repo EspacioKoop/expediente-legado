@@ -1,0 +1,219 @@
+{
+  "_schema": 1,
+  "_fuente": "Proyección runtime del corpus de docs/research/mythology añadido por PR #1153.",
+  "_criterio": "Los ejes de tradición son la media aritmética de entradas ACP con spectralCoordinates. No equivalen a una descripción total de la tradición ni sustituyen fuentes culturales.",
+  "ejes": [
+    "order-chaos",
+    "creation-destruction",
+    "light-shadow",
+    "active-receptive",
+    "individual-collective",
+    "ascent-descent",
+    "stasis-transformation",
+    "voluntary-fated"
+  ],
+  "tradiciones": {
+    "mesopotamian": {
+      "archivo": "docs/research/mythology/archetypes/mesopotamian/ME_PANTHEON.jsonld",
+      "muestra_acp": 13,
+      "ejes_medios": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.4731,
+        "light-shadow": 0.4385,
+        "active-receptive": 0.3769,
+        "individual-collective": 0.4615,
+        "ascent-descent": 0.5115,
+        "stasis-transformation": 0.5115,
+        "voluntary-fated": 0.5154
+      }
+    },
+    "greek": {
+      "archivo": "docs/research/mythology/archetypes/greek/GR_OLYMPIANS.jsonld",
+      "muestra_acp": 22,
+      "ejes_medios": {
+        "order-chaos": 0.3705,
+        "creation-destruction": 0.4295,
+        "light-shadow": 0.4091,
+        "active-receptive": 0.4023,
+        "individual-collective": 0.5114,
+        "ascent-descent": 0.4682,
+        "stasis-transformation": 0.5023,
+        "voluntary-fated": 0.4545
+      }
+    },
+    "japanese": {
+      "archivo": "docs/research/mythology/archetypes/japanese/JP_KAMI.jsonld",
+      "muestra_acp": 17,
+      "ejes_medios": {
+        "order-chaos": 0.3912,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.4235,
+        "active-receptive": 0.3824,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.4765,
+        "stasis-transformation": 0.5294,
+        "voluntary-fated": 0.4706
+      }
+    },
+    "egyptian": {
+      "archivo": "docs/research/mythology/archetypes/egyptian/EG_NETJERU.jsonld",
+      "muestra_acp": 17,
+      "ejes_medios": {
+        "order-chaos": 0.3753,
+        "creation-destruction": 0.4559,
+        "light-shadow": 0.4294,
+        "active-receptive": 0.4118,
+        "individual-collective": 0.4235,
+        "ascent-descent": 0.5147,
+        "stasis-transformation": 0.5088,
+        "voluntary-fated": 0.5
+      }
+    },
+    "persian": {
+      "archivo": "docs/research/mythology/archetypes/persian/PE_PANTHEON.jsonld",
+      "muestra_acp": 18,
+      "ejes_medios": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.3444,
+        "light-shadow": 0.2639,
+        "active-receptive": 0.3972,
+        "individual-collective": 0.575,
+        "ascent-descent": 0.325,
+        "stasis-transformation": 0.4278,
+        "voluntary-fated": 0.4083
+      }
+    },
+    "norse": {
+      "archivo": "docs/research/mythology/archetypes/norse/NO_AESIR_VANIR.jsonld",
+      "muestra_acp": 12,
+      "ejes_medios": {
+        "order-chaos": 0.4292,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.4292,
+        "active-receptive": 0.4083,
+        "individual-collective": 0.5667,
+        "ascent-descent": 0.4917,
+        "stasis-transformation": 0.5292,
+        "voluntary-fated": 0.5958
+      }
+    },
+    "celtic": {
+      "archivo": "docs/research/mythology/archetypes/celtic/CE_PANTHEON.jsonld",
+      "muestra_acp": 13,
+      "ejes_medios": {
+        "order-chaos": 0.4231,
+        "creation-destruction": 0.4769,
+        "light-shadow": 0.4308,
+        "active-receptive": 0.3808,
+        "individual-collective": 0.4692,
+        "ascent-descent": 0.5038,
+        "stasis-transformation": 0.5231,
+        "voluntary-fated": 0.5385
+      }
+    },
+    "slavic": {
+      "archivo": "docs/research/mythology/archetypes/slavic/SL_PANTHEON.jsonld",
+      "muestra_acp": 16,
+      "ejes_medios": {
+        "order-chaos": 0.3781,
+        "creation-destruction": 0.4188,
+        "light-shadow": 0.4094,
+        "active-receptive": 0.4313,
+        "individual-collective": 0.4125,
+        "ascent-descent": 0.475,
+        "stasis-transformation": 0.5031,
+        "voluntary-fated": 0.5156
+      }
+    },
+    "polynesian": {
+      "archivo": "docs/research/mythology/archetypes/polynesian/PL_PANTHEON.jsonld",
+      "muestra_acp": 17,
+      "ejes_medios": {
+        "order-chaos": 0.4147,
+        "creation-destruction": 0.4265,
+        "light-shadow": 0.4088,
+        "active-receptive": 0.4,
+        "individual-collective": 0.3853,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.5206,
+        "voluntary-fated": 0.4794
+      }
+    },
+    "mesoamerican": {
+      "archivo": "docs/research/mythology/archetypes/mesoamerican/MA_PANTHEON.jsonld",
+      "muestra_acp": 17,
+      "ejes_medios": {
+        "order-chaos": 0.3941,
+        "creation-destruction": 0.4912,
+        "light-shadow": 0.4794,
+        "active-receptive": 0.4382,
+        "individual-collective": 0.3353,
+        "ascent-descent": 0.5059,
+        "stasis-transformation": 0.5853,
+        "voluntary-fated": 0.5765
+      }
+    }
+  },
+  "familias": {
+    "gilgamesh": {
+      "tradicion": "mesopotamian",
+      "acp_directo": "arch:ME-GILGAMESH"
+    },
+    "minotauro": {
+      "tradicion": "greek",
+      "acp_directo": ""
+    },
+    "aquiles": {
+      "tradicion": "greek",
+      "acp_directo": ""
+    },
+    "hidra": {
+      "tradicion": "greek",
+      "acp_directo": ""
+    },
+    "dragon_japones": {
+      "tradicion": "japanese",
+      "acp_directo": ""
+    },
+    "duat": {
+      "tradicion": "egyptian",
+      "acp_directo": "",
+      "acp_relacionados": ["arch:EG-ANUBIS", "arch:EG-OSIRIS"]
+    },
+    "simurgh": {
+      "tradicion": "persian",
+      "acp_directo": ""
+    },
+    "yggdrasil": {
+      "tradicion": "norse",
+      "acp_directo": "",
+      "acp_relacionados": ["arch:NO-ODIN"]
+    },
+    "tir_na_nog": {
+      "tradicion": "celtic",
+      "acp_directo": ""
+    },
+    "mari": {
+      "tradicion": "basque",
+      "acp_directo": "",
+      "sin_perfil_acp": "La tradición vasca no está incluida en el corpus ACP de #1153."
+    },
+    "baba_yaga": {
+      "tradicion": "slavic",
+      "acp_directo": "arch:SL-BABA-YAGA"
+    },
+    "anansi_akan": {
+      "tradicion": "akan",
+      "acp_directo": "",
+      "sin_perfil_acp": "El archivo africano de #1153 modela Orishas yoruba; no se reutiliza como perfil Akan."
+    },
+    "maui_tamanuitera": {
+      "tradicion": "polynesian",
+      "acp_directo": "arch:PL-MAUI"
+    },
+    "popol_wuj": {
+      "tradicion": "mesoamerican",
+      "acp_directo": "arch:MA-HERO-TWINS"
+    }
+  }
+}
