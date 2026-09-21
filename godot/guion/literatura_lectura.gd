@@ -42,35 +42,41 @@ static func registrar_interaccion(
 	var id := String(obra["id"])
 	var etiquetas: Array = obra.get("generos", []).duplicate()
 
-	var conocimiento := LiteraturaEventos.crear_evento(
-		"conocimiento:obra:%s" % id,
-		LiteraturaEventos.CANAL_CONOCIMIENTO,
-		id,
-		fuente,
-		String(obra.get("fuente_documental", "")),
-		jornada,
-		etiquetas,
-		{
-			"titulo": String(obra.get("titulo", "")),
-			"autor": String(obra.get("autor", "")),
-			"epoca": String(obra.get("epoca", "")),
-		}
+	var conocimiento := (
+		LiteraturaEventos
+		. crear_evento(
+			"conocimiento:obra:%s" % id,
+			LiteraturaEventos.CANAL_CONOCIMIENTO,
+			id,
+			fuente,
+			String(obra.get("fuente_documental", "")),
+			jornada,
+			etiquetas,
+			{
+				"titulo": String(obra.get("titulo", "")),
+				"autor": String(obra.get("autor", "")),
+				"epoca": String(obra.get("epoca", "")),
+			}
+		)
 	)
 	resultado["conocimiento_nuevo"] = LiteraturaEventos.registrar(registro, conocimiento)
 
 	var efecto: Dictionary = obra.get("efecto_juego", {})
-	var insight := LiteraturaEventos.crear_evento(
-		"insight:obra:%s:%s" % [id, String(lectura["insight_id"])],
-		LiteraturaEventos.CANAL_INSIGHT,
-		id,
-		fuente,
-		String(obra.get("fuente_documental", "")),
-		jornada,
-		[String(lectura["insight_id"])],
-		{
-			"insight_id": String(lectura["insight_id"]),
-			"efecto_declarado": efecto.duplicate(true),
-		}
+	var insight := (
+		LiteraturaEventos
+		. crear_evento(
+			"insight:obra:%s:%s" % [id, String(lectura["insight_id"])],
+			LiteraturaEventos.CANAL_INSIGHT,
+			id,
+			fuente,
+			String(obra.get("fuente_documental", "")),
+			jornada,
+			[String(lectura["insight_id"])],
+			{
+				"insight_id": String(lectura["insight_id"]),
+				"efecto_declarado": efecto.duplicate(true),
+			}
+		)
 	)
 	resultado["insight_nuevo"] = LiteraturaEventos.registrar(registro, insight)
 
