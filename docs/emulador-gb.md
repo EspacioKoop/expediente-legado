@@ -143,7 +143,7 @@ o juegos reales y no inventa semántica de protocolo.
 
 El primer corte de impresión mantiene el periférico fuera del núcleo y de la campaña:
 
-- `ImpresoraTermicaPortatil` implementa una cola local con estados apagada, lista,
+- `ImpresoraTermicaPortatil` implementa una cola FIFO local con estados apagada, lista,
   imprimiendo y papel disponible;
 - la entrada estable es una `Image` o un framebuffer RGBA entregado explícitamente por
   Godot; este corte no implementa el protocolo de una impresora comercial ni afirma
