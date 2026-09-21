@@ -52,7 +52,9 @@ static func _historial_acumulativo(comprobar: Callable) -> void:
 	comprobar.call("el último evento es la decisión", diario[-1]["tipo"], "resuelta")
 	comprobar.call("el diario conserva el día", diario[-1]["dia"], 4)
 	comprobar.call("el diario conserva la vuelta", diario[-1]["vuelta"], 2)
-	comprobar.call("resolver limpia la marca pendiente", historias.esta_pospuesta(estado, "la-justicia"), false)
+	comprobar.call(
+		"resolver limpia la marca pendiente", historias.esta_pospuesta(estado, "la-justicia"), false
+	)
 
 
 static func _contexto_narrativo(comprobar: Callable) -> void:
