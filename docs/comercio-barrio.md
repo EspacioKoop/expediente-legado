@@ -70,6 +70,25 @@ Este PR es **standalone first** y no modifica:
 - precios/calibración global fuera de los importes pequeños del primer catálogo;
 - la UI de inventario: sigue siendo de consulta y no vende a distancia.
 
+## Quiosco Avenida y El Trastero físicos — 2026-09-21
+
+El segundo corte físico completa la presencia en calle de las otras dos
+superficies del contrato:
+
+- **Quiosco Avenida** se materializa como puesto de fachada, con señalética
+  propia y los cuatro productos que devuelve `ComercioBarrio.listar("quiosco")`.
+  Las tres publicaciones reutilizan `PublicacionFisica3D`; el paquete de
+  consumo sigue sin marca ficticia adicional ni utilidad mecánica.
+- **El Trastero** expone la lámpara y el marco de segunda mano devueltos por el
+  catálogo real. Comprar la lámpara sigue pasando por `ComercioBarrio.comprar`
+  y termina en `Inventario.HOME_STORAGE`, por lo que #96 puede materializarla
+  después en casa.
+
+La capa `ComercioBarrio3D` no contiene precios ni una copia del catálogo:
+deriva nombres, importes y estado comprado desde `ComercioBarrio`. Tampoco
+activa #442 al pagar una publicación; la activación cultural continúa exigiendo
+lectura/interacción posterior.
+
 ## Bit 98: identidad visual integrada — 2026-09-21
 
 Bit 98 ya no depende solo de cajas coloreadas para leerse como tienda. La capa
