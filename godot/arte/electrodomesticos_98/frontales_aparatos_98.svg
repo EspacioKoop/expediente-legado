@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <title>Frontales gráficos de electrodomésticos genéricos de finales de los 90</title>
+  <desc>Asset original sin marcas ni texto. Fondo transparente. Cada frontal está aislado en un grupo con id.</desc>
+  <defs>
+    <linearGradient id="plasticoBeige" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d7d0bd"/>
+      <stop offset="1" stop-color="#aaa494"/>
+    </linearGradient>
+    <linearGradient id="plasticoGris" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#787b78"/>
+      <stop offset="1" stop-color="#505451"/>
+    </linearGradient>
+    <radialGradient id="crtVidrio">
+      <stop offset="0" stop-color="#334449"/>
+      <stop offset=".72" stop-color="#182428"/>
+      <stop offset="1" stop-color="#0e1518"/>
+    </radialGradient>
+  </defs>
+
+  <g id="crt_14_beige" transform="translate(45 45)">
+    <rect width="330" height="245" rx="28" fill="url(#plasticoBeige)" stroke="#494842" stroke-width="8"/>
+    <rect x="26" y="26" width="238" height="174" rx="30" fill="#20282a" stroke="#5e605b" stroke-width="8"/>
+    <rect x="42" y="42" width="206" height="142" rx="24" fill="url(#crtVidrio)"/>
+    <circle cx="292" cy="58" r="18" fill="#5c5d55" stroke="#33342f" stroke-width="5"/>
+    <circle cx="292" cy="108" r="14" fill="#5c5d55" stroke="#33342f" stroke-width="5"/>
+    <rect x="280" y="144" width="24" height="10" rx="3" fill="#34352f"/>
+    <rect x="280" y="164" width="24" height="10" rx="3" fill="#34352f"/>
+    <g fill="#67695f">
+      <rect x="35" y="215" width="20" height="7"/><rect x="61" y="215" width="20" height="7"/><rect x="87" y="215" width="20" height="7"/>
+      <rect x="113" y="215" width="20" height="7"/><rect x="139" y="215" width="20" height="7"/><rect x="165" y="215" width="20" height="7"/>
+    </g>
+  </g>
+
+  <g id="crt_21_gris" transform="translate(430 45)">
+    <rect width="360" height="255" rx="22" fill="url(#plasticoGris)" stroke="#2f3332" stroke-width="8"/>
+    <rect x="24" y="22" width="270" height="184" rx="28" fill="#20282a" stroke="#696b68" stroke-width="7"/>
+    <rect x="40" y="38" width="238" height="152" rx="22" fill="url(#crtVidrio)"/>
+    <rect x="307" y="38" width="30" height="104" rx="8" fill="#3c403e"/>
+    <circle cx="322" cy="55" r="8" fill="#c77a3f"/>
+    <circle cx="322" cy="83" r="8" fill="#646963"/>
+    <circle cx="322" cy="111" r="8" fill="#646963"/>
+    <circle cx="322" cy="176" r="19" fill="#3a3e3c" stroke="#8a8c86" stroke-width="4"/>
+    <g fill="#404543">
+      <rect x="36" y="220" width="30" height="8"/><rect x="74" y="220" width="30" height="8"/><rect x="112" y="220" width="30" height="8"/>
+      <rect x="150" y="220" width="30" height="8"/><rect x="188" y="220" width="30" height="8"/><rect x="226" y="220" width="30" height="8"/>
+    </g>
+  </g>
+
+  <g id="lavadora_panel_a" transform="translate(45 360)">
+    <rect width="330" height="285" rx="18" fill="#dadbd6" stroke="#555851" stroke-width="8"/>
+    <rect x="20" y="20" width="290" height="72" rx="8" fill="#c8c9c4"/>
+    <circle cx="70" cy="56" r="24" fill="#5a5e59" stroke="#2f322f" stroke-width="5"/>
+    <circle cx="140" cy="56" r="18" fill="#81857f" stroke="#40433f" stroke-width="4"/>
+    <circle cx="195" cy="56" r="18" fill="#81857f" stroke="#40433f" stroke-width="4"/>
+    <circle cx="250" cy="56" r="8" fill="#b34f3e"/>
+    <circle cx="165" cy="184" r="78" fill="#6f7777" stroke="#393f3f" stroke-width="10"/>
+    <circle cx="165" cy="184" r="58" fill="#1c292d"/>
+    <path d="M125 179c22-34 63-41 89-12-8 42-34 62-79 57-12-13-16-28-10-45z" fill="#71898f" opacity=".62"/>
+    <rect x="24" y="254" width="282" height="10" rx="4" fill="#b5b7b1"/>
+  </g>
+
+  <g id="lavadora_panel_b" transform="translate(430 360)">
+    <rect width="330" height="285" rx="18" fill="#bfc1be" stroke="#4a4d49" stroke-width="8"/>
+    <rect x="18" y="18" width="294" height="78" rx="10" fill="#858985"/>
+    <circle cx="64" cy="57" r="22" fill="#d4d5cf" stroke="#484b48" stroke-width="4"/>
+    <circle cx="126" cy="57" r="16" fill="#d4d5cf" stroke="#484b48" stroke-width="4"/>
+    <rect x="176" y="38" width="84" height="38" rx="6" fill="#222a2c"/>
+    <circle cx="282" cy="57" r="8" fill="#d19a45"/>
+    <circle cx="165" cy="185" r="80" fill="#575f60" stroke="#323738" stroke-width="10"/>
+    <circle cx="165" cy="185" r="58" fill="#182326"/>
+    <path d="M125 177c24-32 69-35 93-4-11 37-39 57-80 50-13-12-17-28-13-46z" fill="#87999c" opacity=".55"/>
+  </g>
+
+  <g id="frigorifico_dos_puertas" transform="translate(835 45)">
+    <rect width="280" height="600" rx="18" fill="#d5d5cf" stroke="#575a55" stroke-width="8"/>
+    <rect x="10" y="12" width="260" height="176" rx="12" fill="#c9cac4"/>
+    <rect x="10" y="202" width="260" height="384" rx="12" fill="#d9dad4"/>
+    <rect x="226" y="40" width="18" height="120" rx="8" fill="#73766f"/>
+    <rect x="226" y="245" width="18" height="210" rx="8" fill="#73766f"/>
+    <rect x="38" y="64" width="120" height="18" rx="6" fill="#b4b6af"/>
+    <g fill="#9fa19a">
+      <rect x="40" y="534" width="26" height="8"/><rect x="72" y="534" width="26" height="8"/><rect x="104" y="534" width="26" height="8"/>
+      <rect x="136" y="534" width="26" height="8"/><rect x="168" y="534" width="26" height="8"/>
+    </g>
+  </g>
+
+  <g id="mando_crt" transform="translate(55 710)">
+    <rect width="165" height="130" rx="26" fill="#555b58" stroke="#292d2c" stroke-width="7"/>
+    <circle cx="82" cy="28" r="10" fill="#bd4a3d"/>
+    <circle cx="45" cy="64" r="12" fill="#8d918c"/>
+    <circle cx="82" cy="64" r="12" fill="#8d918c"/>
+    <circle cx="119" cy="64" r="12" fill="#8d918c"/>
+    <rect x="38" y="94" width="88" height="14" rx="7" fill="#303534"/>
+  </g>
+
+  <g id="panel_minicadena" transform="translate(300 700)">
+    <rect width="435" height="150" rx="18" fill="#363d3f" stroke="#1d2224" stroke-width="8"/>
+    <circle cx="70" cy="76" r="42" fill="#171d1f" stroke="#667074" stroke-width="6"/>
+    <circle cx="365" cy="76" r="42" fill="#171d1f" stroke="#667074" stroke-width="6"/>
+    <rect x="130" y="28" width="176" height="46" rx="6" fill="#182326"/>
+    <rect x="145" y="40" width="62" height="8" rx="4" fill="#c48b46"/>
+    <rect x="130" y="92" width="176" height="34" rx="6" fill="#555e60"/>
+    <circle cx="156" cy="109" r="8" fill="#262c2e"/><circle cx="190" cy="109" r="8" fill="#262c2e"/>
+    <circle cx="224" cy="109" r="8" fill="#262c2e"/><circle cx="258" cy="109" r="8" fill="#262c2e"/>
+  </g>
+</svg>
