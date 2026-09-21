@@ -26,11 +26,7 @@ static func registrar(
 ) -> bool:
 	var id := documento_id.strip_edges()
 	var motivo_limpio := motivo.strip_edges()
-	if (
-		id.is_empty()
-		or not EVENTOS_VALIDOS.has(evento)
-		or not MOTIVOS_VALIDOS.has(motivo_limpio)
-	):
+	if id.is_empty() or not EVENTOS_VALIDOS.has(evento) or not MOTIVOS_VALIDOS.has(motivo_limpio):
 		return false
 
 	var estado := _normalizar_dia(jornada)
