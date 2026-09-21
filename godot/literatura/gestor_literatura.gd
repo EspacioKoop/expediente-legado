@@ -1,0 +1,80 @@
+extends Node
+# Autoload: GestorLiteratura
+signal obra_conocida(obra_id)
+signal autor_descubierto(autor_id)
+var obras_conocidas: Array = []
+var autores_conocidos: Array = []
+var insight_total: int = 0
+var momentum_bonus: float = 0.0
+
+func _ready() -> void:
+    var f = FileAccess.open("res://datos/literatura/obras.json", FileAccess.READ)
+    if f:
+        var data = JSON.parse_string(f.get_as_text())
+        if data.error == OK:
+            self.obras = data.obras
+            self.autores = data.autores
+        f.close()
+
+func conocer_obra(obra_id: String) -> bool:
+    if obra_id in obras_conocidas:
+        return False
+    obras_conocidas.append(obra_id)
+    var efecto = _obtener_efecto_obra(obra_id)
+    if efecto.has("bonus_insight"):
+        self.insight_total += int(efecto.bonus_insight)
+    if efecto.has("bonus_momentum"):
+        self.momentum_bonus += float(efecto.momentum_bonus)
+        GestorMomentum.momentum_actual = min(GestorMomentum.momentum_max, GestorMomentum.momentum_actual + efecto.bonus_momentum)
+    if efecto.has("efecto_especial"):
+        _aplicar_efecto_especial(obra_id, efecto.efecto_especial)
+    # auto-descubrir autor
+    var autor_id = _obtener_autor_obra(obra_id)
+    if autor_id and autor_id not in autores_conocidos:
+        autores_conocidos.append(autor_id)
+        autor_descubierto.emit(autor_id)
+    obra_conocida.emit(obra_id)
+    return True
+
+func obtener_insight_total() -> int:
+    return self.insight_total
+
+func obtener_momentum_bonus() -> float:
+    return self.momentum_bonus
+
+func _obtener_efecto_obra(obra_id: String) -> Dictionary:
+    var file = FileAccess.open("res://datos/literatura/obras.json", FileAccess.READ)
+    if file:
+        var data = JSON.parse_string(file.get_as_text())
+        if data.error == OK:
+            for o in data.obras:
+                if o.id == obra_id:
+                    file.close()
+                    return o.efecto
+        file.close()
+    return {}
+
+func _obtener_autor_obra(obra_id: String) -> String:
+    var file = FileAccess.open("res://datos/literatura/obras.json", FileAccess.READ)
+    if file:
+        var data = JSON.parse_string(file.get_as_text())
+        if data.error == OK:
+            for o in data.obras:
+                if o.id == obra_id:
+                    file.close()
+                    return o.autor
+        file.close()
+    return ""
+
+func _aplicar_efecto_especial(obra_id: String, efecto: String) -> void:
+    match efecto:
+        "revelacion":
+            # desbloquea dialogos internos en el arquetipo Persona
+            if GestorArquetipos.obtener_arquetipo("persona")?.desbloqueado:
+                GestorArquetipos.ganar_insight(20)
+        "transformacion":
+            # efecto visual de metamorfosis temporal
+            pass
+        "no_linealidad":
+            # permite leer obras en cualquier orden sin penalizacion
+            pass
