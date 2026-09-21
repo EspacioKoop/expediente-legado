@@ -84,6 +84,26 @@ func _probar() -> void:
 		trastero.get_node_or_null("RotuloElTrastero") != null,
 		"El Trastero tiene rotulo propio",
 	)
+	var texto_quiosco := quiosco.get_node_or_null("TextoQuioscoAvenida") as Label3D
+	var rotulo_texto_trastero := trastero.get_node_or_null("TextoElTrastero") as Label3D
+	_comprobar(
+		texto_quiosco != null and texto_quiosco.text == "QUIOSCO AVENIDA",
+		"el quiosco conserva nombre legible en runtime",
+	)
+	_comprobar(
+		rotulo_texto_trastero != null and rotulo_texto_trastero.text == "EL TRASTERO",
+		"la segunda mano conserva nombre legible en runtime",
+	)
+	var atrezzo_trastero := trastero.get_node_or_null("AtrezzoTrastero") as Node3D
+	_comprobar(atrezzo_trastero != null, "El Trastero tiene atrezzo de segunda mano")
+	if atrezzo_trastero != null:
+		_comprobar(
+			(
+				atrezzo_trastero.get_node_or_null("RadioUsada") != null
+				and atrezzo_trastero.get_node_or_null("TelefonoUsadoBase") != null
+			),
+			"el atrezzo diferencia segunda mano sin ampliar el catalogo",
+		)
 	var ticket_quiosco := quiosco.get_node_or_null("TicketTransaccion") as Node3D
 	var ticket_trastero := trastero.get_node_or_null("TicketTransaccion") as Node3D
 	_comprobar(

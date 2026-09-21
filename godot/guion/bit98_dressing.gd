@@ -54,6 +54,26 @@ static func _montar_fachada(fachada: Node3D) -> void:
 		Vector2(3.45, 0.86),
 		-90.0,
 	)
+	_texto_cartel(
+		grupo,
+		"TextoRotuloBit98Exterior",
+		"BIT 98",
+		Vector3(5.28, 2.76, -6.68),
+		-90.0,
+		Color(0.95, 0.92, 0.84),
+		64,
+		0.0062,
+	)
+	_texto_cartel(
+		grupo,
+		"SubtituloBit98Exterior",
+		"VIDEOJUEGOS · CONSOLAS · PC",
+		Vector3(5.28, 2.47, -6.68),
+		-90.0,
+		Color(0.86, 0.76, 0.48),
+		28,
+		0.0026,
+	)
 	_lamina(
 		grupo,
 		"CartelNovedadesExterior",
@@ -62,6 +82,16 @@ static func _montar_fachada(fachada: Node3D) -> void:
 		Vector2(0.62, 0.80),
 		-90.0,
 	)
+	_texto_cartel(
+		grupo,
+		"TextoNovedadesExterior",
+		"NOVEDADES",
+		Vector3(5.27, 1.62, -7.98),
+		-90.0,
+		Color(0.94, 0.91, 0.84),
+		28,
+		0.0019,
+	)
 	_lamina(
 		grupo,
 		"CartelSegundaManoExterior",
@@ -69,6 +99,16 @@ static func _montar_fachada(fachada: Node3D) -> void:
 		Vector3(5.33, 1.56, -6.32),
 		Vector2(0.82, 0.61),
 		-90.0,
+	)
+	_texto_cartel(
+		grupo,
+		"TextoSegundaManoExterior",
+		"2ª MANO",
+		Vector3(5.27, 1.58, -6.32),
+		-90.0,
+		Color(0.18, 0.16, 0.13),
+		30,
+		0.0022,
 	)
 
 
@@ -85,6 +125,16 @@ static func _montar_interior(interior: Node3D) -> void:
 		Vector2(3.55, 0.88),
 		0.0,
 	)
+	_texto_cartel(
+		grupo,
+		"TextoRotuloBit98Interior",
+		"BIT 98",
+		Vector3(0.0, 2.51, -3.87),
+		0.0,
+		Color(0.95, 0.92, 0.84),
+		70,
+		0.0062,
+	)
 	_lamina(
 		grupo,
 		"CartelJuegaInterior",
@@ -92,6 +142,16 @@ static func _montar_interior(interior: Node3D) -> void:
 		Vector3(-2.20, 1.48, -3.92),
 		Vector2(0.88, 1.17),
 		0.0,
+	)
+	_texto_cartel(
+		grupo,
+		"TextoJuegaInterior",
+		"JUEGA\nEXPLORA\nCOLECCIONA",
+		Vector3(-2.20, 1.48, -3.86),
+		0.0,
+		Color(0.94, 0.91, 0.84),
+		36,
+		0.0040,
 	)
 	_lamina(
 		grupo,
@@ -101,6 +161,36 @@ static func _montar_interior(interior: Node3D) -> void:
 		Vector2(1.12, 0.83),
 		0.0,
 	)
+	_texto_cartel(
+		grupo,
+		"TextoSegundaManoInterior",
+		"SEGUNDA\nMANO",
+		Vector3(2.15, 1.56, -3.86),
+		0.0,
+		Color(0.18, 0.16, 0.13),
+		36,
+		0.0040,
+	)
+
+	_texto_cartel(
+		grupo,
+		"TextoNovedadesInterior",
+		"NOVEDADES",
+		Vector3(0.0, 1.94, -3.86),
+		0.0,
+		Color(0.86, 0.76, 0.48),
+		34,
+		0.0030,
+	)
+	for indice in PORTADAS.size():
+		_lamina_alto(
+			grupo,
+			"PortadaDestacada_%d" % indice,
+			PORTADAS[indice],
+			Vector3(-1.08 + float(indice) * 1.08, 1.47, -3.84),
+			0.72,
+			0.0,
+		)
 
 	var expositor := Node3D.new()
 	expositor.name = "ExpositorPortadasPropias"
@@ -118,6 +208,35 @@ static func _montar_interior(interior: Node3D) -> void:
 				0.72,
 				giro,
 			)
+
+
+static func _texto_cartel(
+	padre: Node3D,
+	nombre: String,
+	texto: String,
+	pos: Vector3,
+	giro_y: float,
+	color: Color,
+	tamano: int,
+	pixel: float,
+) -> Label3D:
+	var etiqueta := Label3D.new()
+	etiqueta.name = nombre
+	etiqueta.text = texto
+	etiqueta.position = pos
+	etiqueta.rotation_degrees.y = giro_y
+	etiqueta.font = EstiloSiga.fuente_mono()
+	etiqueta.font_size = tamano
+	etiqueta.pixel_size = pixel
+	etiqueta.modulate = color
+	etiqueta.outline_size = 6
+	etiqueta.outline_modulate = Color(0.03, 0.03, 0.04)
+	etiqueta.shaded = false
+	etiqueta.double_sided = true
+	etiqueta.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	etiqueta.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	padre.add_child(etiqueta)
+	return etiqueta
 
 
 static func _lamina_alto(
