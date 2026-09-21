@@ -2,7 +2,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CAPA = ROOT / "godot" / "guion" / "visor_metadatos_app.gd"
-METICULOSIDAD = ROOT / "godot" / "guion" / "visor_meticulosidad_app.gd"
 ANEXOS = ROOT / "godot" / "guion" / "visor_anexos_app.gd"
 PRONOSTICOS = ROOT / "godot" / "guion" / "visor_pronosticos_app.gd"
 ESCENA = ROOT / "godot" / "escenas" / "visor.tscn"
@@ -15,13 +14,11 @@ def fuente() -> str:
 def test_la_escena_activa_la_capa_sobre_anotaciones() -> None:
     texto = fuente()
     escena = ESCENA.read_text(encoding="utf-8")
-    meticulosidad = METICULOSIDAD.read_text(encoding="utf-8")
     anexos = ANEXOS.read_text(encoding="utf-8")
     pronosticos = PRONOSTICOS.read_text(encoding="utf-8")
     assert 'res://guion/visor_pronosticos_app.gd' in escena
     assert 'extends "res://guion/visor_anexos_app.gd"' in pronosticos
-    assert 'extends "res://guion/visor_meticulosidad_app.gd"' in anexos
-    assert 'extends "res://guion/visor_metadatos_app.gd"' in meticulosidad
+    assert 'extends "res://guion/visor_metadatos_app.gd"' in anexos
     assert 'extends "res://guion/visor_anotaciones_app.gd"' in texto
 
 
