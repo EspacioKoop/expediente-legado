@@ -134,7 +134,7 @@ func _init() -> void:
 		_fallar("La publicación no pudo pasar a home_storage")
 		return
 
-	if not await _esperar_nodo(dia, "AcumulacionCasa"):
+	if not await _esperar_nodo(dia, "AcumulacionCasa", true):
 		_fallar("La casa no refrescó AcumulacionCasa")
 		return
 	for _i in FRAMES_ESTABILIZACION:
