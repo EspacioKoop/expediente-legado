@@ -47,12 +47,15 @@ func _process(_delta: float) -> void:
 			cartas_recogidas,
 		)
 	)
-	SuenoAtencionDocumental.montar(
-		mundo,
-		String(escenas[0]),
-		int(dia.jornada.get("dia", 1)),
-		dia._raiz(),
-		Meticulosidad.motivos_oniricos(dia.jornada),
+	(
+		SuenoAtencionDocumental
+		. montar(
+			mundo,
+			String(escenas[0]),
+			int(dia.jornada.get("dia", 1)),
+			dia._raiz(),
+			Meticulosidad.motivos_oniricos(dia.jornada),
+		)
 	)
 
 	var opciones: Dictionary = dia._opciones_sueno()
