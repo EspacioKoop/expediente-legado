@@ -13,11 +13,12 @@ func puede_desbloquear(nodo_id: String) -> bool:
 	var nodo: Dictionary = nodos[nodo_id]
 	var requisitos: Dictionary = nodo.get("requisitos", {})
 
-	if (
-		requisitos.has("insight")
-		and GestorArquetipos.insight_total < int(requisitos.get("insight", 0))
-	):
-		return false
+	if requisitos.has("insight"):
+		var gestor_arquetipos := _autoload("GestorArquetipos")
+		if gestor_arquetipos == null:
+			return false
+		if int(gestor_arquetipos.get("insight_total")) < int(requisitos.get("insight", 0)):
+			return false
 	if (
 		requisitos.has("nodo_previo")
 		and String(requisitos.get("nodo_previo", "")) not in nodos_completados
@@ -62,7 +63,12 @@ func obtener_progreso() -> Dictionary:
 
 func _aplicar_recompensas(recompensas: Dictionary) -> void:
 	if recompensas.has("desbloquea_arquetipo"):
-		GestorArquetipos.desbloquear_arquetipo(String(recompensas["desbloquea_arquetipo"]))
+		var gestor_arquetipos := _autoload("GestorArquetipos")
+		if gestor_arquetipos != null:
+			gestor_arquetipos.call(
+				"desbloquear_arquetipo",
+				String(recompensas["desbloquea_arquetipo"])
+			)
 
 
 func _evento_completado(evento: String) -> bool:
