@@ -1,5 +1,5 @@
-extends RefCounted
 class_name PruebasJungian
+extends RefCounted
 
 
 static func todo(comprobar: Callable) -> void:
