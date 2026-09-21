@@ -693,7 +693,8 @@ func _pintar_doctrinas() -> void:
 			continue
 		var habilidad: Dictionary = Historias.HABILIDADES[eje]
 		var boton := Button.new()
-		boton.text = "%s ×%d" % [tr(String(habilidad["nombre"])), cantidad]
+		var texto_boton := "%s ×%d" % [tr(String(habilidad["nombre"])), cantidad]
+		boton.text = texto_boton
 		boton.tooltip_text = tr(String(habilidad["efecto"]))
 		boton.disabled = bloqueadas
 		boton.pressed.connect(activar_doctrina.bind(eje))
