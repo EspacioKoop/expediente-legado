@@ -28,11 +28,14 @@ static func montar(
 	if bloques.is_empty():
 		return []
 
-	var semilla := Azar.derivar_texto(
-		raiz_azar,
-		"sueno",
-		"meticulosidad:%s" % id_escena,
-		[dia],
+	var semilla := (
+		Azar
+		. derivar_texto(
+			raiz_azar,
+			"sueno",
+			"meticulosidad:%s" % id_escena,
+			[dia],
+		)
 	)
 	var desplazamiento := posmod(semilla, limpios.size())
 	var cantidad := mini(2, limpios.size())
