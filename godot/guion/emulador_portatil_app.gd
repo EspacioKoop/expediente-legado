@@ -26,12 +26,16 @@ const SHADER_LCD := """
 shader_type canvas_item;
 uniform bool filtro_lcd = true;
 uniform float variacion_brillo = 0.0;
+uniform bool paleta_gb_activa = false;
+uniform vec4 paleta_0 : source_color = vec4(0.10, 0.12, 0.10, 1.0);
+uniform vec4 paleta_1 : source_color = vec4(0.28, 0.34, 0.24, 1.0);
+uniform vec4 paleta_2 : source_color = vec4(0.58, 0.64, 0.42, 1.0);
+uniform vec4 paleta_3 : source_color = vec4(0.86, 0.88, 0.68, 1.0);
 
 void fragment() {
     vec4 base = texture(TEXTURE, UV);
-    if (!filtro_lcd) {
-        COLOR = base;
-    } else {
+    vec3 rgb = base.rgb;
+    if (filtro_lcd) {
         vec2 uv_previa = clamp(
             UV - vec2(TEXTURE_PIXEL_SIZE.x, 0.0),
             vec2(0.0),
@@ -42,10 +46,22 @@ void fragment() {
         if (mod(floor(FRAGCOORD.y), 3.0) < 1.0) {
             rejilla = 0.92;
         }
-        vec3 rgb = mix(base.rgb, arrastre.rgb, 0.06) * rejilla;
+        rgb = mix(base.rgb, arrastre.rgb, 0.06) * rejilla;
         rgb *= 1.0 + variacion_brillo;
-        COLOR = vec4(rgb, base.a);
     }
+    if (paleta_gb_activa) {
+        float luma = dot(rgb, vec3(0.2126, 0.7152, 0.0722));
+        if (luma < 0.25) {
+            rgb = paleta_0.rgb;
+        } else if (luma < 0.50) {
+            rgb = paleta_1.rgb;
+        } else if (luma < 0.75) {
+            rgb = paleta_2.rgb;
+        } else {
+            rgb = paleta_3.rgb;
+        }
+    }
+    COLOR = vec4(rgb, base.a);
 }
 """
 
@@ -67,6 +83,7 @@ var _estado: Label
 var _lista: VBoxContainer
 var _textura: ImageTexture
 var _lcd_material: ShaderMaterial
+var _paleta_selector: OptionButton
 var _velo_encendido: ColorRect
 var _audio_fisico: AudioStreamPlayer
 var _sonidos_fisicos_cache: Dictionary = {}
@@ -76,7 +93,10 @@ var _abierto := false
 var _tiempo_emulador := 0.0
 var _tiempo_presentacion := 0.0
 var _ruta_sram_actual := ""
+var _huella_rom_actual := ""
+var _rom_gb_clasica_actual := false
 var _efectos_presentacion := true
+var _imperfecciones_controladas := false
 var _sonidos_fisicos := true
 var _encendiendo := false
 var _tiempo_encendido := 0.0
@@ -267,6 +287,20 @@ func _construir_ui() -> void:
 	efectos_aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	derecha.add_child(efectos_aviso)
 
+	var imperfecciones := CheckButton.new()
+	imperfecciones.name = "ImperfeccionesControladasPortatil"
+	imperfecciones.text = _texto("imperfecciones_controladas")
+	imperfecciones.button_pressed = _imperfecciones_controladas
+	imperfecciones.toggled.connect(_al_cambiar_imperfecciones)
+	derecha.add_child(imperfecciones)
+
+	var imperfecciones_aviso := Label.new()
+	imperfecciones_aviso.text = _texto("imperfecciones_aviso")
+	imperfecciones_aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	derecha.add_child(imperfecciones_aviso)
+
+	_preparar_selector_paleta(derecha)
+
 	var sonidos := CheckButton.new()
 	sonidos.text = _texto("sonidos_fisicos")
 	sonidos.button_pressed = _sonidos_fisicos
@@ -304,7 +338,29 @@ func _preparar_filtro_lcd() -> void:
 	_lcd_material = ShaderMaterial.new()
 	_lcd_material.shader = shader
 	_lcd_material.set_shader_parameter("filtro_lcd", _efectos_presentacion)
+	_lcd_material.set_shader_parameter("paleta_gb_activa", false)
 	_vista.material = _lcd_material
+
+
+func _preparar_selector_paleta(contenedor: VBoxContainer) -> void:
+	var titulo := Label.new()
+	titulo.text = _texto("paleta_gb_titulo")
+	contenedor.add_child(titulo)
+
+	_paleta_selector = OptionButton.new()
+	_paleta_selector.name = "SelectorPaletaGbClasico"
+	for id in PaletasGbClasico.ids():
+		var indice := _paleta_selector.item_count
+		_paleta_selector.add_item(PaletasGbClasico.nombre(id))
+		_paleta_selector.set_item_metadata(indice, id)
+	_paleta_selector.disabled = true
+	_paleta_selector.item_selected.connect(_al_seleccionar_paleta)
+	contenedor.add_child(_paleta_selector)
+
+	var aviso := Label.new()
+	aviso.text = _texto("paleta_gb_aviso")
+	aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	contenedor.add_child(aviso)
 
 
 func _preparar_audio_fisico() -> void:
@@ -361,6 +417,23 @@ func _al_cambiar_sonidos(activos: bool) -> void:
 	_sonidos_fisicos = activos
 	if not activos and _audio_fisico != null:
 		_audio_fisico.stop()
+
+
+func _al_cambiar_imperfecciones(activos: bool) -> void:
+	_imperfecciones_controladas = activos
+
+
+func _mostrar_ruido_contacto() -> void:
+	if (
+		not _efectos_presentacion
+		or not _imperfecciones_controladas
+		or _vista == null
+		or not is_instance_valid(_vista)
+	):
+		return
+	var efecto := EfectoContactoCartucho.new()
+	_vista.add_child(efecto)
+	efecto.iniciar()
 
 
 func _preparar_nucleo() -> void:
@@ -474,6 +547,9 @@ func _cargar_rom_ahora(ruta: String) -> void:
 		_jugando = false
 		_tiempo_emulador = 0.0
 		return
+	_huella_rom_actual = _huella_rom(rom)
+	_rom_gb_clasica_actual = _es_rom_gb_clasica(rom)
+	_configurar_paleta_rom_actual()
 	_ruta_sram_actual = _ruta_sram(rom)
 	_restaurar_sram()
 	_tiempo_emulador = 0.0
@@ -485,14 +561,74 @@ func _cargar_rom_ahora(ruta: String) -> void:
 	_estado.text = _formatear("ejecutando", [titulo])
 
 
-func _ruta_sram(rom: PackedByteArray) -> String:
+func _huella_rom(rom: PackedByteArray) -> String:
 	var contexto := HashingContext.new()
 	if contexto.start(HashingContext.HASH_SHA256) != OK:
 		return ""
 	if contexto.update(rom) != OK:
 		return ""
-	var huella := contexto.finish().hex_encode()
+	return contexto.finish().hex_encode()
+
+
+func _ruta_sram(rom: PackedByteArray) -> String:
+	var huella := _huella_rom(rom)
 	return SRAM_DIR + "/" + huella + ".sav" if not huella.is_empty() else ""
+
+
+func _es_rom_gb_clasica(rom: PackedByteArray) -> bool:
+	return rom.size() > 0x143 and int(rom[0x143]) == 0x00
+
+
+func _configurar_paleta_rom_actual() -> void:
+	if _paleta_selector == null:
+		return
+	_paleta_selector.disabled = not _rom_gb_clasica_actual
+	var id := PaletasGbClasico.NORMAL
+	if _rom_gb_clasica_actual:
+		id = PaletasGbClasico.cargar_preferencia(_huella_rom_actual)
+	_seleccionar_paleta_en_ui(id)
+	_aplicar_paleta(id)
+
+
+func _seleccionar_paleta_en_ui(id: String) -> void:
+	if _paleta_selector == null:
+		return
+	for indice in range(_paleta_selector.item_count):
+		if String(_paleta_selector.get_item_metadata(indice)) == id:
+			_paleta_selector.select(indice)
+			return
+	_paleta_selector.select(0)
+
+
+func _al_seleccionar_paleta(indice: int) -> void:
+	if (
+		_paleta_selector == null
+		or _paleta_selector.disabled
+		or not _rom_gb_clasica_actual
+		or indice < 0
+		or indice >= _paleta_selector.item_count
+	):
+		return
+	var id := String(_paleta_selector.get_item_metadata(indice))
+	_aplicar_paleta(id)
+	if not PaletasGbClasico.guardar_preferencia(_huella_rom_actual, id):
+		push_warning("No se pudo guardar la paleta de GB para esta ROM")
+
+
+func _aplicar_paleta(id: String) -> void:
+	if _lcd_material == null:
+		return
+	var activa := _rom_gb_clasica_actual and id != PaletasGbClasico.NORMAL
+	if not activa:
+		_lcd_material.set_shader_parameter("paleta_gb_activa", false)
+		return
+	var colores := PaletasGbClasico.colores(id)
+	if colores.size() != 4:
+		_lcd_material.set_shader_parameter("paleta_gb_activa", false)
+		return
+	for indice in range(4):
+		_lcd_material.set_shader_parameter("paleta_%d" % indice, colores[indice])
+	_lcd_material.set_shader_parameter("paleta_gb_activa", true)
 
 
 func _restaurar_sram() -> void:
