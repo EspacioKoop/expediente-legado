@@ -6,6 +6,7 @@ extends Node
 
 var _registro: Dictionary = ReligionEventos.nuevo()
 var _mundo_id := 0
+var _recuerdo_mundo_id := 0
 var _observador: Jali98Vigilia = null
 
 
@@ -18,14 +19,20 @@ func _process(_delta: float) -> void:
 	var mundo_id := mundo.get_instance_id()
 	if mundo_id != _mundo_id:
 		_mundo_id = mundo_id
+		_recuerdo_mundo_id = 0
 		_observador = null
 
 	if String(dia.jornada.get("fase", "")) == "casa" and _observador == null:
 		_montar_observador(mundo, dia.jornada)
 
 	var recuerdo := ReligionRecuerdoJali932.recuerdo_para_sueno(_registro)
-	if not recuerdo.is_empty():
-		mundo.set_meta("recuerdo_cultural_jali_98", recuerdo)
+	if recuerdo.is_empty():
+		return
+	mundo.set_meta("recuerdo_cultural_jali_98", recuerdo)
+	if String(dia.jornada.get("fase", "")) == "sueño" and mundo_id != _recuerdo_mundo_id:
+		var firma := ReligionRecuerdoJali9323D.montar(mundo, recuerdo)
+		if firma != null:
+			_recuerdo_mundo_id = mundo_id
 
 
 func registro() -> Dictionary:
