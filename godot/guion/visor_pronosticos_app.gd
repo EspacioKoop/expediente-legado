@@ -101,6 +101,7 @@ func _columna_indice() -> Control:
 	_montar_decision_924(contenido_panel)
 	return columna
 
+
 func _al_elegir_caso(indice: int) -> void:
 	super._al_elegir_caso(indice)
 	_actualizar_pronostico()
