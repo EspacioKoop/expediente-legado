@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="512" viewBox="0 0 1024 512">
+<title>Frente de tormenta — Mari #651</title>
+<desc>Señal abstracta de presión, viento y lluvia; no es iconografía tradicional.</desc>
+<rect width="1024" height="512" fill="#101820"/>
+<g fill="none" stroke-linecap="round">
+  <path d="M70 164 C250 36 410 250 590 112 C730 4 858 80 962 176" stroke="#596a70" stroke-width="44"/>
+  <path d="M54 224 C210 162 350 310 518 208 C680 108 808 192 970 146" stroke="#839296" stroke-width="18"/>
+  <path d="M84 314 L210 262 M188 364 L330 298 M322 398 L470 324 M486 410 L642 330 M650 392 L804 314 M794 360 L942 286" stroke="#7db0b9" stroke-width="12"/>
+  <path d="M136 438 C330 370 516 472 710 398 C806 360 884 354 956 372" stroke="#315f69" stroke-width="24"/>
+</g>
+</svg>
