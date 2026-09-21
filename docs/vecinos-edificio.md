@@ -1,6 +1,6 @@
 # Vecinos, portal y rutinas del edificio
 
-Segundo corte ejecutable de #673 dentro de la expansión de vida cotidiana de #669. El contrato standalone de #739 sigue siendo la única fuente de calendario y estado; este corte lo materializa en el `trayecto` real mediante un controller hijo de `dia.tscn`.
+Segundo corte ejecutable de #673 dentro de la expansión de vida cotidiana de #669. El contrato **standalone first** de #739 sigue siendo la única fuente de calendario y estado; este corte lo materializa en el `trayecto` real mediante un controller hijo de `dia.tscn`.
 
 ## Roster inicial
 
