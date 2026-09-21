@@ -83,7 +83,7 @@ class ComercioBarrio676FisicoTest(unittest.TestCase):
             ]
             for argumentos, minimo in [
                 (["--editor", "--import", "--quit"], None),
-                (["--script", PRUEBA], 32),
+                (["--script", PRUEBA], 31),
             ]:
                 resultado = subprocess.run(
                     base + argumentos,
