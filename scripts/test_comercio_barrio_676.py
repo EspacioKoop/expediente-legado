@@ -49,6 +49,16 @@ class ComercioBarrio676FisicoTest(unittest.TestCase):
         self.assertIn('venta.set_meta("reventa_fisica", true)', self.helper)
         self.assertNotIn("Inventario.HOME_STORAGE", self.helper)
 
+    def test_feedback_transaccion_es_diegetico_y_sin_hud(self):
+        self.assertIn('ticket.name = "TicketTransaccion"', self.helper)
+        self.assertIn("Label3D.new()", self.helper)
+        self.assertIn("EstiloSiga.fuente_mono()", self.helper)
+        self.assertIn('"PAGO · -%d"', self.helper)
+        self.assertIn('"REVENTA · +%d"', self.helper)
+        self.assertIn('"YA COMPRADO"', self.helper)
+        self.assertNotIn("CanvasLayer", self.helper)
+        self.assertNotIn("Control.new()", self.helper)
+
     def test_senaletica_original_versionada(self):
         for nombre in ("quiosco_avenida.svg", "el_trastero.svg", "PROCEDENCIA.md"):
             self.assertTrue((ARTE / nombre).exists(), nombre)
@@ -73,7 +83,7 @@ class ComercioBarrio676FisicoTest(unittest.TestCase):
             ]
             for argumentos, minimo in [
                 (["--editor", "--import", "--quit"], None),
-                (["--script", PRUEBA], 20),
+                (["--script", PRUEBA], 29),
             ]:
                 resultado = subprocess.run(
                     base + argumentos,
