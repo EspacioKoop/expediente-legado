@@ -11,6 +11,8 @@ run/main_scene="res://escenas/inicio.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [autoload]
+GestorEventosLiterarios=res://godot/eventos/literarios/gestor_eventos_literarios.gd
+
 GestorLiteratura=res://godot/literatura/gestor_literatura.gd
 GestorArquetipos=
 GestorMomentum=
