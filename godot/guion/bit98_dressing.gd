@@ -150,8 +150,8 @@ static func _montar_interior(interior: Node3D) -> void:
 		Vector3(-2.20, 1.48, -3.86),
 		0.0,
 		Color(0.94, 0.91, 0.84),
-		28,
-		0.0025,
+		36,
+		0.0040,
 	)
 	_lamina(
 		grupo,
@@ -168,9 +168,29 @@ static func _montar_interior(interior: Node3D) -> void:
 		Vector3(2.15, 1.56, -3.86),
 		0.0,
 		Color(0.18, 0.16, 0.13),
-		30,
-		0.0028,
+		36,
+		0.0040,
 	)
+
+	_texto_cartel(
+		grupo,
+		"TextoNovedadesInterior",
+		"NOVEDADES",
+		Vector3(0.0, 1.94, -3.86),
+		0.0,
+		Color(0.86, 0.76, 0.48),
+		34,
+		0.0030,
+	)
+	for indice in PORTADAS.size():
+		_lamina_alto(
+			grupo,
+			"PortadaDestacada_%d" % indice,
+			PORTADAS[indice],
+			Vector3(-1.08 + float(indice) * 1.08, 1.47, -3.84),
+			0.72,
+			0.0,
+		)
 
 	var expositor := Node3D.new()
 	expositor.name = "ExpositorPortadasPropias"
