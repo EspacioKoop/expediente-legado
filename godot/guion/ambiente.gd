@@ -129,13 +129,16 @@ static func _perfil_es_base(perfil: Dictionary) -> bool:
 
 
 static func _firma_perfil(perfil: Dictionary) -> String:
-	return "%s|%s|e%d|d%d|v%s" % [
-		String(perfil.get("fase", "")),
-		String(perfil.get("franja", FRANJA_BASE)),
-		int(perfil.get("estres", 0)),
-		int(perfil.get("detalle", 0)),
-		String(perfil.get("vigilia", "")),
-	]
+	return (
+		"%s|%s|e%d|d%d|v%s"
+		% [
+			String(perfil.get("fase", "")),
+			String(perfil.get("franja", FRANJA_BASE)),
+			int(perfil.get("estres", 0)),
+			int(perfil.get("detalle", 0)),
+			String(perfil.get("vigilia", "")),
+		]
+	)
 
 
 static func _crear_pista(fase: String) -> AudioStreamWAV:
@@ -158,9 +161,7 @@ static func _crear_pista_con_perfil(fase: String, perfil: Dictionary) -> AudioSt
 	for i in muestras:
 		var t := float(i) / FRECUENCIA
 		var muestra := (
-			_muestra(fase, i, t)
-			if perfil.is_empty()
-			else _muestra_adaptativa(fase, i, t, perfil)
+			_muestra(fase, i, t) if perfil.is_empty() else _muestra_adaptativa(fase, i, t, perfil)
 		)
 		var valor := int(clampf(muestra, -1.0, 1.0) * 32767.0)
 		if valor < 0:
@@ -212,9 +213,7 @@ static func _muestra(fase: String, indice: int, t: float) -> float:
 			return 0.0
 
 
-static func _muestra_adaptativa(
-	fase: String, indice: int, t: float, perfil: Dictionary
-) -> float:
+static func _muestra_adaptativa(fase: String, indice: int, t: float, perfil: Dictionary) -> float:
 	var muestra := _muestra(fase, indice, t)
 
 	if fase == "archivo":
@@ -263,10 +262,7 @@ static func _actividad_archivo(franja: String, indice: int, t: float) -> float:
 			return 0.0
 
 	var pulso := 0.35 + pow(maxf(0.0, sin(TAU * 2.0 * t)), 6.0) * 0.65
-	return (
-		_ruido(indice, 149) * amplitud * 0.65
-		+ sin(TAU * 187.0 * t) * amplitud * 0.35 * pulso
-	)
+	return _ruido(indice, 149) * amplitud * 0.65 + sin(TAU * 187.0 * t) * amplitud * 0.35 * pulso
 
 
 static func _capa_estres(fase: String, nivel: int, t: float) -> float:
@@ -283,10 +279,7 @@ static func _capa_detalle(nivel: int, indice: int, t: float) -> float:
 	if nivel <= 0:
 		return 0.0
 	var intensidad := 0.0010 if nivel == 1 else 0.0022
-	return (
-		_ruido(indice * 3 + 17, 233) * intensidad
-		+ sin(TAU * 997.0 * t) * intensidad * 0.25
-	)
+	return _ruido(indice * 3 + 17, 233) * intensidad + sin(TAU * 997.0 * t) * intensidad * 0.25
 
 
 static func _ruido(indice: int, semilla: int) -> float:
