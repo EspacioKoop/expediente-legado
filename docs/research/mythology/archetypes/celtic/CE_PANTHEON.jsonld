@@ -1,0 +1,820 @@
+{
+  "@context": "../../schema/ACP_CONTEXT.jsonld",
+  "@id": "system:CE",
+  "@type": "ArchetypeSystem",
+  "name": "Celtic Deities",
+  "description": "Gods and mythological figures from Irish, Welsh, and Gaulish traditions. Preserved primarily through medieval Irish manuscripts and Welsh literature, with Gaulish deities known from Roman-era inscriptions. Characterized by shape-shifting, otherworld journeys, and the interpenetration of mortal and divine realms.",
+  "culturalOrigin": "Celtic peoples (Ireland, Wales, Scotland, Gaul, Britain)",
+  "primarySources": ["Lebor Gabála Érenn", "Táin Bó Cúailnge", "Mabinogion", "Roman-Gaulish inscriptions", "Cath Maige Tuired", "Book of Invasions"],
+  "temporalSpan": "c. 500 BCE – 1200 CE (recorded traditions)",
+  "cosmology": {
+    "structure": "Three realms: Land, Sea, Sky; Otherworld (Tír na nÓg, Annwn) coexisting with mortal world",
+    "creationMyth": "Successive invasions of Ireland; gods as Tuatha Dé Danann retreat to síd mounds after defeat",
+    "eschatology": "No apocalypse; eternal cycling; Otherworld accessible through liminal times and places",
+    "keyRealms": ["Mortal World", "Otherworld (Tír na nÓg)", "Síd mounds", "Beneath waves", "Beyond western sea"]
+  },
+  "systemCharacteristics": {
+    "primaryThemes": ["sovereignty", "shape-shifting", "otherworld journeys", "sacred kingship", "cattle raids", "poetic/magical knowledge"],
+    "structuralFeatures": ["Gods as ancestors of peoples", "Thin boundaries between worlds", "Triple goddesses", "Divine/mortal intermarriage"],
+    "relationshipPatterns": ["Divine couples", "Foster relationships", "Hero-god patronage", "Land-sovereignty marriage"]
+  },
+
+  "entries": [
+    {
+      "@id": "arch:CE-DAGDA",
+      "@type": "Archetype",
+      "name": "The Dagda",
+      "aliases": ["Eochaid Ollathair (All-Father)", "Ruad Rofhessa (Lord of Great Knowledge)"],
+      "epithets": ["The Good God", "Lord of Perfect Knowledge", "Father of the Tribe"],
+      "description": "Chief of the Tuatha Dé Danann, father-god of immense appetites and powers. Wields the club that kills and resurrects, owns the cauldron of plenty that never empties, and plays the harp that controls seasons and emotions. Paradoxically depicted as both mighty king and comic glutton.",
+      "gender": "masculine",
+      "domain": ["fertility", "agriculture", "strength", "magic", "life-death", "seasons", "wisdom"],
+      "symbols": ["club/staff", "cauldron of plenty", "harp (Uaithne)", "wheel"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.35,
+        "active-receptive": 0.3,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.45,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.35
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:great-father", "weight": 0.85, "aspects": ["all-father", "tribe-father", "generous-provider"]},
+        {"primordial": "primordial:magician", "weight": 0.7, "aspects": ["druid-king", "harp-magic", "cauldron-keeper"]},
+        {"primordial": "primordial:creator", "weight": 0.55, "aspects": ["life-death-giver", "season-controller"]}
+      ],
+
+      "temporalOrientation": "cyclical",
+
+      "shadowDynamics": {
+        "activationConditions": ["When appetite becomes excess", "When power becomes crude"],
+        "shadowManifestations": ["Glutton", "Comic buffoon (mythic inversion)", "Crude power"],
+        "integrationPath": "Generous abundance without excess; power with refinement"
+      },
+
+      "relationships": [
+        {"type": "PARENT", "target": "arch:CE-BRIGID", "notes": "Father"},
+        {"type": "PARENT", "target": "arch:CE-AENGUS", "notes": "Father (by Boann)"},
+        {"type": "PARENT", "target": "arch:CE-MIDIR", "notes": "Father (some sources)"},
+        {"type": "CONSORT", "target": "arch:CE-MORRIGAN", "notes": "Sacred union before battle"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ZEUS", "fidelity": 0.5, "sharedAspects": ["father-god", "thunder-association"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:NO-ODIN", "fidelity": 0.55, "sharedAspects": ["all-father", "wisdom", "magic"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-EARTH",
+        "planet": "7P-JUPITER",
+        "tarot": ["TAMA-EMPEROR", "TAMA-WHEEL"],
+        "chakra": "CH-MANIPURA",
+        "season": "Samhain",
+        "direction": "North"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Cath Maige Tuired", "Lebor Gabála Érenn"],
+        "tradition": "Irish",
+        "confidence": 0.9
+      }
+    },
+
+    {
+      "@id": "arch:CE-BRIGID",
+      "@type": "Archetype",
+      "name": "Brigid",
+      "aliases": ["Brigit", "Bríg", "Bride (Scottish)"],
+      "epithets": ["The Exalted One", "Lady of the Flame", "Keeper of the Sacred Fire"],
+      "description": "Triple goddess of poetry, smithcraft, and healing—the three sacred fires. Daughter of the Dagda, later syncretized with Saint Brigid. Keeper of the perpetual flame at Kildare. Embodies inspiration, transformation through fire, and the healing arts.",
+      "gender": "feminine",
+      "domain": ["poetry", "smithcraft", "healing", "fire", "spring", "fertility", "childbirth"],
+      "symbols": ["sacred flame", "Brigid's cross", "well", "anvil", "swan"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.3,
+        "light-shadow": 0.2,
+        "active-receptive": 0.45,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.35
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:healer", "weight": 0.8, "aspects": ["medicine", "wells", "restoration"]},
+        {"primordial": "primordial:magician", "weight": 0.75, "aspects": ["poetry-inspiration", "transformation-craft"]},
+        {"primordial": "primordial:great-mother", "weight": 0.6, "aspects": ["fertility", "childbirth", "spring"]}
+      ],
+
+      "temporalOrientation": "cyclical",
+
+      "shadowDynamics": {
+        "activationConditions": ["When fire consumes instead of transforms", "When inspiration becomes obsession"],
+        "shadowManifestations": ["Consuming flame", "Manic inspiration", "Forge that destroys"],
+        "integrationPath": "Fire that transforms without consuming; inspiration grounded in craft"
+      },
+
+      "relationships": [
+        {"type": "CHILD_OF", "target": "arch:CE-DAGDA"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ATHENA", "fidelity": 0.55, "sharedAspects": ["craft", "wisdom", "fire"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HESTIA", "fidelity": 0.5, "sharedAspects": ["sacred-flame", "hearth"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:IN-SARASWATI", "fidelity": 0.5, "sharedAspects": ["poetry", "arts", "inspiration"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-FIRE",
+        "planet": "7P-SUN",
+        "tarot": ["TAMA-STAR", "TAMA-EMPRESS"],
+        "chakra": "CH-ANAHATA",
+        "festival": "Imbolc (February 1)",
+        "direction": "East"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Lebor Gabála Érenn", "Lives of St. Brigid"],
+        "tradition": "Irish (syncretized with Christian saint)",
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:CE-LUGH",
+      "@type": "Archetype",
+      "name": "Lugh",
+      "aliases": ["Lugh Lámhfhada (Long-Arm)", "Lugh Samildánach (Many-Skilled)", "Lugus (Gaulish)"],
+      "epithets": ["The Shining One", "Master of All Arts", "Lord of Light"],
+      "description": "God of light, skill, and craftsmanship—master of every art. Half-Tuatha Dé Danann, half-Fomorian. Slew his grandfather Balor with the sling-stone. Represents the ideal of excellence in all things, the champion who wins through skill rather than brute force.",
+      "gender": "masculine",
+      "domain": ["light", "skill", "crafts", "oaths", "truth", "harvest", "kingship"],
+      "symbols": ["spear (Gáe Assail)", "sling", "ravens", "hound"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.15,
+        "active-receptive": 0.25,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.3,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.3
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:hero", "weight": 0.85, "aspects": ["champion", "Balor-slayer", "skill-master"]},
+        {"primordial": "primordial:magician", "weight": 0.75, "aspects": ["all-crafts", "many-skilled"]},
+        {"primordial": "primordial:sovereign", "weight": 0.65, "aspects": ["divine-king", "Tuatha-leader"]}
+      ],
+
+      "temporalOrientation": "present",
+
+      "shadowDynamics": {
+        "activationConditions": ["When skill becomes pride", "When excellence excludes others"],
+        "shadowManifestations": ["Arrogant perfectionist", "Light that blinds", "Judgmental master"],
+        "integrationPath": "Excellence that elevates all; skill in service of community"
+      },
+
+      "relationships": [
+        {"type": "ANTAGONIST", "target": "arch:CE-BALOR", "narrativeRole": "Grandfather-slayer (prophecy fulfilled)"},
+        {"type": "PARENT", "target": "arch:CE-CU-CHULAINN", "notes": "Divine father"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-APOLLO", "fidelity": 0.65, "sharedAspects": ["light", "arts", "excellence"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:NO-ODIN", "fidelity": 0.45, "sharedAspects": ["ravens", "spear", "knowledge"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-FIRE",
+        "planet": "7P-SUN",
+        "tarot": ["TAMA-MAGICIAN", "TAMA-SUN"],
+        "chakra": "CH-MANIPURA",
+        "festival": "Lughnasadh (August 1)"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Cath Maige Tuired", "Lebor Gabála"],
+        "tradition": "Irish, pan-Celtic (Lugus)",
+        "cultCenters": ["Lyon (Lugdunum)", "Leiden (Lugdunum Batavorum)"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:CE-MORRIGAN",
+      "@type": "Archetype",
+      "name": "The Morrígan",
+      "aliases": ["Mórrígan", "Morrígu", "Great Queen"],
+      "epithets": ["Phantom Queen", "Great Queen", "Queen of Phantoms"],
+      "description": "Triple war goddess of fate, death, and sovereignty. Appears as crow/raven over battlefields choosing the slain. Shape-shifts between maiden, woman, and crone. Offers sovereignty and prophecy to kings. Both terrifying and protective—the dark feminine that governs fate and battle-death.",
+      "gender": "feminine",
+      "domain": ["war", "fate", "death", "prophecy", "sovereignty", "shape-shifting", "cattle"],
+      "symbols": ["crow/raven", "washer at the ford", "cattle", "red (blood)"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.7,
+        "light-shadow": 0.7,
+        "active-receptive": 0.35,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.6,
+        "stasis-transformation": 0.65,
+        "voluntary-fated": 0.8
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:crone", "weight": 0.75, "aspects": ["fate-weaver", "death-goddess", "prophecy"]},
+        {"primordial": "primordial:warrior", "weight": 0.7, "aspects": ["war-goddess", "battle-fury"]},
+        {"primordial": "primordial:great-mother", "weight": 0.5, "aspects": ["sovereignty-giver", "land-goddess"]}
+      ],
+
+      "temporalOrientation": "liminal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When fate becomes cruelty", "When war-lust consumes"],
+        "shadowManifestations": ["Blood-drunk fury", "Merciless fate", "Consuming darkness"],
+        "integrationPath": "Fate accepted with courage; death as transformation"
+      },
+
+      "relationships": [
+        {"type": "CONSORT", "target": "arch:CE-DAGDA", "notes": "Sacred union at Samhain"},
+        {"type": "CONTAINS", "target": "arch:CE-BADB", "notes": "One of the three Morrigna"},
+        {"type": "CONTAINS", "target": "arch:CE-MACHA", "notes": "One of the three Morrigna"},
+        {"type": "CONTAINS", "target": "arch:CE-NEMAIN", "notes": "One of the three Morrigna"},
+        {"type": "CULTURAL_ECHO", "target": "arch:NO-VALKYRIES", "fidelity": 0.7, "sharedAspects": ["chooser-of-slain", "battle", "fate"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HECATE", "fidelity": 0.5, "sharedAspects": ["triple-goddess", "dark-feminine", "crossroads"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-AIR",
+        "planet": "7P-SATURN",
+        "tarot": ["TAMA-DEATH", "TAMA-HIGH-PRIESTESS"],
+        "chakra": "CH-AJNA",
+        "color": "red, black",
+        "animal": "Crow, raven"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Táin Bó Cúailnge", "Cath Maige Tuired"],
+        "tradition": "Irish",
+        "confidence": 0.9
+      }
+    },
+
+    {
+      "@id": "arch:CE-DANU",
+      "@type": "Archetype",
+      "name": "Danu",
+      "aliases": ["Anu", "Ana", "Dana", "Dôn (Welsh)"],
+      "epithets": ["Mother of the Gods", "Flowing One"],
+      "description": "Primordial mother goddess, ancestor of the Tuatha Dé Danann (Peoples of the Goddess Danu). Little direct mythology survives, but her name marks the divine tribe and major rivers (Danube, Don). Represents the primordial source, the flowing waters of origin.",
+      "gender": "feminine",
+      "domain": ["motherhood", "rivers", "fertility", "earth", "abundance", "ancestors"],
+      "symbols": ["rivers", "earth", "flowing water"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.25,
+        "light-shadow": 0.35,
+        "active-receptive": 0.65,
+        "individual-collective": 0.75,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.55
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.95, "aspects": ["ancestor-mother", "divine-source", "river-mother"]},
+        {"primordial": "primordial:creator", "weight": 0.6, "aspects": ["origin", "flowing-source"]}
+      ],
+
+      "temporalOrientation": "eternal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When source becomes flood", "When origin overwhelms present"],
+        "shadowManifestations": ["Drowning waters", "Consuming mother", "Lost in origins"],
+        "integrationPath": "Source that flows forward; ancestry that empowers rather than binds"
+      },
+
+      "relationships": [
+        {"type": "PARENT", "target": "system:TUATHA-DE-DANANN", "notes": "Mother of the divine tribe"},
+        {"type": "CULTURAL_ECHO", "target": "arch:IN-SHAKTI", "fidelity": 0.5, "sharedAspects": ["divine-feminine-source", "all-mother"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-GAIA", "fidelity": 0.55, "sharedAspects": ["earth-mother", "ancestor-of-gods"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-WATER",
+        "planet": "7P-MOON",
+        "tarot": "TAMA-EMPRESS",
+        "chakra": "CH-SVADHISTHANA",
+        "rivers": ["Danube", "Don", "Dnieper"]
+      },
+
+      "metadata": {
+        "canonicalSources": ["Lebor Gabála (by implication)", "Place names"],
+        "tradition": "Pan-Celtic",
+        "confidence": 0.7,
+        "notes": "Little direct mythology; reconstructed from tribe name and river names"
+      }
+    },
+
+    {
+      "@id": "arch:CE-CERNUNNOS",
+      "@type": "Archetype",
+      "name": "Cernunnos",
+      "aliases": ["The Horned One", "Lord of Wild Things"],
+      "epithets": ["Lord of the Animals", "The Antlered God"],
+      "description": "Gaulish god of wild animals, forests, fertility, and wealth. Depicted with antlers, seated cross-legged, holding a torc and serpent, surrounded by animals. Represents the untamed wild, the cycles of nature, and the masculine principle of abundance and virility.",
+      "gender": "masculine",
+      "domain": ["animals", "forests", "fertility", "wealth", "hunting", "underworld"],
+      "symbols": ["antlers", "torc", "ram-headed serpent", "stag", "seated cross-legged pose"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.5,
+        "active-receptive": 0.45,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.6,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.5
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:wild-man", "weight": 0.85, "aspects": ["lord-of-beasts", "untamed", "forest-king"]},
+        {"primordial": "primordial:great-father", "weight": 0.6, "aspects": ["fertility", "abundance", "provider"]}
+      ],
+
+      "temporalOrientation": "cyclical",
+
+      "shadowDynamics": {
+        "activationConditions": ["When wild becomes savage", "When abundance becomes greed"],
+        "shadowManifestations": ["Bestial fury", "Hoarding", "Predator without limit"],
+        "integrationPath": "Wildness in harmony with cycles; abundance shared"
+      },
+
+      "relationships": [
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-PAN", "fidelity": 0.7, "sharedAspects": ["horned", "wild", "nature", "fertility"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-DIONYSUS", "fidelity": 0.45, "sharedAspects": ["wild", "nature-god"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-EARTH",
+        "planet": "7P-SATURN",
+        "tarot": "TAMA-DEVIL",
+        "chakra": "CH-MULADHARA",
+        "season": "Autumn (shedding of antlers)"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Gundestrup Cauldron", "Pillar of the Boatmen"],
+        "tradition": "Gaulish",
+        "confidence": 0.75,
+        "notes": "Name appears once; iconography widespread"
+      }
+    },
+
+    {
+      "@id": "arch:CE-MANANNÁN",
+      "@type": "Archetype",
+      "name": "Manannán mac Lir",
+      "aliases": ["Manawydan (Welsh)", "Son of the Sea"],
+      "epithets": ["Lord of the Sea", "Guardian of the Otherworld", "Ferryman"],
+      "description": "God of the sea, master of magic and illusion, guardian of the Otherworld. Rides the waves on his horse Enbarr, wears a cloak of mist, owns a ship that sails itself. Ferries souls to the Otherworld island of Emain Ablach. Trickster-magician of the waters.",
+      "gender": "masculine",
+      "domain": ["sea", "otherworld", "magic", "weather", "illusion", "travel", "death-transition"],
+      "symbols": ["crane bag (of treasures)", "cloak of mist", "self-sailing boat", "horse Enbarr"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.5,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.5,
+        "active-receptive": 0.4,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.4
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:magician", "weight": 0.85, "aspects": ["illusion", "shape-shifter", "treasure-keeper"]},
+        {"primordial": "primordial:psychopomp", "weight": 0.7, "aspects": ["otherworld-ferryman", "threshold-guardian"]},
+        {"primordial": "primordial:trickster", "weight": 0.55, "aspects": ["mist-weaver", "deceiver"]}
+      ],
+
+      "temporalOrientation": "liminal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When illusion becomes deception", "When threshold-guarding becomes trapping"],
+        "shadowManifestations": ["Deceiver", "Fog that drowns", "Lost in mist"],
+        "integrationPath": "Illusion that reveals truth; transition that leads somewhere"
+      },
+
+      "relationships": [
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-POSEIDON", "fidelity": 0.55, "sharedAspects": ["sea-god", "horses"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HERMES", "fidelity": 0.5, "sharedAspects": ["psychopomp", "trickster", "magic"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:NO-NJORD", "fidelity": 0.5, "sharedAspects": ["sea", "wealth-from-sea"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-WATER",
+        "planet": "7P-MOON",
+        "tarot": ["TAMA-MOON", "TAMA-FOOL"],
+        "chakra": "CH-VISHUDDHA",
+        "direction": "West (toward Otherworld)"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Immram Brain", "Mabinogion"],
+        "tradition": "Irish (Manannán), Welsh (Manawydan)",
+        "confidence": 0.9
+      }
+    },
+
+    {
+      "@id": "arch:CE-AENGUS",
+      "@type": "Archetype",
+      "name": "Aengus Óg",
+      "aliases": ["Óengus", "Mac ind Óc (Young Son)", "Angus"],
+      "epithets": ["The Young One", "God of Love", "Master of Tricks"],
+      "description": "God of love, youth, and poetic inspiration. Son of the Dagda and the river goddess Boann, conceived and born in a single day through magic. Associated with birds (especially swans) and dreams. Represents eternal youth, romantic love, and the magic of poetry.",
+      "gender": "masculine",
+      "domain": ["love", "youth", "poetry", "dreams", "beauty"],
+      "symbols": ["four birds around head (kisses)", "swans", "harp"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.45,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.3,
+        "active-receptive": 0.45,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.3
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:lover", "weight": 0.85, "aspects": ["romantic-love", "beauty", "longing"]},
+        {"primordial": "primordial:divine-child", "weight": 0.7, "aspects": ["eternal-youth", "magical-birth"]},
+        {"primordial": "primordial:trickster", "weight": 0.45, "aspects": ["clever-negotiator", "dream-worker"]}
+      ],
+
+      "temporalOrientation": "eternal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When youth refuses to mature", "When love becomes obsession"],
+        "shadowManifestations": ["Puer aeternus", "Obsessive longing", "Dream over reality"],
+        "integrationPath": "Youth that matures; love grounded in reality"
+      },
+
+      "relationships": [
+        {"type": "CHILD_OF", "target": "arch:CE-DAGDA"},
+        {"type": "CHILD_OF", "target": "arch:CE-BOANN", "notes": "River goddess"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-EROS", "fidelity": 0.7, "sharedAspects": ["love-god", "youth", "desire"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-APOLLO", "fidelity": 0.4, "sharedAspects": ["beauty", "poetry", "music"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-AIR",
+        "planet": "7P-VENUS",
+        "tarot": ["TAMA-LOVERS", "TAMA-FOOL"],
+        "chakra": "CH-ANAHATA"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Aislinge Óenguso (Dream of Aengus)"],
+        "tradition": "Irish",
+        "confidence": 0.85
+      }
+    },
+
+    {
+      "@id": "arch:CE-NUADA",
+      "@type": "Archetype",
+      "name": "Nuada Airgetlám",
+      "aliases": ["Nuada of the Silver Hand", "Nodens (Romano-British)", "Nudd (Welsh)"],
+      "epithets": ["Silver Hand", "King of the Tuatha Dé Danann"],
+      "description": "First king of the Tuatha Dé Danann who lost his arm in battle against the Fir Bolg. Given a functional silver arm by the god-physician Dian Cécht. Lost kingship because of blemish (Celtic kings must be whole), later restored. Represents sovereignty, sacrifice, and restoration.",
+      "gender": "masculine",
+      "domain": ["kingship", "war", "sovereignty", "healing (through replacement)", "justice"],
+      "symbols": ["silver hand/arm", "sword (Claíomh Solais)", "crown"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.2,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.3,
+        "active-receptive": 0.35,
+        "individual-collective": 0.6,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.55
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.9, "aspects": ["divine-king", "rightful-ruler"]},
+        {"primordial": "primordial:warrior", "weight": 0.65, "aspects": ["battle-king", "sword-wielder"]},
+        {"primordial": "primordial:healer", "weight": 0.4, "aspects": ["restoration-through-craft"]}
+      ],
+
+      "temporalOrientation": "present",
+
+      "shadowDynamics": {
+        "activationConditions": ["When kingship requires perfection", "When the wound cannot be healed"],
+        "shadowManifestations": ["Wounded king", "Lost sovereignty", "Imperfection shaming"],
+        "integrationPath": "Sovereignty despite wound; the silver hand as new wholeness"
+      },
+
+      "relationships": [
+        {"type": "CULTURAL_ECHO", "target": "arch:NO-TYR", "fidelity": 0.7, "sharedAspects": ["one-handed", "war-god", "sacrifice"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ZEUS", "fidelity": 0.4, "sharedAspects": ["sky-king", "sovereignty"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-AIR",
+        "planet": "7P-JUPITER",
+        "tarot": ["TAMA-EMPEROR", "TAMA-JUSTICE"],
+        "chakra": "CH-VISHUDDHA",
+        "metal": "Silver"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Cath Maige Tuired", "Lebor Gabála"],
+        "tradition": "Irish",
+        "cultCenters": ["Lydney (as Nodens)"],
+        "confidence": 0.85
+      }
+    },
+
+    {
+      "@id": "arch:CE-CU-CHULAINN",
+      "@type": "Archetype",
+      "name": "Cú Chulainn",
+      "aliases": ["Sétanta (birth name)", "The Hound of Culann"],
+      "epithets": ["Hound of Ulster", "Champion of the Red Branch"],
+      "description": "Greatest hero of Irish mythology, son of Lugh and mortal Deichtine. Named for killing Culann's hound and becoming the smith's guardian in its place. Subject to ríastrad (warp spasm)—a terrifying battle transformation. Bound by multiple geasa (taboos) that ultimately lead to his death.",
+      "gender": "masculine",
+      "domain": ["war", "heroism", "martial arts", "loyalty", "honor", "tragic fate"],
+      "symbols": ["Gáe Bulg (spear)", "chariot", "hound", "battle distortion"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.45,
+        "creation-destruction": 0.6,
+        "light-shadow": 0.4,
+        "active-receptive": 0.15,
+        "individual-collective": 0.25,
+        "ascent-descent": 0.45,
+        "stasis-transformation": 0.65,
+        "voluntary-fated": 0.8
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:hero", "weight": 0.95, "aspects": ["champion", "defender", "martial-master"]},
+        {"primordial": "primordial:warrior", "weight": 0.9, "aspects": ["berserker", "battle-fury", "unmatched"]},
+        {"primordial": "primordial:divine-child", "weight": 0.5, "aspects": ["god-born", "destined"]}
+      ],
+
+      "temporalOrientation": "present",
+
+      "shadowDynamics": {
+        "activationConditions": ["When battle-fury consumes", "When geasa conflict and doom approaches"],
+        "shadowManifestations": ["Ríastrad (battle distortion)", "Cannot stop killing", "Fated to die"],
+        "integrationPath": "Fury channeled for protection; accepting fate with honor"
+      },
+
+      "relationships": [
+        {"type": "CHILD_OF", "target": "arch:CE-LUGH", "notes": "Divine father"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HERACLES", "fidelity": 0.75, "sharedAspects": ["greatest-hero", "divine-parentage", "rage", "tragic-fate"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ACHILLES", "fidelity": 0.7, "sharedAspects": ["invincible-warrior", "doomed", "rage"]}
+      ],
+
+      "contextualVariants": [
+        {
+          "context": "Normal state",
+          "spectralShift": {"order-chaos": 0.35, "creation-destruction": 0.45},
+          "notes": "Beautiful, skilled, honorable"
+        },
+        {
+          "context": "Ríastrad (warp spasm)",
+          "spectralShift": {"order-chaos": 0.8, "creation-destruction": 0.9, "light-shadow": 0.7},
+          "notes": "Monstrous transformation, uncontrollable killing"
+        }
+      ],
+
+      "correspondences": {
+        "element": "EL-FIRE",
+        "planet": "7P-MARS",
+        "tarot": ["TAMA-CHARIOT", "TAMA-STRENGTH"],
+        "chakra": "CH-MANIPURA"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Táin Bó Cúailnge", "Ulster Cycle"],
+        "tradition": "Irish",
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:CE-RHIANNON",
+      "@type": "Archetype",
+      "name": "Rhiannon",
+      "aliases": ["Rigantona (Great Queen)", "Epona (Gaulish cognate)"],
+      "epithets": ["The Great Queen", "Horse Goddess", "Lady of the Otherworld"],
+      "description": "Welsh goddess of horses, sovereignty, and the Otherworld. Appears to Pwyll riding a magical white horse that cannot be caught. Falsely accused of killing her son, she is punished by carrying visitors like a horse. Later vindicated. Associated with birds whose song brings sleep and waking.",
+      "gender": "feminine",
+      "domain": ["horses", "sovereignty", "otherworld", "fertility", "death-transition", "patience"],
+      "symbols": ["white horse", "three magical birds", "foal"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.4,
+        "active-receptive": 0.55,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.65
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.7, "aspects": ["sovereignty", "fertility", "protector"]},
+        {"primordial": "primordial:psychopomp", "weight": 0.55, "aspects": ["otherworld-connection", "birds-of-transition"]},
+        {"primordial": "primordial:maiden", "weight": 0.5, "aspects": ["uncatchable-pursuit"]}
+      ],
+
+      "temporalOrientation": "liminal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When falsely accused and humiliated", "When patience becomes passivity"],
+        "shadowManifestations": ["Unjust suffering", "Silenced queen", "Beast of burden"],
+        "integrationPath": "Patience vindicated; sovereignty reclaimed through endurance"
+      },
+
+      "relationships": [
+        {"type": "CONSORT", "target": "arch:CE-PWYLL", "notes": "Lord of Dyfed"},
+        {"type": "PARENT", "target": "arch:CE-PRYDERI", "notes": "Lost and restored son"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GAULISH-EPONA", "fidelity": 0.85, "sharedAspects": ["horse-goddess", "sovereignty", "fertility"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-DEMETER", "fidelity": 0.5, "sharedAspects": ["grieving-mother", "searching"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-EARTH",
+        "planet": "7P-MOON",
+        "tarot": ["TAMA-STAR", "TAMA-STRENGTH"],
+        "chakra": "CH-ANAHATA",
+        "animal": "White horse"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Mabinogion (First and Third Branches)"],
+        "tradition": "Welsh",
+        "confidence": 0.9
+      }
+    },
+
+    {
+      "@id": "arch:CE-ARAWN",
+      "@type": "Archetype",
+      "name": "Arawn",
+      "aliases": ["King of Annwfn"],
+      "epithets": ["Lord of the Otherworld", "King of Annwn"],
+      "description": "Welsh god of the underworld (Annwfn) and the Wild Hunt. Rules the Otherworld which in Welsh tradition is more paradise than place of punishment. Exchanges places with Pwyll for a year. Associated with hunting, hounds, and the autumnal passage of souls.",
+      "gender": "masculine",
+      "domain": ["underworld", "death", "hunting", "otherworld", "wild hunt"],
+      "symbols": ["white hounds with red ears", "hunting horn", "Annwfn"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.65,
+        "active-receptive": 0.4,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.8,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.6
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.8, "aspects": ["underworld-king", "realm-ruler"]},
+        {"primordial": "primordial:psychopomp", "weight": 0.65, "aspects": ["wild-hunt-leader", "soul-collector"]}
+      ],
+
+      "temporalOrientation": "liminal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When the hunt becomes predatory on the living"],
+        "shadowManifestations": ["Death-dealer", "Wild Hunt that takes unwilling souls"],
+        "integrationPath": "Otherworld as transition, not trap; hunting that follows natural order"
+      },
+
+      "relationships": [
+        {"type": "ALLY", "target": "arch:CE-PWYLL", "notes": "Exchange of realms, lasting friendship"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HADES", "fidelity": 0.6, "sharedAspects": ["underworld-king", "not-evil"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:NO-ODIN", "fidelity": 0.5, "sharedAspects": ["wild-hunt", "otherworld-ruler"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-EARTH",
+        "planet": "7P-SATURN",
+        "tarot": "TAMA-DEATH",
+        "chakra": "CH-MULADHARA",
+        "season": "Autumn, Samhain"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Mabinogion (First Branch)"],
+        "tradition": "Welsh",
+        "confidence": 0.85
+      }
+    },
+
+    {
+      "@id": "arch:CE-BALOR",
+      "@type": "Archetype",
+      "name": "Balor",
+      "aliases": ["Balor of the Evil Eye", "Balor of the Mighty Blows"],
+      "epithets": ["Balor of the Piercing Eye", "King of the Fomorians"],
+      "description": "Giant king of the Fomorians with a single enormous eye that, when opened, destroys everything in its gaze. Grandfather of Lugh, destined to be slain by him. Represents the destructive forces of chaos, blight, and drought—the monstrous other that must be overcome.",
+      "gender": "masculine",
+      "domain": ["destruction", "chaos", "blight", "drought", "tyranny"],
+      "symbols": ["evil eye", "single eye", "giant's size"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.85,
+        "creation-destruction": 0.9,
+        "light-shadow": 0.8,
+        "active-receptive": 0.2,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.6,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.85
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:monster", "weight": 0.85, "aspects": ["giant", "chaos-bringer", "destroyer"]},
+        {"primordial": "primordial:destroyer", "weight": 0.8, "aspects": ["eye-that-kills", "blight-bringer"]},
+        {"primordial": "primordial:sovereign", "weight": 0.5, "aspects": ["tyrant-king"]}
+      ],
+
+      "temporalOrientation": "past",
+
+      "shadowDynamics": {
+        "activationConditions": ["N/A - Balor represents the shadow/chaos itself"],
+        "shadowManifestations": ["Destructive gaze", "Tyranny", "Chaos unchecked"],
+        "integrationPath": "Must be slain by light (Lugh) for order to prevail"
+      },
+
+      "relationships": [
+        {"type": "POLAR_OPPOSITE", "target": "arch:CE-LUGH", "axis": "order-chaos", "strength": 0.9, "notes": "Light vs darkness, order vs chaos"},
+        {"type": "ANTAGONIST", "target": "arch:CE-LUGH", "narrativeRole": "Destined to be slain by grandson"},
+        {"type": "CULTURAL_ECHO", "target": "arch:NO-FENRIR", "fidelity": 0.5, "sharedAspects": ["chaos-monster", "destined-battle"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-TYPHON", "fidelity": 0.6, "sharedAspects": ["chaos-giant", "enemy-of-order"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-FIRE",
+        "planet": "7P-SATURN",
+        "tarot": "TAMA-TOWER",
+        "color": "red (evil eye)"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Cath Maige Tuired"],
+        "tradition": "Irish",
+        "confidence": 0.9
+      }
+    }
+  ],
+
+  "systemRelationships": [
+    {
+      "@type": "SystemPattern",
+      "pattern": "Tuatha Dé Danann",
+      "participants": ["arch:CE-DAGDA", "arch:CE-BRIGID", "arch:CE-LUGH", "arch:CE-NUADA", "arch:CE-MORRIGAN", "arch:CE-DANU"],
+      "dynamic": "The divine tribe—gods as ancestors who retreat to síd mounds after mortal invasion",
+      "narrativeFunction": "Irish divine pantheon; source of Irish identity"
+    },
+    {
+      "@type": "SystemPattern",
+      "pattern": "Battle of Mag Tuired",
+      "participants": ["arch:CE-LUGH", "arch:CE-BALOR", "arch:CE-NUADA", "arch:CE-DAGDA", "arch:CE-MORRIGAN"],
+      "dynamic": "Tuatha Dé Danann vs Fomorians; order vs chaos",
+      "narrativeFunction": "Central cosmic battle; establishment of divine order"
+    },
+    {
+      "@type": "SystemPattern",
+      "pattern": "Welsh Divine Family",
+      "participants": ["arch:CE-RHIANNON", "arch:CE-ARAWN", "arch:CE-MANANNÁN"],
+      "dynamic": "Otherworld connections and sovereignty themes",
+      "narrativeFunction": "Welsh mythology from Mabinogion"
+    }
+  ],
+
+  "metadata": {
+    "version": "1.0",
+    "created": "2025-01-18",
+    "schema": "ACP-ORAS-2.0",
+    "coverage": "Major Celtic deities (13 figures)",
+    "traditions": ["Irish", "Welsh", "Gaulish"],
+    "expansion_candidates": ["Ogma", "Dian Cécht", "Goibniu", "Boann", "Flidais", "Macha", "Badb", "Gwydion", "Math", "Lleu", "Blodeuwedd", "Pwyll", "Pryderi", "Taranis", "Esus", "Teutates"]
+  }
+}

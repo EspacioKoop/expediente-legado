@@ -1,0 +1,1077 @@
+{
+  "@context": "../../schema/ACP_CONTEXT.jsonld",
+  "@id": "system:IN",
+  "@type": "ArchetypeSystem",
+  "name": "Hindu Pantheon",
+  "description": "Deities from Vedic, Puranic, and Tantric traditions representing cosmic principles, natural forces, and the spectrum of consciousness. A living tradition spanning millennia with extraordinary philosophical depth. Gods are both personal beings and cosmic principles—immanent and transcendent simultaneously.",
+  "culturalOrigin": "Indian Subcontinent (Bhārata)",
+  "primarySources": ["Rigveda", "Upanishads", "Mahabharata", "Ramayana", "Puranas", "Tantras", "Bhagavad Gita"],
+  "temporalSpan": "c. 1500 BCE – present (living tradition)",
+  "cosmology": {
+    "structure": "Cyclical cosmic ages (yugas); multiple lokas (realms); Mount Meru as cosmic axis",
+    "creationMyth": "Multiple: Brahma emerges from Vishnu's navel; cosmic sacrifice of Purusha; Shiva's dance; emergence from Hiranyagarbha (golden egg)",
+    "eschatology": "Cyclical dissolution (pralaya) and recreation; individual moksha (liberation) transcends the cycle",
+    "keyRealms": ["Svarga (heaven)", "Bhumi (earth)", "Patala (underworld)", "Vaikuntha (Vishnu's realm)", "Kailasa (Shiva's realm)"]
+  },
+  "systemCharacteristics": {
+    "primaryThemes": ["dharma (cosmic order/duty)", "karma (action/consequence)", "moksha (liberation)", "maya (illusion)", "bhakti (devotion)", "shakti (divine energy)"],
+    "structuralFeatures": ["Trimurti (Creator-Preserver-Destroyer)", "Avatar system", "Devi as supreme shakti", "Non-dualism underlying multiplicity"],
+    "relationshipPatterns": ["Divine couples (god + shakti)", "Avatar incarnations", "Sectarian supremacy claims", "Cosmic dance"]
+  },
+
+  "entries": [
+    {
+      "@id": "arch:IN-BRAHMA",
+      "@type": "Archetype",
+      "name": "Brahma",
+      "aliases": ["Pitamaha", "Vidhi", "Svayambhu"],
+      "epithets": ["The Creator", "Grandfather", "Self-Born", "Lord of Speech"],
+      "description": "The Creator god of the Trimurti, born from the cosmic lotus emerging from Vishnu's navel. Created the universe, the Vedas, and all beings. Paradoxically, the least worshipped of the Trimurti—creation, once done, recedes from devotional focus.",
+      "gender": "masculine",
+      "domain": ["creation", "knowledge", "Vedas", "speech", "time"],
+      "symbols": ["four heads", "lotus", "Vedas", "rosary (mala)", "water pot (kamandalu)", "swan (hamsa)"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.2,
+        "creation-destruction": 0.1,
+        "light-shadow": 0.25,
+        "active-receptive": 0.35,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.3,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.4
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.95, "aspects": ["world-maker", "Veda-revealer", "cosmic-architect"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.6, "aspects": ["grandfather", "knowledge-holder"]}
+      ],
+
+      "temporalOrientation": "cyclical",
+
+      "shadowDynamics": {
+        "activationConditions": ["When creation becomes attachment", "When desire (for Saraswati) overcomes wisdom"],
+        "shadowManifestations": ["Cursed creator (loses worship)", "Desire-driven", "Distant originator"],
+        "integrationPath": "Creation as selfless act; knowledge without attachment"
+      },
+
+      "relationships": [
+        {"type": "COMPLEMENT", "target": "arch:IN-SARASWATI", "dynamic": "Creator and Knowledge/Arts", "strength": 0.85},
+        {"type": "CONSTELLATION", "targets": ["arch:IN-BRAHMA", "arch:IN-VISHNU", "arch:IN-SHIVA"], "pattern": "Trimurti"},
+        {"type": "CULTURAL_ECHO", "target": "arch:ME-ENKI", "fidelity": 0.5, "sharedAspects": ["creation", "knowledge", "waters"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-PTAH", "fidelity": 0.55, "sharedAspects": ["creation-through-word", "cosmic-architect"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-WATER",
+        "planet": "7P-JUPITER",
+        "tarot": "TAMA-MAGICIAN",
+        "chakra": "CH-SAHASRARA",
+        "color": ["red", "gold"],
+        "direction": "East",
+        "number": 4
+      },
+
+      "metadata": {
+        "canonicalSources": ["Brahma Purana", "Rigveda", "Vishnu Purana"],
+        "iconography": "Four-headed god with white beard, seated on lotus, holding Vedas",
+        "cultCenters": ["Pushkar (rare Brahma temple)"],
+        "confidence": 0.9
+      }
+    },
+
+    {
+      "@id": "arch:IN-VISHNU",
+      "@type": "Archetype",
+      "name": "Vishnu",
+      "aliases": ["Narayana", "Hari", "Madhava", "Kesava"],
+      "epithets": ["The Preserver", "He Who Pervades", "Lord of the Universe", "Husband of Lakshmi"],
+      "description": "The Preserver of the Trimurti who maintains cosmic order (dharma). Descends as avatars whenever dharma declines. Blue-skinned, four-armed, reclining on the cosmic serpent Shesha. Represents the sustaining, protecting, balance-maintaining force of the cosmos.",
+      "gender": "masculine",
+      "domain": ["preservation", "protection", "dharma", "cosmic order", "avatars", "compassion"],
+      "symbols": ["conch (shankha)", "discus (chakra)", "mace (gada)", "lotus", "Garuda (eagle mount)", "Shesha (cosmic serpent)"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.2,
+        "active-receptive": 0.4,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.3,
+        "voluntary-fated": 0.35
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:preserver", "weight": 0.95, "aspects": ["cosmic-maintainer", "dharma-protector", "balance-keeper"]},
+        {"primordial": "primordial:sovereign", "weight": 0.8, "aspects": ["cosmic-king", "supreme-lord"]},
+        {"primordial": "primordial:hero", "weight": 0.6, "aspects": ["avatar-descender", "demon-slayer"]}
+      ],
+
+      "temporalOrientation": "eternal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When preservation becomes stagnation", "When order becomes oppression"],
+        "shadowManifestations": ["Distant lord", "Rigid order-keeper", "Wrathful destroyer (in extreme)"],
+        "integrationPath": "Preservation that allows growth; order that serves life"
+      },
+
+      "relationships": [
+        {"type": "COMPLEMENT", "target": "arch:IN-LAKSHMI", "dynamic": "Preserver and Prosperity", "strength": 0.95},
+        {"type": "CONSTELLATION", "targets": ["arch:IN-BRAHMA", "arch:IN-VISHNU", "arch:IN-SHIVA"], "pattern": "Trimurti"},
+        {"type": "CONTAINS", "target": "arch:IN-RAMA", "notes": "Seventh avatar"},
+        {"type": "CONTAINS", "target": "arch:IN-KRISHNA", "notes": "Eighth avatar"},
+        {"type": "POLAR_OPPOSITE", "target": "arch:IN-SHIVA", "axis": "stasis-transformation", "strength": 0.7, "notes": "Complementary opposition within Trimurti"},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-OSIRIS", "fidelity": 0.5, "sharedAspects": ["cosmic-order", "resurrection"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ZEUS", "fidelity": 0.45, "sharedAspects": ["supreme-god", "cosmic-order"]}
+      ],
+
+      "contextualVariants": [
+        {
+          "context": "Reclining on Shesha (cosmic sleep)",
+          "spectralShift": {"active-receptive": 0.7, "stasis-transformation": 0.2},
+          "notes": "Between cosmic cycles, dreaming the universe"
+        },
+        {
+          "context": "Narasimha (man-lion avatar)",
+          "spectralShift": {"creation-destruction": 0.7, "order-chaos": 0.5},
+          "notes": "Fierce protection, liminal form"
+        }
+      ],
+
+      "correspondences": {
+        "element": "EL-WATER",
+        "planet": "7P-JUPITER",
+        "tarot": ["TAMA-EMPEROR", "TAMA-WORLD"],
+        "chakra": "CH-ANAHATA",
+        "color": "blue",
+        "day": "Thursday",
+        "number": 4
+      },
+
+      "metadata": {
+        "canonicalSources": ["Vishnu Purana", "Bhagavata Purana", "Bhagavad Gita"],
+        "iconography": "Blue-skinned, four-armed, holding conch/discus/mace/lotus",
+        "cultCenters": ["Tirupati", "Puri", "Badrinath", "Srirangam"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:IN-SHIVA",
+      "@type": "Archetype",
+      "name": "Shiva",
+      "aliases": ["Mahadeva", "Maheshvara", "Rudra", "Nataraja", "Shankara"],
+      "epithets": ["The Destroyer", "The Auspicious One", "Lord of the Dance", "Great Ascetic", "Lord of Yoga"],
+      "description": "The Transformer/Destroyer of the Trimurti, but destruction in service of renewal. Both supreme ascetic and passionate lover. Dances the Tandava that creates and destroys universes. Embodies all paradoxes: ascetic/householder, fierce/gentle, destroyer/creator, male/female (Ardhanarishvara).",
+      "gender": "masculine",
+      "domain": ["destruction", "transformation", "yoga", "asceticism", "dance", "time", "death", "rebirth"],
+      "symbols": ["trident (trishula)", "drum (damaru)", "third eye", "crescent moon", "Ganges (in hair)", "snake", "tiger skin", "ashes"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.5,
+        "creation-destruction": 0.65,
+        "light-shadow": 0.5,
+        "active-receptive": 0.4,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.85,
+        "voluntary-fated": 0.3
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:destroyer", "weight": 0.85, "aspects": ["cosmic-dissolution", "ego-death", "transformation"]},
+        {"primordial": "primordial:magician", "weight": 0.8, "aspects": ["yogi", "ascetic", "master-of-consciousness"]},
+        {"primordial": "primordial:lover", "weight": 0.6, "aspects": ["Parvati's consort", "erotic-ascetic paradox"]},
+        {"primordial": "primordial:creator", "weight": 0.5, "aspects": ["Nataraja-dance creates", "linga-generative"]}
+      ],
+
+      "temporalOrientation": "eternal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When destruction becomes rage (Rudra)", "When asceticism becomes cold rejection", "When power burns without purpose"],
+        "shadowManifestations": ["Bhairava (terrifying form)", "Rudra (howler)", "Wrathful destroyer"],
+        "integrationPath": "Destruction in service of liberation; fire that purifies not merely burns"
+      },
+
+      "relationships": [
+        {"type": "COMPLEMENT", "target": "arch:IN-PARVATI", "dynamic": "Shiva-Shakti union", "strength": 0.95},
+        {"type": "COMPLEMENT", "target": "arch:IN-SHAKTI", "dynamic": "Consciousness and Energy", "strength": 0.9},
+        {"type": "CONSTELLATION", "targets": ["arch:IN-BRAHMA", "arch:IN-VISHNU", "arch:IN-SHIVA"], "pattern": "Trimurti"},
+        {"type": "PARENT", "target": "arch:IN-GANESHA"},
+        {"type": "PARENT", "target": "arch:IN-KARTIKEYA"},
+        {"type": "POLAR_OPPOSITE", "target": "arch:IN-VISHNU", "axis": "stasis-transformation", "strength": 0.7},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-DIONYSUS", "fidelity": 0.6, "sharedAspects": ["death-rebirth", "ecstasy", "paradox"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:NO-ODIN", "fidelity": 0.5, "sharedAspects": ["ascetic", "wisdom-seeker", "death-associated"]}
+      ],
+
+      "contextualVariants": [
+        {
+          "context": "Nataraja (Lord of Dance)",
+          "spectralShift": {"creation-destruction": 0.5, "stasis-transformation": 0.95},
+          "notes": "Cosmic dance that creates and destroys simultaneously"
+        },
+        {
+          "context": "Dakshinamurti (silent teacher)",
+          "spectralShift": {"active-receptive": 0.7, "order-chaos": 0.2},
+          "notes": "Teaching through silence, supreme guru"
+        },
+        {
+          "context": "Bhairava (terrifying)",
+          "spectralShift": {"order-chaos": 0.7, "creation-destruction": 0.9, "light-shadow": 0.75},
+          "notes": "Wrathful protector, time-devourer"
+        },
+        {
+          "context": "Ardhanarishvara",
+          "spectralShift": {"active-receptive": 0.5, "individual-collective": 0.5},
+          "notes": "Half-male half-female, unity of polarities"
+        }
+      ],
+
+      "correspondences": {
+        "element": "EL-FIRE",
+        "planet": "7P-SATURN",
+        "tarot": ["TAMA-DEATH", "TAMA-TOWER", "TAMA-HERMIT"],
+        "chakra": "CH-AJNA",
+        "color": ["white (ash)", "blue (throat)", "red (Rudra)"],
+        "day": "Monday",
+        "direction": "North (Kailasa)"
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["need for transformation", "ego-death required", "cosmic dissolution", "spiritual awakening"],
+        "typicalArc": "ASCETIC ↔ HOUSEHOLDER / CREATOR ↔ DESTROYER (paradox, not sequence)",
+        "storyFunctions": ["transformer", "liberator", "paradox-holder"],
+        "dramaticTension": "Can destruction be love? Can renunciation embrace the world?"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Shiva Purana", "Linga Purana", "Shaiva Agamas"],
+        "iconography": "Ash-smeared ascetic with third eye, trident, drum, crescent moon in matted hair",
+        "cultCenters": ["Varanasi", "Kedarnath", "Pashupatinath", "Chidambaram"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:IN-SHAKTI",
+      "@type": "Archetype",
+      "name": "Shakti",
+      "aliases": ["Devi", "Mahadevi", "Adi Parashakti"],
+      "epithets": ["Divine Energy", "Supreme Goddess", "Mother of the Universe", "Power Itself"],
+      "description": "The primordial cosmic energy, the divine feminine power that activates and animates all existence. Without Shakti, Shiva is shava (corpse). She is both the transcendent Goddess and the immanent power in all things. Manifests as all goddesses—Durga, Kali, Lakshmi, Saraswati, Parvati.",
+      "gender": "feminine",
+      "domain": ["energy", "power", "creation", "destruction", "all manifestation", "consciousness-activation"],
+      "symbols": ["yoni", "lotus", "all goddess symbols"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.5,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.5,
+        "active-receptive": 0.35,
+        "individual-collective": 0.6,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.4
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.9, "aspects": ["cosmic-mother", "all-source", "nurturer-destroyer"]},
+        {"primordial": "primordial:creator", "weight": 0.75, "aspects": ["energy-that-manifests", "maya-weaver"]},
+        {"primordial": "primordial:destroyer", "weight": 0.7, "aspects": ["Kali-form", "dissolution"]}
+      ],
+
+      "temporalOrientation": "eternal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When power becomes domination", "When energy serves ego", "When the mother devours"],
+        "shadowManifestations": ["Devouring mother", "Chaos unbound", "Power without wisdom"],
+        "integrationPath": "Power in service of liberation; energy guided by consciousness"
+      },
+
+      "relationships": [
+        {"type": "COMPLEMENT", "target": "arch:IN-SHIVA", "dynamic": "Energy and Consciousness", "strength": 0.95},
+        {"type": "CONTAINS", "target": "arch:IN-DURGA"},
+        {"type": "CONTAINS", "target": "arch:IN-KALI"},
+        {"type": "CONTAINS", "target": "arch:IN-LAKSHMI"},
+        {"type": "CONTAINS", "target": "arch:IN-SARASWATI"},
+        {"type": "CONTAINS", "target": "arch:IN-PARVATI"},
+        {"type": "CULTURAL_ECHO", "target": "arch:ME-INANNA", "fidelity": 0.55, "sharedAspects": ["goddess-supreme", "multiple-aspects"]}
+      ],
+
+      "correspondences": {
+        "element": "all",
+        "planet": "7P-MOON",
+        "tarot": ["TAMA-EMPRESS", "TAMA-HIGH-PRIESTESS", "TAMA-STRENGTH"],
+        "chakra": "all (as kundalini)",
+        "color": ["red", "gold", "white", "black"]
+      },
+
+      "metadata": {
+        "canonicalSources": ["Devi Mahatmya", "Devi Bhagavata Purana", "Shakta Tantras"],
+        "iconography": "Varies by form—universal goddess energy",
+        "cultCenters": ["Shakti Peethas throughout India"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:IN-DURGA",
+      "@type": "Archetype",
+      "name": "Durga",
+      "aliases": ["Mahishasuramardini", "Chandika", "Ambika"],
+      "epithets": ["The Invincible", "Slayer of the Buffalo Demon", "She Who Is Difficult to Approach"],
+      "description": "Warrior goddess created from the combined powers of all gods to defeat the demon Mahishasura, whom no male could kill. Rides a lion/tiger, wields weapons of all gods. Embodies fierce protection, righteous wrath, and the victory of dharma over adharma.",
+      "gender": "feminine",
+      "domain": ["war", "protection", "dharma", "victory", "motherhood", "fierce love"],
+      "symbols": ["lion/tiger mount", "multiple arms (8-18)", "weapons of all gods", "trident", "discus"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.6,
+        "light-shadow": 0.3,
+        "active-receptive": 0.15,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.25
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:warrior", "weight": 0.9, "aspects": ["demon-slayer", "dharma-protector", "fierce-goddess"]},
+        {"primordial": "primordial:great-mother", "weight": 0.7, "aspects": ["fierce-protector", "Ma Durga"]}
+      ],
+
+      "temporalOrientation": "present",
+
+      "shadowDynamics": {
+        "activationConditions": ["When protection becomes destruction", "When wrath loses purpose"],
+        "shadowManifestations": ["Kali emerging (further transformation)", "Uncontrollable rage"],
+        "integrationPath": "Fierceness in service of love; destruction only of what must be destroyed"
+      },
+
+      "relationships": [
+        {"type": "ASPECT_OF", "target": "arch:IN-SHAKTI"},
+        {"type": "ASPECT_OF", "target": "arch:IN-PARVATI", "notes": "Fierce aspect"},
+        {"type": "EVOLUTION", "target": "arch:IN-KALI", "trigger": "When rage exceeds even Durga's form", "direction": "forward"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ATHENA", "fidelity": 0.6, "sharedAspects": ["warrior-goddess", "strategic", "protector"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-SEKHMET", "fidelity": 0.65, "sharedAspects": ["lioness", "war", "fierce-protection"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-FIRE",
+        "planet": "7P-MARS",
+        "tarot": "TAMA-STRENGTH",
+        "chakra": "CH-MANIPURA",
+        "color": ["red", "gold"],
+        "festival": "Navaratri/Durga Puja"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Devi Mahatmya", "Markandeya Purana"],
+        "iconography": "Multi-armed goddess on lion, slaying buffalo demon",
+        "cultCenters": ["Bengal (paramount)", "Vaishno Devi"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:IN-KALI",
+      "@type": "Archetype",
+      "name": "Kali",
+      "aliases": ["Kalika", "Mahakali", "Shyama"],
+      "epithets": ["The Black One", "Dark Mother", "Slayer of Ego", "Time Herself"],
+      "description": "The terrifying goddess of time, death, and liberation. Black-skinned, blood-drenched, dancing on Shiva, wearing a garland of skulls and skirt of severed arms. Emerged from Durga's forehead to drink demon blood. Destroys ego, grants liberation. Paradoxically, the most loving mother—love that destroys illusion.",
+      "gender": "feminine",
+      "domain": ["time", "death", "ego-destruction", "liberation", "fierce compassion", "transformation"],
+      "symbols": ["sword", "severed head", "skull bowl", "tongue", "garland of skulls", "skirt of arms"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.7,
+        "creation-destruction": 0.9,
+        "light-shadow": 0.75,
+        "active-receptive": 0.1,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.7,
+        "stasis-transformation": 0.95,
+        "voluntary-fated": 0.5
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:destroyer", "weight": 0.95, "aspects": ["time-devourer", "ego-slayer", "liberation-bringer"]},
+        {"primordial": "primordial:great-mother", "weight": 0.7, "aspects": ["dark-mother", "fierce-love", "death-mother"]},
+        {"primordial": "primordial:crone", "weight": 0.6, "aspects": ["time-keeper", "death-wisdom"]}
+      ],
+
+      "temporalOrientation": "eternal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When destruction becomes nihilism", "When fierce love loses love"],
+        "shadowManifestations": ["Pure destruction without purpose", "Death without rebirth"],
+        "integrationPath": "Destruction as liberation; death as doorway"
+      },
+
+      "relationships": [
+        {"type": "ASPECT_OF", "target": "arch:IN-SHAKTI"},
+        {"type": "EVOLUTION", "target": "arch:IN-DURGA", "notes": "Emerges from Durga when more destruction needed"},
+        {"type": "COMPLEMENT", "target": "arch:IN-SHIVA", "dynamic": "Dancing on Shiva—active/passive, energy/consciousness"},
+        {"type": "POLAR_OPPOSITE", "target": "arch:IN-LAKSHMI", "axis": "creation-destruction", "strength": 0.85},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-SEKHMET", "fidelity": 0.7, "sharedAspects": ["bloodlust", "unstoppable-rage", "needs-appeasing"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:ME-ERESHKIGAL", "fidelity": 0.5, "sharedAspects": ["dark-goddess", "death", "underworld"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-FIRE",
+        "planet": "7P-SATURN",
+        "tarot": ["TAMA-DEATH", "TAMA-TOWER"],
+        "chakra": "CH-MULADHARA",
+        "color": "black",
+        "time": "Midnight, new moon, dark fortnight"
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["ego must die", "demon invincible to all else", "time of dissolution"],
+        "typicalArc": "EMERGES → DESTROYS → INTOXICATED → CALMED (by Shiva) → LIBERATES",
+        "storyFunctions": ["ultimate destroyer", "ego-slayer", "liberator"],
+        "dramaticTension": "Can destruction be love? Can terror be compassion?"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Devi Mahatmya", "Tantras", "Kali Puja traditions"],
+        "iconography": "Black goddess, bloodied sword, severed head, tongue extended, dancing on Shiva",
+        "cultCenters": ["Kalighat (Kolkata)", "Dakshineswar", "Tarapith"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:IN-LAKSHMI",
+      "@type": "Archetype",
+      "name": "Lakshmi",
+      "aliases": ["Shri", "Mahalakshmi", "Kamala"],
+      "epithets": ["Goddess of Wealth", "Lotus Goddess", "Fortune", "She Who Has Auspicious Signs"],
+      "description": "Goddess of wealth, fortune, prosperity, beauty, and grace. Emerged from the churning of the cosmic ocean. Consort of Vishnu, accompanying him in all avatars. Represents both material and spiritual abundance, the fullness of life, auspiciousness itself.",
+      "gender": "feminine",
+      "domain": ["wealth", "prosperity", "beauty", "grace", "fertility", "abundance"],
+      "symbols": ["lotus", "gold coins", "elephants", "owl (vahana)", "pot of wealth"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.2,
+        "light-shadow": 0.2,
+        "active-receptive": 0.6,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.35,
+        "voluntary-fated": 0.4
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.75, "aspects": ["abundance-giver", "nurturer"]},
+        {"primordial": "primordial:lover", "weight": 0.65, "aspects": ["Vishnu's consort", "devotion"]},
+        {"primordial": "primordial:preserver", "weight": 0.5, "aspects": ["prosperity-maintainer", "fortune-sustainer"]}
+      ],
+
+      "temporalOrientation": "present",
+
+      "shadowDynamics": {
+        "activationConditions": ["When wealth becomes attachment", "When fortune becomes pride", "When abundance serves ego"],
+        "shadowManifestations": ["Alakshmi (misfortune, anti-Lakshmi)", "Greed", "Vanity"],
+        "integrationPath": "Wealth as stewardship; prosperity shared; beauty as grace not pride"
+      },
+
+      "relationships": [
+        {"type": "COMPLEMENT", "target": "arch:IN-VISHNU", "dynamic": "Preserver and Prosperity", "strength": 0.95},
+        {"type": "ASPECT_OF", "target": "arch:IN-SHAKTI"},
+        {"type": "POLAR_OPPOSITE", "target": "arch:IN-KALI", "axis": "creation-destruction", "strength": 0.85},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-APHRODITE", "fidelity": 0.55, "sharedAspects": ["beauty", "from-ocean", "love"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:ME-INANNA", "fidelity": 0.4, "sharedAspects": ["storehouse", "abundance"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-WATER",
+        "planet": "7P-VENUS",
+        "tarot": "TAMA-EMPRESS",
+        "chakra": "CH-SVADHISTHANA",
+        "color": ["red", "gold", "pink"],
+        "festival": "Diwali"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Vishnu Purana", "Sri Suktam", "Bhagavata Purana"],
+        "iconography": "Beautiful goddess on lotus, coins flowing from hands, flanked by elephants",
+        "cultCenters": ["All Vishnu temples", "Kolhapur"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:IN-SARASWATI",
+      "@type": "Archetype",
+      "name": "Saraswati",
+      "aliases": ["Vak", "Bharati", "Sharada"],
+      "epithets": ["Goddess of Knowledge", "Lady of the Flowing Waters", "She Who Flows", "Mother of the Vedas"],
+      "description": "Goddess of knowledge, music, arts, speech, and learning. Pure white, seated on lotus or swan, playing the vina. Represents the flowing nature of wisdom, creativity, and articulate expression. Originally a river goddess whose waters symbolize the flow of knowledge.",
+      "gender": "feminine",
+      "domain": ["knowledge", "music", "arts", "speech", "learning", "wisdom", "creativity"],
+      "symbols": ["vina (stringed instrument)", "book (Vedas)", "rosary (mala)", "water pot", "swan (hamsa)", "lotus"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.2,
+        "creation-destruction": 0.3,
+        "light-shadow": 0.15,
+        "active-receptive": 0.55,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.35
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:magician", "weight": 0.8, "aspects": ["knowledge-holder", "word-power", "creative-arts"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.65, "aspects": ["wisdom-embodiment", "teacher"]}
+      ],
+
+      "temporalOrientation": "eternal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When knowledge becomes pride", "When learning serves ego", "When art lacks heart"],
+        "shadowManifestations": ["Intellectual arrogance", "Cold knowledge", "Sterile creativity"],
+        "integrationPath": "Knowledge in service of truth; art that elevates"
+      },
+
+      "relationships": [
+        {"type": "COMPLEMENT", "target": "arch:IN-BRAHMA", "dynamic": "Creator and Knowledge", "strength": 0.85},
+        {"type": "ASPECT_OF", "target": "arch:IN-SHAKTI"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ATHENA", "fidelity": 0.65, "sharedAspects": ["wisdom", "arts", "learning"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-THOTH", "fidelity": 0.55, "sharedAspects": ["knowledge", "writing", "speech"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-WATER",
+        "planet": "7P-MERCURY",
+        "tarot": "TAMA-HIGH-PRIESTESS",
+        "chakra": "CH-VISHUDDHA",
+        "color": "white",
+        "festival": "Vasant Panchami"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Rigveda", "Saraswati Stotram", "Brahmavaivarta Purana"],
+        "iconography": "White-clad goddess on lotus or swan, playing vina",
+        "cultCenters": ["Widespread", "Kashmir (Sharada Peeth)"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:IN-PARVATI",
+      "@type": "Archetype",
+      "name": "Parvati",
+      "aliases": ["Uma", "Gauri", "Himavati"],
+      "epithets": ["Daughter of the Mountain", "The Gentle", "The Golden One"],
+      "description": "Goddess of fertility, love, devotion, and divine marriage. Daughter of Himavan (Himalayas), won Shiva through intense tapas (austerity). Represents the devoted feminine that draws the divine masculine back from renunciation into engagement with the world. The gentle counterpart to Shiva's fierce aspects.",
+      "gender": "feminine",
+      "domain": ["love", "marriage", "fertility", "devotion", "motherhood", "domesticity"],
+      "symbols": ["lotus", "mirror", "mountain", "lion (sometimes)"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.25,
+        "active-receptive": 0.6,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.35
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.8, "aspects": ["mother-of-Ganesha-Kartikeya", "nurturer"]},
+        {"primordial": "primordial:lover", "weight": 0.85, "aspects": ["Shiva's beloved", "sacred-marriage"]},
+        {"primordial": "primordial:maiden", "weight": 0.5, "aspects": ["tapas-practitioner (early)", "devotion"]}
+      ],
+
+      "temporalOrientation": "present",
+
+      "shadowDynamics": {
+        "activationConditions": ["When devotion becomes dependency", "When gentleness enables harm"],
+        "shadowManifestations": ["Durga (fierce aspect)", "Kali (terrifying aspect)", "Passive enabler"],
+        "integrationPath": "Devotion with agency; gentleness with strength"
+      },
+
+      "relationships": [
+        {"type": "COMPLEMENT", "target": "arch:IN-SHIVA", "dynamic": "Divine marriage, householder-ascetic", "strength": 0.95},
+        {"type": "ASPECT_OF", "target": "arch:IN-SHAKTI"},
+        {"type": "CONTAINS", "target": "arch:IN-DURGA", "notes": "Fierce aspect"},
+        {"type": "CONTAINS", "target": "arch:IN-KALI", "notes": "Terrifying aspect"},
+        {"type": "PARENT", "target": "arch:IN-GANESHA"},
+        {"type": "PARENT", "target": "arch:IN-KARTIKEYA"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HERA", "fidelity": 0.45, "sharedAspects": ["divine-wife", "marriage"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-EARTH",
+        "planet": "7P-MOON",
+        "tarot": "TAMA-EMPRESS",
+        "chakra": "CH-ANAHATA",
+        "color": ["green", "gold"],
+        "mountain": "Himalayas"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Shiva Purana", "Kumarasambhava"],
+        "iconography": "Beautiful goddess, often with Shiva, golden/green",
+        "cultCenters": ["As Shakti Peethas", "Kamakhya"],
+        "confidence": 0.9
+      }
+    },
+
+    {
+      "@id": "arch:IN-GANESHA",
+      "@type": "Archetype",
+      "name": "Ganesha",
+      "aliases": ["Ganapati", "Vinayaka", "Vighnaharta"],
+      "epithets": ["Remover of Obstacles", "Lord of Beginnings", "Lord of the Ganas", "Elephant-Headed God"],
+      "description": "Elephant-headed god of beginnings, wisdom, and obstacle removal. Son of Shiva and Parvati, head replaced with elephant after Shiva beheaded him unknowingly. Invoked at the start of all undertakings. Represents the paradox of the obstacle that is also the path—removing obstacles or placing them to redirect.",
+      "gender": "masculine",
+      "domain": ["beginnings", "obstacles", "wisdom", "writing", "arts", "success", "threshold"],
+      "symbols": ["elephant head", "broken tusk", "modak (sweet)", "mouse (vahana)", "axe", "noose"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.3,
+        "active-receptive": 0.45,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.45,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.35
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:trickster", "weight": 0.6, "aspects": ["obstacle-placer-remover", "paradox-holder"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.7, "aspects": ["wisdom", "scribe-of-Mahabharata"]},
+        {"primordial": "primordial:divine-child", "weight": 0.5, "aspects": ["son-of-Shiva-Parvati", "beloved"]}
+      ],
+
+      "temporalOrientation": "present",
+
+      "shadowDynamics": {
+        "activationConditions": ["When obstacle-removal becomes avoidance", "When beginnings never complete"],
+        "shadowManifestations": ["Obstacle-placer (to wrong paths)", "Eternal beginner"],
+        "integrationPath": "Obstacles as teachings; beginnings that lead to completions"
+      },
+
+      "relationships": [
+        {"type": "CHILD_OF", "target": "arch:IN-SHIVA"},
+        {"type": "CHILD_OF", "target": "arch:IN-PARVATI"},
+        {"type": "SIBLING", "target": "arch:IN-KARTIKEYA"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HERMES", "fidelity": 0.5, "sharedAspects": ["threshold", "trickster", "crossroads"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-THOTH", "fidelity": 0.45, "sharedAspects": ["wisdom", "writing", "scribe"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-EARTH",
+        "planet": "7P-MERCURY",
+        "tarot": ["TAMA-FOOL", "TAMA-MAGICIAN"],
+        "chakra": "CH-MULADHARA",
+        "color": ["red", "orange"],
+        "festival": "Ganesh Chaturthi"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Ganesha Purana", "Mudgala Purana", "Shiva Purana"],
+        "iconography": "Elephant-headed god with pot belly, mouse at feet, holding modak and broken tusk",
+        "cultCenters": ["Ashtavinayak (Maharashtra)", "Siddhivinayak"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:IN-KRISHNA",
+      "@type": "Archetype",
+      "name": "Krishna",
+      "aliases": ["Vasudeva", "Govinda", "Madhava", "Keshava"],
+      "epithets": ["The Dark One", "Lord of the Universe", "Butter Thief", "Flute Player", "Charioteer"],
+      "description": "Eighth avatar of Vishnu, complete divine incarnation. Most beloved and complex deity: mischievous child, divine lover of the gopis, philosopher-king of the Bhagavad Gita, cosmic lord. Plays the flute that enchants all creation. Teaches dharma, devotion, and non-attachment while fully engaging with the world.",
+      "gender": "masculine",
+      "domain": ["love", "devotion", "dharma", "cosmic play (lila)", "music", "divine wisdom"],
+      "symbols": ["flute", "peacock feather", "cow", "butter pot", "Sudarshana chakra"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.4,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.3,
+        "active-receptive": 0.35,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.2
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:divine-child", "weight": 0.75, "aspects": ["mischievous-child", "butter-thief", "demon-slayer"]},
+        {"primordial": "primordial:lover", "weight": 0.85, "aspects": ["Radha's beloved", "gopi-enchanter", "divine-romance"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.7, "aspects": ["Gita-teacher", "dharma-instructor"]},
+        {"primordial": "primordial:trickster", "weight": 0.55, "aspects": ["lila-player", "butter-stealer", "cosmic-mischief"]},
+        {"primordial": "primordial:hero", "weight": 0.65, "aspects": ["demon-slayer", "Arjuna's charioteer"]}
+      ],
+
+      "temporalOrientation": "eternal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When play becomes manipulation", "When love becomes attachment"],
+        "shadowManifestations": ["Seducer", "Manipulator", "Cosmic indifference"],
+        "integrationPath": "Divine play with love; non-attachment without coldness"
+      },
+
+      "relationships": [
+        {"type": "AVATAR_OF", "target": "arch:IN-VISHNU"},
+        {"type": "COMPLEMENT", "target": "arch:IN-RADHA", "dynamic": "Divine love", "strength": 0.95},
+        {"type": "ALLY", "target": "arch:IN-ARJUNA", "notes": "Friend, charioteer, teacher"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-APOLLO", "fidelity": 0.4, "sharedAspects": ["music", "beauty", "youth"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-DIONYSUS", "fidelity": 0.5, "sharedAspects": ["ecstasy", "divine-play", "paradox"]}
+      ],
+
+      "contextualVariants": [
+        {
+          "context": "Child Krishna (Bal Krishna)",
+          "spectralShift": {"order-chaos": 0.55, "creation-destruction": 0.35},
+          "notes": "Mischievous, butter-stealing, demon-slaying child"
+        },
+        {
+          "context": "Lover Krishna (Vrindavan)",
+          "spectralShift": {"active-receptive": 0.45, "stasis-transformation": 0.45},
+          "notes": "Flute-player, rasa-lila, Radha's beloved"
+        },
+        {
+          "context": "King/Teacher Krishna (Dwarka/Kurukshetra)",
+          "spectralShift": {"order-chaos": 0.25, "individual-collective": 0.6},
+          "notes": "Philosopher-king, Gita-teacher, statesman"
+        },
+        {
+          "context": "Cosmic Krishna (Vishvarupa)",
+          "spectralShift": {"creation-destruction": 0.6, "stasis-transformation": 0.8, "individual-collective": 0.9},
+          "notes": "Universal form revealed to Arjuna"
+        }
+      ],
+
+      "correspondences": {
+        "element": "EL-AIR",
+        "planet": "7P-VENUS",
+        "tarot": ["TAMA-LOVERS", "TAMA-FOOL", "TAMA-HIEROPHANT"],
+        "chakra": "CH-ANAHATA",
+        "color": ["blue (skin)", "yellow (dhoti)", "peacock colors"],
+        "festival": "Janmashtami"
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["need for divine love", "dharmic confusion", "cosmic play", "liberation"],
+        "typicalArc": "CHILD → LOVER → KING/TEACHER → DEPARTURE",
+        "storyFunctions": ["enchanter", "teacher", "friend", "cosmic lord"],
+        "dramaticTension": "How can the infinite love the finite? How can action be non-attached?"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Bhagavad Gita", "Bhagavata Purana", "Vishnu Purana", "Harivamsa"],
+        "iconography": "Blue-skinned youth with flute, peacock feather, often with Radha or gopis",
+        "cultCenters": ["Vrindavan", "Mathura", "Dwarka", "Puri"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:IN-RAMA",
+      "@type": "Archetype",
+      "name": "Rama",
+      "aliases": ["Ramachandra", "Raghava", "Dasharathi"],
+      "epithets": ["Maryada Purushottama (Perfect Man)", "Lord of Ayodhya", "Ideal King"],
+      "description": "Seventh avatar of Vishnu, hero of the Ramayana. Represents the ideal of dharma—perfect son, husband, brother, and king. Exiled for 14 years, rescued Sita from Ravana with Hanuman's help. The archetype of righteous duty, even when it conflicts with personal desire.",
+      "gender": "masculine",
+      "domain": ["dharma", "righteousness", "ideal kingship", "loyalty", "honor"],
+      "symbols": ["bow and arrow", "blue lotus", "monkey army"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.1,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.15,
+        "active-receptive": 0.25,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.35,
+        "voluntary-fated": 0.4
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:hero", "weight": 0.9, "aspects": ["dharmic-warrior", "exile-returner", "demon-slayer"]},
+        {"primordial": "primordial:sovereign", "weight": 0.85, "aspects": ["ideal-king", "Rama-rajya"]},
+        {"primordial": "primordial:lover", "weight": 0.65, "aspects": ["Sita's husband", "devoted-spouse"]}
+      ],
+
+      "temporalOrientation": "past",
+
+      "shadowDynamics": {
+        "activationConditions": ["When dharma becomes rigid", "When duty crushes love"],
+        "shadowManifestations": ["Cold righteousness", "Public duty over private love (Sita's exile)"],
+        "integrationPath": "Dharma with compassion; duty that does not destroy love"
+      },
+
+      "relationships": [
+        {"type": "AVATAR_OF", "target": "arch:IN-VISHNU"},
+        {"type": "COMPLEMENT", "target": "arch:IN-SITA", "dynamic": "Ideal husband-wife", "strength": 0.9},
+        {"type": "ALLY", "target": "arch:IN-HANUMAN", "dynamic": "Lord and supreme devotee", "strength": 0.95},
+        {"type": "ANTAGONIST", "target": "arch:IN-RAVANA", "narrativeRole": "Dharma vs adharma"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ODYSSEUS", "fidelity": 0.5, "sharedAspects": ["exile-return", "faithful-spouse", "heroic-journey"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-FIRE",
+        "planet": "7P-SUN",
+        "tarot": ["TAMA-JUSTICE", "TAMA-EMPEROR"],
+        "chakra": "CH-MANIPURA",
+        "color": ["blue (skin)", "saffron"],
+        "festival": "Diwali (return), Ram Navami (birth)"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Ramayana", "Ramcharitmanas"],
+        "iconography": "Blue-skinned prince with bow, often with Sita, Lakshmana, Hanuman",
+        "cultCenters": ["Ayodhya", "Rameswaram", "Hampi"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:IN-HANUMAN",
+      "@type": "Archetype",
+      "name": "Hanuman",
+      "aliases": ["Anjaneya", "Maruti", "Bajrangbali"],
+      "epithets": ["Son of the Wind", "Great Devotee", "Servant of Rama", "The Mighty"],
+      "description": "Monkey god, son of Vayu (wind), supreme devotee of Rama. Embodies bhakti (devotion), selfless service, and incredible strength wielded only for dharma. Leaped across the ocean to Lanka, carried a mountain to save Lakshmana. The ideal servant whose ego is dissolved in devotion.",
+      "gender": "masculine",
+      "domain": ["devotion", "strength", "service", "celibacy", "courage", "loyalty"],
+      "symbols": ["mace (gada)", "mountain", "monkey form", "Rama's name in heart"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.2,
+        "active-receptive": 0.2,
+        "individual-collective": 0.7,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.6
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:hero", "weight": 0.85, "aspects": ["strength", "courage", "impossible-feats"]},
+        {"primordial": "primordial:warrior", "weight": 0.8, "aspects": ["protector", "fighter-for-dharma"]},
+        {"primordial": "primordial:lover", "weight": 0.5, "aspects": ["devotion-as-love", "selfless-service"]}
+      ],
+
+      "temporalOrientation": "eternal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When strength forgets (childhood)", "When devotion becomes fanaticism"],
+        "shadowManifestations": ["Forgotten power", "Childish mischief (early)", "Blind devotion"],
+        "integrationPath": "Strength remembered for service; devotion with wisdom"
+      },
+
+      "relationships": [
+        {"type": "ALLY", "target": "arch:IN-RAMA", "dynamic": "Supreme devotee", "strength": 0.95},
+        {"type": "CHILD_OF", "target": "arch:IN-VAYU", "notes": "Son of Wind god"},
+        {"type": "CULTURAL_ECHO", "target": "arch:CN-SUN-WUKONG", "fidelity": 0.6, "sharedAspects": ["monkey", "supernatural-power", "devotion-to-master"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-AIR",
+        "planet": "7P-MARS",
+        "tarot": "TAMA-STRENGTH",
+        "chakra": "CH-ANAHATA",
+        "color": ["saffron", "red"],
+        "day": "Tuesday, Saturday"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Ramayana", "Hanuman Chalisa"],
+        "iconography": "Monkey-faced god with mace, often tearing open chest to reveal Rama-Sita",
+        "cultCenters": ["Widespread—most accessible deity"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:IN-INDRA",
+      "@type": "Archetype",
+      "name": "Indra",
+      "aliases": ["Shakra", "Vajrapani", "Purandara"],
+      "epithets": ["King of the Gods", "Lord of Storms", "Wielder of the Thunderbolt", "Slayer of Vritra"],
+      "description": "Vedic king of the gods, lord of storms, thunder, and war. Slew the serpent Vritra to release the cosmic waters. In later Hinduism, diminished—frequently humiliated by demons, saved by Vishnu/Shiva. Represents the old sky-father sovereignty that gave way to the Trimurti.",
+      "gender": "masculine",
+      "domain": ["storms", "thunder", "war", "kingship (of gods)", "rain"],
+      "symbols": ["thunderbolt (vajra)", "white elephant (Airavata)", "rainbow"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.35,
+        "active-receptive": 0.2,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.25,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.4
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.75, "aspects": ["king-of-gods", "throne-holder"]},
+        {"primordial": "primordial:warrior", "weight": 0.85, "aspects": ["storm-lord", "dragon-slayer"]},
+        {"primordial": "primordial:hero", "weight": 0.65, "aspects": ["Vritra-slayer", "champion"]}
+      ],
+
+      "temporalOrientation": "past",
+
+      "shadowDynamics": {
+        "activationConditions": ["When pride leads to fall", "When kingship is challenged"],
+        "shadowManifestations": ["Arrogant king", "Humiliated sovereign", "Jealous god"],
+        "integrationPath": "Kingship with humility; power under greater power"
+      },
+
+      "relationships": [
+        {"type": "PRECEDES", "target": "arch:IN-VISHNU", "notes": "Vedic supremacy yields to Puranic Vishnu"},
+        {"type": "ANTAGONIST", "target": "concept:VRITRA", "narrativeRole": "Dragon-slaying"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ZEUS", "fidelity": 0.75, "sharedAspects": ["sky-king", "thunder", "storm"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:NO-THOR", "fidelity": 0.7, "sharedAspects": ["thunder", "dragon-slayer", "warrior"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:ME-MARDUK", "fidelity": 0.6, "sharedAspects": ["chaos-dragon-slayer", "storm"]}
+      ],
+
+      "contextualVariants": [
+        {
+          "context": "Vedic Indra (supreme)",
+          "spectralShift": {"individual-collective": 0.3, "order-chaos": 0.25},
+          "notes": "Most important Vedic deity, cosmic champion"
+        },
+        {
+          "context": "Puranic Indra (diminished)",
+          "spectralShift": {"individual-collective": 0.5, "light-shadow": 0.5},
+          "notes": "Frequently humiliated, needs rescue by higher gods"
+        }
+      ],
+
+      "correspondences": {
+        "element": "EL-AIR",
+        "planet": "7P-JUPITER",
+        "tarot": "TAMA-EMPEROR",
+        "chakra": "CH-VISHUDDHA",
+        "color": "white",
+        "direction": "East",
+        "day": "Thursday"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Rigveda", "Puranas"],
+        "iconography": "Crowned king on white elephant, holding thunderbolt",
+        "cultCenters": ["Vedic ritual (historical)", "few temples"],
+        "confidence": 0.9
+      }
+    },
+
+    {
+      "@id": "arch:IN-YAMA",
+      "@type": "Archetype",
+      "name": "Yama",
+      "aliases": ["Dharmaraja", "Kala", "Mrityu"],
+      "epithets": ["Lord of Death", "King of Dharma", "First of Those Who Died"],
+      "description": "God of death and the underworld, lord of dharma (justice). The first mortal to die, he became king of the dead. Judges souls based on karma. Rides a black buffalo, wields a noose and mace. Represents the inescapable law of death and moral consequence.",
+      "gender": "masculine",
+      "domain": ["death", "underworld", "justice", "dharma", "ancestors"],
+      "symbols": ["buffalo (vahana)", "noose (pasha)", "mace (danda)", "scales"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.65,
+        "light-shadow": 0.6,
+        "active-receptive": 0.4,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.85,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.9
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:psychopomp", "weight": 0.8, "aspects": ["death-lord", "afterlife-ruler"]},
+        {"primordial": "primordial:sovereign", "weight": 0.7, "aspects": ["judge-of-dead", "dharma-king"]},
+        {"primordial": "primordial:crone", "weight": 0.5, "aspects": ["death-wisdom", "ending"]}
+      ],
+
+      "temporalOrientation": "eternal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When death becomes cruelty", "When judgment lacks mercy"],
+        "shadowManifestations": ["Merciless death", "Inescapable doom", "Cold law"],
+        "integrationPath": "Death as natural transition; judgment with compassion"
+      },
+
+      "relationships": [
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HADES", "fidelity": 0.7, "sharedAspects": ["underworld-ruler", "death-lord"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-OSIRIS", "fidelity": 0.6, "sharedAspects": ["judge-of-dead", "underworld-king"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:ME-ERESHKIGAL", "fidelity": 0.55, "sharedAspects": ["underworld-ruler"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-EARTH",
+        "planet": "7P-SATURN",
+        "tarot": ["TAMA-DEATH", "TAMA-JUSTICE"],
+        "chakra": "CH-MULADHARA",
+        "color": "black",
+        "direction": "South"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Rigveda", "Kathopanishad", "Garuda Purana"],
+        "iconography": "Green or black figure on buffalo, holding noose",
+        "cultCenters": ["No temples (feared)"],
+        "confidence": 0.9
+      }
+    }
+  ],
+
+  "systemRelationships": [
+    {
+      "@type": "SystemPattern",
+      "pattern": "Trimurti",
+      "participants": ["arch:IN-BRAHMA", "arch:IN-VISHNU", "arch:IN-SHIVA"],
+      "dynamic": "Creator-Preserver-Destroyer: cosmic cycle of manifestation",
+      "narrativeFunction": "Hindu cosmology; three aspects of one ultimate reality"
+    },
+    {
+      "@type": "SystemPattern",
+      "pattern": "Shiva-Shakti",
+      "participants": ["arch:IN-SHIVA", "arch:IN-SHAKTI", "arch:IN-PARVATI", "arch:IN-DURGA", "arch:IN-KALI"],
+      "dynamic": "Consciousness and Energy; masculine stillness activated by feminine power",
+      "narrativeFunction": "Tantra; gender theology; creation through union"
+    },
+    {
+      "@type": "SystemPattern",
+      "pattern": "Avatar System",
+      "participants": ["arch:IN-VISHNU", "arch:IN-RAMA", "arch:IN-KRISHNA"],
+      "dynamic": "Divine descent to restore dharma when it declines",
+      "narrativeFunction": "Hindu theodicy; divine engagement with human realm"
+    },
+    {
+      "@type": "SystemPattern",
+      "pattern": "Devi Forms",
+      "participants": ["arch:IN-SHAKTI", "arch:IN-DURGA", "arch:IN-KALI", "arch:IN-LAKSHMI", "arch:IN-SARASWATI", "arch:IN-PARVATI"],
+      "dynamic": "One Goddess manifesting as many; spectrum from gentle to fierce",
+      "narrativeFunction": "Divine feminine theology; Shaktism"
+    }
+  ],
+
+  "metadata": {
+    "version": "1.0",
+    "created": "2025-01-18",
+    "schema": "ACP-ORAS-2.0",
+    "coverage": "Major Hindu deities (16 figures)",
+    "expansion_candidates": ["Kartikeya/Murugan", "Radha", "Sita", "Ravana", "Agni", "Surya", "Varuna", "Vayu", "Kubera", "Dhanvantari", "Narasimha", "Vamana", "Parashurama", "Buddha avatar", "Kalki"]
+  }
+}

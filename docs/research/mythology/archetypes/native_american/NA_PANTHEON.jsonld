@@ -1,0 +1,615 @@
+{
+  "@context": "../../schema/ACP_CONTEXT.jsonld",
+  "@id": "pantheon:NA-PANTHEON",
+  "@type": "Pantheon",
+  "name": "Native American Spirit Beings and Culture Heroes",
+  "tradition": "Various Native American Traditions",
+  "description": "Sacred beings, culture heroes, and spiritual forces from diverse Native American traditions across North America. This collection represents figures from multiple nations (Lakota, Navajo, Ojibwe, Cherokee, Pacific Northwest, and others) while acknowledging that each nation has its own distinct traditions. These figures are presented with respect for their living spiritual significance.",
+  "canonicalSources": [
+    "Oral traditions (ongoing)",
+    "Ethnographic collections (with limitations)",
+    "Black Elk Speaks",
+    "Navajo ceremonial knowledge",
+    "Various tribal histories"
+  ],
+  "systemPatterns": [
+    {
+      "name": "Trickster Traditions",
+      "description": "Culture heroes/tricksters who bring gifts to humanity while causing trouble - Coyote, Raven, Iktomi, and others vary by region but share transformative roles",
+      "archetypes": ["arch:NA-COYOTE", "arch:NA-RAVEN", "arch:NA-IKTOMI"],
+      "pattern": "Trickster as culture-bringer and boundary-crosser"
+    },
+    {
+      "name": "Sky Powers",
+      "description": "The Thunderbirds and sky beings who bring storms and maintain cosmic order",
+      "archetypes": ["arch:NA-THUNDERBIRD"],
+      "pattern": "Celestial powers governing weather and cosmic balance"
+    },
+    {
+      "name": "Earth and Emergence",
+      "description": "Creation through emergence from lower worlds (Navajo, Pueblo) or the primordial waters",
+      "archetypes": ["arch:NA-CHANGING-WOMAN", "arch:NA-SPIDER-WOMAN"],
+      "pattern": "Emergence and transformation from primordial states"
+    },
+    {
+      "name": "Sacred Balance",
+      "description": "The maintenance of harmony between human, natural, and spiritual realms through proper relationship",
+      "archetypes": ["arch:NA-WHITE-BUFFALO-WOMAN"],
+      "pattern": "Sacred covenant and ceremonial relationship"
+    }
+  ],
+  "entries": [
+    {
+      "@id": "arch:NA-COYOTE",
+      "@type": "Archetype",
+      "name": "Coyote",
+      "aliases": ["Old Man Coyote", "First Angry", "Ma'ii (Navajo)"],
+      "domain": ["Trickery", "Creation", "Fire", "Death", "Transformation", "Foolishness"],
+      "description": "The great trickster of Western and Southwestern traditions, both creator and fool, who shaped the world through mistakes as much as intention. He stole fire for humanity, released death into the world, scattered the stars imperfectly across the sky, and continues to embody the paradox of sacred foolishness. He represents the unpredictable, transformative chaos necessary for life.",
+      "spectralCoordinates": {
+        "order-chaos": 0.8,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.5,
+        "active-receptive": 0.25,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.75,
+        "voluntary-fated": 0.35
+      },
+      "instantiates": [
+        {"primordial": "primordial:trickster", "weight": 0.95, "aspects": ["sacred-fool", "transformer", "boundary-crosser"]},
+        {"primordial": "primordial:creator", "weight": 0.7, "aspects": ["fire-bringer", "world-shaper", "accidental-creator"]},
+        {"primordial": "primordial:hero", "weight": 0.5, "aspects": ["culture-bringer", "fire-stealer"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:AF-ESHU", "fidelity": 0.7, "notes": "Trickster, transformer, necessary chaos"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-LOKI", "fidelity": 0.65, "notes": "Trickster, both helpful and harmful"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HERMES", "fidelity": 0.55, "notes": "Trickster, boundary-crosser, thief"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:PL-MAUI", "fidelity": 0.6, "notes": "Trickster culture hero, fire-stealer"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When trickery serves only self", "When chaos has no teaching"],
+        "shadowManifestations": ["Foolishness without wisdom", "Destruction without creation", "Death released carelessly"],
+        "integrationPath": "The sacred fool whose mistakes teach; chaos that serves transformation"
+      },
+      "correspondences": {
+        "element": "All/Variable",
+        "direction": "All (boundary-crosser)",
+        "color": "Variable (tawny, grey)",
+        "symbol": "Coyote, fire, scattered stars",
+        "association": "Trickery, transformation, fire, death, foolish wisdom"
+      }
+    },
+    {
+      "@id": "arch:NA-RAVEN",
+      "@type": "Archetype",
+      "name": "Raven",
+      "aliases": ["Yéil (Tlingit)", "Big Raven", "Raven Father"],
+      "domain": ["Creation", "Trickery", "Light", "Transformation", "The Northwest Coast"],
+      "description": "The great trickster and creator of Pacific Northwest traditions who stole the sun from its keeper and released it into the sky, bringing light to the world. A shapeshifter and culture hero, he created humans, established customs, and constantly transforms between human and bird forms. Both sacred and profane, he embodies creative intelligence through cunning.",
+      "spectralCoordinates": {
+        "order-chaos": 0.7,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.45,
+        "active-receptive": 0.25,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.75,
+        "voluntary-fated": 0.3
+      },
+      "instantiates": [
+        {"primordial": "primordial:trickster", "weight": 0.9, "aspects": ["light-thief", "shapeshifter"]},
+        {"primordial": "primordial:creator", "weight": 0.85, "aspects": ["world-maker", "light-bringer"]},
+        {"primordial": "primordial:hero", "weight": 0.65, "aspects": ["culture-giver", "transformer"]}
+      ],
+      "relationships": [
+        {"type": "rel:MIRRORS", "target": "arch:NA-COYOTE", "description": "Regional trickster variants"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-PROMETHEUS", "fidelity": 0.6, "notes": "Stole fire/light for humanity"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-ODIN", "fidelity": 0.5, "notes": "Raven association, wisdom through cunning"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:PL-MAUI", "fidelity": 0.65, "notes": "Trickster who captured the sun"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When cunning becomes mere theft", "When transformation has no purpose"],
+        "shadowManifestations": ["Endless hunger", "Theft without giving", "Shape-changing without identity"],
+        "integrationPath": "Cunning in service of light; transformation for the benefit of all"
+      },
+      "correspondences": {
+        "element": "Air/Fire (light)",
+        "direction": "Northwest Coast",
+        "color": "Black (iridescent)",
+        "symbol": "Raven, sun disc, bentwood box",
+        "association": "Light, creation, trickery, Northwest Coast cultures"
+      }
+    },
+    {
+      "@id": "arch:NA-IKTOMI",
+      "@type": "Archetype",
+      "name": "Iktomi",
+      "aliases": ["Spider", "Unktomi", "The Trickster"],
+      "domain": ["Trickery", "Wisdom", "Webs", "Stories", "Dreams"],
+      "description": "The Lakota trickster spider who was once a wisdom god but became the trickster through his own scheming. He invented language and stories but uses them to deceive. Creator of the dreamcatcher, he represents the trap of one's own cleverness. His tales teach through negative example, showing what happens when wisdom serves only ego.",
+      "spectralCoordinates": {
+        "order-chaos": 0.7,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.55,
+        "active-receptive": 0.35,
+        "individual-collective": 0.6,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.4
+      },
+      "instantiates": [
+        {"primordial": "primordial:trickster", "weight": 0.9, "aspects": ["deceiver", "schemer", "trapped-by-own-cleverness"]},
+        {"primordial": "primordial:magician", "weight": 0.65, "aspects": ["web-weaver", "story-maker", "dream-catcher"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.4, "aspects": ["fallen-wisdom", "language-inventor"]}
+      ],
+      "relationships": [
+        {"type": "rel:MIRRORS", "target": "arch:NA-COYOTE", "description": "Plains trickster variant"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:AF-ANANSI", "fidelity": 0.75, "notes": "Spider trickster, story-keeper"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HERMES", "fidelity": 0.5, "notes": "Language inventor, cunning"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When cleverness becomes the trap", "When stories serve only deception"],
+        "shadowManifestations": ["Caught in own web", "Wisdom corrupted", "Language as weapon"],
+        "integrationPath": "Cleverness acknowledging its limits; stories that teach truth"
+      },
+      "correspondences": {
+        "element": "Air (webs)",
+        "direction": "Variable",
+        "color": "Variable",
+        "symbol": "Spider, web, dreamcatcher",
+        "association": "Stories, language, dreams, trickery, Lakota traditions"
+      }
+    },
+    {
+      "@id": "arch:NA-THUNDERBIRD",
+      "@type": "Archetype",
+      "name": "Thunderbird",
+      "aliases": ["Wakinyan (Lakota)", "Animikii (Ojibwe)", "Thunder Being"],
+      "domain": ["Thunder", "Lightning", "Rain", "Power", "Protection", "Cosmic Order"],
+      "description": "The great bird whose wingbeats create thunder and whose eyes flash lightning, found across North American traditions. The Thunderbirds are powerful sky beings who bring storms and rain, wage eternal war against underwater serpents/panthers, and maintain cosmic balance between upper and lower worlds. They test and empower humans who can withstand their presence.",
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.3,
+        "active-receptive": 0.2,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.15,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.45
+      },
+      "instantiates": [
+        {"primordial": "primordial:warrior", "weight": 0.8, "aspects": ["sky-warrior", "serpent-fighter"]},
+        {"primordial": "primordial:sovereign", "weight": 0.7, "aspects": ["sky-power", "cosmic-order"]},
+        {"primordial": "primordial:destroyer", "weight": 0.6, "aspects": ["lightning-wielder", "storm-bringer"]}
+      ],
+      "relationships": [
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:NA-UNDERWATER-PANTHER", "axis": "ascent-descent", "description": "Sky vs water eternal conflict"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:SL-PERUN", "fidelity": 0.7, "notes": "Thunder deity fighting serpent"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-INDRA", "fidelity": 0.65, "notes": "Thunder, dragon-slayer, sky power"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-THOR", "fidelity": 0.6, "notes": "Thunder deity, serpent enemy"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When storms destroy without renewal", "When power becomes terror"],
+        "shadowManifestations": ["Devastating storms", "Lightning without rain", "Power that destroys rather than renews"],
+        "integrationPath": "Thunder that brings needed rain; power in service of balance"
+      },
+      "correspondences": {
+        "element": "Air/Fire (lightning)",
+        "direction": "Above, West (storm direction)",
+        "color": "Black (storm clouds), white",
+        "symbol": "Great bird, lightning, thunder",
+        "association": "Storms, power, cosmic balance, vision quests"
+      }
+    },
+    {
+      "@id": "arch:NA-UNDERWATER-PANTHER",
+      "@type": "Archetype",
+      "name": "Underwater Panther",
+      "aliases": ["Mishipeshu (Ojibwe)", "Unktehila (Lakota)", "Great Lynx"],
+      "domain": ["Water", "Underworld", "Copper", "Medicine Power", "Chaos"],
+      "description": "The powerful water being of Great Lakes and Plains traditions, depicted with feline features, horns, scales, and a serpentine tail. Living in deep waters, it guards copper and medicine power while threatening those who disrespect water. In eternal conflict with Thunderbirds, it represents the necessary chthonic power balancing celestial forces.",
+      "spectralCoordinates": {
+        "order-chaos": 0.65,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.7,
+        "active-receptive": 0.5,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.85,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.6
+      },
+      "instantiates": [
+        {"primordial": "primordial:monster", "weight": 0.75, "aspects": ["water-beast", "chaos-power"]},
+        {"primordial": "primordial:magician", "weight": 0.65, "aspects": ["medicine-power", "copper-guardian"]},
+        {"primordial": "primordial:guardian", "weight": 0.5, "aspects": ["water-keeper", "treasure-guarder"]}
+      ],
+      "relationships": [
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:NA-THUNDERBIRD", "axis": "ascent-descent", "description": "Water vs sky eternal conflict"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:SL-VELES", "fidelity": 0.6, "notes": "Chthonic power opposing thunder god"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-JORMUNGANDR", "fidelity": 0.5, "notes": "Serpentine water monster, cosmic enemy"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When water is disrespected", "When chaos overwhelms order"],
+        "shadowManifestations": ["Drowning", "Storms on water", "Chaos consuming order"],
+        "integrationPath": "Water power respected and balanced; chaos contained but honored"
+      },
+      "correspondences": {
+        "element": "Water",
+        "direction": "Below, deep water",
+        "color": "Green, copper",
+        "symbol": "Horned feline-serpent, copper, deep water",
+        "taboo": "Disrespecting water, taking copper without offering",
+        "association": "Lakes, rivers, medicine power, chaos"
+      }
+    },
+    {
+      "@id": "arch:NA-WHITE-BUFFALO-WOMAN",
+      "@type": "Archetype",
+      "name": "White Buffalo Calf Woman",
+      "aliases": ["Ptesan-Wi", "White Buffalo Maiden"],
+      "domain": ["Sacred Pipe", "Prayer", "Ceremony", "The Lakota People", "Prophecy"],
+      "description": "The sacred woman who brought the chanunpa (sacred pipe) to the Lakota people, teaching them the seven sacred ceremonies that maintain relationship between humans, earth, and sky. Appearing as a beautiful woman in white buckskin, she transformed a disrespectful man to bones while honoring the respectful one. She departed as a white buffalo calf, promising to return.",
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.25,
+        "light-shadow": 0.15,
+        "active-receptive": 0.55,
+        "individual-collective": 0.2,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.85, "aspects": ["ceremony-giver", "people-establisher"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.8, "aspects": ["sacred-teacher", "covenant-bringer"]},
+        {"primordial": "primordial:maiden", "weight": 0.6, "aspects": ["sacred-woman", "beautiful-visitor"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ATHENA", "fidelity": 0.45, "notes": "Divine wisdom-bringer, civilizing"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CE-BRIGID", "fidelity": 0.5, "notes": "Sacred feminine, ceremony, transformation"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-SARASWATI", "fidelity": 0.45, "notes": "Divine feminine bringing sacred knowledge"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When sacred ways are abandoned", "When disrespect meets the sacred"],
+        "shadowManifestations": ["Destruction of the disrespectful", "Sacred covenant broken", "Ceremonies forgotten"],
+        "integrationPath": "Proper relationship maintained through ceremony; respect enabling blessing"
+      },
+      "correspondences": {
+        "element": "All (unifying)",
+        "direction": "All four directions (ceremonies)",
+        "color": "White",
+        "symbol": "Sacred pipe (chanunpa), white buffalo, smoke",
+        "association": "Lakota, sacred pipe, ceremony, prophecy"
+      }
+    },
+    {
+      "@id": "arch:NA-CHANGING-WOMAN",
+      "@type": "Archetype",
+      "name": "Changing Woman",
+      "aliases": ["Asdzą́ą́ Nádleehé (Navajo)", "White Shell Woman", "Turquoise Woman"],
+      "domain": ["Earth", "Seasons", "Life Cycles", "Women", "Blessing Way", "The Navajo People"],
+      "description": "The beloved Navajo deity who embodies the earth and its cycles, aging from young woman to old woman and back with the seasons. She created the four original Navajo clans from her own skin and established the Blessing Way ceremony. Mother of the Hero Twins by the Sun, she represents beauty, harmony, and the sacred cyclical nature of life.",
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.3,
+        "light-shadow": 0.25,
+        "active-receptive": 0.65,
+        "individual-collective": 0.25,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.7,
+        "voluntary-fated": 0.55
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.95, "aspects": ["earth-mother", "people-creator"]},
+        {"primordial": "primordial:maiden", "weight": 0.7, "aspects": ["eternal-renewal", "seasonal-youth"]},
+        {"primordial": "primordial:crone", "weight": 0.7, "aspects": ["seasonal-elder", "cycle-completion"]},
+        {"primordial": "primordial:healer", "weight": 0.65, "aspects": ["blessing-way", "harmony-restorer"]}
+      ],
+      "relationships": [
+        {"type": "rel:CONTAINS", "target": "arch:NA-HERO-TWINS-NAVAJO", "description": "Mother of the Hero Twins"},
+        {"type": "rel:COMPLEMENT", "target": "arch:NA-SUN-FATHER", "description": "Earth and sun, mother and father of twins"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-DEMETER", "fidelity": 0.6, "notes": "Earth mother, seasonal cycles"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:SL-MOKOSH", "fidelity": 0.55, "notes": "Earth mother, women's protector"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:PL-PAPA", "fidelity": 0.5, "notes": "Earth mother, foundation"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When cycles are interrupted", "When harmony is broken"],
+        "shadowManifestations": ["Seasons out of balance", "Aging without renewal", "Disharmony spreading"],
+        "integrationPath": "Accepting all phases of the cycle; harmony through proper ceremony"
+      },
+      "correspondences": {
+        "element": "Earth",
+        "direction": "West (her home)",
+        "color": "White shell, turquoise, jet, abalone (four sacred)",
+        "symbol": "Four seasons, renewal, sacred stones",
+        "ceremony": "Kinaalda (girls' puberty), Blessing Way",
+        "association": "Navajo, earth, seasons, womanhood, harmony"
+      }
+    },
+    {
+      "@id": "arch:NA-SPIDER-WOMAN",
+      "@type": "Archetype",
+      "name": "Spider Woman",
+      "aliases": ["Na'ashjé'ii Asdzáá (Navajo)", "Spider Grandmother (Hopi)", "Kokyangwuti"],
+      "domain": ["Weaving", "Creation", "Protection", "Wisdom", "The Hero Twins' Guide"],
+      "description": "The wise grandmother/creator figure who taught weaving to the Navajo and guided the Hero Twins against the monsters. In Hopi tradition, she is a creator who sang the world into being. She represents the creative power of thought given form, the web of life connecting all things, and the protective wisdom of the feminine elder.",
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.25,
+        "light-shadow": 0.35,
+        "active-receptive": 0.55,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:crone", "weight": 0.85, "aspects": ["grandmother", "wisdom-keeper"]},
+        {"primordial": "primordial:creator", "weight": 0.8, "aspects": ["weaver", "world-singer"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.75, "aspects": ["guide", "teacher", "protector"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ATHENA", "fidelity": 0.55, "notes": "Weaving, wisdom, hero-helper"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-FRIGG", "fidelity": 0.5, "notes": "Weaving, fate, wisdom"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:AF-ANANSI", "fidelity": 0.45, "notes": "Spider, weaving, wisdom (different valence)"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When web traps rather than connects", "When wisdom is withheld"],
+        "shadowManifestations": ["Entanglement", "Isolation in web", "Guidance refused"],
+        "integrationPath": "Weaving that connects; wisdom shared with those who seek"
+      },
+      "correspondences": {
+        "element": "Earth/Air (web)",
+        "direction": "Variable",
+        "color": "Grey, white",
+        "symbol": "Spider, web, loom",
+        "association": "Weaving, creation, wisdom, Southwest traditions"
+      }
+    },
+    {
+      "@id": "arch:NA-HERO-TWINS-NAVAJO",
+      "@type": "Archetype",
+      "name": "Hero Twins (Navajo)",
+      "aliases": ["Monster Slayer (Naayéé' Neizghání)", "Born for Water (Tóbájíshchíní)"],
+      "domain": ["Monster-Slaying", "Balance", "Sun", "Water", "Protection"],
+      "description": "The twin sons of Changing Woman and the Sun who journeyed to their father, received weapons of lightning, and slew the monsters troubling the Navajo people. Monster Slayer is aggressive and direct; Born for Water is protective and thoughtful. Together they represent the balance of action and restraint needed to confront evil.",
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.35,
+        "active-receptive": 0.3,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.4
+      },
+      "instantiates": [
+        {"primordial": "primordial:hero", "weight": 0.95, "aspects": ["monster-slayers", "people-protectors"]},
+        {"primordial": "primordial:twin", "weight": 0.9, "aspects": ["complementary-pair", "balance"]},
+        {"primordial": "primordial:warrior", "weight": 0.8, "aspects": ["demon-fighters", "lightning-wielders"]},
+        {"primordial": "primordial:divine-child", "weight": 0.6, "aspects": ["sun's-sons", "miraculous-birth"]}
+      ],
+      "relationships": [
+        {"type": "rel:CONTAINED_BY", "target": "arch:NA-CHANGING-WOMAN", "description": "Sons of the earth mother"},
+        {"type": "rel:CONTAINED_BY", "target": "arch:NA-SUN-FATHER", "description": "Sons of the sun"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:MA-HERO-TWINS", "fidelity": 0.75, "notes": "Hero twins, underworld/monster journey"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-CASTOR-POLLUX", "fidelity": 0.55, "notes": "Divine twins, complementary"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When slaying goes too far", "When balance is lost between twins"],
+        "shadowManifestations": ["Destroying what should be spared", "Aggression without restraint", "Imbalance"],
+        "integrationPath": "Knowing what to slay and what to spare; action balanced with restraint"
+      },
+      "correspondences": {
+        "element": "Fire (Monster Slayer) / Water (Born for Water)",
+        "direction": "Variable (journey)",
+        "color": "Black (Monster Slayer), blue (Born for Water)",
+        "symbol": "Lightning arrows, flint armor, sun",
+        "association": "Navajo, monster-slaying, protection, balance"
+      }
+    },
+    {
+      "@id": "arch:NA-SUN-FATHER",
+      "@type": "Archetype",
+      "name": "Sun Father",
+      "aliases": ["Jóhonaa'éí (Navajo)", "Tawa (Hopi)", "Father Sun"],
+      "domain": ["Sun", "Life", "Vision", "Father Energy", "Testing"],
+      "description": "The Sun as father deity across multiple Southwestern traditions. Father of the Hero Twins by Changing Woman, he tests them severely before acknowledging paternity and giving them weapons. He represents the life-giving power of the sun, the demanding father who tests before accepting, and the illuminating force of truth and vision.",
+      "spectralCoordinates": {
+        "order-chaos": 0.2,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.15,
+        "active-receptive": 0.25,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.15,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.45
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-father", "weight": 0.9, "aspects": ["sun-father", "tester", "provider"]},
+        {"primordial": "primordial:sovereign", "weight": 0.75, "aspects": ["sky-lord", "light-giver"]},
+        {"primordial": "primordial:creator", "weight": 0.6, "aspects": ["life-sustainer", "illuminator"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:NA-CHANGING-WOMAN", "description": "Sun and earth, father and mother"},
+        {"type": "rel:CONTAINS", "target": "arch:NA-HERO-TWINS-NAVAJO", "description": "Father of the Hero Twins"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-RA", "fidelity": 0.6, "notes": "Sun god, father, cosmic order"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HELIOS", "fidelity": 0.55, "notes": "Sun deity, all-seeing"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:JP-AMATERASU", "fidelity": 0.45, "notes": "Sun deity, divine parent (different gender)"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When testing becomes cruelty", "When light scorches rather than warms"],
+        "shadowManifestations": ["Drought", "Harsh judgment", "Abandoning children"],
+        "integrationPath": "Testing that strengthens; light that nurtures as well as reveals"
+      },
+      "correspondences": {
+        "element": "Fire",
+        "direction": "Above, East to West",
+        "color": "Gold, white",
+        "symbol": "Sun disc, rays, turquoise (Navajo)",
+        "association": "Sun, life, fatherhood, testing, Southwest traditions"
+      }
+    },
+    {
+      "@id": "arch:NA-KOKOPELLI",
+      "@type": "Archetype",
+      "name": "Kokopelli",
+      "aliases": ["Humpbacked Flute Player"],
+      "domain": ["Fertility", "Music", "Trade", "Trickery", "Agriculture", "Joy"],
+      "description": "The humpbacked flute player depicted in ancient rock art throughout the Southwest, associated with fertility, agriculture, music, and trade. His hump carries seeds or trade goods; his flute brings warmth and fertility. He is a joyful, sometimes licentious figure who brings spring, enables conception, and represents the regenerative power of music and play.",
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.3,
+        "light-shadow": 0.4,
+        "active-receptive": 0.35,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.4
+      },
+      "instantiates": [
+        {"primordial": "primordial:trickster", "weight": 0.7, "aspects": ["joyful-fool", "seducer"]},
+        {"primordial": "primordial:creator", "weight": 0.65, "aspects": ["fertility-bringer", "seed-carrier"]},
+        {"primordial": "primordial:magician", "weight": 0.55, "aspects": ["music-power", "trader"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-PAN", "fidelity": 0.65, "notes": "Music, fertility, nature, sexuality"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HERMES", "fidelity": 0.5, "notes": "Trade, trickery, fertility"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-FREYR", "fidelity": 0.5, "notes": "Fertility, joy, abundance"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When fertility becomes exploitation", "When joy becomes license"],
+        "shadowManifestations": ["Unwanted pregnancy", "Trade as exploitation", "Music that deceives"],
+        "integrationPath": "Fertility as blessing; joy that creates rather than destroys"
+      },
+      "correspondences": {
+        "element": "Air (music) / Earth (seeds)",
+        "direction": "South (warmth)",
+        "color": "Variable",
+        "symbol": "Flute, humpback, phallus",
+        "association": "Fertility, music, trade, spring, Southwest rock art"
+      }
+    },
+    {
+      "@id": "arch:NA-SEDNA",
+      "@type": "Archetype",
+      "name": "Sedna",
+      "aliases": ["Nuliajuk", "Nerrivik", "Talilajuk", "Sea Woman"],
+      "domain": ["Sea", "Sea Mammals", "Hunting", "Taboos", "Shamanic Journey"],
+      "description": "The Inuit sea goddess dwelling at the bottom of the ocean, controlling sea mammals that are essential for survival. When taboos are broken, her hair becomes tangled and she withholds game. Shamans must journey to her realm to comb her hair and discover which taboos have been violated. Her origin involves betrayal, transformation, and her severed fingers becoming seals and whales.",
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.65,
+        "active-receptive": 0.65,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.9,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.75
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.8, "aspects": ["sea-mother", "game-provider"]},
+        {"primordial": "primordial:sovereign", "weight": 0.7, "aspects": ["ocean-ruler", "taboo-enforcer"]},
+        {"primordial": "primordial:outcast", "weight": 0.6, "aspects": ["betrayed-woman", "transformed-victim"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:AF-YEMOJA", "fidelity": 0.55, "notes": "Ocean mother, life-giver"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:PL-TANGAROA", "fidelity": 0.5, "notes": "Ocean deity, sea creatures"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:JP-IZANAMI", "fidelity": 0.45, "notes": "Betrayed, transformed, underworld/otherworld ruler"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When taboos are broken", "When relationship with sea is damaged"],
+        "shadowManifestations": ["Game withheld", "Starvation", "Tangled hair blocking abundance"],
+        "integrationPath": "Proper relationship restored through shamanic intervention; taboos honored"
+      },
+      "correspondences": {
+        "element": "Water (ocean)",
+        "direction": "Below, ocean depths",
+        "color": "Blue, grey",
+        "symbol": "Sea mammals, tangled hair, fingerless hands",
+        "association": "Inuit, seals, whales, taboo, shamanic journey"
+      }
+    },
+    {
+      "@id": "arch:NA-SELU",
+      "@type": "Archetype",
+      "name": "Selu",
+      "aliases": ["Corn Mother", "First Woman (Cherokee)"],
+      "domain": ["Corn", "Agriculture", "Sacrifice", "Nourishment", "Rebirth"],
+      "description": "The Cherokee Corn Mother who produced corn and beans from her own body, rubbing the grain from her flesh. When her sons discovered her secret and killed her in horror, she instructed them to drag her body over the ground, and where her blood fell, corn would grow. She represents the sacrificial gift of sustenance through transformation.",
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.4,
+        "active-receptive": 0.7,
+        "individual-collective": 0.25,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.75,
+        "voluntary-fated": 0.65
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.9, "aspects": ["corn-mother", "nourisher"]},
+        {"primordial": "primordial:creator", "weight": 0.7, "aspects": ["food-giver", "agriculture-source"]},
+        {"primordial": "primordial:hero", "weight": 0.5, "aspects": ["self-sacrificer", "willing-death"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-DEMETER", "fidelity": 0.65, "notes": "Grain goddess, agriculture, mother"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:MA-CHICOMECŌĀTL", "fidelity": 0.7, "notes": "Corn goddess, Mesoamerican"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-DUMUZI", "fidelity": 0.5, "notes": "Death enabling agricultural rebirth"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When sacrifice is not honored", "When corn fails"],
+        "shadowManifestations": ["Famine", "Gift rejected", "Death without rebirth"],
+        "integrationPath": "Honoring the sacrifice; death enabling eternal renewal"
+      },
+      "correspondences": {
+        "element": "Earth",
+        "direction": "Fields",
+        "color": "Yellow, green",
+        "symbol": "Corn, agriculture, woman's body",
+        "association": "Cherokee, corn, agriculture, sacrifice, Southeast traditions"
+      }
+    },
+    {
+      "@id": "arch:NA-GLOOSCAP",
+      "@type": "Archetype",
+      "name": "Glooscap",
+      "aliases": ["Glooskap", "Gluskap", "Kluscap"],
+      "domain": ["Culture Hero", "Creation", "Transformation", "Protection", "The Wabanaki"],
+      "description": "The great culture hero and transformer of the Wabanaki confederacy (Abenaki, Mi'kmaq, Passamaquoddy, and others). He transformed the world to make it habitable for humans, shrinking giant animals, teaching skills, and defeating monsters. Unlike tricksters, he is generally benevolent and protective. He departed promising to return when his people need him.",
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.3,
+        "active-receptive": 0.3,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.45
+      },
+      "instantiates": [
+        {"primordial": "primordial:hero", "weight": 0.9, "aspects": ["culture-hero", "transformer", "protector"]},
+        {"primordial": "primordial:creator", "weight": 0.7, "aspects": ["world-shaper", "teacher"]},
+        {"primordial": "primordial:sovereign", "weight": 0.5, "aspects": ["people's-champion", "returner"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:PL-MAUI", "fidelity": 0.6, "notes": "Culture hero, transformer, trickster elements"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:MA-QUETZALCOATL", "fidelity": 0.5, "notes": "Culture hero, departed with promise to return"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CE-CU-CHULAINN", "fidelity": 0.45, "notes": "Great hero, protective of people"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When the hero is absent", "When transformation goes wrong"],
+        "shadowManifestations": ["Absence when needed", "World not yet transformed", "Giant dangers remaining"],
+        "integrationPath": "The hero within each person; transformation as ongoing process"
+      },
+      "correspondences": {
+        "element": "All (transformer)",
+        "direction": "Northeast (Wabanaki territory)",
+        "color": "Variable",
+        "symbol": "Canoe, transformation, benevolent figure",
+        "association": "Wabanaki, culture hero, transformation, protection"
+      }
+    }
+  ]
+}

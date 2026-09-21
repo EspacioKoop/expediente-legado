@@ -1,0 +1,608 @@
+{
+  "@context": "../../schema/ACP_CONTEXT.jsonld",
+  "@id": "pantheon:FI-PANTHEON",
+  "@type": "Pantheon",
+  "name": "Finnish and Baltic Deities",
+  "tradition": "Finnish Mythology / Kalevala / Estonian / Baltic",
+  "description": "The gods, spirits, and heroes of Finnish, Estonian, and Baltic (Lithuanian/Latvian) traditions. Finnish mythology, preserved primarily in the Kalevala epic, features shamanic practices, spirit beings, and culture heroes. Baltic traditions share Indo-European roots with close connections to Slavic and Vedic mythology.",
+  "canonicalSources": [
+    "Kalevala (compiled by Elias Lönnrot)",
+    "Kanteletar",
+    "Estonian folk poetry",
+    "Lithuanian folklore collections",
+    "Latvian dainas"
+  ],
+  "systemPatterns": [
+    {
+      "name": "Kalevala Heroes",
+      "description": "The great sage-heroes Väinämöinen, Ilmarinen, and Lemminkäinen whose deeds shape the world",
+      "archetypes": ["arch:FI-VAINAMOINEN", "arch:FI-ILMARINEN", "arch:FI-LEMMINKAINEN"],
+      "pattern": "Shamanic heroes wielding magic through song and craft"
+    },
+    {
+      "name": "Sampo Quest",
+      "description": "The forging and theft of the Sampo, magical source of prosperity",
+      "archetypes": ["arch:FI-ILMARINEN", "arch:FI-LOUHI"],
+      "pattern": "Creation and loss of world-sustaining artifact"
+    },
+    {
+      "name": "Sky God Complex",
+      "description": "Ukko (Finnish) / Perkūnas (Baltic) as thunder/sky deity with Indo-European parallels",
+      "archetypes": ["arch:FI-UKKO", "arch:FI-PERKUNAS"],
+      "pattern": "Thunder god as cosmic order maintainer"
+    }
+  ],
+  "entries": [
+    {
+      "@id": "arch:FI-UKKO",
+      "@type": "Archetype",
+      "name": "Ukko",
+      "aliases": ["Uku (Estonian)", "Old Man", "God of Sky"],
+      "domain": ["Sky", "Thunder", "Rain", "Harvest", "Oak"],
+      "description": "The supreme sky god of Finnish tradition, lord of thunder, weather, and crops. His name means 'old man,' reflecting his role as divine grandfather. He wields a hammer, axe, or sword to create lightning, and his sexual union with his consort Akka brings fertilizing rain. He became increasingly prominent as Finnish society developed.",
+      "spectralCoordinates": {
+        "order-chaos": 0.2,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.25,
+        "active-receptive": 0.3,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.15,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.45
+      },
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.85, "aspects": ["sky-king", "thunder-lord"]},
+        {"primordial": "primordial:great-father", "weight": 0.75, "aspects": ["divine-grandfather", "provider"]},
+        {"primordial": "primordial:warrior", "weight": 0.55, "aspects": ["lightning-wielder", "storm-bringer"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:FI-AKKA", "description": "Sky father and earth mother"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-THOR", "fidelity": 0.7, "notes": "Thunder god, hammer, oak"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:SL-PERUN", "fidelity": 0.75, "notes": "Thunder god, Baltic-Slavic connections"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-INDRA", "fidelity": 0.6, "notes": "Thunder, rain, Indo-European sky god"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When storms destroy rather than nurture", "When the sky withholds rain"],
+        "shadowManifestations": ["Drought", "Destructive storms", "Divine neglect"],
+        "integrationPath": "Thunder that brings needed rain; power in service of growth"
+      },
+      "correspondences": {
+        "element": "Air/Fire (lightning)",
+        "direction": "Above",
+        "color": "Blue, gold",
+        "day": "Thursday",
+        "symbol": "Hammer/axe, oak, thunder",
+        "association": "Sky, thunder, harvest, supreme deity"
+      }
+    },
+    {
+      "@id": "arch:FI-AKKA",
+      "@type": "Archetype",
+      "name": "Akka",
+      "aliases": ["Maan-Emo", "Rauni", "Earth Mother"],
+      "domain": ["Earth", "Fertility", "Harvest", "Women", "Rowan Tree"],
+      "description": "The earth goddess and consort of Ukko, whose union with the sky god brings fertilizing rain. Associated with the rowan tree (whose Finnish name 'rauni' connects to her name Rauni), she represents the fertile earth receiving sky's blessing. She protects women, especially in childbirth, and governs the harvest.",
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.3,
+        "light-shadow": 0.35,
+        "active-receptive": 0.75,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.7,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.55
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.9, "aspects": ["earth-mother", "fertility-giver"]},
+        {"primordial": "primordial:healer", "weight": 0.6, "aspects": ["childbirth-protector", "harvest-bringer"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:FI-UKKO", "description": "Earth and sky, receiving rain"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:SL-MOKOSH", "fidelity": 0.65, "notes": "Earth mother, women's protector"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-DEMETER", "fidelity": 0.6, "notes": "Earth, harvest, fertility"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When earth is barren", "When birth goes wrong"],
+        "shadowManifestations": ["Crop failure", "Difficult childbirth", "Earth refusing seed"],
+        "integrationPath": "Earth that receives and transforms; fertility through sacred union"
+      },
+      "correspondences": {
+        "element": "Earth",
+        "direction": "Below",
+        "color": "Brown, green",
+        "symbol": "Rowan tree, earth, harvest",
+        "association": "Earth, fertility, women, childbirth"
+      }
+    },
+    {
+      "@id": "arch:FI-VAINAMOINEN",
+      "@type": "Archetype",
+      "name": "Väinämöinen",
+      "aliases": ["Vainamoinen", "The Eternal Sage"],
+      "domain": ["Magic", "Music", "Wisdom", "Creation", "Kantele", "Poetry"],
+      "description": "The primordial sage and central hero of the Kalevala, born old from the primordial waters where he floated for centuries. The greatest singer and magician, he created the kantele (Finnish harp), wielded magic through song, and led the quest for the Sampo. At the end, he departed in a copper boat, leaving the kantele to his people, promising to return when needed.",
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.3,
+        "light-shadow": 0.3,
+        "active-receptive": 0.45,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.55
+      },
+      "instantiates": [
+        {"primordial": "primordial:wise-elder", "weight": 0.95, "aspects": ["eternal-sage", "born-old"]},
+        {"primordial": "primordial:magician", "weight": 0.9, "aspects": ["singer", "spell-weaver", "shaman"]},
+        {"primordial": "primordial:creator", "weight": 0.7, "aspects": ["kantele-maker", "world-singer"]},
+        {"primordial": "primordial:hero", "weight": 0.6, "aspects": ["Sampo-quester", "people's-champion"]}
+      ],
+      "relationships": [
+        {"type": "rel:TENSION", "target": "arch:FI-LOUHI", "description": "Opponent in Sampo conflict"},
+        {"type": "rel:COMPLEMENT", "target": "arch:FI-ILMARINEN", "description": "Wisdom and craft united"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-ODIN", "fidelity": 0.6, "notes": "Wisdom, magic, poetry, old age"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ORPHEUS", "fidelity": 0.65, "notes": "Magic through music, underworld journey"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:MA-QUETZALCOATL", "fidelity": 0.5, "notes": "Culture hero who departed promising return"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When wisdom becomes pride", "When age rejects youth"],
+        "shadowManifestations": ["Jealousy of young rivals", "Magic used for selfish ends", "Departure leaving people bereft"],
+        "integrationPath": "Wisdom shared through song; departure leaving gifts behind"
+      },
+      "correspondences": {
+        "element": "Water/Air (song)",
+        "direction": "Variable (wanderer)",
+        "color": "Blue, grey (aged)",
+        "symbol": "Kantele, copper boat, beard",
+        "association": "Music, magic, wisdom, Kalevala, Finnish culture"
+      }
+    },
+    {
+      "@id": "arch:FI-ILMARINEN",
+      "@type": "Archetype",
+      "name": "Ilmarinen",
+      "aliases": ["The Eternal Hammerer", "Smith of the Heavens"],
+      "domain": ["Smithing", "Creation", "Sky", "The Sampo", "Craftsmanship"],
+      "description": "The divine smith who forged the sky, the Sampo (source of endless prosperity), and many magical artifacts. His name connects to 'ilma' (air/weather), suggesting a sky-smith who hammered out the heavens. He represents the transformative power of craft, turning raw materials into magical creations. His tragic marriage to the Maiden of Pohjola ended in her death.",
+      "spectralCoordinates": {
+        "order-chaos": 0.2,
+        "creation-destruction": 0.25,
+        "light-shadow": 0.35,
+        "active-receptive": 0.25,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.45
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.95, "aspects": ["divine-smith", "Sampo-forger", "sky-maker"]},
+        {"primordial": "primordial:magician", "weight": 0.75, "aspects": ["artifact-creator", "transformer"]},
+        {"primordial": "primordial:hero", "weight": 0.55, "aspects": ["quest-companion", "bride-winner"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:FI-VAINAMOINEN", "description": "Craft and wisdom united"},
+        {"type": "rel:TENSION", "target": "arch:FI-LOUHI", "description": "Forged Sampo for her, then stole it back"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HEPHAESTUS", "fidelity": 0.8, "notes": "Divine smith, magical artifacts"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:SL-SVAROG", "fidelity": 0.7, "notes": "Sky-smith, celestial craftsman"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:AF-OGUN", "fidelity": 0.55, "notes": "Smith, iron/metal work, transformation"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When creation serves wrong purposes", "When craft becomes obsession"],
+        "shadowManifestations": ["Creating the golden bride (failed substitute)", "Forging weapons of destruction", "Loss of beloved"],
+        "integrationPath": "Craft in service of community; creation with heart not just skill"
+      },
+      "correspondences": {
+        "element": "Fire/Metal",
+        "direction": "Above (sky-forger), forge",
+        "color": "Red (fire), silver (metal)",
+        "symbol": "Hammer, Sampo, forge",
+        "association": "Smithing, sky, creation, Kalevala"
+      }
+    },
+    {
+      "@id": "arch:FI-LEMMINKAINEN",
+      "@type": "Archetype",
+      "name": "Lemminkäinen",
+      "aliases": ["Ahti", "Kaukomieli", "The Reckless One"],
+      "domain": ["War", "Love", "Recklessness", "Death and Resurrection", "Youth"],
+      "description": "The handsome, reckless warrior-lover of the Kalevala, known for his charm and impetuousness. His adventures include seducing the women of an island, being killed while trying to shoot the swan of Tuonela, and being resurrected by his mother who gathered his scattered pieces. He represents youthful passion without wisdom, energy without restraint.",
+      "spectralCoordinates": {
+        "order-chaos": 0.65,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.45,
+        "active-receptive": 0.2,
+        "individual-collective": 0.6,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.65,
+        "voluntary-fated": 0.35
+      },
+      "instantiates": [
+        {"primordial": "primordial:hero", "weight": 0.8, "aspects": ["warrior", "adventurer", "death-survivor"]},
+        {"primordial": "primordial:lover", "weight": 0.75, "aspects": ["seducer", "passionate"]},
+        {"primordial": "primordial:rebel", "weight": 0.6, "aspects": ["reckless", "rule-breaker"]},
+        {"primordial": "primordial:divine-child", "weight": 0.5, "aspects": ["mother's-son", "resurrected"]}
+      ],
+      "relationships": [
+        {"type": "rel:EVOLUTION", "target": "arch:FI-LEMMINKAINEN", "description": "Death and resurrection transformation"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ADONIS", "fidelity": 0.55, "notes": "Beautiful youth, death and rebirth"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-OSIRIS", "fidelity": 0.5, "notes": "Dismembered and reassembled"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:SL-JARILO", "fidelity": 0.55, "notes": "Youthful lover, death-rebirth"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When passion overrides wisdom", "When recklessness kills"],
+        "shadowManifestations": ["Death through foolishness", "Leaving devastation behind", "Needing mother's rescue"],
+        "integrationPath": "Passion tempered by wisdom; rebirth enabling maturation"
+      },
+      "correspondences": {
+        "element": "Fire",
+        "direction": "Variable (adventurer)",
+        "color": "Red",
+        "symbol": "Sword, swan of Tuonela, scattered pieces",
+        "association": "War, love, recklessness, death-rebirth, Kalevala"
+      }
+    },
+    {
+      "@id": "arch:FI-LOUHI",
+      "@type": "Archetype",
+      "name": "Louhi",
+      "aliases": ["Mistress of Pohjola", "Witch of the North"],
+      "domain": ["North", "Magic", "Opposition", "Winter", "Darkness"],
+      "description": "The powerful witch-queen of Pohjola (the North), main antagonist in the Kalevala. She commissioned the Sampo from Ilmarinen, offering her daughter as bride-price, then pursued the heroes when they stole it back. She can shapeshift, control weather, and wield powerful magic. She represents the hostile, dark powers of the frozen North.",
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.6,
+        "light-shadow": 0.7,
+        "active-receptive": 0.35,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.45
+      },
+      "instantiates": [
+        {"primordial": "primordial:crone", "weight": 0.85, "aspects": ["witch-queen", "north-ruler"]},
+        {"primordial": "primordial:magician", "weight": 0.8, "aspects": ["shapeshifter", "weather-witch"]},
+        {"primordial": "primordial:sovereign", "weight": 0.7, "aspects": ["Pohjola-mistress", "opponent-queen"]}
+      ],
+      "relationships": [
+        {"type": "rel:TENSION", "target": "arch:FI-VAINAMOINEN", "description": "Primary opponent"},
+        {"type": "rel:TENSION", "target": "arch:FI-ILMARINEN", "description": "Commissioned then lost Sampo to him"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:SL-BABA-YAGA", "fidelity": 0.7, "notes": "Powerful witch, ambiguous power"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-HEL", "fidelity": 0.5, "notes": "Northern, cold, death associations"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When opposition becomes destruction", "When cold consumes all warmth"],
+        "shadowManifestations": ["Stealing sun and moon", "Endless winter", "Pursuing vengeance without end"],
+        "integrationPath": "North's power balanced with South; opposition as necessary polarity"
+      },
+      "correspondences": {
+        "element": "Ice/Air (cold wind)",
+        "direction": "North (Pohjola)",
+        "color": "White, black",
+        "symbol": "Eagle form, Sampo, ice, darkness",
+        "association": "North, winter, magic, opposition, Kalevala"
+      }
+    },
+    {
+      "@id": "arch:FI-TUONI",
+      "@type": "Archetype",
+      "name": "Tuoni",
+      "aliases": ["Tuonen-ukko", "Lord of Tuonela"],
+      "domain": ["Death", "Underworld", "The Black River", "The Dead"],
+      "description": "The lord of Tuonela, the Finnish realm of the dead, located beneath the earth and waters, reached by crossing a black river. With his wife Tuonetar, he rules the shadowy realm where the dead exist in a diminished state. Heroes who journey there face great danger, as Tuonela tries to keep all who enter.",
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.65,
+        "light-shadow": 0.85,
+        "active-receptive": 0.55,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.9,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.85
+      },
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.85, "aspects": ["death-lord", "underworld-king"]},
+        {"primordial": "primordial:destroyer", "weight": 0.6, "aspects": ["life-ender", "keeper-of-dead"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:FI-TUONETAR", "description": "Lord and lady of Tuonela"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HADES", "fidelity": 0.7, "notes": "Underworld ruler"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:SL-VELES", "fidelity": 0.5, "notes": "Chthonic realm ruler"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When death claims the living", "When underworld won't release"],
+        "shadowManifestations": ["Premature death", "Trapped souls", "Death's grip unrelenting"],
+        "integrationPath": "Death as natural passage; underworld as rest not prison"
+      },
+      "correspondences": {
+        "element": "Earth/Water (black river)",
+        "direction": "Below, North",
+        "color": "Black",
+        "symbol": "Black river, swan, nets to catch souls",
+        "association": "Death, underworld, Tuonela, Kalevala"
+      }
+    },
+    {
+      "@id": "arch:FI-TUONETAR",
+      "@type": "Archetype",
+      "name": "Tuonetar",
+      "aliases": ["Mistress of Tuonela", "Death's Hostess"],
+      "domain": ["Death", "Underworld", "Hospitality (Deadly)", "Sleep"],
+      "description": "The hostess of Tuonela who offers deadly hospitality to visitors - beer full of frogs, beds from which none rise. Wife of Tuoni and mother of diseases and death. She represents death as seductive rest, the dangerous comfort of giving up the struggle of life.",
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.6,
+        "light-shadow": 0.8,
+        "active-receptive": 0.65,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.85,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.8
+      },
+      "instantiates": [
+        {"primordial": "primordial:crone", "weight": 0.8, "aspects": ["death-hostess", "underworld-queen"]},
+        {"primordial": "primordial:great-mother", "weight": 0.55, "aspects": ["mother-of-diseases", "deathly-nurturer"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:FI-TUONI", "description": "Queen and king of the dead"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-ERESHKIGAL", "fidelity": 0.6, "notes": "Underworld queen"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-PERSEPHONE", "fidelity": 0.5, "notes": "Underworld queen"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When rest becomes death", "When comfort traps"],
+        "shadowManifestations": ["Seductive death", "Eternal sleep", "Hospitality that kills"],
+        "integrationPath": "Rest that restores; death as transformation not trap"
+      },
+      "correspondences": {
+        "element": "Earth/Water",
+        "direction": "Below",
+        "color": "Black, grey",
+        "symbol": "Beer of death, bed of stone, hospitality items",
+        "association": "Death, underworld, deadly hospitality"
+      }
+    },
+    {
+      "@id": "arch:FI-PERKUNAS",
+      "@type": "Archetype",
+      "name": "Perkūnas",
+      "aliases": ["Pērkons (Latvian)", "Perkūns", "Thunder God"],
+      "domain": ["Thunder", "Lightning", "Justice", "Oak", "War"],
+      "description": "The Baltic thunder god, one of the most important deities in Lithuanian and Latvian tradition, closely related to Slavic Perun. He rides across the sky in a chariot, wielding an axe or hammer against evil spirits and the serpentine Velnias. He represents cosmic justice, punishing liars and oath-breakers with his lightning.",
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.2,
+        "active-receptive": 0.2,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.15,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.4
+      },
+      "instantiates": [
+        {"primordial": "primordial:warrior", "weight": 0.9, "aspects": ["thunder-wielder", "serpent-fighter"]},
+        {"primordial": "primordial:sovereign", "weight": 0.8, "aspects": ["sky-lord", "justice-bringer"]},
+        {"primordial": "primordial:destroyer", "weight": 0.6, "aspects": ["lightning-striker", "evil-punisher"]}
+      ],
+      "relationships": [
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:FI-VELNIAS", "axis": "ascent-descent", "description": "Thunder god vs chthonic serpent"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:SL-PERUN", "fidelity": 0.9, "notes": "Nearly identical Baltic-Slavic thunder god"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-THOR", "fidelity": 0.8, "notes": "Thunder god, hammer/axe, serpent enemy"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-INDRA", "fidelity": 0.75, "notes": "Thunder, serpent-slayer, Indo-European"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When justice becomes vengeance", "When storms destroy the innocent"],
+        "shadowManifestations": ["Destructive storms", "Harsh judgment", "Violence without proportion"],
+        "integrationPath": "Justice that restores; thunder that brings rain, not just destruction"
+      },
+      "correspondences": {
+        "element": "Fire/Air (lightning)",
+        "direction": "Above",
+        "color": "Red, gold",
+        "day": "Thursday",
+        "symbol": "Axe, hammer, oak, thunder",
+        "association": "Thunder, justice, Baltic traditions"
+      }
+    },
+    {
+      "@id": "arch:FI-VELNIAS",
+      "@type": "Archetype",
+      "name": "Velnias",
+      "aliases": ["Velns (Latvian)", "Vėlinas", "The Devil (Christianized)"],
+      "domain": ["Underworld", "Cattle", "Wealth", "Music", "Trickery"],
+      "description": "The Baltic chthonic deity, counterpart to Perkūnas, associated with the underworld, cattle, wealth, and sometimes music. Originally a god of the dead and protector of flocks, he became demonized under Christianity. He retains trickster qualities and is often outwitted in folklore despite his power.",
+      "spectralCoordinates": {
+        "order-chaos": 0.6,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.7,
+        "active-receptive": 0.5,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.8,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:trickster", "weight": 0.75, "aspects": ["cunning", "outwitted"]},
+        {"primordial": "primordial:psychopomp", "weight": 0.65, "aspects": ["underworld-lord", "dead-keeper"]},
+        {"primordial": "primordial:magician", "weight": 0.55, "aspects": ["wealth-controller", "music"]}
+      ],
+      "relationships": [
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:FI-PERKUNAS", "axis": "ascent-descent", "description": "Chthonic vs celestial"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:SL-VELES", "fidelity": 0.85, "notes": "Cattle, underworld, Perun/Perkūnas opponent"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HERMES", "fidelity": 0.5, "notes": "Cattle, trickery, psychopomp"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When cunning serves evil", "When underworld threatens the living"],
+        "shadowManifestations": ["Demonic (Christian overlay)", "Stealing cattle/souls", "Deception"],
+        "integrationPath": "Underworld wisdom balanced with sky justice; trickster teaching through failure"
+      },
+      "correspondences": {
+        "element": "Earth/Water",
+        "direction": "Below",
+        "color": "Black, grey",
+        "symbol": "Cattle, fiddle (music), underworld",
+        "association": "Underworld, cattle, trickery, Baltic traditions"
+      }
+    },
+    {
+      "@id": "arch:FI-LAIMA",
+      "@type": "Archetype",
+      "name": "Laima",
+      "aliases": ["Laime (Latvian)", "Goddess of Fate"],
+      "domain": ["Fate", "Luck", "Childbirth", "Weaving", "Women"],
+      "description": "The Baltic goddess of fate who determines destiny at birth, particularly associated with women, childbirth, and the weaving of life's thread. She appears at births to pronounce the newborn's fate. Often appearing in triads, the Laimas weave, measure, and cut the thread of life. She protects women throughout their lives.",
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.4,
+        "active-receptive": 0.6,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.9
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.75, "aspects": ["birth-goddess", "women's-protector"]},
+        {"primordial": "primordial:magician", "weight": 0.7, "aspects": ["fate-weaver", "destiny-pronouncer"]},
+        {"primordial": "primordial:crone", "weight": 0.5, "aspects": ["thread-cutter", "fate-triad"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-MOIRAI", "fidelity": 0.8, "notes": "Fate-weavers, birth, thread of life"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-NORNS", "fidelity": 0.8, "notes": "Fate-weavers, destiny"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:SL-MOKOSH", "fidelity": 0.6, "notes": "Weaving, women, fate"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When fate is harsh", "When luck turns against"],
+        "shadowManifestations": ["Bad fortune decreed", "Early death woven", "Fate inescapable"],
+        "integrationPath": "Working with fate, not against; luck as relationship not chance"
+      },
+      "correspondences": {
+        "element": "Air/Earth",
+        "direction": "Variable",
+        "color": "White, variable",
+        "symbol": "Spindle, thread, weaving",
+        "association": "Fate, birth, women, luck, Baltic traditions"
+      }
+    },
+    {
+      "@id": "arch:FI-SAULE",
+      "@type": "Archetype",
+      "name": "Saulė",
+      "aliases": ["Saule (Latvian)", "Sun Goddess"],
+      "domain": ["Sun", "Fertility", "Life", "Orphans", "Health"],
+      "description": "The Baltic sun goddess who drives across the sky in a chariot, one of the most beloved deities. She is a nurturing, maternal figure who especially protects orphans and the unfortunate. Her mythic marriage to the Moon (Mėnulis) ended when he was unfaithful with the Morning Star, and Perkūnas cut him in pieces. She represents life-giving warmth.",
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.25,
+        "light-shadow": 0.1,
+        "active-receptive": 0.45,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.2,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.85, "aspects": ["sun-mother", "nurturer", "orphan-protector"]},
+        {"primordial": "primordial:sovereign", "weight": 0.6, "aspects": ["celestial-queen", "life-giver"]},
+        {"primordial": "primordial:healer", "weight": 0.55, "aspects": ["health-bringer", "warmth-giver"]}
+      ],
+      "relationships": [
+        {"type": "rel:TENSION", "target": "arch:FI-MENULIS", "description": "Divorced for infidelity"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:JP-AMATERASU", "fidelity": 0.65, "notes": "Female sun goddess"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-RA", "fidelity": 0.5, "notes": "Sun deity, chariot"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-SURYA", "fidelity": 0.55, "notes": "Sun, chariot, life-giving"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When sun scorches", "When warmth is withheld"],
+        "shadowManifestations": ["Drought", "Winter's extended darkness", "Abandonment"],
+        "integrationPath": "Sun that nurtures all; light especially for those in darkness"
+      },
+      "correspondences": {
+        "element": "Fire",
+        "direction": "Above, East to West",
+        "color": "Gold, yellow, amber",
+        "symbol": "Sun disc, chariot, amber",
+        "association": "Sun, fertility, orphans, Baltic traditions"
+      }
+    },
+    {
+      "@id": "arch:FI-TAPIO",
+      "@type": "Archetype",
+      "name": "Tapio",
+      "aliases": ["Forest King", "Old Man of the Forest"],
+      "domain": ["Forest", "Hunting", "Wildlife", "Moss", "Green Growth"],
+      "description": "The Finnish god of forests, game animals, and the hunt. He appears as a tall figure covered in moss and bark, with a beard of lichen. Hunters must please him with offerings and songs to receive game. With his wife Mielikki and family, he rules the forest realm, protecting it while also granting its bounty to respectful hunters.",
+      "spectralCoordinates": {
+        "order-chaos": 0.4,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.5,
+        "active-receptive": 0.5,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.75, "aspects": ["forest-king", "game-master"]},
+        {"primordial": "primordial:guardian", "weight": 0.7, "aspects": ["forest-protector", "wildlife-keeper"]},
+        {"primordial": "primordial:great-father", "weight": 0.5, "aspects": ["forest-patriarch", "provider"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:FI-MIELIKKI", "description": "King and queen of the forest"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:SL-LESHY", "fidelity": 0.8, "notes": "Forest lord, game keeper"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CE-CERNUNNOS", "fidelity": 0.6, "notes": "Forest god, animals, hunt"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When forest is disrespected", "When hunting violates balance"],
+        "shadowManifestations": ["Game hidden", "Hunters lost", "Forest hostility"],
+        "integrationPath": "Reciprocal relationship with forest; taking only what's offered"
+      },
+      "correspondences": {
+        "element": "Earth (forest)",
+        "direction": "Forest",
+        "color": "Green, brown, grey (lichen)",
+        "symbol": "Moss, trees, game animals",
+        "offerings": "First catch, songs, respectful behavior",
+        "association": "Forest, hunting, wildlife, Finnish tradition"
+      }
+    },
+    {
+      "@id": "arch:FI-MIELIKKI",
+      "@type": "Archetype",
+      "name": "Mielikki",
+      "aliases": ["Mistress of the Forest", "Forest's Honey"],
+      "domain": ["Forest", "Healing", "Animals", "Hunting Success", "Forest Medicine"],
+      "description": "The wife of Tapio and mistress of the forest, particularly associated with healing and the care of wounded animals. Her name may relate to 'honey' or 'pleasant,' reflecting her gentler nature. She heals forest creatures and must be propitiated for hunting success. She knows all forest medicines and can grant or withhold the forest's gifts.",
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.4,
+        "active-receptive": 0.6,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:healer", "weight": 0.85, "aspects": ["forest-healer", "medicine-keeper"]},
+        {"primordial": "primordial:great-mother", "weight": 0.7, "aspects": ["animal-nurturer", "forest-mother"]},
+        {"primordial": "primordial:guardian", "weight": 0.55, "aspects": ["forest-protector", "game-releaser"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:FI-TAPIO", "description": "Queen and king of the forest"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ARTEMIS", "fidelity": 0.55, "notes": "Forest, animals, hunting"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CE-BRIGID", "fidelity": 0.5, "notes": "Healing, nature aspects"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When healing fails", "When forest is harmed"],
+        "shadowManifestations": ["Withholding game", "Forest dangers", "Healing refused"],
+        "integrationPath": "Healing through right relationship; forest's gifts for respectful askers"
+      },
+      "correspondences": {
+        "element": "Earth/Water",
+        "direction": "Forest",
+        "color": "Green, gold (honey)",
+        "symbol": "Forest animals, healing herbs, honey",
+        "association": "Forest, healing, hunting, Finnish tradition"
+      }
+    }
+  ]
+}

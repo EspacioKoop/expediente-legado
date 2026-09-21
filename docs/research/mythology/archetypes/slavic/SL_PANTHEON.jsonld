@@ -1,0 +1,697 @@
+{
+  "@context": "../../schema/ACP_CONTEXT.jsonld",
+  "@id": "pantheon:SL-PANTHEON",
+  "@type": "Pantheon",
+  "name": "Slavic Deities and Spirits",
+  "tradition": "Slavic Mythology / Rodnovery",
+  "description": "The gods, goddesses, and spirits of pre-Christian Slavic peoples, spanning Eastern, Western, and Southern Slavic traditions. Though much was lost to Christianization, the reconstructed pantheon reveals a rich tradition of sky gods, nature spirits, and household guardians reflecting the Slavic relationship with the harsh yet beautiful natural world.",
+  "canonicalSources": [
+    "Primary Chronicle (Nestor)",
+    "Chronica Slavorum (Helmold)",
+    "Knýtlinga saga",
+    "Procopius of Caesarea",
+    "Folklore collections (Afanasyev, etc.)",
+    "Archaeological evidence"
+  ],
+  "systemPatterns": [
+    {
+      "name": "Vladimir's Pantheon",
+      "description": "The six gods whose idols Prince Vladimir erected in Kiev in 980 CE before his conversion: Perun, Khors, Dazhbog, Stribog, Simargl, and Mokosh",
+      "archetypes": ["arch:SL-PERUN", "arch:SL-KHORS", "arch:SL-DAZHBOG", "arch:SL-STRIBOG", "arch:SL-SIMARGL", "arch:SL-MOKOSH"],
+      "pattern": "Official state pantheon representing major cosmic forces"
+    },
+    {
+      "name": "Perun-Veles Opposition",
+      "description": "The fundamental mythic conflict between the sky/thunder god Perun and the chthonic serpent/cattle god Veles, reflecting cosmic struggle between order and chaos, sky and underworld",
+      "archetypes": ["arch:SL-PERUN", "arch:SL-VELES"],
+      "pattern": "Cosmic dualism between celestial and chthonic powers"
+    },
+    {
+      "name": "Triple Realm Cosmology",
+      "description": "The world tree connecting three realms: Prav (divine realm of gods), Yav (middle world of humans), and Nav (underworld of spirits and dead)",
+      "archetypes": ["arch:SL-PERUN", "arch:SL-VELES", "arch:SL-MOKOSH"],
+      "pattern": "Vertical cosmic structure with world tree axis"
+    },
+    {
+      "name": "Household Spirits",
+      "description": "The protective spirits dwelling in home and hearth - Domovoi, Kikimora, Bannik - maintaining the sacred domestic space",
+      "archetypes": ["arch:SL-DOMOVOI"],
+      "pattern": "Animistic protection of domestic realm"
+    }
+  ],
+  "entries": [
+    {
+      "@id": "arch:SL-PERUN",
+      "@type": "Archetype",
+      "name": "Perun",
+      "aliases": ["Perkūnas (Baltic)", "Perkunas", "The Thunderer"],
+      "domain": ["Thunder", "Lightning", "War", "Oak", "Sky", "Justice", "Order"],
+      "description": "The supreme sky god and lord of thunder, wielding lightning bolts against his eternal enemy Veles. Patron of warriors and princes, associated with the oak tree and the eagle. He dwells atop the world tree or cosmic mountain, defending the celestial realm. His name derives from the root meaning 'to strike,' reflecting his thunderous nature.",
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.2,
+        "active-receptive": 0.15,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.15,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.35
+      },
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.9, "aspects": ["sky-king", "divine-ruler"]},
+        {"primordial": "primordial:warrior", "weight": 0.85, "aspects": ["thunder-wielder", "dragon-slayer"]},
+        {"primordial": "primordial:destroyer", "weight": 0.6, "aspects": ["lightning-striker", "chaos-fighter"]}
+      ],
+      "relationships": [
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:SL-VELES", "axis": "ascent-descent", "description": "Eternal cosmic enemies, sky vs underworld"},
+        {"type": "rel:COMPLEMENT", "target": "arch:SL-MOKOSH", "description": "Sky father and earth mother"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-THOR", "fidelity": 0.85, "notes": "Thunder god, dragon/serpent slayer"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ZEUS", "fidelity": 0.75, "notes": "Sky father, thunder, supreme god"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-INDRA", "fidelity": 0.8, "notes": "Thunder god, serpent-slayer, cosmic order"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When order becomes tyranny", "When wrath is disproportionate"],
+        "shadowManifestations": ["Destructive storms", "Merciless justice", "Endless war against the 'other'"],
+        "integrationPath": "Thunder that cleanses rather than destroys; justice with mercy"
+      },
+      "correspondences": {
+        "element": "Fire/Air (lightning)",
+        "direction": "Above, celestial",
+        "color": "Gold, silver",
+        "day": "Thursday (Perundan)",
+        "symbol": "Axe, oak tree, eagle, thunderbolt",
+        "sacred": "Oak groves, hilltops"
+      }
+    },
+    {
+      "@id": "arch:SL-VELES",
+      "@type": "Archetype",
+      "name": "Veles",
+      "aliases": ["Volos", "Weles", "The Hairy One"],
+      "domain": ["Underworld", "Cattle", "Wealth", "Magic", "Music", "Poetry", "Trickery", "The Dead"],
+      "description": "The chthonic god of the underworld, cattle, wealth, and magic, eternal opponent of Perun. Depicted as a serpent or dragon dwelling at the roots of the world tree, he guards the waters and the realm of the dead. Patron of merchants, musicians, and magicians. Despite his opposition to Perun, he is not evil but represents the necessary chthonic half of cosmic balance.",
+      "spectralCoordinates": {
+        "order-chaos": 0.6,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.7,
+        "active-receptive": 0.55,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.85,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:magician", "weight": 0.85, "aspects": ["sorcerer", "seer", "poet-patron"]},
+        {"primordial": "primordial:trickster", "weight": 0.75, "aspects": ["shapeshifter", "boundary-crosser"]},
+        {"primordial": "primordial:psychopomp", "weight": 0.7, "aspects": ["underworld-lord", "dead-guide"]},
+        {"primordial": "primordial:monster", "weight": 0.5, "aspects": ["serpent-form", "dragon"]}
+      ],
+      "relationships": [
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:SL-PERUN", "axis": "ascent-descent", "description": "Eternal cosmic opposition"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-ODIN", "fidelity": 0.6, "notes": "Magic, poetry, wisdom, trickery"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HERMES", "fidelity": 0.55, "notes": "Cattle, commerce, psychopomp, trickery"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-VRITRA", "fidelity": 0.5, "notes": "Serpent opposing thunder god"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When underworld claims the living", "When trickery becomes betrayal"],
+        "shadowManifestations": ["Death claiming before time", "Deception without purpose", "Hoarding wealth"],
+        "integrationPath": "Underworld wisdom brought to light; magic in service of balance"
+      },
+      "correspondences": {
+        "element": "Water/Earth",
+        "direction": "Below, roots of world tree",
+        "color": "Black, brown",
+        "symbol": "Serpent, bear, cattle, willow tree",
+        "sacred": "Lowlands, forests, waters"
+      }
+    },
+    {
+      "@id": "arch:SL-MOKOSH",
+      "@type": "Archetype",
+      "name": "Mokosh",
+      "aliases": ["Mokos", "Mokoš", "The Moist One"],
+      "domain": ["Earth", "Fertility", "Weaving", "Fate", "Women", "Sheep", "Moisture"],
+      "description": "The great earth mother and only goddess in Vladimir's pantheon, protector of women, spinning, weaving, and all moist/fertile things. She determines fate through her weaving and oversees childbirth and women's work. After Christianization, her worship merged with veneration of Saint Paraskeva (Friday). She represents the fertile, life-giving earth.",
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.3,
+        "light-shadow": 0.4,
+        "active-receptive": 0.75,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.65,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.7
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.95, "aspects": ["earth-mother", "fertility-giver"]},
+        {"primordial": "primordial:magician", "weight": 0.65, "aspects": ["fate-weaver", "spinner"]},
+        {"primordial": "primordial:healer", "weight": 0.55, "aspects": ["childbirth-protector", "women's-guardian"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:SL-PERUN", "description": "Earth mother to sky father"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-DEMETER", "fidelity": 0.65, "notes": "Earth goddess, fertility"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-FRIGG", "fidelity": 0.6, "notes": "Fate-weaving, women's protector"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:AF-YEMOJA", "fidelity": 0.5, "notes": "Mother goddess, moisture, fertility"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When earth withholds fertility", "When fate is cruel"],
+        "shadowManifestations": ["Barren earth", "Harsh fates woven", "Abandoned women"],
+        "integrationPath": "Earth that receives all; fate accepted and transformed through work"
+      },
+      "correspondences": {
+        "element": "Earth/Water",
+        "direction": "Below, earth",
+        "color": "Brown, green",
+        "day": "Friday (Paraskeva-Piatnitsa)",
+        "symbol": "Spindle, distaff, sheep, flax",
+        "taboo": "No spinning on Friday"
+      }
+    },
+    {
+      "@id": "arch:SL-DAZHBOG",
+      "@type": "Archetype",
+      "name": "Dazhbog",
+      "aliases": ["Dažbog", "Dabog", "The Giving God"],
+      "domain": ["Sun", "Fire", "Wealth", "Abundance", "Ancestors", "The Slavic People"],
+      "description": "The solar deity and 'giving god' whose name means 'god who gives.' Ancestor of the Slavic people (the 'grandchildren of Dazhbog'), he travels across the sky in a golden chariot. He represents the benevolent, life-giving aspect of the sun that brings warmth, abundance, and prosperity to his people.",
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.25,
+        "light-shadow": 0.15,
+        "active-receptive": 0.35,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.25,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.4
+      },
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.75, "aspects": ["sun-king", "wealth-giver"]},
+        {"primordial": "primordial:great-father", "weight": 0.7, "aspects": ["ancestor", "tribal-father"]},
+        {"primordial": "primordial:creator", "weight": 0.55, "aspects": ["abundance-bringer", "life-sustainer"]}
+      ],
+      "relationships": [
+        {"type": "rel:MIRRORS", "target": "arch:SL-KHORS", "description": "Both solar deities, different aspects"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HELIOS", "fidelity": 0.7, "notes": "Sun god, chariot, daily journey"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-RA", "fidelity": 0.55, "notes": "Sun god, ancestral, life-giving"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-SURYA", "fidelity": 0.6, "notes": "Solar deity, chariot, benevolent"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When sun scorches rather than nurtures", "When giving becomes withholding"],
+        "shadowManifestations": ["Drought", "Famine", "Ancestral abandonment"],
+        "integrationPath": "Sun that gives without burning; abundance shared freely"
+      },
+      "correspondences": {
+        "element": "Fire (solar)",
+        "direction": "Above, east to west",
+        "color": "Gold, white",
+        "symbol": "Sun disc, golden chariot, fire",
+        "association": "Sun, wealth, Slavic ancestry"
+      }
+    },
+    {
+      "@id": "arch:SL-KHORS",
+      "@type": "Archetype",
+      "name": "Khors",
+      "aliases": ["Chors", "Xors"],
+      "domain": ["Sun Disc", "Winter Sun", "Healing", "The Physical Sun"],
+      "description": "The god of the sun disc itself, representing the physical sun rather than its warming power (Dazhbog). Possibly of Iranian origin (related to Khorshed/Khurshid), he may represent the winter sun that gives light but little warmth, or the sun as cosmic body rather than life-giving force.",
+      "spectralCoordinates": {
+        "order-chaos": 0.2,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.2,
+        "active-receptive": 0.45,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.25,
+        "stasis-transformation": 0.35,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:healer", "weight": 0.6, "aspects": ["light-bringer", "darkness-dispeller"]},
+        {"primordial": "primordial:sovereign", "weight": 0.55, "aspects": ["celestial-body", "cosmic-order"]}
+      ],
+      "relationships": [
+        {"type": "rel:MIRRORS", "target": "arch:SL-DAZHBOG", "description": "Different aspects of solar divinity"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-APOLLO", "fidelity": 0.5, "notes": "Solar, healing aspects"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-SURYA", "fidelity": 0.55, "notes": "Sun disc, cosmic body"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When light gives no warmth", "When presence lacks vitality"],
+        "shadowManifestations": ["Cold light", "Winter that never ends", "Sun without life"],
+        "integrationPath": "Light as presence even in darkness; persistence through cold"
+      },
+      "correspondences": {
+        "element": "Fire (cold fire)",
+        "direction": "Above",
+        "color": "Pale gold, white",
+        "symbol": "Sun disc, wheel",
+        "association": "Winter sun, light itself, cosmic order"
+      }
+    },
+    {
+      "@id": "arch:SL-STRIBOG",
+      "@type": "Archetype",
+      "name": "Stribog",
+      "aliases": ["Strzybog", "The Flowing One"],
+      "domain": ["Wind", "Air", "Weather", "Distribution"],
+      "description": "The god of winds, air, and the distribution of wealth. His name may mean 'the flowing/spreading one' or relate to the distribution of goods. Ancestor of the winds, which are called his grandchildren. He governs all atmospheric phenomena and the movement of air across the land.",
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.4,
+        "active-receptive": 0.3,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.55
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-father", "weight": 0.6, "aspects": ["wind-ancestor", "air-lord"]},
+        {"primordial": "primordial:magician", "weight": 0.55, "aspects": ["weather-controller", "distributor"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-AEOLUS", "fidelity": 0.6, "notes": "Wind god, ancestor of winds"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:JP-FUJIN", "fidelity": 0.55, "notes": "Wind deity"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-ENLIL", "fidelity": 0.5, "notes": "Wind, air, breath"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When winds become destructive", "When distribution fails"],
+        "shadowManifestations": ["Devastating storms", "Unequal distribution", "Chaotic weather"],
+        "integrationPath": "Winds that carry rather than destroy; fair distribution"
+      },
+      "correspondences": {
+        "element": "Air",
+        "direction": "All (winds)",
+        "color": "Grey, white",
+        "symbol": "Wind, breath, movement",
+        "association": "Wind, weather, distribution of wealth"
+      }
+    },
+    {
+      "@id": "arch:SL-SVAROG",
+      "@type": "Archetype",
+      "name": "Svarog",
+      "aliases": ["The Bright One", "The Sky Forger"],
+      "domain": ["Sky", "Fire", "Blacksmithing", "The Sun", "Celestial Order"],
+      "description": "The primordial sky god and divine smith, father of Dazhbog (the sun) and Svarozhich (fire). He forged the sun and set it in the sky, and gave humanity fire, the plough, and the art of metalworking. His name relates to 'bright' or 'clear sky.' He may be an earlier supreme deity partially displaced by Perun.",
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.25,
+        "light-shadow": 0.2,
+        "active-receptive": 0.3,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.2,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.45
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.85, "aspects": ["sky-forger", "sun-maker"]},
+        {"primordial": "primordial:great-father", "weight": 0.8, "aspects": ["divine-father", "fire-giver"]},
+        {"primordial": "primordial:magician", "weight": 0.6, "aspects": ["smith", "tool-giver"]}
+      ],
+      "relationships": [
+        {"type": "rel:CONTAINS", "target": "arch:SL-DAZHBOG", "description": "Father of the sun god"},
+        {"type": "rel:CONTAINS", "target": "arch:SL-SVAROZHICH", "description": "Father of fire"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HEPHAESTUS", "fidelity": 0.65, "notes": "Divine smith, fire, metalworking"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-ODIN", "fidelity": 0.5, "notes": "Sky father, creator aspects"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When creation serves destruction", "When fire burns rather than warms"],
+        "shadowManifestations": ["Sky that refuses light", "Fire that consumes", "Tools used for harm"],
+        "integrationPath": "Creation in service of life; fire tamed and useful"
+      },
+      "correspondences": {
+        "element": "Fire/Air",
+        "direction": "Above",
+        "color": "Gold, orange",
+        "symbol": "Forge, hammer, sun, fire",
+        "association": "Smithing, fire, the sun, civilization"
+      }
+    },
+    {
+      "@id": "arch:SL-SVAROZHICH",
+      "@type": "Archetype",
+      "name": "Svarozhich",
+      "aliases": ["Svarožić", "Radegast (Western Slavic)", "Son of Svarog"],
+      "domain": ["Fire", "Hearth", "War (Western)", "Hospitality"],
+      "description": "The god of earthly fire and son of Svarog, representing fire in all its domestic and sacred forms. In Western Slavic lands (as Radegast), he was a major deity of war and hospitality. Fire was treated as sacred and subject to taboos - one must not spit in fire, curse near it, or let it die out.",
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.3,
+        "active-receptive": 0.35,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.45,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.4
+      },
+      "instantiates": [
+        {"primordial": "primordial:divine-child", "weight": 0.7, "aspects": ["son-of-sky", "fire-child"]},
+        {"primordial": "primordial:destroyer", "weight": 0.55, "aspects": ["consuming-fire", "transformer"]},
+        {"primordial": "primordial:warrior", "weight": 0.5, "aspects": ["war-god (Radegast)", "protector"]}
+      ],
+      "relationships": [
+        {"type": "rel:CONTAINED_BY", "target": "arch:SL-SVAROG", "description": "Son of the sky forger"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-AGNI", "fidelity": 0.7, "notes": "Fire god, sacred hearth"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HESTIA", "fidelity": 0.5, "notes": "Sacred hearth fire"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When fire is disrespected", "When hospitality is violated"],
+        "shadowManifestations": ["House fires", "Hearth going cold", "Broken hospitality"],
+        "integrationPath": "Fire honored and maintained; warmth shared with guests"
+      },
+      "correspondences": {
+        "element": "Fire",
+        "direction": "Center (hearth)",
+        "color": "Red, orange",
+        "symbol": "Flames, hearth, torch",
+        "taboo": "Spitting in fire, cursing near fire",
+        "association": "Hearth fire, domestic warmth, hospitality"
+      }
+    },
+    {
+      "@id": "arch:SL-SIMARGL",
+      "@type": "Archetype",
+      "name": "Simargl",
+      "aliases": ["Semargl", "Simargł"],
+      "domain": ["Vegetation", "Seeds", "Harvest", "Protection", "Winged Dog"],
+      "description": "A mysterious deity in Vladimir's pantheon, likely derived from the Iranian Simurgh (the mythical winged dog-bird). He protects seeds and vegetation, guarding the harvest. Depicted as a winged dog or lion, he may guard the world tree and its sacred seeds of all plants.",
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.35,
+        "active-receptive": 0.4,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.45
+      },
+      "instantiates": [
+        {"primordial": "primordial:guardian", "weight": 0.75, "aspects": ["seed-protector", "harvest-guardian"]},
+        {"primordial": "primordial:healer", "weight": 0.55, "aspects": ["vegetation-nurturer", "growth-enabler"]},
+        {"primordial": "primordial:monster", "weight": 0.4, "aspects": ["winged-beast", "composite-creature"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-GARUDA", "fidelity": 0.45, "notes": "Winged divine creature, guardian"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-GRIFFIN", "fidelity": 0.5, "notes": "Composite guardian beast"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When seeds fail to grow", "When protection fails"],
+        "shadowManifestations": ["Crop failure", "Seeds that rot", "Violated boundaries"],
+        "integrationPath": "Guarding life's potential; enabling rather than hoarding growth"
+      },
+      "correspondences": {
+        "element": "Earth/Air",
+        "direction": "Variable (guardian)",
+        "color": "Green, gold",
+        "symbol": "Winged dog, seeds, world tree",
+        "association": "Vegetation, seeds, harvest, guardian"
+      }
+    },
+    {
+      "@id": "arch:SL-JARILO",
+      "@type": "Archetype",
+      "name": "Jarilo",
+      "aliases": ["Yarilo", "Jarovit", "The Furious One"],
+      "domain": ["Spring", "Fertility", "Vegetation", "War", "Youth", "Sexuality"],
+      "description": "The god of spring, fertility, and youthful vitality, returning each year from the underworld to bring spring. His yearly marriage to Morana (spring) and death (winter) reflects the agricultural cycle. He embodies the explosive power of spring growth, youthful sexuality, and the warrior's fury.",
+      "spectralCoordinates": {
+        "order-chaos": 0.5,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.35,
+        "active-receptive": 0.25,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.45,
+        "stasis-transformation": 0.75,
+        "voluntary-fated": 0.6
+      },
+      "instantiates": [
+        {"primordial": "primordial:divine-child", "weight": 0.8, "aspects": ["spring-youth", "returning-son"]},
+        {"primordial": "primordial:lover", "weight": 0.75, "aspects": ["fertility", "sexuality", "passion"]},
+        {"primordial": "primordial:warrior", "weight": 0.55, "aspects": ["youthful-fury", "battle-vigor"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:SL-MORANA", "description": "Spring god marries death goddess, dying in winter"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-DUMUZI", "fidelity": 0.7, "notes": "Dying-rising fertility god"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ADONIS", "fidelity": 0.7, "notes": "Youthful dying-rising god"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-FREYR", "fidelity": 0.6, "notes": "Fertility, sexuality, seasonal"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When spring never comes", "When fertility becomes destructive"],
+        "shadowManifestations": ["Endless winter", "Sterility", "Death of the young god"],
+        "integrationPath": "Accepting the cycle of death and rebirth; spring's return after every winter"
+      },
+      "correspondences": {
+        "element": "Earth (spring growth)",
+        "direction": "East (spring)",
+        "color": "White, green",
+        "symbol": "White horse, spring flowers, wheat",
+        "festival": "Spring festivals, Kupala",
+        "association": "Spring, fertility, youth, the dying god"
+      }
+    },
+    {
+      "@id": "arch:SL-MORANA",
+      "@type": "Archetype",
+      "name": "Morana",
+      "aliases": ["Marzanna", "Morena", "Mara", "The Death Goddess"],
+      "domain": ["Winter", "Death", "Nightmares", "The Harvest's End", "Rebirth"],
+      "description": "The goddess of winter, death, and the dark half of the year. She marries Jarilo in spring but causes his death in winter, then herself 'dies' when her effigy is drowned or burned to welcome spring. She represents the necessary death that allows rebirth, the composting that enables new growth.",
+      "spectralCoordinates": {
+        "order-chaos": 0.4,
+        "creation-destruction": 0.7,
+        "light-shadow": 0.75,
+        "active-receptive": 0.6,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.75,
+        "stasis-transformation": 0.65,
+        "voluntary-fated": 0.7
+      },
+      "instantiates": [
+        {"primordial": "primordial:crone", "weight": 0.8, "aspects": ["winter-hag", "death-bringer"]},
+        {"primordial": "primordial:destroyer", "weight": 0.75, "aspects": ["life-ender", "winter-queen"]},
+        {"primordial": "primordial:great-mother", "weight": 0.5, "aspects": ["necessary-death", "rebirth-enabler"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:SL-JARILO", "description": "Death goddess who kills her spring husband"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-PERSEPHONE", "fidelity": 0.6, "notes": "Seasonal death-rebirth, underworld"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-HEL", "fidelity": 0.55, "notes": "Death goddess, underworld"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-KALI", "fidelity": 0.45, "notes": "Death aspect of goddess"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When winter never ends", "When death brings no rebirth"],
+        "shadowManifestations": ["Eternal winter", "Death without renewal", "Nightmares without waking"],
+        "integrationPath": "Death as necessary rest; winter's end always comes"
+      },
+      "correspondences": {
+        "element": "Water (ice)/Earth",
+        "direction": "North (winter)",
+        "color": "White, black",
+        "symbol": "Effigy, sickle, winter imagery",
+        "festival": "End of winter - drowning/burning of Marzanna effigy",
+        "association": "Winter, death, nightmares, seasonal cycle"
+      }
+    },
+    {
+      "@id": "arch:SL-LADA",
+      "@type": "Archetype",
+      "name": "Lada",
+      "aliases": ["Lado (male consort)", "Lady Lada"],
+      "domain": ["Love", "Beauty", "Marriage", "Spring", "Harmony"],
+      "description": "The goddess of love, beauty, marriage, and harmony, invoked in spring songs and wedding ceremonies. She represents the ideal of married love and familial harmony. Some scholars consider her a later construction from folk songs, but her presence in folklore is undeniable.",
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.25,
+        "light-shadow": 0.25,
+        "active-receptive": 0.6,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.4
+      },
+      "instantiates": [
+        {"primordial": "primordial:lover", "weight": 0.9, "aspects": ["love-goddess", "beauty"]},
+        {"primordial": "primordial:great-mother", "weight": 0.6, "aspects": ["marriage-patron", "family-harmony"]},
+        {"primordial": "primordial:maiden", "weight": 0.55, "aspects": ["spring-beauty", "bride-ideal"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-APHRODITE", "fidelity": 0.7, "notes": "Love, beauty"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-FREYA", "fidelity": 0.6, "notes": "Love, beauty, fertility"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:AF-OSHUN", "fidelity": 0.55, "notes": "Love, beauty, marriage"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When love becomes possession", "When beauty becomes vanity"],
+        "shadowManifestations": ["Jealousy", "Unhappy marriages", "Beauty without substance"],
+        "integrationPath": "Love that liberates; beauty as harmony"
+      },
+      "correspondences": {
+        "element": "Air/Water",
+        "direction": "Variable",
+        "color": "Pink, white, green",
+        "symbol": "Flowers, spring imagery, wedding symbols",
+        "festival": "Spring songs, weddings",
+        "association": "Love, marriage, spring, beauty"
+      }
+    },
+    {
+      "@id": "arch:SL-DOMOVOI",
+      "@type": "Archetype",
+      "name": "Domovoi",
+      "aliases": ["Domowik", "Dedushka (Grandfather)", "House Spirit"],
+      "domain": ["Home", "Hearth", "Family", "Protection", "Household Fortune"],
+      "description": "The protective household spirit dwelling behind the stove or under the threshold. He protects the family and livestock, predicting fortune through sounds and behavior. Appearing as a small old man (sometimes with the face of the family head), he must be respected with offerings or he becomes malicious. When moving homes, he must be formally invited to come along.",
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.5,
+        "active-receptive": 0.5,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.35,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:ancestor", "weight": 0.75, "aspects": ["family-spirit", "grandfather"]},
+        {"primordial": "primordial:guardian", "weight": 0.7, "aspects": ["house-protector", "livestock-watcher"]},
+        {"primordial": "primordial:trickster", "weight": 0.45, "aspects": ["prankster-when-angered", "fortune-teller"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:JP-KAMI", "fidelity": 0.5, "notes": "Household spirits"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CE-BROWNIES", "fidelity": 0.65, "notes": "Household helpers"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When disrespected or ignored", "When household is chaotic"],
+        "shadowManifestations": ["Poltergeist activity", "Bad luck", "Nightmares", "Livestock illness"],
+        "integrationPath": "Regular offerings and respect; maintaining household harmony"
+      },
+      "correspondences": {
+        "element": "Fire (hearth)",
+        "direction": "Center (home)",
+        "color": "Grey, brown",
+        "symbol": "Stove, threshold, small old man",
+        "offerings": "Bread, porridge, milk (left by stove)",
+        "taboo": "Whistling indoors, neglecting the hearth"
+      }
+    },
+    {
+      "@id": "arch:SL-BABA-YAGA",
+      "@type": "Archetype",
+      "name": "Baba Yaga",
+      "aliases": ["Baba Jaga", "The Bone-Legged One"],
+      "domain": ["Forest", "Death", "Transformation", "Testing", "Witchcraft", "Thresholds"],
+      "description": "The fearsome witch of Slavic folklore who lives in a hut on chicken legs deep in the forest. She flies in a mortar, sweeping her tracks with a pestle. Neither fully good nor evil, she tests heroes and heroines - helping those who are respectful and brave, devouring those who fail. She guards the threshold between the world of the living and the dead.",
+      "spectralCoordinates": {
+        "order-chaos": 0.6,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.65,
+        "active-receptive": 0.4,
+        "individual-collective": 0.65,
+        "ascent-descent": 0.65,
+        "stasis-transformation": 0.7,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:crone", "weight": 0.95, "aspects": ["ancient-witch", "death-guardian"]},
+        {"primordial": "primordial:magician", "weight": 0.85, "aspects": ["powerful-witch", "transformer"]},
+        {"primordial": "primordial:trickster", "weight": 0.6, "aspects": ["tester", "ambiguous-helper"]},
+        {"primordial": "primordial:monster", "weight": 0.55, "aspects": ["child-eater", "terrifying-hag"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HECATE", "fidelity": 0.65, "notes": "Crossroads witch, death goddess, thresholds"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:AF-NANA-BURUKU", "fidelity": 0.5, "notes": "Ancient primordial mother, life-death"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CE-MORRIGAN", "fidelity": 0.5, "notes": "Dark feminine, transformation, death"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When testing becomes cruelty", "When death-dealing has no teaching"],
+        "shadowManifestations": ["Devouring without purpose", "Tests impossible to pass", "Death without rebirth"],
+        "integrationPath": "Testing that transforms; the crone as teacher through ordeal"
+      },
+      "correspondences": {
+        "element": "Earth/Fire (oven)",
+        "direction": "Deep forest, threshold",
+        "color": "Black, bone-white",
+        "symbol": "Hut on chicken legs, mortar and pestle, skull fence",
+        "association": "Initiation, death-rebirth, witchcraft, forest, thresholds"
+      }
+    },
+    {
+      "@id": "arch:SL-LESHY",
+      "@type": "Archetype",
+      "name": "Leshy",
+      "aliases": ["Leszy", "Leshii", "Forest Master"],
+      "domain": ["Forest", "Wildlife", "Hunting", "Getting Lost", "Forest Law"],
+      "description": "The lord of the forest who protects trees and animals, leading travelers astray or guiding them depending on their behavior. He can appear as a tall man, a bear, or shrink to the size of a mouse. He rules the wolves and bears, and hunters must bargain with him for success. Peasants avoided his wrath by respecting the forest.",
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.55,
+        "active-receptive": 0.45,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:guardian", "weight": 0.8, "aspects": ["forest-protector", "wildlife-lord"]},
+        {"primordial": "primordial:trickster", "weight": 0.7, "aspects": ["path-confuser", "shapeshifter"]},
+        {"primordial": "primordial:sovereign", "weight": 0.55, "aspects": ["forest-king", "animal-ruler"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-PAN", "fidelity": 0.65, "notes": "Forest lord, wildlife, panic"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CE-CERNUNNOS", "fidelity": 0.6, "notes": "Forest lord, animals, wild nature"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When forest is disrespected", "When hunting violates natural law"],
+        "shadowManifestations": ["Lost forever in woods", "Animals turning on hunters", "Forest closing in"],
+        "integrationPath": "Respecting forest's laws; taking only what's needed"
+      },
+      "correspondences": {
+        "element": "Earth (forest)",
+        "direction": "Deep forest",
+        "color": "Green, brown",
+        "symbol": "Trees, wolf, bear, variable size",
+        "taboo": "Disrespecting forest, overhunting",
+        "association": "Forest, wildlife, hunting, getting lost"
+      }
+    },
+    {
+      "@id": "arch:SL-RUSALKA",
+      "@type": "Archetype",
+      "name": "Rusalka",
+      "aliases": ["Rusalki (plural)", "Water Maiden"],
+      "domain": ["Water", "Drowned Women", "Fertility", "Seduction", "Vengeance"],
+      "description": "Spirits of young women who died by drowning (often by suicide or murder), they inhabit rivers, lakes, and forests near water. Beautiful but dangerous, they can bring fertility to fields during Rusalka Week but also lure young men to drowning. They embody the tragic fate of women and the dangers of liminal water places.",
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.6,
+        "active-receptive": 0.5,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.6,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.75
+      },
+      "instantiates": [
+        {"primordial": "primordial:maiden", "weight": 0.75, "aspects": ["beautiful-dead", "seductress"]},
+        {"primordial": "primordial:outcast", "weight": 0.7, "aspects": ["drowned-woman", "wronged-spirit"]},
+        {"primordial": "primordial:destroyer", "weight": 0.55, "aspects": ["drowning-men", "vengeance"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-SIRENS", "fidelity": 0.6, "notes": "Luring men to water death"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-NYMPHS", "fidelity": 0.55, "notes": "Water spirits, nature maidens"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When vengeance consumes", "When death is not properly mourned"],
+        "shadowManifestations": ["Drowning innocent men", "Endless seeking", "Fields left barren"],
+        "integrationPath": "Honoring the dead properly; transforming vengeance into protective fertility"
+      },
+      "correspondences": {
+        "element": "Water",
+        "direction": "Rivers, lakes, shores",
+        "color": "Pale, green (water weeds)",
+        "symbol": "Water, long hair, flowers, drowning",
+        "festival": "Rusalka Week (late spring)",
+        "association": "Drowned women, fertility, seduction, vengeance"
+      }
+    }
+  ]
+}
