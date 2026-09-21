@@ -184,6 +184,21 @@
       "precio": 45,
       "issues": [932, 916, 931],
       "mito": ""
+    },
+    {
+      "id": "sarnath_98",
+      "titulo": "SARNATH 98",
+      "estado": "jugable",
+      "genero": "memoria y orientación",
+      "resumen": "Observar y recordar tres secuencias de rumbo inspiradas en la condición serial de Sarnath; las rutas son abstractas y solo la tercera completada publica el handshake cultural.",
+      "fuente": "gbc/minijuegos/sarnath_98",
+      "rom": "res://roms/sarnath_98.gbc",
+      "cabecera": "SARNATH98",
+      "cgb": "dual",
+      "incluida": false,
+      "precio": 45,
+      "issues": [932, 916, 931],
+      "mito": ""
     }
   ]
 }
