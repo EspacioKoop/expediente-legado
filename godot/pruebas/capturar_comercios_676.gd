@@ -14,19 +14,19 @@ const FRAMES_ESTABILIZACION := 3
 const CASOS_CALLE := [
 	{
 		"id": "bit98_exterior",
-		"posicion": Vector3(0.2, 0.0, -6.45),
+		"posicion": Vector3(2.55, 0.0, -9.15),
 		"objetivo": Vector3(5.55, 1.55, -6.45),
 		"criterio": "Bit 98 se reconoce como tienda de videojuegos desde la acera",
 	},
 	{
 		"id": "quiosco_avenida",
-		"posicion": Vector3(0.1, 0.0, 3.75),
+		"posicion": Vector3(2.45, 0.0, 1.35),
 		"objetivo": Vector3(4.75, 1.45, 3.75),
 		"criterio": "Quiosco Avenida se reconoce como punto de prensa y compra de barrio",
 	},
 	{
 		"id": "el_trastero",
-		"posicion": Vector3(0.0, 0.0, 11.15),
+		"posicion": Vector3(-2.45, 0.0, 8.75),
 		"objetivo": Vector3(-4.80, 1.45, 11.15),
 		"criterio": "El Trastero se reconoce como segunda mano sin bloquear la lectura de la calle",
 	},
