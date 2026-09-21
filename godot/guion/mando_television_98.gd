@@ -14,6 +14,8 @@ func configurar(televisor: Node) -> void:
 	_televisor = televisor
 	verbo = Verbo.USAR
 	nombre_objeto = "mando del televisor"
+	# USAR es mudo por defecto: aquí sí hay un botón físico bajo el dedo.
+	sonido = "pulsar"
 	_montar_colision()
 	_montar_carcasa()
 	activado.connect(_usar)

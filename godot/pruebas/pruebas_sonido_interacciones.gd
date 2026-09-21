@@ -16,6 +16,7 @@ func _ejecutar() -> void:
 	_probar_verbos_mudos()
 	_probar_sobrescritura()
 	_probar_toggle_conserva_gesto()
+	_probar_tv_distingue_potencia_y_navegacion()
 	_probar_voz_sobrevive_al_objeto()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -108,6 +109,51 @@ func _probar_toggle_conserva_gesto() -> void:
 		voces.size() == 2 and voces[1].stream == Sonido.stream("cerrar"),
 		"cerrar suena a cerrar aunque el callback deje el verbo en abrir",
 	)
+	escena.free()
+
+
+func _probar_tv_distingue_potencia_y_navegacion() -> void:
+	var escena := _escena()
+	var televisor := TelevisionInteractiva3D.new()
+	televisor.name = "TelevisorPrueba"
+	escena.add_child(televisor)
+	televisor.configurar(Vector3(1.2, 0.8, 0.6))
+
+	televisor.interactuar(null)
+	var voces := _voces(escena)
+	_comprobar(televisor.esta_encendida(), "el primer gesto enciende la TV")
+	_comprobar(
+		voces.size() == 1 and voces[0].stream == Sonido.stream("marcar"),
+		"encender la TV usa el switch de potencia",
+	)
+
+	televisor.interactuar(null)
+	voces = _voces(escena)
+	_comprobar(televisor.esta_encendida(), "buscar canal no apaga la TV")
+	_comprobar(
+		voces.size() == 2 and voces[1].stream == Sonido.stream("pulsar"),
+		"buscar canal usa clic y no repite el switch de potencia",
+	)
+
+	televisor.set("_documental_completado", true)
+	televisor.interactuar(null)
+	voces = _voces(escena)
+	_comprobar(not televisor.esta_encendida(), "tras completar, el gesto apaga la TV")
+	_comprobar(
+		voces.size() == 3 and voces[2].stream == Sonido.stream("marcar"),
+		"apagar la TV vuelve a usar el switch de potencia",
+	)
+
+	var mando := escena.get_node_or_null("MandoTelevision98") as MandoTelevision98
+	_comprobar(mando != null, "la TV monta su mando real")
+	if mando != null:
+		mando.interactuar(null)
+		voces = _voces(escena)
+		_comprobar(televisor.esta_encendida(), "el mando alterna la potencia")
+		_comprobar(
+			voces.size() == 4 and voces[3].stream == Sonido.stream("pulsar"),
+			"el botón del mando produce su clic físico",
+		)
 	escena.free()
 
 
