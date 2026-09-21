@@ -48,7 +48,9 @@ func _probar() -> void:
 	)
 	var teclado := calculadora.get_node_or_null("Teclado") as GridContainer
 	_comprobar(teclado != null, "la calculadora expone un teclado propio")
-	_comprobar(teclado != null and teclado.get_child_count() == 20, "el teclado ofrece veinte teclas")
+	_comprobar(
+		teclado != null and teclado.get_child_count() == 20, "el teclado ofrece veinte teclas"
+	)
 	calculadora.queue_free()
 
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
