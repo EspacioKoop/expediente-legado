@@ -38,7 +38,8 @@ const CALENDARIO := [
 ]
 
 const PRACTICAS := {
-	"silencio_memoria": {
+	"silencio_memoria":
+	{
 		"actividad": ID_ACTO_MEMORIA,
 		"fuente": "mundo:mesa_recuerdo_98",
 		"contexto": "sala_comunitaria:acto_memoria",
