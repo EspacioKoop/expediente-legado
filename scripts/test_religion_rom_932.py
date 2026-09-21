@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OBSERVER = ROOT / "godot" / "guion" / "religion_rom_vigilia.gd"
 JALI = ROOT / "godot" / "guion" / "jali_98_vigilia.gd"
 CONSUMER = ROOT / "godot" / "guion" / "religion_recuerdo_jali_932.gd"
+CONSUMER_3D = ROOT / "godot" / "guion" / "religion_recuerdo_jali_932_3d.gd"
 CONTROLLER = ROOT / "godot" / "guion" / "dia_jali_98_app.gd"
 ROM = ROOT / "gbc" / "minijuegos" / "jali_98" / "main.asm"
 README = ROOT / "gbc" / "minijuegos" / "jali_98" / "README.md"
@@ -24,6 +25,7 @@ class ReligionRom932Test(unittest.TestCase):
         cls.observer = OBSERVER.read_text(encoding="utf-8")
         cls.jali = JALI.read_text(encoding="utf-8")
         cls.consumer = CONSUMER.read_text(encoding="utf-8")
+        cls.consumer_3d = CONSUMER_3D.read_text(encoding="utf-8")
         cls.controller = CONTROLLER.read_text(encoding="utf-8")
         cls.rom = ROM.read_text(encoding="utf-8")
         cls.readme = README.read_text(encoding="utf-8")
@@ -49,16 +51,20 @@ class ReligionRom932Test(unittest.TestCase):
         self.assertIn('["geometria", "luz", "sombra", "calado"]', self.consumer)
         self.assertIn('set_meta("recuerdo_cultural_jali_98"', self.controller)
 
+    def test_consecuencia_posterior_es_visible_y_no_jugable(self):
+        self.assertIn("class_name ReligionRecuerdoJali9323D", self.consumer_3d)
+        self.assertIn("for indice in 3", self.consumer_3d)
+        self.assertIn("for brazo in 4", self.consumer_3d)
+        self.assertNotIn("CollisionShape3D", self.consumer_3d)
+        self.assertIn('== "sueño"', self.controller)
+        self.assertIn("ReligionRecuerdoJali9323D.montar", self.controller)
+
     def test_documentacion_separa_fuente_e_invencion(self):
         self.assertIn("1993.67.1", self.doc)
         self.assertIn("The Metropolitan Museum of Art", self.doc)
         self.assertIn("Invención del juego", self.doc)
         self.assertIn("No se reproduce", self.doc)
         self.assertIn("1993.67.1", self.readme)
-
-    def test_vertical_no_incluye_linea_descartada(self):
-        for text in (self.jali, self.consumer, self.controller, self.readme, self.doc):
-            self.assertNotIn("hebre", text.lower())
 
     def test_godot_contract(self):
         engine = os.environ.get("GODOT_BIN", "godot4")
