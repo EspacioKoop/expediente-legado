@@ -90,10 +90,7 @@ func _cumple_requisitos(requisitos: Dictionary) -> bool:
 	if cumple and requisitos.has("arquetipo"):
 		cumple = _arquetipo_desbloqueado(arquetipos, String(requisitos["arquetipo"]))
 	if cumple and requisitos.has("momentum"):
-		cumple = (
-			float(momentum.get("momentum_actual"))
-			>= float(requisitos["momentum"])
-		)
+		cumple = (float(momentum.get("momentum_actual")) >= float(requisitos["momentum"]))
 	return cumple
 
 
