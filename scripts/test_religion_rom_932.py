@@ -14,6 +14,10 @@ VITRAL = ROOT / "godot" / "guion" / "vitral_98_vigilia.gd"
 VITRAL_CONTROLLER = ROOT / "godot" / "guion" / "dia_vitral_98_app.gd"
 VITRAL_ROM = ROOT / "gbc" / "minijuegos" / "vitral_98" / "main.asm"
 VITRAL_DOC = ROOT / "docs" / "religion-rom-vitral-932.md"
+SARNATH = ROOT / "godot" / "guion" / "sarnath_98_vigilia.gd"
+SARNATH_CONTROLLER = ROOT / "godot" / "guion" / "dia_sarnath_98_app.gd"
+SARNATH_ROM = ROOT / "gbc" / "minijuegos" / "sarnath_98" / "main.asm"
+SARNATH_DOC = ROOT / "docs" / "religion-rom-sarnath-932.md"
 CONSUMER = ROOT / "godot" / "guion" / "religion_recuerdo_jali_932.gd"
 CONSUMER_3D = ROOT / "godot" / "guion" / "religion_recuerdo_jali_932_3d.gd"
 CONTROLLER = ROOT / "godot" / "guion" / "dia_jali_98_app.gd"
@@ -32,6 +36,10 @@ class ReligionRom932Test(unittest.TestCase):
         cls.vitral_controller = VITRAL_CONTROLLER.read_text(encoding="utf-8")
         cls.vitral_rom = VITRAL_ROM.read_text(encoding="utf-8")
         cls.vitral_doc = VITRAL_DOC.read_text(encoding="utf-8")
+        cls.sarnath = SARNATH.read_text(encoding="utf-8")
+        cls.sarnath_controller = SARNATH_CONTROLLER.read_text(encoding="utf-8")
+        cls.sarnath_rom = SARNATH_ROM.read_text(encoding="utf-8")
+        cls.sarnath_doc = SARNATH_DOC.read_text(encoding="utf-8")
         cls.consumer = CONSUMER.read_text(encoding="utf-8")
         cls.consumer_3d = CONSUMER_3D.read_text(encoding="utf-8")
         cls.controller = CONTROLLER.read_text(encoding="utf-8")
@@ -55,6 +63,17 @@ class ReligionRom932Test(unittest.TestCase):
         self.assertIn("Vitral98Vigilia.new()", self.vitral_controller)
         self.assertIn("V&A", self.vitral_doc)
         self.assertIn("No se reconstruye el panel de Erfurt", self.vitral_doc)
+
+    def test_tercera_rom_cambia_mecanica_sin_cambiar_contrato(self):
+        self.assertIn('extends "res://guion/religion_rom_vigilia.gd"', self.sarnath)
+        self.assertIn('const TRADICION := "budismo"', self.sarnath)
+        self.assertIn("india:varanasi:sarnath:sitio_arqueologico:unesco_2026", self.sarnath)
+        self.assertIn('const TITULO_ROM := "SARNATH98"', self.sarnath)
+        self.assertIn('SECTION "Handshake", WRAM0[$C100]', self.sarnath_rom)
+        self.assertIn("Ruta0:", self.sarnath_rom)
+        self.assertIn("Sarnath98Vigilia.new()", self.sarnath_controller)
+        self.assertIn("UNESCO", self.sarnath_doc)
+        self.assertIn("no reproduce el trazado de Sarnath", self.sarnath_doc)
 
     def test_handshake_es_externo_y_determinista(self):
         self.assertIn("0xC100", self.jali)
