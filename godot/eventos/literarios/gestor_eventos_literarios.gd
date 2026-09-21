@@ -99,10 +99,7 @@ func _verificar_requisitos(requisitos: Dictionary) -> bool:
 		var arquetipo = arquetipos.call("obtener_arquetipo", String(requisitos["arquetipo"]))
 		cumple = arquetipo != null and bool(arquetipo.get("desbloqueado"))
 	if cumple and requisitos.has("min_momentum"):
-		cumple = (
-			float(momentum.get("momentum_actual"))
-			>= float(requisitos["min_momentum"])
-		)
+		cumple = (float(momentum.get("momentum_actual")) >= float(requisitos["min_momentum"]))
 	if cumple and requisitos.has("momentum"):
 		cumple = float(momentum.get("momentum_actual")) >= float(requisitos["momentum"])
 	if cumple and requisitos.has("min_insight"):
