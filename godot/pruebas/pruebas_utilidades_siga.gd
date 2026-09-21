@@ -40,7 +40,8 @@ func _probar() -> void:
 		"rechaza llamadas a funciones"
 	)
 	_comprobar(
-		calculadora.get_node_or_null("Entrada") is LineEdit, "la entrada es accesible por teclado"
+		calculadora.find_child("Entrada", true, false) is LineEdit,
+		"la entrada es accesible por teclado"
 	)
 	_comprobar(
 		calculadora.get_node_or_null("Pantalla") is PanelContainer,
