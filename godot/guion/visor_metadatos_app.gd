@@ -25,7 +25,7 @@ func _columna_documento() -> Control:
 func _al_elegir_documento(indice: int) -> void:
 	var esperado: Dictionary = caso["registros"][indice]
 	var esperado_id := String(esperado.get("id", ""))
-	var era_leido := jornada.get("leidos_total", []).has(esperado_id)
+	var era_leido: bool = jornada.get("leidos_total", []).has(esperado_id)
 	super._al_elegir_documento(indice)
 	_actualizar_metadatos()
 	if String(registro_actual.get("id", "")) != esperado_id:
@@ -47,7 +47,7 @@ func _al_elegir_caso(indice: int) -> void:
 
 func _al_marcar_folio() -> void:
 	var registro_id := String(registro_actual.get("id", ""))
-	var estaba_marcado := not registro_id.is_empty() and _marcadores_del_caso().has(registro_id)
+	var estaba_marcado: bool = (\n\t\tnot registro_id.is_empty() and _marcadores_del_caso().has(registro_id)\n\t)
 	super._al_marcar_folio()
 	if (
 		not registro_id.is_empty()
