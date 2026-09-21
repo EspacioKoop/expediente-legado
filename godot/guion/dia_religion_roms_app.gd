@@ -48,9 +48,7 @@ func _montar_observadores(mundo: Node3D, jornada: Dictionary) -> void:
 	_montar_sarnath(mundo, jornada, consola)
 
 
-func _montar_jali(
-	mundo: Node3D, jornada: Dictionary, consola: ConsolaPortatil98
-) -> void:
+func _montar_jali(mundo: Node3D, jornada: Dictionary, consola: ConsolaPortatil98) -> void:
 	if _observadores.has(Jali98Vigilia.ID_ROM):
 		return
 	var observador := mundo.get_node_or_null("Jali98VigiliaCasa") as Jali98Vigilia
@@ -62,9 +60,7 @@ func _montar_jali(
 	_observadores[Jali98Vigilia.ID_ROM] = observador
 
 
-func _montar_vitral(
-	mundo: Node3D, jornada: Dictionary, consola: ConsolaPortatil98
-) -> void:
+func _montar_vitral(mundo: Node3D, jornada: Dictionary, consola: ConsolaPortatil98) -> void:
 	if _observadores.has(Vitral98Vigilia.ID_ROM):
 		return
 	var observador := mundo.get_node_or_null("Vitral98VigiliaCasa") as Vitral98Vigilia
@@ -76,9 +72,7 @@ func _montar_vitral(
 	_observadores[Vitral98Vigilia.ID_ROM] = observador
 
 
-func _montar_sarnath(
-	mundo: Node3D, jornada: Dictionary, consola: ConsolaPortatil98
-) -> void:
+func _montar_sarnath(mundo: Node3D, jornada: Dictionary, consola: ConsolaPortatil98) -> void:
 	if _observadores.has(Sarnath98Vigilia.ID_ROM):
 		return
 	var observador := mundo.get_node_or_null("Sarnath98VigiliaCasa") as Sarnath98Vigilia
