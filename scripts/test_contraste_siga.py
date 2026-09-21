@@ -48,7 +48,7 @@ class ContrasteSigaTest(unittest.TestCase):
             )
         }
         extras = {
-            "gris_disabled": (0xB8 / 255.0,) * 3,
+            "gris_disabled": (0xD0 / 255.0,) * 3,
             "gris_readonly": (0xE8 / 255.0,) * 3,
         }
         pares = {
@@ -75,6 +75,7 @@ class ContrasteSigaTest(unittest.TestCase):
             'tema.set_color("font_color", "ItemList", NEGRO)',
             'tema.set_color("font_hovered_color", "ItemList", NEGRO)',
             'tema.set_color("font_selected_color", "ItemList", BLANCO)',
+            'tema.set_color("font_disabled_color", "ItemList", GRIS_TEXTO_DESHABILITADO)',
             'tema.set_stylebox("panel", "ItemList", caja_hundida(BLANCO))',
             'tema.set_color("font_placeholder_color", tipo, GRIS_TEXTO)',
             'tema.set_color("font_disabled_color", tipo, GRIS_TEXTO_DESHABILITADO)',
