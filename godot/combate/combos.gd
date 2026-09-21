@@ -5,29 +5,34 @@ signal combo_ejecutado(nombre_combo, efectos)
 signal finisher_ejecutado(nombre, efectos, es_super)
 
 var combos_disponibles: Dictionary = {
-	"golpe_sombra": {
+	"golpe_sombra":
+	{
 		"nombre": "Golpe de la Sombra",
 		"requisitos": {"momentum_min": 30, "arquetipo": "sombra"},
 		"secuencia": ["ataque_ligero", "ataque_ligero", "ataque_pesado"],
 		"efectos": {"daño_multiplier": 2.0, "aplicar_sombra": true, "area": 2.0},
 	},
-	"abrazo_anima": {
+	"abrazo_anima":
+	{
 		"nombre": "Abrazo del Anima",
 		"requisitos": {"momentum_min": 40, "arquetipo": "anima"},
 		"secuencia": ["ataque_pesado", "esquivar", "ataque_ligero"],
 		"efectos": {"curacion_area": 30, "buff_aliados": {"resistencia": 0.2, "duracion": 10}},
 	},
-	"danza_persona": {
+	"danza_persona":
+	{
 		"nombre": "Danza de la Persona",
 		"requisitos": {"momentum_min": 35, "arquetipo": "persona"},
 		"secuencia": ["esquivar", "ataque_ligero", "esquivar", "ataque_pesado"],
 		"efectos": {"evasion_temporal": 0.5, "duracion": 5, "contragolpe": true},
 	},
-	"despertar_self": {
+	"despertar_self":
+	{
 		"nombre": "Despertar del Self",
 		"requisitos": {"momentum_min": 100, "arquetipo": "self"},
 		"secuencia": ["ataque_pesado", "ataque_pesado", "ataque_pesado", "ataque_pesado"],
-		"efectos": {
+		"efectos":
+		{
 			"daño_masivo": 500,
 			"area": 5.0,
 			"stun": 3.0,
@@ -37,21 +42,25 @@ var combos_disponibles: Dictionary = {
 }
 
 var finishers: Dictionary = {
-	"sombra_desatada": {
+	"sombra_desatada":
+	{
 		"nombre": "Desatamiento de la Sombra",
 		"costo_momentum": 75,
 		"es_super": false,
-		"efectos": {
+		"efectos":
+		{
 			"daño_verdadero": 200,
 			"miedo_enemigos": 4.0,
 			"buff_jugador": {"crit": 0.3, "duracion": 15},
 		},
 	},
-	"furia_divina": {
+	"furia_divina":
+	{
 		"nombre": "Furia del Dios",
 		"costo_momentum": 100,
 		"es_super": true,
-		"efectos": {
+		"efectos":
+		{
 			"daño_divino": 500,
 			"area": 8.0,
 			"curacion_total": true,
@@ -132,10 +141,13 @@ func ejecutar_finisher(nombre: String) -> bool:
 	if momentum.momentum_actual >= float(finisher.get("costo_momentum", 0)):
 		var tipo := "super" if bool(finisher.get("es_super", false)) else "normal"
 		momentum.ejecutar_finisher(tipo)
-		finisher_ejecutado.emit(
-			finisher.get("nombre", nombre),
-			finisher.get("efectos", {}),
-			finisher.get("es_super", false),
+		(
+			finisher_ejecutado
+			. emit(
+				finisher.get("nombre", nombre),
+				finisher.get("efectos", {}),
+				finisher.get("es_super", false),
+			)
 		)
 		return true
 	return false
