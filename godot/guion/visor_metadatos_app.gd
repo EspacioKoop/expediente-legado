@@ -101,11 +101,15 @@ func _actualizar_detalles_meticulosidad() -> void:
 
 	var textos: Array[String] = []
 	for detalle in detalles:
-		var texto := String(detalle.get("texto", "")).strip_edges()
-		if not texto.is_empty():
-			textos.append(texto)
-	_detalle_meticulosidad.text = "\n".join(textos)
-	_detalle_meticulosidad.visible = not textos.is_empty()
+		var clave := String(detalle.get("texto", "")).strip_edges()
+		if not clave.is_empty():
+			textos.append(tr(clave))
+	if textos.is_empty():
+		_detalle_meticulosidad.text = ""
+		_detalle_meticulosidad.visible = false
+		return
+	_detalle_meticulosidad.text = tr("VISOR_DETALLE_961_OBSERVACION") % "\n".join(textos)
+	_detalle_meticulosidad.visible = true
 
 
 func _detalles_meticulosidad_actuales() -> Array[Dictionary]:
