@@ -49,6 +49,21 @@ class MenuGlobalTest(unittest.TestCase):
             self.assertIn(clave, self.textos)
             self.assertIn(f'tr("{clave}")', self.menu)
 
+    def test_historial_de_decisiones_es_superficie_del_menu(self):
+        for clave in (
+            "MENU_GLOBAL_HISTORIAL_DECISIONES",
+            "MENU_GLOBAL_HISTORIAL_SUBTITULO",
+            "MENU_GLOBAL_HISTORIAL_RESUMEN",
+            "MENU_GLOBAL_HISTORIAL_VACIO",
+        ):
+            self.assertIn(clave, self.textos)
+            self.assertIn(f'tr("{clave}")', self.menu)
+        self.assertIn("Historias.new()", self.menu)
+        self.assertIn("_historias.historial(estado)", self.menu)
+        self.assertIn("_historias.presion_indecision(estado)", self.menu)
+        self.assertIn("_texto_eleccion", self.menu)
+        self.assertIn("_historial_volver.grab_focus()", self.menu)
+
     def test_parte_incidencias_es_una_superficie_del_mismo_menu(self):
         self.assertIn("ParteIncidenciasApp.new()", self.menu)
         self.assertIn("ParteIncidencias.ETIQUETA", self.menu)
