@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="320" viewBox="0 0 900 320">
+  <rect width="900" height="320" fill="#1f2b32"/>
+  <rect x="18" y="18" width="864" height="284" fill="#efe3bd" stroke="#742d2a" stroke-width="10"/>
+  <rect x="42" y="44" width="816" height="106" fill="#742d2a"/>
+  <text x="450" y="123" text-anchor="middle" font-family="Arial,sans-serif" font-size="82" font-weight="900" fill="#fff6db">QUIOSCO AVENIDA</text>
+  <text x="450" y="205" text-anchor="middle" font-family="monospace" font-size="31" font-weight="700" fill="#24333a">PRENSA · REVISTAS · CUADERNOS</text>
+  <text x="450" y="255" text-anchor="middle" font-family="monospace" font-size="24" fill="#6a5d45">EDICIÓN DE TARDE · BARRIO · 1998</text>
+</svg>
