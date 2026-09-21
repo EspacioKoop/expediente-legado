@@ -119,7 +119,7 @@ func _construir_interfaz() -> void:
 		{"texto": "C", "accion": "borrar"},
 		{"texto": "=", "accion": "calcular"},
 	]
-	for config: Dictionary in teclas:
+	for config in teclas:
 		_crear_tecla(teclado, String(config["texto"]), String(config["accion"]))
 
 	var acciones := HBoxContainer.new()
