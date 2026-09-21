@@ -76,7 +76,7 @@ class Meticulosidad961Test(unittest.TestCase):
     def test_el_visor_revela_detalles_sin_convertirlos_en_pistas(self):
         self.assertIn("RUTA_DETALLES_METICULOSIDAD", self.capa)
         self.assertIn("_actualizar_detalles_meticulosidad()", self.capa)
-        self.assertIn("DetallesMeticulosidadCatalogo.visibles(", self.capa)
+        self.assertRegex(self.capa, r"DetallesMeticulosidadCatalogo\s*\.\s*visibles\(")
         combinado = self.capa + self.detalles
         self.assertNotIn("pistas_descubiertas", combinado)
         self.assertNotIn("Acusacion", combinado)
