@@ -34,14 +34,7 @@ const CASOS_CALLE := [
 
 
 func _init() -> void:
-	var argumentos := OS.get_cmdline_user_args()
-	var salida := (
-		String(argumentos[0])
-		if argumentos.size() > 0
-		else OS.get_user_data_dir().path_join("evidencia-comercios-676")
-	)
-	if not salida.is_absolute_path():
-		salida = ProjectSettings.globalize_path("res://").path_join(salida)
+	var salida := _resolver_salida()
 	var error_dir := DirAccess.make_dir_recursive_absolute(salida)
 	if error_dir != OK:
 		printerr("No se pudo crear %s (error %d)" % [salida, error_dir])
@@ -61,26 +54,69 @@ func _init() -> void:
 	dia._entrar_en("trayecto")
 	await process_frame
 
-	var calle := dia._mundo.get_node_or_null("CalleIdentidad") as Node3D
-	if calle == null:
-		printerr("El trayecto no montó CalleIdentidad")
+	var contexto := _contexto_comercial(dia)
+	if contexto.is_empty():
 		quit(1)
 		return
-	var locales := calle.get_node_or_null("LocalesComerciales") as CalleLocalesComerciales3D
-	if locales == null:
-		printerr("El trayecto no montó LocalesComerciales")
-		quit(1)
-		return
-	var comercio := calle.get_node_or_null("ComercioBarrioFisico") as ComercioBarrio3D
-	if comercio == null:
-		printerr("El trayecto no montó ComercioBarrioFisico")
-		quit(1)
-		return
+	var calle := contexto["calle"] as Node3D
+	var locales := contexto["locales"] as CalleLocalesComerciales3D
 	if not _validar_rotulos(calle):
 		quit(1)
 		return
 
-	var manifiesto := {
+	var manifiesto := _crear_manifiesto()
+	if not await _capturar_calle(dia, salida, manifiesto):
+		quit(1)
+		return
+
+	var interior_bit98 := await _activar_interior_bit98(dia, calle, locales)
+	if interior_bit98 == null:
+		quit(1)
+		return
+	if not await _capturar_interior(dia, salida, manifiesto, interior_bit98):
+		quit(1)
+		return
+
+	if not _guardar_manifiesto(salida, manifiesto):
+		quit(1)
+	else:
+		print("evidencia #676 -> %s" % salida)
+		quit(0)
+
+
+func _resolver_salida() -> String:
+	var argumentos := OS.get_cmdline_user_args()
+	var salida := (
+		String(argumentos[0])
+		if argumentos.size() > 0
+		else OS.get_user_data_dir().path_join("evidencia-comercios-676")
+	)
+	if not salida.is_absolute_path():
+		salida = ProjectSettings.globalize_path("res://").path_join(salida)
+	return salida
+
+
+func _contexto_comercial(dia) -> Dictionary:
+	var calle := dia._mundo.get_node_or_null("CalleIdentidad") as Node3D
+	if calle == null:
+		printerr("El trayecto no montó CalleIdentidad")
+		return {}
+	var locales := calle.get_node_or_null("LocalesComerciales") as CalleLocalesComerciales3D
+	if locales == null:
+		printerr("El trayecto no montó LocalesComerciales")
+		return {}
+	var comercio := calle.get_node_or_null("ComercioBarrioFisico") as ComercioBarrio3D
+	if comercio == null:
+		printerr("El trayecto no montó ComercioBarrioFisico")
+		return {}
+	return {
+		"calle": calle,
+		"locales": locales,
+	}
+
+
+func _crear_manifiesto() -> Dictionary:
+	return {
 		"issue": 676,
 		"escena": "res://escenas/dia.tscn",
 		"fase": "trayecto",
@@ -94,49 +130,61 @@ func _init() -> void:
 		"casos": [],
 	}
 
+
+func _capturar_calle(dia, salida: String, manifiesto: Dictionary) -> bool:
 	for caso in CASOS_CALLE:
 		if not await _capturar_caso(dia, salida, manifiesto, caso, "calle"):
-			quit(1)
-			return
+			return false
+	return true
 
+
+func _activar_interior_bit98(
+	dia,
+	calle: Node3D,
+	locales: CalleLocalesComerciales3D,
+) -> Node3D:
 	var fachada_bit98 := calle.get_node_or_null("TiendaVideojuegos") as Node3D
 	if fachada_bit98 == null:
 		printerr("Falta fachada de Bit 98")
-		quit(1)
-		return
+		return null
 	var entrar_bit98 := fachada_bit98.get_node_or_null("EntrarTiendaVideojuegos") as Interactuable3D
 	var interior_bit98 := locales.get_node_or_null("InteriorBit98") as Node3D
 	if entrar_bit98 == null or interior_bit98 == null:
 		printerr("Bit 98 no expone entrada e interior para evidencia")
-		quit(1)
-		return
+		return null
+
 	entrar_bit98.interactuar(dia._caminante)
 	await process_frame
 	if not interior_bit98.visible or dia._caminante.global_position.x < 40.0:
 		printerr("La entrada real de Bit 98 no activó el interior")
-		quit(1)
-		return
+		return null
+	return interior_bit98
 
+
+func _capturar_interior(
+	dia,
+	salida: String,
+	manifiesto: Dictionary,
+	interior_bit98: Node3D,
+) -> bool:
 	var caso_interior := {
 		"id": "bit98_interior",
 		"posicion": interior_bit98.global_position + Vector3(0.0, 0.0, 2.35),
 		"objetivo": interior_bit98.global_position + Vector3(0.0, 1.45, -1.10),
 		"criterio": "Bit 98 interior se lee como tienda con mostrador, baldas y producto propio",
 	}
-	if not await _capturar_caso(dia, salida, manifiesto, caso_interior, "interior"):
-		quit(1)
-		return
+	return await _capturar_caso(dia, salida, manifiesto, caso_interior, "interior")
 
+
+func _guardar_manifiesto(salida: String, manifiesto: Dictionary) -> bool:
 	var ruta_manifiesto := salida.path_join("manifest.json")
 	var archivo_manifiesto := FileAccess.open(ruta_manifiesto, FileAccess.WRITE)
 	if archivo_manifiesto == null:
 		printerr("No se pudo crear %s" % ruta_manifiesto)
-		quit(1)
-		return
+		return false
 	archivo_manifiesto.store_string(JSON.stringify(manifiesto, "\t") + "\n")
 	archivo_manifiesto.close()
-	print("evidencia #676 -> %s" % salida)
-	quit(0)
+	return true
 
 
 func _capturar_caso(
