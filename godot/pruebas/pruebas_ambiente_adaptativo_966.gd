@@ -77,17 +77,13 @@ func _probar_streams_adaptativos() -> void:
 	_comprobar(tarde.data != mediodia.data, "la tarde recupera actividad")
 	_comprobar(noche.data != tarde.data, "la noche vacia el edificio")
 
-	var detalle := Ambiente.stream_adaptativo(
-		"archivo", {"meticulosidad": 0.95}
-	) as AudioStreamWAV
+	var detalle := Ambiente.stream_adaptativo("archivo", {"meticulosidad": 0.95}) as AudioStreamWAV
 	_comprobar(detalle.data != base.data, "alta meticulosidad deja microdetalle opcional")
 
 
 func _probar_eco_de_vigilia() -> void:
 	var base := Ambiente.stream("sueño") as AudioStreamWAV
-	var eco := Ambiente.stream_adaptativo(
-		"sueño", {"vigilia_fase": "archivo"}
-	) as AudioStreamWAV
+	var eco := Ambiente.stream_adaptativo("sueño", {"vigilia_fase": "archivo"}) as AudioStreamWAV
 	_comprobar(eco != base, "el sueño puede recibir una huella de vigilia")
 	_comprobar(eco.data != base.data, "la huella de vigilia altera la cama onirica")
 	_comprobar(
@@ -95,7 +91,10 @@ func _probar_eco_de_vigilia() -> void:
 		"una vigilia invalida no inventa una fuente sonora",
 	)
 	_comprobar(
-		Ambiente.stream_adaptativo("archivo", {"vigilia_fase": "casa"}) == Ambiente.stream("archivo"),
+		(
+			Ambiente.stream_adaptativo("archivo", {"vigilia_fase": "casa"})
+			== Ambiente.stream("archivo")
+		),
 		"el eco de vigilia solo existe dentro del sueño",
 	)
 
