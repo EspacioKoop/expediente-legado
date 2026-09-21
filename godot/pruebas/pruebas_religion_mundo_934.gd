@@ -114,8 +114,10 @@ func _probar_reduccion_movimiento() -> void:
 	escena_reducida.practica_interactuable().interactuar(null)
 	_comprobar(escena_reducida.reduccion_movimiento_activa(), "la preferencia llega al componente")
 	_comprobar(
-		JSON.stringify(Eventos.eventos(normal, Eventos.CANAL_PRACTICA))
-		== JSON.stringify(Eventos.eventos(reducido, Eventos.CANAL_PRACTICA)),
+		(
+			JSON.stringify(Eventos.eventos(normal, Eventos.CANAL_PRACTICA))
+			== JSON.stringify(Eventos.eventos(reducido, Eventos.CANAL_PRACTICA))
+		),
 		"reducción de movimiento no cambia el significado de la práctica"
 	)
 	escena_normal.free()
