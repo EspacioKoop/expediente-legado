@@ -8,6 +8,7 @@ func _initialize() -> void:
 	_probar_gate_y_semilla()
 	_probar_vigilia_deliberada()
 	_probar_tensores_y_puente()
+	_probar_tensores_interactivos()
 	_probar_reduccion_movimiento()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -119,6 +120,31 @@ func _probar_tensores_y_puente() -> void:
 	_comprobar(repetido["azimut_sol"], solapado["azimut_sol"], "geometría solar determinista")
 	_comprobar(repetido["sombra_a_x"], solapado["sombra_a_x"], "sombra A determinista")
 	_comprobar(repetido["sombra_b_x"], solapado["sombra_b_x"], "sombra B determinista")
+	sueno.queue_free()
+
+
+func _probar_tensores_interactivos() -> void:
+	var sueno := SuenoMauiTamanuitera.new()
+	get_root().add_child(sueno)
+	sueno.preparar()
+	var persiana := sueno.get_node_or_null("Arquitectura/UsarTensorPersiana") as Interactuable3D
+	var cable := sueno.get_node_or_null("Arquitectura/UsarTensorCable") as Interactuable3D
+	_comprobar(persiana != null, "la persiana expone interacción 3D real")
+	_comprobar(cable != null, "el cable expone interacción 3D real")
+	var actor := Node.new()
+	sueno.add_child(actor)
+
+	persiana.activado.emit(actor)
+	_comprobar(sueno.valor_tensor(SuenoMauiTamanuitera.TENSOR_PERSIANA), 1, "usar persiana avanza estado")
+	persiana.activado.emit(actor)
+	_comprobar(sueno.valor_tensor(SuenoMauiTamanuitera.TENSOR_PERSIANA), 2, "persiana alcanza estado de solapamiento")
+	cable.activado.emit(actor)
+	_comprobar(sueno.valor_tensor(SuenoMauiTamanuitera.TENSOR_CABLE), 1, "usar cable avanza estado")
+	_comprobar(sueno.puente_activo(), "las interacciones del jugador pueden crear el puente")
+	cable.activado.emit(actor)
+	_comprobar(not sueno.puente_activo(), "seguir usando el cable retira el puente")
+	cable.activado.emit(actor)
+	_comprobar(sueno.valor_tensor(SuenoMauiTamanuitera.TENSOR_CABLE), 0, "el tensor cicla sin dejar al jugador bloqueado")
 	sueno.queue_free()
 
 
