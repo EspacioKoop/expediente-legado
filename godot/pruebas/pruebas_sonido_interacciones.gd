@@ -15,6 +15,7 @@ func _ejecutar() -> void:
 	_probar_voz_por_verbo()
 	_probar_verbos_mudos()
 	_probar_sobrescritura()
+	_probar_toggle_conserva_gesto()
 	_probar_voz_sobrevive_al_objeto()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -82,6 +83,31 @@ func _probar_sobrescritura() -> void:
 	_comprobar(voces.size() == 1, "un verbo mudo puede declarar su sonido")
 	if voces.size() == 1:
 		_comprobar(voces[0].stream == Sonido.stream("pulsar"), "y suena el declarado")
+	escena.free()
+
+
+func _probar_toggle_conserva_gesto() -> void:
+	var escena := _escena()
+	var archivador := ArchivadorInteractivo3D.new()
+	escena.add_child(archivador)
+	archivador.configurar(Vector3(0.8, 1.2, 0.5))
+
+	_comprobar(archivador.verbo == Interactuable3D.Verbo.ABRIR, "el archivador empieza cerrado")
+	archivador.interactuar(null)
+	var voces := _voces(escena)
+	_comprobar(archivador.esta_abierto(), "el primer gesto abre el archivador")
+	_comprobar(
+		voces.size() == 1 and voces[0].stream == Sonido.stream("abrir"),
+		"abrir suena a abrir aunque el callback deje el verbo en cerrar",
+	)
+
+	archivador.interactuar(null)
+	voces = _voces(escena)
+	_comprobar(not archivador.esta_abierto(), "el segundo gesto cierra el archivador")
+	_comprobar(
+		voces.size() == 2 and voces[1].stream == Sonido.stream("cerrar"),
+		"cerrar suena a cerrar aunque el callback deje el verbo en abrir",
+	)
 	escena.free()
 
 
