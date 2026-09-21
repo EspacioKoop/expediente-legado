@@ -23,11 +23,13 @@ func _cargar_dialogos() -> void:
 			"requisito": {"arquetipos": ["sombra", "anima"]},
 		},
 		{
-			"texto": "Cervantes me susurró: 'El que lee mucho y anda mucho, ve mucho y sabe mucho'.",
+			"texto":
+			"Cervantes me susurró: 'El que lee mucho y anda mucho, ve mucho y sabe mucho'.",
 			"requisito": {"autor": "cervantes"},
 		},
 		{
-			"texto": "¿Conoces el secreto de la Metamorfosis? Kafka lo guardó para los que transforman su momentum.",
+			"texto":
+			"¿Conoces el secreto de la Metamorfosis? Kafka lo guardó para los que transforman su momentum.",
 			"requisito": {"obra": "metamorfosis", "arquetipo": "sombra"},
 		},
 		{
