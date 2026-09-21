@@ -13,6 +13,7 @@ const CATALOGOS := [
 	"res://datos/casos.json",
 	"res://datos/prometeo.json",
 	"res://datos/sellos.json",
+	"res://datos/detalles_meticulosidad.json",
 ]
 
 # --- Los espacios del día ----------------------------------------------------
