@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="760" viewBox="0 0 700 760">
+  <rect width="700" height="760" fill="#ede7d8"/>
+  <rect x="24" y="24" width="652" height="712" fill="none" stroke="#172235" stroke-width="8"/>
+  <g font-family="Arial,sans-serif" font-size="70" font-weight="900" text-anchor="middle">
+    <rect x="68" y="80" width="564" height="118" fill="#b93a36"/><text x="350" y="158" fill="#fff4df">NOVEDADES</text>
+    <rect x="68" y="240" width="564" height="118" fill="#1f4776"/><text x="350" y="318" fill="#fff4df">IMPORTACIÓN</text>
+    <rect x="68" y="400" width="564" height="118" fill="#2d745c"/><text x="350" y="478" fill="#fff4df">DEMOS</text>
+  </g>
+  <text x="350" y="625" text-anchor="middle" font-family="monospace" font-size="35" font-weight="700" fill="#1d2431">PC · CONSOLAS · PORTÁTIL COLOR 98</text>
+  <text x="350" y="686" text-anchor="middle" font-family="monospace" font-size="25" fill="#6c6258">PREGUNTA EN MOSTRADOR</text>
+</svg>
