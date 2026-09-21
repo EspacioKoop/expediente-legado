@@ -32,6 +32,7 @@ class ComercioBarrio676FisicoTest(unittest.TestCase):
     def test_no_duplica_catalogo_ni_economia(self):
         self.assertRegex(self.helper, r"ComercioBarrio\s*\.\s*listar\s*\(")
         self.assertRegex(self.helper, r"ComercioBarrio\s*\.\s*comprar\s*\(")
+        self.assertRegex(self.helper, r"ComercioBarrio\s*\.\s*vender\s*\(")
         self.assertNotIn("Jornada.gastar", self.helper)
         self.assertNotIn("const CATALOGO", self.helper)
         self.assertNotIn("precio_reventa", self.helper)
@@ -41,6 +42,12 @@ class ComercioBarrio676FisicoTest(unittest.TestCase):
         self.assertIn('Inventario.HOME_STORAGE', (
             ROOT / "godot/pruebas/pruebas_comercio_barrio_676.gd"
         ).read_text(encoding="utf-8"))
+
+    def test_reventa_fisica_usa_solo_carried(self):
+        self.assertIn('"BandejaReventa"', self.helper)
+        self.assertIn("Inventario.CARRIED", self.helper)
+        self.assertIn('venta.set_meta("reventa_fisica", true)', self.helper)
+        self.assertNotIn("Inventario.HOME_STORAGE", self.helper)
 
     def test_senaletica_original_versionada(self):
         for nombre in ("quiosco_avenida.svg", "el_trastero.svg", "PROCEDENCIA.md"):
@@ -66,7 +73,7 @@ class ComercioBarrio676FisicoTest(unittest.TestCase):
             ]
             for argumentos, minimo in [
                 (["--editor", "--import", "--quit"], None),
-                (["--script", PRUEBA], 13),
+                (["--script", PRUEBA], 20),
             ]:
                 resultado = subprocess.run(
                     base + argumentos,

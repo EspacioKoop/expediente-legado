@@ -134,6 +134,97 @@ func _montar_trastero() -> void:
 			Vector3(0.56, 1.06, z),
 			indice,
 		)
+	_montar_reventa(puesto)
+
+
+func _montar_reventa(puesto: Node3D) -> void:
+	var inventario := _inventario()
+	var llevados = inventario.get(Inventario.CARRIED, [])
+	if typeof(llevados) != TYPE_ARRAY:
+		return
+
+	var bandeja := Node3D.new()
+	bandeja.name = "BandejaReventa"
+	bandeja.set_meta("solo_carried", true)
+	puesto.add_child(bandeja)
+	_caja(
+		bandeja,
+		"BaseBandejaReventa",
+		Vector3(0.58, 0.62, 0.0),
+		Vector3(0.34, 0.06, 2.45),
+		COLOR_METAL,
+	)
+
+	var indice := 0
+	for valor in llevados:
+		if typeof(valor) != TYPE_DICTIONARY:
+			continue
+		var objeto: Dictionary = valor
+		if not bool(objeto.get("vendible", false)):
+			continue
+		var item_id := String(objeto.get("id", ""))
+		if item_id.is_empty():
+			continue
+		var fila := indice / 4
+		var columna := indice % 4
+		var posicion := Vector3(
+			0.58,
+			0.73 + float(fila) * 0.25,
+			-0.90 + float(columna) * 0.60,
+		)
+		_montar_objeto_reventa(bandeja, objeto, posicion, indice)
+		indice += 1
+
+
+func _montar_objeto_reventa(
+	padre: Node3D,
+	objeto: Dictionary,
+	posicion: Vector3,
+	indice: int,
+) -> void:
+	var item_id := String(objeto.get("id", ""))
+	var venta := Interactuable3D.new()
+	venta.name = "Vender_%s" % item_id
+	venta.position = posicion
+	venta.verbo = Interactuable3D.Verbo.USAR
+	venta.sonido = Interactuable3D.SIN_SONIDO
+	venta.nombre_objeto = _texto_reventa(objeto)
+	venta.set_meta("reventa_fisica", true)
+	venta.set_meta("item_reventa", item_id)
+	venta.set_meta("indice_reventa", indice)
+	padre.add_child(venta)
+	_visual_reventa(venta, objeto)
+
+	var colision := CollisionShape3D.new()
+	colision.name = "VolumenReventa"
+	var forma := BoxShape3D.new()
+	forma.size = Vector3(0.34, 0.24, 0.44)
+	colision.shape = forma
+	venta.add_child(colision)
+	venta.activado.connect(_vender.bind(item_id, venta))
+
+
+func _visual_reventa(venta: Interactuable3D, objeto: Dictionary) -> void:
+	var item_id := String(objeto.get("id", ""))
+	if not Publicaciones98.por_id(item_id).is_empty():
+		PublicacionFisica3D.montar(venta, item_id)
+		return
+
+	_caja(
+		venta,
+		"ObjetoReventa",
+		Vector3.ZERO,
+		Vector3(0.20, 0.14, 0.18),
+		Color(0.38, 0.34, 0.28),
+		"madera_domestica",
+	)
+	_caja(
+		venta,
+		"EtiquetaReventa",
+		Vector3(-0.11, 0.02, 0.0),
+		Vector3(0.012, 0.07, 0.12),
+		Color(0.72, 0.67, 0.52),
+	)
 
 
 func _montar_producto(
@@ -274,6 +365,30 @@ func _comprar(
 		compra.nombre_objeto = "%s · no disponible" % nombre
 
 
+func _vender(_actor: Node, item_id: String, venta: Interactuable3D) -> void:
+	if _dia == null:
+		return
+	var inventario := _inventario()
+	var resultado := (
+		ComercioBarrio
+		. vender(
+			_dia.jornada,
+			inventario,
+			"segunda_mano",
+			item_id,
+		)
+	)
+	if bool(resultado.get("ok", false)):
+		venta.habilitado = false
+		venta.visible = false
+		if _dia.has_method("_guardar_o_avisar"):
+			_dia.call("_guardar_o_avisar", "")
+		return
+
+	var motivo := String(resultado.get("motivo", "reventa_rechazada"))
+	venta.nombre_objeto = "%s · %s" % [venta.nombre_objeto.get_slice(" · ", 0), motivo]
+
+
 func _buscar_entrada(
 	superficie: String,
 	item_id: String,
@@ -299,6 +414,11 @@ func _texto_compra(entrada: Dictionary) -> String:
 	if bool(entrada.get("comprada", false)):
 		return "%s · comprado" % nombre
 	return "%s · %d" % [nombre, int(entrada.get("precio", 0))]
+
+
+func _texto_reventa(objeto: Dictionary) -> String:
+	var nombre := String(objeto.get("nombre", objeto.get("id", "objeto")))
+	return "vender %s · +%d" % [nombre, maxi(0, int(objeto.get("precio", 0)))]
 
 
 func _lamina(
