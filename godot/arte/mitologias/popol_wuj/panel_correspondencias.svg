@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="512" viewBox="0 0 1024 512">
+<title>Panel de correspondencias — Popol Wuj #655</title>
+<desc>Gráfico contemporáneo original de pares y simetrías; no reproduce glifos históricos.</desc>
+<rect width="1024" height="512" fill="#171513"/>
+<g stroke="#a67947" stroke-width="12" fill="none">
+  <rect x="90" y="88" width="330" height="336" rx="26"/>
+  <rect x="604" y="88" width="330" height="336" rx="26"/>
+  <path d="M420 256 C500 196 524 196 604 256"/>
+  <path d="M420 320 C500 380 524 380 604 320"/>
+</g>
+<g fill="#3e8177" stroke="#d2b172" stroke-width="10">
+  <circle cx="190" cy="186" r="48"/><circle cx="834" cy="186" r="48"/>
+  <rect x="262" y="286" width="76" height="76" transform="rotate(45 300 324)"/>
+  <rect x="686" y="286" width="76" height="76" transform="rotate(45 724 324)"/>
+</g>
+<g fill="#c79855">
+  <path d="M168 296l44-64 44 64-44 64z"/>
+  <path d="M856 296l-44-64-44 64 44 64z"/>
+</g>
+</svg>
