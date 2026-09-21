@@ -1,9 +1,9 @@
-[gd_resource type="Resource" script_class="ArbolIndividuacion" load_steps=2 format=3 uid://...]
+[gd_resource type="Resource" script_class="ArbolIndividuacion" load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://progresion/arbol_individuacion.gd" id="1"]
 
 [resource]
-nodos: {
+nodos = {
 "sombra_inicio": {
 "id": "sombra_inicio",
 "nombre": "Reconocer la Sombra",
