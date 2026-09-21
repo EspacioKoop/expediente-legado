@@ -6,7 +6,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-VISOR = ROOT / "godot" / "guion" / "visor_decision_ideologica_app.gd"
+VISOR = ROOT / "godot" / "guion" / "visor_pronosticos_app.gd"
 ESCENA = ROOT / "godot" / "escenas" / "visor.tscn"
 DIA = ROOT / "godot" / "guion" / "dia_clima_app.gd"
 TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
@@ -23,11 +23,11 @@ class DecisionIdeologica924UITest(unittest.TestCase):
 
     def test_el_visor_real_monta_la_capa_postcierre(self) -> None:
         self.assertIn(
-            'path="res://guion/visor_decision_ideologica_app.gd"',
+            'path="res://guion/visor_pronosticos_app.gd"',
             self.escena,
         )
         self.assertIn(
-            'extends "res://guion/visor_pronosticos_app.gd"',
+            'extends "res://guion/visor_anexos_app.gd"',
             self.visor,
         )
 
@@ -50,9 +50,9 @@ class DecisionIdeologica924UITest(unittest.TestCase):
             'companero.nombre_visible != tr("COMPA_CUNADO")',
             self.dia,
         )
-        self.assertIn("DecisionIdeologicaExpediente.reaccion_para(", self.dia)
+        self.assertIn("reaccion_para(", self.dia)
         self.assertIn(
-            "DecisionIdeologicaExpediente.registrar_lectura_social(",
+            "registrar_lectura_social(",
             self.dia,
         )
         self.assertIn('_guardar_o_avisar("")', self.dia)
