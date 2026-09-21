@@ -124,13 +124,13 @@ func _etiquetas_exposicion(articulo: Dictionary) -> Array:
 	var hecho_datos: Dictionary = articulo.get("hecho", {})
 	var tratamiento: Dictionary = articulo.get("tratamiento", {})
 	for valor in hecho_datos.get("temas", []):
-		var etiqueta := String(valor).strip_edges()
-		if not etiqueta.is_empty() and not etiquetas.has(etiqueta):
-			etiquetas.append(etiqueta)
+		var etiqueta_hecho := String(valor).strip_edges()
+		if not etiqueta_hecho.is_empty() and not etiquetas.has(etiqueta_hecho):
+			etiquetas.append(etiqueta_hecho)
 	for valor in tratamiento.get("enfasis", []):
-		var etiqueta := String(valor).strip_edges()
-		if not etiqueta.is_empty() and not etiquetas.has(etiqueta):
-			etiquetas.append(etiqueta)
+		var etiqueta_enfasis := String(valor).strip_edges()
+		if not etiqueta_enfasis.is_empty() and not etiquetas.has(etiqueta_enfasis):
+			etiquetas.append(etiqueta_enfasis)
 	return etiquetas
 
 
