@@ -75,10 +75,16 @@ static func motivos_oniricos(jornada: Dictionary, maximo: int = 3) -> Array[Stri
 
 static func _normalizar_dia(jornada: Dictionary) -> Dictionary:
 	var dia := int(jornada.get("dia", 0))
+	var vuelta := int(jornada.get("vuelta", 1))
 	var crudo: Variant = jornada.get(CAMPO_JORNADA, {})
-	if not crudo is Dictionary or int((crudo as Dictionary).get("dia", -1)) != dia:
+	if (
+		not crudo is Dictionary
+		or int((crudo as Dictionary).get("dia", -1)) != dia
+		or int((crudo as Dictionary).get("vuelta", -1)) != vuelta
+	):
 		jornada[CAMPO_JORNADA] = {
 			"dia": dia,
+			"vuelta": vuelta,
 			"puntos": 0,
 			"documentos": {},
 			"motivos": {},
