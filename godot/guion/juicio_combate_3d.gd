@@ -405,8 +405,10 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 		if typeof(efectos) == TYPE_DICTIONARY:
 			efectos_jungianos = efectos
 	var probabilidad_critico := clampf(
-		float(efectos_jungianos.get("bonus_crit", 0.0))
-		+ float(efectos_jungianos.get("bonus_todo", 0.0)),
+		(
+			float(efectos_jungianos.get("bonus_crit", 0.0))
+			+ float(efectos_jungianos.get("bonus_todo", 0.0))
+		),
 		0.0,
 		0.75
 	)
@@ -474,9 +476,7 @@ func _esquivar() -> void:
 		var activos = gestor_arquetipos.call("efectos_combinados")
 		if typeof(activos) == TYPE_DICTIONARY:
 			efectos = activos
-	var bonus_evasion := (
-		float(efectos.get("evasion", 0.0)) + float(efectos.get("bonus_todo", 0.0))
-	)
+	var bonus_evasion := float(efectos.get("evasion", 0.0)) + float(efectos.get("bonus_todo", 0.0))
 	_esquiva = 0.34 * (1.0 + bonus_evasion)
 	var gestor_combos := _gestor_jungiano("GestorCombos")
 	if gestor_combos != null:
@@ -838,7 +838,10 @@ func _preparar_sistemas_jungianos() -> void:
 	):
 		momentum.connect("momentum_cambiado", cb_momentum)
 	var cb_combo := Callable(self, "_al_combo_ejecutado")
-	if combos.has_signal("combo_ejecutado") and not combos.is_connected("combo_ejecutado", cb_combo):
+	if (
+		combos.has_signal("combo_ejecutado")
+		and not combos.is_connected("combo_ejecutado", cb_combo)
+	):
 		combos.connect("combo_ejecutado", cb_combo)
 	var cb_finisher := Callable(self, "_al_finisher_ejecutado")
 	if (
@@ -860,10 +863,7 @@ func _al_arquetipo_desbloqueado(arquetipo_id: String) -> void:
 		if arquetipo != null:
 			nombre = String(arquetipo.get("nombre"))
 		puntos = int(arquetipos.get("puntos_habilidad"))
-	_mostrar_aviso_jungiano(
-		"ARQUETIPO · %s · HABILIDAD +1 (%d)" % [nombre, puntos],
-		2.5
-	)
+	_mostrar_aviso_jungiano("ARQUETIPO · %s · HABILIDAD +1 (%d)" % [nombre, puntos], 2.5)
 	_actualizar_hud_jungiano()
 
 
@@ -878,8 +878,7 @@ func _al_combo_ejecutado(nombre: String, efectos: Dictionary) -> void:
 		_dano_combo_pendiente += maxi(0, int(efectos["dano"]))
 	if efectos.has("curacion"):
 		_determinacion_jugador = mini(
-			DETERMINACION_BASE,
-			_determinacion_jugador + maxi(0, int(efectos["curacion"]))
+			DETERMINACION_BASE, _determinacion_jugador + maxi(0, int(efectos["curacion"]))
 		)
 	if bool(efectos.get("contragolpe", false)):
 		_contraataque = maxi(_contraataque, 1)
@@ -907,26 +906,20 @@ func _al_finisher_ejecutado(nombre: String, efectos: Dictionary, es_super: bool)
 	if bool(efectos.get("curacion_total", false)):
 		_determinacion_jugador = DETERMINACION_BASE
 	_invulnerabilidad_jungiana = maxf(
-		_invulnerabilidad_jungiana,
-		float(efectos.get("invulnerabilidad", 0.0))
+		_invulnerabilidad_jungiana, float(efectos.get("invulnerabilidad", 0.0))
 	)
 	_sacudida_camara = 0.38 if es_super else 0.24
 	_particulas_jungianas(float(efectos.get("area", 2.4)), es_super)
 	_reaccion(_figura_rival, 0.62 if es_super else 0.42)
 	Sonido.sonar(self, "marcar")
-	_mostrar_aviso_jungiano(
-		("SUPER FINISHER · " if es_super else "FINISHER · ") + nombre,
-		1.8
-	)
+	_mostrar_aviso_jungiano(("SUPER FINISHER · " if es_super else "FINISHER · ") + nombre, 1.8)
 	_actualizar_hud()
 	if _determinacion_rival <= 0 and not _intentar_retorno_rival():
 		_terminar(true)
 
 
 func _aplicar_curacion_arquetipo(efectos: Dictionary) -> void:
-	var tasa := (
-		float(efectos.get("curacion", 0.0)) + float(efectos.get("bonus_todo", 0.0))
-	)
+	var tasa := float(efectos.get("curacion", 0.0)) + float(efectos.get("bonus_todo", 0.0))
 	if tasa <= 0.0 or _determinacion_jugador >= DETERMINACION_BASE:
 		return
 	_curacion_arquetipo_acumulada += tasa
