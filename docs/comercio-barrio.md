@@ -89,6 +89,25 @@ deriva nombres, importes y estado comprado desde `ComercioBarrio`. Tampoco
 activa #442 al pagar una publicación; la activación cultural continúa exigiendo
 lectura/interacción posterior.
 
+## Reventa física en El Trastero — 2026-09-21
+
+La reventa deja de ser solo una función de dominio. `ComercioBarrio3D`
+materializa una **bandeja de reventa** dentro de El Trastero usando exclusivamente
+los objetos presentes en `Inventario.CARRIED` que estén marcados como vendibles.
+
+Cada objeto de la bandeja:
+
+- muestra nombre e importe procedentes del propio objeto de inventario;
+- llama a `ComercioBarrio.vender(..., "segunda_mano", item_id)`;
+- desaparece de la bandeja cuando la venta se confirma;
+- actualiza el mismo saldo de `Jornada`;
+- conserva a `Inventario.vender()` como autoridad final sobre bloqueos, incluido
+  el veto a objetos de origen onírico.
+
+`HOME_STORAGE` no se consulta para construir la bandeja. Un objeto guardado en
+casa debe sacarse primero y viajar en `carried`; por tanto no aparece una venta
+a distancia disfrazada de interfaz de tienda.
+
 ## Bit 98: identidad visual integrada — 2026-09-21
 
 Bit 98 ya no depende solo de cajas coloreadas para leerse como tienda. La capa
@@ -102,15 +121,20 @@ visual: no conoce precios, inventario, compras, desbloqueos ni semillas onírica
 
 ## Siguiente corte
 
-Cuando las reservas visuales lo permitan:
+Con las tres superficies ya físicas y la reventa operable, quedan mejoras de
+segunda capa sin necesidad de abrir más interiores:
 
-1. montar fachadas reconocibles de quiosco y segunda mano en la calle;
-2. añadir una superficie de interacción accesible por teclado/mando que consuma `listar()/comprar()/vender()`, incluido el tabaco repetible;
+1. completar el feedback diegético de compra/reventa con vendedor fuera de campo o
+   pequeñas variaciones de estado, sin diálogo obligatorio;
+2. comprobar en playtest que la bandeja de reventa sigue siendo legible con varios
+   objetos `carried` y no invade el paso;
 3. hacer que la lámpara/marco de `home_storage` tenga representación visible mediante #96;
 4. conectar la revista a una interacción hojeable de #674 y solo entonces activar #442;
 5. completar #97 con una recompensa onírica física que pueda salir del sueño pero no venderse ni conceder acciones.
 
-Con eso #676 podrá cubrir tres superficies reales sin convertir la calle en un mundo abierto comercial, y #61 gana una costura económica real entre trayecto, casa e inventario.
+Así #676 cubre ya compra y venta sobre superficies reales sin convertir la calle
+en un mundo abierto comercial, y #61 dispone de una costura económica directa
+entre trayecto, casa e inventario.
 
 Refs #61 #83 #93 #96 #97 #124 #244 #442 #674 #676.
 
