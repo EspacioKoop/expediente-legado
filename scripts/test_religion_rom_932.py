@@ -104,7 +104,7 @@ class ReligionRom932Test(unittest.TestCase):
         self.assertIn("for indice in 3", self.consumer_3d)
         self.assertIn("for brazo in 4", self.consumer_3d)
         self.assertNotIn("CollisionShape3D", self.consumer_3d)
-        self.assertIn('== "sueño"', self.controller)
+        self.assertIn('fase != "sueño"', self.controller)
         self.assertIn("ReligionRecuerdoJali9323D.montar", self.controller)
 
     def test_documentacion_separa_fuente_e_invencion(self):
