@@ -6,8 +6,10 @@
 extends "res://guion/visor_anotaciones_app.gd"
 
 const MeticulosidadEstado := preload("res://guion/meticulosidad.gd")
+const DetallesMeticulososEstado := preload("res://guion/detalles_meticulosos.gd")
 
 var _metadatos: Label
+var _detalle_meticuloso: Label
 var _scroll_meticulosidad: VScrollBar
 var _documento_meticulosidad_id := ""
 
@@ -18,6 +20,11 @@ func _columna_documento() -> Control:
 	_metadatos.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_metadatos.text = ""
 	columna.add_child(_metadatos)
+
+	_detalle_meticuloso = Label.new()
+	_detalle_meticuloso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_detalle_meticuloso.visible = false
+	columna.add_child(_detalle_meticuloso)
 	_conectar_scroll_meticulosidad()
 	return columna
 
@@ -76,6 +83,31 @@ func _actualizar_metadatos() -> void:
 	if _metadatos == null:
 		return
 	_metadatos.text = _texto_metadatos(registro_actual)
+	_actualizar_detalle_meticuloso()
+
+
+func _actualizar_detalle_meticuloso() -> void:
+	if _detalle_meticuloso == null:
+		return
+	_detalle_meticuloso.text = ""
+	_detalle_meticuloso.visible = false
+	var registro_id := String(registro_actual.get("id", "")).strip_edges()
+	if registro_id.is_empty():
+		return
+	var motivos := MeticulosidadEstado.motivos_documento(jornada, registro_id)
+	var detalles := DetallesMeticulososEstado.detalles_para(registro_id, motivos)
+	if detalles.is_empty():
+		return
+
+	var textos: Array[String] = []
+	for detalle in detalles:
+		var clave := String(detalle.get("texto", "")).strip_edges()
+		if not clave.is_empty():
+			textos.append(tr(clave))
+	if textos.is_empty():
+		return
+	_detalle_meticuloso.text = tr("VISOR_DETALLE_961_OBSERVACION") % "\n".join(textos)
+	_detalle_meticuloso.visible = true
 
 
 func _conectar_scroll_meticulosidad() -> void:
@@ -108,6 +140,7 @@ func _registrar_meticulosidad(registro: Dictionary, evento: String, motivo: Stri
 		return
 	if MeticulosidadEstado.registrar(jornada, registro_id, evento, motivo):
 		_guardar_o_avisar()
+		_actualizar_detalle_meticuloso()
 
 
 func _registrar_meticulosidad_por_id(registro_id: String, evento: String, motivo: String) -> void:
