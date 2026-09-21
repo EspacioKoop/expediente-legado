@@ -41,7 +41,8 @@
 [ext_resource type="Script" path="res://guion/dia_tir_na_nog_app.gd" id="39"]
 [ext_resource type="Script" path="res://guion/dia_props_utilizables_680_app.gd" id="40"]
 [ext_resource type="Script" path="res://guion/dia_marcadores_mundo_app.gd" id="41"]
-[ext_resource type="Script" path="res://guion/dia_huellas_ambientales_app.gd" id="42"]\n[ext_resource type="Script" path="res://guion/dia_reloj_horario_app.gd" id="43"]
+[ext_resource type="Script" path="res://guion/dia_huellas_ambientales_app.gd" id="42"]
+[ext_resource type="Script" path="res://guion/dia_reloj_horario_app.gd" id="43"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -168,4 +169,6 @@ script = ExtResource("41")
 
 [node name="HuellasAmbientalesController" type="Node" parent="."]
 script = ExtResource("42")
-\n[node name="RelojHorarioController" type="Node" parent="."]\nscript = ExtResource("43")\n
+
+[node name="RelojHorarioController" type="Node" parent="."]
+script = ExtResource("43")
