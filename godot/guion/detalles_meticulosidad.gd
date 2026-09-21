@@ -16,6 +16,7 @@ static func visibles(
 	if id.is_empty():
 		return []
 	var eventos: Array[String] = Meticulosidad.eventos_documento(jornada, id)
+	var motivos: Array[String] = Meticulosidad.motivos_documento(jornada, id)
 	var crudo: Variant = catalogo.get(id, [])
 	if not crudo is Array:
 		return []
@@ -28,7 +29,10 @@ static func visibles(
 		if bool(detalle.get("critico", true)):
 			continue
 		var evento := String(detalle.get("evento", "")).strip_edges()
-		if not eventos.has(evento):
+		var motivo := String(detalle.get("motivo", "")).strip_edges()
+		if not eventos.has(evento) or not motivos.has(motivo):
+			continue
+		if Meticulosidad.motivo_de_evento(jornada, id, evento) != motivo:
 			continue
 		resultado.append(detalle.duplicate(true))
 	return resultado
