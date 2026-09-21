@@ -1,0 +1,30 @@
+{
+  "arquetipos": [
+    {
+      "id": "sombra",
+      "nombre": "Sombra",
+      "descripcion": "Aspecto reprimido",
+      "efecto": {
+        "bonus_crit": 0.1
+      }
+    },
+    {
+      "id": "anima",
+      "nombre": "Anima/Animus",
+      "descripcion": "Contraparte interior",
+      "efecto": {
+        "curacion": 0.05
+      }
+    }
+  ],
+  "bendiciones": [
+    {
+      "id": "bendicion_sol",
+      "nombre": "Bendici\u00f3n del Sol",
+      "duracion": 30,
+      "efecto": {
+        "ataque": 0.15
+      }
+    }
+  ]
+}
