@@ -96,7 +96,10 @@ func _probar_consumidor_posterior() -> void:
 	ReligionEventos.registrar(registro, evento)
 	var recuerdo := ReligionRecuerdoJali932.recuerdo_para_sueno(registro)
 	_comprobar(not recuerdo.is_empty(), "la experiencia completada tiene consumidor externo")
-	_comprobar(recuerdo["motivos"] == ["geometria", "luz", "sombra", "calado"], "solo reutiliza motivos vistos")
+	_comprobar(
+		recuerdo["motivos"] == ["geometria", "luz", "sombra", "calado"],
+		"solo reutiliza motivos vistos"
+	)
 	_comprobar(not bool(recuerdo["hechos_nuevos"]), "el consumidor no introduce hechos nuevos")
 	_comprobar(not bool(recuerdo["asume_conviccion"]), "el consumidor no asume convicción")
 
