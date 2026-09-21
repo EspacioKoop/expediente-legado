@@ -37,12 +37,14 @@ const RITUALES := {
 		"nombre": "Laberinto lunar",
 		"radio_arena": 4.15,
 		"velocidad_rival_mul": 0.86,
+		"tags": ["control_espacio", "movilidad"],
 	},
 	"la-justicia|duat":
 	{
 		"id": "balanza_duat",
 		"nombre": "Balanza del Duat",
 		"contraataque_esquiva": 1,
+		"tags": ["contraataque"],
 	},
 	"la-fuerza|aquiles":
 	{
@@ -50,6 +52,7 @@ const RITUALES := {
 		"nombre": "Talón de la Fuerza",
 		"dano_fuerte_bonus": 1,
 		"recarga_fuerte": 0.82,
+		"tags": ["riesgo"],
 	},
 	"el-sol|maui_tamanuitera":
 	{
@@ -57,6 +60,7 @@ const RITUALES := {
 		"nombre": "Robo del Sol",
 		"interrumpe_telegrafo_fuerte": true,
 		"dano_interrupcion_bonus": 1,
+		"tags": ["telegraph", "neutralizar"],
 	},
 	"el-colgado|anansi_akan":
 	{
@@ -64,6 +68,7 @@ const RITUALES := {
 		"nombre": "Nudo suspendido",
 		"enredo_ligero_segundos": 1.10,
 		"velocidad_enredado_mul": 0.45,
+		"tags": ["control_espacio", "movilidad"],
 	},
 	"la-muerte|hidra":
 	{
@@ -71,6 +76,7 @@ const RITUALES := {
 		"nombre": "Retorno de la Hidra",
 		"retornos_rival": 1,
 		"determinacion_retorno": 2,
+		"tags": ["segunda_fase"],
 	},
 }
 
