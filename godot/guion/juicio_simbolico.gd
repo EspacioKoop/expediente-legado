@@ -119,7 +119,15 @@ static func mito_para(jornada: Dictionary, clave: String) -> String:
 static func descriptor_mito(id_mito: String) -> Dictionary:
 	if not MITOS.has(id_mito):
 		return {}
-	return MITOS[id_mito].duplicate(true)
+	var descriptor: Dictionary = MITOS[id_mito].duplicate(true)
+	var perfil := MitologiasRuntime.familia(id_mito)
+	if perfil.is_empty():
+		return descriptor
+	descriptor["tradicion"] = String(perfil.get("tradicion", ""))
+	descriptor["acp_directo"] = String(perfil.get("acp_directo", ""))
+	descriptor["acp_relacionados"] = perfil.get("acp_relacionados", []).duplicate()
+	descriptor["ejes_acp"] = MitologiasRuntime.ejes(id_mito)
+	return descriptor
 
 
 ## Solo una pareja declarada activa reglas. Un Arcano o mito sueltos siguen

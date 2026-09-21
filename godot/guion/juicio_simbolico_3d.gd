@@ -68,6 +68,14 @@ static func _montar_mito(raiz: Node3D, mito_id: String) -> void:
 		mito.position = POS_MITO
 		mito.scale = Vector3.ONE * 0.72
 	mito.set_meta("mito_id", mito_id)
+	var modulacion := MitologiasRuntime.modulacion_juicio(mito_id)
+	if not modulacion.is_empty():
+		mito.position.y += float(modulacion.get("desplazamiento_y", 0.0))
+		mito.scale.y *= float(modulacion.get("escala_y", 1.0))
+		var ejes = descriptor.get("ejes_acp", {})
+		if typeof(ejes) == TYPE_DICTIONARY:
+			mito.set_meta("acp_ejes", ejes.duplicate(true))
+		mito.set_meta("tradicion", String(descriptor.get("tradicion", "")))
 	raiz.add_child(mito)
 
 	var color: Color = descriptor["color"]
