@@ -30,7 +30,9 @@ static func todo(comprobar: Callable) -> void:
 		bool(arquetipos.call("obtener_arquetipo", "persona").get("desbloqueado")),
 		true
 	)
-	comprobar.call("cada desbloqueo da un punto de habilidad", arquetipos.get("puntos_habilidad"), 1)
+	comprobar.call(
+		"cada desbloqueo da un punto de habilidad", arquetipos.get("puntos_habilidad"), 1
+	)
 
 	arquetipos.call("ganar_insight", 50)
 	comprobar.call(
@@ -56,9 +58,7 @@ static func todo(comprobar: Callable) -> void:
 	var antes_dano := float(momentum.get("momentum_actual"))
 	momentum.call("registrar_dano_recibido")
 	comprobar.call(
-		"recibir daño reduce momentum",
-		float(momentum.get("momentum_actual")) < antes_dano,
-		true
+		"recibir daño reduce momentum", float(momentum.get("momentum_actual")) < antes_dano, true
 	)
 
 	momentum.call("reiniciar")
@@ -69,24 +69,16 @@ static func todo(comprobar: Callable) -> void:
 	combos.call("registrar_entrada", "ataque_ligero")
 	combos.call("registrar_entrada", "ataque_ligero")
 	combos.call("registrar_entrada", "ataque_pesado")
-	comprobar.call(
-		"la secuencia ejecuta Golpe de la Sombra",
-		ejecutados,
-		["Golpe de la Sombra"]
-	)
+	comprobar.call("la secuencia ejecuta Golpe de la Sombra", ejecutados, ["Golpe de la Sombra"])
 	combos.disconnect("combo_ejecutado", capturar_combo)
 
 	momentum.call("reiniciar")
 	momentum.call("agregar_momentum", 75.0)
 	comprobar.call(
-		"con Sombra y 75 hay finisher",
-		combos.call("finisher_disponible_actual"),
-		"sombra_desatada"
+		"con Sombra y 75 hay finisher", combos.call("finisher_disponible_actual"), "sombra_desatada"
 	)
 	comprobar.call(
-		"el finisher consume momentum",
-		combos.call("ejecutar_finisher", "sombra_desatada"),
-		true
+		"el finisher consume momentum", combos.call("ejecutar_finisher", "sombra_desatada"), true
 	)
 	comprobar.call("el finisher deja el medidor a cero", momentum.get("momentum_actual"), 0.0)
 
