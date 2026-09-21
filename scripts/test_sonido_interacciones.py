@@ -30,7 +30,12 @@ class SonidoInteraccionesTest(unittest.TestCase):
         cls.sonido = SONIDO.read_text(encoding="utf-8")
 
     def test_nucleo_suena_sin_conocer_reglas_de_juego(self):
-        self.assertIn("Sonido.sonar_en(self, nombre_sonido())", self.interactuable)
+        self.assertIn("var sonido_actual := nombre_sonido()", self.interactuable)
+        self.assertIn("Sonido.sonar_en(self, sonido_actual)", self.interactuable)
+        self.assertLess(
+            self.interactuable.index("Sonido.sonar_en(self, sonido_actual)"),
+            self.interactuable.index("activado.emit(actor)"),
+        )
         for termino in ("Jornada", "Partida", "Inventario", "dia_app.gd"):
             self.assertNotIn(termino, self.interactuable)
 
