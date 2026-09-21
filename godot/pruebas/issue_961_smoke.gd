@@ -101,7 +101,8 @@ func _probar_detalles_opcionales() -> void:
 			"el detalle revelado tiene texto útil",
 		)
 	var catalogo_invalido := {
-		"factura1@1": [
+		"factura1@1":
+		[
 			{
 				"id": "no-debe-pasar",
 				"evento": "lectura_completa",
