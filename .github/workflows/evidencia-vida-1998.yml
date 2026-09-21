@@ -1,0 +1,142 @@
+name: Evidencia vida 1998 672 674 677
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/evidencia-vida-1998.yml'
+      - '.godot-version'
+      - 'godot/arte/casa_recuerdos_98/**'
+      - 'godot/guion/buzon_postal*.gd'
+      - 'godot/guion/correo_postal*.gd'
+      - 'godot/guion/dia_correo_postal_app.gd'
+      - 'godot/guion/comercio_barrio.gd'
+      - 'godot/guion/inventario.gd'
+      - 'godot/guion/publicacion*.gd'
+      - 'godot/guion/publicaciones*.gd'
+      - 'godot/guion/dia_publicaciones_encontrables_app.gd'
+      - 'godot/guion/casa_acumulacion_3d.gd'
+      - 'godot/guion/casa_estado_ambiental.gd'
+      - 'godot/guion/casa_utileria.gd'
+      - 'godot/guion/dia_acumulacion_casa_app.gd'
+      - 'godot/guion/dia_*app.gd'
+      - 'godot/escenas/dia.tscn'
+      - 'godot/pruebas/capturar_vida_1998_672_674_677.gd'
+      - 'scripts/test_evidencia_vida_1998.py'
+      - 'docs/evidencias/vida-1998/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidencia:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      GALLIUM_DRIVER: llvmpipe
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar Godot declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Importar proyecto
+        run: godot4 --headless --editor --path godot --quit
+
+      - name: Validar contrato de evidencia
+        run: python3 -m unittest -v scripts/test_evidencia_vida_1998.py
+
+      - name: Renderizar gate conjunto sin HUD
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidencia-vida-1998
+          xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+            --script res://pruebas/capturar_vida_1998_672_674_677.gd -- \
+            "$GITHUB_WORKSPACE/evidencia-vida-1998"
+          for captura in buzon_portal publicacion_encontrable acumulacion_tres_fuentes calendario_nevera; do
+            test -s "evidencia-vida-1998/${captura}.png"
+          done
+          test -s evidencia-vida-1998/manifest.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(Path("evidencia-vida-1998/manifest.json").read_text())
+          if manifest["issues"] != [672, 674, 677]:
+              raise SystemExit("manifiesto fuera del gate #672/#674/#677")
+          if manifest["locale"] != "es" or manifest["hud"] is not False:
+              raise SystemExit("la evidencia debe usar locale es y HUD oculto")
+          if manifest["camara"] != "jugable" or manifest["veredicto_automatico"] is not False:
+              raise SystemExit("la evidencia debe usar cámara jugable sin autoaprobar")
+
+          capturas = {caso["id"]: caso for caso in manifest["capturas"]}
+          esperadas = {
+              "buzon_portal",
+              "publicacion_encontrable",
+              "acumulacion_tres_fuentes",
+              "calendario_nevera",
+          }
+          if set(capturas) != esperadas:
+              raise SystemExit("faltan encuadres del gate de vida 1998")
+          hashes = [caso["sha256"] for caso in manifest["capturas"]]
+          if len(hashes) != 4 or len(set(hashes)) != 4:
+              raise SystemExit("las cuatro capturas deben existir y ser distintas")
+          if any(not caso["criterio"].strip() for caso in manifest["capturas"]):
+              raise SystemExit("cada captura debe declarar un criterio humano")
+
+          fuentes = {obj["id"]: obj for obj in manifest["fuentes_home_storage"]}
+          esperadas_fuentes = {
+              "lampara_verde_usada": "comercio_barrio",
+              "postal_iman_calendario": "correo_postal",
+              "manual_casa_98": "publicaciones_encontrables_98",
+          }
+          if set(fuentes) != set(esperadas_fuentes):
+              raise SystemExit("el gate debe contener exactamente tres productores reales")
+          origenes = []
+          for objeto_id, origen in esperadas_fuentes.items():
+              objeto = fuentes[objeto_id]
+              if objeto["origen"] != origen or objeto["origen_esperado"] != origen:
+                  raise SystemExit(f"origen inesperado para {objeto_id}")
+              if objeto["ubicacion"] != "home_storage":
+                  raise SystemExit(f"{objeto_id} no está realmente en home_storage")
+              origenes.append(origen)
+          if len(set(origenes)) != 3:
+              raise SystemExit("se requieren tres orígenes canónicos distintos")
+          print("4/4 encuadres y 3/3 productores reales preparados")
+          PY
+
+      - name: Adjuntar evidencia visual de vida 1998
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-vida-1998-${{ github.sha }}
+          path: evidencia-vida-1998/
+          if-no-files-found: error
+          retention-days: 14
