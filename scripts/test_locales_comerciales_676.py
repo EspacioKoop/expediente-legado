@@ -111,6 +111,10 @@ class LocalesComerciales676Test(unittest.TestCase):
         self.assertIn('"RotuloBit98Exterior"', self.bit98)
         self.assertIn('"RotuloBit98Interior"', self.bit98)
         self.assertIn('"ExpositorPortadasPropias"', self.bit98)
+        self.assertIn('"TextoRotuloBit98Exterior"', self.bit98)
+        self.assertIn('"TextoRotuloBit98Interior"', self.bit98)
+        self.assertIn("Label3D.new()", self.bit98)
+        self.assertIn("EstiloSiga.fuente_mono()", self.bit98)
         self.assertNotIn("TiendaVideojuegos.comprar", self.bit98)
         self.assertNotIn("Jornada.gastar", self.bit98)
 
