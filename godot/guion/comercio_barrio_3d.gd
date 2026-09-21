@@ -76,6 +76,26 @@ func _montar_quiosco() -> void:
 		Vector2(1.95, 0.69),
 		-90.0,
 	)
+	_texto_cartel(
+		puesto,
+		"TextoQuioscoAvenida",
+		"QUIOSCO AVENIDA",
+		Vector3(-0.285, 2.10, 0.0),
+		-90.0,
+		Color(0.96, 0.92, 0.80),
+		36,
+		0.0032,
+	)
+	_texto_cartel(
+		puesto,
+		"SubtituloQuioscoAvenida",
+		"PRENSA · REVISTAS · CUADERNOS",
+		Vector3(-0.285, 1.82, 0.0),
+		-90.0,
+		Color(0.22, 0.19, 0.16),
+		24,
+		0.0017,
+	)
 
 	_montar_ticket(puesto, Vector3(-0.58, 1.36, 1.18))
 
@@ -116,6 +136,26 @@ func _montar_trastero() -> void:
 		Vector3(0.225, 2.02, 0.0),
 		Vector2(2.05, 0.82),
 		90.0,
+	)
+	_texto_cartel(
+		puesto,
+		"TextoElTrastero",
+		"EL TRASTERO",
+		Vector3(0.285, 2.10, 0.0),
+		90.0,
+		Color(0.13, 0.16, 0.14),
+		40,
+		0.0034,
+	)
+	_texto_cartel(
+		puesto,
+		"SubtituloElTrastero",
+		"SEGUNDA MANO",
+		Vector3(0.285, 1.78, 0.0),
+		90.0,
+		Color(0.36, 0.18, 0.14),
+		26,
+		0.0022,
 	)
 
 	_montar_ticket(puesto, Vector3(0.58, 1.36, 1.42))
@@ -495,6 +535,35 @@ func _texto_compra(entrada: Dictionary) -> String:
 func _texto_reventa(objeto: Dictionary) -> String:
 	var nombre := String(objeto.get("nombre", objeto.get("id", "objeto")))
 	return "vender %s · +%d" % [nombre, maxi(0, int(objeto.get("precio", 0)))]
+
+
+func _texto_cartel(
+	padre: Node3D,
+	nombre: String,
+	texto: String,
+	posicion: Vector3,
+	giro_y: float,
+	color: Color,
+	tamano: int,
+	pixel: float,
+) -> Label3D:
+	var etiqueta := Label3D.new()
+	etiqueta.name = nombre
+	etiqueta.text = texto
+	etiqueta.position = posicion
+	etiqueta.rotation_degrees.y = giro_y
+	etiqueta.font = EstiloSiga.fuente_mono()
+	etiqueta.font_size = tamano
+	etiqueta.pixel_size = pixel
+	etiqueta.modulate = color
+	etiqueta.outline_size = 5
+	etiqueta.outline_modulate = Color(0.03, 0.03, 0.03)
+	etiqueta.shaded = false
+	etiqueta.double_sided = true
+	etiqueta.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	etiqueta.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	padre.add_child(etiqueta)
+	return etiqueta
 
 
 func _lamina(
