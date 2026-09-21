@@ -104,9 +104,7 @@ func _init() -> void:
 		printerr("Falta fachada de Bit 98")
 		quit(1)
 		return
-	var entrar_bit98 := (
-		fachada_bit98.get_node_or_null("EntrarTiendaVideojuegos") as Interactuable3D
-	)
+	var entrar_bit98 := fachada_bit98.get_node_or_null("EntrarTiendaVideojuegos") as Interactuable3D
 	var interior_bit98 := locales.get_node_or_null("InteriorBit98") as Node3D
 	if entrar_bit98 == null or interior_bit98 == null:
 		printerr("Bit 98 no expone entrada e interior para evidencia")
