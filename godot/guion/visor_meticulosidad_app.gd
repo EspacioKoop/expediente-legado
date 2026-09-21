@@ -24,7 +24,9 @@ func _al_elegir_documento(indice: int) -> void:
 
 	_documento_meticulosidad_id = esperado_id
 	if era_leido:
-		var motivo := "fecha" if not String(registro_actual.get("fecha", "")).is_empty() else "relectura"
+		var motivo := (
+			"fecha" if not String(registro_actual.get("fecha", "")).is_empty() else "relectura"
+		)
 		_registrar_meticulosidad(registro_actual, "relectura", motivo)
 
 
