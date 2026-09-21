@@ -159,6 +159,7 @@ func _montar_trastero() -> void:
 	)
 
 	_montar_ticket(puesto, Vector3(0.58, 1.36, 1.42))
+	_montar_atrezzo_trastero(puesto)
 
 	var entradas := (
 		ComercioBarrio
@@ -179,6 +180,75 @@ func _montar_trastero() -> void:
 			indice,
 		)
 	_montar_reventa(puesto)
+
+
+func _montar_atrezzo_trastero(puesto: Node3D) -> void:
+	var atrezzo := Node3D.new()
+	atrezzo.name = "AtrezzoTrastero"
+	puesto.add_child(atrezzo)
+
+	_caja(
+		atrezzo,
+		"BaldaAltaTrastero",
+		Vector3(0.31, 1.34, 0.0),
+		Vector3(0.28, 0.06, 2.62),
+		COLOR_MADERA,
+		"madera_domestica",
+	)
+
+	_caja(
+		atrezzo,
+		"RadioUsada",
+		Vector3(0.49, 1.52, -0.92),
+		Vector3(0.18, 0.28, 0.52),
+		Color(0.20, 0.22, 0.19),
+		"plastico_domestico",
+	)
+	_caja(
+		atrezzo,
+		"DialRadioUsada",
+		Vector3(0.59, 1.53, -0.78),
+		Vector3(0.02, 0.09, 0.12),
+		Color(0.66, 0.56, 0.34),
+	)
+	_cilindro(
+		atrezzo,
+		"AntenaRadioUsada",
+		Vector3(0.49, 1.82, -1.08),
+		0.012,
+		0.42,
+		COLOR_METAL,
+	)
+
+	for indice in 3:
+		_caja(
+			atrezzo,
+			"LibroUsado%d" % indice,
+			Vector3(0.50, 1.42 + float(indice) * 0.055, 0.05),
+			Vector3(0.16, 0.05, 0.46 - float(indice) * 0.04),
+			[
+				Color(0.34, 0.20, 0.16),
+				Color(0.18, 0.29, 0.25),
+				Color(0.39, 0.31, 0.16),
+			][indice],
+		)
+
+	_caja(
+		atrezzo,
+		"TelefonoUsadoBase",
+		Vector3(0.50, 1.45, 0.92),
+		Vector3(0.18, 0.14, 0.40),
+		Color(0.23, 0.22, 0.20),
+		"plastico_domestico",
+	)
+	_caja(
+		atrezzo,
+		"TelefonoUsadoAuricular",
+		Vector3(0.51, 1.57, 0.92),
+		Vector3(0.14, 0.08, 0.50),
+		Color(0.16, 0.16, 0.15),
+		"plastico_domestico",
+	)
 
 
 func _montar_reventa(puesto: Node3D) -> void:
