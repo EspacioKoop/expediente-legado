@@ -4,7 +4,7 @@
       "id": "factura1-perforaciones",
       "evento": "lectura_completa",
       "motivo": "margen",
-      "texto": "En el borde inferior se distinguen dos perforaciones de archivador ligeramente desalineadas; parecen de una carpeta anterior y no modifican lo escrito.",
+      "texto": "VISOR_DETALLE_961_FACTURA1_PERFORACIONES",
       "critico": false
     }
   ],
@@ -13,7 +13,14 @@
       "id": "memo1-cinta-fecha",
       "evento": "relectura",
       "motivo": "fecha",
-      "texto": "La fecha mecanografiada acusa una cinta algo más seca que el cuerpo del memorándum; la diferencia material no basta para fechar una segunda intervención.",
+      "texto": "VISOR_DETALLE_961_MEMO1_CINTA_FECHA",
+      "critico": false
+    },
+    {
+      "id": "memo1-cotejo-margen",
+      "evento": "lectura_completa",
+      "motivo": "margen",
+      "texto": "VISOR_DETALLE_961_MEMO1_COTEJO_MARGEN",
       "critico": false
     }
   ],
@@ -22,7 +29,7 @@
       "id": "empleado1-lapiz-pestana",
       "evento": "marcador",
       "motivo": "folio",
-      "texto": "El número de empleado está repasado a lápiz azul en la pestaña exterior; la marca no añade ningún dato al contenido.",
+      "texto": "VISOR_DETALLE_961_EMPLEADO1_LAPIZ_PESTANA",
       "critico": false
     }
   ],
@@ -31,7 +38,7 @@
       "id": "acta1-papel-cotejo",
       "evento": "relacion",
       "motivo": "relacion",
-      "texto": "Puesta junto a otro folio, el papel coincide en gramaje y corte con el stock común de oficina; la coincidencia no identifica autor ni circuito.",
+      "texto": "VISOR_DETALLE_961_ACTA1_PAPEL_COTEJO",
       "critico": false
     }
   ],
@@ -40,7 +47,14 @@
       "id": "oficio2-clip-margen",
       "evento": "lectura_completa",
       "motivo": "margen",
-      "texto": "El margen izquierdo conserva el óxido tenue de un clip retirado; no hay texto oculto debajo.",
+      "texto": "VISOR_DETALLE_961_OFICIO2_CLIP_MARGEN",
+      "critico": false
+    },
+    {
+      "id": "oficio2-anexo-folio",
+      "evento": "marcador",
+      "motivo": "folio",
+      "texto": "VISOR_DETALLE_961_OFICIO2_ANEXO_FOLIO",
       "critico": false
     }
   ],
@@ -49,7 +63,7 @@
       "id": "circular2-sello-fecha",
       "evento": "relectura",
       "motivo": "fecha",
-      "texto": "El sello de distribución pisa parcialmente el año impreso, pero ambos siguen siendo legibles; no cambia la cronología consignada.",
+      "texto": "VISOR_DETALLE_961_CIRCULAR2_SELLO_FECHA",
       "critico": false
     }
   ],
@@ -58,7 +72,7 @@
       "id": "memo3-tinta-sello",
       "evento": "relacion",
       "motivo": "relacion",
-      "texto": "La tinta del sello de recibido tiene un borde más saturado que la del texto mecanografiado; es una diferencia de soporte, no una prueba de procedencia.",
+      "texto": "VISOR_DETALLE_961_MEMO3_TINTA_SELLO",
       "critico": false
     }
   ],
@@ -67,7 +81,7 @@
       "id": "factura4-halo-sello",
       "evento": "marcador",
       "motivo": "folio",
-      "texto": "El sello amarillo deja un halo irregular en el reverso; el color ya visible en el documento no permite atribuirlo a una oficina concreta.",
+      "texto": "VISOR_DETALLE_961_FACTURA4_HALO_SELLO",
       "critico": false
     }
   ]
