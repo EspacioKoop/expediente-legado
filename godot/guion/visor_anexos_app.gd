@@ -2,7 +2,7 @@
 ##
 ## Solo muestra anexos catalogados. Abrirlos no consume acción, no guarda estado,
 ## no descubre pistas y no altera acusación/careo.
-extends "res://guion/visor_metadatos_app.gd"
+extends "res://guion/visor_meticulosidad_app.gd"
 
 const RUTA_ANEXOS := "res://datos/anexos_documentales.json"
 const IdentidadExpedientes := preload("res://guion/visor_identidad_app.gd")
