@@ -19,8 +19,7 @@ func puede_desbloquear(nodo_id: String) -> bool:
 		cumple = gestor_arquetipos != null
 		if cumple:
 			cumple = (
-				int(gestor_arquetipos.get("insight_total"))
-				>= int(requisitos.get("insight", 0))
+				int(gestor_arquetipos.get("insight_total")) >= int(requisitos.get("insight", 0))
 			)
 	if cumple and requisitos.has("nodo_previo"):
 		cumple = String(requisitos.get("nodo_previo", "")) in nodos_completados
