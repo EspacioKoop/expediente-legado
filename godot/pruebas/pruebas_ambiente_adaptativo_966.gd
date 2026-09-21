@@ -14,6 +14,7 @@ func _ejecutar() -> void:
 	_probar_discretizacion()
 	_probar_streams_adaptativos()
 	_probar_eco_de_vigilia()
+	_probar_eco_runtime()
 	_probar_reproduccion_y_fundido()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -97,6 +98,55 @@ func _probar_eco_de_vigilia() -> void:
 		),
 		"el eco de vigilia solo existe dentro del sueño",
 	)
+
+
+func _probar_eco_runtime() -> void:
+	var directa := Node.new()
+	root.add_child(directa)
+	var sueno_directo := Ambiente.reproducir(directa, "sueño")
+	_comprobar(
+		sueno_directo.stream == Ambiente.stream("sueño"),
+		"un sueño sin vigilia previa conserva la cama base",
+	)
+	directa.free()
+
+	var escena := Node.new()
+	root.add_child(escena)
+	Ambiente.reproducir(escena, "casa")
+	_comprobar(
+		String(escena.get_meta(Ambiente.META_ULTIMA_VIGILIA, "")) == "casa",
+		"la fase real queda como memoria acústica local del anfitrion",
+	)
+
+	var sueno_casa := Ambiente.reproducir(escena, "sueño")
+	var eco_casa := Ambiente.stream_adaptativo("sueño", {"vigilia_fase": "casa"})
+	_comprobar(
+		sueno_casa.stream == eco_casa,
+		"casa a sueño inyecta automaticamente el eco de la ultima vigilia",
+	)
+	_comprobar(
+		sueno_casa.stream != Ambiente.stream("sueño"),
+		"el eco automatico modifica de verdad la cama onirica",
+	)
+
+	Ambiente.reproducir(escena, "archivo")
+	var explicito := Ambiente.reproducir(escena, "sueño", -24.0, {"vigilia_fase": "casa"})
+	_comprobar(
+		explicito.stream == eco_casa,
+		"un contexto explicito prevalece sobre la ultima fase recordada",
+	)
+
+	Ambiente.reproducir(escena, "trayecto")
+	var neutro := Ambiente.reproducir(escena, "sueño", -24.0, {"vigilia_fase": ""})
+	_comprobar(
+		neutro.stream == Ambiente.stream("sueño"),
+		"vigilia_fase vacia desactiva de forma explicita el eco automatico",
+	)
+	_comprobar(
+		String(escena.get_meta(Ambiente.META_ULTIMA_VIGILIA, "")) == "trayecto",
+		"entrar en sueño no sobrescribe la ultima vigilia real",
+	)
+	escena.free()
 
 
 func _probar_reproduccion_y_fundido() -> void:

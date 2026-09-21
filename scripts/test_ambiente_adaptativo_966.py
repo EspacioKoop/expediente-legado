@@ -38,6 +38,13 @@ class AmbienteAdaptativo966Test(unittest.TestCase):
         self.assertIn('contexto.has("meticulosidad")', self.source)
         self.assertIn('"vigilia_fase"', self.source)
 
+    def test_eco_runtime_se_deriva_del_anfitrion_y_no_de_un_global(self):
+        self.assertIn('META_ULTIMA_VIGILIA := &"ultima_vigilia_ambiente"', self.source)
+        self.assertIn("nodo.set_meta(META_ULTIMA_VIGILIA, fase)", self.source)
+        self.assertIn("nodo.get_meta(META_ULTIMA_VIGILIA", self.source)
+        self.assertIn('resuelto.has("vigilia_fase")', self.source)
+        self.assertNotIn("static var _ultima_vigilia", self.source)
+
     def test_comportamiento_en_godot_headless(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
         importar_proyecto()

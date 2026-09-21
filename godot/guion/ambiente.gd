@@ -19,6 +19,7 @@ const FUNDIDO_SEGUNDOS := 0.35
 const VOLUMEN_SILENCIO_DB := -60.0
 const META_FASE := &"fase_ambiente"
 const META_PERFIL := &"perfil_ambiente"
+const META_ULTIMA_VIGILIA := &"ultima_vigilia_ambiente"
 const FASES := ["archivo", "trayecto", "casa", "sueño"]
 
 const FRANJA_BASE := "base"
@@ -295,12 +296,13 @@ static func reproducir(
 ) -> AudioStreamPlayer:
 	if nodo == null:
 		return null
-	var pista := stream_adaptativo(fase, contexto)
+	var contexto_reproduccion := _contexto_reproduccion(nodo, fase, contexto)
+	var pista := stream_adaptativo(fase, contexto_reproduccion)
 	if pista == null:
 		detener(nodo)
 		return null
 
-	var perfil := perfil_adaptativo(fase, contexto)
+	var perfil := perfil_adaptativo(fase, contexto_reproduccion)
 	var firma := "%s|base" % fase if _perfil_es_base(perfil) else _firma_perfil(perfil)
 	var anterior := nodo.get_node_or_null(NODO) as AudioStreamPlayer
 	if (
@@ -324,6 +326,27 @@ static func reproducir(
 	var entrada := nodo.create_tween()
 	entrada.tween_property(voz, "volume_db", volumen_db, FUNDIDO_SEGUNDOS)
 	return voz
+
+
+## Resuelve solo memoria acústica efímera del recorrido real. La última fase
+## de vigilia vive en el nodo anfitrión, no en un singleton ni en Partida, y se
+## usa únicamente si quien llama no ha declarado `vigilia_fase` de forma
+## explícita. Así un sueño aislado conserva la cama base y las pruebas pueden
+## construir escenas independientes sin contaminación entre ellas.
+static func _contexto_reproduccion(nodo: Node, fase: String, contexto: Dictionary) -> Dictionary:
+	var resuelto := contexto.duplicate()
+	if not FASES.has(fase):
+		return resuelto
+	if fase != "sueño":
+		nodo.set_meta(META_ULTIMA_VIGILIA, fase)
+		return resuelto
+	if resuelto.has("vigilia_fase"):
+		return resuelto
+
+	var ultima_vigilia := String(nodo.get_meta(META_ULTIMA_VIGILIA, ""))
+	if FASES.has(ultima_vigilia) and ultima_vigilia != "sueño":
+		resuelto["vigilia_fase"] = ultima_vigilia
+	return resuelto
 
 
 static func detener(nodo: Node) -> void:
