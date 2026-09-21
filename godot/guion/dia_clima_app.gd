@@ -253,9 +253,7 @@ func _cerrar_expediente() -> void:
 		_archivado_sesion.refrescar(self)
 		# El visor puede haber consumido una acción y avanzado #963. Al volver a
 		# la oficina se cruza a la cama acústica de la nueva franja, si cambió.
-		Ambiente.reproducir(
-			self, "archivo", -24.0, {"hora": Jornada.hora_decimal(jornada)}
-		)
+		Ambiente.reproducir(self, "archivo", -24.0, {"hora": Jornada.hora_decimal(jornada)})
 
 
 func _abrir_duelo(quien: Dictionary, zona: Area3D) -> void:
