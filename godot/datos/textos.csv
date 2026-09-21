@@ -337,6 +337,9 @@ VISOR_CONCEPTO,Concepto: %s
 VISOR_COSTE_ACCION,1 acción
 VISOR_COSTE_GRATIS,GRATIS
 VISOR_COSTE_REGLA,Primera lectura nueva del día: GRATIS · siguientes: 1 acción · releer hoy: GRATIS
+VISOR_DETALLE_961_MEMO1_MARGEN,La nota de cotejo está incorporada al cuerpo digitalizado; el expediente no identifica quién la añadió.
+VISOR_DETALLE_961_OBSERVACION,Observación adicional · %s
+VISOR_DETALLE_961_OFICIO2_FOLIO,"El oficio deja constancia de una prescripción médica adjunta; el archivo conserva el anexo como metadato, no su contenido clínico."
 VISOR_DOCUMENTOS,Documentos del expediente:
 VISOR_ELIJA,Seleccione un documento de la lista para abrirlo y leerlo.
 VISOR_ESTADO,"%s   ·   Pistas: %d de %d   ·   Día %d   ·   Presupuesto: %d/%d acciones%s"
