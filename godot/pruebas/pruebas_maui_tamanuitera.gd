@@ -135,16 +135,28 @@ func _probar_tensores_interactivos() -> void:
 	sueno.add_child(actor)
 
 	persiana.activado.emit(actor)
-	_comprobar(sueno.valor_tensor(SuenoMauiTamanuitera.TENSOR_PERSIANA), 1, "usar persiana avanza estado")
+	_comprobar(
+		sueno.valor_tensor(SuenoMauiTamanuitera.TENSOR_PERSIANA),
+		1,
+		"usar persiana avanza estado",
+	)
 	persiana.activado.emit(actor)
-	_comprobar(sueno.valor_tensor(SuenoMauiTamanuitera.TENSOR_PERSIANA), 2, "persiana alcanza estado de solapamiento")
+	_comprobar(
+		sueno.valor_tensor(SuenoMauiTamanuitera.TENSOR_PERSIANA),
+		2,
+		"persiana alcanza estado de solapamiento",
+	)
 	cable.activado.emit(actor)
 	_comprobar(sueno.valor_tensor(SuenoMauiTamanuitera.TENSOR_CABLE), 1, "usar cable avanza estado")
 	_comprobar(sueno.puente_activo(), "las interacciones del jugador pueden crear el puente")
 	cable.activado.emit(actor)
 	_comprobar(not sueno.puente_activo(), "seguir usando el cable retira el puente")
 	cable.activado.emit(actor)
-	_comprobar(sueno.valor_tensor(SuenoMauiTamanuitera.TENSOR_CABLE), 0, "el tensor cicla sin dejar al jugador bloqueado")
+	_comprobar(
+		sueno.valor_tensor(SuenoMauiTamanuitera.TENSOR_CABLE),
+		0,
+		"el tensor cicla sin dejar al jugador bloqueado",
+	)
 	sueno.queue_free()
 
 
