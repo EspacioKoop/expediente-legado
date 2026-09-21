@@ -84,6 +84,13 @@ func _probar() -> void:
 		trastero.get_node_or_null("RotuloElTrastero") != null,
 		"El Trastero tiene rotulo propio",
 	)
+	var ticket_quiosco := quiosco.get_node_or_null("TicketTransaccion") as Node3D
+	var ticket_trastero := trastero.get_node_or_null("TicketTransaccion") as Node3D
+	_comprobar(ticket_quiosco != null and not ticket_quiosco.visible, "ticket quiosco empieza oculto")
+	_comprobar(
+		ticket_trastero != null and not ticket_trastero.visible,
+		"ticket trastero empieza oculto",
+	)
 
 	var compras_quiosco := (
 		quiosco
@@ -133,6 +140,20 @@ func _probar() -> void:
 		"la compra del quiosco entra en Inventario",
 	)
 	_comprobar(int(dia.jornada["dinero"]) == 192, "el quiosco usa el precio canonico")
+	if ticket_quiosco != null:
+		var texto_ticket := ticket_quiosco.get_node_or_null("TextoTicket") as Label3D
+		_comprobar(ticket_quiosco.visible, "una compra muestra ticket diegetico")
+		_comprobar(
+			texto_ticket != null and texto_ticket.text == "PAGO · -8",
+			"ticket de compra muestra importe real",
+		)
+		revista.interactuar(dia._caminante)
+		await process_frame
+		_comprobar(
+			texto_ticket != null and texto_ticket.text == "YA COMPRADO",
+			"repetir compra muestra estado sin cobrar otra vez",
+		)
+		_comprobar(int(dia.jornada["dinero"]) == 192, "YA COMPRADO no modifica saldo")
 	_comprobar(
 		SemillasOniricas.familias_activas(dia.jornada) == semillas_antes,
 		"comprar una publicacion no activa una semilla",
@@ -154,6 +175,13 @@ func _probar() -> void:
 			break
 	_comprobar(en_casa, "la lampara comprada se materializa para home_storage")
 	_comprobar(int(dia.jornada["dinero"]) == 158, "El Trastero usa el precio canonico")
+	if ticket_trastero != null:
+		var texto_trastero := ticket_trastero.get_node_or_null("TextoTicket") as Label3D
+		_comprobar(ticket_trastero.visible, "compra en El Trastero muestra ticket")
+		_comprobar(
+			texto_trastero != null and texto_trastero.text == "PAGO · -34",
+			"ticket de El Trastero muestra importe de compra",
+		)
 	_comprobar(
 		String(dia.jornada.get("fase", "")) == fase_inicial,
 		"comprar en la calle no crea otra fase",
@@ -168,6 +196,12 @@ func _probar() -> void:
 		"la reventa retira el objeto carried mediante Inventario",
 	)
 	_comprobar(int(dia.jornada["dinero"]) == 165, "la reventa suma el precio canonico al saldo")
+	if ticket_trastero != null:
+		var texto_reventa := ticket_trastero.get_node_or_null("TextoTicket") as Label3D
+		_comprobar(
+			texto_reventa != null and texto_reventa.text == "REVENTA · +7",
+			"la reventa reutiliza el ticket y muestra el ingreso",
+		)
 	if vender_taza != null:
 		_comprobar(
 			not vender_taza.habilitado and not vender_taza.visible,
