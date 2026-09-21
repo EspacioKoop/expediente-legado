@@ -118,9 +118,7 @@ func _espacio_de(fase: String) -> Dictionary:
 func _contexto_ambiente() -> Dictionary:
 	return {
 		"hora": Jornada.hora_decimal(jornada),
-		"meticulosidad": (
-			float(Meticulosidad.puntos(jornada)) / float(Meticulosidad.PUNTOS_MAX)
-		),
+		"meticulosidad": float(Meticulosidad.puntos(jornada)) / float(Meticulosidad.PUNTOS_MAX),
 	}
 
 
