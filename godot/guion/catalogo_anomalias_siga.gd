@@ -231,6 +231,7 @@ func _caja_catalogo(fondo: Color, borde: Color, margen: float) -> StyleBoxFlat:
 	caja.content_margin_bottom = margen
 	return caja
 
+
 func _refrescar() -> void:
 	if _lista == null:
 		return
