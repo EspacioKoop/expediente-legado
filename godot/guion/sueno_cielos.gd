@@ -281,6 +281,7 @@ static func componer(familia: String, modificadores: Array = []) -> Dictionary:
 	var perfil_mito = PERFILES_MITO.get(familia, {})
 	if typeof(perfil_mito) == TYPE_DICTIONARY:
 		resultado.merge(perfil_mito, true)
+	resultado = MitologiasRuntime.modular_cielo(familia, resultado)
 
 	var capas: Array = modificadores.duplicate(true)
 	capas.sort_custom(_comparar_modificadores)
