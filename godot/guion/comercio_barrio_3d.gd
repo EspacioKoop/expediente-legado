@@ -19,7 +19,6 @@ const POS_TRASTERO := Vector3(-5.05, 0.0, 7.10)
 
 const COLOR_MADERA := Color(0.34, 0.25, 0.18)
 const COLOR_METAL := Color(0.17, 0.18, 0.19)
-const COLOR_PAPEL := Color(0.76, 0.70, 0.55)
 const COLOR_VERDE := Color(0.20, 0.36, 0.24)
 const COLOR_LATON := Color(0.50, 0.37, 0.16)
 
