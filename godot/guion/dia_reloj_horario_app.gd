@@ -87,12 +87,13 @@ func _actualizar_objetivos(dia: Node, hora: int) -> void:
 	_hora_aplicada = hora
 	_reloj.poner_hora(hora)
 
-	var perfil := perfil_luz(hora)
+	var perfil: Dictionary = perfil_luz(hora)
 	var espacio: Dictionary = dia._espacio_actual
 	var color_base: Color = espacio.get("ambiente", Color(0.55, 0.55, 0.58))
 	var energia_base := float(espacio.get("ambiente_energia", 0.7))
 	var sol_base := float(espacio.get("sol", 0.7))
-	_objetivo_color = color_base.lerp(perfil["tinte"], MEZCLA_TINTE)
+	var tinte: Color = perfil["tinte"]
+	_objetivo_color = color_base.lerp(tinte, MEZCLA_TINTE)
 	_objetivo_ambiente = energia_base * float(perfil["ambiente_factor"])
 	_objetivo_sol = sol_base * float(perfil["sol_factor"])
 
