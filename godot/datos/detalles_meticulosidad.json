@@ -1,0 +1,74 @@
+{
+  "factura1@1": [
+    {
+      "id": "factura1-perforaciones",
+      "evento": "lectura_completa",
+      "motivo": "margen",
+      "texto": "En el borde inferior se distinguen dos perforaciones de archivador ligeramente desalineadas; parecen de una carpeta anterior y no modifican lo escrito.",
+      "critico": false
+    }
+  ],
+  "memo1@1": [
+    {
+      "id": "memo1-cinta-fecha",
+      "evento": "relectura",
+      "motivo": "fecha",
+      "texto": "La fecha mecanografiada acusa una cinta algo más seca que el cuerpo del memorándum; la diferencia material no basta para fechar una segunda intervención.",
+      "critico": false
+    }
+  ],
+  "empleado1@1": [
+    {
+      "id": "empleado1-lapiz-pestana",
+      "evento": "marcador",
+      "motivo": "folio",
+      "texto": "El número de empleado está repasado a lápiz azul en la pestaña exterior; la marca no añade ningún dato al contenido.",
+      "critico": false
+    }
+  ],
+  "actaContraloria1@1": [
+    {
+      "id": "acta1-papel-cotejo",
+      "evento": "relacion",
+      "motivo": "relacion",
+      "texto": "Puesta junto a otro folio, el papel coincide en gramaje y corte con el stock común de oficina; la coincidencia no identifica autor ni circuito.",
+      "critico": false
+    }
+  ],
+  "oficio2@2": [
+    {
+      "id": "oficio2-clip-margen",
+      "evento": "lectura_completa",
+      "motivo": "margen",
+      "texto": "El margen izquierdo conserva el óxido tenue de un clip retirado; no hay texto oculto debajo.",
+      "critico": false
+    }
+  ],
+  "circular2@2": [
+    {
+      "id": "circular2-sello-fecha",
+      "evento": "relectura",
+      "motivo": "fecha",
+      "texto": "El sello de distribución pisa parcialmente el año impreso, pero ambos siguen siendo legibles; no cambia la cronología consignada.",
+      "critico": false
+    }
+  ],
+  "memo3@3": [
+    {
+      "id": "memo3-tinta-sello",
+      "evento": "relacion",
+      "motivo": "relacion",
+      "texto": "La tinta del sello de recibido tiene un borde más saturado que la del texto mecanografiado; es una diferencia de soporte, no una prueba de procedencia.",
+      "critico": false
+    }
+  ],
+  "factura4@4": [
+    {
+      "id": "factura4-halo-sello",
+      "evento": "marcador",
+      "motivo": "folio",
+      "texto": "El sello amarillo deja un halo irregular en el reverso; el color ya visible en el documento no permite atribuirlo a una oficina concreta.",
+      "critico": false
+    }
+  ]
+}
