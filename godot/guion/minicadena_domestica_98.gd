@@ -180,6 +180,7 @@ func escuchar_actual() -> bool:
 		return false
 
 	_activar_semilla(contenido)
+	_activar_exposicion(contenido)
 	if _fuente == FUENTE_CASSETTE:
 		_avanzar_cassette()
 	else:
@@ -218,6 +219,32 @@ static func seleccionar_programa(emisora: Dictionary, jornada: Dictionary) -> Di
 		if minuto >= desde and minuto <= hasta:
 			return programa.duplicate(true)
 	return {}
+
+
+## Los metadatos de un programa pueden describir un marco ideológico sin
+## convertir la emisora completa en portavoz de una sola posición. Esta función
+## es pura respecto a la radio: solo delega el registro en el contrato de #919.
+static func registrar_exposicion_de_contenido(
+	estado: Dictionary, contenido: Dictionary, jornada: int
+) -> bool:
+	var exposicion = contenido.get("exposicion_ideologica", {})
+	if typeof(exposicion) != TYPE_DICTIONARY or exposicion.is_empty():
+		return false
+	var etiquetas: Array = []
+	var etiquetas_brutas = exposicion.get("etiquetas", [])
+	if typeof(etiquetas_brutas) == TYPE_ARRAY:
+		etiquetas = (etiquetas_brutas as Array).duplicate()
+	return (
+		Prometeo
+		. registrar_exposicion_ideologica(
+			estado,
+			String(exposicion.get("id", "")),
+			String(exposicion.get("fuente", FUENTE_RADIO)),
+			String(exposicion.get("eje", "")),
+			jornada,
+			etiquetas,
+		)
+	)
 
 
 static func _minutos(hora: String) -> int:
@@ -270,6 +297,26 @@ func _activar_semilla(contenido: Dictionary) -> bool:
 			int(semilla.get("intensidad", 1)),
 		)
 	)
+
+
+func _activar_exposicion(contenido: Dictionary) -> bool:
+	var estado := _estado_partida_actual()
+	if estado.is_empty():
+		return false
+	var jornada := maxi(1, int(_jornada_actual().get("dia", 1)))
+	return registrar_exposicion_de_contenido(estado, contenido, jornada)
+
+
+func _estado_partida_actual() -> Dictionary:
+	if not is_inside_tree():
+		return {}
+	var escena := get_tree().current_scene
+	if escena == null:
+		return {}
+	var partida_actual: Variant = escena.get("partida")
+	if partida_actual is Partida:
+		return (partida_actual as Partida).estado
+	return {}
 
 
 func _jornada_actual() -> Dictionary:

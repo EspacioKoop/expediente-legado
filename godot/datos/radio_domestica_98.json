@@ -16,7 +16,15 @@
           "desde": "16:00",
           "hasta": "23:59",
           "titulo": "Mesa local",
-          "transcripcion": "Vecinos, comercios y asociaciones repasan la jornada sin convertir la emisión en una misión."
+          "transcripcion": "La mesa comenta la prueba de horarios de la planta 4: ampliar el servicio puede ayudar, pero el cambio debería revisarse con la plantilla antes de consolidarlo.",
+          "atencion_requerida": 2,
+          "exposicion_ideologica": {
+            "id": "radio:onda_barrio_98:turnos-atencion-planta4",
+            "fuente": "radio:onda_barrio_98",
+            "hecho_id": "turnos-atencion-planta4",
+            "eje": "socialdemocrata",
+            "etiquetas": ["trabajo", "servicio público", "negociación"]
+          }
         }
       ]
     },
