@@ -365,7 +365,7 @@ func _refrescar_historial() -> void:
 		return
 
 	for evento in eventos:
-		if not evento is Dictionary:
+		if not (evento is Dictionary):
 			continue
 		var fila := Label.new()
 		fila.text = _texto_evento_historial(evento)
