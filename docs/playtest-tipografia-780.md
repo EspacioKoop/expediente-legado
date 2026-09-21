@@ -7,7 +7,7 @@ Este documento convierte ese último pase en evidencia trazable. No sustituye la
 ## Preparación
 
 1. Usar una build identificable por SHA.
-2. Ejecutar con el viewport canónico del proyecto: `1024×680`.
+2. Ejecutar con el viewport canónico del proyecto: `1920×1080`.
 3. Probar la misma build con teclado real y con mando físico real.
 4. No cambiar fuentes del sistema para “arreglar” la sesión: #780 debe ser reproducible con las fuentes empaquetadas.
 5. Guardar una captura de cada una de las cuatro pantallas del recorrido.
@@ -56,7 +56,7 @@ El registrador conserva:
 - una ruta o URL de evidencia por pantalla;
 - incidencias y observaciones literales del tester.
 
-El resumen `listo para valorar cierre de #780` solo queda en **SÍ** cuando el viewport es `1024×680`, ambos dispositivos fueron probados, todos los checks están marcados como cumplidos y existe evidencia para las cuatro pantallas.
+El resumen `listo para valorar cierre de #780` solo queda en **SÍ** cuando el viewport es `1920×1080`, ambos dispositivos fueron probados, todos los checks están marcados como cumplidos y existe evidencia para las cuatro pantallas.
 
 ## Criterio de salida
 
