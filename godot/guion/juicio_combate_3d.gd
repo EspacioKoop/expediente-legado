@@ -355,7 +355,9 @@ func _resolver_ataque_rival() -> void:
 				Sonido.sonar(self, "error")
 				var dano := dano_externalizado(1, _doctrina_activa)
 				_determinacion_jugador = maxi(0, _determinacion_jugador - dano)
-				GestorMomentum.registrar_dano_recibido()
+				var gestor_momentum := _gestor_jungiano("GestorMomentum")
+				if gestor_momentum != null:
+					gestor_momentum.call("registrar_dano_recibido")
 				if externaliza_activa:
 					_cerrar_doctrina()
 				_reaccion(_figura_jugador, -0.18)
@@ -396,7 +398,12 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 	if hacia.length() > alcance:
 		return
 
-	var efectos_jungianos := GestorArquetipos.efectos_combinados()
+	var efectos_jungianos: Dictionary = {}
+	var gestor_arquetipos := _gestor_jungiano("GestorArquetipos")
+	if gestor_arquetipos != null:
+		var efectos = gestor_arquetipos.call("efectos_combinados")
+		if typeof(efectos) == TYPE_DICTIONARY:
+			efectos_jungianos = efectos
 	var probabilidad_critico := clampf(
 		float(efectos_jungianos.get("bonus_crit", 0.0))
 		+ float(efectos_jungianos.get("bonus_todo", 0.0)),
@@ -404,8 +411,12 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 		0.75
 	)
 	var es_critico := probabilidad_critico > 0.0 and randf() < probabilidad_critico
-	GestorMomentum.registrar_golpe(es_critico)
-	GestorCombos.registrar_entrada("ataque_pesado" if fuerte else "ataque_ligero")
+	var gestor_momentum := _gestor_jungiano("GestorMomentum")
+	if gestor_momentum != null:
+		gestor_momentum.call("registrar_golpe", es_critico)
+	var gestor_combos := _gestor_jungiano("GestorCombos")
+	if gestor_combos != null:
+		gestor_combos.call("registrar_entrada", "ataque_pesado" if fuerte else "ataque_ligero")
 
 	var dano := dano_base + _dano_combo_pendiente
 	_dano_combo_pendiente = 0
@@ -457,12 +468,19 @@ func _intentar_retorno_rival() -> bool:
 func _esquivar() -> void:
 	if _esquiva > 0.0:
 		return
-	var efectos := GestorArquetipos.efectos_combinados()
+	var efectos: Dictionary = {}
+	var gestor_arquetipos := _gestor_jungiano("GestorArquetipos")
+	if gestor_arquetipos != null:
+		var activos = gestor_arquetipos.call("efectos_combinados")
+		if typeof(activos) == TYPE_DICTIONARY:
+			efectos = activos
 	var bonus_evasion := (
 		float(efectos.get("evasion", 0.0)) + float(efectos.get("bonus_todo", 0.0))
 	)
 	_esquiva = 0.34 * (1.0 + bonus_evasion)
-	GestorCombos.registrar_entrada("esquivar")
+	var gestor_combos := _gestor_jungiano("GestorCombos")
+	if gestor_combos != null:
+		gestor_combos.call("registrar_entrada", "esquivar")
 	if reduccion_movimiento:
 		return
 	_reaccion(_figura_jugador, 0.12)
@@ -482,8 +500,12 @@ func _terminar(gano: bool) -> void:
 		return
 	_acabado = true
 	_ataque_rival_pendiente = false
-	GestorMomentum.salir_combate()
-	GestorCombos.reiniciar()
+	var gestor_momentum := _gestor_jungiano("GestorMomentum")
+	if gestor_momentum != null:
+		gestor_momentum.call("salir_combate")
+	var gestor_combos := _gestor_jungiano("GestorCombos")
+	if gestor_combos != null:
+		gestor_combos.call("reiniciar")
 	_ocultar_aviso_ataque()
 	terminado.emit(gano)
 
@@ -782,34 +804,64 @@ func _actualizar_camara() -> void:
 	_camara.look_at(centro + Vector3(0.0, 0.9, 0.0), Vector3.UP)
 
 
-func _preparar_sistemas_jungianos() -> void:
-	GestorMomentum.reiniciar()
-	GestorCombos.reiniciar()
-	for arquetipo_id in GestorArquetipos.arquetipos:
-		var arquetipo = GestorArquetipos.arquetipos[arquetipo_id]
-		if arquetipo.desbloqueado:
-			GestorMomentum.aplicar_modificador_arquetipo(String(arquetipo_id))
-	GestorMomentum.en_combate = true
+func _gestor_jungiano(nombre: String) -> Node:
+	return get_node_or_null("/root/" + nombre)
 
-	if not GestorArquetipos.arquetipo_desbloqueado.is_connected(_al_arquetipo_desbloqueado):
-		GestorArquetipos.arquetipo_desbloqueado.connect(_al_arquetipo_desbloqueado)
-	if not GestorMomentum.momentum_cambiado.is_connected(_al_momentum_cambiado):
-		GestorMomentum.momentum_cambiado.connect(_al_momentum_cambiado)
-	if not GestorCombos.combo_ejecutado.is_connected(_al_combo_ejecutado):
-		GestorCombos.combo_ejecutado.connect(_al_combo_ejecutado)
-	if not GestorCombos.finisher_ejecutado.is_connected(_al_finisher_ejecutado):
-		GestorCombos.finisher_ejecutado.connect(_al_finisher_ejecutado)
+
+func _preparar_sistemas_jungianos() -> void:
+	var arquetipos := _gestor_jungiano("GestorArquetipos")
+	var momentum := _gestor_jungiano("GestorMomentum")
+	var combos := _gestor_jungiano("GestorCombos")
+	if arquetipos == null or momentum == null or combos == null:
+		return
+
+	momentum.call("reiniciar")
+	combos.call("reiniciar")
+	var catalogo = arquetipos.get("arquetipos")
+	if typeof(catalogo) == TYPE_DICTIONARY:
+		for arquetipo_id in catalogo:
+			var arquetipo = catalogo[arquetipo_id]
+			if arquetipo != null and bool(arquetipo.get("desbloqueado")):
+				momentum.call("aplicar_modificador_arquetipo", String(arquetipo_id))
+	momentum.set("en_combate", true)
+
+	var cb_arquetipo := Callable(self, "_al_arquetipo_desbloqueado")
+	if (
+		arquetipos.has_signal("arquetipo_desbloqueado")
+		and not arquetipos.is_connected("arquetipo_desbloqueado", cb_arquetipo)
+	):
+		arquetipos.connect("arquetipo_desbloqueado", cb_arquetipo)
+	var cb_momentum := Callable(self, "_al_momentum_cambiado")
+	if (
+		momentum.has_signal("momentum_cambiado")
+		and not momentum.is_connected("momentum_cambiado", cb_momentum)
+	):
+		momentum.connect("momentum_cambiado", cb_momentum)
+	var cb_combo := Callable(self, "_al_combo_ejecutado")
+	if combos.has_signal("combo_ejecutado") and not combos.is_connected("combo_ejecutado", cb_combo):
+		combos.connect("combo_ejecutado", cb_combo)
+	var cb_finisher := Callable(self, "_al_finisher_ejecutado")
+	if (
+		combos.has_signal("finisher_ejecutado")
+		and not combos.is_connected("finisher_ejecutado", cb_finisher)
+	):
+		combos.connect("finisher_ejecutado", cb_finisher)
 
 
 func _al_arquetipo_desbloqueado(arquetipo_id: String) -> void:
-	GestorMomentum.aplicar_modificador_arquetipo(arquetipo_id)
-	var arquetipo = GestorArquetipos.obtener_arquetipo(arquetipo_id)
+	var momentum := _gestor_jungiano("GestorMomentum")
+	if momentum != null:
+		momentum.call("aplicar_modificador_arquetipo", arquetipo_id)
+	var arquetipos := _gestor_jungiano("GestorArquetipos")
 	var nombre := arquetipo_id
-	if arquetipo != null:
-		nombre = String(arquetipo.nombre)
+	var puntos := 0
+	if arquetipos != null:
+		var arquetipo = arquetipos.call("obtener_arquetipo", arquetipo_id)
+		if arquetipo != null:
+			nombre = String(arquetipo.get("nombre"))
+		puntos = int(arquetipos.get("puntos_habilidad"))
 	_mostrar_aviso_jungiano(
-		"ARQUETIPO · %s · HABILIDAD +1 (%d)"
-		% [nombre, GestorArquetipos.puntos_habilidad],
+		"ARQUETIPO · %s · HABILIDAD +1 (%d)" % [nombre, puntos],
 		2.5
 	)
 	_actualizar_hud_jungiano()
@@ -840,10 +892,13 @@ func _al_combo_ejecutado(nombre: String, efectos: Dictionary) -> void:
 
 
 func _ejecutar_finisher_jungiano() -> void:
-	var finisher_id := GestorCombos.finisher_disponible_actual()
+	var combos := _gestor_jungiano("GestorCombos")
+	if combos == null:
+		return
+	var finisher_id := String(combos.call("finisher_disponible_actual"))
 	if finisher_id.is_empty():
 		return
-	GestorCombos.ejecutar_finisher(finisher_id)
+	combos.call("ejecutar_finisher", finisher_id)
 
 
 func _al_finisher_ejecutado(nombre: String, efectos: Dictionary, es_super: bool) -> void:
@@ -881,21 +936,27 @@ func _aplicar_curacion_arquetipo(efectos: Dictionary) -> void:
 
 
 func _actualizar_hud_jungiano() -> void:
-	if _barra_momentum != null:
-		_barra_momentum.max_value = GestorMomentum.momentum_max
-		_barra_momentum.value = GestorMomentum.momentum_actual
-	if _boton_finisher != null:
-		var finisher_id := GestorCombos.finisher_disponible_actual()
-		_boton_finisher.disabled = finisher_id.is_empty() or _acabado
-		if finisher_id.is_empty():
-			_boton_finisher.text = "FINISHER"
-		else:
-			var finisher: Dictionary = GestorCombos.finishers[finisher_id]
-			_boton_finisher.text = (
-				"SUPER FINISHER"
-				if bool(finisher.get("es_super", false))
-				else "FINISHER"
-			)
+	var momentum := _gestor_jungiano("GestorMomentum")
+	var combos := _gestor_jungiano("GestorCombos")
+	if _barra_momentum != null and momentum != null:
+		_barra_momentum.max_value = float(momentum.get("momentum_max"))
+		_barra_momentum.value = float(momentum.get("momentum_actual"))
+	if _boton_finisher == null:
+		return
+	if combos == null:
+		_boton_finisher.disabled = true
+		_boton_finisher.text = "FINISHER"
+		return
+	var finisher_id := String(combos.call("finisher_disponible_actual"))
+	_boton_finisher.disabled = finisher_id.is_empty() or _acabado
+	if finisher_id.is_empty():
+		_boton_finisher.text = "FINISHER"
+		return
+	var catalogo = combos.get("finishers")
+	var es_super := false
+	if typeof(catalogo) == TYPE_DICTIONARY and catalogo.has(finisher_id):
+		es_super = bool(catalogo[finisher_id].get("es_super", false))
+	_boton_finisher.text = "SUPER FINISHER" if es_super else "FINISHER"
 
 
 func _mostrar_aviso_jungiano(texto: String, duracion: float) -> void:
