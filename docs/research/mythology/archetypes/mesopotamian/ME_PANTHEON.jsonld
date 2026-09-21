@@ -1,0 +1,1012 @@
+{
+  "@context": "../../schema/ACP_CONTEXT.jsonld",
+  "@id": "system:ME",
+  "@type": "ArchetypeSystem",
+  "name": "Mesopotamian Pantheon",
+  "description": "Deities from Sumerian, Akkadian, Babylonian, and Assyrian traditions. The oldest recorded pantheon, foundational to Near Eastern religion and deeply influential on later Mediterranean and biblical traditions. Gods embody cosmic forces, civilizational powers, and the tension between order and primordial chaos.",
+  "culturalOrigin": "Mesopotamia (Sumer, Akkad, Babylon, Assyria)",
+  "primarySources": ["Enuma Elish", "Epic of Gilgamesh", "Descent of Inanna", "Atrahasis", "Sumerian Temple Hymns", "Babylonian astronomical texts"],
+  "temporalSpan": "c. 3500 BCE – 100 CE",
+  "cosmology": {
+    "structure": "Heaven (An), Earth (Ki), Underworld (Kur/Irkalla); primordial waters (Apsu/Tiamat) predate ordered cosmos",
+    "creationMyth": "Marduk slays Tiamat (chaos serpent), creates world from her body; or Enlil separates heaven and earth",
+    "eschatology": "Dreary underworld for all dead; no judgment or blessed afterlife in early tradition",
+    "keyRealms": ["Heaven (An)", "Earth (Ki)", "Underworld (Kur)", "Apsu (fresh waters)", "Abzu (deep)"]
+  },
+  "systemCharacteristics": {
+    "primaryThemes": ["civilization vs. chaos", "divine kingship", "fate (namtar)", "me (divine powers/laws)", "descent and return"],
+    "structuralFeatures": ["Divine council", "Syncretism across periods", "Anthropomorphic yet cosmic", "Temple as cosmic center"],
+    "relationshipPatterns": ["Divine triads", "Generational succession", "Sacred marriage (hieros gamos)", "Divine sponsorship of cities"]
+  },
+
+  "entries": [
+    {
+      "@id": "arch:ME-ANU",
+      "@type": "Archetype",
+      "name": "Anu",
+      "aliases": ["An (Sumerian)", "Anum"],
+      "epithets": ["Father of the Gods", "King of Heaven", "Lord of the Constellations"],
+      "description": "Supreme sky god, father of gods, ruler of heaven. Remote and transcendent, rarely intervenes directly but grants authority to other gods. His word is absolute decree. Represents the distant, abstract divine authority.",
+      "gender": "masculine",
+      "domain": ["sky", "heaven", "kingship", "authority", "fate-decrees"],
+      "symbols": ["horned crown", "scepter", "sky-dome", "stars"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.1,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.2,
+        "active-receptive": 0.6,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.05,
+        "stasis-transformation": 0.2,
+        "voluntary-fated": 0.6
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.9, "aspects": ["cosmic-king", "authority-grantor"]},
+        {"primordial": "primordial:great-father", "weight": 0.75, "aspects": ["father-of-gods", "distant-patriarch"]},
+        {"primordial": "primordial:creator", "weight": 0.5, "aspects": ["decreer", "word-power"]}
+      ],
+
+      "temporalOrientation": "eternal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When authority becomes absence", "When transcendence becomes indifference"],
+        "shadowManifestations": ["Absent father", "Remote tyrant", "Authority without presence"],
+        "integrationPath": "Authority that remains connected; transcendence with care"
+      },
+
+      "relationships": [
+        {"type": "PARENT", "target": "arch:ME-ENLIL", "notes": "Father"},
+        {"type": "PARENT", "target": "arch:ME-ENKI", "notes": "Father"},
+        {"type": "CONSORT", "target": "arch:ME-KI", "notes": "Heaven and Earth pairing"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-OURANOS", "fidelity": 0.75, "sharedAspects": ["sky-father", "remote", "primal"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ZEUS", "fidelity": 0.5, "sharedAspects": ["sky", "kingship", "authority"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-AIR",
+        "planet": "7P-SATURN",
+        "tarot": "TAMA-EMPEROR",
+        "number": 60,
+        "direction": "Zenith"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Enuma Elish", "An = Anum god list"],
+        "iconography": "Horned crown, enthroned in heavens",
+        "cultCenters": ["Uruk", "Der"],
+        "confidence": 0.9
+      }
+    },
+
+    {
+      "@id": "arch:ME-ENLIL",
+      "@type": "Archetype",
+      "name": "Enlil",
+      "aliases": ["Ellil (Akkadian)", "Nunamnir"],
+      "epithets": ["Lord Wind", "King of All Lands", "Father of the Gods", "The Great Mountain"],
+      "description": "God of wind, air, earth, and storms. Executive power of the cosmos—while Anu decrees, Enlil enacts. Commands the Tablet of Destinies. Can be benevolent (rain, fertility) or destructive (flood, plague). The active divine will.",
+      "gender": "masculine",
+      "domain": ["wind", "storms", "authority", "fate-execution", "agriculture"],
+      "symbols": ["horned crown", "Tablet of Destinies", "mountain", "plow"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.2,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.3,
+        "active-receptive": 0.2,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.4
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.9, "aspects": ["executor", "cosmic-administrator"]},
+        {"primordial": "primordial:destroyer", "weight": 0.6, "aspects": ["flood-sender", "plague-bringer"]},
+        {"primordial": "primordial:creator", "weight": 0.5, "aspects": ["separator-of-heaven-earth", "civilizer"]}
+      ],
+
+      "temporalOrientation": "present",
+
+      "shadowDynamics": {
+        "activationConditions": ["When order requires destruction", "When authority serves anger"],
+        "shadowManifestations": ["Wrathful destroyer", "Tyrant king", "Flood-bringer"],
+        "integrationPath": "Power balanced with mercy; destruction only when necessary"
+      },
+
+      "relationships": [
+        {"type": "CHILD_OF", "target": "arch:ME-ANU"},
+        {"type": "SIBLING", "target": "arch:ME-ENKI", "notes": "Rivalry and cooperation"},
+        {"type": "CONSORT", "target": "arch:ME-NINLIL", "notes": "Complex courtship/rape narrative"},
+        {"type": "POSSESSES", "target": "concept:TABLET_OF_DESTINIES", "notes": "Controls fate"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ZEUS", "fidelity": 0.65, "sharedAspects": ["sky-storm", "executive-power", "authority"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:NO-ODIN", "fidelity": 0.45, "sharedAspects": ["cosmic-king", "wind", "wisdom"]}
+      ],
+
+      "contextualVariants": [
+        {
+          "context": "Benevolent (spring rains, fertility)",
+          "spectralShift": {"creation-destruction": 0.25, "order-chaos": 0.15},
+          "notes": "Life-giving aspect, agricultural blessing"
+        },
+        {
+          "context": "Wrathful (Flood narrative)",
+          "spectralShift": {"creation-destruction": 0.85, "order-chaos": 0.4},
+          "notes": "Decides to destroy humanity in Atrahasis"
+        }
+      ],
+
+      "correspondences": {
+        "element": "EL-AIR",
+        "planet": "7P-JUPITER",
+        "tarot": "TAMA-EMPEROR",
+        "number": 50,
+        "direction": "All directions (wind)"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Enlil and Ninlil", "Atrahasis", "Enuma Elish"],
+        "iconography": "Horned crown, often with Tablet of Destinies",
+        "cultCenters": ["Nippur (paramount)", "Assur (transferred)"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:ME-ENKI",
+      "@type": "Archetype",
+      "name": "Enki",
+      "aliases": ["Ea (Akkadian)", "Nudimmud"],
+      "epithets": ["Lord of the Earth/Waters", "Lord of Wisdom", "The Clever Prince", "Master of the Deep"],
+      "description": "God of wisdom, magic, fresh waters, crafts, and creation. The clever trickster-sage who solves problems through wit rather than force. Created humanity, saved Utnapishtim from the Flood by clever circumvention of Enlil's decree. Keeper of the me (divine powers).",
+      "gender": "masculine",
+      "domain": ["wisdom", "magic", "fresh water", "crafts", "creation", "cunning"],
+      "symbols": ["flowing water streams", "goat-fish", "turtle", "apsu (deep waters)"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.25,
+        "light-shadow": 0.35,
+        "active-receptive": 0.35,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.65,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.2
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:magician", "weight": 0.9, "aspects": ["wisdom", "cunning", "me-keeper"]},
+        {"primordial": "primordial:creator", "weight": 0.8, "aspects": ["humanity-maker", "craftsman"]},
+        {"primordial": "primordial:trickster", "weight": 0.65, "aspects": ["clever-circumventer", "loophole-finder"]},
+        {"primordial": "primordial:healer", "weight": 0.5, "aspects": ["purifier", "exorcist"]}
+      ],
+
+      "temporalOrientation": "present",
+
+      "shadowDynamics": {
+        "activationConditions": ["When cunning becomes deception", "When wisdom withholds rather than shares"],
+        "shadowManifestations": ["Manipulator", "Keeper of secrets (negative)", "Trickster without conscience"],
+        "integrationPath": "Wisdom in service of life; cleverness with ethics"
+      },
+
+      "relationships": [
+        {"type": "CHILD_OF", "target": "arch:ME-ANU"},
+        {"type": "SIBLING", "target": "arch:ME-ENLIL", "notes": "Often mediates Enlil's harshness"},
+        {"type": "PARENT", "target": "arch:ME-MARDUK", "notes": "Father of Marduk"},
+        {"type": "ALLY", "target": "arch:ME-INANNA", "notes": "Gives her the me (divine powers)"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HERMES", "fidelity": 0.7, "sharedAspects": ["cunning", "magic", "mediation"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-THOTH", "fidelity": 0.7, "sharedAspects": ["wisdom", "magic", "writing", "creation"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-PROMETHEUS", "fidelity": 0.55, "sharedAspects": ["humanity's helper", "defies higher gods"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-WATER",
+        "planet": "7P-MERCURY",
+        "tarot": ["TAMA-MAGICIAN", "TAMA-HERMIT"],
+        "chakra": "CH-VISHUDDHA",
+        "number": 40,
+        "direction": "South"
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["problem requiring wit", "humanity in danger", "magical knowledge needed"],
+        "typicalArc": "OBSERVER → CLEVER INTERVENER → SAVIOR THROUGH WIT",
+        "storyFunctions": ["problem-solver", "humanity's advocate", "divine hacker"],
+        "dramaticTension": "obedience to divine order vs. compassion for humanity"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Enki and Ninhursag", "Inanna and Enki", "Atrahasis", "Enuma Elish"],
+        "iconography": "Streams of water flowing from shoulders, often with goat-fish",
+        "cultCenters": ["Eridu (oldest, paramount)"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:ME-INANNA",
+      "@type": "Archetype",
+      "name": "Inanna",
+      "aliases": ["Ishtar (Akkadian)", "Astarte (Canaanite echo)"],
+      "epithets": ["Queen of Heaven", "Lady of the Me", "Lioness of Battle", "Morning and Evening Star"],
+      "description": "Goddess of love, war, fertility, and political power. The most complex and dynamic Mesopotamian deity. Descends to the underworld and returns. Acquires the me (divine powers) through cunning. Embodies paradox: life and death, love and war, morning and evening star.",
+      "gender": "feminine",
+      "domain": ["love", "war", "fertility", "political power", "Venus (planet)", "prostitution (sacred)", "storehouse"],
+      "symbols": ["eight-pointed star", "lion", "rosette", "reed bundle", "Venus"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.45,
+        "active-receptive": 0.25,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.75,
+        "voluntary-fated": 0.2
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:lover", "weight": 0.85, "aspects": ["sexuality", "passion", "sacred-marriage"]},
+        {"primordial": "primordial:warrior", "weight": 0.8, "aspects": ["battle-fury", "conquest"]},
+        {"primordial": "primordial:sovereign", "weight": 0.7, "aspects": ["political-power", "divine-kingship-grantor"]},
+        {"primordial": "primordial:trickster", "weight": 0.5, "aspects": ["cunning", "me-stealer"]},
+        {"primordial": "primordial:dying-rising-god", "weight": 0.6, "aspects": ["descent-return", "death-rebirth"]}
+      ],
+
+      "temporalOrientation": "cyclical",
+
+      "shadowDynamics": {
+        "activationConditions": ["When desire becomes destruction", "When power serves only self", "When love becomes possession"],
+        "shadowManifestations": ["Devouring lover", "Capricious destroyer", "Ereshkigal (shadow-sister)"],
+        "integrationPath": "Embrace all aspects without being consumed; passion with wisdom"
+      },
+
+      "relationships": [
+        {"type": "POLAR_OPPOSITE", "target": "arch:ME-ERESHKIGAL", "axis": "ascent-descent", "strength": 0.9, "notes": "Above/below, life/death twin-sisters"},
+        {"type": "CONSORT", "target": "arch:ME-DUMUZI", "notes": "Sacred marriage, later condemns him to underworld"},
+        {"type": "ALLY", "target": "arch:ME-ENKI", "notes": "Receives the me from him"},
+        {"type": "DESCENDANT", "target": "arch:ME-ANU", "notes": "Daughter (some traditions)"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-APHRODITE", "fidelity": 0.7, "sharedAspects": ["love", "beauty", "Venus-star"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ATHENA", "fidelity": 0.4, "sharedAspects": ["war-goddess", "strategic"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-HATHOR", "fidelity": 0.55, "sharedAspects": ["love", "sexuality", "war-aspect"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-SEKHMET", "fidelity": 0.45, "sharedAspects": ["war-fury", "lion-association"]}
+      ],
+
+      "contextualVariants": [
+        {
+          "context": "Descent to Underworld",
+          "spectralShift": {"ascent-descent": 0.9, "light-shadow": 0.7, "stasis-transformation": 0.9},
+          "notes": "Stripped of power, dies, resurrects"
+        },
+        {
+          "context": "Queen of Heaven (court goddess)",
+          "spectralShift": {"ascent-descent": 0.2, "order-chaos": 0.35},
+          "notes": "Sovereign aspect, grants kingship"
+        },
+        {
+          "context": "War goddess",
+          "spectralShift": {"creation-destruction": 0.75, "order-chaos": 0.7},
+          "notes": "Battle-fury, blood-drenched lioness"
+        }
+      ],
+
+      "correspondences": {
+        "element": "EL-FIRE",
+        "planet": "7P-VENUS",
+        "tarot": ["TAMA-EMPRESS", "TAMA-STRENGTH", "TAMA-STAR"],
+        "chakra": "CH-SVADHISTHANA",
+        "star": "Venus (Morning and Evening)",
+        "color": ["red", "gold", "lapis blue"],
+        "number": 15
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["desire", "conquest", "descent required", "power sought"],
+        "typicalArc": "DESIRE → ACQUISITION → DESCENT → DEATH → RESURRECTION → RETURN",
+        "storyFunctions": ["lover", "warrior", "descender", "returner"],
+        "dramaticTension": "Can one have both love and power? Can death be transcended?"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Descent of Inanna", "Inanna and Enki", "Inanna's Exaltation", "Epic of Gilgamesh"],
+        "iconography": "Eight-pointed star, lion, weapons and regalia",
+        "cultCenters": ["Uruk (paramount)", "Akkad", "Nineveh (as Ishtar)"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:ME-MARDUK",
+      "@type": "Archetype",
+      "name": "Marduk",
+      "aliases": ["Bel (Lord)", "Asarluhi"],
+      "epithets": ["King of the Gods", "Lord of Lords", "Creator of the World", "Son of the Sun"],
+      "description": "Chief god of Babylon, hero of the Enuma Elish. Young champion who defeats Tiamat (primordial chaos) and creates the world from her body. Absorbs powers of all other gods, becomes supreme. The heroic cosmocrator who orders chaos.",
+      "gender": "masculine",
+      "domain": ["creation", "magic", "justice", "compassion", "storms", "Babylon"],
+      "symbols": ["marru (spade)", "mushussu (dragon)", "bow and arrow", "net"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.2,
+        "active-receptive": 0.15,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.3,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.3
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:hero", "weight": 0.9, "aspects": ["chaos-slayer", "champion", "savior"]},
+        {"primordial": "primordial:creator", "weight": 0.85, "aspects": ["world-shaper", "humanity-maker"]},
+        {"primordial": "primordial:sovereign", "weight": 0.9, "aspects": ["king-of-gods", "cosmocrator"]},
+        {"primordial": "primordial:magician", "weight": 0.6, "aspects": ["spell-caster", "exorcist"]}
+      ],
+
+      "temporalOrientation": "present",
+
+      "shadowDynamics": {
+        "activationConditions": ["When order becomes totalitarian", "When heroism serves only power"],
+        "shadowManifestations": ["Tyrant", "Absorber of all difference", "Monopolizer"],
+        "integrationPath": "Order that preserves diversity; power that serves justice"
+      },
+
+      "relationships": [
+        {"type": "CHILD_OF", "target": "arch:ME-ENKI", "notes": "Son, inherits wisdom"},
+        {"type": "POLAR_OPPOSITE", "target": "arch:ME-TIAMAT", "axis": "order-chaos", "strength": 0.95, "notes": "Cosmos vs. chaos"},
+        {"type": "ANTAGONIST", "target": "arch:ME-TIAMAT", "narrativeRole": "Slays chaos to create world"},
+        {"type": "SUCCEEDS", "target": "arch:ME-ENLIL", "notes": "Assumes supremacy in Babylonian period"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ZEUS", "fidelity": 0.6, "sharedAspects": ["king-of-gods", "storm", "order"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:NO-THOR", "fidelity": 0.5, "sharedAspects": ["chaos-fighter", "storm", "champion"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-FIRE",
+        "planet": "7P-JUPITER",
+        "tarot": ["TAMA-CHARIOT", "TAMA-EMPEROR"],
+        "chakra": "CH-MANIPURA",
+        "color": ["gold", "blue"],
+        "number": 10
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["chaos threatens cosmos", "gods helpless", "champion needed"],
+        "typicalArc": "YOUNG GOD → CHAMPION → CHAOS-SLAYER → WORLD-CREATOR → KING",
+        "storyFunctions": ["hero", "creator", "orderer", "king"],
+        "dramaticTension": "Can chaos ever be truly defeated, or only ordered?"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Enuma Elish", "Marduk's Address to the Demons"],
+        "iconography": "Spade (marru), dragon (mushussu), royal regalia",
+        "cultCenters": ["Babylon (Esagila temple)"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:ME-TIAMAT",
+      "@type": "Archetype",
+      "name": "Tiamat",
+      "aliases": ["Tamtu"],
+      "epithets": ["The Shining One", "Mother of All", "Primordial Chaos"],
+      "description": "Primordial goddess of salt water and chaos. With Apsu (fresh water), parents the first gods. Later becomes monstrous chaos-dragon when younger gods threaten her peace. Slain by Marduk, her body becomes heaven and earth. The original Mother who becomes Monster.",
+      "gender": "feminine",
+      "domain": ["primordial chaos", "salt sea", "creation (primal)", "monsters"],
+      "symbols": ["sea serpent/dragon", "salt water", "chaos monsters"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.95,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.75,
+        "active-receptive": 0.55,
+        "individual-collective": 0.7,
+        "ascent-descent": 0.75,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.7
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.7, "aspects": ["primal-parent", "all-source"]},
+        {"primordial": "primordial:monster", "weight": 0.8, "aspects": ["chaos-dragon", "world-threat"]},
+        {"primordial": "primordial:destroyer", "weight": 0.6, "aspects": ["chaos-bringer", "monster-mother"]}
+      ],
+
+      "temporalOrientation": "past",
+
+      "shadowDynamics": {
+        "activationConditions": ["N/A - Tiamat represents primordial chaos before shadow/light distinction"],
+        "shadowManifestations": ["The chaos that order must constantly hold back"],
+        "integrationPath": "Cannot be integrated, only transformed—her body becomes the world"
+      },
+
+      "relationships": [
+        {"type": "POLAR_OPPOSITE", "target": "arch:ME-MARDUK", "axis": "order-chaos", "strength": 0.95},
+        {"type": "CONSORT", "target": "arch:ME-APSU", "notes": "Fresh and salt waters, primal pair"},
+        {"type": "PARENT", "target": "arch:ME-LAHMU-LAHAMU", "notes": "First divine generation"},
+        {"type": "PARENT", "target": "arch:ME-KINGU", "notes": "Creates and elevates as her champion"},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-APOPHIS", "fidelity": 0.7, "sharedAspects": ["chaos-serpent", "cosmic-threat", "primordial"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:NO-JORMUNGANDR", "fidelity": 0.6, "sharedAspects": ["world-serpent", "chaos"]}
+      ],
+
+      "contextualVariants": [
+        {
+          "context": "Primordial Mother",
+          "spectralShift": {"creation-destruction": 0.2, "order-chaos": 0.6},
+          "notes": "Before conflict, nurturing primal waters"
+        },
+        {
+          "context": "Chaos Dragon",
+          "spectralShift": {"creation-destruction": 0.8, "order-chaos": 0.98},
+          "notes": "Enraged, creates monster army, threatens cosmos"
+        }
+      ],
+
+      "correspondences": {
+        "element": "EL-WATER",
+        "planet": "7P-SATURN",
+        "tarot": "TAMA-MOON",
+        "color": ["deep blue", "black"],
+        "terrain": "Salt sea, primordial ocean"
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["origins", "chaos rising", "cosmic threat"],
+        "typicalArc": "MOTHER → DISTURBED → ENRAGED → MONSTER → DEFEATED → WORLD-BODY",
+        "storyFunctions": ["primal source", "chaos-antagonist", "world-material"],
+        "dramaticTension": "Mother becomes monster—is the origin evil?"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Enuma Elish"],
+        "iconography": "Sea serpent/dragon, sometimes multi-headed",
+        "cultCenters": ["None (anti-god, not worshipped)"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:ME-ERESHKIGAL",
+      "@type": "Archetype",
+      "name": "Ereshkigal",
+      "aliases": ["Allatu (Akkadian)", "Irkalla (metonym for realm)"],
+      "epithets": ["Queen of the Underworld", "Lady of the Great Place", "Mistress of the Great Below"],
+      "description": "Goddess and absolute ruler of the underworld (Kur/Irkalla). Sister and shadow-twin of Inanna. Alone among the dead, mourning in labor, furious and absolute in her realm. Even gods who enter her domain cannot leave. The inescapable Dread Queen.",
+      "gender": "feminine",
+      "domain": ["underworld", "death", "judgment of dead", "absolute law"],
+      "symbols": ["throne", "underworld gate", "tablet and stylus (records dead)"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.7,
+        "light-shadow": 0.9,
+        "active-receptive": 0.55,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.95,
+        "stasis-transformation": 0.3,
+        "voluntary-fated": 0.9
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:crone", "weight": 0.8, "aspects": ["death-queen", "underworld-ruler"]},
+        {"primordial": "primordial:sovereign", "weight": 0.85, "aspects": ["absolute-ruler", "law-of-dead"]},
+        {"primordial": "primordial:destroyer", "weight": 0.6, "aspects": ["death-bringer", "non-return"]}
+      ],
+
+      "temporalOrientation": "eternal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When death-ruling becomes cruelty", "When isolation becomes bitterness"],
+        "shadowManifestations": ["Wrathful isolation", "Envy of the living", "Consuming darkness"],
+        "integrationPath": "Death as natural order; sovereignty with connection"
+      },
+
+      "relationships": [
+        {"type": "POLAR_OPPOSITE", "target": "arch:ME-INANNA", "axis": "ascent-descent", "strength": 0.9, "notes": "Twin sisters, above/below"},
+        {"type": "SIBLING", "target": "arch:ME-INANNA", "notes": "Shadow-sister relationship"},
+        {"type": "CONSORT", "target": "arch:ME-NERGAL", "notes": "Forced marriage, becomes love"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-PERSEPHONE", "fidelity": 0.6, "sharedAspects": ["underworld-queen", "dread"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-NEPHTHYS", "fidelity": 0.5, "sharedAspects": ["shadow-sister", "underworld-association"]}
+      ],
+
+      "contextualVariants": [
+        {
+          "context": "Descent of Inanna",
+          "spectralShift": {"order-chaos": 0.25, "creation-destruction": 0.8},
+          "notes": "Wrathful, kills Inanna, demands substitute"
+        },
+        {
+          "context": "Nergal and Ereshkigal",
+          "spectralShift": {"active-receptive": 0.45, "stasis-transformation": 0.5},
+          "notes": "Love story aspect, transformation through relationship"
+        }
+      ],
+
+      "correspondences": {
+        "element": "EL-EARTH",
+        "planet": "7P-SATURN",
+        "tarot": "TAMA-DEATH",
+        "chakra": "CH-MULADHARA",
+        "color": "black",
+        "direction": "Below"
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["death", "underworld journey", "inescapable fate"],
+        "typicalArc": "RULER → CONFRONTED → VICTOR → (possibly) SOFTENED",
+        "storyFunctions": ["threshold guardian (absolute)", "death-personified", "shadow-twin"],
+        "dramaticTension": "Can death's grip ever be loosened?"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Descent of Inanna", "Nergal and Ereshkigal"],
+        "iconography": "Enthroned queen of darkness",
+        "cultCenters": ["Kutha (via Nergal)", "No direct cult (underworld ruler)"],
+        "confidence": 0.9
+      }
+    },
+
+    {
+      "@id": "arch:ME-DUMUZI",
+      "@type": "Archetype",
+      "name": "Dumuzi",
+      "aliases": ["Tammuz (Akkadian)", "Damu"],
+      "epithets": ["The Shepherd", "Faithful Son", "Lord of the Date Clusters"],
+      "description": "God of shepherds, vegetation, and the dying-and-rising cycle. Consort of Inanna through sacred marriage. When Inanna returns from underworld, she condemns him as her substitute—he spends half the year below. The shepherd-king who dies and returns with the seasons.",
+      "gender": "masculine",
+      "domain": ["shepherds", "vegetation", "fertility", "death-rebirth", "sacred marriage"],
+      "symbols": ["shepherd's crook", "sheep", "date palm", "vegetation"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.5,
+        "active-receptive": 0.6,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.6,
+        "stasis-transformation": 0.75,
+        "voluntary-fated": 0.85
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:dying-rising-god", "weight": 0.95, "aspects": ["vegetation-death-rebirth", "seasonal-cycle"]},
+        {"primordial": "primordial:lover", "weight": 0.7, "aspects": ["sacred-spouse", "beloved"]},
+        {"primordial": "primordial:divine-child", "weight": 0.5, "aspects": ["youthful", "sacrificed-son"]}
+      ],
+
+      "temporalOrientation": "cyclical",
+
+      "shadowDynamics": {
+        "activationConditions": ["When sacrifice becomes victimhood", "When cycles become entrapment"],
+        "shadowManifestations": ["Eternal victim", "Passive sacrifice", "Mourned but not transformed"],
+        "integrationPath": "Embrace the cycle; death as necessary transformation"
+      },
+
+      "relationships": [
+        {"type": "CONSORT", "target": "arch:ME-INANNA", "notes": "Sacred marriage, then condemned by her"},
+        {"type": "COMPLEMENT", "target": "arch:ME-GESHTINANNA", "dynamic": "Sister, shares his underworld time"},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-OSIRIS", "fidelity": 0.75, "sharedAspects": ["dying-rising", "vegetation", "underworld"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ADONIS", "fidelity": 0.8, "sharedAspects": ["beloved-of-goddess", "dies-rises", "vegetation"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-DIONYSUS", "fidelity": 0.6, "sharedAspects": ["vegetation", "death-rebirth"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-EARTH",
+        "planet": "7P-MOON",
+        "tarot": "TAMA-HANGED-MAN",
+        "chakra": "CH-SVADHISTHANA",
+        "season": "Spring/Summer (alive), Fall/Winter (below)",
+        "vegetation": "Grain, date palm"
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["sacred marriage", "betrayal", "seasonal death"],
+        "typicalArc": "BELOVED → CONDEMNED → DESCENT → MOURNED → RETURN",
+        "storyFunctions": ["dying god", "scapegoat", "seasonal cycle embodied"],
+        "dramaticTension": "Love that condemns; death that enables life"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Descent of Inanna", "Dumuzi's Dream", "Sacred Marriage texts"],
+        "iconography": "Young shepherd with crook",
+        "cultCenters": ["Bad-tibira", "Uruk"],
+        "confidence": 0.9
+      }
+    },
+
+    {
+      "@id": "arch:ME-NERGAL",
+      "@type": "Archetype",
+      "name": "Nergal",
+      "aliases": ["Erra", "Meslamtaea"],
+      "epithets": ["Lord of the Underworld", "King of the Setting Sun", "Lord of Plague", "Raging King"],
+      "description": "God of plague, war, death, and the underworld (co-ruler with Ereshkigal). Originally solar (setting/destructive sun), became underworld deity. Fierce, hot-tempered, dangerous. His descent to underworld and forced marriage to Ereshkigal is a violent love story.",
+      "gender": "masculine",
+      "domain": ["plague", "war", "death", "underworld", "destructive sun", "violence"],
+      "symbols": ["lion-headed mace", "scimitar", "lion", "setting sun"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.85,
+        "light-shadow": 0.65,
+        "active-receptive": 0.15,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.75,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.35
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:destroyer", "weight": 0.85, "aspects": ["plague-lord", "war-god", "death-bringer"]},
+        {"primordial": "primordial:warrior", "weight": 0.8, "aspects": ["fierce-combat", "uncontrollable-rage"]},
+        {"primordial": "primordial:sovereign", "weight": 0.6, "aspects": ["underworld-king"]}
+      ],
+
+      "temporalOrientation": "present",
+
+      "shadowDynamics": {
+        "activationConditions": ["When destruction serves only itself", "When rage has no limit"],
+        "shadowManifestations": ["Berserker", "Plague without purpose", "Death-dealer"],
+        "integrationPath": "Destruction in service of cosmic order; passion channeled"
+      },
+
+      "relationships": [
+        {"type": "CONSORT", "target": "arch:ME-ERESHKIGAL", "notes": "Violent courtship becomes rule"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ARES", "fidelity": 0.7, "sharedAspects": ["war", "violence", "rage"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HADES", "fidelity": 0.5, "sharedAspects": ["underworld-king"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-SET", "fidelity": 0.5, "sharedAspects": ["violence", "chaos-association"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-FIRE",
+        "planet": "7P-MARS",
+        "tarot": "TAMA-TOWER",
+        "chakra": "CH-MANIPURA",
+        "color": ["red", "black"],
+        "time": "Midday heat, setting sun"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Nergal and Ereshkigal", "Erra Epic"],
+        "iconography": "Lion-headed mace, fierce warrior",
+        "cultCenters": ["Kutha"],
+        "confidence": 0.9
+      }
+    },
+
+    {
+      "@id": "arch:ME-SHAMASH",
+      "@type": "Archetype",
+      "name": "Shamash",
+      "aliases": ["Utu (Sumerian)", "Shemesh"],
+      "epithets": ["The Sun", "Judge of Heaven and Earth", "Lord of Justice", "He Who Sees All"],
+      "description": "God of the sun and justice. Travels across sky by day, through underworld by night—sees all, judges all. Patron of law, truth, and oracles. Gives the law code to Hammurabi. The all-seeing eye of cosmic justice.",
+      "gender": "masculine",
+      "domain": ["sun", "justice", "law", "truth", "oracles", "travelers"],
+      "symbols": ["sun disk", "saw (cutting through lies)", "rays", "rod and ring"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.1,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.1,
+        "active-receptive": 0.25,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.45
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.75, "aspects": ["cosmic-judge", "law-giver"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.65, "aspects": ["all-seeing", "oracle"]},
+        {"primordial": "primordial:hero", "weight": 0.45, "aspects": ["underworld-traverser", "protector-of-travelers"]}
+      ],
+
+      "temporalOrientation": "cyclical",
+
+      "shadowDynamics": {
+        "activationConditions": ["When justice becomes merciless", "When light becomes blinding/scorching"],
+        "shadowManifestations": ["Harsh judge", "Scorching destroyer", "Pitiless light"],
+        "integrationPath": "Justice with mercy; light that illuminates rather than burns"
+      },
+
+      "relationships": [
+        {"type": "SIBLING", "target": "arch:ME-INANNA", "notes": "Brother (some traditions)"},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-RA", "fidelity": 0.75, "sharedAspects": ["sun", "cosmic-order", "daily-journey"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-APOLLO", "fidelity": 0.6, "sharedAspects": ["sun", "truth", "oracle"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HELIOS", "fidelity": 0.8, "sharedAspects": ["sun-god", "all-seeing"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-FIRE",
+        "planet": "7P-SUN",
+        "tarot": ["TAMA-SUN", "TAMA-JUSTICE"],
+        "chakra": "CH-MANIPURA",
+        "color": "gold",
+        "day": "Sunday"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Shamash Hymn", "Code of Hammurabi stele"],
+        "iconography": "Sun disk, rays, holding rod and ring (symbols of justice)",
+        "cultCenters": ["Sippar", "Larsa"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:ME-SIN",
+      "@type": "Archetype",
+      "name": "Sin",
+      "aliases": ["Nanna (Sumerian)", "Su'en"],
+      "epithets": ["Lord of Wisdom", "He Whose Heart Is Hidden", "Father of the Gods", "Illuminator of Darkness"],
+      "description": "God of the moon, wisdom, and time-keeping. The moon counts months, regulates calendars, illuminates night. Father of Shamash and Inanna/Ishtar. Associated with cattle (crescent = horns). The quiet wisdom that rules the night.",
+      "gender": "masculine",
+      "domain": ["moon", "wisdom", "time-keeping", "cattle", "night"],
+      "symbols": ["crescent moon", "bull/cow horns", "lapis lazuli"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.2,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.55,
+        "active-receptive": 0.65,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.55
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:wise-elder", "weight": 0.75, "aspects": ["time-keeper", "calendar-lord"]},
+        {"primordial": "primordial:great-father", "weight": 0.65, "aspects": ["father-of-sun-and-star"]}
+      ],
+
+      "temporalOrientation": "cyclical",
+
+      "shadowDynamics": {
+        "activationConditions": ["When wisdom becomes cold", "When hidden knowledge becomes secrecy"],
+        "shadowManifestations": ["Cold indifference", "Hidden manipulation", "Lunacy"],
+        "integrationPath": "Wisdom that illuminates darkness without cold distance"
+      },
+
+      "relationships": [
+        {"type": "PARENT", "target": "arch:ME-SHAMASH", "notes": "Father of sun god"},
+        {"type": "PARENT", "target": "arch:ME-INANNA", "notes": "Father of Inanna (some traditions)"},
+        {"type": "CONSORT", "target": "arch:ME-NINGAL", "notes": "Moon and reed goddess"},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-THOTH", "fidelity": 0.55, "sharedAspects": ["moon", "wisdom", "time"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-SELENE", "fidelity": 0.5, "sharedAspects": ["moon"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-WATER",
+        "planet": "7P-MOON",
+        "tarot": "TAMA-HIGH-PRIESTESS",
+        "chakra": "CH-AJNA",
+        "color": ["silver", "lapis blue"],
+        "day": "Monday",
+        "metal": "Silver"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Nanna-Sin hymns", "Journey to Nippur"],
+        "iconography": "Crescent moon, often enthroned with flowing beard",
+        "cultCenters": ["Ur (paramount)", "Harran"],
+        "confidence": 0.9
+      }
+    },
+
+    {
+      "@id": "arch:ME-GILGAMESH",
+      "@type": "Archetype",
+      "name": "Gilgamesh",
+      "aliases": ["Bilgamesh (Sumerian)"],
+      "epithets": ["King of Uruk", "He Who Saw the Deep", "Two-Thirds Divine"],
+      "description": "Legendary king of Uruk, protagonist of humanity's oldest epic. Two-thirds god, one-third human. Befriends Enkidu (wild man), slays Humbaba, rejects Ishtar, loses Enkidu to death, journeys to find immortality, fails, and returns with wisdom instead. The archetypal hero's journey.",
+      "gender": "masculine",
+      "domain": ["kingship", "heroism", "mortality", "friendship", "wisdom-through-loss"],
+      "symbols": ["lion", "bull", "cedar", "plant of immortality (lost)"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.35,
+        "active-receptive": 0.2,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.45,
+        "stasis-transformation": 0.7,
+        "voluntary-fated": 0.45
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:hero", "weight": 0.95, "aspects": ["quester", "monster-slayer", "mortality-confronter"]},
+        {"primordial": "primordial:sovereign", "weight": 0.65, "aspects": ["king", "city-builder"]},
+        {"primordial": "primordial:seeker", "weight": 0.7, "aspects": ["immortality-quester", "wisdom-seeker"]}
+      ],
+
+      "temporalOrientation": "future",
+
+      "shadowDynamics": {
+        "activationConditions": ["When heroism serves ego", "When mortality-denial becomes obsession"],
+        "shadowManifestations": ["Tyrant (early Gilgamesh)", "Death-denier", "Glory-seeker"],
+        "integrationPath": "Accept mortality; find immortality through legacy and wisdom"
+      },
+
+      "relationships": [
+        {"type": "COMPLEMENT", "target": "arch:ME-ENKIDU", "dynamic": "Civilization-Wildness, transformed through friendship", "strength": 0.95},
+        {"type": "ANTAGONIST", "target": "arch:ME-INANNA", "narrativeRole": "Rejects her advances, triggers Bull of Heaven"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HERACLES", "fidelity": 0.75, "sharedAspects": ["labors", "monster-slaying", "descent"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ODYSSEUS", "fidelity": 0.6, "sharedAspects": ["journey", "wisdom-return"]}
+      ],
+
+      "contextualVariants": [
+        {
+          "context": "Early Gilgamesh (tyrant)",
+          "spectralShift": {"order-chaos": 0.5, "individual-collective": 0.15},
+          "notes": "Oppresses Uruk, needs civilizing"
+        },
+        {
+          "context": "Heroic Gilgamesh (with Enkidu)",
+          "spectralShift": {"creation-destruction": 0.55, "individual-collective": 0.4},
+          "notes": "Monster-slaying companion adventures"
+        },
+        {
+          "context": "Grieving/Questing Gilgamesh",
+          "spectralShift": {"stasis-transformation": 0.85, "light-shadow": 0.5},
+          "notes": "Seeking immortality after Enkidu's death"
+        },
+        {
+          "context": "Wise Gilgamesh (return)",
+          "spectralShift": {"order-chaos": 0.25, "stasis-transformation": 0.5},
+          "notes": "Returns with wisdom, accepts mortality, values city"
+        }
+      ],
+
+      "correspondences": {
+        "element": "EL-FIRE",
+        "planet": "7P-SUN",
+        "tarot": ["TAMA-CHARIOT", "TAMA-HERMIT", "TAMA-DEATH"],
+        "chakra": "CH-MANIPURA"
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["heroic pride", "friendship", "loss", "mortality-fear"],
+        "typicalArc": "TYRANT → BEFRIENDED → HERO → GRIEVING → QUESTING → FAILED → WISE",
+        "storyFunctions": ["hero", "seeker", "griever", "returner-with-wisdom"],
+        "dramaticTension": "Can a hero accept mortality?"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Epic of Gilgamesh", "Sumerian Gilgamesh poems"],
+        "iconography": "Bearded king wrestling lions/bulls",
+        "cultCenters": ["Uruk"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:ME-ENKIDU",
+      "@type": "Archetype",
+      "name": "Enkidu",
+      "aliases": [],
+      "epithets": ["The Wild Man", "Created One", "Friend of Gilgamesh"],
+      "description": "Created by the gods to be Gilgamesh's equal and civilizing companion. Born wild, raised by animals, civilized by the sacred prostitute Shamhat. Becomes Gilgamesh's beloved friend and dies young after offending the gods. The Wild that is tamed and lost.",
+      "gender": "masculine",
+      "domain": ["wildness", "friendship", "civilization (acquired)", "nature"],
+      "symbols": ["animals", "wilderness", "transformation"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.4,
+        "active-receptive": 0.4,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.7,
+        "voluntary-fated": 0.75
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:wild-man", "weight": 0.85, "aspects": ["nature-child", "uncivilized", "pure"]},
+        {"primordial": "primordial:hero", "weight": 0.6, "aspects": ["companion-hero", "monster-slayer"]},
+        {"primordial": "primordial:outcast", "weight": 0.5, "aspects": ["created-different", "between-worlds"]},
+        {"primordial": "primordial:twin", "weight": 0.7, "aspects": ["equal-opposite", "completing-other"]}
+      ],
+
+      "temporalOrientation": "present",
+
+      "shadowDynamics": {
+        "activationConditions": ["When wildness cannot be integrated", "When civilization destroys essence"],
+        "shadowManifestations": ["Lost wildness", "Regression to beast", "Death through civilization"],
+        "integrationPath": "Balance wild and civilized; retain essence through transformation"
+      },
+
+      "relationships": [
+        {"type": "COMPLEMENT", "target": "arch:ME-GILGAMESH", "dynamic": "Wild-Civilized completing pair", "strength": 0.95},
+        {"type": "TWIN", "target": "arch:ME-GILGAMESH", "notes": "Created as his equal"},
+        {"type": "EVOLUTION", "target": "arch:ME-CIVILIZED-MAN", "trigger": "Seduction by Shamhat", "direction": "forward"},
+        {"type": "CULTURAL_ECHO", "target": "primordial:wild-man", "fidelity": 0.9, "sharedAspects": ["nature-dwelling", "uncivilized"]}
+      ],
+
+      "contextualVariants": [
+        {
+          "context": "Wild Enkidu",
+          "spectralShift": {"order-chaos": 0.75, "ascent-descent": 0.7, "individual-collective": 0.2},
+          "notes": "Lives with animals, knows no civilization"
+        },
+        {
+          "context": "Civilized Enkidu",
+          "spectralShift": {"order-chaos": 0.35, "ascent-descent": 0.45},
+          "notes": "After Shamhat, can no longer live with animals"
+        },
+        {
+          "context": "Dying Enkidu",
+          "spectralShift": {"stasis-transformation": 0.9, "voluntary-fated": 0.95},
+          "notes": "Cursed by gods, faces mortality"
+        }
+      ],
+
+      "correspondences": {
+        "element": "EL-EARTH",
+        "planet": "7P-MOON",
+        "tarot": ["TAMA-FOOL", "TAMA-DEATH"],
+        "chakra": "CH-MULADHARA"
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["need for balance", "civilization's cost", "friendship"],
+        "typicalArc": "WILD → CIVILIZED → COMPANION → HERO → CURSED → DYING → MOURNED",
+        "storyFunctions": ["shadow-brother", "civilizing mirror", "mortality-reminder"],
+        "dramaticTension": "Does civilization kill the wild? Is the transformation worth the loss?"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Epic of Gilgamesh"],
+        "iconography": "Hairy wild man, often with animals",
+        "cultCenters": ["None (literary figure)"],
+        "confidence": 0.9
+      }
+    }
+  ],
+
+  "systemRelationships": [
+    {
+      "@type": "SystemPattern",
+      "pattern": "Cosmic Hierarchy",
+      "participants": ["arch:ME-ANU", "arch:ME-ENLIL", "arch:ME-ENKI"],
+      "dynamic": "Sky (decree) → Air/Earth (execution) → Waters (wisdom/creation). Tripartite cosmic authority.",
+      "narrativeFunction": "Divine council structure; balance of transcendence, power, and wisdom"
+    },
+    {
+      "@type": "SystemPattern",
+      "pattern": "Descent and Return",
+      "participants": ["arch:ME-INANNA", "arch:ME-ERESHKIGAL", "arch:ME-DUMUZI"],
+      "dynamic": "Above-below polarity; death-resurrection cycle; sacred marriage consequences",
+      "narrativeFunction": "Central Mesopotamian mystery—death as transformation, not ending"
+    },
+    {
+      "@type": "SystemPattern",
+      "pattern": "Chaos-Order Combat",
+      "participants": ["arch:ME-MARDUK", "arch:ME-TIAMAT"],
+      "dynamic": "Young champion defeats primordial chaos, creates cosmos from chaos-body",
+      "narrativeFunction": "Cosmogonic myth; origin of order through heroic combat"
+    },
+    {
+      "@type": "SystemPattern",
+      "pattern": "Hero's Journey",
+      "participants": ["arch:ME-GILGAMESH", "arch:ME-ENKIDU"],
+      "dynamic": "Wild and civilized complete each other; loss teaches mortality; wisdom through failure",
+      "narrativeFunction": "Archetypal human journey—confronting death, finding meaning"
+    }
+  ],
+
+  "metadata": {
+    "version": "1.0",
+    "created": "2025-01-18",
+    "schema": "ACP-ORAS-2.0",
+    "coverage": "Major Mesopotamian deities and heroes (13 figures)",
+    "expansion_candidates": ["Nabu (writing)", "Ninurta (war/agriculture)", "Ningal", "Kingu", "Apsu", "Lahmu-Lahamu", "Anshar-Kishar", "Nisaba", "Gula (healing)", "Adad (storm)"]
+  }
+}

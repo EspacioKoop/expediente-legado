@@ -1,0 +1,794 @@
+{
+  "@context": "../../schema/ACP_CONTEXT.jsonld",
+  "@id": "pantheon:incan",
+  "@type": "Pantheon",
+  "name": "Incan & Andean Pantheon",
+  "tradition": "Incan/Pre-Columbian Andean",
+  "description": "The divine beings of the Inca Empire and broader Andean traditions, centered on Inti (Sun) worship, the cosmic significance of Viracocha as creator, and the animate landscape of huacas (sacred places). The Sapa Inca ruled as Son of the Sun, mediating between cosmic and human realms. Andean cosmology emphasizes reciprocity (ayni), complementary duality (yanantin), and the three-world structure of Hanan Pacha (upper world), Kay Pacha (this world), and Ukhu Pacha (inner/lower world).",
+  "canonicalSources": [
+    "Spanish Colonial Chronicles (Garcilaso de la Vega, Cieza de León, Guaman Poma)",
+    "Huarochirí Manuscript (c. 1598)",
+    "Archaeological Evidence (Machu Picchu, Coricancha, Nazca)",
+    "Oral Traditions of Quechua and Aymara Peoples"
+  ],
+  "systemPatterns": [
+    {
+      "name": "Viracocha Creation",
+      "description": "Viracocha emerges from Lake Titicaca, creates sun, moon, and stars, then fashions humanity from stone, breathing life into them. After teaching civilization, he walks across the water westward, promising to return.",
+      "archetypes": ["incan:viracocha", "incan:inti", "incan:mama-quilla"]
+    },
+    {
+      "name": "Inti and the Sapa Inca",
+      "description": "The Sun God Inti is father to the Inca dynasty. The Sapa Inca rules as Son of the Sun, performing rituals at Inti Raymi to ensure cosmic order and agricultural abundance.",
+      "archetypes": ["incan:inti", "incan:mama-ocllo", "incan:manco-capac"]
+    },
+    {
+      "name": "Pachamama and Reciprocity",
+      "description": "Pachamama as living Earth requires offerings and respect in exchange for fertility and sustenance. The principle of ayni (reciprocity) governs all relationships—human, divine, and ecological.",
+      "archetypes": ["incan:pachamama", "incan:mama-cocha", "incan:illapa"]
+    },
+    {
+      "name": "Three Worlds Cosmology",
+      "description": "The cosmos divided into Hanan Pacha (celestial realm of gods), Kay Pacha (earthly realm of humans), and Ukhu Pacha (inner world of ancestors and origins). The condor, puma, and serpent symbolize these realms respectively.",
+      "archetypes": ["incan:viracocha", "incan:supay", "incan:pachamama"]
+    }
+  ],
+  "entries": [
+    {
+      "@id": "incan:viracocha",
+      "@type": "CulturalArchetype",
+      "name": "Viracocha",
+      "culture": "Incan",
+      "domain": ["creation", "civilization", "cosmic order", "teaching"],
+      "description": "The supreme creator deity who emerged from the waters of Lake Titicaca, created the cosmos, fashioned humanity from stone, and taught the arts of civilization before walking westward across the sea. His departure with promise of return made the Inca vulnerable to identifying Spanish conquistadors with his prophecy.",
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.10,
+        "light-shadow": 0.15,
+        "active-receptive": 0.25,
+        "individual-collective": 0.70,
+        "ascent-descent": 0.10,
+        "stasis-transformation": 0.40,
+        "voluntary-fated": 0.20
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.95, "aspects": ["world-maker", "culture-bringer"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.70, "aspects": ["teacher", "lawgiver"]},
+        {"primordial": "primordial:great-father", "weight": 0.55, "aspects": ["ancestor-of-gods", "patriarch"]}
+      ],
+      "relationships": [
+        {"type": "CULTURAL_ECHO", "target": "mesopotamian:enki", "fidelity": 0.65, "notes": "Creator who teaches civilization"},
+        {"type": "CULTURAL_ECHO", "target": "mesoamerican:quetzalcoatl", "fidelity": 0.75, "notes": "Civilizing creator who departs westward"},
+        {"type": "CONTAINS", "target": "incan:inti", "notes": "Created the sun"},
+        {"type": "CONTAINS", "target": "incan:mama-quilla", "notes": "Created the moon"}
+      ],
+      "contextualVariants": [
+        {
+          "context": "Coastal Traditions (Pachacamac)",
+          "spectralShift": {"ascent-descent": 0.30, "light-shadow": 0.25},
+          "notes": "Merged with Pachacamac as earth-shaker and oracle deity"
+        },
+        {
+          "context": "Return Prophecy",
+          "spectralShift": {"voluntary-fated": 0.75, "stasis-transformation": 0.70},
+          "notes": "The departed god whose return was prophesied"
+        }
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When cosmic order becomes rigidity", "When departure abandons creation"],
+        "shadowManifestations": ["The absent god", "Cold perfection without presence"],
+        "integrationPath": "Recognizing that true creation includes ongoing relationship, not just initial act"
+      },
+      "correspondences": {
+        "direction": "west",
+        "element": "water/foam",
+        "symbols": ["staff", "sun-disc", "tears/rain"],
+        "sacredSites": ["Lake Titicaca", "Tiwanaku"]
+      }
+    },
+    {
+      "@id": "incan:inti",
+      "@type": "CulturalArchetype",
+      "name": "Inti",
+      "culture": "Incan",
+      "domain": ["sun", "kingship", "gold", "agriculture", "cosmic order"],
+      "description": "The Sun God and divine father of the Inca dynasty. Inti was the patron deity of the empire, worshipped at the magnificent Coricancha temple in Cusco. The Sapa Inca ruled as his son, and gold was considered his sweat or tears. Inti Raymi, the Festival of the Sun at winter solstice, was the most important celebration.",
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.25,
+        "light-shadow": 0.05,
+        "active-receptive": 0.20,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.05,
+        "stasis-transformation": 0.30,
+        "voluntary-fated": 0.35
+      },
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.95, "aspects": ["divine-king", "cosmic-ruler"]},
+        {"primordial": "primordial:great-father", "weight": 0.80, "aspects": ["dynasty-founder", "provider"]},
+        {"primordial": "primordial:creator", "weight": 0.50, "aspects": ["life-giver", "growth-enabler"]}
+      ],
+      "relationships": [
+        {"type": "POLAR_OPPOSITE", "target": "incan:mama-quilla", "axis": "light-shadow", "notes": "Sun and Moon as complementary pair"},
+        {"type": "COMPLEMENT", "target": "incan:mama-quilla", "notes": "Husband and wife, day and night"},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-RA", "fidelity": 0.80, "notes": "Sun god as divine father of kings"},
+        {"type": "CULTURAL_ECHO", "target": "arch:IN-SURYA", "fidelity": 0.70, "notes": "Solar deity of cosmic order"},
+        {"type": "CONTAINED_BY", "target": "incan:viracocha", "notes": "Created by Viracocha"},
+        {"type": "CONTAINS", "target": "incan:manco-capac", "notes": "Father of first Inca"}
+      ],
+      "contextualVariants": [
+        {
+          "context": "Inti Raymi (Winter Solstice)",
+          "spectralShift": {"stasis-transformation": 0.55, "voluntary-fated": 0.60},
+          "notes": "The returning sun being ritually strengthened"
+        },
+        {
+          "context": "Imperial Conquest",
+          "spectralShift": {"active-receptive": 0.10, "order-chaos": 0.10},
+          "notes": "Justification for Inca expansion as spreading divine order"
+        }
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When light becomes blinding authority", "When gold becomes greed"],
+        "shadowManifestations": ["Tyrannical divine right", "Scorching destruction"],
+        "integrationPath": "Balancing radiance with warmth, authority with nurturing"
+      },
+      "correspondences": {
+        "metal": "gold",
+        "direction": "east",
+        "animal": "condor",
+        "color": "gold/yellow",
+        "symbols": ["sun-disc", "golden mask", "rays"],
+        "sacredSites": ["Coricancha", "Machu Picchu"]
+      }
+    },
+    {
+      "@id": "incan:mama-quilla",
+      "@type": "CulturalArchetype",
+      "name": "Mama Quilla",
+      "culture": "Incan",
+      "domain": ["moon", "time", "calendars", "femininity", "marriage"],
+      "description": "The Moon Goddess, wife and sister of Inti, and mother of the Inca people. Mama Quilla governed the calendar, menstrual cycles, and the passage of time. Silver was her metal. Lunar eclipses were believed to be attacks by celestial jaguars or serpents, prompting protective rituals.",
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.60,
+        "active-receptive": 0.70,
+        "individual-collective": 0.65,
+        "ascent-descent": 0.25,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.55
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.85, "aspects": ["celestial-mother", "time-keeper"]},
+        {"primordial": "primordial:magician", "weight": 0.55, "aspects": ["calendar-knowledge", "cycle-wisdom"]}
+      ],
+      "relationships": [
+        {"type": "POLAR_OPPOSITE", "target": "incan:inti", "axis": "light-shadow", "notes": "Moon and Sun as complementary opposites"},
+        {"type": "COMPLEMENT", "target": "incan:inti", "notes": "Wife and consort"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-SELENE", "fidelity": 0.65, "notes": "Moon goddess"},
+        {"type": "CULTURAL_ECHO", "target": "mesopotamian:nanna", "fidelity": 0.60, "notes": "Lunar deity governing time"},
+        {"type": "MIRRORS", "target": "incan:pachamama", "notes": "Celestial feminine mirroring earthly feminine"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When cycles become rigid fate", "When reflection becomes passivity"],
+        "shadowManifestations": ["Cold indifference", "Lunacy", "Overwhelming darkness"],
+        "integrationPath": "Embracing change within cycles, active receptivity"
+      },
+      "correspondences": {
+        "metal": "silver",
+        "direction": "west",
+        "color": "silver/white",
+        "symbols": ["crescent moon", "silver disc"],
+        "sacredSites": ["Coricancha (silver chamber)"]
+      }
+    },
+    {
+      "@id": "incan:pachamama",
+      "@type": "CulturalArchetype",
+      "name": "Pachamama",
+      "culture": "Incan/Pan-Andean",
+      "domain": ["earth", "fertility", "agriculture", "nature", "reciprocity"],
+      "description": "The Earth Mother, a living goddess embodying the land itself. Pachamama is not merely personified earth but the animate, sacred landscape requiring respect, offerings, and reciprocal relationship. She provides sustenance but can also cause earthquakes when disrespected. Central to Andean ayni (reciprocity) ethics.",
+      "spectralCoordinates": {
+        "order-chaos": 0.40,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.50,
+        "active-receptive": 0.75,
+        "individual-collective": 0.85,
+        "ascent-descent": 0.85,
+        "stasis-transformation": 0.50,
+        "voluntary-fated": 0.60
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.95, "aspects": ["earth-mother", "nurturer", "provider"]},
+        {"primordial": "primordial:preserver", "weight": 0.70, "aspects": ["sustainer", "fertility"]}
+      ],
+      "relationships": [
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-GAIA", "fidelity": 0.75, "notes": "Primordial earth mother"},
+        {"type": "CULTURAL_ECHO", "target": "arch:IN-PRITHVI", "fidelity": 0.70, "notes": "Earth goddess"},
+        {"type": "CULTURAL_ECHO", "target": "mesoamerican:tlaltecuhtli", "fidelity": 0.65, "notes": "Living earth requiring sacrifice"},
+        {"type": "COMPLEMENT", "target": "incan:inti", "notes": "Earth receiving sun's light for growth"},
+        {"type": "COMPLEMENT", "target": "incan:illapa", "notes": "Earth receiving rain for fertility"},
+        {"type": "TENSION", "target": "incan:mama-cocha", "notes": "Land and sea in productive tension"}
+      ],
+      "contextualVariants": [
+        {
+          "context": "Agricultural Rituals",
+          "spectralShift": {"creation-destruction": 0.30, "active-receptive": 0.85},
+          "notes": "Benevolent provider receiving offerings"
+        },
+        {
+          "context": "Earthquakes",
+          "spectralShift": {"creation-destruction": 0.70, "order-chaos": 0.65},
+          "notes": "Wrathful earth shaking when disrespected"
+        },
+        {
+          "context": "Contemporary Environmentalism",
+          "spectralShift": {"individual-collective": 0.95, "voluntary-fated": 0.80},
+          "notes": "Modern ecological symbol of earth's rights"
+        }
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When earth is exploited without reciprocity", "When abundance becomes entitlement"],
+        "shadowManifestations": ["Devouring mother", "Earthquakes", "Famine"],
+        "integrationPath": "Maintaining reciprocal relationship, giving back what is taken"
+      },
+      "correspondences": {
+        "element": "earth",
+        "direction": "center/below",
+        "color": "green/brown",
+        "offerings": ["coca leaves", "chicha", "food"],
+        "symbols": ["mountain", "terraced fields", "fertility figures"]
+      }
+    },
+    {
+      "@id": "incan:illapa",
+      "@type": "CulturalArchetype",
+      "name": "Illapa",
+      "culture": "Incan",
+      "domain": ["thunder", "lightning", "rain", "weather", "warfare"],
+      "description": "The Thunder and Lightning God who brings the rains essential for agriculture. Illapa was envisioned as a man in the sky drawing water from the celestial river (Milky Way) and releasing it as rain. His thunderbolts were sling-stones, lightning his gleaming garments. Third in importance after Viracocha and Inti.",
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.50,
+        "light-shadow": 0.35,
+        "active-receptive": 0.15,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.15,
+        "stasis-transformation": 0.60,
+        "voluntary-fated": 0.45
+      },
+      "instantiates": [
+        {"primordial": "primordial:warrior", "weight": 0.75, "aspects": ["sky-warrior", "storm-bringer"]},
+        {"primordial": "primordial:creator", "weight": 0.55, "aspects": ["rain-giver", "fertility-enabler"]},
+        {"primordial": "primordial:destroyer", "weight": 0.50, "aspects": ["lightning-striker"]}
+      ],
+      "relationships": [
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ZEUS", "fidelity": 0.70, "notes": "Thunder god"},
+        {"type": "CULTURAL_ECHO", "target": "arch:NO-THOR", "fidelity": 0.65, "notes": "Storm and thunder deity"},
+        {"type": "CULTURAL_ECHO", "target": "slavic:perun", "fidelity": 0.65, "notes": "Thunder god"},
+        {"type": "CULTURAL_ECHO", "target": "mesoamerican:tlaloc", "fidelity": 0.75, "notes": "Rain deity essential for agriculture"},
+        {"type": "COMPLEMENT", "target": "incan:pachamama", "notes": "Rain fertilizing earth"},
+        {"type": "COMPLEMENT", "target": "incan:mama-cocha", "notes": "Drawing from celestial waters"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When storms become destructive", "When power is unleashed without mercy"],
+        "shadowManifestations": ["Devastating floods", "Lightning destruction", "Drought when withheld"],
+        "integrationPath": "Channeling storm power for life-giving rain"
+      },
+      "correspondences": {
+        "element": "air/water",
+        "celestialBody": "Milky Way (as river)",
+        "color": "blue/white",
+        "symbols": ["sling", "club", "lightning bolt"],
+        "animal": "serpent (rainbow)"
+      }
+    },
+    {
+      "@id": "incan:mama-cocha",
+      "@type": "CulturalArchetype",
+      "name": "Mama Cocha",
+      "culture": "Incan",
+      "domain": ["sea", "water", "fish", "sailors", "coastal peoples"],
+      "description": "The Sea Mother goddess, protector of sailors and fishermen, provider of fish and marine abundance. Mama Cocha represented the vast Pacific Ocean that bordered the Inca Empire. Particularly venerated by coastal peoples, she complemented Pachamama as the maritime feminine principle.",
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.50,
+        "light-shadow": 0.55,
+        "active-receptive": 0.65,
+        "individual-collective": 0.70,
+        "ascent-descent": 0.70,
+        "stasis-transformation": 0.60,
+        "voluntary-fated": 0.55
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.80, "aspects": ["sea-mother", "provider"]},
+        {"primordial": "primordial:preserver", "weight": 0.55, "aspects": ["protector-of-sailors"]}
+      ],
+      "relationships": [
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-TETHYS", "fidelity": 0.60, "notes": "Primordial sea goddess"},
+        {"type": "CULTURAL_ECHO", "target": "african:yemoja", "fidelity": 0.70, "notes": "Ocean mother goddess"},
+        {"type": "COMPLEMENT", "target": "incan:pachamama", "notes": "Sea and earth as dual mothers"},
+        {"type": "TENSION", "target": "incan:pachamama", "notes": "Maritime vs. terrestrial realms"},
+        {"type": "MIRRORS", "target": "incan:illapa", "notes": "Waters below mirroring waters above"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When sea becomes destructive", "When depths swallow without return"],
+        "shadowManifestations": ["Drowning", "Storms at sea", "Withholding fish"],
+        "integrationPath": "Respecting ocean's power while accepting her gifts"
+      },
+      "correspondences": {
+        "element": "water",
+        "direction": "west",
+        "color": "blue/green",
+        "symbols": ["waves", "fish", "shells"],
+        "offerings": ["chicha", "coca", "shells"]
+      }
+    },
+    {
+      "@id": "incan:supay",
+      "@type": "CulturalArchetype",
+      "name": "Supay",
+      "culture": "Incan",
+      "domain": ["underworld", "death", "ancestors", "minerals", "mines"],
+      "description": "The ruler of Ukhu Pacha, the inner/lower world of the dead and of origins. Supay governed the realm of ancestors and the precious minerals within the earth. Not originally evil, but associated with death and the chthonic realm. Colonial missionaries reinterpreted him as the Devil, but traditionally he was a necessary cosmic power.",
+      "spectralCoordinates": {
+        "order-chaos": 0.45,
+        "creation-destruction": 0.65,
+        "light-shadow": 0.85,
+        "active-receptive": 0.55,
+        "individual-collective": 0.60,
+        "ascent-descent": 0.95,
+        "stasis-transformation": 0.70,
+        "voluntary-fated": 0.75
+      },
+      "instantiates": [
+        {"primordial": "primordial:psychopomp", "weight": 0.75, "aspects": ["underworld-ruler", "death-guide"]},
+        {"primordial": "primordial:destroyer", "weight": 0.55, "aspects": ["death-bringer"]},
+        {"primordial": "primordial:ancestor", "weight": 0.60, "aspects": ["guardian-of-dead"]}
+      ],
+      "relationships": [
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HADES", "fidelity": 0.70, "notes": "Underworld ruler"},
+        {"type": "CULTURAL_ECHO", "target": "mesoamerican:mictlantecuhtli", "fidelity": 0.75, "notes": "Death lord"},
+        {"type": "POLAR_OPPOSITE", "target": "incan:inti", "axis": "ascent-descent", "notes": "Below vs. above"},
+        {"type": "COMPLEMENT", "target": "incan:pachamama", "notes": "Surface and depths of earth"}
+      ],
+      "contextualVariants": [
+        {
+          "context": "Pre-Colonial",
+          "spectralShift": {"order-chaos": 0.40, "light-shadow": 0.70},
+          "notes": "Necessary cosmic power, not evil"
+        },
+        {
+          "context": "Colonial Demonization",
+          "spectralShift": {"order-chaos": 0.75, "light-shadow": 0.95},
+          "notes": "Equated with Christian Devil"
+        },
+        {
+          "context": "Mining Traditions",
+          "spectralShift": {"creation-destruction": 0.50, "voluntary-fated": 0.60},
+          "notes": "El Tío, the mine spirit requiring offerings"
+        }
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When death becomes annihilation rather than transition", "When depths become prisons"],
+        "shadowManifestations": ["Soul-trapping", "Endless darkness", "Demonic possession (colonial interpretation)"],
+        "integrationPath": "Accepting death as part of the cosmic cycle, honoring ancestors"
+      },
+      "correspondences": {
+        "direction": "below/center",
+        "realm": "Ukhu Pacha",
+        "color": "black/red",
+        "symbols": ["skull", "serpent", "minerals"],
+        "animal": "serpent"
+      }
+    },
+    {
+      "@id": "incan:manco-capac",
+      "@type": "CulturalArchetype",
+      "name": "Manco Cápac",
+      "culture": "Incan",
+      "domain": ["kingship", "civilization", "agriculture", "dynasty founding"],
+      "description": "The legendary first Sapa Inca, son of Inti, who emerged with his sister-wife Mama Ocllo from Lake Titicaca (or the cave of Pacaritambo in alternate traditions). He founded Cusco where his golden staff sank into the earth, taught agriculture and civilization, and established the Inca dynasty.",
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.20,
+        "light-shadow": 0.20,
+        "active-receptive": 0.20,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.35,
+        "voluntary-fated": 0.25
+      },
+      "instantiates": [
+        {"primordial": "primordial:hero", "weight": 0.85, "aspects": ["founder-king", "civilization-bringer"]},
+        {"primordial": "primordial:sovereign", "weight": 0.80, "aspects": ["first-ruler", "lawgiver"]},
+        {"primordial": "primordial:divine-child", "weight": 0.60, "aspects": ["son-of-sun"]}
+      ],
+      "relationships": [
+        {"type": "CONTAINED_BY", "target": "incan:inti", "notes": "Son of the Sun"},
+        {"type": "COMPLEMENT", "target": "incan:mama-ocllo", "notes": "Brother-husband and sister-wife"},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-OSIRIS", "fidelity": 0.60, "notes": "Divine first king"},
+        {"type": "CULTURAL_ECHO", "target": "japanese:jimmu", "fidelity": 0.65, "notes": "Divine dynasty founder"},
+        {"type": "CULTURAL_ECHO", "target": "chinese:yellow-emperor", "fidelity": 0.60, "notes": "Legendary civilization founder"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When founding authority becomes tyranny", "When divine descent justifies oppression"],
+        "shadowManifestations": ["Autocratic rule", "Hubris of divine right"],
+        "integrationPath": "Using divine authority for collective good, servant leadership"
+      },
+      "correspondences": {
+        "symbols": ["golden staff", "sun-disc"],
+        "sacredSites": ["Cusco", "Lake Titicaca", "Pacaritambo"],
+        "color": "gold"
+      }
+    },
+    {
+      "@id": "incan:mama-ocllo",
+      "@type": "CulturalArchetype",
+      "name": "Mama Ocllo",
+      "culture": "Incan",
+      "domain": ["queenship", "weaving", "domesticity", "civilization", "women's arts"],
+      "description": "The first Coya (Queen), sister-wife of Manco Cápac, daughter of Mama Quilla (Moon). She emerged alongside Manco Cápac and taught women the arts of spinning, weaving, and domestic skills. She represents the feminine civilizing force complementing Manco Cápac's masculine founding.",
+      "spectralCoordinates": {
+        "order-chaos": 0.20,
+        "creation-destruction": 0.25,
+        "light-shadow": 0.30,
+        "active-receptive": 0.65,
+        "individual-collective": 0.60,
+        "ascent-descent": 0.40,
+        "stasis-transformation": 0.30,
+        "voluntary-fated": 0.35
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.80, "aspects": ["queen-mother", "teacher-of-women"]},
+        {"primordial": "primordial:sovereign", "weight": 0.65, "aspects": ["first-queen"]},
+        {"primordial": "primordial:magician", "weight": 0.50, "aspects": ["weaving-arts", "domestic-knowledge"]}
+      ],
+      "relationships": [
+        {"type": "CONTAINED_BY", "target": "incan:mama-quilla", "notes": "Daughter of the Moon"},
+        {"type": "COMPLEMENT", "target": "incan:manco-capac", "notes": "Sister-wife, co-founder"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ATHENA", "fidelity": 0.55, "notes": "Goddess teaching weaving/civilization"},
+        {"type": "CULTURAL_ECHO", "target": "chinese:nuwa", "fidelity": 0.50, "notes": "Feminine civilizing deity"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When domestic order becomes confinement", "When tradition becomes oppression"],
+        "shadowManifestations": ["Controlling matriarch", "Rigid gender roles"],
+        "integrationPath": "Teaching skills as liberation, not limitation"
+      },
+      "correspondences": {
+        "symbols": ["spindle", "loom", "moon-disc"],
+        "color": "silver",
+        "crafts": ["weaving", "textile arts"]
+      }
+    },
+    {
+      "@id": "incan:chasca",
+      "@type": "CulturalArchetype",
+      "name": "Chasca",
+      "culture": "Incan",
+      "domain": ["dawn", "dusk", "Venus", "beauty", "flowers", "maidens"],
+      "description": "The goddess of dawn and twilight, associated with the planet Venus as morning and evening star. Chasca was the protector of young women and virgin girls, associated with flowers, beauty, and the liminal times of day when light transitions.",
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.30,
+        "light-shadow": 0.40,
+        "active-receptive": 0.55,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.30,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.45
+      },
+      "instantiates": [
+        {"primordial": "primordial:maiden", "weight": 0.85, "aspects": ["dawn-maiden", "virgin-protector"]},
+        {"primordial": "primordial:lover", "weight": 0.55, "aspects": ["beauty", "flowers"]}
+      ],
+      "relationships": [
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-EOS", "fidelity": 0.70, "notes": "Dawn goddess"},
+        {"type": "CULTURAL_ECHO", "target": "mesoamerican:quetzalcoatl", "fidelity": 0.50, "notes": "Venus association"},
+        {"type": "CULTURAL_ECHO", "target": "mesopotamian:inanna", "fidelity": 0.55, "notes": "Venus goddess"},
+        {"type": "COMPLEMENT", "target": "incan:inti", "notes": "Herald of the sun"},
+        {"type": "COMPLEMENT", "target": "incan:mama-quilla", "notes": "Transitional time between sun and moon"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When beauty becomes vanity", "When innocence becomes naivety"],
+        "shadowManifestations": ["False dawn", "Fading beauty", "Lost innocence"],
+        "integrationPath": "Embracing transition, finding beauty in change"
+      },
+      "correspondences": {
+        "celestialBody": "Venus",
+        "time": "dawn/dusk",
+        "color": "pink/gold",
+        "symbols": ["flowers", "Venus star"]
+      }
+    },
+    {
+      "@id": "incan:catequil",
+      "@type": "CulturalArchetype",
+      "name": "Catequil",
+      "culture": "Incan (Northern regions)",
+      "domain": ["thunder", "lightning", "oracle", "divination", "twins"],
+      "description": "A thunder and lightning deity particularly venerated in northern Peru, associated with oracular powers. Catequil had a famous oracle shrine. Often depicted with his twin brother Piguerao, representing the dual nature of lightning (flash and thunder).",
+      "spectralCoordinates": {
+        "order-chaos": 0.50,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.45,
+        "active-receptive": 0.25,
+        "individual-collective": 0.40,
+        "ascent-descent": 0.20,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.70
+      },
+      "instantiates": [
+        {"primordial": "primordial:warrior", "weight": 0.65, "aspects": ["thunder-warrior"]},
+        {"primordial": "primordial:magician", "weight": 0.70, "aspects": ["oracle", "diviner"]},
+        {"primordial": "primordial:twin", "weight": 0.60, "aspects": ["lightning-twins"]}
+      ],
+      "relationships": [
+        {"type": "MIRRORS", "target": "incan:illapa", "notes": "Regional thunder deity"},
+        {"type": "CULTURAL_ECHO", "target": "mesoamerican:hero-twins", "fidelity": 0.55, "notes": "Divine twins"},
+        {"type": "CONTAINS", "target": "incan:piguerao", "notes": "Twin brother"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When prophecy becomes manipulation", "When power is misused"],
+        "shadowManifestations": ["False prophecy", "Destructive lightning"],
+        "integrationPath": "Using oracular gifts for truth, not power"
+      },
+      "correspondences": {
+        "element": "air/fire",
+        "symbols": ["twin lightning bolts", "sling-stones"],
+        "sacredSites": ["Catequil oracle shrine"]
+      }
+    },
+    {
+      "@id": "incan:kon",
+      "@type": "CulturalArchetype",
+      "name": "Kon",
+      "culture": "Incan (Coastal)",
+      "domain": ["wind", "south", "rain", "coastal deserts"],
+      "description": "A wind and rain deity of coastal Peru, son of Inti and Mama Quilla. Kon was associated with the southern winds and had power over rain. In some myths he created the first humans but was overthrown by Pachacamac.",
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.50,
+        "active-receptive": 0.35,
+        "individual-collective": 0.40,
+        "ascent-descent": 0.25,
+        "stasis-transformation": 0.60,
+        "voluntary-fated": 0.50
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.60, "aspects": ["first-humanity-maker"]},
+        {"primordial": "primordial:trickster", "weight": 0.50, "aspects": ["wind-spirit"]},
+        {"primordial": "primordial:outcast", "weight": 0.55, "aspects": ["overthrown-deity"]}
+      ],
+      "relationships": [
+        {"type": "CONTAINED_BY", "target": "incan:inti", "notes": "Son of the Sun"},
+        {"type": "CONTAINED_BY", "target": "incan:mama-quilla", "notes": "Son of the Moon"},
+        {"type": "DEVOLUTION", "target": "incan:pachacamac", "notes": "Overthrown by Pachacamac"},
+        {"type": "CULTURAL_ECHO", "target": "mesoamerican:ehecatl", "fidelity": 0.60, "notes": "Wind deity"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When creation is imperfect", "When power is lost"],
+        "shadowManifestations": ["Destructive winds", "Drought", "Failed creation"],
+        "integrationPath": "Accepting limitation, yielding to greater powers"
+      },
+      "correspondences": {
+        "element": "air",
+        "direction": "south",
+        "symbols": ["wind", "desert"]
+      }
+    },
+    {
+      "@id": "incan:pachacamac",
+      "@type": "CulturalArchetype",
+      "name": "Pachacamac",
+      "culture": "Incan (Coastal/Central)",
+      "domain": ["earthquakes", "creation", "oracles", "earth-shaking"],
+      "description": "The 'Earth-Shaker' or 'World-Animator,' a powerful creator deity of the central Peruvian coast. His oracle at the site bearing his name was among the most important in pre-Columbian Peru. Pachacamac overthrew Kon, created new humans, and was eventually syncretized with Viracocha.",
+      "spectralCoordinates": {
+        "order-chaos": 0.45,
+        "creation-destruction": 0.50,
+        "light-shadow": 0.55,
+        "active-receptive": 0.30,
+        "individual-collective": 0.60,
+        "ascent-descent": 0.65,
+        "stasis-transformation": 0.65,
+        "voluntary-fated": 0.55
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.80, "aspects": ["world-animator", "humanity-maker"]},
+        {"primordial": "primordial:destroyer", "weight": 0.65, "aspects": ["earthquake-bringer"]},
+        {"primordial": "primordial:magician", "weight": 0.60, "aspects": ["oracle-power"]}
+      ],
+      "relationships": [
+        {"type": "EVOLUTION", "target": "incan:kon", "notes": "Overthrew and replaced Kon"},
+        {"type": "SYNTHESIS", "target": "incan:viracocha", "notes": "Syncretized with highland creator"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-POSEIDON", "fidelity": 0.55, "notes": "Earth-shaker"},
+        {"type": "MIRRORS", "target": "incan:pachamama", "notes": "Earth animation vs. earth embodiment"}
+      ],
+      "contextualVariants": [
+        {
+          "context": "Coastal Worship",
+          "spectralShift": {"individual-collective": 0.70, "ascent-descent": 0.75},
+          "notes": "Supreme deity of coastal peoples"
+        },
+        {
+          "context": "Inca Integration",
+          "spectralShift": {"order-chaos": 0.35, "voluntary-fated": 0.45},
+          "notes": "Incorporated into imperial pantheon"
+        }
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When animation becomes destruction", "When prophecy brings fear"],
+        "shadowManifestations": ["Devastating earthquakes", "Apocalyptic prophecy"],
+        "integrationPath": "Balancing creative and destructive earth-power"
+      },
+      "correspondences": {
+        "element": "earth",
+        "symbols": ["earthquake", "wooden idol"],
+        "sacredSites": ["Pachacamac temple complex"]
+      }
+    },
+    {
+      "@id": "incan:apu",
+      "@type": "CulturalArchetype",
+      "name": "Apu (Mountain Spirits)",
+      "culture": "Incan/Pan-Andean",
+      "domain": ["mountains", "protection", "weather", "local guardians"],
+      "description": "The collective term for mountain spirits (apu means 'lord'), each peak having its own personality and power. Apus are guardians of communities, controllers of local weather, and sources of water. They require offerings and respect. Not a single deity but a class of sacred landscape beings.",
+      "spectralCoordinates": {
+        "order-chaos": 0.30,
+        "creation-destruction": 0.40,
+        "light-shadow": 0.45,
+        "active-receptive": 0.50,
+        "individual-collective": 0.75,
+        "ascent-descent": 0.25,
+        "stasis-transformation": 0.25,
+        "voluntary-fated": 0.60
+      },
+      "instantiates": [
+        {"primordial": "primordial:preserver", "weight": 0.75, "aspects": ["guardian", "protector"]},
+        {"primordial": "primordial:ancestor", "weight": 0.60, "aspects": ["local-spirits", "land-ancestors"]},
+        {"primordial": "primordial:great-father", "weight": 0.50, "aspects": ["mountain-lords"]}
+      ],
+      "relationships": [
+        {"type": "CONTAINED_BY", "target": "incan:pachamama", "notes": "Mountains as parts of Earth Mother"},
+        {"type": "CULTURAL_ECHO", "target": "japanese:kami", "fidelity": 0.70, "notes": "Nature spirits of specific places"},
+        {"type": "CULTURAL_ECHO", "target": "slavic:leshy", "fidelity": 0.55, "notes": "Local nature guardians"},
+        {"type": "CONSTELLATION", "target": ["incan:pachamama", "incan:illapa"], "notes": "Landscape spirits together"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When mountains are disrespected", "When offerings cease"],
+        "shadowManifestations": ["Avalanches", "Harsh weather", "Withdrawal of protection"],
+        "integrationPath": "Maintaining reciprocal relationship with landscape"
+      },
+      "correspondences": {
+        "element": "earth/air",
+        "direction": "varies by mountain",
+        "offerings": ["coca", "chicha", "food"],
+        "symbols": ["mountain peaks", "snow caps"],
+        "sacredSites": ["Major peaks: Ausangate, Salcantay, etc."]
+      }
+    },
+    {
+      "@id": "incan:coyllur",
+      "@type": "CulturalArchetype",
+      "name": "Coyllur",
+      "culture": "Incan",
+      "domain": ["stars", "navigation", "time-keeping", "celestial patterns"],
+      "description": "The collective star goddess or personification of the stars, daughter of Inti and Mama Quilla. Stars were used for agricultural timing, navigation, and divination. Different star clusters (like the Pleiades/Qullqa) had specific agricultural significance.",
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.30,
+        "light-shadow": 0.35,
+        "active-receptive": 0.60,
+        "individual-collective": 0.70,
+        "ascent-descent": 0.10,
+        "stasis-transformation": 0.40,
+        "voluntary-fated": 0.65
+      },
+      "instantiates": [
+        {"primordial": "primordial:magician", "weight": 0.65, "aspects": ["celestial-knowledge", "navigation"]},
+        {"primordial": "primordial:maiden", "weight": 0.55, "aspects": ["celestial-beauty"]}
+      ],
+      "relationships": [
+        {"type": "CONTAINED_BY", "target": "incan:inti", "notes": "Daughter of Sun"},
+        {"type": "CONTAINED_BY", "target": "incan:mama-quilla", "notes": "Daughter of Moon"},
+        {"type": "COMPLEMENT", "target": "incan:mama-quilla", "notes": "Stars complementing moon"},
+        {"type": "CULTURAL_ECHO", "target": "polynesian:matariki", "fidelity": 0.60, "notes": "Pleiades significance"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When celestial signs are misread", "When navigation fails"],
+        "shadowManifestations": ["Lost travelers", "Missed planting seasons"],
+        "integrationPath": "Patient observation, humility before cosmic patterns"
+      },
+      "correspondences": {
+        "celestialBodies": ["Pleiades (Qullqa)", "Southern Cross", "Milky Way"],
+        "color": "silver/white",
+        "symbols": ["star patterns", "celestial llama"]
+      }
+    },
+    {
+      "@id": "incan:pariacaca",
+      "@type": "CulturalArchetype",
+      "name": "Pariacaca",
+      "culture": "Incan (Huarochirí)",
+      "domain": ["rain", "water", "storms", "mountain", "heroism"],
+      "description": "A powerful mountain and rain deity from the Huarochirí region, born from five falcon eggs. Pariacaca defeated the fire god Huallallo Carhuincho, bringing water to the previously fire-dominated region. The Huarochirí Manuscript preserves his mythology in detail.",
+      "spectralCoordinates": {
+        "order-chaos": 0.45,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.35,
+        "active-receptive": 0.20,
+        "individual-collective": 0.50,
+        "ascent-descent": 0.30,
+        "stasis-transformation": 0.60,
+        "voluntary-fated": 0.40
+      },
+      "instantiates": [
+        {"primordial": "primordial:hero", "weight": 0.80, "aspects": ["monster-slayer", "order-bringer"]},
+        {"primordial": "primordial:warrior", "weight": 0.70, "aspects": ["storm-warrior"]},
+        {"primordial": "primordial:creator", "weight": 0.55, "aspects": ["water-bringer"]}
+      ],
+      "relationships": [
+        {"type": "POLAR_OPPOSITE", "target": "incan:huallallo-carhuincho", "axis": "creation-destruction", "notes": "Water vs. fire deity"},
+        {"type": "MIRRORS", "target": "incan:illapa", "notes": "Regional rain/storm deity"},
+        {"type": "CULTURAL_ECHO", "target": "mesoamerican:tlaloc", "fidelity": 0.60, "notes": "Mountain rain deity"},
+        {"type": "CULTURAL_ECHO", "target": "arch:NO-THOR", "fidelity": 0.55, "notes": "Storm hero defeating chaos"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When storms become destructive", "When victory becomes domination"],
+        "shadowManifestations": ["Devastating floods", "Wrathful storms"],
+        "integrationPath": "Channeling warrior energy for life-giving rain"
+      },
+      "correspondences": {
+        "element": "water/air",
+        "animal": "falcon",
+        "color": "blue/gray",
+        "symbols": ["five eggs", "rain/lightning"],
+        "sacredSites": ["Mount Pariacaca"]
+      }
+    },
+    {
+      "@id": "incan:huallallo-carhuincho",
+      "@type": "CulturalArchetype",
+      "name": "Huallallo Carhuincho",
+      "culture": "Incan (Huarochirí)",
+      "domain": ["fire", "volcanoes", "human sacrifice", "old order"],
+      "description": "The fire deity who ruled the Huarochirí region before being defeated by Pariacaca. Associated with human sacrifice and the harsh volcanic landscape, he represents the old, dangerous order overthrown by the water-bringing hero. Driven to the jungle lowlands after his defeat.",
+      "spectralCoordinates": {
+        "order-chaos": 0.65,
+        "creation-destruction": 0.75,
+        "light-shadow": 0.70,
+        "active-receptive": 0.25,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.40,
+        "stasis-transformation": 0.65,
+        "voluntary-fated": 0.55
+      },
+      "instantiates": [
+        {"primordial": "primordial:destroyer", "weight": 0.80, "aspects": ["fire-bringer", "sacrifice-demander"]},
+        {"primordial": "primordial:outcast", "weight": 0.65, "aspects": ["defeated-god"]},
+        {"primordial": "primordial:monster", "weight": 0.55, "aspects": ["man-eater"]}
+      ],
+      "relationships": [
+        {"type": "POLAR_OPPOSITE", "target": "incan:pariacaca", "axis": "creation-destruction", "notes": "Fire vs. water"},
+        {"type": "DEVOLUTION", "target": "incan:pariacaca", "notes": "Defeated and exiled"},
+        {"type": "CULTURAL_ECHO", "target": "mesoamerican:tezcatlipoca", "fidelity": 0.50, "notes": "Destructive, sacrifice-demanding deity"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When he represents the shadow of civilization—its violent, sacrificial foundations"],
+        "shadowManifestations": ["Human sacrifice", "Volcanic destruction", "Return of the repressed"],
+        "integrationPath": "Acknowledging fire's necessary role, contained and transformed"
+      },
+      "correspondences": {
+        "element": "fire",
+        "color": "red/orange",
+        "symbols": ["flames", "volcano"],
+        "region": "Jungle lowlands (exile)"
+      }
+    }
+  ]
+}

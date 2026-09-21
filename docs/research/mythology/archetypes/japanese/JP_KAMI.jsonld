@@ -1,0 +1,847 @@
+{
+  "@context": "../../schema/ACP_CONTEXT.jsonld",
+  "@id": "pantheon:JP-KAMI",
+  "@type": "Pantheon",
+  "name": "Japanese Kami",
+  "tradition": "Shinto / Japanese Mythology",
+  "description": "The divine spirits and deities of Shinto and Japanese mythology, including the primordial creators, nature spirits, and heroic figures from the Kojiki and Nihon Shoki",
+  "canonicalSources": [
+    "Kojiki (712 CE)",
+    "Nihon Shoki (720 CE)",
+    "Fudoki (provincial records)",
+    "Engishiki (927 CE)",
+    "Norito (ritual prayers)"
+  ],
+  "systemPatterns": [
+    {
+      "name": "Izanagi-Izanami Creation",
+      "description": "The paired creator deities who churned the cosmic sea and gave birth to the islands of Japan and the kami",
+      "archetypes": ["arch:JP-IZANAGI", "arch:JP-IZANAMI"],
+      "pattern": "Divine marriage and creative partnership ending in separation through death/pollution"
+    },
+    {
+      "name": "Three Noble Children",
+      "description": "The three supreme kami born from Izanagi's purification - Amaterasu, Tsukuyomi, and Susanoo",
+      "archetypes": ["arch:JP-AMATERASU", "arch:JP-TSUKUYOMI", "arch:JP-SUSANOO"],
+      "pattern": "Celestial triad governing sun, moon, and storm/sea"
+    },
+    {
+      "name": "Heavenly Rock Cave",
+      "description": "Amaterasu's withdrawal and the restoration of cosmic light through divine collaboration",
+      "archetypes": ["arch:JP-AMATERASU", "arch:JP-UZUME", "arch:JP-SUSANOO"],
+      "pattern": "Solar eclipse myth and restoration of cosmic order"
+    },
+    {
+      "name": "Tenson Kōrin (Descent of the Heavenly Grandchild)",
+      "description": "The descent of Ninigi from heaven to establish divine rule on earth",
+      "archetypes": ["arch:JP-NINIGI", "arch:JP-AMATERASU"],
+      "pattern": "Divine mandate and sacred kingship"
+    },
+    {
+      "name": "Kunitsukami vs Amatsukami",
+      "description": "Tension between earthly kami and heavenly kami, resolved through submission and integration",
+      "archetypes": ["arch:JP-OKUNINUSHI", "arch:JP-NINIGI"],
+      "pattern": "Indigenous vs imposed divine order"
+    }
+  ],
+  "entries": [
+    {
+      "@id": "arch:JP-IZANAGI",
+      "@type": "Archetype",
+      "name": "Izanagi-no-Mikoto",
+      "aliases": ["Izanagi-no-Kami", "He Who Invites"],
+      "domain": ["Creation", "Purification", "Life", "The Male Principle"],
+      "description": "The primordial male creator deity who, with his consort Izanami, stirred the cosmic ocean with the heavenly jeweled spear to create the islands of Japan. After Izanami's death, he descended to Yomi to retrieve her but fled in horror at her decayed form, then purified himself, giving birth to the three noble children.",
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.15,
+        "light-shadow": 0.3,
+        "active-receptive": 0.2,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.25,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.35
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.95, "aspects": ["world-shaper", "island-maker"]},
+        {"primordial": "primordial:great-father", "weight": 0.85, "aspects": ["progenitor", "heavenly-parent"]},
+        {"primordial": "primordial:healer", "weight": 0.5, "aspects": ["purification", "misogi"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:JP-IZANAMI", "description": "Divine creative pair"},
+        {"type": "rel:CONTAINS", "target": "arch:JP-AMATERASU", "description": "Father of the sun goddess"},
+        {"type": "rel:CONTAINS", "target": "arch:JP-TSUKUYOMI", "description": "Father of the moon god"},
+        {"type": "rel:CONTAINS", "target": "arch:JP-SUSANOO", "description": "Father of the storm god"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-OURANOS", "fidelity": 0.5, "notes": "Primordial male sky principle"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-ANU", "fidelity": 0.55, "notes": "Heavenly father creator"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When fear of death/pollution overrides love", "When purification becomes obsessive rejection"],
+        "shadowManifestations": ["Abandoning the beloved", "Horror at natural processes", "Excessive purity codes"],
+        "integrationPath": "Accepting death as part of creation cycle, integrating rather than fleeing from shadow"
+      },
+      "contextualVariants": [
+        {
+          "context": "Creation narrative (with Izanami)",
+          "spectralShift": {"creation-destruction": 0.1, "active-receptive": 0.15},
+          "notes": "Active creative principle in divine partnership"
+        },
+        {
+          "context": "Yomi descent and flight",
+          "spectralShift": {"light-shadow": 0.5, "stasis-transformation": 0.6},
+          "notes": "Confronting death and pollution"
+        },
+        {
+          "context": "Misogi purification",
+          "spectralShift": {"order-chaos": 0.15, "creation-destruction": 0.1},
+          "notes": "Establishing purification rites, birthing noble children"
+        }
+      ],
+      "correspondences": {
+        "element": "Heaven/Air",
+        "direction": "Above",
+        "shrine": "Taga Taisha (Shiga)",
+        "festival": "Various creation-related matsuri"
+      }
+    },
+    {
+      "@id": "arch:JP-IZANAMI",
+      "@type": "Archetype",
+      "name": "Izanami-no-Mikoto",
+      "aliases": ["Izanami-no-Kami", "She Who Invites", "Yomotsu-Ōkami"],
+      "domain": ["Creation", "Death", "The Underworld", "The Female Principle"],
+      "description": "The primordial female creator deity and consort of Izanagi. After giving birth to the fire god Kagutsuchi, she died and descended to Yomi (the underworld), where she became the queen of the dead. Her transformation from life-giver to death-queen embodies the inseparability of creation and destruction.",
+      "spectralCoordinates": {
+        "order-chaos": 0.4,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.65,
+        "active-receptive": 0.7,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.75,
+        "stasis-transformation": 0.65,
+        "voluntary-fated": 0.7
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.8, "aspects": ["island-birther", "kami-mother"]},
+        {"primordial": "primordial:great-mother", "weight": 0.9, "aspects": ["life-giver", "death-mother"]},
+        {"primordial": "primordial:destroyer", "weight": 0.7, "aspects": ["death-queen", "pollution-source"]},
+        {"primordial": "primordial:crone", "weight": 0.6, "aspects": ["underworld-ruler", "inevitable-death"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:JP-IZANAGI", "description": "Divine creative pair"},
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:JP-AMATERASU", "axis": "light-shadow", "description": "Underworld mother vs celestial daughter"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-PERSEPHONE", "fidelity": 0.7, "notes": "Death queen transformation"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-ERESHKIGAL", "fidelity": 0.75, "notes": "Underworld goddess"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-KALI", "fidelity": 0.55, "notes": "Creation-destruction unified in feminine"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When creation leads to destruction", "When the beloved rejects transformation"],
+        "shadowManifestations": ["Consuming wrath", "Spreading death", "Binding oaths of destruction"],
+        "integrationPath": "Accepting the unity of life and death, creation and destruction as one process"
+      },
+      "contextualVariants": [
+        {
+          "context": "Creation narrative (with Izanagi)",
+          "spectralShift": {"creation-destruction": 0.2, "light-shadow": 0.35},
+          "notes": "Receptive creative principle in divine partnership"
+        },
+        {
+          "context": "As Yomotsu-Ōkami (Queen of Yomi)",
+          "spectralShift": {"creation-destruction": 0.8, "light-shadow": 0.85, "ascent-descent": 0.9},
+          "notes": "Terrible death goddess threatening to kill 1000 daily"
+        }
+      ],
+      "correspondences": {
+        "element": "Earth/Underworld",
+        "direction": "Below",
+        "shrine": "Izanami Shrine (various)",
+        "association": "Death, childbirth, the boundary between life and death"
+      }
+    },
+    {
+      "@id": "arch:JP-AMATERASU",
+      "@type": "Archetype",
+      "name": "Amaterasu-Ōmikami",
+      "aliases": ["Amaterasu-Ō-Mi-Kami", "Ōhirume-no-Muchi", "Tensho Daijin"],
+      "domain": ["Sun", "Light", "Sovereignty", "Weaving", "Sacred Agriculture"],
+      "description": "The supreme sun goddess and ruler of Takamagahara (the High Plain of Heaven), born from Izanagi's left eye during his purification. She is the divine ancestress of the Imperial line and the most revered deity in Shinto. Her withdrawal into the Heavenly Rock Cave and subsequent emergence symbolizes solar eclipse and restoration.",
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.25,
+        "light-shadow": 0.05,
+        "active-receptive": 0.35,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.1,
+        "stasis-transformation": 0.35,
+        "voluntary-fated": 0.4
+      },
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.95, "aspects": ["divine-ruler", "heavenly-queen"]},
+        {"primordial": "primordial:great-mother", "weight": 0.7, "aspects": ["imperial-ancestress", "life-sustainer"]},
+        {"primordial": "primordial:creator", "weight": 0.6, "aspects": ["rice-cultivation", "sacred-weaving"]}
+      ],
+      "relationships": [
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:JP-TSUKUYOMI", "axis": "light-shadow", "description": "Sun and moon in eternal separation"},
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:JP-SUSANOO", "axis": "order-chaos", "description": "Order vs chaos sibling rivalry"},
+        {"type": "rel:CONTAINS", "target": "arch:JP-NINIGI", "description": "Grandmother of the heavenly grandchild"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-RA", "fidelity": 0.7, "notes": "Supreme solar deity and divine ancestor"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-APOLLO", "fidelity": 0.55, "notes": "Solar, order, civilization"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-SURYA", "fidelity": 0.6, "notes": "Solar deity"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When light withdraws due to shame or violation", "When order becomes rigid exclusion"],
+        "shadowManifestations": ["Withdrawal bringing cosmic darkness", "Refusing to share light", "Isolation in perfectionism"],
+        "integrationPath": "Being drawn out by joy, dance, and laughter; sharing light with all"
+      },
+      "contextualVariants": [
+        {
+          "context": "Takamagahara ruler",
+          "spectralShift": {"order-chaos": 0.1, "individual-collective": 0.2},
+          "notes": "Supreme sovereign of the heavenly realm"
+        },
+        {
+          "context": "Heavenly Rock Cave withdrawal",
+          "spectralShift": {"light-shadow": 0.5, "stasis-transformation": 0.6},
+          "notes": "Hidden, withdrawn, causing cosmic darkness"
+        },
+        {
+          "context": "Imperial ancestress",
+          "spectralShift": {"individual-collective": 0.15, "voluntary-fated": 0.25},
+          "notes": "Divine legitimation of earthly rule"
+        }
+      ],
+      "correspondences": {
+        "element": "Fire/Light",
+        "direction": "East",
+        "shrine": "Ise Grand Shrine (Naiku)",
+        "symbol": "Sacred mirror (Yata no Kagami)",
+        "festival": "Various solar festivals, Imperial rites"
+      }
+    },
+    {
+      "@id": "arch:JP-TSUKUYOMI",
+      "@type": "Archetype",
+      "name": "Tsukuyomi-no-Mikoto",
+      "aliases": ["Tsukiyomi", "Tsukuyomi-no-Kami"],
+      "domain": ["Moon", "Night", "Time", "Counting"],
+      "description": "The moon god born from Izanagi's right eye, ruler of the night. After killing the food goddess Ukemochi in disgust at her manner of producing food, he was banished by Amaterasu to rule the night separately from her day, explaining why sun and moon never meet.",
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.6,
+        "active-receptive": 0.55,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.6, "aspects": ["night-ruler", "time-keeper"]},
+        {"primordial": "primordial:destroyer", "weight": 0.5, "aspects": ["slayer-of-Ukemochi"]},
+        {"primordial": "primordial:magician", "weight": 0.45, "aspects": ["lunar-mystery", "hidden-knowledge"]}
+      ],
+      "relationships": [
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:JP-AMATERASU", "axis": "light-shadow", "description": "Moon eternally separated from sun"},
+        {"type": "rel:MIRRORS", "target": "arch:JP-SUSANOO", "description": "Both exiled by Amaterasu for transgressions"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-SELENE", "fidelity": 0.5, "notes": "Lunar deity"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-SIN", "fidelity": 0.6, "notes": "Moon god"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-THOTH", "fidelity": 0.45, "notes": "Lunar, time-counting aspects"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When disgust overrides compassion", "When purity standards become lethal"],
+        "shadowManifestations": ["Violent rejection of the 'impure'", "Cold isolation", "Murder in the name of propriety"],
+        "integrationPath": "Accepting diverse forms of creation and sustenance"
+      },
+      "correspondences": {
+        "element": "Water/Silver",
+        "direction": "West",
+        "shrine": "Various lunar shrines",
+        "association": "Lunar calendar, night, tides"
+      }
+    },
+    {
+      "@id": "arch:JP-SUSANOO",
+      "@type": "Archetype",
+      "name": "Susanoo-no-Mikoto",
+      "aliases": ["Susano'o", "Takehaya-Susanoo-no-Mikoto", "Gozu Tennō"],
+      "domain": ["Storms", "Sea", "Chaos", "Heroes", "Plague/Protection"],
+      "description": "The tempestuous storm god born from Izanagi's nose, ruler of the sea and storms. Exiled from heaven for tormenting Amaterasu, he descended to Izumo where he slew the eight-headed serpent Yamata-no-Orochi and discovered the sword Kusanagi. He embodies the transformation from chaos-bringer to culture-hero.",
+      "spectralCoordinates": {
+        "order-chaos": 0.75,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.55,
+        "active-receptive": 0.2,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.7,
+        "voluntary-fated": 0.3
+      },
+      "instantiates": [
+        {"primordial": "primordial:trickster", "weight": 0.8, "aspects": ["boundary-violator", "chaos-bringer"]},
+        {"primordial": "primordial:hero", "weight": 0.85, "aspects": ["monster-slayer", "savior"]},
+        {"primordial": "primordial:warrior", "weight": 0.7, "aspects": ["dragon-slayer", "protector"]},
+        {"primordial": "primordial:rebel", "weight": 0.75, "aspects": ["exile", "transgressor"]}
+      ],
+      "relationships": [
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:JP-AMATERASU", "axis": "order-chaos", "description": "Storm chaos vs solar order"},
+        {"type": "rel:EVOLUTION", "target": "arch:JP-SUSANOO", "description": "Transforms from chaos-bringer to culture-hero", "context": "Yamata-no-Orochi narrative"},
+        {"type": "rel:CONTAINS", "target": "arch:JP-OKUNINUSHI", "description": "Father-in-law and tester of Ōkuninushi"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-THOR", "fidelity": 0.65, "notes": "Storm god, monster-slayer"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-POSEIDON", "fidelity": 0.5, "notes": "Sea domain, tempestuous nature"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-INDRA", "fidelity": 0.7, "notes": "Storm god, dragon-slayer"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When grief becomes destruction", "When rebellion has no constructive aim"],
+        "shadowManifestations": ["Wanton destruction", "Violation of sacred spaces", "Terrorizing the innocent"],
+        "integrationPath": "Channeling storm energy into heroic protection; exile leading to redemption"
+      },
+      "contextualVariants": [
+        {
+          "context": "Takamagahara (heaven) - chaotic phase",
+          "spectralShift": {"order-chaos": 0.9, "creation-destruction": 0.75},
+          "notes": "Destructive, grieving, violating taboos"
+        },
+        {
+          "context": "Izumo - heroic phase",
+          "spectralShift": {"order-chaos": 0.5, "creation-destruction": 0.35},
+          "notes": "Dragon-slayer, savior, establisher of lineages"
+        },
+        {
+          "context": "As Gozu Tennō (plague deity)",
+          "spectralShift": {"creation-destruction": 0.7, "light-shadow": 0.7},
+          "notes": "Both bringer and protector against plague"
+        }
+      ],
+      "correspondences": {
+        "element": "Water/Storm",
+        "direction": "Variable (exile)",
+        "shrine": "Izumo Taisha, Yasaka Shrine (Gion)",
+        "symbol": "Sword Kusanagi",
+        "festival": "Gion Matsuri (plague protection)"
+      }
+    },
+    {
+      "@id": "arch:JP-UZUME",
+      "@type": "Archetype",
+      "name": "Ame-no-Uzume-no-Mikoto",
+      "aliases": ["Uzume", "Ama-no-Uzume", "The Great Persuader"],
+      "domain": ["Dawn", "Dance", "Mirth", "Revelry", "Shamanism"],
+      "description": "The goddess of dawn, mirth, and revelry whose ecstatic dance before the Heavenly Rock Cave lured Amaterasu out and restored light to the world. She embodies sacred performance, shamanic ecstasy, and the power of joy to overcome darkness. She later confronted the earthly kami Sarutahiko during the heavenly descent.",
+      "spectralCoordinates": {
+        "order-chaos": 0.6,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.25,
+        "active-receptive": 0.25,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.65,
+        "voluntary-fated": 0.25
+      },
+      "instantiates": [
+        {"primordial": "primordial:trickster", "weight": 0.7, "aspects": ["sacred-fool", "taboo-breaker"]},
+        {"primordial": "primordial:healer", "weight": 0.65, "aspects": ["light-restorer", "joy-bringer"]},
+        {"primordial": "primordial:magician", "weight": 0.6, "aspects": ["shamanic-dancer", "ecstatic-performer"]},
+        {"primordial": "primordial:lover", "weight": 0.5, "aspects": ["sacred-sexuality", "fearless-confronter"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:JP-AMATERASU", "description": "The one who draws out the hidden sun"},
+        {"type": "rel:COMPLEMENT", "target": "arch:JP-SARUTAHIKO", "description": "Divine marriage after confrontation"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-BAUBO", "fidelity": 0.75, "notes": "Ribald humor restoring light/fertility"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-SHAKTI", "fidelity": 0.4, "notes": "Activating feminine energy"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When performance becomes mere exhibition", "When joy becomes escape from reality"],
+        "shadowManifestations": ["Hollow entertainment", "Using charm to manipulate", "Manic avoidance"],
+        "integrationPath": "Authentic sacred performance that transforms rather than distracts"
+      },
+      "correspondences": {
+        "element": "Fire/Light",
+        "direction": "East (dawn)",
+        "shrine": "Various entertainment/performing arts shrines",
+        "association": "Kagura dance, performing arts, shamanism"
+      }
+    },
+    {
+      "@id": "arch:JP-SARUTAHIKO",
+      "@type": "Archetype",
+      "name": "Sarutahiko-Ōkami",
+      "aliases": ["Sarutahiko-no-Kami", "The Great Kami of the Crossroads"],
+      "domain": ["Crossroads", "Guidance", "Earthly Kami", "Martial Arts", "Travel"],
+      "description": "The powerful earthly kami (kunitsukami) who stood at the boundary between heaven and earth when Ninigi descended. His towering form and blazing eyes initially blocked the way until Uzume confronted him. He became the guide for the heavenly grandchild and the patron of travelers and martial artists.",
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.45,
+        "active-receptive": 0.3,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.45
+      },
+      "instantiates": [
+        {"primordial": "primordial:psychopomp", "weight": 0.8, "aspects": ["guide", "crossroads-guardian"]},
+        {"primordial": "primordial:warrior", "weight": 0.65, "aspects": ["martial-power", "protector"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.5, "aspects": ["earthly-wisdom", "guidance"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:JP-UZUME", "description": "Divine marriage - earthly power meets heavenly joy"},
+        {"type": "rel:MIRRORS", "target": "arch:JP-NINIGI", "description": "Earthly kami who guides heavenly descent"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HERMES", "fidelity": 0.65, "notes": "Crossroads, guidance, threshold guardian"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-HEIMDALL", "fidelity": 0.5, "notes": "Guardian at cosmic boundary"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When guardianship becomes obstruction", "When strength intimidates rather than protects"],
+        "shadowManifestations": ["Blocking rather than guiding", "Territoriality", "Intimidation"],
+        "integrationPath": "Opening the way rather than blocking it; strength in service of guidance"
+      },
+      "correspondences": {
+        "element": "Earth",
+        "direction": "All (crossroads)",
+        "shrine": "Tsubaki Grand Shrine, various dōsojin shrines",
+        "association": "Dōsojin (roadside kami), martial arts, travel safety"
+      }
+    },
+    {
+      "@id": "arch:JP-OKUNINUSHI",
+      "@type": "Archetype",
+      "name": "Ōkuninushi-no-Kami",
+      "aliases": ["Ōkuninushi", "Ōnamuchi", "Daikokuten", "Great Land Master"],
+      "domain": ["Earth", "Nation-Building", "Medicine", "Love/Marriage", "Wealth"],
+      "description": "The great earthly kami who ruled Izumo and built the terrestrial realm. Descended from Susanoo, he overcame his brothers' attempts to kill him, won Susanoo's daughter through trials, and civilized the earth with the dwarf god Sukunabikona. He peacefully ceded rule to the heavenly kami, becoming the ruler of the unseen realm.",
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.25,
+        "light-shadow": 0.4,
+        "active-receptive": 0.45,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.6,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.85, "aspects": ["land-ruler", "nation-builder"]},
+        {"primordial": "primordial:hero", "weight": 0.75, "aspects": ["trials-overcomer", "persecuted-youngest"]},
+        {"primordial": "primordial:healer", "weight": 0.65, "aspects": ["medicine-bringer", "restorer"]},
+        {"primordial": "primordial:lover", "weight": 0.6, "aspects": ["marriage-deity", "romantic-hero"]}
+      ],
+      "relationships": [
+        {"type": "rel:EVOLUTION", "target": "arch:JP-OKUNINUSHI", "description": "From persecuted brother to great king", "context": "Hero's journey through death and rebirth"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HADES", "fidelity": 0.5, "notes": "Ruler of unseen/hidden realm"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CE-DAGDA", "fidelity": 0.55, "notes": "Great father, earth-ruler, abundance"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-GANESHA", "fidelity": 0.4, "notes": "Prosperity, obstacles overcome (as Daikokuten)"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When earthly power resists cosmic order", "When abundance becomes hoarding"],
+        "shadowManifestations": ["Refusing to yield", "Excessive attachment to earthly rule"],
+        "integrationPath": "Graceful yielding of visible power to gain invisible sovereignty"
+      },
+      "contextualVariants": [
+        {
+          "context": "Youth - persecuted brother",
+          "spectralShift": {"individual-collective": 0.7, "stasis-transformation": 0.7},
+          "notes": "Killed by brothers, revived, tested by Susanoo"
+        },
+        {
+          "context": "Nation-builder with Sukunabikona",
+          "spectralShift": {"creation-destruction": 0.15, "order-chaos": 0.2},
+          "notes": "Creating civilization, healing, agriculture"
+        },
+        {
+          "context": "As Daikokuten (wealth deity)",
+          "spectralShift": {"light-shadow": 0.3, "ascent-descent": 0.5},
+          "notes": "Buddhist-Shinto syncretic prosperity god"
+        }
+      ],
+      "correspondences": {
+        "element": "Earth",
+        "direction": "Center/Below",
+        "shrine": "Izumo Taisha (greatest shrine)",
+        "symbol": "Mallet of fortune (as Daikokuten)",
+        "association": "Marriage, medicine, prosperity, the unseen"
+      }
+    },
+    {
+      "@id": "arch:JP-NINIGI",
+      "@type": "Archetype",
+      "name": "Ninigi-no-Mikoto",
+      "aliases": ["Ame-nigishi-kuni-nigishi-amatsuhiko-hiko-ho-no-ninigi-no-Mikoto", "Heavenly Grandchild"],
+      "domain": ["Divine Descent", "Sacred Kingship", "Agriculture", "Imperial Line"],
+      "description": "The grandson of Amaterasu who descended from heaven to rule the terrestrial realm, carrying the three sacred treasures (mirror, sword, jewel). His descent (tenson kōrin) established the divine mandate of the Imperial line. He married the blossom princess Konohanasakuya-hime but rejected her sister, explaining human mortality.",
+      "spectralCoordinates": {
+        "order-chaos": 0.2,
+        "creation-destruction": 0.3,
+        "light-shadow": 0.25,
+        "active-receptive": 0.35,
+        "individual-collective": 0.25,
+        "ascent-descent": 0.45,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.65
+      },
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.85, "aspects": ["divine-king", "mandate-bearer"]},
+        {"primordial": "primordial:divine-child", "weight": 0.7, "aspects": ["heavenly-grandchild", "promise-fulfiller"]},
+        {"primordial": "primordial:hero", "weight": 0.5, "aspects": ["descender", "realm-establisher"]}
+      ],
+      "relationships": [
+        {"type": "rel:CONTAINED_BY", "target": "arch:JP-AMATERASU", "description": "Grandson carrying her mandate"},
+        {"type": "rel:COMPLEMENT", "target": "arch:JP-KONOHANASAKUYA", "description": "Divine marriage establishing earthly dynasty"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-DUMUZI", "fidelity": 0.45, "notes": "Divine king, seasonal/mortal nature"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-RAMA", "fidelity": 0.5, "notes": "Divine descent, righteous kingship"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When divine mandate becomes entitlement", "When beauty is preferred over permanence"],
+        "shadowManifestations": ["Superficial judgment", "Rejecting wisdom for appearance", "Causing mortality through poor choice"],
+        "integrationPath": "Accepting both beauty and permanence; seeing beyond surface"
+      },
+      "correspondences": {
+        "element": "Light/Grain",
+        "direction": "Descent (heaven to earth)",
+        "symbol": "Three Sacred Treasures",
+        "association": "Imperial legitimacy, rice cultivation"
+      }
+    },
+    {
+      "@id": "arch:JP-KONOHANASAKUYA",
+      "@type": "Archetype",
+      "name": "Konohanasakuya-hime",
+      "aliases": ["Sakuya-hime", "Princess of the Blossoming Trees", "Sengen"],
+      "domain": ["Cherry Blossoms", "Mount Fuji", "Ephemeral Beauty", "Childbirth", "Fire"],
+      "description": "The beautiful blossom princess who married Ninigi, embodying the ephemeral beauty of cherry blossoms. When Ninigi doubted her children's paternity, she proved her fidelity by giving birth in a burning hut. She is enshrined as the deity of Mount Fuji and protects against volcanic eruptions.",
+      "spectralCoordinates": {
+        "order-chaos": 0.45,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.3,
+        "active-receptive": 0.6,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.75,
+        "voluntary-fated": 0.6
+      },
+      "instantiates": [
+        {"primordial": "primordial:maiden", "weight": 0.85, "aspects": ["ephemeral-beauty", "spring-bloom"]},
+        {"primordial": "primordial:great-mother", "weight": 0.7, "aspects": ["fire-birth", "fierce-protector"]},
+        {"primordial": "primordial:lover", "weight": 0.65, "aspects": ["devoted-wife", "proving-fidelity"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:JP-NINIGI", "description": "Divine marriage with the heavenly grandchild"},
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:JP-IWANAGAHIME", "axis": "stasis-transformation", "description": "Ephemeral beauty vs eternal rock"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-PERSEPHONE", "fidelity": 0.5, "notes": "Spring maiden, cyclical nature"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-SITA", "fidelity": 0.6, "notes": "Fire ordeal proving fidelity"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When beauty becomes vanity", "When impermanence leads to despair"],
+        "shadowManifestations": ["Destructive fire", "Volcanic eruption", "Brief flames that consume"],
+        "integrationPath": "Accepting beauty in impermanence; fierce protection through transformation"
+      },
+      "correspondences": {
+        "element": "Fire/Wood (blossoms)",
+        "direction": "Center (Mount Fuji)",
+        "shrine": "Fujisan Hongū Sengen Taisha",
+        "symbol": "Cherry blossoms, Mount Fuji",
+        "festival": "Hanami (cherry blossom viewing)"
+      }
+    },
+    {
+      "@id": "arch:JP-INARI",
+      "@type": "Archetype",
+      "name": "Inari-Ōkami",
+      "aliases": ["Inari", "Oinari-sama", "Uka-no-Mitama"],
+      "domain": ["Rice", "Foxes", "Fertility", "Industry", "Prosperity", "Swordsmiths"],
+      "description": "The kami of rice, foxes, fertility, and prosperity - one of the most widely worshipped deities in Japan. Inari's gender is ambiguous or shifts, appearing as male, female, or androgynous. The white fox (kitsune) serves as Inari's messenger. Inari's domain expanded from agriculture to include industry, commerce, and worldly success.",
+      "spectralCoordinates": {
+        "order-chaos": 0.4,
+        "creation-destruction": 0.3,
+        "light-shadow": 0.45,
+        "active-receptive": 0.5,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.4
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.7, "aspects": ["fertility", "abundance", "nourishment"]},
+        {"primordial": "primordial:magician", "weight": 0.65, "aspects": ["shape-shifting", "fox-magic", "worldly-success"]},
+        {"primordial": "primordial:trickster", "weight": 0.5, "aspects": ["fox-nature", "boundary-crossing"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-DEMETER", "fidelity": 0.6, "notes": "Grain deity, agricultural fertility"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-LAKSHMI", "fidelity": 0.55, "notes": "Prosperity, abundance"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CE-BRIGID", "fidelity": 0.45, "notes": "Smithcraft, fertility, multiple domains"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When prosperity becomes greed", "When fox-cunning serves selfishness"],
+        "shadowManifestations": ["Kitsune possession", "Trickery for harm", "Hoarding wealth"],
+        "integrationPath": "Prosperity in service of community; cunning for protection"
+      },
+      "contextualVariants": [
+        {
+          "context": "Agricultural Inari",
+          "spectralShift": {"ascent-descent": 0.65, "creation-destruction": 0.2},
+          "notes": "Rice cultivation, harvest abundance"
+        },
+        {
+          "context": "Industrial/Commercial Inari",
+          "spectralShift": {"order-chaos": 0.35, "stasis-transformation": 0.45},
+          "notes": "Business success, worldly achievement"
+        },
+        {
+          "context": "Fox-spirit aspect",
+          "spectralShift": {"order-chaos": 0.55, "light-shadow": 0.55},
+          "notes": "Magical, shape-shifting, liminal"
+        }
+      ],
+      "correspondences": {
+        "element": "Earth/Fire",
+        "direction": "Center (widespread)",
+        "shrine": "Fushimi Inari Taisha (and thousands of others)",
+        "symbol": "Fox, torii gates, rice",
+        "color": "Red (torii), white (fox)"
+      }
+    },
+    {
+      "@id": "arch:JP-HACHIMAN",
+      "@type": "Archetype",
+      "name": "Hachiman",
+      "aliases": ["Hachiman-shin", "Yawata-no-Kami", "Emperor Ōjin"],
+      "domain": ["War", "Archery", "Divine Protection", "Samurai", "Imperial Line"],
+      "description": "The syncretic kami of war and divine protection, identified with the legendary Emperor Ōjin and later adopted as a bodhisattva. He became the tutelary deity of the Minamoto clan and patron of samurai warriors. Unlike pure war gods, Hachiman emphasizes protection and righteous warfare rather than bloodlust.",
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.35,
+        "active-receptive": 0.2,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.35
+      },
+      "instantiates": [
+        {"primordial": "primordial:warrior", "weight": 0.9, "aspects": ["protector", "righteous-battle", "archery"]},
+        {"primordial": "primordial:sovereign", "weight": 0.7, "aspects": ["imperial-deity", "clan-patron"]},
+        {"primordial": "primordial:guardian", "weight": 0.75, "aspects": ["divine-protection", "defender"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ARES", "fidelity": 0.5, "notes": "War god"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ATHENA", "fidelity": 0.6, "notes": "Strategic warfare, civilization protection"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-TYR", "fidelity": 0.55, "notes": "Righteous warfare"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-INDRA", "fidelity": 0.5, "notes": "Warrior deity, divine protection"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When protection becomes aggression", "When warrior code serves ego"],
+        "shadowManifestations": ["Violence for its own sake", "Clan rivalry", "Militarism"],
+        "integrationPath": "Protective strength in service of peace and righteousness"
+      },
+      "correspondences": {
+        "element": "Metal/Earth",
+        "direction": "All (widespread warrior cult)",
+        "shrine": "Usa Jingū, Tsurugaoka Hachimangū",
+        "symbol": "Bow and arrow, tomoe (comma-spiral)",
+        "association": "Samurai, archery, victory in righteous causes"
+      }
+    },
+    {
+      "@id": "arch:JP-BENZAITEN",
+      "@type": "Archetype",
+      "name": "Benzaiten",
+      "aliases": ["Benten", "Sarasvatī (Sanskrit origin)"],
+      "domain": ["Music", "Arts", "Eloquence", "Wisdom", "Water", "Snakes/Dragons"],
+      "description": "The goddess of music, arts, eloquence, and flowing things (water, words, music), derived from the Hindu Saraswati through Buddhist transmission. One of the Seven Lucky Gods (Shichifukujin), she is associated with serpents and dragons, islands, and bodies of water. She embodies the flow of creative and intellectual energy.",
+      "spectralCoordinates": {
+        "order-chaos": 0.4,
+        "creation-destruction": 0.3,
+        "light-shadow": 0.3,
+        "active-receptive": 0.55,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.45,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.4
+      },
+      "instantiates": [
+        {"primordial": "primordial:magician", "weight": 0.75, "aspects": ["arts", "eloquence", "hidden-knowledge"]},
+        {"primordial": "primordial:lover", "weight": 0.55, "aspects": ["beauty", "aesthetic-creation"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.5, "aspects": ["wisdom", "learning"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-SARASWATI", "fidelity": 0.9, "notes": "Direct transmission through Buddhism"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ATHENA", "fidelity": 0.5, "notes": "Wisdom, arts, strategic thinking"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CE-BRIGID", "fidelity": 0.55, "notes": "Arts, inspiration, multiple domains"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When art becomes vanity", "When eloquence becomes manipulation"],
+        "shadowManifestations": ["Jealousy of other artists", "Serpent's venom", "Flood destruction"],
+        "integrationPath": "Art and wisdom in service of enlightenment and beauty"
+      },
+      "correspondences": {
+        "element": "Water",
+        "direction": "Islands, lakeside",
+        "shrine": "Enoshima Shrine, various island/water shrines",
+        "symbol": "Biwa (lute), white snake, dragon",
+        "association": "Seven Lucky Gods, music, learning, wealth"
+      }
+    },
+    {
+      "@id": "arch:JP-RAIJIN",
+      "@type": "Archetype",
+      "name": "Raijin",
+      "aliases": ["Raiden", "Kaminari-sama", "Thunder Kami"],
+      "domain": ["Thunder", "Lightning", "Storms", "Fear", "Protection of Temples"],
+      "description": "The fearsome thunder god depicted with a ring of drums and a demonic appearance. Often paired with Fūjin (wind god), he represents the terrifying power of storms. Despite his fearsome appearance, he is also a protector, and thunder was believed to fertilize rice fields.",
+      "spectralCoordinates": {
+        "order-chaos": 0.7,
+        "creation-destruction": 0.6,
+        "light-shadow": 0.55,
+        "active-receptive": 0.15,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.55
+      },
+      "instantiates": [
+        {"primordial": "primordial:destroyer", "weight": 0.7, "aspects": ["lightning-strike", "terrifying-power"]},
+        {"primordial": "primordial:warrior", "weight": 0.6, "aspects": ["fearsome-protector", "guardian"]},
+        {"primordial": "primordial:trickster", "weight": 0.45, "aspects": ["unpredictable", "drum-beater"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:JP-FUJIN", "description": "Thunder and wind pair"},
+        {"type": "rel:MIRRORS", "target": "arch:JP-SUSANOO", "description": "Storm aspects"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-THOR", "fidelity": 0.7, "notes": "Thunder god"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-INDRA", "fidelity": 0.65, "notes": "Thunder, storms, fearsome protector"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ZEUS", "fidelity": 0.5, "notes": "Thunder/lightning deity"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When power becomes terror for its own sake", "When protection through fear becomes tyranny"],
+        "shadowManifestations": ["Destructive lightning", "Mindless destruction", "Fear without purpose"],
+        "integrationPath": "Fearsome power in service of fertility and protection"
+      },
+      "correspondences": {
+        "element": "Fire/Air (lightning)",
+        "direction": "Sky",
+        "shrine": "Kaminarimon gates, various thunder shrines",
+        "symbol": "Drum ring, lightning bolts",
+        "association": "Thunder, lightning, rice fertility, temple protection"
+      }
+    },
+    {
+      "@id": "arch:JP-FUJIN",
+      "@type": "Archetype",
+      "name": "Fūjin",
+      "aliases": ["Fūten", "Wind Kami"],
+      "domain": ["Wind", "Air", "Breath", "Freedom"],
+      "description": "The wind god depicted carrying a large bag of winds, often paired with Raijin. He represents the vital breath that animates all life and the unpredictable, liberating power of wind. His iconography shows a wild, demonic figure releasing winds from his bag.",
+      "spectralCoordinates": {
+        "order-chaos": 0.75,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.5,
+        "active-receptive": 0.2,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.3,
+        "stasis-transformation": 0.65,
+        "voluntary-fated": 0.6
+      },
+      "instantiates": [
+        {"primordial": "primordial:trickster", "weight": 0.7, "aspects": ["unpredictable", "boundary-crossing"]},
+        {"primordial": "primordial:rebel", "weight": 0.55, "aspects": ["wild-freedom", "untameable"]},
+        {"primordial": "primordial:creator", "weight": 0.4, "aspects": ["vital-breath", "life-animating"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:JP-RAIJIN", "description": "Wind and thunder pair"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-AEOLUS", "fidelity": 0.7, "notes": "Wind keeper with bag of winds"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-VAYU", "fidelity": 0.65, "notes": "Wind/breath deity"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-ENLIL", "fidelity": 0.5, "notes": "Wind/air god"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When freedom becomes destruction", "When breath becomes suffocation"],
+        "shadowManifestations": ["Typhoons", "Devastating storms", "Chaotic destruction"],
+        "integrationPath": "Wind as vital breath and gentle breeze; freedom with responsibility"
+      },
+      "correspondences": {
+        "element": "Air",
+        "direction": "All (wind blows everywhere)",
+        "shrine": "Paired with Raijin at temple gates",
+        "symbol": "Bag of winds",
+        "association": "Weather, breath, freedom, unpredictability"
+      }
+    },
+    {
+      "@id": "arch:JP-JIZO",
+      "@type": "Archetype",
+      "name": "Jizō Bosatsu",
+      "aliases": ["Kṣitigarbha (Sanskrit)", "O-Jizō-sama", "Earth Treasury Bodhisattva"],
+      "domain": ["Children", "Travelers", "The Dead", "Hell Realms", "Boundaries", "Protection"],
+      "description": "The beloved bodhisattva who protects children (especially deceased children), travelers, and beings in the hell realms. Small stone Jizō statues are ubiquitous in Japan, dressed in red bibs and caps by grieving parents. He vowed not to achieve Buddhahood until all hell realms are empty.",
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.55,
+        "active-receptive": 0.6,
+        "individual-collective": 0.25,
+        "ascent-descent": 0.7,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.2
+      },
+      "instantiates": [
+        {"primordial": "primordial:psychopomp", "weight": 0.85, "aspects": ["guide-of-dead", "hell-traveler", "boundary-guardian"]},
+        {"primordial": "primordial:healer", "weight": 0.8, "aspects": ["protector-of-children", "comforter"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.6, "aspects": ["compassionate-guide", "patient-teacher"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HERMES", "fidelity": 0.55, "notes": "Psychopomp, traveler protection, boundaries"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-ANUBIS", "fidelity": 0.5, "notes": "Guide of dead, underworld traveler"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-YAMA", "fidelity": 0.4, "notes": "Connection to death realms (but compassionate rather than judging)"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When compassion enables rather than helps", "When protection becomes overprotection"],
+        "shadowManifestations": ["Endless suffering in hell realms", "Grief without resolution"],
+        "integrationPath": "Compassion that transforms rather than merely comforts; guiding toward liberation"
+      },
+      "correspondences": {
+        "element": "Earth",
+        "direction": "Roadsides, crossroads, graveyards",
+        "symbol": "Staff with six rings, wish-fulfilling jewel",
+        "color": "Red (bibs and caps)",
+        "association": "Mizuko kuyō (memorial for miscarried/aborted children), travelers, safety"
+      }
+    },
+    {
+      "@id": "arch:JP-EMMA",
+      "@type": "Archetype",
+      "name": "Enma-Ō",
+      "aliases": ["Emma", "Yama (Sanskrit origin)", "King of Hell"],
+      "domain": ["Underworld", "Judgment", "Death", "Karma", "Justice"],
+      "description": "The king of the underworld and judge of the dead, derived from the Hindu/Buddhist Yama. He presides over the judgment of souls, consulting the Register of Sins and the Mirror of Karma. Despite his fearsome reputation, he serves cosmic justice rather than evil.",
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.6,
+        "light-shadow": 0.7,
+        "active-receptive": 0.35,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.85,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.8
+      },
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.85, "aspects": ["underworld-king", "cosmic-judge"]},
+        {"primordial": "primordial:destroyer", "weight": 0.6, "aspects": ["death-lord", "karma-enforcer"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.5, "aspects": ["truth-seer", "justice-keeper"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-YAMA", "fidelity": 0.9, "notes": "Direct transmission through Buddhism"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HADES", "fidelity": 0.6, "notes": "Underworld ruler"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-OSIRIS", "fidelity": 0.55, "notes": "Judge of dead, underworld king"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-ERESHKIGAL", "fidelity": 0.45, "notes": "Underworld sovereign"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When judgment becomes cruelty", "When justice lacks mercy"],
+        "shadowManifestations": ["Merciless punishment", "Terrorizing rather than teaching"],
+        "integrationPath": "Justice tempered by compassion; judgment as teaching rather than mere punishment"
+      },
+      "correspondences": {
+        "element": "Earth/Fire (hell)",
+        "direction": "Below",
+        "shrine": "Enma-dō temples",
+        "symbol": "Judge's cap, register of sins, karma mirror",
+        "association": "Buddhist hell realms, judgment, moral consequences"
+      }
+    }
+  ]
+}

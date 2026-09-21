@@ -1,0 +1,1875 @@
+{
+  "@context": "../../schema/ACP_CONTEXT.jsonld",
+  "entries": [
+    {
+      "@id": "system:greek",
+      "@type": "System",
+      "systemCode": "GR",
+      "name": "Greek Olympian Pantheon",
+      "description": "The deities of ancient Greek religion, centered on the Twelve Olympians but including Titans, chthonic deities, and personified forces.",
+      "culturalContext": "Ancient Greece, ~800 BCE - 400 CE",
+      "primarySources": ["Hesiod Theogony", "Homeric Hymns", "Iliad", "Odyssey", "Orphic texts"],
+      "characteristics": [
+        "Anthropomorphic deities with human personalities",
+        "Emphasis on fate (Moira) even over gods",
+        "Complex family relationships and conflicts",
+        "Duality of sky/earth, order/chaos, civilization/nature"
+      ]
+    },
+
+    {
+      "@id": "arch:GR-ZEUS",
+      "@type": "Archetype",
+      "name": "Zeus",
+      "systemCode": "GR",
+      "belongsToSystem": "system:greek",
+      "description": "King of the Olympian gods, ruler of sky and thunder. Father of gods and men. Upholder of cosmic and social order, yet also transgressor through his desires.",
+
+      "aliases": [
+        {"name": "Jupiter", "system": "Roman", "fidelity": 0.95},
+        {"name": "Dyaus Pita", "system": "Vedic", "fidelity": 0.7},
+        {"name": "Tyr/Tiwaz", "system": "Norse", "fidelity": 0.5, "aspect": "sky-father etymology only"},
+        {"name": "Indra", "system": "Hindu", "fidelity": 0.6, "aspect": "thunderer aspect"}
+      ],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.2,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.25,
+        "active-receptive": 0.15,
+        "individual-collective": 0.7,
+        "ascent-descent": 0.1,
+        "stasis-transformation": 0.3,
+        "voluntary-fated": 0.4
+      },
+
+      "elementalComposition": {
+        "air": 0.9,
+        "fire": 0.5,
+        "water": 0.2,
+        "earth": 0.1,
+        "aether": 0.7
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:great-father", "weight": 0.85, "aspects": ["sky-father", "father-of-gods", "progenitor"]},
+        {"primordial": "primordial:sovereign", "weight": 0.9, "aspects": ["cosmic-ruler", "law-giver", "judge"]}
+      ],
+
+      "coreFunction": "To maintain cosmic order, dispense justice, and embody sovereign authority",
+      "symbolicCore": "The thunderbolt that maintains order through power",
+      "domains": ["sky", "thunder", "justice", "hospitality", "kingship", "oaths"],
+
+      "psychologicalMapping": {
+        "jungianStructure": "Father complex, collective superego",
+        "developmentalStage": "Authority and responsibility",
+        "cognitiveBias": "Confirmation bias toward own authority",
+        "integrationTask": "Balancing power with wisdom and restraint"
+      },
+
+      "narrativeRoles": ["sovereign", "judge", "father", "philanderer", "protector"],
+      "storyFunctions": ["establishes order", "dispenses justice", "tests mortals", "intervenes in fate"],
+
+      "correspondences": {
+        "tarot": ["TAMA-EMPEROR", "TAMA-JUSTICE"],
+        "planet": "7P-JUPITER",
+        "element": "EL-AIR",
+        "chakra": "CH-SAHASRARA",
+        "day": "Thursday",
+        "metal": "tin",
+        "animals": ["eagle", "bull"],
+        "plants": ["oak"],
+        "colors": ["royal purple", "sky blue"]
+      },
+
+      "relationships": [
+        {
+          "type": "POLAR_OPPOSITE",
+          "target": "arch:GR-HADES",
+          "axis": "axis:ascent-descent",
+          "strength": 0.95,
+          "notes": "Sky ruler vs Underworld ruler - vertical cosmic axis"
+        },
+        {
+          "type": "COMPLEMENT",
+          "target": "arch:GR-HERA",
+          "dynamic": "king and queen, order through union",
+          "strength": 0.85,
+          "notes": "Sacred marriage (hieros gamos) despite conflicts"
+        },
+        {
+          "type": "ANTAGONIST",
+          "target": "arch:GR-PROMETHEUS",
+          "dynamic": "authority vs rebellion",
+          "strength": 0.9
+        },
+        {
+          "type": "SHADOW",
+          "target": "primordial:tyrant",
+          "activation": "When authority becomes oppression",
+          "strength": 0.7
+        },
+        {
+          "type": "CONTAINS",
+          "target": "primordial:warrior",
+          "aspect": "defender of cosmic order"
+        },
+        {
+          "type": "CULTURAL_ECHO",
+          "target": "arch:IT-JUPITER",
+          "fidelity": 0.95,
+          "notes": "Direct Roman adoption with civic emphasis"
+        },
+        {
+          "type": "CULTURAL_ECHO",
+          "target": "arch:IN-INDRA",
+          "fidelity": 0.6,
+          "notes": "Shared Indo-European thunder god origins"
+        }
+      ],
+
+      "developmentalArc": {
+        "origin": "Son who overthrows father (Cronus)",
+        "ascent": "Establishes Olympian order after Titanomachy",
+        "reign": "Maintains cosmic justice, struggles with desire",
+        "shadow": "Tyranny, sexual predation, jealousy"
+      },
+
+      "ritualFunction": "Invoked for justice, oaths, protection of guests, kingship",
+      "dreamForm": "Lightning, eagles, storms, authoritative male figure",
+      "poeticInvocation": "Cloud-gatherer, father of gods and men, wielder of the aegis"
+    },
+
+    {
+      "@id": "arch:GR-HERA",
+      "@type": "Archetype",
+      "name": "Hera",
+      "systemCode": "GR",
+      "belongsToSystem": "system:greek",
+      "description": "Queen of the gods, goddess of marriage, women, and family. Embodies the dignified and wrathful aspects of committed partnership.",
+
+      "aliases": [
+        {"name": "Juno", "system": "Roman", "fidelity": 0.9},
+        {"name": "Frigg", "system": "Norse", "fidelity": 0.5, "aspect": "queen of gods"}
+      ],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.4,
+        "active-receptive": 0.4,
+        "individual-collective": 0.6,
+        "ascent-descent": 0.25,
+        "stasis-transformation": 0.2,
+        "voluntary-fated": 0.55
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.85, "aspects": ["queen-of-gods", "royal-dignity"]},
+        {"primordial": "primordial:great-mother", "weight": 0.7, "aspects": ["marriage-protector", "women-guardian"]}
+      ],
+
+      "coreFunction": "To sanctify and protect marriage, embody queenly dignity",
+      "symbolicCore": "The sacred bond that must be honored",
+      "domains": ["marriage", "women", "childbirth", "family", "fidelity"],
+
+      "relationships": [
+        {
+          "type": "COMPLEMENT",
+          "target": "arch:GR-ZEUS",
+          "dynamic": "sacred marriage",
+          "strength": 0.85
+        },
+        {
+          "type": "SHADOW",
+          "target": "primordial:jealous-destroyer",
+          "activation": "When betrayal triggers vengeance",
+          "strength": 0.8
+        },
+        {
+          "type": "ANTAGONIST",
+          "target": "arch:GR-HERACLES",
+          "dynamic": "stepmother persecution",
+          "strength": 0.85
+        },
+        {
+          "type": "MIRRORS",
+          "target": "arch:GR-APHRODITE",
+          "domain": "marital love vs erotic love",
+          "notes": "Committed vs passionate aspects of love"
+        }
+      ],
+
+      "correspondences": {
+        "tarot": ["TAMA-EMPRESS", "TAMA-JUSTICE"],
+        "planet": "7P-SATURN",
+        "animals": ["peacock", "cow", "cuckoo"],
+        "plants": ["pomegranate", "lily"],
+        "colors": ["royal blue", "white"]
+      },
+
+      "poeticInvocation": "Ox-eyed queen, protector of the marriage bed, enthroned beside the Thunderer"
+    },
+
+    {
+      "@id": "arch:GR-POSEIDON",
+      "@type": "Archetype",
+      "name": "Poseidon",
+      "systemCode": "GR",
+      "belongsToSystem": "system:greek",
+      "description": "God of the sea, earthquakes, and horses. Represents the vast emotional unconscious, instinctual power, and the forces beneath civilization.",
+
+      "aliases": [
+        {"name": "Neptune", "system": "Roman", "fidelity": 0.9},
+        {"name": "Njord", "system": "Norse", "fidelity": 0.4, "aspect": "sea god"}
+      ],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.5,
+        "active-receptive": 0.35,
+        "individual-collective": 0.6,
+        "ascent-descent": 0.6,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.5
+      },
+
+      "elementalComposition": {
+        "water": 0.95,
+        "earth": 0.5,
+        "air": 0.2,
+        "fire": 0.3
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:great-father", "weight": 0.8, "aspects": ["primal-power", "oceanic-father", "instinctual-depth"]}
+      ],
+
+      "coreFunction": "To embody emotional depth, instinctual power, and the untameable",
+      "symbolicCore": "The ocean that cannot be ruled, only navigated",
+      "domains": ["sea", "earthquakes", "horses", "storms", "navigation"],
+
+      "relationships": [
+        {
+          "type": "POLAR_OPPOSITE",
+          "target": "arch:GR-ATHENA",
+          "axis": "axis:order-chaos",
+          "strength": 0.8,
+          "notes": "Instinct vs reason - their contest for Athens"
+        },
+        {
+          "type": "COMPLEMENT",
+          "target": "arch:GR-ZEUS",
+          "dynamic": "brothers dividing cosmos",
+          "strength": 0.7
+        },
+        {
+          "type": "COMPLEMENT",
+          "target": "arch:GR-HADES",
+          "dynamic": "three brothers, three realms",
+          "strength": 0.7
+        }
+      ],
+
+      "correspondences": {
+        "tarot": ["TAMA-MOON"],
+        "planet": "7P-NEPTUNE",
+        "element": "EL-WATER",
+        "chakra": "CH-SVADHISTHANA",
+        "animals": ["horse", "dolphin", "bull"],
+        "colors": ["sea blue", "sea green"]
+      },
+
+      "poeticInvocation": "Earth-shaker, lord of the wine-dark sea, tamer of horses"
+    },
+
+    {
+      "@id": "arch:GR-ATHENA",
+      "@type": "Archetype",
+      "name": "Athena",
+      "systemCode": "GR",
+      "belongsToSystem": "system:greek",
+      "description": "Goddess of wisdom, strategic warfare, and crafts. Born from Zeus's head fully armored. Represents rational intelligence, civilization, and the integrated feminine that needs no masculine completion.",
+
+      "aliases": [
+        {"name": "Minerva", "system": "Roman", "fidelity": 0.85},
+        {"name": "Neith", "system": "Egyptian", "fidelity": 0.4, "aspect": "weaving, warfare"}
+      ],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.1,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.15,
+        "active-receptive": 0.3,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.3,
+        "stasis-transformation": 0.35,
+        "voluntary-fated": 0.3
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:warrior", "weight": 0.8, "aspects": ["strategic-warfare", "defender-of-cities"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.85, "aspects": ["practical-wisdom", "counsel", "craft-knowledge"]},
+        {"primordial": "primordial:maiden", "weight": 0.7, "aspects": ["virgin-independence", "self-belonging"]}
+      ],
+
+      "coreFunction": "To embody wisdom applied through strategy, craft, and civilization",
+      "symbolicCore": "The owl's gaze that sees in darkness - wisdom penetrating confusion",
+      "domains": ["wisdom", "strategy", "crafts", "civilization", "just warfare", "heroes"],
+
+      "relationships": [
+        {
+          "type": "POLAR_OPPOSITE",
+          "target": "arch:GR-ARES",
+          "axis": "axis:order-chaos",
+          "strength": 0.9,
+          "notes": "Strategic war vs chaotic bloodlust"
+        },
+        {
+          "type": "POLAR_OPPOSITE",
+          "target": "arch:GR-POSEIDON",
+          "axis": "axis:order-chaos",
+          "strength": 0.8,
+          "notes": "Reason vs instinct"
+        },
+        {
+          "type": "COMPLEMENT",
+          "target": "arch:GR-HERMES",
+          "dynamic": "wisdom + cunning",
+          "strength": 0.75
+        },
+        {
+          "type": "ALLY",
+          "target": "arch:GR-ODYSSEUS",
+          "dynamic": "patron and hero",
+          "strength": 0.9
+        },
+        {
+          "type": "MIRRORS",
+          "target": "arch:GR-ARTEMIS",
+          "domain": "virgin goddesses",
+          "notes": "Intellectual independence vs wild independence"
+        }
+      ],
+
+      "correspondences": {
+        "tarot": ["TAMA-JUSTICE", "TAMA-HIGH-PRIESTESS"],
+        "planet": "7P-MERCURY",
+        "element": "EL-AIR",
+        "chakra": "CH-AJNA",
+        "animals": ["owl", "snake"],
+        "plants": ["olive tree"],
+        "colors": ["grey", "silver", "blue"]
+      },
+
+      "poeticInvocation": "Grey-eyed daughter of Zeus, aegis-bearer, unwearied protector of heroes and cities"
+    },
+
+    {
+      "@id": "arch:GR-APOLLO",
+      "@type": "Archetype",
+      "name": "Apollo",
+      "systemCode": "GR",
+      "belongsToSystem": "system:greek",
+      "description": "God of light, reason, prophecy, music, poetry, and healing. The ideal of classical beauty, clarity, and measured harmony. Twin of Artemis.",
+
+      "aliases": [
+        {"name": "Apollo", "system": "Roman", "fidelity": 0.98},
+        {"name": "Helios", "system": "Greek", "fidelity": 0.6, "aspect": "later conflation with sun"},
+        {"name": "Baldr", "system": "Norse", "fidelity": 0.5, "aspect": "radiant god killed"}
+      ],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.3,
+        "light-shadow": 0.1,
+        "active-receptive": 0.35,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.2,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.6
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:healer", "weight": 0.8, "aspects": ["purifier", "plague-sender-and-remover"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.75, "aspects": ["oracle", "truth-revealer", "harmony-bringer"]}
+      ],
+
+      "coreFunction": "To illuminate, purify, heal, and reveal truth through clarity",
+      "symbolicCore": "The sun that reveals all things in clear light",
+      "domains": ["light", "prophecy", "music", "poetry", "healing", "plague", "archery", "truth"],
+
+      "relationships": [
+        {
+          "type": "POLAR_OPPOSITE",
+          "target": "arch:GR-DIONYSUS",
+          "axis": "axis:order-chaos",
+          "strength": 0.95,
+          "notes": "The Apollonian-Dionysian dialectic (Nietzsche)"
+        },
+        {
+          "type": "COMPLEMENT",
+          "target": "arch:GR-ARTEMIS",
+          "dynamic": "divine twins, sun and moon",
+          "strength": 0.9
+        },
+        {
+          "type": "SHADOW",
+          "target": "primordial:cruel-perfectionist",
+          "activation": "When clarity becomes harsh judgment",
+          "strength": 0.6
+        },
+        {
+          "type": "CONTAINS",
+          "target": "primordial:healer"
+        }
+      ],
+
+      "correspondences": {
+        "tarot": ["TAMA-SUN", "TAMA-CHARIOT"],
+        "planet": "7P-SUN",
+        "element": "EL-FIRE",
+        "chakra": "CH-MANIPURA",
+        "animals": ["raven", "swan", "wolf", "dolphin"],
+        "plants": ["laurel", "hyacinth"],
+        "colors": ["gold", "white", "yellow"]
+      },
+
+      "poeticInvocation": "Far-shooter, Phoebus of the silver bow, lord of Delphi, healer and destroyer"
+    },
+
+    {
+      "@id": "arch:GR-ARTEMIS",
+      "@type": "Archetype",
+      "name": "Artemis",
+      "systemCode": "GR",
+      "belongsToSystem": "system:greek",
+      "description": "Goddess of the hunt, wilderness, moon, and childbirth. Virgin huntress who embodies wild feminine independence and the boundary between civilization and nature.",
+
+      "aliases": [
+        {"name": "Diana", "system": "Roman", "fidelity": 0.9},
+        {"name": "Selene", "system": "Greek", "fidelity": 0.5, "aspect": "moon goddess conflation"}
+      ],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.4,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.35,
+        "active-receptive": 0.3,
+        "individual-collective": 0.25,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.25
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:maiden", "weight": 0.9, "aspects": ["virgin-huntress", "wild-independence"]},
+        {"primordial": "primordial:warrior", "weight": 0.7, "aspects": ["fierce-protector", "hunter"]}
+      ],
+
+      "coreFunction": "To protect wildness, independence, and the liminal boundary of nature",
+      "symbolicCore": "The moon that illuminates the wild - fierce independence",
+      "domains": ["hunt", "wilderness", "moon", "childbirth", "young women", "boundaries"],
+
+      "relationships": [
+        {
+          "type": "COMPLEMENT",
+          "target": "arch:GR-APOLLO",
+          "dynamic": "divine twins",
+          "strength": 0.9
+        },
+        {
+          "type": "MIRRORS",
+          "target": "arch:GR-ATHENA",
+          "domain": "virgin independence",
+          "notes": "Wild vs civilized self-belonging"
+        },
+        {
+          "type": "POLAR_OPPOSITE",
+          "target": "arch:GR-APHRODITE",
+          "axis": "axis:individual-collective",
+          "strength": 0.8,
+          "notes": "Independence vs union/connection"
+        }
+      ],
+
+      "correspondences": {
+        "tarot": ["TAMA-MOON", "TAMA-STRENGTH"],
+        "planet": "7P-MOON",
+        "element": "EL-WATER",
+        "chakra": "CH-SVADHISTHANA",
+        "animals": ["deer", "bear", "hunting dogs"],
+        "plants": ["cypress", "amaranth"],
+        "colors": ["silver", "white", "green"]
+      },
+
+      "poeticInvocation": "Lady of the wild places, silver-shafted huntress, torch-bearer of the moon"
+    },
+
+    {
+      "@id": "arch:GR-HERMES",
+      "@type": "Archetype",
+      "name": "Hermes",
+      "systemCode": "GR",
+      "belongsToSystem": "system:greek",
+      "description": "Messenger of the gods, guide of souls, god of boundaries, travelers, thieves, and commerce. The quintessential trickster and threshold-crosser of Greek myth.",
+
+      "aliases": [
+        {"name": "Mercury", "system": "Roman", "fidelity": 0.9},
+        {"name": "Thoth", "system": "Egyptian", "fidelity": 0.65, "aspect": "wisdom, writing, magic"},
+        {"name": "Odin", "system": "Norse", "fidelity": 0.5, "aspect": "wisdom-seeker, traveler"},
+        {"name": "Eshu", "system": "Yoruba", "fidelity": 0.7, "aspect": "crossroads, messenger, trickster"}
+      ],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.5,
+        "active-receptive": 0.3,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.7,
+        "voluntary-fated": 0.25
+      },
+
+      "contextualVariants": [
+        {
+          "context": "Homeric Hymn to Hermes (birth narrative)",
+          "spectralShift": {
+            "order-chaos": 0.7,
+            "light-shadow": 0.4,
+            "voluntary-fated": 0.15
+          },
+          "notes": "More chaotic, youthful trickster - pure agency, choosing mischief"
+        },
+        {
+          "context": "Psychopomp function (Odyssey, guiding souls)",
+          "spectralShift": {
+            "order-chaos": 0.4,
+            "light-shadow": 0.55,
+            "stasis-transformation": 0.6,
+            "voluntary-fated": 0.4
+          },
+          "notes": "More ordered, liminal guide - serving cosmic necessity"
+        },
+        {
+          "context": "Hermes Trismegistus (Hellenistic synthesis)",
+          "spectralShift": {
+            "order-chaos": 0.35,
+            "light-shadow": 0.3,
+            "individual-collective": 0.6,
+            "voluntary-fated": 0.5
+          },
+          "notes": "Wisdom-keeper, revealer of divine mysteries"
+        }
+      ],
+
+      "elementalComposition": {
+        "air": 0.9,
+        "fire": 0.4,
+        "water": 0.3,
+        "earth": 0.2,
+        "aether": 0.6
+      },
+
+      "instantiates": [
+        {
+          "primordial": "primordial:trickster",
+          "weight": 0.85,
+          "aspects": ["boundary-crossing", "cunning", "theft", "mischief", "wit"],
+          "notes": "Core identity - the clever one who disrupts to reveal"
+        },
+        {
+          "primordial": "primordial:psychopomp",
+          "weight": 0.65,
+          "aspects": ["soul-guide", "threshold-crossing", "death-companion", "liminal navigation"],
+          "notes": "Major secondary function - guide between worlds"
+        },
+        {
+          "primordial": "primordial:magician",
+          "weight": 0.45,
+          "aspects": ["hidden-knowledge", "transformation", "sacred words", "ritual power"],
+          "notes": "Via Hermes Trismegistus synthesis - the thrice-great"
+        },
+        {
+          "primordial": "primordial:divine-child",
+          "weight": 0.3,
+          "aspects": ["precocious wisdom", "innocent audacity", "new beginnings"],
+          "notes": "Birth narrative - the infant who steals from Apollo"
+        }
+      ],
+
+      "coreFunction": "To cross boundaries, carry messages, and guide through transitions",
+      "symbolicCore": "The crossroads where all paths meet and diverge",
+      "domains": ["messages", "boundaries", "thieves", "commerce", "travelers", "souls", "language", "cunning"],
+
+      "psychologicalMapping": {
+        "jungianStructure": "Animus aspect, mercurial function",
+        "cognitiveFunctions": ["Ne (extraverted intuition)", "Ti (introverted thinking)"],
+        "MBTI": "ENTP",
+        "enneagram": "7w8",
+        "developmentalStage": "Adolescence through midlife",
+        "integrationTask": "Grounding communication in truth"
+      },
+
+      "relationships": [
+        {
+          "type": "POLAR_OPPOSITE",
+          "target": "arch:GR-HESTIA",
+          "axis": "axis:stasis-transformation",
+          "strength": 0.95,
+          "notes": "Perpetual movement vs sacred stillness - the two never meet on Olympus"
+        },
+        {
+          "type": "COMPLEMENT",
+          "target": "arch:GR-APOLLO",
+          "dynamic": "cunning + clarity",
+          "strength": 0.75,
+          "notes": "Exchange of lyre for cattle"
+        },
+        {
+          "type": "COMPLEMENT",
+          "target": "arch:GR-ATHENA",
+          "dynamic": "cunning + strategy",
+          "strength": 0.75
+        },
+        {
+          "type": "SHADOW",
+          "target": "primordial:deceiver",
+          "activation": "When communication serves manipulation rather than connection",
+          "strength": 0.7
+        },
+        {
+          "type": "EVOLUTION",
+          "target": "primordial:psychopomp",
+          "trigger": "When trickster matures into guide of souls",
+          "direction": "forward"
+        },
+        {
+          "type": "ALLY",
+          "target": "arch:GR-ODYSSEUS",
+          "dynamic": "patron of cunning hero",
+          "strength": 0.85
+        },
+        {
+          "type": "SYNTHESIS",
+          "sources": ["arch:GR-HERMES", "arch:EG-THOTH"],
+          "result": "arch:SYNCRETIC-HERMES-TRISMEGISTUS",
+          "notes": "Hellenistic synthesis creating the thrice-great"
+        },
+        {
+          "type": "CULTURAL_ECHO",
+          "target": "arch:AFY-ESHU",
+          "fidelity": 0.75,
+          "notes": "Crossroads, messenger, divine trickster"
+        }
+      ],
+
+      "narrativeRoles": ["messenger", "trickster", "guide", "thief", "inventor"],
+      "storyFunctions": ["delivers crucial information", "crosses impossible boundaries", "guides through transitions", "provides cunning solutions"],
+
+      "developmentalArc": {
+        "origin": "Born thief (steals Apollo's cattle as infant)",
+        "ascent": "Earns place on Olympus through wit",
+        "mastery": "Becomes psychopomp and divine messenger",
+        "integration": "The trickster who serves cosmic order"
+      },
+
+      "correspondences": {
+        "tarot": ["TAMA-MAGICIAN", "TAMA-FOOL"],
+        "planet": "7P-MERCURY",
+        "element": "EL-AIR",
+        "chakra": "CH-VISHUDDHA",
+        "rune": "RN-ANSUZ",
+        "iChing": ["ICX-FOLLOWING", "ICX-BREAKTHROUGH"],
+        "day": "Wednesday",
+        "metal": "quicksilver/mercury",
+        "animals": ["rooster", "tortoise", "ram"],
+        "plants": ["crocus"],
+        "colors": ["orange", "multicolor", "iridescent"]
+      },
+
+      "ritualFunction": "Invoked at crossroads, for travel, commerce, communication, transitions, magic",
+      "dreamForm": "Swift-moving figure, winged sandals, crossroads, keys, unexpected messages",
+      "poeticInvocation": "Luck-bringer, slayer of Argus, guide of souls to the house of Hades, friend to mortals"
+    },
+
+    {
+      "@id": "arch:GR-DIONYSUS",
+      "@type": "Archetype",
+      "name": "Dionysus",
+      "systemCode": "GR",
+      "belongsToSystem": "system:greek",
+      "description": "God of wine, ecstasy, theatre, and ritual madness. The twice-born who dissolves boundaries between divine and mortal, civilized and wild, self and other.",
+
+      "aliases": [
+        {"name": "Bacchus", "system": "Roman", "fidelity": 0.85},
+        {"name": "Liber", "system": "Roman", "fidelity": 0.7},
+        {"name": "Osiris", "system": "Egyptian", "fidelity": 0.5, "aspect": "dying-rising god"}
+      ],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.8,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.55,
+        "active-receptive": 0.5,
+        "individual-collective": 0.7,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.9,
+        "voluntary-fated": 0.35
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:rebel", "weight": 0.85, "aspects": ["boundary-dissolver", "liberator", "ecstatic-breaker"]},
+        {"primordial": "primordial:divine-child", "weight": 0.75, "aspects": ["twice-born", "eternal-youth", "renewal"]}
+      ],
+
+      "coreFunction": "To dissolve ego boundaries through ecstasy and reveal the divine within chaos",
+      "symbolicCore": "The vine that dies and is reborn - dissolution as liberation",
+      "domains": ["wine", "ecstasy", "theatre", "madness", "fertility", "rebirth", "liberation"],
+
+      "relationships": [
+        {
+          "type": "POLAR_OPPOSITE",
+          "target": "arch:GR-APOLLO",
+          "axis": "axis:order-chaos",
+          "strength": 0.95,
+          "notes": "The fundamental dialectic of Greek consciousness"
+        },
+        {
+          "type": "POLAR_OPPOSITE",
+          "target": "arch:GR-HESTIA",
+          "axis": "axis:stasis-transformation",
+          "strength": 0.85,
+          "notes": "Ecstatic dissolution vs centered stillness"
+        },
+        {
+          "type": "SHADOW",
+          "target": "primordial:destroyer",
+          "activation": "When liberation becomes destruction",
+          "strength": 0.75
+        },
+        {
+          "type": "CULTURAL_ECHO",
+          "target": "arch:IN-SHIVA",
+          "fidelity": 0.6,
+          "notes": "Ecstatic, dancing, transformative masculine"
+        }
+      ],
+
+      "correspondences": {
+        "tarot": ["TAMA-FOOL", "TAMA-HANGED-MAN", "TAMA-TOWER"],
+        "planet": "7P-NEPTUNE",
+        "element": "EL-WATER",
+        "chakra": "CH-SVADHISTHANA",
+        "animals": ["bull", "panther", "serpent", "goat"],
+        "plants": ["vine", "ivy", "fig"],
+        "colors": ["purple", "green", "gold"]
+      },
+
+      "poeticInvocation": "Twice-born, ivy-crowned, loosener of limbs, he who comes"
+    },
+
+    {
+      "@id": "arch:GR-HADES",
+      "@type": "Archetype",
+      "name": "Hades",
+      "systemCode": "GR",
+      "belongsToSystem": "system:greek",
+      "description": "King of the Underworld, lord of the dead and hidden wealth. The unseen one who receives all souls. Represents depth, interiority, and the riches beneath the surface.",
+
+      "aliases": [
+        {"name": "Pluto", "system": "Roman", "fidelity": 0.85},
+        {"name": "Dis Pater", "system": "Roman", "fidelity": 0.8},
+        {"name": "Osiris", "system": "Egyptian", "fidelity": 0.5, "aspect": "lord of dead"}
+      ],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.85,
+        "active-receptive": 0.6,
+        "individual-collective": 0.65,
+        "ascent-descent": 0.95,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.75
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:shadow", "weight": 0.8, "aspects": ["hidden-depth", "underworld-keeper", "what-is-buried"]},
+        {"primordial": "primordial:sovereign", "weight": 0.85, "aspects": ["underworld-king", "receiver-of-all", "wealth-holder"]}
+      ],
+
+      "coreFunction": "To receive, hold, and integrate what is hidden and completed",
+      "symbolicCore": "The wealth beneath the earth - depth holds treasure",
+      "domains": ["death", "underworld", "hidden wealth", "depth", "the unconscious"],
+
+      "relationships": [
+        {
+          "type": "POLAR_OPPOSITE",
+          "target": "arch:GR-ZEUS",
+          "axis": "axis:ascent-descent",
+          "strength": 0.95,
+          "notes": "Sky king vs underworld king"
+        },
+        {
+          "type": "COMPLEMENT",
+          "target": "arch:GR-PERSEPHONE",
+          "dynamic": "underworld king and queen",
+          "strength": 0.9
+        },
+        {
+          "type": "COMPLEMENT",
+          "target": "arch:GR-POSEIDON",
+          "dynamic": "brothers of the three realms",
+          "strength": 0.7
+        }
+      ],
+
+      "correspondences": {
+        "tarot": ["TAMA-DEATH", "TAMA-DEVIL"],
+        "planet": "7P-PLUTO",
+        "element": "EL-EARTH",
+        "chakra": "CH-MULADHARA",
+        "animals": ["three-headed dog (Cerberus)", "serpent"],
+        "plants": ["cypress", "narcissus", "mint"],
+        "colors": ["black", "dark purple"]
+      },
+
+      "poeticInvocation": "The Unseen One, host of many, wealthy one, receiver of all"
+    },
+
+    {
+      "@id": "arch:GR-HESTIA",
+      "@type": "Archetype",
+      "name": "Hestia",
+      "systemCode": "GR",
+      "belongsToSystem": "system:greek",
+      "description": "Goddess of the hearth, home, and sacred fire. The still center around which all revolves. First and last in every offering, yet rarely appears in myth because she IS the center.",
+
+      "aliases": [
+        {"name": "Vesta", "system": "Roman", "fidelity": 0.9}
+      ],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.05,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.3,
+        "active-receptive": 0.95,
+        "individual-collective": 0.6,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.05,
+        "voluntary-fated": 0.5
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:preserver", "weight": 0.9, "aspects": ["sacred-center", "continuity-keeper", "eternal-flame"]},
+        {"primordial": "primordial:maiden", "weight": 0.75, "aspects": ["virgin-completeness", "self-contained"]}
+      ],
+
+      "coreFunction": "To BE the center - the still point around which all moves",
+      "symbolicCore": "The flame that never goes out - sacred presence",
+      "domains": ["hearth", "home", "sacred fire", "center", "stability", "virginity"],
+
+      "relationships": [
+        {
+          "type": "POLAR_OPPOSITE",
+          "target": "arch:GR-HERMES",
+          "axis": "axis:stasis-transformation",
+          "strength": 0.95,
+          "notes": "The fundamental polarity: center and circumference"
+        },
+        {
+          "type": "POLAR_OPPOSITE",
+          "target": "arch:GR-DIONYSUS",
+          "axis": "axis:order-chaos",
+          "strength": 0.85,
+          "notes": "Sacred stillness vs ecstatic dissolution"
+        },
+        {
+          "type": "MIRRORS",
+          "target": "arch:GR-ATHENA",
+          "domain": "virgin self-belonging"
+        },
+        {
+          "type": "TRANSCENDS",
+          "target": "primordial:great-mother",
+          "notes": "Beyond mother into pure center"
+        }
+      ],
+
+      "correspondences": {
+        "tarot": ["TAMA-HIGH-PRIESTESS"],
+        "planet": "7P-SATURN",
+        "element": "EL-FIRE",
+        "chakra": "CH-ANAHATA",
+        "colors": ["warm gold", "orange flame"]
+      },
+
+      "poeticInvocation": "First and last, center of the home, keeper of the undying flame"
+    },
+
+    {
+      "@id": "arch:GR-APHRODITE",
+      "@type": "Archetype",
+      "name": "Aphrodite",
+      "systemCode": "GR",
+      "belongsToSystem": "system:greek",
+      "description": "Goddess of love, beauty, pleasure, and procreation. Born from sea foam, she embodies desire itself - the force that draws all things together.",
+
+      "aliases": [
+        {"name": "Venus", "system": "Roman", "fidelity": 0.9},
+        {"name": "Inanna", "system": "Mesopotamian", "fidelity": 0.6, "aspect": "love goddess"},
+        {"name": "Ishtar", "system": "Mesopotamian", "fidelity": 0.6, "aspect": "love goddess"},
+        {"name": "Hathor", "system": "Egyptian", "fidelity": 0.5, "aspect": "love, beauty"}
+      ],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.5,
+        "creation-destruction": 0.3,
+        "light-shadow": 0.4,
+        "active-receptive": 0.5,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.45
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:lover", "weight": 0.95, "aspects": ["desire-awakener", "beauty-embodiment", "erotic-force"]}
+      ],
+
+      "coreFunction": "To awaken desire, draw together, and embody beauty",
+      "symbolicCore": "The foam-born force that nothing can resist",
+      "domains": ["love", "beauty", "desire", "pleasure", "procreation", "the sea"],
+
+      "relationships": [
+        {
+          "type": "POLAR_OPPOSITE",
+          "target": "arch:GR-ARTEMIS",
+          "axis": "axis:individual-collective",
+          "strength": 0.8,
+          "notes": "Union/desire vs independence/virginity"
+        },
+        {
+          "type": "COMPLEMENT",
+          "target": "arch:GR-ARES",
+          "dynamic": "love and war - their affair",
+          "strength": 0.75
+        },
+        {
+          "type": "MIRRORS",
+          "target": "arch:GR-HERA",
+          "domain": "aspects of love",
+          "notes": "Erotic vs marital"
+        },
+        {
+          "type": "SHADOW",
+          "target": "primordial:seductress-destroyer",
+          "activation": "When desire becomes manipulation"
+        }
+      ],
+
+      "correspondences": {
+        "tarot": ["TAMA-EMPRESS", "TAMA-LOVERS"],
+        "planet": "7P-VENUS",
+        "element": "EL-WATER",
+        "chakra": "CH-ANAHATA",
+        "day": "Friday",
+        "metal": "copper",
+        "animals": ["dove", "swan", "sparrow"],
+        "plants": ["rose", "myrtle", "apple"],
+        "colors": ["pink", "red", "sea green"]
+      },
+
+      "poeticInvocation": "Foam-born, golden one, laughter-loving queen of desire",
+
+      "hasAspect": ["arch:GR-APHRODITE-URANIA", "arch:GR-APHRODITE-PANDEMOS"],
+      "hasEpithet": ["arch:GR-APHRODITE-ANADYOMENE"]
+    },
+
+    {
+      "@id": "arch:GR-APHRODITE-URANIA",
+      "@type": "Aspect",
+      "name": "Aphrodite Urania",
+      "isAspectOf": "arch:GR-APHRODITE",
+      "description": "Heavenly Aphrodite - the celestial, spiritual aspect of love. Love of soul for soul, beauty as divine truth, Platonic eros ascending toward the Good.",
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.25,
+        "light-shadow": 0.2,
+        "active-receptive": 0.55,
+        "individual-collective": 0.6,
+        "ascent-descent": 0.15,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.55
+      },
+      "spectralShiftNote": "Shifts toward light, ascent, and order compared to base Aphrodite",
+      "domains": ["spiritual love", "philosophical eros", "heavenly beauty", "same-sex love (Platonic context)"],
+      "cultCenters": ["Athens (philosophical circles)"],
+      "relationships": [
+        {
+          "type": "POLAR_OPPOSITE",
+          "target": "arch:GR-APHRODITE-PANDEMOS",
+          "axis": "axis:ascent-descent",
+          "strength": 0.85,
+          "notes": "Heavenly vs earthly love"
+        }
+      ]
+    },
+
+    {
+      "@id": "arch:GR-APHRODITE-PANDEMOS",
+      "@type": "Aspect",
+      "name": "Aphrodite Pandemos",
+      "isAspectOf": "arch:GR-APHRODITE",
+      "description": "Common Aphrodite - goddess of physical, earthly love. Sexuality, bodily desire, love accessible to all. Not 'lower' but grounded and embodied.",
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.5,
+        "active-receptive": 0.45,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.65,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.35
+      },
+      "spectralShiftNote": "Shifts toward earth, chaos, and transformation compared to base Aphrodite",
+      "domains": ["physical love", "sexuality", "fertility", "common people's worship"],
+      "cultCenters": ["Athens (civic cult)", "Corinth"],
+      "relationships": [
+        {
+          "type": "POLAR_OPPOSITE",
+          "target": "arch:GR-APHRODITE-URANIA",
+          "axis": "axis:ascent-descent",
+          "strength": 0.85
+        }
+      ]
+    },
+
+    {
+      "@id": "arch:GR-APHRODITE-ANADYOMENE",
+      "@type": "Epithet",
+      "name": "Aphrodite Anadyomene",
+      "isEpithetOf": "arch:GR-APHRODITE",
+      "meaning": "She who rises from the sea",
+      "description": "Aphrodite as she first emerged from the foam - the primal moment of beauty arising from chaos. Iconographic form captured in Apelles' famous painting.",
+      "ritualContext": "Invoked for new beginnings, emergence, birth of beauty from chaos",
+      "artisticTradition": "Classical statuary and painting tradition beginning with Apelles"
+    },
+
+    {
+      "@id": "arch:GR-ARES",
+      "@type": "Archetype",
+      "name": "Ares",
+      "systemCode": "GR",
+      "belongsToSystem": "system:greek",
+      "description": "God of war, violence, and bloodlust. Unlike Athena's strategic warfare, Ares embodies the raw chaos and brutality of battle. Feared and disliked even by the gods.",
+
+      "aliases": [
+        {"name": "Mars", "system": "Roman", "fidelity": 0.75, "notes": "Mars more honorable in Rome"},
+        {"name": "Tyr", "system": "Norse", "fidelity": 0.4, "aspect": "war god only"}
+      ],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.8,
+        "creation-destruction": 0.75,
+        "light-shadow": 0.6,
+        "active-receptive": 0.05,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.65,
+        "voluntary-fated": 0.2
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:warrior", "weight": 0.9, "aspects": ["blood-rage", "chaotic-violence", "raw-aggression"]}
+      ],
+
+      "coreFunction": "To embody raw aggression and the chaos of violence",
+      "symbolicCore": "The blood-rage that knows no restraint",
+      "domains": ["war", "violence", "bloodlust", "courage", "civil order (Roman)"],
+
+      "relationships": [
+        {
+          "type": "POLAR_OPPOSITE",
+          "target": "arch:GR-ATHENA",
+          "axis": "axis:order-chaos",
+          "strength": 0.9,
+          "notes": "Chaotic violence vs strategic warfare"
+        },
+        {
+          "type": "COMPLEMENT",
+          "target": "arch:GR-APHRODITE",
+          "dynamic": "love and war - cosmic tension",
+          "strength": 0.75
+        },
+        {
+          "type": "SHADOW",
+          "target": "primordial:sadist",
+          "activation": "Always - Ares IS the shadow of warfare"
+        }
+      ],
+
+      "correspondences": {
+        "tarot": ["TAMA-TOWER", "TAMA-CHARIOT"],
+        "planet": "7P-MARS",
+        "element": "EL-FIRE",
+        "chakra": "CH-MANIPURA",
+        "day": "Tuesday",
+        "metal": "iron",
+        "animals": ["vulture", "dog", "boar"],
+        "colors": ["red", "blood red"]
+      },
+
+      "poeticInvocation": "Man-slayer, sacker of cities, blood-stained curse of mortals"
+    },
+
+    {
+      "@id": "arch:GR-HEPHAESTUS",
+      "@type": "Archetype",
+      "name": "Hephaestus",
+      "systemCode": "GR",
+      "belongsToSystem": "system:greek",
+      "description": "God of fire, forge, and craftsmanship. The wounded creator - cast from Olympus, lame, yet maker of the most beautiful works. Represents transformation of suffering into art.",
+
+      "aliases": [
+        {"name": "Vulcan", "system": "Roman", "fidelity": 0.85}
+      ],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.15,
+        "light-shadow": 0.45,
+        "active-receptive": 0.25,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.6,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.55
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.9, "aspects": ["divine-craftsman", "wounded-maker", "transformer-of-raw-material"]}
+      ],
+
+      "coreFunction": "To transform raw material into beauty through skill and fire",
+      "symbolicCore": "The wound that becomes the gift - creation through suffering",
+      "domains": ["forge", "crafts", "fire", "volcanoes", "metalwork", "sculpture"],
+
+      "relationships": [
+        {
+          "type": "COMPLEMENT",
+          "target": "arch:GR-ATHENA",
+          "dynamic": "crafts and wisdom",
+          "strength": 0.7
+        },
+        {
+          "type": "MIRRORS",
+          "target": "primordial:wounded-healer",
+          "domain": "wound as source of power"
+        },
+        {
+          "type": "ANTAGONIST",
+          "target": "arch:GR-ARES",
+          "dynamic": "husband cuckolded by lover",
+          "notes": "Aphrodite's affair with Ares"
+        }
+      ],
+
+      "correspondences": {
+        "tarot": ["TAMA-MAGICIAN", "TAMA-STRENGTH"],
+        "planet": "7P-MARS",
+        "element": "EL-FIRE",
+        "chakra": "CH-MANIPURA",
+        "animals": ["donkey", "crane"],
+        "colors": ["orange", "red", "black"]
+      },
+
+      "poeticInvocation": "Illustrious craftsman, limping god of fire, maker of wonders"
+    },
+
+    {
+      "@id": "arch:GR-PERSEPHONE",
+      "@type": "Archetype",
+      "name": "Persephone",
+      "systemCode": "GR",
+      "belongsToSystem": "system:greek",
+      "description": "Queen of the Underworld and goddess of spring. The maiden who descends and returns, embodying the cycle of death and rebirth, innocence transformed through the underworld journey.",
+
+      "aliases": [
+        {"name": "Proserpina", "system": "Roman", "fidelity": 0.9},
+        {"name": "Kore", "system": "Greek", "fidelity": 1.0, "aspect": "maiden aspect before descent"}
+      ],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.4,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.5,
+        "active-receptive": 0.6,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.75,
+        "voluntary-fated": 0.7
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:maiden", "weight": 0.7, "aspects": ["innocent-beginning", "spring-renewal"]},
+        {"primordial": "primordial:crone", "weight": 0.75, "aspects": ["underworld-queen", "death-wisdom", "liminal-crosser"]}
+      ],
+
+      "coreFunction": "To embody the transformative journey through darkness and return",
+      "symbolicCore": "She who descends and rises - death is not the end",
+      "domains": ["spring", "underworld", "rebirth", "cycles", "innocence", "transformation"],
+
+      "relationships": [
+        {
+          "type": "COMPLEMENT",
+          "target": "arch:GR-HADES",
+          "dynamic": "underworld sovereigns",
+          "strength": 0.9
+        },
+        {
+          "type": "COMPLEMENT",
+          "target": "arch:GR-DEMETER",
+          "dynamic": "mother-daughter, above-below",
+          "strength": 0.95
+        },
+        {
+          "type": "EVOLUTION",
+          "source": "Kore (innocent maiden)",
+          "target": "Persephone (underworld queen)",
+          "trigger": "Descent and integration of shadow"
+        },
+        {
+          "type": "CULTURAL_ECHO",
+          "target": "arch:ME-INANNA",
+          "fidelity": 0.7,
+          "notes": "Descent to underworld and return"
+        }
+      ],
+
+      "correspondences": {
+        "tarot": ["TAMA-HIGH-PRIESTESS", "TAMA-DEATH"],
+        "element": "EL-EARTH",
+        "chakra": "CH-MULADHARA",
+        "plants": ["pomegranate", "narcissus", "asphodel"],
+        "colors": ["dark purple", "spring green"]
+      },
+
+      "poeticInvocation": "Dread queen, spring-bringer, she who walks between worlds"
+    },
+
+    {
+      "@id": "arch:GR-DEMETER",
+      "@type": "Archetype",
+      "name": "Demeter",
+      "systemCode": "GR",
+      "belongsToSystem": "system:greek",
+      "description": "Goddess of the harvest, agriculture, and fertility. The grieving mother whose loss brings winter and whose reunion brings spring. Embodies the nourishing earth and the fierce love of mother for child.",
+
+      "aliases": [
+        {"name": "Ceres", "system": "Roman", "fidelity": 0.9},
+        {"name": "Devi", "system": "Hindu", "fidelity": 0.4, "aspect": "earth mother"}
+      ],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.25,
+        "light-shadow": 0.35,
+        "active-receptive": 0.6,
+        "individual-collective": 0.7,
+        "ascent-descent": 0.65,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.6
+      },
+
+      "elementalComposition": {
+        "earth": 0.95,
+        "water": 0.5,
+        "fire": 0.2,
+        "air": 0.2
+      },
+
+      "instantiates": [
+        {
+          "primordial": "primordial:great-mother",
+          "weight": 0.9,
+          "aspects": ["nurturer", "provider", "grief-bearer", "fierce protector"]
+        }
+      ],
+
+      "coreFunction": "To nourish, grow, and protect the cycles of life through seasons",
+      "symbolicCore": "The grain that dies and returns - mother-love that moves worlds",
+      "domains": ["harvest", "agriculture", "fertility", "seasons", "motherhood", "mysteries"],
+
+      "temporalOrientation": "cyclical",
+      "temporalNotes": "Embodies the seasonal cycle; her grief creates winter, her joy creates spring",
+
+      "psychologicalMapping": {
+        "jungianStructure": "Great Mother archetype, maternal complex",
+        "developmentalStage": "Mature motherhood, loss and letting go",
+        "integrationTask": "Releasing children while maintaining connection"
+      },
+
+      "relationships": [
+        {
+          "type": "COMPLEMENT",
+          "target": "arch:GR-PERSEPHONE",
+          "dynamic": "mother-daughter, above-below",
+          "strength": 0.95,
+          "notes": "The central bond of Eleusinian mysteries"
+        },
+        {
+          "type": "ANTAGONIST",
+          "target": "arch:GR-HADES",
+          "dynamic": "mother vs abductor",
+          "strength": 0.8
+        },
+        {
+          "type": "POLAR_OPPOSITE",
+          "target": "arch:GR-HADES",
+          "axis": "axis:ascent-descent",
+          "strength": 0.85,
+          "notes": "Earth surface vs underworld"
+        },
+        {
+          "type": "SHADOW",
+          "target": "primordial:devouring-mother",
+          "activation": "When nurturance becomes smothering; when grief becomes world-destruction",
+          "strength": 0.65
+        },
+        {
+          "type": "CULTURAL_ECHO",
+          "target": "arch:ME-INANNA",
+          "fidelity": 0.5,
+          "notes": "Descent narrative through daughter"
+        }
+      ],
+
+      "correspondences": {
+        "tarot": ["TAMA-EMPRESS"],
+        "planet": "7P-MOON",
+        "element": "EL-EARTH",
+        "chakra": "CH-SVADHISTHANA",
+        "animals": ["pig", "serpent", "gecko"],
+        "plants": ["wheat", "barley", "poppy", "mint"],
+        "colors": ["gold", "green", "brown"]
+      },
+
+      "ritualFunction": "Eleusinian Mysteries - initiation into death and rebirth",
+      "poeticInvocation": "Bringer of seasons, lady of the golden grain, mother of the mysteries"
+    },
+
+    {
+      "@id": "arch:GR-PROMETHEUS",
+      "@type": "Archetype",
+      "name": "Prometheus",
+      "systemCode": "GR",
+      "belongsToSystem": "system:greek",
+      "description": "Titan who stole fire from the gods and gave it to humanity. The suffering benefactor, chained to a rock for eternity. Embodies defiance of divine authority in service of human progress.",
+
+      "aliases": [
+        {"name": "Lucifer", "system": "Gnostic", "fidelity": 0.5, "aspect": "light-bringer, defiant"},
+        {"name": "Loki", "system": "Norse", "fidelity": 0.4, "aspect": "fire-bringer, bound punished"}
+      ],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.3,
+        "light-shadow": 0.25,
+        "active-receptive": 0.2,
+        "individual-collective": 0.75,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.7,
+        "voluntary-fated": 0.15
+      },
+
+      "instantiates": [
+        {
+          "primordial": "primordial:rebel",
+          "weight": 0.9,
+          "aspects": ["defiance", "sacrifice", "transgression for good"]
+        },
+        {
+          "primordial": "primordial:creator",
+          "weight": 0.6,
+          "aspects": ["maker of humanity", "culture-bringer"]
+        },
+        {
+          "primordial": "primordial:outcast",
+          "weight": 0.7,
+          "aspects": ["eternal punishment", "separation from divine order"]
+        }
+      ],
+
+      "coreFunction": "To transgress divine limits for human benefit, bearing the cost",
+      "symbolicCore": "Fire stolen from heaven - the price of progress",
+      "domains": ["fire", "forethought", "craft", "rebellion", "sacrifice", "civilization"],
+
+      "temporalOrientation": "future",
+      "temporalNotes": "His name means 'forethought' - he sees and acts for what will be",
+
+      "psychologicalMapping": {
+        "jungianStructure": "Promethean ego, inflation-deflation cycle",
+        "developmentalStage": "Adolescent rebellion maturing into principled defiance",
+        "integrationTask": "Balancing transgression with wisdom; accepting consequences"
+      },
+
+      "relationships": [
+        {
+          "type": "ANTAGONIST",
+          "target": "arch:GR-ZEUS",
+          "dynamic": "rebel vs authority",
+          "strength": 0.95,
+          "notes": "The archetypal conflict of individual vs cosmic order"
+        },
+        {
+          "type": "COMPLEMENT",
+          "target": "arch:GR-ATHENA",
+          "dynamic": "secret ally (in some myths)",
+          "strength": 0.5
+        },
+        {
+          "type": "POLAR_OPPOSITE",
+          "target": "arch:GR-EPIMETHEUS",
+          "axis": "axis:voluntary-fated",
+          "strength": 0.9,
+          "notes": "Forethought vs Afterthought (his brother)"
+        },
+        {
+          "type": "SHADOW",
+          "target": "primordial:martyr",
+          "activation": "When rebellion becomes identity; when suffering becomes self-definition",
+          "strength": 0.6
+        },
+        {
+          "type": "CULTURAL_ECHO",
+          "target": "arch:SYNCRETIC-LUCIFER",
+          "fidelity": 0.6,
+          "notes": "Light-bringer who defies highest power"
+        }
+      ],
+
+      "correspondences": {
+        "tarot": ["TAMA-HANGED-MAN", "TAMA-TOWER"],
+        "planet": "7P-URANUS",
+        "element": "EL-FIRE",
+        "chakra": "CH-MANIPURA",
+        "animals": ["eagle (tormentor)"],
+        "colors": ["red", "orange", "gold"]
+      },
+
+      "poeticInvocation": "Forethought, fire-thief, friend of mortals, bound yet unbroken"
+    },
+
+    {
+      "@id": "arch:GR-CRONUS",
+      "@type": "Archetype",
+      "name": "Cronus",
+      "systemCode": "GR",
+      "belongsToSystem": "system:greek",
+      "description": "Titan king who ruled before Zeus, castrated his father Ouranos, and devoured his children to prevent prophecy of his overthrow. Embodies time that consumes, the old order, and the father who fears succession.",
+
+      "aliases": [
+        {"name": "Saturn", "system": "Roman", "fidelity": 0.85},
+        {"name": "Chronos", "system": "Greek", "fidelity": 0.6, "notes": "Later conflation with Time personified"}
+      ],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.2,
+        "creation-destruction": 0.7,
+        "light-shadow": 0.7,
+        "active-receptive": 0.35,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.6,
+        "stasis-transformation": 0.3,
+        "voluntary-fated": 0.75
+      },
+
+      "instantiates": [
+        {
+          "primordial": "primordial:great-father",
+          "weight": 0.7,
+          "aspects": ["devouring father", "Senex", "time-bound authority"]
+        },
+        {
+          "primordial": "primordial:destroyer",
+          "weight": 0.6,
+          "aspects": ["consuming time", "ending what was"]
+        },
+        {
+          "primordial": "primordial:sovereign",
+          "weight": 0.5,
+          "aspects": ["ruler of Golden Age", "old order"]
+        }
+      ],
+
+      "coreFunction": "To embody time that devours its children; the old order that must fall",
+      "symbolicCore": "The sickle that cuts and consumes - time takes all",
+      "domains": ["time", "agriculture", "kingship", "prophecy-fear", "the Golden Age"],
+
+      "temporalOrientation": "past",
+      "temporalNotes": "Represents what-was; the age before the current order; nostalgia and dread",
+
+      "psychologicalMapping": {
+        "jungianStructure": "Negative Senex, devouring father complex",
+        "developmentalStage": "Fear of succession, denial of mortality",
+        "integrationTask": "Releasing control; allowing new generation"
+      },
+
+      "relationships": [
+        {
+          "type": "ANTAGONIST",
+          "target": "arch:GR-ZEUS",
+          "dynamic": "father-son succession",
+          "strength": 0.95,
+          "notes": "The central generational conflict"
+        },
+        {
+          "type": "PRECEDES",
+          "target": "arch:GR-ZEUS",
+          "sequencePosition": 1,
+          "notes": "Titan age before Olympian age"
+        },
+        {
+          "type": "POLAR_OPPOSITE",
+          "target": "arch:GR-RHEA",
+          "axis": "axis:creation-destruction",
+          "strength": 0.85,
+          "notes": "Devouring father vs protecting mother"
+        },
+        {
+          "type": "SHADOW",
+          "target": "primordial:tyrant",
+          "activation": "When preservation becomes consumption",
+          "strength": 0.85
+        },
+        {
+          "type": "CONTAINS",
+          "target": "primordial:ancestor",
+          "strength": 0.6,
+          "notes": "The old gods who ruled before"
+        }
+      ],
+
+      "correspondences": {
+        "tarot": ["TAMA-DEVIL", "TAMA-DEATH"],
+        "planet": "7P-SATURN",
+        "element": "EL-EARTH",
+        "chakra": "CH-MULADHARA",
+        "metal": "lead",
+        "day": "Saturday",
+        "animals": ["crow"],
+        "plants": ["cypress", "hemlock"],
+        "colors": ["black", "dark grey", "lead"]
+      },
+
+      "poeticInvocation": "Child-devourer, sickle-bearer, king of the Golden Age now fallen"
+    },
+
+    {
+      "@id": "arch:GR-HERACLES",
+      "@type": "Archetype",
+      "name": "Heracles",
+      "systemCode": "GR",
+      "belongsToSystem": "system:greek",
+      "description": "Greatest of Greek heroes, son of Zeus and mortal Alcmene. Performed the Twelve Labors, descended to the underworld, and was eventually deified. The quintessential Hero archetype struggling toward transcendence.",
+
+      "aliases": [
+        {"name": "Hercules", "system": "Roman", "fidelity": 0.95},
+        {"name": "Melqart", "system": "Phoenician", "fidelity": 0.5, "aspect": "laboring hero"}
+      ],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.4,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.35,
+        "active-receptive": 0.1,
+        "individual-collective": 0.25,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.7,
+        "voluntary-fated": 0.5
+      },
+
+      "instantiates": [
+        {
+          "primordial": "primordial:hero",
+          "weight": 0.95,
+          "aspects": ["monster-slayer", "laborer", "civilizer", "sufferer"]
+        },
+        {
+          "primordial": "primordial:warrior",
+          "weight": 0.8,
+          "aspects": ["strength", "combat", "physical prowess"]
+        },
+        {
+          "primordial": "primordial:divine-child",
+          "weight": 0.4,
+          "aspects": ["son of god", "destined for apotheosis"]
+        }
+      ],
+
+      "coreFunction": "To overcome impossible trials through strength and endurance, achieving transformation",
+      "symbolicCore": "The club and lion-skin - raw power civilized through labor",
+      "domains": ["heroism", "strength", "labors", "monster-slaying", "endurance", "apotheosis"],
+
+      "temporalOrientation": "present",
+      "temporalNotes": "The Hero exists in the eternal now of action; each labor is present-tense struggle",
+
+      "psychologicalMapping": {
+        "jungianStructure": "Heroic ego, strength complex",
+        "developmentalStage": "Youth through apotheosis",
+        "integrationTask": "Mastering rage; transforming strength into service"
+      },
+
+      "narrativeRoles": ["hero", "monster-slayer", "sufferer", "civilizer"],
+      "storyFunctions": ["performs impossible labors", "descends and returns", "achieves deification"],
+
+      "developmentalArc": {
+        "origin": "Divine birth, Hera's persecution",
+        "trials": "Twelve Labors as initiatory journey",
+        "crisis": "Madness, killing of family",
+        "ascent": "Apotheosis - becoming a god"
+      },
+
+      "relationships": [
+        {
+          "type": "ANTAGONIST",
+          "target": "arch:GR-HERA",
+          "dynamic": "stepmother persecution",
+          "strength": 0.9,
+          "notes": "Hera drives him mad; labors are her requirement"
+        },
+        {
+          "type": "ALLY",
+          "target": "arch:GR-ATHENA",
+          "dynamic": "patron goddess",
+          "strength": 0.75
+        },
+        {
+          "type": "EVOLUTION",
+          "target": "primordial:divine-child",
+          "trigger": "Apotheosis after death on Oeta",
+          "direction": "forward"
+        },
+        {
+          "type": "SHADOW",
+          "target": "primordial:berserker",
+          "activation": "When strength becomes uncontrolled rage (madness episode)",
+          "strength": 0.8
+        },
+        {
+          "type": "CULTURAL_ECHO",
+          "target": "arch:ME-GILGAMESH",
+          "fidelity": 0.7,
+          "notes": "Laboring heroes, descent to underworld"
+        }
+      ],
+
+      "correspondences": {
+        "tarot": ["TAMA-STRENGTH", "TAMA-CHARIOT"],
+        "planet": "7P-SUN",
+        "element": "EL-FIRE",
+        "chakra": "CH-MANIPURA",
+        "animals": ["lion"],
+        "plants": ["poplar", "olive"],
+        "colors": ["gold", "red", "lion-tawny"]
+      },
+
+      "poeticInvocation": "Lion-hearted, laborer, son of Zeus, he who endured and ascended"
+    },
+
+    {
+      "@id": "arch:GR-ODYSSEUS",
+      "@type": "Archetype",
+      "name": "Odysseus",
+      "systemCode": "GR",
+      "belongsToSystem": "system:greek",
+      "description": "King of Ithaca, hero of the Trojan War, famed for cunning (metis). His ten-year journey home is the archetypal nostos - the return that transforms. Represents practical wisdom over brute strength.",
+
+      "aliases": [
+        {"name": "Ulysses", "system": "Roman", "fidelity": 0.95}
+      ],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.4,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.4,
+        "active-receptive": 0.3,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.35
+      },
+
+      "instantiates": [
+        {
+          "primordial": "primordial:hero",
+          "weight": 0.8,
+          "aspects": ["journeyer", "returner", "survivor"]
+        },
+        {
+          "primordial": "primordial:trickster",
+          "weight": 0.7,
+          "aspects": ["cunning", "deception", "practical wisdom"]
+        },
+        {
+          "primordial": "primordial:sovereign",
+          "weight": 0.5,
+          "aspects": ["king", "husband", "father returning"]
+        }
+      ],
+
+      "coreFunction": "To survive through wit, navigate the unknown, and return transformed",
+      "symbolicCore": "The long way home - every detour is necessary",
+      "domains": ["cunning", "journey", "return", "survival", "eloquence", "home"],
+
+      "temporalOrientation": "future",
+      "temporalNotes": "Always oriented toward return; every action serves the future homecoming",
+
+      "psychologicalMapping": {
+        "jungianStructure": "Mature ego, integrated anima (Penelope, Athena)",
+        "developmentalStage": "Midlife individuation",
+        "integrationTask": "Returning to origin transformed; claiming identity"
+      },
+
+      "narrativeRoles": ["trickster-hero", "journeyer", "survivor", "storyteller"],
+      "storyFunctions": ["solves by cunning not force", "descends to underworld", "returns transformed"],
+
+      "developmentalArc": {
+        "origin": "Warrior at Troy, deviser of the horse",
+        "descent": "Ten-year wandering, loss of all companions",
+        "trials": "Monsters, gods, temptations",
+        "return": "Reclaiming home and identity"
+      },
+
+      "relationships": [
+        {
+          "type": "ALLY",
+          "target": "arch:GR-ATHENA",
+          "dynamic": "patron and protected",
+          "strength": 0.95,
+          "notes": "Athena loves him for his wit"
+        },
+        {
+          "type": "ALLY",
+          "target": "arch:GR-HERMES",
+          "dynamic": "cunning assists cunning",
+          "strength": 0.7
+        },
+        {
+          "type": "ANTAGONIST",
+          "target": "arch:GR-POSEIDON",
+          "dynamic": "pursuer",
+          "strength": 0.85,
+          "notes": "Poseidon's wrath drives the wandering"
+        },
+        {
+          "type": "COMPLEMENT",
+          "target": "arch:GR-PENELOPE",
+          "dynamic": "husband and wife, matched in wit",
+          "strength": 0.9
+        },
+        {
+          "type": "MIRRORS",
+          "target": "arch:GR-HERACLES",
+          "domain": "heroism",
+          "notes": "Cunning vs strength - two paths to heroism"
+        }
+      ],
+
+      "correspondences": {
+        "tarot": ["TAMA-CHARIOT", "TAMA-HERMIT", "TAMA-WHEEL"],
+        "planet": "7P-MERCURY",
+        "element": "EL-WATER",
+        "chakra": "CH-VISHUDDHA",
+        "animals": ["ram (tied under)"],
+        "colors": ["sea-blue", "grey"]
+      },
+
+      "poeticInvocation": "Much-wandering, sacker of Troy, man of many devices, long-suffering returner"
+    },
+
+    {
+      "@id": "arch:GR-PENELOPE",
+      "@type": "Archetype",
+      "name": "Penelope",
+      "systemCode": "GR",
+      "belongsToSystem": "system:greek",
+      "description": "Queen of Ithaca, wife of Odysseus. Waited twenty years, fending off suitors through wit - her weaving and unweaving is cunning equal to her husband's. Embodies faithful patience as active resistance.",
+
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.35,
+        "active-receptive": 0.7,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.35,
+        "voluntary-fated": 0.4
+      },
+
+      "instantiates": [
+        {
+          "primordial": "primordial:lover",
+          "weight": 0.7,
+          "aspects": ["faithful spouse", "waiting love"]
+        },
+        {
+          "primordial": "primordial:trickster",
+          "weight": 0.6,
+          "aspects": ["cunning weaver", "deceptive patience"]
+        },
+        {
+          "primordial": "primordial:sovereign",
+          "weight": 0.5,
+          "aspects": ["queen holding kingdom"]
+        }
+      ],
+
+      "coreFunction": "To hold the center through patient cunning while awaiting return",
+      "symbolicCore": "The shroud woven by day, unwoven by night - resistance as patience",
+      "domains": ["fidelity", "weaving", "cunning", "patience", "home-keeping", "resistance"],
+
+      "psychologicalMapping": {
+        "jungianStructure": "Integrated anima, mature feminine wisdom",
+        "developmentalStage": "Mature waiting, active patience",
+        "integrationTask": "Maintaining identity during absence; recognizing the true"
+      },
+
+      "relationships": [
+        {
+          "type": "COMPLEMENT",
+          "target": "arch:GR-ODYSSEUS",
+          "dynamic": "matched pair in wit",
+          "strength": 0.9
+        },
+        {
+          "type": "MIRRORS",
+          "target": "arch:GR-HESTIA",
+          "domain": "center-holding",
+          "notes": "She IS the home he returns to"
+        },
+        {
+          "type": "CULTURAL_ECHO",
+          "target": "arch:IN-SITA",
+          "fidelity": 0.5,
+          "notes": "Faithful wife waiting for heroic husband's return"
+        }
+      ],
+
+      "correspondences": {
+        "tarot": ["TAMA-STAR", "TAMA-HIGH-PRIESTESS"],
+        "planet": "7P-MOON",
+        "element": "EL-EARTH",
+        "chakra": "CH-ANAHATA",
+        "animals": ["goose"],
+        "plants": ["flax (for weaving)"],
+        "colors": ["indigo", "grey"]
+      },
+
+      "poeticInvocation": "Daughter of Icarius, circumspect Penelope, weaver of shrouds and schemes"
+    }
+  ]
+}

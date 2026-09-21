@@ -1,0 +1,793 @@
+{
+  "@context": "../../schema/ACP_CONTEXT.jsonld",
+  "@id": "pantheon:AF-ORISHA",
+  "@type": "Pantheon",
+  "name": "Yoruba Orishas and African Diasporic Spirits",
+  "tradition": "Yoruba Religion / Ifá / Santería / Candomblé / Vodou",
+  "description": "The Orishas of Yoruba tradition and their manifestations in African diasporic religions including Santería (Cuba), Candomblé (Brazil), and related Vodou (Haiti) spirits. These divine forces mediate between Olodumare (the Supreme Being) and humanity, each governing specific domains of nature and human experience.",
+  "canonicalSources": [
+    "Ifá Oral Tradition and Odù",
+    "Yoruba Sacred Narratives (Ìtàn)",
+    "Santería/Lucumí oral tradition",
+    "Candomblé ritual texts",
+    "Haitian Vodou liturgy"
+  ],
+  "systemPatterns": [
+    {
+      "name": "Olodumare and the Orishas",
+      "description": "The Supreme Being (Olodumare) delegates specific powers to the Orishas, who interact directly with humanity while Olodumare remains transcendent",
+      "archetypes": ["arch:AF-OLODUMARE", "arch:AF-OBATALA", "arch:AF-ORUNMILA"],
+      "pattern": "Transcendent source with immanent divine intermediaries"
+    },
+    {
+      "name": "Obatala-Oduduwa Creation",
+      "description": "Obatala sent to create earth but fell asleep drunk; Oduduwa completed the task, establishing tension between sky and earth powers",
+      "archetypes": ["arch:AF-OBATALA", "arch:AF-ODUDUWA"],
+      "pattern": "Creation through delegation and correction"
+    },
+    {
+      "name": "Shango's Kingship and Fall",
+      "description": "The fourth Alafin of Oyo who became the thunder orisha after his tragic death, transforming from mortal king to divine force",
+      "archetypes": ["arch:AF-SHANGO"],
+      "pattern": "Apotheosis of the tragic king"
+    },
+    {
+      "name": "Crossroads Dynamics",
+      "description": "Eshu/Elegua guards all crossroads and must be propitiated first in all rituals, mediating between human and divine",
+      "archetypes": ["arch:AF-ESHU"],
+      "pattern": "Trickster as essential mediator and gatekeeper"
+    },
+    {
+      "name": "Syncretism and Survival",
+      "description": "Orishas masked behind Catholic saints during slavery, preserving African religion through strategic adaptation",
+      "archetypes": ["All"],
+      "pattern": "Sacred camouflage and cultural resilience"
+    }
+  ],
+  "entries": [
+    {
+      "@id": "arch:AF-OLODUMARE",
+      "@type": "Archetype",
+      "name": "Olodumare",
+      "aliases": ["Olorun", "Olofi", "Olofin", "The Owner of Heaven"],
+      "domain": ["Supreme Being", "Creation", "Destiny", "Transcendence", "Cosmic Order"],
+      "description": "The Supreme Being and source of all ashé (divine energy/power). Olodumare is the transcendent creator who brought the universe into existence and delegated specific powers to the Orishas. Unlike the Orishas, Olodumare does not possess devotees or receive direct sacrifice, being beyond human petition yet the ultimate source of all blessing.",
+      "spectralCoordinates": {
+        "order-chaos": 0.1,
+        "creation-destruction": 0.1,
+        "light-shadow": 0.1,
+        "active-receptive": 0.5,
+        "individual-collective": 0.1,
+        "ascent-descent": 0.05,
+        "stasis-transformation": 0.3,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.95, "aspects": ["source-of-all", "cosmic-origin"]},
+        {"primordial": "primordial:self", "weight": 0.8, "aspects": ["transcendent-unity", "beyond-duality"]},
+        {"primordial": "primordial:sovereign", "weight": 0.7, "aspects": ["cosmic-ruler", "ultimate-authority"]}
+      ],
+      "relationships": [
+        {"type": "rel:CONTAINS", "target": "arch:AF-OBATALA", "description": "Delegated creation to"},
+        {"type": "rel:CONTAINS", "target": "arch:AF-ORUNMILA", "description": "Witness to creation, keeper of wisdom"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-BRAHMAN", "fidelity": 0.7, "notes": "Transcendent source beyond personal deity"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CN-TAO", "fidelity": 0.65, "notes": "Ultimate source beyond naming"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["N/A - transcendent beyond shadow"],
+        "shadowManifestations": ["Perceived absence or indifference", "Cosmic silence"],
+        "integrationPath": "Understanding transcendence as presence beyond form"
+      },
+      "correspondences": {
+        "element": "All/None (transcendent)",
+        "direction": "Above/Beyond",
+        "color": "White (purity)",
+        "association": "Cannot be directly worshipped; honored through Orishas"
+      }
+    },
+    {
+      "@id": "arch:AF-OBATALA",
+      "@type": "Archetype",
+      "name": "Obatala",
+      "aliases": ["Oxalá (Candomblé)", "Our Lady of Mercy (Santería sync)", "King of White Cloth"],
+      "domain": ["Creation", "Purity", "Wisdom", "Peace", "Human Form", "The Disabled"],
+      "description": "The eldest Orisha and father of humanity, tasked by Olodumare with creating human bodies from clay. When he became drunk on palm wine and created deformed humans, he became their special protector. He embodies wisdom, patience, ethical purity, and cool (calm) energy. All things white are sacred to him.",
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.15,
+        "light-shadow": 0.15,
+        "active-receptive": 0.55,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.2,
+        "stasis-transformation": 0.35,
+        "voluntary-fated": 0.4
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.9, "aspects": ["humanity-shaper", "form-giver"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.85, "aspects": ["patience", "ethical-purity"]},
+        {"primordial": "primordial:great-father", "weight": 0.75, "aspects": ["father-of-orishas", "patriarch"]},
+        {"primordial": "primordial:healer", "weight": 0.6, "aspects": ["protector-of-disabled", "peace-bringer"]}
+      ],
+      "relationships": [
+        {"type": "rel:CONTAINED_BY", "target": "arch:AF-OLODUMARE", "description": "Delegated creation from Supreme Being"},
+        {"type": "rel:COMPLEMENT", "target": "arch:AF-ODUDUWA", "description": "Sky/Earth creative pair"},
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:AF-SHANGO", "axis": "active-receptive", "description": "Cool vs hot energy"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CN-NUWA", "fidelity": 0.7, "notes": "Creator of humanity from clay/earth"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-PROMETHEUS", "fidelity": 0.6, "notes": "Shaper of humanity"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-PTAH", "fidelity": 0.55, "notes": "Creator craftsman, shaper"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When purity becomes rigidity", "When calm becomes passivity", "When intoxication clouds judgment"],
+        "shadowManifestations": ["Creating imperfection through negligence", "Excessive detachment", "Spiritual pride"],
+        "integrationPath": "Accepting imperfection as sacred; finding wisdom in mistakes"
+      },
+      "correspondences": {
+        "element": "Air/Ether",
+        "direction": "Above",
+        "color": "White (exclusively)",
+        "number": [8, 16, 24],
+        "day": "Sunday",
+        "syncretism": "Our Lady of Mercy, Jesus Christ",
+        "taboo": "Palm wine, red palm oil, alcohol"
+      }
+    },
+    {
+      "@id": "arch:AF-ESHU",
+      "@type": "Archetype",
+      "name": "Eshu",
+      "aliases": ["Elegua", "Eleguá", "Exu (Candomblé)", "Papa Legba (Vodou)", "The Trickster"],
+      "domain": ["Crossroads", "Communication", "Trickery", "Fate", "Doorways", "Language"],
+      "description": "The divine messenger and trickster who guards all crossroads, doorways, and thresholds. Nothing reaches the Orishas without passing through Eshu first - he must be propitiated before any ritual. He is neither good nor evil but embodies the dynamic chaos necessary for change. Master of languages who carries prayers to heaven and returns divine messages.",
+      "spectralCoordinates": {
+        "order-chaos": 0.7,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.5,
+        "active-receptive": 0.35,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.7,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:trickster", "weight": 0.95, "aspects": ["divine-chaos", "boundary-crosser", "unpredictable"]},
+        {"primordial": "primordial:psychopomp", "weight": 0.85, "aspects": ["messenger", "doorway-guardian", "crossroads-keeper"]},
+        {"primordial": "primordial:magician", "weight": 0.7, "aspects": ["language-master", "fate-turner"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:AF-ORUNMILA", "description": "Chaos and order, unpredictability and divination"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HERMES", "fidelity": 0.85, "notes": "Messenger, trickster, crossroads, boundaries"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-LOKI", "fidelity": 0.65, "notes": "Trickster, chaos-bringer, necessary disruptor"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:JP-SARUTAHIKO", "fidelity": 0.55, "notes": "Crossroads guardian"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When neglected or disrespected", "When chaos serves no purpose", "When communication becomes manipulation"],
+        "shadowManifestations": ["Blocking all progress", "Miscommunication", "Cruel tricks", "Fate reversed maliciously"],
+        "integrationPath": "Honoring the necessity of chaos; first offerings ensure clear communication"
+      },
+      "contextualVariants": [
+        {
+          "context": "Santería (as Elegua)",
+          "spectralShift": {"light-shadow": 0.4, "order-chaos": 0.6},
+          "notes": "Child-like aspect, playful, syncretized with Holy Child of Atocha"
+        },
+        {
+          "context": "Vodou (as Papa Legba)",
+          "spectralShift": {"ascent-descent": 0.6, "stasis-transformation": 0.5},
+          "notes": "Old man with cane, more elder-like, gate to the spirit world"
+        },
+        {
+          "context": "Candomblé (as Exu)",
+          "spectralShift": {"light-shadow": 0.6, "order-chaos": 0.75},
+          "notes": "More explicitly amoral, associated with sexuality and desire"
+        }
+      ],
+      "correspondences": {
+        "element": "Fire/Earth",
+        "direction": "Crossroads (all directions)",
+        "color": "Red and black",
+        "number": [3, 7, 21],
+        "day": "Monday",
+        "syncretism": "Holy Child of Atocha, Saint Anthony, Saint Michael",
+        "offerings": "Rum, cigars, candy, toys, roosters"
+      }
+    },
+    {
+      "@id": "arch:AF-OGUN",
+      "@type": "Archetype",
+      "name": "Ogun",
+      "aliases": ["Ogún", "Ogum (Candomblé)", "Ogou (Vodou)", "Saint Peter/James (sync)"],
+      "domain": ["Iron", "War", "Labor", "Technology", "Oaths", "Surgery", "Clearing Paths"],
+      "description": "The fierce Orisha of iron, war, and labor who clears paths through the wilderness with his machete. First to descend to earth, he forged the tools that enabled civilization. Patron of blacksmiths, warriors, surgeons, and all who work with metal or cut through obstacles. His energy is hot, direct, and transformative through decisive action.",
+      "spectralCoordinates": {
+        "order-chaos": 0.4,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.4,
+        "active-receptive": 0.1,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.3
+      },
+      "instantiates": [
+        {"primordial": "primordial:warrior", "weight": 0.95, "aspects": ["battle-lord", "path-clearer"]},
+        {"primordial": "primordial:creator", "weight": 0.7, "aspects": ["tool-maker", "civilization-enabler"]},
+        {"primordial": "primordial:destroyer", "weight": 0.65, "aspects": ["cutting", "clearing", "breaking-through"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:AF-ESHU", "description": "Ogun clears physical paths, Eshu opens spiritual ones"},
+        {"type": "rel:TENSION", "target": "arch:AF-SHANGO", "description": "Rival warriors, both claim Oya"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HEPHAESTUS", "fidelity": 0.7, "notes": "Smith god, iron/metal, tools"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ARES", "fidelity": 0.6, "notes": "War god, fierce battle"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-THOR", "fidelity": 0.55, "notes": "Warrior, protector, direct action"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When destruction outweighs creation", "When violence becomes purposeless", "When isolation becomes alienation"],
+        "shadowManifestations": ["Uncontrolled rage", "Destruction without purpose", "Cold brutality", "Broken oaths"],
+        "integrationPath": "Channeling warrior energy into protection and construction; honoring oaths"
+      },
+      "correspondences": {
+        "element": "Iron/Fire",
+        "direction": "Forest paths, railroad tracks",
+        "color": "Green and black",
+        "number": [3, 7],
+        "day": "Tuesday",
+        "syncretism": "Saint Peter, Saint James, Saint George",
+        "offerings": "Rum, cigars, rooster, iron tools, palm oil"
+      }
+    },
+    {
+      "@id": "arch:AF-SHANGO",
+      "@type": "Archetype",
+      "name": "Shango",
+      "aliases": ["Changó", "Xangô (Candomblé)", "Saint Barbara (sync)", "Fourth Alafin of Oyo"],
+      "domain": ["Thunder", "Lightning", "Fire", "Justice", "Kingship", "Dance", "Virility"],
+      "description": "The fiery Orisha of thunder and lightning, once the fourth king (Alafin) of the Oyo Empire. After accidentally killing his family with lightning, he hanged himself but transformed into an Orisha. He embodies masculine power, justice, strategic warfare, passion, and the destructive-creative force of the storm. Master of the bata drums and ecstatic dance.",
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.6,
+        "light-shadow": 0.35,
+        "active-receptive": 0.1,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.65,
+        "voluntary-fated": 0.45
+      },
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.9, "aspects": ["divine-king", "justice-bringer"]},
+        {"primordial": "primordial:warrior", "weight": 0.85, "aspects": ["thunder-warrior", "strategic-fighter"]},
+        {"primordial": "primordial:destroyer", "weight": 0.7, "aspects": ["lightning-wielder", "purifying-fire"]},
+        {"primordial": "primordial:lover", "weight": 0.6, "aspects": ["passionate", "virile", "dancer"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:AF-OYA", "description": "Thunder and wind, husband and wife"},
+        {"type": "rel:TENSION", "target": "arch:AF-OGUN", "description": "Rival warriors"},
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:AF-OBATALA", "axis": "active-receptive", "description": "Hot vs cool energy"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-THOR", "fidelity": 0.75, "notes": "Thunder god, warrior, hot-tempered"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ZEUS", "fidelity": 0.65, "notes": "Thunder/lightning, kingship, passion"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-INDRA", "fidelity": 0.7, "notes": "Thunder, warrior, king of gods"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When passion becomes rage", "When justice becomes vengeance", "When pride leads to destruction"],
+        "shadowManifestations": ["Uncontrolled destruction", "Killing loved ones in rage", "Tyranny", "Self-destruction"],
+        "integrationPath": "Transforming tragedy into apotheosis; channeling fire into justice not revenge"
+      },
+      "contextualVariants": [
+        {
+          "context": "As mortal king (Fourth Alafin)",
+          "spectralShift": {"light-shadow": 0.45, "stasis-transformation": 0.5},
+          "notes": "Historical king, ambitious, tragic"
+        },
+        {
+          "context": "As Orisha (post-apotheosis)",
+          "spectralShift": {"ascent-descent": 0.25, "individual-collective": 0.3},
+          "notes": "Divine thunder force, cosmic justice"
+        }
+      ],
+      "correspondences": {
+        "element": "Fire/Lightning",
+        "direction": "Sky (storms)",
+        "color": "Red and white",
+        "number": [4, 6],
+        "day": "Friday (or Wednesday in some traditions)",
+        "syncretism": "Saint Barbara (female saint - emphasizes androgyny)",
+        "symbol": "Double-headed axe (oshe), bata drums, thunderstones",
+        "offerings": "Rams, roosters, red apples, bananas, okra, amalá"
+      }
+    },
+    {
+      "@id": "arch:AF-OYA",
+      "@type": "Archetype",
+      "name": "Oya",
+      "aliases": ["Oyá", "Yansa", "Iansã (Candomblé)", "Our Lady of Candelaria (sync)"],
+      "domain": ["Wind", "Storms", "Death", "Transformation", "Cemetery Gates", "Change", "Warfare"],
+      "description": "The fierce warrior Orisha of wind, storms, and transformation who guards the gates of the cemetery. Wife of Shango, she stole his secrets of thunder and fights alongside him in battle. She embodies radical change, death as transformation, and feminine warrior power. She can manifest as tornado, hurricane, or the breath of the dying.",
+      "spectralCoordinates": {
+        "order-chaos": 0.65,
+        "creation-destruction": 0.65,
+        "light-shadow": 0.55,
+        "active-receptive": 0.25,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.85,
+        "voluntary-fated": 0.55
+      },
+      "instantiates": [
+        {"primordial": "primordial:destroyer", "weight": 0.85, "aspects": ["storm-bringer", "death-guardian"]},
+        {"primordial": "primordial:warrior", "weight": 0.8, "aspects": ["fierce-fighter", "amazon"]},
+        {"primordial": "primordial:psychopomp", "weight": 0.7, "aspects": ["cemetery-gate-keeper", "death-guide"]},
+        {"primordial": "primordial:crone", "weight": 0.55, "aspects": ["transformation-wisdom", "ancestor-connection"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:AF-SHANGO", "description": "Wind and thunder, co-warriors"},
+        {"type": "rel:MIRRORS", "target": "arch:AF-YEMOJA", "description": "Storm water vs calm water"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-KALI", "fidelity": 0.7, "notes": "Fierce goddess, death, transformation"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CE-MORRIGAN", "fidelity": 0.75, "notes": "War goddess, death, transformation, crows"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HECATE", "fidelity": 0.55, "notes": "Liminal goddess, crossroads, death mysteries"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When change becomes destruction for its own sake", "When warrior energy loses purpose"],
+        "shadowManifestations": ["Uncontrolled destruction", "Chaotic upheaval", "Death without rebirth"],
+        "integrationPath": "Transformation as necessary clearing; death as gateway not ending"
+      },
+      "correspondences": {
+        "element": "Air/Fire (wind and lightning)",
+        "direction": "Cemetery gates, storm fronts",
+        "color": "Maroon/burgundy, nine colors, rainbow",
+        "number": 9,
+        "day": "Wednesday",
+        "syncretism": "Our Lady of Candelaria, Saint Theresa",
+        "symbol": "Iruke (horsetail fly-whisk), sword, copper crown",
+        "taboo": "Lamb (rams sacred to Shango)"
+      }
+    },
+    {
+      "@id": "arch:AF-YEMOJA",
+      "@type": "Archetype",
+      "name": "Yemoja",
+      "aliases": ["Yemaya", "Yemanjá (Candomblé)", "Iemanjá", "La Sirene (Vodou)", "Our Lady of Regla (sync)"],
+      "domain": ["Ocean", "Motherhood", "Fertility", "Fish", "Dreams", "Unconscious", "Protection"],
+      "description": "The great mother Orisha of the ocean and salt water, source of all waters and mother of many Orishas. She embodies maternal love, fertility, protection of children, and the vast depths of the unconscious. In the diaspora, she became associated with the Middle Passage and the protection of those crossing waters. Her domain is the surface and upper layers of the ocean.",
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.3,
+        "light-shadow": 0.4,
+        "active-receptive": 0.7,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.45
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.95, "aspects": ["ocean-mother", "protector-of-children"]},
+        {"primordial": "primordial:healer", "weight": 0.7, "aspects": ["nurturer", "comforter"]},
+        {"primordial": "primordial:magician", "weight": 0.5, "aspects": ["dream-bringer", "unconscious-depths"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:AF-OLOKUN", "description": "Ocean surface and depths"},
+        {"type": "rel:CONTAINS", "target": "arch:AF-SHANGO", "description": "Mother of Shango in some paths"},
+        {"type": "rel:MIRRORS", "target": "arch:AF-OSHUN", "description": "Salt water and fresh water sisters"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-TETHYS", "fidelity": 0.6, "notes": "Primordial ocean mother"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-GANGA", "fidelity": 0.55, "notes": "Sacred water goddess, mother"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CN-MAZU", "fidelity": 0.6, "notes": "Sea goddess, protector of sailors"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When maternal love becomes smothering", "When protection becomes control", "When depths become drowning"],
+        "shadowManifestations": ["Possessive mothering", "Drowning in emotion", "Raging storms", "The devouring mother"],
+        "integrationPath": "Nurturing that releases; depths that transform rather than consume"
+      },
+      "correspondences": {
+        "element": "Water (salt/ocean)",
+        "direction": "Ocean, west",
+        "color": "Blue and white, crystal, silver",
+        "number": 7,
+        "day": "Saturday",
+        "syncretism": "Our Lady of Regla, Stella Maris",
+        "symbol": "Fans, shells, anchors, mermaids, fish",
+        "offerings": "Watermelon, molasses, fish, duck"
+      }
+    },
+    {
+      "@id": "arch:AF-OSHUN",
+      "@type": "Archetype",
+      "name": "Oshun",
+      "aliases": ["Ochún", "Oxum (Candomblé)", "Erzulie Freda (Vodou)", "Our Lady of Charity (sync)"],
+      "domain": ["Fresh Water", "Love", "Beauty", "Fertility", "Prosperity", "Diplomacy", "Divination"],
+      "description": "The beloved Orisha of fresh water, rivers, love, beauty, and prosperity. She embodies feminine grace, sensuality, and the sweet waters that sustain life. A powerful diplomat who once saved the Orishas when other powers failed, she is also a fierce protector who transforms into a warrior when her children are threatened. Patron of pregnancy and women's mysteries.",
+      "spectralCoordinates": {
+        "order-chaos": 0.4,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.3,
+        "active-receptive": 0.6,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.45,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.4
+      },
+      "instantiates": [
+        {"primordial": "primordial:lover", "weight": 0.9, "aspects": ["beauty", "sensuality", "romance"]},
+        {"primordial": "primordial:great-mother", "weight": 0.75, "aspects": ["fertility", "pregnancy-protector"]},
+        {"primordial": "primordial:magician", "weight": 0.6, "aspects": ["divination", "diplomat", "cunning"]},
+        {"primordial": "primordial:warrior", "weight": 0.4, "aspects": ["fierce-protector", "warrior-when-needed"]}
+      ],
+      "relationships": [
+        {"type": "rel:MIRRORS", "target": "arch:AF-YEMOJA", "description": "Fresh water and salt water sisters"},
+        {"type": "rel:COMPLEMENT", "target": "arch:AF-SHANGO", "description": "Lover, wife in some paths"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-APHRODITE", "fidelity": 0.75, "notes": "Love, beauty, water-born"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-LAKSHMI", "fidelity": 0.65, "notes": "Beauty, prosperity, grace"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-INANNA", "fidelity": 0.6, "notes": "Love goddess, fierce protector, multi-faceted"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When love becomes possessiveness", "When beauty becomes vanity", "When sweetness masks manipulation"],
+        "shadowManifestations": ["Jealousy", "Vanity", "Using charm to manipulate", "Rivers flooding in rage"],
+        "integrationPath": "Love that liberates; beauty as blessing not weapon; diplomatic power for healing"
+      },
+      "contextualVariants": [
+        {
+          "context": "As diplomat (saving the Orishas)",
+          "spectralShift": {"active-receptive": 0.35, "order-chaos": 0.3},
+          "notes": "Strategic, powerful, achieving what warriors could not"
+        },
+        {
+          "context": "As warrior (Ibú Ikolé - vulture)",
+          "spectralShift": {"creation-destruction": 0.55, "light-shadow": 0.5},
+          "notes": "Fierce witch, warrior, dark aspect"
+        }
+      ],
+      "correspondences": {
+        "element": "Water (fresh/river)",
+        "direction": "Rivers, east",
+        "color": "Yellow and gold, amber, coral",
+        "number": 5,
+        "day": "Thursday (or Saturday)",
+        "syncretism": "Our Lady of Charity (La Caridad del Cobre)",
+        "symbol": "Mirror, fan, honey, peacock feathers, brass",
+        "offerings": "Honey (tasted first to prove not poison), oranges, pumpkin, cinnamon, chamomile"
+      }
+    },
+    {
+      "@id": "arch:AF-ORUNMILA",
+      "@type": "Archetype",
+      "name": "Orunmila",
+      "aliases": ["Orula", "Ifá", "Saint Francis of Assisi (sync)", "Witness to Destiny"],
+      "domain": ["Divination", "Wisdom", "Destiny", "Ifá System", "Knowledge", "Healing"],
+      "description": "The Orisha of wisdom and divination, present when Olodumare created the universe - the only witness to all destinies. He does not possess devotees but speaks through the Ifá divination system, the most complex oracle in the world. Through his priests (babalawos), he reveals destiny and prescribes remedies. He knows all that was, is, and will be.",
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.2,
+        "active-receptive": 0.55,
+        "individual-collective": 0.25,
+        "ascent-descent": 0.25,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.8
+      },
+      "instantiates": [
+        {"primordial": "primordial:wise-elder", "weight": 0.95, "aspects": ["cosmic-wisdom", "destiny-keeper"]},
+        {"primordial": "primordial:magician", "weight": 0.85, "aspects": ["diviner", "oracle", "fate-revealer"]},
+        {"primordial": "primordial:healer", "weight": 0.6, "aspects": ["prescriber-of-remedies", "balance-restorer"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:AF-ESHU", "description": "Order and chaos, divination needs the messenger"},
+        {"type": "rel:CONTAINED_BY", "target": "arch:AF-OLODUMARE", "description": "Witness to creation"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-APOLLO", "fidelity": 0.55, "notes": "Divination, prophecy, wisdom"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-THOTH", "fidelity": 0.7, "notes": "Divine wisdom, cosmic knowledge, sacred writing"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-ODIN", "fidelity": 0.5, "notes": "Sought wisdom at great cost, knows fate"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When knowledge becomes control", "When destiny is used to manipulate"],
+        "shadowManifestations": ["Fatalism that paralyzes", "Using prophecy to control", "Knowledge without compassion"],
+        "integrationPath": "Wisdom in service of healing; knowing destiny to navigate it, not be enslaved by it"
+      },
+      "correspondences": {
+        "element": "Earth/Air",
+        "direction": "All (witnesses all)",
+        "color": "Green and yellow",
+        "number": [16, 256],
+        "numberNotes": "16 odù, 256 combinations",
+        "day": "Every day (through Ifá)",
+        "syncretism": "Saint Francis of Assisi",
+        "symbol": "Divining chain (opele), palm nuts (ikin), divining board (opon Ifá)",
+        "taboo": "Only male priests (babalawos) can work directly with Orunmila"
+      }
+    },
+    {
+      "@id": "arch:AF-OLOKUN",
+      "@type": "Archetype",
+      "name": "Olokun",
+      "aliases": ["Owner of the Ocean", "Ruler of the Deep"],
+      "domain": ["Ocean Depths", "Wealth", "Secrets", "The Unconscious", "Ancestors of the Middle Passage"],
+      "description": "The mysterious Orisha of the ocean depths, where sunlight cannot reach. Sometimes male, sometimes female, sometimes both or neither, Olokun embodies the unfathomable deep and all its treasures and terrors. In the diaspora, Olokun holds special significance as keeper of the ancestors lost in the Middle Passage, the millions who died in the crossing.",
+      "spectralCoordinates": {
+        "order-chaos": 0.45,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.8,
+        "active-receptive": 0.65,
+        "individual-collective": 0.25,
+        "ascent-descent": 0.9,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.7
+      },
+      "instantiates": [
+        {"primordial": "primordial:self", "weight": 0.7, "aspects": ["oceanic-unconscious", "primal-depths"]},
+        {"primordial": "primordial:ancestor", "weight": 0.75, "aspects": ["keeper-of-drowned-ancestors", "Middle-Passage-guardian"]},
+        {"primordial": "primordial:magician", "weight": 0.6, "aspects": ["ocean-mysteries", "hidden-wealth"]},
+        {"primordial": "primordial:monster", "weight": 0.5, "aspects": ["unfathomable", "terrifying-depths"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:AF-YEMOJA", "description": "Ocean depths and surface"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-POSEIDON", "fidelity": 0.5, "notes": "Ocean ruler, mysterious depths"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-TIAMAT", "fidelity": 0.55, "notes": "Primordial ocean, chaos-depth"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-RAN", "fidelity": 0.5, "notes": "Ocean depths, drowned souls"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When depths consume rather than transform", "When secrets become madness"],
+        "shadowManifestations": ["Drowning in the unconscious", "Overwhelming grief", "Madness from the deep"],
+        "integrationPath": "Diving into depths for treasure and wisdom; honoring the drowned with memory"
+      },
+      "correspondences": {
+        "element": "Water (abyssal)",
+        "direction": "Below the waves",
+        "color": "Blue, black, white, coral",
+        "number": [7, 9],
+        "syncretism": "Our Lady of Regla (shared with Yemoja)",
+        "symbol": "Chains (broken), shells, ocean treasures, masks",
+        "association": "Ancestor veneration, Middle Passage, ocean floor wealth"
+      }
+    },
+    {
+      "@id": "arch:AF-BABALU-AYE",
+      "@type": "Archetype",
+      "name": "Babalú-Ayé",
+      "aliases": ["Obaluaiyê", "Omolu (Candomblé)", "Shopona", "Saint Lazarus (sync)"],
+      "domain": ["Disease", "Healing", "Epidemics", "Smallpox", "Earth", "Suffering", "Outcasts"],
+      "description": "The feared and deeply respected Orisha of disease and healing, particularly epidemic illness. Covered in sores or hidden beneath raffia, he walks with a crutch. He both brings disease and has the power to cure it. Patron of the sick, disabled, and outcast, he teaches that suffering can lead to wisdom. His name was traditionally spoken only in whispers.",
+      "spectralCoordinates": {
+        "order-chaos": 0.4,
+        "creation-destruction": 0.65,
+        "light-shadow": 0.7,
+        "active-receptive": 0.55,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.75,
+        "stasis-transformation": 0.7,
+        "voluntary-fated": 0.75
+      },
+      "instantiates": [
+        {"primordial": "primordial:healer", "weight": 0.85, "aspects": ["disease-curer", "wound-healer"]},
+        {"primordial": "primordial:destroyer", "weight": 0.75, "aspects": ["plague-bringer", "epidemic-lord"]},
+        {"primordial": "primordial:outcast", "weight": 0.7, "aspects": ["suffering-exile", "patron-of-outcasts"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.5, "aspects": ["wisdom-through-suffering"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-APOLLO", "fidelity": 0.5, "notes": "Plague-bringer and healer"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-SHIVA", "fidelity": 0.45, "notes": "Ascetic, outsider, destruction-healing"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:JP-JIZO", "fidelity": 0.4, "notes": "Protector of suffering, outcasts"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When disease serves only destruction", "When suffering has no teaching"],
+        "shadowManifestations": ["Epidemic without mercy", "Spreading contagion in rage", "Abandonment of the sick"],
+        "integrationPath": "Disease as teacher; healing through suffering; embracing the outcast"
+      },
+      "correspondences": {
+        "element": "Earth",
+        "direction": "Earth, graves, crossroads",
+        "color": "Purple/brown, burlap, raffia",
+        "number": [13, 17],
+        "day": "Wednesday or Sunday",
+        "syncretism": "Saint Lazarus (the beggar with sores)",
+        "symbol": "Crutch, broom (já), raffia covering, cowrie shells",
+        "taboo": "Popcorn (associated with smallpox pustules as offerings)"
+      }
+    },
+    {
+      "@id": "arch:AF-OBBA",
+      "@type": "Archetype",
+      "name": "Obba",
+      "aliases": ["Oba", "Saint Catherine of Siena (sync)"],
+      "domain": ["Marriage", "Domestic Life", "Lakes", "Devotion", "Sacrifice", "Betrayed Women"],
+      "description": "The Orisha of marriage and domesticity, once Shango's senior wife. Tricked by the jealous Oshun into cutting off her own ear and putting it in Shango's soup to win his love, she was rejected and exiled. She rules the still waters of lakes and embodies the tragedy of misplaced devotion and the suffering of betrayed wives.",
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.55,
+        "active-receptive": 0.75,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.7
+      },
+      "instantiates": [
+        {"primordial": "primordial:lover", "weight": 0.7, "aspects": ["devoted-wife", "tragic-love"]},
+        {"primordial": "primordial:outcast", "weight": 0.65, "aspects": ["exiled", "rejected", "betrayed"]},
+        {"primordial": "primordial:great-mother", "weight": 0.5, "aspects": ["domesticity", "marriage-keeper"]}
+      ],
+      "relationships": [
+        {"type": "rel:TENSION", "target": "arch:AF-OSHUN", "description": "Rivalry, betrayal, jealousy"},
+        {"type": "rel:COMPLEMENT", "target": "arch:AF-SHANGO", "description": "Former wife, rejected love"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HERA", "fidelity": 0.5, "notes": "Marriage goddess, jealousy, betrayed wife"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:JP-IZANAMI", "fidelity": 0.4, "notes": "Rejected, transformed through loss"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When devotion becomes self-destruction", "When sacrifice is manipulated"],
+        "shadowManifestations": ["Self-mutilation for love", "Passive victimhood", "Resentment without action"],
+        "integrationPath": "Finding dignity in rejection; devotion that does not destroy self"
+      },
+      "correspondences": {
+        "element": "Water (still/lakes)",
+        "direction": "Lakes, cemetery",
+        "color": "Pink and yellow",
+        "number": 8,
+        "syncretism": "Saint Catherine of Siena",
+        "symbol": "Shield, sword, steering wheel (helm)",
+        "association": "Marriage, faithful wives, domestic workers"
+      }
+    },
+    {
+      "@id": "arch:AF-NANA-BURUKU",
+      "@type": "Archetype",
+      "name": "Nana Buruku",
+      "aliases": ["Nanã", "Nana Buluku", "Saint Anne (sync)"],
+      "domain": ["Swamps", "Primordial Mud", "Death", "Ancestors", "Creation", "Deep Feminine"],
+      "description": "One of the most ancient Orishas, predating even Olodumare, she is the primordial mother associated with swamps, mud, and the boundary between life and death. She provided the clay from which Obatala formed humans. Her relationship with Ogun is hostile - she forbids iron in her worship because he used it to slay one of her children.",
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.65,
+        "active-receptive": 0.75,
+        "individual-collective": 0.2,
+        "ascent-descent": 0.8,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.8
+      },
+      "instantiates": [
+        {"primordial": "primordial:crone", "weight": 0.9, "aspects": ["ancient-one", "primordial-mother"]},
+        {"primordial": "primordial:great-mother", "weight": 0.8, "aspects": ["clay-provider", "earth-womb"]},
+        {"primordial": "primordial:ancestor", "weight": 0.7, "aspects": ["grandmother-of-orishas", "keeper-of-dead"]}
+      ],
+      "relationships": [
+        {"type": "rel:TENSION", "target": "arch:AF-OGUN", "description": "Iron forbidden, ancient enmity"},
+        {"type": "rel:COMPLEMENT", "target": "arch:AF-OBATALA", "description": "She provided clay for human creation"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-GAIA", "fidelity": 0.6, "notes": "Primordial earth mother"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-TIAMAT", "fidelity": 0.5, "notes": "Primordial mother, predates order"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-KALI", "fidelity": 0.55, "notes": "Ancient dark mother, life-death"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When the ancient consumes the new", "When death has no rebirth"],
+        "shadowManifestations": ["Swamp that swallows", "Primordial chaos returning", "Implacable ancient grudges"],
+        "integrationPath": "Honoring the old ways while allowing growth; death as return to source"
+      },
+      "correspondences": {
+        "element": "Earth/Water (swamp, mud)",
+        "direction": "Below, swamps",
+        "color": "Purple and white",
+        "number": 7,
+        "syncretism": "Saint Anne (grandmother of Jesus)",
+        "symbol": "Ibiri (palm rib staff), no iron allowed",
+        "taboo": "Iron in her worship"
+      }
+    },
+    {
+      "@id": "arch:AF-ODUDUWA",
+      "@type": "Archetype",
+      "name": "Oduduwa",
+      "aliases": ["Odudua", "Founder of Ile-Ife"],
+      "domain": ["Earth", "Foundation", "Yoruba Nation", "Kingship", "Completion"],
+      "description": "The Orisha who completed the creation of earth when Obatala fell asleep drunk. He descended with soil in a snail shell, a five-toed hen to spread it, and a palm nut to plant. He founded Ile-Ife, the sacred city of the Yoruba, and is ancestor to all Yoruba kings. He represents the earthly complement to Obatala's heavenly nature.",
+      "spectralCoordinates": {
+        "order-chaos": 0.2,
+        "creation-destruction": 0.2,
+        "light-shadow": 0.45,
+        "active-receptive": 0.4,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.7,
+        "stasis-transformation": 0.35,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.85, "aspects": ["earth-founder", "nation-builder"]},
+        {"primordial": "primordial:sovereign", "weight": 0.8, "aspects": ["first-king", "ancestor-of-kings"]},
+        {"primordial": "primordial:great-father", "weight": 0.7, "aspects": ["ancestral-father", "lineage-founder"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:AF-OBATALA", "description": "Earth and sky, completed Obatala's work"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-GEB", "fidelity": 0.6, "notes": "Earth deity, foundation"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CN-HUANGDI", "fidelity": 0.55, "notes": "Ancestor of nation, civilizing founder"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When foundation becomes rigidity", "When ancestry becomes exclusion"],
+        "shadowManifestations": ["Ethnic exclusivism", "Calcified tradition", "Earth that will not yield"],
+        "integrationPath": "Foundation that supports growth; ancestry that includes rather than excludes"
+      },
+      "correspondences": {
+        "element": "Earth",
+        "direction": "Below, Ile-Ife",
+        "color": "Black and white",
+        "symbol": "Snail shell, five-toed hen, sacred chain",
+        "association": "Yoruba kingship, Ile-Ife, national identity"
+      }
+    },
+    {
+      "@id": "arch:AF-OSANYIN",
+      "@type": "Archetype",
+      "name": "Osanyin",
+      "aliases": ["Ossain", "Osain", "Saint Joseph/Sylvester (sync)"],
+      "domain": ["Herbs", "Medicine", "Forest", "Magic", "Healing", "Plant Spirits"],
+      "description": "The one-eyed, one-armed, one-legged Orisha of herbs and plant medicine who lives in the forest and knows every plant's secret. All magical and healing work requires his herbs. He guards the secrets of herbal medicine and forest magic, communicating with the spirits within plants. His deformity comes from various mythical accidents but marks him as liminal.",
+      "spectralCoordinates": {
+        "order-chaos": 0.5,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.5,
+        "active-receptive": 0.5,
+        "individual-collective": 0.6,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.45
+      },
+      "instantiates": [
+        {"primordial": "primordial:healer", "weight": 0.9, "aspects": ["herbalist", "medicine-master"]},
+        {"primordial": "primordial:magician", "weight": 0.85, "aspects": ["plant-magic", "forest-secrets"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.6, "aspects": ["nature-knowledge", "plant-communication"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CN-SHENNONG", "fidelity": 0.7, "notes": "Divine herbalist, medicine discoverer"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ASCLEPIUS", "fidelity": 0.55, "notes": "Healing deity, plant medicine"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CE-BRIGID", "fidelity": 0.45, "notes": "Healing, herb-lore"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When plant knowledge becomes poison", "When healing is withheld"],
+        "shadowManifestations": ["Poisoner", "Hoarding healing knowledge", "Forest that kills"],
+        "integrationPath": "Healing knowledge shared responsibly; forest magic in service of life"
+      },
+      "correspondences": {
+        "element": "Earth (forest)",
+        "direction": "Forest",
+        "color": "Green",
+        "number": 7,
+        "syncretism": "Saint Joseph, Saint Sylvester",
+        "symbol": "Single bird on staff (osanyin), herbs, gourd",
+        "taboo": "Secrets not to be shared with uninitiated"
+      }
+    },
+    {
+      "@id": "arch:AF-AGANJU",
+      "@type": "Archetype",
+      "name": "Aganju",
+      "aliases": ["Aganyu", "Saint Christopher (sync)"],
+      "domain": ["Volcanoes", "Wilderness", "The Desert", "Rivers (crossing)", "Father Energy"],
+      "description": "The Orisha of volcanoes, wilderness, and the untamed earth. Father of Shango in some lineages, he represents raw masculine earth power, the ferryman who carries people across rivers, and the volcanic force beneath the surface. He is invoked for strength to overcome impossible obstacles and cross dangerous thresholds.",
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.6,
+        "light-shadow": 0.45,
+        "active-receptive": 0.2,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.65,
+        "stasis-transformation": 0.65,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-father", "weight": 0.75, "aspects": ["father-of-Shango", "primal-masculine"]},
+        {"primordial": "primordial:destroyer", "weight": 0.7, "aspects": ["volcanic-power", "earth-fire"]},
+        {"primordial": "primordial:psychopomp", "weight": 0.55, "aspects": ["ferryman", "threshold-crosser"]}
+      ],
+      "relationships": [
+        {"type": "rel:CONTAINS", "target": "arch:AF-SHANGO", "description": "Father of Shango"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HEPHAESTUS", "fidelity": 0.5, "notes": "Volcanic fire, earth-forge"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-CHARON", "fidelity": 0.45, "notes": "Ferryman across threshold"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When volcanic energy erupts destructively", "When wilderness consumes"],
+        "shadowManifestations": ["Volcanic destruction", "Impassable wilderness", "Abandonment"],
+        "integrationPath": "Volcanic power contained and channeled; wilderness as teacher not destroyer"
+      },
+      "correspondences": {
+        "element": "Fire/Earth (volcanic)",
+        "direction": "Wilderness, rivers",
+        "color": "Red, brown, green",
+        "number": 9,
+        "syncretism": "Saint Christopher (river-crosser)",
+        "symbol": "Axe, volcanic stones",
+        "offerings": "Rooster, red palm oil, dried fish"
+      }
+    }
+  ]
+}

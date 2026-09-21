@@ -1,0 +1,842 @@
+{
+  "@context": "../../schema/ACP_CONTEXT.jsonld",
+  "@id": "pantheon:persian",
+  "@type": "Pantheon",
+  "name": "Persian & Zoroastrian Pantheon",
+  "tradition": "Persian/Zoroastrian/Iranian",
+  "description": "The divine beings of ancient Iranian religion, culminating in the Zoroastrian reform of Zarathustra. This tradition centers on the cosmic dualism between Ahura Mazda (Wise Lord) and Angra Mainyu (Destructive Spirit), with humanity's role in the cosmic battle between Asha (Truth/Order) and Druj (Lie/Chaos). The Yazatas (worthy of worship) serve as divine helpers, while the Amesha Spentas (Bounteous Immortals) represent aspects of Ahura Mazda. This dualistic framework profoundly influenced later Abrahamic concepts of good vs. evil, angels, heaven, hell, and apocalyptic eschatology.",
+  "canonicalSources": [
+    "Avesta (Yasna, Yasht, Vendidad)",
+    "Bundahishn (Creation text)",
+    "Denkard (Acts of Religion)",
+    "Shahnameh (Ferdowsi)",
+    "Greek sources (Herodotus, Plutarch)"
+  ],
+  "systemPatterns": [
+    {
+      "name": "Cosmic Dualism",
+      "description": "The fundamental opposition between Ahura Mazda (Truth, Light, Life) and Angra Mainyu (Lie, Darkness, Death). Creation is the battleground where these forces contend, with eventual victory for good predetermined but requiring human participation.",
+      "archetypes": ["persian:ahura-mazda", "persian:angra-mainyu"]
+    },
+    {
+      "name": "Amesha Spentas",
+      "description": "The seven Bounteous Immortals who emanate from Ahura Mazda, each governing an aspect of creation and representing a divine virtue. They form a heptad of cosmic principles.",
+      "archetypes": ["persian:ahura-mazda", "persian:spenta-mainyu", "persian:vohu-manah", "persian:asha-vahishta", "persian:khshathra-vairya", "persian:spenta-armaiti", "persian:haurvatat", "persian:ameretat"]
+    },
+    {
+      "name": "Fravashi and Ancestors",
+      "description": "The Fravashi are pre-existent souls/guardian spirits that chose to incarnate and fight for good. They connect living humans to ancestors and to cosmic purpose.",
+      "archetypes": ["persian:fravashi"]
+    },
+    {
+      "name": "Eschatological Battle",
+      "description": "History moves toward Frashokereti (Making Wonderful), the final renovation when evil is defeated, the dead resurrected, and creation restored to perfection through the Saoshyant (savior).",
+      "archetypes": ["persian:ahura-mazda", "persian:saoshyant", "persian:angra-mainyu"]
+    }
+  ],
+  "entries": [
+    {
+      "@id": "persian:ahura-mazda",
+      "@type": "CulturalArchetype",
+      "name": "Ahura Mazda",
+      "culture": "Persian/Zoroastrian",
+      "domain": ["wisdom", "truth", "light", "creation", "cosmic order"],
+      "description": "The supreme deity of Zoroastrianism, the 'Wise Lord' and uncreated creator of all that is good. Ahura Mazda is the source of Asha (Truth/Order) and opposes Druj (Lie/Chaos). He created the material world as a trap for evil and will ultimately triumph in the cosmic battle. His worship replaced or reformed earlier Indo-Iranian polytheism.",
+      "spectralCoordinates": {
+        "order-chaos": 0.05,
+        "creation-destruction": 0.05,
+        "light-shadow": 0.00,
+        "active-receptive": 0.15,
+        "individual-collective": 0.80,
+        "ascent-descent": 0.05,
+        "stasis-transformation": 0.30,
+        "voluntary-fated": 0.15
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.95, "aspects": ["supreme-creator", "world-maker"]},
+        {"primordial": "primordial:sovereign", "weight": 0.90, "aspects": ["cosmic-king", "lord-of-wisdom"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.85, "aspects": ["all-knowing", "truth-source"]}
+      ],
+      "relationships": [
+        {"type": "POLAR_OPPOSITE", "target": "persian:angra-mainyu", "axis": "light-shadow", "notes": "Fundamental cosmic opposition"},
+        {"type": "POLAR_OPPOSITE", "target": "persian:angra-mainyu", "axis": "order-chaos", "notes": "Truth vs. Lie"},
+        {"type": "CONTAINS", "target": "persian:spenta-mainyu", "notes": "Holy Spirit as aspect/emanation"},
+        {"type": "CONTAINS", "target": "persian:vohu-manah", "notes": "Good Mind as emanation"},
+        {"type": "CONTAINS", "target": "persian:asha-vahishta", "notes": "Best Truth as emanation"},
+        {"type": "CULTURAL_ECHO", "target": "arch:IN-VARUNA", "fidelity": 0.70, "notes": "Ahura/Asura cognate, cosmic order"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ZEUS", "fidelity": 0.50, "notes": "Sky father supreme deity"},
+        {"type": "CULTURAL_ECHO", "target": "mesopotamian:anu", "fidelity": 0.55, "notes": "Supreme sky god"}
+      ],
+      "contextualVariants": [
+        {
+          "context": "Early Zoroastrianism (Gathic)",
+          "spectralShift": {"individual-collective": 0.70, "active-receptive": 0.20},
+          "notes": "More abstract, philosophical conception"
+        },
+        {
+          "context": "Later Zoroastrianism (Younger Avesta)",
+          "spectralShift": {"individual-collective": 0.85, "voluntary-fated": 0.10},
+          "notes": "More personified, surrounded by divine helpers"
+        },
+        {
+          "context": "Achaemenid Imperial Religion",
+          "spectralShift": {"order-chaos": 0.10, "active-receptive": 0.10},
+          "notes": "Patron of Persian Empire and kingship"
+        }
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["Ahura Mazda has no shadow in Zoroastrian theology—evil is external, not internal"],
+        "shadowManifestations": ["None—all shadow projected onto Angra Mainyu"],
+        "integrationPath": "The system itself may need integration: acknowledging shadow within good"
+      },
+      "correspondences": {
+        "element": "fire/light",
+        "color": "white/gold",
+        "symbols": ["winged disc (Faravahar)", "fire", "sun"],
+        "direction": "above/all directions"
+      }
+    },
+    {
+      "@id": "persian:angra-mainyu",
+      "@type": "CulturalArchetype",
+      "name": "Angra Mainyu (Ahriman)",
+      "alternateNames": ["Ahriman"],
+      "culture": "Persian/Zoroastrian",
+      "domain": ["destruction", "lies", "darkness", "death", "chaos"],
+      "description": "The 'Destructive Spirit' or 'Evil Spirit,' the cosmic adversary of Ahura Mazda. Angra Mainyu is the source of all evil, death, disease, and the Lie (Druj). He did not create but corrupts, invading the good creation with his demons (daevas). In Zoroastrian eschatology, he will ultimately be defeated and destroyed or neutralized.",
+      "spectralCoordinates": {
+        "order-chaos": 0.95,
+        "creation-destruction": 0.95,
+        "light-shadow": 1.00,
+        "active-receptive": 0.15,
+        "individual-collective": 0.20,
+        "ascent-descent": 0.90,
+        "stasis-transformation": 0.80,
+        "voluntary-fated": 0.85
+      },
+      "instantiates": [
+        {"primordial": "primordial:destroyer", "weight": 0.95, "aspects": ["cosmic-adversary", "corruption"]},
+        {"primordial": "primordial:monster", "weight": 0.80, "aspects": ["father-of-demons"]},
+        {"primordial": "primordial:trickster", "weight": 0.60, "aspects": ["deceiver", "lie-father"]}
+      ],
+      "relationships": [
+        {"type": "POLAR_OPPOSITE", "target": "persian:ahura-mazda", "axis": "light-shadow", "notes": "Fundamental cosmic opposition"},
+        {"type": "POLAR_OPPOSITE", "target": "persian:ahura-mazda", "axis": "order-chaos", "notes": "Lie vs. Truth"},
+        {"type": "CONTAINS", "target": "persian:aeshma", "notes": "Wrath demon"},
+        {"type": "CONTAINS", "target": "persian:az", "notes": "Greed/lust demon"},
+        {"type": "CULTURAL_ECHO", "target": "christian:satan", "fidelity": 0.85, "notes": "Primary influence on devil concept"},
+        {"type": "CULTURAL_ECHO", "target": "arch:NO-LOKI", "fidelity": 0.45, "notes": "Destructive cosmic force"},
+        {"type": "SHADOW", "target": "persian:ahura-mazda", "notes": "Projected shadow of light"}
+      ],
+      "contextualVariants": [
+        {
+          "context": "Gathic (Early) Zoroastrianism",
+          "spectralShift": {"individual-collective": 0.30, "stasis-transformation": 0.70},
+          "notes": "More abstract principle of evil choice"
+        },
+        {
+          "context": "Later Zoroastrianism",
+          "spectralShift": {"individual-collective": 0.15, "active-receptive": 0.10},
+          "notes": "Fully personified adversary with demon armies"
+        },
+        {
+          "context": "Zurvanism",
+          "spectralShift": {"voluntary-fated": 0.95, "individual-collective": 0.40},
+          "notes": "Twin of Ahura Mazda, both born from Zurvan (Time)"
+        }
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["Angra Mainyu IS pure shadow in this system"],
+        "shadowManifestations": ["All evil, death, disease, lies"],
+        "integrationPath": "Zoroastrian answer: not integration but ultimate defeat; Jungian critique: projection needing reintegration"
+      },
+      "correspondences": {
+        "element": "darkness/pollution",
+        "color": "black",
+        "symbols": ["serpent", "fly", "wolf"],
+        "direction": "below/north"
+      }
+    },
+    {
+      "@id": "persian:mithra",
+      "@type": "CulturalArchetype",
+      "name": "Mithra",
+      "culture": "Persian/Zoroastrian/Roman",
+      "domain": ["contracts", "oaths", "light", "war", "justice", "cattle"],
+      "description": "The yazata of contracts, oaths, and the light that watches over agreements. Mithra ('contract') predates Zoroaster, being an Indo-Iranian deity (cognate with Vedic Mitra). He judges souls, leads armies of the just, and was later the center of the Roman Mithraic mysteries. His light is that of truth illuminating falsehood.",
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.40,
+        "light-shadow": 0.10,
+        "active-receptive": 0.20,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.25,
+        "stasis-transformation": 0.35,
+        "voluntary-fated": 0.30
+      },
+      "instantiates": [
+        {"primordial": "primordial:warrior", "weight": 0.80, "aspects": ["champion-of-truth", "cosmic-soldier"]},
+        {"primordial": "primordial:sovereign", "weight": 0.70, "aspects": ["judge", "contract-keeper"]},
+        {"primordial": "primordial:magician", "weight": 0.55, "aspects": ["all-seeing", "light-bringer"]}
+      ],
+      "relationships": [
+        {"type": "CULTURAL_ECHO", "target": "arch:IN-MITRA", "fidelity": 0.85, "notes": "Direct cognate, contract deity"},
+        {"type": "EVOLUTION", "target": "roman:mithras", "notes": "Developed into mystery cult deity"},
+        {"type": "COMPLEMENT", "target": "persian:ahura-mazda", "notes": "Serves as yazata of cosmic order"},
+        {"type": "COMPLEMENT", "target": "persian:rashnu", "notes": "Co-judge at Chinvat Bridge"}
+      ],
+      "contextualVariants": [
+        {
+          "context": "Pre-Zoroastrian Iran",
+          "spectralShift": {"individual-collective": 0.45, "order-chaos": 0.20},
+          "notes": "Major deity, possibly supreme in some regions"
+        },
+        {
+          "context": "Zoroastrian Reform",
+          "spectralShift": {"individual-collective": 0.55, "voluntary-fated": 0.25},
+          "notes": "Subordinated to Ahura Mazda as yazata"
+        },
+        {
+          "context": "Roman Mysteries",
+          "spectralShift": {"ascent-descent": 0.15, "stasis-transformation": 0.50},
+          "notes": "Mystery savior, bull-slayer, grades of initiation"
+        }
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When contracts become legalism", "When judgment becomes merciless"],
+        "shadowManifestations": ["Harsh punishment", "Vengeance for broken oaths"],
+        "integrationPath": "Balancing justice with mercy, letter with spirit of agreements"
+      },
+      "correspondences": {
+        "celestialBody": "sun (or light generally)",
+        "animal": "bull, horse, raven",
+        "color": "gold/white",
+        "symbols": ["sun-disc", "bull-slaying (Roman)"],
+        "number": "10000 (his spies)"
+      }
+    },
+    {
+      "@id": "persian:anahita",
+      "@type": "CulturalArchetype",
+      "name": "Anahita",
+      "alternateNames": ["Aredvi Sura Anahita", "Nahid"],
+      "culture": "Persian/Zoroastrian",
+      "domain": ["waters", "fertility", "wisdom", "healing", "victory"],
+      "description": "The 'Moist, Strong, Immaculate' goddess of all waters, fertility, and wisdom. Anahita is the most prominent female yazata, associated with the cosmic river and all earthly waters. She grants victory, fertility, and purification. Her cult was immensely popular, with temples throughout the Persian Empire.",
+      "spectralCoordinates": {
+        "order-chaos": 0.30,
+        "creation-destruction": 0.25,
+        "light-shadow": 0.20,
+        "active-receptive": 0.60,
+        "individual-collective": 0.65,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.40
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.85, "aspects": ["water-mother", "fertility-giver"]},
+        {"primordial": "primordial:healer", "weight": 0.65, "aspects": ["purifier", "health-giver"]},
+        {"primordial": "primordial:warrior", "weight": 0.50, "aspects": ["victory-granter"]}
+      ],
+      "relationships": [
+        {"type": "CULTURAL_ECHO", "target": "arch:IN-SARASWATI", "fidelity": 0.70, "notes": "River goddess, wisdom"},
+        {"type": "CULTURAL_ECHO", "target": "mesopotamian:inanna", "fidelity": 0.60, "notes": "Fertility goddess, possibly syncretized"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-APHRODITE", "fidelity": 0.55, "notes": "Syncretized in Hellenistic period"},
+        {"type": "COMPLEMENT", "target": "persian:mithra", "notes": "Co-worshipped in many temples"},
+        {"type": "MIRRORS", "target": "persian:spenta-armaiti", "notes": "Feminine divine principles"}
+      ],
+      "contextualVariants": [
+        {
+          "context": "Avestan Hymn (Aban Yasht)",
+          "spectralShift": {"active-receptive": 0.55, "ascent-descent": 0.25},
+          "notes": "Cosmic river goddess, source of all waters"
+        },
+        {
+          "context": "Achaemenid/Sasanian Temple Cult",
+          "spectralShift": {"individual-collective": 0.75, "order-chaos": 0.25},
+          "notes": "Major state goddess with elaborate temples"
+        },
+        {
+          "context": "Syncretistic (Hellenistic)",
+          "spectralShift": {"creation-destruction": 0.20, "light-shadow": 0.25},
+          "notes": "Merged with Ishtar, Aphrodite, Athena"
+        }
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When waters become destructive", "When purity becomes exclusion"],
+        "shadowManifestations": ["Floods", "Withholding fertility", "Drowning"],
+        "integrationPath": "Accepting water's dual nature: life-giving and destroying"
+      },
+      "correspondences": {
+        "element": "water",
+        "animal": "beaver (in Avesta)",
+        "color": "blue/silver",
+        "symbols": ["flowing water", "star (Nahid/Venus)"],
+        "celestialBody": "Venus (as Nahid)"
+      }
+    },
+    {
+      "@id": "persian:vohu-manah",
+      "@type": "CulturalArchetype",
+      "name": "Vohu Manah",
+      "alternateNames": ["Bahman"],
+      "culture": "Persian/Zoroastrian",
+      "domain": ["good mind", "animals", "wisdom", "right thinking"],
+      "description": "The 'Good Mind' or 'Good Thought,' the first and foremost of the Amesha Spentas. Vohu Manah represents the good mind that chooses truth over falsehood. He is the guardian of animals, especially cattle, and was the being who first appeared to Zarathustra in his prophetic vision.",
+      "spectralCoordinates": {
+        "order-chaos": 0.10,
+        "creation-destruction": 0.20,
+        "light-shadow": 0.10,
+        "active-receptive": 0.45,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.20,
+        "stasis-transformation": 0.30,
+        "voluntary-fated": 0.20
+      },
+      "instantiates": [
+        {"primordial": "primordial:wise-elder", "weight": 0.85, "aspects": ["divine-wisdom", "right-thought"]},
+        {"primordial": "primordial:preserver", "weight": 0.60, "aspects": ["animal-guardian"]}
+      ],
+      "relationships": [
+        {"type": "CONTAINED_BY", "target": "persian:ahura-mazda", "notes": "Emanation of Wise Lord"},
+        {"type": "COMPLEMENT", "target": "persian:asha-vahishta", "notes": "Good Mind and Best Truth together"},
+        {"type": "CONSTELLATION", "target": ["persian:asha-vahishta", "persian:khshathra-vairya", "persian:spenta-armaiti", "persian:haurvatat", "persian:ameretat"], "notes": "The six Amesha Spentas"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-NOUS", "fidelity": 0.60, "notes": "Divine Mind concept"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When thinking becomes overthinking", "When mind divorces from action"],
+        "shadowManifestations": ["Aka Manah (Evil Mind)", "Paralysis by analysis"],
+        "integrationPath": "Uniting thought with deed, mind with heart"
+      },
+      "correspondences": {
+        "element": "air/thought",
+        "animal": "cattle, cow",
+        "month": "Bahman (11th month)",
+        "color": "white"
+      }
+    },
+    {
+      "@id": "persian:asha-vahishta",
+      "@type": "CulturalArchetype",
+      "name": "Asha Vahishta",
+      "alternateNames": ["Ardibehesht", "Arta"],
+      "culture": "Persian/Zoroastrian",
+      "domain": ["truth", "righteousness", "fire", "cosmic order"],
+      "description": "'Best Truth' or 'Best Righteousness,' the Amesha Spenta embodying Asha—the fundamental Zoroastrian concept of truth, cosmic order, and righteousness. Guardian of fire, the visible symbol of Asha in worship. Asha is what aligns the cosmos and opposes the Lie (Druj).",
+      "spectralCoordinates": {
+        "order-chaos": 0.05,
+        "creation-destruction": 0.20,
+        "light-shadow": 0.05,
+        "active-receptive": 0.35,
+        "individual-collective": 0.65,
+        "ascent-descent": 0.15,
+        "stasis-transformation": 0.25,
+        "voluntary-fated": 0.25
+      },
+      "instantiates": [
+        {"primordial": "primordial:preserver", "weight": 0.80, "aspects": ["truth-keeper", "order-maintainer"]},
+        {"primordial": "primordial:magician", "weight": 0.60, "aspects": ["fire-guardian", "ritual-fire"]}
+      ],
+      "relationships": [
+        {"type": "CONTAINED_BY", "target": "persian:ahura-mazda", "notes": "Emanation of Wise Lord"},
+        {"type": "POLAR_OPPOSITE", "target": "persian:druj", "axis": "order-chaos", "notes": "Truth vs. Lie"},
+        {"type": "COMPLEMENT", "target": "persian:vohu-manah", "notes": "Truth and Good Mind together"},
+        {"type": "CULTURAL_ECHO", "target": "arch:IN-RITA", "fidelity": 0.85, "notes": "Cognate cosmic order concept"},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-MAAT", "fidelity": 0.75, "notes": "Truth/cosmic order principle"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When truth becomes rigid legalism", "When order becomes oppression"],
+        "shadowManifestations": ["Druj (Lie)", "Cruel righteousness"],
+        "integrationPath": "Flexible truth, living righteousness rather than dead law"
+      },
+      "correspondences": {
+        "element": "fire",
+        "symbols": ["sacred fire", "sun"],
+        "month": "Ardibehesht (2nd month)",
+        "color": "red/flame"
+      }
+    },
+    {
+      "@id": "persian:khshathra-vairya",
+      "@type": "CulturalArchetype",
+      "name": "Khshathra Vairya",
+      "alternateNames": ["Shahrevar"],
+      "culture": "Persian/Zoroastrian",
+      "domain": ["desirable dominion", "metals", "sky", "righteous power"],
+      "description": "'Desirable Dominion' or 'Best Kingdom,' the Amesha Spenta embodying righteous power and sovereignty. Guardian of metals and the sky. Represents the divine power that supports the just ruler and opposes tyranny. The kingdom of Ahura Mazda exercised through righteous authority.",
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.30,
+        "light-shadow": 0.15,
+        "active-receptive": 0.20,
+        "individual-collective": 0.60,
+        "ascent-descent": 0.15,
+        "stasis-transformation": 0.35,
+        "voluntary-fated": 0.30
+      },
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.85, "aspects": ["righteous-power", "just-rule"]},
+        {"primordial": "primordial:warrior", "weight": 0.60, "aspects": ["defender-of-order"]}
+      ],
+      "relationships": [
+        {"type": "CONTAINED_BY", "target": "persian:ahura-mazda", "notes": "Emanation of Wise Lord"},
+        {"type": "COMPLEMENT", "target": "persian:spenta-armaiti", "notes": "Power balanced by devotion"},
+        {"type": "CULTURAL_ECHO", "target": "arch:IN-INDRA", "fidelity": 0.50, "notes": "Warrior sovereignty"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When dominion becomes domination", "When power serves self"],
+        "shadowManifestations": ["Tyranny", "Oppression", "Might makes right"],
+        "integrationPath": "Power in service of truth and collective good"
+      },
+      "correspondences": {
+        "element": "metal/sky",
+        "symbols": ["metals", "sky vault"],
+        "month": "Shahrevar (6th month)"
+      }
+    },
+    {
+      "@id": "persian:spenta-armaiti",
+      "@type": "CulturalArchetype",
+      "name": "Spenta Armaiti",
+      "alternateNames": ["Spandarmad", "Isfandarmad"],
+      "culture": "Persian/Zoroastrian",
+      "domain": ["holy devotion", "earth", "humility", "faith"],
+      "description": "'Holy Devotion' or 'Bounteous Right-mindedness,' the only female Amesha Spenta. She embodies devoted faith, humility, and piety. Guardian of the earth, she is both cosmic principle and nurturing presence. She is the daughter and sometimes bride of Ahura Mazda.",
+      "spectralCoordinates": {
+        "order-chaos": 0.20,
+        "creation-destruction": 0.25,
+        "light-shadow": 0.25,
+        "active-receptive": 0.75,
+        "individual-collective": 0.70,
+        "ascent-descent": 0.65,
+        "stasis-transformation": 0.30,
+        "voluntary-fated": 0.45
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.75, "aspects": ["earth-mother", "faithful-devotion"]},
+        {"primordial": "primordial:preserver", "weight": 0.65, "aspects": ["earth-guardian"]}
+      ],
+      "relationships": [
+        {"type": "CONTAINED_BY", "target": "persian:ahura-mazda", "notes": "Emanation, also daughter/bride"},
+        {"type": "COMPLEMENT", "target": "persian:khshathra-vairya", "notes": "Devotion balanced by power"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-GAIA", "fidelity": 0.55, "notes": "Earth goddess"},
+        {"type": "CULTURAL_ECHO", "target": "incan:pachamama", "fidelity": 0.60, "notes": "Sacred earth mother"},
+        {"type": "MIRRORS", "target": "persian:anahita", "notes": "Feminine divine principles"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When devotion becomes servility", "When humility becomes self-negation"],
+        "shadowManifestations": ["False piety", "Passive acceptance of evil"],
+        "integrationPath": "Active devotion, humble strength"
+      },
+      "correspondences": {
+        "element": "earth",
+        "month": "Spandarmad (12th month)",
+        "day": "5th day of each month"
+      }
+    },
+    {
+      "@id": "persian:haurvatat",
+      "@type": "CulturalArchetype",
+      "name": "Haurvatat",
+      "alternateNames": ["Khordad"],
+      "culture": "Persian/Zoroastrian",
+      "domain": ["wholeness", "perfection", "health", "water"],
+      "description": "'Wholeness' or 'Perfection,' the Amesha Spenta embodying complete well-being and integrity. Guardian of water. Haurvatat represents the state of flourishing health and completeness that is both present blessing and eschatological promise.",
+      "spectralCoordinates": {
+        "order-chaos": 0.20,
+        "creation-destruction": 0.20,
+        "light-shadow": 0.20,
+        "active-receptive": 0.55,
+        "individual-collective": 0.60,
+        "ascent-descent": 0.40,
+        "stasis-transformation": 0.35,
+        "voluntary-fated": 0.35
+      },
+      "instantiates": [
+        {"primordial": "primordial:healer", "weight": 0.80, "aspects": ["wholeness-giver", "health"]},
+        {"primordial": "primordial:preserver", "weight": 0.65, "aspects": ["water-guardian"]}
+      ],
+      "relationships": [
+        {"type": "CONTAINED_BY", "target": "persian:ahura-mazda", "notes": "Emanation of Wise Lord"},
+        {"type": "COMPLEMENT", "target": "persian:ameretat", "notes": "Wholeness and Immortality paired"},
+        {"type": "MIRRORS", "target": "persian:anahita", "notes": "Both associated with waters"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When pursuit of perfection becomes obsession", "When wholeness excludes"],
+        "shadowManifestations": ["Perfectionism", "Intolerance of imperfection"],
+        "integrationPath": "Wholeness that includes brokenness, health that accepts process"
+      },
+      "correspondences": {
+        "element": "water",
+        "month": "Khordad (3rd month)"
+      }
+    },
+    {
+      "@id": "persian:ameretat",
+      "@type": "CulturalArchetype",
+      "name": "Ameretat",
+      "alternateNames": ["Amurdad", "Mordad"],
+      "culture": "Persian/Zoroastrian",
+      "domain": ["immortality", "plants", "eternity", "deathlessness"],
+      "description": "'Immortality' or 'Long Life,' the Amesha Spenta embodying deathlessness and eternal life. Guardian of plants and vegetation. Represents both the physical immortality promised at Frashokereti (renovation) and the spiritual deathlessness available through righteous living.",
+      "spectralCoordinates": {
+        "order-chaos": 0.20,
+        "creation-destruction": 0.15,
+        "light-shadow": 0.20,
+        "active-receptive": 0.55,
+        "individual-collective": 0.60,
+        "ascent-descent": 0.30,
+        "stasis-transformation": 0.15,
+        "voluntary-fated": 0.40
+      },
+      "instantiates": [
+        {"primordial": "primordial:preserver", "weight": 0.85, "aspects": ["life-sustainer", "plant-guardian"]},
+        {"primordial": "primordial:creator", "weight": 0.50, "aspects": ["eternal-life-giver"]}
+      ],
+      "relationships": [
+        {"type": "CONTAINED_BY", "target": "persian:ahura-mazda", "notes": "Emanation of Wise Lord"},
+        {"type": "COMPLEMENT", "target": "persian:haurvatat", "notes": "Immortality and Wholeness paired"},
+        {"type": "CULTURAL_ECHO", "target": "arch:IN-SOMA", "fidelity": 0.55, "notes": "Plant of immortality"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When immortality becomes fear of death", "When stasis resists necessary change"],
+        "shadowManifestations": ["Denial of death", "Clinging to life at any cost"],
+        "integrationPath": "Accepting mortality while participating in eternal life"
+      },
+      "correspondences": {
+        "element": "plants/vegetation",
+        "month": "Amurdad/Mordad (5th month)"
+      }
+    },
+    {
+      "@id": "persian:sraosha",
+      "@type": "CulturalArchetype",
+      "name": "Sraosha",
+      "alternateNames": ["Sarosh"],
+      "culture": "Persian/Zoroastrian",
+      "domain": ["obedience", "prayer", "religious discipline", "guardian of souls"],
+      "description": "'Hearkening' or 'Obedience,' the yazata of hearing and heeding the divine word. Sraosha protects the world at night from demons, guards souls after death, and embodies religious discipline and prayer. He escorts the righteous dead to the Chinvat Bridge for judgment.",
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.30,
+        "light-shadow": 0.25,
+        "active-receptive": 0.50,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.30,
+        "stasis-transformation": 0.35,
+        "voluntary-fated": 0.35
+      },
+      "instantiates": [
+        {"primordial": "primordial:psychopomp", "weight": 0.75, "aspects": ["soul-guide", "death-companion"]},
+        {"primordial": "primordial:warrior", "weight": 0.65, "aspects": ["demon-fighter", "night-protector"]},
+        {"primordial": "primordial:magician", "weight": 0.55, "aspects": ["prayer-power"]}
+      ],
+      "relationships": [
+        {"type": "COMPLEMENT", "target": "persian:mithra", "notes": "Both involved in judgment"},
+        {"type": "COMPLEMENT", "target": "persian:rashnu", "notes": "Soul's journey to judgment"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HERMES", "fidelity": 0.65, "notes": "Psychopomp"},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-ANUBIS", "fidelity": 0.60, "notes": "Soul guide and protector"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When obedience becomes blind compliance", "When discipline becomes joyless"],
+        "shadowManifestations": ["Rigid religiosity", "Loss of inner life"],
+        "integrationPath": "Obedience flowing from love, discipline as liberation"
+      },
+      "correspondences": {
+        "animal": "rooster (announces dawn, drives away night demons)",
+        "time": "night (protective function)"
+      }
+    },
+    {
+      "@id": "persian:rashnu",
+      "@type": "CulturalArchetype",
+      "name": "Rashnu",
+      "culture": "Persian/Zoroastrian",
+      "domain": ["justice", "judgment", "truth", "weighing of souls"],
+      "description": "'The Just One,' the yazata of justice who weighs souls at the Chinvat Bridge after death. Rashnu holds the scales that weigh the thoughts, words, and deeds of the deceased against absolute truth. He cannot be bribed or deceived and shows no favoritism.",
+      "spectralCoordinates": {
+        "order-chaos": 0.10,
+        "creation-destruction": 0.50,
+        "light-shadow": 0.30,
+        "active-receptive": 0.45,
+        "individual-collective": 0.50,
+        "ascent-descent": 0.40,
+        "stasis-transformation": 0.50,
+        "voluntary-fated": 0.60
+      },
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.75, "aspects": ["judge", "justice"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.60, "aspects": ["truth-discerner"]}
+      ],
+      "relationships": [
+        {"type": "COMPLEMENT", "target": "persian:mithra", "notes": "Co-judge at Chinvat Bridge"},
+        {"type": "COMPLEMENT", "target": "persian:sraosha", "notes": "Soul's journey to judgment"},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-MAAT", "fidelity": 0.75, "notes": "Weighing of souls/hearts"},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-OSIRIS", "fidelity": 0.65, "notes": "Judge of the dead"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When justice becomes merciless", "When judgment excludes compassion"],
+        "shadowManifestations": ["Harsh condemnation", "No room for grace"],
+        "integrationPath": "Justice tempered with understanding, truth with mercy"
+      },
+      "correspondences": {
+        "symbols": ["scales of justice", "Chinvat Bridge"],
+        "time": "death/judgment"
+      }
+    },
+    {
+      "@id": "persian:verethraghna",
+      "@type": "CulturalArchetype",
+      "name": "Verethraghna",
+      "alternateNames": ["Bahram", "Vahram"],
+      "culture": "Persian/Zoroastrian",
+      "domain": ["victory", "aggression", "war", "strength", "shapeshifting"],
+      "description": "The yazata of victory, embodying aggressive force against evil. Verethraghna appears in ten forms: wind, bull, horse, camel, boar, youth, raven, ram, buck, and armed warrior. He is the champion who overcomes resistance and breaks through obstacles.",
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.30,
+        "active-receptive": 0.10,
+        "individual-collective": 0.40,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.35
+      },
+      "instantiates": [
+        {"primordial": "primordial:warrior", "weight": 0.95, "aspects": ["champion", "victory-bringer"]},
+        {"primordial": "primordial:hero", "weight": 0.70, "aspects": ["obstacle-breaker"]},
+        {"primordial": "primordial:trickster", "weight": 0.45, "aspects": ["shapeshifter"]}
+      ],
+      "relationships": [
+        {"type": "CULTURAL_ECHO", "target": "arch:IN-INDRA-VRTRAHAN", "fidelity": 0.85, "notes": "Direct cognate, Vritra-slayer"},
+        {"type": "CULTURAL_ECHO", "target": "arch:NO-THOR", "fidelity": 0.60, "notes": "Warrior overcoming chaos"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HERACLES", "fidelity": 0.55, "notes": "Shapeshifting hero/warrior"},
+        {"type": "COMPLEMENT", "target": "persian:mithra", "notes": "Both involved in righteous warfare"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When victory becomes violence for its own sake", "When aggression is unchanneled"],
+        "shadowManifestations": ["Wrath", "Destruction without purpose", "Aeshma (fury demon)"],
+        "integrationPath": "Aggression in service of truth, victory over inner enemies"
+      },
+      "correspondences": {
+        "animals": ["boar", "raven", "bull", "horse", "ram", "buck", "camel"],
+        "day": "Bahram day (20th)",
+        "symbols": ["sword", "mace"]
+      }
+    },
+    {
+      "@id": "persian:tishtrya",
+      "@type": "CulturalArchetype",
+      "name": "Tishtrya",
+      "alternateNames": ["Tir"],
+      "culture": "Persian/Zoroastrian",
+      "domain": ["rain", "star Sirius", "fertility", "cosmic battle"],
+      "description": "The yazata of the star Sirius who brings the rains essential for life. Tishtrya battles the demon Apaosha (drought) each year, transforming into a white horse to fight the black horse of drought. His victory brings the monsoon rains.",
+      "spectralCoordinates": {
+        "order-chaos": 0.40,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.30,
+        "active-receptive": 0.30,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.25,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.50
+      },
+      "instantiates": [
+        {"primordial": "primordial:hero", "weight": 0.75, "aspects": ["dragon-slayer", "drought-fighter"]},
+        {"primordial": "primordial:creator", "weight": 0.60, "aspects": ["rain-bringer", "fertility"]}
+      ],
+      "relationships": [
+        {"type": "POLAR_OPPOSITE", "target": "persian:apaosha", "axis": "creation-destruction", "notes": "Rain vs. drought"},
+        {"type": "CULTURAL_ECHO", "target": "arch:IN-INDRA", "fidelity": 0.70, "notes": "Rain-bringing combat"},
+        {"type": "CULTURAL_ECHO", "target": "mesoamerican:tlaloc", "fidelity": 0.55, "notes": "Rain deity"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When rains fail", "When fertility is withheld"],
+        "shadowManifestations": ["Drought", "Failed combat", "Weakness when not properly worshipped"],
+        "integrationPath": "Community support through proper worship enabling victory"
+      },
+      "correspondences": {
+        "celestialBody": "Sirius",
+        "animal": "white horse",
+        "month": "Tir (4th month)",
+        "season": "monsoon/rainy season"
+      }
+    },
+    {
+      "@id": "persian:daena",
+      "@type": "CulturalArchetype",
+      "name": "Daena",
+      "alternateNames": ["Din"],
+      "culture": "Persian/Zoroastrian",
+      "domain": ["religion", "conscience", "inner self", "vision"],
+      "description": "The personification of religion, conscience, and the inner self. At death, Daena appears to the soul at the Chinvat Bridge as a beautiful maiden (if righteous) or a hag (if wicked)—she is the visible form of one's own deeds and choices accumulated over a lifetime.",
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.40,
+        "light-shadow": 0.40,
+        "active-receptive": 0.65,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.50,
+        "voluntary-fated": 0.45
+      },
+      "instantiates": [
+        {"primordial": "primordial:self", "weight": 0.75, "aspects": ["higher-self", "accumulated-deeds"]},
+        {"primordial": "primordial:maiden", "weight": 0.55, "aspects": ["beautiful-form-of-righteousness"]},
+        {"primordial": "primordial:crone", "weight": 0.55, "aspects": ["hag-form-of-wickedness"]}
+      ],
+      "relationships": [
+        {"type": "MIRRORS", "target": "persian:fravashi", "notes": "Both represent aspects of the higher self"},
+        {"type": "COMPLEMENT", "target": "persian:rashnu", "notes": "Self-confrontation at judgment"},
+        {"type": "CULTURAL_ECHO", "target": "arch:IN-DHARMA", "fidelity": 0.60, "notes": "Religious law personified"}
+      ],
+      "contextualVariants": [
+        {
+          "context": "Righteous Soul",
+          "spectralShift": {"light-shadow": 0.15, "creation-destruction": 0.25},
+          "notes": "Appears as beautiful maiden"
+        },
+        {
+          "context": "Wicked Soul",
+          "spectralShift": {"light-shadow": 0.85, "creation-destruction": 0.75},
+          "notes": "Appears as hideous hag"
+        }
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When one's own shadow is confronted at death"],
+        "shadowManifestations": ["The hag form IS the shadow made visible"],
+        "integrationPath": "Lifetime of good deeds transforming Daena to beautiful form"
+      },
+      "correspondences": {
+        "time": "death/judgment",
+        "place": "Chinvat Bridge"
+      }
+    },
+    {
+      "@id": "persian:fravashi",
+      "@type": "CulturalArchetype",
+      "name": "Fravashi",
+      "alternateNames": ["Fravahr", "Farohar"],
+      "culture": "Persian/Zoroastrian",
+      "domain": ["guardian spirit", "pre-existent soul", "ancestor", "choice"],
+      "description": "The pre-existent soul or guardian spirit that chose to incarnate in the material world to fight against evil. Every human has a Fravashi—it existed before birth and continues after death. The Fravashi made the original choice to enter the cosmic battle. The Faravahar symbol represents this concept.",
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.30,
+        "light-shadow": 0.30,
+        "active-receptive": 0.45,
+        "individual-collective": 0.50,
+        "ascent-descent": 0.20,
+        "stasis-transformation": 0.40,
+        "voluntary-fated": 0.25
+      },
+      "instantiates": [
+        {"primordial": "primordial:self", "weight": 0.80, "aspects": ["higher-self", "pre-existent-soul"]},
+        {"primordial": "primordial:ancestor", "weight": 0.65, "aspects": ["guardian", "spiritual-lineage"]},
+        {"primordial": "primordial:hero", "weight": 0.50, "aspects": ["chose-to-fight"]}
+      ],
+      "relationships": [
+        {"type": "MIRRORS", "target": "persian:daena", "notes": "Both aspects of higher self"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-DAIMON", "fidelity": 0.65, "notes": "Guardian spirit"},
+        {"type": "CULTURAL_ECHO", "target": "arch:EG-KA", "fidelity": 0.60, "notes": "Spiritual double/soul aspect"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When connection to Fravashi is lost", "When choice is forgotten"],
+        "shadowManifestations": ["Alienation from purpose", "Forgetting one's cosmic role"],
+        "integrationPath": "Remembering original choice, aligning life with Fravashi's purpose"
+      },
+      "correspondences": {
+        "symbols": ["Faravahar (winged disc with figure)", "wings"],
+        "time": "All Souls Day (Fravardigan)"
+      }
+    },
+    {
+      "@id": "persian:saoshyant",
+      "@type": "CulturalArchetype",
+      "name": "Saoshyant",
+      "culture": "Persian/Zoroastrian",
+      "domain": ["savior", "resurrection", "renovation", "end times"],
+      "description": "'One Who Brings Benefit,' the future savior(s) who will lead the final battle against evil and bring about Frashokereti—the renovation of the world. Three Saoshyants will come at intervals, the last (Astvat-ereta) born of Zarathustra's seed preserved in a lake and a virgin mother. This concept heavily influenced messianic traditions.",
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.15,
+        "active-receptive": 0.25,
+        "individual-collective": 0.75,
+        "ascent-descent": 0.25,
+        "stasis-transformation": 0.75,
+        "voluntary-fated": 0.30
+      },
+      "instantiates": [
+        {"primordial": "primordial:hero", "weight": 0.90, "aspects": ["world-savior", "final-champion"]},
+        {"primordial": "primordial:divine-child", "weight": 0.65, "aspects": ["miraculous-birth"]},
+        {"primordial": "primordial:sovereign", "weight": 0.60, "aspects": ["ruler-of-renewed-world"]}
+      ],
+      "relationships": [
+        {"type": "CULTURAL_ECHO", "target": "arch:IN-KALKI", "fidelity": 0.70, "notes": "End-times avatar"},
+        {"type": "CULTURAL_ECHO", "target": "jewish:messiah", "fidelity": 0.75, "notes": "Savior figure, influenced tradition"},
+        {"type": "CULTURAL_ECHO", "target": "christian:christ", "fidelity": 0.70, "notes": "Savior, resurrection, end times"},
+        {"type": "COMPLEMENT", "target": "persian:ahura-mazda", "notes": "Agent of final victory"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When waiting for savior becomes passivity", "When hope becomes escapism"],
+        "shadowManifestations": ["Messianic inflation", "Abdication of personal responsibility"],
+        "integrationPath": "Each person participating in Saoshyant's work through righteous action"
+      },
+      "correspondences": {
+        "time": "end of history/Frashokereti",
+        "number": "3 (three Saoshyants)"
+      }
+    },
+    {
+      "@id": "persian:zurvan",
+      "@type": "CulturalArchetype",
+      "name": "Zurvan",
+      "culture": "Persian (Zurvanite)",
+      "domain": ["time", "fate", "space", "primordial unity"],
+      "description": "Infinite Time, the primordial deity of the Zurvanite heresy within Zoroastrianism. In this theology, Zurvan is the father of both Ahura Mazda and Angra Mainyu—twins born from his sacrifice and doubt. Zurvan represents time and fate transcending the dualism of good and evil.",
+      "spectralCoordinates": {
+        "order-chaos": 0.50,
+        "creation-destruction": 0.50,
+        "light-shadow": 0.50,
+        "active-receptive": 0.50,
+        "individual-collective": 0.85,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.50,
+        "voluntary-fated": 0.90
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.75, "aspects": ["primordial-source", "father-of-opposites"]},
+        {"primordial": "primordial:great-father", "weight": 0.70, "aspects": ["father-of-twins"]}
+      ],
+      "relationships": [
+        {"type": "CONTAINS", "target": "persian:ahura-mazda", "notes": "Father in Zurvanite theology"},
+        {"type": "CONTAINS", "target": "persian:angra-mainyu", "notes": "Father in Zurvanite theology"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-CHRONOS", "fidelity": 0.75, "notes": "Primordial time"},
+        {"type": "CULTURAL_ECHO", "target": "arch:IN-BRAHMAN", "fidelity": 0.60, "notes": "Transcendent unity beyond duality"}
+      ],
+      "contextualVariants": [
+        {
+          "context": "Orthodox Zoroastrianism",
+          "spectralShift": {"individual-collective": 0.50},
+          "notes": "Rejected as heresy, time not personified as deity"
+        },
+        {
+          "context": "Zurvanite Sect",
+          "spectralShift": {"voluntary-fated": 0.95, "individual-collective": 0.90},
+          "notes": "Supreme deity above the dualistic pair"
+        }
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When unity dissolves into duality", "When doubt manifests evil"],
+        "shadowManifestations": ["The birth of Angra Mainyu from Zurvan's doubt"],
+        "integrationPath": "Accepting time's passage, transcending yet including duality"
+      },
+      "correspondences": {
+        "symbols": ["lion-headed god (Mithraic influence)", "serpent (time's cycle)"],
+        "concept": "akarana (boundless time)"
+      }
+    }
+  ]
+}

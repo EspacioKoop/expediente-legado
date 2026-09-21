@@ -1,0 +1,1363 @@
+{
+  "@context": "../../schema/ACP_CONTEXT.jsonld",
+  "@id": "system:EG",
+  "@type": "ArchetypeSystem",
+  "name": "Egyptian Pantheon – Netjeru",
+  "description": "Deities of ancient Kemet representing cosmic principles, natural forces, and the eternal cycle of death and rebirth. The Netjeru embody the concept of Ma'at (cosmic order) and its eternal struggle against Isfet (chaos).",
+  "culturalOrigin": "Ancient Egypt / Kemet",
+  "primarySources": ["Pyramid Texts", "Coffin Texts", "Book of the Dead", "Papyrus of Ani", "Heliopolitan Cosmogony", "Memphis Theology"],
+  "temporalSpan": "c. 3100 BCE – 400 CE",
+  "cosmology": {
+    "structure": "Cyclical solar journey through Duat (underworld); eternal balance of Ma'at vs Isfet",
+    "creationMyth": "Multiple: Atum self-creating from Nun (primordial waters), speaking world into being; Ptah creating through thought and word",
+    "eschatology": "Individual judgment (Weighing of the Heart), eternal afterlife in Field of Reeds for justified souls",
+    "keyRealms": ["Sky (Nut)", "Earth (Geb)", "Underworld (Duat)", "Primordial Waters (Nun)"]
+  },
+  "systemCharacteristics": {
+    "primaryThemes": ["death-rebirth", "cosmic order", "solar cycles", "divine kingship", "judgment", "magic (heka)"],
+    "structuralFeatures": ["Syncretism (gods merging)", "Animal symbolism", "Ennead/Ogdoad groupings", "Ba/Ka soul concepts"],
+    "relationshipPatterns": ["Divine couples", "Father-son succession", "Brother antagonism", "Mother-protector"]
+  },
+
+  "entries": [
+    {
+      "@id": "arch:EG-RA",
+      "@type": "Archetype",
+      "name": "Ra",
+      "aliases": ["Re", "Ra-Horakhty", "Atum-Ra", "Amun-Ra"],
+      "epithets": ["Lord of the Sky", "Creator of All", "The Hidden One"],
+      "description": "The supreme solar deity, creator god who sails across the sky by day and through the underworld by night, eternally battling Apophis. Source of all life, light, and cosmic order.",
+      "gender": "masculine",
+      "domain": ["sun", "creation", "kingship", "cosmic order", "life"],
+      "symbols": ["sun disk", "falcon", "scarab (Khepri)", "ram (evening form)", "was scepter"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.2,
+        "light-shadow": 0.1,
+        "active-receptive": 0.2,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.15,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.3
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.95, "aspects": ["world-speaker", "self-generated"]},
+        {"primordial": "primordial:sovereign", "weight": 0.9, "aspects": ["divine-king", "cosmic-ruler"]},
+        {"primordial": "primordial:great-father", "weight": 0.7, "aspects": ["father-of-gods", "life-giver"]}
+      ],
+
+      "temporalOrientation": "cyclical",
+
+      "shadowDynamics": {
+        "activationConditions": ["When order becomes tyranny", "When light blinds rather than illuminates"],
+        "shadowManifestations": ["Aging autocrat", "Distant creator", "Burning destroyer"],
+        "integrationPath": "Accept the necessary descent into darkness for renewal"
+      },
+
+      "relationships": [
+        {"type": "POLAR_OPPOSITE", "target": "arch:EG-APOPHIS", "axis": "order-chaos", "strength": 0.95, "notes": "Eternal cosmic antagonism"},
+        {"type": "CONTAINS", "target": "arch:EG-KHEPRI", "notes": "Morning aspect of Ra"},
+        {"type": "CONTAINS", "target": "arch:EG-ATUM", "notes": "Evening aspect of Ra"},
+        {"type": "SYNTHESIS", "target": "arch:EG-AMUN-RA", "sources": ["arch:EG-RA", "arch:EG-AMUN"], "notes": "New Kingdom syncretism"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-APOLLO", "fidelity": 0.6, "sharedAspects": ["solar", "order", "prophecy"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HELIOS", "fidelity": 0.8, "sharedAspects": ["sun-chariot", "all-seeing"]},
+        {"type": "ANTAGONIST", "target": "arch:EG-APOPHIS", "narrativeRole": "Nightly battle in Duat"}
+      ],
+
+      "contextualVariants": [
+        {
+          "context": "Dawn (as Khepri)",
+          "spectralShift": {"creation-destruction": 0.1, "stasis-transformation": 0.7},
+          "notes": "Rebirth aspect, scarab rolling sun into existence"
+        },
+        {
+          "context": "Midday (as Ra)",
+          "spectralShift": {"ascent-descent": 0.05, "active-receptive": 0.15},
+          "notes": "Full power, zenith of cosmic order"
+        },
+        {
+          "context": "Evening/Night (as Atum)",
+          "spectralShift": {"ascent-descent": 0.7, "light-shadow": 0.6},
+          "notes": "Aged, descending into Duat, confronting chaos"
+        }
+      ],
+
+      "correspondences": {
+        "element": "EL-FIRE",
+        "planet": "7P-SUN",
+        "tarot": "TAMA-SUN",
+        "chakra": "CH-MANIPURA",
+        "day": "Sunday",
+        "metal": "Gold",
+        "color": ["gold", "yellow", "orange"]
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["creation", "cosmic order threatened", "succession crisis"],
+        "typicalArc": "CREATOR → RULER → AGING KING → RENEWED",
+        "storyFunctions": ["sovereign", "life-giver", "ultimate authority"],
+        "dramaticTension": "eternal light vs. encroaching darkness"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Pyramid Texts", "Book of the Dead", "Litany of Ra"],
+        "iconpigraphy": "Human with falcon head and sun disk",
+        "cultCenters": ["Heliopolis", "Thebes (as Amun-Ra)"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:EG-OSIRIS",
+      "@type": "Archetype",
+      "name": "Osiris",
+      "aliases": ["Usir", "Wesir", "Onnophris"],
+      "epithets": ["Lord of the Underworld", "The Eternally Good Being", "He Who Is Permanently Benign"],
+      "description": "God of death, resurrection, fertility, and the afterlife. Murdered by his brother Set, dismembered, and resurrected by Isis. Rules the underworld and judges the dead. The eternal dying-and-rising god.",
+      "gender": "masculine",
+      "domain": ["death", "resurrection", "afterlife", "fertility", "vegetation", "judgment"],
+      "symbols": ["crook and flail", "atef crown", "djed pillar", "green/black skin", "mummy wrappings"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.6,
+        "active-receptive": 0.6,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.85,
+        "stasis-transformation": 0.75,
+        "voluntary-fated": 0.8
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:dying-rising-god", "weight": 0.95, "aspects": ["death-rebirth", "sacrifice", "resurrection"]},
+        {"primordial": "primordial:sovereign", "weight": 0.75, "aspects": ["underworld-king", "judge-of-dead"]},
+        {"primordial": "primordial:great-father", "weight": 0.6, "aspects": ["father-of-Horus", "ancestor"]}
+      ],
+
+      "temporalOrientation": "cyclical",
+
+      "shadowDynamics": {
+        "activationConditions": ["When death becomes fixation", "When passivity enables evil"],
+        "shadowManifestations": ["Victim consciousness", "Paralysis", "Morbid obsession"],
+        "integrationPath": "Death as transformation, not ending; action through legacy"
+      },
+
+      "relationships": [
+        {"type": "POLAR_OPPOSITE", "target": "arch:EG-SET", "axis": "order-chaos", "strength": 0.9, "notes": "Fratricide and eternal opposition"},
+        {"type": "COMPLEMENT", "target": "arch:EG-ISIS", "dynamic": "Spouse, resurrector, completor", "strength": 0.95},
+        {"type": "PARENT", "target": "arch:EG-HORUS", "notes": "Father, avenged by son"},
+        {"type": "SIBLING", "target": "arch:EG-SET", "notes": "Antagonistic brothers"},
+        {"type": "SIBLING", "target": "arch:EG-ISIS", "notes": "Also spouse (royal Egyptian custom)"},
+        {"type": "SIBLING", "target": "arch:EG-NEPHTHYS", "notes": "Sister"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-DIONYSUS", "fidelity": 0.75, "sharedAspects": ["death-rebirth", "vegetation", "dismemberment"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HADES", "fidelity": 0.6, "sharedAspects": ["underworld-ruler", "chthonic"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:NO-BALDUR", "fidelity": 0.65, "sharedAspects": ["good-god-killed", "underworld-descent", "resurrection-hope"]}
+      ],
+
+      "contextualVariants": [
+        {
+          "context": "Living King (before murder)",
+          "spectralShift": {"ascent-descent": 0.4, "light-shadow": 0.3, "active-receptive": 0.4},
+          "notes": "Benevolent earthly ruler, civilizer"
+        },
+        {
+          "context": "Murdered and dismembered",
+          "spectralShift": {"voluntary-fated": 0.95, "stasis-transformation": 0.9},
+          "notes": "Victim, scattered across Egypt"
+        },
+        {
+          "context": "Resurrected Lord of Duat",
+          "spectralShift": {"individual-collective": 0.5, "creation-destruction": 0.5},
+          "notes": "Eternal judge, ruler of blessed dead"
+        }
+      ],
+
+      "correspondences": {
+        "element": "EL-EARTH",
+        "planet": "7P-MOON",
+        "tarot": "TAMA-HANGED-MAN",
+        "chakra": "CH-MULADHARA",
+        "color": ["green", "black"],
+        "vegetation": "grain, tamarisk, willow"
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["death", "betrayal", "succession crisis", "vegetation cycle"],
+        "typicalArc": "KING → VICTIM → RESURRECTED → JUDGE",
+        "storyFunctions": ["sacrifice", "transformation catalyst", "ultimate justice"],
+        "dramaticTension": "death as ending vs. death as doorway"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Pyramid Texts", "Coffin Texts", "Plutarch's De Iside et Osiride"],
+        "iconography": "Mummified king with green/black skin, atef crown, crook and flail",
+        "cultCenters": ["Abydos", "Busiris", "Philae"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:EG-ISIS",
+      "@type": "Archetype",
+      "name": "Isis",
+      "aliases": ["Aset", "Eset", "Iset"],
+      "epithets": ["Great of Magic", "Mistress of the House", "She of the Throne", "Mother of God"],
+      "description": "Goddess of magic, motherhood, healing, and wisdom. Reassembled and resurrected Osiris, conceived Horus, protected him from Set. Master of heka (magic), outwitted Ra to learn his secret name. The most powerful and beloved goddess.",
+      "gender": "feminine",
+      "domain": ["magic", "motherhood", "healing", "wisdom", "protection", "resurrection"],
+      "symbols": ["throne hieroglyph", "tyet (Isis knot)", "cow horns with sun disk", "wings", "sistrum"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.25,
+        "light-shadow": 0.35,
+        "active-receptive": 0.45,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.35
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.9, "aspects": ["divine-mother", "protector", "nurturer"]},
+        {"primordial": "primordial:magician", "weight": 0.85, "aspects": ["heka-master", "secret-knower", "shape-shifter"]},
+        {"primordial": "primordial:healer", "weight": 0.75, "aspects": ["resurrector", "restorer", "medicine"]}
+      ],
+
+      "temporalOrientation": "present",
+
+      "shadowDynamics": {
+        "activationConditions": ["When protection becomes smothering", "When magic serves manipulation"],
+        "shadowManifestations": ["Devouring mother", "Manipulative schemer", "Possessive grief"],
+        "integrationPath": "Let go of what is restored; power in service of love, not control"
+      },
+
+      "relationships": [
+        {"type": "COMPLEMENT", "target": "arch:EG-OSIRIS", "dynamic": "Spouse, resurrector, devotion", "strength": 0.95},
+        {"type": "PARENT", "target": "arch:EG-HORUS", "notes": "Mother, protector"},
+        {"type": "SIBLING", "target": "arch:EG-OSIRIS", "notes": "Also spouse"},
+        {"type": "SIBLING", "target": "arch:EG-SET", "notes": "Brother-in-law, enemy"},
+        {"type": "SIBLING", "target": "arch:EG-NEPHTHYS", "notes": "Twin sister, ally"},
+        {"type": "ANTAGONIST", "target": "arch:EG-SET", "narrativeRole": "Protects Horus from Set's attacks"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-DEMETER", "fidelity": 0.65, "sharedAspects": ["grieving-mother", "searching", "vegetation"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HERA", "fidelity": 0.5, "sharedAspects": ["marriage", "queenship"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HECATE", "fidelity": 0.6, "sharedAspects": ["magic", "crossroads", "lunar"]}
+      ],
+
+      "contextualVariants": [
+        {
+          "context": "Wife of Living Osiris",
+          "spectralShift": {"active-receptive": 0.55, "ascent-descent": 0.4},
+          "notes": "Queen, partner, domestic harmony"
+        },
+        {
+          "context": "Searching/Grieving Widow",
+          "spectralShift": {"order-chaos": 0.5, "light-shadow": 0.5, "voluntary-fated": 0.6},
+          "notes": "Wandering, shape-shifting, seeking"
+        },
+        {
+          "context": "Resurrector and Mother",
+          "spectralShift": {"creation-destruction": 0.15, "active-receptive": 0.35},
+          "notes": "Peak magical power, protective fierceness"
+        },
+        {
+          "context": "Hellenistic/Roman Isis",
+          "spectralShift": {"individual-collective": 0.55, "order-chaos": 0.25},
+          "notes": "Universal goddess, mystery cult center"
+        }
+      ],
+
+      "correspondences": {
+        "element": "EL-WATER",
+        "planet": "7P-MOON",
+        "tarot": ["TAMA-HIGH-PRIESTESS", "TAMA-EMPRESS"],
+        "chakra": "CH-ANAHATA",
+        "day": "Monday",
+        "color": ["blue", "gold", "white"],
+        "star": "Sirius (Sopdet)"
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["loss of beloved", "need for protection", "magical crisis", "healing required"],
+        "typicalArc": "WIFE → WIDOW → RESURRECTOR → MOTHER → UNIVERSAL GODDESS",
+        "storyFunctions": ["helper", "protector", "magical solver", "devoted lover"],
+        "dramaticTension": "love's power to transcend death"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Pyramid Texts", "Coffin Texts", "Metternich Stela", "Aretalogies of Isis"],
+        "iconography": "Woman with throne headdress or cow horns with sun disk, winged",
+        "cultCenters": ["Philae", "Abydos", "Alexandria", "Rome (later)"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:EG-HORUS",
+      "@type": "Archetype",
+      "name": "Horus",
+      "aliases": ["Heru", "Hor", "Haroeris", "Harpocrates"],
+      "epithets": ["The Distant One", "Lord of the Sky", "Avenger of His Father"],
+      "description": "Falcon-headed god of kingship, sky, and war. Son of Osiris and Isis, he avenged his father by battling Set for the throne. Every pharaoh was the living Horus. His eyes are the sun and moon.",
+      "gender": "masculine",
+      "domain": ["kingship", "sky", "war", "protection", "vengeance", "rightful succession"],
+      "symbols": ["falcon", "Eye of Horus (wedjat)", "double crown", "was scepter"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.2,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.25,
+        "active-receptive": 0.25,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.2,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.4
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:hero", "weight": 0.9, "aspects": ["avenger", "champion", "rightful-king"]},
+        {"primordial": "primordial:warrior", "weight": 0.8, "aspects": ["battle-lord", "protector"]},
+        {"primordial": "primordial:sovereign", "weight": 0.85, "aspects": ["divine-king", "successor"]},
+        {"primordial": "primordial:divine-child", "weight": 0.6, "aspects": ["hidden-heir", "protected-son"]}
+      ],
+
+      "temporalOrientation": "present",
+
+      "shadowDynamics": {
+        "activationConditions": ["When vengeance becomes obsession", "When kingship becomes tyranny"],
+        "shadowManifestations": ["Wrathful avenger", "Usurper", "Pride"],
+        "integrationPath": "Justice tempered with mercy; kingship as service"
+      },
+
+      "relationships": [
+        {"type": "POLAR_OPPOSITE", "target": "arch:EG-SET", "axis": "order-chaos", "strength": 0.85, "notes": "The Contendings of Horus and Set"},
+        {"type": "CHILD_OF", "target": "arch:EG-OSIRIS", "notes": "Son, avenger, successor"},
+        {"type": "CHILD_OF", "target": "arch:EG-ISIS", "notes": "Son, protected by"},
+        {"type": "ANTAGONIST", "target": "arch:EG-SET", "narrativeRole": "80-year battle for throne"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-APOLLO", "fidelity": 0.55, "sharedAspects": ["sky", "order", "light"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ARES", "fidelity": 0.4, "sharedAspects": ["war", "combat"]}
+      ],
+
+      "contextualVariants": [
+        {
+          "context": "Horus the Child (Harpocrates)",
+          "spectralShift": {"active-receptive": 0.5, "voluntary-fated": 0.7, "order-chaos": 0.35},
+          "notes": "Hidden in marshes, vulnerable, protected"
+        },
+        {
+          "context": "Horus the Elder (Haroeris)",
+          "spectralShift": {"ascent-descent": 0.15, "creation-destruction": 0.3},
+          "notes": "Primordial sky god, pre-Osirian"
+        },
+        {
+          "context": "Horus Avenger",
+          "spectralShift": {"creation-destruction": 0.55, "active-receptive": 0.15},
+          "notes": "Warrior battling Set, losing eye"
+        },
+        {
+          "context": "Horus as Pharaoh",
+          "spectralShift": {"individual-collective": 0.4, "order-chaos": 0.15},
+          "notes": "Living embodiment in every king"
+        }
+      ],
+
+      "correspondences": {
+        "element": "EL-AIR",
+        "planet": "7P-SUN",
+        "tarot": "TAMA-EMPEROR",
+        "chakra": "CH-AJNA",
+        "color": ["gold", "blue", "red-white (crowns)"],
+        "bodyPart": "Eye (wedjat)"
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["succession crisis", "injustice", "need for champion", "hidden heir revealed"],
+        "typicalArc": "HIDDEN CHILD → WARRIOR → VICTOR → KING",
+        "storyFunctions": ["hero", "avenger", "rightful ruler"],
+        "dramaticTension": "claiming birthright against usurper"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Pyramid Texts", "Contendings of Horus and Seth", "Coffin Texts"],
+        "iconography": "Falcon or falcon-headed man with double crown",
+        "cultCenters": ["Edfu", "Hierakonpolis", "Behdet"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:EG-SET",
+      "@type": "Archetype",
+      "name": "Set",
+      "aliases": ["Seth", "Sutekh", "Setesh"],
+      "epithets": ["Lord of the Red Land", "Lord of Chaos", "Great of Strength"],
+      "description": "God of chaos, storms, desert, war, and foreigners. Murdered and dismembered his brother Osiris, battled Horus for 80 years. Complex deity: dangerous and disruptive but also protector of Ra against Apophis. Necessary chaos.",
+      "gender": "masculine",
+      "domain": ["chaos", "storms", "desert", "violence", "foreigners", "strength", "necessary disorder"],
+      "symbols": ["Set animal (sha)", "was scepter", "red color", "desert animals"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.85,
+        "creation-destruction": 0.75,
+        "light-shadow": 0.7,
+        "active-receptive": 0.15,
+        "individual-collective": 0.25,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.65,
+        "voluntary-fated": 0.25
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:destroyer", "weight": 0.85, "aspects": ["chaos-bringer", "murderer", "dismemberer"]},
+        {"primordial": "primordial:warrior", "weight": 0.8, "aspects": ["storm-lord", "strength", "violence"]},
+        {"primordial": "primordial:trickster", "weight": 0.5, "aspects": ["schemer", "deceiver"]},
+        {"primordial": "primordial:rebel", "weight": 0.6, "aspects": ["usurper", "challenger"]}
+      ],
+
+      "temporalOrientation": "present",
+
+      "shadowDynamics": {
+        "activationConditions": ["When strength serves only self", "When chaos becomes wanton destruction"],
+        "shadowManifestations": ["Murderer", "Tyrant", "Apocalyptic force"],
+        "integrationPath": "Chaos in service of renewal; strength protecting order"
+      },
+
+      "relationships": [
+        {"type": "POLAR_OPPOSITE", "target": "arch:EG-OSIRIS", "axis": "order-chaos", "strength": 0.9, "notes": "Fratricide, cosmic antagonism"},
+        {"type": "POLAR_OPPOSITE", "target": "arch:EG-HORUS", "axis": "order-chaos", "strength": 0.85, "notes": "The Contendings"},
+        {"type": "SIBLING", "target": "arch:EG-OSIRIS", "notes": "Brother, murderer"},
+        {"type": "SIBLING", "target": "arch:EG-ISIS", "notes": "Sister-in-law, enemy"},
+        {"type": "SIBLING", "target": "arch:EG-NEPHTHYS", "notes": "Sister, consort (unhappy)"},
+        {"type": "ALLY", "target": "arch:EG-RA", "notes": "Protector against Apophis on solar barque"},
+        {"type": "ANTAGONIST", "target": "arch:EG-APOPHIS", "narrativeRole": "Defends Ra with spear"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-TYPHON", "fidelity": 0.7, "sharedAspects": ["chaos-monster", "storm", "enemy-of-order"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ARES", "fidelity": 0.5, "sharedAspects": ["violence", "war", "feared"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:NO-LOKI", "fidelity": 0.6, "sharedAspects": ["chaos", "trickery", "eventually-monstrous"]}
+      ],
+
+      "contextualVariants": [
+        {
+          "context": "Early Dynastic (heroic)",
+          "spectralShift": {"order-chaos": 0.55, "light-shadow": 0.4},
+          "notes": "God of Upper Egypt, paired with Horus, protector of pharaoh"
+        },
+        {
+          "context": "Osirian myth (villain)",
+          "spectralShift": {"order-chaos": 0.9, "creation-destruction": 0.85},
+          "notes": "Murderer, usurper, cosmic villain"
+        },
+        {
+          "context": "Protector of Ra",
+          "spectralShift": {"order-chaos": 0.45, "creation-destruction": 0.5},
+          "notes": "Necessary force, defender of solar order against Apophis"
+        },
+        {
+          "context": "Late Period (demonized)",
+          "spectralShift": {"light-shadow": 0.85, "order-chaos": 0.95},
+          "notes": "Fully evil, associated with foreigners, destruction"
+        }
+      ],
+
+      "correspondences": {
+        "element": "EL-FIRE",
+        "planet": "7P-MARS",
+        "tarot": "TAMA-TOWER",
+        "chakra": "CH-MANIPURA",
+        "color": ["red", "black"],
+        "direction": "South (desert)",
+        "terrain": "Desert, foreign lands"
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["jealousy", "need for chaos", "external threat", "necessary destruction"],
+        "typicalArc": "RIVAL → MURDERER → USURPER → DEFEATED → (sometimes) REDEEMED DEFENDER",
+        "storyFunctions": ["antagonist", "shadow", "necessary chaos", "tester"],
+        "dramaticTension": "Is chaos purely evil or necessary for renewal?"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Pyramid Texts", "Contendings of Horus and Seth", "Book of the Dead"],
+        "iconography": "Man with Set animal head (unidentified creature)",
+        "cultCenters": ["Ombos", "Avaris", "Oases"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:EG-THOTH",
+      "@type": "Archetype",
+      "name": "Thoth",
+      "aliases": ["Djehuty", "Tehuti"],
+      "epithets": ["Lord of Divine Words", "Scribe of the Gods", "Lord of Time", "The Reckoner"],
+      "description": "God of writing, wisdom, magic, the moon, and time. Inventor of hieroglyphics, keeper of cosmic records, mediator between opposing forces. Weighs hearts in the Hall of Judgment. Master of secret knowledge.",
+      "gender": "masculine",
+      "domain": ["writing", "wisdom", "magic", "moon", "time", "knowledge", "judgment", "mediation"],
+      "symbols": ["ibis", "baboon", "moon disk", "writing palette", "ankh", "was scepter"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.4,
+        "active-receptive": 0.45,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.45,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.5
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:magician", "weight": 0.9, "aspects": ["secret-knowledge", "heka-master", "word-power"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.85, "aspects": ["record-keeper", "counselor", "judge"]},
+        {"primordial": "primordial:psychopomp", "weight": 0.5, "aspects": ["judgment-witness", "soul-recorder"]}
+      ],
+
+      "temporalOrientation": "eternal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When knowledge becomes gatekeeping", "When wisdom serves manipulation"],
+        "shadowManifestations": ["Pedantic keeper of secrets", "Cold calculator", "Manipulator through words"],
+        "integrationPath": "Knowledge shared, wisdom in service of truth"
+      },
+
+      "relationships": [
+        {"type": "COMPLEMENT", "target": "arch:EG-MAAT", "dynamic": "Truth and its recording", "strength": 0.85},
+        {"type": "ALLY", "target": "arch:EG-OSIRIS", "notes": "Witness at judgment"},
+        {"type": "ALLY", "target": "arch:EG-ISIS", "notes": "Taught her magic, aided resurrection"},
+        {"type": "MEDIATOR", "target": ["arch:EG-HORUS", "arch:EG-SET"], "notes": "Arbitrator in their contendings"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HERMES", "fidelity": 0.8, "sharedAspects": ["messenger", "wisdom", "magic", "liminality"]},
+        {"type": "SYNTHESIS", "target": "arch:SYNCRETIC-HERMES-TRISMEGISTUS", "sources": ["arch:EG-THOTH", "arch:GR-HERMES"], "notes": "Hermetic syncretism"},
+        {"type": "CULTURAL_ECHO", "target": "arch:NO-ODIN", "fidelity": 0.55, "sharedAspects": ["wisdom", "magic", "writing"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-AIR",
+        "planet": "7P-MERCURY",
+        "tarot": ["TAMA-MAGICIAN", "TAMA-HERMIT"],
+        "chakra": "CH-VISHUDDHA",
+        "rune": "RN-ANSUZ",
+        "day": "Wednesday",
+        "color": ["silver", "white", "blue"],
+        "number": 8
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["need for wisdom", "magical crisis", "dispute requiring mediation", "secrets sought"],
+        "typicalArc": "OBSERVER → RECORDER → MEDIATOR → REVEALER",
+        "storyFunctions": ["mentor", "witness", "magical helper", "judge's assistant"],
+        "dramaticTension": "neutrality vs. taking sides"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Pyramid Texts", "Book of Thoth", "Book of the Dead"],
+        "iconography": "Man with ibis head or baboon",
+        "cultCenters": ["Hermopolis Magna (Khemenu)"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:EG-ANUBIS",
+      "@type": "Archetype",
+      "name": "Anubis",
+      "aliases": ["Anpu", "Inpu", "Inpw"],
+      "epithets": ["Lord of the Sacred Land", "He Who Is Upon His Mountain", "Master of Secrets", "He Who Is in the Embalming Place"],
+      "description": "Jackal-headed god of mummification, the dead, and the underworld transition. Guide of souls to judgment, overseer of embalming, protector of graves. The liminal guardian between life and death.",
+      "gender": "masculine",
+      "domain": ["death", "mummification", "embalming", "afterlife passage", "cemeteries", "protection of dead"],
+      "symbols": ["jackal", "imiut fetish", "flail", "embalming equipment", "black color"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.65,
+        "active-receptive": 0.45,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.75,
+        "stasis-transformation": 0.7,
+        "voluntary-fated": 0.6
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:psychopomp", "weight": 0.95, "aspects": ["soul-guide", "death-attendant", "threshold-guardian"]},
+        {"primordial": "primordial:healer", "weight": 0.5, "aspects": ["embalmer", "preserver", "preparer"]}
+      ],
+
+      "temporalOrientation": "eternal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When death-focus becomes morbidity", "When threshold-guarding becomes blocking"],
+        "shadowManifestations": ["Death-obsessed", "Preventing passage", "Decay fixation"],
+        "integrationPath": "Death as sacred transition, not ending"
+      },
+
+      "relationships": [
+        {"type": "COMPLEMENT", "target": "arch:EG-OSIRIS", "dynamic": "Preparer and Judge", "strength": 0.8},
+        {"type": "ALLY", "target": "arch:EG-ISIS", "notes": "Assisted in Osiris resurrection"},
+        {"type": "CHILD_OF", "target": "arch:EG-NEPHTHYS", "notes": "Son (by Osiris in some versions)"},
+        {"type": "PRECEDES", "target": "arch:EG-OSIRIS", "notes": "Originally chief death god, superseded"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HERMES", "fidelity": 0.7, "sharedAspects": ["psychopomp", "guide-of-dead"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-CHARON", "fidelity": 0.5, "sharedAspects": ["underworld-ferryman", "transition"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-EARTH",
+        "planet": "7P-SATURN",
+        "tarot": "TAMA-DEATH",
+        "chakra": "CH-MULADHARA",
+        "color": "black",
+        "direction": "West (realm of dead)"
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["death", "burial rites", "afterlife journey", "threshold crossing"],
+        "typicalArc": "ATTENDANT → GUIDE → WITNESS → PROTECTOR",
+        "storyFunctions": ["threshold guardian", "psychopomp", "preparer"],
+        "dramaticTension": "facilitating vs. testing the passage"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Pyramid Texts", "Book of the Dead", "Coffin Texts"],
+        "iconography": "Black jackal or man with jackal head",
+        "cultCenters": ["Cynopolis", "throughout necropoli"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:EG-MAAT",
+      "@type": "Archetype",
+      "name": "Ma'at",
+      "aliases": ["Maat"],
+      "epithets": ["Lady of Truth", "She Who Sets the Stars in Motion", "Foundation of the Throne"],
+      "description": "Goddess personifying truth, justice, cosmic order, and balance. Her feather weighs against the heart of the deceased. More than a deity—she is the fundamental principle of cosmic harmony that gods and pharaohs must uphold.",
+      "gender": "feminine",
+      "domain": ["truth", "justice", "cosmic order", "balance", "law", "morality"],
+      "symbols": ["ostrich feather", "scales", "ankh", "pedestal/foundation"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.05,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.1,
+        "active-receptive": 0.55,
+        "individual-collective": 0.6,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.25,
+        "voluntary-fated": 0.7
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:preserver", "weight": 0.85, "aspects": ["cosmic-order", "balance-keeper"]},
+        {"primordial": "primordial:sovereign", "weight": 0.6, "aspects": ["cosmic-law", "foundation-of-rule"]}
+      ],
+
+      "temporalOrientation": "eternal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When order becomes rigidity", "When justice becomes merciless"],
+        "shadowManifestations": ["Inflexible law", "Crushing judgment", "Perfectionism"],
+        "integrationPath": "Order that allows growth; justice with mercy"
+      },
+
+      "relationships": [
+        {"type": "POLAR_OPPOSITE", "target": "arch:EG-ISFET", "axis": "order-chaos", "strength": 0.95, "notes": "Cosmic duality"},
+        {"type": "COMPLEMENT", "target": "arch:EG-THOTH", "dynamic": "Truth and its recording", "strength": 0.85},
+        {"type": "COMPLEMENT", "target": "arch:EG-OSIRIS", "dynamic": "Order and its underworld judge", "strength": 0.75},
+        {"type": "CHILD_OF", "target": "arch:EG-RA", "notes": "Daughter of Ra in some versions"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-THEMIS", "fidelity": 0.8, "sharedAspects": ["divine-law", "justice", "order"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-DIKE", "fidelity": 0.75, "sharedAspects": ["justice", "balance"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-AIR",
+        "planet": "7P-JUPITER",
+        "tarot": "TAMA-JUSTICE",
+        "chakra": "CH-ANAHATA",
+        "color": ["white", "gold"],
+        "symbol": "Feather"
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["judgment", "injustice", "cosmic imbalance", "moral crisis"],
+        "typicalArc": "PRINCIPLE → TEST → JUDGMENT → RESTORATION",
+        "storyFunctions": ["standard", "judge", "cosmic law"],
+        "dramaticTension": "individual desire vs. cosmic order"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Pyramid Texts", "Book of the Dead", "Instruction texts"],
+        "iconography": "Woman with ostrich feather on head or feather alone",
+        "cultCenters": ["All temples (as principle)", "Deir el-Medina"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:EG-SEKHMET",
+      "@type": "Archetype",
+      "name": "Sekhmet",
+      "aliases": ["Sakhmet", "Sachmis"],
+      "epithets": ["The Powerful One", "Mistress of Dread", "Lady of Slaughter", "She Before Whom Evil Trembles"],
+      "description": "Lion-headed goddess of war, plague, healing, and the fierce protective power of the sun. Ra's instrument of divine wrath. Nearly destroyed humanity in her bloodlust. Her rage must be appeased but also represents fierce protection.",
+      "gender": "feminine",
+      "domain": ["war", "plague", "healing", "destruction", "protection", "wrath", "solar heat"],
+      "symbols": ["lioness", "sun disk with uraeus", "red linen", "arrows of plague"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.8,
+        "light-shadow": 0.45,
+        "active-receptive": 0.1,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.65,
+        "voluntary-fated": 0.4
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:destroyer", "weight": 0.85, "aspects": ["wrathful", "plague-bringer", "warrior"]},
+        {"primordial": "primordial:warrior", "weight": 0.9, "aspects": ["fierce-protector", "battle-goddess"]},
+        {"primordial": "primordial:healer", "weight": 0.5, "aspects": ["plague-remover", "surgeon"]}
+      ],
+
+      "temporalOrientation": "present",
+
+      "shadowDynamics": {
+        "activationConditions": ["When protection becomes indiscriminate destruction", "When wrath has no limit"],
+        "shadowManifestations": ["Bloodlust", "Genocide", "Plague without cure"],
+        "integrationPath": "Fierce protection with restraint; destruction in service of renewal"
+      },
+
+      "relationships": [
+        {"type": "ASPECT_OF", "target": "arch:EG-HATHOR", "notes": "Wrathful aspect of Hathor"},
+        {"type": "CHILD_OF", "target": "arch:EG-RA", "notes": "Eye of Ra, instrument of wrath"},
+        {"type": "COMPLEMENT", "target": "arch:EG-PTAH", "dynamic": "Destruction and Creation (consort)", "strength": 0.7},
+        {"type": "POLAR_OPPOSITE", "target": "arch:EG-HATHOR", "axis": "creation-destruction", "strength": 0.75, "notes": "Same goddess, opposite poles"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ATHENA", "fidelity": 0.5, "sharedAspects": ["war-goddess", "protection"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:IN-KALI", "fidelity": 0.7, "sharedAspects": ["destruction", "bloodlust", "disease-cure"]}
+      ],
+
+      "contextualVariants": [
+        {
+          "context": "Eye of Ra (wrathful)",
+          "spectralShift": {"order-chaos": 0.7, "creation-destruction": 0.95},
+          "notes": "Sent to destroy rebellious humanity"
+        },
+        {
+          "context": "Appeased (after beer trick)",
+          "spectralShift": {"creation-destruction": 0.5, "order-chaos": 0.35},
+          "notes": "Returns to Hathor form, peaceful"
+        },
+        {
+          "context": "Healer-Sekhmet",
+          "spectralShift": {"creation-destruction": 0.35, "order-chaos": 0.3},
+          "notes": "Priests of Sekhmet were physicians"
+        }
+      ],
+
+      "correspondences": {
+        "element": "EL-FIRE",
+        "planet": "7P-MARS",
+        "tarot": "TAMA-STRENGTH",
+        "chakra": "CH-MANIPURA",
+        "color": ["red", "orange"],
+        "direction": "South (desert, sun)"
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["divine wrath needed", "plague", "war", "protection required"],
+        "typicalArc": "PROTECTOR → UNLEASHED → RAMPAGING → APPEASED → HEALER",
+        "storyFunctions": ["destroyer", "enforcer", "fierce protector"],
+        "dramaticTension": "necessary destruction vs. uncontrollable rage"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Book of the Heavenly Cow", "Litany of Sekhmet"],
+        "iconography": "Lioness-headed woman with sun disk and uraeus",
+        "cultCenters": ["Memphis", "Leontopolis"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:EG-HATHOR",
+      "@type": "Archetype",
+      "name": "Hathor",
+      "aliases": ["Het-Heru", "Het-Hert"],
+      "epithets": ["Mistress of the West", "Lady of the Sycamore", "Golden One", "Lady of Drunkenness"],
+      "description": "Cow goddess of love, beauty, music, joy, fertility, and the afterlife. Mother and consort figure, welcomer of dead to the West. Can transform into wrathful Sekhmet. Embodies feminine creative and nurturing power.",
+      "gender": "feminine",
+      "domain": ["love", "beauty", "music", "joy", "fertility", "motherhood", "afterlife welcome"],
+      "symbols": ["cow", "sistrum", "menat necklace", "sycamore tree", "mirror"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.4,
+        "creation-destruction": 0.2,
+        "light-shadow": 0.25,
+        "active-receptive": 0.65,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.45
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:lover", "weight": 0.85, "aspects": ["love-goddess", "beauty", "joy"]},
+        {"primordial": "primordial:great-mother", "weight": 0.8, "aspects": ["nurturer", "milk-giver", "welcomer"]},
+        {"primordial": "primordial:healer", "weight": 0.5, "aspects": ["joy-bringer", "music-healer"]}
+      ],
+
+      "temporalOrientation": "present",
+
+      "shadowDynamics": {
+        "activationConditions": ["When pleasure becomes excess", "When nurturing becomes smothering", "When provoked to wrath"],
+        "shadowManifestations": ["Sekhmet (wrathful form)", "Devouring mother", "Intoxication as escape"],
+        "integrationPath": "Joy balanced with purpose; nurturing that liberates"
+      },
+
+      "relationships": [
+        {"type": "POLAR_OPPOSITE", "target": "arch:EG-SEKHMET", "axis": "creation-destruction", "strength": 0.75, "notes": "Same goddess, opposite poles"},
+        {"type": "TRANSFORMS_TO", "target": "arch:EG-SEKHMET", "trigger": "When wrath activated", "direction": "forward"},
+        {"type": "CHILD_OF", "target": "arch:EG-RA", "notes": "Eye of Ra (benevolent aspect)"},
+        {"type": "CONSORT", "target": "arch:EG-HORUS", "notes": "Wife of Horus at Edfu"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-APHRODITE", "fidelity": 0.75, "sharedAspects": ["love", "beauty", "sexuality"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:ME-INANNA", "fidelity": 0.6, "sharedAspects": ["love", "sexuality", "cosmic-feminine"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-WATER",
+        "planet": "7P-VENUS",
+        "tarot": "TAMA-EMPRESS",
+        "chakra": "CH-SVADHISTHANA",
+        "color": ["gold", "turquoise", "red"],
+        "tree": "Sycamore"
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["need for joy", "love story", "birth/motherhood", "afterlife transition"],
+        "typicalArc": "JOY-GIVER → LOVER → MOTHER → WELCOMER OF DEAD",
+        "storyFunctions": ["nurturer", "lover", "celebrant", "threshold-welcomer"],
+        "dramaticTension": "maintaining joy in face of suffering"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Pyramid Texts", "Coffin Texts", "Dendera Temple texts"],
+        "iconography": "Cow or woman with cow ears and horns with sun disk",
+        "cultCenters": ["Dendera", "Thebes", "Memphis"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:EG-PTAH",
+      "@type": "Archetype",
+      "name": "Ptah",
+      "aliases": ["Peteh"],
+      "epithets": ["Lord of Truth", "Master of Justice", "Lord of Eternity", "The Beautiful Face"],
+      "description": "Creator god of Memphis who spoke the world into existence through divine thought and word. Patron of craftsmen, architects, and sculptors. Associated with the primordial mound and the creative power of language.",
+      "gender": "masculine",
+      "domain": ["creation", "craftsmen", "architecture", "sculpture", "truth", "speech-creation"],
+      "symbols": ["was scepter", "djed pillar", "ankh", "straight beard", "mummy-form wrappings"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.15,
+        "light-shadow": 0.3,
+        "active-receptive": 0.4,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.35,
+        "voluntary-fated": 0.4
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.9, "aspects": ["world-speaker", "thought-creator", "architect"]},
+        {"primordial": "primordial:magician", "weight": 0.65, "aspects": ["word-power", "naming"]},
+        {"primordial": "primordial:preserver", "weight": 0.5, "aspects": ["craftsman", "maker"]}
+      ],
+
+      "temporalOrientation": "eternal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When creation becomes controlling", "When craft serves only ego"],
+        "shadowManifestations": ["Distant creator", "Perfectionism paralysis", "Creation without heart"],
+        "integrationPath": "Creation in service of life; craft as devotion"
+      },
+
+      "relationships": [
+        {"type": "CONSORT", "target": "arch:EG-SEKHMET", "notes": "Spouse (Memphis triad)"},
+        {"type": "PARENT", "target": "arch:EG-NEFERTEM", "notes": "Father (Memphis triad)"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-HEPHAESTUS", "fidelity": 0.7, "sharedAspects": ["craftsman", "maker", "creation"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:ME-EA", "fidelity": 0.55, "sharedAspects": ["wisdom-creator", "craftsman"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-EARTH",
+        "planet": "7P-SATURN",
+        "tarot": "TAMA-MAGICIAN",
+        "chakra": "CH-VISHUDDHA",
+        "color": ["blue", "green"],
+        "craft": "All skilled crafts, especially stonework"
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["creation needed", "craft mastery sought", "truth speaking"],
+        "typicalArc": "THOUGHT → WORD → CREATION → MAINTENANCE",
+        "storyFunctions": ["creator", "craftsman-patron", "truth-speaker"],
+        "dramaticTension": "thought vs. manifestation"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Shabaka Stone (Memphis Theology)", "Pyramid Texts"],
+        "iconography": "Mummiform man with straight beard, holding was-djed-ankh scepter",
+        "cultCenters": ["Memphis"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:EG-NEPHTHYS",
+      "@type": "Archetype",
+      "name": "Nephthys",
+      "aliases": ["Nebthet", "Nebet-Het"],
+      "epithets": ["Mistress of the House", "Friend of the Dead", "Excellent Goddess"],
+      "description": "Goddess of death, mourning, night, and protective magic. Sister and counterpart to Isis, mourner of Osiris. Associated with the liminal spaces, twilight, and the protective aspects of death. Often in Set's shadow but aligned with Osiris.",
+      "gender": "feminine",
+      "domain": ["death", "mourning", "night", "protection", "magic", "liminal spaces"],
+      "symbols": ["basket and house hieroglyph", "kite (bird)", "funerary objects"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.4,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.65,
+        "active-receptive": 0.6,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.7,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.55
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:crone", "weight": 0.7, "aspects": ["mourner", "death-attendant", "twilight"]},
+        {"primordial": "primordial:healer", "weight": 0.55, "aspects": ["protector-of-dead", "embalming-assistant"]},
+        {"primordial": "primordial:psychopomp", "weight": 0.5, "aspects": ["death-companion", "transition-helper"]}
+      ],
+
+      "temporalOrientation": "eternal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When mourning becomes endless", "When shadow-dwelling becomes avoidance"],
+        "shadowManifestations": ["Perpetual grief", "Death-fixation", "Enabling chaos"],
+        "integrationPath": "Mourning as transition; shadow as complementary light"
+      },
+
+      "relationships": [
+        {"type": "SIBLING", "target": "arch:EG-ISIS", "notes": "Twin sister, ally"},
+        {"type": "SIBLING", "target": "arch:EG-OSIRIS", "notes": "Brother"},
+        {"type": "SIBLING", "target": "arch:EG-SET", "notes": "Brother, nominal consort"},
+        {"type": "COMPLEMENT", "target": "arch:EG-ISIS", "dynamic": "Light/dark twin goddesses", "strength": 0.85},
+        {"type": "PARENT", "target": "arch:EG-ANUBIS", "notes": "Mother (in some versions, by Osiris)"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-PERSEPHONE", "fidelity": 0.5, "sharedAspects": ["underworld", "death-maiden", "transition"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-WATER",
+        "planet": "7P-MOON",
+        "tarot": "TAMA-HIGH-PRIESTESS",
+        "chakra": "CH-AJNA",
+        "color": ["black", "dark blue"],
+        "timeOfDay": "Dusk, night"
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["death", "mourning", "night passages", "liminal transitions"],
+        "typicalArc": "OBSERVER → MOURNER → PROTECTOR → GUIDE",
+        "storyFunctions": ["mourner", "shadow-twin", "helper", "death-companion"],
+        "dramaticTension": "loyalty to family vs. marriage to chaos"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Pyramid Texts", "Coffin Texts", "Lamentations of Isis and Nephthys"],
+        "iconography": "Woman with basket-house hieroglyph on head",
+        "cultCenters": ["Heliopolis", "Abydos", "Memphis"],
+        "confidence": 0.9
+      }
+    },
+
+    {
+      "@id": "arch:EG-APOPHIS",
+      "@type": "Archetype",
+      "name": "Apophis",
+      "aliases": ["Apep", "Apepi"],
+      "epithets": ["The Evil Lizard", "The Encircler", "Enemy of Ra", "Lord of Chaos"],
+      "description": "The giant serpent of chaos who attacks Ra's solar barque each night in the underworld. Embodies pure Isfet (chaos/evil) opposing Ma'at. Never defeated permanently—returns each night. The ultimate antagonist of cosmic order.",
+      "gender": "masculine",
+      "domain": ["chaos", "darkness", "evil", "destruction", "dissolution"],
+      "symbols": ["giant serpent", "darkness", "eclipse"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.98,
+        "creation-destruction": 0.95,
+        "light-shadow": 0.95,
+        "active-receptive": 0.2,
+        "individual-collective": 0.2,
+        "ascent-descent": 0.8,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.9
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:destroyer", "weight": 0.95, "aspects": ["chaos-serpent", "dissolution", "anti-creation"]}
+      ],
+
+      "temporalOrientation": "eternal",
+
+      "shadowDynamics": {
+        "activationConditions": ["N/A - Apophis IS the shadow of cosmic order"],
+        "shadowManifestations": ["Total dissolution", "Eternal darkness", "Un-creation"],
+        "integrationPath": "Cannot be integrated, only eternally opposed and contained"
+      },
+
+      "relationships": [
+        {"type": "POLAR_OPPOSITE", "target": "arch:EG-RA", "axis": "order-chaos", "strength": 0.98, "notes": "Cosmic eternal opposition"},
+        {"type": "POLAR_OPPOSITE", "target": "arch:EG-MAAT", "axis": "order-chaos", "strength": 0.95, "notes": "Isfet personified vs. Ma'at"},
+        {"type": "ANTAGONIST", "target": "arch:EG-RA", "narrativeRole": "Nightly battle in Duat"},
+        {"type": "ANTAGONIST", "target": "arch:EG-SET", "narrativeRole": "Set defends Ra against Apophis"},
+        {"type": "CULTURAL_ECHO", "target": "arch:NO-JORMUNGANDR", "fidelity": 0.7, "sharedAspects": ["world-serpent", "chaos", "cosmic-threat"]},
+        {"type": "CULTURAL_ECHO", "target": "arch:ME-TIAMAT", "fidelity": 0.65, "sharedAspects": ["primordial-chaos", "serpent/dragon", "opposed-by-order"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-WATER",
+        "planet": "7P-SATURN",
+        "tarot": "TAMA-TOWER",
+        "color": "black",
+        "time": "Deepest night, eclipse"
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["cosmic threat", "eclipse", "night terrors", "chaos rising"],
+        "typicalArc": "LURKING → ATTACKING → DEFEATED → RETURNING",
+        "storyFunctions": ["ultimate antagonist", "chaos incarnate", "necessary opposition"],
+        "dramaticTension": "Can chaos ever be truly defeated?"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Book of the Dead", "Amduat", "Book of Gates"],
+        "iconography": "Giant serpent, often being speared or bound",
+        "cultCenters": ["None (anti-god, never worshipped)"],
+        "confidence": 0.95
+      }
+    },
+
+    {
+      "@id": "arch:EG-GEB",
+      "@type": "Archetype",
+      "name": "Geb",
+      "aliases": ["Seb", "Keb"],
+      "epithets": ["Father of the Gods", "Prince of the Gods"],
+      "description": "God of the earth, fertility, and the underworld caves. His body forms the earth, his laugh causes earthquakes. Father of Osiris, Isis, Set, and Nephthys. Separated from his consort Nut (sky) by Shu (air).",
+      "gender": "masculine",
+      "domain": ["earth", "fertility", "caves", "underworld", "earthquakes"],
+      "symbols": ["goose", "earth", "green/brown skin", "plants growing from body"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.45,
+        "active-receptive": 0.55,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.85,
+        "stasis-transformation": 0.35,
+        "voluntary-fated": 0.6
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:great-father", "weight": 0.75, "aspects": ["earth-father", "ancestor"]},
+        {"primordial": "primordial:preserver", "weight": 0.6, "aspects": ["foundation", "stability"]}
+      ],
+
+      "temporalOrientation": "eternal",
+
+      "shadowDynamics": {
+        "activationConditions": ["When stability becomes stagnation", "When foundation becomes prison"],
+        "shadowManifestations": ["Earthquake destruction", "Burial", "Suffocation"],
+        "integrationPath": "Earth as support, not limitation"
+      },
+
+      "relationships": [
+        {"type": "CONSORT", "target": "arch:EG-NUT", "notes": "Separated lovers (sky and earth)"},
+        {"type": "PARENT", "target": "arch:EG-OSIRIS"},
+        {"type": "PARENT", "target": "arch:EG-ISIS"},
+        {"type": "PARENT", "target": "arch:EG-SET"},
+        {"type": "PARENT", "target": "arch:EG-NEPHTHYS"},
+        {"type": "CHILD_OF", "target": "arch:EG-SHU"},
+        {"type": "CHILD_OF", "target": "arch:EG-TEFNUT"},
+        {"type": "POLAR_OPPOSITE", "target": "arch:EG-NUT", "axis": "ascent-descent", "strength": 0.85},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-GAIA", "fidelity": 0.7, "sharedAspects": ["earth", "primordial", "parent-of-gods"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-EARTH",
+        "planet": "7P-SATURN",
+        "tarot": "TAMA-EMPEROR",
+        "chakra": "CH-MULADHARA",
+        "color": ["green", "brown", "black"]
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["need for grounding", "fertility", "ancestral connection"],
+        "typicalArc": "FOUNDATION → SUPPORTER → MOURNER (for Osiris)",
+        "storyFunctions": ["foundation", "father", "earth-body"],
+        "dramaticTension": "separation from beloved (Nut)"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Pyramid Texts", "Coffin Texts", "Heliopolitan Ennead"],
+        "iconography": "Man lying beneath Nut, often with green skin, goose on head",
+        "cultCenters": ["Heliopolis"],
+        "confidence": 0.9
+      }
+    },
+
+    {
+      "@id": "arch:EG-NUT",
+      "@type": "Archetype",
+      "name": "Nut",
+      "aliases": ["Nuit"],
+      "epithets": ["She of a Thousand Souls", "Mistress of All", "She Who Holds a Thousand Souls"],
+      "description": "Goddess of the sky who swallows the sun each evening and gives birth to it each dawn. Her star-spangled body arches over the earth. Mother of Osiris, Isis, Set, Nephthys. Protective canopy over creation.",
+      "gender": "feminine",
+      "domain": ["sky", "stars", "cosmos", "rebirth", "protection"],
+      "symbols": ["starry body", "sycamore tree", "cow", "water pot"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.35,
+        "active-receptive": 0.6,
+        "individual-collective": 0.65,
+        "ascent-descent": 0.1,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.5
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.85, "aspects": ["cosmic-mother", "sky-womb", "star-bearer"]},
+        {"primordial": "primordial:preserver", "weight": 0.55, "aspects": ["protective-canopy", "coffin-lid"]}
+      ],
+
+      "temporalOrientation": "cyclical",
+
+      "shadowDynamics": {
+        "activationConditions": ["When protection becomes enclosure", "When cosmic becomes disconnected"],
+        "shadowManifestations": ["Swallowing without rebirth", "Distant sky", "Crushing vastness"],
+        "integrationPath": "Canopy that inspires rather than overwhelms"
+      },
+
+      "relationships": [
+        {"type": "CONSORT", "target": "arch:EG-GEB", "notes": "Separated lovers"},
+        {"type": "PARENT", "target": "arch:EG-OSIRIS"},
+        {"type": "PARENT", "target": "arch:EG-ISIS"},
+        {"type": "PARENT", "target": "arch:EG-SET"},
+        {"type": "PARENT", "target": "arch:EG-NEPHTHYS"},
+        {"type": "CHILD_OF", "target": "arch:EG-SHU"},
+        {"type": "CHILD_OF", "target": "arch:EG-TEFNUT"},
+        {"type": "POLAR_OPPOSITE", "target": "arch:EG-GEB", "axis": "ascent-descent", "strength": 0.85},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-OURANOS", "fidelity": 0.6, "sharedAspects": ["sky", "primordial", "cosmic"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-AIR",
+        "planet": "7P-MOON",
+        "tarot": "TAMA-STAR",
+        "chakra": "CH-SAHASRARA",
+        "color": ["dark blue", "black with stars"]
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["cosmic scope needed", "protection", "daily cycle", "death transition"],
+        "typicalArc": "SWALLOWER → CARRIER → BIRTHER (of sun)",
+        "storyFunctions": ["cosmic mother", "protector", "cycle-keeper"],
+        "dramaticTension": "separation from beloved (Geb); swallowing vs. birthing sun"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Pyramid Texts", "Coffin Texts", "Nut Book"],
+        "iconography": "Woman arched over earth, body covered with stars",
+        "cultCenters": ["Heliopolis"],
+        "confidence": 0.9
+      }
+    },
+
+    {
+      "@id": "arch:EG-SOBEK",
+      "@type": "Archetype",
+      "name": "Sobek",
+      "aliases": ["Sebek", "Suchos"],
+      "epithets": ["Lord of the Nile", "The Rager", "He Who Snatches"],
+      "description": "Crocodile god of the Nile, fertility, military prowess, and pharaonic power. Embodies the dangerous but life-giving power of the river. Fierce protector and primal force. Associated with Seth but also Ra.",
+      "gender": "masculine",
+      "domain": ["Nile", "fertility", "military", "pharaonic power", "primal force"],
+      "symbols": ["crocodile", "ankh", "was scepter", "Nile"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.45,
+        "active-receptive": 0.25,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.65,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.4
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:warrior", "weight": 0.75, "aspects": ["fierce-protector", "primal-power"]},
+        {"primordial": "primordial:destroyer", "weight": 0.55, "aspects": ["sudden-death", "flood"]}
+      ],
+
+      "temporalOrientation": "present",
+
+      "shadowDynamics": {
+        "activationConditions": ["When protection becomes predation", "When power serves only appetite"],
+        "shadowManifestations": ["Mindless predator", "Flood destruction", "Consuming king"],
+        "integrationPath": "Primal power in service of life and protection"
+      },
+
+      "relationships": [
+        {"type": "ALLY", "target": "arch:EG-RA", "notes": "Associated in some periods"},
+        {"type": "ALLY", "target": "arch:EG-SET", "notes": "Primal power association"},
+        {"type": "ALLY", "target": "arch:EG-HORUS", "notes": "Retrieved lost body parts in some myths"}
+      ],
+
+      "correspondences": {
+        "element": "EL-WATER",
+        "planet": "7P-MARS",
+        "tarot": "TAMA-STRENGTH",
+        "color": ["green", "blue-green"]
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["Nile dangers", "need for fierce protection", "primal power"],
+        "typicalArc": "LURKING → STRIKING → PROTECTING (or DEVOURING)",
+        "storyFunctions": ["primal force", "protector", "threat"],
+        "dramaticTension": "life-giving river vs. deadly predator"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Pyramid Texts", "Faiyum texts"],
+        "iconography": "Crocodile or man with crocodile head",
+        "cultCenters": ["Faiyum (Crocodilopolis)", "Kom Ombo"],
+        "confidence": 0.9
+      }
+    },
+
+    {
+      "@id": "arch:EG-BASTET",
+      "@type": "Archetype",
+      "name": "Bastet",
+      "aliases": ["Bast", "Ubaste"],
+      "epithets": ["Lady of the East", "Eye of Ra", "She of the Ointment Jar"],
+      "description": "Cat goddess of home, fertility, protection, and joy. Originally a fierce lioness protector, later depicted as gentle cat. Protector against evil spirits and disease. Associated with music, dance, and pleasure.",
+      "gender": "feminine",
+      "domain": ["home", "cats", "protection", "fertility", "joy", "perfume"],
+      "symbols": ["cat", "sistrum", "aegis", "ointment jar"],
+
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.3,
+        "active-receptive": 0.55,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.45,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.4
+      },
+
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.7, "aspects": ["home-protector", "nurturer"]},
+        {"primordial": "primordial:warrior", "weight": 0.5, "aspects": ["defender", "Eye-of-Ra"]},
+        {"primordial": "primordial:healer", "weight": 0.5, "aspects": ["disease-protector", "joy-bringer"]}
+      ],
+
+      "temporalOrientation": "present",
+
+      "shadowDynamics": {
+        "activationConditions": ["When protection becomes aggression", "When domesticity becomes captivity"],
+        "shadowManifestations": ["Feral rage", "Clinging attachment", "Fierce jealousy"],
+        "integrationPath": "Fierce protection with gentle presence"
+      },
+
+      "relationships": [
+        {"type": "ASPECT_OF", "target": "arch:EG-SEKHMET", "notes": "Gentler aspect of Eye of Ra"},
+        {"type": "SIBLING", "target": "arch:EG-SEKHMET", "notes": "Some traditions as sisters"},
+        {"type": "CHILD_OF", "target": "arch:EG-RA", "notes": "Eye of Ra"},
+        {"type": "CULTURAL_ECHO", "target": "arch:GR-ARTEMIS", "fidelity": 0.5, "sharedAspects": ["protection", "feminine", "wild-tame"]}
+      ],
+
+      "correspondences": {
+        "element": "EL-FIRE",
+        "planet": "7P-MOON",
+        "tarot": "TAMA-EMPRESS",
+        "chakra": "CH-SVADHISTHANA",
+        "color": ["gold", "green"]
+      },
+
+      "narrativeVector": {
+        "entryPoints": ["need for home protection", "fertility", "joy", "gentle power"],
+        "typicalArc": "FIERCE → GENTLE → PROTECTIVE → NURTURING",
+        "storyFunctions": ["protector", "nurturer", "joy-bringer"],
+        "dramaticTension": "fierce nature vs. gentle presence"
+      },
+
+      "metadata": {
+        "canonicalSources": ["Coffin Texts", "Temple of Bastet texts"],
+        "iconography": "Cat or woman with cat head",
+        "cultCenters": ["Bubastis"],
+        "confidence": 0.9
+      }
+    }
+  ],
+
+  "systemRelationships": [
+    {
+      "@type": "SystemPattern",
+      "pattern": "Osirian Cycle",
+      "participants": ["arch:EG-OSIRIS", "arch:EG-ISIS", "arch:EG-HORUS", "arch:EG-SET", "arch:EG-NEPHTHYS"],
+      "dynamic": "Death-resurrection-vengeance cycle; cosmic drama of order vs. chaos",
+      "narrativeFunction": "Central Egyptian myth of kingship, afterlife, and cosmic balance"
+    },
+    {
+      "@type": "SystemPattern",
+      "pattern": "Solar Cycle",
+      "participants": ["arch:EG-RA", "arch:EG-APOPHIS", "arch:EG-SET", "arch:EG-THOTH"],
+      "dynamic": "Daily death and rebirth of sun; eternal battle with chaos",
+      "narrativeFunction": "Cosmic order maintained through perpetual struggle"
+    },
+    {
+      "@type": "SystemPattern",
+      "pattern": "Heliopolitan Ennead",
+      "participants": ["arch:EG-ATUM", "arch:EG-SHU", "arch:EG-TEFNUT", "arch:EG-GEB", "arch:EG-NUT", "arch:EG-OSIRIS", "arch:EG-ISIS", "arch:EG-SET", "arch:EG-NEPHTHYS"],
+      "dynamic": "Creation genealogy from self-generated Atum",
+      "narrativeFunction": "Explains cosmic structure through divine family"
+    },
+    {
+      "@type": "SystemPattern",
+      "pattern": "Eye of Ra Goddesses",
+      "participants": ["arch:EG-SEKHMET", "arch:EG-HATHOR", "arch:EG-BASTET", "arch:EG-TEFNUT"],
+      "dynamic": "Solar feminine wrath/protection aspect; can transform between fierce and gentle",
+      "narrativeFunction": "Divine feminine power as both nurturing and destructive"
+    }
+  ],
+
+  "metadata": {
+    "version": "1.0",
+    "created": "2025-01-18",
+    "schema": "ACP-ORAS-2.0",
+    "coverage": "Major Netjeru (17 deities)",
+    "expansion_candidates": ["Khonsu", "Mut", "Atum", "Shu", "Tefnut", "Bes", "Taweret", "Khnum", "Nefertem", "Min", "Neith"]
+  }
+}

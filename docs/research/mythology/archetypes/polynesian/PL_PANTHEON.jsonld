@@ -1,0 +1,784 @@
+{
+  "@context": "../../schema/ACP_CONTEXT.jsonld",
+  "@id": "pantheon:PL-PANTHEON",
+  "@type": "Pantheon",
+  "name": "Polynesian Deities and Culture Heroes",
+  "tradition": "Polynesian Mythology / Hawaiian / Maori / Tahitian / Samoan",
+  "description": "The gods, goddesses, and culture heroes of Polynesia, spanning the vast Pacific triangle from Hawaii to New Zealand to Easter Island. These traditions share common ancestral roots while developing distinct regional variations, connected by voyaging, genealogy, and the sacred concept of mana.",
+  "canonicalSources": [
+    "Kumulipo (Hawaiian creation chant)",
+    "Pele and Hi'iaka Epic Cycle",
+    "Maori Oral Traditions",
+    "Te Kore, Te Po, Te Ao (Maori cosmogony)",
+    "Tahitian Cosmogonic Chants",
+    "Various Island Oral Traditions"
+  ],
+  "systemPatterns": [
+    {
+      "name": "Separation of Rangi and Papa",
+      "description": "The primordial parents (Sky Father and Earth Mother) held in eternal embrace until their children force them apart to create space for life",
+      "archetypes": ["arch:PL-RANGI", "arch:PL-PAPA", "arch:PL-TANE"],
+      "pattern": "Creation through separation of primordial unity"
+    },
+    {
+      "name": "Maui's Deeds",
+      "description": "The trickster hero who fished up islands, snared the sun, stole fire, and died attempting to win immortality for humanity",
+      "archetypes": ["arch:PL-MAUI"],
+      "pattern": "Culture hero's transformative feats and noble death"
+    },
+    {
+      "name": "Pele and Hi'iaka",
+      "description": "The volcanic goddess and her loyal sister's epic journey, exploring themes of jealousy, devotion, destruction, and reconciliation",
+      "archetypes": ["arch:PL-PELE", "arch:PL-HIIAKA"],
+      "pattern": "Divine sisterhood, jealousy, and volcanic transformation"
+    },
+    {
+      "name": "The Four Great Gods",
+      "description": "Kū, Kāne, Lono, and Kanaloa - the four major male deities of Hawaiian tradition governing war, life, fertility, and ocean/death",
+      "archetypes": ["arch:PL-KU", "arch:PL-KANE", "arch:PL-LONO", "arch:PL-KANALOA"],
+      "pattern": "Quadripartite divine masculine structure"
+    },
+    {
+      "name": "Mana and Tapu",
+      "description": "The flow of sacred power (mana) and its regulation through sacred restrictions (tapu/kapu), governing all divine-human interaction",
+      "archetypes": ["All"],
+      "pattern": "Sacred power dynamics and cosmic regulation"
+    }
+  ],
+  "entries": [
+    {
+      "@id": "arch:PL-RANGI",
+      "@type": "Archetype",
+      "name": "Rangi",
+      "aliases": ["Ranginui (Maori)", "Wakea (Hawaiian)", "Atea (Tahitian)", "Sky Father"],
+      "domain": ["Sky", "Heaven", "Fatherhood", "Rain (tears)", "Light"],
+      "description": "The Sky Father who, with Papa the Earth Mother, existed in primordial embrace so close their children were trapped in darkness between them. When their son Tāne forced them apart, Rangi's tears became rain, his sighs the mist, and his love for Papa remained eternal. He represents the celestial masculine principle and the sorrow of necessary separation.",
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.25,
+        "light-shadow": 0.2,
+        "active-receptive": 0.35,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.1,
+        "stasis-transformation": 0.3,
+        "voluntary-fated": 0.7
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-father", "weight": 0.95, "aspects": ["sky-father", "progenitor"]},
+        {"primordial": "primordial:creator", "weight": 0.7, "aspects": ["primordial-parent", "life-source"]},
+        {"primordial": "primordial:lover", "weight": 0.6, "aspects": ["eternal-love", "separated-beloved"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:PL-PAPA", "description": "Primordial pair, eternal love despite separation"},
+        {"type": "rel:CONTAINS", "target": "arch:PL-TANE", "description": "Father of Tāne who separated them"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-OURANOS", "fidelity": 0.8, "notes": "Sky father, separated from earth"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-NUT", "fidelity": 0.5, "notes": "Sky parent (gender reversed)"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CN-PANGU", "fidelity": 0.55, "notes": "Primordial separation creating cosmos"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When separation becomes permanent isolation", "When grief overwhelms"],
+        "shadowManifestations": ["Endless rain/storms", "Crushing return to primordial embrace", "Grief that floods the world"],
+        "integrationPath": "Accepting separation as necessary for creation; love that endures across distance"
+      },
+      "correspondences": {
+        "element": "Air/Light",
+        "direction": "Above",
+        "color": "Blue, white",
+        "association": "Rain, mist, sky phenomena, fatherhood"
+      }
+    },
+    {
+      "@id": "arch:PL-PAPA",
+      "@type": "Archetype",
+      "name": "Papa",
+      "aliases": ["Papatūānuku (Maori)", "Papa (Hawaiian)", "Earth Mother"],
+      "domain": ["Earth", "Fertility", "Motherhood", "Foundation", "Nourishment"],
+      "description": "The Earth Mother who lay in primordial embrace with Rangi until their children separated them. She remains below, her body the land itself, nurturing all life while eternally mourning separation from her beloved. Her warmth rises as mist to meet Rangi's tears, their love expressed through nature's cycles.",
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.3,
+        "light-shadow": 0.4,
+        "active-receptive": 0.75,
+        "individual-collective": 0.25,
+        "ascent-descent": 0.85,
+        "stasis-transformation": 0.35,
+        "voluntary-fated": 0.7
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.95, "aspects": ["earth-mother", "nurturer", "foundation"]},
+        {"primordial": "primordial:creator", "weight": 0.7, "aspects": ["life-bearer", "primordial-parent"]},
+        {"primordial": "primordial:lover", "weight": 0.6, "aspects": ["eternal-beloved", "separated-love"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:PL-RANGI", "description": "Primordial pair, earth and sky"},
+        {"type": "rel:CONTAINS", "target": "arch:PL-TANE", "description": "Mother of the separating god"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-GAIA", "fidelity": 0.85, "notes": "Earth mother, primordial feminine"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-PRITHVI", "fidelity": 0.7, "notes": "Earth goddess, nurturer"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-GEB", "fidelity": 0.5, "notes": "Earth parent (gender reversed in Egypt)"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When nurturing becomes smothering", "When grief consumes"],
+        "shadowManifestations": ["Earthquakes of grief", "Barren land", "Refusing to let children go"],
+        "integrationPath": "Nurturing that releases; grief transformed into fertile abundance"
+      },
+      "correspondences": {
+        "element": "Earth",
+        "direction": "Below",
+        "color": "Brown, green",
+        "association": "Land, agriculture, stability, maternal love"
+      }
+    },
+    {
+      "@id": "arch:PL-TANE",
+      "@type": "Archetype",
+      "name": "Tāne",
+      "aliases": ["Tāne Mahuta (Maori)", "Kāne (Hawaiian)", "Ta'aroa aspect (Tahitian)"],
+      "domain": ["Forests", "Light", "Life", "Birds", "Creation of Humans", "Beauty"],
+      "description": "The god of forests and birds who separated Rangi and Papa by lying on his back and pushing his father skyward with his legs, creating space for life. He then clothed his mother with trees and filled the world with beauty. In Maori tradition, he created the first woman from earth and breathed life into her, becoming ancestor of humanity.",
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.2,
+        "light-shadow": 0.2,
+        "active-receptive": 0.3,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.35
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.9, "aspects": ["separator", "life-giver", "beautifier"]},
+        {"primordial": "primordial:hero", "weight": 0.75, "aspects": ["liberator", "world-shaper"]},
+        {"primordial": "primordial:great-father", "weight": 0.6, "aspects": ["ancestor-of-humanity", "progenitor"]}
+      ],
+      "relationships": [
+        {"type": "rel:CONTAINED_BY", "target": "arch:PL-RANGI", "description": "Son who separated the parents"},
+        {"type": "rel:CONTAINED_BY", "target": "arch:PL-PAPA", "description": "Son who clothed the earth-mother"},
+        {"type": "rel:TENSION", "target": "arch:PL-TU", "description": "Different responses to parents - separation vs destruction"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-PROMETHEUS", "fidelity": 0.6, "notes": "Creator of humanity, light-bringer"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-MARDUK", "fidelity": 0.55, "notes": "Separating primordial elements, ordering cosmos"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CN-PANGU", "fidelity": 0.6, "notes": "Separating sky and earth"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When separation goes too far", "When creating life leads to incest"],
+        "shadowManifestations": ["Forests that devour", "Beauty that ensnares", "Incestuous creation"],
+        "integrationPath": "Creation that honors both separation and connection; beauty in service of life"
+      },
+      "correspondences": {
+        "element": "Wood/Air",
+        "direction": "Forest, upward",
+        "color": "Green, gold",
+        "symbol": "Trees (especially kauri), birds",
+        "association": "Forests, birds, light, human creation, beauty"
+      }
+    },
+    {
+      "@id": "arch:PL-TU",
+      "@type": "Archetype",
+      "name": "Tū",
+      "aliases": ["Tūmatauenga (Maori)", "Kū (Hawaiian)", "Tu (Tahitian)"],
+      "domain": ["War", "Humanity", "Courage", "Hunting", "Fishing", "Strength"],
+      "description": "The fierce god of war who alone wanted to kill Rangi and Papa rather than merely separate them. When his brothers refused and later fled from Tāwhirimātea's revenge storms, Tū stood alone and fought. He became the ancestor and patron of humanity, representing our capacity for courage, warfare, and mastery over other creatures.",
+      "spectralCoordinates": {
+        "order-chaos": 0.45,
+        "creation-destruction": 0.6,
+        "light-shadow": 0.4,
+        "active-receptive": 0.1,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.45,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.25
+      },
+      "instantiates": [
+        {"primordial": "primordial:warrior", "weight": 0.95, "aspects": ["battle-god", "courage", "standing-alone"]},
+        {"primordial": "primordial:great-father", "weight": 0.6, "aspects": ["ancestor-of-humans", "progenitor"]},
+        {"primordial": "primordial:destroyer", "weight": 0.55, "aspects": ["killer-instinct", "hunter"]}
+      ],
+      "relationships": [
+        {"type": "rel:TENSION", "target": "arch:PL-TANE", "description": "Different approaches to primordial parents"},
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:PL-RONGO", "axis": "creation-destruction", "description": "War vs peace/cultivation"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ARES", "fidelity": 0.7, "notes": "War god, fierce, direct"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-TYR", "fidelity": 0.6, "notes": "War god, courage, standing firm"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:AF-OGUN", "fidelity": 0.55, "notes": "War, hunting, fierce protector"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When war becomes slaughter", "When courage becomes cruelty"],
+        "shadowManifestations": ["Endless war", "Cannibalism", "Violence without purpose"],
+        "integrationPath": "Warrior strength in service of protection; courage channeled constructively"
+      },
+      "correspondences": {
+        "element": "Fire/Blood",
+        "direction": "Variable (battlefield)",
+        "color": "Red",
+        "symbol": "Weapons, war canoe prows",
+        "association": "War, courage, hunting, fishing, human endeavor"
+      }
+    },
+    {
+      "@id": "arch:PL-TANGAROA",
+      "@type": "Archetype",
+      "name": "Tangaroa",
+      "aliases": ["Kanaloa (Hawaiian)", "Ta'aroa (Tahitian)", "Tagaloa (Samoan)"],
+      "domain": ["Ocean", "Sea Creatures", "Chaos", "The Deep", "Navigation"],
+      "description": "The great god of the sea, fish, and ocean creatures who fled to the ocean when Tū sought to dominate his brothers. In Tahitian tradition (as Ta'aroa), he is the supreme creator who existed alone in the cosmic egg before creating all else. He represents the vast, mysterious depths and the creatures within, as well as the chaos underlying order.",
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.55,
+        "active-receptive": 0.5,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.7,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.55
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.75, "aspects": ["ocean-lord", "life-source"]},
+        {"primordial": "primordial:magician", "weight": 0.6, "aspects": ["ocean-mysteries", "navigation-patron"]},
+        {"primordial": "primordial:self", "weight": 0.5, "aspects": ["primordial-unity", "cosmic-egg"]}
+      ],
+      "relationships": [
+        {"type": "rel:TENSION", "target": "arch:PL-TU", "description": "Fled from war god's dominance"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-POSEIDON", "fidelity": 0.7, "notes": "Sea god, ocean depths"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:AF-OLOKUN", "fidelity": 0.6, "notes": "Ocean depths, primordial water"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-EA", "fidelity": 0.55, "notes": "Primordial water deity, wisdom"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When the ocean consumes", "When chaos overwhelms order"],
+        "shadowManifestations": ["Drowning storms", "Sea monsters", "Navigation impossible"],
+        "integrationPath": "Ocean as connector not barrier; chaos as creative potential"
+      },
+      "contextualVariants": [
+        {
+          "context": "Maori (Tangaroa - sea god)",
+          "spectralShift": {"creation-destruction": 0.5, "order-chaos": 0.6},
+          "notes": "One god among many, lord of fish"
+        },
+        {
+          "context": "Tahitian (Ta'aroa - supreme creator)",
+          "spectralShift": {"creation-destruction": 0.15, "individual-collective": 0.15},
+          "notes": "Supreme being, cosmic egg, creator of all"
+        }
+      ],
+      "correspondences": {
+        "element": "Water",
+        "direction": "Ocean, west",
+        "color": "Blue, deep blue",
+        "symbol": "Fish, octopus, sea creatures",
+        "association": "Ocean, fishing, navigation, sea creatures"
+      }
+    },
+    {
+      "@id": "arch:PL-RONGO",
+      "@type": "Archetype",
+      "name": "Rongo",
+      "aliases": ["Lono (Hawaiian)", "Ro'o (Tahitian)"],
+      "domain": ["Peace", "Agriculture", "Fertility", "Rain", "Music", "Harvest"],
+      "description": "The god of cultivated plants, peace, and fertility who fled to the plants when Tū sought dominance. In Hawaiian tradition as Lono, he is associated with the Makahiki season of peace, games, and harvest. He represents the peaceful, nurturing aspects of life - cultivation over hunting, agriculture over war, harmony over conflict.",
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.2,
+        "light-shadow": 0.25,
+        "active-receptive": 0.6,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.45
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.7, "aspects": ["cultivation", "fertility-bringer"]},
+        {"primordial": "primordial:healer", "weight": 0.65, "aspects": ["peace-bringer", "harmony"]},
+        {"primordial": "primordial:sovereign", "weight": 0.5, "aspects": ["seasonal-king", "Makahiki-lord"]}
+      ],
+      "relationships": [
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:PL-TU", "axis": "creation-destruction", "description": "Peace vs war, cultivation vs hunting"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-DEMETER", "fidelity": 0.6, "notes": "Agriculture, fertility, harvest"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-DUMUZI", "fidelity": 0.55, "notes": "Seasonal fertility, dying-rising pattern"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-FREYR", "fidelity": 0.65, "notes": "Peace, fertility, harvest, seasonal"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When peace becomes passivity", "When cultivation fails"],
+        "shadowManifestations": ["Famine", "Crops that fail", "Peace that allows evil to flourish"],
+        "integrationPath": "Active peace-making; cultivation as transformation"
+      },
+      "correspondences": {
+        "element": "Earth/Water (rain)",
+        "direction": "Fields, gardens",
+        "color": "Green, white",
+        "symbol": "Cultivated plants, rain clouds, Makahiki standard",
+        "festival": "Makahiki (Hawaiian harvest festival)",
+        "association": "Agriculture, peace, games, harvest, rain"
+      }
+    },
+    {
+      "@id": "arch:PL-MAUI",
+      "@type": "Archetype",
+      "name": "Māui",
+      "aliases": ["Māui-tikitiki-a-Taranga", "Maui (Hawaiian)", "Ti'iti'i (Samoan)"],
+      "domain": ["Trickery", "Culture Hero", "Fire", "Sun", "Island-Fishing", "Death"],
+      "description": "The great trickster and culture hero found throughout Polynesia. Born prematurely and cast into the sea, he was raised by the gods and returned to perform mighty deeds: fishing up islands with his magical hook, snaring the sun to slow its passage, stealing fire from the underworld, and finally dying in his attempt to win immortality for humanity by entering the goddess Hine-nui-te-pō.",
+      "spectralCoordinates": {
+        "order-chaos": 0.7,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.45,
+        "active-receptive": 0.2,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.75,
+        "voluntary-fated": 0.3
+      },
+      "instantiates": [
+        {"primordial": "primordial:trickster", "weight": 0.95, "aspects": ["cunning", "rule-breaker", "transformer"]},
+        {"primordial": "primordial:hero", "weight": 0.9, "aspects": ["culture-bringer", "monster-binder", "noble-death"]},
+        {"primordial": "primordial:divine-child", "weight": 0.6, "aspects": ["miraculous-birth", "cast-away-returns"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-PROMETHEUS", "fidelity": 0.75, "notes": "Fire-stealer, humanity's champion"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-LOKI", "fidelity": 0.6, "notes": "Trickster, shape-shifter, transgressor"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:AF-ESHU", "fidelity": 0.55, "notes": "Trickster, transformer, boundary-crosser"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CN-SUN-WUKONG", "fidelity": 0.6, "notes": "Trickster hero, challenging cosmic order"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When trickery becomes hubris", "When challenging death fails"],
+        "shadowManifestations": ["Overreach leading to death", "Tricks that backfire", "Chaos without creation"],
+        "integrationPath": "Trickery in service of humanity; accepting mortality's limits"
+      },
+      "contextualVariants": [
+        {
+          "context": "Island-fishing (creating land)",
+          "spectralShift": {"creation-destruction": 0.3, "order-chaos": 0.6},
+          "notes": "Creator using trickery, forming the islands"
+        },
+        {
+          "context": "Snaring the sun",
+          "spectralShift": {"order-chaos": 0.5, "stasis-transformation": 0.6},
+          "notes": "Ordering time, benefiting humanity"
+        },
+        {
+          "context": "Death in Hine-nui-te-pō",
+          "spectralShift": {"light-shadow": 0.7, "stasis-transformation": 0.9},
+          "notes": "Failed bid for immortality, noble death"
+        }
+      ],
+      "correspondences": {
+        "element": "Fire/All (transformer)",
+        "direction": "Variable (wanderer)",
+        "symbol": "Fish-hook, rope/snare, fire",
+        "association": "Trickery, culture gifts, mortality, transformation"
+      }
+    },
+    {
+      "@id": "arch:PL-PELE",
+      "@type": "Archetype",
+      "name": "Pele",
+      "aliases": ["Pelehonuamea", "She Who Shapes the Sacred Land"],
+      "domain": ["Volcanoes", "Fire", "Lightning", "Dance", "Passion", "Creation/Destruction"],
+      "description": "The Hawaiian goddess of volcanoes, fire, and lightning who traveled from Tahiti to Hawai'i seeking a home, finally settling in Kīlauea. Fiercely passionate and jealous, she creates new land through volcanic eruption while destroying what lies in lava's path. She embodies the raw creative-destructive power of the earth's molten heart and the passionate intensity of Hawaiian spirit.",
+      "spectralCoordinates": {
+        "order-chaos": 0.65,
+        "creation-destruction": 0.6,
+        "light-shadow": 0.45,
+        "active-receptive": 0.15,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.8,
+        "voluntary-fated": 0.35
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.8, "aspects": ["land-maker", "island-builder"]},
+        {"primordial": "primordial:destroyer", "weight": 0.85, "aspects": ["volcano", "consuming-fire"]},
+        {"primordial": "primordial:lover", "weight": 0.6, "aspects": ["passionate", "jealous", "intense"]},
+        {"primordial": "primordial:rebel", "weight": 0.5, "aspects": ["exile", "restless-seeker"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:PL-HIIAKA", "description": "Sisterly love, tension, and reconciliation"},
+        {"type": "rel:COMPLEMENT", "target": "arch:PL-NAMAKA", "description": "Volcanic fire vs ocean water - eternal sisters' battle"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-KALI", "fidelity": 0.6, "notes": "Fierce goddess, creation-destruction unified"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HEPHAESTUS", "fidelity": 0.5, "notes": "Volcanic fire, forge of creation"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:JP-KONOHANASAKUYA", "fidelity": 0.55, "notes": "Volcanic goddess, fire, transformation"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When passion becomes jealous rage", "When creation destroys without purpose"],
+        "shadowManifestations": ["Destructive eruption", "Jealous murder", "Consuming everything in path"],
+        "integrationPath": "Creation through destruction; passion channeled into building"
+      },
+      "correspondences": {
+        "element": "Fire (volcanic)",
+        "direction": "Kīlauea, volcanic vents",
+        "color": "Red, orange, black (lava)",
+        "symbol": "Volcanic eruption, 'ōhi'a lehua flower, lightning",
+        "offerings": "'Ōhelo berries, offerings thrown into crater",
+        "taboo": "Taking lava rocks (invites her wrath)"
+      }
+    },
+    {
+      "@id": "arch:PL-HIIAKA",
+      "@type": "Archetype",
+      "name": "Hi'iaka",
+      "aliases": ["Hi'iakaikapoliopele", "Hi'iaka-in-the-bosom-of-Pele"],
+      "domain": ["Hula", "Healing", "Sorcery", "Loyalty", "Journeying", "Chants"],
+      "description": "The youngest and most beloved sister of Pele, born as an egg carried in Pele's bosom during her voyage to Hawai'i. She is the patron of hula dancers, skilled in healing and sorcery. Her epic journey to fetch Pele's lover Lohi'au, during which Pele destroyed her beloved friend and forests, explores themes of sisterly devotion, betrayal, forgiveness, and the power of sacred arts.",
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.3,
+        "active-receptive": 0.45,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.45,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.4
+      },
+      "instantiates": [
+        {"primordial": "primordial:healer", "weight": 0.8, "aspects": ["medicine", "restoration"]},
+        {"primordial": "primordial:magician", "weight": 0.75, "aspects": ["sorcery", "chants", "hula-power"]},
+        {"primordial": "primordial:hero", "weight": 0.65, "aspects": ["quest-journeyer", "devoted-sister"]},
+        {"primordial": "primordial:maiden", "weight": 0.5, "aspects": ["youngest-sister", "innocent-yet-powerful"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:PL-PELE", "description": "Beloved yet tested sisterhood"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-PERSEPHONE", "fidelity": 0.45, "notes": "Journey, transformation, return"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:JP-UZUME", "fidelity": 0.5, "notes": "Sacred dance, drawing out the hidden"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When loyalty is betrayed", "When devotion is exploited"],
+        "shadowManifestations": ["Righteous anger", "Sorcery for revenge", "Betraying trust when betrayed"],
+        "integrationPath": "Forgiveness without forgetting; loyalty that maintains self-respect"
+      },
+      "correspondences": {
+        "element": "Earth/Air (dance)",
+        "direction": "Journeying, Puna district",
+        "color": "Green (forest)",
+        "symbol": "Hula skirt, pahu drum, 'ōhi'a lehua",
+        "association": "Hula, healing, chants, loyalty, the epic journey"
+      }
+    },
+    {
+      "@id": "arch:PL-HINA",
+      "@type": "Archetype",
+      "name": "Hina",
+      "aliases": ["Hina-i-ka-malama (Hawaiian)", "Hina (Maori/Tahitian)", "Sina (Samoan)"],
+      "domain": ["Moon", "Tapa-Making", "Womanhood", "Tides", "Beauty"],
+      "description": "The great goddess of the moon found throughout Polynesia, associated with women's arts, tapa cloth-making, and the cycles of nature. In various traditions she is Māui's mother, grandmother, or lover. She often escapes to the moon from an oppressive earthly situation, becoming the woman in the moon who beats tapa cloth, her rhythm creating the lunar cycles.",
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.45,
+        "active-receptive": 0.65,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.3,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.55
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.75, "aspects": ["moon-mother", "cycles", "nurturer"]},
+        {"primordial": "primordial:magician", "weight": 0.6, "aspects": ["women's-arts", "tapa-magic", "transformation"]},
+        {"primordial": "primordial:maiden", "weight": 0.5, "aspects": ["beauty", "escape", "renewal"]}
+      ],
+      "relationships": [
+        {"type": "rel:CONTAINS", "target": "arch:PL-MAUI", "description": "Mother/grandmother of Māui in many traditions"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-SELENE", "fidelity": 0.65, "notes": "Moon goddess"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CN-CHANG-E", "fidelity": 0.7, "notes": "Woman who fled to moon, lunar isolation"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:JP-TSUKUYOMI", "fidelity": 0.45, "notes": "Lunar deity, cycles"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When escape becomes permanent isolation", "When cycles become traps"],
+        "shadowManifestations": ["Isolation in the moon", "Endless repetitive work", "Unavailable mothering"],
+        "integrationPath": "Finding freedom without total escape; cycles as renewal not prison"
+      },
+      "correspondences": {
+        "element": "Water (tides)",
+        "direction": "Moon, sky",
+        "color": "White, silver",
+        "symbol": "Tapa cloth, beater, moon",
+        "association": "Moon, women's work, tides, fertility cycles"
+      }
+    },
+    {
+      "@id": "arch:PL-HINE-NUI-TE-PO",
+      "@type": "Archetype",
+      "name": "Hine-nui-te-pō",
+      "aliases": ["Great Woman of Night", "Goddess of Death"],
+      "domain": ["Death", "Night", "Underworld", "Transformation", "The Inevitable"],
+      "description": "The Maori goddess of death and the underworld, once Hine-tītama (Dawn Maiden), the first human woman created by Tāne from earth. When she discovered Tāne was both her creator and father, she fled in shame to the underworld, transforming into the goddess of death. She killed Māui when he tried to enter her body to win immortality for humanity, ensuring death remains humanity's fate.",
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.7,
+        "light-shadow": 0.85,
+        "active-receptive": 0.65,
+        "individual-collective": 0.25,
+        "ascent-descent": 0.9,
+        "stasis-transformation": 0.65,
+        "voluntary-fated": 0.9
+      },
+      "instantiates": [
+        {"primordial": "primordial:crone", "weight": 0.85, "aspects": ["death-goddess", "underworld-queen"]},
+        {"primordial": "primordial:destroyer", "weight": 0.75, "aspects": ["life-ender", "Maui-slayer"]},
+        {"primordial": "primordial:maiden", "weight": 0.4, "aspects": ["former-dawn-maiden", "transformed"]}
+      ],
+      "relationships": [
+        {"type": "rel:EVOLUTION", "target": "arch:PL-HINE-NUI-TE-PO", "description": "Transformed from Dawn Maiden to Death Goddess", "context": "Discovering incest, fleeing to underworld"},
+        {"type": "rel:TENSION", "target": "arch:PL-MAUI", "description": "Killed him to preserve death"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-ERESHKIGAL", "fidelity": 0.7, "notes": "Underworld queen, death goddess"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-PERSEPHONE", "fidelity": 0.6, "notes": "Transformed maiden, underworld queen"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:JP-IZANAMI", "fidelity": 0.65, "notes": "Death goddess, underworld, transformation through rejection"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When death becomes cruel", "When transformation is forced"],
+        "shadowManifestations": ["Premature death", "Death as punishment", "Shame-driven destruction"],
+        "integrationPath": "Death as natural transition; shame transformed into guardianship"
+      },
+      "correspondences": {
+        "element": "Earth (underworld)",
+        "direction": "Below, west",
+        "color": "Black, dark red",
+        "symbol": "Obsidian teeth, vulva (through which souls pass)",
+        "association": "Death, the underworld, human mortality"
+      }
+    },
+    {
+      "@id": "arch:PL-TAWHIRIMATEA",
+      "@type": "Archetype",
+      "name": "Tāwhirimātea",
+      "aliases": ["God of Storms and Winds"],
+      "domain": ["Storms", "Wind", "Weather", "Revenge", "Loyalty to Parents"],
+      "description": "The Maori god of storms, winds, and weather who alone among the brothers refused to separate Rangi and Papa, staying with his father in the sky. When his brothers forced the separation, he descended in fury with his children (the various winds) and made war on them, driving most to flee and hide. He represents filial loyalty, righteous anger, and the destructive power of storms.",
+      "spectralCoordinates": {
+        "order-chaos": 0.75,
+        "creation-destruction": 0.7,
+        "light-shadow": 0.5,
+        "active-receptive": 0.15,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.4
+      },
+      "instantiates": [
+        {"primordial": "primordial:destroyer", "weight": 0.85, "aspects": ["storm-bringer", "avenger"]},
+        {"primordial": "primordial:warrior", "weight": 0.75, "aspects": ["relentless-fighter", "brothers'-enemy"]},
+        {"primordial": "primordial:rebel", "weight": 0.5, "aspects": ["defied-siblings", "filial-loyalty"]}
+      ],
+      "relationships": [
+        {"type": "rel:CONTAINED_BY", "target": "arch:PL-RANGI", "description": "Remained loyal to sky father"},
+        {"type": "rel:TENSION", "target": "arch:PL-TANE", "description": "War against the separator"},
+        {"type": "rel:TENSION", "target": "arch:PL-TU", "description": "Only Tū stood against his storms"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:JP-SUSANOO", "fidelity": 0.6, "notes": "Storm god, family conflict, destructive rampage"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-TYPHON", "fidelity": 0.5, "notes": "Storm monster, war against gods"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When loyalty becomes destructive vengeance", "When anger is never satisfied"],
+        "shadowManifestations": ["Endless storms", "Destruction of all brothers' works", "Rage without resolution"],
+        "integrationPath": "Loyalty that accepts change; storms that clear rather than only destroy"
+      },
+      "correspondences": {
+        "element": "Air (storm)",
+        "direction": "All (wind)",
+        "color": "Grey, dark",
+        "symbol": "Storm clouds, various winds",
+        "association": "Storms, weather, winds, filial piety"
+      }
+    },
+    {
+      "@id": "arch:PL-KANE",
+      "@type": "Archetype",
+      "name": "Kāne",
+      "aliases": ["Kane", "Tāne (as Hawaiian form)"],
+      "domain": ["Life", "Fresh Water", "Sunlight", "Forests", "Procreation"],
+      "description": "The Hawaiian god of life, fresh water, and sunlight - one of the four great gods. He created the first man and gave humanity many gifts. He represents the life force itself, the fresh water that sustains life, and the generative power of nature. With Kū and Lono, he forms the primary Hawaiian divine triad, with Kanaloa as the fourth, more ambiguous figure.",
+      "spectralCoordinates": {
+        "order-chaos": 0.2,
+        "creation-destruction": 0.15,
+        "light-shadow": 0.15,
+        "active-receptive": 0.35,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.3,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.35
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.9, "aspects": ["life-giver", "humanity-maker"]},
+        {"primordial": "primordial:great-father", "weight": 0.75, "aspects": ["ancestor", "progenitor"]},
+        {"primordial": "primordial:healer", "weight": 0.6, "aspects": ["fresh-water", "life-sustainer"]}
+      ],
+      "relationships": [
+        {"type": "rel:CONSTELLATION", "target": "arch:PL-KU", "description": "Hawaiian divine triad"},
+        {"type": "rel:CONSTELLATION", "target": "arch:PL-LONO", "description": "Hawaiian divine triad"},
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:PL-KANALOA", "axis": "light-shadow", "description": "Life vs death, fresh water vs salt"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:PL-TANE", "fidelity": 0.85, "notes": "Hawaiian form of Tāne"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When life force is blocked", "When creation fails"],
+        "shadowManifestations": ["Drought", "Sterility", "Life without purpose"],
+        "integrationPath": "Life in service of growth; creation with responsibility"
+      },
+      "correspondences": {
+        "element": "Water (fresh)/Fire (sun)",
+        "direction": "East (sunrise)",
+        "color": "Yellow, white",
+        "symbol": "Fresh water springs, sunlight, bamboo",
+        "association": "Life, fresh water, procreation, forests"
+      }
+    },
+    {
+      "@id": "arch:PL-KU",
+      "@type": "Archetype",
+      "name": "Kū",
+      "aliases": ["Ku", "Kūka'ilimoku (war aspect)"],
+      "domain": ["War", "Male Activities", "Fishing", "Sorcery", "Politics"],
+      "description": "The Hawaiian god of war and male endeavors - one of the four great gods. He has many manifestations (Kū forms) governing different aspects of male activity from fishing to war to sorcery. His war form Kūka'ilimoku ('Kū the Snatcher of Land') was the war god of Kamehameha I who united the Hawaiian islands.",
+      "spectralCoordinates": {
+        "order-chaos": 0.4,
+        "creation-destruction": 0.6,
+        "light-shadow": 0.45,
+        "active-receptive": 0.1,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.45,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.3
+      },
+      "instantiates": [
+        {"primordial": "primordial:warrior", "weight": 0.9, "aspects": ["war-god", "conqueror"]},
+        {"primordial": "primordial:sovereign", "weight": 0.65, "aspects": ["chiefs'-god", "political-power"]},
+        {"primordial": "primordial:magician", "weight": 0.5, "aspects": ["sorcery", "multiple-forms"]}
+      ],
+      "relationships": [
+        {"type": "rel:CONSTELLATION", "target": "arch:PL-KANE", "description": "Hawaiian divine triad"},
+        {"type": "rel:CONSTELLATION", "target": "arch:PL-LONO", "description": "Hawaiian divine triad"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:PL-TU", "fidelity": 0.9, "notes": "Hawaiian form of Tū"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:AF-OGUN", "fidelity": 0.55, "notes": "War, male activities, tools"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When war serves only conquest", "When masculinity becomes toxic"],
+        "shadowManifestations": ["Endless war", "Human sacrifice", "Destruction of enemies without limit"],
+        "integrationPath": "Warrior strength in service of protection; male power responsibly wielded"
+      },
+      "correspondences": {
+        "element": "Fire/Blood",
+        "direction": "Variable",
+        "color": "Red",
+        "symbol": "Feathered war god images, weapons",
+        "association": "War, male activities, chiefs, sorcery"
+      }
+    },
+    {
+      "@id": "arch:PL-LONO",
+      "@type": "Archetype",
+      "name": "Lono",
+      "aliases": ["Lono-i-ka-makahiki"],
+      "domain": ["Peace", "Agriculture", "Rainfall", "Music", "Makahiki Festival"],
+      "description": "The Hawaiian god of peace, agriculture, and the annual Makahiki festival - one of the four great gods. During Makahiki (roughly October-February), war was forbidden, taxes collected, and Lono was honored with games and celebrations. Captain Cook arrived during Makahiki and was initially received as Lono's manifestation, with tragic consequences.",
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.25,
+        "light-shadow": 0.3,
+        "active-receptive": 0.55,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.7, "aspects": ["seasonal-king", "festival-lord"]},
+        {"primordial": "primordial:healer", "weight": 0.65, "aspects": ["peace-bringer", "rain-giver"]},
+        {"primordial": "primordial:creator", "weight": 0.6, "aspects": ["fertility", "agriculture"]}
+      ],
+      "relationships": [
+        {"type": "rel:CONSTELLATION", "target": "arch:PL-KANE", "description": "Hawaiian divine triad"},
+        {"type": "rel:CONSTELLATION", "target": "arch:PL-KU", "description": "Hawaiian divine triad"},
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:PL-KU", "axis": "creation-destruction", "description": "Peace vs war seasons"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:PL-RONGO", "fidelity": 0.9, "notes": "Hawaiian form of Rongo"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When peace is violated", "When the god-king returns wrongly"],
+        "shadowManifestations": ["Cook's death (misidentified Lono)", "Violated kapu", "False peace"],
+        "integrationPath": "True peace through proper relationship; discernment of true from false divinity"
+      },
+      "correspondences": {
+        "element": "Water (rain)/Earth",
+        "direction": "Circling the island (Makahiki procession)",
+        "color": "White",
+        "symbol": "Makahiki standard (crosspiece with white tapa and feathers)",
+        "festival": "Makahiki (October-February)",
+        "association": "Peace, harvest, games, rain, Captain Cook"
+      }
+    },
+    {
+      "@id": "arch:PL-KANALOA",
+      "@type": "Archetype",
+      "name": "Kanaloa",
+      "aliases": ["Tangaroa (as Hawaiian form)"],
+      "domain": ["Ocean", "Ocean Creatures", "The Underworld", "Healing", "Sorcery"],
+      "description": "The Hawaiian god of the ocean and its creatures - the fourth of the great gods, often paired with Kāne. In some traditions he has darker associations with death, the underworld, and forbidden sorcery, standing in contrast to Kāne's life-giving nature. He rules the salt waters while Kāne rules fresh water, together representing the waters of life and death.",
+      "spectralCoordinates": {
+        "order-chaos": 0.5,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.6,
+        "active-receptive": 0.55,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.65,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.6
+      },
+      "instantiates": [
+        {"primordial": "primordial:magician", "weight": 0.75, "aspects": ["ocean-mysteries", "healing", "sorcery"]},
+        {"primordial": "primordial:psychopomp", "weight": 0.6, "aspects": ["underworld-connection", "death-waters"]},
+        {"primordial": "primordial:self", "weight": 0.5, "aspects": ["oceanic-unconscious", "depths"]}
+      ],
+      "relationships": [
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:PL-KANE", "axis": "light-shadow", "description": "Salt water/death vs fresh water/life"},
+        {"type": "rel:COMPLEMENT", "target": "arch:PL-KANE", "description": "Often travel and work together"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:PL-TANGAROA", "fidelity": 0.85, "notes": "Hawaiian form of Tangaroa"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:AF-OLOKUN", "fidelity": 0.55, "notes": "Ocean depths, underworld connection"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When depths become drowning", "When sorcery turns dark"],
+        "shadowManifestations": ["Death at sea", "Dark sorcery", "Oceanic chaos"],
+        "integrationPath": "Ocean as teacher; death as transformation; sorcery in service of healing"
+      },
+      "correspondences": {
+        "element": "Water (salt)",
+        "direction": "Ocean, below",
+        "color": "Blue, black",
+        "symbol": "Octopus, squid, ocean creatures",
+        "association": "Ocean, healing, navigation, underworld, sorcery"
+      }
+    },
+    {
+      "@id": "arch:PL-NAMAKA",
+      "@type": "Archetype",
+      "name": "Nāmaka",
+      "aliases": ["Nā-maka-o-Kaha'i", "Sea Goddess"],
+      "domain": ["Sea", "Sea Creatures", "Waves", "Rivalry", "Water vs Fire"],
+      "description": "The Hawaiian goddess of the sea and Pele's elder sister, locked in eternal conflict with her volcanic sibling. She pursued Pele across the Pacific, drowning each island home Pele tried to create, until Pele finally established herself in Kīlauea beyond Nāmaka's reach. Their battle represents the eternal struggle between water and fire that shapes the Hawaiian islands.",
+      "spectralCoordinates": {
+        "order-chaos": 0.5,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.45,
+        "active-receptive": 0.4,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:destroyer", "weight": 0.7, "aspects": ["wave-power", "island-drowner"]},
+        {"primordial": "primordial:warrior", "weight": 0.65, "aspects": ["sister-rival", "pursuer"]},
+        {"primordial": "primordial:great-mother", "weight": 0.5, "aspects": ["sea-mother", "ocean-life"]}
+      ],
+      "relationships": [
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:PL-PELE", "axis": "stasis-transformation", "description": "Eternal fire-water conflict"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:AF-YEMOJA", "fidelity": 0.5, "notes": "Sea goddess, fierce yet maternal"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-AMPHITRITE", "fidelity": 0.45, "notes": "Sea queen"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When rivalry consumes purpose", "When water only destroys"],
+        "shadowManifestations": ["Endless pursuit", "Drowning all creation", "Sibling hatred without resolution"],
+        "integrationPath": "Understanding that water and fire together create the islands; rivalry transformed into balance"
+      },
+      "correspondences": {
+        "element": "Water (ocean)",
+        "direction": "Sea",
+        "color": "Blue, white (sea foam)",
+        "symbol": "Waves, sea dragons",
+        "association": "Ocean, waves, Pele's rival, island formation"
+      }
+    }
+  ]
+}

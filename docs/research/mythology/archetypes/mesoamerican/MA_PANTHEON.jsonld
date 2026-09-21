@@ -1,0 +1,777 @@
+{
+  "@context": "../../schema/ACP_CONTEXT.jsonld",
+  "@id": "pantheon:MA-PANTHEON",
+  "@type": "Pantheon",
+  "name": "Mesoamerican Deities",
+  "tradition": "Aztec (Mexica) / Maya / Toltec / Olmec",
+  "description": "The gods and divine forces of Mesoamerican civilizations, primarily the Aztec (Mexica) and Maya traditions. These traditions share deep roots while developing distinct expressions, unified by concepts of cosmic cycles, blood sacrifice, duality, and the intimate relationship between gods and humanity through mutual sustenance.",
+  "canonicalSources": [
+    "Florentine Codex (Bernardino de Sahagún)",
+    "Popol Vuh (K'iche' Maya)",
+    "Codex Borgia",
+    "Codex Dresden (Maya)",
+    "Historia de las Indias de Nueva España",
+    "Leyenda de los Soles"
+  ],
+  "systemPatterns": [
+    {
+      "name": "Five Suns Cosmology",
+      "description": "The universe has been created and destroyed four times; we live in the Fifth Sun, destined to end in earthquakes. Each sun required divine sacrifice to begin.",
+      "archetypes": ["arch:MA-QUETZALCOATL", "arch:MA-TEZCATLIPOCA", "arch:MA-TONATIUH"],
+      "pattern": "Cyclical creation-destruction requiring sacrifice"
+    },
+    {
+      "name": "Tezcatlipoca-Quetzalcoatl Duality",
+      "description": "The eternal opposition and collaboration of the Smoking Mirror and the Feathered Serpent, representing darkness/light, sorcery/civilization, chaos/order",
+      "archetypes": ["arch:MA-TEZCATLIPOCA", "arch:MA-QUETZALCOATL"],
+      "pattern": "Necessary opposition creating cosmic balance"
+    },
+    {
+      "name": "Hero Twins (Maya)",
+      "description": "Hunahpú and Xbalanqué who defeated the Lords of Xibalba through cleverness and sacrifice, becoming sun and moon",
+      "archetypes": ["arch:MA-HERO-TWINS"],
+      "pattern": "Trickster heroes overcoming death through wit"
+    },
+    {
+      "name": "Divine Sacrifice",
+      "description": "Gods sacrificing themselves to create and sustain the cosmos, requiring human reciprocation through blood and heart offerings",
+      "archetypes": ["arch:MA-QUETZALCOATL", "arch:MA-NANAHUATZIN"],
+      "pattern": "Mutual sustenance between gods and humanity"
+    },
+    {
+      "name": "Tlaloc Complex",
+      "description": "The rain god and associated water/fertility deities controlling agriculture and requiring child sacrifice",
+      "archetypes": ["arch:MA-TLALOC", "arch:MA-CHALCHIUHTLICUE"],
+      "pattern": "Fertility through sacrifice to water powers"
+    }
+  ],
+  "entries": [
+    {
+      "@id": "arch:MA-QUETZALCOATL",
+      "@type": "Archetype",
+      "name": "Quetzalcoatl",
+      "aliases": ["Feathered Serpent", "Kukulkan (Maya)", "Q'uq'umatz (K'iche')", "Ce Acatl Topiltzin", "Ehecatl (wind aspect)"],
+      "domain": ["Wind", "Learning", "Civilization", "Priesthood", "Morning Star", "Creation"],
+      "description": "The Feathered Serpent, one of the most important Mesoamerican deities, representing the union of earth (serpent) and sky (quetzal feathers). God of wind, learning, arts, civilization, and the morning star. As priest-king Ce Acatl Topiltzin, he opposed human sacrifice before being tricked by Tezcatlipoca into disgrace and exile, promising to return.",
+      "spectralCoordinates": {
+        "order-chaos": 0.2,
+        "creation-destruction": 0.2,
+        "light-shadow": 0.25,
+        "active-receptive": 0.35,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.45
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.9, "aspects": ["civilization-bringer", "humanity-creator"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.85, "aspects": ["teacher", "priest", "arts-patron"]},
+        {"primordial": "primordial:hero", "weight": 0.7, "aspects": ["culture-hero", "self-sacrificer"]},
+        {"primordial": "primordial:magician", "weight": 0.6, "aspects": ["wind-lord", "transformation"]}
+      ],
+      "relationships": [
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:MA-TEZCATLIPOCA", "axis": "light-shadow", "description": "Eternal rivals and collaborators"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-PROMETHEUS", "fidelity": 0.65, "notes": "Civilization-bringer, humanity's champion"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-THOTH", "fidelity": 0.6, "notes": "Wisdom, learning, civilization"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CN-FUXI", "fidelity": 0.55, "notes": "Culture hero, civilization founder"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When tricked into breaking vows", "When civilization becomes pride"],
+        "shadowManifestations": ["Fall through intoxication and incest", "Exile", "Unfulfilled promise of return"],
+        "integrationPath": "Self-sacrifice for creation; civilization as service not control"
+      },
+      "contextualVariants": [
+        {
+          "context": "As creator god",
+          "spectralShift": {"creation-destruction": 0.1, "ascent-descent": 0.25},
+          "notes": "Retrieving bones from Mictlan to create humanity"
+        },
+        {
+          "context": "As Ehecatl (wind god)",
+          "spectralShift": {"order-chaos": 0.4, "stasis-transformation": 0.7},
+          "notes": "Wind aspect, breath of life, sweeping before rain"
+        },
+        {
+          "context": "As Ce Acatl Topiltzin (priest-king)",
+          "spectralShift": {"light-shadow": 0.15, "individual-collective": 0.5},
+          "notes": "Historical/legendary Toltec ruler"
+        }
+      ],
+      "correspondences": {
+        "element": "Air/Wind",
+        "direction": "East (morning star)",
+        "color": "White, green (quetzal)",
+        "symbol": "Feathered serpent, conch shell (wind jewel), Venus",
+        "calendar": "Ce Acatl (1 Reed)",
+        "association": "Wind, learning, arts, morning star, priesthood"
+      }
+    },
+    {
+      "@id": "arch:MA-TEZCATLIPOCA",
+      "@type": "Archetype",
+      "name": "Tezcatlipoca",
+      "aliases": ["Smoking Mirror", "Titlacauan", "Ipalnemoani", "Night Wind", "Yaotl (Enemy)"],
+      "domain": ["Night", "Sorcery", "Destiny", "Obsidian", "Jaguars", "Rulership", "Temptation"],
+      "description": "The Smoking Mirror, lord of night, sorcery, and destiny, whose obsidian mirror reveals all secrets and fates. He is both the supreme deity who tests and tempts, and the trickster who brought down Quetzalcoatl through deception. Patron of warriors and rulers, he represents the inescapable nature of fate and the dark powers necessary for cosmic balance.",
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.75,
+        "active-receptive": 0.3,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.65,
+        "voluntary-fated": 0.8
+      },
+      "instantiates": [
+        {"primordial": "primordial:magician", "weight": 0.9, "aspects": ["sorcerer", "fate-revealer", "shape-shifter"]},
+        {"primordial": "primordial:trickster", "weight": 0.85, "aspects": ["tempter", "deceiver", "tester"]},
+        {"primordial": "primordial:sovereign", "weight": 0.7, "aspects": ["ruler-patron", "destiny-lord"]},
+        {"primordial": "primordial:destroyer", "weight": 0.6, "aspects": ["sun-destroyer", "age-ender"]}
+      ],
+      "relationships": [
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:MA-QUETZALCOATL", "axis": "light-shadow", "description": "Eternal cosmic duality"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-ODIN", "fidelity": 0.65, "notes": "Sorcery, fate, one-eyed/one-footed, trickster aspects"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-SET", "fidelity": 0.55, "notes": "Dark power, necessary opposition, desert/night"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-SHIVA", "fidelity": 0.5, "notes": "Destroyer, ascetic power, cosmic dance"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When testing becomes cruelty", "When power serves only darkness"],
+        "shadowManifestations": ["Arbitrary destruction", "Temptation without redemption", "Fate as doom"],
+        "integrationPath": "Testing that strengthens; darkness that defines light; fate as teacher"
+      },
+      "correspondences": {
+        "element": "Earth/Obsidian",
+        "direction": "North (Mictlampa, place of death)",
+        "color": "Black, yellow (stripe)",
+        "symbol": "Smoking obsidian mirror, jaguar, missing foot (replaced by mirror)",
+        "calendar": "Various (changeable)",
+        "association": "Night, sorcery, jaguars, rulers, warriors, fate"
+      }
+    },
+    {
+      "@id": "arch:MA-HUITZILOPOCHTLI",
+      "@type": "Archetype",
+      "name": "Huitzilopochtli",
+      "aliases": ["Left-Handed Hummingbird", "Blue Hummingbird on the Left", "Portent"],
+      "domain": ["Sun", "War", "Sacrifice", "The Aztec People", "South"],
+      "description": "The tribal god of the Mexica (Aztec) people who guided them from Aztlan to found Tenochtitlan. Born fully armed to defend his mother Coatlicue from his murderous siblings, he represents the sun that must be fed with blood to continue its journey. He embodies the Aztec mission of cosmic warfare to sustain the Fifth Sun through sacrifice.",
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.65,
+        "light-shadow": 0.35,
+        "active-receptive": 0.1,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.3,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.4
+      },
+      "instantiates": [
+        {"primordial": "primordial:warrior", "weight": 0.95, "aspects": ["divine-warrior", "sun-defender"]},
+        {"primordial": "primordial:sovereign", "weight": 0.8, "aspects": ["tribal-god", "empire-patron"]},
+        {"primordial": "primordial:divine-child", "weight": 0.6, "aspects": ["miraculous-birth", "born-armed"]},
+        {"primordial": "primordial:hero", "weight": 0.55, "aspects": ["mother-defender", "sibling-slayer"]}
+      ],
+      "relationships": [
+        {"type": "rel:TENSION", "target": "arch:MA-COYOLXAUHQUI", "description": "Slew his sister at birth"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ARES", "fidelity": 0.6, "notes": "War god, blood, combat"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-HORUS", "fidelity": 0.55, "notes": "Solar warrior, born to avenge/protect"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-INDRA", "fidelity": 0.5, "notes": "Warrior god, celestial battles"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When war becomes slaughter", "When sacrifice serves power not cosmos"],
+        "shadowManifestations": ["Endless blood-hunger", "Imperial conquest", "Sun-death without enough hearts"],
+        "integrationPath": "Warrior energy defending life; sacrifice as sacred exchange not domination"
+      },
+      "correspondences": {
+        "element": "Fire (solar)",
+        "direction": "South",
+        "color": "Blue, yellow",
+        "symbol": "Hummingbird, eagle, fire serpent (xiuhcoatl)",
+        "temple": "Templo Mayor (Tenochtitlan)",
+        "association": "Sun, war, Aztec destiny, human sacrifice"
+      }
+    },
+    {
+      "@id": "arch:MA-TLALOC",
+      "@type": "Archetype",
+      "name": "Tlaloc",
+      "aliases": ["He Who Makes Things Sprout", "Chaac (Maya)", "Cocijo (Zapotec)"],
+      "domain": ["Rain", "Fertility", "Lightning", "Agriculture", "Mountains", "Child Sacrifice"],
+      "description": "The ancient rain god with goggle eyes and jaguar fangs, predating the Aztecs by millennia. He controls the waters of heaven, sending rain for crops but also floods and lightning. His paradise Tlalocan receives those who die by drowning, lightning, or water-related diseases. Children were sacrificed to him, their tears sympathetically bringing rain.",
+      "spectralCoordinates": {
+        "order-chaos": 0.4,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.45,
+        "active-receptive": 0.45,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.45,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.65
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.75, "aspects": ["rain-giver", "crop-grower"]},
+        {"primordial": "primordial:destroyer", "weight": 0.7, "aspects": ["flood-bringer", "lightning-thrower"]},
+        {"primordial": "primordial:sovereign", "weight": 0.55, "aspects": ["mountain-lord", "Tlalocan-ruler"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:MA-CHALCHIUHTLICUE", "description": "Husband and wife, rain and flowing water"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-INDRA", "fidelity": 0.65, "notes": "Rain god, thunder, fertility"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ZEUS", "fidelity": 0.5, "notes": "Storm god, rain, lightning"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-ENLIL", "fidelity": 0.55, "notes": "Storm, floods, agriculture"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When rain becomes flood", "When sacrifice cannot satisfy"],
+        "shadowManifestations": ["Drowning floods", "Drought from displeasure", "Demanding children's tears"],
+        "integrationPath": "Rain as blessing; fertility through proper relationship not just sacrifice"
+      },
+      "correspondences": {
+        "element": "Water",
+        "direction": "East (also associated with mountains)",
+        "color": "Blue, jade green",
+        "symbol": "Goggle eyes, jaguar fangs, jade, water jars",
+        "temple": "Templo Mayor (shared with Huitzilopochtli)",
+        "paradise": "Tlalocan"
+      }
+    },
+    {
+      "@id": "arch:MA-CHALCHIUHTLICUE",
+      "@type": "Archetype",
+      "name": "Chalchiuhtlicue",
+      "aliases": ["She of the Jade Skirt", "Lady Precious Green"],
+      "domain": ["Rivers", "Lakes", "Streams", "Childbirth", "Baptism", "The Fourth Sun"],
+      "description": "The goddess of flowing water - rivers, lakes, streams, and springs. Wife or sister of Tlaloc, she presided over the Fourth Sun which she destroyed with a great flood. She protects newborns and presides over the ritual bathing of infants. Despite her destructive power, she primarily represents the nurturing aspects of water.",
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.35,
+        "active-receptive": 0.6,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.8, "aspects": ["water-mother", "birth-protector"]},
+        {"primordial": "primordial:destroyer", "weight": 0.6, "aspects": ["flood-bringer", "sun-destroyer"]},
+        {"primordial": "primordial:healer", "weight": 0.55, "aspects": ["purifier", "infant-protector"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:MA-TLALOC", "description": "Partner in water domain"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:AF-OSHUN", "fidelity": 0.6, "notes": "Fresh water goddess, fertility, childbirth"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-GANGA", "fidelity": 0.55, "notes": "Sacred river goddess, purification"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When nurturing becomes drowning", "When purification becomes destruction"],
+        "shadowManifestations": ["World-destroying flood", "Waters that take rather than give"],
+        "integrationPath": "Water that cleanses and nurtures; power used for protection not destruction"
+      },
+      "correspondences": {
+        "element": "Water (flowing)",
+        "direction": "Variable (follows water)",
+        "color": "Blue, jade green",
+        "symbol": "Jade skirt, water lilies, flowing streams",
+        "association": "Rivers, lakes, childbirth, baptism, the Fourth Sun"
+      }
+    },
+    {
+      "@id": "arch:MA-COATLICUE",
+      "@type": "Archetype",
+      "name": "Coatlicue",
+      "aliases": ["Serpent Skirt", "Mother of Gods", "Toci (Our Grandmother)"],
+      "domain": ["Earth", "Life", "Death", "Fertility", "Cosmic Mother"],
+      "description": "The terrifying earth mother whose skirt is woven of serpents and whose necklace is made of human hearts, hands, and skulls. She is the mother of Huitzilopochtli, the moon goddess Coyolxauhqui, and the stars. Impregnated by a ball of feathers while sweeping, she represents the earth that both gives life and reclaims the dead.",
+      "spectralCoordinates": {
+        "order-chaos": 0.45,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.6,
+        "active-receptive": 0.7,
+        "individual-collective": 0.2,
+        "ascent-descent": 0.7,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.75
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.95, "aspects": ["earth-mother", "life-death-unity"]},
+        {"primordial": "primordial:destroyer", "weight": 0.7, "aspects": ["death-giver", "earth-reclaimer"]},
+        {"primordial": "primordial:crone", "weight": 0.6, "aspects": ["ancient-one", "grandmother"]}
+      ],
+      "relationships": [
+        {"type": "rel:CONTAINS", "target": "arch:MA-HUITZILOPOCHTLI", "description": "Mother of the war god"},
+        {"type": "rel:CONTAINS", "target": "arch:MA-COYOLXAUHQUI", "description": "Mother of the moon goddess"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-KALI", "fidelity": 0.75, "notes": "Terrifying mother, life-death, skulls/serpents"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-GAIA", "fidelity": 0.55, "notes": "Primordial earth mother"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:AF-NANA-BURUKU", "fidelity": 0.5, "notes": "Ancient earth mother, life-death"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When earth demands too much blood", "When mother devours children"],
+        "shadowManifestations": ["Insatiable hunger for hearts", "Death without rebirth", "Devouring mother"],
+        "integrationPath": "Earth as womb and tomb; death feeding life in sacred cycle"
+      },
+      "correspondences": {
+        "element": "Earth",
+        "direction": "Center/Below",
+        "color": "Black, earth tones",
+        "symbol": "Serpent skirt, skull necklace, clawed hands/feet",
+        "association": "Earth, life, death, motherhood, fertility"
+      }
+    },
+    {
+      "@id": "arch:MA-COYOLXAUHQUI",
+      "@type": "Archetype",
+      "name": "Coyolxauhqui",
+      "aliases": ["Painted with Bells", "Moon Goddess"],
+      "domain": ["Moon", "Stars", "Night", "Defeated Rebellion"],
+      "description": "The moon goddess, daughter of Coatlicue and leader of the Centzon Huitznahua (Four Hundred Southerners/stars). She led her star-brothers to kill their mother upon learning of her miraculous pregnancy, but was slain and dismembered by the newborn Huitzilopochtli. Her severed head became the moon, forever circling the victorious sun.",
+      "spectralCoordinates": {
+        "order-chaos": 0.6,
+        "creation-destruction": 0.65,
+        "light-shadow": 0.6,
+        "active-receptive": 0.35,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.7
+      },
+      "instantiates": [
+        {"primordial": "primordial:rebel", "weight": 0.8, "aspects": ["matricide-leader", "failed-rebellion"]},
+        {"primordial": "primordial:warrior", "weight": 0.7, "aspects": ["star-warrior", "night-fighter"]},
+        {"primordial": "primordial:destroyer", "weight": 0.6, "aspects": ["would-be-killer", "dismembered"]}
+      ],
+      "relationships": [
+        {"type": "rel:TENSION", "target": "arch:MA-HUITZILOPOCHTLI", "description": "Slain by her brother at birth"},
+        {"type": "rel:CONTAINED_BY", "target": "arch:MA-COATLICUE", "description": "Daughter who tried to kill mother"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-SET", "fidelity": 0.5, "notes": "Defeated sibling, eternal opposition"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-SELENE", "fidelity": 0.4, "notes": "Moon goddess (but very different character)"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When loyalty becomes murder", "When shame drives destruction"],
+        "shadowManifestations": ["Matricidal rage", "Dismemberment", "Eternal defeat"],
+        "integrationPath": "Moon's cycle as acceptance; defeat transformed into celestial role"
+      },
+      "correspondences": {
+        "element": "Air/Night",
+        "direction": "Night sky",
+        "color": "Yellow, gold (bells)",
+        "symbol": "Golden bells, moon disc, dismembered body",
+        "association": "Moon, stars, night, defeated rebellion"
+      }
+    },
+    {
+      "@id": "arch:MA-MICTLANTECUHTLI",
+      "@type": "Archetype",
+      "name": "Mictlantecuhtli",
+      "aliases": ["Lord of Mictlan", "Lord of the Dead"],
+      "domain": ["Death", "Underworld", "The North", "Bones", "Bats", "Spiders"],
+      "description": "The skeletal lord of Mictlan, the lowest level of the underworld where most souls journey after death. With his wife Mictecacihuatl, he rules over the dead who did not die special deaths (battle, sacrifice, childbirth, drowning). Quetzalcoatl had to trick him to retrieve the bones needed to create humanity.",
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.7,
+        "light-shadow": 0.85,
+        "active-receptive": 0.5,
+        "individual-collective": 0.25,
+        "ascent-descent": 0.95,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.85
+      },
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.85, "aspects": ["underworld-king", "death-lord"]},
+        {"primordial": "primordial:destroyer", "weight": 0.7, "aspects": ["life-ender", "bone-keeper"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.45, "aspects": ["final-judge", "soul-receiver"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:MA-MICTECACIHUATL", "description": "King and queen of the dead"},
+        {"type": "rel:TENSION", "target": "arch:MA-QUETZALCOATL", "description": "Tricked by Quetzalcoatl for bones"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HADES", "fidelity": 0.7, "notes": "Underworld ruler, not evil but inevitable"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-OSIRIS", "fidelity": 0.55, "notes": "Lord of the dead, underworld king"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CN-YANLUO", "fidelity": 0.6, "notes": "Underworld ruler, judgment"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When death comes before time", "When underworld refuses to yield"],
+        "shadowManifestations": ["Premature death", "Souls trapped forever", "Opposing creation"],
+        "integrationPath": "Death as completion; yielding bones for new creation"
+      },
+      "correspondences": {
+        "element": "Earth (underworld)",
+        "direction": "North (Mictlampa)",
+        "color": "Black, white (bone)",
+        "symbol": "Skeleton, owl, bat, spider, bones",
+        "association": "Death, underworld, ancestors, Día de los Muertos"
+      }
+    },
+    {
+      "@id": "arch:MA-MICTECACIHUATL",
+      "@type": "Archetype",
+      "name": "Mictecacihuatl",
+      "aliases": ["Lady of the Dead", "Queen of Mictlan", "La Catrina (modern)"],
+      "domain": ["Death", "Underworld", "Ancestor Veneration", "Día de los Muertos"],
+      "description": "The queen of Mictlan and wife of Mictlantecuhtli, guardian of the bones of the dead. She presides over the ancient festivals of the dead that evolved into modern Día de los Muertos. She watches over those who have died and ensures their spirits are honored by the living.",
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.6,
+        "light-shadow": 0.8,
+        "active-receptive": 0.6,
+        "individual-collective": 0.25,
+        "ascent-descent": 0.9,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.8
+      },
+      "instantiates": [
+        {"primordial": "primordial:crone", "weight": 0.85, "aspects": ["death-queen", "bone-guardian"]},
+        {"primordial": "primordial:great-mother", "weight": 0.6, "aspects": ["ancestor-keeper", "dead-nurturer"]},
+        {"primordial": "primordial:sovereign", "weight": 0.55, "aspects": ["underworld-queen", "festival-presider"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:MA-MICTLANTECUHTLI", "description": "Queen and king of the dead"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-ERESHKIGAL", "fidelity": 0.7, "notes": "Underworld queen"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-PERSEPHONE", "fidelity": 0.55, "notes": "Queen of underworld"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:PL-HINE-NUI-TE-PO", "fidelity": 0.5, "notes": "Death goddess, underworld queen"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When the dead are not honored", "When death separates living from dead"],
+        "shadowManifestations": ["Forgotten ancestors", "Death as final ending", "Lost connection"],
+        "integrationPath": "Death as continuation; honoring the dead maintains cosmic connection"
+      },
+      "correspondences": {
+        "element": "Earth (underworld)",
+        "direction": "North",
+        "color": "Black, white, marigold yellow (modern)",
+        "symbol": "Skeleton, bones, marigolds (modern)",
+        "festival": "Día de los Muertos",
+        "association": "Death, ancestors, festival of the dead"
+      }
+    },
+    {
+      "@id": "arch:MA-XIPE-TOTEC",
+      "@type": "Archetype",
+      "name": "Xipe Totec",
+      "aliases": ["Our Lord the Flayed One", "Red Tezcatlipoca"],
+      "domain": ["Spring", "Renewal", "Agriculture", "Goldsmiths", "Flaying", "Rebirth"],
+      "description": "The flayed god of spring and renewal who wears the skin of sacrificial victims. His priests wore the skins of the flayed for twenty days until they rotted off, symbolizing the earth shedding its old skin for new growth. He represents the painful transformation necessary for renewal, the seed dying to become the plant.",
+      "spectralCoordinates": {
+        "order-chaos": 0.45,
+        "creation-destruction": 0.6,
+        "light-shadow": 0.55,
+        "active-receptive": 0.4,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.85,
+        "voluntary-fated": 0.6
+      },
+      "instantiates": [
+        {"primordial": "primordial:destroyer", "weight": 0.75, "aspects": ["flayer", "skin-shedder"]},
+        {"primordial": "primordial:creator", "weight": 0.7, "aspects": ["renewal-bringer", "spring-god"]},
+        {"primordial": "primordial:healer", "weight": 0.5, "aspects": ["regeneration", "new-growth"]}
+      ],
+      "relationships": [
+        {"type": "rel:MIRRORS", "target": "arch:MA-TEZCATLIPOCA", "description": "One of the four Tezcatlipocas (Red)"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-DIONYSUS", "fidelity": 0.55, "notes": "Death-rebirth, transformation, ecstatic rites"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-OSIRIS", "fidelity": 0.5, "notes": "Death and renewal, agricultural cycle"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-DUMUZI", "fidelity": 0.55, "notes": "Dying-rising fertility god"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When transformation becomes torture", "When renewal requires too much death"],
+        "shadowManifestations": ["Endless flaying without rebirth", "Transformation as punishment", "Grotesque renewal"],
+        "integrationPath": "Pain of growth as sacred; shedding old self for new"
+      },
+      "correspondences": {
+        "element": "Earth/Fire",
+        "direction": "East",
+        "color": "Red, gold",
+        "symbol": "Flayed skin, golden ornaments, spring vegetation",
+        "festival": "Tlacaxipehualiztli (flaying of men)",
+        "association": "Spring, goldsmiths, renewal, painful transformation"
+      }
+    },
+    {
+      "@id": "arch:MA-TONATIUH",
+      "@type": "Archetype",
+      "name": "Tonatiuh",
+      "aliases": ["Movement of the Sun", "Fifth Sun"],
+      "domain": ["Sun", "The Fifth Sun", "Cosmic Era", "Warriors", "Sacrifice"],
+      "description": "The sun god of the current cosmic era, the Fifth Sun, who was created when Nanahuatzin threw himself into the fire at Teotihuacan. He refused to move until the other gods sacrificed themselves, establishing the pattern of sacrifice that sustains the sun. He is shown with his tongue out, thirsting for blood.",
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.2,
+        "active-receptive": 0.3,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.2,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.7
+      },
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.85, "aspects": ["cosmic-ruler", "era-lord"]},
+        {"primordial": "primordial:destroyer", "weight": 0.6, "aspects": ["blood-demander", "eventual-ender"]},
+        {"primordial": "primordial:self", "weight": 0.5, "aspects": ["transformation-through-sacrifice"]}
+      ],
+      "relationships": [
+        {"type": "rel:EVOLUTION", "target": "arch:MA-NANAHUATZIN", "description": "Became the Fifth Sun through self-sacrifice"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-RA", "fidelity": 0.6, "notes": "Sun god, cosmic ruler"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HELIOS", "fidelity": 0.5, "notes": "Sun deity, celestial journey"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:JP-AMATERASU", "fidelity": 0.45, "notes": "Sun deity, cosmic importance"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When the sun demands too much blood", "When sacrifice cannot sustain movement"],
+        "shadowManifestations": ["Sun refusing to move", "Endless blood-thirst", "Cosmic standstill"],
+        "integrationPath": "Reciprocal sacrifice sustaining cosmic order; light given for light"
+      },
+      "correspondences": {
+        "element": "Fire",
+        "direction": "Zenith/All",
+        "color": "Red, gold",
+        "symbol": "Tongue out (blood-thirst), eagle, sunstone",
+        "calendar": "4 Ollin (4 Movement - destined destruction by earthquakes)",
+        "association": "Sun, current cosmic era, sacrifice, warriors"
+      }
+    },
+    {
+      "@id": "arch:MA-NANAHUATZIN",
+      "@type": "Archetype",
+      "name": "Nanahuatzin",
+      "aliases": ["The Pimpled One", "The Humble One"],
+      "domain": ["Self-Sacrifice", "Humility", "Transformation", "The Fifth Sun"],
+      "description": "The humble, disease-covered god who threw himself into the sacrificial fire at Teotihuacan to become the Fifth Sun when the proud Tecuciztecatl hesitated. His courage and humility transformed him from the lowliest god to the most important, demonstrating that true sacrifice comes from the humble, not the proud.",
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.35,
+        "active-receptive": 0.45,
+        "individual-collective": 0.25,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.9,
+        "voluntary-fated": 0.2
+      },
+      "instantiates": [
+        {"primordial": "primordial:hero", "weight": 0.9, "aspects": ["self-sacrificer", "humble-one"]},
+        {"primordial": "primordial:outcast", "weight": 0.7, "aspects": ["diseased", "lowly", "despised"]},
+        {"primordial": "primordial:self", "weight": 0.6, "aspects": ["transformation", "apotheosis"]}
+      ],
+      "relationships": [
+        {"type": "rel:EVOLUTION", "target": "arch:MA-TONATIUH", "description": "Became the Fifth Sun"},
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:MA-TECUCIZTECATL", "axis": "voluntary-fated", "description": "Humble vs proud sacrifice"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-SHIVA", "fidelity": 0.4, "notes": "Transformation through fire, ascetic aspects"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-PROMETHEUS", "fidelity": 0.45, "notes": "Self-sacrifice for cosmic benefit"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When humility becomes self-destruction", "When sacrifice is taken for granted"],
+        "shadowManifestations": ["Sacrifice demanded rather than offered", "Lowliness without transformation"],
+        "integrationPath": "Humility as source of greatest power; voluntary sacrifice creating cosmos"
+      },
+      "correspondences": {
+        "element": "Fire (sacrificial)",
+        "direction": "Transformation point",
+        "color": "Gold (transformed)",
+        "symbol": "Diseased skin transformed to solar radiance",
+        "location": "Teotihuacan (place where gods were made)",
+        "association": "Self-sacrifice, humility, cosmic transformation"
+      }
+    },
+    {
+      "@id": "arch:MA-TLAZOLTEOTL",
+      "@type": "Archetype",
+      "name": "Tlazolteotl",
+      "aliases": ["Filth Deity", "Eater of Sins", "Ixcuina"],
+      "domain": ["Sin", "Purification", "Sexuality", "Confession", "Childbirth", "Cotton"],
+      "description": "The goddess who inspires illicit sexual desire and then forgives and cleanses the sin. Penitents could confess their sins to her priests once in a lifetime, and she would 'eat' their transgressions. She presides over sexuality, filth (both physical and moral), and the purification that follows. She assists in childbirth and is associated with cotton and weaving.",
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.6,
+        "active-receptive": 0.55,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.65,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:healer", "weight": 0.75, "aspects": ["sin-eater", "purifier"]},
+        {"primordial": "primordial:lover", "weight": 0.7, "aspects": ["desire-inspirer", "sexuality"]},
+        {"primordial": "primordial:great-mother", "weight": 0.55, "aspects": ["childbirth", "weaving"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-INANNA", "fidelity": 0.55, "notes": "Sexuality, transformation, descent"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-KALI", "fidelity": 0.45, "notes": "Dark goddess, transformation, devouring"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:AF-OYA", "fidelity": 0.4, "notes": "Transformation, death-rebirth aspects"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When desire leads only to sin", "When confession becomes license"],
+        "shadowManifestations": ["Sin without purification", "Endless transgression", "Pollution spreading"],
+        "integrationPath": "Accepting shadow desires to transform them; confession enabling genuine change"
+      },
+      "correspondences": {
+        "element": "Earth",
+        "direction": "West",
+        "color": "Black (filth), white (purification)",
+        "symbol": "Nose ornament, spindle, broom (sweeping away sin)",
+        "association": "Confession, sexuality, purification, childbirth, cotton"
+      }
+    },
+    {
+      "@id": "arch:MA-XOCHIQUETZAL",
+      "@type": "Archetype",
+      "name": "Xochiquetzal",
+      "aliases": ["Precious Feather Flower", "Goddess of Beauty"],
+      "domain": ["Beauty", "Flowers", "Love", "Arts", "Weaving", "Pleasure"],
+      "description": "The eternally young and beautiful goddess of flowers, love, beauty, and the arts. Patron of lovers, artists, weavers, and prostitutes. She was abducted from her husband by Tezcatlipoca (or from Tlaloc, accounts vary), representing how beauty can be stolen but never truly possessed. She embodies innocent pleasure and artistic creativity.",
+      "spectralCoordinates": {
+        "order-chaos": 0.4,
+        "creation-destruction": 0.3,
+        "light-shadow": 0.3,
+        "active-receptive": 0.55,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:lover", "weight": 0.9, "aspects": ["beauty", "pleasure", "romance"]},
+        {"primordial": "primordial:maiden", "weight": 0.8, "aspects": ["eternal-youth", "flower-goddess"]},
+        {"primordial": "primordial:creator", "weight": 0.55, "aspects": ["arts-patron", "weaving"]}
+      ],
+      "relationships": [
+        {"type": "rel:TENSION", "target": "arch:MA-TEZCATLIPOCA", "description": "Abducted by the Smoking Mirror"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-APHRODITE", "fidelity": 0.75, "notes": "Love, beauty, pleasure"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:AF-OSHUN", "fidelity": 0.65, "notes": "Beauty, love, arts"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-LAKSHMI", "fidelity": 0.5, "notes": "Beauty, grace, auspiciousness"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When beauty becomes vanity", "When pleasure lacks boundaries"],
+        "shadowManifestations": ["Seduction without love", "Beauty stolen/possessed", "Art without purpose"],
+        "integrationPath": "Beauty in service of life; pleasure that enhances rather than degrades"
+      },
+      "correspondences": {
+        "element": "Air/Earth (flowers)",
+        "direction": "Variable",
+        "color": "Multi-colored (flowers)",
+        "symbol": "Flowers, quetzal feathers, weaving implements",
+        "association": "Love, beauty, flowers, weaving, pleasure, arts"
+      }
+    },
+    {
+      "@id": "arch:MA-HERO-TWINS",
+      "@type": "Archetype",
+      "name": "Hero Twins",
+      "aliases": ["Hunahpú and Xbalanqué", "Hun Hunahpú (father)"],
+      "domain": ["Trickery", "Ballgame", "Death-Conquest", "Sun and Moon", "Rebirth"],
+      "description": "The Maya Hero Twins from the Popol Vuh who avenged their father and uncle (killed by the Lords of Xibalba) by descending to the underworld, defeating death through cleverness and willing sacrifice, then ascending to become the sun and moon. Their story is the central Maya myth of death, rebirth, and cosmic renewal through the ballgame.",
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.45,
+        "active-receptive": 0.25,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.8,
+        "voluntary-fated": 0.35
+      },
+      "instantiates": [
+        {"primordial": "primordial:hero", "weight": 0.95, "aspects": ["death-conquerors", "avengers"]},
+        {"primordial": "primordial:trickster", "weight": 0.85, "aspects": ["outwitting-death", "clever-sacrifice"]},
+        {"primordial": "primordial:twin", "weight": 0.9, "aspects": ["complementary-pair", "sun-moon"]},
+        {"primordial": "primordial:divine-child", "weight": 0.6, "aspects": ["miraculous-conception", "destiny-fulfillment"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:PL-MAUI", "fidelity": 0.6, "notes": "Trickster hero, transforming cosmos"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-CASTOR-POLLUX", "fidelity": 0.55, "notes": "Divine twins, one mortal/one divine"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-ASHVINS", "fidelity": 0.5, "notes": "Divine twin healers/heroes"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When trickery fails", "When death cannot be outwitted"],
+        "shadowManifestations": ["Father's failure (prior generation)", "Tricks that don't work", "Permanent death"],
+        "integrationPath": "Willing sacrifice enabling resurrection; cunning in service of cosmic order"
+      },
+      "correspondences": {
+        "element": "Fire (sun) / Water (moon)",
+        "direction": "Ascent (from underworld to sky)",
+        "color": "Various (ballgame regalia)",
+        "symbol": "Ballgame equipment, sun, moon",
+        "text": "Popol Vuh",
+        "association": "Ballgame, death and rebirth, sun and moon, Maya cosmology"
+      }
+    },
+    {
+      "@id": "arch:MA-ITZAMNA",
+      "@type": "Archetype",
+      "name": "Itzamná",
+      "aliases": ["Lizard House", "God D", "Zamná"],
+      "domain": ["Sky", "Creation", "Writing", "Healing", "Wisdom", "Day"],
+      "description": "The supreme Maya creator god, lord of the heavens and the day. He invented writing and the calendar, patron of learning and healing. Often depicted as an aged, toothless figure with a large nose, he represents the highest divine wisdom. His consort is Ix Chel. He is the father of the Bacabs who hold up the sky.",
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.2,
+        "light-shadow": 0.2,
+        "active-receptive": 0.4,
+        "individual-collective": 0.25,
+        "ascent-descent": 0.2,
+        "stasis-transformation": 0.35,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.9, "aspects": ["sky-lord", "world-maker"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.9, "aspects": ["knowledge-giver", "calendar-inventor"]},
+        {"primordial": "primordial:healer", "weight": 0.6, "aspects": ["divine-physician", "remedy-giver"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:MA-IX-CHEL", "description": "Divine couple, sky and earth/moon"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-THOTH", "fidelity": 0.7, "notes": "Writing, wisdom, learning"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CN-FUXI", "fidelity": 0.55, "notes": "Creator, writing/system inventor"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-BRAHMA", "fidelity": 0.5, "notes": "Creator, cosmic knowledge"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When wisdom is hoarded", "When age becomes senility"],
+        "shadowManifestations": ["Knowledge without sharing", "Distant creator", "Cosmic indifference"],
+        "integrationPath": "Wisdom shared freely; creation sustained through engagement"
+      },
+      "correspondences": {
+        "element": "Air/Fire (sky)",
+        "direction": "Above, Center",
+        "color": "Blue, white",
+        "symbol": "Aged figure, writing implements, celestial imagery",
+        "association": "Creation, writing, calendar, healing, wisdom"
+      }
+    },
+    {
+      "@id": "arch:MA-IX-CHEL",
+      "@type": "Archetype",
+      "name": "Ix Chel",
+      "aliases": ["Lady Rainbow", "Goddess O", "Chak Chel (old aspect)"],
+      "domain": ["Moon", "Weaving", "Medicine", "Childbirth", "Water", "Destruction"],
+      "description": "The complex Maya moon goddess with both young and old aspects. As young Ix Chel, she is goddess of love, fertility, and the moon. As old Chak Chel, she is a fearsome crone who sends floods and destruction. She taught weaving and medicine to humanity. Her dual nature reflects the moon's phases and women's life stages.",
+      "spectralCoordinates": {
+        "order-chaos": 0.45,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.5,
+        "active-receptive": 0.6,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.55
+      },
+      "instantiates": [
+        {"primordial": "primordial:great-mother", "weight": 0.85, "aspects": ["moon-mother", "childbirth-helper"]},
+        {"primordial": "primordial:healer", "weight": 0.75, "aspects": ["medicine-giver", "midwife"]},
+        {"primordial": "primordial:crone", "weight": 0.65, "aspects": ["old-moon", "flood-bringer"]},
+        {"primordial": "primordial:maiden", "weight": 0.5, "aspects": ["young-moon", "weaver"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:MA-ITZAMNA", "description": "Divine couple"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HECATE", "fidelity": 0.55, "notes": "Moon goddess, triple aspects, magic"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:PL-HINA", "fidelity": 0.5, "notes": "Moon goddess, weaving"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-DURGA", "fidelity": 0.45, "notes": "Dual nature, protective and destructive"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When nurturing becomes destruction", "When the crone overwhelms"],
+        "shadowManifestations": ["Floods", "Difficult childbirth", "Moon's dark phase dangers"],
+        "integrationPath": "Embracing all phases; destruction as necessary cleansing"
+      },
+      "correspondences": {
+        "element": "Water/Earth",
+        "direction": "Variable (moon's path)",
+        "color": "White, red (old aspect)",
+        "symbol": "Moon, rabbit, weaving implements, serpent headdress (old)",
+        "association": "Moon, weaving, medicine, childbirth, floods"
+      }
+    }
+  ]
+}
