@@ -48,10 +48,7 @@ func _ejecutar_cita(obra_id: String) -> void:
 		momentum.call("agregar_momentum", 10.0)
 	else:
 		literatura.call("aplicar_cita_especial", efecto_especial)
-	print(
-		"Citado %s, momentum restante: %.1f"
-		% [obra_id, float(momentum.get("momentum_actual"))]
-	)
+	print("Citado %s, momentum restante: %.1f" % [obra_id, float(momentum.get("momentum_actual"))])
 
 
 func show_ritual() -> void:
