@@ -1,12 +1,13 @@
-extends CharacterBody3D
 class_name NPCMentorLiterario
+extends CharacterBody3D
 
-@onready var area_dialogo: Area3D = $AreaDialogo
 @export var autor_asociado: String = "cervantes"
 @export var dialogos: Array = []
 
 var jugador_en_rango: bool = false
 var dialogo_actual: int = 0
+
+@onready var area_dialogo: Area3D = $AreaDialogo
 
 
 func _ready() -> void:
@@ -75,26 +76,25 @@ func _cumple_requisitos(requisitos: Dictionary) -> bool:
 	if literatura == null or arquetipos == null or momentum == null:
 		return false
 
+	var cumple := true
 	for arquetipo_id in requisitos.get("arquetipos", []):
 		if not _arquetipo_desbloqueado(arquetipos, String(arquetipo_id)):
-			return false
-	if requisitos.has("autor"):
+			cumple = false
+			break
+	if cumple and requisitos.has("autor"):
 		var autores: Array = literatura.get("autores_conocidos")
-		if String(requisitos["autor"]) not in autores:
-			return false
-	if requisitos.has("obra"):
+		cumple = String(requisitos["autor"]) in autores
+	if cumple and requisitos.has("obra"):
 		var obras: Array = literatura.get("obras_conocidas")
-		if String(requisitos["obra"]) not in obras:
-			return false
-	if requisitos.has("arquetipo"):
-		if not _arquetipo_desbloqueado(arquetipos, String(requisitos["arquetipo"])):
-			return false
-	if (
-		requisitos.has("momentum")
-		and float(momentum.get("momentum_actual")) < float(requisitos["momentum"])
-	):
-		return false
-	return true
+		cumple = String(requisitos["obra"]) in obras
+	if cumple and requisitos.has("arquetipo"):
+		cumple = _arquetipo_desbloqueado(arquetipos, String(requisitos["arquetipo"]))
+	if cumple and requisitos.has("momentum"):
+		cumple = (
+			float(momentum.get("momentum_actual"))
+			>= float(requisitos["momentum"])
+		)
+	return cumple
 
 
 func _aplicar_recompensa_dialogo(requisitos: Dictionary) -> void:
