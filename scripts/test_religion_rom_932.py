@@ -10,6 +10,10 @@ from verificar_godot import validar
 ROOT = Path(__file__).resolve().parents[1]
 OBSERVER = ROOT / "godot" / "guion" / "religion_rom_vigilia.gd"
 JALI = ROOT / "godot" / "guion" / "jali_98_vigilia.gd"
+VITRAL = ROOT / "godot" / "guion" / "vitral_98_vigilia.gd"
+VITRAL_CONTROLLER = ROOT / "godot" / "guion" / "dia_vitral_98_app.gd"
+VITRAL_ROM = ROOT / "gbc" / "minijuegos" / "vitral_98" / "main.asm"
+VITRAL_DOC = ROOT / "docs" / "religion-rom-vitral-932.md"
 CONSUMER = ROOT / "godot" / "guion" / "religion_recuerdo_jali_932.gd"
 CONSUMER_3D = ROOT / "godot" / "guion" / "religion_recuerdo_jali_932_3d.gd"
 CONTROLLER = ROOT / "godot" / "guion" / "dia_jali_98_app.gd"
@@ -24,6 +28,10 @@ class ReligionRom932Test(unittest.TestCase):
     def setUpClass(cls):
         cls.observer = OBSERVER.read_text(encoding="utf-8")
         cls.jali = JALI.read_text(encoding="utf-8")
+        cls.vitral = VITRAL.read_text(encoding="utf-8")
+        cls.vitral_controller = VITRAL_CONTROLLER.read_text(encoding="utf-8")
+        cls.vitral_rom = VITRAL_ROM.read_text(encoding="utf-8")
+        cls.vitral_doc = VITRAL_DOC.read_text(encoding="utf-8")
         cls.consumer = CONSUMER.read_text(encoding="utf-8")
         cls.consumer_3d = CONSUMER_3D.read_text(encoding="utf-8")
         cls.controller = CONTROLLER.read_text(encoding="utf-8")
@@ -37,6 +45,16 @@ class ReligionRom932Test(unittest.TestCase):
         self.assertNotIn("CANAL_CONVICCION", self.observer)
         self.assertIn('const TRADICION := "islam"', self.jali)
         self.assertIn("mughal_india:agra:segunda_mitad_siglo_xvi", self.jali)
+
+    def test_segunda_rom_reutiliza_observer_comun(self):
+        self.assertIn('extends "res://guion/religion_rom_vigilia.gd"', self.vitral)
+        self.assertIn('const TRADICION := "cristianismo"', self.vitral)
+        self.assertIn("europa_cristiana:vidriera_taller:ca_1375", self.vitral)
+        self.assertIn('const TITULO_ROM := "VITRAL98"', self.vitral)
+        self.assertIn('SECTION "Handshake", WRAM0[$C100]', self.vitral_rom)
+        self.assertIn("Vitral98Vigilia.new()", self.vitral_controller)
+        self.assertIn("V&A", self.vitral_doc)
+        self.assertIn("No se reconstruye el panel de Erfurt", self.vitral_doc)
 
     def test_handshake_es_externo_y_determinista(self):
         self.assertIn("0xC100", self.jali)
