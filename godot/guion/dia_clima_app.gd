@@ -180,49 +180,37 @@ func _iniciar_conversacion(
 		return
 	if is_instance_valid(_dialogo_actual):
 		return
-	_dialogo_actual = (
-		DialogoDiegetico
-		. mostrar(
-			_hud_prioridades,
-			_caminante,
-			companero,
-			_texto_conversacion_contextual(companero, clave_dialogo),
-		)
+	clave_dialogo = _clave_conversacion_contextual(companero, clave_dialogo)
+	_dialogo_actual = DialogoDiegetico.mostrar(
+		_hud_prioridades, _caminante, companero, tr(clave_dialogo)
 	)
 	_caminante.enfocar_conversacion(companero)
 	_dialogo_actual.tree_exited.connect(_al_cerrar_dialogo)
 
 
-func _texto_conversacion_contextual(
+func _clave_conversacion_contextual(
 	companero: CompaneroInteractivo3D,
 	clave_dialogo: String,
 ) -> String:
-	var texto_base := tr(clave_dialogo)
 	if companero.nombre_visible != tr("COMPA_CUNADO"):
-		return texto_base
+		return clave_dialogo
 
-	var reaccion := (
-		DecisionIdeologicaExpediente
-		. reaccion_para(
-			partida.estado,
-			DecisionIdeologicaExpediente.CASO_VERTICAL,
-			DecisionIdeologicaExpediente.ACTOR_CUNADO,
-		)
+	var reaccion := DecisionIdeologicaExpediente.reaccion_para(
+		partida.estado,
+		DecisionIdeologicaExpediente.CASO_VERTICAL,
+		DecisionIdeologicaExpediente.ACTOR_CUNADO,
 	)
 	var clave_reaccion := String(REACCIONES_CUNADO_924.get(reaccion, ""))
 	if clave_reaccion.is_empty():
-		return texto_base
+		return clave_dialogo
 
-	if (
-		DecisionIdeologicaExpediente
-		. registrar_lectura_social(
-			partida.estado,
-			DecisionIdeologicaExpediente.CASO_VERTICAL,
-			DecisionIdeologicaExpediente.ACTOR_CUNADO,
-		)
+	if DecisionIdeologicaExpediente.registrar_lectura_social(
+		partida.estado,
+		DecisionIdeologicaExpediente.CASO_VERTICAL,
+		DecisionIdeologicaExpediente.ACTOR_CUNADO,
 	):
 		_guardar_o_avisar("")
-	return tr(clave_reaccion)
+	return clave_reaccion
 
 
 func _al_cerrar_dialogo() -> void:
