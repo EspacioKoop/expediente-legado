@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="1024" viewBox="0 0 512 1024">
+<title>Huellas de agua — Mari #651</title>
+<desc>Cauces abstractos para rutas reveladas por lluvia.</desc>
+<rect width="512" height="1024" fill="#172329"/>
+<g fill="none" stroke-linecap="round">
+  <path d="M250 0 C164 110 328 188 228 286 C132 382 350 450 240 570 C148 670 322 774 246 1024" stroke="#5f9ca8" stroke-width="34"/>
+  <path d="M210 38 C148 146 268 214 186 304 C118 382 270 470 188 554" stroke="#8fc1c7" stroke-width="10"/>
+  <path d="M292 130 C380 216 252 302 340 394 C408 466 298 554 352 642" stroke="#487d88" stroke-width="14"/>
+  <path d="M232 608 C334 674 190 786 294 860 C338 892 350 940 330 1010" stroke="#8fc1c7" stroke-width="9"/>
+</g>
+<g fill="#abcfd2">
+  <ellipse cx="176" cy="344" rx="20" ry="8"/><ellipse cx="332" cy="424" rx="24" ry="9"/>
+  <ellipse cx="202" cy="706" rx="19" ry="7"/><ellipse cx="292" cy="898" rx="22" ry="8"/>
+</g>
+</svg>
