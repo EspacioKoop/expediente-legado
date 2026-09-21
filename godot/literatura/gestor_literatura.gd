@@ -1,47 +1,54 @@
 extends Node
-# Autoload: GestorLiteratura
-signal obra_conocida(obra_id)
-var obras_conocidas: Array = []
+
+signal obra_conocida(obra_id: String)
+
+var obras: Array = []
+var obras_conocidas: Array[String] = []
 var insight_total: int = 0
-var momentum_bonus: float = 0.0  # acumulativo temporal
+var momentum_bonus: float = 0.0
+
 
 func _ready() -> void:
-    var f = FileAccess.open("res://datos/literatura/obras.json", FileAccess.READ)
-    if f:
-        var data = JSON.parse_string(f.get_as_text())
-        if data.error == OK:
-            self.obras = data.obras
-        f.close()
+	var archivo := FileAccess.open("res://datos/literatura/obras.json", FileAccess.READ)
+	if archivo == null:
+		return
+	var data = JSON.parse_string(archivo.get_as_text())
+	archivo.close()
+	if typeof(data) == TYPE_DICTIONARY:
+		obras = data.get("obras", [])
+
 
 func conocer_obra(obra_id: String) -> bool:
-    if obra_id in obras_conocidas:
-        return false
-    obras_conocidas.append(obra_id)
-    # otorgar insight basado en efecto
-    var efecto = _obtener_efecto_obra(obra_id)
-    if efecto.has("bonus_insight"):
-        insight_total += int(efecto.bonus_insight)
-    if efecto.has("bonus_momentum"):
-        momentum_bonus += float(efecto.momentum_bonus)
-        # aplicar momentum bonus inmediatamente al gestor de momentum
-        GestorMomentum.momentum_actual = min(GestorMomentum.momentum_max, GestorMomentum.momentum_actual + efecto.bonus_monmentum)
-    obra_conocida.emit(obra_id)
-    return true
+	if obra_id.is_empty() or obra_id in obras_conocidas:
+		return false
+	obras_conocidas.append(obra_id)
 
-func obtener_insight_total():
-    return insight_total
+	var efecto := _obtener_efecto_obra(obra_id)
+	var insight := int(efecto.get("bonus_insight", 0))
+	if insight > 0:
+		insight_total += insight
+		GestorArquetipos.ganar_insight(insight)
 
-func obtener_momentum_bonus():
-    return momentum_bonus
+	var bonus := float(efecto.get("bonus_momentum", 0.0))
+	if bonus > 0.0:
+		momentum_bonus += bonus
+		GestorMomentum.agregar_momentum(bonus)
+
+	obra_conocida.emit(obra_id)
+	return true
+
+
+func obtener_insight_total() -> int:
+	return insight_total
+
+
+func obtener_momentum_bonus() -> float:
+	return momentum_bonus
+
 
 func _obtener_efecto_obra(obra_id: String) -> Dictionary:
-    var file = FileAccess.open("res://datos/literatura/obras.json", FileAccess.READ)
-    if file:
-        var data = JSON.parse_string(file.get_as_text())
-        if data.error == OK:
-            for o in data.obras:
-                if o.id == obra_id:
-                    file.close()
-                    return o.efecto
-        file.close()
-    return {}
+	for obra in obras:
+		if typeof(obra) == TYPE_DICTIONARY and String(obra.get("id", "")) == obra_id:
+			var efecto = obra.get("efecto", {})
+			return efecto.duplicate(true) if typeof(efecto) == TYPE_DICTIONARY else {}
+	return {}
