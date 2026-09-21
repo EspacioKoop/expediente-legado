@@ -123,9 +123,31 @@ El apagado físico también permanece fuera del núcleo:
 - ni el afterglow ni la variación de brillo reciben bytes de ROM, escriben SRAM o alteran el
   framebuffer RGBA que entrega SameBoy.
 
-No se introducen fallos aleatorios de contacto ni retrasos artificiales del audio de ROM en este
-corte. Si se representan más adelante, deberán activarse como estados de presentación explícitos
-y seguir sin mutar el núcleo. Tampoco se recolorean ROMs CGB nativas.
+### Imperfecciones controladas
+
+La opción «Imperfecciones de hardware» está **desactivada por defecto** y además depende de que
+los efectos de presentación estén activos. Su comportamiento es determinista:
+
+- al terminar la inserción física de un cartucho, `EfectoContactoCartucho` superpone un patrón
+  procedural propio durante un único frame de proceso. No lee ni reemplaza el framebuffer nativo;
+- al arrancar la ROM, el consumer de audio mantiene 180 ms de entrada tardía. SameBoy sigue
+  ejecutando frames con normalidad y el PCM se drena y descarta durante ese intervalo, por lo que
+  no se acumula una cola que vaya a reproducirse más tarde;
+- desactivar las imperfecciones o toda la presentación cancela inmediatamente el retardo pendiente;
+- no existe azar, reinicio forzado, corrupción de SRAM, pérdida de progreso ni incompatibilidad
+  fingida.
+
+### Paletas para GB clásico
+
+Las ROMs con flag CGB `0x00` pueden elegir entre el resultado normal de SameBoy y tres paletas
+propias pequeñas: ámbar tenue, salvia LCD y azul humo. La selección es un postproceso de la
+`TextureRect`; nunca modifica el framebuffer RGBA producido por el núcleo.
+
+La preferencia se guarda por SHA-256 de ROM en `user://portatil_color_98.cfg` mediante
+`ConfigFile`. El selector queda deshabilitado para cartuchos dual-mode (`0x80`) y CGB-only
+(`0xC0`), y en esos casos el shader fuerza `paleta_gb_activa = false`. La opción
+«Núcleo (normal)» vuelve explícitamente al comportamiento original. Las tablas de color son
+originales del proyecto y no reproducen firmware ni branding propietario.
 
 ## Link Cable diegético (#245)
 
