@@ -12,11 +12,17 @@ func _initialize() -> void:
 
 
 func _ejecutar() -> void:
+	_probar_carga_visor()
 	_probar_estado_pasivo()
 	_probar_frontera_de_dia()
 	_probar_ecos_oniricos()
 	print("issue_961: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
+
+
+func _probar_carga_visor() -> void:
+	var script_visor := load("res://guion/visor_metadatos_app.gd")
+	_comprobar(script_visor != null, true, "la capa real del visor carga con meticulosidad")
 
 
 func _probar_estado_pasivo() -> void:
