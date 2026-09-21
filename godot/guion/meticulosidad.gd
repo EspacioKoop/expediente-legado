@@ -53,6 +53,27 @@ static func puntos(jornada: Dictionary) -> int:
 	return int(_normalizar_dia(jornada).get("puntos", 0))
 
 
+static func eventos_documento(jornada: Dictionary, documento_id: String) -> Array[String]:
+	var id := documento_id.strip_edges()
+	if id.is_empty():
+		return []
+	var estado: Dictionary = _normalizar_dia(jornada)
+	var documentos: Dictionary = estado.get("documentos", {})
+	var crudo: Variant = documentos.get(id, {})
+	if not crudo is Dictionary:
+		return []
+	var eventos_crudos: Variant = (crudo as Dictionary).get("eventos", [])
+	if not eventos_crudos is Array:
+		return []
+
+	var resultado: Array[String] = []
+	for valor in eventos_crudos:
+		var evento := String(valor).strip_edges()
+		if EVENTOS_VALIDOS.has(evento) and not resultado.has(evento):
+			resultado.append(evento)
+	return resultado
+
+
 ## Motivos que pueden reaparecer esa noche. No decide objetivos ni altera la
 ## selección de escenas: solo devuelve una lista estable para dressing visual.
 static func motivos_oniricos(jornada: Dictionary, maximo: int = 3) -> Array[String]:
