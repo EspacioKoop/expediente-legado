@@ -1,0 +1,25 @@
+[gd_scene load_steps=3 format=3 uid://UID_RIT]
+[ext_resource type="Script" path="res://rituales/literarios/ritual_cita.gd" id=1]
+
+[node name="RitualCita" type="Control"]
+anchors_preset = 15
+layout_margin_top = 100
+layout_margin_left = 100
+layout_margin_right = 100
+layout_margin_bottom = 100
+
+[node name="Panel" type="Panel" parent="."]
+anchors_preset = 15
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
+
+[node name="Title" type="Label" parent="VBoxContainer"]
+text = "Ritual de Cita Literaria"
+
+[node name="ObraSelector" type="OptionButton" parent="VBoxContainer"]
+
+[node name="CitarButton" type="Button" parent="VBoxContainer"]
+text = "Citar"
+
+[node name="CloseButton" type="Button" parent="VBoxContainer"]
+text = "Cerrar"
