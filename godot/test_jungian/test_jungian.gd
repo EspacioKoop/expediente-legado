@@ -1,17 +1,17 @@
-extends Node
+extends Node3D
+
 
 func _ready() -> void:
-    print("Testing Jungian integration")
-    var arquetipos = GestorArquetipos
-    print("Insight:", arquetipos.insight_total)
-    arquetipos.ganar_insight(200)
-    print("Insight after gain:", arquetipos.insight_total)
-    print("Arquetipos desbloqueados:")
-    for id in ["sombra", "anima", "persona", "self"]:
-        var arq = arquetipos.obtener_arquetipo(id)
-        if arq:
-            print(f"  {id}: desbloqueado={arq.desbloqueado}")
-    var momentum = GestorMomentum
-    print("Momentum inicial:", momentum.momentum_actual)
-    momentum.registrar_golpe(es_critico=True)
-    print("Momentum después de golpe crítico:", momentum.momentum_actual)
+	GestorArquetipos.reiniciar()
+	GestorMomentum.reiniciar()
+	GestorCombos.reiniciar()
+	GestorArquetipos.ganar_insight(350)
+
+	var combate := JuicioCombate3D.new()
+	combate.name = "ArenaJungianaPrueba"
+	combate.configurar(
+		{"id": "rival-jungiano-prueba", "nombre": "Rival de prueba"},
+		0,
+		false
+	)
+	add_child(combate)
