@@ -64,7 +64,10 @@ class ProyeccionOniricaTest(unittest.TestCase):
         self.assertIn('path="res://guion/visor_pronosticos_app.gd"', self.escena)
         self.assertIn('extends "res://guion/visor_anexos_app.gd"', self.capa_pronosticos)
         self.assertIn(
-            'extends "res://guion/visor_metadatos_app.gd"', self.capa_anexos
+            'extends "res://guion/visor_meticulosidad_app.gd"', self.capa_anexos
+        )
+        self.assertIn(
+            'extends "res://guion/visor_metadatos_app.gd"', self.capa_meticulosidad
         )
         self.assertIn(
             'extends "res://guion/visor_anotaciones_app.gd"', self.capa_metadatos
