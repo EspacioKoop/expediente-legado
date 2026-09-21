@@ -45,8 +45,7 @@ func _init() -> void:
 	var capa_ocho := Presentacion.montar(mundo, dia_ocho, false)
 	var paquete := capa_ocho.get_node_or_null("PaqueteEquivocado")
 	_comprobar(
-		capa_ocho.get_node_or_null("RepartidorConfundido") != null,
-		"materializa al repartidor"
+		capa_ocho.get_node_or_null("RepartidorConfundido") != null, "materializa al repartidor"
 	)
 	_comprobar(paquete != null, "materializa el paquete equivocado cuando toca")
 	_comprobar(paquete is Interactuable3D, "el paquete usa el contrato comun")
