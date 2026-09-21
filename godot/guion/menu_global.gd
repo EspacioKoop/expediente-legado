@@ -26,13 +26,18 @@ var _fondo: ColorRect
 var _panel_principal: PanelContainer
 var _panel_opciones: PanelContainer
 var _panel_sellos: PanelContainer
+var _panel_historial: PanelContainer
 var _panel_incidencias: ParteIncidenciasApp
 var _continuar: Button
 var _opciones: Button
 var _sellos: Button
+var _historial_boton: Button
 var _incidencias: Button
 var _volver: Button
 var _sellos_volver: Button
+var _historial_volver: Button
+var _historial_resumen: Label
+var _historial_lista: VBoxContainer
 var _salir: Button
 var _volumen: HSlider
 var _reduccion: CheckButton
@@ -45,6 +50,7 @@ var _captura_accion := ""
 var _captura_tipo := ""
 var _foco_previo: Control
 var _mouse_previo := Input.MOUSE_MODE_VISIBLE
+var _historias := Historias.new()
 
 
 func _ready() -> void:
@@ -52,6 +58,7 @@ func _ready() -> void:
 	layer = 100
 	_preferencias = PreferenciasSiga.cargar()
 	_presentacion_sellos = _cargar_presentacion_sellos()
+	_historias.cargar()
 	PreferenciasSiga.aplicar(_preferencias)
 	_aplicar_volumen()
 	_montar()
@@ -129,6 +136,13 @@ func _montar() -> void:
 	var sellos := _caja(_panel_sellos)
 	_sellos_contenido(sellos)
 
+	_panel_historial = _crear_panel()
+	_panel_historial.custom_minimum_size = Vector2(760, 520)
+	_panel_historial.visible = false
+	centro.add_child(_panel_historial)
+	var historial := _caja(_panel_historial)
+	_historial_contenido(historial)
+
 	_panel_incidencias = ParteIncidenciasApp.new()
 	_panel_incidencias.volver.connect(_volver_de_incidencias)
 	centro.add_child(_panel_incidencias)
@@ -176,6 +190,11 @@ func _principal_contenido(caja: VBoxContainer) -> void:
 	_sellos.text = String(_presentacion_sellos.get("titulo", ""))
 	_sellos.pressed.connect(_mostrar_sellos)
 	caja.add_child(_sellos)
+
+	_historial_boton = Button.new()
+	_historial_boton.text = tr("MENU_GLOBAL_HISTORIAL_DECISIONES")
+	_historial_boton.pressed.connect(_mostrar_historial)
+	caja.add_child(_historial_boton)
 
 	_incidencias = Button.new()
 	_incidencias.text = ParteIncidencias.ETIQUETA
@@ -289,6 +308,107 @@ func _sellos_contenido(caja: VBoxContainer) -> void:
 	_sellos_volver.text = tr("MENU_GLOBAL_VOLVER")
 	_sellos_volver.pressed.connect(_mostrar_principal)
 	caja.add_child(_sellos_volver)
+
+
+func _historial_contenido(caja: VBoxContainer) -> void:
+	var titulo := Label.new()
+	titulo.text = tr("MENU_GLOBAL_HISTORIAL_DECISIONES")
+	caja.add_child(titulo)
+
+	var subtitulo := Label.new()
+	subtitulo.text = tr("MENU_GLOBAL_HISTORIAL_SUBTITULO")
+	subtitulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	caja.add_child(subtitulo)
+
+	_historial_resumen = Label.new()
+	_historial_resumen.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	caja.add_child(_historial_resumen)
+
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(680, 300)
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	caja.add_child(scroll)
+
+	_historial_lista = VBoxContainer.new()
+	_historial_lista.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_historial_lista.add_theme_constant_override("separation", 10)
+	scroll.add_child(_historial_lista)
+
+	_historial_volver = Button.new()
+	_historial_volver.text = tr("MENU_GLOBAL_VOLVER")
+	_historial_volver.pressed.connect(_mostrar_principal)
+	caja.add_child(_historial_volver)
+
+
+func _refrescar_historial() -> void:
+	for nodo in _historial_lista.get_children():
+		_historial_lista.remove_child(nodo)
+		nodo.queue_free()
+
+	var estado := _estado_partida_actual()
+	var presion := _historias.presion_indecision(estado)
+	var nivel := clampi(int(presion.get("nivel", 0)), 0, 2)
+	_historial_resumen.text = (
+		tr("MENU_GLOBAL_HISTORIAL_RESUMEN")
+		% [int(presion.get("total", 0)), int(presion.get("reiteradas", 0))]
+	)
+	var aviso := Label.new()
+	aviso.text = tr("MENU_GLOBAL_HISTORIAL_PRESION_%d" % nivel)
+	aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_historial_lista.add_child(aviso)
+
+	var eventos := _historias.historial(estado)
+	if eventos.is_empty():
+		var vacio := Label.new()
+		vacio.text = tr("MENU_GLOBAL_HISTORIAL_VACIO")
+		_historial_lista.add_child(vacio)
+		return
+
+	for evento in eventos:
+		if not evento is Dictionary:
+			continue
+		var fila := Label.new()
+		fila.text = _texto_evento_historial(evento)
+		fila.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		fila.custom_minimum_size.x = 640
+		_historial_lista.add_child(fila)
+
+
+func _texto_evento_historial(evento: Dictionary) -> String:
+	var carta_id := String(evento.get("carta", ""))
+	var nombre := _nombre_carta(carta_id)
+	var legado := bool(evento.get("legado", false))
+	var contexto := tr("MENU_GLOBAL_HISTORIAL_LEGADO") if legado else (
+		tr("MENU_GLOBAL_HISTORIAL_CONTEXTO")
+		% [
+			int(evento.get("dia", 0)),
+			String(evento.get("fase", "")).replace("_", " ").capitalize(),
+		]
+	)
+	var tipo := String(evento.get("tipo", ""))
+	if tipo == "pospuesta":
+		return (
+			tr("MENU_GLOBAL_HISTORIAL_POSPUESTA")
+			% [nombre, int(evento.get("posposiciones", 1)), contexto]
+		)
+
+	var eleccion := _texto_eleccion(carta_id, String(evento.get("eleccion", "")))
+	return tr("MENU_GLOBAL_HISTORIAL_RESUELTA") % [nombre, contexto, eleccion]
+
+
+func _nombre_carta(carta_id: String) -> String:
+	for carta in _estado_partida_actual().get("tarot", []):
+		if String(carta.get("id", "")) == carta_id:
+			return String(carta.get("nombre", carta_id))
+	return carta_id.replace("-", " ").capitalize()
+
+
+func _texto_eleccion(carta_id: String, eje: String) -> String:
+	var historia := _historias.de(carta_id)
+	for opcion in historia.get("opciones", []):
+		if String(opcion.get("eje", "")) == eje:
+			return String(opcion.get("texto", ""))
+	return eje.replace("_", " ").capitalize()
 
 
 func _cargar_presentacion_sellos() -> Dictionary:
@@ -449,6 +569,7 @@ func _abrir() -> void:
 	_panel_principal.visible = true
 	_panel_opciones.visible = false
 	_panel_sellos.visible = false
+	_panel_historial.visible = false
 	_panel_incidencias.visible = false
 	_fondo.visible = true
 	get_tree().paused = true
@@ -470,6 +591,7 @@ func _cerrar() -> void:
 func _mostrar_opciones() -> void:
 	_panel_principal.visible = false
 	_panel_sellos.visible = false
+	_panel_historial.visible = false
 	_panel_incidencias.visible = false
 	_panel_opciones.visible = true
 	_volumen.grab_focus()
@@ -478,15 +600,27 @@ func _mostrar_opciones() -> void:
 func _mostrar_sellos() -> void:
 	_panel_principal.visible = false
 	_panel_opciones.visible = false
+	_panel_historial.visible = false
 	_panel_incidencias.visible = false
 	_panel_sellos.visible = true
 	_sellos_volver.grab_focus()
+
+
+func _mostrar_historial() -> void:
+	_panel_principal.visible = false
+	_panel_opciones.visible = false
+	_panel_sellos.visible = false
+	_panel_incidencias.visible = false
+	_panel_historial.visible = true
+	_refrescar_historial()
+	_historial_volver.grab_focus()
 
 
 func _mostrar_incidencias() -> void:
 	_panel_principal.visible = false
 	_panel_opciones.visible = false
 	_panel_sellos.visible = false
+	_panel_historial.visible = false
 	_panel_incidencias.abrir(_preferencias)
 
 
@@ -494,6 +628,7 @@ func _volver_de_incidencias() -> void:
 	_panel_incidencias.visible = false
 	_panel_opciones.visible = false
 	_panel_sellos.visible = false
+	_panel_historial.visible = false
 	_panel_principal.visible = true
 	_incidencias.grab_focus()
 
@@ -502,6 +637,7 @@ func _mostrar_principal() -> void:
 	_cancelar_captura()
 	_panel_opciones.visible = false
 	_panel_sellos.visible = false
+	_panel_historial.visible = false
 	_panel_incidencias.visible = false
 	_panel_principal.visible = true
 	_opciones.grab_focus()
