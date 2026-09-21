@@ -190,7 +190,9 @@ static func completar(jornada: Dictionary, raiz: int = 0) -> Dictionary:
 			jornada[clave] = int(jornada[clave])
 	if sin_hora_laboral:
 		jornada["hora_minutos"] = _hora_migrada(jornada)
-	jornada["hora_minutos"] = clampi(int(jornada.get("hora_minutos", MINUTOS_INICIO_JORNADA)), 0, MINUTOS_DIA - 1)
+	jornada["hora_minutos"] = clampi(
+		int(jornada.get("hora_minutos", MINUTOS_INICIO_JORNADA)), 0, MINUTOS_DIA - 1
+	)
 	jornada["gato"]["dias_sin_comer"] = int(jornada["gato"].get("dias_sin_comer", 0))
 	jornada["comida_propia"]["dias_sin_comer"] = int(
 		jornada["comida_propia"].get("dias_sin_comer", 0)
