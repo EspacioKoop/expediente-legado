@@ -26,7 +26,8 @@ func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> vo
 
 
 func _interactuar() -> void:
-	if GestorLiteratura.conocer_obra(obra_id):
+	var gestor := get_node_or_null("/root/GestorLiteratura")
+	if gestor != null and bool(gestor.call("conocer_obra", obra_id)):
 		label.text = "Has descubierto: %s" % obra_id
 	else:
 		label.text = "Ya conoces esta obra"
