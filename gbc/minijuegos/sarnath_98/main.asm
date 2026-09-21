@@ -246,25 +246,27 @@ DibujarEstudioInterno:
     ld [BG_MAP + (3 * 32) + 9], a
     call DibujarNumeroRonda
     call ObtenerRuta
-    ld b, a
-    ld c, 0
+    ld c, a
+    ld b, 0
 .estudio_loop:
-    ld a, c
-    cp b
+    ld a, b
+    cp c
     ret z
-    push bc
     ld a, [hli]
-    call TileParaDireccion
-    pop bc
     push hl
-    ld hl, BG_MAP + (8 * 32) + 7
-    ld a, c
+    push bc
+    call TileParaDireccion
+    push af
+    ld a, b
     ld e, a
     ld d, 0
+    ld hl, BG_MAP + (8 * 32) + 7
     add hl, de
-    ld [hl], b
+    pop af
+    ld [hl], a
+    pop bc
     pop hl
-    inc c
+    inc b
     jr .estudio_loop
 
 DibujarEntradaInterno:
@@ -411,16 +413,16 @@ TileParaDireccion:
     jr z, .right
     cp KEY_DOWN
     jr z, .down
-    ld b, TILE_LEFT
+    ld a, TILE_LEFT
     ret
 .up:
-    ld b, TILE_UP
+    ld a, TILE_UP
     ret
 .right:
-    ld b, TILE_RIGHT
+    ld a, TILE_RIGHT
     ret
 .down:
-    ld b, TILE_DOWN
+    ld a, TILE_DOWN
     ret
 
 LeerControles:
