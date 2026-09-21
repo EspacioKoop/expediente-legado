@@ -1,0 +1,4 @@
+[gd_scene load_steps=3 format=3 uid://...]
+[ext_resource type="Script" path="res://test_jungian/test_jungian.gd" id=1]
+[node name="TestJungian" type="Node"]
+script = ExtResource(1)
