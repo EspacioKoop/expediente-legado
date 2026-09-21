@@ -73,7 +73,7 @@ static func perfil_adaptativo(fase: String, contexto: Dictionary = {}) -> Dictio
 		return {}
 
 	var franja := FRANJA_BASE
-	if contexto.has("hora"):
+	if fase == "archivo" and contexto.has("hora"):
 		franja = _franja_horaria(clampf(float(contexto.get("hora", 12.0)), 0.0, 23.999))
 
 	var nivel_estres := 0
