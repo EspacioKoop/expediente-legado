@@ -86,6 +86,12 @@ func _probar_detalles_opcionales() -> void:
 		[],
 		"sin gesto meticuloso no aparece detalle extra",
 	)
+	Meticulosidad.registrar(jornada, "factura1@1", "relectura", "fecha")
+	_comprobar(
+		DetallesMeticulosidad.visibles(catalogo, jornada, "factura1@1"),
+		[],
+		"otro gesto del mismo documento no desbloquea el detalle",
+	)
 	Meticulosidad.registrar(jornada, "factura1@1", "lectura_completa", "margen")
 	var visibles := DetallesMeticulosidad.visibles(catalogo, jornada, "factura1@1")
 	_comprobar(visibles.size(), 1, "el gesto correcto revela un microdetalle autorado")
