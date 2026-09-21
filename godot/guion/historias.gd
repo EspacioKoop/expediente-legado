@@ -116,13 +116,15 @@ func postergar(estado: Dictionary, carta_id: String) -> bool:
 	if estado.get("historias_cartas", {}).has(carta_id):
 		return false
 
+	# Leer los contadores ANTES de añadir la marca actual distingue una partida
+	# nueva de una partida vieja que ya traía "historias_pospuestas" sin contador.
+	var conteos := _conteos_pospuestas(estado)
 	var pospuestas := _pospuestas(estado)
 	if not pospuestas.has(carta_id):
 		pospuestas.append(carta_id)
 		pospuestas.sort()
 	estado["historias_pospuestas"] = pospuestas
 
-	var conteos := _conteos_pospuestas(estado)
 	var conteo := int(conteos.get(carta_id, 0)) + 1
 	conteos[carta_id] = conteo
 	estado[CLAVE_CONTEO_POSPUESTAS] = conteos
