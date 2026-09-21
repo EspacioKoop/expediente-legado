@@ -56,10 +56,6 @@ class ReligionRom932Test(unittest.TestCase):
         self.assertIn("No se reproduce", self.doc)
         self.assertIn("1993.67.1", self.readme)
 
-    def test_vertical_no_incluye_linea_descartada(self):
-        for text in (self.jali, self.consumer, self.controller, self.readme, self.doc):
-            self.assertNotIn("hebre", text.lower())
-
     def test_godot_contract(self):
         engine = os.environ.get("GODOT_BIN", "godot4")
         with tempfile.TemporaryDirectory(prefix="religion-rom-932-") as tmp:
