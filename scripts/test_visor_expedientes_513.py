@@ -120,8 +120,8 @@ class VisorExpedientes513Test(unittest.TestCase):
         )
 
     def test_el_playtest_documentado_usa_el_viewport_real_del_proyecto(self):
-        self.assertIn("window/size/viewport_width=1024", self.proyecto)
-        self.assertIn("window/size/viewport_height=680", self.proyecto)
+        self.assertIn("window/size/viewport_width=1920", self.proyecto)
+        self.assertIn("window/size/viewport_height=1080", self.proyecto)
 
 
 if __name__ == "__main__":
