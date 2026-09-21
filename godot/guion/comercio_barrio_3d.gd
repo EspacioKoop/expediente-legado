@@ -7,12 +7,8 @@ class_name ComercioBarrio3D
 extends Node3D
 
 const NOMBRE := "ComercioBarrioFisico"
-const TEX_QUIOSCO: Texture2D = preload(
-	"res://arte/comercio_barrio/quiosco_avenida.svg"
-)
-const TEX_TRASTERO: Texture2D = preload(
-	"res://arte/comercio_barrio/el_trastero.svg"
-)
+const TEX_QUIOSCO: Texture2D = preload("res://arte/comercio_barrio/quiosco_avenida.svg")
+const TEX_TRASTERO: Texture2D = preload("res://arte/comercio_barrio/el_trastero.svg")
 
 const POS_QUIOSCO := Vector3(4.95, 0.0, 3.75)
 const POS_TRASTERO := Vector3(-5.05, 0.0, 11.15)
@@ -120,10 +116,13 @@ func _montar_trastero() -> void:
 		90.0,
 	)
 
-	var entradas := ComercioBarrio.listar(
-		"segunda_mano",
-		_dia.jornada,
-		_inventario(),
+	var entradas := (
+		ComercioBarrio
+		. listar(
+			"segunda_mano",
+			_dia.jornada,
+			_inventario(),
+		)
 	)
 	for indice in entradas.size():
 		var entrada: Dictionary = entradas[indice]
@@ -249,19 +248,20 @@ func _comprar(
 	if _dia == null:
 		return
 	var inventario := _inventario()
-	var resultado := ComercioBarrio.comprar(
-		_dia.jornada,
-		inventario,
-		superficie,
-		item_id,
+	var resultado := (
+		ComercioBarrio
+		. comprar(
+			_dia.jornada,
+			inventario,
+			superficie,
+			item_id,
+		)
 	)
 	var entrada := _buscar_entrada(superficie, item_id, inventario)
 	if bool(resultado.get("ok", false)):
 		compra.nombre_objeto = _texto_compra(entrada)
 		if not bool(resultado.get("repetible", false)):
-			compra.nombre_objeto = "%s · comprado" % String(
-				entrada.get("nombre", item_id)
-			)
+			compra.nombre_objeto = "%s · comprado" % String(entrada.get("nombre", item_id))
 		if _dia.has_method("_guardar_o_avisar"):
 			_dia.call("_guardar_o_avisar", "")
 		return
@@ -321,9 +321,7 @@ func _lamina(
 	material.albedo_texture = textura
 	material.roughness = 1.0
 	material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	material.texture_filter = (
-		BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
-	)
+	material.texture_filter = (BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC)
 	lamina.material_override = material
 	padre.add_child(lamina)
 
