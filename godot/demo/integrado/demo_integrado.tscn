@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid://UID_DEMO]
+[ext_resource type="Script" path="res://demo/integrado/demo_integrado.gd" id=1]
+[ext_resource type="PackedScene" path="res://interactables/libros/libro_interactivo.tscn" id=2]
+[ext_resource type="PackedScene" path="res://test_jungian/test_jungian.tscn" id=3]
+
+[node name="DemoIntegrado" type="Node3D"]
+name = "Demo Integrado: Jungiano + Literatura"
+
+[node name="LibroOdisea" type="Node3D" parent="."] instance = ExtResource(2)
+transform/position = Vector3(0, 1, 0)
+meta/obra_id = "odisea"
+
+[node name="AreaTest" type="Node3D" parent="."] instance = ExtResource(3)
+transform/position = Vector3(5, 0, 0)
