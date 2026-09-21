@@ -108,6 +108,23 @@ Cada objeto de la bandeja:
 casa debe sacarse primero y viajar en `carried`; por tanto no aparece una venta
 a distancia disfrazada de interfaz de tienda.
 
+## Feedback diegético de transacción — 2026-09-21
+
+Quiosco Avenida y El Trastero incorporan un **ticket físico de mostrador**. No es
+un HUD ni un panel modal: es geometría 3D del propio puesto con texto de mundo.
+
+El mismo ticket se reutiliza para no acumular feedback:
+
+- compra válida: `PAGO · -importe`;
+- reventa válida: `REVENTA · +importe`;
+- intento repetido de una compra idempotente: `YA COMPRADO`;
+- saldo insuficiente: `NO LLEGA EL DINERO`;
+- reventa bloqueada: mensajes breves como `NO SE VENDE` o `NO LO LLEVAS`.
+
+Los importes salen del resultado de `ComercioBarrio.comprar/vender`; el ticket
+no calcula precios ni altera el saldo. Tampoco introduce animación obligatoria,
+temporizadores, `CanvasLayer` ni controles 2D.
+
 ## Bit 98: identidad visual integrada — 2026-09-21
 
 Bit 98 ya no depende solo de cajas coloreadas para leerse como tienda. La capa

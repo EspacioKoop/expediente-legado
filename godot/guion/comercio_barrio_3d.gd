@@ -77,6 +77,8 @@ func _montar_quiosco() -> void:
 		-90.0,
 	)
 
+	_montar_ticket(puesto, Vector3(-0.58, 1.36, 1.18))
+
 	var entradas := ComercioBarrio.listar("quiosco", _dia.jornada, _inventario())
 	for indice in entradas.size():
 		var entrada: Dictionary = entradas[indice]
@@ -115,6 +117,8 @@ func _montar_trastero() -> void:
 		Vector2(2.05, 0.82),
 		90.0,
 	)
+
+	_montar_ticket(puesto, Vector3(0.58, 1.36, 1.42))
 
 	var entradas := (
 		ComercioBarrio
@@ -349,6 +353,7 @@ func _comprar(
 		)
 	)
 	var entrada := _buscar_entrada(superficie, item_id, inventario)
+	_mostrar_ticket(superficie, resultado, "compra")
 	if bool(resultado.get("ok", false)):
 		compra.nombre_objeto = _texto_compra(entrada)
 		if not bool(resultado.get("repetible", false)):
@@ -378,6 +383,7 @@ func _vender(_actor: Node, item_id: String, venta: Interactuable3D) -> void:
 			item_id,
 		)
 	)
+	_mostrar_ticket("segunda_mano", resultado, "venta")
 	if bool(resultado.get("ok", false)):
 		venta.habilitado = false
 		venta.visible = false
@@ -387,6 +393,76 @@ func _vender(_actor: Node, item_id: String, venta: Interactuable3D) -> void:
 
 	var motivo := String(resultado.get("motivo", "reventa_rechazada"))
 	venta.nombre_objeto = "%s · %s" % [venta.nombre_objeto.get_slice(" · ", 0), motivo]
+
+
+func _montar_ticket(puesto: Node3D, posicion: Vector3) -> void:
+	var ticket := Node3D.new()
+	ticket.name = "TicketTransaccion"
+	ticket.position = posicion
+	ticket.visible = false
+	puesto.add_child(ticket)
+
+	_caja(
+		ticket,
+		"PapelTicket",
+		Vector3.ZERO,
+		Vector3(0.018, 0.30, 0.42),
+		Color(0.79, 0.76, 0.66),
+	)
+
+	var texto := Label3D.new()
+	texto.name = "TextoTicket"
+	texto.position = Vector3(-0.02, 0.0, 0.0)
+	texto.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	texto.font = EstiloSiga.fuente_mono()
+	texto.font_size = 30
+	texto.pixel_size = 0.0022
+	texto.outline_size = 5
+	texto.modulate = Color(0.16, 0.15, 0.13)
+	texto.text = ""
+	ticket.add_child(texto)
+
+
+func _mostrar_ticket(superficie: String, resultado: Dictionary, operacion: String) -> void:
+	var puesto := (
+		(
+			get_node_or_null("QuioscoAvenida")
+			if superficie == "quiosco"
+			else get_node_or_null("ElTrastero")
+		)
+		as Node3D
+	)
+	if puesto == null:
+		return
+	var ticket := puesto.get_node_or_null("TicketTransaccion") as Node3D
+	if ticket == null:
+		return
+	var texto := ticket.get_node_or_null("TextoTicket") as Label3D
+	if texto == null:
+		return
+	texto.text = _texto_ticket(resultado, operacion)
+	texto.modulate = (
+		Color(0.18, 0.35, 0.22) if bool(resultado.get("ok", false)) else Color(0.52, 0.16, 0.15)
+	)
+	ticket.visible = true
+
+
+func _texto_ticket(resultado: Dictionary, operacion: String) -> String:
+	if bool(resultado.get("ok", false)):
+		if operacion == "compra" and bool(resultado.get("ya_comprado", false)):
+			return "YA COMPRADO"
+		var importe := maxi(0, int(resultado.get("importe", 0)))
+		return "REVENTA · +%d" % importe if operacion == "venta" else "PAGO · -%d" % importe
+
+	match String(resultado.get("motivo", "fallo")):
+		"sin_dinero":
+			return "NO LLEGA EL DINERO"
+		"no_llevado":
+			return "NO LO LLEVAS"
+		"onirico", "no_vendible":
+			return "NO SE VENDE"
+		_:
+			return "NO DISPONIBLE"
 
 
 func _buscar_entrada(
