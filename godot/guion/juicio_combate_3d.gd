@@ -72,6 +72,14 @@ var _barra_rival: ProgressBar
 var _etiqueta_ritual: Label
 var _etiqueta_ataque: Label
 var _botones_doctrina: HBoxContainer
+var _barra_momentum: ProgressBar
+var _boton_finisher: Button
+var _etiqueta_jungiana: Label
+var _dano_combo_pendiente := 0
+var _curacion_arquetipo_acumulada := 0.0
+var _invulnerabilidad_jungiana := 0.0
+var _sacudida_camara := 0.0
+var _aviso_jungiano_restante := 0.0
 
 
 static func determinacion_rival(bono_documental: int) -> int:
@@ -155,6 +163,7 @@ func configurar(acusado: Dictionary, bono_documental: int, reducir_movimiento: b
 
 
 func _ready() -> void:
+	_preparar_sistemas_jungianos()
 	_resolver_capa_simbolica()
 	_montar_arena()
 	_montar_hud()
@@ -168,6 +177,12 @@ func _process(delta: float) -> void:
 	_recarga_rival = maxf(0.0, _recarga_rival - delta)
 	_esquiva = maxf(0.0, _esquiva - delta)
 	_enredo = maxf(0.0, _enredo - delta)
+	_invulnerabilidad_jungiana = maxf(0.0, _invulnerabilidad_jungiana - delta)
+	_sacudida_camara = maxf(0.0, _sacudida_camara - delta)
+	if _aviso_jungiano_restante > 0.0:
+		_aviso_jungiano_restante = maxf(0.0, _aviso_jungiano_restante - delta)
+		if is_zero_approx(_aviso_jungiano_restante) and _etiqueta_jungiana != null:
+			_etiqueta_jungiana.visible = false
 	if _doctrina_tiempo > 0.0:
 		_doctrina_tiempo = maxf(0.0, _doctrina_tiempo - delta)
 		if is_zero_approx(_doctrina_tiempo):
@@ -333,15 +348,20 @@ func _resolver_ataque_rival() -> void:
 			Sonido.sonar(self, "pulsar")
 			_registrar_esquiva_ritual()
 		_:
-			Sonido.sonar(self, "error")
-			var dano := dano_externalizado(1, _doctrina_activa)
-			_determinacion_jugador = maxi(0, _determinacion_jugador - dano)
-			if externaliza_activa:
-				_cerrar_doctrina()
-			_reaccion(_figura_jugador, -0.18)
-			_actualizar_hud()
-			if _determinacion_jugador <= 0:
-				_terminar(false)
+			if _invulnerabilidad_jungiana > 0.0:
+				Sonido.sonar(self, "pulsar")
+				_mostrar_aviso_jungiano("SELF · IMPACTO NEGADO", 0.8)
+			else:
+				Sonido.sonar(self, "error")
+				var dano := dano_externalizado(1, _doctrina_activa)
+				_determinacion_jugador = maxi(0, _determinacion_jugador - dano)
+				GestorMomentum.registrar_dano_recibido()
+				if externaliza_activa:
+					_cerrar_doctrina()
+				_reaccion(_figura_jugador, -0.18)
+				_actualizar_hud()
+				if _determinacion_jugador <= 0:
+					_terminar(false)
 
 	if comision_activa:
 		_cerrar_doctrina()
@@ -376,7 +396,22 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 	if hacia.length() > alcance:
 		return
 
-	var dano := dano_base
+	var efectos_jungianos := GestorArquetipos.efectos_combinados()
+	var probabilidad_critico := clampf(
+		float(efectos_jungianos.get("bonus_crit", 0.0))
+		+ float(efectos_jungianos.get("bonus_todo", 0.0)),
+		0.0,
+		0.75
+	)
+	var es_critico := probabilidad_critico > 0.0 and randf() < probabilidad_critico
+	GestorMomentum.registrar_golpe(es_critico)
+	GestorCombos.registrar_entrada("ataque_pesado" if fuerte else "ataque_ligero")
+
+	var dano := dano_base + _dano_combo_pendiente
+	_dano_combo_pendiente = 0
+	if es_critico:
+		dano += 1
+		_mostrar_aviso_jungiano("CRÍTICO", 0.65)
 	if fuerte:
 		dano += int(_ritual.get("dano_fuerte_bonus", 0))
 	var interrupcion_ritual := interrumpe_ataque(fuerte, _ataque_rival_pendiente, _ritual)
@@ -395,6 +430,7 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 		_cerrar_doctrina()
 
 	_determinacion_rival = maxi(0, _determinacion_rival - dano)
+	_aplicar_curacion_arquetipo(efectos_jungianos)
 	if not fuerte:
 		var segundos_enredo := float(_ritual.get("enredo_ligero_segundos", 0.0))
 		if segundos_enredo > 0.0:
@@ -421,7 +457,12 @@ func _intentar_retorno_rival() -> bool:
 func _esquivar() -> void:
 	if _esquiva > 0.0:
 		return
-	_esquiva = 0.34
+	var efectos := GestorArquetipos.efectos_combinados()
+	var bonus_evasion := (
+		float(efectos.get("evasion", 0.0)) + float(efectos.get("bonus_todo", 0.0))
+	)
+	_esquiva = 0.34 * (1.0 + bonus_evasion)
+	GestorCombos.registrar_entrada("esquivar")
 	if reduccion_movimiento:
 		return
 	_reaccion(_figura_jugador, 0.12)
@@ -441,6 +482,8 @@ func _terminar(gano: bool) -> void:
 		return
 	_acabado = true
 	_ataque_rival_pendiente = false
+	GestorMomentum.salir_combate()
+	GestorCombos.reiniciar()
 	_ocultar_aviso_ataque()
 	terminado.emit(gano)
 
@@ -646,6 +689,31 @@ func _montar_hud() -> void:
 	_etiqueta_ataque.visible = false
 	bloque.add_child(_etiqueta_ataque)
 
+	var fila_momentum := HBoxContainer.new()
+	fila_momentum.add_theme_constant_override("separation", 8)
+	bloque.add_child(fila_momentum)
+
+	var texto_momentum := Label.new()
+	texto_momentum.text = "MOMENTUM"
+	fila_momentum.add_child(texto_momentum)
+
+	_barra_momentum = ProgressBar.new()
+	_barra_momentum.show_percentage = true
+	_barra_momentum.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	fila_momentum.add_child(_barra_momentum)
+
+	_boton_finisher = Button.new()
+	_boton_finisher.text = "FINISHER"
+	_boton_finisher.disabled = true
+	_boton_finisher.tooltip_text = "Disponible al alcanzar el umbral de momentum"
+	_boton_finisher.pressed.connect(_ejecutar_finisher_jungiano)
+	fila_momentum.add_child(_boton_finisher)
+
+	_etiqueta_jungiana = Label.new()
+	_etiqueta_jungiana.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_etiqueta_jungiana.visible = false
+	bloque.add_child(_etiqueta_jungiana)
+
 
 func _actualizar_hud() -> void:
 	if _barra_jugador == null or _barra_rival == null:
@@ -654,6 +722,7 @@ func _actualizar_hud() -> void:
 	_barra_rival.value = _determinacion_rival
 	if _etiqueta_ritual != null:
 		_etiqueta_ritual.text = _texto_ritual()
+	_actualizar_hud_jungiano()
 
 
 func _texto_ritual() -> String:
@@ -706,8 +775,158 @@ func _actualizar_camara() -> void:
 	if _camara == null or _jugador == null or _rival == null:
 		return
 	var centro := (_jugador.position + _rival.position) * 0.5
-	_camara.position = centro + Vector3(0.0, 7.2, 8.2)
+	var sacudida := Vector3.ZERO
+	if _sacudida_camara > 0.0 and not reduccion_movimiento:
+		sacudida = Vector3(randf_range(-0.12, 0.12), randf_range(-0.08, 0.08), 0.0)
+	_camara.position = centro + Vector3(0.0, 7.2, 8.2) + sacudida
 	_camara.look_at(centro + Vector3(0.0, 0.9, 0.0), Vector3.UP)
+
+
+func _preparar_sistemas_jungianos() -> void:
+	GestorMomentum.reiniciar()
+	GestorCombos.reiniciar()
+	for arquetipo_id in GestorArquetipos.arquetipos:
+		var arquetipo = GestorArquetipos.arquetipos[arquetipo_id]
+		if arquetipo.desbloqueado:
+			GestorMomentum.aplicar_modificador_arquetipo(String(arquetipo_id))
+	GestorMomentum.en_combate = true
+
+	if not GestorArquetipos.arquetipo_desbloqueado.is_connected(_al_arquetipo_desbloqueado):
+		GestorArquetipos.arquetipo_desbloqueado.connect(_al_arquetipo_desbloqueado)
+	if not GestorMomentum.momentum_cambiado.is_connected(_al_momentum_cambiado):
+		GestorMomentum.momentum_cambiado.connect(_al_momentum_cambiado)
+	if not GestorCombos.combo_ejecutado.is_connected(_al_combo_ejecutado):
+		GestorCombos.combo_ejecutado.connect(_al_combo_ejecutado)
+	if not GestorCombos.finisher_ejecutado.is_connected(_al_finisher_ejecutado):
+		GestorCombos.finisher_ejecutado.connect(_al_finisher_ejecutado)
+
+
+func _al_arquetipo_desbloqueado(arquetipo_id: String) -> void:
+	GestorMomentum.aplicar_modificador_arquetipo(arquetipo_id)
+	var arquetipo = GestorArquetipos.obtener_arquetipo(arquetipo_id)
+	var nombre := arquetipo_id
+	if arquetipo != null:
+		nombre = String(arquetipo.nombre)
+	_mostrar_aviso_jungiano(
+		"ARQUETIPO · %s · HABILIDAD +1 (%d)"
+		% [nombre, GestorArquetipos.puntos_habilidad],
+		2.5
+	)
+	_actualizar_hud_jungiano()
+
+
+func _al_momentum_cambiado(_actual: float, _maximo: float) -> void:
+	_actualizar_hud_jungiano()
+
+
+func _al_combo_ejecutado(nombre: String, efectos: Dictionary) -> void:
+	if efectos.has("dano_multiplier"):
+		_dano_combo_pendiente += maxi(1, int(round(float(efectos["dano_multiplier"]) - 1.0)))
+	if efectos.has("dano"):
+		_dano_combo_pendiente += maxi(0, int(efectos["dano"]))
+	if efectos.has("curacion"):
+		_determinacion_jugador = mini(
+			DETERMINACION_BASE,
+			_determinacion_jugador + maxi(0, int(efectos["curacion"]))
+		)
+	if bool(efectos.get("contragolpe", false)):
+		_contraataque = maxi(_contraataque, 1)
+	if efectos.has("evasion_temporal"):
+		_esquiva = maxf(_esquiva, float(efectos.get("duracion", 0.8)))
+	var radio := float(efectos.get("area", 1.2))
+	_particulas_jungianas(radio, false)
+	Sonido.sonar(self, "pulsar")
+	_mostrar_aviso_jungiano("COMBO · %s" % nombre, 1.2)
+
+
+func _ejecutar_finisher_jungiano() -> void:
+	var finisher_id := GestorCombos.finisher_disponible_actual()
+	if finisher_id.is_empty():
+		return
+	GestorCombos.ejecutar_finisher(finisher_id)
+
+
+func _al_finisher_ejecutado(nombre: String, efectos: Dictionary, es_super: bool) -> void:
+	var dano := maxi(0, int(efectos.get("dano", 0)))
+	_determinacion_rival = maxi(0, _determinacion_rival - dano)
+	if bool(efectos.get("curacion_total", false)):
+		_determinacion_jugador = DETERMINACION_BASE
+	_invulnerabilidad_jungiana = maxf(
+		_invulnerabilidad_jungiana,
+		float(efectos.get("invulnerabilidad", 0.0))
+	)
+	_sacudida_camara = 0.38 if es_super else 0.24
+	_particulas_jungianas(float(efectos.get("area", 2.4)), es_super)
+	_reaccion(_figura_rival, 0.62 if es_super else 0.42)
+	Sonido.sonar(self, "marcar")
+	_mostrar_aviso_jungiano(
+		("SUPER FINISHER · " if es_super else "FINISHER · ") + nombre,
+		1.8
+	)
+	_actualizar_hud()
+	if _determinacion_rival <= 0 and not _intentar_retorno_rival():
+		_terminar(true)
+
+
+func _aplicar_curacion_arquetipo(efectos: Dictionary) -> void:
+	var tasa := (
+		float(efectos.get("curacion", 0.0)) + float(efectos.get("bonus_todo", 0.0))
+	)
+	if tasa <= 0.0 or _determinacion_jugador >= DETERMINACION_BASE:
+		return
+	_curacion_arquetipo_acumulada += tasa
+	while _curacion_arquetipo_acumulada >= 1.0:
+		_curacion_arquetipo_acumulada -= 1.0
+		_determinacion_jugador = mini(DETERMINACION_BASE, _determinacion_jugador + 1)
+
+
+func _actualizar_hud_jungiano() -> void:
+	if _barra_momentum != null:
+		_barra_momentum.max_value = GestorMomentum.momentum_max
+		_barra_momentum.value = GestorMomentum.momentum_actual
+	if _boton_finisher != null:
+		var finisher_id := GestorCombos.finisher_disponible_actual()
+		_boton_finisher.disabled = finisher_id.is_empty() or _acabado
+		if finisher_id.is_empty():
+			_boton_finisher.text = "FINISHER"
+		else:
+			var finisher: Dictionary = GestorCombos.finishers[finisher_id]
+			_boton_finisher.text = (
+				"SUPER FINISHER"
+				if bool(finisher.get("es_super", false))
+				else "FINISHER"
+			)
+
+
+func _mostrar_aviso_jungiano(texto: String, duracion: float) -> void:
+	if _etiqueta_jungiana == null:
+		return
+	_etiqueta_jungiana.text = texto
+	_etiqueta_jungiana.visible = true
+	_aviso_jungiano_restante = maxf(_aviso_jungiano_restante, duracion)
+
+
+func _particulas_jungianas(radio: float, es_super: bool) -> void:
+	if _rival == null:
+		return
+	var particulas := CPUParticles3D.new()
+	particulas.amount = 42 if es_super else 24
+	particulas.one_shot = true
+	particulas.lifetime = 0.65 if es_super else 0.45
+	particulas.explosiveness = 1.0
+	particulas.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+	particulas.emission_sphere_radius = clampf(radio * 0.22, 0.3, 1.4)
+	particulas.gravity = Vector3(0.0, -1.8, 0.0)
+	particulas.initial_velocity_min = 2.2
+	particulas.initial_velocity_max = 4.5 if es_super else 3.2
+	var malla := SphereMesh.new()
+	malla.radius = 0.045 if es_super else 0.03
+	malla.height = malla.radius * 2.0
+	particulas.mesh = malla
+	particulas.position = _rival.position + Vector3(0.0, 1.0, 0.0)
+	add_child(particulas)
+	particulas.finished.connect(particulas.queue_free)
+	particulas.restart()
 
 
 func _reaccion(figura: Node3D, desplazamiento: float) -> void:
