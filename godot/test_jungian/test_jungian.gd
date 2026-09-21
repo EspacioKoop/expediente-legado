@@ -15,9 +15,5 @@ func _ready() -> void:
 
 	var combate := JuicioCombate3D.new()
 	combate.name = "ArenaJungianaPrueba"
-	combate.configurar(
-		{"id": "rival-jungiano-prueba", "nombre": "Rival de prueba"},
-		0,
-		false
-	)
+	combate.configurar({"id": "rival-jungiano-prueba", "nombre": "Rival de prueba"}, 0, false)
 	add_child(combate)
