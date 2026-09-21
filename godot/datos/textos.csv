@@ -532,6 +532,16 @@ IMPREVISTO_RECIBO,Recibo inesperado
 ONBOARDING_OBJETIVO_INICIAL,OBJETIVO INICIAL
 ONBOARDING_PUESTO_SIGA,PUESTO 4-B · SIGA-98
 ONBOARDING_ACCION_SIGA,Acérquese al terminal verde para abrir su primer expediente.
+IDEOLOGIA_924_CUNADO_COLECTIVO,"Bueno, así al menos queda claro que esto no era cosa de una sola mesa."
+IDEOLOGIA_924_CUNADO_NEGOCIADO,"Hablarlo antes de que se enquiste tampoco es mala manera de cerrar una mañana."
+IDEOLOGIA_924_CUNADO_PROCEDIMIENTO,"Otra revisión. Si sirve para dejar claro quién hace qué la próxima vez, algo es algo."
+VISOR_DECISION_924_AYUDA,"El expediente ya está firmado. Elija cómo gestionar sus consecuencias; no cambia el veredicto ni las pistas."
+VISOR_DECISION_924_BLOQUEADA,Disponible después de firmar este expediente.
+VISOR_DECISION_924_CONCILIACION,Buscar una salida pactada entre las partes internas
+VISOR_DECISION_924_REGISTRADA,Criterio registrado: %s. El expediente conserva los mismos hechos y veredicto.
+VISOR_DECISION_924_RESPONSABILIDAD,Abrir una revisión conjunta de responsabilidades
+VISOR_DECISION_924_REVISION,Encargar una revisión formal del procedimiento
+VISOR_DECISION_924_TITULO,CONSECUENCIAS DEL CIERRE
 VISOR_PRONOSTICO_ABANDONAR,Abandonar
 VISOR_PRONOSTICO_ARRASTRA,¿Se arrastrará a mañana?
 VISOR_PRONOSTICO_BLOQUEADO,Pronóstico cerrado: el expediente ya ha sido expuesto.
