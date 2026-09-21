@@ -27,12 +27,16 @@ func conocer_obra(obra_id: String) -> bool:
 	var insight := int(efecto.get("bonus_insight", 0))
 	if insight > 0:
 		insight_total += insight
-		GestorArquetipos.ganar_insight(insight)
+		var gestor_arquetipos := get_node_or_null("/root/GestorArquetipos")
+		if gestor_arquetipos != null:
+			gestor_arquetipos.call("ganar_insight", insight)
 
 	var bonus := float(efecto.get("bonus_momentum", 0.0))
 	if bonus > 0.0:
 		momentum_bonus += bonus
-		GestorMomentum.agregar_momentum(bonus)
+		var gestor_momentum := get_node_or_null("/root/GestorMomentum")
+		if gestor_momentum != null:
+			gestor_momentum.call("agregar_momentum", bonus)
 
 	obra_conocida.emit(obra_id)
 	return true
