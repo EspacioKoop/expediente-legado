@@ -108,6 +108,25 @@ La SRAM no se escribe junto a la ROM ni dentro del repositorio y no forma parte 
 El gate end-to-end de #456 compila dos cartuchos MBC5+batería propios con marcadores distintos. `emulador_sram_smoke.gd` abre la UI real, ejecuta la primera ROM, cierra la Portátil Color 98 para forzar el guardado, crea otra instancia y exige que el snapshot se restaure antes de ejecutar de nuevo. Después repite con una segunda ROM y comprueba que ambas rutas SHA-256 y sus contenidos permanecen aislados.
 
 
+## Acabados físicos secundarios (#1055)
+
+El apagado físico también permanece fuera del núcleo:
+
+- al cerrar con efectos de presentación activos, la última textura visible del LCD se entrega a
+  `EfectoApagadoPortatil`, una capa efímera añadida al `SceneTree.root`;
+- esa capa conserva brevemente la imagen y reduce brillo/opacidad durante 180 ms, mientras la
+  UI original se cierra, restaura la pausa previa y devuelve el control **sin esperar** al efecto;
+- el clic de apagado es un `AudioStreamWAV` procedural separado del PCM de la ROM y puede
+  desactivarse junto con el resto de sonidos físicos;
+- el shader LCD aplica una oscilación determinista de brillo de ±1,2 % cuando la presentación
+  está activa. Al desactivar los efectos, el parámetro vuelve inmediatamente a cero;
+- ni el afterglow ni la variación de brillo reciben bytes de ROM, escriben SRAM o alteran el
+  framebuffer RGBA que entrega SameBoy.
+
+No se introducen fallos aleatorios de contacto ni retrasos artificiales del audio de ROM en este
+corte. Si se representan más adelante, deberán activarse como estados de presentación explícitos
+y seguir sin mutar el núcleo. Tampoco se recolorean ROMs CGB nativas.
+
 ## Link Cable diegético (#245)
 
 La primera versión del Link Cable es deliberadamente local y modular:

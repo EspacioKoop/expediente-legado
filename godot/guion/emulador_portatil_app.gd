@@ -25,6 +25,7 @@ const VOLUMEN_SONIDO_FISICO_DB := -18.0
 const SHADER_LCD := """
 shader_type canvas_item;
 uniform bool filtro_lcd = true;
+uniform float variacion_brillo = 0.0;
 
 void fragment() {
     vec4 base = texture(TEXTURE, UV);
@@ -42,6 +43,7 @@ void fragment() {
             rejilla = 0.92;
         }
         vec3 rgb = mix(base.rgb, arrastre.rgb, 0.06) * rejilla;
+        rgb *= 1.0 + variacion_brillo;
         COLOR = vec4(rgb, base.a);
     }
 }
@@ -72,6 +74,7 @@ var _jugando := false
 var _pausa_anterior := false
 var _abierto := false
 var _tiempo_emulador := 0.0
+var _tiempo_presentacion := 0.0
 var _ruta_sram_actual := ""
 var _efectos_presentacion := true
 var _sonidos_fisicos := true
@@ -103,6 +106,7 @@ func abrir() -> void:
 
 
 func _process(delta: float) -> void:
+	_actualizar_variacion_lcd(delta)
 	if _encendiendo:
 		_actualizar_encendido(delta)
 		return
@@ -311,6 +315,7 @@ func _preparar_audio_fisico() -> void:
 	add_child(_audio_fisico)
 	_sonidos_fisicos_cache = {
 		&"encendido": _crear_sonido_fisico(95.0, 230.0, 0.055, 0.52),
+		&"apagado": _crear_sonido_fisico(230.0, 72.0, 0.065, 0.50),
 		&"cartucho": _crear_sonido_fisico(170.0, 65.0, 0.070, 0.58),
 		&"cable": _crear_sonido_fisico(240.0, 105.0, 0.050, 0.36),
 		&"boton": _crear_sonido_fisico(760.0, 420.0, 0.028, 0.30),
@@ -442,6 +447,8 @@ func _al_cambiar_efectos(activos: bool) -> void:
 	_efectos_presentacion = activos
 	if _lcd_material != null:
 		_lcd_material.set_shader_parameter("filtro_lcd", activos)
+		if not activos:
+			_lcd_material.set_shader_parameter("variacion_brillo", 0.0)
 	if activos or not _encendiendo:
 		return
 
@@ -610,6 +617,40 @@ func _joy(boton: JoyButton) -> bool:
 	return Input.is_joy_button_pressed(0, boton)
 
 
+func _actualizar_variacion_lcd(delta: float) -> void:
+	if _lcd_material == null:
+		return
+	if not _efectos_presentacion:
+		_lcd_material.set_shader_parameter("variacion_brillo", 0.0)
+		return
+	_tiempo_presentacion += maxf(delta, 0.0)
+	# Variación determinista y deliberadamente pequeña: materialidad, no fallo.
+	var variacion := sin(_tiempo_presentacion * 1.7) * 0.012
+	_lcd_material.set_shader_parameter("variacion_brillo", variacion)
+
+
+func _lanzar_apagado_fisico() -> void:
+	if get_tree() == null:
+		return
+	var textura: Texture2D = null
+	var material_lcd: Material = null
+	var rect := Rect2()
+	if _efectos_presentacion and _vista != null and _vista.texture != null:
+		textura = _vista.texture
+		material_lcd = _vista.material
+		rect = _vista.get_global_rect()
+	var sonido: AudioStream = null
+	if _sonidos_fisicos:
+		var candidato = _sonidos_fisicos_cache.get(&"apagado")
+		if candidato is AudioStream:
+			sonido = candidato
+	if textura == null and sonido == null:
+		return
+	var efecto := EfectoApagadoPortatil.new()
+	get_tree().root.add_child(efecto)
+	efecto.iniciar(textura, material_lcd, rect, sonido, VOLUMEN_SONIDO_FISICO_DB)
+
+
 func _cerrar() -> void:
 	if not _abierto:
 		return
@@ -618,6 +659,8 @@ func _cerrar() -> void:
 	_tiempo_emulador = 0.0
 	_botones_previos = 0
 	_cancelar_encendido()
+	# El residuo visual/sonoro queda en root y no retiene la UI ni el mundo pausado.
+	_lanzar_apagado_fisico()
 	if _audio_fisico != null:
 		_audio_fisico.stop()
 	_abierto = false
