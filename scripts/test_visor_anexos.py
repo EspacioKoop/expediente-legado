@@ -14,7 +14,7 @@ def test_la_escena_activa_la_capa_de_anexos() -> None:
     superior = PRONOSTICOS.read_text(encoding="utf-8")
     assert 'res://guion/visor_pronosticos_app.gd' in escena
     assert 'extends "res://guion/visor_anexos_app.gd"' in superior
-    assert 'extends "res://guion/visor_metadatos_app.gd"' in capa
+    assert 'extends "res://guion/visor_meticulosidad_app.gd"' in capa
 
 
 def test_el_primer_anexo_no_inventa_contenido_clinico() -> None:
