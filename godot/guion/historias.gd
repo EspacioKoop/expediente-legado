@@ -176,25 +176,27 @@ func historial(estado: Dictionary) -> Array:
 		return crudo.duplicate(true)
 
 	var legado := []
-	var resueltas = estado.get("historias_cartas", {})
-	if typeof(resueltas) == TYPE_DICTIONARY:
-		var ids := resueltas.keys()
-		ids.sort()
-		for carta_id in ids:
-			legado.append(
-				{
-					"tipo": "resuelta",
-					"carta": String(carta_id),
-					"eleccion": String(resueltas[carta_id]),
-					"posposiciones": veces_pospuesta(estado, String(carta_id)),
-					"dia": 0,
-					"vuelta": 0,
-					"fase": "",
-					"legado": true,
-				}
-			)
+	var resueltas_crudas = estado.get("historias_cartas", {})
+	var resueltas: Dictionary = (
+		resueltas_crudas if typeof(resueltas_crudas) == TYPE_DICTIONARY else {}
+	)
+	var ids: Array = resueltas.keys()
+	ids.sort()
+	for carta_id in ids:
+		legado.append(
+			{
+				"tipo": "resuelta",
+				"carta": String(carta_id),
+				"eleccion": String(resueltas[carta_id]),
+				"posposiciones": veces_pospuesta(estado, String(carta_id)),
+				"dia": 0,
+				"vuelta": 0,
+				"fase": "",
+				"legado": true,
+			}
+		)
 	for carta_id in _pospuestas(estado):
-		if typeof(resueltas) == TYPE_DICTIONARY and resueltas.has(carta_id):
+		if resueltas.has(carta_id):
 			continue
 		legado.append(
 			{
