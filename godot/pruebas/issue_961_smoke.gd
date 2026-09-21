@@ -62,6 +62,14 @@ func _probar_frontera_de_dia() -> void:
 	jornada["dia"] = 3
 	_comprobar(Meticulosidad.puntos(jornada), 0, "el día nuevo no hereda meticulosidad")
 	_comprobar(Meticulosidad.motivos_oniricos(jornada), [], "el sueño nuevo empieza sin motivos")
+	Meticulosidad.registrar(jornada, "oficio@1", "marcador", "folio")
+	jornada["dia"] = 3
+	jornada["vuelta"] = 2
+	_comprobar(
+		Meticulosidad.puntos(jornada),
+		0,
+		"una reasignación limpia atención aunque conserve el mismo número de día",
+	)
 
 
 func _probar_ecos_oniricos() -> void:
