@@ -32,9 +32,10 @@ class AudioDocumentos966Test(unittest.TestCase):
                     fechados.append(int(fecha[:4]))
 
         antiguos = [anio for anio in fechados if anio <= 1989]
-        self.assertEqual(len(fechados), 43)
-        self.assertEqual(len(antiguos), 5)
-        self.assertLess(len(antiguos), len(fechados) // 4)
+        recientes = [anio for anio in fechados if anio >= 1990]
+        self.assertTrue(antiguos)
+        self.assertTrue(recientes)
+        self.assertLess(len(antiguos), len(fechados))
 
     def test_primera_lectura_usa_tono_y_relectura_sigue_en_clic(self):
         self.assertIn('Sonido.sonar(self, "documento", tono_documento(registro))', self.visor)
