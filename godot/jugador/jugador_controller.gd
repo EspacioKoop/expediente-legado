@@ -1,11 +1,11 @@
 extends CharacterBody3D
 
+var velocidad := 8.0
+var salto_impulso := 12.0
+
 @onready var gestor_arquetipos := get_node_or_null("/root/GestorArquetipos")
 @onready var gestor_momentum := get_node_or_null("/root/GestorMomentum")
 @onready var gestor_combos := get_node_or_null("/root/GestorCombos")
-
-var velocidad := 8.0
-var salto_impulso := 12.0
 
 
 func _physics_process(delta: float) -> void:
