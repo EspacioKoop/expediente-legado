@@ -150,7 +150,7 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	# bajo demanda. Desde #539 persiste únicamente la progresión local del OS por
 	# partida/vuelta; no duplica jornada, expedientes ni contenido de campaña.
 	_explorador_app = EscritorioSigaApp.new(
-		"explorador", "Explorador", Callable(self, "_crear_explorador"), "equipo"
+		"explorador", "Explorador", Callable(self, "_crear_explorador"), "explorador"
 	)
 	_explorador_app.tamano_minimo = Vector2(480, 330)
 	_explorador_app.tamano_preferido = Vector2(720, 520)
@@ -163,7 +163,7 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	# y favoritos son estado local persistible; el conocimiento de #539 se deriva
 	# del mismo estado OS98 que recibe Explorador.
 	_navegador_app = EscritorioSigaApp.new(
-		"navegador-web98", "Navegador Web98", Callable(self, "_crear_navegador"), "red"
+		"navegador-web98", "Navegador Web98", Callable(self, "_crear_navegador"), "web98"
 	)
 	_navegador_app.tamano_minimo = Vector2(640, 430)
 	_navegador_app.tamano_preferido = Vector2(820, 560)
@@ -175,7 +175,7 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	# #663 se aloja como una aplicación normal del shell. Su estado local solo
 	# contiene instalaciones y ejecuciones ficticias; nunca toca campaña ni host.
 	_software_app = EscritorioSigaApp.new(
-		"software-98", "Archivo de programas", Callable(self, "_crear_software"), "equipo"
+		"software-98", "Archivo de programas", Callable(self, "_crear_software"), "software"
 	)
 	_software_app.tamano_minimo = Vector2(600, 390)
 	_software_app.tamano_preferido = Vector2(760, 520)
@@ -202,7 +202,7 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	# separado por raíz de partida; la calculadora no conserva estado y limita su
 	# evaluación a aritmética, sin acceso a rutas, procesos ni APIs del host.
 	_bloc_notas_app = EscritorioSigaApp.new(
-		"bloc-notas", "Bloc de notas", Callable(self, "_crear_bloc_notas"), "documentos"
+		"bloc-notas", "Bloc de notas", Callable(self, "_crear_bloc_notas"), "bloc-notas"
 	)
 	_bloc_notas_app.tamano_minimo = Vector2(440, 300)
 	_bloc_notas_app.tamano_preferido = Vector2(620, 440)
@@ -212,7 +212,7 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	_apps.append(_bloc_notas_app)
 
 	_calculadora_app = EscritorioSigaApp.new(
-		"calculadora", "Calculadora", Callable(self, "_crear_calculadora"), "equipo"
+		"calculadora", "Calculadora", Callable(self, "_crear_calculadora"), "calculadora"
 	)
 	_calculadora_app.tamano_minimo = Vector2(360, 220)
 	_calculadora_app.tamano_preferido = Vector2(430, 300)
@@ -228,7 +228,7 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 			"catalogo-anomalias",
 			CatalogoAnomaliasSiga.texto("titulo_app"),
 			Callable(self, "_crear_catalogo_anomalias"),
-			"siga",
+			"catalogo-anomalias",
 		)
 	)
 	_catalogo_anomalias_app.tamano_minimo = Vector2(560, 360)
