@@ -149,10 +149,12 @@ Las tres piezas no se mezclan: `guion/jornada.gd` es el ciclo y la economía
 los construye sin conocer el nombre de ninguno. Un sitio nuevo es una entrada
 más del catálogo.
 
-La geometría es cajas a propósito, no un placeholder esperando arte: es el mismo
-argumento que la tipografía sin suavizar. Y los techos van **emisivos** porque
-la luz del motor viene de arriba, así que la cara inferior de un techo está
-siempre en el mínimo y salía negra por construcción.
+La geometría es cajas a propósito, no un placeholder esperando arte: conserva
+el vocabulario visual de bajo detalle del port sin sacrificar la legibilidad de
+la interfaz. La tipografía sí mantiene suavizado y usa fuentes empaquetadas
+(#780). Y los techos van **emisivos** porque la luz del motor viene de arriba,
+así que la cara inferior de un techo está siempre en el mínimo y salía negra
+por construcción.
 
 ## El sueño
 
@@ -199,10 +201,11 @@ pantalla. El motor no se tocó.
 
 ## Assets
 
-`assets/` está vacío y **ya vigilado**: `procedencia.json` exige ficha con
-sha256 para todo lo que entre, y la prueba lo comprueba en las dos direcciones
-—ni ficheros sin ficha ni fichas sin fichero—. La disciplina existe desde antes
-del primer asset, que es la única forma de que no se documente "luego".
+`assets/` ya contiene recursos versionados, incluidas las familias tipográficas
+empaquetadas de #780. `procedencia.json` exige ficha con licencia y sha256 para
+los assets sujetos a procedencia, y la suite comprueba que los recursos
+registrados coinciden con lo que se distribuye. Así la interfaz no depende de
+fuentes instaladas en la máquina ni de assets sin trazabilidad.
 
 ## Qué cambia respecto al backend Java
 
@@ -242,14 +245,15 @@ que en CSS eran `border-style: outset` e `inset` aquí se DIBUJA, porque un
 arriba y a la izquierda, la sombra abajo y a la derecha. Invertirlas es toda la
 diferencia entre un botón y un hueco.
 
-Lo que más delata la época no es la forma de la letra sino el **suavizado**:
-con antialiasing y posicionamiento subpíxel el texto se ve contemporáneo aunque
-el marco sea gris con biseles. `EstiloSiga.tema()` los apaga y fuerza el
-hinting, así que los trazos caen en la rejilla de píxeles. Las fuentes se piden
-al sistema por nombre y con degradación (`MS Sans Serif` → `Tahoma` → lo que
-haya), para no traer al repositorio ni un fichero de fuente. El cuerpo de un
-documento va monoespaciado: es el volcado de un sistema de texto, no una página
-maquetada.
+La identidad de finales de los 90 se conserva en el relieve, el color y la
+jerarquía, pero #780 dejó de degradar la legibilidad para conseguirla.
+`EstiloSiga.tema()` ya no desactiva el antialiasing ni pide fuentes del sistema:
+la interfaz usa **Atkinson Hyperlegible** empaquetada, con su variante Bold para
+títulos. Los documentos usan **MFB Oldstyle**, el texto técnico general usa
+**IBM Plex Mono** y los terminales pueden usar **Kubasta** con IBM Plex Mono como
+fallback reproducible. Los roles están centralizados en `estilo_siga.gd` y las
+fuentes distribuidas tienen su procedencia registrada, así que Linux y Windows
+renderizan las mismas familias sin depender de lo instalado en cada máquina.
 
 Para verlo sin abrir el editor:
 
