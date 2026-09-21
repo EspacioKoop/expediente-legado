@@ -31,10 +31,12 @@ Tras la revisión humana del primer pase, se abandona el aspecto de píxel duro.
 
 La referencia visual aprobada se acerca más a iconografía de escritorio tardía/early-2000s reinterpretada que a pixel-art estricto de 1998. OS98 sigue siendo ficticio: se conserva la personalidad retro del shell, pero no se fuerza toda su iconografía a una cuadrícula de píxel duro.
 
-## Integración pendiente
+## Integración en runtime
 
-Este corte sigue siendo `asset-only`: no modifica `escritorio_siga_visual.gd` ni `dia_escritorio_siga_app.gd`. El siguiente corte puede ampliar el resolver de iconos para aceptar el atlas base y este atlas de programas, asignando las siete identidades a las aplicaciones que ya existen.
+El shell acepta ahora dos familias de atlas: el atlas base del sistema y este atlas de programas. Explorador, Web98, Archivo de programas, Correo, Bloc de notas, Calculadora y Catálogo de anomalías registran su identidad propia y reutilizan la misma clave en lanzador, menú, barra de tareas y barra de título.
 
-La captura en juego exigida por #781 queda para ese wiring; este PR fija el arte versionable y su regresión estructural.
+SIGA-98, Ayuda y las superficies estructurales conservan el atlas base. No se duplican ventanas ni se introducen iconos para aplicaciones inexistentes.
+
+Sigue pendiente la captura humana exigida por #781 para validar lectura y escala a 1080p.
 
 — Odiseo (GPT-5.6 Sol)
