@@ -51,17 +51,23 @@ func _probar() -> void:
 		"El Trastero tiene rotulo propio",
 	)
 
-	var compras_quiosco := quiosco.find_children(
-		"Comprar_quiosco_*",
-		"Interactuable3D",
-		true,
-		false,
+	var compras_quiosco := (
+		quiosco
+		. find_children(
+			"Comprar_quiosco_*",
+			"Interactuable3D",
+			true,
+			false,
+		)
 	)
-	var compras_trastero := trastero.find_children(
-		"Comprar_segunda_mano_*",
-		"Interactuable3D",
-		true,
-		false,
+	var compras_trastero := (
+		trastero
+		. find_children(
+			"Comprar_segunda_mano_*",
+			"Interactuable3D",
+			true,
+			false,
+		)
 	)
 	_comprobar(compras_quiosco.size() == 4, "quiosco expone cuatro productos reales")
 	_comprobar(compras_trastero.size() == 2, "segunda mano expone dos productos reales")
@@ -70,9 +76,7 @@ func _probar() -> void:
 	dia.jornada["dinero"] = 200
 	var semillas_antes := SemillasOniricas.familias_activas(dia.jornada)
 
-	var revista := quiosco.get_node_or_null(
-		"Comprar_quiosco_revista_umbral_98"
-	) as Interactuable3D
+	var revista := quiosco.get_node_or_null("Comprar_quiosco_revista_umbral_98") as Interactuable3D
 	_comprobar(revista != null, "Umbral se compra desde el quiosco fisico")
 	if revista != null:
 		revista.interactuar(dia._caminante)
@@ -89,9 +93,9 @@ func _probar() -> void:
 		"comprar una publicacion no activa una semilla",
 	)
 
-	var lampara := trastero.get_node_or_null(
-		"Comprar_segunda_mano_lampara_verde_usada"
-	) as Interactuable3D
+	var lampara := (
+		trastero.get_node_or_null("Comprar_segunda_mano_lampara_verde_usada") as Interactuable3D
+	)
 	_comprobar(lampara != null, "la lampara se compra desde El Trastero")
 	if lampara != null:
 		lampara.interactuar(dia._caminante)
