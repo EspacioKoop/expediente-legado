@@ -333,9 +333,7 @@ static func reproducir(
 ## usa únicamente si quien llama no ha declarado `vigilia_fase` de forma
 ## explícita. Así un sueño aislado conserva la cama base y las pruebas pueden
 ## construir escenas independientes sin contaminación entre ellas.
-static func _contexto_reproduccion(
-	nodo: Node, fase: String, contexto: Dictionary
-) -> Dictionary:
+static func _contexto_reproduccion(nodo: Node, fase: String, contexto: Dictionary) -> Dictionary:
 	var resuelto := contexto.duplicate()
 	if not FASES.has(fase):
 		return resuelto
