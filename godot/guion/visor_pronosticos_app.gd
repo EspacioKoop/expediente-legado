@@ -15,6 +15,12 @@ const TIPOS := [
 	{"id": "tarot", "texto": "VISOR_PRONOSTICO_TAROT"},
 ]
 
+const TEXTO_DECISION_924 := {
+	"responsabilidad_compartida": "VISOR_DECISION_924_RESPONSABILIDAD",
+	"revision_procedimental": "VISOR_DECISION_924_REVISION",
+	"conciliacion_interna": "VISOR_DECISION_924_CONCILIACION",
+}
+
 var _pronostico_tipo: OptionButton
 var _pronostico_valor: OptionButton
 var _pronostico_confirmar: Button
@@ -23,11 +29,15 @@ var _pronostico_historial_boton: Button
 var _pronostico_estado: Label
 var _ventana_historial: Window
 var _pronostico_historial_lista: ItemList
+var _decision_924_bloque: VBoxContainer
+var _decision_924_estado: Label
+var _decision_924_opciones: VBoxContainer
 
 
 func _ready() -> void:
 	super._ready()
 	_actualizar_pronostico()
+	_actualizar_decision_924()
 
 
 func _columna_indice() -> Control:
@@ -74,17 +84,24 @@ func _columna_indice() -> Control:
 	columna.add_child(acciones)
 
 	_rellenar_valores_pronostico()
+	_montar_decision_924(columna)
 	return columna
 
 
 func _al_elegir_caso(indice: int) -> void:
 	super._al_elegir_caso(indice)
 	_actualizar_pronostico()
+	_actualizar_decision_924()
 
 
 func _al_elegir_documento(indice: int) -> void:
 	super._al_elegir_documento(indice)
 	_actualizar_pronostico()
+
+
+func _mostrar_cierre(acusacion: Dictionary, duelo: Dictionary = {}) -> void:
+	super._mostrar_cierre(acusacion, duelo)
+	_actualizar_decision_924()
 
 
 func _al_cambiar_tipo_pronostico(_indice: int) -> void:
@@ -306,6 +323,84 @@ func _caso_expuesto() -> bool:
 		if leidos_total.has(registro.get("id", "")) or leidos_hoy.has(registro.get("folio", "")):
 			return true
 	return false
+
+
+func _montar_decision_924(columna: Control) -> void:
+	columna.add_child(HSeparator.new())
+	_decision_924_bloque = VBoxContainer.new()
+	_decision_924_bloque.name = "DecisionIdeologicaExpediente"
+	_decision_924_bloque.add_theme_constant_override("separation", 4)
+	columna.add_child(_decision_924_bloque)
+
+	var titulo := Label.new()
+	titulo.text = tr("VISOR_DECISION_924_TITULO")
+	_decision_924_bloque.add_child(titulo)
+
+	_decision_924_estado = Label.new()
+	_decision_924_estado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_decision_924_bloque.add_child(_decision_924_estado)
+
+	_decision_924_opciones = VBoxContainer.new()
+	_decision_924_opciones.add_theme_constant_override("separation", 3)
+	_decision_924_bloque.add_child(_decision_924_opciones)
+
+
+func _actualizar_decision_924() -> void:
+	if (
+		_decision_924_bloque == null
+		or _decision_924_estado == null
+		or _decision_924_opciones == null
+	):
+		return
+	var caso_id := String(caso.get("id", ""))
+	var definicion := DecisionIdeologicaExpediente.definicion(caso_id)
+	_decision_924_bloque.visible = not definicion.is_empty()
+	_limpiar_opciones_decision_924()
+	if definicion.is_empty():
+		return
+
+	var registrada := DecisionIdeologicaExpediente.opcion_registrada(partida.estado, caso_id)
+	if not registrada.is_empty():
+		_decision_924_estado.text = (
+			tr("VISOR_DECISION_924_REGISTRADA") % _texto_opcion_decision_924(registrada)
+		)
+		return
+
+	if not DecisionIdeologicaExpediente.disponible(partida.estado, caso_id):
+		_decision_924_estado.text = tr("VISOR_DECISION_924_BLOQUEADA")
+		return
+
+	_decision_924_estado.text = tr("VISOR_DECISION_924_AYUDA")
+	for opcion in DecisionIdeologicaExpediente.opciones(caso_id):
+		var opcion_id := String(opcion.get("id", ""))
+		if opcion_id.is_empty():
+			continue
+		var boton := Button.new()
+		boton.text = _texto_opcion_decision_924(opcion_id)
+		boton.pressed.connect(_resolver_decision_924.bind(opcion_id))
+		_decision_924_opciones.add_child(boton)
+
+
+func _limpiar_opciones_decision_924() -> void:
+	for hijo in _decision_924_opciones.get_children():
+		_decision_924_opciones.remove_child(hijo)
+		hijo.queue_free()
+
+
+func _resolver_decision_924(opcion_id: String) -> void:
+	if _hay_guardado_a_medias():
+		return
+	var caso_id := String(caso.get("id", ""))
+	var resultado := DecisionIdeologicaExpediente.resolver(partida.estado, caso_id, opcion_id)
+	if String(resultado.get("resultado", "")) == "registrada":
+		Sonido.sonar(self, "pulsar")
+		_guardar_o_avisar()
+	_actualizar_decision_924()
+
+
+func _texto_opcion_decision_924(opcion_id: String) -> String:
+	var clave := String(TEXTO_DECISION_924.get(opcion_id, ""))
+	return tr(clave) if not clave.is_empty() else opcion_id
 
 
 func _nombre_tipo(tipo: String) -> String:
