@@ -1,4 +1,4 @@
-[gd_scene load_steps=44 format=3]
+[gd_scene load_steps=45 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -43,6 +43,7 @@
 [ext_resource type="Script" path="res://guion/dia_marcadores_mundo_app.gd" id="41"]
 [ext_resource type="Script" path="res://guion/dia_huellas_ambientales_app.gd" id="42"]
 [ext_resource type="Script" path="res://guion/dia_reloj_horario_app.gd" id="43"]
+[ext_resource type="Script" path="res://guion/dia_vecinos_edificio_app.gd" id="44"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -130,6 +131,9 @@ script = ExtResource("25")
 
 [node name="CorreoPostalController" type="Node" parent="."]
 script = ExtResource("26")
+
+[node name="VecinosEdificioController" type="Node" parent="."]
+script = ExtResource("44")
 
 [node name="TelefonoFijoController" type="Node" parent="."]
 script = ExtResource("27")
