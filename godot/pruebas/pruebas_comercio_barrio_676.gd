@@ -98,8 +98,10 @@ func _probar() -> void:
 	_comprobar(atrezzo_trastero != null, "El Trastero tiene atrezzo de segunda mano")
 	if atrezzo_trastero != null:
 		_comprobar(
-			atrezzo_trastero.get_node_or_null("RadioUsada") != null
-			and atrezzo_trastero.get_node_or_null("TelefonoUsadoBase") != null,
+			(
+				atrezzo_trastero.get_node_or_null("RadioUsada") != null
+				and atrezzo_trastero.get_node_or_null("TelefonoUsadoBase") != null
+			),
 			"el atrezzo diferencia segunda mano sin ampliar el catalogo",
 		)
 	var ticket_quiosco := quiosco.get_node_or_null("TicketTransaccion") as Node3D
