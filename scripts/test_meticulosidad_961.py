@@ -41,7 +41,7 @@ class Meticulosidad961Test(unittest.TestCase):
 
     def test_el_sueno_consume_motivos_sin_tocar_objetivos(self):
         self.assertIn("Meticulosidad.motivos_oniricos(dia.jornada)", self.controlador)
-        self.assertRegex(self.controlador, r"SuenoAtencionDocumental\\s*\\.\\s*montar\\(")
+        self.assertRegex(self.controlador, r"SuenoAtencionDocumental\s*\.\s*montar\(")
         self.assertIn('eco.set_meta("decorativo", true)', self.sueno)
         self.assertNotIn("CollisionShape3D", self.sueno)
         self.assertNotIn("SuenoObjetivos", self.sueno)
