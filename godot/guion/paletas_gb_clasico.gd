@@ -11,27 +11,33 @@ const NORMAL := "normal"
 
 const PALETAS := {
 	"normal": {"nombre": "Núcleo (normal)"},
-	"ambar": {
+	"ambar":
+	{
 		"nombre": "Ámbar tenue",
-		"colores": [
+		"colores":
+		[
 			Color8(46, 31, 18),
 			Color8(112, 73, 31),
 			Color8(194, 145, 64),
 			Color8(244, 220, 146),
 		],
 	},
-	"salvia": {
+	"salvia":
+	{
 		"nombre": "Salvia LCD",
-		"colores": [
+		"colores":
+		[
 			Color8(28, 40, 31),
 			Color8(61, 84, 60),
 			Color8(126, 147, 95),
 			Color8(213, 220, 166),
 		],
 	},
-	"humo": {
+	"humo":
+	{
 		"nombre": "Azul humo",
-		"colores": [
+		"colores":
+		[
 			Color8(25, 31, 43),
 			Color8(58, 72, 91),
 			Color8(117, 137, 151),
