@@ -12,9 +12,7 @@ var _reduccion_movimiento := false
 
 
 func _ready() -> void:
-	_reduccion_movimiento = bool(
-		PreferenciasSiga.cargar().get("reduccion_movimiento", false)
-	)
+	_reduccion_movimiento = bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false))
 
 
 func _process(_delta: float) -> void:
@@ -68,12 +66,15 @@ func _resolver_paquete(_actor: Node) -> void:
 
 
 func _firma_estado(dia: Node, mundo: Node3D) -> String:
-	return "%d:%d:%s:%s" % [
-		mundo.get_instance_id(),
-		int(dia.jornada.get("dia", 1)),
-		JSON.stringify(dia.jornada.get(VecinosEdificio.CLAVE_RESUELTOS, [])),
-		"reducido" if _reduccion_movimiento else "normal",
-	]
+	return (
+		"%d:%d:%s:%s"
+		% [
+			mundo.get_instance_id(),
+			int(dia.jornada.get("dia", 1)),
+			JSON.stringify(dia.jornada.get(VecinosEdificio.CLAVE_RESUELTOS, [])),
+			"reducido" if _reduccion_movimiento else "normal",
+		]
+	)
 
 
 func _limpiar() -> void:
