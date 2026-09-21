@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="1024" viewBox="0 0 512 1024">
+  <title>Vidriera de luz — #934</title>
+  <desc>Diseño original no narrativo para cultura material cristiana: tracería, vidrio azul y ámbar, sin escena sagrada ni texto.</desc>
+  <defs>
+    <clipPath id="ventana"><path d="M64 960V304C64 154 151 64 256 64s192 90 192 240v656z"/></clipPath>
+  </defs>
+  <g clip-path="url(#ventana)" stroke="#2a2119" stroke-width="18" stroke-linejoin="round">
+    <rect width="512" height="1024" fill="#14304a"/>
+    <path d="M256 70v890M70 410h372M70 680h372" fill="none"/>
+    <path d="M70 410L256 180 442 410 256 680z" fill="#1e5d78"/>
+    <path d="M256 180L330 410 256 680 182 410z" fill="#d89a34"/>
+    <circle cx="256" cy="410" r="82" fill="#e9c76d"/>
+    <path d="M256 328c-52 42-70 76-70 122 32-16 54-14 70 7 16-21 38-23 70-7 0-46-18-80-70-122z" fill="#9ac0b0"/>
+    <path d="M96 760l160-80 160 80-160 180z" fill="#284f6e"/>
+    <path d="M136 850h240M176 760l80 180 80-180" fill="none"/>
+  </g>
+  <path d="M64 960V304C64 154 151 64 256 64s192 90 192 240v656z" fill="none" stroke="#55463b" stroke-width="30"/>
+</svg>
