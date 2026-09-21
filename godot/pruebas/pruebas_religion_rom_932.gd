@@ -103,6 +103,29 @@ func _probar_consumidor_posterior() -> void:
 	_comprobar(not bool(recuerdo["hechos_nuevos"]), "el consumidor no introduce hechos nuevos")
 	_comprobar(not bool(recuerdo["asume_conviccion"]), "el consumidor no asume convicción")
 
+	var mundo := Node3D.new()
+	root.add_child(mundo)
+	_comprobar(
+		ReligionRecuerdoJali9323D.montar(mundo, {}) == null,
+		"sin exposición no aparece geometría onírica",
+	)
+	var firma := ReligionRecuerdoJali9323D.montar(mundo, recuerdo)
+	_comprobar(firma != null, "el recuerdo se materializa en el sueño")
+	_comprobar(firma.name == "RecuerdoJali98", "la consecuencia tiene identidad estable")
+	_comprobar(firma.get_child_count() == 12, "la proyección reutiliza una geometría legible")
+	_comprobar(
+		String(firma.get_meta("fuente_cultural", "")) == "rom:jali_98",
+		"la proyección conserva su procedencia",
+	)
+	_comprobar(
+		not bool(firma.get_meta("asume_conviccion", true)), "la geometría no infiere convicción"
+	)
+	_comprobar(
+		ReligionRecuerdoJali9323D.montar(mundo, recuerdo) == firma,
+		"el mismo mundo no duplica el recuerdo",
+	)
+	mundo.free()
+
 
 func _comprobar(condicion: bool, nombre: String) -> void:
 	if condicion:

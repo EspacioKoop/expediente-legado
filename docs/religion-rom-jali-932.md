@@ -84,6 +84,10 @@ La ROM no conoce Partida, Jornada, ReligionEventos ni el consumidor posterior.
 
 El consumidor posterior solo conserva motivos que el jugador ya ha visto: geometría, luz, sombra y calado. No introduce hechos nuevos de expedientes y no transforma la exposición en práctica o convicción.
 
+### Consecuencia posterior visible
+
+Durante una fase `sueño`, si la exposición a JALI 98 existe, `ReligionRecuerdoJali9323D` materializa una firma baja de suelo formada por tres rosetas geométricas de luz. Es geometría procedural propia, no reproduce el jali histórico ni añade símbolos o texto religioso. No tiene colisión, interacción ni efecto jugable: el sueño recuerda una relación visual ya experimentada en la ROM.
+
 ## Trabajo posterior
 
 Antes de añadir una segunda ROM vinculada a una tradición viva concreta hay que repetir esta estructura documental: fuente, lugar/periodo, materialidad, frontera entre hecho e invención y revisión de símbolos/textos que no deben convertirse en mecánica.
