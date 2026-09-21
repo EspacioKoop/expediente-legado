@@ -86,7 +86,9 @@ func _probar() -> void:
 	)
 	var ticket_quiosco := quiosco.get_node_or_null("TicketTransaccion") as Node3D
 	var ticket_trastero := trastero.get_node_or_null("TicketTransaccion") as Node3D
-	_comprobar(ticket_quiosco != null and not ticket_quiosco.visible, "ticket quiosco empieza oculto")
+	_comprobar(
+		ticket_quiosco != null and not ticket_quiosco.visible, "ticket quiosco empieza oculto"
+	)
 	_comprobar(
 		ticket_trastero != null and not ticket_trastero.visible,
 		"ticket trastero empieza oculto",
