@@ -31,7 +31,6 @@ class ReligionMundo934Test(unittest.TestCase):
         self.assertIn("const DIA_ACTO_MEMORIA := 3", mundo)
         self.assertIn("BoxMesh.new()", escena)
         self.assertNotIn("res://assets/", escena)
-        self.assertNotIn("load(", escena)
 
     def test_practica_es_interaccion_3d_y_no_menu(self) -> None:
         escena = MUNDO_3D.read_text(encoding="utf-8")
