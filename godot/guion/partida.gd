@@ -331,9 +331,7 @@ static func validar(guardado) -> Array:
 		and typeof(guardado["historias_pospuestas_conteo"]) == TYPE_DICTIONARY
 	):
 		for carta_id in guardado["historias_pospuestas_conteo"]:
-			if not _entero_valido(
-				guardado["historias_pospuestas_conteo"][carta_id], 0, 2147483647
-			):
+			if not _entero_valido(guardado["historias_pospuestas_conteo"][carta_id], 0, 2147483647):
 				errores.append("historias_pospuestas_conteo.%s inválido" % String(carta_id))
 	if guardado.has("huellas_ambientales"):
 		if typeof(guardado["huellas_ambientales"]) != TYPE_DICTIONARY:
