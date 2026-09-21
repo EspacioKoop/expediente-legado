@@ -139,6 +139,33 @@ Este corte es deliberadamente visual/ambiental. No afirma compatibilidad con acc
 o juegos reales y no inventa semántica de protocolo.
 
 
+## Impresora térmica diegética (#1054)
+
+El primer corte de impresión mantiene el periférico fuera del núcleo y de la campaña:
+
+- `ImpresoraTermicaPortatil` implementa una cola local con estados apagada, lista,
+  imprimiendo y papel disponible;
+- la entrada estable es una `Image` o un framebuffer RGBA entregado explícitamente por
+  Godot; este corte no implementa el protocolo de una impresora comercial ni afirma
+  compatibilidad con hardware real;
+- la prueba visible usa un **patrón procedural propio** y determinista, convertido a una
+  trama térmica monocroma de 160 píxeles de ancho;
+- `ImpresoraTermicaPortatil3D` vive junto a la Portátil Color 98 como objeto separado,
+  con LED, tira que emerge, textura del papel y un traqueteo `AudioStreamWAV` generado
+  en tiempo de ejecución;
+- sonido y animación son capas externas con interruptores propios; la cola sigue
+  funcionando aunque se desactive su presentación;
+- cerrar la portátil no cancela ni bloquea el trabajo: el controlador pertenece al
+  objeto físico de la casa y avanza con `PROCESS_MODE_ALWAYS`;
+- recoger la tira solo la retira del periférico. Es una interacción decorativa, sin recompensas
+  sistémicas: no entra en inventario, no se guarda y no concede dinero, pistas, acciones ni
+  desbloqueos.
+
+Un adaptador de protocolo real, si se añade más adelante con fixtures propios y licencia
+clara, deberá alimentar la misma entrada RGBA. Así puede sustituirse la fuente de imagen
+sin reescribir cola, papel, sonido o representación 3D.
+
+
 ## Aislamiento
 
 El wrapper nativo recibe únicamente:

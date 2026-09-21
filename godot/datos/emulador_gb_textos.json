@@ -36,5 +36,15 @@
   "ir_emitir": "Emitir pulso IR de prueba",
   "ir_listo": "IR listo · sin receptor local",
   "ir_pulso_emitido": "Pulso IR local #%d · sin receptor",
-  "ir_aviso": "Respuesta visual local: todavía no emula el protocolo IR ni comunica con periféricos."
+  "ir_aviso": "Respuesta visual local: todavía no emula el protocolo IR ni comunica con periféricos.",
+  "impresora_titulo": "IMPRESORA TÉRMICA",
+  "impresora_apagada": "Impresora térmica: apagada",
+  "impresora_lista": "Impresora térmica: lista",
+  "impresora_imprimiendo": "Imprimiendo patrón propio… %d%%",
+  "impresora_papel_disponible": "Tira lista · recógela en la mesa",
+  "impresora_encender": "Encender impresora",
+  "impresora_imprimir_prueba": "Imprimir patrón de prueba",
+  "impresora_imprimiendo_boton": "Imprimiendo…",
+  "impresora_recoger_en_casa": "Papel disponible en la casa",
+  "impresora_aviso": "Primer corte local: imprime un patrón procedural propio; no usa ROM, campaña ni protocolo de periférico real."
 }
