@@ -8,6 +8,7 @@ NATIVE = ROOT / "godot" / "native" / "siga98_gb"
 UI = ROOT / "godot" / "guion" / "emulador_portatil_app.gd"
 AUDIO_UI = ROOT / "godot" / "guion" / "emulador_portatil_audio_app.gd"
 AFTERGLOW = ROOT / "godot" / "guion" / "efecto_apagado_portatil.gd"
+PALETAS = ROOT / "godot" / "guion" / "paletas_gb_clasico.gd"
 PORTATIL = ROOT / "godot" / "guion" / "consola_portatil_98.gd"
 EXTENSION = ROOT / "godot" / "addons" / "siga98_gb" / "siga98_gb.gdextension"
 LOCK = NATIVE / "deps.lock.json"
@@ -24,6 +25,7 @@ class EmuladorGBTest(unittest.TestCase):
         cls.ui = UI.read_text(encoding="utf-8")
         cls.audio_ui = AUDIO_UI.read_text(encoding="utf-8")
         cls.afterglow = AFTERGLOW.read_text(encoding="utf-8")
+        cls.paletas = PALETAS.read_text(encoding="utf-8")
         cls.portatil = PORTATIL.read_text(encoding="utf-8")
         cls.extension = EXTENSION.read_text(encoding="utf-8")
         cls.lock = json.loads(LOCK.read_text(encoding="utf-8"))
@@ -217,6 +219,48 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn('get(&"apagado")', self.ui)
         self.assertIn('name = "ClickApagadoPortatil"', self.afterglow)
         self.assertIn("AudioStreamPlayer.new()", self.afterglow)
+
+    def test_paletas_gb_son_propias_por_rom_y_tienen_fallback_normal(self):
+        self.assertIn('CONFIG_PATH := "user://portatil_color_98.cfg"', self.paletas)
+        self.assertIn('SECTION := "paletas_gb"', self.paletas)
+        self.assertIn('NORMAL := "normal"', self.paletas)
+        for identificador in ("ambar", "salvia", "humo"):
+            self.assertIn(f'"{identificador}"', self.paletas)
+        self.assertIn("ConfigFile.new()", self.paletas)
+        self.assertIn("config.get_value(SECTION, huella, NORMAL)", self.paletas)
+        self.assertIn("config.set_value(SECTION, huella, id)", self.paletas)
+        self.assertNotIn("Siga98GB", self.paletas)
+        self.assertNotIn("save_ram", self.paletas)
+
+    def test_paleta_solo_se_activa_en_rom_gb_clasica(self):
+        self.assertIn("func _es_rom_gb_clasica(rom: PackedByteArray) -> bool:", self.ui)
+        self.assertIn("int(rom[0x143]) == 0x00", self.ui)
+        self.assertIn("uniform bool paleta_gb_activa = false", self.ui)
+        self.assertIn("if (paleta_gb_activa)", self.ui)
+        self.assertIn("_paleta_selector.disabled = not _rom_gb_clasica_actual", self.ui)
+        self.assertIn(
+            "var activa := _rom_gb_clasica_actual and id != PaletasGbClasico.NORMAL",
+            self.ui,
+        )
+        cuerpo = self.ui.split("func _aplicar_paleta(id: String) -> void:", 1)[1].split(
+            "func ", 1
+        )[0]
+        self.assertNotIn("_emulador.call", cuerpo)
+        self.assertNotIn("load_rom", cuerpo)
+        self.assertNotIn("save_ram", cuerpo)
+
+    def test_preferencia_de_paleta_usa_la_misma_huella_sha256_sin_tocar_sram(self):
+        self.assertIn("func _huella_rom(rom: PackedByteArray) -> String:", self.ui)
+        self.assertIn("_huella_rom_actual = _huella_rom(rom)", self.ui)
+        self.assertIn("PaletasGbClasico.cargar_preferencia(_huella_rom_actual)", self.ui)
+        self.assertIn(
+            "PaletasGbClasico.guardar_preferencia(_huella_rom_actual, id)",
+            self.ui,
+        )
+        ruta = self.ui.split("func _ruta_sram(rom: PackedByteArray) -> String:", 1)[1].split(
+            "func ", 1
+        )[0]
+        self.assertIn("var huella := _huella_rom(rom)", ruta)
 
     def test_sonido_fisico_es_procedural_separable_y_desactivable(self):
         self.assertIn("FRECUENCIA_SONIDO_FISICO := 22050", self.ui)
