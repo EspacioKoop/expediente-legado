@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <title>Gráficos de embalaje para electrodomésticos genéricos de 1998</title>
+  <desc>Asset original sin marcas ni texto. Fondo transparente. Diseñado para cajas de cartón y paneles de almacén.</desc>
+  <defs>
+    <pattern id="cartonRayado" width="18" height="18" patternUnits="userSpaceOnUse">
+      <rect width="18" height="18" fill="#b68c57"/>
+      <path d="M0 4h18M0 13h18" stroke="#a37b4b" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <g id="caja_crt" transform="translate(45 45)">
+    <rect width="330" height="300" rx="10" fill="url(#cartonRayado)" stroke="#5b442d" stroke-width="8"/>
+    <rect x="48" y="52" width="234" height="154" rx="18" fill="none" stroke="#4d4539" stroke-width="10"/>
+    <rect x="68" y="72" width="194" height="114" rx="14" fill="none" stroke="#4d4539" stroke-width="6"/>
+    <circle cx="285" cy="235" r="22" fill="none" stroke="#4d4539" stroke-width="7"/>
+    <path d="M62 252h134" stroke="#4d4539" stroke-width="10" stroke-linecap="round"/>
+    <path d="M18 20h48M18 20v48M312 20h-48M312 20v48M18 280h48M18 280v-48M312 280h-48M312 280v-48" fill="none" stroke="#7a5634" stroke-width="8"/>
+  </g>
+
+  <g id="caja_lavadora" transform="translate(430 45)">
+    <rect width="330" height="300" rx="10" fill="url(#cartonRayado)" stroke="#5b442d" stroke-width="8"/>
+    <rect x="58" y="38" width="214" height="214" rx="12" fill="none" stroke="#4d4539" stroke-width="8"/>
+    <circle cx="165" cy="155" r="70" fill="none" stroke="#4d4539" stroke-width="9"/>
+    <circle cx="165" cy="155" r="50" fill="none" stroke="#4d4539" stroke-width="5"/>
+    <circle cx="95" cy="72" r="12" fill="none" stroke="#4d4539" stroke-width="5"/>
+    <circle cx="135" cy="72" r="10" fill="none" stroke="#4d4539" stroke-width="5"/>
+    <rect x="205" y="62" width="38" height="18" rx="4" fill="none" stroke="#4d4539" stroke-width="5"/>
+  </g>
+
+  <g id="caja_frigorifico" transform="translate(815 45)">
+    <rect width="300" height="580" rx="10" fill="url(#cartonRayado)" stroke="#5b442d" stroke-width="8"/>
+    <rect x="60" y="50" width="180" height="470" rx="16" fill="none" stroke="#4d4539" stroke-width="10"/>
+    <path d="M60 190h180" stroke="#4d4539" stroke-width="8"/>
+    <rect x="202" y="82" width="14" height="88" rx="6" fill="#4d4539"/>
+    <rect x="202" y="240" width="14" height="160" rx="6" fill="#4d4539"/>
+    <path d="M22 30h44M22 30v44M278 30h-44M278 30v44M22 550h44M22 550v-44M278 550h-44M278 550v-44" fill="none" stroke="#7a5634" stroke-width="8"/>
+  </g>
+
+  <g id="caja_minicadena" transform="translate(45 420)">
+    <rect width="520" height="300" rx="10" fill="url(#cartonRayado)" stroke="#5b442d" stroke-width="8"/>
+    <circle cx="110" cy="160" r="72" fill="none" stroke="#4d4539" stroke-width="9"/>
+    <circle cx="410" cy="160" r="72" fill="none" stroke="#4d4539" stroke-width="9"/>
+    <rect x="190" y="82" width="140" height="56" rx="8" fill="none" stroke="#4d4539" stroke-width="7"/>
+    <rect x="190" y="164" width="140" height="54" rx="8" fill="none" stroke="#4d4539" stroke-width="7"/>
+    <circle cx="222" cy="244" r="10" fill="#4d4539"/><circle cx="260" cy="244" r="10" fill="#4d4539"/><circle cx="298" cy="244" r="10" fill="#4d4539"/>
+  </g>
+
+  <g id="pictogramas_embalaje" transform="translate(625 675)">
+    <g id="fragil" transform="translate(0 0)">
+      <rect width="110" height="110" rx="12" fill="#c9a16c" stroke="#5b442d" stroke-width="6"/>
+      <path d="M42 24h28l-3 27c-1 12-8 18-11 19v17h22v8H32v-8h22V70c-9-5-13-12-13-22z" fill="none" stroke="#4d4539" stroke-width="6"/>
+    </g>
+    <g id="arriba" transform="translate(140 0)">
+      <rect width="110" height="110" rx="12" fill="#c9a16c" stroke="#5b442d" stroke-width="6"/>
+      <path d="M34 82V34M76 82V34M21 48l13-14 13 14M63 48l13-14 13 14" fill="none" stroke="#4d4539" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g id="seco" transform="translate(280 0)">
+      <rect width="110" height="110" rx="12" fill="#c9a16c" stroke="#5b442d" stroke-width="6"/>
+      <path d="M22 55c18-28 48-28 66 0-7-7-15-6-22 0-7-6-15-7-22 0-7-6-15-7-22 0z" fill="none" stroke="#4d4539" stroke-width="6"/>
+      <path d="M55 55v33" stroke="#4d4539" stroke-width="6"/>
+    </g>
+    <g id="dos_personas" transform="translate(420 0)">
+      <rect width="110" height="110" rx="12" fill="#c9a16c" stroke="#5b442d" stroke-width="6"/>
+      <circle cx="38" cy="38" r="12" fill="#4d4539"/><circle cx="72" cy="38" r="12" fill="#4d4539"/>
+      <path d="M22 86c2-24 10-34 24-34s22 10 24 34M56 86c2-24 10-34 24-34 8 0 15 4 20 12" fill="none" stroke="#4d4539" stroke-width="6" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>

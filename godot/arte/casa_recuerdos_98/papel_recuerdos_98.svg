@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <title>Recuerdos de papel domésticos de 1998</title>
+  <desc>Asset original sin marcas ni texto SVG. Fondo transparente. Fotografías muestran lugares sin personas.</desc>
+  <defs>
+    <linearGradient id="papel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f0e7cf"/><stop offset="1" stop-color="#d2c5a7"/>
+    </linearGradient>
+  </defs>
+
+  <g id="ticket_bus" transform="translate(45 45)">
+    <rect width="270" height="120" rx="8" fill="#d8c89d" stroke="#5f5949" stroke-width="6"/>
+    <circle cx="24" cy="24" r="8" fill="#b76d4e"/><circle cx="246" cy="96" r="8" fill="#b76d4e"/>
+    <g fill="#706852"><rect x="42" y="30" width="140" height="8" rx="3"/><rect x="42" y="52" width="176" height="7" rx="3"/><rect x="42" y="74" width="112" height="7" rx="3"/></g>
+    <g fill="#9c4e42"><circle cx="215" cy="30" r="9"/><circle cx="238" cy="30" r="9"/></g>
+  </g>
+
+  <g id="ticket_cine" transform="translate(365 45)">
+    <path d="M0 0h300v42c-22 0-22 36 0 36v42H0V78c22 0 22-36 0-36z" fill="#c59b67" stroke="#634b34" stroke-width="6"/>
+    <rect x="38" y="24" width="132" height="12" rx="5" fill="#674b43"/>
+    <rect x="38" y="50" width="190" height="9" rx="4" fill="#8d7459"/>
+    <rect x="38" y="76" width="110" height="9" rx="4" fill="#8d7459"/>
+    <circle cx="255" cy="60" r="24" fill="#6e3550"/>
+  </g>
+
+  <g id="recibo_compra" transform="translate(720 35)">
+    <path d="M0 0h250v250l-18-14-18 14-18-14-18 14-18-14-18 14-18-14-18 14-18-14-18 14-18-14-18 14-17-14-17 14V0z" fill="url(#papel)" stroke="#6e6654" stroke-width="5"/>
+    <g fill="#77705e">
+      <rect x="30" y="38" width="150" height="9" rx="4"/><rect x="30" y="66" width="190" height="7" rx="3"/>
+      <rect x="30" y="94" width="172" height="7" rx="3"/><rect x="30" y="122" width="188" height="7" rx="3"/>
+      <rect x="30" y="150" width="116" height="7" rx="3"/><rect x="30" y="190" width="188" height="10" rx="4"/>
+    </g>
+    <g fill="#48453d">
+      <rect x="30" y="216" width="8" height="18"/><rect x="44" y="210" width="5" height="24"/><rect x="55" y="214" width="9" height="20"/>
+      <rect x="70" y="208" width="5" height="26"/><rect x="81" y="212" width="7" height="22"/><rect x="94" y="207" width="10" height="27"/>
+      <rect x="110" y="214" width="5" height="20"/><rect x="121" y="209" width="9" height="25"/>
+    </g>
+  </g>
+
+  <g id="foto_playa" transform="translate(45 260)">
+    <rect width="260" height="220" rx="6" fill="#eee6d0" stroke="#5b564c" stroke-width="5"/>
+    <rect x="18" y="18" width="224" height="164" fill="#8fb1b3"/>
+    <circle cx="190" cy="58" r="22" fill="#e2c36b"/>
+    <path d="M18 132c54-26 112-22 224 2v48H18z" fill="#c9b377"/>
+    <path d="M18 116c62 18 128 18 224-4v34c-70 18-144 18-224 1z" fill="#5f8f95"/>
+    <path d="M18 114l52-52 44 38 34-27 61 43z" fill="#617a70"/>
+  </g>
+
+  <g id="foto_estacion" transform="translate(355 260)">
+    <rect width="260" height="220" rx="6" fill="#eee6d0" stroke="#5b564c" stroke-width="5"/>
+    <rect x="18" y="18" width="224" height="164" fill="#8c9aa0"/>
+    <rect x="38" y="82" width="184" height="82" fill="#6f6254"/>
+    <rect x="54" y="58" width="152" height="32" fill="#4c4f4e"/>
+    <path d="M42 164h176M60 135h142" stroke="#c5bb99" stroke-width="6"/>
+    <path d="M92 164l-24 18M166 164l24 18" stroke="#4a4740" stroke-width="6"/>
+  </g>
+
+  <g id="foto_barrio_lluvia" transform="translate(665 260)">
+    <rect width="260" height="220" rx="6" fill="#eee6d0" stroke="#5b564c" stroke-width="5"/>
+    <rect x="18" y="18" width="224" height="164" fill="#55626b"/>
+    <rect x="28" y="72" width="70" height="110" fill="#39434a"/><rect x="104" y="48" width="58" height="134" fill="#465157"/><rect x="168" y="80" width="62" height="102" fill="#333d43"/>
+    <g fill="#d7b86a"><rect x="42" y="92" width="14" height="18"/><rect x="68" y="120" width="14" height="18"/><rect x="118" y="78" width="14" height="18"/><rect x="185" y="110" width="14" height="18"/></g>
+    <path d="M28 20l-10 22M72 20L60 48M132 18l-13 30M198 16l-12 28M230 24l-11 25" stroke="#9fb5bd" stroke-width="4"/>
+  </g>
+
+  <g id="postal_ciudad" transform="translate(45 555)">
+    <rect width="300" height="190" rx="8" fill="#d7dccf" stroke="#4d5551" stroke-width="6"/>
+    <rect x="16" y="16" width="268" height="124" fill="#718c8c"/>
+    <circle cx="224" cy="46" r="18" fill="#e0c36d"/>
+    <path d="M16 126l48-58 36 28 32-20 48 43 34-31 70 38v14H16z" fill="#385953"/>
+    <rect x="22" y="154" width="130" height="8" rx="4" fill="#687169"/><rect x="22" y="170" width="90" height="6" rx="3" fill="#858b80"/>
+  </g>
+
+  <g id="sobre_correo" transform="translate(405 575)">
+    <rect width="300" height="170" rx="7" fill="#e8dec5" stroke="#665e4d" stroke-width="6"/>
+    <path d="M5 8l145 100L295 8M5 164l105-78M295 164L190 86" fill="none" stroke="#9a8e73" stroke-width="5"/>
+    <rect x="238" y="22" width="34" height="42" fill="#81564a"/>
+    <circle cx="54" cy="48" r="18" fill="none" stroke="#8e6c58" stroke-width="4"/>
+  </g>
+
+  <g id="nota_doblada" transform="translate(770 555)">
+    <path d="M0 0h245v180h-185L0 120z" fill="#e3d69f" stroke="#645d49" stroke-width="6"/>
+    <path d="M0 120h60v60" fill="#c8ba80" stroke="#645d49" stroke-width="5"/>
+    <g fill="#7b735d"><rect x="42" y="36" width="148" height="7" rx="3"/><rect x="42" y="60" width="126" height="7" rx="3"/><rect x="42" y="84" width="154" height="7" rx="3"/></g>
+  </g>
+</svg>

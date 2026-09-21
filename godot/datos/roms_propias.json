@@ -154,6 +154,21 @@
       "precio": 45,
       "issues": [438, 442],
       "mito": "aquiles"
+    },
+    {
+      "id": "jali_98",
+      "titulo": "JALI 98",
+      "estado": "jugable",
+      "genero": "puzle de luz y geometría",
+      "resumen": "Rotar tres bandas de calado hasta recomponer una proyección de luz inspirada de forma documentada en un jali mogol; solo la solución completa publica el handshake cultural.",
+      "fuente": "gbc/minijuegos/jali_98",
+      "rom": "res://roms/jali_98.gbc",
+      "cabecera": "JALI98",
+      "cgb": "dual",
+      "incluida": false,
+      "precio": 45,
+      "issues": [932, 916, 931],
+      "mito": ""
     }
   ]
 }

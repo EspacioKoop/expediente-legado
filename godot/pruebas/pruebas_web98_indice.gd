@@ -154,6 +154,28 @@ func _probar_prensa() -> void:
 			"el tratamiento no sustituye la base factual compartida",
 		)
 
+	var estado := {"historias_cartas": {"el-sol": "centrista"}}
+	var elecciones_antes := Prometeo.conteo_elecciones_ideologicas(estado)
+	prensa.configurar_contexto({"dia": 1})
+	_comprobar(
+		prensa.registrar_exposicion_portada(estado, "la-plaza") == 1,
+		"leer una portada registra una exposición por el hecho mostrado",
+	)
+	_comprobar(
+		prensa.registrar_exposicion_portada(estado, "la-plaza") == 0,
+		"releer la misma portada no duplica exposición",
+	)
+	var exposiciones: Array = estado.get(Prometeo.CLAVE_EXPOSICION_IDEOLOGICA, [])
+	_comprobar(exposiciones.size() == 1, "la exposición de prensa queda en su canal propio")
+	_comprobar(
+		String(exposiciones[0].get("fuente", "")) == "prensa:la-plaza",
+		"la exposición conserva la fuente concreta sin rotularla en pantalla",
+	)
+	_comprobar(
+		Prometeo.conteo_elecciones_ideologicas(estado) == elecciones_antes,
+		"leer prensa no modifica las elecciones ideológicas de la vuelta",
+	)
+
 	prensa.configurar_contexto({"dia": 2})
 	for cabecera in prensa.cabeceras():
 		var portada_dia2 := prensa.portada(String(cabecera.get("id", "")))

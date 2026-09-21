@@ -1,0 +1,354 @@
+{
+  "@context": "../../schema/ACP_CONTEXT.jsonld",
+  "@id": "pantheon:AU-DREAMTIME",
+  "@type": "Pantheon",
+  "name": "Australian Aboriginal Dreamtime Beings",
+  "tradition": "Australian Aboriginal / Dreamtime",
+  "description": "The ancestral beings of Australian Aboriginal Dreamtime (Tjukurpa/Jukurrpa), the eternal time of creation when ancestral spirits shaped the land, established law, and created all living things. These beings continue to exist in sacred sites, ceremonies, and the ongoing spiritual relationship between people and country. Presented with respect for their continuing sacred significance.",
+  "canonicalSources": [
+    "Aboriginal oral traditions (ongoing)",
+    "Ceremonial knowledge (restricted)",
+    "Ethnographic collections (with limitations)",
+    "Various language group traditions"
+  ],
+  "systemPatterns": [
+    {
+      "name": "Dreamtime/The Dreaming",
+      "description": "The eternal creative epoch when ancestral beings traveled across the formless land, creating features, plants, animals, and humans through their actions",
+      "archetypes": ["All"],
+      "pattern": "Creation through ancestral journeying and action"
+    },
+    {
+      "name": "Rainbow Serpent Complex",
+      "description": "The great serpent(s) associated with water, fertility, and creation across many Aboriginal traditions",
+      "archetypes": ["arch:AU-RAINBOW-SERPENT"],
+      "pattern": "Primordial creative-destructive water power"
+    },
+    {
+      "name": "Sky Heroes",
+      "description": "Ancestral beings associated with celestial phenomena - the Pleiades (Seven Sisters), Orion, and others",
+      "archetypes": ["arch:AU-SEVEN-SISTERS"],
+      "pattern": "Earthly events recorded in celestial patterns"
+    }
+  ],
+  "entries": [
+    {
+      "@id": "arch:AU-RAINBOW-SERPENT",
+      "@type": "Archetype",
+      "name": "Rainbow Serpent",
+      "aliases": ["Wagyl", "Yurlungur", "Ngalyod", "Borlung", "Almudj"],
+      "domain": ["Water", "Creation", "Fertility", "Rain", "Sacred Law", "Punishment"],
+      "description": "The great serpent who appears across Aboriginal Australia under many names, associated with water, rainbows, fertility, and the shaping of waterways and landscapes. The Rainbow Serpent carved rivers as it traveled, created waterholes where it rested, and is both life-giver (through water and fertility) and punisher of those who break sacred law. It continues to dwell in deep waters.",
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.5,
+        "active-receptive": 0.4,
+        "individual-collective": 0.25,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.6
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.9, "aspects": ["landscape-shaper", "water-bringer"]},
+        {"primordial": "primordial:great-mother", "weight": 0.7, "aspects": ["fertility-giver", "life-source"]},
+        {"primordial": "primordial:destroyer", "weight": 0.65, "aspects": ["law-enforcer", "punisher"]},
+        {"primordial": "primordial:monster", "weight": 0.5, "aspects": ["great-serpent", "swallower"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:AF-DAMBALLAH", "fidelity": 0.6, "notes": "Serpent, water, creation"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-TIAMAT", "fidelity": 0.5, "notes": "Primordial serpent/dragon, water, creation"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-NAGA", "fidelity": 0.55, "notes": "Sacred serpent, water, fertility"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When sacred law is broken", "When water sites are desecrated"],
+        "shadowManifestations": ["Floods", "Swallowing transgressors", "Drought from displeasure"],
+        "integrationPath": "Proper relationship with water and law; life sustained through respect"
+      },
+      "correspondences": {
+        "element": "Water",
+        "direction": "Waterways, underground",
+        "color": "Rainbow spectrum",
+        "symbol": "Serpent, rainbow, waterholes",
+        "sacred": "Water sources, rock art sites",
+        "association": "Water, fertility, creation, law, multiple Aboriginal traditions"
+      }
+    },
+    {
+      "@id": "arch:AU-BAIAME",
+      "@type": "Archetype",
+      "name": "Baiame",
+      "aliases": ["Biame", "Byamee", "Sky Father", "All-Father"],
+      "domain": ["Sky", "Creation", "Law", "Initiation", "Rain"],
+      "description": "The Sky Father and creator deity of many Southeastern Australian traditions, associated with the sky, creation of all things, and the establishment of sacred law. He created the world, instituted initiation ceremonies, and established the moral law. Often depicted with stars for eyes, he now dwells in the sky world (Bullima) but continues to watch over his creation.",
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.2,
+        "light-shadow": 0.2,
+        "active-receptive": 0.35,
+        "individual-collective": 0.25,
+        "ascent-descent": 0.15,
+        "stasis-transformation": 0.35,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.9, "aspects": ["world-maker", "law-giver"]},
+        {"primordial": "primordial:great-father", "weight": 0.85, "aspects": ["sky-father", "all-father"]},
+        {"primordial": "primordial:sovereign", "weight": 0.7, "aspects": ["supreme-deity", "law-establisher"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:PL-RANGI", "fidelity": 0.55, "notes": "Sky father"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ZEUS", "fidelity": 0.5, "notes": "Sky father, law"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:AF-OLODUMARE", "fidelity": 0.55, "notes": "Supreme creator, somewhat distant"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When law is abandoned", "When creation is neglected"],
+        "shadowManifestations": ["Drought", "Cosmic abandonment", "Initiation rites failed"],
+        "integrationPath": "Maintaining sacred law and ceremony; proper relationship with sky and land"
+      },
+      "correspondences": {
+        "element": "Air/Light",
+        "direction": "Above (sky world)",
+        "color": "White, star-light",
+        "symbol": "Stars (eyes), emu, crystal",
+        "sacred": "Initiation grounds, Bora rings",
+        "association": "Creation, law, initiation, Southeastern Australia"
+      }
+    },
+    {
+      "@id": "arch:AU-SEVEN-SISTERS",
+      "@type": "Archetype",
+      "name": "Seven Sisters",
+      "aliases": ["Kungkarungkara", "Minyipuru", "Pleiades Women"],
+      "domain": ["Stars", "Women", "Flight", "Pursuit", "Sacred Sites"],
+      "description": "The ancestral women who fled across the land pursued by a lustful man (often associated with Orion), their journey creating many landmarks and sacred sites. Eventually they escaped into the sky, becoming the Pleiades star cluster. Their story is told across vast distances, and the sites along their path remain sacred. They represent women's solidarity and escape from unwanted pursuit.",
+      "spectralCoordinates": {
+        "order-chaos": 0.45,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.35,
+        "active-receptive": 0.55,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.25,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.55
+      },
+      "instantiates": [
+        {"primordial": "primordial:maiden", "weight": 0.8, "aspects": ["pursued-women", "escapees"]},
+        {"primordial": "primordial:creator", "weight": 0.6, "aspects": ["landscape-makers", "site-creators"]},
+        {"primordial": "primordial:great-mother", "weight": 0.5, "aspects": ["women's-protectors", "solidarity"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-PLEIADES", "fidelity": 0.7, "notes": "Pleiades myths, pursued maidens"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-DAPHNE", "fidelity": 0.5, "notes": "Fleeing woman, transformation"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When women cannot escape", "When pursuit never ends"],
+        "shadowManifestations": ["Endless pursuit", "Violated boundaries", "Incomplete escape"],
+        "integrationPath": "Escape to freedom; journey creating sacred meaning"
+      },
+      "correspondences": {
+        "element": "Air/Fire (stars)",
+        "direction": "Sky, across landscape",
+        "color": "Star-white, blue",
+        "symbol": "Pleiades, running women, sacred sites along path",
+        "association": "Women, stars, escape, sacred sites, pan-Australian"
+      }
+    },
+    {
+      "@id": "arch:AU-WANDJINA",
+      "@type": "Archetype",
+      "name": "Wandjina",
+      "aliases": ["Wondjina", "Cloud and Rain Spirits"],
+      "domain": ["Rain", "Clouds", "Fertility", "Creation", "The Wet Season"],
+      "description": "The powerful ancestral beings of the Kimberley region, depicted in distinctive rock art with large eyes, halos, and no mouths (because their power over rain and storms would be too great if they could speak). They brought the wet season, created the landscape, and continue to control the monsoon rains. Their images must be repainted to ensure the coming of the rains.",
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.35,
+        "active-receptive": 0.45,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.6
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.85, "aspects": ["rain-bringers", "landscape-makers"]},
+        {"primordial": "primordial:ancestor", "weight": 0.75, "aspects": ["continuing-presence", "rock-art-dwellers"]},
+        {"primordial": "primordial:sovereign", "weight": 0.6, "aspects": ["season-controllers", "power-holders"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:MA-TLALOC", "fidelity": 0.5, "notes": "Rain deity, distinctive eyes"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:SL-PERUN", "fidelity": 0.4, "notes": "Storm/rain control"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When images are not maintained", "When respect is absent"],
+        "shadowManifestations": ["Drought", "Failed wet season", "Floods when angry"],
+        "integrationPath": "Maintaining relationship through caring for images; reciprocal custodianship"
+      },
+      "correspondences": {
+        "element": "Water/Air (rain, clouds)",
+        "direction": "Sky, rock shelters",
+        "color": "White, red, black (rock art)",
+        "symbol": "Distinctive face without mouth, halos, clouds",
+        "sacred": "Rock art sites",
+        "association": "Rain, wet season, Kimberley region"
+      }
+    },
+    {
+      "@id": "arch:AU-MIMI-SPIRITS",
+      "@type": "Archetype",
+      "name": "Mimi Spirits",
+      "aliases": ["Mimih", "Rock Spirits"],
+      "domain": ["Rocks", "Hunting", "Rock Art", "Teaching", "Wind"],
+      "description": "The thin, elongated spirits who live in rock crevices in Arnhem Land, so thin they can only come out when there's no wind lest they be blown away. They taught humans to hunt, paint, and conduct ceremonies. They are both helpful and dangerous - they can heal but also cause illness if offended. Their distinctive figures appear in ancient rock art.",
+      "spectralCoordinates": {
+        "order-chaos": 0.5,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.55,
+        "active-receptive": 0.45,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:wise-elder", "weight": 0.7, "aspects": ["teachers", "culture-givers"]},
+        {"primordial": "primordial:trickster", "weight": 0.55, "aspects": ["ambiguous", "dangerous-helpful"]},
+        {"primordial": "primordial:ancestor", "weight": 0.5, "aspects": ["rock-dwellers", "continuing-presence"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:SL-DOMOVOI", "fidelity": 0.45, "notes": "Dwelling spirits, ambiguous"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CE-SIDHE", "fidelity": 0.5, "notes": "Thin/otherworldly beings, dangerous-helpful"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When offended", "When wind traps them out"],
+        "shadowManifestations": ["Illness", "Bad luck in hunting", "Rock falls"],
+        "integrationPath": "Respectful relationship; learning from their teachings"
+      },
+      "correspondences": {
+        "element": "Earth (rock)/Air",
+        "direction": "Rock crevices",
+        "color": "Rock art pigments",
+        "symbol": "Thin elongated figures, rock art",
+        "taboo": "Disturbing their rock homes",
+        "association": "Rock art, hunting, Arnhem Land"
+      }
+    },
+    {
+      "@id": "arch:AU-YOWIE",
+      "@type": "Archetype",
+      "name": "Yowie",
+      "aliases": ["Doolagarl", "Yahoo", "Wild Man"],
+      "domain": ["Wilderness", "Fear", "Night", "Children's Safety", "Boundaries"],
+      "description": "The hairy wild man of the bush who appears in Aboriginal traditions across Australia, used to keep children from wandering into dangerous wilderness. Whether originally a spirit being or a cultural memory, Yowie represents the dangers of the wild places beyond the safety of camp and the importance of respecting boundaries.",
+      "spectralCoordinates": {
+        "order-chaos": 0.6,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.7,
+        "active-receptive": 0.4,
+        "individual-collective": 0.6,
+        "ascent-descent": 0.6,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.55
+      },
+      "instantiates": [
+        {"primordial": "primordial:monster", "weight": 0.75, "aspects": ["wild-man", "bush-danger"]},
+        {"primordial": "primordial:guardian", "weight": 0.55, "aspects": ["boundary-enforcer", "child-warner"]},
+        {"primordial": "primordial:outcast", "weight": 0.5, "aspects": ["wilderness-dweller", "outside-society"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:SL-LESHY", "fidelity": 0.55, "notes": "Wilderness spirit, danger"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NA-SASQUATCH", "fidelity": 0.6, "notes": "Wild hairy figure"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When boundaries are crossed", "When wilderness is entered unprepared"],
+        "shadowManifestations": ["Taking wanderers", "Terror in the bush", "Lost children"],
+        "integrationPath": "Respecting wilderness boundaries; fear that protects"
+      },
+      "correspondences": {
+        "element": "Earth",
+        "direction": "Wilderness, away from camp",
+        "color": "Dark, hairy",
+        "symbol": "Wild hairy figure",
+        "association": "Wilderness, boundaries, children's safety, pan-Australian"
+      }
+    },
+    {
+      "@id": "arch:AU-TIDDALIK",
+      "@type": "Archetype",
+      "name": "Tiddalik",
+      "aliases": ["The Flood-Causing Frog"],
+      "domain": ["Water", "Drought", "Laughter", "Community Action", "Excess"],
+      "description": "The great frog who drank all the water in the land, causing terrible drought. The animals had to make him laugh to release the water, which they finally did through the eel Nabunum's silly dancing. When Tiddalik laughed, the waters rushed out creating floods and filling the waterways. The story teaches about excess, community problem-solving, and balance.",
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.45,
+        "active-receptive": 0.55,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.55
+      },
+      "instantiates": [
+        {"primordial": "primordial:monster", "weight": 0.6, "aspects": ["water-hoarder", "drought-causer"]},
+        {"primordial": "primordial:trickster", "weight": 0.5, "aspects": ["defeated-by-humor", "transformed"]},
+        {"primordial": "primordial:destroyer", "weight": 0.55, "aspects": ["drought-bringer", "flood-releaser"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:MA-TLALOC", "fidelity": 0.4, "notes": "Water control, drought/flood"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:JP-UZUME", "fidelity": 0.45, "notes": "Laughter solving cosmic problem"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When hoarding takes all", "When excess creates crisis"],
+        "shadowManifestations": ["Drought through greed", "Flood through release"],
+        "integrationPath": "Sharing resources; laughter releasing tension; community solving problems"
+      },
+      "correspondences": {
+        "element": "Water",
+        "direction": "Variable",
+        "color": "Green (frog)",
+        "symbol": "Giant frog, waterways",
+        "association": "Water, community, humor, balance, teaching story"
+      }
+    },
+    {
+      "@id": "arch:AU-BUNYIP",
+      "@type": "Archetype",
+      "name": "Bunyip",
+      "aliases": ["Various regional names"],
+      "domain": ["Waterholes", "Danger", "Swamps", "Fear", "Water Safety"],
+      "description": "The fearsome creature dwelling in waterholes, swamps, and rivers across Australia. Descriptions vary but generally include features of multiple animals. The Bunyip represents the dangers of water - keeping people from dangerous swimming holes, explaining drownings, and maintaining respect for waterways. It may have roots in megafauna memory or spiritual beings.",
+      "spectralCoordinates": {
+        "order-chaos": 0.55,
+        "creation-destruction": 0.6,
+        "light-shadow": 0.7,
+        "active-receptive": 0.45,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.7,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.6
+      },
+      "instantiates": [
+        {"primordial": "primordial:monster", "weight": 0.85, "aspects": ["water-beast", "danger"]},
+        {"primordial": "primordial:guardian", "weight": 0.5, "aspects": ["waterhole-protector", "boundary-enforcer"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NA-UNDERWATER-PANTHER", "fidelity": 0.55, "notes": "Water monster, danger"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:SL-RUSALKA", "fidelity": 0.4, "notes": "Water danger, drowning"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When water is approached carelessly", "When boundaries are ignored"],
+        "shadowManifestations": ["Drowning", "Taking victims", "Water danger"],
+        "integrationPath": "Respecting water; fear that protects"
+      },
+      "correspondences": {
+        "element": "Water",
+        "direction": "Waterholes, swamps",
+        "color": "Dark, murky",
+        "symbol": "Composite water creature",
+        "association": "Water safety, danger, mystery, pan-Australian"
+      }
+    }
+  ]
+}

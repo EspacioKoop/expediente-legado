@@ -47,6 +47,18 @@ class UtilidadesSigaTest(unittest.TestCase):
             # Límite de palabra: «CARACTERES_PERMITIDOS.contains» no es «OS.».
             self.assertIsNone(re.search(rf"\b{re.escape(api)}", fuente), api)
 
+
+    def test_calculadora_tiene_identidad_visual_y_teclado_propios(self) -> None:
+        fuente = CALCULADORA.read_text(encoding="utf-8")
+        self.assertIn("PanelContainer.new()", fuente)
+        self.assertIn("GridContainer.new()", fuente)
+        self.assertIn("teclado.columns = 4", fuente)
+        self.assertIn("_crear_tecla", fuente)
+        self.assertIn("add_theme_stylebox_override", fuente)
+        self.assertIn("add_theme_color_override", fuente)
+        self.assertIn('"Pantalla"', fuente)
+        self.assertIn('"Teclado"', fuente)
+
     def test_utilidades_ejecutables_en_godot(self) -> None:
         motor = os.environ.get("GODOT_BIN", "godot4")
         importar_proyecto()
@@ -66,7 +78,7 @@ class UtilidadesSigaTest(unittest.TestCase):
             check=False,
         )
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
-        self.assertIn("9 pasadas, 0 fallos", resultado.stdout)
+        self.assertIn("12 pasadas, 0 fallos", resultado.stdout)
         self.assertNotIn("ERROR:", resultado.stdout)
         self.assertNotIn("Parse Error:", resultado.stdout)
 

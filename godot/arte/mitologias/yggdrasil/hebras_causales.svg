@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="512" viewBox="0 0 1024 512">
+<title>Hebras causales — Yggdrasil #653</title>
+<desc>Red abstracta de conexiones; no contiene runas ni escritura histórica.</desc>
+<rect width="1024" height="512" fill="#111711"/>
+<g fill="none" stroke-linecap="round">
+  <path d="M96 330 C220 160 332 386 478 214 C624 42 720 338 916 176" stroke="#8b6c3f" stroke-width="24"/>
+  <path d="M98 356 C242 210 352 418 508 250 C664 82 750 366 924 222" stroke="#50673b" stroke-width="10"/>
+  <path d="M96 304 C202 108 340 342 454 174 C584 -18 744 294 920 128" stroke="#b39056" stroke-width="7"/>
+</g>
+<g fill="#d1b274" stroke="#2d2419" stroke-width="8">
+  <circle cx="110" cy="330" r="30"/><circle cx="486" cy="214" r="30"/><circle cx="910" cy="176" r="30"/>
+</g>
+<g fill="#536a42">
+  <circle cx="110" cy="330" r="10"/><circle cx="486" cy="214" r="10"/><circle cx="910" cy="176" r="10"/>
+</g>
+</svg>

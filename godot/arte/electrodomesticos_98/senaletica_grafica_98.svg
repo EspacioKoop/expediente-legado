@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <title>Señalética gráfica para comercio de electrodomésticos de 1998</title>
+  <desc>Asset original sin marcas ni texto. Fondo transparente. Pensado para escaparate, cartelas, flechas y stickers.</desc>
+
+  <g id="estrella_oferta" transform="translate(55 45)">
+    <path d="M150 0l28 32 41-18 12 41 44-1-5 44 39 21-21 39 30 32-34 28 16 41-43 11-2 44-44-7-19 40-38-24-32 30-27-35-42 14-10-43-44 1 7-44-40-18 23-38-31-31 35-26-14-42 43-8 4-44 43 9 21-39z" fill="#c74c3f" stroke="#6a2b25" stroke-width="8"/>
+    <circle cx="150" cy="150" r="64" fill="#f0cf70"/>
+    <circle cx="150" cy="150" r="42" fill="#d96f45"/>
+  </g>
+
+  <g id="flecha_entrada" transform="translate(380 65)">
+    <path d="M0 70h190V20l110 100-110 100v-50H0z" fill="#3f6c65" stroke="#233f3b" stroke-width="8" stroke-linejoin="round"/>
+  </g>
+
+  <g id="flecha_salida" transform="translate(760 65)">
+    <path d="M300 70H110V20L0 120l110 100v-50h190z" fill="#6a4d3b" stroke="#3e2e25" stroke-width="8" stroke-linejoin="round"/>
+  </g>
+
+  <g id="cartela_crt" transform="translate(55 355)">
+    <rect width="280" height="160" rx="12" fill="#e8dfc3" stroke="#4b4a42" stroke-width="7"/>
+    <rect x="26" y="25" width="110" height="80" rx="12" fill="#343d40"/>
+    <rect x="39" y="38" width="84" height="54" rx="9" fill="#1b292d"/>
+    <circle cx="110" cy="130" r="8" fill="#c5643f"/>
+    <g fill="#67685f">
+      <circle cx="176" cy="43" r="9"/><circle cx="206" cy="43" r="9"/><circle cx="236" cy="43" r="9"/>
+      <circle cx="176" cy="78" r="9"/><circle cx="206" cy="78" r="9"/><circle cx="236" cy="78" r="9"/>
+    </g>
+    <rect x="164" y="112" width="84" height="10" rx="5" fill="#b5a772"/>
+    <rect x="164" y="132" width="62" height="8" rx="4" fill="#817a64"/>
+  </g>
+
+  <g id="cartela_lavadora" transform="translate(390 355)">
+    <rect width="280" height="160" rx="12" fill="#e8dfc3" stroke="#4b4a42" stroke-width="7"/>
+    <rect x="24" y="20" width="112" height="116" rx="10" fill="#c7c8c2"/>
+    <circle cx="80" cy="87" r="40" fill="#566164"/>
+    <circle cx="80" cy="87" r="28" fill="#1b292d"/>
+    <circle cx="47" cy="39" r="8" fill="#555a55"/><circle cx="77" cy="39" r="8" fill="#555a55"/>
+    <rect x="158" y="32" width="88" height="12" rx="6" fill="#6a685d"/>
+    <rect x="158" y="58" width="70" height="10" rx="5" fill="#a79a70"/>
+    <rect x="158" y="84" width="82" height="10" rx="5" fill="#a79a70"/>
+    <circle cx="182" cy="126" r="10" fill="#4b6f63"/><circle cx="218" cy="126" r="10" fill="#c06b43"/>
+  </g>
+
+  <g id="cartela_frigorifico" transform="translate(725 355)">
+    <rect width="280" height="160" rx="12" fill="#e8dfc3" stroke="#4b4a42" stroke-width="7"/>
+    <rect x="30" y="15" width="92" height="130" rx="9" fill="#d5d5cf" stroke="#777971" stroke-width="4"/>
+    <path d="M30 57h92" stroke="#777971" stroke-width="4"/>
+    <rect x="98" y="28" width="7" height="22" rx="3" fill="#777971"/>
+    <rect x="98" y="72" width="7" height="46" rx="3" fill="#777971"/>
+    <rect x="151" y="34" width="92" height="12" rx="6" fill="#6a685d"/>
+    <rect x="151" y="61" width="66" height="10" rx="5" fill="#a79a70"/>
+    <rect x="151" y="88" width="84" height="10" rx="5" fill="#a79a70"/>
+    <path d="M160 130h72" stroke="#587668" stroke-width="10" stroke-linecap="round"/>
+  </g>
+
+  <g id="garantia_sello" transform="translate(1040 355)">
+    <circle cx="70" cy="70" r="62" fill="#d5bc72" stroke="#695736" stroke-width="8"/>
+    <circle cx="70" cy="70" r="42" fill="none" stroke="#695736" stroke-width="5" stroke-dasharray="8 7"/>
+    <path d="M46 72l16 16 34-38" fill="none" stroke="#3e5f54" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <g id="sticker_energia" transform="translate(60 620)">
+    <rect width="220" height="210" rx="16" fill="#ece4ca" stroke="#4d4a40" stroke-width="7"/>
+    <g transform="translate(28 30)">
+      <path d="M0 0h80l24 18-24 18H0z" fill="#477d5f"/>
+      <path d="M0 42h100l24 18-24 18H0z" fill="#82a45d"/>
+      <path d="M0 84h120l24 18-24 18H0z" fill="#d2bd58"/>
+      <path d="M0 126h140l24 18-24 18H0z" fill="#c77b45"/>
+    </g>
+  </g>
+
+  <g id="sticker_precaucion_crt" transform="translate(355 640)">
+    <path d="M110 0l110 190H0z" fill="#d3b556" stroke="#5e4b2d" stroke-width="8"/>
+    <path d="M110 48v70M110 148v8" stroke="#3e382d" stroke-width="14" stroke-linecap="round"/>
+  </g>
+
+  <g id="pegatina_revisado" transform="translate(675 640)">
+    <circle cx="105" cy="105" r="96" fill="#73907f" stroke="#354b43" stroke-width="8"/>
+    <circle cx="105" cy="105" r="70" fill="none" stroke="#d9cfaa" stroke-width="8" stroke-dasharray="12 9"/>
+    <path d="M60 108l28 28 62-72" fill="none" stroke="#efe5bf" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <g id="pegatina_descuento" transform="translate(960 660)">
+    <rect width="190" height="165" rx="18" fill="#9e4137" stroke="#562820" stroke-width="8"/>
+    <circle cx="58" cy="50" r="24" fill="#f0d07a"/>
+    <circle cx="132" cy="115" r="24" fill="#f0d07a"/>
+    <path d="M48 128L142 38" stroke="#f0d07a" stroke-width="14" stroke-linecap="round"/>
+  </g>
+</svg>

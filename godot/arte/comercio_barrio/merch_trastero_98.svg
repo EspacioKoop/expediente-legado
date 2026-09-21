@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <title>Objetos de segunda mano genéricos, 1998</title>
+  <desc>Hoja vectorial original sin marcas reales. Fondo transparente. Props separados por grupos con id.</desc>
+
+  <g id="lampara_escritorio" transform="translate(55 70)">
+    <ellipse cx="112" cy="218" rx="88" ry="24" fill="#303433"/>
+    <rect x="102" y="120" width="20" height="104" rx="8" fill="#515957"/>
+    <path d="M112 128L176 68" stroke="#515957" stroke-width="18" stroke-linecap="round"/>
+    <path d="M166 50h84l-28 70h-92z" fill="#b07a45" stroke="#4b4339" stroke-width="6"/>
+    <ellipse cx="196" cy="115" rx="39" ry="14" fill="#f0d78d" opacity=".7"/>
+  </g>
+
+  <g id="radio_portatil" transform="translate(330 75)">
+    <rect width="260" height="160" rx="18" fill="#4e575a" stroke="#23292b" stroke-width="7"/>
+    <rect x="22" y="34" width="118" height="90" rx="8" fill="#2e3537"/>
+    <g fill="#727d7c">
+      <circle cx="48" cy="60" r="9"/><circle cx="78" cy="60" r="9"/><circle cx="108" cy="60" r="9"/>
+      <circle cx="48" cy="90" r="9"/><circle cx="78" cy="90" r="9"/><circle cx="108" cy="90" r="9"/>
+    </g>
+    <rect x="160" y="34" width="74" height="28" rx="4" fill="#d8c588"/>
+    <path d="M172 48h50" stroke="#594d36" stroke-width="4"/>
+    <circle cx="180" cy="105" r="25" fill="#272e30" stroke="#7c8685" stroke-width="5"/>
+    <circle cx="228" cy="105" r="15" fill="#272e30" stroke="#7c8685" stroke-width="4"/>
+    <path d="M50 0c18-38 142-38 160 0" fill="none" stroke="#3b4244" stroke-width="12"/>
+  </g>
+
+  <g id="reloj_despertador" transform="translate(680 80)">
+    <rect x="25" y="12" width="180" height="116" rx="28" fill="#d0c8ad" stroke="#46453e" stroke-width="6"/>
+    <rect x="48" y="34" width="134" height="68" rx="8" fill="#2b302f"/>
+    <text x="115" y="82" text-anchor="middle" font-family="monospace" font-size="40" font-weight="700" fill="#d08d4f">7:45</text>
+    <path d="M55 128l-14 30M176 128l14 30" stroke="#46453e" stroke-width="8"/>
+    <rect x="76" y="0" width="78" height="16" rx="6" fill="#777365"/>
+  </g>
+
+  <g id="telefono_cable" transform="translate(925 70)">
+    <rect x="18" y="50" width="190" height="132" rx="24" fill="#6b695e" stroke="#32322d" stroke-width="7"/>
+    <rect x="50" y="76" width="126" height="70" rx="14" fill="#45463f"/>
+    <g fill="#b7ad8d">
+      <circle cx="78" cy="98" r="8"/><circle cx="113" cy="98" r="8"/><circle cx="148" cy="98" r="8"/>
+      <circle cx="78" cy="124" r="8"/><circle cx="113" cy="124" r="8"/><circle cx="148" cy="124" r="8"/>
+    </g>
+    <path d="M28 50c18-60 166-60 180 0" fill="none" stroke="#45453e" stroke-width="24" stroke-linecap="round"/>
+    <path d="M204 156c48 10 36 52 4 58-35 7-43 34-5 44" fill="none" stroke="#33342f" stroke-width="7"/>
+  </g>
+
+  <g id="ventilador_mesa" transform="translate(70 355)">
+    <circle cx="115" cy="105" r="94" fill="#536167" stroke="#252d31" stroke-width="8"/>
+    <circle cx="115" cy="105" r="78" fill="#a9b1af"/>
+    <g fill="#66777b">
+      <path d="M115 105c5-55 45-65 58-43 16 28-23 52-58 43z"/>
+      <path d="M115 105c54 8 61 49 38 60-28 14-50-27-38-60z"/>
+      <path d="M115 105c-13 52-56 56-65 31-10-29 33-47 65-31z"/>
+      <path d="M115 105c-46-24-39-65-12-69 31-5 41 41 12 69z"/>
+    </g>
+    <circle cx="115" cy="105" r="16" fill="#323b3e"/>
+    <rect x="104" y="198" width="22" height="92" rx="8" fill="#434e51"/>
+    <ellipse cx="115" cy="296" rx="72" ry="22" fill="#32393b"/>
+  </g>
+
+  <g id="tostadora" transform="translate(355 390)">
+    <rect width="230" height="150" rx="32" fill="#c7c1ae" stroke="#4d4c46" stroke-width="7"/>
+    <rect x="45" y="20" width="140" height="24" rx="12" fill="#5b5951"/>
+    <rect x="194" y="58" width="18" height="58" rx="7" fill="#55544d"/>
+    <circle cx="54" cy="112" r="12" fill="#7d644d"/>
+    <rect x="38" y="144" width="28" height="18" rx="5" fill="#4d4c46"/>
+    <rect x="164" y="144" width="28" height="18" rx="5" fill="#4d4c46"/>
+  </g>
+
+  <g id="marco_foto" transform="translate(690 360)">
+    <rect width="210" height="248" rx="8" fill="#6b4630" stroke="#2f2924" stroke-width="8"/>
+    <rect x="26" y="26" width="158" height="196" fill="#e6dbbd"/>
+    <rect x="42" y="42" width="126" height="140" fill="#8a9c95"/>
+    <circle cx="130" cy="78" r="22" fill="#d6bd78"/>
+    <path d="M48 173l32-54 26 26 20-14 36 42z" fill="#4b665d"/>
+    <rect x="56" y="196" width="98" height="8" fill="#756a58"/>
+  </g>
+
+  <g id="jarron" transform="translate(980 365)">
+    <path d="M65 0h66l-12 52c48 38 51 148 19 185-34 40-104 40-138 0-31-37-29-147 20-185z" fill="#6f8a80" stroke="#33413d" stroke-width="7"/>
+    <path d="M27 102c35 18 83 18 119 0M20 159c43 20 91 20 134 0" fill="none" stroke="#c2b477" stroke-width="8"/>
+  </g>
+
+  <g id="caja_cassettes" transform="translate(55 705)">
+    <rect width="280" height="126" rx="10" fill="#5c4632" stroke="#2f2820" stroke-width="7"/>
+    <g transform="translate(18 19)">
+      <rect width="54" height="88" fill="#2d353c"/>
+      <rect x="8" y="14" width="38" height="28" fill="#d7c59c"/>
+    </g>
+    <g transform="translate(82 19)">
+      <rect width="54" height="88" fill="#5f3444"/>
+      <rect x="8" y="14" width="38" height="28" fill="#d7c59c"/>
+    </g>
+    <g transform="translate(146 19)">
+      <rect width="54" height="88" fill="#2f5260"/>
+      <rect x="8" y="14" width="38" height="28" fill="#d7c59c"/>
+    </g>
+    <g transform="translate(210 19)">
+      <rect width="54" height="88" fill="#665c31"/>
+      <rect x="8" y="14" width="38" height="28" fill="#d7c59c"/>
+    </g>
+  </g>
+
+  <g id="flexo_pie" transform="translate(405 670)">
+    <ellipse cx="125" cy="178" rx="100" ry="28" fill="#2d3332"/>
+    <rect x="115" y="65" width="20" height="120" rx="8" fill="#3c4442"/>
+    <path d="M125 74l70-55" stroke="#3c4442" stroke-width="18" stroke-linecap="round"/>
+    <path d="M178 0h102l-34 82h-106z" fill="#7f3a31" stroke="#3c302d" stroke-width="7"/>
+    <ellipse cx="212" cy="78" rx="44" ry="14" fill="#f0cf7c" opacity=".65"/>
+  </g>
+
+  <g id="caja_herramientas" transform="translate(750 700)">
+    <rect x="0" y="38" width="250" height="120" rx="16" fill="#7b3b32" stroke="#342b28" stroke-width="7"/>
+    <rect x="24" y="12" width="202" height="36" rx="14" fill="#9b5b45" stroke="#342b28" stroke-width="7"/>
+    <path d="M78 12c0-46 94-46 94 0" fill="none" stroke="#3d3934" stroke-width="12"/>
+    <rect x="108" y="78" width="34" height="22" rx="5" fill="#d0b26d"/>
+  </g>
+</svg>

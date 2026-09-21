@@ -14,6 +14,11 @@ var _conector_link_cable: MeshInstance3D = null
 var _puerto_ir := PuertoIRPortatil.new()
 var _material_ir: StandardMaterial3D = null
 var _pulso_ir_visual := 0
+var _impresora_termica: ImpresoraTermicaPortatil = null
+
+
+func establecer_impresora_termica(impresora: ImpresoraTermicaPortatil) -> void:
+	_impresora_termica = impresora
 
 
 func configurar() -> void:
@@ -78,6 +83,7 @@ func _alternar(_actor: Node) -> void:
 	_app.roms_compradas = _roms_compradas()
 	_app.set("link_cable", _link_cable)
 	_app.set("puerto_ir", _puerto_ir)
+	_app.set("impresora_termica", _impresora_termica)
 	_app.cerrado.connect(_al_cerrar_app)
 	get_tree().root.add_child(_app)
 	_app.abrir()

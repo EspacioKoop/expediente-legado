@@ -84,6 +84,56 @@ func portada(cabecera_id: String) -> Dictionary:
 	}
 
 
+## Conecta una portada realmente consumida con el contrato transversal de #919.
+## Cada artículo registra la cabecera y el hecho compartido como una exposición
+## idempotente. No escribe elecciones ni decide qué marco es verdadero.
+func registrar_exposicion_portada(estado: Dictionary, cabecera_id: String) -> int:
+	var portada_actual := portada(cabecera_id)
+	if String(portada_actual.get("estado", "")) != "ok":
+		return 0
+	var cabecera: Dictionary = portada_actual.get("cabecera", {})
+	var eje := String(cabecera.get("eje", ""))
+	if not Prometeo.EJES.has(eje):
+		return 0
+
+	var registradas := 0
+	for articulo_valor in portada_actual.get("articulos", []):
+		if not articulo_valor is Dictionary:
+			continue
+		var articulo := articulo_valor as Dictionary
+		var hecho_id := String(articulo.get("hecho_id", ""))
+		if hecho_id.is_empty():
+			continue
+		if (
+			Prometeo
+			. registrar_exposicion_ideologica(
+				estado,
+				"prensa:%s:%s" % [cabecera_id, hecho_id],
+				"prensa:%s" % cabecera_id,
+				eje,
+				int(portada_actual.get("jornada", 1)),
+				_etiquetas_exposicion(articulo),
+			)
+		):
+			registradas += 1
+	return registradas
+
+
+func _etiquetas_exposicion(articulo: Dictionary) -> Array:
+	var etiquetas: Array = []
+	var hecho_datos: Dictionary = articulo.get("hecho", {})
+	var tratamiento: Dictionary = articulo.get("tratamiento", {})
+	for valor in hecho_datos.get("temas", []):
+		var etiqueta_hecho := String(valor).strip_edges()
+		if not etiqueta_hecho.is_empty() and not etiquetas.has(etiqueta_hecho):
+			etiquetas.append(etiqueta_hecho)
+	for valor in tratamiento.get("enfasis", []):
+		var etiqueta_enfasis := String(valor).strip_edges()
+		if not etiqueta_enfasis.is_empty() and not etiquetas.has(etiqueta_enfasis):
+			etiquetas.append(etiqueta_enfasis)
+	return etiquetas
+
+
 func _proyectar_datos(hecho_datos: Dictionary, tratamiento: Dictionary) -> Array[Dictionary]:
 	var por_id: Dictionary = {}
 	for dato in hecho_datos.get("datos", []):

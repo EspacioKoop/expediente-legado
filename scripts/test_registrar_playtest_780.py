@@ -23,7 +23,7 @@ def datos_base(valor: bool = True) -> dict[str, object]:
         "tester": "tester",
         "plataforma": "Linux",
         "build_sha": "abc1234",
-        "viewport": "1024×680",
+        "viewport": "1920×1080",
         "teclado_real": valor,
         "mando_fisico": valor,
         "mando_modelo": "mando USB",
@@ -73,7 +73,7 @@ class RegistrarPlaytest780Test(unittest.TestCase):
     def test_markdown_traza_build_dispositivos_y_cuatro_pantallas(self):
         texto = modulo.render_markdown(datos_base(True))
         self.assertIn("build SHA: `abc1234`", texto)
-        self.assertIn("viewport: `1024×680`", texto)
+        self.assertIn("viewport: `1920×1080`", texto)
         self.assertIn("teclado real probado: sí", texto)
         self.assertIn("mando físico real probado: sí", texto)
         for _clave, titulo, _checks in modulo.PANTALLAS:

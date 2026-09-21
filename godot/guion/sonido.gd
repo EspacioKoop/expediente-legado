@@ -139,18 +139,21 @@ static func impacto_careo() -> AudioStream:
 ## El reproductor se crea y se tira solo: una pantalla que guarda su propio
 ## `AudioStreamPlayer` acaba con uno por cada sitio desde el que suena algo, y
 ## el primero que se olvida de pararlo se solapa con el siguiente.
-static func sonar(nodo: Node, nombre: String) -> void:
-	sonar_stream(nodo, stream(nombre))
+static func sonar(nodo: Node, nombre: String, tono: float = 1.0) -> void:
+	sonar_stream(nodo, stream(nombre), tono)
 
 
 ## La variante para pistas que no salen del catálogo de ficheros, como el
 ## impacto procedimental del careo. Mantiene un único ciclo de vida para todas
 ## las voces efímeras.
-static func sonar_stream(nodo: Node, pista: AudioStream) -> void:
+static func sonar_stream(nodo: Node, pista: AudioStream, tono: float = 1.0) -> void:
 	if pista == null or nodo == null:
 		return
 	var voz := AudioStreamPlayer.new()
 	voz.stream = pista
+	# El tono permite variaciones diegéticas del mismo material sin duplicar
+	# archivos. Se acota para evitar valores inválidos o efectos extremos.
+	voz.pitch_scale = clampf(tono, 0.5, 2.0)
 	voz.finished.connect(voz.queue_free)
 	nodo.add_child(voz)
 	voz.play()

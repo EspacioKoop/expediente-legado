@@ -4,7 +4,7 @@ Este corte valida el hueco que queda después de #514: los cuatro folios ampliad
 
 ## Objetivo
 
-Comprobar que `F-1999-00231`, `MEMO-1999-088`, `EMP-0456` y `ACTA-1999-014` son consultables de principio a fin en el visor de expedientes con el viewport canónico del proyecto (`1024×680`).
+Comprobar que `F-1999-00231`, `MEMO-1999-088`, `EMP-0456` y `ACTA-1999-014` son consultables de principio a fin en el visor de expedientes con el viewport canónico del proyecto (`1920×1080`).
 
 No se evalúa aquí si el jugador acusa a la persona correcta ni se añade una respuesta correcta. El test observa presentación, lectura y descubrimiento de evidencia.
 
@@ -12,7 +12,7 @@ No se evalúa aquí si el jugador acusa a la persona correcta ni se añade una r
 
 1. Arrancar el proyecto Godot con una partida nueva o una partida en la que `caso@1` siga abierto.
 2. Entrar en SIGA-98 y abrir el expediente del cierre contable de 1999.
-3. Mantener la ventana en el viewport configurado por `godot/project.godot`: `1024×680`.
+3. Mantener la ventana en el viewport configurado por `godot/project.godot`: `1920×1080`.
 4. No usar herramientas de depuración para marcar pistas como descubiertas antes de abrir los folios.
 
 ## Recorrido
@@ -65,7 +65,7 @@ python3 scripts/registrar_playtest_513.py --salida docs/playtests/playtest-513.m
 
 El registrador fija en el informe:
 
-- build SHA, plataforma, fecha y viewport `1024×680`;
+- build SHA, plataforma, fecha y viewport `1920×1080`;
 - estado individual de cabecera, lectura completa, recorte y desplazamiento para los cuatro folios;
 - conservación de las dos frases gatillo;
 - carácter no concluyente del peritaje y del intervalo de cinco minutos;
@@ -77,6 +77,6 @@ El resumen `listo para valorar cierre de #513` solo queda en **SÍ** cuando est�
 
 ## Criterio de salida
 
-El corte puede considerarse validado cuando los cuatro documentos se leen completos en `1024×680`, cada folio queda respaldado por una captura, las dos frases gatillo existentes siguen funcionando y el contenido añadido no produce una conclusión automática ni altera el coste de lectura.
+El corte puede considerarse validado cuando los cuatro documentos se leen completos en `1920×1080`, cada folio queda respaldado por una captura, las dos frases gatillo existentes siguen funcionando y el contenido añadido no produce una conclusión automática ni altera el coste de lectura.
 
 Si aparece un fallo visual, registrar al menos: folio, resolución, posición aproximada del scroll y una captura. Si aparece un fallo de lógica, abrirlo separado del contenido editorial para no mezclar texto, economía de jornada y descubrimiento de pistas en el mismo parche.

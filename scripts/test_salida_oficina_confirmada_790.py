@@ -44,7 +44,14 @@ class SalidaOficinaConfirmada790Tests(unittest.TestCase):
         self.assertIn("Interactuable3D.Verbo.ABRIR", self.capa)
         self.assertIn('tr("SALIDA_PUERTA_OFICINA")', self.capa)
         self.assertIn("puerta.activado.connect(_pedir_confirmacion_salida)", self.capa)
-        self.assertIn("forma.shape = origen.shape.duplicate()", self.capa)
+        self.assertIn("caja.size = TAM_INTERACCION", self.capa)
+        self.assertIn("DESPLAZAMIENTO_INTERACCION", self.capa)
+
+    def test_acercarse_a_la_puerta_tambien_abre_la_misma_confirmacion(self):
+        self.assertIn('NOMBRE_ZONA_ACCESO_OFICINA := "ZonaAccesoSalidaOficina"', self.capa)
+        self.assertIn("caja.size = TAM_ACCESO", self.capa)
+        self.assertIn("zona.body_entered.connect(_al_acercarse_a_salida)", self.capa)
+        self.assertIn("_pedir_confirmacion_salida(cuerpo)", self.capa)
 
     def test_confirmar_reinyecta_el_transito_existente_y_cancelar_no(self):
         self.assertIn("ConfirmationDialog.new()", self.capa)

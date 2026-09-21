@@ -138,12 +138,11 @@ func resolver(estado: Dictionary, carta_id: String, eje: String) -> Dictionary:
 
 
 ## Las cargas de habilidad disponibles, por eje.
+##
+## La fuente ya no es solo Tarot: consume el contrato transversal de #919.
+## Exposición y lectura social siguen sin conceder cargas.
 func cargas(estado: Dictionary) -> Dictionary:
-	var puntos := Prometeo.puntos_por_eje(estado.get("historias_cartas", {}), catalogo.keys())
-	var disponibles := {}
-	for eje in Prometeo.EJES:
-		disponibles[eje] = mini(TOPE_CARGAS, puntos[eje])
-	return disponibles
+	return Prometeo.cargas_ideologicas(estado, TOPE_CARGAS)
 
 
 ## Cuántas historias quedan por decidir. Posponer no reduce este contador: el

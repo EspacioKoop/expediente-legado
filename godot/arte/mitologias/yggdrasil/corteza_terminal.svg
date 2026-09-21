@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="768" height="1024" viewBox="0 0 768 1024">
+<title>Corteza terminal — Yggdrasil #653</title>
+<desc>Motivo original de corteza y terminal incrustado; sin runas.</desc>
+<rect width="768" height="1024" fill="#1c160f"/>
+<g fill="none" stroke-linecap="round">
+  <path d="M112 0 C72 160 170 250 126 420 C78 610 176 784 116 1024" stroke="#5d4126" stroke-width="64"/>
+  <path d="M286 0 C232 184 344 284 292 476 C244 654 348 826 306 1024" stroke="#795735" stroke-width="48"/>
+  <path d="M524 0 C448 164 578 310 504 486 C434 654 576 842 536 1024" stroke="#4e3923" stroke-width="70"/>
+  <path d="M676 0 C612 168 716 314 650 500 C600 646 704 826 664 1024" stroke="#88643d" stroke-width="34"/>
+</g>
+<g transform="translate(230 334)">
+  <rect x="0" y="0" width="308" height="220" rx="18" fill="#242a24" stroke="#a18452" stroke-width="14"/>
+  <rect x="30" y="28" width="248" height="116" fill="#18271e" stroke="#536c4b" stroke-width="8"/>
+  <path d="M48 170h52m24 0h52m24 0h60" stroke="#b79d63" stroke-width="12"/>
+  <circle cx="250" cy="170" r="13" fill="#6f855a"/>
+</g>
+</svg>

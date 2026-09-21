@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <title>Imanes, notas y pequeños recuerdos para nevera de 1998</title>
+  <desc>Asset original sin marcas ni texto SVG. Fondo transparente. No contiene datos biográficos.</desc>
+
+  <g id="iman_sol" transform="translate(55 55)">
+    <circle cx="90" cy="90" r="48" fill="#d9b650" stroke="#755f33" stroke-width="7"/>
+    <g stroke="#d9b650" stroke-width="14" stroke-linecap="round">
+      <path d="M90 5v28M90 147v28M5 90h28M147 90h28M30 30l20 20M130 130l20 20M150 30l-20 20M50 130l-20 20"/>
+    </g>
+  </g>
+
+  <g id="iman_casa" transform="translate(260 55)">
+    <path d="M20 100L100 25l80 75v90H20z" fill="#8d5d4a" stroke="#4d342b" stroke-width="7"/>
+    <rect x="72" y="120" width="56" height="70" fill="#d2bb7a"/>
+    <rect x="38" y="112" width="28" height="28" fill="#6d8d8d"/><rect x="134" y="112" width="28" height="28" fill="#6d8d8d"/>
+  </g>
+
+  <g id="iman_pez" transform="translate(500 75)">
+    <path d="M18 80c55-55 128-55 182 0-54 55-127 55-182 0z" fill="#557f7c" stroke="#2d4745" stroke-width="7"/>
+    <path d="M198 80l70-54v108z" fill="#557f7c" stroke="#2d4745" stroke-width="7"/>
+    <circle cx="64" cy="66" r="7" fill="#1f2929"/>
+  </g>
+
+  <g id="iman_ceramica" transform="translate(830 55)">
+    <circle cx="105" cy="105" r="92" fill="#d7c795" stroke="#675b3c" stroke-width="8"/>
+    <path d="M30 116c28-54 57-73 75-73s47 19 75 73c-28 28-57 42-75 42s-47-14-75-42z" fill="#64847c"/>
+    <circle cx="105" cy="86" r="22" fill="#caa75c"/>
+  </g>
+
+  <g id="nota_amarilla" transform="translate(55 330)">
+    <path d="M0 0h260v220h-210L0 168z" fill="#e7d46f" stroke="#6e6337" stroke-width="6"/>
+    <path d="M0 168h50v52" fill="#c9b655" stroke="#6e6337" stroke-width="5"/>
+    <g fill="#847a49"><rect x="46" y="48" width="160" height="8" rx="4"/><rect x="46" y="78" width="120" height="8" rx="4"/><rect x="46" y="108" width="144" height="8" rx="4"/></g>
+  </g>
+
+  <g id="nota_cuadricula" transform="translate(370 330)">
+    <rect width="260" height="220" rx="6" fill="#e8e0c7" stroke="#655f53" stroke-width="6"/>
+    <g stroke="#b8b4a4" stroke-width="2">
+      <path d="M20 0v220M50 0v220M80 0v220M110 0v220M140 0v220M170 0v220M200 0v220M230 0v220"/>
+      <path d="M0 20h260M0 50h260M0 80h260M0 110h260M0 140h260M0 170h260M0 200h260"/>
+    </g>
+    <circle cx="38" cy="32" r="10" fill="#a44b42"/>
+  </g>
+
+  <g id="calendario_mes" transform="translate(690 320)">
+    <rect width="300" height="240" rx="10" fill="#e7dfc7" stroke="#5f5a4d" stroke-width="7"/>
+    <rect x="0" y="0" width="300" height="56" rx="10" fill="#6f4740"/>
+    <g fill="#8e8a7b">
+      <circle cx="45" cy="92" r="10"/><circle cx="85" cy="92" r="10"/><circle cx="125" cy="92" r="10"/><circle cx="165" cy="92" r="10"/><circle cx="205" cy="92" r="10"/><circle cx="245" cy="92" r="10"/>
+      <circle cx="45" cy="132" r="10"/><circle cx="85" cy="132" r="10"/><circle cx="125" cy="132" r="10"/><circle cx="165" cy="132" r="10"/><circle cx="205" cy="132" r="10"/><circle cx="245" cy="132" r="10"/>
+      <circle cx="45" cy="172" r="10"/><circle cx="85" cy="172" r="10"/><circle cx="125" cy="172" r="10"/><circle cx="165" cy="172" r="10"/><circle cx="205" cy="172" r="10"/><circle cx="245" cy="172" r="10"/>
+    </g>
+    <circle cx="165" cy="172" r="18" fill="none" stroke="#b45246" stroke-width="6"/>
+  </g>
+
+  <g id="clip_facturas" transform="translate(55 650)">
+    <rect x="22" y="26" width="220" height="160" rx="8" fill="#e5dcc4" stroke="#675f50" stroke-width="5" transform="rotate(4 22 26)"/>
+    <rect width="220" height="160" rx="8" fill="#efe5cd" stroke="#675f50" stroke-width="5"/>
+    <g fill="#827965"><rect x="36" y="42" width="130" height="8" rx="4"/><rect x="36" y="70" width="160" height="7" rx="3"/><rect x="36" y="98" width="120" height="7" rx="3"/></g>
+    <path d="M82 0c-35 0-35 50 0 50h78c28 0 28-38 0-38h-58" fill="none" stroke="#7b7d78" stroke-width="9"/>
+  </g>
+
+  <g id="iman_lluvia" transform="translate(390 660)">
+    <path d="M40 96c-28-2-34-37-8-49 4-32 50-42 68-16 23-22 67-8 68 26 27 8 24 47-4 52H40z" fill="#647a82" stroke="#34434a" stroke-width="7"/>
+    <path d="M56 130l-12 28M104 130l-12 28M152 130l-12 28" stroke="#6e9ca8" stroke-width="8" stroke-linecap="round"/>
+  </g>
+
+  <g id="iman_carretera" transform="translate(670 650)">
+    <path d="M100 0l100 100-100 100L0 100z" fill="#d1b95f" stroke="#695d34" stroke-width="8"/>
+    <path d="M100 38v124" stroke="#49483f" stroke-width="18"/>
+    <path d="M100 50v25M100 91v25M100 132v20" stroke="#e8dfbb" stroke-width="6"/>
+  </g>
+
+  <g id="foto_mini_paisaje" transform="translate(960 635)">
+    <rect width="190" height="190" rx="6" fill="#eee5ce" stroke="#5f594d" stroke-width="5"/>
+    <rect x="14" y="14" width="162" height="122" fill="#819b9b"/>
+    <circle cx="130" cy="43" r="16" fill="#dfc16c"/>
+    <path d="M14 122l38-50 30 25 22-17 45 42 27-20v34H14z" fill="#46685f"/>
+  </g>
+</svg>

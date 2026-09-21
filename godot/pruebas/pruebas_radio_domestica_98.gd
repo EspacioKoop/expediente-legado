@@ -8,6 +8,7 @@ func _initialize() -> void:
 	_probar_programacion_narrativa()
 	_probar_audio_y_transporte()
 	_probar_radio_deliberada()
+	_probar_exposicion_ideologica()
 	_probar_tir_na_nog_deliberado()
 	_probar_cassette_deliberado()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
@@ -117,6 +118,38 @@ func _probar_radio_deliberada() -> void:
 	_comprobar(
 		SemillasOniricas.familias_activas(jornada).has("simurgh"),
 		"la escucha deliberada usa el contrato común de semillas",
+	)
+	radio.queue_free()
+
+
+func _probar_exposicion_ideologica() -> void:
+	var radio := MinicadenaDomestica98.new()
+	root.add_child(radio)
+	var jornada := {"dia": 1, "acciones": 0}
+	radio.configurar(jornada)
+	var programa := radio.programa_actual(jornada)
+	var exposicion: Dictionary = programa.get("exposicion_ideologica", {})
+	_comprobar(
+		exposicion.get("hecho_id", ""),
+		"turnos-atencion-planta4",
+		"la radio reutiliza el hecho base que aparece en prensa",
+	)
+	var estado := {"historias_cartas": {"el-sol": "centrista"}}
+	var elecciones_antes := Prometeo.conteo_elecciones_ideologicas(estado)
+	_comprobar(
+		MinicadenaDomestica98.registrar_exposicion_de_contenido(estado, programa, 1),
+		"completar el programa registra exposición mediante Prometeo",
+	)
+	_comprobar(
+		not MinicadenaDomestica98.registrar_exposicion_de_contenido(estado, programa, 1),
+		"la misma escucha no duplica el evento de exposición",
+	)
+	var exposiciones: Array = estado.get(Prometeo.CLAVE_EXPOSICION_IDEOLOGICA, [])
+	_comprobar(exposiciones.size(), 1, "la radio escribe únicamente una exposición")
+	_comprobar(
+		Prometeo.conteo_elecciones_ideologicas(estado),
+		elecciones_antes,
+		"escuchar radio no modifica las elecciones ideológicas",
 	)
 	radio.queue_free()
 

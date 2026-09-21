@@ -131,7 +131,7 @@ def render_markdown(datos: dict[str, object]) -> str:
 - tester/facilitador: {datos['tester']}
 - plataforma: {datos['plataforma']}
 - build SHA: `{datos['build_sha']}`
-- viewport: `1024×680`
+- viewport: `1920×1080`
 
 ## Folios
 
@@ -168,7 +168,7 @@ El resultado deriva únicamente de los checks introducidos durante el playtest; 
 
 
 def recoger_datos() -> dict[str, object]:
-    print("Playtest visual #513 — ejecutar a 1024×680 sobre una build identificable.\n")
+    print("Playtest visual #513 — ejecutar a 1920×1080 sobre una build identificable.\n")
     datos: dict[str, object] = {
         "fecha": datetime.now().astimezone().isoformat(timespec="seconds"),
         "tester": preguntar("Tester/facilitador: "),

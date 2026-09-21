@@ -23,6 +23,7 @@ const DURACION_INSERCION_CARTUCHO := 0.14
 
 var link_cable: LinkCablePortatil = null
 var puerto_ir: PuertoIRPortatil = null
+var impresora_termica: ImpresoraTermicaPortatil = null
 var _audio_emulado: AudioStreamPlayer
 var _audio_playback: AudioStreamGeneratorPlayback
 var _audio_pendiente := PackedVector2Array()
@@ -35,6 +36,9 @@ var _link_cable_boton: Button
 var _puerto_ir_panel: VBoxContainer
 var _puerto_ir_estado: Label
 var _puerto_ir_boton: Button
+var _impresora_panel: VBoxContainer
+var _impresora_estado: Label
+var _impresora_boton: Button
 var _ruta_cartucho_actual := ""
 var _rom_cartucho_pendiente := ""
 var _cambiando_cartucho := false
@@ -47,6 +51,7 @@ func abrir() -> void:
 	_preparar_cartucho_visual()
 	_preparar_link_cable()
 	_preparar_puerto_ir()
+	_preparar_impresora_termica()
 
 
 func _process(delta: float) -> void:
@@ -305,6 +310,83 @@ func _actualizar_puerto_ir_ui(secuencia: int) -> void:
 		_puerto_ir_estado.text = _texto("ir_listo")
 	else:
 		_puerto_ir_estado.text = _formatear("ir_pulso_emitido", [secuencia])
+
+
+func _preparar_impresora_termica() -> void:
+	if _lista == null:
+		return
+	if impresora_termica == null:
+		impresora_termica = ImpresoraTermicaPortatil.new()
+
+	_impresora_panel = VBoxContainer.new()
+	_impresora_panel.name = "PanelImpresoraTermica"
+	_impresora_panel.add_theme_constant_override("separation", 4)
+
+	var titulo := Label.new()
+	titulo.text = _texto("impresora_titulo")
+	_impresora_panel.add_child(titulo)
+
+	_impresora_estado = Label.new()
+	_impresora_estado.name = "EstadoImpresoraTermica"
+	_impresora_estado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_impresora_panel.add_child(_impresora_estado)
+
+	_impresora_boton = Button.new()
+	_impresora_boton.name = "BotonImpresoraTermica"
+	_impresora_boton.pressed.connect(_usar_impresora_termica)
+	_impresora_panel.add_child(_impresora_boton)
+
+	var aviso := Label.new()
+	aviso.text = _texto("impresora_aviso")
+	aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_impresora_panel.add_child(aviso)
+
+	_lista.add_child(_impresora_panel)
+	_lista.move_child(_impresora_panel, mini(3, _lista.get_child_count() - 1))
+	impresora_termica.estado_cambiado.connect(_al_cambiar_estado_impresora)
+	impresora_termica.progreso_cambiado.connect(_al_cambiar_progreso_impresora)
+	_actualizar_impresora_termica_ui()
+
+
+func _usar_impresora_termica() -> void:
+	if impresora_termica == null:
+		return
+	match impresora_termica.estado():
+		ImpresoraTermicaPortatil.Estado.APAGADA:
+			impresora_termica.encender()
+		ImpresoraTermicaPortatil.Estado.LISTA:
+			impresora_termica.encolar_imagen(ImpresoraTermicaPortatil.crear_patron_prueba())
+
+
+func _al_cambiar_estado_impresora(_estado: int) -> void:
+	_actualizar_impresora_termica_ui()
+
+
+func _al_cambiar_progreso_impresora(_progreso: float) -> void:
+	_actualizar_impresora_termica_ui()
+
+
+func _actualizar_impresora_termica_ui() -> void:
+	if impresora_termica == null or _impresora_estado == null or _impresora_boton == null:
+		return
+	match impresora_termica.estado():
+		ImpresoraTermicaPortatil.Estado.APAGADA:
+			_impresora_estado.text = _texto("impresora_apagada")
+			_impresora_boton.text = _texto("impresora_encender")
+			_impresora_boton.disabled = false
+		ImpresoraTermicaPortatil.Estado.LISTA:
+			_impresora_estado.text = _texto("impresora_lista")
+			_impresora_boton.text = _texto("impresora_imprimir_prueba")
+			_impresora_boton.disabled = false
+		ImpresoraTermicaPortatil.Estado.IMPRIMIENDO:
+			var porcentaje := int(round(impresora_termica.progreso() * 100.0))
+			_impresora_estado.text = _formatear("impresora_imprimiendo", [porcentaje])
+			_impresora_boton.text = _texto("impresora_imprimiendo_boton")
+			_impresora_boton.disabled = true
+		ImpresoraTermicaPortatil.Estado.PAPEL_DISPONIBLE:
+			_impresora_estado.text = _texto("impresora_papel_disponible")
+			_impresora_boton.text = _texto("impresora_recoger_en_casa")
+			_impresora_boton.disabled = true
 
 
 func _preparar_audio_emulado() -> void:

@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <title>Pegatinas y carteles comerciales genéricos, 1998</title>
+  <desc>Hoja vectorial original sin marcas reales. Fondo transparente. Cada cartel está en un grupo con id.</desc>
+
+  <g id="abierto" transform="translate(55 55)">
+    <rect width="300" height="150" rx="18" fill="#efe4bf" stroke="#32444a" stroke-width="8"/>
+    <text x="150" y="94" text-anchor="middle" font-family="Arial,sans-serif" font-size="56" font-weight="900" fill="#2f6b58">ABIERTO</text>
+    <circle cx="35" cy="30" r="10" fill="#2f6b58"/><circle cx="265" cy="30" r="10" fill="#2f6b58"/>
+  </g>
+
+  <g id="cerrado" transform="translate(430 55)">
+    <rect width="300" height="150" rx="18" fill="#efe4bf" stroke="#513532" stroke-width="8"/>
+    <text x="150" y="94" text-anchor="middle" font-family="Arial,sans-serif" font-size="56" font-weight="900" fill="#9b3f36">CERRADO</text>
+    <circle cx="35" cy="30" r="10" fill="#9b3f36"/><circle cx="265" cy="30" r="10" fill="#9b3f36"/>
+  </g>
+
+  <g id="oferta" transform="translate(805 55)">
+    <path d="M150 0l28 20 34-9 18 31 35 4 5 35 31 17-9 34 21 28-21 28 9 34-31 17-5 35-35 4-18 31-34-9-28 20-28-20-34 9-18-31-35-4-5-35-31-17 9-34-21-28 21-28-9-34 31-17 5-35 35-4 18-31 34 9z" fill="#d55a45" stroke="#713128" stroke-width="7"/>
+    <text x="150" y="170" text-anchor="middle" font-family="Arial,sans-serif" font-size="54" font-weight="900" fill="#fff0c8">OFERTA</text>
+  </g>
+
+  <g id="ocasion" transform="translate(55 290)">
+    <rect width="310" height="165" rx="12" fill="#d5bc72" stroke="#39372f" stroke-width="8"/>
+    <path d="M22 42h266M22 122h266" stroke="#8d3f35" stroke-width="8"/>
+    <text x="155" y="102" text-anchor="middle" font-family="Georgia,serif" font-size="58" font-weight="700" fill="#343a36">OCASIÓN</text>
+  </g>
+
+  <g id="se_compra" transform="translate(430 290)">
+    <rect width="310" height="165" rx="12" fill="#e6dcc2" stroke="#344349" stroke-width="8"/>
+    <text x="155" y="74" text-anchor="middle" font-family="Arial,sans-serif" font-size="42" font-weight="900" fill="#344349">SE COMPRA</text>
+    <text x="155" y="125" text-anchor="middle" font-family="monospace" font-size="24" font-weight="700" fill="#6f4b38">USADO · LIMPIO</text>
+  </g>
+
+  <g id="se_vende" transform="translate(805 290)">
+    <rect width="310" height="165" rx="12" fill="#e6dcc2" stroke="#6e3a33" stroke-width="8"/>
+    <text x="155" y="74" text-anchor="middle" font-family="Arial,sans-serif" font-size="42" font-weight="900" fill="#6e3a33">SE VENDE</text>
+    <text x="155" y="125" text-anchor="middle" font-family="monospace" font-size="24" font-weight="700" fill="#4d514b">REVISADO · HOY</text>
+  </g>
+
+  <g id="prensa" transform="translate(55 535)">
+    <rect width="250" height="130" rx="10" fill="#263844" stroke="#d5bb72" stroke-width="7"/>
+    <text x="125" y="82" text-anchor="middle" font-family="Georgia,serif" font-size="48" font-weight="700" fill="#f0e1b4">PRENSA</text>
+  </g>
+
+  <g id="revistas" transform="translate(335 535)">
+    <rect width="250" height="130" rx="10" fill="#5c3450" stroke="#d5bb72" stroke-width="7"/>
+    <text x="125" y="82" text-anchor="middle" font-family="Arial,sans-serif" font-size="45" font-weight="900" fill="#fff0c5">REVISTAS</text>
+  </g>
+
+  <g id="pilas" transform="translate(615 535)">
+    <rect width="250" height="130" rx="10" fill="#d0a447" stroke="#3f3a2f" stroke-width="7"/>
+    <text x="125" y="82" text-anchor="middle" font-family="Arial,sans-serif" font-size="50" font-weight="900" fill="#2d3435">PILAS</text>
+  </g>
+
+  <g id="cintas" transform="translate(895 535)">
+    <rect width="250" height="130" rx="10" fill="#415a67" stroke="#d9c785" stroke-width="7"/>
+    <text x="125" y="82" text-anchor="middle" font-family="Arial,sans-serif" font-size="48" font-weight="900" fill="#f0e2b8">CINTAS</text>
+  </g>
+
+  <g id="novedad" transform="translate(90 735)">
+    <path d="M0 28L28 0h268l28 28v88l-28 28H28L0 116z" fill="#2f6b58" stroke="#213b35" stroke-width="7"/>
+    <text x="162" y="91" text-anchor="middle" font-family="Arial,sans-serif" font-size="48" font-weight="900" fill="#f3e6bc">NOVEDAD</text>
+  </g>
+
+  <g id="liquidacion" transform="translate(465 735)">
+    <path d="M0 28L28 0h320l28 28v88l-28 28H28L0 116z" fill="#983d34" stroke="#512820" stroke-width="7"/>
+    <text x="188" y="89" text-anchor="middle" font-family="Arial,sans-serif" font-size="43" font-weight="900" fill="#f7e8bf">LIQUIDACIÓN</text>
+  </g>
+
+  <g id="vuelva_pronto" transform="translate(900 715)">
+    <rect width="245" height="170" rx="20" fill="#e8ddbf" stroke="#4a4a42" stroke-width="7"/>
+    <path d="M40 42h165M40 122h165" stroke="#c49e52" stroke-width="6"/>
+    <text x="122" y="88" text-anchor="middle" font-family="Georgia,serif" font-size="32" font-weight="700" fill="#3d4947">VUELVA</text>
+    <text x="122" y="119" text-anchor="middle" font-family="Georgia,serif" font-size="32" font-weight="700" fill="#3d4947">PRONTO</text>
+  </g>
+</svg>

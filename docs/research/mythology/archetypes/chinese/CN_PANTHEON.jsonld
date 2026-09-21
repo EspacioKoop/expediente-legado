@@ -1,0 +1,878 @@
+{
+  "@context": "../../schema/ACP_CONTEXT.jsonld",
+  "@id": "pantheon:CN-PANTHEON",
+  "@type": "Pantheon",
+  "name": "Chinese Mythological Figures",
+  "tradition": "Chinese Mythology / Taoism / Folk Religion",
+  "description": "The divine beings, immortals, and mythological figures of Chinese tradition, spanning primordial creators, celestial bureaucracy, Taoist immortals, and folk deities from texts including the Shanhaijing, Fengshen Yanyi, and Journey to the West",
+  "canonicalSources": [
+    "Shanhaijing (Classic of Mountains and Seas)",
+    "Huainanzi",
+    "Fengshen Yanyi (Investiture of the Gods)",
+    "Journey to the West (Xiyouji)",
+    "Liezi",
+    "Zhuangzi",
+    "Various Taoist scriptures"
+  ],
+  "systemPatterns": [
+    {
+      "name": "Cosmic Creation",
+      "description": "Pangu creates the universe from primordial chaos, separating yin and yang, then his body becomes the world",
+      "archetypes": ["arch:CN-PANGU"],
+      "pattern": "Sacrifice of primordial being to form cosmos"
+    },
+    {
+      "name": "Three Sovereigns and Five Emperors",
+      "description": "The sage-kings who civilized humanity - Fuxi, Nüwa, Shennong, followed by the Yellow Emperor and successors",
+      "archetypes": ["arch:CN-FUXI", "arch:CN-NUWA", "arch:CN-SHENNONG", "arch:CN-HUANGDI"],
+      "pattern": "Culture heroes establishing civilization"
+    },
+    {
+      "name": "Celestial Bureaucracy",
+      "description": "Heaven organized as imperial court with the Jade Emperor as supreme ruler and hierarchical ministries",
+      "archetypes": ["arch:CN-JADE-EMPEROR", "arch:CN-XIWANGMU"],
+      "pattern": "Divine realm mirrors earthly imperial structure"
+    },
+    {
+      "name": "Taoist Immortality",
+      "description": "The Eight Immortals and path to transcendence through cultivation, virtue, and magical arts",
+      "archetypes": ["arch:CN-EIGHT-IMMORTALS"],
+      "pattern": "Human transformation into divine through spiritual practice"
+    },
+    {
+      "name": "Journey to the West",
+      "description": "Sun Wukong's rebellion, punishment, redemption through pilgrimage with Xuanzang",
+      "archetypes": ["arch:CN-SUN-WUKONG"],
+      "pattern": "Trickster-rebel transformed through discipline and compassion"
+    }
+  ],
+  "entries": [
+    {
+      "@id": "arch:CN-PANGU",
+      "@type": "Archetype",
+      "name": "Pangu",
+      "aliases": ["P'an Ku", "The First Being"],
+      "domain": ["Creation", "Primordial Chaos", "Cosmic Sacrifice", "World-Body"],
+      "description": "The primordial giant who emerged from the cosmic egg and separated heaven (yang) and earth (yin). For 18,000 years he held them apart as they grew, then died and his body became the world - eyes as sun and moon, breath as wind, voice as thunder, blood as rivers, flesh as soil, hair as stars and vegetation.",
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.1,
+        "light-shadow": 0.35,
+        "active-receptive": 0.25,
+        "individual-collective": 0.2,
+        "ascent-descent": 0.5,
+        "stasis-transformation": 0.8,
+        "voluntary-fated": 0.75
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.95, "aspects": ["world-shaper", "cosmic-separator"]},
+        {"primordial": "primordial:great-father", "weight": 0.7, "aspects": ["progenitor", "world-body"]},
+        {"primordial": "primordial:self", "weight": 0.6, "aspects": ["primordial-unity", "sacrifice-for-creation"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-YMIR", "fidelity": 0.85, "notes": "Primordial giant whose body becomes the world"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-PURUSHA", "fidelity": 0.8, "notes": "Cosmic being sacrificed to create world"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-TIAMAT", "fidelity": 0.6, "notes": "Primordial being whose body forms cosmos"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When creation requires annihilation", "When the individual must be sacrificed for the whole"],
+        "shadowManifestations": ["Meaningless sacrifice", "Dissolution without creation", "Chaos returning to swallow form"],
+        "integrationPath": "Understanding that death and creation are one process; the body given becomes the world sustained"
+      },
+      "correspondences": {
+        "element": "All five elements (his body)",
+        "direction": "Center (origin point)",
+        "symbol": "Cosmic egg, axe/chisel",
+        "association": "Creation, cosmogony, primordial unity"
+      }
+    },
+    {
+      "@id": "arch:CN-NUWA",
+      "@type": "Archetype",
+      "name": "Nüwa",
+      "aliases": ["Nu Kua", "Nügua", "Empress Wa"],
+      "domain": ["Creation of Humanity", "World Repair", "Marriage", "Serpent Goddess"],
+      "description": "The serpent-bodied goddess who created humanity from yellow earth, molding nobles individually and flicking mud from a rope for commoners. When the pillars of heaven collapsed, she melted five-colored stones to repair the sky, cut off a giant turtle's legs as new pillars, and burned reeds to stop floods. She established marriage and human civilization.",
+      "spectralCoordinates": {
+        "order-chaos": 0.2,
+        "creation-destruction": 0.15,
+        "light-shadow": 0.3,
+        "active-receptive": 0.55,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.45,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.35
+      },
+      "instantiates": [
+        {"primordial": "primordial:creator", "weight": 0.95, "aspects": ["humanity-maker", "world-repairer"]},
+        {"primordial": "primordial:great-mother", "weight": 0.9, "aspects": ["mother-of-humanity", "nurturer"]},
+        {"primordial": "primordial:healer", "weight": 0.75, "aspects": ["cosmic-restorer", "sky-mender"]},
+        {"primordial": "primordial:sovereign", "weight": 0.6, "aspects": ["civilization-establisher", "marriage-institutor"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:CN-FUXI", "description": "Divine sibling-spouse pair who created civilization"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-PROMETHEUS", "fidelity": 0.55, "notes": "Creator of humanity from earth"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-ENKI", "fidelity": 0.5, "notes": "Creator of humanity, civilization-bringer"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-SHAKTI", "fidelity": 0.45, "notes": "Primordial feminine creative power"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When creation produces inequality", "When repair cannot hold"],
+        "shadowManifestations": ["Hierarchy built into creation", "Temporary fixes for permanent problems", "Maternal smothering"],
+        "integrationPath": "Creation that empowers rather than controls; repair that transforms rather than merely patches"
+      },
+      "correspondences": {
+        "element": "Earth/Water",
+        "direction": "Center",
+        "symbol": "Serpent body, compass (with Fuxi's square), five-colored stones",
+        "association": "Creation, marriage, cosmic order, humanity"
+      }
+    },
+    {
+      "@id": "arch:CN-FUXI",
+      "@type": "Archetype",
+      "name": "Fuxi",
+      "aliases": ["Fu Hsi", "Paoxi", "Taihao"],
+      "domain": ["Civilization", "Writing", "Bagua/Trigrams", "Fishing/Hunting", "Divination"],
+      "description": "The serpent-bodied culture hero who, with Nüwa, survived the great flood and repopulated the earth. He invented the bagua (eight trigrams), the basis of the I Ching and all Chinese cosmology. He taught humanity fishing, hunting, animal husbandry, and created the first writing system by observing patterns in nature.",
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.25,
+        "light-shadow": 0.25,
+        "active-receptive": 0.3,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.4
+      },
+      "instantiates": [
+        {"primordial": "primordial:magician", "weight": 0.9, "aspects": ["divination-inventor", "pattern-revealer"]},
+        {"primordial": "primordial:sovereign", "weight": 0.8, "aspects": ["first-emperor", "civilization-founder"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.75, "aspects": ["cosmic-teacher", "system-creator"]},
+        {"primordial": "primordial:creator", "weight": 0.6, "aspects": ["culture-creator", "humanity-restorer"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:CN-NUWA", "description": "Divine sibling-spouse pair (he holds square, she holds compass)"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-PROMETHEUS", "fidelity": 0.6, "notes": "Culture hero who taught humanity"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-THOTH", "fidelity": 0.7, "notes": "Inventor of writing, cosmic patterns"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-ODIN", "fidelity": 0.55, "notes": "Discovered sacred symbols (runes/trigrams)"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When knowledge becomes control", "When patterns become prisons"],
+        "shadowManifestations": ["Rigid systematization", "Knowledge hoarding", "Civilization as domination"],
+        "integrationPath": "Systems that liberate rather than constrain; knowledge shared freely"
+      },
+      "correspondences": {
+        "element": "Wood",
+        "direction": "East",
+        "symbol": "Square (carpenter's), bagua trigrams, turtle shell",
+        "association": "I Ching, divination, civilization, writing"
+      }
+    },
+    {
+      "@id": "arch:CN-SHENNONG",
+      "@type": "Archetype",
+      "name": "Shennong",
+      "aliases": ["Shen Nung", "Divine Farmer", "Yandi (Flame Emperor)"],
+      "domain": ["Agriculture", "Medicine", "Herbalism", "Markets", "Self-Sacrifice"],
+      "description": "The Divine Farmer who taught humanity agriculture and medicine. With a transparent body that revealed the effects of plants, he personally tested hundreds of herbs - including seventy poisons in one day - to discover their medicinal properties. He invented the plow, established markets, and is considered the father of Chinese medicine.",
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.3,
+        "active-receptive": 0.4,
+        "individual-collective": 0.25,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.3
+      },
+      "instantiates": [
+        {"primordial": "primordial:healer", "weight": 0.95, "aspects": ["medicine-discoverer", "herbalist"]},
+        {"primordial": "primordial:hero", "weight": 0.7, "aspects": ["self-sacrificer", "poison-tester"]},
+        {"primordial": "primordial:sovereign", "weight": 0.65, "aspects": ["sage-king", "civilization-bringer"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.6, "aspects": ["teacher", "knowledge-giver"]}
+      ],
+      "relationships": [
+        {"type": "rel:MIRRORS", "target": "arch:CN-HUANGDI", "description": "Paired as Flame Emperor and Yellow Emperor"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ASCLEPIUS", "fidelity": 0.7, "notes": "Divine healer, medicine god"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-DHANVANTARI", "fidelity": 0.65, "notes": "Divine physician"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CE-BRIGID", "fidelity": 0.5, "notes": "Healing, agriculture aspects"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When healing knowledge is hoarded or weaponized", "When self-sacrifice becomes self-destruction"],
+        "shadowManifestations": ["Poisoner", "Knowledge as power over others", "Martyrdom without purpose"],
+        "integrationPath": "Healing wisdom freely shared; accepting limits to self-sacrifice"
+      },
+      "correspondences": {
+        "element": "Fire/Earth",
+        "direction": "South",
+        "symbol": "Plow, herbs, whip for testing plants",
+        "association": "Traditional Chinese Medicine, agriculture, markets"
+      }
+    },
+    {
+      "@id": "arch:CN-HUANGDI",
+      "@type": "Archetype",
+      "name": "Huangdi",
+      "aliases": ["Yellow Emperor", "Huang Ti", "Xuanyuan"],
+      "domain": ["Sovereignty", "Civilization", "Warfare", "Taoism", "Immortality"],
+      "description": "The Yellow Emperor, legendary founder of Chinese civilization and ancestor of all Han Chinese. He defeated the rebel Chiyou with the help of divine beings, unified the tribes, and invented (or his court invented) writing, the calendar, medicine, music, silk, and governmental systems. He ascended to heaven as an immortal on a dragon.",
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.25,
+        "active-receptive": 0.25,
+        "individual-collective": 0.25,
+        "ascent-descent": 0.3,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.45
+      },
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.95, "aspects": ["divine-king", "unifier", "ancestor"]},
+        {"primordial": "primordial:warrior", "weight": 0.7, "aspects": ["battle-winner", "order-establisher"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.65, "aspects": ["civilization-creator", "system-founder"]},
+        {"primordial": "primordial:self", "weight": 0.5, "aspects": ["achieved-immortality", "transcendence"]}
+      ],
+      "relationships": [
+        {"type": "rel:MIRRORS", "target": "arch:CN-SHENNONG", "description": "Paired emperors - Yellow and Flame"},
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:CN-CHIYOU", "axis": "order-chaos", "description": "Order vs chaos in primordial battle"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-RAMA", "fidelity": 0.6, "notes": "Divine king, civilization ideal"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ZEUS", "fidelity": 0.5, "notes": "Supreme ruler who defeated chaos forces"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-MARDUK", "fidelity": 0.55, "notes": "King who defeated chaos, established order"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When order becomes oppression", "When civilization destroys what it claims to protect"],
+        "shadowManifestations": ["Tyranny", "Warfare for conquest not defense", "Cultural imperialism"],
+        "integrationPath": "Leadership that serves rather than dominates; order that includes rather than excludes"
+      },
+      "correspondences": {
+        "element": "Earth",
+        "direction": "Center",
+        "symbol": "Dragon, yellow robes, Xuanyuan sword",
+        "association": "Chinese civilization, Taoism, martial arts, medicine"
+      }
+    },
+    {
+      "@id": "arch:CN-CHIYOU",
+      "@type": "Archetype",
+      "name": "Chiyou",
+      "aliases": ["Chi You", "War God"],
+      "domain": ["War", "Chaos", "Rebellion", "Metallurgy", "Monstrous Power"],
+      "description": "The fearsome war god with bronze head, iron forehead, and the body of a beast, who led the Nine Li tribes against the Yellow Emperor. A master of metal-working who invented weapons, he commanded fog and storms in battle. Though defeated, he was later worshipped as a war god, representing the fierce, untamed aspects of martial power.",
+      "spectralCoordinates": {
+        "order-chaos": 0.85,
+        "creation-destruction": 0.75,
+        "light-shadow": 0.65,
+        "active-receptive": 0.15,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.6,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.35
+      },
+      "instantiates": [
+        {"primordial": "primordial:warrior", "weight": 0.95, "aspects": ["war-god", "battle-fury"]},
+        {"primordial": "primordial:rebel", "weight": 0.85, "aspects": ["chaos-bringer", "order-challenger"]},
+        {"primordial": "primordial:monster", "weight": 0.7, "aspects": ["beast-form", "terrifying-power"]},
+        {"primordial": "primordial:magician", "weight": 0.5, "aspects": ["metallurgy", "weather-magic"]}
+      ],
+      "relationships": [
+        {"type": "rel:POLAR_OPPOSITE", "target": "arch:CN-HUANGDI", "axis": "order-chaos", "description": "Chaos rebel vs civilizing emperor"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ARES", "fidelity": 0.7, "notes": "War god, battle fury"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-FENRIR", "fidelity": 0.55, "notes": "Monstrous chaos force opposing cosmic order"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-TIAMAT", "fidelity": 0.5, "notes": "Primordial chaos defeated by order-king"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When rebellion has no constructive aim", "When war becomes slaughter"],
+        "shadowManifestations": ["Mindless destruction", "Violence for its own sake", "Chaos without creation"],
+        "integrationPath": "Martial power in service of just causes; innovation (metallurgy) channeled constructively"
+      },
+      "correspondences": {
+        "element": "Metal/Fire",
+        "direction": "South (associated with Miao peoples)",
+        "symbol": "Bronze weapons, monstrous form, fog",
+        "association": "War, weapons, rebellion, the conquered other"
+      }
+    },
+    {
+      "@id": "arch:CN-JADE-EMPEROR",
+      "@type": "Archetype",
+      "name": "Jade Emperor",
+      "aliases": ["Yù Huáng", "Yù Dì", "Heavenly Grandfather"],
+      "domain": ["Heaven", "Sovereignty", "Cosmic Order", "Celestial Bureaucracy", "Justice"],
+      "description": "The supreme ruler of Heaven and all divine realms, presiding over the celestial bureaucracy that mirrors the Chinese imperial court. Originally a mortal prince who achieved immortality through countless lifetimes of cultivation, he governs through ministers, judges the living and dead, and maintains cosmic order.",
+      "spectralCoordinates": {
+        "order-chaos": 0.1,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.2,
+        "active-receptive": 0.4,
+        "individual-collective": 0.2,
+        "ascent-descent": 0.1,
+        "stasis-transformation": 0.3,
+        "voluntary-fated": 0.6
+      },
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.95, "aspects": ["cosmic-emperor", "supreme-judge"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.6, "aspects": ["achieved-wisdom", "cosmic-administrator"]},
+        {"primordial": "primordial:great-father", "weight": 0.55, "aspects": ["heavenly-grandfather", "divine-patriarch"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:CN-XIWANGMU", "description": "Supreme yang and yin rulers of heaven"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ZEUS", "fidelity": 0.65, "notes": "Supreme sky ruler"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-INDRA", "fidelity": 0.6, "notes": "King of heaven, celestial court"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:ME-ANU", "fidelity": 0.55, "notes": "Heavenly supreme deity"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When bureaucracy stifles life", "When cosmic order serves only the powerful"],
+        "shadowManifestations": ["Rigid bureaucracy", "Distant uncaring authority", "Justice without mercy"],
+        "integrationPath": "Order that serves all beings; authority accountable to cosmic harmony"
+      },
+      "contextualVariants": [
+        {
+          "context": "Journey to the West (facing Sun Wukong)",
+          "spectralShift": {"order-chaos": 0.05, "stasis-transformation": 0.2},
+          "notes": "Rigid, easily threatened by chaos"
+        },
+        {
+          "context": "Folk religion (benevolent grandfather)",
+          "spectralShift": {"light-shadow": 0.15, "individual-collective": 0.15},
+          "notes": "More accessible, family-oriented deity"
+        }
+      ],
+      "correspondences": {
+        "element": "All (supreme)",
+        "direction": "Celestial North (pole star)",
+        "symbol": "Imperial regalia, jade, dragon robes",
+        "festival": "Birthday on 9th day of first lunar month"
+      }
+    },
+    {
+      "@id": "arch:CN-XIWANGMU",
+      "@type": "Archetype",
+      "name": "Xiwangmu",
+      "aliases": ["Queen Mother of the West", "Xi Wang Mu", "Golden Mother of the Shining Lake"],
+      "domain": ["Immortality", "The West", "Peaches of Immortality", "Female Transcendents", "Death/Life Boundary"],
+      "description": "The powerful Queen Mother of the West who dwells on Mount Kunlun, guardian of the peaches of immortality that ripen once every 3,000-9,000 years. Originally a fearsome goddess of plague and punishment with tiger teeth and leopard tail, she evolved into the serene queen of female immortals and supreme yin counterpart to the Jade Emperor.",
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.4,
+        "active-receptive": 0.65,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.25,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.5
+      },
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.85, "aspects": ["queen-of-immortals", "western-ruler"]},
+        {"primordial": "primordial:great-mother", "weight": 0.75, "aspects": ["immortality-bestower", "guardian"]},
+        {"primordial": "primordial:crone", "weight": 0.65, "aspects": ["ancient-wisdom", "death-life-keeper"]},
+        {"primordial": "primordial:destroyer", "weight": 0.5, "aspects": ["plague-sender", "punisher"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:CN-JADE-EMPEROR", "description": "Yin-yang pair of celestial rulership"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HERA", "fidelity": 0.5, "notes": "Queen of heaven"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-PARVATI", "fidelity": 0.45, "notes": "Divine queen, mountain dwelling"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-HEL", "fidelity": 0.4, "notes": "Underworld/afterlife feminine ruler (early form)"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When immortality is hoarded", "When power corrupts into cruelty"],
+        "shadowManifestations": ["Withholding life/immortality", "Plague and punishment without mercy", "Isolation on the mountain"],
+        "integrationPath": "Sharing immortality wisely; balancing death and life aspects"
+      },
+      "contextualVariants": [
+        {
+          "context": "Shanhaijing (archaic)",
+          "spectralShift": {"order-chaos": 0.5, "creation-destruction": 0.7, "light-shadow": 0.6},
+          "notes": "Tiger teeth, leopard tail, goddess of plague and punishment"
+        },
+        {
+          "context": "Later Taoist tradition",
+          "spectralShift": {"order-chaos": 0.15, "light-shadow": 0.25},
+          "notes": "Serene queen, bestower of immortality"
+        }
+      ],
+      "correspondences": {
+        "element": "Metal (West)",
+        "direction": "West",
+        "symbol": "Peaches, phoenixes, Mount Kunlun",
+        "festival": "Peach Festival (immortality banquet)"
+      }
+    },
+    {
+      "@id": "arch:CN-SUN-WUKONG",
+      "@type": "Archetype",
+      "name": "Sun Wukong",
+      "aliases": ["Monkey King", "Great Sage Equal to Heaven", "Pilgrim Sun"],
+      "domain": ["Trickery", "Rebellion", "Transformation", "Martial Power", "Redemption"],
+      "description": "The Monkey King, born from a stone egg, who mastered martial arts and magic, rebelled against Heaven, was imprisoned under a mountain for 500 years, then redeemed himself by protecting the monk Xuanzang on the journey to retrieve Buddhist scriptures. He embodies the transformation from chaos-rebel to enlightened protector.",
+      "spectralCoordinates": {
+        "order-chaos": 0.7,
+        "creation-destruction": 0.5,
+        "light-shadow": 0.45,
+        "active-receptive": 0.15,
+        "individual-collective": 0.55,
+        "ascent-descent": 0.45,
+        "stasis-transformation": 0.8,
+        "voluntary-fated": 0.4
+      },
+      "instantiates": [
+        {"primordial": "primordial:trickster", "weight": 0.95, "aspects": ["shape-shifter", "rule-breaker", "chaos-bringer"]},
+        {"primordial": "primordial:hero", "weight": 0.85, "aspects": ["monster-slayer", "protector", "redeemed-rebel"]},
+        {"primordial": "primordial:rebel", "weight": 0.8, "aspects": ["heaven-challenger", "authority-defier"]},
+        {"primordial": "primordial:warrior", "weight": 0.75, "aspects": ["martial-master", "demon-fighter"]}
+      ],
+      "relationships": [
+        {"type": "rel:EVOLUTION", "target": "arch:CN-SUN-WUKONG", "description": "Transforms from rebel to protector through journey", "context": "Journey to the West arc"},
+        {"type": "rel:TENSION", "target": "arch:CN-JADE-EMPEROR", "description": "Chaos vs cosmic order"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-LOKI", "fidelity": 0.7, "notes": "Trickster, shape-shifter, rebel against gods"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HERMES", "fidelity": 0.55, "notes": "Trickster, thief, boundary-crosser"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-HANUMAN", "fidelity": 0.75, "notes": "Monkey hero, devoted protector, immense power"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When ego exceeds wisdom", "When power serves only self"],
+        "shadowManifestations": ["Arrogance", "Wanton destruction", "Rebellion without purpose"],
+        "integrationPath": "Headband of discipline; channeling power through compassion and service"
+      },
+      "contextualVariants": [
+        {
+          "context": "Pre-imprisonment (Heaven rebellion)",
+          "spectralShift": {"order-chaos": 0.9, "individual-collective": 0.75},
+          "notes": "Arrogant rebel demanding recognition"
+        },
+        {
+          "context": "Journey to the West (pilgrim)",
+          "spectralShift": {"order-chaos": 0.5, "individual-collective": 0.35},
+          "notes": "Disciplined protector, still mischievous but devoted"
+        },
+        {
+          "context": "Enlightened (end of journey)",
+          "spectralShift": {"order-chaos": 0.4, "light-shadow": 0.25},
+          "notes": "Achieved Buddhahood, integrated trickster-wisdom"
+        }
+      ],
+      "correspondences": {
+        "element": "Metal (born from stone)/Fire (nature)",
+        "direction": "Variable (pilgrim)",
+        "symbol": "Ruyi Jingu Bang (staff), golden headband, cloud-somersault",
+        "association": "Buddhism, martial arts, transformation, rebellion, redemption"
+      }
+    },
+    {
+      "@id": "arch:CN-GUANYIN",
+      "@type": "Archetype",
+      "name": "Guanyin",
+      "aliases": ["Guanshiyin", "Avalokiteśvara (Sanskrit)", "Goddess of Mercy", "Kannon (Japanese)"],
+      "domain": ["Compassion", "Mercy", "Salvation", "Childbirth", "Seafarers"],
+      "description": "The Bodhisattva of Compassion who hears the cries of the world and responds to all who call upon her. Originally the male Avalokiteśvara in Indian Buddhism, she transformed in China into a feminine embodiment of infinite mercy. She appears in many forms to save beings from suffering, and vowed not to rest until all sentient beings are liberated.",
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.3,
+        "light-shadow": 0.15,
+        "active-receptive": 0.7,
+        "individual-collective": 0.15,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.2
+      },
+      "instantiates": [
+        {"primordial": "primordial:healer", "weight": 0.95, "aspects": ["suffering-reliever", "prayer-answerer"]},
+        {"primordial": "primordial:great-mother", "weight": 0.85, "aspects": ["compassionate-mother", "protector-of-children"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.6, "aspects": ["enlightened-guide", "dharma-teacher"]},
+        {"primordial": "primordial:self", "weight": 0.5, "aspects": ["bodhisattva-ideal", "enlightened-being"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-AVALOKITESHVARA", "fidelity": 0.95, "notes": "Direct Buddhist transmission"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:JP-JIZO", "fidelity": 0.6, "notes": "Compassionate bodhisattva, saves suffering beings"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-MARY", "fidelity": 0.5, "notes": "Compassionate mother figure, intercessor"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-ISIS", "fidelity": 0.45, "notes": "Universal mother, hearer of prayers"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When compassion enables rather than transforms", "When hearing suffering without acting"],
+        "shadowManifestations": ["Paralysis from overwhelming suffering", "Compassion fatigue", "Enabling harmful patterns"],
+        "integrationPath": "Skillful compassion that transforms causes of suffering, not just symptoms"
+      },
+      "correspondences": {
+        "element": "Water",
+        "direction": "South Sea (Putuo)",
+        "symbol": "Willow branch, pure water vase, thousand arms/eyes",
+        "mantra": "Om mani padme hum",
+        "association": "Buddhism, mercy, prayers, childbirth, seafarers"
+      }
+    },
+    {
+      "@id": "arch:CN-ERLANG-SHEN",
+      "@type": "Archetype",
+      "name": "Erlang Shen",
+      "aliases": ["Yang Jian", "Lord of Erlang", "Second Son God"],
+      "domain": ["Truth-Seeing", "Demon-Slaying", "Floods", "Engineering", "Heavenly Warrior"],
+      "description": "The three-eyed warrior god who can see through all deceptions with his third truth-seeing eye. Nephew of the Jade Emperor (his mother was a celestial who married a mortal), he is accompanied by his divine hound Xiaotianquan. He battled Sun Wukong to a standstill and is revered for controlling floods through engineering works.",
+      "spectralCoordinates": {
+        "order-chaos": 0.25,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.2,
+        "active-receptive": 0.2,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.45
+      },
+      "instantiates": [
+        {"primordial": "primordial:warrior", "weight": 0.9, "aspects": ["demon-slayer", "heavenly-general"]},
+        {"primordial": "primordial:hero", "weight": 0.8, "aspects": ["monster-fighter", "flood-controller"]},
+        {"primordial": "primordial:magician", "weight": 0.6, "aspects": ["truth-seer", "transformation-master"]}
+      ],
+      "relationships": [
+        {"type": "rel:MIRRORS", "target": "arch:CN-SUN-WUKONG", "description": "Equal opponents, both shape-shifters"},
+        {"type": "rel:CONTAINED_BY", "target": "arch:CN-JADE-EMPEROR", "description": "Nephew, serves heavenly court"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-SHIVA", "fidelity": 0.5, "notes": "Third eye of truth/destruction"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ATHENA", "fidelity": 0.45, "notes": "Strategic warrior, divine birth"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-TYR", "fidelity": 0.5, "notes": "Just warrior, duty-bound"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When truth-seeing becomes judgment", "When duty overrides compassion"],
+        "shadowManifestations": ["Merciless enforcement", "Rigid adherence to law over spirit", "Hunting without mercy"],
+        "integrationPath": "Truth that liberates rather than condemns; justice tempered with understanding"
+      },
+      "correspondences": {
+        "element": "Metal/Water",
+        "direction": "Variable (pursuer)",
+        "symbol": "Third eye, three-pointed spear, divine hound",
+        "association": "Exorcism, truth, flood control, engineering"
+      }
+    },
+    {
+      "@id": "arch:CN-NEZHA",
+      "@type": "Archetype",
+      "name": "Nezha",
+      "aliases": ["Ne Zha", "Third Lotus Prince", "Marshal of the Central Altar"],
+      "domain": ["Youth", "Rebellion", "Filial Sacrifice", "Demon-Fighting", "Protection"],
+      "description": "The eternally youthful warrior deity, born as a flesh ball after three years of pregnancy, who fought the Dragon King at age seven, killed himself to repay his debt to his parents, and was reborn from lotus roots. He wields fire-tipped spear, wind-fire wheels, and the cosmic ring Qiankun, serving as a fierce protector against demons.",
+      "spectralCoordinates": {
+        "order-chaos": 0.6,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.4,
+        "active-receptive": 0.15,
+        "individual-collective": 0.5,
+        "ascent-descent": 0.4,
+        "stasis-transformation": 0.75,
+        "voluntary-fated": 0.35
+      },
+      "instantiates": [
+        {"primordial": "primordial:divine-child", "weight": 0.9, "aspects": ["eternal-youth", "miraculous-birth"]},
+        {"primordial": "primordial:warrior", "weight": 0.85, "aspects": ["demon-fighter", "fierce-protector"]},
+        {"primordial": "primordial:rebel", "weight": 0.75, "aspects": ["authority-challenger", "self-sacrificer"]},
+        {"primordial": "primordial:hero", "weight": 0.7, "aspects": ["monster-slayer", "reborn-champion"]}
+      ],
+      "relationships": [
+        {"type": "rel:EVOLUTION", "target": "arch:CN-NEZHA", "description": "Death and lotus rebirth transformation"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HERACLES", "fidelity": 0.55, "notes": "Divine child, monster-slayer, complicated paternal relationship"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-KRISHNA", "fidelity": 0.5, "notes": "Divine child, demon-slayer, playful yet fierce"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CE-CU-CHULAINN", "fidelity": 0.55, "notes": "Young warrior, transformation fury, tragic elements"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When rebellion becomes self-destruction", "When youthful energy lacks direction"],
+        "shadowManifestations": ["Reckless destruction", "Violence against family/authority", "Self-annihilation"],
+        "integrationPath": "Channeling fierce energy into protection; death-rebirth as transformation not escape"
+      },
+      "contextualVariants": [
+        {
+          "context": "Before death (conflict with Dragon King and father)",
+          "spectralShift": {"order-chaos": 0.75, "creation-destruction": 0.7},
+          "notes": "Reckless, destructive, in conflict with authority"
+        },
+        {
+          "context": "After lotus rebirth",
+          "spectralShift": {"order-chaos": 0.45, "stasis-transformation": 0.5},
+          "notes": "Focused protector, disciplined warrior"
+        }
+      ],
+      "correspondences": {
+        "element": "Fire",
+        "direction": "Center (Central Altar)",
+        "symbol": "Fire-tipped spear, wind-fire wheels, Qiankun ring, Universe Ring, red sash",
+        "association": "Protection of children, demon-fighting, Taoist magic"
+      }
+    },
+    {
+      "@id": "arch:CN-ZHONGLI-QUAN",
+      "@type": "Archetype",
+      "name": "Zhongli Quan",
+      "aliases": ["Han Zhongli", "Leader of the Eight Immortals"],
+      "domain": ["Alchemy", "Immortality", "Military", "Taoist Magic"],
+      "description": "The leader of the Eight Immortals, a former Han dynasty general who achieved immortality through alchemical cultivation. He is depicted as a portly figure with bare belly, wielding a fan that can revive the dead. He represents the Taoist ideal of the achieved immortal who transcended death through spiritual cultivation.",
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.3,
+        "active-receptive": 0.45,
+        "individual-collective": 0.4,
+        "ascent-descent": 0.3,
+        "stasis-transformation": 0.65,
+        "voluntary-fated": 0.35
+      },
+      "instantiates": [
+        {"primordial": "primordial:magician", "weight": 0.85, "aspects": ["alchemist", "immortality-achiever"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.8, "aspects": ["teacher", "leader-of-immortals"]},
+        {"primordial": "primordial:warrior", "weight": 0.5, "aspects": ["former-general", "martial-background"]}
+      ],
+      "relationships": [
+        {"type": "rel:CONSTELLATION", "target": "arch:CN-EIGHT-IMMORTALS", "description": "Leader of the Eight Immortals"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-CHIRON", "fidelity": 0.5, "notes": "Wise teacher, achieved transcendence"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-VYASA", "fidelity": 0.45, "notes": "Immortal sage, spiritual teacher"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When immortality becomes escape from life", "When teaching becomes pride"],
+        "shadowManifestations": ["Spiritual bypassing", "Detachment from human concerns", "Superiority"],
+        "integrationPath": "Immortality in service of others; wisdom shared with humility"
+      },
+      "correspondences": {
+        "element": "Metal",
+        "direction": "Variable",
+        "symbol": "Fan that revives the dead, bare belly",
+        "association": "Taoist alchemy, Eight Immortals, military arts"
+      }
+    },
+    {
+      "@id": "arch:CN-LU-DONGBIN",
+      "@type": "Archetype",
+      "name": "Lü Dongbin",
+      "aliases": ["Lü Yan", "Patriarch Lü", "Master of the Sword"],
+      "domain": ["Sword Mastery", "Poetry", "Scholars", "Medicine", "Taoist Magic"],
+      "description": "The most popular of the Eight Immortals, a Tang dynasty scholar who achieved immortality after passing ten trials from Zhongli Quan. He wields a demon-slaying sword and is the patron of scholars, barbers, and ink-makers. Known for his poetry and romantic adventures, he represents the integration of scholarly refinement with martial and magical power.",
+      "spectralCoordinates": {
+        "order-chaos": 0.45,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.35,
+        "active-receptive": 0.35,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.35,
+        "stasis-transformation": 0.6,
+        "voluntary-fated": 0.4
+      },
+      "instantiates": [
+        {"primordial": "primordial:magician", "weight": 0.85, "aspects": ["swordsman", "exorcist", "alchemist"]},
+        {"primordial": "primordial:hero", "weight": 0.7, "aspects": ["demon-slayer", "trial-overcomer"]},
+        {"primordial": "primordial:lover", "weight": 0.5, "aspects": ["romantic", "poet"]},
+        {"primordial": "primordial:trickster", "weight": 0.45, "aspects": ["disguise-user", "boundary-crosser"]}
+      ],
+      "relationships": [
+        {"type": "rel:CONSTELLATION", "target": "arch:CN-EIGHT-IMMORTALS", "description": "Most famous of the Eight Immortals"},
+        {"type": "rel:EVOLUTION", "target": "arch:CN-LU-DONGBIN", "description": "Scholar transformed through trials", "context": "Ten trials"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HERMES", "fidelity": 0.5, "notes": "Guide, messenger, magical power"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-ODIN", "fidelity": 0.45, "notes": "Wanderer, magic-seeker, poetry"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When charm becomes manipulation", "When wandering becomes escape"],
+        "shadowManifestations": ["Seduction without commitment", "Knowledge without wisdom", "Spiritual pride"],
+        "integrationPath": "Integrating romantic and spiritual nature; using charm in service of liberation"
+      },
+      "correspondences": {
+        "element": "Wood",
+        "direction": "East",
+        "symbol": "Demon-slaying sword, fly-whisk",
+        "association": "Scholars, barbers, ink-makers, exorcism"
+      }
+    },
+    {
+      "@id": "arch:CN-MAZU",
+      "@type": "Archetype",
+      "name": "Mazu",
+      "aliases": ["Matsu", "Tianhou (Empress of Heaven)", "Lin Moniang"],
+      "domain": ["Sea", "Sailors", "Fishermen", "Protection", "Weather"],
+      "description": "The goddess of the sea and protector of sailors, fishermen, and travelers, originally a mortal woman named Lin Moniang from Fujian province who possessed supernatural powers from childhood. She saved her father and brothers at sea through spiritual projection and became the most widely worshipped deity in coastal China, Taiwan, and Southeast Asian Chinese communities.",
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.35,
+        "light-shadow": 0.25,
+        "active-receptive": 0.55,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.45,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.35
+      },
+      "instantiates": [
+        {"primordial": "primordial:healer", "weight": 0.85, "aspects": ["rescuer", "protector"]},
+        {"primordial": "primordial:great-mother", "weight": 0.75, "aspects": ["maritime-mother", "community-guardian"]},
+        {"primordial": "primordial:magician", "weight": 0.6, "aspects": ["weather-controller", "spirit-projector"]},
+        {"primordial": "primordial:maiden", "weight": 0.5, "aspects": ["unmarried-holy-woman", "filial-daughter"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-POSEIDON", "fidelity": 0.4, "notes": "Sea domain (but protective vs temperamental)"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:CN-GUANYIN", "fidelity": 0.55, "notes": "Compassionate protector, hearer of prayers"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:JP-BENZAITEN", "fidelity": 0.45, "notes": "Water-associated protective goddess"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When protection enables recklessness", "When local devotion becomes exclusion"],
+        "shadowManifestations": ["Partiality in salvation", "Storm-bringing when dishonored"],
+        "integrationPath": "Universal protection; teaching wisdom alongside providing safety"
+      },
+      "correspondences": {
+        "element": "Water",
+        "direction": "South Sea",
+        "symbol": "Red robes, peaceful face, ruyi scepter",
+        "festival": "Mazu Birthday (23rd of third lunar month)",
+        "association": "Sailors, fishermen, overseas Chinese communities"
+      }
+    },
+    {
+      "@id": "arch:CN-GUAN-YU",
+      "@type": "Archetype",
+      "name": "Guan Yu",
+      "aliases": ["Guan Di", "Lord Guan", "Emperor Guan", "God of War"],
+      "domain": ["Loyalty", "Righteousness", "Martial Arts", "Protection", "Commerce"],
+      "description": "The deified general from the Three Kingdoms period, renowned for his loyalty to his sworn brother Liu Bei and his martial prowess with the Green Dragon Crescent Blade. After death, he was progressively deified, eventually becoming both a god of war and, paradoxically, a god of wealth and protection for merchants. His red face symbolizes loyalty and righteousness.",
+      "spectralCoordinates": {
+        "order-chaos": 0.2,
+        "creation-destruction": 0.45,
+        "light-shadow": 0.25,
+        "active-receptive": 0.25,
+        "individual-collective": 0.35,
+        "ascent-descent": 0.45,
+        "stasis-transformation": 0.4,
+        "voluntary-fated": 0.3
+      },
+      "instantiates": [
+        {"primordial": "primordial:warrior", "weight": 0.95, "aspects": ["righteous-fighter", "loyal-general"]},
+        {"primordial": "primordial:hero", "weight": 0.85, "aspects": ["exemplar", "deified-mortal"]},
+        {"primordial": "primordial:sovereign", "weight": 0.5, "aspects": ["emperor-title", "divine-authority"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-ARES", "fidelity": 0.5, "notes": "War god"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:JP-HACHIMAN", "fidelity": 0.7, "notes": "Deified warrior, righteous war, protection"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:NO-TYR", "fidelity": 0.6, "notes": "God of righteous warfare, honor"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When loyalty becomes blind", "When righteousness becomes rigidity"],
+        "shadowManifestations": ["Violence in name of loyalty", "Inability to adapt", "Pride"],
+        "integrationPath": "Loyalty that serves greater good; righteousness with flexibility"
+      },
+      "correspondences": {
+        "element": "Metal/Fire",
+        "direction": "Variable",
+        "symbol": "Green Dragon Crescent Blade, red face, long beard",
+        "association": "Police, soldiers, merchants, triads, brotherhood"
+      }
+    },
+    {
+      "@id": "arch:CN-CHANG-E",
+      "@type": "Archetype",
+      "name": "Chang'e",
+      "aliases": ["Ch'ang O", "Lady of the Moon", "Heng'e"],
+      "domain": ["Moon", "Immortality", "Isolation", "Beauty", "Regret"],
+      "description": "The goddess of the moon, originally the wife of the archer Hou Yi who shot down nine of ten suns. When she swallowed his elixir of immortality (either greedily or to prevent a thief from taking it), she floated to the moon where she dwells eternally in the Cold Palace with only a jade rabbit for company. She embodies the tragedy of immortality gained through loss.",
+      "spectralCoordinates": {
+        "order-chaos": 0.35,
+        "creation-destruction": 0.4,
+        "light-shadow": 0.5,
+        "active-receptive": 0.7,
+        "individual-collective": 0.7,
+        "ascent-descent": 0.2,
+        "stasis-transformation": 0.45,
+        "voluntary-fated": 0.65
+      },
+      "instantiates": [
+        {"primordial": "primordial:maiden", "weight": 0.75, "aspects": ["eternal-beauty", "isolation"]},
+        {"primordial": "primordial:outcast", "weight": 0.7, "aspects": ["exile", "separated-from-beloved"]},
+        {"primordial": "primordial:self", "weight": 0.5, "aspects": ["achieved-immortality", "tragic-transcendence"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:CN-HOU-YI", "description": "Tragically separated husband and wife"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-SELENE", "fidelity": 0.6, "notes": "Moon goddess"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:JP-TSUKUYOMI", "fidelity": 0.5, "notes": "Lunar isolation"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-PERSEPHONE", "fidelity": 0.45, "notes": "Separated from love, dwelling in other realm"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When desire for immortality trumps love", "When isolation becomes permanent"],
+        "shadowManifestations": ["Eternal loneliness", "Cold beauty without warmth", "Regret without resolution"],
+        "integrationPath": "Finding meaning in solitude; immortality as service not escape"
+      },
+      "correspondences": {
+        "element": "Metal/Water",
+        "direction": "Above (moon)",
+        "symbol": "Moon, jade rabbit, elixir of immortality",
+        "festival": "Mid-Autumn Festival",
+        "association": "Moon worship, separation, immortality's price"
+      }
+    },
+    {
+      "@id": "arch:CN-HOU-YI",
+      "@type": "Archetype",
+      "name": "Hou Yi",
+      "aliases": ["Yi the Archer", "Lord Archer"],
+      "domain": ["Archery", "Sun", "Heroism", "Mortality", "Loss"],
+      "description": "The divine archer who shot down nine of ten suns that were scorching the earth, saving humanity from destruction. For this act he was stripped of immortality by the Heavenly Emperor. He later obtained an elixir of immortality from Xiwangmu, but his wife Chang'e consumed it, leaving him to die mortal and alone, gazing at the moon where she dwells.",
+      "spectralCoordinates": {
+        "order-chaos": 0.3,
+        "creation-destruction": 0.55,
+        "light-shadow": 0.35,
+        "active-receptive": 0.2,
+        "individual-collective": 0.45,
+        "ascent-descent": 0.55,
+        "stasis-transformation": 0.55,
+        "voluntary-fated": 0.6
+      },
+      "instantiates": [
+        {"primordial": "primordial:hero", "weight": 0.95, "aspects": ["world-savior", "monster-slayer"]},
+        {"primordial": "primordial:warrior", "weight": 0.8, "aspects": ["divine-archer", "protector"]},
+        {"primordial": "primordial:outcast", "weight": 0.6, "aspects": ["punished-hero", "abandoned"]}
+      ],
+      "relationships": [
+        {"type": "rel:COMPLEMENT", "target": "arch:CN-CHANG-E", "description": "Tragically separated husband and wife"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HERACLES", "fidelity": 0.6, "notes": "Great hero, labors, tragic end"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-APOLLO", "fidelity": 0.5, "notes": "Divine archer, sun connection"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-ARJUNA", "fidelity": 0.55, "notes": "Supreme archer, divine but human struggles"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When heroism leads to punishment", "When saving others costs everything personal"],
+        "shadowManifestations": ["Bitterness at unjust treatment", "Tyranny after disillusionment", "Violence without cause"],
+        "integrationPath": "Heroism as its own reward; accepting mortality with dignity"
+      },
+      "correspondences": {
+        "element": "Fire/Metal",
+        "direction": "Variable (sun/earth)",
+        "symbol": "Bow and arrows, nine fallen suns",
+        "festival": "Mid-Autumn Festival (mourning)",
+        "association": "Archery, solar myths, tragic heroism"
+      }
+    },
+    {
+      "@id": "arch:CN-YANLUO",
+      "@type": "Archetype",
+      "name": "Yanluo Wang",
+      "aliases": ["King Yama", "Yan Wang", "Fifth Court King"],
+      "domain": ["Underworld", "Judgment", "Death", "Karma", "Rebirth"],
+      "description": "The king of the underworld and chief judge of the dead, derived from the Hindu/Buddhist Yama but adapted to Chinese bureaucratic cosmology. He presides over the courts of hell where souls are judged and assigned to appropriate punishments or rebirths. He keeps the Book of Life and Death recording every soul's fate.",
+      "spectralCoordinates": {
+        "order-chaos": 0.15,
+        "creation-destruction": 0.6,
+        "light-shadow": 0.7,
+        "active-receptive": 0.4,
+        "individual-collective": 0.3,
+        "ascent-descent": 0.85,
+        "stasis-transformation": 0.5,
+        "voluntary-fated": 0.85
+      },
+      "instantiates": [
+        {"primordial": "primordial:sovereign", "weight": 0.85, "aspects": ["underworld-king", "supreme-judge"]},
+        {"primordial": "primordial:destroyer", "weight": 0.6, "aspects": ["death-lord", "punisher"]},
+        {"primordial": "primordial:wise-elder", "weight": 0.5, "aspects": ["karma-keeper", "fate-administrator"]}
+      ],
+      "relationships": [
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:IN-YAMA", "fidelity": 0.9, "notes": "Direct transmission"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:JP-EMMA", "fidelity": 0.85, "notes": "Same figure in Japanese Buddhism"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:GR-HADES", "fidelity": 0.6, "notes": "Underworld ruler"},
+        {"type": "rel:CULTURAL_ECHO", "target": "arch:EG-OSIRIS", "fidelity": 0.55, "notes": "Judge of dead"}
+      ],
+      "shadowDynamics": {
+        "activationConditions": ["When judgment lacks mercy", "When bureaucracy dehumanizes"],
+        "shadowManifestations": ["Cruel punishment", "Inflexible administration", "Terror without purpose"],
+        "integrationPath": "Justice that reforms rather than merely punishes; judgment that liberates"
+      },
+      "correspondences": {
+        "element": "Earth/Water (underworld)",
+        "direction": "Below",
+        "symbol": "Judge's cap, Book of Life and Death, hell courts",
+        "association": "Death, judgment, Chinese Buddhist hell realms"
+      }
+    }
+  ]
+}

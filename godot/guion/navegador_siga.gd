@@ -364,6 +364,14 @@ func _renderizar_prensa(recurso: Dictionary) -> void:
 	_cabecera_prensa.texture = atlas
 	_cabecera_prensa.visible = true
 	_pagina.text = _texto_portada_prensa(portada)
+	_registrar_exposicion_prensa(cabecera_id)
+
+
+func _registrar_exposicion_prensa(cabecera_id: String) -> void:
+	var estado := _estado_partida_actual()
+	if estado.is_empty():
+		return
+	_prensa.registrar_exposicion_portada(estado, cabecera_id)
 
 
 func _texto_portada_prensa(portada: Dictionary) -> String:
@@ -503,6 +511,18 @@ func _aplicar_escala_texto() -> void:
 	_favoritos_lista.add_theme_font_size_override("font_size", lista)
 	_direccion.add_theme_font_size_override("font_size", lista)
 	_busqueda.add_theme_font_size_override("font_size", lista)
+
+
+func _estado_partida_actual() -> Dictionary:
+	if not is_inside_tree():
+		return {}
+	var escena := get_tree().current_scene
+	if escena == null:
+		return {}
+	var partida_actual: Variant = escena.get("partida")
+	if partida_actual is Partida:
+		return (partida_actual as Partida).estado
+	return {}
 
 
 func _emitir_estado() -> void:

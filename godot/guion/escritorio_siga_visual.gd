@@ -11,8 +11,13 @@ const WALLPAPER: Texture2D = preload("res://arte/os98/wallpaper.svg")
 const SYSTEM_MARK: Texture2D = preload("res://arte/os98/system_mark.svg")
 const ICONOS_32: Texture2D = preload("res://arte/os98/iconos_32.svg")
 const ICONOS_16: Texture2D = preload("res://arte/os98/iconos_16.svg")
+const ICONOS_PROGRAMAS_32: Texture2D = preload("res://arte/os98/iconos_programas_32.svg")
+const ICONOS_PROGRAMAS_16: Texture2D = preload("res://arte/os98/iconos_programas_16.svg")
 const CURSORES_32: Texture2D = preload("res://arte/os98/cursores_32.svg")
 const ORDEN_ICONOS := ["siga", "equipo", "documentos", "red", "papelera", "ayuda"]
+const ORDEN_ICONOS_PROGRAMAS := [
+	"explorador", "web98", "software", "correo", "bloc-notas", "calculadora", "catalogo-anomalias"
+]
 const ORDEN_CURSORES := ["normal", "ayuda", "ocupado", "seleccionar", "texto", "no-disponible"]
 ## Si el foco desaparece por cerrar/reparentar un Control, una de estas acciones
 ## es una señal inequívoca de que teclado/mando necesita un nuevo punto de partida.
@@ -44,7 +49,7 @@ func _exit_tree() -> void:
 
 
 func registrar_identidad_visual(id: String, clave: String) -> void:
-	if id.is_empty() or ORDEN_ICONOS.find(clave) < 0:
+	if id.is_empty() or (ORDEN_ICONOS.find(clave) < 0 and ORDEN_ICONOS_PROGRAMAS.find(clave) < 0):
 		return
 	_identidades_visuales[id] = clave
 	_decorar_accesos(id)
@@ -312,10 +317,14 @@ func _decorar_ventana(id: String) -> void:
 
 func _icono(clave: String, tamano: int) -> Texture2D:
 	var indice := ORDEN_ICONOS.find(clave)
+	var fuente_atlas: Texture2D = ICONOS_32 if tamano == 32 else ICONOS_16
 	if indice < 0:
-		return null
+		indice = ORDEN_ICONOS_PROGRAMAS.find(clave)
+		if indice < 0:
+			return null
+		fuente_atlas = ICONOS_PROGRAMAS_32 if tamano == 32 else ICONOS_PROGRAMAS_16
 	var atlas := AtlasTexture.new()
-	atlas.atlas = ICONOS_32 if tamano == 32 else ICONOS_16
+	atlas.atlas = fuente_atlas
 	atlas.region = Rect2(float(indice * tamano), 0.0, float(tamano), float(tamano))
 	return atlas
 

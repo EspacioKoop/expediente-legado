@@ -182,6 +182,29 @@ class CatalogoAnomaliasTest(unittest.TestCase):
         for prohibido in ("SuenoObjetivos", 'jornada["dinero"]', 'jornada["acciones"]'):
             self.assertNotIn(prohibido, self.ui)
 
+    def test_catalogo_tiene_identidad_visual_propia_sin_romper_el_shell(self):
+        for token in (
+            'const COLOR_INDICE := Color("1f2b2d")',
+            'const COLOR_FICHA := Color("e7eadf")',
+            'const COLOR_PAPEL := Color("f7f6ed")',
+            'PanelContainer.new()',
+            'panel_indice.name = "PanelIndice"',
+            'panel_ficha.name = "PanelFicha"',
+            'EstiloSiga.fuente_titulo()',
+            'EstiloSiga.fuente_mono()',
+            'EstiloSiga.fuente_documento()',
+            '_caja_catalogo(COLOR_INDICE, COLOR_INDICE_BORDE, 10.0)',
+            '_caja_catalogo(COLOR_FICHA, COLOR_INDICE_BORDE, 12.0)',
+            '_caja_catalogo(COLOR_PAPEL, Color("a6ad9d"), 10.0)',
+            'marca.text = _t("titulo_app")',
+        ):
+            self.assertIn(token, self.ui)
+
+        # La personalidad vive dentro de la app: el marco de ventana común sigue
+        # siendo propiedad del shell, no del Catálogo.
+        for prohibido in ("Window.new()", "EscritorioSigaVisual", "registrar_aplicacion("):
+            self.assertNotIn(prohibido, self.ui)
+
     def test_ui_externaliza_los_textos_fijos(self):
         claves = {
             "titulo_app",
