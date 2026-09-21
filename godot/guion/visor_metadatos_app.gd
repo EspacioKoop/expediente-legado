@@ -114,10 +114,13 @@ func _detalles_meticulosidad_actuales() -> Array[Dictionary]:
 	if _catalogo_detalles_meticulosidad.is_empty():
 		_catalogo_detalles_meticulosidad = _cargar_catalogo_detalles_meticulosidad()
 	var registro_id := String(registro_actual.get("id", "")).strip_edges()
-	return DetallesMeticulosidadCatalogo.visibles(
-		_catalogo_detalles_meticulosidad,
-		jornada,
-		registro_id,
+	return (
+		DetallesMeticulosidadCatalogo
+		. visibles(
+			_catalogo_detalles_meticulosidad,
+			jornada,
+			registro_id,
+		)
 	)
 
 
