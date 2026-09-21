@@ -2,6 +2,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CAPA = ROOT / "godot" / "guion" / "visor_metadatos_app.gd"
+METICULOSIDAD = ROOT / "godot" / "guion" / "visor_meticulosidad_app.gd"
+ANEXOS = ROOT / "godot" / "guion" / "visor_anexos_app.gd"
+PRONOSTICOS = ROOT / "godot" / "guion" / "visor_pronosticos_app.gd"
 ESCENA = ROOT / "godot" / "escenas" / "visor.tscn"
 
 
