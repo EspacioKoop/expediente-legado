@@ -10,7 +10,7 @@ from scripts.godot_pruebas import importar_proyecto
 ROOT = Path(__file__).resolve().parents[1]
 AMBIENTE = ROOT / "godot" / "guion" / "ambiente.gd"
 PRUEBA_GODOT = "pruebas/pruebas_ambiente_adaptativo_966.gd"
-RESUMEN_GODOT = re.compile(r"(\\d+) pasadas, 0 fallos")
+RESUMEN_GODOT = re.compile(r"(\d+) pasadas, 0 fallos")
 
 
 class AmbienteAdaptativo966Test(unittest.TestCase):
