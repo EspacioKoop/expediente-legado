@@ -45,3 +45,51 @@ func _obtener_efecto_obra(obra_id: String) -> Dictionary:
                     return o.efecto
         file.close()
     return {}
+
+func _aplicar_efecto_especial(obra_id: String, efecto: String) -> void:
+    match efecto:
+        "revelacion":
+            # desbloquea dialogos internos en el arquetipo Persona
+            if GestorArquetipos.obtener_arquetipo("persona")?.desbloqueado:
+                GestorArquetipos.ganar_insight(20)
+                # Activar bonus temporal de evasion para Persona
+                GestorArquetipos.obtener_arquetipo("persona").efecto_combate.evasion_temporal = 0.3
+        "transformacion":
+            # efecto visual de metamorfosis temporal - afecta a Sombra
+            if GestorArquetipos.obtener_arquetipo("sombra")?.desbloqueado:
+                GestorArquetipos.obtener_arquetipo("sombra").efecto_combate.bonus_crit += 0.1
+        "no_linealidad":
+            # permite leer obras en cualquier orden - afecta a Self
+            if GestorArquetipos.obtener_arquetipo("self")?.desbloqueado:
+                GestorArquetipos.ganar_insight(15)
+        "ciclos_temporales":
+            # Cien años de soledad - momentum bonus ciclico
+            GestorMomentum.momentum_actual = min(GestorMomentum.momentum_max, GestorMomentum.momentum_actual + 15)
+        "corriente_conciencia":
+            # Ulises - maximo insight pero drena momentum
+            GestorArquetipos.ganar_insight(30)
+            GestorMomentum.momentum_actual = max(0, GestorMomentum.momentum_actual - 20)
+
+func _aplicar_cita_especial(obra_id: String, efecto: String) -> void:
+    match efecto:
+        "revelacion":
+            # reveal enemy weakness - aplica debuff a enemigos cercanos
+            print("Revelacion: debilidad enemiga expuesta - Anima cura aliados")
+            if GestorArquetipos.obtener_arquetipo("anima")?.desbloqueado:
+                # Trigger anima healing effect
+                pass
+        "transformacion":
+            # temporary form change - Sombra desatada
+            print("Transformacion: forma alternativa activada - Sombra desatada")
+            if GestorArquetipos.obtener_arquetipo("sombra")?.desbloqueado:
+                GestorMomentum.ejecutar_finisher("super")
+        "no_linealidad":
+            # shuffle combo requirements - Persona adapta
+            print("No linealidad: combos desordenados temporalmente - Persona adapta")
+        "ciclos_temporales":
+            print("Ciclos temporales: momentum regenera rapido")
+            GestorMomentum.decay_rate = 2.0
+        "corriente_conciencia":
+            print("Corriente de conciencia: insight instantaneo")
+            GestorArquetipos.ganar_insight(50)
+
