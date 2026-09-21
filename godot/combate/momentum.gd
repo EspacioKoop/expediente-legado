@@ -58,6 +58,15 @@ func registrar_dano_recibido() -> void:
 	_set_momentum(momentum_actual - 20.0)
 
 
+func consumir_momentum(cantidad: float) -> bool:
+	if cantidad <= 0.0:
+		return true
+	if momentum_actual < cantidad:
+		return false
+	_set_momentum(momentum_actual - cantidad)
+	return true
+
+
 func ejecutar_finisher(tipo: String = "normal") -> bool:
 	var costo := THRESHOLD_SUPER_FINISHER if tipo == "super" else THRESHOLD_FINISHER
 	if momentum_actual < costo:
