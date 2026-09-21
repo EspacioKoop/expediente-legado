@@ -11,11 +11,7 @@ var puntos_insight_requeridos: int = 100
 
 
 func configurar(
-	p_id: String,
-	p_nombre: String,
-	p_descripcion: String,
-	p_efecto: Dictionary,
-	p_puntos: int
+	p_id: String, p_nombre: String, p_descripcion: String, p_efecto: Dictionary, p_puntos: int
 ) -> void:
 	id = p_id
 	nombre = p_nombre
