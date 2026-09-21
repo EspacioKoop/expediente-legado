@@ -65,6 +65,10 @@ class ComercioBarrio676FisicoTest(unittest.TestCase):
         procedencia = (ARTE / "PROCEDENCIA.md").read_text(encoding="utf-8")
         self.assertIn("No usan marcas", procedencia)
         self.assertIn("ComercioBarrio", procedencia)
+        self.assertIn('"TextoQuioscoAvenida"', self.helper)
+        self.assertIn('"TextoElTrastero"', self.helper)
+        self.assertIn("Label3D.new()", self.helper)
+        self.assertIn("EstiloSiga.fuente_mono()", self.helper)
 
     def test_runtime_compra_en_ambas_superficies(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
