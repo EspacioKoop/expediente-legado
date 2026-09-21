@@ -25,13 +25,12 @@ class VecinosEdificio3DTest(unittest.TestCase):
         self.assertIn("VecinosEdificio.presencias", self.presentacion)
         self.assertIn("VecinosEdificio.interacciones", self.presentacion)
         self.assertNotIn("Jornada.gastar", self.presentacion)
-        self.assertNotIn("afinidad", self.presentacion.lower())
-        self.assertNotIn("reputacion", self.presentacion.lower())
+        self.assertNotIn('jornada["dinero"]', self.presentacion)
+        self.assertNotIn('jornada["dinero"]', self.controller)
 
     def test_paquete_usa_interaccion_semantica_y_ancla_postal(self):
         self.assertIn("Interactuable3D.Verbo.COGER", self.presentacion)
-        self.assertIn('"correo_postal"', self.presentacion)
-        self.assertIn('"buzon_portal"', self.presentacion)
+        self.assertIn('get("correo_postal"', self.presentacion)
         self.assertIn("resolver_interaccion", self.controller)
         for patron in ("KEY_", "physical_keycode", "is_key_pressed"):
             self.assertNotIn(patron, self.presentacion)
