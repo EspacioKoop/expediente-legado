@@ -66,22 +66,25 @@ func _aplicar_recompensas(recompensas: Dictionary) -> void:
 		var gestor_arquetipos := _autoload("GestorArquetipos")
 		if gestor_arquetipos != null:
 			gestor_arquetipos.call(
-				"desbloquear_arquetipo",
-				String(recompensas["desbloquea_arquetipo"])
+				"desbloquear_arquetipo", String(recompensas["desbloquea_arquetipo"])
 			)
 
 
 func _evento_completado(evento: String) -> bool:
 	var gestor := _autoload("GestorJuego")
-	return gestor != null and gestor.has_method("evento_completado") and bool(
-		gestor.call("evento_completado", evento)
+	return (
+		gestor != null
+		and gestor.has_method("evento_completado")
+		and bool(gestor.call("evento_completado", evento))
 	)
 
 
 func _ritual_completado(ritual: String) -> bool:
 	var gestor := _autoload("GestorRituales")
-	return gestor != null and gestor.has_method("ritual_completado") and bool(
-		gestor.call("ritual_completado", ritual)
+	return (
+		gestor != null
+		and gestor.has_method("ritual_completado")
+		and bool(gestor.call("ritual_completado", ritual))
 	)
 
 
