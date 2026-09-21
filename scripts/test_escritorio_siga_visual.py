@@ -16,6 +16,8 @@ class EscritorioSigaVisualTest(unittest.TestCase):
             "system_mark.svg": "0 0 18 18",
             "iconos_32.svg": "0 0 192 32",
             "iconos_16.svg": "0 0 96 16",
+            "iconos_programas_32.svg": "0 0 224 32",
+            "iconos_programas_16.svg": "0 0 112 16",
             "cursores_32.svg": "0 0 192 32",
             "iconos_utilidades_32.svg": "0 0 256 32",
             "bandeja_16.svg": "0 0 80 16",
@@ -69,6 +71,8 @@ class EscritorioSigaVisualTest(unittest.TestCase):
             "res://arte/os98/system_mark.svg",
             "res://arte/os98/iconos_32.svg",
             "res://arte/os98/iconos_16.svg",
+            "res://arte/os98/iconos_programas_32.svg",
+            "res://arte/os98/iconos_programas_16.svg",
             "res://arte/os98/cursores_32.svg",
         ):
             self.assertIn(ruta, fuente)
@@ -76,6 +80,8 @@ class EscritorioSigaVisualTest(unittest.TestCase):
         self.assertIn("AtlasTexture.new()", fuente)
         self.assertIn("STRETCH_KEEP_ASPECT_COVERED", fuente)
         self.assertIn("ORDEN_ICONOS", fuente)
+        self.assertIn("ORDEN_ICONOS_PROGRAMAS", fuente)
+        self.assertIn("ICONOS_PROGRAMAS_32 if tamano == 32 else ICONOS_PROGRAMAS_16", fuente)
         self.assertIn("ORDEN_CURSORES", fuente)
 
     def test_cursor_del_os98_se_instala_y_se_restaura_al_salir(self):
@@ -88,6 +94,17 @@ class EscritorioSigaVisualTest(unittest.TestCase):
         fuente = ADAPTADOR.read_text(encoding="utf-8")
         self.assertIn("EscritorioSigaVisual.new()", fuente)
         self.assertIn('EscritorioSigaApp.new("siga-98", titulo_siga, creador_visor, "siga")', fuente)
+        for identidad in (
+            '"explorador", "Explorador", Callable(self, "_crear_explorador"), "explorador"',
+            '"navegador-web98", "Navegador Web98", Callable(self, "_crear_navegador"), "web98"',
+            '"software-98", "Archivo de programas", Callable(self, "_crear_software"), "software"',
+            '"correo", CorreoSiga.texto("titulo_app"), Callable(self, "_crear_correo"), "correo"',
+            '"bloc-notas", "Bloc de notas", Callable(self, "_crear_bloc_notas"), "bloc-notas"',
+            '"calculadora", "Calculadora", Callable(self, "_crear_calculadora"), "calculadora"',
+            '"catalogo-anomalias",',
+        ):
+            self.assertIn(identidad, fuente)
+        self.assertIn('"catalogo-anomalias",\n\t\t)', fuente)
         self.assertIn('registrar_identidad_visual("ayuda-sistema", "ayuda")', fuente)
         for id_sin_app in ("equipo", "documentos", "red", "papelera"):
             self.assertNotIn(f'registrar_aplicacion("{id_sin_app}"', fuente)
