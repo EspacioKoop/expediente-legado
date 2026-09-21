@@ -57,7 +57,7 @@ func _probar_discretizacion() -> void:
 	var media_b := Ambiente.stream_adaptativo("archivo", {"estres": 0.60})
 	_comprobar(media_a == media_b, "dos valores de la misma banda reutilizan stream")
 
-	var alta := Ambiente.stream_adaptativo("archivo", {"estres": 0.90})
+	var alta := Ambiente.stream_adaptativo("archivo", {"estres": 0.90}) as AudioStreamWAV
 	_comprobar(alta != media_a, "cambiar de banda crea otra variante")
 	_comprobar(
 		alta.data != media_a.data,
