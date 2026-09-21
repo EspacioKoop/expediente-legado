@@ -58,9 +58,6 @@ class ProyeccionOniricaTest(unittest.TestCase):
         self.assertIn("_reproducir_sello(resultado)", self.capa)
 
     def test_el_visor_activa_la_costura(self):
-        # Las capas posteriores pueden convertirse en raíz siempre que mantengan
-        # la proyección en su cadena de herencia. No fijamos el contrato a una
-        # implementación intermedia concreta.
         self.assertIn('path="res://guion/visor_pronosticos_app.gd"', self.escena)
         self.assertIn('extends "res://guion/visor_anexos_app.gd"', self.capa_pronosticos)
         self.assertIn(
