@@ -1,0 +1,40 @@
+{
+  "obras": [
+    {
+      "id": "odisea",
+      "titulo": "La Odisea",
+      "autor": "Homero",
+      "epoca": "Antigua Grecia",
+      "genero": "Epopea",
+      "efecto": {
+        "bonus_insight": 10,
+        "descripcion": "Cada lectura otorga insight adicional"
+      }
+    },
+    {
+      "id": "donquijote",
+      "titulo": "Don Quijote de la Mancha",
+      "autor": "Miguel de Cervantes",
+      "epoca": "Siglo de Oro",
+      "genero": "Novela",
+      "efecto": {
+        "bonus_momentum": 5,
+        "descripcion": "Aumenta ganancia de momentum ligeramente"
+      }
+    }
+  ],
+  "autores": [
+    {
+      "id": "homero",
+      "nombre": "Homero",
+      "epoca": "Antigua Grecia",
+      "escuela": "Epopea"
+    },
+    {
+      "id": "cervantes",
+      "nombre": "Miguel de Cervantes",
+      "epoca": "Siglo de Oro",
+      "escuela": "Novela"
+    }
+  ]
+}
