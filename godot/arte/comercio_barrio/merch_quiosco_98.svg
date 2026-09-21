@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <title>Merchandising genérico de quiosco, 1998</title>
+  <desc>Hoja vectorial original sin marcas reales. Fondo transparente. Props separados por grupos con id.</desc>
+  <defs>
+    <linearGradient id="papel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f5efd9"/>
+      <stop offset="1" stop-color="#d8ccb0"/>
+    </linearGradient>
+    <linearGradient id="plasticoRojo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d65343"/>
+      <stop offset="1" stop-color="#8f2f2a"/>
+    </linearGradient>
+  </defs>
+
+  <g id="periodico_local" transform="translate(50 55)">
+    <rect x="8" y="12" width="240" height="150" rx="5" fill="#b9b19d" opacity=".5"/>
+    <rect width="240" height="150" rx="5" fill="url(#papel)" stroke="#4d4a43" stroke-width="5"/>
+    <rect x="16" y="16" width="208" height="34" fill="#263844"/>
+    <text x="120" y="42" text-anchor="middle" font-family="Georgia,serif" font-size="24" font-weight="700" fill="#f3ead2">LA TARDE LOCAL</text>
+    <rect x="18" y="63" width="94" height="56" fill="#75828a"/>
+    <path d="M25 108l20-26 18 18 16-12 24 20z" fill="#d7d0bd"/>
+    <rect x="126" y="64" width="92" height="8" fill="#5a5851"/>
+    <rect x="126" y="82" width="82" height="7" fill="#777268"/>
+    <rect x="126" y="99" width="88" height="7" fill="#777268"/>
+    <rect x="18" y="130" width="196" height="6" fill="#777268"/>
+  </g>
+
+  <g id="revista_musica" transform="translate(330 45)">
+    <rect width="180" height="220" rx="8" fill="#121a22" stroke="#efb04c" stroke-width="6"/>
+    <circle cx="90" cy="108" r="58" fill="#72374e"/>
+    <circle cx="90" cy="108" r="38" fill="#cf7c50"/>
+    <circle cx="90" cy="108" r="15" fill="#201e25"/>
+    <text x="90" y="40" text-anchor="middle" font-family="Arial,sans-serif" font-size="27" font-weight="900" fill="#f1cf78">RUIDO 98</text>
+    <text x="90" y="190" text-anchor="middle" font-family="monospace" font-size="17" font-weight="700" fill="#d7dae0">MÚSICA · DIRECTO</text>
+  </g>
+
+  <g id="revista_juegos" transform="translate(555 45)">
+    <rect width="180" height="220" rx="8" fill="#3c2452" stroke="#77c9bd" stroke-width="6"/>
+    <rect x="30" y="76" width="120" height="82" rx="8" fill="#18222f"/>
+    <rect x="44" y="90" width="92" height="54" rx="4" fill="#6cb5a9"/>
+    <path d="M63 132l22-25 18 17 17-12 16 20z" fill="#e8d78c"/>
+    <circle cx="61" cy="174" r="8" fill="#e7605f"/>
+    <circle cx="87" cy="174" r="8" fill="#e8c24b"/>
+    <text x="90" y="40" text-anchor="middle" font-family="Arial,sans-serif" font-size="26" font-weight="900" fill="#fff1b8">BIT CLUB</text>
+    <text x="90" y="207" text-anchor="middle" font-family="monospace" font-size="16" font-weight="700" fill="#d5f0eb">TRUCOS · DEMOS</text>
+  </g>
+
+  <g id="agenda_98" transform="translate(795 55)">
+    <rect x="12" y="10" width="178" height="205" rx="12" fill="#24313b"/>
+    <rect width="178" height="205" rx="12" fill="#56776b" stroke="#24313b" stroke-width="6"/>
+    <rect x="26" y="45" width="126" height="86" rx="8" fill="#e6d5a4"/>
+    <text x="89" y="92" text-anchor="middle" font-family="Arial,sans-serif" font-size="36" font-weight="900" fill="#324a44">1998</text>
+    <text x="89" y="167" text-anchor="middle" font-family="monospace" font-size="20" font-weight="700" fill="#f6eed7">AGENDA</text>
+    <path d="M18 18v170M39 18v170" stroke="#d8c77f" stroke-width="6"/>
+  </g>
+
+  <g id="cuadernos" transform="translate(50 330)">
+    <rect x="18" y="14" width="210" height="148" rx="7" fill="#c6ad62" transform="rotate(4 18 14)"/>
+    <rect width="210" height="148" rx="7" fill="#315a67" stroke="#18323b" stroke-width="5"/>
+    <rect x="28" y="26" width="154" height="72" rx="4" fill="#e9e0c2"/>
+    <path d="M12 16h18M12 38h18M12 60h18M12 82h18M12 104h18M12 126h18" stroke="#d0c17e" stroke-width="5"/>
+    <text x="105" y="68" text-anchor="middle" font-family="monospace" font-size="20" font-weight="700" fill="#31404a">CUADERNO</text>
+  </g>
+
+  <g id="sobres" transform="translate(325 325)">
+    <rect x="18" y="18" width="190" height="124" rx="4" fill="#d6ccb2"/>
+    <rect width="190" height="124" rx="4" fill="#f0e5c7" stroke="#6a6253" stroke-width="5"/>
+    <path d="M5 8l90 70 90-70M5 117l68-55M185 117l-68-55" fill="none" stroke="#9b9077" stroke-width="4"/>
+    <rect x="142" y="18" width="28" height="34" fill="#b9574c"/>
+  </g>
+
+  <g id="pilas_genericas" transform="translate(570 320)">
+    <rect width="180" height="160" rx="14" fill="#efe6c8" stroke="#353b40" stroke-width="5"/>
+    <text x="90" y="32" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="900" fill="#343b40">PILAS</text>
+    <g transform="translate(34 46)">
+      <rect width="42" height="88" rx="8" fill="#20272d"/>
+      <rect y="46" width="42" height="42" rx="0" fill="#d9953a"/>
+      <rect x="12" y="-7" width="18" height="8" rx="2" fill="#bfc3c4"/>
+    </g>
+    <g transform="translate(103 46)">
+      <rect width="42" height="88" rx="8" fill="#20272d"/>
+      <rect y="46" width="42" height="42" rx="0" fill="#d9953a"/>
+      <rect x="12" y="-7" width="18" height="8" rx="2" fill="#bfc3c4"/>
+    </g>
+  </g>
+
+  <g id="cinta_cassette" transform="translate(810 325)">
+    <rect width="206" height="128" rx="10" fill="#303942" stroke="#12171b" stroke-width="6"/>
+    <rect x="19" y="22" width="168" height="78" rx="5" fill="#e7d8b4"/>
+    <circle cx="69" cy="61" r="22" fill="#20272d"/>
+    <circle cx="137" cy="61" r="22" fill="#20272d"/>
+    <circle cx="69" cy="61" r="8" fill="#d9cba8"/>
+    <circle cx="137" cy="61" r="8" fill="#d9cba8"/>
+    <path d="M87 86h32l18 14H69z" fill="#79848b"/>
+  </g>
+
+  <g id="caramelos" transform="translate(55 585)">
+    <path d="M15 30L0 0l38 12zM165 30l15-30-38 12z" fill="#c0433a"/>
+    <rect x="22" y="8" width="136" height="88" rx="18" fill="url(#plasticoRojo)" stroke="#6f251f" stroke-width="5"/>
+    <circle cx="90" cy="52" r="26" fill="#f0d67a"/>
+    <text x="90" y="59" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="900" fill="#702c28">DULCE</text>
+  </g>
+
+  <g id="postales" transform="translate(300 565)">
+    <rect x="12" y="16" width="180" height="126" rx="4" fill="#d9d1bb" transform="rotate(6 12 16)"/>
+    <rect width="180" height="126" rx="4" fill="#c6d8d0" stroke="#46565a" stroke-width="5"/>
+    <rect x="12" y="12" width="156" height="86" fill="#73939a"/>
+    <circle cx="128" cy="42" r="18" fill="#e6c36e"/>
+    <path d="M20 88l38-44 30 28 24-17 47 33z" fill="#294d51"/>
+    <text x="90" y="118" text-anchor="middle" font-family="monospace" font-size="14" font-weight="700" fill="#39464a">RECUERDO DEL BARRIO</text>
+  </g>
+
+  <g id="boligrafos" transform="translate(555 570)">
+    <rect width="205" height="132" rx="9" fill="#e8dfc4" stroke="#53514a" stroke-width="5"/>
+    <g transform="translate(32 25) rotate(7)">
+      <rect width="18" height="88" rx="7" fill="#274b6c"/>
+      <path d="M0 88h18l-9 15z" fill="#a5a7a3"/>
+    </g>
+    <g transform="translate(82 21) rotate(-5)">
+      <rect width="18" height="88" rx="7" fill="#7b332f"/>
+      <path d="M0 88h18l-9 15z" fill="#a5a7a3"/>
+    </g>
+    <g transform="translate(132 27) rotate(4)">
+      <rect width="18" height="88" rx="7" fill="#333a36"/>
+      <path d="M0 88h18l-9 15z" fill="#a5a7a3"/>
+    </g>
+  </g>
+
+  <g id="expositor_tarjetas" transform="translate(835 545)">
+    <rect x="72" y="0" width="18" height="185" fill="#565950"/>
+    <rect x="0" y="178" width="164" height="18" rx="6" fill="#343a36"/>
+    <g fill="#ece1c3" stroke="#726a59" stroke-width="3">
+      <rect x="5" y="30" width="72" height="48" transform="rotate(-9 5 30)"/>
+      <rect x="88" y="28" width="72" height="48" transform="rotate(8 88 28)"/>
+      <rect x="7" y="98" width="72" height="48" transform="rotate(7 7 98)"/>
+      <rect x="88" y="100" width="72" height="48" transform="rotate(-8 88 100)"/>
+    </g>
+    <g fill="#7d9c8d">
+      <circle cx="37" cy="52" r="12"/><circle cx="125" cy="53" r="12"/>
+      <circle cx="42" cy="121" r="12"/><circle cx="125" cy="123" r="12"/>
+    </g>
+  </g>
+</svg>
