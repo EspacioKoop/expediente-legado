@@ -87,32 +87,27 @@ func _verificar_requisitos(requisitos: Dictionary) -> bool:
 	if literatura == null or arquetipos == null or momentum == null:
 		return false
 
+	var cumple := true
 	var conocidas: Array = literatura.get("obras_conocidas")
 	for obra_id in requisitos.get("obras", []):
 		if String(obra_id) not in conocidas:
-			return false
-	if requisitos.has("obra") and String(requisitos["obra"]) not in conocidas:
-		return false
-	if requisitos.has("arquetipo"):
+			cumple = false
+			break
+	if cumple and requisitos.has("obra"):
+		cumple = String(requisitos["obra"]) in conocidas
+	if cumple and requisitos.has("arquetipo"):
 		var arquetipo = arquetipos.call("obtener_arquetipo", String(requisitos["arquetipo"]))
-		if arquetipo == null or not bool(arquetipo.get("desbloqueado")):
-			return false
-	if (
-		requisitos.has("min_momentum")
-		and float(momentum.get("momentum_actual")) < float(requisitos["min_momentum"])
-	):
-		return false
-	if (
-		requisitos.has("momentum")
-		and float(momentum.get("momentum_actual")) < float(requisitos["momentum"])
-	):
-		return false
-	if (
-		requisitos.has("min_insight")
-		and int(arquetipos.get("insight_total")) < int(requisitos["min_insight"])
-	):
-		return false
-	return true
+		cumple = arquetipo != null and bool(arquetipo.get("desbloqueado"))
+	if cumple and requisitos.has("min_momentum"):
+		cumple = (
+			float(momentum.get("momentum_actual"))
+			>= float(requisitos["min_momentum"])
+		)
+	if cumple and requisitos.has("momentum"):
+		cumple = float(momentum.get("momentum_actual")) >= float(requisitos["momentum"])
+	if cumple and requisitos.has("min_insight"):
+		cumple = int(arquetipos.get("insight_total")) >= int(requisitos["min_insight"])
+	return cumple
 
 
 func _otorgar_recompensas(recompensas: Dictionary) -> void:
