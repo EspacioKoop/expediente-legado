@@ -95,8 +95,7 @@ func aplicar_efecto_especial(efecto: String) -> void:
 				arquetipos.call("ganar_insight", 30)
 			if momentum != null:
 				momentum.set(
-					"momentum_actual",
-					maxf(0.0, float(momentum.get("momentum_actual")) - 20.0)
+					"momentum_actual", maxf(0.0, float(momentum.get("momentum_actual")) - 20.0)
 				)
 
 
