@@ -19,6 +19,40 @@ func _probar() -> void:
 	var dia = DIA.instantiate()
 	root.add_child(dia)
 	await process_frame
+
+	var inventario_pre = dia.partida.estado.get("inventario", {})
+	Inventario.completar(inventario_pre)
+	(
+		Inventario
+		. recoger(
+			inventario_pre,
+			{
+				"id": "taza-reventa",
+				"nombre": "Taza usada",
+				"categoria": "hogar",
+				"origen": "vida",
+				"vendible": true,
+				"precio": 7,
+			},
+		)
+	)
+	(
+		Inventario
+		. recoger(
+			inventario_pre,
+			{
+				"id": "caja-casa-reventa",
+				"nombre": "Caja guardada",
+				"categoria": "hogar",
+				"origen": "vida",
+				"vendible": true,
+				"precio": 5,
+			},
+		)
+	)
+	Inventario.guardar_en_casa(inventario_pre, "caja-casa-reventa")
+	dia.partida.estado["inventario"] = inventario_pre
+
 	dia._entrar_en("trayecto")
 	await process_frame
 
@@ -72,6 +106,17 @@ func _probar() -> void:
 	_comprobar(compras_quiosco.size() == 4, "quiosco expone cuatro productos reales")
 	_comprobar(compras_trastero.size() == 2, "segunda mano expone dos productos reales")
 
+	var bandeja := trastero.get_node_or_null("BandejaReventa") as Node3D
+	_comprobar(bandeja != null, "El Trastero tiene bandeja fisica de reventa")
+	var vender_taza: Interactuable3D = null
+	if bandeja != null:
+		vender_taza = bandeja.get_node_or_null("Vender_taza-reventa") as Interactuable3D
+		_comprobar(vender_taza != null, "un objeto carried vendible aparece para reventa")
+		_comprobar(
+			bandeja.get_node_or_null("Vender_caja-casa-reventa") == null,
+			"home_storage no se vende a distancia",
+		)
+
 	var fase_inicial := String(dia.jornada.get("fase", ""))
 	dia.jornada["dinero"] = 200
 	var semillas_antes := SemillasOniricas.familias_activas(dia.jornada)
@@ -113,6 +158,21 @@ func _probar() -> void:
 		String(dia.jornada.get("fase", "")) == fase_inicial,
 		"comprar en la calle no crea otra fase",
 	)
+
+	if vender_taza != null:
+		vender_taza.interactuar(dia._caminante)
+		await process_frame
+	inventario = dia.partida.estado.get("inventario", {})
+	_comprobar(
+		not Inventario.contiene(inventario, "taza-reventa"),
+		"la reventa retira el objeto carried mediante Inventario",
+	)
+	_comprobar(int(dia.jornada["dinero"]) == 165, "la reventa suma el precio canonico al saldo")
+	if vender_taza != null:
+		_comprobar(
+			not vender_taza.habilitado and not vender_taza.visible,
+			"el objeto vendido desaparece de la bandeja",
+		)
 
 	_terminar(dia)
 
