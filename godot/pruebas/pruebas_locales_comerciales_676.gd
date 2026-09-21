@@ -59,6 +59,13 @@ func _probar() -> void:
 			identidad_fachada.get_node_or_null("RotuloBit98Exterior") != null,
 			"el rotulo Bit 98 existe en fachada",
 		)
+		var texto_exterior := (
+			identidad_fachada.get_node_or_null("TextoRotuloBit98Exterior") as Label3D
+		)
+		_comprobar(
+			texto_exterior != null and texto_exterior.text == "BIT 98",
+			"la fachada de Bit 98 conserva texto legible en runtime",
+		)
 	_comprobar(entrar_electro != null, "Electrodomesticos tiene puerta interactuable")
 	_comprobar(entrar_bit98 != null, "Bit 98 tiene puerta interactuable")
 	_comprobar(
@@ -118,6 +125,13 @@ func _probar() -> void:
 		_comprobar(
 			identidad_interior.get_node_or_null("RotuloBit98Interior") != null,
 			"el rotulo interior de Bit 98 existe",
+		)
+		var texto_interior := (
+			identidad_interior.get_node_or_null("TextoRotuloBit98Interior") as Label3D
+		)
+		_comprobar(
+			texto_interior != null and texto_interior.text == "BIT 98",
+			"el interior conserva identidad textual legible",
 		)
 		var portadas := identidad_interior.find_children(
 			"PortadaPropia_*", "MeshInstance3D", true, false
