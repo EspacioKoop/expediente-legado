@@ -23,9 +23,7 @@ const ETIQUETAS := [
 ]
 
 
-func configurar(
-	registro: Dictionary, jornada: Dictionary, consola: ConsolaPortatil98
-) -> void:
+func configurar(registro: Dictionary, jornada: Dictionary, consola: ConsolaPortatil98) -> void:
 	configurar_contrato(
 		registro,
 		jornada,
