@@ -23,6 +23,7 @@ func _initialize() -> void:
 	_probar_consumidor_posterior()
 	_probar_segundo_contrato_vitral()
 	_probar_tercer_contrato_sarnath()
+	_probar_registro_compartido()
 	print("%d pasadas, %d fallos" % [pasadas, fallos])
 	quit(1 if fallos > 0 else 0)
 
@@ -222,6 +223,63 @@ func _probar_tercer_contrato_sarnath() -> void:
 	)
 
 	observador.free()
+	consola.free()
+
+
+func _probar_registro_compartido() -> void:
+	var registro := ReligionEventos.nuevo()
+	var jornada := {"dia": 13}
+	var consola := ConsolaRomPrueba.new()
+	root.add_child(consola)
+
+	var jali := Jali98Vigilia.new()
+	var vitral := Vitral98Vigilia.new()
+	var sarnath := Sarnath98Vigilia.new()
+	root.add_child(jali)
+	root.add_child(vitral)
+	root.add_child(sarnath)
+	jali.configurar(registro, jornada, consola)
+	vitral.configurar(registro, jornada, consola)
+	sarnath.configurar(registro, jornada, consola)
+
+	consola.memoria_prueba[0xC100] = 0xA5
+
+	consola.titulo_prueba = "JALI98"
+	jali._process(0.0)
+	consola.titulo_prueba = "VITRAL98"
+	vitral._process(0.0)
+	consola.titulo_prueba = "SARNATH98"
+	sarnath._process(0.0)
+
+	var exposiciones := ReligionEventos.eventos(registro, ReligionEventos.CANAL_EXPOSICION)
+	_comprobar(exposiciones.size() == 3, "un registro común conserva las tres exposiciones")
+	var fuentes: Array[String] = []
+	var tradiciones: Array[String] = []
+	for evento_bruto in exposiciones:
+		var evento: Dictionary = evento_bruto
+		fuentes.append(String(evento.get("fuente", "")))
+		tradiciones.append(String(evento.get("tradicion", "")))
+	_comprobar(fuentes.has("rom:jali_98"), "el registro común conserva JALI 98")
+	_comprobar(fuentes.has("rom:vitral_98"), "el registro común conserva VITRAL 98")
+	_comprobar(fuentes.has("rom:sarnath_98"), "el registro común conserva SARNATH 98")
+	_comprobar(tradiciones.has("islam"), "el registro común no pierde procedencia islámica")
+	_comprobar(
+		tradiciones.has("cristianismo"),
+		"el registro común no pierde procedencia cristiana",
+	)
+	_comprobar(tradiciones.has("budismo"), "el registro común no pierde procedencia budista")
+	_comprobar(
+		ReligionEventos.eventos(registro, ReligionEventos.CANAL_PRACTICA).is_empty(),
+		"agrupar exposiciones no crea práctica",
+	)
+	_comprobar(
+		ReligionEventos.eventos(registro, ReligionEventos.CANAL_CONVICCION).is_empty(),
+		"agrupar exposiciones no crea convicción",
+	)
+
+	jali.free()
+	vitral.free()
+	sarnath.free()
 	consola.free()
 
 
