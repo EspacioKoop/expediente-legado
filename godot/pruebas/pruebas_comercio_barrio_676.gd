@@ -94,6 +94,14 @@ func _probar() -> void:
 		texto_trastero != null and texto_trastero.text == "EL TRASTERO",
 		"la segunda mano conserva nombre legible en runtime",
 	)
+	var atrezzo_trastero := trastero.get_node_or_null("AtrezzoTrastero") as Node3D
+	_comprobar(atrezzo_trastero != null, "El Trastero tiene atrezzo de segunda mano")
+	if atrezzo_trastero != null:
+		_comprobar(
+			atrezzo_trastero.get_node_or_null("RadioUsada") != null
+			and atrezzo_trastero.get_node_or_null("TelefonoUsadoBase") != null,
+			"el atrezzo diferencia segunda mano sin ampliar el catalogo",
+		)
 	var ticket_quiosco := quiosco.get_node_or_null("TicketTransaccion") as Node3D
 	var ticket_trastero := trastero.get_node_or_null("TicketTransaccion") as Node3D
 	_comprobar(
