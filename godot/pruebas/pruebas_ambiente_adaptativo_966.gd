@@ -130,9 +130,7 @@ func _probar_eco_runtime() -> void:
 	)
 
 	Ambiente.reproducir(escena, "archivo")
-	var explicito := Ambiente.reproducir(
-		escena, "sueño", -24.0, {"vigilia_fase": "casa"}
-	)
+	var explicito := Ambiente.reproducir(escena, "sueño", -24.0, {"vigilia_fase": "casa"})
 	_comprobar(
 		explicito.stream == eco_casa,
 		"un contexto explicito prevalece sobre la ultima fase recordada",
