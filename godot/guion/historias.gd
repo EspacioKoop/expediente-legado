@@ -23,6 +23,14 @@ const CATALOGO := "res://datos/prometeo.json"
 ## es el techo, así que la ventaja de casarse con una ideología se agota.
 const TOPE_CARGAS := 2
 
+# #954: el booleano histórico de "pospuesta" se conserva por compatibilidad,
+# pero el comportamiento acumulativo necesita dos capas persistentes separadas:
+# contador por carta y un diario cronológico de acciones.
+const CLAVE_CONTEO_POSPUESTAS := "historias_pospuestas_conteo"
+const CLAVE_HISTORIAL := "historial_decisiones"
+const UMBRAL_REITERACION := 2
+const UMBRAL_ACUMULACION := 3
+
 ## Qué hace cada habilidad dentro de una ronda. Ninguna es un bonus pasivo:
 ## todas son una decisión que se gasta.
 ##
@@ -97,23 +105,107 @@ func vista(estado: Dictionary, carta_id: String) -> Dictionary:
 
 ## Registra que esta vez se cierra el relato sin elegir. No concede cargas,
 ## secuelas, puntos ni pistas: la historia sigue pendiente y puede reabrirse
-## con exactamente el mismo catálogo. Repetir la operación es idempotente.
+## con exactamente el mismo catálogo.
+##
+## Desde #954 cada aplazamiento cuenta. La lista booleana sigue existiendo para
+## consumidores antiguos, mientras que el contador y el historial permiten
+## reaccionar a una pauta repetida sin decidir por el jugador ni bloquearle.
 func postergar(estado: Dictionary, carta_id: String) -> bool:
 	if de(carta_id).is_empty():
 		return false
 	if estado.get("historias_cartas", {}).has(carta_id):
 		return false
+
 	var pospuestas := _pospuestas(estado)
 	if not pospuestas.has(carta_id):
 		pospuestas.append(carta_id)
 		pospuestas.sort()
 	estado["historias_pospuestas"] = pospuestas
+
+	var conteos := _conteos_pospuestas(estado)
+	var conteo := int(conteos.get(carta_id, 0)) + 1
+	conteos[carta_id] = conteo
+	estado[CLAVE_CONTEO_POSPUESTAS] = conteos
+	_registrar_historial(estado, carta_id, "pospuesta", "", conteo)
 	return true
 
 
 func esta_pospuesta(estado: Dictionary, carta_id: String) -> bool:
 	var pospuestas = estado.get("historias_pospuestas", [])
 	return typeof(pospuestas) == TYPE_ARRAY and pospuestas.has(carta_id)
+
+
+func veces_pospuesta(estado: Dictionary, carta_id: String) -> int:
+	return int(_conteos_pospuestas(estado).get(carta_id, 0))
+
+
+## Devuelve una presión descriptiva, no una sanción. Quien pinte mundo, sueños
+## o comentarios puede usar los umbrales sin conocer cómo se persisten.
+func presion_indecision(estado: Dictionary) -> Dictionary:
+	var conteos := _conteos_pospuestas(estado)
+	var total := 0
+	var maximo := 0
+	var reiteradas := 0
+	for carta_id in conteos:
+		var veces := maxi(0, int(conteos[carta_id]))
+		total += veces
+		maximo = maxi(maximo, veces)
+		if veces >= UMBRAL_REITERACION:
+			reiteradas += 1
+
+	var nivel := 0
+	if maximo >= UMBRAL_REITERACION:
+		nivel = 1
+	if maximo >= UMBRAL_ACUMULACION or reiteradas >= UMBRAL_REITERACION:
+		nivel = 2
+	return {
+		"nivel": nivel,
+		"total": total,
+		"reiteradas": reiteradas,
+		"maximo": maximo,
+	}
+
+
+## Diario de decisiones del corte político. En guardados anteriores a #954 no
+## inventamos fechas: sintetizamos solo el estado actual y lo marcamos legado.
+func historial(estado: Dictionary) -> Array:
+	var crudo = estado.get(CLAVE_HISTORIAL, [])
+	if typeof(crudo) == TYPE_ARRAY and not crudo.is_empty():
+		return crudo.duplicate(true)
+
+	var legado := []
+	var resueltas = estado.get("historias_cartas", {})
+	if typeof(resueltas) == TYPE_DICTIONARY:
+		var ids := resueltas.keys()
+		ids.sort()
+		for carta_id in ids:
+			legado.append(
+				{
+					"tipo": "resuelta",
+					"carta": String(carta_id),
+					"eleccion": String(resueltas[carta_id]),
+					"posposiciones": veces_pospuesta(estado, String(carta_id)),
+					"dia": 0,
+					"vuelta": 0,
+					"fase": "",
+					"legado": true,
+				}
+			)
+	for carta_id in _pospuestas(estado):
+		if typeof(resueltas) == TYPE_DICTIONARY and resueltas.has(carta_id):
+			continue
+		legado.append(
+			{
+				"tipo": "pospuesta",
+				"carta": String(carta_id),
+				"posposiciones": veces_pospuesta(estado, String(carta_id)),
+				"dia": 0,
+				"vuelta": 0,
+				"fase": "",
+				"legado": true,
+			}
+		)
+	return legado
 
 
 ## Registra la elección y devuelve lo que hay que contar. Muta el estado: la
@@ -132,6 +224,9 @@ func resolver(estado: Dictionary, carta_id: String, eje: String) -> Dictionary:
 	if not historias.has(carta_id):
 		historias[carta_id] = eje
 		estado["historias_cartas"] = historias
+		_registrar_historial(
+			estado, carta_id, "resuelta", eje, veces_pospuesta(estado, carta_id)
+		)
 		_quitar_pospuesta(estado, carta_id)
 
 	return vista(estado, carta_id)
@@ -159,6 +254,43 @@ func pendientes(estado: Dictionary) -> int:
 func _pospuestas(estado: Dictionary) -> Array:
 	var valor = estado.get("historias_pospuestas", [])
 	return valor.duplicate() if typeof(valor) == TYPE_ARRAY else []
+
+
+func _conteos_pospuestas(estado: Dictionary) -> Dictionary:
+	var valor = estado.get(CLAVE_CONTEO_POSPUESTAS, {})
+	if typeof(valor) == TYPE_DICTIONARY:
+		var copia: Dictionary = valor.duplicate()
+		# Migración blanda: una partida de #339/#369 solo conoce la marca
+		# booleana. Si sigue pendiente, cuenta como un aplazamiento, no como cero.
+		for carta_id in _pospuestas(estado):
+			if not copia.has(carta_id):
+				copia[carta_id] = 1
+		return copia
+	var legado := {}
+	for carta_id in _pospuestas(estado):
+		legado[carta_id] = 1
+	return legado
+
+
+func _registrar_historial(
+	estado: Dictionary, carta_id: String, tipo: String, eleccion: String, conteo: int
+) -> void:
+	var historial_crudo = estado.get(CLAVE_HISTORIAL, [])
+	var eventos: Array = historial_crudo.duplicate(true) if typeof(historial_crudo) == TYPE_ARRAY else []
+	var jornada = estado.get("jornada", {})
+	var contexto: Dictionary = jornada if typeof(jornada) == TYPE_DICTIONARY else {}
+	var evento := {
+		"tipo": tipo,
+		"carta": carta_id,
+		"posposiciones": maxi(0, conteo),
+		"dia": int(contexto.get("dia", 0)),
+		"vuelta": int(contexto.get("vuelta", 0)),
+		"fase": String(contexto.get("fase", "")),
+	}
+	if not eleccion.is_empty():
+		evento["eleccion"] = eleccion
+	eventos.append(evento)
+	estado[CLAVE_HISTORIAL] = eventos
 
 
 func _quitar_pospuesta(estado: Dictionary, carta_id: String) -> void:
