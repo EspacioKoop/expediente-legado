@@ -1,5 +1,5 @@
-extends Resource
 class_name ArbolIndividuacion
+extends Resource
 
 @export var nodos: Dictionary = {}
 
@@ -12,31 +12,30 @@ func puede_desbloquear(nodo_id: String) -> bool:
 		return false
 	var nodo: Dictionary = nodos[nodo_id]
 	var requisitos: Dictionary = nodo.get("requisitos", {})
+	var cumple := true
 
 	if requisitos.has("insight"):
 		var gestor_arquetipos := _autoload("GestorArquetipos")
-		if gestor_arquetipos == null:
-			return false
-		if int(gestor_arquetipos.get("insight_total")) < int(requisitos.get("insight", 0)):
-			return false
-	if (
-		requisitos.has("nodo_previo")
-		and String(requisitos.get("nodo_previo", "")) not in nodos_completados
-	):
-		return false
-	for previo in requisitos.get("nodos_previos", []):
-		if String(previo) not in nodos_completados:
-			return false
-	if requisitos.has("evento") and not _evento_completado(String(requisitos["evento"])):
-		return false
-	if requisitos.has("ritual") and not _ritual_completado(String(requisitos["ritual"])):
-		return false
-	if (
-		requisitos.has("nodos_completados")
-		and nodos_completados.size() < int(requisitos["nodos_completados"])
-	):
-		return false
-	return true
+		cumple = gestor_arquetipos != null
+		if cumple:
+			cumple = (
+				int(gestor_arquetipos.get("insight_total"))
+				>= int(requisitos.get("insight", 0))
+			)
+	if cumple and requisitos.has("nodo_previo"):
+		cumple = String(requisitos.get("nodo_previo", "")) in nodos_completados
+	if cumple:
+		for previo in requisitos.get("nodos_previos", []):
+			if String(previo) not in nodos_completados:
+				cumple = false
+				break
+	if cumple and requisitos.has("evento"):
+		cumple = _evento_completado(String(requisitos["evento"]))
+	if cumple and requisitos.has("ritual"):
+		cumple = _ritual_completado(String(requisitos["ritual"]))
+	if cumple and requisitos.has("nodos_completados"):
+		cumple = nodos_completados.size() >= int(requisitos["nodos_completados"])
+	return cumple
 
 
 func desbloquear_nodo(nodo_id: String) -> bool:
