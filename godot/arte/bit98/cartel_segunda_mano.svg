@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="520" viewBox="0 0 700 520">
+  <rect width="700" height="520" fill="#d9b44a"/>
+  <rect x="18" y="18" width="664" height="484" fill="none" stroke="#2a2520" stroke-width="8"/>
+  <text x="350" y="150" text-anchor="middle" font-family="Arial,sans-serif" font-size="76" font-weight="900" fill="#1d2431">SEGUNDA MANO</text>
+  <path d="M80 192h540" stroke="#bd3d39" stroke-width="14"/>
+  <text x="350" y="286" text-anchor="middle" font-family="Arial,sans-serif" font-size="47" font-weight="800" fill="#2a2520">GRANDES JUEGOS</text>
+  <text x="350" y="350" text-anchor="middle" font-family="Arial,sans-serif" font-size="47" font-weight="800" fill="#2a2520">MEJORES HISTORIAS</text>
+  <text x="350" y="440" text-anchor="middle" font-family="monospace" font-size="25" font-weight="700" fill="#60322d">COMPRA · VENTA · CAMBIO</text>
+</svg>
