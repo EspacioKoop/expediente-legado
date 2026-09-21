@@ -21,7 +21,7 @@ class CorreccionVisualNpc275Test(unittest.TestCase):
         self.assertLess(self.proyecto.index(vestuario), self.proyecto.index(correccion))
 
     def test_cabeza_sale_del_torso_y_no_de_headtop_end(self):
-        self.assertIn('RATIO_CABEZA_TORSO := 0.34', self.script)
+        self.assertIn('RATIO_CABEZA_TORSO := 0.30', self.script)
         self.assertIn('get_bone_global_pose(cabeza).origin.y', self.script)
         self.assertIn('get_bone_global_pose(cadera).origin.y', self.script)
         self.assertIn('alto_torso * RATIO_CABEZA_TORSO', self.script)
@@ -39,7 +39,9 @@ class CorreccionVisualNpc275Test(unittest.TestCase):
         self.assertNotIn('clampf(alto_objetivo / alto_actual, 0.25, 1.0)', self.script)
 
     def test_malla_base_pasa_a_underlay_sin_tapar_el_vestuario_runtime(self):
-        self.assertIn('_pintar_importado(pieza, color_base.darkened(0.38))', self.script)
+        self.assertIn('_pintar_importado(pieza, color_base.darkened(0.12))', self.script)
+        self.assertIn('EMISION_LEGIBILIDAD := 0.07', self.script)
+        self.assertIn('set_shader_parameter("emision_fuerza", EMISION_LEGIBILIDAD)', self.script)
         self.assertIn('nodo.owner != null', self.script)
         self.assertIn('material_override = material', self.script)
 

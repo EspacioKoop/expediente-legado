@@ -99,7 +99,7 @@ func _construir() -> void:
 
 	var columnas := HSplitContainer.new()
 	columnas.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	columnas.split_offset = 240
+	columnas.split_offset = 420
 	raiz.add_child(columnas)
 
 	columnas.add_child(_columna_indice())
@@ -167,9 +167,16 @@ func _columna_indice() -> Control:
 	_refrescar_archivo()
 	_archivo.select(0)
 	columna.add_child(_etiqueta(tr("VISOR_DOCUMENTOS"), EstiloSiga.NEGRO))
+	var ayuda_documentos := _etiqueta(tr("VISOR_ELIJA"), EstiloSiga.NEGRO)
+	ayuda_documentos.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	columna.add_child(ayuda_documentos)
 	columna.add_child(_etiqueta(tr("VISOR_COSTE_REGLA"), EstiloSiga.NEGRO))
 
 	_lista = ItemList.new()
+	# El índice de documentos es la acción principal del visor. Sin un mínimo,
+	# las tarjetas opcionales añadidas debajo podían comprimirlo hasta una fila
+	# casi invisible y el jugador no tenía forma evidente de abrir un folio.
+	_lista.custom_minimum_size.y = 280
 	_lista.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_lista.add_theme_stylebox_override("panel", _caja_hundida(EstiloSiga.BLANCO))
 	_lista.add_theme_color_override("font_color", EstiloSiga.NEGRO)

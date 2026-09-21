@@ -20,7 +20,8 @@ extends Node
 const RUTA_PERSONA := "res://assets/modelos/persona.fbx"
 const MARCA := "correccion_visual_275"
 const MARCA_IDENTIDAD := "vestuario_identidad_275"
-const RATIO_CABEZA_TORSO := 0.34
+const RATIO_CABEZA_TORSO := 0.30
+const EMISION_LEGIBILIDAD := 0.07
 const PIEL_CLARA := Color(0.80, 0.65, 0.52)
 const PIEL_OSCURA := Color(0.52, 0.36, 0.27)
 
@@ -90,7 +91,7 @@ func _corregir(pieza: Node) -> void:
 	# El FBX deja de hacer de «piel/ropa todo a la vez»: pasa a ser una capa
 	# inferior oscura. El vestuario procedural que ya monta #589/#642 queda por
 	# encima y la zona inferior se lee como pantalón, no como maniquí desnudo.
-	_pintar_importado(pieza, color_base.darkened(0.38))
+	_pintar_importado(pieza, color_base.darkened(0.12))
 	esqueleto.set_meta(MARCA, true)
 
 
@@ -215,6 +216,11 @@ func _material(color: Color) -> ShaderMaterial:
 	var material := ShaderMaterial.new()
 	material.shader = load(Espacio3D.SHADER_PSX)
 	material.set_shader_parameter("color_base", color)
+	# La oficina usa luz por vértice y los tonos de vestuario son deliberadamente
+	# sobrios. Un relleno mínimo evita que cara/cuerpo colapsen a silueta negra
+	# sin convertir la figura en material unshaded.
+	material.set_shader_parameter("emision", color)
+	material.set_shader_parameter("emision_fuerza", EMISION_LEGIBILIDAD)
 	return material
 
 

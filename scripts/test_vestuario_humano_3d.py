@@ -87,6 +87,11 @@ class VestuarioHumano3DTest(unittest.TestCase):
         self.assertIn("load(Espacio3D.SHADER_PSX)", self.vestuario)
         self.assertIn('get_shader_parameter("color_base")', self.vestuario)
         self.assertIn('set_shader_parameter("color_base", color)', self.vestuario)
+        self.assertIn('EMISION_LEGIBILIDAD := 0.06', self.vestuario)
+        self.assertIn('color_base.lightened(0.16)', self.vestuario)
+        self.assertIn('color_base.lightened(0.48)', self.vestuario)
+        self.assertIn('color_base.darkened(0.08)', self.vestuario)
+        self.assertIn('set_shader_parameter("emision_fuerza", EMISION_LEGIBILIDAD)', self.vestuario)
 
 
 if __name__ == "__main__":

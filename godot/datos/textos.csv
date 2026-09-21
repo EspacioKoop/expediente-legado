@@ -338,7 +338,7 @@ VISOR_COSTE_ACCION,1 acción
 VISOR_COSTE_GRATIS,GRATIS
 VISOR_COSTE_REGLA,Primera lectura nueva del día: GRATIS · siguientes: 1 acción · releer hoy: GRATIS
 VISOR_DOCUMENTOS,Documentos del expediente:
-VISOR_ELIJA,Elija un documento del expediente.
+VISOR_ELIJA,Seleccione un documento de la lista para abrirlo y leerlo.
 VISOR_ESTADO,"%s   ·   Pistas: %d de %d   ·   Día %d   ·   Presupuesto: %d/%d acciones%s"
 VISOR_IMPUTAR,Imputar responsabilidad…
 VISOR_ITEM_COSTE,"%s  %s   ·   %s"

@@ -83,7 +83,7 @@ class RegistrarPlaytest513Test(unittest.TestCase):
     def test_markdown_traza_build_viewport_y_los_cuatro_folios(self):
         texto = modulo.render_markdown(datos_base(True))
         self.assertIn("build SHA: `abc1234`", texto)
-        self.assertIn("viewport: `1024×680`", texto)
+        self.assertIn("viewport: `1920×1080`", texto)
         self.assertIn("evidencia visual adjunta para los cuatro folios: **CUMPLE**", texto)
         for folio, _tipo in modulo.FOLIOS:
             self.assertIn(folio, texto)

@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 
 
-VIEWPORT_CANONICO = "1024x680"
+VIEWPORT_CANONICO = "1920x1080"
 
 PANTALLAS = (
     (
@@ -153,7 +153,7 @@ def render_markdown(datos: dict[str, object]) -> str:
 {''.join(bloques)}
 ## Resumen del gate
 
-- viewport canónico `1024×680`: **{_estado(gate['viewport_ok'])}**
+- viewport canónico `1920×1080`: **{_estado(gate['viewport_ok'])}**
 - teclado + mando físico probados: **{_estado(gate['dispositivos_ok'])}**
 - comprobaciones visuales y de foco: **{_estado(gate['pantallas_ok'])}**
 - evidencia por las cuatro pantallas: **{_estado(gate['capturas_ok'])}**
@@ -179,7 +179,7 @@ def recoger_datos() -> dict[str, object]:
         "tester": preguntar("Tester/facilitador: "),
         "plataforma": preguntar("Plataforma (Linux/Windows/...): "),
         "build_sha": preguntar("Build SHA: "),
-        "viewport": preguntar("Viewport (esperado 1024x680): "),
+        "viewport": preguntar("Viewport (esperado 1920x1080): "),
         "teclado_real": preguntar_si_no("¿Se ha probado con teclado real?"),
         "mando_fisico": preguntar_si_no("¿Se ha probado con mando físico real?"),
         "mando_modelo": preguntar("Modelo de mando (o 'desconocido'): "),

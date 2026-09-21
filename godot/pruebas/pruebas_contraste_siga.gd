@@ -33,7 +33,7 @@ func _probar() -> void:
 		"readonly/gris claro", tema.get_color("font_readonly_color", "TextEdit"), Color("e8e8e8")
 	)
 	_comprobar_par(
-		"boton deshabilitado", tema.get_color("font_disabled_color", "Button"), Color("b8b8b8")
+		"boton deshabilitado", tema.get_color("font_disabled_color", "Button"), Color("d0d0d0")
 	)
 
 	_comprobar(

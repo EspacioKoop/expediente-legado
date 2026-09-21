@@ -18,7 +18,7 @@ const AZUL_TITULO := Color("000080")  ## la barra de título activa
 const AZUL_ENLACE := Color("0000aa")
 const AMARILLO_VISTO := Color("c8c800")  ## una frase gatillo ya leída
 const GRIS_TEXTO := Color("595959")  ## texto secundario AA sobre blanco/gris claro
-const GRIS_TEXTO_DESHABILITADO := Color("404040")  ## AA incluso sobre el gris disabled
+const GRIS_TEXTO_DESHABILITADO := Color("202020")  ## alto contraste incluso en controles disabled
 
 const GROSOR := 2
 const RUTA_FUENTE_DOCUMENTO := "res://assets/fonts/MFBOldstyle-Regular.otf"
@@ -108,7 +108,7 @@ static func _configurar_botones(tema: Theme) -> void:
 		tema.set_stylebox("normal", tipo, caja_saliente())
 		tema.set_stylebox("hover", tipo, caja_saliente(Color("d0d0d0")))
 		tema.set_stylebox("pressed", tipo, caja_hundida(GRIS))
-		tema.set_stylebox("disabled", tipo, caja_saliente(Color("b8b8b8")))
+		tema.set_stylebox("disabled", tipo, caja_saliente(Color("d0d0d0")))
 		tema.set_stylebox("focus", tipo, caja_foco())
 		tema.set_color("font_color", tipo, NEGRO)
 		tema.set_color("font_hover_color", tipo, NEGRO)
@@ -169,6 +169,7 @@ static func _configurar_texto_y_listas(tema: Theme) -> void:
 	tema.set_color("font_hovered_color", "ItemList", NEGRO)
 	tema.set_color("font_selected_color", "ItemList", BLANCO)
 	tema.set_color("font_hovered_selected_color", "ItemList", BLANCO)
+	tema.set_color("font_disabled_color", "ItemList", GRIS_TEXTO_DESHABILITADO)
 
 
 ## Texto de documento. MFB Oldstyle ya estaba empaquetada y registrada como

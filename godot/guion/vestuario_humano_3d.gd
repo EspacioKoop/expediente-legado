@@ -10,6 +10,7 @@ extends Node
 const RUTA_PERSONA := "res://assets/modelos/persona.fbx"
 const MARCA := "vestuario_humano_275"
 const MARCA_IDENTIDAD := "vestuario_identidad_275"
+const EMISION_LEGIBILIDAD := 0.06
 
 const PERFILES_BASE := [
 	{
@@ -234,9 +235,9 @@ func vestir(pieza: Node, perfil: Dictionary, color_base: Color, identidad: Strin
 	if cadera < 0 or pecho < 0 or cabeza < 0:
 		return false
 
-	var color_chaqueta := color_base.darkened(0.24)
-	var color_camisa := color_base.lightened(0.22)
-	var color_pantalon := color_base.darkened(0.34)
+	var color_chaqueta := color_base.lightened(0.16)
+	var color_camisa := color_base.lightened(0.48)
+	var color_pantalon := color_base.darkened(0.08)
 
 	var alto_torso := _distancia_vertical(esqueleto, cadera, cabeza)
 	# Los FBX de este pack pueden traer escalas internas poco intuitivas. La
@@ -460,6 +461,10 @@ func _material(color: Color) -> ShaderMaterial:
 	var material := ShaderMaterial.new()
 	material.shader = load(Espacio3D.SHADER_PSX)
 	material.set_shader_parameter("color_base", color)
+	# El relleno es deliberadamente pequeño: conserva sombreado PSX, pero evita
+	# que ropa oscura bajo fluorescentes termine como una silueta sin volumen.
+	material.set_shader_parameter("emision", color)
+	material.set_shader_parameter("emision_fuerza", EMISION_LEGIBILIDAD)
 	return material
 
 

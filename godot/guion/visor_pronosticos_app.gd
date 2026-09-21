@@ -44,13 +44,27 @@ func _columna_indice() -> Control:
 	var columna: Control = super._columna_indice()
 	columna.add_child(HSeparator.new())
 
+	# Los controles opcionales no deben caer directamente sobre el gris/sombra
+	# del shell. Una superficie clara y opaca mantiene el contraste y separa la
+	# apuesta secundaria de la lista de documentos, que es la acción principal.
+	var panel := PanelContainer.new()
+	panel.name = "PanelPronosticoAuditoria"
+	panel.add_theme_stylebox_override("panel", EstiloSiga.caja_saliente(Color("e6e6e6")))
+	columna.add_child(panel)
+
+	var contenido_panel := VBoxContainer.new()
+	contenido_panel.add_theme_constant_override("separation", 4)
+	panel.add_child(contenido_panel)
+
 	var titulo := Label.new()
 	titulo.text = tr("VISOR_PRONOSTICO_TITULO")
-	columna.add_child(titulo)
+	titulo.add_theme_color_override("font_color", EstiloSiga.NEGRO)
+	contenido_panel.add_child(titulo)
 
 	_pronostico_estado = Label.new()
 	_pronostico_estado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	columna.add_child(_pronostico_estado)
+	_pronostico_estado.add_theme_color_override("font_color", EstiloSiga.NEGRO)
+	contenido_panel.add_child(_pronostico_estado)
 
 	var opciones := HBoxContainer.new()
 	opciones.add_theme_constant_override("separation", 4)
@@ -65,7 +79,7 @@ func _columna_indice() -> Control:
 	_pronostico_valor = OptionButton.new()
 	_pronostico_valor.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	opciones.add_child(_pronostico_valor)
-	columna.add_child(opciones)
+	contenido_panel.add_child(opciones)
 
 	var acciones := HBoxContainer.new()
 	acciones.add_theme_constant_override("separation", 4)
@@ -81,10 +95,10 @@ func _columna_indice() -> Control:
 	_pronostico_historial_boton.text = tr("VISOR_PRONOSTICO_HISTORIAL")
 	_pronostico_historial_boton.pressed.connect(_abrir_historial_pronosticos)
 	acciones.add_child(_pronostico_historial_boton)
-	columna.add_child(acciones)
+	contenido_panel.add_child(acciones)
 
 	_rellenar_valores_pronostico()
-	_montar_decision_924(columna)
+	_montar_decision_924(contenido_panel)
 	return columna
 
 

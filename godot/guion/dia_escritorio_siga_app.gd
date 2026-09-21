@@ -136,6 +136,13 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	var creador_visor := Callable(self, "_crear_visor")
 	var titulo_siga := tr("ESCRITORIO_SIGA_TITULO")
 	_siga_app = EscritorioSigaApp.new("siga-98", titulo_siga, creador_visor, "siga")
+	# SIGA concentra índice, documento, pronóstico y estado. El tamaño de serie
+	# (760×540) hacía que el índice de folios se colapsara y obligaba a jugar
+	# dentro de una ventana menor que el propio contenido. En 1080p abre grande
+	# pero deja escritorio visible alrededor, y sigue siendo redimensionable.
+	_siga_app.tamano_minimo = Vector2(900, 620)
+	_siga_app.tamano_preferido = Vector2(1180, 800)
+	_siga_app.redimensionable = true
 	_siga_app.registrar_en(escritorio)
 	_apps.append(_siga_app)
 

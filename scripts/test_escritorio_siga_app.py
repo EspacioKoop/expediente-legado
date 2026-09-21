@@ -57,6 +57,9 @@ def test_siga_98_es_primer_consumidor_real_del_contrato() -> None:
     texto = fuente(ADAPTADOR)
     assert "var _siga_app: EscritorioSigaApp" in texto
     assert 'EscritorioSigaApp.new("siga-98", titulo_siga, creador_visor, "siga")' in texto
+    assert "_siga_app.tamano_minimo = Vector2(900, 620)" in texto
+    assert "_siga_app.tamano_preferido = Vector2(1180, 800)" in texto
+    assert "_siga_app.redimensionable = true" in texto
     assert "_siga_app.registrar_en(escritorio)" in texto
     assert "_siga_app.adoptar_en(escritorio, visor)" in texto
     assert 'load("res://escenas/visor.tscn")' in texto
