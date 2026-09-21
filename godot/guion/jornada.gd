@@ -15,6 +15,25 @@ extends RefCounted
 ## En orden. El día empieza en el archivo y termina soñando.
 const FASES := ["archivo", "trayecto", "casa", "sueño"]
 
+## #963: el reloj laboral es estado de Jornada, no tiempo real. Solo avanza
+## cuando ocurre una acción significativa o una transición de fase, de modo que
+## observar, leer texto o quedarse quieto nunca castiga al jugador.
+const MINUTOS_INICIO_JORNADA := 9 * 60
+const MINUTOS_FIN_OFICINA := 18 * 60
+const MINUTOS_LLEGADA_CASA := 19 * 60
+const MINUTOS_INICIO_SUENO := 23 * 60
+const MINUTOS_POR_ACCION := 150
+const MINUTOS_DIA := 24 * 60
+
+## Primer catálogo de disponibilidad. Son ventanas ambientales/optativas: ningún
+## consumidor debe usarlas para bloquear progreso principal.
+const HORARIOS_SERVICIOS := {
+	"archivo_fisico": {"desde": 9 * 60, "hasta": 14 * 60},
+	"cafeteria": {"desde": 10 * 60, "hasta": 16 * 60},
+	"jefe": {"desde": 9 * 60, "hasta": 13 * 60},
+	"limpieza": {"desde": 17 * 60, "hasta": 20 * 60},
+}
+
 ## Lo que se cobra por fichar la salida, haya pasado lo que haya pasado. La
 ## nómina no premia acertar: en este juego no hay sospechoso correcto, y pagar
 ## por acertar desmontaría la sátira entera.
@@ -78,6 +97,9 @@ static func nueva(raiz: int = 0, vuelta: int = 1) -> Dictionary:
 		"raiz": raiz,
 		"vuelta": vuelta,
 		"fase": "archivo",
+		# Minutos desde medianoche. Se persiste para que guardar/cargar no cambie
+		# la franja ambiental ni la disponibilidad de servicios.
+		"hora_minutos": MINUTOS_INICIO_JORNADA,
 		"dinero": 120,
 		"cerrados_hoy": 0,
 		# Señal factual para reconocimientos diegéticos: cuántas firmas del día
@@ -159,12 +181,16 @@ static func completar(jornada: Dictionary, raiz: int = 0) -> Dictionary:
 	# el molde. Cargar cero segundos no debe conceder otra noche entera.
 	var sin_reloj := not jornada.has("sueno_resto")
 	var sin_total := not jornada.has("sueno_total")
+	var sin_hora_laboral := not jornada.has("hora_minutos")
 	var molde := nueva(raiz)
 	for clave in molde:
 		if not jornada.has(clave):
 			jornada[clave] = molde[clave]
 		elif typeof(molde[clave]) == TYPE_INT:
 			jornada[clave] = int(jornada[clave])
+	if sin_hora_laboral:
+		jornada["hora_minutos"] = _hora_migrada(jornada)
+	jornada["hora_minutos"] = clampi(int(jornada.get("hora_minutos", MINUTOS_INICIO_JORNADA)), 0, MINUTOS_DIA - 1)
 	jornada["gato"]["dias_sin_comer"] = int(jornada["gato"].get("dias_sin_comer", 0))
 	jornada["comida_propia"]["dias_sin_comer"] = int(
 		jornada["comida_propia"].get("dias_sin_comer", 0)
@@ -213,6 +239,7 @@ static func gastar_accion(jornada: Dictionary) -> bool:
 	if jornada["fase"] != "archivo" or jornada["acciones"] <= 0:
 		return false
 	jornada["acciones"] -= 1
+	avanzar_reloj(jornada, MINUTOS_POR_ACCION)
 	return true
 
 
@@ -256,6 +283,7 @@ static func fichar_salida(jornada: Dictionary) -> Dictionary:
 	var bruto := BASE_DIARIA + POR_EXPEDIENTE * cerrados
 	jornada["dinero"] += bruto
 	jornada["fase"] = "trayecto"
+	sincronizar_reloj_fase(jornada, "trayecto")
 
 	return {
 		"base": BASE_DIARIA,
@@ -459,6 +487,7 @@ static func despertar(jornada: Dictionary) -> int:
 	jornada["acusaciones_precipitadas_hoy"] = 0
 	jornada["acciones"] = ACCIONES_POR_DIA
 	jornada["acciones_bonus_hoy"] = 0
+	jornada["hora_minutos"] = MINUTOS_INICIO_JORNADA
 	jornada["leido_hoy"] = []
 	jornada["seleccion_nocturna"] = []
 	# La noche se acabó aunque queden escenas: despertar de golpe (#90) no
@@ -469,6 +498,79 @@ static func despertar(jornada: Dictionary) -> int:
 	jornada["mapa_anoche"] = []
 	jornada["ronda_cierre"] = {}
 	return jornada["dia"]
+
+
+## Hora laboral actual en minutos desde medianoche.
+static func hora_minutos(jornada: Dictionary) -> int:
+	return clampi(int(jornada.get("hora_minutos", MINUTOS_INICIO_JORNADA)), 0, MINUTOS_DIA - 1)
+
+
+## Hora decimal para consumidores ambientales como #966.
+static func hora_decimal(jornada: Dictionary) -> float:
+	return float(hora_minutos(jornada)) / 60.0
+
+
+## Franja estable y discreta; evita que cada consumidor invente sus propios cortes.
+static func franja_horaria(jornada: Dictionary) -> String:
+	var hora := hora_decimal(jornada)
+	if hora < 7.0 or hora >= 19.0:
+		return "noche"
+	if hora < 11.0:
+		return "manana"
+	if hora < 15.0:
+		return "mediodia"
+	return "tarde"
+
+
+## Disponibilidad optativa de un servicio conocido. Desconocido = no declarado,
+## no "abierto por defecto": así un typo no materializa contenido fantasma.
+static func servicio_disponible(jornada: Dictionary, servicio: String) -> bool:
+	if not HORARIOS_SERVICIOS.has(servicio):
+		return false
+	var horario: Dictionary = HORARIOS_SERVICIOS[servicio]
+	var ahora := hora_minutos(jornada)
+	return ahora >= int(horario["desde"]) and ahora < int(horario["hasta"])
+
+
+## Avanza el reloj sin poder retroceder ni saltar de día. No cambia fase,
+## acciones, dinero ni progreso; por sí solo jamás expulsa al jugador.
+static func avanzar_reloj(jornada: Dictionary, minutos: int) -> int:
+	if minutos <= 0:
+		return hora_minutos(jornada)
+	jornada["hora_minutos"] = mini(MINUTOS_DIA - 1, hora_minutos(jornada) + minutos)
+	return int(jornada["hora_minutos"])
+
+
+## Las transiciones garantizan horas mínimas diegéticas. Si el jugador hizo
+## horas extra no se rebobina el reloj.
+static func sincronizar_reloj_fase(jornada: Dictionary, fase: String) -> int:
+	var minimo := MINUTOS_INICIO_JORNADA
+	match fase:
+		"trayecto":
+			minimo = MINUTOS_FIN_OFICINA
+		"casa":
+			minimo = MINUTOS_LLEGADA_CASA
+		"sueño":
+			minimo = MINUTOS_INICIO_SUENO
+		_:
+			minimo = MINUTOS_INICIO_JORNADA
+	jornada["hora_minutos"] = maxi(hora_minutos(jornada), minimo)
+	return int(jornada["hora_minutos"])
+
+
+## Migración conservadora de guardados anteriores a #963. En archivo se infiere
+## solo desde acciones base ya consumidas; café/bonos nunca hacen retroceder.
+static func _hora_migrada(jornada: Dictionary) -> int:
+	var fase := String(jornada.get("fase", "archivo"))
+	if fase == "archivo":
+		var restantes := clampi(int(jornada.get("acciones", ACCIONES_POR_DIA)), 0, ACCIONES_POR_DIA)
+		var gastadas := ACCIONES_POR_DIA - restantes
+		return MINUTOS_INICIO_JORNADA + gastadas * MINUTOS_POR_ACCION
+	if fase == "trayecto":
+		return MINUTOS_FIN_OFICINA
+	if fase == "casa":
+		return MINUTOS_LLEGADA_CASA
+	return MINUTOS_INICIO_SUENO
 
 
 ## Gasta noche. Devuelve si se ha acabado.
