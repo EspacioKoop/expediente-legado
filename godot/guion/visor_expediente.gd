@@ -12,6 +12,8 @@
 extends Control
 
 const MARGEN := 8
+const ANIO_PAPEL_ANTIGUO_MAX := 1989
+const TONO_PAPEL_ANTIGUO := 0.82
 
 const ICONOS_POR_TIPO := {
 	"FACTURA": "[$]",
@@ -283,6 +285,23 @@ func _icono(tipo: String) -> String:
 	return ICONOS_POR_TIPO.get(tipo, "[ ]")
 
 
+## #966: los documentos de décadas anteriores conservan la misma toma de
+## papel, pero un tono algo más grave los separa de la documentación reciente
+## sin convertir esa diferencia en una pista necesaria. La fecha ya existe en
+## el registro; no se añade otra clasificación narrativa.
+static func tono_documento(registro: Dictionary) -> float:
+	var fecha = registro.get("fecha")
+	if fecha == null:
+		return 1.0
+	var texto := String(fecha)
+	if texto.length() < 4:
+		return 1.0
+	var anio := texto.substr(0, 4)
+	if not anio.is_valid_int():
+		return 1.0
+	return TONO_PAPEL_ANTIGUO if int(anio) <= ANIO_PAPEL_ANTIGUO_MAX else 1.0
+
+
 ## Escribe la partida y dice si pudo. El aviso se queda en pantalla hasta que
 ## un reintento salga bien: lo hecho (la acción gastada, la pista, la carta, la
 ## firma) sigue siendo lo vigente en memoria, pero el disco todavía no lo sabe.
@@ -333,8 +352,12 @@ func _al_elegir_documento(indice: int) -> void:
 		_guardar_o_avisar()
 
 	# La primera lectura del día suena a papel, también si es gratuita.
-	# Las repetidas conservan el sonido de pulsar.
-	Sonido.sonar(self, "documento" if not ya_visto else "pulsar")
+	# El papel pre-1990 usa la misma toma con tono más grave; las repetidas
+	# conservan el clic y no vuelven a explotar la diferencia acústica.
+	if not ya_visto:
+		Sonido.sonar(self, "documento", tono_documento(registro))
+	else:
+		Sonido.sonar(self, "pulsar")
 	_mostrar_registro(registro)
 
 
