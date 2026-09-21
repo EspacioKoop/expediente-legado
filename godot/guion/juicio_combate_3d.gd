@@ -1,18 +1,8 @@
 ## Juicio por Combate de la Ventanilla (#779).
-##
-## Es una apelación, no un sustituto de investigar: las pruebas que hicieron
-## efecto en el careo reducen la determinación inicial del acusado. El combate
-## termina por rendición (determinación a cero), no por muerte.
-##
-## La arena refleja un Arcano recogido/no gastado y una semilla mitológica activa
-## de la jornada. Seis parejas declaradas por `JuicioSimbolico` forman rituales
-## pequeños, legibles y sin consumir progreso.
-##
-## Controles semánticos ya existentes:
-## - movimiento: mover_izquierda/derecha/adelante/atras;
-## - interactuar: ataque ligero;
-## - saltar: ataque fuerte;
-## - agacharse: esquiva.
+## Apelación del careo: las pruebas reducen determinación inicial y el combate
+## termina por rendición, no por muerte. Arcano y semilla mitológica decoran la
+## arena sin consumir progreso. Controles: interactuar = ligero; saltar = fuerte;
+## agacharse = esquiva; el movimiento conserva las acciones semánticas existentes.
 class_name JuicioCombate3D
 extends Node3D
 
