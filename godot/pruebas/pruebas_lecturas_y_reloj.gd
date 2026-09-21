@@ -141,8 +141,12 @@ static func _reloj_laboral(comprobar: Callable) -> void:
 	)
 
 	Jornada.gastar_accion(laboral)
-	comprobar.call("una acción adelanta dos horas y media", Jornada.hora_minutos(laboral), 11 * 60 + 30)
-	comprobar.call("la cafetería abre por horario", Jornada.servicio_disponible(laboral, "cafeteria"), true)
+	comprobar.call(
+		"una acción adelanta dos horas y media", Jornada.hora_minutos(laboral), 11 * 60 + 30
+	)
+	comprobar.call(
+		"la cafetería abre por horario", Jornada.servicio_disponible(laboral, "cafeteria"), true
+	)
 	comprobar.call("la franja cambia a mediodía", Jornada.franja_horaria(laboral), "mediodia")
 
 	Jornada.gastar_accion(laboral)
@@ -154,12 +158,18 @@ static func _reloj_laboral(comprobar: Callable) -> void:
 	)
 
 	var antes_cafe := Jornada.hora_minutos(laboral)
-	comprobar.call("el café opcional sigue disponible", Jornada.tomar_cafe(laboral, Jornada.PRECIO_CAFE), true)
-	comprobar.call("tomar café no rebobina ni adelanta el reloj", Jornada.hora_minutos(laboral), antes_cafe)
+	comprobar.call(
+		"el café opcional sigue disponible", Jornada.tomar_cafe(laboral, Jornada.PRECIO_CAFE), true
+	)
+	comprobar.call(
+		"tomar café no rebobina ni adelanta el reloj", Jornada.hora_minutos(laboral), antes_cafe
+	)
 	Jornada.gastar_accion(laboral)
 	Jornada.gastar_accion(laboral)
 	comprobar.call("las horas extra no bloquean acciones", Jornada.hora_minutos(laboral), 19 * 60)
-	comprobar.call("agotarse acciones sigue siendo la regla laboral", Jornada.jornada_agotada(laboral), true)
+	comprobar.call(
+		"agotarse acciones sigue siendo la regla laboral", Jornada.jornada_agotada(laboral), true
+	)
 
 	Jornada.fichar_salida(laboral)
 	comprobar.call("fichar no rebobina unas horas extra", Jornada.hora_minutos(laboral), 19 * 60)
