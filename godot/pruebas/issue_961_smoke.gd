@@ -15,6 +15,7 @@ func _ejecutar() -> void:
 	_probar_carga_visor()
 	_probar_estado_pasivo()
 	_probar_frontera_de_dia()
+	_probar_detalles_opcionales()
 	_probar_ecos_oniricos()
 	print("issue_961: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
@@ -69,6 +70,51 @@ func _probar_frontera_de_dia() -> void:
 		Meticulosidad.puntos(jornada),
 		0,
 		"una reasignación limpia atención aunque conserve el mismo número de día",
+	)
+
+
+func _probar_detalles_opcionales() -> void:
+	var ruta := "res://datos/detalles_meticulosidad.json"
+	var datos: Variant = JSON.parse_string(FileAccess.get_file_as_string(ruta))
+	_comprobar(datos is Dictionary, true, "el catálogo opcional es JSON válido")
+	if not datos is Dictionary:
+		return
+	var catalogo := datos as Dictionary
+	var jornada := {"dia": 4, "vuelta": 1}
+	_comprobar(
+		DetallesMeticulosidad.visibles(catalogo, jornada, "factura1@1"),
+		[],
+		"sin gesto meticuloso no aparece detalle extra",
+	)
+	Meticulosidad.registrar(jornada, "factura1@1", "lectura_completa", "margen")
+	var visibles := DetallesMeticulosidad.visibles(catalogo, jornada, "factura1@1")
+	_comprobar(visibles.size(), 1, "el gesto correcto revela un microdetalle autorado")
+	if not visibles.is_empty():
+		_comprobar(
+			bool(visibles[0].get("critico", true)),
+			false,
+			"el detalle revelado está marcado como no crítico",
+		)
+		_comprobar(
+			String(visibles[0].get("texto", "")).is_empty(),
+			false,
+			"el detalle revelado tiene texto útil",
+		)
+	var catalogo_invalido := {
+		"factura1@1": [
+			{
+				"id": "no-debe-pasar",
+				"evento": "lectura_completa",
+				"motivo": "margen",
+				"texto": "Contenido crítico inventado.",
+				"critico": true,
+			}
+		]
+	}
+	_comprobar(
+		DetallesMeticulosidad.errores_catalogo(catalogo_invalido, ["factura1@1"]).is_empty(),
+		false,
+		"el contrato rechaza detalles críticos",
 	)
 
 
