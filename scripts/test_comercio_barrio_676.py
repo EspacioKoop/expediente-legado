@@ -69,6 +69,13 @@ class ComercioBarrio676FisicoTest(unittest.TestCase):
         self.assertIn('"TextoElTrastero"', self.helper)
         self.assertIn("Label3D.new()", self.helper)
         self.assertIn("EstiloSiga.fuente_mono()", self.helper)
+        for prop in (
+            '"AtrezzoTrastero"',
+            '"RadioUsada"',
+            '"LibroUsado%d"',
+            '"TelefonoUsadoBase"',
+        ):
+            self.assertIn(prop, self.helper)
 
     def test_runtime_compra_en_ambas_superficies(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
