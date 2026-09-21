@@ -4,6 +4,7 @@ signal obra_conocida(obra_id: String)
 
 var obras: Array = []
 var obras_conocidas: Array[String] = []
+var autores_conocidos: Array[String] = []
 var insight_total: int = 0
 var momentum_bonus: float = 0.0
 
@@ -22,6 +23,11 @@ func conocer_obra(obra_id: String) -> bool:
 	if obra_id.is_empty() or obra_id in obras_conocidas:
 		return false
 	obras_conocidas.append(obra_id)
+
+	var obra := obtener_obra(obra_id)
+	var autor := String(obra.get("autor", ""))
+	if not autor.is_empty() and autor not in autores_conocidos:
+		autores_conocidos.append(autor)
 
 	var efecto := obtener_efecto_obra(obra_id)
 	var insight := int(efecto.get("bonus_insight", 0))
@@ -54,12 +60,17 @@ func obtener_momentum_bonus() -> float:
 	return momentum_bonus
 
 
-func obtener_efecto_obra(obra_id: String) -> Dictionary:
+func obtener_obra(obra_id: String) -> Dictionary:
 	for obra in obras:
 		if typeof(obra) == TYPE_DICTIONARY and String(obra.get("id", "")) == obra_id:
-			var efecto = obra.get("efecto", {})
-			return efecto.duplicate(true) if typeof(efecto) == TYPE_DICTIONARY else {}
+			return obra.duplicate(true)
 	return {}
+
+
+func obtener_efecto_obra(obra_id: String) -> Dictionary:
+	var obra := obtener_obra(obra_id)
+	var efecto = obra.get("efecto", {})
+	return efecto.duplicate(true) if typeof(efecto) == TYPE_DICTIONARY else {}
 
 
 func aplicar_efecto_especial(efecto: String) -> void:
