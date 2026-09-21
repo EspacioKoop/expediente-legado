@@ -208,11 +208,19 @@ static func _montar_mesita(raiz: Node3D, pos: Vector3) -> void:
 
 
 static func _montar_portatil(raiz: Node3D, pos: Vector3) -> void:
+	var impresora := ImpresoraTermicaPortatil3D.new()
+	impresora.name = "ImpresoraTermicaPortatil"
+	impresora.position = pos + Vector3(0.30, -0.07, 0.04)
+	impresora.rotation_degrees = Vector3(-4.0, 18.0, 0.0)
+	raiz.add_child(impresora)
+	impresora.configurar()
+
 	var portatil := ConsolaPortatil98.new()
 	portatil.name = "ConsolaPortatil98"
 	portatil.position = pos
 	portatil.rotation_degrees = Vector3(-12.0, 18.0, 0.0)
 	raiz.add_child(portatil)
+	portatil.establecer_impresora_termica(impresora.controlador())
 	portatil.configurar()
 
 
