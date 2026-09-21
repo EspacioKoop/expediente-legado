@@ -117,7 +117,9 @@ func _probar_consumidor_posterior() -> void:
 		String(firma.get_meta("fuente_cultural", "")) == "rom:jali_98",
 		"la proyección conserva su procedencia",
 	)
-	_comprobar(not bool(firma.get_meta("asume_conviccion", true)), "la geometría no infiere convicción")
+	_comprobar(
+		not bool(firma.get_meta("asume_conviccion", true)), "la geometría no infiere convicción"
+	)
 	_comprobar(
 		ReligionRecuerdoJali9323D.montar(mundo, recuerdo) == firma,
 		"el mismo mundo no duplica el recuerdo",
