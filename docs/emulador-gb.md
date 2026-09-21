@@ -123,9 +123,19 @@ El apagado físico también permanece fuera del núcleo:
 - ni el afterglow ni la variación de brillo reciben bytes de ROM, escriben SRAM o alteran el
   framebuffer RGBA que entrega SameBoy.
 
-No se introducen fallos aleatorios de contacto ni retrasos artificiales del audio de ROM en este
-corte. Si se representan más adelante, deberán activarse como estados de presentación explícitos
-y seguir sin mutar el núcleo.
+### Imperfecciones controladas
+
+La opción «Imperfecciones de hardware» está **desactivada por defecto** y además depende de que
+los efectos de presentación estén activos. Su comportamiento es determinista:
+
+- al terminar la inserción física de un cartucho, `EfectoContactoCartucho` superpone un patrón
+  procedural propio durante un único frame de proceso. No lee ni reemplaza el framebuffer nativo;
+- al arrancar la ROM, el consumer de audio mantiene 180 ms de entrada tardía. SameBoy sigue
+  ejecutando frames con normalidad y el PCM se drena y descarta durante ese intervalo, por lo que
+  no se acumula una cola que vaya a reproducirse más tarde;
+- desactivar las imperfecciones o toda la presentación cancela inmediatamente el retardo pendiente;
+- no existe azar, reinicio forzado, corrupción de SRAM, pérdida de progreso ni incompatibilidad
+  fingida.
 
 ### Paletas para GB clásico
 
