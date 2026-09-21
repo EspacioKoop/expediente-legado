@@ -80,25 +80,13 @@ func _montar_mesa(padre: Node3D) -> void:
 	mesa.name = "MesaRecuerdo"
 	padre.add_child(mesa)
 	_caja(
-		mesa,
-		"Tablero",
-		Vector3(1.55, 0.82, 0.0),
-		Vector3(1.4, 0.10, 0.75),
-		Color(0.28, 0.18, 0.10)
+		mesa, "Tablero", Vector3(1.55, 0.82, 0.0), Vector3(1.4, 0.10, 0.75), Color(0.28, 0.18, 0.10)
 	)
 	_caja(
-		mesa,
-		"PataA",
-		Vector3(1.05, 0.40, 0.0),
-		Vector3(0.10, 0.80, 0.55),
-		Color(0.24, 0.15, 0.08)
+		mesa, "PataA", Vector3(1.05, 0.40, 0.0), Vector3(0.10, 0.80, 0.55), Color(0.24, 0.15, 0.08)
 	)
 	_caja(
-		mesa,
-		"PataB",
-		Vector3(2.05, 0.40, 0.0),
-		Vector3(0.10, 0.80, 0.55),
-		Color(0.24, 0.15, 0.08)
+		mesa, "PataB", Vector3(2.05, 0.40, 0.0), Vector3(0.10, 0.80, 0.55), Color(0.24, 0.15, 0.08)
 	)
 	_caja(
 		mesa,
