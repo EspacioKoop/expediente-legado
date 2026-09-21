@@ -1,4 +1,4 @@
-[gd_scene load_steps=43 format=3]
+[gd_scene load_steps=44 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -42,6 +42,7 @@
 [ext_resource type="Script" path="res://guion/dia_props_utilizables_680_app.gd" id="40"]
 [ext_resource type="Script" path="res://guion/dia_marcadores_mundo_app.gd" id="41"]
 [ext_resource type="Script" path="res://guion/dia_huellas_ambientales_app.gd" id="42"]
+[ext_resource type="Script" path="res://guion/dia_maui_tamanuitera_app.gd" id="43"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -138,6 +139,9 @@ script = ExtResource("28")
 
 [node name="TirNaNogController" type="Node" parent="."]
 script = ExtResource("39")
+
+[node name="MauiTamanuiteraController" type="Node" parent="."]
+script = ExtResource("43")
 
 [node name="RutinasCasaController" type="Node" parent="."]
 script = ExtResource("29")
