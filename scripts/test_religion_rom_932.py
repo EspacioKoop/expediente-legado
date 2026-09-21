@@ -11,16 +11,15 @@ ROOT = Path(__file__).resolve().parents[1]
 OBSERVER = ROOT / "godot" / "guion" / "religion_rom_vigilia.gd"
 JALI = ROOT / "godot" / "guion" / "jali_98_vigilia.gd"
 VITRAL = ROOT / "godot" / "guion" / "vitral_98_vigilia.gd"
-VITRAL_CONTROLLER = ROOT / "godot" / "guion" / "dia_vitral_98_app.gd"
 VITRAL_ROM = ROOT / "gbc" / "minijuegos" / "vitral_98" / "main.asm"
 VITRAL_DOC = ROOT / "docs" / "religion-rom-vitral-932.md"
 SARNATH = ROOT / "godot" / "guion" / "sarnath_98_vigilia.gd"
-SARNATH_CONTROLLER = ROOT / "godot" / "guion" / "dia_sarnath_98_app.gd"
 SARNATH_ROM = ROOT / "gbc" / "minijuegos" / "sarnath_98" / "main.asm"
 SARNATH_DOC = ROOT / "docs" / "religion-rom-sarnath-932.md"
 CONSUMER = ROOT / "godot" / "guion" / "religion_recuerdo_jali_932.gd"
 CONSUMER_3D = ROOT / "godot" / "guion" / "religion_recuerdo_jali_932_3d.gd"
-CONTROLLER = ROOT / "godot" / "guion" / "dia_jali_98_app.gd"
+CONTROLLER = ROOT / "godot" / "guion" / "dia_religion_roms_app.gd"
+DIA = ROOT / "godot" / "escenas" / "dia.tscn"
 ROM = ROOT / "gbc" / "minijuegos" / "jali_98" / "main.asm"
 README = ROOT / "gbc" / "minijuegos" / "jali_98" / "README.md"
 DOC = ROOT / "docs" / "religion-rom-jali-932.md"
@@ -33,16 +32,15 @@ class ReligionRom932Test(unittest.TestCase):
         cls.observer = OBSERVER.read_text(encoding="utf-8")
         cls.jali = JALI.read_text(encoding="utf-8")
         cls.vitral = VITRAL.read_text(encoding="utf-8")
-        cls.vitral_controller = VITRAL_CONTROLLER.read_text(encoding="utf-8")
         cls.vitral_rom = VITRAL_ROM.read_text(encoding="utf-8")
         cls.vitral_doc = VITRAL_DOC.read_text(encoding="utf-8")
         cls.sarnath = SARNATH.read_text(encoding="utf-8")
-        cls.sarnath_controller = SARNATH_CONTROLLER.read_text(encoding="utf-8")
         cls.sarnath_rom = SARNATH_ROM.read_text(encoding="utf-8")
         cls.sarnath_doc = SARNATH_DOC.read_text(encoding="utf-8")
         cls.consumer = CONSUMER.read_text(encoding="utf-8")
         cls.consumer_3d = CONSUMER_3D.read_text(encoding="utf-8")
         cls.controller = CONTROLLER.read_text(encoding="utf-8")
+        cls.dia = DIA.read_text(encoding="utf-8")
         cls.rom = ROM.read_text(encoding="utf-8")
         cls.readme = README.read_text(encoding="utf-8")
         cls.doc = DOC.read_text(encoding="utf-8")
@@ -60,7 +58,7 @@ class ReligionRom932Test(unittest.TestCase):
         self.assertIn("europa_cristiana:vidriera_taller:ca_1375", self.vitral)
         self.assertIn('const TITULO_ROM := "VITRAL98"', self.vitral)
         self.assertIn('SECTION "Handshake", WRAM0[$C100]', self.vitral_rom)
-        self.assertIn("Vitral98Vigilia.new()", self.vitral_controller)
+        self.assertIn("Vitral98Vigilia.new()", self.controller)
         self.assertIn("V&A", self.vitral_doc)
         self.assertIn("No se reconstruye el panel de Erfurt", self.vitral_doc)
 
@@ -71,9 +69,22 @@ class ReligionRom932Test(unittest.TestCase):
         self.assertIn('const TITULO_ROM := "SARNATH98"', self.sarnath)
         self.assertIn('SECTION "Handshake", WRAM0[$C100]', self.sarnath_rom)
         self.assertIn("Ruta0:", self.sarnath_rom)
-        self.assertIn("Sarnath98Vigilia.new()", self.sarnath_controller)
+        self.assertIn("Sarnath98Vigilia.new()", self.controller)
         self.assertIn("UNESCO", self.sarnath_doc)
         self.assertIn("no reproduce el trazado de Sarnath", self.sarnath_doc)
+
+    def test_un_controller_mantiene_un_registro_compartido(self):
+        self.assertEqual(self.controller.count("ReligionEventos.nuevo()"), 1)
+        self.assertIn("Jali98Vigilia.new()", self.controller)
+        self.assertIn("Vitral98Vigilia.new()", self.controller)
+        self.assertIn("Sarnath98Vigilia.new()", self.controller)
+        self.assertGreaterEqual(self.controller.count("configurar(_registro"), 3)
+        self.assertIn("ReligionRecuerdoJali932.recuerdo_para_sueno(_registro)", self.controller)
+        self.assertIn('path="res://guion/dia_religion_roms_app.gd"', self.dia)
+        self.assertIn('[node name="ReligionRomsController" type="Node" parent="."]', self.dia)
+        self.assertNotIn("dia_jali_98_app.gd", self.dia)
+        self.assertNotIn("dia_vitral_98_app.gd", self.dia)
+        self.assertNotIn("dia_sarnath_98_app.gd", self.dia)
 
     def test_handshake_es_externo_y_determinista(self):
         self.assertIn("0xC100", self.jali)
@@ -93,7 +104,7 @@ class ReligionRom932Test(unittest.TestCase):
         self.assertIn("for indice in 3", self.consumer_3d)
         self.assertIn("for brazo in 4", self.consumer_3d)
         self.assertNotIn("CollisionShape3D", self.consumer_3d)
-        self.assertIn('== "sueño"', self.controller)
+        self.assertIn('fase != "sueño"', self.controller)
         self.assertIn("ReligionRecuerdoJali9323D.montar", self.controller)
 
     def test_documentacion_separa_fuente_e_invencion(self):
