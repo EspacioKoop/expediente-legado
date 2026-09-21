@@ -9,6 +9,19 @@ extends HSplitContainer
 const RUTA_TEXTOS := "res://datos/catalogo_anomalias_textos.json"
 const RUTA_VISUALES := "res://datos/catalogo_anomalias_visuales.json"
 
+# Identidad local del Catálogo (#791): conserva el marco OS98 común, pero la
+# superficie interior deja de ser otra ventana gris de SIGA. Índice oscuro de
+# archivo + ficha marfil; sin cambiar datos, desbloqueos ni navegación.
+const COLOR_INDICE := Color("1f2b2d")
+const COLOR_INDICE_BORDE := Color("526b63")
+const COLOR_INDICE_TEXTO := Color("edf3e8")
+const COLOR_ACENTO := Color("87b493")
+const COLOR_SELECCION := Color("34594d")
+const COLOR_FICHA := Color("e7eadf")
+const COLOR_PAPEL := Color("f7f6ed")
+const COLOR_TINTA := Color("1a2522")
+const COLOR_TINTA_SUAVE := Color("52615b")
+
 var _estado: Dictionary = {}
 var _firma_estado := ""
 var _textos: Dictionary = {}
@@ -71,20 +84,35 @@ func _t(clave: String) -> String:
 
 
 func _construir_interfaz() -> void:
+	var panel_indice := PanelContainer.new()
+	panel_indice.name = "PanelIndice"
+	panel_indice.custom_minimum_size = Vector2(235, 0)
+	panel_indice.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	panel_indice.add_theme_stylebox_override(
+		"panel", _caja_catalogo(COLOR_INDICE, COLOR_INDICE_BORDE, 10.0)
+	)
+	add_child(panel_indice)
+
 	var izquierda := VBoxContainer.new()
 	izquierda.name = "Indice"
-	izquierda.custom_minimum_size = Vector2(235, 0)
+	izquierda.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	izquierda.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	add_child(izquierda)
+	izquierda.add_theme_constant_override("separation", 8)
+	panel_indice.add_child(izquierda)
 
 	var cabecera := Label.new()
 	cabecera.name = "TituloIndice"
 	cabecera.text = _t("titulo_indice")
+	cabecera.add_theme_font_override("font", EstiloSiga.fuente_titulo())
+	cabecera.add_theme_font_size_override("font_size", 17)
+	cabecera.add_theme_color_override("font_color", COLOR_INDICE_TEXTO)
 	izquierda.add_child(cabecera)
 
 	_progreso = Label.new()
 	_progreso.name = "Progreso"
 	_progreso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_progreso.add_theme_font_override("font", EstiloSiga.fuente_mono())
+	_progreso.add_theme_color_override("font_color", COLOR_ACENTO)
 	izquierda.add_child(_progreso)
 
 	_lista = ItemList.new()
@@ -92,6 +120,16 @@ func _construir_interfaz() -> void:
 	_lista.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_lista.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_lista.select_mode = ItemList.SELECT_SINGLE
+	_lista.add_theme_font_override("font", EstiloSiga.fuente_mono())
+	_lista.add_theme_color_override("font_color", COLOR_INDICE_TEXTO)
+	_lista.add_theme_color_override("font_hovered_color", COLOR_INDICE_TEXTO)
+	_lista.add_theme_color_override("font_selected_color", Color.WHITE)
+	_lista.add_theme_stylebox_override(
+		"panel", _caja_catalogo(Color("172123"), COLOR_INDICE_BORDE, 4.0)
+	)
+	var seleccion := _caja_catalogo(COLOR_SELECCION, COLOR_ACENTO, 4.0)
+	for estado in ["selected", "selected_focus", "hovered_selected", "hovered_selected_focus"]:
+		_lista.add_theme_stylebox_override(estado, seleccion)
 	_lista.item_selected.connect(_seleccionar)
 	izquierda.add_child(_lista)
 
@@ -99,27 +137,55 @@ func _construir_interfaz() -> void:
 	leyenda.name = "Leyenda"
 	leyenda.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	leyenda.text = _t("leyenda")
+	leyenda.add_theme_font_override("font", EstiloSiga.fuente_mono())
+	leyenda.add_theme_font_size_override("font_size", 12)
+	leyenda.add_theme_color_override("font_color", COLOR_ACENTO)
 	izquierda.add_child(leyenda)
+
+	var panel_ficha := PanelContainer.new()
+	panel_ficha.name = "PanelFicha"
+	panel_ficha.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel_ficha.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	panel_ficha.add_theme_stylebox_override(
+		"panel", _caja_catalogo(COLOR_FICHA, COLOR_INDICE_BORDE, 12.0)
+	)
+	add_child(panel_ficha)
 
 	var derecha := VBoxContainer.new()
 	derecha.name = "Ficha"
 	derecha.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	derecha.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	add_child(derecha)
+	derecha.add_theme_constant_override("separation", 7)
+	panel_ficha.add_child(derecha)
+
+	var marca := Label.new()
+	marca.name = "MarcaCatalogo"
+	marca.text = _t("titulo_app")
+	marca.add_theme_font_override("font", EstiloSiga.fuente_mono())
+	marca.add_theme_font_size_override("font_size", 11)
+	marca.add_theme_color_override("font_color", COLOR_TINTA_SUAVE)
+	derecha.add_child(marca)
 
 	_titulo = Label.new()
 	_titulo.name = "TituloFicha"
 	_titulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_titulo.add_theme_font_override("font", EstiloSiga.fuente_titulo())
+	_titulo.add_theme_font_size_override("font_size", 20)
+	_titulo.add_theme_color_override("font_color", COLOR_TINTA)
 	derecha.add_child(_titulo)
 
 	_origen = Label.new()
 	_origen.name = "Origen"
 	_origen.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_origen.add_theme_font_override("font", EstiloSiga.fuente_mono())
+	_origen.add_theme_color_override("font_color", COLOR_TINTA_SUAVE)
 	derecha.add_child(_origen)
 
 	_variantes = Label.new()
 	_variantes.name = "Variantes"
 	_variantes.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_variantes.add_theme_font_override("font", EstiloSiga.fuente_mono())
+	_variantes.add_theme_color_override("font_color", COLOR_TINTA_SUAVE)
 	derecha.add_child(_variantes)
 
 	_recompensa_visual = TextureRect.new()
@@ -138,13 +204,32 @@ func _construir_interfaz() -> void:
 	_descripcion.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_descripcion.fit_content = false
 	_descripcion.selection_enabled = true
+	_descripcion.add_theme_font_override("normal_font", EstiloSiga.fuente_documento())
+	_descripcion.add_theme_color_override("default_color", COLOR_TINTA)
+	_descripcion.add_theme_stylebox_override(
+		"normal", _caja_catalogo(COLOR_PAPEL, Color("a6ad9d"), 10.0)
+	)
 	derecha.add_child(_descripcion)
 
 	_representacion = Label.new()
 	_representacion.name = "Representacion"
 	_representacion.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_representacion.add_theme_font_override("font", EstiloSiga.fuente_mono())
+	_representacion.add_theme_color_override("font_color", COLOR_TINTA_SUAVE)
 	derecha.add_child(_representacion)
 
+
+func _caja_catalogo(fondo: Color, borde: Color, margen: float) -> StyleBoxFlat:
+	var caja := StyleBoxFlat.new()
+	caja.bg_color = fondo
+	caja.border_color = borde
+	caja.set_border_width_all(1)
+	caja.set_corner_radius_all(0)
+	caja.content_margin_left = margen
+	caja.content_margin_top = margen
+	caja.content_margin_right = margen
+	caja.content_margin_bottom = margen
+	return caja
 
 func _refrescar() -> void:
 	if _lista == null:
