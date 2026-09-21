@@ -181,8 +181,9 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn("DURACION_AFTERGLOW := 0.18", self.afterglow)
         self.assertIn("Node.PROCESS_MODE_ALWAYS", self.afterglow)
         self.assertIn("Control.MOUSE_FILTER_IGNORE", self.afterglow)
-        self.assertNotIn("Siga98GB", self.afterglow)
-        self.assertNotIn("SRAM", self.afterglow)
+        self.assertNotIn("_emulador", self.afterglow)
+        self.assertNotIn('call("load_rom"', self.afterglow)
+        self.assertNotIn('call("save_ram"', self.afterglow)
         self.assertIn("get_tree().root.add_child(efecto)", self.ui)
         cuerpo = self.ui.split("func _cerrar() -> void:", 1)[1].split("func ", 1)[0]
         self.assertIn("_lanzar_apagado_fisico()", cuerpo)
