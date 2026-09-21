@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="360" viewBox="0 0 900 360">
+  <rect width="900" height="360" fill="#27312a"/>
+  <rect x="18" y="18" width="864" height="324" fill="#d3b56b" stroke="#2f302a" stroke-width="10"/>
+  <text x="450" y="130" text-anchor="middle" font-family="Georgia,serif" font-size="96" font-weight="700" fill="#24302b">EL TRASTERO</text>
+  <path d="M105 166h690" stroke="#8e3f32" stroke-width="12"/>
+  <text x="450" y="236" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="800" fill="#352f27">SEGUNDA MANO · CASA · OBJETOS</text>
+  <text x="450" y="298" text-anchor="middle" font-family="monospace" font-size="27" fill="#5e382e">COMPRA · VENTA · CAMBIO</text>
+</svg>
