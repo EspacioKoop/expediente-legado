@@ -20,6 +20,7 @@ const AUDIO_SILENCIO_DB := -80.0
 const DURACION_EXPULSION_CARTUCHO := 0.12
 const DURACION_RANURA_VACIA := 0.06
 const DURACION_INSERCION_CARTUCHO := 0.14
+const DURACION_ENTRADA_AUDIO := 0.18
 
 var link_cable: LinkCablePortatil = null
 var puerto_ir: PuertoIRPortatil = null
@@ -43,6 +44,8 @@ var _ruta_cartucho_actual := ""
 var _rom_cartucho_pendiente := ""
 var _cambiando_cartucho := false
 var _cambio_cartucho_token := 0
+var _retardo_audio_restante := 0.0
+var _espera_audio_al_arrancar := false
 
 
 func abrir() -> void:
@@ -55,15 +58,24 @@ func abrir() -> void:
 
 
 func _process(delta: float) -> void:
+	var jugando_antes := _jugando
 	super._process(delta)
+	if not jugando_antes and _jugando and _espera_audio_al_arrancar:
+		_retardo_audio_restante = DURACION_ENTRADA_AUDIO
+		_espera_audio_al_arrancar = false
+	if _retardo_audio_restante > 0.0:
+		_retardo_audio_restante = maxf(0.0, _retardo_audio_restante - maxf(delta, 0.0))
 	if _jugando and _emulador != null:
 		_bombear_audio_emulado()
 
 
 func _cargar_rom(ruta: String) -> void:
 	_limpiar_audio_emulado()
+	_retardo_audio_restante = 0.0
+	_espera_audio_al_arrancar = false
 	if _emulador == null or ruta.is_empty() or _cambiando_cartucho:
 		return
+	_espera_audio_al_arrancar = _efectos_presentacion and _imperfecciones_controladas
 	if not _efectos_presentacion:
 		_ruta_cartucho_actual = ruta
 		_actualizar_cartucho_visual()
@@ -109,6 +121,7 @@ func _cargar_rom(ruta: String) -> void:
 	if not sigue_insercion:
 		return
 
+	_mostrar_ruido_contacto()
 	_ruta_cartucho_actual = ruta
 	_actualizar_cartucho_visual()
 	_cambiando_cartucho = false
@@ -119,6 +132,9 @@ func _cargar_rom(ruta: String) -> void:
 
 func _al_cambiar_efectos(activos: bool) -> void:
 	super._al_cambiar_efectos(activos)
+	if not activos:
+		_retardo_audio_restante = 0.0
+		_espera_audio_al_arrancar = false
 	if activos or not _cambiando_cartucho:
 		return
 	var ruta := _rom_cartucho_pendiente
@@ -131,8 +147,19 @@ func _al_cambiar_efectos(activos: bool) -> void:
 	super._cargar_rom(ruta)
 
 
+func _al_cambiar_imperfecciones(activos: bool) -> void:
+	super._al_cambiar_imperfecciones(activos)
+	if not activos:
+		_retardo_audio_restante = 0.0
+		_espera_audio_al_arrancar = false
+	elif _efectos_presentacion and _cambiando_cartucho:
+		_espera_audio_al_arrancar = true
+
+
 func _cerrar() -> void:
 	_cancelar_cambio_cartucho()
+	_retardo_audio_restante = 0.0
+	_espera_audio_al_arrancar = false
 	_limpiar_audio_emulado(false)
 	if _audio_emulado != null:
 		_audio_emulado.stop()
@@ -141,6 +168,8 @@ func _cerrar() -> void:
 
 func _exit_tree() -> void:
 	_cancelar_cambio_cartucho()
+	_retardo_audio_restante = 0.0
+	_espera_audio_al_arrancar = false
 	_limpiar_audio_emulado(false)
 	if _audio_emulado != null:
 		_audio_emulado.stop()
@@ -423,6 +452,10 @@ func _bombear_audio_emulado() -> void:
 		return
 	if pcm.size() % AUDIO_BYTES_PER_FRAME != 0:
 		push_warning("PCM GB desalineado; se descarta el bloque")
+		return
+	if _retardo_audio_restante > 0.0:
+		# El núcleo sigue avanzando: el PCM se drena y se descarta solo como presentación.
+		_audio_pendiente.clear()
 		return
 	if _audio_emulado_muted:
 		# El búfer ya se vació al silenciar; aquí basta con no acumular.
