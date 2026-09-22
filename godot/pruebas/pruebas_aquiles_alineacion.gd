@@ -26,9 +26,9 @@ func _probar_reflector_deliberado() -> void:
 	_comprobar(is_equal_approx(reflector.angulo_actual(), 0.0), "ángulo inicial cero")
 
 	_comprobar(reflector.interactuar(root), "primer giro aceptado")
-	_comprobar(not reflector.esta_alineado(), "15 grados no revelan el talón")
+	_comprobar(not reflector.esta_alineado(), "-15 grados no revelan el talón")
 	_comprobar(reflector.interactuar(root), "segundo giro aceptado")
-	_comprobar(not reflector.esta_alineado(), "30 grados siguen sin alinear")
+	_comprobar(not reflector.esta_alineado(), "-30 grados siguen sin alinear")
 	_comprobar(reflector.interactuar(root), "tercer giro aceptado")
 	_comprobar(reflector.esta_alineado(), "45 grados alinean el reflejo")
 	_comprobar(
@@ -63,6 +63,20 @@ func _probar_resolucion_diegetica() -> void:
 	_comprobar(not sello.esta_habilitado(), "dos giros no habilitan el sello")
 	reflector.interactuar(root)
 	_comprobar(talon.visible, "la alineación revela el talón")
+	var disco := reflector.get_node("DiscoReflector") as Node3D
+	var haz := disco.get_node("HazReflejado") as SpotLight3D
+	var figura := sueno.get_node("FiguraAquiles") as Node3D
+	# Esta prueba corre desde SceneTree._initialize(), antes del primer frame.
+	# Componer transforms locales evita depender de global_transform fuera del árbol
+	# y verifica la misma geometría en el espacio local común del sueño.
+	var haz_en_sueno := reflector.transform * disco.transform * haz.transform
+	var talon_en_sueno := figura.transform * talon.transform
+	var direccion_haz := (haz_en_sueno.basis * Vector3.FORWARD).normalized()
+	var hacia_talon := (talon_en_sueno.origin - haz_en_sueno.origin).normalized()
+	_comprobar(
+		direccion_haz.dot(hacia_talon) > 0.99,
+		"el haz visible apunta geométricamente al talón al quedar alineado",
+	)
 	_comprobar(sello.esta_habilitado(), "revelar habilita el sello")
 
 	_comprobar(sello.interactuar(root), "el sello acepta la interacción revelada")
