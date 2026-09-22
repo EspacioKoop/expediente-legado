@@ -4,6 +4,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 DESIERTO = ROOT / "godot" / "guion" / "sueno_desierto.gd"
+DESIERTO_3D = ROOT / "godot" / "guion" / "sueno_desierto_3d.gd"
 DIA_SUENO = ROOT / "godot" / "guion" / "dia_sueno_app.gd"
 ESPACIO_3D = ROOT / "godot" / "guion" / "espacio_3d.gd"
 
@@ -12,6 +13,7 @@ class SuenoDesiertoRuntimeTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.desierto = DESIERTO.read_text(encoding="utf-8")
+        cls.desierto_3d = DESIERTO_3D.read_text(encoding="utf-8")
         cls.dia = DIA_SUENO.read_text(encoding="utf-8")
         cls.espacio_3d = ESPACIO_3D.read_text(encoding="utf-8")
 
@@ -28,6 +30,14 @@ class SuenoDesiertoRuntimeTest(unittest.TestCase):
         self.assertIn('espacio.get("tabiques_poligonales", [])', self.espacio_3d)
         self.assertIn("SuenoGeometria.cuerpo_sala(contorno, altura, tabiques)", self.espacio_3d)
         self.assertNotIn("SuenoDesierto", self.espacio_3d)
+
+    def test_presentacion_reexpone_tabiques_que_la_sala_base_oculta(self):
+        self.assertIn("_ocultar_sala_cerrada()", self.desierto_3d)
+        self.assertIn('espacio.get("tabiques_poligonales", [])', self.desierto_3d)
+        self.assertIn("SuenoGeometria.malla_tabiques(tabiques)", self.desierto_3d)
+        self.assertIn('"TabiquesMineralesFragmentados"', self.desierto_3d)
+        self.assertNotIn("StaticBody3D.new", self.desierto_3d)
+        self.assertNotIn("CollisionShape3D.new", self.desierto_3d)
 
     def test_remapea_contenido_a_coordenadas_del_desierto(self):
         self.assertIn('resultado.get("salidas", [])', self.desierto)
