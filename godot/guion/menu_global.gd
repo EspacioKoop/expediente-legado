@@ -750,9 +750,8 @@ func _tiradas_verificacion(estado: Dictionary) -> Dictionary:
 	var raiz := int(estado.get("semilla", 0))
 	return {
 		"aparicion": Azar.derivar_texto(raiz, "dia", "verificacion_falsa:%s" % fase, indices),
-		"pregunta": (
-			Azar.derivar_texto(raiz, "presentacion", "verificacion_falsa:%s" % fase, indices)
-		),
+		"pregunta":
+		Azar.derivar_texto(raiz, "presentacion", "verificacion_falsa:%s" % fase, indices),
 	}
 
 
