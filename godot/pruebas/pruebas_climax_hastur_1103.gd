@@ -39,6 +39,7 @@ func _init() -> void:
 	_dificultad()
 	_victoria_determinista()
 	_derrota_idempotente()
+	_ultimo_recurso_en_climax()
 	_ruta_handoff_a_panel()
 
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
@@ -171,6 +172,65 @@ func _derrota_idempotente() -> void:
 		int(ClimaxHastur.estado_actual(estado, jornada)["intentos"]) == 2,
 		"el reintento queda persistido",
 	)
+
+
+func _ultimo_recurso_en_climax() -> void:
+	var estado := Partida.nueva()
+	var jornada: Dictionary = estado["jornada"]
+	jornada["raiz"] = 1205
+	estado["vida"] = 1
+	(
+		ClimaxHastur
+		. iniciar(
+			estado,
+			jornada,
+			{"climax_hastur_pendiente": true},
+		)
+	)
+	var actual := ClimaxHastur.estado_actual(estado, jornada)
+	actual["fase"] = ClimaxHastur.FASE_DERROTA
+
+	var consecuencia := ClimaxHastur.aplicar_derrota(estado, jornada)
+	_comprobar(
+		consecuencia["resultado"] == "ultimo_recurso",
+		"la última derrota espera una decisión",
+	)
+	_comprobar(int(estado["vida"]) == 0, "el clímax conserva vida cero")
+	_comprobar(Acusacion.despido_pendiente(estado), "el clímax persiste la frontera")
+	_comprobar(
+		actual["fase"] == ClimaxHastur.FASE_INTERRUMPIDO,
+		"el combate queda interrumpido mientras se decide",
+	)
+
+	var canje := Acusacion.canjear_carta_por_vida(estado, "el-loco")
+	_comprobar(canje["resultado"] == "canje", "el tarot puede salvar el clímax")
+	_comprobar(
+		ClimaxHastur.reanudar_tras_ultimo_recurso(estado, jornada),
+		"el canje rearma el mismo clímax",
+	)
+	_comprobar(
+		actual["fase"] == ClimaxHastur.FASE_COMBATE,
+		"el combate vuelve a fase jugable",
+	)
+	_comprobar(int(jornada["vuelta"]) == 1, "el canje no inicia otra vuelta")
+
+	var cesado := Partida.nueva()
+	var jornada_cese: Dictionary = cesado["jornada"]
+	jornada_cese["raiz"] = 1206
+	cesado["vida"] = 1
+	(
+		ClimaxHastur
+		. iniciar(
+			cesado,
+			jornada_cese,
+			{"climax_hastur_pendiente": true},
+		)
+	)
+	ClimaxHastur.estado_actual(cesado, jornada_cese)["fase"] = ClimaxHastur.FASE_DERROTA
+	ClimaxHastur.aplicar_derrota(cesado, jornada_cese)
+	var cese := Acusacion.aceptar_cese(cesado, jornada_cese)
+	_comprobar(bool(cese["despido"]), "aceptar el cese sí termina el clímax")
+	_comprobar(int(jornada_cese["vuelta"]) == 2, "el cese abre una vuelta nueva")
 
 
 func _ruta_handoff_a_panel() -> void:

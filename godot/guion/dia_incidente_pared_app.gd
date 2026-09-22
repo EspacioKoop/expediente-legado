@@ -226,6 +226,10 @@ func _despedir(dia) -> void:
 	# única ruta que ya reinicia Prometeo + Jornada para una nueva vida laboral.
 	var vidas := maxi(1, int(dia.partida.estado.get("vida", 1)))
 	var castigo := Acusacion.perder_vida(dia.partida.estado, dia.jornada, vidas)
+	# Este incidente ya decidió un cese disciplinario: no ofrece el canje de
+	# último recurso propio del agotamiento normal de vidas.
+	if bool(castigo.get("despido_pendiente", false)):
+		castigo = Acusacion.aceptar_cese(dia.partida.estado, dia.jornada)
 	if not bool(castigo.get("despido", false)):
 		return
 	dia._guardar_o_avisar("")

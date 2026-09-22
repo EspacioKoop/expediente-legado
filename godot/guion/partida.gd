@@ -122,6 +122,8 @@ static func nueva() -> Dictionary:
 		"cartas_conocidas": [],
 		"coliseo_racha_mejor": 0,
 		"despido_mostrado": false,
+		# #1205: vida==0 puede esperar una decisión entre canje y cese.
+		"despido_pendiente": false,
 		"epilogo_avisado": false,
 		"final_politico_mostrado": false,
 		# #1103: progreso reanudable del clímax, aislado por raíz+vuelta.
@@ -305,6 +307,8 @@ static func validar(guardado) -> Array:
 				errores.append("pronosticos.%s" % error)
 	if guardado.has("vida") and not _entero_valido(guardado["vida"], 0, VIDA_MAXIMA):
 		errores.append("vida inválida")
+	if guardado.has("despido_pendiente") and typeof(guardado["despido_pendiente"]) != TYPE_BOOL:
+		errores.append("despido_pendiente no es booleano")
 	for clave in [
 		"pistas_descubiertas",
 		"cartas_conocidas",

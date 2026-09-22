@@ -302,64 +302,117 @@ static func _acusacion(comprobar: Callable) -> void:
 		[]
 	)
 
-	# Si la primera firma agota la última vida, Hierofante pertenece a la vuelta
-	# que acaba de terminar: su memoria queda, pero la nueva vuelta no lo posee.
+	# Si la primera firma agota la última vida, la vuelta NO termina todavía:
+	# Hierofante y Ermitaño siguen poseídos mientras se decide el último recurso.
 	var firma_limite := Partida.nueva()
 	firma_limite["vida"] = 1
 	var dia_limite := Jornada.nueva()
 	var cierre_limite := Acusacion.acusar(
 		firma_limite, dia_limite, caso, caso["sospechosos"][0], []
 	)
-	comprobar.call("la firma límite provoca reasignación", cierre_limite["despido"], true)
+	comprobar.call("la firma límite conserva vida cero", cierre_limite["vida"], 0)
+	comprobar.call("la firma límite deja cese pendiente", cierre_limite["despido_pendiente"], true)
+	comprobar.call("la firma límite todavía no despide", cierre_limite["despido"], false)
+	var hierofante_pendiente: Dictionary = firma_limite["tarot"].filter(es_hierofante)[0]
 	comprobar.call(
-		"el reset no anuncia Hierofante como poseído",
-		cierre_limite.get("cartas_desbloqueadas", []),
-		[]
+		"Hierofante sigue poseído antes de decidir",
+		hierofante_pendiente.get("recogida", false),
+		true
 	)
-	var hierofante_reset: Dictionary = firma_limite["tarot"].filter(es_hierofante)[0]
 	comprobar.call(
-		"la nueva vuelta no conserva Hierofante", hierofante_reset.get("recogida", false), false
-	)
-	comprobar.call(
-		"la memoria fantasma sí recuerda Hierofante",
+		"la memoria fantasma recuerda Hierofante",
 		firma_limite.get("cartas_conocidas", []).has("el-hierofante"),
 		true
 	)
+	var cese_limite := Acusacion.aceptar_cese(firma_limite, dia_limite)
+	comprobar.call("firmar el cese sí provoca reasignación", cese_limite["despido"], true)
+	var hierofante_reset: Dictionary = firma_limite["tarot"].filter(es_hierofante)[0]
+	comprobar.call(
+		"la nueva vuelta ya no posee Hierofante", hierofante_reset.get("recogida", false), false
+	)
 
-	# --- El despido ---
+	# --- La frontera de último recurso ---
 	var ultimo := Partida.nueva()
 	var dia4 := Jornada.nueva()
 	ultimo["vida"] = 1
 	dia4["dia"] = 9
 	dia4["gato"]["dias_sin_comer"] = 2
 	var caida := Acusacion.perder_vida(ultimo, dia4, 1)
-	comprobar.call("sin vidas, te reasignan", caida["despido"], true)
+	comprobar.call("sin vidas queda una decisión pendiente", caida["despido_pendiente"], true)
+	comprobar.call("sin aceptar el cese no hay despido", caida["despido"], false)
+	comprobar.call("la vida queda realmente en cero", ultimo["vida"], 0)
+	comprobar.call("la vuelta todavía es el día nueve", dia4["dia"], 9)
+	comprobar.call("el gato todavía no cruza ningún reset", dia4["gato"]["dias_sin_comer"], 2)
+
+	var es_ermitanio := func(carta): return carta.get("id", "") == "el-ermitanio"
+	var ermitanio_pendiente: Dictionary = ultimo["tarot"].filter(es_ermitanio)[0]
+	comprobar.call(
+		"llegar a cero concede Ermitaño", ermitanio_pendiente.get("recogida", false), true
+	)
+	comprobar.call(
+		"Ermitaño entra en memoria fantasma al perder la vida",
+		ultimo.get("cartas_conocidas", []).has("el-ermitanio"),
+		true
+	)
+	comprobar.call(
+		"la frontera todavía no sella evaluación",
+		ultimo.get("evaluaciones_desempeno", []).size(),
+		0
+	)
+	comprobar.call(
+		"la frontera todavía no concede La Muerte",
+		ultimo.get("cartas_conocidas", []).has("la-muerte"),
+		false
+	)
+
+	var cese := Acusacion.aceptar_cese(ultimo, dia4)
+	comprobar.call("aceptar cese termina la vida laboral", cese["despido"], true)
 	comprobar.call("y empieza otra vida laboral", dia4["dia"], 1)
 	comprobar.call(
 		"con las vidas de la dificultad", ultimo["vida"], Acusacion.DIFICULTADES["normal"]["vidas"]
 	)
 	comprobar.call("el gato sigue siendo tuyo", dia4["gato"]["dias_sin_comer"], 2)
-
-	var es_ermitanio := func(carta): return carta.get("id", "") == "el-ermitanio"
 	var ermitanio_reset: Dictionary = ultimo["tarot"].filter(es_ermitanio)[0]
-	comprobar.call(
-		"el despido conserva la memoria de Ermitaño",
-		ultimo.get("cartas_conocidas", []).has("el-ermitanio"),
-		true
-	)
 	comprobar.call(
 		"la nueva vuelta no posee Ermitaño", ermitanio_reset.get("recogida", false), false
 	)
 	var es_muerte := func(carta): return carta.get("id", "") == "la-muerte"
 	var muerte_reset: Dictionary = ultimo["tarot"].filter(es_muerte)[0]
 	comprobar.call(
-		"el despido registra La Muerte en memoria fantasma",
+		"el cese registra La Muerte en memoria fantasma",
 		ultimo.get("cartas_conocidas", []).has("la-muerte"),
 		true
 	)
 	comprobar.call("la nueva vuelta no posee La Muerte", muerte_reset.get("recogida", false), false)
 	comprobar.call(
-		"el despido no notifica una carta ya reseteada", caida.get("cartas_desbloqueadas", []), []
+		"el cese no notifica una carta ya reseteada", cese.get("cartas_desbloqueadas", []), []
+	)
+
+	# Canjear salva ESTA vuelta, gasta la carta concreta y Templanza nace solo
+	# de ese evento; no hay Muerte, evaluación ni cambio de día.
+	var rescatado := Partida.nueva()
+	var dia_rescatado := Jornada.nueva()
+	rescatado["vida"] = 1
+	dia_rescatado["dia"] = 7
+	Acusacion.perder_vida(rescatado, dia_rescatado, 1)
+	var canje := Acusacion.canjear_carta_por_vida(rescatado, "el-loco")
+	comprobar.call("el canje se ejecuta", canje["resultado"], "canje")
+	comprobar.call("el canje recupera exactamente una vida", rescatado["vida"], 1)
+	comprobar.call("el canje resuelve la frontera", Acusacion.despido_pendiente(rescatado), false)
+	comprobar.call("el canje conserva el mismo día", dia_rescatado["dia"], 7)
+	var es_loco := func(carta): return carta.get("id", "") == "el-loco"
+	var loco_gastado: Dictionary = rescatado["tarot"].filter(es_loco)[0]
+	comprobar.call("la carta canjeada queda gastada", loco_gastado.get("gastada", false), true)
+	var es_templanza := func(carta): return carta.get("id", "") == "la-templanza"
+	var templanza: Dictionary = rescatado["tarot"].filter(es_templanza)[0]
+	comprobar.call("el canje concede Templanza", templanza.get("recogida", false), true)
+	comprobar.call(
+		"el canje no concede La Muerte",
+		rescatado.get("cartas_conocidas", []).has("la-muerte"),
+		false
+	)
+	comprobar.call(
+		"el canje no sella evaluación", rescatado.get("evaluaciones_desempeno", []).size(), 0
 	)
 
 	# Una pérdida no fatal sí concede y propaga El Ermitaño en ESTA vuelta.

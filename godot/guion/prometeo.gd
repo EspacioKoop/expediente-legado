@@ -466,6 +466,7 @@ static func reiniciar_vuelta(estado: Dictionary, vida_maxima: int) -> Dictionary
 	estado["final_politico_mostrado"] = false
 	estado["final_verdadero_mostrado"] = false
 	estado["perdio_vida_en_esta_vuelta"] = false
+	estado["despido_pendiente"] = false
 	estado[CLAVE_ELECCIONES_IDEOLOGICAS] = []
 	estado[CLAVE_EXPOSICION_IDEOLOGICA] = []
 	estado[CLAVE_LECTURAS_SOCIALES] = []

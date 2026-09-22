@@ -609,3 +609,16 @@ JUICIO_JUNGIANO_MOMENTUM,MOMENTUM
 JUICIO_JUNGIANO_FINISHER,FINISHER
 JUICIO_JUNGIANO_SUPER_FINISHER,SUPER FINISHER
 JUICIO_JUNGIANO_FINISHER_TOOLTIP,Disponible al alcanzar el umbral de momentum
+ULTIMO_RECURSO_AVISO,"Su última vida laboral se ha agotado. El cese todavía no está firmado."
+ULTIMO_RECURSO_CANJEAR,Canjear por 1 vida
+ULTIMO_RECURSO_CARTA,%s — %s
+ULTIMO_RECURSO_CESE,Firmar el cese
+ULTIMO_RECURSO_ESTADO_GASTADA,Gastada
+ULTIMO_RECURSO_ESTADO_RECOGIDA,Recogida
+ULTIMO_RECURSO_ESTADO_SELLADA,Sellada
+ULTIMO_RECURSO_EXPLICACION,"Puede canjear una carta recogida y no gastada para recuperar exactamente una vida, o aceptar el cese y comenzar otra vida laboral."
+ULTIMO_RECURSO_TAROT_AYUDA,"El canje es irreversible: la carta queda gastada y esta vuelta ya no puede cumplir El Mundo."
+ULTIMO_RECURSO_TAROT_TITULO,Tarot — último recurso
+ULTIMO_RECURSO_TITULO,CESE PENDIENTE
+ULTIMO_RECURSO_VER_TAROT,Ver mi tarot
+ULTIMO_RECURSO_VOLVER,Volver al aviso
