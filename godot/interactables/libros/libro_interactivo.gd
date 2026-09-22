@@ -27,31 +27,11 @@ func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> vo
 
 func _interactuar() -> void:
 	var gestor = GestorLiteratura
-	if gestor.conocer_obra(obra_id):
+	var fuente := "interactable:libro:%s" % obra_id
+	if gestor.conocer_obra(obra_id, fuente, "lectura_interactiva"):
 		label.text = "Has descubierto: %s" % obra_id
-		var efecto := _obtener_efecto_obra(obra_id)
-		if efecto.has("bonus_insight"):
-			GestorArquetipos.ganar_insight(int(efecto.get("bonus_insight", 0)))
 		print("Interactuado con obra %s" % obra_id)
 	else:
 		label.text = "Ya conoces esta obra"
 	await get_tree().create_timer(2.0).timeout
 	label.text = "E para leer"
-
-
-func _obtener_efecto_obra(id_obra: String) -> Dictionary:
-	var archivo := FileAccess.open("res://datos/literatura/obras.json", FileAccess.READ)
-	if archivo == null:
-		return {}
-	var data = JSON.parse_string(archivo.get_as_text())
-	archivo.close()
-	if not (data is Dictionary):
-		return {}
-	var obras = data.get("obras", [])
-	if not (obras is Array):
-		return {}
-	for obra in obras:
-		if obra is Dictionary and String(obra.get("id", "")) == id_obra:
-			var efecto = obra.get("efecto", {})
-			return efecto if efecto is Dictionary else {}
-	return {}
