@@ -27,6 +27,8 @@ const DIFICULTADES := {
 	"dificil": {"vidas": 2, "umbral": 0.75},
 }
 
+const CLAVE_DESPIDO_PENDIENTE := "despido_pendiente"
+
 
 static func ajustes(estado: Dictionary) -> Dictionary:
 	return DIFICULTADES.get(estado.get("dificultad", "normal"), DIFICULTADES["normal"])
@@ -89,11 +91,6 @@ static func acusar(
 		castigo = perder_vida(estado, jornada, 1)
 		for carta_id in castigo.get("cartas_desbloqueadas", []):
 			cartas_desbloqueadas.append(carta_id)
-		# Si esta firma agotó la última vida, reiniciar_vuelta() ya retiró la
-		# posesión per-run. La memoria fantasma permanece, pero la UI no debe
-		# anunciar como poseída una carta que pertenece a la vuelta terminada.
-		if castigo.get("despido", false):
-			cartas_desbloqueadas.clear()
 
 	return {
 		"resultado": "cerrado",
@@ -103,6 +100,7 @@ static func acusar(
 		"evidencia": [encontradas, pistas.size()],
 		"vida": estado["vida"],
 		"despido": castigo.get("despido", false),
+		"despido_pendiente": castigo.get("despido_pendiente", false),
 		"cartas_desbloqueadas": cartas_desbloqueadas,
 		# Un sospechoso con réplicas escritas no se deja acusar sin más: hay
 		# careo. El duelo NO cambia el veredicto —ya está firmado— pero perderlo
@@ -111,15 +109,22 @@ static func acusar(
 	}
 
 
-## Quita vidas y, si se acaban, te reasignan.
+## Quita vidas y conserva la frontera de último recurso al llegar a cero.
 ##
-## El despido reinicia la capa de Prometeo (#46) y la vida laboral, pero **no**
-## el archivo: las pistas que descubriste y los expedientes que firmaste siguen
-## ahí, porque son del sistema y no tuyos. Otra persona en el mismo puesto
-## hereda tu trabajo, incluidos tus errores.
+## Llegar a cero es una pérdida real de vida (y por tanto puede conceder
+## El Ermitaño), pero NO es todavía un despido. El estado queda persistible
+## con una única decisión pendiente hasta que el jugador canjee o firme el cese.
 static func perder_vida(estado: Dictionary, jornada: Dictionary, cuantas: int) -> Dictionary:
+	if despido_pendiente(estado):
+		return {
+			"despido": false,
+			"despido_pendiente": true,
+			"vida": 0,
+			"cartas_desbloqueadas": [],
+		}
+
 	var vida_anterior := int(estado.get("vida", 3))
-	estado["vida"] = maxi(0, vida_anterior - cuantas)
+	estado["vida"] = maxi(0, vida_anterior - maxi(0, cuantas))
 	var cartas_desbloqueadas := []
 	if estado["vida"] < vida_anterior:
 		# #1029/#46: El Ermitaño se re-gana por perder vida en ESTA vuelta.
@@ -127,26 +132,128 @@ static func perder_vida(estado: Dictionary, jornada: Dictionary, cuantas: int) -
 		estado["perdio_vida_en_esta_vuelta"] = true
 		if Prometeo.desbloquear_carta_en_estado(estado, "el-ermitanio"):
 			cartas_desbloqueadas.append("el-ermitanio")
+
 	if estado["vida"] > 0:
 		return {
 			"despido": false,
+			"despido_pendiente": false,
 			"vida": estado["vida"],
 			"cartas_desbloqueadas": cartas_desbloqueadas,
 		}
 
-	# #1029/#46: La Muerte pertenece al evento de despido de ESTA vuelta.
-	# Se adquiere antes del reset para que la memoria fantasma sobreviva; la
-	# posesión se limpia inmediatamente al comenzar la nueva vida laboral.
-	Prometeo.desbloquear_carta_en_estado(estado, "la-muerte")
+	estado[CLAVE_DESPIDO_PENDIENTE] = true
+	return {
+		"despido": false,
+		"despido_pendiente": true,
+		"vida": 0,
+		"cartas_desbloqueadas": cartas_desbloqueadas,
+	}
 
-	# Hay que sellar ANTES del reset: Jornada contiene todavía el mapa, dinero y gato
-	# de la vida que acaba. La operación es idempotente si esta ruta se reintenta.
+
+## La frontera pendiente es estado de partida, no estado de una pantalla. Así
+## cerrar y volver a abrir el juego conserva exactamente la misma decisión.
+static func despido_pendiente(estado: Dictionary) -> bool:
+	return (
+		bool(estado.get(CLAVE_DESPIDO_PENDIENTE, false))
+		and int(estado.get("vida", 0)) == 0
+	)
+
+
+## Ids de cartas que pueden salvar esta vuelta. Es una consulta pura para que
+## cualquier UI pinte exactamente la misma elegibilidad que valida el canje.
+static func cartas_canjeables(estado: Dictionary) -> Array:
+	if not despido_pendiente(estado):
+		return []
+	var ids := []
+	var tarot_bruto = estado.get("tarot", [])
+	if typeof(tarot_bruto) != TYPE_ARRAY:
+		return ids
+	for bruto in tarot_bruto:
+		if typeof(bruto) != TYPE_DICTIONARY:
+			continue
+		var carta: Dictionary = bruto
+		if bool(carta.get("recogida", false)) and not bool(carta.get("gastada", false)):
+			ids.append(String(carta.get("id", "")))
+	return ids
+
+
+## Canje real de último recurso. No deriva Templanza de una carta ya gastada al
+## cargar: solo este evento explícito puede concederla.
+static func canjear_carta_por_vida(estado: Dictionary, carta_id: String) -> Dictionary:
+	if not despido_pendiente(estado) or carta_id.is_empty():
+		return {
+			"resultado": "rechazado",
+			"despido": false,
+			"despido_pendiente": despido_pendiente(estado),
+			"vida": int(estado.get("vida", 0)),
+			"cartas_desbloqueadas": [],
+		}
+
+	var elegida: Dictionary = {}
+	var tarot_bruto = estado.get("tarot", [])
+	if typeof(tarot_bruto) == TYPE_ARRAY:
+		for bruto in tarot_bruto:
+			if typeof(bruto) != TYPE_DICTIONARY:
+				continue
+			var carta: Dictionary = bruto
+			if String(carta.get("id", "")) == carta_id:
+				elegida = carta
+				break
+
+	if (
+		elegida.is_empty()
+		or not bool(elegida.get("recogida", false))
+		or bool(elegida.get("gastada", false))
+	):
+		return {
+			"resultado": "rechazado",
+			"despido": false,
+			"despido_pendiente": true,
+			"vida": 0,
+			"cartas_desbloqueadas": [],
+		}
+
+	elegida["gastada"] = true
+	estado["vida"] = 1
+	estado[CLAVE_DESPIDO_PENDIENTE] = false
+	var cartas_desbloqueadas := []
+	if Prometeo.desbloquear_carta_en_estado(estado, "la-templanza"):
+		cartas_desbloqueadas.append("la-templanza")
+	return {
+		"resultado": "canje",
+		"despido": false,
+		"despido_pendiente": false,
+		"vida": 1,
+		"carta_gastada": carta_id,
+		"cartas_desbloqueadas": cartas_desbloqueadas,
+	}
+
+
+## Aceptar el cese es la única operación que convierte el cero en despido.
+## La Muerte, la evaluación y los dos resets siguen siendo una sola transacción
+## de dominio, pero ahora ocurren DESPUÉS de la decisión explícita.
+static func aceptar_cese(estado: Dictionary, jornada: Dictionary) -> Dictionary:
+	if not despido_pendiente(estado):
+		return {
+			"resultado": "rechazado",
+			"despido": false,
+			"despido_pendiente": false,
+			"vida": int(estado.get("vida", 0)),
+			"cartas_desbloqueadas": [],
+		}
+
+	Prometeo.desbloquear_carta_en_estado(estado, "la-muerte")
 	EvaluacionDesempeno.sellar(estado, "reasignacion", jornada)
+	estado[CLAVE_DESPIDO_PENDIENTE] = false
 	Prometeo.reiniciar_vuelta(estado, ajustes(estado)["vidas"])
 	Jornada.reiniciar_vuelta(jornada)
-	# La memoria fantasma conserva el evento, pero la nueva vuelta ya no posee
-	# El Ermitaño y por tanto no debe recibir una notificación de la vuelta anterior.
-	return {"despido": true, "vida": estado["vida"], "cartas_desbloqueadas": []}
+	return {
+		"resultado": "cese",
+		"despido": true,
+		"despido_pendiente": false,
+		"vida": estado["vida"],
+		"cartas_desbloqueadas": [],
+	}
 
 
 ## Cierra el careo. Perder cuesta una vida; el veredicto ya está firmado y no
