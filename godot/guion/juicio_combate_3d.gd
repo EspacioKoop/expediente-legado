@@ -111,6 +111,7 @@ static func dano_externalizado(dano_base: int, eje_activo: String) -> int:
 static func determinacion_retorno(ritual: Dictionary, retornos_usados: int) -> int:
 	return REGLAS.determinacion_retorno(ritual, retornos_usados)
 
+
 func configurar(
 	acusado: Dictionary, bono_documental: int, reducir_movimiento: bool, raiz: int = 0
 ) -> void:
@@ -524,14 +525,17 @@ func _estado_partida_anfitrion() -> Dictionary:
 
 
 func _montar_arena() -> void:
-	var nodos := ARENA.montar(
-		self,
-		_acusado,
-		_arcano,
-		_mito_id,
-		_ritual,
-		RADIO_ARENA,
-		_radio_arena,
+	var nodos := (
+		ARENA
+		. montar(
+			self,
+			_acusado,
+			_arcano,
+			_mito_id,
+			_ritual,
+			RADIO_ARENA,
+			_radio_arena,
+		)
 	)
 	_jugador = nodos["jugador"]
 	_rival = nodos["rival"]
@@ -541,19 +545,23 @@ func _montar_arena() -> void:
 	_camara = nodos["camara"]
 	_actualizar_camara()
 
+
 func _montar_hud() -> void:
-	var nodos := HUD.montar(
-		self,
-		tr(String(_acusado.get("nombre", ""))),
-		determinacion_rival(_bono_documental),
-		not _ritual.is_empty() or _hay_cargas_doctrina(),
-		{
-			"ataque_inminente": tr("VENTANILLA_ATAQUE_INMINENTE"),
-			"momentum": tr("JUICIO_JUNGIANO_MOMENTUM"),
-			"finisher": tr("JUICIO_JUNGIANO_FINISHER"),
-			"finisher_tooltip": tr("JUICIO_JUNGIANO_FINISHER_TOOLTIP"),
-		},
-		Callable(self, "_ejecutar_finisher_jungiano"),
+	var nodos := (
+		HUD
+		. montar(
+			self,
+			tr(String(_acusado.get("nombre", ""))),
+			determinacion_rival(_bono_documental),
+			not _ritual.is_empty() or _hay_cargas_doctrina(),
+			{
+				"ataque_inminente": tr("VENTANILLA_ATAQUE_INMINENTE"),
+				"momentum": tr("JUICIO_JUNGIANO_MOMENTUM"),
+				"finisher": tr("JUICIO_JUNGIANO_FINISHER"),
+				"finisher_tooltip": tr("JUICIO_JUNGIANO_FINISHER_TOOLTIP"),
+			},
+			Callable(self, "_ejecutar_finisher_jungiano"),
+		)
 	)
 	_barra_jugador = nodos["barra_jugador"]
 	_barra_rival = nodos["barra_rival"]
@@ -564,6 +572,7 @@ func _montar_hud() -> void:
 	_boton_finisher = nodos["boton_finisher"]
 	_etiqueta_jungiana = nodos["etiqueta_jungiana"]
 	_pintar_doctrinas()
+
 
 func _actualizar_hud() -> void:
 	if _barra_jugador == null or _barra_rival == null:
@@ -630,6 +639,7 @@ func _actualizar_camara() -> void:
 		reduccion_movimiento,
 		_azar,
 	)
+
 
 func _gestor_jungiano(nombre: String) -> Node:
 	return get_node_or_null("/root/" + nombre)
@@ -792,8 +802,10 @@ func _mostrar_aviso_jungiano(texto: String, duracion: float) -> void:
 func _particulas_jungianas(radio: float, es_super: bool) -> void:
 	FEEDBACK.particulas_jungianas(self, _rival, radio, es_super)
 
+
 func _reaccion(figura: Node3D, desplazamiento: float) -> void:
 	FEEDBACK.reaccion(self, figura, desplazamiento, reduccion_movimiento)
+
 
 func _material(color: Color, emision: bool = false) -> StandardMaterial3D:
 	return FEEDBACK.material(color, emision)
