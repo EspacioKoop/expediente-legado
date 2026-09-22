@@ -81,7 +81,9 @@ func _probar_validacion() -> void:
 	_comprobar(not Editor.validar(fecha_rota).is_empty(), "rechaza fechas fuera de rango")
 	var id_roto := _base()
 	id_roto["id"] = "../../casos"
-	_comprobar(not Editor.validar(id_roto).is_empty(), "rechaza ids capaces de escapar del directorio")
+	_comprobar(
+		not Editor.validar(id_roto).is_empty(), "rechaza ids capaces de escapar del directorio"
+	)
 	var vacio := _base()
 	vacio["contenido_bbcode"] = "[b][/b]"
 	_comprobar(not Editor.validar(vacio).is_empty(), "rechaza un cuerpo vacío aunque tenga formato")
