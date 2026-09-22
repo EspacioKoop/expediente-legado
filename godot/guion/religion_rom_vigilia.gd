@@ -43,14 +43,19 @@ func _process(_delta: float) -> void:
 
 	var id_rom := String(_contrato.get("id_rom", ""))
 	var dia := int(_jornada.get("dia", 0))
+	var vuelta := int(_jornada.get("vuelta", 0))
 	var evento := ReligionEventos.crear_evento(
-		"exposicion:rom:%s:jornada:%d" % [id_rom, dia],
+		"exposicion:rom:%s:vuelta:%d:jornada:%d" % [id_rom, vuelta, dia],
 		ReligionEventos.CANAL_EXPOSICION,
 		"rom:%s" % id_rom,
 		String(_contrato.get("contexto", "")),
 		dia,
 		String(_contrato.get("tradicion", "")),
-		_contrato.get("etiquetas", [])
+		_contrato.get("etiquetas", []),
+		[],
+		false,
+		[],
+		{"vuelta": vuelta, "procedencia": "rom:handshake:c100"}
 	)
 	_registrada = ReligionEventos.registrar(_registro, evento)
 	if _registrada:

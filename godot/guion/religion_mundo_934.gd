@@ -68,7 +68,9 @@ static func actividad_disponible(id_actividad: String, dia: int) -> bool:
 	return false
 
 
-static func registrar_exposicion(registro: Dictionary, id_superficie: String, dia: int) -> bool:
+static func registrar_exposicion(
+	registro: Dictionary, id_superficie: String, dia: int, vuelta: int = 0
+) -> bool:
 	var superficie := _superficie(id_superficie)
 	if superficie.is_empty():
 		return false
@@ -76,18 +78,24 @@ static func registrar_exposicion(registro: Dictionary, id_superficie: String, di
 	for actividad in eventos_calendario(dia):
 		etiquetas.append("fuente_calendario:%s" % String(actividad["fuente"]))
 	var evento := ReligionEventos.crear_evento(
-		"exposicion:%s:jornada:%d" % [id_superficie, dia],
+		"exposicion:%s:vuelta:%d:jornada:%d" % [id_superficie, vuelta, dia],
 		ReligionEventos.CANAL_EXPOSICION,
 		String(superficie["fuente"]),
 		String(superficie["espacio"]),
 		dia,
 		"",
-		etiquetas
+		etiquetas,
+		[],
+		false,
+		[],
+		{"vuelta": vuelta, "procedencia": "mundo:interaccion:examinar"}
 	)
 	return ReligionEventos.registrar(registro, evento)
 
 
-static func registrar_practica(registro: Dictionary, id_practica: String, dia: int) -> bool:
+static func registrar_practica(
+	registro: Dictionary, id_practica: String, dia: int, vuelta: int = 0
+) -> bool:
 	var practica: Dictionary = PRACTICAS.get(id_practica, {})
 	if practica.is_empty():
 		return false
@@ -103,13 +111,17 @@ static func registrar_practica(registro: Dictionary, id_practica: String, dia: i
 	if not fuente_calendario.is_empty():
 		etiquetas.append("fuente_calendario:%s" % fuente_calendario)
 	var evento := ReligionEventos.crear_evento(
-		"practica:%s:jornada:%d" % [id_practica, dia],
+		"practica:%s:vuelta:%d:jornada:%d" % [id_practica, vuelta, dia],
 		ReligionEventos.CANAL_PRACTICA,
 		String(practica["fuente"]),
 		String(practica["contexto"]),
 		dia,
 		"",
-		etiquetas
+		etiquetas,
+		[],
+		false,
+		[],
+		{"vuelta": vuelta, "procedencia": "mundo:interaccion:participar"}
 	)
 	return ReligionEventos.registrar(registro, evento)
 
