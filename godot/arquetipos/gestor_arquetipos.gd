@@ -58,3 +58,19 @@ func obtener_efectos_activos() -> Array:
 		if arquetipo != null and bool(arquetipo.desbloqueado):
 			efectos.append(arquetipo.obtener_efecto())
 	return efectos
+
+
+func efectos_combinados() -> Dictionary:
+	var combinados: Dictionary = {}
+	for efecto in obtener_efectos_activos():
+		if not (efecto is Dictionary):
+			continue
+		for clave in efecto:
+			var valor = efecto[clave]
+			if typeof(valor) == TYPE_INT or typeof(valor) == TYPE_FLOAT:
+				combinados[clave] = float(combinados.get(clave, 0.0)) + float(valor)
+			elif typeof(valor) == TYPE_BOOL:
+				combinados[clave] = bool(combinados.get(clave, false)) or bool(valor)
+			elif not combinados.has(clave):
+				combinados[clave] = valor
+	return combinados
