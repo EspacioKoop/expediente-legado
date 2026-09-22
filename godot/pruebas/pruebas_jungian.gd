@@ -4,7 +4,9 @@ extends RefCounted
 
 static func todo(comprobar: Callable) -> void:
 	var temporales: Array[Node] = []
-	var arquetipos := _gestor("GestorArquetipos", "res://arquetipos/gestor_arquetipos.gd", temporales)
+	var arquetipos := _gestor(
+		"GestorArquetipos", "res://arquetipos/gestor_arquetipos.gd", temporales
+	)
 	var momentum := _gestor("GestorMomentum", "res://combate/momentum.gd", temporales)
 	var combos := _gestor("GestorCombos", "res://combate/combos.gd", temporales)
 	comprobar.call("gestor de arquetipos disponible", arquetipos != null, true)
