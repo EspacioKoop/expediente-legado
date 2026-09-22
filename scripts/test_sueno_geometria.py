@@ -38,6 +38,8 @@ class SuenoGeometriaTest(unittest.TestCase):
         self.assertIn("malla_sala(contorno, altura, tabiques)", self.codigo)
 
     def test_tabiques_son_planos_abiertos_y_no_cajas(self):
+        self.assertIn("static func malla_tabiques", self.codigo)
+        self.assertIn("_agregar_tabiques(st, tabiques)", self.codigo)
         self.assertIn('tabique.get("desde"', self.codigo)
         self.assertIn('tabique.get("hasta"', self.codigo)
         self.assertIn('tabique.get("altura_desde"', self.codigo)
