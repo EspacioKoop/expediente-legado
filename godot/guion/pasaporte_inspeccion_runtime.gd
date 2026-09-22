@@ -17,11 +17,11 @@ func _process(_delta: float) -> void:
 	var dia := get_parent()
 	if dia == null:
 		return
-	var mundo = dia.get("_mundo")
-	if not mundo is Node3D:
+	var mundo := dia.get("_mundo") as Node3D
+	if mundo == null:
 		return
 
-	var mundo_id := mundo.get_instance_id()
+	var mundo_id: int = mundo.get_instance_id()
 	if mundo_id != _mundo_id:
 		_mundo_id = mundo_id
 		_montados.clear()
