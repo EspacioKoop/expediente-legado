@@ -283,6 +283,7 @@ func _asegurar_panel() -> void:
 	centro.add_child(_panel)
 	_panel.connect("colocar_solicitado", _confirmar_colocacion)
 	_panel.connect("eliminar_solicitado", _confirmar_eliminacion)
+	_panel.connect("eliminar_zona_solicitado", _confirmar_eliminacion_zona)
 	_panel.connect("cancelar_solicitado", _cerrar_panel)
 
 
@@ -328,6 +329,13 @@ func _confirmar_eliminacion() -> void:
 		_cerrar_panel()
 	else:
 		_panel.call("mostrar_error", "La marca ya no está disponible.")
+
+
+func _confirmar_eliminacion_zona() -> void:
+	if eliminar_zona_actual() > 0:
+		_cerrar_panel()
+	else:
+		_panel.call("mostrar_error", "Esta zona ya no tiene marcas.")
 
 
 func _mensaje_error(motivo: String) -> String:
