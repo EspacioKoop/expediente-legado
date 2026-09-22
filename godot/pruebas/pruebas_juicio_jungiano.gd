@@ -74,7 +74,12 @@ static func todo(comprobar: Callable) -> void:
 	var curacion := JuicioCombateJungiano.aplicar_curacion_arquetipo(
 		5, 0.75, {"curacion": 0.3}, 8
 	)
-	_caso(comprobar, "jungiano: curación acumulada suma un punto", curacion["determinacion_jugador"], 6)
+	_caso(
+		comprobar,
+		"jungiano: curación acumulada suma un punto",
+		curacion["determinacion_jugador"],
+		6,
+	)
 	_caso(
 		comprobar,
 		"jungiano: curación conserva fracción restante",
