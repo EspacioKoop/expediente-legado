@@ -35,7 +35,8 @@ class EditorExpedientes953Test(unittest.TestCase):
         self.assertNotIn("res://datos/casos.json", editor)
         self.assertNotIn("res://datos/textos.csv", editor)
         self.assertIn('"formato": FORMATO', editor)
-        self.assertIn('"editor_meta": {', editor)
+        self.assertIn('"editor_meta":', editor)
+        self.assertIn('"contenido_bbcode":', editor)
 
 
 if __name__ == "__main__":
