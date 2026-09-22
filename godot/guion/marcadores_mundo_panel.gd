@@ -5,6 +5,8 @@
 ## con Interactuar/Cancelar, por lo que teclado y mando mantienen el remapeo.
 extends PanelContainer
 
+const RUTA_TEXTOS := "res://datos/marcadores_mundo_textos.json"
+
 signal colocar_solicitado(tipo: String, color: String, texto: String)
 signal eliminar_solicitado
 signal eliminar_zona_solicitado
@@ -19,13 +21,31 @@ var _eliminar: Button
 var _limpiar_zona: Button
 var _volver: Button
 var _confirmar_limpieza: ConfirmationDialog
+var _textos: Dictionary = {}
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_textos = _cargar_textos()
 	theme = EstiloSiga.tema()
 	custom_minimum_size = Vector2(520, 330)
 	_montar()
+
+
+func _cargar_textos() -> Dictionary:
+	if not FileAccess.file_exists(RUTA_TEXTOS):
+		return {}
+	var archivo := FileAccess.open(RUTA_TEXTOS, FileAccess.READ)
+	if archivo == null:
+		return {}
+	var datos = JSON.parse_string(archivo.get_as_text())
+	if typeof(datos) != TYPE_DICTIONARY:
+		return {}
+	return datos
+
+
+func _cadena(clave: String) -> String:
+	return String(_textos.get(clave, clave))
 
 
 func abrir(puede_colocar: bool, puede_eliminar: bool, cantidad: int) -> void:
@@ -34,13 +54,13 @@ func abrir(puede_colocar: bool, puede_eliminar: bool, cantidad: int) -> void:
 	_eliminar.visible = puede_eliminar
 	_limpiar_zona.visible = cantidad > 0
 	if not puede_colocar:
-		_estado.text = "Apunta a una superficie sólida para colocar una marca."
+		_estado.text = _cadena("superficie_requerida")
 	elif cantidad >= MarcadoresMundo.LIMITE_POR_ZONA:
 		_estado.text = (
-			"Límite de %d marcas alcanzado en esta zona." % MarcadoresMundo.LIMITE_POR_ZONA
+			_cadena("limite_zona") % MarcadoresMundo.LIMITE_POR_ZONA
 		)
 	else:
-		_estado.text = "Marcas en la zona: %d/%d" % [cantidad, MarcadoresMundo.LIMITE_POR_ZONA]
+		_estado.text = _cadena("contador_zona") % [cantidad, MarcadoresMundo.LIMITE_POR_ZONA]
 	_tipo.grab_focus.call_deferred()
 
 
@@ -66,11 +86,11 @@ func _montar() -> void:
 	margen.add_child(caja)
 
 	var titulo := Label.new()
-	titulo.text = "Marcadores"
+	titulo.text = _cadena("titulo")
 	caja.add_child(titulo)
 
 	var ayuda := Label.new()
-	ayuda.text = "Selecciona una marca discreta para la superficie que estabas apuntando."
+	ayuda.text = _cadena("ayuda")
 	ayuda.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	caja.add_child(ayuda)
 
@@ -80,30 +100,30 @@ func _montar() -> void:
 	formulario.add_theme_constant_override("v_separation", 8)
 	caja.add_child(formulario)
 
-	_anadir_etiqueta(formulario, "Tipo")
+	_anadir_etiqueta(formulario, _cadena("tipo"))
 	_tipo = OptionButton.new()
-	_anadir_opcion(_tipo, "Tiza", MarcadoresMundo.TIPO_TIZA)
-	_anadir_opcion(_tipo, "Cinta", MarcadoresMundo.TIPO_CINTA)
-	_anadir_opcion(_tipo, "Nota", MarcadoresMundo.TIPO_NOTA)
-	_anadir_opcion(_tipo, "Carbón", MarcadoresMundo.TIPO_CARBON)
-	_anadir_opcion(_tipo, "Objeto", MarcadoresMundo.TIPO_OBJETO)
+	_anadir_opcion(_tipo, _cadena("tipo_tiza"), MarcadoresMundo.TIPO_TIZA)
+	_anadir_opcion(_tipo, _cadena("tipo_cinta"), MarcadoresMundo.TIPO_CINTA)
+	_anadir_opcion(_tipo, _cadena("tipo_nota"), MarcadoresMundo.TIPO_NOTA)
+	_anadir_opcion(_tipo, _cadena("tipo_carbon"), MarcadoresMundo.TIPO_CARBON)
+	_anadir_opcion(_tipo, _cadena("tipo_objeto"), MarcadoresMundo.TIPO_OBJETO)
 	_tipo.item_selected.connect(_al_tipo_cambiado)
 	formulario.add_child(_tipo)
 
-	_anadir_etiqueta(formulario, "Color")
+	_anadir_etiqueta(formulario, _cadena("color"))
 	_color = OptionButton.new()
-	_anadir_opcion(_color, "Blanco", MarcadoresMundo.COLOR_BLANCO)
-	_anadir_opcion(_color, "Amarillo", MarcadoresMundo.COLOR_AMARILLO)
-	_anadir_opcion(_color, "Rojo", MarcadoresMundo.COLOR_ROJO)
-	_anadir_opcion(_color, "Azul", MarcadoresMundo.COLOR_AZUL)
-	_anadir_opcion(_color, "Verde", MarcadoresMundo.COLOR_VERDE)
+	_anadir_opcion(_color, _cadena("color_blanco"), MarcadoresMundo.COLOR_BLANCO)
+	_anadir_opcion(_color, _cadena("color_amarillo"), MarcadoresMundo.COLOR_AMARILLO)
+	_anadir_opcion(_color, _cadena("color_rojo"), MarcadoresMundo.COLOR_ROJO)
+	_anadir_opcion(_color, _cadena("color_azul"), MarcadoresMundo.COLOR_AZUL)
+	_anadir_opcion(_color, _cadena("color_verde"), MarcadoresMundo.COLOR_VERDE)
 	formulario.add_child(_color)
 
-	_anadir_etiqueta(formulario, "Texto")
+	_anadir_etiqueta(formulario, _cadena("texto"))
 	_texto = LineEdit.new()
 	_texto.max_length = MarcadoresMundo.MAX_TEXTO
 	_texto.placeholder_text = (
-		"Solo cinta o nota · máximo %d caracteres" % MarcadoresMundo.MAX_TEXTO
+		_cadena("texto_placeholder") % MarcadoresMundo.MAX_TEXTO
 	)
 	formulario.add_child(_texto)
 
@@ -117,29 +137,29 @@ func _montar() -> void:
 	caja.add_child(botones)
 
 	_eliminar = Button.new()
-	_eliminar.text = "Eliminar apuntada"
+	_eliminar.text = _cadena("eliminar_apuntada")
 	_eliminar.pressed.connect(func(): eliminar_solicitado.emit())
 	botones.add_child(_eliminar)
 
 	_limpiar_zona = Button.new()
-	_limpiar_zona.text = "Limpiar zona"
+	_limpiar_zona.text = _cadena("limpiar_zona")
 	_limpiar_zona.pressed.connect(_pedir_limpiar_zona)
 	botones.add_child(_limpiar_zona)
 
 	_volver = Button.new()
-	_volver.text = "Volver"
+	_volver.text = _cadena("volver")
 	_volver.pressed.connect(func(): cancelar_solicitado.emit())
 	botones.add_child(_volver)
 
 	_colocar = Button.new()
-	_colocar.text = "Colocar"
+	_colocar.text = _cadena("colocar")
 	_colocar.pressed.connect(_emitir_colocacion)
 	botones.add_child(_colocar)
 
 	_confirmar_limpieza = ConfirmationDialog.new()
-	_confirmar_limpieza.title = "Limpiar marcadores"
-	_confirmar_limpieza.dialog_text = "¿Eliminar todas las marcas de esta zona?"
-	_confirmar_limpieza.ok_button_text = "Eliminar todas"
+	_confirmar_limpieza.title = _cadena("limpiar_titulo")
+	_confirmar_limpieza.dialog_text = _cadena("limpiar_pregunta")
+	_confirmar_limpieza.ok_button_text = _cadena("limpiar_confirmar")
 	_confirmar_limpieza.confirmed.connect(func(): eliminar_zona_solicitado.emit())
 	add_child(_confirmar_limpieza)
 
