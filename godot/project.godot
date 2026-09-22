@@ -12,12 +12,11 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [autoload]
 
+GestorEventosLiterarios="*res://eventos/literarios/gestor_eventos_literarios.gd"
 GestorLiteratura="*res://literatura/gestor_literatura.gd"
 GestorArquetipos="*res://arquetipos/gestor_arquetipos.gd"
 GestorMomentum="*res://combate/momentum.gd"
 GestorCombos="*res://combate/combos.gd"
-GestorEventosLiterarios="*res://eventos/literarios/gestor_eventos_literarios.gd"
-
 MezclaAudio="*res://guion/mezcla_audio.gd"
 MenuGlobal="*res://guion/menu_global.gd"
 MenuSalidaInicio="*res://guion/menu_salida_inicio.gd"

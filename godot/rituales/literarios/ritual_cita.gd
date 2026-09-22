@@ -1,8 +1,8 @@
 extends Control
 
-@onready var selector: OptionButton = $Panel/VBoxContainer/ObraSelector
-@onready var citar_btn: Button = $Panel/VBoxContainer/CitarButton
-@onready var close_btn: Button = $Panel/VBoxContainer/CloseButton
+@onready var selector = $Panel/VBoxContainer/ObraSelector
+@onready var citar_btn = $Panel/VBoxContainer/CitarButton
+@onready var close_btn = $Panel/VBoxContainer/CloseButton
 
 
 func _ready() -> void:
@@ -14,18 +14,27 @@ func _ready() -> void:
 
 func _poblar_selector() -> void:
 	selector.clear()
-	var literatura := _gestor("GestorLiteratura")
-	if literatura == null:
+	var archivo := FileAccess.open("res://datos/literatura/obras.json", FileAccess.READ)
+	if archivo == null:
 		return
-	for obra_id in literatura.get("obras_conocidas"):
-		var obra = literatura.call("obtener_obra", String(obra_id))
-		var titulo := String(obra.get("titulo", obra_id))
-		selector.add_item(titulo)
-		selector.set_item_metadata(selector.item_count - 1, String(obra_id))
+	var data = JSON.parse_string(archivo.get_as_text())
+	archivo.close()
+	if not (data is Dictionary):
+		return
+	var obras = data.get("obras", [])
+	if not (obras is Array):
+		return
+
+	for obra_id in GestorLiteratura.obras_conocidas:
+		for obra in obras:
+			if obra is Dictionary and String(obra.get("id", "")) == String(obra_id):
+				selector.add_item(String(obra.get("titulo", obra_id)))
+				selector.set_item_metadata(selector.item_count - 1, obra_id)
+				break
 
 
 func _on_citar_pressed() -> void:
-	var indice := selector.selected
+	var indice := selector.get_selected()
 	if indice >= 0:
 		var obra_id := String(selector.get_item_metadata(indice))
 		_ejecutar_cita(obra_id)
@@ -33,28 +42,50 @@ func _on_citar_pressed() -> void:
 
 
 func _ejecutar_cita(obra_id: String) -> void:
-	var literatura := _gestor("GestorLiteratura")
-	var momentum := _gestor("GestorMomentum")
-	if literatura == null or momentum == null:
-		return
-	var efecto = literatura.call("obtener_efecto_obra", obra_id)
-	if typeof(efecto) != TYPE_DICTIONARY:
-		return
-	if not bool(momentum.call("consumir_momentum", 30.0)):
+	var efecto := _obtener_efecto_obra(obra_id)
+	var momentum_cost := 30
+	if GestorMomentum.momentum_actual < momentum_cost:
 		return
 
-	var efecto_especial := String(efecto.get("efecto_especial", ""))
-	if efecto_especial.is_empty():
-		momentum.call("agregar_momentum", 10.0)
+	GestorMomentum.momentum_actual -= momentum_cost
+	if efecto.has("efecto_especial"):
+		_aplicar_cita_especial(obra_id, String(efecto.get("efecto_especial", "")))
 	else:
-		literatura.call("aplicar_cita_especial", efecto_especial)
-	print("Citado %s, momentum restante: %.1f" % [obra_id, float(momentum.get("momentum_actual"))])
+		GestorMomentum.momentum_actual = min(
+			GestorMomentum.momentum_max,
+			GestorMomentum.momentum_actual + 10,
+		)
+	print("Citado %s, momentum restante: %s" % [obra_id, GestorMomentum.momentum_actual])
+
+
+func _aplicar_cita_especial(_obra_id: String, efecto: String) -> void:
+	match efecto:
+		"revelacion":
+			print("Revelacion: debilidad enemiga expuesta")
+		"transformacion":
+			print("Transformacion: forma alternativa activada")
+		"no_linealidad":
+			print("No linealidad: combos desordenados temporalmente")
+
+
+func _obtener_efecto_obra(obra_id: String) -> Dictionary:
+	var archivo := FileAccess.open("res://datos/literatura/obras.json", FileAccess.READ)
+	if archivo == null:
+		return {}
+	var data = JSON.parse_string(archivo.get_as_text())
+	archivo.close()
+	if not (data is Dictionary):
+		return {}
+	var obras = data.get("obras", [])
+	if not (obras is Array):
+		return {}
+	for obra in obras:
+		if obra is Dictionary and String(obra.get("id", "")) == obra_id:
+			var efecto = obra.get("efecto", {})
+			return efecto if efecto is Dictionary else {}
+	return {}
 
 
 func show_ritual() -> void:
 	_poblar_selector()
 	visible = true
-
-
-func _gestor(nombre: String) -> Node:
-	return get_node_or_null("/root/" + nombre)

@@ -1,39 +1,46 @@
 extends Node
 
-signal combo_ejecutado(nombre_combo: String, efectos: Dictionary)
-signal finisher_ejecutado(nombre: String, efectos: Dictionary, es_super: bool)
+# Autoload: GestorCombos
+signal combo_ejecutado(nombre_combo, efectos)
+signal finisher_ejecutado(nombre, efectos, es_super)
 
-const MAX_BUFFER := 6
-const TIEMPO_BUFFER := 2.0
+const MAX_BUFFER: int = 6
+const TIEMPO_BUFFER: float = 2.0
 
 var combos_disponibles: Dictionary = {
 	"golpe_sombra":
 	{
 		"nombre": "Golpe de la Sombra",
-		"requisitos": {"momentum_min": 30.0, "arquetipo": "sombra"},
+		"requisitos": {"momentum_min": 30, "arquetipo": "sombra"},
 		"secuencia": ["ataque_ligero", "ataque_ligero", "ataque_pesado"],
-		"efectos": {"dano_multiplier": 2.0, "aplicar_sombra": true, "area": 2.0},
+		"efectos": {"daño_multiplier": 2.0, "aplicar_sombra": true, "area": 2.0},
 	},
 	"abrazo_anima":
 	{
 		"nombre": "Abrazo del Anima",
-		"requisitos": {"momentum_min": 40.0, "arquetipo": "anima"},
+		"requisitos": {"momentum_min": 40, "arquetipo": "anima"},
 		"secuencia": ["ataque_pesado", "esquivar", "ataque_ligero"],
-		"efectos": {"curacion": 2, "resistencia_temporal": 0.2},
+		"efectos": {"curacion_area": 30, "buff_aliados": {"resistencia": 0.2, "duracion": 10}},
 	},
 	"danza_persona":
 	{
 		"nombre": "Danza de la Persona",
-		"requisitos": {"momentum_min": 35.0, "arquetipo": "persona"},
+		"requisitos": {"momentum_min": 35, "arquetipo": "persona"},
 		"secuencia": ["esquivar", "ataque_ligero", "esquivar", "ataque_pesado"],
-		"efectos": {"evasion_temporal": 0.5, "duracion": 1.0, "contragolpe": true},
+		"efectos": {"evasion_temporal": 0.5, "duracion": 5, "contragolpe": true},
 	},
 	"despertar_self":
 	{
 		"nombre": "Despertar del Self",
-		"requisitos": {"momentum_min": 100.0, "arquetipo": "self"},
+		"requisitos": {"momentum_min": 100, "arquetipo": "self"},
 		"secuencia": ["ataque_pesado", "ataque_pesado", "ataque_pesado", "ataque_pesado"],
-		"efectos": {"dano": 4, "area": 5.0, "stun": 1.0},
+		"efectos":
+		{
+			"daño_masivo": 500,
+			"area": 5.0,
+			"stun": 3.0,
+			"buff_permanente": {"stats": 0.1},
+		},
 	},
 }
 
@@ -41,29 +48,45 @@ var finishers: Dictionary = {
 	"sombra_desatada":
 	{
 		"nombre": "Desatamiento de la Sombra",
-		"arquetipo": "sombra",
-		"costo_momentum": 75.0,
+		"costo_momentum": 75,
 		"es_super": false,
-		"efectos": {"dano": 3, "miedo": 1.0},
+		"efectos":
+		{
+			"daño_verdadero": 200,
+			"miedo_enemigos": 4.0,
+			"buff_jugador": {"crit": 0.3, "duracion": 15},
+		},
 	},
-	"furia_self":
+	"furia_divina":
 	{
-		"nombre": "Conjunción del Self",
-		"arquetipo": "self",
-		"costo_momentum": 100.0,
+		"nombre": "Furia del Dios",
+		"costo_momentum": 100,
 		"es_super": true,
-		"efectos": {"dano": 5, "curacion_total": true, "invulnerabilidad": 1.0},
+		"efectos":
+		{
+			"daño_divino": 500,
+			"area": 8.0,
+			"curacion_total": true,
+			"invulnerabilidad": 5.0,
+			"buff_permanente": {"todo": 0.15},
+		},
 	},
 }
 
 var buffer_entradas: Array = []
 
 
+func _ready() -> void:
+	pass
+
+
 func _process(_delta: float) -> void:
 	var ahora := Time.get_ticks_msec() / 1000.0
-	buffer_entradas = buffer_entradas.filter(
-		func(entrada): return ahora - float(entrada.get("tiempo", 0.0)) < TIEMPO_BUFFER
-	)
+	var recientes: Array = []
+	for entrada in buffer_entradas:
+		if ahora - float(entrada.get("tiempo", 0.0)) < TIEMPO_BUFFER:
+			recientes.append(entrada)
+	buffer_entradas = recientes
 
 
 func registrar_entrada(accion: String) -> void:
@@ -74,87 +97,58 @@ func registrar_entrada(accion: String) -> void:
 	_verificar_combos()
 
 
-func ejecutar_finisher(finisher_id: String) -> bool:
-	if not finishers.has(finisher_id):
-		return false
-	var finisher: Dictionary = finishers[finisher_id]
-	if not _arquetipo_desbloqueado(String(finisher.get("arquetipo", ""))):
-		return false
-	var momentum = get_node_or_null("/root/GestorMomentum")
-	if momentum == null:
-		return false
-	var es_super := bool(finisher.get("es_super", false))
-	if not momentum.ejecutar_finisher("super" if es_super else "normal"):
-		return false
-	finisher_ejecutado.emit(
-		String(finisher.get("nombre", finisher_id)),
-		finisher.get("efectos", {}).duplicate(true),
-		es_super
-	)
-	return true
-
-
-func finisher_disponible_actual() -> String:
-	var momentum = get_node_or_null("/root/GestorMomentum")
-	if momentum == null:
-		return ""
-	for finisher_id in ["furia_self", "sombra_desatada"]:
-		var finisher: Dictionary = finishers[finisher_id]
-		if (
-			momentum.momentum_actual >= float(finisher.get("costo_momentum", 0.0))
-			and _arquetipo_desbloqueado(String(finisher.get("arquetipo", "")))
-		):
-			return finisher_id
-	return ""
-
-
-func reiniciar() -> void:
-	buffer_entradas.clear()
-
-
 func _verificar_combos() -> void:
-	var secuencia_actual := buffer_entradas.map(func(entrada): return entrada.get("accion", ""))
+	var secuencia_actual: Array = []
+	for entrada in buffer_entradas:
+		secuencia_actual.append(String(entrada.get("accion", "")))
+
 	for combo_id in combos_disponibles:
 		var combo: Dictionary = combos_disponibles[combo_id]
-		if (
-			_coincide_secuencia(secuencia_actual, combo.get("secuencia", []))
-			and _cumple_requisitos(combo.get("requisitos", {}))
-		):
-			combo_ejecutado.emit(
-				String(combo.get("nombre", combo_id)), combo.get("efectos", {}).duplicate(true)
-			)
-			buffer_entradas.clear()
-			return
+		if _coincide_secuencia(secuencia_actual, combo.get("secuencia", [])):
+			if _cumple_requisitos(combo.get("requisitos", {})):
+				combo_ejecutado.emit(combo.get("nombre", combo_id), combo.get("efectos", {}))
+				buffer_entradas.clear()
+				return
 
 
 func _coincide_secuencia(buffer: Array, objetivo: Array) -> bool:
 	if buffer.size() < objetivo.size():
 		return false
-	for i in objetivo.size():
-		if buffer[buffer.size() - objetivo.size() + i] != objetivo[i]:
+	for indice in range(objetivo.size()):
+		if buffer[buffer.size() - objetivo.size() + indice] != objetivo[indice]:
 			return false
 	return true
 
 
-func _cumple_requisitos(requisitos: Dictionary) -> bool:
-	var momentum = get_node_or_null("/root/GestorMomentum")
-	if momentum == null:
+func _cumple_requisitos(req: Dictionary) -> bool:
+	var momentum = get_node("/root/GestorMomentum")
+	var arquetipos = get_node("/root/GestorArquetipos")
+
+	if req.has("momentum_min") and momentum.momentum_actual < req.get("momentum_min", 0):
 		return false
-	if (
-		requisitos.has("momentum_min")
-		and momentum.momentum_actual < float(requisitos["momentum_min"])
-	):
-		return false
-	if requisitos.has("arquetipo"):
-		return _arquetipo_desbloqueado(String(requisitos["arquetipo"]))
+	if req.has("arquetipo"):
+		var arquetipo = arquetipos.obtener_arquetipo(String(req.get("arquetipo", "")))
+		if arquetipo == null or not bool(arquetipo.desbloqueado):
+			return false
 	return true
 
 
-func _arquetipo_desbloqueado(arquetipo_id: String) -> bool:
-	if arquetipo_id.is_empty():
-		return true
-	var gestor = get_node_or_null("/root/GestorArquetipos")
-	if gestor == null:
+func ejecutar_finisher(nombre: String) -> bool:
+	if not finishers.has(nombre):
 		return false
-	var arquetipo = gestor.obtener_arquetipo(arquetipo_id)
-	return arquetipo != null and arquetipo.desbloqueado
+
+	var finisher: Dictionary = finishers[nombre]
+	var momentum = get_node("/root/GestorMomentum")
+	if momentum.momentum_actual >= float(finisher.get("costo_momentum", 0)):
+		var tipo := "super" if bool(finisher.get("es_super", false)) else "normal"
+		momentum.ejecutar_finisher(tipo)
+		(
+			finisher_ejecutado
+			. emit(
+				finisher.get("nombre", nombre),
+				finisher.get("efectos", {}),
+				finisher.get("es_super", false),
+			)
+		)
+		return true
+	return false

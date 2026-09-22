@@ -2,28 +2,21 @@ extends Node3D
 
 
 func _ready() -> void:
-	var arquetipos := get_node_or_null("/root/GestorArquetipos")
-	var literatura := get_node_or_null("/root/GestorLiteratura")
-	var momentum := get_node_or_null("/root/GestorMomentum")
-	if arquetipos == null or literatura == null or momentum == null:
-		push_warning("Demo integrada sin gestores jungianos disponibles")
-		return
-
-	print("Demo integrada iniciada")
-	print("Insight inicial: ", arquetipos.get("insight_total"))
+	print("Demo Integrado iniciado")
+	print("Insight inicial:", GestorArquetipos.insight_total)
 	print("Arquetipos desbloqueados:")
-	for arquetipo_id in ["sombra", "anima", "persona", "self"]:
-		var arquetipo = arquetipos.call("obtener_arquetipo", arquetipo_id)
+	for id in ["sombra", "anima", "persona", "self"]:
+		var arquetipo = GestorArquetipos.obtener_arquetipo(id)
 		if arquetipo != null:
-			print("  %s: %s" % [arquetipo_id, bool(arquetipo.get("desbloqueado"))])
+			print("  %s: %s" % [id, arquetipo.desbloqueado])
 
-	literatura.call("conocer_obra", "odisea")
-	print("Después de leer Odisea:")
-	print("  Insight: ", arquetipos.get("insight_total"))
-	var sombra = arquetipos.call("obtener_arquetipo", "sombra")
-	print("  Sombra desbloqueada: ", sombra != null and bool(sombra.get("desbloqueado")))
+	GestorLiteratura.conocer_obra("odisea")
+	print("Despues de leer Odisea:")
+	print("  Insight:", GestorArquetipos.insight_total)
+	var sombra = GestorArquetipos.obtener_arquetipo("sombra")
+	print("  Arquetipo sombra desbloqueado?", sombra != null and bool(sombra.desbloqueado))
 
-	momentum.call("registrar_golpe", true)
-	momentum.call("registrar_golpe")
-	momentum.call("registrar_golpe")
-	print("Momentum tras 3 golpes: ", momentum.get("momentum_actual"))
+	GestorMomentum.registrar_golpe(true)
+	GestorMomentum.registrar_golpe()
+	GestorMomentum.registrar_golpe()
+	print("Momentum tras 3 golpes:", GestorMomentum.momentum_actual)

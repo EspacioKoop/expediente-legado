@@ -1,53 +1,46 @@
 extends Node
 
-signal obra_conocida(obra_id: String)
+# Autoload: GestorLiteratura
+signal obra_conocida(obra_id)
 
 var obras: Array = []
-var obras_conocidas: Array[String] = []
-var autores_conocidos: Array[String] = []
+var obras_conocidas: Array = []
+var autores_conocidos: Array = []
 var insight_total: int = 0
-var momentum_bonus: float = 0.0
+var momentum_bonus: float = 0.0  # acumulativo temporal
 
 
 func _ready() -> void:
+	_cargar_catalogo()
+
+
+func _cargar_catalogo() -> void:
 	var archivo := FileAccess.open("res://datos/literatura/obras.json", FileAccess.READ)
 	if archivo == null:
 		return
 	var data = JSON.parse_string(archivo.get_as_text())
 	archivo.close()
-	if typeof(data) == TYPE_DICTIONARY:
-		obras = data.get("obras", [])
+	if not (data is Dictionary):
+		return
+	var obras_data = data.get("obras", [])
+	obras = obras_data if obras_data is Array else []
 
 
 func conocer_obra(obra_id: String) -> bool:
-	if obra_id.is_empty() or obra_id in obras_conocidas:
+	if obra_id in obras_conocidas:
 		return false
 	obras_conocidas.append(obra_id)
 
-	var obra := obtener_obra(obra_id)
-	var autor := String(obra.get("autor", ""))
-	if not autor.is_empty() and autor not in autores_conocidos:
-		autores_conocidos.append(autor)
-
-	var efecto := obtener_efecto_obra(obra_id)
-	var insight := int(efecto.get("bonus_insight", 0))
-	if insight > 0:
-		insight_total += insight
-		var gestor_arquetipos := _gestor("GestorArquetipos")
-		if gestor_arquetipos != null:
-			gestor_arquetipos.call("ganar_insight", insight)
-
-	var bonus := float(efecto.get("bonus_momentum", 0.0))
-	if bonus > 0.0:
+	var efecto := _obtener_efecto_obra(obra_id)
+	if efecto.has("bonus_insight"):
+		insight_total += int(efecto.get("bonus_insight", 0))
+	if efecto.has("bonus_momentum"):
+		var bonus := float(efecto.get("bonus_momentum", 0.0))
 		momentum_bonus += bonus
-		var gestor_momentum := _gestor("GestorMomentum")
-		if gestor_momentum != null:
-			gestor_momentum.call("agregar_momentum", bonus)
-
-	var efecto_especial := String(efecto.get("efecto_especial", ""))
-	if not efecto_especial.is_empty():
-		aplicar_efecto_especial(efecto_especial)
-
+		GestorMomentum.momentum_actual = min(
+			GestorMomentum.momentum_max,
+			GestorMomentum.momentum_actual + bonus,
+		)
 	obra_conocida.emit(obra_id)
 	return true
 
@@ -60,93 +53,64 @@ func obtener_momentum_bonus() -> float:
 	return momentum_bonus
 
 
-func obtener_obra(obra_id: String) -> Dictionary:
+func _obtener_efecto_obra(obra_id: String) -> Dictionary:
+	if obras.is_empty():
+		_cargar_catalogo()
 	for obra in obras:
-		if typeof(obra) == TYPE_DICTIONARY and String(obra.get("id", "")) == obra_id:
-			return obra.duplicate(true)
+		if obra is Dictionary and String(obra.get("id", "")) == obra_id:
+			var efecto = obra.get("efecto", {})
+			return efecto if efecto is Dictionary else {}
 	return {}
 
 
-func obtener_efecto_obra(obra_id: String) -> Dictionary:
-	var obra := obtener_obra(obra_id)
-	var efecto = obra.get("efecto", {})
-	return efecto.duplicate(true) if typeof(efecto) == TYPE_DICTIONARY else {}
+func _arquetipo_desbloqueado(id: String):
+	var arquetipo = GestorArquetipos.obtener_arquetipo(id)
+	if arquetipo == null or not bool(arquetipo.desbloqueado):
+		return null
+	return arquetipo
 
 
-func aplicar_efecto_especial(efecto: String) -> void:
-	var arquetipos := _gestor("GestorArquetipos")
-	var momentum := _gestor("GestorMomentum")
+func _aplicar_efecto_especial(_obra_id: String, efecto: String) -> void:
 	match efecto:
 		"revelacion":
-			if _arquetipo_desbloqueado(arquetipos, "persona"):
-				arquetipos.call("ganar_insight", 20)
-				_sumar_efecto_arquetipo(arquetipos, "persona", "evasion_temporal", 0.3)
+			var persona = _arquetipo_desbloqueado("persona")
+			if persona != null:
+				GestorArquetipos.ganar_insight(20)
+				persona.efecto_combate["evasion_temporal"] = 0.3
 		"transformacion":
-			if _arquetipo_desbloqueado(arquetipos, "sombra"):
-				_sumar_efecto_arquetipo(arquetipos, "sombra", "bonus_crit", 0.1)
-		"no_linealidad":
-			if _arquetipo_desbloqueado(arquetipos, "self"):
-				arquetipos.call("ganar_insight", 15)
-		"ciclos_temporales":
-			if momentum != null:
-				momentum.call("agregar_momentum", 15.0)
-		"corriente_conciencia":
-			if arquetipos != null:
-				arquetipos.call("ganar_insight", 30)
-			if momentum != null:
-				momentum.set(
-					"momentum_actual", maxf(0.0, float(momentum.get("momentum_actual")) - 20.0)
+			var sombra = _arquetipo_desbloqueado("sombra")
+			if sombra != null:
+				sombra.efecto_combate["bonus_crit"] = (
+					float(sombra.efecto_combate.get("bonus_crit", 0.0)) + 0.1
 				)
+		"no_linealidad":
+			if _arquetipo_desbloqueado("self") != null:
+				GestorArquetipos.ganar_insight(15)
+		"ciclos_temporales":
+			GestorMomentum.momentum_actual = min(
+				GestorMomentum.momentum_max,
+				GestorMomentum.momentum_actual + 15,
+			)
+		"corriente_conciencia":
+			GestorArquetipos.ganar_insight(30)
+			GestorMomentum.momentum_actual = max(0, GestorMomentum.momentum_actual - 20)
 
 
-func aplicar_cita_especial(efecto: String) -> void:
-	var arquetipos := _gestor("GestorArquetipos")
-	var momentum := _gestor("GestorMomentum")
+func _aplicar_cita_especial(_obra_id: String, efecto: String) -> void:
 	match efecto:
 		"revelacion":
-			if _arquetipo_desbloqueado(arquetipos, "anima"):
-				_mostrar_cita("Revelación: Anima reconoce la debilidad")
+			print("Revelacion: debilidad enemiga expuesta - Anima cura aliados")
+			if _arquetipo_desbloqueado("anima") != null:
+				pass
 		"transformacion":
-			if _arquetipo_desbloqueado(arquetipos, "sombra") and momentum != null:
-				momentum.call("agregar_momentum", 20.0)
-				_mostrar_cita("Transformación: la Sombra alimenta el momentum")
+			print("Transformacion: forma alternativa activada - Sombra desatada")
+			if _arquetipo_desbloqueado("sombra") != null:
+				GestorMomentum.ejecutar_finisher("super")
 		"no_linealidad":
-			_mostrar_cita("No linealidad: Persona adapta la secuencia")
+			print("No linealidad: combos desordenados temporalmente - Persona adapta")
 		"ciclos_temporales":
-			if momentum != null:
-				momentum.set("decay_rate", minf(float(momentum.get("decay_rate")), 2.0))
-			_mostrar_cita("Ciclos temporales: el momentum decae más despacio")
+			print("Ciclos temporales: momentum regenera rapido")
+			GestorMomentum.decay_rate = 2.0
 		"corriente_conciencia":
-			if arquetipos != null:
-				arquetipos.call("ganar_insight", 50)
-			_mostrar_cita("Corriente de conciencia: insight instantáneo")
-
-
-func _gestor(nombre: String) -> Node:
-	return get_node_or_null("/root/" + nombre)
-
-
-func _arquetipo_desbloqueado(gestor: Node, arquetipo_id: String) -> bool:
-	if gestor == null:
-		return false
-	var arquetipo = gestor.call("obtener_arquetipo", arquetipo_id)
-	return arquetipo != null and bool(arquetipo.get("desbloqueado"))
-
-
-func _sumar_efecto_arquetipo(
-	gestor: Node, arquetipo_id: String, clave: String, cantidad: float
-) -> void:
-	if gestor == null:
-		return
-	var arquetipo = gestor.call("obtener_arquetipo", arquetipo_id)
-	if arquetipo == null:
-		return
-	var efectos = arquetipo.get("efecto_combate")
-	if typeof(efectos) != TYPE_DICTIONARY:
-		return
-	efectos[clave] = float(efectos.get(clave, 0.0)) + cantidad
-	arquetipo.set("efecto_combate", efectos)
-
-
-func _mostrar_cita(mensaje: String) -> void:
-	print(mensaje)
+			print("Corriente de conciencia: insight instantaneo")
+			GestorArquetipos.ganar_insight(50)

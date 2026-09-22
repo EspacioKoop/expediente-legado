@@ -1,93 +1,73 @@
 class_name ArbolIndividuacion
 extends Resource
 
-@export var nodos: Dictionary = {}
-
-var nodos_completados: Array[String] = []
+var nodos: Dictionary = {}
+var nodos_completados: Array = []
 var nodo_actual: String = ""
 
 
-func puede_desbloquear(nodo_id: String) -> bool:
-	if not nodos.has(nodo_id) or nodo_id in nodos_completados:
-		return false
-	var nodo: Dictionary = nodos[nodo_id]
-	var requisitos: Dictionary = nodo.get("requisitos", {})
-	var cumple := true
+func _init() -> void:
+	# Se carga desde el .tres
+	pass
 
-	if requisitos.has("insight"):
-		var gestor_arquetipos := _autoload("GestorArquetipos")
-		cumple = gestor_arquetipos != null
-		if cumple:
-			cumple = (
-				int(gestor_arquetipos.get("insight_total")) >= int(requisitos.get("insight", 0))
-			)
-	if cumple and requisitos.has("nodo_previo"):
-		cumple = String(requisitos.get("nodo_previo", "")) in nodos_completados
-	if cumple:
-		for previo in requisitos.get("nodos_previos", []):
-			if String(previo) not in nodos_completados:
+
+func puede_desbloquear(nodo_id: String) -> bool:
+	var nodo = nodos.get(nodo_id)
+	if nodo == null or nodo_id in nodos_completados:
+		return false
+
+	var req: Dictionary = nodo.requisitos
+	var cumple := not (req.has("insight") and GestorArquetipos.insight_total < req.insight)
+	cumple = cumple and not (req.has("nodo_previo") and req.nodo_previo not in nodos_completados)
+	if cumple and req.has("nodos_previos"):
+		for previo in req.nodos_previos:
+			if previo not in nodos_completados:
 				cumple = false
 				break
-	if cumple and requisitos.has("evento"):
-		cumple = _evento_completado(String(requisitos["evento"]))
-	if cumple and requisitos.has("ritual"):
-		cumple = _ritual_completado(String(requisitos["ritual"]))
-	if cumple and requisitos.has("nodos_completados"):
-		cumple = nodos_completados.size() >= int(requisitos["nodos_completados"])
+	cumple = cumple and not (req.has("evento") and not _evento_completado(req.evento))
+	cumple = cumple and not (req.has("ritual") and not _ritual_completado(req.ritual))
+	cumple = (
+		cumple
+		and not (req.has("nodos_completados") and nodos_completados.size() < req.nodos_completados)
+	)
 	return cumple
 
 
 func desbloquear_nodo(nodo_id: String) -> bool:
 	if not puede_desbloquear(nodo_id):
 		return false
+
 	nodos_completados.append(nodo_id)
-	var nodo: Dictionary = nodos[nodo_id]
-	_aplicar_recompensas(nodo.get("recompensas", {}))
-	nodo_actual = nodo_id
+	var nodo = nodos[nodo_id]
+	_aplicar_recompensas(nodo.recompensas)
+
+	for conexion in nodo.conexiones:
+		if puede_desbloquear(conexion):
+			pass
 	return true
-
-
-func obtener_progreso() -> Dictionary:
-	var total := nodos.size()
-	var porcentaje := 0.0
-	if total > 0:
-		porcentaje = float(nodos_completados.size()) / float(total) * 100.0
-	return {
-		"completados": nodos_completados.size(),
-		"total": total,
-		"porcentaje": porcentaje,
-	}
 
 
 func _aplicar_recompensas(recompensas: Dictionary) -> void:
 	if recompensas.has("desbloquea_arquetipo"):
-		var gestor_arquetipos := _autoload("GestorArquetipos")
-		if gestor_arquetipos != null:
-			gestor_arquetipos.call(
-				"desbloquear_arquetipo", String(recompensas["desbloquea_arquetipo"])
-			)
+		var arquetipo = GestorArquetipos.obtener_arquetipo(recompensas.desbloquea_arquetipo)
+		if arquetipo != null:
+			arquetipo.desbloquear()
 
 
 func _evento_completado(evento: String) -> bool:
-	var gestor := _autoload("GestorJuego")
-	return (
-		gestor != null
-		and gestor.has_method("evento_completado")
-		and bool(gestor.call("evento_completado", evento))
-	)
+	return get_node("/root/GestorJuego").evento_completado(evento)
 
 
 func _ritual_completado(ritual: String) -> bool:
-	var gestor := _autoload("GestorRituales")
-	return (
-		gestor != null
-		and gestor.has_method("ritual_completado")
-		and bool(gestor.call("ritual_completado", ritual))
-	)
+	return get_node("/root/GestorRituales").ritual_completado(ritual)
 
 
-func _autoload(nombre: String) -> Node:
-	var arbol_escenas := Engine.get_main_loop() as SceneTree
-	if arbol_escenas == null:
-		return null
-	return arbol_escenas.root.get_node_or_null(nombre)
+func obtener_progreso() -> Dictionary:
+	var porcentaje := 0.0
+	if not nodos.is_empty():
+		porcentaje = nodos_completados.size() / float(nodos.size()) * 100.0
+	return {
+		"completados": nodos_completados.size(),
+		"total": nodos.size(),
+		"porcentaje": porcentaje,
+	}

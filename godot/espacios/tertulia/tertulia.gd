@@ -7,7 +7,7 @@ extends CharacterBody3D
 var jugador_en_rango: bool = false
 var dialogo_actual: int = 0
 
-@onready var area_dialogo: Area3D = $AreaDialogo
+@onready var area_dialogo = $AreaDialogo
 
 
 func _ready() -> void:
@@ -18,29 +18,28 @@ func _ready() -> void:
 
 func _cargar_dialogos() -> void:
 	dialogos = [
-		{
-			"texto": "Bienvenido a la tertulia. ¿Buscas sabiduría en las páginas?",
-			"requisito": {},
-		},
+		{"texto": "Bienvenido a la tertulia. ¿Buscas sabiduría en las páginas?", "requisito": {}},
 		{
 			"texto": "He leído tu camino. La Sombra y la Anima bailan en ti.",
-			"requisito": {"arquetipos": ["sombra", "anima"]},
+			"requisito": {"arquetipos": ["sombra", "anima"]}
 		},
 		{
-			"texto": "Cervantes recuerda que leer y andar ensanchan la mirada.",
-			"requisito": {"autor": "cervantes"},
+			"texto":
+			"Cervantes me susurró: 'El que lee mucho y anda mucho, ve mucho y sabe mucho'.",
+			"requisito": {"autor": "cervantes"}
 		},
 		{
-			"texto": "¿Conoces el secreto de la Metamorfosis?",
-			"requisito": {"obra": "metamorfosis", "arquetipo": "sombra"},
+			"texto":
+			"¿Conoces el secreto de la Metamorfosis? Kafka lo guardó para los que transforman su momentum.",
+			"requisito": {"obra": "metamorfosis", "arquetipo": "sombra"}
 		},
 		{
-			"texto": "El Self se revela en la no-linealidad.",
-			"requisito": {"obra": "rayuela", "arquetipo": "self"},
+			"texto": "El Self se revela en la no-linealidad. Cortázar lo sabía.",
+			"requisito": {"obra": "rayuela", "arquetipo": "self"}
 		},
 		{
-			"texto": "Tu momentum es fuerte. Prueba una cita en combate.",
-			"requisito": {"momentum": 50, "obra": "odisea"},
+			"texto": "Tu momentum es fuerte. ¿Has probado a citar a Homero en medio del combate?",
+			"requisito": {"momentum": 50, "obra": "odisea"}
 		},
 	]
 
@@ -61,72 +60,59 @@ func _mostrar_dialogo_disponible() -> void:
 		var dialogo: Dictionary = dialogos[indice]
 		var requisito: Dictionary = dialogo.get("requisito", {})
 		if _cumple_requisitos(requisito):
-			print("Tertulia: %s" % String(dialogo.get("texto", "")))
+			print("Tertulia: %s" % dialogo.get("texto", ""))
 			_aplicar_recompensa_dialogo(requisito)
 			dialogo_actual = indice
-			return
-
-
-func _cumple_requisitos(requisitos: Dictionary) -> bool:
-	if requisitos.is_empty():
-		return true
-	var literatura := _gestor("GestorLiteratura")
-	var arquetipos := _gestor("GestorArquetipos")
-	var momentum := _gestor("GestorMomentum")
-	if literatura == null or arquetipos == null or momentum == null:
-		return false
-
-	var cumple := true
-	for arquetipo_id in requisitos.get("arquetipos", []):
-		if not _arquetipo_desbloqueado(arquetipos, String(arquetipo_id)):
-			cumple = false
 			break
-	if cumple and requisitos.has("autor"):
-		var autores: Array = literatura.get("autores_conocidos")
-		cumple = String(requisitos["autor"]) in autores
-	if cumple and requisitos.has("obra"):
-		var obras: Array = literatura.get("obras_conocidas")
-		cumple = String(requisitos["obra"]) in obras
-	if cumple and requisitos.has("arquetipo"):
-		cumple = _arquetipo_desbloqueado(arquetipos, String(requisitos["arquetipo"]))
-	if cumple and requisitos.has("momentum"):
-		cumple = (float(momentum.get("momentum_actual")) >= float(requisitos["momentum"]))
+
+
+func _arquetipo_desbloqueado(id: String):
+	var arquetipo = GestorArquetipos.obtener_arquetipo(id)
+	if arquetipo == null or not bool(arquetipo.desbloqueado):
+		return null
+	return arquetipo
+
+
+func _cumple_requisitos(req: Dictionary) -> bool:
+	var cumple := true
+	if req.has("arquetipos"):
+		for id in req.get("arquetipos", []):
+			if _arquetipo_desbloqueado(String(id)) == null:
+				cumple = false
+				break
+	cumple = (
+		cumple
+		and not (req.has("autor") and req.get("autor") not in GestorLiteratura.autores_conocidos)
+	)
+	cumple = (
+		cumple and not (req.has("obra") and req.get("obra") not in GestorLiteratura.obras_conocidas)
+	)
+	cumple = (
+		cumple
+		and not (
+			req.has("arquetipo")
+			and _arquetipo_desbloqueado(String(req.get("arquetipo", ""))) == null
+		)
+	)
+	cumple = (
+		cumple
+		and not (req.has("momentum") and GestorMomentum.momentum_actual < req.get("momentum", 0))
+	)
 	return cumple
 
 
-func _aplicar_recompensa_dialogo(requisitos: Dictionary) -> void:
-	var arquetipos := _gestor("GestorArquetipos")
-	var momentum := _gestor("GestorMomentum")
-	if arquetipos == null or momentum == null:
-		return
-	if requisitos.get("autor", "") == "cervantes":
-		arquetipos.call("ganar_insight", 25)
-	if (
-		requisitos.get("obra", "") == "metamorfosis"
-		and _arquetipo_desbloqueado(arquetipos, "sombra")
-	):
-		_sumar_bonus_sombra(arquetipos, 0.05)
-	if requisitos.get("obra", "") == "rayuela" and _arquetipo_desbloqueado(arquetipos, "self"):
-		arquetipos.call("ganar_insight", 20)
-	if int(requisitos.get("momentum", 0)) == 50:
-		momentum.call("agregar_momentum", 20.0)
-
-
-func _arquetipo_desbloqueado(arquetipos: Node, arquetipo_id: String) -> bool:
-	var arquetipo = arquetipos.call("obtener_arquetipo", arquetipo_id)
-	return arquetipo != null and bool(arquetipo.get("desbloqueado"))
-
-
-func _sumar_bonus_sombra(arquetipos: Node, cantidad: float) -> void:
-	var sombra = arquetipos.call("obtener_arquetipo", "sombra")
-	if sombra == null:
-		return
-	var efectos = sombra.get("efecto_combate")
-	if typeof(efectos) != TYPE_DICTIONARY:
-		return
-	efectos["bonus_crit"] = float(efectos.get("bonus_crit", 0.0)) + cantidad
-	sombra.set("efecto_combate", efectos)
-
-
-func _gestor(nombre: String) -> Node:
-	return get_node_or_null("/root/" + nombre)
+func _aplicar_recompensa_dialogo(req: Dictionary) -> void:
+	if req.get("autor") == "cervantes":
+		GestorArquetipos.ganar_insight(25)
+	if req.get("obra") == "metamorfosis":
+		var sombra = _arquetipo_desbloqueado("sombra")
+		if sombra != null:
+			sombra.efecto_combate["bonus_crit"] = (
+				float(sombra.efecto_combate.get("bonus_crit", 0.0)) + 0.05
+			)
+	if req.get("obra") == "rayuela" and _arquetipo_desbloqueado("self") != null:
+		GestorArquetipos.ganar_insight(20)
+	if req.get("momentum") == 50:
+		GestorMomentum.momentum_actual = min(
+			GestorMomentum.momentum_max, GestorMomentum.momentum_actual + 20
+		)
