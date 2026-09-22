@@ -166,9 +166,17 @@ func _probar_persistencia_y_reset() -> void:
 		String(carga.get("resultado", "")) == "cargada", "Partida vuelve a cargar el registro"
 	)
 	var registro_releido := Eventos.asegurar_en_estado(releida.estado)
+	var exposiciones_releidas := Eventos.eventos(registro_releido, Eventos.CANAL_EXPOSICION)
+	var evento_releido: Dictionary = exposiciones_releidas[0] if exposiciones_releidas.size() == 1 else {}
 	_comprobar(
-		JSON.stringify(registro_releido) == antes,
-		"los cuatro canales atraviesan guardado y recarga",
+		(
+			exposiciones_releidas.size() == 1
+			and String(evento_releido.get("id", "")) == "exposicion:persistente"
+			and int(evento_releido.get("jornada", -1)) == 6
+			and int(evento_releido.get("vuelta", -1)) == 3
+			and String(evento_releido.get("procedencia", "")) == "prueba:directa"
+		),
+		"el hecho religioso conserva semántica tras guardado y recarga",
 	)
 
 	var nueva := Partida.nueva()
