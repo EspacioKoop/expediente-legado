@@ -94,9 +94,7 @@ func publicar_evento(evento: Dictionary, ahora_unix: int = -1) -> Dictionary:
 	)
 
 
-func consultar_eventos(
-	scene_key: String, kind: String = "", ahora_unix: int = -1
-) -> Dictionary:
+func consultar_eventos(scene_key: String, kind: String = "", ahora_unix: int = -1) -> Dictionary:
 	if _cerrado_voluntario:
 		return _resultado(true, "inactive", {"events": []})
 
@@ -289,10 +287,14 @@ func _encolar_publicacion(mensaje: Dictionary) -> void:
 			var evento_anterior: Dictionary = anterior.get("event", {})
 			if (
 				String(evento_anterior.get("kind", "")) == "presence"
-				and String(evento_anterior.get("actor_public_id", ""))
-				== String(evento.get("actor_public_id", ""))
-				and String(evento_anterior.get("scene_key", ""))
-				== String(evento.get("scene_key", ""))
+				and (
+					String(evento_anterior.get("actor_public_id", ""))
+					== String(evento.get("actor_public_id", ""))
+				)
+				and (
+					String(evento_anterior.get("scene_key", ""))
+					== String(evento.get("scene_key", ""))
+				)
 			):
 				_cola_saliente.remove_at(indice)
 				break
