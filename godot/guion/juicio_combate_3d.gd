@@ -12,6 +12,7 @@ const SIMBOLICO = preload("res://guion/juicio_combate_simbolico.gd")
 const RIVAL = preload("res://guion/juicio_combate_rival.gd")
 const DOCTRINA = preload("res://guion/juicio_combate_doctrina.gd")
 const JUGADOR = preload("res://guion/juicio_combate_jugador.gd")
+const RELIGION = preload("res://guion/religion_conflicto.gd")
 const DETERMINACION_BASE := REGLAS.DETERMINACION_BASE
 const DETERMINACION_MINIMA_RIVAL := REGLAS.DETERMINACION_MINIMA_RIVAL
 const VELOCIDAD_JUGADOR := 4.8
@@ -54,6 +55,8 @@ var _cargas_doctrina: Dictionary = {}
 var _doctrina_activa := ""
 var _doctrina_tiempo := 0.0
 var _comision_pendiente := false
+var _compromisos_religion: Array = []
+var _rival_inicio_agresion := false
 
 var _jugador: CharacterBody3D
 var _rival: CharacterBody3D
@@ -115,6 +118,20 @@ static func dano_externalizado(dano_base: int, eje_activo: String) -> int:
 
 static func determinacion_retorno(ritual: Dictionary, retornos_usados: int) -> int:
 	return REGLAS.determinacion_retorno(ritual, retornos_usados)
+
+
+## Primer compromiso religioso (#936) que todavía obliga a ceder la
+## iniciativa. Vacío si no hay compromisos o si el rival ya atacó primero.
+static func compromiso_religion_bloqueante(
+	compromisos: Array, rival_inicio_agresion: bool
+) -> Dictionary:
+	for compromiso_bruto in compromisos:
+		if typeof(compromiso_bruto) != TYPE_DICTIONARY:
+			continue
+		var compromiso: Dictionary = compromiso_bruto
+		if not RELIGION.puede_iniciar_accion_ofensiva(compromiso, rival_inicio_agresion):
+			return compromiso
+	return {}
 
 
 func configurar(
@@ -292,6 +309,7 @@ func _iniciar_ataque_rival() -> void:
 	if _ataque_rival_pendiente or _acabado:
 		return
 	_ataque_rival_pendiente = true
+	_rival_inicio_agresion = true
 	var usar_comision := _comision_pendiente
 	var telegrafo := RIVAL.iniciar_telegrafo(usar_comision, _ritual)
 	_telegrafo_rival_total = float(telegrafo["total"])
@@ -309,6 +327,7 @@ func _iniciar_ataque_rival() -> void:
 	if _etiqueta_ataque != null:
 		_etiqueta_ataque.visible = true
 	Sonido.sonar(self, "marcar")
+	_actualizar_hud()
 
 
 func _actualizar_telegrafo_rival(delta: float) -> void:
@@ -380,6 +399,8 @@ func _ocultar_aviso_ataque() -> void:
 
 func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> void:
 	if _recarga_jugador > 0.0:
+		return
+	if not compromiso_religion_bloqueante(_compromisos_religion, _rival_inicio_agresion).is_empty():
 		return
 	_recarga_jugador = recarga
 	var hacia := _rival.position - _jugador.position
@@ -499,6 +520,7 @@ func _resolver_capa_simbolica() -> void:
 	_radio_arena = float(capa["radio_arena"])
 	_velocidad_rival = float(capa["velocidad_rival"])
 	_recarga_fuerte = float(capa["recarga_fuerte"])
+	_compromisos_religion = capa.get("compromisos_religion", [])
 
 
 func _aplicar_configuracion_ritual() -> void:
@@ -587,6 +609,8 @@ func _texto_ritual() -> String:
 		var habilidad: Dictionary = Historias.HABILIDADES[eje_estado]
 		var nombre := tr(String(habilidad["nombre"]))
 		texto += (" · " if not texto.is_empty() else "") + nombre
+	if not compromiso_religion_bloqueante(_compromisos_religion, _rival_inicio_agresion).is_empty():
+		texto += (" · " if not texto.is_empty() else "") + tr("JUICIO_RELIGION_COMPROMISO")
 	return texto
 
 
