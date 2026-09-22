@@ -29,8 +29,15 @@ class SuenoLiteratura1182Test(unittest.TestCase):
     def test_no_reselecciona_la_noche(self) -> None:
         self.assertNotIn("Sueno.noche(", self.modulo)
         tramo = self.dia.split("func _espacio_de", 1)[1].split("\n\nfunc ", 1)[0]
-        self.assertIn(". aplicar(", tramo)
-        self.assertLess(tramo.index("Sueno.espacio("), tramo.index("SuenoLiteratura"))
+        self.assertIn("SuenoLiteratura.aplicar(", tramo)
+        self.assertLess(tramo.index("Sueno.espacio("), tramo.index("SuenoLiteratura.aplicar("))
+        self.assertIn("_registro_literario_para_sueno()", tramo)
+        self.assertNotIn("GestorLiteratura.obtener_registro_literario()", tramo)
+
+    def test_integracion_no_exige_autoload_al_compilar(self) -> None:
+        self.assertIn('get_node_or_null("/root/GestorLiteratura")', self.dia)
+        self.assertIn('gestor.has_method("obtener_registro_literario")', self.dia)
+        self.assertIn("return {}", self.dia)
 
     def test_catalogo_declara_motivos_no_hechos(self) -> None:
         obra = self.catalogo["obras"][0]
