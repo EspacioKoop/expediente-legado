@@ -36,6 +36,7 @@ static func aplicar(jornada: Dictionary, evento: String, intensidad: float = 1.0
 	var delta := float(EVENTOS[clave]) * clampf(intensidad, 0.0, INTENSIDAD_MAXIMA)
 	var nuevo := clampf(anterior + delta, 0.0, VALOR_MAXIMO)
 	estado["valor"] = nuevo
+	jornada[CAMPO_JORNADA] = estado
 	return nuevo - anterior
 
 
@@ -62,4 +63,5 @@ static func _asegurar(jornada: Dictionary) -> Dictionary:
 		estado["valor"] = 0.0
 	else:
 		estado["valor"] = clampf(float(valor_crudo), 0.0, VALOR_MAXIMO)
+	jornada[CAMPO_JORNADA] = estado
 	return estado
