@@ -12,6 +12,9 @@ extends "res://guion/dia_onboarding_app.gd"
 
 const VENTANILLA := preload("res://escenas/ventanilla.tscn")
 
+var _ventanas_vivas: CalleVentanasVivas = null
+var _viento: VientoAmbiental = null
+
 
 func _espacio_de(fase: String) -> Dictionary:
 	var espacio: Dictionary = super._espacio_de(fase)
@@ -31,6 +34,7 @@ func _espacio_de(fase: String) -> Dictionary:
 
 func _entrar_en(fase: String) -> void:
 	super._entrar_en(fase)
+	_soltar_capas_calle()
 	if fase == "trayecto":
 		_montar_persiana_calle()
 		TraficoVialCC0.montar(_mundo)
@@ -47,6 +51,49 @@ func _entrar_en(fase: String) -> void:
 			and not ventanilla.activado.is_connected(_abrir_ventanilla_reclamaciones)
 		):
 			ventanilla.activado.connect(_abrir_ventanilla_reclamaciones)
+		# Diferido a propósito: los árboles CC0 y otros vestidos del trayecto los
+		# monta su propio controlador después de esta llamada, y el viento tiene
+		# que encontrarlos ya puestos.
+		_montar_animacion_ambiental.call_deferred(calle)
+
+
+## Da de alta lo que se mueve solo en el trayecto. Todo cuelga del mismo
+## animador para que compartan presupuesto: si mañana el barrio gana peatones,
+## compiten por el cupo en vez de sumarse a él.
+func _montar_animacion_ambiental(calle: Node3D) -> void:
+	if calle == null or not is_instance_valid(calle) or not calle.is_inside_tree():
+		return
+	if _mundo == null or _ventanas_vivas != null:
+		return
+	# El animador lo sirve la capa del sueño, que es el ancestro común: el cupo
+	# de piezas es del día entero, no de la calle.
+	var animador := animador_ambiental()
+	# El desfase de cada pieza sale del día: dos partidas distintas no tienen
+	# por qué encontrarse el mismo piso encendido.
+	animador.semilla = int(jornada.get("dia", 1))
+
+	_ventanas_vivas = CalleVentanasVivas.new()
+	_ventanas_vivas.name = "VentanasVivasCalle"
+	add_child(_ventanas_vivas)
+	_ventanas_vivas.adoptar(calle, animador)
+
+	_viento = VientoAmbiental.new()
+	_viento.name = "VientoCalle"
+	add_child(_viento)
+	_viento.adoptar(_mundo, animador)
+	# `Clima.estado` es una función del día, no un estado aparte: preguntarlo
+	# aquí no duplica ninguna fuente de verdad.
+	_viento.fijar_clima(Clima.estado(int(jornada.get("dia", 1))))
+
+
+## Las piezas de la calle mueren con la fase; el animador que las reparte vive
+## por encima y lo limpia la capa del sueño.
+func _soltar_capas_calle() -> void:
+	for capa in [_ventanas_vivas, _viento]:
+		if capa != null and is_instance_valid(capa):
+			capa.queue_free()
+	_ventanas_vivas = null
+	_viento = null
 
 
 ## El Coliseo de #43 se juega en su propia pantalla; desde la calle se abre

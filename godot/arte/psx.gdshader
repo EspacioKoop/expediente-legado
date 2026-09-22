@@ -41,6 +41,28 @@ uniform vec3 deformacion_textura = vec3(1.0);
 uniform vec4 emision : source_color = vec4(0.0);
 uniform float emision_fuerza = 0.0;
 
+// VIENTO. Balanceo opt-in en el dominio de vértices (#1230). La fuerza en cero
+// —lo normal— no toca un solo vértice: un muro y una farola siguen dibujándose
+// exactamente igual que antes de existir esto. Solo lo pide el follaje.
+//
+// La amplitud crece con la altura sobre el pivote del modelo, que es donde un
+// árbol tiene el tronco: abajo no se mueve nada y arriba se mueve la copa.
+uniform float viento_fuerza = 0.0;
+uniform vec2 viento_direccion = vec2(1.0, 0.0);
+uniform float viento_frecuencia = 1.1;
+// A qué altura sobre el pivote el balanceo ya es pleno. Un árbol de seis metros
+// y un arbusto de uno no pueden compartir la misma rampa.
+uniform float viento_altura = 4.0;
+
+// RESPIRACIÓN. El sueño hincha y deshincha la superficie a lo largo de su
+// normal (#1230). Va aquí, en el vértice, y no en la transformación del nodo,
+// **a propósito**: el muro que ves respira y el muro contra el que chocas no se
+// mueve ni un milímetro. Una animación no puede abrir un agujero por donde
+// caerse (#784).
+uniform float respiracion_fuerza = 0.0;
+uniform float respiracion_frecuencia = 0.14;
+uniform float respiracion_fase = 0.0;
+
 // Lo fina que es la rejilla donde caen los vértices. Más alto es más limpio;
 // por debajo de ~120 el temblor deja de leerse como una máquina y empieza a
 // leerse como un fallo.
@@ -56,6 +78,24 @@ uniform float dithering : hint_range(0.0, 1.0, 0.05) = 0.65;
 varying vec3 mundo;
 
 void vertex() {
+	if (viento_fuerza > 0.0) {
+		vec2 direccion = length(viento_direccion) > 0.0001
+			? normalize(viento_direccion)
+			: vec2(1.0, 0.0);
+		// El desfase por posición del modelo evita que un bosque entero se
+		// incline a la vez, que es lo que delata un balanceo de escaparate.
+		float desfase = (MODEL_MATRIX[3].x + MODEL_MATRIX[3].z) * 0.6;
+		float rampa = clamp(VERTEX.y / max(viento_altura, 0.0001), 0.0, 1.0);
+		float ola = sin(TIME * viento_frecuencia + desfase + VERTEX.y * 0.25);
+		// Una racha no es una onda pura: la segunda armónica la despeina.
+		ola += 0.35 * sin(TIME * viento_frecuencia * 2.7 + desfase);
+		VERTEX.xz += direccion * ola * viento_fuerza * rampa;
+	}
+	if (respiracion_fuerza > 0.0) {
+		float pulso = sin(TIME * respiracion_frecuencia * TAU + respiracion_fase);
+		VERTEX += NORMAL * pulso * respiracion_fuerza;
+	}
+
 	mundo = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 
 	vec4 proyectado = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1.0);

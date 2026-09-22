@@ -46,6 +46,10 @@ static func crear(modelo: String) -> MeshInstance3D:
 	instancia.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# Fondo: más allá de esta distancia la niebla y el skyline ya cierran el plano.
 	instancia.visibility_range_end = 60.0
+	# Un árbol quieto delata el decorado. `VientoAmbiental` recoge lo que esté en
+	# este grupo; el balanceo lo pone el shader y la fuerza empieza en cero, así
+	# que esto no mueve nada por sí solo (#1230).
+	instancia.add_to_group(VientoAmbiental.GRUPO_FOLLAJE)
 	return instancia
 
 

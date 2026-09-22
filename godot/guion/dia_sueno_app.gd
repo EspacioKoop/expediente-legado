@@ -8,7 +8,15 @@ extends "res://guion/dia_app.gd"
 const ESCENA_CINEMATICA := preload("res://escenas/cinematica.tscn")
 const PREPARACION_SUENO := preload("res://guion/preparacion_sueno.gd")
 
+## Un solo animador ambiental por día. Vive aquí, en el ancestro común de la
+## cadena `dia_*`, porque el presupuesto de #1230 es global: si cada fase
+## montara el suyo, la calle y el sueño podrían gastar el doble sin que nadie
+## lo viera. Cada capa registra sus piezas y todas compiten por el mismo cupo.
+const NOMBRE_ANIMADOR := "AnimadorAmbiental"
+
 var _entrada_sueno: Node3D = null
+var _animador_ambiental: AnimadorAmbiental3D = null
+var _respiracion_sueno: SuenoRespiracion = null
 
 
 ## Las identidades fuertes reutilizan formas ya seleccionadas por la noche. La
@@ -47,12 +55,47 @@ func _espacio_de(fase: String) -> Dictionary:
 ## arte puede vestirla sin duplicar reglas ni conocer el id de la sala aquí.
 func _entrar_en(fase: String) -> void:
 	super._entrar_en(fase)
+	# El mundo se rehace entero en cada fase: lo registrado apuntaría a nodos
+	# muertos. Se suelta aquí, antes de que las capas descendientes monten lo
+	# suyo sobre el mundo nuevo.
+	soltar_animacion_ambiental()
 	if fase != "sueño" or _mundo == null:
 		return
 	SuenoCastillo3D.montar(_mundo, _espacio_actual)
 	SuenoMontana3D.montar(_mundo, _espacio_actual)
 	SuenoDesierto3D.montar(_mundo, _espacio_actual)
 	SuenoEscuela3D.montar(_mundo, _espacio_actual)
+	_montar_respiracion_sueno()
+
+
+## El animador ambiental vigente, listo para recibir piezas. Lo usan las capas
+## descendientes de la cadena; aquí no se sabe qué se mueve en cada fase.
+func animador_ambiental() -> AnimadorAmbiental3D:
+	if _animador_ambiental == null or not is_instance_valid(_animador_ambiental):
+		_animador_ambiental = AnimadorAmbiental3D.new()
+		_animador_ambiental.name = NOMBRE_ANIMADOR
+		add_child(_animador_ambiental)
+	return _animador_ambiental
+
+
+func soltar_animacion_ambiental() -> void:
+	if _animador_ambiental != null and is_instance_valid(_animador_ambiental):
+		_animador_ambiental.limpiar()
+	if _respiracion_sueno != null and is_instance_valid(_respiracion_sueno):
+		# Devolver la sala a su forma antes de soltarla: el material puede estar
+		# cacheado y no puede heredar la respiración de la noche anterior.
+		_respiracion_sueno.soltar()
+		_respiracion_sueno.queue_free()
+	_respiracion_sueno = null
+
+
+func _montar_respiracion_sueno() -> void:
+	var animador := animador_ambiental()
+	animador.semilla = int(jornada.get("dia", 1))
+	_respiracion_sueno = SuenoRespiracion.new()
+	_respiracion_sueno.name = "RespiracionSueno"
+	add_child(_respiracion_sueno)
+	_respiracion_sueno.adoptar(_mundo, animador)
 
 
 ## Mientras se ve la bisagra no corre el reloj onírico. La noche ya existe,
