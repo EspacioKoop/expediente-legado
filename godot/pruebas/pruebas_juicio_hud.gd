@@ -72,6 +72,13 @@ static func todo(comprobar: Callable) -> void:
 	_caso(comprobar, "hud: traduce tooltip", boton.tooltip_text, "T:EFECTO")
 	_caso(comprobar, "hud: respeta bloqueo", boton.disabled, true)
 
+	barra_jugador.free()
+	barra_rival.free()
+	etiqueta.free()
+	momentum.free()
+	finisher.free()
+	doctrinas.free()
+
 
 static func _caso(comprobar: Callable, nombre: String, obtenido, esperado) -> void:
 	comprobar.call(nombre, obtenido, esperado)
