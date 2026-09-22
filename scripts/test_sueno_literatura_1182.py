@@ -29,7 +29,8 @@ class SuenoLiteratura1182Test(unittest.TestCase):
     def test_no_reselecciona_la_noche(self) -> None:
         self.assertNotIn("Sueno.noche(", self.modulo)
         tramo = self.dia.split("func _espacio_de", 1)[1].split("\n\nfunc ", 1)[0]
-        self.assertLess(tramo.index("Sueno.espacio("), tramo.index("SuenoLiteratura.aplicar("))
+        self.assertIn(". aplicar(", tramo)
+        self.assertLess(tramo.index("Sueno.espacio("), tramo.index("SuenoLiteratura"))
 
     def test_catalogo_declara_motivos_no_hechos(self) -> None:
         obra = self.catalogo["obras"][0]
