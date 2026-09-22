@@ -186,9 +186,7 @@ func _malla_crestas_minerales(tabiques: Array) -> ArrayMesh:
 			izquierda.append(
 				Vector3(centro.x + normal.x * ancho, 0.025, centro.y + normal.y * ancho)
 			)
-			derecha.append(
-				Vector3(centro.x - normal.x * ancho, 0.025, centro.y - normal.y * ancho)
-			)
+			derecha.append(Vector3(centro.x - normal.x * ancho, 0.025, centro.y - normal.y * ancho))
 			cima.append(Vector3(centro.x, altura_colision + relieve, centro.y))
 
 		for paso in 4:
