@@ -91,9 +91,7 @@ func _montar_sueno(mundo: Node3D, espacio: Dictionary) -> void:
 		return
 	var mari := SuenoMari.new()
 	mari.name = "SuenoMariNoche"
-	mari.reduccion_movimiento = bool(
-		PreferenciasSiga.cargar().get("reduccion_movimiento", false)
-	)
+	mari.reduccion_movimiento = bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false))
 	mari.scale = Vector3.ONE * ESCALA_SUENO
 	mari.position = _ancla_entre_entrada_y_salida(espacio)
 	mundo.add_child(mari)
