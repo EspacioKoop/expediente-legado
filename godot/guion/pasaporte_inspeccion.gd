@@ -84,10 +84,11 @@ static func progreso(estado: Dictionary) -> Dictionary:
 		if not por_zona.has(zona):
 			continue
 		total += 1
-		por_zona[zona]["total"] = int(por_zona[zona]["total"]) + 1
+		var resumen_zona: Dictionary = por_zona[zona]
+		resumen_zona["total"] = int(resumen_zona["total"]) + 1
 		if observado(estado, String(entrada.get("id", ""))):
 			observados += 1
-			por_zona[zona]["observados"] = int(por_zona[zona]["observados"]) + 1
+			resumen_zona["observados"] = int(resumen_zona["observados"]) + 1
 
 	return {
 		"observados": observados,
