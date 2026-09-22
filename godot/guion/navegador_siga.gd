@@ -572,6 +572,7 @@ func _mostrar_busqueda(consulta: String) -> void:
 		)
 		_enlaces.set_item_metadata(indice_item, String(recurso.get("url", "")))
 
+
 func _abrir_cache_actual() -> void:
 	var recurso_id := String(_resultado_actual.get("recurso_id", ""))
 	var cache := _indice.cache_de(recurso_id)
