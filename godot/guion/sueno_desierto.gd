@@ -34,6 +34,7 @@ static func adaptar_espacio(
 	resultado["sol"] = 0.72
 	resultado["contorno"] = familia["contorno"]
 	resultado["altura_contorno"] = float(familia.get("altura", 3.0))
+	resultado["tabiques_poligonales"] = familia.get("tabiques", []).duplicate(true)
 	resultado["entrada"] = Vector3(familia.get("entrada", Vector3(-10, 0, -10)))
 
 	var anclas: Array = familia.get("anclas", []).duplicate(true)

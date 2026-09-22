@@ -5,6 +5,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 DESIERTO = ROOT / "godot" / "guion" / "sueno_desierto.gd"
 DIA_SUENO = ROOT / "godot" / "guion" / "dia_sueno_app.gd"
+ESPACIO_3D = ROOT / "godot" / "guion" / "espacio_3d.gd"
 
 
 class SuenoDesiertoRuntimeTest(unittest.TestCase):
@@ -12,13 +13,21 @@ class SuenoDesiertoRuntimeTest(unittest.TestCase):
     def setUpClass(cls):
         cls.desierto = DESIERTO.read_text(encoding="utf-8")
         cls.dia = DIA_SUENO.read_text(encoding="utf-8")
+        cls.espacio_3d = ESPACIO_3D.read_text(encoding="utf-8")
 
     def test_reutiliza_peine_y_familia_fragmentada(self):
         self.assertIn('const FORMA := "peine"', self.desierto)
         self.assertIn("const FAMILIA := SuenoFamilias.FRAGMENTADA", self.desierto)
         self.assertIn('resultado["contorno"] = familia["contorno"]', self.desierto)
         self.assertIn('resultado["altura_contorno"]', self.desierto)
+        self.assertIn('resultado["tabiques_poligonales"]', self.desierto)
+        self.assertIn('familia.get("tabiques", [])', self.desierto)
         self.assertIn('resultado["entrada"]', self.desierto)
+
+    def test_runtime_materializa_los_tabiques_sin_conocer_el_desierto(self):
+        self.assertIn('espacio.get("tabiques_poligonales", [])', self.espacio_3d)
+        self.assertIn("SuenoGeometria.cuerpo_sala(contorno, altura, tabiques)", self.espacio_3d)
+        self.assertNotIn("SuenoDesierto", self.espacio_3d)
 
     def test_remapea_contenido_a_coordenadas_del_desierto(self):
         self.assertIn('resultado.get("salidas", [])', self.desierto)

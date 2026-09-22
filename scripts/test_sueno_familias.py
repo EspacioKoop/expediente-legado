@@ -35,11 +35,15 @@ class SuenoFamiliasTest(unittest.TestCase):
         self.assertGreaterEqual(self.texto.count('"entrada": Vector3('), 3)
         self.assertGreaterEqual(len(re.findall(r'"anclas"\s*:\s*\[', self.texto)), 3)
 
-    def test_anular_es_contorno_concavo_y_fragmentada_conserva_fragmentos(self):
+    def test_anular_es_concavo_y_fragmentada_declara_tabiques_reales(self):
         anular = self.texto.split("\tANULAR:", 1)[1].split("\tFRAGMENTADA:", 1)[0]
+        fragmentada = self.texto.split("\tFRAGMENTADA:", 1)[1]
         self.assertNotIn('"hueco":', anular)
         self.assertGreaterEqual(anular.count("Vector2("), 16)
-        self.assertRegex(self.texto, re.compile(r'"fragmentos"\s*:\s*\n?\s*\['))
+        self.assertRegex(fragmentada, re.compile(r'"tabiques"\s*:\s*\n?\s*\['))
+        self.assertGreaterEqual(fragmentada.count('"desde": Vector2('), 3)
+        self.assertGreaterEqual(fragmentada.count('"hasta": Vector2('), 3)
+        self.assertIn('familia.get("tabiques", [])', self.texto)
 
     def test_no_toca_progreso_jornada_ni_recompensas(self):
         bloque = self.texto.lower()
