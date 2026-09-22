@@ -11,6 +11,7 @@ CONTRATO = ROOT / "godot" / "guion" / "marcadores_mundo.gd"
 VISUAL = ROOT / "godot" / "guion" / "marcador_mundo_3d.gd"
 CONTROLADOR = ROOT / "godot" / "guion" / "dia_marcadores_mundo_app.gd"
 PANEL = ROOT / "godot" / "guion" / "marcadores_mundo_panel.gd"
+TEXTOS = ROOT / "godot" / "datos" / "marcadores_mundo_textos.json"
 ESCENA = ROOT / "godot" / "escenas" / "dia.tscn"
 
 
@@ -54,7 +55,7 @@ class MarcadoresMundo957Test(unittest.TestCase):
         self.assertIn("mundo.remove_child(anterior)", codigo)
 
         self.assertIn('get_node_or_null("/root/MenuGlobal")', codigo)
-        self.assertIn('_boton_menu.text = "Marcadores"', codigo)
+        self.assertIn('_boton_menu.text = _cadena("menu")', codigo)
         self.assertIn("func _physics_process(_delta: float)", codigo)
         self.assertIn("project_ray_origin", codigo)
         self.assertIn("project_ray_normal", codigo)
@@ -92,7 +93,7 @@ class MarcadoresMundo957Test(unittest.TestCase):
         self.assertIn("cantidad >= MarcadoresMundo.LIMITE_POR_ZONA", codigo)
         self.assertIn("signal eliminar_zona_solicitado", codigo)
         self.assertIn("ConfirmationDialog.new()", codigo)
-        self.assertIn('_limpiar_zona.text = "Limpiar zona"', codigo)
+        self.assertIn('_limpiar_zona.text = _cadena("limpiar_zona")', codigo)
 
         for tipo in (
             "TIPO_TIZA",
@@ -114,6 +115,16 @@ class MarcadoresMundo957Test(unittest.TestCase):
         self.assertNotIn("Partida", codigo)
         self.assertNotIn("Economia", codigo)
         self.assertNotIn("InputMap.add_action", codigo)
+
+    def test_copy_visible_vive_fuera_del_gdscript(self):
+        import json
+
+        datos = json.loads(TEXTOS.read_text(encoding="utf-8"))
+        self.assertEqual(datos["menu"], "Marcadores")
+        self.assertEqual(datos["limpiar_zona"], "Limpiar zona")
+        self.assertIn("texto_placeholder", datos)
+        self.assertIn('RUTA_TEXTOS := "res://datos/marcadores_mundo_textos.json"', PANEL.read_text(encoding="utf-8"))
+        self.assertIn('RUTA_TEXTOS := "res://datos/marcadores_mundo_textos.json"', CONTROLADOR.read_text(encoding="utf-8"))
 
     def test_borrado_apuntado_no_necesita_colision_en_la_marca(self):
         codigo = CONTROLADOR.read_text(encoding="utf-8")
