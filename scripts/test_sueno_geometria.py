@@ -22,6 +22,7 @@ class SuenoGeometriaTest(unittest.TestCase):
         self.assertIn("Geometry2D.triangulate_polygon(contorno)", self.codigo)
         self.assertIn("_agregar_suelo_y_techo", self.codigo)
         self.assertIn("_agregar_paredes", self.codigo)
+        self.assertIn("_agregar_tabiques", self.codigo)
 
     def test_expone_guardia_para_aristas_diagonales(self):
         self.assertIn("func tiene_arista_diagonal", self.codigo)
@@ -34,6 +35,14 @@ class SuenoGeometriaTest(unittest.TestCase):
         self.assertIn("visual.mesh = malla", self.codigo)
         self.assertIn("CollisionShape3D.new()", self.codigo)
         self.assertIn("malla.create_trimesh_shape()", self.codigo)
+        self.assertIn("malla_sala(contorno, altura, tabiques)", self.codigo)
+
+    def test_tabiques_son_planos_abiertos_y_no_cajas(self):
+        self.assertIn('tabique.get("desde"', self.codigo)
+        self.assertIn('tabique.get("hasta"', self.codigo)
+        self.assertIn('tabique.get("altura_desde"', self.codigo)
+        self.assertIn('tabique.get("altura_hasta"', self.codigo)
+        self.assertGreaterEqual(self.codigo.count("_triangulo(st, abajo_"), 4)
 
     def test_un_contorno_invalido_no_intenta_crear_colision(self):
         self.assertIn("if malla.get_surface_count() == 0:", self.codigo)

@@ -70,9 +70,10 @@ static var _familias := {
 		],
 	},
 	FRAGMENTADA:
-	# Una sala principal irregular y dos islas caminables separadas visualmente.
+	# Sala irregular atravesada por planos parciales: no encierra al jugador ni
+	# exige saltar, pero rompe la lectura de "una caja rara" con diagonales y
+	# alturas distintas. Los extremos de cada tabique quedan siempre abiertos.
 	{
-		# No exige salto: la integración debe unirlas con pasos/rampas anchas.
 		"contorno":
 		PackedVector2Array(
 			[
@@ -86,10 +87,26 @@ static var _familias := {
 				Vector2(-9, 1),
 			]
 		),
-		"fragmentos":
+		"tabiques":
 		[
-			PackedVector2Array([Vector2(-7, -2), Vector2(-2, -4), Vector2(1, 1), Vector2(-4, 4)]),
-			PackedVector2Array([Vector2(4, 6), Vector2(9, 4), Vector2(11, 9), Vector2(6, 12)]),
+			{
+				"desde": Vector2(-7, -3),
+				"hasta": Vector2(-2, -5),
+				"altura_desde": 1.1,
+				"altura_hasta": 2.3,
+			},
+			{
+				"desde": Vector2(2, 1),
+				"hasta": Vector2(7, 3),
+				"altura_desde": 2.4,
+				"altura_hasta": 1.2,
+			},
+			{
+				"desde": Vector2(0, 11),
+				"hasta": Vector2(5, 13),
+				"altura_desde": 1.5,
+				"altura_hasta": 2.6,
+			},
 		],
 		"altura": 3.0,
 		"entrada": Vector3(-10, 0, -10),
@@ -112,7 +129,9 @@ static func malla(id: String) -> ArrayMesh:
 	var familia := de(id)
 	if familia.is_empty():
 		return ArrayMesh.new()
-	return SuenoGeometria.malla_sala(familia["contorno"], float(familia.get("altura", 3.2)))
+	return SuenoGeometria.malla_sala(
+		familia["contorno"], float(familia.get("altura", 3.2)), familia.get("tabiques", [])
+	)
 
 
 ## Materializa una familia como arquitectura estática completa.
@@ -125,7 +144,9 @@ static func cuerpo(id: String) -> StaticBody3D:
 	var familia := de(id)
 	if familia.is_empty():
 		return StaticBody3D.new()
-	return SuenoGeometria.cuerpo_sala(familia["contorno"], float(familia.get("altura", 3.2)))
+	return SuenoGeometria.cuerpo_sala(
+		familia["contorno"], float(familia.get("altura", 3.2)), familia.get("tabiques", [])
+	)
 
 
 static func valida(id: String) -> bool:
@@ -133,6 +154,9 @@ static func valida(id: String) -> bool:
 	if familia.is_empty():
 		return false
 	var contorno: PackedVector2Array = familia.get("contorno", PackedVector2Array())
+	var tabiques: Array = familia.get("tabiques", [])
 	return (
-		SuenoGeometria.contorno_valido(contorno) and SuenoGeometria.tiene_arista_diagonal(contorno)
+		SuenoGeometria.contorno_valido(contorno)
+		and SuenoGeometria.tiene_arista_diagonal(contorno)
+		and (id != FRAGMENTADA or not tabiques.is_empty())
 	)

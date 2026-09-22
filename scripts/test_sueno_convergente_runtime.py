@@ -36,7 +36,10 @@ class SuenoConvergenteRuntimeTest(unittest.TestCase):
         bloque_contorno = self.espacio.index('if espacio.has("contorno")')
         bloque_planta = self.espacio.index('elif espacio.has("planta")')
         self.assertLess(bloque_contorno, bloque_planta)
-        self.assertIn('SuenoGeometria.cuerpo_sala(contorno, altura)', self.espacio)
+        self.assertIn(
+            "SuenoGeometria.cuerpo_sala(contorno, altura, tabiques)", self.espacio
+        )
+        self.assertIn('espacio.get("tabiques_poligonales", [])', self.espacio)
 
     def test_no_superpone_colision_ortogonal_al_poligono(self):
         inicio = self.espacio.index('if espacio.has("contorno")')

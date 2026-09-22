@@ -59,7 +59,8 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 			espacio.get("escala_textura", 1.2),
 			deformacion_textura,
 			contraste_textura,
-			preservar_detalle_textura
+			preservar_detalle_textura,
+			espacio.get("tabiques_poligonales", [])
 		)
 	elif espacio.has("planta"):
 		_por_planta(
@@ -352,9 +353,10 @@ static func _por_contorno(
 	metros: float = 1.2,
 	deformacion: Vector3 = Vector3.ONE,
 	contraste: float = 1.0,
-	preservar_detalle_textura: bool = false
+	preservar_detalle_textura: bool = false,
+	tabiques: Array = []
 ) -> void:
-	var cuerpo := SuenoGeometria.cuerpo_sala(contorno, altura)
+	var cuerpo := SuenoGeometria.cuerpo_sala(contorno, altura, tabiques)
 	var malla := _malla_de(cuerpo)
 	if malla != null:
 		var material := ShaderMaterial.new()
