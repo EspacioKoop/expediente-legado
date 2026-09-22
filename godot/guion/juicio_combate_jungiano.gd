@@ -124,6 +124,81 @@ static func estado_hud(anfitrion: Node) -> Dictionary:
 	return estado
 
 
+static func aplicar_combo(
+	dano_combo_pendiente: int,
+	determinacion_jugador: int,
+	contraataque: int,
+	esquiva: float,
+	efectos: Dictionary,
+	determinacion_maxima: int,
+) -> Dictionary:
+	var dano_combo := dano_combo_pendiente
+	if efectos.has("dano_multiplier"):
+		dano_combo += maxi(1, int(round(float(efectos["dano_multiplier"]) - 1.0)))
+	if efectos.has("dano"):
+		dano_combo += maxi(0, int(efectos["dano"]))
+
+	var determinacion := determinacion_jugador
+	if efectos.has("curacion"):
+		determinacion = mini(
+			determinacion_maxima, determinacion + maxi(0, int(efectos["curacion"]))
+		)
+
+	var contra := contraataque
+	if bool(efectos.get("contragolpe", false)):
+		contra = maxi(contra, 1)
+
+	var esquiva_nueva := esquiva
+	if efectos.has("evasion_temporal"):
+		esquiva_nueva = maxf(esquiva_nueva, float(efectos.get("duracion", 0.8)))
+
+	return {
+		"dano_combo_pendiente": dano_combo,
+		"determinacion_jugador": determinacion,
+		"contraataque": contra,
+		"esquiva": esquiva_nueva,
+	}
+
+
+static func aplicar_finisher(
+	determinacion_rival: int,
+	determinacion_jugador: int,
+	invulnerabilidad: float,
+	efectos: Dictionary,
+	es_super: bool,
+	determinacion_maxima: int,
+) -> Dictionary:
+	var dano := maxi(0, int(efectos.get("dano", 0)))
+	var jugador := determinacion_jugador
+	if bool(efectos.get("curacion_total", false)):
+		jugador = determinacion_maxima
+	return {
+		"dano": dano,
+		"determinacion_rival": maxi(0, determinacion_rival - dano),
+		"determinacion_jugador": jugador,
+		"invulnerabilidad": maxf(invulnerabilidad, float(efectos.get("invulnerabilidad", 0.0))),
+		"sacudida_camara": 0.38 if es_super else 0.24,
+	}
+
+
+static func aplicar_curacion_arquetipo(
+	determinacion_jugador: int,
+	acumulada: float,
+	efectos: Dictionary,
+	determinacion_maxima: int,
+) -> Dictionary:
+	var tasa := float(efectos.get("curacion", 0.0)) + float(efectos.get("bonus_todo", 0.0))
+	if tasa <= 0.0 or determinacion_jugador >= determinacion_maxima:
+		return {"determinacion_jugador": determinacion_jugador, "acumulada": acumulada}
+
+	var determinacion := determinacion_jugador
+	var nueva_acumulada := acumulada + tasa
+	while nueva_acumulada >= 1.0:
+		nueva_acumulada -= 1.0
+		determinacion = mini(determinacion_maxima, determinacion + 1)
+	return {"determinacion_jugador": determinacion, "acumulada": nueva_acumulada}
+
+
 static func salir_combate(anfitrion: Node) -> void:
 	var momentum := gestor(anfitrion, "GestorMomentum")
 	if momentum != null:
