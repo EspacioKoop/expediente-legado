@@ -2,25 +2,30 @@
   {
     "id": "archivo:mesa-clasificacion",
     "zona": "archivo",
+    "ancla_tipo": "bulto_rol",
     "ancla": "mesa_clasificacion",
     "modo_observacion": "examinar"
   },
   {
     "id": "trayecto:farola-sodio",
     "zona": "trayecto",
+    "ancla_tipo": "nodo_prefijo",
     "ancla": "FarolaRetroUrban",
     "modo_observacion": "examinar"
   },
   {
     "id": "casa:ventana",
     "zona": "casa",
+    "ancla_tipo": "nodo",
     "ancla": "VentanaCasa",
     "modo_observacion": "examinar"
   },
   {
     "id": "sueno:peine",
     "zona": "sueño",
-    "ancla": "SuenoFormas:peine",
+    "ancla_tipo": "nodo",
+    "ancla": "LuzDeSala",
+    "forma": "peine",
     "modo_observacion": "examinar"
   }
 ]
