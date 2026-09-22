@@ -25,18 +25,30 @@ func _init() -> void:
 
 func _probar_contrato_cerrado() -> void:
 	var creado := PresenciaDatos.crear_evento(
-		"calle", "test-379", "anon-a", "SALA-98", 0, Vector3(1, 0, 2), 0.5, "walk", "saludo", AHORA, "p-a-0"
+		"calle",
+		"test-379",
+		"anon-a",
+		"SALA-98",
+		0,
+		Vector3(1, 0, 2),
+		0.5,
+		"walk",
+		"saludo",
+		AHORA,
+		"p-a-0"
 	)
 	_comprobar("snapshot válido", creado["ok"], true)
 	_comprobar("kind presence", creado["event"]["kind"], "presence")
-	_comprobar("TTL corto", creado["event"]["expires_at"] - creado["event"]["created_at"], PresenciaDatos.TTL_SEGUNDOS)
+	_comprobar(
+		"TTL corto",
+		creado["event"]["expires_at"] - creado["event"]["created_at"],
+		PresenciaDatos.TTL_SEGUNDOS
+	)
 
 	var con_partida: Dictionary = creado["event"].duplicate(true)
 	con_partida["payload"]["partida"] = {"dinero": 999, "fase": "archivo"}
 	_comprobar(
-		"Partida no cabe en payload",
-		PresenciaDatos.validar_evento(con_partida, AHORA)["ok"],
-		false
+		"Partida no cabe en payload", PresenciaDatos.validar_evento(con_partida, AHORA)["ok"], false
 	)
 
 	var gesto_libre := creado["event"].duplicate(true)
@@ -50,9 +62,7 @@ func _probar_contrato_cerrado() -> void:
 	var infinito := creado["event"].duplicate(true)
 	infinito["payload"]["position"] = [INF, 0.0, 0.0]
 	_comprobar(
-		"posición no finita se rechaza",
-		PresenciaDatos.validar_evento(infinito, AHORA)["ok"],
-		false
+		"posición no finita se rechaza", PresenciaDatos.validar_evento(infinito, AHORA)["ok"], false
 	)
 
 	_comprobar("room id legible aceptado", PresenciaDatos.validar_room_id("AMIGOS_98-A"), true)
@@ -84,7 +94,11 @@ func _probar_dos_clientes_fixture() -> void:
 	_comprobar("A ve a B", vistos_a["participants"].size(), 1)
 	_comprobar("B ve a A", vistos_b["participants"].size(), 1)
 	_comprobar("A no se ve a sí mismo", vistos_a["participants"][0]["actor_public_id"], "anon-b")
-	_comprobar("pose remota preservada", vistos_b["participants"][0]["payload"]["position"], [1.0, 0.0, 2.0])
+	_comprobar(
+		"pose remota preservada",
+		vistos_b["participants"][0]["payload"]["position"],
+		[1.0, 0.0, 2.0]
+	)
 
 	var repetido := cliente_b.consultar(AHORA + 1)
 	_comprobar("snapshot repetido no reaparece", repetido["participants"].size(), 0)
@@ -102,7 +116,9 @@ func _probar_dos_clientes_fixture() -> void:
 		"test-379", Vector3(5, 0, 2), 1.2, "idle", "", AHORA + 3, "p-a-2"
 	)
 	transporte_b.inyectar(pub_a_2["event"])
-	_comprobar("participante ocultado desaparece", cliente_b.consultar(AHORA + 3)["participants"].size(), 0)
+	_comprobar(
+		"participante ocultado desaparece", cliente_b.consultar(AHORA + 3)["participants"].size(), 0
+	)
 
 	var otro_room := pub_b["event"].duplicate(true)
 	otro_room["payload"]["room_id"] = "OTRA-SALA"
@@ -112,18 +128,44 @@ func _probar_dos_clientes_fixture() -> void:
 
 func _probar_avatar_no_solido_e_interpolado() -> void:
 	var primero := PresenciaDatos.crear_evento(
-		"calle", "test-379", "anon-remoto", "SALA-98", 0, Vector3.ZERO, 0.0, "idle", "", AHORA, "avatar-0"
+		"calle",
+		"test-379",
+		"anon-remoto",
+		"SALA-98",
+		0,
+		Vector3.ZERO,
+		0.0,
+		"idle",
+		"",
+		AHORA,
+		"avatar-0"
 	)
 	var segundo := PresenciaDatos.crear_evento(
-		"calle", "test-379", "anon-remoto", "SALA-98", 1, Vector3(10, 0, 0), 1.0, "walk", "senalar", AHORA + 1, "avatar-1"
+		"calle",
+		"test-379",
+		"anon-remoto",
+		"SALA-98",
+		1,
+		Vector3(10, 0, 0),
+		1.0,
+		"walk",
+		"senalar",
+		AHORA + 1,
+		"avatar-1"
 	)
 	var avatar := PresenciaRemota3D.new()
 	_comprobar("avatar acepta primera muestra", avatar.aplicar_evento(primero["event"]), true)
-	_comprobar("avatar visible tiene malla", avatar.get_child_count() > 0 and avatar.get_child(0) is MeshInstance3D, true)
+	_comprobar(
+		"avatar visible tiene malla",
+		avatar.get_child_count() > 0 and avatar.get_child(0) is MeshInstance3D,
+		true
+	)
 	_comprobar("avatar no es cuerpo de colisión", avatar is CollisionObject3D, false)
 	_comprobar("avatar acepta segunda muestra", avatar.aplicar_evento(segundo["event"]), true)
 	avatar.avanzar(0.05)
-	_comprobar("interpolación no teleporta", avatar.position.x > 0.0 and avatar.position.x < 10.0, true)
+	_comprobar(
+		"interpolación no teleporta", avatar.position.x > 0.0 and avatar.position.x < 10.0, true
+	)
 	_comprobar("gesto visual cerrado llega", avatar.gesture, "senalar")
 	avatar.free()
 
@@ -136,7 +178,9 @@ func _probar_offline_y_cierre() -> void:
 		"test-379", Vector3.ZERO, 0.0, "idle", "", AHORA, "offline-0"
 	)
 	_comprobar("offline descarta explícitamente", publicacion["status"], "discarded_offline")
-	_comprobar("offline no inventa participantes", offline.consultar(AHORA)["participants"].size(), 0)
+	_comprobar(
+		"offline no inventa participantes", offline.consultar(AHORA)["participants"].size(), 0
+	)
 	_comprobar("servicio estaba activo", offline.activa(), true)
 	var cierre := offline.cerrar_sala()
 	_comprobar("cerrar sala es seguro", cierre["ok"], true)
