@@ -29,8 +29,11 @@ func _process(_delta: float) -> void:
 
 
 func _montar_pendientes(dia: Node, mundo: Node3D) -> void:
-	var fase := String(dia.jornada.get("fase", ""))
-	var forma_actual := _forma_sueno_actual(dia)
+	var jornada = dia.get("jornada")
+	if typeof(jornada) != TYPE_DICTIONARY:
+		return
+	var fase := String(jornada.get("fase", ""))
+	var forma_actual := _forma_sueno_actual(jornada)
 	for entrada in PasaporteInspeccion.catalogo():
 		var punto_id := String(entrada.get("id", ""))
 		if punto_id.is_empty() or _montados.has(punto_id):
@@ -132,10 +135,10 @@ func _buscar_bulto_por_rol(mundo: Node3D, zona: String, rol: String) -> Node3D:
 	return null
 
 
-func _forma_sueno_actual(dia: Node) -> String:
-	if String(dia.jornada.get("fase", "")) != "sueño":
+func _forma_sueno_actual(jornada: Dictionary) -> String:
+	if String(jornada.get("fase", "")) != "sueño":
 		return ""
-	var escenas: Array = dia.jornada.get("sueno_escenas", [])
+	var escenas: Array = jornada.get("sueno_escenas", [])
 	if escenas.is_empty():
 		return ""
 	return String(escenas[0])
