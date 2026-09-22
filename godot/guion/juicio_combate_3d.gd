@@ -691,18 +691,21 @@ func _al_momentum_cambiado(_actual: float, _maximo: float) -> void:
 
 
 func _al_combo_ejecutado(nombre: String, efectos: Dictionary) -> void:
-	if efectos.has("dano_multiplier"):
-		_dano_combo_pendiente += maxi(1, int(round(float(efectos["dano_multiplier"]) - 1.0)))
-	if efectos.has("dano"):
-		_dano_combo_pendiente += maxi(0, int(efectos["dano"]))
-	if efectos.has("curacion"):
-		_determinacion_jugador = mini(
-			DETERMINACION_BASE, _determinacion_jugador + maxi(0, int(efectos["curacion"]))
+	var estado := (
+		JUNGIANO
+		. aplicar_combo(
+			_dano_combo_pendiente,
+			_determinacion_jugador,
+			_contraataque,
+			_esquiva,
+			efectos,
+			DETERMINACION_BASE,
 		)
-	if bool(efectos.get("contragolpe", false)):
-		_contraataque = maxi(_contraataque, 1)
-	if efectos.has("evasion_temporal"):
-		_esquiva = maxf(_esquiva, float(efectos.get("duracion", 0.8)))
+	)
+	_dano_combo_pendiente = int(estado["dano_combo_pendiente"])
+	_determinacion_jugador = int(estado["determinacion_jugador"])
+	_contraataque = int(estado["contraataque"])
+	_esquiva = float(estado["esquiva"])
 	var radio := float(efectos.get("area", 1.2))
 	_particulas_jungianas(radio, false)
 	Sonido.sonar(self, "pulsar")
@@ -714,14 +717,21 @@ func _ejecutar_finisher_jungiano() -> void:
 
 
 func _al_finisher_ejecutado(nombre: String, efectos: Dictionary, es_super: bool) -> void:
-	var dano := maxi(0, int(efectos.get("dano", 0)))
-	_determinacion_rival = maxi(0, _determinacion_rival - dano)
-	if bool(efectos.get("curacion_total", false)):
-		_determinacion_jugador = DETERMINACION_BASE
-	_invulnerabilidad_jungiana = maxf(
-		_invulnerabilidad_jungiana, float(efectos.get("invulnerabilidad", 0.0))
+	var estado := (
+		JUNGIANO
+		. aplicar_finisher(
+			_determinacion_rival,
+			_determinacion_jugador,
+			_invulnerabilidad_jungiana,
+			efectos,
+			es_super,
+			DETERMINACION_BASE,
+		)
 	)
-	_sacudida_camara = 0.38 if es_super else 0.24
+	_determinacion_rival = int(estado["determinacion_rival"])
+	_determinacion_jugador = int(estado["determinacion_jugador"])
+	_invulnerabilidad_jungiana = float(estado["invulnerabilidad"])
+	_sacudida_camara = float(estado["sacudida_camara"])
 	_particulas_jungianas(float(efectos.get("area", 2.4)), es_super)
 	_reaccion(_figura_rival, 0.62 if es_super else 0.42)
 	Sonido.sonar(self, "marcar")
@@ -732,13 +742,17 @@ func _al_finisher_ejecutado(nombre: String, efectos: Dictionary, es_super: bool)
 
 
 func _aplicar_curacion_arquetipo(efectos: Dictionary) -> void:
-	var tasa := float(efectos.get("curacion", 0.0)) + float(efectos.get("bonus_todo", 0.0))
-	if tasa <= 0.0 or _determinacion_jugador >= DETERMINACION_BASE:
-		return
-	_curacion_arquetipo_acumulada += tasa
-	while _curacion_arquetipo_acumulada >= 1.0:
-		_curacion_arquetipo_acumulada -= 1.0
-		_determinacion_jugador = mini(DETERMINACION_BASE, _determinacion_jugador + 1)
+	var estado := (
+		JUNGIANO
+		. aplicar_curacion_arquetipo(
+			_determinacion_jugador,
+			_curacion_arquetipo_acumulada,
+			efectos,
+			DETERMINACION_BASE,
+		)
+	)
+	_determinacion_jugador = int(estado["determinacion_jugador"])
+	_curacion_arquetipo_acumulada = float(estado["acumulada"])
 
 
 func _actualizar_hud_jungiano() -> void:
