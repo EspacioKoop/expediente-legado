@@ -21,11 +21,13 @@ static func plan_movimiento(
 	hacia.y = 0.0
 	var distancia := hacia.length()
 	var paso := {
+		"mover": false,
 		"desplazamiento": Vector3.ZERO,
 		"rotacion_y": 0.0,
 		"iniciar_ataque": false,
 	}
 	if distancia > REGLAS.ALCANCE_RIVAL:
+		paso["mover"] = true
 		var direccion := hacia.normalized()
 		var velocidad := velocidad_rival
 		if enredo_restante > 0.0:
