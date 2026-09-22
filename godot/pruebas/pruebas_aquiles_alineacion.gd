@@ -26,9 +26,9 @@ func _probar_reflector_deliberado() -> void:
 	_comprobar(is_equal_approx(reflector.angulo_actual(), 0.0), "ángulo inicial cero")
 
 	_comprobar(reflector.interactuar(root), "primer giro aceptado")
-	_comprobar(not reflector.esta_alineado(), "15 grados no revelan el talón")
+	_comprobar(not reflector.esta_alineado(), "-15 grados no revelan el talón")
 	_comprobar(reflector.interactuar(root), "segundo giro aceptado")
-	_comprobar(not reflector.esta_alineado(), "30 grados siguen sin alinear")
+	_comprobar(not reflector.esta_alineado(), "-30 grados siguen sin alinear")
 	_comprobar(reflector.interactuar(root), "tercer giro aceptado")
 	_comprobar(reflector.esta_alineado(), "45 grados alinean el reflejo")
 	_comprobar(
@@ -63,6 +63,13 @@ func _probar_resolucion_diegetica() -> void:
 	_comprobar(not sello.esta_habilitado(), "dos giros no habilitan el sello")
 	reflector.interactuar(root)
 	_comprobar(talon.visible, "la alineación revela el talón")
+	var haz := reflector.get_node("DiscoReflector/HazReflejado") as SpotLight3D
+	var direccion_haz := (haz.global_transform.basis * Vector3.FORWARD).normalized()
+	var hacia_talon := (talon.global_position - haz.global_position).normalized()
+	_comprobar(
+		direccion_haz.dot(hacia_talon) > 0.99,
+		"el haz visible apunta geométricamente al talón al quedar alineado",
+	)
 	_comprobar(sello.esta_habilitado(), "revelar habilita el sello")
 
 	_comprobar(sello.interactuar(root), "el sello acepta la interacción revelada")
