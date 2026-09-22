@@ -50,7 +50,9 @@ class OnboardingArchivoTest(unittest.TestCase):
             self.capa,
         )
         self.assertIn("Control.PRESET_CENTER_TOP", self.capa)
-        self.assertIn("EstiloSiga.caja_saliente(COLOR_FONDO_TUTORIAL)", self.capa)
+        self.assertIn("HUDEstilo.caja_tutorial()", self.capa)
+        self.assertIn("HUDEstilo.TITULO_TUTORIAL", self.capa)
+        self.assertIn("HUDEstilo.TEXTO_TUTORIAL", self.capa)
         self.assertNotIn("Control.PRESET_CENTER_BOTTOM", self.capa)
         self.assertNotIn('rol.text = "OBJETIVO INICIAL"', self.capa)
         self.assertNotIn("Mayús corre", self.capa)
