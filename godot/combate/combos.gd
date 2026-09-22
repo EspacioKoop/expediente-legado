@@ -4,6 +4,9 @@ extends Node
 signal combo_ejecutado(nombre_combo, efectos)
 signal finisher_ejecutado(nombre, efectos, es_super)
 
+const MAX_BUFFER: int = 6
+const TIEMPO_BUFFER: float = 2.0
+
 var combos_disponibles: Dictionary = {
 	"golpe_sombra":
 	{
@@ -71,8 +74,6 @@ var finishers: Dictionary = {
 }
 
 var buffer_entradas: Array = []
-const MAX_BUFFER: int = 6
-const TIEMPO_BUFFER: float = 2.0
 
 
 func _ready() -> void:
