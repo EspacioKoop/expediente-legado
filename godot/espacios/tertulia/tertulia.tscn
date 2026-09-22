@@ -1,0 +1,39 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://espacios/tertulia/tertulia.gd" id="1_script"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_sillon"]
+size = Vector3(1, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_mesa"]
+size = Vector3(1.5, 0.1, 1.5)
+
+[sub_resource type="SphereShape3D" id="SphereShape_dialogo"]
+radius = 2.0
+
+[node name="Tertulia" type="Node3D"]
+
+[node name="Sala" type="Node3D" parent="."]
+
+[node name="Sillon1" type="MeshInstance3D" parent="Sala"]
+position = Vector3(-2, 0.5, -2)
+mesh = SubResource("BoxMesh_sillon")
+
+[node name="Sillon2" type="MeshInstance3D" parent="Sala"]
+position = Vector3(2, 0.5, -2)
+mesh = SubResource("BoxMesh_sillon")
+
+[node name="MesaCentral" type="MeshInstance3D" parent="Sala"]
+position = Vector3(0, 0.4, 0)
+mesh = SubResource("BoxMesh_mesa")
+
+[node name="NPC_Mentor" type="CharacterBody3D" parent="."]
+position = Vector3(0, 0, -3)
+script = ExtResource("1_script")
+
+[node name="AreaDialogo" type="Area3D" parent="NPC_Mentor"]
+collision_layer = 1
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NPC_Mentor/AreaDialogo"]
+shape = SubResource("SphereShape_dialogo")

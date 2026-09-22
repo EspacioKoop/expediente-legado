@@ -1,0 +1,148 @@
+[gd_resource type="Resource" script_class="ArbolIndividuacion" format=3]
+
+[ext_resource type="Script" path="res://progresion/arbol_individuacion.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+nodos = {
+"sombra_inicio": {
+"id": "sombra_inicio",
+"nombre": "Reconocer la Sombra",
+"descripcion": "Aceptar la existencia de aspectos reprimidos",
+"tipo": "inicio",
+"requisitos": {"insight": 50, "evento": "diario_encontrado"},
+"recompensas": {"desbloquea_arquetipo": "sombra", "habilidad": "golpe_sombra"},
+"conexiones": ["sombra_integracion", "sombra_proyeccion"],
+"posicion": [100, 100]
+},
+"sombra_integracion": {
+"id": "sombra_integracion",
+"nombre": "Integrar la Sombra",
+"descripcion": "Convertir la oscuridad en fuerza consciente",
+"tipo": "medio",
+"requisitos": {"nodo_previo": "sombra_inicio", "ritual": "derrotar_sombra_interior"},
+"recompensas": {"bonus_crit": 0.1, "finishers": ["sombra_desatada"]},
+"conexiones": ["sombra_maestria"],
+"posicion": [300, 50]
+},
+"sombra_proyeccion": {
+"id": "sombra_proyeccion",
+"nombre": "Proyección Consciente",
+"descripcion": "Reconocer sombras ajenas sin absorberlas",
+"tipo": "medio",
+"requisitos": {"nodo_previo": "sombra_inicio", "evento": "dialogar_mentor"},
+"recompensas": {"evasion": 0.15, "habilidad": "espejo_sombra"},
+"conexiones": ["sombra_maestria"],
+"posicion": [300, 150]
+},
+"sombra_maestria": {
+"id": "sombra_maestria",
+"nombre": "Maestría de la Sombra",
+"descripcion": "Dominio total sobre el aspecto reprimido",
+"tipo": "final",
+"requisitos": {"nodos_previos": ["sombra_integracion", "sombra_proyeccion"]},
+"recompensas": {"bonus_daño_sombra": 0.3, "super_finisher": "furia_divina"},
+"conexiones": [],
+"posicion": [500, 100]
+},
+"anima_inicio": {
+"id": "anima_inicio",
+"nombre": "Encuentro con el Anima/Animus",
+"descripcion": "Reconocer la contraparte interior",
+"tipo": "inicio",
+"requisitos": {"insight": 50, "evento": "sueño_guia"},
+"recompensas": {"desbloquea_arquetipo": "anima", "habilidad": "abrazo_anima"},
+"conexiones": ["anima_curación", "anima_guia"],
+"posicion": [100, 300]
+},
+"anima_curacion": {
+"id": "anima_curacion",
+"nombre": "Sanación Profunda",
+"descripcion": "El Anima sana heridas del pasado",
+"tipo": "medio",
+"requisitos": {"nodo_previo": "anima_inicio", "ritual": "ritual_agua"},
+"recompensas": {"curacion_pasiva": 5, "resistencia_elemental": 0.2},
+"conexiones": ["anima_union"],
+"posicion": [300, 250]
+},
+"anima_guia": {
+"id": "anima_guia",
+"nombre": "Guía Interior",
+"descripcion": "El Anima guía en momentos críticos",
+"tipo": "medio",
+"requisitos": {"nodo_previo": "anima_inicio", "evento": "decision_moral"},
+"recompensas": {"intuicion_combate": true, "bonus_esquivar": 0.1},
+"conexiones": ["anima_union"],
+"posicion": [300, 350]
+},
+"anima_union": {
+"id": "anima_union",
+"nombre": "Unión con el Anima",
+"descripcion": "Integración completa de la contraparte",
+"tipo": "final",
+"requisitos": {"nodos_previos": ["anima_curacion", "anima_guia"]},
+"recompensas": {"curacion_area_ampliada": true, "buff_aliados_permanente": 0.1},
+"conexiones": [],
+"posicion": [500, 300]
+},
+"persona_inicio": {
+"id": "persona_inicio",
+"nombre": "Conciencia de la Máscara",
+"descripcion": "Ver la propia Persona como herramienta",
+"tipo": "inicio",
+"requisitos": {"insight": 30, "evento": "observar_reflejo"},
+"recompensas": {"desbloquea_arquetipo": "persona", "habilidad": "danza_persona"},
+"conexiones": ["persona_adaptacion", "persona_autenticidad"],
+"posicion": [700, 100]
+},
+"persona_adaptacion": {
+"id": "persona_adaptacion",
+"nombre": "Adaptación Fluida",
+"descripcion": "Cambiar de máscara según la situación",
+"tipo": "medio",
+"requisitos": {"nodo_previo": "persona_inicio", "ritual": "cambio_rol"},
+"recompensas": {"bonus_social": 0.3, "infiltracion": true},
+"conexiones": ["persona_trascendencia"],
+"posicion": [900, 50]
+},
+"persona_autenticidad": {
+"id": "persona_autenticidad",
+"nombre": "Autenticidad Radical",
+"descripcion": "Ser uno mismo detrás de cualquier máscara",
+"tipo": "medio",
+"requisitos": {"nodo_previo": "persona_inicio", "evento": "revelar_verdad"},
+"recompensas": {"resistencia_mental": 0.25, "inmune_manipulacion": true},
+"conexiones": ["persona_trascendencia"],
+"posicion": [900, 150]
+},
+"persona_trascendencia": {
+"id": "persona_trascendencia",
+"nombre": "Trascender la Persona",
+"descripcion": "La máscara ya no es necesaria",
+"tipo": "final",
+"requisitos": {"nodos_previos": ["persona_adaptacion", "persona_autenticidad"]},
+"recompensas": {"evasion_maxima": 0.4, "verdad_absoluta": true},
+"conexiones": [],
+"posicion": [1100, 100]
+},
+"self_inicio": {
+"id": "self_inicio",
+"nombre": "Vislumbre del Self",
+"descripcion": "Experimentar momentáneamente la totalidad",
+"tipo": "inicio",
+"requisitos": {"insight": 200, "nodos_completados": 6},
+"recompensas": {"desbloquea_arquetipo": "self"},
+"conexiones": ["self_integracion"],
+"posicion": [400, 500]
+},
+"self_integracion": {
+"id": "self_integracion",
+"nombre": "Integración Total",
+"descripcion": "Todos los aspectos unificados en el Self",
+"tipo": "final",
+"requisitos": {"nodo_previo": "self_inicio", "ritual": "ritual_mandala"},
+"recompensas": {"forma_final": true, "stats_global": 0.15, "acceso_todos_finishers": true},
+"conexiones": [],
+"posicion": [400, 600]
+}
+}
