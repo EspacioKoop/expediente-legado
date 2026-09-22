@@ -1665,6 +1665,66 @@
       "sha256": "3ae9b7509226e9d5a09b21d8487450fec6c80a690fd96f83a2d66825d5566b1c",
       "archivo_origen": "StylooClassroomAssetPack GLTF & FBX/computer/GLTF/COMPUTERprinter.glb",
       "paquete_sha256": "f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954"
+    },
+    {
+      "ruta": "modelos/styloo_school/principal_office_desk_ImphenziaPalette01-256-Gradient.png",
+      "titulo": "Principal Office desk — textura de paleta incrustada",
+      "autor": "styloo",
+      "licencia": "CC0-1.0",
+      "fuente": "https://styloo.itch.io/classroom-asset-pack",
+      "sha256": "8c12ad6d4aa377173f7b3f98be3514e4c6d50214a6587747e6f4d4edecc17bd9",
+      "archivo_origen": "StylooClassroomAssetPack GLTF & FBX/principal office/GLTF/PRINCIPALOFFICEdesk.glb (textura incrustada, extraída al importar)",
+      "paquete_sha256": "f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954"
+    },
+    {
+      "ruta": "modelos/styloo_school/principal_office_chair_ImphenziaPalette01-256-Gradient.png",
+      "titulo": "Principal Office principal chair — textura de paleta incrustada",
+      "autor": "styloo",
+      "licencia": "CC0-1.0",
+      "fuente": "https://styloo.itch.io/classroom-asset-pack",
+      "sha256": "8c12ad6d4aa377173f7b3f98be3514e4c6d50214a6587747e6f4d4edecc17bd9",
+      "archivo_origen": "StylooClassroomAssetPack GLTF & FBX/principal office/GLTF/PRINCIPALOFFICEprincipalchair.glb (textura incrustada, extraída al importar)",
+      "paquete_sha256": "f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954"
+    },
+    {
+      "ruta": "modelos/styloo_school/principal_office_shelf_ImphenziaPalette01-256-Gradient.png",
+      "titulo": "Principal Office shelf — textura de paleta incrustada",
+      "autor": "styloo",
+      "licencia": "CC0-1.0",
+      "fuente": "https://styloo.itch.io/classroom-asset-pack",
+      "sha256": "8c12ad6d4aa377173f7b3f98be3514e4c6d50214a6587747e6f4d4edecc17bd9",
+      "archivo_origen": "StylooClassroomAssetPack GLTF & FBX/principal office/GLTF/PRINCIPALOFFICEshelf.glb (textura incrustada, extraída al importar)",
+      "paquete_sha256": "f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954"
+    },
+    {
+      "ruta": "modelos/styloo_school/principal_office_telephone_ImphenziaPalette01-256-Gradient.png",
+      "titulo": "Principal Office telephone — textura de paleta incrustada",
+      "autor": "styloo",
+      "licencia": "CC0-1.0",
+      "fuente": "https://styloo.itch.io/classroom-asset-pack",
+      "sha256": "8c12ad6d4aa377173f7b3f98be3514e4c6d50214a6587747e6f4d4edecc17bd9",
+      "archivo_origen": "StylooClassroomAssetPack GLTF & FBX/principal office/GLTF/PRINCIPALOFFICEtelephone.glb (textura incrustada, extraída al importar)",
+      "paquete_sha256": "f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954"
+    },
+    {
+      "ruta": "modelos/styloo_school/computer_pc_old_ImphenziaPalette01-256-Gradient.png",
+      "titulo": "Computer Room old PC — textura de paleta incrustada",
+      "autor": "styloo",
+      "licencia": "CC0-1.0",
+      "fuente": "https://styloo.itch.io/classroom-asset-pack",
+      "sha256": "8c12ad6d4aa377173f7b3f98be3514e4c6d50214a6587747e6f4d4edecc17bd9",
+      "archivo_origen": "StylooClassroomAssetPack GLTF & FBX/computer/GLTF/COMPUTERpcold.glb (textura incrustada, extraída al importar)",
+      "paquete_sha256": "f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954"
+    },
+    {
+      "ruta": "modelos/styloo_school/computer_printer_ImphenziaPalette01-256-Gradient.png",
+      "titulo": "Computer Room printer — textura de paleta incrustada",
+      "autor": "styloo",
+      "licencia": "CC0-1.0",
+      "fuente": "https://styloo.itch.io/classroom-asset-pack",
+      "sha256": "8c12ad6d4aa377173f7b3f98be3514e4c6d50214a6587747e6f4d4edecc17bd9",
+      "archivo_origen": "StylooClassroomAssetPack GLTF & FBX/computer/GLTF/COMPUTERprinter.glb (textura incrustada, extraída al importar)",
+      "paquete_sha256": "f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954"
     }
   ]
 }
