@@ -9,6 +9,7 @@ const HUD = preload("res://guion/juicio_combate_hud.gd")
 const ARENA = preload("res://guion/juicio_combate_arena_3d.gd")
 const JUNGIANO = preload("res://guion/juicio_combate_jungiano.gd")
 const SIMBOLICO = preload("res://guion/juicio_combate_simbolico.gd")
+const RIVAL = preload("res://guion/juicio_combate_rival.gd")
 const DETERMINACION_BASE := REGLAS.DETERMINACION_BASE
 const DETERMINACION_MINIMA_RIVAL := REGLAS.DETERMINACION_MINIMA_RIVAL
 const VELOCIDAD_JUGADOR := 4.8
@@ -252,18 +253,23 @@ func _mover_rival(delta: float) -> void:
 		_actualizar_telegrafo_rival(delta)
 		return
 
-	var hacia := _jugador.position - _rival.position
-	hacia.y = 0.0
-	var distancia := hacia.length()
-	if distancia > ALCANCE_RIVAL:
-		var direccion := hacia.normalized()
-		var velocidad := _velocidad_rival
-		if _enredo > 0.0:
-			velocidad *= float(_ritual.get("velocidad_enredado_mul", 1.0))
-		_rival.position += direccion * velocidad * delta
-		_rival.position = _limitar(_rival.position)
-		_rival.rotation.y = atan2(direccion.x, direccion.z)
-	elif _recarga_rival <= 0.0:
+	var paso := (
+		RIVAL
+		. plan_movimiento(
+			_jugador.position,
+			_rival.position,
+			_recarga_rival,
+			_velocidad_rival,
+			_enredo,
+			_ritual,
+			delta,
+		)
+	)
+	var desplazamiento: Vector3 = paso["desplazamiento"]
+	if desplazamiento.length_squared() > 0.0:
+		_rival.position = _limitar(_rival.position + desplazamiento)
+		_rival.rotation.y = float(paso["rotacion_y"])
+	elif bool(paso["iniciar_ataque"]):
 		_iniciar_ataque_rival()
 
 
@@ -272,8 +278,9 @@ func _iniciar_ataque_rival() -> void:
 		return
 	_ataque_rival_pendiente = true
 	var usar_comision := _comision_pendiente
-	_telegrafo_rival_total = duracion_telegrafo(usar_comision, _ritual)
-	_telegrafo_rival = _telegrafo_rival_total
+	var telegrafo := RIVAL.iniciar_telegrafo(usar_comision, _ritual)
+	_telegrafo_rival_total = float(telegrafo["total"])
+	_telegrafo_rival = float(telegrafo["restante"])
 	if usar_comision:
 		_comision_pendiente = false
 		_doctrina_activa = "socialdemocrata"
@@ -290,28 +297,28 @@ func _iniciar_ataque_rival() -> void:
 
 
 func _actualizar_telegrafo_rival(delta: float) -> void:
-	_telegrafo_rival = maxf(0.0, _telegrafo_rival - delta)
+	var estado := RIVAL.avanzar_telegrafo(_telegrafo_rival, _telegrafo_rival_total, delta)
+	_telegrafo_rival = float(estado["restante"])
 	if _aviso_ataque != null:
 		_aviso_ataque.position = _rival.position + Vector3(0.0, 0.02, 0.0)
 		if not reduccion_movimiento:
-			var total := maxf(_telegrafo_rival_total, 0.001)
-			var progreso := 1.0 - _telegrafo_rival / total
-			var escala := lerpf(0.72, 1.0, progreso)
+			var escala := lerpf(0.72, 1.0, float(estado["progreso"]))
 			_aviso_ataque.scale = Vector3(escala, 1.0, escala)
-	if _telegrafo_rival <= 0.0:
+	if bool(estado["resolver"]):
 		_resolver_ataque_rival()
 
 
 func _resolver_ataque_rival() -> void:
 	_ataque_rival_pendiente = false
-	_recarga_rival = RECARGA_RIVAL
 	_ocultar_aviso_ataque()
 
 	var comision_activa := _doctrina_activa == "socialdemocrata"
 	var externaliza_activa := _doctrina_activa == "neoliberal"
 	var hacia := _jugador.position - _rival.position
 	hacia.y = 0.0
-	match resultado_ataque_rival(hacia.length(), _esquiva):
+	var resolucion := RIVAL.resolver_ataque(hacia.length(), _esquiva)
+	_recarga_rival = float(resolucion["recarga"])
+	match String(resolucion["resultado"]):
 		"falla":
 			pass
 		"esquiva":
@@ -339,9 +346,10 @@ func _resolver_ataque_rival() -> void:
 
 func _cancelar_ataque_rival() -> void:
 	_ataque_rival_pendiente = false
-	_telegrafo_rival = 0.0
-	_telegrafo_rival_total = TELEGRAFO_RIVAL
-	_recarga_rival = maxf(_recarga_rival, RECARGA_RIVAL * 0.65)
+	var estado := RIVAL.cancelar_telegrafo(_recarga_rival)
+	_telegrafo_rival = float(estado["restante"])
+	_telegrafo_rival_total = float(estado["total"])
+	_recarga_rival = float(estado["recarga"])
 	_ocultar_aviso_ataque()
 	if _doctrina_activa == "socialdemocrata":
 		_cerrar_doctrina()
