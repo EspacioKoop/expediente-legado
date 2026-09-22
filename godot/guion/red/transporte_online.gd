@@ -6,6 +6,10 @@ extends RefCounted
 const EventoOnline = preload("res://guion/red/evento_online.gd")
 
 
+func procesar(_delta: float) -> void:
+	pass
+
+
 func publicar_evento(_evento: Dictionary, _ahora_unix: int = -1) -> Dictionary:
 	return _resultado(false, "not_implemented")
 
@@ -14,7 +18,7 @@ func consultar_eventos(_scene_key: String, _kind: String = "", _ahora_unix: int 
 	return _resultado(false, "not_implemented", {"events": []})
 
 
-func abrir_sala(_scene_key: String) -> Dictionary:
+func abrir_sala(_scene_key: String, _opciones: Dictionary = {}) -> Dictionary:
 	return _resultado(false, "not_implemented")
 
 

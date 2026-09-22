@@ -23,6 +23,7 @@ const COLOR_PAPEL := Color(0.76, 0.70, 0.57)
 
 var _figura: Node3D
 var _talon: MeshInstance3D
+var _marca_sellado: MeshInstance3D
 var _impactos: Array[MeshInstance3D] = []
 
 
@@ -105,18 +106,32 @@ func aplicar_resolucion(accion: String, reduccion_movimiento: bool) -> bool:
 		return false
 	for impacto in _impactos:
 		impacto.visible = false
-	_talon.material_override = _material(COLOR_PAPEL)
+	var papel := _material(COLOR_PAPEL)
+	_revestir_geometria(_figura, papel)
+	_marca_sellado.visible = true
+	_marca_sellado.scale = Vector3(0.35, 1.0, 0.35)
 	var plan := plan_transformacion(reduccion_movimiento)
+	var duracion := float(plan["duracion"])
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_SINE)
 	tween.set_ease(Tween.EASE_IN_OUT)
+	tween.set_parallel(true)
 	(
 		tween
 		. tween_property(
 			_figura,
 			"scale",
 			Vector3(1.0, 0.055, 1.0),
-			float(plan["duracion"]),
+			duracion,
+		)
+	)
+	(
+		tween
+		. tween_property(
+			_marca_sellado,
+			"scale",
+			Vector3(6.5, 1.0, 6.5),
+			duracion,
 		)
 	)
 	return true
@@ -131,6 +146,7 @@ func _montar_prototipo() -> void:
 	_montar_talon()
 	_montar_pasarela()
 	_montar_impactos()
+	_montar_marca_sellado()
 	_montar_iluminacion()
 	_montar_camara()
 
@@ -274,6 +290,32 @@ func _montar_impactos() -> void:
 		)
 		impacto.rotation_degrees = Vector3(12.0 * i, 24.0 * i, -18.0 + 9.0 * i)
 		_impactos.append(impacto)
+
+
+func _montar_marca_sellado() -> void:
+	var malla := CylinderMesh.new()
+	malla.top_radius = 1.0
+	malla.bottom_radius = 1.0
+	malla.height = 0.05
+	malla.radial_segments = 48
+	_marca_sellado = MeshInstance3D.new()
+	_marca_sellado.name = "MarcaSelladoFinal"
+	_marca_sellado.mesh = malla
+	_marca_sellado.position = Vector3(0.0, 0.035, 0.0)
+	_marca_sellado.scale = Vector3(0.35, 1.0, 0.35)
+	_marca_sellado.material_override = _material(COLOR_TALON)
+	_marca_sellado.visible = false
+	add_child(_marca_sellado)
+
+
+func _revestir_geometria(nodo: Node, material: Material) -> int:
+	var revestidas := 0
+	if nodo is GeometryInstance3D:
+		(nodo as GeometryInstance3D).material_override = material
+		revestidas += 1
+	for hijo in nodo.get_children():
+		revestidas += _revestir_geometria(hijo, material)
+	return revestidas
 
 
 func _montar_iluminacion() -> void:

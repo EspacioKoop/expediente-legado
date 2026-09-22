@@ -16,7 +16,7 @@ func consultar_eventos(_scene_key: String, _kind: String = "", _ahora_unix: int 
 	return _resultado(true, "offline", {"events": []})
 
 
-func abrir_sala(_scene_key: String) -> Dictionary:
+func abrir_sala(_scene_key: String, _opciones: Dictionary = {}) -> Dictionary:
 	return _resultado(true, "offline", {"opened": false})
 
 

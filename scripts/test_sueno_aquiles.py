@@ -37,6 +37,9 @@ class SuenoAquilesTest(unittest.TestCase):
         self.assertIn('"sacudida_camara": false', self.sueno)
         self.assertIn('"flash": false', self.sueno)
         self.assertIn('"escala_progresiva_y_fundido"', self.sueno)
+        self.assertIn('"MarcaSelladoFinal"', self.sueno)
+        self.assertIn("_revestir_geometria(_figura, papel)", self.sueno)
+        self.assertIn("tween.set_parallel(true)", self.sueno)
 
     def test_escena_standalone_usa_el_vertical(self):
         self.assertIn('path="res://guion/sueno_aquiles.gd"', self.escena)

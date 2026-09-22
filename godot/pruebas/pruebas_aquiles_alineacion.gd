@@ -26,11 +26,11 @@ func _probar_reflector_deliberado() -> void:
 	_comprobar(is_equal_approx(reflector.angulo_actual(), 0.0), "ángulo inicial cero")
 
 	_comprobar(reflector.interactuar(root), "primer giro aceptado")
-	_comprobar(not reflector.esta_alineado(), "15 grados no revelan el talón")
+	_comprobar(not reflector.esta_alineado(), "-15 grados no revelan el talón")
 	_comprobar(reflector.interactuar(root), "segundo giro aceptado")
-	_comprobar(not reflector.esta_alineado(), "30 grados siguen sin alinear")
+	_comprobar(not reflector.esta_alineado(), "-30 grados siguen sin alinear")
 	_comprobar(reflector.interactuar(root), "tercer giro aceptado")
-	_comprobar(reflector.esta_alineado(), "45 grados alinean el reflejo")
+	_comprobar(reflector.esta_alineado(), "-45 grados alinean el reflejo")
 	_comprobar(
 		is_equal_approx(reflector.angulo_actual(), ReflectorScript.ANGULO_OBJETIVO),
 		"el ángulo final coincide con el objetivo",
@@ -49,9 +49,13 @@ func _probar_resolucion_diegetica() -> void:
 	var reflector := sueno.reflector()
 	var sello := sueno.sello()
 	var talon := sueno.get_node("FiguraAquiles/VulnerabilidadTalon") as MeshInstance3D
+	var figura := sueno.get_node("FiguraAquiles") as Node3D
+	var marca := sueno.get_node("MarcaSelladoFinal") as MeshInstance3D
 	_comprobar(reflector != null, "la escena monta el reflector")
 	_comprobar(sello != null, "la escena monta el sello")
 	_comprobar(talon != null, "la escena conserva el talón")
+	_comprobar(marca != null, "la escena monta la marca final de sellado")
+	_comprobar(not marca.visible, "la marca final empieza oculta")
 	_comprobar(not talon.visible, "el talón empieza oculto")
 	_comprobar(not sello.esta_habilitado(), "el sello empieza bloqueado")
 	_comprobar(not sello.interactuar(root), "el sello no funciona antes de revelar")
@@ -63,6 +67,19 @@ func _probar_resolucion_diegetica() -> void:
 	_comprobar(not sello.esta_habilitado(), "dos giros no habilitan el sello")
 	reflector.interactuar(root)
 	_comprobar(talon.visible, "la alineación revela el talón")
+	var disco := reflector.get_node("DiscoReflector") as Node3D
+	var haz := disco.get_node("HazReflejado") as SpotLight3D
+	# Esta prueba corre desde SceneTree._initialize(), antes del primer frame.
+	# Componer transforms locales evita depender de global_transform fuera del árbol
+	# y verifica la misma geometría en el espacio local común del sueño.
+	var haz_en_sueno := reflector.transform * disco.transform * haz.transform
+	var talon_en_sueno := figura.transform * talon.transform
+	var direccion_haz := (haz_en_sueno.basis * Vector3.FORWARD).normalized()
+	var hacia_talon := (talon_en_sueno.origin - haz_en_sueno.origin).normalized()
+	_comprobar(
+		direccion_haz.dot(hacia_talon) > 0.99,
+		"el haz visible apunta geométricamente al talón al quedar alineado",
+	)
 	_comprobar(sello.esta_habilitado(), "revelar habilita el sello")
 
 	_comprobar(sello.interactuar(root), "el sello acepta la interacción revelada")
@@ -72,6 +89,15 @@ func _probar_resolucion_diegetica() -> void:
 		not (sueno.get_node("ImpactoAdministrativo1") as MeshInstance3D).visible,
 		"los impactos administrativos desaparecen al resolver",
 	)
+	_comprobar(marca.visible, "resolver hace visible la marca espacial de sellado")
+	var geometrias := figura.find_children("*", "GeometryInstance3D", true, false)
+	var todas_papel := not geometrias.is_empty()
+	for geometria in geometrias:
+		var material := (geometria as GeometryInstance3D).material_override as StandardMaterial3D
+		if material == null or not material.albedo_color.is_equal_approx(SuenoAquiles.COLOR_PAPEL):
+			todas_papel = false
+			break
+	_comprobar(todas_papel, "toda la figura pasa a material de papel al resolver")
 	sueno.queue_free()
 
 
