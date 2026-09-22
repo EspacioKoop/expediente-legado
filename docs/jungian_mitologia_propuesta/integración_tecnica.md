@@ -69,6 +69,21 @@ La arena actual tiene un único rival, por lo que el componente de área se repr
 
 Los finishers se ejecutan mediante `GestorCombos.ejecutar_finisher(id)`. El gestor de combos valida el arquetipo; el gestor de momentum valida y consume el coste.
 
+## Individuación
+
+`res://progresion/individuacion.tres` es el árbol declarativo y `ArbolIndividuacion` mantiene únicamente su progreso y contexto. Como es un `Resource`, no depende de rutas `/root` ni intenta resolver nodos de escena por sí mismo.
+
+El host que conoce la narrativa registra contexto de forma explícita e idempotente:
+
+- `registrar_evento(id)` para hitos narrativos;
+- `registrar_ritual(id)` para rituales completados;
+- `desbloquear_nodo(id)` para consumir requisitos y aplicar recompensas;
+- `conexiones_disponibles()` para consultar los siguientes nodos habilitados;
+- `obtener_progreso()` para UI/guardado;
+- `reiniciar()` para limpiar progreso y contexto de una instancia.
+
+Al desbloquearse un nodo se emite `nodo_desbloqueado(id, recompensas)`. Esto permite que UI, narrativa o persistencia reaccionen sin acoplar el recurso a un autoload inexistente.
+
 ## Feedback de finisher
 
 Al ejecutar un finisher, `JuicioCombate3D` aplica:
@@ -94,7 +109,9 @@ Al ejecutar un finisher, `JuicioCombate3D` aplica:
 - agregación de efectos;
 - ganancia y pérdida de momentum;
 - detección de `Golpe de la Sombra`;
-- disponibilidad y consumo de un finisher.
+- disponibilidad y consumo de un finisher;
+- requisitos de insight + evento del árbol de individuación;
+- requisitos de ritual, desbloqueo idempotente, progreso y reinicio del árbol.
 
 Estas pruebas se ejecutan en el gate canónico de `scripts/verificar_godot.py`.
 
