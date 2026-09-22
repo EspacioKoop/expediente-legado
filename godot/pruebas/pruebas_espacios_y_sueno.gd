@@ -400,9 +400,11 @@ static func _acusacion(comprobar: Callable) -> void:
 	comprobar.call("el canje recupera exactamente una vida", rescatado["vida"], 1)
 	comprobar.call("el canje resuelve la frontera", Acusacion.despido_pendiente(rescatado), false)
 	comprobar.call("el canje conserva el mismo día", dia_rescatado["dia"], 7)
-	var loco_gastado := rescatado["tarot"].filter(func(carta): return carta.get("id", "") == "el-loco")[0]
+	var es_loco := func(carta): return carta.get("id", "") == "el-loco"
+	var loco_gastado: Dictionary = rescatado["tarot"].filter(es_loco)[0]
 	comprobar.call("la carta canjeada queda gastada", loco_gastado.get("gastada", false), true)
-	var templanza := rescatado["tarot"].filter(func(carta): return carta.get("id", "") == "la-templanza")[0]
+	var es_templanza := func(carta): return carta.get("id", "") == "la-templanza"
+	var templanza: Dictionary = rescatado["tarot"].filter(es_templanza)[0]
 	comprobar.call("el canje concede Templanza", templanza.get("recogida", false), true)
 	comprobar.call(
 		"el canje no concede La Muerte",
