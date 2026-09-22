@@ -65,7 +65,9 @@ func _probar_condiciones_y_registro() -> void:
 	var registro := PasaporteInspeccion.registrar_observacion_contextual(
 		partida.estado, "trayecto:farola-sodio"
 	)
-	_comprobar(registro.get("resultado", "") == "registrado", "la observación contextual registra base")
+	_comprobar(
+		registro.get("resultado", "") == "registrado", "la observación contextual registra base"
+	)
 	_comprobar(bool(registro.get("cambio", false)), "el primer vistazo contextual declara cambio")
 	_comprobar(
 		registro.get("variantes_nuevas", []).size() == 4,
@@ -105,9 +107,13 @@ func _probar_condiciones_y_registro() -> void:
 	_comprobar(partida.estado == antes, "la zona incorrecta no modifica Partida")
 
 	var especial := PasaporteInspeccion.progreso_especial(partida.estado)
-	_comprobar(int(especial.get("obtenidas", 0)) == 4, "el progreso especial cuenta variantes únicas")
+	_comprobar(
+		int(especial.get("obtenidas", 0)) == 4, "el progreso especial cuenta variantes únicas"
+	)
 	_comprobar(int(jornada.get("dinero", 0)) == dinero_antes, "las variantes no conceden dinero")
-	_comprobar(int(jornada.get("acciones", 0)) == acciones_antes, "las variantes no conceden acciones")
+	_comprobar(
+		int(jornada.get("acciones", 0)) == acciones_antes, "las variantes no conceden acciones"
+	)
 	_comprobar(
 		partida.estado.get("pistas_descubiertas", []) == pistas_antes,
 		"las variantes no conceden pistas",
@@ -123,9 +129,7 @@ func _probar_persistencia_variantes() -> void:
 	jornada["hora_minutos"] = 20 * 60
 	jornada["vuelta"] = 3
 	jornada["gato"]["presente"] = false
-	PasaporteInspeccion.registrar_observacion_contextual(
-		partida.estado, "trayecto:farola-sodio"
-	)
+	PasaporteInspeccion.registrar_observacion_contextual(partida.estado, "trayecto:farola-sodio")
 
 	_comprobar(partida.guardar(RUTA_PRUEBA), "Partida guarda base y variantes")
 	var recargada := Partida.new()
@@ -188,8 +192,10 @@ func _probar_resolucion_de_anclas() -> void:
 	archivo.add_child(app_archivo)
 	app_archivo._process(0.0)
 	_comprobar(
-		mesa.find_child("PasaporteInspeccion_archivo_mesa_clasificacion", true, false)
-		is PuntoInspeccion3D,
+		(
+			mesa.find_child("PasaporteInspeccion_archivo_mesa_clasificacion", true, false)
+			is PuntoInspeccion3D
+		),
 		"el rol declarativo resuelve la mesa de clasificación construida por Espacio3D",
 	)
 	archivo.free()
@@ -202,8 +208,10 @@ func _probar_resolucion_de_anclas() -> void:
 	trayecto.add_child(app_trayecto)
 	app_trayecto._process(0.0)
 	_comprobar(
-		farola.find_child("PasaporteInspeccion_trayecto_farola_sodio", true, false)
-		is PuntoInspeccion3D,
+		(
+			farola.find_child("PasaporteInspeccion_trayecto_farola_sodio", true, false)
+			is PuntoInspeccion3D
+		),
 		"el prefijo declarativo resuelve una farola real del kit urbano",
 	)
 	trayecto.free()
