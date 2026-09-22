@@ -87,4 +87,26 @@ static func obra_valida(obra: Dictionary) -> bool:
 	if typeof(consumidores) != TYPE_ARRAY or consumidores.is_empty():
 		return false
 
+	# #1182: la capa onirica es opcional y declarativa. El catalogo solo
+	# describe motivos y modulacion visual segura; el consumidor decide si usa
+	# el insight y nunca obtiene hechos de expedientes desde aqui.
+	if obra.has("sueno"):
+		var sueno = obra.get("sueno", {})
+		if typeof(sueno) != TYPE_DICTIONARY:
+			return false
+		if String(sueno.get("consumidor", "")).strip_edges().is_empty():
+			return false
+		var motivos = sueno.get("motivos", [])
+		if typeof(motivos) != TYPE_ARRAY or motivos.is_empty():
+			return false
+		for motivo in motivos:
+			if String(motivo).strip_edges().is_empty():
+				return false
+		var presentacion = sueno.get("presentacion", {})
+		if typeof(presentacion) != TYPE_DICTIONARY:
+			return false
+		var deformacion = presentacion.get("deformacion_textura", [1.0, 1.0, 1.0])
+		if typeof(deformacion) != TYPE_ARRAY or deformacion.size() != 3:
+			return false
+
 	return true

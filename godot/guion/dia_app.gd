@@ -336,7 +336,25 @@ func _espacio_de(fase: String) -> Dictionary:
 	for quien in trozo["figuras"]:
 		if SuenoCombate.se_pelea(quien, partida.estado):
 			_rivales[quien["id"]] = quien
-	return Sueno.espacio(id, jornada["sueno_escenas"].size() - 1, trozo)
+	var espacio_sueno := Sueno.espacio(id, jornada["sueno_escenas"].size() - 1, trozo)
+	# #1182: literatura modula la PRESENTACION de una sala que el sueño ya
+	# selecciono. No toca Sueno.noche(), fuentes #87, salidas ni hechos SIGA.
+	return SuenoLiteratura.aplicar(espacio_sueno, _registro_literario_para_sueno(), cual)
+
+
+## #1182: el autoload literario es una dependencia opcional de presentacion.
+## Los capturadores/gates cargan Dia como script aislado y no siempre registran
+## autoloads del proyecto; por eso no se referencia el identificador global en
+## tiempo de compilacion. Sin gestor disponible, el consumidor recibe un
+## registro vacio y conserva exactamente el sueño base.
+func _registro_literario_para_sueno() -> Dictionary:
+	if not is_inside_tree():
+		return {}
+	var gestor := get_node_or_null("/root/GestorLiteratura")
+	if gestor == null or not gestor.has_method("obtener_registro_literario"):
+		return {}
+	var registro = gestor.call("obtener_registro_literario")
+	return registro if typeof(registro) == TYPE_DICTIONARY else {}
 
 
 ## El coste inesperado se cuenta al cerrar el día, sin abrir otro HUD ni otro
