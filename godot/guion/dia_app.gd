@@ -39,6 +39,7 @@ var _hud: CanvasLayer
 ## La entrada de la vuelta mientras se está poniendo (#68). Fuera de ella es
 ## nula: el reproductor se descarta al terminar en vez de quedarse escuchando.
 var _entrada: Node3D
+var _ultimo_recurso: UltimoRecursoApp
 
 ## El sitio montado ahora mismo, tal como se construyó. Las cinemáticas que
 ## ruedan dentro de él (#395) lo leen en vez de volver a pedirlo: en el sueño
@@ -77,9 +78,72 @@ func _ready() -> void:
 	_montar_entorno()
 	_montar_interfaz()
 	_entrar_en(jornada["fase"])
+	# #1205: una recarga en vida cero debe recuperar la decisión, no fabricar
+	# un reinicio ni dejar al jugador caminar con el cese sin resolver.
+	if Acusacion.despido_pendiente(partida.estado):
+		_abrir_ultimo_recurso_pendiente()
+		return
 	# Conserva la plantilla inicial y las migraciones antes de abrir el visor,
 	# que lee su propia instancia de Partida.
 	_abrir_vuelta()
+
+
+## Recupera o presenta la única decisión pendiente de vida cero.
+func _abrir_ultimo_recurso_pendiente() -> void:
+	if not Acusacion.despido_pendiente(partida.estado):
+		return
+	if is_instance_valid(_ultimo_recurso):
+		_ultimo_recurso.actualizar(partida.estado)
+		return
+	if is_instance_valid(_caminante):
+		_caminante.set_physics_process(false)
+	_ultimo_recurso = UltimoRecursoApp.new()
+	_ultimo_recurso.name = "UltimoRecurso"
+	_ultimo_recurso.canje_solicitado.connect(_al_canjear_ultimo_recurso)
+	_ultimo_recurso.cese_solicitado.connect(_al_aceptar_cese)
+	add_child(_ultimo_recurso)
+	_ultimo_recurso.abrir(partida.estado)
+
+
+func _al_canjear_ultimo_recurso(carta_id: String) -> void:
+	var resultado := Acusacion.canjear_carta_por_vida(partida.estado, carta_id)
+	if String(resultado.get("resultado", "")) != "canje":
+		if is_instance_valid(_ultimo_recurso):
+			_ultimo_recurso.actualizar(partida.estado)
+		return
+
+	# Una derrota de Hastur deja su combate interrumpido mientras existe la
+	# frontera. Si el canje salva la misma vuelta, se rearma ese mismo intento.
+	ClimaxHastur.reanudar_tras_ultimo_recurso(partida.estado, jornada)
+	var guardado := _guardar_o_avisar("")
+	_cerrar_ultimo_recurso()
+	if not guardado:
+		if is_instance_valid(_caminante):
+			_caminante.set_physics_process(true)
+		return
+
+	var climax := get_node_or_null("ClimaxHasturOwnerController")
+	if climax != null and climax.has_method("_reanudar_si_procede"):
+		climax.call_deferred("_reanudar_si_procede")
+	elif is_instance_valid(_caminante):
+		_caminante.set_physics_process(true)
+
+
+func _al_aceptar_cese() -> void:
+	var resultado := Acusacion.aceptar_cese(partida.estado, jornada)
+	if not bool(resultado.get("despido", false)):
+		if is_instance_valid(_ultimo_recurso):
+			_ultimo_recurso.actualizar(partida.estado)
+		return
+	_guardar_o_avisar("")
+	_cerrar_ultimo_recurso()
+	_reasignar()
+
+
+func _cerrar_ultimo_recurso() -> void:
+	if is_instance_valid(_ultimo_recurso):
+		_ultimo_recurso.queue_free()
+	_ultimo_recurso = null
 
 
 ## La entrada de una vida laboral (#68).
