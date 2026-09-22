@@ -153,13 +153,16 @@ func _publicar(caminante: CharacterBody3D, ahora_unix: int) -> void:
 	if caminante.velocity.length_squared() > UMBRAL_MOVIMIENTO_CUADRADO:
 		movimiento = "walk"
 
-	_servicio.publicar_snapshot(
-		_game_build(),
-		caminante.position,
-		caminante.rotation.y,
-		movimiento,
-		_gesto_pendiente,
-		ahora_unix,
+	(
+		_servicio
+		. publicar_snapshot(
+			_game_build(),
+			caminante.position,
+			caminante.rotation.y,
+			movimiento,
+			_gesto_pendiente,
+			ahora_unix,
+		)
 	)
 	# Un gesto es un impulso visual, no un estado que deba repetirse mientras
 	# haya una caída de red.
@@ -252,7 +255,9 @@ func _crear_actor_efimero() -> String:
 
 
 func _game_build() -> String:
-	var version := String(ProjectSettings.get_setting("application/config/version", "dev")).strip_edges()
+	var version := (
+		String(ProjectSettings.get_setting("application/config/version", "dev")).strip_edges()
+	)
 	return "dev" if version.is_empty() else version
 
 
