@@ -51,20 +51,29 @@ static func todo(comprobar: Callable, raiz: Node) -> void:
 	comprobar.call("los tres desbloqueos acumulan puntos", arquetipos.get("puntos_habilidad"), 3)
 
 	var efectos = arquetipos.call("efectos_combinados")
-	comprobar.call(
-		"Sombra expone crítico",
-		is_equal_approx(float(efectos.get("bonus_crit", 0.0)), 0.15),
-		true,
+	(
+		comprobar
+		. call(
+			"Sombra expone crítico",
+			is_equal_approx(float(efectos.get("bonus_crit", 0.0)), 0.15),
+			true,
+		)
 	)
-	comprobar.call(
-		"Persona expone evasión",
-		is_equal_approx(float(efectos.get("evasion", 0.0)), 0.1),
-		true,
+	(
+		comprobar
+		. call(
+			"Persona expone evasión",
+			is_equal_approx(float(efectos.get("evasion", 0.0)), 0.1),
+			true,
+		)
 	)
-	comprobar.call(
-		"Anima expone curación",
-		is_equal_approx(float(efectos.get("curacion", 0.0)), 0.1),
-		true,
+	(
+		comprobar
+		. call(
+			"Anima expone curación",
+			is_equal_approx(float(efectos.get("curacion", 0.0)), 0.1),
+			true,
+		)
 	)
 
 	momentum.call("aplicar_modificador_arquetipo", "sombra")
@@ -105,9 +114,7 @@ static func todo(comprobar: Callable, raiz: Node) -> void:
 			nodo.free()
 
 
-static func _gestor(
-	nombre: String, ruta: String, temporales: Array[Node], raiz: Node
-) -> Node:
+static func _gestor(nombre: String, ruta: String, temporales: Array[Node], raiz: Node) -> Node:
 	var existente := raiz.get_node_or_null(nombre)
 	if existente != null:
 		return existente
