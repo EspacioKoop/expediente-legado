@@ -35,6 +35,7 @@ class SuenoLiteratura1182Test(unittest.TestCase):
         self.assertNotIn("GestorLiteratura.obtener_registro_literario()", tramo)
 
     def test_integracion_no_exige_autoload_al_compilar(self) -> None:
+        self.assertIn("if not is_inside_tree():", self.dia)
         self.assertIn('get_node_or_null("/root/GestorLiteratura")', self.dia)
         self.assertIn('gestor.has_method("obtener_registro_literario")', self.dia)
         self.assertIn("return {}", self.dia)
