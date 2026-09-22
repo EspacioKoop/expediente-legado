@@ -582,29 +582,34 @@ func _montar_hud() -> void:
 
 
 func _actualizar_hud() -> void:
-	if _barra_jugador == null or _barra_rival == null:
+	if not HUD.actualizar_determinacion(
+		_barra_jugador,
+		_barra_rival,
+		_etiqueta_ritual,
+		_determinacion_jugador,
+		_determinacion_rival,
+		_texto_ritual(),
+	):
 		return
-	_barra_jugador.value = _determinacion_jugador
-	_barra_rival.value = _determinacion_rival
-	if _etiqueta_ritual != null:
-		_etiqueta_ritual.text = _texto_ritual()
 	_actualizar_hud_jungiano()
 
 
 func _texto_ritual() -> String:
-	var texto := ""
-	if not _ritual.is_empty():
-		texto = "RITUAL · %s" % String(_ritual.get("nombre", ""))
-	if _contraataque > 0:
-		texto += (" · " if not texto.is_empty() else "") + "CONTRA +%d" % _contraataque
 	var eje_estado := DOCTRINA.eje_estado(_doctrina_activa, _comision_pendiente)
+	var nombre_doctrina := ""
 	if not eje_estado.is_empty():
 		var habilidad: Dictionary = Historias.HABILIDADES[eje_estado]
-		var nombre := tr(String(habilidad["nombre"]))
-		texto += (" · " if not texto.is_empty() else "") + nombre
-	if not compromiso_religion_bloqueante(_compromisos_religion, _rival_inicio_agresion).is_empty():
-		texto += (" · " if not texto.is_empty() else "") + tr("JUICIO_RELIGION_COMPROMISO")
-	return texto
+		nombre_doctrina = tr(String(habilidad["nombre"]))
+	var compromiso_activo := not compromiso_religion_bloqueante(
+		_compromisos_religion, _rival_inicio_agresion
+	).is_empty()
+	return HUD.texto_ritual(
+		_ritual,
+		_contraataque,
+		nombre_doctrina,
+		compromiso_activo,
+		tr("JUICIO_RELIGION_COMPROMISO"),
+	)
 
 
 func _hay_cargas_doctrina() -> bool:
@@ -612,26 +617,15 @@ func _hay_cargas_doctrina() -> bool:
 
 
 func _pintar_doctrinas() -> void:
-	if _botones_doctrina == null:
-		return
-	for hijo in _botones_doctrina.get_children():
-		_botones_doctrina.remove_child(hijo)
-		hijo.queue_free()
-
-	var bloqueadas := DOCTRINA.bloqueada(_doctrina_activa, _comision_pendiente)
-	for eje in Prometeo.EJES:
-		var cantidad := int(_cargas_doctrina.get(eje, 0))
-		if cantidad <= 0:
-			continue
-		var habilidad: Dictionary = Historias.HABILIDADES[eje]
-		var boton := Button.new()
-		var texto_boton := "%s ×%d" % [tr(String(habilidad["nombre"])), cantidad]
-		boton.text = texto_boton
-		boton.tooltip_text = tr(String(habilidad["efecto"]))
-		boton.disabled = bloqueadas
-		boton.pressed.connect(activar_doctrina.bind(eje))
-		_botones_doctrina.add_child(boton)
-	_botones_doctrina.visible = _botones_doctrina.get_child_count() > 0
+	HUD.pintar_doctrinas(
+		_botones_doctrina,
+		_cargas_doctrina,
+		DOCTRINA.bloqueada(_doctrina_activa, _comision_pendiente),
+		Prometeo.EJES,
+		Historias.HABILIDADES,
+		Callable(self, "tr"),
+		Callable(self, "activar_doctrina"),
+	)
 
 
 func _actualizar_camara() -> void:
@@ -749,20 +743,13 @@ func _aplicar_curacion_arquetipo(efectos: Dictionary) -> void:
 
 
 func _actualizar_hud_jungiano() -> void:
-	var estado := JUNGIANO.estado_hud(self)
-	if _barra_momentum != null:
-		_barra_momentum.max_value = float(estado["momentum_max"])
-		_barra_momentum.value = float(estado["momentum_actual"])
-	if _boton_finisher == null:
-		return
-	_boton_finisher.disabled = not bool(estado["disponible"]) or _acabado
-	if not bool(estado["disponible"]):
-		_boton_finisher.text = tr("JUICIO_JUNGIANO_FINISHER")
-		return
-	_boton_finisher.text = (
-		tr("JUICIO_JUNGIANO_SUPER_FINISHER")
-		if bool(estado["es_super"])
-		else tr("JUICIO_JUNGIANO_FINISHER")
+	HUD.actualizar_jungiano(
+		_barra_momentum,
+		_boton_finisher,
+		JUNGIANO.estado_hud(self),
+		_acabado,
+		tr("JUICIO_JUNGIANO_FINISHER"),
+		tr("JUICIO_JUNGIANO_SUPER_FINISHER"),
 	)
 
 
