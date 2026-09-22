@@ -139,9 +139,7 @@ static func _individuacion(comprobar: Callable, arquetipos: Node) -> void:
 		true
 	)
 	comprobar.call(
-		"nodo inicial puede desbloquearse",
-		arbol.call("desbloquear_nodo", "sombra_inicio"),
-		true
+		"nodo inicial puede desbloquearse", arbol.call("desbloquear_nodo", "sombra_inicio"), true
 	)
 	comprobar.call(
 		"un nodo completado no se desbloquea dos veces",
