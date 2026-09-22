@@ -6,8 +6,11 @@ signal obra_conocida(obra_id)
 var obras: Array = []
 var obras_conocidas: Array = []
 var autores_conocidos: Array = []
+# Compatibilidad temporal con consumidores previos. El contrato #1176 no
+# incrementa estos contadores al conocer una obra.
 var insight_total: int = 0
-var momentum_bonus: float = 0.0  # acumulativo temporal
+var momentum_bonus: float = 0.0
+var registro_literario: Dictionary = LiteraturaEventos.nuevo()
 
 
 func _ready() -> void:
@@ -26,23 +29,36 @@ func _cargar_catalogo() -> void:
 	obras = obras_data if obras_data is Array else []
 
 
-func conocer_obra(obra_id: String) -> bool:
-	if obra_id in obras_conocidas:
+func conocer_obra(
+	obra_id: String,
+	fuente: String = "legacy:gestor_literatura",
+	contexto: String = "compatibilidad",
+	jornada: int = 0
+) -> bool:
+	var id := obra_id.strip_edges()
+	if id.is_empty():
 		return false
-	obras_conocidas.append(obra_id)
 
-	var efecto := _obtener_efecto_obra(obra_id)
-	if efecto.has("bonus_insight"):
-		insight_total += int(efecto.get("bonus_insight", 0))
-	if efecto.has("bonus_momentum"):
-		var bonus := float(efecto.get("bonus_momentum", 0.0))
-		momentum_bonus += bonus
-		GestorMomentum.momentum_actual = min(
-			GestorMomentum.momentum_max,
-			GestorMomentum.momentum_actual + bonus,
-		)
-	obra_conocida.emit(obra_id)
+	var evento := LiteraturaEventos.crear_evento(
+		"conocimiento:legacy:%s" % id,
+		LiteraturaEventos.CANAL_CONOCIMIENTO,
+		id,
+		fuente,
+		contexto,
+		jornada,
+		["legacy"],
+	)
+	if not LiteraturaEventos.registrar(registro_literario, evento):
+		return false
+
+	if id not in obras_conocidas:
+		obras_conocidas.append(id)
+	obra_conocida.emit(id)
 	return true
+
+
+func obtener_registro_literario() -> Dictionary:
+	return registro_literario.duplicate(true)
 
 
 func obtener_insight_total() -> int:
@@ -70,6 +86,8 @@ func _arquetipo_desbloqueado(id: String):
 	return arquetipo
 
 
+# Compatibilidad para consumidores explícitos de gameplay. Conocer una obra no
+# llama estas funciones: el efecto debe activarse desde un ritual/conflicto.
 func _aplicar_efecto_especial(_obra_id: String, efecto: String) -> void:
 	match efecto:
 		"revelacion":
