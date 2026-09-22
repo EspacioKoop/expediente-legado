@@ -75,6 +75,16 @@ class RadioDomestica98Test(unittest.TestCase):
         self.assertIn("func alternar_reproduccion", self.minicadena)
         self.assertIn("func cambiar_volumen", self.minicadena)
         self.assertIn("_sincronizar_audio(true)", self.minicadena)
+        self.assertIn("_audio.get_playback_position()", self.minicadena)
+        self.assertIn("_audio.play(_posicion_pausa)", self.minicadena)
+        self.assertIn("_posicion_pausa = 0.0", self.minicadena)
+        self.assertIn("const AUDIO_UNIT_SIZE := 1.5", self.minicadena)
+        self.assertIn("const AUDIO_MAX_DISTANCE := 7.0", self.minicadena)
+        self.assertIn("const AUDIO_PANNING_STRENGTH := 0.65", self.minicadena)
+        self.assertIn(
+            "attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE",
+            self.minicadena,
+        )
         self.assertNotIn("res://assets/audio/", self.minicadena)
 
     def test_casa_monta_la_minicadena_y_el_verificador_la_ejecuta(self):

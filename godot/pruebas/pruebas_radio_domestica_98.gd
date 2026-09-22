@@ -5,8 +5,12 @@ var _fallos := 0
 
 
 func _initialize() -> void:
+	_ejecutar.call_deferred()
+
+
+func _ejecutar() -> void:
 	_probar_programacion_narrativa()
-	_probar_audio_y_transporte()
+	await _probar_audio_y_transporte()
 	_probar_radio_deliberada()
 	_probar_exposicion_ideologica()
 	_probar_tir_na_nog_deliberado()
@@ -26,6 +30,18 @@ func _probar_programacion_narrativa() -> void:
 	if audio != null:
 		_comprobar(audio.bus, &"Musica", "la salida reutiliza el bus común de música")
 		_comprobar(audio.stream is AudioStreamWAV, "la cama audible es procedural y local")
+		_comprobar(
+			is_equal_approx(audio.unit_size, MinicadenaDomestica98.AUDIO_UNIT_SIZE),
+			"la atenuación parte de escala doméstica explícita",
+		)
+		_comprobar(
+			is_equal_approx(audio.max_distance, MinicadenaDomestica98.AUDIO_MAX_DISTANCE),
+			"la minicadena deja de mezclarse fuera de la habitación",
+		)
+		_comprobar(
+			is_equal_approx(audio.panning_strength, MinicadenaDomestica98.AUDIO_PANNING_STRENGTH),
+			"el paneo está limitado para una fuente doméstica cercana",
+		)
 	_comprobar(
 		MinicadenaDomestica98.hora_narrativa({"dia": 1, "acciones": Jornada.ACCIONES_POR_DIA}),
 		"08:16",
@@ -65,11 +81,29 @@ func _probar_audio_y_transporte() -> void:
 
 	radio.alternar_encendido()
 	_comprobar(radio.esta_reproduciendo(), "encender inicia reproducción diegética")
+	await physics_frame
 	radio.alternar_reproduccion()
 	_comprobar(not radio.esta_reproduciendo(), "el transporte puede pausar")
+	if audio != null:
+		_comprobar(not audio.playing, "pausar detiene el playback tras guardar su posición")
 	_comprobar(not radio.escuchar_actual(), "una escucha pausada no cuenta como atención")
 	radio.alternar_reproduccion()
 	_comprobar(radio.esta_reproduciendo(), "el transporte puede reanudar")
+	if audio != null:
+		_comprobar(audio.playing, "reanudar vuelve a encolar el stream desde la posición guardada")
+
+	# Regresión: play() se encola hasta el siguiente frame de física. Pausar en
+	# ese intervalo debe cancelar la cola y conservar una posición inicial segura.
+	radio.alternar_encendido()
+	radio.alternar_encendido()
+	radio.alternar_reproduccion()
+	_comprobar(not radio.esta_reproduciendo(), "la pausa inmediata actualiza el estado lógico")
+	if audio != null:
+		_comprobar(not audio.playing, "la pausa inmediata cancela el play todavía encolado")
+	radio.alternar_reproduccion()
+	_comprobar(radio.esta_reproduciendo(), "reanudar tras pausa inmediata vuelve a encolar audio")
+	if audio != null:
+		_comprobar(audio.playing, "la reanudación inmediata deja el audio preparado para el frame")
 
 	radio.alternar_cassette()
 	_comprobar(
