@@ -192,20 +192,26 @@ func _probar_compatibilidad_legacy() -> void:
 	GestorLiteratura.obras_conocidas = []
 	GestorLiteratura.registro_literario = LiteraturaEventos.nuevo()
 
-	var nueva := GestorLiteratura.conocer_obra(
-		"odisea",
-		"prueba:libro:odisea",
-		"contrato_1176",
-		4,
+	var nueva := (
+		GestorLiteratura
+		. conocer_obra(
+			"odisea",
+			"prueba:libro:odisea",
+			"contrato_1176",
+			4,
+		)
 	)
 	_comprobar(nueva, "el gestor legacy registra conocimiento nuevo")
 	_comprobar(
 		LiteraturaEventos.obra_conocida(GestorLiteratura.registro_literario, "odisea"),
 		"el gestor legacy usa el contrato comun",
 	)
-	var eventos := LiteraturaEventos.eventos(
-		GestorLiteratura.registro_literario,
-		LiteraturaEventos.CANAL_CONOCIMIENTO,
+	var eventos := (
+		LiteraturaEventos
+		. eventos(
+			GestorLiteratura.registro_literario,
+			LiteraturaEventos.CANAL_CONOCIMIENTO,
+		)
 	)
 	_comprobar(eventos.size() == 1, "el bridge legacy registra un solo evento")
 	if not eventos.is_empty():
