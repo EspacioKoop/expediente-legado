@@ -26,11 +26,12 @@ class AquilesAlineacionTest(unittest.TestCase):
 
     def test_reflector_exige_giros_deliberados(self):
         self.assertIn("extends Interactuable3D", self.reflector)
-        self.assertIn("PASO_GRADOS := 15.0", self.reflector)
-        self.assertIn("ANGULO_OBJETIVO := 45.0", self.reflector)
+        self.assertIn("PASO_GRADOS := -15.0", self.reflector)
+        self.assertIn("ANGULO_OBJETIVO := -45.0", self.reflector)
         self.assertIn("func esta_alineado()", self.reflector)
         self.assertIn("func girar_paso()", self.reflector)
         self.assertIn("alineacion_cambiada.emit", self.reflector)
+        self.assertIn("wrapf(_angulo + PASO_GRADOS, -180.0, 180.0)", self.reflector)
 
     def test_sello_nace_bloqueado_y_es_no_combate(self):
         self.assertIn("extends Interactuable3D", self.sello)

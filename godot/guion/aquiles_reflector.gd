@@ -7,8 +7,8 @@ extends Interactuable3D
 
 signal alineacion_cambiada(alineado: bool)
 
-const PASO_GRADOS := 15.0
-const ANGULO_OBJETIVO := 45.0
+const PASO_GRADOS := -15.0
+const ANGULO_OBJETIVO := -45.0
 const TOLERANCIA := 1.0
 
 const COLOR_BRONCE := Color(0.42, 0.30, 0.17)
@@ -45,7 +45,7 @@ func esta_alineado() -> bool:
 
 
 func girar_paso() -> bool:
-	_angulo = fposmod(_angulo + PASO_GRADOS, 360.0)
+	_angulo = wrapf(_angulo + PASO_GRADOS, -180.0, 180.0)
 	if _disco != null:
 		_disco.rotation_degrees.y = _angulo
 	var alineado := esta_alineado()
