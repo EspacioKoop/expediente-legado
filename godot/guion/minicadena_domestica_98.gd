@@ -385,9 +385,18 @@ func _sincronizar_audio(regenerar_stream: bool = false) -> void:
 		return
 	if not _audio.is_inside_tree():
 		return
-	if not _audio.playing:
+	if not _reproduciendo:
+		if _audio.has_stream_playback():
+			_audio.stream_paused = true
+		elif _audio.playing:
+			# play() queda encolado hasta el siguiente frame de física. Si se pausa
+			# antes, todavía no existe playback que pueda aceptar stream_paused.
+			_audio.stop()
+		return
+	if _audio.has_stream_playback():
+		_audio.stream_paused = false
+	elif not _audio.playing:
 		_audio.play()
-	_audio.stream_paused = not _reproduciendo
 
 
 ## Cama diegética mínima y original: no suplanta voces ni música del contenido.
