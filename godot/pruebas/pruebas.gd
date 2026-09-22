@@ -54,6 +54,7 @@ func _init() -> void:
 	PruebasEspaciosYSueno._traducciones(comprobar_cb)
 	PruebasEspaciosYSueno._sueno_contenido(comprobar_cb)
 	load("res://pruebas/pruebas_debug_draw_116.gd").todo(comprobar_cb)
+	load("res://pruebas/pruebas_animacion_ambiental.gd").todo(comprobar_cb)
 	_noche_degradada(comprobar_cb)
 
 	PruebasSuenoFinal._compilan(comprobar_cb)
