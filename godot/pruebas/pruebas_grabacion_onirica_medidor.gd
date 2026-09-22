@@ -11,7 +11,7 @@ var _fallos := 0
 func _init() -> void:
 	var viewport := SubViewport.new()
 	viewport.size = Vector2i(640, 360)
-	viewport.own_world_3d = true
+	viewport.world_3d = World3D.new()
 	root.add_child(viewport)
 	var mundo := Node3D.new()
 	viewport.add_child(mundo)
