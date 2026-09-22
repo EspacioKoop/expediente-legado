@@ -8,6 +8,7 @@ func _initialize() -> void:
 	_probar_catalogo()
 	_probar_lectura_significativa()
 	_probar_separacion_posesion()
+	_probar_compatibilidad_legacy()
 	print("%d pasadas, %d fallos" % [pasadas, fallos])
 	quit(1 if fallos > 0 else 0)
 
@@ -179,6 +180,37 @@ func _probar_separacion_posesion() -> void:
 		not LiteraturaEventos.registrar(registro, colision),
 		"un id no puede reclasificarse en otro canal",
 	)
+
+
+func _probar_compatibilidad_legacy() -> void:
+	var fuente := FileAccess.get_file_as_string("res://literatura/gestor_literatura.gd")
+	_comprobar(not fuente.is_empty(), "el bridge legacy existe")
+	var inicio := fuente.find("func conocer_obra")
+	var fin := fuente.find("\n\nfunc ", inicio + 1)
+	_comprobar(inicio >= 0, "el bridge legacy mantiene conocer_obra")
+	if inicio < 0:
+		return
+	var longitud := fuente.length() - inicio if fin < 0 else fin - inicio
+	var bloque := fuente.substr(inicio, longitud)
+	_comprobar(bloque.contains("LiteraturaEventos"), "el bridge usa el contrato comun")
+	_comprobar(bloque.contains("crear_evento"), "el bridge crea un evento de conocimiento")
+	_comprobar(
+		bloque.contains("registrar(registro_literario, evento)"),
+		"el bridge registra sobre su estado literario",
+	)
+	_comprobar(bloque.contains("fuente"), "el bridge conserva la fuente")
+	_comprobar(bloque.contains("contexto"), "el bridge conserva el contexto")
+	_comprobar(bloque.contains("jornada"), "el bridge conserva la jornada")
+	_comprobar(
+		not bloque.contains("GestorMomentum"),
+		"conocer una obra no modifica momentum de combate",
+	)
+	_comprobar(
+		not bloque.contains("GestorArquetipos"),
+		"conocer una obra no modifica arquetipos",
+	)
+	_comprobar(not bloque.contains("bonus_insight"), "conocer no aplica bonus de insight")
+	_comprobar(not bloque.contains("bonus_momentum"), "conocer no aplica bonus de momentum")
 
 
 func _comprobar(condicion: bool, nombre: String) -> void:

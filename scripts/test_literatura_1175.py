@@ -10,6 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 EVENTOS = ROOT / "godot" / "guion" / "literatura_eventos.gd"
 CATALOGO_GD = ROOT / "godot" / "guion" / "literatura_catalogo.gd"
 LECTURA = ROOT / "godot" / "guion" / "literatura_lectura.gd"
+GESTOR_LEGACY = ROOT / "godot" / "literatura" / "gestor_literatura.gd"
+LIBRO_INTERACTIVO = ROOT / "godot" / "interactables" / "libros" / "libro_interactivo.gd"
 CATALOGO_JSON = ROOT / "godot" / "datos" / "literatura_obras.json"
 DOC = ROOT / "docs" / "literatura-vertical-1175.md"
 TEST_GODOT = "res://pruebas/pruebas_literatura_1175.gd"
@@ -21,6 +23,8 @@ class Literatura1175Test(unittest.TestCase):
         cls.eventos = EVENTOS.read_text(encoding="utf-8")
         cls.catalogo_gd = CATALOGO_GD.read_text(encoding="utf-8")
         cls.lectura = LECTURA.read_text(encoding="utf-8")
+        cls.gestor_legacy = GESTOR_LEGACY.read_text(encoding="utf-8")
+        cls.libro_interactivo = LIBRO_INTERACTIVO.read_text(encoding="utf-8")
         cls.catalogo = json.loads(CATALOGO_JSON.read_text(encoding="utf-8"))
         cls.doc = DOC.read_text(encoding="utf-8")
 
@@ -83,6 +87,21 @@ class Literatura1175Test(unittest.TestCase):
         self.assertIn("momentum", self.doc)
         self.assertIn("arquetipos", self.doc)
         self.assertIn("#1176", self.doc)
+
+    def test_compatibilidad_legacy_no_aplica_buffs_al_conocer(self) -> None:
+        bloque = self.gestor_legacy.split("func conocer_obra", 1)[1].split("\n\nfunc ", 1)[0]
+        self.assertIn("LiteraturaEventos", bloque)
+        self.assertIn("crear_evento", bloque)
+        self.assertIn("LiteraturaEventos.registrar", bloque)
+        self.assertIn("fuente", bloque)
+        self.assertIn("contexto", bloque)
+        self.assertIn("jornada", bloque)
+        self.assertNotIn("GestorMomentum", bloque)
+        self.assertNotIn("GestorArquetipos", bloque)
+        self.assertNotIn("bonus_insight", bloque)
+        self.assertNotIn("bonus_momentum", bloque)
+        self.assertNotIn("ganar_insight", self.libro_interactivo)
+        self.assertNotIn("_obtener_efecto_obra", self.libro_interactivo)
 
     def test_godot_contract(self) -> None:
         engine = os.environ.get("GODOT_BIN", "godot4")
