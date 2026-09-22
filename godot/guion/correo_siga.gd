@@ -1,4 +1,4 @@
-## Cliente de correo corporativo del escritorio OS98 (#538).
+## Cliente de correo corporativo del escritorio OS98 (#538, #791).
 ##
 ## La UI no decide qué mensajes existen ni cuándo llegan: consulta
 ## CorreoSigaModelo con el estado vivo de Jornada y solo conserva qué mensajes
@@ -74,6 +74,7 @@ func _ready() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	size_flags_vertical = Control.SIZE_EXPAND_FILL
 	split_offset = 265
+	add_theme_constant_override("separation", 3)
 	_construir_interfaz()
 	_refrescar()
 
@@ -98,11 +99,14 @@ func _construir_interfaz() -> void:
 	izquierda.name = "Bandeja"
 	izquierda.custom_minimum_size = Vector2(245, 0)
 	izquierda.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	izquierda.add_theme_constant_override("separation", 5)
 	add_child(izquierda)
 
 	var titulo := Label.new()
 	titulo.name = "TituloBandeja"
 	titulo.text = texto("bandeja")
+	titulo.add_theme_font_size_override("font_size", 18)
+	titulo.add_theme_color_override("font_color", Color("#dce9f5"))
 	izquierda.add_child(titulo)
 
 	_lista = ItemList.new()
@@ -110,30 +114,45 @@ func _construir_interfaz() -> void:
 	_lista.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_lista.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_lista.select_mode = ItemList.SELECT_SINGLE
+	_lista.add_theme_color_override("font_color", Color("#172633"))
+	_lista.add_theme_color_override("font_selected_color", Color("#f7fbff"))
+	_lista.add_theme_stylebox_override(
+		"panel", _caja(Color("#e8f0f5"), Color("#668198"), 1, 2, 7.0, 6.0)
+	)
+	_lista.add_theme_stylebox_override(
+		"focus", _caja(Color("#d4e4ee"), Color("#2d658c"), 2, 2, 6.0, 5.0)
+	)
 	_lista.item_selected.connect(_seleccionar_mensaje)
 	izquierda.add_child(_lista)
 
 	_estado = Label.new()
 	_estado.name = "EstadoBandeja"
 	_estado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_estado.add_theme_font_size_override("font_size", 12)
+	_estado.add_theme_color_override("font_color", Color("#bfd0dc"))
 	izquierda.add_child(_estado)
 
 	var derecha := VBoxContainer.new()
 	derecha.name = "Lectura"
 	derecha.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	derecha.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	derecha.add_theme_constant_override("separation", 5)
 	add_child(derecha)
 
 	_cabecera = Label.new()
 	_cabecera.name = "Asunto"
 	_cabecera.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_cabecera.text = texto("seleccionar")
+	_cabecera.add_theme_font_size_override("font_size", 19)
+	_cabecera.add_theme_color_override("font_color", Color("#173f61"))
 	derecha.add_child(_cabecera)
 
 	_meta = Label.new()
 	_meta.name = "Metadatos"
 	_meta.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_meta.text = ""
+	_meta.add_theme_font_size_override("font_size", 12)
+	_meta.add_theme_color_override("font_color", Color("#62717b"))
 	derecha.add_child(_meta)
 
 	_cuerpo = RichTextLabel.new()
@@ -143,6 +162,13 @@ func _construir_interfaz() -> void:
 	_cuerpo.selection_enabled = true
 	_cuerpo.fit_content = false
 	_cuerpo.text = texto("espera")
+	_cuerpo.add_theme_color_override("default_color", Color("#252b2f"))
+	_cuerpo.add_theme_stylebox_override(
+		"normal", _caja(Color("#fffdf6"), Color("#a5a08f"), 1, 2, 11.0, 9.0)
+	)
+	_cuerpo.add_theme_stylebox_override(
+		"focus", _caja(Color("#fffdf6"), Color("#2d658c"), 2, 2, 10.0, 8.0)
+	)
 	derecha.add_child(_cuerpo)
 
 	_respuestas_panel = VBoxContainer.new()
@@ -150,6 +176,46 @@ func _construir_interfaz() -> void:
 	_respuestas_panel.add_theme_constant_override("separation", 6)
 	_respuestas_panel.visible = false
 	derecha.add_child(_respuestas_panel)
+
+
+func _caja(
+	fondo: Color,
+	borde: Color,
+	ancho: int,
+	radio: int,
+	margen_horizontal: float,
+	margen_vertical: float
+) -> StyleBoxFlat:
+	var caja := StyleBoxFlat.new()
+	caja.bg_color = fondo
+	caja.border_color = borde
+	caja.border_width_left = ancho
+	caja.border_width_top = ancho
+	caja.border_width_right = ancho
+	caja.border_width_bottom = ancho
+	caja.corner_radius_top_left = radio
+	caja.corner_radius_top_right = radio
+	caja.corner_radius_bottom_left = radio
+	caja.corner_radius_bottom_right = radio
+	caja.content_margin_left = margen_horizontal
+	caja.content_margin_top = margen_vertical
+	caja.content_margin_right = margen_horizontal
+	caja.content_margin_bottom = margen_vertical
+	return caja
+
+
+func _estilizar_respuesta(boton: Button) -> void:
+	boton.add_theme_color_override("font_color", Color("#20313d"))
+	boton.add_theme_color_override("font_focus_color", Color("#102430"))
+	boton.add_theme_stylebox_override(
+		"normal", _caja(Color("#e6eef4"), Color("#71899a"), 1, 2, 8.0, 5.0)
+	)
+	boton.add_theme_stylebox_override(
+		"hover", _caja(Color("#f1f6f9"), Color("#4b748f"), 1, 2, 8.0, 5.0)
+	)
+	boton.add_theme_stylebox_override(
+		"focus", _caja(Color("#f1f6f9"), Color("#2d658c"), 2, 2, 7.0, 4.0)
+	)
 
 
 func _refrescar() -> void:
@@ -221,6 +287,7 @@ func _mostrar_respuestas(mensaje: Dictionary) -> void:
 
 	var titulo := Label.new()
 	titulo.text = texto("responder")
+	titulo.add_theme_color_override("font_color", Color("#173f61"))
 	_respuestas_panel.add_child(titulo)
 
 	var envio: Variant = _respuestas_enviadas.get(mensaje_id, {})
@@ -248,6 +315,7 @@ func _mostrar_respuestas(mensaje: Dictionary) -> void:
 		var boton := Button.new()
 		boton.text = String(opcion.get("texto", opcion_id))
 		boton.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_estilizar_respuesta(boton)
 		boton.pressed.connect(_enviar_respuesta.bind(mensaje_id, opcion_id))
 		_respuestas_panel.add_child(boton)
 
