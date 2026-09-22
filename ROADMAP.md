@@ -1,207 +1,194 @@
 # Roadmap
 
-Mapa de fases hasta la primera versión completa. **La prioridad operativa la fija el [plan maestro #181](https://github.com/EspacioKoop/expediente-legado/issues/181)**; este documento cambia más despacio y no sustituye criterios de aceptación de issues concretos.
+Mapa de fases hasta la primera versión completa. **La prioridad operativa la fija el [plan maestro #181](https://github.com/EspacioKoop/expediente-legado/issues/181)**; este documento resume estado, gates y dirección. Los criterios de aceptación siguen viviendo en cada issue.
 
 | Dónde se mira | Qué responde |
 | --- | --- |
 | [Plan maestro #181](https://github.com/EspacioKoop/expediente-legado/issues/181) | Qué va primero ahora |
 | [Registro de reservas #182](https://github.com/EspacioKoop/expediente-legado/issues/182) | Quién puede editar qué |
-| [Auditoría de paridad SIGA](docs/paridad-expedientes.md) | Qué del legado existe ya en Godot |
+| [Índice de documentación](docs/README.md) | Qué documento es canónico para cada sistema |
+| [Paridad SIGA](docs/paridad-expedientes.md) | Qué del legado existe ya en Godot |
+| [Paridad ideologías](docs/paridad-ideologias.md) | Qué se recuperó y qué se generalizó |
+| [Paridad religión](docs/paridad-religion.md) | Límites con Tarot/mitología y expansión nueva |
+| [Paridad literatura](docs/paridad-literatura.md) | Contrato y frontera legado → expansión |
 | [Milestones](https://github.com/EspacioKoop/expediente-legado/milestones) | Qué está comprometido para una versión |
 | [Releases](https://github.com/EspacioKoop/expediente-legado/releases) | Qué se ha publicado |
 
-## Estado de integración — 2026-09-14
+## Estado de integración — 2026-09-22
 
-La referencia es `main`. Los PR cerrados sin merge no cuentan como integración y una CI verde no sustituye una validación humana.
+La referencia es `main`. Un PR cerrado sin merge no cuenta como integración y una CI verde no sustituye validación humana.
 
-El segundo playtest humano, realizado sobre la alpha #237 / PR #394, **falló el gate de experiencia** aunque CI y export fueran verdes. El recorrido estaba disponible, pero la build seguía leyendo como prototipo/greybox por cámara, HUD, identidad espacial, materiales, densidad, personajes y puesta en escena. Desde entonces se ha integrado un saneamiento P0 amplio. El siguiente corte debe medir ese saneamiento; no debe reabrir sistemas ya implementados sin un fallo reproducible.
+El proyecto ya no está en el estado descrito por el roadmap del 14/09. Tras el saneamiento P0 se han integrado varias oleadas nuevas: correcciones de oficina/SIGA a 1080p, vida cotidiana 1998, reloj y audio contextual, huellas persistentes, identidad propia de OS98, mitologías en runtime, religión/ideologías transversales, una primera vertical literaria y la modularización inicial del Juicio 3D.
 
-### Recorrido, cámara, HUD y QA
+El siguiente objetivo no es “añadir sistemas porque faltan”, sino **hacer pasar un playthrough humano sobre el `main` actual y convertir sus fallos reproducibles en prioridad**.
 
-- **Partida:** #288 corrige Continuar/Nueva partida; #271 sigue siendo gate humano de persistencia real.
-- **Onboarding:** #304 mejora archivo, puesto 4-B y primera acción; #272 sigue siendo validación humana.
-- **Movimiento/cámara:** #305 normalizó WASD/flechas y pisadas; #405 cubre el núcleo técnico de #396 con ratón y stick derecho, sensibilidad e inversión Y persistentes, deadzone, aceleración/frenado y captura de cursor. #396/#113/#273 quedan para sensación, mando físico y presentación.
-- **HUD/diálogo:** #406 concentra prioridades en `HUDLayer`, sustituye frases por proximidad por interacción explícita con NPC y conserva atribución de hablante; #453 elimina el bloque de estado permanente fuera del archivo. #397/#276 siguen abiertos por lectura visual humana.
-- **Feedback de testers:** #392 integra Parte de incidencias con diagnóstico opt-in, portapapeles/guardado local y URL externa opcional.
+### Recorrido, controles y legibilidad
 
-### SIGA, investigación y decisiones
+- **Oficina/SIGA:** #1141 corrige la ronda de fallos observada a 1920×1080; #1091 confirma salida física y #1089 mantiene una salida de rescate independiente del foco.
+- **Cámara:** #1095/#1097 blindan la interacción entre ratón, GUI y cámara en runtime. #396/#113 siguen siendo gates humanos de sensación y mando físico.
+- **HUD/tipografía:** #780/#1126 protegen fuentes empaquetadas y #397 sigue abierto por jerarquía visual real.
+- **Personajes:** #1083/#1087/#1112/#1113 mejoran presencia y legibilidad. #275/#134 siguen abiertos porque el cierre depende de observación humana, no del mero número de mallas.
+- **Renderer:** el port usa **Forward+** desde #1121, con sombras, SSAO y SSIL; no documentar ya el renderer de compatibilidad como estado actual.
 
-- #289 añade relación manual entre folios; #309 marcadores; #318 metadatos; #320 feedback de relaciones; #321/#323 anexos; #371 valida referencias/procedencia.
-- #352 versiona la auditoría legado → Godot y #367 conecta al careo contexto realmente descubierto. #286 se valida ahora mediante playtest específico: no hay que añadir mecánicas por inercia.
-- #364 introduce archivado manual 3D.
-- #339/#369 permiten posponer la decisión política; #477 exige contexto nuevo antes de volver a decidir. #287 queda como gate de ritmo y comprensión, no como excusa para otra capa genérica.
+### SIGA, expedientes y decisiones
 
-### Interacción, densidad y personajes
+- #513 mantiene el objetivo de evidencia documental consultable; #1101 añade un gate visual reproducible.
+- #431/#286 siguen siendo la superficie de playtest de profundidad SIGA: las capas existentes deben probarse antes de volver a ampliar el framework.
+- #150 ya conecta evaluación con economía, historial y cierre de vida (#1081/#1086/#1090).
+- #954 amplía decisiones con historial y aplazamientos acumulativos (#1159), sin mezclar decisión política con hechos del expediente.
+- #961 añade meticulosidad contextual: microdetalles (#1169), sueño (#1155) y audio (#1187). Debe seguir siendo opt-in/contextual, no una barra universal.
+- #959 ya tiene huellas persistentes y desgaste documental (#1122/#1186).
 
-- #307/#341 establecen el contrato/detector común; #345 conecta el terminal SIGA y #348 los archivadores reales.
-- #400 ya tiene un vertical reactivo en cada espacio principal: casa (#407), oficina (#423), sueño (#424) y calle (#433). El issue paraguas queda principalmente como **validación visual humana transversal** de densidad y respuesta.
-- #465 sustituye dos proxies domésticos de alto valor por una cama y un cuenco reconocibles, anclados a las coordenadas reales de gameplay. #282 sigue abierto para lectura/densidad global.
-- #445 añade respiración ambiental mínima y un gesto selectivo de orientación, respetando reducción de movimiento. #134 sigue abierto por validación humana y posible segundo corte solo si el playtest lo justifica.
-- #275 continúa siendo un gate visual importante: la existencia de una malla low-poly no demuestra por sí sola que los rostros funcionen desde frente, 3/4 y perfil.
+### Mundo, tiempo, audio y vida cotidiana
 
-### Identidad espacial y materiales
+- **Comercio:** #676 dispone de espacios, interiores, reventa física y feedback diegético (#1088/#1127/#1132/#1134) con gate visual #1136.
+- **Casa:** #677 suma objetos, recuerdos y decals propios (#1142–#1146); #1151 consolida evidencia de varias verticales cotidianas.
+- **Vecindario:** #673 materializa vecinos y portal en #1144.
+- **Tiempo:** #963 tiene reloj persistente e iluminación horaria (#1135/#1138).
+- **Audio:** #966 progresa con ambiente por estado/hora, gestos, sueño, TV, papel y meticulosidad (#1128/#1130/#1133/#1137/#1139/#1187). #119 continúa como gate/expansión de mezcla transversal.
+- **Trayecto:** #277 sigue siendo un gate humano de lectura espacial; no basta con añadir props si la calle continúa percibiéndose como pasillo.
 
-- **Oficina:** #412 introduce perfiles reutilizables de melamina, metal pintado y ABS sobre el shader PSX común.
-- **Casa:** #420 consolida la distribución doméstica; #427 añade madera, tejido y acero de cocina propios sin assets binarios nuevos.
-- **Trayecto:** #429 añade cielo exterior y dos capas de profundidad urbana; #449 materializa fachadas con revoco urbano procedural sin cambiar navegación.
-- **Sueño:** la geometría poligonal/no ortogonal y el dressing reactivo ya tienen infraestructura y verticales integrados (#325/#344/#424), pero #279/#398/#399 mantienen el gate de identidad/material final y captura sin HUD.
-- #398 es la regla transversal de composición; #399 la de superficies. Ambos se cierran por lectura humana de los cuatro espacios, no por contar PRs.
+### OS98 y Portátil Color 98
 
-### Cinemáticas y tratamiento visual
+- Iconos propios y personalidad de aplicaciones avanzan en #781/#791: Catálogo, Calculadora, Bloc de notas y Correo ya tienen verticales (#1149/#1150/#1152/#1190/#1192).
+- La Portátil Color 98 recibió apagado físico/afterglow y paletas propias (#1177/#1185/#1188).
+- La portátil es infraestructura compartida por ROMs propias; no duplicar emulador, input, audio o persistencia para cada sistema cultural.
 
-- #410 reemplaza la entrada inicial de cuatro inserts 2D por una secuencia 3D sobre la oficina real.
-- #428 hace casa → sueño mediante tres planos 3D sobre la casa real y conserva el mismo estado al terminar o saltar.
-- #395 ya no necesita volver a implementar esas dos secuencias: faltan captura/vídeo en export y pase humano de legibilidad/ritmo.
-- #470 cerró #115 con comparativas controladas de oficina y sueño, manteniendo `dithering=0.65`; HUD, visor y documentos permanecen fuera del shader espacial.
+### Tarot, mitologías, ideologías, religión y literatura
 
-### Sueño y continuidad
+Estas capas pueden cruzarse, pero **no son una sola estadística**.
 
-- #301 sustituye salida oculta por progreso por objetivos; #308 hace visible 0/2 → 2/2 y reorienta al gato; #313 corrige el detector físico. #281 queda como gate humano de comprensión.
-- #332 limita recompensas oníricas a pistas catalogadas: el sueño no crea hechos nuevos.
-- #280 sigue siendo un gate de **export real** para transiciones y continuidad, ahora complementado por las secuencias 3D de #410/#428.
+- **Tarot:** #1029 sigue portando triggers/progresión del legado; varios desbloqueos ya están integrados (#1094/#1100/#1104/#1108/#1109).
+- **Mitologías:** #1157 integra el corpus común; Mari, Yggdrasil y Popol Wuj recibieron nuevos verticales (#1164–#1166). #1171/#1174 desarrollan el contrato jungiano/mitológico transversal.
+- **Ideologías:** #915–#925 son el marco. Doctrinas heredadas ya llegan al Juicio 3D (#1115), a cierres de expediente (#1124) y a prensa/radio (#1148).
+- **Religión:** #916–#937 mantiene exposición, práctica, convicción y vínculo separados. JALI 98, VITRAL 98 y SARNATH 98 prueban ROM/cultura (#1158/#1163/#1168/#1170); #934 tiene un primer vertical de práctica/cultura material (#1147); #936 ya dispone de un primer contrato contextual de conflicto (#1117).
+- **Literatura:** #1176 cierra el contrato de conocimiento/posesión/insight/ritual. #1178 crea la primera vertical ejecutable y #1194 alinea el legado con ese contrato. La expansión sigue en #1179–#1184.
 
-### Vida cotidiana y extras ya integrados
+### Juicio 3D y deuda técnica
 
-- #83 mantiene la economía base; #84/#85 tienen verticales funcionales y #333 conecta pérdida de vivienda con `home_storage` sin borrar lo llevado encima.
-- #322 integra un primer vertical de trabajillos; #94 sigue abierto para equilibrio.
-- #363/#365 añaden sellos persistentes internos sin recompensa mecánica directa.
-- La portátil, la emulación GB, minijuegos y otros verticales opcionales ya presentes en `main` **no pasan a ser gates de v0.6 por estar integrados**. La expansión adicional permanece detrás del saneamiento P0 salvo autorización explícita de prioridad.
+El crecimiento de capas culturales hizo de `juicio_combate_3d.gd` un punto de concentración excesiva. #1191 es la deuda técnica activa. Ya se han extraído:
 
-## Punto de control actual: saneamiento P0 antes del siguiente corte humano
+- reglas puras (#1193);
+- adaptador jungiano (#1195);
+- capa simbólica (#1196).
 
-Ya no usamos como baseline vigente el SHA previo al segundo playtest. El siguiente candidato debe cortarse desde un `main` donde los cambios P0 necesarios estén integrados y sus workflows verdes, y debe registrar el SHA exacto en las notas de alpha. Hasta entonces, no conviene fijar aquí un hash que envejezca con cada merge.
+Cualquier nueva integración debe preferir módulos/contratos existentes y evitar volver a concentrar responsabilidad en el controlador de escena.
 
-Recorrido de control:
+## Punto de control actual: playthrough humano sobre el main de 2026-09-22
 
-**Nueva partida → entender el archivo → mover cámara libremente y localizar interacciones → usar SIGA → investigar un expediente con relaciones/capas suficientes → firmar/careo → cobrar → recorrer una calle inequívocamente exterior → entrar en una casa reconocible → ver la transición 3D a sueño → completar la primera noche por objetivos → despertar → alquiler/impago → cerrar y recargar conservando estado.**
+Recorrido mínimo a validar:
 
-### Lo que debe validar una persona
+**Nueva partida → entender el archivo → localizar y usar SIGA → abrir/leer documentación real del expediente → relacionar/decidir/careo → cobrar → salir físicamente de la oficina → recorrer el trayecto → entrar en casa → interactuar con vida cotidiana/inventario → dormir → resolver la primera noche por objetivos → despertar → comprobar economía/estado → guardar/cerrar/continuar.**
 
-- **#396/#113/#273** — ratón, stick derecho, sensibilidad, foco, remapeo y tacto con mando físico.
-- **#397/#276** — ninguna capa de HUD tapa diálogo/prompt/tutorial; los NPC conversables se entienden sin llenar la pantalla de iconos.
-- **#398/#399** — oficina, calle, casa y sueño se reconocen sin HUD también por arquitectura, profundidad y materiales.
-- **#282/#400** — hay suficiente densidad 3D e interacción para que los espacios se sientan usados, no una colección de demos aisladas.
-- **#275/#134** — compañeros coherentes desde varios ángulos y con presencia mínima, sin caras pegadas ni sensación de maniquí.
-- **#395/#280** — entrada y casa → sueño se ven, se entienden, pueden saltarse y terminan en el mismo estado en una export real.
-- **#271/#272** — nueva/continuar, persistencia y onboarding funcionan sin conocimiento previo.
-- **#281** — la primera noche se resuelve por objetivos sin buscar una salida invisible.
-- **#286** — el expediente se percibe como investigación ligera real y no como lectura → decisión inmediata.
-- **#287** — posponer y madurar una decisión política evita el ritmo precipitado sin bloquear el flujo.
-- **#119** — ambiente audible y equilibrado en contexto cuando corresponda al corte.
+### Gates que necesitan persona o export real
 
-Cualquier fallo reproducible encontrado aquí gana prioridad frente a expansión opcional. Un gate que pasa se documenta; no se reabre por preferencia estética sin una regresión concreta.
+- **#9** — playthrough end-to-end.
+- **#396/#113** — tacto de cámara, foco, ratón y mando físico.
+- **#397/#780** — jerarquía visual y legibilidad real a 1080p.
+- **#275/#134** — NPCs reconocibles y presencia mínima desde cámara normal.
+- **#277** — trayecto legible como exterior/espacio urbano.
+- **#395/#280** — continuidad/cinemáticas en export.
+- **#431/#513/#286** — profundidad de expediente y documentos realmente consultables.
+- **#793** — foco/salida de SIGA-98 en condiciones reales.
+- **#119/#966** — mezcla audible y adaptativa en contexto.
+- **#112** — export/publicación cuando vuelva a activarse la entrega pública.
+
+Un fallo reproducible de este recorrido gana prioridad frente a una expansión opcional.
 
 ## Fases
 
-### v0.6.0 · Recorrido completo
+### v0.6.0 · Recorrido completo y legible
 
-La estructura del recorrido está cerrada en lo esencial, pero el segundo playtest demostró que “completable” no bastaba. v0.6 contiene ahora el **saneamiento P0 de experiencia** necesario para que el siguiente recorrido humano mida un juego y no un greybox.
+Objetivo: demostrar que el núcleo ya implementado se puede jugar sin conocimiento del código.
 
-Mantener aquí únicamente trabajo que pueda invalidar ese pase: cámara/control, HUD, identidad espacial/material, densidad/personajes, continuidad prioritaria y los gates funcionales del recorrido. Los expedientes adicionales (#91), colecciones y extras no son requisito de salida.
+Incluye únicamente trabajo capaz de invalidar el pase:
 
-**Salida de fase:** una alpha recorrida de principio a fin sin consola ni conocimiento del código, con persistencia real, espacios legibles, control cómodo, sin bloqueos funcionales y sin hallazgos P0 de presentación que impidan evaluar el juego.
+- entrada, cámara, foco, salida y persistencia;
+- SIGA/documentos/careo suficientes para investigar;
+- HUD y tipografía legibles;
+- personajes y espacios reconocibles;
+- trayecto, casa y sueño conectados;
+- correcciones P0 encontradas por #9.
 
-### v0.7.0 · Cinemáticas y continuidad
+**Salida de fase:** playthrough humano sin consola ni bloqueo, con persistencia real y sin fallo P0 que impida evaluar el juego.
 
-Las dos secuencias P0 que bloqueaban el siguiente pase ya tienen verticales 3D integrados (#410 y #428). Antes de expandir la puesta en escena:
+### v0.7.0 · Continuidad, puesta en escena y combate mantenible
 
-- #395/#280 deben pasar captura/vídeo y validación humana en export real;
-- #177 puede aportar investigación/prototipos originales solo cuando resuelvan un problema observado;
-- las nuevas cinemáticas deben reutilizar mundo, props y estado del gameplay, y no reabrir infraestructura estable por estética solamente.
+- validar #395/#280 sobre export real;
+- avanzar #177 solo donde exista una necesidad observada;
+- cerrar la modularización #1191 antes de seguir acumulando reglas en Juicio 3D;
+- mantener sistemas culturales como adaptadores/consumidores, no lógica embebida en escenas.
 
-#209 sigue fuera de esta fase: los incidentes de conducta son simulación cotidiana/social y pertenecen a v0.9.
+**Salida de fase:** transiciones comprensibles y Juicio/combate sin un controlador monolítico que bloquee nuevas integraciones.
 
-### v0.8.0 · Presentación, mando y accesibilidad mínima
+### v0.8.0 · Presentación, mando, accesibilidad y OS98
 
-Ya integrado, entre otros:
-
-- tipografía libre por defecto (#172);
-- foco A-7 (#174);
-- menú global/preferencias (#306);
-- remapeo visual teclado/mando (#335);
-- cámara configurable (#405);
-- HUDLayer/diálogo interactivo (#406) y reducción de HUD permanente (#453);
-- Parte de incidencias para testers (#392).
+Ya existen preferencias, remapeo, cámara configurable, HUD unificado y tipografías empaquetadas.
 
 Pendiente principal:
 
-- validar recorrido con mando físico (#113/#98/#396);
-- cerrar superficies concretas de accesibilidad que #98 mantenga abiertas;
-- completar traducción del catálogo (#107);
-- revisar presentación en resoluciones/exportaciones soportadas;
-- cerrar gates visuales que sobrevivan al pase v0.6 sin convertir esta fase en una reescritura del arte.
+- validación física de #113/#396;
+- superficies concretas de accesibilidad (#98);
+- revisión 1080p y resoluciones soportadas;
+- completar identidad de aplicaciones #781/#791 donde aporte legibilidad, no decoración;
+- cerrar gates visuales supervivientes sin reescribir sistemas que ya funcionan.
 
-El ambiente continuo #119 se evalúa principalmente como parte del ciclo oficina → calle → casa → sueño en v0.9.
+### v0.9.0 · Vida cotidiana y capas transversales
 
-### v0.9.0 · Vida cotidiana, contenido y ambiente
+Esta fase contiene profundidad opcional/semisistémica que debe enriquecer varias jornadas sin bloquear el núcleo:
 
-La economía base ya no es un bloqueo. Esta fase reúne lo que hace que vivir varias jornadas tenga peso y variedad:
+- vida 1998 #669 y derivados;
+- audio/ambiente #966/#119;
+- huellas #959 y meticulosidad #961;
+- gato #787, inventario #97 y sueño #79;
+- mitologías #650/#1171/#1174;
+- ideologías #915–#925;
+- religión #916/#930–#937;
+- literatura #1175/#1179–#1184;
+- expedientes adicionales y contenido cultural que reutilice contratos existentes.
 
-- vivienda/alquiler/impago — #84/#85;
-- compras e imprevistos — #93/#96;
-- trabajillos — #94, con vertical ya integrado y equilibrio aún abierto;
-- gato transversal — #92;
-- sueño alimentado por lo conocido — #79/#87/#89/#97;
-- familias/variación onírica — #279/#284 solo cuando la primera noche ya sea legible;
-- interacción ambiental — #283/#400 por objetos y situaciones concretas, no otra arquitectura genérica;
-- ambiente sonoro — #119;
-- expedientes adicionales — #91;
-- incidentes sociales/consecuencias ambientales — #209 y derivados.
-
-Los minijuegos, la portátil y otros extras ya integrados pueden probarse aquí como contenido opcional, pero no definen la salida de fase.
+**Regla de fase:** ninguna vertical transversal debe crear una segunda `Partida`, un segundo emulador, otro sistema de diálogo o un nuevo “alignment” global.
 
 ### v1.0.0 · Primera versión completa
 
-Objetivo: distribuir una build que sobreviva un playthrough real y cuya accesibilidad mínima esté documentada.
+Objetivo: distribuir una build que sobreviva un playthrough real y cuya accesibilidad/licencias estén documentadas.
 
 - exportación y publicación reproducible — #112;
-- distribución pública/itch.io y preparación comercial — #99;
+- distribución pública/itch.io y preparación comercial — #99, cuando se reactive;
 - playtesting humano de principio a fin — #9;
 - licencias/procedencia verificadas para todo asset distribuible;
-- gates de CI y revisión sin excepciones manuales ocultas.
+- CI y revisión sin excepciones manuales ocultas;
+- documentación canónica coherente con `main`.
 
-La 1.0 no exige agotar el backlog de minijuegos, arte opcional o colecciones.
+La 1.0 no exige agotar el backlog de minijuegos, ROMs, arte opcional ni todas las familias culturales.
 
 ### Después de la 1.0
 
-Permanece detrás del recorrido principal salvo dependencia demostrada:
-
-- expansiones de colecciones/minijuegos que no resuelvan un hallazgo;
-- logros externos (#114);
-- familias oníricas expansivas (#284) una vez validada la primera noche;
-- arte/ambientación que no resuelva un hallazgo concreto del playtest;
-- expansiones de cinemáticas o simulación que no cambien el punto de control actual.
-
-Una pieza opcional ya integrada no se vuelve a tratar como trabajo base: cualquier ampliación futura debe justificar su prioridad de forma independiente.
-
-## Ajuste de milestones — 2026-09-13
-
-Para que GitHub y este roadmap vuelvan a decir lo mismo se recolocaron tres issues abiertos:
-
-- #91: **v0.6 → v0.9**, porque ampliar el catálogo no bloquea el recorrido;
-- #209: **v0.7 → v0.9**, porque es simulación social/cotidiana, no infraestructura cinematográfica;
-- #119: **v0.8 → v0.9**, porque el ambiente se valida como parte del ciclo diario y ya tiene un primer vertical de oficina integrado.
-
-El saneamiento P0 posterior al segundo playtest no revierte ese ajuste: añade gates de experiencia a v0.6, no contenido expansivo.
-
-No se cierran milestones por una CI verde. Se cierran cuando su criterio de salida ha sido validado y existe un release/corte correspondiente.
+- nuevas ROMs y colecciones que no resuelvan un hallazgo;
+- familias oníricas adicionales;
+- expansiones sociales/culturales no necesarias para el recorrido base;
+- arte/ambientación sin un problema concreto de legibilidad o identidad;
+- logros/plataformas externas no necesarias para distribuir la primera versión.
 
 ## Regla para mover trabajo entre fases
 
 1. Un bloqueo observado en #9 gana frente a expansión opcional.
-2. Una mejora P1 pequeña puede adelantarse si mejora directamente el siguiente playthrough.
-3. Los paraguas #279/#282/#283/#400 se ejecutan por verticales pequeños y se cierran por evidencia transversal.
-4. Un issue no “sube” por tener código interesante: debe eliminar un bloqueo, una regresión o una dependencia mínima.
-5. Una pieza técnicamente integrada puede seguir abierta únicamente por validación humana; eso **no autoriza reescribirla** sin un fallo reproducible nuevo.
-6. `main` manda sobre cuerpos históricos de issues, ramas antiguas o comentarios anteriores.
-7. Un extra ya integrado no se convierte por ello en requisito del recorrido principal.
-8. Si el backlog opcional vuelve a crecer mientras los gates P0 siguen abiertos, #181 tiene prioridad y debe aplicarse como cortafuegos.
+2. Una mejora pequeña puede adelantarse si resuelve directamente el siguiente playthrough.
+3. Los paraguas grandes se ejecutan por verticales pequeños y se cierran por evidencia transversal.
+4. Un issue no sube de prioridad por tener código interesante.
+5. Una pieza integrada puede seguir abierta únicamente por validación humana; eso no autoriza reescribirla sin fallo reproducible.
+6. `main` manda sobre cuerpos históricos, ramas antiguas o documentación fechada.
+7. Un extra integrado no se convierte automáticamente en requisito de release.
+8. Los sistemas transversales deben reutilizar contratos; si necesitan flags especiales en cada escena, la arquitectura debe revisarse.
+9. La deuda técnica que impide integrar con seguridad (como #1191) puede ganar prioridad antes de ampliar contenido.
+10. Si documentación, milestone y #181 discrepan, hay que corregir la discrepancia; no mantener planes paralelos.
 
 ## Milestones, Projects y releases
 
-- **Milestone** = versión comprometida; se cierra con su release/corte validado.
-- **Projects** = estado operativo del trabajo, no fuente única de prioridad.
-- **Plan maestro #181** = orden vigente y punto de control.
-- **Release/alpha** = artefacto publicado con notas que distinguen claramente qué se probó automáticamente y qué se validó de forma humana.
+- **Milestone** = versión comprometida; se cierra con release/corte validado.
+- **Projects** = estado operativo, no fuente única de prioridad.
+- **Plan maestro #181** = orden vigente y siguiente punto de control.
+- **Roadmap** = mapa de fases y gates.
+- **Release/alpha** = artefacto concreto con SHA y notas que separan pruebas automáticas de validación humana.
 
-Si dos superficies discrepan, corrige la documentación; no mantengas dos planes paralelos.
+Este documento debe revisarse tras cada playtest grande o cuando una oleada de merges cambie de forma material el alcance del siguiente corte.

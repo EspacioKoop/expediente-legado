@@ -1,5 +1,11 @@
 # Paridad de expedientes: legado web → Godot
 
+## Estado posterior al corte — 2026-09-22
+
+Esta auditoría conserva su valor como mapa **legado → Godot**, pero el runtime ha seguido avanzando. Desde su corte se han integrado, entre otros, correcciones de oficina/SIGA observadas a 1920×1080 (#1141) y un gate visual reproducible para exigir evidencia documental (#1101). Los issues #431/#513/#286 siguen siendo la autoridad para decidir si la profundidad de investigación ya pasa un playtest humano.
+
+No interpretar una fila histórica “pendiente” como permiso para duplicar sistemas que ya estén en `main`: comprobar primero el issue dueño y el código actual.
+
 Estado operativo del issue #286. Esta tabla existe para evitar que una mecánica del legado desaparezca por omisión durante el port.
 
 ## Convención

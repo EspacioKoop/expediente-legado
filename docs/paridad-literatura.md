@@ -1,5 +1,11 @@
 # Paridad de literatura: legado pre-Godot → sistema transversal literario
 
+## Estado posterior al corte — 2026-09-22
+
+La auditoría pre-Godot sigue siendo válida, pero la arquitectura literaria ya dejó de ser solo una propuesta. #1176 cerró el contrato transversal de **conocimiento, posesión, insight y ritual**; #1178 integró el primer corte ejecutable y #1194 alineó la capa legacy con ese contrato.
+
+El trabajo abierto se reorganizó en #1179–#1184. La tabla de ruta inferior se actualiza para reflejar esos issues actuales; no debe reutilizar la numeración provisional anterior.
+
 Seguimiento de #1175 y base documental para sistemas literarios.
 
 ## Corte temporal y método
@@ -22,21 +28,21 @@ La consecuencia para #1175 es importante: **la épica literaria es principalment
 ## Separación de dominios
 | Dominio exigido por #1175 | Resultado en el legado pre-Godot | Decisión |
 | --- | --- | --- |
-| Literatura vivida / practicada | No se encontró evidencia versionada | Contenido nuevo bajo #1176/#1178/#1179; no fabricar paridad |
+| Literatura vivida / practicada | No se encontró evidencia versionada | Contenido nuevo bajo #1176 y #1179–#1184; no fabricar paridad |
 | Institución literaria | No se encontró evidencia versionada | Bibliotecas y tertulias son expansión nueva |
-| Cultura / material literario | Nombres aislados sin sistema | #1178 es expansión nueva |
+| Cultura / material literario | Nombres aislados sin sistema | #1180/#1181 son expansión nueva |
 | Mito / folclore | Algunos nombres mitológicos aparecen como flavor | Mantener separado de literatura; los sistemas de mitología (#932) son independientes |
 | Libro / manuscrito | Aparecen como objetos decorativos sin interacción significativa | Patrón de interacción documental es reutilizable; #1176 debe declarar su propio estado |
-| Saber / conocimiento eruditivo | No se encontró métrica ni progreso | #1177 es expansión nueva |
-| Sueño y simbolismo literario | No se encontró capa onírica literaria | #1179 es expansión; no atribuir al legado los sueños literarios posteriores |
-| Postura personal de NPC | No se encontró postura literaria explícita | #1178 es expansión nueva |
+| Saber / conocimiento eruditivo | No se encontró métrica ni progreso | #1179/#1180/#1181 son expansión nueva |
+| Sueño y simbolismo literario | No se encontró capa onírica literaria | #1182 es expansión; no atribuir al legado los sueños literarios posteriores |
+| Postura personal de NPC | No se encontró postura literaria explícita | #1180 es expansión nueva |
 | Hechos históricos/culturales literarios | No se encontró corpus estructurado | Cualquier tradición viva futura necesita fuentes nuevas conforme a #1175 |
 
 ## Matriz canónica
 | Concepto | Fuente legado | Equivalente actual | Estado | Decisión | Issue destino | Prueba / evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
-| Catálogo de obras literarias | Nombres aislados en ambientación | `ObrasLiterarias` + `datos/literatura/obras.json` | **Portado parcial como flavor** | Literatura nueva; no religion ni mitología | #1176; #1178 | Verificar que los nombres coincidan con ambientación existente |
-| Interacción documental significativa | Objetos decorativos sin lógica | `ObraLiteraria` + `MiniJuegoLectura` | **No existía** | Patrón recuperable de `CartaOcultaService` aplicado a obras | #1176; #1177 | Crear nuevo sistema de interacción que registre exposición |
+| Catálogo de obras literarias | Nombres aislados en ambientación | `ObrasLiterarias` + `datos/literatura/obras.json` | **Portado parcial como flavor** | Literatura nueva; no religion ni mitología | #1176; #1178; #1179 | Verificar que los nombres coincidan con ambientación existente |
+| Interacción documental significativa | Objetos decorativos sin lógica | `ObraLiteraria` + `MiniJuegoLectura` | **No existía** | Patrón recuperable de `CartaOcultaService` aplicado a obras | #1176; #1181 | Crear nuevo sistema de interacción que registre exposición |
 | Desbloqueos de obra por progreso | Ninguno | estado literatura de Godot | **No existía** | Reutilizable como patrón de evento estable e idempotente; estado independiente | #1176; lección de #46, #1029 | Definir IDs estáticos y eventos de descubrimiento |
 | Conocimiento separado de posesión | Ninguno | memoria literaria fantasma | **No existía** | Separar «obra conocida» vs «insight otorgado» | #1176; #46 como precedente | Implementar flags distintos |
 | Contenido dentro del mundo, no formulario abstracto | Ambientación pasiva | `ObraLiteraria` usa escena 3D del mundo | **No existía** | Reutilizar patrón de interacción documental significativa | #1176; #931/#932 | Asegurar que la interacción ocurra en escena 3D |
@@ -63,13 +69,13 @@ La consecuencia para #1175 es importante: **la épica literaria es principalment
 ## Ruta de los sub-issues de #1175
 | Issue | Relación con el legado auditado |
 | --- | --- |
-| #1176 — contrato transversal literario | **Nuevo contrato**. Puede reutilizar idempotencia/procedencia como patrón, nunca el estado Tarot o religioso |
-| #1177 — obras literarias como ROMs | **Expansión nueva**. No había obra literaria pre-Godot con mecánicas |
-| #1178 — diálogos, autores, movimientos | **Expansión nueva**. No se halló postura literaria heredada de NPC |
-| #1179 — espacios, prácticas, calendario, material | **Expansión nueva**. No se halló institución/espacio/material literario heredado |
-| #1180 — sueño y simbolismo literario | **Consumidor nuevo**. Puede cruzar recuerdos de obras/mitos solo declarando su dominio |
-| #1181 — conflicto y ritual literario | **Expansión nueva**. Los compromisos literarios no proceden del combate Tarot legado |
-| #1182 — trayectoria y epílogo literario | **Expansión nueva**. No debe reinterpretar final político o colección de obras como identidad literaria |
+| #1176 — contrato transversal de conocimiento, posesión, insight y ritual | **Contrato integrado**. Reutiliza idempotencia/procedencia como patrón, con estado literario independiente |
+| #1179 — ROMs propias y desbloqueo por conocimiento significativo | **Expansión nueva**. No había ROM literaria pre-Godot; debe reutilizar la Portátil Color 98 |
+| #1180 — autores, movimientos, diálogos e insight contextual | **Expansión nueva**. No se halló postura literaria heredada de NPC |
+| #1181 — biblioteca, tertulia y prácticas de lectura en el mundo | **Expansión nueva**. No se halló institución/espacio literario heredado |
+| #1182 — sueño, memoria y simbolismo onírico | **Consumidor nuevo**. Puede cruzar recuerdos de obras/mitos sin inventar hechos SIGA |
+| #1183 — conflicto, ritual de cita y efectos contextuales | **Expansión nueva**. Conocer una obra habilita opciones; no aplica buffs por sí solo |
+| #1184 — trayectoria cultural y epílogo sin alignment único | **Expansión nueva**. Debe derivar de hechos concretos y admitir pluralidad/ausencia |
 
 ## Criterio de cierre de #1175
 - [x] se revisa legado web/backend y el historial hasta una frontera temporal explícita;
@@ -77,6 +83,6 @@ La consecuencia para #1175 es importante: **la épica literaria es principalment
 - [x] se identifican los **patrones recuperables** para documentos, diálogo/mundo, ROMs, sueño, conflicto y trayectoria, dejando explícito dónde no existía contenido literario heredado;
 - [x] se documentan los límites entre literatura, mitología, Tarot, ideología y simbolismo onírico;
 - [x] el inventario negativo impide que la ausencia se convierta en omisión silenciosa;
-- [x] #1176–#1182 quedan enlazados como destinos y se distingue qué es port y qué es expansión.
+- [x] #1176 y #1179–#1184 quedan enlazados como destinos y se distingue qué es port y qué es expansión.
 
 La conclusión canónica es deliberadamente conservadora: **no había una literatura jugable que rescatar; había sistemas vecinos que deben seguir siendo vecinos**.
