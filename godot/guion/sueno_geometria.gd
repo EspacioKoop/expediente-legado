@@ -27,6 +27,21 @@ static func malla_sala(
 	return st.commit()
 
 
+## Expone únicamente los tabiques con la misma triangulación usada por la sala.
+##
+## Las presentaciones que sustituyen el material base pueden reutilizar esta
+## malla sin copiar la geometría ni crear otra física. Así lo visible sigue
+## coincidiendo con los planos que ya forman parte del trimesh de colisión.
+static func malla_tabiques(tabiques: Array) -> ArrayMesh:
+	if tabiques.is_empty():
+		return ArrayMesh.new()
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	_agregar_tabiques(st, tabiques)
+	st.generate_normals()
+	return st.commit()
+
+
 ## La misma geometría visible también define la colisión.
 ##
 ## Una malla poligonal superpuesta a una planta de cajas no sirve como corte de
