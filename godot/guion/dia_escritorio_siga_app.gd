@@ -414,26 +414,7 @@ func _registrar_ruta_os98(ruta: String) -> void:
 	var estado := _estado_os98(dia)
 	if not ContaminacionOs98.registrar_ruta(estado, ruta):
 		return
-
-	# #1029: la primera entrada REAL en la ruta administrativa restringida es
-	# el equivalente Godot de "consiga acceso administrativo". El memorándum
-	# solo revela la credencial; hacer visible la ruta tampoco concede Tarot.
-	_persistir_estado_os98(dia, estado)
-	var partida_estado := (partida_actual as Partida).estado
-	Prometeo.desbloquear_carta_en_estado(partida_estado, "el-emperador")
-
-	# Si Emperador era la última carta válida pendiente de una partida perfecta,
-	# El Mundo se evalúa en este mismo evento y nunca al cargar el escritorio.
-	var contenido := Contenido.new()
-	if contenido.cargar():
-		Prometeo.sincronizar_tarot_mundo(partida_estado, contenido.principales())
-
-	# El guardado canónico del día escribe Partida y, después, el estado local
-	# de las apps OS98; así acceso restringido y Tarot quedan en el mismo corte.
-	if dia.has_method("_guardar_o_avisar"):
-		dia.call("_guardar_o_avisar", "")
-	else:
-		(partida_actual as Partida).guardar()
+	_al_acceso_administrativo(dia, partida_actual as Partida, estado)
 
 
 func _sincronizar_contexto_os98(dia: Node) -> void:
@@ -516,6 +497,28 @@ func _registrar_correo_leido(id: String) -> void:
 		leidos.append(id)
 	por_partida[clave] = leidos
 	_correo_app.establecer_estado_local("leidos_por_partida", por_partida)
+
+
+## #1029: solo se llama tras el primer acceso REAL a la ruta restringida.
+## El memorándum revela credenciales y la UI puede mostrar la ruta, pero ninguno
+## de esos dos hechos basta para adquirir Tarot.
+func _al_acceso_administrativo(dia: Node, partida_actual: Partida, estado: Dictionary) -> void:
+	_persistir_estado_os98(dia, estado)
+	var partida_estado := partida_actual.estado
+	Prometeo.desbloquear_carta_en_estado(partida_estado, "el-emperador")
+
+	# Si Emperador era la última carta válida pendiente de una partida perfecta,
+	# El Mundo se evalúa en este mismo evento y nunca al cargar el escritorio.
+	var contenido := Contenido.new()
+	if contenido.cargar():
+		Prometeo.sincronizar_tarot_mundo(partida_estado, contenido.principales())
+
+	# Dia escribe primero Partida y después el estado local de las apps OS98.
+	# La rama de fallback solo protege este adaptador si se monta fuera de Dia.
+	if dia.has_method("_guardar_o_avisar"):
+		dia.call("_guardar_o_avisar", "")
+	else:
+		partida_actual.guardar()
 
 
 func _registrar_respuesta_correo(
