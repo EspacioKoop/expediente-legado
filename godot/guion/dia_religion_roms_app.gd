@@ -17,6 +17,11 @@ func _process(_delta: float) -> void:
 	if dia == null or dia._mundo == null:
 		return
 
+	# #931: ROMs, mundo, sueño y conflicto leen la misma fuente de verdad.
+	# No se guarda aquí: el registro forma parte de partida.estado y sigue el
+	# ciclo normal de guardado de Partida.
+	_registro = ReligionEventos.asegurar_en_estado(dia.partida.estado)
+
 	var mundo: Node3D = dia._mundo
 	var mundo_id := mundo.get_instance_id()
 	if mundo_id != _mundo_id:
