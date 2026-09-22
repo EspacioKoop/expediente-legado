@@ -1,0 +1,15 @@
+{
+  "titulo": "Verificación interna",
+  "preguntas": [
+    "Marca la casilla que no pertenece a este universo.",
+    "Selecciona la imagen que muestra el ojo correcto.",
+    "Confirma que no eres un registro duplicado."
+  ],
+  "opciones": [
+    "Soy una persona",
+    "No soy un robot",
+    "He leído el manual del miedo"
+  ],
+  "cancelar": "Cancelar",
+  "confirmar": "Confirmar"
+}

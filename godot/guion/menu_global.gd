@@ -56,6 +56,7 @@ var _captura_tipo := ""
 var _foco_previo: Control
 var _mouse_previo := Input.MOUSE_MODE_VISIBLE
 var _historias := Historias.new()
+var _verificacion: VerificacionFalsa
 
 
 func _ready() -> void:
@@ -95,6 +96,10 @@ func _unhandled_input(evento: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if not evento.is_action_pressed("cancelar"):
+		return
+	if _verificacion != null and _verificacion.visible:
+		_verificacion.ocultar()
+		get_viewport().set_input_as_handled()
 		return
 	if not _fondo.visible and evento is InputEventJoypadButton:
 		return
@@ -152,6 +157,10 @@ func _montar() -> void:
 	_panel_incidencias = ParteIncidenciasApp.new()
 	_panel_incidencias.volver.connect(_volver_de_incidencias)
 	centro.add_child(_panel_incidencias)
+
+	_verificacion = VerificacionFalsa.new()
+	_verificacion.cerrada.connect(_al_cerrar_verificacion)
+	_fondo.add_child(_verificacion)
 
 
 func _crear_panel() -> PanelContainer:
@@ -689,18 +698,67 @@ func _abrir() -> void:
 	_fondo.visible = true
 	get_tree().paused = true
 	_continuar.grab_focus()
+	_quizas_mostrar_verificacion()
 
 
 func _cerrar() -> void:
 	if not _fondo.visible:
 		return
 	_cancelar_captura()
+	if _verificacion != null:
+		_verificacion.ocultar()
 	_fondo.visible = false
 	get_tree().paused = false
 	Input.mouse_mode = _mouse_previo
 	if is_instance_valid(_foco_previo) and _foco_previo.is_inside_tree():
 		_foco_previo.grab_focus()
 	_foco_previo = null
+
+
+func _quizas_mostrar_verificacion() -> void:
+	var partida_actual := _partida_actual()
+	if partida_actual == null or _verificacion == null:
+		return
+	var tiradas := _tiradas_verificacion(partida_actual.estado)
+	if not VerificacionFalsa.debe_mostrar(int(tiradas["aparicion"])):
+		return
+
+	# Igual que en el legado, la APARICIÓN de la verificación es el evento.
+	# Abrir el menú sin que aparezca no concede nada; confirmar tampoco añade
+	# una segunda condición.
+	_verificacion.mostrar(int(tiradas["pregunta"]))
+	if not VerificacionFalsa.registrar(partida_actual.estado):
+		return
+
+	var contenido := Contenido.new()
+	if contenido.cargar():
+		Prometeo.sincronizar_tarot_mundo(partida_actual.estado, contenido.principales())
+	if not partida_actual.guardar():
+		push_warning("No se pudo persistir el evento de verificación falsa.")
+
+
+## El resultado depende solo de estado guardado: misma semilla, vuelta, día,
+## acciones y fase producen la misma aparición y la misma pregunta tras recargar.
+func _tiradas_verificacion(estado: Dictionary) -> Dictionary:
+	var jornada: Dictionary = estado.get("jornada", {})
+	var indices := [
+		int(jornada.get("vuelta", 1)),
+		int(jornada.get("dia", 1)),
+		int(jornada.get("acciones", 0)),
+	]
+	var fase := String(jornada.get("fase", ""))
+	var raiz := int(estado.get("semilla", 0))
+	return {
+		"aparicion": Azar.derivar_texto(raiz, "dia", "verificacion_falsa:%s" % fase, indices),
+		"pregunta": (
+			Azar.derivar_texto(raiz, "presentacion", "verificacion_falsa:%s" % fase, indices)
+		),
+	}
+
+
+func _al_cerrar_verificacion() -> void:
+	if _fondo.visible and is_instance_valid(_continuar):
+		_continuar.grab_focus()
 
 
 func _mostrar_opciones() -> void:
