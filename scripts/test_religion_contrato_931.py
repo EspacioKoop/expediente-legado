@@ -85,7 +85,7 @@ class ReligionContrato931Test(unittest.TestCase):
             )
 
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
-        self.assertRegex(resultado.stdout, r"\\d+ pasadas, 0 fallos")
+        self.assertRegex(resultado.stdout, r"\d+ pasadas, 0 fallos")
 
 
 if __name__ == "__main__":
