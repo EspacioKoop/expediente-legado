@@ -74,6 +74,18 @@ por #932: arrancar o poseer el cartucho no cuenta. Para esta vertical, además, 
 desbloqueo se apoya en conocimiento literario explícito y el observer deberá registrar
 su propio hecho sin sustituir la lectura documental.
 
+
+## Compatibilidad con la capa literaria anterior
+
+El autoload `GestorLiteratura` conserva su API pública mientras se migren tertulia,
+rituales y eventos antiguos, pero `conocer_obra()` ya no aplica `bonus_insight`,
+`bonus_momentum` ni muta sistemas de combate. En su lugar crea un evento de
+`conocimiento` en `LiteraturaEventos` con fuente, contexto y jornada.
+
+`libro_interactivo.gd` también deja de conceder insight como efecto lateral de la
+interacción. Los efectos del catálogo anterior siguen disponibles como datos para
+consumidores explícitos; activarlos pertenece a ritual/conflicto, no al acto de conocer.
+
 ## Pruebas
 
 `godot/pruebas/pruebas_literatura_1175.gd` comprueba catálogo, lectura parcial,
