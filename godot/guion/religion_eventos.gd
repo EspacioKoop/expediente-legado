@@ -178,7 +178,10 @@ static func ultima_declaracion(registro: Dictionary) -> Dictionary:
 	var declaraciones := eventos(registro, CANAL_CONVICCION)
 	for indice in range(declaraciones.size() - 1, -1, -1):
 		var evento = declaraciones[indice]
-		if typeof(evento) == TYPE_DICTIONARY and not String(evento.get("declaracion", "")).is_empty():
+		if (
+			typeof(evento) == TYPE_DICTIONARY
+			and not String(evento.get("declaracion", "")).is_empty()
+		):
 			return evento.duplicate(true)
 	return {}
 
@@ -234,7 +237,10 @@ static func evento_valido(evento: Dictionary) -> bool:
 			return false
 
 	var declaracion := String(evento.get("declaracion", "")).strip_edges()
-	if not declaracion.is_empty() and (canal != CANAL_CONVICCION or not DECLARACIONES.has(declaracion)):
+	if (
+		not declaracion.is_empty()
+		and (canal != CANAL_CONVICCION or not DECLARACIONES.has(declaracion))
+	):
 		return false
 	var actor := String(evento.get("actor", "")).strip_edges()
 	if not actor.is_empty() and canal != CANAL_VINCULO:
