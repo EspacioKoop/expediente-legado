@@ -1,8 +1,3 @@
-## Juicio por Combate de la Ventanilla (#779).
-## Apelación del careo: las pruebas reducen determinación inicial y el combate
-## termina por rendición, no por muerte. Arcano y semilla mitológica decoran la
-## arena sin consumir progreso. Controles: interactuar = ligero; saltar = fuerte;
-## agacharse = esquiva; el movimiento conserva las acciones semánticas existentes.
 class_name JuicioCombate3D
 extends Node3D
 
@@ -584,8 +579,7 @@ func _montar_arena() -> void:
 	suelo.material_override = _material(Color(0.16, 0.17, 0.15))
 	add_child(suelo)
 
-	# Archivadores hacen de límite visual: sigue siendo la institución, no una
-	# arena medieval genérica.
+	# Archivadores como límite visual institucional.
 	for i in 8:
 		var angulo := TAU * float(i) / 8.0
 		var archivador := MeshInstance3D.new()
