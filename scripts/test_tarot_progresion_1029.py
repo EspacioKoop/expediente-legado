@@ -129,9 +129,9 @@ class TarotProgresion1029Test(unittest.TestCase):
         self.assertIn('cartas_desbloqueadas.append("el-hierofante")', bloque)
         self.assertIn('"cartas_desbloqueadas": cartas_desbloqueadas', bloque)
 
-    def test_perder_vida_emite_ermitanio_desde_la_frontera_comun(self) -> None:
+    def test_perder_vida_emite_ermitanio_y_conserva_cero(self) -> None:
         inicio = self.acusacion.index("static func perder_vida(")
-        fin = self.acusacion.index("## Cierra el careo", inicio)
+        fin = self.acusacion.index("## La frontera pendiente", inicio)
         bloque = self.acusacion[inicio:fin]
         self.assertIn("vida_anterior", bloque)
         self.assertIn('estado["vida"] < vida_anterior', bloque)
@@ -141,44 +141,42 @@ class TarotProgresion1029Test(unittest.TestCase):
             bloque,
         )
         self.assertIn('cartas_desbloqueadas.append("el-ermitanio")', bloque)
-        self.assertLess(
-            bloque.index(
-                'Prometeo.desbloquear_carta_en_estado(estado, "el-ermitanio")'
-            ),
-            bloque.index("Prometeo.reiniciar_vuelta"),
-        )
-        self.assertIn(
-            '"cartas_desbloqueadas": cartas_desbloqueadas',
-            bloque,
-        )
-        self.assertRegex(
-            bloque,
-            re.compile(
-                r'return\s*\{\s*"despido"\s*:\s*true\s*,\s*'
-                r'"vida"\s*:\s*estado\["vida"\]\s*,\s*'
-                r'"cartas_desbloqueadas"\s*:\s*\[\]\s*\}'
-            ),
-        )
+        self.assertIn('estado[CLAVE_DESPIDO_PENDIENTE] = true', bloque)
+        self.assertIn('"despido_pendiente": true', bloque)
+        self.assertIn('"vida": 0', bloque)
+        self.assertNotIn("Prometeo.reiniciar_vuelta", bloque)
+        self.assertNotIn('"la-muerte"', bloque)
 
-    def test_despido_registra_muerte_antes_del_reset(self) -> None:
-        inicio = self.acusacion.index("static func perder_vida(")
+    def test_canje_es_evento_explicito_de_templanza(self) -> None:
+        inicio = self.acusacion.index("static func canjear_carta_por_vida(")
+        fin = self.acusacion.index("## Aceptar el cese", inicio)
+        bloque = self.acusacion[inicio:fin]
+        self.assertIn('elegida["gastada"] = true', bloque)
+        self.assertIn('estado["vida"] = 1', bloque)
+        self.assertIn('estado[CLAVE_DESPIDO_PENDIENTE] = false', bloque)
+        self.assertIn(
+            'Prometeo.desbloquear_carta_en_estado(estado, "la-templanza")',
+            bloque,
+        )
+        self.assertNotIn("sincronizar_tarot", bloque)
+        self.assertNotIn('"la-muerte"', bloque)
+        self.assertNotIn("reiniciar_vuelta", bloque)
+
+    def test_aceptar_cese_registra_muerte_antes_del_reset(self) -> None:
+        inicio = self.acusacion.index("static func aceptar_cese(")
         fin = self.acusacion.index("## Cierra el careo", inicio)
         bloque = self.acusacion[inicio:fin]
         muerte = bloque.index(
             'Prometeo.desbloquear_carta_en_estado(estado, "la-muerte")'
         )
+        evaluacion = bloque.index("EvaluacionDesempeno.sellar")
         reset = bloque.index("Prometeo.reiniciar_vuelta")
-        self.assertLess(muerte, reset)
-        self.assertRegex(
-            bloque,
-            re.compile(
-                r'return\s*\{\s*"despido"\s*:\s*true\s*,\s*'
-                r'"vida"\s*:\s*estado\["vida"\]\s*,\s*'
-                r'"cartas_desbloqueadas"\s*:\s*\[\]\s*\}'
-            ),
-        )
+        self.assertLess(muerte, evaluacion)
+        self.assertLess(evaluacion, reset)
+        self.assertIn('"despido": true', bloque)
+        self.assertIn('"despido_pendiente": false', bloque)
 
-    def test_acusacion_propaga_cartas_de_la_perdida_antes_del_reset(self) -> None:
+    def test_acusacion_propaga_cartas_de_la_perdida_sin_borrarlas(self) -> None:
         inicio = self.acusacion.index("static func acusar(")
         fin = self.acusacion.index("## Quita vidas", inicio)
         bloque = self.acusacion[inicio:fin]
@@ -193,10 +191,9 @@ class TarotProgresion1029Test(unittest.TestCase):
             bloque,
         )
         self.assertIsNotNone(propaga_match)
-        propaga = propaga_match.start()
-        limpia = bloque.index("cartas_desbloqueadas.clear()")
-        self.assertLess(castigo, propaga)
-        self.assertLess(propaga, limpia)
+        self.assertLess(castigo, propaga_match.start())
+        self.assertNotIn("cartas_desbloqueadas.clear()", bloque)
+        self.assertIn('"despido_pendiente": castigo.get(', bloque)
 
     def test_victoria_de_careo_emite_colgado_solo_al_ganar(self) -> None:
         inicio = self.acusacion.index("static func resolver_duelo(")
