@@ -76,17 +76,11 @@ func _cumple_nodos_previos(requisitos: Dictionary) -> bool:
 
 
 func _cumple_evento(requisitos: Dictionary) -> bool:
-	return (
-		not requisitos.has("evento")
-		or _evento_completado(String(requisitos.get("evento", "")))
-	)
+	return not requisitos.has("evento") or _evento_completado(String(requisitos.get("evento", "")))
 
 
 func _cumple_ritual(requisitos: Dictionary) -> bool:
-	return (
-		not requisitos.has("ritual")
-		or _ritual_completado(String(requisitos.get("ritual", "")))
-	)
+	return not requisitos.has("ritual") or _ritual_completado(String(requisitos.get("ritual", "")))
 
 
 func _cumple_total_nodos(requisitos: Dictionary) -> bool:
