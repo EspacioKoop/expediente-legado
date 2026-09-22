@@ -61,7 +61,7 @@ class PasaporteInspeccion154Test(unittest.TestCase):
         self.assertIn("estado[Sellos.CLAVE_ESTADO] = obtenidos", self.pasaporte)
         self.assertIn('"ya-observado"', self.pasaporte)
         self.assertIn('"desconocido"', self.pasaporte)
-        self.assertNotIn("FileAccess.open("user://", self.pasaporte)
+        self.assertNotIn('FileAccess.open("user://', self.pasaporte)
         self.assertNotIn("Partida.", self.pasaporte)
 
     def test_punto_3d_solo_emite_observacion_deliberada(self):
@@ -94,7 +94,7 @@ class PasaporteInspeccion154Test(unittest.TestCase):
         comprobar_contrato(
             self,
             "pruebas/pruebas_pasaporte_inspeccion_154.gd",
-            "23 pasadas, 0 fallos",
+            "24 pasadas, 0 fallos",
         )
 
 
