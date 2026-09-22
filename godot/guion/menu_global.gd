@@ -732,7 +732,8 @@ func _quizas_mostrar_verificacion() -> void:
 	var contenido := Contenido.new()
 	if contenido.cargar():
 		Prometeo.sincronizar_tarot_mundo(partida_actual.estado, contenido.principales())
-	partida_actual.guardar()
+	if not partida_actual.guardar():
+		push_warning("No se pudo persistir el evento de verificación falsa.")
 
 
 func _al_cerrar_verificacion() -> void:
