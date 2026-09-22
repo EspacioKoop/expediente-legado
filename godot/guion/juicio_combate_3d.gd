@@ -618,12 +618,15 @@ func _gestor_jungiano(nombre: String) -> Node:
 
 
 func _preparar_sistemas_jungianos() -> void:
-	JUNGIANO.preparar(
-		self,
-		Callable(self, "_al_arquetipo_desbloqueado"),
-		Callable(self, "_al_momentum_cambiado"),
-		Callable(self, "_al_combo_ejecutado"),
-		Callable(self, "_al_finisher_ejecutado"),
+	(
+		JUNGIANO
+		. preparar(
+			self,
+			Callable(self, "_al_arquetipo_desbloqueado"),
+			Callable(self, "_al_momentum_cambiado"),
+			Callable(self, "_al_combo_ejecutado"),
+			Callable(self, "_al_finisher_ejecutado"),
+		)
 	)
 
 
