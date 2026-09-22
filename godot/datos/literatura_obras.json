@@ -26,7 +26,7 @@
       ],
       "fuente_documental": "biblioteca:edicion_1998:vida_es_sueno",
       "lectura": {
-        "umbral_conocimiento": 1.0,
+        "umbral_conocimiento": 1,
         "insight_id": "vigilia_apariencia"
       },
       "rom": {
@@ -42,6 +42,22 @@
           "conflicto_literario"
         ],
         "descripcion": "Un consumidor de conflicto puede convertir el insight en una respuesta contextual ante miedo o confusion; este catalogo no aplica el efecto."
+      },
+      "sueno": {
+        "consumidor": "sueno_literario",
+        "motivos": [
+          "umbral",
+          "doble"
+        ],
+        "presentacion": {
+          "deformacion_textura": [
+            1.08,
+            1,
+            0.94
+          ],
+          "contraste_delta": 0.06,
+          "ambiente_energia_delta": -0.025
+        }
       }
     }
   ]
