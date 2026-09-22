@@ -5,6 +5,7 @@ signal arquetipo_desbloqueado(arquetipo_id)
 
 var arquetipos: Dictionary = {}
 var insight_total: int = 0
+var puntos_habilidad: int = 0
 
 
 func _ready() -> void:
@@ -31,6 +32,14 @@ func _ready() -> void:
 		arquetipos[id] = instancia
 
 
+func reiniciar() -> void:
+	insight_total = 0
+	puntos_habilidad = 0
+	for arquetipo in arquetipos.values():
+		if arquetipo != null:
+			arquetipo.desbloqueado = false
+
+
 func ganar_insight(cantidad: int) -> void:
 	insight_total += cantidad
 	_verificar_desbloqueos()
@@ -45,6 +54,7 @@ func _verificar_desbloqueos() -> void:
 			and insight_total >= int(arquetipo.puntos_insight_requeridos)
 		):
 			arquetipo.desbloquear()
+			puntos_habilidad += 1
 			arquetipo_desbloqueado.emit(id)
 
 
@@ -73,4 +83,6 @@ func efectos_combinados() -> Dictionary:
 				combinados[clave] = bool(combinados.get(clave, false)) or bool(valor)
 			elif not combinados.has(clave):
 				combinados[clave] = valor
+	if combinados.has("curacion_aliados") and not combinados.has("curacion"):
+		combinados["curacion"] = float(combinados["curacion_aliados"])
 	return combinados
