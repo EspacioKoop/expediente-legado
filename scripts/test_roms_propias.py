@@ -110,6 +110,23 @@ class RomsPropiasTest(unittest.TestCase):
                 self.assertEqual(datos[0x143], 0x80 if rom["cgb"] == "dual" else 0xC0)
 
     def test_indice_en_godot(self):
+        ausentes = []
+        for rom in self.roms:
+            if rom["estado"] != "jugable" or not rom["rom"].startswith("res://"):
+                continue
+            ruta = ROOT / "godot" / rom["rom"].removeprefix("res://")
+            if not ruta.exists():
+                ausentes.append(rom["id"])
+        if ausentes:
+            mensaje = (
+                "faltan ROMs propias compiladas para el runtime: "
+                + ", ".join(ausentes)
+                + "; ejecuta bash scripts/preparar_entorno.sh"
+            )
+            if os.environ.get("SIGA98_EXIGIR_EXTENSION") == "1":
+                self.fail(mensaje)
+            self.skipTest(mensaje)
+
         motor = os.environ.get("GODOT_BIN", "godot4")
         with tempfile.TemporaryDirectory(prefix="roms-propias-qa-") as temporal:
             entorno = os.environ.copy()
