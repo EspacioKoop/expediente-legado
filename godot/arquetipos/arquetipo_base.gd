@@ -1,4 +1,4 @@
-extends Node
+extends RefCounted
 
 # Arquetipo Jungiano base - se desbloquea via interacción documental
 signal activado
