@@ -6,12 +6,15 @@ static func todo(comprobar: Callable) -> void:
 	_caso(
 		comprobar,
 		"hud: compone ritual contra doctrina y compromiso",
-		JuicioCombateHud.texto_ritual(
-			{"nombre": "Balanza"},
-			2,
-			"Asamblea",
-			true,
-			"COMPROMISO",
+		(
+			JuicioCombateHud
+			. texto_ritual(
+				{"nombre": "Balanza"},
+				2,
+				"Asamblea",
+				true,
+				"COMPROMISO",
+			)
 		),
 		"RITUAL · Balanza · CONTRA +2 · Asamblea · COMPROMISO",
 	)
@@ -29,18 +32,21 @@ static func todo(comprobar: Callable) -> void:
 
 	var momentum := ProgressBar.new()
 	var finisher := Button.new()
-	JuicioCombateHud.actualizar_jungiano(
-		momentum,
-		finisher,
-		{
-			"momentum_max": 120.0,
-			"momentum_actual": 45.0,
-			"disponible": true,
-			"es_super": true,
-		},
-		false,
-		"FINISHER",
-		"SUPER",
+	(
+		JuicioCombateHud
+		. actualizar_jungiano(
+			momentum,
+			finisher,
+			{
+				"momentum_max": 120.0,
+				"momentum_actual": 45.0,
+				"disponible": true,
+				"es_super": true,
+			},
+			false,
+			"FINISHER",
+			"SUPER",
+		)
 	)
 	_caso(comprobar, "hud: actualiza momentum máximo", momentum.max_value, 120.0)
 	_caso(comprobar, "hud: actualiza momentum actual", momentum.value, 45.0)
