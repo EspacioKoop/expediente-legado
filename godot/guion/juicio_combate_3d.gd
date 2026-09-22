@@ -148,11 +148,14 @@ func configurar(
 	_bono_documental = bono_documental
 	reduccion_movimiento = reducir_movimiento
 	_determinacion_rival = determinacion_rival(_bono_documental)
-	_azar.seed = Azar.derivar_texto(
-		raiz,
-		"combate",
-		"juicio_combate_3d:%s" % String(_acusado.get("id", "")),
-		[bono_documental],
+	_azar.seed = (
+		Azar
+		. derivar_texto(
+			raiz,
+			"combate",
+			"juicio_combate_3d:%s" % String(_acusado.get("id", "")),
+			[bono_documental],
+		)
 	)
 
 
