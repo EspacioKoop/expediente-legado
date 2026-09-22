@@ -3,12 +3,13 @@ extends RefCounted
 
 
 static func todo(comprobar: Callable) -> void:
-	var arquetipos := _singleton("GestorArquetipos")
-	var momentum := _singleton("GestorMomentum")
-	var combos := _singleton("GestorCombos")
-	comprobar.call("autoload de arquetipos disponible", arquetipos != null, true)
-	comprobar.call("autoload de momentum disponible", momentum != null, true)
-	comprobar.call("autoload de combos disponible", combos != null, true)
+	var temporales: Array[Node] = []
+	var arquetipos := _gestor("GestorArquetipos", "res://arquetipos/gestor_arquetipos.gd", temporales)
+	var momentum := _gestor("GestorMomentum", "res://combate/momentum.gd", temporales)
+	var combos := _gestor("GestorCombos", "res://combate/combos.gd", temporales)
+	comprobar.call("gestor de arquetipos disponible", arquetipos != null, true)
+	comprobar.call("gestor de momentum disponible", momentum != null, true)
+	comprobar.call("gestor de combos disponible", combos != null, true)
 	if arquetipos == null or momentum == null or combos == null:
 		return
 
@@ -85,10 +86,25 @@ static func todo(comprobar: Callable) -> void:
 	combos.call("reiniciar")
 	momentum.call("reiniciar")
 	arquetipos.call("reiniciar")
+	for nodo in temporales:
+		if is_instance_valid(nodo):
+			nodo.free()
 
 
-static func _singleton(nombre: String) -> Node:
+static func _gestor(nombre: String, ruta: String, temporales: Array[Node]) -> Node:
 	var arbol := Engine.get_main_loop() as SceneTree
 	if arbol == null:
 		return null
-	return arbol.root.get_node_or_null(nombre)
+	var existente := arbol.root.get_node_or_null(nombre)
+	if existente != null:
+		return existente
+	var script = load(ruta)
+	if script == null:
+		return null
+	var instancia = script.new()
+	if not (instancia is Node):
+		return null
+	instancia.name = nombre
+	arbol.root.add_child(instancia)
+	temporales.append(instancia)
+	return instancia

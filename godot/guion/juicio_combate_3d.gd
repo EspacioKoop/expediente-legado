@@ -70,6 +70,7 @@ var _curacion_arquetipo_acumulada := 0.0
 var _invulnerabilidad_jungiana := 0.0
 var _sacudida_camara := 0.0
 var _aviso_jungiano_restante := 0.0
+var _azar := RandomNumberGenerator.new()
 
 
 static func determinacion_rival(bono_documental: int) -> int:
@@ -145,11 +146,18 @@ static func determinacion_retorno(ritual: Dictionary, retornos_usados: int) -> i
 	return maxi(0, int(ritual.get("determinacion_retorno", 0)))
 
 
-func configurar(acusado: Dictionary, bono_documental: int, reducir_movimiento: bool) -> void:
+func configurar(
+	acusado: Dictionary, bono_documental: int, reducir_movimiento: bool, raiz: int = 0
+) -> void:
 	_acusado = acusado.duplicate(true)
 	_bono_documental = bono_documental
 	reduccion_movimiento = reducir_movimiento
 	_determinacion_rival = determinacion_rival(_bono_documental)
+	_azar.seed = Azar.derivar(
+		raiz,
+		"juicio_combate_3d",
+		[String(_acusado.get("id", "")), bono_documental],
+	)
 
 
 func _ready() -> void:
@@ -402,7 +410,7 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 		0.0,
 		0.75
 	)
-	var es_critico := probabilidad_critico > 0.0 and randf() < probabilidad_critico
+	var es_critico := probabilidad_critico > 0.0 and _azar.randf() < probabilidad_critico
 	var gestor_momentum := _gestor_jungiano("GestorMomentum")
 	if gestor_momentum != null:
 		gestor_momentum.call("registrar_golpe", es_critico)
@@ -706,7 +714,7 @@ func _montar_hud() -> void:
 	bloque.add_child(fila_momentum)
 
 	var texto_momentum := Label.new()
-	texto_momentum.text = "MOMENTUM"
+	texto_momentum.text = tr("JUICIO_JUNGIANO_MOMENTUM")
 	fila_momentum.add_child(texto_momentum)
 
 	_barra_momentum = ProgressBar.new()
@@ -715,9 +723,9 @@ func _montar_hud() -> void:
 	fila_momentum.add_child(_barra_momentum)
 
 	_boton_finisher = Button.new()
-	_boton_finisher.text = "FINISHER"
+	_boton_finisher.text = tr("JUICIO_JUNGIANO_FINISHER")
 	_boton_finisher.disabled = true
-	_boton_finisher.tooltip_text = "Disponible al alcanzar el umbral de momentum"
+	_boton_finisher.tooltip_text = tr("JUICIO_JUNGIANO_FINISHER_TOOLTIP")
 	_boton_finisher.pressed.connect(_ejecutar_finisher_jungiano)
 	fila_momentum.add_child(_boton_finisher)
 
@@ -789,7 +797,7 @@ func _actualizar_camara() -> void:
 	var centro := (_jugador.position + _rival.position) * 0.5
 	var sacudida := Vector3.ZERO
 	if _sacudida_camara > 0.0 and not reduccion_movimiento:
-		sacudida = Vector3(randf_range(-0.12, 0.12), randf_range(-0.08, 0.08), 0.0)
+		sacudida = Vector3(_azar.randf_range(-0.12, 0.12), _azar.randf_range(-0.08, 0.08), 0.0)
 	_camara.position = centro + Vector3(0.0, 7.2, 8.2) + sacudida
 	_camara.look_at(centro + Vector3(0.0, 0.9, 0.0), Vector3.UP)
 
@@ -928,18 +936,20 @@ func _actualizar_hud_jungiano() -> void:
 		return
 	if combos == null:
 		_boton_finisher.disabled = true
-		_boton_finisher.text = "FINISHER"
+		_boton_finisher.text = tr("JUICIO_JUNGIANO_FINISHER")
 		return
 	var finisher_id := String(combos.call("finisher_disponible_actual"))
 	_boton_finisher.disabled = finisher_id.is_empty() or _acabado
 	if finisher_id.is_empty():
-		_boton_finisher.text = "FINISHER"
+		_boton_finisher.text = tr("JUICIO_JUNGIANO_FINISHER")
 		return
 	var catalogo = combos.get("finishers")
 	var es_super := false
 	if typeof(catalogo) == TYPE_DICTIONARY and catalogo.has(finisher_id):
 		es_super = bool(catalogo[finisher_id].get("es_super", false))
-	_boton_finisher.text = "SUPER FINISHER" if es_super else "FINISHER"
+	_boton_finisher.text = (
+		tr("JUICIO_JUNGIANO_SUPER_FINISHER") if es_super else tr("JUICIO_JUNGIANO_FINISHER")
+	)
 
 
 func _mostrar_aviso_jungiano(texto: String, duracion: float) -> void:
