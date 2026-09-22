@@ -21,6 +21,7 @@ func _ejecutar() -> void:
 	viewport.add_child(mundo)
 	var camara := Camera3D.new()
 	mundo.add_child(camara)
+	# Las consultas de frustum requieren que Camera3D ya haya entrado en el árbol.
 	await process_frame
 
 	var delante := Vector3(0.0, 0.0, -5.0)
