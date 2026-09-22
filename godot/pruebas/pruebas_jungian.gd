@@ -124,6 +124,7 @@ static func _individuacion(comprobar: Callable, arquetipos: Node) -> void:
 		return
 
 	var arbol = recurso.duplicate(true)
+	arbol.call("configurar_gestor_arquetipos", arquetipos)
 	comprobar.call("árbol de individuación declara nodos", arbol.get("nodos").size() > 0, true)
 	arquetipos.call("ganar_insight", 50)
 	comprobar.call(
