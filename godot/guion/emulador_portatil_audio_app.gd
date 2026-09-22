@@ -448,18 +448,16 @@ func _bombear_audio_emulado() -> void:
 	if not (pcm_variante is PackedByteArray):
 		return
 	var pcm: PackedByteArray = pcm_variante
-	if pcm.is_empty():
-		return
+	var descartar := pcm.is_empty()
 	if pcm.size() % AUDIO_BYTES_PER_FRAME != 0:
 		push_warning("PCM GB desalineado; se descarta el bloque")
-		return
-	if _retardo_audio_restante > 0.0:
-		# El núcleo sigue avanzando: el PCM se drena y se descarta solo como presentación.
+		descartar = true
+	if _retardo_audio_restante > 0.0 or _audio_emulado_muted:
+		# El núcleo sigue avanzando y el PCM se drena, pero no se acumula durante
+		# el retardo de presentación ni mientras la portátil permanece silenciada.
 		_audio_pendiente.clear()
-		return
-	if _audio_emulado_muted:
-		# El búfer ya se vació al silenciar; aquí basta con no acumular.
-		_audio_pendiente.clear()
+		descartar = true
+	if descartar:
 		return
 
 	var cantidad_frames := int(pcm.size() / AUDIO_BYTES_PER_FRAME)
@@ -482,11 +480,10 @@ func _bombear_audio_emulado() -> void:
 
 	var disponibles := _audio_playback.get_frames_available()
 	var cantidad := mini(disponibles, _audio_pendiente.size())
-	if cantidad <= 0:
-		return
-	var lote := _audio_pendiente.slice(0, cantidad)
-	if _audio_playback.push_buffer(lote):
-		_audio_pendiente = _audio_pendiente.slice(cantidad)
+	if cantidad > 0:
+		var lote := _audio_pendiente.slice(0, cantidad)
+		if _audio_playback.push_buffer(lote):
+			_audio_pendiente = _audio_pendiente.slice(cantidad)
 
 
 func _limpiar_audio_emulado(reanudar: bool = true) -> void:
