@@ -241,7 +241,9 @@ func _reasignacion() -> void:
 		visor.caso["sospechosos"][0],
 		visor.descubiertas
 	)
-	_comprobar("quedarse sin vidas es un despido", resultado["despido"], true)
+	_comprobar("quedarse sin vidas conserva el cero", resultado["vida"], 0)
+	_comprobar("quedarse sin vidas abre último recurso", resultado["despido_pendiente"], true)
+	_comprobar("todavía no hay despido", resultado["despido"], false)
 	visor._al_firmar(resultado, Control.new())
 	await process_frame
 
@@ -261,7 +263,10 @@ func _reasignacion() -> void:
 	if reproductor != null:
 		reproductor.saltar()
 		await process_frame
-	_comprobar("y el expediente lo dice", visor._estado.text.contains(tr("VISOR_REASIGNADO")), true)
+	_comprobar("el sello abre la decisión de último recurso", visor._ultimo_recurso != null, true)
+	visor._al_aceptar_cese(resultado, {})
+	await process_frame
+	_comprobar("firmar el cese reasigna", visor._estado.text.contains(tr("VISOR_REASIGNADO")), true)
 
 	# El id se guarda ANTES de cerrar: al cerrar se libera el visor, y
 	# preguntárselo después es preguntarle a un nodo que ya no existe.
