@@ -15,6 +15,17 @@ extends RefCounted
 
 const OFICINA := {
 	"rotulo": "SITIO_OFICINA",
+	# El archivo se ilumina por PÍXEL (#789). Es el único sitio que lo pide por
+	# ahora, y lo pide porque es el único donde el jugador pasa la jornada
+	# entera mirando muebles y personas a dos metros: sin sombra proyectada
+	# nada apoyaba en el suelo. El resto del mundo sigue con la luz por vértice
+	# de la máquina que se imita.
+	"luz_por_pixel": true,
+	# Y por eso mismo el techo deja de ser una caja de luz. La emisión plena
+	# estaba tapando que la cara de abajo de un techo, con luz por vértice,
+	# salía negra; con luz por píxel la alumbran sus propias lámparas, y al 0,9
+	# de siempre lo que quedaba era una sala quemada y sin volumen.
+	"techo_emision": 0.22,
 	"suelo": Vector2(14, 10),
 	"color_suelo": Color(0.30, 0.29, 0.27),
 	"color_muro": Color(0.58, 0.57, 0.52),
@@ -107,6 +118,16 @@ const OFICINA := {
 			"tam": Vector3(0.5, 0.45, 0.4),
 			"color": Color(0.52, 0.54, 0.50),
 			"modelo": "computerScreen"
+		},
+		# Su pantalla, encendida y sin nada legible, como la del puesto propio.
+		# Un terminal apagado en una sala donde todo el mundo trabaja es lo que
+		# hacía que la fila de mesas se leyera como atrezo (#789). Va en la cara
+		# delantera del monitor, mirando a quien se sienta.
+		{
+			"pos": Vector3(-4.3, 0.98, -1.90),
+			"tam": Vector3(0.38, 0.28, 0.02),
+			"color": Color(0.30, 0.42, 0.34),
+			"emisivo": true
 		},
 		# Archivadores contra el muro del fondo. Son seis y no dos: un archivo
 		# con dos archivadores es un despacho.

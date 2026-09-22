@@ -36,8 +36,19 @@ class SombrasEspacio275Test(unittest.TestCase):
         self.assertIn("_no_proyecta_sombra(cuerpo)", self.espacio)
         self.assertIn("SHADOW_CASTING_SETTING_OFF", self.espacio)
 
-    def test_la_sombra_de_una_lampara_no_cuesta_seis_pasadas(self):
+    def test_el_modo_de_sombra_es_el_que_dibuja_en_cada_sitio(self):
+        # #789 midió en GPU lo que esta prueba daba por bueno: en paraboloide
+        # dual, encender y apagar la sombra de las lámparas de la oficina
+        # devuelve una imagen idéntica píxel a píxel. Forward+ no dibuja ese
+        # modo, así que el ahorro de cuatro pasadas era el ahorro de no dibujar
+        # ninguna sombra.
+        #
+        # Sigue habiendo dos modos y eso es deliberado: el cubo se paga donde la
+        # envolvente se ilumina por píxel y puede recibir la sombra, y el resto
+        # del mundo —que va por vértice y la descarta— no paga nada.
+        self.assertIn("OmniLight3D.SHADOW_CUBE", self.espacio)
         self.assertIn("OmniLight3D.SHADOW_DUAL_PARABOLOID", self.espacio)
+        self.assertIn("_shader_del_sitio == SHADER_PSX_LUZ_PIXEL", self.espacio)
 
     def test_contrato_en_godot_headless(self):
         motor = os.environ.get("GODOT_BIN", "godot4")

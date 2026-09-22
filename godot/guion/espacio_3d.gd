@@ -22,6 +22,15 @@ const GROSOR_MURO := 0.2
 ## que tocarlo se toca una vez.
 const SHADER_PSX := "res://arte/psx.gdshader"
 
+## La misma imagen con la luz por píxel. La pide el sitio que necesita sombras
+## proyectadas —la oficina de #789—, porque la luz por vértice del shader
+## canónico no las aplica: con `vertex_lighting` las sombras de #1121 se
+## calculaban y el material las tiraba.
+const SHADER_PSX_LUZ_PIXEL := "res://arte/psx_luz_pixel.gdshader"
+
+## Cuánto se pinta a sí misma una superficie que se declara encendida.
+const EMISION_PLENA := 0.9
+
 ## Nombre de las lámparas generales de un sitio. Godot le añade sufijo a los
 ## repetidos, así que se reconocen por prefijo.
 const NOMBRE_LUZ_SALA := "LuzDeSala"
@@ -35,10 +44,21 @@ const TOPE_SUBDIVISION := 14
 ## sin levantar la cabeza.
 const ALTURA_CARTEL := 1.7
 
+## Con qué se pinta el sitio que se está construyendo. Lo fija `construir()` al
+## empezar, que es el único camino de entrada del módulo, y vale hasta que el
+## siguiente sitio vuelva a fijarlo: entrar en la calle devuelve el canónico sin
+## que la calle tenga que saber que la oficina pidió otra cosa.
+static var _shader_del_sitio := SHADER_PSX
+
 
 ## Monta el espacio bajo [param raiz] y devuelve las salidas creadas, para que
 ## quien orquesta el día pueda escucharlas.
 static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
+	# Lo primero, antes de crear una sola malla: todo lo que se monte debajo se
+	# pinta con el shader que este sitio haya pedido.
+	_shader_del_sitio = (
+		SHADER_PSX_LUZ_PIXEL if espacio.get("luz_por_pixel", false) else SHADER_PSX
+	)
 	var color_suelo: Color = espacio.get("color_suelo", Color(0.35, 0.34, 0.32))
 	var color_techo: Color = espacio.get("color_techo", Color(0.28, 0.28, 0.27))
 	var color_muro: Color = espacio.get("color_muro", Color(0.55, 0.54, 0.5))
@@ -86,7 +106,14 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 		var centro: Vector2 = espacio.get("centro_suelo", Vector2.ZERO)
 		_suelo(raiz, medidas, color_suelo, espacio.get("textura_suelo", ""), centro)
 		if PoliticaTecho.debe_tener(espacio):
-			_techo(raiz, medidas, color_techo, espacio.get("textura_techo", ""), centro)
+			_techo(
+				raiz,
+				medidas,
+				color_techo,
+				espacio.get("textura_techo", ""),
+				centro,
+				float(espacio.get("techo_emision", EMISION_PLENA))
+			)
 		_muros(raiz, medidas, color_muro, espacio.get("textura_muro", ""), centro)
 
 	# #231 / #479: una mancha es dressing visual del espacio. Se monta después
@@ -277,10 +304,21 @@ static func _luz(raiz: Node3D, luz: Dictionary) -> void:
 	punto.shadow_enabled = true
 	punto.shadow_bias = 0.04
 	punto.shadow_normal_bias = 1.4
-	# Paraboloide dual en vez de cubo: dos pasadas de sombra por lámpara en vez
-	# de seis. Un fluorescente pegado al techo alumbra hacia abajo, así que las
-	# caras que el cubo dedicaría al techo no describen nada que se vea.
-	punto.omni_shadow_mode = OmniLight3D.SHADOW_DUAL_PARABOLOID
+	# Paraboloide dual o cubo, y no es una preferencia: MEDIDO en #789 sobre la
+	# oficina real en GPU, encender y apagar la sombra de estas cinco lámparas en
+	# paraboloide dual da una imagen idéntica píxel a píxel. En Forward+ ese modo
+	# no dibuja nada, así que la optimización de #1121 —dos pasadas en vez de
+	# seis— estaba ahorrando sobre una sombra que no existía. En cubo la sombra
+	# aparece.
+	#
+	# Solo lo pide el sitio que puede enseñarla: donde la envolvente se pinta con
+	# el shader canónico, la luz va por vértice y el material descarta la sombra
+	# llegue como llegue, así que pagar el cubo allí sería pagar por nada.
+	punto.omni_shadow_mode = (
+		OmniLight3D.SHADOW_CUBE
+		if _shader_del_sitio == SHADER_PSX_LUZ_PIXEL
+		else OmniLight3D.SHADOW_DUAL_PARABOLOID
+	)
 	raiz.add_child(punto)
 
 	if not luz.get("carcasa", true):
@@ -360,7 +398,7 @@ static func _por_contorno(
 	var malla := _malla_de(cuerpo)
 	if malla != null:
 		var material := ShaderMaterial.new()
-		material.shader = load(SHADER_PSX)
+		material.shader = load(_shader_del_sitio)
 		material.set_shader_parameter("color_base", color)
 		if not textura.is_empty():
 			var imagen := TexturaProcedural.por_nombre(textura, color, hash(textura), contraste)
@@ -478,7 +516,12 @@ static func _suelo(
 ## agujero. Un techo que se pinta a sí mismo es además lo que hay: en 1998 esa
 ## superficie eran paneles de fluorescente.
 static func _techo(
-	raiz: Node3D, medidas: Vector2, color: Color, textura: String = "", centro := Vector2.ZERO
+	raiz: Node3D,
+	medidas: Vector2,
+	color: Color,
+	textura: String = "",
+	centro := Vector2.ZERO,
+	emision: float = EMISION_PLENA
 ) -> void:
 	var cuerpo := _caja(
 		raiz,
@@ -487,7 +530,7 @@ static func _techo(
 		color,
 		textura
 	)
-	_emisivo(cuerpo, color)
+	_emisivo(cuerpo, color, emision)
 	# Un techo emisivo que además tapara la luz de sus propias lámparas dejaría
 	# la sala a oscuras por el mismo motivo que la carcasa del fluorescente.
 	_no_proyecta_sombra(cuerpo)
@@ -503,13 +546,16 @@ static func _malla_de(cuerpo: Node3D) -> MeshInstance3D:
 	return null
 
 
-static func _emisivo(cuerpo: StaticBody3D, color: Color) -> void:
+## [param fuerza] es cuánto se pinta a sí misma la superficie. El valor por
+## defecto es el de siempre; un sitio con luz por píxel puede pedir menos para su
+## techo, porque ahí la emisión ya no está tapando un agujero negro (#789).
+static func _emisivo(cuerpo: StaticBody3D, color: Color, fuerza: float = EMISION_PLENA) -> void:
 	var malla := _malla_de(cuerpo)
 	if malla == null:
 		return
 	var material: ShaderMaterial = malla.material_override
 	material.set_shader_parameter("emision", color)
-	material.set_shader_parameter("emision_fuerza", 0.9)
+	material.set_shader_parameter("emision_fuerza", fuerza)
 
 
 ## Los cuatro muros salen de lo que mide el suelo, no escritos uno a uno: un
@@ -578,7 +624,7 @@ static func _caja(
 	caja.subdivide_depth = clampi(int(tam.z / METROS_POR_VERTICE), 0, TOPE_SUBDIVISION)
 	malla.mesh = caja
 	var material := ShaderMaterial.new()
-	material.shader = load(SHADER_PSX)
+	material.shader = load(_shader_del_sitio)
 	material.set_shader_parameter("color_base", color)
 	if not textura.is_empty():
 		var imagen := TexturaProcedural.por_nombre(textura, color, hash(textura), contraste)

@@ -6,6 +6,12 @@ on:
     paths:
       - '.github/workflows/oficina-visual-gate-126.yml'
       - 'godot/guion/espacios_catalogo.gd'
+      # Cómo se ilumina la oficina decide cómo se ve tanto como sus muebles
+      # (#789): el módulo que construye el sitio y los dos shaders del mundo
+      # entran en el gate por el mismo motivo por el que entró el renderer.
+      - 'godot/guion/espacio_3d.gd'
+      - 'godot/arte/psx.gdshader'
+      - 'godot/arte/psx_luz_pixel.gdshader'
       - 'godot/guion/oficina_*.gd'
       - 'godot/guion/dia_dressing_cc0_app.gd'
       - 'godot/guion/posters_oficina.gd'
@@ -24,6 +30,12 @@ on:
     paths:
       - '.github/workflows/oficina-visual-gate-126.yml'
       - 'godot/guion/espacios_catalogo.gd'
+      # Cómo se ilumina la oficina decide cómo se ve tanto como sus muebles
+      # (#789): el módulo que construye el sitio y los dos shaders del mundo
+      # entran en el gate por el mismo motivo por el que entró el renderer.
+      - 'godot/guion/espacio_3d.gd'
+      - 'godot/arte/psx.gdshader'
+      - 'godot/arte/psx_luz_pixel.gdshader'
       - 'godot/guion/oficina_*.gd'
       - 'godot/guion/dia_dressing_cc0_app.gd'
       - 'godot/guion/posters_oficina.gd'
