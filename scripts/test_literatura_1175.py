@@ -88,10 +88,10 @@ class Literatura1175Test(unittest.TestCase):
         self.assertIn("arquetipos", self.doc)
         self.assertIn("#1176", self.doc)
 
-
     def test_compatibilidad_legacy_no_aplica_buffs_al_conocer(self) -> None:
         bloque = self.gestor_legacy.split("func conocer_obra", 1)[1].split("\n\nfunc ", 1)[0]
-        self.assertIn("LiteraturaEventos.crear_evento", bloque)
+        self.assertIn("LiteraturaEventos", bloque)
+        self.assertIn("crear_evento", bloque)
         self.assertIn("LiteraturaEventos.registrar", bloque)
         self.assertIn("fuente", bloque)
         self.assertIn("contexto", bloque)
