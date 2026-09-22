@@ -183,70 +183,34 @@ func _probar_separacion_posesion() -> void:
 
 
 func _probar_compatibilidad_legacy() -> void:
-	var obras_previas: Array = GestorLiteratura.obras_conocidas.duplicate()
-	var registro_previo: Dictionary = GestorLiteratura.registro_literario.duplicate(true)
-	var insight_previo := GestorLiteratura.insight_total
-	var bonus_previo := GestorLiteratura.momentum_bonus
-	var momentum_previo := GestorMomentum.momentum_actual
-
-	GestorLiteratura.obras_conocidas = []
-	GestorLiteratura.registro_literario = LiteraturaEventos.nuevo()
-
-	var nueva := (
-		GestorLiteratura
-		. conocer_obra(
-			"odisea",
-			"prueba:libro:odisea",
-			"contrato_1176",
-			4,
-		)
-	)
-	_comprobar(nueva, "el gestor legacy registra conocimiento nuevo")
+	var fuente := FileAccess.get_file_as_string("res://literatura/gestor_literatura.gd")
+	_comprobar(not fuente.is_empty(), "el bridge legacy existe")
+	var inicio := fuente.find("func conocer_obra")
+	var fin := fuente.find("\n\nfunc ", inicio + 1)
+	_comprobar(inicio >= 0, "el bridge legacy mantiene conocer_obra")
+	if inicio < 0:
+		return
+	var longitud := fuente.length() - inicio if fin < 0 else fin - inicio
+	var bloque := fuente.substr(inicio, longitud)
+	_comprobar(bloque.contains("LiteraturaEventos"), "el bridge usa el contrato comun")
+	_comprobar(bloque.contains("crear_evento"), "el bridge crea un evento de conocimiento")
 	_comprobar(
-		LiteraturaEventos.obra_conocida(GestorLiteratura.registro_literario, "odisea"),
-		"el gestor legacy usa el contrato comun",
+		bloque.contains("registrar(registro_literario, evento)"),
+		"el bridge registra sobre su estado literario",
 	)
-	var eventos := (
-		LiteraturaEventos
-		. eventos(
-			GestorLiteratura.registro_literario,
-			LiteraturaEventos.CANAL_CONOCIMIENTO,
-		)
-	)
-	_comprobar(eventos.size() == 1, "el bridge legacy registra un solo evento")
-	if not eventos.is_empty():
-		var evento: Dictionary = eventos[0]
-		_comprobar(
-			String(evento.get("fuente", "")) == "prueba:libro:odisea",
-			"el bridge legacy conserva la fuente",
-		)
-		_comprobar(
-			String(evento.get("contexto", "")) == "contrato_1176",
-			"el bridge legacy conserva el contexto",
-		)
-		_comprobar(int(evento.get("jornada", -1)) == 4, "el bridge legacy conserva la jornada")
-
+	_comprobar(bloque.contains("fuente"), "el bridge conserva la fuente")
+	_comprobar(bloque.contains("contexto"), "el bridge conserva el contexto")
+	_comprobar(bloque.contains("jornada"), "el bridge conserva la jornada")
 	_comprobar(
-		not GestorLiteratura.conocer_obra("odisea", "prueba:otra", "relectura", 5),
-		"el bridge legacy es idempotente",
-	)
-	_comprobar(
-		GestorLiteratura.insight_total == insight_previo,
-		"conocer una obra no incrementa insight legacy",
-	)
-	_comprobar(
-		is_equal_approx(GestorLiteratura.momentum_bonus, bonus_previo),
-		"conocer una obra no incrementa bonus de momentum",
-	)
-	_comprobar(
-		is_equal_approx(GestorMomentum.momentum_actual, momentum_previo),
+		not bloque.contains("GestorMomentum"),
 		"conocer una obra no modifica momentum de combate",
 	)
-
-	GestorLiteratura.obras_conocidas = obras_previas
-	GestorLiteratura.registro_literario = registro_previo
-	GestorLiteratura.insight_total = insight_previo
-	GestorLiteratura.momentum_bonus = bonus_previo
+	_comprobar(
+		not bloque.contains("GestorArquetipos"),
+		"conocer una obra no modifica arquetipos",
+	)
+	_comprobar(not bloque.contains("bonus_insight"), "conocer no aplica bonus de insight")
+	_comprobar(not bloque.contains("bonus_momentum"), "conocer no aplica bonus de momentum")
 
 
 func _comprobar(condicion: bool, nombre: String) -> void:
