@@ -124,7 +124,8 @@ static func validar_payload(payload: Variant) -> Dictionary:
 	return {
 		"ok": true,
 		"reason": "",
-		"payload": {
+		"payload":
+		{
 			"room_id": room_id,
 			"seq": seq,
 			"position": normalizada,
@@ -143,7 +144,13 @@ static func validar_room_id(room_id: String) -> bool:
 		var es_numero := codigo >= 48 and codigo <= 57
 		var es_mayuscula := codigo >= 65 and codigo <= 90
 		var es_minuscula := codigo >= 97 and codigo <= 122
-		if not es_numero and not es_mayuscula and not es_minuscula and codigo != 45 and codigo != 95:
+		if (
+			not es_numero
+			and not es_mayuscula
+			and not es_minuscula
+			and codigo != 45
+			and codigo != 95
+		):
 			return false
 	return true
 
