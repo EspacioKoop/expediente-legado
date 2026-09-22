@@ -111,17 +111,13 @@ func _abrir_ultimo_recurso(acusacion: Dictionary, duelo: Dictionary = {}) -> voi
 		return
 	_ultimo_recurso = UltimoRecursoApp.new()
 	_ultimo_recurso.name = "UltimoRecurso"
-	_ultimo_recurso.canje_solicitado.connect(
-		_al_canjear_ultimo_recurso.bind(acusacion, duelo)
-	)
+	_ultimo_recurso.canje_solicitado.connect(_al_canjear_ultimo_recurso.bind(acusacion, duelo))
 	_ultimo_recurso.cese_solicitado.connect(_al_aceptar_cese.bind(acusacion, duelo))
 	add_child(_ultimo_recurso)
 	_ultimo_recurso.abrir(partida.estado)
 
 
-func _al_canjear_ultimo_recurso(
-	carta_id: String, acusacion: Dictionary, duelo: Dictionary
-) -> void:
+func _al_canjear_ultimo_recurso(carta_id: String, acusacion: Dictionary, duelo: Dictionary) -> void:
 	var resultado := Acusacion.canjear_carta_por_vida(partida.estado, carta_id)
 	if String(resultado.get("resultado", "")) != "canje":
 		if is_instance_valid(_ultimo_recurso):
