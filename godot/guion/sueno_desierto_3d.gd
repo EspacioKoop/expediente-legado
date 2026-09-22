@@ -34,6 +34,7 @@ func _configurar(espacio: Dictionary) -> void:
 	_ocultar_sala_cerrada()
 	var contorno: PackedVector2Array = espacio.get("contorno", PackedVector2Array())
 	_montar_suelo(contorno)
+	_montar_tabiques_visibles(espacio.get("tabiques_poligonales", []))
 	_montar_dunas_lejanas()
 	_montar_huellas()
 	_montar_sombra_sin_objeto()
@@ -135,6 +136,19 @@ func _montar_suelo(contorno: PackedVector2Array) -> void:
 	suelo.mesh = st.commit()
 	suelo.material_override = _material(Color(0.58, 0.39, 0.20), 0.96)
 	add_child(suelo)
+
+
+func _montar_tabiques_visibles(tabiques: Array) -> void:
+	var malla := SuenoGeometria.malla_tabiques(tabiques)
+	if malla.get_surface_count() == 0:
+		return
+	var visual := MeshInstance3D.new()
+	visual.name = "TabiquesMineralesFragmentados"
+	visual.mesh = malla
+	var material := _material(Color(0.30, 0.18, 0.10), 0.98)
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	visual.material_override = material
+	add_child(visual)
 
 
 func _montar_dunas_lejanas() -> void:
