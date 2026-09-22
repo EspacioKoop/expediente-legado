@@ -29,6 +29,7 @@ func _process(_delta: float) -> void:
 	if zona.is_empty():
 		return
 
+	_sincronizar_estres()
 	var marcadores := MarcadoresMundo.listar(_host.jornada, zona)
 	var firma := JSON.stringify(marcadores) + "|%s|%.3f" % [zona, _estres_presentacion]
 	var mundo_id := mundo.get_instance_id()
@@ -44,6 +45,16 @@ func zona_actual() -> String:
 	if _host == null or not is_instance_valid(_host):
 		return ""
 	return String(_host.jornada.get("fase", "")).strip_edges()
+
+
+## #952: los marcadores no guardan estrés propio. Consumen la única fuente de
+## Jornada y solo fuerzan un remontado si cambia su nivel de presentación.
+func _sincronizar_estres() -> void:
+	var nuevo := Estres.nivel(_host.jornada)
+	if is_equal_approx(nuevo, _estres_presentacion):
+		return
+	_estres_presentacion = nuevo
+	_firma = ""
 
 
 ## Las posiciones son locales al mundo de la fase activa. El segundo corte de
@@ -97,8 +108,8 @@ func eliminar_zona_actual() -> int:
 	return cantidad
 
 
-## Permite que un sistema de estrés ya existente module la presentación sin
-## convertir el estrés en dato del marcador ni alterar su posición persistida.
+## Entrada manual conservada para herramientas aisladas y compatibilidad de
+## #957. En el recorrido real, _process() vuelve a sincronizar desde Estres.
 func establecer_estres_presentacion(valor: float) -> void:
 	var nuevo := clampf(valor, 0.0, 1.0)
 	if is_equal_approx(nuevo, _estres_presentacion):
