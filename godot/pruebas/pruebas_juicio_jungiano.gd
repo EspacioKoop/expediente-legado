@@ -28,20 +28,23 @@ static func todo(comprobar: Callable) -> void:
 		true,
 	)
 
-	var combo := JuicioCombateJungiano.aplicar_combo(
-		1,
-		5,
-		0,
-		0.1,
-		{
-			"dano_multiplier": 2.0,
-			"dano": 2,
-			"curacion": 2,
-			"contragolpe": true,
-			"evasion_temporal": true,
-			"duracion": 1.2,
-		},
-		8,
+	var combo := (
+		JuicioCombateJungiano
+		. aplicar_combo(
+			1,
+			5,
+			0,
+			0.1,
+			{
+				"dano_multiplier": 2.0,
+				"dano": 2,
+				"curacion": 2,
+				"contragolpe": true,
+				"evasion_temporal": true,
+				"duracion": 1.2,
+			},
+			8,
+		)
 	)
 	_caso(comprobar, "jungiano: combo acumula daño pendiente", combo["dano_combo_pendiente"], 4)
 	_caso(comprobar, "jungiano: combo cura sin superar máximo", combo["determinacion_jugador"], 7)
@@ -71,9 +74,7 @@ static func todo(comprobar: Callable) -> void:
 		true,
 	)
 
-	var curacion := JuicioCombateJungiano.aplicar_curacion_arquetipo(
-		5, 0.75, {"curacion": 0.3}, 8
-	)
+	var curacion := JuicioCombateJungiano.aplicar_curacion_arquetipo(5, 0.75, {"curacion": 0.3}, 8)
 	_caso(
 		comprobar,
 		"jungiano: curación acumulada suma un punto",
