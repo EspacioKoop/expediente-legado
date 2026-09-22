@@ -89,6 +89,10 @@ static func nueva() -> Dictionary:
 		# #701: la identidad pertenece a esta partida. No es una preferencia
 		# global: borrar o empezar otra partida debe producir otra ficha.
 		"perfil_jugador": PerfilJugador.nuevo(),
+		# #931: un único historial transversal de hechos religiosos observables.
+		# Vive en Partida para atravesar escenas, jornadas y reasignaciones sin
+		# convertir prácticas/exposición en una identidad o puntuación global.
+		ReligionEventos.CLAVE_ESTADO: ReligionEventos.nuevo(),
 		# La fusión solo recupera claves del molde. Si faltan aquí, guardar
 		# escribe el día y las firmas, pero cargar los descarta silenciosamente.
 		"jornada": Jornada.nueva(),
@@ -287,6 +291,12 @@ static func validar(guardado) -> Array:
 
 	if guardado.has("perfil_jugador") and typeof(guardado["perfil_jugador"]) != TYPE_DICTIONARY:
 		errores.append("perfil_jugador no es un objeto")
+	if guardado.has(ReligionEventos.CLAVE_ESTADO):
+		if typeof(guardado[ReligionEventos.CLAVE_ESTADO]) != TYPE_DICTIONARY:
+			errores.append("%s no es un objeto" % ReligionEventos.CLAVE_ESTADO)
+		else:
+			for error in ReligionEventos.validar(guardado[ReligionEventos.CLAVE_ESTADO]):
+				errores.append("%s.%s" % [ReligionEventos.CLAVE_ESTADO, error])
 	if guardado.has("pronosticos"):
 		if typeof(guardado["pronosticos"]) != TYPE_DICTIONARY:
 			errores.append("pronosticos no es un objeto")
@@ -448,6 +458,7 @@ func _fusionar(guardado: Dictionary) -> Dictionary:
 	Jornada.completar(fusionado["jornada"])
 	Inventario.completar(fusionado["inventario"])
 	fusionado["perfil_jugador"] = PerfilJugador.completar(fusionado["perfil_jugador"])
+	ReligionEventos.asegurar_en_estado(fusionado)
 	Pronosticos.completar(fusionado["pronosticos"])
 	return fusionado
 
