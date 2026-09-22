@@ -34,6 +34,19 @@ static func ajustes(estado: Dictionary) -> Dictionary:
 	return DIFICULTADES.get(estado.get("dificultad", "normal"), DIFICULTADES["normal"])
 
 
+## Cambiar dificultad es una acción explícita de configuración de la partida,
+## no una preferencia de interfaz. Como en el legado, bajar el máximo recorta
+## vidas actuales pero subirlo nunca cura. Devuelve solo cartas recién ganadas
+## para que la capa que originó el evento pueda reaccionar si lo necesita.
+static func cambiar_dificultad(estado: Dictionary, nueva: String) -> Array:
+	if not DIFICULTADES.has(nueva):
+		return []
+	var vidas_maximas := int(DIFICULTADES[nueva]["vidas"])
+	estado["dificultad"] = nueva
+	estado["vida"] = mini(int(estado.get("vida", vidas_maximas)), vidas_maximas)
+	return Prometeo.sincronizar_tarot_por_dificultad(estado)
+
+
 ## El veredicto firmado en un expediente, o cadena vacía si sigue abierto.
 static func veredicto_de(estado: Dictionary, caso_id: String) -> String:
 	return estado.get("veredictos", {}).get(caso_id, "")
