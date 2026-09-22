@@ -35,10 +35,7 @@ func _probar_catalogo() -> void:
 	var zonas_validas := zonas.size() == PasaporteInspeccion.ZONAS.size()
 	for zona in zonas:
 		zonas_validas = zonas_validas and PasaporteInspeccion.ZONAS.has(zona)
-	_comprobar(
-		zonas_validas,
-		"hay exactamente un corte para archivo, trayecto, casa y sueño"
-	)
+	_comprobar(zonas_validas, "hay exactamente un corte para archivo, trayecto, casa y sueño")
 	_comprobar(modos_validos, "todos los puntos exigen observación EXAMINAR")
 	_comprobar(SuenoFormas.ids().has("peine"), "el punto onírico referencia una sala existente")
 
@@ -70,8 +67,7 @@ func _probar_interaccion_real() -> void:
 	punto.observado.connect(_al_observar)
 
 	_comprobar(
-		punto.verbo == Interactuable3D.Verbo.EXAMINAR,
-		"el punto usa la acción semántica EXAMINAR"
+		punto.verbo == Interactuable3D.Verbo.EXAMINAR, "el punto usa la acción semántica EXAMINAR"
 	)
 	_comprobar(punto.interactuar(null), "la interacción habilitada se ejecuta")
 	_comprobar(
@@ -94,10 +90,14 @@ func _probar_persistencia() -> void:
 	var acciones_antes := int(jornada.get("acciones", 0))
 	var pistas_antes: Array = partida.estado.get("pistas_descubiertas", []).duplicate()
 
-	var registro := PasaporteInspeccion.registrar_observacion(partida.estado, "trayecto:farola-sodio")
+	var registro := PasaporteInspeccion.registrar_observacion(
+		partida.estado, "trayecto:farola-sodio"
+	)
 	_comprobar(registro.get("resultado", "") == "registrado", "el punto de trayecto se registra")
 	_comprobar(int(jornada.get("dinero", 0)) == dinero_antes, "inspeccionar no concede dinero")
-	_comprobar(int(jornada.get("acciones", 0)) == acciones_antes, "inspeccionar no concede acciones")
+	_comprobar(
+		int(jornada.get("acciones", 0)) == acciones_antes, "inspeccionar no concede acciones"
+	)
 	_comprobar(
 		partida.estado.get("pistas_descubiertas", []) == pistas_antes,
 		"inspeccionar no concede pistas"
