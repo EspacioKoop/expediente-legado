@@ -6,12 +6,15 @@
 extends Node
 
 const RUTA_CONSOLA_QA := "res://debug/consola_depuracion.gd"
+const RUTA_EDITOR_EXPEDIENTES := "res://debug/editor_expedientes.gd"
 const RUTA_CONSOLA_RELEASE := "res://guion/consola_trucos_release.gd"
 
 
 func _ready() -> void:
 	if OS.is_debug_build() or OS.has_feature("qa_tools"):
 		_instanciar(RUTA_CONSOLA_QA, "ConsolaDepuracionUI")
+		if OS.get_environment("SIGA98_EDITOR_EXPEDIENTES") == "1":
+			_instanciar(RUTA_EDITOR_EXPEDIENTES, "EditorExpedientesQA")
 	else:
 		_instanciar(RUTA_CONSOLA_RELEASE, "ConsolaTrucosRelease")
 
@@ -22,8 +25,8 @@ func _instanciar(ruta: String, nombre: String) -> void:
 	var script: Script = load(ruta) as Script
 	if script == null:
 		return
-	var consola := script.new() as Node
-	if consola == null:
+	var instancia := script.new() as Node
+	if instancia == null:
 		return
-	consola.name = nombre
-	add_child(consola)
+	instancia.name = nombre
+	add_child(instancia)
