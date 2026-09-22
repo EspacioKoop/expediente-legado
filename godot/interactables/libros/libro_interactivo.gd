@@ -1,7 +1,7 @@
 extends Area3D
 
-@onready var label = $InteractionLabel
 @export var obra_id: String = "odisea"
+@onready var label = $InteractionLabel
 
 
 func _ready() -> void:
