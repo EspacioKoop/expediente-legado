@@ -64,22 +64,25 @@ func _probar_declaraciones_y_vinculos() -> void:
 		Eventos.DECLARACION_DUDA,
 		Eventos.DECLARACION_CAMBIO,
 	]:
-		var evento := Eventos.crear_evento(
-			"declaracion:%s" % declaracion,
-			Eventos.CANAL_CONVICCION,
-			"dialogo:protagonista",
-			"conversacion:archivo",
-			4,
-			"fixture",
-			[],
-			[],
-			false,
-			[],
-			{
-				"vuelta": 1,
-				"procedencia": "dialogo:declaracion_directa",
-				"declaracion": declaracion,
-			},
+		var evento := (
+			Eventos
+			. crear_evento(
+				"declaracion:%s" % declaracion,
+				Eventos.CANAL_CONVICCION,
+				"dialogo:protagonista",
+				"conversacion:archivo",
+				4,
+				"fixture",
+				[],
+				[],
+				false,
+				[],
+				{
+					"vuelta": 1,
+					"procedencia": "dialogo:declaracion_directa",
+					"declaracion": declaracion,
+				},
+			)
 		)
 		_comprobar(Eventos.registrar(registro, evento), "se registra %s" % declaracion)
 
@@ -92,22 +95,25 @@ func _probar_declaraciones_y_vinculos() -> void:
 		"la postura actual se deriva de la última declaración explícita",
 	)
 
-	var vinculo := Eventos.crear_evento(
-		"vinculo:archivo:comunidad",
-		Eventos.CANAL_VINCULO,
-		"dialogo:npc_archivo",
-		"archivo",
-		4,
-		"",
-		["contacto_directo"],
-		[],
-		false,
-		[],
-		{
-			"vuelta": 1,
-			"procedencia": "dialogo:directo",
-			"actor": "npc:archivo",
-		},
+	var vinculo := (
+		Eventos
+		. crear_evento(
+			"vinculo:archivo:comunidad",
+			Eventos.CANAL_VINCULO,
+			"dialogo:npc_archivo",
+			"archivo",
+			4,
+			"",
+			["contacto_directo"],
+			[],
+			false,
+			[],
+			{
+				"vuelta": 1,
+				"procedencia": "dialogo:directo",
+				"actor": "npc:archivo",
+			},
+		)
 	)
 	_comprobar(Eventos.registrar(registro, vinculo), "se registra un vínculo observable")
 	var por_actor := Eventos.vinculos_por_actor(registro)
@@ -128,18 +134,21 @@ func _probar_persistencia_y_reset() -> void:
 	var partida := Partida.new()
 	partida.estado = Partida.nueva()
 	var registro := Eventos.asegurar_en_estado(partida.estado)
-	var evento := Eventos.crear_evento(
-		"exposicion:persistente",
-		Eventos.CANAL_EXPOSICION,
-		"fixture:persistencia",
-		"archivo",
-		6,
-		"",
-		["fixture"],
-		[],
-		false,
-		[],
-		{"vuelta": 3, "procedencia": "prueba:directa"},
+	var evento := (
+		Eventos
+		. crear_evento(
+			"exposicion:persistente",
+			Eventos.CANAL_EXPOSICION,
+			"fixture:persistencia",
+			"archivo",
+			6,
+			"",
+			["fixture"],
+			[],
+			false,
+			[],
+			{"vuelta": 3, "procedencia": "prueba:directa"},
+		)
 	)
 	Eventos.registrar(registro, evento)
 	var antes := JSON.stringify(registro)
@@ -153,7 +162,9 @@ func _probar_persistencia_y_reset() -> void:
 
 	var releida := Partida.new()
 	var carga := releida.cargar(ruta)
-	_comprobar(String(carga.get("resultado", "")) == "cargada", "Partida vuelve a cargar el registro")
+	_comprobar(
+		String(carga.get("resultado", "")) == "cargada", "Partida vuelve a cargar el registro"
+	)
 	var registro_releido := Eventos.asegurar_en_estado(releida.estado)
 	_comprobar(
 		JSON.stringify(registro_releido) == antes,
@@ -162,10 +173,14 @@ func _probar_persistencia_y_reset() -> void:
 
 	var nueva := Partida.nueva()
 	_comprobar(
-		Eventos.eventos(
-			Eventos.asegurar_en_estado(nueva),
-			Eventos.CANAL_EXPOSICION,
-		).is_empty(),
+		(
+			Eventos
+			. eventos(
+				Eventos.asegurar_en_estado(nueva),
+				Eventos.CANAL_EXPOSICION,
+			)
+			. is_empty()
+		),
 		"una partida nueva sí reinicia la trayectoria religiosa",
 	)
 	_limpiar(ruta)
@@ -174,10 +189,13 @@ func _probar_persistencia_y_reset() -> void:
 func _probar_validacion() -> void:
 	var estado := Partida.nueva()
 	var registro := Eventos.asegurar_en_estado(estado)
-	var evento := Eventos.crear_evento(
-		"duplicado",
-		Eventos.CANAL_EXPOSICION,
-		"fixture",
+	var evento := (
+		Eventos
+		. crear_evento(
+			"duplicado",
+			Eventos.CANAL_EXPOSICION,
+			"fixture",
+		)
 	)
 	Eventos.registrar(registro, evento)
 	var corrupto := estado.duplicate(true)
@@ -189,18 +207,21 @@ func _probar_validacion() -> void:
 			detectado = true
 	_comprobar(detectado, "Partida rechaza un mismo hecho duplicado entre canales")
 
-	var invalido := Eventos.crear_evento(
-		"declaracion-invalida",
-		Eventos.CANAL_EXPOSICION,
-		"fixture",
-		"",
-		0,
-		"",
-		[],
-		[],
-		false,
-		[],
-		{"declaracion": Eventos.DECLARACION_DUDA},
+	var invalido := (
+		Eventos
+		. crear_evento(
+			"declaracion-invalida",
+			Eventos.CANAL_EXPOSICION,
+			"fixture",
+			"",
+			0,
+			"",
+			[],
+			[],
+			false,
+			[],
+			{"declaracion": Eventos.DECLARACION_DUDA},
+		)
 	)
 	_comprobar(invalido.is_empty(), "una exposición no puede declarar convicción implícitamente")
 
