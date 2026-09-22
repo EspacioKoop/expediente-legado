@@ -31,11 +31,15 @@ class SuenoDesiertoRuntimeTest(unittest.TestCase):
         self.assertIn("SuenoGeometria.cuerpo_sala(contorno, altura, tabiques)", self.espacio_3d)
         self.assertNotIn("SuenoDesierto", self.espacio_3d)
 
-    def test_presentacion_reexpone_tabiques_que_la_sala_base_oculta(self):
+    def test_presentacion_viste_tabiques_como_crestas_sin_segunda_fisica(self):
         self.assertIn("_ocultar_sala_cerrada()", self.desierto_3d)
         self.assertIn('espacio.get("tabiques_poligonales", [])', self.desierto_3d)
-        self.assertIn("SuenoGeometria.malla_tabiques(tabiques)", self.desierto_3d)
-        self.assertIn('"TabiquesMineralesFragmentados"', self.desierto_3d)
+        self.assertIn("_malla_crestas_minerales(tabiques)", self.desierto_3d)
+        self.assertIn('"CrestasMineralesFragmentadas"', self.desierto_3d)
+        self.assertIn('tabique.get("desde"', self.desierto_3d)
+        self.assertIn('tabique.get("hasta"', self.desierto_3d)
+        self.assertIn("lerpf(altura_desde, altura_hasta, t)", self.desierto_3d)
+        self.assertIn("altura_colision + relieve", self.desierto_3d)
         self.assertNotIn("StaticBody3D.new", self.desierto_3d)
         self.assertNotIn("CollisionShape3D.new", self.desierto_3d)
 
