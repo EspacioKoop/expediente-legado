@@ -114,10 +114,14 @@ func _probar_controles_climaticos_interactivos() -> void:
 	var actor := Node.new()
 	get_root().add_child(actor)
 
-	var compuerta := sueno.get_node_or_null("ControlesClimaticos/CompuertaLluvia") as Interactuable3D
+	var compuerta := (
+		sueno.get_node_or_null("ControlesClimaticos/CompuertaLluvia") as Interactuable3D
+	)
 	_comprobar(compuerta != null, "la compuerta climática existe en el mundo")
 	_comprobar(compuerta.interactuar(actor), "la compuerta usa el contrato Interactuable3D")
-	_comprobar(sueno.clima_actual(), SuenoMari.CLIMA_LLUVIA, "interactuar con compuerta provoca lluvia")
+	_comprobar(
+		sueno.clima_actual(), SuenoMari.CLIMA_LLUVIA, "interactuar con compuerta provoca lluvia"
+	)
 	_comprobar(
 		sueno.rutas_disponibles()[SuenoMari.RUTA_CAUCE],
 		"la interacción real revela el cauce",
@@ -126,7 +130,9 @@ func _probar_controles_climaticos_interactivos() -> void:
 	var conducto := sueno.get_node_or_null("ControlesClimaticos/ConductoViento") as Interactuable3D
 	_comprobar(conducto != null, "el conducto de viento existe en el mundo")
 	_comprobar(conducto.interactuar(actor), "el conducto se activa por interacción 3D")
-	_comprobar(sueno.clima_actual(), SuenoMari.CLIMA_VIENTO, "interactuar con conducto provoca viento")
+	_comprobar(
+		sueno.clima_actual(), SuenoMari.CLIMA_VIENTO, "interactuar con conducto provoca viento"
+	)
 	_comprobar(
 		sueno.rutas_disponibles()[SuenoMari.RUTA_CORNISA],
 		"la interacción real habilita la cornisa",
