@@ -22,6 +22,17 @@ func _ready() -> void:
 	pass
 
 
+func reiniciar() -> void:
+	momentum_actual = 0.0
+	momentum_max = 100.0
+	decay_rate = 5.0
+	en_combate = false
+	ultimo_golpe_time = 0.0
+	combo_actual = 0
+	multiplicador_momentum = 1.0
+	momentum_cambiado.emit(momentum_actual, momentum_max)
+
+
 func _process(delta: float) -> void:
 	if en_combate and momentum_actual > 0:
 		momentum_actual = max(0.0, momentum_actual - decay_rate * delta * multiplicador_momentum)
@@ -59,11 +70,15 @@ func registrar_golpe(es_critico: bool = false, tipo_danio: String = "fisico") ->
 		finisher_disponible.emit()  # Super finisher
 
 
-func registrar_danio_recibido() -> void:
+func registrar_dano_recibido() -> void:
 	# Perder momentum al recibir daño
 	momentum_actual = max(0.0, momentum_actual - 20.0)
 	combo_actual = 0
 	momentum_cambiado.emit(momentum_actual, momentum_max)
+
+
+func registrar_danio_recibido() -> void:
+	registrar_dano_recibido()
 
 
 func ejecutar_finisher(tipo: String = "normal") -> bool:
