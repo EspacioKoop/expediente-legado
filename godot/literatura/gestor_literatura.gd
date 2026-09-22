@@ -64,17 +64,17 @@ func conocer_obra(
 ## significativa de #1176. A diferencia de conocer_obra(), este metodo puede
 ## registrar insight porque el llamador aporta progreso y fuente concretos.
 func registrar_lectura_significativa(
-	obra_id: String,
-	fuente: String,
-	jornada: int = 0,
-	progreso_normalizado: float = 1.0
+	obra_id: String, fuente: String, jornada: int = 0, progreso_normalizado: float = 1.0
 ) -> Dictionary:
-	var resultado := LiteraturaLectura.registrar_interaccion(
-		registro_literario,
-		obra_id,
-		fuente,
-		jornada,
-		progreso_normalizado,
+	var resultado := (
+		LiteraturaLectura
+		. registrar_interaccion(
+			registro_literario,
+			obra_id,
+			fuente,
+			jornada,
+			progreso_normalizado,
+		)
 	)
 	if bool(resultado.get("conocimiento_nuevo", false)) and obra_id not in obras_conocidas:
 		obras_conocidas.append(obra_id)
