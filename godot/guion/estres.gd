@@ -50,17 +50,6 @@ static func nivel(jornada: Dictionary) -> float:
 	return valor(jornada) / VALOR_MAXIMO
 
 
-## Útil para consumidores que ya discretizan el contexto en bajo/medio/alto.
-## Mantiene exactamente los umbrales usados por Ambiente._nivel().
-static func banda(jornada: Dictionary) -> int:
-	var actual := nivel(jornada)
-	if actual < 0.34:
-		return 0
-	if actual < 0.67:
-		return 1
-	return 2
-
-
 static func _asegurar(jornada: Dictionary) -> Dictionary:
 	var crudo: Variant = jornada.get(CAMPO_JORNADA, {})
 	if not crudo is Dictionary:
