@@ -59,6 +59,39 @@ func _probar() -> void:
 		"el contenido cambia por jornada",
 	)
 
+	var buzon_sobre := BuzonPostalInteractivo3D.new()
+	buzon_sobre.configurar(dia_uno, Inventario.nuevo())
+	_comprobar(
+		buzon_sobre.tipo_correo_visible() == "sobre",
+		"el buzon representa el correo ordinario como sobre fisico",
+	)
+
+	var dia_paquete_visible := Jornada.nueva(672, 1)
+	dia_paquete_visible["dia"] = 4
+	dia_paquete_visible["fase"] = "trayecto"
+	var recogidos_paquete: Array = CorreoPostal.estado(dia_paquete_visible)["recogidos"]
+	for pieza in CorreoPostal.disponibles(dia_paquete_visible):
+		if String(pieza.get("id", "")) != "paquete_calendario_magnetico":
+			recogidos_paquete.append(String(pieza.get("id", "")))
+	var buzon_paquete := BuzonPostalInteractivo3D.new()
+	buzon_paquete.configurar(dia_paquete_visible, Inventario.nuevo())
+	_comprobar(
+		buzon_paquete.tipo_correo_visible() == "paquete",
+		"el buzon distingue el paquete acolchado de un sobre",
+	)
+
+	var dia_vacio_visible := Jornada.nueva(672, 1)
+	dia_vacio_visible["fase"] = "trayecto"
+	var recogidos_vacio: Array = CorreoPostal.estado(dia_vacio_visible)["recogidos"]
+	for pieza in CorreoPostal.disponibles(dia_vacio_visible):
+		recogidos_vacio.append(String(pieza.get("id", "")))
+	var buzon_vacio_visual := BuzonPostalInteractivo3D.new()
+	buzon_vacio_visual.configurar(dia_vacio_visible, Inventario.nuevo())
+	_comprobar(
+		buzon_vacio_visual.tipo_correo_visible() == "vacio",
+		"el indicador desaparece cuando no queda correo",
+	)
+
 	var dia_tres := Jornada.nueva(672, 1)
 	dia_tres["dia"] = 3
 	dia_tres["fase"] = "trayecto"
