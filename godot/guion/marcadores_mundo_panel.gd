@@ -7,6 +7,7 @@ extends PanelContainer
 
 signal colocar_solicitado(tipo: String, color: String, texto: String)
 signal eliminar_solicitado
+signal eliminar_zona_solicitado
 signal cancelar_solicitado
 
 var _tipo: OptionButton
@@ -15,7 +16,9 @@ var _texto: LineEdit
 var _estado: Label
 var _colocar: Button
 var _eliminar: Button
+var _limpiar_zona: Button
 var _volver: Button
+var _confirmar_limpieza: ConfirmationDialog
 
 
 func _ready() -> void:
@@ -29,10 +32,13 @@ func abrir(puede_colocar: bool, puede_eliminar: bool, cantidad: int) -> void:
 	visible = true
 	_colocar.disabled = not puede_colocar or cantidad >= MarcadoresMundo.LIMITE_POR_ZONA
 	_eliminar.visible = puede_eliminar
+	_limpiar_zona.visible = cantidad > 0
 	if not puede_colocar:
 		_estado.text = "Apunta a una superficie sólida para colocar una marca."
 	elif cantidad >= MarcadoresMundo.LIMITE_POR_ZONA:
-		_estado.text = "Límite de %d marcas alcanzado en esta zona." % MarcadoresMundo.LIMITE_POR_ZONA
+		_estado.text = (
+			"Límite de %d marcas alcanzado en esta zona." % MarcadoresMundo.LIMITE_POR_ZONA
+		)
 	else:
 		_estado.text = "Marcas en la zona: %d/%d" % [cantidad, MarcadoresMundo.LIMITE_POR_ZONA]
 	_tipo.grab_focus.call_deferred()
@@ -96,7 +102,9 @@ func _montar() -> void:
 	_anadir_etiqueta(formulario, "Texto")
 	_texto = LineEdit.new()
 	_texto.max_length = MarcadoresMundo.MAX_TEXTO
-	_texto.placeholder_text = "Solo cinta o nota · máximo %d caracteres" % MarcadoresMundo.MAX_TEXTO
+	_texto.placeholder_text = (
+		"Solo cinta o nota · máximo %d caracteres" % MarcadoresMundo.MAX_TEXTO
+	)
 	formulario.add_child(_texto)
 
 	_estado = Label.new()
@@ -113,6 +121,11 @@ func _montar() -> void:
 	_eliminar.pressed.connect(func(): eliminar_solicitado.emit())
 	botones.add_child(_eliminar)
 
+	_limpiar_zona = Button.new()
+	_limpiar_zona.text = "Limpiar zona"
+	_limpiar_zona.pressed.connect(_pedir_limpiar_zona)
+	botones.add_child(_limpiar_zona)
+
 	_volver = Button.new()
 	_volver.text = "Volver"
 	_volver.pressed.connect(func(): cancelar_solicitado.emit())
@@ -122,6 +135,13 @@ func _montar() -> void:
 	_colocar.text = "Colocar"
 	_colocar.pressed.connect(_emitir_colocacion)
 	botones.add_child(_colocar)
+
+	_confirmar_limpieza = ConfirmationDialog.new()
+	_confirmar_limpieza.title = "Limpiar marcadores"
+	_confirmar_limpieza.dialog_text = "¿Eliminar todas las marcas de esta zona?"
+	_confirmar_limpieza.ok_button_text = "Eliminar todas"
+	_confirmar_limpieza.confirmed.connect(func(): eliminar_zona_solicitado.emit())
+	add_child(_confirmar_limpieza)
 
 	_al_tipo_cambiado(0)
 
@@ -144,6 +164,10 @@ func _al_tipo_cambiado(_indice: int) -> void:
 	_texto.editable = tipo in [MarcadoresMundo.TIPO_CINTA, MarcadoresMundo.TIPO_NOTA]
 	if not _texto.editable:
 		_texto.text = ""
+
+
+func _pedir_limpiar_zona() -> void:
+	_confirmar_limpieza.popup_centered()
 
 
 func _emitir_colocacion() -> void:
