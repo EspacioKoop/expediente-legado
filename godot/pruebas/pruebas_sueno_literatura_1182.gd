@@ -26,12 +26,15 @@ func _base() -> Dictionary:
 
 func _registro_con_insight() -> Dictionary:
 	var registro := LiteraturaEventos.nuevo()
-	var lectura := LiteraturaLectura.registrar_interaccion(
-		registro,
-		"vida_es_sueno_1635",
-		"documento:biblioteca:estante_03",
-		2,
-		1.0,
+	var lectura := (
+		LiteraturaLectura
+		. registrar_interaccion(
+			registro,
+			"vida_es_sueno_1635",
+			"documento:biblioteca:estante_03",
+			2,
+			1.0,
+		)
 	)
 	_comprobar(bool(lectura.get("insight_nuevo", false)), "la lectura produce insight real")
 	return registro
@@ -44,11 +47,14 @@ func _probar_fallback_identico() -> void:
 	_comprobar(not vacio.has("motivo_literario"), "el fallback no anade metadatos")
 
 	var solo_conocimiento := LiteraturaEventos.nuevo()
-	var evento := LiteraturaEventos.crear_evento(
-		"conocimiento:prueba",
-		LiteraturaEventos.CANAL_CONOCIMIENTO,
-		"vida_es_sueno_1635",
-		"prueba",
+	var evento := (
+		LiteraturaEventos
+		. crear_evento(
+			"conocimiento:prueba",
+			LiteraturaEventos.CANAL_CONOCIMIENTO,
+			"vida_es_sueno_1635",
+			"prueba",
+		)
 	)
 	LiteraturaEventos.registrar(solo_conocimiento, evento)
 	_comprobar(
