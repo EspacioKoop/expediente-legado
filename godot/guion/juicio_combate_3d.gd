@@ -6,6 +6,7 @@ signal terminado(gano: bool)
 const REGLAS = preload("res://guion/juicio_combate_reglas.gd")
 const FEEDBACK = preload("res://guion/juicio_combate_feedback_3d.gd")
 const HUD = preload("res://guion/juicio_combate_hud.gd")
+const ARENA = preload("res://guion/juicio_combate_arena_3d.gd")
 const DETERMINACION_BASE := REGLAS.DETERMINACION_BASE
 const DETERMINACION_MINIMA_RIVAL := REGLAS.DETERMINACION_MINIMA_RIVAL
 const VELOCIDAD_JUGADOR := 4.8
@@ -523,102 +524,22 @@ func _estado_partida_anfitrion() -> Dictionary:
 
 
 func _montar_arena() -> void:
-	var mundo := WorldEnvironment.new()
-	var entorno := Environment.new()
-	entorno.background_mode = Environment.BG_COLOR
-	entorno.background_color = Color(0.025, 0.027, 0.032)
-	entorno.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	entorno.ambient_light_color = Color(0.48, 0.50, 0.46)
-	entorno.ambient_light_energy = 0.65
-	mundo.environment = entorno
-	add_child(mundo)
-
-	var luz := DirectionalLight3D.new()
-	luz.rotation_degrees = Vector3(-55.0, -35.0, 0.0)
-	luz.light_energy = 1.25
-	add_child(luz)
-
-	var suelo := MeshInstance3D.new()
-	var malla_suelo := CylinderMesh.new()
-	malla_suelo.top_radius = RADIO_ARENA + 0.8
-	malla_suelo.bottom_radius = RADIO_ARENA + 0.8
-	malla_suelo.height = 0.16
-	malla_suelo.radial_segments = 32
-	suelo.mesh = malla_suelo
-	suelo.position.y = -0.12
-	suelo.material_override = _material(Color(0.16, 0.17, 0.15))
-	add_child(suelo)
-
-	# Archivadores como límite visual institucional.
-	for i in 8:
-		var angulo := TAU * float(i) / 8.0
-		var archivador := MeshInstance3D.new()
-		var caja := BoxMesh.new()
-		caja.size = Vector3(0.9, 1.8, 0.55)
-		archivador.mesh = caja
-		archivador.position = Vector3(sin(angulo) * 5.7, 0.9, cos(angulo) * 5.7)
-		archivador.rotation.y = angulo
-		archivador.material_override = _material(Color(0.28, 0.31, 0.28))
-		add_child(archivador)
-
-	JuicioSimbolico3D.montar(self, _arcano, _mito_id)
-	_montar_limite_ritual()
-
-	_jugador = CharacterBody3D.new()
-	_jugador.position = Vector3(0.0, 0.0, 2.4)
-	add_child(_jugador)
-	_figura_jugador = FiguraSilueta.construir(_jugador, Vector3.ZERO, Color(0.68, 0.70, 0.64))
-
-	_rival = CharacterBody3D.new()
-	_rival.position = Vector3(0.0, 0.0, -2.4)
-	add_child(_rival)
-	var clave := String(_acusado.get("id", _acusado.get("nombre", "acusado")))
-	var matiz := 0.52 + float(absi(hash(clave)) % 14) / 100.0
-	_figura_rival = FiguraSilueta.construir(_rival, Vector3.ZERO, Color.from_hsv(matiz, 0.34, 0.72))
-	_montar_aviso_ataque()
-
-	_camara = Camera3D.new()
-	_camara.fov = 52.0
-	add_child(_camara)
+	var nodos := ARENA.montar(
+		self,
+		_acusado,
+		_arcano,
+		_mito_id,
+		_ritual,
+		RADIO_ARENA,
+		_radio_arena,
+	)
+	_jugador = nodos["jugador"]
+	_rival = nodos["rival"]
+	_figura_jugador = nodos["figura_jugador"]
+	_figura_rival = nodos["figura_rival"]
+	_aviso_ataque = nodos["aviso_ataque"]
+	_camara = nodos["camara"]
 	_actualizar_camara()
-
-
-func _montar_aviso_ataque() -> void:
-	_aviso_ataque = MeshInstance3D.new()
-	_aviso_ataque.name = "AvisoAtaqueRival"
-	var malla := CylinderMesh.new()
-	malla.top_radius = ALCANCE_RIVAL
-	malla.bottom_radius = ALCANCE_RIVAL
-	malla.height = 0.025
-	malla.radial_segments = 32
-	_aviso_ataque.mesh = malla
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.82, 0.10, 0.08, 0.34)
-	material.emission_enabled = true
-	material.emission = Color(0.82, 0.10, 0.08)
-	material.emission_energy_multiplier = 0.75
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	_aviso_ataque.material_override = material
-	_aviso_ataque.visible = false
-	add_child(_aviso_ataque)
-
-
-func _montar_limite_ritual() -> void:
-	if String(_ritual.get("id", "")) != "laberinto_lunar":
-		return
-	var color := Color(0.42, 0.48, 0.68)
-	for i in 20:
-		var angulo := TAU * float(i) / 20.0
-		var marca := MeshInstance3D.new()
-		var caja := BoxMesh.new()
-		caja.size = Vector3(0.08, 0.10, 0.42)
-		marca.mesh = caja
-		marca.position = Vector3(sin(angulo) * _radio_arena, 0.03, cos(angulo) * _radio_arena)
-		marca.rotation.y = angulo
-		marca.material_override = _material(color, true)
-		add_child(marca)
-
 
 func _montar_hud() -> void:
 	var nodos := HUD.montar(
