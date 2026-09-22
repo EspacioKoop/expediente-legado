@@ -1605,6 +1605,126 @@
       "licencia": "CC0-1.0",
       "fuente": "https://kenney.nl/assets/impact-sounds",
       "sha256": "15ff82332f342c30e469215539e1cc57e11b221aa2cf7e11e811d313a9927f3d"
+    },
+    {
+      "ruta": "modelos/styloo_school/principal_office_desk.glb",
+      "titulo": "Principal Office desk",
+      "autor": "styloo",
+      "licencia": "CC0-1.0",
+      "fuente": "https://styloo.itch.io/classroom-asset-pack",
+      "sha256": "0e45b95827adc2b911b3db2a534af137650f97c1eb5f132cf38689096714d466",
+      "archivo_origen": "StylooClassroomAssetPack GLTF & FBX/principal office/GLTF/PRINCIPALOFFICEdesk.glb",
+      "paquete_sha256": "f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954"
+    },
+    {
+      "ruta": "modelos/styloo_school/principal_office_chair.glb",
+      "titulo": "Principal Office principal chair",
+      "autor": "styloo",
+      "licencia": "CC0-1.0",
+      "fuente": "https://styloo.itch.io/classroom-asset-pack",
+      "sha256": "a68ba2b7575558a233c75eb6814d3a1098b70f218e3e941f049ffce573248acc",
+      "archivo_origen": "StylooClassroomAssetPack GLTF & FBX/principal office/GLTF/PRINCIPALOFFICEprincipalchair.glb",
+      "paquete_sha256": "f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954"
+    },
+    {
+      "ruta": "modelos/styloo_school/principal_office_shelf.glb",
+      "titulo": "Principal Office shelf",
+      "autor": "styloo",
+      "licencia": "CC0-1.0",
+      "fuente": "https://styloo.itch.io/classroom-asset-pack",
+      "sha256": "c96c576a3f40e334520795dcda74244e943463dcca4af4ea51f8ed35bb1710c5",
+      "archivo_origen": "StylooClassroomAssetPack GLTF & FBX/principal office/GLTF/PRINCIPALOFFICEshelf.glb",
+      "paquete_sha256": "f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954"
+    },
+    {
+      "ruta": "modelos/styloo_school/principal_office_telephone.glb",
+      "titulo": "Principal Office telephone",
+      "autor": "styloo",
+      "licencia": "CC0-1.0",
+      "fuente": "https://styloo.itch.io/classroom-asset-pack",
+      "sha256": "9a5b1fff02e2aabc7a340a9b77c6ce4c319f8e0164958e0b845c2a2efb27c3a5",
+      "archivo_origen": "StylooClassroomAssetPack GLTF & FBX/principal office/GLTF/PRINCIPALOFFICEtelephone.glb",
+      "paquete_sha256": "f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954"
+    },
+    {
+      "ruta": "modelos/styloo_school/computer_pc_old.glb",
+      "titulo": "Computer Room old PC",
+      "autor": "styloo",
+      "licencia": "CC0-1.0",
+      "fuente": "https://styloo.itch.io/classroom-asset-pack",
+      "sha256": "46a697251a34e9ae18defc8cfac09db17a536576fd6f8c771be194d555b36af3",
+      "archivo_origen": "StylooClassroomAssetPack GLTF & FBX/computer/GLTF/COMPUTERpcold.glb",
+      "paquete_sha256": "f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954"
+    },
+    {
+      "ruta": "modelos/styloo_school/computer_printer.glb",
+      "titulo": "Computer Room printer",
+      "autor": "styloo",
+      "licencia": "CC0-1.0",
+      "fuente": "https://styloo.itch.io/classroom-asset-pack",
+      "sha256": "3ae9b7509226e9d5a09b21d8487450fec6c80a690fd96f83a2d66825d5566b1c",
+      "archivo_origen": "StylooClassroomAssetPack GLTF & FBX/computer/GLTF/COMPUTERprinter.glb",
+      "paquete_sha256": "f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954"
+    },
+    {
+      "ruta": "modelos/styloo_school/principal_office_desk_ImphenziaPalette01-256-Gradient.png",
+      "titulo": "Principal Office desk — textura de paleta incrustada",
+      "autor": "styloo",
+      "licencia": "CC0-1.0",
+      "fuente": "https://styloo.itch.io/classroom-asset-pack",
+      "sha256": "8c12ad6d4aa377173f7b3f98be3514e4c6d50214a6587747e6f4d4edecc17bd9",
+      "archivo_origen": "StylooClassroomAssetPack GLTF & FBX/principal office/GLTF/PRINCIPALOFFICEdesk.glb (textura incrustada, extraída al importar)",
+      "paquete_sha256": "f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954"
+    },
+    {
+      "ruta": "modelos/styloo_school/principal_office_chair_ImphenziaPalette01-256-Gradient.png",
+      "titulo": "Principal Office principal chair — textura de paleta incrustada",
+      "autor": "styloo",
+      "licencia": "CC0-1.0",
+      "fuente": "https://styloo.itch.io/classroom-asset-pack",
+      "sha256": "8c12ad6d4aa377173f7b3f98be3514e4c6d50214a6587747e6f4d4edecc17bd9",
+      "archivo_origen": "StylooClassroomAssetPack GLTF & FBX/principal office/GLTF/PRINCIPALOFFICEprincipalchair.glb (textura incrustada, extraída al importar)",
+      "paquete_sha256": "f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954"
+    },
+    {
+      "ruta": "modelos/styloo_school/principal_office_shelf_ImphenziaPalette01-256-Gradient.png",
+      "titulo": "Principal Office shelf — textura de paleta incrustada",
+      "autor": "styloo",
+      "licencia": "CC0-1.0",
+      "fuente": "https://styloo.itch.io/classroom-asset-pack",
+      "sha256": "8c12ad6d4aa377173f7b3f98be3514e4c6d50214a6587747e6f4d4edecc17bd9",
+      "archivo_origen": "StylooClassroomAssetPack GLTF & FBX/principal office/GLTF/PRINCIPALOFFICEshelf.glb (textura incrustada, extraída al importar)",
+      "paquete_sha256": "f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954"
+    },
+    {
+      "ruta": "modelos/styloo_school/principal_office_telephone_ImphenziaPalette01-256-Gradient.png",
+      "titulo": "Principal Office telephone — textura de paleta incrustada",
+      "autor": "styloo",
+      "licencia": "CC0-1.0",
+      "fuente": "https://styloo.itch.io/classroom-asset-pack",
+      "sha256": "8c12ad6d4aa377173f7b3f98be3514e4c6d50214a6587747e6f4d4edecc17bd9",
+      "archivo_origen": "StylooClassroomAssetPack GLTF & FBX/principal office/GLTF/PRINCIPALOFFICEtelephone.glb (textura incrustada, extraída al importar)",
+      "paquete_sha256": "f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954"
+    },
+    {
+      "ruta": "modelos/styloo_school/computer_pc_old_ImphenziaPalette01-256-Gradient.png",
+      "titulo": "Computer Room old PC — textura de paleta incrustada",
+      "autor": "styloo",
+      "licencia": "CC0-1.0",
+      "fuente": "https://styloo.itch.io/classroom-asset-pack",
+      "sha256": "8c12ad6d4aa377173f7b3f98be3514e4c6d50214a6587747e6f4d4edecc17bd9",
+      "archivo_origen": "StylooClassroomAssetPack GLTF & FBX/computer/GLTF/COMPUTERpcold.glb (textura incrustada, extraída al importar)",
+      "paquete_sha256": "f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954"
+    },
+    {
+      "ruta": "modelos/styloo_school/computer_printer_ImphenziaPalette01-256-Gradient.png",
+      "titulo": "Computer Room printer — textura de paleta incrustada",
+      "autor": "styloo",
+      "licencia": "CC0-1.0",
+      "fuente": "https://styloo.itch.io/classroom-asset-pack",
+      "sha256": "8c12ad6d4aa377173f7b3f98be3514e4c6d50214a6587747e6f4d4edecc17bd9",
+      "archivo_origen": "StylooClassroomAssetPack GLTF & FBX/computer/GLTF/COMPUTERprinter.glb (textura incrustada, extraída al importar)",
+      "paquete_sha256": "f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954"
     }
   ]
 }
