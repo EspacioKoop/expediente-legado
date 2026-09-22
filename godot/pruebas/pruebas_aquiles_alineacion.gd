@@ -49,9 +49,13 @@ func _probar_resolucion_diegetica() -> void:
 	var reflector := sueno.reflector()
 	var sello := sueno.sello()
 	var talon := sueno.get_node("FiguraAquiles/VulnerabilidadTalon") as MeshInstance3D
+	var figura := sueno.get_node("FiguraAquiles") as Node3D
+	var marca := sueno.get_node("MarcaSelladoFinal") as MeshInstance3D
 	_comprobar(reflector != null, "la escena monta el reflector")
 	_comprobar(sello != null, "la escena monta el sello")
 	_comprobar(talon != null, "la escena conserva el talón")
+	_comprobar(marca != null, "la escena monta la marca final de sellado")
+	_comprobar(not marca.visible, "la marca final empieza oculta")
 	_comprobar(not talon.visible, "el talón empieza oculto")
 	_comprobar(not sello.esta_habilitado(), "el sello empieza bloqueado")
 	_comprobar(not sello.interactuar(root), "el sello no funciona antes de revelar")
@@ -65,7 +69,6 @@ func _probar_resolucion_diegetica() -> void:
 	_comprobar(talon.visible, "la alineación revela el talón")
 	var disco := reflector.get_node("DiscoReflector") as Node3D
 	var haz := disco.get_node("HazReflejado") as SpotLight3D
-	var figura := sueno.get_node("FiguraAquiles") as Node3D
 	# Esta prueba corre desde SceneTree._initialize(), antes del primer frame.
 	# Componer transforms locales evita depender de global_transform fuera del árbol
 	# y verifica la misma geometría en el espacio local común del sueño.
@@ -86,6 +89,15 @@ func _probar_resolucion_diegetica() -> void:
 		not (sueno.get_node("ImpactoAdministrativo1") as MeshInstance3D).visible,
 		"los impactos administrativos desaparecen al resolver",
 	)
+	_comprobar(marca.visible, "resolver hace visible la marca espacial de sellado")
+	var geometrias := figura.find_children("*", "GeometryInstance3D", true, false)
+	var todas_papel := not geometrias.is_empty()
+	for geometria in geometrias:
+		var material := (geometria as GeometryInstance3D).material_override as StandardMaterial3D
+		if material == null or not material.albedo_color.is_equal_approx(SuenoAquiles.COLOR_PAPEL):
+			todas_papel = false
+			break
+	_comprobar(todas_papel, "toda la figura pasa a material de papel al resolver")
 	sueno.queue_free()
 
 
