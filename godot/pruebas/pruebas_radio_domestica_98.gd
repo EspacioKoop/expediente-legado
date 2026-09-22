@@ -35,9 +35,7 @@ func _probar_programacion_narrativa() -> void:
 			"la minicadena deja de mezclarse fuera de la habitación",
 		)
 		_comprobar(
-			is_equal_approx(
-				audio.panning_strength, MinicadenaDomestica98.AUDIO_PANNING_STRENGTH
-			),
+			is_equal_approx(audio.panning_strength, MinicadenaDomestica98.AUDIO_PANNING_STRENGTH),
 			"el paneo está limitado para una fuente doméstica cercana",
 		)
 	_comprobar(
