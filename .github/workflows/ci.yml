@@ -91,6 +91,13 @@ jobs:
           godot4 --headless --path godot --script res://pruebas/emulador_gbc_smoke.gd \
             -- "$GITHUB_WORKSPACE/gbc/fixtures/cgb_only_smoke/build/cgb_only_smoke.gbc"
 
+      - name: Verificar paletas GB sin recolorear CGB
+        shell: bash
+        run: |
+          godot4 --headless --path godot --script res://pruebas/emulador_paletas_gb_smoke.gd \
+            -- "$GITHUB_WORKSPACE/gbc/fixtures/dmg_only_smoke/build/dmg_only_smoke.gb" \
+               "$GITHUB_WORKSPACE/gbc/fixtures/cgb_only_smoke/build/cgb_only_smoke.gbc"
+
       - name: Persistir y aislar SRAM por ROM al cerrar la portátil
         shell: bash
         run: |
