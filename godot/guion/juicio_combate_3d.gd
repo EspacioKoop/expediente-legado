@@ -667,13 +667,16 @@ func _al_momentum_cambiado(_actual: float, _maximo: float) -> void:
 
 
 func _al_combo_ejecutado(nombre: String, efectos: Dictionary) -> void:
-	var estado := JUNGIANO.aplicar_combo(
-		_dano_combo_pendiente,
-		_determinacion_jugador,
-		_contraataque,
-		_esquiva,
-		efectos,
-		DETERMINACION_BASE,
+	var estado := (
+		JUNGIANO
+		. aplicar_combo(
+			_dano_combo_pendiente,
+			_determinacion_jugador,
+			_contraataque,
+			_esquiva,
+			efectos,
+			DETERMINACION_BASE,
+		)
 	)
 	_dano_combo_pendiente = int(estado["dano_combo_pendiente"])
 	_determinacion_jugador = int(estado["determinacion_jugador"])
@@ -690,13 +693,16 @@ func _ejecutar_finisher_jungiano() -> void:
 
 
 func _al_finisher_ejecutado(nombre: String, efectos: Dictionary, es_super: bool) -> void:
-	var estado := JUNGIANO.aplicar_finisher(
-		_determinacion_rival,
-		_determinacion_jugador,
-		_invulnerabilidad_jungiana,
-		efectos,
-		es_super,
-		DETERMINACION_BASE,
+	var estado := (
+		JUNGIANO
+		. aplicar_finisher(
+			_determinacion_rival,
+			_determinacion_jugador,
+			_invulnerabilidad_jungiana,
+			efectos,
+			es_super,
+			DETERMINACION_BASE,
+		)
 	)
 	_determinacion_rival = int(estado["determinacion_rival"])
 	_determinacion_jugador = int(estado["determinacion_jugador"])
@@ -712,11 +718,14 @@ func _al_finisher_ejecutado(nombre: String, efectos: Dictionary, es_super: bool)
 
 
 func _aplicar_curacion_arquetipo(efectos: Dictionary) -> void:
-	var estado := JUNGIANO.aplicar_curacion_arquetipo(
-		_determinacion_jugador,
-		_curacion_arquetipo_acumulada,
-		efectos,
-		DETERMINACION_BASE,
+	var estado := (
+		JUNGIANO
+		. aplicar_curacion_arquetipo(
+			_determinacion_jugador,
+			_curacion_arquetipo_acumulada,
+			efectos,
+			DETERMINACION_BASE,
+		)
 	)
 	_determinacion_jugador = int(estado["determinacion_jugador"])
 	_curacion_arquetipo_acumulada = float(estado["acumulada"])
