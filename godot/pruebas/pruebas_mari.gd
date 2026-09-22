@@ -8,6 +8,7 @@ func _initialize() -> void:
 	_probar_gate_y_semilla()
 	_probar_vigilia_deliberada()
 	_probar_rutas_climaticas()
+	_probar_controles_climaticos_interactivos()
 	_probar_niebla_tormenta_y_retorno()
 	_probar_accesibilidad_y_reproduccion()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
@@ -103,6 +104,44 @@ func _probar_rutas_climaticas() -> void:
 	_comprobar(not invalida["ok"], "no existe espera aleatoria como regla")
 	_comprobar(invalida["clima"], SuenoMari.CLIMA_VIENTO, "acción inválida no cambia estado")
 	_comprobar(invalida["retorno_disponible"], "acción inválida conserva retorno")
+	sueno.queue_free()
+
+
+func _probar_controles_climaticos_interactivos() -> void:
+	var sueno := SuenoMari.new()
+	get_root().add_child(sueno)
+	sueno.preparar()
+	var actor := Node.new()
+	get_root().add_child(actor)
+
+	var compuerta := sueno.get_node_or_null("ControlesClimaticos/CompuertaLluvia") as Interactuable3D
+	_comprobar(compuerta != null, "la compuerta climática existe en el mundo")
+	_comprobar(compuerta.interactuar(actor), "la compuerta usa el contrato Interactuable3D")
+	_comprobar(sueno.clima_actual(), SuenoMari.CLIMA_LLUVIA, "interactuar con compuerta provoca lluvia")
+	_comprobar(
+		sueno.rutas_disponibles()[SuenoMari.RUTA_CAUCE],
+		"la interacción real revela el cauce",
+	)
+
+	var conducto := sueno.get_node_or_null("ControlesClimaticos/ConductoViento") as Interactuable3D
+	_comprobar(conducto != null, "el conducto de viento existe en el mundo")
+	_comprobar(conducto.interactuar(actor), "el conducto se activa por interacción 3D")
+	_comprobar(sueno.clima_actual(), SuenoMari.CLIMA_VIENTO, "interactuar con conducto provoca viento")
+	_comprobar(
+		sueno.rutas_disponibles()[SuenoMari.RUTA_CORNISA],
+		"la interacción real habilita la cornisa",
+	)
+
+	var refugio := sueno.get_node_or_null("ControlesClimaticos/RefugioTormenta") as Interactuable3D
+	_comprobar(refugio != null, "el refugio de tormenta existe en el mundo")
+	refugio.interactuar(actor)
+	_comprobar(sueno.clima_actual(), SuenoMari.CLIMA_TORMENTA, "refugiarse materializa la tormenta")
+	_comprobar(
+		sueno.rutas_disponibles()[SuenoMari.RUTA_CUEVA],
+		"la tormenta abierta por interacción habilita la cueva",
+	)
+
+	actor.queue_free()
 	sueno.queue_free()
 
 
