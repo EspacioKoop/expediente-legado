@@ -35,13 +35,23 @@ static func todo(comprobar: Callable) -> void:
 
 	var contra := JuicioCombateJugador.resolver_impacto(1, 0, false, false, {}, false, "", 2)
 	_caso(comprobar, "jugador: contraataque se suma al daño", contra["dano"], 3)
-	_caso(comprobar, "jugador: contraataque se marca para consumo", contra["consumir_contraataque"], true)
+	_caso(
+		comprobar,
+		"jugador: contraataque se marca para consumo",
+		contra["consumir_contraataque"],
+		true,
+	)
 
 	var externalizado := JuicioCombateJugador.resolver_impacto(
 		2, 0, false, false, {}, false, "neoliberal", 0
 	)
 	_caso(comprobar, "jugador: externalización duplica daño", externalizado["dano"], 4)
-	_caso(comprobar, "jugador: externalización cierra doctrina", externalizado["cerrar_doctrina"], true)
+	_caso(
+		comprobar,
+		"jugador: externalización cierra doctrina",
+		externalizado["cerrar_doctrina"],
+		true,
+	)
 
 	var enredo := JuicioCombateJugador.resolver_impacto(
 		1, 0, false, false, {"enredo_ligero_segundos": 0.75}, false, "", 0
