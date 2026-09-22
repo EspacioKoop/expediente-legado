@@ -30,7 +30,7 @@ func _probar_reflector_deliberado() -> void:
 	_comprobar(reflector.interactuar(root), "segundo giro aceptado")
 	_comprobar(not reflector.esta_alineado(), "-30 grados siguen sin alinear")
 	_comprobar(reflector.interactuar(root), "tercer giro aceptado")
-	_comprobar(reflector.esta_alineado(), "45 grados alinean el reflejo")
+	_comprobar(reflector.esta_alineado(), "-45 grados alinean el reflejo")
 	_comprobar(
 		is_equal_approx(reflector.angulo_actual(), ReflectorScript.ANGULO_OBJETIVO),
 		"el ángulo final coincide con el objetivo",
