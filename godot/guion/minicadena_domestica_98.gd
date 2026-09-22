@@ -34,6 +34,7 @@ var _atencion_clave := ""
 var _atencion_pasos := 0
 var _indice_volumen := 2
 var _reproduciendo := false
+var _posicion_pausa := 0.0
 var _audio: AudioStreamPlayer3D
 
 
@@ -377,26 +378,21 @@ func _sincronizar_audio(regenerar_stream: bool = false) -> void:
 		if _audio.playing:
 			_audio.stop()
 		_audio.stream = _crear_textura_audio()
-		_audio.stream_paused = false
+		_posicion_pausa = 0.0
 	if not _encendida:
 		if _audio.playing:
 			_audio.stop()
-		_audio.stream_paused = false
+		_posicion_pausa = 0.0
 		return
 	if not _audio.is_inside_tree():
 		return
 	if not _reproduciendo:
-		if _audio.has_stream_playback():
-			_audio.stream_paused = true
-		elif _audio.playing:
-			# play() queda encolado hasta el siguiente frame de física. Si se pausa
-			# antes, todavía no existe playback que pueda aceptar stream_paused.
-			_audio.stop()
+		if _audio.playing or _audio.has_stream_playback():
+			_posicion_pausa = _audio.get_playback_position()
+		_audio.stop()
 		return
-	if _audio.has_stream_playback():
-		_audio.stream_paused = false
-	elif not _audio.playing:
-		_audio.play()
+	if not _audio.playing:
+		_audio.play(_posicion_pausa)
 
 
 ## Cama diegética mínima y original: no suplanta voces ni música del contenido.
