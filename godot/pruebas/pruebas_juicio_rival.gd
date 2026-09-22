@@ -28,6 +28,25 @@ static func todo(comprobar: Callable) -> void:
 		false,
 	)
 
+	var paso_sin_delta := (
+		JuicioCombateRival
+		. plan_movimiento(
+			Vector3(3.0, 0.0, 0.0),
+			Vector3.ZERO,
+			1.0,
+			2.5,
+			0.0,
+			{},
+			0.0,
+		)
+	)
+	_caso(
+		comprobar,
+		"rival: conserva intención de orientar con delta cero",
+		paso_sin_delta["mover"],
+		true,
+	)
+
 	var enredado := (
 		JuicioCombateRival
 		. plan_movimiento(
