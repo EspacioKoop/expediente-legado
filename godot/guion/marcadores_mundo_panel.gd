@@ -5,12 +5,12 @@
 ## con Interactuar/Cancelar, por lo que teclado y mando mantienen el remapeo.
 extends PanelContainer
 
-const RUTA_TEXTOS := "res://datos/marcadores_mundo_textos.json"
-
 signal colocar_solicitado(tipo: String, color: String, texto: String)
 signal eliminar_solicitado
 signal eliminar_zona_solicitado
 signal cancelar_solicitado
+
+const RUTA_TEXTOS := "res://datos/marcadores_mundo_textos.json"
 
 var _tipo: OptionButton
 var _color: OptionButton
