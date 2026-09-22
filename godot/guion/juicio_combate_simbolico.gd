@@ -75,8 +75,7 @@ static func configuracion_ritual(
 ) -> Dictionary:
 	return {
 		"radio_arena": float(ritual.get("radio_arena", radio_base)),
-		"velocidad_rival":
-		velocidad_base * float(ritual.get("velocidad_rival_mul", 1.0)),
+		"velocidad_rival": velocidad_base * float(ritual.get("velocidad_rival_mul", 1.0)),
 		"recarga_fuerte": float(ritual.get("recarga_fuerte", recarga_fuerte_base)),
 	}
 
