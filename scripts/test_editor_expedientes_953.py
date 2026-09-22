@@ -22,7 +22,8 @@ class EditorExpedientes953Test(unittest.TestCase):
 
     def test_el_acceso_es_explicito_y_solo_qa(self):
         cargador = CARGADOR.read_text(encoding="utf-8")
-        self.assertIn('OS.get_environment("SIGA98_EDITOR_EXPEDIENTES") == "1"', cargador)
+        self.assertIn('ENV_EDITOR_EXPEDIENTES := "SIGA98" + "_EDITOR_EXPEDIENTES"', cargador)
+        self.assertIn("OS.get_environment(ENV_EDITOR_EXPEDIENTES) == \"1\"", cargador)
         self.assertIn("OS.is_debug_build()", cargador)
         self.assertIn('OS.has_feature("qa_tools")', cargador)
         self.assertIn('res://debug/editor_expedientes.gd', cargador)
