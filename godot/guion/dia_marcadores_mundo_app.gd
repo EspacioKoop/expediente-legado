@@ -9,6 +9,7 @@ class_name DiaMarcadoresMundoApp
 extends Node
 
 const NOMBRE_RAIZ := "MarcadoresMundoPersistentes"
+const RUTA_TEXTOS := "res://datos/marcadores_mundo_textos.json"
 const PANEL_SCRIPT := preload("res://guion/marcadores_mundo_panel.gd")
 const ALCANCE_APUNTADO := 4.0
 const RADIO_BORRADO := 0.32
@@ -32,10 +33,12 @@ var _panel
 var _modal_abierto := false
 var _pausa_previa := false
 var _mouse_previo := Input.MOUSE_MODE_CAPTURED
+var _textos: Dictionary = {}
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_textos = _cargar_textos()
 	_host = get_parent()
 	call_deferred("_integrar_menu")
 
@@ -76,6 +79,22 @@ func _physics_process(_delta: float) -> void:
 		return
 	_apertura_pendiente = false
 	_resolver_apuntado_y_abrir()
+
+
+func _cargar_textos() -> Dictionary:
+	if not FileAccess.file_exists(RUTA_TEXTOS):
+		return {}
+	var archivo := FileAccess.open(RUTA_TEXTOS, FileAccess.READ)
+	if archivo == null:
+		return {}
+	var datos = JSON.parse_string(archivo.get_as_text())
+	if typeof(datos) != TYPE_DICTIONARY:
+		return {}
+	return datos
+
+
+func _cadena(clave: String) -> String:
+	return String(_textos.get(clave, clave))
 
 
 func zona_actual() -> String:
@@ -173,8 +192,8 @@ func _integrar_menu() -> void:
 	_menu = menu
 	_boton_menu = Button.new()
 	_boton_menu.name = "MarcadoresMundo"
-	_boton_menu.text = "Marcadores"
-	_boton_menu.tooltip_text = "Colocar o retirar una marca en el mundo"
+	_boton_menu.text = _cadena("menu")
+	_boton_menu.tooltip_text = _cadena("tooltip")
 	_boton_menu.accessibility_name = _boton_menu.text
 	_boton_menu.pressed.connect(_pedir_herramienta)
 	caja.add_child(_boton_menu)
@@ -328,26 +347,26 @@ func _confirmar_eliminacion() -> void:
 	if eliminar(_marcador_apuntado_id):
 		_cerrar_panel()
 	else:
-		_panel.call("mostrar_error", "La marca ya no está disponible.")
+		_panel.call("mostrar_error", _cadena("marca_no_disponible"))
 
 
 func _confirmar_eliminacion_zona() -> void:
 	if eliminar_zona_actual() > 0:
 		_cerrar_panel()
 	else:
-		_panel.call("mostrar_error", "Esta zona ya no tiene marcas.")
+		_panel.call("mostrar_error", _cadena("zona_sin_marcas"))
 
 
 func _mensaje_error(motivo: String) -> String:
 	match motivo:
 		"limite_zona":
-			return "Límite de marcas alcanzado en esta zona."
+			return _cadena("error_limite_zona")
 		"zona_invalida":
-			return "No se puede marcar esta zona."
+			return _cadena("error_zona_invalida")
 		"transformacion_invalida":
-			return "La superficie apuntada no es válida."
+			return _cadena("error_transformacion")
 		_:
-			return "No se pudo colocar la marca."
+			return _cadena("error_generico")
 
 
 func _remontar(mundo: Node3D, marcadores: Array) -> void:
