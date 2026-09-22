@@ -287,6 +287,7 @@ func _puntuacion(recurso: Dictionary, tokens: PackedStringArray) -> int:
 			return -1
 	return puntuacion
 
+
 func _es_visible(recurso: Dictionary) -> bool:
 	return _cumple_conocimiento(recurso) and _disponible_en_dia(recurso)
 
