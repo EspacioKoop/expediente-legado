@@ -176,9 +176,7 @@ static func aplicar_finisher(
 		"dano": dano,
 		"determinacion_rival": maxi(0, determinacion_rival - dano),
 		"determinacion_jugador": jugador,
-		"invulnerabilidad": maxf(
-			invulnerabilidad, float(efectos.get("invulnerabilidad", 0.0))
-		),
+		"invulnerabilidad": maxf(invulnerabilidad, float(efectos.get("invulnerabilidad", 0.0))),
 		"sacudida_camara": 0.38 if es_super else 0.24,
 	}
 
