@@ -4,6 +4,7 @@ extends Node3D
 signal terminado(gano: bool)
 
 const REGLAS = preload("res://guion/juicio_combate_reglas.gd")
+const FEEDBACK = preload("res://guion/juicio_combate_feedback_3d.gd")
 const DETERMINACION_BASE := REGLAS.DETERMINACION_BASE
 const DETERMINACION_MINIMA_RIVAL := REGLAS.DETERMINACION_MINIMA_RIVAL
 const VELOCIDAD_JUGADOR := 4.8
@@ -757,15 +758,14 @@ func _pintar_doctrinas() -> void:
 
 
 func _actualizar_camara() -> void:
-	if _camara == null or _jugador == null or _rival == null:
-		return
-	var centro := (_jugador.position + _rival.position) * 0.5
-	var sacudida := Vector3.ZERO
-	if _sacudida_camara > 0.0 and not reduccion_movimiento:
-		sacudida = Vector3(_azar.randf_range(-0.12, 0.12), _azar.randf_range(-0.08, 0.08), 0.0)
-	_camara.position = centro + Vector3(0.0, 7.2, 8.2) + sacudida
-	_camara.look_at(centro + Vector3(0.0, 0.9, 0.0), Vector3.UP)
-
+	FEEDBACK.actualizar_camara(
+		_camara,
+		_jugador,
+		_rival,
+		_sacudida_camara,
+		reduccion_movimiento,
+		_azar,
+	)
 
 func _gestor_jungiano(nombre: String) -> Node:
 	return get_node_or_null("/root/" + nombre)
@@ -926,43 +926,10 @@ func _mostrar_aviso_jungiano(texto: String, duracion: float) -> void:
 
 
 func _particulas_jungianas(radio: float, es_super: bool) -> void:
-	if _rival == null:
-		return
-	var particulas := CPUParticles3D.new()
-	particulas.amount = 42 if es_super else 24
-	particulas.one_shot = true
-	particulas.lifetime = 0.65 if es_super else 0.45
-	particulas.explosiveness = 1.0
-	particulas.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
-	particulas.emission_sphere_radius = clampf(radio * 0.22, 0.3, 1.4)
-	particulas.gravity = Vector3(0.0, -1.8, 0.0)
-	particulas.initial_velocity_min = 2.2
-	particulas.initial_velocity_max = 4.5 if es_super else 3.2
-	var malla := SphereMesh.new()
-	malla.radius = 0.045 if es_super else 0.03
-	malla.height = malla.radius * 2.0
-	particulas.mesh = malla
-	particulas.position = _rival.position + Vector3(0.0, 1.0, 0.0)
-	add_child(particulas)
-	particulas.finished.connect(particulas.queue_free)
-	particulas.restart()
-
+	FEEDBACK.particulas_jungianas(self, _rival, radio, es_super)
 
 func _reaccion(figura: Node3D, desplazamiento: float) -> void:
-	if reduccion_movimiento or figura == null:
-		return
-	var origen := figura.position
-	var tween := create_tween()
-	tween.tween_property(figura, "position:z", origen.z + desplazamiento, 0.08)
-	tween.tween_property(figura, "position:z", origen.z, 0.16)
-
+	FEEDBACK.reaccion(self, figura, desplazamiento, reduccion_movimiento)
 
 func _material(color: Color, emision: bool = false) -> StandardMaterial3D:
-	var material := StandardMaterial3D.new()
-	material.albedo_color = color
-	material.roughness = 0.9
-	if emision:
-		material.emission_enabled = true
-		material.emission = color
-		material.emission_energy_multiplier = 0.8
-	return material
+	return FEEDBACK.material(color, emision)
