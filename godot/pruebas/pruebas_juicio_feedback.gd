@@ -13,8 +13,11 @@ static func todo(comprobar: Callable) -> void:
 	var emisivo := JuicioCombateFeedback3D.material(Color(0.8, 0.4, 0.2), true)
 	comprobar.call("feedback: material emisivo se activa", emisivo.emission_enabled, true)
 	comprobar.call("feedback: emisión conserva color", emisivo.emission, Color(0.8, 0.4, 0.2))
-	comprobar.call(
-		"feedback: emisión conserva energía",
-		is_equal_approx(emisivo.emission_energy_multiplier, 0.8),
-		true,
+	(
+		comprobar
+		. call(
+			"feedback: emisión conserva energía",
+			is_equal_approx(emisivo.emission_energy_multiplier, 0.8),
+			true,
+		)
 	)
