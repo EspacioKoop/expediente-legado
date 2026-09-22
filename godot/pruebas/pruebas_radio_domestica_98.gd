@@ -26,6 +26,20 @@ func _probar_programacion_narrativa() -> void:
 	if audio != null:
 		_comprobar(audio.bus, &"Musica", "la salida reutiliza el bus común de música")
 		_comprobar(audio.stream is AudioStreamWAV, "la cama audible es procedural y local")
+		_comprobar(
+			is_equal_approx(audio.unit_size, MinicadenaDomestica98.AUDIO_UNIT_SIZE),
+			"la atenuación parte de escala doméstica explícita",
+		)
+		_comprobar(
+			is_equal_approx(audio.max_distance, MinicadenaDomestica98.AUDIO_MAX_DISTANCE),
+			"la minicadena deja de mezclarse fuera de la habitación",
+		)
+		_comprobar(
+			is_equal_approx(
+				audio.panning_strength, MinicadenaDomestica98.AUDIO_PANNING_STRENGTH
+			),
+			"el paneo está limitado para una fuente doméstica cercana",
+		)
 	_comprobar(
 		MinicadenaDomestica98.hora_narrativa({"dia": 1, "acciones": Jornada.ACCIONES_POR_DIA}),
 		"08:16",
@@ -67,9 +81,13 @@ func _probar_audio_y_transporte() -> void:
 	_comprobar(radio.esta_reproduciendo(), "encender inicia reproducción diegética")
 	radio.alternar_reproduccion()
 	_comprobar(not radio.esta_reproduciendo(), "el transporte puede pausar")
+	if audio != null:
+		_comprobar(audio.stream_paused, "pausar conserva la posición del stream")
 	_comprobar(not radio.escuchar_actual(), "una escucha pausada no cuenta como atención")
 	radio.alternar_reproduccion()
 	_comprobar(radio.esta_reproduciendo(), "el transporte puede reanudar")
+	if audio != null:
+		_comprobar(not audio.stream_paused, "reanudar continúa el mismo stream")
 
 	radio.alternar_cassette()
 	_comprobar(
