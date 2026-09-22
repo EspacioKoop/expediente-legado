@@ -8,6 +8,11 @@ var nodos_completados: Array = []
 var nodo_actual: String = ""
 var eventos_completados: Array[String] = []
 var rituales_completados: Array[String] = []
+var gestor_arquetipos: Node = null
+
+
+func configurar_gestor_arquetipos(gestor: Node) -> void:
+	gestor_arquetipos = gestor
 
 
 func reiniciar() -> void:
@@ -51,10 +56,11 @@ func _cumple_requisitos(requisitos: Dictionary) -> bool:
 
 
 func _cumple_insight(requisitos: Dictionary) -> bool:
-	return (
-		not requisitos.has("insight")
-		or GestorArquetipos.insight_total >= int(requisitos.get("insight", 0))
-	)
+	if not requisitos.has("insight"):
+		return true
+	if gestor_arquetipos == null:
+		return false
+	return int(gestor_arquetipos.get("insight_total")) >= int(requisitos.get("insight", 0))
 
 
 func _cumple_nodos_previos(requisitos: Dictionary) -> bool:
@@ -123,12 +129,13 @@ func conexiones_disponibles(nodo_id: String = "") -> Array[String]:
 
 
 func _aplicar_recompensas(recompensas: Dictionary) -> void:
-	if recompensas.has("desbloquea_arquetipo"):
-		var arquetipo = GestorArquetipos.obtener_arquetipo(
-			String(recompensas.get("desbloquea_arquetipo", ""))
-		)
-		if arquetipo != null:
-			arquetipo.desbloquear()
+	if gestor_arquetipos == null or not recompensas.has("desbloquea_arquetipo"):
+		return
+	var arquetipo = gestor_arquetipos.call(
+		"obtener_arquetipo", String(recompensas.get("desbloquea_arquetipo", ""))
+	)
+	if arquetipo != null:
+		arquetipo.call("desbloquear")
 
 
 func _evento_completado(evento: String) -> bool:
