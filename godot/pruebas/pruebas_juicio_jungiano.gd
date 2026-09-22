@@ -7,9 +7,7 @@ static func todo(comprobar: Callable) -> void:
 		comprobar,
 		"jungiano: crítico suma Sombra y bonus transversal",
 		is_equal_approx(
-			JuicioCombateJungiano.probabilidad_critico(
-				{"bonus_crit": 0.15, "bonus_todo": 0.10}
-			),
+			JuicioCombateJungiano.probabilidad_critico({"bonus_crit": 0.15, "bonus_todo": 0.10}),
 			0.25,
 		),
 		true,
