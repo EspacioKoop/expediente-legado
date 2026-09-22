@@ -9,8 +9,14 @@ var _fallos := 0
 
 
 func _init() -> void:
+	var viewport := SubViewport.new()
+	viewport.size = Vector2i(640, 360)
+	viewport.own_world_3d = true
+	root.add_child(viewport)
+	var mundo := Node3D.new()
+	viewport.add_child(mundo)
 	var camara := Camera3D.new()
-	root.add_child(camara)
+	mundo.add_child(camara)
 
 	var delante := Vector3(0.0, 0.0, -5.0)
 	var detras := Vector3(0.0, 0.0, 5.0)
@@ -23,7 +29,7 @@ func _init() -> void:
 	_probar_deteccion(camara, delante)
 	_probar_delta_invalido(camara, delante)
 
-	camara.queue_free()
+	viewport.queue_free()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
 
