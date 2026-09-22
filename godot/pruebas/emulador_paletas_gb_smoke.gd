@@ -34,7 +34,9 @@ func _cargar_fixtures() -> Dictionary:
 	return {"error": "", "dmg": dmg, "cgb": cgb}
 
 
-func _validar_paletas(app: EmuladorPortatilApp, dmg: PackedByteArray, cgb: PackedByteArray) -> String:
+func _validar_paletas(
+	app: EmuladorPortatilApp, dmg: PackedByteArray, cgb: PackedByteArray
+) -> String:
 	if not bool(app.call("_es_rom_gb_clasica", dmg)):
 		return "la fixture 0x00 no habilita las paletas GB"
 	if bool(app.call("_es_rom_gb_clasica", cgb)):
