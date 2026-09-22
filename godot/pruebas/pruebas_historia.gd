@@ -18,6 +18,43 @@ static func catalogo(comprobar: Callable) -> void:
 
 	_contrato_ideologico(comprobar)
 	_contexto_narrativo(comprobar)
+	_historial_acumulativo(comprobar)
+
+
+static func _historial_acumulativo(comprobar: Callable) -> void:
+	var historias := Historias.new()
+	comprobar.call("el historial carga el catálogo", historias.cargar(), true)
+	var estado := Partida.nueva()
+	estado["jornada"]["dia"] = 4
+	estado["jornada"]["vuelta"] = 2
+	estado["jornada"]["fase"] = "archivo"
+
+	comprobar.call(
+		"el primer aplazamiento se registra", historias.postergar(estado, "la-justicia"), true
+	)
+	comprobar.call(
+		"un segundo aplazamiento de la misma decisión también cuenta",
+		historias.postergar(estado, "la-justicia"),
+		true
+	)
+	comprobar.call(
+		"el contador conserva dos aplazamientos",
+		historias.veces_pospuesta(estado, "la-justicia"),
+		2
+	)
+	var presion := historias.presion_indecision(estado)
+	comprobar.call("dos aplazamientos activan reiteración", presion["nivel"], 1)
+	comprobar.call("la presión no resuelve la historia", historias.pendientes(estado), 8)
+
+	historias.resolver(estado, "la-justicia", "centrista")
+	var diario := historias.historial(estado)
+	comprobar.call("el diario conserva los tres eventos", diario.size(), 3)
+	comprobar.call("el último evento es la decisión", diario[-1]["tipo"], "resuelta")
+	comprobar.call("el diario conserva el día", diario[-1]["dia"], 4)
+	comprobar.call("el diario conserva la vuelta", diario[-1]["vuelta"], 2)
+	comprobar.call(
+		"resolver limpia la marca pendiente", historias.esta_pospuesta(estado, "la-justicia"), false
+	)
 
 
 static func _contexto_narrativo(comprobar: Callable) -> void:

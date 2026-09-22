@@ -110,6 +110,11 @@ static func nueva() -> Dictionary:
 		"vida": VIDA_MAXIMA,
 		"dificultad": "normal",
 		"historias_cartas": {},
+		# #954: estado acumulativo de decisiones. Las marcas y contadores son
+		# de la vuelta activa; el historial conserva el rastro de toda la partida.
+		"historias_pospuestas": [],
+		"historias_pospuestas_conteo": {},
+		"historial_decisiones": [],
 		"cartas_conocidas": [],
 		"coliseo_racha_mejor": 0,
 		"despido_mostrado": false,
@@ -290,7 +295,14 @@ static func validar(guardado) -> Array:
 				errores.append("pronosticos.%s" % error)
 	if guardado.has("vida") and not _entero_valido(guardado["vida"], 0, VIDA_MAXIMA):
 		errores.append("vida inválida")
-	for clave in ["pistas_descubiertas", "cartas_conocidas", "sueno_vencidos", "sellos_obtenidos"]:
+	for clave in [
+		"pistas_descubiertas",
+		"cartas_conocidas",
+		"sueno_vencidos",
+		"sellos_obtenidos",
+		"historias_pospuestas",
+		"historial_decisiones",
+	]:
 		if guardado.has(clave) and typeof(guardado[clave]) != TYPE_ARRAY:
 			errores.append("%s no es una lista" % clave)
 	if guardado.has("evaluaciones_desempeno"):
@@ -305,9 +317,22 @@ static func validar(guardado) -> Array:
 	for clave in ["logros", "tarot"]:
 		if guardado.has(clave) and typeof(guardado[clave]) != TYPE_ARRAY:
 			errores.append("%s no es una lista" % clave)
-	for clave in ["veredictos", "historias_cartas", "cinematicas_vistas", "reconstrucciones"]:
+	for clave in [
+		"veredictos",
+		"historias_cartas",
+		"historias_pospuestas_conteo",
+		"cinematicas_vistas",
+		"reconstrucciones",
+	]:
 		if guardado.has(clave) and typeof(guardado[clave]) != TYPE_DICTIONARY:
 			errores.append("%s no es un objeto" % clave)
+	if (
+		guardado.has("historias_pospuestas_conteo")
+		and typeof(guardado["historias_pospuestas_conteo"]) == TYPE_DICTIONARY
+	):
+		for carta_id in guardado["historias_pospuestas_conteo"]:
+			if not _entero_valido(guardado["historias_pospuestas_conteo"][carta_id], 0, 2147483647):
+				errores.append("historias_pospuestas_conteo.%s inválido" % String(carta_id))
 	if guardado.has("huellas_ambientales"):
 		if typeof(guardado["huellas_ambientales"]) != TYPE_DICTIONARY:
 			errores.append("huellas_ambientales no es un objeto")

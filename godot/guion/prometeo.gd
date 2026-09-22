@@ -459,6 +459,10 @@ static func reiniciar_vuelta(estado: Dictionary, vida_maxima: int) -> Dictionary
 	estado["despido_mostrado"] = false
 	estado["epilogo_avisado"] = false
 	estado["historias_cartas"] = {}
+	# #954: la nueva vida laboral empieza sin decisiones pendientes ni presión
+	# acumulada de la vuelta anterior. El historial global se conserva.
+	estado["historias_pospuestas"] = []
+	estado["historias_pospuestas_conteo"] = {}
 	estado["final_politico_mostrado"] = false
 	estado["final_verdadero_mostrado"] = false
 	estado["perdio_vida_en_esta_vuelta"] = false
