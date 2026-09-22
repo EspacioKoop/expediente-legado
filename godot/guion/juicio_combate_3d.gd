@@ -11,6 +11,7 @@ const JUNGIANO = preload("res://guion/juicio_combate_jungiano.gd")
 const SIMBOLICO = preload("res://guion/juicio_combate_simbolico.gd")
 const RIVAL = preload("res://guion/juicio_combate_rival.gd")
 const DOCTRINA = preload("res://guion/juicio_combate_doctrina.gd")
+const JUGADOR = preload("res://guion/juicio_combate_jugador.gd")
 const DETERMINACION_BASE := REGLAS.DETERMINACION_BASE
 const DETERMINACION_MINIMA_RIVAL := REGLAS.DETERMINACION_MINIMA_RIVAL
 const VELOCIDAD_JUGADOR := 4.8
@@ -393,34 +394,35 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 	var es_critico := probabilidad_critico > 0.0 and _azar.randf() < probabilidad_critico
 	JUNGIANO.registrar_golpe(self, es_critico, fuerte)
 
-	var dano := dano_base + _dano_combo_pendiente
-	_dano_combo_pendiente = 0
 	if es_critico:
-		dano += 1
 		_mostrar_aviso_jungiano("CRÍTICO", 0.65)
-	if fuerte:
-		dano += int(_ritual.get("dano_fuerte_bonus", 0))
-	var interrupcion_ritual := interrumpe_ataque(fuerte, _ataque_rival_pendiente, _ritual)
-	var interrupcion_asamblea := asamblea_interrumpe(_doctrina_activa, _ataque_rival_pendiente)
-	if interrupcion_ritual:
-		dano += int(_ritual.get("dano_interrupcion_bonus", 0))
-	if interrupcion_ritual or interrupcion_asamblea:
+	var impacto := (
+		JUGADOR
+		. resolver_impacto(
+			dano_base,
+			_dano_combo_pendiente,
+			es_critico,
+			fuerte,
+			_ritual,
+			_ataque_rival_pendiente,
+			_doctrina_activa,
+			_contraataque,
+		)
+	)
+	_dano_combo_pendiente = 0
+	if bool(impacto["interrumpir_rival"]):
 		_cancelar_ataque_rival()
-	if interrupcion_asamblea:
+	if bool(impacto["cerrar_doctrina"]):
 		_cerrar_doctrina()
-	if _contraataque > 0:
-		dano += _contraataque
+	if bool(impacto["consumir_contraataque"]):
 		_contraataque = 0
-	if _doctrina_activa == "neoliberal":
-		dano = dano_externalizado(dano, _doctrina_activa)
-		_cerrar_doctrina()
 
+	var dano := int(impacto["dano"])
 	_determinacion_rival = maxi(0, _determinacion_rival - dano)
 	_aplicar_curacion_arquetipo(efectos_jungianos)
-	if not fuerte:
-		var segundos_enredo := float(_ritual.get("enredo_ligero_segundos", 0.0))
-		if segundos_enredo > 0.0:
-			_enredo = maxf(_enredo, segundos_enredo)
+	var segundos_enredo := float(impacto["enredo_segundos"])
+	if segundos_enredo > 0.0:
+		_enredo = maxf(_enredo, segundos_enredo)
 	_reaccion(_figura_rival, 0.25 + float(dano) * 0.08)
 	_actualizar_hud()
 	if _determinacion_rival <= 0 and not _intentar_retorno_rival():
@@ -444,7 +446,7 @@ func _esquivar() -> void:
 	if _esquiva > 0.0:
 		return
 	var efectos := JUNGIANO.efectos_activos(self)
-	_esquiva = 0.34 * (1.0 + JUNGIANO.bonus_evasion(efectos))
+	_esquiva = JUGADOR.duracion_esquiva(JUNGIANO.bonus_evasion(efectos))
 	JUNGIANO.registrar_esquiva(self)
 	if reduccion_movimiento:
 		return
