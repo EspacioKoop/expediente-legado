@@ -179,10 +179,13 @@ func _ultimo_recurso_en_climax() -> void:
 	var jornada: Dictionary = estado["jornada"]
 	jornada["raiz"] = 1205
 	estado["vida"] = 1
-	ClimaxHastur.iniciar(
-		estado,
-		jornada,
-		{"climax_hastur_pendiente": true},
+	(
+		ClimaxHastur
+		. iniciar(
+			estado,
+			jornada,
+			{"climax_hastur_pendiente": true},
+		)
 	)
 	var actual := ClimaxHastur.estado_actual(estado, jornada)
 	actual["fase"] = ClimaxHastur.FASE_DERROTA
@@ -215,10 +218,13 @@ func _ultimo_recurso_en_climax() -> void:
 	var jornada_cese: Dictionary = cesado["jornada"]
 	jornada_cese["raiz"] = 1206
 	cesado["vida"] = 1
-	ClimaxHastur.iniciar(
-		cesado,
-		jornada_cese,
-		{"climax_hastur_pendiente": true},
+	(
+		ClimaxHastur
+		. iniciar(
+			cesado,
+			jornada_cese,
+			{"climax_hastur_pendiente": true},
+		)
 	)
 	ClimaxHastur.estado_actual(cesado, jornada_cese)["fase"] = ClimaxHastur.FASE_DERROTA
 	ClimaxHastur.aplicar_derrota(cesado, jornada_cese)
