@@ -3,20 +3,24 @@ extends Node3D
 
 signal terminado(gano: bool)
 
-const DETERMINACION_BASE := 8
-const DETERMINACION_MINIMA_RIVAL := 4
+const REGLAS = preload("res://guion/juicio_combate_reglas.gd")
+const FEEDBACK = preload("res://guion/juicio_combate_feedback_3d.gd")
+const HUD = preload("res://guion/juicio_combate_hud.gd")
+const ARENA = preload("res://guion/juicio_combate_arena_3d.gd")
+const DETERMINACION_BASE := REGLAS.DETERMINACION_BASE
+const DETERMINACION_MINIMA_RIVAL := REGLAS.DETERMINACION_MINIMA_RIVAL
 const VELOCIDAD_JUGADOR := 4.8
 const VELOCIDAD_RIVAL := 2.5
 const RADIO_ARENA := 5.0
 const ALCANCE_LIGERO := 1.75
 const ALCANCE_FUERTE := 2.15
-const ALCANCE_RIVAL := 1.45
+const ALCANCE_RIVAL := REGLAS.ALCANCE_RIVAL
 const RECARGA_LIGERA := 0.28
 const RECARGA_FUERTE := 0.58
-const RECARGA_RIVAL := 1.15
-const TELEGRAFO_RIVAL := 0.45
-const DURACION_DOCTRINA := 4.0
-const BONUS_TELEGRAFO_COMISION := 0.55
+const RECARGA_RIVAL := REGLAS.RECARGA_RIVAL
+const TELEGRAFO_RIVAL := REGLAS.TELEGRAFO_RIVAL
+const DURACION_DOCTRINA := REGLAS.DURACION_DOCTRINA
+const BONUS_TELEGRAFO_COMISION := REGLAS.BONUS_TELEGRAFO_COMISION
 const DISTANCIA_MESA := 3.0
 
 var reduccion_movimiento := false
@@ -69,77 +73,43 @@ var _azar := RandomNumberGenerator.new()
 
 
 static func determinacion_rival(bono_documental: int) -> int:
-	return maxi(DETERMINACION_MINIMA_RIVAL, DETERMINACION_BASE - maxi(0, bono_documental))
+	return REGLAS.determinacion_rival(bono_documental)
 
 
 static func resultado_ataque_rival(distancia: float, esquiva_restante: float) -> String:
-	if distancia > ALCANCE_RIVAL:
-		return "falla"
-	if esquiva_restante > 0.0:
-		return "esquiva"
-	return "impacto"
+	return REGLAS.resultado_ataque_rival(distancia, esquiva_restante)
 
 
 static func interrumpe_ataque(fuerte: bool, ataque_pendiente: bool, ritual: Dictionary) -> bool:
-	return fuerte and ataque_pendiente and bool(ritual.get("interrumpe_telegrafo_fuerte", false))
+	return REGLAS.interrumpe_ataque(fuerte, ataque_pendiente, ritual)
 
 
 static func modificadores_doctrina_ritual(eje: String, ritual: Dictionary) -> Dictionary:
-	var etiquetas = ritual.get("tags", [])
-	if typeof(etiquetas) != TYPE_ARRAY:
-		return {}
-	var modificadores := {}
-	match eje:
-		"comunismo":
-			if etiquetas.has("control_espacio"):
-				modificadores["duracion_mul"] = 1.25
-		"centrista":
-			if etiquetas.has("neutralizar"):
-				modificadores["recarga_rival_mul"] = 1.25
-		"socialdemocrata":
-			if etiquetas.has("telegraph"):
-				modificadores["telegraph_bonus"] = 0.25
-		"neoliberal":
-			if etiquetas.has("riesgo"):
-				modificadores["duracion_mul"] = 1.25
-	return modificadores
+	return REGLAS.modificadores_doctrina_ritual(eje, ritual)
 
 
 static func duracion_doctrina(eje: String, ritual: Dictionary) -> float:
-	var modificadores := modificadores_doctrina_ritual(eje, ritual)
-	return DURACION_DOCTRINA * float(modificadores.get("duracion_mul", 1.0))
+	return REGLAS.duracion_doctrina(eje, ritual)
 
 
 static func duracion_telegrafo(comision: bool, ritual: Dictionary) -> float:
-	if not comision:
-		return TELEGRAFO_RIVAL
-	var modificadores := modificadores_doctrina_ritual("socialdemocrata", ritual)
-	return (
-		TELEGRAFO_RIVAL
-		+ BONUS_TELEGRAFO_COMISION
-		+ float(modificadores.get("telegraph_bonus", 0.0))
-	)
+	return REGLAS.duracion_telegrafo(comision, ritual)
 
 
 static func recarga_mesa(ritual: Dictionary) -> float:
-	var modificadores := modificadores_doctrina_ritual("centrista", ritual)
-	return RECARGA_RIVAL * float(modificadores.get("recarga_rival_mul", 1.0))
+	return REGLAS.recarga_mesa(ritual)
 
 
 static func asamblea_interrumpe(eje_activo: String, ataque_pendiente: bool) -> bool:
-	return eje_activo == "comunismo" and ataque_pendiente
+	return REGLAS.asamblea_interrumpe(eje_activo, ataque_pendiente)
 
 
 static func dano_externalizado(dano_base: int, eje_activo: String) -> int:
-	return dano_base * 2 if eje_activo == "neoliberal" else dano_base
+	return REGLAS.dano_externalizado(dano_base, eje_activo)
 
 
 static func determinacion_retorno(ritual: Dictionary, retornos_usados: int) -> int:
-	var maximo := int(ritual.get("retornos_rival", 0))
-	if retornos_usados >= maximo:
-		return 0
-	return maxi(0, int(ritual.get("determinacion_retorno", 0)))
-
+	return REGLAS.determinacion_retorno(ritual, retornos_usados)
 
 func configurar(
 	acusado: Dictionary, bono_documental: int, reducir_movimiento: bool, raiz: int = 0
@@ -554,184 +524,46 @@ func _estado_partida_anfitrion() -> Dictionary:
 
 
 func _montar_arena() -> void:
-	var mundo := WorldEnvironment.new()
-	var entorno := Environment.new()
-	entorno.background_mode = Environment.BG_COLOR
-	entorno.background_color = Color(0.025, 0.027, 0.032)
-	entorno.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	entorno.ambient_light_color = Color(0.48, 0.50, 0.46)
-	entorno.ambient_light_energy = 0.65
-	mundo.environment = entorno
-	add_child(mundo)
-
-	var luz := DirectionalLight3D.new()
-	luz.rotation_degrees = Vector3(-55.0, -35.0, 0.0)
-	luz.light_energy = 1.25
-	add_child(luz)
-
-	var suelo := MeshInstance3D.new()
-	var malla_suelo := CylinderMesh.new()
-	malla_suelo.top_radius = RADIO_ARENA + 0.8
-	malla_suelo.bottom_radius = RADIO_ARENA + 0.8
-	malla_suelo.height = 0.16
-	malla_suelo.radial_segments = 32
-	suelo.mesh = malla_suelo
-	suelo.position.y = -0.12
-	suelo.material_override = _material(Color(0.16, 0.17, 0.15))
-	add_child(suelo)
-
-	# Archivadores como límite visual institucional.
-	for i in 8:
-		var angulo := TAU * float(i) / 8.0
-		var archivador := MeshInstance3D.new()
-		var caja := BoxMesh.new()
-		caja.size = Vector3(0.9, 1.8, 0.55)
-		archivador.mesh = caja
-		archivador.position = Vector3(sin(angulo) * 5.7, 0.9, cos(angulo) * 5.7)
-		archivador.rotation.y = angulo
-		archivador.material_override = _material(Color(0.28, 0.31, 0.28))
-		add_child(archivador)
-
-	JuicioSimbolico3D.montar(self, _arcano, _mito_id)
-	_montar_limite_ritual()
-
-	_jugador = CharacterBody3D.new()
-	_jugador.position = Vector3(0.0, 0.0, 2.4)
-	add_child(_jugador)
-	_figura_jugador = FiguraSilueta.construir(_jugador, Vector3.ZERO, Color(0.68, 0.70, 0.64))
-
-	_rival = CharacterBody3D.new()
-	_rival.position = Vector3(0.0, 0.0, -2.4)
-	add_child(_rival)
-	var clave := String(_acusado.get("id", _acusado.get("nombre", "acusado")))
-	var matiz := 0.52 + float(absi(hash(clave)) % 14) / 100.0
-	_figura_rival = FiguraSilueta.construir(_rival, Vector3.ZERO, Color.from_hsv(matiz, 0.34, 0.72))
-	_montar_aviso_ataque()
-
-	_camara = Camera3D.new()
-	_camara.fov = 52.0
-	add_child(_camara)
+	var nodos := ARENA.montar(
+		self,
+		_acusado,
+		_arcano,
+		_mito_id,
+		_ritual,
+		RADIO_ARENA,
+		_radio_arena,
+	)
+	_jugador = nodos["jugador"]
+	_rival = nodos["rival"]
+	_figura_jugador = nodos["figura_jugador"]
+	_figura_rival = nodos["figura_rival"]
+	_aviso_ataque = nodos["aviso_ataque"]
+	_camara = nodos["camara"]
 	_actualizar_camara()
 
-
-func _montar_aviso_ataque() -> void:
-	_aviso_ataque = MeshInstance3D.new()
-	_aviso_ataque.name = "AvisoAtaqueRival"
-	var malla := CylinderMesh.new()
-	malla.top_radius = ALCANCE_RIVAL
-	malla.bottom_radius = ALCANCE_RIVAL
-	malla.height = 0.025
-	malla.radial_segments = 32
-	_aviso_ataque.mesh = malla
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.82, 0.10, 0.08, 0.34)
-	material.emission_enabled = true
-	material.emission = Color(0.82, 0.10, 0.08)
-	material.emission_energy_multiplier = 0.75
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	_aviso_ataque.material_override = material
-	_aviso_ataque.visible = false
-	add_child(_aviso_ataque)
-
-
-func _montar_limite_ritual() -> void:
-	if String(_ritual.get("id", "")) != "laberinto_lunar":
-		return
-	var color := Color(0.42, 0.48, 0.68)
-	for i in 20:
-		var angulo := TAU * float(i) / 20.0
-		var marca := MeshInstance3D.new()
-		var caja := BoxMesh.new()
-		caja.size = Vector3(0.08, 0.10, 0.42)
-		marca.mesh = caja
-		marca.position = Vector3(sin(angulo) * _radio_arena, 0.03, cos(angulo) * _radio_arena)
-		marca.rotation.y = angulo
-		marca.material_override = _material(color, true)
-		add_child(marca)
-
-
 func _montar_hud() -> void:
-	var capa := CanvasLayer.new()
-	capa.layer = 5
-	add_child(capa)
-
-	var margen := MarginContainer.new()
-	margen.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	margen.add_theme_constant_override("margin_left", 24)
-	margen.add_theme_constant_override("margin_right", 24)
-	margen.add_theme_constant_override("margin_top", 18)
-	capa.add_child(margen)
-
-	var bloque := VBoxContainer.new()
-	bloque.add_theme_constant_override("separation", 6)
-	margen.add_child(bloque)
-
-	var columnas := HBoxContainer.new()
-	columnas.add_theme_constant_override("separation", 32)
-	bloque.add_child(columnas)
-
-	_barra_jugador = ProgressBar.new()
-	_barra_jugador.max_value = DETERMINACION_BASE
-	_barra_jugador.show_percentage = false
-	_barra_jugador.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	columnas.add_child(_barra_jugador)
-
-	var nombre := Label.new()
-	nombre.text = tr(String(_acusado.get("nombre", "")))
-	nombre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	nombre.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	columnas.add_child(nombre)
-
-	_barra_rival = ProgressBar.new()
-	_barra_rival.max_value = determinacion_rival(_bono_documental)
-	_barra_rival.show_percentage = false
-	_barra_rival.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	columnas.add_child(_barra_rival)
-
-	if not _ritual.is_empty() or _hay_cargas_doctrina():
-		_etiqueta_ritual = Label.new()
-		_etiqueta_ritual.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		bloque.add_child(_etiqueta_ritual)
-
-	_botones_doctrina = HBoxContainer.new()
-	_botones_doctrina.alignment = BoxContainer.ALIGNMENT_CENTER
-	_botones_doctrina.add_theme_constant_override("separation", 6)
-	bloque.add_child(_botones_doctrina)
+	var nodos := HUD.montar(
+		self,
+		tr(String(_acusado.get("nombre", ""))),
+		determinacion_rival(_bono_documental),
+		not _ritual.is_empty() or _hay_cargas_doctrina(),
+		{
+			"ataque_inminente": tr("VENTANILLA_ATAQUE_INMINENTE"),
+			"momentum": tr("JUICIO_JUNGIANO_MOMENTUM"),
+			"finisher": tr("JUICIO_JUNGIANO_FINISHER"),
+			"finisher_tooltip": tr("JUICIO_JUNGIANO_FINISHER_TOOLTIP"),
+		},
+		Callable(self, "_ejecutar_finisher_jungiano"),
+	)
+	_barra_jugador = nodos["barra_jugador"]
+	_barra_rival = nodos["barra_rival"]
+	_etiqueta_ritual = nodos["etiqueta_ritual"]
+	_etiqueta_ataque = nodos["etiqueta_ataque"]
+	_botones_doctrina = nodos["botones_doctrina"]
+	_barra_momentum = nodos["barra_momentum"]
+	_boton_finisher = nodos["boton_finisher"]
+	_etiqueta_jungiana = nodos["etiqueta_jungiana"]
 	_pintar_doctrinas()
-
-	_etiqueta_ataque = Label.new()
-	_etiqueta_ataque.text = tr("VENTANILLA_ATAQUE_INMINENTE")
-	_etiqueta_ataque.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_etiqueta_ataque.add_theme_color_override("font_color", Color(0.94, 0.28, 0.18))
-	_etiqueta_ataque.visible = false
-	bloque.add_child(_etiqueta_ataque)
-
-	var fila_momentum := HBoxContainer.new()
-	fila_momentum.add_theme_constant_override("separation", 8)
-	bloque.add_child(fila_momentum)
-
-	var texto_momentum := Label.new()
-	texto_momentum.text = tr("JUICIO_JUNGIANO_MOMENTUM")
-	fila_momentum.add_child(texto_momentum)
-
-	_barra_momentum = ProgressBar.new()
-	_barra_momentum.show_percentage = true
-	_barra_momentum.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	fila_momentum.add_child(_barra_momentum)
-
-	_boton_finisher = Button.new()
-	_boton_finisher.text = tr("JUICIO_JUNGIANO_FINISHER")
-	_boton_finisher.disabled = true
-	_boton_finisher.tooltip_text = tr("JUICIO_JUNGIANO_FINISHER_TOOLTIP")
-	_boton_finisher.pressed.connect(_ejecutar_finisher_jungiano)
-	fila_momentum.add_child(_boton_finisher)
-
-	_etiqueta_jungiana = Label.new()
-	_etiqueta_jungiana.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_etiqueta_jungiana.visible = false
-	bloque.add_child(_etiqueta_jungiana)
-
 
 func _actualizar_hud() -> void:
 	if _barra_jugador == null or _barra_rival == null:
@@ -790,15 +622,14 @@ func _pintar_doctrinas() -> void:
 
 
 func _actualizar_camara() -> void:
-	if _camara == null or _jugador == null or _rival == null:
-		return
-	var centro := (_jugador.position + _rival.position) * 0.5
-	var sacudida := Vector3.ZERO
-	if _sacudida_camara > 0.0 and not reduccion_movimiento:
-		sacudida = Vector3(_azar.randf_range(-0.12, 0.12), _azar.randf_range(-0.08, 0.08), 0.0)
-	_camara.position = centro + Vector3(0.0, 7.2, 8.2) + sacudida
-	_camara.look_at(centro + Vector3(0.0, 0.9, 0.0), Vector3.UP)
-
+	FEEDBACK.actualizar_camara(
+		_camara,
+		_jugador,
+		_rival,
+		_sacudida_camara,
+		reduccion_movimiento,
+		_azar,
+	)
 
 func _gestor_jungiano(nombre: String) -> Node:
 	return get_node_or_null("/root/" + nombre)
@@ -959,43 +790,10 @@ func _mostrar_aviso_jungiano(texto: String, duracion: float) -> void:
 
 
 func _particulas_jungianas(radio: float, es_super: bool) -> void:
-	if _rival == null:
-		return
-	var particulas := CPUParticles3D.new()
-	particulas.amount = 42 if es_super else 24
-	particulas.one_shot = true
-	particulas.lifetime = 0.65 if es_super else 0.45
-	particulas.explosiveness = 1.0
-	particulas.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
-	particulas.emission_sphere_radius = clampf(radio * 0.22, 0.3, 1.4)
-	particulas.gravity = Vector3(0.0, -1.8, 0.0)
-	particulas.initial_velocity_min = 2.2
-	particulas.initial_velocity_max = 4.5 if es_super else 3.2
-	var malla := SphereMesh.new()
-	malla.radius = 0.045 if es_super else 0.03
-	malla.height = malla.radius * 2.0
-	particulas.mesh = malla
-	particulas.position = _rival.position + Vector3(0.0, 1.0, 0.0)
-	add_child(particulas)
-	particulas.finished.connect(particulas.queue_free)
-	particulas.restart()
-
+	FEEDBACK.particulas_jungianas(self, _rival, radio, es_super)
 
 func _reaccion(figura: Node3D, desplazamiento: float) -> void:
-	if reduccion_movimiento or figura == null:
-		return
-	var origen := figura.position
-	var tween := create_tween()
-	tween.tween_property(figura, "position:z", origen.z + desplazamiento, 0.08)
-	tween.tween_property(figura, "position:z", origen.z, 0.16)
-
+	FEEDBACK.reaccion(self, figura, desplazamiento, reduccion_movimiento)
 
 func _material(color: Color, emision: bool = false) -> StandardMaterial3D:
-	var material := StandardMaterial3D.new()
-	material.albedo_color = color
-	material.roughness = 0.9
-	if emision:
-		material.emission_enabled = true
-		material.emission = color
-		material.emission_energy_multiplier = 0.8
-	return material
+	return FEEDBACK.material(color, emision)
