@@ -167,7 +167,9 @@ func _probar_persistencia_y_reset() -> void:
 	)
 	var registro_releido := Eventos.asegurar_en_estado(releida.estado)
 	var exposiciones_releidas := Eventos.eventos(registro_releido, Eventos.CANAL_EXPOSICION)
-	var evento_releido: Dictionary = exposiciones_releidas[0] if exposiciones_releidas.size() == 1 else {}
+	var evento_releido: Dictionary = {}
+	if exposiciones_releidas.size() == 1:
+		evento_releido = exposiciones_releidas[0]
 	_comprobar(
 		(
 			exposiciones_releidas.size() == 1
