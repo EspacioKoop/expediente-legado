@@ -631,13 +631,16 @@ func _pintar_doctrinas() -> void:
 
 
 func _actualizar_camara() -> void:
-	FEEDBACK.actualizar_camara(
-		_camara,
-		_jugador,
-		_rival,
-		_sacudida_camara,
-		reduccion_movimiento,
-		_azar,
+	(
+		FEEDBACK
+		. actualizar_camara(
+			_camara,
+			_jugador,
+			_rival,
+			_sacudida_camara,
+			reduccion_movimiento,
+			_azar,
+		)
 	)
 
 
