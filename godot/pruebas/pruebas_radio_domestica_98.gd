@@ -5,8 +5,12 @@ var _fallos := 0
 
 
 func _initialize() -> void:
+	_ejecutar.call_deferred()
+
+
+func _ejecutar() -> void:
 	_probar_programacion_narrativa()
-	_probar_audio_y_transporte()
+	await _probar_audio_y_transporte()
 	_probar_radio_deliberada()
 	_probar_exposicion_ideologica()
 	_probar_tir_na_nog_deliberado()
@@ -77,15 +81,28 @@ func _probar_audio_y_transporte() -> void:
 
 	radio.alternar_encendido()
 	_comprobar(radio.esta_reproduciendo(), "encender inicia reproducción diegética")
+	await physics_frame
 	radio.alternar_reproduccion()
 	_comprobar(not radio.esta_reproduciendo(), "el transporte puede pausar")
 	if audio != null:
+		_comprobar(audio.has_stream_playback(), "la pausa normal conserva el playback activo")
 		_comprobar(audio.stream_paused, "pausar conserva la posición del stream")
 	_comprobar(not radio.escuchar_actual(), "una escucha pausada no cuenta como atención")
 	radio.alternar_reproduccion()
 	_comprobar(radio.esta_reproduciendo(), "el transporte puede reanudar")
 	if audio != null:
 		_comprobar(not audio.stream_paused, "reanudar continúa el mismo stream")
+
+	# Regresión: play() se encola hasta el siguiente frame de física. Pausar en
+	# ese intervalo no debe dejar que el sonido arranque ignorando el transporte.
+	radio.alternar_encendido()
+	radio.alternar_encendido()
+	radio.alternar_reproduccion()
+	_comprobar(not radio.esta_reproduciendo(), "la pausa inmediata actualiza el estado lógico")
+	if audio != null:
+		_comprobar(not audio.playing, "la pausa inmediata cancela el play todavía encolado")
+	radio.alternar_reproduccion()
+	_comprobar(radio.esta_reproduciendo(), "reanudar tras pausa inmediata vuelve a encolar audio")
 
 	radio.alternar_cassette()
 	_comprobar(
