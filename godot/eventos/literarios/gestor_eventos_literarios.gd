@@ -1,4 +1,3 @@
-class_name GestorEventosLiterarios
 extends Node
 
 signal evento_iniciado(evento_id)
