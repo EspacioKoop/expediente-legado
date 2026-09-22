@@ -28,6 +28,7 @@ func _probar_eventos() -> void:
 		12.0,
 		"un documento sensible aumenta tensión",
 	)
+	_comprobar_cerca(Estres.valor(jornada), 12.0, "el cambio queda persistido en Jornada")
 	_comprobar_cerca(
 		Estres.aplicar(jornada, "oscuridad", 0.5),
 		2.0,
