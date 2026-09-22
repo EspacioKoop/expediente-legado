@@ -37,6 +37,16 @@ class UtilidadesSigaTest(unittest.TestCase):
         for api in ("FileAccess", "DirAccess", "OS.", "execute("):
             self.assertNotIn(api, fuente)
 
+    def test_bloc_tiene_identidad_visual_de_documento(self) -> None:
+        fuente = BLOC.read_text(encoding="utf-8")
+        self.assertIn("PanelContainer.new()", fuente)
+        self.assertIn('"BarraDocumento"', fuente)
+        self.assertIn('"PieDocumento"', fuente)
+        self.assertIn("add_theme_stylebox_override", fuente)
+        self.assertIn("add_theme_color_override", fuente)
+        self.assertIn('Color("#fffaf0")', fuente)
+        self.assertIn('Color("#315f86")', fuente)
+
     def test_calculadora_limita_la_superficie_de_ejecucion(self) -> None:
         fuente = CALCULADORA.read_text(encoding="utf-8")
         self.assertIn("class_name CalculadoraSiga", fuente)
@@ -46,7 +56,6 @@ class UtilidadesSigaTest(unittest.TestCase):
         for api in ("FileAccess", "DirAccess", "OS.", "JavaScriptBridge", "Shell"):
             # Límite de palabra: «CARACTERES_PERMITIDOS.contains» no es «OS.».
             self.assertIsNone(re.search(rf"\b{re.escape(api)}", fuente), api)
-
 
     def test_calculadora_tiene_identidad_visual_y_teclado_propios(self) -> None:
         fuente = CALCULADORA.read_text(encoding="utf-8")
