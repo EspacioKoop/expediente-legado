@@ -7,6 +7,7 @@ extends CanvasLayer
 
 const RUTA_PRESENTACION_SELLOS := "res://datos/sellos_presentacion.json"
 const RUTA_TEXTOS_REMAPEO := "res://datos/menu_remapeo_textos.json"
+const RUTA_TEXTOS_DIFICULTAD := "res://datos/menu_dificultad_textos.json"
 const ETIQUETAS_ACCIONES := {
 	"mover_adelante": "Avanzar",
 	"mover_atras": "Retroceder",
@@ -22,6 +23,7 @@ const ETIQUETAS_ACCIONES := {
 var _preferencias: Dictionary = {}
 var _presentacion_sellos: Dictionary = {}
 var _textos_remapeo: Dictionary = {}
+var _textos_dificultad: Dictionary = {}
 var _fondo: ColorRect
 var _panel_principal: PanelContainer
 var _panel_opciones: PanelContainer
@@ -41,6 +43,9 @@ var _historial_lista: VBoxContainer
 var _salir: Button
 var _volumen: HSlider
 var _reduccion: CheckButton
+var _dificultad: OptionButton
+var _dificultad_detalle: Label
+var _estado_dificultad: Label
 var _sensibilidad_raton: HSlider
 var _sensibilidad_mando: HSlider
 var _invertir_y: CheckButton
@@ -58,6 +63,7 @@ func _ready() -> void:
 	layer = 100
 	_preferencias = PreferenciasSiga.cargar()
 	_presentacion_sellos = _cargar_presentacion_sellos()
+	_textos_dificultad = _cargar_textos_dificultad()
 	_historias.cargar()
 	PreferenciasSiga.aplicar(_preferencias)
 	_aplicar_volumen()
@@ -212,6 +218,11 @@ func _opciones_contenido(caja: VBoxContainer) -> void:
 	titulo.text = tr("MENU_GLOBAL_OPCIONES")
 	caja.add_child(titulo)
 
+	_montar_dificultad(caja)
+
+	var separador_dificultad := HSeparator.new()
+	caja.add_child(separador_dificultad)
+
 	var volumen_titulo := Label.new()
 	volumen_titulo.text = tr("MENU_GLOBAL_VOLUMEN")
 	caja.add_child(volumen_titulo)
@@ -241,6 +252,88 @@ func _opciones_contenido(caja: VBoxContainer) -> void:
 	_volver.text = tr("MENU_GLOBAL_VOLVER")
 	_volver.pressed.connect(_mostrar_principal)
 	caja.add_child(_volver)
+
+
+func _montar_dificultad(caja: VBoxContainer) -> void:
+	var titulo := Label.new()
+	titulo.text = String(_textos_dificultad.get("titulo", ""))
+	caja.add_child(titulo)
+
+	_dificultad = OptionButton.new()
+	for opcion in _textos_dificultad.get("opciones", []):
+		if not (opcion is Dictionary):
+			continue
+		var opcion_id := String(opcion.get("id", ""))
+		if not Acusacion.DIFICULTADES.has(opcion_id):
+			continue
+		_dificultad.add_item(String(opcion.get("nombre", opcion_id)))
+		var indice := _dificultad.item_count - 1
+		_dificultad.set_item_metadata(indice, opcion_id)
+		_dificultad.set_item_tooltip(indice, String(opcion.get("detalle", "")))
+	_dificultad.item_selected.connect(_al_cambiar_dificultad)
+	caja.add_child(_dificultad)
+
+	_dificultad_detalle = Label.new()
+	_dificultad_detalle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	caja.add_child(_dificultad_detalle)
+
+	var ayuda := Label.new()
+	ayuda.text = String(_textos_dificultad.get("ayuda", ""))
+	ayuda.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	caja.add_child(ayuda)
+
+	_estado_dificultad = Label.new()
+	_estado_dificultad.accessibility_live = AccessibilityServer.LIVE_POLITE
+	_estado_dificultad.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	caja.add_child(_estado_dificultad)
+	_refrescar_dificultad()
+
+
+func _refrescar_dificultad() -> void:
+	if _dificultad == null:
+		return
+	var partida_actual := _partida_actual()
+	_dificultad.disabled = partida_actual == null
+	if partida_actual == null:
+		_dificultad.select(-1)
+		_dificultad_detalle.text = ""
+		return
+
+	var actual := String(partida_actual.estado.get("dificultad", "normal"))
+	for indice in _dificultad.item_count:
+		if String(_dificultad.get_item_metadata(indice)) != actual:
+			continue
+		_dificultad.select(indice)
+		_actualizar_detalle_dificultad(indice)
+		return
+
+
+func _actualizar_detalle_dificultad(indice: int) -> void:
+	if indice < 0 or indice >= _dificultad.item_count:
+		_dificultad_detalle.text = ""
+		return
+	_dificultad_detalle.text = _dificultad.get_item_tooltip(indice)
+
+
+func _al_cambiar_dificultad(indice: int) -> void:
+	var partida_actual := _partida_actual()
+	if partida_actual == null or indice < 0 or indice >= _dificultad.item_count:
+		return
+
+	var nueva := String(_dificultad.get_item_metadata(indice))
+	Acusacion.cambiar_dificultad(partida_actual.estado, nueva)
+	# Cambiar la dificultad es un evento real de Tarot. Si La Fuerza era la
+	# última carta válida pendiente, El Mundo se evalúa aquí y no al cargar.
+	var contenido := Contenido.new()
+	if contenido.cargar():
+		Prometeo.sincronizar_tarot_mundo(partida_actual.estado, contenido.principales())
+	_actualizar_detalle_dificultad(indice)
+
+	_estado_dificultad.text = (
+		String(_textos_dificultad.get("guardado_ok", ""))
+		if partida_actual.guardar()
+		else String(_textos_dificultad.get("guardado_error", ""))
+	)
 
 
 func _montar_preferencias_camara(caja: VBoxContainer) -> void:
@@ -430,6 +523,11 @@ func _cargar_presentacion_sellos() -> Dictionary:
 	return datos if datos is Dictionary else {}
 
 
+func _cargar_textos_dificultad() -> Dictionary:
+	var datos = JSON.parse_string(FileAccess.get_file_as_string(RUTA_TEXTOS_DIFICULTAD))
+	return datos if datos is Dictionary else {}
+
+
 func _texto_remapeo(clave: String) -> String:
 	if _textos_remapeo.is_empty():
 		var datos = JSON.parse_string(FileAccess.get_file_as_string(RUTA_TEXTOS_REMAPEO))
@@ -454,14 +552,17 @@ func _texto_sello(entrada: Dictionary) -> String:
 	return "%s  %s\n    %s" % [marca, titulo, descripcion]
 
 
-func _estado_partida_actual() -> Dictionary:
+func _partida_actual() -> Partida:
 	var escena := get_tree().current_scene
 	if escena == null:
-		return {}
+		return null
 	var partida_actual = escena.get("partida")
-	if partida_actual is Partida:
-		return partida_actual.estado
-	return {}
+	return partida_actual if partida_actual is Partida else null
+
+
+func _estado_partida_actual() -> Dictionary:
+	var partida_actual := _partida_actual()
+	return partida_actual.estado if partida_actual != null else {}
 
 
 func _montar_remapeo(caja: VBoxContainer) -> void:
@@ -608,6 +709,7 @@ func _mostrar_opciones() -> void:
 	_panel_historial.visible = false
 	_panel_incidencias.visible = false
 	_panel_opciones.visible = true
+	_refrescar_dificultad()
 	_volumen.grab_focus()
 
 
