@@ -1,5 +1,11 @@
 # Paridad de ideologías: legado → Godot
 
+## Estado posterior al corte — 2026-09-22
+
+La auditoría histórica sigue siendo la referencia para saber qué se recuperó del legado. La expansión transversal ya tiene varios consumidores reales: doctrinas heredadas en Juicio 3D (#1115), huella ideológica en cierres de expediente (#1124) y exposición diferenciada mediante prensa/radio (#1148).
+
+La épica #915 y sus sub-issues #919–#925 continúan siendo el contrato de evolución. Estos avances **generalizan** el legado; no convierten exposición mediática en elección ni establecen un alignment único.
+
 Seguimiento de #918 y base de #915/#919.
 
 ## Alcance
