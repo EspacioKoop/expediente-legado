@@ -2,13 +2,13 @@ class_name PruebasJungian
 extends RefCounted
 
 
-static func todo(comprobar: Callable) -> void:
+static func todo(comprobar: Callable, raiz: Node) -> void:
 	var temporales: Array[Node] = []
 	var arquetipos := _gestor(
-		"GestorArquetipos", "res://arquetipos/gestor_arquetipos.gd", temporales
+		"GestorArquetipos", "res://arquetipos/gestor_arquetipos.gd", temporales, raiz
 	)
-	var momentum := _gestor("GestorMomentum", "res://combate/momentum.gd", temporales)
-	var combos := _gestor("GestorCombos", "res://combate/combos.gd", temporales)
+	var momentum := _gestor("GestorMomentum", "res://combate/momentum.gd", temporales, raiz)
+	var combos := _gestor("GestorCombos", "res://combate/combos.gd", temporales, raiz)
 	comprobar.call("gestor de arquetipos disponible", arquetipos != null, true)
 	comprobar.call("gestor de momentum disponible", momentum != null, true)
 	comprobar.call("gestor de combos disponible", combos != null, true)
@@ -51,9 +51,21 @@ static func todo(comprobar: Callable) -> void:
 	comprobar.call("los tres desbloqueos acumulan puntos", arquetipos.get("puntos_habilidad"), 3)
 
 	var efectos = arquetipos.call("efectos_combinados")
-	comprobar.call("Sombra expone crítico", efectos.get("bonus_crit", 0.0), 0.15)
-	comprobar.call("Persona expone evasión", efectos.get("evasion", 0.0), 0.1)
-	comprobar.call("Anima expone curación", efectos.get("curacion", 0.0), 0.1)
+	comprobar.call(
+		"Sombra expone crítico",
+		is_equal_approx(float(efectos.get("bonus_crit", 0.0)), 0.15),
+		true,
+	)
+	comprobar.call(
+		"Persona expone evasión",
+		is_equal_approx(float(efectos.get("evasion", 0.0)), 0.1),
+		true,
+	)
+	comprobar.call(
+		"Anima expone curación",
+		is_equal_approx(float(efectos.get("curacion", 0.0)), 0.1),
+		true,
+	)
 
 	momentum.call("aplicar_modificador_arquetipo", "sombra")
 	var ganancia: float = momentum.call("registrar_golpe")
@@ -93,11 +105,10 @@ static func todo(comprobar: Callable) -> void:
 			nodo.free()
 
 
-static func _gestor(nombre: String, ruta: String, temporales: Array[Node]) -> Node:
-	var arbol := Engine.get_main_loop() as SceneTree
-	if arbol == null:
-		return null
-	var existente := arbol.root.get_node_or_null(nombre)
+static func _gestor(
+	nombre: String, ruta: String, temporales: Array[Node], raiz: Node
+) -> Node:
+	var existente := raiz.get_node_or_null(nombre)
 	if existente != null:
 		return existente
 	var script = load(ruta)
@@ -107,6 +118,6 @@ static func _gestor(nombre: String, ruta: String, temporales: Array[Node]) -> No
 	if not (instancia is Node):
 		return null
 	instancia.name = nombre
-	arbol.root.add_child(instancia)
+	raiz.add_child(instancia)
 	temporales.append(instancia)
 	return instancia
