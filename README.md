@@ -10,7 +10,8 @@ El proyecto nació como aplicación web con Spring Boot y se está reescribiendo
 | --- | --- |
 | [Plan maestro #181](https://github.com/EspacioKoop/expediente-legado/issues/181) | Qué va primero ahora mismo |
 | [Registro de reservas #182](https://github.com/EspacioKoop/expediente-legado/issues/182) | Quién está tocando qué |
-| [ROADMAP.md](ROADMAP.md) | Fases y dirección hasta la 1.0 |
+| [ROADMAP.md](ROADMAP.md) | Fases, gates y dirección hasta la 1.0 |
+| [Índice de documentación](docs/README.md) | Qué documento es canónico para cada área |
 | [AGENTS.md](AGENTS.md) | Flujo obligatorio para agentes y trampas conocidas |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Ramas, PR, pruebas y revisión |
 | [Auditoría de paridad SIGA](docs/paridad-expedientes.md) | Qué comportamiento del legado existe ya en Godot y qué falta |
@@ -19,32 +20,49 @@ El proyecto nació como aplicación web con Spring Boot y se está reescribiendo
 
 Este repositorio adopta las [Normas Platino](https://github.com/EspacioKoop/normas_platino): **reserva antes de editar, rama propia, PR obligatorio, CI y autorización humana de integración**. El silencio no caduca una reserva y `PR_READY` no equivale a permiso para mergear.
 
-## Estado actual
+## Estado actual — 2026-09-22
 
-La referencia es siempre `main`, no una rama antigua ni un comentario histórico. El **segundo playtest humano** de la alpha #237 / PR #394 falló el gate de experiencia aunque CI y export fueran verdes: el recorrido existía, pero cámara, HUD, identidad espacial, materiales, densidad, animación y puesta en escena todavía hacían que la build se percibiera como prototipo/greybox.
+La referencia es siempre `main`, no una rama antigua ni un comentario histórico. El segundo playtest humano de la alpha #237 / PR #394 falló el gate de experiencia aunque CI y export fueran verdes. Desde entonces el proyecto ha cambiado de escala: además del saneamiento P0 se han integrado sistemas de vida cotidiana, tiempo, audio, huellas persistentes, capas culturales transversales y una revisión importante de SIGA/OS98.
 
-Desde ese playtest se ha integrado un bloque P0 importante. Esto **no equivale a validación humana**: cuando un issue sigue abierto por sensación, lectura visual o mando físico, no se reimplementa a ciegas; se prueba la versión ya integrada y solo se corrige un fallo reproducible.
+Esto **no sustituye el siguiente playthrough humano**. Una CI verde demuestra contratos automatizados; no demuestra por sí sola legibilidad visual, tacto con mando, recorrido end-to-end ni calidad de una exportación.
 
-Estado relevante de `main`:
+### Núcleo de recorrido y presentación
 
-- **cámara y locomoción 3D**: #405 cubre el núcleo técnico de #396 — ratón y stick derecho, sensibilidad e inversión Y persistentes, deadzone, aceleración/frenado y captura de cursor; #396 queda como gate de sensación con ratón y mando físico;
-- **HUD y diálogo**: #406 unifica prioridades de interacción/tutorial/diálogo/modal y convierte a los compañeros en NPC conversables explícitos; #453 retira HUD permanente fuera del archivo. #397/#276 siguen requiriendo un pase visual humano;
-- **cinemáticas prioritarias 3D**: #410 sustituye la avalancha inicial 2D por una secuencia sobre la oficina real y #428 hace casa → sueño en el mundo 3D. #395 queda pendiente de captura/vídeo y legibilidad humana, no de volver a montar esas dos transiciones;
-- **identidad espacial y materiales**: oficina tiene perfiles materiales reutilizables (#412); casa tiene composición doméstica y materiales propios (#420/#427); el trayecto tiene cielo/profundidad urbana (#429) y fachadas materializadas (#449). #398/#399 siguen abiertos sobre todo por sueño y por la comparación humana sin HUD;
-- **densidad e interacción ambiental**: #400 ya tiene verticales en casa (#407), oficina (#423), sueño (#424) y calle (#433); #465 sustituye dos proxies domésticos de alto valor por cama y cuenco reconocibles. Falta validar la densidad transversal desde cámara de juego;
-- **personajes**: #445 añade un primer movimiento ambiental mínimo compatible con reducción de movimiento; #134 sigue abierto por validación. #275 continúa siendo un gate visual de rostros y no debe darse por resuelto solo porque exista una malla low-poly;
-- **tratamiento PSX**: #470 cerró #115 con comparativas controladas de oficina/sueño y mantuvo `dithering=0.65`; interfaz, HUD y documentos quedan fuera del efecto;
-- **SIGA e investigación**: relaciones, marcadores, metadatos, anexos, feedback y contexto de careo ya están integrados (#289/#309/#318/#320/#321/#323/#352/#367); #286 se valida con playtest específico, no añadiendo capas indefinidamente;
-- **decisión política**: además de posponer (#339/#369), #477 exige contexto nuevo antes de decidir, evitando resolver la presión narrativa con un simple botón de aplazamiento;
-- **sueño por objetivos**: 3 objetivos posibles, 2 requeridos, feedback 0/2 → 2/2 y resolución automática siguen siendo la base (#281/#301/#308/#313), con contenido limitado a hechos/pistas catalogados (#332).
+- **Oficina y SIGA-98:** #1141 corrige problemas observados a 1080p; la ventana de referencia del proyecto es **1920×1080**. #1091 confirma una salida física de la oficina y #1089 mantiene una salida de rescate independiente del foco.
+- **Cámara y controles:** el núcleo de #396 está implementado y protegido por pruebas runtime (#1095/#1097), pero #396 y #113 siguen siendo gates humanos de sensación, foco y mando físico.
+- **HUD y legibilidad:** #397 continúa abierto como gate de jerarquía visual; tipografía empaquetada y coherencia básica están protegidas por #780/#1126.
+- **Personajes:** se han añadido mejoras de proporción, nombres, movimiento y atención (#1083/#1087/#1112/#1113) y el renderer del port pasó a **Forward+** con sombras, SSAO y SSIL (#1121). #275/#134 siguen necesitando validación visual humana.
 
-Los extras ya integrados —portátil, emulación GB, minijuegos y verticales opcionales posteriores— **no convierten esa expansión en prioridad**. Mientras el siguiente pase humano P0 no sea satisfactorio, el orden exacto y el punto de control los fija [#181](https://github.com/EspacioKoop/expediente-legado/issues/181).
+### SIGA, decisiones y sistemas persistentes
 
-Siguen siendo gates humanos de recorrido: #271 (partida nueva/continuar), #272 (onboarding), #273/#396 (tacto y cámara), #280/#395 (transiciones en export), #281 (comprensión del sueño), #113 (mando físico/remapeo), #286 (profundidad SIGA), #397/#398/#399 (lectura visual) y #275/#134/#282/#400 (personajes/densidad).
+- **Investigación:** relaciones, metadatos, anexos, feedback, historial y profundidad documental ya tienen verticales integrados; #431/#513 siguen siendo los gates de evidencia/playtest antes de considerar cerrada la profundidad SIGA.
+- **Decisiones:** el historial y los aplazamientos acumulativos se ampliaron en #1159; las consecuencias políticas siguen separadas de hechos objetivos del expediente.
+- **Meticulosidad:** #961 ya afecta microdetalles opcionales (#1169), sueño (#1155) y audio adaptativo (#1187), sin convertir atención en una barra de progreso obligatoria.
+- **Huellas ambientales:** #959 tiene ya un primer vertical persistente (#1122) y desgaste documental (#1186).
+
+### Mundo 1998 y vida cotidiana
+
+- **Comercio de barrio:** Quiosco Avenida, El Trastero, interiores y reventa física tienen verticales integrados (#1127/#1132/#1134/#1088), con evidencia visual automatizada en #1136.
+- **Casa y objetos:** recuerdos, decals y merchandising propios (#1142–#1146) amplían la densidad de 1998; #1151 añade evidencia conjunta para varias verticales cotidianas.
+- **Tiempo y ambiente:** reloj persistente e iluminación horaria (#1135/#1138) ya existen. El audio adaptativo progresa por capas y contexto (#1128/#1130/#1133/#1137/#1139/#1187), pero #966/#119 siguen abiertos como paraguas/gate de mezcla.
+- **Vecindario y trayecto:** vecinos y portal se materializan en #1144; #277 continúa como gate de lectura del trayecto.
+
+### OS98, portátil y contenido cultural
+
+- **OS98:** programas del escritorio tienen iconos e identidad propia en expansión: Catálogo, Calculadora, Bloc de notas y Correo ya cuentan con cortes específicos (#1149/#1150/#1152/#1190/#1192).
+- **Portátil Color 98:** apagado físico/afterglow, paletas y cierre visual se integraron en #1177/#1185/#1188 sin alterar ROMs CGB.
+- **Mitologías:** el corpus común entra en runtime (#1157), con verticales recientes para Mari, Yggdrasil y Popol Wuj (#1164–#1166). #1171/#1174 siguen desarrollando la capa jungiana/mitológica transversal.
+- **Religión:** se mantiene separada de Tarot y mitología. JALI 98, VITRAL 98 y SARNATH 98 ya prueban el patrón cultural/ROM (#1158/#1163/#1168/#1170), y #934 tiene un primer corte de práctica/cultura material (#1147).
+- **Ideologías:** doctrinas heredadas ya llegan al Juicio 3D (#1115), a cierres de expediente (#1124) y a prensa/radio (#1148). #915–#925 siguen siendo el marco transversal.
+- **Literatura:** #1176 definió el contrato de conocimiento/posesión/insight/ritual; #1178 creó el primer corte ejecutable y #1194 alineó el legado con el contrato transversal. La expansión continúa en #1179–#1184.
+
+### Deuda técnica activa
+
+El crecimiento transversal ha cargado especialmente `juicio_combate_3d.gd`. #1191 sigue la modularización; #1193, #1195 y #1196 ya extrajeron reglas puras, adaptador jungiano y capa simbólica. No volver a concentrar lógica de sistemas culturales en un único script.
 
 ## Stack
 
-- **Juego vivo:** Godot 4.7, GDScript, renderer de compatibilidad y pruebas headless.
+- **Juego vivo:** Godot 4.7, GDScript, renderer **Forward+**, viewport de referencia **1920×1080** y pruebas headless/runtime.
 - **Backend legado:** Spring Boot 3, Java 25, Spring Data JPA, Spring Security y Thymeleaf.
 - **Web legado:** Bootstrap 5, Vitest y Playwright.
 - **Datos:** JSON/CSV en `godot/datos/`; MySQL 8 en desarrollo web y H2 para el standalone web.
@@ -58,13 +76,14 @@ Siguen siendo gates humanos de recorrido: #271 (partida nueva/continuar), #272 (
 ├── AGENTS.md
 ├── CONTRIBUTING.md
 ├── ROADMAP.md
-├── docs/                       # decisiones, investigación y auditorías versionadas
+├── docs/                       # decisiones, auditorías, investigación y evidencia
+│   └── README.md               # índice canónico de documentación
 ├── scripts/                    # verificadores y regresiones auxiliares
 ├── backend/                    # versión web / fuente histórica
 ├── dist/                       # empaquetado del standalone web legado
 └── godot/                      # juego vivo
     ├── assets/                 # binarios y procedencia
-    ├── datos/                  # casos, textos, catálogos
+    ├── datos/                  # casos, textos y catálogos
     ├── guion/                  # lógica y capas de presentación
     ├── escenas/
     └── pruebas/
@@ -107,7 +126,9 @@ Convenciones importantes:
 - el texto de interfaz/guion vive en `godot/datos/textos.csv`; el catálogo de casos sigue en JSON;
 - `Sonido`, `Musica` y el ambiente continuo son responsabilidades separadas;
 - el sueño normal progresa por objetivos, no por encontrar una salida física invisible;
-- las mecánicas de investigación no deben inventar hechos: relaciones, anexos y recompensas oníricas consumen datos ya catalogados.
+- las mecánicas de investigación no deben inventar hechos: relaciones, anexos y recompensas oníricas consumen datos ya catalogados;
+- Tarot, mitología, ideología, religión y literatura pueden cruzarse, pero mantienen contratos y fuentes de verdad separados;
+- los efectos culturales/contextuales deben activarse por acciones observables, no por afinidades globales implícitas.
 
 ## Assets y Git LFS
 
