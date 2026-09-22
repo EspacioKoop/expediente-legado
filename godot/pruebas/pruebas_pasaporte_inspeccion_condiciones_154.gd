@@ -8,8 +8,8 @@ class DiaFalso:
 	extends Node3D
 	var partida := Partida.new()
 	var jornada: Dictionary
-	var _mundo: Node3D
 	var guardados := 0
+	var _mundo: Node3D
 
 	func _init() -> void:
 		partida.estado = Partida.nueva()
