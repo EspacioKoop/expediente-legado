@@ -85,16 +85,15 @@ func _probar_audio_y_transporte() -> void:
 	radio.alternar_reproduccion()
 	_comprobar(not radio.esta_reproduciendo(), "el transporte puede pausar")
 	if audio != null:
-		_comprobar(audio.has_stream_playback(), "la pausa normal conserva el playback activo")
-		_comprobar(audio.stream_paused, "pausar conserva la posición del stream")
+		_comprobar(not audio.playing, "pausar detiene el playback tras guardar su posición")
 	_comprobar(not radio.escuchar_actual(), "una escucha pausada no cuenta como atención")
 	radio.alternar_reproduccion()
 	_comprobar(radio.esta_reproduciendo(), "el transporte puede reanudar")
 	if audio != null:
-		_comprobar(not audio.stream_paused, "reanudar continúa el mismo stream")
+		_comprobar(audio.playing, "reanudar vuelve a encolar el stream desde la posición guardada")
 
 	# Regresión: play() se encola hasta el siguiente frame de física. Pausar en
-	# ese intervalo no debe dejar que el sonido arranque ignorando el transporte.
+	# ese intervalo debe cancelar la cola y conservar una posición inicial segura.
 	radio.alternar_encendido()
 	radio.alternar_encendido()
 	radio.alternar_reproduccion()
@@ -103,6 +102,8 @@ func _probar_audio_y_transporte() -> void:
 		_comprobar(not audio.playing, "la pausa inmediata cancela el play todavía encolado")
 	radio.alternar_reproduccion()
 	_comprobar(radio.esta_reproduciendo(), "reanudar tras pausa inmediata vuelve a encolar audio")
+	if audio != null:
+		_comprobar(audio.playing, "la reanudación inmediata deja el audio preparado para el frame")
 
 	radio.alternar_cassette()
 	_comprobar(
