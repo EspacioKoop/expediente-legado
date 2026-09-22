@@ -30,7 +30,7 @@ class CorreoPostalTest(unittest.TestCase):
             check=False,
         )
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
-        self.assertIn("32 pasadas, 0 fallos", resultado.stdout)
+        self.assertIn("35 pasadas, 0 fallos", resultado.stdout)
 
     def test_integracion_no_abre_economia_paralela(self):
         correo = (ROOT / "godot" / "guion" / "correo_postal.gd").read_text()
@@ -79,6 +79,18 @@ class CorreoPostalTest(unittest.TestCase):
             '"normal_font", theme.get_font("mono_font", "RichTextLabel")',
             lector,
         )
+
+    def test_buzon_comunica_correo_sin_estado_visual_paralelo(self):
+        buzon = (ROOT / "godot" / "guion" / "buzon_postal_interactivo_3d.gd").read_text()
+
+        self.assertIn('CorreoPostal.siguiente(jornada)', buzon)
+        self.assertIn('return "paquete"', buzon)
+        self.assertIn('"CorreoVisible"', buzon)
+        self.assertIn('"Sobre"', buzon)
+        self.assertIn('"PaqueteAcolchado"', buzon)
+        self.assertIn('"PlacaNombre"', buzon)
+        self.assertIn('set_meta("tipo", tipo)', buzon)
+        self.assertNotIn('jornada["correo_visual"]', buzon)
 
     def test_paquete_encaja_en_contrato_visual_de_casa(self):
         correo = (ROOT / "godot" / "guion" / "correo_postal.gd").read_text()
