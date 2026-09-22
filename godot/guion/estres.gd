@@ -58,10 +58,7 @@ static func _asegurar(jornada: Dictionary) -> Dictionary:
 
 	var estado := crudo as Dictionary
 	var valor_crudo: Variant = estado.get("valor", 0.0)
-	if (
-		typeof(valor_crudo) not in [TYPE_INT, TYPE_FLOAT]
-		or not is_finite(float(valor_crudo))
-	):
+	if typeof(valor_crudo) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(valor_crudo)):
 		estado["valor"] = 0.0
 	else:
 		estado["valor"] = clampf(float(valor_crudo), 0.0, VALOR_MAXIMO)
