@@ -18,10 +18,10 @@ func _probar() -> void:
 
 
 func _probar_probabilidad() -> void:
-	_comprobar(VerificacionFalsa.debe_mostrar(0.0), "cero entra en el 30 %")
-	_comprobar(VerificacionFalsa.debe_mostrar(0.2999), "un valor bajo 0.3 entra")
-	_comprobar(not VerificacionFalsa.debe_mostrar(0.3), "0.3 queda fuera")
-	_comprobar(not VerificacionFalsa.debe_mostrar(1.0), "uno queda fuera")
+	_comprobar(VerificacionFalsa.debe_mostrar(0), "residuo cero entra en el 30 %")
+	_comprobar(VerificacionFalsa.debe_mostrar(2), "residuo dos entra en el 30 %")
+	_comprobar(not VerificacionFalsa.debe_mostrar(3), "residuo tres queda fuera")
+	_comprobar(not VerificacionFalsa.debe_mostrar(9), "residuo nueve queda fuera")
 
 
 func _probar_tarot_por_evento() -> void:
