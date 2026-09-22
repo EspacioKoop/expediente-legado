@@ -12,12 +12,16 @@ const Mundo = preload("res://guion/religion_mundo_934.gd")
 
 var _registro: Dictionary = {}
 var _dia := 0
+var _vuelta := 0
 var _reduccion_movimiento := false
 
 
-func configurar(registro: Dictionary, dia: int, reduccion_movimiento: bool = false) -> void:
+func configurar(
+	registro: Dictionary, dia: int, reduccion_movimiento: bool = false, vuelta: int = 0
+) -> void:
 	_registro = registro
 	_dia = dia
+	_vuelta = vuelta
 	_reduccion_movimiento = reduccion_movimiento
 	if get_node_or_null("CulturaMaterial") == null:
 		_montar_superficies()
@@ -106,11 +110,11 @@ func _montar_mesa(padre: Node3D) -> void:
 
 
 func _on_tablon_activado(_actor: Node) -> void:
-	Mundo.registrar_exposicion(_registro, "tablon_calendario", _dia)
+	Mundo.registrar_exposicion(_registro, "tablon_calendario", _dia, _vuelta)
 
 
 func _on_practica_activada(_actor: Node) -> void:
-	if Mundo.registrar_practica(_registro, "silencio_memoria", _dia):
+	if Mundo.registrar_practica(_registro, "silencio_memoria", _dia, _vuelta):
 		practica_registrada.emit("silencio_memoria")
 
 
