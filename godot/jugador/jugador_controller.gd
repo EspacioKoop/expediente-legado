@@ -1,13 +1,13 @@
 extends CharacterBody3D
 
 # Player controller integrating Jungian systems
-@onready var gestor_arquetipos = GestorArquetipos
-@onready var gestor_momentum = GestorMomentum
-@onready var gestor_combos = GestorCombos
-
 var velocidad := 8.0
 var salto_impulso := 12.0
 var ultimo_ataque := 0.0
+
+@onready var gestor_arquetipos = GestorArquetipos
+@onready var gestor_momentum = GestorMomentum
+@onready var gestor_combos = GestorCombos
 
 
 func _physics_process(delta: float) -> void:
