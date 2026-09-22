@@ -12,7 +12,7 @@ static func actualizar_camara(
 	rival: Node3D,
 	sacudida_restante: float,
 	reduccion_movimiento: bool,
-	azar: RandomNumberGenerator,
+	rng: RandomNumberGenerator,
 ) -> void:
 	if camara == null or jugador == null or rival == null:
 		return
@@ -20,8 +20,8 @@ static func actualizar_camara(
 	var sacudida := Vector3.ZERO
 	if sacudida_restante > 0.0 and not reduccion_movimiento:
 		sacudida = Vector3(
-			azar.randf_range(-0.12, 0.12),
-			azar.randf_range(-0.08, 0.08),
+			rng.randf_range(-0.12, 0.12),
+			rng.randf_range(-0.08, 0.08),
 			0.0,
 		)
 	camara.position = centro + Vector3(0.0, 7.2, 8.2) + sacudida
