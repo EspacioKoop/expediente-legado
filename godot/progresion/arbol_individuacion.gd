@@ -34,31 +34,66 @@ func puede_desbloquear(nodo_id: String) -> bool:
 	if typeof(nodo) != TYPE_DICTIONARY or nodo_id in nodos_completados:
 		return false
 
-	var req = nodo.get("requisitos", {})
-	if typeof(req) != TYPE_DICTIONARY:
+	var requisitos = nodo.get("requisitos", {})
+	if typeof(requisitos) != TYPE_DICTIONARY:
 		return false
+	return _cumple_requisitos(requisitos)
 
-	if req.has("insight") and GestorArquetipos.insight_total < int(req.get("insight", 0)):
-		return false
-	if req.has("nodo_previo") and String(req.get("nodo_previo", "")) not in nodos_completados:
-		return false
-	if req.has("nodos_previos"):
-		var previos = req.get("nodos_previos", [])
-		if typeof(previos) != TYPE_ARRAY:
-			return false
-		for previo in previos:
-			if String(previo) not in nodos_completados:
-				return false
-	if req.has("evento") and not _evento_completado(String(req.get("evento", ""))):
-		return false
-	if req.has("ritual") and not _ritual_completado(String(req.get("ritual", ""))):
-		return false
+
+func _cumple_requisitos(requisitos: Dictionary) -> bool:
+	return (
+		_cumple_insight(requisitos)
+		and _cumple_nodos_previos(requisitos)
+		and _cumple_evento(requisitos)
+		and _cumple_ritual(requisitos)
+		and _cumple_total_nodos(requisitos)
+	)
+
+
+func _cumple_insight(requisitos: Dictionary) -> bool:
+	return (
+		not requisitos.has("insight")
+		or GestorArquetipos.insight_total >= int(requisitos.get("insight", 0))
+	)
+
+
+func _cumple_nodos_previos(requisitos: Dictionary) -> bool:
 	if (
-		req.has("nodos_completados")
-		and nodos_completados.size() < int(req.get("nodos_completados", 0))
+		requisitos.has("nodo_previo")
+		and String(requisitos.get("nodo_previo", "")) not in nodos_completados
 	):
 		return false
+	if not requisitos.has("nodos_previos"):
+		return true
+
+	var previos = requisitos.get("nodos_previos", [])
+	if typeof(previos) != TYPE_ARRAY:
+		return false
+	for previo in previos:
+		if String(previo) not in nodos_completados:
+			return false
 	return true
+
+
+func _cumple_evento(requisitos: Dictionary) -> bool:
+	return (
+		not requisitos.has("evento")
+		or _evento_completado(String(requisitos.get("evento", "")))
+	)
+
+
+func _cumple_ritual(requisitos: Dictionary) -> bool:
+	return (
+		not requisitos.has("ritual")
+		or _ritual_completado(String(requisitos.get("ritual", "")))
+	)
+
+
+func _cumple_total_nodos(requisitos: Dictionary) -> bool:
+	return (
+		not requisitos.has("nodos_completados")
+		or nodos_completados.size() >= int(requisitos.get("nodos_completados", 0))
+	)
 
 
 func desbloquear_nodo(nodo_id: String) -> bool:
