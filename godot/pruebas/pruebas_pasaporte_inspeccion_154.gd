@@ -32,9 +32,11 @@ func _probar_catalogo() -> void:
 		modos_validos = modos_validos and String(entrada.get("modo_observacion", "")) == "examinar"
 
 	_comprobar(ids.size() == catalogo.size(), "los ids de inspección son únicos")
+	var zonas_validas := zonas.size() == PasaporteInspeccion.ZONAS.size()
+	for zona in zonas:
+		zonas_validas = zonas_validas and PasaporteInspeccion.ZONAS.has(zona)
 	_comprobar(
-		zonas.keys().all(func(zona): return PasaporteInspeccion.ZONAS.has(zona))
-		and zonas.size() == PasaporteInspeccion.ZONAS.size(),
+		zonas_validas,
 		"hay exactamente un corte para archivo, trayecto, casa y sueño"
 	)
 	_comprobar(modos_validos, "todos los puntos exigen observación EXAMINAR")
