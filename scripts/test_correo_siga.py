@@ -143,6 +143,17 @@ class CorreoSigaTest(unittest.TestCase):
         self.assertIn("Button.new()", fuente)
         self.assertIn("_enviar_respuesta.bind", fuente)
 
+    def test_cliente_tiene_identidad_visual_de_correo_98(self) -> None:
+        fuente = CLIENTE.read_text(encoding="utf-8")
+        self.assertIn('"TituloBandeja"', fuente)
+        self.assertIn('"Lectura"', fuente)
+        self.assertIn("add_theme_stylebox_override", fuente)
+        self.assertIn("add_theme_color_override", fuente)
+        self.assertIn('Color("#e8f0f5")', fuente)
+        self.assertIn('Color("#fffdf6")', fuente)
+        self.assertIn('Color("#2d658c")', fuente)
+        self.assertIn("_estilizar_respuesta", fuente)
+
     def test_adaptador_persiste_lecturas_y_respuestas_por_partida(self) -> None:
         fuente = ADAPTADOR.read_text(encoding="utf-8")
         self.assertRegex(
