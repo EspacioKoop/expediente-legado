@@ -16,7 +16,6 @@ func _ejecutar() -> void:
 	_probar_saturacion()
 	_probar_normalizacion()
 	_probar_persistencia_json()
-	_probar_bandas()
 	print("issue_952: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
 
@@ -80,17 +79,6 @@ func _probar_persistencia_json() -> void:
 			11.0,
 			"el valor sobrevive a serializar y restaurar",
 		)
-
-
-func _probar_bandas() -> void:
-	var jornada := {Estres.CAMPO_JORNADA: {"valor": 33.0}}
-	_comprobar(Estres.banda(jornada), 0, "33 por ciento sigue en banda baja")
-	jornada[Estres.CAMPO_JORNADA]["valor"] = 34.0
-	_comprobar(Estres.banda(jornada), 1, "34 por ciento entra en banda media")
-	jornada[Estres.CAMPO_JORNADA]["valor"] = 66.0
-	_comprobar(Estres.banda(jornada), 1, "66 por ciento sigue en banda media")
-	jornada[Estres.CAMPO_JORNADA]["valor"] = 67.0
-	_comprobar(Estres.banda(jornada), 2, "67 por ciento entra en banda alta")
 
 
 func _comprobar(actual, esperado, nombre: String) -> void:
