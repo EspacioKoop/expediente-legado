@@ -70,9 +70,7 @@ static func compromiso_religion_bloqueante(
 		if typeof(compromiso_bruto) != TYPE_DICTIONARY:
 			continue
 		var compromiso: Dictionary = compromiso_bruto
-		if not RELIGION_CONFLICTO.puede_iniciar_accion_ofensiva(
-			compromiso, rival_inicio_agresion
-		):
+		if not RELIGION_CONFLICTO.puede_iniciar_accion_ofensiva(compromiso, rival_inicio_agresion):
 			return compromiso
 	return {}
 
