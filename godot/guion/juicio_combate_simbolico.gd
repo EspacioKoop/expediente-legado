@@ -5,6 +5,10 @@
 class_name JuicioCombateSimbolico
 extends RefCounted
 
+const RELIGION_EVENTOS = preload("res://guion/religion_eventos.gd")
+const RELIGION_CONFLICTO = preload("res://guion/religion_conflicto.gd")
+const CONTEXTO_JUICIO := "juicio:%s"
+
 
 static func resolver(
 	anfitrion: Node,
@@ -43,7 +47,20 @@ static func resolver(
 		"radio_arena": configuracion["radio_arena"],
 		"velocidad_rival": configuracion["velocidad_rival"],
 		"recarga_fuerte": configuracion["recarga_fuerte"],
+		"compromisos_religion": compromisos_religion(estado, clave),
 	}
+
+
+## Compromisos religiosos contextuales (#936) disponibles para este acusado.
+##
+## Consume exclusivamente hechos ya catalogados por ReligionEventos a través
+## de ReligionConflicto; el Juicio nunca decide por sí mismo qué cuenta como
+## práctica o convicción religiosa.
+static func compromisos_religion(estado: Dictionary, clave: String) -> Array:
+	var registro = estado.get(RELIGION_EVENTOS.CLAVE_ESTADO, {})
+	if typeof(registro) != TYPE_DICTIONARY:
+		return []
+	return RELIGION_CONFLICTO.compromisos_disponibles(registro, CONTEXTO_JUICIO % clave, clave)
 
 
 static func estado_partida(anfitrion: Node) -> Dictionary:
