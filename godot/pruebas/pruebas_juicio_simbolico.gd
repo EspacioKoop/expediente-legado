@@ -30,6 +30,26 @@ static func todo(comprobar: Callable) -> void:
 		"Nombre",
 	)
 
+	var compromiso := {"regla": ReligionConflicto.REGLA_NO_INICIAR}
+	_caso(
+		comprobar,
+		"simbólico: compromiso religioso cede iniciativa",
+		JuicioCombateSimbolico.compromiso_religion_bloqueante([compromiso], false).is_empty(),
+		false,
+	)
+	_caso(
+		comprobar,
+		"simbólico: iniciativa rival libera compromiso",
+		JuicioCombateSimbolico.compromiso_religion_bloqueante([compromiso], true),
+		{},
+	)
+	_caso(
+		comprobar,
+		"simbólico: entradas inválidas no inventan bloqueo",
+		JuicioCombateSimbolico.compromiso_religion_bloqueante(["ruido"], false),
+		{},
+	)
+
 
 static func _caso(comprobar: Callable, nombre: String, obtenido, esperado) -> void:
 	comprobar.call(nombre, obtenido, esperado)
