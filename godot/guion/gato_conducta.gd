@@ -109,7 +109,7 @@ static func avanzar(
 	# la jornada sigue siendo la única fuente de verdad del hambre.
 	if desconfia:
 		return _avanzar_hambriento(gato, posicion_sitio(sitios[0], pos), delta)
-	elif gato["estado"] == "hambriento":
+	if gato["estado"] == "hambriento":
 		# Al comer se nota en el acto: no arrastra durante varios segundos la
 		# postura de hambre mientras la jornada ya dice otra cosa.
 		gato["estado"] = "parado"
