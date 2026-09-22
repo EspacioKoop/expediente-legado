@@ -10,10 +10,7 @@ extends RefCounted
 const CONSUMIDOR := "sueno_literario"
 
 
-static func motivos(
-	registro: Dictionary,
-	ruta_catalogo: String = LiteraturaCatalogo.RUTA
-) -> Array:
+static func motivos(registro: Dictionary, ruta_catalogo: String = LiteraturaCatalogo.RUTA) -> Array:
 	var resultado := []
 	for bruto in LiteraturaEventos.eventos(registro, LiteraturaEventos.CANAL_INSIGHT):
 		if typeof(bruto) != TYPE_DICTIONARY:
@@ -47,13 +44,18 @@ static func motivos(
 			var motivo := String(valor).strip_edges()
 			if motivo.is_empty():
 				continue
-			resultado.append({
-				"id": "%s:%s" % [String(obra.get("id", "")), motivo],
-				"obra_id": String(obra.get("id", "")),
-				"insight_id": insight_id,
-				"motivo": motivo,
-				"presentacion": presentacion.duplicate(true),
-			})
+			(
+				resultado
+				. append(
+					{
+						"id": "%s:%s" % [String(obra.get("id", "")), motivo],
+						"obra_id": String(obra.get("id", "")),
+						"insight_id": insight_id,
+						"motivo": motivo,
+						"presentacion": presentacion.duplicate(true),
+					}
+				)
+			)
 
 	resultado.sort_custom(
 		func(a: Dictionary, b: Dictionary) -> bool:
@@ -87,14 +89,18 @@ static func aplicar(
 		actual.z * factor.z,
 	)
 	resultado["contraste_textura"] = clampf(
-		float(resultado.get("contraste_textura", 1.0))
-		+ float(presentacion.get("contraste_delta", 0.0)),
+		(
+			float(resultado.get("contraste_textura", 1.0))
+			+ float(presentacion.get("contraste_delta", 0.0))
+		),
 		0.5,
 		2.0,
 	)
 	resultado["ambiente_energia"] = clampf(
-		float(resultado.get("ambiente_energia", 0.32))
-		+ float(presentacion.get("ambiente_energia_delta", 0.0)),
+		(
+			float(resultado.get("ambiente_energia", 0.32))
+			+ float(presentacion.get("ambiente_energia_delta", 0.0))
+		),
 		0.05,
 		1.5,
 	)
