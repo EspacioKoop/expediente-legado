@@ -9,6 +9,10 @@ var _fallos := 0
 
 
 func _init() -> void:
+	_ejecutar.call_deferred()
+
+
+func _ejecutar() -> void:
 	var viewport := SubViewport.new()
 	viewport.size = Vector2i(640, 360)
 	viewport.world_3d = World3D.new()
@@ -17,6 +21,7 @@ func _init() -> void:
 	viewport.add_child(mundo)
 	var camara := Camera3D.new()
 	mundo.add_child(camara)
+	await process_frame
 
 	var delante := Vector3(0.0, 0.0, -5.0)
 	var detras := Vector3(0.0, 0.0, 5.0)
