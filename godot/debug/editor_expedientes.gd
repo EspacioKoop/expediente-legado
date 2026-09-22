@@ -207,7 +207,7 @@ static func _bbcode_seguro(texto: String) -> String:
 
 
 static func _id_ruta_valido(id: String) -> bool:
-	for prohibido in ["..", "/", "\\", ":", "*", "?", "\"", "<", ">", "|"]:
+	for prohibido in ["..", "/", "\\", ":", "*", "?", '"', "<", ">", "|"]:
 		if id.contains(prohibido):
 			return false
 	return true
