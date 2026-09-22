@@ -30,6 +30,7 @@ func _ejecutar() -> void:
 		quit(1)
 		return
 
+	TranslationServer.set_locale("es")
 	root.size = TAM
 	var fondo := ColorRect.new()
 	fondo.color = Color("2f343a")
