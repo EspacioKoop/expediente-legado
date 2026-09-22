@@ -1,21 +1,54 @@
 ## Integra los marcadores persistentes de #957 en el mundo activo de Dia.
 ##
-## Este primer vertical no captura input ni decide dónde debe apuntar el jugador:
-## expone operaciones para la futura UI y restaura lo ya guardado cada vez que
-## Dia reconstruye archivo, trayecto, casa o sueño.
+## El segundo vertical añade una entrada desde MenuGlobal sin reescribirlo.
+## Al elegir Marcadores, cierra el menú, resuelve el apuntado en physics_process
+## (el espacio físico puede estar bloqueado durante input) y abre un selector
+## modal. Las marcas siguen sin colisión: para borrar se toma la marca persistida
+## más cercana al punto de la superficie que atraviesa la mira.
 class_name DiaMarcadoresMundoApp
 extends Node
 
 const NOMBRE_RAIZ := "MarcadoresMundoPersistentes"
+const RUTA_TEXTOS := "res://datos/marcadores_mundo_textos.json"
+const PANEL_SCRIPT := preload("res://guion/marcadores_mundo_panel.gd")
+const ALCANCE_APUNTADO := 4.0
+const RADIO_BORRADO := 0.32
+const OFFSET_SUPERFICIE := 0.006
 
 var _host
 var _mundo_id := 0
 var _firma := ""
 var _estres_presentacion := 0.0
 
+var _menu: Node
+var _boton_menu: Button
+var _apertura_pendiente := false
+var _punto_local := Vector3.ZERO
+var _normal_local := Vector3.UP
+var _marcador_apuntado_id := ""
+
+var _capa_modal: CanvasLayer
+var _modal_raiz: Control
+var _panel
+var _modal_abierto := false
+var _pausa_previa := false
+var _mouse_previo := Input.MOUSE_MODE_CAPTURED
+var _textos: Dictionary = {}
+
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	_textos = _cargar_textos()
 	_host = get_parent()
+	call_deferred("_integrar_menu")
+
+
+func _exit_tree() -> void:
+	if _modal_abierto:
+		get_tree().paused = _pausa_previa
+		Input.mouse_mode = _mouse_previo
+	if is_instance_valid(_boton_menu):
+		_boton_menu.queue_free()
 
 
 func _process(_delta: float) -> void:
@@ -41,6 +74,29 @@ func _process(_delta: float) -> void:
 	_remontar(mundo, marcadores)
 
 
+func _physics_process(_delta: float) -> void:
+	if not _apertura_pendiente:
+		return
+	_apertura_pendiente = false
+	_resolver_apuntado_y_abrir()
+
+
+func _cargar_textos() -> Dictionary:
+	if not FileAccess.file_exists(RUTA_TEXTOS):
+		return {}
+	var archivo := FileAccess.open(RUTA_TEXTOS, FileAccess.READ)
+	if archivo == null:
+		return {}
+	var datos = JSON.parse_string(archivo.get_as_text())
+	if typeof(datos) != TYPE_DICTIONARY:
+		return {}
+	return datos
+
+
+func _cadena(clave: String) -> String:
+	return String(_textos.get(clave, clave))
+
+
 func zona_actual() -> String:
 	if _host == null or not is_instance_valid(_host):
 		return ""
@@ -57,8 +113,6 @@ func _sincronizar_estres() -> void:
 	_firma = ""
 
 
-## Las posiciones son locales al mundo de la fase activa. El segundo corte de
-## #957 resolverá el raycast/superficie desde la UI; aquí no se inventa input.
 func colocar(
 	tipo: String,
 	color: String,
@@ -116,6 +170,203 @@ func establecer_estres_presentacion(valor: float) -> void:
 		return
 	_estres_presentacion = nuevo
 	_firma = ""
+
+
+## Entrada diegética: se añade al mismo VBox de MenuGlobal que sus acciones
+## principales, como otras extensiones del menú. Al salir de Dia se elimina.
+func _integrar_menu() -> void:
+	if is_instance_valid(_boton_menu):
+		return
+	var menu := get_node_or_null("/root/MenuGlobal")
+	if menu == null:
+		call_deferred("_integrar_menu")
+		return
+	var salir := menu.get("_salir") as Button
+	if salir == null:
+		call_deferred("_integrar_menu")
+		return
+	var caja := salir.get_parent() as VBoxContainer
+	if caja == null:
+		return
+
+	_menu = menu
+	_boton_menu = Button.new()
+	_boton_menu.name = "MarcadoresMundo"
+	_boton_menu.text = _cadena("menu")
+	_boton_menu.tooltip_text = _cadena("tooltip")
+	_boton_menu.accessibility_name = _boton_menu.text
+	_boton_menu.pressed.connect(_pedir_herramienta)
+	caja.add_child(_boton_menu)
+	caja.move_child(_boton_menu, salir.get_index())
+
+
+func _pedir_herramienta() -> void:
+	if _modal_abierto or _apertura_pendiente:
+		return
+	if is_instance_valid(_menu) and _menu.has_method("_cerrar"):
+		_menu.call("_cerrar")
+	_apertura_pendiente = true
+
+
+## Godot recomienda resolver consultas al espacio físico en physics_process.
+## Se proyecta el centro de la cámara, no la posición del ratón: el juego es FPS
+## y la mira corresponde al centro del viewport también con mando.
+func _resolver_apuntado_y_abrir() -> void:
+	if _host == null or not is_instance_valid(_host) or not is_instance_valid(_host._mundo):
+		_abrir_panel(false, "", 0)
+		return
+
+	var camara := get_viewport().get_camera_3d()
+	var mundo := _host._mundo as Node3D
+	if camara == null or mundo == null:
+		_abrir_panel(false, "", 0)
+		return
+
+	var recta := get_viewport().get_visible_rect()
+	var pantalla := recta.position + recta.size * 0.5
+	var origen := camara.project_ray_origin(pantalla)
+	var destino := origen + camara.project_ray_normal(pantalla) * ALCANCE_APUNTADO
+	var consulta := PhysicsRayQueryParameters3D.create(origen, destino)
+	consulta.collide_with_areas = false
+	consulta.collide_with_bodies = true
+
+	var caminante = _host.get("_caminante")
+	if caminante is CollisionObject3D:
+		consulta.exclude = [caminante.get_rid()]
+
+	var golpe := camara.get_world_3d().direct_space_state.intersect_ray(consulta)
+	var marcadores := MarcadoresMundo.listar(_host.jornada, zona_actual())
+	if golpe.is_empty():
+		_abrir_panel(false, "", marcadores.size())
+		return
+	var colisionador = golpe.get("collider")
+	if colisionador is CharacterBody3D:
+		_abrir_panel(false, "", marcadores.size())
+		return
+
+	var posicion_global: Vector3 = golpe.get("position", Vector3.ZERO)
+	var normal_global: Vector3 = golpe.get("normal", Vector3.UP)
+	_punto_local = mundo.to_local(posicion_global)
+	_normal_local = mundo.global_transform.basis.inverse() * normal_global
+	if _normal_local.length_squared() <= 0.000001:
+		_normal_local = Vector3.UP
+	else:
+		_normal_local = _normal_local.normalized()
+
+	_marcador_apuntado_id = marcador_cercano_a(marcadores, _punto_local, RADIO_BORRADO)
+	_abrir_panel(true, _marcador_apuntado_id, marcadores.size())
+
+
+static func marcador_cercano_a(marcadores: Array, punto: Vector3, radio: float) -> String:
+	if radio <= 0.0:
+		return ""
+	var mejor_id := ""
+	var mejor_distancia := radio * radio
+	for datos in marcadores:
+		if not datos is Dictionary:
+			continue
+		var distancia := MarcadoresMundo.posicion_de(datos).distance_squared_to(punto)
+		if distancia > mejor_distancia:
+			continue
+		mejor_distancia = distancia
+		mejor_id = String(datos.get("id", ""))
+	return mejor_id
+
+
+func _asegurar_panel() -> void:
+	if is_instance_valid(_panel):
+		return
+
+	_capa_modal = CanvasLayer.new()
+	_capa_modal.name = "MarcadoresMundoModal"
+	_capa_modal.layer = 110
+	add_child(_capa_modal)
+
+	_modal_raiz = Control.new()
+	_modal_raiz.name = "MarcadoresMundoModalRaiz"
+	_modal_raiz.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_modal_raiz.visible = false
+	_capa_modal.add_child(_modal_raiz)
+
+	var fondo := ColorRect.new()
+	fondo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	fondo.color = Color(0.0, 0.0, 0.0, 0.64)
+	fondo.mouse_filter = Control.MOUSE_FILTER_STOP
+	_modal_raiz.add_child(fondo)
+
+	var centro := CenterContainer.new()
+	centro.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_modal_raiz.add_child(centro)
+
+	_panel = PANEL_SCRIPT.new()
+	centro.add_child(_panel)
+	_panel.connect("colocar_solicitado", _confirmar_colocacion)
+	_panel.connect("eliminar_solicitado", _confirmar_eliminacion)
+	_panel.connect("eliminar_zona_solicitado", _confirmar_eliminacion_zona)
+	_panel.connect("cancelar_solicitado", _cerrar_panel)
+
+
+func _abrir_panel(puede_colocar: bool, marcador_id: String, cantidad: int) -> void:
+	_asegurar_panel()
+	_marcador_apuntado_id = marcador_id
+	_pausa_previa = get_tree().paused
+	_mouse_previo = Input.mouse_mode
+	get_tree().paused = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	_modal_abierto = true
+	_modal_raiz.visible = true
+	_panel.call("abrir", puede_colocar, not marcador_id.is_empty(), cantidad)
+
+
+func _cerrar_panel() -> void:
+	if not _modal_abierto:
+		return
+	_modal_abierto = false
+	_modal_raiz.visible = false
+	get_tree().paused = _pausa_previa
+	Input.mouse_mode = _mouse_previo
+
+
+func _confirmar_colocacion(tipo: String, color: String, texto: String) -> void:
+	var resultado := colocar(
+		tipo,
+		color,
+		texto,
+		_punto_local + _normal_local * OFFSET_SUPERFICIE,
+		_normal_local,
+	)
+	if bool(resultado.get("ok", false)):
+		_cerrar_panel()
+		return
+	_panel.call("mostrar_error", _mensaje_error(String(resultado.get("motivo", ""))))
+
+
+func _confirmar_eliminacion() -> void:
+	if _marcador_apuntado_id.is_empty():
+		return
+	if eliminar(_marcador_apuntado_id):
+		_cerrar_panel()
+	else:
+		_panel.call("mostrar_error", _cadena("marca_no_disponible"))
+
+
+func _confirmar_eliminacion_zona() -> void:
+	if eliminar_zona_actual() > 0:
+		_cerrar_panel()
+	else:
+		_panel.call("mostrar_error", _cadena("zona_sin_marcas"))
+
+
+func _mensaje_error(motivo: String) -> String:
+	match motivo:
+		"limite_zona":
+			return _cadena("error_limite_zona")
+		"zona_invalida":
+			return _cadena("error_zona_invalida")
+		"transformacion_invalida":
+			return _cadena("error_transformacion")
+		_:
+			return _cadena("error_generico")
 
 
 func _remontar(mundo: Node3D, marcadores: Array) -> void:
