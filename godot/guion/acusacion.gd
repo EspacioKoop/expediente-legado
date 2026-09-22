@@ -114,7 +114,7 @@ static func acusar(
 ## Llegar a cero es una pérdida real de vida (y por tanto puede conceder
 ## El Ermitaño), pero NO es todavía un despido. El estado queda persistible
 ## con una única decisión pendiente hasta que el jugador canjee o firme el cese.
-static func perder_vida(estado: Dictionary, jornada: Dictionary, cuantas: int) -> Dictionary:
+static func perder_vida(estado: Dictionary, _jornada: Dictionary, cuantas: int) -> Dictionary:
 	if despido_pendiente(estado):
 		return {
 			"despido": false,
