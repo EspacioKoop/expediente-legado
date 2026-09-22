@@ -1,37 +1,28 @@
-## Juicio por Combate de la Ventanilla (#779).
-##
-## Es una apelación, no un sustituto de investigar: las pruebas que hicieron
-## efecto en el careo reducen la determinación inicial del acusado. El combate
-## termina por rendición (determinación a cero), no por muerte.
-##
-## La arena refleja un Arcano recogido/no gastado y una semilla mitológica activa
-## de la jornada. Seis parejas declaradas por `JuicioSimbolico` forman rituales
-## pequeños, legibles y sin consumir progreso.
-##
-## Controles semánticos ya existentes:
-## - movimiento: mover_izquierda/derecha/adelante/atras;
-## - interactuar: ataque ligero;
-## - saltar: ataque fuerte;
-## - agacharse: esquiva.
 class_name JuicioCombate3D
 extends Node3D
 
 signal terminado(gano: bool)
 
-const DETERMINACION_BASE := 8
-const DETERMINACION_MINIMA_RIVAL := 4
+const REGLAS = preload("res://guion/juicio_combate_reglas.gd")
+const FEEDBACK = preload("res://guion/juicio_combate_feedback_3d.gd")
+const HUD = preload("res://guion/juicio_combate_hud.gd")
+const ARENA = preload("res://guion/juicio_combate_arena_3d.gd")
+const JUNGIANO = preload("res://guion/juicio_combate_jungiano.gd")
+const SIMBOLICO = preload("res://guion/juicio_combate_simbolico.gd")
+const DETERMINACION_BASE := REGLAS.DETERMINACION_BASE
+const DETERMINACION_MINIMA_RIVAL := REGLAS.DETERMINACION_MINIMA_RIVAL
 const VELOCIDAD_JUGADOR := 4.8
 const VELOCIDAD_RIVAL := 2.5
 const RADIO_ARENA := 5.0
 const ALCANCE_LIGERO := 1.75
 const ALCANCE_FUERTE := 2.15
-const ALCANCE_RIVAL := 1.45
+const ALCANCE_RIVAL := REGLAS.ALCANCE_RIVAL
 const RECARGA_LIGERA := 0.28
 const RECARGA_FUERTE := 0.58
-const RECARGA_RIVAL := 1.15
-const TELEGRAFO_RIVAL := 0.45
-const DURACION_DOCTRINA := 4.0
-const BONUS_TELEGRAFO_COMISION := 0.55
+const RECARGA_RIVAL := REGLAS.RECARGA_RIVAL
+const TELEGRAFO_RIVAL := REGLAS.TELEGRAFO_RIVAL
+const DURACION_DOCTRINA := REGLAS.DURACION_DOCTRINA
+const BONUS_TELEGRAFO_COMISION := REGLAS.BONUS_TELEGRAFO_COMISION
 const DISTANCIA_MESA := 3.0
 
 var reduccion_movimiento := false
@@ -72,89 +63,77 @@ var _barra_rival: ProgressBar
 var _etiqueta_ritual: Label
 var _etiqueta_ataque: Label
 var _botones_doctrina: HBoxContainer
+var _barra_momentum: ProgressBar
+var _boton_finisher: Button
+var _etiqueta_jungiana: Label
+var _dano_combo_pendiente := 0
+var _curacion_arquetipo_acumulada := 0.0
+var _invulnerabilidad_jungiana := 0.0
+var _sacudida_camara := 0.0
+var _aviso_jungiano_restante := 0.0
+var _azar := RandomNumberGenerator.new()
 
 
 static func determinacion_rival(bono_documental: int) -> int:
-	return maxi(DETERMINACION_MINIMA_RIVAL, DETERMINACION_BASE - maxi(0, bono_documental))
+	return REGLAS.determinacion_rival(bono_documental)
 
 
 static func resultado_ataque_rival(distancia: float, esquiva_restante: float) -> String:
-	if distancia > ALCANCE_RIVAL:
-		return "falla"
-	if esquiva_restante > 0.0:
-		return "esquiva"
-	return "impacto"
+	return REGLAS.resultado_ataque_rival(distancia, esquiva_restante)
 
 
 static func interrumpe_ataque(fuerte: bool, ataque_pendiente: bool, ritual: Dictionary) -> bool:
-	return fuerte and ataque_pendiente and bool(ritual.get("interrumpe_telegrafo_fuerte", false))
+	return REGLAS.interrumpe_ataque(fuerte, ataque_pendiente, ritual)
 
 
 static func modificadores_doctrina_ritual(eje: String, ritual: Dictionary) -> Dictionary:
-	var etiquetas = ritual.get("tags", [])
-	if typeof(etiquetas) != TYPE_ARRAY:
-		return {}
-	var modificadores := {}
-	match eje:
-		"comunismo":
-			if etiquetas.has("control_espacio"):
-				modificadores["duracion_mul"] = 1.25
-		"centrista":
-			if etiquetas.has("neutralizar"):
-				modificadores["recarga_rival_mul"] = 1.25
-		"socialdemocrata":
-			if etiquetas.has("telegraph"):
-				modificadores["telegraph_bonus"] = 0.25
-		"neoliberal":
-			if etiquetas.has("riesgo"):
-				modificadores["duracion_mul"] = 1.25
-	return modificadores
+	return REGLAS.modificadores_doctrina_ritual(eje, ritual)
 
 
 static func duracion_doctrina(eje: String, ritual: Dictionary) -> float:
-	var modificadores := modificadores_doctrina_ritual(eje, ritual)
-	return DURACION_DOCTRINA * float(modificadores.get("duracion_mul", 1.0))
+	return REGLAS.duracion_doctrina(eje, ritual)
 
 
 static func duracion_telegrafo(comision: bool, ritual: Dictionary) -> float:
-	if not comision:
-		return TELEGRAFO_RIVAL
-	var modificadores := modificadores_doctrina_ritual("socialdemocrata", ritual)
-	return (
-		TELEGRAFO_RIVAL
-		+ BONUS_TELEGRAFO_COMISION
-		+ float(modificadores.get("telegraph_bonus", 0.0))
-	)
+	return REGLAS.duracion_telegrafo(comision, ritual)
 
 
 static func recarga_mesa(ritual: Dictionary) -> float:
-	var modificadores := modificadores_doctrina_ritual("centrista", ritual)
-	return RECARGA_RIVAL * float(modificadores.get("recarga_rival_mul", 1.0))
+	return REGLAS.recarga_mesa(ritual)
 
 
 static func asamblea_interrumpe(eje_activo: String, ataque_pendiente: bool) -> bool:
-	return eje_activo == "comunismo" and ataque_pendiente
+	return REGLAS.asamblea_interrumpe(eje_activo, ataque_pendiente)
 
 
 static func dano_externalizado(dano_base: int, eje_activo: String) -> int:
-	return dano_base * 2 if eje_activo == "neoliberal" else dano_base
+	return REGLAS.dano_externalizado(dano_base, eje_activo)
 
 
 static func determinacion_retorno(ritual: Dictionary, retornos_usados: int) -> int:
-	var maximo := int(ritual.get("retornos_rival", 0))
-	if retornos_usados >= maximo:
-		return 0
-	return maxi(0, int(ritual.get("determinacion_retorno", 0)))
+	return REGLAS.determinacion_retorno(ritual, retornos_usados)
 
 
-func configurar(acusado: Dictionary, bono_documental: int, reducir_movimiento: bool) -> void:
+func configurar(
+	acusado: Dictionary, bono_documental: int, reducir_movimiento: bool, raiz: int = 0
+) -> void:
 	_acusado = acusado.duplicate(true)
 	_bono_documental = bono_documental
 	reduccion_movimiento = reducir_movimiento
 	_determinacion_rival = determinacion_rival(_bono_documental)
+	_azar.seed = (
+		Azar
+		. derivar_texto(
+			raiz,
+			"combate",
+			"juicio_combate_3d:%s" % String(_acusado.get("id", "")),
+			[bono_documental],
+		)
+	)
 
 
 func _ready() -> void:
+	_preparar_sistemas_jungianos()
 	_resolver_capa_simbolica()
 	_montar_arena()
 	_montar_hud()
@@ -168,6 +147,12 @@ func _process(delta: float) -> void:
 	_recarga_rival = maxf(0.0, _recarga_rival - delta)
 	_esquiva = maxf(0.0, _esquiva - delta)
 	_enredo = maxf(0.0, _enredo - delta)
+	_invulnerabilidad_jungiana = maxf(0.0, _invulnerabilidad_jungiana - delta)
+	_sacudida_camara = maxf(0.0, _sacudida_camara - delta)
+	if _aviso_jungiano_restante > 0.0:
+		_aviso_jungiano_restante = maxf(0.0, _aviso_jungiano_restante - delta)
+		if is_zero_approx(_aviso_jungiano_restante) and _etiqueta_jungiana != null:
+			_etiqueta_jungiana.visible = false
 	if _doctrina_tiempo > 0.0:
 		_doctrina_tiempo = maxf(0.0, _doctrina_tiempo - delta)
 		if is_zero_approx(_doctrina_tiempo):
@@ -333,15 +318,20 @@ func _resolver_ataque_rival() -> void:
 			Sonido.sonar(self, "pulsar")
 			_registrar_esquiva_ritual()
 		_:
-			Sonido.sonar(self, "error")
-			var dano := dano_externalizado(1, _doctrina_activa)
-			_determinacion_jugador = maxi(0, _determinacion_jugador - dano)
-			if externaliza_activa:
-				_cerrar_doctrina()
-			_reaccion(_figura_jugador, -0.18)
-			_actualizar_hud()
-			if _determinacion_jugador <= 0:
-				_terminar(false)
+			if _invulnerabilidad_jungiana > 0.0:
+				Sonido.sonar(self, "pulsar")
+				_mostrar_aviso_jungiano("SELF · IMPACTO NEGADO", 0.8)
+			else:
+				Sonido.sonar(self, "error")
+				var dano := dano_externalizado(1, _doctrina_activa)
+				_determinacion_jugador = maxi(0, _determinacion_jugador - dano)
+				JUNGIANO.registrar_dano_recibido(self)
+				if externaliza_activa:
+					_cerrar_doctrina()
+				_reaccion(_figura_jugador, -0.18)
+				_actualizar_hud()
+				if _determinacion_jugador <= 0:
+					_terminar(false)
 
 	if comision_activa:
 		_cerrar_doctrina()
@@ -376,7 +366,16 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 	if hacia.length() > alcance:
 		return
 
-	var dano := dano_base
+	var efectos_jungianos := JUNGIANO.efectos_activos(self)
+	var probabilidad_critico := JUNGIANO.probabilidad_critico(efectos_jungianos)
+	var es_critico := probabilidad_critico > 0.0 and _azar.randf() < probabilidad_critico
+	JUNGIANO.registrar_golpe(self, es_critico, fuerte)
+
+	var dano := dano_base + _dano_combo_pendiente
+	_dano_combo_pendiente = 0
+	if es_critico:
+		dano += 1
+		_mostrar_aviso_jungiano("CRÍTICO", 0.65)
 	if fuerte:
 		dano += int(_ritual.get("dano_fuerte_bonus", 0))
 	var interrupcion_ritual := interrumpe_ataque(fuerte, _ataque_rival_pendiente, _ritual)
@@ -395,6 +394,7 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 		_cerrar_doctrina()
 
 	_determinacion_rival = maxi(0, _determinacion_rival - dano)
+	_aplicar_curacion_arquetipo(efectos_jungianos)
 	if not fuerte:
 		var segundos_enredo := float(_ritual.get("enredo_ligero_segundos", 0.0))
 		if segundos_enredo > 0.0:
@@ -421,7 +421,9 @@ func _intentar_retorno_rival() -> bool:
 func _esquivar() -> void:
 	if _esquiva > 0.0:
 		return
-	_esquiva = 0.34
+	var efectos := JUNGIANO.efectos_activos(self)
+	_esquiva = 0.34 * (1.0 + JUNGIANO.bonus_evasion(efectos))
+	JUNGIANO.registrar_esquiva(self)
 	if reduccion_movimiento:
 		return
 	_reaccion(_figura_jugador, 0.12)
@@ -441,6 +443,7 @@ func _terminar(gano: bool) -> void:
 		return
 	_acabado = true
 	_ataque_rival_pendiente = false
+	JUNGIANO.salir_combate(self)
 	_ocultar_aviso_ataque()
 	terminado.emit(gano)
 
@@ -453,198 +456,90 @@ func _limitar(posicion: Vector3) -> Vector3:
 
 
 func _resolver_capa_simbolica() -> void:
-	var estado := _estado_partida_anfitrion()
-	if estado.is_empty():
+	var capa := (
+		SIMBOLICO
+		. resolver(
+			self,
+			_acusado,
+			RADIO_ARENA,
+			VELOCIDAD_RIVAL,
+			RECARGA_FUERTE,
+		)
+	)
+	if capa.is_empty():
 		return
-	_cargas_doctrina = Prometeo.cargas_ideologicas(estado, Historias.TOPE_CARGAS)
-	var clave := String(_acusado.get("id", _acusado.get("nombre", "acusado")))
-	var tarot = estado.get("tarot", [])
-	if typeof(tarot) == TYPE_ARRAY:
-		_arcano = JuicioSimbolico.arcano_para(tarot, clave)
-	var jornada = estado.get("jornada", {})
-	if typeof(jornada) == TYPE_DICTIONARY:
-		_mito_id = JuicioSimbolico.mito_para(jornada, clave)
-	_ritual = JuicioSimbolico.ritual_para(_arcano, _mito_id)
-	_aplicar_configuracion_ritual()
+	_cargas_doctrina = capa["cargas_doctrina"]
+	_arcano = capa["arcano"]
+	_mito_id = String(capa["mito_id"])
+	_ritual = capa["ritual"]
+	_radio_arena = float(capa["radio_arena"])
+	_velocidad_rival = float(capa["velocidad_rival"])
+	_recarga_fuerte = float(capa["recarga_fuerte"])
 
 
 func _aplicar_configuracion_ritual() -> void:
-	_radio_arena = float(_ritual.get("radio_arena", RADIO_ARENA))
-	_velocidad_rival = VELOCIDAD_RIVAL * float(_ritual.get("velocidad_rival_mul", 1.0))
-	_recarga_fuerte = float(_ritual.get("recarga_fuerte", RECARGA_FUERTE))
-
-
-func _estado_partida_anfitrion() -> Dictionary:
-	var anfitrion := get_parent()
-	if anfitrion == null:
-		return {}
-	var tiene_partida := false
-	for bruto in anfitrion.get_property_list():
-		if typeof(bruto) == TYPE_DICTIONARY and String(bruto.get("name", "")) == "partida":
-			tiene_partida = true
-			break
-	if not tiene_partida:
-		return {}
-	var partida_actual = anfitrion.get("partida")
-	if partida_actual is Partida:
-		return partida_actual.estado
-	return {}
+	var configuracion := (
+		SIMBOLICO
+		. configuracion_ritual(
+			_ritual,
+			RADIO_ARENA,
+			VELOCIDAD_RIVAL,
+			RECARGA_FUERTE,
+		)
+	)
+	_radio_arena = float(configuracion["radio_arena"])
+	_velocidad_rival = float(configuracion["velocidad_rival"])
+	_recarga_fuerte = float(configuracion["recarga_fuerte"])
 
 
 func _montar_arena() -> void:
-	var mundo := WorldEnvironment.new()
-	var entorno := Environment.new()
-	entorno.background_mode = Environment.BG_COLOR
-	entorno.background_color = Color(0.025, 0.027, 0.032)
-	entorno.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	entorno.ambient_light_color = Color(0.48, 0.50, 0.46)
-	entorno.ambient_light_energy = 0.65
-	mundo.environment = entorno
-	add_child(mundo)
-
-	var luz := DirectionalLight3D.new()
-	luz.rotation_degrees = Vector3(-55.0, -35.0, 0.0)
-	luz.light_energy = 1.25
-	add_child(luz)
-
-	var suelo := MeshInstance3D.new()
-	var malla_suelo := CylinderMesh.new()
-	malla_suelo.top_radius = RADIO_ARENA + 0.8
-	malla_suelo.bottom_radius = RADIO_ARENA + 0.8
-	malla_suelo.height = 0.16
-	malla_suelo.radial_segments = 32
-	suelo.mesh = malla_suelo
-	suelo.position.y = -0.12
-	suelo.material_override = _material(Color(0.16, 0.17, 0.15))
-	add_child(suelo)
-
-	# Archivadores hacen de límite visual: sigue siendo la institución, no una
-	# arena medieval genérica.
-	for i in 8:
-		var angulo := TAU * float(i) / 8.0
-		var archivador := MeshInstance3D.new()
-		var caja := BoxMesh.new()
-		caja.size = Vector3(0.9, 1.8, 0.55)
-		archivador.mesh = caja
-		archivador.position = Vector3(sin(angulo) * 5.7, 0.9, cos(angulo) * 5.7)
-		archivador.rotation.y = angulo
-		archivador.material_override = _material(Color(0.28, 0.31, 0.28))
-		add_child(archivador)
-
-	JuicioSimbolico3D.montar(self, _arcano, _mito_id)
-	_montar_limite_ritual()
-
-	_jugador = CharacterBody3D.new()
-	_jugador.position = Vector3(0.0, 0.0, 2.4)
-	add_child(_jugador)
-	_figura_jugador = FiguraSilueta.construir(_jugador, Vector3.ZERO, Color(0.68, 0.70, 0.64))
-
-	_rival = CharacterBody3D.new()
-	_rival.position = Vector3(0.0, 0.0, -2.4)
-	add_child(_rival)
-	var clave := String(_acusado.get("id", _acusado.get("nombre", "acusado")))
-	var matiz := 0.52 + float(absi(hash(clave)) % 14) / 100.0
-	_figura_rival = FiguraSilueta.construir(_rival, Vector3.ZERO, Color.from_hsv(matiz, 0.34, 0.72))
-	_montar_aviso_ataque()
-
-	_camara = Camera3D.new()
-	_camara.fov = 52.0
-	add_child(_camara)
+	var nodos := (
+		ARENA
+		. montar(
+			self,
+			_acusado,
+			_arcano,
+			_mito_id,
+			_ritual,
+			RADIO_ARENA,
+			_radio_arena,
+		)
+	)
+	_jugador = nodos["jugador"]
+	_rival = nodos["rival"]
+	_figura_jugador = nodos["figura_jugador"]
+	_figura_rival = nodos["figura_rival"]
+	_aviso_ataque = nodos["aviso_ataque"]
+	_camara = nodos["camara"]
 	_actualizar_camara()
 
 
-func _montar_aviso_ataque() -> void:
-	_aviso_ataque = MeshInstance3D.new()
-	_aviso_ataque.name = "AvisoAtaqueRival"
-	var malla := CylinderMesh.new()
-	malla.top_radius = ALCANCE_RIVAL
-	malla.bottom_radius = ALCANCE_RIVAL
-	malla.height = 0.025
-	malla.radial_segments = 32
-	_aviso_ataque.mesh = malla
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.82, 0.10, 0.08, 0.34)
-	material.emission_enabled = true
-	material.emission = Color(0.82, 0.10, 0.08)
-	material.emission_energy_multiplier = 0.75
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	_aviso_ataque.material_override = material
-	_aviso_ataque.visible = false
-	add_child(_aviso_ataque)
-
-
-func _montar_limite_ritual() -> void:
-	if String(_ritual.get("id", "")) != "laberinto_lunar":
-		return
-	var color := Color(0.42, 0.48, 0.68)
-	for i in 20:
-		var angulo := TAU * float(i) / 20.0
-		var marca := MeshInstance3D.new()
-		var caja := BoxMesh.new()
-		caja.size = Vector3(0.08, 0.10, 0.42)
-		marca.mesh = caja
-		marca.position = Vector3(sin(angulo) * _radio_arena, 0.03, cos(angulo) * _radio_arena)
-		marca.rotation.y = angulo
-		marca.material_override = _material(color, true)
-		add_child(marca)
-
-
 func _montar_hud() -> void:
-	var capa := CanvasLayer.new()
-	capa.layer = 5
-	add_child(capa)
-
-	var margen := MarginContainer.new()
-	margen.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	margen.add_theme_constant_override("margin_left", 24)
-	margen.add_theme_constant_override("margin_right", 24)
-	margen.add_theme_constant_override("margin_top", 18)
-	capa.add_child(margen)
-
-	var bloque := VBoxContainer.new()
-	bloque.add_theme_constant_override("separation", 6)
-	margen.add_child(bloque)
-
-	var columnas := HBoxContainer.new()
-	columnas.add_theme_constant_override("separation", 32)
-	bloque.add_child(columnas)
-
-	_barra_jugador = ProgressBar.new()
-	_barra_jugador.max_value = DETERMINACION_BASE
-	_barra_jugador.show_percentage = false
-	_barra_jugador.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	columnas.add_child(_barra_jugador)
-
-	var nombre := Label.new()
-	nombre.text = tr(String(_acusado.get("nombre", "")))
-	nombre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	nombre.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	columnas.add_child(nombre)
-
-	_barra_rival = ProgressBar.new()
-	_barra_rival.max_value = determinacion_rival(_bono_documental)
-	_barra_rival.show_percentage = false
-	_barra_rival.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	columnas.add_child(_barra_rival)
-
-	if not _ritual.is_empty() or _hay_cargas_doctrina():
-		_etiqueta_ritual = Label.new()
-		_etiqueta_ritual.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		bloque.add_child(_etiqueta_ritual)
-
-	_botones_doctrina = HBoxContainer.new()
-	_botones_doctrina.alignment = BoxContainer.ALIGNMENT_CENTER
-	_botones_doctrina.add_theme_constant_override("separation", 6)
-	bloque.add_child(_botones_doctrina)
+	var nodos := (
+		HUD
+		. montar(
+			self,
+			tr(String(_acusado.get("nombre", ""))),
+			determinacion_rival(_bono_documental),
+			not _ritual.is_empty() or _hay_cargas_doctrina(),
+			{
+				"ataque_inminente": tr("VENTANILLA_ATAQUE_INMINENTE"),
+				"momentum": tr("JUICIO_JUNGIANO_MOMENTUM"),
+				"finisher": tr("JUICIO_JUNGIANO_FINISHER"),
+				"finisher_tooltip": tr("JUICIO_JUNGIANO_FINISHER_TOOLTIP"),
+			},
+			Callable(self, "_ejecutar_finisher_jungiano"),
+		)
+	)
+	_barra_jugador = nodos["barra_jugador"]
+	_barra_rival = nodos["barra_rival"]
+	_etiqueta_ritual = nodos["etiqueta_ritual"]
+	_etiqueta_ataque = nodos["etiqueta_ataque"]
+	_botones_doctrina = nodos["botones_doctrina"]
+	_barra_momentum = nodos["barra_momentum"]
+	_boton_finisher = nodos["boton_finisher"]
+	_etiqueta_jungiana = nodos["etiqueta_jungiana"]
 	_pintar_doctrinas()
-
-	_etiqueta_ataque = Label.new()
-	_etiqueta_ataque.text = tr("VENTANILLA_ATAQUE_INMINENTE")
-	_etiqueta_ataque.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_etiqueta_ataque.add_theme_color_override("font_color", Color(0.94, 0.28, 0.18))
-	_etiqueta_ataque.visible = false
-	bloque.add_child(_etiqueta_ataque)
 
 
 func _actualizar_hud() -> void:
@@ -654,6 +549,7 @@ func _actualizar_hud() -> void:
 	_barra_rival.value = _determinacion_rival
 	if _etiqueta_ritual != null:
 		_etiqueta_ritual.text = _texto_ritual()
+	_actualizar_hud_jungiano()
 
 
 func _texto_ritual() -> String:
@@ -673,10 +569,7 @@ func _texto_ritual() -> String:
 
 
 func _hay_cargas_doctrina() -> bool:
-	for eje in Prometeo.EJES:
-		if int(_cargas_doctrina.get(eje, 0)) > 0:
-			return true
-	return false
+	return SIMBOLICO.hay_cargas_doctrina(_cargas_doctrina)
 
 
 func _pintar_doctrinas() -> void:
@@ -703,28 +596,138 @@ func _pintar_doctrinas() -> void:
 
 
 func _actualizar_camara() -> void:
-	if _camara == null or _jugador == null or _rival == null:
+	(
+		FEEDBACK
+		. actualizar_camara(
+			_camara,
+			_jugador,
+			_rival,
+			_sacudida_camara,
+			reduccion_movimiento,
+			_azar,
+		)
+	)
+
+
+func _gestor_jungiano(nombre: String) -> Node:
+	return JUNGIANO.gestor(self, nombre)
+
+
+func _preparar_sistemas_jungianos() -> void:
+	(
+		JUNGIANO
+		. preparar(
+			self,
+			Callable(self, "_al_arquetipo_desbloqueado"),
+			Callable(self, "_al_momentum_cambiado"),
+			Callable(self, "_al_combo_ejecutado"),
+			Callable(self, "_al_finisher_ejecutado"),
+		)
+	)
+
+
+func _al_arquetipo_desbloqueado(arquetipo_id: String) -> void:
+	JUNGIANO.aplicar_arquetipo(self, arquetipo_id)
+	var arquetipos := _gestor_jungiano("GestorArquetipos")
+	var nombre := arquetipo_id
+	var puntos := 0
+	if arquetipos != null:
+		var arquetipo = arquetipos.call("obtener_arquetipo", arquetipo_id)
+		if arquetipo != null:
+			nombre = String(arquetipo.get("nombre"))
+		puntos = int(arquetipos.get("puntos_habilidad"))
+	_mostrar_aviso_jungiano("ARQUETIPO · %s · HABILIDAD +1 (%d)" % [nombre, puntos], 2.5)
+	_actualizar_hud_jungiano()
+
+
+func _al_momentum_cambiado(_actual: float, _maximo: float) -> void:
+	_actualizar_hud_jungiano()
+
+
+func _al_combo_ejecutado(nombre: String, efectos: Dictionary) -> void:
+	if efectos.has("dano_multiplier"):
+		_dano_combo_pendiente += maxi(1, int(round(float(efectos["dano_multiplier"]) - 1.0)))
+	if efectos.has("dano"):
+		_dano_combo_pendiente += maxi(0, int(efectos["dano"]))
+	if efectos.has("curacion"):
+		_determinacion_jugador = mini(
+			DETERMINACION_BASE, _determinacion_jugador + maxi(0, int(efectos["curacion"]))
+		)
+	if bool(efectos.get("contragolpe", false)):
+		_contraataque = maxi(_contraataque, 1)
+	if efectos.has("evasion_temporal"):
+		_esquiva = maxf(_esquiva, float(efectos.get("duracion", 0.8)))
+	var radio := float(efectos.get("area", 1.2))
+	_particulas_jungianas(radio, false)
+	Sonido.sonar(self, "pulsar")
+	_mostrar_aviso_jungiano("COMBO · %s" % nombre, 1.2)
+
+
+func _ejecutar_finisher_jungiano() -> void:
+	JUNGIANO.ejecutar_finisher_disponible(self)
+
+
+func _al_finisher_ejecutado(nombre: String, efectos: Dictionary, es_super: bool) -> void:
+	var dano := maxi(0, int(efectos.get("dano", 0)))
+	_determinacion_rival = maxi(0, _determinacion_rival - dano)
+	if bool(efectos.get("curacion_total", false)):
+		_determinacion_jugador = DETERMINACION_BASE
+	_invulnerabilidad_jungiana = maxf(
+		_invulnerabilidad_jungiana, float(efectos.get("invulnerabilidad", 0.0))
+	)
+	_sacudida_camara = 0.38 if es_super else 0.24
+	_particulas_jungianas(float(efectos.get("area", 2.4)), es_super)
+	_reaccion(_figura_rival, 0.62 if es_super else 0.42)
+	Sonido.sonar(self, "marcar")
+	_mostrar_aviso_jungiano(("SUPER FINISHER · " if es_super else "FINISHER · ") + nombre, 1.8)
+	_actualizar_hud()
+	if _determinacion_rival <= 0 and not _intentar_retorno_rival():
+		_terminar(true)
+
+
+func _aplicar_curacion_arquetipo(efectos: Dictionary) -> void:
+	var tasa := float(efectos.get("curacion", 0.0)) + float(efectos.get("bonus_todo", 0.0))
+	if tasa <= 0.0 or _determinacion_jugador >= DETERMINACION_BASE:
 		return
-	var centro := (_jugador.position + _rival.position) * 0.5
-	_camara.position = centro + Vector3(0.0, 7.2, 8.2)
-	_camara.look_at(centro + Vector3(0.0, 0.9, 0.0), Vector3.UP)
+	_curacion_arquetipo_acumulada += tasa
+	while _curacion_arquetipo_acumulada >= 1.0:
+		_curacion_arquetipo_acumulada -= 1.0
+		_determinacion_jugador = mini(DETERMINACION_BASE, _determinacion_jugador + 1)
+
+
+func _actualizar_hud_jungiano() -> void:
+	var estado := JUNGIANO.estado_hud(self)
+	if _barra_momentum != null:
+		_barra_momentum.max_value = float(estado["momentum_max"])
+		_barra_momentum.value = float(estado["momentum_actual"])
+	if _boton_finisher == null:
+		return
+	_boton_finisher.disabled = not bool(estado["disponible"]) or _acabado
+	if not bool(estado["disponible"]):
+		_boton_finisher.text = tr("JUICIO_JUNGIANO_FINISHER")
+		return
+	_boton_finisher.text = (
+		tr("JUICIO_JUNGIANO_SUPER_FINISHER")
+		if bool(estado["es_super"])
+		else tr("JUICIO_JUNGIANO_FINISHER")
+	)
+
+
+func _mostrar_aviso_jungiano(texto: String, duracion: float) -> void:
+	if _etiqueta_jungiana == null:
+		return
+	_etiqueta_jungiana.text = texto
+	_etiqueta_jungiana.visible = true
+	_aviso_jungiano_restante = maxf(_aviso_jungiano_restante, duracion)
+
+
+func _particulas_jungianas(radio: float, es_super: bool) -> void:
+	FEEDBACK.particulas_jungianas(self, _rival, radio, es_super)
 
 
 func _reaccion(figura: Node3D, desplazamiento: float) -> void:
-	if reduccion_movimiento or figura == null:
-		return
-	var origen := figura.position
-	var tween := create_tween()
-	tween.tween_property(figura, "position:z", origen.z + desplazamiento, 0.08)
-	tween.tween_property(figura, "position:z", origen.z, 0.16)
+	FEEDBACK.reaccion(self, figura, desplazamiento, reduccion_movimiento)
 
 
 func _material(color: Color, emision: bool = false) -> StandardMaterial3D:
-	var material := StandardMaterial3D.new()
-	material.albedo_color = color
-	material.roughness = 0.9
-	if emision:
-		material.emission_enabled = true
-		material.emission = color
-		material.emission_energy_multiplier = 0.8
-	return material
+	return FEEDBACK.material(color, emision)

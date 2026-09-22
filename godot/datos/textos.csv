@@ -605,3 +605,7 @@ VISOR_DETALLE_961_OFICIO2_ANEXO_FOLIO,"El oficio deja constancia de una prescrip
 VISOR_DETALLE_961_CIRCULAR2_SELLO_FECHA,"El sello de distribución pisa parcialmente el año impreso, pero ambos siguen siendo legibles; no cambia la cronología consignada."
 VISOR_DETALLE_961_MEMO3_TINTA_SELLO,La tinta del sello de recibido tiene un borde más saturado que la del texto mecanografiado; es una diferencia de soporte, no una prueba de procedencia.
 VISOR_DETALLE_961_FACTURA4_HALO_SELLO,El sello amarillo deja un halo irregular en el reverso; el color ya visible en el documento no permite atribuirlo a una oficina concreta.
+JUICIO_JUNGIANO_MOMENTUM,MOMENTUM
+JUICIO_JUNGIANO_FINISHER,FINISHER
+JUICIO_JUNGIANO_SUPER_FINISHER,SUPER FINISHER
+JUICIO_JUNGIANO_FINISHER_TOOLTIP,Disponible al alcanzar el umbral de momentum

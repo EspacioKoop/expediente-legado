@@ -80,6 +80,25 @@ func _ready() -> void:
 	pass
 
 
+func reiniciar() -> void:
+	buffer_entradas.clear()
+
+
+func finisher_disponible_actual() -> String:
+	var momentum := _gestor("GestorMomentum")
+	if momentum == null:
+		return ""
+	var disponible := ""
+	var mayor_costo := -1.0
+	for finisher_id in finishers:
+		var finisher: Dictionary = finishers[finisher_id]
+		var costo := float(finisher.get("costo_momentum", 0.0))
+		if costo <= float(momentum.momentum_actual) and costo > mayor_costo:
+			disponible = String(finisher_id)
+			mayor_costo = costo
+	return disponible
+
+
 func _process(_delta: float) -> void:
 	var ahora := Time.get_ticks_msec() / 1000.0
 	var recientes: Array = []
@@ -106,7 +125,10 @@ func _verificar_combos() -> void:
 		var combo: Dictionary = combos_disponibles[combo_id]
 		if _coincide_secuencia(secuencia_actual, combo.get("secuencia", [])):
 			if _cumple_requisitos(combo.get("requisitos", {})):
-				combo_ejecutado.emit(combo.get("nombre", combo_id), combo.get("efectos", {}))
+				var efectos: Dictionary = combo.get("efectos", {}).duplicate(true)
+				if efectos.has("daño_multiplier") and not efectos.has("dano_multiplier"):
+					efectos["dano_multiplier"] = efectos["daño_multiplier"]
+				combo_ejecutado.emit(combo.get("nombre", combo_id), efectos)
 				buffer_entradas.clear()
 				return
 
@@ -121,13 +143,18 @@ func _coincide_secuencia(buffer: Array, objetivo: Array) -> bool:
 
 
 func _cumple_requisitos(req: Dictionary) -> bool:
-	var momentum = get_node("/root/GestorMomentum")
-	var arquetipos = get_node("/root/GestorArquetipos")
+	var momentum := _gestor("GestorMomentum")
+	var arquetipos := _gestor("GestorArquetipos")
+	if momentum == null or arquetipos == null:
+		return false
 
-	if req.has("momentum_min") and momentum.momentum_actual < req.get("momentum_min", 0):
+	if (
+		req.has("momentum_min")
+		and float(momentum.get("momentum_actual")) < float(req.get("momentum_min", 0))
+	):
 		return false
 	if req.has("arquetipo"):
-		var arquetipo = arquetipos.obtener_arquetipo(String(req.get("arquetipo", "")))
+		var arquetipo = arquetipos.call("obtener_arquetipo", String(req.get("arquetipo", "")))
 		if arquetipo == null or not bool(arquetipo.desbloqueado):
 			return false
 	return true
@@ -138,17 +165,33 @@ func ejecutar_finisher(nombre: String) -> bool:
 		return false
 
 	var finisher: Dictionary = finishers[nombre]
-	var momentum = get_node("/root/GestorMomentum")
-	if momentum.momentum_actual >= float(finisher.get("costo_momentum", 0)):
+	var momentum := _gestor("GestorMomentum")
+	if momentum == null:
+		return false
+	if float(momentum.get("momentum_actual")) >= float(finisher.get("costo_momentum", 0)):
 		var tipo := "super" if bool(finisher.get("es_super", false)) else "normal"
-		momentum.ejecutar_finisher(tipo)
+		var efectos: Dictionary = finisher.get("efectos", {}).duplicate(true)
+		if not efectos.has("dano"):
+			if efectos.has("daño_divino"):
+				efectos["dano"] = efectos["daño_divino"]
+			elif efectos.has("daño_verdadero"):
+				efectos["dano"] = efectos["daño_verdadero"]
+		if not bool(momentum.call("ejecutar_finisher", tipo)):
+			return false
 		(
 			finisher_ejecutado
 			. emit(
 				finisher.get("nombre", nombre),
-				finisher.get("efectos", {}),
+				efectos,
 				finisher.get("es_super", false),
 			)
 		)
 		return true
 	return false
+
+
+func _gestor(nombre: String) -> Node:
+	var padre := get_parent()
+	if padre == null:
+		return null
+	return padre.get_node_or_null(nombre)

@@ -1,26 +1,34 @@
 {
   "arquetipos": [
     {
+      "id": "persona",
+      "nombre": "Persona",
+      "descripcion": "Máscara social y adaptación",
+      "puntos_insight": 100
+    },
+    {
       "id": "sombra",
       "nombre": "Sombra",
-      "descripcion": "Aspecto reprimido",
-      "efecto": {
-        "bonus_crit": 0.1
-      }
+      "descripcion": "Aspectos reprimidos e integración",
+      "puntos_insight": 150
     },
     {
       "id": "anima",
       "nombre": "Anima/Animus",
-      "descripcion": "Contraparte interior",
-      "efecto": {
-        "curacion": 0.05
-      }
+      "descripcion": "Contraparte interior y cuidado",
+      "puntos_insight": 150
+    },
+    {
+      "id": "self",
+      "nombre": "Self",
+      "descripcion": "Integración de los arquetipos",
+      "puntos_insight": 300
     }
   ],
   "bendiciones": [
     {
       "id": "bendicion_sol",
-      "nombre": "Bendici\u00f3n del Sol",
+      "nombre": "Bendición del Sol",
       "duracion": 30,
       "efecto": {
         "ataque": 0.15
