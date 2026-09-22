@@ -19,6 +19,9 @@ const FRECUENCIAS_RADIO_HZ := [132.0, 165.0, 198.0, 231.0]
 const FRECUENCIA_CASSETTE_HZ := 96.0
 const AUDIO_MIX_RATE := 22050
 const AUDIO_FRAMES := 4096
+const AUDIO_UNIT_SIZE := 1.5
+const AUDIO_MAX_DISTANCE := 7.0
+const AUDIO_PANNING_STRENGTH := 0.65
 
 var _catalogo: Dictionary = {}
 var _jornada: Dictionary = {}
@@ -357,7 +360,10 @@ func _montar_audio() -> void:
 	_audio.name = NOMBRE_AUDIO
 	_audio.bus = BUS_AUDIO
 	_audio.volume_db = volumen_local_db()
-	_audio.max_distance = 8.0
+	_audio.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
+	_audio.unit_size = AUDIO_UNIT_SIZE
+	_audio.max_distance = AUDIO_MAX_DISTANCE
+	_audio.panning_strength = AUDIO_PANNING_STRENGTH
 	add_child(_audio)
 
 
@@ -371,11 +377,17 @@ func _sincronizar_audio(regenerar_stream: bool = false) -> void:
 		if _audio.playing:
 			_audio.stop()
 		_audio.stream = _crear_textura_audio()
-	if _encendida and _reproduciendo:
-		if _audio.is_inside_tree() and not _audio.playing:
-			_audio.play()
-	elif _audio.playing:
-		_audio.stop()
+		_audio.stream_paused = false
+	if not _encendida:
+		if _audio.playing:
+			_audio.stop()
+		_audio.stream_paused = false
+		return
+	if not _audio.is_inside_tree():
+		return
+	if not _audio.playing:
+		_audio.play()
+	_audio.stream_paused = not _reproduciendo
 
 
 ## Cama diegética mínima y original: no suplanta voces ni música del contenido.
