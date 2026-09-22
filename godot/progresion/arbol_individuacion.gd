@@ -26,8 +26,9 @@ func puede_desbloquear(nodo_id: String) -> bool:
 				break
 	cumple = cumple and not (req.has("evento") and not _evento_completado(req.evento))
 	cumple = cumple and not (req.has("ritual") and not _ritual_completado(req.ritual))
-	cumple = cumple and not (
-		req.has("nodos_completados") and nodos_completados.size() < req.nodos_completados
+	cumple = (
+		cumple
+		and not (req.has("nodos_completados") and nodos_completados.size() < req.nodos_completados)
 	)
 	return cumple
 
