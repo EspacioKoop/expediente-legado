@@ -8,7 +8,7 @@ var insight_total: int = 0
 var puntos_habilidad: int = 0
 
 
-func _ready() -> void:
+func _init() -> void:
 	var archivo := FileAccess.open("res://datos/jungian_mitologia.json", FileAccess.READ)
 	if archivo == null:
 		return
