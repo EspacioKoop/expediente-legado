@@ -12,7 +12,7 @@ MENU = ROOT / "godot" / "guion" / "menu_global.gd"
 VERIFICACION = ROOT / "godot" / "guion" / "verificacion_falsa.gd"
 DATOS = ROOT / "godot" / "datos" / "verificacion_falsa_textos.json"
 PRUEBA_GODOT = "pruebas/pruebas_tarot_diablo_1029.gd"
-RESUMEN = re.compile(r"tarot_diablo_1029: (\\d+) pasadas, 0 fallos")
+RESUMEN = re.compile(r"tarot_diablo_1029: (\d+) pasadas, 0 fallos")
 
 
 def bloque(fuente: str, inicio: str, fin: str) -> str:
