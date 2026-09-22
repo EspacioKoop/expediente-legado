@@ -34,13 +34,16 @@ class PasaporteInspeccion154Test(unittest.TestCase):
             {entrada["modo_observacion"] for entrada in self.catalogo},
             {"examinar"},
         )
-        permitidas = {"id", "zona", "ancla", "modo_observacion"}
+        obligatorias = {"id", "zona", "ancla_tipo", "ancla", "modo_observacion"}
+        permitidas = obligatorias | {"forma"}
         for entrada in self.catalogo:
-            self.assertEqual(set(entrada), permitidas)
+            self.assertTrue(obligatorias <= set(entrada))
+            self.assertTrue(set(entrada) <= permitidas)
             self.assertTrue(entrada["id"].strip())
             self.assertTrue(entrada["ancla"].strip())
+            self.assertIn(entrada["ancla_tipo"], {"nodo", "nodo_prefijo", "bulto_rol"})
 
-    def test_catalogo_no_inventa_recompensas_condiciones_ni_coordenadas(self):
+    def test_catalogo_no_inventa_recompensas_ni_coordenadas(self):
         serializado = json.dumps(self.catalogo, ensure_ascii=False).lower()
         for prohibido in (
             "dinero",
