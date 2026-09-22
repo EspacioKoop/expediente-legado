@@ -10,7 +10,6 @@ const POS_PUESTO := Vector3(-4.0, 1.45, 1.0)
 const CLAVE_ROL_ONBOARDING := "ONBOARDING_OBJETIVO_INICIAL"
 const CLAVE_PUESTO_ONBOARDING := "ONBOARDING_PUESTO_SIGA"
 const CLAVE_ACCION_ONBOARDING := "ONBOARDING_ACCION_SIGA"
-const COLOR_FONDO_TUTORIAL := Color("e8edf7")
 const UMBRAL_RESCATE_CAIDA := -8.0
 
 var _pista_puesto: PanelContainer
@@ -92,9 +91,7 @@ func _montar_onboarding_archivo() -> void:
 	_pista_puesto.offset_top = 96
 	_pista_puesto.offset_right = 310
 	_pista_puesto.offset_bottom = 180
-	_pista_puesto.add_theme_stylebox_override(
-		"panel", EstiloSiga.caja_saliente(COLOR_FONDO_TUTORIAL)
-	)
+	_pista_puesto.add_theme_stylebox_override("panel", HUDEstilo.caja_tutorial())
 	_hud.add_child(_pista_puesto)
 
 	var contenido := VBoxContainer.new()
@@ -106,7 +103,7 @@ func _montar_onboarding_archivo() -> void:
 	rol.name = "RolPistaPuesto"
 	rol.text = tr(CLAVE_ROL_ONBOARDING)
 	rol.add_theme_font_override("font", EstiloSiga.fuente_titulo())
-	rol.add_theme_color_override("font_color", EstiloSiga.AZUL_TITULO)
+	rol.add_theme_color_override("font_color", HUDEstilo.TITULO_TUTORIAL)
 	contenido.add_child(rol)
 
 	var texto := Label.new()
@@ -115,6 +112,7 @@ func _montar_onboarding_archivo() -> void:
 	texto.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	texto.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	texto.custom_minimum_size.x = 580
+	texto.add_theme_color_override("font_color", HUDEstilo.TEXTO_TUTORIAL)
 	texto.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	contenido.add_child(texto)
 
