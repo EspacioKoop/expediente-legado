@@ -1,5 +1,11 @@
 # Paridad de literatura: legado pre-Godot → sistema transversal literario
 
+## Estado posterior al corte — 2026-09-22
+
+La auditoría pre-Godot sigue siendo válida, pero la arquitectura literaria ya dejó de ser solo una propuesta. #1176 cerró el contrato transversal de **conocimiento, posesión, insight y ritual**; #1178 integró el primer corte ejecutable y #1194 alineó la capa legacy con ese contrato.
+
+El trabajo abierto se reorganizó en #1179–#1184. La tabla de ruta inferior se actualiza para reflejar esos issues actuales; no debe reutilizar la numeración provisional anterior.
+
 Seguimiento de #1175 y base documental para sistemas literarios.
 
 ## Corte temporal y método
@@ -63,13 +69,13 @@ La consecuencia para #1175 es importante: **la épica literaria es principalment
 ## Ruta de los sub-issues de #1175
 | Issue | Relación con el legado auditado |
 | --- | --- |
-| #1176 — contrato transversal literario | **Nuevo contrato**. Puede reutilizar idempotencia/procedencia como patrón, nunca el estado Tarot o religioso |
-| #1177 — obras literarias como ROMs | **Expansión nueva**. No había obra literaria pre-Godot con mecánicas |
-| #1178 — diálogos, autores, movimientos | **Expansión nueva**. No se halló postura literaria heredada de NPC |
-| #1179 — espacios, prácticas, calendario, material | **Expansión nueva**. No se halló institución/espacio/material literario heredado |
-| #1180 — sueño y simbolismo literario | **Consumidor nuevo**. Puede cruzar recuerdos de obras/mitos solo declarando su dominio |
-| #1181 — conflicto y ritual literario | **Expansión nueva**. Los compromisos literarios no proceden del combate Tarot legado |
-| #1182 — trayectoria y epílogo literario | **Expansión nueva**. No debe reinterpretar final político o colección de obras como identidad literaria |
+| #1176 — contrato transversal de conocimiento, posesión, insight y ritual | **Contrato integrado**. Reutiliza idempotencia/procedencia como patrón, con estado literario independiente |
+| #1179 — ROMs propias y desbloqueo por conocimiento significativo | **Expansión nueva**. No había ROM literaria pre-Godot; debe reutilizar la Portátil Color 98 |
+| #1180 — autores, movimientos, diálogos e insight contextual | **Expansión nueva**. No se halló postura literaria heredada de NPC |
+| #1181 — biblioteca, tertulia y prácticas de lectura en el mundo | **Expansión nueva**. No se halló institución/espacio literario heredado |
+| #1182 — sueño, memoria y simbolismo onírico | **Consumidor nuevo**. Puede cruzar recuerdos de obras/mitos sin inventar hechos SIGA |
+| #1183 — conflicto, ritual de cita y efectos contextuales | **Expansión nueva**. Conocer una obra habilita opciones; no aplica buffs por sí solo |
+| #1184 — trayectoria cultural y epílogo sin alignment único | **Expansión nueva**. Debe derivar de hechos concretos y admitir pluralidad/ausencia |
 
 ## Criterio de cierre de #1175
 - [x] se revisa legado web/backend y el historial hasta una frontera temporal explícita;
@@ -77,6 +83,6 @@ La consecuencia para #1175 es importante: **la épica literaria es principalment
 - [x] se identifican los **patrones recuperables** para documentos, diálogo/mundo, ROMs, sueño, conflicto y trayectoria, dejando explícito dónde no existía contenido literario heredado;
 - [x] se documentan los límites entre literatura, mitología, Tarot, ideología y simbolismo onírico;
 - [x] el inventario negativo impide que la ausencia se convierta en omisión silenciosa;
-- [x] #1176–#1182 quedan enlazados como destinos y se distingue qué es port y qué es expansión.
+- [x] #1176 y #1179–#1184 quedan enlazados como destinos y se distingue qué es port y qué es expansión.
 
 La conclusión canónica es deliberadamente conservadora: **no había una literatura jugable que rescatar; había sistemas vecinos que deben seguir siendo vecinos**.
