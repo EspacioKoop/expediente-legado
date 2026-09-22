@@ -100,7 +100,8 @@ static func registro_desde_datos(datos: Dictionary) -> Dictionary:
 		"folio": String(datos.get("folio", "")).strip_edges(),
 		"contenido": contenido,
 		"fecha": null if fecha.is_empty() else fecha,
-		"editor_meta": {
+		"editor_meta":
+		{
 			"remitente": String(datos.get("remitente", "")).strip_edges(),
 			"destino": String(datos.get("destino", "")).strip_edges(),
 			"asunto": String(datos.get("asunto", "")).strip_edges(),
@@ -143,12 +144,17 @@ static func datos_desde_paquete(paquete: Dictionary) -> Dictionary:
 
 static func vista_bbcode(datos: Dictionary) -> String:
 	var lineas := PackedStringArray()
-	lineas.append(
-		"[b]%s · %s[/b]"
-		% [
-			BBCode.escapar(String(datos.get("folio", "")).strip_edges()),
-			BBCode.escapar(String(datos.get("tipo", "")).strip_edges().to_upper()),
-		]
+	(
+		lineas
+		. append(
+			(
+				"[b]%s · %s[/b]"
+				% [
+					BBCode.escapar(String(datos.get("folio", "")).strip_edges()),
+					BBCode.escapar(String(datos.get("tipo", "")).strip_edges().to_upper()),
+				]
+			)
+		)
 	)
 	var fecha := String(datos.get("fecha", "")).strip_edges()
 	if not fecha.is_empty():
@@ -345,9 +351,7 @@ func _opciones(padre: VBoxContainer, rotulo: String, valores: Array) -> OptionBu
 	return opcion
 
 
-func _boton_formato(
-	padre: HBoxContainer, rotulo: String, apertura: String, cierre: String
-) -> void:
+func _boton_formato(padre: HBoxContainer, rotulo: String, apertura: String, cierre: String) -> void:
 	var boton := Button.new()
 	boton.text = rotulo
 	boton.pressed.connect(_aplicar_formato.bind(apertura, cierre))
