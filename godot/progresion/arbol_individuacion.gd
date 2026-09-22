@@ -77,9 +77,10 @@ func desbloquear_nodo(nodo_id: String) -> bool:
 	return true
 
 
-func conexiones_disponibles(nodo_id: String = nodo_actual) -> Array[String]:
+func conexiones_disponibles(nodo_id: String = "") -> Array[String]:
+	var origen := nodo_actual if nodo_id.is_empty() else nodo_id
 	var disponibles: Array[String] = []
-	var nodo = nodos.get(nodo_id)
+	var nodo = nodos.get(origen)
 	if typeof(nodo) != TYPE_DICTIONARY:
 		return disponibles
 	var conexiones = nodo.get("conexiones", [])
