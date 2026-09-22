@@ -46,9 +46,7 @@ func _probar_mayoria_en_cuadro(camara: Camera3D, delante: Vector3, detras: Vecto
 	)
 
 
-func _probar_cincuenta_por_ciento(
-	camara: Camera3D, delante: Vector3, detras: Vector3
-) -> void:
+func _probar_cincuenta_por_ciento(camara: Camera3D, delante: Vector3, detras: Vector3) -> void:
 	var medidor := Medidor.new()
 	medidor.iniciar("folio-50", true)
 	medidor.muestrear(camara, delante, 0.5)
@@ -85,9 +83,7 @@ func _probar_deteccion(camara: Camera3D, delante: Vector3) -> void:
 
 	_comprobar("la detección llega al contrato", toma.get("figura_detecto_camara"), true)
 	_comprobar(
-		"ser detectado contamina",
-		Contrato.evaluar_toma(toma),
-		Contrato.EstadoGrabacion.CONTAMINADA
+		"ser detectado contamina", Contrato.evaluar_toma(toma), Contrato.EstadoGrabacion.CONTAMINADA
 	)
 
 
