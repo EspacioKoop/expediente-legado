@@ -80,6 +80,25 @@ func _ready() -> void:
 	pass
 
 
+func reiniciar() -> void:
+	buffer_entradas.clear()
+
+
+func finisher_disponible_actual() -> String:
+	var momentum = get_node_or_null("/root/GestorMomentum")
+	if momentum == null:
+		return ""
+	var disponible := ""
+	var mayor_costo := -1.0
+	for finisher_id in finishers:
+		var finisher: Dictionary = finishers[finisher_id]
+		var costo := float(finisher.get("costo_momentum", 0.0))
+		if costo <= float(momentum.momentum_actual) and costo > mayor_costo:
+			disponible = String(finisher_id)
+			mayor_costo = costo
+	return disponible
+
+
 func _process(_delta: float) -> void:
 	var ahora := Time.get_ticks_msec() / 1000.0
 	var recientes: Array = []
@@ -106,7 +125,10 @@ func _verificar_combos() -> void:
 		var combo: Dictionary = combos_disponibles[combo_id]
 		if _coincide_secuencia(secuencia_actual, combo.get("secuencia", [])):
 			if _cumple_requisitos(combo.get("requisitos", {})):
-				combo_ejecutado.emit(combo.get("nombre", combo_id), combo.get("efectos", {}))
+				var efectos: Dictionary = combo.get("efectos", {}).duplicate(true)
+				if efectos.has("daño_multiplier") and not efectos.has("dano_multiplier"):
+					efectos["dano_multiplier"] = efectos["daño_multiplier"]
+				combo_ejecutado.emit(combo.get("nombre", combo_id), efectos)
 				buffer_entradas.clear()
 				return
 
@@ -141,12 +163,18 @@ func ejecutar_finisher(nombre: String) -> bool:
 	var momentum = get_node("/root/GestorMomentum")
 	if momentum.momentum_actual >= float(finisher.get("costo_momentum", 0)):
 		var tipo := "super" if bool(finisher.get("es_super", false)) else "normal"
+		var efectos: Dictionary = finisher.get("efectos", {}).duplicate(true)
+		if not efectos.has("dano"):
+			if efectos.has("daño_divino"):
+				efectos["dano"] = efectos["daño_divino"]
+			elif efectos.has("daño_verdadero"):
+				efectos["dano"] = efectos["daño_verdadero"]
 		momentum.ejecutar_finisher(tipo)
 		(
 			finisher_ejecutado
 			. emit(
 				finisher.get("nombre", nombre),
-				finisher.get("efectos", {}),
+				efectos,
 				finisher.get("es_super", false),
 			)
 		)
