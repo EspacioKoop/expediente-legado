@@ -3,20 +3,21 @@ extends Node3D
 
 signal terminado(gano: bool)
 
-const DETERMINACION_BASE := 8
-const DETERMINACION_MINIMA_RIVAL := 4
+const REGLAS = preload("res://guion/juicio_combate_reglas.gd")
+const DETERMINACION_BASE := REGLAS.DETERMINACION_BASE
+const DETERMINACION_MINIMA_RIVAL := REGLAS.DETERMINACION_MINIMA_RIVAL
 const VELOCIDAD_JUGADOR := 4.8
 const VELOCIDAD_RIVAL := 2.5
 const RADIO_ARENA := 5.0
 const ALCANCE_LIGERO := 1.75
 const ALCANCE_FUERTE := 2.15
-const ALCANCE_RIVAL := 1.45
+const ALCANCE_RIVAL := REGLAS.ALCANCE_RIVAL
 const RECARGA_LIGERA := 0.28
 const RECARGA_FUERTE := 0.58
-const RECARGA_RIVAL := 1.15
-const TELEGRAFO_RIVAL := 0.45
-const DURACION_DOCTRINA := 4.0
-const BONUS_TELEGRAFO_COMISION := 0.55
+const RECARGA_RIVAL := REGLAS.RECARGA_RIVAL
+const TELEGRAFO_RIVAL := REGLAS.TELEGRAFO_RIVAL
+const DURACION_DOCTRINA := REGLAS.DURACION_DOCTRINA
+const BONUS_TELEGRAFO_COMISION := REGLAS.BONUS_TELEGRAFO_COMISION
 const DISTANCIA_MESA := 3.0
 
 var reduccion_movimiento := false
@@ -69,77 +70,43 @@ var _azar := RandomNumberGenerator.new()
 
 
 static func determinacion_rival(bono_documental: int) -> int:
-	return maxi(DETERMINACION_MINIMA_RIVAL, DETERMINACION_BASE - maxi(0, bono_documental))
+	return REGLAS.determinacion_rival(bono_documental)
 
 
 static func resultado_ataque_rival(distancia: float, esquiva_restante: float) -> String:
-	if distancia > ALCANCE_RIVAL:
-		return "falla"
-	if esquiva_restante > 0.0:
-		return "esquiva"
-	return "impacto"
+	return REGLAS.resultado_ataque_rival(distancia, esquiva_restante)
 
 
 static func interrumpe_ataque(fuerte: bool, ataque_pendiente: bool, ritual: Dictionary) -> bool:
-	return fuerte and ataque_pendiente and bool(ritual.get("interrumpe_telegrafo_fuerte", false))
+	return REGLAS.interrumpe_ataque(fuerte, ataque_pendiente, ritual)
 
 
 static func modificadores_doctrina_ritual(eje: String, ritual: Dictionary) -> Dictionary:
-	var etiquetas = ritual.get("tags", [])
-	if typeof(etiquetas) != TYPE_ARRAY:
-		return {}
-	var modificadores := {}
-	match eje:
-		"comunismo":
-			if etiquetas.has("control_espacio"):
-				modificadores["duracion_mul"] = 1.25
-		"centrista":
-			if etiquetas.has("neutralizar"):
-				modificadores["recarga_rival_mul"] = 1.25
-		"socialdemocrata":
-			if etiquetas.has("telegraph"):
-				modificadores["telegraph_bonus"] = 0.25
-		"neoliberal":
-			if etiquetas.has("riesgo"):
-				modificadores["duracion_mul"] = 1.25
-	return modificadores
+	return REGLAS.modificadores_doctrina_ritual(eje, ritual)
 
 
 static func duracion_doctrina(eje: String, ritual: Dictionary) -> float:
-	var modificadores := modificadores_doctrina_ritual(eje, ritual)
-	return DURACION_DOCTRINA * float(modificadores.get("duracion_mul", 1.0))
+	return REGLAS.duracion_doctrina(eje, ritual)
 
 
 static func duracion_telegrafo(comision: bool, ritual: Dictionary) -> float:
-	if not comision:
-		return TELEGRAFO_RIVAL
-	var modificadores := modificadores_doctrina_ritual("socialdemocrata", ritual)
-	return (
-		TELEGRAFO_RIVAL
-		+ BONUS_TELEGRAFO_COMISION
-		+ float(modificadores.get("telegraph_bonus", 0.0))
-	)
+	return REGLAS.duracion_telegrafo(comision, ritual)
 
 
 static func recarga_mesa(ritual: Dictionary) -> float:
-	var modificadores := modificadores_doctrina_ritual("centrista", ritual)
-	return RECARGA_RIVAL * float(modificadores.get("recarga_rival_mul", 1.0))
+	return REGLAS.recarga_mesa(ritual)
 
 
 static func asamblea_interrumpe(eje_activo: String, ataque_pendiente: bool) -> bool:
-	return eje_activo == "comunismo" and ataque_pendiente
+	return REGLAS.asamblea_interrumpe(eje_activo, ataque_pendiente)
 
 
 static func dano_externalizado(dano_base: int, eje_activo: String) -> int:
-	return dano_base * 2 if eje_activo == "neoliberal" else dano_base
+	return REGLAS.dano_externalizado(dano_base, eje_activo)
 
 
 static func determinacion_retorno(ritual: Dictionary, retornos_usados: int) -> int:
-	var maximo := int(ritual.get("retornos_rival", 0))
-	if retornos_usados >= maximo:
-		return 0
-	return maxi(0, int(ritual.get("determinacion_retorno", 0)))
-
+	return REGLAS.determinacion_retorno(ritual, retornos_usados)
 
 func configurar(
 	acusado: Dictionary, bono_documental: int, reducir_movimiento: bool, raiz: int = 0
