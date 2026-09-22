@@ -347,9 +347,7 @@ static func _acusacion(comprobar: Callable) -> void:
 	var es_ermitanio := func(carta): return carta.get("id", "") == "el-ermitanio"
 	var ermitanio_pendiente: Dictionary = ultimo["tarot"].filter(es_ermitanio)[0]
 	comprobar.call(
-		"llegar a cero concede Ermitaño",
-		ermitanio_pendiente.get("recogida", false),
-		true
+		"llegar a cero concede Ermitaño", ermitanio_pendiente.get("recogida", false), true
 	)
 	comprobar.call(
 		"Ermitaño entra en memoria fantasma al perder la vida",
@@ -400,17 +398,11 @@ static func _acusacion(comprobar: Callable) -> void:
 	var canje := Acusacion.canjear_carta_por_vida(rescatado, "el-loco")
 	comprobar.call("el canje se ejecuta", canje["resultado"], "canje")
 	comprobar.call("el canje recupera exactamente una vida", rescatado["vida"], 1)
-	comprobar.call(
-		"el canje resuelve la frontera", Acusacion.despido_pendiente(rescatado), false
-	)
+	comprobar.call("el canje resuelve la frontera", Acusacion.despido_pendiente(rescatado), false)
 	comprobar.call("el canje conserva el mismo día", dia_rescatado["dia"], 7)
-	var loco_gastado := rescatado["tarot"].filter(
-		func(carta): return carta.get("id", "") == "el-loco"
-	)[0]
+	var loco_gastado := rescatado["tarot"].filter(func(carta): return carta.get("id", "") == "el-loco")[0]
 	comprobar.call("la carta canjeada queda gastada", loco_gastado.get("gastada", false), true)
-	var templanza := rescatado["tarot"].filter(
-		func(carta): return carta.get("id", "") == "la-templanza"
-	)[0]
+	var templanza := rescatado["tarot"].filter(func(carta): return carta.get("id", "") == "la-templanza")[0]
 	comprobar.call("el canje concede Templanza", templanza.get("recogida", false), true)
 	comprobar.call(
 		"el canje no concede La Muerte",
