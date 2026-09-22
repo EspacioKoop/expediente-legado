@@ -112,12 +112,22 @@ func _espacio_de(fase: String) -> Dictionary:
 	return espacio
 
 
+## #966 consume las dos fuentes ya canónicas y nada más: Jornada es dueña de
+## la hora (#963) y Meticulosidad de la atención documental diaria (#961).
+## Normalizar aquí mantiene Ambiente puro y evita una segunda puntuación.
+func _contexto_ambiente() -> Dictionary:
+	return {
+		"hora": Jornada.hora_decimal(jornada),
+		"meticulosidad": float(Meticulosidad.puntos(jornada)) / float(Meticulosidad.PUNTOS_MAX),
+	}
+
+
 func _entrar_en(fase: String) -> void:
 	_cerrar_dialogo_actual()
 	_retirar_clima()
 	super._entrar_en(fase)
 	Jornada.sincronizar_reloj_fase(jornada, fase)
-	Ambiente.reproducir(self, fase, -24.0, {"hora": Jornada.hora_decimal(jornada)})
+	Ambiente.reproducir(self, fase, -24.0, _contexto_ambiente())
 	if fase == "archivo":
 		_montar_companeros_conversables()
 		_montar_terminal_interactivo()
@@ -253,7 +263,7 @@ func _cerrar_expediente() -> void:
 		_archivado_sesion.refrescar(self)
 		# El visor puede haber consumido una acción y avanzado #963. Al volver a
 		# la oficina se cruza a la cama acústica de la nueva franja, si cambió.
-		Ambiente.reproducir(self, "archivo", -24.0, {"hora": Jornada.hora_decimal(jornada)})
+		Ambiente.reproducir(self, "archivo", -24.0, _contexto_ambiente())
 
 
 func _abrir_duelo(quien: Dictionary, zona: Area3D) -> void:
