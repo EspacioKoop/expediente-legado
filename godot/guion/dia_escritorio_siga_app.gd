@@ -408,9 +408,32 @@ func _registrar_ruta_os98(ruta: String) -> void:
 	var dia := get_parent()
 	if dia == null or _explorador_app == null:
 		return
+	var partida_actual: Variant = dia.get("partida")
+	if not partida_actual is Partida:
+		return
 	var estado := _estado_os98(dia)
-	if ContaminacionOs98.registrar_ruta(estado, ruta):
-		_persistir_estado_os98(dia, estado)
+	if not ContaminacionOs98.registrar_ruta(estado, ruta):
+		return
+
+	# #1029: la primera entrada REAL en la ruta administrativa restringida es
+	# el equivalente Godot de "consiga acceso administrativo". El memorándum
+	# solo revela la credencial; hacer visible la ruta tampoco concede Tarot.
+	_persistir_estado_os98(dia, estado)
+	var partida_estado := (partida_actual as Partida).estado
+	Prometeo.desbloquear_carta_en_estado(partida_estado, "el-emperador")
+
+	# Si Emperador era la última carta válida pendiente de una partida perfecta,
+	# El Mundo se evalúa en este mismo evento y nunca al cargar el escritorio.
+	var contenido := Contenido.new()
+	if contenido.cargar():
+		Prometeo.sincronizar_tarot_mundo(partida_estado, contenido.principales())
+
+	# El guardado canónico del día escribe Partida y, después, el estado local
+	# de las apps OS98; así acceso restringido y Tarot quedan en el mismo corte.
+	if dia.has_method("_guardar_o_avisar"):
+		dia.call("_guardar_o_avisar", "")
+	else:
+		(partida_actual as Partida).guardar()
 
 
 func _sincronizar_contexto_os98(dia: Node) -> void:
