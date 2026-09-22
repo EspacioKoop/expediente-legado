@@ -43,7 +43,12 @@ func _process(delta: float) -> void:
 		combo_actual = 0
 
 
-func registrar_golpe(es_critico: bool = false, tipo_danio: String = "fisico") -> void:
+func agregar_momentum(cantidad: float) -> void:
+	momentum_actual = clampf(momentum_actual + cantidad, 0.0, momentum_max)
+	momentum_cambiado.emit(momentum_actual, momentum_max)
+
+
+func registrar_golpe(es_critico: bool = false, tipo_danio: String = "fisico") -> float:
 	if not en_combate:
 		en_combate = true
 
@@ -68,6 +73,7 @@ func registrar_golpe(es_critico: bool = false, tipo_danio: String = "fisico") ->
 		finisher_disponible.emit()
 	elif momentum_actual >= THRESHOLD_SUPER_FINISHER:
 		finisher_disponible.emit()  # Super finisher
+	return ganancia
 
 
 func registrar_dano_recibido() -> void:
