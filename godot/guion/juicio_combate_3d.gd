@@ -478,11 +478,14 @@ func _resolver_capa_simbolica() -> void:
 
 
 func _aplicar_configuracion_ritual() -> void:
-	var configuracion := SIMBOLICO.configuracion_ritual(
-		_ritual,
-		RADIO_ARENA,
-		VELOCIDAD_RIVAL,
-		RECARGA_FUERTE,
+	var configuracion := (
+		SIMBOLICO
+		. configuracion_ritual(
+			_ritual,
+			RADIO_ARENA,
+			VELOCIDAD_RIVAL,
+			RECARGA_FUERTE,
+		)
 	)
 	_radio_arena = float(configuracion["radio_arena"])
 	_velocidad_rival = float(configuracion["velocidad_rival"])
