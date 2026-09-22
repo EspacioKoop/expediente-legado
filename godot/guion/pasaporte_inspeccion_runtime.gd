@@ -62,6 +62,7 @@ func crear_punto(punto_id: String) -> PuntoInspeccion3D:
 	punto.configurar(punto_id)
 
 	var colision := CollisionShape3D.new()
+	colision.name = "CollisionShape3D"
 	var esfera := SphereShape3D.new()
 	esfera.radius = RADIO_INTERACCION
 	colision.shape = esfera
