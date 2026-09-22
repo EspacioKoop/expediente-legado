@@ -189,6 +189,7 @@ func ejecutar_finisher(nombre: String) -> bool:
 		return true
 	return false
 
+
 func _gestor(nombre: String) -> Node:
 	var padre := get_parent()
 	if padre == null:
