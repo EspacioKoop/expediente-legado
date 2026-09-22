@@ -51,7 +51,7 @@ func _probar_contrato_cerrado() -> void:
 		"Partida no cabe en payload", PresenciaDatos.validar_evento(con_partida, AHORA)["ok"], false
 	)
 
-	var gesto_libre := creado["event"].duplicate(true)
+	var gesto_libre: Dictionary = creado["event"].duplicate(true)
 	gesto_libre["payload"]["gesture"] = "texto libre"
 	_comprobar(
 		"gesto fuera del enum se rechaza",
@@ -59,7 +59,7 @@ func _probar_contrato_cerrado() -> void:
 		false
 	)
 
-	var infinito := creado["event"].duplicate(true)
+	var infinito: Dictionary = creado["event"].duplicate(true)
 	infinito["payload"]["position"] = [INF, 0.0, 0.0]
 	_comprobar(
 		"posición no finita se rechaza", PresenciaDatos.validar_evento(infinito, AHORA)["ok"], false
@@ -120,7 +120,7 @@ func _probar_dos_clientes_fixture() -> void:
 		"participante ocultado desaparece", cliente_b.consultar(AHORA + 3)["participants"].size(), 0
 	)
 
-	var otro_room := pub_b["event"].duplicate(true)
+	var otro_room: Dictionary = pub_b["event"].duplicate(true)
 	otro_room["payload"]["room_id"] = "OTRA-SALA"
 	transporte_a.inyectar(otro_room)
 	_comprobar("otra sala queda filtrada", cliente_a.consultar(AHORA + 1)["participants"].size(), 0)
@@ -160,7 +160,7 @@ func _probar_avatar_no_solido_e_interpolado() -> void:
 		avatar.get_child_count() > 0 and avatar.get_child(0) is MeshInstance3D,
 		true
 	)
-	_comprobar("avatar no es cuerpo de colisión", avatar is CollisionObject3D, false)
+	_comprobar("avatar no expone capa de colisión", avatar.has_method("get_collision_layer"), false)
 	_comprobar("avatar acepta segunda muestra", avatar.aplicar_evento(segundo["event"]), true)
 	avatar.avanzar(0.05)
 	_comprobar(
