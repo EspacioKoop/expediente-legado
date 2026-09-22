@@ -1,14 +1,15 @@
-[gd_scene load_steps=3 format=3 uid://UID_DEMO]
-[ext_resource type="Script" path="res://demo/integrado/demo_integrado.gd" id=1]
-[ext_resource type="PackedScene" path="res://interactables/libros/libro_interactivo.tscn" id=2]
-[ext_resource type="PackedScene" path="res://test_jungian/test_jungian.tscn" id=3]
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://demo/integrado/demo_integrado.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://interactables/libros/libro_interactivo.tscn" id="2_book"]
+[ext_resource type="PackedScene" path="res://test_jungian/test_jungian.tscn" id="3_test"]
 
 [node name="DemoIntegrado" type="Node3D"]
-name = "Demo Integrado: Jungiano + Literatura"
+script = ExtResource("1_script")
 
-[node name="LibroOdisea" type="Node3D" parent="."] instance = ExtResource(2)
-transform/position = Vector3(0, 1, 0)
-meta/obra_id = "odisea"
+[node name="LibroOdisea" parent="." instance=ExtResource("2_book")]
+position = Vector3(0, 1, 0)
+obra_id = "odisea"
 
-[node name="AreaTest" type="Node3D" parent="."] instance = ExtResource(3)
-transform/position = Vector3(5, 0, 0)
+[node name="AreaTest" parent="." instance=ExtResource("3_test")]
+position = Vector3(5, 0, 0)

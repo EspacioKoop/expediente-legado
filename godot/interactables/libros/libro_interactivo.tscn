@@ -1,8 +1,8 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://interactables/libros/libro_interactivo.gd" id="1_script"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_libro"]
+[sub_resource type="BoxShape3D" id="BoxShape_libro"]
 size = Vector3(0.5, 0.3, 0.1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_libro"]
@@ -14,11 +14,15 @@ collision_mask = 1
 script = ExtResource("1_script")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-shape = SubResource("BoxShape3D_libro")
+shape = SubResource("BoxShape_libro")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_libro")
 
 [node name="InteractionLabel" type="Label" parent="."]
+offset_left = -50.0
+offset_top = -40.0
+offset_right = 50.0
+offset_bottom = 40.0
 text = "E para leer"
 visible = false
