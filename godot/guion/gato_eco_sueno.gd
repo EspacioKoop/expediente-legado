@@ -44,6 +44,39 @@ static func registrar(gato: Dictionary, dia: int, accion: String) -> bool:
 	return true
 
 
+static func validar(gato: Dictionary) -> Array:
+	var errores := []
+	if not gato.has(CLAVE):
+		return errores
+	var eco = gato[CLAVE]
+	if typeof(eco) != TYPE_DICTIONARY:
+		return ["%s no es un objeto" % CLAVE]
+	if not eco.has("dia"):
+		errores.append("%s.dia ausente" % CLAVE)
+	else:
+		var dia = eco["dia"]
+		if (
+			typeof(dia) not in [TYPE_INT, TYPE_FLOAT]
+			or not is_finite(float(dia))
+			or floor(float(dia)) != float(dia)
+			or float(dia) < 0.0
+		):
+			errores.append("%s.dia inválido" % CLAVE)
+	if not eco.has("acciones"):
+		errores.append("%s.acciones ausente" % CLAVE)
+	elif typeof(eco["acciones"]) != TYPE_ARRAY:
+		errores.append("%s.acciones no es una lista" % CLAVE)
+	else:
+		var acciones: Array = eco["acciones"]
+		if acciones.size() > MAX_ACCIONES:
+			errores.append("%s.acciones excede el máximo" % CLAVE)
+		for accion in acciones:
+			if typeof(accion) != TYPE_STRING or not ACCIONES_VALIDAS.has(String(accion)):
+				errores.append("%s.acciones contiene una acción inválida" % CLAVE)
+				break
+	return errores
+
+
 static func acciones_de(gato: Dictionary, dia: int) -> Array:
 	var eco: Dictionary = gato.get(CLAVE, {})
 	if int(eco.get("dia", -1)) != dia:
