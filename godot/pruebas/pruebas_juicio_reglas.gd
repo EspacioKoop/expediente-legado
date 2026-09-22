@@ -35,8 +35,10 @@ static func todo(comprobar: Callable) -> void:
 	_caso(
 		comprobar,
 		"reglas: control de espacio alarga Asamblea",
-		JuicioCombateReglas.duracion_doctrina("comunismo", control)
-			> JuicioCombateReglas.DURACION_DOCTRINA,
+		(
+			JuicioCombateReglas.duracion_doctrina("comunismo", control)
+			> JuicioCombateReglas.DURACION_DOCTRINA
+		),
 		true,
 	)
 	_caso(
@@ -48,15 +50,19 @@ static func todo(comprobar: Callable) -> void:
 	_caso(
 		comprobar,
 		"reglas: telegraph amplía Comisión",
-		JuicioCombateReglas.duracion_telegrafo(true, telegrafo)
-			> JuicioCombateReglas.duracion_telegrafo(true, {}),
+		(
+			JuicioCombateReglas.duracion_telegrafo(true, telegrafo)
+			> JuicioCombateReglas.duracion_telegrafo(true, {})
+		),
 		true,
 	)
 	_caso(
 		comprobar,
 		"reglas: riesgo alarga Externalizar",
-		JuicioCombateReglas.duracion_doctrina("neoliberal", riesgo)
-			> JuicioCombateReglas.DURACION_DOCTRINA,
+		(
+			JuicioCombateReglas.duracion_doctrina("neoliberal", riesgo)
+			> JuicioCombateReglas.DURACION_DOCTRINA
+		),
 		true,
 	)
 	_caso(
@@ -74,9 +80,7 @@ static func todo(comprobar: Callable) -> void:
 	_caso(
 		comprobar,
 		"reglas: interrupción ritual exige golpe fuerte y ataque pendiente",
-		JuicioCombateReglas.interrumpe_ataque(
-			true, true, {"interrumpe_telegrafo_fuerte": true}
-		),
+		JuicioCombateReglas.interrumpe_ataque(true, true, {"interrumpe_telegrafo_fuerte": true}),
 		true,
 	)
 	_caso(
