@@ -16,8 +16,9 @@ var _pregunta: Label
 var _confirmar: Button
 
 
-static func debe_mostrar(valor_azar: float) -> bool:
-	return valor_azar >= 0.0 and valor_azar < PROBABILIDAD
+static func debe_mostrar(tirada: int) -> bool:
+	# Tres residuos de diez conservan el 30 % del legado sin RNG global.
+	return float(posmod(tirada, 10)) / 10.0 < PROBABILIDAD
 
 
 static func registrar(estado: Dictionary) -> bool:
@@ -32,12 +33,10 @@ func _ready() -> void:
 	_montar()
 
 
-func mostrar(indice_pregunta: int = -1) -> void:
+func mostrar(tirada_pregunta: int) -> void:
 	var preguntas: Array = _textos.get("preguntas", [])
 	if not preguntas.is_empty():
-		var indice := indice_pregunta
-		if indice < 0 or indice >= preguntas.size():
-			indice = randi_range(0, preguntas.size() - 1)
+		var indice := posmod(tirada_pregunta, preguntas.size())
 		_pregunta.text = String(preguntas[indice])
 	visible = true
 	_confirmar.grab_focus()
