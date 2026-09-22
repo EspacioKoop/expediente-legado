@@ -180,9 +180,7 @@ static func avanzar(
 	return gato
 
 
-static func _avanzar_hambriento(
-	gato: Dictionary, cuenco: Vector3, delta: float
-) -> Dictionary:
+static func _avanzar_hambriento(gato: Dictionary, cuenco: Vector3, delta: float) -> Dictionary:
 	var pos: Vector3 = gato["pos"]
 	var primera_vez := String(gato.get("estado", "")) != "hambriento"
 	gato["estado"] = "hambriento"
@@ -196,10 +194,7 @@ static func _avanzar_hambriento(
 	var destino: Vector3 = gato.get("destino", cuenco)
 	var desde_cuenco := Vector3(pos.x - cuenco.x, 0, pos.z - cuenco.z)
 	var destino_desde_cuenco := Vector3(destino.x - cuenco.x, 0, destino.z - cuenco.z)
-	if (
-		desde_cuenco.length() > RADIO_HAMBRIENTO
-		or destino_desde_cuenco.length() > RADIO_HAMBRIENTO
-	):
+	if desde_cuenco.length() > RADIO_HAMBRIENTO or destino_desde_cuenco.length() > RADIO_HAMBRIENTO:
 		gato["destino"] = cuenco
 		gato["espera"] = 0.0
 		destino = cuenco
