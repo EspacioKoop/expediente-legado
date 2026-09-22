@@ -17,6 +17,10 @@ func _probar() -> void:
 	_comprobar(indice.catalogo().size() >= 16, "el catálogo incorpora la red y cuatro cabeceras")
 	_comprobar(indice.categorias().size() >= 5, "existen categorías de directorio")
 	_comprobar(indice.buscar("").is_empty(), "una consulta vacía no devuelve toda la red")
+	_comprobar(
+		indice.buscar("coño").is_empty(),
+		"la búsqueda no confunde una palabra con una subcadena de economía",
+	)
 
 	var informatica := indice.buscar("informática")
 	_comprobar(not informatica.is_empty(), "normaliza tildes al buscar")
@@ -202,6 +206,11 @@ func _probar_navegador() -> void:
 	_comprobar(prensa["recurso"]["tipo"] == "prensa", "conserva el tipo de renderer de prensa")
 	navegador.navegar("http://byte.local/")
 	_comprobar(navegador.historial().size() == 3, "registra navegación en historial")
+	navegador.navegar("http://byte.local/")
+	_comprobar(
+		navegador.historial().size() == 3,
+		"no duplica consecutivamente la misma URL en historial",
+	)
 	_comprobar(navegador.url_actual() == "http://byte.local/", "expone la URL actual")
 	navegador.ir_atras()
 	_comprobar(
