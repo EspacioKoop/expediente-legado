@@ -114,6 +114,8 @@ func procesar(delta: float, ahora_unix: int = -1) -> void:
 	if _fase_actual() != FASE_COMPARTIDA:
 		desactivar_sala()
 		return
+	if _servicio != null:
+		_servicio.procesar(delta)
 	if not _host.has_method("get") or not is_instance_valid(_host._mundo):
 		return
 
