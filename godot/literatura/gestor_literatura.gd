@@ -39,14 +39,17 @@ func conocer_obra(
 	if id.is_empty():
 		return false
 
-	var evento := LiteraturaEventos.crear_evento(
-		"conocimiento:legacy:%s" % id,
-		LiteraturaEventos.CANAL_CONOCIMIENTO,
-		id,
-		fuente,
-		contexto,
-		jornada,
-		["legacy"],
+	var evento := (
+		LiteraturaEventos
+		. crear_evento(
+			"conocimiento:legacy:%s" % id,
+			LiteraturaEventos.CANAL_CONOCIMIENTO,
+			id,
+			fuente,
+			contexto,
+			jornada,
+			["legacy"],
+		)
 	)
 	if not LiteraturaEventos.registrar(registro_literario, evento):
 		return false
