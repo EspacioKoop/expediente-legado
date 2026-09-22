@@ -5,6 +5,7 @@ signal terminado(gano: bool)
 
 const REGLAS = preload("res://guion/juicio_combate_reglas.gd")
 const FEEDBACK = preload("res://guion/juicio_combate_feedback_3d.gd")
+const HUD = preload("res://guion/juicio_combate_hud.gd")
 const DETERMINACION_BASE := REGLAS.DETERMINACION_BASE
 const DETERMINACION_MINIMA_RIVAL := REGLAS.DETERMINACION_MINIMA_RIVAL
 const VELOCIDAD_JUGADOR := 4.8
@@ -620,86 +621,28 @@ func _montar_limite_ritual() -> void:
 
 
 func _montar_hud() -> void:
-	var capa := CanvasLayer.new()
-	capa.layer = 5
-	add_child(capa)
-
-	var margen := MarginContainer.new()
-	margen.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	margen.add_theme_constant_override("margin_left", 24)
-	margen.add_theme_constant_override("margin_right", 24)
-	margen.add_theme_constant_override("margin_top", 18)
-	capa.add_child(margen)
-
-	var bloque := VBoxContainer.new()
-	bloque.add_theme_constant_override("separation", 6)
-	margen.add_child(bloque)
-
-	var columnas := HBoxContainer.new()
-	columnas.add_theme_constant_override("separation", 32)
-	bloque.add_child(columnas)
-
-	_barra_jugador = ProgressBar.new()
-	_barra_jugador.max_value = DETERMINACION_BASE
-	_barra_jugador.show_percentage = false
-	_barra_jugador.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	columnas.add_child(_barra_jugador)
-
-	var nombre := Label.new()
-	nombre.text = tr(String(_acusado.get("nombre", "")))
-	nombre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	nombre.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	columnas.add_child(nombre)
-
-	_barra_rival = ProgressBar.new()
-	_barra_rival.max_value = determinacion_rival(_bono_documental)
-	_barra_rival.show_percentage = false
-	_barra_rival.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	columnas.add_child(_barra_rival)
-
-	if not _ritual.is_empty() or _hay_cargas_doctrina():
-		_etiqueta_ritual = Label.new()
-		_etiqueta_ritual.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		bloque.add_child(_etiqueta_ritual)
-
-	_botones_doctrina = HBoxContainer.new()
-	_botones_doctrina.alignment = BoxContainer.ALIGNMENT_CENTER
-	_botones_doctrina.add_theme_constant_override("separation", 6)
-	bloque.add_child(_botones_doctrina)
+	var nodos := HUD.montar(
+		self,
+		tr(String(_acusado.get("nombre", ""))),
+		determinacion_rival(_bono_documental),
+		not _ritual.is_empty() or _hay_cargas_doctrina(),
+		{
+			"ataque_inminente": tr("VENTANILLA_ATAQUE_INMINENTE"),
+			"momentum": tr("JUICIO_JUNGIANO_MOMENTUM"),
+			"finisher": tr("JUICIO_JUNGIANO_FINISHER"),
+			"finisher_tooltip": tr("JUICIO_JUNGIANO_FINISHER_TOOLTIP"),
+		},
+		Callable(self, "_ejecutar_finisher_jungiano"),
+	)
+	_barra_jugador = nodos["barra_jugador"]
+	_barra_rival = nodos["barra_rival"]
+	_etiqueta_ritual = nodos["etiqueta_ritual"]
+	_etiqueta_ataque = nodos["etiqueta_ataque"]
+	_botones_doctrina = nodos["botones_doctrina"]
+	_barra_momentum = nodos["barra_momentum"]
+	_boton_finisher = nodos["boton_finisher"]
+	_etiqueta_jungiana = nodos["etiqueta_jungiana"]
 	_pintar_doctrinas()
-
-	_etiqueta_ataque = Label.new()
-	_etiqueta_ataque.text = tr("VENTANILLA_ATAQUE_INMINENTE")
-	_etiqueta_ataque.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_etiqueta_ataque.add_theme_color_override("font_color", Color(0.94, 0.28, 0.18))
-	_etiqueta_ataque.visible = false
-	bloque.add_child(_etiqueta_ataque)
-
-	var fila_momentum := HBoxContainer.new()
-	fila_momentum.add_theme_constant_override("separation", 8)
-	bloque.add_child(fila_momentum)
-
-	var texto_momentum := Label.new()
-	texto_momentum.text = tr("JUICIO_JUNGIANO_MOMENTUM")
-	fila_momentum.add_child(texto_momentum)
-
-	_barra_momentum = ProgressBar.new()
-	_barra_momentum.show_percentage = true
-	_barra_momentum.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	fila_momentum.add_child(_barra_momentum)
-
-	_boton_finisher = Button.new()
-	_boton_finisher.text = tr("JUICIO_JUNGIANO_FINISHER")
-	_boton_finisher.disabled = true
-	_boton_finisher.tooltip_text = tr("JUICIO_JUNGIANO_FINISHER_TOOLTIP")
-	_boton_finisher.pressed.connect(_ejecutar_finisher_jungiano)
-	fila_momentum.add_child(_boton_finisher)
-
-	_etiqueta_jungiana = Label.new()
-	_etiqueta_jungiana.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_etiqueta_jungiana.visible = false
-	bloque.add_child(_etiqueta_jungiana)
-
 
 func _actualizar_hud() -> void:
 	if _barra_jugador == null or _barra_rival == null:
