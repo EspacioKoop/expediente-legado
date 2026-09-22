@@ -257,11 +257,14 @@ func _abrir_juicio() -> void:
 		return
 	_tablero.visible = false
 	_juicio = JuicioCombate3D.new()
-	_juicio.configurar(
-		_rival,
-		CareoDocumental.bono_juicio(combate),
-		reduccion_movimiento,
-		int(partida.estado.get("semilla", 0)),
+	(
+		_juicio
+		. configurar(
+			_rival,
+			CareoDocumental.bono_juicio(combate),
+			reduccion_movimiento,
+			int(partida.estado.get("semilla", 0)),
+		)
 	)
 	_juicio.terminado.connect(_al_juicio_terminado)
 	add_child(_juicio)
