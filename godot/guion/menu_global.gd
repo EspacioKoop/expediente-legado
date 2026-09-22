@@ -353,7 +353,7 @@ func _refrescar_historial() -> void:
 		% [int(presion.get("total", 0)), int(presion.get("reiteradas", 0))]
 	)
 	var aviso := Label.new()
-	aviso.text = tr("MENU_GLOBAL_HISTORIAL_PRESION_%d" % nivel)
+	aviso.text = _texto_presion_historial(nivel)
 	aviso.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_historial_lista.add_child(aviso)
 
@@ -372,6 +372,16 @@ func _refrescar_historial() -> void:
 		fila.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		fila.custom_minimum_size.x = 640
 		_historial_lista.add_child(fila)
+
+
+func _texto_presion_historial(nivel: int) -> String:
+	match nivel:
+		1:
+			return tr("MENU_GLOBAL_HISTORIAL_PRESION_1")
+		2:
+			return tr("MENU_GLOBAL_HISTORIAL_PRESION_2")
+		_:
+			return tr("MENU_GLOBAL_HISTORIAL_PRESION_0")
 
 
 func _texto_evento_historial(evento: Dictionary) -> String:
