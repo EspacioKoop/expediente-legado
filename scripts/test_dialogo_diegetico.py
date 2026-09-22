@@ -30,6 +30,14 @@ class DialogoDiegeticoTest(unittest.TestCase):
         self.assertIn('return "▲"', self.source)
         self.assertIn('panel.name = "DialogoDiegetico"', self.source)
 
+    def test_dialogo_tiene_rol_visual_distinto_del_tutorial(self):
+        self.assertIn('HUDEstilo.caja_dialogo()', self.source)
+        self.assertIn('hablante.name = "HablanteDialogoDiegetico"', self.source)
+        self.assertIn('HUDEstilo.HABLANTE_DIALOGO', self.source)
+        self.assertIn('HUDEstilo.TEXTO_DIALOGO', self.source)
+        self.assertIn('contenido.add_child(hablante)', self.source)
+        self.assertIn('contenido.add_child(etiqueta)', self.source)
+
     def test_dialogo_toma_prioridad_en_hud_y_se_libera(self):
         self.assertIn("hud.registrar(HUDLayer.DIALOGO, panel)", self.source)
         self.assertIn("hud.activar(HUDLayer.DIALOGO)", self.source)
