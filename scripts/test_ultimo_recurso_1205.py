@@ -1,4 +1,5 @@
 from pathlib import Path
+import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -16,75 +17,95 @@ def bloque(fuente: str, inicio: str, fin: str) -> str:
     return fuente[i:j]
 
 
-def test_cero_es_estado_persistente_y_no_reset() -> None:
-    perder = bloque(
-        ACUSACION,
-        "static func perder_vida(",
-        "## La frontera pendiente",
-    )
-    assert 'estado[CLAVE_DESPIDO_PENDIENTE] = true' in perder
-    assert '"despido_pendiente": true' in perder
-    assert '"vida": 0' in perder
-    assert "reiniciar_vuelta" not in perder
-    assert '"la-muerte"' not in perder
+class UltimoRecurso1205Test(unittest.TestCase):
+    def test_cero_es_estado_persistente_y_no_reset(self) -> None:
+        perder = bloque(
+            ACUSACION,
+            "static func perder_vida(",
+            "## La frontera pendiente",
+        )
+        self.assertIn('estado[CLAVE_DESPIDO_PENDIENTE] = true', perder)
+        self.assertIn('"despido_pendiente": true', perder)
+        self.assertIn('"vida": 0', perder)
+        self.assertNotIn("reiniciar_vuelta", perder)
+        self.assertNotIn('"la-muerte"', perder)
 
-    assert '"despido_pendiente": false' in PARTIDA
-    assert 'guardado.has("despido_pendiente")' in PARTIDA
-    assert "for clave in fusionado:" in PARTIDA
+        self.assertIn('"despido_pendiente": false', PARTIDA)
+        self.assertIn('guardado.has("despido_pendiente")', PARTIDA)
+        self.assertIn("for clave in fusionado:", PARTIDA)
+
+    def test_canje_es_unico_emisor_de_templanza_en_esta_frontera(self) -> None:
+        canje = bloque(
+            ACUSACION,
+            "static func canjear_carta_por_vida(",
+            "## Aceptar el cese",
+        )
+        self.assertIn('elegida["gastada"] = true', canje)
+        self.assertIn('estado["vida"] = 1', canje)
+        self.assertIn(
+            'desbloquear_carta_en_estado(estado, "la-templanza")',
+            canje,
+        )
+        self.assertNotIn("reiniciar_vuelta", canje)
+        self.assertNotIn('"la-muerte"', canje)
+
+        mundo = bloque(
+            PROMETEO,
+            "static func sincronizar_tarot_mundo(",
+            "## Una acusación es precipitada",
+        )
+        self.assertIn('["el-mundo", "la-templanza"]', mundo)
+        self.assertNotIn(
+            'desbloquear_carta_en_estado(estado, "la-templanza")',
+            mundo,
+        )
+
+    def test_cese_es_la_unica_salida_que_reinicia_y_concede_muerte(self) -> None:
+        cese = bloque(
+            ACUSACION,
+            "static func aceptar_cese(",
+            "## Cierra el careo",
+        )
+        self.assertIn(
+            'desbloquear_carta_en_estado(estado, "la-muerte")',
+            cese,
+        )
+        self.assertIn("EvaluacionDesempeno.sellar", cese)
+        self.assertIn("Prometeo.reiniciar_vuelta", cese)
+        self.assertIn("Jornada.reiniciar_vuelta", cese)
+        self.assertLess(
+            cese.index('"la-muerte"'),
+            cese.index("Prometeo.reiniciar_vuelta"),
+        )
+
+    def test_ui_solo_solicita_y_delega_reglas_al_dominio(self) -> None:
+        self.assertIn("signal canje_solicitado", UI)
+        self.assertIn("signal cese_solicitado", UI)
+        self.assertIn("Acusacion.cartas_canjeables(_estado)", UI)
+        self.assertIn('call_deferred("grab_focus")', UI)
+        self.assertNotIn("canjear_carta_por_vida", UI)
+        self.assertNotIn("aceptar_cese", UI)
+
+    def test_recarga_y_visor_recuperan_la_misma_decision(self) -> None:
+        ready = bloque(DIA, "func _ready()", "## Recupera o presenta")
+        self.assertIn("Acusacion.despido_pendiente(partida.estado)", ready)
+        self.assertIn("_abrir_ultimo_recurso_pendiente()", ready)
+
+        sello = bloque(
+            VISOR,
+            "func _al_terminar_sello(",
+            "func _abrir_careo_firmado(",
+        )
+        remate = bloque(
+            VISOR,
+            "func _al_terminar_remate(",
+            "## La misma superficie",
+        )
+        self.assertIn('resultado.get("despido_pendiente", false)', sello)
+        self.assertIn('duelo.get("despido_pendiente", false)', remate)
+        self.assertIn("_abrir_ultimo_recurso", sello)
+        self.assertIn("_abrir_ultimo_recurso", remate)
 
 
-def test_canje_es_unico_emisor_de_templanza_en_esta_frontera() -> None:
-    canje = bloque(
-        ACUSACION,
-        "static func canjear_carta_por_vida(",
-        "## Aceptar el cese",
-    )
-    assert 'elegida["gastada"] = true' in canje
-    assert 'estado["vida"] = 1' in canje
-    assert 'desbloquear_carta_en_estado(estado, "la-templanza")' in canje
-    assert "reiniciar_vuelta" not in canje
-    assert '"la-muerte"' not in canje
-
-    # La sincronización del Mundo sigue excluyendo Templanza, pero no la crea.
-    mundo = bloque(
-        PROMETEO,
-        "static func sincronizar_tarot_mundo(",
-        "## Una acusación es precipitada",
-    )
-    assert '["el-mundo", "la-templanza"]' in mundo
-    assert 'desbloquear_carta_en_estado(estado, "la-templanza")' not in mundo
-
-
-def test_cese_es_la_unica_salida_que_reinicia_y_concede_muerte() -> None:
-    cese = bloque(
-        ACUSACION,
-        "static func aceptar_cese(",
-        "## Cierra el careo",
-    )
-    assert 'desbloquear_carta_en_estado(estado, "la-muerte")' in cese
-    assert "EvaluacionDesempeno.sellar" in cese
-    assert "Prometeo.reiniciar_vuelta" in cese
-    assert "Jornada.reiniciar_vuelta" in cese
-    assert cese.index('"la-muerte"') < cese.index("Prometeo.reiniciar_vuelta")
-
-
-def test_ui_solo_solicita_y_delega_reglas_al_dominio() -> None:
-    assert "signal canje_solicitado" in UI
-    assert "signal cese_solicitado" in UI
-    assert "Acusacion.cartas_canjeables(_estado)" in UI
-    assert 'call_deferred("grab_focus")' in UI
-    assert "canjear_carta_por_vida" not in UI
-    assert "aceptar_cese" not in UI
-
-
-def test_recarga_y_visor_recuperan_la_misma_decision() -> None:
-    ready = bloque(DIA, "func _ready()", "## Recupera o presenta")
-    assert "Acusacion.despido_pendiente(partida.estado)" in ready
-    assert "_abrir_ultimo_recurso_pendiente()" in ready
-
-    sello = bloque(VISOR, "func _al_terminar_sello(", "func _abrir_careo_firmado(")
-    remate = bloque(VISOR, "func _al_terminar_remate(", "## La misma superficie")
-    assert 'resultado.get("despido_pendiente", false)' in sello
-    assert 'duelo.get("despido_pendiente", false)' in remate
-    assert "_abrir_ultimo_recurso" in sello
-    assert "_abrir_ultimo_recurso" in remate
+if __name__ == "__main__":
+    unittest.main()
