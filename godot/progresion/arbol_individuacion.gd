@@ -3,7 +3,7 @@ extends Resource
 
 signal nodo_desbloqueado(nodo_id: String, recompensas: Dictionary)
 
-var nodos: Dictionary = {}
+@export_storage var nodos: Dictionary = {}
 var nodos_completados: Array = []
 var nodo_actual: String = ""
 var eventos_completados: Array[String] = []
