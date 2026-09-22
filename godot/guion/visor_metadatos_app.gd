@@ -1,10 +1,19 @@
 ## Tercera capa de profundidad de #286: metadatos examinables del folio.
 ##
 ## Solo presenta datos ya existentes en el registro (folio, tipo y fecha).
-## No descubre pistas, no interpreta contenido y no altera acusación ni careo.
+## #961 observa aquí gestos deliberados ya disponibles, sin barra visible y sin
+## descubrir pistas críticas ni alterar acusación/careo.
 extends "res://guion/visor_anotaciones_app.gd"
 
+const MeticulosidadEstado := preload("res://guion/meticulosidad.gd")
+const DetallesMeticulosidadCatalogo := preload("res://guion/detalles_meticulosidad.gd")
+const RUTA_DETALLES_METICULOSIDAD := "res://datos/detalles_meticulosidad.json"
+
 var _metadatos: Label
+var _detalle_meticulosidad: Label
+var _scroll_meticulosidad: VScrollBar
+var _documento_meticulosidad_id := ""
+var _catalogo_detalles_meticulosidad: Dictionary = {}
 
 
 func _columna_documento() -> Control:
@@ -13,23 +22,161 @@ func _columna_documento() -> Control:
 	_metadatos.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_metadatos.text = ""
 	columna.add_child(_metadatos)
+
+	_detalle_meticulosidad = Label.new()
+	_detalle_meticulosidad.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_detalle_meticulosidad.visible = false
+	_detalle_meticulosidad.text = ""
+	columna.add_child(_detalle_meticulosidad)
+
+	_conectar_scroll_meticulosidad()
 	return columna
 
 
 func _al_elegir_documento(indice: int) -> void:
+	var esperado: Dictionary = caso["registros"][indice]
+	var esperado_id := String(esperado.get("id", ""))
+	var era_leido: bool = jornada.get("leidos_total", []).has(esperado_id)
 	super._al_elegir_documento(indice)
 	_actualizar_metadatos()
+	if String(registro_actual.get("id", "")) != esperado_id:
+		return
+
+	_documento_meticulosidad_id = esperado_id
+	if era_leido:
+		var motivo := (
+			"fecha" if not String(registro_actual.get("fecha", "")).is_empty() else "relectura"
+		)
+		_registrar_meticulosidad(registro_actual, "relectura", motivo)
 
 
 func _al_elegir_caso(indice: int) -> void:
 	super._al_elegir_caso(indice)
+	_documento_meticulosidad_id = ""
 	_actualizar_metadatos()
+
+
+func _al_marcar_folio() -> void:
+	var registro_id := String(registro_actual.get("id", ""))
+	var estaba_marcado: bool = (
+		not registro_id.is_empty() and _marcadores_del_caso().has(registro_id)
+	)
+	super._al_marcar_folio()
+	if (
+		not registro_id.is_empty()
+		and not estaba_marcado
+		and _marcadores_del_caso().has(registro_id)
+	):
+		_registrar_meticulosidad(registro_actual, "marcador", "folio")
+
+
+func _al_relacionar() -> void:
+	var primero := _origen_relacion
+	var actual := String(registro_actual.get("id", ""))
+	super._al_relacionar()
+	if primero.is_empty() or actual.is_empty() or primero == actual:
+		return
+	# El segundo gesto termina el intento tanto si la relación está catalogada
+	# como si no. La atención está en comparar, no en acertar.
+	if _origen_relacion.is_empty():
+		_registrar_meticulosidad_por_id(primero, "relacion", "relacion")
+		_registrar_meticulosidad(registro_actual, "relacion", "relacion")
 
 
 func _actualizar_metadatos() -> void:
 	if _metadatos == null:
 		return
 	_metadatos.text = _texto_metadatos(registro_actual)
+	_actualizar_detalles_meticulosidad()
+
+
+func _actualizar_detalles_meticulosidad() -> void:
+	if _detalle_meticulosidad == null:
+		return
+	var detalles := _detalles_meticulosidad_actuales()
+	if detalles.is_empty():
+		_detalle_meticulosidad.text = ""
+		_detalle_meticulosidad.visible = false
+		return
+
+	var textos: Array[String] = []
+	for detalle in detalles:
+		var clave := String(detalle.get("texto", "")).strip_edges()
+		if not clave.is_empty():
+			textos.append(tr(clave))
+	if textos.is_empty():
+		_detalle_meticulosidad.text = ""
+		_detalle_meticulosidad.visible = false
+		return
+	_detalle_meticulosidad.text = tr("VISOR_DETALLE_961_OBSERVACION") % "\n".join(textos)
+	_detalle_meticulosidad.visible = true
+
+
+func _detalles_meticulosidad_actuales() -> Array[Dictionary]:
+	if registro_actual.is_empty():
+		return []
+	if _catalogo_detalles_meticulosidad.is_empty():
+		_catalogo_detalles_meticulosidad = _cargar_catalogo_detalles_meticulosidad()
+	var registro_id := String(registro_actual.get("id", "")).strip_edges()
+	return (
+		DetallesMeticulosidadCatalogo
+		. visibles(
+			_catalogo_detalles_meticulosidad,
+			jornada,
+			registro_id,
+		)
+	)
+
+
+static func _cargar_catalogo_detalles_meticulosidad() -> Dictionary:
+	if not FileAccess.file_exists(RUTA_DETALLES_METICULOSIDAD):
+		return {}
+	var datos: Variant = JSON.parse_string(
+		FileAccess.get_file_as_string(RUTA_DETALLES_METICULOSIDAD)
+	)
+	if datos is Dictionary:
+		return datos
+	return {}
+
+
+func _conectar_scroll_meticulosidad() -> void:
+	if _documento == null:
+		return
+	_scroll_meticulosidad = _documento.get_v_scroll_bar()
+	if (
+		_scroll_meticulosidad != null
+		and not _scroll_meticulosidad.value_changed.is_connected(_al_desplazar_documento)
+	):
+		_scroll_meticulosidad.value_changed.connect(_al_desplazar_documento)
+
+
+func _al_desplazar_documento(_valor: float) -> void:
+	if _scroll_meticulosidad == null or _documento_meticulosidad_id.is_empty():
+		return
+	if _scroll_meticulosidad.max_value <= _scroll_meticulosidad.page + 1.0:
+		return
+	if (
+		_scroll_meticulosidad.value + _scroll_meticulosidad.page
+		< _scroll_meticulosidad.max_value - 2.0
+	):
+		return
+	_registrar_meticulosidad(registro_actual, "lectura_completa", "margen")
+
+
+func _registrar_meticulosidad(registro: Dictionary, evento: String, motivo: String) -> void:
+	var registro_id := String(registro.get("id", ""))
+	if registro_id.is_empty():
+		return
+	if MeticulosidadEstado.registrar(jornada, registro_id, evento, motivo):
+		_guardar_o_avisar()
+		_actualizar_detalles_meticulosidad()
+
+
+func _registrar_meticulosidad_por_id(registro_id: String, evento: String, motivo: String) -> void:
+	if registro_id.is_empty():
+		return
+	if MeticulosidadEstado.registrar(jornada, registro_id, evento, motivo):
+		_guardar_o_avisar()
 
 
 static func _texto_metadatos(registro: Dictionary) -> String:

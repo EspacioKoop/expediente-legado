@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="512" viewBox="0 0 1024 512">
+<title>Reflejo causal — Popol Wuj #655</title>
+<desc>Dos rutas gemelas con ecos visuales; sin escritura ni iconografía arqueológica.</desc>
+<rect width="1024" height="512" fill="#101615"/>
+<g fill="none" stroke-linecap="round">
+  <path d="M80 128 H320 Q400 128 400 208 V384 H160 Q80 384 80 304z" stroke="#72543b" stroke-width="34"/>
+  <path d="M944 128 H704 Q624 128 624 208 V384 H864 Q944 384 944 304z" stroke="#72543b" stroke-width="34"/>
+  <path d="M400 208 C470 168 554 168 624 208" stroke="#3d8b82" stroke-width="14"/>
+  <path d="M400 310 C468 350 556 350 624 310" stroke="#b58a55" stroke-width="10"/>
+</g>
+<g fill="#d2b171">
+  <circle cx="240" cy="256" r="28"/><circle cx="784" cy="256" r="28"/>
+</g>
+<g fill="#4b9389">
+  <circle cx="400" cy="208" r="18"/><circle cx="624" cy="208" r="18"/>
+</g>
+</svg>

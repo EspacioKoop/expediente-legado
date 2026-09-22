@@ -198,6 +198,20 @@ func _montar_prototipo() -> void:
 		Vector3(5.8, 2.8, 2.2),
 		COLOR_TENSOR,
 	)
+	_crear_hotspot_tensor(
+		arquitectura,
+		"UsarTensorPersiana",
+		TENSOR_PERSIANA,
+		Vector3(-5.8, 2.5, 2.2),
+		Vector3(0.8, 5.2, 0.8),
+	)
+	_crear_hotspot_tensor(
+		arquitectura,
+		"UsarTensorCable",
+		TENSOR_CABLE,
+		Vector3(5.8, 2.8, 2.2),
+		Vector3(0.8, 5.8, 0.8),
+	)
 
 	_sombra_a = _crear_caja(
 		arquitectura,
@@ -271,6 +285,39 @@ func _aplicar_estado() -> void:
 	var activa := bool(estado["puente_activo"])
 	_puente.visible = activa
 	_puente_colision.disabled = not activa
+
+
+func _al_usar_tensor(_actor: Node, nombre: String) -> void:
+	var actual := valor_tensor(nombre)
+	var pasos := -TENSOR_MAX if actual >= TENSOR_MAX else 1
+	var reduccion := bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false))
+	ajustar_tensor(nombre, pasos, reduccion)
+
+
+func _crear_hotspot_tensor(
+	padre: Node3D,
+	nombre: String,
+	tensor: String,
+	posicion: Vector3,
+	tam: Vector3,
+) -> Interactuable3D:
+	var hotspot := Interactuable3D.new()
+	hotspot.name = nombre
+	hotspot.position = posicion
+	hotspot.verbo = Interactuable3D.Verbo.USAR
+	hotspot.nombre_objeto = "tensor de persiana" if tensor == TENSOR_PERSIANA else "tensor de cable"
+	hotspot.sonido = Interactuable3D.SIN_SONIDO
+	hotspot.collision_mask = 0
+	hotspot.activado.connect(_al_usar_tensor.bind(tensor))
+	padre.add_child(hotspot)
+
+	var forma := BoxShape3D.new()
+	forma.size = tam
+	var colision := CollisionShape3D.new()
+	colision.name = "Colision"
+	colision.shape = forma
+	hotspot.add_child(colision)
+	return hotspot
 
 
 func _crear_bloque_colision(
