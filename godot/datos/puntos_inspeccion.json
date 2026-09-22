@@ -1,0 +1,26 @@
+[
+  {
+    "id": "archivo:mesa-clasificacion",
+    "zona": "archivo",
+    "ancla": "mesa_clasificacion",
+    "modo_observacion": "examinar"
+  },
+  {
+    "id": "trayecto:farola-sodio",
+    "zona": "trayecto",
+    "ancla": "FarolaRetroUrban",
+    "modo_observacion": "examinar"
+  },
+  {
+    "id": "casa:ventana",
+    "zona": "casa",
+    "ancla": "VentanaCasa",
+    "modo_observacion": "examinar"
+  },
+  {
+    "id": "sueno:peine",
+    "zona": "sueño",
+    "ancla": "SuenoFormas:peine",
+    "modo_observacion": "examinar"
+  }
+]
