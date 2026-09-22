@@ -141,15 +141,25 @@ static func aplicar_derrota(
 	actual["fase"] = FASE_INTERRUMPIDO
 	var consecuencia := Acusacion.perder_vida(estado, jornada, 1)
 	var despido := bool(consecuencia.get("despido", false))
+	var pendiente := bool(consecuencia.get("despido_pendiente", false))
 	actual["ultima_derrota"] = {
 		"vida": int(consecuencia.get("vida", estado.get("vida", 0))),
 		"despido": despido,
+		"despido_pendiente": pendiente,
 	}
 
+	if pendiente:
+		return {
+			"resultado": "ultimo_recurso",
+			"despido": false,
+			"despido_pendiente": true,
+			"vida": 0,
+		}
 	if despido:
 		return {
 			"resultado": "reasignacion",
 			"despido": true,
+			"despido_pendiente": false,
 			"vida": int(consecuencia.get("vida", 0)),
 		}
 
@@ -164,6 +174,30 @@ static func aplicar_derrota(
 		"despido": false,
 		"vida": int(consecuencia.get("vida", estado.get("vida", 0))),
 	}
+
+
+## Tras un canje real, el clímax sigue en la misma vuelta y con sus mismas
+## cargas. Solo se crea el siguiente intento si la frontera ya quedó resuelta.
+static func reanudar_tras_ultimo_recurso(estado: Dictionary, jornada: Dictionary) -> bool:
+	if Acusacion.despido_pendiente(estado) or int(estado.get("vida", 0)) <= 0:
+		return false
+	var actual := estado_actual(estado, jornada)
+	if actual.is_empty() or String(actual.get("fase", "")) != FASE_INTERRUMPIDO:
+		return false
+	var ultima = actual.get("ultima_derrota", {})
+	if typeof(ultima) != TYPE_DICTIONARY or not bool(ultima.get("despido_pendiente", false)):
+		return false
+
+	actual["intentos"] = int(actual.get("intentos", 1)) + 1
+	actual["combate"] = _nuevo_combate(
+		String(actual.get("dificultad", "normal")),
+		actual.get("cargas_iniciales", {}),
+	)
+	actual["fase"] = FASE_COMBATE
+	ultima["despido_pendiente"] = false
+	ultima["resuelta"] = "canje"
+	actual["ultima_derrota"] = ultima
+	return true
 
 
 static func contrato_final(estado: Dictionary, jornada: Dictionary) -> Dictionary:
