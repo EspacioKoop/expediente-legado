@@ -582,13 +582,16 @@ func _montar_hud() -> void:
 
 
 func _actualizar_hud() -> void:
-	if not HUD.actualizar_determinacion(
-		_barra_jugador,
-		_barra_rival,
-		_etiqueta_ritual,
-		_determinacion_jugador,
-		_determinacion_rival,
-		_texto_ritual(),
+	if not (
+		HUD
+		. actualizar_determinacion(
+			_barra_jugador,
+			_barra_rival,
+			_etiqueta_ritual,
+			_determinacion_jugador,
+			_determinacion_rival,
+			_texto_ritual(),
+		)
 	):
 		return
 	_actualizar_hud_jungiano()
@@ -600,15 +603,18 @@ func _texto_ritual() -> String:
 	if not eje_estado.is_empty():
 		var habilidad: Dictionary = Historias.HABILIDADES[eje_estado]
 		nombre_doctrina = tr(String(habilidad["nombre"]))
-	var compromiso_activo := not compromiso_religion_bloqueante(
-		_compromisos_religion, _rival_inicio_agresion
-	).is_empty()
-	return HUD.texto_ritual(
-		_ritual,
-		_contraataque,
-		nombre_doctrina,
-		compromiso_activo,
-		tr("JUICIO_RELIGION_COMPROMISO"),
+	var compromiso_activo := not (
+		compromiso_religion_bloqueante(_compromisos_religion, _rival_inicio_agresion).is_empty()
+	)
+	return (
+		HUD
+		. texto_ritual(
+			_ritual,
+			_contraataque,
+			nombre_doctrina,
+			compromiso_activo,
+			tr("JUICIO_RELIGION_COMPROMISO"),
+		)
 	)
 
 
@@ -617,14 +623,17 @@ func _hay_cargas_doctrina() -> bool:
 
 
 func _pintar_doctrinas() -> void:
-	HUD.pintar_doctrinas(
-		_botones_doctrina,
-		_cargas_doctrina,
-		DOCTRINA.bloqueada(_doctrina_activa, _comision_pendiente),
-		Prometeo.EJES,
-		Historias.HABILIDADES,
-		Callable(self, "tr"),
-		Callable(self, "activar_doctrina"),
+	(
+		HUD
+		. pintar_doctrinas(
+			_botones_doctrina,
+			_cargas_doctrina,
+			DOCTRINA.bloqueada(_doctrina_activa, _comision_pendiente),
+			Prometeo.EJES,
+			Historias.HABILIDADES,
+			Callable(self, "tr"),
+			Callable(self, "activar_doctrina"),
+		)
 	)
 
 
@@ -743,13 +752,16 @@ func _aplicar_curacion_arquetipo(efectos: Dictionary) -> void:
 
 
 func _actualizar_hud_jungiano() -> void:
-	HUD.actualizar_jungiano(
-		_barra_momentum,
-		_boton_finisher,
-		JUNGIANO.estado_hud(self),
-		_acabado,
-		tr("JUICIO_JUNGIANO_FINISHER"),
-		tr("JUICIO_JUNGIANO_SUPER_FINISHER"),
+	(
+		HUD
+		. actualizar_jungiano(
+			_barra_momentum,
+			_boton_finisher,
+			JUNGIANO.estado_hud(self),
+			_acabado,
+			tr("JUICIO_JUNGIANO_FINISHER"),
+			tr("JUICIO_JUNGIANO_SUPER_FINISHER"),
+		)
 	)
 
 
