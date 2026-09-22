@@ -10,6 +10,7 @@ const ARENA = preload("res://guion/juicio_combate_arena_3d.gd")
 const JUNGIANO = preload("res://guion/juicio_combate_jungiano.gd")
 const SIMBOLICO = preload("res://guion/juicio_combate_simbolico.gd")
 const RIVAL = preload("res://guion/juicio_combate_rival.gd")
+const DOCTRINA = preload("res://guion/juicio_combate_doctrina.gd")
 const DETERMINACION_BASE := REGLAS.DETERMINACION_BASE
 const DETERMINACION_MINIMA_RIVAL := REGLAS.DETERMINACION_MINIMA_RIVAL
 const VELOCIDAD_JUGADOR := 4.8
@@ -171,21 +172,29 @@ func _process(delta: float) -> void:
 
 
 func activar_doctrina(eje: String) -> bool:
-	if _acabado or not Historias.HABILIDADES.has(eje):
-		return false
-	if int(_cargas_doctrina.get(eje, 0)) <= 0:
-		return false
-	if not _doctrina_activa.is_empty() or _comision_pendiente:
+	var plan := (
+		DOCTRINA
+		. intentar_activar(
+			eje,
+			_cargas_doctrina,
+			_ritual,
+			_acabado,
+			Historias.HABILIDADES.has(eje),
+			_doctrina_activa,
+			_comision_pendiente,
+		)
+	)
+	if not bool(plan["aceptada"]):
 		return false
 
-	_cargas_doctrina[eje] = int(_cargas_doctrina[eje]) - 1
-	match eje:
-		"comunismo", "neoliberal":
-			_doctrina_activa = eje
-			_doctrina_tiempo = duracion_doctrina(eje, _ritual)
-		"centrista":
+	_cargas_doctrina = plan["cargas"]
+	match String(plan["accion"]):
+		DOCTRINA.ACCION_TEMPORIZADA:
+			_doctrina_activa = String(plan["doctrina_activa"])
+			_doctrina_tiempo = float(plan["doctrina_tiempo"])
+		DOCTRINA.ACCION_MESA:
 			_aplicar_mesa_dialogo()
-		"socialdemocrata":
+		DOCTRINA.ACCION_COMISION:
 			_activar_comision()
 
 	Sonido.sonar(self, "marcar")
@@ -212,15 +221,20 @@ func _aplicar_mesa_dialogo() -> void:
 
 
 func _activar_comision() -> void:
-	if not _ataque_rival_pendiente:
-		_comision_pendiente = true
-		return
-	var total_nuevo := duracion_telegrafo(true, _ritual)
-	var extra := maxf(0.0, total_nuevo - TELEGRAFO_RIVAL)
-	_telegrafo_rival += extra
-	_telegrafo_rival_total += extra
-	_doctrina_activa = "socialdemocrata"
-	_doctrina_tiempo = _telegrafo_rival
+	var estado := (
+		DOCTRINA
+		. plan_comision(
+			_ataque_rival_pendiente,
+			_telegrafo_rival,
+			_telegrafo_rival_total,
+			_ritual,
+		)
+	)
+	_comision_pendiente = bool(estado["comision_pendiente"])
+	_doctrina_activa = String(estado["doctrina_activa"])
+	_doctrina_tiempo = float(estado["doctrina_tiempo"])
+	_telegrafo_rival = float(estado["telegrafo_restante"])
+	_telegrafo_rival_total = float(estado["telegrafo_total"])
 
 
 func _cerrar_doctrina() -> void:
@@ -566,9 +580,7 @@ func _texto_ritual() -> String:
 		texto = "RITUAL · %s" % String(_ritual.get("nombre", ""))
 	if _contraataque > 0:
 		texto += (" · " if not texto.is_empty() else "") + "CONTRA +%d" % _contraataque
-	var eje_estado := _doctrina_activa
-	if eje_estado.is_empty() and _comision_pendiente:
-		eje_estado = "socialdemocrata"
+	var eje_estado := DOCTRINA.eje_estado(_doctrina_activa, _comision_pendiente)
 	if not eje_estado.is_empty():
 		var habilidad: Dictionary = Historias.HABILIDADES[eje_estado]
 		var nombre := tr(String(habilidad["nombre"]))
@@ -587,7 +599,7 @@ func _pintar_doctrinas() -> void:
 		_botones_doctrina.remove_child(hijo)
 		hijo.queue_free()
 
-	var bloqueadas := not _doctrina_activa.is_empty() or _comision_pendiente
+	var bloqueadas := DOCTRINA.bloqueada(_doctrina_activa, _comision_pendiente)
 	for eje in Prometeo.EJES:
 		var cantidad := int(_cargas_doctrina.get(eje, 0))
 		if cantidad <= 0:
