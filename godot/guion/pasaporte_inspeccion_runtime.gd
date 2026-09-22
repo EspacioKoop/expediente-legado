@@ -109,12 +109,18 @@ func _buscar_prefijo(nodo: Node, prefijo: String) -> Node3D:
 
 func _buscar_bulto_por_rol(mundo: Node3D, zona: String, rol: String) -> Node3D:
 	var espacio := EspaciosCatalogo.de_fase(zona)
-	var posicion: Variant = null
+	var posicion := Vector3.ZERO
+	var encontrada := false
 	for bulto in espacio.get("bultos", []):
-		if String(bulto.get("rol", "")) == rol:
-			posicion = bulto.get("pos", null)
-			break
-	if typeof(posicion) != TYPE_VECTOR3:
+		if String(bulto.get("rol", "")) != rol:
+			continue
+		var candidata = bulto.get("pos", null)
+		if typeof(candidata) != TYPE_VECTOR3:
+			return null
+		posicion = candidata
+		encontrada = true
+		break
+	if not encontrada:
 		return null
 
 	for hijo in mundo.get_children():
