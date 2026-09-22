@@ -1,5 +1,11 @@
 # Paridad de religión: legado pre-Godot → sistema transversal
 
+## Estado posterior al corte — 2026-09-22
+
+La conclusión histórica de esta auditoría no cambia: no había un subsistema religioso jugable pre-Godot que “portar”. Lo que sí ha avanzado es la expansión nueva: JALI 98 (#1158/#1163), VITRAL 98 (#1168) y SARNATH 98 (#1170) prueban el canal cultural/ROM; #934 dispone de un primer corte de práctica y cultura material (#1147); y #936 tiene ya un primer contrato contextual de conflicto (#1117).
+
+Mantener la separación central de #916: **exposición, práctica, convicción y vínculo no son equivalentes**, y religión no debe absorber Tarot ni mitologías.
+
 Seguimiento de #930 y base documental de #916 / #931–#937.
 
 ## Corte temporal y método
