@@ -22,6 +22,7 @@ static func mostrar(
 	var panel := PanelContainer.new()
 	panel.name = "DialogoDiegetico"
 	panel.theme = EstiloSiga.tema()
+	panel.add_theme_stylebox_override("panel", HUDEstilo.caja_dialogo())
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	panel.offset_left = -330
@@ -29,19 +30,32 @@ static func mostrar(
 	panel.offset_right = 330
 	panel.offset_bottom = -30
 
-	var etiqueta := Label.new()
-	etiqueta.name = "TextoDialogoDiegetico"
-	etiqueta.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	etiqueta.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	etiqueta.custom_minimum_size.x = 620
-	etiqueta.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var contenido := VBoxContainer.new()
+	contenido.name = "ContenidoDialogoDiegetico"
+	contenido.add_theme_constant_override("separation", 4)
+	panel.add_child(contenido)
 
 	var nombre := companero.nombre_visible.strip_edges()
 	if nombre.is_empty():
 		nombre = "…"
 	var direccion := _marca_direccion(caminante, companero.global_position)
-	etiqueta.text = "%s  %s\n%s" % [direccion, nombre, texto]
-	panel.add_child(etiqueta)
+
+	var hablante := Label.new()
+	hablante.name = "HablanteDialogoDiegetico"
+	hablante.text = "%s  %s" % [direccion, nombre]
+	hablante.add_theme_font_override("font", EstiloSiga.fuente_titulo())
+	hablante.add_theme_color_override("font_color", HUDEstilo.HABLANTE_DIALOGO)
+	hablante.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	contenido.add_child(hablante)
+
+	var etiqueta := Label.new()
+	etiqueta.name = "TextoDialogoDiegetico"
+	etiqueta.text = texto
+	etiqueta.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	etiqueta.custom_minimum_size.x = 620
+	etiqueta.add_theme_color_override("font_color", HUDEstilo.TEXTO_DIALOGO)
+	etiqueta.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	contenido.add_child(etiqueta)
 	hud.add_child(panel)
 	hud.registrar(HUDLayer.DIALOGO, panel)
 	hud.activar(HUDLayer.DIALOGO)
