@@ -43,16 +43,37 @@ class TarotDiablo1029Test(unittest.TestCase):
         evento = bloque(
             self.menu,
             "func _quizas_mostrar_verificacion()",
-            "func _al_cerrar_verificacion()",
+            "func _tiradas_verificacion(",
         )
-        self.assertIn("VerificacionFalsa.debe_mostrar(randf())", evento)
-        mostrar = evento.index("_verificacion.mostrar()")
+        self.assertIn(
+            'VerificacionFalsa.debe_mostrar(int(tiradas["aparicion"]))',
+            evento,
+        )
+        mostrar = evento.index('_verificacion.mostrar(int(tiradas["pregunta"]))')
         registrar = evento.index("VerificacionFalsa.registrar(partida_actual.estado)")
         mundo = evento.index("Prometeo.sincronizar_tarot_mundo")
         guardar = evento.index("partida_actual.guardar()")
         self.assertLess(mostrar, registrar)
         self.assertLess(registrar, mundo)
         self.assertLess(mundo, guardar)
+
+    def test_sorteo_usa_semilla_y_estado_reproducible(self) -> None:
+        tiradas = bloque(
+            self.menu,
+            "func _tiradas_verificacion(",
+            "func _al_cerrar_verificacion()",
+        )
+        self.assertIn('estado.get("semilla", 0)', tiradas)
+        self.assertIn('jornada.get("vuelta", 1)', tiradas)
+        self.assertIn('jornada.get("dia", 1)', tiradas)
+        self.assertIn('jornada.get("acciones", 0)', tiradas)
+        self.assertIn('jornada.get("fase", "")', tiradas)
+        self.assertIn('Azar.derivar_texto(raiz, "dia"', tiradas)
+        self.assertIn('Azar.derivar_texto(raiz, "presentacion"', tiradas)
+        self.assertNotIn("randf(", tiradas)
+        self.assertNotIn("randi", tiradas)
+        self.assertNotIn("randomize", tiradas)
+        self.assertNotIn("randi_range", self.verificacion)
 
     def test_cancelar_cierra_verificacion_antes_que_menu(self) -> None:
         entrada = bloque(self.menu, "func _unhandled_input(", "func _puede_abrir()")
