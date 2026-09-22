@@ -61,7 +61,7 @@ func consultar_eventos(scene_key: String, kind: String = "", ahora_unix: int = -
 	return _resultado(true, "ok", {"events": salida})
 
 
-func abrir_sala(scene_key: String) -> Dictionary:
+func abrir_sala(scene_key: String, _opciones: Dictionary = {}) -> Dictionary:
 	if _timeout_simulado:
 		return _resultado(false, "timeout", {"opened": false})
 	return _resultado(not scene_key.is_empty(), "ok", {"opened": not scene_key.is_empty()})

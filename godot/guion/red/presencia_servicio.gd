@@ -29,7 +29,17 @@ func abrir_sala(scene_key: String, room_id: String, actor_public_id: String) -> 
 	if actor_public_id.is_empty() or actor_public_id.length() > 96:
 		return {"ok": false, "status": "invalid_actor_id"}
 
-	var resultado = _transporte.call("abrir_sala", scene_key)
+	var resultado = (
+		_transporte
+		. call(
+			"abrir_sala",
+			scene_key,
+			{
+				"room_id": room_id,
+				"actor_public_id": actor_public_id,
+			},
+		)
+	)
 	if typeof(resultado) != TYPE_DICTIONARY:
 		return {"ok": false, "status": "invalid_transport_result"}
 	if not bool(resultado.get("ok", false)):
@@ -47,6 +57,13 @@ func abrir_sala(scene_key: String, room_id: String, actor_public_id: String) -> 
 	salida["room_id"] = room_id
 	salida["actor_public_id"] = actor_public_id
 	return salida
+
+
+func procesar(delta: float) -> void:
+	if not _activa:
+		return
+	if _transporte != null and _transporte.has_method("procesar"):
+		_transporte.call("procesar", maxf(delta, 0.0))
 
 
 func publicar_snapshot(
@@ -171,6 +188,15 @@ func contexto() -> Dictionary:
 		"room_id": _room_id,
 		"actor_public_id": _actor_public_id,
 	}
+
+
+func estado_transporte() -> Dictionary:
+	if _transporte == null or not _transporte.has_method("health"):
+		return {"ok": false, "status": "transport_unavailable"}
+	var resultado = _transporte.call("health")
+	if typeof(resultado) != TYPE_DICTIONARY:
+		return {"ok": false, "status": "invalid_transport_result"}
+	return resultado
 
 
 func _ahora(valor: int) -> int:
