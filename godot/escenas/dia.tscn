@@ -1,4 +1,4 @@
-[gd_scene load_steps=46 format=3]
+[gd_scene load_steps=47 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -43,7 +43,7 @@
 [ext_resource type="Script" path="res://guion/dia_marcadores_mundo_app.gd" id="41"]
 [ext_resource type="Script" path="res://guion/dia_huellas_ambientales_app.gd" id="42"]
 [ext_resource type="Script" path="res://guion/dia_maui_tamanuitera_app.gd" id="43"]
-[ext_resource type="Script" path="res://guion/dia_reloj_horario_app.gd" id="43"]
+[ext_resource type="Script" path="res://guion/dia_reloj_horario_app.gd" id="46"]
 [ext_resource type="Script" path="res://guion/dia_vecinos_edificio_app.gd" id="44"]
 [ext_resource type="Script" path="res://guion/dia_religion_roms_app.gd" id="45"]
 
@@ -180,7 +180,7 @@ script = ExtResource("41")
 script = ExtResource("42")
 
 [node name="RelojHorarioController" type="Node" parent="."]
-script = ExtResource("43")
+script = ExtResource("46")
 
 [node name="ReligionRomsController" type="Node" parent="."]
 script = ExtResource("45")
