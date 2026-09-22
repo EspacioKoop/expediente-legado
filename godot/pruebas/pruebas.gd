@@ -31,7 +31,7 @@ func _init() -> void:
 	PruebasPrometeoYCombate._combate(comprobar_cb)
 	PruebasPrometeoYCombate._ventanilla(comprobar_cb)
 	PruebasPrometeoYCombate._jornada(comprobar_cb)
-	PruebasJungian.todo(comprobar_cb)
+	PruebasJungian.todo(comprobar_cb, root)
 	PruebasJuicioReglas.todo(comprobar_cb)
 	PruebasJuicioFeedback.todo(comprobar_cb)
 	PruebasJuicioJungiano.todo(comprobar_cb)
