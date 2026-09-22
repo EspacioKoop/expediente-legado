@@ -114,7 +114,7 @@ static func registrar_observacion(estado: Dictionary, punto_id: String) -> Dicti
 
 ## Registro usado por el runtime: prueba que el jugador está en la zona del
 ## punto, registra la observación base y añade únicamente variantes demostrables
-## desde el mismo estado de Partida. Repetir no escribe ids duplicados.
+## desde el mismo estado persistido. Repetir no escribe ids duplicados.
 static func registrar_observacion_contextual(estado: Dictionary, punto_id: String) -> Dictionary:
 	var entrada := ficha(punto_id)
 	if entrada.is_empty():
