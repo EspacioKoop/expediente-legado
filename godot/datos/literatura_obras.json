@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "schema": {
+    "campos_obligatorios": [
+      "id",
+      "titulo",
+      "autor",
+      "epoca",
+      "generos",
+      "fuente_documental",
+      "lectura",
+      "rom",
+      "efecto_juego"
+    ],
+    "nota": "El efecto es declarativo: conocer la obra no aplica buffs por sí mismo."
+  },
+  "obras": [
+    {
+      "id": "vida_es_sueno_1635",
+      "titulo": "La vida es sueño",
+      "autor": "Pedro Calderón de la Barca",
+      "epoca": "Siglo de Oro, 1635",
+      "generos": [
+        "teatro",
+        "drama filosofico"
+      ],
+      "fuente_documental": "biblioteca:edicion_1998:vida_es_sueno",
+      "lectura": {
+        "umbral_conocimiento": 1.0,
+        "insight_id": "vigilia_apariencia"
+      },
+      "rom": {
+        "id": "sueno_98",
+        "estado": "propuesta",
+        "desbloqueo": "conocimiento",
+        "handshake_requerido": true
+      },
+      "efecto_juego": {
+        "id": "palabra_serenidad",
+        "tipo": "modificador_contextual",
+        "consumidores": [
+          "conflicto_literario"
+        ],
+        "descripcion": "Un consumidor de conflicto puede convertir el insight en una respuesta contextual ante miedo o confusion; este catalogo no aplica el efecto."
+      }
+    }
+  ]
+}
