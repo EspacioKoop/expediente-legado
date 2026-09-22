@@ -122,6 +122,17 @@ static func sincronizar_tarot_por_pistas(estado: Dictionary) -> Array:
 	return nuevas
 
 
+## La Fuerza pertenece a la dificultad elegida para ESTA vuelta. Se evalúa
+## únicamente desde eventos reales: cambiar la dificultad o empezar una nueva
+## vida laboral que conserva la dificultad. Cargar una partida no llama aquí.
+static func sincronizar_tarot_por_dificultad(estado: Dictionary) -> Array:
+	if String(estado.get("dificultad", "normal")) != "dificil":
+		return []
+	if desbloquear_carta_en_estado(estado, "la-fuerza"):
+		return ["la-fuerza"]
+	return []
+
+
 ## Progreso por expediente (#1029): Los Enamorados nace exactamente cuando
 ## una pista real completa la investigación del caso que se está mirando.
 ## Recibe el caso explícitamente para no recorrer el catálogo ni convertir una
@@ -477,6 +488,11 @@ static func reiniciar_vuelta(estado: Dictionary, vida_maxima: int) -> Dictionary
 	for carta in estado.get("tarot", []):
 		carta["recogida"] = carta["id"] == "el-loco"
 		carta["gastada"] = false
+
+	# La dificultad sí sobrevive al despido. Empezar una vuelta nueva es un
+	# evento real, así que difícil recupera La Fuerza sin depender de recargar
+	# una pantalla ni convertir cargar() en emisor de Tarot.
+	sincronizar_tarot_por_dificultad(estado)
 
 	for logro in estado.get("logros", []):
 		if logro.get("por_vuelta", false):
