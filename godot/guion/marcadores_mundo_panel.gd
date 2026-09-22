@@ -56,9 +56,7 @@ func abrir(puede_colocar: bool, puede_eliminar: bool, cantidad: int) -> void:
 	if not puede_colocar:
 		_estado.text = _cadena("superficie_requerida")
 	elif cantidad >= MarcadoresMundo.LIMITE_POR_ZONA:
-		_estado.text = (
-			_cadena("limite_zona") % MarcadoresMundo.LIMITE_POR_ZONA
-		)
+		_estado.text = (_cadena("limite_zona") % MarcadoresMundo.LIMITE_POR_ZONA)
 	else:
 		_estado.text = _cadena("contador_zona") % [cantidad, MarcadoresMundo.LIMITE_POR_ZONA]
 	_tipo.grab_focus.call_deferred()
@@ -122,9 +120,7 @@ func _montar() -> void:
 	_anadir_etiqueta(formulario, _cadena("texto"))
 	_texto = LineEdit.new()
 	_texto.max_length = MarcadoresMundo.MAX_TEXTO
-	_texto.placeholder_text = (
-		_cadena("texto_placeholder") % MarcadoresMundo.MAX_TEXTO
-	)
+	_texto.placeholder_text = (_cadena("texto_placeholder") % MarcadoresMundo.MAX_TEXTO)
 	formulario.add_child(_texto)
 
 	_estado = Label.new()
