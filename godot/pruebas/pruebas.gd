@@ -34,6 +34,7 @@ func _init() -> void:
 	PruebasJungian.todo(comprobar_cb, root)
 	PruebasJuicioReglas.todo(comprobar_cb)
 	PruebasJuicioRival.todo(comprobar_cb)
+	PruebasJuicioDoctrina.todo(comprobar_cb)
 	PruebasJuicioFeedback.todo(comprobar_cb)
 	PruebasJuicioJungiano.todo(comprobar_cb)
 	PruebasJuicioSimbolico.todo(comprobar_cb)
