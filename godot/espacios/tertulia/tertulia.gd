@@ -19,11 +19,28 @@ func _ready() -> void:
 func _cargar_dialogos() -> void:
 	dialogos = [
 		{"texto": "Bienvenido a la tertulia. ¿Buscas sabiduría en las páginas?", "requisito": {}},
-		{"texto": "He leído tu camino. La Sombra y la Anima bailan en ti.", "requisito": {"arquetipos": ["sombra", "anima"]}},
-		{"texto": "Cervantes me susurró: 'El que lee mucho y anda mucho, ve mucho y sabe mucho'.", "requisito": {"autor": "cervantes"}},
-		{"texto": "¿Conoces el secreto de la Metamorfosis? Kafka lo guardó para los que transforman su momentum.", "requisito": {"obra": "metamorfosis", "arquetipo": "sombra"}},
-		{"texto": "El Self se revela en la no-linealidad. Cortázar lo sabía.", "requisito": {"obra": "rayuela", "arquetipo": "self"}},
-		{"texto": "Tu momentum es fuerte. ¿Has probado a citar a Homero en medio del combate?", "requisito": {"momentum": 50, "obra": "odisea"}},
+		{
+			"texto": "He leído tu camino. La Sombra y la Anima bailan en ti.",
+			"requisito": {"arquetipos": ["sombra", "anima"]}
+		},
+		{
+			"texto":
+			"Cervantes me susurró: 'El que lee mucho y anda mucho, ve mucho y sabe mucho'.",
+			"requisito": {"autor": "cervantes"}
+		},
+		{
+			"texto":
+			"¿Conoces el secreto de la Metamorfosis? Kafka lo guardó para los que transforman su momentum.",
+			"requisito": {"obra": "metamorfosis", "arquetipo": "sombra"}
+		},
+		{
+			"texto": "El Self se revela en la no-linealidad. Cortázar lo sabía.",
+			"requisito": {"obra": "rayuela", "arquetipo": "self"}
+		},
+		{
+			"texto": "Tu momentum es fuerte. ¿Has probado a citar a Homero en medio del combate?",
+			"requisito": {"momentum": 50, "obra": "odisea"}
+		},
 	]
 
 
@@ -63,10 +80,24 @@ func _cumple_requisitos(req: Dictionary) -> bool:
 			if _arquetipo_desbloqueado(String(id)) == null:
 				cumple = false
 				break
-	cumple = cumple and not (req.has("autor") and req.get("autor") not in GestorLiteratura.autores_conocidos)
-	cumple = cumple and not (req.has("obra") and req.get("obra") not in GestorLiteratura.obras_conocidas)
-	cumple = cumple and not (req.has("arquetipo") and _arquetipo_desbloqueado(String(req.get("arquetipo", ""))) == null)
-	cumple = cumple and not (req.has("momentum") and GestorMomentum.momentum_actual < req.get("momentum", 0))
+	cumple = (
+		cumple
+		and not (req.has("autor") and req.get("autor") not in GestorLiteratura.autores_conocidos)
+	)
+	cumple = (
+		cumple and not (req.has("obra") and req.get("obra") not in GestorLiteratura.obras_conocidas)
+	)
+	cumple = (
+		cumple
+		and not (
+			req.has("arquetipo")
+			and _arquetipo_desbloqueado(String(req.get("arquetipo", ""))) == null
+		)
+	)
+	cumple = (
+		cumple
+		and not (req.has("momentum") and GestorMomentum.momentum_actual < req.get("momentum", 0))
+	)
 	return cumple
 
 
@@ -76,8 +107,12 @@ func _aplicar_recompensa_dialogo(req: Dictionary) -> void:
 	if req.get("obra") == "metamorfosis":
 		var sombra = _arquetipo_desbloqueado("sombra")
 		if sombra != null:
-			sombra.efecto_combate["bonus_crit"] = float(sombra.efecto_combate.get("bonus_crit", 0.0)) + 0.05
+			sombra.efecto_combate["bonus_crit"] = (
+				float(sombra.efecto_combate.get("bonus_crit", 0.0)) + 0.05
+			)
 	if req.get("obra") == "rayuela" and _arquetipo_desbloqueado("self") != null:
 		GestorArquetipos.ganar_insight(20)
 	if req.get("momentum") == 50:
-		GestorMomentum.momentum_actual = min(GestorMomentum.momentum_max, GestorMomentum.momentum_actual + 20)
+		GestorMomentum.momentum_actual = min(
+			GestorMomentum.momentum_max, GestorMomentum.momentum_actual + 20
+		)
