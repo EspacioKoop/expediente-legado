@@ -10,7 +10,12 @@ class AmbienteIntegracionTest(unittest.TestCase):
     def test_el_cambio_de_fase_reproduce_el_ambiente(self):
         codigo = DIA.read_text(encoding="utf-8")
         self.assertIn("Ambiente.reproducir(self, fase, -24.0", codigo)
+        self.assertIn("_contexto_ambiente()", codigo)
         self.assertIn('"hora": Jornada.hora_decimal(jornada)', codigo)
+        self.assertIn('"meticulosidad":', codigo)
+        self.assertIn("Meticulosidad.puntos(jornada)", codigo)
+        self.assertIn("Meticulosidad.PUNTOS_MAX", codigo)
+        self.assertGreaterEqual(codigo.count("_contexto_ambiente()"), 3)
 
     def test_el_wiring_no_duplica_reglas_de_jornada(self):
         codigo = DIA.read_text(encoding="utf-8")

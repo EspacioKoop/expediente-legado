@@ -10,7 +10,9 @@ DIA = (ROOT / "godot/guion/dia_clima_app.gd").read_text(encoding="utf-8")
 class SellosPersistenciaTests(unittest.TestCase):
     def test_partida_incluye_y_valida_sellos(self):
         self.assertIn('"sellos_obtenidos": []', PARTIDA)
-        self.assertIn('"sueno_vencidos", "sellos_obtenidos"', PARTIDA)
+        bloque = PARTIDA.split("for clave in [", 1)[1].split("]:", 1)[0]
+        self.assertIn('"sueno_vencidos"', bloque)
+        self.assertIn('"sellos_obtenidos"', bloque)
         self.assertIn("typeof(guardado[clave]) != TYPE_ARRAY", PARTIDA)
 
     def test_noche_improductiva_se_decide_antes_de_dormir(self):

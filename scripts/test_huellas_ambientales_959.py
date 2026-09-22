@@ -11,6 +11,7 @@ CLIMA = ROOT / "godot" / "guion" / "dia_clima_app.gd"
 DRESSING = ROOT / "godot" / "guion" / "dia_dressing_cc0_app.gd"
 GODOT_TEST = ROOT / "godot" / "pruebas" / "pruebas_huellas_ambientales_959.gd"
 VERIFIER = ROOT / "scripts" / "verificar_godot.py"
+VISOR = ROOT / "godot" / "guion" / "visor_expediente.gd"
 
 
 class HuellasAmbientales959Test(unittest.TestCase):
@@ -23,6 +24,7 @@ class HuellasAmbientales959Test(unittest.TestCase):
         self.dressing = DRESSING.read_text(encoding="utf-8")
         self.godot_test = GODOT_TEST.read_text(encoding="utf-8")
         self.verifier = VERIFIER.read_text(encoding="utf-8")
+        self.visor = VISOR.read_text(encoding="utf-8")
 
     def test_estado_es_partida_y_no_archivo_paralelo(self):
         self.assertIn('"huellas_ambientales": {}', self.partida)
@@ -43,6 +45,14 @@ class HuellasAmbientales959Test(unittest.TestCase):
         self.assertNotIn("CanvasLayer", self.controller)
         self.assertNotIn("Label", self.controller)
         self.assertNotIn("Input.", self.controller)
+
+    def test_lecturas_de_documentos_dejan_desgaste_persistente(self):
+        self.assertRegex(self.visor, r"HuellasAmbientales\s*\.\s*registrar")
+        self.assertIn('"archivo:documento:%s:%s"', self.visor)
+        self.assertIn('"lectura"', self.visor)
+        self.assertIn("HuellasAmbientales.intensidad_de", self.visor)
+        self.assertIn("_color_papel_documento(registro)", self.visor)
+        self.assertIn("if not ya_visto or huella_mutada:", self.visor)
 
     def test_no_convierte_huellas_en_progreso(self):
         for forbidden in ("Sellos.", "Prometeo.", "Economia.", "Acusacion."):

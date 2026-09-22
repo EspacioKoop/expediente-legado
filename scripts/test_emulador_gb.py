@@ -8,6 +8,8 @@ NATIVE = ROOT / "godot" / "native" / "siga98_gb"
 UI = ROOT / "godot" / "guion" / "emulador_portatil_app.gd"
 AUDIO_UI = ROOT / "godot" / "guion" / "emulador_portatil_audio_app.gd"
 AFTERGLOW = ROOT / "godot" / "guion" / "efecto_apagado_portatil.gd"
+CONTACTO = ROOT / "godot" / "guion" / "efecto_contacto_cartucho.gd"
+PALETAS = ROOT / "godot" / "guion" / "paletas_gb_clasico.gd"
 PORTATIL = ROOT / "godot" / "guion" / "consola_portatil_98.gd"
 EXTENSION = ROOT / "godot" / "addons" / "siga98_gb" / "siga98_gb.gdextension"
 LOCK = NATIVE / "deps.lock.json"
@@ -24,6 +26,8 @@ class EmuladorGBTest(unittest.TestCase):
         cls.ui = UI.read_text(encoding="utf-8")
         cls.audio_ui = AUDIO_UI.read_text(encoding="utf-8")
         cls.afterglow = AFTERGLOW.read_text(encoding="utf-8")
+        cls.contacto = CONTACTO.read_text(encoding="utf-8")
+        cls.paletas = PALETAS.read_text(encoding="utf-8")
         cls.portatil = PORTATIL.read_text(encoding="utf-8")
         cls.extension = EXTENSION.read_text(encoding="utf-8")
         cls.lock = json.loads(LOCK.read_text(encoding="utf-8"))
@@ -218,6 +222,95 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn('name = "ClickApagadoPortatil"', self.afterglow)
         self.assertIn("AudioStreamPlayer.new()", self.afterglow)
 
+    def test_paletas_gb_son_propias_por_rom_y_tienen_fallback_normal(self):
+        self.assertIn('CONFIG_PATH := "user://portatil_color_98.cfg"', self.paletas)
+        self.assertIn('SECTION := "paletas_gb"', self.paletas)
+        self.assertIn('NORMAL := "normal"', self.paletas)
+        for identificador in ("ambar", "salvia", "humo"):
+            self.assertIn(f'"{identificador}"', self.paletas)
+        self.assertIn("ConfigFile.new()", self.paletas)
+        self.assertIn("config.get_value(SECTION, huella, NORMAL)", self.paletas)
+        self.assertIn("config.set_value(SECTION, huella, id)", self.paletas)
+        self.assertNotIn("Siga98GB", self.paletas)
+        self.assertNotIn("save_ram", self.paletas)
+
+    def test_paleta_solo_se_activa_en_rom_gb_clasica(self):
+        self.assertIn("func _es_rom_gb_clasica(rom: PackedByteArray) -> bool:", self.ui)
+        self.assertIn("int(rom[0x143]) == 0x00", self.ui)
+        self.assertIn("uniform bool paleta_gb_activa = false", self.ui)
+        self.assertIn("if (paleta_gb_activa)", self.ui)
+        self.assertIn("_paleta_selector.disabled = not _rom_gb_clasica_actual", self.ui)
+        self.assertIn(
+            "var activa := _rom_gb_clasica_actual and id != PaletasGbClasico.NORMAL",
+            self.ui,
+        )
+        cuerpo = self.ui.split("func _aplicar_paleta(id: String) -> void:", 1)[1].split(
+            "func ", 1
+        )[0]
+        self.assertNotIn("_emulador.call", cuerpo)
+        self.assertNotIn("load_rom", cuerpo)
+        self.assertNotIn("save_ram", cuerpo)
+
+    def test_preferencia_de_paleta_usa_la_misma_huella_sha256_sin_tocar_sram(self):
+        self.assertIn("func _huella_rom(rom: PackedByteArray) -> String:", self.ui)
+        self.assertIn("_huella_rom_actual = _huella_rom(rom)", self.ui)
+        self.assertIn("PaletasGbClasico.cargar_preferencia(_huella_rom_actual)", self.ui)
+        self.assertIn(
+            "PaletasGbClasico.guardar_preferencia(_huella_rom_actual, id)",
+            self.ui,
+        )
+        ruta = self.ui.split("func _ruta_sram(rom: PackedByteArray) -> String:", 1)[1].split(
+            "func ", 1
+        )[0]
+        self.assertIn("var huella := _huella_rom(rom)", ruta)
+
+    def test_imperfecciones_controladas_son_opt_in_y_externas(self):
+        self.assertIn("_imperfecciones_controladas := false", self.ui)
+        self.assertIn('name = "ImperfeccionesControladasPortatil"', self.ui)
+        self.assertIn("func _al_cambiar_imperfecciones(activos: bool)", self.ui)
+        cuerpo = self.ui.split("func _mostrar_ruido_contacto() -> void:", 1)[1].split(
+            "func ", 1
+        )[0]
+        self.assertIn("not _efectos_presentacion", cuerpo)
+        self.assertIn("not _imperfecciones_controladas", cuerpo)
+        self.assertIn("EfectoContactoCartucho.new()", cuerpo)
+        self.assertNotIn("_emulador.call", cuerpo)
+        self.assertNotIn("save_ram", cuerpo)
+
+    def test_ruido_contacto_es_un_frame_determinista_sin_estado_de_emulacion(self):
+        self.assertIn("class_name EfectoContactoCartucho", self.contacto)
+        self.assertIn("const FRAMES_VISIBLES := 1", self.contacto)
+        self.assertIn("RuidoContactoCartucho", self.contacto)
+        self.assertIn("SHADER_RUIDO", self.contacto)
+        self.assertNotIn("rand", self.contacto)
+        self.assertNotIn("_emulador", self.contacto)
+        self.assertNotIn("save_ram", self.contacto)
+        self.assertNotIn("load_rom", self.contacto)
+
+    def test_retardo_audio_es_presentacion_y_no_frena_el_nucleo(self):
+        self.assertIn("DURACION_ENTRADA_AUDIO := 0.18", self.audio_ui)
+        self.assertIn(
+            "_espera_audio_al_arrancar = _efectos_presentacion and _imperfecciones_controladas",
+            self.audio_ui,
+        )
+        self.assertIn("_mostrar_ruido_contacto()", self.audio_ui)
+        bomba = self.audio_ui.split("func _bombear_audio_emulado() -> void:", 1)[1].split(
+            "func ", 1
+        )[0]
+        self.assertIn('call("drain_audio_pcm16")', bomba)
+        self.assertIn("if _retardo_audio_restante > 0.0:", bomba)
+        self.assertLess(
+            bomba.index('call("drain_audio_pcm16")'),
+            bomba.index("if _retardo_audio_restante > 0.0:"),
+        )
+        self.assertIn("_audio_pendiente.clear()", bomba)
+        self.assertNotIn("await", bomba)
+        proceso = self.audio_ui.split("func _process(delta: float) -> void:", 1)[1].split(
+            "func ", 1
+        )[0]
+        self.assertIn("super._process(delta)", proceso)
+        self.assertIn("_retardo_audio_restante", proceso)
+
     def test_sonido_fisico_es_procedural_separable_y_desactivable(self):
         self.assertIn("FRECUENCIA_SONIDO_FISICO := 22050", self.ui)
         self.assertIn("AudioStreamPlayer.new()", self.ui)
@@ -308,6 +401,27 @@ class EmuladorGBTest(unittest.TestCase):
         self.assertIn("rom[0x143] != 0xC0", gbc)
         self.assertIn("_contiene(frame, 0)", gbc)
         self.assertIn("_contiene(frame, 1)", gbc)
+
+    def test_ci_blinda_paletas_con_fixtures_dmg_y_cgb(self):
+        self.assertIn("res://pruebas/emulador_paletas_gb_smoke.gd", self.ci)
+        self.assertIn(
+            "gbc/fixtures/dmg_only_smoke/build/dmg_only_smoke.gb",
+            self.ci,
+        )
+        self.assertIn(
+            "gbc/fixtures/cgb_only_smoke/build/cgb_only_smoke.gbc",
+            self.ci,
+        )
+        smoke_paletas = (
+            ROOT / "godot" / "pruebas" / "emulador_paletas_gb_smoke.gd"
+        ).read_text(encoding="utf-8")
+        self.assertIn('app.call("_es_rom_gb_clasica", dmg)', smoke_paletas)
+        self.assertIn('app.call("_es_rom_gb_clasica", cgb)', smoke_paletas)
+        self.assertIn('app.call("_aplicar_paleta", "ambar")', smoke_paletas)
+        self.assertIn(
+            'material.get_shader_parameter("paleta_gb_activa")',
+            smoke_paletas,
+        )
 
     def test_ci_persiste_y_aisla_sram_end_to_end(self):
         self.assertIn("make -C gbc/fixtures/sram_persist_smoke clean all", self.ci)

@@ -337,17 +337,6 @@ VISOR_CONCEPTO,Concepto: %s
 VISOR_COSTE_ACCION,1 acción
 VISOR_COSTE_GRATIS,GRATIS
 VISOR_COSTE_REGLA,Primera lectura nueva del día: GRATIS · siguientes: 1 acción · releer hoy: GRATIS
-VISOR_DETALLE_961_OBSERVACION,Observación adicional · %s
-VISOR_DETALLE_961_FACTURA1_PERFORACIONES,En el borde inferior se distinguen dos perforaciones de archivador ligeramente desalineadas; parecen de una carpeta anterior y no modifican lo escrito.
-VISOR_DETALLE_961_MEMO1_CINTA_FECHA,La fecha mecanografiada acusa una cinta algo más seca que el cuerpo del memorándum; la diferencia material no basta para fechar una segunda intervención.
-VISOR_DETALLE_961_MEMO1_COTEJO_MARGEN,La nota de cotejo está incorporada al cuerpo digitalizado; el expediente no identifica quién la añadió.
-VISOR_DETALLE_961_EMPLEADO1_LAPIZ_PESTANA,El número de empleado está repasado a lápiz azul en la pestaña exterior; la marca no añade ningún dato al contenido.
-VISOR_DETALLE_961_ACTA1_PAPEL_COTEJO,"Puesta junto a otro folio, el papel coincide en gramaje y corte con el stock común de oficina; la coincidencia no identifica autor ni circuito."
-VISOR_DETALLE_961_OFICIO2_CLIP_MARGEN,El margen izquierdo conserva el óxido tenue de un clip retirado; no hay texto oculto debajo.
-VISOR_DETALLE_961_OFICIO2_ANEXO_FOLIO,"El oficio deja constancia de una prescripción médica adjunta; el archivo conserva el anexo como metadato, no su contenido clínico."
-VISOR_DETALLE_961_CIRCULAR2_SELLO_FECHA,"El sello de distribución pisa parcialmente el año impreso, pero ambos siguen siendo legibles; no cambia la cronología consignada."
-VISOR_DETALLE_961_MEMO3_TINTA_SELLO,La tinta del sello de recibido tiene un borde más saturado que la del texto mecanografiado; es una diferencia de soporte, no una prueba de procedencia.
-VISOR_DETALLE_961_FACTURA4_HALO_SELLO,El sello amarillo deja un halo irregular en el reverso; el color ya visible en el documento no permite atribuirlo a una oficina concreta.
 VISOR_DOCUMENTOS,Documentos del expediente:
 VISOR_ELIJA,Seleccione un documento de la lista para abrirlo y leerlo.
 VISOR_ESTADO,"%s   ·   Pistas: %d de %d   ·   Día %d   ·   Presupuesto: %d/%d acciones%s"
@@ -594,6 +583,28 @@ CONSOLA_SERVICIO_PORTATIL_SOLO_CASA,La portátil solo puede abrirse cuando ya es
 CONSOLA_SERVICIO_PORTATIL_AUSENTE,No encuentro la portátil en esta escena.
 CONSOLA_SERVICIO_PORTATIL_ABRIENDO,Abriendo la portátil
 CONSOLA_SERVICIO_SOLO_PARTIDA,Solo funciona dentro de una partida.
+MENU_GLOBAL_HISTORIAL_DECISIONES,Historial de decisiones
+MENU_GLOBAL_HISTORIAL_SUBTITULO,"El archivo conserva cuándo decidió y cuándo dejó una decisión pendiente."
+MENU_GLOBAL_HISTORIAL_RESUMEN,"%d aplazamientos registrados · %d decisiones con reiteración."
+MENU_GLOBAL_HISTORIAL_PRESION_0,No constan demoras reiteradas.
+MENU_GLOBAL_HISTORIAL_PRESION_1,El archivo empieza a acumular demoras reiteradas.
+MENU_GLOBAL_HISTORIAL_PRESION_2,Las demoras ya dejan una huella visible en el expediente.
+MENU_GLOBAL_HISTORIAL_VACIO,Todavía no hay decisiones registradas.
+MENU_GLOBAL_HISTORIAL_LEGADO,"Registro anterior a este sistema; el contexto original no está disponible."
+MENU_GLOBAL_HISTORIAL_CONTEXTO,"Día %d · %s"
+MENU_GLOBAL_HISTORIAL_POSPUESTA,"%s · aplazada (%d)\n%s"
+MENU_GLOBAL_HISTORIAL_RESUELTA,"%s · decidida\n%s\n%s"
+VISOR_DETALLE_961_OBSERVACION,Observación adicional · %s
+VISOR_DETALLE_961_FACTURA1_PERFORACIONES,En el borde inferior se distinguen dos perforaciones de archivador ligeramente desalineadas; parecen de una carpeta anterior y no modifican lo escrito.
+VISOR_DETALLE_961_MEMO1_CINTA_FECHA,La fecha mecanografiada acusa una cinta algo más seca que el cuerpo del memorándum; la diferencia material no basta para fechar una segunda intervención.
+VISOR_DETALLE_961_MEMO1_COTEJO_MARGEN,La nota de cotejo está incorporada al cuerpo digitalizado; el expediente no identifica quién la añadió.
+VISOR_DETALLE_961_EMPLEADO1_LAPIZ_PESTANA,El número de empleado está repasado a lápiz azul en la pestaña exterior; la marca no añade ningún dato al contenido.
+VISOR_DETALLE_961_ACTA1_PAPEL_COTEJO,"Puesta junto a otro folio, el papel coincide en gramaje y corte con el stock común de oficina; la coincidencia no identifica autor ni circuito."
+VISOR_DETALLE_961_OFICIO2_CLIP_MARGEN,El margen izquierdo conserva el óxido tenue de un clip retirado; no hay texto oculto debajo.
+VISOR_DETALLE_961_OFICIO2_ANEXO_FOLIO,"El oficio deja constancia de una prescripción médica adjunta; el archivo conserva el anexo como metadato, no su contenido clínico."
+VISOR_DETALLE_961_CIRCULAR2_SELLO_FECHA,"El sello de distribución pisa parcialmente el año impreso, pero ambos siguen siendo legibles; no cambia la cronología consignada."
+VISOR_DETALLE_961_MEMO3_TINTA_SELLO,La tinta del sello de recibido tiene un borde más saturado que la del texto mecanografiado; es una diferencia de soporte, no una prueba de procedencia.
+VISOR_DETALLE_961_FACTURA4_HALO_SELLO,El sello amarillo deja un halo irregular en el reverso; el color ya visible en el documento no permite atribuirlo a una oficina concreta.
 JUICIO_JUNGIANO_MOMENTUM,MOMENTUM
 JUICIO_JUNGIANO_FINISHER,FINISHER
 JUICIO_JUNGIANO_SUPER_FINISHER,SUPER FINISHER
