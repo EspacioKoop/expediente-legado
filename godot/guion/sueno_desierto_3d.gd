@@ -139,16 +139,75 @@ func _montar_suelo(contorno: PackedVector2Array) -> void:
 
 
 func _montar_tabiques_visibles(tabiques: Array) -> void:
-	var malla := SuenoGeometria.malla_tabiques(tabiques)
+	var malla := _malla_crestas_minerales(tabiques)
 	if malla.get_surface_count() == 0:
 		return
 	var visual := MeshInstance3D.new()
-	visual.name = "TabiquesMineralesFragmentados"
+	visual.name = "CrestasMineralesFragmentadas"
 	visual.mesh = malla
-	var material := _material(Color(0.30, 0.18, 0.10), 0.98)
-	material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	visual.material_override = material
+	visual.material_override = _material(Color(0.44, 0.29, 0.16), 1.0)
 	add_child(visual)
+
+
+## Convierte cada plano físico de FRAGMENTADA en una cresta visual erosionada.
+##
+## La colisión sigue siendo el tabique plano de SuenoGeometria. La cresta se
+## deriva de los mismos extremos y alturas, envuelve ese plano por ambos lados
+## y mantiene su cima siempre un poco por encima: el jugador nunca choca con
+## una pared invisible, pero la escena deja de enseñar láminas de debug.
+func _malla_crestas_minerales(tabiques: Array) -> ArrayMesh:
+	if tabiques.is_empty():
+		return ArrayMesh.new()
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var piezas := 0
+	for indice in tabiques.size():
+		var dato = tabiques[indice]
+		if not (dato is Dictionary):
+			continue
+		var tabique: Dictionary = dato
+		var desde: Vector2 = tabique.get("desde", Vector2.ZERO)
+		var hasta: Vector2 = tabique.get("hasta", Vector2.ZERO)
+		var direccion := hasta - desde
+		if direccion.length_squared() < 0.0001:
+			continue
+		var normal := Vector2(-direccion.y, direccion.x).normalized()
+		var altura_desde := maxf(float(tabique.get("altura_desde", 1.4)), 0.2)
+		var altura_hasta := maxf(float(tabique.get("altura_hasta", altura_desde)), 0.2)
+		var izquierda := []
+		var derecha := []
+		var cima := []
+		for paso in 5:
+			var t := float(paso) / 4.0
+			var centro := desde.lerp(hasta, t)
+			var ancho := 0.58 + 0.08 * sin(float(indice + 1) * 1.7 + t * PI)
+			var altura_colision := lerpf(altura_desde, altura_hasta, t)
+			var relieve := 0.10 + 0.06 * (0.5 + 0.5 * sin(float(indice) * 2.1 + t * TAU))
+			izquierda.append(
+				Vector3(centro.x + normal.x * ancho, 0.025, centro.y + normal.y * ancho)
+			)
+			derecha.append(Vector3(centro.x - normal.x * ancho, 0.025, centro.y - normal.y * ancho))
+			cima.append(Vector3(centro.x, altura_colision + relieve, centro.y))
+
+		for paso in 4:
+			_triangulo_visual(st, izquierda[paso], izquierda[paso + 1], cima[paso + 1])
+			_triangulo_visual(st, izquierda[paso], cima[paso + 1], cima[paso])
+			_triangulo_visual(st, derecha[paso + 1], derecha[paso], cima[paso])
+			_triangulo_visual(st, derecha[paso + 1], cima[paso], cima[paso + 1])
+		_triangulo_visual(st, derecha[0], izquierda[0], cima[0])
+		_triangulo_visual(st, izquierda[4], derecha[4], cima[4])
+		piezas += 1
+
+	if piezas == 0:
+		return ArrayMesh.new()
+	st.generate_normals()
+	return st.commit()
+
+
+func _triangulo_visual(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3) -> void:
+	st.add_vertex(a)
+	st.add_vertex(b)
+	st.add_vertex(c)
 
 
 func _montar_dunas_lejanas() -> void:
