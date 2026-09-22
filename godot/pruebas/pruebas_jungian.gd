@@ -106,12 +106,73 @@ static func todo(comprobar: Callable, raiz: Node) -> void:
 	)
 	comprobar.call("el finisher deja el medidor a cero", momentum.get("momentum_actual"), 0.0)
 
+	_individuacion(comprobar, arquetipos)
+
 	combos.call("reiniciar")
 	momentum.call("reiniciar")
 	arquetipos.call("reiniciar")
 	for nodo in temporales:
 		if is_instance_valid(nodo):
 			nodo.free()
+
+
+static func _individuacion(comprobar: Callable, arquetipos: Node) -> void:
+	arquetipos.call("reiniciar")
+	var recurso = load("res://progresion/individuacion.tres")
+	comprobar.call("árbol de individuación disponible", recurso != null, true)
+	if recurso == null:
+		return
+
+	var arbol = recurso.duplicate(true)
+	comprobar.call("árbol de individuación declara nodos", arbol.get("nodos").size() > 0, true)
+	arquetipos.call("ganar_insight", 50)
+	comprobar.call(
+		"individuación exige evento además de insight",
+		arbol.call("puede_desbloquear", "sombra_inicio"),
+		false
+	)
+	arbol.call("registrar_evento", "diario_encontrado")
+	arbol.call("registrar_evento", "diario_encontrado")
+	comprobar.call(
+		"evento registrado habilita nodo inicial",
+		arbol.call("puede_desbloquear", "sombra_inicio"),
+		true
+	)
+	comprobar.call(
+		"nodo inicial puede desbloquearse",
+		arbol.call("desbloquear_nodo", "sombra_inicio"),
+		true
+	)
+	comprobar.call(
+		"un nodo completado no se desbloquea dos veces",
+		arbol.call("desbloquear_nodo", "sombra_inicio"),
+		false
+	)
+	comprobar.call(
+		"integración de Sombra exige ritual",
+		arbol.call("puede_desbloquear", "sombra_integracion"),
+		false
+	)
+	arbol.call("registrar_ritual", "derrotar_sombra_interior")
+	comprobar.call(
+		"ritual registrado habilita integración de Sombra",
+		arbol.call("puede_desbloquear", "sombra_integracion"),
+		true
+	)
+	var progreso: Dictionary = arbol.call("obtener_progreso")
+	comprobar.call("individuación cuenta nodos completados", progreso.get("completados"), 1)
+	comprobar.call("individuación expone nodo actual", progreso.get("nodo_actual"), "sombra_inicio")
+	arbol.call("reiniciar")
+	comprobar.call(
+		"reiniciar individuación limpia progreso",
+		arbol.call("obtener_progreso").get("completados"),
+		0
+	)
+	comprobar.call(
+		"reiniciar individuación limpia contexto",
+		arbol.call("puede_desbloquear", "sombra_inicio"),
+		false
+	)
 
 
 static func _gestor(nombre: String, ruta: String, temporales: Array[Node], raiz: Node) -> Node:
