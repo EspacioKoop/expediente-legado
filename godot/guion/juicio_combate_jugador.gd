@@ -25,12 +25,8 @@ static func resolver_impacto(
 	if fuerte:
 		dano += int(ritual.get("dano_fuerte_bonus", 0))
 
-	var interrupcion_ritual := REGLAS.interrumpe_ataque(
-		fuerte, ataque_rival_pendiente, ritual
-	)
-	var interrupcion_asamblea := REGLAS.asamblea_interrumpe(
-		doctrina_activa, ataque_rival_pendiente
-	)
+	var interrupcion_ritual := REGLAS.interrumpe_ataque(fuerte, ataque_rival_pendiente, ritual)
+	var interrupcion_asamblea := REGLAS.asamblea_interrumpe(doctrina_activa, ataque_rival_pendiente)
 	if interrupcion_ritual:
 		dano += int(ritual.get("dano_interrupcion_bonus", 0))
 
