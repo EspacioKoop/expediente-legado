@@ -348,6 +348,8 @@ func _espacio_de(fase: String) -> Dictionary:
 ## tiempo de compilacion. Sin gestor disponible, el consumidor recibe un
 ## registro vacio y conserva exactamente el sueño base.
 func _registro_literario_para_sueno() -> Dictionary:
+	if not is_inside_tree():
+		return {}
 	var gestor := get_node_or_null("/root/GestorLiteratura")
 	if gestor == null or not gestor.has_method("obtener_registro_literario"):
 		return {}
