@@ -8,7 +8,9 @@ class_name SuenoGeometria
 extends RefCounted
 
 
-static func malla_sala(contorno: PackedVector2Array, altura: float = 3.2) -> ArrayMesh:
+static func malla_sala(
+	contorno: PackedVector2Array, altura: float = 3.2, tabiques: Array = []
+) -> ArrayMesh:
 	if not contorno_valido(contorno) or altura <= 0.0:
 		return ArrayMesh.new()
 
@@ -20,6 +22,7 @@ static func malla_sala(contorno: PackedVector2Array, altura: float = 3.2) -> Arr
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	_agregar_suelo_y_techo(st, contorno, indices, altura)
 	_agregar_paredes(st, contorno, altura)
+	_agregar_tabiques(st, tabiques)
 	st.generate_normals()
 	return st.commit()
 
@@ -31,9 +34,11 @@ static func malla_sala(contorno: PackedVector2Array, altura: float = 3.2) -> Arr
 ## Rect2i. El cuerpo estático evita esa divergencia generando el trimesh desde
 ## el ArrayMesh exacto que se dibuja. `ConcavePolygonShape3D` es apropiado aquí
 ## porque nunca se usa como cuerpo dinámico, solo como arquitectura inmóvil.
-static func cuerpo_sala(contorno: PackedVector2Array, altura: float = 3.2) -> StaticBody3D:
+static func cuerpo_sala(
+	contorno: PackedVector2Array, altura: float = 3.2, tabiques: Array = []
+) -> StaticBody3D:
 	var cuerpo := StaticBody3D.new()
-	var malla := malla_sala(contorno, altura)
+	var malla := malla_sala(contorno, altura, tabiques)
 	if malla.get_surface_count() == 0:
 		return cuerpo
 
@@ -93,6 +98,34 @@ static func _agregar_paredes(st: SurfaceTool, contorno: PackedVector2Array, altu
 		var arriba_b := _punto(b, altura)
 		_triangulo(st, abajo_a, abajo_b, arriba_b)
 		_triangulo(st, abajo_a, arriba_b, arriba_a)
+
+
+## Tabiques abiertos para la familia fragmentada (#279).
+##
+## Son planos, no cajas: cada segmento deja sus extremos libres para conservar
+## rutas alternativas andando. Las alturas distintas rompen también la silueta
+## horizontal sin introducir saltos ni plataformas de precisión.
+static func _agregar_tabiques(st: SurfaceTool, tabiques: Array) -> void:
+	for dato in tabiques:
+		if not (dato is Dictionary):
+			continue
+		var tabique: Dictionary = dato
+		var desde: Vector2 = tabique.get("desde", Vector2.ZERO)
+		var hasta: Vector2 = tabique.get("hasta", Vector2.ZERO)
+		if desde.is_equal_approx(hasta):
+			continue
+		var altura_desde := maxf(float(tabique.get("altura_desde", 1.4)), 0.2)
+		var altura_hasta := maxf(float(tabique.get("altura_hasta", altura_desde)), 0.2)
+		var abajo_desde := _punto(desde, 0.0)
+		var abajo_hasta := _punto(hasta, 0.0)
+		var arriba_desde := _punto(desde, altura_desde)
+		var arriba_hasta := _punto(hasta, altura_hasta)
+		# Dos caras: el shader puede hacer culling aunque la colisión trimesh
+		# acepte contacto por ambas gracias a backface_collision.
+		_triangulo(st, abajo_desde, abajo_hasta, arriba_hasta)
+		_triangulo(st, abajo_desde, arriba_hasta, arriba_desde)
+		_triangulo(st, abajo_hasta, abajo_desde, arriba_desde)
+		_triangulo(st, abajo_hasta, arriba_desde, arriba_hasta)
 
 
 static func _punto(punto: Vector2, altura: float) -> Vector3:
