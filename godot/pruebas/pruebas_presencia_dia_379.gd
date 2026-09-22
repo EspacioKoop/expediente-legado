@@ -91,18 +91,21 @@ func _probar_remoto_y_gesto() -> void:
 	var controlador := _nuevo_controlador(host)
 	controlador.activar_sala("SALA-98", transporte, "anon-local")
 
-	var remoto := PresenciaDatos.crear_evento(
-		"trayecto",
-		"test-379",
-		"anon-remoto",
-		"SALA-98",
-		0,
-		Vector3(-4, 0, 5),
-		-0.5,
-		"walk",
-		"saludo",
-		AHORA,
-		"remoto-0",
+	var remoto := (
+		PresenciaDatos
+		. crear_evento(
+			"trayecto",
+			"test-379",
+			"anon-remoto",
+			"SALA-98",
+			0,
+			Vector3(-4, 0, 5),
+			-0.5,
+			"walk",
+			"saludo",
+			AHORA,
+			"remoto-0",
+		)
 	)
 	transporte.inyectar(remoto["event"])
 	controlador.procesar(0.11, AHORA + 1)
@@ -113,8 +116,12 @@ func _probar_remoto_y_gesto() -> void:
 	_comprobar("estado cuenta remoto", controlador.estado()["remotos"], 1)
 	if raiz != null and raiz.get_child_count() == 1:
 		var avatar = raiz.get_child(0)
-		_comprobar("avatar no tiene API de colisión", avatar.has_method("get_collision_layer"), false)
-		_comprobar("avatar recibe posición", avatar.estado_visual()["target_position"], Vector3(-4, 0, 5))
+		_comprobar(
+			"avatar no tiene API de colisión", avatar.has_method("get_collision_layer"), false
+		)
+		_comprobar(
+			"avatar recibe posición", avatar.estado_visual()["target_position"], Vector3(-4, 0, 5)
+		)
 
 	_comprobar("gesto cerrado aceptado", controlador.hacer_gesto("senalar"), true)
 	controlador.procesar(0.11, AHORA + 2)
@@ -135,18 +142,21 @@ func _probar_timeout_y_salida_de_fase() -> void:
 	var controlador := _nuevo_controlador(host)
 	controlador.activar_sala("SALA-98", transporte, "anon-local")
 
-	var remoto := PresenciaDatos.crear_evento(
-		"trayecto",
-		"test-379",
-		"anon-remoto",
-		"SALA-98",
-		0,
-		Vector3.ZERO,
-		0.0,
-		"idle",
-		"",
-		AHORA,
-		"timeout-remoto",
+	var remoto := (
+		PresenciaDatos
+		. crear_evento(
+			"trayecto",
+			"test-379",
+			"anon-remoto",
+			"SALA-98",
+			0,
+			Vector3.ZERO,
+			0.0,
+			"idle",
+			"",
+			AHORA,
+			"timeout-remoto",
+		)
 	)
 	transporte.inyectar(remoto["event"])
 	controlador.procesar(0.11, AHORA + 1)
@@ -173,7 +183,11 @@ func _probar_offline_por_defecto() -> void:
 	var controlador := _nuevo_controlador(host)
 	var apertura := controlador.activar_sala("LOCAL-98")
 	_comprobar("sin backend conserva modo offline", apertura["ok"], true)
-	_comprobar("actor generado es seudónimo efímero", String(apertura["actor_public_id"]).begins_with("anon-"), true)
+	_comprobar(
+		"actor generado es seudónimo efímero",
+		String(apertura["actor_public_id"]).begins_with("anon-"),
+		true
+	)
 	controlador.procesar(0.11, AHORA)
 	_comprobar("offline sigue activo sin bloquear", controlador.estado()["activa"], true)
 	_comprobar("offline no inventa remotos", controlador.estado()["remotos"], 0)
