@@ -55,7 +55,9 @@ static func todo(comprobar: Callable) -> void:
 	)
 
 	var pendiente := JuicioCombateDoctrina.plan_comision(false, 0.0, 0.45, {})
-	_caso(comprobar, "doctrina: comisión espera próximo ataque", pendiente["comision_pendiente"], true)
+	_caso(
+		comprobar, "doctrina: comisión espera próximo ataque", pendiente["comision_pendiente"], true
+	)
 	_caso(
 		comprobar,
 		"doctrina: espera no altera total",
@@ -63,11 +65,14 @@ static func todo(comprobar: Callable) -> void:
 		true,
 	)
 
-	var activa := JuicioCombateDoctrina.plan_comision(
-		true,
-		0.20,
-		JuicioCombateReglas.TELEGRAFO_RIVAL,
-		{"tags": ["telegraph"]},
+	var activa := (
+		JuicioCombateDoctrina
+		. plan_comision(
+			true,
+			0.20,
+			JuicioCombateReglas.TELEGRAFO_RIVAL,
+			{"tags": ["telegraph"]},
+		)
 	)
 	_caso(
 		comprobar,
@@ -75,7 +80,9 @@ static func todo(comprobar: Callable) -> void:
 		activa["comision_pendiente"],
 		false,
 	)
-	_caso(comprobar, "doctrina: comisión pasa a activa", activa["doctrina_activa"], "socialdemocrata")
+	_caso(
+		comprobar, "doctrina: comisión pasa a activa", activa["doctrina_activa"], "socialdemocrata"
+	)
 	_caso(
 		comprobar,
 		"doctrina: ritual amplía total de telegrafiado",
