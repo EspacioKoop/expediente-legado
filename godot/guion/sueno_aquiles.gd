@@ -116,17 +116,23 @@ func aplicar_resolucion(accion: String, reduccion_movimiento: bool) -> bool:
 	tween.set_trans(Tween.TRANS_SINE)
 	tween.set_ease(Tween.EASE_IN_OUT)
 	tween.set_parallel(true)
-	tween.tween_property(
-		_figura,
-		"scale",
-		Vector3(1.0, 0.055, 1.0),
-		duracion,
+	(
+		tween
+		. tween_property(
+			_figura,
+			"scale",
+			Vector3(1.0, 0.055, 1.0),
+			duracion,
+		)
 	)
-	tween.tween_property(
-		_marca_sellado,
-		"scale",
-		Vector3(6.5, 1.0, 6.5),
-		duracion,
+	(
+		tween
+		. tween_property(
+			_marca_sellado,
+			"scale",
+			Vector3(6.5, 1.0, 6.5),
+			duracion,
+		)
 	)
 	return true
 
