@@ -86,6 +86,8 @@ const COLOR_NIEBLA := Color(0.57, 0.60, 0.58)
 const COLOR_TORMENTA := Color(0.17, 0.19, 0.23)
 const COLOR_LUZ := Color(0.75, 0.72, 0.55)
 
+var reduccion_movimiento := false
+
 var _clima := CLIMA_CALMA
 var _montado := false
 
@@ -134,6 +136,7 @@ func preparar() -> void:
 	_montado = true
 	_montar_arquitectura()
 	_montar_rutas()
+	_montar_controles_climaticos()
 	_montar_indicios_climaticos()
 	_montar_luz_y_camara()
 	_aplicar_estado_visual()
@@ -254,6 +257,88 @@ func _montar_rutas() -> void:
 		rutas, "RutaCornisa", Vector3(4.0, 0.18, 0.85), Vector3(2.1, 1.35, 0.3), COLOR_VIENTO
 	)
 	_crear_caja(rutas, "RutaCueva", Vector3(1.5, 0.16, 4.1), Vector3(4.8, 0.95, -1.4), COLOR_CUEVA)
+
+
+func _montar_controles_climaticos() -> void:
+	var controles := Node3D.new()
+	controles.name = "ControlesClimaticos"
+	add_child(controles)
+	_crear_control_clima(
+		controles,
+		"CompuertaLluvia",
+		"abrir_compuerta",
+		"compuerta de drenaje",
+		Vector3(-3.4, 0.9, 1.8),
+		Vector3(1.0, 1.6, 0.25),
+		COLOR_AGUA,
+	)
+	_crear_control_clima(
+		controles,
+		"ConductoViento",
+		"abrir_conducto",
+		"conducto de aire",
+		Vector3(0.8, 2.2, -3.2),
+		Vector3(1.2, 0.45, 0.25),
+		COLOR_VIENTO,
+	)
+	_crear_control_clima(
+		controles,
+		"ConductoNiebla",
+		"cerrar_conducto",
+		"compuerta de ventilación",
+		Vector3(-0.8, 2.2, -3.2),
+		Vector3(1.2, 0.45, 0.25),
+		COLOR_NIEBLA,
+	)
+	_crear_control_clima(
+		controles,
+		"RefugioTormenta",
+		"refugiarse",
+		"hueco de refugio",
+		Vector3(3.8, 1.0, -2.8),
+		Vector3(1.0, 2.0, 0.5),
+		COLOR_TORMENTA,
+	)
+	_crear_control_clima(
+		controles,
+		"RestablecerCalma",
+		"restablecer",
+		"baliza de retorno",
+		Vector3(-4.9, 0.7, 3.0),
+		Vector3(0.55, 1.0, 0.55),
+		COLOR_RETORNO,
+	)
+
+
+func _crear_control_clima(
+	padre: Node3D,
+	nombre: String,
+	accion: String,
+	nombre_objeto: String,
+	posicion: Vector3,
+	tam: Vector3,
+	color: Color,
+) -> void:
+	var control := Interactuable3D.new()
+	control.name = nombre
+	control.position = posicion
+	control.verbo = Interactuable3D.Verbo.USAR
+	control.nombre_objeto = nombre_objeto
+	control.sonido = Interactuable3D.SIN_SONIDO
+	control.collision_mask = 0
+	control.activado.connect(_al_accion_clima.bind(accion))
+	padre.add_child(control)
+
+	_crear_caja(control, "Indicador", tam * 0.82, Vector3.ZERO, color)
+	var colision := CollisionShape3D.new()
+	var forma := BoxShape3D.new()
+	forma.size = tam
+	colision.shape = forma
+	control.add_child(colision)
+
+
+func _al_accion_clima(_actor: Node, accion: String) -> void:
+	aplicar_accion(accion, reduccion_movimiento)
 
 
 func _montar_indicios_climaticos() -> void:
