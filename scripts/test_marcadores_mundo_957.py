@@ -90,6 +90,9 @@ class MarcadoresMundo957Test(unittest.TestCase):
         self.assertIn("_texto.max_length = MarcadoresMundo.MAX_TEXTO", codigo)
         self.assertIn('evento.is_action_pressed("cancelar")', codigo)
         self.assertIn("cantidad >= MarcadoresMundo.LIMITE_POR_ZONA", codigo)
+        self.assertIn("signal eliminar_zona_solicitado", codigo)
+        self.assertIn("ConfirmationDialog.new()", codigo)
+        self.assertIn('_limpiar_zona.text = "Limpiar zona"', codigo)
 
         for tipo in (
             "TIPO_TIZA",
@@ -119,6 +122,8 @@ class MarcadoresMundo957Test(unittest.TestCase):
         self.assertIn("MarcadoresMundo.posicion_de(datos).distance_squared_to(punto)", codigo)
         self.assertIn("RADIO_BORRADO", codigo)
         self.assertIn("_marcador_apuntado_id", codigo)
+        self.assertIn("func _confirmar_eliminacion_zona()", codigo)
+        self.assertIn("eliminar_zona_actual() > 0", codigo)
         self.assertNotIn("CollisionShape3D", visual)
         self.assertNotIn("Area3D", visual)
 
