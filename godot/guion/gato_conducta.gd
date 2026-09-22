@@ -162,10 +162,10 @@ static func avanzar(
 	if gato["estado"] == "anda" or gato["estado"] == "parado":
 		_aplicar_rutina(gato)
 
-	# Ha llegado. Espera, y luego elige otro sitio — salvo que esté esperando
-	# junto al cuenco con hambre, que ahí se queda.
+	# Ha llegado. Espera, y luego elige otro sitio. El hambre ya se resolvió
+	# arriba con su propia rutina acotada al cuenco.
 	gato["espera"] -= delta
-	if gato["espera"] > 0.0 or desconfia:
+	if gato["espera"] > 0.0:
 		return gato
 
 	gato["espera"] = randf_range(ESPERA_MINIMA, ESPERA_MAXIMA)
