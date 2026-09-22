@@ -5,6 +5,10 @@ signal momentum_cambiado(nivel_actual, max_nivel)
 signal finisher_disponible
 signal finisher_ejecutado(tipo)
 
+# Configuración de thresholds
+const THRESHOLD_FINISHER: float = 75.0
+const THRESHOLD_SUPER_FINISHER: float = 100.0
+
 var momentum_actual: float = 0.0
 var momentum_max: float = 100.0
 var decay_rate: float = 5.0  # por segundo
@@ -12,10 +16,6 @@ var en_combate: bool = false
 var ultimo_golpe_time: float = 0.0
 var combo_actual: int = 0
 var multiplicador_momentum: float = 1.0
-
-# Configuración de thresholds
-const THRESHOLD_FINISHER: float = 75.0
-const THRESHOLD_SUPER_FINISHER: float = 100.0
 
 
 func _ready() -> void:
@@ -32,7 +32,7 @@ func _process(delta: float) -> void:
 		combo_actual = 0
 
 
-func registrar_golpe(es_critico: bool = false, tipo_daño: String = "fisico") -> void:
+func registrar_golpe(es_critico: bool = false, tipo_danio: String = "fisico") -> void:
 	if not en_combate:
 		en_combate = true
 
@@ -42,9 +42,9 @@ func registrar_golpe(es_critico: bool = false, tipo_daño: String = "fisico") ->
 	var ganancia := 10.0 * multiplicador_momentum
 	if es_critico:
 		ganancia *= 1.5
-	if tipo_daño == "sombra":
+	if tipo_danio == "sombra":
 		ganancia *= 1.3
-	if tipo_daño == "divino":
+	if tipo_danio == "divino":
 		ganancia *= 1.2
 
 	# Bonus por combo
@@ -59,7 +59,7 @@ func registrar_golpe(es_critico: bool = false, tipo_daño: String = "fisico") ->
 		finisher_disponible.emit()  # Super finisher
 
 
-func registrar_daño_recibido() -> void:
+func registrar_danio_recibido() -> void:
 	# Perder momentum al recibir daño
 	momentum_actual = max(0.0, momentum_actual - 20.0)
 	combo_actual = 0
