@@ -38,7 +38,7 @@ class GatoPersistencia787Test(unittest.TestCase):
         comprobar_contrato(
             self,
             "pruebas/pruebas_gato_persistencia_787.gd",
-            "16 pasadas, 0 fallos",
+            "18 pasadas, 0 fallos",
         )
 
 
