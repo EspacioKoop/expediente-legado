@@ -8,6 +8,7 @@ const FEEDBACK = preload("res://guion/juicio_combate_feedback_3d.gd")
 const HUD = preload("res://guion/juicio_combate_hud.gd")
 const ARENA = preload("res://guion/juicio_combate_arena_3d.gd")
 const JUNGIANO = preload("res://guion/juicio_combate_jungiano.gd")
+const SIMBOLICO = preload("res://guion/juicio_combate_simbolico.gd")
 const DETERMINACION_BASE := REGLAS.DETERMINACION_BASE
 const DETERMINACION_MINIMA_RIVAL := REGLAS.DETERMINACION_MINIMA_RIVAL
 const VELOCIDAD_JUGADOR := 4.8
@@ -455,42 +456,25 @@ func _limitar(posicion: Vector3) -> Vector3:
 
 
 func _resolver_capa_simbolica() -> void:
-	var estado := _estado_partida_anfitrion()
-	if estado.is_empty():
+	var capa := (
+		SIMBOLICO
+		. resolver(
+			self,
+			_acusado,
+			RADIO_ARENA,
+			VELOCIDAD_RIVAL,
+			RECARGA_FUERTE,
+		)
+	)
+	if capa.is_empty():
 		return
-	_cargas_doctrina = Prometeo.cargas_ideologicas(estado, Historias.TOPE_CARGAS)
-	var clave := String(_acusado.get("id", _acusado.get("nombre", "acusado")))
-	var tarot = estado.get("tarot", [])
-	if typeof(tarot) == TYPE_ARRAY:
-		_arcano = JuicioSimbolico.arcano_para(tarot, clave)
-	var jornada = estado.get("jornada", {})
-	if typeof(jornada) == TYPE_DICTIONARY:
-		_mito_id = JuicioSimbolico.mito_para(jornada, clave)
-	_ritual = JuicioSimbolico.ritual_para(_arcano, _mito_id)
-	_aplicar_configuracion_ritual()
-
-
-func _aplicar_configuracion_ritual() -> void:
-	_radio_arena = float(_ritual.get("radio_arena", RADIO_ARENA))
-	_velocidad_rival = VELOCIDAD_RIVAL * float(_ritual.get("velocidad_rival_mul", 1.0))
-	_recarga_fuerte = float(_ritual.get("recarga_fuerte", RECARGA_FUERTE))
-
-
-func _estado_partida_anfitrion() -> Dictionary:
-	var anfitrion := get_parent()
-	if anfitrion == null:
-		return {}
-	var tiene_partida := false
-	for bruto in anfitrion.get_property_list():
-		if typeof(bruto) == TYPE_DICTIONARY and String(bruto.get("name", "")) == "partida":
-			tiene_partida = true
-			break
-	if not tiene_partida:
-		return {}
-	var partida_actual = anfitrion.get("partida")
-	if partida_actual is Partida:
-		return partida_actual.estado
-	return {}
+	_cargas_doctrina = capa["cargas_doctrina"]
+	_arcano = capa["arcano"]
+	_mito_id = String(capa["mito_id"])
+	_ritual = capa["ritual"]
+	_radio_arena = float(capa["radio_arena"])
+	_velocidad_rival = float(capa["velocidad_rival"])
+	_recarga_fuerte = float(capa["recarga_fuerte"])
 
 
 func _montar_arena() -> void:
@@ -570,10 +554,7 @@ func _texto_ritual() -> String:
 
 
 func _hay_cargas_doctrina() -> bool:
-	for eje in Prometeo.EJES:
-		if int(_cargas_doctrina.get(eje, 0)) > 0:
-			return true
-	return false
+	return SIMBOLICO.hay_cargas_doctrina(_cargas_doctrina)
 
 
 func _pintar_doctrinas() -> void:
