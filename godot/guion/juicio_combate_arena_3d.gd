@@ -58,9 +58,7 @@ static func montar(
 	var jugador := CharacterBody3D.new()
 	jugador.position = Vector3(0.0, 0.0, 2.4)
 	anfitrion.add_child(jugador)
-	var figura_jugador := FiguraSilueta.construir(
-		jugador, Vector3.ZERO, Color(0.68, 0.70, 0.64)
-	)
+	var figura_jugador := FiguraSilueta.construir(jugador, Vector3.ZERO, Color(0.68, 0.70, 0.64))
 
 	var rival := CharacterBody3D.new()
 	rival.position = Vector3(0.0, 0.0, -2.4)
