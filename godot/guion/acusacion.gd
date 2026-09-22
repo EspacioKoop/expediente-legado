@@ -153,10 +153,7 @@ static func perder_vida(estado: Dictionary, jornada: Dictionary, cuantas: int) -
 ## La frontera pendiente es estado de partida, no estado de una pantalla. Así
 ## cerrar y volver a abrir el juego conserva exactamente la misma decisión.
 static func despido_pendiente(estado: Dictionary) -> bool:
-	return (
-		bool(estado.get(CLAVE_DESPIDO_PENDIENTE, false))
-		and int(estado.get("vida", 0)) == 0
-	)
+	return bool(estado.get(CLAVE_DESPIDO_PENDIENTE, false)) and int(estado.get("vida", 0)) == 0
 
 
 ## Ids de cartas que pueden salvar esta vuelta. Es una consulta pura para que
