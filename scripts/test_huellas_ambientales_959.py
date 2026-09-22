@@ -47,7 +47,7 @@ class HuellasAmbientales959Test(unittest.TestCase):
         self.assertNotIn("Input.", self.controller)
 
     def test_lecturas_de_documentos_dejan_desgaste_persistente(self):
-        self.assertIn("HuellasAmbientales.registrar", self.visor)
+        self.assertRegex(self.visor, r"HuellasAmbientales\s*\.\s*registrar")
         self.assertIn('"archivo:documento:%s:%s"', self.visor)
         self.assertIn('"lectura"', self.visor)
         self.assertIn("HuellasAmbientales.intensidad_de", self.visor)
