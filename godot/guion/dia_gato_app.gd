@@ -158,6 +158,10 @@ func _montar_objetivos_sueno() -> void:
 		var objetivo_id := String(objetivo.get("id", ""))
 		if completados.has(objetivo_id) or not _objetivo_puntuable(estado, objetivo_id):
 			continue
+		# Una plaza de solo guía se completa por su propia interacción, no por
+		# pisarla: montarle una zona daría dos condiciones al mismo objetivo.
+		if bool(objetivo.get("solo_guia", false)):
+			continue
 		var zona := Area3D.new()
 		zona.name = "ObjetivoSueno_%s" % objetivo_id
 		zona.position = objetivo["pos"]
@@ -335,6 +339,99 @@ func _retirar_objetivo_espacial(objetivo_id: String) -> void:
 
 func _id_objetivo_puzzle_onirico(puzzle_id: String, reward_id: String) -> String:
 	return "pista:%s:%s" % [puzzle_id, reward_id]
+
+
+## Una anomalía deformada a partir de un folio leído ESE día (#87) ocupa una de
+## las tres plazas puntuables de la escena: es el objetivo "derivado de contenido
+## leído hoy" que pedía el primer vertical de #299 y que hasta ahora no existía.
+##
+## No inventa nada del expediente, porque el folio ya se leyó y la ficha ya está
+## catalogada; lo único que cambia es qué cuenta para el umbral. Y a diferencia
+## del puzzle opcional, observar una anomalía no tiene ruta de fallo, así que
+## ocupar la plaza nunca puede dejar la escena sin objetivos suficientes.
+func registrar_objetivo_anomalia_documental(anomalia) -> bool:
+	if anomalia == null or String(jornada.get("fase", "")) != "sueño":
+		return false
+	if _objetivo_escena.is_empty() or _objetivos_espacio.is_empty():
+		return false
+	var anomalia_id := String(anomalia.id_catalogo())
+	var folio := String(anomalia.get_meta("documento_origen", "")).strip_edges()
+	if anomalia_id.is_empty() or folio.is_empty():
+		return false
+
+	var estado: Dictionary = _estado_objetivos_actual()
+	var objetivo_id := _id_objetivo_anomalia_documental(anomalia_id, folio)
+	for indice in range(_objetivos_espacio.size() - 1, -1, -1):
+		var candidato: Dictionary = _objetivos_espacio[indice]
+		if bool(candidato.get("solo_guia", false)):
+			continue
+		var reemplazo_id := String(candidato.get("id", ""))
+		if reemplazo_id.is_empty():
+			continue
+		if not (
+			SuenoObjetivos
+			. sustituir_puntuable(
+				estado,
+				{
+					"id": objetivo_id,
+					"tipo": "anomalia",
+					"condicion": "observar",
+					"feedback": "ambiente",
+					"cuenta": true,
+				},
+				reemplazo_id,
+			)
+		):
+			continue
+		_retirar_objetivo_espacial(reemplazo_id)
+		_apuntar_guia_a_anomalia(objetivo_id, anomalia)
+		_actualizar_feedback_objetivos(SuenoObjetivos.progreso(estado))
+		_actualizar_rumbo_guia_pendiente(estado)
+		_orientar_gato_guia()
+		return true
+	return false
+
+
+## Observar la anomalía cierra su plaza una sola vez. El guardado lo decide quien
+## registra el catálogo, para que reconocimiento y progreso compartan escritura.
+func completar_objetivo_anomalia_documental(anomalia_id: String, documento_origen: String) -> bool:
+	if String(jornada.get("fase", "")) != "sueño" or _objetivo_escena.is_empty():
+		return false
+	var folio := documento_origen.strip_edges()
+	if anomalia_id.strip_edges().is_empty() or folio.is_empty():
+		return false
+	var estado: Dictionary = _estado_objetivos_actual()
+	var objetivo_id := _id_objetivo_anomalia_documental(anomalia_id.strip_edges(), folio)
+	if not SuenoObjetivos.completar(estado, objetivo_id):
+		return false
+	_retirar_objetivo_espacial(objetivo_id)
+	_tras_cambio_objetivo(estado, false)
+	return true
+
+
+## La plaza documental no monta zona pisable, pero sí deja una entrada de solo
+## guía: así el gato de #92 sigue orientando hacia un objetivo pendiente real en
+## lugar de hacia una plaza que acaba de dejar de puntuar.
+func _apuntar_guia_a_anomalia(objetivo_id: String, anomalia: Node3D) -> void:
+	for objetivo in _objetivos_espacio:
+		if String(objetivo.get("id", "")) == objetivo_id:
+			return
+	(
+		_objetivos_espacio
+		. append(
+			{
+				"id": objetivo_id,
+				"pos": anomalia.global_position,
+				"solo_guia": true,
+			}
+		)
+	)
+
+
+## El folio forma parte del id: la misma noche reconstruye la misma plaza y dos
+## documentos distintos no comparten objetivo aunque deformen el mismo objeto.
+func _id_objetivo_anomalia_documental(anomalia_id: String, folio: String) -> String:
+	return "anomalia:%s:%s" % [anomalia_id, folio]
 
 
 func _actualizar_objetivo_puzzle_onirico(resultado: Dictionary) -> bool:

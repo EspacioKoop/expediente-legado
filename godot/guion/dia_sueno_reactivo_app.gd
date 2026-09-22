@@ -1,9 +1,13 @@
 ## Controller hijo para el corte onírico de #400 / #149 / #87.
 ##
 ## Observa el mundo ya construido por Dia y añade dressing solo cuando la fase
-## activa es sueño. No cambia la cadena de herencia, no decide objetivos y no
-## toca el diccionario espacial que usa #281. El reconocimiento de una anomalía
-## registra su ID y, si existe, el folio ya leído que originó esa aparición.
+## activa es sueño. No cambia la cadena de herencia y no toca el diccionario
+## espacial que usa #281. El reconocimiento de una anomalía registra su ID y, si
+## existe, el folio ya leído que originó esa aparición.
+##
+## Tampoco decide el contrato de objetivos: cuando una deformación procede de un
+## folio leído hoy, se limita a ofrecerla a la capa de #299, que es quien sabe
+## si queda plaza puntuable libre y quién la posee.
 extends Node
 
 var _mundo_vestido_id := 0
@@ -80,6 +84,15 @@ func _process(_delta: float) -> void:
 		var documento_origen := String(anomalia.get_meta("documento_origen", ""))
 		anomalia.observada.connect(_al_observar_anomalia.bind(documento_origen))
 
+	# La primera deformación que venga de un folio leído hoy ocupa una plaza
+	# puntuable de la escena (#299). Si esta noche no hay material documental,
+	# la escena conserva sus tres rutas espaciales y aquí no cambia nada.
+	for anomalia in anomalias:
+		if String(anomalia.get_meta("documento_origen", "")).strip_edges().is_empty():
+			continue
+		if dia.registrar_objetivo_anomalia_documental(anomalia):
+			break
+
 
 func _al_observar_anomalia(
 	anomalia_id: String, _actor: Node, documento_origen: String = ""
@@ -97,6 +110,9 @@ func _al_observar_anomalia(
 	)
 	var cambio := String(registro.get("resultado", "")) in ["registrada", "reencontrada"]
 	cambio = cambio or String(variante.get("resultado", "")) == "variante-registrada"
+	# Reconocer la anomalía es también la condición de su plaza onírica cuando
+	# nació de un folio: el progreso viaja en el mismo guardado que el catálogo.
+	cambio = dia.completar_objetivo_anomalia_documental(anomalia_id, documento_origen) or cambio
 	if cambio:
 		# Se escribe una sola vez aunque el vistazo descubra a la vez la
 		# anomalía base y su variante documental. Repetir ambas no toca disco.

@@ -11,6 +11,7 @@ TRABAJILLOS = ROOT / "godot" / "guion" / "dia_trabajillos_app.gd"
 ONBOARDING = ROOT / "godot" / "guion" / "dia_onboarding_app.gd"
 CLIMA = ROOT / "godot" / "guion" / "dia_clima_app.gd"
 ESCENA = ROOT / "godot" / "escenas" / "dia.tscn"
+REACTIVO = ROOT / "godot" / "guion" / "dia_sueno_reactivo_app.gd"
 
 
 class SuenoObjetivosTest(unittest.TestCase):
@@ -21,6 +22,7 @@ class SuenoObjetivosTest(unittest.TestCase):
         self.onboarding = ONBOARDING.read_text(encoding="utf-8")
         self.clima = CLIMA.read_text(encoding="utf-8")
         self.escena = ESCENA.read_text(encoding="utf-8")
+        self.reactivo = REACTIVO.read_text(encoding="utf-8")
 
     def test_vertical_tres_objetivos_dos_requeridos(self):
         self.assertIn("POSIBLES_PRIMER_CORTE := 3", self.regla)
@@ -40,6 +42,31 @@ class SuenoObjetivosTest(unittest.TestCase):
         self.assertIn("PuzzleOnirico.ESTADO_COMPLETADO", self.gato)
         self.assertIn("SuenoObjetivos.completar(estado, objetivo_id)", self.gato)
         self.assertIn("SuenoObjetivos.fallar(estado, objetivo_id)", self.gato)
+
+    def test_una_anomalia_de_folio_leido_hoy_ocupa_una_plaza(self):
+        # El primer vertical pedía un objetivo derivado de contenido leído ese
+        # día. La fuente legítima ya existe (#87): las deformaciones que
+        # `SuenoUtileria` marca con `documento_origen`.
+        self.assertIn("registrar_objetivo_anomalia_documental", self.gato)
+        self.assertIn("_id_objetivo_anomalia_documental", self.gato)
+        self.assertIn('"tipo": "anomalia"', self.gato)
+        self.assertIn('"condicion": "observar"', self.gato)
+        self.assertIn("registrar_objetivo_anomalia_documental", self.reactivo)
+        self.assertIn('get_meta("documento_origen"', self.reactivo)
+
+    def test_observar_la_anomalia_es_la_condicion_de_su_plaza(self):
+        self.assertIn("completar_objetivo_anomalia_documental", self.reactivo)
+        self.assertIn("SuenoObjetivos.completar(estado, objetivo_id)", self.gato)
+        # El progreso viaja en el mismo guardado que el catálogo: la llamada
+        # ocurre antes del guardado condicional, no después.
+        completar = self.reactivo.index("completar_objetivo_anomalia_documental(anomalia_id")
+        guardado = self.reactivo.index('dia._guardar_o_avisar("")')
+        self.assertLess(completar, guardado)
+
+    def test_la_plaza_documental_no_monta_una_zona_pisable(self):
+        # Observar y pisar serían dos condiciones para el mismo objetivo.
+        self.assertIn('objetivo.get("solo_guia", false)', self.gato)
+        self.assertIn('"solo_guia": true', self.gato)
 
     def test_contrato_real_se_ejecuta_en_godot(self):
         comprobar_contrato(
