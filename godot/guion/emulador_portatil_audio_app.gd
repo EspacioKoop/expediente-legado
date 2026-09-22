@@ -452,9 +452,12 @@ func _bombear_audio_emulado() -> void:
 	if pcm.size() % AUDIO_BYTES_PER_FRAME != 0:
 		push_warning("PCM GB desalineado; se descarta el bloque")
 		descartar = true
-	if _retardo_audio_restante > 0.0 or _audio_emulado_muted:
-		# El núcleo sigue avanzando y el PCM se drena, pero no se acumula durante
-		# el retardo de presentación ni mientras la portátil permanece silenciada.
+	if _retardo_audio_restante > 0.0:
+		# El núcleo sigue avanzando: el PCM se drena y se descarta solo como presentación.
+		_audio_pendiente.clear()
+		descartar = true
+	if _audio_emulado_muted:
+		# El búfer ya se vació al silenciar; aquí basta con no acumular.
 		_audio_pendiente.clear()
 		descartar = true
 	if descartar:
