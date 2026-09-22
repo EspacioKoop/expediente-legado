@@ -1,4 +1,23 @@
 {
   "titulo": "Dificultad",
-  "opciones": []
+  "ayuda": "Cambiarla ajusta las vidas al nuevo máximo, pero no recupera vidas perdidas.",
+  "guardado_ok": "Dificultad guardada.",
+  "guardado_error": "La dificultad cambió en memoria, pero no se pudo guardar la partida.",
+  "opciones": [
+    {
+      "id": "facil",
+      "nombre": "Fácil",
+      "detalle": "5 vidas · una acusación es precipitada por debajo del 40 % de las pistas."
+    },
+    {
+      "id": "normal",
+      "nombre": "Normal",
+      "detalle": "3 vidas · recomendado · una acusación es precipitada por debajo del 60 %."
+    },
+    {
+      "id": "dificil",
+      "nombre": "Difícil",
+      "detalle": "2 vidas · una acusación es precipitada por debajo del 75 % de las pistas."
+    }
+  ]
 }
