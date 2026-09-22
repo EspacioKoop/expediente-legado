@@ -85,12 +85,12 @@ class TarotEmperador1029Test(unittest.TestCase):
         self.assertIn("contenido.principales()", efecto)
 
     def test_usa_la_frontera_comun_de_memoria_fantasma(self) -> None:
-        acceso = bloque(
+        efecto = bloque(
             self.adaptador,
-            "func _registrar_ruta_os98(",
-            "func _sincronizar_contexto_os98(",
+            "func _al_acceso_administrativo(",
+            "func _registrar_respuesta_correo(",
         )
-        self.assertIn("Prometeo.desbloquear_carta_en_estado", acceso)
+        self.assertIn("Prometeo.desbloquear_carta_en_estado", efecto)
 
         frontera = bloque(
             self.prometeo,
