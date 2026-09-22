@@ -163,7 +163,8 @@ static func pintar_doctrinas(
 			continue
 		var habilidad: Dictionary = habilidades[eje]
 		var boton := Button.new()
-		boton.text = "%s ×%d" % [traducir.call(String(habilidad["nombre"])), cantidad]
+		var texto_boton := "%s ×%d" % [traducir.call(String(habilidad["nombre"])), cantidad]
+		boton.text = texto_boton
 		boton.tooltip_text = String(traducir.call(String(habilidad["efecto"])))
 		boton.disabled = bloqueadas
 		boton.pressed.connect(activar.bind(eje))
