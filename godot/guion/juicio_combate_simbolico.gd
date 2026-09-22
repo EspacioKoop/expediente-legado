@@ -63,6 +63,18 @@ static func compromisos_religion(estado: Dictionary, clave: String) -> Array:
 	return RELIGION_CONFLICTO.compromisos_disponibles(registro, CONTEXTO_JUICIO % clave, clave)
 
 
+static func compromiso_religion_bloqueante(
+	compromisos: Array, rival_inicio_agresion: bool
+) -> Dictionary:
+	for compromiso_bruto in compromisos:
+		if typeof(compromiso_bruto) != TYPE_DICTIONARY:
+			continue
+		var compromiso: Dictionary = compromiso_bruto
+		if not RELIGION_CONFLICTO.puede_iniciar_accion_ofensiva(compromiso, rival_inicio_agresion):
+			return compromiso
+	return {}
+
+
 static func estado_partida(anfitrion: Node) -> Dictionary:
 	var padre := anfitrion.get_parent()
 	if padre == null:

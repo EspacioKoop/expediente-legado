@@ -12,7 +12,6 @@ const SIMBOLICO = preload("res://guion/juicio_combate_simbolico.gd")
 const RIVAL = preload("res://guion/juicio_combate_rival.gd")
 const DOCTRINA = preload("res://guion/juicio_combate_doctrina.gd")
 const JUGADOR = preload("res://guion/juicio_combate_jugador.gd")
-const RELIGION = preload("res://guion/religion_conflicto.gd")
 const DETERMINACION_BASE := REGLAS.DETERMINACION_BASE
 const DETERMINACION_MINIMA_RIVAL := REGLAS.DETERMINACION_MINIMA_RIVAL
 const VELOCIDAD_JUGADOR := 4.8
@@ -125,13 +124,7 @@ static func determinacion_retorno(ritual: Dictionary, retornos_usados: int) -> i
 static func compromiso_religion_bloqueante(
 	compromisos: Array, rival_inicio_agresion: bool
 ) -> Dictionary:
-	for compromiso_bruto in compromisos:
-		if typeof(compromiso_bruto) != TYPE_DICTIONARY:
-			continue
-		var compromiso: Dictionary = compromiso_bruto
-		if not RELIGION.puede_iniciar_accion_ofensiva(compromiso, rival_inicio_agresion):
-			return compromiso
-	return {}
+	return SIMBOLICO.compromiso_religion_bloqueante(compromisos, rival_inicio_agresion)
 
 
 func configurar(
