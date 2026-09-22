@@ -339,10 +339,13 @@ func _espacio_de(fase: String) -> Dictionary:
 	var espacio_sueno := Sueno.espacio(id, jornada["sueno_escenas"].size() - 1, trozo)
 	# #1182: literatura modula la PRESENTACION de una sala que el sueño ya
 	# selecciono. No toca Sueno.noche(), fuentes #87, salidas ni hechos SIGA.
-	return SuenoLiteratura.aplicar(
-		espacio_sueno,
-		GestorLiteratura.obtener_registro_literario(),
-		cual,
+	return (
+		SuenoLiteratura
+		. aplicar(
+			espacio_sueno,
+			GestorLiteratura.obtener_registro_literario(),
+			cual,
+		)
 	)
 
 
