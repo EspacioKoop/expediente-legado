@@ -265,8 +265,8 @@ func _mover_rival(delta: float) -> void:
 			delta,
 		)
 	)
-	var desplazamiento: Vector3 = paso["desplazamiento"]
-	if desplazamiento.length_squared() > 0.0:
+	if bool(paso["mover"]):
+		var desplazamiento: Vector3 = paso["desplazamiento"]
 		_rival.position = _limitar(_rival.position + desplazamiento)
 		_rival.rotation.y = float(paso["rotacion_y"])
 	elif bool(paso["iniciar_ataque"]):
