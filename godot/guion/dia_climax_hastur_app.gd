@@ -105,6 +105,10 @@ func _reanudar_si_procede() -> void:
 	var actual := ClimaxHastur.estado_actual(partida_actual.estado, dia.get("jornada"))
 	if actual.is_empty():
 		return
+	# Dia recupera la frontera persistida antes de que este controlador vuelva a
+	# montar el combate. Así una recarga no crea dos modales para la misma decisión.
+	if Acusacion.despido_pendiente(partida_actual.estado):
+		return
 	_activar_estado()
 
 
@@ -179,9 +183,11 @@ func _al_continuar() -> void:
 	if fase != ClimaxHastur.FASE_DERROTA:
 		return
 	var consecuencia := ClimaxHastur.aplicar_derrota(partida_actual.estado, jornada)
-	var accion := (
-		"derrota_despido" if bool(consecuencia.get("despido", false)) else "derrota_reintento"
-	)
+	var accion := "derrota_reintento"
+	if bool(consecuencia.get("despido_pendiente", false)):
+		accion = "derrota_ultimo_recurso"
+	elif bool(consecuencia.get("despido", false)):
+		accion = "derrota_despido"
 	_guardar_y_luego(dia, accion)
 
 
@@ -223,6 +229,11 @@ func _despues_de_guardar(accion: String) -> void:
 					)
 				)
 				_mostrar_panel(dia, actual)
+		"derrota_ultimo_recurso":
+			var dia := get_parent()
+			_cerrar_panel()
+			if dia != null and dia.has_method("_abrir_ultimo_recurso_pendiente"):
+				dia.call("_abrir_ultimo_recurso_pendiente")
 		"derrota_despido":
 			_cerrar_panel()
 			_reconstruir_vuelta(get_parent())
