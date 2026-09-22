@@ -719,13 +719,14 @@ func _quizas_mostrar_verificacion() -> void:
 	var partida_actual := _partida_actual()
 	if partida_actual == null or _verificacion == null:
 		return
-	if not VerificacionFalsa.debe_mostrar(randf()):
+	var tiradas := _tiradas_verificacion(partida_actual.estado)
+	if not VerificacionFalsa.debe_mostrar(int(tiradas["aparicion"])):
 		return
 
 	# Igual que en el legado, la APARICIÓN de la verificación es el evento.
 	# Abrir el menú sin que aparezca no concede nada; confirmar tampoco añade
 	# una segunda condición.
-	_verificacion.mostrar()
+	_verificacion.mostrar(int(tiradas["pregunta"]))
 	if not VerificacionFalsa.registrar(partida_actual.estado):
 		return
 
@@ -734,6 +735,25 @@ func _quizas_mostrar_verificacion() -> void:
 		Prometeo.sincronizar_tarot_mundo(partida_actual.estado, contenido.principales())
 	if not partida_actual.guardar():
 		push_warning("No se pudo persistir el evento de verificación falsa.")
+
+
+## El resultado depende solo de estado guardado: misma semilla, vuelta, día,
+## acciones y fase producen la misma aparición y la misma pregunta tras recargar.
+func _tiradas_verificacion(estado: Dictionary) -> Dictionary:
+	var jornada: Dictionary = estado.get("jornada", {})
+	var indices := [
+		int(jornada.get("vuelta", 1)),
+		int(jornada.get("dia", 1)),
+		int(jornada.get("acciones", 0)),
+	]
+	var fase := String(jornada.get("fase", ""))
+	var raiz := int(estado.get("semilla", 0))
+	return {
+		"aparicion": Azar.derivar_texto(raiz, "dia", "verificacion_falsa:%s" % fase, indices),
+		"pregunta": (
+			Azar.derivar_texto(raiz, "presentacion", "verificacion_falsa:%s" % fase, indices)
+		),
+	}
 
 
 func _al_cerrar_verificacion() -> void:
