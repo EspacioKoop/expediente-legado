@@ -53,26 +53,36 @@ class TarotEmperador1029Test(unittest.TestCase):
             self.assertNotIn('"el-emperador"', seccion)
             self.assertNotIn("desbloquear_carta_en_estado", seccion)
 
-    def test_acceso_real_concede_emperador_y_evalua_mundo_antes_de_guardar(self) -> None:
+    def test_acceso_real_delega_solo_despues_del_hito_restringido(self) -> None:
         acceso = bloque(
             self.adaptador,
             "func _registrar_ruta_os98(",
             "func _sincronizar_contexto_os98(",
         )
         evento = acceso.index("ContaminacionOs98.registrar_ruta(estado, ruta)")
-        persistencia_os = acceso.index("_persistir_estado_os98(dia, estado)")
-        emperador = acceso.index(
+        efecto = acceso.index("_al_acceso_administrativo(")
+        self.assertLess(evento, efecto)
+        self.assertNotIn('"el-emperador"', acceso)
+        self.assertNotIn("_guardar_o_avisar", acceso)
+
+    def test_efecto_admin_concede_emperador_evalua_mundo_y_guarda(self) -> None:
+        efecto = bloque(
+            self.adaptador,
+            "func _al_acceso_administrativo(",
+            "func _registrar_respuesta_correo(",
+        )
+        persistencia_os = efecto.index("_persistir_estado_os98(dia, estado)")
+        emperador = efecto.index(
             'Prometeo.desbloquear_carta_en_estado(partida_estado, "el-emperador")'
         )
-        mundo = acceso.index("Prometeo.sincronizar_tarot_mundo(")
-        guardado = acceso.index('dia.call("_guardar_o_avisar", "")')
+        mundo = efecto.index("Prometeo.sincronizar_tarot_mundo(")
+        guardado = efecto.index('dia.call("_guardar_o_avisar", "")')
 
-        self.assertLess(evento, persistencia_os)
         self.assertLess(persistencia_os, emperador)
         self.assertLess(emperador, mundo)
         self.assertLess(mundo, guardado)
-        self.assertIn("Contenido.new()", acceso)
-        self.assertIn("contenido.principales()", acceso)
+        self.assertIn("Contenido.new()", efecto)
+        self.assertIn("contenido.principales()", efecto)
 
     def test_usa_la_frontera_comun_de_memoria_fantasma(self) -> None:
         acceso = bloque(
