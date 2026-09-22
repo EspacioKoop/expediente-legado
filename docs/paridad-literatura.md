@@ -28,21 +28,21 @@ La consecuencia para #1175 es importante: **la épica literaria es principalment
 ## Separación de dominios
 | Dominio exigido por #1175 | Resultado en el legado pre-Godot | Decisión |
 | --- | --- | --- |
-| Literatura vivida / practicada | No se encontró evidencia versionada | Contenido nuevo bajo #1176/#1178/#1179; no fabricar paridad |
+| Literatura vivida / practicada | No se encontró evidencia versionada | Contenido nuevo bajo #1176 y #1179–#1184; no fabricar paridad |
 | Institución literaria | No se encontró evidencia versionada | Bibliotecas y tertulias son expansión nueva |
-| Cultura / material literario | Nombres aislados sin sistema | #1178 es expansión nueva |
+| Cultura / material literario | Nombres aislados sin sistema | #1180/#1181 son expansión nueva |
 | Mito / folclore | Algunos nombres mitológicos aparecen como flavor | Mantener separado de literatura; los sistemas de mitología (#932) son independientes |
 | Libro / manuscrito | Aparecen como objetos decorativos sin interacción significativa | Patrón de interacción documental es reutilizable; #1176 debe declarar su propio estado |
-| Saber / conocimiento eruditivo | No se encontró métrica ni progreso | #1177 es expansión nueva |
-| Sueño y simbolismo literario | No se encontró capa onírica literaria | #1179 es expansión; no atribuir al legado los sueños literarios posteriores |
-| Postura personal de NPC | No se encontró postura literaria explícita | #1178 es expansión nueva |
+| Saber / conocimiento eruditivo | No se encontró métrica ni progreso | #1179/#1180/#1181 son expansión nueva |
+| Sueño y simbolismo literario | No se encontró capa onírica literaria | #1182 es expansión; no atribuir al legado los sueños literarios posteriores |
+| Postura personal de NPC | No se encontró postura literaria explícita | #1180 es expansión nueva |
 | Hechos históricos/culturales literarios | No se encontró corpus estructurado | Cualquier tradición viva futura necesita fuentes nuevas conforme a #1175 |
 
 ## Matriz canónica
 | Concepto | Fuente legado | Equivalente actual | Estado | Decisión | Issue destino | Prueba / evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
-| Catálogo de obras literarias | Nombres aislados en ambientación | `ObrasLiterarias` + `datos/literatura/obras.json` | **Portado parcial como flavor** | Literatura nueva; no religion ni mitología | #1176; #1178 | Verificar que los nombres coincidan con ambientación existente |
-| Interacción documental significativa | Objetos decorativos sin lógica | `ObraLiteraria` + `MiniJuegoLectura` | **No existía** | Patrón recuperable de `CartaOcultaService` aplicado a obras | #1176; #1177 | Crear nuevo sistema de interacción que registre exposición |
+| Catálogo de obras literarias | Nombres aislados en ambientación | `ObrasLiterarias` + `datos/literatura/obras.json` | **Portado parcial como flavor** | Literatura nueva; no religion ni mitología | #1176; #1178; #1179 | Verificar que los nombres coincidan con ambientación existente |
+| Interacción documental significativa | Objetos decorativos sin lógica | `ObraLiteraria` + `MiniJuegoLectura` | **No existía** | Patrón recuperable de `CartaOcultaService` aplicado a obras | #1176; #1181 | Crear nuevo sistema de interacción que registre exposición |
 | Desbloqueos de obra por progreso | Ninguno | estado literatura de Godot | **No existía** | Reutilizable como patrón de evento estable e idempotente; estado independiente | #1176; lección de #46, #1029 | Definir IDs estáticos y eventos de descubrimiento |
 | Conocimiento separado de posesión | Ninguno | memoria literaria fantasma | **No existía** | Separar «obra conocida» vs «insight otorgado» | #1176; #46 como precedente | Implementar flags distintos |
 | Contenido dentro del mundo, no formulario abstracto | Ambientación pasiva | `ObraLiteraria` usa escena 3D del mundo | **No existía** | Reutilizar patrón de interacción documental significativa | #1176; #931/#932 | Asegurar que la interacción ocurra en escena 3D |
