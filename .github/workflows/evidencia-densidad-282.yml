@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/evidencia-densidad-282.yml'
       - '.godot-version'
+      - 'godot/project.godot'
       - 'godot/arte/**'
       - 'godot/assets/modelos/**'
       - 'godot/guion/casa*.gd'
@@ -34,9 +35,6 @@ jobs:
   evidencia:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    env:
-      LIBGL_ALWAYS_SOFTWARE: '1'
-      GALLIUM_DRIVER: llvmpipe
     steps:
       - uses: actions/checkout@v4
         with:
@@ -69,16 +67,18 @@ jobs:
       - name: Validar contrato de evidencia
         run: python3 -m unittest -v scripts/test_evidencia_densidad_282.py
 
-      - name: Renderizar densidad de oficina calle casa y sueño sin HUD
+      - name: Renderizar densidad multivista sin HUD
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p evidencia-densidad-282
-          xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+          xvfb-run -a godot4 --path godot \
             --script res://pruebas/capturar_densidad_282.gd -- \
             "$GITHUB_WORKSPACE/evidencia-densidad-282"
-          for captura in oficina calle casa sueno; do
-            test -s "evidencia-densidad-282/${captura}.png"
+          for fase in oficina calle casa sueno; do
+            for vista in frente izquierda derecha; do
+              test -s "evidencia-densidad-282/${fase}_${vista}.png"
+            done
           done
           test -s evidencia-densidad-282/manifest.json
           python3 - <<'PY'
@@ -89,17 +89,22 @@ jobs:
           casos = {caso["id"]: caso for caso in manifest["casos"]}
           if set(casos) != {"oficina", "calle", "casa", "sueno"}:
               raise SystemExit("faltan fases del gate #282")
-          hashes = [caso["sha256"] for caso in manifest["casos"]]
-          if len(hashes) != 4 or len(set(hashes)) != 4:
-              raise SystemExit("las cuatro capturas deben existir y ser distintas")
+          if manifest.get("vistas_por_fase") != 3:
+              raise SystemExit("el gate #282 debe publicar tres vistas por fase")
           for nombre, caso in casos.items():
+              vistas = {vista["id"]: vista for vista in caso.get("vistas", [])}
+              if set(vistas) != {"frente", "izquierda", "derecha"}:
+                  raise SystemExit(f"{nombre}: faltan vistas frontal/laterales")
+              hashes = [vista["sha256"] for vista in vistas.values()]
+              if len(set(hashes)) != 3:
+                  raise SystemExit(f"{nombre}: las tres vistas deben ser distintas")
               if caso["mallas_total"] <= 0:
                   raise SystemExit(f"{nombre}: no se detectaron mallas 3D")
               if caso["bultos_total"] != caso["bultos_modelados"] + caso["bultos_proxy"]:
                   raise SystemExit(f"{nombre}: auditoría declarativa incoherente")
               if not 0.0 <= caso["ratio_bultos_modelados"] <= 1.0:
                   raise SystemExit(f"{nombre}: ratio de modelado fuera de rango")
-          print("4/4 fases capturadas; manifiesto de densidad coherente")
+          print("4/4 fases y 12/12 vistas capturadas; manifiesto de densidad coherente")
           PY
 
       - name: Adjuntar evidencia visual y métricas
