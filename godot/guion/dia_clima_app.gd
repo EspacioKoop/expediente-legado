@@ -60,10 +60,13 @@ func _al_intervalo_estres_entorno() -> void:
 	if _ambiente == null:
 		return
 
-	var evento := EstresAmbiental.evento(
-		String(jornada.get("fase", "")),
-		_ambiente.ambient_light_energy,
-		Jornada.hora_decimal(jornada),
+	var evento := (
+		EstresAmbiental
+		. evento(
+			String(jornada.get("fase", "")),
+			_ambiente.ambient_light_energy,
+			Jornada.hora_decimal(jornada),
+		)
 	)
 	if evento.is_empty():
 		return
