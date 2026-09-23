@@ -8,6 +8,7 @@ class_name Auditorias
 extends RefCounted
 
 const CLAVE_ESTADO := "auditorias"
+const CLAVE_HISTORIAL := "historial"
 const ACCION_SOBRANTE := "accion_sobrante"
 
 ## El contrato base solo declara identidades e incompatibilidades. Los rótulos
@@ -29,7 +30,7 @@ static func ids() -> Array:
 
 ## Crea el estado al COMENZAR la vida. No hay API para añadir condiciones
 ## después: quien quiera cambiarlas tiene que iniciar otra vida laboral.
-static func nueva(seleccion: Array = []) -> Dictionary:
+static func nueva(seleccion: Array = [], historial_previo: Array = []) -> Dictionary:
 	if not compatibles(seleccion):
 		return {}
 	var activas := []
@@ -40,6 +41,7 @@ static func nueva(seleccion: Array = []) -> Dictionary:
 		"activas": activas,
 		"fallidas": {},
 		"completadas": [],
+		CLAVE_HISTORIAL: historial_previo.duplicate(true),
 	}
 
 
@@ -51,13 +53,54 @@ static func asegurar_en_estado(estado_partida: Dictionary) -> Dictionary:
 		estado_partida[CLAVE_ESTADO] = actual
 	elif not estado_partida.has(CLAVE_ESTADO):
 		estado_partida[CLAVE_ESTADO] = actual
+	if not actual.has(CLAVE_HISTORIAL):
+		actual[CLAVE_HISTORIAL] = []
 	return actual
 
 
-## Una reasignación empieza otra vida laboral: ninguna condición de la anterior
-## puede sobrevivir sin que el jugador vuelva a aceptarla.
+## Cierra una vida una sola vez. Las condiciones aún activas han sobrevivido
+## toda la vuelta y se completan en este punto; las ya fallidas conservan su
+## motivo. El registro es descriptivo y no concede recursos, sellos ni logros.
+static func cerrar_vuelta(
+	estado_partida: Dictionary, vuelta: int, motivo: String = "otro"
+) -> Dictionary:
+	if vuelta < 1:
+		return {}
+	var auditoria := asegurar_en_estado(estado_partida)
+	var historial_actual: Array = auditoria.get(CLAVE_HISTORIAL, [])
+	for registro in historial_actual:
+		if typeof(registro) == TYPE_DICTIONARY and int(registro.get("vuelta", -1)) == vuelta:
+			return Dictionary(registro).duplicate(true)
+
+	var activas: Array = auditoria.get("activas", [])
+	if activas.is_empty():
+		return {}
+
+	for id in pendientes(auditoria):
+		completar(auditoria, String(id))
+
+	var registro := {
+		"vuelta": vuelta,
+		"motivo": motivo.strip_edges() if not motivo.strip_edges().is_empty() else "otro",
+		"activas": activas.duplicate(),
+		"completadas": Array(auditoria.get("completadas", [])).duplicate(),
+		"fallidas": Dictionary(auditoria.get("fallidas", {})).duplicate(true),
+	}
+	historial_actual.append(registro)
+	auditoria[CLAVE_HISTORIAL] = historial_actual
+	return registro.duplicate(true)
+
+
+static func historial(estado_partida: Dictionary) -> Array:
+	return Array(asegurar_en_estado(estado_partida).get(CLAVE_HISTORIAL, [])).duplicate(true)
+
+
+## Una reasignación empieza otra vida laboral: ninguna condición activa de la
+## anterior puede sobrevivir, pero el histórico sellado sí.
 static func reiniciar_vuelta(estado_partida: Dictionary) -> void:
-	estado_partida[CLAVE_ESTADO] = nueva()
+	var auditoria := asegurar_en_estado(estado_partida)
+	var historial_previo: Array = auditoria.get(CLAVE_HISTORIAL, [])
+	estado_partida[CLAVE_ESTADO] = nueva([], historial_previo)
 
 
 ## Primer predicado conectado extremo a extremo: al fichar, "accion_sobrante"
@@ -96,6 +139,8 @@ static func validar(auditoria) -> Array:
 		errores.append("fallidas ausente")
 	elif typeof(auditoria["fallidas"]) != TYPE_DICTIONARY:
 		errores.append("fallidas no es un objeto")
+	if auditoria.has(CLAVE_HISTORIAL) and typeof(auditoria[CLAVE_HISTORIAL]) != TYPE_ARRAY:
+		errores.append("historial no es una lista")
 	if not errores.is_empty():
 		return errores
 
@@ -123,6 +168,57 @@ static func validar(auditoria) -> Array:
 			errores.append("motivo de fallo invalido: %s" % id)
 		if completadas_vistas.has(id):
 			errores.append("estado terminal duplicado: %s" % id)
+
+	if auditoria.has(CLAVE_HISTORIAL):
+		errores.append_array(_validar_historial(auditoria[CLAVE_HISTORIAL]))
+	return errores
+
+
+static func _validar_historial(historial_crudo: Array) -> Array:
+	var errores := []
+	var vueltas := {}
+	for i in historial_crudo.size():
+		var registro = historial_crudo[i]
+		if typeof(registro) != TYPE_DICTIONARY:
+			errores.append("historial.%d no es un objeto" % i)
+			continue
+		var vuelta = registro.get("vuelta", -1)
+		if typeof(vuelta) != TYPE_INT or int(vuelta) < 1:
+			errores.append("historial.%d.vuelta invalida" % i)
+		elif vueltas.has(int(vuelta)):
+			errores.append("historial.%d.vuelta duplicada" % i)
+		else:
+			vueltas[int(vuelta)] = true
+		if (
+			typeof(registro.get("motivo")) != TYPE_STRING
+			or String(registro.get("motivo", "")).strip_edges().is_empty()
+		):
+			errores.append("historial.%d.motivo invalido" % i)
+
+		var activas = registro.get("activas")
+		var completadas = registro.get("completadas")
+		var fallidas = registro.get("fallidas")
+		if typeof(activas) != TYPE_ARRAY or not compatibles(activas):
+			errores.append("historial.%d.activas invalidas" % i)
+			continue
+		if typeof(completadas) != TYPE_ARRAY:
+			errores.append("historial.%d.completadas no es una lista" % i)
+			continue
+		if typeof(fallidas) != TYPE_DICTIONARY:
+			errores.append("historial.%d.fallidas no es un objeto" % i)
+			continue
+
+		var terminales := {}
+		for valor in completadas:
+			var id := String(valor)
+			if terminales.has(id) or not activas.has(id):
+				errores.append("historial.%d.completada invalida: %s" % [i, id])
+			terminales[id] = true
+		for clave in fallidas:
+			var id := String(clave)
+			if terminales.has(id) or not activas.has(id) or typeof(fallidas[clave]) != TYPE_STRING:
+				errores.append("historial.%d.fallida invalida: %s" % [i, id])
+			terminales[id] = true
 	return errores
 
 
