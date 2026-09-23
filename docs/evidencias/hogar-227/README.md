@@ -3,7 +3,7 @@
 Este gate convierte la validacion visual pendiente de #227 en un conjunto
 reproducible del mismo build que se esta revisando. No modifica la vivienda,
 el pack ni el gameplay: abre la escena real dia.tscn, entra en casa,
-usa la camara jugable a 1280x720 / FOV 70, oculta el HUD y captura cuatro zonas.
+usa la camara jugable a 1920x1080 / FOV 70, oculta el HUD y captura cuatro zonas.
 
 ## Artifact
 
