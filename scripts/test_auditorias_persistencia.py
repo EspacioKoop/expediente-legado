@@ -31,6 +31,8 @@ class AuditoriasPersistenciaTests(unittest.TestCase):
         )[0]
         self.assertIn('jornada.get("acciones", 0)', bloque)
         self.assertIn('"sin_accion_al_fichar"', bloque)
+        self.assertIn('"gato_sin_comer_al_dormir"', bloque)
+        self.assertIn('"gato_ausente_al_dormir"', bloque)
         for prohibido in ("Jornada.fichar_salida", "Sellos.", "Steam", "guardar("):
             self.assertNotIn(prohibido, bloque)
 
@@ -56,7 +58,7 @@ class AuditoriasPersistenciaTests(unittest.TestCase):
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
         resumen = RESUMEN.search(resultado.stdout)
         self.assertIsNotNone(resumen, resultado.stdout)
-        self.assertGreaterEqual(int(resumen.group(1)), 21, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 28, resultado.stdout)
 
 
 if __name__ == "__main__":
