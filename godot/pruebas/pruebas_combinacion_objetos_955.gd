@@ -1,8 +1,5 @@
 extends SceneTree
 
-var _pasadas := 0
-var _fallos := 0
-
 const RECETAS := [
 	{
 		"id": "documento_reforzado",
@@ -33,6 +30,9 @@ const RECETAS := [
 		},
 	},
 ]
+
+var _pasadas := 0
+var _fallos := 0
 
 
 func _initialize() -> void:
