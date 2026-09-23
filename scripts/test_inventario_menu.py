@@ -9,6 +9,7 @@ from scripts.godot_pruebas import importar_proyecto
 
 ROOT = Path(__file__).resolve().parents[1]
 MENU = ROOT / "godot" / "guion" / "inventario_menu_app.gd"
+CATALOGO_COMBINACIONES = ROOT / "godot" / "guion" / "combinaciones_objetos_catalogo.gd"
 CONTROLADOR = ROOT / "godot" / "guion" / "dia_hud_fases_app.gd"
 PREFERENCIAS = ROOT / "godot" / "guion" / "preferencias_siga.gd"
 PRUEBA_GODOT = "pruebas/pruebas_inventario_menu.gd"
@@ -18,6 +19,7 @@ RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 class InventarioMenuTest(unittest.TestCase):
     def setUp(self):
         self.menu = MENU.read_text(encoding="utf-8")
+        self.catalogo_combinaciones = CATALOGO_COMBINACIONES.read_text(encoding="utf-8")
         self.controlador = CONTROLADOR.read_text(encoding="utf-8")
         self.preferencias = PREFERENCIAS.read_text(encoding="utf-8")
 
@@ -38,6 +40,17 @@ class InventarioMenuTest(unittest.TestCase):
         self.assertIn("hud.activar(HUDLayer.MODAL)", self.controlador)
         self.assertIn("get_tree().paused = true", self.controlador)
         self.assertIn("get_tree().paused = false", self.controlador)
+
+    def test_combinacion_reutiliza_inventario_y_objetos_reales(self):
+        self.assertIn("CombinacionObjetos.combinar(", self.menu)
+        self.assertIn("CombinacionesObjetosCatalogo.recetas()", self.menu)
+        self.assertIn('name = "CombinacionSlotA"', self.menu)
+        self.assertIn('name = "CombinacionSlotB"', self.menu)
+        self.assertIn('name = "CombinacionEjecutar"', self.menu)
+        self.assertIn('"palanca_kkryy"', self.catalogo_combinaciones)
+        self.assertIn("RecompensaOnirica.ID", self.catalogo_combinaciones)
+        self.assertIn('palanca["id"]', self.catalogo_combinaciones)
+        self.assertNotIn("Partida.guardar", self.catalogo_combinaciones)
 
     def test_accion_inventario_es_semantica_y_remapeable(self):
         self.assertIn('"inventario": {"teclado": KEY_I, "mando": JOY_BUTTON_Y}', self.preferencias)
