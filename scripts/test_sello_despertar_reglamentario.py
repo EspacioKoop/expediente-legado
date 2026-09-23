@@ -35,19 +35,25 @@ class SelloDespertarReglamentarioTests(unittest.TestCase):
         tramo = DIA.split('match jornada["fase"]:', 1)[1].split(
             "## Reconoce una noche completada", 1
         )[0]
-        self.assertIn(
-            '_registrar_despertar_reglamentario()\n\t\t\t\tvar dia := Jornada.despertar(jornada)',
-            tramo,
-        )
+        emisor = "_registrar_despertar_reglamentario()"
+        auditoria = "Auditorias.resolver_fin_sueno(partida.estado, true)"
+        despertar = "Jornada.despertar(jornada)"
+        for llamada in (emisor, auditoria, despertar):
+            self.assertIn(llamada, tramo)
+        self.assertLess(tramo.index(emisor), tramo.index(auditoria))
+        self.assertLess(tramo.index(auditoria), tramo.index(despertar))
 
     def test_ruta_de_objetivos_emite_antes_del_despertar_normal(self):
         tramo = GATO.split("func _resolver_objetivos_sueno", 1)[1].split(
             "func registrar_objetivo_puzzle_onirico", 1
         )[0]
-        self.assertIn(
-            '_registrar_despertar_reglamentario()\n\t\tdia_nuevo = Jornada.despertar(jornada)',
-            tramo,
-        )
+        emisor = "_registrar_despertar_reglamentario()"
+        auditoria = "Auditorias.resolver_fin_sueno(partida.estado, true)"
+        despertar = "Jornada.despertar(jornada)"
+        for llamada in (emisor, auditoria, despertar):
+            self.assertIn(llamada, tramo)
+        self.assertLess(tramo.index(emisor), tramo.index(auditoria))
+        self.assertLess(tramo.index(auditoria), tramo.index(despertar))
 
     def test_despertares_forzados_no_emiten(self):
         proceso = DIA.split("func _process(delta: float) -> void:", 1)[1].split(
