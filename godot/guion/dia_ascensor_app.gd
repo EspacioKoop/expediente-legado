@@ -37,6 +37,7 @@ func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
 ## reabra ya en la calle.
 func _salir_por_ascensor() -> void:
 	_registrar_firma_sin_prisa()
+	Auditorias.resolver_fin_archivo(partida.estado)
 	PronosticosAuditoria.resolver_fin_jornada(partida.estado)
 	var paga := Jornada.fichar_salida(jornada)
 	_sonar("nomina")

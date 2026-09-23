@@ -93,6 +93,9 @@ static func nueva() -> Dictionary:
 		# Vive en Partida para atravesar escenas, jornadas y reasignaciones sin
 		# convertir prácticas/exposición en una identidad o puntuación global.
 		ReligionEventos.CLAVE_ESTADO: ReligionEventos.nuevo(),
+		# #152: condiciones opcionales de la vida laboral. Vacío por defecto;
+		# la futura selección de SIGA activará ids antes de empezar la vuelta.
+		Auditorias.CLAVE_ESTADO: Auditorias.nueva(),
 		# La fusión solo recupera claves del molde. Si faltan aquí, guardar
 		# escribe el día y las firmas, pero cargar los descarta silenciosamente.
 		"jornada": Jornada.nueva(),
@@ -285,6 +288,13 @@ static func validar(guardado) -> Array:
 		else:
 			errores.append_array(_validar_jornada(guardado["jornada"]))
 
+	if guardado.has(Auditorias.CLAVE_ESTADO):
+		if typeof(guardado[Auditorias.CLAVE_ESTADO]) != TYPE_DICTIONARY:
+			errores.append("%s no es un objeto" % Auditorias.CLAVE_ESTADO)
+		else:
+			for error in Auditorias.validar(guardado[Auditorias.CLAVE_ESTADO]):
+				errores.append("%s.%s" % [Auditorias.CLAVE_ESTADO, error])
+
 	if guardado.has("inventario"):
 		if typeof(guardado["inventario"]) != TYPE_DICTIONARY:
 			errores.append("inventario no es un objeto")
@@ -466,6 +476,7 @@ func _fusionar(guardado: Dictionary) -> Dictionary:
 	fusionado["perfil_jugador"] = PerfilJugador.completar(fusionado["perfil_jugador"])
 	ReligionEventos.asegurar_en_estado(fusionado)
 	Pronosticos.completar(fusionado["pronosticos"])
+	Auditorias.asegurar_en_estado(fusionado)
 	return fusionado
 
 

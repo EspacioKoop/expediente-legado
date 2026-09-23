@@ -484,6 +484,9 @@ static func reiniciar_vuelta(estado: Dictionary, vida_maxima: int) -> Dictionary
 	# El catálogo conserva la memoria total, pero una nueva vida laboral debe
 	# empezar sin hallazgos atribuidos a la vuelta anterior (#149).
 	CatalogoAnomalias.reiniciar_vuelta(estado)
+	# #152: un reto pertenece a una vida laboral concreta. La siguiente empieza
+	# sin heredar éxito, fallo ni selección de la anterior.
+	Auditorias.reiniciar_vuelta(estado)
 
 	for carta in estado.get("tarot", []):
 		carta["recogida"] = carta["id"] == "el-loco"
