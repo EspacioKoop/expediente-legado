@@ -97,7 +97,7 @@ static func _montar_cuenco_gato(raiz: Node3D, pos: Vector3) -> void:
 
 	var visual := MeshInstance3D.new()
 	visual.name = "VisualCuencoOriginal98"
-	visual.mesh = load("res://assets/modelos/props_originales_98/cuenco_gato_98.obj") as Mesh
+	visual.mesh = load("res://arte/props_originales_98/cuenco_gato_98.obj") as Mesh
 	cuenco.add_child(visual)
 
 
@@ -272,7 +272,7 @@ static func _montar_lampara_pie(raiz: Node3D, pos: Vector3) -> void:
 
 	var visual := MeshInstance3D.new()
 	visual.name = "VisualLamparaOriginal98"
-	visual.mesh = load("res://assets/modelos/props_originales_98/lampara_pie_98.obj") as Mesh
+	visual.mesh = load("res://arte/props_originales_98/lampara_pie_98.obj") as Mesh
 	lampara.add_child(visual)
 
 

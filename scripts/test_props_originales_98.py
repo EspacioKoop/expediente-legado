@@ -3,7 +3,7 @@ import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-ASSET_DIR = ROOT / "godot/assets/modelos/props_originales_98"
+ASSET_DIR = ROOT / "godot/arte/props_originales_98"
 OBJS = [
     "telefono_fijo_base_98.obj",
     "telefono_auricular_98.obj",

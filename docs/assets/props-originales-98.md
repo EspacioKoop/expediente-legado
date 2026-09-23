@@ -15,9 +15,10 @@ No se importan fotografías, logos, tipografías comerciales ni modelos de terce
 ## Formato y procedencia
 
 Los modelos son fuentes Wavefront OBJ y MTL de texto generadas específicamente para
-Expediente Legado a partir del brief del proyecto. No derivan de un asset externo.
-Se evita GLB/PNG para no crear objetos Git LFS ni solapar la reserva activa de
-`godot/assets/procedencia.json`.
+Expediente Legado a partir del brief del proyecto. No derivan de un asset externo y
+viven en `godot/arte/props_originales_98/`, junto al arte fuente propio. Se evita
+`godot/assets/` porque ese árbol exige ficha global de procedencia y el registro
+`godot/assets/procedencia.json` está reservado por otros frentes activos.
 
 Godot 4 importa OBJ como Mesh independiente y admite su MTL asociado. Las piezas
 son estáticas: no necesitan esqueleto, animaciones, UV2 ni materiales PBR. Los

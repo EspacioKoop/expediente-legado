@@ -439,7 +439,7 @@ func _montar_visual() -> void:
 	add_child(visual)
 	var carcasa := MeshInstance3D.new()
 	carcasa.name = "CarcasaMinicadenaOriginal98"
-	carcasa.mesh = load("res://assets/modelos/props_originales_98/minicadena_98.obj") as Mesh
+	carcasa.mesh = load("res://arte/props_originales_98/minicadena_98.obj") as Mesh
 	visual.add_child(carcasa)
 
 

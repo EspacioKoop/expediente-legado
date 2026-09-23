@@ -91,7 +91,7 @@ func _montar_colision() -> void:
 func _montar_carcasa() -> void:
 	var carcasa := MeshInstance3D.new()
 	carcasa.name = "CarcasaImpresoraOriginal98"
-	carcasa.mesh = load("res://assets/modelos/props_originales_98/impresora_termica_98.obj") as Mesh
+	carcasa.mesh = load("res://arte/props_originales_98/impresora_termica_98.obj") as Mesh
 	add_child(carcasa)
 
 	var led := MeshInstance3D.new()
