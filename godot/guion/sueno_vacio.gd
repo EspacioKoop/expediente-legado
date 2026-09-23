@@ -22,7 +22,7 @@ static func adaptar_espacio(espacio: Dictionary) -> Dictionary:
 	resultado["carteles"] = []
 	resultado["decals"] = []
 	resultado["ambiente"] = Color(0.075, 0.085, 0.09)
-	resultado["ambiente_energia"] = 0.24
+	resultado["ambiente_energia"] = 0.38
 	resultado["sol"] = 0.0
 
 	if familia.is_empty():
