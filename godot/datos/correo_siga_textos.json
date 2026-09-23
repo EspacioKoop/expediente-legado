@@ -8,5 +8,6 @@
   "estado": "%d mensaje(s) · %d sin leer",
   "responder": "RESPONDER",
   "respuesta_enviada": "Enviado: %s",
-  "respuesta_espera": "La respuesta, si llega, aparecerá más adelante en la bandeja."
+  "respuesta_espera": "La respuesta, si llega, aparecerá más adelante en la bandeja.",
+  "abrir_adjunto": "Abrir adjunto: %s"
 }
