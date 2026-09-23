@@ -46,3 +46,8 @@ godot/assets/audio/musica/*.ogg filter=lfs diff=lfs merge=lfs -text
 *.obj    text
 *.import text
 *.tres   text
+
+# Recortes fotorealistas propios de oficina: cada WebP pesa menos de 10 KiB.
+# Se guardan como blobs Git normales para evitar el coste de punteros LFS en
+# un lote diminuto y autocontenido; el resto de WebP sigue usando LFS.
+godot/assets/texturas/oficina_ai_98/*.webp -filter -diff -merge -text
