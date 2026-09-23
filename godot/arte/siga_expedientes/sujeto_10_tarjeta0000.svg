@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="120" viewBox="0 0 96 120" shape-rendering="crispEdges">
+<title>Ficha del titular sin nombre de la tarjeta 0000; contorno no biográfico</title>
+<rect width="96" height="120" fill="#e9e5d8"/>
+<rect x="4" y="4" width="88" height="112" fill="#fffdf4" stroke="#353535" stroke-width="2"/>
+<path d="M10 16h76M10 98h76" stroke="#6A4C61" stroke-width="3"/>
+<rect x="12" y="21" width="44" height="58" fill="#ded9ca" stroke="#353535" stroke-width="2" stroke-dasharray="3 2"/>
+<circle cx="34" cy="39" r="11" fill="none" stroke="#67645f" stroke-width="2"/>
+<path d="M17 70c2-13 8-20 17-20s15 7 17 20v5H17z" fill="none" stroke="#67645f" stroke-width="2"/>
+<path d="M64 27h18M64 36h14" stroke="#353535" stroke-width="2"/>
+<rect x="61" y="56" width="26" height="18" fill="#fffdf4" stroke="#6A4C61" stroke-width="2"/>
+<path d="M61 61h26" stroke="#6A4C61" stroke-width="2"/>
+<circle cx="66" cy="68" r="2" fill="none" stroke="#353535" stroke-width="1"/>
+<circle cx="72" cy="68" r="2" fill="none" stroke="#353535" stroke-width="1"/>
+<circle cx="78" cy="68" r="2" fill="none" stroke="#353535" stroke-width="1"/>
+<circle cx="84" cy="68" r="2" fill="none" stroke="#353535" stroke-width="1"/>
+<path d="M15 88h46M15 94h20" stroke="#353535" stroke-width="2" stroke-dasharray="4 2"/>
+<path d="M66 84h16v12H66z" fill="none" stroke="#6A4C61" stroke-width="2"/>
+</svg>

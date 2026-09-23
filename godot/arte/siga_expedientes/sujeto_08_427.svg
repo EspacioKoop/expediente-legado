@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="120" viewBox="0 0 96 120" shape-rendering="crispEdges">
+<title>Ficha administrativa del empleado #427; silueta no biográfica</title>
+<rect width="96" height="120" fill="#e9e5d8"/>
+<rect x="4" y="4" width="88" height="112" fill="#fffdf4" stroke="#353535" stroke-width="2"/>
+<path d="M10 16h76M10 98h76" stroke="#5C6474" stroke-width="3"/>
+<rect x="12" y="21" width="44" height="58" fill="#ded9ca" stroke="#353535" stroke-width="2" stroke-dasharray="3 2"/>
+<circle cx="34" cy="39" r="11" fill="#67645f"/>
+<path d="M17 70c2-13 8-20 17-20s15 7 17 20v5H17z" fill="#67645f"/>
+<path d="M64 27h18M64 36h14" stroke="#353535" stroke-width="2"/>
+<rect x="62" y="68" width="22" height="8" fill="#5C6474"/>
+<circle cx="73" cy="63" r="6" fill="#B04A3A" stroke="#353535" stroke-width="2"/>
+<path d="M15 88h40M15 94h28" stroke="#353535" stroke-width="2"/>
+<rect x="62" y="84" width="6" height="10" fill="none" stroke="#5C6474" stroke-width="2"/>
+<rect x="71" y="84" width="6" height="10" fill="none" stroke="#5C6474" stroke-width="2"/>
+<rect x="80" y="84" width="6" height="10" fill="none" stroke="#5C6474" stroke-width="2"/>
+</svg>

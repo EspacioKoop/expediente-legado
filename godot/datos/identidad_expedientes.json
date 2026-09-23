@@ -20,6 +20,7 @@
     "acento": "#4E627E",
     "icono": "res://arte/siga_expedientes/caso_03_piso13.svg",
     "lamina": "res://arte/siga_expedientes/lamina_03_piso13.svg",
+    "sujeto": "res://arte/siga_expedientes/sujeto_03_montalvo.svg",
     "motivo": "traslado a un piso que no existe"
   },
   "caso4@4": {
@@ -27,6 +28,7 @@
     "acento": "#8A6B2D",
     "icono": "res://arte/siga_expedientes/caso_04_carcosa.svg",
     "lamina": "res://arte/siga_expedientes/lamina_04_carcosa.svg",
+    "sujeto": "res://arte/siga_expedientes/sujeto_04_carcosa.svg",
     "motivo": "contrato escénico y segundo acto no representado"
   },
   "caso5@5": {
@@ -34,6 +36,7 @@
     "acento": "#705A7E",
     "icono": "res://arte/siga_expedientes/caso_05_memo.svg",
     "lamina": "res://arte/siga_expedientes/lamina_05_memo.svg",
+    "sujeto": "res://arte/siga_expedientes/sujeto_05_auditor.svg",
     "motivo": "memorándum idéntico archivado en tres épocas"
   },
   "caso6@6": {
@@ -41,6 +44,7 @@
     "acento": "#9A7A32",
     "icono": "res://arte/siga_expedientes/caso_06_acta.svg",
     "lamina": "res://arte/siga_expedientes/lamina_06_acta.svg",
+    "sujeto": "res://arte/siga_expedientes/sujeto_06_comite.svg",
     "motivo": "acta constitutiva no circulada y sello amarillo"
   },
   "caso7@7": {
@@ -48,6 +52,7 @@
     "acento": "#536E5A",
     "icono": "res://arte/siga_expedientes/caso_07_herencia.svg",
     "lamina": "res://arte/siga_expedientes/lamina_07_herencia.svg",
+    "sujeto": "res://arte/siga_expedientes/sujeto_07_karamazov.svg",
     "motivo": "herencia en acciones y tres reclamantes"
   },
   "caso8@8": {
@@ -55,6 +60,7 @@
     "acento": "#5C6474",
     "icono": "res://arte/siga_expedientes/caso_08_427.svg",
     "lamina": "res://arte/siga_expedientes/lamina_08_427.svg",
+    "sujeto": "res://arte/siga_expedientes/sujeto_08_427.svg",
     "motivo": "empleado reducido a número y botón"
   },
   "caso9@9": {
@@ -62,6 +68,7 @@
     "acento": "#735E48",
     "icono": "res://arte/siga_expedientes/caso_09_r17.svg",
     "lamina": "res://arte/siga_expedientes/lamina_09_r17.svg",
+    "sujeto": "res://arte/siga_expedientes/sujeto_09_vela.svg",
     "motivo": "serie inexistente reclasificada para mantener el circuito"
   },
   "caso10@10": {
@@ -69,6 +76,7 @@
     "acento": "#6A4C61",
     "icono": "res://arte/siga_expedientes/caso_10_mesa0.svg",
     "lamina": "res://arte/siga_expedientes/lamina_10_mesa0.svg",
+    "sujeto": "res://arte/siga_expedientes/sujeto_10_tarjeta0000.svg",
     "motivo": "86 empleados y una presencia administrativa adicional"
   }
 }
