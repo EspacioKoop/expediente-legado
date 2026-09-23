@@ -1,8 +1,9 @@
 ## Superficie de inventario del menú global (#97).
 ##
-## Es deliberadamente de consulta: muestra el inventario persistente sin crear
-## una segunda fuente de verdad ni añadir acciones de guardar/vender. En casa
-## enseña carried + home_storage; fuera de casa solo carried.
+## Muestra el inventario persistente sin crear una segunda fuente de verdad.
+## Guardar/vender siguen fuera de esta superficie; #955 añade únicamente una
+## combinación de dos objetos delegada al dominio transaccional. En casa enseña
+## carried + home_storage; fuera de casa solo carried.
 class_name InventarioMenuApp
 extends PanelContainer
 
