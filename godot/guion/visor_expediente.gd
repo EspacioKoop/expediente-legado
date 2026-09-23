@@ -348,6 +348,8 @@ func _al_elegir_documento(indice: int) -> void:
 			return
 
 	_aviso_partida = ""
+	var auditoria_lectura := Auditorias.resolver_apertura_documento(partida.estado, ya_visto)
+	var auditoria_mutada := bool(auditoria_lectura.get("cambio", false))
 	# El sueño recuerda lo leído, no lo cobrado: un expediente firmado también
 	# deja huella. Una apertura denegada ya ha salido por el return anterior.
 	#
@@ -361,7 +363,7 @@ func _al_elegir_documento(indice: int) -> void:
 	var huella_mutada := _registrar_huella_lectura(registro)
 	if not ya_visto:
 		Jornada.anotar_lectura(jornada, registro["folio"])
-	if not ya_visto or huella_mutada:
+	if not ya_visto or huella_mutada or auditoria_mutada:
 		_guardar_o_avisar()
 
 	# La primera lectura del día suena a papel, también si es gratuita.

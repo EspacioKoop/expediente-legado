@@ -18,6 +18,11 @@ const CONDICIONES := [
 		"titulo": "AUDITORIAS_GATO_DIARIO",
 		"descripcion": "AUDITORIAS_GATO_DIARIO_DESC",
 	},
+	{
+		"id": Auditorias.SIN_RELEER,
+		"titulo": "AUDITORIAS_SIN_RELEER",
+		"descripcion": "AUDITORIAS_SIN_RELEER_DESC",
+	},
 ]
 
 var _estado_partida: Dictionary = {}

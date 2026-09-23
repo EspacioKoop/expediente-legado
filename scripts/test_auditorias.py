@@ -9,6 +9,7 @@ ASCENSOR = Path("godot/guion/dia_ascensor_app.gd")
 SUENO = Path("godot/guion/dia_sueno_app.gd")
 CREADOR = Path("godot/guion/creador_personaje_app.gd")
 NUEVA_VIDA = Path("godot/guion/auditorias_nueva_vida_app.gd")
+VISOR = Path("godot/guion/visor_expediente.gd")
 
 
 def texto() -> str:
@@ -128,4 +129,30 @@ def test_gato_diario_usa_solo_estado_existente_y_no_recompensa():
     assert '"gato_sin_comer_al_dormir"' in bloque
     assert '"gato_ausente_al_dormir"' in bloque
     for termino in ("Jornada.", "Sellos.", "Steam", "guardar(", "dinero +=", "acciones +="):
+        assert termino not in bloque
+
+
+def test_sin_releer_se_evalua_solo_tras_una_apertura_admitida():
+    visor = VISOR.read_text(encoding="utf-8")
+    bloque = visor.split("func _al_elegir_documento", 1)[1].split(
+        "func _mostrar_registro", 1
+    )[0]
+    llamada = "Auditorias.resolver_apertura_documento(partida.estado, ya_visto)"
+    denegacion = "if not Jornada.gastar_lectura"
+    mostrar = "_mostrar_registro(registro)"
+    assert llamada in bloque
+    assert bloque.index(denegacion) < bloque.index(llamada)
+    assert bloque.index(llamada) < bloque.index(mostrar)
+    assert 'var auditoria_mutada := bool(auditoria_lectura.get("cambio", false))' in bloque
+    assert "or auditoria_mutada" in bloque
+
+
+def test_sin_releer_no_bloquea_ni_duplica_reglas_de_jornada():
+    contenido = texto()
+    bloque = contenido.split("static func resolver_apertura_documento", 1)[1].split(
+        "static func validar", 1
+    )[0]
+    assert '"documento_releido"' in bloque
+    assert "ya_visto_hoy" in bloque
+    for termino in ("Jornada.", "guardar(", "Sellos.", "Steam", "dinero", "acciones"):
         assert termino not in bloque

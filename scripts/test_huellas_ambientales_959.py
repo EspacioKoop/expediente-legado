@@ -52,7 +52,7 @@ class HuellasAmbientales959Test(unittest.TestCase):
         self.assertIn('"lectura"', self.visor)
         self.assertIn("HuellasAmbientales.intensidad_de", self.visor)
         self.assertIn("_color_papel_documento(registro)", self.visor)
-        self.assertIn("if not ya_visto or huella_mutada:", self.visor)
+        self.assertIn("if not ya_visto or huella_mutada or auditoria_mutada:", self.visor)
 
     def test_no_convierte_huellas_en_progreso(self):
         for forbidden in ("Sellos.", "Prometeo.", "Economia.", "Acusacion."):
