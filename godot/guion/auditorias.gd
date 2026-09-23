@@ -12,6 +12,7 @@ const CLAVE_HISTORIAL := "historial"
 const CLAVE_SELECCION_RESUELTA := "seleccion_resuelta"
 const ACCION_SOBRANTE := "accion_sobrante"
 const GATO_DIARIO := "gato_diario"
+const SIN_RELEER := "sin_releer"
 
 ## El contrato base solo declara identidades e incompatibilidades. Los rótulos
 ## pertenecen a la futura capa de selección/consulta: declarar aquí claves de
@@ -179,6 +180,23 @@ static func resolver_fin_casa(estado_partida: Dictionary) -> Dictionary:
 			"dias_sin_comer": dias_sin_comer,
 		}
 	return {"resultado": "activa", "id": GATO_DIARIO, "dias_sin_comer": dias_sin_comer}
+
+
+## Tercer predicado verificable: el visor ya sabe si el folio estaba en
+## "leido_hoy". Auditorias recibe ese hecho resuelto y no necesita conocer
+## Jornada ni recalcular qué significa una relectura.
+static func resolver_apertura_documento(
+	estado_partida: Dictionary, ya_visto_hoy: bool
+) -> Dictionary:
+	var auditoria := asegurar_en_estado(estado_partida)
+	var estado_actual := estado(auditoria, SIN_RELEER)
+	if estado_actual != "activa":
+		return {"resultado": estado_actual, "id": SIN_RELEER, "cambio": false}
+	if not ya_visto_hoy:
+		return {"resultado": "activa", "id": SIN_RELEER, "cambio": false}
+
+	var cambio := fallar(auditoria, SIN_RELEER, "documento_releido")
+	return {"resultado": "fallida", "id": SIN_RELEER, "cambio": cambio}
 
 
 ## Valida únicamente estructura e invariantes persistibles. Las reglas de
