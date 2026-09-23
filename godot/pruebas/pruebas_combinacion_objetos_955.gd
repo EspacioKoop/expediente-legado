@@ -37,8 +37,10 @@ const RECETAS := [
 
 func _initialize() -> void:
 	_comprobar(
-		CombinacionObjetos.firma("cinta", "documento")
-		== CombinacionObjetos.firma("documento", "cinta"),
+		(
+			CombinacionObjetos.firma("cinta", "documento")
+			== CombinacionObjetos.firma("documento", "cinta")
+		),
 		"la firma de pareja es conmutativa",
 	)
 
@@ -76,7 +78,9 @@ func _initialize() -> void:
 	_agregar(mejora, "linterna")
 	_agregar(mejora, "bateria")
 	var reemplazo := CombinacionObjetos.combinar(mejora, RECETAS, "bateria", "linterna")
-	_comprobar(reemplazo["estado"] == CombinacionObjetos.ESTADO_EXITO, "permite modificar un objeto")
+	_comprobar(
+		reemplazo["estado"] == CombinacionObjetos.ESTADO_EXITO, "permite modificar un objeto"
+	)
 	_comprobar(Inventario.contiene(mejora, "linterna"), "el id reemplazado vuelve materializado")
 	_comprobar(not Inventario.contiene(mejora, "bateria"), "la mejora consume el accesorio")
 
@@ -95,15 +99,18 @@ func _initialize() -> void:
 
 
 func _agregar(inventario: Dictionary, objeto_id: String) -> void:
-	Inventario.recoger(
-		inventario,
-		{
-			"id": objeto_id,
-			"nombre": objeto_id.capitalize(),
-			"origen": "fixture",
-			"vendible": false,
-			"precio": 0,
-		},
+	(
+		Inventario
+		. recoger(
+			inventario,
+			{
+				"id": objeto_id,
+				"nombre": objeto_id.capitalize(),
+				"origen": "fixture",
+				"vendible": false,
+				"precio": 0,
+			},
+		)
 	)
 
 
