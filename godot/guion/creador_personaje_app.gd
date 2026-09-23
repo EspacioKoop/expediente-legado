@@ -61,6 +61,7 @@ var _ropa: OptionButton
 var _previsualizacion: PrevisualizadorPersonaje3D
 var _trasfondo: OptionButton
 var _descripcion: Label
+var _auditorias: AuditoriasSiga
 var _resumen: Label
 var _estado: Label
 
@@ -152,6 +153,11 @@ func _construir() -> void:
 	nota.text = tr("PERSONAJE_NOTA_TRASFONDO")
 	nota.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	pasado.add_child(nota)
+
+	_auditorias = AuditoriasSiga.new()
+	_auditorias.name = "AuditoriasIniciales"
+	_auditorias.configurar_estado(_partida.estado, _alta_pendiente)
+	pasado.add_child(_auditorias)
 
 	_resumen = Label.new()
 	_resumen.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -294,6 +300,8 @@ func _guardar() -> void:
 	_perfil = _desde_controles()
 	_perfil["configurado"] = true
 	_partida.estado["perfil_jugador"] = _perfil
+	if _alta_pendiente and _auditorias != null:
+		_partida.estado[Auditorias.CLAVE_ESTADO] = Auditorias.nueva(_auditorias.seleccion())
 	if not _partida.guardar():
 		_estado.text = tr("PERSONAJE_ERROR_GUARDAR")
 		return
