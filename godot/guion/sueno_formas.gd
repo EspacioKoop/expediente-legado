@@ -56,12 +56,19 @@ const ALCANCE_LUZ_MATERIAL := 19.0
 const CONTRASTE_MATERIAL_ONIRICO := 2.0
 
 const FORMAS := {
-	# Dos naves cruzadas. Desde el centro se ven cuatro fondos y ninguno dice
-	# nada; desde un brazo no se ve el resto.
+	# Id histórico conservado por compatibilidad (#798). La cruz original deja
+	# de definir tanto la planta lógica como la arquitectura visible: el recorrido
+	# de celdas solo mantiene timing/mapa y la sala real usa la familia fragmentada.
 	"crucero":
 	{
 		"rotulo": "SUENO_ROTULO",
-		"bloques": [Rect2i(0, 5, 22, 6), Rect2i(8, 0, 6, 16)],
+		"bloques":
+		[
+			Rect2i(0, 0, 12, 8),
+			Rect2i(6, 6, 12, 8),
+			Rect2i(2, 12, 10, 6),
+		],
+		"familia_poligonal": SuenoFamilias.FRAGMENTADA,
 		"textura_suelo": "linoleo",
 		"textura_muro": "gotele",
 		"escala_textura": 7.5,
@@ -81,7 +88,7 @@ const FORMAS := {
 				"tam": Vector3(0.5, 0.1, 0.5)
 			}
 		],
-		"entrada": Vector2i(11, 14),
+		"entrada": Vector2i(5, 16),
 		"color_suelo": Color(0.26, 0.24, 0.30),
 		"color_muro": Color(0.33, 0.30, 0.39),
 		"color_techo": Color(0.19, 0.17, 0.22),
