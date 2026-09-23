@@ -109,12 +109,15 @@ const PAQUETES := [
 
 var _instalados: Array[String] = []
 var _ejecuciones: Dictionary = {}
+var _obtenidos: Array[String] = []
 
 
 func catalogo() -> Array[Dictionary]:
 	var salida: Array[Dictionary] = []
 	for paquete in PAQUETES:
-		salida.append((paquete as Dictionary).duplicate(true))
+		var copia := (paquete as Dictionary).duplicate(true)
+		copia["obtenido"] = esta_obtenido(String(copia.get("id", "")))
+		salida.append(copia)
 	return salida
 
 
@@ -123,6 +126,19 @@ func ficha(id: String) -> Dictionary:
 		if String((paquete as Dictionary).get("id", "")) == id:
 			return (paquete as Dictionary).duplicate(true)
 	return {}
+
+
+func esta_obtenido(id: String) -> bool:
+	return _obtenidos.has(id)
+
+
+func registrar_obtencion(id: String) -> bool:
+	if ficha(id).is_empty():
+		return false
+	if not _obtenidos.has(id):
+		_obtenidos.append(id)
+		_obtenidos.sort()
+	return true
 
 
 func esta_instalado(id: String) -> bool:
@@ -183,19 +199,31 @@ func exportar_estado() -> Dictionary:
 	return {
 		"instalados": _instalados.duplicate(),
 		"ejecuciones": _ejecuciones.duplicate(true),
+		"obtenidos": _obtenidos.duplicate(),
 	}
 
 
 func importar_estado(estado: Dictionary) -> void:
 	_instalados.clear()
 	_ejecuciones.clear()
+	_obtenidos.clear()
+	var obtenidos: Variant = estado.get("obtenidos", [])
+	if obtenidos is Array:
+		for valor in obtenidos as Array:
+			var id := String(valor)
+			if not ficha(id).is_empty() and not _obtenidos.has(id):
+				_obtenidos.append(id)
+	_obtenidos.sort()
 	var instalados: Variant = estado.get("instalados", [])
 	if instalados is Array:
 		for valor in instalados as Array:
 			var id := String(valor)
 			if not ficha(id).is_empty() and not _instalados.has(id):
 				_instalados.append(id)
+				if not _obtenidos.has(id):
+					_obtenidos.append(id)
 	_instalados.sort()
+	_obtenidos.sort()
 	var ejecuciones: Variant = estado.get("ejecuciones", {})
 	if ejecuciones is Dictionary:
 		for clave in (ejecuciones as Dictionary).keys():

@@ -14,6 +14,8 @@ VIGILIA = ROOT / "godot" / "guion" / "yggdrasil_vigilia.gd"
 ESCENA_SUENO = ROOT / "godot" / "escenas" / "sueno_yggdrasil.tscn"
 ESCENA_VIGILIA = ROOT / "godot" / "escenas" / "yggdrasil_vigilia.tscn"
 REFERENCIAS = ROOT / "docs" / "assets" / "yggdrasil-referencias.md"
+CONTROLLER = ROOT / "godot" / "guion" / "dia_yggdrasil_app.gd"
+DIA = ROOT / "godot" / "escenas" / "dia.tscn"
 PRUEBA_GODOT = "res://pruebas/pruebas_yggdrasil.gd"
 RESUMEN_GODOT = re.compile(r"(\d+) pasadas, 0 fallos")
 
@@ -27,6 +29,8 @@ class SuenoYggdrasilTest(unittest.TestCase):
         cls.escena_sueno = ESCENA_SUENO.read_text(encoding="utf-8")
         cls.escena_vigilia = ESCENA_VIGILIA.read_text(encoding="utf-8")
         cls.referencias = REFERENCIAS.read_text(encoding="utf-8")
+        cls.controller = CONTROLLER.read_text(encoding="utf-8")
+        cls.dia = DIA.read_text(encoding="utf-8")
 
     def test_semilla_usa_catalogo_comun(self):
         self.assertIn('"yggdrasil",', self.semillas)
@@ -50,6 +54,26 @@ class SuenoYggdrasilTest(unittest.TestCase):
         self.assertNotIn("Label.new()", combinado)
         self.assertNotIn("CanvasLayer", combinado)
 
+    def test_vigilia_esta_en_la_casa_real_y_no_activa_por_presencia(self):
+        self.assertIn('fase == "casa"', self.controller)
+        self.assertIn('String(dia._vivienda()) != "casa"', self.controller)
+        self.assertIn("YggdrasilVigilia.new()", self.controller)
+        self.assertIn("poster.configurar(jornada)", self.controller)
+        self.assertNotIn("activar_semilla_onirica", self.controller)
+
+    def test_controller_nocturno_usa_selector_y_asignacion_comunes(self):
+        self.assertIn("SemillasOniricas", self.controller)
+        self.assertIn(". seleccionar_para_noche(", self.controller)
+        self.assertIn("MitologiasNoche", self.controller)
+        self.assertIn(". corresponde_a_escena(", self.controller)
+        self.assertIn("SuenoYggdrasil.ID_MITO", self.controller)
+        self.assertIn("PreferenciasSiga.cargar()", self.controller)
+        self.assertIn("SuenoYggdrasil.new()", self.controller)
+
+    def test_controller_esta_montado_en_dia_real(self):
+        self.assertIn('path="res://guion/dia_yggdrasil_app.gd"', self.dia)
+        self.assertIn('[node name="YggdrasilController" type="Node" parent="."]', self.dia)
+
     def test_grafo_causal_es_visible_y_acotado(self):
         self.assertIn("const NODO_RAIZ", self.sueno)
         self.assertIn("const NODO_TRONCO", self.sueno)
@@ -62,11 +86,21 @@ class SuenoYggdrasilTest(unittest.TestCase):
         self.assertIn('"Retorno"', self.sueno)
         self.assertIn("clampi(", self.sueno)
 
+    def test_grafo_causal_usa_interaccion_3d_comun(self):
+        self.assertIn("Interactuable3D.new()", self.sueno)
+        self.assertIn("Interactuable3D.Verbo.USAR", self.sueno)
+        self.assertIn("CollisionShape3D.new()", self.sueno)
+        self.assertIn("hotspot.activado.connect", self.sueno)
+        self.assertIn("_al_intervenir", self.sueno)
+        self.assertNotIn("Input.", self.sueno)
+
     def test_reduccion_movimiento_no_cambia_causalidad(self):
         self.assertIn('"corte_fundido" if reduccion_movimiento', self.sueno)
         self.assertIn('"duracion": 0.0 if reduccion_movimiento', self.sueno)
         self.assertIn('"desplazar_sala": not reduccion_movimiento', self.sueno)
         self.assertIn("var destino := String(CONEXIONES[origen])", self.sueno)
+        self.assertIn("var reduccion_movimiento := false", self.sueno)
+        self.assertIn("yggdrasil.reduccion_movimiento", self.controller)
 
     def test_fuentes_culturales_preceden_arte_final(self):
         self.assertIn("Völuspá 19–20", self.referencias)

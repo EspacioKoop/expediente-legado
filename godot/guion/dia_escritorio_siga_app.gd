@@ -18,6 +18,7 @@ var _evaluaciones_app: EscritorioSigaApp
 var _auditorias_app: EscritorioSigaApp
 var _explorador_vista: ExploradorSiga
 var _navegador_vista: NavegadorSiga
+var _software_vista: SoftwareSiga
 var _menu_global: Node
 var _boton_salida_menu_global: Button
 
@@ -314,6 +315,7 @@ func _crear_explorador() -> Control:
 		explorador.configurar_contexto(_contexto_os98(dia))
 	explorador.documento_abierto.connect(_registrar_documento_os98)
 	explorador.ruta_abierta.connect(_registrar_ruta_os98)
+	explorador.paquete_software_obtenido.connect(_registrar_paquete_software_obtenido)
 	return explorador
 
 
@@ -331,6 +333,7 @@ func _crear_navegador() -> Control:
 
 func _crear_software() -> Control:
 	var software := SoftwareSiga.new()
+	_software_vista = software
 	if _software_app != null:
 		software.configurar_estado(_software_app.obtener_estado_local("estado", {}))
 	software.estado_cambiado.connect(_registrar_estado_software)
@@ -368,6 +371,7 @@ func _crear_correo() -> Control:
 				correo.configurar_respuestas_enviadas(respuestas as Dictionary)
 	correo.mensaje_leido.connect(_registrar_correo_leido)
 	correo.respuesta_enviada.connect(_registrar_respuesta_correo)
+	correo.paquete_software_obtenido.connect(_registrar_paquete_software_obtenido)
 	return correo
 
 
@@ -501,6 +505,18 @@ func _persistir_estado_os98(dia: Node, estado: Dictionary) -> void:
 func _registrar_estado_navegador(estado: Dictionary) -> void:
 	if _navegador_app != null:
 		_navegador_app.establecer_estado_local("estado", estado)
+
+
+func _registrar_paquete_software_obtenido(id: String) -> void:
+	if _software_app == null or id.is_empty():
+		return
+	if is_instance_valid(_software_vista):
+		_software_vista.registrar_obtencion(id)
+		return
+	var modelo := SoftwareSigaModelo.new()
+	modelo.importar_estado(_software_app.obtener_estado_local("estado", {}))
+	if modelo.registrar_obtencion(id):
+		_software_app.establecer_estado_local("estado", modelo.exportar_estado())
 
 
 func _registrar_estado_software(estado: Dictionary) -> void:
