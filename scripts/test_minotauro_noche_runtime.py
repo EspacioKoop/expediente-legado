@@ -35,6 +35,10 @@ class MinotauroNocheRuntimeTest(unittest.TestCase):
         self.assertIn('ancla.name = "AnclaAriadna_" + nodo_id', self.vertical)
         self.assertIn('"AlaReplegable"', self.vertical)
         self.assertIn('"Hilo_" + real', self.vertical)
+        self.assertIn('"HiloAriadna"', self.vertical)
+        self.assertIn('"NudoReal_" + real', self.vertical)
+        self.assertIn('"Tramo%02d" % indice', self.vertical)
+        self.assertIn("_reconstruir_hilo_ariadna()", self.vertical)
         self.assertIn('"PresenciaMinotauro"', self.vertical)
         self.assertIn('"SombraBloqueo"', self.vertical)
         self.assertIn("Interactuable3D.new()", self.vertical)
@@ -77,11 +81,14 @@ class MinotauroNocheRuntimeTest(unittest.TestCase):
             '[node name="MinotauroSuenoController" type="Node" parent="."]', self.dia
         )
 
-    def test_smoke_cubre_repliegue_presencia_y_ruta(self):
+    def test_smoke_cubre_repliegue_hilo_presencia_y_ruta(self):
+        self.assertIn("minotauro.marcar_y_cruzar(SuenoMinotauro.CRUCE_NORTE)", self.smoke)
         self.assertIn("minotauro.marcar_y_cruzar(SuenoMinotauro.BISAGRA)", self.smoke)
         self.assertIn("fase_topologica", self.smoke)
         self.assertIn('== "fundido_discreto"', self.smoke)
         self.assertIn("minotauro.marcar_y_cruzar(SuenoMinotauro.CENTRO)", self.smoke)
+        self.assertIn('"HiloAriadna/NudoReal_cruce_norte"', self.smoke)
+        self.assertIn("marca_norte.position.distance_to(nudo_norte.position) > 1.0", self.smoke)
         self.assertIn("SuenoMinotauro.hay_ruta", self.smoke)
 
     @unittest.skipUnless(

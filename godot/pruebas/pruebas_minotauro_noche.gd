@@ -29,10 +29,23 @@ func _initialize() -> void:
 		arquitectura.get_node_or_null("AnclaAriadna_bisagra") != null,
 		"ancla de Ariadna interactuable",
 	)
+	_comprobar(
+		arquitectura.get_node_or_null("HiloAriadna") != null,
+		"hilo de Ariadna tiene contenedor propio",
+	)
+
+	_comprobar(
+		minotauro.marcar_y_cruzar(SuenoMinotauro.CRUCE_NORTE),
+		"primera marca fija un cruce estable",
+	)
+	_comprobar(
+		arquitectura.get_node_or_null("HiloAriadna/Tramo00") != null,
+		"primera marca despliega un tramo continuo desde la entrada",
+	)
 
 	_comprobar(
 		minotauro.marcar_y_cruzar(SuenoMinotauro.BISAGRA),
-		"primera marca cruza la bisagra",
+		"segunda marca cruza la bisagra",
 	)
 	var estado_1 := minotauro.estado()
 	_comprobar(int(estado_1.get("fase_topologica", -1)) == 1, "repliegue determinista")
@@ -47,11 +60,25 @@ func _initialize() -> void:
 
 	_comprobar(
 		minotauro.marcar_y_cruzar(SuenoMinotauro.CENTRO),
-		"segunda marca cruza el centro",
+		"tercera marca cruza el centro",
 	)
 	var estado_2 := minotauro.estado()
 	var bloqueo := String(estado_2.get("bloqueo", ""))
-	_comprobar(String(estado_2.get("presencia", "")) == "cruce", "presencia reacciona")
+	_comprobar(String(estado_2.get("presencia", "")) == "cerca", "presencia reacciona")
+
+	var marca_norte := arquitectura.get_node_or_null("Hilo_cruce_norte") as MeshInstance3D
+	var nudo_norte := (
+		arquitectura.get_node_or_null("HiloAriadna/NudoReal_cruce_norte") as MeshInstance3D
+	)
+	_comprobar(marca_norte != null and nudo_norte != null, "marca y nudo real permanecen visibles")
+	if marca_norte != null and nudo_norte != null:
+		_comprobar(
+			marca_norte.position.distance_to(nudo_norte.position) > 1.0,
+			"el repliegue separa marca aparente e hilo real de forma legible",
+		)
+	var hilo := arquitectura.get_node_or_null("HiloAriadna")
+	_comprobar(hilo != null and hilo.get_child_count() == 6, "tres nudos y tres tramos de hilo")
+
 	_comprobar(
 		SuenoMinotauro.hay_ruta(SuenoMinotauro.CENTRO, SuenoMinotauro.SALIDA, bloqueo),
 		"bloqueo conserva ruta recuperable",
