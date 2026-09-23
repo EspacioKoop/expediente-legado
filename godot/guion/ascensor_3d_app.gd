@@ -190,9 +190,7 @@ func _montar_companero_encuentro() -> void:
 	_companero_encuentro.rotation.y = PI
 	_cabina.add_child(_companero_encuentro)
 	var color: Color = Companeros.CUNADO.get("color", Color(0.34, 0.33, 0.31))
-	if not Modelos.persona(
-		_companero_encuentro, Companeros.cuerpo_de(Companeros.CUNADO), color
-	):
+	if not Modelos.persona(_companero_encuentro, Companeros.cuerpo_de(Companeros.CUNADO), color):
 		_companero_encuentro.queue_free()
 		_companero_encuentro = null
 		return
@@ -202,9 +200,7 @@ func _montar_companero_encuentro() -> void:
 func _actualizar_encuentro(plano: Dictionary) -> void:
 	if not is_instance_valid(_companero_encuentro):
 		return
-	_companero_encuentro.visible = (
-		String(plano.get("encuentro_companero", "")) == "cunado"
-	)
+	_companero_encuentro.visible = (String(plano.get("encuentro_companero", "")) == "cunado")
 
 
 func _mueble_referencia(
