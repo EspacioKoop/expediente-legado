@@ -83,8 +83,7 @@ func _probar_predicado_gato_diario() -> void:
 	var falla := Auditorias.resolver_fin_casa(estado)
 	_comprobar(falla.get("resultado", "") == "fallida", "hambre pendiente falla gato diario")
 	_comprobar(
-		String(auditoria["fallidas"].get(Auditorias.GATO_DIARIO, ""))
-		== "gato_sin_comer_al_dormir",
+		String(auditoria["fallidas"].get(Auditorias.GATO_DIARIO, "")) == "gato_sin_comer_al_dormir",
 		"el fallo del gato conserva motivo técnico estable",
 	)
 
@@ -101,10 +100,10 @@ func _probar_predicado_gato_diario() -> void:
 	var sin_gato := Auditorias.resolver_fin_casa(ausente)
 	_comprobar(sin_gato.get("resultado", "") == "fallida", "gato ausente falla la condición")
 	_comprobar(
-		String(
-			ausente[Auditorias.CLAVE_ESTADO]["fallidas"].get(Auditorias.GATO_DIARIO, "")
-		)
-		== "gato_ausente_al_dormir",
+		(
+			String(ausente[Auditorias.CLAVE_ESTADO]["fallidas"].get(Auditorias.GATO_DIARIO, ""))
+			== "gato_ausente_al_dormir"
+		),
 		"ausencia del gato conserva un motivo técnico estable",
 	)
 
