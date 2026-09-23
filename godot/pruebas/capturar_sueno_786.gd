@@ -12,8 +12,8 @@ const FORMA := "peine"
 const ENCUADRES := [
 	{
 		"id": "entrada",
-		"camara": Vector3(-8.2, ALTURA_JUGADOR, -7.8),
-		"objetivo": Vector3(-3.8, 1.15, -1.5),
+		"camara": Vector3(-6.4, ALTURA_JUGADOR, -4.9),
+		"objetivo": Vector3(-4.4, 1.05, -1.8),
 	},
 	{
 		"id": "interior",
