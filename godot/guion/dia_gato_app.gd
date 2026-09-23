@@ -236,7 +236,12 @@ func _objetivo_puntuable(estado: Dictionary, objetivo_id: String) -> bool:
 func _orientar_gato_guia() -> void:
 	if not is_instance_valid(_gato_guia) or not _hay_rumbo_guia:
 		return
-	var rumbo := _salida_guia - _entrada_guia
+	var origen := _entrada_guia
+	var destino := _salida_guia
+	if is_instance_valid(_mundo):
+		origen = _mundo.to_global(_entrada_guia)
+		destino = _mundo.to_global(_salida_guia)
+	var rumbo := destino - origen
 	rumbo.y = 0.0
 	if rumbo.length() < 0.01:
 		return
@@ -695,6 +700,7 @@ func _montar_guia_sueno() -> void:
 	_gato_guia = Gato.new()
 	_mundo.add_child(_gato_guia)
 	_gato_guia.empezar(posicion, [posicion])
+	_gato_guia.anclar_presentacion_global()
 	_gato_guia.configurar_reduccion_movimiento(_reduccion_movimiento_gato())
 	if not eco.is_empty():
 		_gato_guia.presentar_estado(String(eco.get("estado", "parado")))
