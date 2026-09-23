@@ -42,11 +42,11 @@ class AuditoriasSigaTests(unittest.TestCase):
         self.assertIn("_auditorias.configurar_estado(_partida.estado, _alta_pendiente)", CREADOR)
         self.assertIn("if _alta_pendiente and _auditorias != null:", guardar)
         self.assertIn(
-            "_partida.estado[Auditorias.CLAVE_ESTADO] = Auditorias.nueva(_auditorias.seleccion())",
+            "Auditorias.resolver_seleccion(_partida.estado, _auditorias.seleccion())",
             guardar,
         )
         self.assertLess(
-            guardar.index("Auditorias.nueva(_auditorias.seleccion())"),
+            guardar.index("Auditorias.resolver_seleccion"),
             guardar.index("_partida.guardar()"),
         )
 
@@ -77,7 +77,7 @@ class AuditoriasSigaTests(unittest.TestCase):
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
         resumen = RESUMEN.search(resultado.stdout)
         self.assertIsNotNone(resumen, resultado.stdout)
-        self.assertGreaterEqual(int(resumen.group(1)), 10, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 14, resultado.stdout)
 
 
 if __name__ == "__main__":
