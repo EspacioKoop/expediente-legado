@@ -89,21 +89,12 @@ func _montar_colision() -> void:
 
 
 func _montar_carcasa() -> void:
-	_agregar_caja(
-		Vector3(0, 0.10, 0),
-		Vector3(0.28, 0.18, 0.30),
-		Color(0.64, 0.61, 0.54),
-	)
-	_agregar_caja(
-		Vector3(0, 0.19, -0.055),
-		Vector3(0.22, 0.045, 0.14),
-		Color(0.50, 0.48, 0.43),
-	)
-	_agregar_caja(
-		Vector3(0, 0.16, -0.165),
-		Vector3(0.18, 0.018, 0.026),
-		Color(0.07, 0.07, 0.07),
-	)
+	var carcasa := MeshInstance3D.new()
+	carcasa.name = "CarcasaImpresoraOriginal98"
+	carcasa.mesh = load(
+		"res://assets/modelos/props_originales_98/impresora_termica_98.obj"
+	) as Mesh
+	add_child(carcasa)
 
 	var led := MeshInstance3D.new()
 	led.name = "LedImpresoraTermica"
@@ -117,7 +108,6 @@ func _montar_carcasa() -> void:
 	_material_led.emission_enabled = true
 	led.material_override = _material_led
 	add_child(led)
-
 
 func _montar_papel() -> void:
 	_papel_visual = MeshInstance3D.new()

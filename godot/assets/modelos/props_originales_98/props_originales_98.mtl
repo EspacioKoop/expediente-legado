@@ -1,0 +1,67 @@
+# Shared non-branded materials for original 1998 props
+newmtl plastico_beige
+Ka 0.07 0.065 0.055
+Kd 0.43 0.39 0.31
+Ks 0.05 0.05 0.045
+Ns 18
+illum 2
+newmtl plastico_oscuro
+Ka 0.025 0.024 0.022
+Kd 0.11 0.105 0.095
+Ks 0.06 0.06 0.06
+Ns 28
+illum 2
+newmtl plastico_teal
+Ka 0.02 0.04 0.045
+Kd 0.12 0.29 0.34
+Ks 0.06 0.07 0.07
+Ns 22
+illum 2
+newmtl metal_mate
+Ka 0.06 0.06 0.055
+Kd 0.37 0.38 0.36
+Ks 0.22 0.22 0.20
+Ns 55
+illum 2
+newmtl metal_oscuro
+Ka 0.025 0.025 0.025
+Kd 0.13 0.13 0.12
+Ks 0.18 0.18 0.17
+Ns 45
+illum 2
+newmtl tela_crema
+Ka 0.08 0.07 0.05
+Kd 0.63 0.53 0.36
+Ks 0.015 0.015 0.012
+Ns 5
+illum 2
+newmtl goma
+Ka 0.015 0.015 0.015
+Kd 0.055 0.055 0.055
+Ks 0.025 0.025 0.025
+Ns 8
+illum 2
+newmtl pantalla
+Ka 0.015 0.022 0.018
+Kd 0.09 0.14 0.11
+Ks 0.12 0.14 0.13
+Ns 70
+illum 2
+newmtl vidrio_oscuro
+Ka 0.018 0.018 0.016
+Kd 0.08 0.075 0.065
+Ks 0.18 0.18 0.16
+Ns 85
+illum 2
+newmtl boton_rojo
+Ka 0.05 0.008 0.008
+Kd 0.46 0.07 0.06
+Ks 0.10 0.08 0.08
+Ns 38
+illum 2
+newmtl boton_ambar
+Ka 0.06 0.03 0.006
+Kd 0.62 0.32 0.04
+Ks 0.09 0.07 0.04
+Ns 35
+illum 2
