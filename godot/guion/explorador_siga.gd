@@ -7,6 +7,7 @@ extends VBoxContainer
 
 signal documento_abierto(id: String)
 signal ruta_abierta(ruta: String)
+signal paquete_software_obtenido(id: String)
 
 var _modelo := ExploradorSigaModelo.new()
 var _medios := MediosExtraiblesSigaModelo.new()
@@ -255,6 +256,7 @@ func _abrir_paquete_software(entrada: Dictionary) -> void:
 		]
 	)
 	_mostrar_estado(tr("EXPLORADOR_MEDIO_SOFTWARE_DISPONIBLE") % String(paquete.get("nombre", "")))
+	paquete_software_obtenido.emit(paquete_id)
 
 
 func _refrescar_medios() -> void:
