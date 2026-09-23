@@ -11,7 +11,8 @@ CONTRATO = ROOT / "godot" / "guion" / "marcadores_mundo.gd"
 VISUAL = ROOT / "godot" / "guion" / "marcador_mundo_3d.gd"
 CONTROLADOR = ROOT / "godot" / "guion" / "dia_marcadores_mundo_app.gd"
 PANEL = ROOT / "godot" / "guion" / "marcadores_mundo_panel.gd"
-TEXTOS = ROOT / "godot" / "datos" / "marcadores_mundo_textos.json"
+TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
+TEXTOS_LEGADO = ROOT / "godot" / "datos" / "marcadores_mundo_textos.json"
 ESCENA = ROOT / "godot" / "escenas" / "dia.tscn"
 
 
@@ -55,7 +56,7 @@ class MarcadoresMundo957Test(unittest.TestCase):
         self.assertIn("mundo.remove_child(anterior)", codigo)
 
         self.assertIn('get_node_or_null("/root/MenuGlobal")', codigo)
-        self.assertIn('_boton_menu.text = _cadena("menu")', codigo)
+        self.assertIn('_boton_menu.text = tr("MARCADORES_MUNDO_MENU")', codigo)
         self.assertIn("func _physics_process(_delta: float)", codigo)
         self.assertIn("project_ray_origin", codigo)
         self.assertIn("project_ray_normal", codigo)
@@ -93,7 +94,7 @@ class MarcadoresMundo957Test(unittest.TestCase):
         self.assertIn("cantidad >= MarcadoresMundo.LIMITE_POR_ZONA", codigo)
         self.assertIn("signal eliminar_zona_solicitado", codigo)
         self.assertIn("ConfirmationDialog.new()", codigo)
-        self.assertIn('_limpiar_zona.text = _cadena("limpiar_zona")', codigo)
+        self.assertIn('_limpiar_zona.text = tr("MARCADORES_MUNDO_LIMPIAR_ZONA")', codigo)
 
         for tipo in (
             "TIPO_TIZA",
@@ -116,15 +117,23 @@ class MarcadoresMundo957Test(unittest.TestCase):
         self.assertNotIn("Economia", codigo)
         self.assertNotIn("InputMap.add_action", codigo)
 
-    def test_copy_visible_vive_fuera_del_gdscript(self):
-        import json
+    def test_copy_visible_vive_en_el_catalogo_canonico(self):
+        import csv
+        import re
 
-        datos = json.loads(TEXTOS.read_text(encoding="utf-8"))
-        self.assertEqual(datos["menu"], "Marcadores")
-        self.assertEqual(datos["limpiar_zona"], "Limpiar zona")
-        self.assertIn("texto_placeholder", datos)
-        self.assertIn('RUTA_TEXTOS := "res://datos/marcadores_mundo_textos.json"', PANEL.read_text(encoding="utf-8"))
-        self.assertIn('RUTA_TEXTOS := "res://datos/marcadores_mundo_textos.json"', CONTROLADOR.read_text(encoding="utf-8"))
+        with TEXTOS.open(encoding="utf-8", newline="") as fichero:
+            catalogo = {fila[0]: fila[1] for fila in csv.reader(fichero) if fila}
+        self.assertEqual(catalogo["MARCADORES_MUNDO_MENU"], "Marcadores")
+        self.assertEqual(catalogo["MARCADORES_MUNDO_LIMPIAR_ZONA"], "Limpiar zona")
+        self.assertFalse(TEXTOS_LEGADO.exists(), "el copy no debe duplicarse en un JSON propio")
+
+        for ruta in (PANEL, CONTROLADOR):
+            codigo = ruta.read_text(encoding="utf-8")
+            self.assertNotIn("marcadores_mundo_textos.json", codigo)
+            claves = re.findall(r'tr\(\s*"(MARCADORES_MUNDO_[A-Z_]+)"\s*\)', codigo)
+            self.assertTrue(claves, ruta.name)
+            faltan = sorted(set(claves) - catalogo.keys())
+            self.assertEqual(faltan, [], f"{ruta.name} usa claves ausentes de textos.csv")
 
     def test_borrado_apuntado_no_necesita_colision_en_la_marca(self):
         codigo = CONTROLADOR.read_text(encoding="utf-8")
@@ -157,7 +166,7 @@ class MarcadoresMundo957Test(unittest.TestCase):
             check=False,
         )
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
-        self.assertIn("37 pasadas, 0 fallos", resultado.stdout)
+        self.assertIn("39 pasadas, 0 fallos", resultado.stdout)
         self.assertNotIn("Parse Error:", resultado.stdout)
 
 

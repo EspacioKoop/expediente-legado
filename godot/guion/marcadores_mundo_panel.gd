@@ -10,8 +10,6 @@ signal eliminar_solicitado
 signal eliminar_zona_solicitado
 signal cancelar_solicitado
 
-const RUTA_TEXTOS := "res://datos/marcadores_mundo_textos.json"
-
 var _tipo: OptionButton
 var _color: OptionButton
 var _texto: LineEdit
@@ -21,31 +19,13 @@ var _eliminar: Button
 var _limpiar_zona: Button
 var _volver: Button
 var _confirmar_limpieza: ConfirmationDialog
-var _textos: Dictionary = {}
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_textos = _cargar_textos()
 	theme = EstiloSiga.tema()
 	custom_minimum_size = Vector2(520, 330)
 	_montar()
-
-
-func _cargar_textos() -> Dictionary:
-	if not FileAccess.file_exists(RUTA_TEXTOS):
-		return {}
-	var archivo := FileAccess.open(RUTA_TEXTOS, FileAccess.READ)
-	if archivo == null:
-		return {}
-	var datos = JSON.parse_string(archivo.get_as_text())
-	if typeof(datos) != TYPE_DICTIONARY:
-		return {}
-	return datos
-
-
-func _cadena(clave: String) -> String:
-	return String(_textos.get(clave, clave))
 
 
 func abrir(puede_colocar: bool, puede_eliminar: bool, cantidad: int) -> void:
@@ -54,11 +34,13 @@ func abrir(puede_colocar: bool, puede_eliminar: bool, cantidad: int) -> void:
 	_eliminar.visible = puede_eliminar
 	_limpiar_zona.visible = cantidad > 0
 	if not puede_colocar:
-		_estado.text = _cadena("superficie_requerida")
+		_estado.text = tr("MARCADORES_MUNDO_SUPERFICIE_REQUERIDA")
 	elif cantidad >= MarcadoresMundo.LIMITE_POR_ZONA:
-		_estado.text = (_cadena("limite_zona") % MarcadoresMundo.LIMITE_POR_ZONA)
+		_estado.text = (tr("MARCADORES_MUNDO_LIMITE_ZONA") % MarcadoresMundo.LIMITE_POR_ZONA)
 	else:
-		_estado.text = _cadena("contador_zona") % [cantidad, MarcadoresMundo.LIMITE_POR_ZONA]
+		_estado.text = (
+			tr("MARCADORES_MUNDO_CONTADOR_ZONA") % [cantidad, MarcadoresMundo.LIMITE_POR_ZONA]
+		)
 	_tipo.grab_focus.call_deferred()
 
 
@@ -84,11 +66,11 @@ func _montar() -> void:
 	margen.add_child(caja)
 
 	var titulo := Label.new()
-	titulo.text = _cadena("titulo")
+	titulo.text = tr("MARCADORES_MUNDO_TITULO")
 	caja.add_child(titulo)
 
 	var ayuda := Label.new()
-	ayuda.text = _cadena("ayuda")
+	ayuda.text = tr("MARCADORES_MUNDO_AYUDA")
 	ayuda.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	caja.add_child(ayuda)
 
@@ -98,29 +80,29 @@ func _montar() -> void:
 	formulario.add_theme_constant_override("v_separation", 8)
 	caja.add_child(formulario)
 
-	_anadir_etiqueta(formulario, _cadena("tipo"))
+	_anadir_etiqueta(formulario, tr("MARCADORES_MUNDO_TIPO"))
 	_tipo = OptionButton.new()
-	_anadir_opcion(_tipo, _cadena("tipo_tiza"), MarcadoresMundo.TIPO_TIZA)
-	_anadir_opcion(_tipo, _cadena("tipo_cinta"), MarcadoresMundo.TIPO_CINTA)
-	_anadir_opcion(_tipo, _cadena("tipo_nota"), MarcadoresMundo.TIPO_NOTA)
-	_anadir_opcion(_tipo, _cadena("tipo_carbon"), MarcadoresMundo.TIPO_CARBON)
-	_anadir_opcion(_tipo, _cadena("tipo_objeto"), MarcadoresMundo.TIPO_OBJETO)
+	_anadir_opcion(_tipo, tr("MARCADORES_MUNDO_TIPO_TIZA"), MarcadoresMundo.TIPO_TIZA)
+	_anadir_opcion(_tipo, tr("MARCADORES_MUNDO_TIPO_CINTA"), MarcadoresMundo.TIPO_CINTA)
+	_anadir_opcion(_tipo, tr("MARCADORES_MUNDO_TIPO_NOTA"), MarcadoresMundo.TIPO_NOTA)
+	_anadir_opcion(_tipo, tr("MARCADORES_MUNDO_TIPO_CARBON"), MarcadoresMundo.TIPO_CARBON)
+	_anadir_opcion(_tipo, tr("MARCADORES_MUNDO_TIPO_OBJETO"), MarcadoresMundo.TIPO_OBJETO)
 	_tipo.item_selected.connect(_al_tipo_cambiado)
 	formulario.add_child(_tipo)
 
-	_anadir_etiqueta(formulario, _cadena("color"))
+	_anadir_etiqueta(formulario, tr("MARCADORES_MUNDO_COLOR"))
 	_color = OptionButton.new()
-	_anadir_opcion(_color, _cadena("color_blanco"), MarcadoresMundo.COLOR_BLANCO)
-	_anadir_opcion(_color, _cadena("color_amarillo"), MarcadoresMundo.COLOR_AMARILLO)
-	_anadir_opcion(_color, _cadena("color_rojo"), MarcadoresMundo.COLOR_ROJO)
-	_anadir_opcion(_color, _cadena("color_azul"), MarcadoresMundo.COLOR_AZUL)
-	_anadir_opcion(_color, _cadena("color_verde"), MarcadoresMundo.COLOR_VERDE)
+	_anadir_opcion(_color, tr("MARCADORES_MUNDO_COLOR_BLANCO"), MarcadoresMundo.COLOR_BLANCO)
+	_anadir_opcion(_color, tr("MARCADORES_MUNDO_COLOR_AMARILLO"), MarcadoresMundo.COLOR_AMARILLO)
+	_anadir_opcion(_color, tr("MARCADORES_MUNDO_COLOR_ROJO"), MarcadoresMundo.COLOR_ROJO)
+	_anadir_opcion(_color, tr("MARCADORES_MUNDO_COLOR_AZUL"), MarcadoresMundo.COLOR_AZUL)
+	_anadir_opcion(_color, tr("MARCADORES_MUNDO_COLOR_VERDE"), MarcadoresMundo.COLOR_VERDE)
 	formulario.add_child(_color)
 
-	_anadir_etiqueta(formulario, _cadena("texto"))
+	_anadir_etiqueta(formulario, tr("MARCADORES_MUNDO_TEXTO"))
 	_texto = LineEdit.new()
 	_texto.max_length = MarcadoresMundo.MAX_TEXTO
-	_texto.placeholder_text = (_cadena("texto_placeholder") % MarcadoresMundo.MAX_TEXTO)
+	_texto.placeholder_text = (tr("MARCADORES_MUNDO_TEXTO_PLACEHOLDER") % MarcadoresMundo.MAX_TEXTO)
 	formulario.add_child(_texto)
 
 	_estado = Label.new()
@@ -133,29 +115,29 @@ func _montar() -> void:
 	caja.add_child(botones)
 
 	_eliminar = Button.new()
-	_eliminar.text = _cadena("eliminar_apuntada")
+	_eliminar.text = tr("MARCADORES_MUNDO_ELIMINAR_APUNTADA")
 	_eliminar.pressed.connect(func(): eliminar_solicitado.emit())
 	botones.add_child(_eliminar)
 
 	_limpiar_zona = Button.new()
-	_limpiar_zona.text = _cadena("limpiar_zona")
+	_limpiar_zona.text = tr("MARCADORES_MUNDO_LIMPIAR_ZONA")
 	_limpiar_zona.pressed.connect(_pedir_limpiar_zona)
 	botones.add_child(_limpiar_zona)
 
 	_volver = Button.new()
-	_volver.text = _cadena("volver")
+	_volver.text = tr("MARCADORES_MUNDO_VOLVER")
 	_volver.pressed.connect(func(): cancelar_solicitado.emit())
 	botones.add_child(_volver)
 
 	_colocar = Button.new()
-	_colocar.text = _cadena("colocar")
+	_colocar.text = tr("MARCADORES_MUNDO_COLOCAR")
 	_colocar.pressed.connect(_emitir_colocacion)
 	botones.add_child(_colocar)
 
 	_confirmar_limpieza = ConfirmationDialog.new()
-	_confirmar_limpieza.title = _cadena("limpiar_titulo")
-	_confirmar_limpieza.dialog_text = _cadena("limpiar_pregunta")
-	_confirmar_limpieza.ok_button_text = _cadena("limpiar_confirmar")
+	_confirmar_limpieza.title = tr("MARCADORES_MUNDO_LIMPIAR_TITULO")
+	_confirmar_limpieza.dialog_text = tr("MARCADORES_MUNDO_LIMPIAR_PREGUNTA")
+	_confirmar_limpieza.ok_button_text = tr("MARCADORES_MUNDO_LIMPIAR_CONFIRMAR")
 	_confirmar_limpieza.confirmed.connect(func(): eliminar_zona_solicitado.emit())
 	add_child(_confirmar_limpieza)
 
