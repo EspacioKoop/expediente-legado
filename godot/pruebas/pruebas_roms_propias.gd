@@ -27,6 +27,7 @@ func _initialize() -> void:
 
 	var sin_compras := RomsPropias.en_consola([]).map(func(e): return e["id"])
 	_comprobar(not sin_compras.has("paper_planes_98"), "sin comprar no está en la consola")
+	_comprobar(not sin_compras.has("sueno_98"), "sin conocimiento SUEÑO 98 no aparece")
 	var con_compras := RomsPropias.en_consola(["paper_planes_98", "ariadna_labertinto_98"])
 	var ids_consola := con_compras.map(func(e): return e["id"])
 	_comprobar(not ids_consola.has("ariadna_labertinto_98"), "en proyecto nunca en consola")
@@ -35,6 +36,11 @@ func _initialize() -> void:
 	if RomsPropias.disponible(RomsPropias.por_id("paper_planes_98")):
 		_comprobar(ids_consola.has("paper_planes_98"), "comprada aparece en la consola")
 		_comprobar(sin_compras.has("caza_pixeles_98"), "la incluida aparece sin comprar")
+	if RomsPropias.disponible(RomsPropias.por_id("sueno_98")):
+		var por_conocimiento := RomsPropias.en_consola([], ["sueno_98"]).map(
+			func(e): return e["id"]
+		)
+		_comprobar(por_conocimiento.has("sueno_98"), "desbloqueada aparece sin compra")
 
 	_comprobar(
 		RomsPropias.fuente_semilla("ariadna_labertinto_98") == MinotauroVigilia.FUENTE,
