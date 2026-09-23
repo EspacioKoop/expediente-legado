@@ -192,6 +192,8 @@ func _montar_fondo_barrio(raiz: Node3D) -> void:
 	fondo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	fondo.set_meta("ventana_casa_ai_98", true)
 	raiz.add_child(fondo)
+
+
 func _montar_coche(raiz: Node3D, pos: Vector3, color: Color, giro: float) -> void:
 	var coche := Node3D.new()
 	coche.name = "CocheAparcado"
