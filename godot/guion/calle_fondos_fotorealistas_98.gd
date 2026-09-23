@@ -13,29 +13,29 @@ const BLOQUES := [
 	{
 		"nombre": "BloqueOesteSur98",
 		"archivo": "bloque_01.webp",
-		"pos": Vector3(-10.5, 0.0, -3.8),
-		"altura": 10.2,
+		"pos": Vector3(-9.4, 0.0, -0.8),
+		"altura": 9.6,
 		"giro_y": 90.0,
 	},
 	{
 		"nombre": "BloqueOesteNorte98",
 		"archivo": "bloque_03.webp",
-		"pos": Vector3(-12.3, 0.0, 1.4),
-		"altura": 11.4,
+		"pos": Vector3(-11.4, 0.0, 3.0),
+		"altura": 9.8,
 		"giro_y": 90.0,
 	},
 	{
 		"nombre": "BloqueEsteSur98",
 		"archivo": "bloque_02.webp",
-		"pos": Vector3(10.7, 0.0, -2.2),
+		"pos": Vector3(9.4, 0.0, -0.4),
 		"altura": 10.8,
 		"giro_y": -90.0,
 	},
 	{
 		"nombre": "BloqueEsteNorte98",
 		"archivo": "bloque_04.webp",
-		"pos": Vector3(12.3, 0.0, 2.8),
-		"altura": 11.2,
+		"pos": Vector3(11.4, 0.0, 3.0),
+		"altura": 10.6,
 		"giro_y": -90.0,
 	},
 ]
@@ -63,7 +63,7 @@ static func _agregar_bloque(capa: Node3D, datos: Dictionary) -> void:
 	sprite.name = String(datos.get("nombre", "BloqueFondo98"))
 	sprite.texture = textura
 	sprite.position = base + Vector3(0.0, altura * 0.5, 0.0)
-	sprite.rotation_degrees.y = float(datos.get("giro_y", 0.0))
+	sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	sprite.pixel_size = altura / maxf(float(textura.get_height()), 1.0)
 	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
 	sprite.alpha_scissor_threshold = 0.18
