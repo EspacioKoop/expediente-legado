@@ -14,6 +14,7 @@ const CASOS := [
 	{
 		"id": "casa",
 		"fase": "casa",
+		"camara": Vector3(2.8, 0.0, 3.35),
 		"criterio": "el gato se reconoce en casa con silueta y proporciones legibles",
 	},
 	{
@@ -72,7 +73,7 @@ func _init() -> void:
 		if not is_instance_valid(gato):
 			quit(1)
 			return
-		if not _preparar_camara(dia, gato):
+		if not _preparar_camara(dia, gato, caso):
 			quit(1)
 			return
 
@@ -134,9 +135,10 @@ func _montar_caso(dia, caso: Dictionary) -> Gato:
 	return gato
 
 
-func _preparar_camara(dia, gato: Gato) -> bool:
+func _preparar_camara(dia, gato: Gato, caso: Dictionary) -> bool:
 	var entrada: Vector3 = dia._espacio_actual.get("entrada", Vector3.ZERO)
-	dia._caminante.situar(entrada, 0.0)
+	var posicion: Vector3 = caso.get("camara", entrada)
+	dia._caminante.situar(posicion, 0.0)
 	dia._caminante.set_physics_process(false)
 	var camara := dia._caminante.get_node("Camara") as Camera3D
 	if camara == null:
