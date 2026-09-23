@@ -1,4 +1,4 @@
-[gd_scene load_steps=50 format=3]
+[gd_scene load_steps=51 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -49,6 +49,7 @@
 [ext_resource type="Script" path="res://guion/dia_mari_app.gd" id="47"]
 [ext_resource type="Script" path="res://guion/dia_presencia_coop_app.gd" id="48"]
 [ext_resource type="Script" path="res://guion/dia_yggdrasil_app.gd" id="49"]
+[ext_resource type="Script" path="res://guion/dia_aviones_papel_app.gd" id="50"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -157,6 +158,9 @@ script = ExtResource("47")
 
 [node name="YggdrasilController" type="Node" parent="."]
 script = ExtResource("49")
+
+[node name="AvionesPapelController" type="Node" parent="."]
+script = ExtResource("50")
 
 [node name="RutinasCasaController" type="Node" parent="."]
 script = ExtResource("29")
