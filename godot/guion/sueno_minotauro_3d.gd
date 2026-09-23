@@ -28,6 +28,7 @@ const COLOR_BLOQUEO := Color(0.19, 0.06, 0.04, 0.72)
 var _estado: Dictionary = {}
 var _arquitectura: Node3D
 var _ala_replegable: Node3D
+var _hilo_ariadna: Node3D
 var _presencia: Node3D
 var _audio_presencia: AudioStreamPlayer3D
 var _bloqueo_visual: MeshInstance3D
@@ -48,6 +49,7 @@ func preparar() -> void:
 	add_child(_arquitectura)
 	_montar_corredores()
 	_montar_nodos()
+	_montar_hilo_ariadna()
 	_montar_ala_replegable()
 	_montar_presencia()
 	_montar_luz()
@@ -162,6 +164,12 @@ func _montar_nodos() -> void:
 			Vector3.ZERO,
 			COLOR_ARIADNA,
 		)
+
+
+func _montar_hilo_ariadna() -> void:
+	_hilo_ariadna = Node3D.new()
+	_hilo_ariadna.name = "HiloAriadna"
+	_arquitectura.add_child(_hilo_ariadna)
 
 
 func _montar_ala_replegable() -> void:
@@ -280,6 +288,55 @@ func _actualizar_marcas() -> void:
 			_marcas[real] = marca
 		var aparente := String(lectura.get("aparece_en", real))
 		marca.position = _posicion_local(aparente) + Vector3(0.0, 0.48, 0.0)
+	_reconstruir_hilo_ariadna()
+
+
+## El hilo conserva la topología real aunque las marcas cambien de posición
+## aparente. Al atravesar tabiques o separarse de una marca desplazada, revela
+## qué parte del espacio se ha replegado sin depender de ensayo ciego.
+func _reconstruir_hilo_ariadna() -> void:
+	if _hilo_ariadna == null:
+		return
+	for hijo in _hilo_ariadna.get_children():
+		hijo.free()
+
+	var puntos := [
+		_posicion_local(SuenoMinotauro.ENTRADA) + Vector3(0.0, 0.16, 0.0),
+	]
+	var marcas: Array = _estado.get("marcas", [])
+	for indice in range(marcas.size()):
+		var lectura := SuenoMinotauro.leer_marca(_estado, indice)
+		var real := String(lectura.get("real", ""))
+		if real.is_empty():
+			continue
+		var punto_real := _posicion_local(real) + Vector3(0.0, 0.16, 0.0)
+		_crear_esfera(
+			_hilo_ariadna,
+			"NudoReal_" + real,
+			0.09,
+			punto_real,
+			COLOR_ARIADNA,
+		)
+		puntos.append(punto_real)
+
+	for indice in range(puntos.size() - 1):
+		var desde: Vector3 = puntos[indice]
+		var hasta: Vector3 = puntos[indice + 1]
+		_crear_tramo_hilo(desde, hasta, indice)
+
+
+func _crear_tramo_hilo(desde: Vector3, hasta: Vector3, indice: int) -> void:
+	var longitud := desde.distance_to(hasta)
+	if longitud <= 0.01:
+		return
+	var tramo := _crear_caja(
+		_hilo_ariadna,
+		"Tramo%02d" % indice,
+		Vector3(0.08, 0.04, longitud),
+		desde.lerp(hasta, 0.5),
+		COLOR_ARIADNA,
+	)
+	tramo.look_at(hasta, Vector3.UP)
 
 
 func _actualizar_presencia() -> void:
