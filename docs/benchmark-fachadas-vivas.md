@@ -107,12 +107,34 @@ El resultado conserva 61 ventanas lógicas y los mismos 17 tipos de lote, pero r
 
 El criterio de optimización es por tanto explícito: cubrir toda la calle con profundidad e iluminación aparente, y reservar la geometría interior más cara para el tramo que se observa de cerca.
 
+## Extensión de animación ambiental (#1230)
+
+El mismo runner conserva la pareja histórica `baseline/full` de #861 y añade
+una segunda comparación aislada:
+
+- `ambiental_baseline`: fachadas vivas + el mismo arbolado CC0, con los
+  parámetros de viento y animación en su valor apagado;
+- `ambiental_full`: exactamente la misma geometría y cámara, pero activa
+  `AnimadorAmbiental3D`, el lote único de ventanas vivas y `VientoAmbiental`.
+
+Esto evita atribuir a la animación el coste geométrico de los árboles o de
+`CalleFachadasVivas`. La comparación usa la misma resolución, calentamiento,
+número de muestras, métricas y presupuesto que #861: máximo 10 % de incremento
+en `process_ms`, con tolerancia absoluta mínima de 0,20 ms.
+
+El informe ambiental registra además cuántas ventanas animadas, materiales de
+follaje y piezas activas entraron realmente en el corte. Así un PASS no puede
+salir de un benchmark donde el consumidor no se montó.
+
 ## Artefactos
 
 El workflow `Benchmark fachadas vivas` genera durante 14 días:
 
 - `baseline.png` y `full.png` para la toma fija del benchmark;
-- `baseline.json`, `full.json`, `summary.json` y `report.md` para métricas;
+- `ambiental_baseline.png` y `ambiental_full.png` para el corte de #1230;
+- `baseline.json`, `full.json`, `summary.json` y `report.md` para métricas de #861;
+- `ambiental_baseline.json`, `ambiental_full.json`, `ambiental-summary.json` y
+  `ambiental-report.md` para el presupuesto ambiental;
 - `baseline-ruta.json` y `full-ruta.json` para el contrato de las tres estaciones;
 - `baseline-ruta-cerca.png` / `full-ruta-cerca.png`;
 - `baseline-ruta-media.png` / `full-ruta-media.png`;
@@ -132,6 +154,14 @@ xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
 xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
   --script res://pruebas/benchmark_fachadas_vivas.gd -- \
   --mode=full --output="$PWD/benchmark-fachadas-vivas"
+
+xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+  --script res://pruebas/benchmark_fachadas_vivas.gd -- \
+  --mode=ambiental_baseline --output="$PWD/benchmark-fachadas-vivas"
+
+xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+  --script res://pruebas/benchmark_fachadas_vivas.gd -- \
+  --mode=ambiental_full --output="$PWD/benchmark-fachadas-vivas"
 
 python3 scripts/test_benchmark_fachadas_vivas.py --report benchmark-fachadas-vivas
 
