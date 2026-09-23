@@ -55,7 +55,6 @@ static func planos(vistas: int = 0) -> Array:
 			"camara": Vector3(-0.65, 1.68, 2.55),
 			"mira": Vector3(-3.8, 1.00, 0.75),
 			"segundos": 3.8,
-			"sonido": "puerta_abre",
 			"rotulo": "ENTRADA_RESTAURANDO",
 			"voz": registro_de(vistas),
 		},
