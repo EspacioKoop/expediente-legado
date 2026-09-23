@@ -386,6 +386,18 @@ func actualizar_hambre(hambre: int) -> void:
 	_hambre_actual = maxi(0, hambre)
 
 
+## Separa la presentación del gato de transformaciones heredadas del decorado.
+## En el sueño actúa como ancla estable: conserva su posición global, recupera
+## escala y orientación neutrales y deja que solo su conducta propia cambie la
+## silueta. No toca hambre, memoria, objetivos ni navegación.
+func anclar_presentacion_global() -> void:
+	if not is_inside_tree():
+		return
+	var origen := global_position
+	top_level = true
+	global_transform = Transform3D(Basis.IDENTITY, origen)
+
+
 ## Reduce únicamente movimiento decorativo. La locomoción y las poses que
 ## comunican hambre, descanso, observación o interacción siguen presentes.
 func configurar_reduccion_movimiento(reducir: bool) -> void:
