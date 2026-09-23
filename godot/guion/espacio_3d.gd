@@ -35,6 +35,12 @@ const EMISION_PLENA := 0.9
 ## repetidos, así que se reconocen por prefijo.
 const NOMBRE_LUZ_SALA := "LuzDeSala"
 
+## Las ventanas y la luz que entra por ellas, con nombre por el mismo motivo: la
+## hora la sabe `Jornada`, no este módulo, así que quien la lee tiene que poder
+## encontrarlas para decidir de qué color es fuera y si entra sol (#789).
+const NOMBRE_CRISTAL_VENTANA := "CristalVentana"
+const NOMBRE_LUZ_VENTANA := "LuzDeVentana"
+
 ## Cada cuántos metros se pone un vértice de más. Es el mando que decide si una
 ## lámpara da un charco de luz o tiñe la pared entera.
 const METROS_POR_VERTICE := 1.4
@@ -167,7 +173,9 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 		var cristal := _caja(
 			raiz, ventana["pos"], ventana["tam"], ventana.get("color", Color(0.09, 0.11, 0.20))
 		)
+		cristal.name = NOMBRE_CRISTAL_VENTANA
 		_emisivo(cristal, ventana.get("color", Color(0.09, 0.11, 0.20)))
+		_luz_de_ventana(raiz, ventana, espacio.get("centro_suelo", Vector2.ZERO))
 
 	# Las figuras y los carteles son del sueño (#87), pero este módulo sigue sin
 	# saberlo: aquí solo hay una silueta en un sitio y un texto contra un muro.
@@ -331,6 +339,44 @@ static func _luz(raiz: Node3D, luz: Dictionary) -> void:
 	# no hubo sombras daba igual, pero en cuanto las hay el fluorescente se tapa
 	# a sí mismo y la sala se queda a oscuras. Una lámpara no se hace sombra.
 	_no_proyecta_sombra(cuerpo)
+
+
+## La luz que entra por una ventana: un foco pegado al cristal que mira hacia
+## dentro y hacia el suelo, que es donde el sol de una ventana deja su mancha.
+## Nace APAGADA: este módulo no sabe qué hora es, y una ventana encendida por
+## defecto sería sol a las once de la noche en cualquier sitio que no tenga
+## quien lea la hora. La enciende quien sí la sabe.
+static func _luz_de_ventana(raiz: Node3D, ventana: Dictionary, centro: Vector2) -> void:
+	var pos: Vector3 = ventana["pos"]
+	var tam: Vector3 = ventana["tam"]
+	# Hacia dentro es perpendicular al lado fino del cristal y hacia el centro
+	# del suelo; así sirve igual para una ventana en cualquiera de los muros.
+	var dentro := (
+		Vector3(-signf(pos.x - centro.x), 0, 0)
+		if tam.x < tam.z
+		else Vector3(0, 0, -signf(pos.z - centro.y))
+	)
+	var foco := SpotLight3D.new()
+	foco.name = NOMBRE_LUZ_VENTANA
+	var origen := pos + dentro * 0.35
+	var objetivo := Vector3(pos.x, 0, pos.z) + dentro * 2.6
+	foco.transform = Transform3D(Basis.IDENTITY, origen).looking_at(objetivo, Vector3.UP)
+	foco.spot_range = 7.0
+	# Haz cerrado y poca caída: el sol que entra por una ventana deja una
+	# mancha con borde, no un halo. MEDIDO en GPU sobre la oficina (#789): con
+	# un haz abierto la mancha se diluía en la moqueta oscura y a energía de
+	# fluorescente el suelo bajo la ventana apenas pasaba de 37 a 51 sobre 255.
+	foco.spot_angle = 38.0
+	foco.spot_attenuation = 0.4
+	foco.spot_angle_attenuation = 0.4
+	foco.light_energy = 0.0
+	foco.visible = false
+	foco.shadow_enabled = true
+	foco.shadow_bias = 0.04
+	foco.shadow_normal_bias = 1.4
+	# Nombre legible también para la segunda ventana: sin forzarlo, Godot llama
+	# a la repetida «@SpotLight3D@…» y quien la busca por nombre no la encuentra.
+	raiz.add_child(foco, true)
 
 
 ## Deja de proyectar sombra sin dejar de verse. Es para lo que está DENTRO de
