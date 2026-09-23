@@ -34,6 +34,11 @@ func _init() -> void:
 		return
 
 	root.size = TAMANO
+	# llvmpipe puede completar la primera compilación de StandardMaterial3D
+	# después de varios frames ya dibujados. Una pasada descartada evita que
+	# `normal_inicial.png` mida el calentamiento del renderer en vez del Ryū.
+	await _calentar_materiales()
+
 	var manifiesto := {
 		"issue": 440,
 		"gate_humano": 398,
@@ -112,6 +117,31 @@ func _init() -> void:
 	archivo_manifiesto.close()
 	print("manifiesto -> %s" % ruta_manifiesto)
 	quit(0)
+
+
+func _calentar_materiales() -> void:
+	var mundo := Node3D.new()
+	mundo.name = "CalentamientoRyu440"
+	root.add_child(mundo)
+	var espacio := Sueno.espacio(FORMA, 0, {})
+	_montar_entorno(mundo, espacio)
+	Espacio3D.construir(mundo, espacio)
+
+	var ryu := SuenoRyu.new()
+	ryu.name = "SuenoRyuCalentamiento"
+	ryu.preparar()
+	ryu.scale = Vector3.ONE * ESCALA_RYU
+	var ancla := _ancla_entre_entrada_y_salida(espacio)
+	ryu.position = ancla
+	mundo.add_child(ryu)
+	_montar_camara(mundo, ancla)
+
+	for i in 90:
+		await process_frame
+	await create_timer(0.75).timeout
+	await RenderingServer.frame_post_draw
+	mundo.queue_free()
+	await process_frame
 
 
 func _montar_entorno(mundo: Node3D, espacio: Dictionary) -> void:
