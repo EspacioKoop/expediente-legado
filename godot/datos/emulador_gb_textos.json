@@ -2,6 +2,7 @@
   "titulo": "PORTÁTIL COLOR 98",
   "rom_propia": "%s (incluida)",
   "rom_comprada": "%s (comprada)",
+  "rom_desbloqueada": "%s (desbloqueada)",
   "cerrar": "Salir de la portátil",
   "carpeta": "ROMs locales: %s",
   "sin_nucleo": "El núcleo de emulación no está compilado en esta versión.",
