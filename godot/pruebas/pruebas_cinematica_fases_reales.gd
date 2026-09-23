@@ -57,6 +57,11 @@ func _probar() -> void:
 		"sueño: la entrada onírica cuenta exactamente una vista",
 	)
 
+	# Las escenas oníricas pueden liberar texturas y RIDs de render de forma diferida.
+	# Damos el mismo margen de drenaje que otras regresiones 3D antes de cerrar
+	# SceneTree, sin ocultar errores: el wrapper Python sigue rechazando cualquier
+	# ERROR real que Godot imprima durante la ejecución o el teardown.
+	await create_timer(0.25).timeout
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
