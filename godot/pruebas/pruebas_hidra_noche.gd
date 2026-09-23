@@ -49,8 +49,10 @@ func _initialize() -> void:
 		if hidra != null:
 			var conexiones_visuales := hidra.get_node_or_null("ConexionesRaiz")
 			_comprobar(
-				conexiones_visuales != null
-				and conexiones_visuales.get_child_count() == int(estado.get("cabezas", 0)),
+				(
+					conexiones_visuales != null
+					and conexiones_visuales.get_child_count() == int(estado.get("cabezas", 0))
+				),
 				"cada cabeza mantiene conexión visual con la raíz",
 			)
 		_comprobar(nodo.habilitado, "nodo común habilitado al ser legible")
