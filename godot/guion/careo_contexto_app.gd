@@ -23,9 +23,20 @@ func _ready() -> void:
 
 func _empezar_duelo() -> void:
 	super._empezar_duelo()
-	if _contexto_investigacion.is_empty():
-		return
-	var descripcion := String(_contexto_investigacion.get("descripcion", ""))
-	if descripcion.is_empty():
-		return
-	_cronica.text = descripcion + "\n" + _cronica.text
+	var prefijos: Array[String] = []
+
+	var variante := DialogoIdeologico.resolver(
+		DialogoIdeologico.SUPERFICIE_CAREO_EXPOSICION,
+		estado,
+	)
+	var clave_ideologica := String(variante.get("clave", ""))
+	if not clave_ideologica.is_empty():
+		prefijos.append(tr(clave_ideologica))
+
+	if not _contexto_investigacion.is_empty():
+		var descripcion := String(_contexto_investigacion.get("descripcion", ""))
+		if not descripcion.is_empty():
+			prefijos.append(descripcion)
+
+	if not prefijos.is_empty():
+		_cronica.text = "\n".join(prefijos) + "\n" + _cronica.text
