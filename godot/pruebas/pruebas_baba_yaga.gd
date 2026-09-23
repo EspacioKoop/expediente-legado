@@ -195,7 +195,7 @@ func _probar_controles_interactivos() -> void:
 		"la marca física permite comprobar el desplazamiento",
 	)
 
-	var antes_archivador := sueno.posiciones_actuales()[SuenoBabaYaga.OBJETO_ARCHIVADOR]
+	var antes_archivador: Vector3 = sueno.posiciones_actuales()[SuenoBabaYaga.OBJETO_ARCHIVADOR]
 	var observatorio := (
 		sueno.get_node_or_null("ControlesBosque/ObservatorioArchivador") as Interactuable3D
 	)
