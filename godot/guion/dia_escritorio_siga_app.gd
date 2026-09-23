@@ -328,6 +328,7 @@ func _crear_navegador() -> Control:
 	if _navegador_app != null:
 		navegador.configurar_estado(_navegador_app.obtener_estado_local("estado", {}))
 	navegador.estado_cambiado.connect(_registrar_estado_navegador)
+	navegador.paquete_software_obtenido.connect(_registrar_paquete_software_obtenido)
 	return navegador
 
 
