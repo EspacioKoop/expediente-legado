@@ -8,5 +8,18 @@
   "sin_descripcion": "Sin descripción.",
   "detalle_uso": "Uso: %s",
   "detalle_origen": "Origen: %s",
-  "volver": "Volver"
+  "volver": "Volver",
+  "combinacion_titulo": "Combinar objetos",
+  "combinacion_ayuda": "Selecciona un objeto y asígnalo a cada ranura. También puedes activar un objeto para ocupar la siguiente ranura libre.",
+  "combinacion_slot_a": "Ranura A",
+  "combinacion_slot_b": "Ranura B",
+  "combinacion_combinar": "Combinar",
+  "combinacion_vacia": "—",
+  "combinacion_sin_seleccion": "Selecciona un objeto del inventario primero.",
+  "combinacion_slot_vacio": "Necesitas dos objetos.",
+  "combinacion_mismo_objeto": "Necesitas dos objetos distintos.",
+  "combinacion_sin_receta": "No encaja nada útil.",
+  "combinacion_objeto_ausente": "Uno de esos objetos ya no está disponible.",
+  "combinacion_exito": "Combinación conseguida: %s",
+  "combinacion_error": "La combinación no pudo completarse."
 }
