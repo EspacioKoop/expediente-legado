@@ -26,7 +26,7 @@ const CASOS := [
 	{
 		"id": "estar",
 		"zona": "estar",
-		"posicion": Vector3(0.90, 0.0, 3.45),
+		"posicion": Vector3(0.90, 0.0, -0.20),
 		"objetivo_nodo": "CasaHogarCC0/MesaBajaHogar",
 		"criterio": "sofa, mesa baja y mueble de TV forman un estar legible y proporcionado",
 	},
