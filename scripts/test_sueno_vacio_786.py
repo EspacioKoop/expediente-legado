@@ -26,6 +26,8 @@ class SuenoVacio786Test(unittest.TestCase):
         self.assertIn('resultado["sueno_sin_lecturas"] = true', self.adaptador)
         self.assertIn('resultado["figuras"] = []', self.adaptador)
         self.assertIn('resultado["carteles"] = []', self.adaptador)
+        self.assertIn("SuenoFamilias.FRAGMENTADA", self.adaptador)
+        self.assertIn('resultado["tabiques_poligonales"]', self.adaptador)
         self.assertIn('jornada.get("leido_hoy", []).is_empty()', self.dia)
         self.assertIn("return SuenoVacio.adaptar_espacio(espacio)", self.dia)
 
@@ -42,6 +44,10 @@ class SuenoVacio786Test(unittest.TestCase):
             "entorno.fog_density = DENSIDAD_NIEBLA",
             'grupo.name = "HuellasPuestosVacios"',
             'grupo.name = "EcosTabiquesOficina"',
+            'grupo.name = "EcosMobiliarioOficina"',
+            '"oficina_psx/desk1"',
+            '"oficina_psx/office_chair_black"',
+            '"oficina_psx/computer_monitor"',
             'grupo.name = "FluorescentesDesalineados"',
             'name = "ZumbidoOficinaVacia"',
         ):
