@@ -84,7 +84,9 @@ func _probar_modal_reincorporacion() -> void:
 	app.abrir(estado)
 
 	var check := app.find_child("Condicion_accion_sobrante", true, false) as CheckBox
-	_comprobar(check != null and not check.disabled, "la reincorporación ofrece el selector editable")
+	_comprobar(
+		check != null and not check.disabled, "la reincorporación ofrece el selector editable"
+	)
 	if check != null:
 		check.set_pressed_no_signal(true)
 
