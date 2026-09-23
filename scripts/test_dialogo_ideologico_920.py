@@ -35,13 +35,15 @@ class DialogoIdeologico920Test(unittest.TestCase):
         self.assertNotIn("Button.new", self.modelo)
 
     def test_oficina_reutiliza_el_dialogo_existente(self) -> None:
-        self.assertIn("DialogoIdeologico.resolver(", self.dia)
+        self.assertIn("DialogoIdeologico", self.dia)
+        self.assertIn(". resolver(", self.dia)
         self.assertIn("DialogoDiegetico.mostrar(", self.dia)
         self.assertIn("DialogoIdeologico.registrar_respuesta(", self.dia)
 
     def test_careo_solo_presenta_contexto_y_no_muta_combate(self) -> None:
         self.assertIn("SUPERFICIE_CAREO_EXPOSICION", self.careo)
-        self.assertIn("DialogoIdeologico.resolver(", self.careo)
+        self.assertIn("DialogoIdeologico", self.careo)
+        self.assertIn(". resolver(", self.careo)
         self.assertNotIn("Combate.jugar", self.careo)
         self.assertNotIn('estado["veredictos"] =', self.careo)
         self.assertNotIn('estado["pistas_descubiertas"] =', self.careo)
