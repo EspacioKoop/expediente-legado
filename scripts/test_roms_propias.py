@@ -67,12 +67,22 @@ class RomsPropiasTest(unittest.TestCase):
                     self.assertEqual((rom["rom"], rom["precio"]), ("", 0))
                     self.assertFalse(rom["incluida"])
 
-    def test_la_consola_trae_una_y_la_tienda_vende_el_resto(self):
+    def test_la_consola_distingue_incluidas_tienda_y_desbloqueos(self):
         incluidas = [r for r in self.roms if r["incluida"]]
         self.assertEqual([r["id"] for r in incluidas], ["caza_pixeles_98"])
         for rom in self.roms:
-            if rom["estado"] == "jugable" and not rom["incluida"]:
+            if rom["estado"] != "jugable" or rom["incluida"]:
+                continue
+            desbloqueo = rom.get("desbloqueo", "")
+            if desbloqueo:
+                self.assertEqual(rom["precio"], 0, rom["id"])
+            else:
                 self.assertGreater(rom["precio"], 0, rom["id"])
+
+        sueno = self.por_id["sueno_98"]
+        self.assertEqual(sueno["desbloqueo"], "conocimiento:vida_es_sueno_1635")
+        self.assertFalse(sueno["incluida"])
+        self.assertEqual(sueno["precio"], 0)
 
     def test_build_y_workflows_respetan_estado_y_fuentes(self):
         preparar = (ROOT / "scripts/preparar_emulador_gb.sh").read_text(encoding="utf-8")

@@ -8,6 +8,7 @@ extends Interactuable3D
 var _encendida := false
 var _material_pantalla: StandardMaterial3D
 var _roms_detectadas: Array[Dictionary] = []
+var _roms_desbloqueadas: Array = []
 var _app: EmuladorPortatilApp = null
 var _link_cable := LinkCablePortatil.new()
 var _conector_link_cable: MeshInstance3D = null
@@ -46,6 +47,20 @@ func roms_disponibles() -> Array[Dictionary]:
 	return _roms_detectadas.duplicate(true)
 
 
+## Canal genérico para contenidos que se obtienen fuera de tienda. La consola
+## conserva ids, pero no conoce literatura, mitología ni ningún motivo narrativo.
+func desbloquear_rom(id_rom: String) -> bool:
+	var id := id_rom.strip_edges()
+	if id.is_empty() or _roms_desbloqueadas.has(id):
+		return false
+	_roms_desbloqueadas.append(id)
+	return true
+
+
+func roms_desbloqueadas() -> Array:
+	return _roms_desbloqueadas.duplicate()
+
+
 ## Consulta genérica para capas externas que necesiten observar una ROM propia
 ## sin recibir el objeto emulador ni acoplar la consola a estado de campaña.
 func titulo_rom_activa() -> String:
@@ -81,6 +96,7 @@ func _alternar(_actor: Node) -> void:
 
 	_app = EmuladorPortatilAudioApp.new()
 	_app.roms_compradas = _roms_compradas()
+	_app.roms_desbloqueadas = _roms_desbloqueadas.duplicate()
 	_app.set("link_cable", _link_cable)
 	_app.set("puerto_ir", _puerto_ir)
 	_app.set("impresora_termica", _impresora_termica)

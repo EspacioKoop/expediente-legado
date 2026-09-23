@@ -108,6 +108,14 @@ func obtener_registro_literario() -> Dictionary:
 	return registro_literario.duplicate(true)
 
 
+## Entrada para observers externos (#1179). Por diseño rechaza conocimiento:
+## ningún minijuego o handshake puede sustituir una lectura significativa.
+func registrar_evento_externo(evento: Dictionary) -> bool:
+	if String(evento.get("canal", "")) == LiteraturaEventos.CANAL_CONOCIMIENTO:
+		return false
+	return LiteraturaEventos.registrar(registro_literario, evento)
+
+
 func obtener_insight_total() -> int:
 	return insight_total
 

@@ -108,7 +108,11 @@ class EmuladorGBTest(unittest.TestCase):
             self.assertNotIn(termino, combinado)
 
     def test_ui_usa_rom_propia_y_catalogo_usuario(self):
-        self.assertIn("RomsPropias.en_consola(roms_compradas)", self.ui)
+        self.assertIn(
+            "RomsPropias.en_consola(roms_compradas, roms_desbloqueadas)",
+            self.ui,
+        )
+        self.assertIn("var roms_desbloqueadas: Array = []", self.ui)
         self.assertIn("CatalogoRomsUsuario.listar()", self.ui)
         self.assertIn('ClassDB.class_exists(&"Siga98GB")', self.ui)
         self.assertIn("JOY_BUTTON_DPAD_RIGHT", self.ui)

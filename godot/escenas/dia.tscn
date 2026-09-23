@@ -1,4 +1,4 @@
-[gd_scene load_steps=52 format=3]
+[gd_scene load_steps=53 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -51,6 +51,7 @@
 [ext_resource type="Script" path="res://guion/dia_yggdrasil_app.gd" id="49"]
 [ext_resource type="Script" path="res://guion/dia_aviones_papel_app.gd" id="50"]
 [ext_resource type="Script" path="res://guion/dia_baba_yaga_app.gd" id="51"]
+[ext_resource type="Script" path="res://guion/dia_literatura_rom_app.gd" id="52"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -201,6 +202,9 @@ script = ExtResource("46")
 
 [node name="ReligionRomsController" type="Node" parent="."]
 script = ExtResource("45")
+
+[node name="LiteraturaRomController" type="Node" parent="."]
+script = ExtResource("52")
 
 [node name="PresenciaCoopController" type="Node" parent="."]
 script = ExtResource("48")

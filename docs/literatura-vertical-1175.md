@@ -28,12 +28,14 @@ declara como mínimo:
 - id, título, autor, época y géneros;
 - procedencia documental dentro del mundo;
 - umbral de lectura e id de insight;
-- propuesta de ROM: id, estado, condición de desbloqueo y necesidad de handshake;
+- ROM asociada: id, estado, condición de desbloqueo y necesidad de handshake;
 - efecto de juego **declarativo**, con uno o más consumidores explícitos.
 
 El primer fixture es *La vida es sueño* (Calderón, 1635). No se incorpora texto de la
-obra: solo metadatos y una traducción jugable original. `SUENO 98` queda marcada como
-**propuesta**, no como ROM existente.
+obra: solo metadatos y una traducción jugable original. Desde #1179, `SUEÑO 98` es una
+ROM propia jugable y se desbloquea únicamente cuando el registro contiene conocimiento
+explícito de la obra. Su diseño y la separación fuente/adaptación/invención se documentan
+en `docs/literatura-rom-sueno-1179.md`.
 
 ## Prototipo de lectura
 
@@ -69,10 +71,10 @@ arquetipo permanente.
 inventar hechos de expedientes. La selección del sueño sigue perteneciendo al sistema
 onírico.
 
-**ROMs.** La futura ROM literaria debe seguir el patrón de handshake externo ya probado
-por #932: arrancar o poseer el cartucho no cuenta. Para esta vertical, además, el
-desbloqueo se apoya en conocimiento literario explícito y el observer deberá registrar
-su propio hecho sin sustituir la lectura documental.
+**ROMs.** `SUEÑO 98` sigue el patrón de handshake externo ya probado por #932:
+arrancar o poseer el cartucho no cuenta. `LiteraturaRoms` consulta exclusivamente el
+canal de conocimiento para desbloquearlo y `Sueno98Vigilia` registra, tras el objetivo,
+un insight idempotente distinto de la lectura documental.
 
 
 ## Compatibilidad con la capa literaria anterior
@@ -100,8 +102,8 @@ Godot en headless.
 1. Biblioteca o tertulia física con una interacción de lectura real que produzca el
    progreso normalizado.
 2. Ritual de cita con buff temporal administrado por un consumidor de conflicto.
-3. `SUENO 98` u otra ROM propia con objetivo significativo + handshake, sin regalar
-   conocimiento al arrancar.
+3. Ampliar el catálogo con otra ROM literaria reutilizando `LiteraturaRoms` y el
+   observer genérico, sin añadir reglas al emulador.
 4. Consumidor onírico que use motivos conocidos.
 5. Trayectoria/epílogo basada en una colección de hechos, no en un alignment literario.
 
