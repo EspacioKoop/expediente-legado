@@ -8,6 +8,9 @@ extends CanvasLayer
 const RUTA_PRESENTACION_SELLOS := "res://datos/sellos_presentacion.json"
 const RUTA_TEXTOS_REMAPEO := "res://datos/menu_remapeo_textos.json"
 const RUTA_TEXTOS_DIFICULTAD := "res://datos/menu_dificultad_textos.json"
+## Fuera de `textos.csv` como la dificultad: son nombres de máquinas con su
+## detalle, y el selector los recorre en orden (#1270).
+const RUTA_TEXTOS_FILTRO := "res://datos/filtro_pantalla_textos.json"
 const ETIQUETAS_ACCIONES := {
 	"mover_adelante": "Avanzar",
 	"mover_atras": "Retroceder",
@@ -24,6 +27,7 @@ var _preferencias: Dictionary = {}
 var _presentacion_sellos: Dictionary = {}
 var _textos_remapeo: Dictionary = {}
 var _textos_dificultad: Dictionary = {}
+var _textos_filtro: Dictionary = {}
 var _fondo: ColorRect
 var _panel_principal: PanelContainer
 var _panel_opciones: PanelContainer
@@ -43,6 +47,7 @@ var _historial_lista: VBoxContainer
 var _salir: Button
 var _volumen: HSlider
 var _reduccion: CheckButton
+var _filtro: OptionButton
 var _dificultad: OptionButton
 var _dificultad_detalle: Label
 var _estado_dificultad: Label
@@ -65,6 +70,7 @@ func _ready() -> void:
 	_preferencias = PreferenciasSiga.cargar()
 	_presentacion_sellos = _cargar_presentacion_sellos()
 	_textos_dificultad = _cargar_textos_dificultad()
+	_textos_filtro = _cargar_json(RUTA_TEXTOS_FILTRO)
 	_historias.cargar()
 	PreferenciasSiga.aplicar(_preferencias)
 	_aplicar_volumen()
@@ -251,6 +257,7 @@ func _opciones_contenido(caja: VBoxContainer) -> void:
 	_reduccion.toggled.connect(_al_cambiar_reduccion)
 	caja.add_child(_reduccion)
 
+	_montar_filtro_pantalla(caja)
 	_montar_preferencias_camara(caja)
 
 	var separador := HSeparator.new()
@@ -343,6 +350,32 @@ func _al_cambiar_dificultad(indice: int) -> void:
 		if partida_actual.guardar()
 		else String(_textos_dificultad.get("guardado_error", ""))
 	)
+
+
+## Filtro de época sobre el 3D (#1270). La interfaz queda fuera siempre.
+func _montar_filtro_pantalla(caja: VBoxContainer) -> void:
+	var titulo := Label.new()
+	titulo.text = String(_textos_filtro.get("titulo", ""))
+	caja.add_child(titulo)
+
+	_filtro = OptionButton.new()
+	_filtro.accessibility_name = titulo.text
+	var actual := FiltroPantalla.valido(_preferencias.get("filtro_pantalla"))
+	for id in FiltroPantalla.ids():
+		var textos: Dictionary = _textos_filtro.get("opciones", {}).get(id, {})
+		_filtro.add_item(String(textos.get("nombre", id)))
+		var indice := _filtro.item_count - 1
+		_filtro.set_item_metadata(indice, id)
+		_filtro.set_item_tooltip(indice, String(textos.get("detalle", "")))
+		if id == actual:
+			_filtro.select(indice)
+	_filtro.item_selected.connect(_al_cambiar_filtro)
+	caja.add_child(_filtro)
+
+	var ayuda := Label.new()
+	ayuda.text = String(_textos_filtro.get("ayuda", ""))
+	ayuda.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	caja.add_child(ayuda)
 
 
 func _montar_preferencias_camara(caja: VBoxContainer) -> void:
@@ -529,6 +562,11 @@ func _texto_eleccion(carta_id: String, eje: String) -> String:
 
 func _cargar_presentacion_sellos() -> Dictionary:
 	var datos = JSON.parse_string(FileAccess.get_file_as_string(RUTA_PRESENTACION_SELLOS))
+	return datos if datos is Dictionary else {}
+
+
+func _cargar_json(ruta: String) -> Dictionary:
+	var datos = JSON.parse_string(FileAccess.get_file_as_string(ruta))
 	return datos if datos is Dictionary else {}
 
 
@@ -825,6 +863,14 @@ func _al_cambiar_volumen(valor: float) -> void:
 func _al_cambiar_reduccion(activa: bool) -> void:
 	_preferencias["reduccion_movimiento"] = activa
 	PreferenciasSiga.guardar(_preferencias)
+	# El filtro también se mueve (temblor, grano): se congela o se suelta ya.
+	FiltroPantalla.refrescar(get_tree(), _preferencias)
+
+
+func _al_cambiar_filtro(indice: int) -> void:
+	_preferencias["filtro_pantalla"] = FiltroPantalla.valido(_filtro.get_item_metadata(indice))
+	PreferenciasSiga.guardar(_preferencias)
+	FiltroPantalla.refrescar(get_tree(), _preferencias)
 
 
 func _al_cambiar_sensibilidad_raton(valor: float) -> void:

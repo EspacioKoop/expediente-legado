@@ -278,6 +278,9 @@ func _montar() -> void:
 	entorno.environment.ambient_light_color = Color(0.55, 0.55, 0.58)
 	entorno.environment.ambient_light_energy = 0.55
 	_vista_plato.add_child(entorno)
+	# El plató es otro mundo 3D: sin esto, una cinemática con decorado se vería
+	# sin el filtro que el resto del juego sí lleva (#1270).
+	FiltroPantalla.aplicar(entorno, PreferenciasSiga.cargar())
 
 	_lienzo = Control.new()
 	_lienzo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

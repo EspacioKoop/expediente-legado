@@ -269,6 +269,7 @@ func _montar_entorno() -> void:
 	ajustes.ssil_intensity = 0.7
 	entorno.environment = ajustes
 	add_child(entorno)
+	FiltroPantalla.aplicar(entorno, PreferenciasSiga.cargar())
 
 	var sol := DirectionalLight3D.new()
 	sol.rotation_degrees = Vector3(-55, -35, 0)

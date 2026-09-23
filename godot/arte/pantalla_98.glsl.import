@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://b8g31w3oi06ex"
+path="res://.godot/imported/pantalla_98.glsl-d84dbb53886a78cecb7751253cd974d6.res"
+
+[deps]
+
+source_file="res://arte/pantalla_98.glsl"
+dest_files=["res://.godot/imported/pantalla_98.glsl-d84dbb53886a78cecb7751253cd974d6.res"]
+
+[params]
+
