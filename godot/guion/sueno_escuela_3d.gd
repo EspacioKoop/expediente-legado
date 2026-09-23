@@ -1,9 +1,9 @@
 ## Presentación 3D de la pesadilla escolar (#284).
 ##
-## La planta `crucero` conserva toda la física. Esta capa apaga únicamente la
-## geometría visible de esa planta y la redibuja con lenguaje escolar: suelo de
-## linóleo, zócalo, paredes crema, fluorescentes, puertas numeradas, pupitres,
-## taquillas y reloj. No crea cuerpos ni colisiones paralelas.
+## El id `crucero` ya no define la forma (#798). La arquitectura visible y la
+## colisión pertenecen al contorno poligonal del espacio; esta capa no las
+## sustituye. Solo conserva lenguaje escolar reutilizable —fluorescentes,
+## puertas, pupitres, taquillas, reloj y pizarra— sobre esa silueta.
 class_name SuenoEscuela3D
 extends Node3D
 
@@ -12,9 +12,9 @@ const ESCENA_TAQUILLAS := preload("res://escenas/suenos/props_284/taquillas_esco
 const ESCENA_RELOJ := preload("res://escenas/suenos/props_284/reloj_escolar_anomalo.tscn")
 const ALTURA := 2.8
 const INTERVALO_TIMBRE := 7.5
-# La entrada de `crucero` cae junto al último fluorescente (z=10). La evidencia
-# sin HUD de #282 mostró que dejarlo solo como quad autoiluminado hunde los
-# pupitres/taquillas cercanos en sombra y hace leer la sala como vacío.
+# Se iluminan varios hitos del contorno fragmentado. La evidencia sin HUD de
+# #282 mostró que dejar los quads autoiluminados sin luz local hunde la utilería
+# cercana en sombra y hace leer la sala como vacío.
 const FLUORESCENTES_CON_LUZ := [0, 2, 4, 5]
 
 var _puertas: Array[Node3D] = []
@@ -40,11 +40,11 @@ static func montar(mundo: Node3D, espacio: Dictionary) -> Node3D:
 
 
 func _configurar(espacio: Dictionary) -> void:
-	var bloques: Array = espacio.get("planta", []).duplicate(true)
-	if bloques.is_empty():
+	var contorno: PackedVector2Array = espacio.get("contorno", PackedVector2Array())
+	if contorno.size() < 3:
 		return
-	_ocultar_arquitectura_base()
-	_montar_arquitectura(bloques)
+	# La malla/collision de Espacio3D sigue visible: redibujar `planta` aquí
+	# reintroduciría exactamente la cruz que #798 elimina.
 	_montar_fluorescentes()
 	_montar_puertas()
 	_montar_pupitres(espacio)
@@ -163,12 +163,12 @@ func _anadir_triangulos(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: 
 
 func _montar_fluorescentes() -> void:
 	var posiciones := [
-		Vector3(-14.0, 2.72, 0.0),
-		Vector3(-5.0, 2.72, 0.0),
-		Vector3(5.0, 2.72, 0.0),
-		Vector3(14.0, 2.72, 0.0),
-		Vector3(0.0, 2.72, -10.0),
-		Vector3(0.0, 2.72, 10.0),
+		Vector3(-8.0, 2.72, -9.0),
+		Vector3(-2.0, 2.72, -10.0),
+		Vector3(6.0, 2.72, -7.0),
+		Vector3(-6.0, 2.72, 2.0),
+		Vector3(2.0, 2.72, 5.0),
+		Vector3(5.0, 2.72, 10.0),
 	]
 	for i in posiciones.size():
 		var lampara := MeshInstance3D.new()
@@ -214,12 +214,12 @@ func _montar_puertas() -> void:
 
 func _montar_pupitres(espacio: Dictionary) -> void:
 	var posiciones := [
-		Vector3(-17.0, 0.0, -3.0),
-		Vector3(-13.0, 0.0, -3.0),
-		Vector3(-9.0, 0.0, -3.0),
-		Vector3(-17.0, 0.0, 2.0),
-		Vector3(-13.0, 0.0, 2.0),
-		Vector3(-9.0, 0.0, 2.0),
+		Vector3(-7.0, 0.0, -5.0),
+		Vector3(-3.5, 0.0, -5.5),
+		Vector3(0.0, 0.0, -4.5),
+		Vector3(-4.5, 0.0, 2.5),
+		Vector3(-1.0, 0.0, 4.5),
+		Vector3(3.0, 0.0, 6.5),
 	]
 	for i in posiciones.size():
 		var pupitre := ESCENA_PUPITRE.instantiate() as Node3D
@@ -270,7 +270,7 @@ func _montar_pizarra() -> void:
 	var forma := QuadMesh.new()
 	forma.size = Vector2(4.8, 1.45)
 	pizarra.mesh = forma
-	pizarra.position = Vector3(-21.88, 1.62, 0.0)
+	pizarra.position = Vector3(-8.0, 1.62, 1.0)
 	pizarra.rotation_degrees.y = 90.0
 	pizarra.material_override = _material(Color(0.055, 0.16, 0.12), 0.78)
 	add_child(pizarra)
@@ -299,16 +299,16 @@ func _montar_audio() -> void:
 
 func _aplicar_variante() -> void:
 	var posiciones_a := [
-		Vector3(-17.0, 1.06, -5.91),
-		Vector3(-8.0, 1.06, -5.91),
-		Vector3(8.0, 1.06, 5.91),
-		Vector3(17.0, 1.06, 5.91),
+		Vector3(-7.0, 1.06, -6.0),
+		Vector3(-3.0, 1.06, 3.0),
+		Vector3(5.0, 1.06, -5.0),
+		Vector3(5.0, 1.06, 6.0),
 	]
 	var posiciones_b := [
-		Vector3(-11.0, 1.06, 5.91),
-		Vector3(-3.0, 1.06, 5.91),
-		Vector3(3.0, 1.06, -5.91),
-		Vector3(14.0, 1.06, -5.91),
+		Vector3(-5.0, 1.06, -8.0),
+		Vector3(1.0, 1.06, -5.0),
+		Vector3(-4.0, 1.06, 7.0),
+		Vector3(6.0, 1.06, 4.0),
 	]
 	var posiciones := posiciones_a if _variante == 0 else posiciones_b
 	for i in _puertas.size():
