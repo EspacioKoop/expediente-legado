@@ -239,13 +239,14 @@ func _datos_arrastre_inventario(at_position: Vector2):
 	if objeto_id.is_empty() or not _objeto_visible(objeto_id):
 		return null
 
-	var vista := Label.new()
-	vista.text = _nombre_objeto(objeto)
-	vista.custom_minimum_size = Vector2(180, 32)
-	vista.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vista.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	vista.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_arbol.set_drag_preview(vista)
+	if _arbol.is_inside_tree():
+		var vista := Label.new()
+		vista.text = _nombre_objeto(objeto)
+		vista.custom_minimum_size = Vector2(180, 32)
+		vista.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		vista.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		vista.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_arbol.set_drag_preview(vista)
 	return {
 		"tipo": TIPO_ARRASTRE_OBJETO,
 		"objeto_id": objeto_id,
