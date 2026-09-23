@@ -39,7 +39,12 @@ layout_mode = 2
 
 [node name="CitarButton" type="Button" parent="Panel/VBoxContainer"]
 layout_mode = 2
-text = "Citar"
+text = "Citar · 30 momentum"
+
+[node name="Status" type="Label" parent="Panel/VBoxContainer"]
+layout_mode = 2
+text = "Completa una lectura para obtener un insight citable."
+autowrap_mode = 2
 
 [node name="CloseButton" type="Button" parent="Panel/VBoxContainer"]
 layout_mode = 2
