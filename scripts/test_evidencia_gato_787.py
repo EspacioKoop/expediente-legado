@@ -30,7 +30,9 @@ class EvidenciaGato787Test(unittest.TestCase):
 
     def test_usa_camara_jugable_y_encuadra_la_silueta(self):
         self.assertIn('dia._caminante.get_node("Camara")', self.captura)
-        self.assertIn("dia._caminante.situar(entrada, 0.0)", self.captura)
+        self.assertIn('"camara": Vector3(2.8, 0.0, 3.35)', self.captura)
+        self.assertIn('var posicion: Vector3 = caso.get("camara", entrada)', self.captura)
+        self.assertIn("dia._caminante.situar(posicion, 0.0)", self.captura)
         self.assertIn("camara.look_at(gato.global_position", self.captura)
         self.assertIn("camara.fov = FOV", self.captura)
         self.assertIn("dia._hud_prioridades.visible = false", self.captura)
