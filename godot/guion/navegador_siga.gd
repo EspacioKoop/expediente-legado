@@ -516,8 +516,8 @@ func _configurar_descarga_software(recurso: Dictionary) -> void:
 	if paquete.is_empty():
 		return
 	_paquete_software_actual = paquete_id
-	_descargar_software.text = tr("NAVEGADOR_DESCARGAR_SOFTWARE") % String(
-		paquete.get("nombre", paquete_id)
+	_descargar_software.text = (
+		tr("NAVEGADOR_DESCARGAR_SOFTWARE") % String(paquete.get("nombre", paquete_id))
 	)
 	_descargar_software.visible = true
 
