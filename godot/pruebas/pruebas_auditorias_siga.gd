@@ -11,6 +11,7 @@ func _initialize() -> void:
 func _ejecutar() -> void:
 	_probar_selector_sin_efectos()
 	_probar_consulta_de_estado()
+	_probar_modal_reincorporacion()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
@@ -72,6 +73,38 @@ func _probar_consulta_de_estado() -> void:
 	)
 	_comprobar(panel.seleccion().is_empty(), "el modo consulta no devuelve una nueva selección")
 	panel.free()
+
+
+func _probar_modal_reincorporacion() -> void:
+	var estado := Partida.nueva()
+	estado[Auditorias.CLAVE_ESTADO] = Auditorias.nueva([], [], false)
+	var antes := JSON.stringify(estado[Auditorias.CLAVE_ESTADO])
+	var app := AuditoriasNuevaVidaApp.new()
+	root.add_child(app)
+	app.abrir(estado)
+
+	var check := app.find_child("Condicion_accion_sobrante", true, false) as CheckBox
+	_comprobar(check != null and not check.disabled, "la reincorporación ofrece el selector editable")
+	if check != null:
+		check.set_pressed_no_signal(true)
+
+	var captura := {"emitida": false, "seleccion": []}
+	app.seleccion_confirmada.connect(
+		func(seleccion: Array):
+			captura["emitida"] = true
+			captura["seleccion"] = seleccion.duplicate()
+	)
+	app.call("_confirmar")
+	_comprobar(bool(captura["emitida"]), "el modal emite una decisión explícita")
+	_comprobar(
+		captura["seleccion"] == [Auditorias.ACCION_SOBRANTE],
+		"el modal entrega la selección sin reinterpretarla",
+	)
+	_comprobar(
+		JSON.stringify(estado[Auditorias.CLAVE_ESTADO]) == antes,
+		"el modal no muta Partida antes de que Dia confirme",
+	)
+	app.free()
 
 
 func _comprobar(condicion: bool, nombre: String) -> void:
