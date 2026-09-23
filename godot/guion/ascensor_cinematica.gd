@@ -17,7 +17,16 @@ const ORIGEN := Vector3(0.0, 0.0, 120.0)
 
 
 static func planos_de(vistas: int = 0) -> Array:
-	return Cinematica.resolver(_planos(), {}, vistas)
+	var planos := _planos()
+	# #135: el ascensor puede encerrar una vez al jugador con alguien de la
+	# oficina, pero no se convierte en un generador de encuentros. La misma cuenta
+	# de vistas que acorta la cinemática decide si ese momento todavía existe;
+	# saltarlo también cuenta como haberlo dejado atrás.
+	if vistas == 0:
+		for plano in planos:
+			plano["encuentro_companero"] = "cunado"
+		planos[1]["voz"] = Companeros.frase_de(Companeros.CUNADO, 1)
+	return Cinematica.resolver(planos, {}, vistas)
 
 
 static func _planos() -> Array:
