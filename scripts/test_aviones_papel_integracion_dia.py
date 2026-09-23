@@ -5,6 +5,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 CONTROLLER = ROOT / "godot" / "guion" / "dia_aviones_papel_app.gd"
 DIA = ROOT / "godot" / "escenas" / "dia.tscn"
+TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
 
 
 def sin_comentarios(fuente):
@@ -15,10 +16,15 @@ class AvionesPapelIntegracionDiaTest(unittest.TestCase):
     def setUp(self):
         self.controller = CONTROLLER.read_text(encoding="utf-8")
         self.dia = DIA.read_text(encoding="utf-8")
+        self.textos = TEXTOS.read_text(encoding="utf-8")
 
     def test_dia_monta_el_controller(self):
         self.assertIn('path="res://guion/dia_aviones_papel_app.gd"', self.dia)
         self.assertIn('[node name="AvionesPapelController"', self.dia)
+
+    def test_oferta_tiene_rotulo_traducible(self):
+        self.assertIn('AVIONES_TITULO,Aviones de papel', self.textos)
+        self.assertIn('tr("AVIONES_TITULO")', self.controller)
 
     def test_reutiliza_disponibilidad_y_escena_de_jornada(self):
         self.assertIn(
