@@ -9,12 +9,6 @@ const FONDO_BASE := Color(0.05, 0.05, 0.06)
 ## lo sustituye cuando el clima lo exige.
 const FONDO_EXTERIOR := Color(0.035, 0.055, 0.10)
 const TAM_TERMINAL_INTERACTIVO := Vector3(1.0, 1.2, 0.8)
-const REACCIONES_CUNADO_924 := {
-	"cierre_colectivo": "IDEOLOGIA_924_CUNADO_COLECTIVO",
-	"cierre_procedimental": "IDEOLOGIA_924_CUNADO_PROCEDIMIENTO",
-	"cierre_negociado": "IDEOLOGIA_924_CUNADO_NEGOCIADO",
-}
-
 var _clima_nodo: Node3D = null
 var _archivado_sesion := ArchivadoSesion3D.new()
 var _hud_prioridades: HUDLayer
@@ -206,26 +200,15 @@ func _clave_conversacion_contextual(
 	if companero.nombre_visible != tr("COMPA_CUNADO"):
 		return clave_dialogo
 
-	var reaccion := (
-		DecisionIdeologicaExpediente
-		. reaccion_para(
-			partida.estado,
-			DecisionIdeologicaExpediente.CASO_VERTICAL,
-			DecisionIdeologicaExpediente.ACTOR_CUNADO,
-		)
+	var variante := DialogoIdeologico.resolver(
+		DialogoIdeologico.SUPERFICIE_OFICINA_CUNADO,
+		partida.estado,
 	)
-	var clave_reaccion := String(REACCIONES_CUNADO_924.get(reaccion, ""))
+	var clave_reaccion := String(variante.get("clave", ""))
 	if clave_reaccion.is_empty():
 		return clave_dialogo
 
-	if (
-		DecisionIdeologicaExpediente
-		. registrar_lectura_social(
-			partida.estado,
-			DecisionIdeologicaExpediente.CASO_VERTICAL,
-			DecisionIdeologicaExpediente.ACTOR_CUNADO,
-		)
-	):
+	if DialogoIdeologico.registrar_respuesta(partida.estado, variante):
 		_guardar_o_avisar("")
 	return clave_reaccion
 
