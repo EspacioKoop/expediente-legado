@@ -13,6 +13,7 @@ var _clima_nodo: Node3D = null
 var _archivado_sesion := ArchivadoSesion3D.new()
 var _hud_prioridades: HUDLayer
 var _dialogo_actual: PanelContainer
+var _temporizador_estres_entorno: Timer
 
 
 func _montar_interfaz() -> void:
@@ -27,6 +28,48 @@ func _montar_interfaz() -> void:
 		_hud_prioridades.registrar(HUDLayer.ESTADO, estado)
 		_hud_prioridades.activar(HUDLayer.ESTADO)
 	_caminante.conectar_hud(_hud_prioridades)
+	_montar_temporizador_estres_entorno()
+
+
+## #952: un intervalo completo debe transcurrir en la misma fase antes de
+## modificar estrés. Reiniciar al entrar evita farmear cruzando una puerta.
+func _montar_temporizador_estres_entorno() -> void:
+	if is_instance_valid(_temporizador_estres_entorno):
+		return
+	_temporizador_estres_entorno = Timer.new()
+	_temporizador_estres_entorno.name = "TemporizadorEstresEntorno"
+	_temporizador_estres_entorno.wait_time = EstresAmbiental.INTERVALO_SEGUNDOS
+	_temporizador_estres_entorno.one_shot = false
+	_temporizador_estres_entorno.timeout.connect(_al_intervalo_estres_entorno)
+	add_child(_temporizador_estres_entorno)
+	_temporizador_estres_entorno.start()
+
+
+func _reiniciar_temporizador_estres_entorno() -> void:
+	if is_instance_valid(_temporizador_estres_entorno):
+		_temporizador_estres_entorno.start()
+
+
+func _al_intervalo_estres_entorno() -> void:
+	if partida.guardado_pendiente or _pantalla != null or _entrada != null:
+		return
+	if is_instance_valid(_dialogo_actual):
+		return
+	if is_instance_valid(_caminante) and not _caminante.is_physics_processing():
+		return
+	if _ambiente == null:
+		return
+
+	var evento := EstresAmbiental.evento(
+		String(jornada.get("fase", "")),
+		_ambiente.ambient_light_energy,
+		Jornada.hora_decimal(jornada),
+	)
+	if evento.is_empty():
+		return
+	if is_zero_approx(Estres.aplicar(jornada, evento, EstresAmbiental.INTENSIDAD)):
+		return
+	_guardar_o_avisar("")
 
 
 func _abrir_vuelta() -> void:
@@ -121,6 +164,7 @@ func _entrar_en(fase: String) -> void:
 	_cerrar_dialogo_actual()
 	_retirar_clima()
 	super._entrar_en(fase)
+	_reiniciar_temporizador_estres_entorno()
 	Jornada.sincronizar_reloj_fase(jornada, fase)
 	Ambiente.reproducir(self, fase, -24.0, _contexto_ambiente())
 	if fase == "archivo":
