@@ -1,0 +1,112 @@
+name: Evidencia gato 787
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/evidencia-gato-787.yml'
+      - '.godot-version'
+      - 'godot/guion/gato*.gd'
+      - 'godot/guion/dia_*app.gd'
+      - 'godot/guion/sueno*.gd'
+      - 'godot/guion/espacio_3d.gd'
+      - 'godot/guion/espacios_catalogo.gd'
+      - 'godot/escenas/dia.tscn'
+      - 'godot/pruebas/capturar_gato_787.gd'
+      - 'scripts/test_evidencia_gato_787.py'
+      - 'docs/evidencias/gato-787/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidencia:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      GALLIUM_DRIVER: llvmpipe
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar Godot declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Importar proyecto
+        run: godot4 --headless --editor --path godot --quit
+
+      - name: Validar contrato de evidencia
+        run: python3 -m unittest -v scripts/test_evidencia_gato_787.py
+
+      - name: Renderizar gato en casa y sueño sin HUD
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidencia-gato-787
+          xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+            --script res://pruebas/capturar_gato_787.gd -- \
+            "$GITHUB_WORKSPACE/evidencia-gato-787"
+          for captura in casa sueno; do
+            test -s "evidencia-gato-787/${captura}.png"
+          done
+          test -s evidencia-gato-787/manifest.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(Path("evidencia-gato-787/manifest.json").read_text())
+          if manifest["issue"] != 787:
+              raise SystemExit("manifiesto fuera del gate #787")
+          if manifest["locale"] != "es" or manifest["hud"] is not False:
+              raise SystemExit("la evidencia debe usar locale es y HUD oculto")
+          if manifest["camara"] != "jugable" or manifest["veredicto_automatico"] is not False:
+              raise SystemExit("la evidencia debe usar cámara jugable sin autoaprobar")
+          casos = {caso["id"]: caso for caso in manifest["casos"]}
+          if set(casos) != {"casa", "sueno"}:
+              raise SystemExit("faltan casa o sueño en la evidencia de #787")
+          hashes = [caso["sha256"] for caso in manifest["casos"]]
+          if len(hashes) != 2 or len(set(hashes)) != 2:
+              raise SystemExit("casa y sueño deben producir capturas distintas")
+          if casos["sueno"]["gato_top_level"] is not True:
+              raise SystemExit("la guía onírica no está aislada del decorado")
+          escala = casos["sueno"]["escala_global"]
+          if any(abs(float(valor) - 1.0) > 0.01 for valor in escala):
+              raise SystemExit("la raíz del gato onírico no mantiene escala global 1:1:1")
+          if any(float(caso["distancia_camara"]) <= 0.0 for caso in casos.values()):
+              raise SystemExit("encuadre inválido: cámara y gato coinciden")
+          print("2/2 contextos capturados; evidencia lista para revisión humana")
+          PY
+
+      - name: Adjuntar evidencia visual de #787
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-gato-787-${{ github.sha }}
+          path: evidencia-gato-787/
+          if-no-files-found: error
+          retention-days: 14
