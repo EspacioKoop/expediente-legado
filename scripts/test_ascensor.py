@@ -81,6 +81,15 @@ class AscensorTest(unittest.TestCase):
         self.assertIn("Cinematica.vistas_de", self.capa)
         self.assertIn('extends "res://guion/cinematica_app.gd"', self.app_3d)
 
+    def test_el_encuentro_del_ascensor_es_unico_y_reutiliza_al_cunado(self):
+        self.assertIn("if vistas == 0:", self.cinematica)
+        self.assertIn('plano["encuentro_companero"] = "cunado"', self.cinematica)
+        self.assertIn("Companeros.frase_de(Companeros.CUNADO, 1)", self.cinematica)
+        self.assertIn('"_companero_encuentro.name = \\"EncuentroCunado\\""', self.app_3d)
+        self.assertIn("Companeros.cuerpo_de(Companeros.CUNADO)", self.app_3d)
+        self.assertIn('String(plano.get("encuentro_companero", "")) == "cunado"', self.app_3d)
+        self.assertNotIn("cinematicas_vistas", self.app_3d)
+
     def test_solo_intercepta_archivo_hacia_trayecto(self):
         self.assertIn('jornada.get("fase", "") == "archivo"', self.capa)
         self.assertIn('String(salida.get_meta("destino", "")) == "trayecto"', self.capa)
