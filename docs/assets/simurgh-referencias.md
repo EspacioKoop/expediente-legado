@@ -28,6 +28,14 @@ Ambas fichas del Met identifican sus imágenes como Public Domain. Si en un cort
 - **Sombra de ave:** presencia ambiental abstracta; evita fabricar una anatomía «canónica» donde las fuentes visuales varían entre épocas y talleres.
 - **Cambio de capa:** intercambio discreto de escena, nunca interpolación del tamaño físico del jugador.
 
+## Estado del corte
+
+El vertical ya está conectado al ciclo real. En fase `casa`, `Dia` monta una lámina examinable en la vivienda real; verla de fondo no activa la familia y el jugador debe observarla y girarla deliberadamente. En fase `sueño`, el controller consume exclusivamente `SemillasOniricas` + `MitologiasNoche` y materializa Simurgh solo en la escena asignada.
+
+El cambio de escala deja de ser una API de prototipo: cada capa expone un `Interactuable3D` sobre la misma ancla pluma/pasarela. Al cambiar de capa se desactiva físicamente el hotspot de la capa oculta para evitar interacciones fantasma. `reduccion_movimiento` mantiene la misma regla espacial mediante corte/fundido, sin zoom, movimiento forzado de cámara ni escalado interpolado del jugador.
+
+La emisora cultural doméstica sigue siendo una fuente alternativa compatible con el contrato común de semillas, pero la lámina queda como superficie principal de vigilia para este vertical.
+
 ## Pendiente antes de arte final
 
 1. Elegir una dirección visual propia basada en varias referencias persas, no en una única miniatura.
