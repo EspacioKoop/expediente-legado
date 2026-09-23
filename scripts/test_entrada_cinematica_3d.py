@@ -47,6 +47,11 @@ class EntradaCinematica3DTest(unittest.TestCase):
             self.assertIn(acento, self.entrada)
         self.assertIn("func _sonar_plano(plano: Dictionary) -> void:", self.reproductor)
         self.assertIn("Sonido.sonar(self, nombre, tono)", self.reproductor)
+        self.assertIn("Sonido.detener(self)", self.reproductor)
+        self.assertLess(
+            self.reproductor.index("Sonido.detener(self)"),
+            self.reproductor.index("terminada.emit()"),
+        )
         self.assertNotIn('"sonido": "puerta_abre"', self.entrada)
         self.assertNotIn("AudioStreamPlayer.new()", self.reproductor)
 
