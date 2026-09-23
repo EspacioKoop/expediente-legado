@@ -1,0 +1,103 @@
+name: Evidencia Hidra 439
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/evidencia-hidra-439.yml'
+      - '.godot-version'
+      - 'godot/project.godot'
+      - 'godot/guion/hidra_vigilia.gd'
+      - 'godot/guion/sueno_hidra*.gd'
+      - 'godot/guion/dia_hidra_*app.gd'
+      - 'godot/pruebas/capturar_hidra_439.gd'
+      - 'godot/pruebas/pruebas_hidra_noche.gd'
+      - 'scripts/test_evidencia_hidra_439.py'
+      - 'scripts/test_hidra_noche_runtime.py'
+      - 'docs/evidencias/hidra-439/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidencia:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar Godot declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Importar proyecto
+        run: godot4 --headless --editor --path godot --quit
+
+      - name: Validar contrato de evidencia
+        run: python3 -m unittest -v scripts/test_evidencia_hidra_439.py
+
+      - name: Renderizar estados de la Hidra sin HUD
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidencia-hidra-439
+          xvfb-run -a godot4 --path godot \
+            --script res://pruebas/capturar_hidra_439.gd -- \
+            "$GITHUB_WORKSPACE/evidencia-hidra-439"
+          test -s evidencia-hidra-439/01_inicial.png
+          test -s evidencia-hidra-439/02_proliferacion.png
+          test -s evidencia-hidra-439/03_resuelta.png
+          test -s evidencia-hidra-439/manifest.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(Path("evidencia-hidra-439/manifest.json").read_text())
+          estados = manifest.get("estados", [])
+          if [estado.get("id") for estado in estados] != ["inicial", "proliferacion", "resuelta"]:
+              raise SystemExit("la evidencia #439 no contiene los tres estados esperados")
+          inicial, proliferacion, resuelta = estados
+          if proliferacion["cabezas"] <= inicial["cabezas"]:
+              raise SystemExit("la proliferación no aumenta el número de cabezas")
+          if proliferacion["regeneraciones"] < 1 or not proliferacion["nodo_legible"]:
+              raise SystemExit("el estado intermedio no hace visible la regla completa")
+          if not resuelta["resuelta"] or resuelta["cabezas"] != 0:
+              raise SystemExit("el estado final no colapsa la proliferación")
+          hashes = [estado["sha256"] for estado in estados]
+          if len(set(hashes)) != 3:
+              raise SystemExit("las tres capturas deben representar estados visuales distintos")
+          print("3/3 estados de Hidra capturados y diferenciados")
+          PY
+
+      - name: Adjuntar evidencia perceptiva
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-hidra-439-${{ github.sha }}
+          path: evidencia-hidra-439/
+          if-no-files-found: error
+          retention-days: 14
