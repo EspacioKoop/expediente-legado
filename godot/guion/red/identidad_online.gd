@@ -106,13 +106,19 @@ func _guardar() -> bool:
 	var fichero := FileAccess.open(temporal, FileAccess.WRITE)
 	if fichero == null:
 		return false
-	var guardado := fichero.store_string(
-		JSON.stringify(
-			{
-				"version": VERSION,
-				"enabled": habilitada,
-				"actor_public_id": actor_public_id(),
-			}
+	var guardado := (
+		fichero
+		. store_string(
+			(
+				JSON
+				. stringify(
+					{
+						"version": VERSION,
+						"enabled": habilitada,
+						"actor_public_id": actor_public_id(),
+					}
+				)
+			)
 		)
 	)
 	fichero.close()
