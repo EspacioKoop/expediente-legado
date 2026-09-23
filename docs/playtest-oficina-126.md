@@ -12,9 +12,22 @@ Usar un alias anónimo para el participante y no registrar datos personales inne
 
 ## Build
 
-Usar una export real que contenga #994 y #995. Registrar:
+Usar una export real del mismo commit que la evidencia visual revisada. No reutilizar
+capturas antiguas de #995 después de cambios de presentación: desde aquel gate entraron,
+entre otros, Forward+ con sombras/SSAO/SSIL (#1121) y el lote administrativo Styloo
+materializado (#1216).
+
+Antes del pase:
+
+1. descargar el artifact `SIGA-98-oficina-visual-gate-126-<sha>` del run de `push` sobre `main` que corresponde a la build (el artifact efímero de un PR no sirve como evidencia final);
+2. revisar sus dos PNG y su `README.md`;
+3. confirmar que el `commit SHA` del artifact coincide con `BUILD-INFO.txt` de la build;
+4. confirmar en el manifest si Styloo está activo y qué renderer se usó.
+
+Registrar:
 
 - `build_sha` de `BUILD-INFO.txt`;
+- SHA del artifact visual revisado;
 - plataforma;
 - si el participante conocía previamente el proyecto.
 
@@ -52,6 +65,7 @@ No exigir vocabulario interno como «zona de clasificación», «planta 4» o no
 
 El gate queda listo para valorar cierre cuando:
 
+- el artifact visual revisado y la build del playtest corresponden al mismo SHA;
 - el participante no conocía previamente el layout;
 - reconoce el lugar como oficina/archivo funcional sin depender de HUD;
 - identifica varias zonas con función;
@@ -71,7 +85,8 @@ El script conserva respuestas literales y resume solo los checks introducidos po
 
 ## Qué adjuntar al issue
 
-- build SHA y plataforma;
+- build SHA, SHA del artifact visual y plataforma;
+- manifest del gate visual del mismo commit;
 - alias del participante;
 - confirmación de conocimiento previo;
 - cuatro respuestas literales;
