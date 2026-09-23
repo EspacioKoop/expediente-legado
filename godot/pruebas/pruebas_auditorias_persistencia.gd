@@ -12,6 +12,7 @@ func _initialize() -> void:
 	_probar_guardado_y_recarga()
 	_probar_predicado_accion_sobrante()
 	_probar_predicado_gato_diario()
+	_probar_predicado_sin_releer()
 	_probar_cierre_historial()
 	_probar_reasignacion()
 	_probar_migracion_partida_antigua()
@@ -105,6 +106,37 @@ func _probar_predicado_gato_diario() -> void:
 			== "gato_ausente_al_dormir"
 		),
 		"ausencia del gato conserva un motivo técnico estable",
+	)
+
+
+func _probar_predicado_sin_releer() -> void:
+	var estado := Partida.nueva()
+	estado[Auditorias.CLAVE_ESTADO] = Auditorias.nueva([Auditorias.SIN_RELEER])
+	var auditoria: Dictionary = estado[Auditorias.CLAVE_ESTADO]
+
+	var primera := Auditorias.resolver_apertura_documento(estado, false)
+	_comprobar(primera.get("resultado", "") == "activa", "primera lectura mantiene sin releer")
+	_comprobar(
+		Auditorias.estado(auditoria, Auditorias.SIN_RELEER) == "activa",
+		"leer un folio nuevo no completa ni falla el reto",
+	)
+
+	var repetida := Auditorias.resolver_apertura_documento(estado, true)
+	_comprobar(repetida.get("resultado", "") == "fallida", "releer falla la condición")
+	_comprobar(bool(repetida.get("cambio", false)), "la primera relectura declara mutación persistible")
+	_comprobar(
+		String(auditoria["fallidas"].get(Auditorias.SIN_RELEER, "")) == "documento_releido",
+		"la relectura conserva un motivo técnico estable",
+	)
+
+	var terminal := Auditorias.resolver_apertura_documento(estado, false)
+	_comprobar(
+		terminal.get("resultado", "") == "fallida",
+		"una lectura nueva posterior no revive la condición fallida",
+	)
+	_comprobar(
+		not bool(terminal.get("cambio", true)),
+		"consultar tras el fallo no vuelve a mutar el estado",
 	)
 
 
