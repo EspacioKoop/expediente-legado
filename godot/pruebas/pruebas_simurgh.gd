@@ -99,7 +99,9 @@ func _probar_capas_y_accesibilidad() -> void:
 	_comprobar(not normal["mover_camara"], "el cambio no desplaza cámara")
 	_comprobar(not normal["escalar_jugador"], "el jugador nunca se interpola de tamaño")
 	_comprobar(normal["retorno_disponible"], "el retorno sobrevive al cambio")
-	_comprobar(\n		punto_escritorio.collision_layer, 0, "el hotspot doméstico se desactiva al ocultarse"\n	)
+	_comprobar(
+		punto_escritorio.collision_layer, 0, "el hotspot doméstico se desactiva al ocultarse"
+	)
 	_comprobar(punto_monumental.collision_layer > 0, "el hotspot monumental pasa a estar activo")
 
 	sueno.reduccion_movimiento = true
