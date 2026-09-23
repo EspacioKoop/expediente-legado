@@ -224,11 +224,8 @@ func _aplicar_mesa_dialogo() -> void:
 	_recarga_rival = maxf(_recarga_rival, recarga_mesa(_ritual))
 	if _jugador == null or _rival == null:
 		return
-	var separacion := _rival.position - _jugador.position
-	separacion.y = 0.0
-	if separacion.length_squared() < 0.001:
-		separacion = Vector3(0.0, 0.0, -1.0)
-	_rival.position = _limitar(_jugador.position + separacion.normalized() * DISTANCIA_MESA)
+	var destino := RIVAL.posicion_mesa(_jugador.position, _rival.position, DISTANCIA_MESA)
+	_rival.position = _limitar(destino)
 
 
 func _activar_comision() -> void:
@@ -339,35 +336,38 @@ func _resolver_ataque_rival() -> void:
 	_ataque_rival_pendiente = false
 	_ocultar_aviso_ataque()
 
-	var comision_activa := _doctrina_activa == "socialdemocrata"
-	var externaliza_activa := _doctrina_activa == "neoliberal"
 	var hacia := _jugador.position - _rival.position
 	hacia.y = 0.0
 	var resolucion := RIVAL.resolver_ataque(hacia.length(), _esquiva)
 	_recarga_rival = float(resolucion["recarga"])
-	match String(resolucion["resultado"]):
-		"falla":
-			pass
+	var efecto := (
+		RIVAL
+		. resolver_impacto_en_jugador(
+			String(resolucion["resultado"]),
+			_determinacion_jugador,
+			_invulnerabilidad_jungiana,
+			_doctrina_activa,
+		)
+	)
+	match String(efecto["desenlace"]):
 		"esquiva":
 			Sonido.sonar(self, "pulsar")
 			_registrar_esquiva_ritual()
-		_:
-			if _invulnerabilidad_jungiana > 0.0:
-				Sonido.sonar(self, "pulsar")
-				_mostrar_aviso_jungiano("SELF · IMPACTO NEGADO", 0.8)
-			else:
-				Sonido.sonar(self, "error")
-				var dano := dano_externalizado(1, _doctrina_activa)
-				_determinacion_jugador = maxi(0, _determinacion_jugador - dano)
-				JUNGIANO.registrar_dano_recibido(self)
-				if externaliza_activa:
-					_cerrar_doctrina()
-				_reaccion(_figura_jugador, -0.18)
-				_actualizar_hud()
-				if _determinacion_jugador <= 0:
-					_terminar(false)
+		"negado":
+			Sonido.sonar(self, "pulsar")
+			_mostrar_aviso_jungiano("SELF · IMPACTO NEGADO", 0.8)
+		"impacto":
+			Sonido.sonar(self, "error")
+			_determinacion_jugador = int(efecto["determinacion_jugador"])
+			JUNGIANO.registrar_dano_recibido(self)
+			if bool(efecto["cerrar_externalizar"]):
+				_cerrar_doctrina()
+			_reaccion(_figura_jugador, -0.18)
+			_actualizar_hud()
+			if bool(efecto["derrota"]):
+				_terminar(false)
 
-	if comision_activa:
+	if bool(efecto["cerrar_comision"]):
 		_cerrar_doctrina()
 
 
@@ -444,12 +444,12 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 
 
 func _intentar_retorno_rival() -> bool:
-	var determinacion := determinacion_retorno(_ritual, _retornos_rival)
-	if determinacion <= 0:
+	var plan := RIVAL.retorno(_ritual, _retornos_rival)
+	if not bool(plan["acepta"]):
 		return false
-	_retornos_rival += 1
-	_determinacion_rival = determinacion
-	_recarga_rival = RECARGA_RIVAL * 0.50
+	_retornos_rival = int(plan["retornos"])
+	_determinacion_rival = int(plan["determinacion"])
+	_recarga_rival = float(plan["recarga"])
 	_reaccion(_figura_rival, -0.30)
 	Sonido.sonar(self, "marcar")
 	_actualizar_hud()
