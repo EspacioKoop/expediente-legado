@@ -67,11 +67,11 @@ static func _agregar_bloque(capa: Node3D, datos: Dictionary) -> void:
 	sprite.pixel_size = altura / maxf(float(textura.get_height()), 1.0)
 	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
 	sprite.alpha_scissor_threshold = 0.18
-	sprite.shaded = true
-	sprite.double_sided = false
+	sprite.shaded = false
+	sprite.double_sided = true
 	sprite.fixed_size = false
 	sprite.no_depth_test = false
-	sprite.modulate = Color(0.72, 0.74, 0.78, 1.0)
+	sprite.modulate = Color(0.56, 0.54, 0.52, 1.0)
 	sprite.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	sprite.set_meta("calle_ai_98", true)
 	capa.add_child(sprite)
