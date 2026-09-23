@@ -4,8 +4,6 @@
 ## capa solo materializa el vertical 3D sin sustituir sala, entrada ni salida.
 extends Node
 
-const ESCALA_ENCUENTRO := 0.48
-
 var _mundo_montado_id := 0
 var _ryu_montado_esta_noche := false
 var _fase_anterior := ""
@@ -77,7 +75,7 @@ func _montar_ryu(mundo: Node3D, espacio: Dictionary) -> void:
 	# Se prepara fuera del árbol para que reducción de movimiento determine
 	# desde el inicio la densidad de lluvia y no exista cámara standalone.
 	ryu.preparar()
-	ryu.scale = Vector3.ONE * ESCALA_ENCUENTRO
+	ryu.scale = Vector3.ONE * SuenoRyu.ESCALA_ENCUENTRO
 	ryu.position = _ancla_entre_entrada_y_salida(espacio)
 	mundo.add_child(ryu)
 
