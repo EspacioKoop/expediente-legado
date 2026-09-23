@@ -6,6 +6,8 @@ PARTIDA = Path("godot/guion/partida.gd")
 PROMETEO = Path("godot/guion/prometeo.gd")
 DIA = Path("godot/guion/dia_app.gd")
 ASCENSOR = Path("godot/guion/dia_ascensor_app.gd")
+CREADOR = Path("godot/guion/creador_personaje_app.gd")
+NUEVA_VIDA = Path("godot/guion/auditorias_nueva_vida_app.gd")
 
 
 def texto() -> str:
@@ -74,3 +76,34 @@ def test_el_predicado_no_bloquea_ni_recompensa():
     assert "resolver_fin_archivo" in contenido
     for termino in ("Jornada.fichar_salida", "guardar(", "Sellos.", "Steam", "dinero +="):
         assert termino not in contenido
+
+
+def test_seleccion_de_vuelta_tiene_estado_persistible_y_unico():
+    contenido = texto()
+    assert 'const CLAVE_SELECCION_RESUELTA := "seleccion_resuelta"' in contenido
+    assert "static func seleccion_pendiente(" in contenido
+    assert "static func resolver_seleccion(" in contenido
+    assert "nueva([], historial_previo, false)" in contenido
+
+
+def test_alta_y_reasignacion_resuelven_antes_de_empezar():
+    creador = CREADOR.read_text(encoding="utf-8")
+    dia = DIA.read_text(encoding="utf-8")
+    assert "Auditorias.resolver_seleccion(_partida.estado, _auditorias.seleccion())" in creador
+    assert "Auditorias.seleccion_pendiente(partida.estado)" in dia
+    assert "AuditoriasNuevaVidaApp.new()" in dia
+    assert "Auditorias.resolver_seleccion(partida.estado, seleccion)" in dia
+    abrir = dia.split("func _abrir_vuelta() -> void:", 1)[1].split(
+        "func _abrir_auditorias_nueva_vida", 1
+    )[0]
+    assert abrir.index("Auditorias.seleccion_pendiente(partida.estado)") < abrir.index(
+        "_registrar_reincorporacion()"
+    )
+
+
+def test_modal_de_reasignacion_solo_emite_intencion():
+    contenido = NUEVA_VIDA.read_text(encoding="utf-8")
+    assert "signal seleccion_confirmada(seleccion: Array)" in contenido
+    assert "AuditoriasSiga.new()" in contenido
+    for prohibido in ("Partida.", "guardar(", "Auditorias.resolver_seleccion", "Jornada."):
+        assert prohibido not in contenido
