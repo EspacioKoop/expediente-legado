@@ -1,0 +1,28 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://interactables/libros/libro_lectura_significativa.gd" id="1_script"]
+
+[sub_resource type="BoxShape3D" id="BoxShape_libro"]
+size = Vector3(0.55, 0.08, 0.38)
+
+[sub_resource type="BoxMesh" id="BoxMesh_libro"]
+size = Vector3(0.55, 0.08, 0.38)
+
+[node name="LibroLecturaSignificativa" type="Area3D"]
+collision_layer = 1
+collision_mask = 1
+script = ExtResource("1_script")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape_libro")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_libro")
+
+[node name="InteractionLabel" type="Label" parent="."]
+offset_left = -120.0
+offset_top = -55.0
+offset_right = 120.0
+offset_bottom = -20.0
+text = "E para hojear"
+visible = false
