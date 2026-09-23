@@ -68,8 +68,9 @@ static func _agregar_sprite(capa: Node3D, datos: Dictionary) -> void:
 	var sprite := Sprite3D.new()
 	sprite.name = String(datos["nombre"])
 	sprite.texture = textura
-	sprite.position = Vector3(datos["pos"])
-	sprite.pixel_size = float(datos["altura"]) / maxf(float(textura.get_height()), 1.0)
+	var posicion: Vector3 = datos.get("pos", Vector3.ZERO)
+	sprite.position = posicion
+	sprite.pixel_size = float(datos.get("altura", 0.5)) / maxf(float(textura.get_height()), 1.0)
 	sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
 	sprite.alpha_scissor_threshold = 0.18
