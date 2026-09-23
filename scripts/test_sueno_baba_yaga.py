@@ -15,6 +15,8 @@ VIGILIA = ROOT / "godot" / "guion" / "baba_yaga_vigilia.gd"
 ESCENA_SUENO = ROOT / "godot" / "escenas" / "sueno_baba_yaga.tscn"
 ESCENA_VIGILIA = ROOT / "godot" / "escenas" / "baba_yaga_vigilia.tscn"
 REFERENCIAS = ROOT / "docs" / "assets" / "baba-yaga-referencias.md"
+CONTROLLER = ROOT / "godot" / "guion" / "dia_baba_yaga_app.gd"
+DIA = ROOT / "godot" / "escenas" / "dia.tscn"
 PRUEBA_GODOT = "res://pruebas/pruebas_baba_yaga.gd"
 RESUMEN_GODOT = re.compile(r"(\d+) pasadas, 0 fallos")
 
@@ -29,6 +31,8 @@ class SuenoBabaYagaTest(unittest.TestCase):
         cls.escena_sueno = ESCENA_SUENO.read_text(encoding="utf-8")
         cls.escena_vigilia = ESCENA_VIGILIA.read_text(encoding="utf-8")
         cls.referencias = REFERENCIAS.read_text(encoding="utf-8")
+        cls.controller = CONTROLLER.read_text(encoding="utf-8")
+        cls.dia = DIA.read_text(encoding="utf-8")
 
     def test_semilla_usa_catalogo_comun(self):
         self.assertIn('"baba_yaga",', self.semillas)
@@ -86,6 +90,30 @@ class SuenoBabaYagaTest(unittest.TestCase):
         self.assertIn('"mover_camara": false', self.sueno)
         self.assertIn('"desplazar_jugador": false', self.sueno)
         self.assertIn('"flash": false', self.sueno)
+
+    def test_recorrido_real_reutiliza_vigilia_y_selector_comunes(self):
+        self.assertIn('String(dia._vivienda()) != "casa"', self.controller)
+        self.assertIn("BabaYagaVigilia.new()", self.controller)
+        self.assertIn("libro.configurar(jornada)", self.controller)
+        self.assertIn("SemillasOniricas", self.controller)
+        self.assertIn(". seleccionar_para_noche(", self.controller)
+        self.assertIn("MitologiasNoche", self.controller)
+        self.assertIn(". corresponde_a_escena(", self.controller)
+        self.assertIn("SuenoBabaYaga.ID_MITO", self.controller)
+        self.assertNotIn("activar_semilla_onirica", self.controller)
+        self.assertIn('path="res://guion/dia_baba_yaga_app.gd"', self.dia)
+        self.assertIn('[node name="BabaYagaController" type="Node" parent="."]', self.dia)
+
+    def test_bosque_tiene_controles_interactuables_reales(self):
+        self.assertIn("Interactuable3D.new()", self.sueno)
+        self.assertIn('controles.name = "ControlesBosque"', self.sueno)
+        self.assertIn('"UmbralBosque"', self.sueno)
+        self.assertIn('"ObservatorioArchivador"', self.sueno)
+        self.assertIn('"CintaPersistente"', self.sueno)
+        self.assertIn("control.activado.connect", self.sueno)
+        self.assertIn("aplicar_evento(EVENTO_UMBRAL", self.sueno)
+        self.assertIn("aplicar_evento(EVENTO_FUERA_CAMPO", self.sueno)
+        self.assertIn("PreferenciasSiga.cargar()", self.sueno)
 
     def test_fuentes_culturales_preceden_arte_final(self):
         self.assertIn("Sibelan Forrester", self.referencias)
