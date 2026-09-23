@@ -66,8 +66,10 @@ func _montar_audio() -> void:
 	_audio.volume_db = -9.0
 	_audio.unit_size = 4.0
 	_audio.max_distance = 14.0
+	# Godot 4.7 inicia autoplay al entrar en el árbol; evita llamar play()
+	# durante SceneTree._init(), cuando el nodo aún puede estar fuera del árbol.
+	_audio.autoplay = true
 	add_child(_audio)
-	_audio.play()
 
 
 func _process(delta: float) -> void:
