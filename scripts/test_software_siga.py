@@ -79,7 +79,7 @@ def test_ui_conserva_activacion_por_teclado_y_no_hardcodea_teclas() -> None:
 def test_software_se_registra_por_el_contrato_comun_y_persiste_estado_local() -> None:
     adaptador = fuente(ADAPTADOR)
     assert "var _software_app: EscritorioSigaApp" in adaptador
-    assert '"software-98", "Archivo de programas", Callable(self, "_crear_software"), "equipo"' in adaptador
+    assert '"software-98", "Archivo de programas", Callable(self, "_crear_software"), "software"' in adaptador
     assert "_software_app.persistir_estado = true" in adaptador
     assert "_software_app.registrar_en(escritorio)" in adaptador
     assert "func _crear_software() -> Control:" in adaptador
