@@ -15,28 +15,24 @@ const BLOQUES := [
 		"archivo": "bloque_01.webp",
 		"pos": Vector3(-9.4, 0.0, -0.8),
 		"altura": 9.6,
-		"giro_y": 90.0,
 	},
 	{
 		"nombre": "BloqueOesteNorte98",
 		"archivo": "bloque_03.webp",
 		"pos": Vector3(-11.4, 0.0, 3.0),
 		"altura": 9.8,
-		"giro_y": 90.0,
 	},
 	{
 		"nombre": "BloqueEsteSur98",
 		"archivo": "bloque_02.webp",
 		"pos": Vector3(9.4, 0.0, -0.4),
 		"altura": 10.8,
-		"giro_y": -90.0,
 	},
 	{
 		"nombre": "BloqueEsteNorte98",
 		"archivo": "bloque_04.webp",
 		"pos": Vector3(11.4, 0.0, 3.0),
 		"altura": 10.6,
-		"giro_y": -90.0,
 	},
 ]
 
