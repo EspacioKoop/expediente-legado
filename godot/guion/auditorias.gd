@@ -183,7 +183,7 @@ static func _validar_historial(historial_crudo: Array) -> Array:
 			errores.append("historial.%d no es un objeto" % i)
 			continue
 		var vuelta = registro.get("vuelta", -1)
-		if typeof(vuelta) != TYPE_INT or int(vuelta) < 1:
+		if not _entero_positivo(vuelta):
 			errores.append("historial.%d.vuelta invalida" % i)
 		elif vueltas.has(int(vuelta)):
 			errores.append("historial.%d.vuelta duplicada" % i)
@@ -269,3 +269,11 @@ static func pendientes(auditoria: Dictionary) -> Array:
 		if estado(auditoria, id) == "activa":
 			resultado.append(id)
 	return resultado
+
+
+static func _entero_positivo(valor) -> bool:
+	if typeof(valor) == TYPE_INT:
+		return valor >= 1
+	if typeof(valor) != TYPE_FLOAT or not is_finite(valor):
+		return false
+	return floor(valor) == valor and valor >= 1.0
