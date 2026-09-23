@@ -10,6 +10,7 @@ extends HSplitContainer
 
 signal mensaje_leido(id: String)
 signal respuesta_enviada(mensaje_id: String, opcion_id: String, dia: int, acciones: int)
+signal paquete_software_obtenido(id: String)
 
 const RUTA_TEXTOS := "res://datos/correo_siga_textos.json"
 
@@ -25,6 +26,8 @@ var _cabecera: Label
 var _meta: Label
 var _cuerpo: RichTextLabel
 var _estado: Label
+var _adjunto: Button
+var _adjunto_paquete_id := ""
 var _respuestas_panel: VBoxContainer
 
 
@@ -171,6 +174,12 @@ func _construir_interfaz() -> void:
 	)
 	derecha.add_child(_cuerpo)
 
+	_adjunto = Button.new()
+	_adjunto.name = "AbrirAdjunto"
+	_adjunto.visible = false
+	_adjunto.pressed.connect(_abrir_adjunto)
+	derecha.add_child(_adjunto)
+
 	_respuestas_panel = VBoxContainer.new()
 	_respuestas_panel.name = "Respuestas"
 	_respuestas_panel.add_theme_constant_override("separation", 6)
@@ -267,12 +276,27 @@ func _seleccionar_mensaje(indice: int) -> void:
 		]
 	)
 	_cuerpo.text = String(mensaje.get("cuerpo", ""))
+	_configurar_adjunto(mensaje)
 	_mostrar_respuestas(mensaje)
 	if not _leidos.has(id):
 		_leidos.append(id)
 		_lista.set_item_text(indice, _rotulo(mensaje, false))
 		mensaje_leido.emit(id)
 		_actualizar_estado(_lista.item_count)
+
+
+func _configurar_adjunto(mensaje: Dictionary) -> void:
+	_adjunto_paquete_id = String(mensaje.get("paquete_software", "")).strip_edges()
+	var nombre := String(mensaje.get("adjunto", "")).strip_edges()
+	_adjunto.visible = not nombre.is_empty() and not _adjunto_paquete_id.is_empty()
+	if _adjunto.visible:
+		_adjunto.text = texto("abrir_adjunto") % nombre
+
+
+func _abrir_adjunto() -> void:
+	if _adjunto_paquete_id.is_empty():
+		return
+	paquete_software_obtenido.emit(_adjunto_paquete_id)
 
 
 func _mostrar_respuestas(mensaje: Dictionary) -> void:
