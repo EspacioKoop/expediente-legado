@@ -40,6 +40,11 @@ func _init() -> void:
 	encuentro.scale = Vector3.ONE * ESCALA_ENCUENTRO
 	mundo.add_child(encuentro)
 
+	# El capturador arranca desde SceneTree._init(): configurar antes del primer
+	# frame permite que SuenoHidra._ready() vuelva a ocultar el vertical después.
+	# Esperar aquí deja preparada la jerarquía real antes de aplicar la semilla.
+	await process_frame
+
 	var semillas := {}
 	semillas[SuenoHidra.SEMILLA] = {"fuente": "rom:hydra_loop_98"}
 	if not encuentro.configurar(semillas, false, 3):
@@ -129,16 +134,19 @@ func _capturar_estado(
 		return false
 
 	var estado := hidra.estado_actual()
-	manifiesto["estados"].append(
-		{
-			"id": id_estado,
-			"captura": archivo,
-			"cabezas": int(estado.get("cabezas", 0)),
-			"regeneraciones": int(estado.get("regeneraciones", 0)),
-			"nodo_legible": estado.get("nodo_legible", false) == true,
-			"resuelta": estado.get("resuelta", false) == true,
-			"sha256": FileAccess.get_sha256(destino),
-		}
+	(
+		manifiesto["estados"]
+		. append(
+			{
+				"id": id_estado,
+				"captura": archivo,
+				"cabezas": int(estado.get("cabezas", 0)),
+				"regeneraciones": int(estado.get("regeneraciones", 0)),
+				"nodo_legible": estado.get("nodo_legible", false) == true,
+				"resuelta": estado.get("resuelta", false) == true,
+				"sha256": FileAccess.get_sha256(destino),
+			}
+		)
 	)
 	print("%s -> %s" % [id_estado, destino])
 	return true
@@ -179,8 +187,7 @@ func _montar_entorno(mundo: Node3D) -> void:
 func _montar_camara(mundo: Node3D) -> void:
 	var camara := Camera3D.new()
 	camara.name = "CamaraJugadorSinHUD"
-	camara.position = POSICION_CAMARA
+	camara.look_at_from_position(POSICION_CAMARA, OBJETIVO_CAMARA, Vector3.UP)
 	camara.fov = FOV
 	camara.current = true
 	mundo.add_child(camara)
-	camara.look_at(OBJETIVO_CAMARA, Vector3.UP)
