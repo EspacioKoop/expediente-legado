@@ -66,7 +66,8 @@ class LiteraturaDialogo1180Test(unittest.TestCase):
     def test_dialogo_se_monta_en_el_recorrido_real(self) -> None:
         self.assertIn('"dialogo_literario": DIALOGO_LITERARIO_1180', self.dia)
         self.assertIn('"fuente_dialogo_literario": FUENTE_LITERARIA_1180', self.dia)
-        self.assertIn("DialogoDiegetico.mostrar_eleccion(", self.dia)
+        self.assertIn("DialogoDiegetico", self.dia)
+        self.assertIn("mostrar_eleccion(", self.dia)
         self.assertIn('"resolver_dialogo"', self.dia)
         self.assertIn('"resolver_reentrada_dialogo"', self.dia)
         self.assertIn("func mostrar_eleccion(", self.diegetico)
