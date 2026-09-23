@@ -7,6 +7,8 @@ const AyudaDatos = preload("res://guion/red/ayuda_datos.gd")
 const AyudaServicio = preload("res://guion/red/ayuda_servicio.gd")
 const TransporteFixture = preload("res://guion/red/transporte_fixture.gd")
 const TransporteNulo = preload("res://guion/red/transporte_nulo.gd")
+const DiaAyudaResonanciaApp = preload("res://guion/dia_ayuda_resonancia_app.gd")
+const SuenoAyudaResonancia3D = preload("res://guion/sueno_ayuda_resonancia_3d.gd")
 const AHORA := 2_000_000_000
 const ESCENA := "suenio/primera_noche"
 
@@ -19,6 +21,7 @@ func _init() -> void:
 	_probar_evento_seguro()
 	_probar_fixture_opt_out_y_spam()
 	_probar_offline_y_rate_limit()
+	_probar_presentacion_local()
 	print("\n%d pasadas, %d fallos" % [pasadas, fallos])
 	quit(1 if fallos > 0 else 0)
 
@@ -145,6 +148,53 @@ func _probar_offline_y_rate_limit() -> void:
 	)
 	_comprobar("la primera publicación pasa", primera["ok"], true)
 	_comprobar("publicar seguido queda limitado", segunda["status"], "rate_limited")
+
+
+func _probar_presentacion_local() -> void:
+	var abierta := _evento("anon-visual", "suenio_umbral", [], "help-visual")
+	var figura := _evento(
+		"anon-figura", "suenio_figura", ["figura_onirica"], "help-figura"
+	)
+	var controlador := DiaAyudaResonanciaApp.new()
+	controlador.configurar_transporte(TransporteFixture.new([abierta["event"], figura["event"]]))
+
+	var mundo := Node3D.new()
+	root.add_child(mundo)
+	var espacio := {
+		"entrada": Vector3(1.0, 0.0, 2.0),
+		"figuras": [{"pos": Vector3(4.0, 0.0, 5.0)}],
+	}
+	var creadas := controlador.mostrar_ayudas_en(mundo, espacio, AHORA + 1)
+	_comprobar("dos ayudas conocidas se presentan", creadas.size(), 2)
+	_comprobar("la presentación usa el nodo local", creadas[0] is SuenoAyudaResonancia3D, true)
+	_comprobar("el umbral usa la entrada visible", creadas[0].position, Vector3(1.0, 0.55, 2.0))
+	_comprobar("el anchor de figura queda identificado", creadas[1].get_meta("anchor_id"), "suenio_figura")
+	_comprobar(
+		"la resonancia crea luz",
+		creadas[0].get_node_or_null("PulsoResonancia") != null,
+		true
+	)
+	_comprobar(
+		"la resonancia crea audio",
+		creadas[0].get_node_or_null("EcoResonancia") != null,
+		true
+	)
+	_comprobar(
+		"la resonancia no crea colisión",
+		creadas[0].find_children("*", "CollisionShape3D", true, false).size(),
+		0
+	)
+
+	var filtrado := DiaAyudaResonanciaApp.new()
+	filtrado.configurar_transporte(TransporteFixture.new([abierta["event"], figura["event"]]))
+	var mundo_sin_figura := Node3D.new()
+	root.add_child(mundo_sin_figura)
+	var solo_umbral := filtrado.mostrar_ayudas_en(
+		mundo_sin_figura, {"entrada": Vector3.ZERO, "figuras": []}, AHORA + 1
+	)
+	_comprobar("sin figura conocida solo se presenta el umbral", solo_umbral.size(), 1)
+	mundo.queue_free()
+	mundo_sin_figura.queue_free()
 
 
 func _comprobar(nombre: String, obtenido: Variant, esperado: Variant) -> void:
