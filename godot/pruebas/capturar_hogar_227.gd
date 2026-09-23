@@ -230,9 +230,7 @@ func _guardar_captura(destino: String) -> bool:
 		printerr("Viewport vacio para %s" % destino)
 		return false
 	if imagen.get_size() != TAMANO:
-		printerr(
-			"Resolucion inesperada para #227: %s; esperada %s" % [imagen.get_size(), TAMANO]
-		)
+		printerr("Resolucion inesperada para #227: %s; esperada %s" % [imagen.get_size(), TAMANO])
 		return false
 	var error_png := imagen.save_png(destino)
 	if error_png != OK:
