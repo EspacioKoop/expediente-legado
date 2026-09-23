@@ -23,11 +23,14 @@ static func recetas() -> Array[Dictionary]:
 	palanca["receta_combinacion"] = RECETA_PALANCA_CUNA
 
 	var salida: Array[Dictionary] = []
-	salida.append(
-		{
-			"id": RECETA_PALANCA_CUNA,
-			"ingredientes": ["palanca_kkryy", RecompensaOnirica.ID],
-			"resultado": palanca,
-		}
+	(
+		salida
+		. append(
+			{
+				"id": RECETA_PALANCA_CUNA,
+				"ingredientes": ["palanca_kkryy", RecompensaOnirica.ID],
+				"resultado": palanca,
+			}
+		)
 	)
 	return salida
