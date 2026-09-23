@@ -9,6 +9,7 @@ func _init() -> void:
 	_consistente()
 	_plural()
 	_contextual()
+	_auditorias_descriptivas()
 	_logros_idempotentes()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
@@ -89,6 +90,34 @@ func _contextual() -> void:
 		resumen["dominantes"] == ["socialdemocrata"],
 		"contextual conserva el recuento transversal",
 	)
+
+
+func _auditorias_descriptivas() -> void:
+	var estado := _estado_base()
+	estado[Auditorias.CLAVE_ESTADO] = Auditorias.nueva(
+		[Auditorias.SIN_RELEER, Auditorias.SUENO_COMPLETO]
+	)
+	Auditorias.fallar(
+		estado[Auditorias.CLAVE_ESTADO], Auditorias.SIN_RELEER, "documento_releido"
+	)
+	var antes := JSON.stringify(estado)
+	var resumen := FinalPolitico.resumen(estado, {"veredicto": "hastur_confrontado"})
+	var auditoria: Dictionary = resumen.get("auditoria", {})
+	_comprobar(auditoria.get("origen", "") == "actual", "el final lee la auditoría viva sin cerrarla")
+	var condiciones: Array = auditoria.get("condiciones", [])
+	_comprobar(condiciones.size() == 2, "el final conserva todas las condiciones seleccionadas")
+	var por_id := {}
+	for condicion in condiciones:
+		por_id[String(condicion.get("id", ""))] = String(condicion.get("estado", ""))
+	_comprobar(
+		por_id.get(Auditorias.SIN_RELEER, "") == "fallida",
+		"el final refleja una condición ya fallida",
+	)
+	_comprobar(
+		por_id.get(Auditorias.SUENO_COMPLETO, "") == "activa",
+		"el final no completa una condición que sigue vigente",
+	)
+	_comprobar(JSON.stringify(estado) == antes, "resumir el final no muta Auditorías")
 
 
 func _logros_idempotentes() -> void:
