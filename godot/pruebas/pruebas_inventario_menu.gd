@@ -104,6 +104,32 @@ func _initialize() -> void:
 		"prepara la recompensa onírica real para combinar"
 	)
 	panel.abrir(estado_combo)
+	var arrastre = panel._datos_arrastre_inventario(Vector2.INF)
+	_comprobar(arrastre is Dictionary, "el árbol expone datos de arrastre del objeto enfocado")
+	_comprobar(
+		String(arrastre.get("tipo", "")) == InventarioMenuApp.TIPO_ARRASTRE_OBJETO,
+		"el payload de arrastre usa un tipo estable"
+	)
+	_comprobar(
+		String(arrastre.get("objeto_id", "")) == "palanca_kkryy",
+		"el arrastre conserva el ID real del inventario"
+	)
+	_comprobar(
+		panel._puede_soltar_en_slot(Vector2.ZERO, arrastre, "a"),
+		"la ranura A acepta un objeto real arrastrado"
+	)
+	panel._soltar_en_slot(Vector2.ZERO, arrastre, "a")
+	var slot_a := panel.find_child("CombinacionSlotA", true, false) as Button
+	_comprobar(
+		slot_a != null and "Palanca" in slot_a.text,
+		"soltar el objeto actualiza visualmente la ranura A"
+	)
+	_comprobar(
+		not panel._puede_soltar_en_slot(
+			Vector2.ZERO, {"tipo": "otro", "objeto_id": "palanca_kkryy"}, "b"
+		),
+		"las ranuras rechazan payloads ajenos al inventario"
+	)
 	_comprobar(
 		panel.find_child("CombinacionSlotA", true, false) is Button,
 		"la superficie monta la ranura A"
@@ -117,12 +143,8 @@ func _initialize() -> void:
 		"la superficie monta una acción de combinar con foco"
 	)
 	_comprobar(
-		panel.seleccionar_para_combinar("palanca_kkryy", "a"),
-		"permite asignar por contrato el primer objeto visible"
-	)
-	_comprobar(
 		panel.seleccionar_para_combinar(RecompensaOnirica.ID, "b"),
-		"permite asignar por contrato el segundo objeto visible"
+		"el flujo de teclado/mando sigue pudiendo asignar el segundo objeto"
 	)
 	var combinado := panel.combinar_slots()
 	_comprobar(
