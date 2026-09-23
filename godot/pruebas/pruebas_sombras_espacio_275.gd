@@ -29,12 +29,17 @@ func _probar() -> void:
 			luces.append(luz)
 	_comprobar(not luces.is_empty(), true, "la oficina declara lámparas de sala")
 
+	# La oficina se ilumina por píxel desde #789, y ahí el modo de sombra dejó de
+	# ser una preferencia de coste: medido en GPU, en paraboloide dual estas
+	# lámparas dan una imagen idéntica píxel a píxel con la sombra encendida y
+	# apagada —Forward+ no dibuja ese modo—, así que la sala se quedaba sin una
+	# sola sombra de contacto. Donde la sombra se ve, se exige cubo.
 	for luz in luces:
 		_comprobar(luz.shadow_enabled, true, "cada lámpara proyecta sombra")
 		_comprobar(
 			luz.omni_shadow_mode,
-			OmniLight3D.SHADOW_DUAL_PARABOLOID,
-			"la sombra va en paraboloide dual y no en cubo",
+			OmniLight3D.SHADOW_CUBE,
+			"la sombra de un sitio con luz por píxel va en cubo, que es el modo que dibuja",
 		)
 
 	# El contrato que importa: una lámpara no puede quedar encerrada en algo que
