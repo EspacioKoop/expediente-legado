@@ -37,4 +37,4 @@ No se fija como «canónico» ningún mapa moderno de nueve mundos, diagrama eso
 
 ## Estado del corte
 
-El prototipo implementa tres nodos y tres conexiones causales visibles, activación deliberada mediante un póster doméstico y presentación alternativa para `reduccion_movimiento`. El arte final queda deliberadamente pendiente hasta revisar varias referencias visuales y separar con claridad fuente medieval, reconstrucción académica y convención pop.
+El vertical implementa tres nodos y tres conexiones causales visibles, con interacción 3D común en cada nodo. La activación deliberada mediante el póster se monta únicamente en la vivienda real (`casa`), y durante la fase de sueño el controlador de `Dia` consume `SemillasOniricas` + `MitologiasNoche` para insertar Yggdrasil solo en la escena asignada, conservando la cámara, iluminación y salida del sueño base. `reduccion_movimiento` se propaga al grafo causal sin cambiar sus reglas. El arte final queda deliberadamente pendiente hasta revisar varias referencias visuales y separar con claridad fuente medieval, reconstrucción académica y convención pop.
