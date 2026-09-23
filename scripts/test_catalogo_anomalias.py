@@ -247,7 +247,7 @@ class CatalogoAnomaliasTest(unittest.TestCase):
         self.assertIn("CatalogoAnomaliasSiga.new()", self.escritorio)
         self.assertIn("catalogo.configurar_estado(partida_actual.estado)", self.escritorio)
         bloque = self.escritorio.split("func _crear_catalogo_anomalias", 1)[1].split(
-            "func _registrar_correo_leido", 1
+            "\n\nfunc ", 1
         )[0]
         self.assertNotIn("guardar", bloque.lower())
         self.assertNotIn("registrar(", bloque)
