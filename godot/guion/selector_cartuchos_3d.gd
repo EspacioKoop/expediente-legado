@@ -52,9 +52,16 @@ static func _entradas_disponibles(app: Node) -> Array[Dictionary]:
 	var entradas: Array[Dictionary] = []
 	var compradas_variante = app.get("roms_compradas")
 	var compradas: Array = compradas_variante if compradas_variante is Array else []
-	for rom in RomsPropias.en_consola(compradas):
+	var desbloqueadas_variante = app.get("roms_desbloqueadas")
+	var desbloqueadas: Array = (
+		desbloqueadas_variante if desbloqueadas_variante is Array else []
+	)
+	for rom in RomsPropias.en_consola(compradas, desbloqueadas):
 		var titulo := String(rom.get("titulo", ""))
-		var clave := "rom_propia" if bool(rom.get("incluida", false)) else "rom_comprada"
+		var id_rom := String(rom.get("id", ""))
+		var clave := "rom_propia"
+		if not bool(rom.get("incluida", false)):
+			clave = "rom_comprada" if compradas.has(id_rom) else "rom_desbloqueada"
 		(
 			entradas
 			. append(
