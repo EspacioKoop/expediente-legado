@@ -128,6 +128,9 @@ func _montar_skyline(mundo: Node3D) -> void:
 		Color(0.09, 0.105, 0.13)
 	)
 
+	# Línea intermedia fotorealista: solo asoma por los huecos centrales.
+	CalleFondosFotorealistas98.montar(mundo)
+
 
 func _edificio(
 	mundo: Node3D, modelo: String, posicion: Vector3, escala: float, giro_y: float, color: Color
