@@ -98,8 +98,7 @@ func _probar_validacion() -> void:
 
 	var guardado_seleccion := {
 		"version": Partida.VERSION,
-		Auditorias.CLAVE_ESTADO:
-		{"activas": ["inventada"], "fallidas": {}, "completadas": []},
+		Auditorias.CLAVE_ESTADO: {"activas": ["inventada"], "fallidas": {}, "completadas": []},
 	}
 	var errores_seleccion := Partida.validar(guardado_seleccion)
 	_comprobar(
