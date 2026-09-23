@@ -39,6 +39,17 @@ class EntradaCinematica3DTest(unittest.TestCase):
         self.assertIn("mira_origen.lerp(mira_destino, suave)", self.reproductor)
         self.assertIn("avance * avance * (3.0 - 2.0 * avance)", self.reproductor)
 
+    def test_acentos_de_plano_usan_el_ciclo_de_vida_comun(self) -> None:
+        for acento in (
+            '"sonido": "puerta_abre"',
+            '"sonido": "pulsar"',
+            '"sonido": "marcar"',
+        ):
+            self.assertIn(acento, self.entrada)
+        self.assertIn("func _sonar_plano(plano: Dictionary) -> void:", self.reproductor)
+        self.assertIn("Sonido.sonar(self, nombre, tono)", self.reproductor)
+        self.assertNotIn("AudioStreamPlayer.new()", self.reproductor)
+
     def test_puesto_encuadra_el_terminal_real(self) -> None:
         # El puesto del jugador está en (-4, 1); su pantalla real vive en
         # (-4, 0.98, 0.68). El bloqueo anterior acababa mirando otra mesa.
