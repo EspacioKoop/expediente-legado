@@ -1,8 +1,10 @@
 from pathlib import Path
+import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 MUSICA = ROOT / "godot" / "guion" / "musica.gd"
+CAREO = ROOT / "godot" / "guion" / "careo_app.gd"
 GITATTRIBUTES = ROOT / ".gitattributes"
 
 
@@ -10,6 +12,7 @@ class MusicaPuntualTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.codigo = MUSICA.read_text(encoding="utf-8")
+        cls.careo = CAREO.read_text(encoding="utf-8")
         cls.atributos = GITATTRIBUTES.read_text(encoding="utf-8")
 
     def test_solo_declara_momentos_dramaticos(self):
@@ -39,6 +42,19 @@ class MusicaPuntualTest(unittest.TestCase):
         regla = "godot/assets/audio/musica/*.ogg filter=lfs diff=lfs merge=lfs -text"
         self.assertIn(regla, self.atributos)
         self.assertNotIn("\n*.ogg   filter=lfs", self.atributos)
+
+    def test_catalogo_musical_solo_resuelve_su_subdirectorio(self):
+        self.assertIn('const RUTA := "res://assets/audio/musica/"', self.codigo)
+
+    def test_careo_gobierna_inicio_y_fin_de_la_musica(self):
+        inicio = re.findall(
+            r'Musica\s*\.\s*reproducir\(\s*self\s*,\s*"careo"\s*\)',
+            self.careo,
+        )
+        paradas = re.findall(r"Musica\s*\.\s*detener\(\s*self\s*\)", self.careo)
+        self.assertEqual(1, len(inicio))
+        self.assertGreaterEqual(len(paradas), 2)
+        self.assertIn("func _exit_tree() -> void:", self.careo)
 
     def test_no_duplica_efectos_ni_ambiente(self):
         self.assertNotIn("Sonido.sonar", self.codigo)

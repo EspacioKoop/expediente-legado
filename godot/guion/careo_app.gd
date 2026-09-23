@@ -72,6 +72,12 @@ func _ready() -> void:
 	)
 
 
+func _exit_tree() -> void:
+	# Si la escena se abandona antes de resolver el duelo, la música no debe
+	# sobrevivir al careo ni contaminar la pantalla siguiente.
+	Musica.detener(self)
+
+
 ## El compañero llega en el segundo plano: justo cuando la cosa se está
 ## poniendo solemne.
 func _al_entrar_plano(indice: int, _plano: Dictionary) -> void:
@@ -84,6 +90,9 @@ func _empezar_duelo() -> void:
 	if not _en_cinematica:
 		return
 	_en_cinematica = false
+	# El slot vacío sigue siendo un no-op hasta que la pista distribuible entre
+	# por LFS; el ciclo de vida de la escena ya queda resuelto de una vez.
+	Musica.reproducir(self, "careo")
 	_camara_duelo.current = true
 	_camara_duelo.position = Vector3(0.0, 1.6, 2.9)
 	_camara_duelo.look_at(Vector3(0, 1.5, 0), Vector3.UP)
@@ -118,6 +127,7 @@ func _al_jugar(tipo: String) -> void:
 
 	if ronda["terminado"]:
 		var gano: bool = ronda["ganador"] == "jugador"
+		Musica.detener(self)
 		_decir(Cunado.comentario("victoria" if gano else "derrota", _tirada()))
 		_botones.visible = false
 		terminado.emit(gano)
