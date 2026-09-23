@@ -14,6 +14,7 @@ func _initialize() -> void:
 func _ejecutar() -> void:
 	_probar_oficina_y_lectura_social()
 	_probar_exposicion_en_careo()
+	_probar_minimo_elecciones()
 	_probar_condiciones_de_memoria()
 	print("issue_920: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
@@ -134,6 +135,57 @@ func _probar_exposicion_en_careo() -> void:
 		ultima.get("clave", ""),
 		"IDEOLOGIA_920_CAREO_EXP_NEOLIBERAL",
 		"si hay varios marcos se usa la exposición más reciente y no el orden del enum",
+	)
+
+
+func _probar_minimo_elecciones() -> void:
+	var estado := _estado_base()
+	var condicion := {
+		"requiere_eleccion": {"eje": "comunismo", "minimo": 2},
+	}
+	(
+		Prometeo
+		. registrar_eleccion_ideologica(
+			estado,
+			"dialogo:fixture:1",
+			"dialogo",
+			"comunismo",
+			"fixture",
+		)
+	)
+	_comprobar(
+		DialogoIdeologico.cumple(estado, condicion),
+		false,
+		"una sola eleccion no satisface minimo dos",
+	)
+	(
+		Prometeo
+		. registrar_exposicion_ideologica(
+			estado,
+			"prensa:fixture",
+			"prensa",
+			"comunismo",
+		)
+	)
+	_comprobar(
+		DialogoIdeologico.cumple(estado, condicion),
+		false,
+		"la exposicion no completa un minimo de elecciones",
+	)
+	(
+		Prometeo
+		. registrar_eleccion_ideologica(
+			estado,
+			"dialogo:fixture:2",
+			"dialogo",
+			"comunismo",
+			"fixture",
+		)
+	)
+	_comprobar(
+		DialogoIdeologico.cumple(estado, condicion),
+		true,
+		"dos elecciones del eje satisfacen minimo dos",
 	)
 
 
