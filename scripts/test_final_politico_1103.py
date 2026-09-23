@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MODELO = ROOT / "godot" / "guion" / "final_politico.gd"
 PANEL = ROOT / "godot" / "guion" / "final_politico_panel.gd"
 OWNER = ROOT / "godot" / "guion" / "dia_climax_hastur_app.gd"
+TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
 PRUEBA = ROOT / "godot" / "pruebas" / "pruebas_final_politico_1103.gd"
 
 
@@ -37,6 +38,33 @@ def test_owner_consume_contrato_y_persiste_cierre() -> None:
     assert "FinalPoliticoPanel.new()" in owner
     assert "FinalPolitico.confirmar_cierre" in owner
     assert 'actual["final_politico_pendiente"] = false' in owner
+
+
+def test_final_menciona_auditorias_sin_cerrar_la_vida() -> None:
+    modelo = fuente(MODELO)
+    panel = fuente(PANEL)
+    textos = fuente(TEXTOS)
+    self_codigo = modelo + "\n" + panel
+    assert "Auditorias.resumen_narrativo(estado)" in modelo
+    assert 'resumen.get("auditoria"' in panel
+    assert 'tr("AUDITORIAS_FINAL_TITULO")' in panel
+    assert 'tr("AUDITORIAS_%s" % id.to_upper())' in panel
+    for clave in (
+        "AUDITORIAS_FINAL_TITULO,",
+        "AUDITORIAS_FINAL_LINEA,",
+        "AUDITORIAS_FINAL_ESTADO_ACTIVA,",
+        "AUDITORIAS_FINAL_ESTADO_FALLIDA,",
+        "AUDITORIAS_FINAL_ESTADO_COMPLETADA,",
+        "AUDITORIAS_FINAL_ESTADO_PENDIENTE,",
+    ):
+        assert clave in textos
+    for prohibido in (
+        "Auditorias.cerrar_vuelta(",
+        "Auditorias.completar(",
+        "Auditorias.fallar(",
+        "Auditorias.reiniciar_vuelta(",
+    ):
+        assert prohibido not in self_codigo
 
 
 def test_modelo_no_accede_a_red_host_o_disco() -> None:
