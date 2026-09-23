@@ -1905,6 +1905,54 @@
       "sha256": "d3abb08f85ced373eb947599e841f690e309104c6987aa321598a34ea1df41c1",
       "archivo_origen": "128x128/Wall/Horror_Wall_09-128x128.png",
       "paquete_sha256": "1fee483ce0253e64096442a2c16833ec9da90bdfa2836e5d54a061f293abf6fb"
+    },
+    {
+      "ruta": "texturas/oficina_ai_98/fax_98.webp",
+      "titulo": "Fax de oficina 1998",
+      "autor": "EspacioKoop (generado con OpenAI ImageGen)",
+      "licencia": "Propio del proyecto; salida generada con OpenAI",
+      "fuente": "https://openai.com/policies/eu-terms-of-use/",
+      "sha256": "cbad78db590647d94444f60a06a54aaee4334e24f6943071476c8e9cdc5ad18c"
+    },
+    {
+      "ruta": "texturas/oficina_ai_98/escaner_98.webp",
+      "titulo": "Escáner plano de oficina 1998",
+      "autor": "EspacioKoop (generado con OpenAI ImageGen)",
+      "licencia": "Propio del proyecto; salida generada con OpenAI",
+      "fuente": "https://openai.com/policies/eu-terms-of-use/",
+      "sha256": "3cc3704963a91dbbc251ee6a3e306e1cec085c28008579c2a935bd6b1d104f20"
+    },
+    {
+      "ruta": "texturas/oficina_ai_98/fotocopiadora_98.webp",
+      "titulo": "Fotocopiadora de oficina 1998",
+      "autor": "EspacioKoop (generado con OpenAI ImageGen)",
+      "licencia": "Propio del proyecto; salida generada con OpenAI",
+      "fuente": "https://openai.com/policies/eu-terms-of-use/",
+      "sha256": "a9b70fdae421d485fedb89c5cb55e11b9408aa96354c15cd3a8d6c33c2c81c59"
+    },
+    {
+      "ruta": "texturas/oficina_ai_98/dispensador_agua_98.webp",
+      "titulo": "Dispensador de agua de oficina 1998",
+      "autor": "EspacioKoop (generado con OpenAI ImageGen)",
+      "licencia": "Propio del proyecto; salida generada con OpenAI",
+      "fuente": "https://openai.com/policies/eu-terms-of-use/",
+      "sha256": "bb7a11804db623aaf1e34f08990b413f45aa50560617dd08dd946427c2eb9a5c"
+    },
+    {
+      "ruta": "texturas/oficina_ai_98/grapadora_98.webp",
+      "titulo": "Grapadora de oficina 1998",
+      "autor": "EspacioKoop (generado con OpenAI ImageGen)",
+      "licencia": "Propio del proyecto; salida generada con OpenAI",
+      "fuente": "https://openai.com/policies/eu-terms-of-use/",
+      "sha256": "d851cbd93324eddacf62261df83d47e1b905ccb26e5e85280ab8cd6a696fd3e4"
+    },
+    {
+      "ruta": "texturas/oficina_ai_98/perforadora_98.webp",
+      "titulo": "Perforadora de dos agujeros 1998",
+      "autor": "EspacioKoop (generado con OpenAI ImageGen)",
+      "licencia": "Propio del proyecto; salida generada con OpenAI",
+      "fuente": "https://openai.com/policies/eu-terms-of-use/",
+      "sha256": "633529753ca54d70abdc3cf240218ebfa8599a8728a680a764418f01cec1c6c9"
     }
   ]
 }
