@@ -1,0 +1,22 @@
+{
+  "id": "piramide-03",
+  "salida": "cuadro-piramide-03.png",
+  "titulo": "Pirámide nocturna y triángulo celeste",
+  "autor": "Expediente Legado",
+  "licencia": "CC0-1.0",
+  "fuente": "scripts/generar_cuadros_piramidales.py",
+  "ancho": 320,
+  "alto": 224,
+  "semilla": 19503,
+  "motivo": "constelacion",
+  "sha256": "e35897cee9344eda22661feec1c85c482f5c1ec5fcb06bd629110e729f54da44",
+  "paleta": {
+    "papel": "#D7D0B3",
+    "tinta": "#1C2434",
+    "sombra": "#343D50",
+    "noche": "#111725",
+    "estrella": "#E3C98B",
+    "acento": "#A45045",
+    "linea": "#6B7180"
+  }
+}
