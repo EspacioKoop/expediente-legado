@@ -111,17 +111,20 @@ func _espacio_de(fase: String) -> Dictionary:
 		# del roster aleatorio. Marta ocupa la mesa de clasificación como
 		# mediadora de lectura; Espacio3D le da el mismo cuerpo que al resto.
 		var figuras: Array = espacio.get("figuras", []).duplicate(true)
-		figuras.append(
-			{
-				"id": "mediadora_archivo_98",
-				"pos": POS_MEDIADORA_LITERARIA_1180,
-				"color": Color(0.29, 0.31, 0.35),
-				"rotulo": "Marta",
-				"frase": "",
-				"modelo": Companeros.CUERPO,
-				"dialogo_literario": DIALOGO_LITERARIO_1180,
-				"fuente_dialogo_literario": FUENTE_LITERARIA_1180,
-			}
+		(
+			figuras
+			. append(
+				{
+					"id": "mediadora_archivo_98",
+					"pos": POS_MEDIADORA_LITERARIA_1180,
+					"color": Color(0.29, 0.31, 0.35),
+					"rotulo": "Marta",
+					"frase": "",
+					"modelo": Companeros.CUERPO,
+					"dialogo_literario": DIALOGO_LITERARIO_1180,
+					"fuente_dialogo_literario": FUENTE_LITERARIA_1180,
+				}
+			)
 		)
 		espacio["figuras"] = figuras
 	return espacio
@@ -184,9 +187,12 @@ func _montar_companeros_conversables() -> void:
 		companero.nombre_visible = String(figura.get("rotulo", ""))
 		companero.clave_dialogo = clave
 		companero.set_meta("dialogo_literario", dialogo_literario)
-		companero.set_meta(
-			"fuente_dialogo_literario",
-			String(figura.get("fuente_dialogo_literario", "")),
+		(
+			companero
+			. set_meta(
+				"fuente_dialogo_literario",
+				String(figura.get("fuente_dialogo_literario", "")),
+			)
 		)
 		companero.conversacion_solicitada.connect(_iniciar_conversacion)
 		_mundo.add_child(companero)
@@ -234,11 +240,14 @@ func _iniciar_conversacion_literaria(
 	if typeof(reentrada_var) == TYPE_DICTIONARY:
 		var reentrada: Dictionary = reentrada_var
 		if bool(reentrada.get("disponible", false)):
-			_dialogo_actual = DialogoDiegetico.mostrar(
-				_hud_prioridades,
-				_caminante,
-				companero,
-				String(reentrada.get("texto", "")),
+			_dialogo_actual = (
+				DialogoDiegetico
+				. mostrar(
+					_hud_prioridades,
+					_caminante,
+					companero,
+					String(reentrada.get("texto", "")),
+				)
 			)
 			_enfocar_dialogo_actual(companero)
 			return
@@ -251,22 +260,28 @@ func _iniciar_conversacion_literaria(
 		if typeof(rama_bruta) != TYPE_DICTIONARY:
 			continue
 		var rama: Dictionary = rama_bruta
-		opciones.append(
-			{
-				"id": String(rama.get("id", "")),
-				"texto": String(rama.get("texto", "")),
-			}
+		(
+			opciones
+			. append(
+				{
+					"id": String(rama.get("id", "")),
+					"texto": String(rama.get("texto", "")),
+				}
+			)
 		)
 	if opciones.is_empty():
 		return
 
-	_dialogo_actual = DialogoDiegetico.mostrar_eleccion(
-		_hud_prioridades,
-		_caminante,
-		companero,
-		String(dialogo.get("apertura", "")),
-		opciones,
-		_resolver_eleccion_literaria.bind(companero, id_dialogo),
+	_dialogo_actual = (
+		DialogoDiegetico
+		. mostrar_eleccion(
+			_hud_prioridades,
+			_caminante,
+			companero,
+			String(dialogo.get("apertura", "")),
+			opciones,
+			_resolver_eleccion_literaria.bind(companero, id_dialogo),
+		)
 	)
 	_enfocar_dialogo_actual(companero)
 
@@ -283,12 +298,15 @@ func _resolver_eleccion_literaria(
 	if fuente.is_empty():
 		return ""
 
-	var resultado_var = gestor.call(
-		"resolver_dialogo",
-		id_dialogo,
-		id_rama,
-		fuente,
-		int(jornada.get("dia", 0)),
+	var resultado_var = (
+		gestor
+		. call(
+			"resolver_dialogo",
+			id_dialogo,
+			id_rama,
+			fuente,
+			int(jornada.get("dia", 0)),
+		)
 	)
 	if typeof(resultado_var) != TYPE_DICTIONARY:
 		return ""
