@@ -20,14 +20,24 @@ class EvidenciaSueno284Test(unittest.TestCase):
             ("castillo", "patio"),
             ("montana", "embudo"),
             ("desierto", "peine"),
-            ("escuela", "crucero"),
         ):
             self.assertIn(f'"id": "{identidad}"', self.capturador)
             self.assertIn(f'"forma": "{forma}"', self.capturador)
             self.assertIn(f"{identidad}.png", self.workflow)
 
+        self.assertIn('"id": "escuela"', self.capturador)
+        self.assertIn('"forma": "crucero"', self.capturador)
+        self.assertIn('"captura": "escuela_general.png"', self.capturador)
+        self.assertIn('"captura": "escuela_contenido.png"', self.capturador)
+        self.assertIn("escuela_general.png", self.workflow)
+        self.assertIn("escuela_contenido.png", self.workflow)
+
         for clase in ("Castillo", "Montana", "Desierto", "Escuela"):
             self.assertIn(f"Sueno{clase}3D.montar", self.capturador)
+
+    def test_captura_la_arquitectura_base_que_usa_el_runtime(self) -> None:
+        self.assertIn("Espacio3D.construir(mundo, espacio)", self.capturador)
+        self.assertIn('"gate_humano_crucero": 798', self.capturador)
 
     def test_comparacion_usa_camara_de_jugador_y_sin_hud(self) -> None:
         self.assertIn("const ALTURA_JUGADOR := 1.65", self.capturador)
