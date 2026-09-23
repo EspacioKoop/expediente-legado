@@ -4,10 +4,12 @@
 ## fijo: el reloj de la pared decía una hora y la ventana otra, y por ella no
 ## entraba luz. Aquí se exige la cadena entera —el sitio monta el cristal y su
 ## foco, el foco nace apagado, y quien sabe la hora lo enciende de día y lo
-## apaga de noche— y también lo contrario: un sitio sin ventanas no gana luces.
+## apaga de noche— y también lo contrario: las ventanas de la calle, que son
+## fachada vista desde fuera, no ganan luces.
 extends SceneTree
 
 const Horario := preload("res://guion/dia_reloj_horario_app.gd")
+const DiaCalle := preload("res://guion/dia_calle_app.gd")
 
 ## Lo mínimo del día que lee el controlador. Montar `dia.tscn` entero para esto
 ## sería probar veinte controladores a la vez y no saber cuál falla.
@@ -32,15 +34,23 @@ func _probar() -> void:
 	var oficina := Node3D.new()
 	root.add_child(oficina)
 	Espacio3D.construir(oficina, EspaciosCatalogo.OFICINA.duplicate(true))
+	# El trayecto REAL, no la constante del catálogo: es `dia_calle_app` quien
+	# le añade las ventanas de las fachadas, y son justo esas las que no deben
+	# ganar un foco.
+	var dia_calle = DiaCalle.new()
+	var trayecto: Dictionary = dia_calle.call("_espacio_de", "trayecto")
+	dia_calle.free()
 	var calle := Node3D.new()
 	root.add_child(calle)
-	Espacio3D.construir(calle, EspaciosCatalogo.CALLE.duplicate(true))
+	Espacio3D.construir(calle, trayecto)
 	await process_frame
 
 	var focos := _focos(oficina)
 	_comprobar(focos.size() == EspaciosCatalogo.OFICINA["ventanas"].size(), "un foco por ventana")
 	_comprobar(_cristales(oficina).size() == focos.size(), "cada cristal se encuentra por nombre")
-	_comprobar(_focos(calle).is_empty(), "un sitio sin ventanas no gana luces")
+	_comprobar(not trayecto.get("ventanas", []).is_empty(), "el trayecto declara ventanas")
+	_comprobar(_focos(calle).is_empty(), "las ventanas de fachada no ganan un foco")
+	_comprobar(_cristales(calle).is_empty(), "ni el nombre que lee el controlador")
 	for foco in focos:
 		# El foco nace apagado: el módulo que construye no sabe qué hora es.
 		_comprobar(not foco.visible and foco.light_energy == 0.0, "el foco nace apagado")

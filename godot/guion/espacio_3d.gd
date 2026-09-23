@@ -173,9 +173,14 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 		var cristal := _caja(
 			raiz, ventana["pos"], ventana["tam"], ventana.get("color", Color(0.09, 0.11, 0.20))
 		)
-		cristal.name = NOMBRE_CRISTAL_VENTANA
 		_emisivo(cristal, ventana.get("color", Color(0.09, 0.11, 0.20)))
-		_luz_de_ventana(raiz, ventana, espacio.get("centro_suelo", Vector2.ZERO))
+		# La luz que entra solo existe mirando desde dentro de una sala que la
+		# pueda recibir. Las ventanas de la calle son fachada vista desde fuera:
+		# un foco «hacia dentro» alumbraría la calzada, y el benchmark de #861
+		# midió lo que cuestan sesenta focos que nadie enciende.
+		if _shader_del_sitio == SHADER_PSX_LUZ_PIXEL:
+			cristal.name = NOMBRE_CRISTAL_VENTANA
+			_luz_de_ventana(raiz, ventana, espacio.get("centro_suelo", Vector2.ZERO))
 
 	# Las figuras y los carteles son del sueño (#87), pero este módulo sigue sin
 	# saberlo: aquí solo hay una silueta en un sitio y un texto contra un muro.
