@@ -11,8 +11,15 @@ func _ready() -> void:
 
 
 func _probar_lectura_fisica_y_ritual() -> void:
-	GestorLiteratura.registro_literario = LiteraturaEventos.nuevo()
-	GestorLiteratura.obras_conocidas.clear()
+	var gestor := get_node_or_null("/root/GestorLiteratura")
+	_comprobar(gestor != null, "el autoload de literatura esta disponible")
+	if gestor == null:
+		return
+
+	gestor.set("registro_literario", LiteraturaEventos.nuevo())
+	var conocidas = gestor.get("obras_conocidas")
+	if conocidas is Array:
+		conocidas.clear()
 
 	var script_libro = load("res://interactables/libros/libro_lectura_significativa.gd")
 	var libro = script_libro.new()
@@ -26,11 +33,12 @@ func _probar_lectura_fisica_y_ritual() -> void:
 		String(hojeo.get("motivo", "")) == "lectura_incompleta",
 		"el primer paso queda como lectura incompleta",
 	)
+	var registro: Dictionary = gestor.get("registro_literario")
 	_comprobar(
 		(
 			LiteraturaEventos
 			. eventos(
-				GestorLiteratura.registro_literario,
+				registro,
 				LiteraturaEventos.CANAL_INSIGHT,
 			)
 			. is_empty()
@@ -42,26 +50,25 @@ func _probar_lectura_fisica_y_ritual() -> void:
 	_comprobar(bool(completa.get("completa", false)), "el segundo paso completa la lectura")
 	_comprobar(bool(completa.get("conocimiento_nuevo", false)), "la lectura crea conocimiento")
 	_comprobar(bool(completa.get("insight_nuevo", false)), "la lectura crea insight")
+	registro = gestor.get("registro_literario")
 	_comprobar(
 		not (
 			LiteraturaEventos
 			. obra_poseida(
-				GestorLiteratura.registro_literario,
+				registro,
 				"vida_es_sueno_1635",
 			)
 		),
 		"leer en biblioteca no concede posesion",
 	)
 
-	var ritual := (
-		GestorLiteratura
-		. ejecutar_ritual_cita(
-			"vida_es_sueno_1635",
-			"biblioteca:mesa_cita",
-			"biblioteca:practica:01",
-			5,
-			70.0,
-		)
+	var ritual: Dictionary = gestor.call(
+		"ejecutar_ritual_cita",
+		"vida_es_sueno_1635",
+		"biblioteca:mesa_cita",
+		"biblioteca:practica:01",
+		5,
+		70.0,
 	)
 	_comprobar(bool(ritual.get("aplicado", false)), "la mesa puede ejecutar el ritual")
 	_comprobar(
@@ -78,15 +85,13 @@ func _probar_lectura_fisica_y_ritual() -> void:
 		"el buff queda limitado al encuentro",
 	)
 
-	var repetido := (
-		GestorLiteratura
-		. ejecutar_ritual_cita(
-			"vida_es_sueno_1635",
-			"biblioteca:mesa_cita",
-			"biblioteca:practica:01",
-			5,
-			40.0,
-		)
+	var repetido: Dictionary = gestor.call(
+		"ejecutar_ritual_cita",
+		"vida_es_sueno_1635",
+		"biblioteca:mesa_cita",
+		"biblioteca:practica:01",
+		5,
+		40.0,
 	)
 	_comprobar(not bool(repetido.get("aplicado", false)), "la misma cita no se duplica")
 	_comprobar(
