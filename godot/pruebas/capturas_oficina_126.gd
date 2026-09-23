@@ -167,23 +167,33 @@ func _guardar_manifest() -> void:
 	if archivo == null:
 		_fallar("no se pudo escribir %s" % ruta)
 		return
+	var commit_sha := OS.get_environment("GITHUB_SHA").strip_edges()
+	if commit_sha.is_empty():
+		commit_sha = "no-disponible"
+	var styloo_activo := _mundo.has_meta("oficina_styloo_cc0")
+	var renderer := RenderingServer.get_current_rendering_method()
 	(
 		archivo
 		. store_string(
-			"""# Gate visual de oficina #126
+			("""# Gate visual de oficina #126
 
 Capturas deterministas del espacio real sin HUD.
 
+- commit SHA: `%s`
+- Styloo administrativo activo: **%s**
+- renderer: `%s`
 - `puestos-archivo.png`: puestos, mesa de clasificación y batería de archivo.
 - `acceso-ventanas.png`: acceso, café y ventanas nocturnas.
 
 La revisión humana debe comprobar que el lugar se reconoce como oficina/archivo
-habitado y funcional sin depender de rótulos.
+habitado y funcional sin depender de rótulos. El playtest final debe usar una
+build cuyo SHA coincida con el commit de este artifact.
 """
+				% [commit_sha, "sí" if styloo_activo else "no", renderer]
+			)
 		)
 	)
 	archivo.close()
-
 
 func _fallar(mensaje: String) -> void:
 	_fallos += 1
