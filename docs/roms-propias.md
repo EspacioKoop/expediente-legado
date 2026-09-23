@@ -9,6 +9,7 @@ Solo entran ROMs **propias**: código de este repositorio bajo `gbc/minijuegos/<
 | id | Título | Género | Dónde se consigue | Precio | Issues |
 |---|---|---|---|---|---|
 | `caza_pixeles_98` | Pixel Exodus | arcade de 30 s | incluida con la consola | — | #124 #95 #384 #386 |
+| `sueno_98` | SUEÑO 98 | puzle de perspectivas; tres composiciones | conocimiento de *La vida es sueño* | — | #1179 #1175 #1176 |
 | `paper_planes_98` | Paper Planes 98 | vuelo; ruta Nueva York 1998 | tienda de videojuegos | 45 | #95 #388 |
 | `croc_riders_98` | Croc Riders 98 | carreras; El Cairo → Giza | tienda de videojuegos | 45 | #95 #389 |
 | `aquiles_98` | MYRMIDON 98 | duelo de observación; leer guardia y talón vulnerable | tienda de videojuegos | 45 | #438 #442 |
@@ -24,6 +25,8 @@ Todas son ROMs propias en modo dual CGB (`0x80`) sobre el cartucho estándar del
 `VITRAL 98` demuestra que ese observer común no está acoplado a una única tradición: cuatro piezas abstractas de vidrio/plomo deben recomponerse siguiendo una lógica de diseño de taller. El contrato técnico es el mismo (`$C100 = 0xA5` solo al completar), pero la procedencia cambia a vidriera cristiana medieval europea documentada por el V&A. No reproduce escenas religiosas; registra exposición cultural mediante `Vitral98Vigilia`. Véase `docs/religion-rom-vitral-932.md`.
 
 `SARNATH 98` cambia de mecánica: el jugador observa y memoriza tres secuencias de rumbo abstractas. No reproduce el plano de Sarnath ni una ruta histórica; la documentación UNESCO de 2026 se usa para fijar la procedencia del sitio y su condición serial. `Sarnath98Vigilia` registra exposición cultural budista solo tras completar las tres rondas. Véase `docs/religion-rom-sarnath-932.md`.
+
+`SUEÑO 98` introduce un tercer origen de cartucho, distinto de incluida/tienda: **desbloqueo**. `LiteraturaRoms` solo devuelve `sueno_98` cuando `LiteraturaEventos` acredita conocimiento de `vida_es_sueno_1635`; posesión, otros insights y el mero arranque no sirven. El cartucho publica `$C100 = 0xA5` tras resolver tres composiciones y `Sueno98Vigilia` traduce ese byte a un insight literario idempotente. Véase `docs/literatura-rom-sueno-1179.md`.
 
 ## En proyecto
 
@@ -48,7 +51,7 @@ Contrapartes de vigilia de los sueños mitológicos (#435, #442). Permanecen fue
 - **Build de runtime:** `scripts/preparar_emulador_gb.sh rom` compila solo las entradas `jugable` y las deja en `godot/roms/<id>.gbc`. Una fuente prototipo que siga `en_proyecto` queda fuera de ese build.
 - **CI GBC:** `.github/workflows/gbc-fixtures.yml` puede compilar e inspeccionar también fuentes prototipo para demostrar que son reproducibles sin exponerlas al juego.
 - **Tienda:** `TiendaVideojuegos.catalogo()` vende las jugables con precio (`RomsPropias.a_la_venta()`).
-- **Consola:** la Portátil Color 98 y la consola de sobremesa muestran las `incluida` más las compradas en la jornada (`RomsPropias.en_consola`), siempre que el artefacto exista en la build.
+- **Consola:** la Portátil Color 98 y la consola de sobremesa muestran las `incluida`, las compradas y los IDs desbloqueados por sistemas externos (`RomsPropias.en_consola`), siempre que el artefacto exista en la build. La consola no conoce el motivo del desbloqueo.
 - **Sueños:** la fuente de semilla de una ROM es `RomsPropias.fuente_semilla(id)` (`rom:<id>`). El cartucho ARIADNA del Minotauro ya la usa. `RYU FLOW` consume ese mismo contrato desde `RyuFlowVigilia`; comprarla o arrancarla por sí solo no registra nada: hace falta resolver el cauce.
 
 ## Añadir una ROM
@@ -56,7 +59,7 @@ Contrapartes de vigilia de los sueños mitológicos (#435, #442). Permanecen fue
 1. **Reservar:** abrir o usar su issue y añadir la entrada al JSON como `en_proyecto`, con un `id` definitivo (`^[a-z0-9_]+$`, que no se cambia después).
 2. **Crear un prototipo de fuente, si procede:** `gbc/minijuegos/<id>/` con `Makefile` (`ROM := build/<id>.gbc`), `README.md` y, si puede, `test_rom.py`. Mientras siga `en_proyecto`, mantener `rom` vacío, `precio: 0` e `incluida: false`.
 3. **Validarlo en CI:** una fuente prototipo puede añadirse a `gbc-fixtures.yml` sin entrar todavía en el runtime.
-4. **Declararla jugable:** cuando las dependencias del vertical estén liberadas, pasarla a `jugable`, rellenar `rom: res://roms/<id>.gbc` y fijar `precio` o `incluida`.
+4. **Declararla jugable:** cuando las dependencias del vertical estén liberadas, pasarla a `jugable`, rellenar `rom: res://roms/<id>.gbc` y fijar `precio`, `incluida` o un contrato explícito de `desbloqueo`.
 5. **Documentarla:** reflejar el cambio de estado en esta página.
 
 `scripts/test_roms_propias.py` comprueba:

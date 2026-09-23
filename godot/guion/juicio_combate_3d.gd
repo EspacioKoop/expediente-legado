@@ -156,20 +156,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if _acabado:
 		return
-	_recarga_jugador = maxf(0.0, _recarga_jugador - delta)
-	_recarga_rival = maxf(0.0, _recarga_rival - delta)
-	_esquiva = maxf(0.0, _esquiva - delta)
-	_enredo = maxf(0.0, _enredo - delta)
-	_invulnerabilidad_jungiana = maxf(0.0, _invulnerabilidad_jungiana - delta)
-	_sacudida_camara = maxf(0.0, _sacudida_camara - delta)
-	if _aviso_jungiano_restante > 0.0:
-		_aviso_jungiano_restante = maxf(0.0, _aviso_jungiano_restante - delta)
-		if is_zero_approx(_aviso_jungiano_restante) and _etiqueta_jungiana != null:
-			_etiqueta_jungiana.visible = false
-	if _doctrina_tiempo > 0.0:
-		_doctrina_tiempo = maxf(0.0, _doctrina_tiempo - delta)
-		if is_zero_approx(_doctrina_tiempo):
-			_cerrar_doctrina()
+	_descontar_temporizadores(delta)
 	_mover_jugador(delta)
 	_mover_rival(delta)
 	_actualizar_camara()
@@ -180,6 +167,42 @@ func _process(delta: float) -> void:
 		_atacar(2, ALCANCE_FUERTE, _recarga_fuerte, true)
 	if Input.is_action_just_pressed("agacharse"):
 		_esquivar()
+
+
+## Los campos siguen siendo propios del nodo porque pruebas y
+## `JuicioFeedbackRitual` los leen por nombre; aquí solo se aplican los
+## cierres que la regla pura declara expirados.
+func _descontar_temporizadores(delta: float) -> void:
+	var paso := (
+		REGLAS
+		. descontar_temporizadores(
+			{
+				"recarga_jugador": _recarga_jugador,
+				"recarga_rival": _recarga_rival,
+				"esquiva": _esquiva,
+				"enredo": _enredo,
+				"invulnerabilidad_jungiana": _invulnerabilidad_jungiana,
+				"sacudida_camara": _sacudida_camara,
+				"aviso_jungiano": _aviso_jungiano_restante,
+				"doctrina": _doctrina_tiempo,
+			},
+			delta
+		)
+	)
+	var restantes: Dictionary = paso["restantes"]
+	_recarga_jugador = restantes["recarga_jugador"]
+	_recarga_rival = restantes["recarga_rival"]
+	_esquiva = restantes["esquiva"]
+	_enredo = restantes["enredo"]
+	_invulnerabilidad_jungiana = restantes["invulnerabilidad_jungiana"]
+	_sacudida_camara = restantes["sacudida_camara"]
+	_aviso_jungiano_restante = restantes["aviso_jungiano"]
+	_doctrina_tiempo = restantes["doctrina"]
+	var expirados: Array = paso["expirados"]
+	if expirados.has("aviso_jungiano") and _etiqueta_jungiana != null:
+		_etiqueta_jungiana.visible = false
+	if expirados.has("doctrina"):
+		_cerrar_doctrina()
 
 
 func activar_doctrina(eje: String) -> bool:

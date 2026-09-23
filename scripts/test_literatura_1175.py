@@ -52,7 +52,7 @@ class Literatura1175Test(unittest.TestCase):
             "efecto_juego",
         ):
             self.assertIn(key, obra)
-        self.assertEqual(obra["rom"]["estado"], "propuesta")
+        self.assertEqual(obra["rom"]["estado"], "jugable")
         self.assertEqual(obra["rom"]["desbloqueo"], "conocimiento")
         self.assertTrue(obra["rom"]["handshake_requerido"])
         self.assertEqual(obra["efecto_juego"]["tipo"], "modificador_contextual")

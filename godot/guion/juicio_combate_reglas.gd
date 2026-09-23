@@ -92,3 +92,18 @@ static func determinacion_retorno(ritual: Dictionary, retornos_usados: int) -> i
 	if retornos_usados >= maximo:
 		return 0
 	return maxi(0, int(ritual.get("determinacion_retorno", 0)))
+
+
+## Descuenta `delta` de cada temporizador sin bajar de cero. `expirados`
+## solo recoge los que seguían corriendo y llegan a cero en este paso: un
+## temporizador ya parado no vuelve a disparar su cierre en cada frame.
+static func descontar_temporizadores(temporizadores: Dictionary, delta: float) -> Dictionary:
+	var restantes := {}
+	var expirados: Array[String] = []
+	for nombre in temporizadores:
+		var antes := float(temporizadores[nombre])
+		var despues := maxf(0.0, antes - delta)
+		restantes[nombre] = despues
+		if antes > 0.0 and is_zero_approx(despues):
+			expirados.append(String(nombre))
+	return {"restantes": restantes, "expirados": expirados}

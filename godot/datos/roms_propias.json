@@ -1,5 +1,5 @@
 {
-  "_regla": "Índice único de ROMs propias de SIGA-98. Toda ROM propia que tenga fuente, se compile, se venda, aparezca en la consola o active una semilla onírica está aquí con un id estable. Una ROM en_proyecto puede tener fuente prototipo verificable sin entrar todavía en runtime. Solo código propio bajo gbc/minijuegos/<id>; nunca BIOS, dumps ni ROMs comerciales. Ver docs/roms-propias.md.",
+  "_regla": "Índice único de ROMs propias de SIGA-98. Toda ROM propia que tenga fuente, se compile, se venda, se desbloquee, aparezca en la consola o active una semilla onírica está aquí con un id estable. Una ROM en_proyecto puede tener fuente prototipo verificable sin entrar todavía en runtime. Solo código propio bajo gbc/minijuegos/<id>; nunca BIOS, dumps ni ROMs comerciales. Ver docs/roms-propias.md.",
   "estados": {
     "jugable": "Hay fuente en gbc/minijuegos/<id>, compila con RGBDS y el build de runtime la deja en res://roms/<id>.gbc.",
     "en_proyecto": "Decidida y con issue. Puede no tener fuente o tener un prototipo compilable en CI aislado; no se vende, no entra en el build de runtime y no aparece en la consola."
@@ -18,6 +18,22 @@
       "incluida": true,
       "precio": 0,
       "issues": [124, 95, 384, 386],
+      "mito": ""
+    },
+    {
+      "id": "sueno_98",
+      "titulo": "SUEÑO 98",
+      "estado": "jugable",
+      "genero": "puzle de perspectivas",
+      "resumen": "Alinear tres composiciones abstractas de luz y sombra tras conocer La vida es sueño; solo la tercera solución publica el handshake literario.",
+      "fuente": "gbc/minijuegos/sueno_98",
+      "rom": "res://roms/sueno_98.gbc",
+      "cabecera": "SUENO98",
+      "cgb": "dual",
+      "incluida": false,
+      "precio": 0,
+      "desbloqueo": "conocimiento:vida_es_sueno_1635",
+      "issues": [1179, 1175, 1176],
       "mito": ""
     },
     {
