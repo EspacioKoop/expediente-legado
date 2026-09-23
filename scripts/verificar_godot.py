@@ -102,7 +102,7 @@ def ejecutar():
                 "ayudas-multiplayer",
                 ["--script", "pruebas/pruebas_ayudas_multiplayer.gd"],
                 30,
-                18,
+                26,
             ),
             (
                 "enlaces-pistas",

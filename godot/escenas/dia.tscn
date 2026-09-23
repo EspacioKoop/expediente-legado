@@ -1,4 +1,4 @@
-[gd_scene load_steps=53 format=3]
+[gd_scene load_steps=54 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -52,6 +52,7 @@
 [ext_resource type="Script" path="res://guion/dia_aviones_papel_app.gd" id="50"]
 [ext_resource type="Script" path="res://guion/dia_baba_yaga_app.gd" id="51"]
 [ext_resource type="Script" path="res://guion/dia_literatura_rom_app.gd" id="52"]
+[ext_resource type="Script" path="res://guion/dia_ayuda_resonancia_app.gd" id="53"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -208,3 +209,6 @@ script = ExtResource("52")
 
 [node name="PresenciaCoopController" type="Node" parent="."]
 script = ExtResource("48")
+
+[node name="AyudaResonanciaController" type="Node" parent="."]
+script = ExtResource("53")
