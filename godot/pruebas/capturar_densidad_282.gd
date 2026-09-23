@@ -54,6 +54,7 @@ func _init() -> void:
 		quit(1)
 		return
 
+	TranslationServer.set_locale("es")
 	root.size = TAMANO
 	var dia = load("res://escenas/dia.tscn").instantiate()
 	root.add_child(dia)
@@ -70,6 +71,7 @@ func _init() -> void:
 		"tamano": [TAMANO.x, TAMANO.y],
 		"fov": FOV,
 		"hud": false,
+		"locale": TranslationServer.get_locale(),
 		"vistas_por_fase": VISTAS.size(),
 		"criterio": "evidencia_para_revision_humana",
 		"casos": [],
@@ -79,6 +81,9 @@ func _init() -> void:
 		if String(caso["fase"]) == "sueño":
 			dia.jornada["sueno_escenas"] = [String(caso["escena"])]
 		dia._entrar_en(String(caso["fase"]))
+		if String(caso["fase"]) == "trayecto" and not _validar_rotulos_calle(dia):
+			quit(1)
+			return
 
 		var vistas: Array[Dictionary] = []
 		for vista in VISTAS:
@@ -168,6 +173,19 @@ func _ocultar_hud(dia) -> void:
 	for capa in dia.find_children("*", "CanvasLayer", true, false):
 		if capa is CanvasLayer:
 			capa.visible = false
+
+
+func _validar_rotulos_calle(dia) -> bool:
+	var calle := dia._mundo.get_node_or_null("CalleIdentidad") as Node3D
+	if calle == null:
+		printerr("El trayecto no monto CalleIdentidad")
+		return false
+	for nodo in calle.find_children("*", "Label3D", true, false):
+		var rotulo := nodo as Label3D
+		if rotulo != null and rotulo.text.begins_with("CALLE_"):
+			printerr("Rotulo sin traducir en evidencia #282: %s" % rotulo.text)
+			return false
+	return true
 
 
 func _guardar_captura(destino: String) -> bool:
