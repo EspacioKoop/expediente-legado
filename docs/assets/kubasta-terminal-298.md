@@ -3,6 +3,24 @@
 Fuente canónica: https://zichy.itch.io/kubasta  
 Licencia publicada por el autor: **CC0-1.0 / Public Domain**.
 
+## Licencia: dos fuentes públicas y una discrepancia en los metadatos
+
+Comprobado el 2026-09-23 al materializar el TTF:
+
+- la ficha de itch.io (studio zichy) declara *Creative Commons Zero v1.0
+  Universal*;
+- la ficha original en FontStruct
+  (<https://fontstruct.com/fontstructions/show/1526716/kubasta>), de **Kai
+  Kubasta**, declara *Creative Commons CC0 Public Domain Dedication*;
+- la tabla `name` del propio `Kubasta.ttf` contiene «Copyright Kai Kubasta
+  2018» y la cadena «Open Font License». El ZIP no incluye fichero de licencia.
+
+Las dos declaraciones del autor coinciden en CC0, y es la licencia que se
+registra en `procedencia.json`. La cadena OFL incrustada no se corresponde con
+ninguna de ellas; se deja constancia aquí en vez de ignorarla. Si se quisiera
+cubrir también esa lectura, la OFL permite empaquetar la fuente dentro de un
+juego siempre que acompañe su texto de licencia y no se venda por separado.
+
 ## Estado del proyecto
 
 Desde #836, `main` ya empaqueta **IBM Plex Mono** y
@@ -36,8 +54,10 @@ La auditoría estática confirma los caracteres del contrato:
 - `terminal_font` sigue limitado a `RichTextLabel` y `LineEdit`; no se
   convierte Kubasta en fuente global.
 
-Por tanto, mergear este corte **no cambia visualmente** un checkout que aún no
-contenga el TTF LFS.
+Desde que el TTF entró por Git LFS (puntero con OID `73febb39…`, 150.820 B),
+`fuente_terminal()` resuelve a `res://assets/fonts/Kubasta.ttf` y el gate
+visual corre en modo estricto (`--exigir-kubasta`). El fallback a IBM Plex Mono
+se conserva para checkouts sin objetos LFS.
 
 ## Consumidores reales
 
@@ -49,12 +69,12 @@ El rol ya no queda como una entrada de `Theme` sin uso:
   Kubasta no invade la lectura de expedientes;
 - la consola de playtest aplica `fuente_terminal()` tanto al registro
   `RichTextLabel` como a la línea de comandos `LineEdit`;
-- mientras `Kubasta.ttf` no exista, esos consumidores reciben IBM Plex Mono
+- en un checkout sin el objeto LFS, esos consumidores reciben IBM Plex Mono
   mediante el fallback ya integrado.
 
-Esto convierte #298 en una integración funcional y acotada: cuando el objeto
-LFS real entre en el repositorio, las superficies anteriores cambiarán de
-identidad sin modificar la tipografía global ni el texto documental.
+Con el TTF ya en el repositorio, esas superficies cambian de identidad; fuera de
+ellas el juego **no cambia visualmente**: ni la tipografía global ni el texto
+documental dependen de Kubasta.
 
 ## Materialización reproducible
 
@@ -111,8 +131,10 @@ visuales en una afirmación automática.
 ## Matriz de validación pendiente
 
 La cobertura de glifos ya está comprobada estáticamente y el harness visual ya
-está automatizado. La aceptación final sigue requiriendo el TTF materializado y
-revisión humana de la matriz:
+está automatizado, y el TTF ya está materializado: el gate estricto pasó en
+local (GPU real, Forward+) con 8 capturas, 0 fallos y el rol terminal resuelto a
+`res://assets/fonts/Kubasta.ttf`. La aceptación final sigue requiriendo revisión
+humana de la matriz:
 
 - tamaños **10/12/14/16 px**;
 - alto contraste claro/oscuro;

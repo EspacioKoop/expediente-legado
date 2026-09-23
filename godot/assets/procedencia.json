@@ -1725,6 +1725,16 @@
       "sha256": "8c12ad6d4aa377173f7b3f98be3514e4c6d50214a6587747e6f4d4edecc17bd9",
       "archivo_origen": "StylooClassroomAssetPack GLTF & FBX/computer/GLTF/COMPUTERprinter.glb (textura incrustada, extraída al importar)",
       "paquete_sha256": "f9dd508d353783be22577331a6ece9700120319e4399b583b82ad6a7d23d0954"
+    },
+    {
+      "ruta": "fonts/Kubasta.ttf",
+      "titulo": "Kubasta Regular",
+      "autor": "studio zichy",
+      "licencia": "CC0-1.0",
+      "fuente": "https://zichy.itch.io/kubasta",
+      "sha256": "73febb398631f45a0763e275dcb8c4d60fe74ac9e00e74edb21b176f7b4d6824",
+      "archivo_origen": "Kubasta/Kubasta.ttf",
+      "paquete_sha256": "e2d4c74fbec43a9c5b9d1b818fb943976144be2980bd504e83b0f4f21a8a288c"
     }
   ]
 }
