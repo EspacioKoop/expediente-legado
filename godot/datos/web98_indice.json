@@ -1,41 +1,13 @@
 {
   "version": 1,
   "categorias": [
-    {
-      "id": "institucional",
-      "titulo": "Organismos e intranet",
-      "orden": 10
-    },
-    {
-      "id": "actualidad",
-      "titulo": "Actualidad y servicios",
-      "orden": 20
-    },
-    {
-      "id": "informatica",
-      "titulo": "Informática y software",
-      "orden": 30
-    },
-    {
-      "id": "ocio",
-      "titulo": "Ocio y comunidad",
-      "orden": 40
-    },
-    {
-      "id": "comunidad",
-      "titulo": "BBS y comunidad",
-      "orden": 45
-    },
-    {
-      "id": "personal",
-      "titulo": "Páginas personales",
-      "orden": 50
-    },
-    {
-      "id": "archivo",
-      "titulo": "Archivo",
-      "orden": 90
-    }
+    {"id": "institucional", "titulo": "Organismos e intranet", "orden": 10},
+    {"id": "actualidad", "titulo": "Actualidad y servicios", "orden": 20},
+    {"id": "informatica", "titulo": "Informática y software", "orden": 30},
+    {"id": "ocio", "titulo": "Ocio y comunidad", "orden": 40},
+    {"id": "comunidad", "titulo": "BBS y comunidad", "orden": 45},
+    {"id": "personal", "titulo": "Páginas personales", "orden": 50},
+    {"id": "archivo", "titulo": "Archivo", "orden": 90}
   ],
   "recursos": [
     {
@@ -44,13 +16,7 @@
       "titulo": "Portal interno DGAI",
       "snippet": "Directorio de servicios, teléfonos y recursos de la planta 4.",
       "categoria": "institucional",
-      "terminos": [
-        "dgai",
-        "intranet",
-        "directorio",
-        "servicios",
-        "planta 4"
-      ],
+      "terminos": ["dgai", "intranet", "directorio", "servicios", "planta 4"],
       "prioridad": 100,
       "orden_directorio": 10,
       "indexado": true,
@@ -58,13 +24,7 @@
       "disponible_hasta_dia": 0,
       "requiere_conocimiento": [],
       "mirrors": [],
-      "enlaces": [
-        "directorio-red98",
-        "meteo-red",
-        "marcador-98",
-        "byte-local",
-        "tablón-clasificados"
-      ],
+      "enlaces": ["directorio-red98", "meteo-red", "marcador-98", "byte-local", "tablón-clasificados"],
       "cache": null
     },
     {
@@ -73,13 +33,7 @@
       "titulo": "Índice Red 98",
       "snippet": "Un directorio pequeño de páginas locales, ordenado a mano por categorías.",
       "categoria": "institucional",
-      "terminos": [
-        "indice",
-        "directorio",
-        "buscar",
-        "red",
-        "paginas"
-      ],
+      "terminos": ["indice", "directorio", "buscar", "red", "paginas"],
       "prioridad": 95,
       "orden_directorio": 20,
       "indexado": true,
@@ -87,13 +41,7 @@
       "disponible_hasta_dia": 0,
       "requiere_conocimiento": [],
       "mirrors": [],
-      "enlaces": [
-        "portal-dgai",
-        "byte-local",
-        "pagina-becario",
-        "pagina-telefono",
-        "archivo-modem"
-      ],
+      "enlaces": ["portal-dgai", "byte-local", "pagina-becario", "pagina-telefono", "archivo-modem"],
       "cache": null
     },
     {
@@ -102,13 +50,7 @@
       "titulo": "MeteoRed",
       "snippet": "Previsión local y avisos meteorológicos de la jornada.",
       "categoria": "actualidad",
-      "terminos": [
-        "tiempo",
-        "meteo",
-        "prevision",
-        "lluvia",
-        "temperatura"
-      ],
+      "terminos": ["tiempo", "meteo", "prevision", "lluvia", "temperatura"],
       "prioridad": 70,
       "orden_directorio": 10,
       "indexado": true,
@@ -116,9 +58,7 @@
       "disponible_hasta_dia": 0,
       "requiere_conocimiento": [],
       "mirrors": [],
-      "enlaces": [
-        "portal-dgai"
-      ],
+      "enlaces": ["portal-dgai"],
       "cache": null
     },
     {
@@ -127,13 +67,7 @@
       "titulo": "Marcador 98",
       "snippet": "Resultados, agenda y breves deportivos de la red local.",
       "categoria": "actualidad",
-      "terminos": [
-        "deportes",
-        "resultados",
-        "marcador",
-        "agenda",
-        "partidos"
-      ],
+      "terminos": ["deportes", "resultados", "marcador", "agenda", "partidos"],
       "prioridad": 68,
       "orden_directorio": 20,
       "indexado": true,
@@ -141,10 +75,7 @@
       "disponible_hasta_dia": 0,
       "requiere_conocimiento": [],
       "mirrors": [],
-      "enlaces": [
-        "portal-dgai",
-        "butaca-7"
-      ],
+      "enlaces": ["portal-dgai", "butaca-7"],
       "cache": null
     },
     {
@@ -153,27 +84,15 @@
       "titulo": "Byte Local",
       "snippet": "Utilidades, trucos de oficina y reseñas de shareware para equipos modestos.",
       "categoria": "informatica",
-      "terminos": [
-        "informatica",
-        "shareware",
-        "utilidades",
-        "modem",
-        "software",
-        "descargas"
-      ],
+      "terminos": ["informatica", "shareware", "utilidades", "modem", "software", "descargas"],
       "prioridad": 80,
       "orden_directorio": 10,
       "indexado": true,
       "disponible_desde_dia": 1,
       "disponible_hasta_dia": 0,
       "requiere_conocimiento": [],
-      "mirrors": [
-        "http://mirror.red98/byte-local/"
-      ],
-      "enlaces": [
-        "archivo-modem",
-        "directorio-red98"
-      ],
+      "mirrors": ["http://mirror.red98/byte-local/"],
+      "enlaces": ["archivo-modem", "directorio-red98"],
       "cache": {
         "capturada_dia": 1,
         "titulo": "Byte Local — copia en caché",
@@ -187,13 +106,7 @@
       "titulo": "Butaca 7",
       "snippet": "Cartelera, reseñas breves y horarios de salas de barrio.",
       "categoria": "ocio",
-      "terminos": [
-        "cine",
-        "cartelera",
-        "peliculas",
-        "horarios",
-        "ocio"
-      ],
+      "terminos": ["cine", "cartelera", "peliculas", "horarios", "ocio"],
       "prioridad": 55,
       "orden_directorio": 10,
       "indexado": true,
@@ -201,10 +114,7 @@
       "disponible_hasta_dia": 0,
       "requiere_conocimiento": [],
       "mirrors": [],
-      "enlaces": [
-        "marcador-98",
-        "tablón-clasificados"
-      ],
+      "enlaces": ["marcador-98", "tablón-clasificados"],
       "cache": null
     },
     {
@@ -213,13 +123,7 @@
       "titulo": "El Tablón",
       "snippet": "Anuncios por palabras, compraventa y pequeños avisos entre particulares.",
       "categoria": "ocio",
-      "terminos": [
-        "clasificados",
-        "anuncios",
-        "venta",
-        "compra",
-        "tablon"
-      ],
+      "terminos": ["clasificados", "anuncios", "venta", "compra", "tablon"],
       "prioridad": 52,
       "orden_directorio": 20,
       "indexado": true,
@@ -227,10 +131,7 @@
       "disponible_hasta_dia": 0,
       "requiere_conocimiento": [],
       "mirrors": [],
-      "enlaces": [
-        "pagina-becario",
-        "pagina-telefono"
-      ],
+      "enlaces": ["pagina-becario", "pagina-telefono"],
       "cache": null
     },
     {
@@ -239,13 +140,7 @@
       "titulo": "La esquina del becario",
       "snippet": "Apuntes de informática, listas de enlaces y una colección de botones de 88x31.",
       "categoria": "personal",
-      "terminos": [
-        "becario",
-        "enlaces",
-        "ordenadores",
-        "botones",
-        "pagina personal"
-      ],
+      "terminos": ["becario", "enlaces", "ordenadores", "botones", "pagina personal"],
       "prioridad": 45,
       "orden_directorio": 10,
       "indexado": true,
@@ -255,10 +150,7 @@
       "disponible_hasta_dia": 0,
       "requiere_conocimiento": [],
       "mirrors": [],
-      "enlaces": [
-        "byte-local",
-        "guestbook-becario"
-      ],
+      "enlaces": ["byte-local", "guestbook-becario"],
       "cache": null,
       "paquete_software": "bannerlab-95"
     },
@@ -268,12 +160,7 @@
       "titulo": "Libro de visitas de la esquina del becario",
       "snippet": "Firmas antiguas y pruebas de que la página llevaba tiempo circulando por la oficina.",
       "categoria": "personal",
-      "terminos": [
-        "becario",
-        "libro",
-        "visitas",
-        "firmas"
-      ],
+      "terminos": ["becario", "libro", "visitas", "firmas"],
       "prioridad": 20,
       "orden_directorio": 11,
       "indexado": false,
@@ -283,9 +170,7 @@
       "disponible_hasta_dia": 0,
       "requiere_conocimiento": [],
       "mirrors": [],
-      "enlaces": [
-        "pagina-becario"
-      ],
+      "enlaces": ["pagina-becario"],
       "cache": null
     },
     {
@@ -294,13 +179,7 @@
       "titulo": "Centralita y extensiones útiles",
       "snippet": "Una página personal sobria con horarios, prefijos internos y notas sobre llamadas.",
       "categoria": "personal",
-      "terminos": [
-        "telefono",
-        "centralita",
-        "extensiones",
-        "llamadas",
-        "pagina personal"
-      ],
+      "terminos": ["telefono", "centralita", "extensiones", "llamadas", "pagina personal"],
       "prioridad": 42,
       "orden_directorio": 20,
       "indexado": true,
@@ -310,10 +189,7 @@
       "disponible_hasta_dia": 0,
       "requiere_conocimiento": [],
       "mirrors": [],
-      "enlaces": [
-        "portal-dgai",
-        "tablón-clasificados"
-      ],
+      "enlaces": ["portal-dgai", "tablón-clasificados"],
       "cache": null
     },
     {
@@ -322,13 +198,7 @@
       "titulo": "Archivo Red 98: guía de módem",
       "snippet": "Una guía vieja que sigue indexada aunque varias referencias ya estén desfasadas.",
       "categoria": "archivo",
-      "terminos": [
-        "archivo",
-        "modem",
-        "conexion",
-        "33k",
-        "guia"
-      ],
+      "terminos": ["archivo", "modem", "conexion", "33k", "guia"],
       "prioridad": 35,
       "orden_directorio": 10,
       "indexado": true,
@@ -336,9 +206,7 @@
       "disponible_hasta_dia": 2,
       "requiere_conocimiento": [],
       "mirrors": [],
-      "enlaces": [
-        "byte-local"
-      ],
+      "enlaces": ["byte-local"],
       "cache": {
         "capturada_dia": 1,
         "titulo": "Guía de módem — copia en caché",
@@ -352,24 +220,15 @@
       "titulo": "Diagnóstico de enlace restringido",
       "snippet": "Recurso administrativo disponible únicamente con conocimiento acreditado de enlace13.",
       "categoria": "institucional",
-      "terminos": [
-        "enlace13",
-        "diagnostico",
-        "acceso",
-        "restringido"
-      ],
+      "terminos": ["enlace13", "diagnostico", "acceso", "restringido"],
       "prioridad": 120,
       "orden_directorio": 99,
       "indexado": true,
       "disponible_desde_dia": 1,
       "disponible_hasta_dia": 0,
-      "requiere_conocimiento": [
-        "enlace13"
-      ],
+      "requiere_conocimiento": ["enlace13"],
       "mirrors": [],
-      "enlaces": [
-        "volcado-cache-13"
-      ],
+      "enlaces": ["volcado-cache-13"],
       "cache": null
     },
     {
@@ -378,24 +237,15 @@
       "titulo": "Volcado local 13",
       "snippet": "Copia de caché asociada a una navegación que no figura en el historial normal.",
       "categoria": "archivo",
-      "terminos": [
-        "volcado",
-        "cache",
-        "diagnostico",
-        "registro"
-      ],
+      "terminos": ["volcado", "cache", "diagnostico", "registro"],
       "prioridad": 5,
       "orden_directorio": 999,
       "indexado": false,
       "disponible_desde_dia": 1,
       "disponible_hasta_dia": 0,
-      "requiere_conocimiento": [
-        "os98_incoherencia"
-      ],
+      "requiere_conocimiento": ["os98_incoherencia"],
       "mirrors": [],
-      "enlaces": [
-        "diagnostico-enlace13"
-      ],
+      "enlaces": ["diagnostico-enlace13"],
       "cache": {
         "capturada_dia": 99,
         "titulo": "Volcado local 13 — copia en caché",
