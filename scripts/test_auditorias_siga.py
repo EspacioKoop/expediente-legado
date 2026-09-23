@@ -22,6 +22,9 @@ class AuditoriasSigaTests(unittest.TestCase):
         self.assertIn("CheckBox.new()", UI)
         self.assertIn("check.disabled = not _editable", UI)
         self.assertIn("check.set_pressed_no_signal", UI)
+        self.assertIn("Auditorias.GATO_DIARIO", UI)
+        self.assertIn('name = "HistorialAuditorias"', UI)
+        self.assertIn("Auditorias.CLAVE_HISTORIAL", UI)
 
     def test_la_ui_no_persiste_ni_resuelve_reglas(self):
         for prohibido in (
@@ -65,6 +68,11 @@ class AuditoriasSigaTests(unittest.TestCase):
             "AUDITORIAS_AYUDA_CONSULTA,",
             "AUDITORIAS_ACCION_SOBRANTE,",
             "AUDITORIAS_ACCION_SOBRANTE_DESC,",
+            "AUDITORIAS_GATO_DIARIO,",
+            "AUDITORIAS_GATO_DIARIO_DESC,",
+            "AUDITORIAS_HISTORIAL_TITULO,",
+            "AUDITORIAS_HISTORIAL_VIDA,",
+            "AUDITORIAS_HISTORIAL_LINEA,",
             "AUDITORIAS_ESTADO_ACTIVA,",
             "AUDITORIAS_ESTADO_FALLIDA,",
             "AUDITORIAS_ESTADO_COMPLETADA,",
@@ -77,7 +85,7 @@ class AuditoriasSigaTests(unittest.TestCase):
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
         resumen = RESUMEN.search(resultado.stdout)
         self.assertIsNotNone(resumen, resultado.stdout)
-        self.assertGreaterEqual(int(resumen.group(1)), 14, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 20, resultado.stdout)
 
 
 if __name__ == "__main__":

@@ -11,6 +11,7 @@ func _initialize() -> void:
 	_limpiar()
 	_probar_guardado_y_recarga()
 	_probar_predicado_accion_sobrante()
+	_probar_predicado_gato_diario()
 	_probar_cierre_historial()
 	_probar_reasignacion()
 	_probar_migracion_partida_antigua()
@@ -60,6 +61,50 @@ func _probar_predicado_accion_sobrante() -> void:
 	_comprobar(
 		terminal.get("resultado", "") == "fallida",
 		"un día posterior no revive una condición ya fallida",
+	)
+
+
+func _probar_predicado_gato_diario() -> void:
+	var estado := Partida.nueva()
+	estado[Auditorias.CLAVE_ESTADO] = Auditorias.nueva([Auditorias.GATO_DIARIO])
+	var jornada: Dictionary = estado["jornada"]
+
+	jornada["gato"]["presente"] = true
+	jornada["gato"]["dias_sin_comer"] = 0
+	var cumple := Auditorias.resolver_fin_casa(estado)
+	_comprobar(cumple.get("resultado", "") == "activa", "gato atendido mantiene el reto")
+	var auditoria: Dictionary = estado[Auditorias.CLAVE_ESTADO]
+	_comprobar(
+		Auditorias.estado(auditoria, Auditorias.GATO_DIARIO) == "activa",
+		"cumplir una noche no completa prematuramente la vida",
+	)
+
+	jornada["gato"]["dias_sin_comer"] = 1
+	var falla := Auditorias.resolver_fin_casa(estado)
+	_comprobar(falla.get("resultado", "") == "fallida", "hambre pendiente falla gato diario")
+	_comprobar(
+		String(auditoria["fallidas"].get(Auditorias.GATO_DIARIO, "")) == "gato_sin_comer_al_dormir",
+		"el fallo del gato conserva motivo técnico estable",
+	)
+
+	jornada["gato"]["dias_sin_comer"] = 0
+	var terminal := Auditorias.resolver_fin_casa(estado)
+	_comprobar(
+		terminal.get("resultado", "") == "fallida",
+		"alimentarlo después no revive una condición ya fallida",
+	)
+
+	var ausente := Partida.nueva()
+	ausente[Auditorias.CLAVE_ESTADO] = Auditorias.nueva([Auditorias.GATO_DIARIO])
+	ausente["jornada"]["gato"]["presente"] = false
+	var sin_gato := Auditorias.resolver_fin_casa(ausente)
+	_comprobar(sin_gato.get("resultado", "") == "fallida", "gato ausente falla la condición")
+	_comprobar(
+		(
+			String(ausente[Auditorias.CLAVE_ESTADO]["fallidas"].get(Auditorias.GATO_DIARIO, ""))
+			== "gato_ausente_al_dormir"
+		),
+		"ausencia del gato conserva un motivo técnico estable",
 	)
 
 

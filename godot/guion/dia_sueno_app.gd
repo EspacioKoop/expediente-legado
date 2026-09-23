@@ -193,6 +193,7 @@ func _cerrar_preparacion_sueno(restaurar_control: bool) -> void:
 ## noche, montar la primera sala y recordar su mapa. Solo después se reproduce
 ## la transición, de modo que saltarla o cerrarla no decide nada.
 func _dormir_con_entrada() -> void:
+	Auditorias.resolver_fin_casa(partida.estado)
 	var noche := Jornada.dormir(jornada)
 	_aplicar_politica_sueno()
 	_hablando = false

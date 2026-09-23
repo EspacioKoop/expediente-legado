@@ -11,6 +11,7 @@ func _initialize() -> void:
 func _ejecutar() -> void:
 	_probar_selector_sin_efectos()
 	_probar_consulta_de_estado()
+	_probar_historial_sellado()
 	_probar_modal_reincorporacion()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -31,10 +32,16 @@ func _probar_selector_sin_efectos() -> void:
 		_comprobar(not check.disabled, "la condición se puede elegir durante el alta")
 		check.set_pressed_no_signal(true)
 
+	var check_gato := panel.get_node_or_null("Bloque_gato_diario/Condicion_gato_diario") as CheckBox
+	_comprobar(check_gato != null, "el selector construye gato diario")
+	if check_gato != null:
+		_comprobar(not check_gato.disabled, "gato diario se puede elegir durante el alta")
+		check_gato.set_pressed_no_signal(true)
+
 	var seleccion := panel.seleccion()
 	_comprobar(
-		seleccion == [Auditorias.ACCION_SOBRANTE],
-		"la selección devuelve el id estable de la condición",
+		seleccion == [Auditorias.ACCION_SOBRANTE, Auditorias.GATO_DIARIO],
+		"la selección devuelve ids estables y ordenados",
 	)
 	_comprobar(
 		JSON.stringify(estado[Auditorias.CLAVE_ESTADO]) == antes,
@@ -44,7 +51,11 @@ func _probar_selector_sin_efectos() -> void:
 	estado[Auditorias.CLAVE_ESTADO] = Auditorias.nueva(seleccion)
 	_comprobar(
 		Auditorias.estado(estado[Auditorias.CLAVE_ESTADO], Auditorias.ACCION_SOBRANTE) == "activa",
-		"el owner puede persistir la selección al aceptar el alta",
+		"el owner puede persistir acción sobrante",
+	)
+	_comprobar(
+		Auditorias.estado(estado[Auditorias.CLAVE_ESTADO], Auditorias.GATO_DIARIO) == "activa",
+		"el owner puede persistir gato diario",
 	)
 	panel.free()
 
@@ -72,6 +83,36 @@ func _probar_consulta_de_estado() -> void:
 		"la consulta se refresca cuando el estado canónico cambia",
 	)
 	_comprobar(panel.seleccion().is_empty(), "el modo consulta no devuelve una nueva selección")
+	panel.free()
+
+
+func _probar_historial_sellado() -> void:
+	var estado := Partida.nueva()
+	estado[Auditorias.CLAVE_ESTADO] = Auditorias.nueva(
+		[Auditorias.ACCION_SOBRANTE, Auditorias.GATO_DIARIO]
+	)
+	Auditorias.fallar(
+		estado[Auditorias.CLAVE_ESTADO], Auditorias.GATO_DIARIO, "gato_sin_comer_al_dormir"
+	)
+	Auditorias.cerrar_vuelta(estado, 1, "reasignacion")
+
+	var panel := AuditoriasSiga.new()
+	panel.configurar_estado(estado, false)
+	root.add_child(panel)
+
+	var historial := panel.get_node_or_null("HistorialAuditorias") as VBoxContainer
+	var vida := panel.find_child("Vida_1", true, false) as VBoxContainer
+	_comprobar(historial != null and historial.visible, "SIGA muestra el historial en consulta")
+	_comprobar(vida != null, "SIGA construye la vida sellada")
+	_comprobar(
+		vida != null and vida.get_child_count() >= 3,
+		"la vida sellada muestra cierre y resultados por condición",
+	)
+
+	panel.configurar_estado(estado, true)
+	_comprobar(
+		historial != null and not historial.visible, "el selector oculta el historial cerrado"
+	)
 	panel.free()
 
 
