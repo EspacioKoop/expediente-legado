@@ -336,7 +336,7 @@ func _crear_tramo_hilo(desde: Vector3, hasta: Vector3, indice: int) -> void:
 		desde.lerp(hasta, 0.5),
 		COLOR_ARIADNA,
 	)
-	tramo.look_at(hasta, Vector3.UP)
+	tramo.look_at(_hilo_ariadna.to_global(hasta), Vector3.UP)
 
 
 func _actualizar_presencia() -> void:
