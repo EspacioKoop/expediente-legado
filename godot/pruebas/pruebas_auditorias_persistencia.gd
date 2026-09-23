@@ -115,6 +115,17 @@ func _probar_reasignacion() -> void:
 	var estado_reasignado := Auditorias.estado(auditoria, Auditorias.ACCION_SOBRANTE)
 	_comprobar(estado_reasignado == "inactiva", "una nueva vida laboral no hereda el reto anterior")
 	_comprobar(auditoria["activas"].is_empty(), "la reasignación deja una selección vacía")
+	_comprobar(Auditorias.seleccion_pendiente(estado), "la nueva vida queda esperando selección")
+	_comprobar(
+		Auditorias.resolver_seleccion(estado, [Auditorias.ACCION_SOBRANTE]),
+		"la nueva vida acepta una selección exactamente una vez",
+	)
+	_comprobar(not Auditorias.seleccion_pendiente(estado), "resolver la oferta la cierra")
+	_comprobar(
+		not Auditorias.resolver_seleccion(estado, []),
+		"una selección ya resuelta no se puede sustituir a mitad de vida",
+	)
+	_comprobar(Auditorias.historial(estado).size() == 1, "elegir de nuevo conserva el historial")
 
 
 func _probar_migracion_partida_antigua() -> void:
