@@ -139,11 +139,14 @@ func _montar_entorno(mundo: Node3D, espacio: Dictionary) -> void:
 func _montar_camara(mundo: Node3D, ancla: Vector3) -> Camera3D:
 	var camara := Camera3D.new()
 	camara.name = "CamaraJugadorSinHUD"
-	camara.position = ancla + Vector3(6.6, ALTURA_JUGADOR, 6.9)
+	# El Ryū se ancla en el dedo central de la forma peine. Mirarlo desde +x/+z
+	# sacaba la cámara fuera de la planta y la evidencia atravesaba un muro.
+	# Este punto queda dentro del mismo pasillo, a altura real de jugador.
+	camara.position = Vector3(ancla.x, ALTURA_JUGADOR, ancla.z - 6.2)
 	camara.fov = FOV
 	camara.current = true
 	mundo.add_child(camara)
-	camara.look_at(ancla + Vector3(0.0, 1.55, 0.0), Vector3.UP)
+	camara.look_at(ancla + Vector3(0.0, 1.15, 0.4), Vector3.UP)
 	return camara
 
 
