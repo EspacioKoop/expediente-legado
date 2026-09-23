@@ -18,6 +18,14 @@ func _probar() -> void:
 	}
 	bbs.configurar_contexto(contexto)
 
+	var recursos_catalogo := bbs.recursos_web_catalogo()
+	_comprobar(recursos_catalogo.size() == 3, "Web98 puede registrar todos los BBS por adelantado")
+	var recurso_byte := _por_id(recursos_catalogo, "byte-local-bbs")
+	_comprobar(
+		String(recurso_byte.get("paquete_software", "")) == "archivazo-21",
+		"Byte Local BBS exporta el paquete ficticio sin ejecutarlo",
+	)
+
 	var tablones_dia1 := _ids(bbs.tablones_visibles())
 	_comprobar(tablones_dia1.size() == 2, "el primer día solo muestra dos tablones")
 	_comprobar(tablones_dia1.has("byte-local-bbs"), "Byte Local está visible desde el inicio")
@@ -78,6 +86,13 @@ func _probar() -> void:
 
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
+
+
+func _por_id(elementos: Array[Dictionary], id: String) -> Dictionary:
+	for elemento in elementos:
+		if String(elemento.get("id", "")) == id:
+			return elemento
+	return {}
 
 
 func _ids(elementos: Array[Dictionary]) -> Array[String]:

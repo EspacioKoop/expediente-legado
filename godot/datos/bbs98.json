@@ -12,7 +12,8 @@
       "visible_desde_dia": 1,
       "visible_hasta_dia": 0,
       "requiere_conocimiento": [],
-      "enlaces_web": ["byte-local"]
+      "enlaces_web": ["byte-local"],
+      "paquete_software": "archivazo-21"
     },
     {
       "id": "nodo-4b",

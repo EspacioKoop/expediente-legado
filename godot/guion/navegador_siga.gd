@@ -7,6 +7,7 @@ class_name NavegadorSiga
 extends VBoxContainer
 
 signal estado_cambiado(estado: Dictionary)
+signal paquete_software_obtenido(id: String)
 
 const URL_INICIO := "http://intranet.dgai/"
 const TEXTURA_CABECERAS_PRENSA := preload("res://arte/os98/prensa_cabeceras_98.svg")
@@ -52,6 +53,8 @@ var _historial_lista: ItemList
 var _favoritos_lista: ItemList
 var _busqueda: LineEdit
 var _cache: Button
+var _descargar_software: Button
+var _paquete_software_actual := ""
 
 
 func configurar_contexto(contexto: Dictionary) -> void:
@@ -329,6 +332,12 @@ func _construir_interfaz() -> void:
 	_pagina.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	principal.add_child(_pagina)
 
+	_descargar_software = Button.new()
+	_descargar_software.name = "DescargarSoftware"
+	_descargar_software.visible = false
+	_descargar_software.pressed.connect(_obtener_software_actual)
+	principal.add_child(_descargar_software)
+
 	var etiqueta_enlaces := Label.new()
 	etiqueta_enlaces.text = tr("NAVEGADOR_ENLACES")
 	principal.add_child(etiqueta_enlaces)
@@ -461,6 +470,8 @@ func _renderizar(resultado: Dictionary) -> void:
 	)
 	_enlaces.clear()
 	_cache.visible = false
+	_descargar_software.visible = false
+	_paquete_software_actual = ""
 	_ocultar_visuales_web()
 
 	var estado := String(resultado.get("estado", "no_encontrado"))
@@ -471,6 +482,7 @@ func _renderizar(resultado: Dictionary) -> void:
 			_renderizar_prensa(recurso)
 		else:
 			_renderizar_recurso_generico(resultado, recurso, url)
+		_configurar_descarga_software(recurso)
 		_renderizar_enlaces(recurso)
 		return
 	if estado == "caido":
@@ -494,6 +506,26 @@ func _renderizar_recurso_generico(resultado: Dictionary, recurso: Dictionary, ur
 			via,
 		]
 	)
+
+
+func _configurar_descarga_software(recurso: Dictionary) -> void:
+	var paquete_id := String(recurso.get("paquete_software", "")).strip_edges()
+	if paquete_id.is_empty():
+		return
+	var paquete := SoftwareSigaModelo.new().ficha(paquete_id)
+	if paquete.is_empty():
+		return
+	_paquete_software_actual = paquete_id
+	_descargar_software.text = (
+		tr("NAVEGADOR_DESCARGAR_SOFTWARE") % String(paquete.get("nombre", paquete_id))
+	)
+	_descargar_software.visible = true
+
+
+func _obtener_software_actual() -> void:
+	if _paquete_software_actual.is_empty():
+		return
+	paquete_software_obtenido.emit(_paquete_software_actual)
 
 
 func _renderizar_prensa(recurso: Dictionary) -> void:
@@ -665,6 +697,8 @@ func _aplicar_escala_texto() -> void:
 	_favoritos_lista.add_theme_font_size_override("font_size", lista)
 	_direccion.add_theme_font_size_override("font_size", lista)
 	_busqueda.add_theme_font_size_override("font_size", lista)
+	if _descargar_software != null:
+		_descargar_software.add_theme_font_size_override("font_size", lista)
 
 
 func _estado_partida_actual() -> Dictionary:

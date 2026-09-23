@@ -22,6 +22,19 @@ func _probar() -> void:
 		"la búsqueda no confunde una palabra con una subcadena de economía",
 	)
 
+	var bbs := indice.resolver_url("http://bbs.bytelocal.net/")
+	_comprobar(bbs["estado"] == "ok", "Byte Local BBS es navegable desde Web98")
+	_comprobar(bbs["recurso"]["tipo"] == "bbs", "el índice conserva el tipo BBS")
+	_comprobar(
+		bbs["recurso"]["paquete_software"] == "archivazo-21",
+		"el BBS declara Archivazo como descarga ficticia",
+	)
+	var pagina_becario := indice.resolver_url("http://usuarios.red98/~becario/")
+	_comprobar(
+		pagina_becario["recurso"]["paquete_software"] == "bannerlab-95",
+		"la página personal declara BannerLab como descarga ficticia",
+	)
+
 	var informatica := indice.buscar("informática")
 	_comprobar(not informatica.is_empty(), "normaliza tildes al buscar")
 	_comprobar(informatica[0]["id"] == "byte-local", "Byte Local responde a informática")
@@ -75,6 +88,17 @@ func _probar() -> void:
 	_comprobar(mirror["estado"] == "ok", "caer el origen no derriba el mirror")
 	_comprobar(
 		indice.cache_de("byte-local")["estado"] == "ok", "la caché sobrevive al servidor caído"
+	)
+
+	indice.configurar_contexto({"dia": 1, "conocimiento": [], "urls_caidas": []})
+	_comprobar(
+		indice.resolver_url("http://tablon.norte/")["estado"] == "no_encontrado",
+		"Web98 no adelanta un BBS de jornada 2",
+	)
+	indice.configurar_contexto({"dia": 2, "conocimiento": [], "urls_caidas": []})
+	_comprobar(
+		indice.resolver_url("http://tablon.norte/")["estado"] == "ok",
+		"Web98 habilita el BBS cuando llega su jornada",
 	)
 
 	indice.configurar_contexto({"dia": 3, "conocimiento": [], "urls_caidas": []})
