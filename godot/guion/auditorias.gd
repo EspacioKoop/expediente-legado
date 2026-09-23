@@ -11,6 +11,7 @@ const CLAVE_ESTADO := "auditorias"
 const CLAVE_HISTORIAL := "historial"
 const CLAVE_SELECCION_RESUELTA := "seleccion_resuelta"
 const ACCION_SOBRANTE := "accion_sobrante"
+const GATO_DIARIO := "gato_diario"
 
 ## El contrato base solo declara identidades e incompatibilidades. Los rótulos
 ## pertenecen a la futura capa de selección/consulta: declarar aquí claves de
@@ -147,6 +148,37 @@ static func resolver_fin_archivo(estado_partida: Dictionary) -> Dictionary:
 		fallar(auditoria, ACCION_SOBRANTE, "sin_accion_al_fichar")
 		return {"resultado": "fallida", "id": ACCION_SOBRANTE, "acciones": acciones}
 	return {"resultado": "activa", "id": ACCION_SOBRANTE, "acciones": acciones}
+
+
+## Segundo predicado extremo a extremo: al acostarse, "gato_diario" observa
+## el hambre que Jornada ya mantiene. Cero significa atendido; un valor mayor
+## implica que el día termina sin haberlo alimentado. Se evalúa ANTES de
+## Jornada.dormir(), que incrementa el contador para la noche siguiente.
+static func resolver_fin_casa(estado_partida: Dictionary) -> Dictionary:
+	var auditoria := asegurar_en_estado(estado_partida)
+	var estado_actual := estado(auditoria, GATO_DIARIO)
+	if estado_actual != "activa":
+		return {"resultado": estado_actual, "id": GATO_DIARIO}
+
+	var jornada = estado_partida.get("jornada", {})
+	if typeof(jornada) != TYPE_DICTIONARY:
+		return {"resultado": "sin-jornada", "id": GATO_DIARIO}
+	var gato = jornada.get("gato", {})
+	if typeof(gato) != TYPE_DICTIONARY:
+		return {"resultado": "sin-gato", "id": GATO_DIARIO}
+
+	if not bool(gato.get("presente", false)):
+		fallar(auditoria, GATO_DIARIO, "gato_ausente_al_dormir")
+		return {"resultado": "fallida", "id": GATO_DIARIO}
+	var dias_sin_comer := int(gato.get("dias_sin_comer", 0))
+	if dias_sin_comer > 0:
+		fallar(auditoria, GATO_DIARIO, "gato_sin_comer_al_dormir")
+		return {
+			"resultado": "fallida",
+			"id": GATO_DIARIO,
+			"dias_sin_comer": dias_sin_comer,
+		}
+	return {"resultado": "activa", "id": GATO_DIARIO, "dias_sin_comer": dias_sin_comer}
 
 
 ## Valida únicamente estructura e invariantes persistibles. Las reglas de
