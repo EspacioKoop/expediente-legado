@@ -97,13 +97,13 @@ func _auditorias_descriptivas() -> void:
 	estado[Auditorias.CLAVE_ESTADO] = Auditorias.nueva(
 		[Auditorias.SIN_RELEER, Auditorias.SUENO_COMPLETO]
 	)
-	Auditorias.fallar(
-		estado[Auditorias.CLAVE_ESTADO], Auditorias.SIN_RELEER, "documento_releido"
-	)
+	Auditorias.fallar(estado[Auditorias.CLAVE_ESTADO], Auditorias.SIN_RELEER, "documento_releido")
 	var antes := JSON.stringify(estado)
 	var resumen := FinalPolitico.resumen(estado, {"veredicto": "hastur_confrontado"})
 	var auditoria: Dictionary = resumen.get("auditoria", {})
-	_comprobar(auditoria.get("origen", "") == "actual", "el final lee la auditoría viva sin cerrarla")
+	_comprobar(
+		auditoria.get("origen", "") == "actual", "el final lee la auditoría viva sin cerrarla"
+	)
 	var condiciones: Array = auditoria.get("condiciones", [])
 	_comprobar(condiciones.size() == 2, "el final conserva todas las condiciones seleccionadas")
 	var por_id := {}
