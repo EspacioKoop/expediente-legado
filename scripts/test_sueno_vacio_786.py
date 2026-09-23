@@ -42,6 +42,9 @@ class SuenoVacio786Test(unittest.TestCase):
         for contrato in (
             "entorno.fog_enabled = true",
             "entorno.fog_density = DENSIDAD_NIEBLA",
+            'suelo.name = "SueloOficinaAusente"',
+            'borde.name = "PerimetroOficinaAusente"',
+            'visual.visible = false',
             'grupo.name = "HuellasPuestosVacios"',
             'grupo.name = "EcosTabiquesOficina"',
             'grupo.name = "EcosMobiliarioOficina"',
@@ -54,6 +57,7 @@ class SuenoVacio786Test(unittest.TestCase):
             self.assertIn(contrato, self.presentacion)
         self.assertNotIn("BoxMesh.new()", self.presentacion)
         self.assertNotIn("CSGBox3D", self.presentacion)
+        self.assertIn('espacio.get("tabiques_poligonales", [])', self.presentacion)
 
     def test_audio_es_procedural_y_no_carga_recuerdos(self) -> None:
         self.assertIn("AudioStreamWAV.new()", self.audio)
