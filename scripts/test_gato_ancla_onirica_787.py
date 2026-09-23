@@ -23,7 +23,7 @@ class GatoAnclaOnirica787Test(unittest.TestCase):
 
     def test_gato_expone_un_contrato_de_presentacion_sin_estado_jugable(self):
         gato = GATO.read_text(encoding="utf-8")
-        bloque = gato.split("func anclar_presentacion_global() -> void:", 1)[1].split("\nfunc ", 1)[0]
+        bloque = gato.split("func anclar_presentacion_global() -> void:", 1)[1].split("\n\n", 1)[0]
         self.assertIn("top_level = true", bloque)
         self.assertIn("Transform3D(Basis.IDENTITY, origen)", bloque)
         for prohibido in ("jornada", "hambre", "GatoEcoSueno", "SuenoObjetivos"):
