@@ -40,6 +40,8 @@ static func planos() -> Array:
 			"mira": Vector3(-2.40, 0.46, -2.00),
 			"fundido_desde": 0.0,
 			"fundido_hasta": 0.16,
+			"sonido": "cama",
+			"sonido_tono": 0.78,
 			"segundos": 3.0,
 		},
 		{

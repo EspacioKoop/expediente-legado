@@ -8,6 +8,7 @@ CONTROLLER = ROOT / "godot" / "guion" / "dia_cinematica_sueno_controller.gd"
 REACTIVO = ROOT / "godot" / "guion" / "dia_sueno_reactivo_app.gd"
 CALLE = ROOT / "godot" / "guion" / "dia_calle_app.gd"
 REPRODUCTOR = ROOT / "godot" / "guion" / "cinematica_app.gd"
+SONIDO = ROOT / "godot" / "guion" / "sonido.gd"
 ESCENA = ROOT / "godot" / "escenas" / "dia.tscn"
 
 
@@ -18,6 +19,7 @@ class SuenoCinematica3DTest(unittest.TestCase):
         self.reactivo = REACTIVO.read_text(encoding="utf-8")
         self.calle = CALLE.read_text(encoding="utf-8")
         self.reproductor = REPRODUCTOR.read_text(encoding="utf-8")
+        self.sonido = SONIDO.read_text(encoding="utf-8")
         self.escena = ESCENA.read_text(encoding="utf-8")
 
     def test_transicion_es_3d_y_reutiliza_la_casa(self) -> None:
@@ -45,6 +47,12 @@ class SuenoCinematica3DTest(unittest.TestCase):
         self.assertIn(
             "_fundido.color = Color(0.0, 0.0, 0.0, 0.0)", self.reproductor
         )
+
+    def test_acostarse_tiene_un_acento_fisico_sin_asset_nuevo(self) -> None:
+        self.assertIn('"sonido": "cama"', self.cinematica)
+        self.assertIn('"sonido_tono": 0.78', self.cinematica)
+        self.assertIn('"cama": "impactSoft_medium_000.ogg"', self.sonido)
+        self.assertIn("Sonido.sonar(self, nombre, tono)", self.reproductor)
 
     def test_controller_dedicado_no_cambia_la_cadena_historica(self) -> None:
         self.assertIn('extends "res://guion/dia_onboarding_app.gd"', self.calle)

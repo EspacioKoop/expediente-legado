@@ -237,6 +237,7 @@ func _mostrar_portal() -> void:
 
 
 func _animar_bajada() -> void:
+	Sonido.sonar(self, "marcar", 0.88)
 	_marcar_planta(4)
 	var panel := create_tween()
 	for planta in [3, 2, 1]:
@@ -251,6 +252,7 @@ func _animar_bajada() -> void:
 
 
 func _abrir_puertas() -> void:
+	Sonido.sonar(self, "puerta_abre")
 	_junta_puerta.visible = false
 	var puertas := create_tween().set_parallel(true)
 	puertas.tween_property(_puerta_izquierda, "position:x", -1.58, 0.62)
@@ -264,6 +266,7 @@ func _abrir_puertas_inmediato() -> void:
 
 
 func _cerrar_puertas_animado() -> void:
+	Sonido.sonar(self, "puerta_cierra")
 	_junta_puerta.visible = false
 	var puertas := create_tween().set_parallel(true)
 	puertas.tween_property(_puerta_izquierda, "position:x", -0.82, 0.58)

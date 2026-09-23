@@ -76,6 +76,9 @@ const CATALOGO := {
 	"error": "error_003.ogg",
 	"firmar": "confirmation_001.ogg",
 	"marcar": "switch_002.ogg",
+	# El mismo impacto blando ya auditado para objetos sirve como apoyo físico
+	# de la cama sin añadir un asset ni reutilizar el nombre semántico `coger`.
+	"cama": "impactSoft_medium_000.ogg",
 }
 
 ## Gestos físicos que se repiten mucho —abrir el mismo archivador diez veces al
@@ -157,6 +160,22 @@ static func sonar_stream(nodo: Node, pista: AudioStream, tono: float = 1.0) -> v
 	voz.finished.connect(voz.queue_free)
 	nodo.add_child(voz)
 	voz.play()
+
+
+## Corta las voces efímeras 2D que cuelgan directamente de [param nodo].
+##
+## Sirve para pantallas de vida muy corta —como una cinemática que se salta—:
+## esperar únicamente a `finished` deja al servidor de audio usando el stream
+## cuando el árbol ya se está desmontando. Parar, soltar el stream y liberar la
+## voz ANTES de emitir la salida da al motor un frame limpio para cerrar.
+static func detener(nodo: Node) -> void:
+	if nodo == null:
+		return
+	for hijo in nodo.get_children():
+		if hijo is AudioStreamPlayer:
+			hijo.stop()
+			hijo.stream = null
+			hijo.free()
 
 
 ## Suena una vez donde está [param origen], en el espacio 3D.

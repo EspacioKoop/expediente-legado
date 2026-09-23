@@ -58,6 +58,12 @@ class AscensorTest(unittest.TestCase):
         self.assertIn('tween_property(_puerta_izquierda, "position:x"', self.app_3d)
         self.assertIn('tween_property(_puerta_derecha, "position:x"', self.app_3d)
 
+    def test_puertas_y_bajada_tienen_acentos_fisicos(self):
+        self.assertIn('Sonido.sonar(self, "puerta_cierra")', self.app_3d)
+        self.assertIn('Sonido.sonar(self, "puerta_abre")', self.app_3d)
+        self.assertIn('Sonido.sonar(self, "marcar", 0.88)', self.app_3d)
+        self.assertNotIn("AudioStreamPlayer.new()", self.app_3d)
+
     def test_salida_conserva_referentes_del_archivo_hasta_cerrar_puertas(self):
         self.assertIn('"salida-archivo"', self.app_3d)
         self.assertIn("_mostrar_planta4()", self.app_3d)
