@@ -200,9 +200,12 @@ func _clave_conversacion_contextual(
 	if companero.nombre_visible != tr("COMPA_CUNADO"):
 		return clave_dialogo
 
-	var variante := DialogoIdeologico.resolver(
-		DialogoIdeologico.SUPERFICIE_OFICINA_CUNADO,
-		partida.estado,
+	var variante := (
+		DialogoIdeologico
+		. resolver(
+			DialogoIdeologico.SUPERFICIE_OFICINA_CUNADO,
+			partida.estado,
+		)
 	)
 	var clave_reaccion := String(variante.get("clave", ""))
 	if clave_reaccion.is_empty():
