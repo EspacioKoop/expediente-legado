@@ -5,6 +5,7 @@
     {"id": "actualidad", "titulo": "Actualidad y servicios", "orden": 20},
     {"id": "informatica", "titulo": "Informática y software", "orden": 30},
     {"id": "ocio", "titulo": "Ocio y comunidad", "orden": 40},
+    {"id": "comunidad", "titulo": "BBS y comunidad", "orden": 45},
     {"id": "personal", "titulo": "Páginas personales", "orden": 50},
     {"id": "archivo", "titulo": "Archivo", "orden": 90}
   ],
@@ -150,7 +151,8 @@
       "requiere_conocimiento": [],
       "mirrors": [],
       "enlaces": ["byte-local", "guestbook-becario"],
-      "cache": null
+      "cache": null,
+      "paquete_software": "bannerlab-95"
     },
     {
       "id": "guestbook-becario",

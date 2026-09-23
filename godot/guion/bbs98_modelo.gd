@@ -143,22 +143,41 @@ func referencia_de_mensaje(mensaje_id: String) -> Dictionary:
 func recursos_web() -> Array[Dictionary]:
 	var resultado: Array[Dictionary] = []
 	for tablon in tablones_visibles():
-		(
-			resultado
-			. append(
-				{
-					"id": String(tablon.get("id", "")),
-					"url": String(tablon.get("url", "")),
-					"titulo": String(tablon.get("nombre", "")),
-					"snippet": String(tablon.get("descripcion", "")),
-					"categoria": "comunidad",
-					"terminos": tablon.get("terminos_indexados", []).duplicate(true),
-					"tipo": "bbs",
-					"tablon_id": String(tablon.get("id", "")),
-				}
-			)
-		)
+		resultado.append(_recurso_web_de_tablon(tablon))
 	return resultado
+
+
+## Catálogo completo para que Web98 registre también los tablones que aparecerán
+## en jornadas posteriores. La visibilidad la vuelve a resolver Web98 con los
+## mismos campos declarativos, evitando congelar el índice al contexto inicial.
+func recursos_web_catalogo() -> Array[Dictionary]:
+	var resultado: Array[Dictionary] = []
+	for tablon in _tablones:
+		resultado.append(_recurso_web_de_tablon(tablon))
+	return resultado
+
+
+func _recurso_web_de_tablon(tablon: Dictionary) -> Dictionary:
+	return {
+		"id": String(tablon.get("id", "")),
+		"url": String(tablon.get("url", "")),
+		"titulo": String(tablon.get("nombre", "")),
+		"snippet": String(tablon.get("descripcion", "")),
+		"categoria": "comunidad",
+		"terminos": tablon.get("terminos_indexados", []).duplicate(true),
+		"prioridad": 58,
+		"orden_directorio": 50,
+		"indexado": true,
+		"disponible_desde_dia": int(tablon.get("visible_desde_dia", 1)),
+		"disponible_hasta_dia": int(tablon.get("visible_hasta_dia", 0)),
+		"requiere_conocimiento": tablon.get("requiere_conocimiento", []).duplicate(true),
+		"mirrors": [],
+		"enlaces": tablon.get("enlaces_web", []).duplicate(true),
+		"cache": null,
+		"tipo": "bbs",
+		"tablon_id": String(tablon.get("id", "")),
+		"paquete_software": String(tablon.get("paquete_software", "")),
+	}
 
 
 func _hilo_visible(hilo: Dictionary) -> bool:
