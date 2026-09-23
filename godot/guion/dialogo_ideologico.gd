@@ -145,12 +145,15 @@ static func registrar_respuesta(estado: Dictionary, variante: Dictionary) -> boo
 		return false
 	var etiquetas = respuesta.get("etiquetas", [])
 	var lista: Array = etiquetas.duplicate() if typeof(etiquetas) == TYPE_ARRAY else []
-	return Prometeo.registrar_lectura_social(
-		estado,
-		actor,
-		evento,
-		String(respuesta.get("reaccion", "")),
-		lista,
+	return (
+		Prometeo
+		. registrar_lectura_social(
+			estado,
+			actor,
+			evento,
+			String(respuesta.get("reaccion", "")),
+			lista,
+		)
 	)
 
 
@@ -222,7 +225,10 @@ static func _coincide(evento: Dictionary, condicion: Dictionary) -> bool:
 	if not fuente.is_empty() and String(evento.get("fuente", "")) != fuente:
 		return false
 	var fuente_prefijo := String(condicion.get("fuente_prefijo", ""))
-	if not fuente_prefijo.is_empty() and not String(evento.get("fuente", "")).begins_with(fuente_prefijo):
+	if (
+		not fuente_prefijo.is_empty()
+		and not String(evento.get("fuente", "")).begins_with(fuente_prefijo)
+	):
 		return false
 	var etiqueta := String(condicion.get("etiqueta", ""))
 	if not etiqueta.is_empty():
