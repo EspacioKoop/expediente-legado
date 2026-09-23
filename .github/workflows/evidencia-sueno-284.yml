@@ -66,7 +66,8 @@ jobs:
           test -s evidencia-sueno-284/castillo.png
           test -s evidencia-sueno-284/montana.png
           test -s evidencia-sueno-284/desierto.png
-          test -s evidencia-sueno-284/escuela.png
+          test -s evidencia-sueno-284/escuela_general.png
+          test -s evidencia-sueno-284/escuela_contenido.png
           test -s evidencia-sueno-284/manifest.json
 
       - name: Adjuntar evidencia comparativa

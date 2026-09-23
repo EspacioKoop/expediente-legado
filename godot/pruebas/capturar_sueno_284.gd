@@ -1,8 +1,9 @@
 ## Evidencia comparativa de las cuatro identidades fuertes de #284.
 ##
 ## Renderiza castillo, montaña, desierto y escuela sin HUD, a altura de jugador
-## y con el mismo FOV. No sustituye el pase humano de #398: produce entradas
-## comparables y reproducibles para que ese pase juzgue lectura espacial real.
+## y con el mismo FOV. Desde #798 la escuela se captura desde dos ángulos:
+## silueta general e integración del contenido del día. No sustituye el pase
+## humano de #398/#798: produce entradas comparables y reproducibles.
 extends SceneTree
 
 const TAMANO := Vector2i(1280, 720)
@@ -32,8 +33,16 @@ const CASOS := [
 	{
 		"id": "escuela",
 		"forma": "crucero",
-		"camara": Vector3(-18.0, ALTURA_JUGADOR, 0.0),
-		"objetivo": Vector3(3.0, 1.45, 0.0),
+		"captura": "escuela_general.png",
+		"camara": Vector3(-9.5, ALTURA_JUGADOR, -10.5),
+		"objetivo": Vector3(2.0, 1.35, 2.5),
+	},
+	{
+		"id": "escuela",
+		"forma": "crucero",
+		"captura": "escuela_contenido.png",
+		"camara": Vector3(6.5, ALTURA_JUGADOR, -5.0),
+		"objetivo": Vector3(-3.0, 1.45, -0.6),
 	},
 ]
 
@@ -57,6 +66,7 @@ func _init() -> void:
 	var manifiesto := {
 		"issue": 284,
 		"gate_humano": 398,
+		"gate_humano_crucero": 798,
 		"tamano": [TAMANO.x, TAMANO.y],
 		"fov": FOV,
 		"altura_jugador": ALTURA_JUGADOR,
@@ -66,11 +76,16 @@ func _init() -> void:
 
 	for caso in CASOS:
 		var mundo := Node3D.new()
-		mundo.name = "EvidenciaSueno284_%s" % String(caso["id"])
+		var captura := String(caso.get("captura", "%s.png" % String(caso["id"])))
+		mundo.name = "EvidenciaSueno284_%s" % captura.get_basename()
 		root.add_child(mundo)
 
 		var espacio := _espacio_para(String(caso["id"]), String(caso["forma"]))
 		_montar_entorno(mundo, espacio)
+		# El capturador debe reproducir el runtime real. Antes solo montaba la
+		# presentación; #1263 dejó al descubierto ese error porque escuela ya no
+		# redibuja una arquitectura paralela sobre la base poligonal.
+		Espacio3D.construir(mundo, espacio)
 		var camara := _montar_camara(
 			mundo,
 			Vector3(caso["camara"]),
@@ -87,7 +102,7 @@ func _init() -> void:
 		camara.look_at(Vector3(caso["objetivo"]), Vector3.UP)
 		await RenderingServer.frame_post_draw
 
-		var archivo := "%s.png" % String(caso["id"])
+		var archivo := captura
 		var destino := salida.path_join(archivo)
 		if not _guardar_captura(destino):
 			quit(1)
