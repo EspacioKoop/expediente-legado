@@ -43,8 +43,9 @@ static func previsualizar(
 		return _fallo("slot_vacio")
 	if objeto_a == objeto_b:
 		return _fallo("mismo_objeto")
-	if not Inventario.contiene(inventario, objeto_a) or not Inventario.contiene(
-		inventario, objeto_b
+	if (
+		not Inventario.contiene(inventario, objeto_a)
+		or not Inventario.contiene(inventario, objeto_b)
 	):
 		return _fallo("objeto_ausente")
 
@@ -94,7 +95,9 @@ static func combinar(
 	return vista
 
 
-static func _ids_consumidos(receta: Dictionary, objeto_a: String, objeto_b: String) -> Array[String]:
+static func _ids_consumidos(
+	receta: Dictionary, objeto_a: String, objeto_b: String
+) -> Array[String]:
 	var bruto = receta.get("consumir", [objeto_a, objeto_b])
 	if not bruto is Array:
 		return []
