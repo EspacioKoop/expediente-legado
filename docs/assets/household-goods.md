@@ -60,3 +60,20 @@ La copia onírica no añade otro binario, no duplica procedencia, no crea invent
 - presupuesto de triángulos.
 
 Capturas: `docs/capturas/casa-hogar-227-antes.png`, `docs/capturas/casa-hogar-227-entrada.png`, `docs/capturas/casa-hogar-227-estar.png` y `docs/capturas/casa-hogar-227-cocina.png`.
+
+
+## Gate visual reproducible
+
+El workflow **Evidencia hogar 227** convierte el pendiente visual en un artifact del
+mismo build: cuatro PNG sin HUD —entrada, estar, dormitorio y cocina-comedor— y
+un `manifest.json` que inventaría las 15 instancias domésticas que materializan
+los 13 GLB seleccionados. Para cada objeto registra en qué encuadres su centro
+queda dentro del frustum de la cámara jugable.
+
+El contrato automatizado comprueba montaje, presencia de `AssetCc0`, cobertura
+de las cuatro zonas y capturas distintas. Deliberadamente **no autoaprueba**
+escala, clipping ni legibilidad: esos criterios siguen siendo un pase humano
+sobre el artifact. El armario deformado de #967 conserva además su validación
+propia casa→sueño y debe revisarse visualmente antes de cerrar #227.
+
+Guía del pase: `docs/evidencias/hogar-227/README.md`.
