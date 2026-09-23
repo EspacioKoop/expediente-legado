@@ -58,6 +58,13 @@ func _init() -> void:
 	camara.current = true
 	mundo.add_child(camara)
 
+	# Los GLB de oficina y sus shaders se materializan en el primer frame real.
+	# Esperar aquí evita que la primera evidencia capture solo el clear del
+	# viewport mientras el segundo encuadre, por casualidad, ya está caliente.
+	for i in 30:
+		await process_frame
+	await RenderingServer.frame_post_draw
+
 	var manifiesto := {
 		"issue": 786,
 		"forma": FORMA,
