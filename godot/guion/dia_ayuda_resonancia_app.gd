@@ -60,9 +60,7 @@ func set_ayudas_visibles(activas: bool) -> void:
 	_servicio.set_ayudas_visibles(activas)
 
 
-func mostrar_ayudas_en(
-	mundo: Node3D, espacio: Dictionary, ahora_unix: int = -1
-) -> Array:
+func mostrar_ayudas_en(mundo: Node3D, espacio: Dictionary, ahora_unix: int = -1) -> Array:
 	var conocimiento := _conocimiento_local(espacio)
 	var consulta := _servicio.consultar(SCENE_KEY, conocimiento, ahora_unix)
 	if not bool(consulta.get("ok", false)):
