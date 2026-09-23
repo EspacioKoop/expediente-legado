@@ -55,6 +55,17 @@ class InventarioMenuTest(unittest.TestCase):
         )
         self.assertNotIn("Partida.guardar", self.catalogo_combinaciones)
 
+    def test_drag_drop_usa_el_contrato_nativo_de_control(self):
+        self.assertIn("set_drag_forwarding(", self.menu)
+        self.assertIn("_datos_arrastre_inventario", self.menu)
+        self.assertIn("_puede_soltar_en_slot.bind(\"a\")", self.menu)
+        self.assertIn("_soltar_en_slot.bind(\"b\")", self.menu)
+        self.assertIn("get_item_at_position(at_position)", self.menu)
+        self.assertIn("set_drag_preview(vista)", self.menu)
+        self.assertIn("Vector2.INF", self.menu)
+        self.assertIn("Control.MOUSE_FILTER_IGNORE", self.menu)
+        self.assertIn("item_activated.connect(_asignar_seleccion_al_primer_slot)", self.menu)
+
     def test_accion_inventario_es_semantica_y_remapeable(self):
         self.assertIn('"inventario": {"teclado": KEY_I, "mando": JOY_BUTTON_Y}', self.preferencias)
         self.assertIn('evento.is_action_pressed("inventario")', self.controlador)
