@@ -49,6 +49,14 @@ func _initialize() -> void:
 		float(noche["sol_factor"]) < float(tarde["sol_factor"]),
 		"las horas extra reducen la luz direccional"
 	)
+	# #789: la ventana también dice la hora, y no puede contradecir al reloj.
+	for perfil in [manana, mediodia, tarde]:
+		_comprobar(float(perfil["ventana_energia"]) > 0.0, "de día entra luz por la ventana")
+		_comprobar(
+			Color(perfil["cristal"]).get_luminance() > Color(noche["cristal"]).get_luminance(),
+			"el cristal de día es más claro que el de noche"
+		)
+	_comprobar(float(noche["ventana_energia"]) == 0.0, "de noche no entra sol")
 
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
