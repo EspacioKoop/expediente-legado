@@ -124,6 +124,77 @@ static func historial(estado_partida: Dictionary) -> Array:
 	return Array(asegurar_en_estado(estado_partida).get(CLAVE_HISTORIAL, [])).duplicate(true)
 
 
+## Resumen de solo lectura para superficies narrativas como #100.
+##
+## Si la vuelta actual ya fue sellada, usa ese registro inmutable. Si la vida
+## sigue abierta, describe únicamente la selección y su estado actual sin
+## completarla, fallarla ni crear historial. Así un final de investigación puede
+## recordar el reto sin fingir que la vida laboral terminó con él.
+static func resumen_narrativo(estado_partida: Dictionary) -> Dictionary:
+	var auditoria_cruda = estado_partida.get(CLAVE_ESTADO, {})
+	if typeof(auditoria_cruda) != TYPE_DICTIONARY:
+		return {}
+	var auditoria: Dictionary = auditoria_cruda
+	var jornada_cruda = estado_partida.get("jornada", {})
+	var vuelta := 1
+	if typeof(jornada_cruda) == TYPE_DICTIONARY:
+		vuelta = maxi(1, int((jornada_cruda as Dictionary).get("vuelta", 1)))
+
+	var historial_crudo = auditoria.get(CLAVE_HISTORIAL, [])
+	if typeof(historial_crudo) == TYPE_ARRAY:
+		for registro in historial_crudo:
+			if (
+				typeof(registro) == TYPE_DICTIONARY
+				and int((registro as Dictionary).get("vuelta", -1)) == vuelta
+			):
+				return {
+					"vuelta": vuelta,
+					"origen": "historial",
+					"condiciones": _condiciones_de_registro(registro as Dictionary),
+				}
+
+	var seleccion_cruda = auditoria.get("activas", [])
+	if typeof(seleccion_cruda) != TYPE_ARRAY:
+		return {}
+	var seleccion: Array = (seleccion_cruda as Array).duplicate()
+	seleccion.sort()
+	var condiciones := []
+	for valor in seleccion:
+		var id := String(valor)
+		if not CATALOGO.has(id):
+			continue
+		condiciones.append({"id": id, "estado": estado(auditoria, id)})
+	if condiciones.is_empty():
+		return {}
+	return {
+		"vuelta": vuelta,
+		"origen": "actual",
+		"condiciones": condiciones,
+	}
+
+
+static func _condiciones_de_registro(registro: Dictionary) -> Array:
+	var seleccion_cruda = registro.get("activas", [])
+	if typeof(seleccion_cruda) != TYPE_ARRAY:
+		return []
+	var seleccion: Array = (seleccion_cruda as Array).duplicate()
+	seleccion.sort()
+	var completadas = registro.get("completadas", [])
+	var fallidas = registro.get("fallidas", {})
+	var condiciones := []
+	for valor in seleccion:
+		var id := String(valor)
+		if not CATALOGO.has(id):
+			continue
+		var estado_registrado := "pendiente"
+		if typeof(fallidas) == TYPE_DICTIONARY and (fallidas as Dictionary).has(id):
+			estado_registrado = "fallida"
+		elif typeof(completadas) == TYPE_ARRAY and (completadas as Array).has(id):
+			estado_registrado = "completada"
+		condiciones.append({"id": id, "estado": estado_registrado})
+	return condiciones
+
+
 ## Una reasignación empieza otra vida laboral: ninguna condición activa de la
 ## anterior puede sobrevivir, pero el histórico sellado sí.
 static func reiniciar_vuelta(estado_partida: Dictionary) -> void:

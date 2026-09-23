@@ -213,3 +213,23 @@ def test_sueno_completo_recibe_un_hecho_y_no_duplica_sistemas():
         "vida",
     ):
         assert termino not in bloque
+
+
+def test_resumen_narrativo_es_puro_y_prefiere_historial_de_la_vuelta():
+    contenido = texto()
+    bloque = contenido.split("static func resumen_narrativo", 1)[1].split(
+        "static func _condiciones_de_registro", 1
+    )[0]
+    assert '"origen": "historial"' in bloque
+    assert '"origen": "actual"' in bloque
+    assert '"condiciones"' in bloque
+    for prohibido in (
+        "asegurar_en_estado(",
+        "cerrar_vuelta(",
+        "fallar(",
+        "completar(",
+        "Sellos.",
+        "Steam",
+        "guardar(",
+    ):
+        assert prohibido not in bloque

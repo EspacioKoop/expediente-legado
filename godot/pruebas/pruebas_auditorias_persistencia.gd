@@ -14,6 +14,7 @@ func _initialize() -> void:
 	_probar_predicado_gato_diario()
 	_probar_predicado_sin_releer()
 	_probar_predicado_sueno_completo()
+	_probar_resumen_narrativo()
 	_probar_cierre_historial()
 	_probar_reasignacion()
 	_probar_migracion_partida_antigua()
@@ -175,6 +176,47 @@ func _probar_predicado_sueno_completo() -> void:
 	_comprobar(
 		not bool(terminal.get("cambio", true)),
 		"consultar un reto terminal no vuelve a mutarlo",
+	)
+
+
+func _probar_resumen_narrativo() -> void:
+	var estado := Partida.nueva()
+	estado[Auditorias.CLAVE_ESTADO] = Auditorias.nueva(
+		[Auditorias.SIN_RELEER, Auditorias.SUENO_COMPLETO]
+	)
+	Auditorias.fallar(estado[Auditorias.CLAVE_ESTADO], Auditorias.SIN_RELEER, "documento_releido")
+	var antes := JSON.stringify(estado)
+	var actual := Auditorias.resumen_narrativo(estado)
+	_comprobar(actual.get("origen", "") == "actual", "el resumen usa la vida abierta")
+	var condiciones: Array = actual.get("condiciones", [])
+	_comprobar(condiciones.size() == 2, "el resumen conserva la selección completa")
+	var por_id := {}
+	for condicion in condiciones:
+		por_id[String(condicion.get("id", ""))] = String(condicion.get("estado", ""))
+	_comprobar(por_id.get(Auditorias.SIN_RELEER, "") == "fallida", "el resumen conserva el fallo")
+	_comprobar(
+		por_id.get(Auditorias.SUENO_COMPLETO, "") == "activa",
+		"el resumen no completa una condición abierta",
+	)
+	_comprobar(JSON.stringify(estado) == antes, "resumir no muta la partida")
+
+	Auditorias.cerrar_vuelta(estado, 1, "reasignacion")
+	estado[Auditorias.CLAVE_ESTADO]["completadas"].clear()
+	estado[Auditorias.CLAVE_ESTADO]["fallidas"].clear()
+	var sellado := Auditorias.resumen_narrativo(estado)
+	_comprobar(
+		sellado.get("origen", "") == "historial", "el resumen prefiere el sello de la vuelta"
+	)
+	por_id.clear()
+	for condicion in sellado.get("condiciones", []):
+		por_id[String(condicion.get("id", ""))] = String(condicion.get("estado", ""))
+	_comprobar(
+		por_id.get(Auditorias.SIN_RELEER, "") == "fallida",
+		"el historial preserva el fallo aunque cambie el estado vivo",
+	)
+	_comprobar(
+		por_id.get(Auditorias.SUENO_COMPLETO, "") == "completada",
+		"el historial preserva la condición completada",
 	)
 
 

@@ -22,6 +22,7 @@ static func resumen(estado: Dictionary, contrato: Dictionary = {}) -> Dictionary
 	var conteo := Prometeo.conteo_elecciones_ideologicas(estado)
 	var dominantes := Prometeo.ejes_dominantes(estado)
 	var patron := _patron(elecciones, dominantes)
+	var auditoria := Auditorias.resumen_narrativo(estado)
 	var ejemplos := []
 
 	for evento in elecciones:
@@ -44,6 +45,7 @@ static func resumen(estado: Dictionary, contrato: Dictionary = {}) -> Dictionary
 		"dominantes": dominantes,
 		"elecciones": elecciones.size(),
 		"ejemplos": ejemplos,
+		"auditoria": auditoria,
 		"veredicto": String(contrato.get("veredicto", "")),
 	}
 
