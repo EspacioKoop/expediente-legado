@@ -46,7 +46,7 @@ class SuenoVacio786Test(unittest.TestCase):
             'borde.name = "PerimetroOficinaAusente"',
             '(visual as MeshInstance3D).visible = false',
             'grupo.name = "HuellasPuestosVacios"',
-            'grupo.name = "EcosTabiquesOficina"',
+            'paneles.name = "EcosTabiquesOficina"',
             'grupo.name = "EcosMobiliarioOficina"',
             '"oficina_psx/desk1"',
             '"oficina_psx/office_chair_black"',
