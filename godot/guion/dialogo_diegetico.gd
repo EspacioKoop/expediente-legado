@@ -83,9 +83,9 @@ static func mostrar_eleccion(
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 
 	var contenido := panel.get_node_or_null("ContenidoDialogoDiegetico") as VBoxContainer
-	var etiqueta := panel.get_node_or_null(
-		"ContenidoDialogoDiegetico/TextoDialogoDiegetico"
-	) as Label
+	var etiqueta := (
+		panel.get_node_or_null("ContenidoDialogoDiegetico/TextoDialogoDiegetico") as Label
+	)
 	if contenido == null or etiqueta == null:
 		hud.get_tree().create_timer(DURACION).timeout.connect(_retirar.bind(panel, hud))
 		return panel
