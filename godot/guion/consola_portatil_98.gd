@@ -136,9 +136,7 @@ func _montar_colision() -> void:
 func _montar_carcasa() -> void:
 	var carcasa := MeshInstance3D.new()
 	carcasa.name = "CarcasaPortatilOriginal98"
-	carcasa.mesh = load(
-		"res://assets/modelos/props_originales_98/consola_portatil_98.obj"
-	) as Mesh
+	carcasa.mesh = load("res://assets/modelos/props_originales_98/consola_portatil_98.obj") as Mesh
 	add_child(carcasa)
 
 	# La pantalla dinámica se mantiene separada para reflejar encendido/apagado
@@ -151,6 +149,7 @@ func _montar_carcasa() -> void:
 	_material_pantalla.emission_enabled = true
 	_material_pantalla.emission = Color(0.08, 0.12, 0.09)
 	_material_pantalla.emission_energy_multiplier = 0.15
+
 
 func _montar_link_cable() -> void:
 	var cable := MeshInstance3D.new()
