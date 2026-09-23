@@ -4,12 +4,20 @@ Este gate convierte el pendiente visual de #282 en una revisión reproducible. E
 workflow **Evidencia densidad 282** arranca el recorrido real de `dia.tscn` y
 produce **12 capturas sin HUD**: oficina, calle, casa y sueño, cada una desde el
 spawn jugable en tres direcciones reproducibles —frente, izquierda y derecha—,
-con cámara del jugador a 1280×720 y FOV 70.
+con cámara del jugador a 1280×720 y FOV 70. Estas vistas son el panorama
+transversal y mantienen las métricas comparables entre fases.
 
-La ampliación a tres direcciones evita que un único encuadre convierta en falso
-negativo un proxy, una superficie vacía o una composición pobre que quede justo
-fuera de cámara. No mueve al jugador a puntos artificiales: las tres vistas
-comparten el mismo spawn y solo cambia el rumbo de cámara.
+El artifact incluye además **13 vistas canónicas** en `canonicas/`, reutilizando
+los encuadres mantenidos por los gates específicos de oficina (#126), calle
+(#277), casa (#133) y sueño (#284). Estas son las vistas prioritarias para la
+revisión humana: apuntan a puestos/archivo, accesos, escaparates, portal,
+estancias domésticas, consola/TV y las identidades oníricas, en vez de asumir que
+girar ±90° desde un único spawn siempre enseña contenido útil.
+
+El artifact de #1285 confirmó precisamente ese límite: aunque las tres imágenes
+por fase eran distintas, algunas laterales quedaban dominadas por una pared o
+por espacio vacío. Se conservan porque sirven como snapshots comparables del
+spawn, pero **no deben usarse solas como veredicto visual**.
 
 El workflow usa el renderer declarado por el proyecto, actualmente **Forward+**.
 No fuerza `gl_compatibility`: desde #1243 hay diferencias visuales relevantes
@@ -55,8 +63,13 @@ una fase porque un único encuadre casual no enseñaba su punto débil.
   o deformar objetos reconocibles de vigilia; no volver a un corredor de bloques
   ni a planos/láminas de debug.
 
-La automatización comprueba que existen las doce vistas, que las tres imágenes de
-cada fase son distintas y que el manifiesto es internamente coherente.
+La automatización comprueba que existen las doce vistas panorámicas, que las tres
+imágenes de cada fase son distintas, que el manifiesto es internamente coherente
+y que las 13 vistas canónicas de las cuatro verticales se han generado. El
+directorio `canonicas/` se considera el conjunto principal para el pase visual;
+el panorama desde spawn queda como apoyo diagnóstico.
+
 **No sustituye la revisión humana** exigida por #282/#398/#400: el cierre sigue
-necesitando mirar las capturas o jugar el recorrido y registrar qué proxy,
-objeto o composición concreta falla si la densidad todavía no es suficiente.
+necesitando mirar las vistas canónicas o jugar el recorrido y registrar qué
+proxy, objeto o composición concreta falla si la densidad todavía no es
+suficiente.
