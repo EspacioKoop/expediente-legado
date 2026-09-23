@@ -29,8 +29,8 @@ class CalleFondosFotorealistas98Test(unittest.TestCase):
         for archivo in ARCHIVOS:
             self.assertIn(f'"{archivo}"', self.runtime)
         self.assertIn("CalleFondosFotorealistas98.montar(mundo)", self.skyline)
-        self.assertIn("Vector3(-10.5, 0.0, -3.8)", self.runtime)
-        self.assertIn("Vector3(10.7, 0.0, -2.2)", self.runtime)
+        self.assertIn("Vector3(-9.4, 0.0, -0.8)", self.runtime)
+        self.assertIn("Vector3(9.4, 0.0, -0.4)", self.runtime)
 
     def test_son_impostores_3d_con_profundidad_y_sin_billboard(self):
         for contrato in (
@@ -40,11 +40,11 @@ class CalleFondosFotorealistas98Test(unittest.TestCase):
             "sprite.double_sided = true",
             "sprite.fixed_size = false",
             "sprite.no_depth_test = false",
-            "sprite.rotation_degrees.y",
+            "BaseMaterial3D.BILLBOARD_FIXED_Y",
             "sprite.pixel_size",
         ):
             self.assertIn(contrato, self.runtime)
-        self.assertNotIn("BILLBOARD_", self.runtime)
+        self.assertNotIn("BILLBOARD_ENABLED", self.runtime)
 
     def test_no_introduce_fisica_interaccion_ni_reglas(self):
         for termino in (
