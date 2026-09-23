@@ -305,9 +305,9 @@ func _guardar() -> void:
 	_partida.estado["perfil_jugador"] = _perfil
 	var auditoria_previa: Dictionary = {}
 	if _alta_pendiente and _auditorias != null:
-		auditoria_previa = (
-			Dictionary(_partida.estado.get(Auditorias.CLAVE_ESTADO, {})).duplicate(true)
-		)
+		auditoria_previa = (Dictionary(_partida.estado.get(Auditorias.CLAVE_ESTADO, {})).duplicate(
+			true
+		))
 		if not Auditorias.resolver_seleccion(_partida.estado, _auditorias.seleccion()):
 			_estado.text = tr("PERSONAJE_ERROR_GUARDAR")
 			return
