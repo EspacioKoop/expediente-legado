@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "dialogos": [
+    {
+      "id": "biblioteca_calderon_apariencia",
+      "npc": {
+        "id": "mediadora_biblioteca_98",
+        "nombre": "Marta",
+        "rol": "mediadora cultural"
+      },
+      "obra_id": "vida_es_sueno_1635",
+      "movimiento": {
+        "id": "barroco",
+        "nombre": "Barroco",
+        "contexto": "El Barroco permite situar la tensión entre apariencia, representación y elección sin atribuir una identidad cultural al jugador."
+      },
+      "apertura": "Marta deja el libro abierto: «¿Qué te interesa de que Segismundo dude de lo que ve?»",
+      "ramas": [
+        {
+          "id": "eleccion",
+          "texto": "Que, aun dudando de la realidad, tenga que responder por lo que elige.",
+          "respuesta": "Marta asiente: «Entonces no estás diciendo quién eres; estás señalando una tensión entre incertidumbre y responsabilidad.»",
+          "consecuencia_visible": "Marta anota «elección bajo incertidumbre» en la ficha de lectura.",
+          "reentrada": "Marta señala la anotación anterior: «Seguimos teniendo esa elección bajo incertidumbre como referencia.»",
+          "insight_id": "apariencia_y_eleccion",
+          "etiquetas": [
+            "barroco",
+            "apariencia",
+            "eleccion"
+          ]
+        },
+        {
+          "id": "representacion",
+          "texto": "Que el papel que interpreta pueda confundirse con lo que realmente es.",
+          "respuesta": "Marta responde: «Eso nos sirve para hablar de representación sin convertir una lectura en una etiqueta sobre ti.»",
+          "consecuencia_visible": "Marta subraya «representación no equivale a identidad» en la ficha de lectura.",
+          "reentrada": "Marta vuelve al subrayado: «La representación sigue siendo contexto, no una afiliación tuya.»",
+          "insight_id": "apariencia_y_eleccion",
+          "etiquetas": [
+            "barroco",
+            "apariencia",
+            "representacion"
+          ]
+        }
+      ]
+    }
+  ]
+}
