@@ -130,7 +130,7 @@ La segunda forma requiere diseño propio, criterios de aceptación y, normalment
 
 ## Estado de adopción
 
-La investigación ya no parte de cero. A fecha de esta actualización:
+La investigación ya no parte de cero. A fecha de 23/09/2026:
 
 | Entrega | Estado | Consecuencia |
 | --- | --- | --- |
@@ -138,21 +138,33 @@ La investigación ya no parte de cero. A fecha de esta actualización:
 | *Steins;Gate*, Lain PS1 y continuidad inspirada por Kojima (#247) | Integrada | Queda fijada la frontera `estado persistido -> variante de presentación` |
 | Repetición con variación casa → sueño (#311) | Integrada y probada | Primer principio de #177 que llegó a gameplay real; no se debe reimplementar en otro sistema |
 | Comparación jugable de Evangelion (#329) | Integrada | Completa la entrega pendiente de adaptaciones jugables y refuerza estado/determinismo/accesibilidad |
-| Cinemáticas 3D prioritarias (#395) | En implementación independiente | #177 aporta criterios; #395 es dueño de cámara, continuidad espacial y puesta en escena ejecutable |
+| Síntesis post-playtest (#856) | Integrada | El fallo humano del 17/09 se convirtió en la gramática `orientar → acción → residuo` |
+| Entrada / oficina (#858) | Integrada | Primer vertical rehecho bajo la gramática post-playtest |
+| Casa → sueño (#1073) | Integrada | Segundo vertical rehecho; continuidad de cámara y fundido opt-in sobre la casa real |
+| Oficina → trayecto (#1074) | Integrada | Tercer vertical rehecho; mantiene un referente del archivo hasta completar el tránsito |
+| Enganches funcionales entre fases (#280 / #1036) | Cerrados | Entrada, inicio de jornada, archivo → trayecto y casa → sueño están cubiertos por regresión real |
+| Protocolo de validación humana (#682) | Integrado | El último gate puede ejecutarse de forma ciega y registrar respuestas literales |
+| Calidad/dirección P0 (#395) | Validación humana | No autoriza más retoques por lectura de código: el siguiente cambio debe responder a un fallo observado |
 
-Por tanto, #177 **no debe generar más PR de código por inspiración aislada**. Una técnica solo pasa a implementación si resuelve un problema observado y el issue dueño de ese problema la adopta. Esto evita competir con el plan maestro y evita que la investigación se convierta en expansión opcional.
+Por tanto, #177 **no debe generar más PR de código por inspiración aislada**. Los tres blueprints derivados del fallo humano ya están implementados. Una técnica solo vuelve a pasar a implementación si un pase real detecta un problema concreto y el issue dueño de ese problema la adopta.
 
 ### Gate restante de investigación
 
-La parte documental está suficientemente cubierta. El único gate propio que queda es comprobar, durante los próximos playtests de cinemáticas, que las guardas anteriores se cumplen en la práctica:
+La parte documental y la traducción a gameplay están cubiertas. El único gate propio que queda es el pase ciego sobre una build posterior a #1074, usando el protocolo de #682 y registrando el resultado bajo #395.
+
+Para poder cerrar #177 deben quedar verificadas conjuntamente estas guardas:
 
 - saltar una escena no cambia estado ni pierde progreso;
 - la alternativa de movimiento reducido conserva información y continuidad;
 - ninguna variación revela información no conocida;
-- una persona que no conozca las referencias externas entiende la escena;
+- una persona sin conocimiento previo de las referencias entiende **entrada/oficina**, **oficina → trayecto** y **casa → sueño**;
+- el participante puede identificar dónde estaba y dónde termina cada transición sin depender de rótulos explicativos;
+- no se reproducen los fallos del 17/09 de ritmo, encuadre, contenido de plano o acabado de forma que bloqueen la comprensión;
 - las escenas recurrentes no se vuelven más largas o invasivas con la repetición.
 
-Si esos puntos se validan bajo #395/#280, #177 puede cerrarse como investigación completada sin exigir un cuarto prototipo independiente.
+#280 ya no bloquea este cierre: quedó resuelto como defecto funcional. El bloqueo vigente es #395 en `estado:validacion-humana`.
+
+Si el pase ciego supera esos puntos, #177 puede cerrarse como investigación aplicada completada. Si falla, el nuevo trabajo debe abrirse o continuar bajo el issue dueño de la escena concreta y #177 solo debe conservar la trazabilidad de qué principio se corrigió.
 
 ## Fronteras con otros issues
 
