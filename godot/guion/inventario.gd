@@ -39,6 +39,29 @@ static func sacar_de_casa(estado: Dictionary, objeto_id: String) -> bool:
 	return _mover(estado, objeto_id, HOME_STORAGE, CARRIED)
 
 
+## Extrae un objeto por id conservando su ubicación original para que sistemas
+## de dominio puedan aplicar una operación transaccional y, si hiciera falta,
+## restaurarlo sin inventar una segunda representación del inventario.
+static func retirar(estado: Dictionary, objeto_id: String) -> Dictionary:
+	completar(estado)
+	for ubicacion in [CARRIED, HOME_STORAGE]:
+		var indice := _indice(estado[ubicacion], objeto_id)
+		if indice < 0:
+			continue
+		var objeto: Dictionary = estado[ubicacion][indice]
+		estado[ubicacion].remove_at(indice)
+		return {
+			"retirado": true,
+			"objeto": objeto,
+			"ubicacion": ubicacion,
+		}
+	return {
+		"retirado": false,
+		"objeto": {},
+		"ubicacion": "",
+	}
+
+
 static func vender(estado: Dictionary, objeto_id: String) -> Dictionary:
 	completar(estado)
 	for ubicacion in [CARRIED, HOME_STORAGE]:
