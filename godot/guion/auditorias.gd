@@ -13,6 +13,7 @@ const CLAVE_SELECCION_RESUELTA := "seleccion_resuelta"
 const ACCION_SOBRANTE := "accion_sobrante"
 const GATO_DIARIO := "gato_diario"
 const SIN_RELEER := "sin_releer"
+const SUENO_COMPLETO := "sueno_completo"
 
 ## El contrato base solo declara identidades e incompatibilidades. Los rótulos
 ## pertenecen a la futura capa de selección/consulta: declarar aquí claves de
@@ -197,6 +198,21 @@ static func resolver_apertura_documento(
 
 	var cambio := fallar(auditoria, SIN_RELEER, "documento_releido")
 	return {"resultado": "fallida", "id": SIN_RELEER, "cambio": cambio}
+
+
+## Cuarto predicado verificable: quien controla la transición del sueño ya sabe
+## si la noche terminó por consumir su última escena o si se cortó de golpe.
+## Auditorias recibe ese hecho y no interpreta reloj, objetivos ni combates.
+static func resolver_fin_sueno(estado_partida: Dictionary, completado: bool) -> Dictionary:
+	var auditoria := asegurar_en_estado(estado_partida)
+	var estado_actual := estado(auditoria, SUENO_COMPLETO)
+	if estado_actual != "activa":
+		return {"resultado": estado_actual, "id": SUENO_COMPLETO, "cambio": false}
+	if completado:
+		return {"resultado": "activa", "id": SUENO_COMPLETO, "cambio": false}
+
+	var cambio := fallar(auditoria, SUENO_COMPLETO, "sueno_interrumpido")
+	return {"resultado": "fallida", "id": SUENO_COMPLETO, "cambio": cambio}
 
 
 ## Valida únicamente estructura e invariantes persistibles. Las reglas de
