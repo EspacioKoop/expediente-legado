@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 LIBRO = ROOT / "godot" / "interactables" / "libros" / "libro_lectura_significativa.gd"
 BIBLIOTECA = ROOT / "godot" / "espacios" / "biblioteca" / "biblioteca.tscn"
 RITUAL = ROOT / "godot" / "rituales" / "literarios" / "ritual_cita.gd"
-TEST_GODOT = "res://pruebas/pruebas_biblioteca_literaria_1181.gd"
+TEST_GODOT = "res://pruebas/pruebas_biblioteca_literaria_1181.tscn"
 
 
 class BibliotecaLiteraria1181Test(unittest.TestCase):
@@ -56,7 +56,6 @@ class BibliotecaLiteraria1181Test(unittest.TestCase):
                     "es",
                     "--path",
                     str(ROOT / "godot"),
-                    "--script",
                     TEST_GODOT,
                 ],
                 env=env,
