@@ -1,5 +1,5 @@
 {
-  "_regla": "Índice único de ROMs propias de SIGA-98. Toda ROM propia que tenga fuente, se compile, se venda, aparezca en la consola o active una semilla onírica está aquí con un id estable. Una ROM en_proyecto puede tener fuente prototipo verificable sin entrar todavía en runtime. Solo código propio bajo gbc/minijuegos/<id>; nunca BIOS, dumps ni ROMs comerciales. Ver docs/roms-propias.md.",
+  "_regla": "Índice único de ROMs propias de SIGA-98. Toda ROM propia que tenga fuente, se compile, se venda, se desbloquee, aparezca en la consola o active una semilla onírica está aquí con un id estable. Una ROM en_proyecto puede tener fuente prototipo verificable sin entrar todavía en runtime. Solo código propio bajo gbc/minijuegos/<id>; nunca BIOS, dumps ni ROMs comerciales. Ver docs/roms-propias.md.",
   "estados": {
     "jugable": "Hay fuente en gbc/minijuegos/<id>, compila con RGBDS y el build de runtime la deja en res://roms/<id>.gbc.",
     "en_proyecto": "Decidida y con issue. Puede no tener fuente o tener un prototipo compilable en CI aislado; no se vende, no entra en el build de runtime y no aparece en la consola."
@@ -17,7 +17,32 @@
       "cgb": "dual",
       "incluida": true,
       "precio": 0,
-      "issues": [124, 95, 384, 386],
+      "issues": [
+        124,
+        95,
+        384,
+        386
+      ],
+      "mito": ""
+    },
+    {
+      "id": "sueno_98",
+      "titulo": "SUEÑO 98",
+      "estado": "jugable",
+      "genero": "puzle de perspectivas",
+      "resumen": "Alinear tres composiciones abstractas de luz y sombra tras conocer La vida es sueño; solo la tercera solución publica el handshake literario.",
+      "fuente": "gbc/minijuegos/sueno_98",
+      "rom": "res://roms/sueno_98.gbc",
+      "cabecera": "SUENO98",
+      "cgb": "dual",
+      "incluida": false,
+      "precio": 0,
+      "desbloqueo": "conocimiento:vida_es_sueno_1635",
+      "issues": [
+        1179,
+        1175,
+        1176
+      ],
       "mito": ""
     },
     {
@@ -32,7 +57,10 @@
       "cgb": "dual",
       "incluida": false,
       "precio": 45,
-      "issues": [95, 388],
+      "issues": [
+        95,
+        388
+      ],
       "mito": ""
     },
     {
@@ -47,7 +75,10 @@
       "cgb": "dual",
       "incluida": false,
       "precio": 45,
-      "issues": [95, 389],
+      "issues": [
+        95,
+        389
+      ],
       "mito": ""
     },
     {
@@ -62,7 +93,11 @@
       "cgb": "",
       "incluida": false,
       "precio": 0,
-      "issues": [437, 442, 512],
+      "issues": [
+        437,
+        442,
+        512
+      ],
       "mito": "minotauro"
     },
     {
@@ -77,7 +112,10 @@
       "cgb": "",
       "incluida": false,
       "precio": 0,
-      "issues": [436, 442],
+      "issues": [
+        436,
+        442
+      ],
       "mito": "gilgamesh"
     },
     {
@@ -92,7 +130,10 @@
       "cgb": "dual",
       "incluida": false,
       "precio": 0,
-      "issues": [439, 442],
+      "issues": [
+        439,
+        442
+      ],
       "mito": "hidra"
     },
     {
@@ -107,7 +148,11 @@
       "cgb": "dual",
       "incluida": false,
       "precio": 0,
-      "issues": [748, 656, 442],
+      "issues": [
+        748,
+        656,
+        442
+      ],
       "mito": "anansi_akan"
     },
     {
@@ -122,7 +167,14 @@
       "cgb": "dual",
       "incluida": false,
       "precio": 45,
-      "issues": [440, 442, 542, 609, 622, 627],
+      "issues": [
+        440,
+        442,
+        542,
+        609,
+        622,
+        627
+      ],
       "mito": "dragon_japones"
     },
     {
@@ -137,7 +189,10 @@
       "cgb": "",
       "incluida": false,
       "precio": 0,
-      "issues": [441, 442],
+      "issues": [
+        441,
+        442
+      ],
       "mito": "duat"
     },
     {
@@ -152,7 +207,10 @@
       "cgb": "dual",
       "incluida": false,
       "precio": 45,
-      "issues": [438, 442],
+      "issues": [
+        438,
+        442
+      ],
       "mito": "aquiles"
     },
     {
@@ -167,7 +225,11 @@
       "cgb": "dual",
       "incluida": false,
       "precio": 45,
-      "issues": [932, 916, 931],
+      "issues": [
+        932,
+        916,
+        931
+      ],
       "mito": ""
     },
     {
@@ -182,7 +244,11 @@
       "cgb": "dual",
       "incluida": false,
       "precio": 45,
-      "issues": [932, 916, 931],
+      "issues": [
+        932,
+        916,
+        931
+      ],
       "mito": ""
     },
     {
@@ -197,7 +263,11 @@
       "cgb": "dual",
       "incluida": false,
       "precio": 45,
-      "issues": [932, 916, 931],
+      "issues": [
+        932,
+        916,
+        931
+      ],
       "mito": ""
     }
   ]
