@@ -392,9 +392,10 @@ func _cargar_catalogo(ruta: String) -> void:
 			_registrar_recurso((valor as Dictionary).duplicate(true))
 	if ruta == RUTA_CATALOGO:
 		_cargar_recursos_extra(RUTA_AMATEUR)
+		_cargar_bbs()
 		_anexar_enlaces(
 			"directorio-red98",
-			["ring-aficiones-index", "ring-caseras-index", "pagina-gatos"],
+			["ring-aficiones-index", "ring-caseras-index", "pagina-gatos", "byte-local-bbs"],
 		)
 	_cargar_cabeceras_prensa()
 	_anexar_enlaces_prensa()
@@ -409,6 +410,12 @@ func _cargar_recursos_extra(ruta: String) -> void:
 	for valor in (datos as Dictionary).get("recursos", []):
 		if valor is Dictionary:
 			_registrar_recurso((valor as Dictionary).duplicate(true))
+
+
+func _cargar_bbs() -> void:
+	var bbs := Bbs98Modelo.new()
+	for recurso in bbs.recursos_web_catalogo():
+		_registrar_recurso(recurso)
 
 
 func _cargar_cabeceras_prensa() -> void:
