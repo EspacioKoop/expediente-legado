@@ -36,5 +36,14 @@ Antes de usar un prop en primer plano o en una build pública conviene retirar/r
 rotulación y revisar el recorte. También puede quedar algún píxel del fondo de estudio en
 bordes complejos.
 
-El lote no modifica todavía ninguna escena: entra como biblioteca utilizable para evitar
-acoplar una decisión de colocación a la incorporación de los recursos.
+## Integración en la oficina
+
+`OficinaFotorealista98` monta los seis recortes únicamente durante la fase `archivo`:
+
+- fotocopiadora y dispensador de agua como dressing de suelo;
+- fax y escáner sobre la batería de archivadores;
+- grapadora y perforadora sobre la mesa de clasificación.
+
+Se usan `Sprite3D` con billboard fijo en Y, recorte alfa y sombreado por las luces del
+archivo. No tienen colisión ni interacción: siguen siendo escenografía ligera y no alteran
+navegación, economía ni persistencia.
