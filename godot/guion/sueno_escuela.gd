@@ -49,13 +49,16 @@ static func adaptar_espacio(
 	var tabiques: Array = resultado.get("tabiques_poligonales", []).duplicate(true)
 	if not frase_conocida.is_empty():
 		var largo := clampf(4.0 + float(frase_conocida.length()) * 0.03, 4.0, 6.5)
-		tabiques.append(
-			{
-				"desde": Vector2(-5.5, -2.5),
-				"hasta": Vector2(-5.5 + largo, 0.8),
-				"altura_desde": 1.35,
-				"altura_hasta": 2.35,
-			}
+		(
+			tabiques
+			. append(
+				{
+					"desde": Vector2(-5.5, -2.5),
+					"hasta": Vector2(-5.5 + largo, 0.8),
+					"altura_desde": 1.35,
+					"altura_hasta": 2.35,
+				}
+			)
 		)
 	resultado["tabiques_poligonales"] = tabiques
 
