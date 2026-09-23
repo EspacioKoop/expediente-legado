@@ -15,7 +15,7 @@ static func resolver(
 		return {
 			"consumidor": "dialogo_reentrada",
 			"disponible": false,
-		"texto": "",
+			"texto": "",
 			"insight_id": "",
 			"fuente": "",
 		}
