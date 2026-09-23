@@ -142,7 +142,9 @@ func _ejecutar() -> void:
 				continue
 			conteo_fachadas["render_batches"] += 1
 			conteo_fachadas["batched_instances"] += lote.multimesh.instance_count
-	conteo_fachadas["animated_windows"] = ventanas_vivas.ventanas_animadas() if ventanas_vivas != null else 0
+	conteo_fachadas["animated_windows"] = (
+		ventanas_vivas.ventanas_animadas() if ventanas_vivas != null else 0
+	)
 	conteo_fachadas["wind_materials"] = viento.materiales() if viento != null else 0
 	conteo_fachadas["active_pieces"] = int(animador.estado()["activas"]) if animador != null else 0
 
