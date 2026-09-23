@@ -10,7 +10,7 @@
   "detalle_origen": "Origen: %s",
   "volver": "Volver",
   "combinacion_titulo": "Combinar objetos",
-  "combinacion_ayuda": "Selecciona un objeto y asígnalo a cada ranura. También puedes activar un objeto para ocupar la siguiente ranura libre.",
+  "combinacion_ayuda": "Arrastra un objeto del inventario a cada ranura. Con teclado o mando, selecciona y activa el objeto o usa los botones de ranura.",
   "combinacion_slot_a": "Ranura A",
   "combinacion_slot_b": "Ranura B",
   "combinacion_combinar": "Combinar",
