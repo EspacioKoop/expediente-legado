@@ -9,7 +9,7 @@ const TAMANO := Vector2i(1280, 720)
 const FOV := 70.0
 const ALTURA_JUGADOR := 1.65
 const FORMA := "peine"
-const ESCALA_RYU := 0.48
+const ESCALA_RYU := SuenoRyu.ESCALA_ENCUENTRO
 
 const CASOS := [
 	{"id": "normal_inicial", "reduccion_movimiento": false, "resolver": false},
