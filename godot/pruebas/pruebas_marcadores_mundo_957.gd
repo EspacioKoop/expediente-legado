@@ -242,6 +242,19 @@ func _initialize() -> void:
 		"guardar y cargar conserva marcas oníricas",
 	)
 
+	# El copy vive en textos.csv: si la clave no resolviera, el panel mostraría
+	# «MARCADORES_MUNDO_…». En _initialize el árbol aún no propaga _ready, así
+	# que el panel se monta a mano.
+	var panel: PanelContainer = load("res://guion/marcadores_mundo_panel.gd").new()
+	panel.call("_montar")
+	_comprobar(panel.get("_limpiar_zona").text == "Limpiar zona", "el panel resuelve su copy")
+	panel.call("abrir", false, false, 0)
+	_comprobar(
+		not String(panel.get("_estado").text).begins_with("MARCADORES_MUNDO_"),
+		"el estado del panel no muestra claves",
+	)
+	panel.free()
+
 	_limpiar()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
