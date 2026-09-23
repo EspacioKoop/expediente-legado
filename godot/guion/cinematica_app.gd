@@ -127,6 +127,7 @@ func _siguiente() -> void:
 
 	_actualizar_fundido(plano, 0.0)
 	plano_entrado.emit(_plano, plano)
+	_sonar_plano(plano)
 
 	var es_2d: bool = plano["tipo"] == "2d"
 	_fondo.visible = es_2d
@@ -135,6 +136,18 @@ func _siguiente() -> void:
 	_preparar_plato(decorado)
 	if _camara != null:
 		_camara.current = not es_2d and (not decorado.is_empty() or _tiene_mundo_3d())
+
+
+## Acento puntual opt-in del plano. Se delega en `Sonido`, que crea una voz
+## efímera y la libera al terminar. El reproductor no conserva AudioStream ni
+## AudioStreamPlayer propios: al cerrar/saltar la cinemática, liberar este nodo
+## libera también cualquier hijo que todavía estuviera sonando.
+func _sonar_plano(plano: Dictionary) -> void:
+	var nombre := String(plano.get("sonido", ""))
+	if nombre.is_empty():
+		return
+	var tono := float(plano.get("sonido_tono", 1.0))
+	Sonido.sonar(self, nombre, tono)
 
 
 func _terminar() -> void:
