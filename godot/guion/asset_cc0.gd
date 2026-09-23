@@ -28,7 +28,7 @@ static func _adaptar_materiales(pieza: Node3D) -> void:
 		for superficie in malla.mesh.get_surface_count():
 			var original := malla.get_active_material(superficie) as BaseMaterial3D
 			var material := ShaderMaterial.new()
-			material.shader = load(Espacio3D.SHADER_PSX)
+			material.shader = load(Espacio3D.shader_del_sitio())
 			material.set_shader_parameter("usar_uv", true)
 			if original != null:
 				material.set_shader_parameter("color_base", original.albedo_color)

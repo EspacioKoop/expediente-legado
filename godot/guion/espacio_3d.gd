@@ -57,6 +57,14 @@ const ALTURA_CARTEL := 1.7
 static var _shader_del_sitio := SHADER_PSX
 
 
+## El shader con el que se pinta el sitio montado. Lo que se monta DENTRO de un
+## sitio —muebles, assets, personas, ropa— lo pide aquí en vez de fijar el
+## canónico: en la oficina de #789 la envolvente recibía sombra y todo lo que
+## había encima no, así que las figuras seguían leyéndose como siluetas.
+static func shader_del_sitio() -> String:
+	return _shader_del_sitio
+
+
 ## Monta el espacio bajo [param raiz] y devuelve las salidas creadas, para que
 ## quien orquesta el día pueda escucharlas.
 static func construir(raiz: Node3D, espacio: Dictionary) -> Array:

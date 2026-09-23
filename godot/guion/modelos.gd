@@ -783,7 +783,7 @@ static func _rasgo_esfera(padre: Node3D, posicion: Vector3, escala: Vector3, col
 
 static func _material_rasgo(color: Color) -> ShaderMaterial:
 	var material := ShaderMaterial.new()
-	material.shader = load(Espacio3D.SHADER_PSX)
+	material.shader = load(Espacio3D.shader_del_sitio())
 	material.set_shader_parameter("color_base", color)
 	return material
 
@@ -849,7 +849,7 @@ static func _limites(nodo: Node3D) -> AABB:
 ## convertirse en una superficie plana de otro juego.
 static func _pintar(nodo: Node3D, color: Color, textura: String = "") -> void:
 	var material := ShaderMaterial.new()
-	material.shader = load(Espacio3D.SHADER_PSX)
+	material.shader = load(Espacio3D.shader_del_sitio())
 	material.set_shader_parameter("color_base", color)
 	if not textura.is_empty():
 		var imagen := TexturaProcedural.por_nombre(textura, color, hash(textura))

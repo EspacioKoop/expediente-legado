@@ -52,7 +52,7 @@ class Rostros3DTest(unittest.TestCase):
         self.assertIn("perfil.get(\"x\"", self.cara)
 
     def test_conserva_el_shader_comun(self):
-        self.assertIn("material.shader = load(Espacio3D.SHADER_PSX)", self.texto)
+        self.assertIn("material.shader = load(Espacio3D.shader_del_sitio())", self.texto)
 
 
 if __name__ == "__main__":
