@@ -188,6 +188,12 @@ jobs:
           python -m venv /tmp/pyboy
           /tmp/pyboy/bin/python -m pip install --quiet pyboy==2.6.1
 
+      - name: Play-test Paper Planes 98
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C gbc/minijuegos/paper_planes_98 test PYTHON=/tmp/pyboy/bin/python
+
       - name: Build and play-test RYU_FLOW
         shell: bash
         run: |

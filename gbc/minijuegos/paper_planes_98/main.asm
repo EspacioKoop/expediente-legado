@@ -821,6 +821,7 @@ PonerSprite:
     ret
 
 DibujarHUD:
+    ; Una sola fila mantiene estado y deja el cielo libre para leer la ruta.
     ld a, [wTipoHito]
     and 1
     jr nz, .viento_abajo
@@ -831,18 +832,15 @@ DibujarHUD:
 .hud0:
     ld de, BG_MAP
     call EscribirCadena
-    ld hl, TextoHUD1
-    ld de, BG_MAP + 32
-    call EscribirCadena
 
     ld a, [wVidas]
     call TileDigito
-    ld [BG_MAP + 10], a
+    ld [BG_MAP + 1], a
 
     ld a, [wTipoHito]
     inc a
     call TileDigito
-    ld [BG_MAP + 32 + 4], a
+    ld [BG_MAP + 8], a
 
     ld a, [wScore]
     ld b, 0
@@ -854,14 +852,14 @@ DibujarHUD:
     ld c, a
     ld a, b
     call TileDigito
-    ld [BG_MAP + 32 + 9], a
+    ld [BG_MAP + 13], a
     ld a, c
     call TileDigito
-    ld [BG_MAP + 32 + 10], a
+    ld [BG_MAP + 14], a
 
     ld a, [wPerfectos]
     call TileDigito
-    ld [BG_MAP + 32 + 16], a
+    ld [BG_MAP + 17], a
     ret
 
 DibujarNombreHito:
@@ -1042,6 +1040,12 @@ LimpiarBG:
     ret
 
 DibujarFondoBase:
+    ; Rompe el cielo plano con tres nubes, sin competir con los hitos.
+    ld a, TILE_NUBE
+    ld [BG_MAP + (5 * 32) + 2], a
+    ld [BG_MAP + (8 * 32) + 15], a
+    ld [BG_MAP + (11 * 32) + 7], a
+
     ld hl, BG_MAP + (15 * 32)
     ld b, 20
     ld a, TILE_SKYLINE
@@ -1050,17 +1054,36 @@ DibujarFondoBase:
     dec b
     jr nz, .skyline
 
+    ; El tilemap mide 32 celdas por fila aunque solo 20 sean visibles.
+    ; Dibujar 40 celdas seguidas producía una barra de agua de 32+8.
     ld hl, BG_MAP + (16 * 32)
-    ld b, 40
+    ld b, 20
     ld a, TILE_AGUA
-.agua:
+.agua_superior:
     ld [hli], a
     dec b
-    jr nz, .agua
+    jr nz, .agua_superior
+
+    ld hl, BG_MAP + (17 * 32)
+    ld b, 20
+    ld a, TILE_AGUA
+.agua_inferior:
+    ld [hli], a
+    dec b
+    jr nz, .agua_inferior
     ret
 
 DibujarFondoJuego:
     call DibujarFondoBase
+
+    ; Una segunda capa baja da masa al skyline sin tapar título/final.
+    ld hl, BG_MAP + (14 * 32)
+    ld b, 20
+    ld a, TILE_EDIFICIO
+.edificios:
+    ld [hli], a
+    dec b
+    jr nz, .edificios
     ret
 
 CargarTiles:
@@ -1206,9 +1229,8 @@ TextoNY1998:   db "NEW YORK 1998", 0
 TextoVolar:    db "A/UP FLY  B HOLD", 0
 TextoRuta1:    db "LIBERTY > WTC", 0
 TextoRuta2:    db "BRIDGE > EMPIRE", 0
-TextoHUDUp:    db "NYC98 FOLD3 WIND UP", 0
-TextoHUDDown:  db "NYC98 FOLD3 WIND DN", 0
-TextoHUD1:     db "GATE1/4 S00 PERF0", 0
+TextoHUDUp:    db "F3 WUP G1/4 S00 P0", 0
+TextoHUDDown:  db "F3 WDN G1/4 S00 P0", 0
 TextoLiberty:  db "LIBERTY", 0
 TextoWTC:      db "WTC", 0
 TextoBridge:   db "BRIDGE", 0
@@ -1221,8 +1243,9 @@ TextoAgain:    db "A/START AGAIN", 0
 
 Tiles:
     db $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-    db $00, $00, $00, $00, $01, $00, $07, $00, $1F, $00, $F8, $18, $1F, $00, $07, $00
-    db $80, $00, $E0, $00, $FC, $00, $18, $FF, $FC, $00, $E0, $00, $80, $00, $00, $00
+    ; Silueta 16x8 más compacta: ambos bitplanes marcan contorno oscuro.
+    db $01, $01, $03, $03, $0F, $0F, $FF, $FF, $0F, $0F, $03, $03, $00, $00, $00, $00
+    db $00, $00, $80, $80, $C0, $C0, $FF, $FF, $FE, $FE, $FC, $FC, $F8, $F8, $38, $38
     db $FF, $FF, $DB, $99, $DB, $99, $FF, $FF, $B7, $B7, $B7, $B7, $FF, $FF, $B7, $B7
     db $18, $18, $3C, $3C, $7E, $7E, $FF, $FF, $FF, $FF, $B7, $B7, $B7, $B7, $FF, $FF
     db $18, $18, $18, $18, $18, $18, $3C, $3C, $3C, $3C, $7E, $7E, $FF, $FF, $FF, $FF
@@ -1277,7 +1300,8 @@ Tiles:
 TilesFin:
 
 PaletaFondo:
-    dw $7FFF, $7E40, $58A0, $0000
+    ; Azul cielo pálido en el color 0: conserva contraste sin fondo blanco lavado.
+    dw $7F56, $7E40, $58A0, $0000
 PaletaFondoFin:
 
 PaletasObjetos:
