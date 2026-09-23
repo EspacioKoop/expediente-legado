@@ -31,15 +31,21 @@ func _estado_base() -> Dictionary:
 func _probar_oficina_y_lectura_social() -> void:
 	var estado := _estado_base()
 	estado["veredictos"][DecisionIdeologicaExpediente.CASO_VERTICAL] = "sospechosoIbarra@1"
-	DecisionIdeologicaExpediente.resolver(
-		estado,
-		DecisionIdeologicaExpediente.CASO_VERTICAL,
-		"responsabilidad_compartida",
+	(
+		DecisionIdeologicaExpediente
+		. resolver(
+			estado,
+			DecisionIdeologicaExpediente.CASO_VERTICAL,
+			"responsabilidad_compartida",
+		)
 	)
 	var antes := Prometeo.conteo_elecciones_ideologicas(estado).duplicate(true)
-	var variante := DialogoIdeologico.resolver(
-		DialogoIdeologico.SUPERFICIE_OFICINA_CUNADO,
-		estado,
+	var variante := (
+		DialogoIdeologico
+		. resolver(
+			DialogoIdeologico.SUPERFICIE_OFICINA_CUNADO,
+			estado,
+		)
 	)
 	_comprobar(
 		variante.get("clave", ""),
@@ -66,24 +72,34 @@ func _probar_oficina_y_lectura_social() -> void:
 func _probar_exposicion_en_careo() -> void:
 	var estado := _estado_base()
 	_comprobar(
-		DialogoIdeologico.resolver(
-			DialogoIdeologico.SUPERFICIE_CAREO_EXPOSICION,
-			estado,
-		).is_empty(),
+		(
+			DialogoIdeologico
+			. resolver(
+				DialogoIdeologico.SUPERFICIE_CAREO_EXPOSICION,
+				estado,
+			)
+			. is_empty()
+		),
 		true,
 		"sin exposición no aparece un reconocimiento ideológico",
 	)
-	Prometeo.registrar_exposicion_ideologica(
-		estado,
-		"prensa:diario-central:turnos",
-		"prensa:diario-central",
-		"centrista",
-		2,
-		["procedimiento"],
+	(
+		Prometeo
+		. registrar_exposicion_ideologica(
+			estado,
+			"prensa:diario-central:turnos",
+			"prensa:diario-central",
+			"centrista",
+			2,
+			["procedimiento"],
+		)
 	)
-	var variante := DialogoIdeologico.resolver(
-		DialogoIdeologico.SUPERFICIE_CAREO_EXPOSICION,
-		estado,
+	var variante := (
+		DialogoIdeologico
+		. resolver(
+			DialogoIdeologico.SUPERFICIE_CAREO_EXPOSICION,
+			estado,
+		)
 	)
 	_comprobar(
 		variante.get("clave", ""),
@@ -96,17 +112,23 @@ func _probar_exposicion_en_careo() -> void:
 		"leer prensa no crea una elección política",
 	)
 
-	Prometeo.registrar_exposicion_ideologica(
-		estado,
-		"prensa:gaceta-mercantil:turnos",
-		"prensa:gaceta-mercantil",
-		"neoliberal",
-		2,
-		["costes"],
+	(
+		Prometeo
+		. registrar_exposicion_ideologica(
+			estado,
+			"prensa:gaceta-mercantil:turnos",
+			"prensa:gaceta-mercantil",
+			"neoliberal",
+			2,
+			["costes"],
+		)
 	)
-	var ultima := DialogoIdeologico.resolver(
-		DialogoIdeologico.SUPERFICIE_CAREO_EXPOSICION,
-		estado,
+	var ultima := (
+		DialogoIdeologico
+		. resolver(
+			DialogoIdeologico.SUPERFICIE_CAREO_EXPOSICION,
+			estado,
+		)
 	)
 	_comprobar(
 		ultima.get("clave", ""),
@@ -125,12 +147,15 @@ func _probar_condiciones_de_memoria() -> void:
 		false,
 		"un actor no recuerda un evento ausente de sus lecturas",
 	)
-	Prometeo.registrar_lectura_social(
-		estado,
-		"cunado",
-		"expediente:fixture",
-		"comentario",
-		["fixture"],
+	(
+		Prometeo
+		. registrar_lectura_social(
+			estado,
+			"cunado",
+			"expediente:fixture",
+			"comentario",
+			["fixture"],
+		)
 	)
 	_comprobar(
 		DialogoIdeologico.cumple(estado, condicion),
