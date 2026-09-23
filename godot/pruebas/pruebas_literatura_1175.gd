@@ -25,8 +25,8 @@ func _probar_catalogo() -> void:
 	_comprobar(String(obra.get("titulo", "")) == "La vida es sueño", "titulo documentado")
 	_comprobar(String(obra.get("autor", "")) == "Pedro Calderón de la Barca", "autor documentado")
 	var rom: Dictionary = obra.get("rom", {})
-	_comprobar(String(rom.get("id", "")) == "sueno_98", "la obra declara una ROM futura")
-	_comprobar(String(rom.get("estado", "")) == "propuesta", "la ROM no se finge implementada")
+	_comprobar(String(rom.get("id", "")) == "sueno_98", "la obra declara su ROM propia")
+	_comprobar(String(rom.get("estado", "")) == "jugable", "la ROM ya está implementada")
 	var efecto: Dictionary = obra.get("efecto_juego", {})
 	_comprobar(
 		String(efecto.get("tipo", "")) == "modificador_contextual",
