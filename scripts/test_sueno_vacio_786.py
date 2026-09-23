@@ -44,7 +44,7 @@ class SuenoVacio786Test(unittest.TestCase):
             "entorno.fog_density = DENSIDAD_NIEBLA",
             'suelo.name = "SueloOficinaAusente"',
             'borde.name = "PerimetroOficinaAusente"',
-            'visual.visible = false',
+            '(visual as MeshInstance3D).visible = false',
             'grupo.name = "HuellasPuestosVacios"',
             'grupo.name = "EcosTabiquesOficina"',
             'grupo.name = "EcosMobiliarioOficina"',
