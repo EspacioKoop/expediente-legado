@@ -31,6 +31,7 @@ var _ala_replegable: Node3D
 var _hilo_ariadna: Node3D
 var _presencia: Node3D
 var _audio_presencia: AudioStreamPlayer3D
+var _luz_archivo: OmniLight3D
 var _bloqueo_visual: MeshInstance3D
 var _marcas := {}
 var _nodo_actual := SuenoMinotauro.ENTRADA
@@ -224,13 +225,34 @@ func _montar_presencia() -> void:
 
 
 func _montar_luz() -> void:
-	var luz := OmniLight3D.new()
-	luz.name = "LuzArchivo"
-	luz.position = Vector3(0.0, 4.2, 0.0)
-	luz.light_color = Color(0.72, 0.64, 0.48)
-	luz.light_energy = 3.1
-	luz.omni_range = 14.0
-	_arquitectura.add_child(luz)
+	_luz_archivo = OmniLight3D.new()
+	_luz_archivo.name = "LuzArchivo"
+	_luz_archivo.position = Vector3(0.0, 4.2, 0.0)
+	_arquitectura.add_child(_luz_archivo)
+	_aplicar_luz_presencia(SuenoMinotauro.PRESENCIAS[0])
+
+
+func _aplicar_luz_presencia(presencia: String) -> void:
+	if _luz_archivo == null:
+		return
+	var energia := 2.4
+	var alcance := 11.0
+	var color := Color(0.72, 0.64, 0.48)
+	if presencia == "respiracion":
+		energia = 2.9
+		alcance = 12.5
+		color = Color(0.74, 0.60, 0.43)
+	elif presencia == "cruce":
+		energia = 3.5
+		alcance = 14.0
+		color = Color(0.76, 0.52, 0.36)
+	elif presencia == "cerca":
+		energia = 4.2
+		alcance = 16.0
+		color = Color(0.80, 0.42, 0.30)
+	_luz_archivo.light_energy = energia
+	_luz_archivo.omni_range = alcance
+	_luz_archivo.light_color = color
 
 
 func _aplicar_estado_visual(animar_repliegue: bool) -> void:
@@ -357,6 +379,7 @@ func _actualizar_presencia() -> void:
 	if _audio_presencia != null:
 		_audio_presencia.volume_db = SuenoMinotauroAudio.volumen_db(presencia)
 		_audio_presencia.pitch_scale = SuenoMinotauroAudio.pitch_scale(presencia)
+	_aplicar_luz_presencia(presencia)
 
 	var bloqueo := String(_estado.get("bloqueo", ""))
 	_bloqueo_visual.visible = not bloqueo.is_empty()

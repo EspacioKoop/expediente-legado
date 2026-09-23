@@ -41,6 +41,11 @@ class MinotauroNocheRuntimeTest(unittest.TestCase):
         self.assertIn("_reconstruir_hilo_ariadna()", self.vertical)
         self.assertIn('"PresenciaMinotauro"', self.vertical)
         self.assertIn('"SombraBloqueo"', self.vertical)
+        self.assertIn("var _luz_archivo: OmniLight3D", self.vertical)
+        self.assertIn("_aplicar_luz_presencia(presencia)", self.vertical)
+        self.assertIn("_luz_archivo.light_energy = energia", self.vertical)
+        self.assertIn("_luz_archivo.omni_range = alcance", self.vertical)
+        self.assertIn("_luz_archivo.light_color = color", self.vertical)
         self.assertIn("Interactuable3D.new()", self.vertical)
 
     def test_reduccion_movimiento_no_cambia_regla(self):
@@ -89,6 +94,10 @@ class MinotauroNocheRuntimeTest(unittest.TestCase):
         self.assertIn("minotauro.marcar_y_cruzar(SuenoMinotauro.CENTRO)", self.smoke)
         self.assertIn('"HiloAriadna/NudoReal_cruce_norte"', self.smoke)
         self.assertIn("marca_norte.position.distance_to(nudo_norte.position) > 1.0", self.smoke)
+        self.assertIn('"LuzArchivo"', self.smoke)
+        self.assertIn("luz.light_energy > energia_lejana", self.smoke)
+        self.assertIn("is_equal_approx(luz.light_energy, 4.2)", self.smoke)
+        self.assertIn("is_equal_approx(luz.omni_range, 16.0)", self.smoke)
         self.assertIn("SuenoMinotauro.hay_ruta", self.smoke)
 
     @unittest.skipUnless(

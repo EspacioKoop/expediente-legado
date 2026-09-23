@@ -33,11 +33,18 @@ func _initialize() -> void:
 		arquitectura.get_node_or_null("HiloAriadna") != null,
 		"hilo de Ariadna tiene contenedor propio",
 	)
+	var luz := arquitectura.get_node_or_null("LuzArchivo") as OmniLight3D
+	_comprobar(luz != null, "luz de archivo disponible")
+	var energia_lejana := luz.light_energy if luz != null else 0.0
+	var alcance_lejano := luz.omni_range if luz != null else 0.0
 
 	_comprobar(
 		minotauro.marcar_y_cruzar(SuenoMinotauro.CRUCE_NORTE),
 		"primera marca fija un cruce estable",
 	)
+	if luz != null:
+		_comprobar(luz.light_energy > energia_lejana, "respiración aumenta energía de luz")
+		_comprobar(luz.omni_range > alcance_lejano, "respiración amplía alcance de luz")
 	_comprobar(
 		arquitectura.get_node_or_null("HiloAriadna/Tramo00") != null,
 		"primera marca despliega un tramo continuo desde la entrada",
@@ -65,6 +72,16 @@ func _initialize() -> void:
 	var estado_2 := minotauro.estado()
 	var bloqueo := String(estado_2.get("bloqueo", ""))
 	_comprobar(String(estado_2.get("presencia", "")) == "cerca", "presencia reacciona")
+	if luz != null:
+		_comprobar(
+			is_equal_approx(luz.light_energy, 4.2),
+			"presencia cercana refuerza iluminación",
+		)
+		_comprobar(
+			is_equal_approx(luz.omni_range, 16.0),
+			"presencia cercana alcanza más laberinto",
+		)
+		_comprobar(luz.light_color.r > luz.light_color.g, "presencia cercana calienta la luz")
 
 	var marca_norte := arquitectura.get_node_or_null("Hilo_cruce_norte") as MeshInstance3D
 	var nudo_norte := (
