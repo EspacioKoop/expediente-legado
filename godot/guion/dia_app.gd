@@ -168,10 +168,7 @@ func _abrir_vuelta() -> void:
 		return
 	if jornada["acciones"] != Jornada.ACCIONES_POR_DIA:
 		return
-	if (
-		int(jornada.get("vuelta", 1)) > 1
-		and Auditorias.seleccion_pendiente(partida.estado)
-	):
+	if int(jornada.get("vuelta", 1)) > 1 and Auditorias.seleccion_pendiente(partida.estado):
 		_abrir_auditorias_nueva_vida()
 		return
 
