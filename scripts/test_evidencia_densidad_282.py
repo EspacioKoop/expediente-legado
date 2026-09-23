@@ -32,6 +32,8 @@ class EvidenciaDensidad282Test(unittest.TestCase):
             self.assertIn(f'"id": "{caso}"', self.captura)
             self.assertIn(f'"fase": "{fase}"', self.captura)
         self.assertIn('"hud": false', self.captura)
+        self.assertIn('TranslationServer.set_locale("es")', self.captura)
+        self.assertIn('"locale": TranslationServer.get_locale()', self.captura)
         self.assertIn("dia._hud_prioridades.visible = false", self.captura)
         self.assertIn('dia.find_children("*", "CanvasLayer"', self.captura)
 
@@ -66,6 +68,8 @@ class EvidenciaDensidad282Test(unittest.TestCase):
         ):
             self.assertIn(campo, self.captura)
         self.assertIn('"criterio": "evidencia_para_revision_humana"', self.captura)
+        self.assertIn('_validar_rotulos_calle(dia)', self.captura)
+        self.assertIn('rotulo.text.begins_with("CALLE_")', self.captura)
         self.assertIn("NO deciden", self.captura)
 
     def test_workflow_publica_doce_png_y_manifiesto(self):
@@ -80,6 +84,7 @@ class EvidenciaDensidad282Test(unittest.TestCase):
         )
         self.assertIn("manifest.json", self.workflow)
         self.assertIn("actions/upload-artifact@v4", self.workflow)
+        self.assertIn('manifest.get("locale") != "es"', self.workflow)
         self.assertIn('manifest.get("vistas_por_fase") != 3', self.workflow)
         self.assertIn('len(set(hashes)) != 3', self.workflow)
         self.assertIn('caso["mallas_total"] <= 0', self.workflow)
