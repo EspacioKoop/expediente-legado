@@ -442,6 +442,7 @@ func _montar_visual() -> void:
 	carcasa.mesh = load("res://assets/modelos/props_originales_98/minicadena_98.obj") as Mesh
 	visual.add_child(carcasa)
 
+
 func _montar_controles() -> void:
 	var controles := Node3D.new()
 	controles.name = NOMBRE_CONTROLES
