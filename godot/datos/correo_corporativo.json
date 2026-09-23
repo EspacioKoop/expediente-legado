@@ -205,6 +205,20 @@
       "tipo": "sistema",
       "importancia_narrativa": false,
       "adjunto": ""
+    },
+    {
+      "id": "spam-relojito-pro",
+      "remitente": "UtilSoft Catálogo",
+      "direccion": "catalogo@utilsoft.example",
+      "asunto": "Relojito Pro 1.8 TRIAL",
+      "cuerpo": "Gracias por solicitar nuestro catálogo de utilidades. Se adjunta una copia de evaluación de Relojito Pro 1.8. La alarma y el reloj funcionan únicamente dentro del entorno simulado del puesto.",
+      "dia_entrega": 1,
+      "acciones_max": 0,
+      "hora": "16:41",
+      "tipo": "spam",
+      "importancia_narrativa": false,
+      "adjunto": "RELOJ18.ZIP",
+      "paquete_software": "relojito-pro"
     }
   ]
 }

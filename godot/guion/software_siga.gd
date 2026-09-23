@@ -30,6 +30,15 @@ func exportar_estado() -> Dictionary:
 	return _modelo.exportar_estado()
 
 
+func registrar_obtencion(id: String) -> bool:
+	if not _modelo.registrar_obtencion(id):
+		return false
+	estado_cambiado.emit(_modelo.exportar_estado())
+	if is_node_ready():
+		_refrescar()
+	return true
+
+
 func _ready() -> void:
 	custom_minimum_size = Vector2(600, 390)
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -130,7 +139,10 @@ func _refrescar() -> void:
 		var marca := (
 			SoftwareSigaTextos.texto("instalado_marca") if _modelo.esta_instalado(id) else ""
 		)
-		var indice := _lista.add_item(marca + String(paquete.get("nombre", id)))
+		var fuente_marca := (
+			SoftwareSigaTextos.texto("fuente_marca") if _modelo.esta_obtenido(id) else ""
+		)
+		var indice := _lista.add_item(marca + fuente_marca + String(paquete.get("nombre", id)))
 		_lista.set_item_metadata(indice, id)
 		if id == seleccionado:
 			_lista.select(indice)
@@ -166,9 +178,13 @@ func _seleccionar(indice: int) -> void:
 	)
 	_descripcion.text = String(paquete.get("descripcion", ""))
 	var instalado := _modelo.esta_instalado(id)
-	_estado.text = SoftwareSigaTextos.texto(
+	var estado_instalacion := SoftwareSigaTextos.texto(
 		"estado_instalado" if instalado else "estado_disponible"
 	)
+	var estado_fuente := SoftwareSigaTextos.texto(
+		"fuente_obtenida" if _modelo.esta_obtenido(id) else "fuente_pendiente"
+	)
+	_estado.text = "%s · %s" % [estado_instalacion, estado_fuente]
 	_instalar.text = SoftwareSigaTextos.texto("desinstalar" if instalado else "instalar")
 	_ejecutar.disabled = not instalado
 	_resultado.text = ""
