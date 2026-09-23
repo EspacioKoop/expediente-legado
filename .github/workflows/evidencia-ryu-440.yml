@@ -1,0 +1,79 @@
+name: Evidencia Ryū 440
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/evidencia-ryu-440.yml'
+      - '.godot-version'
+      - 'godot/guion/espacio_3d.gd'
+      - 'godot/guion/sueno.gd'
+      - 'godot/guion/sueno_ryu.gd'
+      - 'godot/pruebas/capturar_ryu_440.gd'
+      - 'scripts/test_evidencia_ryu_440.py'
+      - 'docs/evidencias/ryu-440/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidencia:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      GALLIUM_DRIVER: llvmpipe
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Instalar Godot declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Importar proyecto
+        run: godot4 --headless --editor --path godot --quit
+
+      - name: Validar contrato de evidencia
+        run: python3 -m unittest -v scripts/test_evidencia_ryu_440.py
+
+      - name: Renderizar estados comparables de Ryū
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidencia-ryu-440
+          xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+            --script res://pruebas/capturar_ryu_440.gd -- \
+            "$GITHUB_WORKSPACE/evidencia-ryu-440"
+          test -s evidencia-ryu-440/normal_inicial.png
+          test -s evidencia-ryu-440/normal_resuelto.png
+          test -s evidencia-ryu-440/reducido_resuelto.png
+          test -s evidencia-ryu-440/manifest.json
+
+      - name: Adjuntar evidencia Ryū
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-ryu-440-${{ github.sha }}
+          path: evidencia-ryu-440/
+          if-no-files-found: error
+          retention-days: 14
