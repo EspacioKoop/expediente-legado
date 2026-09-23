@@ -25,6 +25,14 @@ const ESPERA_MAXIMA := 4.5
 ## A qué distancia del jugador reacciona.
 const CERCA := 2.2
 
+## Con hambre no abandona el cuenco, pero tampoco se congela: hace pequeños
+## recorridos alrededor de él. El radio es suficientemente corto para que la
+## señal siga siendo inequívoca desde la puerta.
+const RADIO_HAMBRIENTO := 0.55
+const VELOCIDAD_HAMBRIENTO := 0.45
+const ESPERA_HAMBRIENTO := 0.8
+const LLEGADA_HAMBRIENTO := 0.08
+
 ## Al alcanzar a alguien que lo ha cuidado no se limita a quedarse parado:
 ## durante un instante se frota contra él. Es puramente conductual — no cambia
 ## hambre, dinero ni afinidad — y después deja un margen antes de volver.
@@ -57,6 +65,7 @@ static func nuevo(donde: Vector3) -> Dictionary:
 		"rutina_destino": "",
 		"mimos_resto": 0.0,
 		"mimos_pausa": 0.0,
+		"paso_hambriento": 0,
 	}
 
 
@@ -99,15 +108,13 @@ static func avanzar(
 	# la puerta sin que nadie lo diga. Tiene prioridad incluso sobre los mimos:
 	# la jornada sigue siendo la única fuente de verdad del hambre.
 	if desconfia:
-		gato["destino"] = posicion_sitio(sitios[0], pos)
-		gato["rutina_destino"] = ""
-		gato["estado"] = "hambriento"
-		gato["mimos_resto"] = 0.0
-	elif gato["estado"] == "hambriento":
+		return _avanzar_hambriento(gato, posicion_sitio(sitios[0], pos), delta)
+	if gato["estado"] == "hambriento":
 		# Al comer se nota en el acto: no arrastra durante varios segundos la
 		# postura de hambre mientras la jornada ya dice otra cosa.
 		gato["estado"] = "parado"
 		gato["espera"] = 0.0
+		gato["paso_hambriento"] = 0
 	elif gato["estado"] == "mimos":
 		gato["mimos_resto"] = maxf(0.0, float(gato.get("mimos_resto", 0.0)) - delta)
 		gato["destino"] = pos
@@ -155,10 +162,10 @@ static func avanzar(
 	if gato["estado"] == "anda" or gato["estado"] == "parado":
 		_aplicar_rutina(gato)
 
-	# Ha llegado. Espera, y luego elige otro sitio — salvo que esté esperando
-	# junto al cuenco con hambre, que ahí se queda.
+	# Ha llegado. Espera, y luego elige otro sitio. El hambre ya se resolvió
+	# arriba con su propia rutina acotada al cuenco.
 	gato["espera"] -= delta
-	if gato["espera"] > 0.0 or desconfia:
+	if gato["espera"] > 0.0:
 		return gato
 
 	gato["espera"] = randf_range(ESPERA_MINIMA, ESPERA_MAXIMA)
@@ -171,6 +178,56 @@ static func avanzar(
 	else:
 		_aplicar_rutina(gato)
 	return gato
+
+
+static func _avanzar_hambriento(gato: Dictionary, cuenco: Vector3, delta: float) -> Dictionary:
+	var pos: Vector3 = gato["pos"]
+	var primera_vez := String(gato.get("estado", "")) != "hambriento"
+	gato["estado"] = "hambriento"
+	gato["mimos_resto"] = 0.0
+	gato["rutina_destino"] = ""
+
+	if primera_vez:
+		gato["destino"] = cuenco
+		gato["espera"] = 0.0
+
+	var destino: Vector3 = gato.get("destino", cuenco)
+	var desde_cuenco := Vector3(pos.x - cuenco.x, 0, pos.z - cuenco.z)
+	var destino_desde_cuenco := Vector3(destino.x - cuenco.x, 0, destino.z - cuenco.z)
+	if desde_cuenco.length() > RADIO_HAMBRIENTO or destino_desde_cuenco.length() > RADIO_HAMBRIENTO:
+		gato["destino"] = cuenco
+		gato["espera"] = 0.0
+		destino = cuenco
+
+	var falta := Vector3(destino.x - pos.x, 0, destino.z - pos.z)
+	if falta.length() <= LLEGADA_HAMBRIENTO:
+		gato["espera"] = float(gato.get("espera", 0.0)) - delta
+		if gato["espera"] > 0.0:
+			return gato
+		var paso_cuenco := int(gato.get("paso_hambriento", 0))
+		gato["destino"] = _punto_hambriento(cuenco, paso_cuenco)
+		gato["paso_hambriento"] = paso_cuenco + 1
+		gato["espera"] = ESPERA_HAMBRIENTO
+		destino = gato["destino"]
+		falta = Vector3(destino.x - pos.x, 0, destino.z - pos.z)
+
+	if falta.length() > 0.0:
+		var paso := minf(VELOCIDAD_HAMBRIENTO * delta, falta.length())
+		gato["pos"] = pos + falta.normalized() * paso
+	return gato
+
+
+static func _punto_hambriento(cuenco: Vector3, paso: int) -> Vector3:
+	match paso % 4:
+		0:
+			return cuenco + Vector3(RADIO_HAMBRIENTO, 0, 0)
+		1:
+			return cuenco + Vector3(0, 0, RADIO_HAMBRIENTO)
+		2:
+			return cuenco + Vector3(-RADIO_HAMBRIENTO, 0, 0)
+		3:
+			return cuenco + Vector3(0, 0, -RADIO_HAMBRIENTO)
+	return cuenco
 
 
 static func _aplicar_rutina(gato: Dictionary) -> void:

@@ -35,6 +35,30 @@ static func _gato(comprobar: Callable) -> void:
 		[sitios[0], "hambriento"]
 	)
 
+	# #1240: quedarse junto al cuenco no significa convertirse en geometría.
+	# En treinta segundos debe moverse, sin salir de la zona ni pedir mimos.
+	var inquieto := GatoConducta.nuevo(sitios[0])
+	var recorrido := 0.0
+	var distancia_maxima := 0.0
+	var estados := {}
+	for _paso in 600:
+		var antes: Vector3 = inquieto["pos"]
+		GatoConducta.avanzar(inquieto, sitios, Jornada.PACIENCIA_GATO, sitios[0], 0.05)
+		recorrido += antes.distance_to(inquieto["pos"])
+		distancia_maxima = maxf(distancia_maxima, inquieto["pos"].distance_to(sitios[0]))
+		estados[String(inquieto["estado"])] = true
+	comprobar.call("hambriento sigue moviéndose junto al cuenco", recorrido > 0.5, true)
+	comprobar.call(
+		"hambriento no abandona el cuenco",
+		distancia_maxima <= GatoConducta.RADIO_HAMBRIENTO + 0.01,
+		true
+	)
+	comprobar.call(
+		"hambriento no viene ni pide mimos",
+		[estados.has("viene"), estados.has("mimos")],
+		[false, false]
+	)
+
 	# Recién comido y con alguien cerca, se acerca. Es la única recompensa que
 	# da el juego por cuidarlo, y no lleva ningún número.
 	var contento := GatoConducta.nuevo(sitios[1])
