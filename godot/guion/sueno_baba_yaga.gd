@@ -105,6 +105,7 @@ func preparar() -> void:
 	_montar_cabana()
 	_montar_retorno()
 	_montar_marcas()
+	_montar_controles()
 	_montar_luz_y_camara()
 	_aplicar_estado_visual()
 
@@ -323,6 +324,89 @@ func _montar_marcas() -> void:
 	marcas.name = "MarcasPersistentes"
 	add_child(marcas)
 	_sincronizar_marcas_visual()
+
+
+func _montar_controles() -> void:
+	var controles := Node3D.new()
+	controles.name = "ControlesBosque"
+	add_child(controles)
+
+	var umbral := _crear_control(
+		controles,
+		"UmbralBosque",
+		"umbral del bosque",
+		Vector3(0.0, 1.0, -4.2),
+		Vector3(2.4, 2.0, 0.35),
+		COLOR_MADERA,
+	)
+	umbral.activado.connect(_al_cruzar_umbral)
+
+	var observatorio := _crear_control(
+		controles,
+		"ObservatorioArchivador",
+		"punto de observación",
+		Vector3(4.7, 0.75, 3.9),
+		Vector3(0.8, 1.4, 0.8),
+		COLOR_ARCHIVO,
+	)
+	observatorio.activado.connect(_al_comprobar_archivador)
+
+	var cinta := _crear_control(
+		controles,
+		"CintaPersistente",
+		"cinta para marcar",
+		Vector3(-4.2, 0.75, 3.8),
+		Vector3(0.8, 1.2, 0.8),
+		COLOR_MARCA,
+	)
+	cinta.activado.connect(_al_usar_cinta)
+
+
+func _crear_control(
+	padre: Node3D,
+	nombre: String,
+	nombre_objeto: String,
+	posicion: Vector3,
+	tam: Vector3,
+	color: Color,
+) -> Interactuable3D:
+	var control := Interactuable3D.new()
+	control.name = nombre
+	control.position = posicion
+	control.verbo = Interactuable3D.Verbo.USAR
+	control.nombre_objeto = nombre_objeto
+	control.sonido = Interactuable3D.SIN_SONIDO
+	control.collision_mask = 0
+	padre.add_child(control)
+
+	_crear_caja(control, "Indicador", tam * 0.82, Vector3.ZERO, color)
+	var forma := BoxShape3D.new()
+	forma.size = tam
+	var colision := CollisionShape3D.new()
+	colision.name = "Colision"
+	colision.shape = forma
+	control.add_child(colision)
+	return control
+
+
+func _al_cruzar_umbral(_actor: Node) -> void:
+	aplicar_evento(EVENTO_UMBRAL, false, _reduccion_movimiento_activa())
+
+
+func _al_comprobar_archivador(_actor: Node) -> void:
+	aplicar_evento(EVENTO_FUERA_CAMPO, true, _reduccion_movimiento_activa())
+
+
+func _al_usar_cinta(_actor: Node) -> void:
+	const MARCA_JUGADOR := "cinta_jugador"
+	if not _marcas.has(MARCA_JUGADOR):
+		dejar_marca(MARCA_JUGADOR, OBJETO_ARBOL)
+		return
+	comparar_marca(MARCA_JUGADOR)
+
+
+func _reduccion_movimiento_activa() -> bool:
+	return bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false))
 
 
 func _montar_luz_y_camara() -> void:
