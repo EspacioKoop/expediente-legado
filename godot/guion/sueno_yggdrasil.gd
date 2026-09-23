@@ -43,13 +43,14 @@ const COLOR_CONEXION := Color(0.46, 0.36, 0.18)
 const COLOR_ACTIVO := Color(0.74, 0.62, 0.30)
 const COLOR_RETORNO := Color(0.26, 0.48, 0.38)
 
+var reduccion_movimiento := false
+
 var _estado := {
 	NODO_RAIZ: 0,
 	NODO_TRONCO: 0,
 	NODO_RAMA: 0,
 }
 var _montado := false
-var reduccion_movimiento := false
 
 
 static func puede_entrar(estado: Dictionary) -> bool:
