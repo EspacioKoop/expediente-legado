@@ -11,6 +11,8 @@ on:
       - 'godot/assets/modelos/household_goods/**'
       - 'godot/guion/asset_cc0.gd'
       - 'godot/guion/casa*.gd'
+      - 'godot/guion/ventana_exterior_3d.gd'
+      - 'godot/assets/texturas/ventana_casa_ai_98/**'
       - 'godot/guion/dia_*app.gd'
       - 'godot/guion/espacio_3d.gd'
       - 'godot/guion/espacios_catalogo.gd'

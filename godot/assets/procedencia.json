@@ -1937,6 +1937,14 @@
       "licencia": "Propio del proyecto; salida generada con OpenAI",
       "fuente": "https://openai.com/policies/eu-terms-of-use/",
       "sha256": "bee11a21aba694942745fde7a662b01dcfc6a342053562047636172a04366024"
+    },
+    {
+      "ruta": "texturas/ventana_casa_ai_98/fondo_barrio_98.webp",
+      "titulo": "Barrio visto desde la ventana de casa — matte 1998",
+      "autor": "EspacioKoop (generado con OpenAI ImageGen; recorte y reducción propios)",
+      "licencia": "Propio del proyecto; salida generada con OpenAI",
+      "fuente": "https://openai.com/policies/eu-terms-of-use/",
+      "sha256": "9a12e2a07eeb237a64a6f43fbb6e70d56616076ad75c3b31fce00f026d3e9883"
     }
   ]
 }

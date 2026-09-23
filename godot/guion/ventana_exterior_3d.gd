@@ -1,20 +1,23 @@
-## Exterior urbano 3D renderizado en vivo para la ventana de la casa (#566).
+## Diorama urbano híbrido renderizado en vivo para la ventana de la casa (#566).
 ##
-## No es una lámina ni un fondo prerenderizado: un SubViewport de baja resolución
-## contiene cámara, edificios, balcones, árboles, coches, farolas, antenas, nubes
-## y precipitación 3D. La textura del viewport se muestra tras el marco existente;
-## así la pared de la casa no necesita un hueco estructural y las crucetas siguen
-## ocluyendo correctamente la vista.
+## El SubViewport conserva profundidad real, cámara, calle, árboles, coches,
+## farolas, nubes, niebla y precipitación 3D. La línea de bloques procedurales que
+## dominaba la vista se sustituye por un matte urbano propio de segunda línea:
+## aporta balcones, azoteas, antenas y densidad de barrio sin duplicar geometría
+## ni convertir la ventana en una captura estática.
 ##
-## Todo se construye con primitivas de Godot. No hay assets externos ni carga de
-## ficheros, y el render a 320x180 con filtrado nearest mantiene la lectura PSX.
+## El matte se renderiza dentro del mismo mundo 3D y recibe un tinte por clima.
+## El render a 320x180 con filtrado nearest mantiene la lectura PSX y las capas
+## volumétricas siguen pasando por delante de la imagen.
 class_name VentanaExterior3D
 extends Node3D
 
 const TAM_VIEWPORT := Vector2i(320, 180)
+const FONDO_BARRIO_98 := preload("res://assets/texturas/ventana_casa_ai_98/fondo_barrio_98.webp")
 const ESTADO_DEFECTO := Clima.DESPEJADO
 
 var _viewport: SubViewport
+var _fondo_material: StandardMaterial3D
 var _entorno: Environment
 var _sol: DirectionalLight3D
 var _lluvia: GPUParticles3D
@@ -151,25 +154,9 @@ func _montar_barrio(raiz: Node3D) -> void:
 		Color(0.43, 0.41, 0.37)
 	)
 
-	# Bloques asimétricos: proporciones de barrio español de finales de los 90.
-	_montar_edificio(
-		raiz, Vector3(-6.2, 3.0, -12.8), Vector3(5.2, 6.0, 4.2), Color(0.52, 0.43, 0.34), 4, 4, true
-	)
-	_montar_edificio(
-		raiz, Vector3(5.9, 3.6, -14.0), Vector3(5.0, 7.2, 4.5), Color(0.45, 0.42, 0.36), 5, 4, true
-	)
-	_montar_edificio(
-		raiz,
-		Vector3(-1.1, 3.15, -20.0),
-		Vector3(6.4, 6.3, 3.6),
-		Color(0.50, 0.47, 0.39),
-		4,
-		6,
-		false
-	)
-	_montar_edificio(
-		raiz, Vector3(8.8, 2.7, -22.0), Vector3(4.2, 5.4, 3.4), Color(0.39, 0.38, 0.35), 3, 3, false
-	)
+	# Segunda línea fotorealista. La calle, coches, vegetación y clima siguen
+	# siendo 3D para que la vista conserve profundidad y respuesta ambiental.
+	_montar_fondo_barrio(raiz)
 
 	# Coches aparcados y uno más lejano rompen la lectura de maqueta vacía.
 	_montar_coche(raiz, Vector3(-3.3, 0.30, -6.7), Color(0.22, 0.25, 0.27), 8.0)
@@ -187,96 +174,24 @@ func _montar_barrio(raiz: Node3D) -> void:
 		_montar_farola(raiz, pos)
 
 
-func _montar_edificio(
-	raiz: Node3D,
-	centro: Vector3,
-	tam: Vector3,
-	color: Color,
-	plantas: int,
-	columnas: int,
-	balcones: bool
-) -> void:
-	var edificio := Node3D.new()
-	edificio.name = "BloqueViviendas"
-	edificio.position = centro
-	raiz.add_child(edificio)
-	_agregar_caja(edificio, "Fachada", Vector3.ZERO, tam, color)
-
-	var frente_z := tam.z * 0.5 + 0.025
-	var margen_x := tam.x * 0.11
-	var ancho_util := tam.x - margen_x * 2.0
-	var paso_x := ancho_util / float(columnas)
-	var paso_y := tam.y / float(plantas + 1)
-	for planta in range(plantas):
-		var y := -tam.y * 0.5 + paso_y * float(planta + 1)
-		for columna in range(columnas):
-			var x := -ancho_util * 0.5 + paso_x * (float(columna) + 0.5)
-			var encendida := ((planta * 7 + columna * 3 + columnas) % 8) == 0
-			var cristal := Color(0.60, 0.53, 0.36) if encendida else Color(0.12, 0.16, 0.17)
-			_agregar_caja(
-				edificio,
-				"Ventana",
-				Vector3(x, y, frente_z),
-				Vector3(paso_x * 0.46, paso_y * 0.46, 0.055),
-				cristal,
-				encendida
-			)
-
-			if balcones and planta > 0 and (columna + planta) % 2 == 0:
-				var profundidad := 0.48
-				_agregar_caja(
-					edificio,
-					"Balcon",
-					Vector3(x, y - paso_y * 0.28, frente_z + profundidad * 0.42),
-					Vector3(paso_x * 0.72, 0.08, profundidad),
-					Color(0.29, 0.28, 0.25)
-				)
-				_agregar_caja(
-					edificio,
-					"Barandilla",
-					Vector3(x, y - 0.02, frente_z + profundidad * 0.78),
-					Vector3(paso_x * 0.72, 0.42, 0.035),
-					Color(0.20, 0.20, 0.19)
-				)
-
-	# Cornisa, cuarto de azotea y antena aportan perfil urbano y profundidad.
-	_agregar_caja(
-		edificio,
-		"Cornisa",
-		Vector3(0.0, tam.y * 0.5 + 0.07, 0.0),
-		Vector3(tam.x + 0.20, 0.14, tam.z + 0.16),
-		color.darkened(0.10)
-	)
-	_agregar_caja(
-		edificio,
-		"CasetaAzotea",
-		Vector3(tam.x * 0.18, tam.y * 0.5 + 0.45, 0.15),
-		Vector3(1.0, 0.76, 1.15),
-		color.darkened(0.16)
-	)
-	_montar_antena(edificio, Vector3(-tam.x * 0.18, tam.y * 0.5 + 0.18, 0.10))
-
-
-func _montar_antena(raiz: Node3D, pos: Vector3) -> void:
-	var antena := Node3D.new()
-	antena.name = "AntenaTV"
-	antena.position = pos
-	raiz.add_child(antena)
-	_agregar_caja(
-		antena,
-		"Mastil",
-		Vector3(0.0, 0.72, 0.0),
-		Vector3(0.035, 1.45, 0.035),
-		Color(0.24, 0.25, 0.24)
-	)
-	for y in [0.64, 0.82, 1.00, 1.18]:
-		_agregar_caja(
-			antena,
-			"Elemento",
-			Vector3(0.0, y, 0.0),
-			Vector3(0.72, 0.025, 0.025),
-			Color(0.24, 0.25, 0.24)
-		)
+func _montar_fondo_barrio(raiz: Node3D) -> void:
+	var fondo := MeshInstance3D.new()
+	fondo.name = "FondoBarrioFotorealista98"
+	var quad := QuadMesh.new()
+	quad.size = Vector2(26.0, 14.625)
+	_fondo_material = StandardMaterial3D.new()
+	_fondo_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_fondo_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_fondo_material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	_fondo_material.albedo_texture = FONDO_BARRIO_98
+	quad.material = _fondo_material
+	fondo.mesh = quad
+	# Detrás de la calle procedural, suficientemente cerca para leer detalle sin
+	# competir con los props volumétricos de primer término.
+	fondo.position = Vector3(0.0, 4.65, -24.5)
+	fondo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	fondo.set_meta("ventana_casa_ai_98", true)
+	raiz.add_child(fondo)
 
 
 func _montar_coche(raiz: Node3D, pos: Vector3, color: Color, giro: float) -> void:
@@ -435,35 +350,45 @@ func _aplicar_clima() -> void:
 
 	match estado:
 		Clima.NUBLADO:
+			_tintar_fondo(Color(0.70, 0.72, 0.72))
 			_entorno.background_color = Color(0.43, 0.48, 0.50)
 			_entorno.ambient_light_color = Color(0.63, 0.65, 0.65)
 			_entorno.ambient_light_energy = 0.72
 			_sol.light_color = Color(0.78, 0.80, 0.78)
 			_sol.light_energy = 0.62
 		Clima.LLUVIA:
+			_tintar_fondo(Color(0.48, 0.55, 0.60))
 			_entorno.background_color = Color(0.25, 0.30, 0.33)
 			_entorno.ambient_light_color = Color(0.48, 0.54, 0.57)
 			_entorno.ambient_light_energy = 0.60
 			_sol.light_color = Color(0.62, 0.67, 0.69)
 			_sol.light_energy = 0.42
 		Clima.NIEBLA:
+			_tintar_fondo(Color(0.78, 0.79, 0.77))
 			_entorno.background_color = Color(0.59, 0.62, 0.62)
 			_entorno.ambient_light_color = Color(0.71, 0.72, 0.70)
 			_entorno.ambient_light_energy = 0.82
 			_sol.light_color = Color(0.76, 0.77, 0.73)
 			_sol.light_energy = 0.32
 		Clima.NIEVE:
+			_tintar_fondo(Color(0.78, 0.84, 0.90))
 			_entorno.background_color = Color(0.56, 0.62, 0.68)
 			_entorno.ambient_light_color = Color(0.72, 0.78, 0.83)
 			_entorno.ambient_light_energy = 0.88
 			_sol.light_color = Color(0.83, 0.88, 0.94)
 			_sol.light_energy = 0.70
 		_:
+			_tintar_fondo(Color(1.0, 0.96, 0.90))
 			_entorno.background_color = Color(0.40, 0.57, 0.72)
 			_entorno.ambient_light_color = Color(0.73, 0.67, 0.57)
 			_entorno.ambient_light_energy = 0.74
 			_sol.light_color = Color(1.0, 0.89, 0.71)
 			_sol.light_energy = 1.20
+
+
+func _tintar_fondo(color: Color) -> void:
+	if _fondo_material != null:
+		_fondo_material.albedo_color = color
 
 
 func _agregar_caja(
