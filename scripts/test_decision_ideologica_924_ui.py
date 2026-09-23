@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 VISOR = ROOT / "godot" / "guion" / "visor_pronosticos_app.gd"
 ESCENA = ROOT / "godot" / "escenas" / "visor.tscn"
 DIA = ROOT / "godot" / "guion" / "dia_clima_app.gd"
+DIALOGO = ROOT / "godot" / "guion" / "dialogo_ideologico.gd"
 TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
 
 
@@ -18,6 +19,7 @@ class DecisionIdeologica924UITest(unittest.TestCase):
         cls.visor = VISOR.read_text(encoding="utf-8")
         cls.escena = ESCENA.read_text(encoding="utf-8")
         cls.dia = DIA.read_text(encoding="utf-8")
+        cls.dialogo = DIALOGO.read_text(encoding="utf-8")
         with TEXTOS.open(encoding="utf-8", newline="") as archivo:
             cls.textos = {fila["clave"]: fila["es"] for fila in csv.DictReader(archivo)}
 
@@ -50,18 +52,29 @@ class DecisionIdeologica924UITest(unittest.TestCase):
             'companero.nombre_visible != tr("COMPA_CUNADO")',
             self.dia,
         )
-        self.assertIn("reaccion_para(", self.dia)
-        self.assertIn(
-            "registrar_lectura_social(",
-            self.dia,
-        )
+        self.assertIn("DialogoIdeologico.SUPERFICIE_OFICINA_CUNADO", self.dia)
+        self.assertIn("DialogoIdeologico.registrar_respuesta(", self.dia)
         self.assertIn('_guardar_o_avisar("")', self.dia)
+
+        self.assertIn(
+            '"requiere_evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL',
+            self.dialogo,
+        )
+        self.assertIn(
+            '"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL',
+            self.dialogo,
+        )
+        self.assertIn(
+            '"actor": DecisionIdeologicaExpediente.ACTOR_CUNADO',
+            self.dialogo,
+        )
+        self.assertIn("registrar_lectura_social(", self.dialogo)
         for reaccion in (
             "cierre_colectivo",
             "cierre_procedimental",
             "cierre_negociado",
         ):
-            self.assertIn(f'"{reaccion}"', self.dia)
+            self.assertIn(f'"reaccion": "{reaccion}"', self.dialogo)
 
     def test_todo_el_texto_visible_sale_del_catalogo(self) -> None:
         esperadas = {
