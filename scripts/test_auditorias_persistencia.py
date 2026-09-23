@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PARTIDA = (ROOT / "godot/guion/partida.gd").read_text(encoding="utf-8")
 AUDITORIAS = (ROOT / "godot/guion/auditorias.gd").read_text(encoding="utf-8")
 PRUEBA_GODOT = "res://pruebas/pruebas_auditorias_persistencia.gd"
-RESUMEN = re.compile(r"(\\d+) pasadas, 0 fallos")
+RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 
 
 class AuditoriasPersistenciaTests(unittest.TestCase):
