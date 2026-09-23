@@ -152,6 +152,10 @@ func _sonar_plano(plano: Dictionary) -> void:
 
 func _terminar() -> void:
 	_reproduciendo = false
+	# Los acentos pueden seguir sonando al saltar o al avanzar artificialmente
+	# una prueba. Se cortan aquí, antes de que el llamante reciba `terminada`
+	# y libere este nodo, para no dejar recursos de audio vivos al desmontar.
+	Sonido.detener(self)
 	# Saltarla cuenta como verla: quien la salta ya la conoce, que es
 	# exactamente lo que el acortado quiere premiar.
 	if not _id.is_empty() and not _estado.is_empty():
