@@ -91,13 +91,16 @@ func ejecutar_ritual_cita(
 	jornada: int = 0,
 	momentum_actual: float = 0.0
 ) -> Dictionary:
-	return LiteraturaConflicto.ejecutar_cita(
-		registro_literario,
-		obra_id,
-		fuente,
-		encuentro_id,
-		jornada,
-		momentum_actual,
+	return (
+		LiteraturaConflicto
+		. ejecutar_cita(
+			registro_literario,
+			obra_id,
+			fuente,
+			encuentro_id,
+			jornada,
+			momentum_actual,
+		)
 	)
 
 
