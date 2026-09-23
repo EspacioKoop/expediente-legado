@@ -1,8 +1,12 @@
 ## Evidencia reproducible del gate de densidad 3D de #282.
 ##
 ## Renderiza las cuatro fases del recorrido real desde `dia.tscn`, con HUD
-## oculto y cámara del jugador. Además registra señales objetivas de composición:
-## bultos declarativos modelados/proxy, tipos de malla e interactuables presentes.
+## oculto y cámara del jugador. Para no convertir un único encuadre en falso
+## negativo, cada fase se captura desde el mismo spawn en tres direcciones:
+## frente y laterales a ±90 grados.
+##
+## Además registra señales objetivas de composición: bultos declarativos
+## modelados/proxy, tipos de malla e interactuables presentes.
 ##
 ## Las métricas NO deciden si el espacio "se ve terminado": una BoxMesh puede ser
 ## correcta para un objeto prismático y una ArrayMesh puede seguir siendo pobre.
@@ -14,6 +18,12 @@ const Densidad := preload("res://guion/densidad_3d.gd")
 const TAMANO := Vector2i(1280, 720)
 const FOV := 70.0
 const FRAMES_ESTABILIZACION := 2
+
+const VISTAS := [
+	{"id": "frente", "offset_mirada": 0.0},
+	{"id": "izquierda", "offset_mirada": -90.0},
+	{"id": "derecha", "offset_mirada": 90.0},
+]
 
 const CASOS := [
 	{"id": "oficina", "fase": "archivo", "mirada": 0.0, "inclinacion": -8.0},
@@ -60,6 +70,7 @@ func _init() -> void:
 		"tamano": [TAMANO.x, TAMANO.y],
 		"fov": FOV,
 		"hud": false,
+		"vistas_por_fase": VISTAS.size(),
 		"criterio": "evidencia_para_revision_humana",
 		"casos": [],
 	}
@@ -68,18 +79,30 @@ func _init() -> void:
 		if String(caso["fase"]) == "sueño":
 			dia.jornada["sueno_escenas"] = [String(caso["escena"])]
 		dia._entrar_en(String(caso["fase"]))
-		_estabilizar_camara(dia, caso)
 
-		for i in FRAMES_ESTABILIZACION:
-			await process_frame
-		_ocultar_hud(dia)
-		await RenderingServer.frame_post_draw
+		var vistas: Array[Dictionary] = []
+		for vista in VISTAS:
+			var mirada := _estabilizar_camara(dia, caso, vista)
 
-		var archivo := "%s.png" % String(caso["id"])
-		var destino := salida.path_join(archivo)
-		if not _guardar_captura(destino):
-			quit(1)
-			return
+			for i in FRAMES_ESTABILIZACION:
+				await process_frame
+			_ocultar_hud(dia)
+			await RenderingServer.frame_post_draw
+
+			var archivo := "%s_%s.png" % [String(caso["id"]), String(vista["id"])]
+			var destino := salida.path_join(archivo)
+			if not _guardar_captura(destino):
+				quit(1)
+				return
+			vistas.append(
+				{
+					"id": String(vista["id"]),
+					"captura": archivo,
+					"mirada": mirada,
+					"inclinacion": float(caso["inclinacion"]),
+					"sha256": FileAccess.get_sha256(destino),
+				}
+			)
 
 		var auditoria := Densidad.auditar(dia._espacio_actual)
 		var diagnostico := _diagnostico_runtime(dia)
@@ -89,9 +112,10 @@ func _init() -> void:
 				{
 					"id": String(caso["id"]),
 					"fase": String(caso["fase"]),
-					"captura": archivo,
-					"mirada": float(caso["mirada"]),
+					"captura": String(vistas[0]["captura"]),
+					"mirada": float(vistas[0]["mirada"]),
 					"inclinacion": float(caso["inclinacion"]),
+					"vistas": vistas,
 					"bultos_total": int(auditoria["total"]),
 					"bultos_modelados": int(auditoria["modelados"]),
 					"bultos_proxy": int(auditoria["proxies"]),
@@ -104,7 +128,7 @@ func _init() -> void:
 					"lotes_multimesh": diagnostico["lotes_multimesh"],
 					"interactuables": diagnostico["interactuables"],
 					"interactuables_habilitados": diagnostico["interactuables_habilitados"],
-					"sha256": FileAccess.get_sha256(destino),
+					"sha256": String(vistas[0]["sha256"]),
 				}
 			)
 		)
@@ -121,14 +145,18 @@ func _init() -> void:
 	quit(0)
 
 
-func _estabilizar_camara(dia, caso: Dictionary) -> void:
+func _estabilizar_camara(dia, caso: Dictionary, vista: Dictionary) -> float:
 	var entrada: Vector3 = dia._espacio_actual["entrada"]
-	var mirada := float(caso["mirada"])
+	var mirada := fposmod(
+		float(caso["mirada"]) + float(vista["offset_mirada"]),
+		360.0,
+	)
 	dia._caminante.situar(entrada, mirada)
 	dia._caminante.set_physics_process(false)
 	var camara := dia._caminante.get_node("Camara") as Camera3D
 	camara.fov = FOV
 	camara.rotation.x = deg_to_rad(float(caso["inclinacion"]))
+	return mirada
 
 
 func _ocultar_hud(dia) -> void:
