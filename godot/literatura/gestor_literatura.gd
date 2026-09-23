@@ -117,12 +117,15 @@ func resolver_dialogo(
 	fuente: String,
 	jornada: int = 0,
 ) -> Dictionary:
-	return LiteraturaDialogo.conversar(
-		registro_literario,
-		id_dialogo,
-		id_rama,
-		fuente,
-		jornada,
+	return (
+		LiteraturaDialogo
+		. conversar(
+			registro_literario,
+			id_dialogo,
+			id_rama,
+			fuente,
+			jornada,
+		)
 	)
 
 
