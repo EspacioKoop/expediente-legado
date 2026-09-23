@@ -7,6 +7,14 @@ on:
       - '.github/workflows/benchmark-fachadas-vivas.yml'
       - '.godot-version'
       - 'godot/guion/calle_fachadas_vivas.gd'
+      - 'godot/guion/animacion_ambiental.gd'
+      - 'godot/guion/animador_ambiental_3d.gd'
+      - 'godot/guion/calle_ventanas_vivas.gd'
+      - 'godot/guion/viento_ambiental.gd'
+      - 'godot/guion/dia_arboles_cc0_app.gd'
+      - 'godot/arte/psx.gdshader'
+      - 'godot/arte/ventana_viva.gdshader'
+      - 'godot/arte/arboles_quaternius.gd'
       - 'godot/guion/calle_identidad.gd'
       - 'godot/guion/dia_calle_app.gd'
       - 'godot/guion/espacio_3d.gd'
@@ -77,7 +85,23 @@ jobs:
             --script res://pruebas/benchmark_fachadas_vivas.gd -- \
             --mode=full --output="$GITHUB_WORKSPACE/benchmark-fachadas-vivas"
 
-      - name: Comparar coste y presupuesto
+      - name: Ejecutar baseline ambiental
+        shell: bash
+        run: |
+          set -euo pipefail
+          xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+            --script res://pruebas/benchmark_fachadas_vivas.gd -- \
+            --mode=ambiental_baseline --output="$GITHUB_WORKSPACE/benchmark-fachadas-vivas"
+
+      - name: Ejecutar capa de animación ambiental
+        shell: bash
+        run: |
+          set -euo pipefail
+          xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+            --script res://pruebas/benchmark_fachadas_vivas.gd -- \
+            --mode=ambiental_full --output="$GITHUB_WORKSPACE/benchmark-fachadas-vivas"
+
+      - name: Comparar costes y presupuestos
         shell: bash
         run: |
           set -euo pipefail
