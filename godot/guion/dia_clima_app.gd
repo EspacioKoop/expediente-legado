@@ -316,11 +316,14 @@ func _resolver_eleccion_literaria(
 
 	var respuesta := String(resultado.get("respuesta", "")).strip_edges()
 	var consecuencia := String(resultado.get("consecuencia_visible", "")).strip_edges()
+	var salida := ""
 	if respuesta.is_empty():
-		return consecuencia
-	if consecuencia.is_empty():
-		return respuesta
-	return "%s\n%s" % [respuesta, consecuencia]
+		salida = consecuencia
+	elif consecuencia.is_empty():
+		salida = respuesta
+	else:
+		salida = "%s\n%s" % [respuesta, consecuencia]
+	return salida
 
 
 func _gestor_literatura() -> Node:
