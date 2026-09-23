@@ -57,6 +57,21 @@ class RyuNocheRuntimeTest(unittest.TestCase):
         self.assertNotIn("Camera3D.new()", self.vertical)
         self.assertNotIn(".current = true", self.vertical)
 
+    def test_escala_no_recorta_el_ojo_luna_con_techo_estandar(self):
+        self.assertIn("const ESCALA_ENCUENTRO := 0.30", self.vertical)
+        self.assertIn(
+            "ryu.scale = Vector3.ONE * SuenoRyu.ESCALA_ENCUENTRO",
+            self.controller,
+        )
+        self.assertNotIn("const ESCALA_ENCUENTRO := 0.48", self.controller)
+        altura_ancla_habitual = 0.55
+        altura_local_ojo = 6.0 + 1.4
+        altura_techo = 2.8
+        self.assertLess(
+            altura_ancla_habitual + altura_local_ojo * 0.30,
+            altura_techo,
+        )
+
     def test_controller_usa_selector_y_asignacion_comunes(self):
         self.assertRegex(
             self.controller,
