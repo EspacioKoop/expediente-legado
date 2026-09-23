@@ -88,13 +88,16 @@ func _init() -> void:
 		if not _guardar_captura(salida.path_join(archivo)):
 			quit(1)
 			return
-		manifiesto["capturas"].append(
-			{
-				"id": String(encuadre["id"]),
-				"archivo": archivo,
-				"camara": _vector_a_array(Vector3(encuadre["camara"])),
-				"objetivo": _vector_a_array(Vector3(encuadre["objetivo"])),
-			}
+		(
+			manifiesto["capturas"]
+			. append(
+				{
+					"id": String(encuadre["id"]),
+					"archivo": archivo,
+					"camara": _vector_a_array(Vector3(encuadre["camara"])),
+					"objetivo": _vector_a_array(Vector3(encuadre["objetivo"])),
+				}
+			)
 		)
 
 	var ruta_manifiesto := salida.path_join("manifest.json")
