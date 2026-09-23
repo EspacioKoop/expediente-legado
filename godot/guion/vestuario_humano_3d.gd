@@ -459,7 +459,7 @@ func _caja(padre: Node3D, tam: Vector3, posicion: Vector3, color: Color) -> void
 
 func _material(color: Color) -> ShaderMaterial:
 	var material := ShaderMaterial.new()
-	material.shader = load(Espacio3D.SHADER_PSX)
+	material.shader = load(Espacio3D.shader_del_sitio())
 	material.set_shader_parameter("color_base", color)
 	# El relleno es deliberadamente pequeño: conserva sombreado PSX, pero evita
 	# que ropa oscura bajo fluorescentes termine como una silueta sin volumen.

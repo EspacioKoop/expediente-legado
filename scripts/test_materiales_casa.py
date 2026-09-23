@@ -44,7 +44,7 @@ class MaterialesCasaTest(unittest.TestCase):
 
     def test_utileria_reutiliza_el_shader_psx_central(self):
         self.assertIn("Modelos._pintar(malla, color, textura)", self.utileria)
-        self.assertIn("material.shader = load(Espacio3D.SHADER_PSX)", self.modelos)
+        self.assertIn("material.shader = load(Espacio3D.shader_del_sitio())", self.modelos)
         self.assertIn('set_shader_parameter("textura", imagen)', self.modelos)
         self.assertIn('set_shader_parameter("con_textura", true)', self.modelos)
         self.assertNotIn("StandardMaterial3D.new()", self.utileria)

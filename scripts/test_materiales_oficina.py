@@ -44,7 +44,7 @@ class MaterialesOficinaTest(unittest.TestCase):
         self.assertIn('set_shader_parameter("textura", imagen)', self.modelos)
         self.assertIn('set_shader_parameter("con_textura", true)', self.modelos)
         self.assertRegex(self.modelos, r'set_shader_parameter\(\s*"escala_textura"')
-        self.assertIn("material.shader = load(Espacio3D.SHADER_PSX)", self.modelos)
+        self.assertIn("material.shader = load(Espacio3D.shader_del_sitio())", self.modelos)
         self.assertIn("muestra_triplanar", self.shader)
 
     def test_personas_siguen_sin_material_de_mueble(self):

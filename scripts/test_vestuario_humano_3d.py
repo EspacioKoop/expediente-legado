@@ -84,7 +84,7 @@ class VestuarioHumano3DTest(unittest.TestCase):
         self.assertIn("func _solapas(", self.vestuario)
 
     def test_conserva_el_shader_visual_del_proyecto(self):
-        self.assertIn("load(Espacio3D.SHADER_PSX)", self.vestuario)
+        self.assertIn("load(Espacio3D.shader_del_sitio())", self.vestuario)
         self.assertIn('get_shader_parameter("color_base")', self.vestuario)
         self.assertIn('set_shader_parameter("color_base", color)', self.vestuario)
         self.assertIn('EMISION_LEGIBILIDAD := 0.06', self.vestuario)

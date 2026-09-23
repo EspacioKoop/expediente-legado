@@ -214,7 +214,7 @@ func _mallas_importadas(nodo: Node) -> Array:
 
 func _material(color: Color) -> ShaderMaterial:
 	var material := ShaderMaterial.new()
-	material.shader = load(Espacio3D.SHADER_PSX)
+	material.shader = load(Espacio3D.shader_del_sitio())
 	material.set_shader_parameter("color_base", color)
 	# La oficina usa luz por vértice y los tonos de vestuario son deliberadamente
 	# sobrios. Un relleno mínimo evita que cara/cuerpo colapsen a silueta negra

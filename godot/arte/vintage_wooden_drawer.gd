@@ -65,7 +65,7 @@ static func _caja(tamano: Vector3, color: Color) -> BoxMesh:
 	var caja := BoxMesh.new()
 	caja.size = tamano
 	var material := ShaderMaterial.new()
-	material.shader = load(Espacio3D.SHADER_PSX)
+	material.shader = load(Espacio3D.shader_del_sitio())
 	material.set_shader_parameter("color_base", color)
 	caja.material = material
 	return caja

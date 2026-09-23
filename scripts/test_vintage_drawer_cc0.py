@@ -23,7 +23,7 @@ class VintageDrawerCC0Test(unittest.TestCase):
         self.assertIn("const TAMANO := Vector3(0.90, 1.12, 0.46)", codigo)
         self.assertIn("MultiMeshInstance3D", codigo)
         self.assertEqual(codigo.count('raiz.add_child(_multimesh('), 3)
-        self.assertIn("Espacio3D.SHADER_PSX", codigo)
+        self.assertIn("Espacio3D.shader_del_sitio()", codigo)
         for token in ("HTTPRequest", "HTTPClient", "FileAccess.open", "load(\"http"):
             self.assertNotIn(token, codigo)
 
