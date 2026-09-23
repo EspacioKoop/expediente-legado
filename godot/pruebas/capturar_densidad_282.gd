@@ -94,14 +94,17 @@ func _init() -> void:
 			if not _guardar_captura(destino):
 				quit(1)
 				return
-			vistas.append(
-				{
-					"id": String(vista["id"]),
-					"captura": archivo,
-					"mirada": mirada,
-					"inclinacion": float(caso["inclinacion"]),
-					"sha256": FileAccess.get_sha256(destino),
-				}
+			(
+				vistas
+				. append(
+					{
+						"id": String(vista["id"]),
+						"captura": archivo,
+						"mirada": mirada,
+						"inclinacion": float(caso["inclinacion"]),
+						"sha256": FileAccess.get_sha256(destino),
+					}
+				)
 			)
 
 		var auditoria := Densidad.auditar(dia._espacio_actual)
