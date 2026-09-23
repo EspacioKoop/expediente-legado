@@ -12,13 +12,13 @@ const FORMA := "peine"
 const ENCUADRES := [
 	{
 		"id": "entrada",
-		"camara": Vector3(-9.5, ALTURA_JUGADOR, -9.0),
-		"objetivo": Vector3(0.0, 1.25, 0.0),
+		"camara": Vector3(-8.2, ALTURA_JUGADOR, -7.8),
+		"objetivo": Vector3(-3.8, 1.15, -1.5),
 	},
 	{
 		"id": "interior",
-		"camara": Vector3(1.4, ALTURA_JUGADOR, 5.8),
-		"objetivo": Vector3(4.0, 1.15, -0.5),
+		"camara": Vector3(0.0, ALTURA_JUGADOR, 6.2),
+		"objetivo": Vector3(1.1, 1.05, 2.4),
 	},
 ]
 
@@ -108,10 +108,10 @@ func _montar_entorno(mundo: Node3D, espacio: Dictionary) -> void:
 	world_environment.name = "EntornoEvidencia786"
 	var entorno := Environment.new()
 	entorno.background_mode = Environment.BG_COLOR
-	entorno.background_color = ambiente.darkened(0.55)
+	entorno.background_color = ambiente.darkened(0.32)
 	entorno.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	entorno.ambient_light_color = ambiente.lightened(0.18)
-	entorno.ambient_light_energy = float(espacio.get("ambiente_energia", 0.16))
+	entorno.ambient_light_color = ambiente.lightened(0.34)
+	entorno.ambient_light_energy = float(espacio.get("ambiente_energia", 0.38))
 	world_environment.environment = entorno
 	mundo.add_child(world_environment)
 
