@@ -72,6 +72,9 @@ func _ready() -> void:
 	_partida.cargar()
 	_perfil = PerfilJugador.completar(_partida.estado.get("perfil_jugador", {}))
 	_alta_pendiente = not PerfilJugador.esta_configurado(_perfil)
+	if _alta_pendiente:
+		var historial_auditoria := Auditorias.historial(_partida.estado)
+		_partida.estado[Auditorias.CLAVE_ESTADO] = Auditorias.nueva([], historial_auditoria, false)
 	_construir()
 	_cargar_controles()
 	_refrescar()
@@ -300,9 +303,17 @@ func _guardar() -> void:
 	_perfil = _desde_controles()
 	_perfil["configurado"] = true
 	_partida.estado["perfil_jugador"] = _perfil
+	var auditoria_previa: Dictionary = {}
 	if _alta_pendiente and _auditorias != null:
-		_partida.estado[Auditorias.CLAVE_ESTADO] = Auditorias.nueva(_auditorias.seleccion())
+		auditoria_previa = (Dictionary(_partida.estado.get(Auditorias.CLAVE_ESTADO, {})).duplicate(
+			true
+		))
+		if not Auditorias.resolver_seleccion(_partida.estado, _auditorias.seleccion()):
+			_estado.text = tr("PERSONAJE_ERROR_GUARDAR")
+			return
 	if not _partida.guardar():
+		if _alta_pendiente and not auditoria_previa.is_empty():
+			_partida.estado[Auditorias.CLAVE_ESTADO] = auditoria_previa
 		_estado.text = tr("PERSONAJE_ERROR_GUARDAR")
 		return
 	if _alta_pendiente:

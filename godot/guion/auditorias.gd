@@ -9,6 +9,7 @@ extends RefCounted
 
 const CLAVE_ESTADO := "auditorias"
 const CLAVE_HISTORIAL := "historial"
+const CLAVE_SELECCION_RESUELTA := "seleccion_resuelta"
 const ACCION_SOBRANTE := "accion_sobrante"
 
 ## El contrato base solo declara identidades e incompatibilidades. Los rótulos
@@ -28,9 +29,12 @@ static func ids() -> Array:
 	return resultado
 
 
-## Crea el estado al COMENZAR la vida. No hay API para añadir condiciones
-## después: quien quiera cambiarlas tiene que iniciar otra vida laboral.
-static func nueva(seleccion: Array = [], historial_previo: Array = []) -> Dictionary:
+## Crea el estado al COMENZAR la vida. Una selección resuelta puede estar
+## vacía: rechazar el reto también es una decisión válida y debe distinguirse
+## de "todavía no se ha preguntado".
+static func nueva(
+	seleccion: Array = [], historial_previo: Array = [], seleccion_resuelta: bool = true
+) -> Dictionary:
 	if not compatibles(seleccion):
 		return {}
 	var activas := []
@@ -42,6 +46,7 @@ static func nueva(seleccion: Array = [], historial_previo: Array = []) -> Dictio
 		"fallidas": {},
 		"completadas": [],
 		CLAVE_HISTORIAL: historial_previo.duplicate(true),
+		CLAVE_SELECCION_RESUELTA: seleccion_resuelta,
 	}
 
 
@@ -55,7 +60,28 @@ static func asegurar_en_estado(estado_partida: Dictionary) -> Dictionary:
 		estado_partida[CLAVE_ESTADO] = actual
 	if not actual.has(CLAVE_HISTORIAL):
 		actual[CLAVE_HISTORIAL] = []
+	# Un guardado anterior a este corte ya estaba dentro de una vida laboral:
+	# migrarlo no debe abrir una decisión nueva a mitad de jornada.
+	if not actual.has(CLAVE_SELECCION_RESUELTA):
+		actual[CLAVE_SELECCION_RESUELTA] = true
 	return actual
+
+
+static func seleccion_pendiente(estado_partida: Dictionary) -> bool:
+	return not bool(asegurar_en_estado(estado_partida).get(CLAVE_SELECCION_RESUELTA, true))
+
+
+## Resuelve exactamente una oferta de comienzo de vida. Una lista vacía
+## significa "continuar sin condición". El histórico nunca se pierde.
+static func resolver_seleccion(estado_partida: Dictionary, seleccion: Array) -> bool:
+	if not compatibles(seleccion):
+		return false
+	var auditoria := asegurar_en_estado(estado_partida)
+	if bool(auditoria.get(CLAVE_SELECCION_RESUELTA, true)):
+		return false
+	var historial_previo: Array = auditoria.get(CLAVE_HISTORIAL, [])
+	estado_partida[CLAVE_ESTADO] = nueva(seleccion, historial_previo, true)
+	return true
 
 
 ## Cierra una vida una sola vez. Las condiciones aún activas han sobrevivido
@@ -100,7 +126,7 @@ static func historial(estado_partida: Dictionary) -> Array:
 static func reiniciar_vuelta(estado_partida: Dictionary) -> void:
 	var auditoria := asegurar_en_estado(estado_partida)
 	var historial_previo: Array = auditoria.get(CLAVE_HISTORIAL, [])
-	estado_partida[CLAVE_ESTADO] = nueva([], historial_previo)
+	estado_partida[CLAVE_ESTADO] = nueva([], historial_previo, false)
 
 
 ## Primer predicado conectado extremo a extremo: al fichar, "accion_sobrante"
@@ -141,6 +167,11 @@ static func validar(auditoria) -> Array:
 		errores.append("fallidas no es un objeto")
 	if auditoria.has(CLAVE_HISTORIAL) and typeof(auditoria[CLAVE_HISTORIAL]) != TYPE_ARRAY:
 		errores.append("historial no es una lista")
+	if (
+		auditoria.has(CLAVE_SELECCION_RESUELTA)
+		and typeof(auditoria[CLAVE_SELECCION_RESUELTA]) != TYPE_BOOL
+	):
+		errores.append("seleccion_resuelta no es booleana")
 	if not errores.is_empty():
 		return errores
 

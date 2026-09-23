@@ -25,8 +25,7 @@ func _init() -> void:
 		)
 		comprobar_recurso(caso_id, identidad, "icono")
 		comprobar_recurso(caso_id, identidad, "lamina")
-		if not String(identidad.get("sujeto", "")).is_empty():
-			comprobar_recurso(caso_id, identidad, "sujeto")
+		comprobar_recurso(caso_id, identidad, "sujeto")
 
 	print("%d pasadas, %d fallos" % [pasadas, fallos])
 	quit(1 if fallos > 0 else 0)

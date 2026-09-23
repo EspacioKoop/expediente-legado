@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="120" viewBox="0 0 96 120" shape-rendering="crispEdges">
+<title>Ficha de proveedor de Carcosa Servicios Escénicos; telón sin retrato, ficha no biográfica</title>
+<rect width="96" height="120" fill="#e9e5d8"/>
+<rect x="4" y="4" width="88" height="112" fill="#fffdf4" stroke="#353535" stroke-width="2"/>
+<path d="M10 16h76M10 98h76" stroke="#8A6B2D" stroke-width="3"/>
+<rect x="12" y="21" width="44" height="58" fill="#ded9ca" stroke="#353535" stroke-width="2" stroke-dasharray="3 2"/>
+<path d="M14 23h40v7H14z" fill="#8A6B2D"/>
+<path d="M14 30h19c-3 14-3 30 0 47H14z" fill="#67645f"/>
+<path d="M54 30H35c3 14 3 30 0 47h19z" fill="#67645f"/>
+<path d="M64 27h18M64 36h14M64 45h18" stroke="#353535" stroke-width="2"/>
+<path d="M69 56v18M77 56v18" stroke="#8A6B2D" stroke-width="3"/>
+<path d="M63 76l20-22" stroke="#353535" stroke-width="2"/>
+<path d="M15 88h46M15 94h36" stroke="#353535" stroke-width="2"/>
+<path d="M76 84v12M70 90h12" stroke="#8A6B2D" stroke-width="3"/>
+</svg>

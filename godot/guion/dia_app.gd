@@ -40,6 +40,7 @@ var _hud: CanvasLayer
 ## nula: el reproductor se descarta al terminar en vez de quedarse escuchando.
 var _entrada: Node3D
 var _ultimo_recurso: UltimoRecursoApp
+var _auditorias_nueva_vida: AuditoriasNuevaVidaApp
 
 ## El sitio montado ahora mismo, tal como se construyó. Las cinemáticas que
 ## ruedan dentro de él (#395) lo leen en vez de volver a pedirlo: en el sueño
@@ -167,6 +168,9 @@ func _abrir_vuelta() -> void:
 		return
 	if jornada["acciones"] != Jornada.ACCIONES_POR_DIA:
 		return
+	if int(jornada.get("vuelta", 1)) > 1 and Auditorias.seleccion_pendiente(partida.estado):
+		_abrir_auditorias_nueva_vida()
+		return
 
 	_registrar_reincorporacion()
 
@@ -192,6 +196,33 @@ func _abrir_vuelta() -> void:
 ## Se deriva del contador de vuelta existente: no hace falta una bandera paralela
 ## y recargar el día 1 sigue siendo idempotente. El guardado ocurre al cerrar la
 ## misma entrada de vuelta.
+func _abrir_auditorias_nueva_vida() -> void:
+	if is_instance_valid(_auditorias_nueva_vida):
+		return
+	if is_instance_valid(_caminante):
+		_caminante.set_physics_process(false)
+	if is_instance_valid(_hud):
+		_hud.visible = false
+	_auditorias_nueva_vida = AuditoriasNuevaVidaApp.new()
+	_auditorias_nueva_vida.name = "AuditoriasNuevaVida"
+	_auditorias_nueva_vida.seleccion_confirmada.connect(_confirmar_auditorias_nueva_vida)
+	add_child(_auditorias_nueva_vida)
+	_auditorias_nueva_vida.abrir(partida.estado)
+
+
+func _confirmar_auditorias_nueva_vida(seleccion: Array) -> void:
+	var anterior := Dictionary(partida.estado.get(Auditorias.CLAVE_ESTADO, {})).duplicate(true)
+	if not Auditorias.resolver_seleccion(partida.estado, seleccion):
+		return
+	if not _guardar_o_avisar(""):
+		partida.estado[Auditorias.CLAVE_ESTADO] = anterior
+		return
+	if is_instance_valid(_auditorias_nueva_vida):
+		_auditorias_nueva_vida.queue_free()
+	_auditorias_nueva_vida = null
+	_abrir_vuelta()
+
+
 func _registrar_reincorporacion() -> Dictionary:
 	if int(jornada.get("vuelta", 1)) <= 1:
 		return {"resultado": "no-cumplido", "id": SELLO_REINCORPORACION}
