@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="120" viewBox="0 0 96 120" shape-rendering="crispEdges">
+<title>Ficha administrativa de F. P. Karamázov; silueta no biográfica</title>
+<rect width="96" height="120" fill="#e9e5d8"/>
+<rect x="4" y="4" width="88" height="112" fill="#fffdf4" stroke="#353535" stroke-width="2"/>
+<path d="M10 16h76M10 98h76" stroke="#536E5A" stroke-width="3"/>
+<rect x="12" y="21" width="44" height="58" fill="#ded9ca" stroke="#353535" stroke-width="2" stroke-dasharray="3 2"/>
+<circle cx="34" cy="39" r="11" fill="#67645f"/>
+<path d="M17 70c2-13 8-20 17-20s15 7 17 20v5H17z" fill="#67645f"/>
+<path d="M40 21h16v16z" fill="#353535"/>
+<path d="M64 27h18M64 36h14" stroke="#353535" stroke-width="2"/>
+<path d="M74 78V64M74 64l-10-8M74 64v-10M74 64l10-8" fill="none" stroke="#536E5A" stroke-width="2"/>
+<rect x="61" y="53" width="5" height="5" fill="#536E5A"/>
+<rect x="72" y="50" width="5" height="5" fill="#536E5A"/>
+<rect x="82" y="53" width="5" height="5" fill="#536E5A"/>
+<path d="M15 88h42M15 94h32" stroke="#353535" stroke-width="2"/>
+<rect x="64" y="84" width="20" height="12" fill="none" stroke="#536E5A" stroke-width="2"/>
+<path d="M68 90h12" stroke="#536E5A" stroke-width="1"/>
+</svg>

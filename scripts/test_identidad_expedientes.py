@@ -18,7 +18,7 @@ class IdentidadExpedientesTest(unittest.TestCase):
         comprobar_contrato(
             self,
             "pruebas/pruebas_identidad_expedientes.gd",
-            "67 pasadas, 0 fallos",
+            "83 pasadas, 0 fallos",
         )
 
     def test_hay_diez_identidades_y_portadas_distintas(self):
@@ -33,21 +33,20 @@ class IdentidadExpedientesTest(unittest.TestCase):
             self.assertTrue(ficha["icono"].startswith("res://arte/siga_expedientes/"))
             self.assertTrue(ficha["lamina"].startswith("res://arte/siga_expedientes/lamina_"))
 
-    def test_los_dos_casos_del_gate_tienen_fichas_de_sujeto_no_biograficas(self):
+    def test_cada_expediente_tiene_ficha_de_sujeto_no_biografica(self):
         catalogo = json.loads(CATALOGO.read_text(encoding="utf-8"))
-        sujetos = {
-            caso_id: ficha["sujeto"]
-            for caso_id, ficha in catalogo.items()
-            if ficha.get("sujeto")
-        }
-        self.assertEqual(set(sujetos), {"caso@1", "caso2@2"})
-        self.assertEqual(len(set(sujetos.values())), 2)
+        sujetos = {caso_id: ficha.get("sujeto", "") for caso_id, ficha in catalogo.items()}
+        self.assertTrue(all(sujetos.values()), sujetos)
+        self.assertEqual(len(set(sujetos.values())), len(catalogo))
         for ruta in sujetos.values():
             self.assertTrue(ruta.startswith("res://arte/siga_expedientes/sujeto_"))
             asset = ROOT / "godot" / ruta.removeprefix("res://")
             texto = asset.read_text(encoding="utf-8")
-            self.assertIn("silueta no biográfica", texto)
+            # Sin rasgos inventados ni rótulos rasterizados: el nombre vive en el
+            # catálogo y la ficha solo ilustra lo que la descripción ya afirma.
+            self.assertIn("no biográfic", texto)
             self.assertNotIn("<text", texto)
+            self.assertNotIn("<image", texto)
 
     def test_la_identidad_es_presentacion_sin_reglas_de_juego(self):
         codigo = VISOR.read_text(encoding="utf-8")
