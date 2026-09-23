@@ -53,9 +53,7 @@ static func _entradas_disponibles(app: Node) -> Array[Dictionary]:
 	var compradas_variante = app.get("roms_compradas")
 	var compradas: Array = compradas_variante if compradas_variante is Array else []
 	var desbloqueadas_variante = app.get("roms_desbloqueadas")
-	var desbloqueadas: Array = (
-		desbloqueadas_variante if desbloqueadas_variante is Array else []
-	)
+	var desbloqueadas: Array = desbloqueadas_variante if desbloqueadas_variante is Array else []
 	for rom in RomsPropias.en_consola(compradas, desbloqueadas):
 		var titulo := String(rom.get("titulo", ""))
 		var id_rom := String(rom.get("id", ""))
