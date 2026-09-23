@@ -267,6 +267,7 @@ func _resolver_objetivos_sueno() -> void:
 	var dia_nuevo := -1
 	if jornada["sueno_escenas"].is_empty():
 		_registrar_despertar_reglamentario()
+		Auditorias.resolver_fin_sueno(partida.estado, true)
 		dia_nuevo = Jornada.despertar(jornada)
 		destino = "archivo"
 	if not _guardar_o_avisar(destino):
