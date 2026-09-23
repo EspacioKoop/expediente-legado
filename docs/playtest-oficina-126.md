@@ -19,7 +19,7 @@ materializado (#1216).
 
 Antes del pase:
 
-1. ejecutar o descargar el artifact `SIGA-98-oficina-visual-gate-126-<sha>`;
+1. descargar el artifact `SIGA-98-oficina-visual-gate-126-<sha>` del run de `push` sobre `main` que corresponde a la build (el artifact efímero de un PR no sirve como evidencia final);
 2. revisar sus dos PNG y su `README.md`;
 3. confirmar que el `commit SHA` del artifact coincide con `BUILD-INFO.txt` de la build;
 4. confirmar en el manifest si Styloo está activo y qué renderer se usó.
