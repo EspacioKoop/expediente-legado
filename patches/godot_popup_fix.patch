@@ -1,7 +1,7 @@
 diff --git a/scene/gui/popup.cpp b/scene/gui/popup.cpp
 --- a/scene/gui/popup.cpp
 +++ b/scene/gui/popup.cpp
-@@ -47,8 +47,16 @@ void Popup::_initialize_visible_parents() {
+@@ -7,8 +7,14 @@
  			parent_window = parent_window->get_parent_visible_window();
  			if (parent_window) {
  				visible_parents.push_back(parent_window);
@@ -18,7 +18,7 @@ diff --git a/scene/gui/popup.cpp b/scene/gui/popup.cpp
  			}
  		}
  	}
-@@ -57,8 +65,14 @@ void Popup::_initialize_visible_parents() {
+@@ -17,8 +23,14 @@
  void Popup::_deinitialize_visible_parents() {
  	if (is_embedded()) {
  		for (Window *parent_window : visible_parents) {
