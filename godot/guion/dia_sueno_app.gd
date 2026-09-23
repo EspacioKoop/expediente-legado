@@ -27,6 +27,11 @@ func _espacio_de(fase: String) -> Dictionary:
 	if fase != "sueño" or jornada["sueno_escenas"].is_empty():
 		return espacio
 	var id := String(jornada["sueno_escenas"][0])
+	# #786: cero lecturas tiene una identidad propia. No pasa por las identidades
+	# temáticas ni por HorrorTexturas porque ambas introducirían señales ajenas al
+	# día vacío; solo se deforma la estructura laboral que ya conoce el jugador.
+	if jornada.get("leido_hoy", []).is_empty():
+		return SuenoVacio.adaptar_espacio(espacio)
 	if SuenoEscuela.es_forma(id):
 		espacio = SuenoEscuela.adaptar_espacio(espacio, {"variante_aulas": 0})
 	elif SuenoMontana.es_forma(id):
@@ -61,6 +66,7 @@ func _entrar_en(fase: String) -> void:
 	soltar_animacion_ambiental()
 	if fase != "sueño" or _mundo == null:
 		return
+	SuenoVacio3D.montar(_mundo, _espacio_actual)
 	SuenoCastillo3D.montar(_mundo, _espacio_actual)
 	SuenoMontana3D.montar(_mundo, _espacio_actual)
 	SuenoDesierto3D.montar(_mundo, _espacio_actual)

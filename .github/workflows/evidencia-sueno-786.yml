@@ -1,0 +1,77 @@
+name: Evidencia sueño vacío 786
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/evidencia-sueno-786.yml'
+      - '.godot-version'
+      - 'godot/guion/dia_sueno_app.gd'
+      - 'godot/guion/sueno_vacio*.gd'
+      - 'godot/pruebas/capturar_sueno_786.gd'
+      - 'scripts/test_sueno_vacio_786.py'
+      - 'docs/evidencias/sueno-786/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidencia:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      GALLIUM_DRIVER: llvmpipe
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Instalar Godot declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Importar proyecto
+        run: godot4 --headless --editor --path godot --quit
+
+      - name: Validar contrato del sueño vacío
+        run: python3 -m unittest -v scripts/test_sueno_vacio_786.py
+
+      - name: Renderizar sueño sin lecturas
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidencia-sueno-786
+          xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+            --script res://pruebas/capturar_sueno_786.gd -- \
+            "$GITHUB_WORKSPACE/evidencia-sueno-786"
+          test -s evidencia-sueno-786/entrada.png
+          test -s evidencia-sueno-786/interior.png
+          test -s evidencia-sueno-786/manifest.json
+
+      - name: Adjuntar capturas para revisión humana
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-sueno-786-${{ github.sha }}
+          path: evidencia-sueno-786/
+          if-no-files-found: error
+          retention-days: 14
