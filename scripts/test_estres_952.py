@@ -11,6 +11,7 @@ ESTRES = ROOT / "godot" / "guion" / "estres.gd"
 MARCADORES = ROOT / "godot" / "guion" / "dia_marcadores_mundo_app.gd"
 VISOR = ROOT / "godot" / "guion" / "visor_expediente.gd"
 DIA = ROOT / "godot" / "guion" / "dia_clima_app.gd"
+ENTORNO = ROOT / "godot" / "guion" / "estres_ambiental.gd"
 SMOKE = "pruebas/issue_952_smoke.gd"
 
 
@@ -21,6 +22,7 @@ class Estres952Test(unittest.TestCase):
         cls.marcadores = MARCADORES.read_text(encoding="utf-8")
         cls.visor = VISOR.read_text(encoding="utf-8")
         cls.dia = DIA.read_text(encoding="utf-8")
+        cls.entorno = ENTORNO.read_text(encoding="utf-8")
 
     def test_estado_invisible_y_acotado_vive_en_jornada(self):
         self.assertIn('const CAMPO_JORNADA := "estres_dinamico"', self.estres)
@@ -67,6 +69,22 @@ class Estres952Test(unittest.TestCase):
     def test_ambiente_consume_el_nivel_canonico(self):
         self.assertIn('"estres": Estres.nivel(jornada)', self.dia)
         self.assertNotIn('jornada["estres_dinamico"]', self.dia)
+
+    def test_exposicion_ambiental_es_temporal_y_usa_la_luz_real(self):
+        self.assertIn("INTERVALO_SEGUNDOS := 60.0", self.entorno)
+        self.assertIn('return "oscuridad"', self.entorno)
+        self.assertIn('return "zona_segura"', self.entorno)
+        self.assertIn('if fase == "sueño":', self.entorno)
+        self.assertIn("_ambiente.ambient_light_energy", self.dia)
+        self.assertIn("Jornada.hora_decimal(jornada)", self.dia)
+        self.assertIn("EstresAmbiental.INTENSIDAD", self.dia)
+
+    def test_cambiar_de_fase_reinicia_la_exposicion_y_modales_no_cuentan(self):
+        self.assertIn("_reiniciar_temporizador_estres_entorno()", self.dia)
+        self.assertIn("partida.guardado_pendiente or _pantalla != null or _entrada != null", self.dia)
+        self.assertIn("is_instance_valid(_dialogo_actual)", self.dia)
+        self.assertIn("not _caminante.is_physics_processing()", self.dia)
+        self.assertIn('_guardar_o_avisar("")', self.dia)
 
     def test_smoke_godot(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
