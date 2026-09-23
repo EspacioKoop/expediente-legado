@@ -8,6 +8,7 @@ from scripts.godot_pruebas import ejecutar_script
 ROOT = Path(__file__).resolve().parents[1]
 PARTIDA = (ROOT / "godot/guion/partida.gd").read_text(encoding="utf-8")
 AUDITORIAS = (ROOT / "godot/guion/auditorias.gd").read_text(encoding="utf-8")
+ACUSACION = (ROOT / "godot/guion/acusacion.gd").read_text(encoding="utf-8")
 PRUEBA_GODOT = "res://pruebas/pruebas_auditorias_persistencia.gd"
 RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 
@@ -33,12 +34,29 @@ class AuditoriasPersistenciaTests(unittest.TestCase):
         for prohibido in ("Jornada.fichar_salida", "Sellos.", "Steam", "guardar("):
             self.assertNotIn(prohibido, bloque)
 
+    def test_cese_sella_auditoria_antes_del_reset(self):
+        bloque = ACUSACION.split("static func aceptar_cese(", 1)[1].split(
+            "## Cierra el careo", 1
+        )[0]
+        sello = 'Auditorias.cerrar_vuelta('
+        reset = 'Prometeo.reiniciar_vuelta(estado, ajustes(estado)["vidas"])'
+        self.assertIn(sello, bloque)
+        self.assertIn(reset, bloque)
+        self.assertLess(bloque.index(sello), bloque.index(reset))
+
+    def test_historial_es_idempotente_y_sin_recompensas(self):
+        self.assertIn("static func cerrar_vuelta(", AUDITORIAS)
+        self.assertIn("static func historial(", AUDITORIAS)
+        self.assertIn("historial_previo.duplicate(true)", AUDITORIAS)
+        for prohibido in ("Sellos.", "Steam", "dinero +=", "acciones +=", "vida +="):
+            self.assertNotIn(prohibido, AUDITORIAS)
+
     def test_round_trip_real_en_godot(self):
         resultado = ejecutar_script(PRUEBA_GODOT)
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
         resumen = RESUMEN.search(resultado.stdout)
         self.assertIsNotNone(resumen, resultado.stdout)
-        self.assertGreaterEqual(int(resumen.group(1)), 15, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 21, resultado.stdout)
 
 
 if __name__ == "__main__":
