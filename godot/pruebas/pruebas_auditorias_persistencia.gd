@@ -75,8 +75,10 @@ func _probar_cierre_historial() -> void:
 		"cerrar la vida completa el reto que seguia activo",
 	)
 	_comprobar(
-		Auditorias.estado(estado[Auditorias.CLAVE_ESTADO], Auditorias.ACCION_SOBRANTE)
-		== "completada",
+		(
+			Auditorias.estado(estado[Auditorias.CLAVE_ESTADO], Auditorias.ACCION_SOBRANTE)
+			== "completada"
+		),
 		"el estado vivo queda completado antes del reset",
 	)
 	var repetido := Auditorias.cerrar_vuelta(estado, 1, "reasignacion")
@@ -85,8 +87,10 @@ func _probar_cierre_historial() -> void:
 
 	Prometeo.reiniciar_vuelta(estado, Partida.VIDA_MAXIMA)
 	_comprobar(
-		Auditorias.estado(estado[Auditorias.CLAVE_ESTADO], Auditorias.ACCION_SOBRANTE)
-		== "inactiva",
+		(
+			Auditorias.estado(estado[Auditorias.CLAVE_ESTADO], Auditorias.ACCION_SOBRANTE)
+			== "inactiva"
+		),
 		"el reset limpia la seleccion activa",
 	)
 	_comprobar(Auditorias.historial(estado).size() == 1, "el reset conserva el historial sellado")
