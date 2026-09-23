@@ -82,6 +82,28 @@ func registrar_lectura_significativa(
 	return resultado
 
 
+## Puente del autoload hacia el consumidor puro de #1183. El consumidor calcula
+## coste y modificador; quien invoque este método decide cómo aplicar el coste.
+func ejecutar_ritual_cita(
+	obra_id: String,
+	fuente: String,
+	encuentro_id: String,
+	jornada: int = 0,
+	momentum_actual: float = 0.0
+) -> Dictionary:
+	return (
+		LiteraturaConflicto
+		. ejecutar_cita(
+			registro_literario,
+			obra_id,
+			fuente,
+			encuentro_id,
+			jornada,
+			momentum_actual,
+		)
+	)
+
+
 func obtener_registro_literario() -> Dictionary:
 	return registro_literario.duplicate(true)
 
