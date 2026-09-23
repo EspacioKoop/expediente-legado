@@ -25,9 +25,12 @@ func _empezar_duelo() -> void:
 	super._empezar_duelo()
 	var prefijos: Array[String] = []
 
-	var variante := DialogoIdeologico.resolver(
-		DialogoIdeologico.SUPERFICIE_CAREO_EXPOSICION,
-		estado,
+	var variante := (
+		DialogoIdeologico
+		. resolver(
+			DialogoIdeologico.SUPERFICIE_CAREO_EXPOSICION,
+			estado,
+		)
 	)
 	var clave_ideologica := String(variante.get("clave", ""))
 	if not clave_ideologica.is_empty():
