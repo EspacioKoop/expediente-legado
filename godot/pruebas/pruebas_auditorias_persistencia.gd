@@ -184,9 +184,7 @@ func _probar_resumen_narrativo() -> void:
 	estado[Auditorias.CLAVE_ESTADO] = Auditorias.nueva(
 		[Auditorias.SIN_RELEER, Auditorias.SUENO_COMPLETO]
 	)
-	Auditorias.fallar(
-		estado[Auditorias.CLAVE_ESTADO], Auditorias.SIN_RELEER, "documento_releido"
-	)
+	Auditorias.fallar(estado[Auditorias.CLAVE_ESTADO], Auditorias.SIN_RELEER, "documento_releido")
 	var antes := JSON.stringify(estado)
 	var actual := Auditorias.resumen_narrativo(estado)
 	_comprobar(actual.get("origen", "") == "actual", "el resumen usa la vida abierta")
@@ -206,7 +204,9 @@ func _probar_resumen_narrativo() -> void:
 	estado[Auditorias.CLAVE_ESTADO]["completadas"].clear()
 	estado[Auditorias.CLAVE_ESTADO]["fallidas"].clear()
 	var sellado := Auditorias.resumen_narrativo(estado)
-	_comprobar(sellado.get("origen", "") == "historial", "el resumen prefiere el sello de la vuelta")
+	_comprobar(
+		sellado.get("origen", "") == "historial", "el resumen prefiere el sello de la vuelta"
+	)
 	por_id.clear()
 	for condicion in sellado.get("condiciones", []):
 		por_id[String(condicion.get("id", ""))] = String(condicion.get("estado", ""))
