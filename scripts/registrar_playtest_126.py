@@ -31,6 +31,9 @@ def preguntar_si_no(prompt: str) -> bool:
 
 
 def evaluar_gate(datos: dict[str, object]) -> dict[str, bool]:
+    build_sha = str(datos["build_sha"]).strip()
+    gate_visual_sha = str(datos["gate_visual_sha"]).strip()
+    evidencia_misma_build = bool(build_sha and gate_visual_sha and build_sha == gate_visual_sha)
     participante_nuevo = not bool(datos["conocimiento_previo"])
     lugar_reconocido = bool(datos["lugar_reconocido"])
     zonas_reconocidas = bool(datos["zonas_reconocidas"])
@@ -41,6 +44,7 @@ def evaluar_gate(datos: dict[str, object]) -> dict[str, bool]:
 
     listo = all(
         (
+            evidencia_misma_build,
             participante_nuevo,
             lugar_reconocido,
             zonas_reconocidas,
@@ -51,6 +55,7 @@ def evaluar_gate(datos: dict[str, object]) -> dict[str, bool]:
         )
     )
     return {
+        "evidencia_misma_build": evidencia_misma_build,
         "participante_nuevo": participante_nuevo,
         "lugar_reconocido": lugar_reconocido,
         "zonas_reconocidas": zonas_reconocidas,
@@ -81,6 +86,7 @@ def render_markdown(datos: dict[str, object]) -> str:
 - participante: {datos['participante']}
 - plataforma: {datos['plataforma']}
 - build SHA: `{datos['build_sha']}`
+- gate visual SHA: `{datos['gate_visual_sha']}`
 - conocimiento previo del proyecto/layout: {_si_no(bool(datos['conocimiento_previo']))}
 
 ## Respuestas literales
@@ -113,6 +119,7 @@ def render_markdown(datos: dict[str, object]) -> str:
 
 ## Resumen del gate
 
+- gate visual y build corresponden al mismo SHA: **{_estado(gate['evidencia_misma_build'])}**
 - participante nuevo: **{_estado(gate['participante_nuevo'])}**
 - lugar reconocido: **{_estado(gate['lugar_reconocido'])}**
 - zonas funcionales reconocidas: **{_estado(gate['zonas_reconocidas'])}**
@@ -137,6 +144,7 @@ def recoger_datos() -> dict[str, object]:
         "participante": preguntar("Alias del participante: "),
         "plataforma": preguntar("Plataforma (Linux/Windows/...): "),
         "build_sha": preguntar("Build SHA (BUILD-INFO.txt): "),
+        "gate_visual_sha": preguntar("SHA del artifact visual #126 revisado: "),
         "conocimiento_previo": preguntar_si_no(
             "¿Conocía previamente el proyecto o el layout de la oficina?"
         ),
