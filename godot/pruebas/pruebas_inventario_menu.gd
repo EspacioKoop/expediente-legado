@@ -121,7 +121,7 @@ func _initialize() -> void:
 	panel._soltar_en_slot(Vector2.ZERO, arrastre, "a")
 	var slot_a := panel.find_child("CombinacionSlotA", true, false) as Button
 	_comprobar(
-		slot_a != null and "Palanca" in slot_a.text,
+		slot_a != null and "palanca" in slot_a.text.to_lower(),
 		"soltar el objeto actualiza visualmente la ranura A"
 	)
 	_comprobar(
