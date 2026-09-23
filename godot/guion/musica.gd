@@ -6,7 +6,7 @@
 class_name Musica
 extends RefCounted
 
-const RUTA := "res://assets/audio/"
+const RUTA := "res://assets/audio/musica/"
 const NODO := "MusicaPuntual"
 
 const CATALOGO := {
