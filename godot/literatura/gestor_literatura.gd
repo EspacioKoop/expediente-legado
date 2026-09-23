@@ -108,6 +108,28 @@ func obtener_registro_literario() -> Dictionary:
 	return registro_literario.duplicate(true)
 
 
+## Puente de runtime para el productor conversacional de #1180. El estado sigue
+## viviendo en este autoload; Dia solo aporta qué NPC físico se activó y qué
+## rama eligió el jugador.
+func resolver_dialogo(
+	id_dialogo: String,
+	id_rama: String,
+	fuente: String,
+	jornada: int = 0,
+) -> Dictionary:
+	return LiteraturaDialogo.conversar(
+		registro_literario,
+		id_dialogo,
+		id_rama,
+		fuente,
+		jornada,
+	)
+
+
+func resolver_reentrada_dialogo(id_dialogo: String) -> Dictionary:
+	return LiteraturaDialogoReentrada.resolver(registro_literario, id_dialogo)
+
+
 ## Entrada para observers externos (#1179). Por diseño rechaza conocimiento:
 ## ningún minijuego o handshake puede sustituir una lectura significativa.
 func registrar_evento_externo(evento: Dictionary) -> bool:
