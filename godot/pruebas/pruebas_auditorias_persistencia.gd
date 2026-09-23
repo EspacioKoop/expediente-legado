@@ -91,6 +91,17 @@ func _probar_cierre_historial() -> void:
 	)
 	_comprobar(Auditorias.historial(estado).size() == 1, "el reset conserva el historial sellado")
 
+	var partida := Partida.new()
+	partida.estado = estado
+	_comprobar(partida.guardar(RUTA), "el historial sellado se puede guardar")
+	var recargada := Partida.new()
+	var carga := recargada.cargar(RUTA)
+	_comprobar(carga.get("resultado", "") == "cargada", "el historial sellado se puede recargar")
+	_comprobar(
+		Auditorias.historial(recargada.estado).size() == 1,
+		"guardar y cargar conserva el historial de auditoria",
+	)
+
 
 func _probar_reasignacion() -> void:
 	var estado := Partida.nueva()
