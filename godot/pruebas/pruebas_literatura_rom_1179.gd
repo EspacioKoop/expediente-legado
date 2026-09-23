@@ -19,11 +19,14 @@ func _probar_desbloqueo_exige_conocimiento() -> void:
 		"sin eventos la ROM permanece bloqueada",
 	)
 
-	var posesion := LiteraturaEventos.crear_evento(
-		"posesion:1179",
-		LiteraturaEventos.CANAL_POSESION,
-		Sueno98Vigilia.OBRA_ID,
-		"inventario:prueba",
+	var posesion := (
+		LiteraturaEventos
+		. crear_evento(
+			"posesion:1179",
+			LiteraturaEventos.CANAL_POSESION,
+			Sueno98Vigilia.OBRA_ID,
+			"inventario:prueba",
+		)
 	)
 	_comprobar(LiteraturaEventos.registrar(registro, posesion), "la posesion se registra")
 	_comprobar(
@@ -31,11 +34,14 @@ func _probar_desbloqueo_exige_conocimiento() -> void:
 		"poseer no desbloquea la ROM",
 	)
 
-	var insight := LiteraturaEventos.crear_evento(
-		"insight:1179:previo",
-		LiteraturaEventos.CANAL_INSIGHT,
-		Sueno98Vigilia.OBRA_ID,
-		"conversacion:prueba",
+	var insight := (
+		LiteraturaEventos
+		. crear_evento(
+			"insight:1179:previo",
+			LiteraturaEventos.CANAL_INSIGHT,
+			Sueno98Vigilia.OBRA_ID,
+			"conversacion:prueba",
+		)
 	)
 	_comprobar(LiteraturaEventos.registrar(registro, insight), "el insight previo se registra")
 	_comprobar(
@@ -43,11 +49,14 @@ func _probar_desbloqueo_exige_conocimiento() -> void:
 		"un insight sin conocimiento no desbloquea",
 	)
 
-	var conocimiento := LiteraturaEventos.crear_evento(
-		"conocimiento:1179",
-		LiteraturaEventos.CANAL_CONOCIMIENTO,
-		Sueno98Vigilia.OBRA_ID,
-		"documento:biblioteca:prueba",
+	var conocimiento := (
+		LiteraturaEventos
+		. crear_evento(
+			"conocimiento:1179",
+			LiteraturaEventos.CANAL_CONOCIMIENTO,
+			Sueno98Vigilia.OBRA_ID,
+			"documento:biblioteca:prueba",
+		)
 	)
 	_comprobar(
 		LiteraturaEventos.registrar(registro, conocimiento),
@@ -61,19 +70,22 @@ func _probar_desbloqueo_exige_conocimiento() -> void:
 
 func _probar_evento_de_handshake() -> void:
 	var observador := LiteraturaRomVigilia.new()
-	observador.configurar_contrato(
-		null,
-		{"dia": 4, "vuelta": 2},
-		null,
-		{
-			"id_rom": Sueno98Vigilia.ID_ROM,
-			"titulo_rom": Sueno98Vigilia.TITULO_ROM,
-			"obra_id": Sueno98Vigilia.OBRA_ID,
-			"direccion": Sueno98Vigilia.DIRECCION_ESTADO,
-			"valor": Sueno98Vigilia.ESTADO_COMPLETADO,
-			"contexto": Sueno98Vigilia.CONTEXTO,
-			"etiquetas": Sueno98Vigilia.ETIQUETAS,
-		},
+	(
+		observador
+		. configurar_contrato(
+			null,
+			{"dia": 4, "vuelta": 2},
+			null,
+			{
+				"id_rom": Sueno98Vigilia.ID_ROM,
+				"titulo_rom": Sueno98Vigilia.TITULO_ROM,
+				"obra_id": Sueno98Vigilia.OBRA_ID,
+				"direccion": Sueno98Vigilia.DIRECCION_ESTADO,
+				"valor": Sueno98Vigilia.ESTADO_COMPLETADO,
+				"contexto": Sueno98Vigilia.CONTEXTO,
+				"etiquetas": Sueno98Vigilia.ETIQUETAS,
+			},
+		)
 	)
 	var evento := observador.evento_handshake()
 	_comprobar(not evento.is_empty(), "el contrato produce un evento valido")
