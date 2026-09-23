@@ -255,19 +255,16 @@ func _cerrar_doctrina() -> void:
 
 
 func _mover_jugador(delta: float) -> void:
-	var direccion := Vector2(
+	var entrada := Vector2(
 		Input.get_axis("mover_izquierda", "mover_derecha"),
 		Input.get_axis("mover_adelante", "mover_atras")
 	)
-	if direccion.length_squared() > 1.0:
-		direccion = direccion.normalized()
-	var multiplicador := 2.25 if _esquiva > 0.0 else 1.0
-	_jugador.position += (
-		Vector3(direccion.x, 0.0, direccion.y) * VELOCIDAD_JUGADOR * multiplicador * delta
+	var paso := JUGADOR.plan_movimiento(
+		_jugador.position, entrada, VELOCIDAD_JUGADOR, _esquiva > 0.0, _radio_arena, delta
 	)
-	_jugador.position = _limitar(_jugador.position)
-	if direccion.length_squared() > 0.01:
-		_jugador.rotation.y = atan2(direccion.x, direccion.y)
+	_jugador.position = paso["posicion"]
+	if bool(paso["orientar"]):
+		_jugador.rotation.y = float(paso["rotacion_y"])
 
 
 func _mover_rival(delta: float) -> void:
@@ -468,10 +465,10 @@ func _esquivar() -> void:
 
 
 func _registrar_esquiva_ritual() -> void:
-	var bono := int(_ritual.get("contraataque_esquiva", 0))
-	if bono <= 0:
+	var plan := JUGADOR.contraataque_tras_esquiva(_ritual, _contraataque)
+	if not bool(plan["aplica"]):
 		return
-	_contraataque = maxi(_contraataque, bono)
+	_contraataque = int(plan["contraataque"])
 	_reaccion(_figura_rival, 0.10)
 	_actualizar_hud()
 
@@ -487,10 +484,7 @@ func _terminar(gano: bool) -> void:
 
 
 func _limitar(posicion: Vector3) -> Vector3:
-	var plano := Vector2(posicion.x, posicion.z)
-	if plano.length() > _radio_arena:
-		plano = plano.normalized() * _radio_arena
-	return Vector3(plano.x, 0.0, plano.y)
+	return REGLAS.limitar_a_arena(posicion, _radio_arena)
 
 
 func _resolver_capa_simbolica() -> void:

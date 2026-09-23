@@ -98,6 +98,21 @@ static func todo(comprobar: Callable) -> void:
 		JuicioCombateReglas.duracion_doctrina("comunismo", control),
 	)
 
+	_caso(
+		comprobar,
+		"reglas: dentro de la arena no se toca la posición",
+		JuicioCombateReglas.limitar_a_arena(Vector3(1.0, 0.0, -2.0), 5.0),
+		Vector3(1.0, 0.0, -2.0),
+	)
+	_caso(
+		comprobar,
+		"reglas: fuera de la arena se proyecta al borde y al suelo",
+		JuicioCombateReglas.limitar_a_arena(Vector3(6.0, 1.5, 8.0), 5.0).is_equal_approx(
+			Vector3(3.0, 0.0, 4.0)
+		),
+		true,
+	)
+
 
 static func _caso(comprobar: Callable, nombre: String, obtenido, esperado) -> void:
 	comprobar.call(nombre, obtenido, esperado)
