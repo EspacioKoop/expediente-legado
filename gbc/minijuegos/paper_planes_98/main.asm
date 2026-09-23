@@ -195,7 +195,6 @@ IniciarPartida:
     ld [wHitoX], a
 
     call DibujarHUD
-    call DibujarNombreHito
     call ActualizarOAM
     call SonidoSalida
 
@@ -393,7 +392,6 @@ SiguienteHito:
     ld [wGateChecked], a
     ld [wLandCrashed], a
     call DibujarHUD
-    call DibujarNombreHito
     ret
 
 .fin:
@@ -862,37 +860,6 @@ DibujarHUD:
     ld [BG_MAP + 17], a
     ret
 
-DibujarNombreHito:
-    ld hl, BG_MAP + (2 * 32)
-    ld b, 20
-    xor a
-.limpia:
-    ld [hli], a
-    dec b
-    jr nz, .limpia
-
-    ld a, [wTipoHito]
-    or a
-    jr z, .liberty
-    cp 1
-    jr z, .wtc
-    cp 2
-    jr z, .bridge
-    ld hl, TextoEmpire
-    jr .escribe
-.liberty:
-    ld hl, TextoLiberty
-    jr .escribe
-.wtc:
-    ld hl, TextoWTC
-    jr .escribe
-.bridge:
-    ld hl, TextoBridge
-.escribe:
-    ld de, BG_MAP + (2 * 32) + 6
-    call EscribirCadena
-    ret
-
 EscribirDosDigitosFinal:
     ld b, 0
     cp 10
@@ -1231,10 +1198,6 @@ TextoRuta1:    db "LIBERTY > WTC", 0
 TextoRuta2:    db "BRIDGE > EMPIRE", 0
 TextoHUDUp:    db "F3 WUP G1/4 S00 P0", 0
 TextoHUDDown:  db "F3 WDN G1/4 S00 P0", 0
-TextoLiberty:  db "LIBERTY", 0
-TextoWTC:      db "WTC", 0
-TextoBridge:   db "BRIDGE", 0
-TextoEmpire:   db "EMPIRE", 0
 TextoClear:    db "NYC CLEAR", 0
 TextoCrumpled: db "PLANE CRUMPLED", 0
 TextoScore:    db "SCORE 00", 0
