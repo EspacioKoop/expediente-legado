@@ -152,9 +152,7 @@ func _probar_offline_y_rate_limit() -> void:
 
 func _probar_presentacion_local() -> void:
 	var abierta := _evento("anon-visual", "suenio_umbral", [], "help-visual")
-	var figura := _evento(
-		"anon-figura", "suenio_figura", ["figura_onirica"], "help-figura"
-	)
+	var figura := _evento("anon-figura", "suenio_figura", ["figura_onirica"], "help-figura")
 	var controlador := DiaAyudaResonanciaApp.new()
 	controlador.configurar_transporte(TransporteFixture.new([abierta["event"], figura["event"]]))
 
@@ -168,16 +166,14 @@ func _probar_presentacion_local() -> void:
 	_comprobar("dos ayudas conocidas se presentan", creadas.size(), 2)
 	_comprobar("la presentación usa el nodo local", creadas[0] is SuenoAyudaResonancia3D, true)
 	_comprobar("el umbral usa la entrada visible", creadas[0].position, Vector3(1.0, 0.55, 2.0))
-	_comprobar("el anchor de figura queda identificado", creadas[1].get_meta("anchor_id"), "suenio_figura")
 	_comprobar(
-		"la resonancia crea luz",
-		creadas[0].get_node_or_null("PulsoResonancia") != null,
-		true
+		"el anchor de figura queda identificado", creadas[1].get_meta("anchor_id"), "suenio_figura"
 	)
 	_comprobar(
-		"la resonancia crea audio",
-		creadas[0].get_node_or_null("EcoResonancia") != null,
-		true
+		"la resonancia crea luz", creadas[0].get_node_or_null("PulsoResonancia") != null, true
+	)
+	_comprobar(
+		"la resonancia crea audio", creadas[0].get_node_or_null("EcoResonancia") != null, true
 	)
 	_comprobar(
 		"la resonancia no crea colisión",
