@@ -113,6 +113,7 @@ class SuenoBabaYagaTest(unittest.TestCase):
         self.assertIn("umbral.activado.connect", self.sueno)
         self.assertIn("observatorio.activado.connect", self.sueno)
         self.assertIn("cinta.activado.connect", self.sueno)
+        self.assertIn("control.add_child(colision)", self.sueno)
         self.assertIn("aplicar_evento(EVENTO_UMBRAL", self.sueno)
         self.assertIn("aplicar_evento(EVENTO_FUERA_CAMPO", self.sueno)
         self.assertIn("PreferenciasSiga.cargar()", self.sueno)
