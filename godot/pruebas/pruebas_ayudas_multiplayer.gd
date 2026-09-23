@@ -189,8 +189,13 @@ func _probar_presentacion_local() -> void:
 		mundo_sin_figura, {"entrada": Vector3.ZERO, "figuras": []}, AHORA + 1
 	)
 	_comprobar("sin figura conocida solo se presenta el umbral", solo_umbral.size(), 1)
-	mundo.queue_free()
-	mundo_sin_figura.queue_free()
+
+	# Esta prueba termina desde SceneTree._init(): queue_free() no llega a vaciarse
+	# antes de quit(), así que liberamos los fixtures sin esperar a otro frame.
+	mundo.free()
+	mundo_sin_figura.free()
+	controlador.free()
+	filtrado.free()
 
 
 func _comprobar(nombre: String, obtenido: Variant, esperado: Variant) -> void:
