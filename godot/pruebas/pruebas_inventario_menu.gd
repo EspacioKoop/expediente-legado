@@ -94,7 +94,9 @@ func _initialize() -> void:
 	estado_combo["jornada"]["fase"] = "casa"
 	var inventario_combo: Dictionary = estado_combo["inventario"]
 	_comprobar(
-		Inventario.recoger(inventario_combo, PropsUtilizablesCC0.objeto_inventario("palanca_kkryy")),
+		Inventario.recoger(
+			inventario_combo, PropsUtilizablesCC0.objeto_inventario("palanca_kkryy")
+		),
 		"prepara la palanca real para combinar"
 	)
 	_comprobar(
@@ -137,8 +139,10 @@ func _initialize() -> void:
 	)
 	var palanca_combinada := _buscar(inventario_combo, "palanca_kkryy")
 	_comprobar(
-		String(palanca_combinada.get("receta_combinacion", ""))
-		== CombinacionesObjetosCatalogo.RECETA_PALANCA_CUNA,
+		(
+			String(palanca_combinada.get("receta_combinacion", ""))
+			== CombinacionesObjetosCatalogo.RECETA_PALANCA_CUNA
+		),
 		"el resultado persistente conserva la huella de la receta"
 	)
 
