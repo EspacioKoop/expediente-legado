@@ -62,9 +62,7 @@ func _montar_geometria() -> void:
 		return
 	var carcasa := MeshInstance3D.new()
 	carcasa.name = "Carcasa"
-	carcasa.mesh = (
-		load("res://arte/props_originales_98/telefono_fijo_base_98.obj") as Mesh
-	)
+	carcasa.mesh = (load("res://arte/props_originales_98/telefono_fijo_base_98.obj") as Mesh)
 	add_child(carcasa)
 
 	_auricular = Node3D.new()
