@@ -214,6 +214,9 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 				cuerpo = null
 		if cuerpo == null:
 			cuerpo = FiguraSilueta.construir(raiz, figura["pos"], color_figura)
+		# Hacia dónde mira. Por defecto, al frente de siempre; una cinemática de
+		# salida (#899) necesita espaldas, no caras.
+		cuerpo.rotation.y = float(figura.get("giro", 0.0))
 		if not figura.get("rotulo", "").is_empty():
 			# El nombre va SOBRE la cabeza, y la cabeza está más alta o más baja
 			# según se sea una silueta o una persona de verdad. Silueta y modelo
@@ -291,6 +294,17 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 	# como cualquier otro y por eso lo declara el catálogo.
 	for cigarro in espacio.get("cigarros", []):
 		Cigarro.construir(raiz, cigarro)
+
+	# El gato de un decorado es el mismo gato y no una figura de cajas (#899):
+	# quieto en una pose. Nadie llama a su `avanzar`, así que no anda, no pide
+	# comida ni toca el estado de la partida; quien orquesta el día sigue
+	# montando el gato jugable por su cuenta.
+	for gato in espacio.get("gatos", []):
+		var bicho := Gato.new()
+		raiz.add_child(bicho)
+		bicho.empezar(gato["pos"], [])
+		bicho.rotation.y = float(gato.get("giro", 0.0))
+		bicho.presentar_estado(String(gato.get("pose", "durmiendo")))
 
 	# Las luces las declara el sitio, igual que sus muebles. Un fluorescente no
 	# es un efecto: es una lámpara que está en el techo del archivo y que se ve
