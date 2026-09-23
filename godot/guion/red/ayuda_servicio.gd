@@ -68,9 +68,7 @@ func publicar(
 	return resultado
 
 
-func consultar(
-	scene_key: String, conocimiento: Array = [], ahora_unix: int = -1
-) -> Dictionary:
+func consultar(scene_key: String, conocimiento: Array = [], ahora_unix: int = -1) -> Dictionary:
 	if not _ayudas_visibles:
 		return {"ok": true, "status": "disabled_local", "helps": []}
 	var ahora := _ahora(ahora_unix)
