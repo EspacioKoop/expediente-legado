@@ -1,9 +1,9 @@
 extends SceneTree
 
+const DIALOGO := "biblioteca_calderon_apariencia"
+
 var pasadas := 0
 var fallos := 0
-
-const DIALOGO := "biblioteca_calderon_apariencia"
 
 
 func _initialize() -> void:
