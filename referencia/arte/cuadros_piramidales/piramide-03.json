@@ -4,7 +4,7 @@
   "titulo": "Pirámide nocturna y triángulo celeste",
   "autor": "Expediente Legado",
   "licencia": "CC0-1.0",
-  "fuente": "scripts/generar_cuadros_piramidales.py",
+  "fuente": "docs/assets/cuadros-piramidales-originales.md",
   "ancho": 320,
   "alto": 224,
   "semilla": 19503,
