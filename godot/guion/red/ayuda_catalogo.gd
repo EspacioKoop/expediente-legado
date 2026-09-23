@@ -5,7 +5,8 @@ extends RefCounted
 ## La red solo transporta IDs declarativos; nunca texto, scripts ni recursos.
 
 const HELP_TYPES := {
-	"resonancia": {
+	"resonancia":
+	{
 		"visual": "pulso_luz",
 		"audio": "eco_breve",
 	},
@@ -14,11 +15,13 @@ const HELP_TYPES := {
 const STRENGTHS := ["leve", "media"]
 
 const ANCHORS := {
-	"suenio_umbral": {
+	"suenio_umbral":
+	{
 		"scene_key": "suenio/primera_noche",
 		"knowledge_gate": "",
 	},
-	"suenio_figura": {
+	"suenio_figura":
+	{
 		"scene_key": "suenio/primera_noche",
 		"knowledge_gate": "figura_onirica",
 	},
