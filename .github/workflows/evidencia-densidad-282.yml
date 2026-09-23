@@ -87,6 +87,8 @@ jobs:
 
           manifest = json.loads(Path("evidencia-densidad-282/manifest.json").read_text())
           casos = {caso["id"]: caso for caso in manifest["casos"]}
+          if manifest.get("locale") != "es":
+              raise SystemExit("el gate #282 debe renderizar el catálogo español")
           if set(casos) != {"oficina", "calle", "casa", "sueno"}:
               raise SystemExit("faltan fases del gate #282")
           if manifest.get("vistas_por_fase") != 3:
