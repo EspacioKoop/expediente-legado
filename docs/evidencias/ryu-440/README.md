@@ -6,7 +6,7 @@ La evidencia **no sustituye** el playtest visual humano exigido por #398/#181. U
 
 ## Qué produce
 
-El workflow `Evidencia Ryū 440` monta un `Espacio3D` real de sueño, inserta `SuenoRyu` con la misma escala `0.48` del controller nocturno y usa una cámara sin HUD a altura de jugador. Publica:
+El workflow `Evidencia Ryū 440` monta un `Espacio3D` real de sueño, inserta `SuenoRyu` con la escala canónica `SuenoRyu.ESCALA_ENCUENTRO` (`0.30`) y usa una cámara sin HUD a altura de jugador. La escala deja el borde superior del ojo/luminaria en ~2.77 m con el ancla habitual (`0.55 + 7.4 × 0.30`), dentro del techo de 2.8 m de `Espacio3D`. Publica:
 
 - `normal_inicial.png`: estado inicial, tres compuertas opuestas al objetivo y lluvia completa;
 - `normal_resuelto.png`: mismo encuadre tras accionar las tres compuertas mediante `Interactuable3D.interactuar()`, con puente y ojo/luminaria reaccionados;
