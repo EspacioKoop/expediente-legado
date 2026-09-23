@@ -11,7 +11,7 @@
 ## revision humana sobre las PNG del mismo build.
 extends SceneTree
 
-const TAMANO := Vector2i(1280, 720)
+const TAMANO := Vector2i(1920, 1080)
 const FOV := 70.0
 const FRAMES_ESTABILIZACION := 3
 
