@@ -45,20 +45,27 @@ func _init() -> void:
 	# Esperar aquí deja preparada la jerarquía real antes de aplicar la semilla.
 	await process_frame
 
+	var correcto := await _generar_evidencia(salida, mundo, encuentro)
+	quit(0 if correcto else 1)
+
+
+func _generar_evidencia(
+	salida: String,
+	mundo: Node3D,
+	encuentro: SuenoHidraInteraccion3D,
+) -> bool:
 	var semillas := {}
 	semillas[SuenoHidra.SEMILLA] = {"fuente": "rom:hydra_loop_98"}
 	if not encuentro.configurar(semillas, false, 3):
 		printerr("La semilla de Hidra no habilitó el encuentro")
-		quit(1)
-		return
+		return false
 
 	var hidra := encuentro.get_node_or_null("HidraProcedural") as SuenoHidra
 	var sintoma := encuentro.get_node_or_null("SintomaHidra") as Interactuable3D
 	var nodo := encuentro.get_node_or_null("NodoComunHidra") as Interactuable3D
 	if hidra == null or sintoma == null or nodo == null:
 		printerr("No se montó el vertical jugable completo de Hidra")
-		quit(1)
-		return
+		return false
 
 	var actor := Node.new()
 	actor.name = "ActorEvidencia"
@@ -73,15 +80,25 @@ func _init() -> void:
 		"criterio": "evidencia_para_revision_humana",
 		"estados": [],
 	}
+	if not await _capturar_secuencia(salida, hidra, sintoma, nodo, actor, manifiesto):
+		return false
+	return _guardar_manifiesto(salida, manifiesto)
 
+
+func _capturar_secuencia(
+	salida: String,
+	hidra: SuenoHidra,
+	sintoma: Interactuable3D,
+	nodo: Interactuable3D,
+	actor: Node,
+	manifiesto: Dictionary,
+) -> bool:
 	if not await _capturar_estado(salida, "01_inicial.png", "inicial", hidra, manifiesto):
-		quit(1)
-		return
+		return false
 
 	if not sintoma.interactuar(actor) or not sintoma.interactuar(actor):
 		printerr("No se pudo llevar la Hidra al estado de proliferación")
-		quit(1)
-		return
+		return false
 	if not await _capturar_estado(
 		salida,
 		"02_proliferacion.png",
@@ -89,27 +106,24 @@ func _init() -> void:
 		hidra,
 		manifiesto,
 	):
-		quit(1)
-		return
+		return false
 
 	if not nodo.interactuar(actor):
 		printerr("El nodo común no quedó resoluble tras hacer legible la raíz")
-		quit(1)
-		return
-	if not await _capturar_estado(salida, "03_resuelta.png", "resuelta", hidra, manifiesto):
-		quit(1)
-		return
+		return false
+	return await _capturar_estado(salida, "03_resuelta.png", "resuelta", hidra, manifiesto)
 
+
+func _guardar_manifiesto(salida: String, manifiesto: Dictionary) -> bool:
 	var ruta_manifiesto := salida.path_join("manifest.json")
 	var archivo_manifiesto := FileAccess.open(ruta_manifiesto, FileAccess.WRITE)
 	if archivo_manifiesto == null:
 		printerr("No se pudo crear %s" % ruta_manifiesto)
-		quit(1)
-		return
+		return false
 	archivo_manifiesto.store_string(JSON.stringify(manifiesto, "\t") + "\n")
 	archivo_manifiesto.close()
 	print("evidencia #439 -> %s" % salida)
-	quit(0)
+	return true
 
 
 func _capturar_estado(
