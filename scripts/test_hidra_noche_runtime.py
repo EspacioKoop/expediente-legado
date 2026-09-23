@@ -88,6 +88,13 @@ class HidraNocheRuntimeTest(unittest.TestCase):
         self.assertIn("encuentro.resuelta()", self.smoke)
         self.assertIn('hidra.modo_aparicion() == "fundido_discreto"', self.smoke)
 
+    def test_lectura_visual_conecta_raiz_y_colapsa_a_semilla(self):
+        self.assertIn('"ConexionesRaiz"', self.core)
+        self.assertIn("cable.look_at(fin, Vector3.UP)", self.core)
+        self.assertIn('"SemillaHydraLoopFinal"', self.core)
+        self.assertIn('get_node_or_null("ConexionesRaiz")', self.smoke)
+        self.assertIn('get_node_or_null("ResolucionHidra/SemillaHydraLoopFinal")', self.smoke)
+
     @unittest.skipUnless(
         shutil.which(os.environ.get("GODOT_BIN", "godot4")),
         "Godot no está disponible en PATH",
