@@ -95,8 +95,8 @@ La ROM no contiene referencias a Godot, `LiteraturaEventos`, `GestorLiteratura` 
 `CANAL_CONOCIMIENTO`. Así, ningún observer o minijuego puede usar este puente para
 simular que la obra fue leída.
 
-El id del evento no incluye jornada ni vuelta: rejugar o reabrir la ROM no duplica el
-hecho literario.
+El id del evento no incluye jornada ni vuelta: el registro es **idempotente** y rejugar
+o reabrir la ROM no duplica el hecho literario.
 
 ## 7. Regresión
 
