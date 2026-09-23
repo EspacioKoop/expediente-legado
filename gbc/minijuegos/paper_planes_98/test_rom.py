@@ -214,5 +214,26 @@ class PruebasROM(unittest.TestCase):
                 self.assertEqual(memoria[0x9820:0x9820 + 20], bytes(20))
 
 
+    def test_cambio_de_hito_no_reintroduce_rotulo_en_tercera_fila(self):
+        def preparar(emulador):
+            emulador.memory[0x9800:0x9860] = [0] * 96
+            valores = {
+                "wTipoHito": 0,
+                "wVidas": 3,
+                "wScore": 0,
+                "wPerfectos": 0,
+                "wGateChecked": 1,
+                "wLandCrashed": 1,
+            }
+            for nombre, valor in valores.items():
+                emulador.memory[self.simbolos[nombre]] = valor
+
+        memoria = self.ejecutar("SiguienteHito", preparar)
+        self.assertEqual(memoria[self.simbolos["wTipoHito"]], 1)
+        self.assertNotEqual(memoria[0x9800:0x9800 + 20], bytes(20))
+        self.assertEqual(memoria[0x9820:0x9820 + 20], bytes(20))
+        self.assertEqual(memoria[0x9840:0x9840 + 20], bytes(20))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

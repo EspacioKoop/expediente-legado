@@ -34,7 +34,7 @@ No se incorporan fotografías, logotipos, BIOS ni ROMs de terceros. Todos los gr
 
 El segundo pase convierte la ruta en algo más que memorizar cuatro alturas: el jugador debe anticipar la racha del siguiente tramo, decidir cuándo corregir y cuándo fijar la trayectoria con **B**, y escoger entre un paso simplemente seguro o buscar la banda estrecha que da el perfecto.
 
-El pase de legibilidad de #804 mantiene esas reglas y corrige únicamente presentación: el cielo CGB deja de ser blanco puro, aparecen nubes de referencia, el skyline jugable gana una base urbana, el avión usa una silueta 16×8 de alto contraste y las dos filas de agua se escriben respetando el stride real de 32 celdas del tilemap. Esto último evita la antigua franja 32+8 que se leía como una barra atravesando media pantalla.
+El pase de legibilidad de #804 mantiene esas reglas y corrige únicamente presentación: el cielo CGB deja de ser blanco puro, aparecen nubes de referencia, el skyline jugable gana una base urbana, el avión usa una silueta 16×8 de alto contraste y las dos filas de agua se escriben respetando el stride real de 32 celdas del tilemap. Esto último evita la antigua franja 32+8 que se leía como una barra atravesando media pantalla. El nombre del hito deja de ocupar una tercera fila durante el vuelo: el gate del HUD y la silueta del obstáculo mantienen esa lectura sin añadir otro rótulo.
 
 La puntuación, las vidas, los perfectos y la ruta existen únicamente dentro de la RAM de la ROM. No hay dinero, pistas, progreso de `Partida`, cambios de `Jornada` ni efectos sobre sueño/archivo.
 
@@ -67,7 +67,7 @@ make test PYTHON=/tmp/paper-planes-tests/bin/python
 
 `test_rom.py` ejecuta el código máquina compilado en copias temporales de la ROM y comprueba la cabecera dual-mode, la limpieza de las 1024 celdas del fondo, el stride y la anchura visible de skyline/agua, la silueta 16×8 del avión, los sprites de los cuatro hitos en OAM, el HUD de una fila, la alternancia/frecuencia de las rachas, el bloqueo del viento con **B** y la diferencia entre un paso normal y un paso perfecto.
 
-El arnés llama a las rutinas con la LCD apagada: verifica sus escrituras en memoria, pero no el presupuesto de VBlank, el renderizado durante una partida ni controles físicos. PyBoy es una dependencia de pruebas local; no se distribuye con la ROM ni se integra en el juego. El workflow GBC existente compila la ROM; estas pruebas se ejecutan explícitamente con `make test`.
+El arnés llama a las rutinas con la LCD apagada: verifica sus escrituras en memoria, pero no el presupuesto de VBlank, el renderizado durante una partida ni controles físicos. PyBoy es una dependencia de pruebas local; no se distribuye con la ROM ni se integra en el juego. El workflow GBC compila la ROM y ejecuta estas regresiones con `make test`.
 
 ## Siguientes rutas candidatas
 
