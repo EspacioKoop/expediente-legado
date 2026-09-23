@@ -15,6 +15,7 @@ var _bloc_notas_app: EscritorioSigaApp
 var _calculadora_app: EscritorioSigaApp
 var _catalogo_anomalias_app: EscritorioSigaApp
 var _evaluaciones_app: EscritorioSigaApp
+var _auditorias_app: EscritorioSigaApp
 var _explorador_vista: ExploradorSiga
 var _navegador_vista: NavegadorSiga
 var _menu_global: Node
@@ -255,6 +256,24 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	_evaluaciones_app.registrar_en(escritorio)
 	_apps.append(_evaluaciones_app)
 
+	# #152: consulta del reto elegido para esta vida. Comparte el estado canónico
+	# de Partida y no ofrece edición desde el escritorio: aceptar una condición
+	# sigue siendo una decisión previa a empezar la vida laboral.
+	_auditorias_app = (
+		EscritorioSigaApp
+		. new(
+			"auditorias",
+			tr("AUDITORIAS_APP_TITULO"),
+			Callable(self, "_crear_auditorias"),
+			"siga",
+		)
+	)
+	_auditorias_app.tamano_minimo = Vector2(520, 300)
+	_auditorias_app.tamano_preferido = Vector2(700, 430)
+	_auditorias_app.redimensionable = true
+	_auditorias_app.registrar_en(escritorio)
+	_apps.append(_auditorias_app)
+
 	# Reponer el estado declarado ANTES de adoptar/abrir nada: así una app que
 	# lea su estado local al construir su contenido (como hacen Correo y #539) ya
 	# lo ve actualizado desde el primer fotograma.
@@ -387,6 +406,17 @@ func _crear_evaluaciones() -> Control:
 	if partida_actual is Partida:
 		evaluaciones.configurar_estado(partida_actual.estado)
 	return evaluaciones
+
+
+func _crear_auditorias() -> Control:
+	var auditorias := AuditoriasSiga.new()
+	var dia := get_parent()
+	if dia == null:
+		return auditorias
+	var partida_actual: Variant = dia.get("partida")
+	if partida_actual is Partida:
+		auditorias.configurar_estado(partida_actual.estado, false)
+	return auditorias
 
 
 func _registrar_documento_os98(documento_id: String) -> void:
