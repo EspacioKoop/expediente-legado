@@ -99,9 +99,7 @@ func _init() -> void:
 					"criterio": String(caso["criterio"]),
 					"gato_top_level": gato.top_level,
 					"escala_global": _vector_a_array(escala),
-					"distancia_camara": camara.global_position.distance_to(
-						gato.global_position
-					),
+					"distancia_camara": camara.global_position.distance_to(gato.global_position),
 					"sha256": FileAccess.get_sha256(destino),
 				}
 			)
