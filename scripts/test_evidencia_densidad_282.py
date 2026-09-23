@@ -72,7 +72,7 @@ class EvidenciaDensidad282Test(unittest.TestCase):
         self.assertIn('rotulo.text.begins_with("CALLE_")', self.captura)
         self.assertIn("NO deciden", self.captura)
 
-    def test_workflow_publica_doce_png_y_manifiesto(self):
+    def test_workflow_publica_panorama_y_vistas_canonicas(self):
         self.assertIn("xvfb-run -a godot4", self.workflow)
         self.assertNotIn("--rendering-method gl_compatibility", self.workflow)
         self.assertIn('renderer/rendering_method="forward_plus"', self.proyecto)
@@ -88,6 +88,29 @@ class EvidenciaDensidad282Test(unittest.TestCase):
         self.assertIn('manifest.get("vistas_por_fase") != 3', self.workflow)
         self.assertIn('len(set(hashes)) != 3', self.workflow)
         self.assertIn('caso["mallas_total"] <= 0', self.workflow)
+        for capturador in (
+            "capturas_oficina_126.gd",
+            "capturar_calle_277.gd",
+            "capturar_casa_133.gd",
+            "capturar_sueno_284.gd",
+        ):
+            self.assertIn(capturador, self.workflow)
+        for captura in (
+            "oficina/puestos-archivo.png",
+            "oficina/acceso-ventanas.png",
+            "calle/spawn_exterior.png",
+            "calle/escaparate_crt.png",
+            "calle/portal_casa.png",
+            "casa/entrada_vivienda.png",
+            "casa/salon_dormitorio.png",
+            "casa/consola_television.png",
+            "sueno/castillo.png",
+            "sueno/montana.png",
+            "sueno/desierto.png",
+            "sueno/escuela_general.png",
+            "sueno/escuela_contenido.png",
+        ):
+            self.assertIn(captura, self.workflow)
 
     def test_documentacion_exige_revision_humana(self):
         self.assertIn("sin HUD", self.docs)
@@ -97,6 +120,8 @@ class EvidenciaDensidad282Test(unittest.TestCase):
         self.assertIn("manifest.json", self.docs)
         self.assertIn("forward+", self.docs.lower())
         self.assertIn("12 capturas", self.docs.lower())
+        self.assertIn("13 vistas canónicas", self.docs.lower())
+        self.assertIn("canonicas/", self.docs)
 
 
 if __name__ == "__main__":
