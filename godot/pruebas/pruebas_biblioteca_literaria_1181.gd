@@ -27,10 +27,14 @@ func _probar_lectura_fisica_y_ritual() -> void:
 		"el primer paso queda como lectura incompleta",
 	)
 	_comprobar(
-		LiteraturaEventos.eventos(
-			GestorLiteratura.registro_literario,
-			LiteraturaEventos.CANAL_INSIGHT,
-		).is_empty(),
+		(
+			LiteraturaEventos
+			. eventos(
+				GestorLiteratura.registro_literario,
+				LiteraturaEventos.CANAL_INSIGHT,
+			)
+			. is_empty()
+		),
 		"hojear no crea insight",
 	)
 
@@ -39,9 +43,12 @@ func _probar_lectura_fisica_y_ritual() -> void:
 	_comprobar(bool(completa.get("conocimiento_nuevo", false)), "la lectura crea conocimiento")
 	_comprobar(bool(completa.get("insight_nuevo", false)), "la lectura crea insight")
 	_comprobar(
-		not LiteraturaEventos.obra_poseida(
-			GestorLiteratura.registro_literario,
-			"vida_es_sueno_1635",
+		not (
+			LiteraturaEventos
+			. obra_poseida(
+				GestorLiteratura.registro_literario,
+				"vida_es_sueno_1635",
+			)
 		),
 		"leer en biblioteca no concede posesion",
 	)
