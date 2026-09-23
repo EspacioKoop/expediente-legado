@@ -8,11 +8,21 @@
       "url": "http://bbs.bytelocal.net/",
       "estado": "abierto",
       "descripcion": "Tablón vecinal de hardware, juegos y problemas con módems.",
-      "terminos_indexados": ["modem", "drivers", "doom", "quake", "sonido", "windows98"],
+      "terminos_indexados": [
+        "modem",
+        "drivers",
+        "doom",
+        "quake",
+        "sonido",
+        "windows98"
+      ],
       "visible_desde_dia": 1,
       "visible_hasta_dia": 0,
       "requiere_conocimiento": [],
-      "enlaces_web": ["byte-local"]
+      "enlaces_web": [
+        "byte-local"
+      ],
+      "paquete_software": "archivazo-21"
     },
     {
       "id": "nodo-4b",
@@ -21,7 +31,13 @@
       "url": "http://nodo4b.radio/",
       "estado": "archivado",
       "descripcion": "Archivo de radioafición, electrónica casera y packet radio.",
-      "terminos_indexados": ["radio", "antena", "packet", "modem", "soldador"],
+      "terminos_indexados": [
+        "radio",
+        "antena",
+        "packet",
+        "modem",
+        "soldador"
+      ],
       "visible_desde_dia": 1,
       "visible_hasta_dia": 0,
       "requiere_conocimiento": [],
@@ -34,11 +50,20 @@
       "url": "http://tablon.norte/",
       "estado": "cerrado",
       "descripcion": "Anuncios de segunda mano, quedadas y avisos de barrio conservados en copia local.",
-      "terminos_indexados": ["vendo", "compro", "monitor", "cartucho", "cine", "quedada"],
+      "terminos_indexados": [
+        "vendo",
+        "compro",
+        "monitor",
+        "cartucho",
+        "cine",
+        "quedada"
+      ],
       "visible_desde_dia": 2,
       "visible_hasta_dia": 0,
       "requiere_conocimiento": [],
-      "enlaces_web": ["tablon-clasificados"]
+      "enlaces_web": [
+        "tablon-clasificados"
+      ]
     }
   ],
   "usuarios": [
@@ -99,7 +124,10 @@
       "titulo": "¿El módem cuelga al segundo intento?",
       "estado": "abierto",
       "fecha_ultimo": "1998-03-12 18:42",
-      "terminos": ["modem", "drivers"],
+      "terminos": [
+        "modem",
+        "drivers"
+      ],
       "visible_desde_dia": 1,
       "visible_hasta_dia": 0,
       "requiere_conocimiento": [],
@@ -111,11 +139,17 @@
       "titulo": "Quake sin sonido después de tocar drivers",
       "estado": "cerrado",
       "fecha_ultimo": "1998-05-02 22:11",
-      "terminos": ["quake", "drivers", "sonido"],
+      "terminos": [
+        "quake",
+        "drivers",
+        "sonido"
+      ],
       "visible_desde_dia": 1,
       "visible_hasta_dia": 0,
       "requiere_conocimiento": [],
-      "requiere_companeros": ["telefono"]
+      "requiere_companeros": [
+        "telefono"
+      ]
     },
     {
       "id": "radio-packet",
@@ -123,7 +157,11 @@
       "titulo": "Packet a 1200: ruido al caer la tarde",
       "estado": "archivado",
       "fecha_ultimo": "1997-11-21 20:05",
-      "terminos": ["packet", "radio", "antena"],
+      "terminos": [
+        "packet",
+        "radio",
+        "antena"
+      ],
       "visible_desde_dia": 1,
       "visible_hasta_dia": 0,
       "requiere_conocimiento": [],
@@ -135,7 +173,9 @@
       "titulo": "Soldador barato para empezar",
       "estado": "archivado",
       "fecha_ultimo": "1998-01-08 09:12",
-      "terminos": ["soldador"],
+      "terminos": [
+        "soldador"
+      ],
       "visible_desde_dia": 1,
       "visible_hasta_dia": 0,
       "requiere_conocimiento": [],
@@ -147,7 +187,10 @@
       "titulo": "Vendo monitor 14 pulgadas",
       "estado": "cerrado",
       "fecha_ultimo": "1998-06-17 13:28",
-      "terminos": ["vendo", "monitor"],
+      "terminos": [
+        "vendo",
+        "monitor"
+      ],
       "visible_desde_dia": 2,
       "visible_hasta_dia": 0,
       "requiere_conocimiento": [],
@@ -159,7 +202,10 @@
       "titulo": "Quedada para sesión de tarde",
       "estado": "cerrado",
       "fecha_ultimo": "1998-06-20 17:03",
-      "terminos": ["quedada", "cine"],
+      "terminos": [
+        "quedada",
+        "cine"
+      ],
       "visible_desde_dia": 2,
       "visible_hasta_dia": 0,
       "requiere_conocimiento": [],
@@ -195,7 +241,9 @@
       "visible_desde_dia": 1,
       "visible_hasta_dia": 0,
       "requiere_conocimiento": [],
-      "requiere_companeros": ["telefono"]
+      "requiere_companeros": [
+        "telefono"
+      ]
     },
     {
       "id": "byte-m3",
@@ -225,7 +273,9 @@
       "visible_desde_dia": 1,
       "visible_hasta_dia": 0,
       "requiere_conocimiento": [],
-      "requiere_companeros": ["telefono"]
+      "requiere_companeros": [
+        "telefono"
+      ]
     },
     {
       "id": "byte-q2",
