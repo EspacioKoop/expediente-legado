@@ -110,7 +110,9 @@ func _probar_historial_sellado() -> void:
 	)
 
 	panel.configurar_estado(estado, true)
-	_comprobar(historial != null and not historial.visible, "el selector oculta el historial cerrado")
+	_comprobar(
+		historial != null and not historial.visible, "el selector oculta el historial cerrado"
+	)
 	panel.free()
 
 
