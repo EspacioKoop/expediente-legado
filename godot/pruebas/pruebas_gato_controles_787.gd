@@ -76,8 +76,10 @@ func _probar_dispositivo(nombre: String, evento: InputEvent) -> void:
 	actor.position = Vector3(2.0, 0.0, 0.0)
 	gato.interactuar(actor)
 	_comprobar(
-		String(gato.estado.get("estado", "")) == "viene"
-		and gato.estado.get("destino", Vector3.ZERO) == Vector3(2.0, 0.0, 0.0),
+		(
+			String(gato.estado.get("estado", "")) == "viene"
+			and gato.estado.get("destino", Vector3.ZERO) == Vector3(2.0, 0.0, 0.0)
+		),
 		"%s permite llamar" % nombre,
 	)
 
