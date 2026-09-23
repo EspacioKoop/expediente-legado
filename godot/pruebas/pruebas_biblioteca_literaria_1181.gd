@@ -62,13 +62,16 @@ func _probar_lectura_fisica_y_ritual() -> void:
 		"leer en biblioteca no concede posesion",
 	)
 
-	var ritual: Dictionary = gestor.call(
-		"ejecutar_ritual_cita",
-		"vida_es_sueno_1635",
-		"biblioteca:mesa_cita",
-		"biblioteca:practica:01",
-		5,
-		70.0,
+	var ritual: Dictionary = (
+		gestor
+		. call(
+			"ejecutar_ritual_cita",
+			"vida_es_sueno_1635",
+			"biblioteca:mesa_cita",
+			"biblioteca:practica:01",
+			5,
+			70.0,
+		)
 	)
 	_comprobar(bool(ritual.get("aplicado", false)), "la mesa puede ejecutar el ritual")
 	_comprobar(
@@ -85,13 +88,16 @@ func _probar_lectura_fisica_y_ritual() -> void:
 		"el buff queda limitado al encuentro",
 	)
 
-	var repetido: Dictionary = gestor.call(
-		"ejecutar_ritual_cita",
-		"vida_es_sueno_1635",
-		"biblioteca:mesa_cita",
-		"biblioteca:practica:01",
-		5,
-		40.0,
+	var repetido: Dictionary = (
+		gestor
+		. call(
+			"ejecutar_ritual_cita",
+			"vida_es_sueno_1635",
+			"biblioteca:mesa_cita",
+			"biblioteca:practica:01",
+			5,
+			40.0,
+		)
 	)
 	_comprobar(not bool(repetido.get("aplicado", false)), "la misma cita no se duplica")
 	_comprobar(
