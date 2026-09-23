@@ -1,0 +1,121 @@
+name: Evidencia hogar 227
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/evidencia-hogar-227.yml'
+      - '.godot-version'
+      - 'godot/project.godot'
+      - 'godot/arte/**'
+      - 'godot/assets/modelos/household_goods/**'
+      - 'godot/guion/asset_cc0.gd'
+      - 'godot/guion/casa*.gd'
+      - 'godot/guion/dia_*app.gd'
+      - 'godot/guion/espacio_3d.gd'
+      - 'godot/guion/espacios_catalogo.gd'
+      - 'godot/guion/modelos.gd'
+      - 'godot/escenas/dia.tscn'
+      - 'godot/pruebas/capturar_hogar_227.gd'
+      - 'scripts/test_evidencia_hogar_227.py'
+      - 'docs/evidencias/hogar-227/**'
+      - 'docs/assets/household-goods.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidencia:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      GALLIUM_DRIVER: llvmpipe
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar Godot declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Importar proyecto
+        run: godot4 --headless --editor --path godot --quit
+
+      - name: Validar contrato de evidencia
+        run: python3 -m unittest -v scripts/test_evidencia_hogar_227.py
+
+      - name: Renderizar cuatro zonas domesticas sin HUD
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidencia-hogar-227
+          xvfb-run -a godot4 --path godot \
+            --script res://pruebas/capturar_hogar_227.gd -- \
+            "$GITHUB_WORKSPACE/evidencia-hogar-227"
+          for captura in entrada estar dormitorio cocina_comedor; do
+            test -s "evidencia-hogar-227/${captura}.png"
+          done
+          test -s evidencia-hogar-227/manifest.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(Path("evidencia-hogar-227/manifest.json").read_text())
+          if manifest["issue"] != 227 or manifest["fase"] != "casa":
+              raise SystemExit("manifiesto fuera del gate #227")
+          if manifest["locale"] != "es" or manifest["hud"] is not False:
+              raise SystemExit("la evidencia debe usar locale es y HUD oculto")
+          if manifest["camara"] != "jugable" or manifest["veredicto_automatico"] is not False:
+              raise SystemExit("la evidencia debe usar camara jugable sin autoaprobar")
+          if manifest["instancias_cc0"] != 15 or len(manifest["objetos"]) != 15:
+              raise SystemExit("deben materializarse las 15 instancias domesticas CC0")
+          casos = {caso["id"]: caso for caso in manifest["casos"]}
+          esperados = {"entrada", "estar", "dormitorio", "cocina_comedor"}
+          if set(casos) != esperados:
+              raise SystemExit("faltan zonas del gate #227")
+          hashes = [caso["sha256"] for caso in manifest["casos"]]
+          if len(set(hashes)) != 4:
+              raise SystemExit("las cuatro capturas deben ser distintas")
+          for caso_id, caso in casos.items():
+              zona = caso["zona"]
+              cubiertos = [
+                  objeto for objeto in manifest["objetos"]
+                  if objeto["zona"] == zona and caso_id in objeto["vistas"]
+              ]
+              if not cubiertos:
+                  raise SystemExit(f"{caso_id}: el encuadre no cubre ningun objeto de {zona}")
+          print("4/4 zonas y 15/15 instancias de #227 inventariadas; revisar PNG manualmente")
+          PY
+
+      - name: Adjuntar evidencia visual de #227
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-hogar-227-${{ github.sha }}
+          path: evidencia-hogar-227/
+          if-no-files-found: error
+          retention-days: 14
