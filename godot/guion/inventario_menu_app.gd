@@ -10,6 +10,7 @@ extends PanelContainer
 signal volver
 
 const RUTA_TEXTOS := "res://datos/inventario_presentacion.json"
+const TIPO_ARRASTRE_OBJETO := "inventario_objeto"
 
 var _textos: Dictionary = {}
 var _arbol: Tree
@@ -120,6 +121,7 @@ func _montar() -> void:
 	_arbol.custom_minimum_size.x = 330
 	_arbol.item_selected.connect(_mostrar_detalle_seleccionado)
 	_arbol.item_activated.connect(_asignar_seleccion_al_primer_slot)
+	_arbol.set_drag_forwarding(_datos_arrastre_inventario, Callable(), Callable())
 	cuerpo.add_child(_arbol)
 
 	_detalle = RichTextLabel.new()
@@ -153,6 +155,9 @@ func _montar() -> void:
 	_slot_a_boton.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_slot_a_boton.accessibility_name = String(_textos.get("combinacion_slot_a", "Ranura A"))
 	_slot_a_boton.pressed.connect(_asignar_seleccion.bind("a"))
+	_slot_a_boton.set_drag_forwarding(
+		Callable(), _puede_soltar_en_slot.bind("a"), _soltar_en_slot.bind("a")
+	)
 	slots.add_child(_slot_a_boton)
 
 	_slot_b_boton = Button.new()
@@ -160,6 +165,9 @@ func _montar() -> void:
 	_slot_b_boton.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_slot_b_boton.accessibility_name = String(_textos.get("combinacion_slot_b", "Ranura B"))
 	_slot_b_boton.pressed.connect(_asignar_seleccion.bind("b"))
+	_slot_b_boton.set_drag_forwarding(
+		Callable(), _puede_soltar_en_slot.bind("b"), _soltar_en_slot.bind("b")
+	)
 	slots.add_child(_slot_b_boton)
 
 	_combinar_boton = Button.new()
@@ -214,6 +222,48 @@ func _llenar_seccion(raiz: TreeItem, titulo: String, objetos) -> void:
 		var fila := _arbol.create_item(seccion)
 		fila.set_text(0, _nombre_objeto(objeto))
 		fila.set_metadata(0, objeto.duplicate(true))
+
+
+func _datos_arrastre_inventario(at_position: Vector2):
+	var fila: TreeItem = (
+		_arbol.get_selected()
+		if at_position == Vector2.INF
+		else _arbol.get_item_at_position(at_position)
+	)
+	if fila == null:
+		return null
+	var objeto = fila.get_metadata(0)
+	if not objeto is Dictionary:
+		return null
+	var objeto_id := String(objeto.get("id", ""))
+	if objeto_id.is_empty() or not _objeto_visible(objeto_id):
+		return null
+
+	var vista := Label.new()
+	vista.text = _nombre_objeto(objeto)
+	vista.custom_minimum_size = Vector2(180, 32)
+	vista.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vista.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	vista.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_arbol.set_drag_preview(vista)
+	return {
+		"tipo": TIPO_ARRASTRE_OBJETO,
+		"objeto_id": objeto_id,
+	}
+
+
+func _puede_soltar_en_slot(_at_position: Vector2, datos, slot: String) -> bool:
+	if slot not in ["a", "b"] or not datos is Dictionary:
+		return false
+	if String(datos.get("tipo", "")) != TIPO_ARRASTRE_OBJETO:
+		return false
+	return _objeto_visible(String(datos.get("objeto_id", "")))
+
+
+func _soltar_en_slot(at_position: Vector2, datos, slot: String) -> void:
+	if not _puede_soltar_en_slot(at_position, datos, slot):
+		return
+	seleccionar_para_combinar(String(datos.get("objeto_id", "")), slot)
 
 
 func seleccionar_para_combinar(objeto_id: String, slot: String) -> bool:
