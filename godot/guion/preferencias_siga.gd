@@ -112,6 +112,7 @@ static func nuevas() -> Dictionary:
 		"sensibilidad_camara_mando": 1.0,
 		"invertir_camara_y": false,
 		"posicion_asistente_gato": null,
+		"filtro_pantalla": FiltroPantalla.NINGUNO,
 	}
 
 
@@ -281,6 +282,7 @@ static func cargar(ruta: String = RUTA) -> Dictionary:
 		SENSIBILIDAD_CAMARA_MAX
 	)
 	resultado["invertir_camara_y"] = bool(datos.get("invertir_camara_y", false))
+	resultado["filtro_pantalla"] = FiltroPantalla.valido(datos.get("filtro_pantalla"))
 	var posicion: Variant = datos.get("posicion_asistente_gato", null)
 	if posicion is Dictionary and posicion.has("x") and posicion.has("y"):
 		resultado["posicion_asistente_gato"] = {

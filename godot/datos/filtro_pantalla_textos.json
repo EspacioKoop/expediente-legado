@@ -1,0 +1,22 @@
+{
+  "titulo": "Filtro de pantalla",
+  "ayuda": "Solo cambia el mundo 3D: los documentos, el visor y los menús se leen siempre sin filtro.",
+  "opciones": {
+    "ninguno": {
+      "nombre": "Ninguno",
+      "detalle": "La imagen tal cual."
+    },
+    "monitor": {
+      "nombre": "Monitor 98",
+      "detalle": "Barrido fino y un poco de color corrido, como el monitor del archivo."
+    },
+    "televisor": {
+      "nombre": "Televisor",
+      "detalle": "Más barrido, color que se sale de los bordes y esquinas oscuras."
+    },
+    "vhs": {
+      "nombre": "VHS",
+      "detalle": "Una cinta de videoclub gastada: la imagen tiembla y el color se separa. Con reducción de movimiento, quieta."
+    }
+  }
+}
