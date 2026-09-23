@@ -14,6 +14,7 @@ A7_TITULO,FORMULARIO A-7  ·  IMPUTACIÓN DE RESPONSABILIDAD
 A7_VOLVER,Volver al expediente
 A7_YA_CERRADO,Este expediente ya tiene veredicto firme.
 AVIONES_EMPATE,Empate
+AVIONES_TITULO,Aviones de papel
 AVIONES_ESTADO_ABANDONADA,Ronda abandonada · el ciclo diario no cambia
 AVIONES_ESTADO_FIN,Ronda terminada · ganador: %s
 AVIONES_ESTADO_LANZAMIENTO,Tu turno · lanzamiento %d/3
