@@ -113,6 +113,30 @@ static func todo(comprobar: Callable) -> void:
 		true,
 	)
 
+	var paso := JuicioCombateReglas.descontar_temporizadores(
+		{"doctrina": 0.1, "esquiva": 0.5, "recarga": 0.0}, 0.25
+	)
+	var restantes: Dictionary = paso["restantes"]
+	_caso(
+		comprobar,
+		"reglas: temporizadores descuentan sin bajar de cero",
+		[restantes["doctrina"], restantes["esquiva"], restantes["recarga"]],
+		[0.0, 0.25, 0.0],
+	)
+	_caso(
+		comprobar,
+		"reglas: solo expira el temporizador que seguía corriendo",
+		paso["expirados"],
+		["doctrina"],
+	)
+	var parado := JuicioCombateReglas.descontar_temporizadores({"doctrina": 0.0}, 0.25)
+	_caso(
+		comprobar,
+		"reglas: temporizador parado no vuelve a expirar",
+		(parado["expirados"] as Array).is_empty(),
+		true,
+	)
+
 
 static func _caso(comprobar: Callable, nombre: String, obtenido, esperado) -> void:
 	comprobar.call(nombre, obtenido, esperado)

@@ -626,6 +626,18 @@ ULTIMO_RECURSO_TAROT_TITULO,Tarot — último recurso
 ULTIMO_RECURSO_TITULO,CESE PENDIENTE
 ULTIMO_RECURSO_VER_TAROT,Ver mi tarot
 ULTIMO_RECURSO_VOLVER,Volver al aviso
+BINGO_SIGA_APP_TITULO,Bingo del auditor
+BINGO_SIGA_CABECERA,Tarjeta diaria de SIGA
+BINGO_SIGA_AYUDA,Tres objetivos opcionales para esta jornada. No conceden dinero, acciones, vidas ni pistas.
+BINGO_SIGA_DECISION,Decisión: %s
+BINGO_SIGA_DECISION_PENDIENTE,Pendiente
+BINGO_SIGA_DECISION_ACEPTADA,Aceptada
+BINGO_SIGA_DECISION_DESCARTADA,Descartada
+BINGO_SIGA_DECISION_IGNORADA,Ignorada
+BINGO_SIGA_ACEPTAR,Aceptar tarjeta
+BINGO_SIGA_DESCARTAR,Descartar tarjeta
+BINGO_SIGA_IGNORAR,Ignorar hoy
+BINGO_SIGA_SIN_PARTIDA,No hay una jornada activa.
 AUDITORIAS_ACCION_SOBRANTE,"Terminar la jornada con una acción sin gastar"
 AUDITORIAS_ACCION_SOBRANTE_DESC,"Al fichar la salida debe quedar al menos una acción disponible. Fallar el reto no bloquea la partida."
 AUDITORIAS_APP_TITULO,"Condiciones de auditoría"
