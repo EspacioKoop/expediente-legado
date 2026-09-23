@@ -56,12 +56,18 @@ static func disponible(entrada: Dictionary) -> bool:
 	return not ruta.is_empty() and FileAccess.file_exists(ruta)
 
 
-## Lo que enseña la consola: incluidas de serie más las compradas en la tienda.
-static func en_consola(compradas: Array) -> Array[Dictionary]:
+## Lo que enseña la consola: incluidas de serie, compradas y desbloqueadas por
+## sistemas externos. RomsPropias no conoce por qué se produjo el desbloqueo.
+static func en_consola(compradas: Array, desbloqueadas: Array = []) -> Array[Dictionary]:
 	var salida: Array[Dictionary] = []
 	for entrada in jugables():
+		var id_rom := String(entrada.get("id", ""))
 		if (
-			(bool(entrada.get("incluida", false)) or compradas.has(entrada["id"]))
+			(
+				bool(entrada.get("incluida", false))
+				or compradas.has(id_rom)
+				or desbloqueadas.has(id_rom)
+			)
 			and disponible(entrada)
 		):
 			salida.append(entrada)
