@@ -243,8 +243,10 @@ func _initialize() -> void:
 	)
 
 	# El copy vive en textos.csv: si la clave no resolviera, el panel mostraría
-	# «MARCADORES_MUNDO_…». En _initialize el árbol aún no propaga _ready, así
-	# que el panel se monta a mano.
+	# «MARCADORES_MUNDO_…». El catálogo solo tiene «es» y CI corre con otro
+	# locale, así que se fija como en las demás pruebas que leen copy. En
+	# _initialize el árbol aún no propaga _ready: el panel se monta a mano.
+	TranslationServer.set_locale("es")
 	var panel: PanelContainer = load("res://guion/marcadores_mundo_panel.gd").new()
 	panel.call("_montar")
 	_comprobar(panel.get("_limpiar_zona").text == "Limpiar zona", "el panel resuelve su copy")
