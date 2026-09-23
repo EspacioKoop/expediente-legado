@@ -65,8 +65,9 @@ static func reiniciar_vuelta(estado_partida: Dictionary) -> void:
 ## cambie de fase; no cobra, no bloquea la salida y no concede recompensa.
 static func resolver_fin_archivo(estado_partida: Dictionary) -> Dictionary:
 	var auditoria := asegurar_en_estado(estado_partida)
-	if estado(auditoria, ACCION_SOBRANTE) != "activa":
-		return {"resultado": "inactiva", "id": ACCION_SOBRANTE}
+	var estado_actual := estado(auditoria, ACCION_SOBRANTE)
+	if estado_actual != "activa":
+		return {"resultado": estado_actual, "id": ACCION_SOBRANTE}
 
 	var jornada = estado_partida.get("jornada", {})
 	if typeof(jornada) != TYPE_DICTIONARY:
