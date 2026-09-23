@@ -24,22 +24,10 @@ func _init() -> void:
 
 
 func _evento(
-	actor: String,
-	anchor: String,
-	conocimiento: Array,
-	event_id: String,
-	instante: int = AHORA
+	actor: String, anchor: String, conocimiento: Array, event_id: String, instante: int = AHORA
 ) -> Dictionary:
 	var creado := AyudaDatos.crear_evento(
-		ESCENA,
-		"test-378",
-		actor,
-		anchor,
-		"resonancia",
-		"leve",
-		instante,
-		conocimiento,
-		event_id
+		ESCENA, "test-378", actor, anchor, "resonancia", "leve", instante, conocimiento, event_id
 	)
 	return creado
 
@@ -90,22 +78,14 @@ func _probar_evento_seguro() -> void:
 		false
 	)
 	var escena_incorrecta := AyudaDatos.crear_evento(
-		"siga",
-		"test-378",
-		"anon-01",
-		"suenio_umbral",
-		"resonancia",
-		"leve",
-		AHORA
+		"siga", "test-378", "anon-01", "suenio_umbral", "resonancia", "leve", AHORA
 	)
 	_comprobar("SIGA queda fuera de esta ayuda", escena_incorrecta["ok"], false)
 
 
 func _probar_fixture_opt_out_y_spam() -> void:
 	var normal := _evento("anon-02", "suenio_umbral", [], "help-normal")
-	var bloqueada := _evento(
-		"anon-03", "suenio_figura", ["figura_onirica"], "help-locked"
-	)
+	var bloqueada := _evento("anon-03", "suenio_figura", ["figura_onirica"], "help-locked")
 	var extra_1 := _evento("anon-04", "suenio_umbral", [], "help-extra-1")
 	var extra_2 := _evento("anon-05", "suenio_umbral", [], "help-extra-2")
 	var servicio := AyudaServicio.new(
@@ -115,15 +95,11 @@ func _probar_fixture_opt_out_y_spam() -> void:
 	)
 	var sin_conocimiento := servicio.consultar(ESCENA, [], AHORA + 1)
 	_comprobar(
-		"receptor sin conocimiento no ve anchor bloqueado",
-		sin_conocimiento["helps"].size(),
-		2
+		"receptor sin conocimiento no ve anchor bloqueado", sin_conocimiento["helps"].size(), 2
 	)
 	var con_conocimiento := servicio.consultar(ESCENA, ["figura_onirica"], AHORA + 1)
 	_comprobar(
-		"spam por anchor queda acotado pero otro anchor entra",
-		con_conocimiento["helps"].size(),
-		3
+		"spam por anchor queda acotado pero otro anchor entra", con_conocimiento["helps"].size(), 3
 	)
 	servicio.ocultar_evento("help-normal")
 	var ocultada := servicio.consultar(ESCENA, ["figura_onirica"], AHORA + 1)
@@ -137,19 +113,11 @@ func _probar_fixture_opt_out_y_spam() -> void:
 func _probar_offline_y_rate_limit() -> void:
 	var offline := AyudaServicio.new(TransporteNulo.new())
 	var publicacion_offline := offline.publicar(
-		ESCENA,
-		"test-378",
-		"anon-offline",
-		"suenio_umbral",
-		"resonancia",
-		"leve",
-		AHORA
+		ESCENA, "test-378", "anon-offline", "suenio_umbral", "resonancia", "leve", AHORA
 	)
 	_comprobar("offline no bloquea publicación", publicacion_offline["ok"], true)
 	_comprobar(
-		"offline descarta explícitamente",
-		publicacion_offline["status"],
-		"discarded_offline"
+		"offline descarta explícitamente", publicacion_offline["status"], "discarded_offline"
 	)
 
 	var online := AyudaServicio.new(TransporteFixture.new())
