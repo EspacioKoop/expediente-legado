@@ -1,21 +1,92 @@
-[gd_scene format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="PackedScene" path="res://interactables/libros/libro_interactivo.tscn" id="1_book"]
+[ext_resource type="PackedScene" path="res://interactables/libros/libro_lectura_significativa.tscn" id="2_significativa"]
+[ext_resource type="PackedScene" path="res://rituales/literarios/ritual_cita.tscn" id="3_ritual"]
+[ext_resource type="Script" path="res://espacios/biblioteca/estacion_ritual_cita.gd" id="4_estacion"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_mesa"]
-size = Vector3(2, 0.1, 1.5)
+size = Vector3(2.4, 0.12, 1.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_suelo"]
+size = Vector3(10, 0.2, 8)
+
+[sub_resource type="BoxShape3D" id="BoxShape_suelo"]
+size = Vector3(10, 0.2, 8)
+
+[sub_resource type="BoxMesh" id="BoxMesh_estanteria"]
+size = Vector3(4.5, 2.8, 0.35)
+
+[sub_resource type="BoxMesh" id="BoxMesh_atril"]
+size = Vector3(0.9, 0.9, 0.9)
+
+[sub_resource type="BoxShape3D" id="BoxShape_atril"]
+size = Vector3(0.9, 0.9, 0.9)
 
 [node name="Biblioteca" type="Node3D"]
 
-[node name="Estanteria1" type="Node3D" parent="."]
-position = Vector3(0, 0, -3)
+[node name="Suelo" type="StaticBody3D" parent="."]
 
-[node name="Estanteria2" type="Node3D" parent="."]
-position = Vector3(0, 0, 3)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Suelo"]
+position = Vector3(0, -0.1, 0)
+mesh = SubResource("BoxMesh_suelo")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Suelo"]
+position = Vector3(0, -0.1, 0)
+shape = SubResource("BoxShape_suelo")
+
+[node name="Rotulo" type="Label3D" parent="."]
+position = Vector3(0, 2.8, -3.75)
+text = "BIBLIOTECA · LECTURA / TERTULIA"
+font_size = 48
+
+[node name="LuzLectura" type="OmniLight3D" parent="."]
+position = Vector3(0, 3.2, 0)
+omni_range = 9.0
+light_energy = 1.4
+
+[node name="Estanteria1" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.4, -3.6)
+mesh = SubResource("BoxMesh_estanteria")
+
+[node name="Estanteria2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.4, 3.6)
+mesh = SubResource("BoxMesh_estanteria")
 
 [node name="MesaCentral" type="MeshInstance3D" parent="."]
-position = Vector3(0, 0.5, 0)
+position = Vector3(0, 0.75, 0)
 mesh = SubResource("BoxMesh_mesa")
+
+[node name="LibroVidaEsSueno" parent="." instance=ExtResource("2_significativa")]
+position = Vector3(0, 0.86, 0)
+obra_id = "vida_es_sueno_1635"
+fuente_documental = "biblioteca:edicion_1998:vida_es_sueno"
+pasos_para_completar = 2
+
+[node name="MesaRitual" type="Area3D" parent="."]
+position = Vector3(3.2, 0.55, 0)
+collision_layer = 1
+collision_mask = 1
+script = ExtResource("4_estacion")
+ritual_ui_path = NodePath("../RitualCita")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="MesaRitual"]
+mesh = SubResource("BoxMesh_atril")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MesaRitual"]
+shape = SubResource("BoxShape_atril")
+
+[node name="InteractionLabel" type="Label" parent="MesaRitual"]
+offset_left = -100.0
+offset_top = -70.0
+offset_right = 100.0
+offset_bottom = -35.0
+text = "E para preparar una cita"
+visible = false
+
+[node name="RitualCita" parent="." instance=ExtResource("3_ritual")]
+encuentro_id = "biblioteca:practica:01"
+fuente_ritual = "biblioteca:mesa_cita"
 
 [node name="LibroOdisea" parent="." instance=ExtResource("1_book")]
 position = Vector3(-1.5, 1, -3)
