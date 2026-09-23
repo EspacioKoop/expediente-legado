@@ -201,10 +201,13 @@ func _montar_ecos_modelados() -> void:
 		var escritorio := Node3D.new()
 		escritorio.name = "EscritorioEco"
 		puesto.add_child(escritorio)
-		AssetCc0.sustituir(
-			escritorio,
-			"oficina_psx/desk1" if i != 1 else "oficina_psx/desk2",
-			Vector3(2.5, 0.95, 1.25),
+		(
+			AssetCc0
+			. sustituir(
+				escritorio,
+				"oficina_psx/desk1" if i != 1 else "oficina_psx/desk2",
+				Vector3(2.5, 0.95, 1.25),
+			)
 		)
 
 		var silla := Node3D.new()
@@ -227,9 +230,7 @@ func _montar_ecos_modelados() -> void:
 	archivador.rotation_degrees.y = 23.0
 	archivador.scale = Vector3(0.82, 1.55, 0.78)
 	grupo.add_child(archivador)
-	AssetCc0.sustituir(
-		archivador, "oficina_psx/file_cabinet_large", Vector3(1.0, 2.2, 0.72)
-	)
+	AssetCc0.sustituir(archivador, "oficina_psx/file_cabinet_large", Vector3(1.0, 2.2, 0.72))
 
 
 func _montar_fluorescentes() -> void:
