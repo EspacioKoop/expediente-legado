@@ -18,12 +18,13 @@ a 288 px de alto para funcionar como fondo barato en la estética PSX del juego.
 
 `CalleFondosFotorealistas98` coloca dos piezas detrás de las fachadas del lado oeste y
 dos detrás del lado este. Las posiciones están deliberadamente fuera de aceras y calzada,
-a x ±10–12 m, de modo que aparecen únicamente a través de los huecos de la línea frontal.
+a x ±9–12 m, de modo que aparecen únicamente a través de los huecos de la línea frontal.
 
-Los sprites mantienen orientación fija hacia la calle: no usan billboard y por tanto no
-giran con la cámara. Conservan prueba de profundidad, escala de mundo y sombreado del
-entorno; usan alpha cut para evitar los problemas habituales de ordenación de transparencias.
-No añaden colisión, interacción, navegación ni reglas de jornada.
+Los sprites usan billboard vertical (`BILLBOARD_FIXED_Y`) como impostores de segunda línea:
+solo giran sobre Y para presentar la fachada hacia la cámara sin inclinarse. Conservan prueba
+de profundidad y escala de mundo; se modulan con un tono nocturno estable y usan alpha cut
+para evitar los problemas habituales de ordenación de transparencias. No añaden colisión,
+interacción, navegación ni reglas de jornada.
 
 ## Procedencia
 
