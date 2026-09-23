@@ -17,12 +17,7 @@
       "cgb": "dual",
       "incluida": true,
       "precio": 0,
-      "issues": [
-        124,
-        95,
-        384,
-        386
-      ],
+      "issues": [124, 95, 384, 386],
       "mito": ""
     },
     {
@@ -38,11 +33,7 @@
       "incluida": false,
       "precio": 0,
       "desbloqueo": "conocimiento:vida_es_sueno_1635",
-      "issues": [
-        1179,
-        1175,
-        1176
-      ],
+      "issues": [1179, 1175, 1176],
       "mito": ""
     },
     {
@@ -57,10 +48,7 @@
       "cgb": "dual",
       "incluida": false,
       "precio": 45,
-      "issues": [
-        95,
-        388
-      ],
+      "issues": [95, 388],
       "mito": ""
     },
     {
@@ -75,10 +63,7 @@
       "cgb": "dual",
       "incluida": false,
       "precio": 45,
-      "issues": [
-        95,
-        389
-      ],
+      "issues": [95, 389],
       "mito": ""
     },
     {
@@ -93,11 +78,7 @@
       "cgb": "",
       "incluida": false,
       "precio": 0,
-      "issues": [
-        437,
-        442,
-        512
-      ],
+      "issues": [437, 442, 512],
       "mito": "minotauro"
     },
     {
@@ -112,10 +93,7 @@
       "cgb": "",
       "incluida": false,
       "precio": 0,
-      "issues": [
-        436,
-        442
-      ],
+      "issues": [436, 442],
       "mito": "gilgamesh"
     },
     {
@@ -130,10 +108,7 @@
       "cgb": "dual",
       "incluida": false,
       "precio": 0,
-      "issues": [
-        439,
-        442
-      ],
+      "issues": [439, 442],
       "mito": "hidra"
     },
     {
@@ -148,11 +123,7 @@
       "cgb": "dual",
       "incluida": false,
       "precio": 0,
-      "issues": [
-        748,
-        656,
-        442
-      ],
+      "issues": [748, 656, 442],
       "mito": "anansi_akan"
     },
     {
@@ -167,14 +138,7 @@
       "cgb": "dual",
       "incluida": false,
       "precio": 45,
-      "issues": [
-        440,
-        442,
-        542,
-        609,
-        622,
-        627
-      ],
+      "issues": [440, 442, 542, 609, 622, 627],
       "mito": "dragon_japones"
     },
     {
@@ -189,10 +153,7 @@
       "cgb": "",
       "incluida": false,
       "precio": 0,
-      "issues": [
-        441,
-        442
-      ],
+      "issues": [441, 442],
       "mito": "duat"
     },
     {
@@ -207,10 +168,7 @@
       "cgb": "dual",
       "incluida": false,
       "precio": 45,
-      "issues": [
-        438,
-        442
-      ],
+      "issues": [438, 442],
       "mito": "aquiles"
     },
     {
@@ -225,11 +183,7 @@
       "cgb": "dual",
       "incluida": false,
       "precio": 45,
-      "issues": [
-        932,
-        916,
-        931
-      ],
+      "issues": [932, 916, 931],
       "mito": ""
     },
     {
@@ -244,11 +198,7 @@
       "cgb": "dual",
       "incluida": false,
       "precio": 45,
-      "issues": [
-        932,
-        916,
-        931
-      ],
+      "issues": [932, 916, 931],
       "mito": ""
     },
     {
@@ -263,11 +213,7 @@
       "cgb": "dual",
       "incluida": false,
       "precio": 45,
-      "issues": [
-        932,
-        916,
-        931
-      ],
+      "issues": [932, 916, 931],
       "mito": ""
     }
   ]
