@@ -39,12 +39,15 @@ func _probar_catalogo_y_dos_ramas() -> void:
 
 func _probar_insight_con_procedencia() -> void:
 	var registro := LiteraturaEventos.nuevo()
-	var resultado := LiteraturaDialogo.conversar(
-		registro,
-		DIALOGO,
-		"eleccion",
-		"npc:biblioteca:mediadora_98",
-		4,
+	var resultado := (
+		LiteraturaDialogo
+		. conversar(
+			registro,
+			DIALOGO,
+			"eleccion",
+			"npc:biblioteca:mediadora_98",
+			4,
+		)
 	)
 	_comprobar(bool(resultado["valida"]), "la rama valida se resuelve")
 	_comprobar(bool(resultado["insight_nuevo"]), "la primera conversacion registra insight")
@@ -76,26 +79,35 @@ func _probar_insight_con_procedencia() -> void:
 
 func _probar_reentrada_idempotente() -> void:
 	var registro := LiteraturaEventos.nuevo()
-	var primera := LiteraturaDialogo.conversar(
-		registro,
-		DIALOGO,
-		"eleccion",
-		"npc:biblioteca:mediadora_98",
-		2,
+	var primera := (
+		LiteraturaDialogo
+		. conversar(
+			registro,
+			DIALOGO,
+			"eleccion",
+			"npc:biblioteca:mediadora_98",
+			2,
+		)
 	)
-	var repetida := LiteraturaDialogo.conversar(
-		registro,
-		DIALOGO,
-		"eleccion",
-		"npc:biblioteca:mediadora_98",
-		3,
+	var repetida := (
+		LiteraturaDialogo
+		. conversar(
+			registro,
+			DIALOGO,
+			"eleccion",
+			"npc:biblioteca:mediadora_98",
+			3,
+		)
 	)
-	var otra_rama := LiteraturaDialogo.conversar(
-		registro,
-		DIALOGO,
-		"representacion",
-		"npc:biblioteca:mediadora_98",
-		3,
+	var otra_rama := (
+		LiteraturaDialogo
+		. conversar(
+			registro,
+			DIALOGO,
+			"representacion",
+			"npc:biblioteca:mediadora_98",
+			3,
+		)
 	)
 	_comprobar(bool(primera["insight_nuevo"]), "la primera entrada crea el hecho")
 	_comprobar(not bool(repetida["insight_nuevo"]), "repetir la rama no duplica")
@@ -108,12 +120,15 @@ func _probar_reentrada_idempotente() -> void:
 
 func _probar_dos_consumidores() -> void:
 	var registro := LiteraturaEventos.nuevo()
-	LiteraturaDialogo.conversar(
-		registro,
-		DIALOGO,
-		"representacion",
-		"npc:biblioteca:mediadora_98",
-		5,
+	(
+		LiteraturaDialogo
+		. conversar(
+			registro,
+			DIALOGO,
+			"representacion",
+			"npc:biblioteca:mediadora_98",
+			5,
+		)
 	)
 	var reentrada := LiteraturaDialogoReentrada.resolver(registro, DIALOGO)
 	var contexto := LiteraturaMovimientoContexto.resolver(registro, DIALOGO)
@@ -131,18 +146,25 @@ func _probar_dos_consumidores() -> void:
 		String(reentrada["fuente"]) == String(contexto["fuente"]),
 		"ambos conservan la misma procedencia",
 	)
-	_comprobar(not String(reentrada["texto"]).is_empty(), "la reentrada produce variante de dialogo")
-	_comprobar(not String(contexto["texto"]).is_empty(), "el movimiento produce contexto utilizable")
+	_comprobar(
+		not String(reentrada["texto"]).is_empty(), "la reentrada produce variante de dialogo"
+	)
+	_comprobar(
+		not String(contexto["texto"]).is_empty(), "el movimiento produce contexto utilizable"
+	)
 
 
 func _probar_exposicion_no_es_identidad() -> void:
 	var registro := LiteraturaEventos.nuevo()
-	LiteraturaDialogo.conversar(
-		registro,
-		DIALOGO,
-		"eleccion",
-		"npc:biblioteca:mediadora_98",
-		1,
+	(
+		LiteraturaDialogo
+		. conversar(
+			registro,
+			DIALOGO,
+			"eleccion",
+			"npc:biblioteca:mediadora_98",
+			1,
+		)
 	)
 	_comprobar(
 		LiteraturaEventos.eventos(registro, LiteraturaEventos.CANAL_CONOCIMIENTO).is_empty(),
