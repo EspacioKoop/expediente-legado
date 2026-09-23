@@ -162,6 +162,22 @@ static func sonar_stream(nodo: Node, pista: AudioStream, tono: float = 1.0) -> v
 	voz.play()
 
 
+## Corta las voces efímeras 2D que cuelgan directamente de [param nodo].
+##
+## Sirve para pantallas de vida muy corta —como una cinemática que se salta—:
+## esperar únicamente a `finished` deja al servidor de audio usando el stream
+## cuando el árbol ya se está desmontando. Parar, soltar el stream y liberar la
+## voz ANTES de emitir la salida da al motor un frame limpio para cerrar.
+static func detener(nodo: Node) -> void:
+	if nodo == null:
+		return
+	for hijo in nodo.get_children():
+		if hijo is AudioStreamPlayer:
+			hijo.stop()
+			hijo.stream = null
+			hijo.free()
+
+
 ## Suena una vez donde está [param origen], en el espacio 3D.
 ##
 ## La voz no cuelga del objeto sino de la escena: quien la pide puede
