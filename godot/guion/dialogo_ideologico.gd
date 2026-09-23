@@ -115,7 +115,7 @@ static func cumple(estado: Dictionary, condiciones: Dictionary) -> bool:
 
 	var eleccion = condiciones.get("requiere_eleccion", {})
 	if typeof(eleccion) == TYPE_DICTIONARY and not eleccion.is_empty():
-		if _eleccion_que_cumple(estado, eleccion).is_empty():
+		if not _cumple_eleccion(estado, eleccion):
 			return false
 
 	var exposicion = condiciones.get("requiere_exposicion", {})
@@ -167,14 +167,18 @@ static func _eleccion_por_id(estado: Dictionary, evento_id: String) -> Dictionar
 	return {}
 
 
-static func _eleccion_que_cumple(estado: Dictionary, condicion: Dictionary) -> Dictionary:
+static func _cumple_eleccion(estado: Dictionary, condicion: Dictionary) -> bool:
+	var minimo := maxi(1, int(condicion.get("minimo", 1)))
+	var coincidencias := 0
 	for valor in Prometeo.elecciones_ideologicas(estado):
 		if typeof(valor) != TYPE_DICTIONARY:
 			continue
 		var evento: Dictionary = valor
 		if _coincide(evento, condicion):
-			return evento.duplicate(true)
-	return {}
+			coincidencias += 1
+			if coincidencias >= minimo:
+				return true
+	return false
 
 
 static func _recencia_exposicion(estado: Dictionary, condicion) -> int:
