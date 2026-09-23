@@ -175,7 +175,8 @@ func _guardar_manifest() -> void:
 	(
 		archivo
 		. store_string(
-			("""# Gate visual de oficina #126
+			(
+				"""# Gate visual de oficina #126
 
 Capturas deterministas del espacio real sin HUD.
 
@@ -194,6 +195,7 @@ build cuyo SHA coincida con el commit de este artifact.
 		)
 	)
 	archivo.close()
+
 
 func _fallar(mensaje: String) -> void:
 	_fallos += 1
