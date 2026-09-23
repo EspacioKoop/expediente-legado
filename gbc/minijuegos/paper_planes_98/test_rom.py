@@ -73,6 +73,43 @@ class PruebasROM(unittest.TestCase):
         self.assertEqual(memoria[0x97FF], 0x55)
         self.assertEqual(memoria[0x9C00], 0x55)
 
+    def test_fondo_respeta_stride_y_anchura_visible(self):
+        def preparar(emulador):
+            emulador.memory[0x9800:0x9C00] = [0x55] * 1024
+
+        memoria = self.ejecutar("DibujarFondoBase", preparar)
+        self.assertEqual(memoria[0x9800 + 5 * 32 + 2], 12)
+        self.assertEqual(memoria[0x9800 + 8 * 32 + 15], 12)
+        self.assertEqual(memoria[0x9800 + 11 * 32 + 7], 12)
+        self.assertEqual(
+            memoria[0x9800 + 15 * 32:0x9800 + 15 * 32 + 20],
+            bytes([10]) * 20,
+        )
+        for fila in (16, 17):
+            inicio = 0x9800 + fila * 32
+            self.assertEqual(memoria[inicio:inicio + 20], bytes([11]) * 20)
+            self.assertEqual(memoria[inicio + 20:inicio + 32], bytes([0x55]) * 12)
+
+    def test_fondo_de_juego_anade_base_urbana_sin_invadir_padding(self):
+        def preparar(emulador):
+            emulador.memory[0x9800:0x9C00] = [0] * 1024
+
+        memoria = self.ejecutar("DibujarFondoJuego", preparar)
+        inicio = 0x9800 + 14 * 32
+        self.assertEqual(memoria[inicio:inicio + 20], bytes([3]) * 20)
+        self.assertEqual(memoria[inicio + 20:inicio + 32], bytes(12))
+
+    def test_avion_tiene_silueta_16x8_de_alto_contraste(self):
+        inicio = self.simbolos["Tiles"] + 16
+        avion = self.rom[inicio:inicio + 32]
+        esperado = bytes([
+            0x01, 0x01, 0x03, 0x03, 0x0F, 0x0F, 0xFF, 0xFF,
+            0x0F, 0x0F, 0x03, 0x03, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x80, 0x80, 0xC0, 0xC0, 0xFF, 0xFF,
+            0xFE, 0xFE, 0xFC, 0xFC, 0xF8, 0xF8, 0x38, 0x38,
+        ])
+        self.assertEqual(avion, esperado)
+
     def test_los_cuatro_hitos_se_escriben_en_oam(self):
         for tipo, cantidad in enumerate((8, 22, 18, 17)):
             with self.subTest(hito=tipo):
@@ -145,7 +182,7 @@ class PruebasROM(unittest.TestCase):
                 self.assertEqual(memoria[self.simbolos["wScore"]], 1)
                 self.assertEqual(memoria[self.simbolos["wPerfectos"]], 0)
 
-    def test_hud_muestra_viento_score_y_perfectos_sin_restos(self):
+    def test_hud_cabe_en_una_fila_y_deja_la_segunda_libre(self):
         def tile(caracter):
             if caracter == " ":
                 return 0
@@ -171,14 +208,10 @@ class PruebasROM(unittest.TestCase):
                         emulador.memory[self.simbolos[nombre]] = valor
 
                 memoria = self.ejecutar("DibujarHUD", preparar)
-                textos = (
-                    f"NYC98 FOLD{vidas} WIND {viento}",
-                    f"GATE{hito + 1}/4 S{puntos:02} PERF{perfectos}",
-                )
-                for fila, texto in enumerate(textos):
-                    esperado = bytes(map(tile, texto.ljust(20)))
-                    inicio = 0x9800 + fila * 32
-                    self.assertEqual(memoria[inicio:inicio + 20], esperado)
+                texto = f"F{vidas} W{viento} G{hito + 1}/4 S{puntos:02} P{perfectos}"
+                esperado = bytes(map(tile, texto.ljust(20)))
+                self.assertEqual(memoria[0x9800:0x9800 + 20], esperado)
+                self.assertEqual(memoria[0x9820:0x9820 + 20], bytes(20))
 
 
 if __name__ == "__main__":
