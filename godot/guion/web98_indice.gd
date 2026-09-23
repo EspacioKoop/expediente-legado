@@ -265,22 +265,22 @@ func _presentar_amateur(recurso: Dictionary, dia: int) -> String:
 
 
 func _puntuacion(recurso: Dictionary, tokens: PackedStringArray) -> int:
-	var titulo := _normalizar_texto(String(recurso.get("titulo", "")))
-	var snippet := _normalizar_texto(String(recurso.get("snippet", "")))
-	var etiquetas := ""
+	var titulo := _tokens(String(recurso.get("titulo", "")))
+	var snippet := _tokens(String(recurso.get("snippet", "")))
+	var etiquetas_texto := ""
 	for termino in recurso.get("terminos", []):
-		etiquetas += " " + String(termino)
-	etiquetas = _normalizar_texto(etiquetas)
+		etiquetas_texto += " " + String(termino)
+	var etiquetas := _tokens(etiquetas_texto)
 	var puntuacion := int(recurso.get("prioridad", 0))
 	for token in tokens:
 		var encontrado := false
-		if titulo.contains(token):
+		if titulo.has(token):
 			puntuacion += 30
 			encontrado = true
-		if etiquetas.contains(token):
+		if etiquetas.has(token):
 			puntuacion += 20
 			encontrado = true
-		if snippet.contains(token):
+		if snippet.has(token):
 			puntuacion += 5
 			encontrado = true
 		if not encontrado:

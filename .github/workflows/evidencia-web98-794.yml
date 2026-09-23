@@ -1,0 +1,82 @@
+name: Evidencia Web98 794
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/evidencia-web98-794.yml'
+      - '.godot-version'
+      - 'godot/arte/os98/web_*'
+      - 'godot/datos/textos.csv'
+      - 'godot/datos/web98_*.json'
+      - 'godot/guion/navegador_siga.gd'
+      - 'godot/guion/web98_*.gd'
+      - 'godot/pruebas/capturar_web98_794.gd'
+      - 'godot/pruebas/pruebas_web98_indice.gd'
+      - 'scripts/test_evidencia_web98_794.py'
+      - 'scripts/test_web98_indice.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidencia:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      GALLIUM_DRIVER: llvmpipe
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Instalar Godot declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Importar proyecto
+        run: godot4 --headless --editor --path godot --quit
+
+      - name: Regresiones Web98
+        run: python3 -m unittest scripts.test_web98_indice scripts.test_evidencia_web98_794
+
+      - name: Capturar navegador real
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidencia-web98-794
+          xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+            --script res://pruebas/capturar_web98_794.gd -- \
+            "$GITHUB_WORKSPACE/evidencia-web98-794"
+          for captura in byte-local busqueda-sin-falso-positivo pagina-personal; do
+            test -s "evidencia-web98-794/${captura}.png"
+          done
+          test "$(sha256sum evidencia-web98-794/*.png | cut -d' ' -f1 | sort -u | wc -l)" -eq 3
+
+      - name: Adjuntar capturas de #794
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-web98-794-${{ github.sha }}
+          path: evidencia-web98-794/*.png
+          if-no-files-found: error
+          retention-days: 14

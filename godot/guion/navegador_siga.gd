@@ -10,6 +10,19 @@ signal estado_cambiado(estado: Dictionary)
 
 const URL_INICIO := "http://intranet.dgai/"
 const TEXTURA_CABECERAS_PRENSA := preload("res://arte/os98/prensa_cabeceras_98.svg")
+const TEXTURA_WEB_CABECERAS := preload("res://arte/os98/web_cabeceras_sitios_98.svg")
+const TEXTURA_WEB_NAVEGACION := preload("res://arte/os98/web_navegacion_sitios_98.svg")
+const TEXTURA_WEB_MODULOS := preload("res://arte/os98/web_modulos_sitios_98.svg")
+const TEXTURA_WEB_BADGES := preload("res://arte/os98/web_badges_88x31.svg")
+const TEXTURA_WEB_DECORACION := preload("res://arte/os98/web_decoracion_sitios_98.svg")
+const SITIOS_WEB_VISUALES := {
+	"marcador-98": {"fila": 0, "modulo": 0},
+	"meteo-red": {"fila": 1, "modulo": 1},
+	"byte-local": {"fila": 2, "modulo": 2},
+	"butaca-7": {"fila": 3, "modulo": 3},
+	"tablón-clasificados": {"fila": 4, "modulo": 4},
+}
+const MODULO_WEB_PERSONAL := 5
 const ESCALA_TEXTO_MIN := 0.8
 const ESCALA_TEXTO_MAX := 1.6
 const ESCALA_TEXTO_PASO := 0.2
@@ -28,6 +41,11 @@ var _adelante: Button
 var _direccion: LineEdit
 var _favorito: Button
 var _cabecera_prensa: TextureRect
+var _cabecera_sitio: TextureRect
+var _navegacion_sitio: TextureRect
+var _modulo_sitio: TextureRect
+var _badge_web: TextureRect
+var _decoracion_web: TextureRect
 var _pagina: RichTextLabel
 var _enlaces: ItemList
 var _historial_lista: ItemList
@@ -115,10 +133,16 @@ func navegar(url: String, registrar_historial: bool = true) -> Dictionary:
 	var resultado := _indice.resolver_url(limpia)
 	_resultado_actual = resultado.duplicate(true)
 	if registrar_historial:
-		if _indice_historial + 1 < _historial.size():
-			_historial = _historial.slice(0, _indice_historial + 1)
-		_historial.append(limpia)
-		_indice_historial = _historial.size() - 1
+		var repite_actual := (
+			_indice_historial >= 0
+			and _indice_historial < _historial.size()
+			and _historial[_indice_historial].to_lower() == limpia.to_lower()
+		)
+		if not repite_actual:
+			if _indice_historial + 1 < _historial.size():
+				_historial = _historial.slice(0, _indice_historial + 1)
+			_historial.append(limpia)
+			_indice_historial = _historial.size() - 1
 		_emitir_estado()
 	if is_node_ready():
 		_renderizar(resultado)
@@ -258,11 +282,44 @@ func _construir_interfaz() -> void:
 	principal.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	cuerpo.add_child(principal)
 
+	_cabecera_sitio = TextureRect.new()
+	_cabecera_sitio.custom_minimum_size = Vector2(468, 72)
+	_cabecera_sitio.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_cabecera_sitio.visible = false
+	principal.add_child(_cabecera_sitio)
+
+	_navegacion_sitio = TextureRect.new()
+	_navegacion_sitio.custom_minimum_size = Vector2(468, 24)
+	_navegacion_sitio.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_navegacion_sitio.visible = false
+	principal.add_child(_navegacion_sitio)
+
 	_cabecera_prensa = TextureRect.new()
 	_cabecera_prensa.custom_minimum_size = Vector2(468, 60)
 	_cabecera_prensa.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_cabecera_prensa.visible = false
 	principal.add_child(_cabecera_prensa)
+
+	var visual_web := HBoxContainer.new()
+	visual_web.alignment = BoxContainer.ALIGNMENT_CENTER
+	visual_web.add_theme_constant_override("separation", 12)
+	principal.add_child(visual_web)
+
+	_modulo_sitio = TextureRect.new()
+	_modulo_sitio.custom_minimum_size = Vector2(220, 100)
+	_modulo_sitio.visible = false
+	visual_web.add_child(_modulo_sitio)
+
+	_badge_web = TextureRect.new()
+	_badge_web.custom_minimum_size = Vector2(88, 31)
+	_badge_web.visible = false
+	visual_web.add_child(_badge_web)
+
+	_decoracion_web = TextureRect.new()
+	_decoracion_web.custom_minimum_size = Vector2(468, 28)
+	_decoracion_web.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_decoracion_web.visible = false
+	principal.add_child(_decoracion_web)
 
 	_pagina = RichTextLabel.new()
 	_pagina.bbcode_enabled = true
@@ -306,6 +363,94 @@ func _resolver_sin_historial(url: String) -> void:
 		_refrescar_laterales()
 
 
+func _recorte_atlas(atlas: Texture2D, region: Rect2) -> AtlasTexture:
+	var textura := AtlasTexture.new()
+	textura.atlas = atlas
+	textura.region = region
+	textura.filter_clip = true
+	return textura
+
+
+func _ocultar_visuales_web() -> void:
+	if _cabecera_sitio != null:
+		_cabecera_sitio.visible = false
+	if _navegacion_sitio != null:
+		_navegacion_sitio.visible = false
+	if _cabecera_prensa != null:
+		_cabecera_prensa.visible = false
+	if _modulo_sitio != null:
+		_modulo_sitio.visible = false
+	if _badge_web != null:
+		_badge_web.visible = false
+	if _decoracion_web != null:
+		_decoracion_web.visible = false
+
+
+func _region_badge(recurso: Dictionary, via: String) -> Rect2:
+	if via == "mirror":
+		return Rect2(0, 31, 88, 31)
+	match String(recurso.get("categoria", "")):
+		"institucional":
+			return Rect2(88, 31, 88, 31)
+		"archivo":
+			return Rect2(176, 31, 88, 31)
+		"personal":
+			return Rect2(176, 0, 88, 31)
+	return Rect2(264, 31, 88, 31)
+
+
+func _preparar_visuales_recurso(recurso: Dictionary, via: String) -> void:
+	_decoracion_web.texture = _recorte_atlas(
+		TEXTURA_WEB_DECORACION,
+		Rect2(0, 0, 468, 28),
+	)
+	_decoracion_web.visible = true
+	_badge_web.texture = _recorte_atlas(TEXTURA_WEB_BADGES, _region_badge(recurso, via))
+	_badge_web.visible = true
+
+	var recurso_id := String(recurso.get("id", ""))
+	var visual: Variant = SITIOS_WEB_VISUALES.get(recurso_id, null)
+	if visual is Dictionary:
+		var fila := int((visual as Dictionary).get("fila", 0))
+		var modulo := int((visual as Dictionary).get("modulo", 0))
+		_cabecera_sitio.texture = _recorte_atlas(
+			TEXTURA_WEB_CABECERAS,
+			Rect2(0, fila * 72, 468, 72),
+		)
+		_navegacion_sitio.texture = _recorte_atlas(
+			TEXTURA_WEB_NAVEGACION,
+			Rect2(0, fila * 24, 468, 24),
+		)
+		_modulo_sitio.texture = _recorte_atlas(
+			TEXTURA_WEB_MODULOS,
+			Rect2((modulo % 2) * 220, floori(float(modulo) / 2.0) * 100, 220, 100),
+		)
+		_cabecera_sitio.visible = true
+		_navegacion_sitio.visible = true
+		_modulo_sitio.visible = true
+	elif String(recurso.get("categoria", "")) == "personal":
+		_modulo_sitio.texture = _recorte_atlas(
+			TEXTURA_WEB_MODULOS,
+			Rect2(
+				(MODULO_WEB_PERSONAL % 2) * 220,
+				floori(float(MODULO_WEB_PERSONAL) / 2.0) * 100,
+				220,
+				100,
+			),
+		)
+		_modulo_sitio.visible = true
+
+
+func _mostrar_decoracion_busqueda() -> void:
+	_decoracion_web.texture = _recorte_atlas(
+		TEXTURA_WEB_DECORACION,
+		Rect2(0, 0, 468, 28),
+	)
+	_decoracion_web.visible = true
+	_badge_web.texture = _recorte_atlas(TEXTURA_WEB_BADGES, Rect2(0, 0, 88, 31))
+	_badge_web.visible = true
+
+
 func _renderizar(resultado: Dictionary) -> void:
 	var url := url_actual()
 	_direccion.text = url
@@ -316,11 +461,12 @@ func _renderizar(resultado: Dictionary) -> void:
 	)
 	_enlaces.clear()
 	_cache.visible = false
-	_cabecera_prensa.visible = false
+	_ocultar_visuales_web()
 
 	var estado := String(resultado.get("estado", "no_encontrado"))
 	if estado == "ok":
 		var recurso: Dictionary = resultado.get("recurso", {})
+		_preparar_visuales_recurso(recurso, String(resultado.get("via", "origen")))
 		if String(recurso.get("tipo", "")) == "prensa":
 			_renderizar_prensa(recurso)
 		else:
@@ -413,8 +559,12 @@ func _renderizar_enlaces(recurso: Dictionary) -> void:
 
 func _mostrar_busqueda(consulta: String) -> void:
 	var resultados := buscar(consulta)
-	_cabecera_prensa.visible = false
-	_pagina.text = tr("NAVEGADOR_RESULTADOS") % [consulta, resultados.size()]
+	_ocultar_visuales_web()
+	_mostrar_decoracion_busqueda()
+	if resultados.size() == 1:
+		_pagina.text = tr("NAVEGADOR_RESULTADO_UNO") % consulta
+	else:
+		_pagina.text = tr("NAVEGADOR_RESULTADOS") % [consulta, resultados.size()]
 	_enlaces.clear()
 	for recurso in resultados:
 		var indice_item := _enlaces.add_item(
@@ -429,7 +579,11 @@ func _abrir_cache_actual() -> void:
 	if String(cache.get("estado", "")) != "ok":
 		return
 	var datos: Dictionary = cache.get("cache", {})
-	_cabecera_prensa.visible = false
+	_ocultar_visuales_web()
+	_decoracion_web.texture = _recorte_atlas(TEXTURA_WEB_DECORACION, Rect2(0, 0, 468, 28))
+	_decoracion_web.visible = true
+	_badge_web.texture = _recorte_atlas(TEXTURA_WEB_BADGES, Rect2(176, 31, 88, 31))
+	_badge_web.visible = true
 	_pagina.text = (
 		tr("NAVEGADOR_CACHE_PAGINA")
 		% [

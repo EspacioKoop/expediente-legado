@@ -194,6 +194,7 @@ NAVEGADOR_PRENSA_OPINION,[i]Opinión · %s[/i]
 NAVEGADOR_PRENSA_SIN_ARTICULOS,No hay artículos disponibles para esta jornada.
 NAVEGADOR_QUITAR_FAVORITO,Quitar favorito
 NAVEGADOR_RECARGAR,Recargar
+NAVEGADOR_RESULTADO_UNO,[b]Resultados para «%s»[/b]\n\n1 coincidencia en el índice local.
 NAVEGADOR_RESULTADOS,[b]Resultados para «%s»[/b]\n\n%d coincidencias en el índice local.
 NAVEGADOR_SERVIDOR_CAIDO,[b]Servidor no disponible[/b]\n%s\n\nEl servidor simulado no responde.
 NAVEGADOR_SIN_TITULO,Sin título
