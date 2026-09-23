@@ -73,8 +73,14 @@ func _initialize() -> void:
 	var bloqueo := String(estado_2.get("bloqueo", ""))
 	_comprobar(String(estado_2.get("presencia", "")) == "cerca", "presencia reacciona")
 	if luz != null:
-		_comprobar(luz.light_energy >= 4.2, "presencia cercana refuerza iluminación")
-		_comprobar(luz.omni_range >= 16.0, "presencia cercana alcanza más laberinto")
+		_comprobar(
+			is_equal_approx(luz.light_energy, 4.2),
+			"presencia cercana refuerza iluminación",
+		)
+		_comprobar(
+			is_equal_approx(luz.omni_range, 16.0),
+			"presencia cercana alcanza más laberinto",
+		)
 		_comprobar(luz.light_color.r > luz.light_color.g, "presencia cercana calienta la luz")
 
 	var marca_norte := arquitectura.get_node_or_null("Hilo_cruce_norte") as MeshInstance3D
