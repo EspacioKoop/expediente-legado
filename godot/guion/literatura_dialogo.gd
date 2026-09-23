@@ -79,23 +79,26 @@ static func conversar(
 	var npc: Dictionary = dialogo.get("npc", {})
 	var movimiento: Dictionary = dialogo.get("movimiento", {})
 	var insight_id := String(rama.get("insight_id", "")).strip_edges()
-	var evento := LiteraturaEventos.crear_evento(
-		"insight:dialogo:%s:%s" % [String(dialogo["id"]), insight_id],
-		LiteraturaEventos.CANAL_INSIGHT,
-		String(dialogo["obra_id"]),
-		origen,
-		"dialogo:%s" % String(dialogo["id"]),
-		jornada,
-		rama.get("etiquetas", []),
-		{
-			"productor": "dialogo_literario",
-			"dialogo_id": String(dialogo["id"]),
-			"rama_id": String(rama["id"]),
-			"insight_id": insight_id,
-			"npc_id": String(npc.get("id", "")),
-			"movimiento_id": String(movimiento.get("id", "")),
-			"consecuencia_visible": String(rama.get("consecuencia_visible", "")),
-		},
+	var evento := (
+		LiteraturaEventos
+		. crear_evento(
+			"insight:dialogo:%s:%s" % [String(dialogo["id"]), insight_id],
+			LiteraturaEventos.CANAL_INSIGHT,
+			String(dialogo["obra_id"]),
+			origen,
+			"dialogo:%s" % String(dialogo["id"]),
+			jornada,
+			rama.get("etiquetas", []),
+			{
+				"productor": "dialogo_literario",
+				"dialogo_id": String(dialogo["id"]),
+				"rama_id": String(rama["id"]),
+				"insight_id": insight_id,
+				"npc_id": String(npc.get("id", "")),
+				"movimiento_id": String(movimiento.get("id", "")),
+				"consecuencia_visible": String(rama.get("consecuencia_visible", "")),
+			},
+		)
 	)
 	var nuevo := LiteraturaEventos.registrar(registro, evento)
 	resultado["valida"] = true
