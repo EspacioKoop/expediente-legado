@@ -293,12 +293,8 @@ func _inventario_mutable() -> Dictionary:
 func _refrescar_combinacion() -> void:
 	if not is_instance_valid(_slot_a_boton):
 		return
-	_slot_a_boton.text = _texto_slot(
-		String(_textos.get("combinacion_slot_a", "Ranura A")), _slot_a
-	)
-	_slot_b_boton.text = _texto_slot(
-		String(_textos.get("combinacion_slot_b", "Ranura B")), _slot_b
-	)
+	_slot_a_boton.text = _texto_slot(String(_textos.get("combinacion_slot_a", "Ranura A")), _slot_a)
+	_slot_b_boton.text = _texto_slot(String(_textos.get("combinacion_slot_b", "Ranura B")), _slot_b)
 	_combinar_boton.disabled = _slot_a.is_empty() or _slot_b.is_empty()
 
 
@@ -325,12 +321,16 @@ func _mensaje_fallo(motivo: String) -> String:
 		"slot_vacio":
 			return String(_textos.get("combinacion_slot_vacio", "Necesitas dos objetos."))
 		"mismo_objeto":
-			return String(_textos.get("combinacion_mismo_objeto", "Necesitas dos objetos distintos."))
+			return String(
+				_textos.get("combinacion_mismo_objeto", "Necesitas dos objetos distintos.")
+			)
 		"sin_receta":
 			return String(_textos.get("combinacion_sin_receta", "No encaja nada útil."))
 		"objeto_ausente":
 			return String(
-				_textos.get("combinacion_objeto_ausente", "Uno de esos objetos ya no está disponible.")
+				_textos.get(
+					"combinacion_objeto_ausente", "Uno de esos objetos ya no está disponible."
+				)
 			)
 		_:
 			return String(_textos.get("combinacion_error", "La combinación no pudo completarse."))
