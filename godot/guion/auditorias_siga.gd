@@ -23,6 +23,11 @@ const CONDICIONES := [
 		"titulo": "AUDITORIAS_SIN_RELEER",
 		"descripcion": "AUDITORIAS_SIN_RELEER_DESC",
 	},
+	{
+		"id": Auditorias.SUENO_COMPLETO,
+		"titulo": "AUDITORIAS_SUENO_COMPLETO",
+		"descripcion": "AUDITORIAS_SUENO_COMPLETO_DESC",
+	},
 ]
 
 var _estado_partida: Dictionary = {}

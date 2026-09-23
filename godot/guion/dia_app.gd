@@ -475,6 +475,7 @@ func _process(delta: float) -> void:
 	if jornada.get("fase", "") != "sueño" or _pantalla != null:
 		return
 	if Jornada.gastar_sueno(jornada, delta):
+		Auditorias.resolver_fin_sueno(partida.estado, false)
 		var dia := Jornada.despertar_de_golpe(jornada)
 		_hablando = false
 		_nomina.text = tr("DIA_DESPERTAR_DE_GOLPE") % dia
@@ -610,6 +611,7 @@ func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
 			jornada["sueno_escenas"].pop_front()
 			if jornada["sueno_escenas"].is_empty():
 				_registrar_despertar_reglamentario()
+				Auditorias.resolver_fin_sueno(partida.estado, true)
 				var dia := Jornada.despertar(jornada)
 				_hablando = false
 				_nomina.text = tr("DIA_NUEVO") % dia
@@ -847,6 +849,8 @@ func _cerrar_duelo(gano: bool, quien: Dictionary, zona: Area3D) -> void:
 	_pantalla.queue_free()
 	_pantalla = null
 
+	if not gano:
+		Auditorias.resolver_fin_sueno(partida.estado, false)
 	var final := SuenoCombate.resolver(partida.estado, jornada, quien, gano)
 	# El duelo ya está resuelto en memoria, así que se devuelve el control pase
 	# lo que pase: encerrar al jugador en una pantalla muerta no salva nada. Si

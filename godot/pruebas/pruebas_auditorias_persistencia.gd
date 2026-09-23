@@ -13,6 +13,7 @@ func _initialize() -> void:
 	_probar_predicado_accion_sobrante()
 	_probar_predicado_gato_diario()
 	_probar_predicado_sin_releer()
+	_probar_predicado_sueno_completo()
 	_probar_cierre_historial()
 	_probar_reasignacion()
 	_probar_migracion_partida_antigua()
@@ -139,6 +140,41 @@ func _probar_predicado_sin_releer() -> void:
 	_comprobar(
 		not bool(terminal.get("cambio", true)),
 		"consultar tras el fallo no vuelve a mutar el estado",
+	)
+
+
+func _probar_predicado_sueno_completo() -> void:
+	var estado := Partida.nueva()
+	estado[Auditorias.CLAVE_ESTADO] = Auditorias.nueva([Auditorias.SUENO_COMPLETO])
+	var auditoria: Dictionary = estado[Auditorias.CLAVE_ESTADO]
+
+	var normal := Auditorias.resolver_fin_sueno(estado, true)
+	_comprobar(normal.get("resultado", "") == "activa", "completar una noche mantiene el reto")
+	_comprobar(
+		Auditorias.estado(auditoria, Auditorias.SUENO_COMPLETO) == "activa",
+		"una noche completa no cierra prematuramente el reto de vida",
+	)
+	_comprobar(
+		not bool(normal.get("cambio", true)),
+		"el cierre normal no añade estado paralelo por noche",
+	)
+
+	var forzado := Auditorias.resolver_fin_sueno(estado, false)
+	_comprobar(forzado.get("resultado", "") == "fallida", "un despertar forzado falla el reto")
+	_comprobar(bool(forzado.get("cambio", false)), "el primer corte forzado declara mutación")
+	_comprobar(
+		String(auditoria["fallidas"].get(Auditorias.SUENO_COMPLETO, "")) == "sueno_interrumpido",
+		"el sueño incompleto conserva un motivo técnico estable",
+	)
+
+	var terminal := Auditorias.resolver_fin_sueno(estado, true)
+	_comprobar(
+		terminal.get("resultado", "") == "fallida",
+		"una noche completa posterior no revive el reto fallido",
+	)
+	_comprobar(
+		not bool(terminal.get("cambio", true)),
+		"consultar un reto terminal no vuelve a mutarlo",
 	)
 
 
