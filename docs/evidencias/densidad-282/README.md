@@ -16,6 +16,13 @@ No fuerza `gl_compatibility`: desde #1243 hay diferencias visuales relevantes
 de iluminación y sombras que solo deben juzgarse sobre el renderer canónico del
 juego.
 
+El runner fija además `TranslationServer.set_locale("es")` antes de montar
+`dia.tscn`. El artifact de #1281 dejó al descubierto esta omisión: la vista
+lateral de calle mostraba `CALLE_ROTULO_RECLAMACIONES` y
+`CALLE_ROTULO_TURNO` en vez de sus rótulos reales. Eso era un defecto del
+capturador aislado, no evidencia válida para juzgar el juego. El gate falla ahora
+si cualquier `Label3D` de `CalleIdentidad` sigue empezando por `CALLE_`.
+
 Junto a las PNG se publica un `manifest.json` con dos familias de señales:
 
 - la auditoría declarativa de `Densidad3D`: bultos con modelo, bultos que siguen
@@ -23,8 +30,8 @@ Junto a las PNG se publica un `manifest.json` con dos familias de señales:
 - el árbol 3D realmente montado: número de `MeshInstance3D`, cajas, superficies
   planas, `ArrayMesh`, otras primitivas, lotes `MultiMesh` e interactuables.
 
-Cada caso del manifiesto incluye además sus tres vistas, rumbo e inclinación y
-SHA-256 de cada PNG. La vista frontal se conserva también en los campos
+El manifiesto registra también el locale efectivo. Cada caso incluye sus tres
+vistas, rumbo e inclinación y SHA-256 de cada PNG. La vista frontal se conserva también en los campos
 históricos `captura`/`sha256` para no romper consumidores anteriores.
 
 Estas cifras son **diagnóstico, no una puntuación artística**. Una `BoxMesh`
