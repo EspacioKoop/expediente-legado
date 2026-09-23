@@ -85,7 +85,7 @@ class AscensorTest(unittest.TestCase):
         self.assertIn("if vistas == 0:", self.cinematica)
         self.assertIn('plano["encuentro_companero"] = "cunado"', self.cinematica)
         self.assertIn("Companeros.frase_de(Companeros.CUNADO, 1)", self.cinematica)
-        self.assertIn('"_companero_encuentro.name = \\"EncuentroCunado\\""', self.app_3d)
+        self.assertIn('_companero_encuentro.name = "EncuentroCunado"', self.app_3d)
         self.assertIn("Companeros.cuerpo_de(Companeros.CUNADO)", self.app_3d)
         self.assertIn('String(plano.get("encuentro_companero", "")) == "cunado"', self.app_3d)
         self.assertNotIn("cinematicas_vistas", self.app_3d)
