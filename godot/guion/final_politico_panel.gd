@@ -88,6 +88,8 @@ func _construir() -> void:
 		for ejemplo in ejemplos:
 			caja.add_child(_etiqueta(_texto_ejemplo(ejemplo)))
 
+	_montar_auditorias(caja)
+
 	_boton = Button.new()
 	_boton.name = "Continuar"
 	_boton.theme = EstiloSiga.tema()
@@ -96,6 +98,43 @@ func _construir() -> void:
 	_boton.pressed.connect(func(): continuar_solicitado.emit())
 	caja.add_child(_boton)
 	_boton.grab_focus()
+
+
+func _montar_auditorias(caja: VBoxContainer) -> void:
+	var resumen_crudo = _resumen.get("auditoria", {})
+	if typeof(resumen_crudo) != TYPE_DICTIONARY:
+		return
+	var condiciones_crudas = (resumen_crudo as Dictionary).get("condiciones", [])
+	if typeof(condiciones_crudas) != TYPE_ARRAY or (condiciones_crudas as Array).is_empty():
+		return
+
+	var titulo := _etiqueta(tr("AUDITORIAS_FINAL_TITULO"))
+	titulo.name = "AuditoriasTitulo"
+	caja.add_child(titulo)
+	for condicion in condiciones_crudas:
+		if typeof(condicion) != TYPE_DICTIONARY:
+			continue
+		var fila: Dictionary = condicion
+		var id := String(fila.get("id", ""))
+		if id.is_empty():
+			continue
+		var nombre := tr("AUDITORIAS_%s" % id.to_upper())
+		var estado := _texto_estado_auditoria(String(fila.get("estado", "")))
+		var linea := _etiqueta(tr("AUDITORIAS_FINAL_LINEA") % [nombre, estado])
+		linea.name = "Auditoria_%s" % id
+		caja.add_child(linea)
+
+
+func _texto_estado_auditoria(estado: String) -> String:
+	match estado:
+		"activa":
+			return tr("AUDITORIAS_FINAL_ESTADO_ACTIVA")
+		"fallida":
+			return tr("AUDITORIAS_FINAL_ESTADO_FALLIDA")
+		"completada":
+			return tr("AUDITORIAS_FINAL_ESTADO_COMPLETADA")
+		_:
+			return tr("AUDITORIAS_FINAL_ESTADO_PENDIENTE")
 
 
 func _texto_dominantes(dominantes: Array) -> String:
