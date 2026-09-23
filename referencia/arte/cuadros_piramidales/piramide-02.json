@@ -1,0 +1,21 @@
+{
+  "id": "piramide-02",
+  "salida": "cuadro-piramide-02.png",
+  "titulo": "Sección de monumento y retícula",
+  "autor": "Expediente Legado",
+  "licencia": "CC0-1.0",
+  "fuente": "scripts/generar_cuadros_piramidales.py",
+  "ancho": 320,
+  "alto": 224,
+  "semilla": 19502,
+  "motivo": "seccion",
+  "sha256": "c7ab003f17daeb22032b4a40b510487a02257d0985cc1bb00fa298e4c86e187f",
+  "paleta": {
+    "papel": "#D7D1B7",
+    "tinta": "#31434A",
+    "sombra": "#52666B",
+    "arena": "#B2A77E",
+    "acento": "#8B4F3D",
+    "linea": "#A59D83"
+  }
+}
