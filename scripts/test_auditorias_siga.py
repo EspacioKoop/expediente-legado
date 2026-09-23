@@ -23,6 +23,7 @@ class AuditoriasSigaTests(unittest.TestCase):
         self.assertIn("check.disabled = not _editable", UI)
         self.assertIn("check.set_pressed_no_signal", UI)
         self.assertIn("Auditorias.GATO_DIARIO", UI)
+        self.assertIn("Auditorias.SIN_RELEER", UI)
         self.assertIn('name = "HistorialAuditorias"', UI)
         self.assertIn("Auditorias.CLAVE_HISTORIAL", UI)
 
@@ -70,6 +71,8 @@ class AuditoriasSigaTests(unittest.TestCase):
             "AUDITORIAS_ACCION_SOBRANTE_DESC,",
             "AUDITORIAS_GATO_DIARIO,",
             "AUDITORIAS_GATO_DIARIO_DESC,",
+            "AUDITORIAS_SIN_RELEER,",
+            "AUDITORIAS_SIN_RELEER_DESC,",
             "AUDITORIAS_HISTORIAL_TITULO,",
             "AUDITORIAS_HISTORIAL_VIDA,",
             "AUDITORIAS_HISTORIAL_LINEA,",
@@ -85,7 +88,7 @@ class AuditoriasSigaTests(unittest.TestCase):
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
         resumen = RESUMEN.search(resultado.stdout)
         self.assertIsNotNone(resumen, resultado.stdout)
-        self.assertGreaterEqual(int(resumen.group(1)), 20, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 23, resultado.stdout)
 
 
 if __name__ == "__main__":
