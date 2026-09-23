@@ -471,15 +471,18 @@ func _abrir_bingo_pendiente(dia: Node, escritorio: EscritorioSiga) -> void:
 	)
 	var dia_actual := int((jornada as Dictionary).get("dia", 1))
 	var ya_existia := (
-		actual_previo is Dictionary and int((actual_previo as Dictionary).get("dia", 0)) == dia_actual
+		actual_previo is Dictionary
+		and int((actual_previo as Dictionary).get("dia", 0)) == dia_actual
 	)
 	var actual := BingoSiga.tarjeta_diaria((partida_actual as Partida).estado)
 	if not ya_existia:
 		_persistir_bingo_siga("")
 	if (
 		not bool(actual.get("cerrada", false))
-		and String(actual.get("decision", BingoSiga.DECISION_PENDIENTE))
-		== BingoSiga.DECISION_PENDIENTE
+		and (
+			String(actual.get("decision", BingoSiga.DECISION_PENDIENTE))
+			== BingoSiga.DECISION_PENDIENTE
+		)
 	):
 		_bingo_app.abrir(escritorio)
 
