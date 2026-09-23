@@ -55,6 +55,21 @@ El script:
 
 No modifica `godot/assets/procedencia.json` y **no crea punteros LFS**. Los PNG preparados deben incorporarse después mediante Git LFS real, conforme a `.gitattributes`; un puntero sin su objeto LFS no es una integración válida.
 
+### Lote instalado
+
+El repositorio contiene, como objetos Git LFS reales, **exactamente los 17 PNG
+128×128 que consumen los `PERFILES` de `HorrorTexturas`**: los 10 de muro y suelo
+(Brick 11, Floor 12, Metal 06, Misc 13, Stone 07/10/13/14 y Wall 05/09) y las
+manchas Stain 07 y 10–15. Se prepararon con el script anterior a partir del RAR
+128×128 auditado, y cada uno tiene su ficha en `procedencia.json`. El
+`License.txt` del RAR confirma CC0 1.0.
+
+El resto de la unión de perfiles curados del manifiesto no se importa mientras
+ningún consumidor lo cargue. `scripts/test_horror_texturas.py` exige que el lote
+coincida con los perfiles del runtime, y `horror_texturas_smoke.gd` que cada
+pieza planificada se aplique y cargue como `Texture2D` de 128×128, con alfa en
+las manchas. Las capturas A/B están en `docs/evidencias/horror-texturas-231/`.
+
 ## Integración runtime
 
 `TexturaProcedural` admite rutas `res://` directas además de los alias JPG históricos. Así un espacio puede declarar una textura importada sin crear un segundo sistema de materiales, manteniendo fallback cuando el pack no está instalado.

@@ -1735,6 +1735,176 @@
       "sha256": "73febb398631f45a0763e275dcb8c4d60fe74ac9e00e74edb21b176f7b4d6824",
       "archivo_origen": "Kubasta/Kubasta.ttf",
       "paquete_sha256": "e2d4c74fbec43a9c5b9d1b818fb943976144be2980bd504e83b0f4f21a8a288c"
+    },
+    {
+      "ruta": "texturas/horror_sbs/128x128/Brick/Horror_Brick_11-128x128.png",
+      "titulo": "Horror Texture Pack — Horror_Brick_11",
+      "autor": "Screaming Brain Studios",
+      "licencia": "CC0-1.0",
+      "fuente": "https://screamingbrainstudios.itch.io/horror-texture-pack",
+      "sha256": "84d65d5e5f441925a1facf1a0afad84639db69836abc13b2a524df2ae6dbc8c8",
+      "archivo_origen": "128x128/Brick/Horror_Brick_11-128x128.png",
+      "paquete_sha256": "1fee483ce0253e64096442a2c16833ec9da90bdfa2836e5d54a061f293abf6fb"
+    },
+    {
+      "ruta": "texturas/horror_sbs/128x128/Floor/Horror_Floor_12-128x128.png",
+      "titulo": "Horror Texture Pack — Horror_Floor_12",
+      "autor": "Screaming Brain Studios",
+      "licencia": "CC0-1.0",
+      "fuente": "https://screamingbrainstudios.itch.io/horror-texture-pack",
+      "sha256": "d0b5e67a5853d509abf6d1cefb58b85a7da332f4ecc018bcf9dff255c0e5733b",
+      "archivo_origen": "128x128/Floor/Horror_Floor_12-128x128.png",
+      "paquete_sha256": "1fee483ce0253e64096442a2c16833ec9da90bdfa2836e5d54a061f293abf6fb"
+    },
+    {
+      "ruta": "texturas/horror_sbs/128x128/Metal/Horror_Metal_06-128x128.png",
+      "titulo": "Horror Texture Pack — Horror_Metal_06",
+      "autor": "Screaming Brain Studios",
+      "licencia": "CC0-1.0",
+      "fuente": "https://screamingbrainstudios.itch.io/horror-texture-pack",
+      "sha256": "493adcf3c124ccc2906bf20d576777809da5a5801bbc0a60cf2dc36572b13cc9",
+      "archivo_origen": "128x128/Metal/Horror_Metal_06-128x128.png",
+      "paquete_sha256": "1fee483ce0253e64096442a2c16833ec9da90bdfa2836e5d54a061f293abf6fb"
+    },
+    {
+      "ruta": "texturas/horror_sbs/128x128/Misc/Horror_Misc_13-128x128.png",
+      "titulo": "Horror Texture Pack — Horror_Misc_13",
+      "autor": "Screaming Brain Studios",
+      "licencia": "CC0-1.0",
+      "fuente": "https://screamingbrainstudios.itch.io/horror-texture-pack",
+      "sha256": "d6e5e5057fe7e4f2da07663973436ecebb88b28f3765e1e39ee4376ff84376b5",
+      "archivo_origen": "128x128/Misc/Horror_Misc_13-128x128.png",
+      "paquete_sha256": "1fee483ce0253e64096442a2c16833ec9da90bdfa2836e5d54a061f293abf6fb"
+    },
+    {
+      "ruta": "texturas/horror_sbs/128x128/Stains/Horror_Stain_07-128x128.png",
+      "titulo": "Horror Texture Pack — Horror_Stain_07",
+      "autor": "Screaming Brain Studios",
+      "licencia": "CC0-1.0",
+      "fuente": "https://screamingbrainstudios.itch.io/horror-texture-pack",
+      "sha256": "d1565f1cd7895f7947eb9f05497ecedadede2fda2ee53a1463d60ba0e09c16d1",
+      "archivo_origen": "128x128/Stains/Horror_Stain_07-128x128.png",
+      "paquete_sha256": "1fee483ce0253e64096442a2c16833ec9da90bdfa2836e5d54a061f293abf6fb"
+    },
+    {
+      "ruta": "texturas/horror_sbs/128x128/Stains/Horror_Stain_10-128x128.png",
+      "titulo": "Horror Texture Pack — Horror_Stain_10",
+      "autor": "Screaming Brain Studios",
+      "licencia": "CC0-1.0",
+      "fuente": "https://screamingbrainstudios.itch.io/horror-texture-pack",
+      "sha256": "ecd456ed83349cc3e355a400f3a0d60194656d71c6172201595de3e490863abe",
+      "archivo_origen": "128x128/Stains/Horror_Stain_10-128x128.png",
+      "paquete_sha256": "1fee483ce0253e64096442a2c16833ec9da90bdfa2836e5d54a061f293abf6fb"
+    },
+    {
+      "ruta": "texturas/horror_sbs/128x128/Stains/Horror_Stain_11-128x128.png",
+      "titulo": "Horror Texture Pack — Horror_Stain_11",
+      "autor": "Screaming Brain Studios",
+      "licencia": "CC0-1.0",
+      "fuente": "https://screamingbrainstudios.itch.io/horror-texture-pack",
+      "sha256": "f5d37a9c6ace284ac11930fe01ab35981db2548b6a39dee4e7eca5dab805ce99",
+      "archivo_origen": "128x128/Stains/Horror_Stain_11-128x128.png",
+      "paquete_sha256": "1fee483ce0253e64096442a2c16833ec9da90bdfa2836e5d54a061f293abf6fb"
+    },
+    {
+      "ruta": "texturas/horror_sbs/128x128/Stains/Horror_Stain_12-128x128.png",
+      "titulo": "Horror Texture Pack — Horror_Stain_12",
+      "autor": "Screaming Brain Studios",
+      "licencia": "CC0-1.0",
+      "fuente": "https://screamingbrainstudios.itch.io/horror-texture-pack",
+      "sha256": "36918a4ad13312c659dbe7642533afaa9ef411a76eb200e29e3587e491b365b3",
+      "archivo_origen": "128x128/Stains/Horror_Stain_12-128x128.png",
+      "paquete_sha256": "1fee483ce0253e64096442a2c16833ec9da90bdfa2836e5d54a061f293abf6fb"
+    },
+    {
+      "ruta": "texturas/horror_sbs/128x128/Stains/Horror_Stain_13-128x128.png",
+      "titulo": "Horror Texture Pack — Horror_Stain_13",
+      "autor": "Screaming Brain Studios",
+      "licencia": "CC0-1.0",
+      "fuente": "https://screamingbrainstudios.itch.io/horror-texture-pack",
+      "sha256": "b74d849dbefbddc803974b2f3ab9bb8b4c36cd222b4b07add638a77ec9923be4",
+      "archivo_origen": "128x128/Stains/Horror_Stain_13-128x128.png",
+      "paquete_sha256": "1fee483ce0253e64096442a2c16833ec9da90bdfa2836e5d54a061f293abf6fb"
+    },
+    {
+      "ruta": "texturas/horror_sbs/128x128/Stains/Horror_Stain_14-128x128.png",
+      "titulo": "Horror Texture Pack — Horror_Stain_14",
+      "autor": "Screaming Brain Studios",
+      "licencia": "CC0-1.0",
+      "fuente": "https://screamingbrainstudios.itch.io/horror-texture-pack",
+      "sha256": "9ff1eac54976a7a9d78aa5a238bb35e662b725ee2f300b34d1e17d2cb9c38c81",
+      "archivo_origen": "128x128/Stains/Horror_Stain_14-128x128.png",
+      "paquete_sha256": "1fee483ce0253e64096442a2c16833ec9da90bdfa2836e5d54a061f293abf6fb"
+    },
+    {
+      "ruta": "texturas/horror_sbs/128x128/Stains/Horror_Stain_15-128x128.png",
+      "titulo": "Horror Texture Pack — Horror_Stain_15",
+      "autor": "Screaming Brain Studios",
+      "licencia": "CC0-1.0",
+      "fuente": "https://screamingbrainstudios.itch.io/horror-texture-pack",
+      "sha256": "ca4239e1742b0d79d1a5f61a742cd64a05eb22ab22c90f7bead11c8709b51bf1",
+      "archivo_origen": "128x128/Stains/Horror_Stain_15-128x128.png",
+      "paquete_sha256": "1fee483ce0253e64096442a2c16833ec9da90bdfa2836e5d54a061f293abf6fb"
+    },
+    {
+      "ruta": "texturas/horror_sbs/128x128/Stone/Horror_Stone_07-128x128.png",
+      "titulo": "Horror Texture Pack — Horror_Stone_07",
+      "autor": "Screaming Brain Studios",
+      "licencia": "CC0-1.0",
+      "fuente": "https://screamingbrainstudios.itch.io/horror-texture-pack",
+      "sha256": "15edd1c7a2edcb56410758533049bf2ba617988d62bf2591922758fa97f0fed8",
+      "archivo_origen": "128x128/Stone/Horror_Stone_07-128x128.png",
+      "paquete_sha256": "1fee483ce0253e64096442a2c16833ec9da90bdfa2836e5d54a061f293abf6fb"
+    },
+    {
+      "ruta": "texturas/horror_sbs/128x128/Stone/Horror_Stone_10-128x128.png",
+      "titulo": "Horror Texture Pack — Horror_Stone_10",
+      "autor": "Screaming Brain Studios",
+      "licencia": "CC0-1.0",
+      "fuente": "https://screamingbrainstudios.itch.io/horror-texture-pack",
+      "sha256": "510206a8f8e2ec3f99cb55fe44ef992652b0d4a40724a8c17e5799a653062568",
+      "archivo_origen": "128x128/Stone/Horror_Stone_10-128x128.png",
+      "paquete_sha256": "1fee483ce0253e64096442a2c16833ec9da90bdfa2836e5d54a061f293abf6fb"
+    },
+    {
+      "ruta": "texturas/horror_sbs/128x128/Stone/Horror_Stone_13-128x128.png",
+      "titulo": "Horror Texture Pack — Horror_Stone_13",
+      "autor": "Screaming Brain Studios",
+      "licencia": "CC0-1.0",
+      "fuente": "https://screamingbrainstudios.itch.io/horror-texture-pack",
+      "sha256": "f7c3c00e14673dac357b73351b52091e84e7ef95fb84529e5627a667cb216417",
+      "archivo_origen": "128x128/Stone/Horror_Stone_13-128x128.png",
+      "paquete_sha256": "1fee483ce0253e64096442a2c16833ec9da90bdfa2836e5d54a061f293abf6fb"
+    },
+    {
+      "ruta": "texturas/horror_sbs/128x128/Stone/Horror_Stone_14-128x128.png",
+      "titulo": "Horror Texture Pack — Horror_Stone_14",
+      "autor": "Screaming Brain Studios",
+      "licencia": "CC0-1.0",
+      "fuente": "https://screamingbrainstudios.itch.io/horror-texture-pack",
+      "sha256": "f247242bf95b3e06ad149b0506493e243cf465ae6de1b81ea6f446d98354e6f3",
+      "archivo_origen": "128x128/Stone/Horror_Stone_14-128x128.png",
+      "paquete_sha256": "1fee483ce0253e64096442a2c16833ec9da90bdfa2836e5d54a061f293abf6fb"
+    },
+    {
+      "ruta": "texturas/horror_sbs/128x128/Wall/Horror_Wall_05-128x128.png",
+      "titulo": "Horror Texture Pack — Horror_Wall_05",
+      "autor": "Screaming Brain Studios",
+      "licencia": "CC0-1.0",
+      "fuente": "https://screamingbrainstudios.itch.io/horror-texture-pack",
+      "sha256": "54c1f9bfedd9aa32d0b8e643bd78f4737fd6dfbff1be878b7d1b771b8fad4e1d",
+      "archivo_origen": "128x128/Wall/Horror_Wall_05-128x128.png",
+      "paquete_sha256": "1fee483ce0253e64096442a2c16833ec9da90bdfa2836e5d54a061f293abf6fb"
+    },
+    {
+      "ruta": "texturas/horror_sbs/128x128/Wall/Horror_Wall_09-128x128.png",
+      "titulo": "Horror Texture Pack — Horror_Wall_09",
+      "autor": "Screaming Brain Studios",
+      "licencia": "CC0-1.0",
+      "fuente": "https://screamingbrainstudios.itch.io/horror-texture-pack",
+      "sha256": "d3abb08f85ced373eb947599e841f690e309104c6987aa321598a34ea1df41c1",
+      "archivo_origen": "128x128/Wall/Horror_Wall_09-128x128.png",
+      "paquete_sha256": "1fee483ce0253e64096442a2c16833ec9da90bdfa2836e5d54a061f293abf6fb"
     }
   ]
 }

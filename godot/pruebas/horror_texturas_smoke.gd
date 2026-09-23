@@ -59,8 +59,50 @@ func _init() -> void:
 		HorrorTexturas.perfil_de({}, "escalera") == "archivo",
 	)
 
+	_comprobar_lote_materializado(carteles)
+
 	print("horror_texturas_smoke: %d fallos" % fallos)
 	quit(1 if fallos > 0 else 0)
+
+
+## El lote 128x128 ya vive en Git LFS: todo lo que planifica un perfil debe
+## aplicarse de verdad. Si falta una pieza, `aplicar` la salta en silencio y el
+## sueño vuelve al fallback sin que nada lo avise; esta comprobación lo impide.
+func _comprobar_lote_materializado(carteles: Array) -> void:
+	for perfil in HorrorTexturas.PERFILES:
+		var espacio := {"carteles": carteles, "figuras": []}
+		var forma := "crucero"
+		if perfil == "archivo":
+			forma = "escalera"
+		else:
+			espacio["identidad_onirica"] = perfil
+		var aplicado := HorrorTexturas.aplicar(espacio, forma, HorrorTexturas.NIVEL_MAX)
+		comprobar(
+			"%s aplica su perfil con el lote instalado" % perfil,
+			aplicado.get("horror_perfil", "") == perfil,
+		)
+		for clave in ["textura_muro", "textura_suelo"]:
+			comprobar(
+				"%s: %s es la del perfil" % [perfil, clave],
+				aplicado.has(clave) and _carga_128(String(aplicado[clave]), false),
+			)
+		var decals: Array = aplicado.get("decals", [])
+		comprobar("%s: las tres marcas existen" % perfil, decals.size() == 3)
+		for entrada in decals:
+			var ruta := String(entrada["ruta"])
+			comprobar("%s: %s carga con alfa" % [perfil, ruta.get_file()], _carga_128(ruta, true))
+
+
+func _carga_128(ruta: String, exigir_alfa: bool) -> bool:
+	if not ResourceLoader.exists(ruta):
+		return false
+	var textura := ResourceLoader.load(ruta, "Texture2D") as Texture2D
+	if textura == null or textura.get_size() != Vector2(128, 128):
+		return false
+	if not exigir_alfa:
+		return true
+	var imagen := textura.get_image()
+	return imagen != null and imagen.detect_alpha() != Image.ALPHA_NONE
 
 
 func _es_mancha_excluida(ruta: String) -> bool:
