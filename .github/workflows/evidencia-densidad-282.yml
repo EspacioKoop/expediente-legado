@@ -20,6 +20,10 @@ on:
       - 'godot/guion/modelos.gd'
       - 'godot/escenas/dia.tscn'
       - 'godot/pruebas/capturar_densidad_282.gd'
+      - 'godot/pruebas/capturas_oficina_126.gd'
+      - 'godot/pruebas/capturar_calle_277.gd'
+      - 'godot/pruebas/capturar_casa_133.gd'
+      - 'godot/pruebas/capturar_sueno_284.gd'
       - 'scripts/test_evidencia_densidad_282.py'
       - 'docs/evidencias/densidad-282/**'
   workflow_dispatch:
@@ -108,6 +112,43 @@ jobs:
                   raise SystemExit(f"{nombre}: ratio de modelado fuera de rango")
           print("4/4 fases y 12/12 vistas capturadas; manifiesto de densidad coherente")
           PY
+
+      - name: Renderizar vistas canónicas por vertical
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="$GITHUB_WORKSPACE/evidencia-densidad-282/canonicas"
+          mkdir -p "$base/oficina" "$base/calle" "$base/casa" "$base/sueno"
+
+          xvfb-run -a godot4 --path godot \
+            --script res://pruebas/capturas_oficina_126.gd -- "$base/oficina"
+          xvfb-run -a godot4 --path godot \
+            --script res://pruebas/capturar_calle_277.gd -- "$base/calle"
+          xvfb-run -a godot4 --path godot \
+            --script res://pruebas/capturar_casa_133.gd -- "$base/casa"
+          xvfb-run -a godot4 --path godot \
+            --script res://pruebas/capturar_sueno_284.gd -- "$base/sueno"
+
+          for archivo in \
+            oficina/puestos-archivo.png \
+            oficina/acceso-ventanas.png \
+            calle/spawn_exterior.png \
+            calle/escaparate_crt.png \
+            calle/portal_casa.png \
+            casa/entrada_vivienda.png \
+            casa/salon_dormitorio.png \
+            casa/consola_television.png \
+            sueno/castillo.png \
+            sueno/montana.png \
+            sueno/desierto.png \
+            sueno/escuela_general.png \
+            sueno/escuela_contenido.png; do
+            test -s "$base/$archivo"
+          done
+          test -s "$base/oficina/README.md"
+          test -s "$base/calle/manifest.json"
+          test -s "$base/casa/manifest.json"
+          test -s "$base/sueno/manifest.json"
 
       - name: Adjuntar evidencia visual y métricas
         if: always()
