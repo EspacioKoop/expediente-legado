@@ -6,6 +6,7 @@ PARTIDA = Path("godot/guion/partida.gd")
 PROMETEO = Path("godot/guion/prometeo.gd")
 DIA = Path("godot/guion/dia_app.gd")
 ASCENSOR = Path("godot/guion/dia_ascensor_app.gd")
+SUENO = Path("godot/guion/dia_sueno_app.gd")
 CREADOR = Path("godot/guion/creador_personaje_app.gd")
 NUEVA_VIDA = Path("godot/guion/auditorias_nueva_vida_app.gd")
 
@@ -107,3 +108,24 @@ def test_modal_de_reasignacion_solo_emite_intencion():
     assert "AuditoriasSiga.new()" in contenido
     for prohibido in ("Partida.", "guardar(", "Auditorias.resolver_seleccion", "Jornada."):
         assert prohibido not in contenido
+
+
+def test_gato_diario_se_evalua_antes_de_dormir_en_ambas_rutas():
+    llamada = "Auditorias.resolver_fin_casa(partida.estado)"
+    dormir = "Jornada.dormir(jornada)"
+    for ruta in (DIA, SUENO):
+        contenido = ruta.read_text(encoding="utf-8")
+        assert llamada in contenido
+        assert contenido.index(llamada) < contenido.index(dormir)
+
+
+def test_gato_diario_usa_solo_estado_existente_y_no_recompensa():
+    contenido = texto()
+    bloque = contenido.split("static func resolver_fin_casa", 1)[1].split(
+        "static func validar", 1
+    )[0]
+    assert 'gato.get("dias_sin_comer", 0)' in bloque
+    assert '"gato_sin_comer_al_dormir"' in bloque
+    assert '"gato_ausente_al_dormir"' in bloque
+    for termino in ("Jornada.", "Sellos.", "Steam", "guardar(", "dinero +=", "acciones +="):
+        assert termino not in bloque
