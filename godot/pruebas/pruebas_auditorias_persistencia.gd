@@ -123,7 +123,9 @@ func _probar_predicado_sin_releer() -> void:
 
 	var repetida := Auditorias.resolver_apertura_documento(estado, true)
 	_comprobar(repetida.get("resultado", "") == "fallida", "releer falla la condición")
-	_comprobar(bool(repetida.get("cambio", false)), "la primera relectura declara mutación persistible")
+	_comprobar(
+		bool(repetida.get("cambio", false)), "la primera relectura declara mutación persistible"
+	)
 	_comprobar(
 		String(auditoria["fallidas"].get(Auditorias.SIN_RELEER, "")) == "documento_releido",
 		"la relectura conserva un motivo técnico estable",
