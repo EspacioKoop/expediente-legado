@@ -44,9 +44,25 @@ func _probar_selector_sin_efectos() -> void:
 		_comprobar(not check_releer.disabled, "sin releer se puede elegir durante el alta")
 		check_releer.set_pressed_no_signal(true)
 
+	var check_sueno := (
+		panel.get_node_or_null("Bloque_sueno_completo/Condicion_sueno_completo") as CheckBox
+	)
+	_comprobar(check_sueno != null, "el selector construye sueño completo")
+	if check_sueno != null:
+		_comprobar(not check_sueno.disabled, "sueño completo se puede elegir durante el alta")
+		check_sueno.set_pressed_no_signal(true)
+
 	var seleccion := panel.seleccion()
 	_comprobar(
-		seleccion == [Auditorias.ACCION_SOBRANTE, Auditorias.GATO_DIARIO, Auditorias.SIN_RELEER],
+		(
+			seleccion
+			== [
+				Auditorias.ACCION_SOBRANTE,
+				Auditorias.GATO_DIARIO,
+				Auditorias.SIN_RELEER,
+				Auditorias.SUENO_COMPLETO,
+			]
+		),
 		"la selección devuelve ids estables y ordenados",
 	)
 	_comprobar(
@@ -66,6 +82,10 @@ func _probar_selector_sin_efectos() -> void:
 	_comprobar(
 		Auditorias.estado(estado[Auditorias.CLAVE_ESTADO], Auditorias.SIN_RELEER) == "activa",
 		"el owner puede persistir sin releer",
+	)
+	_comprobar(
+		Auditorias.estado(estado[Auditorias.CLAVE_ESTADO], Auditorias.SUENO_COMPLETO) == "activa",
+		"el owner puede persistir sueño completo",
 	)
 	panel.free()
 
