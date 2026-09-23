@@ -14,6 +14,13 @@ const DURACION_DOCTRINA := 4.0
 const BONUS_TELEGRAFO_COMISION := 0.55
 
 
+static func limitar_a_arena(posicion: Vector3, radio: float) -> Vector3:
+	var plano := Vector2(posicion.x, posicion.z)
+	if plano.length() > radio:
+		plano = plano.normalized() * radio
+	return Vector3(plano.x, 0.0, plano.y)
+
+
 static func determinacion_rival(bono_documental: int) -> int:
 	return maxi(DETERMINACION_MINIMA_RIVAL, DETERMINACION_BASE - maxi(0, bono_documental))
 
