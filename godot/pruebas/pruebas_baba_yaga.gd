@@ -184,8 +184,10 @@ func _probar_controles_interactivos() -> void:
 	_comprobar(umbral != null, "el umbral interactuable existe en el mundo")
 	_comprobar(umbral.interactuar(actor), "el umbral se activa por interacción 3D")
 	_comprobar(
-		sueno.posiciones_actuales()[SuenoBabaYaga.OBJETO_ARBOL]
-		!= inicial[SuenoBabaYaga.OBJETO_ARBOL],
+		(
+			sueno.posiciones_actuales()[SuenoBabaYaga.OBJETO_ARBOL]
+			!= inicial[SuenoBabaYaga.OBJETO_ARBOL]
+		),
 		"usar el umbral mueve la arquitectura por su regla",
 	)
 	_comprobar(
