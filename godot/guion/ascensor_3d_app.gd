@@ -24,6 +24,7 @@ var _junta_puerta: MeshInstance3D
 var _salida_exterior: MeshInstance3D
 var _luces_panel: Array[MeshInstance3D] = []
 var _referentes_planta4: Array[Node3D] = []
+var _companero_encuentro: Node3D
 var _luz_techo: OmniLight3D
 var _luz_destino: OmniLight3D
 
@@ -107,6 +108,7 @@ func _montar_cabina() -> void:
 	)
 	_salida_exterior.visible = false
 	_montar_referentes_planta4()
+	_montar_companero_encuentro()
 
 	_luz_techo = OmniLight3D.new()
 	_luz_techo.name = "FluorescenteCabina"
@@ -128,6 +130,7 @@ func _montar_cabina() -> void:
 
 
 func _al_entrar_plano(_indice: int, plano: Dictionary) -> void:
+	_actualizar_encuentro(plano)
 	match String(plano.get("nombre", "")):
 		"salida-archivo":
 			_mostrar_planta4()
@@ -175,6 +178,32 @@ func _montar_referentes_planta4() -> void:
 			"computerScreen",
 			Color(0.52, 0.54, 0.50)
 		)
+	)
+
+
+func _montar_companero_encuentro() -> void:
+	# El cuerpo es el mismo que ya usa la plantilla de oficina. No tiene colisión,
+	# interacción ni estado propio: es presencia dentro de una presentación.
+	_companero_encuentro = Node3D.new()
+	_companero_encuentro.name = "EncuentroCunado"
+	_companero_encuentro.position = Vector3(-1.05, -1.42, 0.52)
+	_companero_encuentro.rotation.y = PI
+	_cabina.add_child(_companero_encuentro)
+	var color: Color = Companeros.CUNADO.get("color", Color(0.34, 0.33, 0.31))
+	if not Modelos.persona(
+		_companero_encuentro, Companeros.cuerpo_de(Companeros.CUNADO), color
+	):
+		_companero_encuentro.queue_free()
+		_companero_encuentro = null
+		return
+	_companero_encuentro.visible = false
+
+
+func _actualizar_encuentro(plano: Dictionary) -> void:
+	if not is_instance_valid(_companero_encuentro):
+		return
+	_companero_encuentro.visible = (
+		String(plano.get("encuentro_companero", "")) == "cunado"
 	)
 
 
