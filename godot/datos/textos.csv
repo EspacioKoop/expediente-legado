@@ -695,3 +695,7 @@ MARCADORES_MUNDO_ERROR_LIMITE_ZONA,Límite de marcas alcanzado en esta zona.
 MARCADORES_MUNDO_ERROR_ZONA_INVALIDA,No se puede marcar esta zona.
 MARCADORES_MUNDO_ERROR_TRANSFORMACION,La superficie apuntada no es válida.
 MARCADORES_MUNDO_ERROR_GENERICO,No se pudo colocar la marca.
+IDEOLOGIA_920_CAREO_EXP_COMUNISMO,"El argumento le resulta familiar: quién asume el coste y cómo se reparte entre quienes sostienen la situación."
+IDEOLOGIA_920_CAREO_EXP_SOCIALDEMOCRATA,"Reconoce el marco: negociar, revisar efectos y dejar garantías antes de consolidar el cambio."
+IDEOLOGIA_920_CAREO_EXP_CENTRISTA,"Reconoce el marco: procedimiento, posiciones enfrentadas y continuidad antes de cerrar una salida."
+IDEOLOGIA_920_CAREO_EXP_NEOLIBERAL,"Reconoce el marco: costes, incentivos y resultados medibles antes de sostener la medida."
