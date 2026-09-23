@@ -76,6 +76,9 @@ const CATALOGO := {
 	"error": "error_003.ogg",
 	"firmar": "confirmation_001.ogg",
 	"marcar": "switch_002.ogg",
+	# El mismo impacto blando ya auditado para objetos sirve como apoyo físico
+	# de la cama sin añadir un asset ni reutilizar el nombre semántico `coger`.
+	"cama": "impactSoft_medium_000.ogg",
 }
 
 ## Gestos físicos que se repiten mucho —abrir el mismo archivador diez veces al
