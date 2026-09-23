@@ -49,7 +49,10 @@ class InventarioMenuTest(unittest.TestCase):
         self.assertIn('name = "CombinacionEjecutar"', self.menu)
         self.assertIn('"palanca_kkryy"', self.catalogo_combinaciones)
         self.assertIn("RecompensaOnirica.ID", self.catalogo_combinaciones)
-        self.assertIn('palanca["id"]', self.catalogo_combinaciones)
+        self.assertIn(
+            'PropsUtilizablesCC0.objeto_inventario("palanca_kkryy")',
+            self.catalogo_combinaciones,
+        )
         self.assertNotIn("Partida.guardar", self.catalogo_combinaciones)
 
     def test_accion_inventario_es_semantica_y_remapeable(self):
