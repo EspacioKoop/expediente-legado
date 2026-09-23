@@ -36,8 +36,8 @@ class CalleFondosFotorealistas98Test(unittest.TestCase):
         for contrato in (
             "Sprite3D.new()",
             "SpriteBase3D.ALPHA_CUT_DISCARD",
-            "sprite.shaded = true",
-            "sprite.double_sided = false",
+            "sprite.shaded = false",
+            "sprite.double_sided = true",
             "sprite.fixed_size = false",
             "sprite.no_depth_test = false",
             "sprite.rotation_degrees.y",
