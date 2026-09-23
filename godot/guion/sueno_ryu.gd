@@ -10,6 +10,10 @@ const ID_MITO := "dragon_japones"
 const ESTADO_OBJETIVO := [true, false, true]
 const CANTIDAD_COMPUERTAS := 3
 const SEGMENTOS_DRAGON := 15
+# El ojo/luminaria alcanza y=7.4 en coordenadas locales (centro 6.0 + radio 1.4).
+# Con el ancla nocturna habitual en y=0.55, 0.30 deja su borde superior en 2.77 m,
+# dentro del techo de 2.8 m de Espacio3D en vez de recortarlo.
+const ESCALA_ENCUENTRO := 0.30
 
 const COLOR_AGUA_ACTIVA := Color(0.18, 0.72, 0.82, 0.82)
 const COLOR_METAL := Color(0.25, 0.29, 0.31)
