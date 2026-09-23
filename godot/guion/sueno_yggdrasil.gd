@@ -49,6 +49,7 @@ var _estado := {
 	NODO_RAMA: 0,
 }
 var _montado := false
+var reduccion_movimiento := false
 
 
 static func puede_entrar(estado: Dictionary) -> bool:
@@ -111,7 +112,7 @@ func ruta_retorno_disponible() -> bool:
 ## Ejecuta la acción propia de un nodo y modifica el nodo remoto conectado.
 ## Repetir acciones satura en 2: no hay combinaciones exhaustivas ni estados
 ## irreversibles; el retorno existe en todos los estados.
-func intervenir(origen: String, reduccion_movimiento: bool = false) -> Dictionary:
+func intervenir(origen: String, forzar_reduccion_movimiento: bool = false) -> Dictionary:
 	preparar()
 	if not CONEXIONES.has(origen) or not ACCIONES.has(origen):
 		return {"ok": false, "origen": origen, "retorno_disponible": ruta_retorno_disponible()}
@@ -121,7 +122,7 @@ func intervenir(origen: String, reduccion_movimiento: bool = false) -> Dictionar
 	_estado[destino] = clampi(int(_estado.get(destino, 0)) + int(regla["delta"]), 0, 2)
 	_aplicar_estado_visual()
 
-	var salida := plan_presentacion(reduccion_movimiento)
+	var salida := plan_presentacion(reduccion_movimiento or forzar_reduccion_movimiento)
 	(
 		salida
 		. merge(
@@ -167,6 +168,37 @@ func _crear_nodo(id: String, posicion: Vector3, color: Color, detalle: String) -
 	_crear_caja(
 		contenedor, "Indicador", Vector3(0.65, 0.18, 0.65), Vector3(0.0, 2.95, 0.0), COLOR_ACTIVO
 	)
+	_crear_hotspot_nodo(contenedor, id)
+
+
+func _crear_hotspot_nodo(padre: Node3D, id: String) -> void:
+	var hotspot := Interactuable3D.new()
+	hotspot.name = "Interactuar_%s" % id
+	hotspot.position = Vector3(0.0, 1.2, 0.0)
+	hotspot.verbo = Interactuable3D.Verbo.USAR
+	hotspot.nombre_objeto = _nombre_nodo(id)
+	hotspot.sonido = Interactuable3D.SIN_SONIDO
+	hotspot.collision_mask = 0
+	hotspot.activado.connect(_al_intervenir.bind(id))
+	padre.add_child(hotspot)
+
+	var colision := CollisionShape3D.new()
+	var forma := BoxShape3D.new()
+	forma.size = Vector3(2.35, 2.55, 2.35)
+	colision.shape = forma
+	hotspot.add_child(colision)
+
+
+func _nombre_nodo(id: String) -> String:
+	if id == NODO_RAIZ:
+		return "raíz de archivadores"
+	if id == NODO_RAMA:
+		return "rama pasarela"
+	return "tronco terminal"
+
+
+func _al_intervenir(_actor: Node, origen: String) -> void:
+	intervenir(origen, reduccion_movimiento)
 
 
 func _montar_conexiones() -> void:
