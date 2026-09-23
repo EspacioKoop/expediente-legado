@@ -18,6 +18,7 @@ static func mostrar(
 	caminante: Node3D,
 	companero: CompaneroInteractivo3D,
 	texto: String,
+	duracion: float = DURACION,
 ) -> PanelContainer:
 	var panel := PanelContainer.new()
 	panel.name = "DialogoDiegetico"
@@ -61,8 +62,95 @@ static func mostrar(
 	hud.activar(HUDLayer.DIALOGO)
 
 	Sonido.sonar_stream(hud, _tono())
-	hud.get_tree().create_timer(DURACION).timeout.connect(_retirar.bind(panel, hud))
+	if duracion > 0.0:
+		hud.get_tree().create_timer(duracion).timeout.connect(_retirar.bind(panel, hud))
 	return panel
+
+
+## Variante interactiva del mismo subtítulo. No crea otro HUD: parte del panel
+## diegético normal, suspende únicamente su retirada automática y añade botones
+## de rama dentro del mismo contenido.
+static func mostrar_eleccion(
+	hud: HUDLayer,
+	caminante: Node3D,
+	companero: CompaneroInteractivo3D,
+	texto: String,
+	opciones: Array,
+	al_elegir: Callable,
+) -> PanelContainer:
+	var panel := mostrar(hud, caminante, companero, texto, 0.0)
+	panel.offset_top = -260
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+
+	var contenido := panel.get_node_or_null("ContenidoDialogoDiegetico") as VBoxContainer
+	var etiqueta := panel.get_node_or_null(
+		"ContenidoDialogoDiegetico/TextoDialogoDiegetico"
+	) as Label
+	if contenido == null or etiqueta == null:
+		hud.get_tree().create_timer(DURACION).timeout.connect(_retirar.bind(panel, hud))
+		return panel
+
+	var lista := VBoxContainer.new()
+	lista.name = "OpcionesDialogoDiegetico"
+	lista.add_theme_constant_override("separation", 6)
+	contenido.add_child(lista)
+
+	var primer_boton: Button = null
+	for opcion_bruta in opciones:
+		if typeof(opcion_bruta) != TYPE_DICTIONARY:
+			continue
+		var opcion: Dictionary = opcion_bruta
+		var id_opcion := String(opcion.get("id", "")).strip_edges()
+		var texto_opcion := String(opcion.get("texto", "")).strip_edges()
+		if id_opcion.is_empty() or texto_opcion.is_empty():
+			continue
+		var boton := Button.new()
+		boton.text = texto_opcion
+		boton.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		boton.focus_mode = Control.FOCUS_ALL
+		boton.pressed.connect(
+			_resolver_eleccion.bind(panel, hud, etiqueta, lista, id_opcion, al_elegir)
+		)
+		lista.add_child(boton)
+		if primer_boton == null:
+			primer_boton = boton
+
+	if primer_boton == null:
+		hud.get_tree().create_timer(DURACION).timeout.connect(_retirar.bind(panel, hud))
+	else:
+		primer_boton.call_deferred("grab_focus")
+	return panel
+
+
+static func _resolver_eleccion(
+	panel: PanelContainer,
+	hud: HUDLayer,
+	etiqueta: Label,
+	lista: VBoxContainer,
+	id_opcion: String,
+	al_elegir: Callable,
+) -> void:
+	if not is_instance_valid(panel) or not is_instance_valid(etiqueta):
+		return
+	if is_instance_valid(lista):
+		lista.visible = false
+		for hijo in lista.get_children():
+			if hijo is Button:
+				hijo.disabled = true
+
+	var respuesta := ""
+	if al_elegir.is_valid():
+		var valor = al_elegir.call(id_opcion)
+		if typeof(valor) == TYPE_STRING:
+			respuesta = String(valor)
+	if not respuesta.is_empty():
+		etiqueta.text = respuesta
+
+	if is_instance_valid(lista):
+		lista.queue_free()
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if is_instance_valid(hud):
+		hud.get_tree().create_timer(DURACION).timeout.connect(_retirar.bind(panel, hud))
 
 
 static func _marca_direccion(caminante: Node3D, posicion: Vector3) -> String:
