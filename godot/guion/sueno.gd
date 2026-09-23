@@ -292,6 +292,10 @@ static func espacio(id: String, quedan: int, contenido: Dictionary = {}) -> Dict
 	if es_poligonal:
 		resultado["contorno"] = familia["contorno"]
 		resultado["altura_contorno"] = float(familia.get("altura", 3.2))
+		# Las familias pueden declarar planos internos además del perímetro. Se
+		# propagan desde el contrato genérico para que cualquier forma que adopte
+		# FRAGMENTADA obtenga la misma geometría visible y física, sin adaptadores.
+		resultado["tabiques_poligonales"] = familia.get("tabiques", []).duplicate(true)
 
 	# #284: la forma decide si tiene una identidad onírica fuerte. `Sueno`
 	# termina primero el contrato espacial genérico y solo después delega la
