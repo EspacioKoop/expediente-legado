@@ -11,6 +11,7 @@ func _initialize() -> void:
 	_limpiar()
 	_probar_guardado_y_recarga()
 	_probar_predicado_accion_sobrante()
+	_probar_cierre_historial()
 	_probar_reasignacion()
 	_probar_migracion_partida_antigua()
 	_probar_validacion()
@@ -60,6 +61,35 @@ func _probar_predicado_accion_sobrante() -> void:
 		terminal.get("resultado", "") == "fallida",
 		"un día posterior no revive una condición ya fallida",
 	)
+
+
+func _probar_cierre_historial() -> void:
+	var estado := Partida.nueva()
+	estado[Auditorias.CLAVE_ESTADO] = Auditorias.nueva([Auditorias.ACCION_SOBRANTE])
+	estado["jornada"]["acciones"] = 1
+	Auditorias.resolver_fin_archivo(estado)
+
+	var registro := Auditorias.cerrar_vuelta(estado, 1, "reasignacion")
+	_comprobar(
+		registro.get("completadas", []).has(Auditorias.ACCION_SOBRANTE),
+		"cerrar la vida completa el reto que seguia activo",
+	)
+	_comprobar(
+		Auditorias.estado(estado[Auditorias.CLAVE_ESTADO], Auditorias.ACCION_SOBRANTE)
+		== "completada",
+		"el estado vivo queda completado antes del reset",
+	)
+	var repetido := Auditorias.cerrar_vuelta(estado, 1, "reasignacion")
+	_comprobar(repetido == registro, "cerrar dos veces la misma vuelta es idempotente")
+	_comprobar(Auditorias.historial(estado).size() == 1, "el historial no duplica la vuelta")
+
+	Prometeo.reiniciar_vuelta(estado, Partida.VIDA_MAXIMA)
+	_comprobar(
+		Auditorias.estado(estado[Auditorias.CLAVE_ESTADO], Auditorias.ACCION_SOBRANTE)
+		== "inactiva",
+		"el reset limpia la seleccion activa",
+	)
+	_comprobar(Auditorias.historial(estado).size() == 1, "el reset conserva el historial sellado")
 
 
 func _probar_reasignacion() -> void:
