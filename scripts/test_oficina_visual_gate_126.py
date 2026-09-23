@@ -28,6 +28,10 @@ class OficinaVisualGate126Test(unittest.TestCase):
         self.assertIn("OficinaAssetsCc0.montar(_mundo)", self.captura)
         self.assertIn("PostersOficina.montar(_mundo)", self.captura)
         self.assertIn("CuadrosOficina.montar(_mundo)", self.captura)
+        self.assertIn('OS.get_environment("GITHUB_SHA")', self.captura)
+        self.assertIn('has_meta("oficina_styloo_cc0")', self.captura)
+        self.assertIn("RenderingServer.get_current_rendering_method()", self.captura)
+        self.assertIn("build cuyo SHA coincida", self.captura)
         self.assertNotIn("CanvasLayer.new()", self.captura)
 
     def test_incluye_companeros_sin_rotulos(self):
