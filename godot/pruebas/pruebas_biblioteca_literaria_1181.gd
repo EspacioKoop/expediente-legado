@@ -1,13 +1,13 @@
-extends SceneTree
+extends Node
 
 var pasadas := 0
 var fallos := 0
 
 
-func _initialize() -> void:
+func _ready() -> void:
 	_probar_lectura_fisica_y_ritual()
 	print("%d pasadas, %d fallos" % [pasadas, fallos])
-	quit(1 if fallos > 0 else 0)
+	get_tree().quit(1 if fallos > 0 else 0)
 
 
 func _probar_lectura_fisica_y_ritual() -> void:
