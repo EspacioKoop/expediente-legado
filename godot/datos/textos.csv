@@ -624,3 +624,13 @@ ULTIMO_RECURSO_TAROT_TITULO,Tarot — último recurso
 ULTIMO_RECURSO_TITULO,CESE PENDIENTE
 ULTIMO_RECURSO_VER_TAROT,Ver mi tarot
 ULTIMO_RECURSO_VOLVER,Volver al aviso
+AUDITORIAS_ACCION_SOBRANTE,"Terminar la jornada con una acción sin gastar"
+AUDITORIAS_ACCION_SOBRANTE_DESC,"Al fichar la salida debe quedar al menos una acción disponible. Fallar el reto no bloquea la partida."
+AUDITORIAS_APP_TITULO,"Condiciones de auditoría"
+AUDITORIAS_AYUDA_CONSULTA,"Estado de la condición opcional aceptada para esta vida laboral. Esta pantalla no modifica el reto."
+AUDITORIAS_AYUDA_SELECCION,"Opcional. La selección se fija al guardar esta ficha y no puede cambiarse durante la vida laboral."
+AUDITORIAS_CABECERA,"Condición extraordinaria"
+AUDITORIAS_ESTADO_ACTIVA,"Estado: activa"
+AUDITORIAS_ESTADO_COMPLETADA,"Estado: completada"
+AUDITORIAS_ESTADO_FALLIDA,"Estado: fallida"
+AUDITORIAS_ESTADO_INACTIVA,"Estado: no seleccionada"
