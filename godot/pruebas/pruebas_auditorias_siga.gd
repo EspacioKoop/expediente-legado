@@ -22,9 +22,9 @@ func _probar_selector_sin_efectos() -> void:
 	panel.configurar_estado(estado, true)
 	root.add_child(panel)
 
-	var check := panel.get_node_or_null(
-		"Bloque_accion_sobrante/Condicion_accion_sobrante"
-	) as CheckBox
+	var check := (
+		panel.get_node_or_null("Bloque_accion_sobrante/Condicion_accion_sobrante") as CheckBox
+	)
 	_comprobar(check != null, "el selector construye la condición disponible")
 	if check != null:
 		_comprobar(not check.disabled, "la condición se puede elegir durante el alta")
@@ -42,8 +42,7 @@ func _probar_selector_sin_efectos() -> void:
 
 	estado[Auditorias.CLAVE_ESTADO] = Auditorias.nueva(seleccion)
 	_comprobar(
-		Auditorias.estado(estado[Auditorias.CLAVE_ESTADO], Auditorias.ACCION_SOBRANTE)
-		== "activa",
+		Auditorias.estado(estado[Auditorias.CLAVE_ESTADO], Auditorias.ACCION_SOBRANTE) == "activa",
 		"el owner puede persistir la selección al aceptar el alta",
 	)
 	panel.free()
@@ -56,20 +55,16 @@ func _probar_consulta_de_estado() -> void:
 	panel.configurar_estado(estado, false)
 	root.add_child(panel)
 
-	var check := panel.get_node_or_null(
-		"Bloque_accion_sobrante/Condicion_accion_sobrante"
-	) as CheckBox
-	var rotulo := panel.get_node_or_null(
-		"Bloque_accion_sobrante/Estado_accion_sobrante"
-	) as Label
+	var check := (
+		panel.get_node_or_null("Bloque_accion_sobrante/Condicion_accion_sobrante") as CheckBox
+	)
+	var rotulo := panel.get_node_or_null("Bloque_accion_sobrante/Estado_accion_sobrante") as Label
 	_comprobar(check != null and check.disabled, "SIGA presenta la condición en solo lectura")
 	_comprobar(check != null and check.button_pressed, "SIGA refleja la condición activa")
 	_comprobar(rotulo != null and not rotulo.text.is_empty(), "SIGA muestra un estado textual")
 
 	var texto_activo := rotulo.text if rotulo != null else ""
-	Auditorias.fallar(
-		estado[Auditorias.CLAVE_ESTADO], Auditorias.ACCION_SOBRANTE, "prueba"
-	)
+	Auditorias.fallar(estado[Auditorias.CLAVE_ESTADO], Auditorias.ACCION_SOBRANTE, "prueba")
 	panel.configurar_estado(estado, false)
 	_comprobar(
 		rotulo != null and rotulo.text != texto_activo,
