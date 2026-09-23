@@ -26,7 +26,7 @@ const PAQUETES := [
 		"licencia": "shareware",
 		"tamano_kb": 512,
 		"origen_superficie": "bbs",
-		"origen": "BBS Nodo 7 · Área de ficheros",
+		"origen": "Byte Local BBS · Área de ficheros",
 		"descripcion":
 		"Empaqueta carpetas en contenedores .AZO. La compresión es enteramente simulada.",
 		"interaccion": "compresor",
