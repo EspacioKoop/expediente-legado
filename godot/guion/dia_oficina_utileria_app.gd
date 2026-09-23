@@ -20,6 +20,7 @@ func _process(_delta: float) -> void:
 	if String(dia.jornada.get("fase", "")) == "archivo":
 		OficinaUtileria.montar(mundo, Jornada.PRECIO_CAFE)
 		OficinaAssetsCc0.montar(mundo)
+		OficinaFotorealista98.montar(mundo)
 		PostersOficina.montar(mundo)
 		CuadrosOficina.montar(mundo)
 		_conectar_cafe(dia, mundo)
