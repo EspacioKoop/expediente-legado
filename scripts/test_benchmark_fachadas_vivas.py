@@ -163,7 +163,19 @@ def validate_ambiental_artifacts(directory: Path) -> tuple[dict[str, Any], str]:
     full = load_report(directory / "ambiental_full.json")
     _validate_screenshots(directory, ("ambiental_baseline", "ambiental_full"))
     summary = compare_reports(baseline, full)
+    baseline_components = set(summary.get("baseline_components", []))
+    full_components = set(summary.get("full_components", []))
+    if "animacion_ambiental" in baseline_components:
+        raise ValueError("ambiental_baseline no debe activar animación ambiental")
+    if full_components - {"animacion_ambiental"} != baseline_components:
+        raise ValueError("la pareja ambiental no comparte la misma geometría base")
+    if "animacion_ambiental" not in full_components:
+        raise ValueError("ambiental_full no activó la capa ambiental")
+
     counts = summary.get("feature_counts", {})
+    for key in ("animated_windows", "wind_materials", "active_pieces"):
+        if int(counts.get(key, 0)) <= 0:
+            raise ValueError(f"benchmark ambiental vacío: {key}=0")
     feature_text = (
         f"Feature ambiental: {int(counts.get('animated_windows', 0))} ventanas animadas / "
         f"{int(counts.get('wind_materials', 0))} materiales de follaje / "
@@ -201,7 +213,15 @@ class BenchmarkFachadasComparisonTest(unittest.TestCase):
                 "target": [-5.25, 5.8, -12.2],
                 "fov": 68.0,
             },
-            "components": ["trayecto", "calle_identidad"],
+            "components": (
+                ["trayecto", "calle_identidad", "fachadas_vivas", "arboles_cc0", "animacion_ambiental"]
+                if mode == "ambiental_full"
+                else (
+                    ["trayecto", "calle_identidad", "fachadas_vivas", "arboles_cc0"]
+                    if mode == "ambiental_baseline"
+                    else ["trayecto", "calle_identidad"]
+                )
+            ),
             "feature_counts": {
                 "grupos": 61 if full_like else 0,
                 "render_batches": 17 if full_like else 0,
