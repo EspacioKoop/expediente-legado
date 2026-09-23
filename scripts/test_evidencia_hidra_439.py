@@ -34,6 +34,14 @@ class EvidenciaHidra439Test(unittest.TestCase):
         for termino in ("CanvasLayer", "Control.new", "Label.new"):
             self.assertNotIn(termino, self.captura)
 
+    def test_configura_despues_de_ready_y_orienta_camara_fuera_del_arbol(self):
+        inicio = self.captura.index("mundo.add_child(encuentro)")
+        fin = self.captura.index("var semillas", inicio)
+        montaje = self.captura[inicio:fin]
+        self.assertIn("await process_frame", montaje)
+        self.assertIn("look_at_from_position(", self.captura)
+        self.assertNotIn("camara.look_at(", self.captura)
+
     def test_manifiesto_registra_la_causalidad_sin_puntuar_estetica(self):
         for campo in (
             '"cabezas"',
