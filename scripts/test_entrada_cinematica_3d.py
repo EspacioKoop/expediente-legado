@@ -41,13 +41,13 @@ class EntradaCinematica3DTest(unittest.TestCase):
 
     def test_acentos_de_plano_usan_el_ciclo_de_vida_comun(self) -> None:
         for acento in (
-            '"sonido": "puerta_abre"',
             '"sonido": "pulsar"',
             '"sonido": "marcar"',
         ):
             self.assertIn(acento, self.entrada)
         self.assertIn("func _sonar_plano(plano: Dictionary) -> void:", self.reproductor)
         self.assertIn("Sonido.sonar(self, nombre, tono)", self.reproductor)
+        self.assertNotIn('"sonido": "puerta_abre"', self.entrada)
         self.assertNotIn("AudioStreamPlayer.new()", self.reproductor)
 
     def test_puesto_encuadra_el_terminal_real(self) -> None:
