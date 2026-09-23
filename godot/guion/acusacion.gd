@@ -254,9 +254,7 @@ static func aceptar_cese(estado: Dictionary, jornada: Dictionary) -> Dictionary:
 
 	Prometeo.desbloquear_carta_en_estado(estado, "la-muerte")
 	EvaluacionDesempeno.sellar(estado, "reasignacion", jornada)
-	var auditoria := Auditorias.cerrar_vuelta(
-		estado, int(jornada.get("vuelta", 1)), "reasignacion"
-	)
+	var auditoria := Auditorias.cerrar_vuelta(estado, int(jornada.get("vuelta", 1)), "reasignacion")
 	estado[CLAVE_DESPIDO_PENDIENTE] = false
 	Prometeo.reiniciar_vuelta(estado, ajustes(estado)["vidas"])
 	Jornada.reiniciar_vuelta(jornada)
