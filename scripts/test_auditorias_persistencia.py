@@ -60,7 +60,7 @@ class AuditoriasPersistenciaTests(unittest.TestCase):
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
         resumen = RESUMEN.search(resultado.stdout)
         self.assertIsNotNone(resumen, resultado.stdout)
-        self.assertGreaterEqual(int(resumen.group(1)), 43, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 51, resultado.stdout)
 
 
 if __name__ == "__main__":
