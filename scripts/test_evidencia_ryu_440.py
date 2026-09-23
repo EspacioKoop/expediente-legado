@@ -27,7 +27,10 @@ class EvidenciaRyu440Test(unittest.TestCase):
     def test_reproduce_el_contexto_runtime_sin_hud(self) -> None:
         self.assertIn('const FORMA := "peine"', self.capturador)
         self.assertIn("Espacio3D.construir(mundo, espacio)", self.capturador)
-        self.assertIn("const ESCALA_RYU := 0.48", self.capturador)
+        self.assertIn(
+            "const ESCALA_RYU := SuenoRyu.ESCALA_ENCUENTRO",
+            self.capturador,
+        )
         self.assertIn("ryu.scale = Vector3.ONE * ESCALA_RYU", self.capturador)
         self.assertIn('camara.name = "CamaraJugadorSinHUD"', self.capturador)
         self.assertIn('"hud": false', self.capturador)
