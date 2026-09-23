@@ -15,6 +15,7 @@ func _ejecutar() -> void:
 	_probar_eventos()
 	_probar_saturacion()
 	_probar_normalizacion()
+	_probar_entorno()
 	_probar_persistencia_json()
 	print("issue_952: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
@@ -66,6 +67,34 @@ func _probar_normalizacion() -> void:
 	_comprobar_cerca(Estres.valor(jornada), 100.0, "un guardado excesivo se acota")
 	jornada[Estres.CAMPO_JORNADA] = []
 	_comprobar_cerca(Estres.valor(jornada), 0.0, "un estado no diccionario se repara")
+
+
+func _probar_entorno() -> void:
+	_comprobar(
+		EstresAmbiental.evento("trayecto", 0.35, 20.0),
+		"oscuridad",
+		"la calle oscura produce exposición a oscuridad",
+	)
+	_comprobar(
+		EstresAmbiental.evento("casa", 0.45, 20.0),
+		"zona_segura",
+		"la casa suficientemente iluminada permite recuperación",
+	)
+	_comprobar(
+		EstresAmbiental.evento("archivo", 0.55, 14.0),
+		"zona_segura",
+		"la oficina diurna iluminada es zona segura",
+	)
+	_comprobar(
+		EstresAmbiental.evento("archivo", 0.55, 20.0),
+		"",
+		"la oficina nocturna no se trata como refugio automático",
+	)
+	_comprobar(
+		EstresAmbiental.evento("sueño", 0.20, 2.0),
+		"",
+		"el sueño no retroalimenta estrés por su propia iluminación",
+	)
 
 
 func _probar_persistencia_json() -> void:
