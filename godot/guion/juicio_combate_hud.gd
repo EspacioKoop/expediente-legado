@@ -104,3 +104,90 @@ static func montar(
 		"boton_finisher": boton_finisher,
 		"etiqueta_jungiana": etiqueta_jungiana,
 	}
+
+
+static func actualizar_determinacion(
+	barra_jugador: ProgressBar,
+	barra_rival: ProgressBar,
+	etiqueta_ritual: Label,
+	determinacion_jugador: int,
+	determinacion_rival: int,
+	texto_ritual: String,
+) -> bool:
+	if barra_jugador == null or barra_rival == null:
+		return false
+	barra_jugador.value = determinacion_jugador
+	barra_rival.value = determinacion_rival
+	if etiqueta_ritual != null:
+		etiqueta_ritual.text = texto_ritual
+	return true
+
+
+static func texto_ritual(
+	ritual: Dictionary,
+	contraataque: int,
+	nombre_doctrina: String,
+	compromiso_activo: bool,
+	texto_compromiso: String,
+) -> String:
+	var texto := ""
+	if not ritual.is_empty():
+		texto = "RITUAL · %s" % String(ritual.get("nombre", ""))
+	if contraataque > 0:
+		texto += (" · " if not texto.is_empty() else "") + "CONTRA +%d" % contraataque
+	if not nombre_doctrina.is_empty():
+		texto += (" · " if not texto.is_empty() else "") + nombre_doctrina
+	if compromiso_activo:
+		texto += (" · " if not texto.is_empty() else "") + texto_compromiso
+	return texto
+
+
+static func pintar_doctrinas(
+	contenedor: HBoxContainer,
+	cargas: Dictionary,
+	bloqueadas: bool,
+	ejes,
+	habilidades: Dictionary,
+	traducir: Callable,
+	activar: Callable,
+) -> void:
+	if contenedor == null:
+		return
+	for hijo in contenedor.get_children():
+		contenedor.remove_child(hijo)
+		hijo.queue_free()
+
+	for eje in ejes:
+		var cantidad := int(cargas.get(eje, 0))
+		if cantidad <= 0 or not habilidades.has(eje):
+			continue
+		var habilidad: Dictionary = habilidades[eje]
+		var boton := Button.new()
+		var texto_boton := "%s ×%d" % [traducir.call(String(habilidad["nombre"])), cantidad]
+		boton.text = texto_boton
+		boton.tooltip_text = String(traducir.call(String(habilidad["efecto"])))
+		boton.disabled = bloqueadas
+		boton.pressed.connect(activar.bind(eje))
+		contenedor.add_child(boton)
+	contenedor.visible = contenedor.get_child_count() > 0
+
+
+static func actualizar_jungiano(
+	barra_momentum: ProgressBar,
+	boton_finisher: Button,
+	estado: Dictionary,
+	acabado: bool,
+	texto_finisher: String,
+	texto_super_finisher: String,
+) -> void:
+	if barra_momentum != null:
+		barra_momentum.max_value = float(estado["momentum_max"])
+		barra_momentum.value = float(estado["momentum_actual"])
+	if boton_finisher == null:
+		return
+	boton_finisher.disabled = not bool(estado["disponible"]) or acabado
+	boton_finisher.text = (
+		texto_super_finisher
+		if bool(estado["disponible"]) and bool(estado["es_super"])
+		else texto_finisher
+	)
