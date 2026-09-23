@@ -103,9 +103,7 @@ func _refrescar() -> void:
 	if _ayuda == null:
 		return
 
-	_ayuda.text = tr(
-		"AUDITORIAS_AYUDA_SELECCION" if _editable else "AUDITORIAS_AYUDA_CONSULTA"
-	)
+	_ayuda.text = tr("AUDITORIAS_AYUDA_SELECCION" if _editable else "AUDITORIAS_AYUDA_CONSULTA")
 	var auditoria := _auditoria_actual()
 	for definicion in CONDICIONES:
 		var id := String(definicion["id"])
