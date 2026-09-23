@@ -39,7 +39,13 @@ class SelectorCartuchos3DTest(unittest.TestCase):
             self.assertIn(termino, self.selector)
 
     def test_reutiliza_catalogo_y_arte_local_de_cartuchos(self):
-        self.assertIn("RomsPropias.en_consola(compradas)", self.selector)
+        self.assertIn(
+            "RomsPropias.en_consola(compradas, desbloqueadas)",
+            self.selector,
+        )
+        self.assertIn('app.get("roms_desbloqueadas")', self.selector)
+        self.assertIn("rom_desbloqueada", self.selector)
+        self.assertEqual(self.textos["rom_desbloqueada"], "%s (desbloqueada)")
         self.assertIn("CatalogoRomsUsuario.listar()", self.selector)
         self.assertIn(
             'RUTA_ETIQUETAS := "res://arte/consola98/cartuchos/"',
