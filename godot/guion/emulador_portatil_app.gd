@@ -74,8 +74,9 @@ const BTN_LEFT := 0x20
 const BTN_UP := 0x40
 const BTN_DOWN := 0x80
 
-## Qué ROMs propias hay en el selector: incluidas + compradas (RomsPropias).
+## Qué ROMs propias hay en el selector: incluidas + compradas + desbloqueadas.
 var roms_compradas: Array = []
+var roms_desbloqueadas: Array = []
 var _textos: Dictionary = {}
 var _emulador: Object = null
 var _vista: TextureRect
@@ -448,9 +449,12 @@ func _refrescar_roms() -> void:
 		hijo.queue_free()
 
 	var entradas: Array[Dictionary] = []
-	var propias := RomsPropias.en_consola(roms_compradas)
+	var propias := RomsPropias.en_consola(roms_compradas, roms_desbloqueadas)
 	for rom in propias:
-		var etiqueta := "rom_propia" if bool(rom.get("incluida", false)) else "rom_comprada"
+		var id_rom := String(rom.get("id", ""))
+		var etiqueta := "rom_propia"
+		if not bool(rom.get("incluida", false)):
+			etiqueta = "rom_comprada" if roms_compradas.has(id_rom) else "rom_desbloqueada"
 		entradas.append({"nombre": _formatear(etiqueta, [rom["titulo"]]), "ruta": rom["rom"]})
 	if propias.is_empty() and _emulador != null:
 		_estado.text = _texto("rom_propia_ausente")
