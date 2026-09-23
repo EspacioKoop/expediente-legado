@@ -46,9 +46,26 @@ func _initialize() -> void:
 		)
 		_comprobar(int(estado.get("regeneraciones", 0)) == 1, "regeneración arquitectónica")
 		_comprobar(estado.get("nodo_legible", false) == true, "raíz deducible tras insistir")
+		if hidra != null:
+			var conexiones_visuales := hidra.get_node_or_null("ConexionesRaiz")
+			_comprobar(
+				(
+					conexiones_visuales != null
+					and conexiones_visuales.get_child_count() == int(estado.get("cabezas", 0))
+				),
+				"cada cabeza mantiene conexión visual con la raíz",
+			)
 		_comprobar(nodo.habilitado, "nodo común habilitado al ser legible")
 		_comprobar(nodo.interactuar(actor), "intervención explícita sobre el nodo")
 		_comprobar(encuentro.resuelta(), "Hidra resuelta por causa común")
+		if hidra != null:
+			var semilla_final := hidra.get_node_or_null("ResolucionHidra/SemillaHydraLoopFinal")
+			var conexiones_finales := hidra.get_node_or_null("ConexionesRaiz")
+			_comprobar(semilla_final != null, "la Hidra colapsa al cartucho que sembró el sueño")
+			_comprobar(
+				conexiones_finales != null and conexiones_finales.get_child_count() == 0,
+				"las conexiones desaparecen al resolver la causa",
+			)
 		_comprobar(not sintoma.interactuar(actor), "síntomas bloqueados tras resolver")
 		_comprobar(not conexiones.interactuar(actor), "observación bloqueada tras resolver")
 

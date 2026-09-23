@@ -21,6 +21,7 @@ const CORTES_POR_REGENERACION := 2
 const MAX_REGENERACIONES := 2
 const PISTA_NODO_LEGIBLE := 2
 const ANCHO_CORREDOR_SEGURO := 3.0
+const POSICION_RAIZ := Vector3(0.0, 0.8, -2.0)
 
 ## Anclas visuales fijas: la seed solo rota el punto de inicio. Así la misma
 ## partida produce la misma proliferación incluso después de guardar/cargar.
@@ -48,6 +49,8 @@ var _habilitada := false
 var _reduccion_movimiento := false
 var _cabezas_3d: Node3D
 var _arquitectura_3d: Node3D
+var _conexiones_3d: Node3D
+var _resolucion_3d: Node3D
 var _raiz_visual: MeshInstance3D
 
 
@@ -215,6 +218,14 @@ func _asegurar_estructura() -> void:
 		_arquitectura_3d = Node3D.new()
 		_arquitectura_3d.name = "RegeneracionArquitectonica"
 		add_child(_arquitectura_3d)
+	if _conexiones_3d == null:
+		_conexiones_3d = Node3D.new()
+		_conexiones_3d.name = "ConexionesRaiz"
+		add_child(_conexiones_3d)
+	if _resolucion_3d == null:
+		_resolucion_3d = Node3D.new()
+		_resolucion_3d.name = "ResolucionHidra"
+		add_child(_resolucion_3d)
 	if _raiz_visual == null:
 		_raiz_visual = MeshInstance3D.new()
 		_raiz_visual.name = "NodoComun"
@@ -222,7 +233,7 @@ func _asegurar_estructura() -> void:
 		esfera.radius = 0.75
 		esfera.height = 1.5
 		_raiz_visual.mesh = esfera
-		_raiz_visual.position = Vector3(0.0, 0.8, -2.0)
+		_raiz_visual.position = POSICION_RAIZ
 		add_child(_raiz_visual)
 
 
@@ -230,18 +241,23 @@ func _sincronizar_visuales() -> void:
 	_asegurar_estructura()
 	_vaciar(_cabezas_3d)
 	_vaciar(_arquitectura_3d)
+	_vaciar(_conexiones_3d)
+	_vaciar(_resolucion_3d)
 
 	var resuelta: bool = _estado.get("resuelta", false) == true
-	_raiz_visual.visible = _habilitada
-	_raiz_visual.scale = Vector3.ONE * (0.35 if resuelta else 1.0)
-	_actualizar_material_raiz(resuelta)
+	_raiz_visual.visible = _habilitada and not resuelta
+	_raiz_visual.scale = Vector3.ONE
+	_actualizar_material_raiz(false)
 	if resuelta:
+		_crear_semilla_final()
 		return
 
 	var cantidad := mini(MAX_CABEZAS, int(_estado.get("cabezas", CABEZAS_INICIALES)))
 	var raiz_seed := int(_estado.get("raiz_seed", 0))
 	for indice in cantidad:
-		_crear_cabeza(indice, posicion_cabeza(indice, raiz_seed))
+		var ancla := posicion_cabeza(indice, raiz_seed)
+		_crear_cabeza(indice, ancla)
+		_crear_conexion(indice, ancla)
 
 	var regeneraciones := mini(MAX_REGENERACIONES, int(_estado.get("regeneraciones", 0)))
 	for indice in regeneraciones:
@@ -276,6 +292,60 @@ func _crear_cabeza(indice: int, ancla: Vector3) -> void:
 	material.roughness = 0.82
 	cuello.material_override = material
 	cabeza.material_override = material
+
+
+## Las conexiones hacen visible que las cabezas comparten una misma causa. La
+## geometría es puramente visual y cambia de lectura cuando el nodo ya es legible.
+func _crear_conexion(indice: int, ancla: Vector3) -> void:
+	var inicio := POSICION_RAIZ
+	var fin := ancla + Vector3(0.0, 0.8, 0.0)
+	var distancia := inicio.distance_to(fin)
+	if distancia <= 0.001:
+		return
+
+	var cable := MeshInstance3D.new()
+	cable.name = "Conexion_%02d" % indice
+	var caja := BoxMesh.new()
+	caja.size = Vector3(0.08, 0.08, distancia)
+	cable.mesh = caja
+	cable.position = inicio.lerp(fin, 0.5)
+	_conexiones_3d.add_child(cable)
+	cable.look_at(fin, Vector3.UP)
+
+	var material := StandardMaterial3D.new()
+	var legible := int(_estado.get("pista_nivel", 0)) >= PISTA_NODO_LEGIBLE
+	material.albedo_color = Color(0.68, 0.52, 0.18) if legible else Color(0.24, 0.17, 0.13)
+	material.roughness = 0.86
+	cable.material_override = material
+
+
+## Resolver la causa colapsa toda la proliferación en el objeto doméstico que
+## sembró el sueño, en vez de dejar una esfera abstracta como estado final.
+func _crear_semilla_final() -> void:
+	var cartucho := Node3D.new()
+	cartucho.name = "SemillaHydraLoopFinal"
+	cartucho.position = POSICION_RAIZ + Vector3(0.0, -0.58, 0.0)
+	_resolucion_3d.add_child(cartucho)
+
+	var carcasa := MeshInstance3D.new()
+	var caja := BoxMesh.new()
+	caja.size = Vector3(0.62, 0.12, 0.4)
+	carcasa.mesh = caja
+	cartucho.add_child(carcasa)
+
+	var etiqueta := MeshInstance3D.new()
+	etiqueta.name = "EtiquetaHydraLoopFinal"
+	var plano := QuadMesh.new()
+	plano.size = Vector2(0.42, 0.24)
+	etiqueta.mesh = plano
+	etiqueta.position = Vector3(0.0, 0.065, 0.0)
+	etiqueta.rotation_degrees = Vector3(-90.0, 0.0, 0.0)
+	cartucho.add_child(etiqueta)
+
+	var material := StandardMaterial3D.new()
+	material.albedo_color = Color(0.18, 0.58, 0.28)
+	material.roughness = 0.72
+	etiqueta.material_override = material
 
 
 ## Cada regeneración añade tres planos/volúmenes visuales que sugieren una sala.
