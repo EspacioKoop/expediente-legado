@@ -106,12 +106,13 @@ func _espacio_de(fase: String) -> Dictionary:
 	return espacio
 
 
-## #966 consume las dos fuentes ya canónicas y nada más: Jornada es dueña de
-## la hora (#963) y Meticulosidad de la atención documental diaria (#961).
-## Normalizar aquí mantiene Ambiente puro y evita una segunda puntuación.
+## #966 consume únicamente fuentes canónicas: Jornada es dueña de la hora
+## (#963), Estres del estado emocional (#952) y Meticulosidad de la atención
+## documental diaria (#961). Normalizar aquí evita puntuaciones paralelas.
 func _contexto_ambiente() -> Dictionary:
 	return {
 		"hora": Jornada.hora_decimal(jornada),
+		"estres": Estres.nivel(jornada),
 		"meticulosidad": float(Meticulosidad.puntos(jornada)) / float(Meticulosidad.PUNTOS_MAX),
 	}
 
