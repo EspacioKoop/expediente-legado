@@ -59,20 +59,23 @@ func evento_handshake() -> Dictionary:
 		return {}
 	var id_rom := String(_contrato.get("id_rom", ""))
 	var obra_id := String(_contrato.get("obra_id", ""))
-	return LiteraturaEventos.crear_evento(
-		"insight:rom:%s:objetivo_completado" % id_rom,
-		LiteraturaEventos.CANAL_INSIGHT,
-		obra_id,
-		"rom:%s" % id_rom,
-		String(_contrato.get("contexto", "")),
-		int(_jornada.get("dia", 0)),
-		_contrato.get("etiquetas", []),
-		{
-			"rom_id": id_rom,
-			"procedencia": "rom:handshake:c100",
-			"adaptacion_original": true,
-			"vuelta": int(_jornada.get("vuelta", 0)),
-		},
+	return (
+		LiteraturaEventos
+		. crear_evento(
+			"insight:rom:%s:objetivo_completado" % id_rom,
+			LiteraturaEventos.CANAL_INSIGHT,
+			obra_id,
+			"rom:%s" % id_rom,
+			String(_contrato.get("contexto", "")),
+			int(_jornada.get("dia", 0)),
+			_contrato.get("etiquetas", []),
+			{
+				"rom_id": id_rom,
+				"procedencia": "rom:handshake:c100",
+				"adaptacion_original": true,
+				"vuelta": int(_jornada.get("vuelta", 0)),
+			},
+		)
 	)
 
 
