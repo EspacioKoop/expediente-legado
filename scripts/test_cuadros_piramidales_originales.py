@@ -42,7 +42,7 @@ class CuadrosPiramidalesOriginalesTest(unittest.TestCase):
         for item in especificaciones:
             self.assertEqual("CC0-1.0", item["licencia"])
             self.assertEqual("Expediente Legado", item["autor"])
-            self.assertEqual("scripts/generar_cuadros_piramidales.py", item["fuente"])
+            self.assertEqual("docs/assets/cuadros-piramidales-originales.md", item["fuente"])
             self.assertRegex(item["sha256"], r"^[0-9a-f]{64}$")
 
     def test_render_es_reproducible_y_coincide_con_hash_catalogado(self) -> None:
