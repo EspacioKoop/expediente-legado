@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -13,6 +15,8 @@ HORROR = GODOT / "guion" / "horror_texturas.gd"
 TEXTURAS = GODOT / "guion" / "textura_procedural.gd"
 DIA_SUENO = GODOT / "guion" / "dia_sueno_app.gd"
 SUENO = GODOT / "guion" / "sueno.gd"
+PROCEDENCIA = GODOT / "assets" / "procedencia.json"
+PAQUETE_128_SHA256 = "1fee483ce0253e64096442a2c16833ec9da90bdfa2836e5d54a061f293abf6fb"
 
 
 class HorrorTexturasContractTest(unittest.TestCase):
@@ -35,6 +39,38 @@ class HorrorTexturasContractTest(unittest.TestCase):
         self.assertIn("HorrorTexturas.aplicar", dia)
         self.assertLess(dia.index("SuenoEscuela.adaptar_espacio"), dia.index("HorrorTexturas.aplicar"))
         self.assertNotIn("TexturaProcedural.aplicar_horror_sueno", sueno)
+
+    def test_lote_lfs_cubre_exactamente_los_perfiles(self) -> None:
+        # Se lee el PNG como puntero LFS desde el índice de git: así la prueba
+        # vale también en un checkout sin objetos descargados.
+        horror = HORROR.read_text(encoding="utf-8")
+        ids = set(re.findall(r'"((?:Brick|Floor|Metal|Misc|Stains|Stone|Wall)/Horror_\w+)"', horror))
+        self.assertTrue(ids)
+        fichas = {
+            ficha["ruta"]: ficha
+            for ficha in json.loads(PROCEDENCIA.read_text(encoding="utf-8"))["assets"]
+        }
+        lote = GODOT / "assets" / "texturas" / "horror_sbs" / "128x128"
+        instalados = {
+            ruta.relative_to(lote).as_posix().removesuffix("-128x128.png")
+            for ruta in lote.rglob("*.png")
+        }
+        self.assertEqual(instalados, ids, "el lote debe ser exactamente lo que consumen los perfiles")
+        for identificador in sorted(ids):
+            with self.subTest(identificador=identificador):
+                self.assertNotRegex(identificador, r"Stain_0[1-5]$")
+                rel = f"texturas/horror_sbs/128x128/{identificador}-128x128.png"
+                ficha = fichas.get(rel)
+                self.assertIsNotNone(ficha, f"falta la procedencia de {rel}")
+                self.assertEqual(ficha["licencia"], "CC0-1.0")
+                self.assertEqual(ficha["paquete_sha256"], PAQUETE_128_SHA256)
+                puntero = subprocess.run(
+                    ["git", "-C", str(RAIZ), "show", f":godot/assets/{rel}"],
+                    stdout=subprocess.PIPE,
+                    check=False,
+                ).stdout.decode("utf-8", "replace")
+                if puntero.startswith("version https://git-lfs"):
+                    self.assertIn(f"oid sha256:{ficha['sha256']}", puntero)
 
     def test_smoke_godot(self) -> None:
         motor = shutil.which(os.environ.get("GODOT_BIN", "godot4"))
