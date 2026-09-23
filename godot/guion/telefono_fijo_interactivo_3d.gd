@@ -62,9 +62,9 @@ func _montar_geometria() -> void:
 		return
 	var carcasa := MeshInstance3D.new()
 	carcasa.name = "Carcasa"
-	carcasa.mesh = load(
-		"res://assets/modelos/props_originales_98/telefono_fijo_base_98.obj"
-	) as Mesh
+	carcasa.mesh = (
+		load("res://assets/modelos/props_originales_98/telefono_fijo_base_98.obj") as Mesh
+	)
 	add_child(carcasa)
 
 	_auricular = Node3D.new()
@@ -73,9 +73,9 @@ func _montar_geometria() -> void:
 	add_child(_auricular)
 	var visual_auricular := MeshInstance3D.new()
 	visual_auricular.name = "VisualAuricularOriginal98"
-	visual_auricular.mesh = load(
-		"res://assets/modelos/props_originales_98/telefono_auricular_98.obj"
-	) as Mesh
+	visual_auricular.mesh = (
+		load("res://assets/modelos/props_originales_98/telefono_auricular_98.obj") as Mesh
+	)
 	_auricular.add_child(visual_auricular)
 
 	# Conserva el nodo semántico; las teclas forman parte de la malla importada.
@@ -89,6 +89,7 @@ func _montar_geometria() -> void:
 	_piloto_mensaje = _crear_caja(
 		"PilotoMensajes", Vector3(0.055, 0.025, 0.035), Vector3(0.22, 0.215, 0.18), COLOR_APAGADO
 	)
+
 
 func _crear_caja(nombre: String, tam: Vector3, posicion: Vector3, color: Color) -> MeshInstance3D:
 	return _crear_caja_en(self, nombre, tam, posicion, color)
