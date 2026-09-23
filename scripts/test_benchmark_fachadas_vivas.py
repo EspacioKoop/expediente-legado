@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Valida y compara el benchmark específico de fachadas vivas (#861)."""
+"""Valida y compara los benchmarks de fachadas vivas (#861) y animación ambiental (#1230)."""
 from __future__ import annotations
 
 import argparse
@@ -19,13 +19,14 @@ REQUIRED_METRICS = (
 )
 PROCESS_BUDGET_PERCENT = 10.0
 PROCESS_ABS_TOLERANCE_MS = 0.20
+VALID_MODES = {"baseline", "full", "ambiental_baseline", "ambiental_full"}
 
 
 def load_report(path: Path) -> dict[str, Any]:
     data = json.loads(path.read_text(encoding="utf-8"))
     if data.get("schema") != 1:
         raise ValueError(f"{path}: schema inesperado")
-    if data.get("mode") not in {"baseline", "full"}:
+    if data.get("mode") not in VALID_MODES:
         raise ValueError(f"{path}: mode inválido")
     if data.get("resolution") != [1280, 720]:
         raise ValueError(f"{path}: resolución no canónica")
@@ -70,6 +71,8 @@ def compare_reports(baseline: dict[str, Any], full: dict[str, Any]) -> dict[str,
 
     return {
         "schema": 1,
+        "baseline_mode": baseline.get("mode"),
+        "full_mode": full.get("mode"),
         "baseline_components": baseline.get("components", []),
         "full_components": full.get("components", []),
         "feature_counts": full.get("feature_counts", {}),
@@ -87,7 +90,15 @@ def compare_reports(baseline: dict[str, Any], full: dict[str, Any]) -> dict[str,
     }
 
 
-def format_report(summary: dict[str, Any]) -> str:
+def format_report(
+    summary: dict[str, Any],
+    *,
+    title: str = "# Benchmark fachadas vivas · #861",
+    intro: str = "Comparación baseline/full sobre la misma cámara, resolución y número de frames.",
+    baseline_label: str = "Baseline",
+    full_label: str = "Fachadas vivas",
+    feature_text: str | None = None,
+) -> str:
     rows = []
     for metric in REQUIRED_METRICS:
         item = summary["deltas"][metric]
@@ -99,22 +110,26 @@ def format_report(summary: dict[str, Any]) -> str:
     budget = summary["budget"]
     status = "PASS" if budget["passed"] else "FAIL"
     counts = summary.get("feature_counts", {})
+    if feature_text is None:
+        feature_text = (
+            f"Feature: {int(counts.get('grupos', 0))} ventanas / "
+            f"{int(counts.get('render_batches', 0))} lotes MultiMesh / "
+            f"{int(counts.get('batched_instances', 0))} instancias."
+        )
     return "\n".join(
         [
-            "# Benchmark fachadas vivas · #861",
+            title,
             "",
-            "Comparación baseline/full sobre la misma cámara, resolución y número de frames.",
+            intro,
             "",
-            "| Métrica | Baseline | Fachadas vivas | Δ | Δ % |",
+            f"| Métrica | {baseline_label} | {full_label} | Δ | Δ % |",
             "| --- | ---: | ---: | ---: | ---: |",
             *rows,
             "",
             f"Presupuesto process_ms: **{status}** · Δ observado "
             f"{budget['observed_delta_ms']:+.3f} ms · permitido "
             f"{budget['allowed_delta_ms']:.3f} ms.",
-            f"Feature: {int(counts.get('grupos', 0))} ventanas / "
-            f"{int(counts.get('render_batches', 0))} lotes MultiMesh / "
-            f"{int(counts.get('batched_instances', 0))} instancias.",
+            feature_text,
             f"GPU frame time: {summary.get('gpu_frame_ms_note', 'N/D')}",
             "",
             "El runner usa render software; el gate compara únicamente ejecuciones del mismo entorno. "
@@ -123,13 +138,17 @@ def format_report(summary: dict[str, Any]) -> str:
     ) + "\n"
 
 
-def validate_artifacts(directory: Path) -> tuple[dict[str, Any], str]:
-    baseline = load_report(directory / "baseline.json")
-    full = load_report(directory / "full.json")
-    for mode in ("baseline", "full"):
+def _validate_screenshots(directory: Path, modes: tuple[str, str]) -> None:
+    for mode in modes:
         screenshot = directory / f"{mode}.png"
         if not screenshot.is_file() or screenshot.stat().st_size <= 0:
             raise ValueError(f"captura ausente o vacía: {screenshot}")
+
+
+def validate_artifacts(directory: Path) -> tuple[dict[str, Any], str]:
+    baseline = load_report(directory / "baseline.json")
+    full = load_report(directory / "full.json")
+    _validate_screenshots(directory, ("baseline", "full"))
     summary = compare_reports(baseline, full)
     markdown = format_report(summary)
     (directory / "summary.json").write_text(
@@ -139,8 +158,38 @@ def validate_artifacts(directory: Path) -> tuple[dict[str, Any], str]:
     return summary, markdown
 
 
+def validate_ambiental_artifacts(directory: Path) -> tuple[dict[str, Any], str]:
+    baseline = load_report(directory / "ambiental_baseline.json")
+    full = load_report(directory / "ambiental_full.json")
+    _validate_screenshots(directory, ("ambiental_baseline", "ambiental_full"))
+    summary = compare_reports(baseline, full)
+    counts = summary.get("feature_counts", {})
+    feature_text = (
+        f"Feature ambiental: {int(counts.get('animated_windows', 0))} ventanas animadas / "
+        f"{int(counts.get('wind_materials', 0))} materiales de follaje / "
+        f"{int(counts.get('active_pieces', 0))} piezas activas."
+    )
+    markdown = format_report(
+        summary,
+        title="# Benchmark animación ambiental · #1230",
+        intro=(
+            "Comparación ambiental_baseline/ambiental_full con fachadas y arbolado "
+            "idénticos; solo la segunda activa planificador, ventanas y viento."
+        ),
+        baseline_label="Sin animación ambiental",
+        full_label="Con animación ambiental",
+        feature_text=feature_text,
+    )
+    (directory / "ambiental-summary.json").write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    (directory / "ambiental-report.md").write_text(markdown, encoding="utf-8")
+    return summary, markdown
+
+
 class BenchmarkFachadasComparisonTest(unittest.TestCase):
     def _fixture(self, mode: str, process_ms: float = 2.0) -> dict[str, Any]:
+        full_like = mode in {"full", "ambiental_baseline", "ambiental_full"}
         return {
             "schema": 1,
             "mode": mode,
@@ -154,9 +203,9 @@ class BenchmarkFachadasComparisonTest(unittest.TestCase):
             },
             "components": ["trayecto", "calle_identidad"],
             "feature_counts": {
-                "grupos": 61 if mode == "full" else 0,
-                "render_batches": 17 if mode == "full" else 0,
-                "batched_instances": 145 if mode == "full" else 0,
+                "grupos": 61 if full_like else 0,
+                "render_batches": 17 if full_like else 0,
+                "batched_instances": 145 if full_like else 0,
             },
             "metrics_avg": {
                 "draw_calls": 20.0 if mode == "baseline" else 25.0,
@@ -202,17 +251,53 @@ class BenchmarkFachadasComparisonTest(unittest.TestCase):
             self.assertTrue((directory / "summary.json").is_file())
             self.assertTrue((directory / "report.md").is_file())
 
+    def test_ambiental_uses_the_same_budget_and_apparatus(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            directory = Path(temp)
+            baseline = self._fixture("ambiental_baseline", 3.0)
+            full = self._fixture("ambiental_full", 3.2)
+            baseline["feature_counts"].update(
+                {"animated_windows": 0, "wind_materials": 0, "active_pieces": 0}
+            )
+            full["feature_counts"].update(
+                {"render_batches": 18, "batched_instances": 163,
+                 "animated_windows": 18, "wind_materials": 3, "active_pieces": 19}
+            )
+            for mode, report in (
+                ("ambiental_baseline", baseline),
+                ("ambiental_full", full),
+            ):
+                (directory / f"{mode}.json").write_text(
+                    json.dumps(report), encoding="utf-8"
+                )
+                (directory / f"{mode}.png").write_bytes(b"png")
+            summary, markdown = validate_ambiental_artifacts(directory)
+            self.assertTrue(summary["budget"]["passed"])
+            self.assertIn("Benchmark animación ambiental · #1230", markdown)
+            self.assertIn("18 ventanas animadas", markdown)
+            self.assertTrue((directory / "ambiental-summary.json").is_file())
+            self.assertTrue((directory / "ambiental-report.md").is_file())
+
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--report", type=Path, required=True)
     args = parser.parse_args()
+
     summary, markdown = validate_artifacts(args.report)
+    ambiental_summary, ambiental_markdown = validate_ambiental_artifacts(args.report)
     print(markdown, end="")
-    if not summary["budget"]["passed"]:
-        budget = summary["budget"]
+    print("\n" + ambiental_markdown, end="")
+
+    for nombre, resultado in (
+        ("fachadas", summary),
+        ("animación ambiental", ambiental_summary),
+    ):
+        if resultado["budget"]["passed"]:
+            continue
+        budget = resultado["budget"]
         raise SystemExit(
-            "regresión de process_ms fuera de presupuesto: "
+            f"regresión de process_ms fuera de presupuesto ({nombre}): "
             f"{budget['observed_delta_ms']:+.3f} ms > {budget['allowed_delta_ms']:.3f} ms"
         )
     return 0
