@@ -9,6 +9,7 @@ func _initialize() -> void:
 	_probar_vigilia_deliberada()
 	_probar_umbral_y_marcas()
 	_probar_fuera_de_campo()
+	_probar_controles_interactivos()
 	_probar_accesibilidad_y_reproduccion()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -160,6 +161,55 @@ func _probar_fuera_de_campo() -> void:
 		oculto["posiciones"],
 		"evento desconocido no cambia la arquitectura",
 	)
+	sueno.queue_free()
+
+
+func _probar_controles_interactivos() -> void:
+	var sueno := SuenoBabaYaga.new()
+	get_root().add_child(sueno)
+	sueno.preparar()
+	var actor := Node.new()
+	get_root().add_child(actor)
+
+	var cinta := sueno.get_node_or_null("ControlesBosque/CintaPersistente") as Interactuable3D
+	_comprobar(cinta != null, "la cinta persistente existe en el mundo")
+	_comprobar(cinta.interactuar(actor), "la cinta usa el contrato Interactuable3D")
+	_comprobar(
+		sueno.marcas_persistentes().has("cinta_jugador"),
+		"interactuar deja una marca persistente real",
+	)
+
+	var inicial := sueno.posiciones_actuales()
+	var umbral := sueno.get_node_or_null("ControlesBosque/UmbralBosque") as Interactuable3D
+	_comprobar(umbral != null, "el umbral interactuable existe en el mundo")
+	_comprobar(umbral.interactuar(actor), "el umbral se activa por interacción 3D")
+	_comprobar(
+		sueno.posiciones_actuales()[SuenoBabaYaga.OBJETO_ARBOL]
+		!= inicial[SuenoBabaYaga.OBJETO_ARBOL],
+		"usar el umbral mueve la arquitectura por su regla",
+	)
+	_comprobar(
+		sueno.comparar_marca("cinta_jugador")["movido"],
+		"la marca física permite comprobar el desplazamiento",
+	)
+
+	var antes_archivador := sueno.posiciones_actuales()[SuenoBabaYaga.OBJETO_ARCHIVADOR]
+	var observatorio := (
+		sueno.get_node_or_null("ControlesBosque/ObservatorioArchivador") as Interactuable3D
+	)
+	_comprobar(observatorio != null, "el punto de observación existe en el mundo")
+	_comprobar(
+		observatorio.interactuar(actor),
+		"el punto de observación confirma la regla fuera de campo",
+	)
+	_comprobar(
+		sueno.posiciones_actuales()[SuenoBabaYaga.OBJETO_ARCHIVADOR] != antes_archivador,
+		"confirmar fuera de campo mueve solo el archivador",
+	)
+	_comprobar(sueno.cabana_visible(), "los controles conservan la cabaña-ancla")
+	_comprobar(sueno.ruta_retorno_disponible(), "los controles conservan la ruta de retorno")
+
+	actor.queue_free()
 	sueno.queue_free()
 
 
