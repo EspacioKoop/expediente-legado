@@ -22,6 +22,8 @@ const COLOR_SUELO := Color(0.16, 0.17, 0.18)
 const COLOR_RETORNO := Color(0.32, 0.52, 0.42)
 const COLOR_SOMBRA := Color(0.05, 0.05, 0.06)
 
+var reduccion_movimiento := false
+
 var _capas: Array[Node3D] = []
 var _capa_actual := 0
 
@@ -57,10 +59,10 @@ static func registrar_semilla(
 	return true
 
 
-static func plan_transicion(reduccion_movimiento: bool) -> Dictionary:
+static func plan_transicion(reduccion: bool) -> Dictionary:
 	return {
-		"modo": "corte_fundido" if reduccion_movimiento else "fundido_breve",
-		"duracion": 0.0 if reduccion_movimiento else 0.22,
+		"modo": "corte_fundido" if reduccion else "fundido_breve",
+		"duracion": 0.0 if reduccion else 0.22,
 		"zoom_camara": false,
 		"mover_camara": false,
 		"escalar_jugador": false,
@@ -87,11 +89,11 @@ func capa_actual() -> String:
 	return String(CAPAS[_capa_actual])
 
 
-func cambiar_capa(reduccion_movimiento: bool = false) -> Dictionary:
+func cambiar_capa(forzar_reduccion_movimiento: bool = false) -> Dictionary:
 	_montar_prototipo()
 	_capa_actual = (_capa_actual + 1) % CAPAS.size()
 	_aplicar_capa_visible()
-	var plan := plan_transicion(reduccion_movimiento)
+	var plan := plan_transicion(reduccion_movimiento or forzar_reduccion_movimiento)
 	plan["capa"] = capa_actual()
 	plan["retorno_disponible"] = ruta_retorno_disponible()
 	return plan
@@ -129,6 +131,12 @@ func _montar_prototipo() -> void:
 func _montar_escritorio(capa: Node3D) -> void:
 	_crear_caja(capa, "Mesa", Vector3(12.0, 0.35, 8.0), Vector3(0.0, -0.20, 0.0), COLOR_SUELO)
 	_crear_caja(capa, "Pluma", Vector3(3.8, 0.10, 0.36), Vector3(0.0, 0.18, 0.2), COLOR_PLUMA)
+	_crear_punto_cambio(
+		capa,
+		"pluma",
+		Vector3(0.0, 0.55, 0.2),
+		Vector3(4.2, 1.0, 1.0),
+	)
 	var archivos := Node3D.new()
 	archivos.name = "Archivadores"
 	capa.add_child(archivos)
@@ -152,6 +160,12 @@ func _montar_monumental(capa: Node3D) -> void:
 		Vector3(11.0, 0.28, 1.15),
 		Vector3(0.0, 1.1, 0.2),
 		COLOR_PLUMA,
+	)
+	_crear_punto_cambio(
+		capa,
+		"pasarela de pluma",
+		Vector3(0.0, 1.65, 0.2),
+		Vector3(4.0, 1.2, 1.7),
 	)
 	var cordillera := Node3D.new()
 	cordillera.name = "CordilleraArchivos"
@@ -183,9 +197,42 @@ func _montar_monumental(capa: Node3D) -> void:
 	_crear_caja(capa, "Retorno", Vector3(2.2, 0.18, 2.2), Vector3(-8.0, 0.12, 6.0), COLOR_RETORNO)
 
 
+func _crear_punto_cambio(
+	padre: Node3D,
+	nombre_objeto: String,
+	posicion: Vector3,
+	tam: Vector3,
+) -> void:
+	var hotspot := Interactuable3D.new()
+	hotspot.name = "PuntoCambio"
+	hotspot.position = posicion
+	hotspot.verbo = Interactuable3D.Verbo.EXAMINAR
+	hotspot.nombre_objeto = nombre_objeto
+	hotspot.sonido = Interactuable3D.SIN_SONIDO
+	hotspot.collision_mask = 0
+	hotspot.activado.connect(_al_cambiar_capa)
+	padre.add_child(hotspot)
+
+	var colision := CollisionShape3D.new()
+	var forma := BoxShape3D.new()
+	forma.size = tam
+	colision.shape = forma
+	hotspot.add_child(colision)
+
+
+func _al_cambiar_capa(_actor: Node) -> void:
+	cambiar_capa(reduccion_movimiento)
+
+
 func _aplicar_capa_visible() -> void:
 	for i in _capas.size():
-		_capas[i].visible = i == _capa_actual
+		var activa := i == _capa_actual
+		_capas[i].visible = activa
+		var punto := _capas[i].get_node_or_null("PuntoCambio") as Area3D
+		if punto != null:
+			# Un Area3D oculto sigue pudiendo entrar en consultas físicas. Quitar su
+			# layer evita interactuar con la capa que no está materializada.
+			punto.collision_layer = 1 if activa else 0
 
 
 func _montar_luz_y_camara() -> void:
