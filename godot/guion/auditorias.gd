@@ -153,7 +153,7 @@ static func resolver_fin_archivo(estado_partida: Dictionary) -> Dictionary:
 ## Segundo predicado extremo a extremo: al acostarse, "gato_diario" observa
 ## el hambre que Jornada ya mantiene. Cero significa atendido; un valor mayor
 ## implica que el día termina sin haberlo alimentado. Se evalúa ANTES de
-## Jornada.dormir(), que incrementa el contador para la noche siguiente.
+## el cierre doméstico, que incrementa el contador para la noche siguiente.
 static func resolver_fin_casa(estado_partida: Dictionary) -> Dictionary:
 	var auditoria := asegurar_en_estado(estado_partida)
 	var estado_actual := estado(auditoria, GATO_DIARIO)
