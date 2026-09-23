@@ -16,6 +16,7 @@ var _calculadora_app: EscritorioSigaApp
 var _catalogo_anomalias_app: EscritorioSigaApp
 var _evaluaciones_app: EscritorioSigaApp
 var _auditorias_app: EscritorioSigaApp
+var _bingo_app: EscritorioSigaApp
 var _explorador_vista: ExploradorSiga
 var _navegador_vista: NavegadorSiga
 var _software_vista: SoftwareSiga
@@ -275,6 +276,24 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	_auditorias_app.registrar_en(escritorio)
 	_apps.append(_auditorias_app)
 
+	# #151: la tarjeta diaria usa el estado canónico de Jornada. La app no
+	# declara persistencia local porque aceptar/descartar/ignorar ya pertenecen
+	# a Partida y deben viajar con su guardado normal.
+	_bingo_app = (
+		EscritorioSigaApp
+		. new(
+			"bingo-siga",
+			tr("BINGO_SIGA_APP_TITULO"),
+			Callable(self, "_crear_bingo_siga"),
+			"siga",
+		)
+	)
+	_bingo_app.tamano_minimo = Vector2(520, 340)
+	_bingo_app.tamano_preferido = Vector2(700, 500)
+	_bingo_app.redimensionable = true
+	_bingo_app.registrar_en(escritorio)
+	_apps.append(_bingo_app)
+
 	# Reponer el estado declarado ANTES de adoptar/abrir nada: así una app que
 	# lea su estado local al construir su contenido (como hacen Correo y #539) ya
 	# lo ve actualizado desde el primer fotograma.
@@ -286,6 +305,7 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	escritorio.activar_ayuda_sistema()
 	_siga_app.adoptar_en(escritorio, visor)
 	escritorio.salir_solicitado.connect(_solicitar_salida)
+	_abrir_bingo_pendiente(dia, escritorio)
 
 	# `_abrir_expediente()` conserva temporalmente el botón histórico para que
 	# la propiedad de salir siga en Dia. El shell ofrece esa acción en su menú,
@@ -422,6 +442,59 @@ func _crear_auditorias() -> Control:
 	if partida_actual is Partida:
 		auditorias.configurar_estado(partida_actual.estado, false)
 	return auditorias
+
+
+func _crear_bingo_siga() -> Control:
+	var bingo := BingoSigaPanel.new()
+	var dia := get_parent()
+	if dia == null:
+		return bingo
+	var partida_actual: Variant = dia.get("partida")
+	if partida_actual is Partida:
+		bingo.configurar_estado(partida_actual.estado)
+		bingo.decision_cambiada.connect(_persistir_bingo_siga)
+	return bingo
+
+
+func _abrir_bingo_pendiente(dia: Node, escritorio: EscritorioSiga) -> void:
+	if _bingo_app == null or dia == null:
+		return
+	var partida_actual: Variant = dia.get("partida")
+	if not partida_actual is Partida:
+		return
+	var jornada: Variant = (partida_actual as Partida).estado.get("jornada", {})
+	if not jornada is Dictionary:
+		return
+	var estado_bingo: Variant = (jornada as Dictionary).get(BingoSiga.CLAVE_ESTADO, {})
+	var actual_previo: Variant = (
+		(estado_bingo as Dictionary).get("actual", {}) if estado_bingo is Dictionary else {}
+	)
+	var dia_actual := int((jornada as Dictionary).get("dia", 1))
+	var ya_existia := (
+		actual_previo is Dictionary and int((actual_previo as Dictionary).get("dia", 0)) == dia_actual
+	)
+	var actual := BingoSiga.tarjeta_diaria((partida_actual as Partida).estado)
+	if not ya_existia:
+		_persistir_bingo_siga("")
+	if (
+		not bool(actual.get("cerrada", false))
+		and String(actual.get("decision", BingoSiga.DECISION_PENDIENTE))
+		== BingoSiga.DECISION_PENDIENTE
+	):
+		_bingo_app.abrir(escritorio)
+
+
+func _persistir_bingo_siga(_decision: String) -> void:
+	var dia := get_parent()
+	if dia == null:
+		return
+	var partida_actual: Variant = dia.get("partida")
+	if not partida_actual is Partida:
+		return
+	if dia.has_method("_guardar_o_avisar"):
+		dia.call("_guardar_o_avisar", "")
+	else:
+		(partida_actual as Partida).guardar()
 
 
 func _registrar_documento_os98(documento_id: String) -> void:
