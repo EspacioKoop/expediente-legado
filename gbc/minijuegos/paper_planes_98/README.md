@@ -34,7 +34,7 @@ No se incorporan fotografías, logotipos, BIOS ni ROMs de terceros. Todos los gr
 
 El segundo pase convierte la ruta en algo más que memorizar cuatro alturas: el jugador debe anticipar la racha del siguiente tramo, decidir cuándo corregir y cuándo fijar la trayectoria con **B**, y escoger entre un paso simplemente seguro o buscar la banda estrecha que da el perfecto.
 
-El pase de legibilidad de #804 mantiene esas reglas y corrige únicamente presentación: el cielo CGB deja de ser blanco puro, aparecen nubes de referencia, el skyline jugable gana una base urbana, el avión usa una silueta 16×8 de alto contraste y las dos filas de agua se escriben respetando el stride real de 32 celdas del tilemap. Esto último evita la antigua franja 32+8 que se leía como una barra atravesando media pantalla.
+El pase de legibilidad de #804 mantiene esas reglas y corrige únicamente presentación: el cielo CGB deja de ser blanco puro, aparecen nubes de referencia, el skyline jugable gana una base urbana, el avión usa una silueta 16×8 de alto contraste y las dos filas de agua se escriben respetando el stride real de 32 celdas del tilemap. Esto último evita la antigua franja 32+8 que se leía como una barra atravesando media pantalla. El nombre del hito deja de ocupar una tercera fila de texto durante el vuelo: el gate del HUD y la silueta del obstáculo llevan esa lectura.
 
 La puntuación, las vidas, los perfectos y la ruta existen únicamente dentro de la RAM de la ROM. No hay dinero, pistas, progreso de `Partida`, cambios de `Jornada` ni efectos sobre sueño/archivo.
 
