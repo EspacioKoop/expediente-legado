@@ -26,14 +26,14 @@ const CASOS := [
 	{
 		"id": "estar",
 		"zona": "estar",
-		"posicion": Vector3(0.65, 0.0, 2.75),
+		"posicion": Vector3(0.90, 0.0, 3.45),
 		"objetivo_nodo": "CasaHogarCC0/MesaBajaHogar",
 		"criterio": "sofa, mesa baja y mueble de TV forman un estar legible y proporcionado",
 	},
 	{
 		"id": "dormitorio",
 		"zona": "dormitorio",
-		"posicion": Vector3(0.10, 0.0, -0.10),
+		"posicion": Vector3(-0.55, 0.0, -0.95),
 		"objetivo_nodo": "CasaHogarCC0/ArmarioHogar",
 		"criterio": "el armario se integra en el dormitorio sin invadir paso, cama ni tabiques",
 	},
@@ -56,7 +56,11 @@ const OBJETOS := [
 	{"nodo": "CasaHogarCC0/SillaComedorOesteB", "modelo": "chair_01", "zona": "cocina_comedor"},
 	{"nodo": "CasaHogarCC0/SillaComedorEste", "modelo": "chair_01", "zona": "cocina_comedor"},
 	{"nodo": "CasaHogarCC0/HornoHogar", "modelo": "stove_01", "zona": "cocina_comedor"},
-	{"nodo": "CasaHogarCC0/LavadoraHogar", "modelo": "washing_machine_01", "zona": "cocina_comedor"},
+	{
+		"nodo": "CasaHogarCC0/LavadoraHogar",
+		"modelo": "washing_machine_01",
+		"zona": "cocina_comedor"
+	},
 	{"nodo": "CasaHogarCC0/MicroondasHogar", "modelo": "microwave_01", "zona": "cocina_comedor"},
 	{"nodo": "CasaHogarCC0/TostadoraHogar", "modelo": "toaster_01", "zona": "cocina_comedor"},
 	{"nodo": "CasaHogarCC0/HervidorHogar", "modelo": "kettle_01", "zona": "cocina_comedor"},
@@ -137,15 +141,14 @@ func _init() -> void:
 		if not _guardar_captura(destino):
 			quit(1)
 			return
-		manifiesto["casos"].append(
-			{
-				"id": String(caso["id"]),
-				"zona": String(caso["zona"]),
-				"captura": archivo,
-				"criterio": String(caso["criterio"]),
-				"sha256": FileAccess.get_sha256(destino),
-			}
-		)
+		var registro_caso := {
+			"id": String(caso["id"]),
+			"zona": String(caso["zona"]),
+			"captura": archivo,
+			"criterio": String(caso["criterio"]),
+			"sha256": FileAccess.get_sha256(destino),
+		}
+		manifiesto["casos"].append(registro_caso)
 
 	var ruta_manifiesto := salida.path_join("manifest.json")
 	var archivo_manifiesto := FileAccess.open(ruta_manifiesto, FileAccess.WRITE)
@@ -170,15 +173,14 @@ func _inventariar_objetos(mundo: Node3D) -> Array:
 		if nodo.get_node_or_null("AssetCc0") == null:
 			printerr("%s no conserva su visual AssetCc0" % ruta)
 			continue
-		inventario.append(
-			{
-				"nodo": ruta,
-				"modelo": String(ficha["modelo"]),
-				"zona": String(ficha["zona"]),
-				"vistas": [],
-				"pantalla_por_vista": {},
-			}
-		)
+		var registro := {
+			"nodo": ruta,
+			"modelo": String(ficha["modelo"]),
+			"zona": String(ficha["zona"]),
+			"vistas": [],
+			"pantalla_por_vista": {},
+		}
+		inventario.append(registro)
 	return inventario
 
 
@@ -204,9 +206,7 @@ func _preparar_camara(dia, caso: Dictionary) -> Camera3D:
 	return camara
 
 
-func _registrar_cobertura(
-	objetos: Array, mundo: Node3D, camara: Camera3D, vista: String
-) -> void:
+func _registrar_cobertura(objetos: Array, mundo: Node3D, camara: Camera3D, vista: String) -> void:
 	for objeto in objetos:
 		var nodo := mundo.get_node_or_null(String(objeto["nodo"])) as Node3D
 		if nodo == null or not camara.is_position_in_frustum(nodo.global_position):
@@ -228,6 +228,11 @@ func _guardar_captura(destino: String) -> bool:
 	var imagen := root.get_texture().get_image()
 	if imagen == null or imagen.is_empty():
 		printerr("Viewport vacio para %s" % destino)
+		return false
+	if imagen.get_size() != TAMANO:
+		printerr(
+			"Resolucion inesperada para #227: %s; esperada %s" % [imagen.get_size(), TAMANO]
+		)
 		return false
 	var error_png := imagen.save_png(destino)
 	if error_png != OK:
