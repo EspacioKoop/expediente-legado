@@ -85,9 +85,7 @@ class LiteraturaRom1179Test(unittest.TestCase):
         )[0]
         self.assertIn("ld [wSuenoCompletado], a", bloque)
         prefijo = self.rom_source.split("CompletarObjetivoFinal:", 1)[0]
-        self.assertNotIn("ld [wSuenoCompletado], a", prefijo.split("Inicio:", 1)[1].replace(
-            "ld [wSuenoCompletado], a\n", "", 1
-        ))
+        self.assertNotIn("ld a, MARCA_COMPLETADO", prefijo)
 
     def test_controller_esta_montado_en_dia(self):
         self.assertIn('path="res://guion/dia_literatura_rom_app.gd"', self.dia)
