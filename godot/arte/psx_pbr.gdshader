@@ -14,7 +14,7 @@ uniform vec4 color_base : source_color = vec4(1.0);
 
 uniform sampler2D textura : source_color, filter_linear_mipmap_anisotropic, repeat_enable, hint_default_white;
 uniform sampler2D mapa_normal : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
-uniform sampler2D mapa_roughness : hint_roughness_gray, filter_linear_mipmap_anisotropic, repeat_enable, hint_default_white;
+uniform sampler2D mapa_roughness : hint_roughness_gray, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D mapa_ao : filter_linear_mipmap_anisotropic, repeat_enable, hint_default_white;
 
 uniform bool usar_uv = true;
