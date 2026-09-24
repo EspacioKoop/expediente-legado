@@ -15,6 +15,9 @@ extends RefCounted
 
 const RUTA := "res://assets/cc0/quaternius_ual/"
 const BIBLIOTECA := &"ual"
+const RAIZ_PERFIL := "Root"
+## Lo que la articulación de la punta del pie queda sobre el suelo.
+const ALTO_PUNTERA := 0.03
 
 ## Clip propio → [fichero, animación de UAL, en bucle]. El tercer valor falta en
 ## los gestos continuos; los de un solo paso —levantarse, sentarse, coger algo—
@@ -72,6 +75,17 @@ const HUESOS := {
 	"RightToes": "RightToeBase",
 }
 
+## Lo que `persona.fbx` trae de serie y un avatar fotorrealista no (#275). Los
+## nombres terminan en el sufijo que busca `Modelos._animar`. Teclear de pie no
+## existe en UAL: quien trabaja sentado usa `sentado_hablando` y de pie respira.
+const CLIPS_BASE := {
+	"idle": ["UAL1_Standard.glb", "Idle"],
+	"walk": ["UAL1_Standard.glb", "Walk_Formal"],
+	"run": ["UAL1_Standard.glb", "Jog_Fwd"],
+	"work": ["UAL1_Standard.glb", "Idle"],
+}
+const BIBLIOTECA_BASE := &"base"
+
 static var _fuentes := {}
 static var _convertidas := {}
 
@@ -85,7 +99,7 @@ static func reproducir(pieza: Node3D, clip: String, desfase: float = 0.0) -> boo
 	if reproductor == null or esqueleto == null or not CLIPS.has(clip):
 		return false
 	var animacion := _animacion(
-		clip, _ruta_esqueleto(reproductor, esqueleto), _altura_cadera(esqueleto)
+		clip, _ruta_esqueleto(reproductor, esqueleto), _altura_cadera(esqueleto), esqueleto
 	)
 	if animacion == null:
 		return false
@@ -115,14 +129,50 @@ static func duracion(clip: String) -> float:
 	return fuente.length if fuente != null else 0.0
 
 
-static func _animacion(clip: String, ruta_esqueleto: String, altura: float) -> Animation:
-	var clave := "%s|%s|%.4f" % [clip, ruta_esqueleto, altura]
+## Da a un avatar con esqueleto del perfil humanoide los clips que `persona.fbx`
+## trae de fábrica, en su propia biblioteca, para que `Modelos._animar` los
+## encuentre por sufijo igual que en el maniquí.
+static func preparar_base(pieza: Node3D) -> bool:
+	var esqueleto := Modelos._esqueleto(pieza)
+	if esqueleto == null:
+		return false
+	var reproductor := Modelos._reproductor(pieza)
+	if reproductor == null:
+		# El avatar llega sin animaciones propias y el importador no le crea
+		# reproductor. Colgado de la raíz, sus pistas apuntan igual que en
+		# `persona.fbx`: ruta relativa al modelo.
+		reproductor = AnimationPlayer.new()
+		reproductor.name = "AnimationPlayer"
+		pieza.add_child(reproductor)
+	if reproductor.has_animation_library(BIBLIOTECA_BASE):
+		return true
+	var biblioteca := AnimationLibrary.new()
+	var ruta := _ruta_esqueleto(reproductor, esqueleto)
+	var altura := _altura_cadera(esqueleto)
+	for nombre in CLIPS_BASE:
+		var datos: Array = CLIPS_BASE[nombre]
+		var fuente := _fuente(datos[0], datos[1])
+		if fuente == null:
+			continue
+		var clave := "base:%s|%s|%.4f|perfil" % [nombre, ruta, altura]
+		if not _convertidas.has(clave):
+			_convertidas[clave] = convertir(fuente, ruta, altura, true, _huesos_de(esqueleto))
+		biblioteca.add_animation(nombre, _convertidas[clave])
+	reproductor.add_animation_library(BIBLIOTECA_BASE, biblioteca)
+	return not biblioteca.get_animation_list().is_empty()
+
+
+static func _animacion(
+	clip: String, ruta_esqueleto: String, altura: float, esqueleto: Skeleton3D
+) -> Animation:
+	var huesos := _huesos_de(esqueleto)
+	var clave := "%s|%s|%.4f|%s" % [clip, ruta_esqueleto, altura, huesos != HUESOS]
 	if _convertidas.has(clave):
 		return _convertidas[clave]
 	var fuente := _fuente(CLIPS[clip][0], CLIPS[clip][1])
 	if fuente == null:
 		return null
-	var animacion := convertir(fuente, ruta_esqueleto, altura, en_bucle(clip))
+	var animacion := convertir(fuente, ruta_esqueleto, altura, en_bucle(clip), huesos)
 	_convertidas[clave] = animacion
 	return animacion
 
@@ -153,15 +203,22 @@ static func _fuente(fichero: String, nombre: String) -> Animation:
 ## [param altura_cadera] la devuelve a la escala de la figura dentro de las
 ## propias claves, y no con `Skeleton3D.motion_scale`: eso escalaría también las
 ## pistas de `Idle` y `Working` y la figura se hundiría al volver a ellas.
+##
+## [param huesos] traduce del perfil a la figura: `HUESOS` para `persona.fbx`, o
+## la identidad para un esqueleto importado ya con el perfil humanoide.
 static func convertir(
-	fuente: Animation, ruta_esqueleto: String, altura_cadera: float, bucle: bool = true
+	fuente: Animation,
+	ruta_esqueleto: String,
+	altura_cadera: float,
+	bucle: bool = true,
+	huesos: Dictionary = HUESOS
 ) -> Animation:
 	var animacion := Animation.new()
 	animacion.length = fuente.length
 	animacion.loop_mode = Animation.LOOP_LINEAR if bucle else Animation.LOOP_NONE
 	for pista in fuente.get_track_count():
 		var hueso := String(fuente.track_get_path(pista).get_concatenated_subnames())
-		if not HUESOS.has(hueso):
+		if not huesos.has(hueso):
 			continue
 		var tipo := fuente.track_get_type(pista)
 		var es_rotacion := tipo == Animation.TYPE_ROTATION_3D
@@ -169,21 +226,53 @@ static func convertir(
 		if not es_rotacion and not es_cadera:
 			continue
 		var nueva := animacion.add_track(tipo)
-		animacion.track_set_path(nueva, NodePath("%s:%s" % [ruta_esqueleto, HUESOS[hueso]]))
+		animacion.track_set_path(nueva, NodePath("%s:%s" % [ruta_esqueleto, huesos[hueso]]))
 		animacion.track_set_interpolation_type(nueva, fuente.track_get_interpolation_type(pista))
 		for clave in fuente.track_get_key_count(pista):
 			var valor = fuente.track_get_key_value(pista, clave)
 			if es_cadera:
 				valor = valor * altura_cadera
 			animacion.track_insert_key(nueva, fuente.track_get_key_time(pista, clave), valor)
+	if huesos.has(RAIZ_PERFIL):
+		# UAL deja la raíz en el suelo y no la anima; un Biped la tiene a la
+		# altura de la pelvis. Sin fijarla, la cadera del clip se suma a esa
+		# altura y la figura flota un metro.
+		var raiz := animacion.add_track(Animation.TYPE_POSITION_3D)
+		animacion.track_set_path(raiz, NodePath("%s:%s" % [ruta_esqueleto, RAIZ_PERFIL]))
+		animacion.position_track_insert_key(raiz, 0.0, Vector3.ZERO)
 	return animacion
+
+
+## Qué huesos de UAL mueve un clip en esta figura y cómo se llaman en ella. Un
+## esqueleto importado con `BoneMap` ya usa los nombres del perfil: se mapea
+## cada hueso a sí mismo, incluidos los dedos que `persona.fbx` no tiene.
+static func _huesos_de(esqueleto: Skeleton3D) -> Dictionary:
+	if esqueleto.find_bone("UpperChest") < 0:
+		return HUESOS
+	var propios := {}
+	for i in esqueleto.get_bone_count():
+		var nombre := esqueleto.get_bone_name(i)
+		propios[nombre] = nombre
+	return propios
 
 
 static func _altura_cadera(esqueleto: Skeleton3D) -> float:
 	var cadera := esqueleto.find_bone("Hips")
 	if cadera < 0:
 		return 1.0
-	return esqueleto.get_bone_global_rest(cadera).origin.y
+	var altura := esqueleto.get_bone_global_rest(cadera).origin.y
+	if esqueleto.find_bone("UpperChest") < 0:
+		return altura
+	# Un avatar convertido a glTF deja la pelvis como hueso raíz en el origen:
+	# lo que UAL normaliza es su altura sobre el suelo, no sobre ese origen. El
+	# AABB de la malla no sirve de suela porque conserva los ejes del FBX
+	# original; la punta del pie sí, a un par de centímetros del suelo.
+	var suela := INF
+	for pie in ["LeftToes", "RightToes"]:
+		var hueso := esqueleto.find_bone(pie)
+		if hueso >= 0:
+			suela = minf(suela, esqueleto.get_bone_global_rest(hueso).origin.y)
+	return altura - suela + ALTO_PUNTERA if suela < altura else altura
 
 
 static func _ruta_esqueleto(reproductor: AnimationPlayer, esqueleto: Skeleton3D) -> String:

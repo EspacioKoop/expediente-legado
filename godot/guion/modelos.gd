@@ -58,6 +58,9 @@ const ESCALAS_MATERIAL := {
 ## cambia aquí.
 const ALTO_PERSONA := 1.75
 
+## Subcarpeta de `RUTA` con los avatares fotorrealistas (#275).
+const CARPETA_REALISTAS := "rocketbox/"
+
 const PERFILES_FACIALES := {
 	"emperador":
 	{"piel": Color(0.72, 0.56, 0.43), "cabello": Color(0.08, 0.07, 0.06), "x": 0.96, "z": 0.92},
@@ -131,11 +134,26 @@ static func persona(cuerpo: Node3D, nombre: String, color: Color, retrato: Strin
 	var pieza := _instanciar(cuerpo, nombre)
 	if pieza == null:
 		return false
+	if es_realista(nombre):
+		# Un avatar vestido trae su piel, su pelo y su ropa: teñirlo o ponerle
+		# la cara procedural es justo lo que hacía del maniquí un maniquí.
+		AnimacionesUAL.preparar_base(pieza)
+		_animar(pieza)
+		return true
 	_pintar(pieza, color)
 	_animar(pieza)
 	if not retrato.is_empty():
 		_poner_cara(pieza, retrato)
 	return true
+
+
+## Si [param nombre] es un avatar fotorrealista de #275 y no el maniquí.
+##
+## Los avatares son Microsoft Rocketbox (MIT) convertidos a `.glb` con sus
+## texturas, e importados con el `BoneMap` humanoide: su esqueleto ya habla el
+## perfil de Godot y las animaciones UAL se le aplican sin traducir nombres.
+static func es_realista(nombre: String) -> bool:
+	return nombre.begins_with(CARPETA_REALISTAS)
 
 
 static func _instanciar(cuerpo: Node3D, nombre: String) -> Node3D:
