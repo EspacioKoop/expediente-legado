@@ -79,8 +79,11 @@ class EmuladorGBImpresoraTermicaTest(unittest.TestCase):
         self.assertIn("datos.encode_s16(indice * 2, muestra)", self.fisica)
         self.assertIn("func establecer_sonido_habilitado(habilitado: bool)", self.fisica)
         self.assertIn("func establecer_animacion_habilitada(habilitada: bool)", self.fisica)
-        for termino in ("load(", "preload(", ".wav", ".ogg", ".mp3"):
+        for termino in (".wav", ".ogg", ".mp3"):
             self.assertNotIn(termino, self.fisica)
+        for linea in self.fisica.splitlines():
+            if "load(" in linea:
+                self.assertIn("res://arte/props_originales_98/impresora_termica_98.obj", linea)
 
     def test_ui_imprime_solo_patron_propio_y_no_lee_el_nucleo(self):
         self.assertIn("var impresora_termica: ImpresoraTermicaPortatil = null", self.audio_ui)
