@@ -25,6 +25,7 @@ static func sustituir(cuerpo: Node3D, nombre: String, tam: Vector3) -> bool:
 static func _adaptar_materiales(pieza: Node3D) -> void:
 	for nodo in Modelos._mallas(pieza):
 		var malla: MeshInstance3D = nodo
+		var adaptados: Array[Material] = []
 		for superficie in malla.mesh.get_surface_count():
 			var original := malla.get_active_material(superficie) as BaseMaterial3D
 			var material := ShaderMaterial.new()
@@ -36,3 +37,9 @@ static func _adaptar_materiales(pieza: Node3D) -> void:
 					material.set_shader_parameter("textura", original.albedo_texture)
 					material.set_shader_parameter("con_textura", true)
 			malla.set_surface_override_material(superficie, material)
+			adaptados.append(material)
+		# La malla suelta sus materiales por superficie ANTES de que el servidor
+		# libere su instancia, y con malla de sombra y LOD importadas el servidor
+		# aún los consulta: «Parameter "material" is null» al liberar el asset,
+		# también en GPU. Los metadatos se sueltan después, así que los retienen.
+		malla.set_meta(&"materiales_adaptados", adaptados)

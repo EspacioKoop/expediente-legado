@@ -55,6 +55,9 @@ class LuzPixelMuebles789Test(unittest.TestCase):
         self.assertIsNotNone(resumen, resultado.stdout)
         self.assertGreaterEqual(int(resumen.group(1)), 8, resultado.stdout)
         self.assertNotIn("SCRIPT ERROR:", resultado.stdout)
+        # La oficina se monta con AssetCc0 y se libera al acabar. Un material
+        # soltado antes que su instancia solo se ve en el log.
+        self.assertNotIn('Parameter "material" is null', resultado.stdout)
 
 
 if __name__ == "__main__":
