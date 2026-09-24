@@ -1,0 +1,73 @@
+## Fondos fotorealistas ligeros para cerrar los huecos centrales de la calle.
+##
+## Son impostores 2D sin colisión situados detrás de las fachadas jugables. No
+## sustituyen el skyline CC0: añaden una línea intermedia precisamente donde el
+## centro izquierda/derecha deja ver huecos demasiado limpios entre edificios.
+class_name CalleFondosFotorealistas98
+extends RefCounted
+
+const BASE := "res://assets/texturas/calle_ai_98/"
+const NOMBRE_CAPA := "FondosFotorealistas98"
+
+const BLOQUES := [
+	{
+		"nombre": "BloqueOesteSur98",
+		"archivo": "bloque_01.webp",
+		"pos": Vector3(-9.4, 0.0, -0.8),
+		"altura": 9.6,
+	},
+	{
+		"nombre": "BloqueOesteNorte98",
+		"archivo": "bloque_03.webp",
+		"pos": Vector3(-11.4, 0.0, 3.0),
+		"altura": 9.8,
+	},
+	{
+		"nombre": "BloqueEsteSur98",
+		"archivo": "bloque_02.webp",
+		"pos": Vector3(9.4, 0.0, -0.4),
+		"altura": 10.8,
+	},
+	{
+		"nombre": "BloqueEsteNorte98",
+		"archivo": "bloque_04.webp",
+		"pos": Vector3(11.4, 0.0, 3.0),
+		"altura": 10.6,
+	},
+]
+
+
+static func montar(mundo: Node3D) -> void:
+	if mundo == null or mundo.has_node(NOMBRE_CAPA):
+		return
+	var capa := Node3D.new()
+	capa.name = NOMBRE_CAPA
+	mundo.add_child(capa)
+	for datos in BLOQUES:
+		_agregar_bloque(capa, datos)
+
+
+static func _agregar_bloque(capa: Node3D, datos: Dictionary) -> void:
+	var textura := load(BASE + String(datos.get("archivo", ""))) as Texture2D
+	if textura == null:
+		push_warning("No se pudo cargar fondo fotorealista: %s" % datos.get("archivo", "?"))
+		return
+
+	var altura := float(datos.get("altura", 10.0))
+	var base: Vector3 = datos.get("pos", Vector3.ZERO)
+	var sprite := Sprite3D.new()
+	sprite.name = String(datos.get("nombre", "BloqueFondo98"))
+	sprite.texture = textura
+	sprite.position = base + Vector3(0.0, altura * 0.5, 0.0)
+	sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
+	sprite.pixel_size = altura / maxf(float(textura.get_height()), 1.0)
+	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+	sprite.alpha_scissor_threshold = 0.18
+	sprite.shaded = false
+	sprite.double_sided = true
+	sprite.fixed_size = false
+	sprite.no_depth_test = false
+	sprite.modulate = Color(0.56, 0.54, 0.52, 1.0)
+	sprite.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	sprite.set_meta("calle_ai_98", true)
+	capa.add_child(sprite)

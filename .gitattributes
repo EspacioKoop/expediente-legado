@@ -46,3 +46,9 @@ godot/assets/audio/musica/*.ogg filter=lfs diff=lfs merge=lfs -text
 *.obj    text
 *.import text
 *.tres   text
+
+# Impostores urbanos propios, pequeños y autocontenidos (<10 KiB cada uno).
+godot/assets/texturas/calle_ai_98/*.webp -filter -diff -merge -text
+
+# Matte propio de la ventana de casa, autocontenido (<10 KiB).
+godot/assets/texturas/ventana_casa_ai_98/*.webp -filter -diff -merge -text

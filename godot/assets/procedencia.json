@@ -2014,6 +2014,46 @@
       "fuente": "https://github.com/microsoft/Microsoft-Rocketbox",
       "sha256": "17474e386e0b9e1a700cc3d06b2b0882a2c376d9c6b49c7f8274409b8f8d2352",
       "archivo_origen": "LICENSE.md @ 0943055db6ec570bcef9f2c8b41c9e5467c808f9"
+    },
+    {
+      "ruta": "texturas/calle_ai_98/bloque_01.webp",
+      "titulo": "Bloque residencial de fondo 01",
+      "autor": "EspacioKoop (generado con OpenAI ImageGen)",
+      "licencia": "Propio del proyecto; salida generada con OpenAI",
+      "fuente": "https://openai.com/policies/eu-terms-of-use/",
+      "sha256": "d8bc2ccd0d466e3556a8494c8ac7f01a2c5b307619a4a04c93df828fac8243a9"
+    },
+    {
+      "ruta": "texturas/calle_ai_98/bloque_02.webp",
+      "titulo": "Bloque residencial de fondo 02",
+      "autor": "EspacioKoop (generado con OpenAI ImageGen)",
+      "licencia": "Propio del proyecto; salida generada con OpenAI",
+      "fuente": "https://openai.com/policies/eu-terms-of-use/",
+      "sha256": "1c3d6c8ea3b031ac230b8d5074174dc17b4a3dc19e639e22a4b8b7137dc549d5"
+    },
+    {
+      "ruta": "texturas/calle_ai_98/bloque_03.webp",
+      "titulo": "Bloque residencial de fondo 03",
+      "autor": "EspacioKoop (generado con OpenAI ImageGen)",
+      "licencia": "Propio del proyecto; salida generada con OpenAI",
+      "fuente": "https://openai.com/policies/eu-terms-of-use/",
+      "sha256": "c5b861496d2a345e45442d12e0aeb29d283a5e0cc71e571cb7dc0cad1d6cf8bc"
+    },
+    {
+      "ruta": "texturas/calle_ai_98/bloque_04.webp",
+      "titulo": "Bloque residencial de fondo 04",
+      "autor": "EspacioKoop (generado con OpenAI ImageGen)",
+      "licencia": "Propio del proyecto; salida generada con OpenAI",
+      "fuente": "https://openai.com/policies/eu-terms-of-use/",
+      "sha256": "bee11a21aba694942745fde7a662b01dcfc6a342053562047636172a04366024"
+    },
+    {
+      "ruta": "texturas/ventana_casa_ai_98/fondo_barrio_98.webp",
+      "titulo": "Barrio visto desde la ventana de casa — matte 1998",
+      "autor": "EspacioKoop (generado con OpenAI ImageGen; recorte y reducción propios)",
+      "licencia": "Propio del proyecto; salida generada con OpenAI",
+      "fuente": "https://openai.com/policies/eu-terms-of-use/",
+      "sha256": "9a12e2a07eeb237a64a6f43fbb6e70d56616076ad75c3b31fce00f026d3e9883"
     }
   ]
 }

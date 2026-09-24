@@ -363,6 +363,10 @@ func _al_elegir_documento(indice: int) -> void:
 	var huella_mutada := _registrar_huella_lectura(registro)
 	if not ya_visto:
 		Jornada.anotar_lectura(jornada, registro["folio"])
+		# #952: la clasificación confidencial ya es dato canónico del caso. Solo
+		# una apertura nueva admitida genera tensión; releer no permite acumularla.
+		if bool(caso.get("confidencial", false)):
+			Estres.aplicar(jornada, "documento_sensible")
 	if not ya_visto or huella_mutada or auditoria_mutada:
 		_guardar_o_avisar()
 

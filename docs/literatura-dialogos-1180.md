@@ -7,6 +7,8 @@ crear una identidad cultural paralela.
 
 El catálogo `godot/datos/literatura_dialogos.json` describe el NPC mediador,
 la obra, el movimiento literario como contexto y las ramas de conversación.
+La primera mediadora es Marta, una compañera física del archivo situada junto
+a la mesa de clasificación; no depende del roster aleatorio de cada vuelta.
 Elegir una rama registra únicamente un evento en el canal `insight`, con:
 
 - fuente concreta del NPC;
@@ -22,11 +24,20 @@ probar la otra formulación no duplica el hecho.
 
 ## Primer diálogo
 
-La mediadora de biblioteca comenta *La vida es sueño*. El jugador puede
-enfocar la conversación desde la elección bajo incertidumbre o desde la
-representación. Las respuestas son distintas y cada rama declara una
-consecuencia visible en la ficha de lectura, pero ninguna respuesta se traduce
-en afiliación, reputación, ideología, arquetipo ni atributo de personalidad.
+Marta deja una edición de *La vida es sueño* sobre la mesa de clasificación del
+archivo. El jugador puede enfocar la conversación desde la elección bajo
+incertidumbre o desde la representación. Las respuestas son distintas y cada
+rama declara una consecuencia visible en la ficha de lectura, pero ninguna
+respuesta se traduce en afiliación, reputación, ideología, arquetipo ni atributo
+de personalidad.
+
+`Dia` monta a Marta como figura 3D estable y añade sobre esa misma posición un
+`CompaneroInteractivo3D`. La elección usa
+`DialogoDiegetico.mostrar_eleccion()`: es el mismo panel diegético ya usado por
+los compañeros, ampliado con botones de rama y sin crear un segundo HUD. La
+elección se resuelve en `GestorLiteratura`, que conserva el registro común del
+contrato transversal. Al volver a hablar, `LiteraturaDialogoReentrada` sustituye
+las ramas por la referencia a la anotación ya hecha.
 
 ## Consumidores
 
@@ -48,12 +59,11 @@ insight y ausencia de conversión de exposición en identidad.
 `scripts/test_literatura_dialogo_1180.py` entra en el descubrimiento normal de
 tests Python y ejecuta además la prueba headless de Godot.
 
-## Siguiente corte
+## Estado del corte
 
-El contrato ya es ejecutable, pero este PR no monta todavía una UI de elección
-en `Dia`: el diálogo diegético actual muestra una línea resuelta y no ofrece
-botones de rama. El siguiente paso debe adaptar una superficie de elección
-reutilizable al NPC físico sin duplicar `DialogoDiegetico`, y hacer visible en
-el recorrido real la consecuencia declarada aquí.
+El primer criterio de #1180 queda cubierto en el recorrido real: NPC físico,
+dos ramas elegibles, respuesta y consecuencia visibles, y reentrada sobre el
+mismo insight. La siguiente ampliación puede sumar más autores o movimientos
+reutilizando este mismo cableado sin añadir otro sistema de conversación.
 
 Refs #1175 #1176 #1180.
