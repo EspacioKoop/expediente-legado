@@ -61,6 +61,7 @@ func _probar_avatar(quien: Dictionary) -> void:
 		if (malla as MeshInstance3D).material_override != null:
 			tintadas += 1
 	_comprobar(tintadas == 0, "%s conserva su ropa y su piel" % id)
+	_comprobar_materiales(pieza, id)
 	_comprobar(
 		pieza.find_children("*", "BoneAttachment3D", true, false).is_empty(),
 		"%s no lleva cara ni ropa procedural encima" % id
@@ -99,6 +100,32 @@ func _probar_maniqui_intacto() -> void:
 		not Modelos.es_realista(Companeros.CUERPO), "el cuerpo genérico sigue siendo el de siempre"
 	)
 	_comprobar(Companeros.cuerpo_de({}) == "", "sin id no hay cuerpo")
+
+
+## Las superficies opacas pasan al shader del sitio con SU textura —para que la
+## oficina las ilumine por píxel (#789)— y las recortadas por alfa conservan el
+## recorte en vez de pintarse como tarjetas opacas.
+func _comprobar_materiales(pieza: Node3D, id: String) -> void:
+	var del_sitio := 0
+	var ajenas := 0
+	for nodo in pieza.find_children("*", "MeshInstance3D", true, false):
+		var malla: MeshInstance3D = nodo
+		for superficie in malla.mesh.get_surface_count():
+			var material := malla.get_active_material(superficie)
+			if material is BaseMaterial3D:
+				if material.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED:
+					ajenas += 1
+			elif (
+				material is ShaderMaterial
+				and material.shader.resource_path == Espacio3D.shader_del_sitio()
+				and material.get_shader_parameter("con_textura")
+				and material.get_shader_parameter("usar_uv")
+			):
+				del_sitio += 1
+			else:
+				ajenas += 1
+	_comprobar(del_sitio > 0, "%s usa el shader del sitio con su textura" % id)
+	_comprobar(ajenas == 0, "%s no deja superficies opacas con otro material" % id)
 
 
 func _comprobar_postura(pieza: Node3D, que: String) -> void:

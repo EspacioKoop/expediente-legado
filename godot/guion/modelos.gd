@@ -137,6 +137,7 @@ static func persona(cuerpo: Node3D, nombre: String, color: Color, retrato: Strin
 	if es_realista(nombre):
 		# Un avatar vestido trae su piel, su pelo y su ropa: teñirlo o ponerle
 		# la cara procedural es justo lo que hacía del maniquí un maniquí.
+		_adaptar_realista(pieza)
 		AnimacionesUAL.preparar_base(pieza)
 		_animar(pieza)
 		return true
@@ -154,6 +155,31 @@ static func persona(cuerpo: Node3D, nombre: String, color: Color, retrato: Strin
 ## perfil de Godot y las animaciones UAL se le aplican sin traducir nombres.
 static func es_realista(nombre: String) -> bool:
 	return nombre.begins_with(CARPETA_REALISTAS)
+
+
+## Pasa el avatar al material del sitio conservando su textura y sus UV, como
+## hace `AssetCc0` con los assets. Con el material importado sería la única
+## figura sin el tratamiento de la máquina y, en la oficina, sin la luz por
+## píxel de #789: volvería a leerse como una silueta sin sombra.
+##
+## Las superficies recortadas por alfa (pestañas, pelo) conservan el suyo: el
+## shader PSX no descarta píxeles y las pintaría como tarjetas opacas. El mapa
+## de normales se pierde en las demás; el shader del mundo no lo usa.
+static func _adaptar_realista(pieza: Node3D) -> void:
+	for nodo in _mallas(pieza):
+		var malla: MeshInstance3D = nodo
+		for superficie in malla.mesh.get_surface_count():
+			var original := malla.get_active_material(superficie) as BaseMaterial3D
+			if original == null or original.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED:
+				continue
+			var material := ShaderMaterial.new()
+			material.shader = load(Espacio3D.shader_del_sitio())
+			material.set_shader_parameter("usar_uv", true)
+			material.set_shader_parameter("color_base", original.albedo_color)
+			if original.albedo_texture != null:
+				material.set_shader_parameter("textura", original.albedo_texture)
+				material.set_shader_parameter("con_textura", true)
+			malla.set_surface_override_material(superficie, material)
 
 
 static func _instanciar(cuerpo: Node3D, nombre: String) -> Node3D:
