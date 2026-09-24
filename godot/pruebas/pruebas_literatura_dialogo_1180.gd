@@ -19,6 +19,11 @@ func _initialize() -> void:
 func _probar_catalogo_y_dos_ramas() -> void:
 	var dialogo := LiteraturaDialogo.obtener(DIALOGO)
 	_comprobar(not dialogo.is_empty(), "carga el primer dialogo literario")
+	var npc: Dictionary = dialogo.get("npc", {})
+	_comprobar(
+		String(npc.get("id", "")) == "mediadora_archivo_98",
+		"el catalogo identifica al NPC fisico de archivo",
+	)
 	var ramas: Array = dialogo.get("ramas", [])
 	_comprobar(ramas.size() == 2, "el primer dialogo ofrece dos ramas")
 	if ramas.size() < 2:
@@ -45,7 +50,7 @@ func _probar_insight_con_procedencia() -> void:
 			registro,
 			DIALOGO,
 			"eleccion",
-			"npc:biblioteca:mediadora_98",
+			"npc:archivo:mediadora_98",
 			4,
 		)
 	)
@@ -63,7 +68,7 @@ func _probar_insight_con_procedencia() -> void:
 	var insight: Dictionary = insights[0]
 	var metadatos: Dictionary = insight.get("metadatos", {})
 	_comprobar(
-		String(insight.get("fuente", "")) == "npc:biblioteca:mediadora_98",
+		String(insight.get("fuente", "")) == "npc:archivo:mediadora_98",
 		"el insight conserva la procedencia del NPC",
 	)
 	_comprobar(int(insight.get("jornada", 0)) == 4, "el insight conserva la jornada")
@@ -85,7 +90,7 @@ func _probar_reentrada_idempotente() -> void:
 			registro,
 			DIALOGO,
 			"eleccion",
-			"npc:biblioteca:mediadora_98",
+			"npc:archivo:mediadora_98",
 			2,
 		)
 	)

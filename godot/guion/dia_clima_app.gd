@@ -9,6 +9,9 @@ const FONDO_BASE := Color(0.05, 0.05, 0.06)
 ## lo sustituye cuando el clima lo exige.
 const FONDO_EXTERIOR := Color(0.035, 0.055, 0.10)
 const TAM_TERMINAL_INTERACTIVO := Vector3(1.0, 1.2, 0.8)
+const DIALOGO_LITERARIO_1180 := "biblioteca_calderon_apariencia"
+const FUENTE_LITERARIA_1180 := "npc:archivo:mediadora_98"
+const POS_MEDIADORA_LITERARIA_1180 := Vector3(3.55, 0.0, -1.35)
 var _clima_nodo: Node3D = null
 var _archivado_sesion := ArchivadoSesion3D.new()
 var _hud_prioridades: HUDLayer
@@ -103,6 +106,27 @@ func _espacio_de(fase: String) -> Dictionary:
 	var espacio: Dictionary = super._espacio_de(fase)
 	if fase == "trayecto":
 		espacio["exterior"] = true
+	elif fase == "archivo":
+		# #1180 necesita un NPC físico estable sin volver fijo ningún miembro
+		# del roster aleatorio. Marta ocupa la mesa de clasificación como
+		# mediadora de lectura; Espacio3D le da el mismo cuerpo que al resto.
+		var figuras: Array = espacio.get("figuras", []).duplicate(true)
+		(
+			figuras
+			. append(
+				{
+					"id": "mediadora_archivo_98",
+					"pos": POS_MEDIADORA_LITERARIA_1180,
+					"color": Color(0.29, 0.31, 0.35),
+					"rotulo": "Marta",
+					"frase": "",
+					"modelo": Companeros.CUERPO,
+					"dialogo_literario": DIALOGO_LITERARIO_1180,
+					"fuente_dialogo_literario": FUENTE_LITERARIA_1180,
+				}
+			)
+		)
+		espacio["figuras"] = figuras
 	return espacio
 
 
@@ -151,12 +175,11 @@ func _entrar_en(fase: String) -> void:
 ## capa solo añade intención y conserva una fuente inequívoca del diálogo.
 func _montar_companeros_conversables() -> void:
 	_desactivar_frases_proximidad(_mundo)
-	var espacio := EspaciosCatalogo.de_fase("archivo").duplicate(true)
-	espacio["figuras"] = _plantilla_en(espacio)
 	var indice := 0
-	for figura in espacio.get("figuras", []):
+	for figura in _espacio_actual.get("figuras", []):
 		var clave := String(figura.get("frase", ""))
-		if clave.is_empty():
+		var dialogo_literario := String(figura.get("dialogo_literario", ""))
+		if clave.is_empty() and dialogo_literario.is_empty():
 			continue
 		indice += 1
 		var companero := CompaneroInteractivo3D.new()
@@ -164,6 +187,14 @@ func _montar_companeros_conversables() -> void:
 		companero.position = figura["pos"] + Vector3(0.0, 0.9, 0.0)
 		companero.nombre_visible = String(figura.get("rotulo", ""))
 		companero.clave_dialogo = clave
+		companero.set_meta("dialogo_literario", dialogo_literario)
+		(
+			companero
+			. set_meta(
+				"fuente_dialogo_literario",
+				String(figura.get("fuente_dialogo_literario", "")),
+			)
+		)
 		companero.conversacion_solicitada.connect(_iniciar_conversacion)
 		_mundo.add_child(companero)
 
@@ -182,14 +213,136 @@ func _iniciar_conversacion(
 	_actor: Node,
 	clave_dialogo: String,
 ) -> void:
-	if _pantalla != null or clave_dialogo.is_empty():
+	var dialogo_literario := String(companero.get_meta("dialogo_literario", ""))
+	if _pantalla != null or (clave_dialogo.is_empty() and dialogo_literario.is_empty()):
 		return
 	if is_instance_valid(_dialogo_actual):
 		return
+	if not dialogo_literario.is_empty():
+		_iniciar_conversacion_literaria(companero, dialogo_literario)
+		return
+
 	clave_dialogo = _clave_conversacion_contextual(companero, clave_dialogo)
 	_dialogo_actual = DialogoDiegetico.mostrar(
 		_hud_prioridades, _caminante, companero, tr(clave_dialogo)
 	)
+	_enfocar_dialogo_actual(companero)
+
+
+func _iniciar_conversacion_literaria(
+	companero: CompaneroInteractivo3D,
+	id_dialogo: String,
+) -> void:
+	var gestor := _gestor_literatura()
+	if gestor == null:
+		return
+
+	var reentrada_var = gestor.call("resolver_reentrada_dialogo", id_dialogo)
+	if typeof(reentrada_var) == TYPE_DICTIONARY:
+		var reentrada: Dictionary = reentrada_var
+		if bool(reentrada.get("disponible", false)):
+			_dialogo_actual = (
+				DialogoDiegetico
+				. mostrar(
+					_hud_prioridades,
+					_caminante,
+					companero,
+					String(reentrada.get("texto", "")),
+				)
+			)
+			_enfocar_dialogo_actual(companero)
+			return
+
+	var dialogo := LiteraturaDialogo.obtener(id_dialogo)
+	if dialogo.is_empty():
+		return
+	var opciones := []
+	for rama_bruta in dialogo.get("ramas", []):
+		if typeof(rama_bruta) != TYPE_DICTIONARY:
+			continue
+		var rama: Dictionary = rama_bruta
+		(
+			opciones
+			. append(
+				{
+					"id": String(rama.get("id", "")),
+					"texto": String(rama.get("texto", "")),
+				}
+			)
+		)
+	if opciones.is_empty():
+		return
+
+	_dialogo_actual = (
+		DialogoDiegetico
+		. mostrar_eleccion(
+			_hud_prioridades,
+			_caminante,
+			companero,
+			String(dialogo.get("apertura", "")),
+			opciones,
+			_resolver_eleccion_literaria.bind(companero, id_dialogo),
+		)
+	)
+	_enfocar_dialogo_actual(companero)
+
+
+func _resolver_eleccion_literaria(
+	id_rama: String,
+	companero: CompaneroInteractivo3D,
+	id_dialogo: String,
+) -> String:
+	var gestor := _gestor_literatura()
+	if gestor == null:
+		return ""
+	var fuente := String(companero.get_meta("fuente_dialogo_literario", "")).strip_edges()
+	if fuente.is_empty():
+		return ""
+
+	var resultado_var = (
+		gestor
+		. call(
+			"resolver_dialogo",
+			id_dialogo,
+			id_rama,
+			fuente,
+			int(jornada.get("dia", 0)),
+		)
+	)
+	if typeof(resultado_var) != TYPE_DICTIONARY:
+		return ""
+	var resultado: Dictionary = resultado_var
+	if not bool(resultado.get("valida", false)):
+		return ""
+
+	var respuesta := String(resultado.get("respuesta", "")).strip_edges()
+	var consecuencia := String(resultado.get("consecuencia_visible", "")).strip_edges()
+	var salida := ""
+	if respuesta.is_empty():
+		salida = consecuencia
+	elif consecuencia.is_empty():
+		salida = respuesta
+	else:
+		salida = "%s\n%s" % [respuesta, consecuencia]
+	return salida
+
+
+func _gestor_literatura() -> Node:
+	if not is_inside_tree():
+		return null
+	var gestor := get_node_or_null("/root/GestorLiteratura")
+	if (
+		gestor == null
+		or not gestor.has_method("resolver_dialogo")
+		or not gestor.has_method("resolver_reentrada_dialogo")
+	):
+		return null
+	return gestor
+
+
+func _enfocar_dialogo_actual(companero: CompaneroInteractivo3D) -> void:
+	if not is_instance_valid(_dialogo_actual):
+		return
 	_caminante.enfocar_conversacion(companero)
 	_dialogo_actual.tree_exited.connect(_al_cerrar_dialogo)
 
