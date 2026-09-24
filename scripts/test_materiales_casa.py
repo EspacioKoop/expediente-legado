@@ -36,11 +36,11 @@ class MaterialesCasaTest(unittest.TestCase):
         self.assertIn('const MADERA := "madera_domestica"', self.utileria)
         self.assertIn('const TEJIDO := "tejido_domestico"', self.utileria)
         self.assertIn('const ACERO := "acero_cocina"', self.utileria)
-        # Se cuentan referencias semánticas, no `TOKEN)`; gdformat puede partir
-        # una llamada en varias líneas sin cambiar qué material usa.
+        # Los props originales sustituyen parte de las primitivas; las zonas que
+        # siguen siendo procedurales conservan sus perfiles de materia.
         self.assertGreaterEqual(self.utileria.count("TEJIDO"), 6)
         self.assertGreaterEqual(self.utileria.count("MADERA"), 13)
-        self.assertGreaterEqual(self.utileria.count("ACERO"), 9)
+        self.assertGreaterEqual(self.utileria.count("ACERO"), 7)
 
     def test_utileria_reutiliza_el_shader_psx_central(self):
         self.assertIn("Modelos._pintar(malla, color, textura)", self.utileria)
@@ -59,7 +59,10 @@ class MaterialesCasaTest(unittest.TestCase):
         self.assertNotIn(".glb", self.utileria)
         self.assertNotIn(".png", self.utileria)
         self.assertNotIn("preload(", self.utileria)
-        self.assertNotIn("load(", self.utileria)
+        for linea in self.utileria.splitlines():
+            if "load(" in linea:
+                self.assertIn("res://arte/props_originales_98/", linea)
+                self.assertIn(".obj", linea)
 
 
 if __name__ == "__main__":
