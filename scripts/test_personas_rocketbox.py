@@ -71,6 +71,11 @@ class PersonasRocketboxTest(unittest.TestCase):
         )
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
         self.assertIsNotNone(RESUMEN_GODOT.search(resultado.stdout), resultado.stdout)
+        # Un shader que no compila deja la figura sin material y la prueba de
+        # contrato seguiría en verde; un material liberado antes que su
+        # instancia solo se ve en el log.
+        for error in ("SHADER ERROR", "Shader compilation failed", 'Parameter "material" is null'):
+            self.assertNotIn(error, resultado.stdout)
 
 
 if __name__ == "__main__":

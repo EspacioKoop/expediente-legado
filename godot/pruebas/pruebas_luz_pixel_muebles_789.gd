@@ -135,14 +135,14 @@ func _materiales_de(malla: MeshInstance3D) -> Array:
 	return materiales
 
 
+## Los avatares con mapa de normales (#275) van a `psx_pbr`, que también
+## ilumina por píxel: lo que se exige es recibir sombra, no un fichero concreto.
 func _hay_persona_por_pixel(sitio: Node) -> bool:
+	var por_pixel := [Espacio3D.SHADER_PSX_LUZ_PIXEL, TexturasPBR.SHADER_PBR]
 	for nodo in sitio.find_children("*", "Skeleton3D", true, false):
 		for hijo in nodo.find_children("*", "MeshInstance3D", true, false):
 			for material in _materiales_de(hijo):
-				if (
-					material is ShaderMaterial
-					and material.shader.resource_path == Espacio3D.SHADER_PSX_LUZ_PIXEL
-				):
+				if material is ShaderMaterial and material.shader.resource_path in por_pixel:
 					return true
 	return false
 

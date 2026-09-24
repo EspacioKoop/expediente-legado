@@ -28,6 +28,7 @@ func _ejecutar() -> void:
 	for quien in [Companeros.CUNADO] + Array(Companeros.ROSTER):
 		await _probar_avatar(quien)
 	await _probar_clip_de_oficina()
+	_probar_relieve_por_pixel()
 	_probar_maniqui_intacto()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -104,9 +105,11 @@ func _probar_maniqui_intacto() -> void:
 
 ## Las superficies opacas pasan al shader del sitio con SU textura —para que la
 ## oficina las ilumine por píxel (#789)— y las recortadas por alfa conservan el
-## recorte en vez de pintarse como tarjetas opacas.
-func _comprobar_materiales(pieza: Node3D, id: String) -> void:
+## recorte en vez de pintarse como tarjetas opacas. Con [param relieve], las que
+## traen mapa de normales van a `psx_pbr` con ese mapa.
+func _comprobar_materiales(pieza: Node3D, id: String, relieve := false) -> void:
 	var del_sitio := 0
+	var con_relieve := 0
 	var ajenas := 0
 	for nodo in pieza.find_children("*", "MeshInstance3D", true, false):
 		var malla: MeshInstance3D = nodo
@@ -115,17 +118,47 @@ func _comprobar_materiales(pieza: Node3D, id: String) -> void:
 			if material is BaseMaterial3D:
 				if material.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED:
 					ajenas += 1
+				continue
+			var shader := ""
+			if material is ShaderMaterial and material.shader != null:
+				shader = material.shader.resource_path
+			if not (material is ShaderMaterial and material.get_shader_parameter("usar_uv")):
+				ajenas += 1
 			elif (
-				material is ShaderMaterial
-				and material.shader.resource_path == Espacio3D.shader_del_sitio()
+				shader == Espacio3D.shader_del_sitio()
 				and material.get_shader_parameter("con_textura")
-				and material.get_shader_parameter("usar_uv")
 			):
 				del_sitio += 1
+			elif (
+				relieve
+				and shader == TexturasPBR.SHADER_PBR
+				and material.get_shader_parameter("con_normal")
+				and material.get_shader_parameter("mapa_normal") != null
+				and material.get_shader_parameter("textura") != null
+			):
+				con_relieve += 1
 			else:
 				ajenas += 1
-	_comprobar(del_sitio > 0, "%s usa el shader del sitio con su textura" % id)
+	if relieve:
+		_comprobar(con_relieve > 0, "%s conserva el mapa de normales con luz por píxel" % id)
+	else:
+		_comprobar(del_sitio > 0, "%s usa el shader del sitio con su textura" % id)
 	_comprobar(ajenas == 0, "%s no deja superficies opacas con otro material" % id)
+
+
+## En un sitio con luz por píxel —la oficina— el relieve del avatar se ve.
+## Se fija el shader del sitio como lo haría `Espacio3D.construir` y se restaura
+## después, para no contaminar las demás comprobaciones.
+func _probar_relieve_por_pixel() -> void:
+	var anterior := Espacio3D.shader_del_sitio()
+	Espacio3D._shader_del_sitio = Espacio3D.SHADER_PSX_LUZ_PIXEL
+	for quien in [Companeros.CUNADO] + Array(Companeros.ROSTER):
+		var cuerpo := Node3D.new()
+		root.add_child(cuerpo)
+		Modelos.persona(cuerpo, Companeros.cuerpo_de(quien), quien["color"])
+		_comprobar_materiales(cuerpo.get_child(0) as Node3D, String(quien["id"]), true)
+		cuerpo.free()
+	Espacio3D._shader_del_sitio = anterior
 
 
 func _comprobar_postura(pieza: Node3D, que: String) -> void:

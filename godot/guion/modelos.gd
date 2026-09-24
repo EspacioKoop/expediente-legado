@@ -163,23 +163,44 @@ static func es_realista(nombre: String) -> bool:
 ## píxel de #789: volvería a leerse como una silueta sin sombra.
 ##
 ## Las superficies recortadas por alfa (pestañas, pelo) conservan el suyo: el
-## shader PSX no descarta píxeles y las pintaría como tarjetas opacas. El mapa
-## de normales se pierde en las demás; el shader del mundo no lo usa.
+## shader PSX no descarta píxeles y las pintaría como tarjetas opacas.
+##
+## El relieve del mapa de normales solo se ve con luz por píxel. En un sitio que
+## la pide, las superficies que lo traen van a `psx_pbr` (#399), que conserva el
+## temblor, el color cortado y el dithering y además lee el mapa. En el resto
+## del mundo la luz se calcula por vértice y el mapa no aportaría nada.
 static func _adaptar_realista(pieza: Node3D) -> void:
+	var por_pixel := Espacio3D.shader_del_sitio() == Espacio3D.SHADER_PSX_LUZ_PIXEL
 	for nodo in _mallas(pieza):
 		var malla: MeshInstance3D = nodo
+		var adaptados: Array[Material] = []
 		for superficie in malla.mesh.get_surface_count():
 			var original := malla.get_active_material(superficie) as BaseMaterial3D
 			if original == null or original.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED:
 				continue
+			var relieve := por_pixel and original.normal_enabled and original.normal_texture != null
 			var material := ShaderMaterial.new()
-			material.shader = load(Espacio3D.shader_del_sitio())
+			material.shader = load(
+				TexturasPBR.SHADER_PBR if relieve else Espacio3D.shader_del_sitio()
+			)
 			material.set_shader_parameter("usar_uv", true)
 			material.set_shader_parameter("color_base", original.albedo_color)
 			if original.albedo_texture != null:
 				material.set_shader_parameter("textura", original.albedo_texture)
-				material.set_shader_parameter("con_textura", true)
+				if not relieve:
+					material.set_shader_parameter("con_textura", true)
+			if relieve:
+				material.set_shader_parameter("mapa_normal", original.normal_texture)
+				material.set_shader_parameter("con_normal", true)
+				material.set_shader_parameter("fuerza_normal", original.normal_scale)
+				material.set_shader_parameter("especular", original.metallic_specular)
 			malla.set_surface_override_material(superficie, material)
+			adaptados.append(material)
+		# La malla suelta sus materiales por superficie ANTES de que el servidor
+		# libere su instancia, y con malla de sombra y LOD importadas el servidor
+		# aún los consulta: «Parameter "material" is null» al liberar la figura,
+		# también en GPU. Los metadatos se sueltan después, así que los retienen.
+		malla.set_meta(&"materiales_adaptados", adaptados)
 
 
 static func _instanciar(cuerpo: Node3D, nombre: String) -> Node3D:
