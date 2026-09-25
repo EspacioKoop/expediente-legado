@@ -107,7 +107,7 @@ func _montar_ecos(
 		return
 	if not dia.conectar_recompensa_onirica(ecos.nucleo, caso):
 		return
-	var presentacion = EcosArchivoPresentacion.crear(ecos)
+	var presentacion = EcosArchivoPresentacion.crear(ecos, String(candidato.get("tipo", "")))
 	if presentacion == null:
 		return
 
@@ -178,6 +178,7 @@ func _candidato(dia: Node) -> Dictionary:
 				continue
 			var candidato := {
 				"folio": String(registro.get("folio", "")),
+				"tipo": String(registro.get("tipo", "")),
 				"frase": frase,
 				"reward_id": pista_id,
 				"descripcion": String(pista.get("descripcion", "")),
@@ -230,6 +231,7 @@ func _candidato_guardado(dia: Node, sesion: Dictionary) -> Dictionary:
 					return {}
 				return {
 					"folio": folio,
+					"tipo": String(registro.get("tipo", "")),
 					"frase": frase,
 					"reward_id": reward_id,
 					"descripcion": String(pista.get("descripcion", "")),
