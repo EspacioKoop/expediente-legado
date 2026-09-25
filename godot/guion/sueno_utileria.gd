@@ -105,6 +105,7 @@ static func montar(
 	documentos_origen: Array = [],
 	objetos_tocados: Array = [],
 	cartas_recogidas: Array = [],
+	modificadores_simbolicos: Array = [],
 ) -> Array:
 	var folios := _folios_validos(documentos_origen)
 	var prescripciones := prescripciones_para(objetos_tocados)
@@ -173,7 +174,7 @@ static func montar(
 		)
 		_montar_eco_simbolico(anomalia, motivo)
 		creadas.append(anomalia)
-	SuenoEspacioSimbolico.montar(mundo, creadas)
+	SuenoEspacioSimbolico.montar(mundo, creadas, modificadores_simbolicos)
 	return creadas
 
 
