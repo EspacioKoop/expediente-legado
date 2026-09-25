@@ -1957,13 +1957,6 @@
       "conversion": "FBX + texturas TGA 2048 convertidos a glb con godot/herramientas/convertir_rocketbox.gd (Godot 4.7): texturas de color, normal y opacidad a 1024 px en WebP con pérdida; sin mapas specular."
     },
     {
-      "ruta": "modelos/rocketbox/female_adult_13.glb",
-      "titulo": "Female_Adult_13 — Microsoft Rocketbox Avatar Library",
-      "autor": "Microsoft",
-      "licencia": "MIT",
-      "fuente": "https://github.com/microsoft/Microsoft-Rocketbox",
-      "sha256": "e3e1bee64495db286e1e9996d4f28341f4279f2fe6fc0177f633ff6cff829b27",
-      "archivo_origen": "Assets/Avatars/Adults/Female_Adult_13/Export/Female_Adult_13.fbx @ 0943055db6ec570bcef9f2c8b41c9e5467c808f9",
       "ruta": "modelos/rocketbox/male_adult_07.glb",
       "titulo": "Male_Adult_07 — Microsoft Rocketbox Avatar Library",
       "autor": "Microsoft",
@@ -2211,6 +2204,22 @@
       "licencia": "Propio del proyecto; salida generada con OpenAI",
       "fuente": "https://openai.com/policies/eu-terms-of-use/",
       "sha256": "633529753ca54d70abdc3cf240218ebfa8599a8728a680a764418f01cec1c6c9"
+    },
+    {
+      "ruta": "texturas/yggdrasil_ai_98/bonsai_yggdrasil_98.webp",
+      "titulo": "Bonsái doméstico inspirado en Yggdrasil",
+      "autor": "EspacioKoop (generado con OpenAI ImageGen; reducción propia)",
+      "licencia": "Propio del proyecto; salida generada con OpenAI",
+      "fuente": "https://openai.com/policies/eu-terms-of-use/",
+      "sha256": "4b7a53f5f89905872a42a02430b775fe1282fbcef1de929c331ce481a8c4d70c"
+    },
+    {
+      "ruta": "texturas/yggdrasil_ai_98/yggdrasils_egg_atrezzo_98.webp",
+      "titulo": "Yggdrasil's Egg — videojuego ficticio, atrezzo de Bit 98",
+      "autor": "EspacioKoop (generado con OpenAI ImageGen; reducción propia)",
+      "licencia": "Propio del proyecto; salida generada con OpenAI",
+      "fuente": "https://openai.com/policies/eu-terms-of-use/",
+      "sha256": "9752604a9fbbecf0d869984113779dc86caf109e23236ebd3dd28741f50ecdd9"
     }
   ]
 }
