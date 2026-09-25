@@ -80,12 +80,11 @@ func ejecutar(linea: String) -> Dictionary:
 					)
 				)
 			"del", "erase", "rm", "copy", "cp", "edit":
-				resultado = _resultado(
-					false, "OPERACION NO DISPONIBLE: terminal de solo lectura"
-				)
+				resultado = _resultado(false, "OPERACION NO DISPONIBLE: terminal de solo lectura")
 			_:
 				resultado = _resultado(false, "Comando no reconocido: %s" % comando)
 	return resultado
+
 
 func cwd() -> String:
 	return _cwd
