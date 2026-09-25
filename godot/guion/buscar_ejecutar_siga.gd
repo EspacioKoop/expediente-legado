@@ -71,25 +71,29 @@ func buscar(consulta: String) -> Array[Dictionary]:
 		var reconstruccion: Dictionary = documento.get("reconstruccion", {})
 		if reconstruccion.is_empty():
 			continue
-		var bolsa_documento := "%s %s %s %s %s" % [
-			String(documento.get("folio", "")),
-			String(documento.get("tipo", "")),
-			String(documento.get("caso_titulo", "")),
-			String(documento.get("contenido", "")),
-			_texto_fragmentos(reconstruccion.get("fragmentos", [])),
-		]
+		var bolsa_documento := (
+			"%s %s %s %s %s"
+			% [
+				String(documento.get("folio", "")),
+				String(documento.get("tipo", "")),
+				String(documento.get("caso_titulo", "")),
+				String(documento.get("contenido", "")),
+				_texto_fragmentos(reconstruccion.get("fragmentos", [])),
+			]
+		)
 		if not _coincide(normalizada, bolsa_documento):
 			continue
 		var resultado_reconstruccion := {
 			"tipo": "reconstruccion",
-			"titulo":
-			"%s · %s" % [tr("VISOR_RECONSTRUIR"), String(documento.get("folio", ""))],
+			"titulo": "%s · %s" % [tr("VISOR_RECONSTRUIR"), String(documento.get("folio", ""))],
 			"detalle":
-			"%s · %s"
-			% [
-				String(documento.get("caso_titulo", "")),
-				String(reconstruccion.get("titulo", "")),
-			],
+			(
+				"%s · %s"
+				% [
+					String(documento.get("caso_titulo", "")),
+					String(reconstruccion.get("titulo", "")),
+				]
+			),
 			"destino": String(documento.get("registro", "")),
 			"caso": String(documento.get("caso", "")),
 		}
