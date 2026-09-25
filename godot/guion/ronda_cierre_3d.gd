@@ -13,6 +13,22 @@ const NOMBRE_RAIZ := "RondaCierreFisica"
 const ALTURA_CONVERSABLE := 0.9
 const POS_CUNADO := Vector3(-1.9, 0.0, 0.4)
 const POS_LUZ_OBJETIVO := Vector3(-4.0, 2.65, 2.0)
+const POSICIONES := {
+	"recoger_a7": Vector3(-3.55, 0.84, 1.28),
+	"apagar_lampara": Vector3(-6.82, 1.15, 1.65),
+	"cerrar_puerta": Vector3(6.72, 1.02, 3.55),
+	"revisar_bandeja": Vector3(-4.62, 0.88, -2.24),
+	"devolver_carpeta": Vector3(3.70, 0.86, 0.06),
+	"comprobar_tablon": Vector3(-1.50, 1.65, -4.72),
+}
+const NOMBRES := {
+	"recoger_a7": "formulario A-7",
+	"apagar_lampara": "interruptor de la lámpara",
+	"cerrar_puerta": "puerta auxiliar",
+	"revisar_bandeja": "bandeja de entrada",
+	"devolver_carpeta": "carpeta de clasificación",
+	"comprobar_tablon": "tablón de anuncios",
+}
 
 var _estado: Dictionary = {}
 var _puntos := {}
@@ -188,21 +204,7 @@ func _agregar_visual_si_toca(punto: Interactuable3D, id_punto: String) -> void:
 
 
 func _posicion(id_punto: String) -> Vector3:
-	match id_punto:
-		"recoger_a7":
-			return Vector3(-3.55, 0.84, 1.28)
-		"apagar_lampara":
-			return Vector3(-6.82, 1.15, 1.65)
-		"cerrar_puerta":
-			return Vector3(6.72, 1.02, 3.55)
-		"revisar_bandeja":
-			return Vector3(-4.62, 0.88, -2.24)
-		"devolver_carpeta":
-			return Vector3(3.70, 0.86, 0.06)
-		"comprobar_tablon":
-			return Vector3(-1.50, 1.65, -4.72)
-		_:
-			return Vector3.INF
+	return POSICIONES.get(id_punto, Vector3.INF)
 
 
 func _tam_interaccion(id_punto: String) -> Vector3:
@@ -232,18 +234,4 @@ func _verbo(id_punto: String) -> int:
 
 
 func _nombre(id_punto: String) -> String:
-	match id_punto:
-		"recoger_a7":
-			return "formulario A-7"
-		"apagar_lampara":
-			return "interruptor de la lámpara"
-		"cerrar_puerta":
-			return "puerta auxiliar"
-		"revisar_bandeja":
-			return "bandeja de entrada"
-		"devolver_carpeta":
-			return "carpeta de clasificación"
-		"comprobar_tablon":
-			return "tablón de anuncios"
-		_:
-			return "punto de cierre"
+	return String(NOMBRES.get(id_punto, "punto de cierre"))
