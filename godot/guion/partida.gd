@@ -125,6 +125,8 @@ static func nueva() -> Dictionary:
 		"historias_pospuestas": [],
 		"historias_pospuestas_conteo": {},
 		"historial_decisiones": [],
+		# #925: snapshots factuales de cada vida, separados del estado activo.
+		Prometeo.CLAVE_HISTORIAL_IDEOLOGICO: [],
 		"cartas_conocidas": [],
 		"coliseo_racha_mejor": 0,
 		"despido_mostrado": false,
@@ -344,6 +346,13 @@ static func validar(guardado) -> Array:
 		else:
 			for error in EvaluacionDesempeno.validar_historial(guardado["evaluaciones_desempeno"]):
 				errores.append("evaluaciones_desempeno.%s" % error)
+	if guardado.has(Prometeo.CLAVE_HISTORIAL_IDEOLOGICO):
+		var historial_ideologico = guardado[Prometeo.CLAVE_HISTORIAL_IDEOLOGICO]
+		if typeof(historial_ideologico) != TYPE_ARRAY:
+			errores.append("%s no es una lista" % Prometeo.CLAVE_HISTORIAL_IDEOLOGICO)
+		else:
+			for error in Prometeo.validar_historial_trayectorias_ideologicas(historial_ideologico):
+				errores.append("%s.%s" % [Prometeo.CLAVE_HISTORIAL_IDEOLOGICO, error])
 	for clave in ["anomalias_descubiertas", "anomalias_descubiertas_vuelta"]:
 		if guardado.has(clave) and typeof(guardado[clave]) != TYPE_ARRAY:
 			errores.append("%s no es una lista" % clave)
