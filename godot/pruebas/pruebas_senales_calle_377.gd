@@ -46,16 +46,7 @@ func _ejecutar() -> void:
 		"sig-1"
 	)
 	var evento_portal := SenalDatos.crear_evento(
-		"calle",
-		"test",
-		"anon-b",
-		"calle_portal",
-		"sigue",
-		["derecha"],
-		AHORA + 1,
-		[],
-		-1,
-		"sig-2"
+		"calle", "test", "anon-b", "calle_portal", "sigue", ["derecha"], AHORA + 1, [], -1, "sig-2"
 	)
 	_comprobar("fixtures válidos", evento_escaparate["ok"] and evento_portal["ok"])
 	var fixture := TransporteFixture.new([evento_escaparate["event"], evento_portal["event"]])
