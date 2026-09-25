@@ -34,7 +34,9 @@ func punto(id_punto: String) -> Interactuable3D:
 func refrescar() -> void:
 	if _estado.is_empty():
 		return
-	var bloqueada := bool(_estado.get("abandonada", false)) or bool(_estado.get("finalizada", false))
+	var bloqueada := (
+		bool(_estado.get("abandonada", false)) or bool(_estado.get("finalizada", false))
+	)
 	var completados: Array = _estado.get("completados", [])
 	for id_punto in _puntos:
 		var interactuable := _puntos[id_punto] as Interactuable3D
