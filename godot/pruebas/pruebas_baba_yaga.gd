@@ -297,7 +297,11 @@ func _probar_interior_variable() -> void:
 		vistos.append(sueno.interior_actual())
 		if i < SuenoBabaYaga.INTERIORES_CABANA.size() - 1:
 			var cambio := sueno.aplicar_evento(SuenoBabaYaga.EVENTO_UMBRAL)
-			_comprobar(cambio["interior_cabana"], SuenoBabaYaga.INTERIORES_CABANA[i + 1])
+			_comprobar(
+				cambio["interior_cabana"],
+				SuenoBabaYaga.INTERIORES_CABANA[i + 1],
+				"el evento expone el siguiente interior",
+			)
 
 	_comprobar(vistos, SuenoBabaYaga.INTERIORES_CABANA, "la secuencia interior es determinista")
 	var vuelta := sueno.aplicar_evento(SuenoBabaYaga.EVENTO_UMBRAL)
