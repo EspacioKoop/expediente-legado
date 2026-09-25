@@ -44,9 +44,18 @@ class RondaCierreFisica156Tests(unittest.TestCase):
         self.assertIn("RondaCierre.abandonar(estado)", self.controlador)
         self.assertIn('fase != "archivo"', self.controlador)
 
-    def test_no_toca_economia_ni_recompensas(self):
+    def test_concede_solo_el_sello_cosmetico_sin_tocar_balance(self):
+        self.assertIn('SELLO_RECOMPENSA := "planta-en-orden"', self.controlador)
+        self.assertIn("Sellos.registrar_sello", self.controlador)
+        self.assertIn("Sellos.tiene_sello", self.controlador)
         bloque = (self.fisica + self.controlador).lower()
-        for termino in ("sellos.", "gastar_accion", '["dinero"]', '["acciones"]', "vidas"):
+        for termino in (
+            "gastar_accion",
+            '["dinero"]',
+            '["acciones"]',
+            "pistas_descubiertas",
+            "vidas",
+        ):
             self.assertNotIn(termino, bloque)
 
     def test_montado_en_dia_y_con_smoke_de_recorrido_y_abandono(self):
@@ -54,6 +63,7 @@ class RondaCierreFisica156Tests(unittest.TestCase):
         self.assertIn("RondaCierreController", self.escena)
         self.assertIn("_probar_recorrido_completo", self.smoke)
         self.assertIn("_probar_abandono_parcial", self.smoke)
+        self.assertIn("_probar_sello_planta_en_orden", self.smoke)
 
 
 if __name__ == "__main__":
