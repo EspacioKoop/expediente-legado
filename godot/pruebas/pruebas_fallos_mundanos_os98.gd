@@ -16,10 +16,19 @@ func _probar() -> void:
 	for regla in catalogo:
 		_comprobar(not String(regla.get("id", "")).is_empty(), "cada regla tiene id")
 		_comprobar(not String(regla.get("causa", "")).is_empty(), "cada regla tiene causa")
-		_comprobar(not String(regla.get("resolucion", "")).is_empty(), "cada regla tiene resolución")
-		_comprobar(not String(regla.get("salida_segura", "")).is_empty(), "cada regla tiene salida segura")
-		_comprobar(not String(regla.get("regla_normal", "")).is_empty(), "cada regla define normalidad")
-		_comprobar(not String(regla.get("fixture_anomalo", "")).is_empty(), "cada regla expone fixture anómalo")
+		_comprobar(
+			not String(regla.get("resolucion", "")).is_empty(), "cada regla tiene resolución"
+		)
+		_comprobar(
+			not String(regla.get("salida_segura", "")).is_empty(), "cada regla tiene salida segura"
+		)
+		_comprobar(
+			not String(regla.get("regla_normal", "")).is_empty(), "cada regla define normalidad"
+		)
+		_comprobar(
+			not String(regla.get("fixture_anomalo", "")).is_empty(),
+			"cada regla expone fixture anómalo"
+		)
 
 	var shareware := FallosMundanosOs98.evaluar(
 		"shareware_expirado", {"evento": "licencia_expirada"}
@@ -45,12 +54,15 @@ func _probar() -> void:
 	_comprobar(cache["activo"], "la caché antigua es un fallo normal reproducible")
 	_comprobar(cache["superficie"] == "web98", "caché enlaza con #667")
 
-	var retirado_anomalo := FallosMundanosOs98.evaluar(
-		"medio_retirado",
-		{
-			"evento": "ruta_medio_retirado",
-			"fixture_anomalo": "archivo_accesible_tras_retirada",
-		},
+	var retirado_anomalo := (
+		FallosMundanosOs98
+		. evaluar(
+			"medio_retirado",
+			{
+				"evento": "ruta_medio_retirado",
+				"fixture_anomalo": "archivo_accesible_tras_retirada",
+			},
+		)
 	)
 	_comprobar(
 		retirado_anomalo["estado"] == FallosMundanosOs98.ESTADO_FIXTURE_ANOMALO,
@@ -62,9 +74,7 @@ func _probar() -> void:
 		"la anomalía conserva la regla normal que está rompiendo",
 	)
 
-	var inactivo := FallosMundanosOs98.evaluar(
-		"formato_no_reconocido", {"evento": "otro_evento"}
-	)
+	var inactivo := FallosMundanosOs98.evaluar("formato_no_reconocido", {"evento": "otro_evento"})
 	_comprobar(not inactivo["activo"], "un evento distinto no fabrica fallos")
 	_comprobar(
 		inactivo["estado"] == FallosMundanosOs98.ESTADO_NORMAL,
