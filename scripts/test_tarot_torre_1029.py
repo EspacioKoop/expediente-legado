@@ -13,7 +13,7 @@ CONTROLADOR = ROOT / "godot" / "guion" / "dia_inactividad_prometeo_app.gd"
 TEXTOS = ROOT / "godot" / "datos" / "final_alternativo_textos.json"
 ESCENA = ROOT / "godot" / "escenas" / "dia.tscn"
 PRUEBA_GODOT = "pruebas/pruebas_tarot_torre_1029.gd"
-RESUMEN = re.compile(r"tarot_torre_1029: (\\d+) pasadas, 0 fallos")
+RESUMEN = re.compile(r"tarot_torre_1029: (\d+) pasadas, 0 fallos")
 
 
 def bloque(fuente: str, inicio: str, fin: str) -> str:
