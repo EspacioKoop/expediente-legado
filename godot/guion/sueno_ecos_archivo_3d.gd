@@ -121,6 +121,17 @@ func _montar_panel(eco: Interactuable3D) -> void:
 	texto.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	eco.add_child(texto)
 
+	# Segunda impresión del mismo texto, usada solo como deformación visual.
+	# Nunca introduce contenido nuevo: repite exactamente texto_visible.
+	var eco_visual := Label3D.new()
+	eco_visual.name = "EcoVisual"
+	eco_visual.position = Vector3(0.0, 1.1, 0.02)
+	eco_visual.font_size = 30
+	eco_visual.pixel_size = 0.0032
+	eco_visual.modulate = Color(COLOR_TEXTO.r, COLOR_TEXTO.g, COLOR_TEXTO.b, 0.0)
+	eco_visual.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	eco.add_child(eco_visual)
+
 	var orden := Label3D.new()
 	orden.name = "Orden"
 	orden.position = Vector3(0.0, 1.72, 0.0)
@@ -184,6 +195,43 @@ func _crear_jamba(padre: Node3D, posicion_local: Vector3, giro_z: float) -> void
 	padre.add_child(jamba)
 
 
+## Cada familia documental altera la lectura espacial sin cambiar el puzzle:
+## repetición = copia desplazada; palabra ausente = ya viene en texto_visible;
+## rótulo deshecho = panel inclinado; eco lejano = copia tenue y ampliada.
+func _aplicar_manifestacion(
+	eco: Interactuable3D, manifestacion: String, slot: int, texto_visible: String
+) -> void:
+	var texto := eco.get_node("Texto") as Label3D
+	var eco_visual := eco.get_node("EcoVisual") as Label3D
+	var panel := eco.get_node("Panel") as MeshInstance3D
+	if texto == null or eco_visual == null or panel == null:
+		return
+
+	panel.rotation = Vector3.ZERO
+	panel.scale = Vector3.ONE
+	texto.rotation = Vector3.ZERO
+	eco_visual.text = ""
+	eco_visual.position = Vector3(0.0, 1.1, 0.02)
+	eco_visual.scale = Vector3.ONE
+	eco_visual.modulate = Color(COLOR_TEXTO.r, COLOR_TEXTO.g, COLOR_TEXTO.b, 0.0)
+
+	match manifestacion:
+		EcosArchivoPresentacion.MANIFESTACION_REPETICION:
+			eco_visual.text = texto_visible
+			eco_visual.position = Vector3(0.08, 1.04, 0.025)
+			eco_visual.modulate = Color(COLOR_TEXTO.r, COLOR_TEXTO.g, COLOR_TEXTO.b, 0.24)
+		EcosArchivoPresentacion.MANIFESTACION_ROTULO_DESHECHO:
+			var signo := -1.0 if slot % 2 == 0 else 1.0
+			panel.rotation.z = signo * (0.045 + float(slot) * 0.012)
+			panel.scale.x = 0.96 - float(slot) * 0.015
+			texto.rotation.z = -panel.rotation.z * 0.35
+		EcosArchivoPresentacion.MANIFESTACION_ECO_LEJANO:
+			eco_visual.text = texto_visible
+			eco_visual.position = Vector3(0.0, 1.1, 0.075)
+			eco_visual.scale = Vector3(1.08, 1.08, 1.0)
+			eco_visual.modulate = Color(COLOR_TEXTO.r, COLOR_TEXTO.g, COLOR_TEXTO.b, 0.16)
+
+
 func _al_activar_eco(_actor: Node, slot: int) -> void:
 	if presentacion == null or slot < 0 or slot >= _ecos_3d.size():
 		return
@@ -222,7 +270,11 @@ func _sincronizar() -> void:
 		var texto := eco.get_node("Texto") as Label3D
 		var orden := eco.get_node("Orden") as Label3D
 		var panel := eco.get_node("Panel") as MeshInstance3D
-		texto.text = str(dato.get("texto", ""))
+		var texto_visible := str(dato.get("texto_visible", dato.get("texto", "")))
+		texto.text = texto_visible
+		_aplicar_manifestacion(
+			eco, str(vista.get("manifestacion", "")), slot, texto_visible
+		)
 		var posicion := int(dato.get("posicion_seleccion", -1))
 		var eco_id := int(dato.get("id", -1))
 		orden.text = "" if posicion < 0 else "%d" % (posicion + 1)
