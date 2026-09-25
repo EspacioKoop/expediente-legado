@@ -10,6 +10,7 @@ func _initialize() -> void:
 	_probar_umbral_y_marcas()
 	_probar_fuera_de_campo()
 	_probar_controles_interactivos()
+	_probar_acabado_ambiental()
 	_probar_accesibilidad_y_reproduccion()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -228,6 +229,35 @@ func _probar_controles_interactivos() -> void:
 	_comprobar(sueno.ruta_retorno_disponible(), "los controles conservan la ruta de retorno")
 
 	actor.queue_free()
+	sueno.queue_free()
+
+
+func _probar_acabado_ambiental() -> void:
+	var sueno := SuenoBabaYaga.new()
+	get_root().add_child(sueno)
+	sueno.preparar()
+
+	var acabado := sueno.get_node_or_null("AcabadoAmbiental")
+	_comprobar(acabado != null, "existe pase ambiental separado de la lógica móvil")
+	_comprobar(
+		sueno.get_node_or_null("AcabadoAmbiental/BosqueFondo/TroncoColumna01") != null,
+		"bosque de fondo mezcla tronco y columna SIGA-98",
+	)
+	_comprobar(
+		sueno.get_node_or_null("AcabadoAmbiental/TechoOficinaInvertido/PanelTecho01") != null,
+		"techo de oficina invertido refuerza la escalada onírica",
+	)
+	_comprobar(
+		sueno.get_node_or_null("AcabadoAmbiental/PlanoAdministrativoPlegado/HojaA") != null,
+		"plano administrativo plegado materializa la hibridación sin texto",
+	)
+	var cocina := sueno.get_node_or_null("CabanaAncla/InteriorImposible/CocinaSIGA98")
+	_comprobar(cocina != null, "interior imposible contiene una cocina doméstica SIGA-98")
+	_comprobar(cocina.get_child_count() >= 9, "cocina tiene mobiliario suficiente para leerse como espacio")
+	var colisiones := acabado.find_children("*", "CollisionShape3D", true, false)
+	_comprobar(colisiones.is_empty(), "acabado ambiental no añade colisiones ni bloquea rutas")
+	_comprobar(sueno.cabana_visible(), "acabado conserva la cabaña-ancla")
+	_comprobar(sueno.ruta_retorno_disponible(), "acabado conserva el retorno seguro")
 	sueno.queue_free()
 
 
