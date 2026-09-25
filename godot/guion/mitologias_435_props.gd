@@ -18,9 +18,7 @@ const PAPEL := preload("res://arte/mitologias_435/materiales/papel_archivo_envej
 static func tablilla_uruk() -> Node3D:
 	var raiz := Node3D.new()
 	raiz.name = "TablillaUrukPBR"
-	var soporte := _caja(
-		raiz, "Tablilla", Vector3(2.4, 1.65, 0.22), Vector3.ZERO, ARCILLA
-	)
+	var soporte := _caja(raiz, "Tablilla", Vector3(2.4, 1.65, 0.22), Vector3.ZERO, ARCILLA)
 	soporte.rotation_degrees.z = -3.0
 	for fila in 5:
 		for columna in 7:
@@ -118,18 +116,14 @@ static func panoplia_aquiles() -> Node3D:
 		Vector3.ZERO,
 	)
 	greba.scale.z = 0.58
-	_caja(
-		raiz, "MarcaTalon", Vector3(0.30, 0.08, 0.34), Vector3(1.1, 0.10, -0.28), PAPEL
-	)
+	_caja(raiz, "MarcaTalon", Vector3(0.30, 0.08, 0.34), Vector3(1.1, 0.10, -0.28), PAPEL)
 	return raiz
 
 
 static func busto_hidra() -> Node3D:
 	var raiz := Node3D.new()
 	raiz.name = "BustoHidraPBR"
-	_cilindro(
-		raiz, "Pedestal", 1.25, 1.55, 0.55, Vector3(0.0, 0.28, 0.0), CALIZA, 24
-	)
+	_cilindro(raiz, "Pedestal", 1.25, 1.55, 0.55, Vector3(0.0, 0.28, 0.0), CALIZA, 24)
 	for indice in 5:
 		var angulo := deg_to_rad(-54.0 + indice * 27.0)
 		var x := sin(angulo) * 1.05
@@ -206,9 +200,7 @@ static func balanza_duat() -> Node3D:
 	raiz.name = "BalanzaDuatPBR"
 	_cilindro(raiz, "Base", 0.92, 1.18, 0.44, Vector3(0.0, 0.22, 0.0), CALIZA, 24)
 	_caja(raiz, "Pilar", Vector3(0.38, 2.8, 0.50), Vector3(0.0, 1.78, 0.0), CALIZA)
-	var brazo := _caja(
-		raiz, "Brazo", Vector3(4.6, 0.18, 0.30), Vector3(0.0, 3.12, 0.0), BRONCE
-	)
+	var brazo := _caja(raiz, "Brazo", Vector3(4.6, 0.18, 0.30), Vector3(0.0, 3.12, 0.0), BRONCE)
 	brazo.rotation_degrees.z = 1.8
 	for lado in [-1.0, 1.0]:
 		_cilindro(
@@ -256,9 +248,7 @@ static func legajo_siga() -> Node3D:
 	_caja(raiz, "TapaSuperior", Vector3(2.22, 0.08, 1.58), Vector3(0.0, 0.58, 0.0), PAPEL)
 	_caja(raiz, "CuerdaX", Vector3(2.48, 0.07, 0.07), Vector3(0.0, 0.66, 0.0), BRONCE)
 	_caja(raiz, "CuerdaZ", Vector3(0.07, 0.07, 1.88), Vector3(0.0, 0.67, 0.0), BRONCE)
-	_cilindro(
-		raiz, "Sello", 0.24, 0.27, 0.08, Vector3(0.0, 0.74, -0.02), BRONCE, 24
-	)
+	_cilindro(raiz, "Sello", 0.24, 0.27, 0.08, Vector3(0.0, 0.74, -0.02), BRONCE, 24)
 	return raiz
 
 

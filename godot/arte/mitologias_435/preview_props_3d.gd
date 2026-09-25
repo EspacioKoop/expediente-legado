@@ -1,5 +1,6 @@
 extends Node3D
 
+
 func _ready() -> void:
 	var piezas := [
 		["TablillaUruk", Mitologias435Props.tablilla_uruk(), Vector3(-9.0, 0.8, 0.0)],
