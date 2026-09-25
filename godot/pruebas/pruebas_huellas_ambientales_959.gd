@@ -8,6 +8,7 @@ class DiaDoble:
 	var partida := Partida.new()
 	var guardados := 0
 	var _mundo: Node3D
+	var _caminante: CharacterBody3D
 
 	func _init() -> void:
 		partida.estado = Partida.nueva()
@@ -96,6 +97,10 @@ func _probar() -> void:
 	mundo.name = "Mundo"
 	dia.add_child(mundo)
 	dia._mundo = mundo
+	dia._caminante = CharacterBody3D.new()
+	dia._caminante.name = "Caminante"
+	dia.add_child(dia._caminante)
+	dia._caminante.position = Vector3(0.2, 0.0, 0.2)
 	var terminal := Interactuable3D.new()
 	terminal.name = "TerminalMarcable"
 	terminal.position = Vector3(1.2, 0.8, -0.7)
@@ -131,6 +136,50 @@ func _probar() -> void:
 	_comprobar(
 		dia.partida.estado["huellas_ambientales"].size() == 1,
 		"objetos sin opt-in no generan huellas",
+	)
+
+	# El punto inicial solo siembra la celda: una carga o quedarse quieto no
+	# cuentan como tránsito. La marca aparece al volver tres veces a la misma.
+	for vuelta in range(3):
+		# Cada salida pisa una celda distinta: solo la celda de origen se repite
+		# tres veces y, por tanto, solo ella debe cruzar el umbral persistente.
+		dia._caminante.position = Vector3(1.6 + float(vuelta) * 1.4, 0.0, 0.2)
+		controller._process(0.0)
+		dia._caminante.position = Vector3(0.2, 0.0, 0.2)
+		controller._process(0.0)
+	var id_transito := "transito:archivo:0:0"
+	_comprobar(
+		dia.partida.estado["huellas_ambientales"].has(id_transito),
+		"tres retornos reales crean desgaste de tránsito",
+	)
+	var transito: Dictionary = dia.partida.estado["huellas_ambientales"][id_transito]
+	_comprobar(transito.get("tipo") == "paso", "el tránsito usa el tipo paso")
+	_comprobar(int(transito.get("usos", 0)) == 1, "el umbral crea un único uso persistente")
+	_comprobar(dia.guardados == 2, "solo el desgaste efectivo añade un guardado")
+	_comprobar(raiz.get_child_count() == 2, "el tránsito añade una segunda marca barata")
+
+	controller._process(0.0)
+	_comprobar(
+		int(dia.partida.estado["huellas_ambientales"][id_transito]["usos"]) == 1,
+		"quedarse en la celda no incrementa desgaste",
+	)
+
+	# Cambiar de mundo reconstruye la marca persistida, pero la propia carga no
+	# cuenta como una nueva pasada por la celda.
+	mundo.queue_free()
+	var mundo_recargado := Node3D.new()
+	mundo_recargado.name = "MundoRecargado"
+	dia.add_child(mundo_recargado)
+	dia._mundo = mundo_recargado
+	controller._process(0.0)
+	var raiz_recargada := mundo_recargado.get_node_or_null("HuellasAmbientales959")
+	_comprobar(
+		raiz_recargada != null and raiz_recargada.get_child_count() == 1,
+		"la recarga reconstruye la huella de tránsito",
+	)
+	_comprobar(
+		int(dia.partida.estado["huellas_ambientales"][id_transito]["usos"]) == 1,
+		"reconstruir el mundo no suma una pasada fantasma",
 	)
 
 	dia.queue_free()
