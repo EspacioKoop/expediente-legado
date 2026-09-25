@@ -123,9 +123,7 @@ static func modificadores(
 			CANAL_EXPOSICION,
 		)
 		if not exposicion.is_empty():
-			resultado.append(
-				_modificador(exposicion, CANAL_EXPOSICION, reduccion_movimiento)
-			)
+			resultado.append(_modificador(exposicion, CANAL_EXPOSICION, reduccion_movimiento))
 	return resultado
 
 
@@ -156,11 +154,14 @@ static func _elegir_familia(
 ) -> String:
 	if familias.is_empty():
 		return ""
-	var semilla := Azar.derivar_texto(
-		raiz_azar,
-		"sueno",
-		"ideologia:%s" % canal,
-		[jornada_actual],
+	var semilla := (
+		Azar
+		. derivar_texto(
+			raiz_azar,
+			"sueno",
+			"ideologia:%s" % canal,
+			[jornada_actual],
+		)
 	)
 	return String(familias[posmod(semilla, familias.size())])
 
