@@ -13,6 +13,21 @@ var momentum_bonus: float = 0.0
 var registro_literario: Dictionary = LiteraturaEventos.nuevo()
 
 
+## Vincula el autoload al único registro que vive en Partida. La referencia se
+## conserva deliberadamente: productores y guardado escriben el mismo objeto.
+func vincular_a_estado(estado: Dictionary) -> void:
+	registro_literario = LiteraturaEventos.asegurar_en_estado(estado)
+	obras_conocidas = []
+	for evento_bruto in LiteraturaEventos.eventos(
+		registro_literario, LiteraturaEventos.CANAL_CONOCIMIENTO
+	):
+		if typeof(evento_bruto) != TYPE_DICTIONARY:
+			continue
+		var obra_id := String(evento_bruto.get("obra_id", ""))
+		if not obra_id.is_empty() and not obras_conocidas.has(obra_id):
+			obras_conocidas.append(obra_id)
+
+
 func _ready() -> void:
 	_cargar_catalogo()
 
