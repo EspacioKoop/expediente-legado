@@ -81,10 +81,13 @@ func _modificadores_cielo_sueno() -> Array:
 	var reduccion_movimiento: bool = (
 		PreferenciasSiga.cargar().get("reduccion_movimiento", false) == true
 	)
-	return RELIGION_SUENO.modificadores(
-		registro,
-		int(jornada.get("dia", 0)),
-		reduccion_movimiento,
+	return (
+		RELIGION_SUENO
+		. modificadores(
+			registro,
+			int(jornada.get("dia", 0)),
+			reduccion_movimiento,
+		)
 	)
 
 
