@@ -11,8 +11,8 @@ const ROTULO: Texture2D = preload("res://arte/bit98/rotulo_bit98.svg")
 const CARTEL_JUEGA: Texture2D = preload("res://arte/bit98/cartel_juega.svg")
 const CARTEL_SEGUNDA_MANO: Texture2D = preload("res://arte/bit98/cartel_segunda_mano.svg")
 const CARTEL_NOVEDADES: Texture2D = preload("res://arte/bit98/cartel_novedades.svg")
-const YGGDRASILS_EGG_ATREZZO: Texture2D = preload(\
-	"res://assets/texturas/yggdrasil_ai_98/yggdrasils_egg_atrezzo_98.webp"\
+const YGGDRASILS_EGG_ATREZZO: Texture2D = preload(
+	"res://assets/texturas/yggdrasil_ai_98/yggdrasils_egg_atrezzo_98.webp"
 )
 const PORTADAS := [
 	preload("res://arte/consola98/cartuchos/caza_pixeles_98.jpg"),
@@ -211,7 +211,6 @@ static func _montar_interior(interior: Node3D) -> void:
 				0.72,
 				giro,
 			)
-
 
 	# Producto ficticio de 1998, solo atrezzo: no entra en RomsPropias ni en
 	# TiendaVideojuegos y, por tanto, no tiene precio, stock ni ROM asociada.
