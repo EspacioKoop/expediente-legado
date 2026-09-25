@@ -1,0 +1,140 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Shader" path="res://arte/sueno_fotorrealista/material_microdetalle.gdshader" id="1_shader"]
+
+[sub_resource type="ShaderMaterial" id="Plastico"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.25, 0.235, 0.205, 1)
+shader_parameter/metallic_amount = 0.02
+shader_parameter/roughness_base = 0.58
+shader_parameter/grime_strength = 0.31
+shader_parameter/wetness = 0.08
+shader_parameter/micro_scale = 26.0
+
+[sub_resource type="ShaderMaterial" id="Cristal"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.055, 0.082, 0.078, 1)
+shader_parameter/metallic_amount = 0.10
+shader_parameter/roughness_base = 0.10
+shader_parameter/grime_strength = 0.12
+shader_parameter/wetness = 0.92
+shader_parameter/emission_color = Color(0.055, 0.13, 0.12, 1)
+shader_parameter/emission_energy = 0.24
+shader_parameter/micro_scale = 52.0
+
+[sub_resource type="ShaderMaterial" id="Goma"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.045, 0.042, 0.038, 1)
+shader_parameter/metallic_amount = 0.0
+shader_parameter/roughness_base = 0.88
+shader_parameter/grime_strength = 0.18
+
+[sub_resource type="BoxMesh" id="Carcasa"]
+size = Vector3(0.88, 0.72, 0.58)
+
+[sub_resource type="BoxMesh" id="Pantalla"]
+size = Vector3(0.64, 0.45, 0.035)
+
+[sub_resource type="BoxMesh" id="MarcoH"]
+size = Vector3(0.71, 0.045, 0.055)
+
+[sub_resource type="BoxMesh" id="MarcoV"]
+size = Vector3(0.045, 0.49, 0.055)
+
+[sub_resource type="CylinderMesh" id="Mando"]
+top_radius = 0.045
+bottom_radius = 0.045
+height = 0.055
+radial_segments = 20
+
+[sub_resource type="BoxMesh" id="Ranura"]
+size = Vector3(0.42, 0.018, 0.018)
+
+[sub_resource type="BoxMesh" id="Gota"]
+size = Vector3(0.018, 0.10, 0.009)
+
+[node name="CRTCondensacion" type="Node3D"]
+metadata/origen_reconocible = "televisor_casa"
+metadata/uso = "sueno"
+metadata/issue = 87
+
+[node name="Carcasa" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.40, 0)
+mesh = SubResource("Carcasa")
+material_override = SubResource("Plastico")
+
+[node name="Pantalla" type="MeshInstance3D" parent="."]
+position = Vector3(-0.055, 0.43, -0.308)
+mesh = SubResource("Pantalla")
+material_override = SubResource("Cristal")
+
+[node name="MarcoSuperior" type="MeshInstance3D" parent="."]
+position = Vector3(-0.055, 0.685, -0.33)
+mesh = SubResource("MarcoH")
+material_override = SubResource("Plastico")
+
+[node name="MarcoInferior" type="MeshInstance3D" parent="."]
+position = Vector3(-0.055, 0.175, -0.33)
+mesh = SubResource("MarcoH")
+material_override = SubResource("Plastico")
+
+[node name="MarcoIzquierdo" type="MeshInstance3D" parent="."]
+position = Vector3(-0.43, 0.43, -0.33)
+mesh = SubResource("MarcoV")
+material_override = SubResource("Plastico")
+
+[node name="MarcoDerecho" type="MeshInstance3D" parent="."]
+position = Vector3(0.32, 0.43, -0.33)
+mesh = SubResource("MarcoV")
+material_override = SubResource("Plastico")
+
+[node name="MandoCanal" type="MeshInstance3D" parent="."]
+position = Vector3(0.355, 0.50, -0.345)
+rotation = Vector3(1.5708, 0, 0)
+mesh = SubResource("Mando")
+material_override = SubResource("Goma")
+
+[node name="MandoVolumen" type="MeshInstance3D" parent="."]
+position = Vector3(0.355, 0.37, -0.345)
+rotation = Vector3(1.5708, 0, 0)
+mesh = SubResource("Mando")
+material_override = SubResource("Goma")
+
+[node name="Ranura1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.09, 0.70, 0.296)
+mesh = SubResource("Ranura")
+material_override = SubResource("Goma")
+
+[node name="Ranura2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.09, 0.66, 0.296)
+mesh = SubResource("Ranura")
+material_override = SubResource("Goma")
+
+[node name="Ranura3" type="MeshInstance3D" parent="."]
+position = Vector3(-0.09, 0.62, 0.296)
+mesh = SubResource("Ranura")
+material_override = SubResource("Goma")
+
+[node name="Condensacion1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.26, 0.50, -0.328)
+rotation = Vector3(0, 0, -0.08)
+scale = Vector3(1, 1.35, 1)
+mesh = SubResource("Gota")
+material_override = SubResource("Cristal")
+
+[node name="Condensacion2" type="MeshInstance3D" parent="."]
+position = Vector3(0.02, 0.38, -0.328)
+rotation = Vector3(0, 0, 0.04)
+scale = Vector3(0.75, 1.72, 1)
+mesh = SubResource("Gota")
+material_override = SubResource("Cristal")
+
+[node name="Condensacion3" type="MeshInstance3D" parent="."]
+position = Vector3(0.19, 0.52, -0.328)
+rotation = Vector3(0, 0, -0.03)
+scale = Vector3(0.65, 0.88, 1)
+mesh = SubResource("Gota")
+material_override = SubResource("Cristal")
+
+[node name="AnclaInteraccion" type="Marker3D" parent="."]
+position = Vector3(0, 0.44, -0.58)
