@@ -72,6 +72,7 @@ static func aplicar_logros(estado: Dictionary) -> Array:
 
 
 static func confirmar_cierre(estado: Dictionary) -> Array:
+	Prometeo.archivar_trayectoria_ideologica(estado, "final_narrativo")
 	estado["final_politico_mostrado"] = true
 	return aplicar_logros(estado)
 
