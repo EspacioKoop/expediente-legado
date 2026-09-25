@@ -96,11 +96,11 @@ func _resolver_reposo() -> void:
 	var posicion: Vector2 = estado_bola.get("posicion", INICIO)
 	if posicion.distance_to(OBJETIVO) <= RADIO_OBJETIVO:
 		terminada = true
-		_refrescar_ui("HOYO COMPLETADO")
+		_refrescar_ui(tr("GOLF_HOYO_COMPLETADO"))
 		return
 	if golpes >= MAX_GOLPES:
 		terminada = true
-		_refrescar_ui("LÍMITE DE GOLPES ALCANZADO")
+		_refrescar_ui(tr("GOLF_HOYO_LIMITE"))
 		return
 	_refrescar_ui()
 
@@ -184,7 +184,7 @@ func _construir_ui() -> void:
 	capa.add_child(caja)
 
 	var titulo := Label.new()
-	titulo.text = "GOLF DE PASILLO · HOYO DE PRUEBA"
+	titulo.text = tr("GOLF_HOYO_TITULO")
 	titulo.add_theme_font_size_override("font_size", 22)
 	caja.add_child(titulo)
 
@@ -193,7 +193,7 @@ func _construir_ui() -> void:
 	caja.add_child(_estado)
 
 	_ayuda = Label.new()
-	_ayuda.text = "←/→ apuntar · ↑/↓ potencia · A/Enter golpear · B/Esc salir"
+	_ayuda.text = tr("GOLF_HOYO_AYUDA")
 	caja.add_child(_ayuda)
 
 
@@ -201,10 +201,10 @@ func _refrescar_ui(mensaje: String = "") -> void:
 	if not is_instance_valid(_estado):
 		return
 	if not mensaje.is_empty():
-		_estado.text = "%s · %d golpes" % [mensaje, golpes]
+		_estado.text = tr("GOLF_HOYO_RESULTADO") % [mensaje, golpes]
 		return
 	_estado.text = (
-		"Ángulo %+.0f° · Potencia %d%% · Golpes %d/%d"
+		tr("GOLF_HOYO_ESTADO")
 		% [
 			angulo_grados,
 			roundi(potencia * 100.0),
