@@ -68,7 +68,7 @@ static func _montar_uno(tienda: Node3D, dependiente: Dictionary) -> CompaneroInt
 	charla.name = "Conversacion"
 	charla.position = Vector3(0.0, 0.9, 0.0)
 	charla.nombre_visible = TranslationServer.translate(String(dependiente["clave"]))
-	charla.clave_dialogo = "%s_INSISTE" % String(dependiente["clave"])
+	charla.clave_dialogo = String(dependiente["insiste"])
 	charla.set_meta("dependiente", id)
 	charla.set_meta("charlas", 0)
 	raiz.add_child(charla)

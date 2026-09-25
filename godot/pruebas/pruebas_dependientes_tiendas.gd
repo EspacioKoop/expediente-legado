@@ -127,7 +127,7 @@ func _probar_clientes() -> void:
 	_comprobar(not DependientesTiendas.es_cliente(julian, del_quiosco), "Julián no tiene clientes")
 	# Las ROMs compradas viven en el perfil del jugador (`user://`), no en la
 	# partida: aquí solo se comprueba que Kike sí reconoce clientes.
-	_comprobar(bool(kike.get("cliente", false)), "Kike reconoce a quien le compra")
+	_comprobar(not String(kike["frase_cliente"]).is_empty(), "Kike reconoce a quien le compra")
 
 
 func _probar_montaje() -> void:

@@ -21,7 +21,6 @@ class_name EcosSueno
 extends RefCounted
 
 const CLAVE := "ecos_sueno_hoy"
-const VARIANTES := 3
 
 
 static func registrar(jornada: Dictionary, id: String) -> bool:
@@ -69,11 +68,12 @@ static func de_sala(jornada: Dictionary, quedan: int) -> Dictionary:
 		dependiente = DependientesTiendas.de(hablados[quedan % hablados.size()])
 		# La variante rota con el día y con la sala: la misma persona en dos
 		# salas de la misma noche no repite.
-		clave = "%s_SUENO_%d" % [dependiente["clave"], (dia + quedan - 1) % VARIANTES + 1]
+		var suenos: Array = dependiente["suenos"]
+		clave = String(suenos[(dia + quedan - 1) % suenos.size()])
 	elif quedan == 0:
 		var todos := DependientesTiendas.todos()
 		dependiente = todos[(dia - 1) % todos.size()]
-		clave = "%s_SUENO_EXTRANO" % dependiente["clave"]
+		clave = String(dependiente["extrano"])
 	else:
 		return {}
 	return {"id": dependiente["id"], "dependiente": dependiente, "frase": clave}
@@ -81,9 +81,8 @@ static func de_sala(jornada: Dictionary, quedan: int) -> Dictionary:
 
 ## Todas las claves oníricas de [param dependiente], para las pruebas.
 static func claves(dependiente: Dictionary) -> Array[String]:
-	var base := String(dependiente["clave"])
 	var salida: Array[String] = []
-	for n in range(1, VARIANTES + 1):
-		salida.append("%s_SUENO_%d" % [base, n])
-	salida.append("%s_SUENO_EXTRANO" % base)
+	for clave in dependiente["suenos"]:
+		salida.append(String(clave))
+	salida.append(String(dependiente["extrano"]))
 	return salida
