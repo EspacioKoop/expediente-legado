@@ -1,0 +1,116 @@
+name: Evidencia mitologías 435
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/evidencia-mitologias-435.yml'
+      - '.godot-version'
+      - 'godot/guion/sueno_gilgamesh.gd'
+      - 'godot/guion/sueno_aquiles.gd'
+      - 'godot/guion/sueno_duat.gd'
+      - 'godot/guion/mitologias_435_*'
+      - 'godot/arte/mitologias_435/**'
+      - 'godot/pruebas/capturar_mitologias_435.gd'
+      - 'scripts/test_evidencia_mitologias_435.py'
+      - 'docs/evidencias/mitologias-435/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidencia:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      GALLIUM_DRIVER: llvmpipe
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar Godot declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Importar proyecto
+        run: godot4 --headless --editor --path godot --quit
+
+      - name: Validar contrato del gate
+        run: python3 -m unittest -v scripts/test_evidencia_mitologias_435.py
+
+      - name: Renderizar Gilgamesh, Aquiles y Duat
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidencia-mitologias-435
+          xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+            --script res://pruebas/capturar_mitologias_435.gd -- \
+            "$GITHUB_WORKSPACE/evidencia-mitologias-435"
+          for archivo in \
+            436_gilgamesh_inicial.png \
+            436_gilgamesh_resuelto.png \
+            438_aquiles_revelado.png \
+            438_aquiles_resuelto.png \
+            441_duat_inicial.png \
+            441_duat_equilibrado.png; do
+            test -s "evidencia-mitologias-435/$archivo"
+          done
+          test -s evidencia-mitologias-435/manifest.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(Path("evidencia-mitologias-435/manifest.json").read_text())
+          if manifest["issue"] != 435:
+              raise SystemExit("issue incorrecto")
+          if manifest["veredicto_automatico"] is not False:
+              raise SystemExit("el gate no debe autoaprobar legibilidad")
+          if manifest["requiere_revision_humana"] is not True:
+              raise SystemExit("falta el gate humano explícito")
+          capturas = manifest["capturas"]
+          if len(capturas) != 6:
+              raise SystemExit("se esperaban seis capturas")
+          por_issue = {}
+          for captura in capturas:
+              por_issue.setdefault(captura["issue"], []).append(captura)
+          if sorted(por_issue) != [436, 438, 441]:
+              raise SystemExit("faltan familias en el manifiesto")
+          for issue, estados in por_issue.items():
+              hashes = {estado["sha256"] for estado in estados}
+              if len(estados) != 2 or len(hashes) != 2:
+                  raise SystemExit(f"#{issue}: los dos estados deben ser visualmente distintos")
+          print("6 capturas reproducibles; juicio de legibilidad pendiente de revisión humana")
+          PY
+
+      - name: Adjuntar evidencia visual
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-mitologias-435-${{ github.sha }}
+          path: evidencia-mitologias-435/
+          if-no-files-found: error
+          retention-days: 14
