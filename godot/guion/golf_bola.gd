@@ -1,9 +1,9 @@
 ## Simulación determinista de la bola del golf de pasillo (#158).
 ##
 ## Usa coordenadas locales 2D sobre el suelo del hoyo. No depende de nodos de
-## física: la escena 3D solo necesita proyectar `posicion` a X/Z y dibujar la
-## bola. El paso fijo, el rozamiento y el límite de pasos garantizan que un tiro
-## termina incluso si la presentación pierde frames.
+## física: la escena 3D solo proyecta la posición y dibuja la bola. El paso fijo,
+## el rozamiento, los obstáculos rectangulares y el watchdog hacen reproducible
+## cada tiro aunque la presentación pierda frames.
 class_name GolfBola
 extends RefCounted
 
@@ -21,6 +21,7 @@ const LIMITES_POR_DEFECTO := Rect2(-1.4, -2.4, 2.8, 4.8)
 static func nueva(
 	posicion: Vector2 = Vector2.ZERO,
 	limites: Rect2 = LIMITES_POR_DEFECTO,
+	obstaculos: Array = [],
 ) -> Dictionary:
 	if not _limites_validos(limites):
 		limites = LIMITES_POR_DEFECTO
@@ -28,13 +29,14 @@ static func nueva(
 		"posicion": _encajar(posicion, limites),
 		"velocidad": Vector2.ZERO,
 		"limites": limites,
+		"obstaculos": _obstaculos_validos(obstaculos),
 		"acumulador": 0.0,
 		"pasos": 0,
 		"detenida": true,
 	}
 
 
-## Inicia un tiro solo cuando la bola está quieta. `potencia` se expresa de 0 a
+## Inicia un tiro solo cuando la bola está quieta. potencia se expresa de 0 a
 ## 1 y se convierte a una velocidad acotada para que el controlador de entrada
 ## no pueda inyectar energía arbitraria.
 static func golpear(estado: Dictionary, direccion: Vector2, potencia: float) -> Dictionary:
@@ -87,6 +89,7 @@ static func _paso_fijo(estado: Dictionary) -> void:
 		estado["limites"] = limites
 
 	var posicion: Vector2 = estado.get("posicion", Vector2.ZERO)
+	var anterior := posicion
 	var velocidad: Vector2 = estado.get("velocidad", Vector2.ZERO)
 	posicion += velocidad * PASO_FIJO
 
@@ -109,6 +112,15 @@ static func _paso_fijo(estado: Dictionary) -> void:
 		posicion.y = max_y
 		velocidad.y = -absf(velocidad.y) * REBOTE_PARED
 
+	var rebote := _resolver_obstaculos(
+		anterior,
+		posicion,
+		velocidad,
+		estado.get("obstaculos", []),
+	)
+	posicion = rebote["posicion"]
+	velocidad = rebote["velocidad"]
+
 	var rapidez := velocidad.length()
 	var rapidez_nueva := maxf(rapidez - ROZAMIENTO * PASO_FIJO, 0.0)
 	if rapidez_nueva <= VELOCIDAD_REPOSO:
@@ -122,6 +134,66 @@ static func _paso_fijo(estado: Dictionary) -> void:
 
 	if velocidad == Vector2.ZERO or int(estado["pasos"]) >= MAX_PASOS:
 		_forzar_reposo(estado)
+
+
+static func _resolver_obstaculos(
+	anterior: Vector2,
+	posicion: Vector2,
+	velocidad: Vector2,
+	obstaculos: Array,
+) -> Dictionary:
+	for valor in obstaculos:
+		if typeof(valor) != TYPE_RECT2:
+			continue
+		var recta: Rect2 = valor
+		var margen := Vector2.ONE * RADIO_BOLA
+		var expandido := Rect2(recta.position - margen, recta.size + margen * 2.0)
+		if not expandido.has_point(posicion):
+			continue
+
+		if anterior.x <= expandido.position.x:
+			posicion.x = expandido.position.x
+			velocidad.x = -absf(velocidad.x) * REBOTE_PARED
+		elif anterior.x >= expandido.end.x:
+			posicion.x = expandido.end.x
+			velocidad.x = absf(velocidad.x) * REBOTE_PARED
+		elif anterior.y <= expandido.position.y:
+			posicion.y = expandido.position.y
+			velocidad.y = -absf(velocidad.y) * REBOTE_PARED
+		elif anterior.y >= expandido.end.y:
+			posicion.y = expandido.end.y
+			velocidad.y = absf(velocidad.y) * REBOTE_PARED
+		else:
+			var izquierda := absf(posicion.x - expandido.position.x)
+			var derecha := absf(expandido.end.x - posicion.x)
+			var arriba := absf(posicion.y - expandido.position.y)
+			var abajo := absf(expandido.end.y - posicion.y)
+			var menor := minf(minf(izquierda, derecha), minf(arriba, abajo))
+			if is_equal_approx(menor, izquierda):
+				posicion.x = expandido.position.x
+				velocidad.x = -absf(velocidad.x) * REBOTE_PARED
+			elif is_equal_approx(menor, derecha):
+				posicion.x = expandido.end.x
+				velocidad.x = absf(velocidad.x) * REBOTE_PARED
+			elif is_equal_approx(menor, arriba):
+				posicion.y = expandido.position.y
+				velocidad.y = -absf(velocidad.y) * REBOTE_PARED
+			else:
+				posicion.y = expandido.end.y
+				velocidad.y = absf(velocidad.y) * REBOTE_PARED
+	return {"posicion": posicion, "velocidad": velocidad}
+
+
+static func _obstaculos_validos(obstaculos: Array) -> Array:
+	var salida := []
+	for valor in obstaculos:
+		if typeof(valor) != TYPE_RECT2:
+			continue
+		var recta: Rect2 = valor
+		if recta.size.x <= 0.0 or recta.size.y <= 0.0:
+			continue
+		salida.append(recta)
+	return salida
 
 
 static func _forzar_reposo(estado: Dictionary) -> void:
