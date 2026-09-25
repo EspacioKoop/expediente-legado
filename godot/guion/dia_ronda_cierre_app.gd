@@ -104,7 +104,6 @@ func _al_completar_punto(_id_punto: String) -> void:
 	_guardar(dia)
 
 
-
 func _finalizar_y_recompensar(dia, estado: Dictionary) -> String:
 	var rango := RondaCierre.finalizar(estado)
 	_registrar_recompensa(dia, rango)
