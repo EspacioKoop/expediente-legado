@@ -255,7 +255,8 @@ func _probar_navegador() -> void:
 	_comprobar(navegador.url_actual() == "http://byte.local/", "expone la URL actual")
 	navegador.ir_atras()
 	_comprobar(
-		navegador.url_actual() == "http://laplaza.red98/", "Atrás recupera la visita anterior"
+		navegador.url_actual() == "http://bbs.bytelocal.net/#hilo=byte-modem-ocupado",
+		"Atrás recupera la visita anterior, incluido el hilo BBS",
 	)
 	navegador.ir_adelante()
 	_comprobar(
