@@ -5,6 +5,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 MUSICA = ROOT / "godot" / "guion" / "musica.gd"
 CAREO = ROOT / "godot" / "guion" / "careo_app.gd"
+FINAL_POLITICO = ROOT / "godot" / "guion" / "dia_climax_hastur_app.gd"
 GITATTRIBUTES = ROOT / ".gitattributes"
 
 
@@ -13,6 +14,7 @@ class MusicaPuntualTest(unittest.TestCase):
     def setUpClass(cls):
         cls.codigo = MUSICA.read_text(encoding="utf-8")
         cls.careo = CAREO.read_text(encoding="utf-8")
+        cls.final_politico = FINAL_POLITICO.read_text(encoding="utf-8")
         cls.atributos = GITATTRIBUTES.read_text(encoding="utf-8")
 
     def test_solo_declara_momentos_dramaticos(self):
@@ -55,6 +57,20 @@ class MusicaPuntualTest(unittest.TestCase):
         self.assertEqual(1, len(inicio))
         self.assertGreaterEqual(len(paradas), 2)
         self.assertIn("func _exit_tree() -> void:", self.careo)
+
+    def test_final_politico_gobierna_inicio_y_fin_de_la_musica(self):
+        inicio = re.findall(
+            r'Musica\s*\.\s*reproducir\(\s*self\s*,\s*"final"\s*\)',
+            self.final_politico,
+        )
+        paradas = re.findall(
+            r"Musica\s*\.\s*detener\(\s*self\s*\)",
+            self.final_politico,
+        )
+        self.assertEqual(1, len(inicio))
+        self.assertGreaterEqual(len(paradas), 2)
+        self.assertIn("func _cerrar_final() -> void:", self.final_politico)
+        self.assertIn("func _exit_tree() -> void:", self.final_politico)
 
     def test_no_duplica_efectos_ni_ambiente(self):
         self.assertNotIn("Sonido.sonar", self.codigo)
