@@ -4,11 +4,10 @@ class_name TraficoVialCC0
 extends RefCounted
 
 const CARPETA := "res://assets/modelos/traffic_road/"
+const HOLGURA_TAPA := 0.0015
 const PIEZAS := [
-	# 1,5 mm separan la cara inferior del asfalto: suficiente para evitar
-	# z-fighting sin que la tapa se lea como una pieza apoyada sobre la calzada.
-	["TapaSur", "Manhole_Cover", Vector3(-2.0, 0.0015, -5.0), 0.70, 0.0],
-	["TapaNorte", "Manhole_Cover", Vector3(2.0, 0.0015, 11.0), 0.70, 0.0],
+	["TapaSur", "Manhole_Cover", Vector3(-2.0, 0.0, -5.0), 0.70, 0.0],
+	["TapaNorte", "Manhole_Cover", Vector3(2.0, 0.0, 11.0), 0.70, 0.0],
 	["Barrera", "Road_Block", Vector3(3.25, 0.0, 6.0), 1.10, 90.0],
 	["ConoSur", "Traffic_Cone", Vector3(3.25, 0.0, 4.7), 0.65, 0.0],
 	["ConoNorte", "Traffic_Cone", Vector3(3.25, 0.0, 7.3), 0.65, 0.0],
@@ -54,6 +53,10 @@ static func _crear_pieza(ficha: Array, materiales: Dictionary) -> Node3D:
 	var factor: float = ficha[3] / medida
 	modelo.scale = Vector3.ONE * factor
 	modelo.position = -Vector3(caja.get_center().x, caja.position.y, caja.get_center().z) * factor
+	if ficha[1] == "Manhole_Cover":
+		# La tapa tiene grosor real: se empotra en el asfalto y solo se deja
+		# una holgura mínima en la cara superior para evitar z-fighting.
+		modelo.position.y -= caja.size.y * factor - HOLGURA_TAPA
 	if ficha[1] == "Road_Block":
 		# La barrera alcanza la calzada: una caja evita atravesarla sin
 		# introducir física de vehículo ni colisión por triángulo.
