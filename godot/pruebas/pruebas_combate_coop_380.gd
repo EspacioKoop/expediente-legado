@@ -47,9 +47,7 @@ func _probar_contrato_cerrado() -> void:
 	var ronda_fuera: Dictionary = evento["event"].duplicate(true)
 	ronda_fuera["payload"]["round"] = 3
 	_comprobar(
-		"solo existen tres rondas",
-		CombateCoopDatos.validar_evento(ronda_fuera, AHORA)["ok"],
-		false
+		"solo existen tres rondas", CombateCoopDatos.validar_evento(ronda_fuera, AHORA)["ok"], false
 	)
 
 
@@ -92,17 +90,13 @@ func _probar_vertical_dos_clientes() -> void:
 		for evento in recibidas["choices"]:
 			var actor := String(evento["actor_public_id"])
 			var accion := String(evento["payload"]["action"])
-			var resolucion := CombateCoop.elegir(
-				sesion, actor, accion, func() -> float: return 0.0
-			)
+			var resolucion := CombateCoop.elegir(sesion, actor, accion, func() -> float: return 0.0)
 			_comprobar("elección aceptada %d %s" % [ronda, actor], resolucion["ok"], true)
 
 	_comprobar("exactamente tres rondas", sesion["historial"].size(), 3)
 	_comprobar("sesión termina", sesion["terminado"], true)
 	_comprobar(
-		"combinación usa ambos inputs",
-		sesion["historial"][0]["accion_combinada"],
-		"objecion"
+		"combinación usa ambos inputs", sesion["historial"][0]["accion_combinada"], "objecion"
 	)
 	_comprobar("cerrar A es seguro", cliente_a.cerrar()["ok"], true)
 	_comprobar("cerrar B es seguro", cliente_b.cerrar()["ok"], true)
@@ -123,14 +117,10 @@ func _probar_offline_y_partida_intacta() -> void:
 		"ventanilla_coop", "LOCAL-380", "reclamacion-offline", "anon-offline"
 	)
 	_comprobar("offline no bloquea apertura", apertura["ok"], true)
-	var publicacion := offline.publicar_eleccion(
-		0, "objecion", "test-380", AHORA, "offline-0"
-	)
+	var publicacion := offline.publicar_eleccion(0, "objecion", "test-380", AHORA, "offline-0")
 	_comprobar("offline descarta explícitamente", publicacion["status"], "discarded_offline")
 	_comprobar(
-		"offline no inventa elecciones",
-		offline.consultar_elecciones(0, AHORA)["choices"].size(),
-		0
+		"offline no inventa elecciones", offline.consultar_elecciones(0, AHORA)["choices"].size(), 0
 	)
 	offline.cerrar()
 	_comprobar("Partida queda byte a byte igual", JSON.stringify(partida), antes)
