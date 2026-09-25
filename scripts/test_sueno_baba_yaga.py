@@ -80,6 +80,12 @@ class SuenoBabaYagaTest(unittest.TestCase):
         self.assertIn('"CabanaAncla"', self.sueno)
         self.assertIn('"InteriorImposible"', self.sueno)
         self.assertIn('"RetornoSeguro"', self.sueno)
+        self.assertIn('"DintelRetorno"', self.sueno)
+        self.assertIn('"LecturaComparacion"', self.sueno)
+        self.assertIn('"OrigenMarca"', self.sueno)
+        self.assertIn('"DestinoActual"', self.sueno)
+        self.assertIn("func ultima_comparacion()", self.sueno)
+        self.assertIn("PASOS_RASTRO := 5", self.sueno)
         self.assertIn('get_node("CabanaAncla").visible = true', self.sueno)
         self.assertIn('get_node("RetornoSeguro").visible = true', self.sueno)
 

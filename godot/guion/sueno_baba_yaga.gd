@@ -53,10 +53,13 @@ const COLOR_CABANA := Color(0.42, 0.31, 0.20)
 const COLOR_INTERIOR := Color(0.54, 0.43, 0.27)
 const COLOR_MARCA := Color(0.72, 0.62, 0.30)
 const COLOR_RETORNO := Color(0.28, 0.50, 0.37)
+const COLOR_COMPARACION := Color(0.72, 0.78, 0.67)
+const PASOS_RASTRO := 5
 
 var _fase_umbral := 0
 var _fase_fuera_campo := 0
 var _marcas: Dictionary = {}
+var _ultima_comparacion: Dictionary = {}
 var _montado := false
 
 
@@ -105,6 +108,7 @@ func preparar() -> void:
 	_montar_cabana()
 	_montar_retorno()
 	_montar_marcas()
+	_montar_lectura_comparacion()
 	_montar_controles()
 	_montar_luz_y_camara()
 	_aplicar_estado_visual()
@@ -123,6 +127,10 @@ func marcas_persistentes() -> Dictionary:
 	return _marcas.duplicate(true)
 
 
+func ultima_comparacion() -> Dictionary:
+	return _ultima_comparacion.duplicate(true)
+
+
 func dejar_marca(nombre: String, objetivo: String) -> bool:
 	preparar()
 	var id := nombre.strip_edges()
@@ -133,18 +141,22 @@ func dejar_marca(nombre: String, objetivo: String) -> bool:
 		"objetivo": objetivo,
 		"posicion": posiciones[objetivo],
 	}
+	_ultima_comparacion = {}
 	_sincronizar_marcas_visual()
+	_sincronizar_comparacion_visual()
 	return true
 
 
 func comparar_marca(nombre: String) -> Dictionary:
 	if not _marcas.has(nombre):
-		return {"ok": false, "movido": false}
+		_ultima_comparacion = {"ok": false, "movido": false}
+		_sincronizar_comparacion_visual()
+		return _ultima_comparacion.duplicate(true)
 	var marca: Dictionary = _marcas[nombre]
 	var objetivo := String(marca.get("objetivo", ""))
 	var origen: Vector3 = marca.get("posicion", Vector3.ZERO)
 	var actual: Vector3 = posiciones_actuales().get(objetivo, origen)
-	return {
+	_ultima_comparacion = {
 		"ok": true,
 		"objetivo": objetivo,
 		"origen": origen,
@@ -152,6 +164,8 @@ func comparar_marca(nombre: String) -> Dictionary:
 		"movido": not origen.is_equal_approx(actual),
 		"distancia": origen.distance_to(actual),
 	}
+	_sincronizar_comparacion_visual()
+	return _ultima_comparacion.duplicate(true)
 
 
 ## Regla espacial:
@@ -174,7 +188,9 @@ func aplicar_evento(
 		cambiado = true
 
 	if cambiado:
+		_ultima_comparacion = {}
 		_aplicar_estado_visual()
+		_sincronizar_comparacion_visual()
 
 	var salida := plan_transicion(reduccion_movimiento)
 	(
@@ -208,6 +224,7 @@ func estado_reproducible() -> Dictionary:
 		"fase_umbral": _fase_umbral,
 		"fase_fuera_campo": _fase_fuera_campo,
 		"marcas": _marcas.duplicate(true),
+		"ultima_comparacion": _ultima_comparacion.duplicate(true),
 	}
 
 
@@ -216,9 +233,14 @@ func restaurar_estado(estado: Dictionary) -> void:
 	_fase_fuera_campo = posmod(int(estado.get("fase_fuera_campo", 0)), POSICIONES_ARCHIVADOR.size())
 	var marcas = estado.get("marcas", {})
 	_marcas = marcas.duplicate(true) if typeof(marcas) == TYPE_DICTIONARY else {}
+	var comparacion = estado.get("ultima_comparacion", {})
+	_ultima_comparacion = (
+		comparacion.duplicate(true) if typeof(comparacion) == TYPE_DICTIONARY else {}
+	)
 	if _montado:
 		_aplicar_estado_visual()
 		_sincronizar_marcas_visual()
+		_sincronizar_comparacion_visual()
 
 
 func _montar_bosque() -> void:
@@ -317,6 +339,27 @@ func _montar_retorno() -> void:
 		Vector3(0.0, 0.10, 5.2),
 		COLOR_RETORNO,
 	)
+	_crear_caja(
+		self,
+		"BalizaRetornoIzquierda",
+		Vector3(0.18, 1.9, 0.18),
+		Vector3(-1.0, 0.95, 5.2),
+		COLOR_RETORNO,
+	)
+	_crear_caja(
+		self,
+		"BalizaRetornoDerecha",
+		Vector3(0.18, 1.9, 0.18),
+		Vector3(1.0, 0.95, 5.2),
+		COLOR_RETORNO,
+	)
+	_crear_caja(
+		self,
+		"DintelRetorno",
+		Vector3(2.18, 0.18, 0.18),
+		Vector3(0.0, 1.82, 5.2),
+		COLOR_RETORNO,
+	)
 
 
 func _montar_marcas() -> void:
@@ -324,6 +367,13 @@ func _montar_marcas() -> void:
 	marcas.name = "MarcasPersistentes"
 	add_child(marcas)
 	_sincronizar_marcas_visual()
+
+
+func _montar_lectura_comparacion() -> void:
+	var lectura := Node3D.new()
+	lectura.name = "LecturaComparacion"
+	add_child(lectura)
+	_sincronizar_comparacion_visual()
 
 
 func _montar_controles() -> void:
@@ -453,6 +503,46 @@ func _sincronizar_marcas_visual() -> void:
 			Vector3(0.55, 0.08, 0.55),
 			posicion + Vector3(0.0, 0.06, 0.0),
 			COLOR_MARCA,
+		)
+
+
+func _sincronizar_comparacion_visual() -> void:
+	var contenedor := get_node_or_null("LecturaComparacion")
+	if contenedor == null:
+		return
+	for hijo in contenedor.get_children():
+		contenedor.remove_child(hijo)
+		hijo.queue_free()
+	if (
+		not bool(_ultima_comparacion.get("ok", false))
+		or not bool(_ultima_comparacion.get("movido", false))
+	):
+		return
+	var origen: Vector3 = _ultima_comparacion.get("origen", Vector3.ZERO)
+	var actual: Vector3 = _ultima_comparacion.get("actual", origen)
+	_crear_caja(
+		contenedor,
+		"OrigenMarca",
+		Vector3(0.82, 0.08, 0.82),
+		origen + Vector3(0.0, 0.08, 0.0),
+		COLOR_MARCA,
+	)
+	_crear_caja(
+		contenedor,
+		"DestinoActual",
+		Vector3(0.32, 0.88, 0.32),
+		actual + Vector3(0.0, 0.44, 0.0),
+		COLOR_COMPARACION,
+	)
+	for i in range(1, PASOS_RASTRO):
+		var proporcion := float(i) / float(PASOS_RASTRO)
+		var paso := origen.lerp(actual, proporcion)
+		_crear_caja(
+			contenedor,
+			"Paso_%02d" % i,
+			Vector3(0.18, 0.06, 0.18),
+			paso + Vector3(0.0, 0.05, 0.0),
+			COLOR_COMPARACION,
 		)
 
 
