@@ -241,7 +241,7 @@ func _comprobar_materiales(pieza: Node3D, id: String, relieve := false) -> void:
 			var shader := ""
 			if material is ShaderMaterial and material.shader != null:
 				shader = material.shader.resource_path
-			if material.has_meta("identidad_historica_275"):
+			if material != null and material.has_meta("identidad_historica_275"):
 				if shader != Espacio3D.shader_del_sitio():
 					ajenas += 1
 				continue
