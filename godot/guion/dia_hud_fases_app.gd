@@ -119,16 +119,12 @@ static func modelo_recursos(estado_partida: Dictionary) -> Dictionary:
 			var lecturas_hechas := leido_hoy.size() if leido_hoy is Array else 0
 			modelo["acciones"] = int(jornada.get("acciones", 0))
 			modelo["pistas"] = pistas.size() if pistas is Array else 0
-			modelo["lecturas_gratis"] = maxi(
-				0, Jornada.DOCUMENTOS_GRATIS_POR_DIA - lecturas_hechas
-			)
+			modelo["lecturas_gratis"] = maxi(0, Jornada.DOCUMENTOS_GRATIS_POR_DIA - lecturas_hechas)
 		"trayecto":
 			modelo["acciones"] = int(jornada.get("acciones", 0))
 			modelo["objetos"] = Inventario.visibles(inventario, false).size()
 			var vencimiento := Jornada.alquiler_vencimiento(dia)
-			modelo["alquiler_hoy"] = (
-				dia == vencimiento and Jornada.alquiler_pendiente(jornada)
-			)
+			modelo["alquiler_hoy"] = (dia == vencimiento and Jornada.alquiler_pendiente(jornada))
 			modelo["alquiler_importe"] = Jornada.PRECIO_ALQUILER
 		"casa":
 			modelo["objetos"] = Inventario.visibles(inventario, true).size()
@@ -204,9 +200,7 @@ func _texto_de_recursos(modelo: Dictionary) -> String:
 		"trayecto":
 			_anadir_parte(partes, _formatear_recurso("dinero", [modelo.get("dinero", 0)]))
 			_anadir_parte(partes, _formatear_recurso("acciones", [modelo.get("acciones", 0)]))
-			_anadir_parte(
-				partes, _formatear_recurso("objetos_fuera", [modelo.get("objetos", 0)])
-			)
+			_anadir_parte(partes, _formatear_recurso("objetos_fuera", [modelo.get("objetos", 0)]))
 			if bool(modelo.get("alquiler_hoy", false)):
 				_anadir_parte(
 					partes,
@@ -216,9 +210,7 @@ func _texto_de_recursos(modelo: Dictionary) -> String:
 				)
 		"casa":
 			_anadir_parte(partes, _formatear_recurso("dinero", [modelo.get("dinero", 0)]))
-			_anadir_parte(
-				partes, _formatear_recurso("objetos_casa", [modelo.get("objetos", 0)])
-			)
+			_anadir_parte(partes, _formatear_recurso("objetos_casa", [modelo.get("objetos", 0)]))
 
 	return String(_textos_recursos.get("separador", " ")).join(PackedStringArray(partes))
 
