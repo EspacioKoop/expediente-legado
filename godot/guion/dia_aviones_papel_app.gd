@@ -10,6 +10,16 @@ const ESCENA_AVIONES := preload("res://escenas/minijuego_aviones_papel_jornada.t
 const POSICION_OFERTA := Vector3(3.6, 0.82, 0.0)
 const RADIO_OFERTA := 0.55
 const DURACION_COMENTARIO := 4.0
+const POSICIONES_COMPANEROS := [
+	Vector3(2.65, 0.0, 0.95),
+	Vector3(4.55, 0.0, 0.85),
+	Vector3(4.35, 0.0, -1.00),
+]
+const COLORES_COMPANEROS := [
+	Color(0.48, 0.60, 0.70),
+	Color(0.66, 0.48, 0.52),
+	Color(0.52, 0.62, 0.46),
+]
 
 var _mundo_id := 0
 var _oferta: Interactuable3D
@@ -25,6 +35,7 @@ var _menu_unhandled_previo := true
 var _mouse_previo := Input.MOUSE_MODE_CAPTURED
 var _presentacion_guardada := false
 var _comentario: CanvasLayer
+var _companeros_grupo: Node3D
 
 
 func _process(_delta: float) -> void:
@@ -42,6 +53,7 @@ func _process(_delta: float) -> void:
 	if id != _mundo_id:
 		_mundo_id = id
 		_oferta = null
+		_retirar_companeros()
 
 	if not AvionesPapelDescanso.disponible(dia.jornada):
 		_retirar_oferta()
@@ -51,6 +63,7 @@ func _process(_delta: float) -> void:
 
 
 func _exit_tree() -> void:
+	_retirar_companeros()
 	if _presentacion_guardada:
 		_restaurar_presentacion()
 
@@ -88,12 +101,56 @@ func _montar_oferta(mundo: Node3D) -> void:
 	oferta.activado.connect(_abrir)
 	mundo.add_child(oferta)
 	_oferta = oferta
+	_montar_companeros(mundo)
+
+
+func _montar_companeros(mundo: Node3D) -> void:
+	_retirar_companeros()
+	var grupo := Node3D.new()
+	grupo.name = "AvionesPapelCompaneros"
+	mundo.add_child(grupo)
+	_companeros_grupo = grupo
+
+	var preferencias := PreferenciasSiga.cargar()
+	var reducir := bool(preferencias.get("reduccion_movimiento", false))
+	for indice in POSICIONES_COMPANEROS.size():
+		var cuerpo := Node3D.new()
+		cuerpo.name = "CompaneroAviones%d" % (indice + 1)
+		cuerpo.position = POSICIONES_COMPANEROS[indice]
+		# Miran hacia la mesa/oferta de aviones sin convertirse en obstáculos.
+		var hacia := POSICION_OFERTA - cuerpo.position
+		cuerpo.rotation.y = atan2(-hacia.x, -hacia.z)
+		grupo.add_child(cuerpo)
+		if not Modelos.persona(cuerpo, "persona", COLORES_COMPANEROS[indice]):
+			cuerpo.queue_free()
+			continue
+
+		var idle := CompaneroIdle3D.new()
+		idle.name = "IdleAviones%d" % (indice + 1)
+		grupo.add_child(idle)
+		# Reutiliza #134: dos esperan respirando y uno cruza los brazos.
+		idle.configurar(
+			cuerpo,
+			hash("aviones-papel-%d" % indice),
+			false,
+			reducir,
+			false,
+			indice == 2,
+			false,
+		)
+
+
+func _retirar_companeros() -> void:
+	if is_instance_valid(_companeros_grupo):
+		_companeros_grupo.queue_free()
+	_companeros_grupo = null
 
 
 func _retirar_oferta() -> void:
 	if is_instance_valid(_oferta):
 		_oferta.queue_free()
 	_oferta = null
+	_retirar_companeros()
 
 
 func _abrir(_actor: Node) -> void:
