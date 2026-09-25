@@ -190,6 +190,7 @@ func _descontar_temporizadores(delta: float) -> void:
 	if expirados.has("doctrina"):
 		_cerrar_doctrina()
 
+
 func _descontar_tregua_religion(delta: float) -> void:
 	if _tregua_religion_restante <= 0.0:
 		return
