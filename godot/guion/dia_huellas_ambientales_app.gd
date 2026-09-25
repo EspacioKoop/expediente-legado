@@ -120,6 +120,8 @@ func _tamano_de(tipo: String) -> Vector2:
 			return Vector2(0.28, 0.24)
 		"lectura":
 			return Vector2(0.24, 0.20)
+		"equipo":
+			return Vector2(0.42, 0.34)
 		_:
 			return Vector2(0.34, 0.23)
 
