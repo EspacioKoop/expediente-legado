@@ -177,7 +177,7 @@ func _capturar_rotulo_3d(salida: String) -> Dictionary:
 	luz.light_energy = 1.5
 	mundo.add_child(luz)
 
-	var controlador := load("res://guion/dia_climax_os98_app.gd").new()
+	var controlador: Node = Controller.new()
 	controlador._sincronizar_rotulos_3d(mundo, CONTEXTO, false, 0.78)
 	var original := String(rotulo.get_meta("_texto_corrupto_original_806", ""))
 	var visual := rotulo.text
