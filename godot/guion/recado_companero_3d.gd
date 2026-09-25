@@ -112,11 +112,11 @@ func _entrar(nueva: int) -> void:
 	_indice = 1
 	match fase:
 		Fase.LEVANTARSE:
-			_duracion = AnimacionesUAL.duracion("levantarse")
+			_duracion = AnimacionesUAL.duracion("levantarse", _cuerpo)
 		Fase.SENTARSE:
-			_duracion = AnimacionesUAL.duracion("sentarse")
+			_duracion = AnimacionesUAL.duracion("sentarse", _cuerpo)
 		Fase.GESTO:
-			_duracion = AnimacionesUAL.duracion("coger")
+			_duracion = AnimacionesUAL.duracion("coger", _cuerpo)
 		_:
 			_duracion = 0.0
 	_reproducir_fase()
