@@ -26,6 +26,7 @@ CAMPOS_TRADUCIBLES = {
     "etiqueta",
     "secuelaUtil",
     "secuelaConfusion",
+    "ataques",
 }
 
 
@@ -114,8 +115,8 @@ class CatalogoLocaleTest(unittest.TestCase):
                 self.assertNotEqual(opcion_es["etiqueta"], opcion_en["etiqueta"])
                 self.assertNotEqual(opcion_es["texto"], opcion_en["texto"])
 
-    def test_casos_1_a_4_estan_traducidos_al_ingles(self):
-        for indice in (0, 1, 2, 3):
+    def test_casos_1_a_6_estan_traducidos_al_ingles(self):
+        for indice in (0, 1, 2, 3, 4, 5):
             caso_es = self.es["casos"][indice]
             caso_en = self.en["casos"][indice]
             self.assertEqual(caso_es["id"], caso_en["id"])
@@ -141,6 +142,17 @@ class CatalogoLocaleTest(unittest.TestCase):
                 self.assertNotEqual(
                     sospechoso_es["desenlace"], sospechoso_en["desenlace"]
                 )
+
+    def test_ataques_del_caso_6_son_texto_localizable(self):
+        caso_es = self.es["casos"][5]
+        caso_en = self.en["casos"][5]
+        for sospechoso_es, sospechoso_en in zip(
+            caso_es["sospechosos"], caso_en["sospechosos"], strict=True
+        ):
+            for ataque_es, ataque_en in zip(
+                sospechoso_es["ataques"], sospechoso_en["ataques"], strict=True
+            ):
+                self.assertNotEqual(ataque_es, ataque_en)
 
     def test_el_contrato_permite_traducir_texto_pero_no_quitar_fichas(self):
         traducida = copy.deepcopy(self.es)

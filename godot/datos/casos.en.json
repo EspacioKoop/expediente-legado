@@ -342,8 +342,8 @@
     },
     {
       "id": "caso5@5",
-      "titulo": "El expediente MEMO-1978-014 (y 1993, y 2007)",
-      "descripcion": "Un memorándum con el mismo folio, la misma fecha de redacción y el mismo texto letra por letra —incluida una falta de ortografía— aparece archivado por separado en 1978, 1993 y 2007. La copia de 2007 incluye además una nota manuscrita que se dirige, literalmente, 'al auditor que lo esté leyendo ahora'. Determinar cuál copia es la original, si alguna lo es.",
+      "titulo": "The MEMO-1978-014 file (and 1993, and 2007)",
+      "descripcion": "A memorandum with the same folio, the same drafting date, and the exact same text letter for letter — including a spelling mistake — appears filed separately in 1978, 1993, and 2007. The 2007 copy also contains a handwritten note addressed, literally, 'to the auditor reading this now.' Determine which copy is the original, if any of them are.",
       "anioSuceso": 1978,
       "estado": "ABIERTO",
       "confidencial": false,
@@ -353,21 +353,21 @@
           "id": "memo5@5",
           "tipo": "MEMORANDO",
           "folio": "MEMO-1978-014",
-          "contenido": "Texto idéntico en las tres copias archivadas (1978, 1993, 2007), incluida la misma falta de ortografía en la tercera línea. La copia de 2007 trae, al margen y a mano: 'esto es para el auditor que lo esté leyendo ahora, sin importar cuándo sea ahora.'",
+          "contenido": "Identical text in all three archived copies (1978, 1993, 2007), including the same spelling mistake on the third line. The 2007 copy bears a handwritten note in the margin: 'this is for the auditor reading it now, no matter when now is.'",
           "fecha": "2007-04-09"
         },
         {
           "id": "acta5@5",
           "tipo": "ACTA",
           "folio": "ACTA-2007-002",
-          "contenido": "Acta del Archivo Muerto: se deja constancia de que este expediente debe 'revisarse' aproximadamente cada quince años, aunque no existe razón administrativa registrada para dicha periodicidad, ni acuerdo que la haya establecido.",
+          "contenido": "Dead Archive report: it is recorded that this file must be 'reviewed' approximately every fifteen years, although there is no recorded administrative reason for that interval and no agreement establishing it.",
           "fecha": "2007-04-09"
         },
         {
           "id": "empleado5@5",
           "tipo": "EMPLEADO",
           "folio": "EMP-AUD-1993",
-          "contenido": "Auditor predecesor, comisión especial de 1993. Nota de cierre de su propio informe sobre este expediente, palabra por palabra idéntica a la que cualquier auditor posterior redactaría al llegar a la misma conclusión.",
+          "contenido": "Previous auditor, special commission of 1993. Closing note in their own report on this file, word for word identical to what any later auditor would write upon reaching the same conclusion.",
           "fecha": "1993-05-02"
         }
       ],
@@ -375,53 +375,53 @@
         {
           "id": "pista9@5",
           "registroOrigen": "memo5@5",
-          "descripcion": "Las tres copias comparten folio, fecha y hasta errores de mecanografía idénticos: algo imposible si en verdad fueron redactadas por separado.",
-          "fraseGatillo": "incluida la misma falta de ortografía en la tercera línea"
+          "descripcion": "All three copies share the same folio, date, and even identical typing errors: impossible if they were truly drafted separately.",
+          "fraseGatillo": "including the same spelling mistake on the third line"
         },
         {
           "id": "pista10@5",
           "registroOrigen": "empleado5@5",
-          "descripcion": "El informe de cierre del auditor de 1993 coincide, palabra por palabra, con lo que el auditor actual está a punto de escribir.",
-          "fraseGatillo": "palabra por palabra idéntica a la que cualquier auditor posterior redactaría"
+          "descripcion": "The 1993 auditor's closing report matches, word for word, what the current auditor is about to write.",
+          "fraseGatillo": "word for word identical to what any later auditor would write"
         },
         {
           "id": "pista25@5",
           "registroOrigen": "memo5@5",
           "registroOrigen2": "empleado5@5",
-          "descripcion": "La nota manuscrita en el margen del memo de 2007 y el informe de cierre del auditor de 1993 están escritos con la misma letra, aunque fueron encontrados en cajas archivadas catorce años y miles de kilómetros aparte."
+          "descripcion": "The handwritten note in the margin of the 2007 memo and the 1993 auditor's closing report are written in the same hand, although they were found in archive boxes fourteen years and thousands of kilometers apart."
         },
         {
           "id": "pista32@5",
           "registroOrigen": "acta5@5",
           "registroOrigen2": "memo5@5",
-          "descripcion": "La periodicidad de revisión que fija esta acta coincide, año con año, con las fechas de las tres copias del memo — como si ya se supiera, en 2007, cuándo iba a aparecer la siguiente."
+          "descripcion": "The review interval set by this report matches, year for year, the dates of the three memorandum copies — as though in 2007 someone already knew when the next one would appear."
         }
       ],
       "sospechosos": [
         {
           "id": "sospechosoArchivoMuerto5@5",
-          "nombre": "El Archivo Muerto",
-          "descripcion": "El lugar donde conviven, sin explicación, las tres copias del mismo memo.",
-          "desenlace": "Se ordena una auditoría al Archivo Muerto. La orden se archiva, correctamente, en el Archivo Muerto."
+          "nombre": "The Dead Archive",
+          "descripcion": "The place where all three copies of the same memorandum coexist without explanation.",
+          "desenlace": "An audit of the Dead Archive is ordered. The order is filed, correctly, in the Dead Archive."
         },
         {
           "id": "sospechosoAuditor1993@5",
-          "nombre": "El auditor de 1993",
-          "descripcion": "Escribió, palabra por palabra, la misma conclusión que cualquier auditor posterior llegaría a escribir.",
-          "desenlace": "Se le atribuye responsabilidad al auditor de la comisión especial de 1993. No hay forma de notificarle: su expediente de personal tampoco puede localizarse."
+          "nombre": "The 1993 auditor",
+          "descripcion": "Wrote, word for word, the same conclusion any later auditor would eventually write.",
+          "desenlace": "Responsibility is assigned to the auditor from the 1993 special commission. There is no way to notify them: their personnel file cannot be located either."
         },
         {
           "id": "sospechosoUsted5@5",
-          "nombre": "Usted mismo",
-          "descripcion": "Quien firma este cierre ahora, sin importar cuándo sea 'ahora'.",
-          "desenlace": "Se le atribuye la responsabilidad a quien firma este cierre. Dado que usted es quien lo firma, el expediente queda, por primera vez en su historia, formalmente resuelto. No hay precedente de qué hacer con esa información."
+          "nombre": "Yourself",
+          "descripcion": "The person signing this closing now, no matter when 'now' is.",
+          "desenlace": "Responsibility is assigned to whoever signs this closing. Since you are the one signing it, the file is formally resolved for the first time in its history. There is no precedent for what to do with that information."
         }
       ]
     },
     {
       "id": "caso6@6",
-      "titulo": "Acta constitutiva de la empresa (versión no circulada)",
-      "descripcion": "En el fondo del Archivo Muerto hay una versión del acta constitutiva de la empresa que nunca se hizo pública. En ella, el órgano fundador no es un consejo de accionistas sino un 'Comité Ad Honorem' cuyo único objeto declarado es 'la administración perpetua del expediente'. No lleva sello notarial: lleva el mismo sello amarillo visto en la factura de Carcosa Servicios Escénicos de 1996. La última página lista firmantes autorizados vigentes, y entre ellos ya aparece, con fecha muy anterior a su contratación, el usuario del auditor que revisa este expediente.",
+      "titulo": "Company Articles of Incorporation (Uncirculated Version)",
+      "descripcion": "At the bottom of the Dead Archive lies a version of the company's articles of incorporation that was never made public. In it, the founding body is not a board of shareholders but an 'Ad Honorem Committee' whose sole stated purpose is 'the perpetual administration of the file.' It bears no notarial seal: it carries the same yellow seal seen on Carcosa Servicios Escénicos' 1996 invoice. The last page lists currently authorized signatories, and among them already appears the username of the auditor reviewing this file, dated long before their actual hiring.",
       "anioSuceso": 1958,
       "estado": "ABIERTO",
       "confidencial": true,
@@ -431,28 +431,28 @@
           "id": "acta6@6",
           "tipo": "ACTA",
           "folio": "ACTA-1958-001",
-          "contenido": "Acta constitutiva, versión no circulada. Órgano fundador: 'Comité Ad Honorem'. Objeto social declarado: 'la administración perpetua del expediente'. Sellada con sello amarillo, no notarial, idéntico al usado por Carcosa Servicios Escénicos en 1996.",
+          "contenido": "Articles of incorporation, uncirculated version. Founding body: 'Ad Honorem Committee.' Stated corporate purpose: 'the perpetual administration of the file.' Sealed with a yellow, non-notarial stamp identical to the one used by Carcosa Servicios Escénicos in 1996.",
           "fecha": "1958-03-03"
         },
         {
           "id": "circular6@6",
           "tipo": "CIRCULAR",
           "folio": "CIRC-0000-001",
-          "contenido": "El proceso de auditoría continuará sin interrupción, conforme al acta fundacional, hasta que el expediente decida cerrarse por sí mismo. No se establece fecha límite porque no corresponde establecerla.",
+          "contenido": "The audit process will continue without interruption, pursuant to the founding charter, until the file decides to close itself. No deadline is established because establishing one is not considered appropriate.",
           "fecha": null
         },
         {
           "id": "fax6@6",
           "tipo": "FAX",
           "folio": "FAX-1996-077",
-          "contenido": "Transmisión entrante, calidad deficiente. Encabezado y pie de página legibles; el cuerpo del mensaje está compuesto por trazos que no corresponden a ningún alfabeto reconocido. El número de origen coincide con el registrado para Carcosa Servicios Escénicos.",
+          "contenido": "Incoming transmission, poor quality. Header and footer are legible; the message body consists of marks that correspond to no recognized alphabet. The originating number matches the one registered for Carcosa Servicios Escénicos.",
           "fecha": "1996-12-17"
         },
         {
           "id": "empleado6@6",
           "tipo": "EMPLEADO",
           "folio": "EMP-0001",
-          "contenido": "Lista de firmantes autorizados del Comité Ad Honorem, vigente desde su fundación. Incluye el usuario 'auditor01', con fecha de alta anterior a cualquier contratación registrada para dicho usuario en el sistema de nómina.",
+          "contenido": "List of authorized signatories of the Ad Honorem Committee, valid since its founding. Includes username 'auditor01', with an enrollment date earlier than any hiring recorded for that user in the payroll system.",
           "fecha": "1958-03-03"
         }
       ],
@@ -460,77 +460,77 @@
         {
           "id": "pista11@6",
           "registroOrigen": "acta6@6",
-          "descripcion": "El sello del Comité Ad Honorem es idéntico al sello amarillo usado por Carcosa Servicios Escénicos en la factura de 1996.",
-          "fraseGatillo": "Sellada con sello amarillo, no notarial"
+          "descripcion": "The Ad Honorem Committee's seal is identical to the yellow seal used by Carcosa Servicios Escénicos on the 1996 invoice.",
+          "fraseGatillo": "Sealed with a yellow, non-notarial stamp"
         },
         {
           "id": "pista12@6",
           "registroOrigen": "empleado6@6",
-          "descripcion": "La lista de firmantes autorizados del comité ya incluye al usuario del auditor actual, con una fecha de alta anterior a su propia contratación.",
-          "fraseGatillo": "con fecha de alta anterior a cualquier contratación registrada"
+          "descripcion": "The committee's authorized-signatory list already includes the current auditor's username, with an enrollment date earlier than their own hiring.",
+          "fraseGatillo": "with an enrollment date earlier than any recorded hiring"
         },
         {
           "id": "pista13@6",
           "registroOrigen": "circular6@6",
-          "descripcion": "La circular que rige la auditoría no tiene fecha de emisión ni de cierre. Conforme al acta fundacional, el expediente se cerrará solo cuando decida hacerlo.",
-          "fraseGatillo": "hasta que el expediente decida cerrarse por sí mismo"
+          "descripcion": "The circular governing the audit has neither an issue date nor a closing date. Under the founding charter, the file will close only when it decides to do so.",
+          "fraseGatillo": "until the file decides to close itself"
         },
         {
           "id": "pista26@6",
           "registroOrigen": "acta6@6",
           "registroOrigen2": "fax6@6",
-          "descripcion": "El número de origen del fax coincide con el registrado en la factura de Carcosa de 1996, pero la línea telefónica correspondiente fue dada de baja, según los registros de la compañía telefónica, en 1962."
+          "descripcion": "The fax's originating number matches the one registered on Carcosa's 1996 invoice, but telephone-company records say the corresponding line was disconnected in 1962."
         },
         {
           "id": "pista33@6",
           "registroOrigen": "circular6@6",
           "registroOrigen2": "empleado6@6",
-          "descripcion": "La circular sin fecha límite y la lista de firmantes de 1958 se imprimieron, según los metadatos conservados, con la misma impresora — un modelo que la empresa no adquirió sino hasta 1989."
+          "descripcion": "The open-ended circular and the 1958 signatory list were printed, according to preserved metadata, on the same printer — a model the company did not acquire until 1989."
         }
       ],
       "sospechosos": [
         {
           "id": "sospechosoComite6@6",
-          "nombre": "El Comité Ad Honorem",
-          "descripcion": "El órgano que ha autorizado todo desde 1958 sin figurar en ningún organigrama.",
-          "desenlace": "Se presenta la acusación ante el Comité Ad Honorem. El comité la recibe, la sella con el mismo sello amarillo de siempre, y la incorpora al acta fundacional como el artículo que faltaba. El expediente queda, oficialmente, más completo que antes.",
+          "nombre": "The Ad Honorem Committee",
+          "descripcion": "The body that has authorized everything since 1958 without appearing on any organization chart.",
+          "desenlace": "The accusation is presented to the Ad Honorem Committee. The committee receives it, stamps it with the same old yellow seal, and incorporates it into the founding charter as the missing article. The file is, officially, more complete than before.",
           "ataques": [
-            "El Comité solicita que la acusación se presente por triplicado, en el formato vigente en 1958.",
-            "El Comité informa que ese formato fue derogado por un acuerdo del propio Comité, no localizado en el archivo.",
-            "El Comité cita el artículo 4 del acta fundacional: toda objeción en su contra se considera, automáticamente, parte del acta."
+            "The Committee requests that the accusation be submitted in triplicate, using the form current in 1958.",
+            "The Committee reports that this form was repealed by an agreement of the Committee itself that cannot be found in the archive.",
+            "The Committee cites article 4 of the founding charter: every objection against it is automatically considered part of the charter."
           ]
         },
         {
           "id": "sospechosoCarcosa6@6",
           "nombre": "Carcosa Servicios Escénicos",
-          "descripcion": "La compañía teatral cuyo sello amarillo es idéntico al del comité fundador.",
-          "desenlace": "Se presenta la acusación contra Carcosa Servicios Escénicos. No hay a quién notificar: su domicilio fiscal es un teatro que, según el catastro, jamás terminó de construirse.",
+          "descripcion": "The theater company whose yellow seal is identical to that of the founding committee.",
+          "desenlace": "The accusation is filed against Carcosa Servicios Escénicos. There is nobody to notify: its registered tax address is a theater that, according to property records, was never finished.",
           "ataques": [
-            "Carcosa contesta que la acusación corresponde, en realidad, a una reseña del Acto I, y la archiva como tal.",
-            "Carcosa ofrece un descuento del 15% en la próxima puesta en escena si se retira el cargo.",
-            "Carcosa advierte que insistir obliga a representar el Acto II completo, ante todos los presentes."
+            "Carcosa replies that the accusation is actually a review of Act I and files it as such.",
+            "Carcosa offers a 15% discount on the next production if the charge is withdrawn.",
+            "Carcosa warns that insisting requires the full performance of Act II before everyone present."
           ]
         },
         {
           "id": "sospechosoAuditor1958@6",
-          "nombre": "auditor01 (usted, desde 1958)",
-          "descripcion": "El firmante que ya figuraba en la lista autorizada décadas antes de existir.",
-          "desenlace": "Se presenta la acusación contra el firmante registrado desde 1958. Es usted. El sistema acepta la acusación sin objeción: en el fondo, siempre fue lo único congruente que se podía escribir en este expediente.",
+          "nombre": "auditor01 (you, since 1958)",
+          "descripcion": "The signatory who already appeared on the authorized list decades before existing.",
+          "desenlace": "The accusation is filed against the signatory registered since 1958. It is you. The system accepts the accusation without objection: deep down, it was always the only coherent thing that could be written in this file.",
           "ataques": [
-            "Usted intenta objetar. La objeción ya está redactada, con su letra, en un documento de 1958.",
-            "Revisa la fecha de alta que consta a su nombre: es anterior a la de esta objeción.",
-            "No hay forma de acusarse a uno mismo sin, con ello, ratificar la propia firma."
+            "You try to object. The objection is already written, in your handwriting, in a document from 1958.",
+            "You check the enrollment date recorded under your name: it predates this objection.",
+            "There is no way to accuse yourself without thereby ratifying your own signature."
           ]
         },
         {
           "id": "sospechosoSiga6@6",
-          "nombre": "SIGA (el sistema mismo)",
-          "descripcion": "El propio sistema que procesa esta acusación.",
-          "desenlace": "Se presenta la acusación contra el sistema SIGA. No existe un formulario diseñado para acusar al sistema que procesa las acusaciones. La pantalla parpadea, marca las 11:34, y no vuelve a actualizarse durante el resto de su turno.",
+          "nombre": "SIGA (the system itself)",
+          "descripcion": "The very system processing this accusation.",
+          "desenlace": "The accusation is filed against the SIGA system. No form exists for accusing the system that processes accusations. The screen flickers, displays 11:34, and does not update again for the rest of your shift.",
           "ataques": [
-            "El sistema responde con el mismo formulario que usted acaba de enviar, sin cambios.",
-            "El sistema marca la hora: 11:34. Sigue marcando las 11:34.",
-            "El sistema le informa que su sesión, técnicamente, nunca ha comenzado."
+            "The system responds with the same form you just submitted, unchanged.",
+            "The system displays the time: 11:34. It still displays 11:34.",
+            "The system informs you that, technically, your session has never begun."
           ]
         }
       ]
