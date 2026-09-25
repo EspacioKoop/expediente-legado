@@ -86,7 +86,7 @@ Los `.glb`, `.fbx` y texturas raster deben entrar mediante **Git LFS real**, con
 - [x] colocar las piezas fuera de objetivos interactivos y del paso principal;
 - [x] medir el coste con varias instancias simultáneas;
 - [x] ejecutar importación Godot, suite, arranque y Alpha (PR #507: CI `34903760016` y Alpha `34903759979`, ambas en `success`);
-- [ ] validación visual humana de época, escala, clipping y legibilidad.
+- [ ] validación visual humana de época, escala, clipping y legibilidad; el workflow `Evidencia trafico vial 225` publica cuatro PNG + `manifest.json` reproducibles para este gate.
 
 ## Relación con otros issues
 
@@ -147,6 +147,19 @@ Capturas reales sin HUD, Godot 4.7.2 Compatibility / Mesa llvmpipe, 1280×720:
 
 Se utilizó la cámara del caminante, FOV 75°, a 1,65 m de altura, con posición
 fijada para inspección. No son un playthrough humano ni una prueba de mando.
+
+### Gate reproducible de aceptación visual
+
+El corte posterior de #225 añade `godot/pruebas/capturar_trafico_vial_225.gd` y
+el workflow `Evidencia trafico vial 225`. Sobre la escena real `dia.tscn`, fase
+`trayecto`, genera cuatro vistas sin HUD (`barrera_conos`, `tapa_sur`,
+`tapa_norte`, `paso_central`) y un `manifest.json` con las cinco instancias,
+AABB visuales, cobertura de frustum, posición en pantalla y SHA-256 de los PNG.
+La automatización verifica montaje y encuadre, pero declara
+`veredicto_automatico=false`: época, escala, clipping y legibilidad siguen siendo
+un gate humano. La guía de revisión vive en
+`docs/evidencias/trafico-vial-225/README.md` y alimenta también el gate transversal
+#398.
 
 Medición adicional con cámara fija `(0, 4, -10)` mirando a `(0, 0, 4)`, FOV 100°,
 misma escena detenida y 60 fotogramas de estabilización por muestra: ocultar /
