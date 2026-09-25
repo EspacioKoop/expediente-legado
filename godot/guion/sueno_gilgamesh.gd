@@ -252,9 +252,15 @@ func _montar_identidad_uruk(ciudad: Node3D) -> void:
 	var puerta := Node3D.new()
 	puerta.name = "PuertaMonumentalArchivo"
 	hitos.add_child(puerta)
-	_crear_caja(puerta, "TorreIzquierda", Vector3(2.15, 6.2, 1.6), Vector3(-2.9, 3.1, -6.7), COLOR_LADRILLO)
-	_crear_caja(puerta, "TorreDerecha", Vector3(2.15, 6.2, 1.6), Vector3(2.9, 3.1, -6.7), COLOR_LADRILLO)
-	_crear_caja(puerta, "DintelArchivo", Vector3(4.1, 1.1, 1.45), Vector3(0.0, 5.25, -6.7), COLOR_ARCHIVO)
+	_crear_caja(
+		puerta, "TorreIzquierda", Vector3(2.15, 6.2, 1.6), Vector3(-2.9, 3.1, -6.7), COLOR_LADRILLO
+	)
+	_crear_caja(
+		puerta, "TorreDerecha", Vector3(2.15, 6.2, 1.6), Vector3(2.9, 3.1, -6.7), COLOR_LADRILLO
+	)
+	_crear_caja(
+		puerta, "DintelArchivo", Vector3(4.1, 1.1, 1.45), Vector3(0.0, 5.25, -6.7), COLOR_ARCHIVO
+	)
 
 	var inundacion := Node3D.new()
 	inundacion.name = "InundacionVertical"
