@@ -2,141 +2,141 @@
   "logros": [
     {
       "id": "primer-mirada",
-      "titulo": "Primer mirada",
-      "descripcion": "Abriste el menú de verdad.",
+      "titulo": "First Look",
+      "descripcion": "You opened the real menu.",
       "desbloqueado": false,
       "por_vuelta": false
     },
     {
       "id": "sospecha",
-      "titulo": "Sospecha",
-      "descripcion": "Te topaste con una verificación falsa.",
+      "titulo": "Suspicion",
+      "descripcion": "You ran into a false verification.",
       "desbloqueado": false,
       "por_vuelta": false
     },
     {
       "id": "primer-expediente",
-      "titulo": "Primer expediente",
-      "descripcion": "Cerraste un caso con una acusación.",
+      "titulo": "First Case",
+      "descripcion": "You closed a case with an accusation.",
       "desbloqueado": false,
       "por_vuelta": true
     },
     {
       "id": "archivo-completo",
-      "titulo": "El archivo completo",
-      "descripcion": "Resolviste todos los expedientes a tu cargo.",
+      "titulo": "The Complete Archive",
+      "descripcion": "You resolved every case assigned to you.",
       "desbloqueado": false,
       "por_vuelta": true
     },
     {
       "id": "acceso-privilegiado",
-      "titulo": "Acceso privilegiado",
-      "descripcion": "Alguien le franqueó el paso a un nivel que no debería existir.",
+      "titulo": "Privileged Access",
+      "descripcion": "Someone let you through to a level that should not exist.",
       "desbloqueado": false,
       "por_vuelta": false
     },
     {
       "id": "reasignado",
-      "titulo": "Reasignado",
-      "descripcion": "El sistema decidió que ya no le necesitaba.",
+      "titulo": "Reassigned",
+      "descripcion": "The system decided it no longer needed you.",
       "desbloqueado": false,
       "por_vuelta": true
     },
     {
       "id": "final-verdadero",
-      "titulo": "Las cuatro cartas",
-      "descripcion": "Cerró el archivo sin canjear ni una sola carta.",
+      "titulo": "The Four Cards",
+      "descripcion": "You closed the archive without redeeming a single card.",
       "desbloqueado": false,
       "por_vuelta": false
     },
     {
       "id": "ventanilla-tres",
-      "titulo": "Constancia registrada",
-      "descripcion": "Atendió tres reclamaciones seguidas sin perder la compostura.",
+      "titulo": "Record Entered",
+      "descripcion": "You handled three complaints in a row without losing your composure.",
       "desbloqueado": false,
       "por_vuelta": false
     },
     {
       "id": "referencias-cruzadas",
-      "titulo": "Referencias cruzadas",
-      "descripcion": "Encontró todas las conclusiones que exigen combinar documentos.",
+      "titulo": "Cross-References",
+      "descripcion": "You found every conclusion that requires combining documents.",
       "desbloqueado": false,
       "por_vuelta": true
     },
     {
       "id": "lectura-integra",
-      "titulo": "Leído de cabo a rabo",
-      "descripcion": "Descubrió hasta la última pista del archivo.",
+      "titulo": "Read Cover to Cover",
+      "descripcion": "You uncovered every last clue in the archive.",
       "desbloqueado": false,
       "por_vuelta": true
     },
     {
       "id": "hoja-sin-tacha",
-      "titulo": "Hoja de servicio sin tacha",
-      "descripcion": "Cerró todos los expedientes a su cargo sin perder una sola vida.",
+      "titulo": "Spotless Service Record",
+      "descripcion": "You closed every assigned case without losing a single life.",
       "desbloqueado": false,
       "por_vuelta": true
     },
     {
       "id": "disciplina-de-partido",
-      "titulo": "Disciplina de partido",
-      "descripcion": "Respondió las ocho historias con la misma ideología, pasara lo que pasara.",
+      "titulo": "Party Discipline",
+      "descripcion": "You answered all eight stories with the same ideology, no matter what.",
       "desbloqueado": false,
       "por_vuelta": true
     },
     {
       "id": "instinto-de-archivo",
-      "titulo": "Instinto de archivo",
-      "descripcion": "Las ocho decisiones fueron la útil para el expediente. Ninguna por convicción.",
+      "titulo": "Archive Instinct",
+      "descripcion": "All eight decisions were useful for the case. None were made out of conviction.",
       "desbloqueado": false,
       "por_vuelta": true
     },
     {
       "id": "metodo-del-descarte",
-      "titulo": "El método del descarte",
-      "descripcion": "Las ocho decisiones sembraron confusión. El archivo tomó nota.",
+      "titulo": "Process of Elimination",
+      "descripcion": "All eight decisions sowed confusion. The archive took note.",
       "desbloqueado": false,
       "por_vuelta": true
     },
     {
       "id": "papeleta-depositada",
-      "titulo": "Papeleta depositada",
-      "descripcion": "Llegó a un final político, fuera el que fuera.",
+      "titulo": "Ballot Cast",
+      "descripcion": "You reached a political ending, whichever one it was.",
       "desbloqueado": false,
       "por_vuelta": true
     },
     {
       "id": "ultimo-recurso",
-      "titulo": "Último recurso ejercido",
-      "descripcion": "Canjeó una carta por una vida. Consta en acta.",
+      "titulo": "Last Resort Exercised",
+      "descripcion": "You traded a card for a life. It is on the record.",
       "desbloqueado": false,
       "por_vuelta": true
     },
     {
       "id": "funcionario-del-mes",
-      "titulo": "Funcionario del mes",
-      "descripcion": "Cinco reclamaciones seguidas atendidas en la Ventanilla.",
+      "titulo": "Employee of the Month",
+      "descripcion": "You handled five complaints in a row at the Counter.",
       "desbloqueado": false,
       "por_vuelta": false
     },
     {
       "id": "ventanilla-inagotable",
-      "titulo": "Ventanilla inagotable",
-      "descripcion": "Diez reclamaciones seguidas. El mostrador ya tiene su forma.",
+      "titulo": "Endless Counter",
+      "descripcion": "Ten complaints in a row. The counter has already taken your shape.",
       "desbloqueado": false,
       "por_vuelta": false
     },
     {
       "id": "careo-a-puerta-cerrada",
-      "titulo": "Careo a puerta cerrada",
-      "descripcion": "Ganó un enfrentamiento que oficialmente nunca tuvo lugar.",
+      "titulo": "Closed-Door Confrontation",
+      "descripcion": "You won a confrontation that officially never took place.",
       "desbloqueado": false,
       "por_vuelta": false
     },
     {
       "id": "la-garganta-abierta",
-      "titulo": "La garganta abierta",
-      "descripcion": "Se quedó mirando el sistema hasta que el sistema le devolvió la mirada.",
+      "titulo": "The Open Throat",
+      "descripcion": "You stared at the system until the system stared back.",
       "desbloqueado": false,
       "por_vuelta": false
     }
