@@ -18,8 +18,10 @@ func _ejecutar() -> void:
 func _probar_registro_exposicion() -> void:
 	var estado := {"historias_cartas": {}}
 	var bloque := {
-		"boletin": {
-			"exposicion_ideologica": {
+		"boletin":
+		{
+			"exposicion_ideologica":
+			{
 				"id": "tv:fixture:turnos",
 				"fuente": "tv:fixture",
 				"eje": "centrista",
