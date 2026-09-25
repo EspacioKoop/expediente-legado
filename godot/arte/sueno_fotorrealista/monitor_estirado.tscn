@@ -1,0 +1,94 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Shader" path="res://arte/sueno_fotorrealista/material_microdetalle.gdshader" id="1_shader"]
+
+[sub_resource type="ShaderMaterial" id="Plastico"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.22, 0.215, 0.19, 1)
+shader_parameter/metallic_amount = 0.03
+shader_parameter/roughness_base = 0.62
+shader_parameter/grime_strength = 0.24
+shader_parameter/wetness = 0.05
+shader_parameter/micro_scale = 30.0
+
+[sub_resource type="ShaderMaterial" id="Cristal"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.045, 0.07, 0.068, 1)
+shader_parameter/metallic_amount = 0.08
+shader_parameter/roughness_base = 0.13
+shader_parameter/grime_strength = 0.10
+shader_parameter/wetness = 0.46
+shader_parameter/emission_color = Color(0.035, 0.11, 0.095, 1)
+shader_parameter/emission_energy = 0.34
+shader_parameter/micro_scale = 54.0
+
+[sub_resource type="ShaderMaterial" id="Metal"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.34, 0.36, 0.35, 1)
+shader_parameter/metallic_amount = 0.72
+shader_parameter/roughness_base = 0.31
+shader_parameter/grime_strength = 0.16
+shader_parameter/wetness = 0.08
+shader_parameter/micro_scale = 38.0
+
+[sub_resource type="ShaderMaterial" id="Eco"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.04, 0.075, 0.07, 1)
+shader_parameter/metallic_amount = 0.14
+shader_parameter/roughness_base = 0.08
+shader_parameter/grime_strength = 0.05
+shader_parameter/wetness = 0.82
+shader_parameter/emission_color = Color(0.025, 0.12, 0.10, 1)
+shader_parameter/emission_energy = 0.20
+shader_parameter/micro_scale = 62.0
+
+[sub_resource type="BoxMesh" id="Carcasa"]
+size = Vector3(0.86, 0.62, 0.36)
+
+[sub_resource type="BoxMesh" id="Pantalla"]
+size = Vector3(0.69, 0.45, 0.025)
+
+[sub_resource type="BoxMesh" id="Cuello"]
+size = Vector3(0.13, 0.20, 0.13)
+
+[sub_resource type="BoxMesh" id="Base"]
+size = Vector3(0.42, 0.055, 0.28)
+
+[sub_resource type="BoxMesh" id="EcoPantalla"]
+size = Vector3(1.28, 0.31, 0.018)
+
+[node name="MonitorEstirado" type="Node3D"]
+metadata/origen_reconocible = "monitor"
+metadata/origen_id = "computerScreen"
+metadata/uso = "sueno"
+metadata/issue = 87
+metadata/issue_padre = 79
+
+[node name="Carcasa" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.67, 0)
+mesh = SubResource("Carcasa")
+material_override = SubResource("Plastico")
+
+[node name="Pantalla" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.68, -0.198)
+mesh = SubResource("Pantalla")
+material_override = SubResource("Cristal")
+
+[node name="Cuello" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.25, 0.03)
+mesh = SubResource("Cuello")
+material_override = SubResource("Metal")
+
+[node name="Base" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.13, 0.02)
+mesh = SubResource("Base")
+material_override = SubResource("Metal")
+
+[node name="PantallaEco" type="MeshInstance3D" parent="."]
+position = Vector3(0.24, 0.68, -0.232)
+rotation = Vector3(0, 0.055, -0.025)
+mesh = SubResource("EcoPantalla")
+material_override = SubResource("Eco")
+
+[node name="AnclaInteraccion" type="Marker3D" parent="."]
+position = Vector3(0, 0.62, -0.56)
