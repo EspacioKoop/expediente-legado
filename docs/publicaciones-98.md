@@ -14,7 +14,19 @@ La implementación se divide en contratos pequeños: catálogo/lectura persisten
 - `estratos_ciudad_06`: arqueología/cultura urbana;
 - `manual_casa_98`: guía práctica doméstica.
 
-Todas incluyen al menos una pieza legible. `Umbral — nº 17` y `La Tarde Local` tienen tres piezas diferenciadas cada una (portada + artículos/secciones), suficiente para probar hojeado real sin maquetar una revista completa.
+El sexto corte convierte el catálogo en contenido editorial real: **las siete publicaciones tienen cuatro piezas hojeables cada una (28 piezas en total)**. Ya no hay ejemplares que funcionen como una única tarjeta de texto.
+
+La densidad editorial se reparte por función:
+
+- `Umbral — nº 17`: portada, dossier, croquis y correo de lectores; tono de misterio barato con advertencias que mantienen claro que los relatos son ficticios/no verificados;
+- `Cuaderno cultural — Popol Wuj`: portada, Héroes Gemelos, comentario sobre parejas/ecos y nota de contexto; mantiene la especificidad k’iche’ documentada para #655;
+- `La Tarde Local`: portada, noticia vecinal, breves y agenda práctica del barrio;
+- `Byte Doméstico — nº 42`: portada, copias de seguridad, convivencia con módem y consultorio técnico;
+- `Marcador 98 — jornada 9`: portada, crónica, análisis táctico y breves de vestuario;
+- `Estratos y Ciudad — cuaderno 6`: portada, ensayo urbano, lámina estratigráfica y nota de campo;
+- `Arreglos de casa para gente con prisa`: portada, preparación, fuga doméstica y una advertencia explícita para no improvisar con electricidad.
+
+Cada pieza tiene título, tipo e ID estable y aporta texto sustantivo. El smoke de runtime exige al menos cuatro piezas por publicación, IDs internos únicos y un mínimo de contenido por pieza para evitar regresiones hacia publicaciones puramente decorativas.
 
 El contenido evita cabeceras, logos, artículos, personajes o portadas reales. La inspiración se limita a gramática editorial general de finales de los noventa.
 
@@ -117,7 +129,7 @@ El ejemplar usa el mismo `Inventario`, `VisorPublicacion`, almacenamiento domés
 
 Además, el `PublicacionesEncontrablesController` ya presente en `dia.tscn` monta durante `trayecto` un **punto de lectura** exterior con una copia de consulta del mismo cuaderno. Ese atril abre `VisorPublicacion` directamente en la calle, por lo que la secuencia de dos piezas + cierre puede registrar `popol_wuj` antes de llegar a casa. Comprar una copia en el catálogo del quiosco es opcional y **no activa** la semilla: compra y lectura comparten ID/fuente, pero solo `Publicaciones98.cerrar_tras_lectura()` decide la activación.
 
-La prensa general y el resto de publicaciones no tienen semilla por defecto: ocio y ambientación no equivalen automáticamente a contenido onírico.
+La prensa general y el resto de publicaciones **siguen sin semilla por decisión de diseño**: ocio y ambientación no equivalen automáticamente a contenido onírico. Este corte considera resuelta la duda de #674 sobre añadir más handshakes a #442: se conservan únicamente Umbral → Minotauro y Popol Wuj → `popol_wuj`, porque ya cubren el contrato sin convertir cada lectura en un interruptor de sueños.
 
 ## Pruebas
 
@@ -154,7 +166,6 @@ Los tests Python asociados ejecutan estos smokes con Godot headless y comprueban
 
 Este PR **no cierra #674**. Quedan fuera deliberadamente:
 
-- decidir si más publicaciones alimentan #442 sin saturar el sistema cultural;
 - validación humana de legibilidad, foco, tamaño físico y presentación con teclado/mando reales.
 
 Refs #93 #96 #97 #133 #181 #283 #442 #674 #676 #677.

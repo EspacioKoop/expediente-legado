@@ -28,21 +28,50 @@ const CATALOGO := [
 				"tipo": "portada",
 				"titulo": "Los pasillos que vuelven al mismo sitio",
 				"texto":
-				"Una portada barata promete testimonios sobre edificios donde orientarse parece imposible.",
+				(
+					"Un bloque de viviendas ocupa la portada bajo un titular enorme. "
+					+ "La revista promete testimonios sobre corredores que parecen "
+					+ "cambiar de longitud, puertas que reaparecen y vecinos que ya no "
+					+ "se fían de sus propios planos."
+				),
 			},
 			{
 				"id": "dossier",
 				"tipo": "articulo",
 				"titulo": "El plano imposible",
 				"texto":
-				"Compara relatos contradictorios y dibuja un recorrido que se repliega sobre sí mismo.",
+				(
+					"El redactor superpone cuatro croquis enviados por lectores. "
+					+ "Ninguno coincide del todo, pero tres repiten el mismo detalle: "
+					+ "después del cuarto giro siempre aparece una puerta sin número. "
+					+ "El artículo admite que no pudo verificar los relatos, aunque "
+					+ "imprime el recorrido como si fuera una prueba."
+				),
+			},
+			{
+				"id": "croquis",
+				"tipo": "lamina",
+				"titulo": "Siete giros y una puerta",
+				"texto":
+				(
+					"Una página central muestra un dibujo deliberadamente confuso: "
+					+ "rellanos, flechas, escaleras y un patio interior. En el margen "
+					+ "alguien ha anotado a bolígrafo: «si vuelves al ascensor, no has "
+					+ "salido; has empezado otra vez»."
+				),
 			},
 			{
 				"id": "cartas",
 				"tipo": "correo_lectores",
 				"titulo": "Cartas desde el sótano",
 				"texto":
-				"Tres lectores oyen ruidos tras los tabiques y recuerdan una puerta imposible.",
+				(
+					"Tres lectores describen golpes detrás de tabiques, una bombilla "
+					+ "que siempre está encendida y una puerta que juraban no haber "
+					+ "visto antes. La propia revista remata la sección con una nota "
+					+ "pequeña: «relatos no comprobados; no derribe paredes por su "
+					+ "cuenta»."
+				),
 			},
 		],
 	},
@@ -63,21 +92,48 @@ const CATALOGO := [
 				"tipo": "portada",
 				"titulo": "Popol Wuj: relato k’iche’",
 				"texto":
-				"Un cuaderno presenta el Popol Wuj como relato k’iche’ y distingue otras tradiciones.",
+				(
+					"El cuaderno presenta el Popol Wuj como un relato de tradición "
+					+ "k’iche’ y avisa desde la primera página de que no debe usarse "
+					+ "«maya» como etiqueta intercambiable para pueblos, épocas y "
+					+ "tradiciones distintas."
+				),
 			},
 			{
 				"id": "gemelos",
 				"tipo": "articulo",
 				"titulo": "Los Gemelos Héroes",
 				"texto":
-				"Una doble página resume a los Gemelos Héroes y su choque con los Señores del Inframundo.",
+				(
+					"Una doble página resume el ciclo de los Gemelos Héroes y su "
+					+ "confrontación con los Señores del Inframundo. El texto insiste "
+					+ "menos en memorizar nombres que en observar cómo la pareja "
+					+ "responde a pruebas mediante atención, correspondencia y astucia."
+				),
 			},
 			{
-				"id": "correspondencias",
+				"id": "ecos",
 				"tipo": "comentario",
-				"titulo": "Parejas y consecuencias",
+				"titulo": "Parejas, ecos y consecuencias",
 				"texto":
-				"El comentario invita a observar correspondencias sin convertir la cultura en un examen.",
+				(
+					"El comentario editorial propone una lectura sencilla: dos "
+					+ "acciones separadas pueden reflejarse entre sí sin ser idénticas. "
+					+ "El cuaderno lo ilustra con dos columnas de ejemplos cotidianos y "
+					+ "evita convertir la tradición en un cuestionario."
+				),
+			},
+			{
+				"id": "contexto",
+				"tipo": "nota",
+				"titulo": "Una nota antes de seguir",
+				"texto":
+				(
+					"La nota final recuerda que el cuaderno es una introducción y no "
+					+ "una reconstrucción histórica, religiosa o visual de Xibalbá. "
+					+ "Recomienda distinguir fuentes, contexto y traducciones antes de "
+					+ "sacar conclusiones generales."
+				),
 			},
 		],
 	},
@@ -95,19 +151,48 @@ const CATALOGO := [
 				"tipo": "portada",
 				"titulo": "Obras, lluvia y una tarde de tráfico lento",
 				"texto":
-				"La portada reúne obras, sucesos menores y una foto del centro bajo la lluvia.",
+				(
+					"La portada reúne tres asuntos que compiten por espacio: obras en "
+					+ "una avenida, una tarde de lluvia persistente y retenciones junto "
+					+ "al mercado. La foto principal muestra paraguas, vallas y faros "
+					+ "reflejados en el asfalto."
+				),
 			},
 			{
 				"id": "local",
 				"tipo": "noticia",
 				"titulo": "El mercado ampliará su horario los viernes",
-				"texto": "Vecinos y comerciantes discrepan sobre el nuevo horario del mercado.",
+				"texto":
+				(
+					"Vecinos y comerciantes discrepan sobre el nuevo horario. Los "
+					+ "tenderos esperan más ventas al final del día; quienes viven "
+					+ "encima piden que la carga y descarga termine antes de la noche. "
+					+ "El ayuntamiento probará el cambio durante un mes."
+				),
+			},
+			{
+				"id": "sucesos",
+				"tipo": "breves",
+				"titulo": "Tres breves de última hora",
+				"texto":
+				(
+					"Un autobús quedó detenido por una avería sin heridos, apareció "
+					+ "una bicicleta encadenada desde hace semanas en la plaza y la "
+					+ "policía local devolvió una cartera encontrada en un portal. "
+					+ "Ninguna historia ocupa más de seis líneas."
+				),
 			},
 			{
 				"id": "agenda",
 				"tipo": "agenda",
 				"titulo": "Cineclub, mercadillo y charla de barrio",
-				"texto": "La agenda reúne cineclub, mercadillo y una pequeña charla de barrio.",
+				"texto":
+				(
+					"La agenda anuncia una proyección en 16 mm, un mercadillo de "
+					+ "segunda mano y una charla sobre la historia del barrio. Al pie "
+					+ "hay horarios de biblioteca, farmacia de guardia y dos teléfonos "
+					+ "útiles escritos con tipografía diminuta."
+				),
 			},
 		],
 	},
@@ -125,14 +210,49 @@ const CATALOGO := [
 				"tipo": "portada",
 				"titulo": "Ordena tu disco antes de que sea tarde",
 				"texto":
-				"Una cubierta sobria promete mantenimiento, periféricos y redes domésticas.",
+				(
+					"Una cubierta sobria promete mantenimiento, periféricos, módems y "
+					+ "redes domésticas. En una esquina, un reclamo asegura que "
+					+ "organizar carpetas «también ahorra discusiones cuando el "
+					+ "ordenador es de toda la casa»."
+				),
 			},
 			{
 				"id": "tutorial",
 				"tipo": "guia",
 				"titulo": "Copias de seguridad sin misterio",
 				"texto":
-				"La guía separa documentos de programas y recomienda verificar cada copia.",
+				(
+					"La guía separa documentos de programas, recomienda copiar "
+					+ "primero lo irremplazable y verificar después la copia abriendo "
+					+ "varios archivos al azar. También advierte que guardar todo en el "
+					+ "mismo disco no es una copia de seguridad."
+				),
+			},
+			{
+				"id": "modem",
+				"tipo": "articulo",
+				"titulo": "Cuando la línea comunica",
+				"texto":
+				(
+					"Un artículo de dos columnas explica por qué una conexión por "
+					+ "módem ocupa la línea telefónica y propone acordar horarios en "
+					+ "casas compartidas. El autor admite que la mejor solución técnica "
+					+ "sigue siendo, a veces, avisar antes de conectarse."
+				),
+			},
+			{
+				"id": "consultorio",
+				"tipo": "consultorio",
+				"titulo": "El lector pregunta: «¿por qué va más lento?»",
+				"texto":
+				(
+					"El consultorio descarta una causa única: poco espacio libre, "
+					+ "demasiados programas al inicio y discos desordenados pueden "
+					+ "parecer el mismo problema. La respuesta termina con una "
+					+ "recomendación poco espectacular: cambiar una cosa cada vez y "
+					+ "anotar qué mejora."
+				),
 			},
 		],
 	},
@@ -146,10 +266,51 @@ const CATALOGO := [
 		"piezas":
 		[
 			{
+				"id": "portada",
+				"tipo": "portada",
+				"titulo": "Jornada embarrada",
+				"texto":
+				(
+					"La portada dedica casi todo el espacio a una fotografía de botas "
+					+ "cubiertas de barro y una grada bajo paraguas. Los resultados "
+					+ "aparecen en una columna lateral, sin clubes ni marcas reales."
+				),
+			},
+			{
 				"id": "cronica",
 				"tipo": "cronica",
 				"titulo": "Noventa minutos bajo el barro",
-				"texto": "La crónica habla del barro, la grada y un partido sin nombres reales.",
+				"texto":
+				(
+					"La crónica describe un partido trabado, con pases cortos, "
+					+ "balones que se frenan en charcos y dos ocasiones claras en toda "
+					+ "la segunda parte. El público celebra más una carrera imposible "
+					+ "por la banda que el empate final."
+				),
+			},
+			{
+				"id": "tactica",
+				"tipo": "analisis",
+				"titulo": "Cinco metros que cambiaron el partido",
+				"texto":
+				(
+					"Un diagrama sencillo compara dos dibujos defensivos. La pieza "
+					+ "sostiene que adelantar una línea apenas cinco metros obligó al "
+					+ "rival a jugar de espaldas y convirtió una tarde caótica en un "
+					+ "partido algo más controlable."
+				),
+			},
+			{
+				"id": "vestuario",
+				"tipo": "breves",
+				"titulo": "Del vestuario al autobús",
+				"texto":
+				(
+					"Una columna de breves habla de botas secándose sobre radiadores, "
+					+ "bocadillos repartidos tarde y un portero suplente que terminó "
+					+ "ayudando a empujar el autobús fuera de un aparcamiento "
+					+ "embarrado."
+				),
 			},
 		],
 	},
@@ -163,17 +324,52 @@ const CATALOGO := [
 		"piezas":
 		[
 			{
+				"id": "portada",
+				"tipo": "portada",
+				"titulo": "La ciudad debajo de la ciudad",
+				"texto":
+				(
+					"La cubierta reproduce un dibujo técnico ficticio de una calle "
+					+ "cortada en sección: asfalto, tuberías, cimentaciones y muros de "
+					+ "épocas distintas aparecen como capas superpuestas."
+				),
+			},
+			{
 				"id": "ensayo",
 				"tipo": "ensayo",
 				"titulo": "Cuando una calle tapa otra calle",
 				"texto":
-				"Un ensayo explica cómo las reformas dejan capas de memoria bajo la ciudad.",
+				(
+					"El ensayo explica que una reforma rara vez borra por completo lo "
+					+ "anterior. Cambian cotas, usos y fachadas, pero sobreviven "
+					+ "medianeras, trazas de cimentación y decisiones urbanas que "
+					+ "todavía condicionan por dónde se puede abrir una zanja."
+				),
 			},
 			{
 				"id": "lamina",
 				"tipo": "lamina",
 				"titulo": "Sección de un patio excavado",
-				"texto": "Una lámina separa relleno reciente, cimentación y un muro anterior.",
+				"texto":
+				(
+					"Una lámina separa relleno reciente, cimentación moderna, un "
+					+ "suelo anterior y un muro más antiguo. Las notas insisten en no "
+					+ "interpretar una capa aislada sin mirar qué corta, qué cubre y "
+					+ "con qué se relaciona."
+				),
+			},
+			{
+				"id": "diario_campo",
+				"tipo": "nota_campo",
+				"titulo": "Martes, 17:40 — aparece otra pared",
+				"texto":
+				(
+					"Una nota de campo ficticia cuenta que el equipo esperaba "
+					+ "encontrar una canalización y encontró un muro. La anotación no "
+					+ "celebra un «tesoro»: pide fotografiar, medir, revisar planos "
+					+ "viejos y retrasar cualquier conclusión hasta comparar el "
+					+ "conjunto."
+				),
 			},
 		],
 	},
@@ -187,10 +383,52 @@ const CATALOGO := [
 		"piezas":
 		[
 			{
+				"id": "portada",
+				"tipo": "portada",
+				"titulo": "Treinta arreglos que empiezan por no empeorarlo",
+				"texto":
+				(
+					"La portada promete soluciones rápidas, pero el subtítulo rebaja "
+					+ "expectativas: «saber cuándo parar también cuenta como "
+					+ "reparación»."
+				),
+			},
+			{
 				"id": "indice",
 				"tipo": "indice",
 				"titulo": "Antes de tocar nada",
-				"texto": "El índice aconseja cortar agua o corriente y no improvisar reparaciones.",
+				"texto":
+				(
+					"El índice aconseja cortar agua o corriente cuando proceda, "
+					+ "despejar la zona, guardar tornillos en un recipiente y hacer una "
+					+ "foto antes de desmontar algo que luego haya que recordar cómo "
+					+ "estaba."
+				),
+			},
+			{
+				"id": "grifo",
+				"tipo": "guia",
+				"titulo": "El grifo que gotea a las tres de la mañana",
+				"texto":
+				(
+					"La guía propone empezar por lo básico: cerrar el paso, comprobar "
+					+ "de dónde sale realmente el agua y no forzar piezas agarrotadas. "
+					+ "Si hay que aplicar mucha fuerza, el manual recomienda parar "
+					+ "antes de convertir una fuga pequeña en una avería grande."
+				),
+			},
+			{
+				"id": "enchufe",
+				"tipo": "advertencia",
+				"titulo": "Electricidad: aquí se acaba el bricolaje",
+				"texto":
+				(
+					"Una página enmarcada recuerda que un aparato desenchufado no "
+					+ "convierte toda una instalación en segura y desaconseja "
+					+ "intervenir en cuadros, cableado empotrado o averías cuyo origen "
+					+ "no se entienda. «Llamar a un profesional también es terminar el "
+					+ "trabajo»."
+				),
 			},
 		],
 	},

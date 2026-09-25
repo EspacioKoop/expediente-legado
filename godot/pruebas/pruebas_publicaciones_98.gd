@@ -21,6 +21,22 @@ func _probar() -> void:
 		_comprobar(not String(entrada.get("titulo", "")).is_empty(), "título original")
 		_comprobar(not String(entrada.get("categoria", "")).is_empty(), "categoría cultural")
 		_comprobar(bool(entrada.get("permite_casa", false)), "puede guardarse en casa")
+		var piezas: Array = entrada.get("piezas", [])
+		_comprobar(piezas.size() >= 4, "%s tiene al menos cuatro piezas editoriales" % item_id)
+		var pieza_ids: Array[String] = []
+		for pieza in piezas:
+			var pieza_id := String(pieza.get("id", ""))
+			_comprobar(not pieza_id.is_empty(), "%s tiene pieza con id" % item_id)
+			_comprobar(not pieza_ids.has(pieza_id), "%s no repite ids de pieza" % item_id)
+			pieza_ids.append(pieza_id)
+			_comprobar(
+				not String(pieza.get("titulo", "")).is_empty(),
+				"%s tiene título de pieza" % item_id,
+			)
+			_comprobar(
+				String(pieza.get("texto", "")).length() >= 80,
+				"%s aporta texto sustantivo en cada pieza" % item_id,
+			)
 
 	_comprobar(Publicaciones98.comprables().size() == 3, "tres publicaciones usan quiosco")
 	var umbral := Publicaciones98.por_id("revista_umbral_98")
