@@ -12,7 +12,6 @@ PROCEDENCIA = ASSETS / "procedencia.json"
 
 ARCHIVOS = (
     "fax_98.webp",
-    "escaner_98.webp",
     "fotocopiadora_98.webp",
     "dispensador_agua_98.webp",
     "grapadora_98.webp",
@@ -27,7 +26,7 @@ class OficinaFotorealista98Test(unittest.TestCase):
         cls.controlador = CONTROLADOR.read_text(encoding="utf-8")
         cls.registro = json.loads(PROCEDENCIA.read_text(encoding="utf-8"))
 
-    def test_monta_los_seis_props_y_solo_en_archivo(self):
+    def test_monta_los_cinco_props_y_solo_en_archivo(self):
         for archivo in ARCHIVOS:
             self.assertIn(f'"{archivo}"', self.runtime)
         self.assertIn("OficinaFotorealista98.montar(mundo)", self.controlador)
