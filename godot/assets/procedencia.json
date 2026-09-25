@@ -2054,6 +2054,46 @@
       "licencia": "Propio del proyecto; salida generada con OpenAI",
       "fuente": "https://openai.com/policies/eu-terms-of-use/",
       "sha256": "9a12e2a07eeb237a64a6f43fbb6e70d56616076ad75c3b31fce00f026d3e9883"
+    },
+    {
+      "ruta": "texturas/oficina_ai_98/fax_98.webp",
+      "titulo": "Fax de oficina 1998",
+      "autor": "EspacioKoop (generado con OpenAI ImageGen)",
+      "licencia": "Propio del proyecto; salida generada con OpenAI",
+      "fuente": "https://openai.com/policies/eu-terms-of-use/",
+      "sha256": "cbad78db590647d94444f60a06a54aaee4334e24f6943071476c8e9cdc5ad18c"
+    },
+    {
+      "ruta": "texturas/oficina_ai_98/fotocopiadora_98.webp",
+      "titulo": "Fotocopiadora de oficina 1998",
+      "autor": "EspacioKoop (generado con OpenAI ImageGen)",
+      "licencia": "Propio del proyecto; salida generada con OpenAI",
+      "fuente": "https://openai.com/policies/eu-terms-of-use/",
+      "sha256": "a9b70fdae421d485fedb89c5cb55e11b9408aa96354c15cd3a8d6c33c2c81c59"
+    },
+    {
+      "ruta": "texturas/oficina_ai_98/dispensador_agua_98.webp",
+      "titulo": "Dispensador de agua de oficina 1998",
+      "autor": "EspacioKoop (generado con OpenAI ImageGen)",
+      "licencia": "Propio del proyecto; salida generada con OpenAI",
+      "fuente": "https://openai.com/policies/eu-terms-of-use/",
+      "sha256": "f0b3bee52d065ec95986678f7d7c749d0904c927b51c4bdf5fe8b656204aacaf"
+    },
+    {
+      "ruta": "texturas/oficina_ai_98/grapadora_98.webp",
+      "titulo": "Grapadora de oficina 1998",
+      "autor": "EspacioKoop (generado con OpenAI ImageGen)",
+      "licencia": "Propio del proyecto; salida generada con OpenAI",
+      "fuente": "https://openai.com/policies/eu-terms-of-use/",
+      "sha256": "d851cbd93324eddacf62261df83d47e1b905ccb26e5e85280ab8cd6a696fd3e4"
+    },
+    {
+      "ruta": "texturas/oficina_ai_98/perforadora_98.webp",
+      "titulo": "Perforadora de dos agujeros 1998",
+      "autor": "EspacioKoop (generado con OpenAI ImageGen)",
+      "licencia": "Propio del proyecto; salida generada con OpenAI",
+      "fuente": "https://openai.com/policies/eu-terms-of-use/",
+      "sha256": "633529753ca54d70abdc3cf240218ebfa8599a8728a680a764418f01cec1c6c9"
     }
   ]
 }
