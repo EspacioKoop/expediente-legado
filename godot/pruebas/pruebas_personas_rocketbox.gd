@@ -17,6 +17,8 @@ const CABEZA_MAX := 1.75
 ## Inclinado sobre una mesa, que es lo más bajo que baja un gesto de pie.
 const CABEZA_INCLINADO := 1.1
 
+const IDENTIDAD := preload("res://guion/identidad_historica_rocketbox.gd")
+
 const MARCAS_HISTORICAS := {
 	"emperador": "GafasPuyi",
 	"aduanero_ny": "BarbaMelville",
@@ -99,6 +101,8 @@ func _probar_avatar(quien: Dictionary) -> void:
 			),
 			"%s tiene un rasgo 3D reconocible específico" % id
 		)
+		if identidad != null and esqueleto != null:
+			_comprobar_colocacion(identidad, esqueleto, id)
 
 	var reproductor := Modelos._reproductor(pieza)
 	_comprobar(reproductor != null, "%s tiene reproductor" % id)
@@ -291,6 +295,56 @@ func _probar_relieve_por_pixel() -> void:
 		_comprobar_materiales(cuerpo.get_child(0) as Node3D, String(quien["id"]), true)
 		cuerpo.free()
 	Espacio3D._shader_del_sitio = anterior
+
+
+## Cada rasgo en su sitio de la cara, medido contra los huesos faciales del
+## mismo avatar: que exista un nodo `GafasPuyi` no dice nada si cuelga del
+## cuello, que es lo que pasaba con los desplazamientos fijados a ojo.
+func _comprobar_colocacion(identidad: Node3D, esqueleto: Skeleton3D, id: String) -> void:
+	var r := IDENTIDAD.rostro(esqueleto, esqueleto.find_bone("Head"))
+	var ojos: Vector3 = r["ojos"]
+	var nariz: Vector3 = r["nariz"]
+	var labio: Vector3 = r["labio"]
+	var ceja: Vector3 = r["ceja"]
+	for grupo in identidad.get_children():
+		var caja := _caja_en(identidad, grupo)
+		var centro := caja.get_center()
+		var nombre := String(grupo.name)
+		if nombre.begins_with("Gafas"):
+			_comprobar(
+				absf(centro.y - ojos.y) < 0.015 and caja.end.z > ojos.z + 0.015,
+				"%s: las gafas quedan delante de los ojos" % id
+			)
+		elif nombre.begins_with("Bigote"):
+			_comprobar(
+				centro.y > labio.y and centro.y < nariz.y and caja.end.z > labio.z,
+				"%s: el bigote queda entre la nariz y el labio" % id
+			)
+		elif nombre.begins_with("Barba"):
+			_comprobar(
+				centro.y < labio.y and caja.position.y < labio.y - 0.03,
+				"%s: la barba baja del labio al mentón" % id
+			)
+		elif nombre.begins_with("Sombrero") or nombre.begins_with("Boina"):
+			_comprobar(
+				centro.y > ceja.y + 0.02 and caja.end.y > ceja.y + 0.06,
+				"%s: el sombrero va sobre la cabeza y no tapa los ojos" % id
+			)
+
+
+## Caja de todas las mallas de [param nodo] en el espacio de [param base].
+func _caja_en(base: Node3D, nodo: Node) -> AABB:
+	var caja := AABB()
+	var primera := true
+	var mallas: Array = nodo.find_children("*", "MeshInstance3D", true, false)
+	if nodo is MeshInstance3D:
+		mallas.append(nodo)
+	for malla in mallas:
+		var relativa := base.global_transform.affine_inverse() * (malla as Node3D).global_transform
+		var suya := relativa * (malla as MeshInstance3D).get_aabb()
+		caja = suya if primera else caja.merge(suya)
+		primera = false
+	return caja
 
 
 func _bajo_identidad_historica(nodo: Node) -> bool:
