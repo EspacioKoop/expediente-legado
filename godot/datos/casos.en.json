@@ -3,7 +3,7 @@
     {
       "id": "caso@1",
       "titulo": "El cierre de caja de 1999",
-      "descripcion": "Un descuadre nunca explicado en el cierre contable de fin de año quedó enterrado en el sistema SIGA. La empresa quiere saber qué ocurrió realmente.",
+      "descripcion": "An unexplained discrepancy in the year-end accounting close was buried in the SIGA system. The company wants to know what really happened.",
       "anioSuceso": 1999,
       "estado": "ABIERTO",
       "confidencial": false,
@@ -13,28 +13,28 @@
           "id": "factura1@1",
           "tipo": "FACTURA",
           "folio": "F-1999-00231",
-          "contenido": "Factura por 'servicios de consultoría' emitida el 30/12/1999. Monto: $482,000. Proveedor sin RFC registrado.",
+          "contenido": "Invoice for 'consulting services' issued on 30/12/1999. Amount: $482,000. Supplier with no registered RFC. Billed concept: consulting services; the work delivered is not identified. The missing RFC leaves the supplier's tax identity unresolved. The invoice proves what was claimed for payment, but not how the payment was authorized or reviewed.",
           "fecha": "1999-12-30"
         },
         {
           "id": "memo1@1",
           "tipo": "MEMORANDO",
           "folio": "MEMO-1999-088",
-          "contenido": "De: Dirección de Finanzas. Para: Contraloría. 'Autorizo el pago urgente sin revisión previa, bajo mi responsabilidad.' Firmado: J. Ibarra.",
+          "contenido": "From: Finance Directorate. To: Comptroller's Office. 'I authorize the urgent payment without prior review, under my responsibility.' Signed: J. Ibarra. The authorization is dated 29/12/1999 and the preserved invoice is dated the following day. The phrase 'under my responsibility' attributes the authorization to the signer, but does not identify the supplier or describe the service. Cross-check note: the ink analysis cited when linking this memorandum to the resignation attributes both signatures to the same pen. Nobody remembers requesting that analysis.",
           "fecha": "1999-12-29"
         },
         {
           "id": "empleado1@1",
           "tipo": "EMPLEADO",
           "folio": "EMP-0456",
-          "contenido": "J. Ibarra. Director de Finanzas 1997-2000. Renunció el 03/01/2000, cuatro días después del cierre de caja.",
+          "contenido": "J. Ibarra. Finance Director, 1997-2000. Resigned on 03/01/2000, four days after the cash closing. The record establishes the position and resignation date, but gives no explanation for its proximity to the accounting close. Cross-check note: the analysis attached to memorandum MEMO-1999-088 links the ink in this signature to the authorization; this record cannot verify that independently.",
           "fecha": "2000-01-03"
         },
         {
           "id": "actaContraloria1@1",
           "tipo": "ACTA",
           "folio": "ACTA-1999-014",
-          "contenido": "Acta de revisión de Contraloría sobre el pago urgente: 'Se revisó la documentación y no se encontraron observaciones.' Firmada el mismo día del pago, cinco minutos después de la hora de registro de la factura.",
+          "contenido": "Comptroller's review report on the urgent payment: 'The documentation was reviewed and no observations were found.' Signed on the same day as the payment, five minutes after the invoice was logged. The report does not explain how the missing RFC shown on the invoice was resolved. Finance's authorization dispensed with prior review; this report states that a review did occur. The interval raises questions about the scope of that review, but by itself does not establish negligence, a deliberate instruction, or an insufficient check.",
           "fecha": "1999-12-30"
         }
       ],
@@ -42,53 +42,53 @@
         {
           "id": "pista1@1",
           "registroOrigen": "memo1@1",
-          "descripcion": "El memorándum de autorización se firmó un día antes del cierre, saltándose el proceso normal de revisión.",
-          "fraseGatillo": "sin revisión previa"
+          "descripcion": "The authorization memorandum was signed one day before closing, bypassing the normal review process.",
+          "fraseGatillo": "without prior review"
         },
         {
           "id": "pista2@1",
           "registroOrigen": "empleado1@1",
-          "descripcion": "El Director de Finanzas renunció justo después del cierre de caja, sin explicación registrada.",
-          "fraseGatillo": "cuatro días después del cierre de caja"
+          "descripcion": "The Finance Director resigned immediately after the cash closing, with no explanation recorded.",
+          "fraseGatillo": "four days after the cash closing"
         },
         {
           "id": "pista20@1",
           "registroOrigen": "factura1@1",
           "registroOrigen2": "actaContraloria1@1",
-          "descripcion": "La revisión de Contraloría se completó en cinco minutos, el mismo día del pago, sin observar que el proveedor de la factura no tenía RFC registrado."
+          "descripcion": "The Comptroller's review was completed in five minutes, on the day of payment, without noting that the invoice supplier had no registered RFC."
         },
         {
           "id": "pista28@1",
           "registroOrigen": "memo1@1",
           "registroOrigen2": "empleado1@1",
-          "descripcion": "El memo que autoriza el pago urgente y la renuncia de J. Ibarra están firmados con la misma pluma, según el peritaje de tinta anexo al expediente — un peritaje que nadie recuerda haber solicitado."
+          "descripcion": "The memorandum authorizing the urgent payment and J. Ibarra's resignation are signed with the same pen, according to the ink analysis attached to the file — an analysis nobody remembers requesting."
         }
       ],
       "sospechosos": [
         {
           "id": "sospechosoIbarra@1",
           "nombre": "J. Ibarra",
-          "descripcion": "Director de Finanzas. Firmó la autorización de pago urgente y renunció días después.",
-          "desenlace": "Se emite responsiva a nombre de J. Ibarra por el monto completo. El caso se cierra. Nadie recupera el dinero: Ibarra nunca fue localizado para notificarle."
+          "descripcion": "Finance Director. Signed the urgent payment authorization and resigned days later.",
+          "desenlace": "A liability notice is issued in J. Ibarra's name for the full amount. The case is closed. Nobody recovers the money: Ibarra was never located to be notified."
         },
         {
           "id": "sospechosoProveedor@1",
-          "nombre": "El proveedor sin RFC",
-          "descripcion": "La empresa que recibió el pago de 'servicios de consultoría' no tiene registro fiscal ni existencia comprobable.",
-          "desenlace": "Se cursa una orden de investigación contra un proveedor que, según el registro mercantil, nunca existió legalmente. La orden se archiva por 'imposibilidad práctica de notificación'."
+          "nombre": "The supplier without an RFC",
+          "descripcion": "The company that received payment for 'consulting services' has no tax registration and no verifiable legal existence.",
+          "desenlace": "An investigation order is issued against a supplier that, according to the commercial registry, never legally existed. The order is filed for 'practical impossibility of notification.'"
         },
         {
           "id": "sospechosoContraloria@1",
-          "nombre": "Contraloría",
-          "descripcion": "El área responsable de revisar el pago antes de autorizarlo lo aprobó sin observaciones en cinco minutos.",
-          "desenlace": "Se turna el caso a Contraloría para que audite el proceder de Contraloría. El resultado de dicha autoevaluación nunca se hizo público."
+          "nombre": "Comptroller's Office",
+          "descripcion": "The department responsible for reviewing the payment before authorization approved it with no observations in five minutes.",
+          "desenlace": "The case is referred to the Comptroller's Office so that the Comptroller's Office can audit the conduct of the Comptroller's Office. The result of that self-assessment was never made public."
         }
       ]
     },
     {
       "id": "caso2@2",
       "titulo": "El trámite de la silla 4-B",
-      "descripcion": "En 1990, un empleado de Almacén solicitó una silla ergonómica tras una lesión de espalda certificada por el médico de la empresa. La solicitud pasó por catorce oficinas distintas a lo largo de seis años, cada una exigiendo un nuevo formulario que citaba al anterior, hasta que el empleado se jubiló sin haber recibido la silla ni una negativa por escrito. El expediente nunca se aprobó, nunca se rechazó, y en sentido estricto tampoco llegó a cerrarse.",
+      "descripcion": "In 1990, a warehouse employee requested an ergonomic chair after a back injury certified by the company doctor. Over six years the request passed through fourteen different offices, each demanding a new form that cited the previous one, until the employee retired without receiving either the chair or a written denial. The file was never approved, never rejected, and strictly speaking was never closed either.",
       "anioSuceso": 1996,
       "estado": "CERRADO",
       "confidencial": false,
@@ -98,28 +98,28 @@
           "id": "oficio2@2",
           "tipo": "OFICIO",
           "folio": "OF-1990-114",
-          "contenido": "Solicito silla ergonómica por prescripción médica adjunta. Se turna a Comité de Bienestar Laboral conforme a la Circular 12, para su valoración y trámite correspondiente.",
+          "contenido": "I request an ergonomic chair pursuant to the attached medical prescription. Referred to the Workplace Welfare Committee under Circular 12 for assessment and the corresponding procedure.",
           "fecha": "1990-03-14"
         },
         {
           "id": "circular2@2",
           "tipo": "CIRCULAR",
           "folio": "CIRC-1988-012",
-          "contenido": "Toda solicitud de mobiliario especial deberá ser dictaminada por el Comité de Bienestar Laboral, el cual sesionará cuando exista quórum. El comité no ha sesionado desde su fundación por falta de quórum.",
+          "contenido": "Every request for special furniture must be ruled on by the Workplace Welfare Committee, which shall meet when quorum is present. The committee has not met since its creation because quorum has never been reached.",
           "fecha": "1988-06-01"
         },
         {
           "id": "empleado2@2",
           "tipo": "EMPLEADO",
           "folio": "EMP-0112",
-          "contenido": "R. Salcido. Almacén general 1979-1996. Se jubiló el 20/02/1996. Última anotación en su expediente: 'sigo esperando respuesta sobre la silla.'",
+          "contenido": "R. Salcido. General warehouse, 1979-1996. Retired on 20/02/1996. Last note in the file: 'I am still waiting for an answer about the chair.'",
           "fecha": "1996-02-20"
         },
         {
           "id": "oficioReestructura2@2",
           "tipo": "OFICIO",
           "folio": "OF-1987-200",
-          "contenido": "Se notifica la eliminación de la Jefatura de Bienestar Laboral por reestructuración administrativa, efectiva a partir de esta fecha.",
+          "contenido": "Notice is hereby given that the Workplace Welfare Department is eliminated as part of an administrative restructuring, effective from this date.",
           "fecha": "1987-05-04"
         }
       ],
@@ -127,46 +127,46 @@
         {
           "id": "pista3@2",
           "registroOrigen": "circular2@2",
-          "descripcion": "El Comité de Bienestar Laboral, único con autoridad para aprobar la solicitud, jamás ha alcanzado quórum desde que fue creado.",
-          "fraseGatillo": "no ha sesionado desde su fundación por falta de quórum"
+          "descripcion": "The Workplace Welfare Committee, the only body authorized to approve the request, has never reached quorum since it was created.",
+          "fraseGatillo": "has not met since its creation because quorum has never been reached"
         },
         {
           "id": "pista4@2",
           "registroOrigen": "empleado2@2",
-          "descripcion": "El puesto con firma autorizante para este trámite fue eliminado en la reestructuración de 1987, un año antes de que se emitiera la propia Circular 12.",
-          "fraseGatillo": "sigo esperando respuesta sobre la silla"
+          "descripcion": "The position with signing authority for this procedure was eliminated in the 1987 restructuring, one year before Circular 12 itself was issued.",
+          "fraseGatillo": "I am still waiting for an answer about the chair"
         },
         {
           "id": "pista22@2",
           "registroOrigen": "circular2@2",
           "registroOrigen2": "oficioReestructura2@2",
-          "descripcion": "La Circular 12 exige la firma de la Jefatura de Bienestar Laboral para aprobar cualquier trámite de mobiliario especial, pero esa jefatura fue eliminada un año antes de que la circular se emitiera."
+          "descripcion": "Circular 12 requires the signature of the Workplace Welfare Department to approve any special-furniture procedure, but that department was eliminated one year before the circular was issued."
         },
         {
           "id": "pista29@2",
           "registroOrigen": "oficio2@2",
           "registroOrigen2": "empleado2@2",
-          "descripcion": "La solicitud original de 1990 nunca fue marcada como aprobada, rechazada ni cancelada: sigue en trámite, catorce oficinas después, a nombre de un empleado que ya se jubiló."
+          "descripcion": "The original 1990 request was never marked approved, rejected, or cancelled: fourteen offices later, it is still in process under the name of an employee who has already retired."
         }
       ],
       "sospechosos": [
         {
           "id": "sospechosoComite2@2",
-          "nombre": "El Comité de Bienestar Laboral",
-          "descripcion": "Único con autoridad para aprobar la solicitud. Nunca ha alcanzado quórum desde su fundación.",
-          "desenlace": "Se notifica al Comité de Bienestar Laboral que se le atribuye la responsabilidad del caso. El comité no puede acusar recibo porque nunca ha sesionado."
+          "nombre": "The Workplace Welfare Committee",
+          "descripcion": "The only body authorized to approve the request. It has never reached quorum since its creation.",
+          "desenlace": "The Workplace Welfare Committee is notified that responsibility for the case has been attributed to it. The committee cannot acknowledge receipt because it has never met."
         },
         {
           "id": "sospechosoCircular2@2",
-          "nombre": "La Circular 12",
-          "descripcion": "El propio documento que exige una firma imposible de obtener desde antes de existir.",
-          "desenlace": "Se abre un procedimiento para modificar la Circular 12. El procedimiento para modificar circulares está regulado, a su vez, por la Circular 12."
+          "nombre": "Circular 12",
+          "descripcion": "The very document that requires a signature that has been impossible to obtain since before the document existed.",
+          "desenlace": "A procedure is opened to amend Circular 12. The procedure for amending circulars is itself governed by Circular 12."
         },
         {
           "id": "sospechosoSalcido@2",
           "nombre": "R. Salcido",
-          "descripcion": "El propio solicitante. Esperó seis años sin escalar el trámite por otra vía.",
-          "desenlace": "Se determina que el solicitante debió dar seguimiento con mayor insistencia. No se especifica ante quién, ya que el puesto correspondiente fue eliminado en 1987."
+          "descripcion": "The applicant himself. He waited six years without escalating the procedure through another channel.",
+          "desenlace": "It is determined that the applicant should have followed up more insistently. It is not specified with whom, since the corresponding position was eliminated in 1987."
         }
       ]
     },

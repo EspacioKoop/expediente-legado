@@ -114,6 +114,34 @@ class CatalogoLocaleTest(unittest.TestCase):
                 self.assertNotEqual(opcion_es["etiqueta"], opcion_en["etiqueta"])
                 self.assertNotEqual(opcion_es["texto"], opcion_en["texto"])
 
+    def test_casos_1_y_2_estan_traducidos_al_ingles(self):
+        for indice in (0, 1):
+            caso_es = self.es["casos"][indice]
+            caso_en = self.en["casos"][indice]
+            self.assertEqual(caso_es["id"], caso_en["id"])
+            self.assertNotEqual(caso_es["descripcion"], caso_en["descripcion"])
+            for registro_es, registro_en in zip(
+                caso_es["registros"], caso_en["registros"], strict=True
+            ):
+                self.assertNotEqual(registro_es["contenido"], registro_en["contenido"])
+            for pista_es, pista_en in zip(
+                caso_es["pistas"], caso_en["pistas"], strict=True
+            ):
+                self.assertNotEqual(pista_es["descripcion"], pista_en["descripcion"])
+                if "fraseGatillo" in pista_es:
+                    self.assertNotEqual(
+                        pista_es["fraseGatillo"], pista_en["fraseGatillo"]
+                    )
+            for sospechoso_es, sospechoso_en in zip(
+                caso_es["sospechosos"], caso_en["sospechosos"], strict=True
+            ):
+                self.assertNotEqual(
+                    sospechoso_es["descripcion"], sospechoso_en["descripcion"]
+                )
+                self.assertNotEqual(
+                    sospechoso_es["desenlace"], sospechoso_en["desenlace"]
+                )
+
     def test_el_contrato_permite_traducir_texto_pero_no_quitar_fichas(self):
         traducida = copy.deepcopy(self.es)
         traducida["casos"][0]["descripcion"] = "Translated text"
