@@ -46,7 +46,6 @@ func _process(delta: float) -> void:
 	climax_hastur_pendiente.emit(contexto.duplicate(true))
 
 
-
 ## Aplica #806 únicamente al visor documental ya montado por Explorador. El
 ## texto original se conserva fuera del renderer para que refrescos del visor,
 ## reducción de movimiento o una fase normal puedan restaurarlo sin pérdida.
@@ -73,7 +72,10 @@ func _sincronizar_documento(
 		_tiempo_texto = 0.0
 
 	var configuracion: Variant = contexto.get("efecto_texto", {})
-	if not configuracion is Dictionary or not bool((configuracion as Dictionary).get("activo", false)):
+	if (
+		not configuracion is Dictionary
+		or not bool((configuracion as Dictionary).get("activo", false))
+	):
 		_restaurar_documento(visor)
 		return
 	if reducir_movimiento:
@@ -81,10 +83,13 @@ func _sincronizar_documento(
 		return
 
 	var ajuste := (configuracion as Dictionary).duplicate(true)
-	ajuste["semilla"] = "%s:%d" % [
-		String(ajuste.get("semilla", "contaminacion-os98")),
-		hash(_texto_original),
-	]
+	ajuste["semilla"] = (
+		"%s:%d"
+		% [
+			String(ajuste.get("semilla", "contaminacion-os98")),
+			hash(_texto_original),
+		]
+	)
 	var duracion := maxf(0.01, float(ajuste.get("duracion", 1.35)))
 	_tiempo_texto = fmod(_tiempo_texto + maxf(delta, 0.0), duracion * 2.0)
 	var progreso := TextoCorruptoNarrativo.progreso_para_tiempo(_tiempo_texto, duracion)
