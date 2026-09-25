@@ -267,8 +267,15 @@ func _montar_ave(color: Color) -> void:
 		color.darkened(0.10),
 		Vector3(0, 0, -14),
 	)
-	_parte("OjoI", Vector3(0.025, 0.025, 0.025), Vector3(-0.055, 0.255, -0.258), Color(0.01, 0.01, 0.01))
-	_parte("OjoD", Vector3(0.025, 0.025, 0.025), Vector3(0.055, 0.255, -0.258), Color(0.01, 0.01, 0.01))
+	_parte(
+		"OjoI",
+		Vector3(0.025, 0.025, 0.025),
+		Vector3(-0.055, 0.255, -0.258),
+		Color(0.01, 0.01, 0.01)
+	)
+	_parte(
+		"OjoD", Vector3(0.025, 0.025, 0.025), Vector3(0.055, 0.255, -0.258), Color(0.01, 0.01, 0.01)
+	)
 	_parte(
 		"PataI",
 		Vector3(0.025, 0.12, 0.025),
@@ -289,8 +296,20 @@ func _montar_perro(color: Color) -> void:
 	_parte("Cabeza", Vector3(0.34, 0.34, 0.38), Vector3(0, 0.68, -0.55), color.lightened(0.08))
 	_parte("Morro", Vector3(0.23, 0.18, 0.25), Vector3(0, 0.59, -0.78), color.darkened(0.10))
 	_parte("Nariz", Vector3(0.12, 0.10, 0.08), Vector3(0, 0.61, -0.93), Color(0.035, 0.03, 0.03))
-	_parte("OrejaI", Vector3(0.13, 0.22, 0.09), Vector3(-0.12, 0.87, -0.55), color.darkened(0.12), Vector3(0, 0, -14))
-	_parte("OrejaD", Vector3(0.13, 0.22, 0.09), Vector3(0.12, 0.87, -0.55), color.darkened(0.12), Vector3(0, 0, 14))
+	_parte(
+		"OrejaI",
+		Vector3(0.13, 0.22, 0.09),
+		Vector3(-0.12, 0.87, -0.55),
+		color.darkened(0.12),
+		Vector3(0, 0, -14)
+	)
+	_parte(
+		"OrejaD",
+		Vector3(0.13, 0.22, 0.09),
+		Vector3(0.12, 0.87, -0.55),
+		color.darkened(0.12),
+		Vector3(0, 0, 14)
+	)
 	for x in [-0.14, 0.14]:
 		for z in [-0.24, 0.24]:
 			_parte("Pata", Vector3(0.09, 0.42, 0.10), Vector3(x, 0.16, z), color.darkened(0.07))
@@ -336,12 +355,29 @@ func _montar_ciervo(color: Color) -> void:
 	)
 	_parte("Cabeza", Vector3(0.28, 0.30, 0.45), Vector3(0, 1.38, -0.62), color.lightened(0.07))
 	_parte("Morro", Vector3(0.20, 0.16, 0.22), Vector3(0, 1.32, -0.91), color.darkened(0.09))
-	_parte("OrejaI", Vector3(0.10, 0.22, 0.08), Vector3(-0.16, 1.55, -0.62), color.lightened(0.04), Vector3(0, 0, -25))
-	_parte("OrejaD", Vector3(0.10, 0.22, 0.08), Vector3(0.16, 1.55, -0.62), color.lightened(0.04), Vector3(0, 0, 25))
+	_parte(
+		"OrejaI",
+		Vector3(0.10, 0.22, 0.08),
+		Vector3(-0.16, 1.55, -0.62),
+		color.lightened(0.04),
+		Vector3(0, 0, -25)
+	)
+	_parte(
+		"OrejaD",
+		Vector3(0.10, 0.22, 0.08),
+		Vector3(0.16, 1.55, -0.62),
+		color.lightened(0.04),
+		Vector3(0, 0, 25)
+	)
 	for x in [-0.16, 0.16]:
 		for z in [-0.32, 0.32]:
 			_parte("Pata", Vector3(0.085, 0.80, 0.09), Vector3(x, 0.30, z), color.darkened(0.10))
-			_parte("Pezuña", Vector3(0.10, 0.08, 0.14), Vector3(x, -0.08, z - 0.025), Color(0.07, 0.055, 0.045))
+			_parte(
+				"Pezuña",
+				Vector3(0.10, 0.08, 0.14),
+				Vector3(x, -0.08, z - 0.025),
+				Color(0.07, 0.055, 0.045)
+			)
 	_parte(
 		"AstaI",
 		Vector3(0.035, 0.46, 0.035),
@@ -356,8 +392,20 @@ func _montar_ciervo(color: Color) -> void:
 		Color(0.16, 0.12, 0.09),
 		Vector3(0, 0, 12),
 	)
-	_parte("PuntaAstaI", Vector3(0.025, 0.24, 0.025), Vector3(-0.18, 1.82, -0.60), Color(0.16, 0.12, 0.09), Vector3(0, 0, -38))
-	_parte("PuntaAstaD", Vector3(0.025, 0.24, 0.025), Vector3(0.18, 1.82, -0.60), Color(0.16, 0.12, 0.09), Vector3(0, 0, 38))
+	_parte(
+		"PuntaAstaI",
+		Vector3(0.025, 0.24, 0.025),
+		Vector3(-0.18, 1.82, -0.60),
+		Color(0.16, 0.12, 0.09),
+		Vector3(0, 0, -38)
+	)
+	_parte(
+		"PuntaAstaD",
+		Vector3(0.025, 0.24, 0.025),
+		Vector3(0.18, 1.82, -0.60),
+		Color(0.16, 0.12, 0.09),
+		Vector3(0, 0, 38)
+	)
 
 
 func _parte(
