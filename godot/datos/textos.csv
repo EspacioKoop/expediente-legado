@@ -719,3 +719,14 @@ GOLF_HOYO_COMPLETADO,"HOYO COMPLETADO"
 GOLF_HOYO_LIMITE,"LÍMITE DE GOLPES ALCANZADO"
 GOLF_HOYO_RESULTADO,"%s · %d golpes"
 GOLF_HOYO_ESTADO,"Ángulo %+.0f° · Potencia %d%% · Golpes %d/%d"
+NAVEGADOR_BBS_HILO_NO_DISPONIBLE,[b]Hilo no disponible[/b]\\n\\nEl hilo no existe o todavía no es visible.
+NAVEGADOR_BBS_ESTADO,Estado: %s
+NAVEGADOR_BBS_HILOS_DISPONIBLES,Hilos disponibles: %d
+NAVEGADOR_BBS_HILO_LISTA,[%s] %s · %s
+NAVEGADOR_BBS_HILO_ESTADO,Estado: %s · última actividad: %s
+NAVEGADOR_BBS_MENSAJE_CABECERA,[b]%s[/b] · %s · %s/%s
+NAVEGADOR_BBS_CITA_NO_DISPONIBLE,> [mensaje citado no disponible]
+NAVEGADOR_BBS_CITA,> %s: %s
+NAVEGADOR_BBS_MENSAJE_ELIMINADO,[mensaje eliminado]
+NAVEGADOR_BBS_FIRMA,-- %s
+NAVEGADOR_BBS_VOLVER_TABLON,← Volver al tablón
