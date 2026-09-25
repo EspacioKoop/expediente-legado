@@ -71,6 +71,7 @@ func _raiz() -> int:
 
 func _ready() -> void:
 	partida.cargar()
+	_vincular_literatura_partida()
 	contenido.cargar()
 	historias.cargar()
 	jornada = Jornada.completar(partida.estado.get("jornada", Jornada.nueva(_raiz())), _raiz())
@@ -443,6 +444,14 @@ func _espacio_de(fase: String) -> Dictionary:
 ## autoloads del proyecto; por eso no se referencia el identificador global en
 ## tiempo de compilacion. Sin gestor disponible, el consumidor recibe un
 ## registro vacio y conserva exactamente el sueño base.
+func _vincular_literatura_partida() -> void:
+	if not is_inside_tree():
+		return
+	var gestor := get_node_or_null("/root/GestorLiteratura")
+	if gestor != null and gestor.has_method("vincular_a_estado"):
+		gestor.call("vincular_a_estado", partida.estado)
+
+
 func _registro_literario_para_sueno() -> Dictionary:
 	if not is_inside_tree():
 		return {}
@@ -788,6 +797,7 @@ func _al_pulsar_borrar() -> void:
 	if not partida.borrar():
 		_nomina.text = tr("ARCHIVO_ERROR_GUARDAR")
 		return
+	_vincular_literatura_partida()
 
 	jornada = Jornada.completar(partida.estado.get("jornada", Jornada.nueva(_raiz())), _raiz())
 	partida.estado["jornada"] = jornada
@@ -898,6 +908,7 @@ func _cerrar_expediente() -> void:
 	var vuelta_antes := int(jornada.get("vuelta", 1))
 
 	partida.cargar()
+	_vincular_literatura_partida()
 	jornada = Jornada.completar(partida.estado.get("jornada", Jornada.nueva(_raiz())), _raiz())
 	partida.estado["jornada"] = jornada
 

@@ -6,6 +6,8 @@
 class_name LiteraturaEventos
 extends RefCounted
 
+const CLAVE_ESTADO := "literatura"
+
 const CANAL_CONOCIMIENTO := "conocimiento"
 const CANAL_POSESION := "posesion"
 const CANAL_INSIGHT := "insight"
@@ -25,6 +27,49 @@ static func nuevo() -> Dictionary:
 		CANAL_INSIGHT: [],
 		CANAL_RITUAL: [],
 	}
+
+
+## Devuelve el registro literario persistente de una Partida. Los hechos son
+## historia de campaña: cambiar de jornada o de vuelta no los borra; una
+## partida nueva sí comienza vacía.
+static func asegurar_en_estado(estado: Dictionary) -> Dictionary:
+	var registro = estado.get(CLAVE_ESTADO, null)
+	if typeof(registro) != TYPE_DICTIONARY:
+		registro = nuevo()
+		estado[CLAVE_ESTADO] = registro
+		return registro
+	for canal in CANALES:
+		if typeof(registro.get(canal, null)) != TYPE_ARRAY:
+			registro[canal] = []
+	return registro
+
+
+static func validar(registro) -> Array:
+	var errores := []
+	if typeof(registro) != TYPE_DICTIONARY:
+		return ["no es un objeto"]
+	var ids := {}
+	for canal in CANALES:
+		var lista = registro.get(canal, null)
+		if typeof(lista) != TYPE_ARRAY:
+			errores.append("%s no es una lista" % canal)
+			continue
+		for indice in lista.size():
+			var evento = lista[indice]
+			if typeof(evento) != TYPE_DICTIONARY:
+				errores.append("%s[%d] no es un objeto" % [canal, indice])
+				continue
+			if not evento_valido(evento):
+				errores.append("%s[%d] inválido" % [canal, indice])
+				continue
+			if String(evento.get("canal", "")) != canal:
+				errores.append("%s[%d] declara otro canal" % [canal, indice])
+			var id := String(evento.get("id", ""))
+			if ids.has(id):
+				errores.append("id duplicado: %s" % id)
+			else:
+				ids[id] = true
+	return errores
 
 
 static func crear_evento(

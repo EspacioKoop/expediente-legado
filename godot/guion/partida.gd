@@ -93,6 +93,9 @@ static func nueva() -> Dictionary:
 		# Vive en Partida para atravesar escenas, jornadas y reasignaciones sin
 		# convertir prácticas/exposición en una identidad o puntuación global.
 		ReligionEventos.CLAVE_ESTADO: ReligionEventos.nuevo(),
+		# #1184: historial literario transversal persistente. Sobrevive a jornadas
+		# y reasignaciones; borrar/empezar una partida crea uno vacío.
+		LiteraturaEventos.CLAVE_ESTADO: LiteraturaEventos.nuevo(),
 		# #152: condiciones opcionales de la vida laboral. Vacío por defecto;
 		# la futura selección de SIGA activará ids antes de empezar la vuelta.
 		Auditorias.CLAVE_ESTADO: Auditorias.nueva(),
@@ -309,6 +312,12 @@ static func validar(guardado) -> Array:
 		else:
 			for error in ReligionEventos.validar(guardado[ReligionEventos.CLAVE_ESTADO]):
 				errores.append("%s.%s" % [ReligionEventos.CLAVE_ESTADO, error])
+	if guardado.has(LiteraturaEventos.CLAVE_ESTADO):
+		if typeof(guardado[LiteraturaEventos.CLAVE_ESTADO]) != TYPE_DICTIONARY:
+			errores.append("%s no es un objeto" % LiteraturaEventos.CLAVE_ESTADO)
+		else:
+			for error in LiteraturaEventos.validar(guardado[LiteraturaEventos.CLAVE_ESTADO]):
+				errores.append("%s.%s" % [LiteraturaEventos.CLAVE_ESTADO, error])
 	if guardado.has("pronosticos"):
 		if typeof(guardado["pronosticos"]) != TYPE_DICTIONARY:
 			errores.append("pronosticos no es un objeto")
@@ -475,6 +484,7 @@ func _fusionar(guardado: Dictionary) -> Dictionary:
 	Inventario.completar(fusionado["inventario"])
 	fusionado["perfil_jugador"] = PerfilJugador.completar(fusionado["perfil_jugador"])
 	ReligionEventos.asegurar_en_estado(fusionado)
+	LiteraturaEventos.asegurar_en_estado(fusionado)
 	Pronosticos.completar(fusionado["pronosticos"])
 	Auditorias.asegurar_en_estado(fusionado)
 	return fusionado
