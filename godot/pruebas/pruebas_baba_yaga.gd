@@ -426,9 +426,7 @@ func _probar_habitacion_giratoria() -> void:
 	reducida.aplicar_evento(SuenoBabaYaga.EVENTO_UMBRAL, false, true)
 	var corte := reducida.aplicar_evento(SuenoBabaYaga.EVENTO_UMBRAL, false, true)
 	var giro_corte: Dictionary = corte["giro_habitacion"]
-	var habitacion_reducida := (
-		reducida.get_node("AcabadoAmbiental/HabitacionGiratoria") as Node3D
-	)
+	var habitacion_reducida := reducida.get_node("AcabadoAmbiental/HabitacionGiratoria") as Node3D
 	_comprobar(giro_corte["modo"], "corte_fundido", "reducción evita interpolar el giro")
 	_comprobar(not giro_corte["animar"], "reducción de movimiento no anima habitación")
 	_comprobar(giro_corte["duracion"], 0.0, "giro accesible no tiene duración")
