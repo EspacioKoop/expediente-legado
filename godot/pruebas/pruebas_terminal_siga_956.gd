@@ -74,7 +74,7 @@ func _probar() -> void:
 	_comprobar(app._registro != null, "la pantalla monta historial de terminal")
 	_comprobar(app._abrir_siga != null, "la pantalla ofrece acceso explícito al visor SIGA")
 	_comprobar(
-		app._abrir_siga.text == tr("TERMINAL_SIGA_ABRIR"),
+		app._abrir_siga.text == TranslationServer.translate("TERMINAL_SIGA_ABRIR"),
 		"la UI resuelve sus textos desde el catálogo de traducciones",
 	)
 	var ui_help: Dictionary = app.ejecutar("help")
