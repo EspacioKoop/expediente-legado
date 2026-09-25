@@ -14,6 +14,7 @@ func _initialize() -> void:
 func _probar() -> void:
 	await _probar_recorrido_completo()
 	await _probar_abandono_parcial()
+	await _probar_cunado_montado_tarde()
 	_probar_oferta_determinista()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(0 if _fallos == 0 else 1)
@@ -96,6 +97,30 @@ func _probar_abandono_parcial() -> void:
 		pendiente != null and not pendiente.habilitado, "abandono desactiva puntos pendientes"
 	)
 	_comprobar(estado["completados"].size() == 1, "abandono no duplica progreso")
+	mundo.queue_free()
+	await process_frame
+
+
+func _probar_cunado_montado_tarde() -> void:
+	var mundo := Node3D.new()
+	root.add_child(mundo)
+	var estado := _estado(["recoger_a7", "devolver_carpeta", RondaCierre.PUNTO_CUNADO])
+	var capa := RondaCierre3D.new()
+	mundo.add_child(capa)
+	capa.configurar(estado)
+	await process_frame
+
+	_comprobar(capa.punto(RondaCierre.PUNTO_CUNADO) == null, "cuñado ausente no crea un sustituto")
+	var cunado := CompaneroInteractivo3D.new()
+	cunado.position = RondaCierre3D.POS_CUNADO + Vector3.UP * RondaCierre3D.ALTURA_CONVERSABLE
+	mundo.add_child(cunado)
+	await process_frame
+	capa.refrescar()
+	_comprobar(capa.punto(RondaCierre.PUNTO_CUNADO) == cunado, "recarga reengancha al cuñado real")
+	_comprobar(cunado.interactuar(root), "despedida reutiliza la interacción del compañero")
+	_comprobar(
+		estado["completados"].has(RondaCierre.PUNTO_CUNADO), "despedida queda en progreso persistido"
+	)
 	mundo.queue_free()
 	await process_frame
 
