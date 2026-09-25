@@ -76,7 +76,7 @@ class CatalogoLocaleTest(unittest.TestCase):
     def test_catalogos_ingleses_recuperan_paridad_sin_activar_traduccion_incompleta(self):
         self.assertTrue(misma_estructura(self.es, self.en))
         self.assertTrue(misma_estructura(self.prometeo_es, self.prometeo_en))
-        self.assertFalse(self.estado_locales["casos"]["en"])
+        self.assertTrue(self.estado_locales["casos"]["en"])
         self.assertTrue(self.estado_locales["prometeo"]["en"])
         self.assertNotIn("QUERY LENGTH LIMIT EXCEEDED", CASOS_EN.read_text(encoding="utf-8"))
         self.assertNotIn("QUERY LENGTH LIMIT EXCEEDED", PROMETEO_EN.read_text(encoding="utf-8"))
@@ -154,6 +154,16 @@ class CatalogoLocaleTest(unittest.TestCase):
             ):
                 self.assertNotEqual(ataque_es, ataque_en)
 
+    def test_conceptos_estan_traducidos_y_los_enlaces_apuntan_a_nombres_locales(self):
+        nombres = {concepto["nombre"] for concepto in self.en["conceptos"]}
+        for concepto_es, concepto_en in zip(
+            self.es["conceptos"], self.en["conceptos"], strict=True
+        ):
+            self.assertEqual(concepto_es["id"], concepto_en["id"])
+            self.assertNotEqual(concepto_es["resumen"], concepto_en["resumen"])
+            for referencia in __import__("re").findall(r"\\[\\[([^\\]]+)\\]\\]", concepto_en["resumen"]):
+                self.assertIn(referencia, nombres)
+
     def test_el_contrato_permite_traducir_texto_pero_no_quitar_fichas(self):
         traducida = copy.deepcopy(self.es)
         traducida["casos"][0]["descripcion"] = "Translated text"
@@ -172,12 +182,12 @@ class CatalogoLocaleTest(unittest.TestCase):
         alterada["casos"][0]["principal"] = not alterada["casos"][0]["principal"]
         self.assertFalse(misma_estructura(self.es, alterada))
 
-    def test_ingles_tiene_las_mismas_fichas_pero_sigue_marcado_incompleto(self):
+    def test_ingles_tiene_las_mismas_fichas_y_esta_activo(self):
         ids_es = {caso["id"] for caso in self.es["casos"]}
         ids_en = {caso["id"] for caso in self.en["casos"]}
         self.assertEqual(ids_es, ids_en)
         self.assertTrue(misma_estructura(self.es, self.en))
-        self.assertFalse(self.estado_locales["casos"]["en"])
+        self.assertTrue(self.estado_locales["casos"]["en"])
 
 
 if __name__ == "__main__":
