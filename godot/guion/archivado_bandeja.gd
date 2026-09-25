@@ -7,6 +7,8 @@ class_name ArchivadoBandeja
 extends RefCounted
 
 const VERSION_GUARDADO := 1
+const DEMORA_BUSQUEDA_POR_ERROR := 0.35
+const DEMORA_BUSQUEDA_MAX := 1.4
 
 
 static func nueva(casos: Array, folios_leidos: Array) -> Dictionary:
@@ -99,6 +101,13 @@ static func desorden_por_destino(estado: Dictionary) -> Dictionary:
 			continue
 		resultado[destino] = int(resultado.get(destino, 0)) + 1
 	return resultado
+
+
+static func demora_busqueda(estado: Dictionary) -> float:
+	var total := 0
+	for cantidad in desorden_por_destino(estado).values():
+		total += int(cantidad)
+	return minf(DEMORA_BUSQUEDA_MAX, float(total) * DEMORA_BUSQUEDA_POR_ERROR)
 
 
 static func resultado(estado: Dictionary) -> Dictionary:
