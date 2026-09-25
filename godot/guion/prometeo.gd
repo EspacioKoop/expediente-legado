@@ -448,12 +448,15 @@ static func resumen_trayectoria_ideologica(estado: Dictionary) -> Dictionary:
 	for evento in elecciones:
 		if ejemplos.size() >= 4:
 			break
-		ejemplos.append(
-			{
-				"contexto": String(evento.get("contexto", evento.get("id", ""))),
-				"eje": String(evento.get("eje", "")),
-				"fuente": String(evento.get("fuente", "")),
-			}
+		(
+			ejemplos
+			. append(
+				{
+					"contexto": String(evento.get("contexto", evento.get("id", ""))),
+					"eje": String(evento.get("eje", "")),
+					"fuente": String(evento.get("fuente", "")),
+				}
+			)
 		)
 
 	var jornada = estado.get("jornada", {})
@@ -482,9 +485,7 @@ static func archivar_trayectoria_ideologica(
 		if typeof(registro) == TYPE_DICTIONARY and int(registro.get("vuelta", -1)) == vuelta:
 			return Dictionary(registro).duplicate(true)
 
-	resumen["motivo"] = (
-		motivo.strip_edges() if not motivo.strip_edges().is_empty() else "otro"
-	)
+	resumen["motivo"] = (motivo.strip_edges() if not motivo.strip_edges().is_empty() else "otro")
 	historial.append(resumen)
 	estado[CLAVE_HISTORIAL_IDEOLOGICO] = historial
 	return resumen.duplicate(true)
