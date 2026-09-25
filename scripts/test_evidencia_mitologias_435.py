@@ -32,7 +32,7 @@ class EvidenciaMitologias435Test(unittest.TestCase):
             "colocar_fragmento(",
             "aplicar_lectura_espacial(true, false)",
             'aplicar_resolucion("sellar", true)',
-            "SuenoDuat.aplicar_pesaje_3d(",
+            "aplicar_pesaje_3d(",
         ):
             self.assertIn(token, self.capturador)
 
