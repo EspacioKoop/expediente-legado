@@ -38,9 +38,7 @@ func _ready() -> void:
 	rotulo.text = "ARCHIVO B"
 	controller._sincronizar_rotulos_3d(mundo, contexto, false, 0.75)
 	_comprobar(rotulo.text != "ARCHIVO B", "cambio externo de destino adopta nueva fuente")
-	controller._sincronizar_rotulos_3d(
-		mundo, {"efecto_texto": {"activo": false}}, false, 0.1
-	)
+	controller._sincronizar_rotulos_3d(mundo, {"efecto_texto": {"activo": false}}, false, 0.1)
 	_comprobar(rotulo.text == "ARCHIVO B", "fase normal restaura destino")
 
 	rotulo.text = "ARCHIVO CRÍTICO"
