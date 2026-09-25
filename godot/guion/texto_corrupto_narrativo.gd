@@ -41,13 +41,14 @@ static func resolver_texto(
 			salida += caracter
 			continue
 
-		var modo := posmod(firma / 1000, 3)
+		var modo := posmod(floori(float(firma) / 1000.0), 3)
 		match modo:
 			0:
-				var repeticiones := 2 + posmod(firma / 3000, 3)
+				var repeticiones := 2 + posmod(floori(float(firma) / 3000.0), 3)
 				salida += caracter.repeat(repeticiones)
 			1:
-				salida += GLIFOS[posmod(firma / 7000, GLIFOS.size())]
+				var indice_glifo := posmod(floori(float(firma) / 7000.0), GLIFOS.size())
+				salida += GLIFOS[indice_glifo]
 			_:
 				var siguiente := texto.substr((indice + 1) % texto.length(), 1)
 				salida += caracter + siguiente
