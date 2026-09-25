@@ -69,7 +69,10 @@ func _probar_avatar(quien: Dictionary) -> void:
 	)
 	var tintadas := 0
 	for malla in pieza.find_children("*", "MeshInstance3D", true, false):
-		if not _bajo_identidad_historica(malla) and (malla as MeshInstance3D).material_override != null:
+		if (
+			not _bajo_identidad_historica(malla)
+			and (malla as MeshInstance3D).material_override != null
+		):
 			tintadas += 1
 	_comprobar(tintadas == 0, "%s conserva su ropa y su piel" % id)
 	_comprobar_materiales(pieza, id)
@@ -81,13 +84,19 @@ func _probar_avatar(quien: Dictionary) -> void:
 		_comprobar(identidad != null, "%s recupera identidad histórica sobre Rocketbox" % id)
 		var esqueleto := Modelos._esqueleto(pieza)
 		_comprobar(
-			esqueleto != null
-			and String(esqueleto.get_meta("identidad_historica_275", "")) == retrato,
+			(
+				esqueleto != null
+				and String(esqueleto.get_meta("identidad_historica_275", "")) == retrato
+			),
 			"%s marca su identidad con la clave de retrato" % id
 		)
 		var marca := String(MARCAS_HISTORICAS.get(id, ""))
 		_comprobar(
-			not marca.is_empty() and identidad != null and identidad.find_child(marca, true, false) != null,
+			(
+				not marca.is_empty()
+				and identidad != null
+				and identidad.find_child(marca, true, false) != null
+			),
 			"%s tiene un rasgo 3D reconocible específico" % id
 		)
 
