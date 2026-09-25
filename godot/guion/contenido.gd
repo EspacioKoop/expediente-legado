@@ -12,6 +12,7 @@ extends RefCounted
 
 const RUTA := "res://datos/casos.json"
 const IDIOMA_CANONICO := "es"
+const RUTA_ESTADO_LOCALES := "res://datos/catalogos.locales.json"
 const CAMPOS_TRADUCIBLES := [
 	"titulo",
 	"descripcion",
@@ -51,7 +52,7 @@ static func ruta_catalogo(nombre: String, locale: String = "") -> String:
 		return canonica
 
 	var candidata := "res://datos/%s.%s.json" % [nombre, idioma]
-	if not FileAccess.file_exists(candidata):
+	if not FileAccess.file_exists(candidata) or not _catalogo_localizado_completo(nombre, idioma):
 		return canonica
 
 	var base := _leer_json(canonica, false)
@@ -62,6 +63,14 @@ static func ruta_catalogo(nombre: String, locale: String = "") -> String:
 		)
 		return canonica
 	return candidata
+
+
+static func _catalogo_localizado_completo(nombre: String, idioma: String) -> bool:
+	var estado := _leer_json(RUTA_ESTADO_LOCALES, false)
+	if estado.is_empty():
+		return false
+	var catalogo = estado.get(nombre, {})
+	return typeof(catalogo) == TYPE_DICTIONARY and bool(catalogo.get(idioma, false))
 
 
 static func _idioma(locale: String) -> String:
