@@ -17,7 +17,7 @@ class EditorExpedientes953Test(unittest.TestCase):
         comprobar_contrato(
             self,
             "pruebas/pruebas_editor_expedientes_953.gd",
-            "17 pasadas, 0 fallos",
+            "28 pasadas, 0 fallos",
         )
 
     def test_el_acceso_es_explicito_y_solo_qa(self):
