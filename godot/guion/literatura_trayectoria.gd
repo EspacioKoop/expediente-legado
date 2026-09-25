@@ -18,14 +18,17 @@ static func resumir(registro: Dictionary) -> Dictionary:
 			var obra_id := String(evento.get("obra_id", "")).strip_edges()
 			if obra_id.is_empty():
 				continue
-			var ficha: Dictionary = por_obra.get(
-				obra_id,
-				{
-					"obra_id": obra_id,
-					"canales": [],
-					"eventos": [],
-					"procedencias": [],
-				},
+			var ficha: Dictionary = (
+				por_obra
+				. get(
+					obra_id,
+					{
+						"obra_id": obra_id,
+						"canales": [],
+						"eventos": [],
+						"procedencias": [],
+					},
+				)
 			)
 			_agregar_unico(ficha["canales"], canal)
 			var evento_id := String(evento.get("id", ""))
