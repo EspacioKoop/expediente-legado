@@ -1,6 +1,6 @@
 ## Dressing fotorealista 2D para la oficina SIGA-98.
 ##
-## Los seis recortes se montan como Sprite3D con billboard fijo en Y: conservan
+## Los cinco recortes se montan como Sprite3D con billboard fijo en Y: conservan
 ## escala de mundo, reciben la luz del archivo y no añaden física ni interacción.
 ## La capa es idempotente para que los reconstruidos de fase no dupliquen props.
 class_name OficinaFotorealista98
@@ -27,12 +27,6 @@ const PROPS := [
 		"archivo": "fax_98.webp",
 		"pos": Vector3(5.42, 2.02, -1.0),
 		"altura": 0.48,
-	},
-	{
-		"nombre": "Escaner98",
-		"archivo": "escaner_98.webp",
-		"pos": Vector3(5.42, 1.98, 0.5),
-		"altura": 0.36,
 	},
 	{
 		"nombre": "Grapadora98",
