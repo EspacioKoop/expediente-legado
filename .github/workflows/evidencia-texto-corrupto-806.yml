@@ -1,0 +1,104 @@
+name: Evidencia texto corrupto 806
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/evidencia-texto-corrupto-806.yml'
+      - '.godot-version'
+      - 'godot/guion/texto_corrupto_narrativo.gd'
+      - 'godot/guion/contaminacion_os98.gd'
+      - 'godot/guion/dia_climax_os98_app.gd'
+      - 'godot/guion/explorador_siga.gd'
+      - 'godot/guion/dia_archivado_app.gd'
+      - 'godot/guion/archivador_interactivo_3d.gd'
+      - 'godot/pruebas/capturar_texto_corrupto_806.gd'
+      - 'scripts/test_evidencia_texto_corrupto_806.py'
+      - 'docs/evidencias/texto-corrupto-806/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidencia:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      GALLIUM_DRIVER: llvmpipe
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar Godot declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Importar proyecto
+        run: godot4 --headless --editor --path godot --quit
+
+      - name: Validar contrato de evidencia
+        run: python3 -m unittest -v scripts/test_evidencia_texto_corrupto_806.py
+
+      - name: Renderizar documento OS98 y rótulo 3D
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidencia-texto-corrupto-806
+          xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+            --script res://pruebas/capturar_texto_corrupto_806.gd -- \
+            "$GITHUB_WORKSPACE/evidencia-texto-corrupto-806"
+          test -s evidencia-texto-corrupto-806/documento-os98.png
+          test -s evidencia-texto-corrupto-806/rotulo-3d.png
+          test -s evidencia-texto-corrupto-806/manifest.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(Path("evidencia-texto-corrupto-806/manifest.json").read_text())
+          if manifest["issue"] != 806 or manifest["veredicto_automatico"] is not False:
+              raise SystemExit("manifiesto inválido para #806")
+          casos = {caso["id"]: caso for caso in manifest["casos"]}
+          if set(casos) != {"documento-os98", "rotulo-3d"}:
+              raise SystemExit("faltan las dos superficies de aceptación")
+          for caso in casos.values():
+              if not caso["sha256"] or caso["texto_visual"] == caso["texto_original"]:
+                  raise SystemExit(f"captura sin corrupción visible: {caso['id']}")
+          if casos["documento-os98"]["superficie"] != "ExploradorSiga/VisorDocumento":
+              raise SystemExit("el documento no usa la superficie real esperada")
+          if casos["rotulo-3d"]["superficie"] != "ArchivadorInteractivo3D/DestinoArchivado":
+              raise SystemExit("el rótulo no usa la superficie real esperada")
+          print("2/2 superficies renderizadas; listas para revisión humana")
+          PY
+
+      - name: Adjuntar evidencia visual de #806
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-texto-corrupto-806-${{ github.sha }}
+          path: evidencia-texto-corrupto-806/
+          if-no-files-found: error
+          retention-days: 14
