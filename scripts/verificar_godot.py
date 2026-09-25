@@ -123,6 +123,12 @@ def ejecutar():
                 9,
             ),
             (
+                "religion-sueno-935",
+                ["--script", "pruebas/pruebas_religion_sueno_935.gd"],
+                30,
+                17,
+            ),
+            (
                 "radio-domestica-98",
                 ["--script", "pruebas/pruebas_radio_domestica_98.gd"],
                 30,
