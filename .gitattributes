@@ -55,3 +55,6 @@ godot/assets/texturas/ventana_casa_ai_98/*.webp -filter -diff -merge -text
 
 # Recortes fotorealistas propios de oficina: blobs Git pequeños y autocontenidos.
 godot/assets/texturas/oficina_ai_98/*.webp -filter -diff -merge -text
+
+# Atrezzo Yggdrasil propio, pequeño y autocontenido (<10 KiB cada uno).
+godot/assets/texturas/yggdrasil_ai_98/*.webp -filter -diff -merge -text
