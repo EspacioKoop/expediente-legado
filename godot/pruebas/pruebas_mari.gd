@@ -10,6 +10,7 @@ func _initialize() -> void:
 	_probar_rutas_climaticas()
 	_probar_controles_climaticos_interactivos()
 	_probar_niebla_tormenta_y_retorno()
+	_probar_pack_visual_integrado()
 	_probar_accesibilidad_y_reproduccion()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -180,6 +181,32 @@ func _probar_niebla_tormenta_y_retorno() -> void:
 		sueno.get_node("IndiciosClimaticos/PresenciaPaisaje").visible,
 		"presencia se expresa por paisaje y no NPC",
 	)
+	sueno.queue_free()
+
+
+func _probar_pack_visual_integrado() -> void:
+	var sueno := SuenoMari.new()
+	get_root().add_child(sueno)
+	sueno.preparar()
+
+	var portal := sueno.get_node_or_null("ArteMari/PortalCuevaArte") as MeshInstance3D
+	var estratos := sueno.get_node_or_null("ArteMari/EstratosMontanaArte") as MeshInstance3D
+	var frente := sueno.get_node_or_null("ArteMari/FrenteTormentaArte") as Sprite3D
+	var cauce := sueno.get_node_or_null("ArteMari/CauceAguaArte") as Sprite3D
+	_comprobar(portal != null and portal.mesh != null, "asset OBJ de boca de cueva está montado")
+	_comprobar(estratos != null and estratos.mesh != null, "asset OBJ de estratos está montado")
+	_comprobar(frente != null and frente.texture != null, "asset SVG de tormenta está montado")
+	_comprobar(cauce != null and cauce.texture != null, "asset SVG de cauce está montado")
+	_comprobar(not portal.visible, "boca de cueva artística empieza cerrada")
+	_comprobar(not cauce.visible, "cauce artístico empieza oculto")
+
+	sueno.aplicar_accion("abrir_compuerta")
+	_comprobar(cauce.visible, "lluvia revela el cauce artístico")
+	_comprobar(not portal.visible, "lluvia no abre la boca de cueva artística")
+
+	sueno.aplicar_accion("refugiarse")
+	_comprobar(portal.visible, "tormenta abre la boca de cueva artística")
+	_comprobar(frente.visible, "tormenta muestra el frente visual del pack")
 	sueno.queue_free()
 
 

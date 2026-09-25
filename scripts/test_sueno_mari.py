@@ -14,6 +14,7 @@ VIGILIA = ROOT / "godot" / "guion" / "mari_vigilia.gd"
 ESCENA_SUENO = ROOT / "godot" / "escenas" / "sueno_mari.tscn"
 ESCENA_VIGILIA = ROOT / "godot" / "escenas" / "mari_vigilia.tscn"
 REFERENCIAS = ROOT / "docs" / "assets" / "mari-referencias.md"
+ARTE_MARI = ROOT / "godot" / "arte" / "mitologias" / "mari"
 CONTROLLER = ROOT / "godot" / "guion" / "dia_mari_app.gd"
 DIA = ROOT / "godot" / "escenas" / "dia.tscn"
 PRUEBA_GODOT = "res://pruebas/pruebas_mari.gd"
@@ -77,6 +78,21 @@ class SuenoMariTest(unittest.TestCase):
         self.assertIn('"lejana": _clima != CLIMA_NIEBLA', self.sueno)
         self.assertIn('"cercana": true', self.sueno)
         self.assertNotIn("CharacterBody3D.new()", self.sueno)
+
+    def test_pack_visual_mergeado_se_usa_en_runtime(self):
+        assets = {
+            "cueva_portal.obj": 'ASSET_CUEVA := "res://arte/mitologias/mari/cueva_portal.obj"',
+            "estratos_montana.obj": 'ASSET_ESTRATOS := "res://arte/mitologias/mari/estratos_montana.obj"',
+            "frente_tormenta.svg": 'ASSET_TORMENTA := "res://arte/mitologias/mari/frente_tormenta.svg"',
+            "huellas_agua.svg": 'ASSET_CAUCE := "res://arte/mitologias/mari/huellas_agua.svg"',
+        }
+        for nombre, referencia in assets.items():
+            self.assertTrue((ARTE_MARI / nombre).is_file(), nombre)
+            self.assertIn(referencia, self.sueno)
+        self.assertIn("_montar_pack_visual()", self.sueno)
+        self.assertIn('"PortalCuevaArte"', self.sueno)
+        self.assertIn('"FrenteTormentaArte"', self.sueno)
+        self.assertIn('"CauceAguaArte"', self.sueno)
 
     def test_reduccion_movimiento_conserva_mecanica(self):
         self.assertIn('"corte_fundido" if reduccion_movimiento', self.sueno)
