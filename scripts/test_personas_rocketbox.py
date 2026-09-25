@@ -13,6 +13,7 @@ PROCEDENCIA = ROOT / "godot" / "assets" / "procedencia.json"
 CARPETA = ROOT / "godot" / "assets" / "modelos" / "rocketbox"
 COMPANEROS = ROOT / "godot" / "guion" / "companeros.gd"
 DEPENDIENTES = ROOT / "godot" / "guion" / "dependientes_tiendas.gd"
+PERFIL_JUGADOR = ROOT / "godot" / "guion" / "perfil_jugador.gd"
 PRESETS = ROOT / "godot" / "export_presets.cfg"
 PRUEBA_GODOT = "pruebas/pruebas_personas_rocketbox.gd"
 RESUMEN_GODOT = re.compile(r"(\d+) pasadas, 0 fallos")
@@ -24,9 +25,14 @@ def _avatares():
 
 class PersonasRocketboxTest(unittest.TestCase):
     def test_cada_companero_apunta_a_un_avatar_versionado(self):
-        # Compañeros de oficina y dependientes de tienda: entre los dos usan
-        # todos los avatares del repositorio y ninguno sobra.
-        texto = COMPANEROS.read_text(encoding="utf-8") + DEPENDIENTES.read_text(encoding="utf-8")
+        # Compañeros de oficina, dependientes de tienda y cuerpos elegibles del
+        # protagonista: entre los tres usan todos los avatares del repositorio
+        # y ninguno sobra.
+        texto = (
+            COMPANEROS.read_text(encoding="utf-8")
+            + DEPENDIENTES.read_text(encoding="utf-8")
+            + PERFIL_JUGADOR.read_text(encoding="utf-8")
+        )
         nombres = set(re.findall(r'"rocketbox/([a-z0-9_]+)"', texto))
         self.assertTrue(nombres)
         presentes = {avatar.stem for avatar in _avatares()}
