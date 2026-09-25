@@ -1,0 +1,12 @@
+{
+  "separador": "   ·   ",
+  "dia": "DÍA %d",
+  "hora": "%02d:%02d",
+  "acciones": "ACCIONES %d",
+  "dinero": "DINERO %d",
+  "pistas": "PISTAS %d",
+  "lecturas_gratis": "LECTURAS SIN COSTE %d",
+  "objetos_fuera": "MOCHILA %d",
+  "objetos_casa": "OBJETOS A MANO %d",
+  "alquiler_hoy": "ALQUILER HOY %d"
+}
