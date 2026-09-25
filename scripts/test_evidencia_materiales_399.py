@@ -61,11 +61,26 @@ class EvidenciaMateriales399Test(unittest.TestCase):
             self.captura,
         )
 
-    def test_workflow_publica_png_y_manifiesto_sin_versionarlos(self):
+    def test_compone_una_comparativa_2x2_sin_re_renderizar(self):
+        self.assertIn('"comparativa": "comparativa.png"', self.captura)
+        self.assertIn(
+            '"orden_comparativa": ["oficina", "calle", "casa", "sueno"]',
+            self.captura,
+        )
+        self.assertIn("capturas_comparativa.append", self.captura)
+        self.assertIn("func _guardar_comparativa(", self.captura)
+        self.assertIn("Image.create_empty", self.captura)
+        self.assertIn("miniatura.resize(ancho, alto", self.captura)
+        self.assertIn("comparativa.blit_rect(", self.captura)
+        self.assertIn('"sha256_comparativa"', self.captura)
+
+    def test_workflow_publica_png_manifiesto_comparativa_y_resumen(self):
         self.assertIn("xvfb-run -a godot4", self.workflow)
         self.assertIn("for captura in oficina calle casa sueno; do", self.workflow)
         self.assertIn('test -s "evidencia-materiales-399/${captura}.png"', self.workflow)
+        self.assertIn("comparativa.png", self.workflow)
         self.assertIn("manifest.json", self.workflow)
+        self.assertIn("resumen.md", self.workflow)
         self.assertIn("actions/upload-artifact@v4", self.workflow)
         self.assertIn("len(set(hashes)) != 4", self.workflow)
 
@@ -73,6 +88,8 @@ class EvidenciaMateriales399Test(unittest.TestCase):
         self.assertIn("revisión", self.docs.lower())
         self.assertIn("humana", self.docs.lower())
         self.assertIn("sin HUD", self.docs)
+        self.assertIn("comparativa 2×2", self.docs.lower())
+        self.assertIn("resumen.md", self.docs)
         self.assertIn("no sustituye", self.docs.lower())
 
 

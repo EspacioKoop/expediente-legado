@@ -12,6 +12,7 @@ const SIMBOLICO = preload("res://guion/juicio_combate_simbolico.gd")
 const RIVAL = preload("res://guion/juicio_combate_rival.gd")
 const DOCTRINA = preload("res://guion/juicio_combate_doctrina.gd")
 const JUGADOR = preload("res://guion/juicio_combate_jugador.gd")
+const ESTADO_TEMPORAL = preload("res://guion/juicio_combate_estado_temporal.gd")
 const DETERMINACION_BASE := REGLAS.DETERMINACION_BASE
 const DETERMINACION_MINIMA_RIVAL := REGLAS.DETERMINACION_MINIMA_RIVAL
 const VELOCIDAD_JUGADOR := 4.8
@@ -35,10 +36,22 @@ var _bono_documental := 0
 var _determinacion_jugador := DETERMINACION_BASE
 var _determinacion_rival := DETERMINACION_BASE
 var _acabado := false
-var _recarga_jugador := 0.0
-var _recarga_rival := 0.0
-var _esquiva := 0.0
-var _enredo := 0.0
+var _estado_temporal := ESTADO_TEMPORAL.new()
+var _recarga_jugador: float:
+	get:
+		return _estado_temporal.recarga_jugador
+	set(valor):
+		_estado_temporal.recarga_jugador = valor
+var _esquiva: float:
+	get:
+		return _estado_temporal.esquiva
+	set(valor):
+		_estado_temporal.esquiva = valor
+var _enredo: float:
+	get:
+		return _estado_temporal.enredo
+	set(valor):
+		_estado_temporal.enredo = valor
 var _telegrafo_rival := 0.0
 var _telegrafo_rival_total := TELEGRAFO_RIVAL
 var _ataque_rival_pendiente := false
@@ -52,7 +65,6 @@ var _velocidad_rival := VELOCIDAD_RIVAL
 var _recarga_fuerte := RECARGA_FUERTE
 var _cargas_doctrina: Dictionary = {}
 var _doctrina_activa := ""
-var _doctrina_tiempo := 0.0
 var _comision_pendiente := false
 var _compromisos_religion: Array = []
 var _rival_inicio_agresion := false
@@ -74,9 +86,6 @@ var _boton_finisher: Button
 var _etiqueta_jungiana: Label
 var _dano_combo_pendiente := 0
 var _curacion_arquetipo_acumulada := 0.0
-var _invulnerabilidad_jungiana := 0.0
-var _sacudida_camara := 0.0
-var _aviso_jungiano_restante := 0.0
 var _azar := RandomNumberGenerator.new()
 
 
@@ -175,32 +184,7 @@ func _process(delta: float) -> void:
 ## `JuicioFeedbackRitual` los leen por nombre; aquí solo se aplican los
 ## cierres que la regla pura declara expirados.
 func _descontar_temporizadores(delta: float) -> void:
-	var paso := (
-		REGLAS
-		. descontar_temporizadores(
-			{
-				"recarga_jugador": _recarga_jugador,
-				"recarga_rival": _recarga_rival,
-				"esquiva": _esquiva,
-				"enredo": _enredo,
-				"invulnerabilidad_jungiana": _invulnerabilidad_jungiana,
-				"sacudida_camara": _sacudida_camara,
-				"aviso_jungiano": _aviso_jungiano_restante,
-				"doctrina": _doctrina_tiempo,
-			},
-			delta
-		)
-	)
-	var restantes: Dictionary = paso["restantes"]
-	_recarga_jugador = restantes["recarga_jugador"]
-	_recarga_rival = restantes["recarga_rival"]
-	_esquiva = restantes["esquiva"]
-	_enredo = restantes["enredo"]
-	_invulnerabilidad_jungiana = restantes["invulnerabilidad_jungiana"]
-	_sacudida_camara = restantes["sacudida_camara"]
-	_aviso_jungiano_restante = restantes["aviso_jungiano"]
-	_doctrina_tiempo = restantes["doctrina"]
-	var expirados: Array = paso["expirados"]
+	var expirados := _estado_temporal.descontar(delta)
 	if expirados.has("aviso_jungiano") and _etiqueta_jungiana != null:
 		_etiqueta_jungiana.visible = false
 	if expirados.has("doctrina"):
@@ -236,7 +220,7 @@ func activar_doctrina(eje: String) -> bool:
 	match String(plan["accion"]):
 		DOCTRINA.ACCION_TEMPORIZADA:
 			_doctrina_activa = String(plan["doctrina_activa"])
-			_doctrina_tiempo = float(plan["doctrina_tiempo"])
+			_estado_temporal.doctrina = float(plan["doctrina_tiempo"])
 		DOCTRINA.ACCION_MESA:
 			_aplicar_mesa_dialogo()
 		DOCTRINA.ACCION_COMISION:
@@ -255,7 +239,7 @@ func abandonar() -> void:
 func _aplicar_mesa_dialogo() -> void:
 	if _ataque_rival_pendiente:
 		_cancelar_ataque_rival()
-	_recarga_rival = maxf(_recarga_rival, recarga_mesa(_ritual))
+	_estado_temporal.recarga_rival = maxf(_estado_temporal.recarga_rival, recarga_mesa(_ritual))
 	if _jugador == null or _rival == null:
 		return
 	var destino := RIVAL.posicion_mesa(_jugador.position, _rival.position, DISTANCIA_MESA)
@@ -274,7 +258,7 @@ func _activar_comision() -> void:
 	)
 	_comision_pendiente = bool(estado["comision_pendiente"])
 	_doctrina_activa = String(estado["doctrina_activa"])
-	_doctrina_tiempo = float(estado["doctrina_tiempo"])
+	_estado_temporal.doctrina = float(estado["doctrina_tiempo"])
 	_telegrafo_rival = float(estado["telegrafo_restante"])
 	_telegrafo_rival_total = float(estado["telegrafo_total"])
 
@@ -283,7 +267,7 @@ func _cerrar_doctrina() -> void:
 	if _doctrina_activa.is_empty():
 		return
 	_doctrina_activa = ""
-	_doctrina_tiempo = 0.0
+	_estado_temporal.doctrina = 0.0
 	_actualizar_hud()
 	_pintar_doctrinas()
 
@@ -311,7 +295,7 @@ func _mover_rival(delta: float) -> void:
 		. plan_movimiento(
 			_jugador.position,
 			_rival.position,
-			_recarga_rival,
+			_estado_temporal.recarga_rival,
 			_velocidad_rival,
 			_enredo,
 			_ritual,
@@ -338,7 +322,7 @@ func _iniciar_ataque_rival() -> void:
 	if usar_comision:
 		_comision_pendiente = false
 		_doctrina_activa = "socialdemocrata"
-		_doctrina_tiempo = _telegrafo_rival_total
+		_estado_temporal.doctrina = _telegrafo_rival_total
 		_actualizar_hud()
 		_pintar_doctrinas()
 	if _aviso_ataque != null:
@@ -370,13 +354,13 @@ func _resolver_ataque_rival() -> void:
 	var hacia := _jugador.position - _rival.position
 	hacia.y = 0.0
 	var resolucion := RIVAL.resolver_ataque(hacia.length(), _esquiva)
-	_recarga_rival = float(resolucion["recarga"])
+	_estado_temporal.recarga_rival = float(resolucion["recarga"])
 	var efecto := (
 		RIVAL
 		. resolver_impacto_en_jugador(
 			String(resolucion["resultado"]),
 			_determinacion_jugador,
-			_invulnerabilidad_jungiana,
+			_estado_temporal.invulnerabilidad_jungiana,
 			_doctrina_activa,
 		)
 	)
@@ -404,10 +388,10 @@ func _resolver_ataque_rival() -> void:
 
 func _cancelar_ataque_rival() -> void:
 	_ataque_rival_pendiente = false
-	var estado := RIVAL.cancelar_telegrafo(_recarga_rival)
+	var estado := RIVAL.cancelar_telegrafo(_estado_temporal.recarga_rival)
 	_telegrafo_rival = float(estado["restante"])
 	_telegrafo_rival_total = float(estado["total"])
-	_recarga_rival = float(estado["recarga"])
+	_estado_temporal.recarga_rival = float(estado["recarga"])
 	_ocultar_aviso_ataque()
 	if _doctrina_activa == "socialdemocrata":
 		_cerrar_doctrina()
@@ -480,7 +464,7 @@ func _intentar_retorno_rival() -> bool:
 		return false
 	_retornos_rival = int(plan["retornos"])
 	_determinacion_rival = int(plan["determinacion"])
-	_recarga_rival = float(plan["recarga"])
+	_estado_temporal.recarga_rival = float(plan["recarga"])
 	_reaccion(_figura_rival, -0.30)
 	Sonido.sonar(self, "marcar")
 	_actualizar_hud()
@@ -678,7 +662,7 @@ func _actualizar_camara() -> void:
 			_camara,
 			_jugador,
 			_rival,
-			_sacudida_camara,
+			_estado_temporal.sacudida_camara,
 			reduccion_movimiento,
 			_azar,
 		)
@@ -752,7 +736,7 @@ func _al_finisher_ejecutado(nombre: String, efectos: Dictionary, es_super: bool)
 		. aplicar_finisher(
 			_determinacion_rival,
 			_determinacion_jugador,
-			_invulnerabilidad_jungiana,
+			_estado_temporal.invulnerabilidad_jungiana,
 			efectos,
 			es_super,
 			DETERMINACION_BASE,
@@ -760,8 +744,8 @@ func _al_finisher_ejecutado(nombre: String, efectos: Dictionary, es_super: bool)
 	)
 	_determinacion_rival = int(estado["determinacion_rival"])
 	_determinacion_jugador = int(estado["determinacion_jugador"])
-	_invulnerabilidad_jungiana = float(estado["invulnerabilidad"])
-	_sacudida_camara = float(estado["sacudida_camara"])
+	_estado_temporal.invulnerabilidad_jungiana = float(estado["invulnerabilidad"])
+	_estado_temporal.sacudida_camara = float(estado["sacudida_camara"])
 	_particulas_jungianas(float(efectos.get("area", 2.4)), es_super)
 	_reaccion(_figura_rival, 0.62 if es_super else 0.42)
 	Sonido.sonar(self, "marcar")
@@ -804,7 +788,7 @@ func _mostrar_aviso_jungiano(texto: String, duracion: float) -> void:
 		return
 	_etiqueta_jungiana.text = texto
 	_etiqueta_jungiana.visible = true
-	_aviso_jungiano_restante = maxf(_aviso_jungiano_restante, duracion)
+	_estado_temporal.aviso_jungiano = maxf(_estado_temporal.aviso_jungiano, duracion)
 
 
 func _particulas_jungianas(radio: float, es_super: bool) -> void:
