@@ -57,17 +57,22 @@ static func modificadores(
 		var parametros: Dictionary = PARAMETROS_POR_CANAL.get(canal, {}).duplicate(true)
 		if reduccion_movimiento:
 			parametros = _reducir_movimiento(parametros)
-		resultado.append(
-			{
-				"origen": "religion:%s" % String(NOMBRE_ORIGEN_POR_CANAL.get(canal, canal)),
-				"prioridad": int(PRIORIDAD_POR_CANAL.get(canal, 100)),
-				"parametros": parametros,
-			}
+		(
+			resultado
+			. append(
+				{
+					"origen": "religion:%s" % String(NOMBRE_ORIGEN_POR_CANAL.get(canal, canal)),
+					"prioridad": int(PRIORIDAD_POR_CANAL.get(canal, 100)),
+					"parametros": parametros,
+				}
+			)
 		)
 	return resultado
 
 
-static func _hay_evento_en_jornada(registro: Dictionary, canal: String, jornada_actual: int) -> bool:
+static func _hay_evento_en_jornada(
+	registro: Dictionary, canal: String, jornada_actual: int
+) -> bool:
 	for evento_crudo in ReligionEventos.eventos(registro, canal):
 		if typeof(evento_crudo) != TYPE_DICTIONARY:
 			continue
