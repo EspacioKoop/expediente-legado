@@ -288,7 +288,9 @@ func _esfera(
 	return nodo
 
 
-func _material(color: Color, transparente: bool = false, emisivo: bool = false) -> StandardMaterial3D:
+func _material(
+	color: Color, transparente: bool = false, emisivo: bool = false
+) -> StandardMaterial3D:
 	var material := StandardMaterial3D.new()
 	material.albedo_color = color
 	material.roughness = 0.48
