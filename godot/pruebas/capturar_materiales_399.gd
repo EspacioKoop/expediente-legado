@@ -182,7 +182,7 @@ func _guardar_comparativa(capturas: Array[Dictionary], destino: String) -> bool:
 	var comparativa := Image.create_empty(TAMANO.x, TAMANO.y, false, primera.get_format())
 	comparativa.fill(Color.BLACK)
 
-	for indice in capturas.size():
+	for indice in range(capturas.size()):
 		var imagen := capturas[indice]["imagen"] as Image
 		if imagen == null or imagen.is_empty():
 			printerr("Captura %d vacía al montar la comparativa" % indice)
