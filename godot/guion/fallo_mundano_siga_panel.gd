@@ -30,7 +30,7 @@ func _ready() -> void:
 
 	_cerrar_boton = Button.new()
 	_cerrar_boton.name = "Cerrar"
-	_cerrar_boton.text = "Cerrar aviso"
+	_cerrar_boton.text = tr("FALLO_MUNDANO_CERRAR")
 	_cerrar_boton.focus_mode = Control.FOCUS_ALL
 	_cerrar_boton.pressed.connect(cerrar)
 	add_child(_cerrar_boton)
@@ -44,9 +44,9 @@ func presentar(id: String, evento: String) -> bool:
 
 	var foco := get_viewport().gui_get_focus_owner()
 	_foco_previo = foco as Control if foco is Control else null
-	_titulo.text = "Incidencia normal · %s" % id.replace("_", " ")
+	_titulo.text = tr("FALLO_MUNDANO_TITULO")
 	_detalle.text = (
-		"%s\n\nSolución: %s"
+		tr("FALLO_MUNDANO_DETALLE")
 		% [
 			String(incidencia.get("causa", "")),
 			String(incidencia.get("resolucion", "")),
