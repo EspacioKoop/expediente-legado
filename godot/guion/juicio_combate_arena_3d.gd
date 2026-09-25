@@ -14,7 +14,9 @@ static func montar(
 	ritual: Dictionary,
 	radio_base: float,
 	radio_ritual: float,
+	perfil: Dictionary = {},
 ) -> Dictionary:
+	var color := JuicioCombateEscenografia3D.color_mito(mito_id)
 	var mundo := WorldEnvironment.new()
 	var entorno := Environment.new()
 	entorno.background_mode = Environment.BG_COLOR
@@ -22,14 +24,17 @@ static func montar(
 	entorno.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	entorno.ambient_light_color = Color(0.48, 0.50, 0.46)
 	entorno.ambient_light_energy = 0.65
+	JuicioCombateEscenografia3D.vestir_entorno(entorno, color)
 	mundo.environment = entorno
 	anfitrion.add_child(mundo)
 	FiltroPantalla.aplicar(mundo, PreferenciasSiga.cargar())
 
 	var luz := DirectionalLight3D.new()
 	luz.rotation_degrees = Vector3(-55.0, -35.0, 0.0)
-	luz.light_energy = 1.25
+	# De relleno: la luz que manda es el foco cenital de la escenografía.
+	luz.light_energy = 0.8
 	anfitrion.add_child(luz)
+	JuicioCombateEscenografia3D.montar_luces(anfitrion, color)
 
 	var suelo := MeshInstance3D.new()
 	var malla_suelo := CylinderMesh.new()
@@ -39,19 +44,21 @@ static func montar(
 	malla_suelo.radial_segments = 32
 	suelo.mesh = malla_suelo
 	suelo.position.y = -0.12
-	suelo.material_override = JuicioCombateFeedback3D.material(Color(0.16, 0.17, 0.15))
+	suelo.material_override = JuicioCombateEscenografia3D.material_suelo(
+		color, radio_base + 0.8, radio_ritual
+	)
 	anfitrion.add_child(suelo)
 
 	for i in 8:
 		var angulo := TAU * float(i) / 8.0
-		var archivador := MeshInstance3D.new()
-		var caja := BoxMesh.new()
-		caja.size = Vector3(0.9, 1.8, 0.55)
-		archivador.mesh = caja
+		var archivador := JuicioCombateEscenografia3D.archivador(i, Color(0.28, 0.31, 0.28))
 		archivador.position = Vector3(sin(angulo) * 5.7, 0.9, cos(angulo) * 5.7)
-		archivador.rotation.y = angulo
-		archivador.material_override = JuicioCombateFeedback3D.material(Color(0.28, 0.31, 0.28))
+		# Los cajones miran al centro: es el archivo el que te juzga.
+		archivador.rotation.y = angulo + PI
 		anfitrion.add_child(archivador)
+	JuicioCombateEscenografia3D.montar_aire(
+		anfitrion, bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false))
+	)
 
 	JuicioSimbolico3D.montar(anfitrion, arcano, mito_id)
 	_montar_limite_ritual(anfitrion, ritual, radio_ritual)
@@ -59,16 +66,13 @@ static func montar(
 	var jugador := CharacterBody3D.new()
 	jugador.position = Vector3(0.0, 0.0, 2.4)
 	anfitrion.add_child(jugador)
-	var figura_jugador := FiguraSilueta.construir(jugador, Vector3.ZERO, Color(0.68, 0.70, 0.64))
+	var figura_jugador := JuicioCombateEscenografia3D.cuerpo_jugador(jugador, perfil)
 
 	var rival := CharacterBody3D.new()
 	rival.position = Vector3(0.0, 0.0, -2.4)
 	anfitrion.add_child(rival)
 	var clave := String(acusado.get("id", acusado.get("nombre", "acusado")))
-	var matiz := 0.52 + float(absi(hash(clave)) % 14) / 100.0
-	var figura_rival := FiguraSilueta.construir(
-		rival, Vector3.ZERO, Color.from_hsv(matiz, 0.34, 0.72)
-	)
+	var figura_rival := JuicioCombateEscenografia3D.rival_sin_cara(rival, clave, color)
 	var aviso_ataque := _montar_aviso_ataque(anfitrion)
 
 	var camara := Camera3D.new()
