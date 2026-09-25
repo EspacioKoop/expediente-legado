@@ -42,6 +42,7 @@ const LATENCIAS := {
 }
 
 var _cwd := "/"
+var _archivos: Dictionary = ARCHIVOS.duplicate(true)
 
 
 func ejecutar(linea: String) -> Dictionary:
@@ -79,8 +80,14 @@ func ejecutar(linea: String) -> Dictionary:
 						+ "TCP    SIGA-98:1048   ARCHIVO.LOCAL:98   ESTABLECIDA"
 					)
 				)
-			"del", "erase", "rm", "copy", "cp", "edit":
-				resultado = _resultado(false, "OPERACION NO DISPONIBLE: terminal de solo lectura")
+			"copy", "cp":
+				resultado = _copiar(partes)
+			"edit":
+				resultado = _editar(partes)
+			"del", "erase", "rm":
+				resultado = _borrar(_argumento(partes))
+			"users", "usuarios":
+				resultado = _usuarios()
 			_:
 				resultado = _resultado(false, "Comando no reconocido: %s" % comando)
 	return resultado
@@ -93,7 +100,7 @@ func cwd() -> String:
 func _listar(argumento: String) -> Dictionary:
 	var destino := _normalizar(_cwd, argumento) if not argumento.is_empty() else _cwd
 	if not DIRECTORIOS.has(destino):
-		if ARCHIVOS.has(destino):
+		if _archivos.has(destino):
 			return _resultado(true, destino.get_file())
 		return _resultado(false, "Ruta no encontrada: %s" % destino)
 
@@ -102,7 +109,7 @@ func _listar(argumento: String) -> Dictionary:
 		var ruta := String(directorio)
 		if ruta != destino and _padre(ruta) == destino:
 			entradas.append("[DIR] " + ruta.get_file())
-	for archivo in ARCHIVOS:
+	for archivo in _archivos:
 		var ruta := String(archivo)
 		if _padre(ruta) == destino:
 			entradas.append("      " + ruta.get_file())
@@ -127,9 +134,59 @@ func _leer(argumento: String) -> Dictionary:
 	var destino := _normalizar(_cwd, argumento)
 	if DIRECTORIOS.has(destino):
 		return _resultado(false, "Es un directorio: %s" % destino)
-	if not ARCHIVOS.has(destino):
+	if not _archivos.has(destino):
 		return _resultado(false, "Archivo no encontrado: %s" % destino)
-	return _resultado(true, String(ARCHIVOS[destino]))
+	return _resultado(true, String(_archivos[destino]))
+
+
+func _copiar(partes: PackedStringArray) -> Dictionary:
+	if partes.size() < 3:
+		return _resultado(false, "Uso: COPY origen destino")
+	var origen := _normalizar(_cwd, String(partes[1]))
+	var destino := _normalizar(_cwd, String(partes[2]))
+	if not _archivos.has(origen):
+		return _resultado(false, "Archivo no encontrado: %s" % origen)
+	if DIRECTORIOS.has(destino):
+		destino = _normalizar(destino, origen.get_file())
+	if not DIRECTORIOS.has(_padre(destino)):
+		return _resultado(false, "Directorio de destino no encontrado: %s" % _padre(destino))
+	_archivos[destino] = _archivos[origen]
+	return _resultado(true, "1 archivo copiado: %s" % destino)
+
+
+func _editar(partes: PackedStringArray) -> Dictionary:
+	if partes.size() < 3:
+		return _resultado(false, "Uso: EDIT archivo texto")
+	var destino := _normalizar(_cwd, String(partes[1]))
+	if DIRECTORIOS.has(destino):
+		return _resultado(false, "Es un directorio: %s" % destino)
+	if not DIRECTORIOS.has(_padre(destino)):
+		return _resultado(false, "Directorio no encontrado: %s" % _padre(destino))
+	var texto := _resto_desde(partes, 2)
+	_archivos[destino] = texto
+	return _resultado(true, "Archivo temporal guardado: %s" % destino)
+
+
+func _borrar(argumento: String) -> Dictionary:
+	if argumento.is_empty():
+		return _resultado(false, "Uso: DEL archivo")
+	var destino := _normalizar(_cwd, argumento)
+	if DIRECTORIOS.has(destino):
+		return _resultado(false, "No se pueden borrar directorios")
+	if not _archivos.has(destino):
+		return _resultado(false, "Archivo no encontrado: %s" % destino)
+	_archivos.erase(destino)
+	return _resultado(true, "Archivo temporal eliminado: %s" % destino)
+
+
+func _usuarios() -> Dictionary:
+	var usuarios := []
+	for archivo in _archivos:
+		var ruta := String(archivo)
+		if _padre(ruta) == "/USUARIOS":
+			usuarios.append(ruta.get_file().trim_suffix(".TXT").to_lower())
+	usuarios.sort()
+	return _resultado(true, "\n".join(usuarios))
 
 
 func _ping(argumento: String) -> Dictionary:
@@ -156,8 +213,12 @@ static func _argumento(partes: PackedStringArray) -> String:
 
 
 static func _resto(partes: PackedStringArray) -> String:
+	return _resto_desde(partes, 1)
+
+
+static func _resto_desde(partes: PackedStringArray, inicio: int) -> String:
 	var salida := ""
-	for i in range(1, partes.size()):
+	for i in range(inicio, partes.size()):
 		if not salida.is_empty():
 			salida += " "
 		salida += String(partes[i])
@@ -216,6 +277,7 @@ static func _padre(ruta: String) -> String:
 static func _ayuda() -> String:
 	return (
 		"HELP  DIR/LS  CD  PWD  TYPE/CAT\n"
+		+ "COPY/CP  EDIT  DEL/RM  USERS\n"
 		+ "WHOAMI  SET  ECHO  PING  NETSTAT\n"
-		+ "Sistema local simulado · solo lectura"
+		+ "Sistema local simulado · cambios temporales de sesión"
 	)
