@@ -116,7 +116,9 @@ La forma recomendada es generar con un solo comando la matriz de cierre: **8 car
 python3 scripts/preparar_validacion_tarot_645.py
 ```
 
-La salida queda en `dist/qa/tarot-645/` junto a un `manifest.json` con los **26 recorridos** y su resultado. Cada nombre empieza por `tarot-`, así que `--output` puede apuntar a cualquier directorio sin romper el dispatcher de QA. También existe `--dry-run` para revisar comandos sin abrir Godot.\n\nEl mismo comando genera `revision-humana.md` en ese directorio. La hoja agrupa las 26 evidencias, incrusta cada captura por ruta relativa y añade casillas de revisión para correspondencia visual, legibilidad, persistencia, skip y reducción de movimiento. Sirve para que el pase humano quede auditable sin convertir CI en una falsa aprobación visual.
+La salida queda en `dist/qa/tarot-645/` junto a un `manifest.json` con los **26 recorridos** y su resultado. Cada nombre empieza por `tarot-`, así que `--output` puede apuntar a cualquier directorio sin romper el dispatcher de QA. También existe `--dry-run` para revisar comandos sin abrir Godot.
+
+El mismo comando genera `revision-humana.md` en ese directorio. La hoja agrupa las 26 evidencias, incrusta cada captura por ruta relativa y añade casillas de revisión para correspondencia visual, legibilidad, persistencia, skip y reducción de movimiento. Sirve para que el pase humano quede auditable sin convertir CI en una falsa aprobación visual.
 
 Estas capturas sirven como **preflight visual reproducible**, no sustituyen el pase humano sobre el export candidato exigido por el criterio de cierre.
 
