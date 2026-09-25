@@ -446,6 +446,10 @@ func _crear_cuerno(padre: Node3D, nombre: String, posicion: Vector3, giro_z: flo
 
 
 func _material(color: Color, transparente: bool = false) -> StandardMaterial3D:
+	if color == COLOR_ARCHIVO:
+		return Mitologias435Materiales.crear("metal_archivo_oxidado", color, transparente)
+	if color == COLOR_PAPEL:
+		return Mitologias435Materiales.crear("papel_archivo_envejecido", color, transparente)
 	var material := StandardMaterial3D.new()
 	material.albedo_color = color
 	material.roughness = 0.76

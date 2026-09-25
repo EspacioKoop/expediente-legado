@@ -494,6 +494,12 @@ func _crear_caja(
 
 
 func _material(color: Color, emision: bool = false) -> StandardMaterial3D:
+	if color == COLOR_LADRILLO:
+		return Mitologias435Materiales.crear("arcilla_uruk", color, false, emision)
+	if color == COLOR_ARCHIVO:
+		return Mitologias435Materiales.crear("metal_archivo_oxidado", color, false, emision)
+	if color == COLOR_PAPEL:
+		return Mitologias435Materiales.crear("papel_archivo_envejecido", color, false, emision)
 	var material := StandardMaterial3D.new()
 	material.albedo_color = color
 	material.roughness = 0.78

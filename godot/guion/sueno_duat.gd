@@ -451,6 +451,12 @@ static func _transformar_arquitectura(
 
 
 static func _material(color: Color) -> StandardMaterial3D:
+	if color == COLOR_PIEDRA:
+		return Mitologias435Materiales.crear("caliza_duat", color)
+	if color == COLOR_ORO_APAGADO or color == COLOR_BANDEJA:
+		return Mitologias435Materiales.crear("bronce_votivo", color)
+	if color == COLOR_PESO:
+		return Mitologias435Materiales.crear("arcilla_uruk", color)
 	var material := StandardMaterial3D.new()
 	material.albedo_color = color
 	material.roughness = 0.86
