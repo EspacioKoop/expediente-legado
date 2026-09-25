@@ -81,6 +81,14 @@ class CatalogoLocaleTest(unittest.TestCase):
         self.assertNotIn("QUERY LENGTH LIMIT EXCEEDED", PROMETEO_EN.read_text(encoding="utf-8"))
         self.assertIn("_catalogo_localizado_completo(nombre, idioma)", self.codigo)
 
+    def test_prometeo_ingles_traduce_todos_los_logros(self):
+        for logro_es, logro_en in zip(
+            self.prometeo_es["logros"], self.prometeo_en["logros"], strict=True
+        ):
+            self.assertEqual(logro_es["id"], logro_en["id"])
+            self.assertNotEqual(logro_es["titulo"], logro_en["titulo"])
+            self.assertNotEqual(logro_es["descripcion"], logro_en["descripcion"])
+
     def test_el_contrato_permite_traducir_texto_pero_no_quitar_fichas(self):
         traducida = copy.deepcopy(self.es)
         traducida["casos"][0]["descripcion"] = "Translated text"
