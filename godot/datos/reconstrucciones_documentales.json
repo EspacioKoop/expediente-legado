@@ -14,9 +14,21 @@
         "no se identifica qué trabajo se entregó"
       ],
       "planos": [
-        {"encuadre": "detalle", "duracion": 1.8, "motivo": "documento"},
-        {"encuadre": "general", "duracion": 2.2, "motivo": "mesa_vacia"},
-        {"encuadre": "detalle", "duracion": 1.6, "motivo": "campo_incompleto"}
+        {
+          "encuadre": "detalle",
+          "duracion": 1.8,
+          "motivo": "documento"
+        },
+        {
+          "encuadre": "general",
+          "duracion": 2.2,
+          "motivo": "mesa_vacia"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.6,
+          "motivo": "campo_incompleto"
+        }
       ]
     },
     {
@@ -31,9 +43,21 @@
         "no identifica al proveedor ni describe el servicio"
       ],
       "planos": [
-        {"encuadre": "general", "duracion": 2.0, "motivo": "firma"},
-        {"encuadre": "detalle", "duracion": 1.5, "motivo": "sello"},
-        {"encuadre": "fijo", "duracion": 2.0, "motivo": "ausencia"}
+        {
+          "encuadre": "general",
+          "duracion": 2,
+          "motivo": "firma"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.5,
+          "motivo": "sello"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 2,
+          "motivo": "ausencia"
+        }
       ]
     },
     {
@@ -48,9 +72,21 @@
         "no explica cómo se resolvió la falta de RFC"
       ],
       "planos": [
-        {"encuadre": "general", "duracion": 1.8, "motivo": "revision"},
-        {"encuadre": "detalle", "duracion": 1.8, "motivo": "reloj"},
-        {"encuadre": "fijo", "duracion": 2.0, "motivo": "campo_incompleto"}
+        {
+          "encuadre": "general",
+          "duracion": 1.8,
+          "motivo": "revision"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.8,
+          "motivo": "reloj"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 2,
+          "motivo": "campo_incompleto"
+        }
       ]
     },
     {
@@ -64,9 +100,21 @@
         "Preséntese el día 05/07/1993 sin excepción."
       ],
       "planos": [
-        {"encuadre": "general", "duracion": 2.2, "motivo": "pasillo"},
-        {"encuadre": "detalle", "duracion": 1.5, "motivo": "indicador_13"},
-        {"encuadre": "fijo", "duracion": 1.8, "motivo": "puerta"}
+        {
+          "encuadre": "general",
+          "duracion": 2.2,
+          "motivo": "pasillo"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.5,
+          "motivo": "indicador_13"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.8,
+          "motivo": "puerta"
+        }
       ]
     },
     {
@@ -81,9 +129,21 @@
         "ni escalera registrada en los planos vigentes"
       ],
       "planos": [
-        {"encuadre": "general", "duracion": 2.0, "motivo": "ascensor"},
-        {"encuadre": "detalle", "duracion": 1.8, "motivo": "botonera"},
-        {"encuadre": "fijo", "duracion": 2.0, "motivo": "plano"}
+        {
+          "encuadre": "general",
+          "duracion": 2,
+          "motivo": "ascensor"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.8,
+          "motivo": "botonera"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 2,
+          "motivo": "plano"
+        }
       ]
     },
     {
@@ -97,9 +157,21 @@
         "Cierre definitivo del expediente."
       ],
       "planos": [
-        {"encuadre": "general", "duracion": 2.0, "motivo": "sotano"},
-        {"encuadre": "fijo", "duracion": 1.8, "motivo": "silueta"},
-        {"encuadre": "detalle", "duracion": 1.4, "motivo": "sello_cierre"}
+        {
+          "encuadre": "general",
+          "duracion": 2,
+          "motivo": "sotano"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.8,
+          "motivo": "silueta"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.4,
+          "motivo": "sello_cierre"
+        }
       ]
     },
     {
@@ -114,9 +186,21 @@
         "Cierre definitivo del expediente."
       ],
       "planos": [
-        {"encuadre": "general", "duracion": 2.0, "motivo": "cuarto_piso"},
-        {"encuadre": "detalle", "duracion": 1.6, "motivo": "ventana"},
-        {"encuadre": "fijo", "duracion": 1.8, "motivo": "espacio_sin_testigos"}
+        {
+          "encuadre": "general",
+          "duracion": 2,
+          "motivo": "cuarto_piso"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.6,
+          "motivo": "ventana"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.8,
+          "motivo": "espacio_sin_testigos"
+        }
       ]
     },
     {
@@ -130,9 +214,21 @@
         "incluido el expediente mismo, que sin embargo usted sigue leyendo"
       ],
       "planos": [
-        {"encuadre": "general", "duracion": 2.2, "motivo": "oficina_vacia"},
-        {"encuadre": "detalle", "duracion": 1.8, "motivo": "mesa_sin_equipo"},
-        {"encuadre": "fijo", "duracion": 2.0, "motivo": "expediente_presente"}
+        {
+          "encuadre": "general",
+          "duracion": 2.2,
+          "motivo": "oficina_vacia"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.8,
+          "motivo": "mesa_sin_equipo"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 2,
+          "motivo": "expediente_presente"
+        }
       ]
     },
     {
@@ -147,9 +243,21 @@
         "sin nombre, departamento ni firma de recepción"
       ],
       "planos": [
-        {"encuadre": "general", "duracion": 2.0, "motivo": "comedor"},
-        {"encuadre": "detalle", "duracion": 1.7, "motivo": "vale_00"},
-        {"encuadre": "fijo", "duracion": 1.8, "motivo": "asiento_sin_identidad"}
+        {
+          "encuadre": "general",
+          "duracion": 2,
+          "motivo": "comedor"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.7,
+          "motivo": "vale_00"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.8,
+          "motivo": "asiento_sin_identidad"
+        }
       ]
     },
     {
@@ -164,9 +272,21 @@
         "No constan accesos en fin de semana ni fuera del horario ordinario."
       ],
       "planos": [
-        {"encuadre": "detalle", "duracion": 1.8, "motivo": "tarjeta_0000"},
-        {"encuadre": "general", "duracion": 2.0, "motivo": "torniquete"},
-        {"encuadre": "fijo", "duracion": 1.8, "motivo": "reloj"}
+        {
+          "encuadre": "detalle",
+          "duracion": 1.8,
+          "motivo": "tarjeta_0000"
+        },
+        {
+          "encuadre": "general",
+          "duracion": 2,
+          "motivo": "torniquete"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.8,
+          "motivo": "reloj"
+        }
       ]
     },
     {
@@ -180,9 +300,639 @@
         "No existe numeración 00 ni espacio sin asignar entre las mesas representadas."
       ],
       "planos": [
-        {"encuadre": "cenital", "duracion": 2.2, "motivo": "planta_3a"},
-        {"encuadre": "detalle", "duracion": 1.8, "motivo": "numeracion"},
-        {"encuadre": "fijo", "duracion": 1.8, "motivo": "hueco_inexistente"}
+        {
+          "encuadre": "cenital",
+          "duracion": 2.2,
+          "motivo": "planta_3a"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.8,
+          "motivo": "numeracion"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.8,
+          "motivo": "hueco_inexistente"
+        }
+      ]
+    },
+    {
+      "id": "caso2_solicitud",
+      "caso": "caso2@2",
+      "registro": "oficio2@2",
+      "folio": "OF-1990-114",
+      "titulo": "Lo que afirma la solicitud",
+      "fragmentos": [
+        "Solicito silla ergonómica por prescripción médica adjunta.",
+        "Se turna a Comité de Bienestar Laboral"
+      ],
+      "planos": [
+        {
+          "encuadre": "general",
+          "duracion": 2,
+          "motivo": "almacen"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.6,
+          "motivo": "solicitud"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.8,
+          "motivo": "silla_ausente"
+        }
+      ]
+    },
+    {
+      "id": "caso2_comite",
+      "caso": "caso2@2",
+      "registro": "circular2@2",
+      "folio": "CIRC-1988-012",
+      "titulo": "Lo que afirma la Circular 12",
+      "fragmentos": [
+        "deberá ser dictaminada por el Comité de Bienestar Laboral",
+        "El comité no ha sesionado desde su fundación por falta de quórum."
+      ],
+      "planos": [
+        {
+          "encuadre": "general",
+          "duracion": 2,
+          "motivo": "sala_comite"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.7,
+          "motivo": "sillas_vacias"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.8,
+          "motivo": "reloj_parado"
+        }
+      ]
+    },
+    {
+      "id": "caso2_reestructura",
+      "caso": "caso2@2",
+      "registro": "oficioReestructura2@2",
+      "folio": "OF-1987-200",
+      "titulo": "Lo que afirma la reestructuración",
+      "fragmentos": [
+        "eliminación de la Jefatura de Bienestar Laboral",
+        "efectiva a partir de esta fecha."
+      ],
+      "planos": [
+        {
+          "encuadre": "general",
+          "duracion": 1.9,
+          "motivo": "oficina_vacia"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.5,
+          "motivo": "placa_retirada"
+        }
+      ]
+    },
+    {
+      "id": "caso4_factura",
+      "caso": "caso4@4",
+      "registro": "factura4@4",
+      "folio": "F-1996-00187",
+      "titulo": "Lo que factura Carcosa",
+      "fragmentos": [
+        "montaje escénico, Acto I únicamente",
+        "Recargo por omisión del Acto II",
+        "es de color amarillo."
+      ],
+      "planos": [
+        {
+          "encuadre": "general",
+          "duracion": 2,
+          "motivo": "escenario"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.7,
+          "motivo": "factura"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.5,
+          "motivo": "sello_amarillo"
+        }
+      ]
+    },
+    {
+      "id": "caso4_rrhh",
+      "caso": "caso4@4",
+      "registro": "memo4@4",
+      "folio": "MEMO-1996-233",
+      "titulo": "Lo que registra Recursos Humanos",
+      "fragmentos": [
+        "cinco empleados han solicitado cambio de área esta semana.",
+        "prefiero no decirlo por escrito",
+        "Se recomienda no dar seguimiento adicional al tema."
+      ],
+      "planos": [
+        {
+          "encuadre": "general",
+          "duracion": 2.1,
+          "motivo": "pasillo_rrhh"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.8,
+          "motivo": "cinco_sillas"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.6,
+          "motivo": "formularios"
+        }
+      ]
+    },
+    {
+      "id": "caso4_acta",
+      "caso": "caso4@4",
+      "registro": "acta4@4",
+      "folio": "ACTA-1996-041",
+      "titulo": "Lo que afirma el comité organizador",
+      "fragmentos": [
+        "excelente Acto I",
+        "no proceder con la lectura del segundo acto",
+        "por unanimidad y sin discusión"
+      ],
+      "planos": [
+        {
+          "encuadre": "general",
+          "duracion": 2,
+          "motivo": "mesa_comite"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.6,
+          "motivo": "programa_acto_i"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.8,
+          "motivo": "telon_cerrado"
+        }
+      ]
+    },
+    {
+      "id": "caso5_memo",
+      "caso": "caso5@5",
+      "registro": "memo5@5",
+      "folio": "MEMO-1978-014",
+      "titulo": "Lo que afirma la copia de 2007",
+      "fragmentos": [
+        "Texto idéntico en las tres copias archivadas",
+        "incluida la misma falta de ortografía en la tercera línea.",
+        "esto es para el auditor que lo esté leyendo ahora"
+      ],
+      "planos": [
+        {
+          "encuadre": "general",
+          "duracion": 2,
+          "motivo": "archivo_muerto"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.8,
+          "motivo": "tres_copias"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.7,
+          "motivo": "nota_margen"
+        }
+      ]
+    },
+    {
+      "id": "caso5_acta",
+      "caso": "caso5@5",
+      "registro": "acta5@5",
+      "folio": "ACTA-2007-002",
+      "titulo": "Lo que afirma Archivo Muerto",
+      "fragmentos": [
+        "debe 'revisarse' aproximadamente cada quince años",
+        "no existe razón administrativa registrada para dicha periodicidad"
+      ],
+      "planos": [
+        {
+          "encuadre": "general",
+          "duracion": 2,
+          "motivo": "estanterias"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.6,
+          "motivo": "calendario"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.8,
+          "motivo": "caja_sellada"
+        }
+      ]
+    },
+    {
+      "id": "caso5_auditor",
+      "caso": "caso5@5",
+      "registro": "empleado5@5",
+      "folio": "EMP-AUD-1993",
+      "titulo": "Lo que dejó el auditor de 1993",
+      "fragmentos": [
+        "Auditor predecesor, comisión especial de 1993.",
+        "palabra por palabra idéntica a la que cualquier auditor posterior redactaría"
+      ],
+      "planos": [
+        {
+          "encuadre": "general",
+          "duracion": 2,
+          "motivo": "puesto_auditor"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.7,
+          "motivo": "informe"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.8,
+          "motivo": "silla_vacia"
+        }
+      ]
+    },
+    {
+      "id": "caso6_acta",
+      "caso": "caso6@6",
+      "registro": "acta6@6",
+      "folio": "ACTA-1958-001",
+      "titulo": "Lo que afirma el acta fundacional",
+      "fragmentos": [
+        "Órgano fundador: 'Comité Ad Honorem'.",
+        "la administración perpetua del expediente",
+        "Sellada con sello amarillo, no notarial"
+      ],
+      "planos": [
+        {
+          "encuadre": "general",
+          "duracion": 2.1,
+          "motivo": "mesa_fundacional"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.6,
+          "motivo": "acta"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.6,
+          "motivo": "sello_amarillo"
+        }
+      ]
+    },
+    {
+      "id": "caso6_circular",
+      "caso": "caso6@6",
+      "registro": "circular6@6",
+      "folio": "CIRC-0000-001",
+      "titulo": "Lo que ordena la circular sin fecha",
+      "fragmentos": [
+        "El proceso de auditoría continuará sin interrupción",
+        "hasta que el expediente decida cerrarse por sí mismo.",
+        "No se establece fecha límite"
+      ],
+      "planos": [
+        {
+          "encuadre": "general",
+          "duracion": 2,
+          "motivo": "oficina_nocturna"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.7,
+          "motivo": "circular_sin_fecha"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.9,
+          "motivo": "reloj_sin_hora"
+        }
+      ]
+    },
+    {
+      "id": "caso6_fax",
+      "caso": "caso6@6",
+      "registro": "fax6@6",
+      "folio": "FAX-1996-077",
+      "titulo": "Lo que conserva el fax",
+      "fragmentos": [
+        "Transmisión entrante, calidad deficiente.",
+        "trazos que no corresponden a ningún alfabeto reconocido.",
+        "El número de origen coincide con el registrado para Carcosa Servicios Escénicos."
+      ],
+      "planos": [
+        {
+          "encuadre": "general",
+          "duracion": 1.9,
+          "motivo": "fax"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.8,
+          "motivo": "papel_fax"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.7,
+          "motivo": "linea_telefonica"
+        }
+      ]
+    },
+    {
+      "id": "caso6_firmantes",
+      "caso": "caso6@6",
+      "registro": "empleado6@6",
+      "folio": "EMP-0001",
+      "titulo": "Lo que afirma la lista de firmantes",
+      "fragmentos": [
+        "Lista de firmantes autorizados del Comité Ad Honorem",
+        "Incluye el usuario 'auditor01'",
+        "con fecha de alta anterior a cualquier contratación registrada"
+      ],
+      "planos": [
+        {
+          "encuadre": "general",
+          "duracion": 1.9,
+          "motivo": "archivo_personal"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.8,
+          "motivo": "lista_firmantes"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.8,
+          "motivo": "terminal_auditor"
+        }
+      ]
+    },
+    {
+      "id": "caso7_dimitri",
+      "caso": "caso7@7",
+      "registro": "empleadoD@7",
+      "folio": "EMP-0512",
+      "titulo": "Lo que dice el expediente de D. Karamázov",
+      "fragmentos": [
+        "Reclamó por escrito, en al menos tres juntas, el dinero que su padre le adeudaba.",
+        "Despedido el 14/09/1998 por 'conducta impropia'",
+        "cuatro días después de la desaparición de los fondos."
+      ],
+      "planos": [
+        {
+          "encuadre": "general",
+          "duracion": 2,
+          "motivo": "junta"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.7,
+          "motivo": "reclamos"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.8,
+          "motivo": "puesto_vacio"
+        }
+      ]
+    },
+    {
+      "id": "caso7_ivan",
+      "caso": "caso7@7",
+      "registro": "memoI@7",
+      "folio": "MEMO-1998-091",
+      "titulo": "Lo que dice el memorándum de I. Karamázov",
+      "fragmentos": [
+        "Si ningún superior revisa jamás un expediente, entonces todo lo que hagamos con él está permitido.",
+        "Distribuida por correo interno una semana antes del cierre de caja."
+      ],
+      "planos": [
+        {
+          "encuadre": "general",
+          "duracion": 2,
+          "motivo": "correo_interno"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.7,
+          "motivo": "memorandum"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.8,
+          "motivo": "bandejas_entrada"
+        }
+      ]
+    },
+    {
+      "id": "caso7_smerdiakov",
+      "caso": "caso7@7",
+      "registro": "empleadoSmerdiakov@7",
+      "folio": "EMP-0533",
+      "titulo": "Lo que dice el expediente de P. Smerdiakov",
+      "fragmentos": [
+        "único empleado con llave de la caja fuerte.",
+        "Falleció el 20/09/1998, seis días después de la desaparición de los fondos.",
+        "Recursos Humanos cerró su expediente sin abrir investigación."
+      ],
+      "planos": [
+        {
+          "encuadre": "detalle",
+          "duracion": 1.6,
+          "motivo": "llave"
+        },
+        {
+          "encuadre": "general",
+          "duracion": 2,
+          "motivo": "caja_fuerte"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.8,
+          "motivo": "expediente_cerrado"
+        }
+      ]
+    },
+    {
+      "id": "caso7_reapertura",
+      "caso": "caso7@7",
+      "registro": "oficioA@7",
+      "folio": "OF-1998-077",
+      "titulo": "Lo que afirma la solicitud de reapertura",
+      "fragmentos": [
+        "solicita la reapertura del caso de su hermano D. Karamázov",
+        "la acusación se basó solo en reclamos verbales",
+        "Procedimiento cerrado, no ha lugar."
+      ],
+      "planos": [
+        {
+          "encuadre": "general",
+          "duracion": 1.9,
+          "motivo": "contraloria"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.7,
+          "motivo": "solicitud_reapertura"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.5,
+          "motivo": "sello_no_ha_lugar"
+        }
+      ]
+    },
+    {
+      "id": "caso9_asignacion",
+      "caso": "caso9@9",
+      "registro": "memoAsignacion9@9",
+      "folio": "MEMO-1997-144",
+      "titulo": "Lo que ordena Jefatura",
+      "fragmentos": [
+        "Se asigna el lote 44-B, compuesto por doce expedientes, a la serie administrativa R-17.",
+        "Tramitar por el circuito ordinario"
+      ],
+      "planos": [
+        {
+          "encuadre": "general",
+          "duracion": 2,
+          "motivo": "mesa_12"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.7,
+          "motivo": "lote_44b"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.8,
+          "motivo": "bandeja_salida"
+        }
+      ]
+    },
+    {
+      "id": "caso9_devolucion",
+      "caso": "caso9@9",
+      "registro": "parteDevolucion9@9",
+      "folio": "PARTE-1997-031",
+      "titulo": "Lo que registra Mesa 12",
+      "fragmentos": [
+        "Mesa 12 devuelve sin trámite el lote 44-B.",
+        "No consta unidad receptora para la serie R-17.",
+        "Se registraron cuatro devoluciones el 07/04, cuatro el 08/04 y cuatro el 09/04."
+      ],
+      "planos": [
+        {
+          "encuadre": "general",
+          "duracion": 2,
+          "motivo": "mesa_12"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.7,
+          "motivo": "parte_devolucion"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.8,
+          "motivo": "doce_expedientes"
+        }
+      ]
+    },
+    {
+      "id": "caso9_indice",
+      "caso": "caso9@9",
+      "registro": "indiceSeries9@9",
+      "folio": "IND-1997-SERIES",
+      "titulo": "Lo que afirma el índice",
+      "fragmentos": [
+        "R-16 — Reclamaciones internas, Archivo A; R-18 — Revisión extraordinaria, Archivo A.",
+        "Entre ambas entradas no figura ninguna serie ni nota de anulación."
+      ],
+      "planos": [
+        {
+          "encuadre": "detalle",
+          "duracion": 1.8,
+          "motivo": "indice"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.8,
+          "motivo": "hueco_r17"
+        }
+      ]
+    },
+    {
+      "id": "caso9_reclasificacion",
+      "caso": "caso9@9",
+      "registro": "incidenciaJefatura9@9",
+      "folio": "INC-1997-052",
+      "titulo": "Lo que ordena la incidencia",
+      "fragmentos": [
+        "para evitar la paralización del circuito, reclasificar provisionalmente el lote 44-B como R-18.",
+        "No modificar los documentos de origen."
+      ],
+      "planos": [
+        {
+          "encuadre": "general",
+          "duracion": 1.9,
+          "motivo": "jefatura"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.7,
+          "motivo": "sello_r18"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.8,
+          "motivo": "documentos_r17"
+        }
+      ]
+    },
+    {
+      "id": "caso9_archivo",
+      "caso": "caso9@9",
+      "registro": "hojaRuta9@9",
+      "folio": "RUTA-1997-A4-17",
+      "titulo": "Lo que afirma Archivo A",
+      "fragmentos": [
+        "Ubicación reservada: estante 4, hueco 17, serie R-17.",
+        "reserva de espacio para lote 44-B, autorizada el 04/04/1997."
+      ],
+      "planos": [
+        {
+          "encuadre": "general",
+          "duracion": 2,
+          "motivo": "archivo_a"
+        },
+        {
+          "encuadre": "detalle",
+          "duracion": 1.7,
+          "motivo": "estante_4_hueco_17"
+        },
+        {
+          "encuadre": "fijo",
+          "duracion": 1.8,
+          "motivo": "hueco_reservado"
+        }
       ]
     }
   ]

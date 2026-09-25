@@ -15,12 +15,23 @@ class ReconstruccionesDocumentales286Test(unittest.TestCase):
         cls.catalogo = json.loads(RECONSTRUCCIONES.read_text(encoding="utf-8"))
         cls.reconstrucciones = cls.catalogo["reconstrucciones"]
 
-    def test_primer_vertical_cubre_cuatro_expedientes(self):
+    def test_catalogo_cubre_los_diez_expedientes(self):
         self.assertEqual(
             {r["caso"] for r in self.reconstrucciones},
-            {"caso@1", "caso3@3", "caso8@8", "caso10@10"},
+            {
+                "caso@1",
+                "caso2@2",
+                "caso3@3",
+                "caso4@4",
+                "caso5@5",
+                "caso6@6",
+                "caso7@7",
+                "caso8@8",
+                "caso9@9",
+                "caso10@10",
+            },
         )
-        self.assertGreaterEqual(len(self.reconstrucciones), 10)
+        self.assertGreaterEqual(len(self.reconstrucciones), 30)
 
     def test_cada_reconstruccion_apunta_a_un_folio_real(self):
         casos = {caso["id"]: caso for caso in self.casos}
