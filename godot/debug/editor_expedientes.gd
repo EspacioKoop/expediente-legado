@@ -24,6 +24,47 @@ const ETIQUETAS_FORMATO := [
 ]
 const SELLOS := ["SIN SELLO", "RECIBIDO", "CONFIDENCIAL", "COPIA", "ARCHIVO"]
 const FIRMAS := ["SIN FIRMA", "JEFATURA", "CONTRALORÍA", "SECRETARÍA"]
+const PLANTILLAS := [
+	{
+		"nombre": "Oficial · 1992",
+		"tipo": "OFICIO",
+		"folio": "OF-1992-001",
+		"fecha": "1992-03-18",
+		"remitente": "Secretaría General",
+		"destino": "Archivo Central",
+		"asunto": "Remisión de antecedentes",
+		"clasificacion": "OFICIAL",
+		"contenido_bbcode": "Se remiten los antecedentes indicados para su [b]incorporación al expediente[/b].",
+		"sello": "RECIBIDO",
+		"firma": "SECRETARÍA",
+	},
+	{
+		"nombre": "Interno · 1996",
+		"tipo": "MEMORANDO",
+		"folio": "MEM-1996-014",
+		"fecha": "1996-11-07",
+		"remitente": "Contraloría",
+		"destino": "Jefatura",
+		"asunto": "Cotejo interno",
+		"clasificacion": "INTERNO",
+		"contenido_bbcode": "Pendiente de [i]cotejo interno[/i] antes de su archivo definitivo.",
+		"sello": "ARCHIVO",
+		"firma": "CONTRALORÍA",
+	},
+	{
+		"nombre": "Personal · 1999",
+		"tipo": "NOTA",
+		"folio": "NOTA-1999-003",
+		"fecha": "1999-06-24",
+		"remitente": "M. R.",
+		"destino": "Archivo personal",
+		"asunto": "Recordatorio",
+		"clasificacion": "PERSONAL",
+		"contenido_bbcode": "Recordar revisar la carpeta antes del viernes.\n[center]No adjuntar al registro principal.[/center]",
+		"sello": "SIN SELLO",
+		"firma": "SIN FIRMA",
+	},
+]
 
 var _id: LineEdit
 var _tipo: LineEdit
@@ -36,6 +77,7 @@ var _clasificacion: LineEdit
 var _cuerpo: TextEdit
 var _sello: OptionButton
 var _firma: OptionButton
+var _plantilla: OptionButton
 var _vista: RichTextLabel
 var _estado: Label
 
@@ -221,9 +263,16 @@ static func _fecha_valida(fecha: String) -> bool:
 	var dia := fecha.substr(8, 2)
 	if not anio.is_valid_int() or not mes.is_valid_int() or not dia.is_valid_int():
 		return false
+	var anio_num := int(anio)
 	var mes_num := int(mes)
 	var dia_num := int(dia)
-	return mes_num >= 1 and mes_num <= 12 and dia_num >= 1 and dia_num <= 31
+	if mes_num < 1 or mes_num > 12 or dia_num < 1:
+		return false
+	var dias_mes := [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+	var bisiesto := anio_num % 4 == 0 and (anio_num % 100 != 0 or anio_num % 400 == 0)
+	if bisiesto:
+		dias_mes[1] = 29
+	return dia_num <= dias_mes[mes_num - 1]
 
 
 static func _agregar_meta_plano(
@@ -280,6 +329,8 @@ func _montar_formulario() -> Control:
 	lista.add_theme_constant_override("separation", 6)
 	scroll.add_child(lista)
 
+	_plantilla = _opciones(lista, "Plantilla QA", _nombres_plantillas())
+	_plantilla.item_selected.connect(_aplicar_plantilla)
 	_id = _campo(lista, "ID", "doc-prueba@1")
 	_tipo = _campo(lista, "Tipo", "MEMORANDO")
 	_folio = _campo(lista, "Folio", "MEMO-1998-001")
@@ -339,6 +390,22 @@ func _campo(padre: VBoxContainer, rotulo: String, placeholder: String) -> LineEd
 	campo.text_changed.connect(_al_cambiar_texto)
 	padre.add_child(campo)
 	return campo
+
+
+static func _nombres_plantillas() -> Array:
+	var nombres: Array = []
+	for plantilla in PLANTILLAS:
+		nombres.append(String(plantilla["nombre"]))
+	return nombres
+
+
+static func datos_plantilla(indice: int) -> Dictionary:
+	if indice < 0 or indice >= PLANTILLAS.size():
+		return {}
+	var datos: Dictionary = PLANTILLAS[indice].duplicate(true)
+	datos.erase("nombre")
+	datos["id"] = "qa-%s" % String(PLANTILLAS[indice]["nombre"]).to_lower().replace(" · ", "-").replace(" ", "-")
+	return datos
 
 
 func _opciones(padre: VBoxContainer, rotulo: String, valores: Array) -> OptionButton:
@@ -402,6 +469,14 @@ func _al_cambiar_texto(_texto: String) -> void:
 
 func _al_cambiar_opcion(_indice: int) -> void:
 	_refrescar_vista()
+
+
+func _aplicar_plantilla(indice: int) -> void:
+	var datos := datos_plantilla(indice)
+	if datos.is_empty():
+		return
+	_aplicar_datos(datos)
+	_estado.text = "Plantilla QA aplicada; edita antes de guardar si necesitas otra variante."
 
 
 func _refrescar_vista() -> void:
