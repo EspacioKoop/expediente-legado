@@ -7,6 +7,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 LIBRO = ROOT / "godot" / "interactables" / "libros" / "libro_lectura_significativa.gd"
+ESTACION = ROOT / "godot" / "espacios" / "biblioteca" / "estacion_ritual_cita.gd"
 BIBLIOTECA = ROOT / "godot" / "espacios" / "biblioteca" / "biblioteca.tscn"
 RITUAL = ROOT / "godot" / "rituales" / "literarios" / "ritual_cita.gd"
 TEST_GODOT = "res://pruebas/pruebas_biblioteca_literaria_1181.tscn"
@@ -16,15 +17,26 @@ class BibliotecaLiteraria1181Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.libro = LIBRO.read_text(encoding="utf-8")
+        cls.estacion = ESTACION.read_text(encoding="utf-8")
         cls.biblioteca = BIBLIOTECA.read_text(encoding="utf-8")
         cls.ritual = RITUAL.read_text(encoding="utf-8")
 
     def test_lectura_fisica_usa_contrato_nuevo(self) -> None:
+        self.assertIn("extends Interactuable3D", self.libro)
+        self.assertIn("func interactuar(actor: Node)", self.libro)
         self.assertIn("registrar_lectura_significativa", self.libro)
         self.assertIn("pasos_para_completar", self.libro)
         self.assertNotIn("conocer_obra(", self.libro)
         self.assertNotIn("CANAL_POSESION", self.libro)
         self.assertNotIn("SIGA", self.libro)
+        self.assertNotIn("KEY_E", self.libro)
+
+    def test_mesa_ritual_usa_interaccion_semantica(self) -> None:
+        self.assertIn("extends Interactuable3D", self.estacion)
+        self.assertIn("func interactuar(actor: Node)", self.estacion)
+        self.assertIn("abrir_ritual()", self.estacion)
+        self.assertNotIn("KEY_E", self.estacion)
+        self.assertNotIn("_input_event", self.estacion)
 
     def test_biblioteca_expone_obra_y_mesa_ritual(self) -> None:
         self.assertIn("LibroVidaEsSueno", self.biblioteca)
