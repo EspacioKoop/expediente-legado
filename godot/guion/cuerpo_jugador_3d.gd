@@ -1,8 +1,9 @@
 ## Cuerpo visual del protagonista para primera persona y previsualización.
 ##
-## Es la misma figura que los compañeros —`persona.fbx`, vestida por el pase de
-## #275 y animada con UAL— para que mirar hacia abajo revele a una persona del
-## mismo mundo y el creador pueda enseñar esa misma silueta en 3D. Sigue siendo
+## El protagonista conserva temporalmente el rig configurable `persona.fbx`,
+## vestido por el pase de #275 y animado con UAL. Los compañeros de oficina ya
+## usan Rocketbox desde #1320; aquí se mantiene el rig legacy porque la ficha
+## necesita variar complexión, piel, pelo y ropa en vivo. Sigue siendo
 ## deliberadamente visual: no crea colisiones ni cambia la escala del caminante.
 ## El perfil lo entrega quien ya tiene la partida cargada (`DiaApp`) o el editor:
 ## este nodo no lee ni escribe guardados.
@@ -117,6 +118,8 @@ func _construir() -> void:
 	var piel := Color.from_string(String(apariencia["piel"]), Color("c9916b"))
 	var cabello := Color.from_string(String(apariencia["cabello"]), Color("30251f"))
 	var ropa := Color.from_string(String(apariencia["ropa"]), Color("59616b"))
+	# La malla histórica es solo un underlay: la piel visible se pinta aparte.
+	var bajo_ropa := ropa.darkened(0.32)
 
 	var soporte := Node3D.new()
 	soporte.name = "Figura"
@@ -129,9 +132,10 @@ func _construir() -> void:
 	soporte.scale = Vector3.ONE * escala_modo * altura
 	add_child(soporte)
 
-	# Como en la oficina, el maniquí se tiñe del color de la ropa y el vestuario
-	# pone encima chaqueta más oscura y camisa más clara.
-	if not Modelos.persona(soporte, "persona", ropa):
+	# `persona.fbx` queda como underlay oscuro para pantalón/sombras. La ropa real
+	# la aporta VestuarioHumano3D y la piel visible (cabeza, cuello y manos) se
+	# pinta explícitamente con `piel`, evitando que el color de ropa llegue a la cara.
+	if not Modelos.persona(soporte, "persona", bajo_ropa):
 		return
 	_figura = soporte.get_child(0) as Node3D
 	_reproductor = Modelos._reproductor(_figura)
@@ -194,6 +198,26 @@ func _rostro_exterior(esqueleto: Skeleton3D, piel: Color, cabello: Color, peinad
 	var radio_y := alto * 0.50
 	var radio_z := alto * 0.39
 	var centro_y := alto * 0.48
+
+	# La cabeza procedural ya cubría el cráneo, pero el cuello importado seguía
+	# heredando el color del underlay. Se añade una pieza de piel independiente
+	# anclada al hueso Neck para que la ficha se lea como una persona coherente.
+	var cuello := esqueleto.find_bone("Neck")
+	if cuello >= 0:
+		var enganche_cuello := BoneAttachment3D.new()
+		enganche_cuello.name = "PielCuelloJugador"
+		enganche_cuello.bone_idx = cuello
+		esqueleto.add_child(enganche_cuello)
+		_esfera_psx(
+			enganche_cuello,
+			"PielCuello",
+			Vector3(0.0, alto * 0.035, 0.0),
+			Vector3(alto * 0.19, alto * 0.18, alto * 0.17),
+			piel,
+			6,
+			4,
+		)
+
 	_esfera_psx(
 		enganche,
 		"PielCabeza",
