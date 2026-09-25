@@ -25,8 +25,11 @@ func _process(_delta: float) -> void:
 
 	if fase != "archivo":
 		_capa = null
-		return
+	else:
+		_procesar_archivo(dia)
 
+
+func _procesar_archivo(dia) -> void:
 	var estado_var = dia.jornada.get("ronda_cierre", {})
 	if typeof(estado_var) != TYPE_DICTIONARY:
 		return
@@ -62,7 +65,6 @@ func _process(_delta: float) -> void:
 		_capa.configurar(estado)
 		_capa.punto_completado.connect(_al_completar_punto)
 	_mundo_id = mundo_id
-
 
 static func ofrecida(dia: int, raiz: int) -> bool:
 	# Dos tardes de cada tres para una misma semilla. No usa RNG global y por
