@@ -228,11 +228,15 @@ static func _poner_identidad_realista(pieza: Node3D, retrato: String) -> void:
 		return
 
 	var alto := maxf(
-		absf(
-			esqueleto.get_bone_global_rest(cabeza).origin.y
-			- esqueleto.get_bone_global_rest(cuello).origin.y
-		)
-		* 1.9,
+		(
+			absf(
+				(
+					esqueleto.get_bone_global_rest(cabeza).origin.y
+					- esqueleto.get_bone_global_rest(cuello).origin.y
+				)
+			)
+			* 1.9
+		),
 		0.18
 	)
 	var enganche := BoneAttachment3D.new()
@@ -280,10 +284,7 @@ static func _gafas_realistas(
 	_aro_gafa(grupo, Vector3(-separacion, y, z), radio, alto * 0.014, color)
 	_aro_gafa(grupo, Vector3(separacion, y, z), radio, alto * 0.014, color)
 	_rasgo_esfera(
-		grupo,
-		Vector3(0.0, y, z),
-		Vector3(alto * 0.095, alto * 0.012, alto * 0.012),
-		color
+		grupo, Vector3(0.0, y, z), Vector3(alto * 0.095, alto * 0.012, alto * 0.012), color
 	)
 	for malla in _mallas(grupo):
 		_marcar_material_identidad(malla)
