@@ -48,6 +48,7 @@ Cuando una auditoría dice “no existía”, significa que no se encontró esa 
 
 - `design/` contiene contratos o gramáticas que pueden seguir vigentes.
 - `research/` contiene investigación y referencias; sirve para informar decisiones, no para declarar una mecánica integrada.
+- [research/referencias-ludonarrativas.md](research/referencias-ludonarrativas.md) — corpus transversal de juegos, cine/TV, literatura y recursos reutilizables; traduce referencias a técnicas, riesgos e issues dueños (#1432).
 - `jungian_mitologia_propuesta/` contiene propuestas de la capa jungiana/mitológica.
 - `audio/`, `assets/`, `visuales/` y `licencias/` agrupan documentación específica de producción.
 
