@@ -5,7 +5,7 @@ from scripts.godot_pruebas import ejecutar_script
 
 
 PRUEBA_GODOT = "pruebas/pruebas_combate_coop_380.gd"
-RESUMEN_GODOT = re.compile(r"(\\d+) pasadas, 0 fallos")
+RESUMEN_GODOT = re.compile(r"(\d+) pasadas, 0 fallos")
 
 
 class CombateCoop380RuntimeTest(unittest.TestCase):
