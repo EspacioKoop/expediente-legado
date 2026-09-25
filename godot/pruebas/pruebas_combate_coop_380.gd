@@ -138,7 +138,11 @@ func _probar_desconexion_reintento() -> void:
 		CombateCoop.elegir(sesion, "anon-b", "silencio", func() -> float: return 0.0)["resolved"],
 		true
 	)
-	_comprobar("la elección previa de A se conserva", sesion["historial"][0]["elecciones"]["anon-a"], "objecion")
+	_comprobar(
+		"la elección previa de A se conserva",
+		sesion["historial"][0]["elecciones"]["anon-a"],
+		"objecion"
+	)
 
 
 func _probar_suplencia_desconectado() -> void:
