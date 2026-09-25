@@ -58,6 +58,17 @@ class HuellasAmbientales959Test(unittest.TestCase):
         self.assertIn("_color_papel_documento(registro)", self.visor)
         self.assertIn("if not ya_visto or huella_mutada or auditoria_mutada:", self.visor)
 
+    def test_transito_repetido_tiene_umbral_y_celda_estable(self):
+        self.assertIn('PREFIJO_TRANSITO := "transito:"', self.controller)
+        self.assertIn("PASADAS_PARA_MARCA := 3", self.controller)
+        self.assertIn("CELDA_TRANSITO := 1.25", self.controller)
+        self.assertIn("_sembrar_celda_actual(dia)", self.controller)
+        self.assertIn("HuellasAmbientales.registrar(dia.partida.estado, id, \"paso\", fase)", self.controller)
+        self.assertIn("_montar_transito_guardado(dia, mundo)", self.controller)
+        self.assertIn('"transito:archivo:0:0"', self.godot_test)
+        self.assertIn("tres retornos reales crean desgaste de tránsito", self.godot_test)
+        self.assertIn("reconstruir el mundo no suma una pasada fantasma", self.godot_test)
+
     def test_equipos_domesticos_dejan_huella_sin_estado_paralelo(self):
         self.assertIn('"equipo"', self.core)
         self.assertIn('"equipo":', self.controller)
