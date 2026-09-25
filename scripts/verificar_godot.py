@@ -195,6 +195,12 @@ def ejecutar():
                 45,
             ),
             (
+                "fauna-contextual-1411",
+                ["--script", "pruebas/pruebas_fauna_contextual_1411.gd"],
+                30,
+                40,
+            ),
+            (
                 "ronda-cierre-156",
                 ["--script", "pruebas/pruebas_ronda_cierre_3d.gd"],
                 30,

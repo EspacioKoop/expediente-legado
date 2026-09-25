@@ -22,6 +22,9 @@ var _animador: AnimadorAmbiental3D = null
 var _partes: Dictionary = {}
 var _rotaciones_base: Dictionary = {}
 var _materiales: Dictionary = {}
+var _ritmo := 1.0
+var _acabado := 0.0
+var _variante := "base"
 
 
 func configurar(
@@ -38,12 +41,17 @@ func configurar(
 	_distancia_alerta = float(_dato.get("distancia_alerta", 0.0))
 	_intensidad_reaccion = float(_dato.get("intensidad_reaccion", 0.0))
 	_fase = float(_dato.get("fase", 0.0))
+	_ritmo = maxf(0.05, float(_dato.get("ritmo", 1.0)))
+	_acabado = float(_dato.get("acabado", 0.0))
+	_variante = String(_dato.get("variante", "base"))
 	_origen = _dato.get("pos", Vector3.ZERO)
 	position = _origen
 	set_meta("fauna_id", _id)
 	set_meta("especie", String(_dato.get("especie", "")))
 	set_meta("fauna_ambiental", true)
 	set_meta("reaccion_fauna", _reaccion)
+	set_meta("variante_fauna", _variante)
+	set_meta("ritmo_fauna", _ritmo)
 	_montar_visual()
 
 
@@ -53,6 +61,14 @@ func id_fauna() -> String:
 
 func especie() -> String:
 	return String(_dato.get("especie", ""))
+
+
+func variante() -> String:
+	return _variante
+
+
+func ritmo() -> float:
+	return _ritmo
 
 
 func origen() -> Vector3:
@@ -68,7 +84,7 @@ func distancia_alerta() -> float:
 
 
 func desplazamiento_en(tiempo: float) -> Vector3:
-	var t := tiempo + _fase
+	var t := tiempo * _ritmo + _fase
 	match _movimiento:
 		"suelo_ave":
 			return Vector3(
@@ -189,33 +205,47 @@ func _orientar(tiempo: float, desplazamiento: Vector3, respuesta: Dictionary) ->
 func _animar_gesto(tiempo: float, peso_reaccion: float) -> void:
 	if _visual == null:
 		return
-	var t := tiempo + _fase
+	var t := tiempo * _ritmo + _fase
 	_visual.rotation.z = sin(t * 2.1) * 0.035
 	match especie():
 		"paloma", "gorrion":
-			_aplicar_rotacion_gesto("Cabeza", Vector3(sin(t * 3.2) * 0.10, 0.0, 0.0))
-			var ala_suelo := absf(sin(t * 2.4)) * 0.045
+			var nervio := 1.28 if especie() == "gorrion" else 1.0
+			var picoteo := pow(maxf(0.0, sin(t * 1.37 * nervio + sin(t * 0.31))), 10.0)
+			var cabeza_x := sin(t * 3.2 * nervio) * 0.075 + picoteo * 0.34
+			var cabeza_z := sin(t * 5.1 * nervio) * 0.025
+			_aplicar_rotacion_gesto("Cabeza", Vector3(cabeza_x, 0.0, cabeza_z))
+			var ala_suelo := absf(sin(t * 2.4 * nervio)) * 0.045
 			_aplicar_rotacion_gesto("AlaI", Vector3(0.0, 0.0, ala_suelo))
 			_aplicar_rotacion_gesto("AlaD", Vector3(0.0, 0.0, -ala_suelo))
 		"cuervo":
-			var batido_cuervo := absf(sin(t * 4.4)) * 0.48
+			var fase_batido := t * 4.4 + sin(t * 0.73) * 0.85
+			var batido_cuervo := absf(sin(fase_batido)) * 0.50
 			_aplicar_rotacion_gesto("AlaI", Vector3(0.0, 0.0, batido_cuervo))
 			_aplicar_rotacion_gesto("AlaD", Vector3(0.0, 0.0, -batido_cuervo))
-			_aplicar_rotacion_gesto("Cabeza", Vector3(0.0, sin(t * 0.9) * 0.08, 0.0))
-		"perro":
-			_aplicar_rotacion_gesto("Cola", Vector3(0.0, sin(t * 3.0) * 0.55, 0.0))
 			_aplicar_rotacion_gesto(
 				"Cabeza",
-				Vector3(sin(t * 1.7) * 0.07 * (1.0 - peso_reaccion), 0.0, 0.0),
+				Vector3(sin(t * 0.61) * 0.05, sin(t * 0.9) * 0.10, sin(t * 0.47) * 0.12),
 			)
+		"perro":
+			var cola_ritmo := 2.2 + (sin(t * 0.41) + 1.0) * 0.9
+			var cola_amplitud := 0.30 + (sin(t * 0.37) + 1.0) * 0.13
+			_aplicar_rotacion_gesto("Cola", Vector3(0.0, sin(t * cola_ritmo) * cola_amplitud, 0.0))
+			var olfateo := pow(maxf(0.0, sin(t * 0.83)), 8.0)
+			var gesto_cabeza := sin(t * 1.7) * 0.055 * (1.0 - peso_reaccion) + olfateo * 0.24
+			_aplicar_rotacion_gesto("Cabeza", Vector3(gesto_cabeza, 0.0, 0.0))
 		"polilla":
-			var batido_polilla := sin(t * 6.2) * 0.72
+			var fase_alas := t * 6.2 + sin(t * 1.17) * 1.25 + sin(t * 0.43) * 0.42
+			var batido_polilla := sin(fase_alas) * 0.74
 			_aplicar_rotacion_gesto("AlaI", Vector3(0.0, 0.0, batido_polilla))
 			_aplicar_rotacion_gesto("AlaD", Vector3(0.0, 0.0, -batido_polilla))
 		"ciervo":
+			var calma := 1.0 - peso_reaccion
+			var respiracion := sin(t * 0.82) * 0.035
 			_aplicar_rotacion_gesto(
-				"Cabeza",
-				Vector3(0.0, sin(t * 0.55) * 0.08 * (1.0 - peso_reaccion), 0.0),
+				"Cabeza", Vector3(respiracion, sin(t * 0.55) * 0.08 * calma, 0.0)
+			)
+			_aplicar_rotacion_gesto(
+				"Cuello", Vector3(sin(t * 0.82 + 0.4) * 0.025, sin(t * 0.31) * 0.025 * calma, 0.0)
 			)
 
 
@@ -708,12 +738,12 @@ func _parte_mesh(
 
 
 func _material(color: Color, rugosidad: float) -> StandardMaterial3D:
-	var clave := "%s|%.2f" % [color.to_html(), rugosidad]
+	var clave := "%s|%.2f" % [color.to_html(), rugosidad + _acabado]
 	if _materiales.has(clave):
 		return _materiales[clave] as StandardMaterial3D
 	var material := StandardMaterial3D.new()
 	material.albedo_color = color
-	material.roughness = clampf(rugosidad, 0.0, 1.0)
+	material.roughness = clampf(rugosidad + _acabado, 0.0, 1.0)
 	material.metallic = 0.0
 	_materiales[clave] = material
 	return material
