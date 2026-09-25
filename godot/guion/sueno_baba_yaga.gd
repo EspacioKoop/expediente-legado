@@ -98,12 +98,27 @@ const POSICIONES_FONDO_FASE := [
 	Vector3(0.28, 0.0, -0.30),
 	Vector3(0.10, 0.0, 0.16),
 ]
+const POSICIONES_HABITACION_FASE := [
+	Vector3(5.35, 2.55, 4.45),
+	Vector3(5.15, 2.70, 4.30),
+	Vector3(5.55, 2.95, 4.10),
+	Vector3(5.30, 2.65, 4.35),
+]
+const ROTACIONES_HABITACION_FASE := [
+	Vector3.ZERO,
+	Vector3(0.0, 0.0, 18.0),
+	Vector3(0.0, 0.0, 90.0),
+	Vector3(0.0, 0.0, 112.0),
+]
+const ESTADOS_HABITACION_EXTERIOR := [false, false, true, true]
+const DURACION_GIRO_HABITACION := 0.24
 
 var _fase_umbral := 0
 var _fase_fuera_campo := 0
 var _marcas: Dictionary = {}
 var _ultima_comparacion: Dictionary = {}
 var _tween_cabana: Tween
+var _tween_habitacion: Tween
 var _montado := false
 
 
@@ -199,6 +214,30 @@ func plan_transito_cabana(origen: Vector3, reduccion_movimiento: bool) -> Dictio
 	}
 
 
+func estado_habitacion_actual() -> Dictionary:
+	var fase := _fase_umbral % POSICIONES_HABITACION_FASE.size()
+	return {
+		"fase": fase,
+		"posicion": POSICIONES_HABITACION_FASE[fase],
+		"rotacion": ROTACIONES_HABITACION_FASE[fase],
+		"exterior": ESTADOS_HABITACION_EXTERIOR[fase],
+	}
+
+
+func plan_giro_habitacion(origen: Dictionary, reduccion_movimiento: bool) -> Dictionary:
+	var destino := estado_habitacion_actual()
+	return {
+		"aplicado": true,
+		"modo": "corte_fundido" if reduccion_movimiento else "giro_habitacion",
+		"animar": not reduccion_movimiento,
+		"origen": origen.duplicate(true),
+		"destino": destino,
+		"duracion": 0.0 if reduccion_movimiento else DURACION_GIRO_HABITACION,
+		"desplazar_jugador": false,
+		"mover_camara": false,
+	}
+
+
 func dejar_marca(nombre: String, objetivo: String) -> bool:
 	preparar()
 	var id := nombre.strip_edges()
@@ -249,7 +288,9 @@ func aplicar_evento(
 	preparar()
 	var cambiado := false
 	var origen_cabana: Vector3 = posiciones_actuales()[OBJETO_CABANA]
+	var origen_habitacion := estado_habitacion_actual()
 	var transito_cabana := {"aplicado": false}
+	var giro_habitacion := {"aplicado": false}
 	if evento == EVENTO_UMBRAL:
 		_fase_umbral = (_fase_umbral + 1) % POSICIONES_CABANA.size()
 		cambiado = true
@@ -262,6 +303,7 @@ func aplicar_evento(
 		_aplicar_estado_visual()
 		if evento == EVENTO_UMBRAL:
 			transito_cabana = _aplicar_transito_cabana(origen_cabana, reduccion_movimiento)
+			giro_habitacion = _aplicar_giro_habitacion(origen_habitacion, reduccion_movimiento)
 		_sincronizar_comparacion_visual()
 
 	var salida := plan_transicion(reduccion_movimiento)
@@ -278,6 +320,7 @@ func aplicar_evento(
 				"interior_cabana": interior_actual(),
 				"fase_ambiental": fase_ambiental_actual(),
 				"transito_cabana": transito_cabana,
+				"giro_habitacion": giro_habitacion,
 			},
 			true,
 		)
@@ -610,6 +653,75 @@ func _montar_acabado_ambiental() -> void:
 			COLOR_MARCA,
 		)
 
+	var habitacion := Node3D.new()
+	habitacion.name = "HabitacionGiratoria"
+	acabado.add_child(habitacion)
+	_crear_caja(
+		habitacion,
+		"SueloHabitacion",
+		Vector3(3.20, 0.10, 2.60),
+		Vector3(0.0, -1.30, 0.0),
+		COLOR_INTERIOR,
+	)
+	_crear_caja(
+		habitacion,
+		"ParedFondo",
+		Vector3(3.20, 2.60, 0.10),
+		Vector3(0.0, 0.0, -1.30),
+		COLOR_ARCHIVO,
+	)
+	_crear_caja(
+		habitacion,
+		"ParedLateral",
+		Vector3(0.10, 2.60, 2.60),
+		Vector3(-1.60, 0.0, 0.0),
+		COLOR_ARCHIVO,
+	)
+	_crear_caja(
+		habitacion,
+		"TechoHabitacion",
+		Vector3(3.20, 0.10, 2.60),
+		Vector3(0.0, 1.30, 0.0),
+		COLOR_SUELO,
+	)
+
+	var lectura_interior := Node3D.new()
+	lectura_interior.name = "LecturaInterior"
+	habitacion.add_child(lectura_interior)
+	_crear_caja(
+		lectura_interior,
+		"MesaInterior",
+		Vector3(1.25, 0.12, 0.75),
+		Vector3(0.45, -0.75, 0.15),
+		COLOR_MADERA,
+	)
+	_crear_caja(
+		lectura_interior,
+		"LuzInterior",
+		Vector3(1.35, 0.06, 0.18),
+		Vector3(0.0, 1.12, 0.0),
+		COLOR_COMPARACION,
+	)
+
+	var lectura_exterior := Node3D.new()
+	lectura_exterior.name = "LecturaExterior"
+	habitacion.add_child(lectura_exterior)
+	_crear_caja(
+		lectura_exterior,
+		"AleroExterior",
+		Vector3(3.45, 0.18, 0.70),
+		Vector3(0.0, 1.28, -1.18),
+		COLOR_MADERA,
+	)
+	for i in 4:
+		_crear_caja(
+			lectura_exterior,
+			"ListonFachada%02d" % (i + 1),
+			Vector3(0.12, 2.20, 0.12),
+			Vector3(-1.15 + float(i) * 0.76, 0.0, -1.38),
+			COLOR_CABANA,
+		)
+
 
 func _montar_retorno() -> void:
 	_crear_caja(
@@ -811,6 +923,49 @@ func _actualizar_acabado_ambiental() -> void:
 	plano.position = POSICIONES_PLANO_FASE[fase]
 	plano.rotation_degrees = ROTACIONES_PLANO_FASE[fase]
 	fondo.position = POSICIONES_FONDO_FASE[fase]
+	_actualizar_habitacion_giratoria()
+
+
+func _actualizar_habitacion_giratoria() -> void:
+	var habitacion := get_node_or_null("AcabadoAmbiental/HabitacionGiratoria") as Node3D
+	if habitacion == null:
+		return
+	var estado := estado_habitacion_actual()
+	habitacion.position = estado["posicion"]
+	habitacion.rotation_degrees = estado["rotacion"]
+	var interior := habitacion.get_node_or_null("LecturaInterior") as Node3D
+	var exterior := habitacion.get_node_or_null("LecturaExterior") as Node3D
+	if interior != null:
+		interior.visible = not bool(estado["exterior"])
+	if exterior != null:
+		exterior.visible = bool(estado["exterior"])
+
+
+func _aplicar_giro_habitacion(origen: Dictionary, reduccion_movimiento: bool) -> Dictionary:
+	var plan := plan_giro_habitacion(origen, reduccion_movimiento)
+	var habitacion := get_node_or_null("AcabadoAmbiental/HabitacionGiratoria") as Node3D
+	if habitacion == null:
+		return plan
+	if _tween_habitacion != null and _tween_habitacion.is_valid():
+		_tween_habitacion.kill()
+	var destino: Dictionary = plan["destino"]
+	if reduccion_movimiento:
+		habitacion.position = destino["posicion"]
+		habitacion.rotation_degrees = destino["rotacion"]
+		return plan
+	habitacion.position = origen["posicion"]
+	habitacion.rotation_degrees = origen["rotacion"]
+	_tween_habitacion = create_tween()
+	_tween_habitacion.set_parallel(true)
+	_tween_habitacion.set_trans(Tween.TRANS_SINE)
+	_tween_habitacion.set_ease(Tween.EASE_IN_OUT)
+	_tween_habitacion.tween_property(
+		habitacion, "position", destino["posicion"], DURACION_GIRO_HABITACION
+	)
+	_tween_habitacion.tween_property(
+		habitacion, "rotation_degrees", destino["rotacion"], DURACION_GIRO_HABITACION
+	)
+	return plan
 
 
 func _sincronizar_marcas_visual() -> void:
