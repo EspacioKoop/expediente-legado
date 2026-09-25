@@ -733,3 +733,62 @@ NAVEGADOR_BBS_VOLVER_TABLON,← Volver al tablón
 FALLO_MUNDANO_TITULO,Incidencia normal
 FALLO_MUNDANO_DETALLE,"%s\\n\\nSolución: %s"
 FALLO_MUNDANO_CERRAR,Cerrar aviso
+DEPEND_PACO,"Paco, el del quiosco"
+DEPEND_PACO_SALUDO_1,"¿Lo de siempre, jefe? El periódico de hoy trae lo mismo que el de ayer, pero con otra fecha."
+DEPEND_PACO_SALUDO_2,"Aquí me tiene, en esta esquina desde el setenta y tres. He visto pasar tres alcaldes y ningún autobús a su hora."
+DEPEND_PACO_SALUDO_3,"No me hable del Mundial, que todavía no se me ha pasado lo de Nigeria."
+DEPEND_PACO_SALUDO_4,"Dicen que con lo del efecto 2000 se van a parar los relojes. Yo al mío le he dado cuerda esta mañana, por si acaso."
+DEPEND_PACO_SALUDO_5,"Usted trabaja en el archivo, ¿verdad? Se le nota en los dedos: tinta de sello."
+DEPEND_PACO_LLUVIA,Con este agua no se vende ni un periódico. La gente prefiere mojarse sin saber lo que pasa.
+DEPEND_PACO_NIEVE,"Nieve en esta calle... La última vez fue el año que cerraron la fábrica. Yo no digo nada, eh."
+DEPEND_PACO_NIEBLA,Con esta niebla hasta los titulares se leen borrosos.
+DEPEND_PACO_CLIENTE,"¿Qué tal lo que se llevó? Yo esas revistas no las leo, que me dan pesadillas, pero se venden solas."
+DEPEND_PACO_INSISTE,"Si no va a comprar, apártese un poquito, que me tapa las revistas."
+DEPEND_REMEDIOS,"Remedios, de El Trastero"
+DEPEND_REMEDIOS_SALUDO_1,"Pase, pase. Aquí nada es nuevo, pero todo lo ha querido alguien."
+DEPEND_REMEDIOS_SALUDO_2,Esa lámpara verde la trajo un señor que no ha vuelto. Las cosas esperan más que las personas.
+DEPEND_REMEDIOS_SALUDO_3,"Si coge algo y se le quedan frías las manos, déjelo. No es para usted."
+DEPEND_REMEDIOS_SALUDO_4,"Yo no vendo cosas, hijo. Les busco otra casa."
+DEPEND_REMEDIOS_SALUDO_5,"Mi marido decía que el trastero de uno es la memoria de los demás. Luego se murió, y lo vendí todo aquí mismo."
+DEPEND_REMEDIOS_LLUVIA,Con la humedad la madera se queja. ¿La oye? Cruje como si quisiera contar algo.
+DEPEND_REMEDIOS_NIEVE,Los días de nieve viene gente a venderme las cosas de sus difuntos. No sé por qué será.
+DEPEND_REMEDIOS_NIEBLA,Con niebla entran clientes que luego no recuerdo haber atendido.
+DEPEND_REMEDIOS_CLIENTE,¿Cómo se ha hecho a la casa lo que se llevó? A veces les cuesta acostumbrarse.
+DEPEND_REMEDIOS_INSISTE,"Tómese su tiempo. Aquí nadie tiene prisa, ni siquiera lo que está a la venta."
+DEPEND_JULIAN,"Julián, de Electrodomésticos"
+DEPEND_JULIAN_SALUDO_1,"¡Buenas! Televisor de veintinueve pulgadas con teletexto y mando a distancia. En doce cómodos plazos sin intereses. Sin intereses, ¿eh?"
+DEPEND_JULIAN_SALUDO_2,"Este frigorífico hace el hielo solo. Solo. Usted se va a trabajar y cuando vuelve, hielo. Eso es el progreso."
+DEPEND_JULIAN_SALUDO_3,"Dentro de nada todo esto se paga en euros. Compre ahora, que luego a saber a cómo se pone."
+DEPEND_JULIAN_SALUDO_4,"¿Tiene vídeo en casa? ¿Con programador? Entonces no tiene vídeo, tiene un pisapapeles."
+DEPEND_JULIAN_SALUDO_5,"Mire, yo no le vendo una lavadora. Le vendo los domingos por la mañana."
+DEPEND_JULIAN_LLUVIA,"Día de lluvia, día de secadora. Tengo una que se lo deja todo seco en cuarenta minutos. Garantizado."
+DEPEND_JULIAN_NIEVE,Con este frío lo que usted necesita es un radiador de aceite. Silencioso: ni se entera de que lo tiene.
+DEPEND_JULIAN_NIEBLA,"Con niebla la antena coge fatal. Nada que no arregle un buen descodificador, por cierto."
+DEPEND_JULIAN_INSISTE,"Piénselo, piénselo. Pero la oferta acaba el sábado. Bueno, acaba todos los sábados, pero este también."
+DEPEND_KIKE,"Kike, de Bit 98"
+DEPEND_KIKE_SALUDO_1,"Si vienes a preguntar si la Play lee copias, la respuesta oficial es que no."
+DEPEND_KIKE_SALUDO_2,"Tú eres el del archivo. Los del archivo nunca compran nada, solo leen la parte de atrás de las cajas."
+DEPEND_KIKE_SALUDO_3,"La recreativa del fondo lleva tres días con la misma partida. Nadie la ha tocado. Ni idea, tío."
+DEPEND_KIKE_SALUDO_4,Aquí no se prueba nada sin comprar. Salvo si no mira el jefe. Y el jefe no mira nunca.
+DEPEND_KIKE_SALUDO_5,"Cartuchos, mandos, tarjetas de memoria... Lo que quieras menos conversación, tronco."
+DEPEND_KIKE_LLUVIA,Llueve. Mejor: la gente se mete aquí y se queda jugando en vez de irse a casa.
+DEPEND_KIKE_NIEVE,Con nieve se va la luz y se borran las partidas guardadas. Te lo digo por experiencia.
+DEPEND_KIKE_NIEBLA,Con esta niebla parece que la calle no ha terminado de cargar.
+DEPEND_KIKE_CLIENTE,"¿Qué tal el cartucho? No me lo devuelvas, que aquí no hay devoluciones. Ni cambios. Ni nada."
+DEPEND_KIKE_INSISTE,Sigo aquí. Tampoco tengo adónde ir.
+DEPEND_PACO_SUENO_1,Aquí también vendo el periódico de mañana. Nadie lo compra: da miedo saber lo que va a pasar.
+DEPEND_PACO_SUENO_2,He visto pasar tres alcaldes... y a usted. A usted lo he visto pasar muchas veces. Demasiadas.
+DEPEND_PACO_SUENO_3,Los titulares de esta noche están en blanco. Los ha tachado alguien con tinta de sello.
+DEPEND_PACO_SUENO_EXTRANO,"No hemos hablado nunca, jefe. Pero todas las mañanas le guardo el periódico."
+DEPEND_REMEDIOS_SUENO_1,"¿Lo ve? Aquí vienen las cosas cuando ya nadie las quiere. Y la gente también, a veces."
+DEPEND_REMEDIOS_SUENO_2,"Esa lámpara verde era suya. ¿No se acuerda? La trajo usted mismo, hace muchos años."
+DEPEND_REMEDIOS_SUENO_3,No toque nada. Aquí todo tiene las manos frías.
+DEPEND_REMEDIOS_SUENO_EXTRANO,Usted nunca entra en mi tienda. Pero sus cosas acabarán en ella. Todas acaban.
+DEPEND_JULIAN_SUENO_1,¡Oferta de esta noche! Un televisor que solo emite lo que usted no quiere ver. Sin intereses.
+DEPEND_JULIAN_SUENO_2,"Aquí todo se paga a plazos. Doce, veinticuatro... los que le queden."
+DEPEND_JULIAN_SUENO_3,¿Oye ese zumbido? Es el frigorífico. Lleva haciendo hielo desde el setenta y tres.
+DEPEND_JULIAN_SUENO_EXTRANO,"No se vaya sin mirar, que esta oferta es solo para los que sueñan."
+DEPEND_KIKE_SUENO_1,Esta partida no se puede guardar. Ninguna de aquí se puede.
+DEPEND_KIKE_SUENO_2,La recreativa del fondo eres tú. Llevas tres días en la misma pantalla.
+DEPEND_KIKE_SUENO_3,"Game over, tronco. Aquí no se acaban las fichas: se acaban las ganas."
+DEPEND_KIKE_SUENO_EXTRANO,Nunca vienes a la tienda. Da igual: aquí dentro todos jugamos la misma partida.
