@@ -119,7 +119,8 @@ func _probar_cunado_montado_tarde() -> void:
 	_comprobar(capa.punto(RondaCierre.PUNTO_CUNADO) == cunado, "recarga reengancha al cuñado real")
 	_comprobar(cunado.interactuar(root), "despedida reutiliza la interacción del compañero")
 	_comprobar(
-		estado["completados"].has(RondaCierre.PUNTO_CUNADO), "despedida queda en progreso persistido"
+		estado["completados"].has(RondaCierre.PUNTO_CUNADO),
+		"despedida queda en progreso persistido"
 	)
 	mundo.queue_free()
 	await process_frame
