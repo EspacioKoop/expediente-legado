@@ -21,6 +21,7 @@ var _visual: Node3D = null
 var _animador: AnimadorAmbiental3D = null
 var _partes: Dictionary = {}
 var _rotaciones_base: Dictionary = {}
+var _materiales: Dictionary = {}
 
 
 func configurar(
@@ -231,6 +232,7 @@ func _montar_visual() -> void:
 		_visual.queue_free()
 	_partes.clear()
 	_rotaciones_base.clear()
+	_materiales.clear()
 	_visual = Node3D.new()
 	_visual.name = "Visual"
 	add_child(_visual)
@@ -249,188 +251,505 @@ func _montar_visual() -> void:
 
 
 func _montar_ave(color: Color) -> void:
-	_parte("Cuerpo", Vector3(0.22, 0.18, 0.34), Vector3(0, 0.13, 0), color)
-	_parte("Cabeza", Vector3(0.15, 0.15, 0.16), Vector3(0, 0.23, -0.18), color.lightened(0.06))
-	_parte("Pico", Vector3(0.065, 0.035, 0.10), Vector3(0, 0.23, -0.30), Color(0.72, 0.52, 0.20))
-	_parte("Cola", Vector3(0.14, 0.04, 0.24), Vector3(0, 0.14, 0.26), color.darkened(0.16))
-	_parte(
+	_parte_esfera(
+		"Cuerpo", Vector3(0.30, 0.22, 0.42), Vector3(0, 0.15, 0), color, Vector3.ZERO, 0.88, true
+	)
+	_parte_esfera(
+		"Cabeza",
+		Vector3(0.18, 0.18, 0.18),
+		Vector3(0, 0.27, -0.19),
+		color.lightened(0.06),
+		Vector3.ZERO,
+		0.84,
+		true,
+	)
+	_parte_cono(
+		"Pico",
+		Vector3(0.075, 0.13, 0.075),
+		Vector3(0, 0.255, -0.34),
+		Color(0.72, 0.52, 0.20),
+		Vector3(-90, 0, 0),
+		0.72,
+	)
+	_parte_capsula(
+		"Cola",
+		Vector3(0.13, 0.25, 0.055),
+		Vector3(0, 0.14, 0.31),
+		color.darkened(0.16),
+		Vector3(-90, 0, 0),
+		0.90,
+	)
+	_parte_esfera(
 		"AlaI",
-		Vector3(0.24, 0.025, 0.22),
-		Vector3(-0.16, 0.14, 0.02),
+		Vector3(0.27, 0.055, 0.28),
+		Vector3(-0.16, 0.15, 0.015),
 		color.darkened(0.10),
 		Vector3(0, 0, 14),
+		0.91,
+		true,
 	)
-	_parte(
+	_parte_esfera(
 		"AlaD",
-		Vector3(0.24, 0.025, 0.22),
-		Vector3(0.16, 0.14, 0.02),
+		Vector3(0.27, 0.055, 0.28),
+		Vector3(0.16, 0.15, 0.015),
 		color.darkened(0.10),
 		Vector3(0, 0, -14),
+		0.91,
+		true,
 	)
-	_parte(
+	_parte_esfera(
 		"OjoI",
-		Vector3(0.025, 0.025, 0.025),
-		Vector3(-0.055, 0.255, -0.258),
-		Color(0.01, 0.01, 0.01)
+		Vector3(0.030, 0.030, 0.030),
+		Vector3(-0.060, 0.285, -0.270),
+		Color(0.012, 0.010, 0.010),
+		Vector3.ZERO,
+		0.36,
 	)
-	_parte(
-		"OjoD", Vector3(0.025, 0.025, 0.025), Vector3(0.055, 0.255, -0.258), Color(0.01, 0.01, 0.01)
+	_parte_esfera(
+		"OjoD",
+		Vector3(0.030, 0.030, 0.030),
+		Vector3(0.060, 0.285, -0.270),
+		Color(0.012, 0.010, 0.010),
+		Vector3.ZERO,
+		0.36,
 	)
-	_parte(
+	_parte_cilindro(
 		"PataI",
-		Vector3(0.025, 0.12, 0.025),
-		Vector3(-0.045, 0.01, 0.04),
+		Vector3(0.025, 0.11, 0.025),
+		Vector3(-0.048, 0.04, 0.03),
 		Color(0.45, 0.28, 0.20),
+		Vector3.ZERO,
+		0.82,
 	)
-	_parte(
+	_parte_cilindro(
 		"PataD",
-		Vector3(0.025, 0.12, 0.025),
-		Vector3(0.045, 0.01, 0.04),
+		Vector3(0.025, 0.11, 0.025),
+		Vector3(0.048, 0.04, 0.03),
 		Color(0.45, 0.28, 0.20),
+		Vector3.ZERO,
+		0.82,
 	)
 
 
 func _montar_perro(color: Color) -> void:
-	_parte("Cuerpo", Vector3(0.42, 0.38, 0.82), Vector3(0, 0.42, 0), color)
-	_parte("Pecho", Vector3(0.34, 0.43, 0.30), Vector3(0, 0.48, -0.34), color.lightened(0.05))
-	_parte("Cabeza", Vector3(0.34, 0.34, 0.38), Vector3(0, 0.68, -0.55), color.lightened(0.08))
-	_parte("Morro", Vector3(0.23, 0.18, 0.25), Vector3(0, 0.59, -0.78), color.darkened(0.10))
-	_parte("Nariz", Vector3(0.12, 0.10, 0.08), Vector3(0, 0.61, -0.93), Color(0.035, 0.03, 0.03))
-	_parte(
+	_parte_capsula(
+		"Cuerpo",
+		Vector3(0.46, 0.72, 0.46),
+		Vector3(0, 0.46, 0),
+		color,
+		Vector3(-90, 0, 0),
+		0.86,
+		true,
+	)
+	_parte_esfera(
+		"Pecho",
+		Vector3(0.37, 0.48, 0.34),
+		Vector3(0, 0.50, -0.30),
+		color.lightened(0.05),
+		Vector3.ZERO,
+		0.88,
+		true,
+	)
+	_parte_esfera(
+		"Cabeza",
+		Vector3(0.38, 0.38, 0.40),
+		Vector3(0, 0.72, -0.58),
+		color.lightened(0.08),
+		Vector3.ZERO,
+		0.84,
+		true,
+	)
+	_parte_capsula(
+		"Morro",
+		Vector3(0.24, 0.31, 0.20),
+		Vector3(0, 0.63, -0.82),
+		color.darkened(0.10),
+		Vector3(-90, 0, 0),
+		0.80,
+	)
+	_parte_esfera(
+		"Nariz",
+		Vector3(0.13, 0.10, 0.10),
+		Vector3(0, 0.63, -0.98),
+		Color(0.035, 0.03, 0.03),
+		Vector3.ZERO,
+		0.34,
+	)
+	_parte_esfera(
 		"OrejaI",
-		Vector3(0.13, 0.22, 0.09),
-		Vector3(-0.12, 0.87, -0.55),
+		Vector3(0.14, 0.24, 0.08),
+		Vector3(-0.13, 0.91, -0.57),
 		color.darkened(0.12),
-		Vector3(0, 0, -14)
+		Vector3(0, 0, -15),
+		0.92,
 	)
-	_parte(
+	_parte_esfera(
 		"OrejaD",
-		Vector3(0.13, 0.22, 0.09),
-		Vector3(0.12, 0.87, -0.55),
+		Vector3(0.14, 0.24, 0.08),
+		Vector3(0.13, 0.91, -0.57),
 		color.darkened(0.12),
-		Vector3(0, 0, 14)
+		Vector3(0, 0, 15),
+		0.92,
 	)
-	for x in [-0.14, 0.14]:
-		for z in [-0.24, 0.24]:
-			_parte("Pata", Vector3(0.09, 0.42, 0.10), Vector3(x, 0.16, z), color.darkened(0.07))
-	_parte(
+	for x in [-0.15, 0.15]:
+		for z in [-0.25, 0.25]:
+			_parte_capsula(
+				"Pata",
+				Vector3(0.09, 0.30, 0.09),
+				Vector3(x, 0.19, z),
+				color.darkened(0.07),
+				Vector3.ZERO,
+				0.90,
+			)
+	_parte_capsula(
 		"Cola",
-		Vector3(0.08, 0.08, 0.48),
-		Vector3(0, 0.53, 0.58),
+		Vector3(0.085, 0.43, 0.085),
+		Vector3(0, 0.57, 0.57),
 		color.darkened(0.08),
-		Vector3(28, 0, 0),
+		Vector3(58, 0, 0),
+		0.90,
 	)
 
 
 func _montar_polilla(color: Color) -> void:
-	_parte("Cuerpo", Vector3(0.10, 0.12, 0.28), Vector3.ZERO, color.darkened(0.25))
-	_parte("AlaI", Vector3(0.48, 0.025, 0.34), Vector3(-0.25, 0, 0), color, Vector3(0, 12, 18))
-	_parte("AlaD", Vector3(0.48, 0.025, 0.34), Vector3(0.25, 0, 0), color, Vector3(0, -12, -18))
-	_parte("MarcaI", Vector3(0.11, 0.03, 0.11), Vector3(-0.29, 0.025, -0.02), color.darkened(0.30))
-	_parte("MarcaD", Vector3(0.11, 0.03, 0.11), Vector3(0.29, 0.025, -0.02), color.darkened(0.30))
-	_parte(
+	_parte_capsula(
+		"Cuerpo",
+		Vector3(0.11, 0.30, 0.11),
+		Vector3.ZERO,
+		color.darkened(0.25),
+		Vector3(-90, 0, 0),
+		0.78,
+		true,
+	)
+	_parte_esfera(
+		"AlaI",
+		Vector3(0.53, 0.045, 0.38),
+		Vector3(-0.26, 0, 0),
+		color,
+		Vector3(0, 12, 18),
+		0.93,
+		true,
+	)
+	_parte_esfera(
+		"AlaD",
+		Vector3(0.53, 0.045, 0.38),
+		Vector3(0.26, 0, 0),
+		color,
+		Vector3(0, -12, -18),
+		0.93,
+		true,
+	)
+	_parte_esfera(
+		"MarcaI",
+		Vector3(0.12, 0.050, 0.12),
+		Vector3(-0.30, 0.025, -0.02),
+		color.darkened(0.30),
+		Vector3.ZERO,
+		0.86,
+	)
+	_parte_esfera(
+		"MarcaD",
+		Vector3(0.12, 0.050, 0.12),
+		Vector3(0.30, 0.025, -0.02),
+		color.darkened(0.30),
+		Vector3.ZERO,
+		0.86,
+	)
+	_parte_cilindro(
 		"AntenaI",
-		Vector3(0.018, 0.018, 0.24),
-		Vector3(-0.05, 0.04, -0.21),
+		Vector3(0.018, 0.24, 0.018),
+		Vector3(-0.05, 0.04, -0.22),
 		color.darkened(0.30),
 		Vector3(-18, -14, 0),
+		0.88,
 	)
-	_parte(
+	_parte_cilindro(
 		"AntenaD",
-		Vector3(0.018, 0.018, 0.24),
-		Vector3(0.05, 0.04, -0.21),
+		Vector3(0.018, 0.24, 0.018),
+		Vector3(0.05, 0.04, -0.22),
 		color.darkened(0.30),
 		Vector3(-18, 14, 0),
+		0.88,
 	)
 
 
 func _montar_ciervo(color: Color) -> void:
-	_parte("Cuerpo", Vector3(0.48, 0.52, 1.05), Vector3(0, 0.72, 0), color)
-	_parte(
+	_parte_capsula(
+		"Cuerpo",
+		Vector3(0.52, 0.88, 0.52),
+		Vector3(0, 0.76, 0),
+		color,
+		Vector3(-90, 0, 0),
+		0.87,
+		true,
+	)
+	_parte_capsula(
 		"Cuello",
-		Vector3(0.26, 0.72, 0.28),
-		Vector3(0, 1.05, -0.42),
+		Vector3(0.28, 0.66, 0.28),
+		Vector3(0, 1.08, -0.40),
 		color.lightened(0.04),
 		Vector3(-18, 0, 0),
+		0.88,
+		true,
 	)
-	_parte("Cabeza", Vector3(0.28, 0.30, 0.45), Vector3(0, 1.38, -0.62), color.lightened(0.07))
-	_parte("Morro", Vector3(0.20, 0.16, 0.22), Vector3(0, 1.32, -0.91), color.darkened(0.09))
-	_parte(
+	_parte_esfera(
+		"Cabeza",
+		Vector3(0.31, 0.32, 0.43),
+		Vector3(0, 1.43, -0.65),
+		color.lightened(0.07),
+		Vector3.ZERO,
+		0.84,
+		true,
+	)
+	_parte_capsula(
+		"Morro",
+		Vector3(0.20, 0.26, 0.18),
+		Vector3(0, 1.36, -0.91),
+		color.darkened(0.09),
+		Vector3(-90, 0, 0),
+		0.79,
+	)
+	_parte_esfera(
 		"OrejaI",
-		Vector3(0.10, 0.22, 0.08),
-		Vector3(-0.16, 1.55, -0.62),
+		Vector3(0.11, 0.24, 0.075),
+		Vector3(-0.17, 1.61, -0.63),
 		color.lightened(0.04),
-		Vector3(0, 0, -25)
+		Vector3(0, 0, -26),
+		0.91,
 	)
-	_parte(
+	_parte_esfera(
 		"OrejaD",
-		Vector3(0.10, 0.22, 0.08),
-		Vector3(0.16, 1.55, -0.62),
+		Vector3(0.11, 0.24, 0.075),
+		Vector3(0.17, 1.61, -0.63),
 		color.lightened(0.04),
-		Vector3(0, 0, 25)
+		Vector3(0, 0, 26),
+		0.91,
 	)
-	for x in [-0.16, 0.16]:
-		for z in [-0.32, 0.32]:
-			_parte("Pata", Vector3(0.085, 0.80, 0.09), Vector3(x, 0.30, z), color.darkened(0.10))
-			_parte(
-				"Pezuña",
-				Vector3(0.10, 0.08, 0.14),
-				Vector3(x, -0.08, z - 0.025),
-				Color(0.07, 0.055, 0.045)
+	_parte_esfera(
+		"OjoI",
+		Vector3(0.032, 0.032, 0.032),
+		Vector3(-0.090, 1.47, -0.825),
+		Color(0.015, 0.012, 0.01),
+		Vector3.ZERO,
+		0.33,
+	)
+	_parte_esfera(
+		"OjoD",
+		Vector3(0.032, 0.032, 0.032),
+		Vector3(0.090, 1.47, -0.825),
+		Color(0.015, 0.012, 0.01),
+		Vector3.ZERO,
+		0.33,
+	)
+	for x in [-0.17, 0.17]:
+		for z in [-0.34, 0.34]:
+			_parte_capsula(
+				"Pata",
+				Vector3(0.085, 0.56, 0.085),
+				Vector3(x, 0.34, z),
+				color.darkened(0.10),
+				Vector3.ZERO,
+				0.91,
 			)
-	_parte(
+			_parte_esfera(
+				"Pezuña",
+				Vector3(0.11, 0.075, 0.16),
+				Vector3(x, 0.02, z - 0.025),
+				Color(0.07, 0.055, 0.045),
+				Vector3.ZERO,
+				0.68,
+			)
+	_parte_cilindro(
 		"AstaI",
-		Vector3(0.035, 0.46, 0.035),
-		Vector3(-0.10, 1.66, -0.60),
+		Vector3(0.035, 0.48, 0.035),
+		Vector3(-0.10, 1.73, -0.61),
 		Color(0.16, 0.12, 0.09),
 		Vector3(0, 0, -12),
+		0.76,
 	)
-	_parte(
+	_parte_cilindro(
 		"AstaD",
-		Vector3(0.035, 0.46, 0.035),
-		Vector3(0.10, 1.66, -0.60),
+		Vector3(0.035, 0.48, 0.035),
+		Vector3(0.10, 1.73, -0.61),
 		Color(0.16, 0.12, 0.09),
 		Vector3(0, 0, 12),
+		0.76,
 	)
-	_parte(
+	_parte_cilindro(
 		"PuntaAstaI",
-		Vector3(0.025, 0.24, 0.025),
-		Vector3(-0.18, 1.82, -0.60),
+		Vector3(0.025, 0.25, 0.025),
+		Vector3(-0.18, 1.90, -0.61),
 		Color(0.16, 0.12, 0.09),
-		Vector3(0, 0, -38)
+		Vector3(0, 0, -38),
+		0.76,
 	)
-	_parte(
+	_parte_cilindro(
 		"PuntaAstaD",
-		Vector3(0.025, 0.24, 0.025),
-		Vector3(0.18, 1.82, -0.60),
+		Vector3(0.025, 0.25, 0.025),
+		Vector3(0.18, 1.90, -0.61),
 		Color(0.16, 0.12, 0.09),
-		Vector3(0, 0, 38)
+		Vector3(0, 0, 38),
+		0.76,
 	)
 
 
-func _parte(
+func _parte_esfera(
 	nombre: String,
-	tamano: Vector3,
+	escala: Vector3,
 	posicion_local: Vector3,
 	color: Color,
 	giro_grados: Vector3 = Vector3.ZERO,
+	rugosidad: float = 0.88,
+	sombra: bool = false,
 ) -> MeshInstance3D:
-	var malla := BoxMesh.new()
-	malla.size = tamano
-	var material := StandardMaterial3D.new()
-	material.albedo_color = color
-	material.roughness = 0.92
+	return _parte_mesh(
+		nombre,
+		_malla_esfera(),
+		escala,
+		posicion_local,
+		color,
+		giro_grados,
+		rugosidad,
+		sombra,
+	)
 
+
+func _parte_capsula(
+	nombre: String,
+	escala: Vector3,
+	posicion_local: Vector3,
+	color: Color,
+	giro_grados: Vector3 = Vector3.ZERO,
+	rugosidad: float = 0.88,
+	sombra: bool = false,
+) -> MeshInstance3D:
+	return _parte_mesh(
+		nombre,
+		_malla_capsula(),
+		escala,
+		posicion_local,
+		color,
+		giro_grados,
+		rugosidad,
+		sombra,
+	)
+
+
+func _parte_cilindro(
+	nombre: String,
+	escala: Vector3,
+	posicion_local: Vector3,
+	color: Color,
+	giro_grados: Vector3 = Vector3.ZERO,
+	rugosidad: float = 0.88,
+	sombra: bool = false,
+) -> MeshInstance3D:
+	return _parte_mesh(
+		nombre,
+		_malla_cilindro(),
+		escala,
+		posicion_local,
+		color,
+		giro_grados,
+		rugosidad,
+		sombra,
+	)
+
+
+func _parte_cono(
+	nombre: String,
+	escala: Vector3,
+	posicion_local: Vector3,
+	color: Color,
+	giro_grados: Vector3 = Vector3.ZERO,
+	rugosidad: float = 0.82,
+	sombra: bool = false,
+) -> MeshInstance3D:
+	return _parte_mesh(
+		nombre,
+		_malla_cono(),
+		escala,
+		posicion_local,
+		color,
+		giro_grados,
+		rugosidad,
+		sombra,
+	)
+
+
+func _parte_mesh(
+	nombre: String,
+	malla: Mesh,
+	escala: Vector3,
+	posicion_local: Vector3,
+	color: Color,
+	giro_grados: Vector3,
+	rugosidad: float,
+	sombra: bool,
+) -> MeshInstance3D:
 	var parte := MeshInstance3D.new()
 	parte.name = nombre
 	parte.mesh = malla
-	parte.material_override = material
+	parte.material_override = _material(color, rugosidad)
 	parte.position = posicion_local
 	parte.rotation_degrees = giro_grados
-	parte.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parte.scale = escala
+	parte.cast_shadow = (
+		GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		if sombra
+		else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	)
 	parte.visibility_range_end = 58.0
 	_visual.add_child(parte)
 	if not _partes.has(nombre):
 		_partes[nombre] = parte
 		_rotaciones_base[nombre] = parte.rotation
 	return parte
+
+
+func _material(color: Color, rugosidad: float) -> StandardMaterial3D:
+	var clave := "%s|%.2f" % [color.to_html(), rugosidad]
+	if _materiales.has(clave):
+		return _materiales[clave] as StandardMaterial3D
+	var material := StandardMaterial3D.new()
+	material.albedo_color = color
+	material.roughness = clampf(rugosidad, 0.0, 1.0)
+	material.metallic = 0.0
+	_materiales[clave] = material
+	return material
+
+
+func _malla_esfera() -> SphereMesh:
+	var malla := SphereMesh.new()
+	malla.radial_segments = 12
+	malla.rings = 6
+	return malla
+
+
+func _malla_capsula() -> CapsuleMesh:
+	var malla := CapsuleMesh.new()
+	malla.radial_segments = 10
+	malla.rings = 4
+	malla.radius = 0.5
+	malla.height = 1.4
+	return malla
+
+
+func _malla_cilindro() -> CylinderMesh:
+	var malla := CylinderMesh.new()
+	malla.radial_segments = 8
+	malla.rings = 1
+	malla.top_radius = 0.5
+	malla.bottom_radius = 0.5
+	malla.height = 1.0
+	return malla
+
+
+func _malla_cono() -> CylinderMesh:
+	var malla := CylinderMesh.new()
+	malla.radial_segments = 7
+	malla.rings = 1
+	malla.top_radius = 0.0
+	malla.bottom_radius = 0.5
+	malla.height = 1.0
+	return malla
