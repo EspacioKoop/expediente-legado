@@ -9,6 +9,17 @@ extends RefCounted
 
 const CLAVE := "objetos_tocados_sueno"
 
+## Metadatos físicos reutilizables por sistemas oníricos que necesiten una
+## propiedad cuantitativa observable. Son unidades relativas, no kilogramos:
+## importan las diferencias y la reproducibilidad, no simular una báscula real.
+const PERFILES_PESO := {
+	"silla": {"peso": 2.0, "peso_sellado": 2.5},
+	"monitor": {"peso": 4.0, "peso_sellado": 3.5},
+	"archivador": {"peso": 6.0, "peso_sellado": 7.0},
+	"armario_hogar": {"peso": 8.0, "peso_sellado": 6.5},
+	"televisor_casa": {"peso": 5.0, "peso_sellado": 4.0},
+}
+
 
 ## Registra una interacción deliberada. Devuelve true solo cuando aparece una
 ## familia nueva y, por tanto, merece escribir la partida una vez.
@@ -49,3 +60,24 @@ static func del_dia(jornada: Dictionary) -> Array:
 		if not id.is_empty() and not validos.has(id):
 			validos.append(id)
 	return validos
+
+
+## Traduce únicamente objetos realmente tocados hoy a perfiles aptos para un
+## pesaje. Un ID conocido por otros sueños pero sin perfil físico se ignora:
+## ningún consumidor obtiene objetos de relleno ni inventa propiedades.
+static func para_pesaje(jornada: Dictionary) -> Array:
+	var resultado := []
+	for valor in del_dia(jornada):
+		var id := String(valor)
+		if not PERFILES_PESO.has(id):
+			continue
+		var perfil: Dictionary = PERFILES_PESO[id]
+		resultado.append(
+			{
+				"id": id,
+				"peso": float(perfil.get("peso", 0.0)),
+				"peso_sellado": float(perfil.get("peso_sellado", perfil.get("peso", 0.0))),
+				"manipulado_hoy": true,
+			}
+		)
+	return resultado
