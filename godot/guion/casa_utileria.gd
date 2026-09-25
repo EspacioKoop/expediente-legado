@@ -1,4 +1,4 @@
-## Utilería doméstica procedural para dar lectura 3D a la casa (#133, #282, #400).
+## Utilería doméstica híbrida para dar lectura 3D a la casa (#133, #282, #400).
 ##
 ## Los objetos siguen construidos con primitivas simples y sin assets externos.
 ## La composición separa usos domésticos reconocibles antes de añadir más props:
@@ -95,12 +95,10 @@ static func _montar_cuenco_gato(raiz: Node3D, pos: Vector3) -> void:
 	cuenco.position = pos
 	raiz.add_child(cuenco)
 
-	# Un tronco de cono bajo con centro oscuro hace legible el recipiente abierto
-	# sin añadir estado propio: lleno/vacío sigue perteneciendo a la lógica del gato.
-	_agregar_cilindro_truncado(
-		cuenco, Vector3(0, 0.07, 0), 0.18, 0.11, 0.11, Color(0.48, 0.46, 0.42), ACERO
-	)
-	_agregar_cilindro(cuenco, Vector3(0, 0.132, 0), 0.13, 0.012, Color(0.10, 0.09, 0.08))
+	var visual := MeshInstance3D.new()
+	visual.name = "VisualCuencoOriginal98"
+	visual.mesh = load("res://arte/props_originales_98/cuenco_gato_98.obj") as Mesh
+	cuenco.add_child(visual)
 
 
 static func _montar_sofa(raiz: Node3D, pos: Vector3, giro_y: float) -> void:
@@ -272,9 +270,10 @@ static func _montar_lampara_pie(raiz: Node3D, pos: Vector3) -> void:
 	raiz.add_child(lampara)
 	lampara.configurar()
 
-	_agregar_cilindro(lampara, Vector3(0, 0.05, 0), 0.28, 0.10, Color(0.18, 0.17, 0.16), ACERO)
-	_agregar_cilindro(lampara, Vector3(0, 0.82, 0), 0.045, 1.55, Color(0.26, 0.24, 0.22), ACERO)
-	_agregar_pantalla(lampara, Vector3(0, 1.62, 0))
+	var visual := MeshInstance3D.new()
+	visual.name = "VisualLamparaOriginal98"
+	visual.mesh = load("res://arte/props_originales_98/lampara_pie_98.obj") as Mesh
+	lampara.add_child(visual)
 
 
 static func _agregar_pantalla(raiz: Node3D, pos: Vector3) -> void:

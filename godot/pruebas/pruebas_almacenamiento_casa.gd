@@ -141,8 +141,8 @@ func _probar_distribucion_domestica() -> void:
 		"la cama añade marco, cabecero, ropa y patas al volumen histórico"
 	)
 	_comprobar(
-		cuenco != null and cuenco.find_children("*", "MeshInstance3D", true, false).size() >= 2,
-		"el cuenco tiene cuerpo e interior diferenciados"
+		cuenco != null and cuenco.get_node_or_null("VisualCuencoOriginal98") is MeshInstance3D,
+		"el cuenco usa la malla original 98"
 	)
 	_comprobar(
 		cama != null and cama.position.is_equal_approx(Vector3(-2.4, 0.0, -2.0)),

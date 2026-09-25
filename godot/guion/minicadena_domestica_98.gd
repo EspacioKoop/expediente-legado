@@ -437,27 +437,10 @@ func _montar_visual() -> void:
 	var visual := Node3D.new()
 	visual.name = NOMBRE_VISUAL
 	add_child(visual)
-	_caja(visual, Vector3(0, 0.20, 0), Vector3(0.78, 0.36, 0.28), Color(0.18, 0.18, 0.17))
-	_caja(visual, Vector3(0, 0.23, 0.148), Vector3(0.30, 0.16, 0.018), Color(0.08, 0.08, 0.07))
-	_caja(visual, Vector3(0, 0.10, 0.150), Vector3(0.26, 0.055, 0.016), Color(0.26, 0.22, 0.17))
-	for x in [-0.25, 0.25]:
-		_cilindro(
-			visual,
-			Vector3(x, 0.21, 0.155),
-			0.105,
-			0.022,
-			Color(0.10, 0.10, 0.09),
-			Vector3(90, 0, 0),
-		)
-	for x in [-0.11, 0.0, 0.11]:
-		_cilindro(
-			visual,
-			Vector3(x, 0.335, 0.158),
-			0.025,
-			0.025,
-			Color(0.38, 0.37, 0.33),
-			Vector3(90, 0, 0),
-		)
+	var carcasa := MeshInstance3D.new()
+	carcasa.name = "CarcasaMinicadenaOriginal98"
+	carcasa.mesh = load("res://arte/props_originales_98/minicadena_98.obj") as Mesh
+	visual.add_child(carcasa)
 
 
 func _montar_controles() -> void:
