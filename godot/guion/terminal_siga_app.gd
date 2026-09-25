@@ -23,8 +23,8 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	theme = EstiloSiga.tema()
 	_montar()
-	_escribir("SIGA-98 TERMINAL DE CONSULTA")
-	_escribir("HELP muestra los comandos disponibles.")
+	_escribir(tr("TERMINAL_SIGA_INICIO"))
+	_escribir(tr("TERMINAL_SIGA_AYUDA"))
 	_linea.grab_focus.call_deferred()
 
 
@@ -68,7 +68,7 @@ func _montar() -> void:
 	panel.add_child(caja)
 
 	var barra := Label.new()
-	barra.text = "SIGA-98 · TERMINAL"
+	barra.text = tr("TERMINAL_SIGA_TITULO")
 	barra.add_theme_font_override("font", EstiloSiga.fuente_titulo())
 	barra.add_theme_color_override("font_color", EstiloSiga.BLANCO)
 	var fondo_barra := StyleBoxFlat.new()
@@ -87,7 +87,7 @@ func _montar() -> void:
 	_registro.selection_enabled = true
 	_registro.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_registro.custom_minimum_size = Vector2(0.0, 340.0)
-	_registro.accessibility_name = "Historial del terminal SIGA"
+	_registro.accessibility_name = tr("TERMINAL_SIGA_HISTORIAL_ACCESIBLE")
 	_registro.add_theme_font_override("normal_font", EstiloSiga.fuente_terminal())
 	_registro.add_theme_color_override("default_color", VERDE_TERMINAL)
 	var caja_registro := StyleBoxFlat.new()
@@ -100,8 +100,8 @@ func _montar() -> void:
 
 	_linea = LineEdit.new()
 	_linea.name = "LineaTerminal"
-	_linea.placeholder_text = "HELP"
-	_linea.accessibility_name = "Comando del terminal SIGA"
+	_linea.placeholder_text = tr("TERMINAL_SIGA_PLACEHOLDER")
+	_linea.accessibility_name = tr("TERMINAL_SIGA_COMANDO_ACCESIBLE")
 	_linea.add_theme_font_override("font", EstiloSiga.fuente_terminal())
 	_linea.text_submitted.connect(ejecutar)
 	caja.add_child(_linea)
@@ -112,15 +112,15 @@ func _montar() -> void:
 
 	_abrir_siga = Button.new()
 	_abrir_siga.name = "AbrirSIGA"
-	_abrir_siga.text = "Abrir SIGA"
-	_abrir_siga.accessibility_name = "Abrir SIGA"
+	_abrir_siga.text = tr("TERMINAL_SIGA_ABRIR")
+	_abrir_siga.accessibility_name = _abrir_siga.text
 	_abrir_siga.pressed.connect(func(): abrir_siga_solicitado.emit())
 	acciones.add_child(_abrir_siga)
 
 	_cerrar = Button.new()
 	_cerrar.name = "CerrarTerminal"
-	_cerrar.text = "Cerrar"
-	_cerrar.accessibility_name = "Cerrar terminal"
+	_cerrar.text = tr("TERMINAL_SIGA_CERRAR")
+	_cerrar.accessibility_name = _cerrar.text
 	_cerrar.pressed.connect(func(): cerrar_solicitado.emit())
 	acciones.add_child(_cerrar)
 
