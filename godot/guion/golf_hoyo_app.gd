@@ -203,9 +203,12 @@ func _refrescar_ui(mensaje: String = "") -> void:
 	if not mensaje.is_empty():
 		_estado.text = "%s · %d golpes" % [mensaje, golpes]
 		return
-	_estado.text = "Ángulo %+.0f° · Potencia %d%% · Golpes %d/%d" % [
-		angulo_grados,
-		roundi(potencia * 100.0),
-		golpes,
-		MAX_GOLPES,
-	]
+	_estado.text = (
+		"Ángulo %+.0f° · Potencia %d%% · Golpes %d/%d"
+		% [
+			angulo_grados,
+			roundi(potencia * 100.0),
+			golpes,
+			MAX_GOLPES,
+		]
+	)
