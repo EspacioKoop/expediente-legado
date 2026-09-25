@@ -53,6 +53,10 @@ func _probar() -> void:
 		_comprobar(caja.end.x < -1.6 or caja.position.x > 1.6, "paso central libre")
 		if str(pieza.name).begins_with("Tapa"):
 			_comprobar(absf(caja.size.x - 0.70) < 0.001, "tapa a escala 70 cm")
+			_comprobar(
+				pieza.position.y >= 0.001 and pieza.position.y <= 0.002,
+				"tapa casi enrasada con margen anti-z-fighting",
+			)
 		else:
 			var alto := 1.10 if pieza.name == &"Barrera" else 0.65
 			_comprobar(absf(caja.size.y - alto) < 0.001, "altura de mobiliario realista")
