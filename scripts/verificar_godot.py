@@ -177,6 +177,12 @@ def ejecutar():
                 18,
             ),
             (
+                "terminal-siga-956",
+                ["--script", "pruebas/pruebas_terminal_siga_956.gd"],
+                30,
+                25,
+            ),
+            (
                 "fauna-ambiental-1396",
                 ["--script", "pruebas/pruebas_fauna_ambiental_1396.gd"],
                 30,
