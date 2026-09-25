@@ -161,7 +161,9 @@ class CatalogoLocaleTest(unittest.TestCase):
         ):
             self.assertEqual(concepto_es["id"], concepto_en["id"])
             self.assertNotEqual(concepto_es["resumen"], concepto_en["resumen"])
-            for referencia in __import__("re").findall(r"\\[\\[([^]]+)\\]\\]", concepto_en["resumen"]):
+            partes = concepto_en["resumen"].split("[[")
+            for parte in partes[1:]:
+                referencia = parte.split("]]", 1)[0]
                 self.assertIn(referencia, nombres)
 
     def test_el_contrato_permite_traducir_texto_pero_no_quitar_fichas(self):
