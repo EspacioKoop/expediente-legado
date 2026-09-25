@@ -129,14 +129,17 @@ func _montar_companeros(mundo: Node3D) -> void:
 		idle.name = "IdleAviones%d" % (indice + 1)
 		grupo.add_child(idle)
 		# Reutiliza #134: dos esperan respirando y uno cruza los brazos.
-		idle.configurar(
-			cuerpo,
-			hash("aviones-papel-%d" % indice),
-			false,
-			reducir,
-			false,
-			indice == 2,
-			false,
+		(
+			idle
+			. configurar(
+				cuerpo,
+				hash("aviones-papel-%d" % indice),
+				false,
+				reducir,
+				false,
+				indice == 2,
+				false,
+			)
 		)
 
 
