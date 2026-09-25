@@ -143,23 +143,30 @@ func _probar_runtime_combate() -> void:
 	voto.free()
 
 	var registro_tregua := Eventos.nuevo()
-	Eventos.registrar(
-		registro_tregua,
-		Eventos.crear_evento(
-			"tregua-runtime-936",
-			Eventos.CANAL_PRACTICA,
-			"escena:fixture",
-			"juicio:runtime-936",
-			1,
-			"tradicion_fixture",
-			[],
-			[Conflicto.REGLA_TREGUA_MUTUA],
-			true,
-			["runtime-936"],
+	(
+		Eventos
+		. registrar(
+			registro_tregua,
+			(
+				Eventos
+				. crear_evento(
+					"tregua-runtime-936",
+					Eventos.CANAL_PRACTICA,
+					"escena:fixture",
+					"juicio:runtime-936",
+					1,
+					"tradicion_fixture",
+					[],
+					[Conflicto.REGLA_TREGUA_MUTUA],
+					true,
+					["runtime-936"],
+				)
+			)
 		)
 	)
 	var tregua_compromiso: Dictionary = (
-		Conflicto.compromisos_disponibles(
+		Conflicto
+		. compromisos_disponibles(
 			registro_tregua,
 			"juicio:runtime-936",
 			"runtime-936",
