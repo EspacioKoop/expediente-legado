@@ -142,6 +142,62 @@ func _probar_runtime_combate() -> void:
 	)
 	voto.free()
 
+	var registro_tregua := Eventos.nuevo()
+	Eventos.registrar(
+		registro_tregua,
+		Eventos.crear_evento(
+			"tregua-runtime-936",
+			Eventos.CANAL_PRACTICA,
+			"escena:fixture",
+			"juicio:runtime-936",
+			1,
+			"tradicion_fixture",
+			[],
+			[Conflicto.REGLA_TREGUA_MUTUA],
+			true,
+			["runtime-936"],
+		)
+	)
+	var tregua_compromiso: Dictionary = (
+		Conflicto.compromisos_disponibles(
+			registro_tregua,
+			"juicio:runtime-936",
+			"runtime-936",
+		)[0]
+	)
+	_comprobar(
+		not JuicioCombateSimbolico.tregua_religion_activa([tregua_compromiso]).is_empty(),
+		"la capa simbólica reconoce una tregua bilateral ya validada",
+	)
+
+	var tregua := await _nuevo_juicio()
+	_acercar(tregua)
+	tregua._compromisos_religion = [tregua_compromiso]
+	tregua._tregua_religion_restante = float(tregua_compromiso["duracion"])
+	tregua._recarga_jugador = 0.0
+	tregua._atacar(1, JuicioCombate3D.ALCANCE_LIGERO, JuicioCombate3D.RECARGA_LIGERA, false)
+	_comprobar(
+		tregua._determinacion_rival == JuicioCombate3D.DETERMINACION_BASE,
+		"durante la tregua el jugador no puede iniciar agresión",
+	)
+	tregua._iniciar_ataque_rival()
+	_comprobar(
+		not tregua._ataque_rival_pendiente and not tregua._rival_inicio_agresion,
+		"durante la tregua el rival tampoco puede iniciar agresión",
+	)
+	_comprobar(
+		tregua._texto_ritual().contains(tr("JUICIO_RELIGION_TREGUA")),
+		"el HUD distingue la tregua del voto unilateral",
+	)
+	tregua._descontar_tregua_religion(float(tregua_compromiso["duracion"]) + 0.01)
+	tregua._recarga_jugador = 0.0
+	tregua._atacar(1, JuicioCombate3D.ALCANCE_LIGERO, JuicioCombate3D.RECARGA_LIGERA, false)
+	_comprobar(
+		tregua._determinacion_rival == JuicioCombate3D.DETERMINACION_BASE - 1,
+		"al terminar la ventana de tregua vuelve el combate base",
+	)
+	tregua.free()
+
 	var base := await _nuevo_juicio()
 	_acercar(base)
 	base._recarga_jugador = 0.0
