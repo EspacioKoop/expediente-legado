@@ -177,6 +177,12 @@ def ejecutar():
                 18,
             ),
             (
+                "fauna-ambiental-1396",
+                ["--script", "pruebas/pruebas_fauna_ambiental_1396.gd"],
+                30,
+                18,
+            ),
+            (
                 "ronda-cierre-156",
                 ["--script", "pruebas/pruebas_ronda_cierre_3d.gd"],
                 30,

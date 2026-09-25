@@ -1,4 +1,4 @@
-[gd_scene load_steps=60 format=3]
+[gd_scene load_steps=61 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -59,6 +59,7 @@
 [ext_resource type="Script" path="res://guion/dia_senales_multiplayer_app.gd" id="57"]
 [ext_resource type="Script" path="res://guion/dia_inactividad_prometeo_app.gd" id="58"]
 [ext_resource type="Script" path="res://guion/dia_ronda_cierre_app.gd" id="59"]
+[ext_resource type="Script" path="res://guion/dia_fauna_ambiental_app.gd" id="60"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -89,6 +90,9 @@ script = ExtResource("59")
 
 [node name="SuenoReactivoController" type="Node" parent="."]
 script = ExtResource("8")
+
+[node name="FaunaAmbientalController" type="Node" parent="."]
+script = ExtResource("60")
 
 [node name="ObjetivosLegibilidadController" type="Node" parent="."]
 script = ExtResource("36")
