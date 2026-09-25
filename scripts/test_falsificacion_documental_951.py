@@ -53,6 +53,26 @@ class FalsificacionDocumental951Test(unittest.TestCase):
             self.assertNotIn(token, metodo)
         self.assertIn("_borrador_falsificacion =", metodo)
 
+    def test_revision_interna_es_narrativa_y_no_persistente(self):
+        self.assertIn("static func resolver_revision", self.modelo)
+        inicio = self.visor.index("func _resolver_revision_falsificacion()")
+        fin = self.visor.index("\n\nfunc _reiniciar_analisis_documental()", inicio)
+        metodo = self.visor[inicio:fin]
+        for token in (
+            "_guardar_o_avisar",
+            "partida.estado",
+            "pistas_descubiertas",
+            "descubiertas.append",
+            "Jornada.gastar",
+        ):
+            self.assertNotIn(token, metodo)
+        for clave in (
+            "VISOR_FALSIFICACION_951_REVISION_ACEPTADA",
+            "VISOR_FALSIFICACION_951_REVISION_COTEJO",
+            "VISOR_FALSIFICACION_951_REVISION_RETENIDA",
+        ):
+            self.assertIn(f'"{clave}"', self.visor)
+
     def test_calidad_y_riesgo_se_traducen_desde_claves_explicitas(self):
         for clave in (
             "VISOR_FALSIFICACION_951_CALIDAD_BAJA",
