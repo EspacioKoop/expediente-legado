@@ -83,6 +83,20 @@ func obtener_textura() -> ViewportTexture:
 	return _viewport.get_texture()
 
 
+## Suspende el render y la lógica ambiental cuando otra superficie modal cubre
+## por completo el menú (p. ej. el portátil). Evita mantener dos viewports 3D
+## actualizándose detrás de un overlay que el jugador no puede ver.
+func configurar_activo(activo: bool) -> void:
+	set_process(activo)
+	set_process_input(activo)
+	if _viewport != null:
+		_viewport.render_target_update_mode = (
+			SubViewport.UPDATE_ALWAYS if activo else SubViewport.UPDATE_DISABLED
+		)
+	if _exterior != null:
+		_exterior.configurar_activo(activo)
+
+
 func configurar_reduccion_movimiento(activa: bool) -> void:
 	_reduccion_movimiento = activa
 	if activa:

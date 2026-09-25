@@ -280,12 +280,15 @@ func _abrir_portatil() -> void:
 	app.roms_compradas = TiendaVideojuegos.compras({})
 	app.cerrado.connect(_al_cerrar_portatil)
 	_portatil_app = app
+	_diorama.configurar_activo(false)
 	get_tree().root.add_child(app)
 	app.abrir()
 
 
 func _al_cerrar_portatil() -> void:
 	_portatil_app = null
+	if is_instance_valid(_diorama):
+		_diorama.configurar_activo(true)
 	if is_instance_valid(_portatil):
 		_portatil.grab_focus()
 

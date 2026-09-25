@@ -49,6 +49,14 @@ func configurar(estado_clima: String) -> void:
 ## congelar la deriva de nubes/niebla cuando el jugador pide menos movimiento.
 ## La lluvia sigue el mismo patrón que un fuego o un reloj: un bucle ya
 ## estable, no un desplazamiento nuevo en pantalla, así que se deja intacta.
+func configurar_activo(activo: bool) -> void:
+	set_process(activo)
+	if _viewport != null:
+		_viewport.render_target_update_mode = (
+			SubViewport.UPDATE_ALWAYS if activo else SubViewport.UPDATE_DISABLED
+		)
+
+
 func configurar_reduccion_movimiento(activa: bool) -> void:
 	_reduccion_movimiento = activa
 
