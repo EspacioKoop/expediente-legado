@@ -116,7 +116,9 @@ static func modelo_recursos(estado_partida: Dictionary) -> Dictionary:
 	match fase:
 		"archivo":
 			var leido_hoy = jornada.get("leido_hoy", [])
-			var lecturas_hechas := leido_hoy.size() if leido_hoy is Array else 0
+			var lecturas_hechas: int = 0
+			if leido_hoy is Array:
+				lecturas_hechas = leido_hoy.size()
 			modelo["acciones"] = int(jornada.get("acciones", 0))
 			modelo["pistas"] = pistas.size() if pistas is Array else 0
 			modelo["lecturas_gratis"] = maxi(0, Jornada.DOCUMENTOS_GRATIS_POR_DIA - lecturas_hechas)
