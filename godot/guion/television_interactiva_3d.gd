@@ -27,6 +27,10 @@ func configurar(tam: Vector3) -> void:
 	verbo = Verbo.ENCENDER
 	_cargar_catalogo_tv()
 	nombre_objeto = "televisor"
+	# #959: el CRT opta al sistema común de huellas. La marca solo expresa
+	# manipulación acumulada del aparato; no activa contenido, semillas ni recompensas.
+	set_meta("huella_ambiental_id", "casa:televisor")
+	set_meta("huella_ambiental_tipo", "equipo")
 
 	var colision := CollisionShape3D.new()
 	var forma := BoxShape3D.new()
