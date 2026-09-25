@@ -202,11 +202,11 @@ func _animar_gesto(tiempo: float, peso_reaccion: float) -> void:
 			_aplicar_rotacion_gesto("AlaD", Vector3(0.0, 0.0, -batido_cuervo))
 			_aplicar_rotacion_gesto("Cabeza", Vector3(0.0, sin(t * 0.9) * 0.08, 0.0))
 		"perro":
-		_aplicar_rotacion_gesto("Cola", Vector3(0.0, sin(t * 3.0) * 0.55, 0.0))
-		_aplicar_rotacion_gesto(
-			"Cabeza",
-			Vector3(sin(t * 1.7) * 0.07 * (1.0 - peso_reaccion), 0.0, 0.0),
-		)
+			_aplicar_rotacion_gesto("Cola", Vector3(0.0, sin(t * 3.0) * 0.55, 0.0))
+			_aplicar_rotacion_gesto(
+				"Cabeza",
+				Vector3(sin(t * 1.7) * 0.07 * (1.0 - peso_reaccion), 0.0, 0.0),
+			)
 		"polilla":
 			var batido_polilla := sin(t * 6.2) * 0.72
 			_aplicar_rotacion_gesto("AlaI", Vector3(0.0, 0.0, batido_polilla))

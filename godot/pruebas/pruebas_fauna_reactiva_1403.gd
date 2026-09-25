@@ -109,7 +109,9 @@ func _probar_gestos_y_reduccion() -> void:
 	var giro_quieto := ala_quieta.rotation if ala_quieta != null else Vector3.ZERO
 	var posicion_quieta := quieto.position
 	quieto.animar_pieza(quieto.id_fauna(), 2.35, 1.0, AnimacionAmbiental.LOD_CERCA)
-	_comprobar(quieto.position == posicion_quieta, "#1403: reducción de movimiento congela posición")
+	_comprobar(
+		quieto.position == posicion_quieta, "#1403: reducción de movimiento congela posición"
+	)
 	_comprobar(
 		ala_quieta == null or ala_quieta.rotation == giro_quieto,
 		"#1403: reducción de movimiento congela microgestos",
