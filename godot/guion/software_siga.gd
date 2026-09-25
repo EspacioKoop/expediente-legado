@@ -18,6 +18,7 @@ var _estado: Label
 var _resultado: Label
 var _instalar: Button
 var _ejecutar: Button
+var _incidencia: FalloMundanoSigaPanel
 
 
 func configurar_estado(estado: Dictionary) -> void:
@@ -128,6 +129,9 @@ func _construir_interfaz() -> void:
 	_resultado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	derecha.add_child(_resultado)
 
+	_incidencia = FalloMundanoSigaPanel.new()
+	derecha.add_child(_incidencia)
+
 
 func _refrescar() -> void:
 	if _lista == null:
@@ -188,6 +192,8 @@ func _seleccionar(indice: int) -> void:
 	_instalar.text = SoftwareSigaTextos.texto("desinstalar" if instalado else "instalar")
 	_ejecutar.disabled = not instalado
 	_resultado.text = ""
+	if _incidencia != null:
+		_incidencia.cerrar(false)
 
 
 func _activar_indice(indice: int) -> void:
@@ -223,6 +229,14 @@ func _ejecutar_seleccion() -> void:
 		return
 	var resultado := _modelo.ejecutar(id)
 	_resultado.text = String(resultado.get("mensaje", ""))
+	var incidencia_valor: Variant = resultado.get("incidencia", {})
+	if incidencia_valor is Dictionary and not (incidencia_valor as Dictionary).is_empty():
+		var incidencia := incidencia_valor as Dictionary
+		_incidencia.presentar(
+			String(incidencia.get("id", "")), String(incidencia.get("evento", ""))
+		)
+	else:
+		_incidencia.cerrar(false)
 	estado_cambiado.emit(_modelo.exportar_estado())
 
 
