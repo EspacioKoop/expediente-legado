@@ -34,7 +34,7 @@ func _ready() -> void:
 
 func _construir() -> void:
 	var fondo := ColorRect.new()
-	fondo.color = EstiloSiga.GRIS
+	fondo.color = EstiloSiga.PAPEL
 	fondo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	fondo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(fondo)

@@ -345,7 +345,7 @@ func _construir_barra() -> void:
 	_barra.offset_top = -_alto_barra
 	_barra.offset_bottom = 0.0
 	_barra.z_index = 1000
-	_barra.add_theme_stylebox_override("panel", _estilo_panel(EstiloSiga.GRIS, EstiloSiga.NEGRO))
+	_barra.add_theme_stylebox_override("panel", _estilo_panel(EstiloSiga.PAPEL, EstiloSiga.NEGRO))
 	add_child(_barra)
 
 	var fila := HBoxContainer.new()
@@ -389,7 +389,7 @@ func _construir_menu() -> void:
 	_menu.offset_bottom = -_alto_barra
 	_menu.z_index = 1001
 	_menu.visible = false
-	_menu.add_theme_stylebox_override("panel", _estilo_panel(EstiloSiga.GRIS, EstiloSiga.NEGRO))
+	_menu.add_theme_stylebox_override("panel", _estilo_panel(EstiloSiga.PAPEL, EstiloSiga.NEGRO))
 	add_child(_menu)
 
 	var margen := MarginContainer.new()
@@ -508,7 +508,7 @@ func _crear_ventana(
 	fondo.name = "Fondo"
 	fondo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	fondo.mouse_filter = Control.MOUSE_FILTER_STOP
-	fondo.add_theme_stylebox_override("panel", _estilo_panel(EstiloSiga.GRIS, EstiloSiga.NEGRO))
+	fondo.add_theme_stylebox_override("panel", _estilo_panel(EstiloSiga.PAPEL, EstiloSiga.NEGRO))
 	panel.add_child(fondo)
 
 	var columna := VBoxContainer.new()
@@ -876,15 +876,15 @@ func _crear_ayuda_sistema() -> Control:
 
 func _preparar_boton(boton: Button, icono_escritorio: bool = false) -> void:
 	boton.focus_mode = Control.FOCUS_ALL
-	var normal := _estilo_panel(Color(EstiloSiga.GRIS, 0.96), EstiloSiga.GRIS_OSCURO)
+	var normal := _estilo_panel(Color(EstiloSiga.PAPEL_BOTON, 0.96), EstiloSiga.GRIS_OSCURO)
 	if icono_escritorio:
 		normal = _estilo_panel(Color(FONDO_CORPORATIVO, 0.35), Color(FONDO_CORPORATIVO, 0.0))
 	boton.add_theme_stylebox_override("normal", normal)
 	boton.add_theme_stylebox_override(
-		"hover", _estilo_panel(EstiloSiga.GRIS_CLARO, EstiloSiga.BLANCO)
+		"hover", _estilo_panel(EstiloSiga.BLANCO, EstiloSiga.GRIS_OSCURO)
 	)
 	boton.add_theme_stylebox_override(
-		"pressed", _estilo_panel(EstiloSiga.GRIS_OSCURO, EstiloSiga.NEGRO)
+		"pressed", _estilo_panel(EstiloSiga.PAPEL_PULSADO, EstiloSiga.NEGRO)
 	)
 	var foco := _estilo_panel(Color(0, 0, 0, 0), CREMA)
 	foco.border_width_left = 2

@@ -45,7 +45,7 @@ func montar(columna: Control, caso: Dictionary) -> void:
 	var textos := VBoxContainer.new()
 	_titulo = _etiqueta("", EstiloSiga.NEGRO)
 	_titulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_codigo = _etiqueta("", EstiloSiga.GRIS_OSCURO)
+	_codigo = _etiqueta("", EstiloSiga.GRIS_TEXTO)
 	textos.add_child(_titulo)
 	textos.add_child(_codigo)
 	fila.add_child(textos)

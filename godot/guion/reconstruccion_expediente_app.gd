@@ -28,6 +28,7 @@ var _volver: Button
 
 func _ready() -> void:
 	theme = EstiloSiga.tema()
+	EstiloSiga.declarar_bisel(self, EstiloSiga.PAPEL)
 	_preparar_orden()
 	_construir()
 	_refrescar_tarjetas()
@@ -45,7 +46,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _draw() -> void:
-	EstiloSiga.dibujar_bisel(self, Rect2(Vector2.ZERO, size), EstiloSiga.GRIS, true)
+	EstiloSiga.dibujar_bisel(self, Rect2(Vector2.ZERO, size), EstiloSiga.PAPEL, true)
 
 
 func _preparar_orden() -> void:

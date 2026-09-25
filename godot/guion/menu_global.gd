@@ -11,6 +11,11 @@ const RUTA_TEXTOS_DIFICULTAD := "res://datos/menu_dificultad_textos.json"
 ## Fuera de `textos.csv` como la dificultad: son nombres de máquinas con su
 ## detalle, y el selector los recorre en orden (#1270).
 const RUTA_TEXTOS_FILTRO := "res://datos/filtro_pantalla_textos.json"
+## El panel más alto (Opciones) se desplaza dentro de este alto en vez de salirse
+## de la pantalla a 1080p.
+const ALTO_MAXIMO_PANEL := 860.0
+const ANCHO_PANEL := 720.0
+const ALTO_BOTON := 44.0
 const ETIQUETAS_ACCIONES := {
 	"mover_adelante": "Avanzar",
 	"mover_atras": "Retroceder",
@@ -127,7 +132,7 @@ func _puede_abrir() -> bool:
 func _montar() -> void:
 	_fondo = ColorRect.new()
 	_fondo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_fondo.color = Color(0.0, 0.0, 0.0, 0.72)
+	_fondo.color = EstiloJuego.VELO
 	_fondo.mouse_filter = Control.MOUSE_FILTER_STOP
 	_fondo.visible = false
 	add_child(_fondo)
@@ -144,7 +149,7 @@ func _montar() -> void:
 	_panel_opciones = _crear_panel()
 	_panel_opciones.visible = false
 	centro.add_child(_panel_opciones)
-	var opciones := _caja(_panel_opciones)
+	var opciones := _caja(_panel_opciones, true)
 	_opciones_contenido(opciones)
 
 	_panel_sellos = _crear_panel()
@@ -167,20 +172,45 @@ func _montar() -> void:
 	_verificacion = VerificacionFalsa.new()
 	_verificacion.cerrada.connect(_al_cerrar_verificacion)
 	_fondo.add_child(_verificacion)
+	_dar_cuerpo_a_botones()
 
 
+## Botones con altura de dedo y de mando: con la de serie, «Volver» y los del
+## remapeo eran franjas de 26 px.
+func _dar_cuerpo_a_botones() -> void:
+	for panel in [_panel_principal, _panel_opciones, _panel_sellos, _panel_historial]:
+		for boton in panel.find_children("*", "BaseButton", true, false):
+			(boton as Control).custom_minimum_size.y = maxf(
+				(boton as Control).custom_minimum_size.y, ALTO_BOTON
+			)
+
+
+## El menú es del jugador, no de SIGA: tema de menús del juego, grafito con texto
+## claro. Con el tema OS98 y el panel de serie de Godot quedaba texto negro sobre
+## gris oscuro.
 func _crear_panel() -> PanelContainer:
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(640, 300)
-	panel.theme = EstiloSiga.tema()
+	panel.custom_minimum_size = Vector2(ANCHO_PANEL, 300)
+	panel.theme = EstiloJuego.tema()
 	return panel
 
 
-func _caja(panel: PanelContainer) -> VBoxContainer:
+func _caja(panel: PanelContainer, desplazable: bool = false) -> VBoxContainer:
+	var contenedor: Control = panel
+	if desplazable:
+		var scroll := ScrollContainer.new()
+		scroll.name = "Desplazable"
+		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		scroll.custom_minimum_size = Vector2(ANCHO_PANEL - 40.0, ALTO_MAXIMO_PANEL)
+		# El foco de teclado/mando arrastra el desplazamiento hasta el control.
+		scroll.follow_focus = true
+		panel.add_child(scroll)
+		contenedor = scroll
 	var margen := MarginContainer.new()
+	margen.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for lado in ["left", "top", "right", "bottom"]:
-		margen.add_theme_constant_override("margin_" + lado, 24)
-	panel.add_child(margen)
+		margen.add_theme_constant_override("margin_" + lado, 12)
+	contenedor.add_child(margen)
 	var caja := VBoxContainer.new()
 	caja.add_theme_constant_override("separation", 14)
 	margen.add_child(caja)
@@ -190,16 +220,19 @@ func _caja(panel: PanelContainer) -> VBoxContainer:
 func _principal_contenido(caja: VBoxContainer) -> void:
 	var titulo := Label.new()
 	titulo.text = tr("MENU_GLOBAL_TITULO")
+	EstiloJuego.titulo_seccion(titulo, 26)
 	caja.add_child(titulo)
 
 	var subtitulo := Label.new()
 	subtitulo.text = tr("MENU_GLOBAL_SUBTITULO")
 	subtitulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	EstiloJuego.secundario(subtitulo)
 	caja.add_child(subtitulo)
 
 	_continuar = Button.new()
 	_continuar.text = tr("MENU_GLOBAL_CONTINUAR")
 	_continuar.pressed.connect(_cerrar)
+	EstiloJuego.hacer_primario(_continuar)
 	caja.add_child(_continuar)
 
 	_opciones = Button.new()
@@ -231,6 +264,7 @@ func _principal_contenido(caja: VBoxContainer) -> void:
 func _opciones_contenido(caja: VBoxContainer) -> void:
 	var titulo := Label.new()
 	titulo.text = tr("MENU_GLOBAL_OPCIONES")
+	EstiloJuego.titulo_seccion(titulo, 26)
 	caja.add_child(titulo)
 
 	_montar_dificultad(caja)
@@ -240,6 +274,7 @@ func _opciones_contenido(caja: VBoxContainer) -> void:
 
 	var volumen_titulo := Label.new()
 	volumen_titulo.text = tr("MENU_GLOBAL_VOLUMEN")
+	EstiloJuego.titulo_seccion(volumen_titulo)
 	caja.add_child(volumen_titulo)
 
 	_volumen = HSlider.new()
@@ -273,6 +308,7 @@ func _opciones_contenido(caja: VBoxContainer) -> void:
 func _montar_dificultad(caja: VBoxContainer) -> void:
 	var titulo := Label.new()
 	titulo.text = String(_textos_dificultad.get("titulo", ""))
+	EstiloJuego.titulo_seccion(titulo)
 	caja.add_child(titulo)
 
 	_dificultad = OptionButton.new()
@@ -296,6 +332,7 @@ func _montar_dificultad(caja: VBoxContainer) -> void:
 	var ayuda := Label.new()
 	ayuda.text = String(_textos_dificultad.get("ayuda", ""))
 	ayuda.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	EstiloJuego.secundario(ayuda)
 	caja.add_child(ayuda)
 
 	_estado_dificultad = Label.new()
@@ -356,6 +393,7 @@ func _al_cambiar_dificultad(indice: int) -> void:
 func _montar_filtro_pantalla(caja: VBoxContainer) -> void:
 	var titulo := Label.new()
 	titulo.text = String(_textos_filtro.get("titulo", ""))
+	EstiloJuego.titulo_seccion(titulo)
 	caja.add_child(titulo)
 
 	_filtro = OptionButton.new()
@@ -375,6 +413,7 @@ func _montar_filtro_pantalla(caja: VBoxContainer) -> void:
 	var ayuda := Label.new()
 	ayuda.text = String(_textos_filtro.get("ayuda", ""))
 	ayuda.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	EstiloJuego.secundario(ayuda)
 	caja.add_child(ayuda)
 
 
@@ -425,10 +464,12 @@ func _slider_preferencia(
 func _sellos_contenido(caja: VBoxContainer) -> void:
 	var titulo := Label.new()
 	titulo.text = String(_presentacion_sellos.get("titulo", ""))
+	EstiloJuego.titulo_seccion(titulo, 26)
 	caja.add_child(titulo)
 
 	var subtitulo := Label.new()
 	subtitulo.text = String(_presentacion_sellos.get("subtitulo", ""))
+	EstiloJuego.secundario(subtitulo)
 	caja.add_child(subtitulo)
 
 	for entrada in Sellos.catalogo():
@@ -448,11 +489,13 @@ func _sellos_contenido(caja: VBoxContainer) -> void:
 func _historial_contenido(caja: VBoxContainer) -> void:
 	var titulo := Label.new()
 	titulo.text = tr("MENU_GLOBAL_HISTORIAL_DECISIONES")
+	EstiloJuego.titulo_seccion(titulo, 26)
 	caja.add_child(titulo)
 
 	var subtitulo := Label.new()
 	subtitulo.text = tr("MENU_GLOBAL_HISTORIAL_SUBTITULO")
 	subtitulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	EstiloJuego.secundario(subtitulo)
 	caja.add_child(subtitulo)
 
 	_historial_resumen = Label.new()

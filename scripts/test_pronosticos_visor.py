@@ -36,7 +36,7 @@ class PronosticosVisorTests(unittest.TestCase):
         self.assertIn("VISOR_PRONOSTICO_BLOQUEADO,", TEXTOS)
         self.assertIn('"documento_clave"', VISOR)
         self.assertIn('PanelPronosticoAuditoria', VISOR)
-        self.assertIn('EstiloSiga.caja_saliente(Color("e6e6e6"))', VISOR)
+        self.assertIn("EstiloSiga.caja_saliente(EstiloSiga.PAPEL)", VISOR)
 
     def test_flujo_real_en_godot(self):
         resultado = ejecutar_script(PRUEBA_GODOT)

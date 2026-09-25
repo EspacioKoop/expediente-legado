@@ -1,4 +1,8 @@
 ## Regresión headless del contrato de contraste OS98 (#792).
+##
+## Desde la regla de «ningún texto negro sobre gris» el texto del OS98 va sobre
+## papel, no sobre el gris de sistema. Las pantallas montadas las vigila
+## `pruebas_contraste_pantallas.gd`; aquí, las parejas del propio tema.
 extends SceneTree
 
 const MIN_AA := 4.5
@@ -14,7 +18,7 @@ func _initialize() -> void:
 func _probar() -> void:
 	var tema := EstiloSiga.tema()
 
-	_comprobar_par("label/gris", tema.get_color("font_color", "Label"), EstiloSiga.GRIS)
+	_comprobar_par("label/papel", tema.get_color("font_color", "Label"), EstiloSiga.PAPEL)
 	_comprobar_par(
 		"richtext/blanco", tema.get_color("default_color", "RichTextLabel"), EstiloSiga.BLANCO
 	)
@@ -30,10 +34,23 @@ func _probar() -> void:
 		EstiloSiga.BLANCO
 	)
 	_comprobar_par(
-		"readonly/gris claro", tema.get_color("font_readonly_color", "TextEdit"), Color("e8e8e8")
+		"readonly/papel", tema.get_color("font_readonly_color", "TextEdit"), EstiloSiga.PAPEL
 	)
 	_comprobar_par(
-		"boton deshabilitado", tema.get_color("font_disabled_color", "Button"), Color("d0d0d0")
+		"boton deshabilitado", tema.get_color("font_disabled_color", "Button"), EstiloSiga.PAPEL
+	)
+
+	for estado in ["normal", "hover", "pressed", "disabled"]:
+		var caja := tema.get_stylebox(estado, "Button") as StyleBoxFlat
+		_comprobar(
+			not ContrasteTexto.es_gris(caja.bg_color),
+			"el botón %s no pone texto negro sobre gris" % estado,
+		)
+	_comprobar(
+		not ContrasteTexto.es_gris(
+			(tema.get_stylebox("panel", "PanelContainer") as StyleBoxFlat).bg_color
+		),
+		"un PanelContainer del tema no deja el gris de serie detrás del texto negro",
 	)
 
 	_comprobar(

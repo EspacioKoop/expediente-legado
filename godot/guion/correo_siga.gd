@@ -109,7 +109,7 @@ func _construir_interfaz() -> void:
 	titulo.name = "TituloBandeja"
 	titulo.text = texto("bandeja")
 	titulo.add_theme_font_size_override("font_size", 18)
-	titulo.add_theme_color_override("font_color", Color("#dce9f5"))
+	titulo.add_theme_color_override("font_color", Color("#1f3f5c"))
 	izquierda.add_child(titulo)
 
 	_lista = ItemList.new()
@@ -132,7 +132,7 @@ func _construir_interfaz() -> void:
 	_estado.name = "EstadoBandeja"
 	_estado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_estado.add_theme_font_size_override("font_size", 12)
-	_estado.add_theme_color_override("font_color", Color("#bfd0dc"))
+	_estado.add_theme_color_override("font_color", Color("#3a5163"))
 	izquierda.add_child(_estado)
 
 	var derecha := VBoxContainer.new()

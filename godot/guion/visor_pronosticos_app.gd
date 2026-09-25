@@ -49,7 +49,7 @@ func _columna_indice() -> Control:
 	# apuesta secundaria de la lista de documentos, que es la acción principal.
 	var panel := PanelContainer.new()
 	panel.name = "PanelPronosticoAuditoria"
-	panel.add_theme_stylebox_override("panel", EstiloSiga.caja_saliente(Color("e6e6e6")))
+	panel.add_theme_stylebox_override("panel", EstiloSiga.caja_saliente(EstiloSiga.PAPEL))
 	columna.add_child(panel)
 
 	var contenido_panel := VBoxContainer.new()

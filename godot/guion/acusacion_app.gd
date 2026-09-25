@@ -33,6 +33,7 @@ var _aviso: Label
 
 func _ready() -> void:
 	theme = EstiloSiga.tema()
+	EstiloSiga.declarar_bisel(self, EstiloSiga.PAPEL)
 	_construir()
 	# El foco se entrega después de terminar de montar el árbol: así abrir o
 	# reconstruir el A-7 nunca conserva una referencia a un control ya liberado.
@@ -49,7 +50,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _draw() -> void:
-	EstiloSiga.dibujar_bisel(self, Rect2(Vector2.ZERO, size), EstiloSiga.GRIS, true)
+	EstiloSiga.dibujar_bisel(self, Rect2(Vector2.ZERO, size), EstiloSiga.PAPEL, true)
 
 
 func _construir() -> void:

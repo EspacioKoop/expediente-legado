@@ -45,6 +45,9 @@ const ROPAS := [
 	["PERSONAJE_ROPA_VERDE", "#4f5f52"],
 	["PERSONAJE_ROPA_BURDEOS", "#69454c"],
 ]
+const ANCHO_ETIQUETA := 150.0
+const ALTO_CONTROL := 38.0
+const TAM_BOTON := Vector2(190, 46)
 
 var _partida := Partida.new()
 var _perfil: Dictionary
@@ -68,7 +71,7 @@ var _estado: Label
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	theme = EstiloSiga.tema()
+	theme = EstiloJuego.tema()
 	_partida.cargar()
 	_perfil = PerfilJugador.completar(_partida.estado.get("perfil_jugador", {}))
 	_alta_pendiente = not PerfilJugador.esta_configurado(_perfil)
@@ -81,37 +84,45 @@ func _ready() -> void:
 
 
 func _construir() -> void:
+	# Pantalla del jugador, no un programa de SIGA: fondo grafito propio y texto
+	# claro. Sin él, el tema dejaba texto negro sobre el gris de serie de Godot.
+	var fondo := ColorRect.new()
+	fondo.name = "Fondo"
+	fondo.color = EstiloJuego.FONDO
+	fondo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(fondo)
+
+	# Dentro del fondo y no a su lado: así el fondo es de verdad lo que hay detrás
+	# de cada texto, también para `ContrasteTexto`.
 	var margen := MarginContainer.new()
 	margen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	for lado in ["left", "top", "right", "bottom"]:
-		margen.add_theme_constant_override("margin_" + lado, 22)
-	add_child(margen)
+	for lado in ["left", "right"]:
+		margen.add_theme_constant_override("margin_" + lado, 48)
+	for lado in ["top", "bottom"]:
+		margen.add_theme_constant_override("margin_" + lado, 32)
+	fondo.add_child(margen)
 
 	var raiz := VBoxContainer.new()
-	raiz.add_theme_constant_override("separation", 12)
+	raiz.add_theme_constant_override("separation", 18)
 	margen.add_child(raiz)
 
 	var titulo := Label.new()
 	titulo.text = tr("PERSONAJE_TITULO")
-	titulo.add_theme_font_size_override("font_size", 20)
+	EstiloJuego.titulo_seccion(titulo, 30)
 	raiz.add_child(titulo)
 
 	var subtitulo := Label.new()
 	subtitulo.text = tr("PERSONAJE_SUBTITULO")
 	subtitulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	EstiloJuego.secundario(subtitulo)
 	raiz.add_child(subtitulo)
 
 	var columnas := HBoxContainer.new()
 	columnas.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	columnas.add_theme_constant_override("separation", 20)
+	columnas.add_theme_constant_override("separation", 24)
 	raiz.add_child(columnas)
 
-	var aspecto := VBoxContainer.new()
-	aspecto.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	aspecto.add_theme_constant_override("separation", 8)
-	columnas.add_child(aspecto)
-	_cabecera(aspecto, "PERSONAJE_APARIENCIA")
-
+	var aspecto := _columna(columnas, "PERSONAJE_APARIENCIA", 1.0)
 	_cuerpo = _opcion(aspecto, "PERSONAJE_COMPLEXION", CUERPOS)
 	_altura = _deslizador(aspecto, "PERSONAJE_ALTURA", 0.92, 1.08)
 	_hombros = _deslizador(aspecto, "PERSONAJE_HOMBROS", 0.88, 1.12)
@@ -122,25 +133,24 @@ func _construir() -> void:
 	_prenda = _opcion(aspecto, "PERSONAJE_PRENDA", PRENDAS)
 	_ropa = _opcion(aspecto, "PERSONAJE_ROPA", ROPAS)
 
-	var vista := VBoxContainer.new()
+	var vista := PanelContainer.new()
+	vista.name = "Vista"
 	vista.custom_minimum_size.x = 250.0
 	vista.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vista.size_flags_stretch_ratio = 0.9
 	vista.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	columnas.add_child(vista)
 	_previsualizacion = PrevisualizadorPersonaje3D.new()
 	vista.add_child(_previsualizacion)
 
-	var pasado := VBoxContainer.new()
-	pasado.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	pasado.add_theme_constant_override("separation", 8)
-	columnas.add_child(pasado)
-	_cabecera(pasado, "PERSONAJE_TRASFONDO")
-
+	var pasado := _columna(columnas, "PERSONAJE_TRASFONDO", 1.1)
 	var etiqueta := Label.new()
 	etiqueta.text = tr("PERSONAJE_ANTES_DE_SIGA")
+	EstiloJuego.secundario(etiqueta)
 	pasado.add_child(etiqueta)
 	_trasfondo = OptionButton.new()
 	_trasfondo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_trasfondo.custom_minimum_size.y = ALTO_CONTROL
 	for entrada in PerfilJugador.TRASFONDOS:
 		_trasfondo.add_item(tr(String(entrada["nombre"])))
 		_trasfondo.set_item_metadata(_trasfondo.item_count - 1, entrada["id"])
@@ -149,59 +159,88 @@ func _construir() -> void:
 
 	_descripcion = Label.new()
 	_descripcion.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_descripcion.custom_minimum_size.y = 110
+	_descripcion.custom_minimum_size.y = 72
 	pasado.add_child(_descripcion)
 
 	var nota := Label.new()
 	nota.text = tr("PERSONAJE_NOTA_TRASFONDO")
 	nota.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	EstiloJuego.secundario(nota)
 	pasado.add_child(nota)
+	pasado.add_child(HSeparator.new())
 
 	_auditorias = AuditoriasSiga.new()
 	_auditorias.name = "AuditoriasIniciales"
 	_auditorias.configurar_estado(_partida.estado, _alta_pendiente)
 	pasado.add_child(_auditorias)
 
+	var pie := HBoxContainer.new()
+	pie.name = "Pie"
+	pie.add_theme_constant_override("separation", 16)
+	raiz.add_child(pie)
+
+	var textos := VBoxContainer.new()
+	textos.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pie.add_child(textos)
 	_resumen = Label.new()
 	_resumen.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_resumen.custom_minimum_size.y = 54
-	raiz.add_child(_resumen)
-
+	EstiloJuego.secundario(_resumen)
+	textos.add_child(_resumen)
 	_estado = Label.new()
-	raiz.add_child(_estado)
+	_estado.add_theme_color_override("font_color", EstiloJuego.ACENTO)
+	textos.add_child(_estado)
 
-	var botones := HBoxContainer.new()
-	botones.alignment = BoxContainer.ALIGNMENT_END
-	botones.add_theme_constant_override("separation", 8)
-	raiz.add_child(botones)
 	var volver := Button.new()
 	volver.text = tr("PERSONAJE_CANCELAR")
+	volver.custom_minimum_size = TAM_BOTON
 	volver.pressed.connect(_volver)
-	botones.add_child(volver)
+	pie.add_child(volver)
 	var guardar := Button.new()
 	guardar.text = tr("PERSONAJE_GUARDAR")
+	guardar.custom_minimum_size = TAM_BOTON
+	EstiloJuego.hacer_primario(guardar)
 	guardar.pressed.connect(_guardar)
-	botones.add_child(guardar)
+	pie.add_child(guardar)
+
+
+## Una columna del creador: tarjeta con su rótulo, y desplazable, porque la de
+## trasfondo crece con las auditorías y a 720p no cabe entera.
+func _columna(padre: HBoxContainer, clave: String, proporcion: float) -> VBoxContainer:
+	var tarjeta := PanelContainer.new()
+	tarjeta.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tarjeta.size_flags_stretch_ratio = proporcion
+	tarjeta.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	padre.add_child(tarjeta)
+	var desplazable := ScrollContainer.new()
+	desplazable.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	tarjeta.add_child(desplazable)
+	var caja := VBoxContainer.new()
+	caja.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	caja.add_theme_constant_override("separation", 12)
+	desplazable.add_child(caja)
+	_cabecera(caja, clave)
+	return caja
 
 
 func _cabecera(caja: VBoxContainer, clave: String) -> void:
 	var etiqueta := Label.new()
 	etiqueta.text = tr(clave)
-	etiqueta.add_theme_font_size_override("font_size", 16)
+	EstiloJuego.titulo_seccion(etiqueta, 20)
 	caja.add_child(etiqueta)
 	caja.add_child(HSeparator.new())
 
 
 func _opcion(caja: VBoxContainer, clave: String, opciones: Array) -> OptionButton:
 	var fila := HBoxContainer.new()
-	fila.add_theme_constant_override("separation", 8)
+	fila.add_theme_constant_override("separation", 12)
 	caja.add_child(fila)
 	var etiqueta := Label.new()
 	etiqueta.text = tr(clave)
-	etiqueta.custom_minimum_size.x = 125
+	etiqueta.custom_minimum_size.x = ANCHO_ETIQUETA
 	fila.add_child(etiqueta)
 	var control := OptionButton.new()
 	control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	control.custom_minimum_size.y = ALTO_CONTROL
 	for opcion in opciones:
 		control.add_item(tr(String(opcion[0])))
 		control.set_item_metadata(control.item_count - 1, opcion[1])
@@ -212,17 +251,20 @@ func _opcion(caja: VBoxContainer, clave: String, opciones: Array) -> OptionButto
 
 func _deslizador(caja: VBoxContainer, clave: String, minimo: float, maximo: float) -> HSlider:
 	var fila := HBoxContainer.new()
-	fila.add_theme_constant_override("separation", 8)
+	fila.add_theme_constant_override("separation", 12)
 	caja.add_child(fila)
 	var etiqueta := Label.new()
 	etiqueta.text = tr(clave)
-	etiqueta.custom_minimum_size.x = 125
+	etiqueta.custom_minimum_size.x = ANCHO_ETIQUETA
 	fila.add_child(etiqueta)
 	var control := HSlider.new()
 	control.min_value = minimo
 	control.max_value = maximo
 	control.step = 0.01
 	control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	control.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	control.custom_minimum_size.y = ALTO_CONTROL
+	control.accessibility_name = etiqueta.text
 	control.value_changed.connect(func(_valor): _refrescar())
 	fila.add_child(control)
 	return control
