@@ -106,13 +106,9 @@ func _probar() -> void:
 
 	var reloj_nueva_vuelta := InactividadPrometeo.new()
 	reloj_nueva_vuelta.iniciar(recargada.estado)
-	_comprobar(
-		reloj_nueva_vuelta.avanzar(
-			recargada.estado,
-			InactividadPrometeo.SEGUNDOS_FINAL,
-		),
-		"la nueva vuelta rearma el final por inactividad",
-	)
+	var segundos_final := InactividadPrometeo.SEGUNDOS_FINAL
+	var final_nueva_vuelta := reloj_nueva_vuelta.avanzar(recargada.estado, segundos_final)
+	_comprobar(final_nueva_vuelta, "la nueva vuelta rearma el final por inactividad")
 	_comprobar(
 		Prometeo.desbloquear_carta_en_estado(recargada.estado, "la-torre"),
 		"La Torre se puede volver a adquirir en la nueva vuelta",
