@@ -34,7 +34,8 @@ const PLANTILLAS := [
 		"destino": "Archivo Central",
 		"asunto": "Remisión de antecedentes",
 		"clasificacion": "OFICIAL",
-		"contenido_bbcode": "Se remiten los antecedentes indicados para su [b]incorporación al expediente[/b].",
+		"contenido_bbcode":
+		"Se remiten los antecedentes indicados para su [b]incorporación al expediente[/b].",
 		"sello": "RECIBIDO",
 		"firma": "SECRETARÍA",
 	},
@@ -60,7 +61,8 @@ const PLANTILLAS := [
 		"destino": "Archivo personal",
 		"asunto": "Recordatorio",
 		"clasificacion": "PERSONAL",
-		"contenido_bbcode": "Recordar revisar la carpeta antes del viernes.\n[center]No adjuntar al registro principal.[/center]",
+		"contenido_bbcode":
+		"Recordar revisar la carpeta antes del viernes.\n[center]No adjuntar al registro principal.[/center]",
 		"sello": "SIN SELLO",
 		"firma": "SIN FIRMA",
 	},
@@ -404,7 +406,10 @@ static func datos_plantilla(indice: int) -> Dictionary:
 		return {}
 	var datos: Dictionary = PLANTILLAS[indice].duplicate(true)
 	datos.erase("nombre")
-	datos["id"] = "qa-%s" % String(PLANTILLAS[indice]["nombre"]).to_lower().replace(" · ", "-").replace(" ", "-")
+	datos["id"] = (
+		"qa-%s"
+		% String(PLANTILLAS[indice]["nombre"]).to_lower().replace(" · ", "-").replace(" ", "-")
+	)
 	return datos
 
 
