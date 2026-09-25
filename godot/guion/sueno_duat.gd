@@ -52,7 +52,7 @@ static func habilitado(jornada: Dictionary) -> bool:
 ## realmente entre los objetos seleccionados: nunca exige adivinar moralidad.
 static func preparar_pesaje(objetos_conocidos: Array, semilla: int = 0) -> Dictionary:
 	var validos := _objetos_validos(objetos_conocidos)
-	if validos.size() < 2:
+	if validos.is_empty():
 		return {}
 
 	var limite := mini(MAX_OBJETOS, validos.size())
@@ -61,13 +61,20 @@ static func preparar_pesaje(objetos_conocidos: Array, semilla: int = 0) -> Dicti
 	for desplazamiento in limite:
 		objetos.append(validos[(inicio + desplazamiento) % validos.size()].duplicate(true))
 
-	# Elegir posiciones pares o impares según la semilla garantiza una solución
-	# real y evita convertir el puzzle en un inventario completo de objetos.
+	# Con un único objeto el reto sigue siendo físico: el objetivo usa una de sus
+	# dos variantes observables. Con varios, alternar posiciones mantiene una
+	# combinación reproducible sin convertir el puzzle en inventario completo.
 	var paridad := posmod(semilla, 2)
 	var peso_objetivo := 0.0
-	for indice in objetos.size():
-		if indice % 2 == paridad:
-			peso_objetivo += float(objetos[indice].get("peso", 0.0))
+	if objetos.size() == 1:
+		var unico: Dictionary = objetos[0]
+		peso_objetivo = float(unico.get("peso", 0.0))
+		if paridad == 1:
+			peso_objetivo = float(unico.get("peso_sellado", peso_objetivo))
+	else:
+		for indice in objetos.size():
+			if indice % 2 == paridad:
+				peso_objetivo += float(objetos[indice].get("peso", 0.0))
 
 	return {
 		"objetos": objetos,

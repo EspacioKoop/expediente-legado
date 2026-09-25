@@ -1,4 +1,4 @@
-[gd_scene load_steps=55 format=3]
+[gd_scene load_steps=56 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -54,6 +54,7 @@
 [ext_resource type="Script" path="res://guion/dia_literatura_rom_app.gd" id="52"]
 [ext_resource type="Script" path="res://guion/dia_ayuda_resonancia_app.gd" id="53"]
 [ext_resource type="Script" path="res://guion/dia_simurgh_app.gd" id="54"]
+[ext_resource type="Script" path="res://guion/dia_duat_sueno_app.gd" id="55"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -138,6 +139,9 @@ script = ExtResource("24")
 
 [node name="HidraSuenoController" type="Node" parent="."]
 script = ExtResource("25")
+
+[node name="DuatSuenoController" type="Node" parent="."]
+script = ExtResource("55")
 
 [node name="CorreoPostalController" type="Node" parent="."]
 script = ExtResource("26")

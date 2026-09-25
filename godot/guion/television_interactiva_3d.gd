@@ -10,6 +10,7 @@ extends Interactuable3D
 
 const OFFSET_MANDO_MESA := Vector3(1.43, -0.58, -0.11)
 const OFFSET_PORTATIL_MESA := Vector3(1.15, -0.56, 0.07)
+const OBJETO_ONIRICO_ID := "televisor_casa"
 
 var _encendida := false
 var _brillo: OmniLight3D
@@ -97,6 +98,8 @@ func _interactuar_directo(_actor: Node) -> void:
 	if jornada_actual.is_empty():
 		return
 	_documental_completado = SuenoDuat.registrar_documental(jornada_actual, true)
+	if _documental_completado:
+		ObjetosOniricos.registrar(jornada_actual, OBJETO_ONIRICO_ID)
 
 
 func _alternar(_actor: Node) -> void:
