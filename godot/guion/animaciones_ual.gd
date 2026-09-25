@@ -94,6 +94,9 @@ static var _convertidas := {}
 ## [param desfase] (0–1 del clip). Devuelve falso si la figura no tiene
 ## reproductor o esqueleto, o el clip no existe: quien llama conserva su gesto.
 static func reproducir(pieza: Node3D, clip: String, desfase: float = 0.0) -> bool:
+	# Un avatar fotorrealista usa la captura de Rocketbox si la tiene (#1319).
+	if AnimacionesRocketbox.reproducir(pieza, clip, desfase):
+		return true
 	var reproductor := Modelos._reproductor(pieza)
 	var esqueleto := Modelos._esqueleto(pieza)
 	if reproductor == null or esqueleto == null or not CLIPS.has(clip):
@@ -121,8 +124,11 @@ static func en_bucle(clip: String) -> bool:
 	return datos.size() < 3 or bool(datos[2])
 
 
-## Cuánto dura [param clip] en segundos, o 0 si no existe.
-static func duracion(clip: String) -> float:
+## Cuánto dura [param clip] en segundos, o 0 si no existe. Con [param pieza],
+## la duración del clip que esa figura reproduce de verdad (Rocketbox o UAL).
+static func duracion(clip: String, pieza: Node3D = null) -> float:
+	if pieza != null and AnimacionesRocketbox.tiene(pieza, clip):
+		return AnimacionesRocketbox.duracion(pieza, clip)
 	if not CLIPS.has(clip):
 		return 0.0
 	var fuente := _fuente(CLIPS[clip][0], CLIPS[clip][1])
@@ -150,6 +156,12 @@ static func preparar_base(pieza: Node3D) -> bool:
 	var ruta := _ruta_esqueleto(reproductor, esqueleto)
 	var altura := _altura_cadera(esqueleto)
 	for nombre in CLIPS_BASE:
+		# La respiración, el paso y el trabajo de un avatar salen de Rocketbox
+		# (#1319); UAL queda como respaldo si falta la biblioteca o el clip.
+		var propia := AnimacionesRocketbox.animacion_para(pieza, nombre)
+		if propia != null:
+			biblioteca.add_animation(nombre, propia)
+			continue
 		var datos: Array = CLIPS_BASE[nombre]
 		var fuente := _fuente(datos[0], datos[1])
 		if fuente == null:

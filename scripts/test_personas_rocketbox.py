@@ -58,6 +58,26 @@ class PersonasRocketboxTest(unittest.TestCase):
                 # Sin fix_silhouette los clips UAL retuercen los brazos del Biped.
                 self.assertIn('"retarget/rest_fixer/fix_silhouette/enable": true', texto)
 
+    def test_animaciones_de_captura_son_rocketbox_mit_y_humanoides(self):
+        # #1319: dos bibliotecas, una por sexo, con ficha MIT y el mismo BoneMap
+        # Biped que los avatares; sin fix_silhouette los brazos salen retorcidos.
+        fichas = {
+            ficha["ruta"]: ficha
+            for ficha in json.loads(PROCEDENCIA.read_text(encoding="utf-8"))["assets"]
+        }
+        animaciones = sorted((CARPETA / "animaciones").glob("*.glb"))
+        self.assertEqual([a.name for a in animaciones], ["animaciones_f.glb", "animaciones_m.glb"])
+        for biblioteca in animaciones:
+            with self.subTest(biblioteca=biblioteca.name):
+                ficha = fichas.get(f"modelos/rocketbox/animaciones/{biblioteca.name}")
+                self.assertIsNotNone(ficha)
+                self.assertEqual((ficha["autor"], ficha["licencia"]), ("Microsoft", "MIT"))
+                self.assertIn("0943055d", ficha["archivo_origen"])
+                importacion = Path(f"{biblioteca}.import").read_text(encoding="utf-8")
+                self.assertIn('"PATH:Skeleton3D"', importacion)
+                self.assertIn('&"Bip01 Pelvis"', importacion)
+                self.assertIn('"retarget/rest_fixer/fix_silhouette/enable": true', importacion)
+
     def test_personas_en_godot_headless(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
         importar_proyecto()
