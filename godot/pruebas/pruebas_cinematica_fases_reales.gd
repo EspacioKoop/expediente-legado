@@ -22,6 +22,7 @@ func _probar() -> void:
 
 	await _probar_entrada_de_vuelta()
 	await _probar_inicio_de_jornada()
+	_probar_inicio_sin_catalogo()
 
 	var trayecto_por_salto: Dictionary = await _recorrer_archivo_trayecto(true)
 	var trayecto_por_fin: Dictionary = await _recorrer_archivo_trayecto(false)
@@ -139,6 +140,20 @@ func _probar_inicio_de_jornada() -> void:
 
 ## Salida real de oficina: el Area3D tiene que pasar por DiaAscensorApp, asentar
 ## trayecto, presentar el selector y montar el ascensor antes de devolver control.
+## Con un idioma de sistema sin catálogo, `translate` devuelve la clave y el
+## `%` de los rótulos rompía la cinemática: cae al catálogo español.
+func _probar_inicio_sin_catalogo() -> void:
+	var idioma := TranslationServer.get_locale()
+	TranslationServer.set_locale("en")
+	var jornada := {"dia": 3, "dinero": 40, "acciones": 5, "gato": {"presente": true}}
+	var planos := InicioJornadaCinematica.planos_de(jornada)
+	TranslationServer.set_locale(idioma)
+	_comprobar(planos[0].get("rotulo", "") == "Día 3.", "jornada: rótulo sin catálogo del sistema")
+	var voz := String(planos[1].get("voz", ""))
+	_comprobar(voz.begins_with("40 en el bolsillo"), "jornada: estado sin catálogo del sistema")
+	_comprobar(voz.ends_with("el gato espera en casa"), "jornada: gato sin catálogo del sistema")
+
+
 func _recorrer_archivo_trayecto(saltar: bool) -> Dictionary:
 	# Sin acciones no se abre #69 y representa además el momento normal de fichar.
 	_preparar_partida("archivo", 2, 0)
