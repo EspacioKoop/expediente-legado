@@ -22,7 +22,8 @@ class HudFasesTest(unittest.TestCase):
 
     def test_contrato_recursos_ejecutable_en_godot(self):
         resultado = ejecutar_script("res://pruebas/pruebas_hud_recursos_contextuales.gd")
-        self.assertEqual(resultado.returncode, 0, resultado.stdout + resultado.stderr)
+        salida = (resultado.stdout or "") + (resultado.stderr or "")
+        self.assertEqual(resultado.returncode, 0, salida)
         self.assertIn("hud_recursos:", resultado.stdout)
         self.assertIn("0 fallos", resultado.stdout)
 
