@@ -16,7 +16,8 @@ func _ready() -> void:
 
 	var controller := Controller.new()
 	var contexto := {
-		"efecto_texto": {
+		"efecto_texto":
+		{
 			"activo": true,
 			"intensidad": 0.88,
 			"duracion": 1.0,
@@ -25,7 +26,9 @@ func _ready() -> void:
 	}
 
 	controller._sincronizar_documento(pantalla, contexto, false, 0.75)
-	_comprobar(visor.text != "MEMORÁNDUM ENLACE 13 / ACCESO RESTRINGIDO", "documento real se corrompe")
+	_comprobar(
+		visor.text != "MEMORÁNDUM ENLACE 13 / ACCESO RESTRINGIDO", "documento real se corrompe"
+	)
 	var primer_visual := visor.text
 	controller._sincronizar_documento(pantalla, contexto, false, 0.0)
 	_comprobar(visor.text == primer_visual, "mismo estado temporal es determinista")
