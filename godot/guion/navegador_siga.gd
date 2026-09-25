@@ -30,6 +30,7 @@ const ESCALA_TEXTO_PASO := 0.2
 
 var _indice := Web98Indice.new()
 var _prensa := Web98Prensa.new()
+var _bbs := Bbs98Modelo.new()
 var _contexto: Dictionary = {"dia": 1, "conocimiento": [], "urls_caidas": []}
 var _historial: Array[String] = []
 var _indice_historial := -1
@@ -61,6 +62,7 @@ func configurar_contexto(contexto: Dictionary) -> void:
 	_contexto = contexto.duplicate(true)
 	_indice.configurar_contexto(_contexto)
 	_prensa.configurar_contexto(_contexto)
+	_bbs.configurar_contexto(_contexto)
 	if is_node_ready() and not url_actual().is_empty():
 		_resolver_sin_historial(url_actual())
 
@@ -133,7 +135,17 @@ func navegar(url: String, registrar_historial: bool = true) -> Dictionary:
 		return {}
 	if not limpia.contains("://"):
 		limpia = "http://" + limpia
-	var resultado := _indice.resolver_url(limpia)
+	var url_indice := limpia
+	var hilo_bbs := ""
+	var marcador_hilo := limpia.find("#hilo=")
+	if marcador_hilo >= 0:
+		url_indice = limpia.substr(0, marcador_hilo)
+		hilo_bbs = limpia.substr(marcador_hilo + 6).strip_edges()
+	var resultado := _indice.resolver_url(url_indice)
+	if not hilo_bbs.is_empty() and String(resultado.get("estado", "")) == "ok":
+		var recurso_bbs: Dictionary = resultado.get("recurso", {})
+		if String(recurso_bbs.get("tipo", "")) == "bbs":
+			resultado["bbs_hilo_id"] = hilo_bbs
 	_resultado_actual = resultado.duplicate(true)
 	if registrar_historial:
 		var repite_actual := (
@@ -192,6 +204,7 @@ func _ready() -> void:
 	size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_indice.configurar_contexto(_contexto)
 	_prensa.configurar_contexto(_contexto)
+	_bbs.configurar_contexto(_contexto)
 	_construir_interfaz()
 	_aplicar_escala_texto()
 	if _indice_historial >= 0 and _indice_historial < _historial.size():
@@ -366,7 +379,17 @@ func _construir_interfaz() -> void:
 
 
 func _resolver_sin_historial(url: String) -> void:
-	_resultado_actual = _indice.resolver_url(url)
+	var url_indice := url
+	var hilo_bbs := ""
+	var marcador_hilo := url.find("#hilo=")
+	if marcador_hilo >= 0:
+		url_indice = url.substr(0, marcador_hilo)
+		hilo_bbs = url.substr(marcador_hilo + 6).strip_edges()
+	_resultado_actual = _indice.resolver_url(url_indice)
+	if not hilo_bbs.is_empty() and String(_resultado_actual.get("estado", "")) == "ok":
+		var recurso_bbs: Dictionary = _resultado_actual.get("recurso", {})
+		if String(recurso_bbs.get("tipo", "")) == "bbs":
+			_resultado_actual["bbs_hilo_id"] = hilo_bbs
 	if is_node_ready():
 		_renderizar(_resultado_actual)
 		_refrescar_laterales()
@@ -478,12 +501,16 @@ func _renderizar(resultado: Dictionary) -> void:
 	if estado == "ok":
 		var recurso: Dictionary = resultado.get("recurso", {})
 		_preparar_visuales_recurso(recurso, String(resultado.get("via", "origen")))
-		if String(recurso.get("tipo", "")) == "prensa":
+		var tipo_recurso := String(recurso.get("tipo", ""))
+		if tipo_recurso == "prensa":
 			_renderizar_prensa(recurso)
+		elif tipo_recurso == "bbs":
+			_renderizar_bbs(resultado, recurso, url)
 		else:
 			_renderizar_recurso_generico(resultado, recurso, url)
 		_configurar_descarga_software(recurso)
-		_renderizar_enlaces(recurso)
+		if tipo_recurso != "bbs":
+			_renderizar_enlaces(recurso)
 		return
 	if estado == "caido":
 		_pagina.text = tr("NAVEGADOR_SERVIDOR_CAIDO") % url
@@ -506,6 +533,113 @@ func _renderizar_recurso_generico(resultado: Dictionary, recurso: Dictionary, ur
 			via,
 		]
 	)
+
+
+func _renderizar_bbs(resultado: Dictionary, recurso: Dictionary, url: String) -> void:
+	var tablon_id := String(recurso.get("tablon_id", recurso.get("id", "")))
+	var hilos := _bbs.hilos_de(tablon_id)
+	var hilo_id := String(resultado.get("bbs_hilo_id", ""))
+	_renderizar_enlaces(recurso)
+
+	if hilo_id.is_empty():
+		var bloques: Array[String] = []
+		bloques.append("[b]%s[/b]" % String(recurso.get("titulo", tr("NAVEGADOR_SIN_TITULO"))))
+		bloques.append(String(recurso.get("snippet", "")))
+		bloques.append(tr("NAVEGADOR_BBS_ESTADO") % _estado_tablon_bbs(tablon_id))
+		bloques.append(tr("NAVEGADOR_BBS_HILOS_DISPONIBLES") % hilos.size())
+		_pagina.text = "\n\n".join(bloques)
+		for hilo in hilos:
+			var indice_item := (
+				_enlaces
+				. add_item(
+					(
+						tr("NAVEGADOR_BBS_HILO_LISTA")
+						% [
+							String(hilo.get("estado", "abierto")),
+							String(hilo.get("titulo", "")),
+							String(hilo.get("fecha_ultimo", "")),
+						]
+					)
+				)
+			)
+			(
+				_enlaces
+				. set_item_metadata(
+					indice_item,
+					"%s#hilo=%s" % [String(recurso.get("url", url)), String(hilo.get("id", ""))],
+				)
+			)
+		return
+
+	var hilo_actual: Dictionary = {}
+	for hilo in hilos:
+		if String(hilo.get("id", "")) == hilo_id:
+			hilo_actual = hilo
+			break
+	if hilo_actual.is_empty():
+		_pagina.text = tr("NAVEGADOR_BBS_HILO_NO_DISPONIBLE")
+		return
+
+	var volver := _enlaces.add_item(tr("NAVEGADOR_BBS_VOLVER_TABLON"))
+	_enlaces.set_item_metadata(volver, String(recurso.get("url", url)))
+	var bloques_hilo: Array[String] = []
+	bloques_hilo.append("[b]%s[/b]" % String(hilo_actual.get("titulo", "")))
+	(
+		bloques_hilo
+		. append(
+			(
+				tr("NAVEGADOR_BBS_HILO_ESTADO")
+				% [
+					String(hilo_actual.get("estado", "")),
+					String(hilo_actual.get("fecha_ultimo", "")),
+				]
+			)
+		)
+	)
+	for mensaje in _bbs.mensajes_de(hilo_id):
+		var autor: Dictionary = mensaje.get("autor", {})
+		var nick := String(autor.get("nick", mensaje.get("autor_id", "?")))
+		var tipo := String(mensaje.get("tipo", "normal"))
+		var estado := String(mensaje.get("estado", "visible"))
+		bloques_hilo.append(
+			(
+				tr("NAVEGADOR_BBS_MENSAJE_CABECERA")
+				% [nick, String(mensaje.get("fecha", "")), tipo, estado]
+			)
+		)
+		var referencia := _bbs.referencia_de_mensaje(String(mensaje.get("id", "")))
+		if not referencia.is_empty():
+			if String(referencia.get("estado", "")) in ["eliminado", "no_disponible"]:
+				bloques_hilo.append(tr("NAVEGADOR_BBS_CITA_NO_DISPONIBLE"))
+			else:
+				var autor_citado: Dictionary = referencia.get("autor", {})
+				(
+					bloques_hilo
+					. append(
+						(
+							tr("NAVEGADOR_BBS_CITA")
+							% [
+								String(autor_citado.get("nick", referencia.get("autor_id", "?"))),
+								String(referencia.get("texto", "")),
+							]
+						)
+					)
+				)
+		var texto := String(mensaje.get("texto", ""))
+		if texto.is_empty() and estado == "eliminado":
+			texto = tr("NAVEGADOR_BBS_MENSAJE_ELIMINADO")
+		bloques_hilo.append(texto)
+		var firma := String(autor.get("firma", "")).strip_edges()
+		if not firma.is_empty() and tipo == "normal":
+			bloques_hilo.append(tr("NAVEGADOR_BBS_FIRMA") % firma)
+	_pagina.text = "\n\n".join(bloques_hilo)
+
+
+func _estado_tablon_bbs(tablon_id: String) -> String:
+	for tablon in _bbs.tablones_visibles():
+		if String(tablon.get("id", "")) == tablon_id:
+			return String(tablon.get("estado", ""))
+	return ""
 
 
 func _configurar_descarga_software(recurso: Dictionary) -> void:

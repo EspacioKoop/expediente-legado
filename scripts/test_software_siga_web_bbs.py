@@ -81,3 +81,16 @@ def test_corte_sigue_sin_red_ni_procesos_reales() -> None:
         "OS.create_process(",
     ):
         assert prohibido not in codigo
+
+
+def test_navegador_renderiza_bbs_y_rutas_de_hilo_sin_red_paralela() -> None:
+    navegador = fuente(NAVEGADOR)
+    assert "var _bbs := Bbs98Modelo.new()" in navegador
+    assert "_bbs.configurar_contexto(_contexto)" in navegador
+    assert 'elif tipo_recurso == "bbs":' in navegador
+    assert "_renderizar_bbs(resultado, recurso, url)" in navegador
+    assert 'find("#hilo=")' in navegador
+    assert 'resultado["bbs_hilo_id"] = hilo_bbs' in navegador
+    assert '_bbs.hilos_de(tablon_id)' in navegador
+    assert '_bbs.mensajes_de(hilo_id)' in navegador
+    assert '_bbs.referencia_de_mensaje(String(mensaje.get("id", "")))' in navegador
