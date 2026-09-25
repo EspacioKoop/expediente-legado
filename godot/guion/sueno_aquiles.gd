@@ -368,7 +368,11 @@ func _material(color: Color, emision: bool = false) -> StandardMaterial3D:
 	if color == COLOR_BRONCE:
 		return Mitologias435Materiales.crear("bronce_votivo", color, false, emision)
 	if color == COLOR_PAPEL:
-		return Mitologias435Materiales.crear("papel_archivo_envejecido", color, false, emision)
+		var papel := Mitologias435Materiales.crear(
+			"papel_archivo_envejecido", color, false, emision
+		)
+		papel.albedo_color = color
+		return papel
 	var material := StandardMaterial3D.new()
 	material.albedo_color = color
 	material.roughness = 0.72
