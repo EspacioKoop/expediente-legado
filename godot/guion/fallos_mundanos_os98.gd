@@ -41,7 +41,8 @@ const REGLAS := [
 		"causa": "El periodo ficticio de prueba terminó según el propio estado del paquete.",
 		"resolucion": "Cerrar el popup de registro o desinstalar el programa.",
 		"salida_segura": "cerrar_popup",
-		"regla_normal": "Un trial expirado permanece expirado hasta que se desinstala o cambia su estado declarado.",
+		"regla_normal":
+		"Un trial expirado permanece expirado hasta que se desinstala o cambia su estado declarado.",
 		"fixture_anomalo": "trial_revive_sin_cambio_de_estado",
 		"refs": ["#663"],
 	},
@@ -50,7 +51,8 @@ const REGLAS := [
 		"superficie": "software",
 		"evento": "residente_activo",
 		"causa": "Una utilidad ficticia sigue residente porque todavía no se cerró correctamente.",
-		"resolucion": "Cerrar la utilidad desde su menú o desinstalarla desde Archivo de programas.",
+		"resolucion":
+		"Cerrar la utilidad desde su menú o desinstalarla desde Archivo de programas.",
 		"salida_segura": "cerrar_utilidad",
 		"regla_normal": "Cerrar o desinstalar correctamente elimina el residente simulado.",
 		"fixture_anomalo": "residente_regresa_tras_desinstalar",
@@ -74,7 +76,8 @@ const REGLAS := [
 		"causa": "La unidad simulada dejó de estar montada.",
 		"resolucion": "Volver a Mi equipo, insertar el medio correcto o cerrar la ventana.",
 		"salida_segura": "volver_a_equipo",
-		"regla_normal": "Retirar un medio hace inaccesibles sus rutas sin cerrar por la fuerza la ventana.",
+		"regla_normal":
+		"Retirar un medio hace inaccesibles sus rutas sin cerrar por la fuerza la ventana.",
 		"fixture_anomalo": "archivo_accesible_tras_retirada",
 		"refs": ["#664"],
 	},
@@ -85,7 +88,8 @@ const REGLAS := [
 		"causa": "La copia local declarada es anterior al contenido actual del recurso.",
 		"resolucion": "Volver al origen, usar un mirror conocido o aceptar la copia antigua.",
 		"salida_segura": "volver_al_origen",
-		"regla_normal": "La caché solo existe para recursos que la declaran y conserva su fecha propia.",
+		"regla_normal":
+		"La caché solo existe para recursos que la declaran y conserva su fecha propia.",
 		"fixture_anomalo": "cache_de_recurso_imposible",
 		"refs": ["#667"],
 	},
