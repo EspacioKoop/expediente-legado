@@ -121,6 +121,18 @@ class SuenoBabaYagaTest(unittest.TestCase):
         self.assertIn("create_tween()", self.sueno)
         self.assertIn("Tween.TRANS_SINE", self.sueno)
 
+    def test_habitacion_gira_y_cambia_a_exterior(self):
+        self.assertIn("POSICIONES_HABITACION_FASE := [", self.sueno)
+        self.assertIn("ROTACIONES_HABITACION_FASE := [", self.sueno)
+        self.assertIn("ESTADOS_HABITACION_EXTERIOR := [false, false, true, true]", self.sueno)
+        self.assertIn('"HabitacionGiratoria"', self.sueno)
+        self.assertIn('"LecturaInterior"', self.sueno)
+        self.assertIn('"LecturaExterior"', self.sueno)
+        self.assertIn("func estado_habitacion_actual()", self.sueno)
+        self.assertIn("func plan_giro_habitacion(", self.sueno)
+        self.assertIn("func _aplicar_giro_habitacion(", self.sueno)
+        self.assertIn('"giro_habitacion": giro_habitacion', self.sueno)
+
     def test_interior_cabana_cambia_sin_mover_el_marco(self):
         self.assertIn("INTERIORES_CABANA := [", self.sueno)
         self.assertIn('"EstadosInterior"', self.sueno)
