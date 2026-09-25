@@ -114,8 +114,8 @@ class CatalogoLocaleTest(unittest.TestCase):
                 self.assertNotEqual(opcion_es["etiqueta"], opcion_en["etiqueta"])
                 self.assertNotEqual(opcion_es["texto"], opcion_en["texto"])
 
-    def test_casos_1_y_2_estan_traducidos_al_ingles(self):
-        for indice in (0, 1):
+    def test_casos_1_a_4_estan_traducidos_al_ingles(self):
+        for indice in (0, 1, 2, 3):
             caso_es = self.es["casos"][indice]
             caso_en = self.en["casos"][indice]
             self.assertEqual(caso_es["id"], caso_en["id"])
