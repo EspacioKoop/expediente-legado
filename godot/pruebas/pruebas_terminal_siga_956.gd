@@ -93,7 +93,7 @@ func _probar() -> void:
 		"la UI reutiliza la apertura real del visor SIGA",
 	)
 	_comprobar(
-		not capa.contains("_sonar(\"documento\")\n\t_abrir_expediente()"),
+		not capa.contains('_sonar("documento")\n\t_abrir_expediente()'),
 		"usar el terminal ya no salta directamente al visor",
 	)
 
