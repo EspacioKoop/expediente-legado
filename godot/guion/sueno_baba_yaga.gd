@@ -511,6 +511,7 @@ func _sincronizar_comparacion_visual() -> void:
 	if contenedor == null:
 		return
 	for hijo in contenedor.get_children():
+		contenedor.remove_child(hijo)
 		hijo.queue_free()
 	if (
 		not bool(_ultima_comparacion.get("ok", false))
