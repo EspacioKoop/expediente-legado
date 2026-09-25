@@ -87,7 +87,30 @@ static func contexto(partida: Dictionary, estado: Dictionary, dia: int) -> Dicti
 		"conocimiento": conocimiento,
 		"urls_caidas": urls_caidas,
 		"fase_contaminacion": fase,
+		"efecto_texto": configuracion_texto_corrupto(fase),
 		"climax_hastur_pendiente": fase >= FASE_CLIMAX,
+	}
+
+
+## Contrato visual declarativo para #806. La presentación decide qué nodos
+## concretos reciben el efecto; aquí solo se publica intensidad, ritmo y semilla
+## estable por fase narrativa.
+static func configuracion_texto_corrupto(fase: int) -> Dictionary:
+	var fase_segura := clampi(fase, FASE_NORMALIDAD, FASE_CLIMAX)
+	var intensidad := 0.0
+	match fase_segura:
+		FASE_INCOHERENCIAS:
+			intensidad = 0.30
+		FASE_CONTAMINACION_CRUZADA:
+			intensidad = 0.62
+		FASE_CLIMAX:
+			intensidad = 0.88
+	return {
+		"activo": intensidad > 0.0,
+		"intensidad": intensidad,
+		"duracion": 1.35,
+		"reversible": true,
+		"semilla": "contaminacion-os98-fase-%d" % fase_segura,
 	}
 
 
