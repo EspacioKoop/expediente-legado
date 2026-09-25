@@ -72,12 +72,15 @@ static func para_pesaje(jornada: Dictionary) -> Array:
 		if not PERFILES_PESO.has(id):
 			continue
 		var perfil: Dictionary = PERFILES_PESO[id]
-		resultado.append(
-			{
-				"id": id,
-				"peso": float(perfil.get("peso", 0.0)),
-				"peso_sellado": float(perfil.get("peso_sellado", perfil.get("peso", 0.0))),
-				"manipulado_hoy": true,
-			}
+		(
+			resultado
+			. append(
+				{
+					"id": id,
+					"peso": float(perfil.get("peso", 0.0)),
+					"peso_sellado": float(perfil.get("peso_sellado", perfil.get("peso", 0.0))),
+					"manipulado_hoy": true,
+				}
+			)
 		)
 	return resultado
