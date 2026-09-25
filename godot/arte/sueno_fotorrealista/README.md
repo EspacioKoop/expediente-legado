@@ -7,14 +7,22 @@ rugosidad, metal, humedad, suciedad y emisión.
 ## Piezas
 
 - archivador_humedo.tscn: archivador metálico de cuatro cajones con vetas húmedas;
+- armario_desencajado.tscn: armario doméstico fuera de escuadra, con una puerta-eco
+  que conserva la silueta del mueble original;
 - crt_condensacion.tscn: televisor CRT sin marca, con cristal húmedo y condensación;
 - fluorescente_oxidado.tscn: luminaria oxidada con tubo emisivo y luz local barata;
+- monitor_estirado.tscn: monitor de sobremesa reconocible con un eco de pantalla
+  horizontalmente imposible;
 - silla_reflejo.tscn: silla doméstica/oficina con un segundo volumen imposible que
-  funciona como reflejo desfasado.
+  funciona como reflejo desfasado;
+- tarot_pliegue.tscn: carta sin texto ni iconografía narrativa, plegada en profundidad
+  alrededor de un centro geométrico no semántico.
 
 Cada escena declara metadata/origen_reconocible para mantener el contrato de #87:
 el sueño deforma una familia ya vista o manipulada, no fabrica una fuente narrativa
-nueva.
+nueva. Las piezas añadidas para #79 también fijan metadata/origen_id con el ID real
+ya utilizado por el catálogo (computerScreen, household_goods/wardrobe_01 y tarotCard),
+de modo que la integración posterior pueda cerrarse en fail-closed sin alias visuales.
 
 ## Material común
 
@@ -28,9 +36,11 @@ No contiene logos, marcas reales, texto diegético ni hechos de expedientes.
 ## Integración
 
 Este corte no modifica SuenoUtileria, dia.tscn ni controladores compartidos porque
-esas rutas tienen reservas activas. Las cuatro escenas quedan listas para
+esas rutas tienen reservas activas. Las siete escenas quedan listas para
 instanciarse como PackedScene en un corte posterior de #87 una vez exista una
-reserva libre para la integración.
+reserva libre para la integración. Con este lote ya existe una representación 3D
+ligera para silla, monitor, archivador, televisor doméstico, armario doméstico y
+tarot; el fluorescente queda como apoyo ambiental derivado de la oficina.
 
 Al integrarlas:
 1. elegir la escena por el ID ya registrado en ObjetosOniricos;
