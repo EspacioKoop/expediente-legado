@@ -7,9 +7,12 @@ ASSET_DIR = ROOT / "godot" / "arte" / "sueno_fotorrealista"
 SHADER = ASSET_DIR / "material_microdetalle.gdshader"
 SCENES = {
     "archivador_humedo.tscn": "archivador",
+    "armario_desencajado.tscn": "armario_domestico",
     "crt_condensacion.tscn": "televisor_casa",
     "fluorescente_oxidado.tscn": "fluorescente",
+    "monitor_estirado.tscn": "monitor",
     "silla_reflejo.tscn": "silla",
+    "tarot_pliegue.tscn": "tarot",
 }
 
 
@@ -34,6 +37,18 @@ class SuenoFotorrealistaAssetsTest(unittest.TestCase):
                 self.assertIn('metadata/uso = "sueno"', texto)
                 self.assertIn('metadata/issue = 87', texto)
                 self.assertIn('type="MeshInstance3D"', texto)
+
+    def test_nuevas_piezas_trazan_el_id_real_del_catalogo(self):
+        esperados = {
+            "armario_desencajado.tscn": "household_goods/wardrobe_01",
+            "monitor_estirado.tscn": "computerScreen",
+            "tarot_pliegue.tscn": "tarotCard",
+        }
+        for nombre, origen_id in esperados.items():
+            texto = (ASSET_DIR / nombre).read_text(encoding="utf-8")
+            with self.subTest(nombre=nombre):
+                self.assertIn(f'metadata/origen_id = "{origen_id}"', texto)
+                self.assertIn('metadata/issue_padre = 79', texto)
 
     def test_lote_no_introduce_binarios_marcas_ni_texto_narrativo(self):
         # Godot 4 puede crear sidecars .uid de texto al importar recursos.
