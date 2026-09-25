@@ -272,9 +272,7 @@ func _sincronizar() -> void:
 		var panel := eco.get_node("Panel") as MeshInstance3D
 		var texto_visible := str(dato.get("texto_visible", dato.get("texto", "")))
 		texto.text = texto_visible
-		_aplicar_manifestacion(
-			eco, str(vista.get("manifestacion", "")), slot, texto_visible
-		)
+		_aplicar_manifestacion(eco, str(vista.get("manifestacion", "")), slot, texto_visible)
 		var posicion := int(dato.get("posicion_seleccion", -1))
 		var eco_id := int(dato.get("id", -1))
 		orden.text = "" if posicion < 0 else "%d" % (posicion + 1)
