@@ -162,6 +162,19 @@ func _actualizar_metadatos() -> void:
 	_actualizar_detalles_meticulosidad()
 
 
+func _puntos_atencion_sin_mutar() -> int:
+	var crudo: Variant = jornada.get(MeticulosidadEstado.CAMPO_JORNADA, {})
+	if not crudo is Dictionary:
+		return 0
+	var estado := crudo as Dictionary
+	if (
+		int(estado.get("dia", -1)) != int(jornada.get("dia", 0))
+		or int(estado.get("vuelta", -1)) != int(jornada.get("vuelta", 1))
+	):
+		return 0
+	return clampi(int(estado.get("puntos", 0)), 0, MeticulosidadEstado.PUNTOS_MAX)
+
+
 func _reiniciar_falsificacion_documental() -> void:
 	_borrador_falsificacion = {}
 	if _resultado_falsificacion == null:
@@ -181,7 +194,7 @@ func _crear_copia_falsificada() -> void:
 	_borrador_falsificacion = FalsificacionDocumentalModelo.crear_copia(
 		registro_actual,
 		intervencion,
-		MeticulosidadEstado.puntos(jornada),
+		_puntos_atencion_sin_mutar(),
 	)
 	if _borrador_falsificacion.is_empty():
 		return
