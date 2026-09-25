@@ -174,7 +174,7 @@ def ejecutar():
                 "ronda-cierre-156",
                 ["--script", "pruebas/pruebas_ronda_cierre_3d.gd"],
                 30,
-                26,
+                30,
             ),
             ("recorrido", ["--script", "pruebas/recorrido.gd"], 60, 95),
             ("arranque", ["--quit-after", "90"], 30, None),
