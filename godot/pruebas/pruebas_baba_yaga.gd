@@ -295,7 +295,9 @@ func _probar_escalada_ambiental() -> void:
 		_comprobar(plano.position, posicion_plano, "plano usa posición declarada")
 		_comprobar(plano.rotation_degrees, rotacion_plano, "plano usa rotación declarada")
 		_comprobar(fondo.position, posicion_fondo, "bosque de fondo usa posición declarada")
-		_comprobar(not posiciones_vistas.has(techo.position), "cada fase tiene lectura visual propia")
+		_comprobar(
+			not posiciones_vistas.has(techo.position), "cada fase tiene lectura visual propia"
+		)
 		posiciones_vistas.append(techo.position)
 		_comprobar(retorno.position, retorno_inicial, "escalada no mueve el retorno seguro")
 		if i < SuenoBabaYaga.POSICIONES_TECHO_FASE.size() - 1:
