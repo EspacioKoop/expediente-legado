@@ -82,19 +82,31 @@ func _modificadores_cielo_sueno() -> Array:
 	var resultado := []
 	var registro = partida.estado.get(ReligionEventos.CLAVE_ESTADO, {})
 	if typeof(registro) == TYPE_DICTIONARY:
-		resultado.append_array(
-			RELIGION_SUENO.modificadores(
-				registro,
-				int(jornada.get("dia", 0)),
-				reduccion_movimiento,
+		(
+			resultado
+			. append_array(
+				(
+					RELIGION_SUENO
+					. modificadores(
+						registro,
+						int(jornada.get("dia", 0)),
+						reduccion_movimiento,
+					)
+				)
 			)
 		)
-	resultado.append_array(
-		IDEOLOGIA_SUENO.modificadores(
-			partida.estado,
-			int(jornada.get("dia", 0)),
-			_raiz(),
-			reduccion_movimiento,
+	(
+		resultado
+		. append_array(
+			(
+				IDEOLOGIA_SUENO
+				. modificadores(
+					partida.estado,
+					int(jornada.get("dia", 0)),
+					_raiz(),
+					reduccion_movimiento,
+				)
+			)
 		)
 	)
 	return resultado
