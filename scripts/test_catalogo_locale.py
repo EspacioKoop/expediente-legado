@@ -99,11 +99,12 @@ class CatalogoLocaleTest(unittest.TestCase):
         alterada["casos"][0]["principal"] = not alterada["casos"][0]["principal"]
         self.assertFalse(misma_estructura(self.es, alterada))
 
-    def test_ingles_actual_cae_en_fallback_hasta_recuperar_paridad(self):
+    def test_ingles_tiene_las_mismas_fichas_pero_sigue_marcado_incompleto(self):
         ids_es = {caso["id"] for caso in self.es["casos"]}
         ids_en = {caso["id"] for caso in self.en["casos"]}
-        self.assertIn("caso9@9", ids_es - ids_en)
-        self.assertFalse(misma_estructura(self.es, self.en))
+        self.assertEqual(ids_es, ids_en)
+        self.assertTrue(misma_estructura(self.es, self.en))
+        self.assertFalse(self.estado_locales["casos"]["en"])
 
 
 if __name__ == "__main__":
