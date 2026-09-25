@@ -17,6 +17,8 @@ var _registro: RichTextLabel
 var _linea: LineEdit
 var _abrir_siga: Button
 var _cerrar: Button
+var _historial_comandos: Array[String] = []
+var _indice_historial := 0
 
 
 func _ready() -> void:
@@ -39,12 +41,40 @@ func ejecutar(texto: String) -> Dictionary:
 	if limpio.is_empty():
 		return {"ok": true, "salida": "", "cwd": _terminal.cwd()}
 	_escribir("%s> %s" % [_terminal.cwd(), limpio])
+	_registrar_comando(limpio)
 	var resultado := _terminal.ejecutar(limpio)
 	var salida := String(resultado.get("salida", ""))
 	if not salida.is_empty():
 		_escribir(salida)
 	_linea.clear()
 	return resultado
+
+
+func _registrar_comando(comando: String) -> void:
+	if _historial_comandos.is_empty() or _historial_comandos.back() != comando:
+		_historial_comandos.append(comando)
+	_indice_historial = _historial_comandos.size()
+
+
+func _al_input_linea(evento: InputEvent) -> void:
+	if _historial_comandos.is_empty():
+		return
+	if evento.is_action_pressed("ui_up"):
+		_indice_historial = maxi(0, _indice_historial - 1)
+		_mostrar_comando_historial()
+		_linea.accept_event()
+	elif evento.is_action_pressed("ui_down"):
+		_indice_historial = mini(_historial_comandos.size(), _indice_historial + 1)
+		if _indice_historial == _historial_comandos.size():
+			_linea.clear()
+		else:
+			_mostrar_comando_historial()
+		_linea.accept_event()
+
+
+func _mostrar_comando_historial() -> void:
+	_linea.text = _historial_comandos[_indice_historial]
+	_linea.caret_column = _linea.text.length()
 
 
 func _montar() -> void:
@@ -104,6 +134,7 @@ func _montar() -> void:
 	_linea.accessibility_name = tr("TERMINAL_SIGA_COMANDO_ACCESIBLE")
 	_linea.add_theme_font_override("font", EstiloSiga.fuente_terminal())
 	_linea.text_submitted.connect(ejecutar)
+	_linea.gui_input.connect(_al_input_linea)
 	caja.add_child(_linea)
 
 	var acciones := HBoxContainer.new()

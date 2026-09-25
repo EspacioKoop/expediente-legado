@@ -115,6 +115,25 @@ func _probar() -> void:
 	)
 	var ui_help: Dictionary = app.ejecutar("help")
 	_comprobar(bool(ui_help["ok"]), "la UI delega HELP al núcleo")
+	app.ejecutar("pwd")
+	_comprobar(
+		app._historial_comandos == ["help", "pwd"],
+		"la UI conserva historial de comandos ejecutados",
+	)
+	var arriba := InputEventAction.new()
+	arriba.action = "ui_up"
+	arriba.pressed = true
+	app._al_input_linea(arriba)
+	_comprobar(app._linea.text == "pwd", "flecha arriba recupera el último comando")
+	app._al_input_linea(arriba)
+	_comprobar(app._linea.text == "help", "otra flecha arriba recorre el historial")
+	var abajo := InputEventAction.new()
+	abajo.action = "ui_down"
+	abajo.pressed = true
+	app._al_input_linea(abajo)
+	_comprobar(app._linea.text == "pwd", "flecha abajo avanza por el historial")
+	app._al_input_linea(abajo)
+	_comprobar(app._linea.text.is_empty(), "al final del historial vuelve a línea vacía")
 	_comprobar(
 		app._registro.get_parsed_text().contains("DIR/LS"),
 		"la salida del núcleo aparece en el historial visible",
