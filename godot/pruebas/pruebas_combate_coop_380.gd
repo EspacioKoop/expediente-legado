@@ -1,6 +1,6 @@
 extends SceneTree
 
-## Regresión standalone del primer vertical de combate cooperativo (#380).
+## Regresión standalone del combate cooperativo (#380), incluida desconexión/reintento.
 
 const CombateCoop = preload("res://guion/combate_coop.gd")
 const CombateCoopDatos = preload("res://guion/red/combate_coop_datos.gd")
@@ -17,6 +17,8 @@ var fallos := 0
 func _init() -> void:
 	_probar_contrato_cerrado()
 	_probar_vertical_dos_clientes()
+	_probar_desconexion_reintento()
+	_probar_suplencia_desconectado()
 	_probar_offline_y_partida_intacta()
 	print("\n%d pasadas, %d fallos" % [pasadas, fallos])
 	quit(1 if fallos > 0 else 0)
@@ -100,6 +102,67 @@ func _probar_vertical_dos_clientes() -> void:
 	)
 	_comprobar("cerrar A es seguro", cliente_a.cerrar()["ok"], true)
 	_comprobar("cerrar B es seguro", cliente_b.cerrar()["ok"], true)
+
+
+func _probar_desconexion_reintento() -> void:
+	var transporte_a := TransporteFixture.new()
+	var transporte_b := TransporteFixture.new()
+	var cliente_a := CombateCoopServicio.new(transporte_a)
+	var cliente_b := CombateCoopServicio.new(transporte_b)
+	cliente_a.abrir("ventanilla_coop", "SALA-RETRY", "reclamacion-retry", "anon-a")
+	cliente_b.abrir("ventanilla_coop", "SALA-RETRY", "reclamacion-retry", "anon-b")
+
+	var sesion := CombateCoop.nueva({"id": "retry", "ataques": []}, "anon-a", "anon-b")
+	var pub_a := cliente_a.publicar_eleccion(0, "objecion", "test-380", AHORA, "retry-a")
+	_comprobar("A publica antes de la caída", pub_a["ok"], true)
+	_comprobar(
+		"A queda esperando al compañero",
+		CombateCoop.elegir(sesion, "anon-a", "objecion", func() -> float: return 0.0)["status"],
+		"waiting_partner"
+	)
+
+	_comprobar("desconexión se registra", CombateCoop.desconectar(sesion, "anon-b")["ok"], true)
+	_comprobar("B queda marcado offline", sesion["conectados"]["anon-b"], false)
+	cliente_b.cerrar()
+
+	_comprobar(
+		"B puede reabrir la misma sala",
+		cliente_b.abrir("ventanilla_coop", "SALA-RETRY", "reclamacion-retry", "anon-b")["ok"],
+		true
+	)
+	_comprobar("reconexión se registra", CombateCoop.reconectar(sesion, "anon-b")["ok"], true)
+	var pub_b := cliente_b.publicar_eleccion(0, "silencio", "test-380", AHORA + 1, "retry-b")
+	_comprobar("B publica tras reconectar", pub_b["ok"], true)
+	_comprobar(
+		"la ronda resuelve tras reintento",
+		CombateCoop.elegir(sesion, "anon-b", "silencio", func() -> float: return 0.0)["resolved"],
+		true
+	)
+	_comprobar("la elección previa de A se conserva", sesion["historial"][0]["elecciones"]["anon-a"], "objecion")
+
+
+func _probar_suplencia_desconectado() -> void:
+	var partida := {
+		"veredictos": {"caso-previo": "firma"},
+		"pistas_descubiertas": ["pista-previa"],
+		"dinero": 37,
+		"vidas": 2,
+		"historias_cartas": {"la-justicia": {"eleccion": "socialdemocrata"}},
+	}
+	var antes := JSON.stringify(partida)
+	var sesion := CombateCoop.nueva({"id": "fallback", "ataques": []}, "anon-a", "anon-b")
+
+	var espera := CombateCoop.elegir(sesion, "anon-a", "insistencia", func() -> float: return 0.0)
+	_comprobar("A puede elegir antes de caída", espera["status"], "waiting_partner")
+	CombateCoop.desconectar(sesion, "anon-b")
+	var suplencia := CombateCoop.suplir_desconectado(sesion, "anon-b", func() -> float: return 0.0)
+	_comprobar("suplencia determinista resuelve", suplencia["resolved"], true)
+	_comprobar(
+		"suplencia usa silencio",
+		sesion["historial"][0]["elecciones"]["anon-b"],
+		CombateCoop.ACCION_SUPLENCIA
+	)
+	_comprobar("suplencia no toca Partida", JSON.stringify(partida), antes)
 
 
 func _probar_offline_y_partida_intacta() -> void:
