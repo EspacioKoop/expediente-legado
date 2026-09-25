@@ -78,4 +78,5 @@ mirar_abajo={
 
 [internationalization]
 
+locale/fallback="es"
 locale/translations=PackedStringArray("res://datos/textos.es.translation")
