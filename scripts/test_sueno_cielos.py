@@ -63,8 +63,11 @@ class SuenoCielosTest(unittest.TestCase):
         self.assertIn("tarot:<id>", self.cielos)
         self.assertIn("ideologia:<tag>", self.cielos)
         self.assertIn("_modificadores_cielo_sueno()", self.dia)
-        # El runtime de cielo no inventa campos de jornada para estas capas.
-        self.assertNotIn("religion_", self.dia)
+        self.assertIn('const RELIGION_SUENO := preload("res://guion/religion_sueno_935.gd")', self.dia)
+        self.assertRegex(self.dia, r"RELIGION_SUENO\s*\.\s*modificadores\(")
+        # El runtime consume el contrato común; no inventa flags de creencia.
+        self.assertNotIn("religion_fe", self.dia)
+        self.assertNotIn("religiosidad", self.dia)
         self.assertNotIn("ideologia_", self.dia)
         self.assertNotIn("tarot_", self.dia)
 
