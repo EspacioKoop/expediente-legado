@@ -44,6 +44,13 @@ const POSICIONES_CABANA := [
 	Vector3(0.2, 0.0, 1.0),
 	Vector3(-1.4, 0.0, -0.1),
 ]
+const PUNTOS_HORIZONTE_CABANA := [
+	Vector3(6.4, 5.5, 4.8),
+	Vector3(6.4, 5.5, -5.8),
+	Vector3(-6.4, 5.5, -5.8),
+	Vector3(-6.4, 5.5, 4.8),
+]
+const DURACION_TRAMO_HORIZONTE := 0.18
 
 const COLOR_SUELO := Color(0.13, 0.15, 0.13)
 const COLOR_BOSQUE := Color(0.19, 0.27, 0.18)
@@ -96,6 +103,7 @@ var _fase_umbral := 0
 var _fase_fuera_campo := 0
 var _marcas: Dictionary = {}
 var _ultima_comparacion: Dictionary = {}
+var _tween_cabana: Tween
 var _montado := false
 
 
@@ -176,6 +184,21 @@ func fase_ambiental_actual() -> int:
 	return _fase_umbral % POSICIONES_TECHO_FASE.size()
 
 
+func plan_transito_cabana(origen: Vector3, reduccion_movimiento: bool) -> Dictionary:
+	var fase := _fase_umbral % POSICIONES_CABANA.size()
+	return {
+		"aplicado": true,
+		"modo": "corte_fundido" if reduccion_movimiento else "arco_horizonte",
+		"animar": not reduccion_movimiento,
+		"origen": origen,
+		"horizonte": PUNTOS_HORIZONTE_CABANA[fase],
+		"destino": POSICIONES_CABANA[fase],
+		"duracion": 0.0 if reduccion_movimiento else DURACION_TRAMO_HORIZONTE * 2.0,
+		"desplazar_jugador": false,
+		"mover_camara": false,
+	}
+
+
 func dejar_marca(nombre: String, objetivo: String) -> bool:
 	preparar()
 	var id := nombre.strip_edges()
@@ -225,6 +248,8 @@ func aplicar_evento(
 ) -> Dictionary:
 	preparar()
 	var cambiado := false
+	var origen_cabana: Vector3 = posiciones_actuales()[OBJETO_CABANA]
+	var transito_cabana := {"aplicado": false}
 	if evento == EVENTO_UMBRAL:
 		_fase_umbral = (_fase_umbral + 1) % POSICIONES_CABANA.size()
 		cambiado = true
@@ -235,6 +260,8 @@ func aplicar_evento(
 	if cambiado:
 		_ultima_comparacion = {}
 		_aplicar_estado_visual()
+		if evento == EVENTO_UMBRAL:
+			transito_cabana = _aplicar_transito_cabana(origen_cabana, reduccion_movimiento)
 		_sincronizar_comparacion_visual()
 
 	var salida := plan_transicion(reduccion_movimiento)
@@ -250,6 +277,7 @@ func aplicar_evento(
 				"retorno_disponible": ruta_retorno_disponible(),
 				"interior_cabana": interior_actual(),
 				"fase_ambiental": fase_ambiental_actual(),
+				"transito_cabana": transito_cabana,
 			},
 			true,
 		)
@@ -738,6 +766,27 @@ func _aplicar_estado_visual() -> void:
 	_actualizar_interior_cabana()
 	_actualizar_acabado_ambiental()
 	get_node("RetornoSeguro").visible = true
+
+
+func _aplicar_transito_cabana(origen: Vector3, reduccion_movimiento: bool) -> Dictionary:
+	var plan := plan_transito_cabana(origen, reduccion_movimiento)
+	var cabana := get_node_or_null("CabanaAncla") as Node3D
+	if cabana == null:
+		return plan
+	if _tween_cabana != null and _tween_cabana.is_valid():
+		_tween_cabana.kill()
+	var destino: Vector3 = plan["destino"]
+	if reduccion_movimiento:
+		cabana.position = destino
+		return plan
+	var horizonte: Vector3 = plan["horizonte"]
+	cabana.position = origen
+	_tween_cabana = create_tween()
+	_tween_cabana.set_trans(Tween.TRANS_SINE)
+	_tween_cabana.set_ease(Tween.EASE_IN_OUT)
+	_tween_cabana.tween_property(cabana, "position", horizonte, DURACION_TRAMO_HORIZONTE)
+	_tween_cabana.tween_property(cabana, "position", destino, DURACION_TRAMO_HORIZONTE)
+	return plan
 
 
 func _actualizar_interior_cabana() -> void:
