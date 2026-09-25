@@ -10,6 +10,8 @@
 ## si queda plaza puntuable libre y quién la posee.
 extends Node
 
+const IDEOLOGIA_SUENO := preload("res://guion/ideologia_sueno_923.gd")
+
 var _mundo_vestido_id := 0
 
 
@@ -39,6 +41,21 @@ func _process(_delta: float) -> void:
 			if not carta_id.is_empty() and not cartas_recogidas.has(carta_id):
 				cartas_recogidas.append(carta_id)
 
+	var modificadores_ideologicos := []
+	if partida_actual is Partida:
+		var reduccion_movimiento: bool = (
+			PreferenciasSiga.cargar().get("reduccion_movimiento", false) == true
+		)
+		modificadores_ideologicos = (
+			IDEOLOGIA_SUENO
+			. modificadores(
+				partida_actual.estado,
+				int(dia.jornada.get("dia", 1)),
+				dia._raiz(),
+				reduccion_movimiento,
+			)
+		)
+
 	var anomalias := (
 		SuenoUtileria
 		. montar(
@@ -49,6 +66,7 @@ func _process(_delta: float) -> void:
 			dia.jornada.get("leido_hoy", []),
 			ObjetosOniricos.del_dia(dia.jornada),
 			cartas_recogidas,
+			modificadores_ideologicos,
 		)
 	)
 	(
