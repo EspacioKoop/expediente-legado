@@ -291,9 +291,15 @@ func _probar_escalada_ambiental() -> void:
 		var posicion_fondo: Vector3 = SuenoBabaYaga.POSICIONES_FONDO_FASE[i]
 		_comprobar(sueno.fase_ambiental_actual(), i, "fase ambiental sigue el umbral")
 		_comprobar(techo.position, posicion_techo, "techo usa posición declarada")
-		_comprobar(techo.rotation_degrees, rotacion_techo, "techo usa rotación declarada")
+		_comprobar(
+			techo.rotation_degrees.is_equal_approx(rotacion_techo),
+			"techo usa rotación declarada",
+		)
 		_comprobar(plano.position, posicion_plano, "plano usa posición declarada")
-		_comprobar(plano.rotation_degrees, rotacion_plano, "plano usa rotación declarada")
+		_comprobar(
+			plano.rotation_degrees.is_equal_approx(rotacion_plano),
+			"plano usa rotación declarada",
+		)
 		_comprobar(fondo.position, posicion_fondo, "bosque de fondo usa posición declarada")
 		_comprobar(
 			not posiciones_vistas.has(techo.position), "cada fase tiene lectura visual propia"
@@ -426,8 +432,7 @@ func _probar_accesibilidad_y_reproduccion() -> void:
 	var techo_copia := copia.get_node("AcabadoAmbiental/TechoOficinaInvertido") as Node3D
 	var techo_original := sueno.get_node("AcabadoAmbiental/TechoOficinaInvertido") as Node3D
 	_comprobar(
-		techo_copia.transform,
-		techo_original.transform,
+		techo_copia.transform.is_equal_approx(techo_original.transform),
 		"restauración recompone la escalada ambiental",
 	)
 	sueno.queue_free()
