@@ -48,6 +48,7 @@ def evaluar_gate(datos: dict[str, object]) -> dict[str, bool]:
             "entrada_tarea_correcta",
         )
     )
+    comprension_trayecto = bool(datos["trayecto_continuidad_correcta"])
     comprension_sueno = bool(datos["sueno_causa_correcta"])
     participante_nuevo = not bool(datos["conocimiento_previo"])
     ritmo_sin_bloqueo = not bool(datos["problema_reproducible"])
@@ -55,12 +56,14 @@ def evaluar_gate(datos: dict[str, object]) -> dict[str, bool]:
     return {
         "participante_nuevo": participante_nuevo,
         "comprension_entrada": comprension_entrada,
+        "comprension_trayecto": comprension_trayecto,
         "comprension_sueno": comprension_sueno,
         "ritmo_sin_bloqueo": ritmo_sin_bloqueo,
         "listo_para_valorar_cierre": all(
             (
                 participante_nuevo,
                 comprension_entrada,
+                comprension_trayecto,
                 comprension_sueno,
                 ritmo_sin_bloqueo,
             )
@@ -110,6 +113,18 @@ Checks del facilitador:
 - tarea inmediata comprendida: {_si_no(bool(datos['entrada_tarea_correcta']))}
 - ritmo percibido: {datos['entrada_ritmo']}
 
+## Oficina → trayecto
+
+**¿De dónde vienes y a dónde crees que te está llevando esta transición?**
+
+> {datos['trayecto_continuidad_respuesta']}
+
+Checks del facilitador:
+
+- continuidad archivo/oficina → salida/trayecto comprendida: {_si_no(bool(datos['trayecto_continuidad_correcta']))}
+- ritmo percibido: {datos['trayecto_ritmo']}
+- sincronía audiovisual percibida: {datos['trayecto_sincronia']}
+
 ## Casa → sueño
 
 **¿Qué acción acaba de provocar este cambio de espacio?**
@@ -130,6 +145,7 @@ Checks del facilitador:
 
 - participante nuevo: **{_estado(gate['participante_nuevo'])}**
 - comprensión entrada/oficina: **{_estado(gate['comprension_entrada'])}**
+- comprensión oficina → trayecto: **{_estado(gate['comprension_trayecto'])}**
 - comprensión casa → sueño: **{_estado(gate['comprension_sueno'])}**
 - sin bloqueo reproducible de ritmo/confusión: **{_estado(gate['ritmo_sin_bloqueo'])}**
 - listo para valorar cierre de #395: **{'SÍ' if gate['listo_para_valorar_cierre'] else 'NO'}**
@@ -170,6 +186,22 @@ def recoger_datos() -> dict[str, object]:
     datos["entrada_lugar_correcto"] = preguntar_si_no("¿Comprendió el lugar?")
     datos["entrada_rol_correcto"] = preguntar_si_no("¿Comprendió el rol?")
     datos["entrada_tarea_correcta"] = preguntar_si_no("¿Comprendió la tarea inmediata?")
+
+    print("\n--- Oficina → trayecto ---")
+    datos["trayecto_continuidad_respuesta"] = preguntar(
+        "¿De dónde vienes y a dónde crees que te está llevando esta transición? "
+    )
+    datos["trayecto_ritmo"] = preguntar_opcion(
+        "Ritmo de oficina→trayecto",
+        ("bien", "rapida", "larga", "confusa"),
+    )
+    datos["trayecto_sincronia"] = preguntar_opcion(
+        "Sincronía audiovisual de oficina→trayecto",
+        ("bien", "desfasada", "confusa"),
+    )
+    datos["trayecto_continuidad_correcta"] = preguntar_si_no(
+        "¿Comprendió la continuidad archivo/oficina → salida/trayecto?"
+    )
 
     print("\n--- Casa → sueño ---")
     datos["sueno_causa_respuesta"] = preguntar(
