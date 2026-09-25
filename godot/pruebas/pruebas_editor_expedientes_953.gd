@@ -108,13 +108,18 @@ func _probar_plantillas_qa() -> void:
 	var interno := Editor.datos_plantilla(1)
 	var personal := Editor.datos_plantilla(2)
 	_comprobar(oficial.get("tipo", "") == "OFICIO", "plantilla oficial cubre oficio")
-	_comprobar(interno.get("clasificacion", "") == "INTERNO", "plantilla interna conserva clasificación")
+	_comprobar(
+		interno.get("clasificacion", "") == "INTERNO", "plantilla interna conserva clasificación"
+	)
 	_comprobar(personal.get("tipo", "") == "NOTA", "plantilla personal cubre nota")
 	_comprobar(Editor.validar(oficial).is_empty(), "plantilla oficial es exportable")
 	_comprobar(Editor.validar(interno).is_empty(), "plantilla interna es exportable")
 	_comprobar(Editor.validar(personal).is_empty(), "plantilla personal es exportable")
 	var recargado := Editor.datos_desde_paquete(Editor.paquete_desde_datos(personal))
-	_comprobar(recargado.get("asunto", "") == personal["asunto"], "plantilla personal conserva metadatos al recargar")
+	_comprobar(
+		recargado.get("asunto", "") == personal["asunto"],
+		"plantilla personal conserva metadatos al recargar"
+	)
 
 
 func _probar_calendario() -> void:
@@ -126,7 +131,9 @@ func _probar_calendario() -> void:
 	_comprobar(Editor.validar(bisiesto).is_empty(), "acepta 29 de febrero en año bisiesto")
 	var no_bisiesto := _base()
 	no_bisiesto["fecha"] = "1999-02-29"
-	_comprobar(not Editor.validar(no_bisiesto).is_empty(), "rechaza 29 de febrero fuera de bisiesto")
+	_comprobar(
+		not Editor.validar(no_bisiesto).is_empty(), "rechaza 29 de febrero fuera de bisiesto"
+	)
 
 
 func contenido_sin_formato(contenido: String) -> bool:
