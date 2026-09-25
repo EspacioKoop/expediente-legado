@@ -52,24 +52,30 @@ func _probar_base_intacta() -> void:
 
 func _probar_elecciones_deforman_la_misma_familia() -> void:
 	var reparto := _estado()
-	Prometeo.registrar_eleccion_ideologica(
-		reparto,
-		"fixture:reparto",
-		"expediente",
-		"comunismo",
-		"caso-fixture",
-		1,
-		["responsabilidad_colectiva", "control_interno"],
+	(
+		Prometeo
+		. registrar_eleccion_ideologica(
+			reparto,
+			"fixture:reparto",
+			"expediente",
+			"comunismo",
+			"caso-fixture",
+			1,
+			["responsabilidad_colectiva", "control_interno"],
+		)
 	)
 	var procedimiento := _estado()
-	Prometeo.registrar_eleccion_ideologica(
-		procedimiento,
-		"fixture:procedimiento",
-		"expediente",
-		"socialdemocrata",
-		"caso-fixture",
-		1,
-		["garantias_procedimiento", "revision_institucional"],
+	(
+		Prometeo
+		. registrar_eleccion_ideologica(
+			procedimiento,
+			"fixture:procedimiento",
+			"expediente",
+			"socialdemocrata",
+			"caso-fixture",
+			1,
+			["garantias_procedimiento", "revision_institucional"],
+		)
 	)
 
 	var mods_reparto := IDEOLOGIA_SUENO.modificadores(reparto, 1, 923, false)
@@ -85,8 +91,7 @@ func _probar_elecciones_deforman_la_misma_familia() -> void:
 		"los tags procedimentales seleccionan capas",
 	)
 	_comprobar(
-		String(mods_reparto[0].get("regla", ""))
-		!= String(mods_procedimiento[0].get("regla", "")),
+		String(mods_reparto[0].get("regla", "")) != String(mods_procedimiento[0].get("regla", "")),
 		"dos decisiones pueden producir relaciones estructurales distintas",
 	)
 
@@ -94,18 +99,19 @@ func _probar_elecciones_deforman_la_misma_familia() -> void:
 	var mundo_procedimiento := Node3D.new()
 	root.add_child(mundo_reparto)
 	root.add_child(mundo_procedimiento)
-	SuenoUtileria.montar(
-		mundo_reparto, "crucero", 1, 923, [], ["archivador"], [], mods_reparto
-	)
-	SuenoUtileria.montar(
-		mundo_procedimiento,
-		"crucero",
-		1,
-		923,
-		[],
-		["archivador"],
-		[],
-		mods_procedimiento,
+	SuenoUtileria.montar(mundo_reparto, "crucero", 1, 923, [], ["archivador"], [], mods_reparto)
+	(
+		SuenoUtileria
+		. montar(
+			mundo_procedimiento,
+			"crucero",
+			1,
+			923,
+			[],
+			["archivador"],
+			[],
+			mods_procedimiento,
+		)
 	)
 
 	var rima_a := _primera_rima(mundo_reparto)
@@ -132,13 +138,17 @@ func _probar_elecciones_deforman_la_misma_familia() -> void:
 				"procedimiento usa capas sucesivas",
 			)
 			_comprobar(
-				capa_a.find_children("*", "MeshInstance3D", true, false).size()
-				!= capa_b.find_children("*", "MeshInstance3D", true, false).size(),
+				(
+					capa_a.find_children("*", "MeshInstance3D", true, false).size()
+					!= capa_b.find_children("*", "MeshInstance3D", true, false).size()
+				),
 				"la misma base recibe composiciones estructurales distintas",
 			)
 			_comprobar(
-				capa_a.find_children("*", "CollisionShape3D", true, false).is_empty()
-				and capa_b.find_children("*", "CollisionShape3D", true, false).is_empty(),
+				(
+					capa_a.find_children("*", "CollisionShape3D", true, false).is_empty()
+					and capa_b.find_children("*", "CollisionShape3D", true, false).is_empty()
+				),
 				"el primer vertical no altera colisión ni navegación",
 			)
 	mundo_reparto.queue_free()
@@ -147,13 +157,16 @@ func _probar_elecciones_deforman_la_misma_familia() -> void:
 
 func _probar_exposicion_solo_visual() -> void:
 	var estado := _estado()
-	Prometeo.registrar_exposicion_ideologica(
-		estado,
-		"tv:fixture",
-		"tv:fixture",
-		"centrista",
-		1,
-		["procedimiento", "evaluación"],
+	(
+		Prometeo
+		. registrar_exposicion_ideologica(
+			estado,
+			"tv:fixture",
+			"tv:fixture",
+			"centrista",
+			1,
+			["procedimiento", "evaluación"],
+		)
 	)
 	var modificadores := IDEOLOGIA_SUENO.modificadores(estado, 1, 923, false)
 	_comprobar(modificadores.size() == 1, "una exposición real puede modular la noche")
@@ -190,23 +203,29 @@ func _probar_exposicion_solo_visual() -> void:
 
 func _probar_reproducibilidad() -> void:
 	var estado := _estado()
-	Prometeo.registrar_eleccion_ideologica(
-		estado,
-		"fixture:a",
-		"expediente",
-		"comunismo",
-		"caso-a",
-		1,
-		["responsabilidad_colectiva"],
+	(
+		Prometeo
+		. registrar_eleccion_ideologica(
+			estado,
+			"fixture:a",
+			"expediente",
+			"comunismo",
+			"caso-a",
+			1,
+			["responsabilidad_colectiva"],
+		)
 	)
-	Prometeo.registrar_eleccion_ideologica(
-		estado,
-		"fixture:b",
-		"expediente",
-		"centrista",
-		"caso-b",
-		1,
-		["conciliacion"],
+	(
+		Prometeo
+		. registrar_eleccion_ideologica(
+			estado,
+			"fixture:b",
+			"expediente",
+			"centrista",
+			"caso-b",
+			1,
+			["conciliacion"],
+		)
 	)
 	var a := IDEOLOGIA_SUENO.modificadores(estado, 1, 12345, false)
 	var b := IDEOLOGIA_SUENO.modificadores(estado, 1, 12345, false)
@@ -215,13 +234,16 @@ func _probar_reproducibilidad() -> void:
 
 func _probar_reduccion_movimiento() -> void:
 	var estado := _estado()
-	Prometeo.registrar_exposicion_ideologica(
-		estado,
-		"tv:movimiento",
-		"tv:fixture",
-		"centrista",
-		1,
-		["procedimiento"],
+	(
+		Prometeo
+		. registrar_exposicion_ideologica(
+			estado,
+			"tv:movimiento",
+			"tv:fixture",
+			"centrista",
+			1,
+			["procedimiento"],
+		)
 	)
 	var normal := IDEOLOGIA_SUENO.modificadores(estado, 1, 923, false)
 	var reducida := IDEOLOGIA_SUENO.modificadores(estado, 1, 923, true)
@@ -230,8 +252,10 @@ func _probar_reduccion_movimiento() -> void:
 		"reducir movimiento no cambia la regla o familia seleccionada",
 	)
 	_comprobar(
-		float(reducida[0]["parametros"].get("cirros", 0.0))
-			< float(normal[0]["parametros"].get("cirros", 0.0)),
+		(
+			float(reducida[0]["parametros"].get("cirros", 0.0))
+			< float(normal[0]["parametros"].get("cirros", 0.0))
+		),
 		"reducción de movimiento atenúa únicamente parámetros animados",
 	)
 
