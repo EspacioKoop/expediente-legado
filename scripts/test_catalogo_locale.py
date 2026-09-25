@@ -89,6 +89,16 @@ class CatalogoLocaleTest(unittest.TestCase):
             self.assertNotEqual(logro_es["titulo"], logro_en["titulo"])
             self.assertNotEqual(logro_es["descripcion"], logro_en["descripcion"])
 
+    def test_prometeo_ingles_traduce_todo_el_tarot(self):
+        for carta_es, carta_en in zip(
+            self.prometeo_es["tarot"], self.prometeo_en["tarot"], strict=True
+        ):
+            self.assertEqual(carta_es["id"], carta_en["id"])
+            self.assertNotEqual(carta_es["nombre"], carta_en["nombre"])
+            self.assertNotEqual(carta_es["descripcion"], carta_en["descripcion"])
+            if carta_es["requisito"]:
+                self.assertNotEqual(carta_es["requisito"], carta_en["requisito"])
+
     def test_el_contrato_permite_traducir_texto_pero_no_quitar_fichas(self):
         traducida = copy.deepcopy(self.es)
         traducida["casos"][0]["descripcion"] = "Translated text"

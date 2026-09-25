@@ -144,179 +144,179 @@
   "tarot": [
     {
       "id": "el-loco",
-      "nombre": "El Loco",
-      "descripcion": "Empezó sin saber en qué expediente se estaba metiendo.",
+      "nombre": "The Fool",
+      "descripcion": "You started without knowing what kind of case you were getting into.",
       "recogida": true,
       "gastada": false,
       "requisito": ""
     },
     {
       "id": "el-mago",
-      "nombre": "El Mago",
-      "descripcion": "Convierte un formulario en otro con solo cambiar el membrete.",
+      "nombre": "The Magician",
+      "descripcion": "Turns one form into another just by changing the letterhead.",
       "recogida": false,
       "gastada": false,
-      "requisito": "Descubra su primera pista."
+      "requisito": "Discover your first clue."
     },
     {
       "id": "la-sacerdotisa",
-      "nombre": "La Sacerdotisa",
-      "descripcion": "Sabe lo que hay en el cajón cerrado y no lo dice.",
+      "nombre": "The High Priestess",
+      "descripcion": "She knows what is in the locked drawer and does not say.",
       "recogida": false,
       "gastada": false,
-      "requisito": "Hay algo oculto en «El expediente del empleado #427»."
+      "requisito": "Something is hidden in “The file of employee #427”."
     },
     {
       "id": "la-emperatriz",
-      "nombre": "La Emperatriz",
-      "descripcion": "Firma en nombre de alguien que ya no trabaja aquí.",
+      "nombre": "The Empress",
+      "descripcion": "She signs on behalf of someone who no longer works here.",
       "recogida": false,
       "gastada": false,
-      "requisito": "Hay algo oculto en «El expediente de la herencia Karamázov»."
+      "requisito": "Something is hidden in “The Karamazov inheritance file”."
     },
     {
       "id": "el-emperador",
-      "nombre": "El Emperador",
-      "descripcion": "Su despacho existe aunque nadie lo haya visto abierto.",
+      "nombre": "The Emperor",
+      "descripcion": "His office exists even though no one has ever seen it open.",
       "recogida": false,
       "gastada": false,
-      "requisito": "Consiga acceso administrativo."
+      "requisito": "Obtain administrative access."
     },
     {
       "id": "el-hierofante",
-      "nombre": "El Hierofante",
-      "descripcion": "Dicta el procedimiento correcto, que cambia según el día.",
+      "nombre": "The Hierophant",
+      "descripcion": "He dictates the correct procedure, which changes depending on the day.",
       "recogida": false,
       "gastada": false,
-      "requisito": "Cierre un expediente con una acusación."
+      "requisito": "Close a case with an accusation."
     },
     {
       "id": "los-enamorados",
-      "nombre": "Los Enamorados",
-      "descripcion": "Dos documentos que no deberían ir juntos, van juntos.",
+      "nombre": "The Lovers",
+      "descripcion": "Two documents that should not go together, go together.",
       "recogida": false,
       "gastada": false,
-      "requisito": "Complete la investigación de un expediente."
+      "requisito": "Complete a case investigation."
     },
     {
       "id": "el-carro",
-      "nombre": "El Carro",
-      "descripcion": "Avanza aunque nadie sepa hacia dónde apunta el trámite.",
+      "nombre": "The Chariot",
+      "descripcion": "It moves forward even though no one knows where the procedure is headed.",
       "recogida": false,
       "gastada": false,
-      "requisito": "Hay algo oculto en «El expediente MEMO-1978-014 (y 1993, y 2007)»."
+      "requisito": "Something is hidden in “The MEMO-1978-014 file (and 1993, and 2007)”."
     },
     {
       "id": "la-fuerza",
-      "nombre": "La Fuerza",
-      "descripcion": "No necesita imponerse: solo aguanta más rondas de las que debería.",
+      "nombre": "Strength",
+      "descripcion": "It does not need to impose itself: it simply lasts more rounds than it should.",
       "recogida": false,
       "gastada": false,
-      "requisito": "Juegue en dificultad difícil."
+      "requisito": "Play on hard difficulty."
     },
     {
       "id": "el-ermitanio",
-      "nombre": "El Ermitaño",
-      "descripcion": "Se quedó solo con el expediente después de que lo señalaran.",
+      "nombre": "The Hermit",
+      "descripcion": "He was left alone with the file after they singled him out.",
       "recogida": false,
       "gastada": false,
-      "requisito": "Pierda una vida por acusar sin fundamento."
+      "requisito": "Lose a life by making an unfounded accusation."
     },
     {
       "id": "la-rueda",
-      "nombre": "La Rueda de la Fortuna",
-      "descripcion": "El trámite gira y siempre cae del lado que no esperaba.",
+      "nombre": "Wheel of Fortune",
+      "descripcion": "The procedure turns and always lands on the side you did not expect.",
       "recogida": false,
       "gastada": false,
-      "requisito": "Hay algo oculto en «El trámite de la silla 4-B»."
+      "requisito": "Something is hidden in “The 4-B chair procedure”."
     },
     {
       "id": "la-justicia",
-      "nombre": "La Justicia",
-      "descripcion": "Pesa las pruebas después de haber decidido ya la sentencia.",
+      "nombre": "Justice",
+      "descripcion": "It weighs the evidence after the sentence has already been decided.",
       "recogida": false,
       "gastada": false,
-      "requisito": "Hay algo oculto en «El cierre de caja de 1999»."
+      "requisito": "Something is hidden in “The 1999 cash closing”."
     },
     {
       "id": "el-colgado",
-      "nombre": "El Colgado",
-      "descripcion": "Cuelga de una decisión que todavía no ha terminado de tomar.",
+      "nombre": "The Hanged Man",
+      "descripcion": "He hangs from a decision he still has not finished making.",
       "recogida": false,
       "gastada": false,
-      "requisito": "Gane un enfrentamiento."
+      "requisito": "Win a confrontation."
     },
     {
       "id": "la-muerte",
-      "nombre": "La Muerte",
-      "descripcion": "No es el final. Aquí nunca lo es.",
+      "nombre": "Death",
+      "descripcion": "It is not the end. Here it never is.",
       "recogida": false,
       "gastada": false,
-      "requisito": "Sea reasignado por acumular demasiados fallos."
+      "requisito": "Be reassigned after accumulating too many failures."
     },
     {
       "id": "la-templanza",
-      "nombre": "La Templanza",
-      "descripcion": "Cambia una certeza por otra cosa que todavía no sabe si necesita.",
+      "nombre": "Temperance",
+      "descripcion": "It trades one certainty for something else you still do not know you need.",
       "recogida": false,
       "gastada": false,
-      "requisito": "Canjee una carta por una vida."
+      "requisito": "Trade a card for a life."
     },
     {
       "id": "el-diablo",
-      "nombre": "El Diablo",
-      "descripcion": "Le hizo marcar una casilla que no significaba nada. Y usted la marcó.",
+      "nombre": "The Devil",
+      "descripcion": "It made you tick a box that meant nothing. And you ticked it.",
       "recogida": false,
       "gastada": false,
-      "requisito": "Tropiece con una verificación falsa."
+      "requisito": "Run into a false verification."
     },
     {
       "id": "la-torre",
-      "nombre": "La Torre",
-      "descripcion": "Todo lo que creía firme se cae de golpe, y sigue ahí de pie de todos modos.",
+      "nombre": "The Tower",
+      "descripcion": "Everything you thought was solid collapses at once, and somehow it is still standing.",
       "recogida": false,
       "gastada": false,
-      "requisito": "Deje pasar demasiado tiempo sin hacer nada."
+      "requisito": "Let too much time pass without doing anything."
     },
     {
       "id": "la-estrella",
-      "nombre": "La Estrella",
-      "descripcion": "Una luz pequeña, pero constante, entre tanto expediente sin cerrar.",
+      "nombre": "The Star",
+      "descripcion": "A small but steady light among so many unfinished files.",
       "recogida": false,
       "gastada": false,
-      "requisito": "Descubra al menos veinte pistas."
+      "requisito": "Discover at least twenty clues."
     },
     {
       "id": "la-luna",
-      "nombre": "La Luna",
-      "descripcion": "Ilumina lo mismo de siempre, pero ahora se ve todo lo que había alrededor.",
+      "nombre": "The Moon",
+      "descripcion": "It lights the same old thing, but now you can see everything around it.",
       "recogida": false,
       "gastada": false,
-      "requisito": "Hay algo oculto en «Contrato de fin de año con Carcosa Servicios Escénicos»."
+      "requisito": "Something is hidden in “Year-end contract with Carcosa Servicios Escénicos”."
     },
     {
       "id": "el-sol",
-      "nombre": "El Sol",
-      "descripcion": "El único documento que no necesita ninguna firma para ser verdad.",
+      "nombre": "The Sun",
+      "descripcion": "The only document that needs no signature to be true.",
       "recogida": false,
       "gastada": false,
-      "requisito": "Hay algo oculto en un expediente confidencial. Necesitará acceso administrativo."
+      "requisito": "Something is hidden in a confidential file. You will need administrative access."
     },
     {
       "id": "el-juicio",
-      "nombre": "El Juicio",
-      "descripcion": "Ha señalado a alguien en cada expediente. Ahora que decida el sistema.",
+      "nombre": "Judgement",
+      "descripcion": "You have pointed to someone in every case. Now let the system decide.",
       "recogida": false,
       "gastada": false,
-      "requisito": "Hay algo oculto en «Traspaso de personal: expediente de E. Montalvo»."
+      "requisito": "Something is hidden in “Personnel transfer: E. Montalvo file”."
     },
     {
       "id": "el-mundo",
-      "nombre": "El Mundo",
-      "descripcion": "Las veintiuna cartas anteriores, cerrando el círculo.",
+      "nombre": "The World",
+      "descripcion": "The previous twenty-one cards, closing the circle.",
       "recogida": false,
       "gastada": false,
-      "requisito": "Reúna el resto de cartas sin gastar ninguna."
+      "requisito": "Collect the rest of the cards without spending any."
     }
   ],
   "historias": {
