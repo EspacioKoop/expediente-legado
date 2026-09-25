@@ -173,7 +173,7 @@
     {
       "id": "caso3@3",
       "titulo": "Traspaso de personal: expediente de E. Montalvo",
-      "descripcion": "En 1993 se registró el traslado del empleado E. Montalvo al 'Departamento de Enlace Especial', ubicado según el memo en el piso 13. El edificio, de acuerdo con todos los planos y actas de mantenimiento, tiene solo doce pisos. A partir de la fecha del traslado no existe ningún otro registro de Montalvo: ni recibos de nómina, ni renuncia, ni baja. El memo de traslado, sin embargo, aparece debidamente sellado de recibido.",
+      "descripcion": "In 1993, employee E. Montalvo was recorded as transferred to the 'Special Liaison Department', located according to the memorandum on the 13th floor. The building, according to every plan and maintenance report, has only twelve floors. From the date of the transfer onward there is no further record of Montalvo: no pay slips, resignation, or termination. The transfer memorandum, however, is properly stamped as received.",
       "anioSuceso": 1993,
       "estado": "ABIERTO",
       "confidencial": false,
@@ -183,28 +183,28 @@
           "id": "memo3@3",
           "tipo": "MEMORANDO",
           "folio": "MEMO-1993-201",
-          "contenido": "Se traslada a E. Montalvo al Departamento de Enlace Especial, piso 13, por instrucción del Comité Ad Honorem. Preséntese el día 05/07/1993 sin excepción.",
+          "contenido": "E. Montalvo is transferred to the Special Liaison Department, 13th floor, by instruction of the Ad Honorem Committee. Report there on 05/07/1993 without exception.",
           "fecha": "1993-07-01"
         },
         {
           "id": "oficio3@3",
           "tipo": "OFICIO",
           "folio": "OF-1993-055",
-          "contenido": "Administración de edificio informa que el inmueble consta de doce niveles. No existe botón de piso 13 en ningún elevador ni escalera registrada en los planos vigentes.",
+          "contenido": "Building Administration reports that the property has twelve levels. There is no 13th-floor button in any elevator and no staircase to such a floor appears in the current plans.",
           "fecha": "1993-07-10"
         },
         {
           "id": "acta3@3",
           "tipo": "ACTA",
           "folio": "ACTA-1993-009",
-          "contenido": "Acta de reunión del Comité Ad Honorem donde se autoriza el traslado. Lista de asistentes: L. Pardo, R. Guzmán, [nombre ilegible en el original digitalizado]. No se encontró este comité en ningún organigrama oficial de la empresa.",
+          "contenido": "Minutes of the Ad Honorem Committee meeting authorizing the transfer. Attendees: L. Pardo, R. Guzmán, [name illegible in the digitized original]. No record of this committee was found in any official company organization chart.",
           "fecha": "1993-06-28"
         },
         {
           "id": "empleado3@3",
           "tipo": "EMPLEADO",
           "folio": "EMP-0233",
-          "contenido": "E. Montalvo. Auxiliar administrativo 1988-1993. Último recibo de nómina: junio de 1993. Sin renuncia ni baja registrada después del traslado.",
+          "contenido": "E. Montalvo. Administrative assistant, 1988-1993. Last pay slip: June 1993. No resignation or termination recorded after the transfer.",
           "fecha": "1993-06-30"
         }
       ],
@@ -212,53 +212,53 @@
         {
           "id": "pista5@3",
           "registroOrigen": "oficio3@3",
-          "descripcion": "No existe un piso 13 en los planos del edificio, pero el memo de traslado fue timbrado de recibido como si el destino fuera real.",
-          "fraseGatillo": "No existe botón de piso 13"
+          "descripcion": "There is no 13th floor in the building plans, yet the transfer memorandum was stamped as received as though the destination were real.",
+          "fraseGatillo": "There is no 13th-floor button"
         },
         {
           "id": "pista6@3",
           "registroOrigen": "acta3@3",
-          "descripcion": "El 'Comité Ad Honorem' que ordenó el traslado no figura en ningún organigrama, presupuesto ni acta de constitución conocida de la empresa.",
-          "fraseGatillo": "No se encontró este comité en ningún organigrama oficial"
+          "descripcion": "The 'Ad Honorem Committee' that ordered the transfer appears in no known company organization chart, budget, or founding record.",
+          "fraseGatillo": "No record of this committee was found in any official organization chart"
         },
         {
           "id": "pista23@3",
           "registroOrigen": "memo3@3",
           "registroOrigen2": "oficio3@3",
-          "descripcion": "La confirmación de que no existe un piso 13 llegó cinco días después de la fecha en que, según el propio memo de traslado, Montalvo ya debía haberse presentado ahí."
+          "descripcion": "Confirmation that no 13th floor exists arrived five days after the date on which, according to the transfer memorandum itself, Montalvo was already supposed to have reported there."
         },
         {
           "id": "pista30@3",
           "registroOrigen": "acta3@3",
           "registroOrigen2": "empleado3@3",
-          "descripcion": "El nombre ilegible en la lista de asistentes del acta comparte la misma clave de empleado que aparece en el expediente de E. Montalvo."
+          "descripcion": "The illegible name on the meeting attendance list shares the same employee code that appears in E. Montalvo's personnel file."
         }
       ],
       "sospechosos": [
         {
           "id": "sospechosoComite3@3",
           "nombre": "Comité Ad Honorem",
-          "descripcion": "Ordenó el traslado a un piso que, según todos los planos, no existe.",
-          "desenlace": "Se solicita al Comité Ad Honorem un informe sobre el traslado. La solicitud se turna, por instrucción del propio comité, al Departamento de Enlace Especial, piso 13."
+          "descripcion": "Ordered the transfer to a floor that, according to every plan, does not exist.",
+          "desenlace": "The Ad Honorem Committee is asked for a report on the transfer. By instruction of the committee itself, the request is forwarded to the Special Liaison Department, 13th floor."
         },
         {
           "id": "sospechosoRecepcion3@3",
-          "nombre": "Recepción del edificio",
-          "descripcion": "Selló de recibido un memorándum con un destino que el propio edificio no tiene.",
-          "desenlace": "Se amonesta al personal de recepción por sellar de recibido un memorándum con un destino inexistente. El sello utilizado ese día ya no está en el inventario de la empresa."
+          "nombre": "Building Reception",
+          "descripcion": "Stamped as received a memorandum whose destination does not exist in the building.",
+          "desenlace": "Reception staff are reprimanded for stamping as received a memorandum addressed to a nonexistent destination. The stamp used that day is no longer in the company inventory."
         },
         {
           "id": "sospechosoMontalvo@3",
           "nombre": "E. Montalvo",
-          "descripcion": "El propio empleado trasladado. Nunca reportó la inconsistencia del piso 13 antes de presentarse.",
-          "desenlace": "Se determina que correspondía al propio empleado señalar la inconsistencia del piso 13 antes de presentarse a su nuevo puesto. El expediente no aclara cómo debía hacerlo, dado que ya no hay forma de contactarlo."
+          "descripcion": "The transferred employee himself. He never reported the inconsistency of the 13th floor before reporting for duty.",
+          "desenlace": "It is determined that the employee himself should have pointed out the 13th-floor inconsistency before reporting to his new post. The file does not explain how he was supposed to do so, since there is now no way to contact him."
         }
       ]
     },
     {
       "id": "caso4@4",
       "titulo": "Contrato de fin de año con Carcosa Servicios Escénicos",
-      "descripcion": "Para la fiesta de aniversario de 1996, Recursos Humanos contrató a 'Carcosa Servicios Escénicos' para montar una obra de teatro. Las facturas detallan un cobro adicional específicamente por NO representar el segundo acto. En la semana siguiente al evento, varios empleados que asistieron solicitaron cambio de área o renunciaron, citando motivos que ninguno quiso poner por escrito.",
+      "descripcion": "For the company's 1996 anniversary party, Human Resources hired 'Carcosa Servicios Escénicos' to stage a play. The invoices itemize an additional charge specifically for NOT performing the second act. In the week after the event, several employees who attended requested transfers or resigned, citing reasons none of them were willing to put in writing.",
       "anioSuceso": 1996,
       "estado": "ABIERTO",
       "confidencial": false,
@@ -268,28 +268,28 @@
           "id": "factura4@4",
           "tipo": "FACTURA",
           "folio": "F-1996-00187",
-          "contenido": "Carcosa Servicios Escénicos S. de R.L. Concepto: 'montaje escénico, Acto I únicamente'. Recargo por omisión del Acto II, incluido a solicitud expresa del cliente. Campo de RFC del proveedor: en blanco. Sello de recibido: no corresponde al sello oficial de la empresa; es de color amarillo.",
+          "contenido": "Carcosa Servicios Escénicos S. de R.L. Item: 'stage production, Act I only.' Surcharge for omission of Act II, included at the client's express request. Supplier RFC field: blank. Receipt stamp: does not match the company's official stamp; it is yellow.",
           "fecha": "1996-12-18"
         },
         {
           "id": "memo4@4",
           "tipo": "MEMORANDO",
           "folio": "MEMO-1996-233",
-          "contenido": "De: Recursos Humanos. Nota interna posterior al evento: cinco empleados han solicitado cambio de área esta semana. Motivo consignado por todos ellos, de forma idéntica: 'prefiero no decirlo por escrito'. Se recomienda no dar seguimiento adicional al tema.",
+          "contenido": "From: Human Resources. Internal note after the event: five employees have requested department transfers this week. Reason entered by all of them, identically: 'I would rather not put it in writing.' No further follow-up is recommended.",
           "fecha": "1996-12-23"
         },
         {
           "id": "acta4@4",
           "tipo": "ACTA",
           "folio": "ACTA-1996-041",
-          "contenido": "Acta del comité organizador agradeciendo a Carcosa Servicios Escénicos por un 'excelente Acto I'. Se decidió, por unanimidad y sin discusión, no proceder con la lectura del segundo acto, conforme a la cláusula 4 del contrato.",
+          "contenido": "Minutes of the organizing committee thanking Carcosa Servicios Escénicos for an 'excellent Act I.' It was decided unanimously and without discussion not to proceed with the reading of the second act, pursuant to clause 4 of the contract.",
           "fecha": "1996-12-19"
         },
         {
           "id": "empleado4@4",
           "tipo": "EMPLEADO",
           "folio": "EMP-0378",
-          "contenido": "Empleado solicitó cambio de área el 21/12/1996, tres días después del evento de aniversario. Motivo consignado en el formulario oficial: 'prefiero no decirlo por escrito.'",
+          "contenido": "Employee requested a department transfer on 21/12/1996, three days after the anniversary event. Reason entered on the official form: 'I would rather not put it in writing.'",
           "fecha": "1996-12-21"
         }
       ],
@@ -297,46 +297,46 @@
         {
           "id": "pista7@4",
           "registroOrigen": "acta4@4",
-          "descripcion": "El contrato con Carcosa incluye una cláusula que prohíbe expresamente representar el Acto II. Nadie en el comité recuerda quién la propuso ni por qué.",
-          "fraseGatillo": "no proceder con la lectura del segundo acto"
+          "descripcion": "The contract with Carcosa contains a clause expressly forbidding performance of Act II. Nobody on the committee remembers who proposed it or why.",
+          "fraseGatillo": "not proceed with the reading of the second act"
         },
         {
           "id": "pista8@4",
           "registroOrigen": "memo4@4",
-          "descripcion": "Cinco empleados pidieron cambio de área la misma semana, con la misma frase exacta como motivo. Recursos Humanos decidió no investigar más a fondo.",
-          "fraseGatillo": "prefiero no decirlo por escrito"
+          "descripcion": "Five employees requested transfers in the same week, using the exact same phrase as their reason. Human Resources decided not to investigate further.",
+          "fraseGatillo": "I would rather not put it in writing"
         },
         {
           "id": "pista24@4",
           "registroOrigen": "factura4@4",
           "registroOrigen2": "acta4@4",
-          "descripcion": "La cláusula 4 del contrato aparece redactada con la misma tinta y sello amarillo de la factura, aunque ningún miembro del comité recuerda haberla negociado ni firmado ese documento."
+          "descripcion": "Clause 4 of the contract appears to have been written with the same ink and yellow stamp as the invoice, although no committee member remembers negotiating it or signing that document."
         },
         {
           "id": "pista31@4",
           "registroOrigen": "memo4@4",
           "registroOrigen2": "empleado4@4",
-          "descripcion": "Este es el primero de los cinco empleados que reportó Recursos Humanos esa semana; es también el único cuyo nombre no aparece tachado en la lista interna adjunta al memo."
+          "descripcion": "This is the first of the five employees Human Resources reported that week; it is also the only one whose name is not crossed out on the internal list attached to the memorandum."
         }
       ],
       "sospechosos": [
         {
           "id": "sospechosoCarcosa@4",
           "nombre": "Carcosa Servicios Escénicos",
-          "descripcion": "El proveedor contratado para el evento. Cobró un recargo específico por no representar el Acto II.",
-          "desenlace": "Se cancela el contrato con Carcosa Servicios Escénicos para futuros eventos. La empresa no tiene manera de notificarles: el domicilio fiscal registrado corresponde a un teatro clausurado en 1962."
+          "descripcion": "The supplier hired for the event. Charged a specific surcharge for not performing Act II.",
+          "desenlace": "The contract with Carcosa Servicios Escénicos is cancelled for future events. The company has no way to notify them: the registered tax address belongs to a theater closed since 1962."
         },
         {
           "id": "sospechosoComiteOrganizador@4",
-          "nombre": "El comité organizador del evento",
-          "descripcion": "Aprobó la cláusula que prohíbe el Acto II sin discusión ni registro de quién la propuso.",
-          "desenlace": "Se solicita al comité organizador una explicación por no cuestionar la cláusula del Acto II. Ningún integrante recuerda haber estado en la reunión donde se aprobó."
+          "nombre": "The event organizing committee",
+          "descripcion": "Approved the clause prohibiting Act II without discussion or any record of who proposed it.",
+          "desenlace": "The organizing committee is asked to explain why it did not question the Act II clause. No member remembers attending the meeting where it was approved."
         },
         {
           "id": "sospechosoRRHH4@4",
-          "nombre": "Recursos Humanos",
-          "descripcion": "Recibió los cinco reportes de cambio de área la misma semana y decidió no darles seguimiento.",
-          "desenlace": "Se instruye a Recursos Humanos investigar los cambios de área solicitados esa semana. Recursos Humanos responde que, siguiendo su propia recomendación anterior, no le dará seguimiento."
+          "nombre": "Human Resources",
+          "descripcion": "Received the five transfer reports in the same week and decided not to follow them up.",
+          "desenlace": "Human Resources is instructed to investigate the transfer requests filed that week. Human Resources replies that, following its own earlier recommendation, it will not pursue the matter."
         }
       ]
     },
