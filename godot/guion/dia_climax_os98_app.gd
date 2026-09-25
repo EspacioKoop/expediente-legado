@@ -83,7 +83,7 @@ func _sincronizar_documento(
 	var ajuste := (configuracion as Dictionary).duplicate(true)
 	ajuste["semilla"] = "%s:%d" % [
 		String(ajuste.get("semilla", "contaminacion-os98")),
-		_texto_original.hash(),
+		hash(_texto_original),
 	]
 	var duracion := maxf(0.01, float(ajuste.get("duracion", 1.35)))
 	_tiempo_texto = fmod(_tiempo_texto + maxf(delta, 0.0), duracion * 2.0)
