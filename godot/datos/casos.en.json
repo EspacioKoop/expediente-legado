@@ -537,8 +537,8 @@
     },
     {
       "id": "caso7@7",
-      "titulo": "El expediente de la herencia Karamázov",
-      "descripcion": "Tras la muerte repentina de F. P. Karamázov, fundador y accionista mayoritario, sus tres hijos reclamaron una herencia de $3,000,000 en acciones que nunca se formalizó en ningún testamento. Uno de ellos fue despedido y señalado por Recursos Humanos como responsable de la desaparición de los fondos; el expediente de su defensa nunca llegó a revisarse.",
+      "titulo": "The Karamazov Inheritance File",
+      "descripcion": "After the sudden death of F. P. Karamazov, founder and majority shareholder, his three sons claimed an inheritance of $3,000,000 in shares that was never formalized in any will. One of them was dismissed and identified by Human Resources as responsible for the disappearance of the funds; the file containing his defense was never reviewed.",
       "anioSuceso": 1998,
       "estado": "CERRADO",
       "confidencial": false,
@@ -548,28 +548,28 @@
           "id": "empleadoD@7",
           "tipo": "EMPLEADO",
           "folio": "EMP-0512",
-          "contenido": "D. Karamázov. Gerente de Ventas 1990-1998. Reclamó por escrito, en al menos tres juntas, el dinero que su padre le adeudaba. Despedido el 14/09/1998 por 'conducta impropia', cuatro días después de la desaparición de los fondos.",
+          "contenido": "D. Karamazov. Sales Manager, 1990-1998. In at least three meetings, he demanded in writing the money his father owed him. Dismissed on 14/09/1998 for 'improper conduct,' four days after the disappearance of the funds.",
           "fecha": "1998-09-14"
         },
         {
           "id": "memoI@7",
           "tipo": "MEMORANDO",
           "folio": "MEMO-1998-091",
-          "contenido": "De: I. Karamázov, Departamento de Planeación. Circular interna sin destinatario claro: 'Si ningún superior revisa jamás un expediente, entonces todo lo que hagamos con él está permitido.' Distribuida por correo interno una semana antes del cierre de caja.",
+          "contenido": "From: I. Karamazov, Planning Department. Internal circular with no clear recipient: 'If no superior ever reviews a file, then everything we do with it is permitted.' Distributed through internal mail one week before the cash closing.",
           "fecha": "1998-09-06"
         },
         {
           "id": "empleadoSmerdiakov@7",
           "tipo": "EMPLEADO",
           "folio": "EMP-0533",
-          "contenido": "P. Smerdiakov. Asistente personal de F. P. Karamázov, único empleado con llave de la caja fuerte. Falleció el 20/09/1998, seis días después de la desaparición de los fondos. Recursos Humanos cerró su expediente sin abrir investigación.",
+          "contenido": "P. Smerdiakov. Personal assistant to F. P. Karamazov, the only employee with a key to the safe. Died on 20/09/1998, six days after the disappearance of the funds. Human Resources closed his file without opening an investigation.",
           "fecha": "1998-09-20"
         },
         {
           "id": "oficioA@7",
           "tipo": "OFICIO",
           "folio": "OF-1998-077",
-          "contenido": "A. Karamázov solicita la reapertura del caso de su hermano D. Karamázov, argumentando que la acusación se basó solo en reclamos verbales, no en evidencia de acceso a la caja fuerte. Respuesta de Contraloría: 'Procedimiento cerrado, no ha lugar.'",
+          "contenido": "A. Karamazov requests that the case of his brother D. Karamazov be reopened, arguing that the accusation was based only on verbal claims, not evidence of access to the safe. Comptroller's response: 'Procedure closed; no action warranted.'",
           "fecha": "1998-10-02"
         }
       ],
@@ -577,65 +577,65 @@
         {
           "id": "pista14@7",
           "registroOrigen": "memoI@7",
-          "descripcion": "El memorándum de I. Karamázov circuló apenas una semana antes de la desaparición de los fondos, y llegó por correo interno a todo el personal con llave de la caja fuerte.",
-          "fraseGatillo": "una semana antes del cierre de caja"
+          "descripcion": "I. Karamazov's memorandum circulated just one week before the funds disappeared and reached every employee with a key to the safe through internal mail.",
+          "fraseGatillo": "one week before the cash closing"
         },
         {
           "id": "pista15@7",
           "registroOrigen": "empleadoSmerdiakov@7",
-          "descripcion": "El único empleado con acceso a la caja fuerte falleció seis días después de los hechos, sin que Recursos Humanos abriera investigación alguna sobre su fallecimiento.",
-          "fraseGatillo": "sin abrir investigación"
+          "descripcion": "The only employee with access to the safe died six days after the events, without Human Resources opening any investigation into his death.",
+          "fraseGatillo": "without opening an investigation"
         },
         {
           "id": "pista16@7",
           "registroOrigen": "empleadoD@7",
-          "descripcion": "La acusación contra D. Karamázov se basó únicamente en sus reclamos públicos por escrito; nadie verificó si tuvo acceso real a la caja fuerte.",
-          "fraseGatillo": "cuatro días después de la desaparición de los fondos"
+          "descripcion": "The accusation against D. Karamazov was based solely on his public written complaints; nobody checked whether he actually had access to the safe.",
+          "fraseGatillo": "four days after the disappearance of the funds"
         },
         {
           "id": "pista21@7",
           "registroOrigen": "memoI@7",
           "registroOrigen2": "empleadoSmerdiakov@7",
-          "descripcion": "El memo de I. Karamázov fue sellado de recibido por P. Smerdiakov el mismo día en que este retiró la llave de la caja fuerte de su cajón habitual."
+          "descripcion": "I. Karamazov's memorandum was stamped as received by P. Smerdiakov on the same day Smerdiakov removed the safe key from its usual drawer."
         },
         {
           "id": "pista34@7",
           "registroOrigen": "empleadoD@7",
           "registroOrigen2": "oficioA@7",
-          "descripcion": "La solicitud de reapertura de A. Karamázov está fechada el mismo día en que, según el expediente de su hermano, Contraloría ya había archivado el caso como 'sin elementos adicionales' — antes de recibir la solicitud."
+          "descripcion": "A. Karamazov's reopening request is dated the same day that, according to his brother's file, the Comptroller's Office had already archived the case as 'no additional evidence' — before receiving the request."
         }
       ],
       "sospechosos": [
         {
           "id": "sospechosoD@7",
           "nombre": "D. Karamázov",
-          "descripcion": "Reclamó públicamente el dinero que su padre le debía. Fue despedido cuatro días después de la desaparición de los fondos.",
-          "desenlace": "Se ratifica el despido de D. Karamázov. Nadie investiga si tuvo acceso real a los fondos. Expediente cerrado por segunda vez, con el mismo error que la primera."
+          "descripcion": "Publicly demanded the money his father owed him. He was dismissed four days after the funds disappeared.",
+          "desenlace": "D. Karamazov's dismissal is upheld. Nobody investigates whether he actually had access to the funds. The file is closed for a second time, with the same mistake as the first."
         },
         {
           "id": "sospechosoI@7",
           "nombre": "I. Karamázov",
-          "descripcion": "Distribuyó una circular argumentando que, sin revisión, todo está permitido, justo antes de la desaparición de los fondos.",
-          "desenlace": "Se le cita a comparecer por 'responsabilidad intelectual' sobre la circular. La empresa no cuenta con ningún procedimiento para sancionar una idea, así que el citatorio se archiva sin trámite posterior."
+          "descripcion": "Distributed a circular arguing that, without review, everything is permitted, immediately before the funds disappeared.",
+          "desenlace": "He is summoned to answer for 'intellectual responsibility' for the circular. The company has no procedure for sanctioning an idea, so the summons is filed with no further action."
         },
         {
           "id": "sospechosoSmerdiakovAcusado@7",
           "nombre": "P. Smerdiakov",
-          "descripcion": "Único empleado con llave de la caja fuerte. Falleció seis días después de los hechos.",
-          "desenlace": "Se emite responsiva en contra de un empleado fallecido. Recursos Humanos confirma que, en efecto, no hay impedimento normativo para ello."
+          "descripcion": "The only employee with a key to the safe. Died six days after the events.",
+          "desenlace": "A liability notice is issued against a deceased employee. Human Resources confirms that there is, in fact, no regulatory obstacle to doing so."
         },
         {
           "id": "sospechosoA@7",
           "nombre": "A. Karamázov",
-          "descripcion": "El único hermano que pidió reabrir el caso, argumentando que la acusación original no tenía sustento.",
-          "desenlace": "Se le atribuye responsabilidad por 'exceso de insistencia en la reapertura del caso'. Es la primera vez que solicitar una revisión se documenta como falta administrativa."
+          "descripcion": "The only brother who requested that the case be reopened, arguing that the original accusation lacked any basis.",
+          "desenlace": "Responsibility is assigned to him for 'excessive insistence on reopening the case.' It is the first time that requesting a review is documented as an administrative offense."
         }
       ]
     },
     {
       "id": "caso8@8",
-      "titulo": "El expediente del empleado #427",
-      "descripcion": "El registro de nómina identifica a este empleado únicamente como '#427'. Su descripción de funciones, íntegra, dice: 'Presionar el botón cuando el sistema lo requiera.' Existen al menos tres actas de cierre para este expediente, cada una con un desenlace distinto e incompatible con las demás, las tres fechadas el mismo día.",
+      "titulo": "The Employee #427 File",
+      "descripcion": "The payroll record identifies this employee only as '#427'. Their full job description reads: 'Press the button when the system requires it.' There are at least three closing reports for this file, each with a different outcome incompatible with the others, all three dated the same day.",
       "anioSuceso": 1998,
       "estado": "ABIERTO",
       "confidencial": false,
@@ -645,35 +645,35 @@
           "id": "empleado427@8",
           "tipo": "EMPLEADO",
           "folio": "EMP-0427",
-          "contenido": "#427. Puesto: Operador de terminal, función C. Descripción de funciones íntegra: 'Presionar el botón cuando el sistema lo requiera.' Quince años de antigüedad. Sin evaluaciones de desempeño registradas. Sin nombre en el campo correspondiente.",
+          "contenido": "#427. Position: terminal operator, function C. Full job description: 'Press the button when the system requires it.' Fifteen years of service. No performance evaluations on record. No name in the corresponding field.",
           "fecha": "1983-01-10"
         },
         {
           "id": "actaA@8",
           "tipo": "ACTA",
           "folio": "ACTA-1998-427A",
-          "contenido": "Se determinó que el empleado #427 fue reasignado a labores de conserjería en el sótano, donde permanece. Cierre definitivo del expediente.",
+          "contenido": "It was determined that employee #427 was reassigned to janitorial duties in the basement, where they remain. Final closure of the file.",
           "fecha": "1998-11-05"
         },
         {
           "id": "actaB@8",
           "tipo": "ACTA",
           "folio": "ACTA-1998-427B",
-          "contenido": "Se determinó que el empleado #427 abandonó el inmueble por una ventana del cuarto piso. No hubo testigos. Cierre definitivo del expediente.",
+          "contenido": "It was determined that employee #427 left the building through a fourth-floor window. There were no witnesses. Final closure of the file.",
           "fecha": "1998-11-05"
         },
         {
           "id": "actaC@8",
           "tipo": "ACTA",
           "folio": "ACTA-1998-427C",
-          "contenido": "Se determinó que las instalaciones fueron desmanteladas por completo cuarenta y ocho horas después de iniciada esta investigación, incluido el expediente mismo, que sin embargo usted sigue leyendo. Cierre definitivo del expediente.",
+          "contenido": "It was determined that the premises were completely dismantled forty-eight hours after this investigation began, including the file itself, which you are nevertheless still reading. Final closure of the file.",
           "fecha": "1998-11-05"
         },
         {
           "id": "fax427@8",
           "tipo": "FAX",
           "folio": "FAX-1998-427",
-          "contenido": "Transmisión sin remitente identificado, sin registro de envío ni de recepción. El texto dice, en su totalidad: 'Muy bien. Ha llegado hasta aquí.'",
+          "contenido": "Transmission with no identified sender and no record of sending or receipt. The entire text reads: 'Very good. You made it this far.'",
           "fecha": "1998-11-05"
         }
       ],
@@ -681,58 +681,58 @@
         {
           "id": "pista17@8",
           "registroOrigen": "actaA@8",
-          "descripcion": "Las tres actas de cierre están fechadas el mismo día y a la misma hora, y ninguna hace referencia a las otras dos.",
-          "fraseGatillo": "reasignado a labores de conserjería en el sótano"
+          "descripcion": "All three closing reports are dated the same day and at the same time, and none refers to the other two.",
+          "fraseGatillo": "reassigned to janitorial duties in the basement"
         },
         {
           "id": "pista18@8",
           "registroOrigen": "empleado427@8",
-          "descripcion": "La descripción de funciones de #427 nunca fue cuestionada en quince años: presionar un botón, sin más contexto administrativo ni evaluación alguna.",
-          "fraseGatillo": "Sin evaluaciones de desempeño registradas"
+          "descripcion": "#427's job description was never questioned in fifteen years: press a button, with no further administrative context and no evaluation of any kind.",
+          "fraseGatillo": "No performance evaluations on record"
         },
         {
           "id": "pista19@8",
           "registroOrigen": "fax427@8",
-          "descripcion": "La transmisión sin remitente se dirige directamente a quien consulta el expediente, sin importar cuál de las tres actas haya leído primero.",
-          "fraseGatillo": "Ha llegado hasta aquí"
+          "descripcion": "The senderless transmission addresses whoever is consulting the file directly, regardless of which of the three closing reports they read first.",
+          "fraseGatillo": "You made it this far"
         },
         {
           "id": "pista27@8",
           "registroOrigen": "empleado427@8",
           "registroOrigen2": "fax427@8",
-          "descripcion": "El campo de nombre en el expediente de #427 nunca estuvo lleno. Nadie había notado, hasta ahora, que el campo de remitente del fax tampoco lo está: los dos huecos coinciden en formato, como si fueran el mismo campo repetido dos veces."
+          "descripcion": "The name field in #427's file was never filled in. Nobody had noticed until now that the fax sender field is blank as well: the two empty spaces match in format, as if they were the same field repeated twice."
         },
         {
           "id": "pista35@8",
           "registroOrigen": "actaB@8",
           "registroOrigen2": "actaC@8",
-          "descripcion": "El Acta B dice que #427 salió por una ventana del cuarto piso; el Acta C dice que las instalaciones fueron desmanteladas cuarenta y ocho horas después de iniciar la investigación. Ninguna de las dos actas fue escrita después de la otra: comparten la misma hora de firma."
+          "descripcion": "Report B says #427 left through a fourth-floor window; Report C says the premises were dismantled forty-eight hours after the investigation began. Neither report was written after the other: they share the same signing time."
         }
       ],
       "sospechosos": [
         {
           "id": "sospechosoConserjeria@8",
-          "nombre": "Conserjería del sótano",
-          "descripcion": "Según el Acta A, ahí fue reasignado el empleado #427.",
-          "desenlace": "Se presenta la acusación ante Conserjería. Confirman que #427 nunca se ha presentado a laborar ahí, aunque su gafete sigue registrado en la lista de asistencia diaria."
+          "nombre": "Basement Janitorial Services",
+          "descripcion": "According to Report A, this is where employee #427 was reassigned.",
+          "desenlace": "The accusation is presented to Janitorial Services. They confirm that #427 has never reported to work there, although the badge is still listed on the daily attendance sheet."
         },
         {
           "id": "sospechosoMantenimiento@8",
-          "nombre": "Mantenimiento de la cuarta planta",
-          "descripcion": "Según el Acta B, por su ventana salió el empleado #427.",
-          "desenlace": "Se presenta la acusación ante Mantenimiento. Confirman que la ventana en cuestión no puede abrirse: está sellada desde la construcción del edificio."
+          "nombre": "Fourth-Floor Maintenance",
+          "descripcion": "According to Report B, employee #427 left through their window.",
+          "desenlace": "The accusation is presented to Maintenance. They confirm that the window in question cannot be opened: it has been sealed since the building was constructed."
         },
         {
           "id": "sospechosoEmpresaDesmantelada@8",
-          "nombre": "La empresa que ya no existe",
-          "descripcion": "Según el Acta C, desmantelada por completo cuarenta y ocho horas después de iniciada la investigación.",
-          "desenlace": "Se presenta la acusación contra una empresa que, según las actas, fue desmantelada hace décadas. La acusación se procesa con normalidad. Aparentemente, alguien sigue ahí para recibirla."
+          "nombre": "The company that no longer exists",
+          "descripcion": "According to Report C, it was completely dismantled forty-eight hours after the investigation began.",
+          "desenlace": "The accusation is filed against a company that, according to the reports, was dismantled decades ago. The accusation is processed normally. Apparently, someone is still there to receive it."
         },
         {
           "id": "sospechosoUsted8@8",
-          "nombre": "Usted",
-          "descripcion": "Quien está leyendo el expediente ahora mismo, a quien se dirige la transmisión sin remitente.",
-          "desenlace": "Se presenta la acusación contra quien está leyendo el expediente. No hay una casilla pensada para esta respuesta, así que el sistema la registra igual, en blanco, bajo el nombre '#427'."
+          "nombre": "You",
+          "descripcion": "The person reading the file right now, to whom the senderless transmission is addressed.",
+          "desenlace": "The accusation is filed against whoever is reading the file. There is no box intended for this answer, so the system records it anyway, blank, under the name '#427'."
         }
       ]
     },
