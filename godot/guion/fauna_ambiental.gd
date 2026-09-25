@@ -54,7 +54,7 @@ const CALLE_BASE := [
 	{"especie": "paloma", "pos": Vector3(-2.72, 0.10, 5.75)},
 	{"especie": "gorrion", "pos": Vector3(-3.02, 0.24, -1.6)},
 	{"especie": "gorrion", "pos": Vector3(3.04, 0.24, 8.7)},
-	{"especie": "perro", "pos": Vector3(-2.65, 0.28, 11.2)},
+	{"especie": "perro", "pos": Vector3(-4.72, 0.19, 11.2)},
 ]
 
 const SUENO_ESPECIES := ["cuervo", "cuervo", "polilla", "polilla", "polilla", "ciervo"]
@@ -124,7 +124,7 @@ static func _plan_sueno(
 			"polilla":
 				posicion.y += 1.45 + rng.randf_range(-0.18, 0.30)
 			"ciervo":
-				posicion.y += 0.78
+				posicion.y += 0.10
 		(
 			resultado
 			. append(
