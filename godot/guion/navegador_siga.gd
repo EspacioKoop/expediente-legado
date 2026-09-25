@@ -602,7 +602,10 @@ func _renderizar_bbs(resultado: Dictionary, recurso: Dictionary, url: String) ->
 		var tipo := String(mensaje.get("tipo", "normal"))
 		var estado := String(mensaje.get("estado", "visible"))
 		bloques_hilo.append(
-			tr("NAVEGADOR_BBS_MENSAJE_CABECERA") % [nick, String(mensaje.get("fecha", "")), tipo, estado]
+			(
+				tr("NAVEGADOR_BBS_MENSAJE_CABECERA")
+				% [nick, String(mensaje.get("fecha", "")), tipo, estado]
+			)
 		)
 		var referencia := _bbs.referencia_de_mensaje(String(mensaje.get("id", "")))
 		if not referencia.is_empty():
