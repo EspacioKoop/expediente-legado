@@ -7,7 +7,6 @@ extends "res://guion/dia_sueno_app.gd"
 
 const CIELO_SIGA := preload("res://arte/cielo_siga.tres")
 const RELIGION_SUENO := preload("res://guion/religion_sueno_935.gd")
-const IDEOLOGIA_SUENO := preload("res://guion/ideologia_sueno_923.gd")
 
 
 func _montar_entorno() -> void:
@@ -99,7 +98,7 @@ func _modificadores_cielo_sueno() -> Array:
 		resultado
 		. append_array(
 			(
-				IDEOLOGIA_SUENO
+				IdeologiaSueno923
 				. modificadores(
 					partida.estado,
 					int(jornada.get("dia", 0)),

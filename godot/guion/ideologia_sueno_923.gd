@@ -188,9 +188,10 @@ static func _modificador(
 
 static func _normalizar_etiqueta(valor: String) -> String:
 	var texto := valor.strip_edges().to_lower()
-	for origen in ["á", "é", "í", "ó", "ú", "ü"]:
-		var destino := {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ü": "u"}[origen]
-		texto = texto.replace(origen, destino)
+	var reemplazos := {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ü": "u"}
+	for origen in reemplazos:
+		var destino := String(reemplazos[origen])
+		texto = texto.replace(String(origen), destino)
 	return texto.replace(" ", "_").replace("-", "_")
 
 

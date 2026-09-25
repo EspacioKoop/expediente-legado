@@ -10,8 +10,6 @@
 ## si queda plaza puntuable libre y quién la posee.
 extends Node
 
-const IDEOLOGIA_SUENO := preload("res://guion/ideologia_sueno_923.gd")
-
 var _mundo_vestido_id := 0
 
 
@@ -47,7 +45,7 @@ func _process(_delta: float) -> void:
 			PreferenciasSiga.cargar().get("reduccion_movimiento", false) == true
 		)
 		modificadores_ideologicos = (
-			IDEOLOGIA_SUENO
+			IdeologiaSueno923
 			. modificadores(
 				partida_actual.estado,
 				int(dia.jornada.get("dia", 1)),
