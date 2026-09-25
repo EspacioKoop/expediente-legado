@@ -17,6 +17,14 @@ const CABEZA_MAX := 1.75
 ## Inclinado sobre una mesa, que es lo más bajo que baja un gesto de pie.
 const CABEZA_INCLINADO := 1.1
 
+const MARCAS_HISTORICAS := {
+	"emperador": "GafasPuyi",
+	"aduanero_ny": "BarbaMelville",
+	"correspondencia": "SombreroPessoa",
+	"riegos": "GafasCavafis",
+	"fielato": "BigoteRousseau",
+}
+
 var _pasadas := 0
 var _fallos := 0
 
@@ -49,11 +57,10 @@ func _probar_roster_con_cuerpo_propio() -> void:
 
 func _probar_avatar(quien: Dictionary) -> void:
 	var id := String(quien["id"])
+	var retrato := String(quien.get("retrato", ""))
 	var cuerpo := Node3D.new()
 	root.add_child(cuerpo)
-	var creada := Modelos.persona(
-		cuerpo, Companeros.cuerpo_de(quien), quien["color"], String(quien.get("retrato", ""))
-	)
+	var creada := Modelos.persona(cuerpo, Companeros.cuerpo_de(quien), quien["color"], retrato)
 	_comprobar(creada, "%s se monta" % id)
 	var pieza := cuerpo.get_child(0) as Node3D
 	_comprobar(
@@ -62,14 +69,27 @@ func _probar_avatar(quien: Dictionary) -> void:
 	)
 	var tintadas := 0
 	for malla in pieza.find_children("*", "MeshInstance3D", true, false):
-		if (malla as MeshInstance3D).material_override != null:
+		if not _bajo_identidad_historica(malla) and (malla as MeshInstance3D).material_override != null:
 			tintadas += 1
 	_comprobar(tintadas == 0, "%s conserva su ropa y su piel" % id)
 	_comprobar_materiales(pieza, id)
-	_comprobar(
-		pieza.find_children("*", "BoneAttachment3D", true, false).is_empty(),
-		"%s no lleva cara ni ropa procedural encima" % id
-	)
+
+	var identidad := pieza.find_child("IdentidadHistorica275", true, false) as BoneAttachment3D
+	if retrato.is_empty():
+		_comprobar(identidad == null, "%s no recibe rasgos históricos inventados" % id)
+	else:
+		_comprobar(identidad != null, "%s recupera identidad histórica sobre Rocketbox" % id)
+		var esqueleto := Modelos._esqueleto(pieza)
+		_comprobar(
+			esqueleto != null
+			and String(esqueleto.get_meta("identidad_historica_275", "")) == retrato,
+			"%s marca su identidad con la clave de retrato" % id
+		)
+		var marca := String(MARCAS_HISTORICAS.get(id, ""))
+		_comprobar(
+			not marca.is_empty() and identidad != null and identidad.find_child(marca, true, false) != null,
+			"%s tiene un rasgo 3D reconocible específico" % id
+		)
 
 	var reproductor := Modelos._reproductor(pieza)
 	_comprobar(reproductor != null, "%s tiene reproductor" % id)
@@ -221,6 +241,10 @@ func _comprobar_materiales(pieza: Node3D, id: String, relieve := false) -> void:
 			var shader := ""
 			if material is ShaderMaterial and material.shader != null:
 				shader = material.shader.resource_path
+			if material.has_meta("identidad_historica_275"):
+				if shader != Espacio3D.shader_del_sitio():
+					ajenas += 1
+				continue
 			if not (material is ShaderMaterial and material.get_shader_parameter("usar_uv")):
 				ajenas += 1
 			elif (
@@ -258,6 +282,15 @@ func _probar_relieve_por_pixel() -> void:
 		_comprobar_materiales(cuerpo.get_child(0) as Node3D, String(quien["id"]), true)
 		cuerpo.free()
 	Espacio3D._shader_del_sitio = anterior
+
+
+func _bajo_identidad_historica(nodo: Node) -> bool:
+	var actual := nodo.get_parent()
+	while actual != null:
+		if actual.name == "IdentidadHistorica275":
+			return true
+		actual = actual.get_parent()
+	return false
 
 
 func _comprobar_postura(pieza: Node3D, que: String) -> void:
