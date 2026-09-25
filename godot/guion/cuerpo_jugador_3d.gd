@@ -1,8 +1,9 @@
 ## Cuerpo visual del protagonista para primera persona y previsualización.
 ##
-## Es la misma figura que los compañeros —`persona.fbx`, vestida por el pase de
-## #275 y animada con UAL— para que mirar hacia abajo revele a una persona del
-## mismo mundo y el creador pueda enseñar esa misma silueta en 3D. Sigue siendo
+## El protagonista conserva temporalmente el rig configurable `persona.fbx`,
+## vestido por el pase de #275 y animado con UAL. Los compañeros de oficina ya
+## usan Rocketbox desde #1320; aquí se mantiene el rig legacy porque la ficha
+## necesita variar complexión, piel, pelo y ropa en vivo. Sigue siendo
 ## deliberadamente visual: no crea colisiones ni cambia la escala del caminante.
 ## El perfil lo entrega quien ya tiene la partida cargada (`DiaApp`) o el editor:
 ## este nodo no lee ni escribe guardados.
