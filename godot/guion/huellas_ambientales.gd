@@ -7,7 +7,7 @@ class_name HuellasAmbientales
 extends RefCounted
 
 const CLAVE := "huellas_ambientales"
-const TIPOS := ["uso", "apertura", "roce", "lectura", "paso"]
+const TIPOS := ["uso", "apertura", "roce", "lectura", "paso", "equipo"]
 const MAX_HUELLAS := 64
 const USOS_MAX := 8
 const INTENSIDAD_BASE := 0.14

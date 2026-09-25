@@ -12,6 +12,8 @@ DRESSING = ROOT / "godot" / "guion" / "dia_dressing_cc0_app.gd"
 GODOT_TEST = ROOT / "godot" / "pruebas" / "pruebas_huellas_ambientales_959.gd"
 VERIFIER = ROOT / "scripts" / "verificar_godot.py"
 VISOR = ROOT / "godot" / "guion" / "visor_expediente.gd"
+LAMPARA = ROOT / "godot" / "guion" / "lampara_interactiva_3d.gd"
+TELEVISOR = ROOT / "godot" / "guion" / "television_interactiva_3d.gd"
 
 
 class HuellasAmbientales959Test(unittest.TestCase):
@@ -25,6 +27,8 @@ class HuellasAmbientales959Test(unittest.TestCase):
         self.godot_test = GODOT_TEST.read_text(encoding="utf-8")
         self.verifier = VERIFIER.read_text(encoding="utf-8")
         self.visor = VISOR.read_text(encoding="utf-8")
+        self.lampara = LAMPARA.read_text(encoding="utf-8")
+        self.televisor = TELEVISOR.read_text(encoding="utf-8")
 
     def test_estado_es_partida_y_no_archivo_paralelo(self):
         self.assertIn('"huellas_ambientales": {}', self.partida)
@@ -53,6 +57,16 @@ class HuellasAmbientales959Test(unittest.TestCase):
         self.assertIn("HuellasAmbientales.intensidad_de", self.visor)
         self.assertIn("_color_papel_documento(registro)", self.visor)
         self.assertIn("if not ya_visto or huella_mutada or auditoria_mutada:", self.visor)
+
+    def test_equipos_domesticos_dejan_huella_sin_estado_paralelo(self):
+        self.assertIn('"equipo"', self.core)
+        self.assertIn('"equipo":', self.controller)
+        self.assertIn('set_meta("huella_ambiental_id", "casa:lampara_pie")', self.lampara)
+        self.assertIn('set_meta("huella_ambiental_tipo", "equipo")', self.lampara)
+        self.assertIn('set_meta("huella_ambiental_id", "casa:televisor")', self.televisor)
+        self.assertIn('set_meta("huella_ambiental_tipo", "equipo")', self.televisor)
+        self.assertNotIn("HuellasAmbientales.registrar", self.lampara)
+        self.assertNotIn("HuellasAmbientales.registrar", self.televisor)
 
     def test_no_convierte_huellas_en_progreso(self):
         for forbidden in ("Sellos.", "Prometeo.", "Economia.", "Acusacion."):
