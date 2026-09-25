@@ -8,12 +8,23 @@ extends "res://guion/visor_anotaciones_app.gd"
 const MeticulosidadEstado := preload("res://guion/meticulosidad.gd")
 const DetallesMeticulosidadCatalogo := preload("res://guion/detalles_meticulosidad.gd")
 const RUTA_DETALLES_METICULOSIDAD := "res://datos/detalles_meticulosidad.json"
+const RUTA_ANALISIS_DOCUMENTAL := "res://datos/analisis_documental.json"
+const CLAVES_ANALISIS_DOCUMENTAL := [
+	"VISOR_ANALISIS_951_FACTURA4_SELLO",
+	"VISOR_ANALISIS_951_FACTURA4_RFC",
+	"VISOR_ANALISIS_951_ACTA6_SELLO",
+	"VISOR_ANALISIS_951_CIRCULAR6_FECHA",
+	"VISOR_ANALISIS_951_MEMO5_FECHA",
+]
 
 var _metadatos: Label
 var _detalle_meticulosidad: Label
 var _scroll_meticulosidad: VScrollBar
 var _documento_meticulosidad_id := ""
 var _catalogo_detalles_meticulosidad: Dictionary = {}
+var _analizar_documento: Button
+var _resultado_analisis: Label
+var _catalogo_analisis_documental: Dictionary = {}
 
 
 func _columna_documento() -> Control:
@@ -29,6 +40,19 @@ func _columna_documento() -> Control:
 	_detalle_meticulosidad.text = ""
 	columna.add_child(_detalle_meticulosidad)
 
+	_analizar_documento = Button.new()
+	_analizar_documento.text = tr("VISOR_ANALISIS_951_ACCION")
+	_analizar_documento.tooltip_text = tr("VISOR_ANALISIS_951_AYUDA")
+	_analizar_documento.disabled = true
+	_analizar_documento.pressed.connect(_analizar_documento_actual)
+	columna.add_child(_analizar_documento)
+
+	_resultado_analisis = Label.new()
+	_resultado_analisis.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_resultado_analisis.visible = false
+	_resultado_analisis.text = ""
+	columna.add_child(_resultado_analisis)
+
 	_conectar_scroll_meticulosidad()
 	return columna
 
@@ -42,6 +66,7 @@ func _al_elegir_documento(indice: int) -> void:
 	if String(registro_actual.get("id", "")) != esperado_id:
 		return
 
+	_reiniciar_analisis_documental()
 	_documento_meticulosidad_id = esperado_id
 	if era_leido:
 		var motivo := (
@@ -53,6 +78,7 @@ func _al_elegir_documento(indice: int) -> void:
 func _al_elegir_caso(indice: int) -> void:
 	super._al_elegir_caso(indice)
 	_documento_meticulosidad_id = ""
+	_reiniciar_analisis_documental()
 	_actualizar_metadatos()
 
 
@@ -87,7 +113,49 @@ func _actualizar_metadatos() -> void:
 	if _metadatos == null:
 		return
 	_metadatos.text = _texto_metadatos(registro_actual)
+	if _analizar_documento != null:
+		_analizar_documento.disabled = registro_actual.is_empty()
 	_actualizar_detalles_meticulosidad()
+
+
+func _reiniciar_analisis_documental() -> void:
+	if _resultado_analisis == null:
+		return
+	_resultado_analisis.text = ""
+	_resultado_analisis.visible = false
+
+
+func _analizar_documento_actual() -> void:
+	if registro_actual.is_empty() or _resultado_analisis == null:
+		return
+	if _catalogo_analisis_documental.is_empty():
+		_catalogo_analisis_documental = _cargar_catalogo_analisis_documental()
+
+	var registro_id := String(registro_actual.get("id", "")).strip_edges()
+	var entradas: Variant = _catalogo_analisis_documental.get(registro_id, [])
+	var textos: Array[String] = []
+	if entradas is Array:
+		for valor in entradas:
+			if not valor is Dictionary:
+				continue
+			var clave := String((valor as Dictionary).get("texto", "")).strip_edges()
+			if CLAVES_ANALISIS_DOCUMENTAL.has(clave):
+				textos.append(tr(clave))
+
+	if textos.is_empty():
+		_resultado_analisis.text = tr("VISOR_ANALISIS_951_SIN_HALLAZGOS")
+	else:
+		_resultado_analisis.text = tr("VISOR_ANALISIS_951_RESULTADO") % "\n".join(textos)
+	_resultado_analisis.visible = true
+
+
+static func _cargar_catalogo_analisis_documental() -> Dictionary:
+	if not FileAccess.file_exists(RUTA_ANALISIS_DOCUMENTAL):
+		return {}
+	var datos: Variant = JSON.parse_string(FileAccess.get_file_as_string(RUTA_ANALISIS_DOCUMENTAL))
+	if datos is Dictionary:
+		return datos
+	return {}
 
 
 func _actualizar_detalles_meticulosidad() -> void:
