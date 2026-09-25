@@ -33,6 +33,7 @@ func _process(_delta: float) -> void:
 		_pasadas_transito.clear()
 		_asegurar_raiz(mundo)
 		_montar_transito_guardado(dia, mundo)
+		_sembrar_celda_actual(dia)
 	_conectar_marcables(dia, mundo, mundo)
 	_registrar_transito(dia, mundo)
 
@@ -71,6 +72,21 @@ func _al_activar(
 	_montar_o_actualizar_marca(dia, dia._mundo, marcable, id, tipo)
 	if dia.has_method("_guardar_o_avisar"):
 		dia.call("_guardar_o_avisar", "")
+
+
+func _sembrar_celda_actual(dia: Node) -> void:
+	var fase := String(dia.jornada.get("fase", ""))
+	if not FASES_TRANSITO.has(fase):
+		return
+	var caminante = dia.get("_caminante")
+	if not caminante is Node3D or not is_instance_valid(caminante):
+		return
+	var posicion := (caminante as Node3D).global_position
+	var celda := Vector2i(
+		floori(posicion.x / CELDA_TRANSITO),
+		floori(posicion.z / CELDA_TRANSITO),
+	)
+	_ultima_celda_transito = _id_transito(fase, celda)
 
 
 ## Una celda cuenta solo al ENTRAR en ella. Quedarse quieto o vibrar dentro de
