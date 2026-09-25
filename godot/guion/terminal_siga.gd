@@ -18,7 +18,10 @@ const ARCHIVOS := {
 	"/README.TXT":
 	"SIGA-98 · TERMINAL DE CONSULTA\nEscriba HELP para ver los comandos disponibles.",
 	"/SIGA/MEMOS/AYUDA.TXT":
-	"Los expedientes se consultan desde la aplicación SIGA. Este terminal solo expone utilidades de consulta.",
+	(
+		"Los expedientes se consultan desde la aplicación SIGA. "
+		+ "Este terminal solo expone utilidades de consulta."
+	),
 	"/SIGA/CASOS/INDICE.TXT":
 	"Índice local disponible. Abra SIGA para consultar expedientes y folios autorizados.",
 	"/RED/HOSTS.TXT":
@@ -43,43 +46,46 @@ var _cwd := "/"
 
 func ejecutar(linea: String) -> Dictionary:
 	var limpia := linea.strip_edges()
+	var resultado: Dictionary
 	if limpia.is_empty():
-		return _resultado(true, "")
-
-	var partes := limpia.split(" ", false)
-	var comando := String(partes[0]).to_lower()
-	match comando:
-		"help", "?":
-			return _resultado(true, _ayuda())
-		"pwd":
-			return _resultado(true, _cwd)
-		"dir", "ls":
-			return _listar(_argumento(partes))
-		"cd":
-			return _cambiar_directorio(_argumento(partes))
-		"type", "cat":
-			return _leer(_argumento(partes))
-		"whoami":
-			return _resultado(true, String(ENTORNO["USER"]))
-		"set":
-			return _resultado(true, _entorno_texto())
-		"echo":
-			return _resultado(true, _expandir(_resto(partes)))
-		"ping":
-			return _ping(_argumento(partes))
-		"netstat":
-			return _resultado(
-				true,
-				(
-					"PROTO  LOCAL          REMOTO             ESTADO\n"
-					+ "TCP    SIGA-98:1048   ARCHIVO.LOCAL:98   ESTABLECIDA"
+		resultado = _resultado(true, "")
+	else:
+		var partes := limpia.split(" ", false)
+		var comando := String(partes[0]).to_lower()
+		match comando:
+			"help", "?":
+				resultado = _resultado(true, _ayuda())
+			"pwd":
+				resultado = _resultado(true, _cwd)
+			"dir", "ls":
+				resultado = _listar(_argumento(partes))
+			"cd":
+				resultado = _cambiar_directorio(_argumento(partes))
+			"type", "cat":
+				resultado = _leer(_argumento(partes))
+			"whoami":
+				resultado = _resultado(true, String(ENTORNO["USER"]))
+			"set":
+				resultado = _resultado(true, _entorno_texto())
+			"echo":
+				resultado = _resultado(true, _expandir(_resto(partes)))
+			"ping":
+				resultado = _ping(_argumento(partes))
+			"netstat":
+				resultado = _resultado(
+					true,
+					(
+						"PROTO  LOCAL          REMOTO             ESTADO\n"
+						+ "TCP    SIGA-98:1048   ARCHIVO.LOCAL:98   ESTABLECIDA"
+					)
 				)
-			)
-		"del", "erase", "rm", "copy", "cp", "edit":
-			return _resultado(false, "OPERACION NO DISPONIBLE: terminal de solo lectura")
-		_:
-			return _resultado(false, "Comando no reconocido: %s" % comando)
-
+			"del", "erase", "rm", "copy", "cp", "edit":
+				resultado = _resultado(
+					false, "OPERACION NO DISPONIBLE: terminal de solo lectura"
+				)
+			_:
+				resultado = _resultado(false, "Comando no reconocido: %s" % comando)
+	return resultado
 
 func cwd() -> String:
 	return _cwd
