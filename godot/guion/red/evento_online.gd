@@ -18,6 +18,7 @@ const ESPECIFICACIONES := {
 	"signal": {"max_bytes": 1536, "max_ttl": 900},
 	"presence": {"max_bytes": 1024, "max_ttl": 120},
 	"help": {"max_bytes": 2048, "max_ttl": 1800},
+	"coop_combat": {"max_bytes": 1536, "max_ttl": 30},
 }
 
 
