@@ -613,6 +613,7 @@ JUICIO_JUNGIANO_FINISHER,FINISHER
 JUICIO_JUNGIANO_SUPER_FINISHER,SUPER FINISHER
 JUICIO_JUNGIANO_FINISHER_TOOLTIP,Disponible al alcanzar el umbral de momentum
 JUICIO_RELIGION_COMPROMISO,COMPROMISO · cede la iniciativa
+JUICIO_RELIGION_TREGUA,TREGUA · reposicionamiento sin agresión
 ULTIMO_RECURSO_AVISO,"Su última vida laboral se ha agotado. El cese todavía no está firmado."
 ULTIMO_RECURSO_CANJEAR,Canjear por 1 vida
 ULTIMO_RECURSO_CARTA,%s — %s
@@ -712,3 +713,9 @@ IDEOLOGIA_920_CAREO_EXP_COMUNISMO,"El argumento le resulta familiar: quién asum
 IDEOLOGIA_920_CAREO_EXP_SOCIALDEMOCRATA,"Reconoce el marco: negociar, revisar efectos y dejar garantías antes de consolidar el cambio."
 IDEOLOGIA_920_CAREO_EXP_CENTRISTA,"Reconoce el marco: procedimiento, posiciones enfrentadas y continuidad antes de cerrar una salida."
 IDEOLOGIA_920_CAREO_EXP_NEOLIBERAL,"Reconoce el marco: costes, incentivos y resultados medibles antes de sostener la medida."
+GOLF_HOYO_TITULO,"GOLF DE PASILLO · HOYO DE PRUEBA"
+GOLF_HOYO_AYUDA,"←/→ apuntar · ↑/↓ potencia · A/Enter golpear · B/Esc salir"
+GOLF_HOYO_COMPLETADO,"HOYO COMPLETADO"
+GOLF_HOYO_LIMITE,"LÍMITE DE GOLPES ALCANZADO"
+GOLF_HOYO_RESULTADO,"%s · %d golpes"
+GOLF_HOYO_ESTADO,"Ángulo %+.0f° · Potencia %d%% · Golpes %d/%d"

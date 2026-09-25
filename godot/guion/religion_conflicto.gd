@@ -9,6 +9,7 @@ extends RefCounted
 
 const REGLA_NO_INICIAR := "no_iniciar_agresion"
 const REGLA_TREGUA_MUTUA := "tregua_mutua"
+const DURACION_TREGUA_TEMPORAL := 2.5
 const REGLAS := [REGLA_NO_INICIAR, REGLA_TREGUA_MUTUA]
 
 
@@ -77,6 +78,7 @@ static func _compromiso_mutuo(evento: Dictionary) -> Dictionary:
 		"regla": REGLA_TREGUA_MUTUA,
 		"alcance": "mutuo",
 		"fuente_evento": String(evento.get("id", "")),
+		"duracion": DURACION_TREGUA_TEMPORAL,
 		"etiquetas": ["control_espacio", "restriccion"],
 	}
 

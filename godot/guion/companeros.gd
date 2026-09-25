@@ -32,6 +32,20 @@ const POR_VUELTA := 3
 ## la cara es además cómo se resolvía esto en la máquina que el juego imita.
 const CUERPO := "persona"
 
+## El avatar fotorrealista de cada uno (#275), bajo `assets/modelos/`.
+const CUERPOS := {
+	"cunado": "rocketbox/male_adult_13",
+	"emperador": "rocketbox/business_male_02",
+	"aduanero_ny": "rocketbox/male_adult_05",
+	"correspondencia": "rocketbox/business_male_03",
+	"riegos": "rocketbox/business_male_04",
+	"fielato": "rocketbox/male_adult_03",
+	"becario": "rocketbox/male_adult_02",
+	"jubilacion": "rocketbox/male_adult_14",
+	"mesa_de_en_medio": "rocketbox/female_adult_09",
+	"telefono": "rocketbox/business_female_02",
+}
+
 ## El que está siempre. No entra en el sorteo.
 const CUNADO := {
 	"id": "cunado",
@@ -132,13 +146,18 @@ static func plantilla(semilla: int) -> Array:
 ## Alejandría. Sus frases solo funcionan si se les reconoce, así que el retrato
 ## se declara AQUÍ, al lado de quien es: al revés que el cuerpo, que se deriva
 ## porque da igual cuál toque.
-## Qué cuerpo tiene alguien: el de todos, salvo que no sea nadie.
+## Qué cuerpo tiene alguien: el suyo, el de todos si aún no tiene, o ninguno
+## si no es nadie.
 ##
-## Sigue siendo una función y no una constante suelta porque quien la llama no
-## tiene por qué saber que hoy hay un solo cuerpo. El día que haya varios, cambia
-## aquí y no en la oficina.
+## Ese día llegó con #275: el maniquí teñido no se leía como persona por muchos
+## parches de cara y ropa que se le pusieran encima. Cada compañero tiene ahora
+## un avatar vestido propio. Para los que existieron el reparto es provisional:
+## se eligió por silueta y edad, y su parecido se afina uno a uno.
 static func cuerpo_de(companero: Dictionary) -> String:
-	return "" if String(companero.get("id", "")).is_empty() else CUERPO
+	var id := String(companero.get("id", ""))
+	if id.is_empty():
+		return ""
+	return String(CUERPOS.get(id, CUERPO))
 
 
 ## Lo que dice hoy. Rota con el día y no al azar: alguien que dijera otra cosa

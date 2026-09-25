@@ -8,6 +8,7 @@ const POSICION_CAMARA := Vector3(0.0, 1.65, -7.4)
 const OBJETIVO_CAMARA := Vector3(-5.25, 5.8, -12.2)
 const FOV_CAMARA := 68.0
 const DIA_CALLE := preload("res://guion/dia_calle_app.gd")
+const DIA_ARBOLES := preload("res://guion/dia_arboles_cc0_app.gd")
 
 var _modo := "baseline"
 var _salida := ""
@@ -20,7 +21,7 @@ func _initialize() -> void:
 		elif argumento.begins_with("--output="):
 			_salida = argumento.trim_prefix("--output=")
 
-	if _modo not in ["baseline", "full"]:
+	if _modo not in ["baseline", "full", "ambiental_baseline", "ambiental_full"]:
 		_fallar("modo inválido: %s" % _modo)
 		return
 	if _salida.is_empty():
@@ -54,12 +55,18 @@ func _ejecutar() -> void:
 		return
 	var componentes := ["trayecto", "calle_identidad"]
 	var fachadas: Node3D = null
-	if _modo == "full":
+	if _modo in ["full", "ambiental_baseline", "ambiental_full"]:
 		fachadas = CalleFachadasVivas.montar(calle)
 		if fachadas == null:
 			_fallar("CalleFachadasVivas no pudo montarse")
 			return
 		componentes.append("fachadas_vivas")
+
+	if _modo in ["ambiental_baseline", "ambiental_full"]:
+		var arboles_modelo = DIA_ARBOLES.new()
+		arboles_modelo.call("_montar_arbolado", mundo)
+		arboles_modelo.free()
+		componentes.append("arboles_cc0")
 
 	var camara := Camera3D.new()
 	camara.name = "CamaraBenchmarkFachadas"
@@ -68,6 +75,27 @@ func _ejecutar() -> void:
 	mundo.add_child(camara)
 	camara.look_at(OBJETIVO_CAMARA, Vector3.UP)
 	camara.current = true
+
+	var ventanas_vivas: CalleVentanasVivas = null
+	var viento: VientoAmbiental = null
+	var animador: AnimadorAmbiental3D = null
+	if _modo == "ambiental_full":
+		animador = AnimadorAmbiental3D.new()
+		animador.name = "AnimadorAmbientalBenchmark"
+		escena.add_child(animador)
+		animador.observar(camara)
+
+		ventanas_vivas = CalleVentanasVivas.new()
+		ventanas_vivas.name = "VentanasVivasBenchmark"
+		escena.add_child(ventanas_vivas)
+		ventanas_vivas.adoptar(calle, animador)
+
+		viento = VientoAmbiental.new()
+		viento.name = "VientoAmbientalBenchmark"
+		escena.add_child(viento)
+		viento.adoptar(mundo, animador)
+		viento.fijar_clima("lluvia")
+		componentes.append("animacion_ambiental")
 
 	for _i in CALENTAMIENTO:
 		await process_frame
@@ -114,6 +142,11 @@ func _ejecutar() -> void:
 				continue
 			conteo_fachadas["render_batches"] += 1
 			conteo_fachadas["batched_instances"] += lote.multimesh.instance_count
+	conteo_fachadas["animated_windows"] = (
+		ventanas_vivas.ventanas_animadas() if ventanas_vivas != null else 0
+	)
+	conteo_fachadas["wind_materials"] = viento.materiales() if viento != null else 0
+	conteo_fachadas["active_pieces"] = int(animador.estado()["activas"]) if animador != null else 0
 
 	var informe := {
 		"schema": 1,

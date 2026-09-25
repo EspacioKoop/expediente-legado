@@ -12,6 +12,7 @@ class AmbienteIntegracionTest(unittest.TestCase):
         self.assertIn("Ambiente.reproducir(self, fase, -24.0", codigo)
         self.assertIn("_contexto_ambiente()", codigo)
         self.assertIn('"hora": Jornada.hora_decimal(jornada)', codigo)
+        self.assertIn('"estres": Estres.nivel(jornada)', codigo)
         self.assertIn('"meticulosidad":', codigo)
         self.assertIn("Meticulosidad.puntos(jornada)", codigo)
         self.assertIn("Meticulosidad.PUNTOS_MAX", codigo)

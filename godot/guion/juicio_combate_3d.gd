@@ -56,6 +56,7 @@ var _doctrina_tiempo := 0.0
 var _comision_pendiente := false
 var _compromisos_religion: Array = []
 var _rival_inicio_agresion := false
+var _tregua_religion_restante := 0.0
 
 var _jugador: CharacterBody3D
 var _rival: CharacterBody3D
@@ -157,6 +158,7 @@ func _process(delta: float) -> void:
 	if _acabado:
 		return
 	_descontar_temporizadores(delta)
+	_descontar_tregua_religion(delta)
 	_mover_jugador(delta)
 	_mover_rival(delta)
 	_actualizar_camara()
@@ -203,6 +205,15 @@ func _descontar_temporizadores(delta: float) -> void:
 		_etiqueta_jungiana.visible = false
 	if expirados.has("doctrina"):
 		_cerrar_doctrina()
+
+
+func _descontar_tregua_religion(delta: float) -> void:
+	if _tregua_religion_restante <= 0.0:
+		return
+	var anterior := _tregua_religion_restante
+	_tregua_religion_restante = maxf(0.0, _tregua_religion_restante - delta)
+	if anterior > 0.0 and _tregua_religion_restante <= 0.0:
+		_actualizar_hud()
 
 
 func activar_doctrina(eje: String) -> bool:
@@ -316,7 +327,7 @@ func _mover_rival(delta: float) -> void:
 
 
 func _iniciar_ataque_rival() -> void:
-	if _ataque_rival_pendiente or _acabado:
+	if _ataque_rival_pendiente or _acabado or _tregua_religion_restante > 0.0:
 		return
 	_ataque_rival_pendiente = true
 	_rival_inicio_agresion = true
@@ -411,7 +422,7 @@ func _ocultar_aviso_ataque() -> void:
 
 
 func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> void:
-	if _recarga_jugador > 0.0:
+	if _recarga_jugador > 0.0 or _tregua_religion_restante > 0.0:
 		return
 	if not compromiso_religion_bloqueante(_compromisos_religion, _rival_inicio_agresion).is_empty():
 		return
@@ -531,6 +542,8 @@ func _resolver_capa_simbolica() -> void:
 	_velocidad_rival = float(capa["velocidad_rival"])
 	_recarga_fuerte = float(capa["recarga_fuerte"])
 	_compromisos_religion = capa.get("compromisos_religion", [])
+	var tregua := SIMBOLICO.tregua_religion_activa(_compromisos_religion)
+	_tregua_religion_restante = maxf(0.0, float(tregua.get("duracion", 0.0)))
 
 
 func _aplicar_configuracion_ritual() -> void:
@@ -623,14 +636,18 @@ func _texto_ritual() -> String:
 	var compromiso_activo := not (
 		compromiso_religion_bloqueante(_compromisos_religion, _rival_inicio_agresion).is_empty()
 	)
+	var tregua_activa := _tregua_religion_restante > 0.0
+	var texto_religion := (
+		tr("JUICIO_RELIGION_TREGUA") if tregua_activa else tr("JUICIO_RELIGION_COMPROMISO")
+	)
 	return (
 		HUD
 		. texto_ritual(
 			_ritual,
 			_contraataque,
 			nombre_doctrina,
-			compromiso_activo,
-			tr("JUICIO_RELIGION_COMPROMISO"),
+			compromiso_activo or tregua_activa,
+			texto_religion,
 		)
 	)
 

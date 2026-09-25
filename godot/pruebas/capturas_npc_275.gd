@@ -2,8 +2,9 @@ extends SceneTree
 
 ## Gate visual reproducible para #275.
 ##
-## Instancia el mismo `persona.fbx` que usa la oficina y deja actuar a los
-## autoloads reales de vestuario + corrección visual. Después congela el idle y
+## Instancia la misma figura que usa la oficina —el avatar realista de cada
+## compañero, o `persona.fbx` con los autoloads reales de vestuario + corrección
+## visual para quien aún no lo tenga. Después congela el idle y
 ## guarda capturas comparables desde frente y 3/4 para TODO el roster. Los NPCs
 ## históricos añaden perfil y primer plano para revisar cara/cabello sin tener
 ## que recorrer una partida concreta.
@@ -152,12 +153,15 @@ func _capturar_persona(quien: Dictionary) -> void:
 	if esqueleto == null:
 		_fallar("%s no conserva Skeleton3D" % String(quien.get("id", "")))
 		return
-	if not esqueleto.has_meta("vestuario_humano_275"):
-		_fallar("%s no recibió vestuario" % String(quien.get("id", "")))
-		return
-	if not esqueleto.has_meta("correccion_visual_275"):
-		_fallar("%s no recibió corrección visual #275" % String(quien.get("id", "")))
-		return
+	# Los avatares realistas traen ropa y cara propias; los pases de vestuario y
+	# corrección solo se exigen a quien sigue siendo el maniquí.
+	if not Modelos.es_realista(Companeros.cuerpo_de(quien)):
+		if not esqueleto.has_meta("vestuario_humano_275"):
+			_fallar("%s no recibió vestuario" % String(quien.get("id", "")))
+			return
+		if not esqueleto.has_meta("correccion_visual_275"):
+			_fallar("%s no recibió corrección visual #275" % String(quien.get("id", "")))
+			return
 
 	_congelar_animacion(_modelo_actual)
 

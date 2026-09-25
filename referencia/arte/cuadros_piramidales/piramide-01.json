@@ -1,0 +1,22 @@
+{
+  "id": "piramide-01",
+  "salida": "cuadro-piramide-01.png",
+  "titulo": "Tres monumentos bajo sol administrativo",
+  "autor": "Expediente Legado",
+  "licencia": "CC0-1.0",
+  "fuente": "docs/assets/cuadros-piramidales-originales.md",
+  "ancho": 320,
+  "alto": 224,
+  "semilla": 19501,
+  "motivo": "horizonte",
+  "sha256": "f409296951511243d8754eaead458ee01c5cac4767e7cc7f37d21aaad9f8d53e",
+  "paleta": {
+    "papel": "#D9C8A4",
+    "tinta": "#3A302A",
+    "sombra": "#6C5340",
+    "arena": "#B99B69",
+    "arena_clara": "#D5B883",
+    "acento": "#A44B38",
+    "linea": "#8C7658"
+  }
+}

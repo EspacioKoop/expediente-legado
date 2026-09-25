@@ -4,9 +4,9 @@
     {
       "id": "biblioteca_calderon_apariencia",
       "npc": {
-        "id": "mediadora_biblioteca_98",
+        "id": "mediadora_archivo_98",
         "nombre": "Marta",
-        "rol": "mediadora cultural"
+        "rol": "compañera de archivo y mediadora de lectura"
       },
       "obra_id": "vida_es_sueno_1635",
       "movimiento": {
@@ -14,7 +14,7 @@
         "nombre": "Barroco",
         "contexto": "El Barroco permite situar la tensión entre apariencia, representación y elección sin atribuir una identidad cultural al jugador."
       },
-      "apertura": "Marta deja el libro abierto: «¿Qué te interesa de que Segismundo dude de lo que ve?»",
+      "apertura": "Marta deja una edición abierta sobre la mesa de clasificación: «¿Qué te interesa de que Segismundo dude de lo que ve?»",
       "ramas": [
         {
           "id": "eleccion",

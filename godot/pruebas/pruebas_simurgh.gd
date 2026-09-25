@@ -86,14 +86,26 @@ func _probar_capas_y_accesibilidad() -> void:
 	)
 	_comprobar(sueno.ruta_retorno_disponible(), "ambas capas conservan retorno")
 
+	var punto_escritorio := sueno.get_node_or_null("CapaEscritorio/PuntoCambio") as Interactuable3D
+	var punto_monumental := sueno.get_node_or_null("CapaMonumental/PuntoCambio") as Interactuable3D
+	_comprobar(punto_escritorio != null, "la pluma expone interacción 3D común")
+	_comprobar(punto_monumental != null, "la pasarela expone interacción 3D común")
+	_comprobar(punto_escritorio.collision_layer > 0, "solo la capa visible es interactuable")
+	_comprobar(punto_monumental.collision_layer, 0, "la capa oculta no queda en el raycast")
+
 	var normal := sueno.cambiar_capa(false)
 	_comprobar(normal["capa"], "monumental", "el cambio revela la escala monumental")
 	_comprobar(not normal["zoom_camara"], "el cambio no usa zoom obligatorio")
 	_comprobar(not normal["mover_camara"], "el cambio no desplaza cámara")
 	_comprobar(not normal["escalar_jugador"], "el jugador nunca se interpola de tamaño")
 	_comprobar(normal["retorno_disponible"], "el retorno sobrevive al cambio")
+	_comprobar(
+		punto_escritorio.collision_layer, 0, "el hotspot doméstico se desactiva al ocultarse"
+	)
+	_comprobar(punto_monumental.collision_layer > 0, "el hotspot monumental pasa a estar activo")
 
-	var reducida := sueno.cambiar_capa(true)
+	sueno.reduccion_movimiento = true
+	var reducida := sueno.cambiar_capa(false)
 	_comprobar(reducida["capa"], "escritorio", "la capa reducida vuelve al escritorio")
 	_comprobar(reducida["modo"], "corte_fundido", "movimiento reducido usa corte/fundido")
 	_comprobar(reducida["duracion"], 0.0, "movimiento reducido no interpola")

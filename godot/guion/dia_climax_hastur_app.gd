@@ -24,6 +24,9 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
+	# La música puntual pertenece a este controlador: si el día se desmonta con
+	# el final abierto, no debe sobrevivir a la escena siguiente.
+	Musica.detener(self)
 	var callback := Callable(self, "_al_handoff")
 	if (
 		is_instance_valid(_handoff)
@@ -270,6 +273,9 @@ func _mostrar_final(dia: Node, contrato: Dictionary) -> void:
 	if partida_actual == null:
 		return
 	_habilitar_movimiento(dia, false)
+	# El slot vacío sigue siendo silencio seguro. Cuando entre un asset válido,
+	# el final político lo reproducirá una sola vez por política de Musica.
+	Musica.reproducir(self, "final")
 
 	_capa_final = CanvasLayer.new()
 	_capa_final.name = "FinalPoliticoCapa"
@@ -297,6 +303,7 @@ func _al_cerrar_final() -> void:
 
 func _cerrar_final() -> void:
 	var dia := get_parent()
+	Musica.detener(self)
 	if is_instance_valid(_capa_final):
 		_capa_final.queue_free()
 	_capa_final = null
