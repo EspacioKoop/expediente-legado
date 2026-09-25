@@ -379,7 +379,17 @@ func _construir_interfaz() -> void:
 
 
 func _resolver_sin_historial(url: String) -> void:
-	_resultado_actual = _indice.resolver_url(url)
+	var url_indice := url
+	var hilo_bbs := ""
+	var marcador_hilo := url.find("#hilo=")
+	if marcador_hilo >= 0:
+		url_indice = url.substr(0, marcador_hilo)
+		hilo_bbs = url.substr(marcador_hilo + 6).strip_edges()
+	_resultado_actual = _indice.resolver_url(url_indice)
+	if not hilo_bbs.is_empty() and String(_resultado_actual.get("estado", "")) == "ok":
+		var recurso_bbs: Dictionary = _resultado_actual.get("recurso", {})
+		if String(recurso_bbs.get("tipo", "")) == "bbs":
+			_resultado_actual["bbs_hilo_id"] = hilo_bbs
 	if is_node_ready():
 		_renderizar(_resultado_actual)
 		_refrescar_laterales()
