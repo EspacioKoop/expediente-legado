@@ -96,6 +96,19 @@ El acabado de fondo deja de ser una decoración fija y responde a la misma `fase
 
 Las transformaciones representan una escalada espacial propia de SIGA-98; no se presentan como motivos folclóricos documentados.
 
+## Tránsito de horizonte de la cabaña
+
+Al cruzar el umbral, la cabaña deja de saltar visualmente entre anclas y usa un trayecto declarado de tres puntos: **origen → horizonte elevado → destino**.
+
+- cada fase tiene un punto de horizonte fijo y reproducible;
+- el tramo de horizonte queda elevado y fuera de la zona jugable para no barrer al jugador;
+- la cabaña sigue siendo geometría sin colisión, por lo que el tránsito no altera navegación ni softlocks;
+- el modo normal usa dos tramos breves con `Tween.TRANS_SINE` y no mueve la cámara;
+- con `reduccion_movimiento`, no hay interpolación: se aplica un corte/fundido y la cabaña aparece directamente en el nuevo ancla;
+- el resultado del evento expone origen, horizonte, destino, duración y flags de seguridad, facilitando pruebas y futuras integraciones.
+
+Este tránsito es una solución visual propia de SIGA-98 para la escalada onírica; no se presenta como motivo folclórico documentado.
+
 ## Interior variable de la cabaña
 
 La puerta conserva un **marco estable**, pero el contenido que enmarca cambia de forma determinista con la misma fase espacial que mueve la cabaña:
