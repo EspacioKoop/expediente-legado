@@ -37,6 +37,7 @@ func refrescar(host) -> void:
 		return
 
 	_configurar_archivadores(host, caso)
+	_sincronizar_desorden_espacial(host)
 	if is_instance_valid(_carpeta_archivado):
 		return
 	_montar_carpeta(host, caso)
@@ -172,6 +173,7 @@ func _archivar_en(actor: Node, host, archivador: ArchivadorInteractivo3D) -> voi
 	var destino := String(archivador.get_meta("destino_archivado", ""))
 	var correcta := ArchivadoBandeja.colocar(_estado_archivado, _carpeta_archivado.caso, destino)
 	_persistir(host)
+	_sincronizar_desorden_espacial(host)
 	_guardar(host)
 	if not correcta:
 		host._nomina.text = _texto("destino_incorrecto")
@@ -185,6 +187,13 @@ func _archivar_en(actor: Node, host, archivador: ArchivadorInteractivo3D) -> voi
 	_carpeta_archivado.queue_free()
 	_carpeta_archivado = null
 	refrescar(host)
+
+
+func _sincronizar_desorden_espacial(host) -> void:
+	var desorden := ArchivadoBandeja.desorden_por_destino(_estado_archivado)
+	for archivador in _archivadores_del_mundo(host):
+		var destino := String(archivador.get_meta("destino_archivado", ""))
+		ArchivadoDesorden3D.aplicar(archivador, int(desorden.get(destino, 0)))
 
 
 func _mostrar_resultado(host, resumen: Dictionary) -> void:

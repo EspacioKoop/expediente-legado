@@ -78,6 +78,29 @@ static func colocar(estado: Dictionary, caso: Dictionary, destino: String) -> bo
 
 ## Resultado actual de la bandeja. `Archivado.evaluar` mide los intentos; esta
 ## capa añade las carpetas que aún siguen físicamente pendientes.
+## El desorden espacial se deriva de intentos incorrectos que todavía no se han
+## resuelto. Cuando ese mismo caso acaba en su destino correcto deja de estar
+## pendiente y todas sus carpetas mal colocadas desaparecen del cómputo.
+static func desorden_por_destino(estado: Dictionary) -> Dictionary:
+	var pendientes := {}
+	for caso in estado.get("pendientes", []):
+		var caso_id := String(caso.get("id", ""))
+		if not caso_id.is_empty():
+			pendientes[caso_id] = true
+
+	var resultado := {}
+	for colocacion in estado.get("colocaciones", []):
+		var caso: Dictionary = colocacion.get("caso", {})
+		var caso_id := String(caso.get("id", ""))
+		if not pendientes.has(caso_id):
+			continue
+		var destino := String(colocacion.get("destino", ""))
+		if destino.is_empty() or destino == Archivado.destino_de(caso):
+			continue
+		resultado[destino] = int(resultado.get(destino, 0)) + 1
+	return resultado
+
+
 static func resultado(estado: Dictionary) -> Dictionary:
 	var resumen := Archivado.evaluar(estado.get("colocaciones", []))
 	resumen["pendientes"] = estado.get("pendientes", []).size()
