@@ -638,9 +638,7 @@ func _texto_ritual() -> String:
 	)
 	var tregua_activa := _tregua_religion_restante > 0.0
 	var texto_religion := (
-		tr("JUICIO_RELIGION_TREGUA")
-		if tregua_activa
-		else tr("JUICIO_RELIGION_COMPROMISO")
+		tr("JUICIO_RELIGION_TREGUA") if tregua_activa else tr("JUICIO_RELIGION_COMPROMISO")
 	)
 	return (
 		HUD
