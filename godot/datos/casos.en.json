@@ -962,9 +962,9 @@
   "conceptos": [
     {
       "id": "conceptoComite@6",
-      "nombre": "Comité Ad Honorem",
+      "nombre": "Ad Honorem Committee",
       "tipo": "COMITE",
-      "resumen": "Órgano que autoriza decisiones desde al menos 1958 sin figurar jamás en un organigrama oficial. Ordenó el traslado de [[E. Montalvo]] a un piso que no existe, y redactó una versión no circulada del acta constitutiva de la empresa. Su sello es idéntico al de [[Carcosa Servicios Escénicos]]. El mismo patrón de cierres sin preguntas reaparece en el expediente de [[P. Smerdiakov]], años antes de que el Comité existiera oficialmente en ningún papel. La fórmula de su acta fundacional reaparece, palabra por palabra, en la creación del [[Comité de Bienestar Laboral]] de 1988.",
+      "resumen": "A body that has authorized decisions since at least 1958 without ever appearing on an official organization chart. It ordered the transfer of [[E. Montalvo]] to a floor that does not exist, and drafted an uncirculated version of the company's articles of incorporation. Its seal is identical to that of [[Carcosa Servicios Escénicos]]. The same pattern of closures without questions reappears in [[P. Smerdiakov]]'s file, years before the Committee officially existed on paper. The wording of its founding charter reappears word for word in the 1988 creation of the [[Workplace Welfare Committee]].",
       "pistas": [
         "pista3@2",
         "pista6@3",
@@ -976,9 +976,9 @@
     },
     {
       "id": "conceptoBienestar@6",
-      "nombre": "Comité de Bienestar Laboral",
+      "nombre": "Workplace Welfare Committee",
       "tipo": "COMITE",
-      "resumen": "Creado en 1988 para dictaminar solicitudes de mobiliario especial. No ha alcanzado quórum ni una sola vez desde su fundación, lo que dejó seis años en trámite la silla de R. Salcido. Su acta de creación reproduce, palabra por palabra, la fórmula del acta fundacional del [[Comité Ad Honorem]] de 1958 — incluida la cláusula que define el quórum de un modo que ningún número de asistentes puede satisfacer.",
+      "resumen": "Created in 1988 to rule on requests for special furniture. It has never reached quorum since its founding, leaving R. Salcido's chair request in process for six years. Its founding record reproduces, word for word, the wording of the 1958 founding charter of the [[Ad Honorem Committee]] — including the clause defining quorum in a way that no number of attendees can satisfy.",
       "pistas": [
         "pista3@2",
         "pista22@2"
@@ -988,7 +988,7 @@
       "id": "conceptoCarcosa@6",
       "nombre": "Carcosa Servicios Escénicos",
       "tipo": "EMPRESA",
-      "resumen": "Proveedor contratado en 1996 para el evento de aniversario. Cobró un recargo específico por NO representar el segundo acto de su montaje, [[El Rey de Amarillo (Acto II)]]. Selló su factura con un sello amarillo que no corresponde a ningún notario ni al sello oficial de la empresa: el mismo que usa el [[Comité Ad Honorem]]. La dirección fiscal de su contrato reaparece en 1999, declarada por [[El proveedor sin RFC]] del cierre de caja.",
+      "resumen": "Supplier hired in 1996 for the anniversary event. It charged a specific surcharge for NOT performing the second act of its production, [[The King in Yellow (Act II)]]. Its invoice bears a yellow seal that matches neither a notary nor the company's official seal: the same one used by the [[Ad Honorem Committee]]. The tax address on its contract appears again in 1999, declared by [[The supplier without an RFC]] in the cash-closing file.",
       "pistas": [
         "pista20@1",
         "pista7@4",
@@ -998,27 +998,27 @@
     },
     {
       "id": "conceptoProveedor@6",
-      "nombre": "El proveedor sin RFC",
+      "nombre": "The supplier without an RFC",
       "tipo": "EMPRESA",
-      "resumen": "Cobró $482,000 por 'servicios de consultoría' el 30/12/1999, autorizado sin revisión previa y aprobado por Contraloría en cinco minutos. El registro mercantil no lo conoce. La dirección fiscal declarada en su factura coincide con la que usó [[Carcosa Servicios Escénicos]] en su contrato de 1996 — un local que, según el padrón municipal, lleva vacío desde 1994.",
+      "resumen": "Received $482,000 for 'consulting services' on 30/12/1999, authorized without prior review and approved by the Comptroller's Office in five minutes. The commercial registry has no record of it. The tax address declared on its invoice matches the one used by [[Carcosa Servicios Escénicos]] in its 1996 contract — premises that, according to municipal records, have been vacant since 1994.",
       "pistas": [
         "pista20@1"
       ]
     },
     {
       "id": "conceptoActoII@6",
-      "nombre": "El Rey de Amarillo (Acto II)",
+      "nombre": "The King in Yellow (Act II)",
       "tipo": "DOCUMENTO",
-      "resumen": "Segundo acto de la obra montada por [[Carcosa Servicios Escénicos]] en la fiesta de aniversario de 1996. El contrato prohíbe expresamente representarlo. Nadie en el comité organizador recuerda quién propuso esa cláusula, ni por qué el Acto I bastó para que varios asistentes pidieran cambio de área la misma semana.",
+      "resumen": "Second act of the play staged by [[Carcosa Servicios Escénicos]] at the 1996 anniversary party. The contract expressly forbids its performance. Nobody on the organizing committee remembers who proposed that clause, or why Act I alone was enough for several attendees to request department transfers that same week.",
       "pistas": [
         "pista7@4"
       ]
     },
     {
       "id": "conceptoPiso13@6",
-      "nombre": "El piso 13 / Enlace Especial",
+      "nombre": "The 13th Floor / Special Liaison",
       "tipo": "LUGAR",
-      "resumen": "Destino del traslado de [[E. Montalvo]] en 1993, según un memorándum sellado de recibido. El edificio, de acuerdo con todos los planos vigentes, tiene doce pisos. La orden de traslado la firmó el [[Comité Ad Honorem]].",
+      "resumen": "Destination of [[E. Montalvo]]'s 1993 transfer, according to a memorandum stamped as received. The building has twelve floors according to every current plan. The transfer order was signed by the [[Ad Honorem Committee]].",
       "pistas": [
         "pista5@3",
         "pista6@3"
@@ -1028,16 +1028,16 @@
       "id": "conceptoMontalvo@6",
       "nombre": "E. Montalvo",
       "tipo": "PERSONA",
-      "resumen": "Auxiliar administrativo 1988-1993. Trasladado a [[El piso 13 / Enlace Especial]] por instrucción del [[Comité Ad Honorem]]. No hay renuncia, baja ni recibo de nómina posterior a la fecha del traslado.",
+      "resumen": "Administrative assistant, 1988-1993. Transferred to [[The 13th Floor / Special Liaison]] by instruction of the [[Ad Honorem Committee]]. There is no resignation, termination, or pay slip after the transfer date.",
       "pistas": [
         "pista5@3"
       ]
     },
     {
       "id": "conceptoMemoRepetido@6",
-      "nombre": "El expediente que se repite (MEMO-1978-014)",
+      "nombre": "The Repeating File (MEMO-1978-014)",
       "tipo": "DOCUMENTO",
-      "resumen": "Un memorándum con folio, fecha y errores de mecanografía idénticos aparece archivado por separado en 1978, 1993 y 2007. La copia más reciente incluye una nota dirigida, literalmente, a quien lo esté leyendo ahora. Guardado en el [[Archivo Muerto]].",
+      "resumen": "A memorandum with identical folio, date, and typing errors appears filed separately in 1978, 1993, and 2007. The most recent copy includes a note addressed literally to whoever is reading it now. Stored in the [[Dead Archive]].",
       "pistas": [
         "pista9@5",
         "pista10@5"
@@ -1045,9 +1045,9 @@
     },
     {
       "id": "conceptoArchivoMuerto@6",
-      "nombre": "Archivo Muerto",
+      "nombre": "Dead Archive",
       "tipo": "LUGAR",
-      "resumen": "Depósito de expedientes que, según un acta de 2007, deben 'revisarse' cada quince años sin que exista razón administrativa registrada para ello. Ahí apareció también la versión no circulada del acta fundacional del [[Comité Ad Honorem]], de 1958. Ahí, tarde o temprano, terminan también los expedientes sin remitente ni destino claro, como el de [[Empleado #427]].",
+      "resumen": "Repository for files that, according to a 2007 report, must be 'reviewed' every fifteen years despite no recorded administrative reason for doing so. The uncirculated 1958 founding charter of the [[Ad Honorem Committee]] also surfaced there. Sooner or later, files with no clear sender or destination end up there too, such as the file of [[Employee #427]].",
       "pistas": [
         "pista9@5",
         "pista19@8"
@@ -1055,34 +1055,34 @@
     },
     {
       "id": "conceptoAuditor@6",
-      "nombre": "auditor01 (usted)",
+      "nombre": "auditor01 (you)",
       "tipo": "PERSONA",
-      "resumen": "Su propio usuario figura en la lista de firmantes autorizados del [[Comité Ad Honorem]] desde 1958, con una fecha de alta muy anterior a su contratación real. No hay una explicación administrativa registrada para ello. Tampoco se ha solicitado una.",
+      "resumen": "Your own username appears on the [[Ad Honorem Committee]]'s list of authorized signatories since 1958, with an enrollment date long before your actual hiring. There is no recorded administrative explanation for this. None has been requested.",
       "pistas": [
         "pista12@6"
       ]
     },
     {
       "id": "conceptoEpilogo@6",
-      "nombre": "Memorándum de acreditación especial",
+      "nombre": "Special Accreditation Memorandum",
       "tipo": "DOCUMENTO",
-      "resumen": "Para: auditor en turno. Habiendo dado cierre a los cinco expedientes bajo su cargo, se le concede acceso temporal a los archivos del [[Comité Ad Honorem]], en los términos del acta fundacional. Usuario: enlace13. Clave de acceso: hastur-local-13. Esta acreditación no requiere renovación ni caduca: simplemente, no se ha previsto ese caso.",
+      "resumen": "To: auditor on duty. Having closed the five files under your responsibility, you are granted temporary access to the [[Ad Honorem Committee]] archives under the terms of the founding charter. User: enlace13. Access key: hastur-local-13. This accreditation requires no renewal and does not expire: that case was simply never provided for.",
       "epilogo": true
     },
     {
       "id": "conceptoDKaramazov@7",
-      "nombre": "D. Karamázov",
+      "nombre": "D. Karamazov",
       "tipo": "PERSONA",
-      "resumen": "Gerente de Ventas despedido por 'conducta impropia' cuatro días después de la desaparición de los fondos de su padre. La acusación en su contra se basó solo en sus reclamos por escrito, nunca en evidencia de acceso a la caja fuerte, que sí tenía [[P. Smerdiakov]].",
+      "resumen": "Sales Manager dismissed for 'improper conduct' four days after his father's funds disappeared. The accusation against him was based only on his written complaints, never on evidence that he had access to the safe, which [[P. Smerdiakov]] did.",
       "pistas": [
         "pista16@7"
       ]
     },
     {
       "id": "conceptoIKaramazov@7",
-      "nombre": "I. Karamázov",
+      "nombre": "I. Karamazov",
       "tipo": "PERSONA",
-      "resumen": "Del Departamento de Planeación. Distribuyó una circular interna una semana antes de la desaparición de los fondos, argumentando que sin revisión todo está permitido. La leyó, entre otros, [[P. Smerdiakov]].",
+      "resumen": "Planning Department. Distributed an internal circular one week before the funds disappeared, arguing that without review everything is permitted. Among those who read it was [[P. Smerdiakov]].",
       "pistas": [
         "pista14@7"
       ]
@@ -1091,25 +1091,25 @@
       "id": "conceptoSmerdiakov@7",
       "nombre": "P. Smerdiakov",
       "tipo": "PERSONA",
-      "resumen": "Único empleado con llave de la caja fuerte. Falleció seis días después de la desaparición de los fondos; Recursos Humanos cerró su expediente sin preguntar por qué, poco después de que circulara el memorándum de [[I. Karamázov]]. El mismo silencio administrativo, el mismo cierre sin explicación, reaparece décadas después en los expedientes que ya autoriza el [[Comité Ad Honorem]].",
+      "resumen": "The only employee with a key to the safe. Died six days after the funds disappeared; Human Resources closed his file without asking why, shortly after [[I. Karamazov]]'s memorandum circulated. The same administrative silence, the same unexplained closure, reappears decades later in files already authorized by the [[Ad Honorem Committee]].",
       "pistas": [
         "pista15@7"
       ]
     },
     {
       "id": "concepto427@8",
-      "nombre": "Empleado #427",
+      "nombre": "Employee #427",
       "tipo": "PERSONA",
-      "resumen": "Quince años presionando un botón sin que nadie preguntara para qué. Su expediente tiene tres actas de cierre incompatibles entre sí, y después llegó [[La transmisión sin remitente]].",
+      "resumen": "Fifteen years pressing a button without anyone asking why. The file contains three mutually incompatible closing reports, followed by [[The Senderless Transmission]].",
       "pistas": [
         "pista18@8"
       ]
     },
     {
       "id": "conceptoTransmision@8",
-      "nombre": "La transmisión sin remitente",
+      "nombre": "The Senderless Transmission",
       "tipo": "DOCUMENTO",
-      "resumen": "Un fax sin origen registrado, llegado el mismo día de las tres actas de cierre de [[Empleado #427]]. No dice a quién va dirigido, y aun así parece saber exactamente quién lo está leyendo. Expedientes así, sin remitente ni destino claro, suelen terminar en el [[Archivo Muerto]].",
+      "resumen": "A fax with no recorded origin, received on the same day as the three closing reports for [[Employee #427]]. It says who it is addressed to nowhere, yet still seems to know exactly who is reading it. Files like this, with no clear sender or destination, tend to end up in the [[Dead Archive]].",
       "pistas": [
         "pista19@8"
       ]
