@@ -11,6 +11,7 @@ func _initialize() -> void:
 	_probar_fuera_de_campo()
 	_probar_controles_interactivos()
 	_probar_acabado_ambiental()
+	_probar_interior_variable()
 	_probar_accesibilidad_y_reproduccion()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -251,7 +252,9 @@ func _probar_acabado_ambiental() -> void:
 		sueno.get_node_or_null("AcabadoAmbiental/PlanoAdministrativoPlegado/HojaA") != null,
 		"plano administrativo plegado materializa la hibridación sin texto",
 	)
-	var cocina := sueno.get_node_or_null("CabanaAncla/InteriorImposible/CocinaSIGA98")
+	var cocina := sueno.get_node_or_null(
+		"CabanaAncla/InteriorImposible/EstadosInterior/CocinaSIGA98"
+	)
 	_comprobar(cocina != null, "interior imposible contiene una cocina doméstica SIGA-98")
 	_comprobar(
 		cocina.get_child_count() >= 9, "cocina tiene mobiliario suficiente para leerse como espacio"
@@ -260,6 +263,49 @@ func _probar_acabado_ambiental() -> void:
 	_comprobar(colisiones.is_empty(), "acabado ambiental no añade colisiones ni bloquea rutas")
 	_comprobar(sueno.cabana_visible(), "acabado conserva la cabaña-ancla")
 	_comprobar(sueno.ruta_retorno_disponible(), "acabado conserva el retorno seguro")
+	sueno.queue_free()
+
+
+func _probar_interior_variable() -> void:
+	var sueno := SuenoBabaYaga.new()
+	get_root().add_child(sueno)
+	sueno.preparar()
+
+	var marco := sueno.get_node_or_null("CabanaAncla/InteriorImposible/MarcoPuerta")
+	var estados := sueno.get_node_or_null("CabanaAncla/InteriorImposible/EstadosInterior")
+	_comprobar(marco != null, "el marco de puerta existe como ancla estable")
+	_comprobar(estados != null, "la cabaña contiene estados interiores declarados")
+	_comprobar(
+		estados.get_child_count(),
+		SuenoBabaYaga.INTERIORES_CABANA.size(),
+		"hay un interior por fase del umbral",
+	)
+
+	var vistos: Array[String] = []
+	for i in SuenoBabaYaga.INTERIORES_CABANA.size():
+		var esperado: String = SuenoBabaYaga.INTERIORES_CABANA[i]
+		_comprobar(sueno.interior_actual(), esperado, "interior sigue la fase espacial")
+		var visibles := 0
+		for estado in estados.get_children():
+			if estado.visible:
+				visibles += 1
+				_comprobar(
+					String(estado.name), esperado, "solo se muestra el interior seleccionado"
+				)
+		_comprobar(visibles, 1, "solo hay un interior visible por fase")
+		_comprobar(sueno.get_node_or_null("CabanaAncla/InteriorImposible/MarcoPuerta"), marco)
+		vistos.append(sueno.interior_actual())
+		if i < SuenoBabaYaga.INTERIORES_CABANA.size() - 1:
+			var cambio := sueno.aplicar_evento(SuenoBabaYaga.EVENTO_UMBRAL)
+			_comprobar(
+				cambio["interior_cabana"],
+				SuenoBabaYaga.INTERIORES_CABANA[i + 1],
+				"el evento expone el siguiente interior",
+			)
+
+	_comprobar(vistos, SuenoBabaYaga.INTERIORES_CABANA, "la secuencia interior es determinista")
+	var vuelta := sueno.aplicar_evento(SuenoBabaYaga.EVENTO_UMBRAL)
+	_comprobar(vuelta["interior_cabana"], SuenoBabaYaga.INTERIORES_CABANA[0], "el ciclo es estable")
 	sueno.queue_free()
 
 
@@ -322,6 +368,11 @@ func _probar_accesibilidad_y_reproduccion() -> void:
 	_comprobar(
 		copia.get_node_or_null("CabanaAncla/InteriorImposible/SueloInterior") != null,
 		"cabaña materializa interior mayor que su volumen",
+	)
+	_comprobar(
+		copia.interior_actual(),
+		sueno.interior_actual(),
+		"restauración conserva el interior ligado a la fase espacial",
 	)
 	sueno.queue_free()
 	copia.queue_free()

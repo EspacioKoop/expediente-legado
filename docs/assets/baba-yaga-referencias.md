@@ -83,6 +83,19 @@ Para avanzar el acabado sin cerrar todavía una iconografía figurativa de Baba 
 
 Este pase trabaja únicamente con la hibridación propia del juego (bosque, oficina, archivo y vivienda) y evita convertir una adaptación moderna concreta en referencia canónica.
 
+## Interior variable de la cabaña
+
+La puerta conserva un **marco estable**, pero el contenido que enmarca cambia de forma determinista con la misma fase espacial que mueve la cabaña:
+
+- `CocinaSIGA98`: vivienda doméstica imposible, mayor por dentro que por fuera;
+- `ArchivoInvertido`: archivadores y mesa invertida convierten el interior en una oficina suspendida;
+- `BosqueInterior`: troncos aparecen dentro de la vivienda bajo un falso techo exterior;
+- `SalaUmbral`: una sucesión de marcos repite la idea de puerta dentro de puerta sin teletransporte ni azar.
+
+Solo un estado interior está visible a la vez. El cambio reutiliza la fase del umbral, se serializa indirectamente mediante `fase_umbral` y se reconstruye al restaurar partida. El marco, el retorno seguro y la lógica de navegación permanecen estables.
+
+Este recurso sigue siendo una invención espacial de SIGA-98 y no se presenta como motivo folclórico documentado.
+
 ### Gate humano antes de cerrar #652
 
 El código puede comprobar reglas, persistencia y ausencia de softlock, pero no sustituye un pase humano. Antes de cerrar el issue conviene registrar una sesión breve con estos puntos:

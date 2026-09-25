@@ -55,6 +55,12 @@ const COLOR_MARCA := Color(0.72, 0.62, 0.30)
 const COLOR_RETORNO := Color(0.28, 0.50, 0.37)
 const COLOR_COMPARACION := Color(0.72, 0.78, 0.67)
 const PASOS_RASTRO := 5
+const INTERIORES_CABANA := [
+	"CocinaSIGA98",
+	"ArchivoInvertido",
+	"BosqueInterior",
+	"SalaUmbral",
+]
 
 var _fase_umbral := 0
 var _fase_fuera_campo := 0
@@ -132,6 +138,10 @@ func ultima_comparacion() -> Dictionary:
 	return _ultima_comparacion.duplicate(true)
 
 
+func interior_actual() -> String:
+	return INTERIORES_CABANA[_fase_umbral % INTERIORES_CABANA.size()]
+
+
 func dejar_marca(nombre: String, objetivo: String) -> bool:
 	preparar()
 	var id := nombre.strip_edges()
@@ -204,6 +214,7 @@ func aplicar_evento(
 				"marcas": marcas_persistentes(),
 				"cabana_visible": cabana_visible(),
 				"retorno_disponible": ruta_retorno_disponible(),
+				"interior_cabana": interior_actual(),
 			},
 			true,
 		)
@@ -331,9 +342,13 @@ func _montar_cabana() -> void:
 		COLOR_MARCA,
 	)
 
+	var estados := Node3D.new()
+	estados.name = "EstadosInterior"
+	interior.add_child(estados)
+
 	var cocina := Node3D.new()
 	cocina.name = "CocinaSIGA98"
-	interior.add_child(cocina)
+	estados.add_child(cocina)
 	_crear_caja(
 		cocina,
 		"Encimera",
@@ -378,6 +393,80 @@ func _montar_cabana() -> void:
 			Vector3(0.12, 0.68, 0.12),
 			Vector3(x, 1.34, z),
 			COLOR_ARCHIVO,
+		)
+
+	var archivo := Node3D.new()
+	archivo.name = "ArchivoInvertido"
+	estados.add_child(archivo)
+	for i in 3:
+		_crear_caja(
+			archivo,
+			"Archivador%02d" % (i + 1),
+			Vector3(0.82, 1.72, 0.72),
+			Vector3(-1.35 + float(i) * 1.35, 1.94, 0.72),
+			COLOR_ARCHIVO,
+		)
+		_crear_caja(
+			archivo,
+			"Etiqueta%02d" % (i + 1),
+			Vector3(0.38, 0.12, 0.05),
+			Vector3(-1.35 + float(i) * 1.35, 2.18, 0.34),
+			COLOR_MARCA,
+		)
+	var mesa_invertida := _crear_caja(
+		archivo,
+		"MesaInvertida",
+		Vector3(2.70, 0.12, 1.25),
+		Vector3(0.0, 3.30, 0.28),
+		COLOR_MADERA,
+	)
+	mesa_invertida.rotation_degrees.z = 180.0
+
+	var bosque_interior := Node3D.new()
+	bosque_interior.name = "BosqueInterior"
+	estados.add_child(bosque_interior)
+	for i in 5:
+		var x_bosque := -2.0 + float(i) * 1.0
+		var altura_bosque := 2.4 + float(i % 2) * 0.65
+		_crear_caja(
+			bosque_interior,
+			"TroncoInterior%02d" % (i + 1),
+			Vector3(0.24, altura_bosque, 0.24),
+			Vector3(x_bosque, 1.10 + altura_bosque * 0.5, 0.82),
+			COLOR_BOSQUE,
+		)
+	_crear_caja(
+		bosque_interior,
+		"TechoExterior",
+		Vector3(4.80, 0.10, 2.80),
+		Vector3(0.0, 3.82, 0.50),
+		COLOR_SUELO,
+	)
+
+	var sala_umbral := Node3D.new()
+	sala_umbral.name = "SalaUmbral"
+	estados.add_child(sala_umbral)
+	for i in 3:
+		_crear_caja(
+			sala_umbral,
+			"Marco%02dA" % (i + 1),
+			Vector3(0.14, 2.20, 0.14),
+			Vector3(-1.20 + float(i) * 1.20, 2.14, 0.70 + float(i) * 0.22),
+			COLOR_MARCA,
+		)
+		_crear_caja(
+			sala_umbral,
+			"Marco%02dB" % (i + 1),
+			Vector3(0.14, 2.20, 0.14),
+			Vector3(-0.55 + float(i) * 1.20, 2.14, 0.70 + float(i) * 0.22),
+			COLOR_MARCA,
+		)
+		_crear_caja(
+			sala_umbral,
+			"Dintel%02d" % (i + 1),
+			Vector3(0.80, 0.14, 0.14),
+			Vector3(-0.88 + float(i) * 1.20, 3.20, 0.70 + float(i) * 0.22),
+			COLOR_MARCA,
 		)
 
 
@@ -611,7 +700,18 @@ func _aplicar_estado_visual() -> void:
 	get_node("BosqueMovil/ArchivadorHito").position = posiciones[OBJETO_ARCHIVADOR]
 	get_node("CabanaAncla").position = posiciones[OBJETO_CABANA]
 	get_node("CabanaAncla").visible = true
+	_actualizar_interior_cabana()
 	get_node("RetornoSeguro").visible = true
+
+
+func _actualizar_interior_cabana() -> void:
+	var estados := get_node_or_null("CabanaAncla/InteriorImposible/EstadosInterior")
+	if estados == null:
+		return
+	var seleccionado := interior_actual()
+	for estado in estados.get_children():
+		if estado is Node3D:
+			estado.visible = String(estado.name) == seleccionado
 
 
 func _sincronizar_marcas_visual() -> void:

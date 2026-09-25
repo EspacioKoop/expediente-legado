@@ -100,6 +100,18 @@ class SuenoBabaYagaTest(unittest.TestCase):
         self.assertNotIn("Sprite3D.new()", self.sueno)
         self.assertNotIn("Decal.new()", self.sueno)
 
+    def test_interior_cabana_cambia_sin_mover_el_marco(self):
+        self.assertIn("INTERIORES_CABANA := [", self.sueno)
+        self.assertIn('"EstadosInterior"', self.sueno)
+        self.assertIn('"CocinaSIGA98"', self.sueno)
+        self.assertIn('"ArchivoInvertido"', self.sueno)
+        self.assertIn('"BosqueInterior"', self.sueno)
+        self.assertIn('"SalaUmbral"', self.sueno)
+        self.assertIn("func interior_actual()", self.sueno)
+        self.assertIn("func _actualizar_interior_cabana()", self.sueno)
+        self.assertIn('"interior_cabana": interior_actual()', self.sueno)
+        self.assertIn('"MarcoPuerta"', self.sueno)
+
     def test_reduccion_movimiento_conserva_mecanica(self):
         self.assertIn('"corte_fundido" if reduccion_movimiento', self.sueno)
         self.assertIn('"duracion": 0.0 if reduccion_movimiento', self.sueno)
