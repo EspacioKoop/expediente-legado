@@ -183,6 +183,12 @@ def ejecutar():
                 18,
             ),
             (
+                "fauna-reactiva-1403",
+                ["--script", "pruebas/pruebas_fauna_reactiva_1403.gd"],
+                30,
+                30,
+            ),
+            (
                 "ronda-cierre-156",
                 ["--script", "pruebas/pruebas_ronda_cierre_3d.gd"],
                 30,
