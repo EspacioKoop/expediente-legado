@@ -11,7 +11,7 @@ const COLOR_ESTRUCTURA := Color(0.30, 0.28, 0.36)
 const GROSOR := 0.08
 
 
-static func montar(mundo: Node3D, anomalias: Array) -> Array:
+static func montar(mundo: Node3D, anomalias: Array, modificadores: Array = []) -> Array:
 	var creadas := []
 	var capa: Node3D
 	for valor in anomalias:
@@ -35,7 +35,80 @@ static func montar(mundo: Node3D, anomalias: Array) -> Array:
 		capa.add_child(rima)
 		_montar_motivo(rima, motivo)
 		creadas.append(rima)
+	_aplicar_modificadores(creadas, modificadores)
 	return creadas
+
+
+static func _aplicar_modificadores(rimas: Array, modificadores: Array) -> void:
+	var activo := {}
+	for valor in modificadores:
+		if typeof(valor) != TYPE_DICTIONARY:
+			continue
+		var modificador: Dictionary = valor
+		if String(modificador.get("canal", "")) != "eleccion":
+			continue
+		if String(modificador.get("regla", "")).is_empty():
+			continue
+		activo = modificador
+		break
+	if activo.is_empty():
+		return
+
+	for valor_rima in rimas:
+		if not valor_rima is Node3D:
+			continue
+		var rima: Node3D = valor_rima
+		var capa := Node3D.new()
+		capa.name = "ModificadorIdeologico"
+		capa.set_meta("canal_modificador", String(activo.get("canal", "")))
+		capa.set_meta("familia_modificadora", String(activo.get("familia", "")))
+		capa.set_meta("regla_modificadora", String(activo.get("regla", "")))
+		rima.add_child(capa)
+		_montar_regla(capa, String(activo.get("regla", "")))
+
+
+static func _montar_regla(raiz: Node3D, regla: String) -> void:
+	match regla:
+		"distribuir":
+			_montar_distribucion(raiz)
+		"capas":
+			_montar_capas(raiz)
+		"equilibrar":
+			_montar_equilibrio(raiz)
+		"desplazar":
+			_montar_desplazamiento(raiz)
+
+
+static func _montar_distribucion(raiz: Node3D) -> void:
+	for i in range(3):
+		_caja(
+			raiz,
+			"Ancla%02d" % (i + 1),
+			Vector3(-1.10 + 1.10 * i, 0.18, 0.0),
+			Vector3(0.22, 0.36, 0.62),
+		)
+
+
+static func _montar_capas(raiz: Node3D) -> void:
+	_marco(raiz, "CapaA", Vector3(0.0, 0.0, -0.55), 0.0)
+	_marco(raiz, "CapaB", Vector3(0.0, 0.0, 0.0), 0.0)
+	_marco(raiz, "CapaC", Vector3(0.0, 0.0, 0.55), 0.0)
+
+
+static func _montar_equilibrio(raiz: Node3D) -> void:
+	_caja(raiz, "PesoA", Vector3(-1.0, 0.18, 0.0), Vector3(0.68, 0.36, 0.68))
+	_caja(raiz, "PesoB", Vector3(1.0, 0.18, 0.0), Vector3(0.68, 0.36, 0.68))
+	_caja(raiz, "Vinculo", Vector3(0.0, 0.08, 0.0), Vector3(1.80, 0.08, GROSOR))
+
+
+static func _montar_desplazamiento(raiz: Node3D) -> void:
+	for i in range(3):
+		_caja(
+			raiz,
+			"Tramo%02d" % (i + 1),
+			Vector3(-0.75 + 0.75 * i, 0.14, -0.55 + 0.55 * i),
+			Vector3(0.58, 0.28, 0.58),
+		)
 
 
 static func _motivo_soportado(motivo: String) -> bool:
