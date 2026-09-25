@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<defs><pattern id="p" width="128" height="128" patternUnits="userSpaceOnUse"><rect width="128" height="128" fill="#8080ff"/><g fill="none" stroke="#788cff" stroke-width="3" opacity=".75">
+<path d="M0 20q16-18 32 0q16-18 32 0q16-18 32 0q16-18 32 0"/><path d="M-16 52q16-18 32 0q16-18 32 0q16-18 32 0q16-18 32 0q16-18 32 0"/><path d="M0 84q16-18 32 0q16-18 32 0q16-18 32 0q16-18 32 0"/><path d="M-16 116q16-18 32 0q16-18 32 0q16-18 32 0q16-18 32 0q16-18 32 0"/></g></pattern></defs>
+<rect width="512" height="512" fill="url(#p)"/>
+
+</svg>
