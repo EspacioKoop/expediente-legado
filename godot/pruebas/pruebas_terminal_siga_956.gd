@@ -73,6 +73,10 @@ func _probar() -> void:
 	_comprobar(app._linea != null and app._linea.has_focus(), "la entrada recibe foco al abrir")
 	_comprobar(app._registro != null, "la pantalla monta historial de terminal")
 	_comprobar(app._abrir_siga != null, "la pantalla ofrece acceso explícito al visor SIGA")
+	_comprobar(
+		app._abrir_siga.text == tr("TERMINAL_SIGA_ABRIR"),
+		"la UI resuelve sus textos desde el catálogo de traducciones",
+	)
 	var ui_help: Dictionary = app.ejecutar("help")
 	_comprobar(bool(ui_help["ok"]), "la UI delega HELP al núcleo")
 	_comprobar(
