@@ -229,8 +229,8 @@ static func _poner_identidad_realista(pieza: Node3D, retrato: String) -> void:
 
 	var alto := maxf(
 		absf(
-			esqueleto.get_bone_global_pose(cabeza).origin.y
-			- esqueleto.get_bone_global_pose(cuello).origin.y
+			esqueleto.get_bone_global_rest(cabeza).origin.y
+			- esqueleto.get_bone_global_rest(cuello).origin.y
 		)
 		* 1.9,
 		0.18
