@@ -1,6 +1,6 @@
 ## Consumidor de trayectoria literaria para epílogos (#1175/#1184).
 ##
-## No calcula una identidad, nivel ni alignment. Resume hechos concretos del
+## No calcula una identidad, nivel ni eje cultural. Resume hechos concretos del
 ## registro persistente y los adjunta a un final ya resuelto sin reemplazarlo.
 class_name LiteraturaTrayectoria
 extends RefCounted
