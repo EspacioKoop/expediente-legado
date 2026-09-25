@@ -3,7 +3,7 @@
 Este gate convierte la validacion visual pendiente de #225 en un conjunto
 reproducible del mismo build que se esta revisando. No modifica el lote ni el
 gameplay: abre la escena real `dia.tscn`, entra en `trayecto`, usa la camara
-jugable a 1280x720 / FOV 75, oculta el HUD y captura cuatro vistas.
+jugable a 1920x1080 / FOV 75, oculta el HUD y captura cuatro vistas.
 
 ## Artifact
 
