@@ -44,6 +44,7 @@ class AnalisisDocumental951Test(unittest.TestCase):
                 self.assertNotIn(detalle_id, ids_detalle)
                 ids_detalle.add(detalle_id)
                 self.assertRegex(self.textos, rf"(?m)^{re.escape(clave)},")
+                self.assertIn(f'"{clave}"', self.visor)
 
     def test_analizar_no_guarda_ni_descubre_pistas(self):
         inicio = self.visor.index("func _analizar_documento_actual()")
