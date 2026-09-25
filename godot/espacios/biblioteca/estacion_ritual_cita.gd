@@ -1,4 +1,4 @@
-extends Area3D
+extends Interactuable3D
 
 @export var ritual_ui_path: NodePath
 
@@ -6,25 +6,16 @@ extends Area3D
 
 
 func _ready() -> void:
+	verbo = Verbo.USAR
+	nombre_objeto = "mesa de cita"
 	if label != null:
 		label.visible = false
 
 
-func _on_area_entered(area: Area3D) -> void:
-	if area.is_in_group("jugador") and label != null:
-		label.visible = true
-
-
-func _on_area_exited(area: Area3D) -> void:
-	if area.is_in_group("jugador") and label != null:
-		label.visible = false
-
-
-func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		abrir_ritual()
-	if event is InputEventKey and event.pressed and event.keycode == KEY_E:
-		abrir_ritual()
+func interactuar(actor: Node) -> bool:
+	if not super.interactuar(actor):
+		return false
+	return abrir_ritual()
 
 
 func abrir_ritual() -> bool:
