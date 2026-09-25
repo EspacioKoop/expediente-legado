@@ -62,8 +62,10 @@ func _probar() -> void:
 	var copia: Dictionary = terminal.ejecutar("copy README.TXT /SIGA/MEMOS/COPIA.TXT")
 	_comprobar(bool(copia["ok"]), "COPY crea una copia temporal")
 	_comprobar(
-		terminal.ejecutar("type /SIGA/MEMOS/COPIA.TXT")["salida"]
-		== terminal.ejecutar("type /README.TXT")["salida"],
+		(
+			terminal.ejecutar("type /SIGA/MEMOS/COPIA.TXT")["salida"]
+			== terminal.ejecutar("type /README.TXT")["salida"]
+		),
 		"COPY conserva el contenido dentro del filesystem simulado",
 	)
 	var editado: Dictionary = terminal.ejecutar("edit /SIGA/MEMOS/NOTAS.TXT pista temporal")
