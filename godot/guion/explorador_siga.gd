@@ -32,8 +32,8 @@ func configurar_contexto(contexto: Dictionary) -> void:
 	_medios.configurar_contexto(contexto)
 	if is_node_ready():
 		if _incidencia != null:
-		_incidencia.cerrar(false)
-	if _resolver_ruta(_ruta_actual).is_empty():
+			_incidencia.cerrar(false)
+		if _resolver_ruta(_ruta_actual).is_empty():
 			_ruta_actual = ExploradorSigaModelo.RUTA_RAIZ
 		_refrescar()
 
@@ -344,6 +344,8 @@ func _alternar_medio() -> void:
 		return
 
 	var ruta_unidad := _medios.ruta_de_medio(id)
+	if _incidencia != null:
+		_incidencia.cerrar(false)
 	if not _medios.montar(id):
 		_mostrar_estado(tr("EXPLORADOR_MEDIO_NO_DISPONIBLE"))
 		return
