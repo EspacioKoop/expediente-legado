@@ -19,6 +19,7 @@ func _probar() -> void:
 	var ayuda: Dictionary = terminal.ejecutar("help")
 	_comprobar(bool(ayuda["ok"]), "HELP responde")
 	_comprobar(String(ayuda["salida"]).contains("DIR/LS"), "HELP enumera comandos")
+	_comprobar(String(ayuda["salida"]).contains("COPY/CP"), "HELP anuncia comandos temporales")
 
 	var raiz: Dictionary = terminal.ejecutar("dir")
 	_comprobar(bool(raiz["ok"]), "DIR lista la raíz")
@@ -58,8 +59,41 @@ func _probar() -> void:
 		"NETSTAT muestra conexiones simuladas",
 	)
 
-	for comando in ["del README.TXT", "rm README.TXT", "copy README.TXT X.TXT", "edit README.TXT"]:
-		_comprobar(not bool(terminal.ejecutar(comando)["ok"]), comando + " queda bloqueado")
+	var copia: Dictionary = terminal.ejecutar("copy README.TXT /SIGA/MEMOS/COPIA.TXT")
+	_comprobar(bool(copia["ok"]), "COPY crea una copia temporal")
+	_comprobar(
+		terminal.ejecutar("type /SIGA/MEMOS/COPIA.TXT")["salida"]
+		== terminal.ejecutar("type /README.TXT")["salida"],
+		"COPY conserva el contenido dentro del filesystem simulado",
+	)
+	var editado: Dictionary = terminal.ejecutar("edit /SIGA/MEMOS/NOTAS.TXT pista temporal")
+	_comprobar(bool(editado["ok"]), "EDIT crea o reemplaza un archivo temporal")
+	_comprobar(
+		terminal.ejecutar("cat /SIGA/MEMOS/NOTAS.TXT")["salida"] == "pista temporal",
+		"EDIT conserva texto con espacios",
+	)
+	_comprobar(
+		String(terminal.ejecutar("users")["salida"]).contains("auditor"),
+		"USERS enumera usuarios ficticios",
+	)
+	_comprobar(bool(terminal.ejecutar("del /SIGA/MEMOS/COPIA.TXT")["ok"]), "DEL borra la copia")
+	_comprobar(
+		not bool(terminal.ejecutar("type /SIGA/MEMOS/COPIA.TXT")["ok"]),
+		"el archivo eliminado desaparece durante la sesión",
+	)
+	var nueva_sesion = Terminal.new()
+	_comprobar(
+		not bool(nueva_sesion.ejecutar("type /SIGA/MEMOS/NOTAS.TXT")["ok"]),
+		"los cambios temporales se reinician al crear otra sesión",
+	)
+	_comprobar(
+		bool(nueva_sesion.ejecutar("type /README.TXT")["ok"]),
+		"una sesión nueva recupera los archivos base",
+	)
+	_comprobar(
+		not bool(terminal.ejecutar("copy /etc/passwd /SIGA/MEMOS/X.TXT")["ok"]),
+		"COPY no puede leer rutas fuera del namespace simulado",
+	)
 
 	_comprobar(not bool(terminal.ejecutar("comando_inventado")["ok"]), "comando desconocido falla")
 	_comprobar(
