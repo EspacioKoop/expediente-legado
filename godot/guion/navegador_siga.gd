@@ -549,17 +549,25 @@ func _renderizar_bbs(resultado: Dictionary, recurso: Dictionary, url: String) ->
 		bloques.append("Hilos disponibles: %d" % hilos.size())
 		_pagina.text = "\n\n".join(bloques)
 		for hilo in hilos:
-			var indice_item := _enlaces.add_item(
-				"[%s] %s · %s"
-				% [
-					String(hilo.get("estado", "abierto")),
-					String(hilo.get("titulo", "")),
-					String(hilo.get("fecha_ultimo", "")),
-				]
+			var indice_item := (
+				_enlaces
+				. add_item(
+					(
+						"[%s] %s · %s"
+						% [
+							String(hilo.get("estado", "abierto")),
+							String(hilo.get("titulo", "")),
+							String(hilo.get("fecha_ultimo", "")),
+						]
+					)
+				)
 			)
-			_enlaces.set_item_metadata(
-				indice_item,
-				"%s#hilo=%s" % [String(recurso.get("url", url)), String(hilo.get("id", ""))],
+			(
+				_enlaces
+				. set_item_metadata(
+					indice_item,
+					"%s#hilo=%s" % [String(recurso.get("url", url)), String(hilo.get("id", ""))],
+				)
 			)
 		return
 
@@ -576,12 +584,17 @@ func _renderizar_bbs(resultado: Dictionary, recurso: Dictionary, url: String) ->
 	_enlaces.set_item_metadata(volver, String(recurso.get("url", url)))
 	var bloques_hilo: Array[String] = []
 	bloques_hilo.append("[b]%s[/b]" % String(hilo_actual.get("titulo", "")))
-	bloques_hilo.append(
-		"Estado: %s · última actividad: %s"
-		% [
-			String(hilo_actual.get("estado", "")),
-			String(hilo_actual.get("fecha_ultimo", "")),
-		]
+	(
+		bloques_hilo
+		. append(
+			(
+				"Estado: %s · última actividad: %s"
+				% [
+					String(hilo_actual.get("estado", "")),
+					String(hilo_actual.get("fecha_ultimo", "")),
+				]
+			)
+		)
 	)
 	for mensaje in _bbs.mensajes_de(hilo_id):
 		var autor: Dictionary = mensaje.get("autor", {})
@@ -589,8 +602,7 @@ func _renderizar_bbs(resultado: Dictionary, recurso: Dictionary, url: String) ->
 		var tipo := String(mensaje.get("tipo", "normal"))
 		var estado := String(mensaje.get("estado", "visible"))
 		bloques_hilo.append(
-			"[b]%s[/b] · %s · %s/%s"
-			% [nick, String(mensaje.get("fecha", "")), tipo, estado]
+			"[b]%s[/b] · %s · %s/%s" % [nick, String(mensaje.get("fecha", "")), tipo, estado]
 		)
 		var referencia := _bbs.referencia_de_mensaje(String(mensaje.get("id", "")))
 		if not referencia.is_empty():
@@ -598,12 +610,17 @@ func _renderizar_bbs(resultado: Dictionary, recurso: Dictionary, url: String) ->
 				bloques_hilo.append("> [mensaje citado no disponible]")
 			else:
 				var autor_citado: Dictionary = referencia.get("autor", {})
-				bloques_hilo.append(
-					"> %s: %s"
-					% [
-						String(autor_citado.get("nick", referencia.get("autor_id", "?"))),
-						String(referencia.get("texto", "")),
-					]
+				(
+					bloques_hilo
+					. append(
+						(
+							"> %s: %s"
+							% [
+								String(autor_citado.get("nick", referencia.get("autor_id", "?"))),
+								String(referencia.get("texto", "")),
+							]
+						)
+					)
 				)
 		var texto := String(mensaje.get("texto", ""))
 		if texto.is_empty() and estado == "eliminado":
