@@ -17,7 +17,8 @@ const CASOS := [
         "id": "barrera_conos",
         "posicion": Vector3(0.0, 0.0, 2.0),
         "objetivo": Vector3(3.25, 0.55, 6.0),
-        "criterio":\n\t\t"barrera y conos se leen como dressing secundario, plausibles para 1998 y sin clipping",
+        "criterio":
+		"barrera y conos se leen como dressing secundario, plausibles para 1998 y sin clipping",
     },
     {
         "id": "tapa_sur",
