@@ -12,6 +12,7 @@ func _initialize() -> void:
 	_probar_controles_interactivos()
 	_probar_acabado_ambiental()
 	_probar_escalada_ambiental()
+	_probar_transito_horizonte()
 	_probar_interior_variable()
 	_probar_accesibilidad_y_reproduccion()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
@@ -314,6 +315,71 @@ func _probar_escalada_ambiental() -> void:
 	_comprobar(cierre["fase_ambiental"], 0, "escalada ambiental forma un ciclo estable")
 	_comprobar(retorno.position, retorno_inicial, "ciclo completo conserva retorno")
 	sueno.queue_free()
+
+
+func _probar_transito_horizonte() -> void:
+	var sueno := SuenoBabaYaga.new()
+	get_root().add_child(sueno)
+	sueno.preparar()
+	var inicial := sueno.posiciones_actuales()
+	var cambio := sueno.aplicar_evento(SuenoBabaYaga.EVENTO_UMBRAL, false, false)
+	var transito: Dictionary = cambio["transito_cabana"]
+
+	_comprobar(transito["aplicado"], "cruzar el umbral declara tránsito de cabaña")
+	_comprobar(
+		transito["modo"],
+		"arco_horizonte",
+		"modo normal atraviesa el horizonte",
+	)
+	_comprobar(transito["animar"], "modo normal anima la cabaña")
+	_comprobar(
+		transito["origen"],
+		inicial[SuenoBabaYaga.OBJETO_CABANA],
+		"tránsito parte del ancla anterior",
+	)
+	_comprobar(
+		transito["destino"],
+		cambio["posiciones"][SuenoBabaYaga.OBJETO_CABANA],
+		"tránsito termina en el nuevo ancla lógica",
+	)
+	_comprobar(
+		transito["horizonte"],
+		SuenoBabaYaga.PUNTOS_HORIZONTE_CABANA[1],
+		"tránsito usa el punto de horizonte de la fase destino",
+	)
+	var horizonte: Vector3 = transito["horizonte"]
+	_comprobar(horizonte.y >= 5.0, "tránsito pasa por encima de la zona jugable")
+	_comprobar(
+		transito["duracion"],
+		SuenoBabaYaga.DURACION_TRAMO_HORIZONTE * 2.0,
+		"tránsito normal tiene duración acotada",
+	)
+	_comprobar(not transito["desplazar_jugador"], "tránsito nunca desplaza al jugador")
+	_comprobar(not transito["mover_camara"], "tránsito no fuerza movimiento de cámara")
+	_comprobar(cambio["cabana_visible"], "cabaña sigue siendo un ancla visible")
+	_comprobar(cambio["retorno_disponible"], "tránsito conserva el retorno seguro")
+
+	var reducida := SuenoBabaYaga.new()
+	get_root().add_child(reducida)
+	reducida.preparar()
+	var corte := reducida.aplicar_evento(SuenoBabaYaga.EVENTO_UMBRAL, false, true)
+	var plan_corte: Dictionary = corte["transito_cabana"]
+	_comprobar(
+		plan_corte["modo"],
+		"corte_fundido",
+		"reducción de movimiento evita el arco animado",
+	)
+	_comprobar(not plan_corte["animar"], "reducción de movimiento no anima la cabaña")
+	_comprobar(plan_corte["duracion"], 0.0, "corte accesible no interpola")
+	var cabana_reducida := reducida.get_node("CabanaAncla") as Node3D
+	_comprobar(
+		cabana_reducida.position,
+		corte["posiciones"][SuenoBabaYaga.OBJETO_CABANA],
+		"corte coloca directamente la cabaña en el destino",
+	)
+
+	sueno.queue_free()
+	reducida.queue_free()
 
 
 func _probar_interior_variable() -> void:
