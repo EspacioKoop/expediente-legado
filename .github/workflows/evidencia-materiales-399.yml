@@ -78,16 +78,22 @@ jobs:
           for captura in oficina calle casa sueno; do
             test -s "evidencia-materiales-399/${captura}.png"
           done
+          test -s evidencia-materiales-399/comparativa.png
           test -s evidencia-materiales-399/manifest.json
           python3 - <<'PY'
           import json
           from pathlib import Path
 
-          manifest = json.loads(Path("evidencia-materiales-399/manifest.json").read_text())
+          raiz = Path("evidencia-materiales-399")
+          manifest = json.loads((raiz / "manifest.json").read_text())
           casos = {caso["id"]: caso for caso in manifest["casos"]}
           hashes = [caso["sha256"] for caso in manifest["casos"]]
           if len(hashes) != 4 or len(set(hashes)) != 4:
               raise SystemExit("las cuatro capturas deben existir y ser distintas")
+          if manifest.get("comparativa") != "comparativa.png":
+              raise SystemExit("el manifiesto debe declarar la comparativa")
+          if not manifest.get("sha256_comparativa"):
+              raise SystemExit("la comparativa debe registrar sha256")
           sueno = casos["sueno"]
           if not sueno["preservar_detalle_textura"] or sueno["materiales_detalle"] <= 0:
               raise SystemExit("el sueño debe renderizar materiales PSX con detalle opt-in")
@@ -96,8 +102,36 @@ jobs:
           for normal in ("oficina", "calle", "casa"):
               if casos[normal]["preservar_detalle_textura"] or casos[normal]["materiales_detalle"] != 0:
                   raise SystemExit(f"{normal} no debe activar el detalle onírico")
-          print("4/4 capturas distintas; sampler onírico aislado y activo")
+
+          lineas = [
+              "# Evidencia visual de materiales · #399",
+              "",
+              "La comparativa 2×2 usa este orden: **oficina · calle / casa · sueño**.",
+              "",
+              "![Comparativa 2×2](comparativa.png)",
+              "",
+              "| Fase | Suelo | Muro | PSX | Texturados | Deformados | Detalle | Captura |",
+              "| --- | --- | --- | ---: | ---: | ---: | ---: | --- |",
+          ]
+          for id_caso in ("oficina", "calle", "casa", "sueno"):
+              caso = casos[id_caso]
+              lineas.append(
+                  f"| {id_caso} | {caso['textura_suelo']} | {caso['textura_muro']} | "
+                  f"{caso['materiales_psx']} | {caso['materiales_texturados']} | "
+                  f"{caso['materiales_deformados']} | {caso['materiales_detalle']} | "
+                  f"[{caso['captura']}]({caso['captura']}) |"
+              )
+          lineas.extend(
+              [
+                  "",
+                  "Este resumen organiza la evidencia; no sustituye la revisión humana de legibilidad.",
+                  "",
+              ]
+          )
+          (raiz / "resumen.md").write_text("\n".join(lineas), encoding="utf-8")
+          print("4/4 capturas distintas; comparativa y resumen generados; sampler onírico aislado y activo")
           PY
+          test -s evidencia-materiales-399/resumen.md
 
       - name: Adjuntar evidencia visual
         if: always()
