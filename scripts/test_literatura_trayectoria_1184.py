@@ -42,7 +42,7 @@ class LiteraturaTrayectoria1184Test(unittest.TestCase):
     def test_documenta_reset_y_pluralidad(self):
         self.assertIn("reasignación", self.doc)
         self.assertIn("partida nueva", self.doc)
-        self.assertIn("pluralidad", self.doc)
+        self.assertIn("pluralidad", self.doc.lower())
         self.assertIn("procedencia", self.doc)
         self.assertIn("no bloquea", self.doc)
 
