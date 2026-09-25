@@ -99,6 +99,12 @@ def ejecutar():
                 12,
             ),
             (
+                "senales-calle-377",
+                ["--script", "pruebas/pruebas_senales_calle_377.gd"],
+                30,
+                10,
+            ),
+            (
                 "ayudas-multiplayer",
                 ["--script", "pruebas/pruebas_ayudas_multiplayer.gd"],
                 30,
