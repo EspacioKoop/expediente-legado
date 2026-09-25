@@ -1,4 +1,4 @@
-[gd_scene load_steps=56 format=3]
+[gd_scene load_steps=57 format=3]
 
 [ext_resource type="Script" path="res://guion/dia_clima_app.gd" id="1"]
 [ext_resource type="Script" path="res://guion/dia_corcho_app.gd" id="2"]
@@ -55,6 +55,7 @@
 [ext_resource type="Script" path="res://guion/dia_ayuda_resonancia_app.gd" id="53"]
 [ext_resource type="Script" path="res://guion/dia_simurgh_app.gd" id="54"]
 [ext_resource type="Script" path="res://guion/dia_duat_sueno_app.gd" id="55"]
+[ext_resource type="Script" path="res://guion/dia_popol_wuj_app.gd" id="56"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -169,6 +170,9 @@ script = ExtResource("49")
 
 [node name="SimurghController" type="Node" parent="."]
 script = ExtResource("54")
+
+[node name="PopolWujController" type="Node" parent="."]
+script = ExtResource("56")
 
 [node name="AvionesPapelController" type="Node" parent="."]
 script = ExtResource("50")

@@ -14,6 +14,8 @@ VIGILIA = ROOT / "godot" / "guion" / "popol_wuj_vigilia.gd"
 CIELOS = ROOT / "godot" / "guion" / "sueno_cielos.gd"
 ESCENA_SUENO = ROOT / "godot" / "escenas" / "sueno_popol_wuj.tscn"
 ESCENA_VIGILIA = ROOT / "godot" / "escenas" / "popol_wuj_vigilia.tscn"
+CONTROLLER = ROOT / "godot" / "guion" / "dia_popol_wuj_app.gd"
+DIA = ROOT / "godot" / "escenas" / "dia.tscn"
 REFERENCIAS = ROOT / "docs" / "assets" / "popol-wuj-referencias.md"
 PRUEBA_GODOT = "res://pruebas/pruebas_popol_wuj.gd"
 RESUMEN_GODOT = re.compile(r"(\d+) pasadas, 0 fallos")
@@ -28,6 +30,8 @@ class SuenoPopolWujTest(unittest.TestCase):
         cls.cielos = CIELOS.read_text(encoding="utf-8")
         cls.escena_sueno = ESCENA_SUENO.read_text(encoding="utf-8")
         cls.escena_vigilia = ESCENA_VIGILIA.read_text(encoding="utf-8")
+        cls.controller = CONTROLLER.read_text(encoding="utf-8")
+        cls.dia = DIA.read_text(encoding="utf-8")
         cls.referencias = REFERENCIAS.read_text(encoding="utf-8")
 
     def test_semilla_usa_catalogo_comun(self):
@@ -90,6 +94,21 @@ class SuenoPopolWujTest(unittest.TestCase):
         self.assertIn('[node name="SuenoPopolWuj" type="Node3D"]', self.escena_sueno)
         self.assertIn('path="res://guion/popol_wuj_vigilia.gd"', self.escena_vigilia)
         self.assertIn('[node name="PopolWujVigilia" type="Area3D"]', self.escena_vigilia)
+
+    def test_recorrido_real_reutiliza_selector_y_hotspots_comunes(self):
+        self.assertIn('path="res://guion/dia_popol_wuj_app.gd"', self.dia)
+        self.assertIn('[node name="PopolWujController" type="Node" parent="."]', self.dia)
+        self.assertIn("SemillasOniricas", self.controller)
+        self.assertIn("seleccionar_para_noche", self.controller)
+        self.assertIn("MitologiasNoche", self.controller)
+        self.assertIn("corresponde_a_escena", self.controller)
+        self.assertIn("SuenoPopolWuj.ID_MITO", self.controller)
+        self.assertIn("Interactuable3D.new()", self.controller)
+        self.assertIn("CollisionShape3D.new()", self.controller)
+        self.assertIn("SuenoPopolWuj.ELEMENTOS", self.controller)
+        self.assertIn("PreferenciasSiga.cargar()", self.controller)
+        self.assertNotIn("activar_semilla_onirica", self.controller)
+        self.assertNotIn("PopolWujVigilia.new()", self.controller)
 
     def test_contrato_funciona_en_godot_headless(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
