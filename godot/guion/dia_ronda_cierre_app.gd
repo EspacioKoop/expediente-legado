@@ -66,6 +66,7 @@ func _procesar_archivo(dia) -> void:
 		_capa.punto_completado.connect(_al_completar_punto)
 	_mundo_id = mundo_id
 
+
 static func ofrecida(dia: int, raiz: int) -> bool:
 	# Dos tardes de cada tres para una misma semilla. No usa RNG global y por
 	# tanto guardar/recargar nunca cambia si hoy había ronda.
