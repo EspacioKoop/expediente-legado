@@ -60,6 +60,7 @@ const ALTO_PERSONA := 1.75
 
 ## Subcarpeta de `RUTA` con los avatares fotorrealistas (#275).
 const CARPETA_REALISTAS := "rocketbox/"
+const IDENTIDAD_ROCKETBOX := preload("res://guion/identidad_historica_rocketbox.gd")
 
 const PERFILES_FACIALES := {
 	"emperador":
@@ -82,14 +83,16 @@ const PERFILES_FACIALES := {
 
 ## `retrato` sigue siendo la clave estable que llega desde el catálogo, pero la
 ## identidad visual deja de salir solo de un hash. Cada entrada de esta tabla
-## habilita rasgos modelados para la persona histórica concreta. Puyi, Melville,
-## Pessoa y Cavafis ya tienen pase propio; el resto puede incorporarse uno a uno
-## sin volver a una fotografía pegada sobre la cara.
+## habilita rasgos modelados para la persona histórica concreta. La misma clave
+## sirve tanto al maniquí legacy como a los avatares Rocketbox: en estos últimos
+## solo añade accesorios/volúmenes reconocibles y conserva intactos piel, cara y
+## texturas del avatar. No se pega ninguna fotografía sobre la malla.
 const PERSONAJES_FACIALES := {
 	"emperador": "Puyi",
 	"aduanero_ny": "Herman Melville",
 	"correspondencia": "Fernando Pessoa",
 	"riegos": "Constantino Cavafis",
+	"fielato": "Henri Rousseau",
 }
 
 ## Lo que se carga una vez y se reusa. Las salas repiten mueble —seis
@@ -135,9 +138,13 @@ static func persona(cuerpo: Node3D, nombre: String, color: Color, retrato: Strin
 	if pieza == null:
 		return false
 	if es_realista(nombre):
-		# Un avatar vestido trae su piel, su pelo y su ropa: teñirlo o ponerle
-		# la cara procedural es justo lo que hacía del maniquí un maniquí.
+		# Un avatar vestido trae su piel, su pelo y su ropa: teñirlo o sustituir
+		# su cara por un volumen procedural volvería a convertirlo en maniquí.
+		# Los históricos reciben solo geometría secundaria reconocible —gafas,
+		# barba, bigote, sombrero o sienes— anclada a Head.
 		_adaptar_realista(pieza)
+		if not retrato.is_empty():
+			IDENTIDAD_ROCKETBOX.aplicar(pieza, retrato)
 		AnimacionesUAL.preparar_base(pieza)
 		_animar(pieza)
 		return true

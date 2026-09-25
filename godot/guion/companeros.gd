@@ -23,13 +23,11 @@ extends RefCounted
 ## Cuántos se sientan alrededor, sin contar al cuñado.
 const POR_VUELTA := 3
 
-## El cuerpo, uno para todos.
+## Cuerpo legacy para figuras humanas que aún no han migrado a Rocketbox.
 ##
-## Once mallas distintas serían once descargas de dos megas para que la
-## diferencia entre dos oficinistas sea el corte del pelo. Lo que distingue a
-## estos es otra cosa: el color de la ropa, que declara cada uno, y la CARA, que
-## cinco de ellos tienen y es la suya de verdad. Reutilizar el cuerpo y cambiar
-## la cara es además cómo se resolvía esto en la máquina que el juego imita.
+## Los compañeros de oficina tienen un avatar vestido propio desde #1320. Esta
+## constante sigue siendo el fallback de bolos/careo/jugador y de cualquier
+## llamada antigua que todavía necesite el rig configurable `persona.fbx`.
 const CUERPO := "persona"
 
 ## El avatar fotorrealista de cada uno (#275), bajo `assets/modelos/`.
@@ -143,9 +141,8 @@ static func plantilla(semilla: int) -> Array:
 ## después de haber sido emperador, Melville diecinueve años de inspector de
 ## aduanas, Pessoa en la correspondencia comercial, el aduanero Rousseau
 ## pintando selvas que no vio, Cavafis treinta años en la Oficina de Riegos de
-## Alejandría. Sus frases solo funcionan si se les reconoce, así que el retrato
-## se declara AQUÍ, al lado de quien es: al revés que el cuerpo, que se deriva
-## porque da igual cuál toque.
+## Alejandría. `retrato` ya no significa una imagen pegada: es la clave estable
+## con la que Modelos añade rasgos 3D reconocibles al avatar correspondiente.
 ## Qué cuerpo tiene alguien: el suyo, el de todos si aún no tiene, o ninguno
 ## si no es nadie.
 ##

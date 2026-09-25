@@ -17,6 +17,17 @@ const CABEZA_MAX := 1.75
 ## Inclinado sobre una mesa, que es lo más bajo que baja un gesto de pie.
 const CABEZA_INCLINADO := 1.1
 
+const IDENTIDAD := preload("res://guion/identidad_historica_rocketbox.gd")
+const PELO_CAPAS := preload("res://guion/pelo_capas.gd")
+
+const MARCAS_HISTORICAS := {
+	"emperador": "GafasPuyi",
+	"aduanero_ny": "BarbaMelville",
+	"correspondencia": "SombreroPessoa",
+	"riegos": "GafasCavafis",
+	"fielato": "BigoteRousseau",
+}
+
 var _pasadas := 0
 var _fallos := 0
 
@@ -49,11 +60,10 @@ func _probar_roster_con_cuerpo_propio() -> void:
 
 func _probar_avatar(quien: Dictionary) -> void:
 	var id := String(quien["id"])
+	var retrato := String(quien.get("retrato", ""))
 	var cuerpo := Node3D.new()
 	root.add_child(cuerpo)
-	var creada := Modelos.persona(
-		cuerpo, Companeros.cuerpo_de(quien), quien["color"], String(quien.get("retrato", ""))
-	)
+	var creada := Modelos.persona(cuerpo, Companeros.cuerpo_de(quien), quien["color"], retrato)
 	_comprobar(creada, "%s se monta" % id)
 	var pieza := cuerpo.get_child(0) as Node3D
 	_comprobar(
@@ -62,14 +72,36 @@ func _probar_avatar(quien: Dictionary) -> void:
 	)
 	var tintadas := 0
 	for malla in pieza.find_children("*", "MeshInstance3D", true, false):
-		if (malla as MeshInstance3D).material_override != null:
+		if (
+			not _bajo_identidad_historica(malla)
+			and not _es_identidad(malla)
+			and (malla as MeshInstance3D).material_override != null
+		):
 			tintadas += 1
 	_comprobar(tintadas == 0, "%s conserva su ropa y su piel" % id)
 	_comprobar_materiales(pieza, id)
-	_comprobar(
-		pieza.find_children("*", "BoneAttachment3D", true, false).is_empty(),
-		"%s no lleva cara ni ropa procedural encima" % id
-	)
+
+	var identidad := pieza.find_child("IdentidadHistorica275", true, false) as BoneAttachment3D
+	if retrato.is_empty():
+		_comprobar(identidad == null, "%s no recibe rasgos históricos inventados" % id)
+	else:
+		_comprobar(identidad != null, "%s recupera identidad histórica sobre Rocketbox" % id)
+		var esqueleto := Modelos._esqueleto(pieza)
+		_comprobar(
+			(
+				esqueleto != null
+				and String(esqueleto.get_meta("identidad_historica_275", "")) == retrato
+			),
+			"%s marca su identidad con la clave de retrato" % id
+		)
+		var marca := String(MARCAS_HISTORICAS.get(id, ""))
+		_comprobar(
+			not marca.is_empty() and pieza.find_child(marca, true, false) != null,
+			"%s tiene un rasgo 3D reconocible específico" % id
+		)
+		if identidad != null and esqueleto != null:
+			_comprobar_colocacion(identidad, esqueleto, id)
+			_comprobar_pelo(esqueleto, id)
 
 	var reproductor := Modelos._reproductor(pieza)
 	_comprobar(reproductor != null, "%s tiene reproductor" % id)
@@ -221,6 +253,10 @@ func _comprobar_materiales(pieza: Node3D, id: String, relieve := false) -> void:
 			var shader := ""
 			if material is ShaderMaterial and material.shader != null:
 				shader = material.shader.resource_path
+			if material != null and material.has_meta("identidad_historica_275"):
+				if shader != Espacio3D.shader_del_sitio() and shader != PELO_CAPAS.SHADER:
+					ajenas += 1
+				continue
 			if not (material is ShaderMaterial and material.get_shader_parameter("usar_uv")):
 				ajenas += 1
 			elif (
@@ -258,6 +294,104 @@ func _probar_relieve_por_pixel() -> void:
 		_comprobar_materiales(cuerpo.get_child(0) as Node3D, String(quien["id"]), true)
 		cuerpo.free()
 	Espacio3D._shader_del_sitio = anterior
+
+
+## Cada rasgo en su sitio de la cara, medido contra los huesos faciales del
+## mismo avatar: que exista un nodo `GafasPuyi` no dice nada si cuelga del
+## cuello, que es lo que pasaba con los desplazamientos fijados a ojo.
+func _comprobar_colocacion(identidad: Node3D, esqueleto: Skeleton3D, id: String) -> void:
+	var r := IDENTIDAD.rostro(esqueleto, esqueleto.find_bone("Head"))
+	var ojos: Vector3 = r["ojos"]
+	var nariz: Vector3 = r["nariz"]
+	var labio: Vector3 = r["labio"]
+	var ceja: Vector3 = r["ceja"]
+	for grupo in identidad.get_children():
+		var caja := _caja_en(identidad, grupo)
+		var centro := caja.get_center()
+		var nombre := String(grupo.name)
+		if nombre.begins_with("Gafas"):
+			_comprobar(
+				absf(centro.y - ojos.y) < 0.015 and caja.end.z > ojos.z + 0.015,
+				"%s: las gafas quedan delante de los ojos" % id
+			)
+		elif nombre.begins_with("Bigote"):
+			_comprobar(
+				centro.y > labio.y and centro.y < nariz.y and caja.end.z > labio.z,
+				"%s: el bigote queda entre la nariz y el labio" % id
+			)
+		elif nombre.begins_with("Barba"):
+			_comprobar(
+				centro.y < labio.y and caja.position.y < labio.y - 0.03,
+				"%s: la barba baja del labio al mentón" % id
+			)
+		elif nombre.begins_with("Sombrero") or nombre.begins_with("Boina"):
+			_comprobar(
+				centro.y > ceja.y + 0.02 and caja.end.y > ceja.y + 0.06,
+				"%s: el sombrero va sobre la cabeza y no tapa los ojos" % id
+			)
+
+
+## Barba, bigote y pelo por capas: dónde cae el centro de cada malla ya
+## construida, medido en el espacio de Head contra los huesos faciales.
+func _comprobar_pelo(esqueleto: Skeleton3D, id: String) -> void:
+	var r := IDENTIDAD.rostro(esqueleto, esqueleto.find_bone("Head"))
+	var ojos: Vector3 = r["ojos"]
+	var nariz: Vector3 = r["nariz"]
+	var labio: Vector3 = r["labio"]
+	for nodo in esqueleto.find_children("*", "MeshInstance3D", true, false):
+		var malla := nodo as MeshInstance3D
+		# Los accesorios rígidos (gafas, sombrero) cuelgan del enganche de Head
+		# y se miden en _comprobar_colocacion; aquí solo las capas de pelo.
+		if not _es_identidad(malla) or _bajo_identidad_historica(malla):
+			continue
+		var puntos := PELO_CAPAS.vertices_en_cabeza(esqueleto, malla, 0)
+		var centro := Vector3.ZERO
+		for punto in puntos:
+			centro += punto
+		centro /= maxf(puntos.size(), 1)
+		var nombre := String(malla.name)
+		_comprobar(malla.skin != null, "%s: %s se deforma con la cara" % [id, nombre])
+		if nombre.begins_with("Bigote"):
+			_comprobar(
+				centro.y > labio.y - 0.015 and centro.y < nariz.y and centro.z > labio.z - 0.02,
+				"%s: el bigote cubre el labio superior" % id
+			)
+		elif nombre.begins_with("Barba"):
+			_comprobar(
+				centro.y < labio.y and centro.y > labio.y - 0.09,
+				"%s: la barba va del carrillo al mentón" % id
+			)
+		elif nombre.begins_with("Pelo"):
+			_comprobar(centro.y > ojos.y, "%s: el pelo va sobre la cabeza" % id)
+
+
+func _es_identidad(malla: MeshInstance3D) -> bool:
+	var material := malla.material_override
+	return material != null and material.has_meta("identidad_historica_275")
+
+
+## Caja de todas las mallas de [param nodo] en el espacio de [param base].
+func _caja_en(base: Node3D, nodo: Node) -> AABB:
+	var caja := AABB()
+	var primera := true
+	var mallas: Array = nodo.find_children("*", "MeshInstance3D", true, false)
+	if nodo is MeshInstance3D:
+		mallas.append(nodo)
+	for malla in mallas:
+		var relativa := base.global_transform.affine_inverse() * (malla as Node3D).global_transform
+		var suya := relativa * (malla as MeshInstance3D).get_aabb()
+		caja = suya if primera else caja.merge(suya)
+		primera = false
+	return caja
+
+
+func _bajo_identidad_historica(nodo: Node) -> bool:
+	var actual := nodo.get_parent()
+	while actual != null:
+		if actual.name == "IdentidadHistorica275":
+			return true
+		actual = actual.get_parent()
+	return false
 
 
 func _comprobar_postura(pieza: Node3D, que: String) -> void:
