@@ -43,6 +43,7 @@ const TENDENCIA_REACTIVA := 0.7
 const CLAVE_ELECCIONES_IDEOLOGICAS := "elecciones_ideologicas_run"
 const CLAVE_EXPOSICION_IDEOLOGICA := "exposicion_ideologica_hoy"
 const CLAVE_LECTURAS_SOCIALES := "lecturas_sociales"
+const CLAVE_HISTORIAL_IDEOLOGICO := "historial_trayectorias_ideologicas"
 const PREFIJO_HISTORIA := "tarot:"
 
 
@@ -418,6 +419,147 @@ static func ejes_dominantes(estado: Dictionary) -> Array:
 	return dominantes
 
 
+## Lectura factual de la trayectoria de la vuelta para #925.
+##
+## Describe el patrón observado en decisiones explícitas. No crea una identidad
+## permanente ni consulta exposición o lecturas sociales.
+static func patron_trayectoria_ideologica(estado: Dictionary) -> String:
+	var elecciones := elecciones_ideologicas(estado)
+	if elecciones.is_empty():
+		return "sin_registro"
+
+	var ejes := {}
+	for evento in elecciones:
+		ejes[String(evento.get("eje", ""))] = true
+	if ejes.size() == 1:
+		return "consistente"
+	if ejes_dominantes(estado).size() > 1:
+		return "plural"
+	return "contextual"
+
+
+## Snapshot inmutable y reducido de una vida laboral.
+##
+## Los ejemplos conservan hechos elegidos por el jugador, no contenido editorial
+## ni una puntuación inferida. El resumen se puede archivar antes del reset.
+static func resumen_trayectoria_ideologica(estado: Dictionary) -> Dictionary:
+	var elecciones := elecciones_ideologicas(estado)
+	var ejemplos := []
+	for evento in elecciones:
+		if ejemplos.size() >= 4:
+			break
+		ejemplos.append(
+			{
+				"contexto": String(evento.get("contexto", evento.get("id", ""))),
+				"eje": String(evento.get("eje", "")),
+				"fuente": String(evento.get("fuente", "")),
+			}
+		)
+
+	var jornada = estado.get("jornada", {})
+	var vuelta := 1
+	if typeof(jornada) == TYPE_DICTIONARY:
+		vuelta = maxi(1, int(jornada.get("vuelta", 1)))
+	return {
+		"vuelta": vuelta,
+		"patron": patron_trayectoria_ideologica(estado),
+		"conteo": conteo_elecciones_ideologicas(estado),
+		"dominantes": ejes_dominantes(estado),
+		"elecciones": elecciones.size(),
+		"ejemplos": ejemplos,
+	}
+
+
+## Conserva una única fotografía por vida antes de limpiar la capa per-run.
+## Repetir un cierre de la misma vuelta es idempotente.
+static func archivar_trayectoria_ideologica(
+	estado: Dictionary, motivo: String = "reinicio_vuelta"
+) -> Dictionary:
+	var resumen := resumen_trayectoria_ideologica(estado)
+	var vuelta := int(resumen["vuelta"])
+	var historial := _lista_estado(estado, CLAVE_HISTORIAL_IDEOLOGICO)
+	for registro in historial:
+		if typeof(registro) == TYPE_DICTIONARY and int(registro.get("vuelta", -1)) == vuelta:
+			return Dictionary(registro).duplicate(true)
+
+	resumen["motivo"] = (
+		motivo.strip_edges() if not motivo.strip_edges().is_empty() else "otro"
+	)
+	historial.append(resumen)
+	estado[CLAVE_HISTORIAL_IDEOLOGICO] = historial
+	return resumen.duplicate(true)
+
+
+static func historial_trayectorias_ideologicas(estado: Dictionary) -> Array:
+	return _lista_estado(estado, CLAVE_HISTORIAL_IDEOLOGICO)
+
+
+## Valida el resumen persistido sin reinterpretar políticamente su contenido.
+static func validar_historial_trayectorias_ideologicas(historial: Array) -> Array:
+	var errores := []
+	var vueltas := {}
+	var patrones := ["sin_registro", "consistente", "plural", "contextual"]
+	for i in historial.size():
+		var registro = historial[i]
+		if typeof(registro) != TYPE_DICTIONARY:
+			errores.append("%d no es un objeto" % i)
+			continue
+
+		var vuelta = registro.get("vuelta", -1)
+		if not _entero_no_negativo(vuelta) or int(vuelta) < 1:
+			errores.append("%d.vuelta inválida" % i)
+		elif vueltas.has(int(vuelta)):
+			errores.append("%d.vuelta duplicada" % i)
+		else:
+			vueltas[int(vuelta)] = true
+
+		if not patrones.has(String(registro.get("patron", ""))):
+			errores.append("%d.patron inválido" % i)
+		if (
+			typeof(registro.get("motivo")) != TYPE_STRING
+			or String(registro.get("motivo", "")).strip_edges().is_empty()
+		):
+			errores.append("%d.motivo inválido" % i)
+
+		var conteo = registro.get("conteo")
+		if typeof(conteo) != TYPE_DICTIONARY:
+			errores.append("%d.conteo no es un objeto" % i)
+		else:
+			for eje in EJES:
+				if not _entero_no_negativo(conteo.get(eje, -1)):
+					errores.append("%d.conteo.%s inválido" % [i, eje])
+
+		var dominantes = registro.get("dominantes")
+		if typeof(dominantes) != TYPE_ARRAY:
+			errores.append("%d.dominantes no es una lista" % i)
+		else:
+			var vistos := {}
+			for eje in dominantes:
+				var eje_id := String(eje)
+				if not EJES.has(eje_id):
+					errores.append("%d.dominantes contiene eje inválido" % i)
+				elif vistos.has(eje_id):
+					errores.append("%d.dominantes contiene duplicados" % i)
+				else:
+					vistos[eje_id] = true
+
+		if not _entero_no_negativo(registro.get("elecciones", -1)):
+			errores.append("%d.elecciones inválida" % i)
+		var ejemplos = registro.get("ejemplos")
+		if typeof(ejemplos) != TYPE_ARRAY:
+			errores.append("%d.ejemplos no es una lista" % i)
+		elif ejemplos.size() > 4:
+			errores.append("%d.ejemplos supera el máximo" % i)
+		else:
+			for ejemplo in ejemplos:
+				if typeof(ejemplo) != TYPE_DICTIONARY:
+					errores.append("%d.ejemplos contiene valor inválido" % i)
+					continue
+				if not EJES.has(String(ejemplo.get("eje", ""))):
+					errores.append("%d.ejemplos contiene eje inválido" % i)
+	return errores
+
+
 ## La exposición es diaria. Quien gobierne el cambio de jornada puede limpiar
 ## solo este canal sin tocar decisiones ni reacciones de la vuelta.
 static func reiniciar_exposicion_ideologica_diaria(estado: Dictionary) -> void:
@@ -466,6 +608,8 @@ static func actualizar_racha(racha: int, mejor: int, gano: bool) -> Dictionary:
 ## vueltas anteriores), la mejor racha, la dificultad, los logros de vitrina ni
 ## los indicadores de "alguna vez". Muta el estado recibido, como el original.
 static func reiniciar_vuelta(estado: Dictionary, vida_maxima: int) -> Dictionary:
+	# #925: se fotografía la trayectoria antes de borrar historias/elecciones.
+	archivar_trayectoria_ideologica(estado, "reinicio_vuelta")
 	estado["vida"] = vida_maxima
 	estado["despido_mostrado"] = false
 	estado["epilogo_avisado"] = false
@@ -502,6 +646,14 @@ static func reiniciar_vuelta(estado: Dictionary, vida_maxima: int) -> Dictionary
 			logro["desbloqueado"] = false
 
 	return estado
+
+
+static func _entero_no_negativo(valor) -> bool:
+	if typeof(valor) == TYPE_INT:
+		return valor >= 0
+	if typeof(valor) != TYPE_FLOAT or not is_finite(valor):
+		return false
+	return floor(valor) == valor and valor >= 0.0
 
 
 static func _lista_estado(estado: Dictionary, clave: String) -> Array:
