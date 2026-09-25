@@ -194,6 +194,22 @@ func _probar_controles_interactivos() -> void:
 		sueno.comparar_marca("cinta_jugador")["movido"],
 		"la marca física permite comprobar el desplazamiento",
 	)
+	_comprobar(
+		sueno.ultima_comparacion()["movido"],
+		"la comparación queda disponible como estado legible",
+	)
+	var lectura := sueno.get_node_or_null("LecturaComparacion")
+	_comprobar(lectura != null, "existe el contenedor de lectura espacial")
+	_comprobar(
+		lectura.get_child_count() >= SuenoBabaYaga.PASOS_RASTRO,
+		"comparar materializa origen, destino y pasos diegéticos",
+	)
+	sueno.aplicar_evento(SuenoBabaYaga.EVENTO_UMBRAL)
+	_comprobar(
+		lectura.get_child_count(),
+		0,
+		"una nueva reconfiguración retira el rastro ya obsoleto",
+	)
 
 	var antes_archivador: Vector3 = sueno.posiciones_actuales()[SuenoBabaYaga.OBJETO_ARCHIVADOR]
 	var observatorio := (
@@ -234,6 +250,14 @@ func _probar_accesibilidad_y_reproduccion() -> void:
 	_comprobar(not reducida["animar_geometria"], "reducción evita geometría animada")
 	_comprobar(reducida["cabana_visible"], "reducción conserva cabaña-ancla")
 	_comprobar(reducida["retorno_disponible"], "reducción conserva retorno")
+	_comprobar(
+		sueno.get_node_or_null("DintelRetorno") != null,
+		"retorno seguro tiene una silueta vertical estable además del color",
+	)
+	_comprobar(
+		sueno.comparar_marca("postit_1")["movido"],
+		"la lectura espacial funciona también con reducción de movimiento",
+	)
 
 	var guardado := sueno.estado_reproducible()
 	var copia := SuenoBabaYaga.new()
@@ -250,6 +274,16 @@ func _probar_accesibilidad_y_reproduccion() -> void:
 		copia.marcas_persistentes(),
 		sueno.marcas_persistentes(),
 		"restauración conserva marcas",
+	)
+	_comprobar(
+		copia.ultima_comparacion(),
+		sueno.ultima_comparacion(),
+		"restauración conserva la última lectura espacial",
+	)
+	var lectura_copia := copia.get_node_or_null("LecturaComparacion")
+	_comprobar(
+		lectura_copia != null and lectura_copia.get_child_count() >= SuenoBabaYaga.PASOS_RASTRO,
+		"restauración rematerializa el rastro de comparación",
 	)
 	_comprobar(copia.cabana_visible(), "restauración conserva cabaña")
 	_comprobar(copia.ruta_retorno_disponible(), "restauración conserva salida")
