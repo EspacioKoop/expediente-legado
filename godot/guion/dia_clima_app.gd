@@ -593,7 +593,38 @@ func _montar_archivadores_interactivos(espacio: Dictionary) -> void:
 func _activar_terminal_siga(_actor: Node) -> void:
 	if _pantalla != null:
 		return
+	_cerrar_dialogo_actual()
+	if _hud_prioridades != null:
+		_hud_prioridades.activar(HUDLayer.MODAL)
+	_caminante.set_physics_process(false)
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_sonar("documento")
+
+	_pantalla = CanvasLayer.new()
+	_pantalla.name = "PantallaTerminalSIGA"
+	_pantalla.layer = 30
+	add_child(_pantalla)
+
+	var terminal := TerminalSigaApp.new()
+	terminal.name = "TerminalSIGA"
+	terminal.cerrar_solicitado.connect(_cerrar_terminal_siga)
+	terminal.abrir_siga_solicitado.connect(_abrir_siga_desde_terminal)
+	_pantalla.add_child(terminal)
+
+
+func _cerrar_terminal_siga() -> void:
+	if _pantalla == null:
+		return
+	_pantalla.queue_free()
+	_pantalla = null
+	_caminante.set_physics_process(true)
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	if _hud_prioridades != null:
+		_hud_prioridades.desactivar(HUDLayer.MODAL)
+
+
+func _abrir_siga_desde_terminal() -> void:
+	_cerrar_terminal_siga()
 	_abrir_expediente()
 
 

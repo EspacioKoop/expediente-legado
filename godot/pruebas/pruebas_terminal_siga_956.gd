@@ -2,6 +2,7 @@
 extends SceneTree
 
 const Terminal := preload("res://guion/terminal_siga.gd")
+const TerminalApp := preload("res://guion/terminal_siga_app.gd")
 
 var _pasadas := 0
 var _fallos := 0
@@ -64,6 +65,40 @@ func _probar() -> void:
 	_comprobar(
 		not Terminal.ARCHIVOS.has("/etc/passwd"),
 		"el namespace del terminal no contiene rutas del host",
+	)
+
+	var app = TerminalApp.new()
+	root.add_child(app)
+	await process_frame
+	_comprobar(app._linea != null and app._linea.has_focus(), "la entrada recibe foco al abrir")
+	_comprobar(app._registro != null, "la pantalla monta historial de terminal")
+	_comprobar(app._abrir_siga != null, "la pantalla ofrece acceso explícito al visor SIGA")
+	_comprobar(
+		app._abrir_siga.text == TranslationServer.translate("TERMINAL_SIGA_ABRIR"),
+		"la UI resuelve sus textos desde el catálogo de traducciones",
+	)
+	var ui_help: Dictionary = app.ejecutar("help")
+	_comprobar(bool(ui_help["ok"]), "la UI delega HELP al núcleo")
+	_comprobar(
+		app._registro.get_parsed_text().contains("DIR/LS"),
+		"la salida del núcleo aparece en el historial visible",
+	)
+	_comprobar(
+		app._linea.focus_neighbor_bottom == app._linea.get_path_to(app._abrir_siga),
+		"mando/teclado pueden bajar desde la línea al botón SIGA",
+	)
+	app.queue_free()
+	await process_frame
+
+	var capa := FileAccess.get_file_as_string("res://guion/dia_clima_app.gd")
+	_comprobar(capa.contains("TerminalSigaApp.new()"), "el terminal físico abre la nueva UI")
+	_comprobar(
+		capa.contains("terminal.abrir_siga_solicitado.connect(_abrir_siga_desde_terminal)"),
+		"la UI reutiliza la apertura real del visor SIGA",
+	)
+	_comprobar(
+		not capa.contains('_sonar("documento")\n\t_abrir_expediente()'),
+		"usar el terminal ya no salta directamente al visor",
 	)
 
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
