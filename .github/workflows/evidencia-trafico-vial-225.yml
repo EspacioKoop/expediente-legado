@@ -1,0 +1,132 @@
+name: Evidencia trafico vial 225
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/evidencia-trafico-vial-225.yml'
+      - '.godot-version'
+      - 'godot/project.godot'
+      - 'godot/assets/modelos/traffic_road/**'
+      - 'godot/guion/trafico_vial_cc0.gd'
+      - 'godot/guion/dia_calle_app.gd'
+      - 'godot/guion/calle*.gd'
+      - 'godot/guion/espacio_3d.gd'
+      - 'godot/guion/espacios_catalogo.gd'
+      - 'godot/escenas/dia.tscn'
+      - 'godot/pruebas/capturar_trafico_vial_225.gd'
+      - 'scripts/test_evidencia_trafico_vial_225.py'
+      - 'docs/evidencias/trafico-vial-225/**'
+      - 'docs/assets/traffic-road-assets.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidencia:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      GALLIUM_DRIVER: llvmpipe
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar Godot declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Importar proyecto
+        run: godot4 --headless --editor --path godot --quit
+
+      - name: Validar contrato de evidencia
+        run: python3 -m unittest -v scripts/test_evidencia_trafico_vial_225.py
+
+      - name: Renderizar gate visual sin HUD
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidencia-trafico-vial-225
+          xvfb-run -a godot4 --path godot \
+            --script res://pruebas/capturar_trafico_vial_225.gd -- \
+            "$GITHUB_WORKSPACE/evidencia-trafico-vial-225"
+          for captura in barrera_conos tapa_sur tapa_norte paso_central; do
+            test -s "evidencia-trafico-vial-225/${captura}.png"
+          done
+          test -s evidencia-trafico-vial-225/manifest.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(
+              Path("evidencia-trafico-vial-225/manifest.json").read_text()
+          )
+          if manifest["issue"] != 225 or manifest["fase"] != "trayecto":
+              raise SystemExit("manifiesto fuera del gate #225")
+          if manifest["locale"] != "es" or manifest["hud"] is not False:
+              raise SystemExit("la evidencia debe usar locale es y HUD oculto")
+          if (
+              manifest["camara"] != "jugable"
+              or manifest["veredicto_automatico"] is not False
+          ):
+              raise SystemExit("la evidencia debe usar camara jugable sin autoaprobar")
+          if manifest["instancias_cc0"] != 5 or len(manifest["objetos"]) != 5:
+              raise SystemExit("deben inventariarse las 5 instancias CC0 de #225")
+
+          objetos = {objeto["nodo"]: objeto for objeto in manifest["objetos"]}
+          esperados = {"TapaSur", "TapaNorte", "Barrera", "ConoSur", "ConoNorte"}
+          if set(objetos) != esperados:
+              raise SystemExit("inventario visual de #225 incompleto")
+
+          casos = {caso["id"]: caso for caso in manifest["casos"]}
+          casos_esperados = {"barrera_conos", "tapa_sur", "tapa_norte", "paso_central"}
+          if set(casos) != casos_esperados:
+              raise SystemExit("faltan vistas del gate #225")
+
+          hashes = [caso["sha256"] for caso in manifest["casos"]]
+          if len(set(hashes)) != 4:
+              raise SystemExit("las cuatro capturas deben ser distintas")
+
+          for nombre in ("Barrera", "ConoSur", "ConoNorte"):
+              if "barrera_conos" not in objetos[nombre]["vistas"]:
+                  raise SystemExit(f"{nombre} queda fuera del encuadre barrera_conos")
+          if "tapa_sur" not in objetos["TapaSur"]["vistas"]:
+              raise SystemExit("TapaSur queda fuera de su encuadre")
+          if "tapa_norte" not in objetos["TapaNorte"]["vistas"]:
+              raise SystemExit("TapaNorte queda fuera de su encuadre")
+
+          print("4 vistas y 5 instancias de #225 preparadas; revisar PNG manualmente")
+          PY
+
+      - name: Adjuntar evidencia visual de #225
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-trafico-vial-225-${{ github.sha }}
+          path: evidencia-trafico-vial-225/
+          if-no-files-found: error
+          retention-days: 14
