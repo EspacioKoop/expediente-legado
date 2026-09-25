@@ -37,8 +37,12 @@ func _probar_determinismo() -> void:
 	_comprobar(a == b, "#1411: mismo día y raíz repiten variantes y posiciones")
 	for dato in a:
 		var pieza := dato as Dictionary
-		_comprobar(not String(pieza.get("variante", "")).is_empty(), "#1411: cada pieza tiene variante")
-		_comprobar(is_equal_approx(float(pieza.get("ritmo", 0.0)), 1.0), "#1411: base conserva ritmo")
+		_comprobar(
+			not String(pieza.get("variante", "")).is_empty(), "#1411: cada pieza tiene variante"
+		)
+		_comprobar(
+			is_equal_approx(float(pieza.get("ritmo", 0.0)), 1.0), "#1411: base conserva ritmo"
+		)
 
 
 func _probar_contexto_calle() -> void:

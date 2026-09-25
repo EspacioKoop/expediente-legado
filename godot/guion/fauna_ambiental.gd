@@ -97,7 +97,12 @@ const VARIANTES := {
 	"ciervo":
 	[
 		{"id": "castano", "color": Color(0.37, 0.25, 0.16), "escala": 1.00, "acabado": 0.02},
-		{"id": "palido_onirico", "color": Color(0.62, 0.60, 0.54), "escala": 1.05, "acabado": -0.08},
+		{
+			"id": "palido_onirico",
+			"color": Color(0.62, 0.60, 0.54),
+			"escala": 1.05,
+			"acabado": -0.08
+		},
 	],
 }
 
@@ -148,16 +153,19 @@ static func _plan_calle(dia: int, raiz: int, clima: String, franja: String) -> A
 		var posicion: Vector3 = base["pos"]
 		posicion.x += rng.randf_range(-0.14, 0.14)
 		posicion.z += rng.randf_range(-0.55, 0.55)
-		resultado.append(
-			_dato(
-				"fauna:calle:%s:%d" % [especie, i],
-				especie,
-				posicion,
-				rng.randf_range(0.0, TAU),
-				rng,
-				false,
-				clima,
-				franja,
+		(
+			resultado
+			. append(
+				_dato(
+					"fauna:calle:%s:%d" % [especie, i],
+					especie,
+					posicion,
+					rng.randf_range(0.0, TAU),
+					rng,
+					false,
+					clima,
+					franja,
+				)
 			)
 		)
 	return resultado
@@ -183,14 +191,17 @@ static func _plan_sueno(
 				posicion.y += 1.45 + rng.randf_range(-0.18, 0.30)
 			"ciervo":
 				posicion.y += 0.10
-		resultado.append(
-			_dato(
-				"fauna:sueno:%s:%s:%d" % [contexto, especie, i],
-				especie,
-				posicion,
-				rng.randf_range(0.0, TAU),
-				rng,
-				true,
+		(
+			resultado
+			. append(
+				_dato(
+					"fauna:sueno:%s:%s:%d" % [contexto, especie, i],
+					especie,
+					posicion,
+					rng.randf_range(0.0, TAU),
+					rng,
+					true,
+				)
 			)
 		)
 	return resultado
@@ -236,9 +247,7 @@ static func _dato(
 	}
 
 
-static func _variante(
-	especie: String, rng: RandomNumberGenerator, onirico: bool
-) -> Dictionary:
+static func _variante(especie: String, rng: RandomNumberGenerator, onirico: bool) -> Dictionary:
 	var opciones: Array = VARIANTES.get(especie, [])
 	if opciones.is_empty():
 		return {}

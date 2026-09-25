@@ -229,13 +229,9 @@ func _animar_gesto(tiempo: float, peso_reaccion: float) -> void:
 		"perro":
 			var cola_ritmo := 2.2 + (sin(t * 0.41) + 1.0) * 0.9
 			var cola_amplitud := 0.30 + (sin(t * 0.37) + 1.0) * 0.13
-			_aplicar_rotacion_gesto(
-				"Cola", Vector3(0.0, sin(t * cola_ritmo) * cola_amplitud, 0.0)
-			)
+			_aplicar_rotacion_gesto("Cola", Vector3(0.0, sin(t * cola_ritmo) * cola_amplitud, 0.0))
 			var olfateo := pow(maxf(0.0, sin(t * 0.83)), 8.0)
-			var gesto_cabeza := (
-				sin(t * 1.7) * 0.055 * (1.0 - peso_reaccion) + olfateo * 0.24
-			)
+			var gesto_cabeza := sin(t * 1.7) * 0.055 * (1.0 - peso_reaccion) + olfateo * 0.24
 			_aplicar_rotacion_gesto("Cabeza", Vector3(gesto_cabeza, 0.0, 0.0))
 		"polilla":
 			var fase_alas := t * 6.2 + sin(t * 1.17) * 1.25 + sin(t * 0.43) * 0.42
