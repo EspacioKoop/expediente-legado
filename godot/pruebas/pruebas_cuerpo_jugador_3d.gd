@@ -119,6 +119,40 @@ func _probar() -> void:
 		"jugador_estrecho",
 		"delgado usa el perfil estrecho del vestuario",
 	)
+
+	# En la ficha exterior, ninguna superficie que representa piel puede heredar
+	# el color de ropa del underlay. Cabeza + cuello + dos manos deben llevar el
+	# tono de piel solicitado aunque la ropa tenga un color muy distinto.
+	var exterior := CuerpoJugador3D.new()
+	exterior.primera_persona = false
+	exterior.perfil = {
+		"apariencia":
+		{
+			"piel": "#7a4d36",
+			"cabello": "#201913",
+			"ropa": "#284f83",
+			"peinado": "recogido",
+		},
+	}
+	caminante.add_child(exterior)
+	for _i in 3:
+		await process_frame
+	var esqueleto_exterior := Modelos._esqueleto(exterior.figura())
+	_comprobar(esqueleto_exterior != null, "la previsualización conserva su Skeleton3D")
+	if esqueleto_exterior != null:
+		var piel_visible := 0
+		for nombre in ["PielCabeza", "PielCuello", "Piel"]:
+			for nodo in esqueleto_exterior.find_children(nombre, "MeshInstance3D", true, false):
+				var material := (nodo as MeshInstance3D).material_override as ShaderMaterial
+				if material != null:
+					var color: Color = material.get_shader_parameter("color_base")
+					if color.is_equal_approx(Color("#7a4d36")):
+						piel_visible += 1
+		_comprobar(piel_visible, 4, "cabeza, cuello y manos usan el tono de piel de la ficha")
+		_comprobar(
+			esqueleto_exterior.find_child("PielCuelloJugador", true, false) is BoneAttachment3D,
+			"el cuello visible tiene una capa de piel separada del underlay",
+		)
 	_terminar()
 
 
