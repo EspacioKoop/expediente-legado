@@ -63,8 +63,11 @@ func _init() -> void:
 		"tamano": [TAMANO.x, TAMANO.y],
 		"fov": FOV,
 		"hud": false,
+		"comparativa": "comparativa.png",
+		"orden_comparativa": ["oficina", "calle", "casa", "sueno"],
 		"casos": [],
 	}
+	var capturas_comparativa: Array[Dictionary] = []
 
 	for caso in CASOS:
 		if String(caso["fase"]) == "sueño":
@@ -82,9 +85,11 @@ func _init() -> void:
 		var deformacion: Vector3 = dia._espacio_actual.get("deformacion_textura", Vector3.ONE)
 		var contraste := float(dia._espacio_actual.get("contraste_textura", 1.0))
 		var diagnostico_material := _diagnostico_materiales(dia)
-		if not _guardar_captura(destino):
+		var imagen := root.get_texture().get_image()
+		if not _guardar_captura(imagen, destino):
 			quit(1)
 			return
+		capturas_comparativa.append({"id": String(caso["id"]), "imagen": imagen})
 
 		(
 			manifiesto["casos"]
@@ -110,6 +115,12 @@ func _init() -> void:
 				}
 			)
 		)
+
+	var ruta_comparativa := salida.path_join(String(manifiesto["comparativa"]))
+	if not _guardar_comparativa(capturas_comparativa, ruta_comparativa):
+		quit(1)
+		return
+	manifiesto["sha256_comparativa"] = FileAccess.get_sha256(ruta_comparativa)
 
 	var ruta_manifiesto := salida.path_join("manifest.json")
 	var archivo_manifiesto := FileAccess.open(ruta_manifiesto, FileAccess.WRITE)
@@ -144,8 +155,7 @@ func _ocultar_hud(dia) -> void:
 			capa.visible = false
 
 
-func _guardar_captura(destino: String) -> bool:
-	var imagen := root.get_texture().get_image()
+func _guardar_captura(imagen: Image, destino: String) -> bool:
 	if imagen == null or imagen.is_empty():
 		printerr("Viewport vacío para %s" % destino)
 		return false
@@ -154,6 +164,44 @@ func _guardar_captura(destino: String) -> bool:
 		printerr("No se pudo guardar %s (error %d)" % [destino, error_png])
 		return false
 	print("captura -> %s" % destino)
+	return true
+
+
+func _guardar_comparativa(capturas: Array[Dictionary], destino: String) -> bool:
+	if capturas.size() != 4:
+		printerr("La comparativa necesita exactamente cuatro capturas")
+		return false
+
+	var primera := capturas[0]["imagen"] as Image
+	if primera == null or primera.is_empty():
+		printerr("La primera captura de la comparativa está vacía")
+		return false
+
+	var ancho := int(TAMANO.x * 0.5)
+	var alto := int(TAMANO.y * 0.5)
+	var comparativa := Image.create_empty(TAMANO.x, TAMANO.y, false, primera.get_format())
+	comparativa.fill(Color.BLACK)
+
+	for indice in capturas.size():
+		var imagen := capturas[indice]["imagen"] as Image
+		if imagen == null or imagen.is_empty():
+			printerr("Captura %d vacía al montar la comparativa" % indice)
+			return false
+		var miniatura := imagen.duplicate() as Image
+		miniatura.resize(ancho, alto, Image.INTERPOLATE_BILINEAR)
+		var columna := indice % 2
+		var fila := floori(float(indice) * 0.5)
+		comparativa.blit_rect(
+			miniatura,
+			Rect2i(Vector2i.ZERO, miniatura.get_size()),
+			Vector2i(columna * ancho, fila * alto)
+		)
+
+	var error_png := comparativa.save_png(destino)
+	if error_png != OK:
+		printerr("No se pudo guardar comparativa %s (error %d)" % [destino, error_png])
+		return false
+	print("comparativa -> %s" % destino)
 	return true
 
 
