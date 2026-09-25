@@ -587,6 +587,18 @@ VISOR_ANALISIS_951_FACTURA4_RFC,El campo de RFC del proveedor figura vacío en l
 VISOR_ANALISIS_951_ACTA6_SELLO,El sello amarillo consta como no notarial y coincide con el usado por Carcosa en documentación posterior.
 VISOR_ANALISIS_951_CIRCULAR6_FECHA,La copia no conserva fecha de registro en sus metadatos.
 VISOR_ANALISIS_951_MEMO5_FECHA,El folio remite a 1978 mientras la copia abierta está fechada en 2007; el propio documento declara que existen varias copias.
+VISOR_FALSIFICACION_951_FECHA,Alterar fecha
+VISOR_FALSIFICACION_951_SELLO,Alterar sello
+VISOR_FALSIFICACION_951_FIRMA,Alterar firma
+VISOR_FALSIFICACION_951_ACCION,Crear copia alterada
+VISOR_FALSIFICACION_951_AYUDA,Trabajar sobre una copia temporal; el original del expediente permanece intacto.
+VISOR_FALSIFICACION_951_RESULTADO,COPIA TEMPORAL · Calidad: %s · Riesgo de detección: %s
+VISOR_FALSIFICACION_951_CALIDAD_BAJA,baja
+VISOR_FALSIFICACION_951_CALIDAD_MEDIA,media
+VISOR_FALSIFICACION_951_CALIDAD_ALTA,alta
+VISOR_FALSIFICACION_951_RIESGO_ALTO,alto
+VISOR_FALSIFICACION_951_RIESGO_MEDIO,medio
+VISOR_FALSIFICACION_951_RIESGO_BAJO,bajo
 VISOR_DETALLE_961_FACTURA1_PERFORACIONES,En el borde inferior se distinguen dos perforaciones de archivador ligeramente desalineadas; parecen de una carpeta anterior y no modifican lo escrito.
 VISOR_DETALLE_961_MEMO1_CINTA_FECHA,La fecha mecanografiada acusa una cinta algo más seca que el cuerpo del memorándum; la diferencia material no basta para fechar una segunda intervención.
 VISOR_DETALLE_961_MEMO1_COTEJO_MARGEN,La nota de cotejo está incorporada al cuerpo digitalizado; el expediente no identifica quién la añadió.
