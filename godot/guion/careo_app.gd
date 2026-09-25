@@ -180,6 +180,7 @@ func _montar_sala() -> void:
 	ajustes.ambient_light_energy = 0.5
 	entorno.environment = ajustes
 	add_child(entorno)
+	FiltroPantalla.aplicar(entorno, PreferenciasSiga.cargar())
 
 	# Un foco desde arriba y nada más: el careo no ocurre en una oficina, ocurre
 	# en la idea que el sistema tiene de sí mismo.
