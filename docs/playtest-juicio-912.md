@@ -73,3 +73,32 @@ El resumen es una copia: herramientas externas pueden transformarlo o agregarlo 
 El baseline y el runner cubren la preparación reproducible, pero **no autorizan por sí solos ajustes numéricos ni el cierre del issue**. El siguiente paso sigue siendo ejecutar los siete escenarios desde controles reales y comparar las líneas `PLAYTEST_912_JSON` junto a observaciones de cámara, alcance, telegráfico y feedback.
 
 Cualquier cambio posterior de números debe citar esa observación y añadir una regresión que impida volver al extremo que motivó el ajuste.
+
+
+## Registro humano normalizado
+
+El runner anterior produce telemetría por sesión, pero #912 también exige
+conservar observaciones que no se deducen de esos contadores: cámara, alcance,
+legibilidad del telegráfico, función percibida de ligero/fuerte/esquiva y si el
+ritual cambió una decisión real.
+
+Para reunir ambas capas en un informe único:
+
+```bash
+python3 scripts/registrar_playtest_912.py \
+  --salida docs/playtests/playtest-912.md
+```
+
+El registrador recorre exactamente la misma matriz de siete escenarios y pide
+las métricas de cada sesión, evidencia concreta y checks humanos. También exige
+la matriz completa con teclado, al menos una muestra con mando físico y una
+comprobación específica con reducción de movimiento.
+
+El campo `listo para valorar cierre de #912` es solo un control de completitud:
+no compara DPS, no puntúa rituales y no decide qué combinación es mejor. La
+conclusión sobre dominancia/inutilidad la introduce explícitamente el tester a
+partir del pase real.
+
+La regresión `scripts/test_registrar_playtest_912.py` protege ese límite: un
+valor numérico extremo no hace fallar o pasar el gate por sí solo, mientras que
+la falta de evidencia, dispositivo o legibilidad sí deja el registro pendiente.

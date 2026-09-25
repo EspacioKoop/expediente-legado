@@ -159,6 +159,12 @@ def ejecutar():
                 20,
             ),
             (
+                "juicio-gestos",
+                ["--script", "pruebas/pruebas_juicio_gestos.gd"],
+                30,
+                16,
+            ),
+            (
                 "bolos-pasillo",
                 ["--script", "pruebas/pruebas_bolos_pasillo_3d.gd"],
                 30,
@@ -167,6 +173,12 @@ def ejecutar():
             (
                 "huellas-ambientales",
                 ["--script", "pruebas/pruebas_huellas_ambientales_959.gd"],
+                30,
+                18,
+            ),
+            (
+                "fauna-ambiental-1396",
+                ["--script", "pruebas/pruebas_fauna_ambiental_1396.gd"],
                 30,
                 18,
             ),

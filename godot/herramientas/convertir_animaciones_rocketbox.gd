@@ -44,6 +44,22 @@ const CLIPS := {
 		"sit_down_chair_01": CON_XYZ,
 		"documents_take": ESTATICAS,
 		"sit_table_gestic_thoughtful": ESTATICAS,
+		# Reposo variado del protagonista (#1319, segunda tanda).
+		"idle_look_around_01": ESTATICAS,
+		"idle_scratch_head_01": ESTATICAS,
+		"idle_yawn_01": ESTATICAS,
+		"idle_nervous_01": ESTATICAS,
+		"idle_waiting_01": ESTATICAS,
+		"idle_stretch_arms_01": ESTATICAS,
+		# Juicio y careo: atacar, encajar, perder los nervios y ganar.
+		"idle_angry_01": ESTATICAS,
+		"gestic_talk_nervous_01": ESTATICAS,
+		"gestic_listen_deny_01": ESTATICAS,
+		"gestic_listen_angry_01": ESTATICAS,
+		"cheer_01": ESTATICAS,
+		"claphands_01": ESTATICAS,
+		# El hombre solo discute furioso en `xyz`.
+		"gestic_talk_angry_01": CON_XYZ,
 	},
 	"f":
 	{
@@ -58,6 +74,21 @@ const CLIPS := {
 		"sit_down_chair_01": CON_XYZ,
 		"documents_take": ESTATICAS,
 		"sit_table_gestic_thoughtful": ESTATICAS,
+		# Reposo variado del protagonista (#1319, segunda tanda).
+		"idle_look_around_01": ESTATICAS,
+		"idle_scratch_head_01": ESTATICAS,
+		"idle_yawn_01": ESTATICAS,
+		"idle_nervous_01": ESTATICAS,
+		"idle_waiting_01": ESTATICAS,
+		"idle_stretch_arms_01": ESTATICAS,
+		# Juicio y careo: atacar, encajar, perder los nervios y ganar.
+		"idle_angry_01": ESTATICAS,
+		"gestic_talk_nervous_01": ESTATICAS,
+		"gestic_listen_deny_01": ESTATICAS,
+		"gestic_listen_angry_01": ESTATICAS,
+		"cheer_01": ESTATICAS,
+		"claphands_01": ESTATICAS,
+		"gestic_talk_angry_01": ESTATICAS,
 	},
 }
 

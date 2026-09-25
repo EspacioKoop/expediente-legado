@@ -6,45 +6,6 @@
 ## de modo que los controles nunca describen una silueta distinta a la jugable.
 extends Control
 
-## Cada opción es [clave de textos.csv, valor guardado en el perfil].
-const CUERPOS := [
-	["PERSONAJE_CUERPO_DELGADO", "delgado"],
-	["PERSONAJE_CUERPO_MEDIO", "medio"],
-	["PERSONAJE_CUERPO_ROBUSTO", "robusto"],
-]
-const PIELES := [
-	["PERSONAJE_PIEL_CLARO", "#e7c3a4"],
-	["PERSONAJE_PIEL_MEDIO_CLARO", "#c9916b"],
-	["PERSONAJE_PIEL_MEDIO", "#a96f50"],
-	["PERSONAJE_PIEL_OLIVA", "#9a7655"],
-	["PERSONAJE_PIEL_OSCURO", "#6f4936"],
-	["PERSONAJE_PIEL_MUY_OSCURO", "#452f26"],
-]
-const CABELLOS := [
-	["PERSONAJE_CABELLO_NEGRO", "#1f1b19"],
-	["PERSONAJE_CABELLO_CASTANO_OSCURO", "#30251f"],
-	["PERSONAJE_CABELLO_CASTANO", "#5b4030"],
-	["PERSONAJE_CABELLO_RUBIO_OSCURO", "#8b7754"],
-	["PERSONAJE_CABELLO_CANOSO", "#77736f"],
-]
-const PEINADOS := [
-	["PERSONAJE_PEINADO_CORTO", "corto"],
-	["PERSONAJE_PEINADO_MEDIO", "medio"],
-	["PERSONAJE_PEINADO_RAPADO", "rapado"],
-	["PERSONAJE_PEINADO_RECOGIDO", "recogido"],
-]
-const PRENDAS := [
-	["PERSONAJE_PRENDA_CAMISA", "camisa"],
-	["PERSONAJE_PRENDA_JERSEY", "jersey"],
-	["PERSONAJE_PRENDA_CHAQUETA", "chaqueta"],
-]
-const ROPAS := [
-	["PERSONAJE_ROPA_GRIS", "#59616b"],
-	["PERSONAJE_ROPA_AZUL", "#45566e"],
-	["PERSONAJE_ROPA_MARRON", "#665044"],
-	["PERSONAJE_ROPA_VERDE", "#4f5f52"],
-	["PERSONAJE_ROPA_BURDEOS", "#69454c"],
-]
 const ANCHO_ETIQUETA := 150.0
 const ALTO_CONTROL := 38.0
 const TAM_BOTON := Vector2(190, 46)
@@ -52,15 +13,8 @@ const TAM_BOTON := Vector2(190, 46)
 var _partida := Partida.new()
 var _perfil: Dictionary
 var _alta_pendiente := false
-var _cuerpo: OptionButton
+var _avatar: OptionButton
 var _altura: HSlider
-var _hombros: HSlider
-var _cintura: HSlider
-var _piel: OptionButton
-var _cabello: OptionButton
-var _peinado: OptionButton
-var _prenda: OptionButton
-var _ropa: OptionButton
 var _previsualizacion: PrevisualizadorPersonaje3D
 var _trasfondo: OptionButton
 var _descripcion: Label
@@ -123,15 +77,13 @@ func _construir() -> void:
 	raiz.add_child(columnas)
 
 	var aspecto := _columna(columnas, "PERSONAJE_APARIENCIA", 1.0)
-	_cuerpo = _opcion(aspecto, "PERSONAJE_COMPLEXION", CUERPOS)
+	# Un cuerpo entero de entre los de la ficha: cara, pelo y ropa vienen con
+	# él. La altura es lo único que se ajusta encima.
+	var avatares := []
+	for avatar in PerfilJugador.AVATARES:
+		avatares.append([avatar["nombre"], avatar["id"]])
+	_avatar = _opcion(aspecto, "PERSONAJE_AVATAR", avatares)
 	_altura = _deslizador(aspecto, "PERSONAJE_ALTURA", 0.92, 1.08)
-	_hombros = _deslizador(aspecto, "PERSONAJE_HOMBROS", 0.88, 1.12)
-	_cintura = _deslizador(aspecto, "PERSONAJE_CINTURA", 0.88, 1.12)
-	_piel = _opcion(aspecto, "PERSONAJE_PIEL", PIELES)
-	_cabello = _opcion(aspecto, "PERSONAJE_CABELLO", CABELLOS)
-	_peinado = _opcion(aspecto, "PERSONAJE_PEINADO", PEINADOS)
-	_prenda = _opcion(aspecto, "PERSONAJE_PRENDA", PRENDAS)
-	_ropa = _opcion(aspecto, "PERSONAJE_ROPA", ROPAS)
 
 	var vista := PanelContainer.new()
 	vista.name = "Vista"
@@ -272,15 +224,8 @@ func _deslizador(caja: VBoxContainer, clave: String, minimo: float, maximo: floa
 
 func _cargar_controles() -> void:
 	var apariencia: Dictionary = _perfil["apariencia"]
-	_seleccionar(_cuerpo, apariencia["cuerpo"])
+	_seleccionar(_avatar, apariencia["avatar"])
 	_altura.value = float(apariencia["altura"])
-	_hombros.value = float(apariencia["hombros"])
-	_cintura.value = float(apariencia["cintura"])
-	_seleccionar(_piel, apariencia["piel"])
-	_seleccionar(_cabello, apariencia["cabello"])
-	_seleccionar(_peinado, apariencia["peinado"])
-	_seleccionar(_prenda, apariencia["prenda"])
-	_seleccionar(_ropa, apariencia["ropa"])
 	_seleccionar(_trasfondo, _perfil["trasfondo"])
 
 
@@ -304,15 +249,8 @@ func _desde_controles() -> Dictionary:
 			{
 				"apariencia":
 				{
-					"cuerpo": _valor(_cuerpo),
+					"avatar": _valor(_avatar),
 					"altura": _altura.value,
-					"hombros": _hombros.value,
-					"cintura": _cintura.value,
-					"piel": _valor(_piel),
-					"cabello": _valor(_cabello),
-					"peinado": _valor(_peinado),
-					"prenda": _valor(_prenda),
-					"ropa": _valor(_ropa),
 				},
 				"trasfondo": _valor(_trasfondo),
 			}
@@ -333,10 +271,8 @@ func _refrescar() -> void:
 		tr("PERSONAJE_RESUMEN")
 		% [
 			", ".join(etiquetas),
-			_cuerpo.get_item_text(maxi(_cuerpo.selected, 0)),
+			_avatar.get_item_text(maxi(_avatar.selected, 0)),
 			float(candidato["apariencia"]["altura"]),
-			float(candidato["apariencia"]["hombros"]),
-			float(candidato["apariencia"]["cintura"]),
 		]
 	)
 
