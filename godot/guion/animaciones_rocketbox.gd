@@ -48,6 +48,21 @@ const CLIPS := {
 	"sentarse": ["sit_down_chair_01", DE_PIE, SENTADO],
 	"andar": ["walk_neutral_01", DE_PIE, DE_PIE],
 	"coger": ["documents_take", DE_PIE, DE_PIE],
+	# Reposo variado: lo que hace alguien que lleva un rato parado.
+	"mirar_alrededor": ["idle_look_around_01", DE_PIE, DE_PIE],
+	"rascarse": ["idle_scratch_head_01", DE_PIE, DE_PIE],
+	"bostezar": ["idle_yawn_01", DE_PIE, DE_PIE],
+	"nervioso": ["idle_nervous_01", DE_PIE, DE_PIE],
+	"esperar": ["idle_waiting_01", DE_PIE, DE_PIE],
+	"estirarse": ["idle_stretch_arms_01", DE_PIE, DE_PIE],
+	# Juicio y careo.
+	"enfadado": ["idle_angry_01", DE_PIE, DE_PIE],
+	"discutir": ["gestic_talk_angry_01", DE_PIE, DE_PIE],
+	"titubear": ["gestic_talk_nervous_01", DE_PIE, DE_PIE],
+	"negar": ["gestic_listen_deny_01", DE_PIE, DE_PIE],
+	"encajar": ["gestic_listen_angry_01", DE_PIE, DE_PIE],
+	"celebrar": ["cheer_01", DE_PIE, DE_PIE],
+	"aplaudir": ["claphands_01", DE_PIE, DE_PIE],
 }
 
 ## Avatares de mujer, por el nombre de su `.glb` (#275).

@@ -28,18 +28,36 @@ const ESCALA_BASE := 0.94
 ## La cámara agachada baja 0.35 m: el cuerpo baja lo mismo para no atravesarla.
 const BAJADA_AGACHADO := -0.35
 const IDENTIDAD := "jugador"
+## Tras este rato quieto, un gesto de alguien que espera: mirar alrededor,
+## rascarse, estirarse... Sin ellos, respirar en bucle delata al maniquí.
+const PAUSA_VARIANTE := 9.0
+## Con estrés alto se nota en el cuerpo; al final del día, el cansancio.
+const UMBRAL_NERVIOSO := 0.6
+const HORA_CANSADO := 18 * 60
+const VARIANTES := {
+	"": ["mirar_alrededor", "esperar", "rascarse", "estirarse"],
+	"nervioso": ["nervioso", "mirar_alrededor", "nervioso", "rascarse"],
+	"cansado": ["bostezar", "estirarse", "esperar", "bostezar"],
+}
 
 ## En juego se mantiene el recorte específico de primera persona. El creador lo
 ## pone a `false`: la figura nace apoyada en el suelo, mirando a cámara y con una
 ## cabeza/pelo procedurales que reflejan la ficha.
 @export var primera_persona := true
+## El Juicio lo apaga: ahí los gestos son del combate, no de la espera.
+@export var variar_reposo := true
 
 var perfil: Dictionary = {}
 var estado := ""
+## "", "nervioso" o "cansado": lo fija quien conoce la jornada (`DiaApp`).
+var animo := ""
 
 var _camara: Camera3D
 var _figura: Node3D
 var _reproductor: AnimationPlayer
+var _quieto := 0.0
+var _variante_restante := 0.0
+var _variantes_hechas := 0
 
 
 ## Encoge el hueso `Neck` (y con él la cabeza) después de cada animación. La
@@ -85,7 +103,44 @@ func _process(delta: float) -> void:
 	position.y = lerpf(position.y, objetivo, minf(1.0, delta * 12.0))
 	var cuerpo := get_parent() as CharacterBody3D
 	var velocidad := Vector2(cuerpo.velocity.x, cuerpo.velocity.z).length() if cuerpo else 0.0
+	_variar_reposo(delta, velocidad)
 	animar(velocidad)
+
+
+## El ánimo que se le ve al cuerpo con este estrés (0-1) y esta hora del día.
+static func animo_de(estres: float, hora_minutos: int) -> String:
+	if estres >= UMBRAL_NERVIOSO:
+		return "nervioso"
+	if hora_minutos >= HORA_CANSADO:
+		return "cansado"
+	return ""
+
+
+## El gesto número [param n] de la espera con este [param animo_actual].
+static func variante_reposo(animo_actual: String, n: int) -> String:
+	var lista: Array = VARIANTES.get(animo_actual, VARIANTES[""])
+	return String(lista[n % lista.size()])
+
+
+func _variar_reposo(delta: float, velocidad: float) -> void:
+	if not variar_reposo or _figura == null or velocidad >= UMBRAL_ANDAR:
+		_quieto = 0.0
+		_variante_restante = 0.0
+		return
+	if _variante_restante > 0.0:
+		_variante_restante -= delta
+		if _variante_restante <= 0.0:
+			# Vacío fuerza a `animar` a volver a respirar.
+			estado = ""
+		return
+	_quieto += delta
+	if _quieto < PAUSA_VARIANTE:
+		return
+	_quieto = 0.0
+	var clip := variante_reposo(animo, _variantes_hechas)
+	_variantes_hechas += 1
+	if AnimacionesUAL.reproducir(_figura, clip) and _reproductor != null:
+		_variante_restante = _reproductor.current_animation_length
 
 
 ## Elige el gesto según la velocidad horizontal. Solo reinicia la animación

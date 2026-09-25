@@ -2128,9 +2128,9 @@
       "autor": "Microsoft",
       "licencia": "MIT",
       "fuente": "https://github.com/microsoft/Microsoft-Rocketbox",
-      "sha256": "d471e772d9079956fa808f307d5b26396bd385f052b41b1b2ca2406cd89c0fed",
-      "archivo_origen": "Assets/Animations/all_animations_max_motextr_{static,xy,xyz}/: static/m_idle_breathe_01.max.fbx, xy/m_walk_neutral_01.max.fbx, xy/m_run_neutral_01.max.fbx, static/m_cell_phone_talk_01.max.fbx, static/m_gestic_talk_neutral_01.max.fbx, static/m_sit_table_idle_neutral_01.max.fbx, static/m_work_table.max.fbx, xyz/m_sit_stand_up_chair_01.max.fbx, xyz/m_sit_down_chair_01.max.fbx, static/m_documents_take.max.fbx, static/m_sit_table_gestic_thoughtful.max.fbx @ 0943055db6ec570bcef9f2c8b41c9e5467c808f9",
-      "conversion": "Once .max.fbx reunidos en un glb sin malla con godot/herramientas/convertir_animaciones_rocketbox.gd (Godot 4.7): solo los huesos del BoneMap humanoide, posición solo en raíz y pelvis, claves optimizadas; un triángulo degenerado ancla la piel para que el importador cree el esqueleto (#1319)."
+      "sha256": "e96a4e21ac3166f3812071f1bad58c660b8a171e8b8340006104747317128355",
+      "archivo_origen": "Assets/Animations/all_animations_max_motextr_{static,xy,xyz}/: static/m_idle_breathe_01.max.fbx, xy/m_walk_neutral_01.max.fbx, xy/m_run_neutral_01.max.fbx, static/m_cell_phone_talk_01.max.fbx, static/m_gestic_talk_neutral_01.max.fbx, static/m_sit_table_idle_neutral_01.max.fbx, static/m_work_table.max.fbx, xyz/m_sit_stand_up_chair_01.max.fbx, xyz/m_sit_down_chair_01.max.fbx, static/m_documents_take.max.fbx, static/m_sit_table_gestic_thoughtful.max.fbx, static/m_idle_look_around_01.max.fbx, static/m_idle_scratch_head_01.max.fbx, static/m_idle_yawn_01.max.fbx, static/m_idle_nervous_01.max.fbx, static/m_idle_waiting_01.max.fbx, static/m_idle_stretch_arms_01.max.fbx, static/m_idle_angry_01.max.fbx, static/m_gestic_talk_nervous_01.max.fbx, static/m_gestic_listen_deny_01.max.fbx, static/m_gestic_listen_angry_01.max.fbx, static/m_cheer_01.max.fbx, static/m_claphands_01.max.fbx, xyz/m_gestic_talk_angry_01.max.fbx @ 0943055db6ec570bcef9f2c8b41c9e5467c808f9",
+      "conversion": "Veinticuatro .max.fbx reunidos en un glb sin malla con godot/herramientas/convertir_animaciones_rocketbox.gd (Godot 4.7): solo los huesos del BoneMap humanoide, posición solo en raíz y pelvis, claves optimizadas; un triángulo degenerado ancla la piel para que el importador cree el esqueleto (#1319)."
     },
     {
       "ruta": "modelos/rocketbox/animaciones/animaciones_f.glb",
@@ -2138,9 +2138,9 @@
       "autor": "Microsoft",
       "licencia": "MIT",
       "fuente": "https://github.com/microsoft/Microsoft-Rocketbox",
-      "sha256": "289f53ae86da0b8338a7f26b7abcfc62eb019186495d6ea647260b9bb2d14719",
-      "archivo_origen": "Assets/Animations/all_animations_max_motextr_{static,xy,xyz}/: static/f_idle_breathe_01.max.fbx, xy/f_walk_neutral_01.max.fbx, xy/f_run_neutral_01.max.fbx, xyz/f_cell_phone_talk_01.max.fbx, static/f_gestic_talk_neutral_01.max.fbx, static/f_sit_table_idle_neutral_01.max.fbx, static/f_work_table.max.fbx, xyz/f_sit_stand_up_chair_01.max.fbx, xyz/f_sit_down_chair_01.max.fbx, static/f_documents_take.max.fbx, static/f_sit_table_gestic_thoughtful.max.fbx @ 0943055db6ec570bcef9f2c8b41c9e5467c808f9",
-      "conversion": "Once .max.fbx reunidos en un glb sin malla con godot/herramientas/convertir_animaciones_rocketbox.gd (Godot 4.7): solo los huesos del BoneMap humanoide, posición solo en raíz y pelvis, claves optimizadas; un triángulo degenerado ancla la piel para que el importador cree el esqueleto (#1319)."
+      "sha256": "a7dcd3442d045970f4d972075470668353c2bbb652eac08d15582bbd55236335",
+      "archivo_origen": "Assets/Animations/all_animations_max_motextr_{static,xy,xyz}/: static/f_idle_breathe_01.max.fbx, xy/f_walk_neutral_01.max.fbx, xy/f_run_neutral_01.max.fbx, xyz/f_cell_phone_talk_01.max.fbx, static/f_gestic_talk_neutral_01.max.fbx, static/f_sit_table_idle_neutral_01.max.fbx, static/f_work_table.max.fbx, xyz/f_sit_stand_up_chair_01.max.fbx, xyz/f_sit_down_chair_01.max.fbx, static/f_documents_take.max.fbx, static/f_sit_table_gestic_thoughtful.max.fbx, static/f_idle_look_around_01.max.fbx, static/f_idle_scratch_head_01.max.fbx, static/f_idle_yawn_01.max.fbx, static/f_idle_nervous_01.max.fbx, static/f_idle_waiting_01.max.fbx, static/f_idle_stretch_arms_01.max.fbx, static/f_idle_angry_01.max.fbx, static/f_gestic_talk_nervous_01.max.fbx, static/f_gestic_listen_deny_01.max.fbx, static/f_gestic_listen_angry_01.max.fbx, static/f_cheer_01.max.fbx, static/f_claphands_01.max.fbx, static/f_gestic_talk_angry_01.max.fbx @ 0943055db6ec570bcef9f2c8b41c9e5467c808f9",
+      "conversion": "Veinticuatro .max.fbx reunidos en un glb sin malla con godot/herramientas/convertir_animaciones_rocketbox.gd (Godot 4.7): solo los huesos del BoneMap humanoide, posición solo en raíz y pelvis, claves optimizadas; un triángulo degenerado ancla la piel para que el importador cree el esqueleto (#1319)."
     },
     {
       "ruta": "texturas/calle_ai_98/bloque_01.webp",

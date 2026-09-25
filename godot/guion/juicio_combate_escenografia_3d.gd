@@ -191,6 +191,7 @@ static func cuerpo_jugador(padre: Node3D, perfil: Dictionary) -> Node3D:
 	var cuerpo := CuerpoJugador3D.new()
 	cuerpo.name = "CuerpoJugador"
 	cuerpo.primera_persona = false
+	cuerpo.variar_reposo = false
 	cuerpo.perfil = PerfilJugador.completar(perfil)
 	padre.add_child(cuerpo)
 	return cuerpo
@@ -222,14 +223,46 @@ static func rival_sin_cara(padre: Node3D, clave: String, color: Color) -> Node3D
 ## Anda o se queda quieto según se mueva. Solo cambia el clip al cambiar de
 ## estado, no en cada fotograma.
 static func andar(figura: Node3D, andando: bool) -> void:
-	if figura == null or bool(figura.get_meta("andando", false)) == andando:
+	if figura == null:
+		return
+	# Un gesto de combate en curso manda; al acabar se vuelve a andar o respirar.
+	if Time.get_ticks_msec() < int(figura.get_meta("gesto_hasta", 0)):
+		return
+	if figura.has_meta("gesto_hasta"):
+		figura.remove_meta("gesto_hasta")
+		figura.remove_meta("andando")
+		if figura is CuerpoJugador3D:
+			(figura as CuerpoJugador3D).estado = ""
+	if figura.has_meta("andando") and bool(figura.get_meta("andando")) == andando:
 		return
 	figura.set_meta("andando", andando)
 	if figura is CuerpoJugador3D:
 		(figura as CuerpoJugador3D).animar(2.0 if andando else 0.0)
 		return
-	if figura.get_child_count() > 0 and figura.get_child(0) is Node3D:
-		AnimacionesUAL.reproducir(figura.get_child(0), "walk" if andando else "idle")
+	var pieza := _pieza(figura)
+	if pieza != null:
+		AnimacionesUAL.reproducir(pieza, "walk" if andando else "idle")
+
+
+## Un gesto de combate (`discutir`, `encajar`, `celebrar`...) sobre la figura
+## del jugador o del rival. Dura lo que dura el clip; mientras, `andar` no lo
+## pisa. Devuelve si había clip que poner.
+static func gesto(figura: Node3D, clip: String) -> bool:
+	var pieza := _pieza(figura)
+	if pieza == null or not AnimacionesUAL.reproducir(pieza, clip):
+		return false
+	var reproductor := Modelos._reproductor(pieza)
+	var segundos := reproductor.current_animation_length if reproductor != null else 1.0
+	figura.set_meta("gesto_hasta", Time.get_ticks_msec() + int(segundos * 1000.0))
+	return true
+
+
+static func _pieza(figura: Node3D) -> Node3D:
+	if figura is CuerpoJugador3D:
+		return (figura as CuerpoJugador3D).figura()
+	if figura != null and figura.get_child_count() > 0 and figura.get_child(0) is Node3D:
+		return figura.get_child(0)
+	return null
 
 
 ## Negro mate y sin textura, salvo el recorte de las superficies con opacidad

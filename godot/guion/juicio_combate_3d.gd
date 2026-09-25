@@ -374,6 +374,7 @@ func _resolver_ataque_rival() -> void:
 			_registrar_esquiva_ritual()
 		"negado":
 			Sonido.sonar(self, "pulsar")
+			JuicioCombateEscenografia3D.gesto(_figura_jugador, "negar")
 			_mostrar_aviso_jungiano("SELF · IMPACTO NEGADO", 0.8)
 		"impacto":
 			Sonido.sonar(self, "error")
@@ -382,6 +383,7 @@ func _resolver_ataque_rival() -> void:
 			if bool(efecto["cerrar_externalizar"]):
 				_cerrar_doctrina()
 			_reaccion(_figura_jugador, -0.18)
+			JuicioCombateEscenografia3D.gesto(_figura_jugador, "encajar")
 			_actualizar_hud()
 			if bool(efecto["derrota"]):
 				_terminar(false)
@@ -457,6 +459,8 @@ func _atacar(dano_base: int, alcance: float, recarga: float, fuerte: bool) -> vo
 	if segundos_enredo > 0.0:
 		_enredo = maxf(_enredo, segundos_enredo)
 	_reaccion(_figura_rival, 0.25 + float(dano) * 0.08)
+	JuicioCombateEscenografia3D.gesto(_figura_jugador, "discutir")
+	JuicioCombateEscenografia3D.gesto(_figura_rival, "encajar")
 	_actualizar_hud()
 	if _determinacion_rival <= 0 and not _intentar_retorno_rival():
 		_terminar(true)
@@ -470,6 +474,7 @@ func _intentar_retorno_rival() -> bool:
 	_determinacion_rival = int(plan["determinacion"])
 	_estado_temporal.recarga_rival = float(plan["recarga"])
 	_reaccion(_figura_rival, -0.30)
+	JuicioCombateEscenografia3D.gesto(_figura_rival, "enfadado")
 	Sonido.sonar(self, "marcar")
 	_actualizar_hud()
 	return true
@@ -502,6 +507,8 @@ func _terminar(gano: bool) -> void:
 	_ataque_rival_pendiente = false
 	JUNGIANO.salir_combate(self)
 	_ocultar_aviso_ataque()
+	JuicioCombateEscenografia3D.gesto(_figura_jugador, "celebrar" if gano else "nervioso")
+	JuicioCombateEscenografia3D.gesto(_figura_rival, "nervioso" if gano else "aplaudir")
 	terminado.emit(gano)
 
 
