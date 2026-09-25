@@ -63,6 +63,21 @@ class EcosArchivoRuntimeTest(unittest.TestCase):
         self.assertIn("CollisionShape3D.new()", self.vertical)
         self.assertIn("var eco := Interactuable3D.new()", self.vertical)
 
+    def test_cada_eco_tiene_microhabitacion_visual_sin_colision(self):
+        self.assertIn("const GIROS_ECOS := [-0.14, 0.0, 0.14]", self.vertical)
+        self.assertIn("_montar_microhabitacion(eco, slot)", self.vertical)
+        self.assertIn('habitacion.name = "MicroHabitacion"', self.vertical)
+        for nombre in ("Suelo", "Techo", "ParedIzquierda", "ParedDerecha", "Fondo"):
+            self.assertIn(f'"{nombre}"', self.vertical)
+        self.assertIn("BaseMaterial3D.TRANSPARENCY_ALPHA", self.vertical)
+        self.assertIn("SHADOW_CASTING_SETTING_OFF", self.vertical)
+        inicio = self.vertical.index("func _montar_microhabitacion")
+        fin = self.vertical.index("func _montar_panel", inicio)
+        microhabitacion = self.vertical[inicio:fin]
+        self.assertNotIn("CollisionShape3D", microhabitacion)
+        self.assertNotIn("StaticBody3D", microhabitacion)
+        self.assertNotIn("NavigationObstacle3D", microhabitacion)
+
     def test_controller_solo_deriva_recompensas_de_documentos_leidos(self):
         self.assertIn('dia.jornada.get("leido_hoy",[])', self.controller_compact)
         self.assertIn('dia.partida.estado.get("pistas_descubiertas",[])', self.controller_compact)
