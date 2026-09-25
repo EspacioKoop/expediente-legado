@@ -45,9 +45,7 @@ static func reconectar(sesion: Dictionary, actor_id: String) -> Dictionary:
 	return {"ok": true, "status": "reconnected", "actor": actor_id}
 
 
-static func suplir_desconectado(
-	sesion: Dictionary, actor_id: String, azar: Callable
-) -> Dictionary:
+static func suplir_desconectado(sesion: Dictionary, actor_id: String, azar: Callable) -> Dictionary:
 	if sesion.is_empty() or bool(sesion.get("terminado", true)):
 		return {"ok": false, "status": "session_finished"}
 	if not sesion["actores"].has(actor_id):
