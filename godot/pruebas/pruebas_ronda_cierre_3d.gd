@@ -9,6 +9,7 @@ class DiaFalso:
 	var jornada: Dictionary
 	var partida := Partida.new()
 	var guardados := 0
+	var _mundo: Node3D = null
 
 	func _init() -> void:
 		partida.estado = Partida.nueva()
