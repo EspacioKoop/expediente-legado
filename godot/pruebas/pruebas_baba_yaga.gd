@@ -283,7 +283,7 @@ func _probar_interior_variable() -> void:
 
 	var vistos: Array[String] = []
 	for i in SuenoBabaYaga.INTERIORES_CABANA.size():
-		var esperado := SuenoBabaYaga.INTERIORES_CABANA[i]
+		var esperado: String = SuenoBabaYaga.INTERIORES_CABANA[i]
 		_comprobar(sueno.interior_actual(), esperado, "interior sigue la fase espacial")
 		var visibles := 0
 		for estado in estados.get_children():
