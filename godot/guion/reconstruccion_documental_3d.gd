@@ -48,15 +48,19 @@ static func planos_de(reconstruccion: Dictionary, reduccion_movimiento := false)
 		if reduccion_movimiento:
 			encuadre = "fijo"
 		var camara: Dictionary = CAMARAS.get(encuadre, CAMARAS["fijo"])
-		planos.append(
-			{
-				"tipo": "3d",
-				"nombre": "%s_%d" % [String(reconstruccion.get("id", "reconstruccion")), indice],
-				"camara": camara["camara"],
-				"mira": camara["mira"],
-				"segundos": maxf(0.2, float(fuente.get("duracion", 1.0))),
-				"rotulo": "%s · %s" % [folio, titulo] if indice == 0 else "",
-				"motivo": String(fuente.get("motivo", "")),
-			}
+		(
+			planos
+			. append(
+				{
+					"tipo": "3d",
+					"nombre":
+					"%s_%d" % [String(reconstruccion.get("id", "reconstruccion")), indice],
+					"camara": camara["camara"],
+					"mira": camara["mira"],
+					"segundos": maxf(0.2, float(fuente.get("duracion", 1.0))),
+					"rotulo": "%s · %s" % [folio, titulo] if indice == 0 else "",
+					"motivo": String(fuente.get("motivo", "")),
+				}
+			)
 		)
 	return planos
