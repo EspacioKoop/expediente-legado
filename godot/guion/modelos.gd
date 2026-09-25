@@ -60,6 +60,7 @@ const ALTO_PERSONA := 1.75
 
 ## Subcarpeta de `RUTA` con los avatares fotorrealistas (#275).
 const CARPETA_REALISTAS := "rocketbox/"
+const IDENTIDAD_ROCKETBOX := preload("res://guion/identidad_historica_rocketbox.gd")
 
 const PERFILES_FACIALES := {
 	"emperador":
@@ -143,7 +144,7 @@ static func persona(cuerpo: Node3D, nombre: String, color: Color, retrato: Strin
 		# barba, bigote, sombrero o sienes— anclada a Head.
 		_adaptar_realista(pieza)
 		if not retrato.is_empty():
-			_poner_identidad_realista(pieza, retrato)
+			IDENTIDAD_ROCKETBOX.aplicar(pieza, retrato)
 		AnimacionesUAL.preparar_base(pieza)
 		_animar(pieza)
 		return true
@@ -207,180 +208,6 @@ static func _adaptar_realista(pieza: Node3D) -> void:
 		# aún los consulta: «Parameter "material" is null» al liberar la figura,
 		# también en GPU. Los metadatos se sueltan después, así que los retienen.
 		malla.set_meta(&"materiales_adaptados", adaptados)
-
-
-## Rasgos históricos sobre Rocketbox.
-##
-## A diferencia de `_poner_cara`, no sustituye cabeza, piel ni cabello del
-## avatar. Solo añade señales de silueta/rostro que sobreviven al tramado PSX y
-## se mueven con el hueso Head. El tamaño se deriva de Head↔Neck para no fijar
-## centímetros a un avatar concreto.
-static func _poner_identidad_realista(pieza: Node3D, retrato: String) -> void:
-	var personaje := String(PERSONAJES_FACIALES.get(retrato, ""))
-	if personaje.is_empty():
-		return
-	var esqueleto := _esqueleto(pieza)
-	if esqueleto == null:
-		return
-	var cabeza := esqueleto.find_bone("Head")
-	var cuello := esqueleto.find_bone("Neck")
-	if cabeza < 0 or cuello < 0:
-		return
-
-	var alto := maxf(
-		(
-			absf(
-				(
-					esqueleto.get_bone_global_rest(cabeza).origin.y
-					- esqueleto.get_bone_global_rest(cuello).origin.y
-				)
-			)
-			* 1.9
-		),
-		0.18
-	)
-	var enganche := BoneAttachment3D.new()
-	enganche.name = "IdentidadHistorica275"
-	enganche.bone_idx = cabeza
-	esqueleto.add_child(enganche)
-	esqueleto.set_meta("identidad_historica_275", retrato)
-
-	var oscuro := Color(0.075, 0.065, 0.055)
-	var pelo := Color(0.12, 0.105, 0.09)
-	match personaje:
-		"Puyi":
-			_gafas_realistas(enganche, alto, "GafasPuyi", 0.96)
-		"Herman Melville":
-			_barba_realista(enganche, alto, "BarbaMelville", Color(0.20, 0.18, 0.16))
-		"Fernando Pessoa":
-			_gafas_realistas(enganche, alto, "GafasPessoa", 0.90)
-			_bigote_realista(enganche, alto, "BigotePessoa", oscuro, 0.78)
-			_sombrero_realista(enganche, alto, "SombreroPessoa", oscuro)
-		"Constantino Cavafis":
-			_gafas_realistas(enganche, alto, "GafasCavafis", 0.92)
-			_bigote_realista(enganche, alto, "BigoteCavafis", pelo, 0.88)
-			_sienes_realistas(enganche, alto, "SienesCavafis", pelo, 0.74)
-		"Henri Rousseau":
-			_bigote_realista(enganche, alto, "BigoteRousseau", oscuro, 1.15)
-			_sienes_realistas(enganche, alto, "SienesRousseau", pelo, 1.02)
-
-
-static func _grupo_identidad(padre: Node3D, nombre: String) -> Node3D:
-	var grupo := Node3D.new()
-	grupo.name = nombre
-	padre.add_child(grupo)
-	return grupo
-
-
-static func _gafas_realistas(
-	padre: Node3D, alto: float, nombre: String, escala: float = 1.0
-) -> void:
-	var grupo := _grupo_identidad(padre, nombre)
-	var separacion := alto * 0.19 * escala
-	var radio := alto * 0.105 * escala
-	var y := alto * 0.18
-	var z := alto * 0.40
-	var color := Color(0.055, 0.05, 0.045)
-	_aro_gafa(grupo, Vector3(-separacion, y, z), radio, alto * 0.014, color)
-	_aro_gafa(grupo, Vector3(separacion, y, z), radio, alto * 0.014, color)
-	_rasgo_esfera(
-		grupo, Vector3(0.0, y, z), Vector3(alto * 0.095, alto * 0.012, alto * 0.012), color
-	)
-	for malla in _mallas(grupo):
-		_marcar_material_identidad(malla)
-
-
-static func _barba_realista(padre: Node3D, alto: float, nombre: String, color: Color) -> void:
-	var grupo := _grupo_identidad(padre, nombre)
-	var z := alto * 0.31
-	_rasgo_esfera(
-		grupo,
-		Vector3(-alto * 0.10, -alto * 0.10, z),
-		Vector3(alto * 0.19, alto * 0.24, alto * 0.11),
-		color
-	)
-	_rasgo_esfera(
-		grupo,
-		Vector3(alto * 0.10, -alto * 0.10, z),
-		Vector3(alto * 0.19, alto * 0.24, alto * 0.11),
-		color
-	)
-	_rasgo_esfera(
-		grupo,
-		Vector3(0.0, -alto * 0.28, alto * 0.25),
-		Vector3(alto * 0.24, alto * 0.30, alto * 0.13),
-		color
-	)
-	_bigote_realista(grupo, alto, "BigoteMelville", color.darkened(0.08), 0.92)
-	for malla in _mallas(grupo):
-		_marcar_material_identidad(malla)
-
-
-static func _bigote_realista(
-	padre: Node3D, alto: float, nombre: String, color: Color, ancho: float
-) -> void:
-	var grupo := _grupo_identidad(padre, nombre)
-	var y := -alto * 0.055
-	var z := alto * 0.43
-	for lado in [-1.0, 1.0]:
-		_rasgo_esfera(
-			grupo,
-			Vector3(lado * alto * 0.070, y, z),
-			Vector3(alto * 0.12 * ancho, alto * 0.030, alto * 0.025),
-			color
-		)
-	for malla in _mallas(grupo):
-		_marcar_material_identidad(malla)
-
-
-static func _sombrero_realista(padre: Node3D, alto: float, nombre: String, color: Color) -> void:
-	var grupo := _grupo_identidad(padre, nombre)
-	var ala := MeshInstance3D.new()
-	var malla_ala := CylinderMesh.new()
-	malla_ala.top_radius = alto * 0.54
-	malla_ala.bottom_radius = alto * 0.54
-	malla_ala.height = alto * 0.035
-	malla_ala.radial_segments = 12
-	ala.mesh = malla_ala
-	ala.position = Vector3(0.0, alto * 0.56, 0.0)
-	ala.scale.z = 0.72
-	ala.material_override = _material_rasgo(color)
-	grupo.add_child(ala)
-
-	var copa := MeshInstance3D.new()
-	var malla_copa := CylinderMesh.new()
-	malla_copa.top_radius = alto * 0.28
-	malla_copa.bottom_radius = alto * 0.34
-	malla_copa.height = alto * 0.34
-	malla_copa.radial_segments = 10
-	copa.mesh = malla_copa
-	copa.position = Vector3(0.0, alto * 0.70, -alto * 0.015)
-	copa.scale.z = 0.82
-	copa.material_override = _material_rasgo(color)
-	grupo.add_child(copa)
-	for malla in _mallas(grupo):
-		_marcar_material_identidad(malla)
-
-
-static func _sienes_realistas(
-	padre: Node3D, alto: float, nombre: String, color: Color, volumen: float
-) -> void:
-	var grupo := _grupo_identidad(padre, nombre)
-	for lado in [-1.0, 1.0]:
-		_rasgo_esfera(
-			grupo,
-			Vector3(lado * alto * 0.31, alto * 0.31, -alto * 0.01),
-			Vector3(alto * 0.11 * volumen, alto * 0.20, alto * 0.10),
-			color
-		)
-	for malla in _mallas(grupo):
-		_marcar_material_identidad(malla)
-
-
-static func _marcar_material_identidad(malla: MeshInstance3D) -> void:
-	var material := malla.material_override
-	if material != null:
-		material.set_meta("identidad_historica_275", true)
 
 
 static func _instanciar(cuerpo: Node3D, nombre: String) -> Node3D:
