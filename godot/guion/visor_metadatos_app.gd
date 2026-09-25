@@ -194,10 +194,13 @@ func _crear_copia_falsificada() -> void:
 	)
 	if disponible:
 		var intervencion := String(_selector_falsificacion.get_selected_metadata())
-		_borrador_falsificacion = FalsificacionDocumentalModelo.crear_copia(
-			registro_actual,
-			intervencion,
-			_puntos_atencion_sin_mutar(),
+		_borrador_falsificacion = (
+			FalsificacionDocumentalModelo
+			. crear_copia(
+				registro_actual,
+				intervencion,
+				_puntos_atencion_sin_mutar(),
+			)
 		)
 		if not _borrador_falsificacion.is_empty():
 			var calidad := String(_borrador_falsificacion.get("calidad", "baja"))
