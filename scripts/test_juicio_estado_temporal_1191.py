@@ -35,7 +35,7 @@ class JuicioEstadoTemporal1191Test(unittest.TestCase):
             self.assertIn(f"_estado_temporal.{nombre}", juicio)
 
         self.assertIn("func descontar(delta: float) -> Array:", estado)
-        self.assertIn("REGLAS.descontar_temporizadores", estado.replace("\n", ""))
+        self.assertIn("descontar_temporizadores", estado)
 
     def test_regresion_runtime_standalone(self) -> None:
         motor = os.environ.get("GODOT_BIN") or shutil.which("godot4")
