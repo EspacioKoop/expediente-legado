@@ -22,12 +22,16 @@ func _probar() -> void:
 
 	previo.grab_focus()
 	await process_frame
-	_comprobar(panel.presentar("shareware_expirado", "licencia_expirada"), "presenta fallo conocido")
+	_comprobar(
+		panel.presentar("shareware_expirado", "licencia_expirada"), "presenta fallo conocido"
+	)
 	await process_frame
 	_comprobar(panel.visible, "el aviso queda visible")
 	var cerrar := panel.get_node_or_null("Cerrar") as Button
 	_comprobar(cerrar != null, "existe salida cerrable")
-	_comprobar(cerrar != null and cerrar.focus_mode == Control.FOCUS_ALL, "el cierre acepta teclado")
+	_comprobar(
+		cerrar != null and cerrar.focus_mode == Control.FOCUS_ALL, "el cierre acepta teclado"
+	)
 	_comprobar(get_root().gui_get_focus_owner() == cerrar, "el aviso dirige foco al cierre")
 	var detalle := panel.get_node_or_null("Detalle") as Label
 	_comprobar(detalle != null and detalle.text.contains("Solución:"), "muestra causa y resolución")
