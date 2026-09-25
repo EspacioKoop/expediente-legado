@@ -1,0 +1,24 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://arte/ryu_440/kit_visual_ryu.gd" id="1_ryu"]
+
+[node name="MuestraKitVisualRyu" type="Node3D"]
+script = ExtResource("1_ryu")
+
+[node name="LuzPrincipal" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-52, -28, 0)
+light_color = Color(0.72, 0.82, 0.86, 1)
+light_energy = 1.15
+shadow_enabled = true
+
+[node name="LuzAgua" type="OmniLight3D" parent="."]
+position = Vector3(-0.5, 4.4, 2.5)
+light_color = Color(0.28, 0.66, 0.78, 1)
+light_energy = 2.4
+omni_range = 14.0
+
+[node name="CamaraMuestra" type="Camera3D" parent="."]
+position = Vector3(0, 5.8, 18)
+rotation_degrees = Vector3(-12, 0, 0)
+fov = 58.0
+current = true
