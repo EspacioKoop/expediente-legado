@@ -1,14 +1,15 @@
 ## Árbitro común de superficies del HUD (#397).
 ##
 ## No decide contenido ni crea textos: únicamente aplica la jerarquía visual
-## entre estado, interacción, tutorial, fase, diálogo y modales. Así cada sistema
-## puede seguir siendo dueño de su contenido sin pelear por la misma atención.
+## entre estado, recursos, interacción, tutorial, fase, diálogo y modales. Así cada
+## sistema puede seguir siendo dueño de su contenido sin pelear por la misma atención.
 class_name HUDLayer
 extends CanvasLayer
 
 signal superficie_cambiada(tipo: StringName, visible: bool)
 
 const ESTADO := &"estado"
+const RECURSOS := &"recursos"
 const INTERACCION := &"interaccion"
 const TUTORIAL := &"tutorial"
 const FASE := &"fase"
@@ -67,6 +68,12 @@ func debe_ser_visible(tipo: StringName) -> bool:
 		return tipo == MODAL
 	if tipo == ESTADO:
 		return true
+	if tipo == RECURSOS:
+		# La banda de recursos es información secundaria. Puede convivir con el
+		# prompt corto de interacción, pero desaparece cuando una superficie que
+		# requiere lectura (tutorial, cambio de fase o diálogo) toma el foco.
+		var primaria := _primaria_activa()
+		return primaria == StringName() or primaria == INTERACCION
 	if tipo == MODAL:
 		return true
 	return tipo == _primaria_activa()
@@ -103,4 +110,4 @@ func _refrescar() -> void:
 
 
 func _tipo_valido(tipo: StringName) -> bool:
-	return tipo in [ESTADO, INTERACCION, TUTORIAL, FASE, DIALOGO, MODAL]
+	return tipo in [ESTADO, RECURSOS, INTERACCION, TUTORIAL, FASE, DIALOGO, MODAL]
