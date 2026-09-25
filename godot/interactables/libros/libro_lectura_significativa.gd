@@ -1,4 +1,4 @@
-extends Area3D
+extends Interactuable3D
 
 signal progreso_cambiado(obra_id: String, progreso: float)
 signal lectura_completada(obra_id: String)
@@ -13,26 +13,18 @@ var pasos_realizados: int = 0
 
 
 func _ready() -> void:
+	verbo = Verbo.LEER
+	nombre_objeto = "libro"
 	if label != null:
 		label.visible = false
 		_actualizar_label()
 
 
-func _on_area_entered(area: Area3D) -> void:
-	if area.is_in_group("jugador") and label != null:
-		label.visible = true
-
-
-func _on_area_exited(area: Area3D) -> void:
-	if area.is_in_group("jugador") and label != null:
-		label.visible = false
-
-
-func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		avanzar_lectura()
-	if event is InputEventKey and event.pressed and event.keycode == KEY_E:
-		avanzar_lectura()
+func interactuar(actor: Node) -> bool:
+	if not super.interactuar(actor):
+		return false
+	avanzar_lectura()
+	return true
 
 
 func avanzar_lectura(jornada: int = 0) -> Dictionary:
@@ -66,6 +58,6 @@ func _actualizar_label(resultado: Dictionary = {}) -> void:
 		return
 	var progreso := float(pasos_realizados) / float(maxi(1, pasos_para_completar))
 	if pasos_realizados == 0:
-		label.text = "E para hojear"
+		label.text = "Leer"
 	else:
-		label.text = "Lectura %d%% · E para continuar" % roundi(progreso * 100.0)
+		label.text = "Lectura %d%% · continuar" % roundi(progreso * 100.0)
