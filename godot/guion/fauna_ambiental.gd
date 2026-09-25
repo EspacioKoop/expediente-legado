@@ -15,36 +15,54 @@ const ESPECIES := {
 		"movimiento": "suelo_ave",
 		"escala": 1.0,
 		"color": Color(0.42, 0.44, 0.48),
+		"reaccion": "huir",
+		"distancia_alerta": 2.6,
+		"intensidad_reaccion": 1.10,
 	},
 	"gorrion":
 	{
 		"movimiento": "suelo_ave",
 		"escala": 0.72,
 		"color": Color(0.40, 0.31, 0.23),
+		"reaccion": "huir",
+		"distancia_alerta": 2.2,
+		"intensidad_reaccion": 1.35,
 	},
 	"perro":
 	{
 		"movimiento": "deambular",
 		"escala": 1.0,
 		"color": Color(0.42, 0.28, 0.16),
+		"reaccion": "observar",
+		"distancia_alerta": 3.8,
+		"intensidad_reaccion": 0.0,
 	},
 	"cuervo":
 	{
 		"movimiento": "vuelo",
 		"escala": 1.18,
 		"color": Color(0.035, 0.04, 0.055),
+		"reaccion": "huir",
+		"distancia_alerta": 3.4,
+		"intensidad_reaccion": 0.75,
 	},
 	"polilla":
 	{
 		"movimiento": "orbita",
 		"escala": 1.55,
 		"color": Color(0.64, 0.58, 0.46),
+		"reaccion": "subir",
+		"distancia_alerta": 2.6,
+		"intensidad_reaccion": 0.55,
 	},
 	"ciervo":
 	{
 		"movimiento": "deambular",
 		"escala": 1.12,
 		"color": Color(0.36, 0.25, 0.16),
+		"reaccion": "vigilar",
+		"distancia_alerta": 6.5,
+		"intensidad_reaccion": 0.0,
 	},
 }
 
@@ -149,6 +167,9 @@ static func _dato(id: String, especie: String, posicion: Vector3, fase: float) -
 		"movimiento": String(especie_ficha.get("movimiento", "quieto")),
 		"escala": float(especie_ficha.get("escala", 1.0)),
 		"color": especie_ficha.get("color", Color.WHITE),
+		"reaccion": String(especie_ficha.get("reaccion", "ninguna")),
+		"distancia_alerta": float(especie_ficha.get("distancia_alerta", 0.0)),
+		"intensidad_reaccion": float(especie_ficha.get("intensidad_reaccion", 0.0)),
 	}
 
 
