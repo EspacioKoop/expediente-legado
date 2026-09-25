@@ -109,6 +109,20 @@ Al cruzar el umbral, la cabaña deja de saltar visualmente entre anclas y usa un
 
 Este tránsito es una solución visual propia de SIGA-98 para la escalada onírica; no se presenta como motivo folclórico documentado.
 
+## Habitación giratoria que pasa a exterior
+
+Una pieza escénica independiente de la navegación representa la escalada en la que una habitación completa gira hasta convertirse en fachada:
+
+- la habitación tiene cuatro estados ligados a `fase_umbral`;
+- las dos primeras fases muestran elementos interiores; las dos últimas activan alero y listones de fachada;
+- la fase exterior principal alcanza un giro de **90°**, de modo que suelo y paredes cambian de lectura espacial;
+- el nodo está fuera de la ruta jugable y no contiene `CollisionShape3D`;
+- en modo normal posición y rotación interpolan juntas mediante un tween breve;
+- con `reduccion_movimiento`, se usa corte/fundido y se aplica directamente la transformación final;
+- restaurar la partida recompone la misma transformación a partir de `fase_umbral`.
+
+La habitación giratoria es una invención escénica de SIGA-98 para representar espacio onírico mutable; no se atribuye al folclore como motivo documentado.
+
 ## Interior variable de la cabaña
 
 La puerta conserva un **marco estable**, pero el contenido que enmarca cambia de forma determinista con la misma fase espacial que mueve la cabaña:

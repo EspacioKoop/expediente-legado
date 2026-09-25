@@ -13,6 +13,7 @@ func _initialize() -> void:
 	_probar_acabado_ambiental()
 	_probar_escalada_ambiental()
 	_probar_transito_horizonte()
+	_probar_habitacion_giratoria()
 	_probar_interior_variable()
 	_probar_accesibilidad_y_reproduccion()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
@@ -382,6 +383,62 @@ func _probar_transito_horizonte() -> void:
 	reducida.queue_free()
 
 
+func _probar_habitacion_giratoria() -> void:
+	var sueno := SuenoBabaYaga.new()
+	get_root().add_child(sueno)
+	sueno.preparar()
+
+	var habitacion := sueno.get_node_or_null("AcabadoAmbiental/HabitacionGiratoria") as Node3D
+	var interior := habitacion.get_node_or_null("LecturaInterior") as Node3D
+	var exterior := habitacion.get_node_or_null("LecturaExterior") as Node3D
+	_comprobar(habitacion != null, "existe habitación giratoria fuera de la ruta")
+	_comprobar(interior != null, "habitación declara lectura interior")
+	_comprobar(exterior != null, "habitación declara lectura exterior")
+	_comprobar(interior.visible, "fase inicial se lee como interior")
+	_comprobar(not exterior.visible, "fase inicial oculta lectura exterior")
+	var colisiones := habitacion.find_children("*", "CollisionShape3D", true, false)
+	_comprobar(colisiones.is_empty(), "habitación giratoria no añade colisiones")
+
+	var fase_uno := sueno.aplicar_evento(SuenoBabaYaga.EVENTO_UMBRAL, false, false)
+	var giro_uno: Dictionary = fase_uno["giro_habitacion"]
+	_comprobar(giro_uno["aplicado"], "umbral declara giro de habitación")
+	_comprobar(giro_uno["modo"], "giro_habitacion", "modo normal anima el giro")
+	_comprobar(giro_uno["animar"], "modo normal permite giro visible")
+	_comprobar(not giro_uno["destino"]["exterior"], "primera fase aún conserva lectura interior")
+	_comprobar(not giro_uno["desplazar_jugador"], "giro no desplaza al jugador")
+	_comprobar(not giro_uno["mover_camara"], "giro no fuerza cámara")
+
+	var fase_dos := sueno.aplicar_evento(SuenoBabaYaga.EVENTO_UMBRAL, false, false)
+	var giro_dos: Dictionary = fase_dos["giro_habitacion"]
+	var rotacion_exterior: Vector3 = giro_dos["destino"]["rotacion"]
+	_comprobar(giro_dos["destino"]["exterior"], "segunda fase convierte la habitación en exterior")
+	_comprobar(
+		rotacion_exterior.is_equal_approx(Vector3(0.0, 0.0, 90.0)),
+		"lectura exterior usa giro de noventa grados",
+	)
+	_comprobar(not interior.visible, "lectura interior se oculta al exteriorizar")
+	_comprobar(exterior.visible, "fachada exterior aparece tras el giro")
+	_comprobar(sueno.ruta_retorno_disponible(), "giro conserva retorno seguro")
+
+	var reducida := SuenoBabaYaga.new()
+	get_root().add_child(reducida)
+	reducida.preparar()
+	reducida.aplicar_evento(SuenoBabaYaga.EVENTO_UMBRAL, false, true)
+	var corte := reducida.aplicar_evento(SuenoBabaYaga.EVENTO_UMBRAL, false, true)
+	var giro_corte: Dictionary = corte["giro_habitacion"]
+	var habitacion_reducida := reducida.get_node("AcabadoAmbiental/HabitacionGiratoria") as Node3D
+	_comprobar(giro_corte["modo"], "corte_fundido", "reducción evita interpolar el giro")
+	_comprobar(not giro_corte["animar"], "reducción de movimiento no anima habitación")
+	_comprobar(giro_corte["duracion"], 0.0, "giro accesible no tiene duración")
+	_comprobar(
+		habitacion_reducida.rotation_degrees.is_equal_approx(Vector3(0.0, 0.0, 90.0)),
+		"reducción aplica directamente la orientación exterior",
+	)
+
+	sueno.queue_free()
+	reducida.queue_free()
+
+
 func _probar_interior_variable() -> void:
 	var sueno := SuenoBabaYaga.new()
 	get_root().add_child(sueno)
@@ -500,6 +557,12 @@ func _probar_accesibilidad_y_reproduccion() -> void:
 	_comprobar(
 		techo_copia.transform.is_equal_approx(techo_original.transform),
 		"restauración recompone la escalada ambiental",
+	)
+	var habitacion_copia := copia.get_node("AcabadoAmbiental/HabitacionGiratoria") as Node3D
+	var habitacion_original := sueno.get_node("AcabadoAmbiental/HabitacionGiratoria") as Node3D
+	_comprobar(
+		habitacion_copia.transform.is_equal_approx(habitacion_original.transform),
+		"restauración recompone la habitación giratoria",
 	)
 	sueno.queue_free()
 	copia.queue_free()
