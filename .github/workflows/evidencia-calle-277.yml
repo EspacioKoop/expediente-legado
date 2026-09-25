@@ -74,7 +74,7 @@ jobs:
           xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
             --script res://pruebas/capturar_calle_277.gd -- \
             "$GITHUB_WORKSPACE/evidencia-calle-277"
-          for captura in spawn_exterior escaparate_crt portal_casa; do
+          for captura in spawn_exterior mitad_recorrido escaparate_crt portal_casa; do
             test -s "evidencia-calle-277/${captura}.png"
           done
           test -s evidencia-calle-277/manifest.json
@@ -90,15 +90,15 @@ jobs:
           if manifest["camara"] != "jugable" or manifest["veredicto_automatico"] is not False:
               raise SystemExit("la evidencia debe usar cámara jugable sin autoaprobar")
           casos = {caso["id"]: caso for caso in manifest["casos"]}
-          esperados = {"spawn_exterior", "escaparate_crt", "portal_casa"}
+          esperados = {"spawn_exterior", "mitad_recorrido", "escaparate_crt", "portal_casa"}
           if set(casos) != esperados:
               raise SystemExit("faltan encuadres del gate #277")
           hashes = [caso["sha256"] for caso in manifest["casos"]]
-          if len(hashes) != 3 or len(set(hashes)) != 3:
-              raise SystemExit("las tres capturas deben existir y ser distintas")
+          if len(hashes) != 4 or len(set(hashes)) != 4:
+              raise SystemExit("las cuatro capturas deben existir y ser distintas")
           if any(not caso["criterio"].strip() for caso in manifest["casos"]):
               raise SystemExit("cada captura debe declarar el criterio que permite juzgar")
-          print("3/3 encuadres de #277 capturados y manifiesto coherente")
+          print("4/4 encuadres de #277 capturados y manifiesto coherente")
           PY
 
       - name: Adjuntar evidencia visual de #277
