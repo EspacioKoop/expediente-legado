@@ -7,6 +7,7 @@ extends "res://guion/dia_sueno_app.gd"
 
 const CIELO_SIGA := preload("res://arte/cielo_siga.tres")
 const RELIGION_SUENO := preload("res://guion/religion_sueno_935.gd")
+const IDEOLOGIA_SUENO := preload("res://guion/ideologia_sueno_923.gd")
 
 
 func _montar_entorno() -> void:
@@ -75,20 +76,28 @@ func _aplicar_cielo_sueno() -> void:
 ## deduce fe desde objetos, ROMs o mitologías: solo traduce los hechos explícitos
 ## de la jornada actual a la gramática visual compartida.
 func _modificadores_cielo_sueno() -> Array:
-	var registro = partida.estado.get(ReligionEventos.CLAVE_ESTADO, {})
-	if typeof(registro) != TYPE_DICTIONARY:
-		return []
 	var reduccion_movimiento: bool = (
 		PreferenciasSiga.cargar().get("reduccion_movimiento", false) == true
 	)
-	return (
-		RELIGION_SUENO
-		. modificadores(
-			registro,
+	var resultado := []
+	var registro = partida.estado.get(ReligionEventos.CLAVE_ESTADO, {})
+	if typeof(registro) == TYPE_DICTIONARY:
+		resultado.append_array(
+			RELIGION_SUENO.modificadores(
+				registro,
+				int(jornada.get("dia", 0)),
+				reduccion_movimiento,
+			)
+		)
+	resultado.append_array(
+		IDEOLOGIA_SUENO.modificadores(
+			partida.estado,
 			int(jornada.get("dia", 0)),
+			_raiz(),
 			reduccion_movimiento,
 		)
 	)
+	return resultado
 
 
 func _material_cielo_siga() -> ShaderMaterial:
