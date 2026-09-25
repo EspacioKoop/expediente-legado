@@ -6,9 +6,20 @@
 extends "res://guion/visor_anotaciones_app.gd"
 
 const MeticulosidadEstado := preload("res://guion/meticulosidad.gd")
+const FalsificacionDocumentalModelo := preload("res://guion/falsificacion_documental.gd")
 const DetallesMeticulosidadCatalogo := preload("res://guion/detalles_meticulosidad.gd")
 const RUTA_DETALLES_METICULOSIDAD := "res://datos/detalles_meticulosidad.json"
 const RUTA_ANALISIS_DOCUMENTAL := "res://datos/analisis_documental.json"
+const CLAVES_CALIDAD_FALSIFICACION := {
+	"baja": "VISOR_FALSIFICACION_951_CALIDAD_BAJA",
+	"media": "VISOR_FALSIFICACION_951_CALIDAD_MEDIA",
+	"alta": "VISOR_FALSIFICACION_951_CALIDAD_ALTA",
+}
+const CLAVES_RIESGO_FALSIFICACION := {
+	"alto": "VISOR_FALSIFICACION_951_RIESGO_ALTO",
+	"medio": "VISOR_FALSIFICACION_951_RIESGO_MEDIO",
+	"bajo": "VISOR_FALSIFICACION_951_RIESGO_BAJO",
+}
 const CLAVES_ANALISIS_DOCUMENTAL := [
 	"VISOR_ANALISIS_951_FACTURA4_SELLO",
 	"VISOR_ANALISIS_951_FACTURA4_RFC",
@@ -25,6 +36,10 @@ var _catalogo_detalles_meticulosidad: Dictionary = {}
 var _analizar_documento: Button
 var _resultado_analisis: Label
 var _catalogo_analisis_documental: Dictionary = {}
+var _selector_falsificacion: OptionButton
+var _crear_falsificacion: Button
+var _resultado_falsificacion: Label
+var _borrador_falsificacion: Dictionary = {}
 
 
 func _columna_documento() -> Control:
@@ -53,6 +68,29 @@ func _columna_documento() -> Control:
 	_resultado_analisis.text = ""
 	columna.add_child(_resultado_analisis)
 
+	_selector_falsificacion = OptionButton.new()
+	_selector_falsificacion.add_item(tr("VISOR_FALSIFICACION_951_FECHA"))
+	_selector_falsificacion.set_item_metadata(0, "fecha")
+	_selector_falsificacion.add_item(tr("VISOR_FALSIFICACION_951_SELLO"))
+	_selector_falsificacion.set_item_metadata(1, "sello")
+	_selector_falsificacion.add_item(tr("VISOR_FALSIFICACION_951_FIRMA"))
+	_selector_falsificacion.set_item_metadata(2, "firma")
+	_selector_falsificacion.disabled = true
+	columna.add_child(_selector_falsificacion)
+
+	_crear_falsificacion = Button.new()
+	_crear_falsificacion.text = tr("VISOR_FALSIFICACION_951_ACCION")
+	_crear_falsificacion.tooltip_text = tr("VISOR_FALSIFICACION_951_AYUDA")
+	_crear_falsificacion.disabled = true
+	_crear_falsificacion.pressed.connect(_crear_copia_falsificada)
+	columna.add_child(_crear_falsificacion)
+
+	_resultado_falsificacion = Label.new()
+	_resultado_falsificacion.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_resultado_falsificacion.visible = false
+	_resultado_falsificacion.text = ""
+	columna.add_child(_resultado_falsificacion)
+
 	_conectar_scroll_meticulosidad()
 	return columna
 
@@ -67,6 +105,7 @@ func _al_elegir_documento(indice: int) -> void:
 		return
 
 	_reiniciar_analisis_documental()
+	_reiniciar_falsificacion_documental()
 	_documento_meticulosidad_id = esperado_id
 	if era_leido:
 		var motivo := (
@@ -79,6 +118,7 @@ func _al_elegir_caso(indice: int) -> void:
 	super._al_elegir_caso(indice)
 	_documento_meticulosidad_id = ""
 	_reiniciar_analisis_documental()
+	_reiniciar_falsificacion_documental()
 	_actualizar_metadatos()
 
 
@@ -115,7 +155,64 @@ func _actualizar_metadatos() -> void:
 	_metadatos.text = _texto_metadatos(registro_actual)
 	if _analizar_documento != null:
 		_analizar_documento.disabled = registro_actual.is_empty()
+	if _selector_falsificacion != null:
+		_selector_falsificacion.disabled = registro_actual.is_empty()
+	if _crear_falsificacion != null:
+		_crear_falsificacion.disabled = registro_actual.is_empty()
 	_actualizar_detalles_meticulosidad()
+
+
+func _puntos_atencion_sin_mutar() -> int:
+	var puntos := 0
+	var crudo: Variant = jornada.get(MeticulosidadEstado.CAMPO_JORNADA, {})
+	if crudo is Dictionary:
+		var estado := crudo as Dictionary
+		var mismo_dia := int(estado.get("dia", -1)) == int(jornada.get("dia", 0))
+		var misma_vuelta := int(estado.get("vuelta", -1)) == int(jornada.get("vuelta", 1))
+		if mismo_dia and misma_vuelta:
+			puntos = clampi(
+				int(estado.get("puntos", 0)),
+				0,
+				MeticulosidadEstado.PUNTOS_MAX,
+			)
+	return puntos
+
+
+func _reiniciar_falsificacion_documental() -> void:
+	_borrador_falsificacion = {}
+	if _resultado_falsificacion == null:
+		return
+	_resultado_falsificacion.text = ""
+	_resultado_falsificacion.visible = false
+
+
+func _crear_copia_falsificada() -> void:
+	var disponible := (
+		not registro_actual.is_empty()
+		and _selector_falsificacion != null
+		and _resultado_falsificacion != null
+	)
+	if disponible:
+		var intervencion := String(_selector_falsificacion.get_selected_metadata())
+		_borrador_falsificacion = (
+			FalsificacionDocumentalModelo
+			. crear_copia(
+				registro_actual,
+				intervencion,
+				_puntos_atencion_sin_mutar(),
+			)
+		)
+		if not _borrador_falsificacion.is_empty():
+			var calidad := String(_borrador_falsificacion.get("calidad", "baja"))
+			var riesgo := String(_borrador_falsificacion.get("riesgo", "alto"))
+			_resultado_falsificacion.text = (
+				tr("VISOR_FALSIFICACION_951_RESULTADO")
+				% [
+					tr(String(CLAVES_CALIDAD_FALSIFICACION.get(calidad, ""))),
+					tr(String(CLAVES_RIESGO_FALSIFICACION.get(riesgo, ""))),
+				]
+			)
+			_resultado_falsificacion.visible = true
 
 
 func _reiniciar_analisis_documental() -> void:
