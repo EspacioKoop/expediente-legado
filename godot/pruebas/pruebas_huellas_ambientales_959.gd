@@ -140,8 +140,10 @@ func _probar() -> void:
 
 	# El punto inicial solo siembra la celda: una carga o quedarse quieto no
 	# cuentan como tránsito. La marca aparece al volver tres veces a la misma.
-	for _vuelta in range(3):
-		dia._caminante.position = Vector3(1.6, 0.0, 0.2)
+	for vuelta in range(3):
+		# Cada salida pisa una celda distinta: solo la celda de origen se repite
+		# tres veces y, por tanto, solo ella debe cruzar el umbral persistente.
+		dia._caminante.position = Vector3(1.6 + float(vuelta) * 1.4, 0.0, 0.2)
 		controller._process(0.0)
 		dia._caminante.position = Vector3(0.2, 0.0, 0.2)
 		controller._process(0.0)
