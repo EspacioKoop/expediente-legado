@@ -5,6 +5,10 @@ var _fallos := 0
 
 
 func _initialize() -> void:
+	call_deferred("_probar")
+
+
+func _probar() -> void:
 	_probar_catalogo()
 	_probar_reproducibilidad()
 	await _probar_montaje_sin_fisica()
