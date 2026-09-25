@@ -93,7 +93,8 @@ static func validar_payload(payload: Variant) -> Dictionary:
 	return {
 		"ok": true,
 		"reason": "",
-		"payload": {
+		"payload":
+		{
 			"room_id": room_id,
 			"encounter_id": encounter_id,
 			"round": ronda,
