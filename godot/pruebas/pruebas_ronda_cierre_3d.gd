@@ -3,6 +3,22 @@ extends SceneTree
 
 const RondaApp := preload("res://guion/dia_ronda_cierre_app.gd")
 
+
+class DiaFalso:
+	extends Node
+	var jornada: Dictionary
+	var partida := Partida.new()
+	var guardados := 0
+
+	func _init() -> void:
+		partida.estado = Partida.nueva()
+		jornada = partida.estado["jornada"]
+
+	func _guardar_o_avisar(_destino: String) -> bool:
+		guardados += 1
+		return true
+
+
 var _pasadas := 0
 var _fallos := 0
 
@@ -15,6 +31,7 @@ func _probar() -> void:
 	await _probar_recorrido_completo()
 	await _probar_abandono_parcial()
 	await _probar_cunado_montado_tarde()
+	await _probar_sello_planta_en_orden()
 	_probar_oferta_determinista()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(0 if _fallos == 0 else 1)
@@ -123,6 +140,53 @@ func _probar_cunado_montado_tarde() -> void:
 		"despedida queda en progreso persistido"
 	)
 	mundo.queue_free()
+	await process_frame
+
+
+func _probar_sello_planta_en_orden() -> void:
+	var dia := DiaFalso.new()
+	root.add_child(dia)
+	var estado := _estado(["recoger_a7", "apagar_lampara", "devolver_carpeta"])
+	for id_punto in estado["ruta"]:
+		RondaCierre.completar_punto(estado, String(id_punto))
+	dia.jornada["ronda_cierre"] = estado
+
+	var controller := RondaApp.new()
+	dia.add_child(controller)
+	controller._al_completar_punto("devolver_carpeta")
+	_comprobar(bool(estado["finalizada"]), "completar la ruta finaliza la ronda")
+	_comprobar(estado["rango"] == RondaCierre.IMPECABLE, "la ruta completa queda impecable")
+	_comprobar(
+		Sellos.tiene_sello(dia.partida.estado, RondaApp.SELLO_RECOMPENSA),
+		"la ronda impecable concede planta-en-orden"
+	)
+	_comprobar(dia.guardados == 1, "sello y ronda se guardan por el camino canónico")
+
+	controller._al_completar_punto("devolver_carpeta")
+	var obtenidos: Array = dia.partida.estado.get(Sellos.CLAVE_ESTADO, [])
+	_comprobar(
+		obtenidos.count(RondaApp.SELLO_RECOMPENSA) == 1,
+		"repetir la finalización no duplica el sello"
+	)
+
+	var dia_legado := DiaFalso.new()
+	root.add_child(dia_legado)
+	var estado_legado := _estado(["recoger_a7", "revisar_bandeja", "comprobar_tablon"])
+	for id_punto in estado_legado["ruta"]:
+		RondaCierre.completar_punto(estado_legado, String(id_punto))
+	RondaCierre.finalizar(estado_legado)
+	dia_legado.jornada["ronda_cierre"] = estado_legado
+	var controller_legado := RondaApp.new()
+	dia_legado.add_child(controller_legado)
+	controller_legado._procesar_archivo(dia_legado)
+	_comprobar(
+		Sellos.tiene_sello(dia_legado.partida.estado, RondaApp.SELLO_RECOMPENSA),
+		"una ronda impecable ya finalizada recupera el sello al cargar"
+	)
+	_comprobar(dia_legado.guardados == 1, "la migración del sello se guarda una sola vez")
+
+	dia.queue_free()
+	dia_legado.queue_free()
 	await process_frame
 
 
