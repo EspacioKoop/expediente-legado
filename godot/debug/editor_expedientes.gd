@@ -62,7 +62,10 @@ const PLANTILLAS := [
 		"asunto": "Recordatorio",
 		"clasificacion": "PERSONAL",
 		"contenido_bbcode":
-		"Recordar revisar la carpeta antes del viernes.\n[center]No adjuntar al registro principal.[/center]",
+		(
+			"Recordar revisar la carpeta antes del viernes.\n"
+			+ "[center]No adjuntar al registro principal.[/center]"
+		),
 		"sello": "SIN SELLO",
 		"firma": "SIN FIRMA",
 	},
