@@ -104,9 +104,8 @@ func _programar_busqueda_carpeta(host, caso: Dictionary) -> void:
 		_montar_carpeta(host, caso)
 		return
 	host._nomina.text = _texto("buscando_carpeta")
-	host.get_tree().create_timer(demora).timeout.connect(
-		_terminar_busqueda_carpeta.bind(host, caso_id, token)
-	)
+	var callback := _terminar_busqueda_carpeta.bind(host, caso_id, token)
+	host.get_tree().create_timer(demora).timeout.connect(callback)
 
 
 func _terminar_busqueda_carpeta(host, caso_id: String, token: int) -> void:
