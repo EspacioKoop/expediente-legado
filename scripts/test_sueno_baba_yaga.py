@@ -10,6 +10,7 @@ from scripts.godot_pruebas import importar_proyecto
 ROOT = Path(__file__).resolve().parents[1]
 SEMILLAS = ROOT / "godot" / "guion" / "SemillasOniricas.gd"
 SUENO = ROOT / "godot" / "guion" / "sueno_baba_yaga.gd"
+HABITACION_GIRATORIA = ROOT / "godot" / "guion" / "baba_yaga_habitacion_giratoria.gd"
 SUENO_CIELOS = ROOT / "godot" / "guion" / "sueno_cielos.gd"
 VIGILIA = ROOT / "godot" / "guion" / "baba_yaga_vigilia.gd"
 ESCENA_SUENO = ROOT / "godot" / "escenas" / "sueno_baba_yaga.tscn"
@@ -26,6 +27,7 @@ class SuenoBabaYagaTest(unittest.TestCase):
     def setUpClass(cls):
         cls.semillas = SEMILLAS.read_text(encoding="utf-8")
         cls.sueno = SUENO.read_text(encoding="utf-8")
+        cls.habitacion_giratoria = HABITACION_GIRATORIA.read_text(encoding="utf-8")
         cls.sueno_cielos = SUENO_CIELOS.read_text(encoding="utf-8")
         cls.vigilia = VIGILIA.read_text(encoding="utf-8")
         cls.escena_sueno = ESCENA_SUENO.read_text(encoding="utf-8")
@@ -122,16 +124,19 @@ class SuenoBabaYagaTest(unittest.TestCase):
         self.assertIn("Tween.TRANS_SINE", self.sueno)
 
     def test_habitacion_gira_y_cambia_a_exterior(self):
-        self.assertIn("POSICIONES_HABITACION_FASE := [", self.sueno)
-        self.assertIn("ROTACIONES_HABITACION_FASE := [", self.sueno)
-        self.assertIn("ESTADOS_HABITACION_EXTERIOR := [false, false, true, true]", self.sueno)
-        self.assertIn('"HabitacionGiratoria"', self.sueno)
-        self.assertIn('"LecturaInterior"', self.sueno)
-        self.assertIn('"LecturaExterior"', self.sueno)
+        self.assertIn("BabaYagaHabitacionGiratoria.POSICIONES_FASE", self.sueno)
+        self.assertIn("BabaYagaHabitacionGiratoria.ROTACIONES_FASE", self.sueno)
+        self.assertIn("BabaYagaHabitacionGiratoria.new()", self.sueno)
         self.assertIn("func estado_habitacion_actual()", self.sueno)
         self.assertIn("func plan_giro_habitacion(", self.sueno)
         self.assertIn("func _aplicar_giro_habitacion(", self.sueno)
         self.assertIn('"giro_habitacion": giro_habitacion', self.sueno)
+        self.assertIn("class_name BabaYagaHabitacionGiratoria", self.habitacion_giratoria)
+        self.assertIn("const POSICIONES_FASE := [", self.habitacion_giratoria)
+        self.assertIn("const ROTACIONES_FASE := [", self.habitacion_giratoria)
+        self.assertIn("const ESTADOS_EXTERIOR := [false, false, true, true]", self.habitacion_giratoria)
+        self.assertIn('"LecturaInterior"', self.habitacion_giratoria)
+        self.assertIn('"LecturaExterior"', self.habitacion_giratoria)
 
     def test_interior_cabana_cambia_sin_mover_el_marco(self):
         self.assertIn("INTERIORES_CABANA := [", self.sueno)
