@@ -354,8 +354,12 @@ func _probar_transito_horizonte() -> void:
 		SuenoBabaYaga.DURACION_TRAMO_HORIZONTE * 2.0,
 		"tránsito normal tiene duración acotada",
 	)
-	_comprobar(not transito["desplazar_jugador"], "tránsito nunca desplaza al jugador")
-	_comprobar(not transito["mover_camara"], "tránsito no fuerza movimiento de cámara")
+	_comprobar(
+		not transito["desplazar_jugador"], "tránsito nunca desplaza al jugador"
+	)
+	_comprobar(
+		not transito["mover_camara"], "tránsito no fuerza movimiento de cámara"
+	)
 	_comprobar(cambio["cabana_visible"], "cabaña sigue siendo un ancla visible")
 	_comprobar(cambio["retorno_disponible"], "tránsito conserva el retorno seguro")
 
@@ -369,7 +373,9 @@ func _probar_transito_horizonte() -> void:
 		"corte_fundido",
 		"reducción de movimiento evita el arco animado",
 	)
-	_comprobar(not plan_corte["animar"], "reducción de movimiento no anima la cabaña")
+	_comprobar(
+		not plan_corte["animar"], "reducción de movimiento no anima la cabaña"
+	)
 	_comprobar(plan_corte["duracion"], 0.0, "corte accesible no interpola")
 	var cabana_reducida := reducida.get_node("CabanaAncla") as Node3D
 	_comprobar(
