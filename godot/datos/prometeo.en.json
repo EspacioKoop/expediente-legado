@@ -321,220 +321,220 @@
   ],
   "historias": {
     "la-justicia": {
-      "texto": "El cierre de caja de 1999 nunca cuadró. Faltan 47 pesetas que nadie reclamó y sobran 47 pesetas que nadie explicó. Alguien, en algún momento, decidió que ambas cosas eran la misma cosa. ¿Qué hacer con esa discrepancia que lleva veintisiete años cuadrando sola?",
+      "texto": "The 1999 cash closing never balanced. Forty-seven pesetas are missing that nobody claimed, and forty-seven pesetas are left over that nobody explained. At some point, someone decided those were the same thing. What do you do with a discrepancy that has been balancing itself for twenty-seven years?",
       "opciones": [
         {
           "eje": "comunismo",
-          "etiqueta": "Comunismo de lujo automatizado",
-          "texto": "Abolir la caja. Que las 47 pesetas se repartan entre todos los empleados a partes iguales, incluidos los que ya no trabajan aquí."
+          "etiqueta": "Automated luxury communism",
+          "texto": "Abolish the cash box. Split the 47 pesetas equally among all employees, including those who no longer work here."
         },
         {
           "eje": "centrista",
-          "etiqueta": "Centrismo radical del término medio",
-          "texto": "Formar una mesa de diálogo entre las 47 pesetas que faltan y las que sobran, sin comprometerse a ningún resultado antes de la próxima legislatura contable."
+          "etiqueta": "Radical middle-of-the-road centrism",
+          "texto": "Set up a dialogue table between the 47 missing pesetas and the 47 surplus pesetas, without committing to any result before the next accounting term."
         },
         {
           "eje": "socialdemocrata",
-          "etiqueta": "Socialdemocracia nórdica de catálogo IKEA",
-          "texto": "Crear una comisión de seguimiento del desajuste, con informe anual y compromiso de revisión en cuatro años."
+          "etiqueta": "Nordic social democracy, IKEA-catalog edition",
+          "texto": "Create a commission to monitor the discrepancy, with an annual report and a commitment to review it in four years."
         },
         {
           "eje": "neoliberal",
-          "etiqueta": "Neoliberalismo disruptivo de startup unicornio",
-          "texto": "Privatizar la discrepancia. Sacarla a concurso. El mejor postor se queda con las 47 pesetas y con la culpa."
+          "etiqueta": "Disruptive unicorn-startup neoliberalism",
+          "texto": "Privatize the discrepancy. Put it out to tender. The highest bidder gets the 47 pesetas and the blame."
         }
       ],
-      "secuelaUtil": "La decisión remueve el archivo: la factura F-1999-00231 y el acta de Contraloría se registraron con cinco minutos de diferencia. Puestas una junto a la otra, quizá cuadren algo más que la caja.",
-      "secuelaConfusion": "Fuentes de la propia mesa aseguran que el descuadre nació en nómina, no en caja. Revisar las nóminas de 1998 parece el siguiente paso obvio."
+      "secuelaUtil": "The decision shakes something loose in the archive: invoice F-1999-00231 and the Comptroller's report were logged five minutes apart. Put side by side, they may balance more than the cash box.",
+      "secuelaConfusion": "Sources at the desk itself insist the discrepancy began in payroll, not cash. Reviewing the 1998 payroll records seems like the obvious next step."
     },
     "la-rueda": {
-      "texto": "La silla 4-B lleva seis años esperando una firma que autorice su propia existencia. Cada vez que el trámite avanza una casilla, aparece una casilla nueva delante. Alguien, en algún despacho, puede detener la rueda. O puede que solo la esté empujando.",
+      "texto": "Chair 4-B has spent six years waiting for a signature authorizing its own existence. Every time the procedure advances one square, a new square appears in front of it. Someone, in some office, can stop the wheel. Or maybe they are only pushing it.",
       "opciones": [
         {
           "eje": "comunismo",
-          "etiqueta": "Comunismo de lujo automatizado",
-          "texto": "Eliminar el trámite. La silla 4-B pasa a pertenecer a quien la necesite, sin formulario, sin firma, sin 4-B."
+          "etiqueta": "Automated luxury communism",
+          "texto": "Eliminate the procedure. Chair 4-B belongs to whoever needs it, with no form, no signature, no 4-B."
         },
         {
           "eje": "centrista",
-          "etiqueta": "Centrismo radical del término medio",
-          "texto": "Rebautizar el trámite como 'silla 4-B (en revisión)' y dejarlo así indefinidamente, para no sentar precedente en ningún sentido."
+          "etiqueta": "Radical middle-of-the-road centrism",
+          "texto": "Rename the procedure 'chair 4-B (under review)' and leave it that way indefinitely, so no precedent is set in either direction."
         },
         {
           "eje": "socialdemocrata",
-          "etiqueta": "Socialdemocracia nórdica de catálogo IKEA",
-          "texto": "Aprobar la silla con carácter provisional, sujeta a una evaluación de impacto silla-trabajador cada dos años."
+          "etiqueta": "Nordic social democracy, IKEA-catalog edition",
+          "texto": "Approve the chair provisionally, subject to a chair-worker impact assessment every two years."
         },
         {
           "eje": "neoliberal",
-          "etiqueta": "Neoliberalismo disruptivo de startup unicornio",
-          "texto": "Externalizar la silla 4-B a una empresa de mobiliario que cobre por uso. Quien necesite sentarse, que puje."
+          "etiqueta": "Disruptive unicorn-startup neoliberalism",
+          "texto": "Outsource chair 4-B to a furniture company that charges by use. Whoever needs to sit down can bid."
         }
       ],
-      "secuelaUtil": "El movimiento obliga a fechar los papeles: la Circular 12 es de 1988, y hay un oficio de 1987 sobre cierta jefatura. Dos documentos que piden ser leídos juntos.",
-      "secuelaConfusion": "Se rumorea que la silla llegó a entregarse y que Salcido la rechazó por escrito. Encontrar ese escrito lo cerraría todo."
+      "secuelaUtil": "The move forces the paperwork to be dated: Circular 12 is from 1988, and there is a 1987 memo about a certain department head. Two documents asking to be read together.",
+      "secuelaConfusion": "Rumor has it the chair was actually delivered and Salcido rejected it in writing. Finding that note would settle everything."
     },
     "el-juicio": {
-      "texto": "A E. Montalvo lo trasladan de departamento por tercera vez este año, aunque nadie recuerda haberlo autorizado ni haberlo pedido. El expediente dice que el traspaso 'responde a criterios objetivos'. Nadie ha visto esos criterios. Alguien tiene que decidir qué se hace con Montalvo, otra vez.",
+      "texto": "E. Montalvo is transferred between departments for the third time this year, although nobody remembers authorizing it or requesting it. The file says the transfer 'responds to objective criteria.' Nobody has seen those criteria. Someone has to decide what happens to Montalvo, again.",
       "opciones": [
         {
           "eje": "comunismo",
-          "etiqueta": "Comunismo de lujo automatizado",
-          "texto": "Abolir los departamentos. Montalvo trabaja donde quiera, cuando quiera, o no trabaja, y el departamento se adapta a Montalvo."
+          "etiqueta": "Automated luxury communism",
+          "texto": "Abolish departments. Montalvo works wherever he wants, whenever he wants, or does not work, and the department adapts to Montalvo."
         },
         {
           "eje": "centrista",
-          "etiqueta": "Centrismo radical del término medio",
-          "texto": "Trasladarlo a un departamento intermedio, a medio camino entre el anterior y el siguiente, hasta nuevo aviso."
+          "etiqueta": "Radical middle-of-the-road centrism",
+          "texto": "Move him to an intermediate department, halfway between the previous one and the next, until further notice."
         },
         {
           "eje": "socialdemocrata",
-          "etiqueta": "Socialdemocracia nórdica de catálogo IKEA",
-          "texto": "Garantizar estabilidad mediante un contrato de traspasos regulados, con derecho a apelar cada reasignación."
+          "etiqueta": "Nordic social democracy, IKEA-catalog edition",
+          "texto": "Guarantee stability through a regulated transfer contract, with the right to appeal every reassignment."
         },
         {
           "eje": "neoliberal",
-          "etiqueta": "Neoliberalismo disruptivo de startup unicornio",
-          "texto": "Que Montalvo compita por su propio puesto cada trimestre. La motivación, dicen, mejora con la incertidumbre."
+          "etiqueta": "Disruptive unicorn-startup neoliberalism",
+          "texto": "Make Montalvo compete for his own position every quarter. Motivation, they say, improves with uncertainty."
         }
       ],
-      "secuelaUtil": "Al revisar el traslado, alguien repara en la copia sellada del memorándum: el destino no es un departamento, es un piso. Léala otra vez, despacio.",
-      "secuelaConfusion": "En Dirección insisten en que Montalvo pidió el traslado él mismo, de palabra. Bastaría con encontrar a quien se lo oyó decir."
+      "secuelaUtil": "While reviewing the transfer, someone notices the stamped copy of the memorandum: the destination is not a department, it is a floor. Read it again, slowly.",
+      "secuelaConfusion": "Management insists Montalvo requested the transfer himself, verbally. All that would be needed is to find someone who heard him say it."
     },
     "la-luna": {
-      "texto": "El contrato con Carcosa Servicios Escénicos incluye una cláusula que nadie ha leído entera: dice que la función 'continuará representándose mientras exista un público, aunque el público no lo sepa'. Nadie quiere preguntar qué pasa si se cancela.",
+      "texto": "The contract with Carcosa Servicios Escénicos contains a clause nobody has read in full: it says the performance 'will continue as long as an audience exists, even if the audience does not know it.' Nobody wants to ask what happens if it is cancelled.",
       "opciones": [
         {
           "eje": "comunismo",
-          "etiqueta": "Comunismo de lujo automatizado",
-          "texto": "Cancelar el contrato y declarar la función patrimonio común: que la represente quien quiera, gratis, para siempre."
+          "etiqueta": "Automated luxury communism",
+          "texto": "Cancel the contract and declare the performance common heritage: anyone may stage it, free of charge, forever."
         },
         {
           "eje": "centrista",
-          "etiqueta": "Centrismo radical del término medio",
-          "texto": "Renovar el contrato 'con reservas', sin especificar cuáles, para poder invocarlas después si hace falta."
+          "etiqueta": "Radical middle-of-the-road centrism",
+          "texto": "Renew the contract 'with reservations,' without specifying what they are, so they can be invoked later if necessary."
         },
         {
           "eje": "socialdemocrata",
-          "etiqueta": "Socialdemocracia nórdica de catálogo IKEA",
-          "texto": "Renovar con una cláusula de revisión social que garantice condiciones dignas al elenco, sea quien sea el elenco."
+          "etiqueta": "Nordic social democracy, IKEA-catalog edition",
+          "texto": "Renew it with a social-review clause guaranteeing decent conditions for the cast, whoever the cast may be."
         },
         {
           "eje": "neoliberal",
-          "etiqueta": "Neoliberalismo disruptivo de startup unicornio",
-          "texto": "Renovar y ampliar. Si el público no sabe que es público, es un mercado sin competencia. Hay que explotarlo."
+          "etiqueta": "Disruptive unicorn-startup neoliberalism",
+          "texto": "Renew and expand it. If the audience does not know it is an audience, that is a market without competition. Exploit it."
         }
       ],
-      "secuelaUtil": "La gestión saca a la luz un concepto facturado en negativo: un recargo cobrado por NO representar algo. Lo importante de ese contrato está en lo que no se hizo.",
-      "secuelaConfusion": "El elenco, dicen, sigue cobrando nóminas. Buscar los recibos de los actores parece la vía rápida."
+      "secuelaUtil": "The paperwork reveals an item billed as a negative charge: a surcharge for NOT performing something. The important part of this contract is what did not happen.",
+      "secuelaConfusion": "They say the cast is still receiving payroll. Looking for the actors' pay slips seems like the quickest route."
     },
     "el-carro": {
-      "texto": "El memorando 1978-014 se ha vuelto a presentar, idéntico, en 1993 y en 2007. Nadie sabe quién lo redactó la primera vez ni por qué vuelve. Alguien tiene que decidir si se aprueba otra vez, se archiva para siempre, o se deja avanzar sin saber hacia dónde.",
+      "texto": "Memorandum 1978-014 was submitted again, unchanged, in 1993 and in 2007. Nobody knows who drafted it the first time or why it keeps returning. Someone has to decide whether to approve it again, archive it forever, or let it move forward without knowing where it is going.",
       "opciones": [
         {
           "eje": "comunismo",
-          "etiqueta": "Comunismo de lujo automatizado",
-          "texto": "Aprobarlo de una vez por todas y liberar el recurso que llevaba pidiendo desde 1978, sin más trámite."
+          "etiqueta": "Automated luxury communism",
+          "texto": "Approve it once and for all and release the resource it has been requesting since 1978, with no further procedure."
         },
         {
           "eje": "centrista",
-          "etiqueta": "Centrismo radical del término medio",
-          "texto": "Reenviarlo a estudio, otra vez, sin fecha límite, para que el ciclo se resuelva solo con el tiempo."
+          "etiqueta": "Radical middle-of-the-road centrism",
+          "texto": "Send it back for study, again, with no deadline, so the cycle can resolve itself over time."
         },
         {
           "eje": "socialdemocrata",
-          "etiqueta": "Socialdemocracia nórdica de catálogo IKEA",
-          "texto": "Aprobarlo parcialmente, con revisión programada para dentro de otros catorce años, por si acaso."
+          "etiqueta": "Nordic social democracy, IKEA-catalog edition",
+          "texto": "Approve it partially, with another review scheduled fourteen years from now, just in case."
         },
         {
           "eje": "neoliberal",
-          "etiqueta": "Neoliberalismo disruptivo de startup unicornio",
-          "texto": "Subastar el memorando al mejor postor. Quien lo compre, que decida qué hacer con él."
+          "etiqueta": "Disruptive unicorn-startup neoliberalism",
+          "texto": "Auction the memorandum to the highest bidder. Whoever buys it gets to decide what to do with it."
         }
       ],
-      "secuelaUtil": "El trámite obliga a cotejar las tres copias: comparten hasta las erratas, y las fechas de archivo dibujan un patrón de quince años. No es coincidencia, es instrucción.",
-      "secuelaConfusion": "Hay quien jura que existe una cuarta copia, de 1963, en el registro de entrada. Encontrarla lo explicaría todo."
+      "secuelaUtil": "The procedure forces the three copies to be compared: they share even the typos, and the filing dates draw a fifteen-year pattern. It is not coincidence, it is instruction.",
+      "secuelaConfusion": "Someone swears there is a fourth copy from 1963 in the incoming registry. Finding it would explain everything."
     },
     "el-sol": {
-      "texto": "El acta original de constitución de la empresa nunca circuló. Dice cosas que la versión oficial no dice. Es, quizás, el único documento de todo el archivo que no necesita ninguna firma para ser verdad. Alguien tiene que decidir si se hace pública.",
+      "texto": "The company's original articles of incorporation never circulated. They say things the official version does not. It may be the only document in the entire archive that needs no signature to be true. Someone has to decide whether to make it public.",
       "opciones": [
         {
           "eje": "comunismo",
-          "etiqueta": "Comunismo de lujo automatizado",
-          "texto": "Publicarla entera, sin editar, y disolver la empresa en una asamblea abierta a cualquiera que quisiera entrar."
+          "etiqueta": "Automated luxury communism",
+          "texto": "Publish it in full, unedited, and dissolve the company into an open assembly anyone can join."
         },
         {
           "eje": "centrista",
-          "etiqueta": "Centrismo radical del término medio",
-          "texto": "Publicar un resumen, sin las partes 'susceptibles de generar controversia', que resultan ser casi todas."
+          "etiqueta": "Radical middle-of-the-road centrism",
+          "texto": "Publish a summary without the parts 'liable to cause controversy,' which turns out to be nearly all of it."
         },
         {
           "eje": "socialdemocrata",
-          "etiqueta": "Socialdemocracia nórdica de catálogo IKEA",
-          "texto": "Publicarla con un informe de acompañamiento que explique el contexto y proponga reformas graduales."
+          "etiqueta": "Nordic social democracy, IKEA-catalog edition",
+          "texto": "Publish it with an accompanying report explaining the context and proposing gradual reforms."
         },
         {
           "eje": "neoliberal",
-          "etiqueta": "Neoliberalismo disruptivo de startup unicornio",
-          "texto": "Vender los derechos a quien mejor la sepa monetizar. La verdad, bien gestionada, es un activo."
+          "etiqueta": "Disruptive unicorn-startup neoliberalism",
+          "texto": "Sell the rights to whoever can monetize it best. Truth, properly managed, is an asset."
         }
       ],
-      "secuelaUtil": "El acta menciona una lista de firmantes autorizados desde 1958. Hay un nombre en esa lista que usted conoce mejor que ninguno.",
-      "secuelaConfusion": "La versión oficial bastaría: la diferencia con la original, aseguran, es solo tipográfica."
+      "secuelaUtil": "The document mentions a list of authorized signatories dating back to 1958. There is a name on that list you know better than any other.",
+      "secuelaConfusion": "The official version would be enough, they insist: the only difference from the original is typographical."
     },
     "la-emperatriz": {
-      "texto": "La herencia Karamázov lleva generaciones sin repartirse: cada heredero firma en nombre de alguien que ya no puede firmar. Nadie recuerda quién empezó. Alguien, ahora, tiene que decidir cómo se reparte lo que ya nadie sabe de quién era.",
+      "texto": "The Karamazov inheritance has gone undistributed for generations: every heir signs on behalf of someone who can no longer sign. Nobody remembers who started it. Now someone has to decide how to divide what nobody even knows belongs to whom.",
       "opciones": [
         {
           "eje": "comunismo",
-          "etiqueta": "Comunismo de lujo automatizado",
-          "texto": "Repartirla a partes iguales entre todos los que alguna vez trabajaron en el expediente, herederos o no."
+          "etiqueta": "Automated luxury communism",
+          "texto": "Divide it equally among everyone who ever worked on the case, heirs or not."
         },
         {
           "eje": "centrista",
-          "etiqueta": "Centrismo radical del término medio",
-          "texto": "Congelarla indefinidamente hasta que los herederos 'lleguen a un consenso', sin fijar ningún mecanismo para lograrlo."
+          "etiqueta": "Radical middle-of-the-road centrism",
+          "texto": "Freeze it indefinitely until the heirs 'reach a consensus,' without defining any mechanism for doing so."
         },
         {
           "eje": "socialdemocrata",
-          "etiqueta": "Socialdemocracia nórdica de catálogo IKEA",
-          "texto": "Repartirla según necesidad certificada, con una comisión de herederos que revise cada solicitud."
+          "etiqueta": "Nordic social democracy, IKEA-catalog edition",
+          "texto": "Distribute it according to certified need, with a committee of heirs reviewing each application."
         },
         {
           "eje": "neoliberal",
-          "etiqueta": "Neoliberalismo disruptivo de startup unicornio",
-          "texto": "Sacarla a subasta entre los propios herederos. Gana quien más pueda pagar por lo que ya era suyo."
+          "etiqueta": "Disruptive unicorn-startup neoliberalism",
+          "texto": "Put it up for auction among the heirs themselves. Whoever can pay the most wins what was already theirs."
         }
       ],
-      "secuelaUtil": "El reparto exige acreditar titularidades, y aflora un cuarto apellido que no está entre los reclamantes. Búsquelo en los papeles de personal, no en los de familia.",
-      "secuelaConfusion": "Un supuesto testamento ológrafo circula por Dirección. Conseguir una copia resolvería el reparto."
+      "secuelaUtil": "The distribution requires proof of title, and a fourth surname surfaces that is not among the claimants. Look for it in personnel records, not family records.",
+      "secuelaConfusion": "A supposed handwritten will is circulating through Management. Getting a copy would settle the distribution."
     },
     "la-sacerdotisa": {
-      "texto": "El empleado #427 nunca tuvo nombre en ningún documento, solo número. Alguien, en algún cajón, sabe quién fue. No lo dice. Alguien más tiene que decidir si merece la pena preguntarlo.",
+      "texto": "Employee #427 never had a name in any document, only a number. Someone, in some drawer, knows who they were. They are not saying. Someone else has to decide whether it is worth asking.",
       "opciones": [
         {
           "eje": "comunismo",
-          "etiqueta": "Comunismo de lujo automatizado",
-          "texto": "Devolverle el nombre, borrar el número de todos los archivos y hacerlo público como acto reparador."
+          "etiqueta": "Automated luxury communism",
+          "texto": "Give the name back, erase the number from every file, and make the identity public as an act of redress."
         },
         {
           "eje": "centrista",
-          "etiqueta": "Centrismo radical del término medio",
-          "texto": "Dejar el expediente como está, ni número ni nombre, 'por respeto a todas las partes', sin especificar cuáles."
+          "etiqueta": "Radical middle-of-the-road centrism",
+          "texto": "Leave the file as it is, neither number nor name, 'out of respect for all parties,' without specifying who those parties are."
         },
         {
           "eje": "socialdemocrata",
-          "etiqueta": "Socialdemocracia nórdica de catálogo IKEA",
-          "texto": "Abrir una investigación oficial, con plazo, presupuesto y un informe final que probablemente nadie lea."
+          "etiqueta": "Nordic social democracy, IKEA-catalog edition",
+          "texto": "Open an official investigation, with a deadline, a budget, and a final report that probably nobody will read."
         },
         {
           "eje": "neoliberal",
-          "etiqueta": "Neoliberalismo disruptivo de startup unicornio",
-          "texto": "Vender el expediente a un interesado externo. La identidad, como todo, tiene un precio de mercado."
+          "etiqueta": "Disruptive unicorn-startup neoliberalism",
+          "texto": "Sell the file to an outside interested party. Identity, like everything else, has a market price."
         }
       ],
-      "secuelaUtil": "La consulta deja un rastro: el número 427 aparece una vez más en el archivo, lejos de personal, en un registro de transmisiones. Lo que se transmitió no era una vacante.",
-      "secuelaConfusion": "Alguien recuerda que #427 firmaba como 'V.' en los partes de limpieza. Los partes de limpieza no se conservan, pero puede intentarlo."
+      "secuelaUtil": "The inquiry leaves a trail: the number 427 appears once more in the archive, far from personnel, in a transfer record. What was transferred was not a vacancy.",
+      "secuelaConfusion": "Someone remembers that #427 signed cleaning logs as 'V.' The cleaning logs were not preserved, but you can try."
     }
   }
 }

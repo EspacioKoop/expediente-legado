@@ -76,7 +76,7 @@ class CatalogoLocaleTest(unittest.TestCase):
         self.assertTrue(misma_estructura(self.es, self.en))
         self.assertTrue(misma_estructura(self.prometeo_es, self.prometeo_en))
         self.assertFalse(self.estado_locales["casos"]["en"])
-        self.assertFalse(self.estado_locales["prometeo"]["en"])
+        self.assertTrue(self.estado_locales["prometeo"]["en"])
         self.assertNotIn("QUERY LENGTH LIMIT EXCEEDED", CASOS_EN.read_text(encoding="utf-8"))
         self.assertNotIn("QUERY LENGTH LIMIT EXCEEDED", PROMETEO_EN.read_text(encoding="utf-8"))
         self.assertIn("_catalogo_localizado_completo(nombre, idioma)", self.codigo)
@@ -98,6 +98,21 @@ class CatalogoLocaleTest(unittest.TestCase):
             self.assertNotEqual(carta_es["descripcion"], carta_en["descripcion"])
             if carta_es["requisito"]:
                 self.assertNotEqual(carta_es["requisito"], carta_en["requisito"])
+
+    def test_prometeo_ingles_traduce_todas_las_historias(self):
+        for historia_id, historia_es in self.prometeo_es["historias"].items():
+            historia_en = self.prometeo_en["historias"][historia_id]
+            self.assertNotEqual(historia_es["texto"], historia_en["texto"])
+            self.assertNotEqual(historia_es["secuelaUtil"], historia_en["secuelaUtil"])
+            self.assertNotEqual(
+                historia_es["secuelaConfusion"], historia_en["secuelaConfusion"]
+            )
+            for opcion_es, opcion_en in zip(
+                historia_es["opciones"], historia_en["opciones"], strict=True
+            ):
+                self.assertEqual(opcion_es["eje"], opcion_en["eje"])
+                self.assertNotEqual(opcion_es["etiqueta"], opcion_en["etiqueta"])
+                self.assertNotEqual(opcion_es["texto"], opcion_en["texto"])
 
     def test_el_contrato_permite_traducir_texto_pero_no_quitar_fichas(self):
         traducida = copy.deepcopy(self.es)
