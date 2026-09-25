@@ -53,10 +53,13 @@ func _probar_hoyo_standalone() -> void:
 
 func _probar_rebote_obstaculo() -> void:
 	var obstaculo := Rect2(-0.05, -0.20, 0.10, 0.40)
-	var bola := GolfBola.nueva(
-		Vector2(-0.25, 0.0),
-		Rect2(-1.0, -1.0, 2.0, 2.0),
-		[obstaculo],
+	var bola := (
+		GolfBola
+		. nueva(
+			Vector2(-0.25, 0.0),
+			Rect2(-1.0, -1.0, 2.0, 2.0),
+			[obstaculo],
+		)
 	)
 	GolfBola.golpear(bola, Vector2.RIGHT, 0.65)
 	var reboto := false
@@ -114,8 +117,13 @@ func _probar_abandono() -> void:
 	await process_frame
 	partida._al_abandonar_hoyo()
 	await process_frame
-	_comprobar(bool(partida.resultado_final.get("abandonada", false)), "abandonar produce resultado válido")
-	_comprobar(not bool(partida.resultado_final.get("completa", true)), "abandonar no cuenta como partida completa")
+	_comprobar(
+		bool(partida.resultado_final.get("abandonada", false)), "abandonar produce resultado válido"
+	)
+	_comprobar(
+		not bool(partida.resultado_final.get("completa", true)),
+		"abandonar no cuenta como partida completa"
+	)
 	partida.queue_free()
 	await process_frame
 
