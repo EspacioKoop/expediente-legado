@@ -11,6 +11,7 @@ CASOS_ES = ROOT / "godot" / "datos" / "casos.json"
 CASOS_EN = ROOT / "godot" / "datos" / "casos.en.json"
 PROMETEO_ES = ROOT / "godot" / "datos" / "prometeo.json"
 PROMETEO_EN = ROOT / "godot" / "datos" / "prometeo.en.json"
+ESTADO_LOCALES = ROOT / "godot" / "datos" / "catalogos.locales.json"
 
 CAMPOS_TRADUCIBLES = {
     "titulo",
@@ -59,6 +60,7 @@ class CatalogoLocaleTest(unittest.TestCase):
         cls.en = json.loads(CASOS_EN.read_text(encoding="utf-8"))
         cls.prometeo_es = json.loads(PROMETEO_ES.read_text(encoding="utf-8"))
         cls.prometeo_en = json.loads(PROMETEO_EN.read_text(encoding="utf-8"))
+        cls.estado_locales = json.loads(ESTADO_LOCALES.read_text(encoding="utf-8"))
 
     def test_el_cargador_resuelve_locale_y_conserva_fallback_espanol(self):
         self.assertIn("TranslationServer.get_locale()", self.codigo)
@@ -70,15 +72,14 @@ class CatalogoLocaleTest(unittest.TestCase):
         self.assertIn('Contenido.ruta_catalogo("prometeo")', self.historias)
         self.assertIn('func cargar(ruta: String = "")', self.historias)
 
-    def test_prometeo_ingles_actual_cae_en_fallback_si_cambia_reglas(self):
-        self.assertFalse(misma_estructura(self.prometeo_es, self.prometeo_en))
-        ejes_validos = {"comunismo", "centrista", "socialdemocrata", "neoliberal"}
-        ejes_en = {
-            opcion["eje"]
-            for historia in self.prometeo_en.get("historias", {}).values()
-            for opcion in historia.get("opciones", [])
-        }
-        self.assertTrue(ejes_en - ejes_validos)
+    def test_catalogos_ingleses_recuperan_paridad_sin_activar_traduccion_incompleta(self):
+        self.assertTrue(misma_estructura(self.es, self.en))
+        self.assertTrue(misma_estructura(self.prometeo_es, self.prometeo_en))
+        self.assertFalse(self.estado_locales["casos"]["en"])
+        self.assertFalse(self.estado_locales["prometeo"]["en"])
+        self.assertNotIn("QUERY LENGTH LIMIT EXCEEDED", CASOS_EN.read_text(encoding="utf-8"))
+        self.assertNotIn("QUERY LENGTH LIMIT EXCEEDED", PROMETEO_EN.read_text(encoding="utf-8"))
+        self.assertIn("_catalogo_localizado_completo(nombre, idioma)", self.codigo)
 
     def test_el_contrato_permite_traducir_texto_pero_no_quitar_fichas(self):
         traducida = copy.deepcopy(self.es)
@@ -98,11 +99,12 @@ class CatalogoLocaleTest(unittest.TestCase):
         alterada["casos"][0]["principal"] = not alterada["casos"][0]["principal"]
         self.assertFalse(misma_estructura(self.es, alterada))
 
-    def test_ingles_actual_cae_en_fallback_hasta_recuperar_paridad(self):
+    def test_ingles_tiene_las_mismas_fichas_pero_sigue_marcado_incompleto(self):
         ids_es = {caso["id"] for caso in self.es["casos"]}
         ids_en = {caso["id"] for caso in self.en["casos"]}
-        self.assertIn("caso9@9", ids_es - ids_en)
-        self.assertFalse(misma_estructura(self.es, self.en))
+        self.assertEqual(ids_es, ids_en)
+        self.assertTrue(misma_estructura(self.es, self.en))
+        self.assertFalse(self.estado_locales["casos"]["en"])
 
 
 if __name__ == "__main__":
