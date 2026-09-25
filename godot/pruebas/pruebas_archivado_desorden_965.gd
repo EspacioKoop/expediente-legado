@@ -52,7 +52,10 @@ func _initialize() -> void:
 		int(archivador.get_meta("archivado_desorden", -1)) == 5,
 		"el archivador conserva la cantidad lógica completa",
 	)
-	_comprobar(pila != null and pila.get_child_count() == 3, "la pila visual se limita a tres carpetas")
+	_comprobar(
+		pila != null and pila.get_child_count() == 3,
+		"la pila visual se limita a tres carpetas",
+	)
 	_comprobar(
 		archivador.find_children("*", "CollisionShape3D", true, false).is_empty(),
 		"el desorden visual no crea colisiones ni bloqueos",
