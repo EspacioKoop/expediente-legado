@@ -1,0 +1,29 @@
+{
+  "bloques": [
+    {
+      "id": "tarde-dia-1",
+      "dias": [1],
+      "titulo": "Boletín local y microdocumental",
+      "boletin": {
+        "hecho_id": "turnos-atencion-planta4",
+        "tratamiento": {
+          "titular": "La DGAI revisará el nuevo turno tras su primera semana",
+          "rotulo": "NUEVO TURNO · PRUEBA 2 SEMANAS\n+30 MIN TARDE · REVISIÓN 1ª SEMANA",
+          "datos_destacados": ["duracion", "franja", "seguimiento", "objetivo"],
+          "omisiones": ["salario"],
+          "enfasis": ["carácter provisional", "evaluación del servicio"],
+          "texto": "El boletín presenta la ampliación de media hora como una prueba limitada y destaca que habrá seguimiento antes de convertirla en rutina."
+        },
+        "exposicion_ideologica": {
+          "id": "tv:canal-local-8:turnos-atencion-planta4",
+          "fuente": "tv:canal-local-8:boletin",
+          "eje": "centrista",
+          "etiquetas": ["trabajo", "servicio público", "procedimiento", "evaluación"]
+        }
+      },
+      "documental": {
+        "fuente": "tv:microdocumental_excavaciones_98"
+      }
+    }
+  ]
+}
