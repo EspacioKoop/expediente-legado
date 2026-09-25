@@ -11,6 +11,7 @@ func _initialize() -> void:
 	_probar_fuera_de_campo()
 	_probar_controles_interactivos()
 	_probar_acabado_ambiental()
+	_probar_escalada_ambiental()
 	_probar_interior_variable()
 	_probar_accesibilidad_y_reproduccion()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
@@ -266,6 +267,55 @@ func _probar_acabado_ambiental() -> void:
 	sueno.queue_free()
 
 
+func _probar_escalada_ambiental() -> void:
+	var sueno := SuenoBabaYaga.new()
+	get_root().add_child(sueno)
+	sueno.preparar()
+
+	var techo := sueno.get_node_or_null("AcabadoAmbiental/TechoOficinaInvertido") as Node3D
+	var plano := sueno.get_node_or_null("AcabadoAmbiental/PlanoAdministrativoPlegado") as Node3D
+	var fondo := sueno.get_node_or_null("AcabadoAmbiental/BosqueFondo") as Node3D
+	var retorno := sueno.get_node_or_null("RetornoSeguro") as Node3D
+	_comprobar(techo != null, "escalada conserva techo invertido")
+	_comprobar(plano != null, "escalada conserva plano administrativo")
+	_comprobar(fondo != null, "escalada conserva bosque de fondo")
+	_comprobar(retorno != null, "escalada conserva retorno seguro")
+	var retorno_inicial := retorno.position
+	var posiciones_vistas: Array[Vector3] = []
+
+	for i in SuenoBabaYaga.POSICIONES_TECHO_FASE.size():
+		var posicion_techo: Vector3 = SuenoBabaYaga.POSICIONES_TECHO_FASE[i]
+		var rotacion_techo: Vector3 = SuenoBabaYaga.ROTACIONES_TECHO_FASE[i]
+		var posicion_plano: Vector3 = SuenoBabaYaga.POSICIONES_PLANO_FASE[i]
+		var rotacion_plano: Vector3 = SuenoBabaYaga.ROTACIONES_PLANO_FASE[i]
+		var posicion_fondo: Vector3 = SuenoBabaYaga.POSICIONES_FONDO_FASE[i]
+		_comprobar(sueno.fase_ambiental_actual(), i, "fase ambiental sigue el umbral")
+		_comprobar(techo.position, posicion_techo, "techo usa posición declarada")
+		_comprobar(
+			techo.rotation_degrees.is_equal_approx(rotacion_techo),
+			"techo usa rotación declarada",
+		)
+		_comprobar(plano.position, posicion_plano, "plano usa posición declarada")
+		_comprobar(
+			plano.rotation_degrees.is_equal_approx(rotacion_plano),
+			"plano usa rotación declarada",
+		)
+		_comprobar(fondo.position, posicion_fondo, "bosque de fondo usa posición declarada")
+		_comprobar(
+			not posiciones_vistas.has(techo.position), "cada fase tiene lectura visual propia"
+		)
+		posiciones_vistas.append(techo.position)
+		_comprobar(retorno.position, retorno_inicial, "escalada no mueve el retorno seguro")
+		if i < SuenoBabaYaga.POSICIONES_TECHO_FASE.size() - 1:
+			var cambio := sueno.aplicar_evento(SuenoBabaYaga.EVENTO_UMBRAL)
+			_comprobar(cambio["fase_ambiental"], i + 1, "evento expone nueva fase ambiental")
+
+	var cierre := sueno.aplicar_evento(SuenoBabaYaga.EVENTO_UMBRAL)
+	_comprobar(cierre["fase_ambiental"], 0, "escalada ambiental forma un ciclo estable")
+	_comprobar(retorno.position, retorno_inicial, "ciclo completo conserva retorno")
+	sueno.queue_free()
+
+
 func _probar_interior_variable() -> void:
 	var sueno := SuenoBabaYaga.new()
 	get_root().add_child(sueno)
@@ -373,6 +423,17 @@ func _probar_accesibilidad_y_reproduccion() -> void:
 		copia.interior_actual(),
 		sueno.interior_actual(),
 		"restauración conserva el interior ligado a la fase espacial",
+	)
+	_comprobar(
+		copia.fase_ambiental_actual(),
+		sueno.fase_ambiental_actual(),
+		"restauración conserva la fase ambiental",
+	)
+	var techo_copia := copia.get_node("AcabadoAmbiental/TechoOficinaInvertido") as Node3D
+	var techo_original := sueno.get_node("AcabadoAmbiental/TechoOficinaInvertido") as Node3D
+	_comprobar(
+		techo_copia.transform.is_equal_approx(techo_original.transform),
+		"restauración recompone la escalada ambiental",
 	)
 	sueno.queue_free()
 	copia.queue_free()

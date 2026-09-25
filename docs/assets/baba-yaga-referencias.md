@@ -83,6 +83,19 @@ Para avanzar el acabado sin cerrar todavía una iconografía figurativa de Baba 
 
 Este pase trabaja únicamente con la hibridación propia del juego (bosque, oficina, archivo y vivienda) y evita convertir una adaptación moderna concreta en referencia canónica.
 
+## Escalada ambiental por fases
+
+El acabado de fondo deja de ser una decoración fija y responde a la misma `fase_umbral` que gobierna la arquitectura principal:
+
+- el **techo de oficina invertido** cambia de posición e inclinación entre cuatro estados declarados;
+- el **plano administrativo plegado** se desplaza y rota para reforzar la lectura de paisaje-documento;
+- el **bosque de fondo** cambia levemente de encuadre, manteniéndose siempre fuera de la ruta jugable;
+- la fase ambiental se deriva únicamente de `fase_umbral`, sin RNG ni temporizadores;
+- restaurar una partida recompone exactamente la misma transformación;
+- `RetornoSeguro` no se desplaza y la capa sigue sin añadir colisiones.
+
+Las transformaciones representan una escalada espacial propia de SIGA-98; no se presentan como motivos folclóricos documentados.
+
 ## Interior variable de la cabaña
 
 La puerta conserva un **marco estable**, pero el contenido que enmarca cambia de forma determinista con la misma fase espacial que mueve la cabaña:

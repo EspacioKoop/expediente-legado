@@ -100,6 +100,16 @@ class SuenoBabaYagaTest(unittest.TestCase):
         self.assertNotIn("Sprite3D.new()", self.sueno)
         self.assertNotIn("Decal.new()", self.sueno)
 
+    def test_escalada_ambiental_sigue_la_fase_del_umbral(self):
+        self.assertIn("POSICIONES_TECHO_FASE := [", self.sueno)
+        self.assertIn("ROTACIONES_TECHO_FASE := [", self.sueno)
+        self.assertIn("POSICIONES_PLANO_FASE := [", self.sueno)
+        self.assertIn("ROTACIONES_PLANO_FASE := [", self.sueno)
+        self.assertIn("POSICIONES_FONDO_FASE := [", self.sueno)
+        self.assertIn("func fase_ambiental_actual()", self.sueno)
+        self.assertIn("func _actualizar_acabado_ambiental()", self.sueno)
+        self.assertIn('"fase_ambiental": fase_ambiental_actual()', self.sueno)
+
     def test_interior_cabana_cambia_sin_mover_el_marco(self):
         self.assertIn("INTERIORES_CABANA := [", self.sueno)
         self.assertIn('"EstadosInterior"', self.sueno)

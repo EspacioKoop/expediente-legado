@@ -61,6 +61,36 @@ const INTERIORES_CABANA := [
 	"BosqueInterior",
 	"SalaUmbral",
 ]
+const POSICIONES_TECHO_FASE := [
+	Vector3.ZERO,
+	Vector3(0.35, -0.30, 0.18),
+	Vector3(-0.55, -0.72, 0.42),
+	Vector3(0.20, -0.18, -0.38),
+]
+const ROTACIONES_TECHO_FASE := [
+	Vector3.ZERO,
+	Vector3(0.0, 0.0, 4.0),
+	Vector3(7.0, 0.0, -6.0),
+	Vector3(-4.0, 0.0, 3.0),
+]
+const POSICIONES_PLANO_FASE := [
+	Vector3.ZERO,
+	Vector3(0.25, 0.0, -0.30),
+	Vector3(0.70, -0.12, -0.65),
+	Vector3(-0.20, 0.08, -0.18),
+]
+const ROTACIONES_PLANO_FASE := [
+	Vector3.ZERO,
+	Vector3(0.0, -8.0, 0.0),
+	Vector3(-10.0, -18.0, 6.0),
+	Vector3(5.0, 10.0, -4.0),
+]
+const POSICIONES_FONDO_FASE := [
+	Vector3.ZERO,
+	Vector3(-0.18, 0.0, 0.22),
+	Vector3(0.28, 0.0, -0.30),
+	Vector3(0.10, 0.0, 0.16),
+]
 
 var _fase_umbral := 0
 var _fase_fuera_campo := 0
@@ -142,6 +172,10 @@ func interior_actual() -> String:
 	return INTERIORES_CABANA[_fase_umbral % INTERIORES_CABANA.size()]
 
 
+func fase_ambiental_actual() -> int:
+	return _fase_umbral % POSICIONES_TECHO_FASE.size()
+
+
 func dejar_marca(nombre: String, objetivo: String) -> bool:
 	preparar()
 	var id := nombre.strip_edges()
@@ -215,6 +249,7 @@ func aplicar_evento(
 				"cabana_visible": cabana_visible(),
 				"retorno_disponible": ruta_retorno_disponible(),
 				"interior_cabana": interior_actual(),
+				"fase_ambiental": fase_ambiental_actual(),
 			},
 			true,
 		)
@@ -701,6 +736,7 @@ func _aplicar_estado_visual() -> void:
 	get_node("CabanaAncla").position = posiciones[OBJETO_CABANA]
 	get_node("CabanaAncla").visible = true
 	_actualizar_interior_cabana()
+	_actualizar_acabado_ambiental()
 	get_node("RetornoSeguro").visible = true
 
 
@@ -712,6 +748,20 @@ func _actualizar_interior_cabana() -> void:
 	for estado in estados.get_children():
 		if estado is Node3D:
 			estado.visible = String(estado.name) == seleccionado
+
+
+func _actualizar_acabado_ambiental() -> void:
+	var techo := get_node_or_null("AcabadoAmbiental/TechoOficinaInvertido") as Node3D
+	var plano := get_node_or_null("AcabadoAmbiental/PlanoAdministrativoPlegado") as Node3D
+	var fondo := get_node_or_null("AcabadoAmbiental/BosqueFondo") as Node3D
+	if techo == null or plano == null or fondo == null:
+		return
+	var fase := fase_ambiental_actual()
+	techo.position = POSICIONES_TECHO_FASE[fase]
+	techo.rotation_degrees = ROTACIONES_TECHO_FASE[fase]
+	plano.position = POSICIONES_PLANO_FASE[fase]
+	plano.rotation_degrees = ROTACIONES_PLANO_FASE[fase]
+	fondo.position = POSICIONES_FONDO_FASE[fase]
 
 
 func _sincronizar_marcas_visual() -> void:
