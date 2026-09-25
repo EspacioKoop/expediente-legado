@@ -15,6 +15,10 @@
     "tipo": "boceto",
     "ruta": "res://arte/catalogo_anomalias/tarot-geometria-viva.svg"
   },
+  "televisor-domestico-desfasado": {
+    "tipo": "boceto",
+    "ruta": "res://arte/catalogo_anomalias/televisor-domestico-desfasado.svg"
+  },
   "@vuelta-completa": {
     "tipo": "sello",
     "ruta": "res://arte/catalogo_anomalias/vuelta-completa.svg"
