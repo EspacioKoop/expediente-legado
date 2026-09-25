@@ -46,6 +46,8 @@ const COLOR_LADRILLO := Color(0.42, 0.23, 0.16)
 const COLOR_ARCHIVO := Color(0.30, 0.34, 0.31)
 const COLOR_PAPEL := Color(0.67, 0.61, 0.46)
 const COLOR_RUTA := Color(0.78, 0.68, 0.42)
+const COLOR_AGUA_VERTICAL := Color(0.12, 0.32, 0.46)
+const COLOR_SELLO_CELESTE := Color(0.62, 0.19, 0.16)
 
 var _estado_puzzle: Dictionary = {}
 var _fragmentos: Dictionary = {}
@@ -191,6 +193,7 @@ func _montar_prototipo() -> void:
 		COLOR_LADRILLO,
 	)
 	_montar_muralla_archivo(ciudad)
+	_montar_identidad_uruk(ciudad)
 	_montar_barrios(ciudad)
 	_montar_puzzle(ciudad)
 	_montar_salida(ciudad)
@@ -223,6 +226,68 @@ func _montar_muralla_archivo(ciudad: Node3D) -> void:
 			Vector3(0.0, 8.0, -6.2 + i * 2.05),
 			COLOR_ARCHIVO if i % 2 == 0 else COLOR_LADRILLO,
 		)
+
+
+## Hitos de puesta en escena para que el sueño se lea como Gilgamesh/SIGA desde
+## cámara jugable y no como otro castillo genérico. Son formas simbólicas sin
+## texto factual: terraza escalonada, puerta monumental, agua imposible y sellos.
+func _montar_identidad_uruk(ciudad: Node3D) -> void:
+	var hitos := Node3D.new()
+	hitos.name = "HitosUruk"
+	ciudad.add_child(hitos)
+
+	var zigurat := Node3D.new()
+	zigurat.name = "ZiguratArchivo"
+	hitos.add_child(zigurat)
+	for nivel in 4:
+		var escala := 1.0 - float(nivel) * 0.17
+		_crear_caja(
+			zigurat,
+			"Terraza%d" % (nivel + 1),
+			Vector3(7.2 * escala, 0.72, 4.8 * escala),
+			Vector3(-6.1, 0.55 + nivel * 0.72, -5.0),
+			COLOR_LADRILLO if nivel % 2 == 0 else COLOR_ARCHIVO,
+		)
+
+	var puerta := Node3D.new()
+	puerta.name = "PuertaMonumentalArchivo"
+	hitos.add_child(puerta)
+	_crear_caja(
+		puerta, "TorreIzquierda", Vector3(2.15, 6.2, 1.6), Vector3(-2.9, 3.1, -6.7), COLOR_LADRILLO
+	)
+	_crear_caja(
+		puerta, "TorreDerecha", Vector3(2.15, 6.2, 1.6), Vector3(2.9, 3.1, -6.7), COLOR_LADRILLO
+	)
+	_crear_caja(
+		puerta, "DintelArchivo", Vector3(4.1, 1.1, 1.45), Vector3(0.0, 5.25, -6.7), COLOR_ARCHIVO
+	)
+
+	var inundacion := Node3D.new()
+	inundacion.name = "InundacionVertical"
+	hitos.add_child(inundacion)
+	for tramo in 5:
+		_crear_caja(
+			inundacion,
+			"CanalPared%d" % (tramo + 1),
+			Vector3(0.12, 1.0, 2.5),
+			Vector3(10.18, 0.8 + tramo * 1.0, -4.8 + tramo * 1.6),
+			COLOR_AGUA_VERTICAL,
+			true,
+		)
+
+	var sellos := Node3D.new()
+	sellos.name = "SellosCelestes"
+	hitos.add_child(sellos)
+	for i in 3:
+		var sello := _crear_caja(
+			sellos,
+			"Sello%d" % (i + 1),
+			Vector3(1.0 + i * 0.18, 0.28, 1.0 + i * 0.18),
+			Vector3(-3.4 + i * 3.4, 6.4 + i * 0.55, -1.6 - i * 0.8),
+			COLOR_SELLO_CELESTE,
+			true,
+		)
+		sello.rotation_degrees = Vector3(18.0 + i * 9.0, 22.0 - i * 15.0, 12.0 + i * 17.0)
 
 
 func _montar_barrios(ciudad: Node3D) -> void:

@@ -167,6 +167,22 @@ func _probar_vertical_3d() -> void:
 		sueno.get_node_or_null("CiudadImposible/MurallaVertical") != null,
 		"la ciudad incluye muralla/archivo vertical",
 	)
+	_comprobar(
+		sueno.get_node_or_null("CiudadImposible/HitosUruk/ZiguratArchivo") != null,
+		"la ciudad incluye un zigurat/archivo escalonado reconocible",
+	)
+	_comprobar(
+		sueno.get_node_or_null("CiudadImposible/HitosUruk/PuertaMonumentalArchivo") != null,
+		"la ciudad incluye una puerta monumental propia",
+	)
+	_comprobar(
+		sueno.get_node_or_null("CiudadImposible/HitosUruk/InundacionVertical") != null,
+		"el agua imposible asciende por la pared",
+	)
+	_comprobar(
+		sueno.get_node_or_null("CiudadImposible/HitosUruk/SellosCelestes") != null,
+		"los sellos suspendidos refuerzan la hibridacion SIGA",
+	)
 	var techo := sueno.get_node_or_null("CiudadImposible/MurallaArchivoTecho") as Node3D
 	_comprobar(techo != null, "existe la continuidad imposible por el techo")
 	_comprobar(not techo.visible, "la continuidad cenital empieza oculta")

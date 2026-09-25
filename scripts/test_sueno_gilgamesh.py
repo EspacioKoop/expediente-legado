@@ -66,6 +66,11 @@ class SuenoGilgameshTest(unittest.TestCase):
         self.assertIn('"desplazar_camara": false', self.sueno)
         self.assertIn('"MurallaArchivoTecho"', self.sueno)
         self.assertIn('"RutaFinal"', self.sueno)
+        self.assertIn('"HitosUruk"', self.sueno)
+        self.assertIn('"ZiguratArchivo"', self.sueno)
+        self.assertIn('"PuertaMonumentalArchivo"', self.sueno)
+        self.assertIn('"InundacionVertical"', self.sueno)
+        self.assertIn('"SellosCelestes"', self.sueno)
 
     def test_no_depende_de_hud_ni_assets_externos(self):
         combinado = self.sueno + self.vigilia
