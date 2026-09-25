@@ -5,8 +5,10 @@ extends RefCounted
 
 const CARPETA := "res://assets/modelos/traffic_road/"
 const PIEZAS := [
-	["TapaSur", "Manhole_Cover", Vector3(-2.0, 0.004, -5.0), 0.70, 0.0],
-	["TapaNorte", "Manhole_Cover", Vector3(2.0, 0.004, 11.0), 0.70, 0.0],
+	# 1,5 mm separan la cara inferior del asfalto: suficiente para evitar
+	# z-fighting sin que la tapa se lea como una pieza apoyada sobre la calzada.
+	["TapaSur", "Manhole_Cover", Vector3(-2.0, 0.0015, -5.0), 0.70, 0.0],
+	["TapaNorte", "Manhole_Cover", Vector3(2.0, 0.0015, 11.0), 0.70, 0.0],
 	["Barrera", "Road_Block", Vector3(3.25, 0.0, 6.0), 1.10, 90.0],
 	["ConoSur", "Traffic_Cone", Vector3(3.25, 0.0, 4.7), 0.65, 0.0],
 	["ConoNorte", "Traffic_Cone", Vector3(3.25, 0.0, 7.3), 0.65, 0.0],
