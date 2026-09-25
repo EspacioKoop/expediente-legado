@@ -711,7 +711,7 @@ func _actualizar_interior_cabana() -> void:
 	var seleccionado := interior_actual()
 	for estado in estados.get_children():
 		if estado is Node3D:
-			estado.visible = estado.name == seleccionado
+			estado.visible = String(estado.name) == seleccionado
 
 
 func _sincronizar_marcas_visual() -> void:
