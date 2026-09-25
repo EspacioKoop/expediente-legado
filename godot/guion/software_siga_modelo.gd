@@ -192,7 +192,13 @@ func ejecutar(id: String) -> Dictionary:
 			mensaje = "Lienzo 32×32 abierto con paleta de 16 colores."
 		_:
 			mensaje = "PixelVista muestra una imagen de ejemplo integrada."
-	return {"ok": true, "mensaje": mensaje}
+	var incidencia := {}
+	if id == "relojito-pro" and numero >= 3:
+		incidencia = {
+			"id": "shareware_expirado",
+			"evento": "licencia_expirada",
+		}
+	return {"ok": true, "mensaje": mensaje, "incidencia": incidencia}
 
 
 func exportar_estado() -> Dictionary:
