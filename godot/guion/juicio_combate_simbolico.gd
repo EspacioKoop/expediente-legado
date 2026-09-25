@@ -75,6 +75,16 @@ static func compromiso_religion_bloqueante(
 	return {}
 
 
+static func tregua_religion_activa(compromisos: Array) -> Dictionary:
+	for compromiso_bruto in compromisos:
+		if typeof(compromiso_bruto) != TYPE_DICTIONARY:
+			continue
+		var compromiso: Dictionary = compromiso_bruto
+		if RELIGION_CONFLICTO.tregua_mutua_activa(compromiso):
+			return compromiso
+	return {}
+
+
 static func estado_partida(anfitrion: Node) -> Dictionary:
 	var padre := anfitrion.get_parent()
 	if padre == null:
