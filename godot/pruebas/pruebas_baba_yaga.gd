@@ -252,8 +252,8 @@ func _probar_acabado_ambiental() -> void:
 		sueno.get_node_or_null("AcabadoAmbiental/PlanoAdministrativoPlegado/HojaA") != null,
 		"plano administrativo plegado materializa la hibridación sin texto",
 	)
-	var cocina := (
-		sueno.get_node_or_null("CabanaAncla/InteriorImposible/EstadosInterior/CocinaSIGA98")
+	var cocina := sueno.get_node_or_null(
+		"CabanaAncla/InteriorImposible/EstadosInterior/CocinaSIGA98"
 	)
 	_comprobar(cocina != null, "interior imposible contiene una cocina doméstica SIGA-98")
 	_comprobar(
@@ -289,7 +289,9 @@ func _probar_interior_variable() -> void:
 		for estado in estados.get_children():
 			if estado.visible:
 				visibles += 1
-				_comprobar(String(estado.name), esperado, "solo se muestra el interior seleccionado")
+				_comprobar(
+					String(estado.name), esperado, "solo se muestra el interior seleccionado"
+				)
 		_comprobar(visibles, 1, "solo hay un interior visible por fase")
 		_comprobar(sueno.get_node_or_null("CabanaAncla/InteriorImposible/MarcoPuerta"), marco)
 		vistos.append(sueno.interior_actual())
