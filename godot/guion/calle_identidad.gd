@@ -208,14 +208,34 @@ static func _edificio_oficina(calle: Node3D) -> void:
 static func _bloque_casa(calle: Node3D) -> void:
 	var z := CASA_FACHADA_Z
 	var raiz := _grupo(calle, "BloqueCasa")
-	_caja(
-		raiz,
-		"Volumen",
-		Vector3(0, 6.0, z + 3.1),
-		Vector3(19.0, 12.0, 6.2),
-		Color(0.50, 0.39, 0.28),
-		"revoco_urbano"
-	)
+	# La masa superior se escalona para que el final de la calle no cierre todo
+	# el campo visual como una pared. La planta baja sigue siendo continua y el
+	# portal no se mueve; solo se recorta la silueta contra el cielo.
+	for tramo in [
+		{
+			"nombre": "AlaOeste",
+			"centro": Vector3(-6.4, 4.3, z + 3.1),
+			"tam": Vector3(6.2, 8.6, 6.2),
+		},
+		{
+			"nombre": "TorreCentral",
+			"centro": Vector3(0.0, 5.5, z + 3.1),
+			"tam": Vector3(6.8, 11.0, 6.2),
+		},
+		{
+			"nombre": "AlaEste",
+			"centro": Vector3(6.4, 4.3, z + 3.1),
+			"tam": Vector3(6.2, 8.6, 6.2),
+		},
+	]:
+		_caja(
+			raiz,
+			String(tramo["nombre"]),
+			tramo["centro"],
+			tramo["tam"],
+			Color(0.50, 0.39, 0.28),
+			"revoco_urbano"
+		)
 	_caja(
 		raiz,
 		"Bajos",
@@ -224,9 +244,18 @@ static func _bloque_casa(calle: Node3D) -> void:
 		Color(0.34, 0.25, 0.19),
 		"revoco_urbano"
 	)
-	_caja(
-		raiz, "Alero", Vector3(0, 12.1, z - 0.2), Vector3(19.4, 0.25, 0.5), Color(0.28, 0.22, 0.18)
-	)
+	for alero in [
+		{"nombre": "AleroOeste", "x": -6.4, "y": 8.72, "ancho": 6.4},
+		{"nombre": "AleroCentral", "x": 0.0, "y": 11.12, "ancho": 7.0},
+		{"nombre": "AleroEste", "x": 6.4, "y": 8.72, "ancho": 6.4},
+	]:
+		_caja(
+			raiz,
+			String(alero["nombre"]),
+			Vector3(float(alero["x"]), float(alero["y"]), z - 0.2),
+			Vector3(float(alero["ancho"]), 0.25, 0.5),
+			Color(0.28, 0.22, 0.18)
+		)
 	# El portal: el marco ya lo declara dia_calle_app; aquí la puerta y su luz.
 	_caja(
 		raiz,
@@ -262,6 +291,10 @@ static func _bloque_casa(calle: Node3D) -> void:
 		var y := 3.6 + planta * 2.7
 		for i in 7:
 			var x := -7.8 + i * 2.6
+			# La tercera planta solo existe en la torre central: las alas bajas
+			# dejan dos franjas de cielo visibles durante el tramo final.
+			if planta == 2 and absf(x) > 3.2:
+				continue
 			var semilla := 100 + planta * 13 + i
 			var nombre := "%d_%d" % [planta, i]
 			if _azar(semilla) < 0.42:
@@ -304,21 +337,22 @@ static func _bloque_casa(calle: Node3D) -> void:
 					Vector3(1.7, 0.9, 0.04),
 					METAL
 				)
-	# Azotea: depósito de agua y antenas de televisión.
+	# Azotea: depósito y antenas permanecen sobre el cuerpo central para que las
+	# alas laterales no vuelvan a cerrar la silueta ganada.
 	_caja(
 		raiz,
 		"Deposito",
-		Vector3(-4.5, 12.9, z + 3.0),
+		Vector3(-1.7, 11.7, z + 3.0),
 		Vector3(1.6, 1.4, 1.6),
 		Color(0.42, 0.40, 0.38),
 		"metal_pintado"
 	)
-	for x in [-1.0, 2.4, 5.8]:
-		_caja(raiz, "AntenaTV%.0f" % x, Vector3(x, 13.0, z + 1.5), Vector3(0.05, 1.6, 0.05), METAL)
+	for x in [-2.4, 0.8, 2.5]:
+		_caja(raiz, "AntenaTV%.0f" % x, Vector3(x, 11.8, z + 1.5), Vector3(0.05, 1.6, 0.05), METAL)
 		_caja(
 			raiz,
 			"AntenaTVBrazo%.0f" % x,
-			Vector3(x, 13.6, z + 1.5),
+			Vector3(x, 12.4, z + 1.5),
 			Vector3(0.9, 0.04, 0.04),
 			METAL
 		)
