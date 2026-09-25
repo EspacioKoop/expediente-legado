@@ -45,6 +45,10 @@ class EcosArchivoRuntimeTest(unittest.TestCase):
         self.assertIn("activado.connect(_al_activar_eco.bind(slot))", self.vertical)
         self.assertIn("EcosArchivoPresentacion.EVENTO_COMPLETADO", self.vertical)
         self.assertIn("_recompensa_texto", self.vertical)
+        self.assertIn('eco_visual.name = "EcoVisual"', self.vertical)
+        self.assertIn('dato.get("texto_visible", dato.get("texto", ""))', self.vertical)
+        self.assertIn("MANIFESTACION_ROTULO_DESHECHO", self.vertical)
+        self.assertIn("MANIFESTACION_ECO_LEJANO", self.vertical)
         self.assertNotIn("Input.", self.vertical)
         self.assertNotIn("JOY_BUTTON_", self.vertical)
         self.assertNotIn("KEY_", self.vertical)
@@ -68,8 +72,12 @@ class EcosArchivoRuntimeTest(unittest.TestCase):
         self.assertIn(".contains(frase)", self.controller_compact)
         self.assertIn('pista.has("registroOrigen2")', self.controller_compact)
         self.assertIn('candidato.get("reward_id","")', self.controller_compact)
+        self.assertIn('registro.get("tipo","")', self.controller_compact)
         self.assertIn("EcosArchivo.crear(", self.controller_compact)
-        self.assertIn("EcosArchivoPresentacion.crear(ecos)", self.controller_compact)
+        self.assertIn(
+            'EcosArchivoPresentacion.crear(ecos,String(candidato.get("tipo","")))',
+            self.controller_compact,
+        )
 
     def test_controller_conecta_recompensa_real_y_prioriza_pendientes(self):
         self.assertIn("pendientesifnotpendientes.is_empty()elseconocidas", self.controller_compact)
