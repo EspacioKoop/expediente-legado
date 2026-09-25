@@ -45,11 +45,14 @@ func _registrar_superficies() -> void:
 	_ejecutar_app.tamano_preferido = Vector2(620, 300)
 	_ejecutar_app.registrar_en(_escritorio)
 
-	_reconstruccion_app = EscritorioSigaApp.new(
-		"reconstruccion-documental",
-		tr("VISOR_RECONSTRUIR"),
-		Callable(self, "_crear_reconstruccion"),
-		"siga",
+	_reconstruccion_app = (
+		EscritorioSigaApp
+		. new(
+			"reconstruccion-documental",
+			tr("VISOR_RECONSTRUIR"),
+			Callable(self, "_crear_reconstruccion"),
+			"siga",
+		)
 	)
 	_reconstruccion_app.tamano_minimo = Vector2(560, 420)
 	_reconstruccion_app.tamano_preferido = Vector2(760, 620)
@@ -75,9 +78,12 @@ func _crear_ejecutar() -> Control:
 
 func _crear_reconstruccion() -> Control:
 	var superficie := ReconstruccionDocumentalSiga.new()
-	superficie.configurar(
-		_reconstruccion_pendiente,
-		bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false)),
+	(
+		superficie
+		. configurar(
+			_reconstruccion_pendiente,
+			bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false)),
+		)
 	)
 	return superficie
 
@@ -139,16 +145,19 @@ func _documentos_reconstruibles() -> Array[Dictionary]:
 				caso_id, [registro_id]
 			)
 			for reconstruccion in reconstrucciones:
-				resultado.append(
-					{
-						"caso": caso_id,
-						"caso_titulo": caso_titulo,
-						"registro": registro_id,
-						"folio": folio,
-						"tipo": String(registro.get("tipo", "")),
-						"contenido": tr(String(registro.get("contenido", ""))),
-						"reconstruccion": reconstruccion.duplicate(true),
-					}
+				(
+					resultado
+					. append(
+						{
+							"caso": caso_id,
+							"caso_titulo": caso_titulo,
+							"registro": registro_id,
+							"folio": folio,
+							"tipo": String(registro.get("tipo", "")),
+							"contenido": tr(String(registro.get("contenido", ""))),
+							"reconstruccion": reconstruccion.duplicate(true),
+						}
+					)
 				)
 	return resultado
 
