@@ -1,0 +1,107 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Shader" path="res://arte/sueno_fotorrealista/material_microdetalle.gdshader" id="1_shader"]
+
+[sub_resource type="ShaderMaterial" id="Tela"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.20, 0.16, 0.13, 1)
+shader_parameter/metallic_amount = 0.0
+shader_parameter/roughness_base = 0.88
+shader_parameter/grime_strength = 0.30
+shader_parameter/wetness = 0.06
+shader_parameter/micro_scale = 58.0
+
+[sub_resource type="ShaderMaterial" id="Acero"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.45, 0.47, 0.46, 1)
+shader_parameter/metallic_amount = 0.88
+shader_parameter/roughness_base = 0.24
+shader_parameter/grime_strength = 0.16
+shader_parameter/wetness = 0.22
+shader_parameter/micro_scale = 34.0
+
+[sub_resource type="ShaderMaterial" id="Reflejo"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.08, 0.095, 0.10, 1)
+shader_parameter/metallic_amount = 0.62
+shader_parameter/roughness_base = 0.12
+shader_parameter/grime_strength = 0.08
+shader_parameter/wetness = 0.86
+shader_parameter/emission_color = Color(0.025, 0.05, 0.06, 1)
+shader_parameter/emission_energy = 0.22
+shader_parameter/micro_scale = 46.0
+
+[sub_resource type="BoxMesh" id="Asiento"]
+size = Vector3(0.48, 0.10, 0.46)
+
+[sub_resource type="BoxMesh" id="Respaldo"]
+size = Vector3(0.46, 0.52, 0.085)
+
+[sub_resource type="CylinderMesh" id="Pata"]
+top_radius = 0.022
+bottom_radius = 0.026
+height = 0.46
+radial_segments = 16
+
+[sub_resource type="BoxMesh" id="ReflejoAsiento"]
+size = Vector3(0.48, 0.055, 0.46)
+
+[sub_resource type="BoxMesh" id="ReflejoRespaldo"]
+size = Vector3(0.46, 0.31, 0.055)
+
+[node name="SillaReflejo" type="Node3D"]
+metadata/origen_reconocible = "silla"
+metadata/uso = "sueno"
+metadata/issue = 87
+
+[node name="Asiento" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.50, 0)
+mesh = SubResource("Asiento")
+material_override = SubResource("Tela")
+
+[node name="Respaldo" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.84, 0.18)
+rotation = Vector3(-0.10, 0, 0)
+mesh = SubResource("Respaldo")
+material_override = SubResource("Tela")
+
+[node name="PataDI" type="MeshInstance3D" parent="."]
+position = Vector3(-0.19, 0.24, -0.17)
+mesh = SubResource("Pata")
+material_override = SubResource("Acero")
+
+[node name="PataDD" type="MeshInstance3D" parent="."]
+position = Vector3(0.19, 0.24, -0.17)
+mesh = SubResource("Pata")
+material_override = SubResource("Acero")
+
+[node name="PataTI" type="MeshInstance3D" parent="."]
+position = Vector3(-0.19, 0.24, 0.17)
+rotation = Vector3(0.05, 0, 0.03)
+mesh = SubResource("Pata")
+material_override = SubResource("Acero")
+
+[node name="PataTD" type="MeshInstance3D" parent="."]
+position = Vector3(0.19, 0.24, 0.17)
+rotation = Vector3(-0.04, 0, -0.025)
+mesh = SubResource("Pata")
+material_override = SubResource("Acero")
+
+[node name="ReflejoImposible" type="Node3D" parent="."]
+position = Vector3(0.10, 0.0, 0.62)
+rotation = Vector3(0, 3.14159, 0)
+scale = Vector3(0.94, 1.18, 0.94)
+
+[node name="Asiento" type="MeshInstance3D" parent="ReflejoImposible"]
+position = Vector3(0, 0.41, 0)
+mesh = SubResource("ReflejoAsiento")
+material_override = SubResource("Reflejo")
+
+[node name="Respaldo" type="MeshInstance3D" parent="ReflejoImposible"]
+position = Vector3(0, 0.69, 0.17)
+rotation = Vector3(0.12, 0, 0)
+mesh = SubResource("ReflejoRespaldo")
+material_override = SubResource("Reflejo")
+
+[node name="AnclaInteraccion" type="Marker3D" parent="."]
+position = Vector3(0, 0.62, -0.55)

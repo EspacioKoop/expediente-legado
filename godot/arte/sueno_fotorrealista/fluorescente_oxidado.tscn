@@ -1,0 +1,96 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Shader" path="res://arte/sueno_fotorrealista/material_microdetalle.gdshader" id="1_shader"]
+
+[sub_resource type="ShaderMaterial" id="Metal"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.42, 0.41, 0.37, 1)
+shader_parameter/metallic_amount = 0.70
+shader_parameter/roughness_base = 0.48
+shader_parameter/grime_strength = 0.34
+shader_parameter/wetness = 0.12
+shader_parameter/micro_scale = 38.0
+
+[sub_resource type="ShaderMaterial" id="Oxido"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.29, 0.105, 0.045, 1)
+shader_parameter/metallic_amount = 0.22
+shader_parameter/roughness_base = 0.78
+shader_parameter/grime_strength = 0.52
+shader_parameter/wetness = 0.08
+shader_parameter/micro_scale = 44.0
+
+[sub_resource type="ShaderMaterial" id="Tubo"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.72, 0.79, 0.73, 1)
+shader_parameter/metallic_amount = 0.0
+shader_parameter/roughness_base = 0.18
+shader_parameter/grime_strength = 0.08
+shader_parameter/wetness = 0.05
+shader_parameter/emission_color = Color(0.58, 0.72, 0.64, 1)
+shader_parameter/emission_energy = 2.4
+shader_parameter/micro_scale = 20.0
+
+[sub_resource type="BoxMesh" id="Cajetin"]
+size = Vector3(1.72, 0.10, 0.22)
+
+[sub_resource type="CylinderMesh" id="TuboMesh"]
+top_radius = 0.028
+bottom_radius = 0.028
+height = 1.54
+radial_segments = 20
+
+[sub_resource type="BoxMesh" id="Soporte"]
+size = Vector3(0.09, 0.12, 0.24)
+
+[sub_resource type="BoxMesh" id="Costra"]
+size = Vector3(0.24, 0.018, 0.10)
+
+[node name="FluorescenteOxidado" type="Node3D"]
+metadata/origen_reconocible = "fluorescente"
+metadata/uso = "sueno"
+metadata/issue = 87
+
+[node name="Cajetin" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.09, 0)
+mesh = SubResource("Cajetin")
+material_override = SubResource("Metal")
+
+[node name="Tubo" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.015, -0.11)
+rotation = Vector3(0, 0, 1.5708)
+mesh = SubResource("TuboMesh")
+material_override = SubResource("Tubo")
+
+[node name="SoporteIzquierdo" type="MeshInstance3D" parent="."]
+position = Vector3(-0.77, -0.01, -0.03)
+mesh = SubResource("Soporte")
+material_override = SubResource("Oxido")
+
+[node name="SoporteDerecho" type="MeshInstance3D" parent="."]
+position = Vector3(0.77, -0.01, -0.03)
+mesh = SubResource("Soporte")
+material_override = SubResource("Oxido")
+
+[node name="Oxido1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.48, 0.035, -0.119)
+rotation = Vector3(0, 0, 0.08)
+mesh = SubResource("Costra")
+material_override = SubResource("Oxido")
+
+[node name="Oxido2" type="MeshInstance3D" parent="."]
+position = Vector3(0.34, 0.045, -0.119)
+rotation = Vector3(0, 0, -0.05)
+scale = Vector3(0.72, 1, 1.25)
+mesh = SubResource("Costra")
+material_override = SubResource("Oxido")
+
+[node name="LuzLocal" type="OmniLight3D" parent="."]
+position = Vector3(0, -0.18, 0)
+light_color = Color(0.58, 0.72, 0.64, 1)
+light_energy = 1.45
+omni_range = 3.8
+shadow_enabled = false
+
+[node name="AnclaTecho" type="Marker3D" parent="."]
+position = Vector3(0, 0.18, 0)

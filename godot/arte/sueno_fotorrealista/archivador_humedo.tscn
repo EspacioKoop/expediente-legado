@@ -1,0 +1,114 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Shader" path="res://arte/sueno_fotorrealista/material_microdetalle.gdshader" id="1_shader"]
+
+[sub_resource type="ShaderMaterial" id="Metal"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.29, 0.31, 0.30, 1)
+shader_parameter/metallic_amount = 0.82
+shader_parameter/roughness_base = 0.34
+shader_parameter/grime_strength = 0.28
+shader_parameter/wetness = 0.18
+shader_parameter/micro_scale = 34.0
+
+[sub_resource type="ShaderMaterial" id="MetalHumedo"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.20, 0.22, 0.21, 1)
+shader_parameter/metallic_amount = 0.74
+shader_parameter/roughness_base = 0.24
+shader_parameter/grime_strength = 0.36
+shader_parameter/wetness = 0.78
+shader_parameter/micro_scale = 42.0
+
+[sub_resource type="ShaderMaterial" id="Goma"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.055, 0.050, 0.048, 1)
+shader_parameter/metallic_amount = 0.0
+shader_parameter/roughness_base = 0.82
+shader_parameter/grime_strength = 0.20
+shader_parameter/wetness = 0.08
+
+[sub_resource type="BoxMesh" id="Cuerpo"]
+size = Vector3(1.05, 1.90, 0.56)
+
+[sub_resource type="BoxMesh" id="Cajon"]
+size = Vector3(0.93, 0.38, 0.045)
+
+[sub_resource type="BoxMesh" id="Tirador"]
+size = Vector3(0.24, 0.035, 0.055)
+
+[sub_resource type="BoxMesh" id="VetaHumeda"]
+size = Vector3(0.055, 0.42, 0.012)
+
+[node name="ArchivadorHumedo" type="Node3D"]
+metadata/origen_reconocible = "archivador"
+metadata/uso = "sueno"
+metadata/issue = 87
+
+[node name="Cuerpo" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.95, 0)
+mesh = SubResource("Cuerpo")
+material_override = SubResource("Metal")
+
+[node name="Cajon1" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.54, -0.302)
+mesh = SubResource("Cajon")
+material_override = SubResource("Metal")
+
+[node name="Cajon2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.10, -0.302)
+mesh = SubResource("Cajon")
+material_override = SubResource("Metal")
+
+[node name="Cajon3" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.66, -0.302)
+mesh = SubResource("Cajon")
+material_override = SubResource("Metal")
+
+[node name="Cajon4" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.22, -0.302)
+mesh = SubResource("Cajon")
+material_override = SubResource("Metal")
+
+[node name="Tirador1" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.54, -0.352)
+mesh = SubResource("Tirador")
+material_override = SubResource("Goma")
+
+[node name="Tirador2" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.10, -0.352)
+mesh = SubResource("Tirador")
+material_override = SubResource("Goma")
+
+[node name="Tirador3" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.66, -0.352)
+mesh = SubResource("Tirador")
+material_override = SubResource("Goma")
+
+[node name="Tirador4" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.22, -0.352)
+mesh = SubResource("Tirador")
+material_override = SubResource("Goma")
+
+[node name="VetaHumeda1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.34, 1.22, -0.333)
+rotation = Vector3(0, 0, -0.075)
+mesh = SubResource("VetaHumeda")
+material_override = SubResource("MetalHumedo")
+
+[node name="VetaHumeda2" type="MeshInstance3D" parent="."]
+position = Vector3(0.28, 0.83, -0.333)
+rotation = Vector3(0, 0, 0.052)
+scale = Vector3(0.72, 1.35, 1)
+mesh = SubResource("VetaHumeda")
+material_override = SubResource("MetalHumedo")
+
+[node name="VetaHumeda3" type="MeshInstance3D" parent="."]
+position = Vector3(0.08, 1.57, -0.333)
+rotation = Vector3(0, 0, 0.11)
+scale = Vector3(0.55, 0.72, 1)
+mesh = SubResource("VetaHumeda")
+material_override = SubResource("MetalHumedo")
+
+[node name="AnclaInteraccion" type="Marker3D" parent="."]
+position = Vector3(0, 1.05, -0.56)
