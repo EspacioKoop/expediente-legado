@@ -253,7 +253,9 @@ func _probar_acabado_ambiental() -> void:
 	)
 	var cocina := sueno.get_node_or_null("CabanaAncla/InteriorImposible/CocinaSIGA98")
 	_comprobar(cocina != null, "interior imposible contiene una cocina doméstica SIGA-98")
-	_comprobar(cocina.get_child_count() >= 9, "cocina tiene mobiliario suficiente para leerse como espacio")
+	_comprobar(
+		cocina.get_child_count() >= 9, "cocina tiene mobiliario suficiente para leerse como espacio"
+	)
 	var colisiones := acabado.find_children("*", "CollisionShape3D", true, false)
 	_comprobar(colisiones.is_empty(), "acabado ambiental no añade colisiones ni bloquea rutas")
 	_comprobar(sueno.cabana_visible(), "acabado conserva la cabaña-ancla")
