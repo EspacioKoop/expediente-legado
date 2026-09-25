@@ -1,6 +1,6 @@
 # Props fotorealistas de oficina 1998
 
-Este lote añade seis recortes 2D generados específicamente para *Expediente Legado* el
+Este lote añade cinco recortes 2D generados específicamente para *Expediente Legado* el
 24 de septiembre de 2026. Se eligieron después de revisar los props ya presentes en el
 repositorio para no duplicar el monitor, teléfono, teclado, impresora, mobiliario ni la
 utilería procedural existente.
@@ -8,7 +8,6 @@ utilería procedural existente.
 ## Contenido
 
 - `fax_98.webp`: fax de sobremesa con papel y auricular.
-- `escaner_98.webp`: escáner plano A4 de carcasa beige.
 - `fotocopiadora_98.webp`: fotocopiadora autónoma de oficina.
 - `dispensador_agua_98.webp`: dispensador con garrafa.
 - `grapadora_98.webp`: grapadora metálica usada.
@@ -38,10 +37,10 @@ bordes complejos.
 
 ## Integración en la oficina
 
-`OficinaFotorealista98` monta los seis recortes únicamente durante la fase `archivo`:
+`OficinaFotorealista98` monta los cinco recortes únicamente durante la fase `archivo`:
 
 - fotocopiadora y dispensador de agua como dressing de suelo;
-- fax y escáner sobre la batería de archivadores;
+- fax sobre la batería de archivadores;
 - grapadora y perforadora sobre la mesa de clasificación.
 
 Se usan `Sprite3D` con billboard fijo en Y, recorte alfa y sombreado por las luces del
