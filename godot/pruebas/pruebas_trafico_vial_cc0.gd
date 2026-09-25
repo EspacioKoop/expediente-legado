@@ -59,7 +59,6 @@ func _probar() -> void:
 			_comprobar(caja.position.y < -0.02, "grosor de tapa empotrado en el asfalto")
 		else:
 			_comprobar(absf(caja.position.y - pieza.position.y) < 0.001, "base apoyada")
-		else:
 			var alto := 1.10 if pieza.name == &"Barrera" else 0.65
 			_comprobar(absf(caja.size.y - alto) < 0.001, "altura de mobiliario realista")
 	print("Lote: 5 instancias, %d triángulos" % triangulos)
