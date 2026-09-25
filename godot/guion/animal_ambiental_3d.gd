@@ -66,9 +66,7 @@ func desplazamiento_en(tiempo: float) -> Vector3:
 	return Vector3.ZERO
 
 
-func animar_pieza(
-	id: String, tiempo: float, _transcurrido: float, lod: String
-) -> void:
+func animar_pieza(id: String, tiempo: float, _transcurrido: float, lod: String) -> void:
 	if id != _id or reduccion_movimiento:
 		return
 	var desplazamiento := desplazamiento_en(tiempo)
@@ -108,10 +106,26 @@ func _montar_ave(color: Color) -> void:
 	_parte("Cuerpo", Vector3(0.22, 0.18, 0.34), Vector3(0, 0.13, 0), color)
 	_parte("Cabeza", Vector3(0.15, 0.15, 0.16), Vector3(0, 0.23, -0.18), color.lightened(0.06))
 	_parte("Pico", Vector3(0.065, 0.035, 0.10), Vector3(0, 0.23, -0.30), Color(0.72, 0.52, 0.20))
-	_parte("AlaI", Vector3(0.24, 0.025, 0.22), Vector3(-0.16, 0.14, 0.02), color.darkened(0.10), Vector3(0, 0, 14))
-	_parte("AlaD", Vector3(0.24, 0.025, 0.22), Vector3(0.16, 0.14, 0.02), color.darkened(0.10), Vector3(0, 0, -14))
-	_parte("PataI", Vector3(0.025, 0.12, 0.025), Vector3(-0.045, 0.01, 0.04), Color(0.45, 0.28, 0.20))
-	_parte("PataD", Vector3(0.025, 0.12, 0.025), Vector3(0.045, 0.01, 0.04), Color(0.45, 0.28, 0.20))
+	_parte(
+		"AlaI",
+		Vector3(0.24, 0.025, 0.22),
+		Vector3(-0.16, 0.14, 0.02),
+		color.darkened(0.10),
+		Vector3(0, 0, 14)
+	)
+	_parte(
+		"AlaD",
+		Vector3(0.24, 0.025, 0.22),
+		Vector3(0.16, 0.14, 0.02),
+		color.darkened(0.10),
+		Vector3(0, 0, -14)
+	)
+	_parte(
+		"PataI", Vector3(0.025, 0.12, 0.025), Vector3(-0.045, 0.01, 0.04), Color(0.45, 0.28, 0.20)
+	)
+	_parte(
+		"PataD", Vector3(0.025, 0.12, 0.025), Vector3(0.045, 0.01, 0.04), Color(0.45, 0.28, 0.20)
+	)
 
 
 func _montar_perro(color: Color) -> void:
@@ -122,26 +136,62 @@ func _montar_perro(color: Color) -> void:
 	for x in [-0.14, 0.14]:
 		for z in [-0.24, 0.24]:
 			_parte("Pata", Vector3(0.09, 0.42, 0.10), Vector3(x, 0.16, z), color.darkened(0.07))
-	_parte("Cola", Vector3(0.08, 0.08, 0.48), Vector3(0, 0.53, 0.58), color.darkened(0.08), Vector3(28, 0, 0))
+	_parte(
+		"Cola",
+		Vector3(0.08, 0.08, 0.48),
+		Vector3(0, 0.53, 0.58),
+		color.darkened(0.08),
+		Vector3(28, 0, 0)
+	)
 
 
 func _montar_polilla(color: Color) -> void:
 	_parte("Cuerpo", Vector3(0.10, 0.12, 0.28), Vector3.ZERO, color.darkened(0.25))
 	_parte("AlaI", Vector3(0.48, 0.025, 0.34), Vector3(-0.25, 0, 0), color, Vector3(0, 12, 18))
 	_parte("AlaD", Vector3(0.48, 0.025, 0.34), Vector3(0.25, 0, 0), color, Vector3(0, -12, -18))
-	_parte("AntenaI", Vector3(0.018, 0.018, 0.24), Vector3(-0.05, 0.04, -0.21), color.darkened(0.30), Vector3(-18, -14, 0))
-	_parte("AntenaD", Vector3(0.018, 0.018, 0.24), Vector3(0.05, 0.04, -0.21), color.darkened(0.30), Vector3(-18, 14, 0))
+	_parte(
+		"AntenaI",
+		Vector3(0.018, 0.018, 0.24),
+		Vector3(-0.05, 0.04, -0.21),
+		color.darkened(0.30),
+		Vector3(-18, -14, 0)
+	)
+	_parte(
+		"AntenaD",
+		Vector3(0.018, 0.018, 0.24),
+		Vector3(0.05, 0.04, -0.21),
+		color.darkened(0.30),
+		Vector3(-18, 14, 0)
+	)
 
 
 func _montar_ciervo(color: Color) -> void:
 	_parte("Cuerpo", Vector3(0.48, 0.52, 1.05), Vector3(0, 0.72, 0), color)
-	_parte("Cuello", Vector3(0.26, 0.72, 0.28), Vector3(0, 1.05, -0.42), color.lightened(0.04), Vector3(-18, 0, 0))
+	_parte(
+		"Cuello",
+		Vector3(0.26, 0.72, 0.28),
+		Vector3(0, 1.05, -0.42),
+		color.lightened(0.04),
+		Vector3(-18, 0, 0)
+	)
 	_parte("Cabeza", Vector3(0.28, 0.30, 0.45), Vector3(0, 1.38, -0.62), color.lightened(0.07))
 	for x in [-0.16, 0.16]:
 		for z in [-0.32, 0.32]:
 			_parte("Pata", Vector3(0.085, 0.80, 0.09), Vector3(x, 0.30, z), color.darkened(0.10))
-	_parte("AstaI", Vector3(0.035, 0.46, 0.035), Vector3(-0.10, 1.66, -0.60), Color(0.16, 0.12, 0.09), Vector3(0, 0, -12))
-	_parte("AstaD", Vector3(0.035, 0.46, 0.035), Vector3(0.10, 1.66, -0.60), Color(0.16, 0.12, 0.09), Vector3(0, 0, 12))
+	_parte(
+		"AstaI",
+		Vector3(0.035, 0.46, 0.035),
+		Vector3(-0.10, 1.66, -0.60),
+		Color(0.16, 0.12, 0.09),
+		Vector3(0, 0, -12)
+	)
+	_parte(
+		"AstaD",
+		Vector3(0.035, 0.46, 0.035),
+		Vector3(0.10, 1.66, -0.60),
+		Color(0.16, 0.12, 0.09),
+		Vector3(0, 0, 12)
+	)
 
 
 func _parte(
