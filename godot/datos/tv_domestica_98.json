@@ -8,6 +8,7 @@
         "hecho_id": "turnos-atencion-planta4",
         "tratamiento": {
           "titular": "La DGAI revisará el nuevo turno tras su primera semana",
+          "rotulo": "NUEVO TURNO · PRUEBA 2 SEMANAS\n+30 MIN TARDE · REVISIÓN 1ª SEMANA",
           "datos_destacados": ["duracion", "franja", "seguimiento", "objetivo"],
           "omisiones": ["salario"],
           "enfasis": ["carácter provisional", "evaluación del servicio"],
