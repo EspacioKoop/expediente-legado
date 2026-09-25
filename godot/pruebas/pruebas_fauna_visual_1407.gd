@@ -34,8 +34,7 @@ func _probar_especie(especie: String) -> void:
 		"#1407: " + especie + " mantiene rugosidad orgánica",
 	)
 	_comprobar(
-		cuerpo != null
-		and cuerpo.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_ON,
+		cuerpo != null and cuerpo.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_ON,
 		"#1407: " + especie + " proyecta sombra solo desde masa principal",
 	)
 
