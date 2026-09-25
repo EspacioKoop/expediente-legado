@@ -62,10 +62,11 @@ const HABILIDADES := {
 var catalogo: Dictionary = {}
 
 
-func cargar(ruta: String = CATALOGO) -> bool:
-	var fichero := FileAccess.open(ruta, FileAccess.READ)
+func cargar(ruta: String = "") -> bool:
+	var seleccionada := ruta if not ruta.is_empty() else Contenido.ruta_catalogo("prometeo")
+	var fichero := FileAccess.open(seleccionada, FileAccess.READ)
 	if fichero == null:
-		push_error("No se pudo abrir %s" % ruta)
+		push_error("No se pudo abrir %s" % seleccionada)
 		return false
 	var crudo = JSON.parse_string(fichero.get_as_text())
 	fichero.close()
