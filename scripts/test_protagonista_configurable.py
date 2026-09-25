@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import unittest
 
 
@@ -27,12 +28,11 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
         cls.dia = DIA.read_text()
         cls.textos = TEXTOS.read_text()
 
-    def test_hay_tres_complexiones_reutilizables(self):
-        for nombre in ("delgado", "medio", "robusto"):
-            self.assertIn(f'"{nombre}"', self.perfil)
-        # Mismo vocabulario de silueta que el vestuario de la oficina (#275).
-        self.assertIn('"delgado": "estrecho"', self.perfil)
-        self.assertIn("VESTUARIO.PERFILES_BASE", self.perfil)
+    def test_hay_seis_avatares_rocketbox_elegibles(self):
+        ids = re.findall(r'"id": "(rocketbox/[a-z0-9_]+)"', self.perfil)
+        self.assertEqual(len(ids), 6)
+        for avatar in ids:
+            self.assertTrue((RAIZ / f"godot/assets/modelos/{avatar}.glb").exists(), avatar)
 
     def test_hay_seis_trasfondos_y_son_narrativos(self):
         ids = (
@@ -67,11 +67,10 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
         self.assertIn('clampf(float(apariencia.get("altura"', self.perfil)
 
     def test_cuerpo_es_visual_y_no_crea_colisiones(self):
-        # El detalle (figura, vestuario, gestos) lo verifica la prueba Godot
+        # El detalle (figura, gestos) lo verifica la prueba Godot
         # pruebas_cuerpo_jugador_3d.gd sobre el árbol real.
         self.assertIn("extends Node3D", self.cuerpo)
-        self.assertIn('Modelos.persona(soporte, "persona"', self.cuerpo)
-        self.assertIn("vestuario.vestir(", self.cuerpo)
+        self.assertIn('Modelos.persona(soporte, String(apariencia["avatar"])', self.cuerpo)
         self.assertIn('AnimacionesUAL.reproducir(_figura, "andar")', self.cuerpo)
         self.assertNotIn("CollisionShape3D.new()", self.cuerpo)
         self.assertNotIn("extends CharacterBody3D", self.cuerpo)
@@ -88,11 +87,8 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
 
     def test_editor_expone_aspecto_y_trasfondo(self):
         textos = {
-            "PERSONAJE_COMPLEXION": "Complexión",
+            "PERSONAJE_AVATAR": "Aspecto",
             "PERSONAJE_ALTURA": "Altura visual",
-            "PERSONAJE_PIEL": "Tono de piel",
-            "PERSONAJE_PEINADO": "Peinado",
-            "PERSONAJE_PRENDA": "Prenda",
             "PERSONAJE_ANTES_DE_SIGA": "Antes de SIGA",
         }
         for clave, texto in textos.items():
@@ -113,15 +109,9 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
         self.assertNotIn("Partida.new()", self.previsualizador)
         self.assertNotIn(".guardar(", self.previsualizador)
 
-    def test_modo_exterior_muestra_cabeza_piel_cabello_y_peinado(self):
+    def test_primera_persona_oculta_la_cabeza(self):
         self.assertIn("@export var primera_persona := true", self.cuerpo)
-        self.assertIn("if primera_persona:", self.cuerpo)
-        self.assertIn("_rostro_exterior(", self.cuerpo)
-        self.assertIn('enganche.name = "RostroJugador"', self.cuerpo)
-        self.assertIn('"PielCabeza"', self.cuerpo)
-        self.assertIn('"Cabello"', self.cuerpo)
-        for peinado in ("rapado", "medio", "recogido"):
-            self.assertIn(f'"{peinado}"', self.cuerpo)
+        self.assertIn("OcultarCabeza.new()", self.cuerpo)
 
     def test_nueva_partida_exige_ficha_y_guardarla_arranca_el_dia(self):
         self.assertIn('perfil["configurado"] = false', self.inicio)

@@ -1,0 +1,54 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://ci4ipjjypepn2"
+path="res://.godot/imported/female_adult_04.glb-c2161c8eb420f883d319da08546c468a.scn"
+
+[deps]
+
+source_file="res://assets/modelos/rocketbox/female_adult_04.glb"
+dest_files=["res://.godot/imported/female_adult_04.glb-c2161c8eb420f883d319da08546c468a.scn"]
+
+[params]
+
+nodes/root_type=""
+nodes/root_name=""
+nodes/root_script=null
+mesh_library/use_node_names_as_mesh_names=false
+array_mesh/deduplicate_surfaces=true
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+nodes/import_as_skeleton_bones=false
+nodes/use_name_suffixes=true
+nodes/use_node_type_suffixes=true
+meshes/ensure_tangents=true
+meshes/generate_lods=true
+meshes/create_shadow_meshes=true
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+meshes/force_disable_compression=false
+skins/use_named_skins=true
+animation/import=true
+animation/fps=30
+animation/trimming=false
+animation/remove_immutable_tracks=true
+animation/import_rest_as_RESET=false
+import_script/path=""
+materials/extract=0
+materials/extract_format=0
+materials/extract_path=""
+_subresources={
+"nodes": {
+"PATH:Bip01/Skeleton3D": {
+"retarget/bone_map": Object(BoneMap,"resource_local_to_scene":false,"resource_name":"","profile":Object(SkeletonProfileHumanoid,"resource_local_to_scene":false,"resource_name":"","root_bone":&"Root","scale_base_bone":&"Hips","group_size":4,"bone_size":56,"script":null)
+,"bonemap":null,"bone_map/Root":&"Bip01","bone_map/Hips":&"Bip01 Pelvis","bone_map/Spine":&"Bip01 Spine","bone_map/Chest":&"Bip01 Spine1","bone_map/UpperChest":&"Bip01 Spine2","bone_map/Neck":&"Bip01 Neck","bone_map/Head":&"Bip01 Head","bone_map/LeftEye":&"Bip01 LEye","bone_map/RightEye":&"Bip01 REye","bone_map/Jaw":&"Bip01 MJaw","bone_map/LeftShoulder":&"Bip01 L Clavicle","bone_map/LeftUpperArm":&"Bip01 L UpperArm","bone_map/LeftLowerArm":&"Bip01 L Forearm","bone_map/LeftHand":&"Bip01 L Hand","bone_map/LeftThumbMetacarpal":&"Bip01 L Finger0","bone_map/LeftThumbProximal":&"Bip01 L Finger001","bone_map/LeftThumbDistal":&"Bip01 L Finger002","bone_map/LeftIndexProximal":&"Bip01 L Finger1","bone_map/LeftIndexIntermediate":&"Bip01 L Finger111","bone_map/LeftIndexDistal":&"Bip01 L Finger112","bone_map/LeftMiddleProximal":&"Bip01 L Finger2","bone_map/LeftMiddleIntermediate":&"Bip01 L Finger221","bone_map/LeftMiddleDistal":&"Bip01 L Finger222","bone_map/LeftRingProximal":&"Bip01 L Finger3","bone_map/LeftRingIntermediate":&"Bip01 L Finger331","bone_map/LeftRingDistal":&"Bip01 L Finger332","bone_map/LeftLittleProximal":&"Bip01 L Finger4","bone_map/LeftLittleIntermediate":&"Bip01 L Finger441","bone_map/LeftLittleDistal":&"Bip01 L Finger442","bone_map/RightShoulder":&"Bip01 R Clavicle","bone_map/RightUpperArm":&"Bip01 R UpperArm","bone_map/RightLowerArm":&"Bip01 R Forearm","bone_map/RightHand":&"Bip01 R Hand","bone_map/RightThumbMetacarpal":&"Bip01 R Finger0","bone_map/RightThumbProximal":&"Bip01 R Finger001","bone_map/RightThumbDistal":&"Bip01 R Finger002","bone_map/RightIndexProximal":&"Bip01 R Finger1","bone_map/RightIndexIntermediate":&"Bip01 R Finger111","bone_map/RightIndexDistal":&"Bip01 R Finger112","bone_map/RightMiddleProximal":&"Bip01 R Finger2","bone_map/RightMiddleIntermediate":&"Bip01 R Finger221","bone_map/RightMiddleDistal":&"Bip01 R Finger222","bone_map/RightRingProximal":&"Bip01 R Finger3","bone_map/RightRingIntermediate":&"Bip01 R Finger331","bone_map/RightRingDistal":&"Bip01 R Finger332","bone_map/RightLittleProximal":&"Bip01 R Finger4","bone_map/RightLittleIntermediate":&"Bip01 R Finger441","bone_map/RightLittleDistal":&"Bip01 R Finger442","bone_map/LeftUpperLeg":&"Bip01 L Thigh","bone_map/LeftLowerLeg":&"Bip01 L Calf","bone_map/LeftFoot":&"Bip01 L Foot","bone_map/LeftToes":&"Bip01 L Toe0","bone_map/RightUpperLeg":&"Bip01 R Thigh","bone_map/RightLowerLeg":&"Bip01 R Calf","bone_map/RightFoot":&"Bip01 R Foot","bone_map/RightToes":&"Bip01 R Toe0","script":null)
+,
+"retarget/rest_fixer/fix_silhouette/enable": true
+}
+}
+}
+gltf/naming_version=2
+gltf/embedded_image_handling=2
+gltf/texture_map_mode=1

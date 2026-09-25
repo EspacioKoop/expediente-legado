@@ -25,16 +25,7 @@ func _probar() -> void:
 	caminante.add_child(camara)
 
 	var cuerpo := CuerpoJugador3D.new()
-	cuerpo.perfil = {
-		"apariencia":
-		{
-			"cuerpo": "robusto",
-			"prenda": "jersey",
-			"hombros": 1.10,
-			"piel": "#6f4936",
-			"ropa": "#45566e",
-		},
-	}
+	cuerpo.perfil = {"apariencia": {"avatar": "rocketbox/female_adult_07", "altura": 1.04}}
 	caminante.add_child(cuerpo)
 	for _i in 4:
 		await process_frame
@@ -45,8 +36,8 @@ func _probar() -> void:
 		_terminar()
 		return
 	_comprobar(
-		String(figura.scene_file_path) == "res://assets/modelos/persona.fbx",
-		"es persona.fbx, el rig configurable del protagonista",
+		String(figura.scene_file_path).ends_with("rocketbox/female_adult_07.glb"),
+		"es el avatar Rocketbox que eligió la ficha",
 	)
 	var esqueleto := Modelos._esqueleto(figura)
 	_comprobar(esqueleto != null, "la figura conserva su Skeleton3D")
@@ -55,20 +46,8 @@ func _probar() -> void:
 		return
 
 	_comprobar(
-		String(esqueleto.get_meta("vestuario_humano_275", "")),
-		"jugador_robusto",
-		"viste la complexión de la ficha y no un perfil por hash",
+		String(esqueleto.get_meta("identidad_jugador", "")), "jugador", "marcado como jugador"
 	)
-	_comprobar(
-		String(esqueleto.get_meta("vestuario_identidad_275", "")),
-		"jugador",
-		"la identidad queda marcada como jugador",
-	)
-	_comprobar(
-		esqueleto.find_child("VestuarioTorso", true, false) is BoneAttachment3D,
-		"lleva el torso del vestuario anclado al rig",
-	)
-
 	# El modificador actúa dentro de la actualización del esqueleto y Godot
 	# restaura la pose después: la escala se lee en `skeleton_updated`.
 	var cabeza := esqueleto.find_bone("Neck")
@@ -86,72 +65,52 @@ func _probar() -> void:
 	var cuello_y := (esqueleto.global_transform * esqueleto.get_bone_global_pose(cuello)).origin.y
 	_comprobar(cuello_y < camara.global_position.y, "el cuello queda por debajo de la cámara")
 
-	var manos := 0
-	for nodo in esqueleto.find_children("Piel", "MeshInstance3D", true, false):
-		var material := (nodo as MeshInstance3D).material_override as ShaderMaterial
-		if material != null:
-			var color: Color = material.get_shader_parameter("color_base")
-			if color.is_equal_approx(Color("#6f4936")):
-				manos += 1
-	_comprobar(manos, 2, "las dos manos van en el tono de piel de la ficha")
 	_comprobar(not _contiene_colision(cuerpo), "el cuerpo no añade colisiones")
 
 	var reproductor := Modelos._reproductor(figura)
 	_comprobar(cuerpo.estado, "reposo", "quieto, respira")
 	cuerpo.animar(2.6)
 	_comprobar(cuerpo.estado, "andar", "a paso normal, anda")
-	_comprobar(String(reproductor.current_animation), "ual/andar", "andar usa Walk_Formal de UAL")
+	_comprobar(
+		String(reproductor.current_animation).ends_with("andar"), "andar usa el clip de andar"
+	)
 	_comprobar(reproductor.speed_scale > 1.0, "el paso se acelera con la velocidad")
 	cuerpo.animar(4.4)
 	_comprobar(cuerpo.estado, "correr", "a la carrera, corre")
-	_comprobar(String(reproductor.current_animation).ends_with("Run"), "correr usa Run")
+	_comprobar(String(reproductor.current_animation).ends_with("run"), "correr usa run")
 	_comprobar(is_equal_approx(reproductor.speed_scale, 1.0), "correr no reescala el clip")
 	cuerpo.animar(0.0)
-	_comprobar(String(reproductor.current_animation).ends_with("Idle"), "al parar vuelve a Idle")
+	_comprobar(String(reproductor.current_animation).ends_with("idle"), "al parar vuelve a idle")
 
-	cuerpo.aplicar({"apariencia": {"cuerpo": "delgado", "prenda": "camisa"}})
+	cuerpo.aplicar({"apariencia": {"avatar": "rocketbox/male_adult_12"}})
 	for _i in 3:
 		await process_frame
 	_comprobar(cuerpo.get_child_count(), 1, "cambiar la ficha no acumula figuras")
-	var nueva := Modelos._esqueleto(cuerpo.figura())
 	_comprobar(
-		String(nueva.get_meta("vestuario_humano_275", "")),
-		"jugador_estrecho",
-		"delgado usa el perfil estrecho del vestuario",
+		String(cuerpo.figura().scene_file_path).ends_with("male_adult_12.glb"),
+		"cambiar de avatar cambia el cuerpo",
 	)
 
-	# En la ficha exterior, ninguna superficie que representa piel puede heredar
-	# el color de ropa del underlay. Cabeza + cuello + dos manos deben llevar el
-	# tono de piel solicitado aunque la ropa tenga un color muy distinto.
-	var exterior := CuerpoJugador3D.new()
-	exterior.primera_persona = false
-	exterior.perfil = {
-		"apariencia":
-		{
-			"piel": "#7a4d36",
-			"cabello": "#201913",
-			"ropa": "#284f83",
-			"peinado": "recogido",
-		},
-	}
-	caminante.add_child(exterior)
+	# Una ficha de antes de los avatares (complexión, piel...) cae en el primero.
+	cuerpo.aplicar({"apariencia": {"cuerpo": "robusto", "piel": "#6f4936"}})
 	for _i in 3:
 		await process_frame
-	var esqueleto_exterior := Modelos._esqueleto(exterior.figura())
-	_comprobar(esqueleto_exterior != null, "la previsualización conserva su Skeleton3D")
-	if esqueleto_exterior != null:
-		var piel_visible := 0
-		for nombre in ["PielCabeza", "PielCuello", "Piel"]:
-			for nodo in esqueleto_exterior.find_children(nombre, "MeshInstance3D", true, false):
-				var material := (nodo as MeshInstance3D).material_override as ShaderMaterial
-				if material != null:
-					var color: Color = material.get_shader_parameter("color_base")
-					if color.is_equal_approx(Color("#7a4d36")):
-						piel_visible += 1
-		_comprobar(piel_visible, 4, "cabeza, cuello y manos usan el tono de piel de la ficha")
+	_comprobar(
+		String(cuerpo.figura().scene_file_path).ends_with(
+			"%s.glb" % PerfilJugador.AVATARES[0]["id"]
+		),
+		"una ficha antigua recibe el primer avatar",
+	)
+
+	# Todos los avatares de la ficha cargan y ninguno lo usa un compañero.
+	for avatar in PerfilJugador.AVATARES:
 		_comprobar(
-			esqueleto_exterior.find_child("PielCuelloJugador", true, false) is BoneAttachment3D,
-			"el cuello visible tiene una capa de piel separada del underlay",
+			ResourceLoader.exists("%s%s.glb" % [Modelos.RUTA, avatar["id"]]),
+			"%s existe" % avatar["id"],
+		)
+		_comprobar(
+			not Companeros.CUERPOS.values().has(avatar["id"]),
+			"%s no es de un compañero" % avatar["id"],
 		)
 	_terminar()
 
