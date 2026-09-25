@@ -3,11 +3,20 @@
 ## reducción de movimiento.
 extends SceneTree
 
-## Tope de partículas vivas que puede sumar un espacio: menos que una décima
-## parte de la lluvia exterior.
+## Tope de partículas vivas que puede sumar un interior: una octava parte de
+## la lluvia exterior.
 const PRESUPUESTO := (
 	EfectosLigeros.PARTICULAS_VAPOR * EfectosLigeros.MAX_TAZAS
-	+ (EfectosLigeros.PARTICULAS_POLVO * EfectosLigeros.MAX_LUCES_POLVO)
+	+ EfectosLigeros.PARTICULAS_POLVO * EfectosLigeros.MAX_LUCES_POLVO
+	+ EfectosLigeros.PARTICULAS_CHISPAS
+)
+## Y la calle, sumando todo aunque goteo y humo no coincidan nunca: así no
+## depende de esa exclusión.
+const PRESUPUESTO_CALLE := (
+	EfectosCalle.PARTICULAS_GOTEO * EfectosCalle.MAX_MARQUESINAS
+	+ EfectosCalle.PARTICULAS_PAPELES
+	+ EfectosCalle.PARTICULAS_HUMO * 2
+	+ EfectosCalle.PARTICULAS_VAHO
 )
 
 var _pasadas := 0
@@ -22,6 +31,8 @@ func _probar() -> void:
 	_probar_interior()
 	_probar_calle_con_lluvia()
 	_probar_reduccion()
+	_probar_calle()
+	_probar_chispas_y_neblina()
 	_probar_sin_nada()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -52,6 +63,21 @@ func _mundo() -> Node3D:
 	mundo.add_child(tenue)
 	var sol := DirectionalLight3D.new()
 	mundo.add_child(sol)
+	var sala := OmniLight3D.new()
+	sala.name = Espacio3D.NOMBRE_LUZ_SALA
+	sala.light_energy = 1.0
+	mundo.add_child(sala)
+	# Como en la calle: cada marquesina cuelga de su tienda.
+	for i in 6:
+		var tienda := Node3D.new()
+		tienda.position = Vector3(-3, 3, i * 4)
+		mundo.add_child(tienda)
+		var marquesina := MeshInstance3D.new()
+		marquesina.name = "Marquesina"
+		var caja := BoxMesh.new()
+		caja.size = Vector3(3, 0.1, 1)
+		marquesina.mesh = caja
+		tienda.add_child(marquesina)
 	var cristal := MeshInstance3D.new()
 	cristal.name = "CristalVista3D"
 	var quad := QuadMesh.new()
@@ -161,11 +187,89 @@ func _probar_reduccion() -> void:
 	mundo.free()
 
 
+func _probar_calle() -> void:
+	var mundo := _mundo()
+	var lluvia := EfectosLigeros.montar(mundo, "trayecto", Clima.LLUVIA, false, true)
+	_comprobar(
+		lluvia.get_node_or_null("Salpicaduras") is MeshInstance3D, "con lluvia salpica el suelo"
+	)
+	var goteos := lluvia.find_children("Goteo*", "GPUParticles3D", false, false)
+	_comprobar(goteos.size() == EfectosCalle.MAX_MARQUESINAS, "gotean las marquesinas, con tope")
+	_comprobar(lluvia.get_node_or_null("Papeles") == null, "con lluvia no vuelan papeles")
+	_comprobar(lluvia.get_node_or_null("Vaho") == null, "con lluvia no se ve el aliento")
+	_comprobar(
+		EfectosLigeros.particulas_totales(lluvia) <= PRESUPUESTO_CALLE,
+		(
+			"con lluvia, la calle no pasa de su presupuesto (%d)"
+			% EfectosLigeros.particulas_totales(lluvia)
+		)
+	)
+	var seco := EfectosLigeros.montar(mundo, "trayecto", Clima.DESPEJADO, false, true)
+	_comprobar(seco.get_node_or_null("Papeles") is GPUParticles3D, "en seco vuelan papeles")
+	_comprobar(seco.find_children("Goteo*", "", false, false).is_empty(), "en seco nada gotea")
+	var frio := EfectosLigeros.montar(mundo, "trayecto", Clima.NIEVE, false, true)
+	_comprobar(
+		(
+			frio.find_children("HumoAlcantarilla*", "", false, false).size()
+			== EfectosCalle.ALCANTARILLAS.size()
+		),
+		"con frío humean las alcantarillas"
+	)
+	_comprobar(frio.get_node_or_null("Vaho") is GPUParticles3D, "y se ve el aliento")
+	_comprobar(frio.get_node_or_null("Papeles") == null, "con nieve no vuelan papeles")
+	_comprobar(
+		EfectosLigeros.particulas_totales(frio) <= PRESUPUESTO_CALLE,
+		"la calle no pasa de su presupuesto (%d)" % EfectosLigeros.particulas_totales(frio)
+	)
+	var quieta := EfectosLigeros.montar(mundo, "trayecto", Clima.LLUVIA, true, true)
+	_comprobar(
+		EfectosLigeros.particulas_totales(quieta) == 0, "sin movimiento, la calle sin partículas"
+	)
+	var salpicaduras := quieta.get_node("Salpicaduras") as MeshInstance3D
+	_comprobar(
+		(salpicaduras.material_override as ShaderMaterial).get_shader_parameter("velocidad") == 0.0,
+		"y las salpicaduras quietas"
+	)
+	mundo.free()
+
+
+func _probar_chispas_y_neblina() -> void:
+	var mundo := _mundo()
+	var archivo := EfectosLigeros.montar(mundo, "archivo", Clima.DESPEJADO, false)
+	var chispas := archivo.get_node_or_null("ChispasFluorescente") as GPUParticles3D
+	_comprobar(chispas != null and chispas.one_shot, "el fluorescente del archivo chisporrotea")
+	_comprobar(archivo.get_node_or_null("RelojChispas") is Timer, "de vez en cuando")
+	var lampara := mundo.get_node(Espacio3D.NOMBRE_LUZ_SALA) as OmniLight3D
+	EfectosLigeros.chisporrotear(lampara, chispas)
+	_comprobar(chispas.emitting, "al chisporrotear salen chispas")
+	var quieto := EfectosLigeros.montar(mundo, "archivo", Clima.DESPEJADO, true)
+	_comprobar(
+		quieto == null or quieto.get_node_or_null("ChispasFluorescente") == null,
+		"sin destellos con reducción de movimiento"
+	)
+	var sueno := EfectosLigeros.montar(mundo, "sueño", Clima.DESPEJADO, true)
+	var neblina := sueno.get_node_or_null("NeblinaBaja") as MeshInstance3D
+	_comprobar(
+		neblina != null and neblina.position.y < 0.5, "el sueño tiene neblina a ras de suelo"
+	)
+	_comprobar(
+		(
+			neblina != null
+			and (
+				(neblina.material_override as ShaderMaterial).get_shader_parameter("velocidad")
+				== 0.0
+			)
+		),
+		"quieta con reducción de movimiento"
+	)
+	mundo.free()
+
+
 func _probar_sin_nada() -> void:
 	var vacio := Node3D.new()
 	root.add_child(vacio)
 	_comprobar(
-		EfectosLigeros.montar(vacio, "sueño", Clima.DESPEJADO, false) == null,
+		EfectosLigeros.montar(vacio, "casa", Clima.DESPEJADO, false) == null,
 		"un espacio sin nada que adornar no gana nodos"
 	)
 	_comprobar(vacio.get_child_count() == 0, "ni un nodo vacío")
