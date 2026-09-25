@@ -25,7 +25,9 @@ static func nueva(rival: Dictionary, actor_a: String, actor_b: String) -> Dictio
 	}
 
 
-static func elegir(sesion: Dictionary, actor_id: String, accion: String, azar: Callable) -> Dictionary:
+static func elegir(
+	sesion: Dictionary, actor_id: String, accion: String, azar: Callable
+) -> Dictionary:
 	if sesion.is_empty() or bool(sesion.get("terminado", true)):
 		return {"ok": false, "status": "session_finished"}
 	if not sesion["actores"].has(actor_id):
@@ -51,7 +53,8 @@ static func elegir(sesion: Dictionary, actor_id: String, accion: String, azar: C
 	var resultado := Combate.jugar(sesion["combate"], combinada, "", azar)
 	var registro := {
 		"ronda": ronda,
-		"elecciones": {
+		"elecciones":
+		{
 			sesion["actores"][0]: acciones[0],
 			sesion["actores"][1]: acciones[1],
 		},
