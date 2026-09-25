@@ -105,6 +105,9 @@ func _conectar_cunado() -> void:
 
 
 func _al_activar(_actor: Node, id_punto: String, interactuable: Interactuable3D) -> void:
+	var completados: Array = _estado.get("completados", [])
+	if completados.has(id_punto):
+		return
 	if not RondaCierre.completar_punto(_estado, id_punto):
 		return
 	_aplicar_estado_completado(id_punto, interactuable)
