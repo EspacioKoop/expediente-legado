@@ -186,9 +186,12 @@ func _sincronizar_rotulo_3d(
 	var presentacion := TextoCorruptoNarrativo.aplicar(
 		rotulo, original, progreso, ajuste, false, critico
 	)
-	rotulo.set_meta(
-		"_texto_corrupto_visual_806",
-		String(presentacion.get("texto_visual", original)),
+	(
+		rotulo
+		. set_meta(
+			"_texto_corrupto_visual_806",
+			String(presentacion.get("texto_visual", original)),
+		)
 	)
 
 
