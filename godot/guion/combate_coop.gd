@@ -8,6 +8,7 @@ extends RefCounted
 
 const MAX_RONDAS := 3
 const PARTICIPANTES := 2
+const ACCION_SUPLENCIA := "silencio"
 
 
 static func nueva(rival: Dictionary, actor_a: String, actor_b: String) -> Dictionary:
@@ -17,12 +18,46 @@ static func nueva(rival: Dictionary, actor_a: String, actor_b: String) -> Dictio
 		return {}
 	return {
 		"actores": actores,
+		"conectados": {actores[0]: true, actores[1]: true},
 		"combate": Combate.nuevo("ciclo", rival, {}),
 		"elecciones": {},
 		"historial": [],
 		"terminado": false,
 		"ganador": "",
 	}
+
+
+static func desconectar(sesion: Dictionary, actor_id: String) -> Dictionary:
+	if sesion.is_empty() or bool(sesion.get("terminado", true)):
+		return {"ok": false, "status": "session_finished"}
+	if not sesion["actores"].has(actor_id):
+		return {"ok": false, "status": "unknown_actor"}
+	sesion["conectados"][actor_id] = false
+	return {"ok": true, "status": "disconnected", "actor": actor_id}
+
+
+static func reconectar(sesion: Dictionary, actor_id: String) -> Dictionary:
+	if sesion.is_empty() or bool(sesion.get("terminado", true)):
+		return {"ok": false, "status": "session_finished"}
+	if not sesion["actores"].has(actor_id):
+		return {"ok": false, "status": "unknown_actor"}
+	sesion["conectados"][actor_id] = true
+	return {"ok": true, "status": "reconnected", "actor": actor_id}
+
+
+static func suplir_desconectado(sesion: Dictionary, actor_id: String, azar: Callable) -> Dictionary:
+	if sesion.is_empty() or bool(sesion.get("terminado", true)):
+		return {"ok": false, "status": "session_finished"}
+	if not sesion["actores"].has(actor_id):
+		return {"ok": false, "status": "unknown_actor"}
+	if bool(sesion["conectados"].get(actor_id, true)):
+		return {"ok": false, "status": "actor_connected"}
+
+	var ronda := int(sesion["historial"].size())
+	var clave := "%d:%s" % [ronda, actor_id]
+	if sesion["elecciones"].has(clave):
+		return {"ok": false, "status": "choice_already_recorded"}
+	return elegir(sesion, actor_id, ACCION_SUPLENCIA, azar)
 
 
 static func elegir(
