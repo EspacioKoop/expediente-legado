@@ -10,32 +10,38 @@ const FASE_CALLE := "trayecto"
 const FASE_SUENO := "sueño"
 
 const ESPECIES := {
-	"paloma": {
+	"paloma":
+	{
 		"movimiento": "suelo_ave",
 		"escala": 1.0,
 		"color": Color(0.42, 0.44, 0.48),
 	},
-	"gorrion": {
+	"gorrion":
+	{
 		"movimiento": "suelo_ave",
 		"escala": 0.72,
 		"color": Color(0.40, 0.31, 0.23),
 	},
-	"perro": {
+	"perro":
+	{
 		"movimiento": "deambular",
 		"escala": 1.0,
 		"color": Color(0.42, 0.28, 0.16),
 	},
-	"cuervo": {
+	"cuervo":
+	{
 		"movimiento": "vuelo",
 		"escala": 1.18,
 		"color": Color(0.035, 0.04, 0.055),
 	},
-	"polilla": {
+	"polilla":
+	{
 		"movimiento": "orbita",
 		"escala": 1.55,
 		"color": Color(0.64, 0.58, 0.46),
 	},
-	"ciervo": {
+	"ciervo":
+	{
 		"movimiento": "deambular",
 		"escala": 1.12,
 		"color": Color(0.36, 0.25, 0.16),
@@ -85,12 +91,15 @@ static func _plan_calle(dia: int, raiz: int) -> Array[Dictionary]:
 		var posicion: Vector3 = base["pos"]
 		posicion.x += rng.randf_range(-0.14, 0.14)
 		posicion.z += rng.randf_range(-0.55, 0.55)
-		resultado.append(
-			_dato(
-				"fauna:calle:%s:%d" % [especie, i],
-				especie,
-				posicion,
-				rng.randf_range(0.0, TAU),
+		(
+			resultado
+			. append(
+				_dato(
+					"fauna:calle:%s:%d" % [especie, i],
+					especie,
+					posicion,
+					rng.randf_range(0.0, TAU),
+				)
 			)
 		)
 	return resultado
@@ -116,12 +125,15 @@ static func _plan_sueno(
 				posicion.y += 1.45 + rng.randf_range(-0.18, 0.30)
 			"ciervo":
 				posicion.y += 0.78
-		resultado.append(
-			_dato(
-				"fauna:sueno:%s:%s:%d" % [contexto, especie, i],
-				especie,
-				posicion,
-				rng.randf_range(0.0, TAU),
+		(
+			resultado
+			. append(
+				_dato(
+					"fauna:sueno:%s:%s:%d" % [contexto, especie, i],
+					especie,
+					posicion,
+					rng.randf_range(0.0, TAU),
+				)
 			)
 		)
 	return resultado
