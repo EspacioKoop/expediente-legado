@@ -24,30 +24,37 @@ func _probar_canales_distintos() -> void:
 	_comprobar(_capa(capas, "religion:exposicion").has("parametros"), "exposición llega al sueño")
 	_comprobar(_capa(capas, "religion:practica").has("parametros"), "práctica llega al sueño")
 	_comprobar(
-		_capa(capas, "religion:exposicion")["parametros"]
-		!= _capa(capas, "religion:practica")["parametros"],
+		(
+			_capa(capas, "religion:exposicion")["parametros"]
+			!= _capa(capas, "religion:practica")["parametros"]
+		),
 		"exposición y práctica tienen efectos distintos",
 	)
 
 
 func _probar_rom_no_infiere_conviccion() -> void:
 	var registro := ReligionEventos.nuevo()
-	var evento := ReligionEventos.crear_evento(
-		"rom:jardines:completa",
-		ReligionEventos.CANAL_EXPOSICION,
-		"rom:JARDINES98",
-		"portatil_color_98",
-		5,
-		"",
-		["rom", "cultura_material"],
-		[],
-		false,
-		[],
-		{"procedencia": "rom:handshake"},
+	var evento := (
+		ReligionEventos
+		. crear_evento(
+			"rom:jardines:completa",
+			ReligionEventos.CANAL_EXPOSICION,
+			"rom:JARDINES98",
+			"portatil_color_98",
+			5,
+			"",
+			["rom", "cultura_material"],
+			[],
+			false,
+			[],
+			{"procedencia": "rom:handshake"},
+		)
 	)
 	_comprobar(ReligionEventos.registrar(registro, evento), "la ROM registra exposición")
 	var capas := SuenoReligion.modificadores(registro, 5)
-	_comprobar(_capa(capas, "religion:exposicion").has("parametros"), "la ROM aporta material onírico")
+	_comprobar(
+		_capa(capas, "religion:exposicion").has("parametros"), "la ROM aporta material onírico"
+	)
 	_comprobar(_capa(capas, "religion:conviccion").is_empty(), "la ROM no inventa convicción")
 	_comprobar(
 		ReligionEventos.eventos(registro, ReligionEventos.CANAL_CONVICCION).is_empty(),
