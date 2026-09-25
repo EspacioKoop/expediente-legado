@@ -1,0 +1,111 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Shader" path="res://arte/sueno_fotorrealista/material_microdetalle.gdshader" id="1_shader"]
+
+[sub_resource type="ShaderMaterial" id="Madera"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.26, 0.17, 0.095, 1)
+shader_parameter/metallic_amount = 0.0
+shader_parameter/roughness_base = 0.72
+shader_parameter/grime_strength = 0.24
+shader_parameter/wetness = 0.07
+shader_parameter/micro_scale = 28.0
+
+[sub_resource type="ShaderMaterial" id="MaderaOscura"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.12, 0.075, 0.045, 1)
+shader_parameter/metallic_amount = 0.0
+shader_parameter/roughness_base = 0.80
+shader_parameter/grime_strength = 0.31
+shader_parameter/wetness = 0.10
+shader_parameter/micro_scale = 36.0
+
+[sub_resource type="ShaderMaterial" id="Metal"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.38, 0.37, 0.33, 1)
+shader_parameter/metallic_amount = 0.78
+shader_parameter/roughness_base = 0.26
+shader_parameter/grime_strength = 0.18
+shader_parameter/wetness = 0.13
+shader_parameter/micro_scale = 44.0
+
+[sub_resource type="ShaderMaterial" id="Eco"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.08, 0.055, 0.038, 1)
+shader_parameter/metallic_amount = 0.10
+shader_parameter/roughness_base = 0.19
+shader_parameter/grime_strength = 0.14
+shader_parameter/wetness = 0.68
+shader_parameter/emission_color = Color(0.055, 0.032, 0.02, 1)
+shader_parameter/emission_energy = 0.12
+shader_parameter/micro_scale = 50.0
+
+[sub_resource type="BoxMesh" id="Cuerpo"]
+size = Vector3(1.24, 2.02, 0.58)
+
+[sub_resource type="BoxMesh" id="Puerta"]
+size = Vector3(0.57, 1.84, 0.055)
+
+[sub_resource type="CylinderMesh" id="Tirador"]
+top_radius = 0.018
+bottom_radius = 0.018
+height = 0.16
+radial_segments = 16
+
+[sub_resource type="BoxMesh" id="Zocalo"]
+size = Vector3(1.18, 0.12, 0.54)
+
+[sub_resource type="BoxMesh" id="EcoPuerta"]
+size = Vector3(0.43, 2.42, 0.032)
+
+[node name="ArmarioDesencajado" type="Node3D"]
+metadata/origen_reconocible = "armario_domestico"
+metadata/origen_id = "household_goods/wardrobe_01"
+metadata/uso = "sueno"
+metadata/issue = 87
+metadata/issue_padre = 79
+
+[node name="Cuerpo" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.01, 0)
+mesh = SubResource("Cuerpo")
+material_override = SubResource("MaderaOscura")
+
+[node name="PuertaIzquierda" type="MeshInstance3D" parent="."]
+position = Vector3(-0.30, 1.04, -0.317)
+rotation = Vector3(0.018, 0.035, -0.018)
+mesh = SubResource("Puerta")
+material_override = SubResource("Madera")
+
+[node name="PuertaDerecha" type="MeshInstance3D" parent="."]
+position = Vector3(0.31, 0.98, -0.326)
+rotation = Vector3(-0.015, -0.048, 0.028)
+scale = Vector3(0.94, 1.08, 1)
+mesh = SubResource("Puerta")
+material_override = SubResource("Madera")
+
+[node name="TiradorIzquierdo" type="MeshInstance3D" parent="."]
+position = Vector3(-0.075, 1.05, -0.37)
+rotation = Vector3(0, 0, 1.5708)
+mesh = SubResource("Tirador")
+material_override = SubResource("Metal")
+
+[node name="TiradorDerecho" type="MeshInstance3D" parent="."]
+position = Vector3(0.08, 1.02, -0.38)
+rotation = Vector3(0, 0, 1.5708)
+mesh = SubResource("Tirador")
+material_override = SubResource("Metal")
+
+[node name="Zocalo" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.07, 0)
+rotation = Vector3(0, 0, -0.025)
+mesh = SubResource("Zocalo")
+material_override = SubResource("MaderaOscura")
+
+[node name="PuertaEco" type="MeshInstance3D" parent="."]
+position = Vector3(0.49, 1.22, -0.39)
+rotation = Vector3(0.02, -0.22, 0.075)
+mesh = SubResource("EcoPuerta")
+material_override = SubResource("Eco")
+
+[node name="AnclaInteraccion" type="Marker3D" parent="."]
+position = Vector3(0, 1.05, -0.72)

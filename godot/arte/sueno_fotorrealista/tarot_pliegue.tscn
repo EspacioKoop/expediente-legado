@@ -1,0 +1,105 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Shader" path="res://arte/sueno_fotorrealista/material_microdetalle.gdshader" id="1_shader"]
+
+[sub_resource type="ShaderMaterial" id="Papel"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.71, 0.63, 0.44, 1)
+shader_parameter/metallic_amount = 0.0
+shader_parameter/roughness_base = 0.68
+shader_parameter/grime_strength = 0.20
+shader_parameter/wetness = 0.03
+shader_parameter/micro_scale = 72.0
+
+[sub_resource type="ShaderMaterial" id="Borde"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.13, 0.105, 0.07, 1)
+shader_parameter/metallic_amount = 0.05
+shader_parameter/roughness_base = 0.58
+shader_parameter/grime_strength = 0.12
+shader_parameter/wetness = 0.02
+shader_parameter/micro_scale = 58.0
+
+[sub_resource type="ShaderMaterial" id="Centro"]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_base = Color(0.12, 0.18, 0.16, 1)
+shader_parameter/metallic_amount = 0.12
+shader_parameter/roughness_base = 0.22
+shader_parameter/grime_strength = 0.08
+shader_parameter/wetness = 0.18
+shader_parameter/emission_color = Color(0.12, 0.25, 0.20, 1)
+shader_parameter/emission_energy = 0.46
+shader_parameter/micro_scale = 48.0
+
+[sub_resource type="BoxMesh" id="Carta"]
+size = Vector3(0.44, 0.015, 0.68)
+
+[sub_resource type="BoxMesh" id="BandaH"]
+size = Vector3(0.40, 0.022, 0.022)
+
+[sub_resource type="BoxMesh" id="BandaV"]
+size = Vector3(0.022, 0.022, 0.62)
+
+[sub_resource type="CylinderMesh" id="CentroMesh"]
+top_radius = 0.075
+bottom_radius = 0.075
+height = 0.024
+radial_segments = 24
+
+[node name="TarotPliegue" type="Node3D"]
+metadata/origen_reconocible = "tarot"
+metadata/origen_id = "tarotCard"
+metadata/uso = "sueno"
+metadata/issue = 87
+metadata/issue_padre = 79
+
+[node name="CartaInferior" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.38, 0.16)
+rotation = Vector3(-0.62, 0, 0)
+mesh = SubResource("Carta")
+material_override = SubResource("Papel")
+
+[node name="CartaCentral" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.68, -0.03)
+rotation = Vector3(0.08, 0, 0)
+mesh = SubResource("Carta")
+material_override = SubResource("Papel")
+
+[node name="CartaSuperior" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.98, 0.18)
+rotation = Vector3(0.70, 0, 0)
+mesh = SubResource("Carta")
+material_override = SubResource("Papel")
+
+[node name="BordeSuperior" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.29, 0.41)
+rotation = Vector3(0.70, 0, 0)
+mesh = SubResource("BandaH")
+material_override = SubResource("Borde")
+
+[node name="BordeInferior" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.10, 0.37)
+rotation = Vector3(-0.62, 0, 0)
+mesh = SubResource("BandaH")
+material_override = SubResource("Borde")
+
+[node name="EjeIzquierdo" type="MeshInstance3D" parent="."]
+position = Vector3(-0.205, 0.68, -0.045)
+rotation = Vector3(1.5708, 0, 0)
+mesh = SubResource("BandaV")
+material_override = SubResource("Borde")
+
+[node name="EjeDerecho" type="MeshInstance3D" parent="."]
+position = Vector3(0.205, 0.68, -0.045)
+rotation = Vector3(1.5708, 0, 0)
+mesh = SubResource("BandaV")
+material_override = SubResource("Borde")
+
+[node name="CentroSinSimbolo" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.70, -0.055)
+rotation = Vector3(1.5708, 0, 0)
+mesh = SubResource("CentroMesh")
+material_override = SubResource("Centro")
+
+[node name="AnclaInteraccion" type="Marker3D" parent="."]
+position = Vector3(0, 0.72, -0.56)
