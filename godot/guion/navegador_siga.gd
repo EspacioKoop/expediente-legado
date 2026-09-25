@@ -545,15 +545,15 @@ func _renderizar_bbs(resultado: Dictionary, recurso: Dictionary, url: String) ->
 		var bloques: Array[String] = []
 		bloques.append("[b]%s[/b]" % String(recurso.get("titulo", tr("NAVEGADOR_SIN_TITULO"))))
 		bloques.append(String(recurso.get("snippet", "")))
-		bloques.append("Estado: %s" % _estado_tablon_bbs(tablon_id))
-		bloques.append("Hilos disponibles: %d" % hilos.size())
+		bloques.append(tr("NAVEGADOR_BBS_ESTADO") % _estado_tablon_bbs(tablon_id))
+		bloques.append(tr("NAVEGADOR_BBS_HILOS_DISPONIBLES") % hilos.size())
 		_pagina.text = "\n\n".join(bloques)
 		for hilo in hilos:
 			var indice_item := (
 				_enlaces
 				. add_item(
 					(
-						"[%s] %s · %s"
+						tr("NAVEGADOR_BBS_HILO_LISTA")
 						% [
 							String(hilo.get("estado", "abierto")),
 							String(hilo.get("titulo", "")),
@@ -577,10 +577,10 @@ func _renderizar_bbs(resultado: Dictionary, recurso: Dictionary, url: String) ->
 			hilo_actual = hilo
 			break
 	if hilo_actual.is_empty():
-		_pagina.text = "[b]Hilo no disponible[/b]\n\nEl hilo no existe o todavía no es visible."
+		_pagina.text = tr("NAVEGADOR_BBS_HILO_NO_DISPONIBLE")
 		return
 
-	var volver := _enlaces.add_item("← Volver al tablón")
+	var volver := _enlaces.add_item(tr("NAVEGADOR_BBS_VOLVER_TABLON"))
 	_enlaces.set_item_metadata(volver, String(recurso.get("url", url)))
 	var bloques_hilo: Array[String] = []
 	bloques_hilo.append("[b]%s[/b]" % String(hilo_actual.get("titulo", "")))
@@ -588,7 +588,7 @@ func _renderizar_bbs(resultado: Dictionary, recurso: Dictionary, url: String) ->
 		bloques_hilo
 		. append(
 			(
-				"Estado: %s · última actividad: %s"
+				tr("NAVEGADOR_BBS_HILO_ESTADO")
 				% [
 					String(hilo_actual.get("estado", "")),
 					String(hilo_actual.get("fecha_ultimo", "")),
@@ -602,19 +602,19 @@ func _renderizar_bbs(resultado: Dictionary, recurso: Dictionary, url: String) ->
 		var tipo := String(mensaje.get("tipo", "normal"))
 		var estado := String(mensaje.get("estado", "visible"))
 		bloques_hilo.append(
-			"[b]%s[/b] · %s · %s/%s" % [nick, String(mensaje.get("fecha", "")), tipo, estado]
+			tr("NAVEGADOR_BBS_MENSAJE_CABECERA") % [nick, String(mensaje.get("fecha", "")), tipo, estado]
 		)
 		var referencia := _bbs.referencia_de_mensaje(String(mensaje.get("id", "")))
 		if not referencia.is_empty():
 			if String(referencia.get("estado", "")) in ["eliminado", "no_disponible"]:
-				bloques_hilo.append("> [mensaje citado no disponible]")
+				bloques_hilo.append(tr("NAVEGADOR_BBS_CITA_NO_DISPONIBLE"))
 			else:
 				var autor_citado: Dictionary = referencia.get("autor", {})
 				(
 					bloques_hilo
 					. append(
 						(
-							"> %s: %s"
+							tr("NAVEGADOR_BBS_CITA")
 							% [
 								String(autor_citado.get("nick", referencia.get("autor_id", "?"))),
 								String(referencia.get("texto", "")),
@@ -624,11 +624,11 @@ func _renderizar_bbs(resultado: Dictionary, recurso: Dictionary, url: String) ->
 				)
 		var texto := String(mensaje.get("texto", ""))
 		if texto.is_empty() and estado == "eliminado":
-			texto = "[mensaje eliminado]"
+			texto = tr("NAVEGADOR_BBS_MENSAJE_ELIMINADO")
 		bloques_hilo.append(texto)
 		var firma := String(autor.get("firma", "")).strip_edges()
 		if not firma.is_empty() and tipo == "normal":
-			bloques_hilo.append("-- %s" % firma)
+			bloques_hilo.append(tr("NAVEGADOR_BBS_FIRMA") % firma)
 	_pagina.text = "\n\n".join(bloques_hilo)
 
 
