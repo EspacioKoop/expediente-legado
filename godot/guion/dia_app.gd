@@ -332,6 +332,16 @@ func _montar_interfaz() -> void:
 
 
 func _entrar_en(fase: String) -> void:
+	# El cuerpo del protagonista espera según cómo va el día (estrés, hora).
+	var cuerpo_jugador := (
+		_caminante.get_node_or_null("CuerpoJugador3D") as CuerpoJugador3D
+		if _caminante != null
+		else null
+	)
+	if cuerpo_jugador != null:
+		cuerpo_jugador.animo = CuerpoJugador3D.animo_de(
+			Estres.nivel(jornada), int(jornada.get("hora_minutos", 0))
+		)
 	if _hablando:
 		_nomina.text = ""
 		_hablando = false

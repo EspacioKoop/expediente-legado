@@ -159,6 +159,12 @@ def ejecutar():
                 20,
             ),
             (
+                "juicio-gestos",
+                ["--script", "pruebas/pruebas_juicio_gestos.gd"],
+                30,
+                16,
+            ),
+            (
                 "bolos-pasillo",
                 ["--script", "pruebas/pruebas_bolos_pasillo_3d.gd"],
                 30,

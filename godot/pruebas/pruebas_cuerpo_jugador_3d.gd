@@ -108,6 +108,31 @@ func _probar() -> void:
 		"una ficha antigua recibe el primer avatar",
 	)
 
+	# El ánimo sale del estrés y de la hora, y cambia qué hace al esperar.
+	_comprobar(CuerpoJugador3D.animo_de(0.8, 600), "nervioso", "estrés alto: nervioso")
+	_comprobar(CuerpoJugador3D.animo_de(0.1, 19 * 60), "cansado", "de tarde: cansado")
+	_comprobar(CuerpoJugador3D.animo_de(0.1, 600), "", "por la mañana, sin más")
+	_comprobar(CuerpoJugador3D.variante_reposo("cansado", 0), "bostezar", "cansado bosteza")
+	for animo in CuerpoJugador3D.VARIANTES:
+		for clip in CuerpoJugador3D.VARIANTES[animo]:
+			_comprobar(
+				AnimacionesRocketbox.CLIPS.has(clip),
+				true,
+				"la espera usa un clip que existe: %s" % clip
+			)
+	# Quieto el rato suficiente, cambia de gesto y luego vuelve a respirar.
+	cuerpo.animar(0.0)
+	cuerpo._variar_reposo(CuerpoJugador3D.PAUSA_VARIANTE + 0.1, 0.0)
+	var gesto := String(Modelos._reproductor(cuerpo.figura()).current_animation)
+	_comprobar(not gesto.ends_with("idle"), true, "tras la pausa hace otra cosa (%s)" % gesto)
+	cuerpo._variar_reposo(60.0, 0.0)
+	cuerpo.animar(0.0)
+	_comprobar(
+		String(Modelos._reproductor(cuerpo.figura()).current_animation).ends_with("idle"),
+		true,
+		"y después vuelve a respirar",
+	)
+
 	# Todos los avatares de la ficha cargan y ninguno lo usa un compañero.
 	for avatar in PerfilJugador.AVATARES:
 		_comprobar(
