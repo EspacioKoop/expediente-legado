@@ -40,12 +40,11 @@ func avanzar(estado: Dictionary, delta: float) -> bool:
 
 
 static func firma_progreso(estado: Dictionary) -> String:
-	return JSON.stringify(
-		{
-			"tarot": _estado_tarot(estado),
-			"logros": _estado_logros(estado),
-		}
-	)
+	var resumen := {
+		"tarot": _estado_tarot(estado),
+		"logros": _estado_logros(estado),
+	}
+	return JSON.stringify(resumen)
 
 
 static func desbloquear_logro_final(estado: Dictionary) -> bool:
@@ -66,13 +65,12 @@ static func _estado_tarot(estado: Dictionary) -> Array:
 	for carta in estado.get("tarot", []):
 		if typeof(carta) != TYPE_DICTIONARY:
 			continue
-		resumen.append(
-			{
-				"id": String(carta.get("id", "")),
-				"recogida": bool(carta.get("recogida", false)),
-				"gastada": bool(carta.get("gastada", false)),
-			}
-		)
+		var entrada := {
+			"id": String(carta.get("id", "")),
+			"recogida": bool(carta.get("recogida", false)),
+			"gastada": bool(carta.get("gastada", false)),
+		}
+		resumen.append(entrada)
 	return resumen
 
 
@@ -81,10 +79,9 @@ static func _estado_logros(estado: Dictionary) -> Array:
 	for logro in estado.get("logros", []):
 		if typeof(logro) != TYPE_DICTIONARY:
 			continue
-		resumen.append(
-			{
-				"id": String(logro.get("id", "")),
-				"desbloqueado": bool(logro.get("desbloqueado", false)),
-			}
-		)
+		var entrada := {
+			"id": String(logro.get("id", "")),
+			"desbloqueado": bool(logro.get("desbloqueado", false)),
+		}
+		resumen.append(entrada)
 	return resumen
