@@ -1,12 +1,13 @@
-## Primer hoyo jugable standalone del golf de pasillo (#158).
+## Hoyo jugable standalone del golf de pasillo (#158).
 ##
 ## Presenta GolfBola en 3D sin introducir física no determinista. La bola visual
-## queda congelada y sigue el estado puro de GolfBola. Este corte no toca
-## Partida, rankings, compañeros ni recompensas.
+## queda congelada y sigue el estado puro de GolfBola. La configuración permite
+## reutilizar el mismo slice dentro de una partida de tres hoyos.
 class_name GolfHoyoApp
 extends Node3D
 
 signal cerrado
+signal hoyo_completado(golpes: int)
 
 const BOLA_SCENE: PackedScene = preload("res://arte/golf_pasillo/modelos/bola_siga.tscn")
 const LIMITE := Rect2(-1.15, -2.15, 2.30, 4.30)
@@ -17,6 +18,13 @@ const PASO_ANGULO := 5.0
 const PASO_POTENCIA := 0.1
 const MAX_GOLPES := 12
 
+var limite: Rect2 = LIMITE
+var inicio: Vector2 = INICIO
+var objetivo: Vector2 = OBJETIVO
+var radio_objetivo := RADIO_OBJETIVO
+var obstaculos: Array = []
+var numero_hoyo := 1
+
 var estado_bola: Dictionary = {}
 var angulo_grados := 0.0
 var potencia := 0.45
@@ -26,6 +34,29 @@ var terminada := false
 var _bola: RigidBody3D
 var _estado: Label
 var _ayuda: Label
+
+
+func configurar(configuracion: Dictionary) -> bool:
+	if is_node_ready():
+		return false
+	var candidato_limite = configuracion.get("limite", LIMITE)
+	if typeof(candidato_limite) == TYPE_RECT2:
+		limite = candidato_limite
+	var candidato_inicio = configuracion.get("inicio", INICIO)
+	if typeof(candidato_inicio) == TYPE_VECTOR2:
+		inicio = candidato_inicio
+	var candidato_objetivo = configuracion.get("objetivo", OBJETIVO)
+	if typeof(candidato_objetivo) == TYPE_VECTOR2:
+		objetivo = candidato_objetivo
+	radio_objetivo = clampf(
+		float(configuracion.get("radio_objetivo", RADIO_OBJETIVO)),
+		GolfBola.RADIO_BOLA * 1.5,
+		0.35,
+	)
+	var candidatos = configuracion.get("obstaculos", [])
+	obstaculos = candidatos.duplicate(true) if candidatos is Array else []
+	numero_hoyo = clampi(int(configuracion.get("numero_hoyo", 1)), 1, Golf.HOYOS)
+	return true
 
 
 func _ready() -> void:
@@ -93,27 +124,31 @@ func _golpear() -> void:
 
 
 func _resolver_reposo() -> void:
-	var posicion: Vector2 = estado_bola.get("posicion", INICIO)
-	if posicion.distance_to(OBJETIVO) <= RADIO_OBJETIVO:
+	if terminada:
+		return
+	var posicion: Vector2 = estado_bola.get("posicion", inicio)
+	if posicion.distance_to(objetivo) <= radio_objetivo:
 		terminada = true
 		_refrescar_ui(tr("GOLF_HOYO_COMPLETADO"))
+		hoyo_completado.emit(golpes)
 		return
 	if golpes >= MAX_GOLPES:
 		terminada = true
 		_refrescar_ui(tr("GOLF_HOYO_LIMITE"))
+		hoyo_completado.emit(golpes)
 		return
 	_refrescar_ui()
 
 
 func _reiniciar_bola() -> void:
-	estado_bola = GolfBola.nueva(INICIO, LIMITE)
+	estado_bola = GolfBola.nueva(inicio, limite, obstaculos)
 	_sincronizar_bola_visual()
 
 
 func _sincronizar_bola_visual() -> void:
 	if not is_instance_valid(_bola):
 		return
-	var p: Vector2 = estado_bola.get("posicion", INICIO)
+	var p: Vector2 = estado_bola.get("posicion", inicio)
 	_bola.position = Vector3(p.x, GolfBola.RADIO_BOLA, p.y)
 
 
@@ -136,28 +171,31 @@ func _construir_mundo() -> void:
 
 	var suelo := MeshInstance3D.new()
 	var malla_suelo := BoxMesh.new()
-	malla_suelo.size = Vector3(LIMITE.size.x, 0.05, LIMITE.size.y)
+	malla_suelo.size = Vector3(limite.size.x, 0.05, limite.size.y)
 	suelo.mesh = malla_suelo
-	suelo.position = Vector3(0.0, -0.025, 0.0)
+	var centro := limite.get_center()
+	suelo.position = Vector3(centro.x, -0.025, centro.y)
 	var material := StandardMaterial3D.new()
 	material.albedo_color = Color(0.25, 0.28, 0.25)
 	material.roughness = 0.92
 	suelo.material_override = material
 	add_child(suelo)
 
-	var objetivo := MeshInstance3D.new()
-	objetivo.name = "Objetivo"
+	var objetivo_visual := MeshInstance3D.new()
+	objetivo_visual.name = "Objetivo"
 	var disco := CylinderMesh.new()
-	disco.top_radius = RADIO_OBJETIVO
-	disco.bottom_radius = RADIO_OBJETIVO
+	disco.top_radius = radio_objetivo
+	disco.bottom_radius = radio_objetivo
 	disco.height = 0.008
-	objetivo.mesh = disco
-	objetivo.position = Vector3(OBJETIVO.x, 0.006, OBJETIVO.y)
+	objetivo_visual.mesh = disco
+	objetivo_visual.position = Vector3(objetivo.x, 0.006, objetivo.y)
 	var material_objetivo := StandardMaterial3D.new()
 	material_objetivo.albedo_color = Color(0.08, 0.08, 0.08)
 	material_objetivo.roughness = 1.0
-	objetivo.material_override = material_objetivo
-	add_child(objetivo)
+	objetivo_visual.material_override = material_objetivo
+	add_child(objetivo_visual)
+
+	_montar_obstaculos()
 
 	_bola = BOLA_SCENE.instantiate()
 	_bola.name = "Bola"
@@ -172,6 +210,26 @@ func _construir_mundo() -> void:
 	add_child(camara)
 
 
+func _montar_obstaculos() -> void:
+	for i in obstaculos.size():
+		var valor = obstaculos[i]
+		if typeof(valor) != TYPE_RECT2:
+			continue
+		var recta: Rect2 = valor
+		var obstaculo := MeshInstance3D.new()
+		obstaculo.name = "Obstaculo%d" % (i + 1)
+		var caja := BoxMesh.new()
+		caja.size = Vector3(recta.size.x, 0.18, recta.size.y)
+		obstaculo.mesh = caja
+		var centro := recta.get_center()
+		obstaculo.position = Vector3(centro.x, 0.09, centro.y)
+		var material := StandardMaterial3D.new()
+		material.albedo_color = Color(0.30, 0.27, 0.22)
+		material.roughness = 0.9
+		obstaculo.material_override = material
+		add_child(obstaculo)
+
+
 func _construir_ui() -> void:
 	var capa := CanvasLayer.new()
 	add_child(capa)
@@ -184,7 +242,7 @@ func _construir_ui() -> void:
 	capa.add_child(caja)
 
 	var titulo := Label.new()
-	titulo.text = tr("GOLF_HOYO_TITULO")
+	titulo.text = "%s · %d/%d" % [tr("GOLF_HOYO_TITULO"), numero_hoyo, Golf.HOYOS]
 	titulo.add_theme_font_size_override("font_size", 22)
 	caja.add_child(titulo)
 
