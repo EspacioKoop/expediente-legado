@@ -1,0 +1,189 @@
+{
+  "version": 1,
+  "criterio": "Cada reconstrucción representa solo lo que un registro leído permite afirmar. Los fragmentos deben existir literalmente en el folio de origen.",
+  "reconstrucciones": [
+    {
+      "id": "caso1_factura_pago",
+      "caso": "caso@1",
+      "registro": "factura1@1",
+      "folio": "F-1999-00231",
+      "titulo": "Lo que afirma la factura",
+      "fragmentos": [
+        "Monto: $482,000.",
+        "Proveedor sin RFC registrado.",
+        "no se identifica qué trabajo se entregó"
+      ],
+      "planos": [
+        {"encuadre": "detalle", "duracion": 1.8, "motivo": "documento"},
+        {"encuadre": "general", "duracion": 2.2, "motivo": "mesa_vacia"},
+        {"encuadre": "detalle", "duracion": 1.6, "motivo": "campo_incompleto"}
+      ]
+    },
+    {
+      "id": "caso1_memo_autorizacion",
+      "caso": "caso@1",
+      "registro": "memo1@1",
+      "folio": "MEMO-1999-088",
+      "titulo": "Lo que afirma Finanzas",
+      "fragmentos": [
+        "Autorizo el pago urgente sin revisión previa, bajo mi responsabilidad.",
+        "Firmado: J. Ibarra.",
+        "no identifica al proveedor ni describe el servicio"
+      ],
+      "planos": [
+        {"encuadre": "general", "duracion": 2.0, "motivo": "firma"},
+        {"encuadre": "detalle", "duracion": 1.5, "motivo": "sello"},
+        {"encuadre": "fijo", "duracion": 2.0, "motivo": "ausencia"}
+      ]
+    },
+    {
+      "id": "caso1_acta_revision",
+      "caso": "caso@1",
+      "registro": "actaContraloria1@1",
+      "folio": "ACTA-1999-014",
+      "titulo": "Lo que afirma Contraloría",
+      "fragmentos": [
+        "Se revisó la documentación y no se encontraron observaciones.",
+        "cinco minutos después de la hora de registro de la factura",
+        "no explica cómo se resolvió la falta de RFC"
+      ],
+      "planos": [
+        {"encuadre": "general", "duracion": 1.8, "motivo": "revision"},
+        {"encuadre": "detalle", "duracion": 1.8, "motivo": "reloj"},
+        {"encuadre": "fijo", "duracion": 2.0, "motivo": "campo_incompleto"}
+      ]
+    },
+    {
+      "id": "caso3_memo_traslado",
+      "caso": "caso3@3",
+      "registro": "memo3@3",
+      "folio": "MEMO-1993-201",
+      "titulo": "Lo que afirma el traslado",
+      "fragmentos": [
+        "Departamento de Enlace Especial, piso 13",
+        "Preséntese el día 05/07/1993 sin excepción."
+      ],
+      "planos": [
+        {"encuadre": "general", "duracion": 2.2, "motivo": "pasillo"},
+        {"encuadre": "detalle", "duracion": 1.5, "motivo": "indicador_13"},
+        {"encuadre": "fijo", "duracion": 1.8, "motivo": "puerta"}
+      ]
+    },
+    {
+      "id": "caso3_oficio_edificio",
+      "caso": "caso3@3",
+      "registro": "oficio3@3",
+      "folio": "OF-1993-055",
+      "titulo": "Lo que afirma el edificio",
+      "fragmentos": [
+        "el inmueble consta de doce niveles",
+        "No existe botón de piso 13 en ningún elevador",
+        "ni escalera registrada en los planos vigentes"
+      ],
+      "planos": [
+        {"encuadre": "general", "duracion": 2.0, "motivo": "ascensor"},
+        {"encuadre": "detalle", "duracion": 1.8, "motivo": "botonera"},
+        {"encuadre": "fijo", "duracion": 2.0, "motivo": "plano"}
+      ]
+    },
+    {
+      "id": "caso8_acta_a",
+      "caso": "caso8@8",
+      "registro": "actaA@8",
+      "folio": "ACTA-1998-427A",
+      "titulo": "Cierre A",
+      "fragmentos": [
+        "fue reasignado a labores de conserjería en el sótano",
+        "Cierre definitivo del expediente."
+      ],
+      "planos": [
+        {"encuadre": "general", "duracion": 2.0, "motivo": "sotano"},
+        {"encuadre": "fijo", "duracion": 1.8, "motivo": "silueta"},
+        {"encuadre": "detalle", "duracion": 1.4, "motivo": "sello_cierre"}
+      ]
+    },
+    {
+      "id": "caso8_acta_b",
+      "caso": "caso8@8",
+      "registro": "actaB@8",
+      "folio": "ACTA-1998-427B",
+      "titulo": "Cierre B",
+      "fragmentos": [
+        "abandonó el inmueble por una ventana del cuarto piso",
+        "No hubo testigos.",
+        "Cierre definitivo del expediente."
+      ],
+      "planos": [
+        {"encuadre": "general", "duracion": 2.0, "motivo": "cuarto_piso"},
+        {"encuadre": "detalle", "duracion": 1.6, "motivo": "ventana"},
+        {"encuadre": "fijo", "duracion": 1.8, "motivo": "espacio_sin_testigos"}
+      ]
+    },
+    {
+      "id": "caso8_acta_c",
+      "caso": "caso8@8",
+      "registro": "actaC@8",
+      "folio": "ACTA-1998-427C",
+      "titulo": "Cierre C",
+      "fragmentos": [
+        "las instalaciones fueron desmanteladas por completo cuarenta y ocho horas después de iniciada esta investigación",
+        "incluido el expediente mismo, que sin embargo usted sigue leyendo"
+      ],
+      "planos": [
+        {"encuadre": "general", "duracion": 2.2, "motivo": "oficina_vacia"},
+        {"encuadre": "detalle", "duracion": 1.8, "motivo": "mesa_sin_equipo"},
+        {"encuadre": "fijo", "duracion": 2.0, "motivo": "expediente_presente"}
+      ]
+    },
+    {
+      "id": "caso10_comedor",
+      "caso": "caso10@10",
+      "registro": "comedor10@10",
+      "folio": "COM-1996-09",
+      "titulo": "Lo que cuenta el comedor",
+      "fragmentos": [
+        "Se sirvieron 87 menús completos en cada uno de los diecinueve días laborables.",
+        "MESA 0 — cargo interno",
+        "sin nombre, departamento ni firma de recepción"
+      ],
+      "planos": [
+        {"encuadre": "general", "duracion": 2.0, "motivo": "comedor"},
+        {"encuadre": "detalle", "duracion": 1.7, "motivo": "vale_00"},
+        {"encuadre": "fijo", "duracion": 1.8, "motivo": "asiento_sin_identidad"}
+      ]
+    },
+    {
+      "id": "caso10_accesos",
+      "caso": "caso10@10",
+      "registro": "accesos10@10",
+      "folio": "ACC-1996-0000",
+      "titulo": "Lo que cuenta Control de Accesos",
+      "fragmentos": [
+        "Tarjeta 0000 — titular: SIN ASIGNAR.",
+        "Diecinueve jornadas registradas durante septiembre.",
+        "No constan accesos en fin de semana ni fuera del horario ordinario."
+      ],
+      "planos": [
+        {"encuadre": "detalle", "duracion": 1.8, "motivo": "tarjeta_0000"},
+        {"encuadre": "general", "duracion": 2.0, "motivo": "torniquete"},
+        {"encuadre": "fijo", "duracion": 1.8, "motivo": "reloj"}
+      ]
+    },
+    {
+      "id": "caso10_plano",
+      "caso": "caso10@10",
+      "registro": "plano3A10@10",
+      "folio": "PLANO-1996-3A",
+      "titulo": "Lo que afirma el plano",
+      "fragmentos": [
+        "Mesas numeradas 01 a 86.",
+        "No existe numeración 00 ni espacio sin asignar entre las mesas representadas."
+      ],
+      "planos": [
+        {"encuadre": "cenital", "duracion": 2.2, "motivo": "planta_3a"},
+        {"encuadre": "detalle", "duracion": 1.8, "motivo": "numeracion"},
+        {"encuadre": "fijo", "duracion": 1.8, "motivo": "hueco_inexistente"}
+      ]
+    }
+  ]
+}
