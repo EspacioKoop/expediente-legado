@@ -24,20 +24,27 @@ const EVENTO_DISPERSADO := "dispersado"
 const EVENTO_ABANDONADO := "abandonado"
 const EVENTO_CERRADO := "cerrado"
 
+const MANIFESTACION_REPETICION := "repeticion"
+const MANIFESTACION_PALABRA_AUSENTE := "palabra_ausente"
+const MANIFESTACION_ROTULO_DESHECHO := "rotulo_deshecho"
+const MANIFESTACION_ECO_LEJANO := "eco_lejano"
+
 var ecos
+var tipo_documento := ""
 var foco := 0
 var seleccion: Array = []
 var ultimo_evento := EVENTO_NINGUNO
 var cerrada := false
 
 
-static func crear(ecos_instancia):
+static func crear(ecos_instancia, tipo_documental: String = ""):
 	if ecos_instancia == null or ecos_instancia.nucleo == null:
 		return null
 	var presentacion = _nueva_instancia()
 	if presentacion == null:
 		return null
 	presentacion.ecos = ecos_instancia
+	presentacion.tipo_documento = tipo_documental.strip_edges().to_upper()
 	presentacion.seleccion = ecos_instancia.seleccion
 	presentacion.cerrada = not ecos_instancia.nucleo.pendiente()
 	return presentacion
@@ -127,10 +134,12 @@ func vista(reduccion_movimiento: bool) -> Dictionary:
 	for indice in range(presentados.size()):
 		var eco: Dictionary = presentados[indice]
 		var id := int(eco.get("id", -1))
+		var texto := str(eco.get("texto", ""))
 		var elemento := {
 			"slot": indice,
 			"id": id,
-			"texto": str(eco.get("texto", "")),
+			"texto": texto,
+			"texto_visible": _deformar_texto(texto, id),
 			"foco": indice == foco,
 			"seleccionado": seleccion.has(id),
 			"posicion_seleccion": seleccion.find(id),
@@ -148,8 +157,38 @@ func vista(reduccion_movimiento: bool) -> Dictionary:
 		"ultimo_evento": ultimo_evento,
 		"confirmacion_disponible": seleccion.size() == Ecos.CANTIDAD_FRAGMENTOS and not _terminal(),
 		"salida_disponible": true,
+		"manifestacion": manifestacion_para_tipo(tipo_documento),
 		"movimiento": ecos.politica_presentacion(reduccion_movimiento),
 	}
+
+
+## El tipo del documento ya está en el expediente leído. Aquí solo decide cómo
+## se deforma visualmente el recuerdo: nunca cambia ids, solución ni recompensa.
+static func manifestacion_para_tipo(tipo_documental: String) -> String:
+	var normalizado := tipo_documental.strip_edges().to_upper()
+	match normalizado:
+		"FACTURA", "FAX", "TELEGRAMA", "RECIBO":
+			return MANIFESTACION_REPETICION
+		"EMPLEADO", "FICHA", "EXPEDIENTE":
+			return MANIFESTACION_PALABRA_AUSENTE
+		"ACTA", "RESOLUCION", "DICTAMEN":
+			return MANIFESTACION_ROTULO_DESHECHO
+		"MEMORANDO", "OFICIO", "CIRCULAR", "CARTA":
+			return MANIFESTACION_ECO_LEJANO
+		_:
+			return MANIFESTACION_ECO_LEJANO
+
+
+## La variante «palabra ausente» oculta una sola palabra del fragmento central.
+## El texto canónico permanece en `texto`; la capa 3D consume `texto_visible`.
+func _deformar_texto(texto: String, id: int) -> String:
+	if manifestacion_para_tipo(tipo_documento) != MANIFESTACION_PALABRA_AUSENTE or id != 1:
+		return texto
+	var palabras := texto.split(" ", false)
+	if palabras.size() < 2:
+		return texto
+	palabras[int(palabras.size() / 2)] = "····"
+	return " ".join(palabras)
 
 
 func _estado_visual() -> String:
