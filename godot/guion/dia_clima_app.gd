@@ -206,7 +206,19 @@ func _entrar_en(fase: String) -> void:
 	# La niebla cambia el fondo global del Environment. Cada entrada restaura el
 	# valor base antes de decidir si este espacio recibe tiempo exterior.
 	_ambiente.background_color = FONDO_BASE
+	# Vapor, polvo, charcos y gotas: ambiente ligero que depende del tiempo del
+	# día aunque el espacio sea interior (la ventana de casa también se moja).
 	var espacio := _espacio_de(fase)
+	var clima_hoy := String(jornada.get("clima_forzado", ""))
+	if clima_hoy.is_empty():
+		clima_hoy = Clima.estado(int(jornada.get("dia", 1)))
+	EfectosLigeros.montar(
+		_mundo,
+		fase,
+		clima_hoy,
+		bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false)),
+		bool(espacio.get("exterior", false))
+	)
 	if not bool(espacio.get("exterior", false)):
 		return
 	# Un cielo exterior legible no necesita otro WorldEnvironment: basta cambiar
