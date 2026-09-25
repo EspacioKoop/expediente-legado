@@ -49,11 +49,16 @@ func _probar() -> void:
 				_comprobar(mate != original, "material original sin mutar")
 				_comprobar(mate.roughness == 1.0 and mate.metallic == 0.0, "acabado mate")
 				_comprobar(mate.specular_mode == BaseMaterial3D.SPECULAR_DISABLED, "sin brillo")
-		_comprobar(absf(caja.position.y - pieza.position.y) < 0.001, "base apoyada")
 		_comprobar(caja.end.x < -1.6 or caja.position.x > 1.6, "paso central libre")
 		if str(pieza.name).begins_with("Tapa"):
 			_comprobar(absf(caja.size.x - 0.70) < 0.001, "tapa a escala 70 cm")
+			_comprobar(
+				absf(caja.end.y - Vial.HOLGURA_TAPA) < 0.0005,
+				"cara superior de tapa casi enrasada sin z-fighting",
+			)
+			_comprobar(caja.position.y < -0.02, "grosor de tapa empotrado en el asfalto")
 		else:
+			_comprobar(absf(caja.position.y - pieza.position.y) < 0.001, "base apoyada")
 			var alto := 1.10 if pieza.name == &"Barrera" else 0.65
 			_comprobar(absf(caja.size.y - alto) < 0.001, "altura de mobiliario realista")
 	print("Lote: 5 instancias, %d triángulos" % triangulos)
