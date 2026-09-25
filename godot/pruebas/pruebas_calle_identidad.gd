@@ -167,24 +167,34 @@ func _probar_silueta_bloque_casa(calle: Node3D) -> void:
 	var oeste := bloque.get_node_or_null("AlaOeste") as MeshInstance3D
 	var centro := bloque.get_node_or_null("TorreCentral") as MeshInstance3D
 	var este := bloque.get_node_or_null("AlaEste") as MeshInstance3D
-	_comprobar(oeste != null and centro != null and este != null, "el bloque final tiene silueta escalonada")
-	_comprobar(bloque.get_node_or_null("Volumen") == null, "no vuelve el prisma monolítico del bloque final")
+	_comprobar(
+		oeste != null and centro != null and este != null,
+		"el bloque final tiene silueta escalonada"
+	)
+	_comprobar(
+		bloque.get_node_or_null("Volumen") == null,
+		"no vuelve el prisma monolítico del bloque final"
+	)
 	if oeste != null and centro != null and este != null:
 		var malla_oeste := oeste.mesh as BoxMesh
 		var malla_centro := centro.mesh as BoxMesh
 		var malla_este := este.mesh as BoxMesh
 		_comprobar(
-			malla_oeste != null
-			and malla_centro != null
-			and malla_este != null
-			and malla_oeste.size.y < malla_centro.size.y
-			and malla_este.size.y < malla_centro.size.y,
+			(
+				malla_oeste != null
+				and malla_centro != null
+				and malla_este != null
+				and malla_oeste.size.y < malla_centro.size.y
+				and malla_este.size.y < malla_centro.size.y
+			),
 			"las alas dejan cielo a ambos lados de la torre central"
 		)
 	_comprobar(
-		bloque.get_node_or_null("Ventana2_0") == null
-		and bloque.get_node_or_null("Ventana2_3") != null
-		and bloque.get_node_or_null("Ventana2_6") == null,
+		(
+			bloque.get_node_or_null("Ventana2_0") == null
+			and bloque.get_node_or_null("Ventana2_3") != null
+			and bloque.get_node_or_null("Ventana2_6") == null
+		),
 		"la tercera planta se concentra en el cuerpo central"
 	)
 	_comprobar(bloque.get_node_or_null("PuertaPortal") != null, "el portal de casa se conserva")
