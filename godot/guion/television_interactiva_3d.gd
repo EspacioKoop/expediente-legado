@@ -17,6 +17,7 @@ var _encendida := false
 var _brillo: OmniLight3D
 var _cristal_pantalla: MeshInstance3D
 var _emision_pantalla: Node3D
+var _rotulo_boletin: Label3D
 var _paso_documental := 0
 var _documental_completado := false
 var _catalogo_tv: Dictionary = {}
@@ -95,6 +96,7 @@ func _interactuar_directo(_actor: Node) -> void:
 		return
 	if _paso_documental == 0:
 		_paso_documental = 1
+		_mostrar_boletin_tv()
 		return
 
 	var jornada_actual := _jornada_en_escena()
@@ -102,8 +104,28 @@ func _interactuar_directo(_actor: Node) -> void:
 		return
 	_documental_completado = SuenoDuat.registrar_documental(jornada_actual, true)
 	if _documental_completado:
+		_ocultar_boletin_tv()
 		_activar_exposicion_tv(jornada_actual)
 		ObjetosOniricos.registrar(jornada_actual, OBJETO_ONIRICO_ID)
+
+
+func _mostrar_boletin_tv() -> void:
+	if _rotulo_boletin == null:
+		return
+	var bloque := _bloque_tv_actual(_jornada_en_escena())
+	var boletin = bloque.get("boletin", {})
+	if typeof(boletin) != TYPE_DICTIONARY:
+		return
+	var tratamiento = boletin.get("tratamiento", {})
+	if typeof(tratamiento) != TYPE_DICTIONARY:
+		return
+	_rotulo_boletin.text = String(tratamiento.get("rotulo", ""))
+	_rotulo_boletin.visible = not _rotulo_boletin.text.is_empty()
+
+
+func _ocultar_boletin_tv() -> void:
+	if _rotulo_boletin != null:
+		_rotulo_boletin.visible = false
 
 
 ## El boletín previo al microdocumental comparte hecho base con prensa/radio,
@@ -197,6 +219,7 @@ func _alternar(_actor: Node) -> void:
 		_emision_pantalla.visible = _encendida
 	if not _encendida and not _documental_completado:
 		_paso_documental = 0
+		_ocultar_boletin_tv()
 
 
 ## El modelo CC0 aporta la carcasa, pero el shader doméstico unifica demasiado
@@ -232,6 +255,17 @@ func _montar_superficie_pantalla(tam: Vector3) -> void:
 	)
 	_emision_pantalla.name = "EmisionPantallaTV"
 	_emision_pantalla.visible = false
+
+	_rotulo_boletin = Label3D.new()
+	_rotulo_boletin.name = "RotuloBoletinTV"
+	_rotulo_boletin.position = pos_frente + Vector3(0.012, 0.0, 0.0)
+	_rotulo_boletin.rotation_degrees.y = 90.0
+	_rotulo_boletin.font_size = 24
+	_rotulo_boletin.pixel_size = 0.00125
+	_rotulo_boletin.outline_size = 4
+	_rotulo_boletin.modulate = Color(0.90, 0.93, 0.86)
+	_rotulo_boletin.visible = false
+	add_child(_rotulo_boletin)
 
 
 ## `TelevisionInteractiva3D` vive bajo `_mundo`, que se recrea al entrar en casa.
