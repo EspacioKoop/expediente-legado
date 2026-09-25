@@ -37,6 +37,8 @@ class JuicioCombateReligion936Test(unittest.TestCase):
 
         self.assertIn("compromiso_religion_bloqueante", juicio)
         self.assertIn("_rival_inicio_agresion", juicio)
+        self.assertIn("_tregua_religion_restante", juicio)
+        self.assertIn("tregua_religion_activa", simbolico)
 
     def test_regresion_runtime_standalone(self) -> None:
         motor = os.environ.get("GODOT_BIN") or shutil.which("godot4")
