@@ -33,10 +33,13 @@ func _ready() -> void:
 func _construir() -> void:
 	var cabecera := Label.new()
 	cabecera.name = "Cabecera"
-	cabecera.text = "%s · %s" % [
-		tr("VISOR_RECONSTRUIR"),
-		String(_reconstruccion.get("folio", "")),
-	]
+	cabecera.text = (
+		"%s · %s"
+		% [
+			tr("VISOR_RECONSTRUIR"),
+			String(_reconstruccion.get("folio", "")),
+		]
+	)
 	cabecera.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(cabecera)
 
@@ -68,9 +71,7 @@ func _construir() -> void:
 	marco.add_child(vista)
 
 	_construir_maqueta(vista)
-	_planos = ReconstruccionDocumental3D.planos_de(
-		_reconstruccion, _reduccion_movimiento
-	)
+	_planos = ReconstruccionDocumental3D.planos_de(_reconstruccion, _reduccion_movimiento)
 
 	var controles := HBoxContainer.new()
 	controles.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -197,11 +198,14 @@ func _aplicar_plano() -> void:
 	_camara.position = posicion
 	_camara.look_at(mira, Vector3.UP)
 	_marcador.position = mira + Vector3(0.0, 0.22, 0.0)
-	_estado.text = "%d/%d · %s" % [
-		_indice_plano + 1,
-		_planos.size(),
-		_humanizar_motivo(String(plano.get("motivo", ""))),
-	]
+	_estado.text = (
+		"%d/%d · %s"
+		% [
+			_indice_plano + 1,
+			_planos.size(),
+			_humanizar_motivo(String(plano.get("motivo", ""))),
+		]
+	)
 
 
 func _humanizar_motivo(motivo: String) -> String:
