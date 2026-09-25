@@ -1,6 +1,8 @@
 ## Recorrido físico y abandono de la ronda de cierre (#156).
 extends SceneTree
 
+const RondaApp := preload("res://guion/dia_ronda_cierre_app.gd")
+
 var _pasadas := 0
 var _fallos := 0
 
@@ -91,12 +93,12 @@ func _probar_abandono_parcial() -> void:
 
 
 func _probar_oferta_determinista() -> void:
-	var a := DiaRondaCierreApp.ofrecida(7, 1234)
-	var b := DiaRondaCierreApp.ofrecida(7, 1234)
+	var a := RondaApp.ofrecida(7, 1234)
+	var b := RondaApp.ofrecida(7, 1234)
 	_comprobar(a == b, "misma semilla y día conservan oferta")
 	var resultados := []
 	for dia in range(1, 7):
-		resultados.append(DiaRondaCierreApp.ofrecida(dia, 1234))
+		resultados.append(RondaApp.ofrecida(dia, 1234))
 	_comprobar(resultados.has(true) and resultados.has(false), "la ronda aparece algunas tardes")
 
 
