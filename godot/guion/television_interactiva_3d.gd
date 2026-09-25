@@ -113,14 +113,18 @@ func _mostrar_boletin_tv() -> void:
 	if _rotulo_boletin == null:
 		return
 	var bloque := _bloque_tv_actual(_jornada_en_escena())
+	_rotulo_boletin.text = rotulo_de_bloque(bloque)
+	_rotulo_boletin.visible = not _rotulo_boletin.text.is_empty()
+
+
+static func rotulo_de_bloque(bloque: Dictionary) -> String:
 	var boletin = bloque.get("boletin", {})
 	if typeof(boletin) != TYPE_DICTIONARY:
-		return
+		return ""
 	var tratamiento = boletin.get("tratamiento", {})
 	if typeof(tratamiento) != TYPE_DICTIONARY:
-		return
-	_rotulo_boletin.text = String(tratamiento.get("rotulo", ""))
-	_rotulo_boletin.visible = not _rotulo_boletin.text.is_empty()
+		return ""
+	return String(tratamiento.get("rotulo", ""))
 
 
 func _ocultar_boletin_tv() -> void:
@@ -223,9 +227,9 @@ func _alternar(_actor: Node) -> void:
 
 
 ## El modelo CC0 aporta la carcasa, pero el shader doméstico unifica demasiado
-## marco y tubo. Esta superficie devuelve al CRT una pantalla legible sin añadir
-## programa, texto ni UI: apagada es cristal oscuro; encendida muestra la nieve
-## procedural que ya usa `Pantalla` como fallback neutro.
+## marco y tubo. Esta superficie devuelve al CRT una pantalla legible: apagada
+## es cristal oscuro; encendida combina la nieve procedural con el rótulo del
+## boletín seleccionado.
 func _montar_superficie_pantalla(tam: Vector3) -> void:
 	var pos_frente := Vector3(tam.z * 0.5 + 0.012, tam.y * 0.03, 0.0)
 	var tam_pantalla := Vector2(tam.x * 0.66, tam.y * 0.56)
