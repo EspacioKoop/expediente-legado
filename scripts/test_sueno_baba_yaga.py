@@ -110,6 +110,17 @@ class SuenoBabaYagaTest(unittest.TestCase):
         self.assertIn("func _actualizar_acabado_ambiental()", self.sueno)
         self.assertIn('"fase_ambiental": fase_ambiental_actual()', self.sueno)
 
+    def test_cabana_declara_transito_de_horizonte(self):
+        self.assertIn("PUNTOS_HORIZONTE_CABANA := [", self.sueno)
+        self.assertIn("DURACION_TRAMO_HORIZONTE := 0.18", self.sueno)
+        self.assertIn("func plan_transito_cabana(", self.sueno)
+        self.assertIn("func _aplicar_transito_cabana(", self.sueno)
+        self.assertIn('"modo": "corte_fundido" if reduccion_movimiento', self.sueno)
+        self.assertIn('"arco_horizonte"', self.sueno)
+        self.assertIn('"transito_cabana": transito_cabana', self.sueno)
+        self.assertIn("create_tween()", self.sueno)
+        self.assertIn("Tween.TRANS_SINE", self.sueno)
+
     def test_interior_cabana_cambia_sin_mover_el_marco(self):
         self.assertIn("INTERIORES_CABANA := [", self.sueno)
         self.assertIn('"EstadosInterior"', self.sueno)
