@@ -15,6 +15,10 @@ var _luz: OmniLight3D
 func configurar() -> void:
 	verbo = Verbo.ENCENDER
 	nombre_objeto = "lámpara"
+	# #959: el uso repetido deja una marca ambiental persistente, sin convertir
+	# el estado local encendida/apagada en progreso ni en una segunda fuente de verdad.
+	set_meta("huella_ambiental_id", "casa:lampara_pie")
+	set_meta("huella_ambiental_tipo", "equipo")
 
 	var colision := CollisionShape3D.new()
 	var forma := BoxShape3D.new()
