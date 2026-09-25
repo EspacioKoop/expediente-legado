@@ -24,13 +24,16 @@ var _boton_medio: Button
 var _lista: ItemList
 var _visor: RichTextLabel
 var _estado: Label
+var _incidencia: FalloMundanoSigaPanel
 
 
 func configurar_contexto(contexto: Dictionary) -> void:
 	_modelo.configurar_contexto(contexto)
 	_medios.configurar_contexto(contexto)
 	if is_node_ready():
-		if _resolver_ruta(_ruta_actual).is_empty():
+		if _incidencia != null:
+		_incidencia.cerrar(false)
+	if _resolver_ruta(_ruta_actual).is_empty():
 			_ruta_actual = ExploradorSigaModelo.RUTA_RAIZ
 		_refrescar()
 
@@ -121,6 +124,9 @@ func _construir_interfaz() -> void:
 	_estado.text = ""
 	add_child(_estado)
 
+	_incidencia = FalloMundanoSigaPanel.new()
+	add_child(_incidencia)
+
 	_refrescar_medios()
 
 
@@ -135,6 +141,8 @@ func _navegar_a(ruta: String, registrar_historial: bool) -> void:
 		return
 
 	_ruta_actual = normalizada
+	if _incidencia != null:
+		_incidencia.cerrar(false)
 	if registrar_historial:
 		if _indice_historial < _historial.size() - 1:
 			_historial.resize(_indice_historial + 1)
@@ -205,6 +213,8 @@ func _activar_indice(indice: int) -> void:
 
 func _abrir_documento(entrada: Dictionary) -> void:
 	var accion := String(entrada.get("accion", ""))
+	if _incidencia != null:
+		_incidencia.cerrar(false)
 	if accion == "mostrar_paquete_software":
 		_abrir_paquete_software(entrada)
 		return
@@ -327,6 +337,7 @@ func _alternar_medio() -> void:
 		if dentro:
 			_navegar_a(destino, true)
 			_mostrar_estado(tr("EXPLORADOR_MEDIO_RETIRADO_VENTANA"))
+			_incidencia.presentar("medio_retirado", "ruta_medio_retirado")
 		else:
 			_refrescar()
 			_mostrar_estado(tr("EXPLORADOR_MEDIO_RETIRADO"))
