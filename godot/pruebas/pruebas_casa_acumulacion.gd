@@ -131,8 +131,17 @@ func _probar_iman_postal_en_nevera() -> void:
 	_comprobar(
 		String(iman.get_meta("variante", "")) == "iman_calendario", "declara variante propia"
 	)
-	_comprobar(iman.position.x < -0.36, "el imán queda delante de la puerta de la nevera")
-	_comprobar(iman.get_child_count() >= 8, "el calendario tiene cuerpo y cuadrícula visibles")
+	_comprobar(iman.position.x <= -0.39, "el imán queda separado del plano de la puerta")
+	_comprobar(iman.position.z > 0.0, "el calendario evita las asas situadas hacia z negativo")
+	_comprobar(
+		iman.get_child_count() >= 10, "el calendario tiene cuerpo, cuadrícula e imanes visibles"
+	)
+	var cuerpo := iman.get_child(0) as MeshInstance3D
+	var caja := cuerpo.mesh as BoxMesh if cuerpo != null else null
+	_comprobar(
+		caja != null and caja.size.y >= 0.40 and caja.size.z >= 0.30,
+		"el calendario ocupa una superficie legible desde cámara jugable"
+	)
 	_comprobar(acumulacion.get_child_count() == 0, "el imán no se duplica en la estantería")
 
 	CasaAcumulacion.montar(casa, estado)

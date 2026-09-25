@@ -167,31 +167,34 @@ static func _limpiar_iman_calendario(nevera: Node3D) -> void:
 static func _montar_iman_calendario(nevera: Node3D, objeto: Dictionary) -> void:
 	var iman := Node3D.new()
 	iman.name = NOMBRE_IMAN_CALENDARIO
-	# La puerta visible de NeveraCasa está en x=-0.36. El papel queda unos
-	# milímetros por delante, alejado de las asas situadas hacia z negativo.
-	iman.position = Vector3(-0.372, 1.28, 0.10)
+	# La puerta visible de NeveraCasa está en x=-0.36. El papel queda claramente
+	# por delante para evitar z-fighting y separado de las asas situadas hacia z negativo.
+	iman.position = Vector3(-0.392, 1.26, 0.12)
 	iman.set_meta("objeto_id", String(objeto.get("id", "")))
 	iman.set_meta("origen", String(objeto.get("origen", "")))
 	iman.set_meta("variante", "iman_calendario")
 	nevera.add_child(iman)
 
-	# Cuerpo del calendario: cartulina fina, cabecera y una cuadrícula mínima.
-	_caja(iman, Vector3.ZERO, Vector3(0.014, 0.24, 0.18), Color(0.74, 0.70, 0.56))
-	_caja(iman, Vector3(-0.010, 0.085, 0), Vector3(0.010, 0.045, 0.16), Color(0.48, 0.20, 0.16))
-	for y in [-0.045, -0.005, 0.035]:
-		_caja(iman, Vector3(-0.010, y, 0), Vector3(0.010, 0.008, 0.14), Color(0.34, 0.32, 0.28))
-	for z in [-0.045, 0.0, 0.045]:
+	# Cuerpo del calendario: deliberadamente mayor y más contrastado que la primera
+	# versión. Desde la cámara jugable debe leerse como papel sujeto a la puerta,
+	# no como otra variación del metal gris de la nevera.
+	_caja(iman, Vector3.ZERO, Vector3(0.018, 0.40, 0.30), Color(0.88, 0.84, 0.69))
+	_caja(iman, Vector3(-0.014, 0.145, 0), Vector3(0.014, 0.075, 0.27), Color(0.58, 0.16, 0.12))
+	for y in [-0.090, -0.035, 0.020, 0.075]:
+		_caja(iman, Vector3(-0.014, y, 0), Vector3(0.014, 0.010, 0.25), Color(0.20, 0.18, 0.16))
+	for z in [-0.080, 0.0, 0.080]:
 		_caja(
-			iman, Vector3(-0.010, -0.025, z), Vector3(0.010, 0.12, 0.006), Color(0.34, 0.32, 0.28)
+			iman, Vector3(-0.014, -0.030, z), Vector3(0.014, 0.22, 0.008), Color(0.20, 0.18, 0.16)
 		)
-	_cilindro(
-		iman,
-		Vector3(-0.018, 0.095, 0.060),
-		0.018,
-		0.012,
-		Color(0.16, 0.20, 0.24),
-		Vector3(0, 0, 90)
-	)
+	for z in [-0.105, 0.105]:
+		_cilindro(
+			iman,
+			Vector3(-0.024, 0.155, z),
+			0.024,
+			0.016,
+			Color(0.10, 0.18, 0.28),
+			Vector3(0, 0, 90)
+		)
 
 
 static func _variante(objeto: Dictionary) -> String:
