@@ -228,11 +228,28 @@ func _probar_navegador() -> void:
 	var prensa := navegador.navegar("http://laplaza.red98/")
 	_comprobar(prensa["estado"] == "ok", "el navegador abre una cabecera declarativa")
 	_comprobar(prensa["recurso"]["tipo"] == "prensa", "conserva el tipo de renderer de prensa")
+	var bbs := navegador.navegar("http://bbs.bytelocal.net/")
+	_comprobar(bbs["estado"] == "ok", "el navegador abre el tablón BBS especializado")
+	var hilo_bbs := navegador.navegar("http://bbs.bytelocal.net/#hilo=byte-modem-ocupado")
+	_comprobar(
+		String(hilo_bbs.get("bbs_hilo_id", "")) == "byte-modem-ocupado",
+		"el navegador resuelve una ruta interna de hilo sin crear una red paralela",
+	)
+	navegador.ir_atras()
+	_comprobar(
+		navegador.url_actual() == "http://bbs.bytelocal.net/",
+		"Atrás vuelve del hilo al tablón",
+	)
+	navegador.ir_adelante()
+	_comprobar(
+		navegador.url_actual() == "http://bbs.bytelocal.net/#hilo=byte-modem-ocupado",
+		"Adelante recupera el hilo BBS",
+	)
 	navegador.navegar("http://byte.local/")
-	_comprobar(navegador.historial().size() == 3, "registra navegación en historial")
+	_comprobar(navegador.historial().size() == 5, "registra navegación en historial")
 	navegador.navegar("http://byte.local/")
 	_comprobar(
-		navegador.historial().size() == 3,
+		navegador.historial().size() == 5,
 		"no duplica consecutivamente la misma URL en historial",
 	)
 	_comprobar(navegador.url_actual() == "http://byte.local/", "expone la URL actual")
