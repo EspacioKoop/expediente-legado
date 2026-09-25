@@ -13,6 +13,8 @@ const CLAVE_JORNADA := "archivado_bandeja"
 var _estado_archivado: Dictionary = {}
 var _carpeta_archivado: CarpetaArchivable3D = null
 var _textos: Dictionary = {}
+var _busqueda_caso_id := ""
+var _busqueda_token := 0
 
 
 func refrescar(host) -> void:
@@ -26,6 +28,7 @@ func refrescar(host) -> void:
 
 	var caso := ArchivadoBandeja.siguiente_pendiente(_estado_archivado)
 	if caso.is_empty():
+		_cancelar_busqueda()
 		if (
 			not _estado_archivado.get("cerrada", false)
 			and not _estado_archivado.get("casos", []).is_empty()
@@ -40,10 +43,11 @@ func refrescar(host) -> void:
 	_sincronizar_desorden_espacial(host)
 	if is_instance_valid(_carpeta_archivado):
 		return
-	_montar_carpeta(host, caso)
+	_programar_busqueda_carpeta(host, caso)
 
 
 func abandonar(host, guardar: bool = true) -> Dictionary:
+	_cancelar_busqueda()
 	if _estado_archivado.is_empty():
 		return {}
 	if ArchivadoBandeja.siguiente_pendiente(_estado_archivado).is_empty():
