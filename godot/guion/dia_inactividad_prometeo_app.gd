@@ -58,10 +58,8 @@ func _mostrar_final(dia: Node, partida_actual: Partida) -> void:
 	# mismo evento jugable y nunca durante carga/presentación.
 	var contenido_actual = dia.get("contenido")
 	if contenido_actual is Contenido:
-		Prometeo.sincronizar_tarot_mundo(
-			estado,
-			(contenido_actual as Contenido).principales(),
-		)
+		var casos_principales := (contenido_actual as Contenido).principales()
+		Prometeo.sincronizar_tarot_mundo(estado, casos_principales)
 
 	_guardar_evento(dia, partida_actual)
 	_abrir_dialogo(dia)
