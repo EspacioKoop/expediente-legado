@@ -134,8 +134,7 @@ func _probar_iman_postal_en_nevera() -> void:
 	_comprobar(iman.position.x <= -0.39, "el imán queda separado del plano de la puerta")
 	_comprobar(iman.position.z > 0.0, "el calendario evita las asas situadas hacia z negativo")
 	_comprobar(
-		iman.get_child_count() >= 10,
-		"el calendario tiene cuerpo, cuadrícula e imanes visibles"
+		iman.get_child_count() >= 10, "el calendario tiene cuerpo, cuadrícula e imanes visibles"
 	)
 	var cuerpo := iman.get_child(0) as MeshInstance3D
 	var caja := cuerpo.mesh as BoxMesh if cuerpo != null else null
