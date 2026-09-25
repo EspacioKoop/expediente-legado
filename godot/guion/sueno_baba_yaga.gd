@@ -98,6 +98,10 @@ const POSICIONES_FONDO_FASE := [
 	Vector3(0.28, 0.0, -0.30),
 	Vector3(0.10, 0.0, 0.16),
 ]
+const POSICIONES_HABITACION_FASE := BabaYagaHabitacionGiratoria.POSICIONES_FASE
+const ROTACIONES_HABITACION_FASE := BabaYagaHabitacionGiratoria.ROTACIONES_FASE
+const ESTADOS_HABITACION_EXTERIOR := BabaYagaHabitacionGiratoria.ESTADOS_EXTERIOR
+const DURACION_GIRO_HABITACION := BabaYagaHabitacionGiratoria.DURACION_GIRO
 
 var _fase_umbral := 0
 var _fase_fuera_campo := 0
@@ -199,6 +203,17 @@ func plan_transito_cabana(origen: Vector3, reduccion_movimiento: bool) -> Dictio
 	}
 
 
+func estado_habitacion_actual() -> Dictionary:
+	return BabaYagaHabitacionGiratoria.estado_para_fase(_fase_umbral)
+
+
+func plan_giro_habitacion(origen: Dictionary, reduccion_movimiento: bool) -> Dictionary:
+	var habitacion := get_node_or_null("AcabadoAmbiental/HabitacionGiratoria") as BabaYagaHabitacionGiratoria
+	if habitacion == null:
+		return {"aplicado": false}
+	return habitacion.plan_giro(origen, _fase_umbral, reduccion_movimiento)
+
+
 func dejar_marca(nombre: String, objetivo: String) -> bool:
 	preparar()
 	var id := nombre.strip_edges()
@@ -249,7 +264,9 @@ func aplicar_evento(
 	preparar()
 	var cambiado := false
 	var origen_cabana: Vector3 = posiciones_actuales()[OBJETO_CABANA]
+	var origen_habitacion := estado_habitacion_actual()
 	var transito_cabana := {"aplicado": false}
+	var giro_habitacion := {"aplicado": false}
 	if evento == EVENTO_UMBRAL:
 		_fase_umbral = (_fase_umbral + 1) % POSICIONES_CABANA.size()
 		cambiado = true
@@ -262,6 +279,7 @@ func aplicar_evento(
 		_aplicar_estado_visual()
 		if evento == EVENTO_UMBRAL:
 			transito_cabana = _aplicar_transito_cabana(origen_cabana, reduccion_movimiento)
+			giro_habitacion = _aplicar_giro_habitacion(origen_habitacion, reduccion_movimiento)
 		_sincronizar_comparacion_visual()
 
 	var salida := plan_transicion(reduccion_movimiento)
@@ -278,6 +296,7 @@ func aplicar_evento(
 				"interior_cabana": interior_actual(),
 				"fase_ambiental": fase_ambiental_actual(),
 				"transito_cabana": transito_cabana,
+				"giro_habitacion": giro_habitacion,
 			},
 			true,
 		)
@@ -610,8 +629,12 @@ func _montar_acabado_ambiental() -> void:
 			COLOR_MARCA,
 		)
 
+	var habitacion := BabaYagaHabitacionGiratoria.new()
+	acabado.add_child(habitacion)
+	habitacion.preparar()
 
-func _montar_retorno() -> void:
+
+func _montar_retorno() -> void:func _montar_retorno() -> void:
 	_crear_caja(
 		self,
 		"RetornoSeguro",
@@ -811,6 +834,20 @@ func _actualizar_acabado_ambiental() -> void:
 	plano.position = POSICIONES_PLANO_FASE[fase]
 	plano.rotation_degrees = ROTACIONES_PLANO_FASE[fase]
 	fondo.position = POSICIONES_FONDO_FASE[fase]
+	_actualizar_habitacion_giratoria()
+
+
+func _actualizar_habitacion_giratoria() -> void:
+	var habitacion := get_node_or_null("AcabadoAmbiental/HabitacionGiratoria") as BabaYagaHabitacionGiratoria
+	if habitacion != null:
+		habitacion.aplicar_estado(_fase_umbral)
+
+
+func _aplicar_giro_habitacion(origen: Dictionary, reduccion_movimiento: bool) -> Dictionary:
+	var habitacion := get_node_or_null("AcabadoAmbiental/HabitacionGiratoria") as BabaYagaHabitacionGiratoria
+	if habitacion == null:
+		return {"aplicado": false}
+	return habitacion.aplicar_giro(origen, _fase_umbral, reduccion_movimiento)
 
 
 func _sincronizar_marcas_visual() -> void:
