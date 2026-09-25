@@ -92,11 +92,20 @@ func _probar() -> void:
 	await process_frame
 	_comprobar(visor.pieza_actual_id() == "local", "respeta la pieza inicial")
 
+	var piezas_prensa: Array = Publicaciones98.por_id("periodico_tarde_98").get("piezas", [])
+	var indice_local := -1
+	for indice in range(piezas_prensa.size()):
+		if String(piezas_prensa[indice].get("id", "")) == "local":
+			indice_local = indice
+			break
+	_comprobar(indice_local >= 0, "la pieza inicial existe en el catálogo")
+	var siguiente_prensa := String(piezas_prensa[indice_local + 1].get("id", ""))
+
 	var hombro_derecho := InputEventJoypadButton.new()
 	hombro_derecho.button_index = JOY_BUTTON_RIGHT_SHOULDER
 	hombro_derecho.pressed = true
 	visor._unhandled_input(hombro_derecho)
-	_comprobar(visor.pieza_actual_id() == "agenda", "R1 avanza con mando")
+	_comprobar(visor.pieza_actual_id() == siguiente_prensa, "R1 avanza con mando")
 
 	var hombro_izquierdo := InputEventJoypadButton.new()
 	hombro_izquierdo.button_index = JOY_BUTTON_LEFT_SHOULDER
