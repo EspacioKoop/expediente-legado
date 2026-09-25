@@ -4,7 +4,7 @@ extends SceneTree
 ##
 ## Monta `CuerpoJugador3D` dentro de un caminante de prueba —CharacterBody3D con
 ## su `Camara`— y comprueba el árbol que de verdad se ve en primera persona:
-## `persona.fbx` vestida con el perfil de la ficha y no con el del roster,
+## `persona.fbx` vestida con el perfil configurable de la ficha,
 ## cabeza oculta bajo la cámara, manos de piel, gestos según la velocidad y
 ## ninguna colisión nueva.
 
@@ -46,7 +46,7 @@ func _probar() -> void:
 		return
 	_comprobar(
 		String(figura.scene_file_path) == "res://assets/modelos/persona.fbx",
-		"es persona.fbx, la misma figura que los compañeros",
+		"es persona.fbx, el rig configurable del protagonista",
 	)
 	var esqueleto := Modelos._esqueleto(figura)
 	_comprobar(esqueleto != null, "la figura conserva su Skeleton3D")
