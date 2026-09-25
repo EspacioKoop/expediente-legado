@@ -56,7 +56,8 @@
 [ext_resource type="Script" path="res://guion/dia_simurgh_app.gd" id="54"]
 [ext_resource type="Script" path="res://guion/dia_duat_sueno_app.gd" id="55"]
 [ext_resource type="Script" path="res://guion/dia_popol_wuj_app.gd" id="56"]
-[ext_resource type="Script" path="res://guion/dia_senales_multiplayer_app.gd" id="57"]\n[ext_resource type="Script" path="res://guion/dia_inactividad_prometeo_app.gd" id="58"]
+[ext_resource type="Script" path="res://guion/dia_senales_multiplayer_app.gd" id="57"]
+[ext_resource type="Script" path="res://guion/dia_inactividad_prometeo_app.gd" id="58"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
@@ -229,4 +230,5 @@ script = ExtResource("53")
 [node name="SenalesMultiplayerController" type="Node" parent="."]
 script = ExtResource("57")
 
-[node name="InactividadPrometeoController" type="Node" parent="."]\nscript = ExtResource("58")\n
+[node name="InactividadPrometeoController" type="Node" parent="."]
+script = ExtResource("58")
