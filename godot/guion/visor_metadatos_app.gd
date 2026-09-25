@@ -9,6 +9,13 @@ const MeticulosidadEstado := preload("res://guion/meticulosidad.gd")
 const DetallesMeticulosidadCatalogo := preload("res://guion/detalles_meticulosidad.gd")
 const RUTA_DETALLES_METICULOSIDAD := "res://datos/detalles_meticulosidad.json"
 const RUTA_ANALISIS_DOCUMENTAL := "res://datos/analisis_documental.json"
+const CLAVES_ANALISIS_DOCUMENTAL := [
+	"VISOR_ANALISIS_951_FACTURA4_SELLO",
+	"VISOR_ANALISIS_951_FACTURA4_RFC",
+	"VISOR_ANALISIS_951_ACTA6_SELLO",
+	"VISOR_ANALISIS_951_CIRCULAR6_FECHA",
+	"VISOR_ANALISIS_951_MEMO5_FECHA",
+]
 
 var _metadatos: Label
 var _detalle_meticulosidad: Label
@@ -132,7 +139,7 @@ func _analizar_documento_actual() -> void:
 			if not valor is Dictionary:
 				continue
 			var clave := String((valor as Dictionary).get("texto", "")).strip_edges()
-			if not clave.is_empty():
+			if CLAVES_ANALISIS_DOCUMENTAL.has(clave):
 				textos.append(tr(clave))
 
 	if textos.is_empty():
