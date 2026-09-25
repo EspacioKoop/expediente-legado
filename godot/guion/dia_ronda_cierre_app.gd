@@ -7,6 +7,7 @@ extends Node
 
 const HORA_OFERTA := 15 * 60
 const CICLO_OFERTA := 3
+const SELLO_RECOMPENSA := "planta-en-orden"
 
 var _fase_anterior := ""
 var _mundo_id := 0
@@ -43,10 +44,14 @@ func _procesar_archivo(dia) -> void:
 		estado = Jornada.asegurar_ronda_cierre(dia.jornada, _cunado_presente(dia._mundo))
 		_guardar(dia)
 
-	if bool(estado.get("abandonada", false)) or bool(estado.get("finalizada", false)):
+	if bool(estado.get("abandonada", false)):
+		return
+	if bool(estado.get("finalizada", false)):
+		if _registrar_recompensa(dia, String(estado.get("rango", ""))):
+			_guardar(dia)
 		return
 	if bool(RondaCierre.progreso(estado).get("completa", false)):
-		RondaCierre.finalizar(estado)
+		_finalizar_y_recompensar(dia, estado)
 		_guardar(dia)
 		return
 
@@ -93,10 +98,32 @@ func _al_completar_punto(_id_punto: String) -> void:
 		return
 	var estado: Dictionary = estado_var
 	if bool(RondaCierre.progreso(estado).get("completa", false)):
-		RondaCierre.finalizar(estado)
+		_finalizar_y_recompensar(dia, estado)
 	if is_instance_valid(_capa):
 		_capa.refrescar()
 	_guardar(dia)
+
+
+
+func _finalizar_y_recompensar(dia, estado: Dictionary) -> String:
+	var rango := RondaCierre.finalizar(estado)
+	_registrar_recompensa(dia, rango)
+	return rango
+
+
+func _registrar_recompensa(dia, rango: String) -> bool:
+	if rango != RondaCierre.IMPECABLE:
+		return false
+	var partida = dia.get("partida")
+	if partida == null:
+		return false
+	var estado_partida = partida.get("estado")
+	if typeof(estado_partida) != TYPE_DICTIONARY:
+		return false
+	if Sellos.tiene_sello(estado_partida, SELLO_RECOMPENSA):
+		return false
+	var registro := Sellos.registrar_sello(estado_partida, SELLO_RECOMPENSA)
+	return String(registro.get("resultado", "")) == "registrado"
 
 
 func _abandonar_si_pendiente(dia) -> void:
