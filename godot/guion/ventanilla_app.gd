@@ -267,6 +267,7 @@ func _abrir_juicio() -> void:
 			int(partida.estado.get("semilla", 0)),
 		)
 	)
+	_juicio.perfil_jugador = partida.estado.get("perfil_jugador", {})
 	_juicio.terminado.connect(_al_juicio_terminado)
 	add_child(_juicio)
 

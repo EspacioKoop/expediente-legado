@@ -203,6 +203,10 @@ func _entrar_en(fase: String) -> void:
 		CasaUtileria.montar(_mundo)
 		_montar_gilgamesh_vigilia()
 		_montar_ryu_flow_vigilia()
+	elif fase == "trayecto":
+		_montar_dependientes()
+	elif fase == "sueño":
+		_montar_eco_sueno()
 	# La niebla cambia el fondo global del Environment. Cada entrada restaura el
 	# valor base antes de decidir si este espacio recibe tiempo exterior.
 	_ambiente.background_color = FONDO_BASE
@@ -227,6 +231,37 @@ func _entrar_en(fase: String) -> void:
 	# La consola de pruebas (#770) puede fijar un clima; sin ella manda el día.
 	var forzado := String(jornada.get("clima_forzado", ""))
 	_aplicar_clima(forzado if not forzado.is_empty() else Clima.estado(int(jornada.get("dia", 1))))
+
+
+## Los dependientes de las tiendas del trayecto hablan por el mismo camino que
+## los compañeros; lo único suyo es que la línea se decide al hablar, porque
+## cambia con cada charla de la visita.
+func _montar_dependientes() -> void:
+	for charla in DependientesTiendas3D.montar(_mundo):
+		charla.conversacion_solicitada.connect(_conversar_con_dependiente)
+
+
+func _conversar_con_dependiente(
+	charla: CompaneroInteractivo3D, actor: Node, _clave: String
+) -> void:
+	if _pantalla != null or is_instance_valid(_dialogo_actual):
+		return
+	var clima := String(jornada.get("clima_forzado", ""))
+	if clima.is_empty():
+		clima = Clima.estado(int(jornada.get("dia", 1)))
+	# Quien te da conversación de día vuelve de noche (EcosSueno).
+	EcosSueno.registrar(jornada, String(charla.get_meta("dependiente", "")))
+	_iniciar_conversacion(
+		charla, actor, DependientesTiendas3D.siguiente_frase(charla, jornada, clima)
+	)
+
+
+## El eco del día en la sala del sueño. Su frase es fija en la sala, así que
+## habla por el camino de los compañeros sin más.
+func _montar_eco_sueno() -> void:
+	var eco := EcosSueno3D.montar(_mundo, _espacio_actual, jornada)
+	if eco != null:
+		eco.conversacion_solicitada.connect(_iniciar_conversacion)
 
 
 ## Sustituye los volúmenes automáticos de frase por objetos a los que hay que

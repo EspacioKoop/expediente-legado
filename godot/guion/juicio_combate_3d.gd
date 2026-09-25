@@ -29,6 +29,8 @@ const DURACION_DOCTRINA := REGLAS.DURACION_DOCTRINA
 const BONUS_TELEGRAFO_COMISION := REGLAS.BONUS_TELEGRAFO_COMISION
 const DISTANCIA_MESA := 3.0
 
+## La ficha del jugador, para que pelee con su cuerpo. Vacía: el de serie.
+var perfil_jugador: Dictionary = {}
 var reduccion_movimiento := false
 
 var _acusado: Dictionary = {}
@@ -281,6 +283,7 @@ func _mover_jugador(delta: float) -> void:
 		_jugador.position, entrada, VELOCIDAD_JUGADOR, _esquiva > 0.0, _radio_arena, delta
 	)
 	_jugador.position = paso["posicion"]
+	JuicioCombateEscenografia3D.andar(_figura_jugador, entrada.length() > 0.1)
 	if bool(paso["orientar"]):
 		_jugador.rotation.y = float(paso["rotacion_y"])
 
@@ -302,6 +305,7 @@ func _mover_rival(delta: float) -> void:
 			delta,
 		)
 	)
+	JuicioCombateEscenografia3D.andar(_figura_rival, bool(paso["mover"]))
 	if bool(paso["mover"]):
 		var desplazamiento: Vector3 = paso["desplazamiento"]
 		_rival.position = _limitar(_rival.position + desplazamiento)
@@ -556,6 +560,7 @@ func _montar_arena() -> void:
 			_ritual,
 			RADIO_ARENA,
 			_radio_arena,
+			perfil_jugador,
 		)
 	)
 	_jugador = nodos["jugador"]

@@ -38,6 +38,7 @@ func _init() -> void:
 	PruebasJuicioJugador.todo(comprobar_cb)
 	PruebasJuicioHud.todo(comprobar_cb)
 	PruebasJuicioFeedback.todo(comprobar_cb)
+	PruebasJuicioEscenografia.todo(comprobar_cb)
 	PruebasJuicioJungiano.todo(comprobar_cb)
 	PruebasJuicioSimbolico.todo(comprobar_cb)
 	PruebasAlquiler.todo(comprobar_cb)
