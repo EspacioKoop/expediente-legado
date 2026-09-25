@@ -17,9 +17,11 @@ const POSICIONES_ECOS := [
 	Vector3(0.0, 0.0, -0.8),
 	Vector3(2.5, 0.0, 0.7),
 ]
+const GIROS_ECOS := [-0.14, 0.0, 0.14]
 const COLOR_BASE := Color(0.13, 0.15, 0.20)
 const COLOR_SELECCION := Color(0.31, 0.35, 0.46)
 const COLOR_TEXTO := Color(0.82, 0.84, 0.88)
+const COLOR_HABITACION := Color(0.08, 0.09, 0.12, 0.68)
 
 var presentacion
 var reduccion_movimiento := false
@@ -72,11 +74,13 @@ func _montar() -> void:
 		var eco := Interactuable3D.new()
 		eco.name = "EcoArchivo_%d" % slot
 		eco.position = POSICIONES_ECOS[slot]
+		eco.rotation.y = GIROS_ECOS[slot]
 		eco.verbo = Interactuable3D.Verbo.LEER
 		eco.nombre_objeto = "#%d" % (slot + 1)
 		eco.set_meta("slot", slot)
 		eco.activado.connect(_al_activar_eco.bind(slot))
 		add_child(eco)
+		_montar_microhabitacion(eco, slot)
 		_montar_panel(eco)
 		_ecos_3d.append(eco)
 
@@ -96,6 +100,84 @@ func _montar() -> void:
 	_confirmar.activado.connect(_al_confirmar)
 	add_child(_confirmar)
 	_montar_confirmacion(_confirmar)
+
+
+## Cada eco se lee dentro de una pequeña estancia deformada. Las superficies son
+## únicamente malla translúcida: no añaden cuerpos, navegación ni puertas y por
+## tanto conservan la salida segura del sueño.
+func _montar_microhabitacion(eco: Interactuable3D, slot: int) -> void:
+	var habitacion := Node3D.new()
+	habitacion.name = "MicroHabitacion"
+	habitacion.set_meta("slot", slot)
+	eco.add_child(habitacion)
+
+	var material := StandardMaterial3D.new()
+	material.albedo_color = COLOR_HABITACION
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.roughness = 1.0
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+
+	var signo := -1.0 if slot % 2 == 0 else 1.0
+	_crear_superficie_habitacion(
+		habitacion,
+		"Suelo",
+		Vector3(2.8, 0.08, 1.9),
+		Vector3(0.0, 0.04, 0.35),
+		Vector3(0.0, 0.0, signo * 0.018),
+		material,
+	)
+	_crear_superficie_habitacion(
+		habitacion,
+		"Techo",
+		Vector3(2.7, 0.08, 1.7),
+		Vector3(0.0, 2.42, 0.32),
+		Vector3(0.0, 0.0, -signo * (0.05 + float(slot) * 0.012)),
+		material,
+	)
+	_crear_superficie_habitacion(
+		habitacion,
+		"ParedIzquierda",
+		Vector3(0.10, 2.35, 1.65),
+		Vector3(-1.34, 1.18, 0.34),
+		Vector3(0.0, 0.0, 0.055 + signo * 0.018),
+		material,
+	)
+	_crear_superficie_habitacion(
+		habitacion,
+		"ParedDerecha",
+		Vector3(0.10, 2.28, 1.65),
+		Vector3(1.34, 1.15, 0.34),
+		Vector3(0.0, 0.0, -0.045 + signo * 0.016),
+		material,
+	)
+	_crear_superficie_habitacion(
+		habitacion,
+		"Fondo",
+		Vector3(2.68, 2.30, 0.08),
+		Vector3(0.0, 1.15, 1.15),
+		Vector3(signo * 0.012, 0.0, -signo * 0.025),
+		material,
+	)
+
+
+func _crear_superficie_habitacion(
+	padre: Node3D,
+	nombre: String,
+	tamano: Vector3,
+	posicion_local: Vector3,
+	rotacion_local: Vector3,
+	material: Material,
+) -> void:
+	var superficie := MeshInstance3D.new()
+	superficie.name = nombre
+	var caja := BoxMesh.new()
+	caja.size = tamano
+	superficie.mesh = caja
+	superficie.position = posicion_local
+	superficie.rotation = rotacion_local
+	superficie.material_override = material
+	superficie.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	padre.add_child(superficie)
 
 
 func _montar_panel(eco: Interactuable3D) -> void:

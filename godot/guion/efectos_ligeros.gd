@@ -17,12 +17,23 @@
 ## Con reducción de movimiento el polvo y el vapor no se montan y las ondas y
 ## gotas se quedan quietas: el charco y el cristal mojado siguen diciendo que
 ## llueve.
+##
+## Segunda tanda: chispas del fluorescente del archivo, neblina baja en el sueño
+## y, en el trayecto, lo que monta `EfectosCalle` (salpicaduras, goteo de
+## marquesinas, papeles al viento, humo de alcantarilla y vaho).
 class_name EfectosLigeros
 extends RefCounted
 
 const NOMBRE := "EfectosLigeros"
 const SHADER_CHARCO := "res://arte/charco_ondas.gdshader"
 const SHADER_GOTAS := "res://arte/gotas_cristal.gdshader"
+const SHADER_NEBLINA := "res://arte/neblina_baja.gdshader"
+const PARTICULAS_CHISPAS := 14
+## Cada cuánto chisporrotea el fluorescente, en segundos: lo bastante raro para
+## que sorprenda y lo bastante fijo para que se repita igual cada partida.
+const INTERVALO_CHISPAS := 23.0
+const PARPADEO := 0.15
+const LADO_NEBLINA := 40.0
 
 const PARTICULAS_VAPOR := 10
 const MAX_TAZAS := 8
@@ -38,6 +49,9 @@ const NOMBRE_VAPOR := "VaporLigero"
 ## Cuántas veces y cada cuánto se vuelve a buscar un cristal que aún no está.
 const REINTENTOS_CRISTAL := 20
 const PAUSA_CRISTAL := 0.5
+
+## Mancha difusa compartida por vapor, humo y aliento; se genera una vez.
+static var _mancha: GradientTexture2D
 
 
 ## Monta los efectos que tocan en [param mundo] para [param fase] con el tiempo
@@ -63,6 +77,13 @@ static func montar(
 			_polvo(mundo, raiz)
 	if llueve and fase == "trayecto":
 		_charcos(raiz, reducir)
+	if fase == "trayecto":
+		EfectosCalle.montar(raiz, mundo, clima, reducir)
+	# El parpadeo es un destello: con reducción de movimiento no se monta.
+	if fase == "archivo" and not reducir:
+		_chispas(mundo, raiz)
+	if fase == "sueño":
+		_neblina(raiz, reducir)
 	if llueve:
 		mojar_cristales(mundo, reducir)
 		_seguir_mojando(mundo, raiz, reducir)
@@ -111,7 +132,7 @@ static func _vapor(mundo: Node3D) -> void:
 		proceso.turbulence_noise_strength = 0.4
 		proceso.turbulence_noise_scale = 3.0
 		proceso.alpha_curve = _curva_aparece_y_se_va()
-		_color(vapor, Color(0.95, 0.95, 0.92, 0.22))
+		_color(vapor, Color(0.95, 0.95, 0.92, 0.22), false, true)
 		vapor.visibility_aabb = AABB(Vector3(-0.2, 0.0, -0.2), Vector3(0.4, 0.5, 0.4))
 		taza.add_child(vapor)
 
@@ -147,6 +168,68 @@ static func _polvo(mundo: Node3D, raiz: Node3D) -> void:
 		_color(polvo, Color(1.0, 0.95, 0.82, 0.55), true)
 		polvo.visibility_aabb = AABB(Vector3(-1, -1, -1), Vector3(2, 2, 2))
 		raiz.add_child(polvo)
+
+
+# --- Chispas del fluorescente ----------------------------------------------------
+
+
+## Una lámpara del archivo chisporrotea de vez en cuando: parpadea un instante
+## y suelta un puñado de chispas que caen. Una sola lámpara, siempre la misma.
+static func _chispas(mundo: Node3D, raiz: Node3D) -> void:
+	var lamparas := mundo.find_children(Espacio3D.NOMBRE_LUZ_SALA, "OmniLight3D", true, false)
+	if lamparas.is_empty():
+		return
+	var lampara: OmniLight3D = lamparas[0]
+	var chispas := _emisor(PARTICULAS_CHISPAS, 0.9, Vector2(0.015, 0.015))
+	chispas.name = "ChispasFluorescente"
+	chispas.one_shot = true
+	chispas.emitting = false
+	chispas.explosiveness = 0.9
+	chispas.preprocess = 0.0
+	chispas.position = raiz.to_local(lampara.global_position) + Vector3(0, -0.1, 0)
+	var proceso := chispas.process_material as ParticleProcessMaterial
+	proceso.direction = Vector3.DOWN
+	proceso.spread = 55.0
+	proceso.initial_velocity_min = 0.6
+	proceso.initial_velocity_max = 1.4
+	proceso.gravity = Vector3(0, -9.8, 0)
+	_color(chispas, Color(1.0, 0.92, 0.6, 1.0), true)
+	raiz.add_child(chispas)
+	var reloj := Timer.new()
+	reloj.name = "RelojChispas"
+	reloj.wait_time = INTERVALO_CHISPAS
+	reloj.autostart = true
+	raiz.add_child(reloj)
+	reloj.timeout.connect(func(): chisporrotear(lampara, chispas))
+
+
+## Un chisporroteo: la lámpara cae un instante y suelta las chispas.
+static func chisporrotear(lampara: OmniLight3D, chispas: GPUParticles3D) -> void:
+	if not is_instance_valid(lampara) or not is_instance_valid(chispas):
+		return
+	var energia := lampara.light_energy
+	chispas.restart()
+	var tween := lampara.create_tween()
+	tween.tween_property(lampara, "light_energy", energia * 0.15, PARPADEO * 0.3)
+	tween.tween_property(lampara, "light_energy", energia, PARPADEO * 0.7)
+
+
+# --- Neblina del sueño ----------------------------------------------------------
+
+
+static func _neblina(raiz: Node3D, reducir: bool) -> void:
+	var neblina := MeshInstance3D.new()
+	neblina.name = "NeblinaBaja"
+	var plano := PlaneMesh.new()
+	plano.size = Vector2(LADO_NEBLINA, LADO_NEBLINA)
+	neblina.mesh = plano
+	neblina.position = Vector3(0, 0.18, 0)
+	neblina.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var material := ShaderMaterial.new()
+	material.shader = load(SHADER_NEBLINA)
+	material.set_shader_parameter("velocidad", 0.0 if reducir else 1.0)
+	neblina.material_override = material
+	raiz.add_child(neblina)
 
 
 # --- Charcos y gotas: shader, sin partículas ------------------------------------
@@ -255,8 +338,13 @@ static func _emisor(cantidad: int, vida: float, tamano: Vector2) -> GPUParticles
 	return emisor
 
 
-static func _color(emisor: GPUParticles3D, color: Color, aditivo: bool = false) -> void:
+static func _color(
+	emisor: GPUParticles3D, color: Color, aditivo: bool = false, suave: bool = false
+) -> void:
 	var material := StandardMaterial3D.new()
+	# Vapor, humo y aliento son nubes: un quad liso se lee como un cuadrado.
+	if suave:
+		material.albedo_texture = _mancha_suave()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
@@ -265,6 +353,22 @@ static func _color(emisor: GPUParticles3D, color: Color, aditivo: bool = false) 
 	if aditivo:
 		material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 	(emisor.draw_pass_1 as QuadMesh).material = material
+
+
+## Círculo blanco que se difumina hasta transparente, generado una vez y sin
+## binarios.
+static func _mancha_suave() -> GradientTexture2D:
+	if _mancha == null:
+		var gradiente := Gradient.new()
+		gradiente.colors = PackedColorArray([Color(1, 1, 1, 1), Color(1, 1, 1, 0)])
+		_mancha = GradientTexture2D.new()
+		_mancha.gradient = gradiente
+		_mancha.fill = GradientTexture2D.FILL_RADIAL
+		_mancha.fill_from = Vector2(0.5, 0.5)
+		_mancha.fill_to = Vector2(0.5, 0.0)
+		_mancha.width = 32
+		_mancha.height = 32
+	return _mancha
 
 
 static func _curva_aparece_y_se_va() -> CurveTexture:
