@@ -121,14 +121,106 @@ def _ejecutar(comando: list[str], salida: Path) -> dict:
     }
 
 
+def _escribir_revision(destino: Path, manifiesto: dict) -> None:
+    """Genera una hoja Markdown de revisión humana junto a las capturas."""
+
+    entradas = manifiesto["entradas"]
+    lineas = [
+        "# Revisión humana Tarot #645",
+        "",
+        "> Esta hoja organiza la evidencia; no sustituye la inspección humana.",
+        "",
+        f"- Recorridos esperados: **{manifiesto['esperadas']}**",
+        f"- Recorridos generados: **{manifiesto['total']}**",
+        "",
+        "## Criterios globales",
+        "",
+        "- [ ] Las ocho cartas ocultas muestran el frontal correcto y legible.",
+        "- [ ] Reducción de movimiento conserva carta, desbloqueo y estado posterior.",
+        "- [ ] Skip conserva desbloqueo, historia política y estado de canje.",
+        "- [ ] El Mago se obtiene por la primera pista real y su frontal es correcto.",
+        "",
+    ]
+
+    ocultas = [entrada for entrada in entradas if entrada["tipo"] == "oculta"]
+    por_carta: dict[str, list[dict]] = {}
+    for entrada in ocultas:
+        por_carta.setdefault(entrada["carta"], []).append(entrada)
+
+    for folio, carta in CARTAS_OCULTAS:
+        lineas.extend([f"## {carta} — {folio}", ""])
+        for entrada in por_carta.get(carta, []):
+            captura = entrada["captura"]
+            recorrido = entrada["recorrido"]
+            estado = "generada" if entrada["ok"] is True else (
+                "fallida" if entrada["ok"] is False else "pendiente"
+            )
+            lineas.extend(
+                [
+                    f"### {recorrido}",
+                    "",
+                    f"Estado técnico: **{estado}**",
+                    "",
+                    f"![{carta} {recorrido}]({captura})",
+                    "",
+                    "- [ ] Frontal corresponde al arcano esperado.",
+                    "- [ ] Composición y texto son legibles en el montaje 3D.",
+                ]
+            )
+            if recorrido == "skip":
+                lineas.append(
+                    "- [ ] El salto termina con el mismo desbloqueo/historia/canje."
+                )
+            else:
+                lineas.append(
+                    "- [ ] El resultado de desbloqueo y persistencia es correcto."
+                )
+            lineas.append("")
+
+    lineas.extend(["## el-mago — progresión real", ""])
+    for entrada in entradas:
+        if entrada["tipo"] != "progreso":
+            continue
+        captura = entrada["captura"]
+        recorrido = entrada["recorrido"]
+        estado = "generada" if entrada["ok"] is True else (
+            "fallida" if entrada["ok"] is False else "pendiente"
+        )
+        lineas.extend(
+            [
+                f"### {recorrido}",
+                "",
+                f"Estado técnico: **{estado}**",
+                "",
+                f"![el-mago progreso {recorrido}]({captura})",
+                "",
+                "- [ ] El Mago se ha obtenido por primera pista, no fabricado desde QA.",
+                "- [ ] Frontal correcto y legible.",
+                "- [ ] Posesión per-run y memoria conocida quedan conservadas.",
+                "",
+            ]
+        )
+
+    lineas.extend(
+        [
+            "## Cierre",
+            "",
+            "- [ ] Revisión humana completada sobre candidato/export real.",
+            "- [ ] Las tres casillas pendientes de #645 pueden marcarse con evidencia.",
+            "",
+        ]
+    )
+    (destino / "revision-humana.md").write_text(
+        "\n".join(lineas), encoding="utf-8"
+    )
+
+
 def preparar(destino: Path, godot: str, ejecutar: bool = True) -> dict:
     destino.mkdir(parents=True, exist_ok=True)
     entradas: list[dict] = []
 
     for folio, carta in CARTAS_OCULTAS:
         for nombre, plano, modo in RECORRIDOS_OCULTAS:
-            # El propio nombre contiene "tarot": así un --output personalizado
-            # no desactiva por accidente el dispatcher especial del capturador.
             salida = destino / f"tarot-{carta}-{nombre}.png"
             comando = _comando_oculta(godot, salida, folio, plano, modo)
             entrada = {
@@ -147,8 +239,6 @@ def preparar(destino: Path, godot: str, ejecutar: bool = True) -> dict:
             entradas.append(entrada)
 
     for nombre, plano, modo in RECORRIDOS_PROGRESO:
-        # "tarot" y "progreso" deben vivir en el fichero, no depender del
-        # directorio: capturar.gd usa ambas palabras para escoger esta ruta.
         salida = destino / f"tarot-el-mago-progreso-{nombre}.png"
         comando = _comando_progreso(godot, salida, plano, modo)
         entrada = {
@@ -183,6 +273,7 @@ def preparar(destino: Path, godot: str, ejecutar: bool = True) -> dict:
         json.dumps(manifiesto, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
+    _escribir_revision(destino, manifiesto)
     return manifiesto
 
 
@@ -192,13 +283,13 @@ def main() -> int:
         "--output",
         type=Path,
         default=ROOT / "dist" / "qa" / "tarot-645",
-        help="Directorio de capturas y manifest.json.",
+        help="Directorio de capturas, manifest.json y revision-humana.md.",
     )
     parser.add_argument("--godot", help="Ejecutable de Godot (por defecto godot4/godot).")
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Escribe el manifiesto y los comandos sin ejecutar Godot.",
+        help="Escribe manifiesto, hoja de revisión y comandos sin ejecutar Godot.",
     )
     args = parser.parse_args()
 
@@ -209,6 +300,7 @@ def main() -> int:
     manifiesto = preparar(args.output, godot, ejecutar=not args.dry_run)
     fallos = [e for e in manifiesto["entradas"] if e["ok"] is False]
     print(f"Tarot #645: {manifiesto['total']} recorridos preparados en {args.output}")
+    print(f"Hoja de revisión: {args.output / 'revision-humana.md'}")
     if args.dry_run:
         print("Dry-run: no se ejecutó Godot.")
         return 0

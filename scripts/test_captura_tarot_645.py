@@ -39,7 +39,9 @@ class CapturaTarot645Test(unittest.TestCase):
     def test_preparador_genera_ocultas_y_progreso_aislables(self) -> None:
         modulo = _cargar_preparador()
         with tempfile.TemporaryDirectory() as temporal:
-            manifiesto = modulo.preparar(Path(temporal), "godot4", ejecutar=False)
+            destino = Path(temporal)
+            manifiesto = modulo.preparar(destino, "godot4", ejecutar=False)
+            revision = (destino / "revision-humana.md").read_text(encoding="utf-8")
         self.assertEqual(manifiesto["total"], 26)
         self.assertEqual(manifiesto["esperadas"], 26)
         capturas = {entrada["captura"] for entrada in manifiesto["entradas"]}
@@ -60,6 +62,10 @@ class CapturaTarot645Test(unittest.TestCase):
         self.assertTrue(all("progreso" in entrada["captura"] for entrada in progreso))
         self.assertTrue(all(entrada["carta"] == "el-mago" for entrada in progreso))
         self.assertTrue(all(entrada["ok"] is None for entrada in manifiesto["entradas"]))
+        self.assertIn("# Revisión humana Tarot #645", revision)
+        self.assertIn("![la-justicia normal](tarot-la-justicia-normal.png)", revision)
+        self.assertIn("![el-mago progreso normal](tarot-el-mago-progreso-normal.png)", revision)
+        self.assertEqual(revision.count("Estado técnico: **pendiente**"), 26)
 
     def test_documenta_las_ocho_cartas_y_no_finge_la_progresion(self) -> None:
         for folio in (
@@ -77,6 +83,7 @@ class CapturaTarot645Test(unittest.TestCase):
         self.assertIn("primera pista", self.doc)
         self.assertIn("#1029", self.doc)
         self.assertIn("permanece pendiente", self.doc)
+        self.assertIn("revision-humana.md", self.doc)
 
 
 if __name__ == "__main__":
