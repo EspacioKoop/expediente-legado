@@ -55,7 +55,9 @@ func _probar_recorrido_completo() -> void:
 	capa.configurar(estado)
 	await process_frame
 
-	_comprobar(capa.find_children("*", "Label3D", true, false).is_empty(), "sin marcadores flotantes")
+	_comprobar(
+		capa.find_children("*", "Label3D", true, false).is_empty(), "sin marcadores flotantes"
+	)
 	for id_punto in ruta:
 		var objetivo := capa.punto(id_punto)
 		_comprobar(objetivo != null, "%s existe físicamente" % id_punto)
@@ -65,7 +67,9 @@ func _probar_recorrido_completo() -> void:
 
 	var luz := mundo.get_node_or_null(Espacio3D.NOMBRE_LUZ_SALA) as OmniLight3D
 	_comprobar(luz != null and not luz.visible, "apagar lámpara cambia el mundo")
-	_comprobar(RondaCierre.finalizar(estado) == RondaCierre.IMPECABLE, "recorrido completo es impecable")
+	_comprobar(
+		RondaCierre.finalizar(estado) == RondaCierre.IMPECABLE, "recorrido completo es impecable"
+	)
 	_comprobar(bool(RondaCierre.progreso(estado)["completa"]), "progreso queda completo")
 	mundo.queue_free()
 	await process_frame
@@ -80,13 +84,17 @@ func _probar_abandono_parcial() -> void:
 	await process_frame
 
 	var primero := capa.punto("recoger_a7")
-	_comprobar(primero != null and primero.interactuar(root), "se puede hacer un punto antes de abandonar")
+	_comprobar(
+		primero != null and primero.interactuar(root), "se puede hacer un punto antes de abandonar"
+	)
 	RondaCierre.abandonar(estado)
 	capa.refrescar()
 	_comprobar(bool(estado["abandonada"]), "abandono queda persistido")
 	_comprobar(estado["rango"] == RondaCierre.ABANDONADA, "abandono conserva su rango")
 	var pendiente := capa.punto("comprobar_tablon")
-	_comprobar(pendiente != null and not pendiente.habilitado, "abandono desactiva puntos pendientes")
+	_comprobar(
+		pendiente != null and not pendiente.habilitado, "abandono desactiva puntos pendientes"
+	)
 	_comprobar(estado["completados"].size() == 1, "abandono no duplica progreso")
 	mundo.queue_free()
 	await process_frame
