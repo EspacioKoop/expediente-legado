@@ -147,6 +147,7 @@ func _montar_prototipo() -> void:
 	_montar_pasarela()
 	_montar_impactos()
 	_montar_marca_sellado()
+	_montar_prop_panoplia()
 	_montar_iluminacion()
 	_montar_camara()
 
@@ -316,6 +317,16 @@ func _revestir_geometria(nodo: Node, material: Material) -> int:
 	for hijo in nodo.get_children():
 		revestidas += _revestir_geometria(hijo, material)
 	return revestidas
+
+
+func _montar_prop_panoplia() -> void:
+	var prop := Mitologias435Props.panoplia_aquiles()
+	prop.name = "PropPanopliaAquiles"
+	prop.position = Vector3(4.35, 0.0, 3.45)
+	prop.rotation_degrees = Vector3(0.0, -24.0, 0.0)
+	prop.scale = Vector3.ONE * 0.78
+	prop.set_meta("mitologias_435_solo_visual", true)
+	add_child(prop)
 
 
 func _montar_iluminacion() -> void:

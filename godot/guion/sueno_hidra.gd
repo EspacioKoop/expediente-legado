@@ -235,6 +235,14 @@ func _asegurar_estructura() -> void:
 		_raiz_visual.mesh = esfera
 		_raiz_visual.position = POSICION_RAIZ
 		add_child(_raiz_visual)
+	if get_node_or_null("PropBustoHidra") == null:
+		var prop := Mitologias435Props.busto_hidra()
+		prop.name = "PropBustoHidra"
+		prop.position = Vector3(-7.2, 0.0, -7.4)
+		prop.rotation_degrees = Vector3(0.0, 26.0, 0.0)
+		prop.scale = Vector3.ONE * 0.62
+		prop.set_meta("mitologias_435_solo_visual", true)
+		add_child(prop)
 
 
 func _sincronizar_visuales() -> void:

@@ -235,7 +235,18 @@ static func crear_prototipo_3d(
 
 	_montar_balanza(raiz)
 	_montar_pesos(raiz, estado_pesaje)
+	_montar_prop_legajo(raiz)
 	return raiz
+
+
+static func _montar_prop_legajo(raiz: Node3D) -> void:
+	var prop := Mitologias435Props.legajo_siga()
+	prop.name = "PropLegajoSiga"
+	prop.position = Vector3(-3.8, 0.58, 1.7)
+	prop.rotation_degrees = Vector3(-4.0, 18.0, 0.0)
+	prop.scale = Vector3.ONE * 0.74
+	prop.set_meta("mitologias_435_solo_visual", true)
+	raiz.add_child(prop)
 
 
 ## Aplica una selección real al prototipo. La balanza refleja el error de peso y

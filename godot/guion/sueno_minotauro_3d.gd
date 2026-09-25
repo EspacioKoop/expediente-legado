@@ -53,6 +53,7 @@ func preparar() -> void:
 	_montar_hilo_ariadna()
 	_montar_ala_replegable()
 	_montar_presencia()
+	_montar_prop_archivador()
 	_montar_luz()
 	_aplicar_estado_visual(false)
 
@@ -222,6 +223,16 @@ func _montar_presencia() -> void:
 		COLOR_BLOQUEO,
 	)
 	_bloqueo_visual.visible = false
+
+
+func _montar_prop_archivador() -> void:
+	var prop := Mitologias435Props.archivador_onirico()
+	prop.name = "PropArchivadorOnirico"
+	prop.position = Vector3(-5.6, 0.0, -3.8)
+	prop.rotation_degrees = Vector3(0.0, -18.0, 0.0)
+	prop.scale = Vector3.ONE * 0.82
+	prop.set_meta("mitologias_435_solo_visual", true)
+	_arquitectura.add_child(prop)
 
 
 func _montar_luz() -> void:

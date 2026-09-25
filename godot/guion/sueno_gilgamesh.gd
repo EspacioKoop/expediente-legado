@@ -197,8 +197,19 @@ func _montar_prototipo() -> void:
 	_montar_barrios(ciudad)
 	_montar_puzzle(ciudad)
 	_montar_salida(ciudad)
+	_montar_prop_tablilla_uruk(ciudad)
 	_montar_iluminacion()
 	_montar_camara()
+
+
+func _montar_prop_tablilla_uruk(ciudad: Node3D) -> void:
+	var prop := Mitologias435Props.tablilla_uruk()
+	prop.name = "PropTablillaUruk"
+	prop.position = Vector3(-8.1, 1.05, 3.8)
+	prop.rotation_degrees = Vector3(-8.0, 24.0, 0.0)
+	prop.scale = Vector3.ONE * 0.72
+	prop.set_meta("mitologias_435_solo_visual", true)
+	ciudad.add_child(prop)
 
 
 func _montar_muralla_archivo(ciudad: Node3D) -> void:

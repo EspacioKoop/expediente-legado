@@ -53,6 +53,7 @@ func preparar() -> void:
 	_montar_plataformas(arquitectura)
 	_montar_compuertas(arquitectura)
 	_montar_dragon(arquitectura)
+	_montar_prop_compuerta_ritual(arquitectura)
 	_montar_lluvia(arquitectura)
 	_montar_iluminacion(arquitectura)
 	_recalcular_flujo()
@@ -182,6 +183,16 @@ func _montar_dragon(raiz: Node3D) -> void:
 			COLOR_DRAGON if indice % 2 == 0 else COLOR_DRAGON_CLARO,
 		)
 		_segmentos_dragon.append(segmento)
+
+
+func _montar_prop_compuerta_ritual(raiz: Node3D) -> void:
+	var prop := Mitologias435Props.compuerta_ryu()
+	prop.name = "PropCompuertaRyu"
+	prop.position = Vector3(7.2, 0.0, -3.6)
+	prop.rotation_degrees = Vector3(0.0, -32.0, 0.0)
+	prop.scale = Vector3.ONE * 0.64
+	prop.set_meta("mitologias_435_solo_visual", true)
+	raiz.add_child(prop)
 
 
 func _montar_lluvia(raiz: Node3D) -> void:
