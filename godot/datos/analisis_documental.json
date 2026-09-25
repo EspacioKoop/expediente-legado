@@ -1,0 +1,30 @@
+{
+  "factura4@4": [
+    {
+      "id": "factura4-sello",
+      "texto": "VISOR_ANALISIS_951_FACTURA4_SELLO"
+    },
+    {
+      "id": "factura4-rfc",
+      "texto": "VISOR_ANALISIS_951_FACTURA4_RFC"
+    }
+  ],
+  "acta6@6": [
+    {
+      "id": "acta6-sello",
+      "texto": "VISOR_ANALISIS_951_ACTA6_SELLO"
+    }
+  ],
+  "circular6@6": [
+    {
+      "id": "circular6-fecha",
+      "texto": "VISOR_ANALISIS_951_CIRCULAR6_FECHA"
+    }
+  ],
+  "memo5@5": [
+    {
+      "id": "memo5-fecha",
+      "texto": "VISOR_ANALISIS_951_MEMO5_FECHA"
+    }
+  ]
+}
