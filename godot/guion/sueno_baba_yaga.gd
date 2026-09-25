@@ -784,8 +784,12 @@ func _aplicar_transito_cabana(origen: Vector3, reduccion_movimiento: bool) -> Di
 	_tween_cabana = create_tween()
 	_tween_cabana.set_trans(Tween.TRANS_SINE)
 	_tween_cabana.set_ease(Tween.EASE_IN_OUT)
-	_tween_cabana.tween_property(cabana, "position", horizonte, DURACION_TRAMO_HORIZONTE)
-	_tween_cabana.tween_property(cabana, "position", destino, DURACION_TRAMO_HORIZONTE)
+	_tween_cabana.tween_property(
+		cabana, "position", horizonte, DURACION_TRAMO_HORIZONTE
+	)
+	_tween_cabana.tween_property(
+		cabana, "position", destino, DURACION_TRAMO_HORIZONTE
+	)
 	return plan
 
 
