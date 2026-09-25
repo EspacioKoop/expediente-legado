@@ -636,6 +636,7 @@
       "id": "caso8@8",
       "titulo": "El expediente del empleado #427",
       "descripcion": "El registro de nómina identifica a este empleado únicamente como '#427'. Su descripción de funciones, íntegra, dice: 'Presionar el botón cuando el sistema lo requiera.' Existen al menos tres actas de cierre para este expediente, cada una con un desenlace distinto e incompatible con las demás, las tres fechadas el mismo día.",
+      "anioSuceso": 1998,
       "estado": "ABIERTO",
       "confidencial": false,
       "principal": false,
@@ -732,6 +733,228 @@
           "nombre": "Usted",
           "descripcion": "Quien está leyendo el expediente ahora mismo, a quien se dirige la transmisión sin remitente.",
           "desenlace": "Se presenta la acusación contra quien está leyendo el expediente. No hay una casilla pensada para esta respuesta, así que el sistema la registra igual, en blanco, bajo el nombre '#427'."
+        }
+      ]
+    },
+    {
+      "id": "caso9@9",
+      "titulo": "CASO_9_TITULO",
+      "descripcion": "El lote administrativo 44-B fue asignado a la serie R-17 y a la mesa de Leandro Vela. Durante tres jornadas, Vela devolvió los expedientes sin tramitar porque el índice oficial no reconoce esa serie. El mismo archivo conserva, sin embargo, una ubicación física reservada para R-17 y una orden posterior de reclasificar el lote como R-18 para que el circuito siguiera funcionando.",
+      "anioSuceso": 1997,
+      "estado": "ABIERTO",
+      "confidencial": false,
+      "principal": false,
+      "registros": [
+        {
+          "id": "memoAsignacion9@9",
+          "tipo": "MEMORANDO",
+          "folio": "MEMO-1997-144",
+          "contenido": "De: Jefatura de Sección. Para: Mesa 12, Leandro Vela. Se asigna el lote 44-B, compuesto por doce expedientes, a la serie administrativa R-17. Tramitar por el circuito ordinario y remitir a Archivo al cierre de cada jornada.",
+          "fecha": "1997-04-07"
+        },
+        {
+          "id": "parteDevolucion9@9",
+          "tipo": "PARTE",
+          "folio": "PARTE-1997-031",
+          "contenido": "Mesa 12 devuelve sin trámite el lote 44-B. Motivo consignado por Leandro Vela: 'No consta unidad receptora para la serie R-17.' Se registraron cuatro devoluciones el 07/04, cuatro el 08/04 y cuatro el 09/04.",
+          "fecha": "1997-04-09"
+        },
+        {
+          "id": "indiceSeries9@9",
+          "tipo": "INDICE",
+          "folio": "IND-1997-SERIES",
+          "contenido": "Extracto del Índice General de Series Administrativas vigente: R-16 — Reclamaciones internas, Archivo A; R-18 — Revisión extraordinaria, Archivo A. Entre ambas entradas no figura ninguna serie ni nota de anulación.",
+          "fecha": "1997-01-02"
+        },
+        {
+          "id": "controlPresencia9@9",
+          "tipo": "CONTROL",
+          "folio": "CTRL-1997-041",
+          "contenido": "Control de presencia, Mesa 12. Leandro Vela: entrada 07:56 / salida 16:04 los días 07/04, 08/04 y 09/04. Sin ausencias, permisos ni incidencias registradas. Las devoluciones del lote 44-B se anotaron dentro de esas jornadas.",
+          "fecha": "1997-04-09"
+        },
+        {
+          "id": "incidenciaJefatura9@9",
+          "tipo": "INCIDENCIA",
+          "folio": "INC-1997-052",
+          "contenido": "Marta Ochoa, Jefatura de Sección: para evitar la paralización del circuito, reclasificar provisionalmente el lote 44-B como R-18. No modificar los documentos de origen. La regularización del código R-17 se tramitará por separado.",
+          "fecha": "1997-04-10"
+        },
+        {
+          "id": "hojaRuta9@9",
+          "tipo": "HOJA_RUTA",
+          "folio": "RUTA-1997-A4-17",
+          "contenido": "Archivo A — hoja de ocupación. Ubicación reservada: estante 4, hueco 17, serie R-17. Capacidad: 24 expedientes. Último movimiento consignado: reserva de espacio para lote 44-B, autorizada el 04/04/1997.",
+          "fecha": "1997-04-04"
+        }
+      ],
+      "pistas": [
+        {
+          "id": "pista36@9",
+          "registroOrigen": "parteDevolucion9@9",
+          "descripcion": "Leandro dejó por escrito el motivo exacto de las devoluciones: el circuito no identificaba una unidad receptora para R-17.",
+          "fraseGatillo": "No consta unidad receptora para la serie R-17."
+        },
+        {
+          "id": "pista37@9",
+          "registroOrigen": "hojaRuta9@9",
+          "descripcion": "Archivo había reservado una ubicación física para R-17 antes de que comenzaran las devoluciones del lote 44-B.",
+          "fraseGatillo": "Ubicación reservada: estante 4, hueco 17, serie R-17."
+        },
+        {
+          "id": "pista38@9",
+          "registroOrigen": "memoAsignacion9@9",
+          "registroOrigen2": "indiceSeries9@9",
+          "descripcion": "El memorando asigna oficialmente el lote 44-B a R-17, pero el índice vigente salta de R-16 a R-18 sin registrar esa serie ni su anulación."
+        },
+        {
+          "id": "pista39@9",
+          "registroOrigen": "parteDevolucion9@9",
+          "registroOrigen2": "controlPresencia9@9",
+          "descripcion": "Las doce devoluciones se registraron durante jornadas en las que Leandro constaba presente en su mesa; no hay una ausencia o permiso que explique la falta de tramitación."
+        },
+        {
+          "id": "pista40@9",
+          "registroOrigen": "incidenciaJefatura9@9",
+          "registroOrigen2": "hojaRuta9@9",
+          "descripcion": "Jefatura ordenó reclasificar el lote como R-18 para desbloquear el circuito aunque Archivo ya conservaba un hueco R-17 reservado específicamente para ese mismo lote."
+        }
+      ],
+      "sospechosos": [
+        {
+          "id": "sospechosoLeandro9@9",
+          "nombre": "Leandro Vela",
+          "descripcion": "Funcionario de la Mesa 12. Devolvió los doce expedientes del lote 44-B alegando que R-17 no tenía unidad receptora en el índice operativo.",
+          "desenlace": "Se atribuye a Leandro Vela la interrupción del trámite por devolver el lote en vez de elevar la anomalía antes de la tercera jornada. La medida explica las devoluciones, pero deja sin resolver por qué una serie ausente del índice tenía asignación formal y espacio físico reservado."
+        },
+        {
+          "id": "sospechosoMarta9@9",
+          "nombre": "Marta Ochoa",
+          "descripcion": "Jefa de sección. Ordenó reclasificar provisionalmente el lote 44-B como R-18 para que el circuito continuara sin corregir primero la discrepancia de R-17.",
+          "desenlace": "Se atribuye a Marta Ochoa la normalización de una clasificación contradictoria. El lote vuelve a circular como R-18, mientras la orden original y la reserva física continúan identificándolo como R-17."
+        },
+        {
+          "id": "sospechosoJulian9@9",
+          "nombre": "Julián Bermejo",
+          "descripcion": "Responsable del índice administrativo vigente. El extracto bajo su custodia salta de R-16 a R-18 sin serie R-17 ni nota de anulación.",
+          "desenlace": "Se atribuye a Julián Bermejo el mantenimiento incompleto del índice administrativo. Corregir el índice explicaría el bloqueo operativo, pero no determina por sí solo si R-17 debía figurar, anularse o conservar el hueco que Archivo ya le había reservado."
+        }
+      ]
+    },
+    {
+      "id": "caso10@10",
+      "titulo": "CASO_10_TITULO",
+      "descripcion": "En septiembre de 1996 la plantilla oficial registra 86 empleados, pero durante diecinueve jornadas el comedor factura 87 menús, una tarjeta 0000 sin titular registra un horario ordinario y Sistemas mantiene activo PUESTO-00. El plano no contiene una Mesa 0 y Recursos Humanos ordenó mantener acceso, equipo y servicios de su ocupante sin darlo de alta hasta recibir un nombre completo.",
+      "anioSuceso": 1996,
+      "estado": "ABIERTO",
+      "confidencial": false,
+      "principal": false,
+      "registros": [
+        {
+          "id": "resumenPlantilla10@10",
+          "tipo": "RESUMEN_PLANTILLA",
+          "folio": "RES-1996-09",
+          "contenido": "Cierre de plantilla correspondiente a septiembre de 1996. Personal activo: 86. Altas del mes: 1. Bajas del mes: 0. Plazas presupuestadas: 86. No existen plazas provisionales, becarios ni personal externo imputado a nómina en este centro.",
+          "fecha": "1996-09"
+        },
+        {
+          "id": "comedor10@10",
+          "tipo": "RELACION",
+          "folio": "COM-1996-09",
+          "contenido": "Comedor de personal, liquidación de septiembre. Se sirvieron 87 menús completos en cada uno de los diecinueve días laborables. Los vales 01 a 86 corresponden a empleados activos. El vale adicional figura todos los días como MESA 0 — cargo interno, sin nombre, departamento ni firma de recepción.",
+          "fecha": "1996-09"
+        },
+        {
+          "id": "accesos10@10",
+          "tipo": "CONTROL",
+          "folio": "ACC-1996-0000",
+          "contenido": "Extracto de movimientos de la tarjeta 0000. Tarjeta 0000 — titular: SIN ASIGNAR. Entrada habitual entre 07:38 y 07:46; salida entre 17:08 y 17:19. Diecinueve jornadas registradas durante septiembre. No constan accesos en fin de semana ni fuera del horario ordinario.",
+          "fecha": "1996-09"
+        },
+        {
+          "id": "puesto0010@10",
+          "tipo": "INVENTARIO",
+          "folio": "INV-1996-P00",
+          "contenido": "Equipo PUESTO-00. Estado: ACTIVO. Dirección interna reservada. Recibe copia nocturna de configuración y responde al control automático cada jornada laborable. Usuario asignado: —. Ubicación declarada: Mesa 0. Observación de mantenimiento: no retirar de red mientras continúe generando actividad.",
+          "fecha": "1996-09"
+        },
+        {
+          "id": "plano3A10@10",
+          "tipo": "PLANO",
+          "folio": "PLANO-1996-3A",
+          "contenido": "Planta administrativa 3A. Mesas numeradas 01 a 86. Puestos 01-20: Contabilidad. 21-44: Compras. 45-63: Archivo. 64-86: Administración General. No existe numeración 00 ni espacio sin asignar entre las mesas representadas.",
+          "fecha": "1996-09"
+        },
+        {
+          "id": "memoRRHH10@10",
+          "tipo": "MEMORANDO",
+          "folio": "RRHH-1996-211",
+          "contenido": "De: Elisa Marín, Recursos Humanos. Para: Control de Accesos / Sistemas / Servicios Generales. Incidencia temporal de identificación. No dar de alta al ocupante de Mesa 0 hasta recibir un nombre completo. Mantener acceso, equipo y servicios ordinarios para evitar una interrupción de actividad. Revisar situación al cierre de mes. No consta revisión posterior.",
+          "fecha": "1996-09"
+        }
+      ],
+      "pistas": [
+        {
+          "id": "pista41@10",
+          "registroOrigen": "comedor10@10",
+          "descripcion": "El comedor registra un vale adicional todos los días de septiembre bajo la denominación Mesa 0, sin nombre ni departamento.",
+          "fraseGatillo": "MESA 0 — cargo interno"
+        },
+        {
+          "id": "pista42@10",
+          "registroOrigen": "accesos10@10",
+          "descripcion": "La tarjeta 0000 registra diecinueve jornadas de horario ordinario aunque el sistema no tiene titular asignado.",
+          "fraseGatillo": "Tarjeta 0000 — titular: SIN ASIGNAR."
+        },
+        {
+          "id": "pista43@10",
+          "registroOrigen": "memoRRHH10@10",
+          "descripcion": "Recursos Humanos ordenó mantener servicios ordinarios para el ocupante de Mesa 0 sin darle de alta hasta conocer un nombre completo.",
+          "fraseGatillo": "No dar de alta al ocupante de Mesa 0 hasta recibir un nombre completo."
+        },
+        {
+          "id": "pista44@10",
+          "registroOrigen": "resumenPlantilla10@10",
+          "registroOrigen2": "comedor10@10",
+          "descripcion": "La plantilla cierra con 86 empleados y sin personal externo, mientras el comedor registra 87 menús en cada una de las diecinueve jornadas laborables."
+        },
+        {
+          "id": "pista45@10",
+          "registroOrigen": "accesos10@10",
+          "registroOrigen2": "puesto0010@10",
+          "descripcion": "La tarjeta 0000 y PUESTO-00 registran actividad durante las mismas diecinueve jornadas laborables; la coincidencia relaciona ambos rastros sin identificar por sí sola a una persona."
+        },
+        {
+          "id": "pista46@10",
+          "registroOrigen": "puesto0010@10",
+          "registroOrigen2": "plano3A10@10",
+          "descripcion": "Sistemas ubica PUESTO-00 en Mesa 0, mientras el plano administrativo solo numera mesas del 01 al 86 y niega un espacio sin asignar."
+        },
+        {
+          "id": "pista47@10",
+          "registroOrigen": "memoRRHH10@10",
+          "registroOrigen2": "resumenPlantilla10@10",
+          "descripcion": "La orden de no dar de alta al ocupante de Mesa 0 sigue sin revisión posterior y el cierre mensual confirma que la plantilla quedó en 86 empleados."
+        }
+      ],
+      "sospechosos": [
+        {
+          "id": "sospechosoElisa10@10",
+          "nombre": "Elisa Marín",
+          "descripcion": "Responsable de Recursos Humanos que firmó la instrucción de mantener acceso y servicios sin dar de alta al ocupante de Mesa 0.",
+          "desenlace": "Se atribuye a Elisa Marín la normalización de una presencia sin alta administrativa. Al día siguiente, la plantilla sigue marcando 86 y el comedor vuelve a facturar 87 menús."
+        },
+        {
+          "id": "sospechosoVictor10@10",
+          "nombre": "Víctor Soria",
+          "descripcion": "Responsable de Sistemas que mantuvo PUESTO-00 activo pese a no tener usuario asignado ni ubicación reconocida en el plano.",
+          "desenlace": "Se ordena retirar PUESTO-00 del inventario activo. El control nocturno registra una última respuesta del equipo después de constar como retirado."
+        },
+        {
+          "id": "sospechoso0000@10",
+          "nombre": "Titular de la tarjeta 0000",
+          "descripcion": "Identidad no asignada que dejó diecinueve jornadas de accesos ordinarios; el expediente no permite demostrar que sea la causa de los demás rastros de Mesa 0.",
+          "desenlace": "El sistema intenta abrir una responsiva a nombre del titular de la tarjeta 0000 y crea un registro de empleado con el campo de identidad vacío. La plantilla pasa de 86 a 87 sin que aparezca un nombre."
         }
       ]
     }
