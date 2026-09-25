@@ -6,6 +6,7 @@
 extends "res://guion/dia_sueno_app.gd"
 
 const CIELO_SIGA := preload("res://arte/cielo_siga.tres")
+const RELIGION_SUENO := preload("res://guion/religion_sueno_935.gd")
 
 
 func _montar_entorno() -> void:
@@ -70,12 +71,21 @@ func _aplicar_cielo_sueno() -> void:
 	SuenoCielos.aplicar(material, perfil)
 
 
-## Punto de extensión común para #935/#923/Tarot. La capa de cielo NO infiere
-## religión, convicción o ideología desde objetos consumidos: cada sistema debe
-## resolver primero sus propias experiencias/tags y entregar modificadores
-## explícitos al compositor.
+## #935 consume el contrato común ya resuelto por ReligionEventos. Esta capa no
+## deduce fe desde objetos, ROMs o mitologías: solo traduce los hechos explícitos
+## de la jornada actual a la gramática visual compartida.
 func _modificadores_cielo_sueno() -> Array:
-	return []
+	var registro = partida.estado.get(ReligionEventos.CLAVE_ESTADO, {})
+	if typeof(registro) != TYPE_DICTIONARY:
+		return []
+	var reduccion_movimiento: bool = (
+		PreferenciasSiga.cargar().get("reduccion_movimiento", false) == true
+	)
+	return RELIGION_SUENO.modificadores(
+		registro,
+		int(jornada.get("dia", 0)),
+		reduccion_movimiento,
+	)
 
 
 func _material_cielo_siga() -> ShaderMaterial:
