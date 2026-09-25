@@ -6,6 +6,11 @@ ROOT = Path(__file__).resolve().parents[1]
 ASIGNACION = ROOT / "godot" / "guion" / "mitologias_noche.gd"
 AQUILES = ROOT / "godot" / "guion" / "dia_aquiles_sueno_app.gd"
 GILGAMESH = ROOT / "godot" / "guion" / "dia_gilgamesh_sueno_app.gd"
+MINOTAURO = ROOT / "godot" / "guion" / "dia_minotauro_sueno_app.gd"
+HIDRA = ROOT / "godot" / "guion" / "dia_hidra_sueno_app.gd"
+RYU = ROOT / "godot" / "guion" / "dia_ryu_sueno_app.gd"
+RYU_VIGILIA = ROOT / "godot" / "guion" / "ryu_flow_vigilia.gd"
+DUAT = ROOT / "godot" / "guion" / "sueno_duat.gd"
 SUENO_GILGAMESH = ROOT / "godot" / "guion" / "sueno_gilgamesh.gd"
 DIA = ROOT / "godot" / "escenas" / "dia.tscn"
 
@@ -16,6 +21,11 @@ class MitologiasNocheRuntimeTest(unittest.TestCase):
         cls.asignacion = ASIGNACION.read_text(encoding="utf-8")
         cls.aquiles = AQUILES.read_text(encoding="utf-8")
         cls.gilgamesh = GILGAMESH.read_text(encoding="utf-8")
+        cls.minotauro = MINOTAURO.read_text(encoding="utf-8")
+        cls.hidra = HIDRA.read_text(encoding="utf-8")
+        cls.ryu = RYU.read_text(encoding="utf-8")
+        cls.ryu_vigilia = RYU_VIGILIA.read_text(encoding="utf-8")
+        cls.duat = DUAT.read_text(encoding="utf-8")
         cls.sueno_gilgamesh = SUENO_GILGAMESH.read_text(encoding="utf-8")
         cls.dia = DIA.read_text(encoding="utf-8")
 
@@ -32,8 +42,15 @@ class MitologiasNocheRuntimeTest(unittest.TestCase):
         self.assertIn("cantidad_escenas - pendientes", self.asignacion)
         self.assertIn("static func corresponde_a_escena(", self.asignacion)
 
-    def test_aquiles_y_gilgamesh_consumen_la_misma_seleccion(self):
-        for controller in (self.aquiles, self.gilgamesh):
+    def test_verticales_originales_consumen_la_misma_seleccion(self):
+        controllers = (
+            self.aquiles,
+            self.gilgamesh,
+            self.minotauro,
+            self.hidra,
+            self.ryu,
+        )
+        for controller in controllers:
             self.assertRegex(
                 controller,
                 r"SemillasOniricas\s*\.\s*seleccionar_para_noche\s*\(",
@@ -44,8 +61,35 @@ class MitologiasNocheRuntimeTest(unittest.TestCase):
                 r"MitologiasNoche\s*\.\s*corresponde_a_escena\s*\(",
             )
             self.assertNotIn("activar_semilla_onirica", controller)
-        self.assertIn("SuenoAquiles.ID_MITO", self.aquiles)
-        self.assertIn("SuenoGilgamesh.ID_MITO", self.gilgamesh)
+
+    def test_epica_435_tiene_al_menos_tres_familias_jugables_en_dia_real(self):
+        nodos = (
+            "AquilesSuenoController",
+            "GilgameshSuenoController",
+            "MinotauroSuenoController",
+            "HidraSuenoController",
+            "RyuSuenoController",
+        )
+        montados = sum(
+            f'[node name="{nombre}" type="Node" parent="."]' in self.dia
+            for nombre in nodos
+        )
+        self.assertGreaterEqual(montados, 3)
+
+    def test_epica_435_cubre_semilla_rom_y_semilla_tv_fuera_de_oficina(self):
+        self.assertIn('const ID_ROM := "ryu_flow_98"', self.ryu_vigilia)
+        self.assertIn('const ID_MITO := "dragon_japones"', self.ryu_vigilia)
+        self.assertIn('extends "res://guion/semilla_rom_vigilia.gd"', self.ryu_vigilia)
+        self.assertIn('const FUENTE_TV := "tv:microdocumental_excavaciones_98"', self.duat)
+        self.assertIn(
+            "SemillasOniricas.activar_semilla_onirica(jornada, ID, FUENTE_TV, 1)",
+            self.duat,
+        )
+
+    def test_reduccion_movimiento_se_propaga_a_verticales_jugables(self):
+        for controller in (self.aquiles, self.minotauro, self.hidra, self.ryu):
+            self.assertIn("reduccion_movimiento", controller)
+            self.assertIn("PreferenciasSiga.cargar()", controller)
 
     def test_gilgamesh_usa_vertical_real_con_interaccion_integrada(self):
         self.assertIn(
@@ -65,13 +109,16 @@ class MitologiasNocheRuntimeTest(unittest.TestCase):
         self.assertIn('espacio.get("salidas", [])', self.gilgamesh)
         self.assertIn("entrada.lerp(salida, 0.5)", self.gilgamesh)
 
-    def test_dia_monta_ambos_controllers_nocturnos(self):
-        self.assertIn('path="res://guion/dia_aquiles_sueno_app.gd"', self.dia)
-        self.assertIn('path="res://guion/dia_gilgamesh_sueno_app.gd"', self.dia)
-        self.assertIn('[node name="AquilesSuenoController" type="Node" parent="."]', self.dia)
-        self.assertIn(
-            '[node name="GilgameshSuenoController" type="Node" parent="."]', self.dia
+    def test_dia_monta_controladores_nocturnos_originales(self):
+        rutas = (
+            "dia_aquiles_sueno_app.gd",
+            "dia_gilgamesh_sueno_app.gd",
+            "dia_minotauro_sueno_app.gd",
+            "dia_hidra_sueno_app.gd",
+            "dia_ryu_sueno_app.gd",
         )
+        for ruta in rutas:
+            self.assertIn(f'path="res://guion/{ruta}"', self.dia)
 
 
 if __name__ == "__main__":
