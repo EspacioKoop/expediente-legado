@@ -29,7 +29,9 @@ func _ejecutar() -> void:
 	hoyo._sincronizar_bola_visual()
 	hoyo._resolver_reposo()
 	var posicion: Vector2 = hoyo.estado_bola.get("posicion")
-	_comprobar(is_finite(posicion.x) and is_finite(posicion.y), "el tiro termina en posición finita")
+	_comprobar(
+		is_finite(posicion.x) and is_finite(posicion.y), "el tiro termina en posición finita"
+	)
 	_comprobar(GolfBola.detenida(hoyo.estado_bola), "el tiro siempre termina")
 
 	hoyo.estado_bola["posicion"] = GolfHoyoApp.OBJETIVO
