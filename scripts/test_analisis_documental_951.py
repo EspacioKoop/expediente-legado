@@ -24,7 +24,10 @@ class AnalisisDocumental951Test(unittest.TestCase):
         }
 
     def test_el_modo_vive_en_la_capa_real_de_metadatos(self):
-        self.assertIn('RUTA_ANALISIS_DOCUMENTAL := "res://datos/analisis_documental.json"', self.visor)
+        self.assertIn(
+            'RUTA_ANALISIS_DOCUMENTAL := "res://datos/analisis_documental.json"',
+            self.visor,
+        )
         self.assertIn('_analizar_documento.text = tr("VISOR_ANALISIS_951_ACCION")', self.visor)
         self.assertIn("_analizar_documento.pressed.connect(_analizar_documento_actual)", self.visor)
         self.assertIn("_resultado_analisis.visible = true", self.visor)
