@@ -409,6 +409,14 @@ func _crear_bigote(padre: Node3D, nombre: String, lado: float) -> void:
 
 
 func _material(color: Color, transparente: bool = false) -> StandardMaterial3D:
+	if color == COLOR_METAL:
+		return Mitologias435Materiales.crear(
+			"metal_archivo_oxidado", color, transparente
+		)
+	if color == COLOR_DRAGON or color == COLOR_DRAGON_CLARO:
+		return Mitologias435Materiales.crear(
+			"jade_ryu_humedo", color, transparente
+		)
 	var material := StandardMaterial3D.new()
 	material.albedo_color = color
 	material.roughness = 0.58
