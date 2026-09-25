@@ -182,14 +182,16 @@ La mayor parte de las obras de este documento **no son recursos reutilizables**.
 
 Para material que pueda incorporarse al repositorio:
 
-| Fuente | Regla de uso |
+Verificación de licencias: **26/09/2026**. Volver a comprobar la fuente original en el momento de importar.
+
+| Fuente | Estado verificado y regla de uso |
 | --- | --- |
-| **Poly Haven** | Catálogo orientado a recursos CC0; registrar de todos modos fuente, autor/proyecto, licencia y hash en la procedencia del repo. |
-| **Kenney** | Muchos packs se publican CC0; verificar la ficha concreta antes de importar. |
-| **Solarus starter packs** | La licencia puede separar código y assets; verificar cada paquete y cada componente. |
-| **Freedoom** | Open source no significa CC0; respetar su licencia BSD y procedencia. |
-| **The Dark Mod** | Proyecto con mezcla de licencias; no tratar el conjunto como un banco CC0. |
-| **Quaternius** | Verificar la licencia del pack concreto y la versión de sus términos; no asumir que todo el catálogo comparte una licencia histórica. |
+| **Poly Haven** | Su [licencia oficial](https://polyhaven.com/license) declara **CC0 para todos sus HDRI, texturas y modelos 3D**. Aun así, registrar fuente, proyecto/autor, licencia y hash en la procedencia del repo. |
+| **Kenney** | Su [soporte oficial](https://kenney.nl/support) declara **CC0 para todos los game assets publicados en sus páginas de assets**. No usar el logo de Kenney como si fuera un asset CC0. |
+| **Solarus MIT Starter Quest** | La [documentación de resource packs](https://docs.solarus-games.org/resources/resource-packs/) y la [aclaración de licencia](https://www.solarus-games.org/news/2020-08-01-clarification-about-quest-licensing/) separan scripts **MIT** y arte **Public Domain/CC0**. Otros packs Solarus pueden usar GPL/CC-BY-SA: verificar paquete y componente. |
+| **Freedoom** | El [manual oficial](https://github.com/freedoom/freedoom/blob/master/manual/freedoom-manual-en.adoc) describe el juego completo como reutilizable bajo licencia **BSD modificada / 3-clause BSD**. No es CC0. |
+| **The Dark Mod** | No tratarlo como banco CC0: el código y el material no comparten necesariamente licencia y el material no-software del núcleo usa una base no comercial salvo excepciones. Verificar el archivo/licencia concreto antes de considerar cualquier reutilización. |
+| **Quaternius** | La [Quaternius Asset License v1.0](https://quaternius.com/license.html), actualizada el **28/08/2026**, permite usar y modificar assets gratuitamente en proyectos personales, educativos y comerciales sin atribución, pero **prohíbe revender o redistribuir los assets como assets/pack/stock independiente**. No clasificar el catálogo actual como CC0. |
 
 Regla operativa: **“gratis”, “open source”, “freeware” y “abandonware” no significan CC0**.
 
