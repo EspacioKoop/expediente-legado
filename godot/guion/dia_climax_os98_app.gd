@@ -126,7 +126,6 @@ func _olvidar_documento() -> void:
 	_tiempo_texto = 0.0
 
 
-
 ## Aplica el mismo contrato narrativo a los rótulos físicos del archivado (#157).
 ## Son superficies 3D reales del recorrido; el estado visual vive como metadata
 ## local del Label3D y nunca modifica la lógica de clasificación.
