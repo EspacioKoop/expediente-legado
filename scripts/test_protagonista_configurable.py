@@ -30,7 +30,7 @@ class ProtagonistaConfigurableTest(unittest.TestCase):
 
     def test_hay_seis_avatares_rocketbox_elegibles(self):
         ids = re.findall(r'"id": "(rocketbox/[a-z0-9_]+)"', self.perfil)
-        self.assertEqual(len(ids), 6)
+        self.assertEqual(len(ids), 5)
         for avatar in ids:
             self.assertTrue((RAIZ / f"godot/assets/modelos/{avatar}.glb").exists(), avatar)
 

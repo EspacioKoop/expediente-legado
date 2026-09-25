@@ -25,7 +25,7 @@ func _probar() -> void:
 	caminante.add_child(camara)
 
 	var cuerpo := CuerpoJugador3D.new()
-	cuerpo.perfil = {"apariencia": {"avatar": "rocketbox/female_adult_07", "altura": 1.04}}
+	cuerpo.perfil = {"apariencia": {"avatar": "rocketbox/female_adult_04", "altura": 1.04}}
 	caminante.add_child(cuerpo)
 	for _i in 4:
 		await process_frame
@@ -36,7 +36,7 @@ func _probar() -> void:
 		_terminar()
 		return
 	_comprobar(
-		String(figura.scene_file_path).ends_with("rocketbox/female_adult_07.glb"),
+		String(figura.scene_file_path).ends_with("rocketbox/female_adult_04.glb"),
 		"es el avatar Rocketbox que eligió la ficha",
 	)
 	var esqueleto := Modelos._esqueleto(figura)
@@ -50,7 +50,13 @@ func _probar() -> void:
 	)
 	# El modificador actúa dentro de la actualización del esqueleto y Godot
 	# restaura la pose después: la escala se lee en `skeleton_updated`.
+	# Sin el BoneMap del import el esqueleto conserva los nombres Biped y no hay
+	# `Neck`: la cabeza no se oculta y la cámara ve el interior del cráneo.
 	var cabeza := esqueleto.find_bone("Neck")
+	_comprobar(cabeza >= 0, "el esqueleto viene con el perfil humanoide (hay Neck)")
+	if cabeza < 0:
+		_terminar()
+		return
 	var escalas_cabeza: Array[float] = []
 	var medir := func() -> void: escalas_cabeza.append(esqueleto.get_bone_pose_scale(cabeza).x)
 	esqueleto.skeleton_updated.connect(medir)
@@ -108,6 +114,15 @@ func _probar() -> void:
 			ResourceLoader.exists("%s%s.glb" % [Modelos.RUTA, avatar["id"]]),
 			"%s existe" % avatar["id"],
 		)
+		var prueba := Node3D.new()
+		root.add_child(prueba)
+		Modelos.persona(prueba, String(avatar["id"]), Color.WHITE, "")
+		var huesos := Modelos._esqueleto(prueba.get_child(0))
+		_comprobar(
+			huesos != null and huesos.find_bone("Neck") >= 0 and huesos.find_bone("Head") >= 0,
+			"%s trae el perfil humanoide" % avatar["id"],
+		)
+		prueba.free()
 		_comprobar(
 			not Companeros.CUERPOS.values().has(avatar["id"]),
 			"%s no es de un compañero" % avatar["id"],

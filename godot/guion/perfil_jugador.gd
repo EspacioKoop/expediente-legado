@@ -16,7 +16,6 @@ const VERSION := 1
 ## `nombre` es clave de textos.csv.
 const AVATARES := [
 	{"id": "rocketbox/male_adult_11", "nombre": "PERSONAJE_AVATAR_CAMISA_OSCURA"},
-	{"id": "rocketbox/female_adult_07", "nombre": "PERSONAJE_AVATAR_CHAQUETA_MARRON"},
 	{"id": "rocketbox/male_adult_06", "nombre": "PERSONAJE_AVATAR_CAMISETA_ROJA"},
 	{"id": "rocketbox/female_adult_04", "nombre": "PERSONAJE_AVATAR_CAZADORA_CUERO"},
 	{"id": "rocketbox/male_adult_12", "nombre": "PERSONAJE_AVATAR_CAZADORA_VAQUERA"},

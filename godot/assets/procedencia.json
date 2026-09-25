@@ -1927,16 +1927,6 @@
       "conversion": "FBX + texturas TGA 2048 convertidos a glb con godot/herramientas/convertir_rocketbox.gd (Godot 4.7): texturas de color, normal y opacidad a 1024 px en WebP con pérdida; sin mapas specular."
     },
     {
-      "ruta": "modelos/rocketbox/female_adult_07.glb",
-      "titulo": "Female_Adult_07 — Microsoft Rocketbox Avatar Library",
-      "autor": "Microsoft",
-      "licencia": "MIT",
-      "fuente": "https://github.com/microsoft/Microsoft-Rocketbox",
-      "sha256": "cb87f2a455917e014acfdda52b3b9f4948f4b8163063a855d3b5be86e6f227b4",
-      "archivo_origen": "Assets/Avatars/Adults/Female_Adult_07/Export/Female_Adult_07.fbx @ 0943055db6ec570bcef9f2c8b41c9e5467c808f9",
-      "conversion": "FBX + texturas TGA 2048 convertidos a glb con godot/herramientas/convertir_rocketbox.gd (Godot 4.7): texturas de color, normal y opacidad a 1024 px en WebP con pérdida; sin mapas specular."
-    },
-    {
       "ruta": "modelos/rocketbox/male_adult_06.glb",
       "titulo": "Male_Adult_06 — Microsoft Rocketbox Avatar Library",
       "autor": "Microsoft",
