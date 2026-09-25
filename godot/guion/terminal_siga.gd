@@ -23,8 +23,7 @@ const ARCHIVOS := {
 	"Índice local disponible. Abra SIGA para consultar expedientes y folios autorizados.",
 	"/RED/HOSTS.TXT":
 	"SIGA.LOCAL       10.98.0.10\nARCHIVO.LOCAL    10.98.0.20\nINTRANET.LOCAL   10.98.0.30",
-	"/USUARIOS/AUDITOR.TXT":
-	"usuario=auditor\nperfil=consulta\nunidad=archivo",
+	"/USUARIOS/AUDITOR.TXT": "usuario=auditor\nperfil=consulta\nunidad=archivo",
 }
 
 const ENTORNO := {
@@ -71,8 +70,10 @@ func ejecutar(linea: String) -> Dictionary:
 		"netstat":
 			return _resultado(
 				true,
-				"PROTO  LOCAL          REMOTO             ESTADO\n"
-				+ "TCP    SIGA-98:1048   ARCHIVO.LOCAL:98   ESTABLECIDA"
+				(
+					"PROTO  LOCAL          REMOTO             ESTADO\n"
+					+ "TCP    SIGA-98:1048   ARCHIVO.LOCAL:98   ESTABLECIDA"
+				)
 			)
 		"del", "erase", "rm", "copy", "cp", "edit":
 			return _resultado(false, "OPERACION NO DISPONIBLE: terminal de solo lectura")
@@ -133,8 +134,7 @@ func _ping(argumento: String) -> Dictionary:
 	if not LATENCIAS.has(host):
 		return _resultado(false, "Host simulado desconocido: %s" % host)
 	return _resultado(
-		true,
-		"PING %s (simulado): respuesta en %d ms" % [host.to_upper(), int(LATENCIAS[host])]
+		true, "PING %s (simulado): respuesta en %d ms" % [host.to_upper(), int(LATENCIAS[host])]
 	)
 
 
