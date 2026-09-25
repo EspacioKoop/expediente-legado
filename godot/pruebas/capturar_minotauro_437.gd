@@ -6,6 +6,7 @@ extends SceneTree
 
 const CAPTURAS := ["inicial", "marca-estable", "marca-desplazada"]
 
+
 func _init() -> void:
 	var argumentos := OS.get_cmdline_user_args()
 	var salida := (
