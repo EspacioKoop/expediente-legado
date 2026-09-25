@@ -7,6 +7,7 @@ extends SceneTree
 
 const TAMANO := Vector2i(1280, 720)
 const COLOR_FONDO := Color(0.035, 0.045, 0.055)
+const Controller = preload("res://guion/dia_climax_os98_app.gd")
 const CONTEXTO := {
 	"efecto_texto":
 	{
@@ -94,7 +95,7 @@ func _capturar_documento(salida: String) -> Dictionary:
 		+ "No reenviar este documento fuera de SIGA."
 	)
 
-	var controlador := load("res://guion/dia_climax_os98_app.gd").new()
+	var controlador: Node = Controller.new()
 	controlador._sincronizar_documento(explorador, CONTEXTO, false, 0.78)
 	var original := String(controlador._texto_original)
 	var visual := visor.text
