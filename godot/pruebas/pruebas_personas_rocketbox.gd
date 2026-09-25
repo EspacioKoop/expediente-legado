@@ -14,6 +14,8 @@ const PIE_MIN := -0.05
 const PIE_MAX := 0.20
 const CABEZA_MIN := 1.35
 const CABEZA_MAX := 1.75
+## Inclinado sobre una mesa, que es lo más bajo que baja un gesto de pie.
+const CABEZA_INCLINADO := 1.1
 
 var _pasadas := 0
 var _fallos := 0
@@ -28,6 +30,7 @@ func _ejecutar() -> void:
 	for quien in [Companeros.CUNADO] + Array(Companeros.ROSTER):
 		await _probar_avatar(quien)
 	await _probar_clip_de_oficina()
+	await _probar_captura_rocketbox()
 	_probar_relieve_por_pixel()
 	_probar_maniqui_intacto()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
@@ -94,6 +97,89 @@ func _probar_clip_de_oficina() -> void:
 	cuerpo.free()
 
 
+## Los gestos de oficina de un avatar salen de la captura de Rocketbox (#1319)
+## en su variante de hombre o de mujer, y en tres momentos de cada clip: pies en
+## el suelo, altura de adulto y mirando a +Z de pie; sentado, la cadera donde la
+## dejaba UAL, que es a lo que está medida la silla.
+func _probar_captura_rocketbox() -> void:
+	var asiento: Vector3 = AnimacionesRocketbox.cadera_sentada_ual()
+	for quien in [Companeros.CUNADO] + Array(Companeros.ROSTER):
+		var cuerpo_id := Companeros.cuerpo_de(quien)
+		var mujer := (
+			cuerpo_id.get_file().begins_with("female_")
+			or cuerpo_id.get_file().begins_with("business_female_")
+		)
+		if quien != Companeros.CUNADO and not mujer:
+			continue
+		var cuerpo := Node3D.new()
+		root.add_child(cuerpo)
+		Modelos.persona(cuerpo, cuerpo_id, Color.GRAY)
+		var pieza := cuerpo.get_child(0) as Node3D
+		var id := String(quien["id"])
+		_comprobar(
+			AnimacionesRocketbox.sexo(pieza) == ("f" if mujer else "m"),
+			"%s usa la captura de su sexo" % id
+		)
+		var reproductor := Modelos._reproductor(pieza)
+		for clip in AnimacionesRocketbox.CLIPS:
+			var datos: Array = AnimacionesRocketbox.CLIPS[clip]
+			for desfase in [0.0, 0.5, 0.95]:
+				var usado := AnimacionesUAL.reproducir(pieza, clip, desfase)
+				_comprobar(
+					usado and String(reproductor.current_animation).begins_with("rocketbox/"),
+					"%s hace %s con Rocketbox" % [id, clip]
+				)
+				await _asentar(reproductor)
+				var que := "%s en %s al %d %%" % [id, clip, roundi(desfase * 100.0)]
+				var sentado_ahora: bool = (
+					(desfase == 0.0 and datos[1] == AnimacionesRocketbox.SENTADO)
+					or (desfase == 0.95 and datos[2] == AnimacionesRocketbox.SENTADO)
+					or (datos[1] == AnimacionesRocketbox.SENTADO and datos[2] == datos[1])
+				)
+				if sentado_ahora:
+					_comprobar_sentado(pieza, asiento, que)
+				elif datos[1] == AnimacionesRocketbox.DE_PIE and datos[2] == datos[1]:
+					# A mitad de gesto se corre con un pie atrás o se inclina uno
+					# sobre la mesa: la postura completa se exige al empezar, y
+					# luego que pise el suelo y no se desplome.
+					if desfase == 0.0:
+						_comprobar_postura(pieza, que)
+					else:
+						_comprobar_en_pie(pieza, que)
+		cuerpo.free()
+
+
+func _comprobar_en_pie(pieza: Node3D, que: String) -> void:
+	var esqueleto := Modelos._esqueleto(pieza)
+	var suelo := pieza.global_position.y
+	var pie := minf(_hueso_global(esqueleto, "LeftFoot").y, _hueso_global(esqueleto, "RightFoot").y)
+	_comprobar(
+		pie - suelo > PIE_MIN and pie - suelo < PIE_MAX,
+		"%s pisa el suelo (pie a %.2f m)" % [que, pie - suelo]
+	)
+	var alto := _hueso_global(esqueleto, "Head").y - suelo
+	_comprobar(alto > CABEZA_INCLINADO, "%s no se desploma (%.2f m)" % [que, alto])
+
+
+## Sentado la figura no mide su altura: lo que importa es que la cadera caiga en
+## la silla de UAL y que los pies no atraviesen el suelo más de lo que ya sube
+## `CompaneroIdle3D.ALTURA_ASIENTO`.
+func _comprobar_sentado(pieza: Node3D, asiento: Vector3, que: String) -> void:
+	var esqueleto := Modelos._esqueleto(pieza)
+	var cadera := _hueso_global(esqueleto, "Hips") - pieza.global_position
+	var altura := AnimacionesUAL._altura_cadera(esqueleto)
+	var esperada := asiento * altura
+	_comprobar(
+		Vector2(cadera.y, cadera.z).distance_to(Vector2(esperada.y, esperada.z)) < 0.04,
+		"%s: cadera en la silla (%.2f, %.2f)" % [que, cadera.y, cadera.z]
+	)
+	var pie := minf(_hueso_global(esqueleto, "LeftFoot").y, _hueso_global(esqueleto, "RightFoot").y)
+	_comprobar(
+		pie - pieza.global_position.y > -CompaneroIdle3D.ALTURA_ASIENTO - 0.02,
+		"%s: pies sobre el suelo (%.2f)" % [que, pie]
+	)
+
+
 ## El resto de figuras (bolos, careo, jugador) siguen con `persona.fbx` hasta su
 ## propio corte: el avatar no puede colarse por el nombre genérico.
 func _probar_maniqui_intacto() -> void:
@@ -101,6 +187,19 @@ func _probar_maniqui_intacto() -> void:
 		not Modelos.es_realista(Companeros.CUERPO), "el cuerpo genérico sigue siendo el de siempre"
 	)
 	_comprobar(Companeros.cuerpo_de({}) == "", "sin id no hay cuerpo")
+	var maniqui := Node3D.new()
+	root.add_child(maniqui)
+	Modelos.persona(maniqui, Companeros.CUERPO, Color.GRAY)
+	var figura := maniqui.get_child(0) as Node3D
+	_comprobar(AnimacionesRocketbox.sexo(figura).is_empty(), "persona.fbx no es un avatar")
+	_comprobar(
+		(
+			AnimacionesUAL.reproducir(figura, "telefono")
+			and String(Modelos._reproductor(figura).current_animation).begins_with("ual/")
+		),
+		"persona.fbx sigue gesticulando con UAL"
+	)
+	maniqui.free()
 
 
 ## Las superficies opacas pasan al shader del sitio con SU textura —para que la

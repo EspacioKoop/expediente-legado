@@ -2016,6 +2016,26 @@
       "archivo_origen": "LICENSE.md @ 0943055db6ec570bcef9f2c8b41c9e5467c808f9"
     },
     {
+      "ruta": "modelos/rocketbox/animaciones/animaciones_m.glb",
+      "titulo": "Animaciones de captura (hombre) — Microsoft Rocketbox Avatar Library",
+      "autor": "Microsoft",
+      "licencia": "MIT",
+      "fuente": "https://github.com/microsoft/Microsoft-Rocketbox",
+      "sha256": "d471e772d9079956fa808f307d5b26396bd385f052b41b1b2ca2406cd89c0fed",
+      "archivo_origen": "Assets/Animations/all_animations_max_motextr_{static,xy,xyz}/: static/m_idle_breathe_01.max.fbx, xy/m_walk_neutral_01.max.fbx, xy/m_run_neutral_01.max.fbx, static/m_cell_phone_talk_01.max.fbx, static/m_gestic_talk_neutral_01.max.fbx, static/m_sit_table_idle_neutral_01.max.fbx, static/m_work_table.max.fbx, xyz/m_sit_stand_up_chair_01.max.fbx, xyz/m_sit_down_chair_01.max.fbx, static/m_documents_take.max.fbx, static/m_sit_table_gestic_thoughtful.max.fbx @ 0943055db6ec570bcef9f2c8b41c9e5467c808f9",
+      "conversion": "Once .max.fbx reunidos en un glb sin malla con godot/herramientas/convertir_animaciones_rocketbox.gd (Godot 4.7): solo los huesos del BoneMap humanoide, posición solo en raíz y pelvis, claves optimizadas; un triángulo degenerado ancla la piel para que el importador cree el esqueleto (#1319)."
+    },
+    {
+      "ruta": "modelos/rocketbox/animaciones/animaciones_f.glb",
+      "titulo": "Animaciones de captura (mujer) — Microsoft Rocketbox Avatar Library",
+      "autor": "Microsoft",
+      "licencia": "MIT",
+      "fuente": "https://github.com/microsoft/Microsoft-Rocketbox",
+      "sha256": "289f53ae86da0b8338a7f26b7abcfc62eb019186495d6ea647260b9bb2d14719",
+      "archivo_origen": "Assets/Animations/all_animations_max_motextr_{static,xy,xyz}/: static/f_idle_breathe_01.max.fbx, xy/f_walk_neutral_01.max.fbx, xy/f_run_neutral_01.max.fbx, xyz/f_cell_phone_talk_01.max.fbx, static/f_gestic_talk_neutral_01.max.fbx, static/f_sit_table_idle_neutral_01.max.fbx, static/f_work_table.max.fbx, xyz/f_sit_stand_up_chair_01.max.fbx, xyz/f_sit_down_chair_01.max.fbx, static/f_documents_take.max.fbx, static/f_sit_table_gestic_thoughtful.max.fbx @ 0943055db6ec570bcef9f2c8b41c9e5467c808f9",
+      "conversion": "Once .max.fbx reunidos en un glb sin malla con godot/herramientas/convertir_animaciones_rocketbox.gd (Godot 4.7): solo los huesos del BoneMap humanoide, posición solo en raíz y pelvis, claves optimizadas; un triángulo degenerado ancla la piel para que el importador cree el esqueleto (#1319)."
+    },
+    {
       "ruta": "texturas/calle_ai_98/bloque_01.webp",
       "titulo": "Bloque residencial de fondo 01",
       "autor": "EspacioKoop (generado con OpenAI ImageGen)",
