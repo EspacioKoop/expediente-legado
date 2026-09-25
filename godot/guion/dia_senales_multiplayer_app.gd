@@ -101,17 +101,20 @@ func publicar_en_anchor(
 		return {"ok": false, "status": "fase_no_disponible"}
 	if not POSICIONES_ANCHOR.has(anchor_id):
 		return {"ok": false, "status": "unknown_anchor"}
-	return _servicio.publicar(
-		SCENE_KEY,
-		_game_build(),
-		actor_public_id,
-		anchor_id,
-		plantilla_id,
-		tokens,
-		ahora_unix,
-		_conocimiento,
-		gesto,
-		event_id,
+	return (
+		_servicio
+		. publicar(
+			SCENE_KEY,
+			_game_build(),
+			actor_public_id,
+			anchor_id,
+			plantilla_id,
+			tokens,
+			ahora_unix,
+			_conocimiento,
+			gesto,
+			event_id,
+		)
 	)
 
 
@@ -140,7 +143,10 @@ func _consultar(ahora_unix: int) -> void:
 		if not POSICIONES_ANCHOR.has(anchor_id):
 			continue
 		var anterior: Dictionary = por_anchor.get(anchor_id, {})
-		if anterior.is_empty() or int(evento.get("created_at", 0)) >= int(anterior.get("created_at", 0)):
+		if (
+			anterior.is_empty()
+			or int(evento.get("created_at", 0)) >= int(anterior.get("created_at", 0))
+		):
 			por_anchor[anchor_id] = evento
 
 	for anchor_id in POSICIONES_ANCHOR:
@@ -203,5 +209,7 @@ func _fase_actual() -> String:
 
 
 func _game_build() -> String:
-	var version := String(ProjectSettings.get_setting("application/config/version", "dev")).strip_edges()
+	var version := (
+		String(ProjectSettings.get_setting("application/config/version", "dev")).strip_edges()
+	)
 	return "dev" if version.is_empty() else version
