@@ -107,9 +107,7 @@ func _montar_ecos(
 		return
 	if not dia.conectar_recompensa_onirica(ecos.nucleo, caso):
 		return
-	var presentacion = EcosArchivoPresentacion.crear(
-		ecos, String(candidato.get("tipo", ""))
-	)
+	var presentacion = EcosArchivoPresentacion.crear(ecos, String(candidato.get("tipo", "")))
 	if presentacion == null:
 		return
 
