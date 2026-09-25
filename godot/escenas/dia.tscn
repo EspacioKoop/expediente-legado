@@ -55,7 +55,8 @@
 [ext_resource type="Script" path="res://guion/dia_ayuda_resonancia_app.gd" id="53"]
 [ext_resource type="Script" path="res://guion/dia_simurgh_app.gd" id="54"]
 [ext_resource type="Script" path="res://guion/dia_duat_sueno_app.gd" id="55"]
-[ext_resource type="Script" path="res://guion/dia_popol_wuj_app.gd" id="56"]\n[ext_resource type="Script" path="res://guion/dia_senales_multiplayer_app.gd" id="57"]
+[ext_resource type="Script" path="res://guion/dia_popol_wuj_app.gd" id="56"]
+[ext_resource type="Script" path="res://guion/dia_senales_multiplayer_app.gd" id="57"]
 
 [node name="Dia" type="Node3D"]
 script = ExtResource("1")
