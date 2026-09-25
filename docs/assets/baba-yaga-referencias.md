@@ -59,6 +59,28 @@ El sistema de árbol, valla y archivador que cambian cuando salen de campo o al 
 - con `reduccion_movimiento`, la transición se expresa por corte/fundido y la geometría no necesita interpolarse;
 - las marcas y la solución son idénticas con o sin reducción de movimiento.
 
+## Pase de lectura espacial
+
+El vertical incorpora ahora feedback **diegético** para que la regla pueda deducirse desde la escena y no desde HUD o texto externo:
+
+- la cinta conserva el punto de origen y, al volver a consultarla después de un cambio, materializa un rastro corto hasta la posición actual del objeto;
+- origen y destino usan geometrías distintas, de modo que la lectura no depende solo del color;
+- el rastro se invalida en cuanto vuelve a cambiar la arquitectura, evitando presentar una comparación obsoleta como vigente;
+- el retorno seguro mantiene su plataforma y añade una baliza con dos montantes y dintel, visible como ancla estable aunque cambie el bosque;
+- la última comparación forma parte del estado reproducible y se rematerializa al restaurar una partida;
+- `reduccion_movimiento` conserva exactamente esta lectura sin animar geometría ni mover la cámara.
+
+### Gate humano antes de cerrar #652
+
+El código puede comprobar reglas, persistencia y ausencia de softlock, pero no sustituye un pase humano. Antes de cerrar el issue conviene registrar una sesión breve con estos puntos:
+
+- [ ] una persona que no conozca la implementación identifica qué elemento cambió usando la cinta;
+- [ ] distingue con claridad origen, posición actual y retorno seguro sin explicación verbal;
+- [ ] entiende tras dos cruces que árbol/valla/cabaña responden al umbral y que el archivador usa otra regla;
+- [ ] no confunde la cabaña con un enemigo o encuentro de combate;
+- [ ] la lectura sigue siendo clara con `reduccion_movimiento`;
+- [ ] revisión humana confirma que iconografía, texto y assets no convierten una variante rusa concreta en supuesto canon pan-eslavo.
+
 ## Estado del corte
 
-La dirección artística final queda pendiente. Antes de incorporar ilustraciones históricas, diseños figurativos de Baba Yaga o cualquier asset externo deberá revisarse licencia/procedencia y registrarse, cuando corresponda, en `godot/assets/procedencia.json` con URL, derechos/licencia y `sha256`.
+La dirección artística figurativa final y el gate humano siguen pendientes. Antes de incorporar ilustraciones históricas, diseños figurativos de Baba Yaga o cualquier asset externo deberá revisarse licencia/procedencia y registrarse, cuando corresponda, en `godot/assets/procedencia.json` con URL, derechos/licencia y `sha256`.
