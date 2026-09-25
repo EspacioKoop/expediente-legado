@@ -1,5 +1,8 @@
 extends SceneTree
 
+const HOYO_SCENE: PackedScene = preload("res://escenas/golf_hoyo_standalone.tscn")
+const PARTIDA_SCENE: PackedScene = preload("res://escenas/golf_partida_standalone.tscn")
+
 var _pasadas := 0
 var _fallos := 0
 
@@ -18,7 +21,7 @@ func _ejecutar() -> void:
 
 
 func _probar_hoyo_standalone() -> void:
-	var hoyo: GolfHoyoApp = load("res://escenas/golf_hoyo_standalone.tscn").instantiate()
+	var hoyo: GolfHoyoApp = HOYO_SCENE.instantiate()
 	root.add_child(hoyo)
 	await process_frame
 
@@ -74,7 +77,7 @@ func _probar_rebote_obstaculo() -> void:
 
 
 func _probar_partida_tres_hoyos() -> void:
-	var partida: GolfPartidaApp = load("res://escenas/golf_partida_standalone.tscn").instantiate()
+	var partida: GolfPartidaApp = PARTIDA_SCENE.instantiate()
 	root.add_child(partida)
 	await process_frame
 
@@ -112,7 +115,7 @@ func _probar_partida_tres_hoyos() -> void:
 
 
 func _probar_abandono() -> void:
-	var partida: GolfPartidaApp = load("res://escenas/golf_partida_standalone.tscn").instantiate()
+	var partida: GolfPartidaApp = PARTIDA_SCENE.instantiate()
 	root.add_child(partida)
 	await process_frame
 	partida._al_abandonar_hoyo()
