@@ -52,6 +52,27 @@ class AvionesPapelIntegracionDiaTest(unittest.TestCase):
         ):
             self.assertNotIn(prohibido, codigo)
 
+    def test_companeros_reutilizan_sistema_134_sin_entrar_en_fisica(self):
+        self.assertIn("POSICIONES_COMPANEROS", self.controller)
+        self.assertIn('Modelos.persona(cuerpo, "persona"', self.controller)
+        self.assertIn("CompaneroIdle3D.new()", self.controller)
+        self.assertIn("PreferenciasSiga.cargar()", self.controller)
+        self.assertIn('get("reduccion_movimiento", false)', self.controller)
+        self.assertIn("_retirar_companeros()", self.controller)
+
+        bloque = self.controller.split("func _montar_companeros", 1)[1].split(
+            "func _retirar_companeros", 1
+        )[0]
+        self.assertIn("var cuerpo := Node3D.new()", bloque)
+        self.assertNotIn("AnimacionesUAL.reproducir", bloque)
+        for tipo_fisico in (
+            "CharacterBody3D.new(",
+            "StaticBody3D.new(",
+            "RigidBody3D.new(",
+            "CollisionShape3D.new(",
+        ):
+            self.assertNotIn(tipo_fisico, bloque)
+
     def test_restaura_control_y_presenta_comentario_seguro(self):
         self.assertIn("Node.PROCESS_MODE_DISABLED", self.controller)
         self.assertIn("Input.MOUSE_MODE_VISIBLE", self.controller)
