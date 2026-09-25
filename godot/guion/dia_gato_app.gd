@@ -267,6 +267,9 @@ func _resolver_objetivos_sueno() -> void:
 	# la escena vieja con la cola ya consumida haría que un reintento saltase una
 	# segunda escena y es precisamente el softlock que #299 quiere evitar.
 	var jornada_antes := jornada.duplicate(true)
+	var exposicion_antes: Array = (
+		partida.estado.get(Prometeo.CLAVE_EXPOSICION_IDEOLOGICA, []).duplicate(true)
+	)
 	jornada["sueno_escenas"].pop_front()
 	var destino := "sueño"
 	var dia_nuevo := -1
@@ -274,10 +277,12 @@ func _resolver_objetivos_sueno() -> void:
 		_registrar_despertar_reglamentario()
 		Auditorias.resolver_fin_sueno(partida.estado, true)
 		dia_nuevo = Jornada.despertar(jornada)
+		Prometeo.reiniciar_exposicion_ideologica_diaria(partida.estado)
 		destino = "archivo"
 	if not _guardar_o_avisar(destino):
 		jornada.clear()
 		jornada.merge(jornada_antes, true)
+		partida.estado[Prometeo.CLAVE_EXPOSICION_IDEOLOGICA] = exposicion_antes
 		_resolviendo_objetivos = false
 		_caminante.set_physics_process(true)
 		return
