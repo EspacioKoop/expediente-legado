@@ -159,8 +159,9 @@ func _crear_caja(
 	tam: Vector3,
 	posicion: Vector3,
 	color: Color,
-	padre: Node3D = self,
+	padre: Node3D = null,
 ) -> MeshInstance3D:
+	var destino := padre if padre != null else self
 	var malla := BoxMesh.new()
 	malla.size = tam
 	var nodo := MeshInstance3D.new()
@@ -171,5 +172,5 @@ func _crear_caja(
 	material.albedo_color = color
 	material.roughness = 0.84
 	nodo.material_override = material
-	padre.add_child(nodo)
+	destino.add_child(nodo)
 	return nodo
