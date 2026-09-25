@@ -12,6 +12,7 @@ func _initialize() -> void:
 	_probar_todas_las_formas()
 	_probar_gramatica_simbolica()
 	_probar_armario_domestico_cc0()
+	_probar_televisor_domestico()
 	_probar_espacio_simbolico()
 	_probar_reproducibilidad()
 	_probar_tarot_no_filtra_pistas()
@@ -183,6 +184,38 @@ func _probar_armario_domestico_cc0() -> void:
 					if material != null and material.get_shader_parameter("con_textura"):
 						conserva_paleta = true
 		_comprobar(conserva_paleta, "#227: la copia onírica conserva la paleta PSX del pack")
+	mundo.queue_free()
+
+
+func _probar_televisor_domestico() -> void:
+	var mundo := Node3D.new()
+	root.add_child(mundo)
+	var creadas := SuenoUtileria.montar(mundo, "crucero", 8, 442, [], ["televisor_casa"])
+	_comprobar(creadas.size() == 1, "#87: el televisor atendido produce una sola anomalía")
+	if creadas.size() == 1:
+		var televisor: AnomaliaSueno3D = creadas[0]
+		_comprobar(
+			televisor.id_catalogo() == "televisor-domestico-desfasado",
+			"#87: el televisor enlaza su entrada estable del catálogo",
+		)
+		_comprobar(
+			String(televisor.get_meta("objeto_origen", "")) == "televisor_casa",
+			"#87: la deformación conserva el televisor real manipulado durante el día",
+		)
+		_comprobar(
+			String(televisor.get_meta("motivo_simbolico", "")) == "doble",
+			"#888: el televisor reutiliza la familia doble sin inventar simbología explícita",
+		)
+		var visual := televisor.find_child("FormaDeformada", false, false) as Node3D
+		_comprobar(visual != null, "#87: el televisor monta una forma reconocible")
+		_comprobar(
+			visual != null and visual.find_child("RespaldoGeometrico", true, false) == null,
+			"#87: el televisor no cae al cubo genérico",
+		)
+		_comprobar(
+			televisor.find_child("EcoSimbolico", false, false) != null,
+			"#888: el televisor puede proyectar su doble visual",
+		)
 	mundo.queue_free()
 
 

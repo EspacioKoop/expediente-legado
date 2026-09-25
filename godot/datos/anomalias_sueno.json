@@ -56,6 +56,20 @@
     "modo_observacion": "exploracion"
   },
   {
+    "id": "televisor-domestico-desfasado",
+    "titulo": "Televisor doméstico desfasado",
+    "descripcion": "El televisor visto con atención durante el día conserva su carcasa CRT, pero pantalla, profundidad y orientación parecen pertenecer a instantes distintos.",
+    "nota_visual": "CRT reconocible comprimido en altura y estirado en profundidad, con giro imposible",
+    "origen_tipo": "objeto",
+    "origen_id": "televisionVintage",
+    "representacion": {
+      "tipo": "modelo-procedural",
+      "modelo": "televisionVintage",
+      "rasgo": "desfase-volumetrico"
+    },
+    "modo_observacion": "exploracion"
+  },
+  {
     "id": "armario-domestico-desencajado",
     "titulo": "Armario doméstico desencajado",
     "descripcion": "El armario de casa reaparece reconocible, pero sus proporciones y ejes dejan de encajar entre sí.",
