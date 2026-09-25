@@ -154,6 +154,10 @@ func _init() -> void:
 	var mutuos := Conflicto.compromisos_disponibles(registro, "juicio:caso-4", "rival-1")
 	_comprobar(mutuos.size() == 1, "una tregua conocida puede ser bilateral")
 	_comprobar(Conflicto.tregua_mutua_activa(mutuos[0]), "la tregua declara alcance mutuo")
+	_comprobar(
+		float(mutuos[0].get("duracion", 0.0)) == Conflicto.DURACION_TREGUA_TEMPORAL,
+		"la tregua bilateral expone una ventana temporal explícita",
+	)
 
 	var registro_a := Eventos.nuevo()
 	var registro_b := Eventos.nuevo()
