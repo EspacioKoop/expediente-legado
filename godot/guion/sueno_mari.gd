@@ -9,6 +9,10 @@ extends Node3D
 
 const ID_MITO := "mari"
 const CLAVE_SEMILLA := "semilla_onirica_mari"
+const ASSET_CUEVA := "res://arte/mitologias/mari/cueva_portal.obj"
+const ASSET_ESTRATOS := "res://arte/mitologias/mari/estratos_montana.obj"
+const ASSET_TORMENTA := "res://arte/mitologias/mari/frente_tormenta.svg"
+const ASSET_CAUCE := "res://arte/mitologias/mari/huellas_agua.svg"
 const FUENTE_VIGILIA := "folleto:cuevas_montana_98"
 const INSPECCIONES_MINIMAS := 2
 
@@ -135,6 +139,7 @@ func preparar() -> void:
 		return
 	_montado = true
 	_montar_arquitectura()
+	_montar_pack_visual()
 	_montar_rutas()
 	_montar_controles_climaticos()
 	_montar_indicios_climaticos()
@@ -243,6 +248,88 @@ func _montar_arquitectura() -> void:
 	_crear_caja(
 		cueva, "LaderaInterior", Vector3(4.6, 0.35, 5.5), Vector3(0.0, 0.65, -2.0), COLOR_ROCA_CLARA
 	)
+
+
+func _montar_pack_visual() -> void:
+	var arte := Node3D.new()
+	arte.name = "ArteMari"
+	add_child(arte)
+
+	_crear_malla_asset(
+		arte,
+		"PortalCuevaArte",
+		ASSET_CUEVA,
+		Vector3(4.8, 0.72, -1.4),
+		Vector3(0.0, 90.0, 0.0),
+		Vector3(1.15, 1.15, 1.15),
+	)
+	_crear_malla_asset(
+		arte,
+		"EstratosMontanaArte",
+		ASSET_ESTRATOS,
+		Vector3(4.65, 1.35, -4.0),
+		Vector3(0.0, 0.0, 0.0),
+		Vector3(1.35, 1.35, 1.35),
+	)
+	_crear_sprite_asset(
+		arte,
+		"FrenteTormentaArte",
+		ASSET_TORMENTA,
+		Vector3(1.3, 3.6, -4.75),
+		Vector3(0.0, 0.0, 0.0),
+		0.006,
+	)
+	_crear_sprite_asset(
+		arte,
+		"CauceAguaArte",
+		ASSET_CAUCE,
+		Vector3(-0.4, 0.13, 2.5),
+		Vector3(-90.0, 0.0, 90.0),
+		0.0035,
+	)
+
+
+func _crear_malla_asset(
+	padre: Node3D,
+	nombre: String,
+	ruta: String,
+	posicion: Vector3,
+	rotacion: Vector3,
+	escala: Vector3,
+) -> void:
+	var malla := ResourceLoader.load(ruta) as Mesh
+	if malla == null:
+		push_warning("Mari: no se pudo cargar asset 3D %s" % ruta)
+		return
+	var nodo := MeshInstance3D.new()
+	nodo.name = nombre
+	nodo.mesh = malla
+	nodo.position = posicion
+	nodo.rotation_degrees = rotacion
+	nodo.scale = escala
+	padre.add_child(nodo)
+
+
+func _crear_sprite_asset(
+	padre: Node3D,
+	nombre: String,
+	ruta: String,
+	posicion: Vector3,
+	rotacion: Vector3,
+	pixel_size: float,
+) -> void:
+	var textura := ResourceLoader.load(ruta) as Texture2D
+	if textura == null:
+		push_warning("Mari: no se pudo cargar asset visual %s" % ruta)
+		return
+	var nodo := Sprite3D.new()
+	nodo.name = nombre
+	nodo.texture = textura
+	nodo.position = posicion
+	nodo.rotation_degrees = rotacion
+	nodo.pixel_size = pixel_size
+	nodo.shaded = true
+	padre.add_child(nodo)
 
 
 func _montar_rutas() -> void:
@@ -413,6 +500,19 @@ func _aplicar_estado_visual() -> void:
 	(get_node("IndiciosClimaticos/PresenciaPaisaje") as MeshInstance3D).visible = (
 		_clima == CLIMA_TORMENTA
 	)
+
+	var portal := get_node_or_null("ArteMari/PortalCuevaArte") as MeshInstance3D
+	if portal != null:
+		portal.visible = bool(rutas[RUTA_CUEVA])
+	var estratos := get_node_or_null("ArteMari/EstratosMontanaArte") as MeshInstance3D
+	if estratos != null:
+		estratos.visible = true
+	var tormenta := get_node_or_null("ArteMari/FrenteTormentaArte") as Sprite3D
+	if tormenta != null:
+		tormenta.visible = _clima == CLIMA_TORMENTA
+	var cauce := get_node_or_null("ArteMari/CauceAguaArte") as Sprite3D
+	if cauce != null:
+		cauce.visible = _clima in [CLIMA_LLUVIA, CLIMA_TORMENTA]
 
 
 func _crear_caja(
