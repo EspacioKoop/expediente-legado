@@ -26,6 +26,7 @@ const CAMPOS_TRADUCIBLES := [
 	"etiqueta",
 	"secuelaUtil",
 	"secuelaConfusion",
+	"ataques",
 ]
 
 var casos: Array = []
