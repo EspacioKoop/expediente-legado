@@ -1,9 +1,10 @@
 ## Evidencia reproducible del gate visual de #277.
 ##
-## Captura tres vistas del trayecto real con la cámara jugable y sin HUD:
+## Captura cuatro vistas del trayecto real con la cámara jugable y sin HUD:
 ## 1) desde el spawn hacia casa, para juzgar si se lee como exterior;
-## 2) el escaparate de electrodomésticos, para juzgar si las CRT tienen contexto;
-## 3) la aproximación al portal 7, para juzgar si el destino se entiende.
+## 2) desde la mitad del recorrido, para comprobar que la calle conserva profundidad;
+## 3) el escaparate de electrodomésticos, para juzgar si las CRT tienen contexto;
+## 4) la aproximación al portal 7, para juzgar si el destino se entiende.
 ##
 ## Este runner no decide el resultado artístico: produce evidencia comparable para
 ## revisión humana y falla solo ante roturas objetivas del contrato de captura.
@@ -19,6 +20,13 @@ const CASOS := [
 		"usar_entrada": true,
 		"objetivo": Vector3(0.0, 1.8, 15.5),
 		"criterio": "desde el spawn se reconoce una calle exterior sin HUD",
+	},
+	{
+		"id": "mitad_recorrido",
+		"posicion": Vector3(0.0, 0.0, 3.5),
+		"objetivo": Vector3(0.0, 1.8, 13.5),
+		"criterio":
+		"desde la mitad del trayecto se conserva cielo, profundidad urbana y lectura de calle",
 	},
 	{
 		"id": "escaparate_crt",
