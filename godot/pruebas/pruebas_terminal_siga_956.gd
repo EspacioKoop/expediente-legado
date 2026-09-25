@@ -36,7 +36,9 @@ func _probar() -> void:
 	_comprobar(terminal.cwd() == "/", "no se puede escapar por encima de la raíz")
 	var absoluto: Dictionary = terminal.ejecutar("cat /red/hosts.txt")
 	_comprobar(bool(absoluto["ok"]), "CAT acepta ruta absoluta")
-	_comprobar(String(absoluto["salida"]).contains("ARCHIVO.LOCAL"), "hosts son ficticios y estables")
+	_comprobar(
+		String(absoluto["salida"]).contains("ARCHIVO.LOCAL"), "hosts son ficticios y estables"
+	)
 
 	_comprobar(terminal.ejecutar("whoami")["salida"] == "auditor", "WHOAMI es determinista")
 	var entorno: String = terminal.ejecutar("set")["salida"]
