@@ -36,7 +36,9 @@ class SuenoFotorrealistaAssetsTest(unittest.TestCase):
                 self.assertIn('type="MeshInstance3D"', texto)
 
     def test_lote_no_introduce_binarios_marcas_ni_texto_narrativo(self):
-        permitidos = {".tscn", ".gdshader", ".md"}
+        # Godot 4 puede crear sidecars .uid de texto al importar recursos.
+        # Son metadatos del motor, no assets binarios ni una nueva dependencia.
+        permitidos = {".tscn", ".gdshader", ".md", ".uid"}
         for ruta in ASSET_DIR.iterdir():
             self.assertIn(ruta.suffix, permitidos)
 
