@@ -11,6 +11,7 @@ extends Interactuable3D
 const OFFSET_MANDO_MESA := Vector3(1.43, -0.58, -0.11)
 const OFFSET_PORTATIL_MESA := Vector3(1.15, -0.56, 0.07)
 const OBJETO_ONIRICO_ID := "televisor_casa"
+const RUTA_CATALOGO_TV := "res://datos/tv_domestica_98.json"
 
 var _encendida := false
 var _brillo: OmniLight3D
@@ -18,10 +19,12 @@ var _cristal_pantalla: MeshInstance3D
 var _emision_pantalla: Node3D
 var _paso_documental := 0
 var _documental_completado := false
+var _catalogo_tv: Dictionary = {}
 
 
 func configurar(tam: Vector3) -> void:
 	verbo = Verbo.ENCENDER
+	_cargar_catalogo_tv()
 	nombre_objeto = "televisor"
 
 	var colision := CollisionShape3D.new()
@@ -99,7 +102,90 @@ func _interactuar_directo(_actor: Node) -> void:
 		return
 	_documental_completado = SuenoDuat.registrar_documental(jornada_actual, true)
 	if _documental_completado:
+		_activar_exposicion_tv(jornada_actual)
 		ObjetosOniricos.registrar(jornada_actual, OBJETO_ONIRICO_ID)
+
+
+## El boletín previo al microdocumental comparte hecho base con prensa/radio,
+## pero conserva su tratamiento editorial en un catálogo TV separado. Solo se
+## registra al completar deliberadamente el bloque, nunca por encender el CRT.
+static func registrar_exposicion_de_bloque(
+	estado: Dictionary, bloque: Dictionary, jornada: int
+) -> bool:
+	var boletin = bloque.get("boletin", {})
+	if typeof(boletin) != TYPE_DICTIONARY or boletin.is_empty():
+		return false
+	var exposicion = boletin.get("exposicion_ideologica", {})
+	if typeof(exposicion) != TYPE_DICTIONARY or exposicion.is_empty():
+		return false
+	var etiquetas: Array = []
+	var etiquetas_brutas = exposicion.get("etiquetas", [])
+	if typeof(etiquetas_brutas) == TYPE_ARRAY:
+		etiquetas = (etiquetas_brutas as Array).duplicate()
+	return (
+		Prometeo
+		. registrar_exposicion_ideologica(
+			estado,
+			String(exposicion.get("id", "")),
+			String(exposicion.get("fuente", "tv")),
+			String(exposicion.get("eje", "")),
+			jornada,
+			etiquetas,
+		)
+	)
+
+
+func _activar_exposicion_tv(jornada_actual: Dictionary) -> bool:
+	var estado := _estado_partida_actual()
+	if estado.is_empty():
+		return false
+	var bloque := _bloque_tv_actual(jornada_actual)
+	if bloque.is_empty():
+		return false
+	var dia := maxi(1, int(jornada_actual.get("dia", 1)))
+	return registrar_exposicion_de_bloque(estado, bloque, dia)
+
+
+func _bloque_tv_actual(jornada_actual: Dictionary) -> Dictionary:
+	var bloques = _catalogo_tv.get("bloques", [])
+	if typeof(bloques) != TYPE_ARRAY:
+		return {}
+	var dia := maxi(1, int(jornada_actual.get("dia", 1)))
+	for valor in bloques:
+		if typeof(valor) != TYPE_DICTIONARY:
+			continue
+		var bloque: Dictionary = valor
+		var dias = bloque.get("dias", [])
+		if typeof(dias) == TYPE_ARRAY and not dias.is_empty() and not dias.has(dia):
+			continue
+		return bloque.duplicate(true)
+	return {}
+
+
+func _estado_partida_actual() -> Dictionary:
+	if not is_inside_tree():
+		return {}
+	var escena := get_tree().current_scene
+	if escena == null:
+		return {}
+	var partida_actual: Variant = escena.get("partida")
+	if partida_actual is Partida:
+		return (partida_actual as Partida).estado
+	return {}
+
+
+func _cargar_catalogo_tv() -> void:
+	if not _catalogo_tv.is_empty():
+		return
+	var archivo := FileAccess.open(RUTA_CATALOGO_TV, FileAccess.READ)
+	if archivo == null:
+		push_error("No se pudo abrir %s" % RUTA_CATALOGO_TV)
+		return
+	var valor = JSON.parse_string(archivo.get_as_text())
+	if typeof(valor) != TYPE_DICTIONARY:
+		push_error("Catálogo TV doméstica inválido")
+		return
+	_catalogo_tv = valor
 
 
 func _alternar(_actor: Node) -> void:
