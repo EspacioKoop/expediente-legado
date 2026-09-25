@@ -11,6 +11,10 @@
 ## `mira_desde`. Los planos antiguos conservan exactamente su acercamiento corto.
 ## La extensión es solo de puesta en escena: no cambia estado ni duración.
 ##
+## Sobre todo eso pone el lenguaje de cine común (`LenguajeCine`, #395):
+## formato panorámico con franjas, focal cerrada con profundidad de campo,
+## cámara en mano leve, grano y viñeta. Un plano puede ajustar `fov` y `foco`.
+##
 ## No sabe qué cinemática está poniendo. Recibe planos ya resueltos y emite
 ## `terminada` cuando acaba o cuando la saltan — quien la pidió decide qué pasa
 ## después.
@@ -53,6 +57,13 @@ var _voz: Label
 var _fondo: ColorRect
 var _figuras: Node2D
 var _fundido: ColorRect
+var _grano: ColorRect
+var _franja_superior: ColorRect
+var _franja_inferior: ColorRect
+## Reloj de toda la cinemática, no del plano: las franjas entran al empezar la
+## secuencia y salen al acabarla, no en cada corte.
+var _reloj := 0.0
+var _total := 0.0
 
 
 func _ready() -> void:
@@ -73,6 +84,11 @@ func reproducir(rodaje: Array, id: String = "", estado: Dictionary = {}) -> void
 	_plano = -1
 	_reproduciendo = true
 	visible = true
+	_reloj = 0.0
+	_total = Cinematica.duracion(rodaje)
+	_grano.material.set_shader_parameter("quieto", _reduccion_movimiento)
+	_grano.visible = true
+	_actualizar_franjas()
 	_siguiente()
 
 
@@ -86,6 +102,8 @@ func _process(delta: float) -> void:
 	if not _reproduciendo:
 		return
 	_transcurrido += delta
+	_reloj += delta
+	_actualizar_franjas()
 	var plano: Dictionary = _rodaje[_plano]
 	var duracion: float = plano["segundos"]
 	var avance: float = clampf(_transcurrido / duracion, 0.0, 1.0)
@@ -136,6 +154,8 @@ func _siguiente() -> void:
 	_preparar_plato(decorado)
 	if _camara != null:
 		_camara.current = not es_2d and (not decorado.is_empty() or _tiene_mundo_3d())
+		if not es_2d:
+			_ajustar_optica(plano)
 
 
 ## Acento puntual opt-in del plano. Se delega en `Sonido`, que crea una voz
@@ -162,6 +182,8 @@ func _terminar() -> void:
 		Cinematica.anotar_vista(_estado, _id)
 	_rotulo.text = ""
 	_voz.text = ""
+	_grano.visible = false
+	_actualizar_franjas()
 	_fondo.visible = false
 	_figuras.visible = false
 	if _fundido != null:
@@ -194,6 +216,7 @@ func _mover_camara(plano: Dictionary, avance: float) -> void:
 		var suave := avance * avance * (3.0 - 2.0 * avance)
 		_camara.global_position = origen.lerp(destino, suave)
 		_camara.look_at(mira_origen.lerp(mira_destino, suave), Vector3.UP)
+		_camara.global_position += LenguajeCine.mano(_reloj, _reduccion_movimiento)
 		return
 
 	# Compatibilidad: los planos existentes sin trayectoria conservan el
@@ -204,6 +227,37 @@ func _mover_camara(plano: Dictionary, avance: float) -> void:
 	var acercamiento: Vector3 = destino.normalized() * -0.25 * factor_movimiento
 	_camara.global_position = destino + acercamiento
 	_camara.look_at(mira_destino, Vector3.UP)
+	# La mano va después de encuadrar: mueve la cámara unos milímetros sin
+	# cambiar a dónde mira, como un operador que respira.
+	_camara.global_position += LenguajeCine.mano(_reloj, _reduccion_movimiento)
+
+
+## Focal y foco del plano: la óptica de cine, o la que el plano declare.
+func _ajustar_optica(plano: Dictionary) -> void:
+	_camara.fov = LenguajeCine.fov_de(plano)
+	var camara: Vector3 = plano.get("camara", Vector3.ZERO)
+	var mira: Vector3 = plano.get("mira", Vector3.FORWARD)
+	_camara.attributes = LenguajeCine.atributos(LenguajeCine.foco_de(plano, camara, mira))
+
+
+## Franjas del formato panorámico y, con ellas, dónde van los textos: el rótulo
+## justo encima de la imagen recortada y la voz dentro de la franja, como un
+## subtítulo de cine.
+func _actualizar_franjas() -> void:
+	var alto := LenguajeCine.alto_franja(_lienzo.size)
+	var apertura := 0.0
+	if _reproduciendo:
+		apertura = LenguajeCine.apertura_franjas(_reloj, _total - _reloj, _reduccion_movimiento)
+	var visible_alto := alto * apertura
+	_franja_superior.size = Vector2(_lienzo.size.x, visible_alto)
+	_franja_superior.position = Vector2.ZERO
+	_franja_inferior.size = Vector2(_lienzo.size.x, visible_alto)
+	_franja_inferior.position = Vector2(0.0, _lienzo.size.y - visible_alto)
+	var hueco := maxf(alto, 60.0)
+	_rotulo.offset_bottom = -hueco - 16.0
+	_rotulo.offset_top = _rotulo.offset_bottom - 110.0
+	_voz.offset_bottom = -hueco * 0.5 + 16.0
+	_voz.offset_top = _voz.offset_bottom - 40.0
 
 
 ## Fundido opt-in para transiciones donde la acción es perder continuidad visual,
@@ -321,6 +375,21 @@ func _montar() -> void:
 	_fundido.color = Color(0.0, 0.0, 0.0, 0.0)
 	_lienzo.add_child(_fundido)
 
+	# Grano y viñeta encima de la imagen y debajo de franjas y textos.
+	_grano = ColorRect.new()
+	_grano.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_grano.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var material := ShaderMaterial.new()
+	material.shader = preload("res://arte/grano_cine.gdshader")
+	material.set_shader_parameter("grano", LenguajeCine.GRANO)
+	material.set_shader_parameter("vineta", LenguajeCine.VINETA)
+	_grano.material = material
+	_grano.visible = false
+	_lienzo.add_child(_grano)
+
+	_franja_superior = _franja()
+	_franja_inferior = _franja()
+
 	_rotulo = _texto(48)
 	_rotulo.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	_rotulo.offset_top = -230
@@ -338,7 +407,17 @@ func _montar() -> void:
 	_voz.offset_right = -16
 	_voz.offset_bottom = -20
 	_voz.add_theme_color_override("font_color", Color(0.85, 0.82, 0.55))
+	_voz.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_lienzo.add_child(_voz)
+
+
+func _franja() -> ColorRect:
+	var franja := ColorRect.new()
+	franja.color = Color.BLACK
+	franja.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	franja.size = Vector2.ZERO
+	_lienzo.add_child(franja)
+	return franja
 
 
 func _texto(tamano: int) -> Label:
