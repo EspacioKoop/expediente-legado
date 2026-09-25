@@ -44,6 +44,18 @@ static func crear_copia(
 	return resultado
 
 
+static func resolver_revision(copia: Dictionary) -> String:
+	var calidad := String(copia.get("calidad", "")).strip_edges()
+	match calidad:
+		"alta":
+			return "aceptada"
+		"media":
+			return "cotejo"
+		"baja":
+			return "retenida"
+	return ""
+
+
 static func _apoyo_material(registro: Dictionary, intervencion: String) -> int:
 	var contenido := String(registro.get("contenido", "")).to_lower()
 	var apoyo := 0

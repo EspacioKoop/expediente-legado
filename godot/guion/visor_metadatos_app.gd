@@ -20,6 +20,11 @@ const CLAVES_RIESGO_FALSIFICACION := {
 	"medio": "VISOR_FALSIFICACION_951_RIESGO_MEDIO",
 	"bajo": "VISOR_FALSIFICACION_951_RIESGO_BAJO",
 }
+const CLAVES_REVISION_FALSIFICACION := {
+	"aceptada": "VISOR_FALSIFICACION_951_REVISION_ACEPTADA",
+	"cotejo": "VISOR_FALSIFICACION_951_REVISION_COTEJO",
+	"retenida": "VISOR_FALSIFICACION_951_REVISION_RETENIDA",
+}
 const CLAVES_ANALISIS_DOCUMENTAL := [
 	"VISOR_ANALISIS_951_FACTURA4_SELLO",
 	"VISOR_ANALISIS_951_FACTURA4_RFC",
@@ -39,6 +44,8 @@ var _catalogo_analisis_documental: Dictionary = {}
 var _selector_falsificacion: OptionButton
 var _crear_falsificacion: Button
 var _resultado_falsificacion: Label
+var _revisar_falsificacion: Button
+var _resultado_revision_falsificacion: Label
 var _borrador_falsificacion: Dictionary = {}
 
 
@@ -90,6 +97,19 @@ func _columna_documento() -> Control:
 	_resultado_falsificacion.visible = false
 	_resultado_falsificacion.text = ""
 	columna.add_child(_resultado_falsificacion)
+
+	_revisar_falsificacion = Button.new()
+	_revisar_falsificacion.text = tr("VISOR_FALSIFICACION_951_REVISAR")
+	_revisar_falsificacion.tooltip_text = tr("VISOR_FALSIFICACION_951_REVISAR_AYUDA")
+	_revisar_falsificacion.disabled = true
+	_revisar_falsificacion.pressed.connect(_resolver_revision_falsificacion)
+	columna.add_child(_revisar_falsificacion)
+
+	_resultado_revision_falsificacion = Label.new()
+	_resultado_revision_falsificacion.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_resultado_revision_falsificacion.visible = false
+	_resultado_revision_falsificacion.text = ""
+	columna.add_child(_resultado_revision_falsificacion)
 
 	_conectar_scroll_meticulosidad()
 	return columna
@@ -180,10 +200,14 @@ func _puntos_atencion_sin_mutar() -> int:
 
 func _reiniciar_falsificacion_documental() -> void:
 	_borrador_falsificacion = {}
-	if _resultado_falsificacion == null:
-		return
-	_resultado_falsificacion.text = ""
-	_resultado_falsificacion.visible = false
+	if _resultado_falsificacion != null:
+		_resultado_falsificacion.text = ""
+		_resultado_falsificacion.visible = false
+	if _revisar_falsificacion != null:
+		_revisar_falsificacion.disabled = true
+	if _resultado_revision_falsificacion != null:
+		_resultado_revision_falsificacion.text = ""
+		_resultado_revision_falsificacion.visible = false
 
 
 func _crear_copia_falsificada() -> void:
@@ -213,6 +237,22 @@ func _crear_copia_falsificada() -> void:
 				]
 			)
 			_resultado_falsificacion.visible = true
+			if _revisar_falsificacion != null:
+				_revisar_falsificacion.disabled = false
+			if _resultado_revision_falsificacion != null:
+				_resultado_revision_falsificacion.text = ""
+				_resultado_revision_falsificacion.visible = false
+
+
+func _resolver_revision_falsificacion() -> void:
+	if _borrador_falsificacion.is_empty() or _resultado_revision_falsificacion == null:
+		return
+	var revision := FalsificacionDocumentalModelo.resolver_revision(_borrador_falsificacion)
+	var clave := String(CLAVES_REVISION_FALSIFICACION.get(revision, ""))
+	if clave.is_empty():
+		return
+	_resultado_revision_falsificacion.text = tr("VISOR_FALSIFICACION_951_REVISION") % tr(clave)
+	_resultado_revision_falsificacion.visible = true
 
 
 func _reiniciar_analisis_documental() -> void:

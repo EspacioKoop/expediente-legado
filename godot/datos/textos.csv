@@ -599,6 +599,12 @@ VISOR_FALSIFICACION_951_CALIDAD_ALTA,alta
 VISOR_FALSIFICACION_951_RIESGO_ALTO,alto
 VISOR_FALSIFICACION_951_RIESGO_MEDIO,medio
 VISOR_FALSIFICACION_951_RIESGO_BAJO,bajo
+VISOR_FALSIFICACION_951_REVISAR,Pasar por control interno
+VISOR_FALSIFICACION_951_REVISAR_AYUDA,Simular cómo respondería la mesa de control a esta copia temporal.
+VISOR_FALSIFICACION_951_REVISION,CONTROL INTERNO · %s
+VISOR_FALSIFICACION_951_REVISION_ACEPTADA,La copia pasa sin observaciones y vuelve a la bandeja de trámite.
+VISOR_FALSIFICACION_951_REVISION_COTEJO,La copia vuelve con una solicitud de cotejo manual antes de continuar.
+VISOR_FALSIFICACION_951_REVISION_RETENIDA,La copia queda retenida como sospechosa y no entra en el circuito documental.
 VISOR_DETALLE_961_FACTURA1_PERFORACIONES,En el borde inferior se distinguen dos perforaciones de archivador ligeramente desalineadas; parecen de una carpeta anterior y no modifican lo escrito.
 VISOR_DETALLE_961_MEMO1_CINTA_FECHA,La fecha mecanografiada acusa una cinta algo más seca que el cuerpo del memorándum; la diferencia material no basta para fechar una segunda intervención.
 VISOR_DETALLE_961_MEMO1_COTEJO_MARGEN,La nota de cotejo está incorporada al cuerpo digitalizado; el expediente no identifica quién la añadió.
