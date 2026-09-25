@@ -17,7 +17,7 @@ const CASOS := [
         "id": "barrera_conos",
         "posicion": Vector3(0.0, 0.0, 2.0),
         "objetivo": Vector3(3.25, 0.55, 6.0),
-        "criterio": "barrera y conos se leen como dressing secundario, plausibles para 1998 y sin clipping",
+        "criterio":\n\t\t"barrera y conos se leen como dressing secundario, plausibles para 1998 y sin clipping",
     },
     {
         "id": "tapa_sur",
@@ -114,14 +114,17 @@ func _init() -> void:
         if not _guardar_captura(destino):
             quit(1)
             return
-        manifiesto["casos"].append(
-            {
-                "id": String(caso["id"]),
-                "captura": archivo,
-                "criterio": String(caso["criterio"]),
-                "camara_mundo": _vector_a_array(camara.global_position),
-                "sha256": FileAccess.get_sha256(destino),
-            }
+        (
+            manifiesto["casos"]
+            . append(
+                {
+                    "id": String(caso["id"]),
+                    "captura": archivo,
+                    "criterio": String(caso["criterio"]),
+                    "camara_mundo": _vector_a_array(camara.global_position),
+                    "sha256": FileAccess.get_sha256(destino),
+                }
+            )
         )
 
     var ruta_manifiesto := salida.path_join("manifest.json")
@@ -147,14 +150,17 @@ func _inventariar_objetos(lote: Node3D) -> Array:
         if caja.size == Vector3.ZERO:
             printerr("Instancia de #225 sin malla visible: %s" % nombre)
             continue
-        inventario.append(
-            {
-                "nodo": String(nombre),
-                "tamano_m": _vector_a_array(caja.size),
-                "centro_mundo": _vector_a_array(caja.get_center()),
-                "vistas": [],
-                "pantalla_por_vista": {},
-            }
+        (
+            inventario
+            . append(
+                {
+                    "nodo": String(nombre),
+                    "tamano_m": _vector_a_array(caja.size),
+                    "centro_mundo": _vector_a_array(caja.get_center()),
+                    "vistas": [],
+                    "pantalla_por_vista": {},
+                }
+            )
         )
     return inventario
 
@@ -172,9 +178,7 @@ func _preparar_camara(dia, caso: Dictionary) -> Camera3D:
     return camara
 
 
-func _registrar_cobertura(
-    objetos: Array, lote: Node3D, camara: Camera3D, vista: String
-) -> void:
+func _registrar_cobertura(objetos: Array, lote: Node3D, camara: Camera3D, vista: String) -> void:
     for objeto in objetos:
         var nodo := lote.get_node_or_null(String(objeto["nodo"])) as Node3D
         if nodo == null:
