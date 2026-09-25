@@ -89,6 +89,17 @@ class SuenoBabaYagaTest(unittest.TestCase):
         self.assertIn('get_node("CabanaAncla").visible = true', self.sueno)
         self.assertIn('get_node("RetornoSeguro").visible = true', self.sueno)
 
+    def test_acabado_ambiental_es_procedural_y_no_figurativo(self):
+        self.assertIn("func _montar_acabado_ambiental()", self.sueno)
+        self.assertIn('"AcabadoAmbiental"', self.sueno)
+        self.assertIn('"BosqueFondo"', self.sueno)
+        self.assertIn('"TechoOficinaInvertido"', self.sueno)
+        self.assertIn('"PlanoAdministrativoPlegado"', self.sueno)
+        self.assertIn('"CocinaSIGA98"', self.sueno)
+        self.assertIn('"Fluorescente%02d"', self.sueno)
+        self.assertNotIn("Sprite3D.new()", self.sueno)
+        self.assertNotIn("Decal.new()", self.sueno)
+
     def test_reduccion_movimiento_conserva_mecanica(self):
         self.assertIn('"corte_fundido" if reduccion_movimiento', self.sueno)
         self.assertIn('"duracion": 0.0 if reduccion_movimiento', self.sueno)

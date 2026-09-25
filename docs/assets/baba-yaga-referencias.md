@@ -70,6 +70,19 @@ El vertical incorpora ahora feedback **diegético** para que la regla pueda dedu
 - la última comparación forma parte del estado reproducible y se rematerializa al restaurar una partida;
 - `reduccion_movimiento` conserva exactamente esta lectura sin animar geometría ni mover la cámara.
 
+## Pase ambiental procedural
+
+Para avanzar el acabado sin cerrar todavía una iconografía figurativa de Baba Yaga, la escena incorpora una capa propia de geometría procedural:
+
+- un **bosque de fondo** en el que troncos y columnas de oficina comparten silueta;
+- paneles de **techo de oficina invertido** sobre el bosque, con luminarias lineales suspendidas;
+- un **plano administrativo plegado** convertido en volumen del paisaje, reforzando la idea de bosque como documento imposible;
+- una **cocina doméstica SIGA-98** dentro del interior mayor-por-dentro de la cabaña: encimera, muebles, alacena, cocina eléctrica y mesa;
+- todos estos elementos son `MeshInstance3D` visuales y no añaden `CollisionShape3D`, de modo que el pase de arte no cambia rutas, reglas ni riesgo de softlock;
+- no se introduce figura, rostro, vestuario ni anatomía de Baba Yaga: esa decisión sigue detrás del gate cultural y artístico.
+
+Este pase trabaja únicamente con la hibridación propia del juego (bosque, oficina, archivo y vivienda) y evita convertir una adaptación moderna concreta en referencia canónica.
+
 ### Gate humano antes de cerrar #652
 
 El código puede comprobar reglas, persistencia y ausencia de softlock, pero no sustituye un pase humano. Antes de cerrar el issue conviene registrar una sesión breve con estos puntos:

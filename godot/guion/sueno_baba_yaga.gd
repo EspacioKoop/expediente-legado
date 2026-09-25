@@ -106,6 +106,7 @@ func preparar() -> void:
 	_montado = true
 	_montar_bosque()
 	_montar_cabana()
+	_montar_acabado_ambiental()
 	_montar_retorno()
 	_montar_marcas()
 	_montar_lectura_comparacion()
@@ -329,6 +330,133 @@ func _montar_cabana() -> void:
 		Vector3(0.0, 2.0, -1.4),
 		COLOR_MARCA,
 	)
+
+	var cocina := Node3D.new()
+	cocina.name = "CocinaSIGA98"
+	interior.add_child(cocina)
+	_crear_caja(
+		cocina,
+		"Encimera",
+		Vector3(2.25, 0.16, 0.62),
+		Vector3(1.12, 1.70, 0.78),
+		COLOR_ARCHIVO,
+	)
+	_crear_caja(
+		cocina,
+		"MuebleBajo",
+		Vector3(2.18, 0.92, 0.56),
+		Vector3(1.12, 1.22, 0.78),
+		COLOR_CABANA,
+	)
+	_crear_caja(
+		cocina,
+		"Alacena",
+		Vector3(1.72, 0.82, 0.42),
+		Vector3(1.25, 2.68, 0.90),
+		COLOR_INTERIOR,
+	)
+	_crear_caja(
+		cocina,
+		"CocinaElectrica",
+		Vector3(0.68, 0.12, 0.48),
+		Vector3(0.55, 1.82, 0.73),
+		COLOR_MARCA,
+	)
+	_crear_caja(
+		cocina,
+		"Mesa",
+		Vector3(1.30, 0.12, 1.02),
+		Vector3(-1.22, 1.68, 0.48),
+		COLOR_MADERA,
+	)
+	for i in 4:
+		var x := -1.68 if i % 2 == 0 else -0.78
+		var z := 0.14 if i < 2 else 0.82
+		_crear_caja(
+			cocina,
+			"PataMesa%d" % (i + 1),
+			Vector3(0.12, 0.68, 0.12),
+			Vector3(x, 1.34, z),
+			COLOR_ARCHIVO,
+		)
+
+
+func _montar_acabado_ambiental() -> void:
+	var acabado := Node3D.new()
+	acabado.name = "AcabadoAmbiental"
+	add_child(acabado)
+
+	var fondo := Node3D.new()
+	fondo.name = "BosqueFondo"
+	acabado.add_child(fondo)
+	var hitos := [
+		Vector3(-6.25, 0.0, -4.6),
+		Vector3(-6.55, 0.0, -1.4),
+		Vector3(-6.10, 0.0, 2.4),
+		Vector3(6.20, 0.0, -4.2),
+		Vector3(6.45, 0.0, -0.8),
+		Vector3(6.15, 0.0, 2.9),
+		Vector3(-3.7, 0.0, -5.25),
+		Vector3(3.9, 0.0, -5.15),
+	]
+	for i in hitos.size():
+		var altura := 4.4 + float(i % 3) * 0.55
+		_crear_caja(
+			fondo,
+			"TroncoColumna%02d" % (i + 1),
+			Vector3(0.42, altura, 0.42),
+			hitos[i] + Vector3(0.0, altura * 0.5, 0.0),
+			COLOR_BOSQUE if i % 2 == 0 else COLOR_ARCHIVO,
+		)
+
+	var techo := Node3D.new()
+	techo.name = "TechoOficinaInvertido"
+	acabado.add_child(techo)
+	for i in 4:
+		var panel := _crear_caja(
+			techo,
+			"PanelTecho%02d" % (i + 1),
+			Vector3(3.15, 0.10, 2.25),
+			Vector3(-4.8 + float(i) * 3.2, 5.35, -0.20 + float(i % 2) * 0.34),
+			COLOR_ARCHIVO,
+		)
+		panel.rotation_degrees.z = 180.0
+	for i in 3:
+		_crear_caja(
+			techo,
+			"Fluorescente%02d" % (i + 1),
+			Vector3(1.85, 0.06, 0.16),
+			Vector3(-3.15 + float(i) * 3.15, 5.18, 0.22),
+			COLOR_COMPARACION,
+		)
+
+	var plano := Node3D.new()
+	plano.name = "PlanoAdministrativoPlegado"
+	acabado.add_child(plano)
+	var hoja_a := _crear_caja(
+		plano,
+		"HojaA",
+		Vector3(2.85, 2.25, 0.08),
+		Vector3(-4.95, 1.45, 4.55),
+		COLOR_INTERIOR,
+	)
+	hoja_a.rotation_degrees.y = 24.0
+	var hoja_b := _crear_caja(
+		plano,
+		"HojaB",
+		Vector3(2.85, 2.25, 0.08),
+		Vector3(-2.55, 1.45, 4.55),
+		COLOR_INTERIOR,
+	)
+	hoja_b.rotation_degrees.y = -24.0
+	for i in 3:
+		_crear_caja(
+			plano,
+			"LineaArchivo%02d" % (i + 1),
+			Vector3(1.70, 0.05, 0.10),
+			Vector3(-4.80 + float(i) * 1.05, 1.25 + float(i) * 0.38, 4.45),
+			COLOR_MARCA,
+		)
 
 
 func _montar_retorno() -> void:
