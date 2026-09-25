@@ -60,6 +60,7 @@ func _raiz() -> int:
 
 func _ready() -> void:
 	theme = EstiloSiga.tema()
+	EstiloSiga.declarar_bisel(self, EstiloSiga.PAPEL)
 	if not contenido.cargar() or not historias.cargar():
 		return
 
@@ -82,7 +83,7 @@ func _ready() -> void:
 func _draw() -> void:
 	# La ventana entera es un panel saliente, como el marco de un programa de
 	# la época.
-	EstiloSiga.dibujar_bisel(self, Rect2(Vector2.ZERO, size), EstiloSiga.GRIS, true)
+	EstiloSiga.dibujar_bisel(self, Rect2(Vector2.ZERO, size), EstiloSiga.PAPEL, true)
 
 
 func _construir() -> void:
@@ -221,7 +222,7 @@ func _refrescar_archivo() -> void:
 		_archivo.add_item(nombre)
 		_archivo.set_item_tooltip(i, nombre)
 		if cerrado:
-			_archivo.set_item_custom_bg_color(i, EstiloSiga.GRIS)
+			_archivo.set_item_custom_bg_color(i, EstiloSiga.PAPEL_ARCHIVADO)
 		if ficha["id"] == caso["id"]:
 			_archivo.select(i)
 
@@ -715,7 +716,7 @@ func _caja_hundida(fondo: Color) -> StyleBoxFlat:
 
 func _hueco() -> PanelContainer:
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", _caja_hundida(EstiloSiga.GRIS))
+	panel.add_theme_stylebox_override("panel", _caja_hundida(EstiloSiga.PAPEL))
 	return panel
 
 

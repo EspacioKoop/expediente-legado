@@ -185,7 +185,7 @@ class CatalogoAnomaliasTest(unittest.TestCase):
     def test_catalogo_tiene_identidad_visual_propia_sin_romper_el_shell(self):
         for token in (
             'const COLOR_INDICE := Color("1f2b2d")',
-            'const COLOR_FICHA := Color("e7eadf")',
+            'const COLOR_FICHA := Color("efe9d6")',
             'const COLOR_PAPEL := Color("f7f6ed")',
             'PanelContainer.new()',
             'panel_indice.name = "PanelIndice"',

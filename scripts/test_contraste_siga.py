@@ -38,7 +38,10 @@ class ContrasteSigaTest(unittest.TestCase):
         colores = {
             nombre: _constante(nombre)
             for nombre in (
-                "GRIS",
+                "PAPEL",
+                "PAPEL_BOTON",
+                "PAPEL_PULSADO",
+                "PAPEL_ARCHIVADO",
                 "NEGRO",
                 "BLANCO",
                 "AZUL_TITULO",
@@ -47,25 +50,34 @@ class ContrasteSigaTest(unittest.TestCase):
                 "GRIS_TEXTO_DESHABILITADO",
             )
         }
-        extras = {
-            "gris_disabled": (0xD0 / 255.0,) * 3,
-            "gris_readonly": (0xE8 / 255.0,) * 3,
-        }
         pares = {
-            "texto general sobre gris": (colores["NEGRO"], colores["GRIS"]),
+            "texto general sobre papel": (colores["NEGRO"], colores["PAPEL"]),
+            "botón sobre papel": (colores["NEGRO"], colores["PAPEL_BOTON"]),
+            "botón pulsado": (colores["NEGRO"], colores["PAPEL_PULSADO"]),
+            "expediente sellado": (colores["NEGRO"], colores["PAPEL_ARCHIVADO"]),
             "texto principal sobre blanco": (colores["NEGRO"], colores["BLANCO"]),
             "selección sobre azul": (colores["BLANCO"], colores["AZUL_TITULO"]),
             "enlace sobre blanco": (colores["AZUL_ENLACE"], colores["BLANCO"]),
             "texto secundario sobre blanco": (colores["GRIS_TEXTO"], colores["BLANCO"]),
-            "readonly sobre gris claro": (colores["GRIS_TEXTO"], extras["gris_readonly"]),
-            "disabled sobre gris": (
-                colores["GRIS_TEXTO_DESHABILITADO"],
-                extras["gris_disabled"],
-            ),
+            "readonly sobre papel": (colores["GRIS_TEXTO"], colores["PAPEL"]),
+            "disabled sobre papel": (colores["GRIS_TEXTO_DESHABILITADO"], colores["PAPEL"]),
         }
         for nombre, (frente, fondo) in pares.items():
             with self.subTest(nombre=nombre):
                 self.assertGreaterEqual(contraste(frente, fondo), MIN_AA)
+
+    def test_ninguna_superficie_con_texto_es_gris(self):
+        # Misma definición que ContrasteTexto.es_gris: casi sin croma, ni casi
+        # blanco ni casi negro. El papel del OS98 es cálido a propósito.
+        for nombre in ("PAPEL", "PAPEL_BOTON", "PAPEL_PULSADO", "PAPEL_ARCHIVADO"):
+            with self.subTest(nombre=nombre):
+                rgb = _constante(nombre)
+                croma = max(rgb) - min(rgb)
+                lum = _luminancia(rgb)
+                self.assertFalse(croma < 0.05 and 0.03 < lum < 0.85)
+        self.assertNotIn("caja_hundida(GRIS)", FUENTE)
+        self.assertNotIn('Color("d0d0d0")', FUENTE)
+        self.assertIn('tema.set_stylebox("panel", "PanelContainer", caja_saliente(PAPEL))', FUENTE)
 
     def test_controles_problematicos_usan_la_paleta_comun(self):
         contratos = (

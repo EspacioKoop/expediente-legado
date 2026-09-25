@@ -106,7 +106,7 @@ func _recorrer() -> void:
 	_comprobar(
 		"el expediente firmado cambia de fondo",
 		archivo._archivo.get_item_custom_bg_color(0),
-		EstiloSiga.GRIS
+		EstiloSiga.PAPEL_ARCHIVADO
 	)
 	var antes: Array = archivo.descubiertas.duplicate()
 	archivo._al_pulsar_marca("pista:" + archivo.caso["pistas"][0]["id"])

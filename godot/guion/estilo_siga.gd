@@ -9,7 +9,14 @@
 class_name EstiloSiga
 extends RefCounted
 
-const GRIS := Color("c0c0c0")  ## el gris de sistema de la época
+const GRIS := Color("c0c0c0")  ## el gris de sistema de la época: relieve, nunca fondo de texto
+## Superficies con texto. El OS98 conserva marco, relieve y barra azul, pero
+## detrás de un texto negro no hay gris: hay papel. Ninguna pantalla del juego
+## pone texto oscuro sobre gris (`pruebas_contraste_pantallas.gd`).
+const PAPEL := Color("f1ede2")  ## cuerpos de ventana, barra, menús, paneles
+const PAPEL_BOTON := Color("faf8f2")
+const PAPEL_PULSADO := Color("e6dfcc")
+const PAPEL_ARCHIVADO := Color("e8dcb8")  ## carpeta manila: expediente sellado
 const GRIS_CLARO := Color("dfdfdf")  ## la luz del bisel
 const GRIS_OSCURO := Color("808080")  ## su sombra
 const NEGRO := Color("000000")
@@ -18,7 +25,7 @@ const AZUL_TITULO := Color("000080")  ## la barra de título activa
 const AZUL_ENLACE := Color("0000aa")
 const AMARILLO_VISTO := Color("c8c800")  ## una frase gatillo ya leída
 const GRIS_TEXTO := Color("595959")  ## texto secundario AA sobre blanco/gris claro
-const GRIS_TEXTO_DESHABILITADO := Color("202020")  ## alto contraste incluso en controles disabled
+const GRIS_TEXTO_DESHABILITADO := Color("3a3a3a")  ## deshabilitado, pero legible sobre papel
 
 const GROSOR := 2
 const RUTA_FUENTE_DOCUMENTO := "res://assets/fonts/MFBOldstyle-Regular.otf"
@@ -30,6 +37,8 @@ const RUTA_FUENTE_TERMINAL := "res://assets/fonts/Kubasta.ttf"
 
 ## Dibuja el bisel sobre un rectángulo. [param saliente] a false lo hunde.
 static func dibujar_bisel(lienzo: CanvasItem, rect: Rect2, fondo: Color, saliente: bool) -> void:
+	if lienzo is Control:
+		declarar_bisel(lienzo as Control, fondo)
 	var luz := GRIS_CLARO if saliente else GRIS_OSCURO
 	var sombra := GRIS_OSCURO if saliente else GRIS_CLARO
 	lienzo.draw_rect(rect, fondo)
@@ -55,13 +64,20 @@ static func dibujar_bisel(lienzo: CanvasItem, rect: Rect2, fondo: Color, salient
 		)
 
 
+## Un control que se pinta el bisel en `_draw` declara aquí qué hay detrás de sus
+## textos, para `ContrasteTexto`. Se llama también desde `_ready`: sin GPU no hay
+## `_draw`, y la regla de contraste corre headless.
+static func declarar_bisel(control: Control, fondo: Color) -> void:
+	ContrasteTexto.declarar_fondo(control, fondo)
+
+
 ## Equivalente reutilizable del bisel saliente para controles del Theme.
 ##
 ## StyleBoxFlat no deja asignar un color distinto a cada lado. Combinamos un
 ## borde claro con una sombra corta desplazada abajo/derecha: a tamaño real el
 ## resultado conserva las dos masas de luz del bisel clásico sin necesitar un
 ## recurso binario ni un shader por control.
-static func caja_saliente(fondo: Color = GRIS) -> StyleBoxFlat:
+static func caja_saliente(fondo: Color = PAPEL_BOTON) -> StyleBoxFlat:
 	return _caja_retro(fondo, false)
 
 
@@ -106,9 +122,9 @@ static func _caja_retro(fondo: Color, hundida: bool) -> StyleBoxFlat:
 static func _configurar_botones(tema: Theme) -> void:
 	for tipo in ["Button", "OptionButton", "MenuButton"]:
 		tema.set_stylebox("normal", tipo, caja_saliente())
-		tema.set_stylebox("hover", tipo, caja_saliente(Color("d0d0d0")))
-		tema.set_stylebox("pressed", tipo, caja_hundida(GRIS))
-		tema.set_stylebox("disabled", tipo, caja_saliente(Color("d0d0d0")))
+		tema.set_stylebox("hover", tipo, caja_saliente(BLANCO))
+		tema.set_stylebox("pressed", tipo, caja_hundida(PAPEL_PULSADO))
+		tema.set_stylebox("disabled", tipo, caja_saliente(PAPEL))
 		tema.set_stylebox("focus", tipo, caja_foco())
 		tema.set_color("font_color", tipo, NEGRO)
 		tema.set_color("font_hover_color", tipo, NEGRO)
@@ -122,7 +138,7 @@ static func _configurar_campos(tema: Theme) -> void:
 	for tipo in ["LineEdit", "TextEdit"]:
 		tema.set_stylebox("normal", tipo, caja_hundida(BLANCO))
 		tema.set_stylebox("focus", tipo, caja_foco())
-		tema.set_stylebox("read_only", tipo, caja_hundida(Color("e8e8e8")))
+		tema.set_stylebox("read_only", tipo, caja_hundida(PAPEL))
 		tema.set_color("font_color", tipo, NEGRO)
 		tema.set_color("font_selected_color", tipo, BLANCO)
 		tema.set_color("font_placeholder_color", tipo, GRIS_TEXTO)
@@ -152,6 +168,11 @@ static func caja_seleccion() -> StyleBoxFlat:
 ## los pares de color y sus fondos para que todas las apps hereden el contrato.
 static func _configurar_texto_y_listas(tema: Theme) -> void:
 	tema.set_color("font_color", "Label", NEGRO)
+	# El texto es negro, así que ningún panel del tema puede quedarse con el gris
+	# oscuro de serie de Godot: sin fondo propio, un PanelContainer era negro
+	# sobre gris.
+	tema.set_stylebox("panel", "PanelContainer", caja_saliente(PAPEL))
+	tema.set_stylebox("panel", "Panel", caja_saliente(PAPEL))
 
 	tema.set_stylebox("normal", "RichTextLabel", caja_hundida(BLANCO))
 	tema.set_stylebox("focus", "RichTextLabel", caja_foco())

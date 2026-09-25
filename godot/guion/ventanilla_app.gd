@@ -58,6 +58,7 @@ var _pulso_racha := 0
 
 func _ready() -> void:
 	theme = EstiloSiga.tema()
+	EstiloSiga.declarar_bisel(self, EstiloSiga.PAPEL)
 	contenido.cargar()
 	historias.cargar()
 	if partida_externa != null:
@@ -109,7 +110,7 @@ func _salir_ventanilla() -> void:
 
 
 func _draw() -> void:
-	EstiloSiga.dibujar_bisel(self, Rect2(Vector2.ZERO, size), EstiloSiga.GRIS, true)
+	EstiloSiga.dibujar_bisel(self, Rect2(Vector2.ZERO, size), EstiloSiga.PAPEL, true)
 
 
 # --- Turno ------------------------------------------------------------------
@@ -489,7 +490,7 @@ func _construir() -> void:
 	_ficha.bbcode_enabled = true
 	_ficha.custom_minimum_size.y = 72
 	_ficha.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_ficha.add_theme_stylebox_override("normal", _hundido(EstiloSiga.GRIS))
+	_ficha.add_theme_stylebox_override("normal", _hundido(EstiloSiga.PAPEL))
 	_ficha.add_theme_color_override("default_color", EstiloSiga.NEGRO)
 	informacion.add_child(_ficha)
 
