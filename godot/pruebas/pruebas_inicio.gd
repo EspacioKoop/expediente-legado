@@ -155,6 +155,22 @@ func _probar() -> void:
 		inicio._diorama.get("_exterior").get("_reduccion_movimiento"),
 		"reducir movimiento también congela la ventana exterior del diorama"
 	)
+	inicio._diorama.configurar_activo(false)
+	_comprobar(not inicio._diorama.is_processing(), "#830: el diorama puede suspender su proceso bajo overlays")
+	_comprobar(
+		inicio._diorama.get("_viewport").render_target_update_mode == SubViewport.UPDATE_DISABLED,
+		"#830: suspender el diorama detiene su viewport principal"
+	)
+	_comprobar(
+		inicio._diorama.get("_exterior").get("_viewport").render_target_update_mode == SubViewport.UPDATE_DISABLED,
+		"#830: suspender el diorama detiene también el viewport exterior"
+	)
+	inicio._diorama.configurar_activo(true)
+	_comprobar(inicio._diorama.is_processing(), "reactivar el diorama restaura su proceso")
+	_comprobar(
+		inicio._diorama.get("_viewport").render_target_update_mode == SubViewport.UPDATE_ALWAYS,
+		"reactivar el diorama restaura el render en vivo"
+	)
 	_comprobar(
 		vapor != null and not vapor.visible, "reducir movimiento elimina el vapor no esencial"
 	)
