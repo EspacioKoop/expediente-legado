@@ -108,10 +108,13 @@ func _construir_interfaz() -> void:
 	_cargar = _crear_boton(tr("INICIO_CARGAR"), _cargar_partida)
 	_cargar.tooltip_text = tr("INICIO_CARGAR_TOOLTIP")
 	caja.add_child(_cargar)
+	# #567: la Ventanilla es una acción principal del menú, no un extra
+	# escondido. Mantiene acceso directo incluso sin partida guardada.
+	_ventanilla = _crear_boton(tr("INICIO_VENTANILLA"), _abrir_ventanilla)
+	caja.add_child(_ventanilla)
 
-	# #830: el nivel principal del menú conserva la jerarquía propuesta en el
-	# issue. Las utilidades que ya existían siguen disponibles dentro de Extras
-	# sin duplicar escenas ni alterar sus contratos funcionales.
+	# #830: utilidades secundarias siguen agrupadas en Extras sin duplicar
+	# escenas ni alterar sus contratos funcionales.
 	_extras = _crear_boton("Extras", _alternar_extras)
 	caja.add_child(_extras)
 	_extras_contenedor = VBoxContainer.new()
@@ -124,18 +127,47 @@ func _construir_interfaz() -> void:
 	_extras_contenedor.add_child(_personaje)
 	_portatil = _crear_boton("Portátil Color 98", _abrir_portatil)
 	_extras_contenedor.add_child(_portatil)
-	_ventanilla = _crear_boton(tr("INICIO_VENTANILLA"), _abrir_ventanilla)
-	_extras_contenedor.add_child(_ventanilla)
 
 	_ajustes = _crear_boton(tr("MENU_GLOBAL_OPCIONES"), _abrir_ajustes)
 	caja.add_child(_ajustes)
 	_salir = _crear_boton(tr("MENU_GLOBAL_SALIR"), _salir_del_juego)
 	caja.add_child(_salir)
+	_configurar_foco_menu_principal()
 
 	for propiedad in ZONAS_POR_BOTON:
 		var boton: Button = get(propiedad)
 		var zona: String = ZONAS_POR_BOTON[propiedad]
 		boton.focus_entered.connect(_diorama.enfocar.bind(zona))
+
+
+func _configurar_foco_menu_principal() -> void:
+	# #98: el mando no depende de la heurística espacial de Godot. El recorrido
+	# principal es estable y cíclico; al abrir Extras se entra explícitamente en
+	# sus dos acciones y desde la última se continúa hacia Ajustes.
+	var principales := [_continuar, _nueva, _cargar, _ventanilla, _extras, _ajustes, _salir]
+	for i in principales.size():
+		var actual: Control = principales[i]
+		var anterior: Control = principales[(i - 1 + principales.size()) % principales.size()]
+		var siguiente: Control = principales[(i + 1) % principales.size()]
+		actual.focus_neighbor_top = actual.get_path_to(anterior)
+		actual.focus_neighbor_left = actual.focus_neighbor_top
+		actual.focus_previous = actual.focus_neighbor_top
+		actual.focus_neighbor_bottom = actual.get_path_to(siguiente)
+		actual.focus_neighbor_right = actual.focus_neighbor_bottom
+		actual.focus_next = actual.focus_neighbor_bottom
+
+	_personaje.focus_neighbor_top = _personaje.get_path_to(_extras)
+	_personaje.focus_neighbor_left = _personaje.focus_neighbor_top
+	_personaje.focus_previous = _personaje.focus_neighbor_top
+	_personaje.focus_neighbor_bottom = _personaje.get_path_to(_portatil)
+	_personaje.focus_neighbor_right = _personaje.focus_neighbor_bottom
+	_personaje.focus_next = _personaje.focus_neighbor_bottom
+	_portatil.focus_neighbor_top = _portatil.get_path_to(_personaje)
+	_portatil.focus_neighbor_left = _portatil.focus_neighbor_top
+	_portatil.focus_previous = _portatil.focus_neighbor_top
+	_portatil.focus_neighbor_bottom = _portatil.get_path_to(_ajustes)
+	_portatil.focus_neighbor_right = _portatil.focus_neighbor_bottom
+	_portatil.focus_next = _portatil.focus_neighbor_bottom
 
 
 func _crear_cabecera(caja: VBoxContainer) -> void:

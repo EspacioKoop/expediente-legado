@@ -75,6 +75,18 @@ func _probar() -> void:
 	_comprobar(not FileAccess.file_exists(_ruta), "abrir menú no crea partida")
 	_comprobar(inicio._extras != null, "#830: el nivel principal ofrece una entrada Extras")
 	_comprobar(
+		inicio._ventanilla.get_parent() == inicio._extras.get_parent(),
+		"#567: ventanilla es una acción principal y no queda escondida en Extras"
+	)
+	_comprobar(
+		inicio._extras.focus_neighbor_top == inicio._extras.get_path_to(inicio._ventanilla),
+		"#98: el recorrido de mando llega a Extras desde Ventanilla de forma explícita"
+	)
+	_comprobar(
+		inicio._extras.focus_neighbor_bottom == inicio._extras.get_path_to(inicio._ajustes),
+		"#98: el recorrido principal continúa de Extras a Ajustes"
+	)
+	_comprobar(
 		not inicio._extras_contenedor.visible,
 		"Extras empieza recogido para mantener limpia la jerarquía principal"
 	)
@@ -84,8 +96,12 @@ func _probar() -> void:
 		"Extras despliega los accesos secundarios sin cambiar de escena"
 	)
 	_comprobar(
-		inicio._personaje.visible and inicio._portatil.visible and inicio._ventanilla.visible,
-		"Personaje, portátil y ventanilla siguen accesibles dentro de Extras"
+		inicio._personaje.visible and inicio._portatil.visible,
+		"Personaje y portátil siguen accesibles dentro de Extras"
+	)
+	_comprobar(
+		inicio._portatil.focus_neighbor_bottom == inicio._portatil.get_path_to(inicio._ajustes),
+		"#98: el mando puede salir de Extras hacia Ajustes sin depender de heurística"
 	)
 	inicio._extras.pressed.emit()
 	_comprobar(not inicio._extras_contenedor.visible, "Extras puede volver a recogerse")
