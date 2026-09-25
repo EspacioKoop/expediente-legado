@@ -11,6 +11,8 @@
 ## las gafas en las mejillas y el bigote bajo la barbilla.
 extends RefCounted
 
+const PeloCapas := preload("res://guion/pelo_capas.gd")
+
 const PERSONAJES := {
 	"emperador": "Puyi",
 	"aduanero_ny": "Herman Melville",
@@ -41,10 +43,6 @@ const HUESOS_ROSTRO := {
 }
 
 const NEGRO := Color(0.04, 0.035, 0.03)
-const CASTANO_OSCURO := Color(0.09, 0.07, 0.055)
-const ENTRECANO := Color(0.17, 0.155, 0.14)
-const CANAS := Color(0.47, 0.44, 0.40)
-const GRIS_BARBA := Color(0.30, 0.28, 0.26)
 const FIELTRO := Color(0.13, 0.12, 0.11)
 const CINTA := Color(0.05, 0.045, 0.04)
 
@@ -72,23 +70,113 @@ static func aplicar(pieza: Node3D, retrato: String) -> void:
 			# Las gafas redondas de montura gruesa son todo el retrato.
 			_gafas(enganche, r, "GafasPuyi", 0.0215, 0.0042, NEGRO)
 		"Herman Melville":
-			# 1885: barba entera y poblada, canosa, que tapa la boca.
-			_barba(enganche, r, "BarbaMelville", CANAS, 1.35)
-			_bigote(enganche, r, "BigoteMelville", CANAS, 1.25, 1.5)
+			# 1885: barba entera, poblada y canosa, que baja hasta el cuello y
+			# se come la boca por arriba.
+			_barba(
+				esqueleto,
+				r,
+				"BarbaMelville",
+				0.085,
+				{
+					"capas": 8,
+					"largo": 0.019,
+					"caida": 1.0,
+					"densidad": 150.0,
+					"raiz": Color(0.58, 0.56, 0.52),
+					"punta": Color(0.80, 0.78, 0.74),
+					"variacion": 0.18,
+					"cobertura": 0.95,
+				}
+			)
+			_bigote(
+				esqueleto,
+				r,
+				"BigoteMelville",
+				1.0,
+				{
+					"capas": 6,
+					"largo": 0.013,
+					"caida": 1.4,
+					"densidad": 170.0,
+					"raiz": Color(0.55, 0.53, 0.50),
+					"punta": Color(0.78, 0.76, 0.72),
+					"variacion": 0.15,
+					"cobertura": 1.0,
+				}
+			)
 		"Fernando Pessoa":
 			_gafas(enganche, r, "GafasPessoa", 0.0185, 0.0022, NEGRO)
-			_bigote(enganche, r, "BigotePessoa", CASTANO_OSCURO, 1.3, 0.62)
+			_bigote(
+				esqueleto,
+				r,
+				"BigotePessoa",
+				0.8,
+				{
+					"capas": 7,
+					"largo": 0.006,
+					"caida": 0.9,
+					"densidad": 120.0,
+					"raiz": Color(0.10, 0.08, 0.065),
+					"punta": Color(0.17, 0.14, 0.11),
+					"variacion": 0.1,
+					"cobertura": 1.0,
+				}
+			)
 			_sombrero(enganche, r, "SombreroPessoa", FIELTRO)
 		"Constantino Cavafis":
 			# Afeitado en los retratos conocidos; lo reconocible son las gafas
-			# y el pelo oscuro que le queda en sienes y nuca.
+			# redondas y el pelo oscuro peinado hacia atrás.
 			_gafas(enganche, r, "GafasCavafis", 0.0200, 0.0030, NEGRO)
-			_pelo(enganche, r, "PeloCavafis", ENTRECANO)
+			_pelo(
+				esqueleto,
+				r,
+				"PeloCavafis",
+				{
+					"capas": 9,
+					"largo": 0.010,
+					"caida": 0.5,
+					"densidad": 190.0,
+					"raiz": Color(0.13, 0.115, 0.10),
+					"punta": Color(0.24, 0.21, 0.19),
+					"variacion": 0.12,
+					"cobertura": 1.0,
+				}
+			)
 		"Henri Rousseau":
 			# El autorretrato: barba recortada, bigote y boina de pintor.
-			_barba(enganche, r, "BarbaRousseau", GRIS_BARBA, 1.0)
-			_bigote(enganche, r, "BigoteRousseau", GRIS_BARBA, 1.2, 1.3)
-			_boina(enganche, r, "BoinaRousseau", NEGRO)
+			_barba(
+				esqueleto,
+				r,
+				"BarbaRousseau",
+				0.07,
+				{
+					"capas": 6,
+					"largo": 0.009,
+					"caida": 0.7,
+					"densidad": 170.0,
+					"raiz": Color(0.44, 0.42, 0.40),
+					"punta": Color(0.64, 0.62, 0.58),
+					"variacion": 0.18,
+					"cobertura": 0.95,
+				}
+			)
+			_bigote(
+				esqueleto,
+				r,
+				"BigoteRousseau",
+				1.0,
+				{
+					"capas": 5,
+					"largo": 0.010,
+					"caida": 1.2,
+					"densidad": 180.0,
+					"raiz": Color(0.40, 0.38, 0.36),
+					"punta": Color(0.60, 0.58, 0.55),
+					"variacion": 0.15,
+					"cobertura": 1.0,
+				}
+			)
+			_boina(enganche, r, "BoinaRousseau", Color(0.09, 0.09, 0.11))
 
 
 ## Puntos del rostro en el espacio del hueso Head (rest), más `k`, la escala
@@ -121,7 +209,7 @@ static func _gafas(
 	var grupo := _grupo(padre, nombre)
 	var k: float = r["k"]
 	var ojos: Vector3 = r["ojos"]
-	var z := ojos.z + 0.026 * k
+	var z := ojos.z + 0.031 * k
 	var radio_k := radio * k
 	for ojo in [r["ojo_izq"], r["ojo_der"]]:
 		var centro := Vector3((ojo as Vector3).x * 1.02, ojo.y, z)
@@ -154,64 +242,101 @@ static func _gafas(
 		)
 
 
-## Bigote bajo la nariz: dos mechones que caen hacia las comisuras.
-static func _bigote(
-	padre: Node3D, r: Dictionary, nombre: String, color: Color, ancho: float, grueso: float
-) -> void:
-	var grupo := _grupo(padre, nombre)
-	var k: float = r["k"]
-	var nariz: Vector3 = r["nariz"]
-	var labio: Vector3 = r["labio"]
-	var y := lerpf(labio.y, nariz.y, 0.36)
-	var z := maxf(labio.z, nariz.z) + 0.001 * k
-	for lado in [-1.0, 1.0]:
-		var mechon := _esfera(
-			grupo,
-			Vector3(lado * 0.0115 * k * ancho, y, z),
-			Vector3(0.0135 * k * ancho, 0.0048 * k * grueso, 0.0065 * k),
-			color
-		)
-		mechon.rotation.z = lado * -0.28
-
-
-## Barba entera: dos masas que siguen la mandíbula, del carrillo al mentón, y
-## una tercera en el mentón, solapadas para leerse como una sola. Van hundidas
-## en la cara, así que solo asoma el borde. [param volumen] es cuánto asoma;
-## por debajo de 1 es una barba recortada.
+## Barba entera por capas: desde la patilla, por los carrillos y bajo la
+## línea del pómulo, hasta [param alcance] metros por debajo del labio. Deja
+## libres los labios y el bigote, que va aparte.
 static func _barba(
-	padre: Node3D, r: Dictionary, nombre: String, color: Color, volumen: float
-) -> void:
-	var grupo := _grupo(padre, nombre)
+	esqueleto: Skeleton3D, r: Dictionary, nombre: String, alcance: float, opciones: Dictionary
+) -> MeshInstance3D:
+	return PeloCapas.crear(
+		esqueleto, nombre, func(p: Vector3) -> float: return mascara_barba(p, r, alcance), opciones
+	)
+
+
+## Bigote por capas sobre el labio superior. [param ancho] 1 llega a las
+## comisuras; por debajo, un bigote más corto.
+static func _bigote(
+	esqueleto: Skeleton3D, r: Dictionary, nombre: String, ancho: float, opciones: Dictionary
+) -> MeshInstance3D:
+	return PeloCapas.crear(
+		esqueleto, nombre, func(p: Vector3) -> float: return mascara_bigote(p, r, ancho), opciones
+	)
+
+
+## Pelo corto por capas en coronilla, sienes y nuca, con la línea del
+## nacimiento en la frente y sin tapar las orejas.
+static func _pelo(
+	esqueleto: Skeleton3D, r: Dictionary, nombre: String, opciones: Dictionary
+) -> MeshInstance3D:
+	return PeloCapas.crear(
+		esqueleto, nombre, func(p: Vector3) -> float: return mascara_pelo(p, r), opciones
+	)
+
+
+static func mascara_barba(p: Vector3, r: Dictionary, alcance: float) -> float:
+	var k: float = r["k"]
+	var ojos: Vector3 = r["ojos"]
+	var labio: Vector3 = r["labio"]
+	var x := absf(p.x) / k
+	# Línea superior: de la comisura sube por el carrillo hasta la patilla.
+	var tope := lerpf(
+		labio.y + 0.004 * k, ojos.y - 0.042 * k, clampf((x - 0.020) / 0.042, 0.0, 1.0)
+	)
+	# La patilla: una franja estrecha delante de la oreja.
+	if x > 0.060 and p.z > -0.024 * k and p.z < 0.004 * k:
+		tope = ojos.y + 0.004 * k
+	var arriba := _escalon(tope + 0.005 * k, tope - 0.005 * k, p.y)
+	# Por detrás de la oreja no hay barba.
+	var delante := _escalon(-0.030 * k, -0.016 * k, p.z)
+	# Por debajo, hasta el cuello.
+	var fondo := _escalon(labio.y - alcance - 0.010 * k, labio.y - alcance + 0.010 * k, p.y)
+	# Los labios quedan libres.
+	var boca := 1.0
+	if p.z > labio.z - 0.030 * k:
+		var d := pow(p.x / (0.026 * k), 2.0) + pow((p.y - labio.y + 0.009 * k) / (0.013 * k), 2.0)
+		boca = _escalon(0.75, 1.35, d)
+	# El bigote es otra máscara.
+	var bigote := 1.0 - _escalon(0.0, 1.0, mascara_bigote(p, r, 1.0) * 4.0)
+	return arriba * delante * fondo * boca * bigote
+
+
+static func mascara_bigote(p: Vector3, r: Dictionary, ancho: float) -> float:
 	var k: float = r["k"]
 	var labio: Vector3 = r["labio"]
-	for lado in [-1.0, 1.0]:
-		var carrillo := _esfera(
-			grupo,
-			Vector3(lado * 0.047 * k, labio.y - 0.022 * k * volumen, 0.022 * k),
-			Vector3(0.020 * volumen, 0.042 * volumen, 0.046) * k,
-			color
-		)
-		carrillo.rotation = Vector3(0.62, lado * 0.30, 0.0)
-		# La quijada entre carrillo y mentón, para que no quede un hueco.
-		_esfera(
-			grupo,
-			Vector3(lado * 0.031 * k, labio.y - 0.040 * k * volumen, 0.058 * k),
-			Vector3(0.022, 0.026 * volumen, 0.030) * k,
-			color
-		)
-	_esfera(
-		grupo,
-		Vector3(0.0, labio.y - 0.046 * k * volumen, labio.z - 0.030 * k),
-		Vector3(0.044, 0.040 * volumen, 0.034 * volumen) * k,
-		color
+	var x := absf(p.x) / k
+	if p.z < labio.z - 0.028 * k:
+		return 0.0
+	var lateral := _escalon(0.030 * ancho + 0.004, 0.030 * ancho - 0.004, x)
+	# Pegado al labio, y en las puntas cae hacia la comisura.
+	var suelo := labio.y + lerpf(-0.006, -0.011, clampf((x - 0.014) / 0.02, 0.0, 1.0)) * k
+	var techo := labio.y + 0.002 * k
+	# La franja es estrecha: sin reforzar, la máscara casi nunca llega a 1 y el
+	# bigote sale deshilachado entero.
+	var valor := (
+		lateral
+		* _escalon(suelo - 0.002 * k, suelo + 0.002 * k, p.y)
+		* _escalon(techo + 0.003 * k, techo - 0.003 * k, p.y)
 	)
-	# Bajo el labio, la mosca que une bigote y mentón.
-	_esfera(
-		grupo,
-		Vector3(0.0, labio.y - 0.020 * k, labio.z - 0.007 * k),
-		Vector3(0.018, 0.012, 0.008) * k,
-		color
-	)
+	return clampf(valor * 4.0, 0.0, 1.0)
+
+
+static func mascara_pelo(p: Vector3, r: Dictionary) -> float:
+	var k: float = r["k"]
+	var ojos: Vector3 = r["ojos"]
+	var ceja: Vector3 = r["ceja"]
+	var labio: Vector3 = r["labio"]
+	# El nacimiento baja de la frente a la nuca según se va hacia atrás.
+	var atras := clampf((0.030 * k - p.z) / (0.110 * k), 0.0, 1.0)
+	var linea := lerpf(ceja.y + 0.036 * k, labio.y - 0.004 * k, atras)
+	var pelo := _escalon(linea - 0.006 * k, linea + 0.006 * k, p.y)
+	# Las orejas, libres.
+	if absf(p.x) > 0.058 * k and p.y < ojos.y + 0.016 * k and p.z > -0.050 * k:
+		pelo *= 1.0 - _escalon(-0.050 * k, -0.036 * k, p.z)
+	return clampf(pelo * 1.6, 0.0, 1.0)
+
+
+static func _escalon(desde: float, hasta: float, x: float) -> float:
+	return smoothstep(desde, hasta, x) if desde < hasta else 1.0 - smoothstep(hasta, desde, x)
 
 
 ## Sombrero de fieltro de ala corta: copa con cinta, calado a la altura de la
@@ -273,25 +398,6 @@ static func _boina(padre: Node3D, r: Dictionary, nombre: String, color: Color) -
 	grupo.position = Vector3(0.010 * k, ceja.y + 0.052 * k, -0.036 * k)
 	grupo.rotation = Vector3(-0.32, 0.0, -0.24)
 	_esfera(grupo, Vector3.ZERO, Vector3(0.104 * k, 0.026 * k, 0.114 * k), color)
-
-
-## Pelo oscuro sobre un avatar calvo: lo que le queda a un hombre de entradas,
-## en las sienes, sobre las orejas y por la nuca. Nada por delante de la oreja
-## ni por encima de la coronilla, que es donde un casquete se lee como casco.
-static func _pelo(padre: Node3D, r: Dictionary, nombre: String, color: Color) -> void:
-	var grupo := _grupo(padre, nombre)
-	var k: float = r["k"]
-	var ojos: Vector3 = r["ojos"]
-	for lado in [-1.0, 1.0]:
-		_esfera(
-			grupo,
-			Vector3(lado * 0.060 * k, ojos.y + 0.004 * k, -0.044 * k),
-			Vector3(0.015, 0.026, 0.040) * k,
-			color
-		)
-	_esfera(
-		grupo, Vector3(0.0, ojos.y - 0.004 * k, -0.070 * k), Vector3(0.056, 0.034, 0.024) * k, color
-	)
 
 
 static func _aro(
