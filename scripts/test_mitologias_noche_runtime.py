@@ -11,6 +11,7 @@ HIDRA = ROOT / "godot" / "guion" / "dia_hidra_sueno_app.gd"
 RYU = ROOT / "godot" / "guion" / "dia_ryu_sueno_app.gd"
 RYU_VIGILIA = ROOT / "godot" / "guion" / "ryu_flow_vigilia.gd"
 DUAT = ROOT / "godot" / "guion" / "sueno_duat.gd"
+DUAT_CONTROLLER = ROOT / "godot" / "guion" / "dia_duat_sueno_app.gd"
 SUENO_GILGAMESH = ROOT / "godot" / "guion" / "sueno_gilgamesh.gd"
 DIA = ROOT / "godot" / "escenas" / "dia.tscn"
 
@@ -26,6 +27,7 @@ class MitologiasNocheRuntimeTest(unittest.TestCase):
         cls.ryu = RYU.read_text(encoding="utf-8")
         cls.ryu_vigilia = RYU_VIGILIA.read_text(encoding="utf-8")
         cls.duat = DUAT.read_text(encoding="utf-8")
+        cls.duat_controller = DUAT_CONTROLLER.read_text(encoding="utf-8")
         cls.sueno_gilgamesh = SUENO_GILGAMESH.read_text(encoding="utf-8")
         cls.dia = DIA.read_text(encoding="utf-8")
 
@@ -49,6 +51,7 @@ class MitologiasNocheRuntimeTest(unittest.TestCase):
             self.minotauro,
             self.hidra,
             self.ryu,
+            self.duat_controller,
         )
         for controller in controllers:
             self.assertRegex(
@@ -62,19 +65,17 @@ class MitologiasNocheRuntimeTest(unittest.TestCase):
             )
             self.assertNotIn("activar_semilla_onirica", controller)
 
-    def test_epica_435_tiene_al_menos_tres_familias_jugables_en_dia_real(self):
+    def test_epica_435_monta_las_seis_familias_originales_en_dia_real(self):
         nodos = (
             "AquilesSuenoController",
             "GilgameshSuenoController",
             "MinotauroSuenoController",
             "HidraSuenoController",
             "RyuSuenoController",
+            "DuatSuenoController",
         )
-        montados = sum(
-            f'[node name="{nombre}" type="Node" parent="."]' in self.dia
-            for nombre in nodos
-        )
-        self.assertGreaterEqual(montados, 3)
+        for nombre in nodos:
+            self.assertIn(f'[node name="{nombre}" type="Node" parent="."]', self.dia)
 
     def test_epica_435_cubre_semilla_rom_y_semilla_tv_fuera_de_oficina(self):
         self.assertIn('const ID_ROM := "ryu_flow_98"', self.ryu_vigilia)
@@ -87,7 +88,13 @@ class MitologiasNocheRuntimeTest(unittest.TestCase):
         )
 
     def test_reduccion_movimiento_se_propaga_a_verticales_jugables(self):
-        for controller in (self.aquiles, self.minotauro, self.hidra, self.ryu):
+        for controller in (
+            self.aquiles,
+            self.minotauro,
+            self.hidra,
+            self.ryu,
+            self.duat_controller,
+        ):
             self.assertIn("reduccion_movimiento", controller)
             self.assertIn("PreferenciasSiga.cargar()", controller)
 
@@ -116,6 +123,7 @@ class MitologiasNocheRuntimeTest(unittest.TestCase):
             "dia_minotauro_sueno_app.gd",
             "dia_hidra_sueno_app.gd",
             "dia_ryu_sueno_app.gd",
+            "dia_duat_sueno_app.gd",
         )
         for ruta in rutas:
             self.assertIn(f'path="res://guion/{ruta}"', self.dia)
