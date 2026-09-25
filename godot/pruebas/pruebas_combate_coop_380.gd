@@ -102,7 +102,7 @@ func _probar_vertical_dos_clientes() -> void:
 	_comprobar(
 		"combinación usa ambos inputs",
 		sesion["historial"][0]["accion_combinada"],
-		"silencio"
+		"objecion"
 	)
 	_comprobar("cerrar A es seguro", cliente_a.cerrar()["ok"], true)
 	_comprobar("cerrar B es seguro", cliente_b.cerrar()["ok"], true)
