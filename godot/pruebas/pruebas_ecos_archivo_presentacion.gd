@@ -13,15 +13,16 @@ func _initialize() -> void:
 	_probar_seleccion_y_correccion()
 	_probar_completar()
 	_probar_fallo_y_salida()
+	_probar_manifestaciones_documentales()
 	_probar_reduccion_movimiento()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
 
-func _nuevo(folio: String, semilla: int = 161):
+func _nuevo(folio: String, semilla: int = 161, tipo_documental: String = ""):
 	var frase := "la puerta recuerda el nombre que el archivo intentó borrar"
 	var ecos = Ecos.crear(folio, frase, [folio], semilla)
-	return Presentacion.crear(ecos)
+	return Presentacion.crear(ecos, tipo_documental)
 
 
 func _probar_vista_y_foco() -> void:
@@ -133,6 +134,44 @@ func _probar_fallo_y_salida() -> void:
 	_comprobar(
 		abandonada.vista(false)["estado"] == Presentacion.EVENTO_ABANDONADO,
 		"la vista refleja abandono sin inventar recompensa"
+	)
+
+
+func _probar_manifestaciones_documentales() -> void:
+	var factura = _nuevo("F-M1", 707, "factura")
+	var empleado = _nuevo("F-M2", 808, "EMPLEADO")
+	var acta = _nuevo("F-M3", 909, "ACTA")
+	var memo = _nuevo("F-M4", 1001, "MEMORANDO")
+	_comprobar(
+		factura.vista(false)["manifestacion"] == Presentacion.MANIFESTACION_REPETICION,
+		"factura usa repetición visual",
+	)
+	_comprobar(
+		empleado.vista(false)["manifestacion"] == Presentacion.MANIFESTACION_PALABRA_AUSENTE,
+		"ficha de empleado usa palabra ausente",
+	)
+	_comprobar(
+		acta.vista(false)["manifestacion"] == Presentacion.MANIFESTACION_ROTULO_DESHECHO,
+		"acta usa rótulo deshecho",
+	)
+	_comprobar(
+		memo.vista(false)["manifestacion"] == Presentacion.MANIFESTACION_ECO_LEJANO,
+		"memorando usa eco lejano",
+	)
+	var vista_empleado: Dictionary = empleado.vista(false)
+	var deformado := false
+	var original_intacto := true
+	for elemento in vista_empleado["elementos"]:
+		if int(elemento["id"]) != 1:
+			continue
+		deformado = str(elemento["texto_visible"]).contains("····")
+		original_intacto = not str(elemento["texto"]).contains("····")
+	_comprobar(deformado, "palabra ausente deforma solo la copia visible")
+	_comprobar(original_intacto, "la frase canónica permanece intacta")
+	var misma_familia = _nuevo("F-M5", 2026, "FACTURA")
+	_comprobar(
+		misma_familia.vista(false)["manifestacion"] == factura.vista(false)["manifestacion"],
+		"la manifestación depende del tipo y no de una tirada aleatoria",
 	)
 
 
