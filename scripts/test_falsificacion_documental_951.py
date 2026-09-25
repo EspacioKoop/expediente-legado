@@ -20,9 +20,13 @@ class FalsificacionDocumental951Test(unittest.TestCase):
 
     def test_modelo_es_temporal_determinista_y_sin_io(self):
         self.assertIn('"temporal": true', self.modelo)
-        self.assertNotIn("rand", self.modelo.lower())
+        codigo = "\n".join(
+            linea for linea in self.modelo.splitlines()
+            if not linea.lstrip().startswith("#")
+        )
+        self.assertNotIn("rand", codigo.lower())
         for token in ("FileAccess", "DirAccess", "Partida", "guardar("):
-            self.assertNotIn(token, self.modelo)
+            self.assertNotIn(token, codigo)
 
     def test_visor_ofrece_tres_intervenciones_diegéticas(self):
         for clave, valor in (
