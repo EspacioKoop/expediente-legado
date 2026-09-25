@@ -195,9 +195,10 @@ func _estado_partida_actual() -> Dictionary:
 	if escena == null:
 		return {}
 	var partida_actual: Variant = escena.get("partida")
-	if partida_actual is Partida:
-		return (partida_actual as Partida).estado
-	return {}
+	if partida_actual == null:
+		return {}
+	var estado: Variant = partida_actual.get("estado")
+	return estado if typeof(estado) == TYPE_DICTIONARY else {}
 
 
 func _cargar_catalogo_tv() -> void:
