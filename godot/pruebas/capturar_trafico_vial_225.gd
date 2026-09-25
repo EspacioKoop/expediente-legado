@@ -8,7 +8,7 @@
 ## el juicio humano de epoca, escala, clipping o legibilidad.
 extends SceneTree
 
-const TAMANO := Vector2i(1280, 720)
+const TAMANO := Vector2i(1920, 1080)
 const FOV := 75.0
 const FRAMES_ESTABILIZACION := 3
 
