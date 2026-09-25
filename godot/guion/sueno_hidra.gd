@@ -287,9 +287,7 @@ func _crear_cabeza(indice: int, ancla: Vector3) -> void:
 	cabeza.position = Vector3(0.0, 2.55, 0.0)
 	grupo.add_child(cabeza)
 
-	var material := Mitologias435Materiales.crear(
-		"escama_hidra", Color(0.22, 0.34, 0.18)
-	)
+	var material := Mitologias435Materiales.crear("escama_hidra", Color(0.22, 0.34, 0.18))
 	cuello.material_override = material
 	cabeza.material_override = material
 
