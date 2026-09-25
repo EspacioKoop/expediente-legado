@@ -25,10 +25,18 @@ func _process(delta: float) -> void:
 	var contexto: Dictionary = escritorio.call("_contexto_os98", dia)
 	var preferencias := PreferenciasSiga.cargar()
 	var pantalla: Variant = dia.get("_pantalla")
+	var reducir_movimiento := bool(preferencias.get("reduccion_movimiento", false))
 	_sincronizar_documento(
 		pantalla as Node if pantalla is Node else null,
 		contexto,
-		bool(preferencias.get("reduccion_movimiento", false)),
+		reducir_movimiento,
+		delta,
+	)
+	var mundo: Variant = dia.get("_mundo")
+	_sincronizar_rotulos_3d(
+		mundo as Node if mundo is Node else null,
+		contexto,
+		reducir_movimiento,
 		delta,
 	)
 	if not bool(contexto.get("climax_hastur_pendiente", false)):
@@ -116,3 +124,78 @@ func _olvidar_documento() -> void:
 	_texto_original = ""
 	_texto_visual = ""
 	_tiempo_texto = 0.0
+
+
+## Aplica el mismo contrato narrativo a los rótulos físicos del archivado (#157).
+## Son superficies 3D reales del recorrido; el estado visual vive como metadata
+## local del Label3D y nunca modifica la lógica de clasificación.
+func _sincronizar_rotulos_3d(
+	mundo: Node, contexto: Dictionary, reducir_movimiento: bool, delta: float
+) -> void:
+	if mundo == null:
+		return
+	var configuracion: Variant = contexto.get("efecto_texto", {})
+	for nodo in mundo.find_children("DestinoArchivado", "Label3D", true, false):
+		var rotulo := nodo as Label3D
+		if rotulo == null:
+			continue
+		_sincronizar_rotulo_3d(rotulo, configuracion, reducir_movimiento, delta)
+
+
+func _sincronizar_rotulo_3d(
+	rotulo: Label3D, configuracion: Variant, reducir_movimiento: bool, delta: float
+) -> void:
+	var original := String(rotulo.get_meta("_texto_corrupto_original_806", rotulo.text))
+	var visual := String(rotulo.get_meta("_texto_corrupto_visual_806", rotulo.text))
+	if rotulo.text != visual:
+		original = rotulo.text
+		visual = rotulo.text
+		rotulo.set_meta("_texto_corrupto_original_806", original)
+		rotulo.set_meta("_texto_corrupto_visual_806", visual)
+		rotulo.set_meta("_texto_corrupto_tiempo_806", 0.0)
+	elif not rotulo.has_meta("_texto_corrupto_original_806"):
+		rotulo.set_meta("_texto_corrupto_original_806", original)
+		rotulo.set_meta("_texto_corrupto_visual_806", visual)
+		rotulo.set_meta("_texto_corrupto_tiempo_806", 0.0)
+
+	if (
+		not configuracion is Dictionary
+		or not bool((configuracion as Dictionary).get("activo", false))
+		or reducir_movimiento
+	):
+		_restaurar_rotulo_3d(rotulo, original)
+		return
+
+	var ajuste := (configuracion as Dictionary).duplicate(true)
+	ajuste["semilla"] = (
+		"%s:rotulo:%d"
+		% [
+			String(ajuste.get("semilla", "contaminacion-os98")),
+			hash(original),
+		]
+	)
+	var duracion := maxf(0.01, float(ajuste.get("duracion", 1.35)))
+	var tiempo := float(rotulo.get_meta("_texto_corrupto_tiempo_806", 0.0))
+	tiempo = fmod(tiempo + maxf(delta, 0.0), duracion * 2.0)
+	rotulo.set_meta("_texto_corrupto_tiempo_806", tiempo)
+	var progreso := TextoCorruptoNarrativo.progreso_para_tiempo(tiempo, duracion)
+	if tiempo > duracion:
+		progreso = TextoCorruptoNarrativo.progreso_para_tiempo(tiempo - duracion, duracion, true)
+	var critico := bool(rotulo.get_meta("texto_corrupto_critico", false))
+	var presentacion := TextoCorruptoNarrativo.aplicar(
+		rotulo, original, progreso, ajuste, false, critico
+	)
+	(
+		rotulo
+		. set_meta(
+			"_texto_corrupto_visual_806",
+			String(presentacion.get("texto_visual", original)),
+		)
+	)
+
+
+func _restaurar_rotulo_3d(rotulo: Label3D, original: String) -> void:
+	if rotulo.text != original:
+		rotulo.text = original
+	rotulo.set_meta("_texto_corrupto_visual_806", original)
+	rotulo.set_meta("_texto_corrupto_tiempo_806", 0.0)
