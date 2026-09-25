@@ -32,6 +32,12 @@ func _process(_delta: float) -> void:
 
 	var animador: AnimadorAmbiental3D = dia.animador_ambiental()
 	animador.semilla = int(dia.jornada.get("dia", 1))
+	var clima := ""
+	if fase == FaunaAmbiental.FASE_CALLE:
+		clima = String(dia.jornada.get("clima_forzado", ""))
+		if clima.is_empty():
+			clima = Clima.estado(int(dia.jornada.get("dia", 1)))
+	var franja := Jornada.franja_horaria(dia.jornada)
 
 	_capa = FaunaAmbiental3D.new()
 	_capa.name = "FaunaAmbiental"
@@ -46,5 +52,7 @@ func _process(_delta: float) -> void:
 			contexto,
 			animador,
 			bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false)),
+			clima,
+			franja,
 		)
 	)

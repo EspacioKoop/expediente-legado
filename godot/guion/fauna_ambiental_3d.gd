@@ -13,9 +13,11 @@ func montar(
 	contexto: String,
 	animador: AnimadorAmbiental3D,
 	reduccion_movimiento: bool = false,
+	clima: String = "",
+	franja: String = "",
 ) -> Array[AnimalAmbiental3D]:
 	_limpiar()
-	var plan := FaunaAmbiental.plan(fase, espacio, dia, raiz, contexto)
+	var plan := FaunaAmbiental.plan(fase, espacio, dia, raiz, contexto, clima, franja)
 	for dato in plan:
 		var animal := AnimalAmbiental3D.new()
 		animal.name = _nombre_nodo(String(dato.get("especie", "animal")), _animales.size())
