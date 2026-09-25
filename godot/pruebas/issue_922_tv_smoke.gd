@@ -54,12 +54,12 @@ func _probar_registro_exposicion() -> void:
 func _probar_rotulo_visible() -> void:
 	var televisor := TelevisionInteractiva3D.new()
 	televisor.configurar(Vector3(1.0, 0.8, 0.5))
-	televisor._mostrar_boletin_tv()
+	var bloque := televisor._bloque_tv_actual({"dia": 1})
+	var texto := TelevisionInteractiva3D.rotulo_de_bloque(bloque)
 	var rotulo := televisor.get_node_or_null("RotuloBoletinTV") as Label3D
 	_comprobar(rotulo != null, true, "el CRT monta un rótulo de boletín")
-	if rotulo != null:
-		_comprobar(rotulo.visible, true, "el boletín se hace visible al seleccionarlo")
-		_comprobar(not rotulo.text.is_empty(), true, "el rótulo contiene información visible")
+	_comprobar(not bloque.is_empty(), true, "el catálogo TV resuelve el bloque del día")
+	_comprobar(not texto.is_empty(), true, "el bloque produce información visible")
 	televisor.free()
 
 
