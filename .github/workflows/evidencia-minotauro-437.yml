@@ -1,0 +1,96 @@
+name: Evidencia Minotauro 437
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/evidencia-minotauro-437.yml'
+      - '.godot-version'
+      - 'godot/guion/sueno_minotauro.gd'
+      - 'godot/guion/sueno_minotauro_3d.gd'
+      - 'godot/pruebas/capturar_minotauro_437.gd'
+      - 'scripts/test_evidencia_minotauro_437.py'
+      - 'docs/evidencias/minotauro-437/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidencia:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      LIBGL_ALWAYS_SOFTWARE: '1'
+      GALLIUM_DRIVER: llvmpipe
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar Godot declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Importar proyecto
+        run: godot4 --headless --editor --path godot --quit
+
+      - name: Validar contrato de evidencia
+        run: python3 -m unittest -v scripts/test_evidencia_minotauro_437.py
+
+      - name: Renderizar regla espacial
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidencia-minotauro-437
+          xvfb-run -a godot4 --path godot --rendering-method gl_compatibility \
+            --script res://pruebas/capturar_minotauro_437.gd -- \
+            "$GITHUB_WORKSPACE/evidencia-minotauro-437"
+          for estado in inicial marca-estable marca-desplazada; do
+            test -s "evidencia-minotauro-437/$estado.png"
+          done
+          test -s evidencia-minotauro-437/manifest.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(Path("evidencia-minotauro-437/manifest.json").read_text())
+          if manifest["issue"] != 437 or manifest["veredicto_automatico"] is not False:
+              raise SystemExit("manifiesto inválido para #437")
+          if manifest["fase_topologica"] != 2:
+              raise SystemExit("la captura final no alcanzó la fase topológica esperada")
+          marca = manifest["primera_marca"]
+          if marca["real"] != "cruce_norte" or marca["aparece_en"] != "cruce_sur":
+              raise SystemExit("la marca no demuestra el desplazamiento aparente esperado")
+          print("3 estados renderizados; legibilidad pendiente de revisión humana")
+          PY
+
+      - name: Adjuntar evidencia visual de #437
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-minotauro-437-${{ github.sha }}
+          path: evidencia-minotauro-437/
+          if-no-files-found: error
+          retention-days: 14
