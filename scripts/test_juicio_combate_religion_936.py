@@ -34,6 +34,7 @@ class JuicioCombateReligion936Test(unittest.TestCase):
 
     def test_combate_base_sigue_intacto_sin_compromisos(self) -> None:
         juicio = JUICIO.read_text(encoding="utf-8")
+        simbolico = SIMBOLICO.read_text(encoding="utf-8")
 
         self.assertIn("compromiso_religion_bloqueante", juicio)
         self.assertIn("_rival_inicio_agresion", juicio)
