@@ -12,9 +12,11 @@ Pack de arte de primera parte para reforzar el vertical de Mari ya existente sin
 
 ## Uso
 
-Los OBJ usan unidades aproximadas a metros y están pensados para importación directa en Godot. No llevan colisiones embebidas: el runtime puede reutilizar primitivas simples para no acoplar arte y navegación.
+Los OBJ usan unidades aproximadas a metros y están pensados para importación directa en Godot. No llevan colisiones embebidas: el runtime reutiliza primitivas simples para no acoplar arte y navegación.
 
-Los SVG son originales y no representan iconografía religiosa/histórica. Funcionan como decals, paneles o referencias de material para comunicar **clima → cambio espacial**.
+`SuenoMari` monta actualmente `cueva_portal.obj` y `estratos_montana.obj` como capa visual sobre esa geometría estable. La boca artística solo se muestra cuando la tormenta habilita la ruta de cueva.
+
+Los SVG son originales y no representan iconografía religiosa/histórica. `frente_tormenta.svg` y `huellas_agua.svg` se montan como señales 3D ligadas al mismo estado climático determinista: el cauce aparece con lluvia/tormenta y el frente solo durante tormenta.
 
 ## Límites
 
