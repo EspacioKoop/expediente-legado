@@ -192,6 +192,9 @@ static func cuerpo_jugador(padre: Node3D, perfil: Dictionary) -> Node3D:
 	cuerpo.name = "CuerpoJugador"
 	cuerpo.primera_persona = false
 	cuerpo.variar_reposo = false
+	# En la arena lo mueve el Juicio por posición, sin velocidad física: si se
+	# animara solo, cada fotograma volvería a respirar y pisaría andar y gestos.
+	cuerpo.auto_animar = false
 	cuerpo.perfil = PerfilJugador.completar(perfil)
 	padre.add_child(cuerpo)
 	return cuerpo
@@ -246,15 +249,25 @@ static func andar(figura: Node3D, andando: bool) -> void:
 
 ## Un gesto de combate (`discutir`, `encajar`, `celebrar`...) sobre la figura
 ## del jugador o del rival. Dura lo que dura el clip; mientras, `andar` no lo
-## pisa. Devuelve si había clip que poner.
-static func gesto(figura: Node3D, clip: String) -> bool:
+## pisa. Devuelve cuántos segundos dura de verdad (0 si no había clip).
+##
+## El reproductor puede venir acelerado de andar (`CuerpoJugador3D.animar`
+## escala el paso a la velocidad): el gesto va a su ritmo, y el bloqueo se mide
+## con la velocidad efectiva, no con la duración nominal, o se quedaría
+## congelado en su última pose hasta que venciera el bloqueo.
+static func gesto(figura: Node3D, clip: String) -> float:
 	var pieza := _pieza(figura)
 	if pieza == null or not AnimacionesUAL.reproducir(pieza, clip):
-		return false
+		return 0.0
 	var reproductor := Modelos._reproductor(pieza)
-	var segundos := reproductor.current_animation_length if reproductor != null else 1.0
+	var segundos := 1.0
+	if reproductor != null:
+		reproductor.speed_scale = 1.0
+		segundos = (
+			reproductor.current_animation_length / maxf(absf(reproductor.get_playing_speed()), 0.01)
+		)
 	figura.set_meta("gesto_hasta", Time.get_ticks_msec() + int(segundos * 1000.0))
-	return true
+	return segundos
 
 
 static func _pieza(figura: Node3D) -> Node3D:

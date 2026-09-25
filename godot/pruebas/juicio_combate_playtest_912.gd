@@ -70,10 +70,10 @@ func _intentar_retorno_rival() -> bool:
 	return retorno
 
 
-func _terminar(gano: bool) -> void:
+func _terminar(gano: bool, inmediato: bool = false) -> void:
 	if not _acabado and _resultado_playtest == "en_curso":
 		_resultado_playtest = "victoria" if gano else "derrota"
-	super._terminar(gano)
+	super._terminar(gano, inmediato)
 
 
 func resumen_playtest() -> Dictionary:

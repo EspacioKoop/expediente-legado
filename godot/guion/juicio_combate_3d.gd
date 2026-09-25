@@ -3,6 +3,9 @@ extends Node3D
 
 signal terminado(gano: bool)
 
+## Lo más que se sostiene el gesto final antes de cerrar el Juicio.
+const PAUSA_FINAL_MAX := 2.5
+
 const REGLAS = preload("res://guion/juicio_combate_reglas.gd")
 const FEEDBACK = preload("res://guion/juicio_combate_feedback_3d.gd")
 const HUD = preload("res://guion/juicio_combate_hud.gd")
@@ -235,7 +238,8 @@ func activar_doctrina(eje: String) -> bool:
 
 
 func abandonar() -> void:
-	_terminar(false)
+	# Quien se va no espera a ver el gesto.
+	_terminar(false, true)
 
 
 func _aplicar_mesa_dialogo() -> void:
@@ -500,15 +504,23 @@ func _registrar_esquiva_ritual() -> void:
 	_actualizar_hud()
 
 
-func _terminar(gano: bool) -> void:
+func _terminar(gano: bool, inmediato: bool = false) -> void:
 	if _acabado:
 		return
 	_acabado = true
 	_ataque_rival_pendiente = false
 	JUNGIANO.salir_combate(self)
 	_ocultar_aviso_ataque()
-	JuicioCombateEscenografia3D.gesto(_figura_jugador, "celebrar" if gano else "nervioso")
-	JuicioCombateEscenografia3D.gesto(_figura_rival, "nervioso" if gano else "aplaudir")
+	var espera := maxf(
+		JuicioCombateEscenografia3D.gesto(_figura_jugador, "celebrar" if gano else "nervioso"),
+		JuicioCombateEscenografia3D.gesto(_figura_rival, "nervioso" if gano else "aplaudir"),
+	)
+	# El gesto final se ve antes de cerrar: quien escucha `terminado` libera la
+	# escena en ese mismo fotograma (VentanillaApp). El resultado ya es firme
+	# (`_acabado`), así que la espera no admite más golpes.
+	espera = minf(espera, PAUSA_FINAL_MAX)
+	if not inmediato and espera > 0.0 and is_inside_tree():
+		await get_tree().create_timer(espera).timeout
 	terminado.emit(gano)
 
 

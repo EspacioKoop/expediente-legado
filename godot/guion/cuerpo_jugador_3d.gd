@@ -46,6 +46,9 @@ const VARIANTES := {
 @export var primera_persona := true
 ## El Juicio lo apaga: ahí los gestos son del combate, no de la espera.
 @export var variar_reposo := true
+## Si se anima solo con la velocidad del CharacterBody3D padre. El Juicio lo
+## apaga porque mueve al jugador por posición y decide él cuándo anda.
+@export var auto_animar := true
 
 var perfil: Dictionary = {}
 var estado := ""
@@ -102,6 +105,8 @@ func _process(delta: float) -> void:
 		objetivo = BAJADA_AGACHADO
 	position.y = lerpf(position.y, objetivo, minf(1.0, delta * 12.0))
 	var cuerpo := get_parent() as CharacterBody3D
+	if not auto_animar:
+		return
 	var velocidad := Vector2(cuerpo.velocity.x, cuerpo.velocity.z).length() if cuerpo else 0.0
 	_variar_reposo(delta, velocidad)
 	animar(velocidad)
