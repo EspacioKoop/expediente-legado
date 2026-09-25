@@ -143,9 +143,10 @@ func _montar_transito_guardado(dia: Node, mundo: Node3D) -> void:
 		if String(entrada.get("tipo", "")) != "paso":
 			continue
 		var id := String(entrada.get("id", ""))
-		var celda := _celda_desde_id(id, fase)
-		if celda == null:
+		var celda_valor: Variant = _celda_desde_id(id, fase)
+		if not celda_valor is Vector2i:
 			continue
+		var celda: Vector2i = celda_valor
 		_montar_marca_en(
 			mundo,
 			id,
@@ -237,7 +238,7 @@ func _id_transito(fase: String, celda: Vector2i) -> String:
 	return "%s%s:%d:%d" % [PREFIJO_TRANSITO, fase, celda.x, celda.y]
 
 
-func _celda_desde_id(id: String, fase: String):
+func _celda_desde_id(id: String, fase: String) -> Variant:
 	var prefijo := "%s%s:" % [PREFIJO_TRANSITO, fase]
 	if not id.begins_with(prefijo):
 		return null
