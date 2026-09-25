@@ -41,9 +41,13 @@ class ArchivadoDesorden965Test(unittest.TestCase):
         self.assertIn("MAX_VISIBLES := 3", self.desorden)
         self.assertIn("MeshInstance3D.new()", self.desorden)
         self.assertIn("BoxMesh.new()", self.desorden)
-        self.assertNotIn("CollisionShape3D", self.desorden)
-        self.assertNotIn("StaticBody3D", self.desorden)
-        self.assertNotIn("NavigationObstacle3D", self.desorden)
+        codigo = "\n".join(
+            linea for linea in self.desorden.splitlines()
+            if not linea.lstrip().startswith("#")
+        )
+        self.assertNotIn("CollisionShape3D", codigo)
+        self.assertNotIn("StaticBody3D", codigo)
+        self.assertNotIn("NavigationObstacle3D", codigo)
 
     def test_no_inventa_otra_persistencia(self):
         combinado = self.controlador + self.desorden
