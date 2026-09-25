@@ -37,9 +37,11 @@ func _procesar_archivo(dia) -> void:
 	var estado: Dictionary = estado_var
 
 	if estado.is_empty():
-		if Jornada.hora_minutos(dia.jornada) < HORA_OFERTA:
-			return
-		if not ofrecida(int(dia.jornada.get("dia", 1)), int(dia.jornada.get("raiz", 0))):
+		var fuera_de_horario := Jornada.hora_minutos(dia.jornada) < HORA_OFERTA
+		var oferta_hoy := ofrecida(
+			int(dia.jornada.get("dia", 1)), int(dia.jornada.get("raiz", 0))
+		)
+		if fuera_de_horario or not oferta_hoy:
 			return
 		estado = Jornada.asegurar_ronda_cierre(dia.jornada, _cunado_presente(dia._mundo))
 		_guardar(dia)
