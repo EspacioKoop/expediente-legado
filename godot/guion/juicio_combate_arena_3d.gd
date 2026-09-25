@@ -24,6 +24,7 @@ static func montar(
 	entorno.ambient_light_energy = 0.65
 	mundo.environment = entorno
 	anfitrion.add_child(mundo)
+	FiltroPantalla.aplicar(mundo, PreferenciasSiga.cargar())
 
 	var luz := DirectionalLight3D.new()
 	luz.rotation_degrees = Vector3(-55.0, -35.0, 0.0)

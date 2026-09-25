@@ -33,6 +33,7 @@ func _probar() -> void:
 	_probar_preferencias()
 	_probar_aplicar()
 	_probar_menu()
+	_probar_integraciones_3d()
 	await _probar_mundos_reales()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -153,6 +154,23 @@ func _probar_menu() -> void:
 			_comprobar(not selector.get_item_tooltip(i).is_empty(), "%s explica qué es" % id)
 	caja.free()
 	menu.free()
+
+
+func _probar_integraciones_3d() -> void:
+	var rutas := [
+		"res://guion/careo_app.gd",
+		"res://guion/juicio_combate_arena_3d.gd",
+	]
+	for ruta in rutas:
+		var fichero := FileAccess.open(ruta, FileAccess.READ)
+		_comprobar(fichero != null, "%s se puede inspeccionar" % ruta)
+		if fichero == null:
+			continue
+		var fuente := fichero.get_as_text()
+		_comprobar(
+			fuente.contains("FiltroPantalla.aplicar("),
+			"%s aplica el filtro al WorldEnvironment" % ruta
+		)
 
 
 func _probar_mundos_reales() -> void:
