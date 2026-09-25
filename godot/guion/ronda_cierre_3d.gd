@@ -50,6 +50,9 @@ func punto(id_punto: String) -> Interactuable3D:
 func refrescar() -> void:
 	if _estado.is_empty():
 		return
+	var ruta: Array = _estado.get("ruta", [])
+	if ruta.has(RondaCierre.PUNTO_CUNADO) and not _puntos.has(RondaCierre.PUNTO_CUNADO):
+		_conectar_cunado()
 	var bloqueada := (
 		bool(_estado.get("abandonada", false)) or bool(_estado.get("finalizada", false))
 	)
