@@ -1,0 +1,65 @@
+[gd_scene load_steps=15 format=3]
+
+[ext_resource type="Material" path="res://arte/mitologias_435/materiales/arcilla_uruk.tres" id="1"]
+[ext_resource type="Material" path="res://arte/mitologias_435/materiales/metal_archivo_oxidado.tres" id="2"]
+[ext_resource type="Material" path="res://arte/mitologias_435/materiales/bronce_votivo.tres" id="3"]
+[ext_resource type="Material" path="res://arte/mitologias_435/materiales/escama_hidra.tres" id="4"]
+[ext_resource type="Material" path="res://arte/mitologias_435/materiales/jade_ryu_humedo.tres" id="5"]
+[ext_resource type="Material" path="res://arte/mitologias_435/materiales/caliza_duat.tres" id="6"]
+[ext_resource type="Material" path="res://arte/mitologias_435/materiales/papel_archivo_envejecido.tres" id="7"]
+
+[sub_resource type="BoxMesh" id="Box"]
+size = Vector3(1.45, 1.45, 1.45)
+
+[sub_resource type="SphereMesh" id="Sphere"]
+radius = 0.78
+height = 1.56
+radial_segments = 32
+rings = 16
+
+[sub_resource type="CylinderMesh" id="Cylinder"]
+top_radius = 0.62
+bottom_radius = 0.78
+height = 1.55
+radial_segments = 32
+
+[sub_resource type="PlaneMesh" id="Plane"]
+size = Vector2(1.6, 1.6)
+
+[node name="Mitologias435Materiales" type="Node3D"]
+
+[node name="ArcillaUruk" type="MeshInstance3D" parent="."]
+position = Vector3(-4.8, 0.8, 0)
+mesh = SubResource("Box")
+material_override = ExtResource("1")
+
+[node name="MetalArchivo" type="MeshInstance3D" parent="."]
+position = Vector3(-3.2, 0.8, 0)
+mesh = SubResource("Box")
+material_override = ExtResource("2")
+
+[node name="BronceVotivo" type="MeshInstance3D" parent="."]
+position = Vector3(-1.6, 0.8, 0)
+mesh = SubResource("Cylinder")
+material_override = ExtResource("3")
+
+[node name="EscamaHidra" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.8, 0)
+mesh = SubResource("Sphere")
+material_override = ExtResource("4")
+
+[node name="JadeRyu" type="MeshInstance3D" parent="."]
+position = Vector3(1.6, 0.8, 0)
+mesh = SubResource("Sphere")
+material_override = ExtResource("5")
+
+[node name="CalizaDuat" type="MeshInstance3D" parent="."]
+position = Vector3(3.2, 0.8, 0)
+mesh = SubResource("Box")
+material_override = ExtResource("6")
+
+[node name="PapelArchivo" type="MeshInstance3D" parent="."]
+position = Vector3(4.8, 0.8, 0)
+rotation_degrees = Vector3(-90, 0, 0)
+mesh = SubResource("Plane")
+material_override = ExtResource("7")
