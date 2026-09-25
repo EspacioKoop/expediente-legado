@@ -95,17 +95,13 @@ func _capturar_aquiles(salida: String, manifiesto: Dictionary) -> bool:
 	if not sueno.aplicar_lectura_espacial(true, false):
 		printerr("Aquiles no reveló el talón con la lectura espacial")
 		return false
-	if not await _guardar(
-		salida, "438_aquiles_revelado.png", "aquiles_revelado", 438, manifiesto
-	):
+	if not await _guardar(salida, "438_aquiles_revelado.png", "aquiles_revelado", 438, manifiesto):
 		return false
 
 	if not sueno.aplicar_resolucion("sellar", true):
 		printerr("Aquiles no aceptó la resolución por sellado")
 		return false
-	if not await _guardar(
-		salida, "438_aquiles_resuelto.png", "aquiles_resuelto", 438, manifiesto
-	):
+	if not await _guardar(salida, "438_aquiles_resuelto.png", "aquiles_resuelto", 438, manifiesto):
 		return false
 	mundo.queue_free()
 	await process_frame
@@ -114,15 +110,18 @@ func _capturar_aquiles(salida: String, manifiesto: Dictionary) -> bool:
 
 func _capturar_duat(salida: String, manifiesto: Dictionary) -> bool:
 	var mundo := _nuevo_mundo("EvidenciaDuat441", Color(0.035, 0.032, 0.028))
-	var estado := SuenoDuat.preparar_pesaje(
-		[
-			{
-				"id": "expediente_evidencia",
-				"peso": 1.0,
-				"manipulado_hoy": true,
-			}
-		],
-		0,
+	var estado := (
+		SuenoDuat
+		. preparar_pesaje(
+			[
+				{
+					"id": "expediente_evidencia",
+					"peso": 1.0,
+					"manipulado_hoy": true,
+				}
+			],
+			0,
+		)
 	)
 	if estado.is_empty():
 		printerr("Duat no generó un pesaje reproducible")
@@ -137,18 +136,19 @@ func _capturar_duat(salida: String, manifiesto: Dictionary) -> bool:
 	if not await _guardar(salida, "441_duat_inicial.png", "duat_inicial", 441, manifiesto):
 		return false
 
-	var resultado := SuenoDuat.aplicar_pesaje_3d(
-		prototipo,
-		estado,
-		{"expediente_evidencia": false},
-		true,
+	var resultado := (
+		SuenoDuat
+		. aplicar_pesaje_3d(
+			prototipo,
+			estado,
+			{"expediente_evidencia": false},
+			true,
+		)
 	)
 	if not bool(resultado.get("equilibrado", false)):
 		printerr("Duat no alcanzó el equilibrio determinista")
 		return false
-	if not await _guardar(
-		salida, "441_duat_equilibrado.png", "duat_equilibrado", 441, manifiesto
-	):
+	if not await _guardar(salida, "441_duat_equilibrado.png", "duat_equilibrado", 441, manifiesto):
 		return false
 	mundo.queue_free()
 	await process_frame
