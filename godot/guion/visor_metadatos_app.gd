@@ -163,16 +163,19 @@ func _actualizar_metadatos() -> void:
 
 
 func _puntos_atencion_sin_mutar() -> int:
+	var puntos := 0
 	var crudo: Variant = jornada.get(MeticulosidadEstado.CAMPO_JORNADA, {})
-	if not crudo is Dictionary:
-		return 0
-	var estado := crudo as Dictionary
-	if (
-		int(estado.get("dia", -1)) != int(jornada.get("dia", 0))
-		or int(estado.get("vuelta", -1)) != int(jornada.get("vuelta", 1))
-	):
-		return 0
-	return clampi(int(estado.get("puntos", 0)), 0, MeticulosidadEstado.PUNTOS_MAX)
+	if crudo is Dictionary:
+		var estado := crudo as Dictionary
+		var mismo_dia := int(estado.get("dia", -1)) == int(jornada.get("dia", 0))
+		var misma_vuelta := int(estado.get("vuelta", -1)) == int(jornada.get("vuelta", 1))
+		if mismo_dia and misma_vuelta:
+			puntos = clampi(
+				int(estado.get("puntos", 0)),
+				0,
+				MeticulosidadEstado.PUNTOS_MAX,
+			)
+	return puntos
 
 
 func _reiniciar_falsificacion_documental() -> void:
@@ -184,31 +187,29 @@ func _reiniciar_falsificacion_documental() -> void:
 
 
 func _crear_copia_falsificada() -> void:
-	if (
-		registro_actual.is_empty()
-		or _selector_falsificacion == null
-		or _resultado_falsificacion == null
-	):
-		return
-	var intervencion := String(_selector_falsificacion.get_selected_metadata())
-	_borrador_falsificacion = FalsificacionDocumentalModelo.crear_copia(
-		registro_actual,
-		intervencion,
-		_puntos_atencion_sin_mutar(),
+	var disponible := (
+		not registro_actual.is_empty()
+		and _selector_falsificacion != null
+		and _resultado_falsificacion != null
 	)
-	if _borrador_falsificacion.is_empty():
-		return
-
-	var calidad := String(_borrador_falsificacion.get("calidad", "baja"))
-	var riesgo := String(_borrador_falsificacion.get("riesgo", "alto"))
-	_resultado_falsificacion.text = (
-		tr("VISOR_FALSIFICACION_951_RESULTADO")
-		% [
-			tr(String(CLAVES_CALIDAD_FALSIFICACION.get(calidad, ""))),
-			tr(String(CLAVES_RIESGO_FALSIFICACION.get(riesgo, ""))),
-		]
-	)
-	_resultado_falsificacion.visible = true
+	if disponible:
+		var intervencion := String(_selector_falsificacion.get_selected_metadata())
+		_borrador_falsificacion = FalsificacionDocumentalModelo.crear_copia(
+			registro_actual,
+			intervencion,
+			_puntos_atencion_sin_mutar(),
+		)
+		if not _borrador_falsificacion.is_empty():
+			var calidad := String(_borrador_falsificacion.get("calidad", "baja"))
+			var riesgo := String(_borrador_falsificacion.get("riesgo", "alto"))
+			_resultado_falsificacion.text = (
+				tr("VISOR_FALSIFICACION_951_RESULTADO")
+				% [
+					tr(String(CLAVES_CALIDAD_FALSIFICACION.get(calidad, ""))),
+					tr(String(CLAVES_RIESGO_FALSIFICACION.get(riesgo, ""))),
+				]
+			)
+			_resultado_falsificacion.visible = true
 
 
 func _reiniciar_analisis_documental() -> void:
