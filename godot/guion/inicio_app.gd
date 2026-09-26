@@ -204,7 +204,10 @@ func _crear_estado(caja: VBoxContainer) -> void:
 func _crear_boton(texto: String, accion: Callable) -> Button:
 	var boton := Button.new()
 	boton.text = texto
-	boton.custom_minimum_size.y = 36
+	# #1449 / #830: el menú debe leerse como una lista compacta superpuesta al
+	# diorama, no como una botonera que ocupa todo el viewport.
+	boton.custom_minimum_size = Vector2(360, 36)
+	boton.size_flags_horizontal = Control.SIZE_SHRINK_END
 	boton.focus_mode = Control.FOCUS_ALL
 	boton.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	boton.flat = true

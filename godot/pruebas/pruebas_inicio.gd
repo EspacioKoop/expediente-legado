@@ -70,6 +70,18 @@ func _probar() -> void:
 		inicio._continuar.custom_minimum_size.y >= 36.0,
 		"acciones tienen presencia visual suficiente"
 	)
+	_comprobar(
+		inicio._continuar.custom_minimum_size.x == 360.0,
+		"#1449: las acciones mantienen un ancho compacto y consistente"
+	)
+	_comprobar(
+		inicio._continuar.size_flags_horizontal == Control.SIZE_SHRINK_END,
+		"#1449: las acciones no se estiran al ancho completo del contenedor"
+	)
+	_comprobar(
+		inicio._portatil.custom_minimum_size.x == inicio._continuar.custom_minimum_size.x,
+		"#1449: las acciones de Extras usan la misma anchura visual"
+	)
 	_comprobar(inicio._continuar.disabled, "sin guardado no permite continuar")
 	_comprobar(inicio._cargar.disabled, "sin guardado no permite cargar")
 	_comprobar(not FileAccess.file_exists(_ruta), "abrir menú no crea partida")
