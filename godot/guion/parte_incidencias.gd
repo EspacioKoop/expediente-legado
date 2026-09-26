@@ -8,6 +8,7 @@ extends RefCounted
 
 const ETIQUETA := "Parte de incidencias"
 const RUTA_CONFIG := "res://datos/incidencias.json"
+const ORIGEN_REPORTE := "siga98-f9"
 const CATEGORIAS := ["bug", "mejora", "sugerencia", "queja", "accesibilidad", "otro"]
 const CLAVES_DIAGNOSTICO := [
 	"build",
@@ -34,15 +35,20 @@ static func url_configurada(configuracion: Dictionary = {}) -> String:
 	return ""
 
 
+static func url_issue_fallback(configuracion: Dictionary = {}) -> String:
+	var datos := configuracion if not configuracion.is_empty() else cargar_configuracion()
+	var url := String(datos.get("fallback_issue_url", "")).strip_edges()
+	if url.begins_with("https://github.com/") and url.contains("/issues/new"):
+		return url
+	return ""
+
+
 static func texto_fallback(configuracion: Dictionary = {}) -> String:
 	var datos := configuracion if not configuracion.is_empty() else cargar_configuracion()
 	return String(
-		(
-			datos
-			. get(
-				"fallback",
-				"Copie o guarde el parte y envíelo por el canal de pruebas acordado.",
-			)
+		datos.get(
+			"fallback",
+			"No se pudo enviar automáticamente. Se abrirá GitHub con el reporte preparado.",
 		)
 	)
 
@@ -63,7 +69,7 @@ static func diagnostico(escena: String, reduccion_movimiento: bool) -> Dictionar
 	if caracteristicas is PackedStringArray and not caracteristicas.is_empty():
 		version_godot = String(caracteristicas[0])
 	var candidato := {
-		"build": String(ProjectSettings.get_setting("application/config/version", "dev")),
+		"build": build_actual(),
 		"godot": version_godot,
 		"plataforma": plataforma_generica(OS.get_name()),
 		"escena": escena_segura(escena),
@@ -72,6 +78,62 @@ static func diagnostico(escena: String, reduccion_movimiento: bool) -> Dictionar
 		"reduccion_movimiento": reduccion_movimiento,
 	}
 	return filtrar_diagnostico(candidato)
+
+
+static func build_actual(ruta_explicita: String = "") -> String:
+	var ruta := ruta_explicita
+	if ruta.is_empty():
+		var ejecutable := OS.get_executable_path()
+		if not ejecutable.is_empty():
+			ruta = ejecutable.get_base_dir().path_join("BUILD-INFO.txt")
+	if not ruta.is_empty() and FileAccess.file_exists(ruta):
+		for linea in FileAccess.get_file_as_string(ruta).split("\n"):
+			var limpia := String(linea).strip_edges()
+			if not limpia.begins_with("build_sha="):
+				continue
+			var sha := limpia.trim_prefix("build_sha=").strip_edges()
+			if _sha_seguro(sha):
+				return sha
+	var version := String(ProjectSettings.get_setting("application/config/version", "dev")).strip_edges()
+	return "dev" if version.is_empty() else version
+
+
+static func _sha_seguro(valor: String) -> bool:
+	if valor.length() < 7 or valor.length() > 64:
+		return false
+	for caracter in valor.to_lower():
+		if String.chr(caracter) not in "0123456789abcdef":
+			return false
+	return true
+
+
+static func crear_payload(campos: Dictionary, adjunto: Dictionary = {}) -> Dictionary:
+	var categoria := String(campos.get("categoria", "otro"))
+	if categoria not in CATEGORIAS:
+		categoria = "otro"
+	var titulo := String(campos.get("titulo", "")).strip_edges()
+	var diagnostico_filtrado := filtrar_diagnostico(adjunto)
+	return {
+		"schema": 1,
+		"source": ORIGEN_REPORTE,
+		"category": categoria,
+		"title": titulo,
+		"body": compilar(campos, diagnostico_filtrado),
+		"diagnostic": diagnostico_filtrado,
+	}
+
+
+static func url_issue_preparado(
+	payload: Dictionary, configuracion: Dictionary = {}
+) -> String:
+	var base := url_issue_fallback(configuracion)
+	if base.is_empty():
+		return ""
+	var categoria := String(payload.get("category", "otro")).to_upper()
+	var titulo := String(payload.get("title", "")).strip_edges()
+	var asunto := "[Playtest][%s] %s" % [categoria, titulo]
+	var cuerpo := String(payload.get("body", ""))
+	return "%s?title=%s&body=%s" % [base, asunto.uri_encode(), cuerpo.uri_encode()]
 
 
 static func filtrar_diagnostico(candidato: Dictionary) -> Dictionary:
