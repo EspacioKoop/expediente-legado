@@ -8,7 +8,14 @@ var _pasadas := 0
 
 
 func _initialize() -> void:
+	var watchdog := create_timer(15.0)
+	watchdog.timeout.connect(_agotar_tiempo)
 	call_deferred("_probar")
+
+
+func _agotar_tiempo() -> void:
+	push_error("Timeout interno en pruebas_buscar_ejecutar_siga.gd")
+	quit(1)
 
 
 func _probar() -> void:
