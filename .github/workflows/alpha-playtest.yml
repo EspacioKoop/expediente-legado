@@ -264,8 +264,6 @@ jobs:
           mv salida/SIGA-98-godot-alpha-windows.zip salida/SIGA-98-playtest-windows.zip
 
           cp scripts/playtest.sh salida/Actualizar-SIGA98.sh
-          cp scripts/playtest.ps1 salida/Actualizar-SIGA98.ps1
-          cp scripts/playtest.cmd salida/Actualizar-SIGA98.cmd
 
           python3 - <<'PY'
           from pathlib import Path
@@ -284,8 +282,6 @@ jobs:
               SIGA-98-playtest-windows.zip \
               SIGA-98-Actualizador-Windows.zip \
               Actualizar-SIGA98.sh \
-              Actualizar-SIGA98.ps1 \
-              Actualizar-SIGA98.cmd \
               > SIGA-98-playtest-SHA256SUMS.txt
           )
 
@@ -314,8 +310,6 @@ jobs:
                   "linux": "SIGA-98-playtest-linux.zip",
                   "windows": "SIGA-98-playtest-windows.zip",
                   "windows_updater": "SIGA-98-Actualizador-Windows.zip",
-                  "windows_cmd": "Actualizar-SIGA98.cmd",
-                  "windows_powershell": "Actualizar-SIGA98.ps1",
                   "linux_updater": "Actualizar-SIGA98.sh",
                   "checksums": "SIGA-98-playtest-SHA256SUMS.txt",
               },
@@ -375,8 +369,6 @@ jobs:
             salida/SIGA-98-playtest-windows.zip \
             salida/SIGA-98-Actualizador-Windows.zip \
             salida/Actualizar-SIGA98.sh \
-            salida/Actualizar-SIGA98.ps1 \
-            salida/Actualizar-SIGA98.cmd \
             salida/SIGA-98-playtest-SHA256SUMS.txt \
             salida/SIGA-98-playtest-build.json \
             --clobber
