@@ -41,6 +41,7 @@ const COLOR_TRONCO := Color(0.30, 0.20, 0.12)
 const COLOR_RAMA := Color(0.33, 0.27, 0.14)
 const COLOR_CONEXION := Color(0.46, 0.36, 0.18)
 const COLOR_ACTIVO := Color(0.74, 0.62, 0.30)
+const COLOR_BLOQUEO := Color(0.48, 0.16, 0.12)
 const COLOR_RETORNO := Color(0.26, 0.48, 0.38)
 
 var reduccion_movimiento := false
@@ -169,7 +170,29 @@ func _crear_nodo(id: String, posicion: Vector3, color: Color, detalle: String) -
 	_crear_caja(
 		contenedor, "Indicador", Vector3(0.65, 0.18, 0.65), Vector3(0.0, 2.95, 0.0), COLOR_ACTIVO
 	)
+	_crear_efecto_visual(contenedor, id)
 	_crear_hotspot_nodo(contenedor, id)
+
+
+## Cada destino expone un cambio distinto: brillo, altura o barrera visual.
+## La barrera no tiene colisión; comunica "acceso" sin poder crear un softlock.
+func _crear_efecto_visual(padre: Node3D, id: String) -> void:
+	if id == NODO_RAMA:
+		var luz := OmniLight3D.new()
+		luz.name = "LuzRemota"
+		luz.position = Vector3(0.0, 3.0, 0.0)
+		luz.light_color = COLOR_ACTIVO
+		luz.light_energy = 0.15
+		luz.omni_range = 4.5
+		padre.add_child(luz)
+	elif id == NODO_RAIZ:
+		_crear_caja(
+			padre,
+			"BarreraAcceso",
+			Vector3(2.8, 0.20, 0.35),
+			Vector3(0.0, -0.25, -1.45),
+			COLOR_BLOQUEO,
+		)
 
 
 func _crear_hotspot_nodo(padre: Node3D, id: String) -> void:
@@ -247,12 +270,26 @@ func _aplicar_estado_visual() -> void:
 		var nivel := int(_estado[nodo])
 		var indicador := contenedor.get_node_or_null("Indicador") as MeshInstance3D
 		if indicador != null:
-			indicador.scale = Vector3.ONE * (1.0 + 0.22 * nivel)
+			indicador.scale = Vector3.ONE
 		var nucleo := contenedor.get_node_or_null("Nucleo") as MeshInstance3D
 		if nucleo != null:
-			# Estado discreto: con reducción de movimiento el consumidor puede cortar
-			# directamente a esta pose sin interpolar.
-			nucleo.position.y = 1.1 + 0.35 * nivel
+			nucleo.position.y = 1.1
+
+		# El cambio sigue siendo discreto y reproducible, pero ahora la semántica
+		# declarada por ACCIONES se reconoce también en la geometría/iluminación.
+		if nodo == NODO_RAMA:
+			if indicador != null:
+				indicador.scale = Vector3.ONE * (1.0 + 0.22 * nivel)
+			var luz := contenedor.get_node_or_null("LuzRemota") as OmniLight3D
+			if luz != null:
+				luz.light_energy = 0.15 + 0.55 * nivel
+		elif nodo == NODO_TRONCO:
+			if nucleo != null:
+				nucleo.position.y = 1.1 + 0.35 * nivel
+		elif nodo == NODO_RAIZ:
+			var barrera := contenedor.get_node_or_null("BarreraAcceso") as MeshInstance3D
+			if barrera != null:
+				barrera.position.y = -0.25 + 0.85 * nivel
 
 
 func _crear_caja(
