@@ -443,7 +443,7 @@ MENU_GLOBAL_VOLVER,Volver
 MENU_GLOBAL_SALIR,Salir al escritorio
 MENU_GLOBAL_VOLUMEN,Volumen
 MENU_GLOBAL_REDUCCION_MOVIMIENTO,Reducir movimiento
-MENU_GLOBAL_SUBTITULO,Preferencias comunes de archivo, casa y sueño.
+MENU_GLOBAL_SUBTITULO,"Preferencias comunes de archivo, casa y sueño."
 MENU_GLOBAL_SENSIBILIDAD_RATON,Sensibilidad de ratón
 MENU_GLOBAL_SENSIBILIDAD_MANDO,Sensibilidad de stick derecho
 MENU_GLOBAL_INVERTIR_CAMARA_Y,Invertir eje Y de cámara
@@ -613,7 +613,7 @@ VISOR_DETALLE_961_ACTA1_PAPEL_COTEJO,"Puesta junto a otro folio, el papel coinci
 VISOR_DETALLE_961_OFICIO2_CLIP_MARGEN,El margen izquierdo conserva el óxido tenue de un clip retirado; no hay texto oculto debajo.
 VISOR_DETALLE_961_OFICIO2_ANEXO_FOLIO,"El oficio deja constancia de una prescripción médica adjunta; el archivo conserva el anexo como metadato, no su contenido clínico."
 VISOR_DETALLE_961_CIRCULAR2_SELLO_FECHA,"El sello de distribución pisa parcialmente el año impreso, pero ambos siguen siendo legibles; no cambia la cronología consignada."
-VISOR_DETALLE_961_MEMO3_TINTA_SELLO,La tinta del sello de recibido tiene un borde más saturado que la del texto mecanografiado; es una diferencia de soporte, no una prueba de procedencia.
+VISOR_DETALLE_961_MEMO3_TINTA_SELLO,"La tinta del sello de recibido tiene un borde más saturado que la del texto mecanografiado; es una diferencia de soporte, no una prueba de procedencia."
 VISOR_DETALLE_961_FACTURA4_HALO_SELLO,El sello amarillo deja un halo irregular en el reverso; el color ya visible en el documento no permite atribuirlo a una oficina concreta.
 JUICIO_JUNGIANO_MOMENTUM,MOMENTUM
 JUICIO_JUNGIANO_FINISHER,FINISHER
@@ -636,7 +636,7 @@ ULTIMO_RECURSO_VER_TAROT,Ver mi tarot
 ULTIMO_RECURSO_VOLVER,Volver al aviso
 BINGO_SIGA_APP_TITULO,Bingo del auditor
 BINGO_SIGA_CABECERA,Tarjeta diaria de SIGA
-BINGO_SIGA_AYUDA,Tres objetivos opcionales para esta jornada. No conceden dinero, acciones, vidas ni pistas.
+BINGO_SIGA_AYUDA,"Tres objetivos opcionales para esta jornada. No conceden dinero, acciones, vidas ni pistas."
 BINGO_SIGA_DECISION,Decisión: %s
 BINGO_SIGA_DECISION_PENDIENTE,Pendiente
 BINGO_SIGA_DECISION_ACEPTADA,Aceptada
