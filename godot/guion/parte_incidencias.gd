@@ -101,10 +101,10 @@ static func build_actual(ruta_explicita: String = "") -> String:
 static func _sha_seguro(valor: String) -> bool:
 	if valor.length() < 7 or valor.length() > 64:
 		return false
-	for caracter in valor.to_lower():
-		if String.chr(caracter) not in "0123456789abcdef":
-			return false
-	return true
+	var patron := RegEx.new()
+	if patron.compile("^[0-9a-fA-F]{7,64}$") != OK:
+		return false
+	return patron.search(valor) != null
 
 
 static func crear_payload(campos: Dictionary, adjunto: Dictionary = {}) -> Dictionary:
