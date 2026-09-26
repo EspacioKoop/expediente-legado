@@ -924,6 +924,9 @@ func _cerrar_expediente() -> void:
 
 	_caminante.set_physics_process(true)
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	# #1451: este mensaje solo describe el estado mientras SIGA está abierto.
+	# Al levantarse no debe sobrevivir como si el jugador siguiera sentado.
+	_nomina.text = ""
 
 	# Le han reasignado mientras firmaba: se levanta otra persona de esa silla.
 	if int(jornada.get("vuelta", 1)) != vuelta_antes:
