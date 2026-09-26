@@ -6,6 +6,8 @@ on:
     paths:
       - '.github/workflows/alpha-playtest.yml'
       - 'scripts/playtest.sh'
+      - 'scripts/playtest.ps1'
+      - 'scripts/playtest.cmd'
       - 'godot/**'
       - 'gbc/minijuegos/caza_pixeles_98/**'
       - 'scripts/preparar_emulador_gb.sh'
@@ -23,6 +25,8 @@ on:
       - 'scripts/preparar_emulador_gb.sh'
       - 'scripts/auditar_frontera_qa.py'
       - 'scripts/playtest.sh'
+      - 'scripts/playtest.ps1'
+      - 'scripts/playtest.cmd'
       - 'dist/exportar-godot-alpha.sh'
       - '.godot-version'
   workflow_dispatch:
@@ -78,6 +82,22 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Validar launchers Windows
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path 'scripts/playtest.ps1'),
+            [ref]$tokens,
+            [ref]$errors
+          ) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.Message }
+            exit 1
+          }
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/playtest.ps1 -Help | Out-Null
+          cmd.exe /c "scripts\playtest.cmd --help"
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -243,9 +263,29 @@ jobs:
           mv salida/SIGA-98-godot-alpha-linux.zip salida/SIGA-98-playtest-linux.zip
           mv salida/SIGA-98-godot-alpha-windows.zip salida/SIGA-98-playtest-windows.zip
 
+          cp scripts/playtest.sh salida/Actualizar-SIGA98.sh
+          cp scripts/playtest.ps1 salida/Actualizar-SIGA98.ps1
+          cp scripts/playtest.cmd salida/Actualizar-SIGA98.cmd
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+
+          destino = Path("salida/SIGA-98-Actualizador-Windows.zip")
+          with zipfile.ZipFile(destino, "w", zipfile.ZIP_DEFLATED) as zf:
+              zf.write("scripts/playtest.cmd", "Actualizar-SIGA98.cmd")
+              zf.write("scripts/playtest.ps1", "Actualizar-SIGA98.ps1")
+          PY
+
           (
             cd salida
-            sha256sum SIGA-98-playtest-linux.zip SIGA-98-playtest-windows.zip \
+            sha256sum \
+              SIGA-98-playtest-linux.zip \
+              SIGA-98-playtest-windows.zip \
+              SIGA-98-Actualizador-Windows.zip \
+              Actualizar-SIGA98.sh \
+              Actualizar-SIGA98.ps1 \
+              Actualizar-SIGA98.cmd \
               > SIGA-98-playtest-SHA256SUMS.txt
           )
 
@@ -273,6 +313,10 @@ jobs:
               "assets": {
                   "linux": "SIGA-98-playtest-linux.zip",
                   "windows": "SIGA-98-playtest-windows.zip",
+                  "windows_updater": "SIGA-98-Actualizador-Windows.zip",
+                  "windows_cmd": "Actualizar-SIGA98.cmd",
+                  "windows_powershell": "Actualizar-SIGA98.ps1",
+                  "linux_updater": "Actualizar-SIGA98.sh",
                   "checksums": "SIGA-98-playtest-SHA256SUMS.txt",
               },
           }
@@ -288,8 +332,14 @@ jobs:
           Build actual: $GITHUB_SHA
           Run: https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
 
-          Descarga recomendada desde un checkout del repo:
-          bash scripts/playtest.sh
+          Para testers Windows sin Git:
+          1. descarga SIGA-98-Actualizador-Windows.zip;
+          2. extrae sus dos archivos;
+          3. haz doble clic en Actualizar-SIGA98.cmd.
+
+          Para Linux sin clonar el repo:
+          descarga Actualizar-SIGA98.sh y ejecuta:
+          bash Actualizar-SIGA98.sh
 
           El tag playtest-latest es un ancla estable del canal, no el identificador
           del código contenido en cada actualización. La fuente de verdad de la
@@ -323,6 +373,10 @@ jobs:
           gh release upload "$canal" \
             salida/SIGA-98-playtest-linux.zip \
             salida/SIGA-98-playtest-windows.zip \
+            salida/SIGA-98-Actualizador-Windows.zip \
+            salida/Actualizar-SIGA98.sh \
+            salida/Actualizar-SIGA98.ps1 \
+            salida/Actualizar-SIGA98.cmd \
             salida/SIGA-98-playtest-SHA256SUMS.txt \
             salida/SIGA-98-playtest-build.json \
             --clobber
