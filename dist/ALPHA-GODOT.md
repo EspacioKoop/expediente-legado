@@ -124,14 +124,14 @@ un cambio relevante llega a `main`. Tras pasar el smoke y las auditorías:
 - actualiza la prerelease `playtest-latest`;
 - publica `SIGA-98-playtest-linux.zip`;
 - publica `SIGA-98-playtest-windows.zip`;
-- publica `SIGA-98-Actualizador-Windows.zip`;
-- publica `Actualizar-SIGA98.cmd`, `Actualizar-SIGA98.ps1` y
-  `Actualizar-SIGA98.sh` también por separado;
+- publica `SIGA-98-Actualizador-Windows.zip`, que contiene el CMD y el
+  PowerShell juntos;
+- publica `Actualizar-SIGA98.sh` para Linux;
 - publica `SIGA-98-playtest-SHA256SUMS.txt`;
 - publica `SIGA-98-playtest-build.json`.
 
-Los checksums cubren tanto los dos paquetes del juego como los launchers
-distribuidos.
+Los checksums cubren los dos paquetes del juego, el paquete de actualizador
+Windows y el launcher Linux distribuidos.
 
 Los PR siguen generando artifacts efímeros, pero **no** actualizan
 `playtest-latest`.
