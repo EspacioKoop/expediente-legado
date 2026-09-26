@@ -10,10 +10,12 @@ signal abrir_aplicacion(id: String)
 signal abrir_ruta(ruta: String)
 signal abrir_url(url: String)
 signal abrir_ayuda
+signal abrir_reconstruccion(caso_id: String, registro_id: String)
 
 var _modo := "buscar"
 var _apps: Array[Dictionary] = []
 var _contexto: Dictionary = {}
+var _documentos: Array[Dictionary] = []
 var _entrada: LineEdit
 var _lista: ItemList
 var _detalle: Label
@@ -21,10 +23,16 @@ var _estado: Label
 var _resultados: Array[Dictionary] = []
 
 
-func configurar(modo: String, apps: Array[Dictionary], contexto: Dictionary) -> void:
+func configurar(
+	modo: String,
+	apps: Array[Dictionary],
+	contexto: Dictionary,
+	documentos: Array[Dictionary] = [],
+) -> void:
 	_modo = "ejecutar" if modo == "ejecutar" else "buscar"
 	_apps = apps.duplicate(true)
 	_contexto = contexto.duplicate(true)
+	_documentos = documentos.duplicate(true)
 
 
 func _ready() -> void:
@@ -58,6 +66,38 @@ func buscar(consulta: String) -> Array[Dictionary]:
 				"destino": id,
 			}
 			resultado.append(resultado_app)
+
+	for documento in _documentos:
+		var reconstruccion: Dictionary = documento.get("reconstruccion", {})
+		if reconstruccion.is_empty():
+			continue
+		var bolsa_documento := (
+			"%s %s %s %s %s"
+			% [
+				String(documento.get("folio", "")),
+				String(documento.get("tipo", "")),
+				String(documento.get("caso_titulo", "")),
+				String(documento.get("contenido", "")),
+				_texto_fragmentos(reconstruccion.get("fragmentos", [])),
+			]
+		)
+		if not _coincide(normalizada, bolsa_documento):
+			continue
+		var resultado_reconstruccion := {
+			"tipo": "reconstruccion",
+			"titulo": "%s · %s" % [tr("VISOR_RECONSTRUIR"), String(documento.get("folio", ""))],
+			"detalle":
+			(
+				"%s · %s"
+				% [
+					String(documento.get("caso_titulo", "")),
+					String(reconstruccion.get("titulo", "")),
+				]
+			),
+			"destino": String(documento.get("registro", "")),
+			"caso": String(documento.get("caso", "")),
+		}
+		resultado.append(resultado_reconstruccion)
 
 	var explorador := ExploradorSigaModelo.new()
 	explorador.configurar_contexto(_contexto)
@@ -327,6 +367,19 @@ func _despachar(resultado: Dictionary) -> void:
 			abrir_url.emit(String(resultado.get("destino", "")))
 		"ayuda":
 			abrir_ayuda.emit()
+		"reconstruccion":
+			abrir_reconstruccion.emit(
+				String(resultado.get("caso", "")), String(resultado.get("destino", ""))
+			)
+
+
+func _texto_fragmentos(fragmentos: Array) -> String:
+	var texto := ""
+	for fragmento in fragmentos:
+		if not texto.is_empty():
+			texto += " "
+		texto += String(fragmento)
+	return texto
 
 
 func _coincide(consulta_normalizada: String, texto: String) -> bool:

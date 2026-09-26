@@ -9,6 +9,7 @@ from scripts.godot_pruebas import importar_proyecto
 ROOT = Path(__file__).resolve().parents[1]
 SUPERFICIE = ROOT / "godot" / "guion" / "buscar_ejecutar_siga.gd"
 CONTROLADOR = ROOT / "godot" / "guion" / "dia_buscar_ejecutar_app.gd"
+RECONSTRUCCION = ROOT / "godot" / "guion" / "reconstruccion_documental_siga.gd"
 DIA = ROOT / "godot" / "escenas" / "dia.tscn"
 
 
@@ -42,6 +43,27 @@ class BuscarEjecutarSigaTest(unittest.TestCase):
         self.assertIn("dia_buscar_ejecutar_app.gd", escena)
         self.assertIn('node name="BuscarEjecutarController"', escena)
 
+    def test_busqueda_documental_solo_consume_lecturas_y_catalogo_existente(self) -> None:
+        superficie = SUPERFICIE.read_text(encoding="utf-8")
+        controlador = CONTROLADOR.read_text(encoding="utf-8")
+        self.assertIn("var _documentos: Array[Dictionary]", superficie)
+        self.assertIn('"tipo": "reconstruccion"', superficie)
+        self.assertIn("abrir_reconstruccion.emit", superficie)
+        self.assertIn('get("leido_hoy", [])', controlador)
+        self.assertIn("not leidos.has(folio)", controlador)
+        self.assertIn("ReconstruccionDocumental3D.para_registros", controlador)
+        self.assertIn('"reconstruccion-documental"', controlador)
+        self.assertNotIn("Partida.new()", controlador)
+
+    def test_visor_de_reconstruccion_es_3d_y_no_decide_hechos(self) -> None:
+        fuente = RECONSTRUCCION.read_text(encoding="utf-8")
+        self.assertIn("SubViewportContainer.new()", fuente)
+        self.assertIn("Camera3D.new()", fuente)
+        self.assertIn("ReconstruccionDocumental3D.planos_de", fuente)
+        self.assertIn('reconstruccion.get("fragmentos", [])', fuente)
+        self.assertNotIn("culpable", fuente.lower())
+        self.assertNotIn("veredicto", fuente.lower())
+
     def test_superficies_ejecutables_en_godot(self) -> None:
         motor = os.environ.get("GODOT_BIN", "godot4")
         importar_proyecto()
@@ -57,11 +79,11 @@ class BuscarEjecutarSigaTest(unittest.TestCase):
             text=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            timeout=30,
+            timeout=45,
             check=False,
         )
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
-        self.assertIn("11 pasadas, 0 fallos", resultado.stdout)
+        self.assertIn("18 pasadas, 0 fallos", resultado.stdout)
         self.assertNotIn("ERROR:", resultado.stdout)
         self.assertNotIn("Parse Error:", resultado.stdout)
 

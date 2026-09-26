@@ -1,13 +1,21 @@
 extends SceneTree
 
 const Superficie := preload("res://guion/buscar_ejecutar_siga.gd")
+const ReconstruccionUI := preload("res://guion/reconstruccion_documental_siga.gd")
 
 var _fallos := 0
 var _pasadas := 0
 
 
 func _initialize() -> void:
+	var watchdog := create_timer(15.0)
+	watchdog.timeout.connect(_agotar_tiempo)
 	call_deferred("_probar")
+
+
+func _agotar_tiempo() -> void:
+	push_error("Timeout interno en pruebas_buscar_ejecutar_siga.gd")
+	quit(1)
 
 
 func _probar() -> void:
@@ -26,8 +34,33 @@ func _probar() -> void:
 		"fase_contaminacion": 0,
 	}
 
+	var reconstruccion := {
+		"id": "caso1_factura",
+		"caso": "caso1@1",
+		"registro": "factura@1",
+		"folio": "F-1999-00231",
+		"titulo": "Lo que afirma la factura",
+		"fragmentos": ["Monto: 482000", "Proveedor sin RFC"],
+		"planos":
+		[
+			{"encuadre": "general", "duracion": 1.0, "motivo": "mesa_factura"},
+			{"encuadre": "detalle", "duracion": 1.0, "motivo": "sello"},
+		],
+	}
+	var documentos: Array[Dictionary] = [
+		{
+			"caso": "caso1@1",
+			"caso_titulo": "Cierre contable",
+			"registro": "factura@1",
+			"folio": "F-1999-00231",
+			"tipo": "FACTURA",
+			"contenido": "Monto 482000. Proveedor sin RFC.",
+			"reconstruccion": reconstruccion,
+		}
+	]
+
 	var buscar := Superficie.new()
-	buscar.configurar("buscar", apps, contexto_base)
+	buscar.configurar("buscar", apps, contexto_base, documentos)
 	get_root().add_child(buscar)
 	await process_frame
 	_comprobar(
@@ -45,6 +78,51 @@ func _probar() -> void:
 		not _contiene_texto(buscar.buscar("acreditacion"), "Memorándum"),
 		"no revela documentos ocultos"
 	)
+	var resultados_evidencia := buscar.buscar("482000")
+	_comprobar(
+		_contiene_tipo(resultados_evidencia, "reconstruccion"),
+		"encuentra reconstrucciones solo en evidencia aportada como leída",
+	)
+	_comprobar(
+		buscar.buscar("solo-no-leido").is_empty(),
+		"una evidencia no aportada por el controlador no entra en el índice",
+	)
+	var apertura := {"caso": "", "registro": ""}
+	buscar.abrir_reconstruccion.connect(
+		func(caso_id: String, registro_id: String):
+			apertura["caso"] = caso_id
+			apertura["registro"] = registro_id
+	)
+	buscar.call("_despachar", resultados_evidencia[0])
+	_comprobar(
+		apertura["caso"] == "caso1@1" and apertura["registro"] == "factura@1",
+		"activar un resultado conserva la procedencia caso/registro",
+	)
+
+	var visor := ReconstruccionUI.new()
+	visor.configurar(reconstruccion, false)
+	get_root().add_child(visor)
+	await process_frame
+	_comprobar(
+		visor.get_node_or_null("Plano3D") is SubViewportContainer,
+		"la reconstrucción abre una maqueta 3D real",
+	)
+	var fuente := visor.get_node_or_null("Fuente") as Label
+	_comprobar(
+		fuente != null and fuente.text.contains("482000"),
+		"la reconstrucción mantiene visibles los fragmentos de procedencia",
+	)
+	var estado_plano := visor.find_child("EstadoPlano", true, false) as Label
+	_comprobar(
+		estado_plano != null and estado_plano.text.begins_with("1/2"),
+		"la reconstrucción empieza en el primer plano catalogado",
+	)
+	visor.call("_siguiente")
+	_comprobar(
+		estado_plano != null and estado_plano.text.begins_with("2/2"),
+		"el jugador puede recorrer los puntos de vista catalogados",
+	)
+	visor.queue_free()
 	buscar.queue_free()
 
 	var ejecutar := Superficie.new()
@@ -77,6 +155,13 @@ func _probar() -> void:
 func _contiene_titulo(resultados: Array[Dictionary], titulo: String) -> bool:
 	for resultado in resultados:
 		if String(resultado.get("titulo", "")) == titulo:
+			return true
+	return false
+
+
+func _contiene_tipo(resultados: Array[Dictionary], tipo: String) -> bool:
+	for resultado in resultados:
+		if String(resultado.get("tipo", "")) == tipo:
 			return true
 	return false
 

@@ -5,6 +5,8 @@ var _escritorio_id := 0
 var _escritorio: EscritorioSiga
 var _buscar_app: EscritorioSigaApp
 var _ejecutar_app: EscritorioSigaApp
+var _reconstruccion_app: EscritorioSigaApp
+var _reconstruccion_pendiente: Dictionary = {}
 
 
 func _process(_delta: float) -> void:
@@ -43,10 +45,26 @@ func _registrar_superficies() -> void:
 	_ejecutar_app.tamano_preferido = Vector2(620, 300)
 	_ejecutar_app.registrar_en(_escritorio)
 
+	_reconstruccion_app = (
+		EscritorioSigaApp
+		. new(
+			"reconstruccion-documental",
+			tr("VISOR_RECONSTRUIR"),
+			Callable(self, "_crear_reconstruccion"),
+			"siga",
+		)
+	)
+	_reconstruccion_app.tamano_minimo = Vector2(560, 420)
+	_reconstruccion_app.tamano_preferido = Vector2(760, 620)
+	_reconstruccion_app.redimensionable = true
+	_reconstruccion_app.registrar_en(_escritorio)
+
 
 func _crear_buscar() -> Control:
 	var superficie := BuscarEjecutarSiga.new()
-	superficie.configurar("buscar", _catalogo_apps(), _contexto_actual())
+	superficie.configurar(
+		"buscar", _catalogo_apps(), _contexto_actual(), _documentos_reconstruibles()
+	)
 	_conectar_superficie(superficie)
 	return superficie
 
@@ -58,11 +76,24 @@ func _crear_ejecutar() -> Control:
 	return superficie
 
 
+func _crear_reconstruccion() -> Control:
+	var superficie := ReconstruccionDocumentalSiga.new()
+	(
+		superficie
+		. configurar(
+			_reconstruccion_pendiente,
+			bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false)),
+		)
+	)
+	return superficie
+
+
 func _conectar_superficie(superficie: BuscarEjecutarSiga) -> void:
 	superficie.abrir_aplicacion.connect(_abrir_aplicacion_lanzador)
 	superficie.abrir_ruta.connect(_abrir_ruta_lanzador)
 	superficie.abrir_url.connect(_abrir_url_lanzador)
 	superficie.abrir_ayuda.connect(_abrir_ayuda_lanzador)
+	superficie.abrir_reconstruccion.connect(_abrir_reconstruccion_lanzador)
 
 
 func _catalogo_apps() -> Array[Dictionary]:
@@ -92,6 +123,56 @@ func _catalogo_apps() -> Array[Dictionary]:
 	]
 
 
+func _documentos_reconstruibles() -> Array[Dictionary]:
+	var resultado: Array[Dictionary] = []
+	var dia := get_parent()
+	if dia == null:
+		return resultado
+	var jornada: Variant = dia.get("jornada")
+	var contenido: Variant = dia.get("contenido")
+	if not jornada is Dictionary or not contenido is Contenido:
+		return resultado
+	var leidos: Array = (jornada as Dictionary).get("leido_hoy", [])
+	for caso in (contenido as Contenido).casos:
+		var caso_id := String(caso.get("id", ""))
+		var caso_titulo := tr(String(caso.get("titulo", "")))
+		for registro in caso.get("registros", []):
+			var folio := String(registro.get("folio", ""))
+			if folio.is_empty() or not leidos.has(folio):
+				continue
+			var registro_id := String(registro.get("id", ""))
+			var reconstrucciones := ReconstruccionDocumental3D.para_registros(
+				caso_id, [registro_id]
+			)
+			for reconstruccion in reconstrucciones:
+				(
+					resultado
+					. append(
+						{
+							"caso": caso_id,
+							"caso_titulo": caso_titulo,
+							"registro": registro_id,
+							"folio": folio,
+							"tipo": String(registro.get("tipo", "")),
+							"contenido": tr(String(registro.get("contenido", ""))),
+							"reconstruccion": reconstruccion.duplicate(true),
+						}
+					)
+				)
+	return resultado
+
+
+func _buscar_reconstruccion(caso_id: String, registro_id: String) -> Dictionary:
+	for documento in _documentos_reconstruibles():
+		if (
+			String(documento.get("caso", "")) == caso_id
+			and String(documento.get("registro", "")) == registro_id
+		):
+			var reconstruccion: Dictionary = documento.get("reconstruccion", {})
+			return reconstruccion.duplicate(true)
+	return {}
+
+
 func _contexto_actual() -> Dictionary:
 	var dia := get_parent()
 	if dia == null:
@@ -119,6 +200,17 @@ func _contexto_minimo(dia: int) -> Dictionary:
 		"habilitar_enlace13": false,
 		"fase_contaminacion": 0,
 	}
+
+
+func _abrir_reconstruccion_lanzador(caso_id: String, registro_id: String) -> void:
+	if _escritorio == null or _reconstruccion_app == null:
+		return
+	var reconstruccion := _buscar_reconstruccion(caso_id, registro_id)
+	if reconstruccion.is_empty():
+		return
+	_reconstruccion_pendiente = reconstruccion
+	_reconstruccion_app.cerrar(_escritorio)
+	_reconstruccion_app.abrir(_escritorio)
 
 
 func _abrir_aplicacion_lanzador(id: String) -> void:
