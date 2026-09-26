@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - '.github/workflows/alpha-playtest.yml'
+      - 'scripts/playtest.sh'
       - 'godot/**'
       - 'gbc/minijuegos/caza_pixeles_98/**'
       - 'scripts/preparar_emulador_gb.sh'
@@ -12,8 +13,18 @@ on:
       - 'dist/exportar-godot-alpha.sh'
       - '.godot-version'
   push:
+    branches: [ main ]
     tags:
       - 'v*'
+    paths:
+      - '.github/workflows/alpha-playtest.yml'
+      - 'godot/**'
+      - 'gbc/minijuegos/caza_pixeles_98/**'
+      - 'scripts/preparar_emulador_gb.sh'
+      - 'scripts/auditar_frontera_qa.py'
+      - 'scripts/playtest.sh'
+      - 'dist/exportar-godot-alpha.sh'
+      - '.godot-version'
   workflow_dispatch:
 
 concurrency:
@@ -29,6 +40,11 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: Validar launcher de playtest
+        shell: bash
+        run: |
+          bash -n scripts/playtest.sh
+          bash scripts/playtest.sh --help >/dev/null
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -201,6 +217,115 @@ jobs:
           name: SIGA-98-godot-alpha-checksums
           path: dist/salida/SIGA-98-godot-alpha-SHA256SUMS.txt
           if-no-files-found: error
+
+  publicar-playtest-continuo:
+    # En main mantenemos un canal QA descargable con URLs estables. No mueve
+    # releases versionadas ni publica en itch.io.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: export-alpha
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Recoger los artefactos exportados
+        uses: actions/download-artifact@v4
+        with:
+          pattern: SIGA-98-godot-alpha-*
+          merge-multiple: true
+          path: salida
+
+      - name: Preparar nombres, checksums y metadatos del canal
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mv salida/SIGA-98-godot-alpha-linux.zip salida/SIGA-98-playtest-linux.zip
+          mv salida/SIGA-98-godot-alpha-windows.zip salida/SIGA-98-playtest-windows.zip
+
+          (
+            cd salida
+            sha256sum SIGA-98-playtest-linux.zip SIGA-98-playtest-windows.zip \
+              > SIGA-98-playtest-SHA256SUMS.txt
+          )
+
+          python3 - <<'PY'
+          from datetime import datetime, timezone
+          import json
+          import os
+          from pathlib import Path
+
+          sha = os.environ["GITHUB_SHA"]
+          run_id = int(os.environ["GITHUB_RUN_ID"])
+          datos = {
+              "channel": "playtest-latest",
+              "sha": sha,
+              "short_sha": sha[:12],
+              "repository": os.environ["GITHUB_REPOSITORY"],
+              "ref": os.environ["GITHUB_REF"],
+              "run_id": run_id,
+              "run_attempt": int(os.environ["GITHUB_RUN_ATTEMPT"]),
+              "run_url": (
+                  f"https://github.com/{os.environ['GITHUB_REPOSITORY']}"
+                  f"/actions/runs/{run_id}"
+              ),
+              "built_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+              "assets": {
+                  "linux": "SIGA-98-playtest-linux.zip",
+                  "windows": "SIGA-98-playtest-windows.zip",
+                  "checksums": "SIGA-98-playtest-SHA256SUMS.txt",
+              },
+          }
+          Path("salida/SIGA-98-playtest-build.json").write_text(
+              json.dumps(datos, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+          cat > "$RUNNER_TEMP/playtest-notes.md" <<EOF
+          Canal continuo de QA para playtesting humano sobre main.
+
+          Build actual: $GITHUB_SHA
+          Run: https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+
+          Descarga recomendada desde un checkout del repo:
+          bash scripts/playtest.sh
+
+          El tag playtest-latest es un ancla estable del canal, no el identificador
+          del código contenido en cada actualización. La fuente de verdad de la
+          build es SIGA-98-playtest-build.json y BUILD-INFO.txt dentro de cada ZIP.
+
+          Este canal no sustituye las releases versionadas v* ni publica en itch.io.
+          EOF
+
+      - name: Crear o actualizar la prerelease rodante
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          canal="playtest-latest"
+          corto="${GITHUB_SHA:0:12}"
+
+          if gh release view "$canal" >/dev/null 2>&1; then
+            gh release edit "$canal" \
+              --title "Playtest continuo · $corto" \
+              --notes-file "$RUNNER_TEMP/playtest-notes.md" \
+              --prerelease
+          else
+            gh release create "$canal" \
+              --target "$GITHUB_SHA" \
+              --title "Playtest continuo · $corto" \
+              --notes-file "$RUNNER_TEMP/playtest-notes.md" \
+              --prerelease
+          fi
+
+          gh release upload "$canal" \
+            salida/SIGA-98-playtest-linux.zip \
+            salida/SIGA-98-playtest-windows.zip \
+            salida/SIGA-98-playtest-SHA256SUMS.txt \
+            salida/SIGA-98-playtest-build.json \
+            --clobber
 
   publicar-release:
     # Solo al empujar una etiqueta vX.Y.Z: el resto de disparadores siguen
