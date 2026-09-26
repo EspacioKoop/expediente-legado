@@ -82,11 +82,11 @@ func ejecutar(linea: String) -> Dictionary:
 				)
 			"copy", "cp":
 				resultado = _copiar(partes)
-			"edit":
+			"edit", "vi":
 				resultado = _editar(partes)
 			"del", "erase", "rm":
 				resultado = _borrar(_argumento(partes))
-			"users", "usuarios":
+			"users", "usuarios", "who":
 				resultado = _usuarios()
 			_:
 				resultado = _resultado(false, "Comando no reconocido: %s" % comando)
@@ -277,7 +277,7 @@ static func _padre(ruta: String) -> String:
 static func _ayuda() -> String:
 	return (
 		"HELP  DIR/LS  CD  PWD  TYPE/CAT\n"
-		+ "COPY/CP  EDIT  DEL/RM  USERS\n"
+		+ "COPY/CP  EDIT/VI  DEL/RM  USERS/WHO\n"
 		+ "WHOAMI  SET  ECHO  PING  NETSTAT\n"
 		+ "Sistema local simulado · cambios temporales de sesión"
 	)
