@@ -16,22 +16,26 @@ Este directorio contiene auditorías, decisiones de diseño, investigación, evi
 | Paridad religión | [paridad-religion.md](paridad-religion.md) | Fronteras religión/Tarot/mitología |
 | Paridad literatura | [paridad-literatura.md](paridad-literatura.md) | Legado cultural y contrato literario |
 | Gramática simbólica | [design/gramatica-simbolica-siga98.md](design/gramatica-simbolica-siga98.md) | Convenciones simbólicas compartidas |
+| Referencias ludonarrativas | [research/referencias-ludonarrativas.md](research/referencias-ludonarrativas.md) | Técnicas externas, riesgos y mapa de adopción; no declara features integradas |
 | Procedencia de assets | `godot/assets/procedencia.json` + `docs/licencias/` | Licencia, fuente y hashes |
 
-## Estado transversal — 2026-09-22
+## Estado transversal — 2026-09-26
 
-Las capas que más han cambiado desde la documentación del 14/09 son:
+El índice se sincroniza con `main` hasta el commit `6ccfa4317897d70ca9462e7c92aefea41095b2bc`. Para prioridad operativa sigue mandando #181; para integración real, `main` y los PR fusionados.
 
-- **mundo 1998**: comercio, reventa, vecinos, objetos domésticos y evidencia visual;
-- **tiempo/audio**: reloj persistente, iluminación por hora y ambiente adaptativo;
-- **OS98/Portátil Color 98**: identidad de aplicaciones, paletas y acabado físico;
-- **mitologías/Jung**: corpus runtime y nuevos adaptadores;
-- **ideologías**: doctrinas en Juicio, decisiones y medios;
-- **religión**: ROMs culturales, práctica material y conflicto contextual;
-- **literatura**: contrato transversal nuevo y primera vertical ejecutable;
-- **deuda técnica**: modularización de `juicio_combate_3d.gd`.
+Cambios materiales desde el corte anterior:
 
-Para el estado exacto de prioridad, usar #181; para saber qué está realmente integrado, usar `main` y los PR fusionados.
+- **SIGA/OS98:** el terminal ya tiene núcleo seguro, UI física, archivos/usuarios simulados e historial (#1410/#1416/#1422/#1423);
+- **investigación documental:** reconstrucciones 3D cubren los diez expedientes (#1365/#1369), y análisis/falsificación/revisión de copias añaden nuevas acciones sin reescribir la evidencia (#1426/#1429/#1431);
+- **HUD/legibilidad:** #1401 conecta el HUD contextual a fases reales; #1367 refuerza contraste de menús y superficies OS98, manteniendo abiertos los gates humanos;
+- **consecuencias burocráticas:** #1435/#1436 convierten errores de archivado en desorden visible y demora acotada/reversible, derivados del estado existente;
+- **mundo vivo:** fauna, microgestos y respuesta a clima/hora progresan en #1398/#1404/#1409/#1412; #1363/#1420 amplían huellas de uso a equipos y tránsito;
+- **personajes:** protagonista Rocketbox, mocap de compañeros y dependientes con identidad funcional avanzan en #1394/#1371/#1391;
+- **sueños/mitologías:** PBR y props propios se conectan a las seis familias (#1414/#1417/#1419/#1425/#1428), Mari entra al runtime (#1427) y Baba Yaga gana arquitectura mutable por fases (#1413/#1415/#1421/#1424/#1430/#1434);
+- **atrezzo cultural:** #1440 añade el bonsái inspirado en Yggdrasil y **Yggdrasil's Egg** como dressing sin desbloqueos ni economía;
+- **investigación de diseño:** #1433 versiona el corpus [referencias ludonarrativas](research/referencias-ludonarrativas.md), separando técnica reutilizable de contenido protegido y de features realmente integradas.
+
+El criterio de lectura sigue siendo el mismo: separar **hecho integrado**, **gate pendiente** y **propuesta**. Un artefacto de CI, screenshot automatizado o documento de investigación no cierra por sí solo un requisito humano.
 
 ## Auditorías y paridad
 

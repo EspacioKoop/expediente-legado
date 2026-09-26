@@ -14,67 +14,48 @@ Mapa de fases hasta la primera versión completa. **La prioridad operativa la fi
 | [Milestones](https://github.com/EspacioKoop/expediente-legado/milestones) | Qué está comprometido para una versión |
 | [Releases](https://github.com/EspacioKoop/expediente-legado/releases) | Qué se ha publicado |
 
-## Estado de integración — 2026-09-22
+## Estado de integración — 2026-09-26
 
-La referencia es `main`. Un PR cerrado sin merge no cuenta como integración y una CI verde no sustituye validación humana.
+La referencia es `main`, con corte documental en `6ccfa4317897d70ca9462e7c92aefea41095b2bc`. Un PR cerrado sin merge no cuenta como integración y una CI verde no sustituye validación humana.
 
-El proyecto ya no está en el estado descrito por el roadmap del 14/09. Tras el saneamiento P0 se han integrado varias oleadas nuevas: correcciones de oficina/SIGA a 1080p, vida cotidiana 1998, reloj y audio contextual, huellas persistentes, identidad propia de OS98, mitologías en runtime, religión/ideologías transversales, una primera vertical literaria y la modularización inicial del Juicio 3D.
+Desde el corte del 22/09 el proyecto ha añadido profundidad en varias superficies sin cambiar la regla de prioridad: **un fallo reproducible del recorrido base gana frente a una expansión opcional**. La oleada reciente refuerza herramientas de investigación, OS98/SIGA, consecuencias burocráticas, fauna/huellas y dirección onírica.
 
-El siguiente objetivo no es “añadir sistemas porque faltan”, sino **hacer pasar un playthrough humano sobre el `main` actual y convertir sus fallos reproducibles en prioridad**.
+### Recorrido, HUD y personajes
 
-### Recorrido, controles y legibilidad
+- #1401 implementa el HUD contextual de #397: los recursos dependen de la fase en vez de ocupar siempre la pantalla. #397 sigue necesitando evaluación humana de jerarquía/legibilidad.
+- #1367 mejora contraste de menús y superficies OS98; no sustituye el gate visual global.
+- #1394 lleva el avatar Rocketbox al protagonista; #1371 y #1391 mejoran animación/presencia de compañeros y dependientes. #275/#134 siguen siendo gates humanos.
+- #396/#113 continúan como gates de cámara, foco y mando físico.
 
-- **Oficina/SIGA:** #1141 corrige la ronda de fallos observada a 1920×1080; #1091 confirma salida física y #1089 mantiene una salida de rescate independiente del foco.
-- **Cámara:** #1095/#1097 blindan la interacción entre ratón, GUI y cámara en runtime. #396/#113 siguen siendo gates humanos de sensación y mando físico.
-- **HUD/tipografía:** #780/#1126 protegen fuentes empaquetadas y #397 sigue abierto por jerarquía visual real.
-- **Personajes:** #1083/#1087/#1112/#1113 mejoran presencia y legibilidad. #275/#134 siguen abiertos porque el cierre depende de observación humana, no del mero número de mallas.
-- **Renderer:** el port usa **Forward+** desde #1121, con sombras, SSAO y SSIL; no documentar ya el renderer de compatibilidad como estado actual.
+### Investigación, SIGA-98 y documentos
 
-### SIGA, expedientes y decisiones
+- #1365/#1369 completan reconstrucciones 3D documentales para los diez expedientes actuales. Deben leerse como **punto de vista de una fuente**, nunca como verdad omnisciente.
+- #1410/#1416/#1422/#1423 convierten el terminal SIGA en una superficie jugable: parser ficticio, UI diegética, archivos temporales simulados, usuarios e historial. Todo permanece aislado de filesystem/red/procesos reales.
+- #1426/#1429/#1431 añaden análisis, falsificación temporal y revisión narrativa de copias, con resultados deterministas y sin reescribir la evidencia original.
+- #1435/#1436 conectan archivado incorrecto con desorden visible y demora breve de búsqueda, ambos derivados del mismo estado y recuperables al corregir.
+- #286/#431/#513 siguen siendo los gates de profundidad: la siguiente pregunta es si estas herramientas mejoran la investigación real durante una partida, no cuántas capas existen.
 
-- #513 mantiene el objetivo de evidencia documental consultable; #1101 añade un gate visual reproducible.
-- #431/#286 siguen siendo la superficie de playtest de profundidad SIGA: las capas existentes deben probarse antes de volver a ampliar el framework.
-- #150 ya conecta evaluación con economía, historial y cierre de vida (#1081/#1086/#1090).
-- #954 amplía decisiones con historial y aplazamientos acumulativos (#1159), sin mezclar decisión política con hechos del expediente.
-- #961 añade meticulosidad contextual: microdetalles (#1169), sueño (#1155) y audio (#1187). Debe seguir siendo opt-in/contextual, no una barra universal.
-- #959 ya tiene huellas persistentes y desgaste documental (#1122/#1186).
+### Mundo, persistencia y vida cotidiana
 
-### Mundo, tiempo, audio y vida cotidiana
+- #1398/#1404/#1409/#1412 añaden fauna ambiental, microgestos, acabado y respuesta a hora/clima.
+- #1363 y #1420 amplían #959 con huellas de equipos domésticos y tránsito repetido sin crear un sistema paralelo.
+- #1418 amplía el golf a tres hoyos como vertical autónomo; sigue fuera de los requisitos de release.
+- #1440 añade el bonsái inspirado en Yggdrasil y **Yggdrasil's Egg** como atrezzo diegético sin desbloqueos ni economía.
 
-- **Comercio:** #676 dispone de espacios, interiores, reventa física y feedback diegético (#1088/#1127/#1132/#1134) con gate visual #1136.
-- **Casa:** #677 suma objetos, recuerdos y decals propios (#1142–#1146); #1151 consolida evidencia de varias verticales cotidianas.
-- **Vecindario:** #673 materializa vecinos y portal en #1144.
-- **Tiempo:** #963 tiene reloj persistente e iluminación horaria (#1135/#1138).
-- **Audio:** #966 progresa con ambiente por estado/hora, gestos, sueño, TV, papel y meticulosidad (#1128/#1130/#1133/#1137/#1139/#1187). #119 continúa como gate/expansión de mezcla transversal.
-- **Trayecto:** #277 sigue siendo un gate humano de lectura espacial; no basta con añadir props si la calle continúa percibiéndose como pasillo.
+### Sueños y presentación
 
-### OS98 y Portátil Color 98
+- #1414/#1417/#1419/#1425 conectan materiales y props PBR propios a las seis familias de #435; #1428 añade evidencia visual reproducible para las familias que no tenían capturador dedicado.
+- #1427 integra el pack visual de Mari al runtime.
+- #1413/#1415/#1421/#1424/#1430/#1434 desarrollan Baba Yaga como arquitectura mutable y legible sin mover la navegación al mismo sistema visual.
+- #1433 versiona el corpus transversal de referencias ludonarrativas. Es investigación aplicable a issues dueños, no un permiso para abrir features por mera inspiración.
 
-- Iconos propios y personalidad de aplicaciones avanzan en #781/#791: Catálogo, Calculadora, Bloc de notas y Correo ya tienen verticales (#1149/#1150/#1152/#1190/#1192).
-- La Portátil Color 98 recibió apagado físico/afterglow y paletas propias (#1177/#1185/#1188).
-- La portátil es infraestructura compartida por ROMs propias; no duplicar emulador, input, audio o persistencia para cada sistema cultural.
+### Deuda técnica y disciplina de integración
 
-### Tarot, mitologías, ideologías, religión y literatura
+La regla tras la modularización inicial del Juicio 3D se mantiene: sistemas transversales deben consumir contratos pequeños y estado existente, no concentrar más responsabilidad en controladores de escena. El mismo criterio aplica ahora a terminal, reconstrucciones, huellas y consecuencias de archivado.
 
-Estas capas pueden cruzarse, pero **no son una sola estadística**.
+Ninguna evidencia automatizada nueva cierra por sí sola un criterio que exija persona, GPU real, mando físico o export.
 
-- **Tarot:** #1029 sigue portando triggers/progresión del legado; varios desbloqueos ya están integrados (#1094/#1100/#1104/#1108/#1109).
-- **Mitologías:** #1157 integra el corpus común; Mari, Yggdrasil y Popol Wuj recibieron nuevos verticales (#1164–#1166). #1171/#1174 desarrollan el contrato jungiano/mitológico transversal.
-- **Ideologías:** #915–#925 son el marco. Doctrinas heredadas ya llegan al Juicio 3D (#1115), a cierres de expediente (#1124) y a prensa/radio (#1148).
-- **Religión:** #916–#937 mantiene exposición, práctica, convicción y vínculo separados. JALI 98, VITRAL 98 y SARNATH 98 prueban ROM/cultura (#1158/#1163/#1168/#1170); #934 tiene un primer vertical de práctica/cultura material (#1147); #936 ya dispone de un primer contrato contextual de conflicto (#1117).
-- **Literatura:** #1176 cierra el contrato de conocimiento/posesión/insight/ritual. #1178 crea la primera vertical ejecutable y #1194 alinea el legado con ese contrato. La expansión sigue en #1179–#1184.
-
-### Juicio 3D y deuda técnica
-
-El crecimiento de capas culturales hizo de `juicio_combate_3d.gd` un punto de concentración excesiva. #1191 es la deuda técnica activa. Ya se han extraído:
-
-- reglas puras (#1193);
-- adaptador jungiano (#1195);
-- capa simbólica (#1196).
-
-Cualquier nueva integración debe preferir módulos/contratos existentes y evitar volver a concentrar responsabilidad en el controlador de escena.
-
-## Punto de control actual: playthrough humano sobre el main de 2026-09-22
+## Punto de control actual: playthrough humano sobre el main de 2026-09-26
 
 Recorrido mínimo a validar:
 
@@ -130,7 +111,7 @@ Pendiente principal:
 - validación física de #113/#396;
 - superficies concretas de accesibilidad (#98);
 - revisión 1080p y resoluciones soportadas;
-- completar identidad de aplicaciones #781/#791 donde aporte legibilidad, no decoración;
+- validar en flujo real la identidad de aplicaciones #781/#791 y el terminal SIGA #956, priorizando legibilidad y navegación sobre decoración;
 - cerrar gates visuales supervivientes sin reescribir sistemas que ya funcionan.
 
 ### v0.9.0 · Vida cotidiana y capas transversales
@@ -139,7 +120,7 @@ Esta fase contiene profundidad opcional/semisistémica que debe enriquecer varia
 
 - vida 1998 #669 y derivados;
 - audio/ambiente #966/#119;
-- huellas #959 y meticulosidad #961;
+- huellas #959, meticulosidad #961 y consecuencias espaciales de archivado #965;
 - gato #787, inventario #97 y sueño #79;
 - mitologías #650/#1171/#1174;
 - ideologías #915–#925;
