@@ -12,6 +12,7 @@ El proyecto nació como aplicación web con Spring Boot y se está reescribiendo
 | [Registro de reservas #182](https://github.com/EspacioKoop/expediente-legado/issues/182) | Quién está tocando qué |
 | [ROADMAP.md](ROADMAP.md) | Fases, gates y dirección hasta la 1.0 |
 | [Índice de documentación](docs/README.md) | Qué documento es canónico para cada área |
+| [Referencias ludonarrativas](docs/research/referencias-ludonarrativas.md) | Técnicas de investigación/presentación y sus límites de adopción |
 | [AGENTS.md](AGENTS.md) | Flujo obligatorio para agentes y trampas conocidas |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Ramas, PR, pruebas y revisión |
 | [Auditoría de paridad SIGA](docs/paridad-expedientes.md) | Qué comportamiento del legado existe ya en Godot y qué falta |
@@ -20,45 +21,54 @@ El proyecto nació como aplicación web con Spring Boot y se está reescribiendo
 
 Este repositorio adopta las [Normas Platino](https://github.com/EspacioKoop/normas_platino): **reserva antes de editar, rama propia, PR obligatorio, CI y autorización humana de integración**. El silencio no caduca una reserva y `PR_READY` no equivale a permiso para mergear.
 
-## Estado actual — 2026-09-22
+## Estado actual — 2026-09-26
 
-La referencia es siempre `main`, no una rama antigua ni un comentario histórico. El segundo playtest humano de la alpha #237 / PR #394 falló el gate de experiencia aunque CI y export fueran verdes. Desde entonces el proyecto ha cambiado de escala: además del saneamiento P0 se han integrado sistemas de vida cotidiana, tiempo, audio, huellas persistentes, capas culturales transversales y una revisión importante de SIGA/OS98.
+La referencia sigue siendo `main`. Este corte documenta el estado integrado hasta `6ccfa4317897d70ca9462e7c92aefea41095b2bc`; un PR abierto o una rama adelantada no cuentan como funcionalidad disponible hasta su merge.
 
-Esto **no sustituye el siguiente playthrough humano**. Una CI verde demuestra contratos automatizados; no demuestra por sí sola legibilidad visual, tacto con mando, recorrido end-to-end ni calidad de una exportación.
+El núcleo ya no está en una fase de “port mínimo”. En los últimos cortes se han reforzado la investigación documental, la interfaz diegética de SIGA-98, las consecuencias espaciales del trabajo burocrático, la vida ambiental y la identidad visual/onírica. Aun así, **el siguiente playthrough humano completo sigue siendo el gate principal**: CI verde y evidencia automatizada no sustituyen legibilidad, tacto, ritmo ni continuidad real.
 
-### Núcleo de recorrido y presentación
+### Recorrido, interfaz y personajes
 
-- **Oficina y SIGA-98:** #1141 corrige problemas observados a 1080p; la ventana de referencia del proyecto es **1920×1080**. #1091 confirma una salida física de la oficina y #1089 mantiene una salida de rescate independiente del foco.
-- **Cámara y controles:** el núcleo de #396 está implementado y protegido por pruebas runtime (#1095/#1097), pero #396 y #113 siguen siendo gates humanos de sensación, foco y mando físico.
-- **HUD y legibilidad:** #397 continúa abierto como gate de jerarquía visual; tipografía empaquetada y coherencia básica están protegidas por #780/#1126.
-- **Personajes:** se han añadido mejoras de proporción, nombres, movimiento y atención (#1083/#1087/#1112/#1113) y el renderer del port pasó a **Forward+** con sombras, SSAO y SSIL (#1121). #275/#134 siguen necesitando validación visual humana.
+- **HUD contextual:** #1401 conecta #397 con un HUD de recursos dependiente de fase, evitando mostrar información irrelevante de forma permanente. #397 sigue abierto como gate humano de jerarquía visual y lectura a resolución real.
+- **Contraste y menús:** #1367 fija una regla visual más clara para menú general, creador de personaje y superficies OS98, sin dar por cerrada por sí sola la revisión visual global.
+- **Protagonista y NPCs:** #1394 convierte al jugador en un avatar Rocketbox seleccionable; #1371 añade captura de movimiento Rocketbox a compañeros compatibles y #1391 da identidad funcional a dependientes de tiendas. #275/#134 continúan requiriendo validación humana de proporción, reconocimiento y presencia.
+- **Oficina/cámara/salida:** se mantienen las correcciones y salvaguardas ya integradas para foco, cámara y salida física; #396/#113 siguen siendo gates humanos de sensación y mando.
 
-### SIGA, decisiones y sistemas persistentes
+### SIGA-98, expedientes y trabajo documental
 
-- **Investigación:** relaciones, metadatos, anexos, feedback, historial y profundidad documental ya tienen verticales integrados; #431/#513 siguen siendo los gates de evidencia/playtest antes de considerar cerrada la profundidad SIGA.
-- **Decisiones:** el historial y los aplazamientos acumulativos se ampliaron en #1159; las consecuencias políticas siguen separadas de hechos objetivos del expediente.
-- **Meticulosidad:** #961 ya afecta microdetalles opcionales (#1169), sueño (#1155) y audio adaptativo (#1187), sin convertir atención en una barra de progreso obligatoria.
-- **Huellas ambientales:** #959 tiene ya un primer vertical persistente (#1122) y desgaste documental (#1186).
+- **Reconstrucciones 3D por fuente:** #1365 y #1369 cubren los diez expedientes actuales con reconstrucciones breves ligadas a documentos leídos. Son representaciones de un punto de vista, no una “verdad canónica secreta”.
+- **Terminal SIGA:** #1410 crea un núcleo de terminal ficticio y seguro; #1416 lo conecta al puesto de oficina; #1422 añade archivos temporales/usuarios simulados y #1423 historial navegable. No ejecuta red, procesos ni filesystem reales.
+- **Análisis y falsificación de copias:** #1426 añade análisis opcional basado en hechos visibles; #1429 permite intervenir copias temporales de forma determinista y #1431 añade revisión interna narrativa. Este bloque no debe reescribir el documento fuente ni convertir el minijuego en una vía para inventar evidencia.
+- **Archivado con consecuencias:** #1435 materializa desorden recuperable al archivar mal y #1436 deriva una demora de búsqueda acotada de ese mismo estado. Las consecuencias son reversibles y no crean una segunda fuente de persistencia.
+- **Profundidad de investigación:** #286/#431/#513 siguen siendo los paraguas/gates de calidad. Más herramientas no equivalen automáticamente a un expediente más interesante: el playtest debe comprobar qué aporta realmente a leer, contrastar y decidir.
 
-### Mundo 1998 y vida cotidiana
+### Mundo 1998, casa y sistemas persistentes
 
-- **Comercio de barrio:** Quiosco Avenida, El Trastero, interiores y reventa física tienen verticales integrados (#1127/#1132/#1134/#1088), con evidencia visual automatizada en #1136.
-- **Casa y objetos:** recuerdos, decals y merchandising propios (#1142–#1146) amplían la densidad de 1998; #1151 añade evidencia conjunta para varias verticales cotidianas.
-- **Tiempo y ambiente:** reloj persistente e iluminación horaria (#1135/#1138) ya existen. El audio adaptativo progresa por capas y contexto (#1128/#1130/#1133/#1137/#1139/#1187), pero #966/#119 siguen abiertos como paraguas/gate de mezcla.
-- **Vecindario y trayecto:** vecinos y portal se materializan en #1144; #277 continúa como gate de lectura del trayecto.
+- **Fauna ambiental:** #1398 introduce animales en calle y sueños; #1404, #1409 y #1412 añaden microgestos, anatomía/acabado y variantes dependientes de hora/clima sin convertirlos en IA sistémica pesada.
+- **Huellas de uso:** #1363 extiende huellas persistentes a equipos domésticos y #1420 añade desgaste por tránsito repetido, reutilizando el contrato existente en vez de duplicar estado.
+- **Minijuegos acotados:** #1418 convierte el golf en una partida determinista de tres hoyos manteniéndolo como slice autónomo, no como requisito del recorrido principal.
+- **Atrezzo cultural:** #1440 integra un bonsái doméstico inspirado en Yggdrasil y la caja ficticia **Yggdrasil's Egg** en la tienda de videojuegos. Ambos son atrezzo: no desbloquean mitología, no alteran economía y no se presentan como fuentes históricas.
 
-### OS98, portátil y contenido cultural
+### Sueños, mitologías y dirección audiovisual
 
-- **OS98:** programas del escritorio tienen iconos e identidad propia en expansión: Catálogo, Calculadora, Bloc de notas y Correo ya cuentan con cortes específicos (#1149/#1150/#1152/#1190/#1192).
-- **Portátil Color 98:** apagado físico/afterglow, paletas y cierre visual se integraron en #1177/#1185/#1188 sin alterar ROMs CGB.
-- **Mitologías:** el corpus común entra en runtime (#1157), con verticales recientes para Mari, Yggdrasil y Popol Wuj (#1164–#1166). #1171/#1174 siguen desarrollando la capa jungiana/mitológica transversal.
-- **Religión:** se mantiene separada de Tarot y mitología. JALI 98, VITRAL 98 y SARNATH 98 ya prueban el patrón cultural/ROM (#1158/#1163/#1168/#1170), y #934 tiene un primer corte de práctica/cultura material (#1147).
-- **Ideologías:** doctrinas heredadas ya llegan al Juicio 3D (#1115), a cierres de expediente (#1124) y a prensa/radio (#1148). #915–#925 siguen siendo el marco transversal.
-- **Literatura:** #1176 definió el contrato de conocimiento/posesión/insight/ritual; #1178 creó el primer corte ejecutable y #1194 alineó el legado con el contrato transversal. La expansión continúa en #1179–#1184.
+- **PBR y props oníricos:** #1414, #1417, #1419 y #1425 añaden materiales/props propios y los conectan a las seis familias originales de #435; #1428 completa evidencia visual automatizada para Gilgamesh, Aquiles y Duat sin autoaprobar el criterio artístico.
+- **Mari:** #1427 conecta el pack visual de Mari al runtime conservando selección nocturna y lógica climática existentes.
+- **Baba Yaga:** #1413, #1415, #1421, #1424, #1430 y #1434 convierten el vertical en un espacio más legible y mutable: interior imposible por fases, escalada ambiental, tránsito por horizonte y una habitación que pasa de interior a exterior. La capa visual permanece separada de navegación y seguridad.
+- **Referencias de diseño:** #1433 incorpora el corpus transversal de [referencias ludonarrativas](docs/research/referencias-ludonarrativas.md), con una regla explícita: estudiar técnicas no equivale a copiar contenido ni a declarar una mecánica implementada.
 
-### Deuda técnica activa
+### Gates que siguen mandando
 
-El crecimiento transversal ha cargado especialmente `juicio_combate_3d.gd`. #1191 sigue la modularización; #1193, #1195 y #1196 ya extrajeron reglas puras, adaptador jungiano y capa simbólica. No volver a concentrar lógica de sistemas culturales en un único script.
+Siguen necesitando persona, hardware o export real, entre otros:
+
+- **#9** — playthrough end-to-end sobre el `main` actual;
+- **#396/#113** — cámara, foco y mando físico;
+- **#397/#780** — jerarquía visual y legibilidad real;
+- **#275/#134** — reconocimiento y proporción de NPCs;
+- **#277** — lectura espacial del trayecto;
+- **#395/#280** — continuidad y cinemáticas en export;
+- **#431/#513/#286** — profundidad de expedientes y utilidad real de documentos/reconstrucciones;
+- **#119/#966** — mezcla y audio adaptativo en contexto;
+- **#112** — exportación/publicación cuando vuelva a activarse la entrega pública.
 
 ## Stack
 
