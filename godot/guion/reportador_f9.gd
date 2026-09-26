@@ -21,8 +21,10 @@ func _ready() -> void:
 func _input(evento: InputEvent) -> void:
 	if evento is InputEventKey:
 		var tecla := evento as InputEventKey
-		if tecla.pressed and not tecla.echo and (
-			tecla.keycode == KEY_F9 or tecla.physical_keycode == KEY_F9
+		if (
+			tecla.pressed
+			and not tecla.echo
+			and (tecla.keycode == KEY_F9 or tecla.physical_keycode == KEY_F9)
 		):
 			if _fondo.visible:
 				_cerrar()
