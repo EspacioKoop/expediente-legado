@@ -9,9 +9,12 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 NUCLEO = ROOT / "godot" / "guion" / "parte_incidencias.gd"
 APP = ROOT / "godot" / "guion" / "parte_incidencias_app.gd"
-MENU = ROOT / "godot" / "guion" / "menu_global.gd"
+REPORTADOR = ROOT / "godot" / "guion" / "reportador_f9.gd"
+PROJECT = ROOT / "godot" / "project.godot"
 CONFIG = ROOT / "godot" / "datos" / "incidencias.json"
 EXPORT = ROOT / "dist" / "exportar-godot-alpha.sh"
+WORKFLOW = ROOT / ".github" / "workflows" / "alpha-playtest.yml"
+WORKER = ROOT / "infra" / "feedback-worker" / "worker.js"
 RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 
 
@@ -20,9 +23,12 @@ class ParteIncidenciasTest(unittest.TestCase):
     def setUpClass(cls):
         cls.nucleo = NUCLEO.read_text(encoding="utf-8")
         cls.app = APP.read_text(encoding="utf-8")
-        cls.menu = MENU.read_text(encoding="utf-8")
+        cls.reportador = REPORTADOR.read_text(encoding="utf-8")
+        cls.project = PROJECT.read_text(encoding="utf-8")
         cls.config = json.loads(CONFIG.read_text(encoding="utf-8"))
         cls.export = EXPORT.read_text(encoding="utf-8")
+        cls.workflow = WORKFLOW.read_text(encoding="utf-8")
+        cls.worker = WORKER.read_text(encoding="utf-8")
 
     def test_contrato_ejecutable_en_godot(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
@@ -44,15 +50,27 @@ class ParteIncidenciasTest(unittest.TestCase):
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
         resumen = RESUMEN.search(resultado.stdout)
         self.assertIsNotNone(resumen, resultado.stdout)
-        self.assertGreaterEqual(int(resumen.group(1)), 16, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 24, resultado.stdout)
         self.assertNotIn("SCRIPT ERROR:", resultado.stdout)
         self.assertNotIn("Parse Error:", resultado.stdout)
+
+    def test_f9_es_global_y_preserva_estado_previo(self):
+        self.assertIn('ReportadorF9="*res://guion/reportador_f9.gd"', self.project)
+        self.assertIn("KEY_F9", self.reportador)
+        self.assertIn("func _input(evento: InputEvent)", self.reportador)
+        self.assertIn("_pausa_previa = get_tree().paused", self.reportador)
+        self.assertIn("get_tree().paused = _pausa_previa", self.reportador)
+        self.assertIn("_mouse_previo = Input.mouse_mode", self.reportador)
+        self.assertIn("Input.mouse_mode = _mouse_previo", self.reportador)
+        self.assertIn("_foco_previo = get_viewport().gui_get_focus_owner()", self.reportador)
+        self.assertIn("_app.abrir(PreferenciasSiga.cargar(), true)", self.reportador)
 
     def test_endpoint_esta_fuera_del_codigo_y_se_inyecta_al_exportar(self):
         self.assertEqual(self.config["feedback_url"], "")
         self.assertIn("SIGA98_FEEDBACK_URL", self.export)
         self.assertIn("datos/incidencias.json", self.export)
         self.assertIn('url.startswith(("https://", "http://"))', self.export)
+        self.assertIn("vars.SIGA98_FEEDBACK_URL", self.workflow)
         self.assertNotIn("SIGA98_FEEDBACK_URL", self.nucleo)
         self.assertNotIn("SIGA98_FEEDBACK_URL", self.app)
 
@@ -69,16 +87,20 @@ class ParteIncidenciasTest(unittest.TestCase):
         for prohibido in (
             "OS.get_environment",
             "get_user_data_dir",
-            "HTTPClient",
-            "HTTPRequest",
             "partida.estado",
         ):
             self.assertNotIn(prohibido, self.nucleo + self.app)
         self.assertIn("filtrar_diagnostico", self.nucleo)
         self.assertIn('ruta.begins_with("res://")', self.nucleo)
 
-    def test_diagnostico_requiere_consentimiento_y_muestra_previa(self):
-        self.assertIn("_diagnostico.button_pressed", self.app)
+    def test_build_usa_sha_del_paquete_si_existe(self):
+        self.assertIn('"BUILD-INFO.txt"', self.nucleo)
+        self.assertIn('"build_sha="', self.nucleo)
+        self.assertIn("OS.get_executable_path()", self.nucleo)
+        self.assertIn("build_actual()", self.nucleo)
+
+    def test_diagnostico_f9_es_visible_y_desmarcable(self):
+        self.assertIn("_diagnostico.button_pressed = diagnostico_por_defecto", self.app)
         self.assertIn("_diagnostico_previa.visible = activo", self.app)
         self.assertIn("formatear_diagnostico", self.app)
         self.assertEqual(
@@ -94,21 +116,33 @@ class ParteIncidenciasTest(unittest.TestCase):
         self.assertIn("texto_interfaz", self.nucleo)
         self.assertIn('"textos"', CONFIG.read_text(encoding="utf-8"))
 
-    def test_transporte_copia_antes_de_abrir_y_tiene_fallback_local(self):
-        copiar = "DisplayServer.clipboard_set(parte)"
-        abrir = "OS.shell_open(url)"
-        self.assertIn(copiar, self.app)
-        self.assertIn(abrir, self.app)
-        self.assertLess(self.app.index(copiar), self.app.index(abrir))
-        self.assertIn("guardar_local", self.app)
-        self.assertIn("user://parte-incidencias-", self.nucleo)
+    def test_envio_es_post_json_y_no_portapapeles(self):
+        self.assertIn("HTTPRequest.new()", self.app)
+        self.assertIn("HTTPClient.METHOD_POST", self.app)
+        self.assertIn('"Content-Type: application/json"', self.app)
+        self.assertIn("JSON.stringify(payload)", self.app)
+        self.assertNotIn("clipboard_set", self.app)
+        self.assertNotIn("api.github.com", self.app)
+        self.assertNotIn("Authorization", self.app)
 
-    def test_menu_global_expone_el_parte_y_restaura_foco(self):
-        self.assertIn("ParteIncidenciasApp.new()", self.menu)
-        self.assertIn("ParteIncidencias.ETIQUETA", self.menu)
-        self.assertIn("_mostrar_incidencias", self.menu)
-        self.assertIn("_incidencias.grab_focus()", self.menu)
-        self.assertIn("_volver_de_incidencias", self.menu)
+    def test_fallback_abre_issue_prerellenado(self):
+        self.assertEqual(
+            self.config["fallback_issue_url"],
+            "https://github.com/EspacioKoop/expediente-legado/issues/new",
+        )
+        self.assertIn("url_issue_preparado", self.nucleo)
+        self.assertIn("OS.shell_open(url)", self.app)
+        self.assertIn("guardar_local", self.app)
+
+    def test_gateway_guarda_secretos_solo_en_servidor(self):
+        self.assertIn("GITHUB_TOKEN", self.worker)
+        self.assertIn("https://api.github.com/repos/", self.worker)
+        self.assertIn("/issues", self.worker)
+        self.assertIn("RESEND_API_KEY", self.worker)
+        self.assertIn("https://api.resend.com/emails", self.worker)
+        cliente = self.nucleo + self.app + self.reportador
+        for secreto in ("GITHUB_TOKEN", "RESEND_API_KEY", "REPORT_EMAIL_TO"):
+            self.assertNotIn(secreto, cliente)
 
     def test_formulario_usa_controles_navegables_estandar(self):
         for control in (
