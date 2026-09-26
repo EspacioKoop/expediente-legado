@@ -45,9 +45,10 @@ class BingoSigaUiTest(unittest.TestCase):
         ]
         self.assertNotIn("persistir_estado = true", bloque)
 
-    def test_tarjeta_pendiente_se_abre_y_se_persiste_por_partida(self):
+    def test_tarjeta_pendiente_se_materializa_sin_autoabrirse(self):
+        self.assertIn("_preparar_bingo_diario(dia)", self.controller)
         self.assertIn("BingoSiga.tarjeta_diaria((partida_actual as Partida).estado)", self.controller)
-        self.assertIn("_bingo_app.abrir(escritorio)", self.controller)
+        self.assertNotIn("_bingo_app.abrir(escritorio)", self.controller)
         self.assertIn('dia.call("_guardar_o_avisar", "")', self.controller)
         self.assertIn("(partida_actual as Partida).guardar()", self.controller)
 

@@ -305,7 +305,7 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	escritorio.activar_ayuda_sistema()
 	_siga_app.adoptar_en(escritorio, visor)
 	escritorio.salir_solicitado.connect(_solicitar_salida)
-	_abrir_bingo_pendiente(dia, escritorio)
+	_preparar_bingo_diario(dia)
 
 	# `_abrir_expediente()` conserva temporalmente el botón histórico para que
 	# la propiedad de salir siga en Dia. El shell ofrece esa acción en su menú,
@@ -456,7 +456,7 @@ func _crear_bingo_siga() -> Control:
 	return bingo
 
 
-func _abrir_bingo_pendiente(dia: Node, escritorio: EscritorioSiga) -> void:
+func _preparar_bingo_diario(dia: Node) -> void:
 	if _bingo_app == null or dia == null:
 		return
 	var partida_actual: Variant = dia.get("partida")
@@ -474,17 +474,12 @@ func _abrir_bingo_pendiente(dia: Node, escritorio: EscritorioSiga) -> void:
 		actual_previo is Dictionary
 		and int((actual_previo as Dictionary).get("dia", 0)) == dia_actual
 	)
-	var actual := BingoSiga.tarjeta_diaria((partida_actual as Partida).estado)
+	# #1453: la tarjeta se materializa y persiste al entrar en SIGA, pero la
+	# ventana no se abre sola. El jugador decide si quiere consultarla desde la
+	# app ya registrada en el escritorio.
+	BingoSiga.tarjeta_diaria((partida_actual as Partida).estado)
 	if not ya_existia:
 		_persistir_bingo_siga("")
-	if (
-		not bool(actual.get("cerrada", false))
-		and (
-			String(actual.get("decision", BingoSiga.DECISION_PENDIENTE))
-			== BingoSiga.DECISION_PENDIENTE
-		)
-	):
-		_bingo_app.abrir(escritorio)
 
 
 func _persistir_bingo_siga(_decision: String) -> void:
