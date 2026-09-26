@@ -46,9 +46,12 @@ static func url_issue_fallback(configuracion: Dictionary = {}) -> String:
 static func texto_fallback(configuracion: Dictionary = {}) -> String:
 	var datos := configuracion if not configuracion.is_empty() else cargar_configuracion()
 	return String(
-		datos.get(
-			"fallback",
-			"No se pudo enviar automáticamente. Se abrirá GitHub con el reporte preparado.",
+		(
+			datos
+			. get(
+				"fallback",
+				"No se pudo enviar automáticamente. Se abrirá GitHub con el reporte preparado.",
+			)
 		)
 	)
 
@@ -94,7 +97,9 @@ static func build_actual(ruta_explicita: String = "") -> String:
 			var sha := limpia.trim_prefix("build_sha=").strip_edges()
 			if _sha_seguro(sha):
 				return sha
-	var version := String(ProjectSettings.get_setting("application/config/version", "dev")).strip_edges()
+	var version := (
+		String(ProjectSettings.get_setting("application/config/version", "dev")).strip_edges()
+	)
 	return "dev" if version.is_empty() else version
 
 
@@ -123,9 +128,7 @@ static func crear_payload(campos: Dictionary, adjunto: Dictionary = {}) -> Dicti
 	}
 
 
-static func url_issue_preparado(
-	payload: Dictionary, configuracion: Dictionary = {}
-) -> String:
+static func url_issue_preparado(payload: Dictionary, configuracion: Dictionary = {}) -> String:
 	var base := url_issue_fallback(configuracion)
 	if base.is_empty():
 		return ""
