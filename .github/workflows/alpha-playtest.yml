@@ -203,6 +203,9 @@ jobs:
         env:
           GODOT_BIN: godot4
           SIGA98_QA_TOOLS: ${{ startsWith(github.ref, 'refs/tags/v') && '0' || '1' }}
+          # Variable pública del repositorio. Contiene solo la URL del gateway;
+          # las credenciales de GitHub/correo viven exclusivamente en el servidor.
+          SIGA98_FEEDBACK_URL: ${{ vars.SIGA98_FEEDBACK_URL }}
         run: bash dist/exportar-godot-alpha.sh
 
       - name: Auditar los ejecutables que se van a adjuntar
