@@ -93,6 +93,18 @@ func _probar_grafo_y_causalidad() -> void:
 
 	var inicial := sueno.estado_reproducible()
 	_comprobar(inicial[SuenoYggdrasil.NODO_RAMA], 0, "rama empieza neutra")
+	var luz_rama := (
+		sueno.get_node("%s/LuzRemota" % SuenoYggdrasil.NODO_RAMA) as OmniLight3D
+	)
+	var nucleo_tronco := (
+		sueno.get_node("%s/Nucleo" % SuenoYggdrasil.NODO_TRONCO) as MeshInstance3D
+	)
+	var barrera_raiz := (
+		sueno.get_node("%s/BarreraAcceso" % SuenoYggdrasil.NODO_RAIZ) as MeshInstance3D
+	)
+	var energia_rama_inicial := luz_rama.light_energy
+	var altura_tronco_inicial := nucleo_tronco.position.y
+	var altura_barrera_inicial := barrera_raiz.position.y
 	var desde_raiz := sueno.intervenir(SuenoYggdrasil.NODO_RAIZ)
 	_comprobar(desde_raiz["ok"], "intervención válida")
 	_comprobar(desde_raiz["origen"], SuenoYggdrasil.NODO_RAIZ, "feedback conserva origen")
@@ -105,15 +117,27 @@ func _probar_grafo_y_causalidad() -> void:
 	_comprobar(
 		sueno.estado_reproducible()[SuenoYggdrasil.NODO_RAIZ], 0, "origen no se auto modifica"
 	)
+	_comprobar(
+		luz_rama.light_energy > energia_rama_inicial,
+		"alimentar la raíz aumenta físicamente la luz de la rama remota",
+	)
 
 	var desde_rama := sueno.intervenir(SuenoYggdrasil.NODO_RAMA)
 	_comprobar(
 		desde_rama["destino"], SuenoYggdrasil.NODO_TRONCO, "segunda arista también es remota"
 	)
 	_comprobar(desde_rama["efecto"], "altura", "rama controla altura del tronco")
+	_comprobar(
+		nucleo_tronco.position.y > altura_tronco_inicial,
+		"tensar la rama eleva físicamente el tronco remoto",
+	)
 	var desde_tronco := sueno.intervenir(SuenoYggdrasil.NODO_TRONCO)
 	_comprobar(desde_tronco["destino"], SuenoYggdrasil.NODO_RAIZ, "tercera arista cierra grafo")
 	_comprobar(desde_tronco["efecto"], "acceso", "tronco controla acceso de raíz")
+	_comprobar(
+		barrera_raiz.position.y > altura_barrera_inicial,
+		"bloquear el tronco eleva una barrera visual en la raíz remota",
+	)
 	_comprobar(desde_tronco["retorno_disponible"], "ninguna intervención elimina retorno")
 
 	var invalida := sueno.intervenir("nodo_inexistente")
