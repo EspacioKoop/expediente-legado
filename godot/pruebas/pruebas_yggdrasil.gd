@@ -93,12 +93,8 @@ func _probar_grafo_y_causalidad() -> void:
 
 	var inicial := sueno.estado_reproducible()
 	_comprobar(inicial[SuenoYggdrasil.NODO_RAMA], 0, "rama empieza neutra")
-	var luz_rama := (
-		sueno.get_node("%s/LuzRemota" % SuenoYggdrasil.NODO_RAMA) as OmniLight3D
-	)
-	var nucleo_tronco := (
-		sueno.get_node("%s/Nucleo" % SuenoYggdrasil.NODO_TRONCO) as MeshInstance3D
-	)
+	var luz_rama := sueno.get_node("%s/LuzRemota" % SuenoYggdrasil.NODO_RAMA) as OmniLight3D
+	var nucleo_tronco := sueno.get_node("%s/Nucleo" % SuenoYggdrasil.NODO_TRONCO) as MeshInstance3D
 	var barrera_raiz := (
 		sueno.get_node("%s/BarreraAcceso" % SuenoYggdrasil.NODO_RAIZ) as MeshInstance3D
 	)
