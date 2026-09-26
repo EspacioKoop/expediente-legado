@@ -23,6 +23,7 @@ MenuSalidaInicio="*res://guion/menu_salida_inicio.gd"
 VestuarioHumano3D="*res://guion/vestuario_humano_3d.gd"
 CorreccionVisualNPC275="*res://guion/correccion_visual_npc_275.gd"
 ConsolaDepuracion="*res://guion/cargador_consola_depuracion.gd"
+ReportadorF9="*res://guion/reportador_f9.gd"
 
 [rendering]
 
