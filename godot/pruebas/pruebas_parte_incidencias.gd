@@ -94,18 +94,32 @@ func _init() -> void:
 	)
 	comprobar(
 		"fallback pre-rellena título",
-		Parte.url_issue_preparado(
-			payload,
-			{"fallback_issue_url": "https://github.com/EspacioKoop/expediente-legado/issues/new"},
-		).contains("title="),
+		(
+			Parte
+			. url_issue_preparado(
+				payload,
+				{
+					"fallback_issue_url":
+					"https://github.com/EspacioKoop/expediente-legado/issues/new"
+				},
+			)
+			. contains("title=")
+		),
 		true,
 	)
 	comprobar(
 		"fallback pre-rellena cuerpo",
-		Parte.url_issue_preparado(
-			payload,
-			{"fallback_issue_url": "https://github.com/EspacioKoop/expediente-legado/issues/new"},
-		).contains("body="),
+		(
+			Parte
+			. url_issue_preparado(
+				payload,
+				{
+					"fallback_issue_url":
+					"https://github.com/EspacioKoop/expediente-legado/issues/new"
+				},
+			)
+			. contains("body=")
+		),
 		true,
 	)
 
