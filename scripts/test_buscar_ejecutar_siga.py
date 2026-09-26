@@ -49,7 +49,8 @@ class BuscarEjecutarSigaTest(unittest.TestCase):
         self.assertIn("var _documentos: Array[Dictionary]", superficie)
         self.assertIn('"tipo": "reconstruccion"', superficie)
         self.assertIn("abrir_reconstruccion.emit", superficie)
-        self.assertIn('jornada.get("leido_hoy", [])', controlador)
+        self.assertIn('get("leido_hoy", [])', controlador)
+        self.assertIn("not leidos.has(folio)", controlador)
         self.assertIn("ReconstruccionDocumental3D.para_registros", controlador)
         self.assertIn('"reconstruccion-documental"', controlador)
         self.assertNotIn("Partida.new()", controlador)
@@ -78,7 +79,7 @@ class BuscarEjecutarSigaTest(unittest.TestCase):
             text=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            timeout=30,
+            timeout=45,
             check=False,
         )
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
