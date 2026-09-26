@@ -112,14 +112,14 @@ func _probar() -> void:
 		fuente != null and fuente.text.contains("482000"),
 		"la reconstrucción mantiene visibles los fragmentos de procedencia",
 	)
-	var estado_plano := visor.get_node_or_null("EstadoPlano") as Label
+	var estado_plano := visor.find_child("EstadoPlano", true, false) as Label
 	_comprobar(
 		estado_plano != null and estado_plano.text.begins_with("1/2"),
 		"la reconstrucción empieza en el primer plano catalogado",
 	)
 	visor.call("_siguiente")
 	_comprobar(
-		estado_plano.text.begins_with("2/2"),
+		estado_plano != null and estado_plano.text.begins_with("2/2"),
 		"el jugador puede recorrer los puntos de vista catalogados",
 	)
 	visor.queue_free()
