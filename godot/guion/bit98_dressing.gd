@@ -11,6 +11,9 @@ const ROTULO: Texture2D = preload("res://arte/bit98/rotulo_bit98.svg")
 const CARTEL_JUEGA: Texture2D = preload("res://arte/bit98/cartel_juega.svg")
 const CARTEL_SEGUNDA_MANO: Texture2D = preload("res://arte/bit98/cartel_segunda_mano.svg")
 const CARTEL_NOVEDADES: Texture2D = preload("res://arte/bit98/cartel_novedades.svg")
+const YGGDRASILS_EGG_ATREZZO: Texture2D = preload(
+	"res://assets/texturas/yggdrasil_ai_98/yggdrasils_egg_atrezzo_98.webp"
+)
 const PORTADAS := [
 	preload("res://arte/consola98/cartuchos/caza_pixeles_98.jpg"),
 	preload("res://arte/consola98/cartuchos/paper_planes_98.jpg"),
@@ -208,6 +211,20 @@ static func _montar_interior(interior: Node3D) -> void:
 				0.72,
 				giro,
 			)
+
+	# Producto ficticio de 1998, solo atrezzo: no entra en RomsPropias ni en
+	# TiendaVideojuegos y, por tanto, no tiene precio, stock ni ROM asociada.
+	var huevo := _lamina_alto(
+		grupo,
+		"YggdrasilsEggAtrezzo98",
+		YGGDRASILS_EGG_ATREZZO,
+		Vector3(1.55, 1.45, -2.22),
+		0.66,
+		-18.0,
+	)
+	var material_huevo := huevo.material_override as StandardMaterial3D
+	if material_huevo != null:
+		material_huevo.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 
 
 static func _texto_cartel(

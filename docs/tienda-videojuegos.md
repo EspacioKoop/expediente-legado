@@ -49,6 +49,10 @@ La consola doméstica de #124 y la nueva entrada **Portátil Color 98** del men�
 
 El emulador sigue aislado del estado de campaña: recibe la lista de compras al abrirse y no sabe de dinero, jornadas ni guardados. El menú reutiliza `EmuladorPortatilAudioApp`, por lo que controles, SRAM, presentación y audio son los mismos que desde la consola 3D.
 
+## Atrezzo de escaparate
+
+**Yggdrasil's Egg** aparece en el interior de Bit 98 como caja de videojuego ficticio de 1998. Es únicamente dressing visual: no figura en `RomsPropias`, `TiendaVideojuegos.catalogo()` ni `roms_propias.json`, no tiene ROM binaria, precio, stock, compra ni desbloqueo. Esta separación permite usarlo como eco diegético de #653 sin convertir el escaparate en otra superficie de activación.
+
 ## Alcance y dependencias
 
 La implementación sigue sin comercializar archivos externos y no modifica `espacios_catalogo.gd`. La geometría de la calle continúa gobernada por #277/#181; #800 solo cambia la autoridad de persistencia y añade la entrada de inicio.

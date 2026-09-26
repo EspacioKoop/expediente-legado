@@ -840,13 +840,17 @@ func _actualizar_acabado_ambiental() -> void:
 
 
 func _actualizar_habitacion_giratoria() -> void:
-	var habitacion := get_node_or_null("AcabadoAmbiental/HabitacionGiratoria") as BabaYagaHabitacionGiratoria
+	var habitacion := (
+		get_node_or_null("AcabadoAmbiental/HabitacionGiratoria") as BabaYagaHabitacionGiratoria
+	)
 	if habitacion != null:
 		habitacion.aplicar_estado(_fase_umbral)
 
 
 func _aplicar_giro_habitacion(origen: Dictionary, reduccion_movimiento: bool) -> Dictionary:
-	var habitacion := get_node_or_null("AcabadoAmbiental/HabitacionGiratoria") as BabaYagaHabitacionGiratoria
+	var habitacion := (
+		get_node_or_null("AcabadoAmbiental/HabitacionGiratoria") as BabaYagaHabitacionGiratoria
+	)
 	if habitacion == null:
 		return {"aplicado": false}
 	return habitacion.aplicar_giro(origen, _fase_umbral, reduccion_movimiento)

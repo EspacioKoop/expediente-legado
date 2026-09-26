@@ -33,6 +33,7 @@ func _process(_delta: float) -> void:
 		if mundo_id != _mundo_casa_id:
 			_mundo_casa_id = mundo_id
 			_montar_poster(mundo, dia.jornada)
+			YggdrasilAtrezzo98.montar_casa(mundo)
 		return
 
 	if fase != "sueño" or _sueno_montado_esta_noche:

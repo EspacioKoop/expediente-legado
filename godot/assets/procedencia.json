@@ -2211,6 +2211,22 @@
       "licencia": "Propio del proyecto; salida generada con OpenAI",
       "fuente": "https://openai.com/policies/eu-terms-of-use/",
       "sha256": "633529753ca54d70abdc3cf240218ebfa8599a8728a680a764418f01cec1c6c9"
+    },
+    {
+      "ruta": "texturas/yggdrasil_ai_98/bonsai_yggdrasil_98.webp",
+      "titulo": "Bonsái doméstico inspirado en Yggdrasil",
+      "autor": "EspacioKoop (generado con OpenAI ImageGen; reducción propia)",
+      "licencia": "Propio del proyecto; salida generada con OpenAI",
+      "fuente": "https://openai.com/policies/eu-terms-of-use/",
+      "sha256": "4b7a53f5f89905872a42a02430b775fe1282fbcef1de929c331ce481a8c4d70c"
+    },
+    {
+      "ruta": "texturas/yggdrasil_ai_98/yggdrasils_egg_atrezzo_98.webp",
+      "titulo": "Yggdrasil's Egg — videojuego ficticio, atrezzo de Bit 98",
+      "autor": "EspacioKoop (generado con OpenAI ImageGen; reducción propia)",
+      "licencia": "Propio del proyecto; salida generada con OpenAI",
+      "fuente": "https://openai.com/policies/eu-terms-of-use/",
+      "sha256": "9752604a9fbbecf0d869984113779dc86caf109e23236ebd3dd28741f50ecdd9"
     }
   ]
 }

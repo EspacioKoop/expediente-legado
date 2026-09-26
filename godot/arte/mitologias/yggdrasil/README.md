@@ -20,6 +20,6 @@ Los SVG no contienen runas ni alfabetos pseudo-nórdicos: solo líneas, fibras, 
 
 El diseño sigue `docs/assets/yggdrasil-referencias.md` y evita presentar reconstrucciones modernas como hechos medievales. Las «hebras» son una traducción visual original del contrato de conexiones del juego, no una representación arqueológica.
 
-Arte original para este repositorio. Sin PNG/GLB para no saltarse Git LFS.
+Arte original para este repositorio. Las mallas y motivos de este directorio siguen siendo texto/SVG. El atrezzo diegético de casa y Bit 98 vive aparte en `godot/assets/texturas/yggdrasil_ai_98/` como WebP propio de runtime, optimizado a menos de 10 KiB por pieza y registrado en `godot/assets/procedencia.json`; no se presenta como reproducción histórica.
 
 Refs #650 #653.
