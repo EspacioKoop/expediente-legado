@@ -10,12 +10,24 @@ func _init() -> void:
 	comprobar("categorías previstas", Parte.CATEGORIAS.size(), 6)
 	comprobar(
 		"URL HTTPS admitida",
-		Parte.url_configurada({"feedback_url": "https://example.test/form"}),
-		"https://example.test/form",
+		Parte.url_configurada({"feedback_url": "https://example.test/report"}),
+		"https://example.test/report",
 	)
 	comprobar(
 		"esquema no web rechazado",
 		Parte.url_configurada({"feedback_url": "file:///tmp/form"}),
+		"",
+	)
+	comprobar(
+		"fallback GitHub admitido",
+		Parte.url_issue_fallback(
+			{"fallback_issue_url": "https://github.com/EspacioKoop/expediente-legado/issues/new"}
+		),
+		"https://github.com/EspacioKoop/expediente-legado/issues/new",
+	)
+	comprobar(
+		"fallback ajeno rechazado",
+		Parte.url_issue_fallback({"fallback_issue_url": "https://example.test/issues/new"}),
 		"",
 	)
 	comprobar("escena res se reduce a nombre", Parte.escena_segura("res://escenas/dia.tscn"), "dia")
@@ -70,6 +82,57 @@ func _init() -> void:
 		true,
 	)
 	comprobar("secreto no reaparece", con_diagnostico.contains("secreto"), false)
+
+	var payload := Parte.crear_payload(campos, filtrado)
+	comprobar("payload declara origen F9", payload.get("source"), "siga98-f9")
+	comprobar("payload conserva categoría", payload.get("category"), "bug")
+	comprobar("payload conserva título", payload.get("title"), "Botón sin respuesta")
+	comprobar(
+		"payload contiene cuerpo formateado",
+		String(payload.get("body", "")).contains("PARTE DE INCIDENCIAS"),
+		true,
+	)
+	comprobar(
+		"fallback pre-rellena título",
+		(
+			Parte
+			. url_issue_preparado(
+				payload,
+				{
+					"fallback_issue_url":
+					"https://github.com/EspacioKoop/expediente-legado/issues/new"
+				},
+			)
+			. contains("title=")
+		),
+		true,
+	)
+	comprobar(
+		"fallback pre-rellena cuerpo",
+		(
+			Parte
+			. url_issue_preparado(
+				payload,
+				{
+					"fallback_issue_url":
+					"https://github.com/EspacioKoop/expediente-legado/issues/new"
+				},
+			)
+			. contains("body=")
+		),
+		true,
+	)
+
+	var ruta_build := "user://build-info-prueba.txt"
+	var archivo := FileAccess.open(ruta_build, FileAccess.WRITE)
+	archivo.store_string("SIGA-98 alpha playtest\nbuild_sha=0123456789abcdef\n")
+	archivo.close()
+	comprobar(
+		"BUILD-INFO aporta SHA exacto",
+		Parte.build_actual(ruta_build),
+		"0123456789abcdef",
+	)
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(ruta_build))
 
 	print("%d pasadas, %d fallos" % [pasadas, fallos])
 	quit(1 if fallos > 0 else 0)

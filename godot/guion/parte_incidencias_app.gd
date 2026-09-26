@@ -1,8 +1,9 @@
-## Superficie Godot del Parte de incidencias (#381).
+## Superficie Godot del Parte de incidencias (#381, #1460).
 ##
-## El envío externo es deliberadamente simple: prepara y copia el parte y, si
-## existe una URL HTTP(S) configurada al empaquetar, abre ese formulario. Así el
-## juego no necesita credenciales ni un cliente de red propio en este vertical.
+## El juego nunca contiene credenciales de GitHub o SMTP. Envía un payload
+## filtrado a un gateway HTTP(S) configurable; ese servidor crea el issue y,
+## opcionalmente, remite correo. Si el gateway no está configurado o falla,
+## abre un GitHub Issue pre-rellenado sin depender del portapapeles.
 class_name ParteIncidenciasApp
 extends PanelContainer
 
@@ -17,10 +18,12 @@ var _esperado: TextEdit
 var _observado: TextEdit
 var _diagnostico: CheckButton
 var _diagnostico_previa: TextEdit
-var _accion_externa: Button
+var _enviar: Button
 var _estado: Label
+var _http: HTTPRequest
 var _configuracion: Dictionary = {}
 var _reduccion_movimiento := false
+var _payload_pendiente: Dictionary = {}
 
 
 func _ready() -> void:
@@ -32,9 +35,9 @@ func _ready() -> void:
 	visible = false
 
 
-func abrir(preferencias: Dictionary) -> void:
+func abrir(preferencias: Dictionary, diagnostico_por_defecto: bool = false) -> void:
 	_reduccion_movimiento = bool(preferencias.get("reduccion_movimiento", false))
-	_reiniciar()
+	_reiniciar(diagnostico_por_defecto)
 	visible = true
 	_categoria.grab_focus()
 
@@ -45,6 +48,11 @@ func cerrar() -> void:
 
 
 func _montar() -> void:
+	_http = HTTPRequest.new()
+	_http.timeout = 15.0
+	_http.request_completed.connect(_al_envio_completado)
+	add_child(_http)
+
 	var margen := MarginContainer.new()
 	for lado in ["left", "top", "right", "bottom"]:
 		margen.add_theme_constant_override("margin_" + lado, 20)
@@ -109,9 +117,11 @@ func _montar() -> void:
 	acciones.add_theme_constant_override("separation", 8)
 	caja.add_child(acciones)
 
-	_accion_externa = Button.new()
-	_accion_externa.pressed.connect(_copiar_y_abrir)
-	acciones.add_child(_accion_externa)
+	_enviar = Button.new()
+	_enviar.text = _texto("enviar")
+	_enviar.pressed.connect(_enviar_reporte)
+	EstiloJuego.hacer_primario(_enviar)
+	acciones.add_child(_enviar)
 
 	var guardar := Button.new()
 	guardar.text = _texto("guardar")
@@ -125,6 +135,7 @@ func _montar() -> void:
 
 	_estado = Label.new()
 	_estado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_estado.accessibility_live = AccessibilityServer.LIVE_POLITE
 	caja.add_child(_estado)
 
 
@@ -148,19 +159,18 @@ func _area(caja: VBoxContainer, placeholder: String, alto: float) -> TextEdit:
 	return area
 
 
-func _reiniciar() -> void:
+func _reiniciar(diagnostico_por_defecto: bool) -> void:
 	_categoria.select(0)
 	_titulo.clear()
 	_descripcion.clear()
 	_pasos.clear()
 	_esperado.clear()
 	_observado.clear()
-	_diagnostico.button_pressed = false
-	_diagnostico_previa.visible = false
-	_diagnostico_previa.text = ""
-	_estado.text = ParteIncidencias.texto_fallback(_configuracion)
-	var url := ParteIncidencias.url_configurada(_configuracion)
-	_accion_externa.text = _texto("copiar_abrir") if not url.is_empty() else _texto("copiar")
+	_payload_pendiente.clear()
+	_enviar.disabled = false
+	_diagnostico.button_pressed = diagnostico_por_defecto
+	_actualizar_diagnostico(diagnostico_por_defecto)
+	_estado.text = _texto("listo")
 	_al_cambiar_categoria(_categoria.selected)
 
 
@@ -204,31 +214,87 @@ func _diagnostico_actual() -> Dictionary:
 	return ParteIncidencias.diagnostico(escena, _reduccion_movimiento)
 
 
-func _preparar_parte() -> String:
+func _preparar_payload() -> Dictionary:
 	if _titulo.text.strip_edges().is_empty() or _descripcion.text.strip_edges().is_empty():
 		_estado.text = _texto("faltan")
-		return ""
-	return ParteIncidencias.compilar(_campos(), _diagnostico_actual())
+		return {}
+	return ParteIncidencias.crear_payload(_campos(), _diagnostico_actual())
 
 
-func _copiar_y_abrir() -> void:
-	var parte := _preparar_parte()
-	if parte.is_empty():
+func _enviar_reporte() -> void:
+	var payload := _preparar_payload()
+	if payload.is_empty():
 		return
-	DisplayServer.clipboard_set(parte)
+
 	var url := ParteIncidencias.url_configurada(_configuracion)
 	if url.is_empty():
-		_estado.text = _texto("copiado_fallback") % ParteIncidencias.texto_fallback(_configuracion)
+		_abrir_fallback(payload, _texto("sin_endpoint"))
+		return
+
+	_payload_pendiente = payload
+	_enviar.disabled = true
+	_estado.text = _texto("enviando")
+	var cabeceras := PackedStringArray(
+		[
+			"Content-Type: application/json",
+			"Accept: application/json",
+		]
+	)
+	var error := (
+		_http
+		. request(
+			url,
+			cabeceras,
+			HTTPClient.METHOD_POST,
+			JSON.stringify(payload),
+		)
+	)
+	if error != OK:
+		_enviar.disabled = false
+		_abrir_fallback(payload, _texto("error_envio"))
+
+
+func _al_envio_completado(
+	resultado: int,
+	codigo: int,
+	_cabeceras: PackedStringArray,
+	cuerpo: PackedByteArray,
+) -> void:
+	_enviar.disabled = false
+	if resultado == HTTPRequest.RESULT_SUCCESS and codigo >= 200 and codigo < 300:
+		_estado.text = _texto("enviado")
+		var datos = JSON.parse_string(cuerpo.get_string_from_utf8())
+		if datos is Dictionary:
+			var issue_url := String(datos.get("issue_url", "")).strip_edges()
+			if issue_url.begins_with("https://github.com/"):
+				_estado.text = _texto("enviado_issue") % issue_url
+		_payload_pendiente.clear()
+		return
+
+	var payload := _payload_pendiente.duplicate(true)
+	_payload_pendiente.clear()
+	if payload.is_empty():
+		_estado.text = _texto("error_envio")
+		return
+	_abrir_fallback(payload, _texto("error_envio"))
+
+
+func _abrir_fallback(payload: Dictionary, motivo: String) -> void:
+	# Guardar primero evita perder lo escrito aunque el navegador tampoco abra.
+	ParteIncidencias.guardar_local(String(payload.get("body", "")))
+	var url := ParteIncidencias.url_issue_preparado(payload, _configuracion)
+	if url.is_empty():
+		_estado.text = _texto("error_sin_fallback")
 		return
 	var error := OS.shell_open(url)
-	_estado.text = _texto("copiado_abierto") if error == OK else _texto("error_abrir")
+	_estado.text = _texto("fallback_abierto") if error == OK else motivo
 
 
 func _guardar() -> void:
-	var parte := _preparar_parte()
-	if parte.is_empty():
+	var payload := _preparar_payload()
+	if payload.is_empty():
 		return
-	var ruta := ParteIncidencias.guardar_local(parte)
+	var ruta := ParteIncidencias.guardar_local(String(payload.get("body", "")))
 	if ruta.is_empty():
 		_estado.text = _texto("error_guardar")
 	else:
