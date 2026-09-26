@@ -20,6 +20,8 @@ func _probar() -> void:
 	_comprobar(bool(ayuda["ok"]), "HELP responde")
 	_comprobar(String(ayuda["salida"]).contains("DIR/LS"), "HELP enumera comandos")
 	_comprobar(String(ayuda["salida"]).contains("COPY/CP"), "HELP anuncia comandos temporales")
+	_comprobar(String(ayuda["salida"]).contains("EDIT/VI"), "HELP anuncia alias VI")
+	_comprobar(String(ayuda["salida"]).contains("USERS/WHO"), "HELP anuncia alias WHO")
 
 	var raiz: Dictionary = terminal.ejecutar("dir")
 	_comprobar(bool(raiz["ok"]), "DIR lista la raíz")
@@ -74,9 +76,19 @@ func _probar() -> void:
 		terminal.ejecutar("cat /SIGA/MEMOS/NOTAS.TXT")["salida"] == "pista temporal",
 		"EDIT conserva texto con espacios",
 	)
+	var vi: Dictionary = terminal.ejecutar("vi /SIGA/MEMOS/VI.TXT nota desde alias")
+	_comprobar(bool(vi["ok"]), "VI delega en el editor temporal")
+	_comprobar(
+		terminal.ejecutar("cat /SIGA/MEMOS/VI.TXT")["salida"] == "nota desde alias",
+		"VI conserva el mismo contrato de EDIT",
+	)
 	_comprobar(
 		String(terminal.ejecutar("users")["salida"]).contains("auditor"),
 		"USERS enumera usuarios ficticios",
+	)
+	_comprobar(
+		terminal.ejecutar("who")["salida"] == terminal.ejecutar("users")["salida"],
+		"WHO reutiliza el directorio de usuarios ficticios",
 	)
 	_comprobar(bool(terminal.ejecutar("del /SIGA/MEMOS/COPIA.TXT")["ok"]), "DEL borra la copia")
 	_comprobar(
