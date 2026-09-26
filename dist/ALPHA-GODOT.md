@@ -3,10 +3,65 @@
 Este empaquetado es distinto de `dist/empaquetar-alpha.sh`, que sigue siendo el
 build histórico del backend web con JRE embebido.
 
-## Playtest rápido: actualizar y jugar
+## Testers externos: sin Git ni checkout
 
-Para probar el `main` más reciente sin clonar otra vez ni localizar artefactos
-a mano:
+El canal `playtest-latest` publica launchers junto a cada alpha para que probar
+una build no requiera clonar el repositorio ni localizar artifacts de Actions.
+
+### Windows: flujo recomendado
+
+Descarga **`SIGA-98-Actualizador-Windows.zip`** desde la prerelease
+`playtest-latest`, extrae sus dos archivos en cualquier carpeta y haz doble
+clic en:
+
+```text
+Actualizar-SIGA98.cmd
+```
+
+El paquete contiene también `Actualizar-SIGA98.ps1`. El CMD únicamente lanza
+ese actualizador local; no descarga ni ejecuta scripts remotos.
+
+El actualizador usa Windows PowerShell incluido en Windows y:
+
+1. consulta el JSON pequeño de la build actual;
+2. compara su SHA con el de la instalación local;
+3. no descarga el juego si ya es la misma build;
+4. si cambió, descarga `SIGA-98-playtest-windows.zip`;
+5. verifica SHA-256 contra el fichero publicado por CI;
+6. extrae primero a una carpeta temporal y sustituye la instalación solo cuando
+   el paquete está completo;
+7. arranca `SIGA-98.exe`.
+
+La ruta por defecto es:
+
+```text
+%LOCALAPPDATA%\SIGA98\playtest
+```
+
+No necesita Git, GitHub CLI, Python, WSL, Git Bash ni Godot.
+
+Desde una consola se pueden usar opciones adicionales:
+
+```text
+Actualizar-SIGA98.cmd -NoRun
+Actualizar-SIGA98.cmd -Force
+Actualizar-SIGA98.cmd -InstallDir "D:\Juegos\SIGA98-playtest"
+```
+
+### Linux: sin clonar el repositorio
+
+Descarga `Actualizar-SIGA98.sh` desde la misma prerelease y ejecuta:
+
+```bash
+bash Actualizar-SIGA98.sh
+```
+
+El launcher Linux mantiene las opciones `--no-run`, `--force`,
+`--platform` y `--dir`.
+
+## Desarrollo: usar el launcher desde el checkout
+
+Desde un checkout del repositorio también puede ejecutarse:
 
 ```bash
 bash scripts/playtest.sh
@@ -21,7 +76,7 @@ El script:
 5. verifica su SHA-256 antes de sustituir la instalación;
 6. arranca el juego.
 
-La instalación por defecto queda en:
+La instalación Linux por defecto queda en:
 
 ```text
 ~/.local/share/siga98-playtest/linux/
@@ -49,7 +104,7 @@ bash scripts/playtest.sh --platform windows --no-run
 También puedes elegir la ruta con `--dir RUTA` o
 `SIGA98_PLAYTEST_DIR=/ruta`.
 
-### Dependencias del actualizador
+### Dependencias del launcher Linux
 
 - `curl`;
 - `python3`;
@@ -57,8 +112,8 @@ También puedes elegir la ruta con `--dir RUTA` o
 - `sha256sum`;
 - `awk`.
 
-No necesita GitHub CLI ni token para descargar porque el repositorio y la
-prerelease de QA son públicos.
+No necesita GitHub CLI ni token porque el repositorio y la prerelease de QA son
+públicos.
 
 ## Cómo se publica el canal continuo
 
@@ -69,8 +124,14 @@ un cambio relevante llega a `main`. Tras pasar el smoke y las auditorías:
 - actualiza la prerelease `playtest-latest`;
 - publica `SIGA-98-playtest-linux.zip`;
 - publica `SIGA-98-playtest-windows.zip`;
+- publica `SIGA-98-Actualizador-Windows.zip`;
+- publica `Actualizar-SIGA98.cmd`, `Actualizar-SIGA98.ps1` y
+  `Actualizar-SIGA98.sh` también por separado;
 - publica `SIGA-98-playtest-SHA256SUMS.txt`;
 - publica `SIGA-98-playtest-build.json`.
+
+Los checksums cubren tanto los dos paquetes del juego como los launchers
+distribuidos.
 
 Los PR siguen generando artifacts efímeros, pero **no** actualizan
 `playtest-latest`.
