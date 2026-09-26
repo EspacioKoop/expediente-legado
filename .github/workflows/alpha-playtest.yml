@@ -248,6 +248,15 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Recuperar launchers versionados
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            scripts/playtest.sh
+            scripts/playtest.ps1
+            scripts/playtest.cmd
+          sparse-checkout-cone-mode: false
+
       - name: Recoger los artefactos exportados
         uses: actions/download-artifact@v4
         with:
