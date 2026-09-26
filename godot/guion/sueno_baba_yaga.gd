@@ -208,7 +208,9 @@ func estado_habitacion_actual() -> Dictionary:
 
 
 func plan_giro_habitacion(origen: Dictionary, reduccion_movimiento: bool) -> Dictionary:
-	var habitacion := get_node_or_null("AcabadoAmbiental/HabitacionGiratoria") as BabaYagaHabitacionGiratoria
+	var habitacion := (
+		get_node_or_null("AcabadoAmbiental/HabitacionGiratoria") as BabaYagaHabitacionGiratoria
+	)
 	if habitacion == null:
 		return {"aplicado": false}
 	return habitacion.plan_giro(origen, _fase_umbral, reduccion_movimiento)
@@ -634,7 +636,7 @@ func _montar_acabado_ambiental() -> void:
 	habitacion.preparar()
 
 
-func _montar_retorno() -> void:func _montar_retorno() -> void:
+func _montar_retorno() -> void:
 	_crear_caja(
 		self,
 		"RetornoSeguro",
@@ -838,13 +840,17 @@ func _actualizar_acabado_ambiental() -> void:
 
 
 func _actualizar_habitacion_giratoria() -> void:
-	var habitacion := get_node_or_null("AcabadoAmbiental/HabitacionGiratoria") as BabaYagaHabitacionGiratoria
+	var habitacion := (
+		get_node_or_null("AcabadoAmbiental/HabitacionGiratoria") as BabaYagaHabitacionGiratoria
+	)
 	if habitacion != null:
 		habitacion.aplicar_estado(_fase_umbral)
 
 
 func _aplicar_giro_habitacion(origen: Dictionary, reduccion_movimiento: bool) -> Dictionary:
-	var habitacion := get_node_or_null("AcabadoAmbiental/HabitacionGiratoria") as BabaYagaHabitacionGiratoria
+	var habitacion := (
+		get_node_or_null("AcabadoAmbiental/HabitacionGiratoria") as BabaYagaHabitacionGiratoria
+	)
 	if habitacion == null:
 		return {"aplicado": false}
 	return habitacion.aplicar_giro(origen, _fase_umbral, reduccion_movimiento)

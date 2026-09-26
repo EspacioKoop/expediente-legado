@@ -38,3 +38,14 @@ No se fija como «canónico» ningún mapa moderno de nueve mundos, diagrama eso
 ## Estado del corte
 
 El vertical implementa tres nodos y tres conexiones causales visibles, con interacción 3D común en cada nodo. La activación deliberada mediante el póster se monta únicamente en la vivienda real (`casa`), y durante la fase de sueño el controlador de `Dia` consume `SemillasOniricas` + `MitologiasNoche` para insertar Yggdrasil solo en la escena asignada, conservando la cámara, iluminación y salida del sueño base. `reduccion_movimiento` se propaga al grafo causal sin cambiar sus reglas. El arte final queda deliberadamente pendiente hasta revisar varias referencias visuales y separar con claridad fuente medieval, reconstrucción académica y convención pop.
+
+## Atrezzo diegético de vigilia
+
+El pase de arte incorpora dos objetos ficticios contemporáneos al mundo del juego, no dos fuentes históricas:
+
+- un **bonsái doméstico de Yggdrasil**, cuyo tronco, raíces expuestas y ramificación exagerada traducen a escala de salón la idea de ámbitos conectados;
+- **Yggdrasil's Egg**, caja de un videojuego ficticio expuesta en Bit 98 como puro atrezzo.
+
+Ambos se etiquetan deliberadamente como interpretaciones comerciales/decorativas de 1998. Sus mapas, iconografía fantástica o convenciones visuales no se usan para afirmar la cosmología medieval ni para resolver el sueño. El bonsái no activa la semilla —esa responsabilidad sigue en el póster interactivo— y `Yggdrasil's Egg` no entra en el catálogo de ROMs ni en la economía.
+
+Los recortes de runtime son arte propio generado para el proyecto y se registran con SHA-256 en `godot/assets/procedencia.json`.
