@@ -67,12 +67,19 @@ class ParteIncidenciasTest(unittest.TestCase):
 
     def test_endpoint_esta_fuera_del_codigo_y_se_inyecta_al_exportar(self):
         self.assertEqual(self.config["feedback_url"], "")
+        self.assertIn(
+            'DEFAULT_FEEDBACK_URL="https://expediente-legado.vercel.app/api/report"',
+            self.export,
+        )
         self.assertIn("SIGA98_FEEDBACK_URL", self.export)
         self.assertIn("datos/incidencias.json", self.export)
+        self.assertIn("url = override or default", self.export)
         self.assertIn('url.startswith(("https://", "http://"))', self.export)
         self.assertIn("vars.SIGA98_FEEDBACK_URL", self.workflow)
         self.assertNotIn("SIGA98_FEEDBACK_URL", self.nucleo)
         self.assertNotIn("SIGA98_FEEDBACK_URL", self.app)
+        self.assertNotIn("expediente-legado.vercel.app", self.nucleo)
+        self.assertNotIn("expediente-legado.vercel.app", self.app)
 
     def test_diagnostico_es_lista_blanca_y_no_inspecciona_entorno(self):
         for clave in (
