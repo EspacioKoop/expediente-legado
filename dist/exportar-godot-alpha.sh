@@ -12,6 +12,7 @@ ACTUAL="$($MOTOR --version | tr -d '\r\n')"
 CONFIG_INCIDENCIAS="$GODOT_DIR/datos/incidencias.json"
 NOTAS_ALPHA="$RAIZ/docs/alpha-playtest-2026-09-15.md"
 QA_TOOLS="${SIGA98_QA_TOOLS:-0}"
+DEFAULT_FEEDBACK_URL="https://expediente-legado.vercel.app/api/report"
 RESPALDO_INCIDENCIAS="$(mktemp)"
 cp "$CONFIG_INCIDENCIAS" "$RESPALDO_INCIDENCIAS"
 
@@ -32,15 +33,19 @@ if [ "$QA_TOOLS" != "0" ] && [ "$QA_TOOLS" != "1" ]; then
 fi
 
 # El formulario de feedback se configura al empaquetar, no queda hardcodeado
-# en GDScript. La URL es pública dentro de la build y solo se aceptan HTTP(S).
-python3 - "$CONFIG_INCIDENCIAS" "${SIGA98_FEEDBACK_URL:-}" <<'PY'
+# en GDScript. Las alphas usan el gateway desplegado por defecto; una
+# SIGA98_FEEDBACK_URL no vacía permite redirigir builds concretas. La URL es
+# pública dentro de la build y solo se aceptan HTTP(S).
+python3 - "$CONFIG_INCIDENCIAS" "${SIGA98_FEEDBACK_URL:-}" "$DEFAULT_FEEDBACK_URL" <<'PY'
 import json
 from pathlib import Path
 import sys
 
 ruta = Path(sys.argv[1])
-url = sys.argv[2].strip()
-if url and not url.startswith(("https://", "http://")):
+override = sys.argv[2].strip()
+default = sys.argv[3].strip()
+url = override or default
+if not url.startswith(("https://", "http://")):
     raise SystemExit("ERROR: SIGA98_FEEDBACK_URL debe usar http:// o https://")
 datos = json.loads(ruta.read_text(encoding="utf-8"))
 datos["feedback_url"] = url
