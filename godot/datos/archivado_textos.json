@@ -2,5 +2,6 @@
   "carpeta_en_mano": "Carpeta en mano · busca el archivador %s",
   "destino_incorrecto": "Destino incorrecto · la carpeta sigue en tu mano",
   "carpeta_archivada": "Carpeta archivada · %s",
-  "bandeja_completa": "Bandeja completada · %d%% de precisión · rango %s"
+  "bandeja_completa": "Bandeja completada · %d%% de precisión · rango %s",
+  "buscando_carpeta": "Buscando la siguiente carpeta entre el desorden…"
 }

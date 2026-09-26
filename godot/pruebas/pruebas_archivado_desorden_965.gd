@@ -28,6 +28,10 @@ func _initialize() -> void:
 	)
 	var desorden := Bandeja.desorden_por_destino(estado)
 	_comprobar(desorden.get("1980-ABIERTO-GENERAL", 0) == 1, "el primer error genera desorden")
+	_comprobar(
+		is_equal_approx(Bandeja.demora_busqueda(estado), 0.7),
+		"dos errores añaden una demora breve y determinista",
+	)
 	_comprobar(desorden.get("1970-CERRADO-GENERAL", 0) == 1, "cada destino conserva su pila")
 
 	var serializado := Bandeja.serializar(estado)
@@ -42,9 +46,21 @@ func _initialize() -> void:
 		Bandeja.desorden_por_destino(estado).is_empty(),
 		"resolver el caso limpia sus errores espaciales",
 	)
+	_comprobar(
+		is_zero_approx(Bandeja.demora_busqueda(estado)),
+		"al ordenar desaparece también la demora de búsqueda",
+	)
 
 	var archivador := Node3D.new()
 	root.add_child(archivador)
+	var estado_cargado := Bandeja.nueva([caso], ["F-1998-001"])
+	for i in 8:
+		Bandeja.colocar(estado_cargado, caso, "ERRONEO-%d" % i)
+	_comprobar(
+		is_equal_approx(Bandeja.demora_busqueda(estado_cargado), Bandeja.DEMORA_BUSQUEDA_MAX),
+		"la demora se satura para no convertir el desorden en bloqueo",
+	)
+
 	Desorden3D.aplicar(archivador, 5)
 	var pila := archivador.get_node_or_null(Desorden3D.NOMBRE)
 	_comprobar(pila != null, "el desorden crea una pila 3D")

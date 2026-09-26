@@ -13,6 +13,8 @@ const CLAVE_JORNADA := "archivado_bandeja"
 var _estado_archivado: Dictionary = {}
 var _carpeta_archivado: CarpetaArchivable3D = null
 var _textos: Dictionary = {}
+var _busqueda_caso_id := ""
+var _busqueda_token := 0
 
 
 func refrescar(host) -> void:
@@ -26,6 +28,7 @@ func refrescar(host) -> void:
 
 	var caso := ArchivadoBandeja.siguiente_pendiente(_estado_archivado)
 	if caso.is_empty():
+		_cancelar_busqueda()
 		if (
 			not _estado_archivado.get("cerrada", false)
 			and not _estado_archivado.get("casos", []).is_empty()
@@ -40,10 +43,11 @@ func refrescar(host) -> void:
 	_sincronizar_desorden_espacial(host)
 	if is_instance_valid(_carpeta_archivado):
 		return
-	_montar_carpeta(host, caso)
+	_programar_busqueda_carpeta(host, caso)
 
 
 func abandonar(host, guardar: bool = true) -> Dictionary:
+	_cancelar_busqueda()
 	if _estado_archivado.is_empty():
 		return {}
 	if ArchivadoBandeja.siguiente_pendiente(_estado_archivado).is_empty():
@@ -85,6 +89,37 @@ func _persistir(host) -> void:
 func _guardar(host) -> void:
 	if host.has_method("_guardar_o_avisar"):
 		host.call("_guardar_o_avisar", "")
+
+
+func _programar_busqueda_carpeta(host, caso: Dictionary) -> void:
+	var caso_id := String(caso.get("id", ""))
+	if caso_id.is_empty() or _busqueda_caso_id == caso_id:
+		return
+	_busqueda_token += 1
+	var token := _busqueda_token
+	_busqueda_caso_id = caso_id
+	var demora := ArchivadoBandeja.demora_busqueda(_estado_archivado)
+	if demora <= 0.0:
+		_busqueda_caso_id = ""
+		_montar_carpeta(host, caso)
+		return
+	host._nomina.text = _texto("buscando_carpeta")
+	var callback := _terminar_busqueda_carpeta.bind(host, caso_id, token)
+	host.get_tree().create_timer(demora).timeout.connect(callback)
+
+
+func _terminar_busqueda_carpeta(host, caso_id: String, token: int) -> void:
+	if token != _busqueda_token or _busqueda_caso_id != caso_id or not is_instance_valid(host):
+		return
+	_busqueda_caso_id = ""
+	var caso := ArchivadoBandeja.siguiente_pendiente(_estado_archivado)
+	if String(caso.get("id", "")) == caso_id and not is_instance_valid(_carpeta_archivado):
+		_montar_carpeta(host, caso)
+
+
+func _cancelar_busqueda() -> void:
+	_busqueda_token += 1
+	_busqueda_caso_id = ""
 
 
 func _montar_carpeta(host, caso: Dictionary) -> void:

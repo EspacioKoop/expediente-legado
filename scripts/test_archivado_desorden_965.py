@@ -26,6 +26,15 @@ class ArchivadoDesorden965Test(unittest.TestCase):
         self.assertIn('estado.get("pendientes", [])', self.bandeja)
         self.assertNotIn('"desorden":', self.bandeja)
 
+    def test_busqueda_se_demora_sin_bloquear_la_interaccion(self):
+        self.assertIn("DEMORA_BUSQUEDA_POR_ERROR := 0.35", self.bandeja)
+        self.assertIn("DEMORA_BUSQUEDA_MAX := 1.4", self.bandeja)
+        self.assertIn("static func demora_busqueda", self.bandeja)
+        self.assertIn("create_timer(demora)", self.controlador)
+        self.assertIn('_texto("buscando_carpeta")', self.controlador)
+        self.assertIn("_cancelar_busqueda()", self.controlador)
+        self.assertNotIn("await get_tree().create_timer", self.controlador)
+
     def test_controlador_reconstruye_y_actualiza_el_espacio(self):
         self.assertIn("_sincronizar_desorden_espacial(host)", self.controlador)
         self.assertIn("ArchivadoBandeja.desorden_por_destino", self.controlador)
