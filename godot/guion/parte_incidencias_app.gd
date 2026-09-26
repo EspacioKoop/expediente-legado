@@ -234,15 +234,20 @@ func _enviar_reporte() -> void:
 	_payload_pendiente = payload
 	_enviar.disabled = true
 	_estado.text = _texto("enviando")
-	var cabeceras := PackedStringArray([
-		"Content-Type: application/json",
-		"Accept: application/json",
-	])
-	var error := _http.request(
-		url,
-		cabeceras,
-		HTTPClient.METHOD_POST,
-		JSON.stringify(payload),
+	var cabeceras := PackedStringArray(
+		[
+			"Content-Type: application/json",
+			"Accept: application/json",
+		]
+	)
+	var error := (
+		_http
+		. request(
+			url,
+			cabeceras,
+			HTTPClient.METHOD_POST,
+			JSON.stringify(payload),
+		)
 	)
 	if error != OK:
 		_enviar.disabled = false
