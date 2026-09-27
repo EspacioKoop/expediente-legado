@@ -58,6 +58,13 @@ func _probar_resolucion_diegetica() -> void:
 	_comprobar(not marca.visible, "la marca final empieza oculta")
 	_comprobar(not talon.visible, "el talón empieza oculto")
 	_comprobar(not sello.esta_habilitado(), "el sello empieza bloqueado")
+	for i in range(1, 4):
+		var impacto := sueno.get_node("ImpactoAdministrativo%d" % i) as MeshInstance3D
+		var estela := sueno.get_node("EstelaImpacto%d" % i) as MeshInstance3D
+		var rechazo := sueno.get_node("OndaRechazo%d" % i) as MeshInstance3D
+		_comprobar(impacto.visible, "el impacto %d queda congelado ante la figura" % i)
+		_comprobar(estela.visible, "la estela %d comunica trayectoria detenida" % i)
+		_comprobar(rechazo.visible, "la onda %d comunica rechazo sin texto" % i)
 	_comprobar(not sello.interactuar(root), "el sello no funciona antes de revelar")
 	_comprobar(not sueno.esta_resuelta(), "no hay resolución pasiva")
 
@@ -85,10 +92,19 @@ func _probar_resolucion_diegetica() -> void:
 	_comprobar(sello.interactuar(root), "el sello acepta la interacción revelada")
 	_comprobar(sueno.esta_resuelta(), "sellar resuelve el sueño")
 	_comprobar(not sello.esta_habilitado(), "el sello se bloquea tras resolver")
-	_comprobar(
-		not (sueno.get_node("ImpactoAdministrativo1") as MeshInstance3D).visible,
-		"los impactos administrativos desaparecen al resolver",
-	)
+	for i in range(1, 4):
+		_comprobar(
+			not (sueno.get_node("ImpactoAdministrativo%d" % i) as MeshInstance3D).visible,
+			"el impacto %d desaparece al resolver" % i,
+		)
+		_comprobar(
+			not (sueno.get_node("EstelaImpacto%d" % i) as MeshInstance3D).visible,
+			"la estela %d desaparece al resolver" % i,
+		)
+		_comprobar(
+			not (sueno.get_node("OndaRechazo%d" % i) as MeshInstance3D).visible,
+			"la onda %d desaparece al resolver" % i,
+		)
 	_comprobar(marca.visible, "resolver hace visible la marca espacial de sellado")
 	var geometrias := figura.find_children("*", "GeometryInstance3D", true, false)
 	var todas_papel := not geometrias.is_empty()

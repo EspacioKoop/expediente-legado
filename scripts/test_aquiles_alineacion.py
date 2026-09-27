@@ -49,6 +49,15 @@ class AquilesAlineacionTest(unittest.TestCase):
         self.assertIn('aplicar_resolucion("sellar", reduccion_movimiento)', self.puzzle)
         self.assertIn("revelada and not _resuelta", self.puzzle)
 
+    def test_invulnerabilidad_se_comunica_sin_texto(self):
+        base = (ROOT / "godot" / "guion" / "sueno_aquiles.gd").read_text(encoding="utf-8")
+        self.assertIn('"EstelaImpacto%d"', base)
+        self.assertIn('"OndaRechazo%d"', base)
+        self.assertIn("COLOR_RECHAZO", base)
+        self.assertNotIn("Label.new()", base)
+        self.assertNotIn("RichTextLabel.new()", base)
+        self.assertNotIn("texto_tutorial", base.lower())
+
     def test_escena_standalone_usa_vertical_de_alineacion(self):
         self.assertIn('path="res://guion/sueno_aquiles_alineacion.gd"', self.escena)
         self.assertIn('[node name="SuenoAquilesAlineacion" type="Node3D"]', self.escena)

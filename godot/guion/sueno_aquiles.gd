@@ -20,6 +20,7 @@ const COLOR_PIEDRA := Color(0.54, 0.50, 0.46)
 const COLOR_BRONCE := Color(0.34, 0.25, 0.16)
 const COLOR_TALON := Color(0.78, 0.24, 0.12)
 const COLOR_PAPEL := Color(0.76, 0.70, 0.57)
+const COLOR_RECHAZO := Color(0.74, 0.43, 0.18)
 
 var _figura: Node3D
 var _talon: MeshInstance3D
@@ -276,10 +277,18 @@ func _montar_pasarela() -> void:
 
 
 func _montar_impactos() -> void:
-	var posiciones := [
+	# Tres documentos quedan congelados justo antes de tocar la figura. Cada uno
+	# conserva una estela física y una placa de rechazo contra el cuerpo: la
+	# invulnerabilidad se lee en el espacio sin tutorial ni texto explicativo.
+	var posiciones: Array[Vector3] = [
 		Vector3(-2.6, 6.8, 1.5),
 		Vector3(2.5, 5.9, 1.1),
 		Vector3(0.7, 8.0, 1.2),
+	]
+	var origenes: Array[Vector3] = [
+		Vector3(-4.9, 7.5, 5.2),
+		Vector3(4.7, 6.6, 4.8),
+		Vector3(1.9, 9.0, 5.0),
 	]
 	for i in posiciones.size():
 		var impacto := _crear_caja(
@@ -291,6 +300,27 @@ func _montar_impactos() -> void:
 		)
 		impacto.rotation_degrees = Vector3(12.0 * i, 24.0 * i, -18.0 + 9.0 * i)
 		_impactos.append(impacto)
+
+		var delta: Vector3 = posiciones[i] - origenes[i]
+		var estela := _crear_caja(
+			self,
+			"EstelaImpacto%d" % (i + 1),
+			Vector3(0.07, 0.07, delta.length()),
+			(origenes[i] + posiciones[i]) * 0.5,
+			COLOR_RECHAZO,
+		)
+		estela.look_at(posiciones[i], Vector3.UP)
+		_impactos.append(estela)
+
+		var rechazo := _crear_caja(
+			self,
+			"OndaRechazo%d" % (i + 1),
+			Vector3(0.82, 0.82, 0.06),
+			posiciones[i] + Vector3(0.0, 0.0, -0.18),
+			COLOR_RECHAZO,
+		)
+		rechazo.rotation_degrees.z = 15.0 + 23.0 * i
+		_impactos.append(rechazo)
 
 
 func _montar_marca_sellado() -> void:
