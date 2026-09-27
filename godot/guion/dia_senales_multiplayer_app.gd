@@ -75,7 +75,7 @@ func activar(
 		if _actor_public_id.is_empty():
 			_red_status = "identity_required"
 		else:
-			var apertura := _servicio.abrir_sala(SCENE_KEY, _room_id, _actor_public_id)
+			var apertura: Dictionary = _servicio.abrir_sala(SCENE_KEY, _room_id, _actor_public_id)
 			_red_status = String(apertura.get("status", "transport_error"))
 	_activa = true
 	_acumulado = INTERVALO_CONSULTA
@@ -105,7 +105,7 @@ func procesar(delta: float, ahora_unix: int = -1) -> void:
 		return
 	if _servicio != null and not _room_id.is_empty():
 		_servicio.procesar_red(delta)
-		var salud := _servicio.health()
+		var salud: Dictionary = _servicio.health()
 		_red_status = String(salud.get("status", _red_status))
 	if _host == null or not is_instance_valid(_host) or _fase_actual() != FASE:
 		desactivar()
