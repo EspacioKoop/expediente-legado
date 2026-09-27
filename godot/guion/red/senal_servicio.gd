@@ -22,13 +22,16 @@ func _init(transporte: RefCounted = null) -> void:
 
 
 func abrir_sala(scene_key: String, room_id: String, actor_public_id: String) -> Dictionary:
-	var resultado = _transporte.call(
-		"abrir_sala",
-		scene_key,
-		{
-			"room_id": room_id,
-			"actor_public_id": actor_public_id,
-		},
+	var resultado = (
+		_transporte
+		. call(
+			"abrir_sala",
+			scene_key,
+			{
+				"room_id": room_id,
+				"actor_public_id": actor_public_id,
+			},
+		)
 	)
 	if typeof(resultado) != TYPE_DICTIONARY:
 		return {"ok": false, "status": "invalid_transport_result"}
