@@ -19,6 +19,11 @@ class OficinaVisualGate126Test(unittest.TestCase):
         self.assertIn("const TAM := Vector2i(1280, 720)", self.captura)
         self.assertIn("RenderingServer.frame_post_draw", self.captura)
         self.assertIn("imagen.save_png(ruta)", self.captura)
+        self.assertIn("const MOMENTOS := [", self.captura)
+        self.assertIn('"sufijo": "mediodia"', self.captura)
+        self.assertIn('"sufijo": "tarde"', self.captura)
+        self.assertIn('"sufijo": "noche"', self.captura)
+        self.assertIn("Jornada.MINUTOS_INICIO_JORNADA", self.captura)
 
     def test_monta_el_archivo_real_sin_hud(self):
         self.assertIn("EspaciosCatalogo.OFICINA.duplicate(true)", self.captura)
@@ -31,6 +36,12 @@ class OficinaVisualGate126Test(unittest.TestCase):
         self.assertIn('OS.get_environment("GITHUB_SHA")', self.captura)
         self.assertIn('has_meta("oficina_styloo_cc0")', self.captura)
         self.assertIn("RenderingServer.get_current_rendering_method()", self.captura)
+        self.assertIn('OS.get_environment("SIGA98_EXIGIR_FORWARD_PLUS") == "1"', self.captura)
+        self.assertIn('exigir_forward_plus and renderer != "forward_plus"', self.captura)
+        self.assertIn('renderer esperado forward_plus', self.captura)
+        self.assertIn('preload("res://guion/dia_reloj_horario_app.gd")', self.captura)
+        self.assertIn('_dia.jornada["hora_minutos"] = minutos', self.captura)
+        self.assertIn("_horario._transicionar_luz(_dia, 10.0)", self.captura)
         self.assertIn("build cuyo SHA coincida", self.captura)
         self.assertNotIn("CanvasLayer.new()", self.captura)
 
@@ -40,12 +51,20 @@ class OficinaVisualGate126Test(unittest.TestCase):
         self.assertIn('"frase": ""', self.captura)
 
     def test_workflow_publica_artifact_para_revision_humana(self):
-        self.assertIn("xvfb-run -a godot4", self.workflow)
+        self.assertIn("mesa-vulkan-drivers", self.workflow)
+        self.assertIn("VK_DRIVER_FILES", self.workflow)
+        self.assertIn("vulkaninfo --summary", self.workflow)
+        self.assertIn("SIGA98_EXIGIR_FORWARD_PLUS=1", self.workflow)
+        self.assertIn("xvfb-run -a godot4 --rendering-method forward_plus --path godot", self.workflow)
         self.assertIn("res://pruebas/capturas_oficina_126.gd", self.workflow)
         self.assertIn("actions/upload-artifact@v4", self.workflow)
         self.assertIn("SIGA-98-oficina-visual-gate-126-${{ github.sha }}", self.workflow)
         self.assertIn("puestos-archivo.png", self.workflow)
         self.assertIn("acceso-ventanas.png", self.workflow)
+        self.assertIn("for sufijo in mediodia tarde noche; do", self.workflow)
+        self.assertIn('test -s "$salida/puestos-archivo-$sufijo.png"', self.workflow)
+        self.assertIn('test -s "$salida/acceso-ventanas-$sufijo.png"', self.workflow)
+        self.assertIn("'godot/guion/dia_reloj_horario_app.gd'", self.workflow)
 
 
 if __name__ == "__main__":
