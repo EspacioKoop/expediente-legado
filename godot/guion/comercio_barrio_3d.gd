@@ -98,6 +98,7 @@ func _montar_quiosco() -> void:
 	)
 
 	_montar_ticket(puesto, Vector3(-0.58, 1.36, 1.18))
+	_montar_estado_horario(puesto, "quiosco", Vector3(-0.285, 1.56, 0.0), -90.0)
 
 	var entradas := ComercioBarrio.listar("quiosco", _dia.jornada, _inventario())
 	for indice in entradas.size():
@@ -159,6 +160,7 @@ func _montar_trastero() -> void:
 	)
 
 	_montar_ticket(puesto, Vector3(0.58, 1.36, 1.42))
+	_montar_estado_horario(puesto, "segunda_mano", Vector3(0.285, 1.52, 0.0), 90.0)
 	_montar_atrezzo_trastero(puesto)
 
 	var entradas := (
@@ -505,6 +507,32 @@ func _vender(_actor: Node, item_id: String, venta: Interactuable3D) -> void:
 	venta.nombre_objeto = "%s · %s" % [venta.nombre_objeto.get_slice(" · ", 0), motivo]
 
 
+func _montar_estado_horario(
+	puesto: Node3D, superficie: String, posicion: Vector3, giro_y: float
+) -> void:
+	var estado := ComercioBarrio.estado(superficie, _dia.jornada)
+	var desde := _hora_texto(int(estado.get("desde", 0)))
+	var hasta := _hora_texto(int(estado.get("hasta", 0)))
+	var abierto := bool(estado.get("abierto", false))
+	var texto := "%s · %s–%s" % ["ABIERTO" if abierto else "CERRADO", desde, hasta]
+	var etiqueta := _texto_cartel(
+		puesto,
+		"EstadoHorario",
+		texto,
+		posicion,
+		giro_y,
+		Color(0.22, 0.42, 0.26) if abierto else Color(0.52, 0.16, 0.15),
+		20,
+		0.0016,
+	)
+	etiqueta.set_meta("estado_comercio", superficie)
+	etiqueta.set_meta("abierto", abierto)
+
+
+func _hora_texto(minutos: int) -> String:
+	return "%02d:%02d" % [int(minutos / 60), posmod(minutos, 60)]
+
+
 func _montar_ticket(puesto: Node3D, posicion: Vector3) -> void:
 	var ticket := Node3D.new()
 	ticket.name = "TicketTransaccion"
@@ -569,6 +597,8 @@ func _texto_ticket(resultado: Dictionary, operacion: String) -> String:
 			return "NO LLEGA EL DINERO"
 		"no_llevado":
 			return "NO LO LLEVAS"
+		"cerrado":
+			return "CERRADO"
 		"onirico", "no_vendible":
 			return "NO SE VENDE"
 		_:
