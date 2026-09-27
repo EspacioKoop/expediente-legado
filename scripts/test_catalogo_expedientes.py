@@ -152,6 +152,43 @@ class CatalogoExpedientesTest(unittest.TestCase):
         self.assertGreaterEqual(sum("registroOrigen2" in pista for pista in caso["pistas"]), 4)
         self.assertIn("CASO_10_TITULO,", TEXTOS.read_text(encoding="utf-8"))
 
+    def test_caso11_circular_fija_el_nuevo_corte(self):
+        casos_por_id = {caso["id"]: caso for caso in self.casos}
+        self.assertIn("caso11@11", casos_por_id)
+        caso = casos_por_id["caso11@11"]
+
+        self.assertEqual(caso["titulo"], "CASO_11_TITULO")
+        self.assertEqual(caso["anioSuceso"], 1998)
+        self.assertEqual(len(caso["registros"]), 6)
+        self.assertEqual(len(caso["sospechosos"]), 3)
+        self.assertGreaterEqual(sum("fraseGatillo" in pista for pista in caso["pistas"]), 3)
+        textos = TEXTOS.read_text(encoding="utf-8")
+        self.assertIn("CASO_11_TITULO,", textos)
+        nuevos = ("PARTE_IMPRENTA", "EVALUACION", "EXPEDIENTE_DISCIPLINARIO", "REGISTRO_ARCHIVO")
+        tipos = {registro["tipo"] for registro in caso["registros"]}
+        for tipo in nuevos:
+            self.assertIn(tipo, tipos)
+            self.assertIn(f"\n{tipo},", textos)
+
+    def test_caso11_relaciona_pares_distintos_sin_repetir_orden_inverso(self):
+        caso = {caso["id"]: caso for caso in self.casos}["caso11@11"]
+        pares = [
+            frozenset((pista["registroOrigen"], pista["registroOrigen2"]))
+            for pista in caso["pistas"]
+            if "registroOrigen2" in pista
+        ]
+        self.assertGreaterEqual(len(pares), 4)
+        self.assertEqual(len(pares), len(set(pares)))
+
+    def test_caso11_no_explica_la_contradiccion_como_sobrenatural(self):
+        caso = {caso["id"]: caso for caso in self.casos}["caso11@11"]
+        textos = [pista["descripcion"] for pista in caso["pistas"]]
+        textos += [s["descripcion"] for s in caso["sospechosos"]]
+        textos += [s["desenlace"] for s in caso["sospechosos"]]
+        for texto in textos:
+            for vetada in ("viaj", "futuro", "sobrenatural", "imposible", "falsific"):
+                self.assertNotIn(vetada, texto.lower(), texto)
+
 
 if __name__ == "__main__":
     unittest.main()

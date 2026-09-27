@@ -445,7 +445,7 @@ func _progreso() -> void:
 func _contenido() -> void:
 	var contenido := Contenido.new()
 	comprobar("casos.json carga", contenido.cargar(), true)
-	comprobar("diez casos", contenido.casos.size(), 10)
+	comprobar("once casos", contenido.casos.size(), 11)
 	comprobar("dieciséis conceptos", contenido.conceptos.size(), 16)
 	var registros := 0
 	var pistas := 0
@@ -454,9 +454,9 @@ func _contenido() -> void:
 		registros += c["registros"].size()
 		pistas += c["pistas"].size()
 		sospechosos += c["sospechosos"].size()
-	comprobar("cuarenta y cuatro registros", registros, 44)
-	comprobar("cuarenta y siete pistas", pistas, 47)
-	comprobar("treinta y tres sospechosos", sospechosos, 33)
+	comprobar("cincuenta registros", registros, 50)
+	comprobar("cincuenta y cuatro pistas", pistas, 54)
+	comprobar("treinta y seis sospechosos", sospechosos, 36)
 	comprobar("seis casos principales", contenido.principales().size(), 6)
 	var anios_decimales := contenido.casos.filter(
 		func(c): return c.get("anioSuceso") != null and typeof(c["anioSuceso"]) != TYPE_INT

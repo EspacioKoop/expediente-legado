@@ -1,6 +1,6 @@
 # Identidad visual de expedientes SIGA
 
-Pack visual para que los diez expedientes principales sean reconocibles antes
+Pack visual para que los once expedientes sean reconocibles antes
 de leer el título completo. Todo el material es SVG original construido con
 primitivas simples y sin fuentes gráficas externas.
 
@@ -24,6 +24,7 @@ Cada expediente tiene tres piezas:
 | 8 | #427 | ficha laboral y empleado numerado |
 | 9 | R-17 → R-18 | reclasificación entre series |
 | 10 | 86 + MESA 0 | empleado adicional sin alta |
+| 11 | 0/98 ← 11/97 | circular citada y sellada antes de su emisión |
 
 ## Fichas de sujeto
 
@@ -45,6 +46,7 @@ Cuando el sujeto es una entidad o no tiene titular, la silueta se sustituye.
 | 8 | #427 | el botón de su descripción de funciones; tres actas del mismo día |
 | 9 | Leandro Vela | lote devuelto sin tramitar; serie ausente reclasificada |
 | 10 | titular de la tarjeta 0000 | solo contorno, sin alta; tarjeta de acceso a ceros |
+| 11 | la Circular 0/98 | hoja en lugar de silueta; sello anterior a su fecha, frase tachada y asiento sin número |
 
 La asociación entre caso, color, icono, lámina y ficha vive en
 `res://datos/identidad_expedientes.json`. El componente visual consume ese
