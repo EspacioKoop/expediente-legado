@@ -70,7 +70,8 @@ func _ejecutar() -> void:
 
 	_montar_oficina()
 	var renderer := String(RenderingServer.get_current_rendering_method())
-	if renderer != "forward_plus":
+	var exigir_forward_plus := OS.get_environment("SIGA98_EXIGIR_FORWARD_PLUS") == "1"
+	if exigir_forward_plus and renderer != "forward_plus":
 		_fallar("renderer esperado forward_plus, actual %s" % renderer)
 		quit(1)
 		return

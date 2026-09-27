@@ -111,7 +111,8 @@ jobs:
           salida="$GITHUB_WORKSPACE/dist/capturas-oficina-126"
           rm -rf "$salida"
           mkdir -p "$salida"
-          xvfb-run -a godot4 --rendering-method forward_plus --path godot \
+          SIGA98_EXIGIR_FORWARD_PLUS=1 \
+            xvfb-run -a godot4 --rendering-method forward_plus --path godot \
             --script res://pruebas/capturas_oficina_126.gd -- "$salida"
           test -f "$salida/README.md"
           test -s "$salida/puestos-archivo.png"
