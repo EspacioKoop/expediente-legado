@@ -236,7 +236,10 @@ func _actualizar_actividad(forzar: bool) -> void:
 			return
 	if _brazos_cruzados and AnimacionesUAL.reproducir(objetivo, "brazos_cruzados"):
 		return
-	Modelos._animar(objetivo, "work" if _trabajando else "idle")
+	var clip_rutina := "work" if _trabajando else "idle"
+	if AnimacionesUAL.reproducir(objetivo, clip_rutina, fase / TAU):
+		return
+	Modelos._animar(objetivo, clip_rutina)
 
 
 ## Mira brevemente al actor solo si cruza por delante y dentro de un radio
