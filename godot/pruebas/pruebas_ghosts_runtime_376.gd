@@ -161,10 +161,13 @@ func _nuevo_controlador(
 	var controlador := DiaGhostsApp.new()
 	host.add_child(controlador)
 	controlador._host = host
-	var configurado := controlador.configurar_transporte(
-		transporte,
-		actor_public_id,
-		DiaGhostsApp.ROOM_ID_DEFECTO,
+	var configurado := (
+		controlador
+		. configurar_transporte(
+			transporte,
+			actor_public_id,
+			DiaGhostsApp.ROOM_ID_DEFECTO,
+		)
 	)
 	_comprobar("controller acepta transporte", configurado.get("ok", false), true)
 	return controlador
