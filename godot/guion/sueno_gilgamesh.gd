@@ -11,6 +11,9 @@ const CLAVE_SEMILLA := "semilla_onirica_gilgamesh"
 const FUENTE_VIGILIA := "libro:arqueologia_uruk_98"
 const PAGINAS_MINIMAS := 3
 const FRAGMENTOS_NECESARIOS := 4
+## Escala canónica del encuentro nocturno. La comparte runtime y evidencia para
+## que el gate visual no evalúe un diorama a una escala distinta de la partida.
+const ESCALA_ENCUENTRO := 0.44
 const TRANSFORMACION_FINAL := "muralla_archivo_continua_por_techo"
 const TEXTURAS_FRAGMENTOS := {
 	"fragmento_puerta": preload("res://arte/gilgamesh/fragmento_puerta.svg"),
