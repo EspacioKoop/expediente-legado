@@ -1,0 +1,30 @@
+{
+  "name": "siga98-feedback",
+  "main": "worker.js",
+  "compatibility_date": "2026-09-27",
+  "workers_dev": true,
+  "vars": {
+    "GITHUB_REPOSITORY": "EspacioKoop/expediente-legado"
+  },
+  "secrets": {
+    "required": ["GITHUB_TOKEN"]
+  },
+  "ratelimits": [
+    {
+      "name": "REPORT_RATE_LIMITER",
+      "namespace_id": "43601",
+      "simple": {
+        "limit": 6,
+        "period": 60
+      }
+    },
+    {
+      "name": "REPORT_GLOBAL_LIMITER",
+      "namespace_id": "43602",
+      "simple": {
+        "limit": 30,
+        "period": 60
+      }
+    }
+  ]
+}
