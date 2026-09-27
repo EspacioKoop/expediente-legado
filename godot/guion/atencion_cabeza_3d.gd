@@ -12,7 +12,7 @@ const PESO_CABEZA := 0.65
 var giro := 0.0
 
 
-func _process_modification() -> void:
+func _process_modification_with_delta(_delta: float) -> void:
 	if is_zero_approx(giro):
 		return
 	var esqueleto := get_skeleton()
