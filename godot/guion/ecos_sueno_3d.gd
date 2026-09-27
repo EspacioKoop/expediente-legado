@@ -91,9 +91,7 @@ static func montar(
 	raiz.add_child(charla)
 
 	if not movimiento_ghost.is_empty():
-		aplicar_movimiento_ghost(
-			raiz, movimiento_ghost, scene_revision, anchor_key, ahora_unix
-		)
+		aplicar_movimiento_ghost(raiz, movimiento_ghost, scene_revision, anchor_key, ahora_unix)
 	return charla
 
 
@@ -107,12 +105,7 @@ static func aplicar_movimiento_ghost(
 	anchor_key: String,
 	ahora_unix: int
 ) -> bool:
-	if (
-		raiz_npc == null
-		or scene_revision.is_empty()
-		or anchor_key.is_empty()
-		or ahora_unix <= 0
-	):
+	if raiz_npc == null or scene_revision.is_empty() or anchor_key.is_empty() or ahora_unix <= 0:
 		return false
 	var payload = evento.get("payload", {})
 	if typeof(payload) != TYPE_DICTIONARY or String(payload.get("space", "")) != "anchor":
