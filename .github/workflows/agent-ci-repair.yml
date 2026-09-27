@@ -64,6 +64,11 @@ jobs:
           fi
           provider="${BASH_REMATCH[1]}"
           issue="${BASH_REMATCH[2]}"
+          owner="${GITHUB_REPOSITORY%%/*}"
+          head_repo="$(gh api -X GET "repos/$GITHUB_REPOSITORY/pulls" -f state=open -f head="$owner:$BRANCH" --jq '.[0].head.repo.full_name // empty')"
+          if [[ "$head_repo" != "$GITHUB_REPOSITORY" ]]; then
+            echo "run=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
           if [[ "$provider" == qwen && "$HAS_QWEN" != true ]] || [[ "$provider" == gemini && "$HAS_GEMINI" != true ]]; then
             gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human >/dev/null 2>&1 || true
             gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body "CI falló pero falta la API key de $provider para reparación automática." || true
