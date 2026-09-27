@@ -2,13 +2,20 @@ class_name GhostServicio
 extends RefCounted
 
 ## Adaptador offline-first para publicar/consultar ghosts sin acoplar escenas al transporte (#376).
+##
+## La selección es deliberadamente pequeña: excluye al actor local, prefiere
+## actores no vistos recientemente y conserva el orden de frescura que entrega
+## el transporte/relay.
 
 const GhostDatos = preload("res://guion/red/ghost_datos.gd")
 
 const MAX_VISIBLES := 3
+const MAX_ACTORES_RECIENTES := 6
 
 var _transporte: RefCounted
 var _habilitado := true
+var _actor_public_id := ""
+var _actores_recientes: Array[String] = []
 
 
 func _init(transporte: RefCounted, habilitado: bool = true) -> void:
@@ -22,6 +29,14 @@ func habilitar(valor: bool) -> void:
 
 func habilitado() -> bool:
 	return _habilitado
+
+
+func configurar_actor_local(actor_public_id: String) -> void:
+	_actor_public_id = actor_public_id.strip_edges()
+
+
+func reiniciar_seleccion() -> void:
+	_actores_recientes.clear()
 
 
 func publicar(evento: Dictionary, ahora_unix: int) -> Dictionary:
@@ -53,8 +68,8 @@ func consultar(
 			"ghosts": [],
 		}
 
-	var salida: Array = []
-	var actores := {}
+	var validos: Array[Dictionary] = []
+	var actores_evento := {}
 	for crudo in consulta.get("events", []):
 		var validacion := GhostDatos.validar_evento(crudo, ahora_unix)
 		if not validacion["ok"]:
@@ -66,11 +81,40 @@ func consultar(
 		if String(payload["space"]) == "anchor" and String(payload["anchor_key"]) != anchor_key:
 			continue
 		var actor := String(evento["actor_public_id"])
-		if actores.has(actor):
+		if actor.is_empty() or actor == _actor_public_id or actores_evento.has(actor):
 			continue
-		actores[actor] = true
-		salida.append(evento)
-		if salida.size() >= MAX_VISIBLES:
-			break
+		actores_evento[actor] = true
+		validos.append(evento)
+
+	var salida: Array = []
+	_seleccionar(validos, salida, true)
+	if salida.size() < MAX_VISIBLES:
+		_seleccionar(validos, salida, false)
+	for evento in salida:
+		_recordar_actor(String(evento["actor_public_id"]))
 
 	return {"ok": true, "status": "ok", "ghosts": salida}
+
+
+func _seleccionar(validos: Array[Dictionary], salida: Array, solo_nuevos: bool) -> void:
+	for evento in validos:
+		if salida.size() >= MAX_VISIBLES:
+			return
+		var actor := String(evento["actor_public_id"])
+		var reciente := _actores_recientes.has(actor)
+		if solo_nuevos == reciente:
+			continue
+		var ya_elegido := false
+		for elegido in salida:
+			if String(elegido["actor_public_id"]) == actor:
+				ya_elegido = true
+				break
+		if not ya_elegido:
+			salida.append(evento)
+
+
+func _recordar_actor(actor_public_id: String) -> void:
+	_actores_recientes.erase(actor_public_id)
+	_actores_recientes.append(actor_public_id)
+	while _actores_recientes.size() > MAX_ACTORES_RECIENTES:
+		_actores_recientes.pop_front()
