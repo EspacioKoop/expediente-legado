@@ -240,9 +240,11 @@ func _abrir_documento(indice: int) -> void:
 	_lector_contenido.text = String(dato.get("contenido", dato.get("extracto", "")))
 	_sincronizar_lector_seleccion()
 
-	_pausa_previa = get_tree().paused
+	var arbol := get_tree()
+	if arbol != null:
+		_pausa_previa = arbol.paused
+		arbol.paused = true
 	_mouse_previo = Input.mouse_mode
-	get_tree().paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_lector.popup_centered()
 	_lector_contenido.grab_focus.call_deferred()
@@ -287,7 +289,9 @@ func _restaurar_control_lector() -> void:
 	if _indice_lectura < 0:
 		return
 	_indice_lectura = -1
-	get_tree().paused = _pausa_previa
+	var arbol := get_tree()
+	if arbol != null:
+		arbol.paused = _pausa_previa
 	Input.mouse_mode = _mouse_previo
 
 
