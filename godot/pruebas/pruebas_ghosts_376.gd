@@ -39,10 +39,18 @@ func _probar_fixture_y_reproductor() -> void:
 	if not validacion["ok"]:
 		return
 	_comprobar("fixture es ghost", validacion["event"]["kind"], "ghost")
-	_comprobar("fixture queda bajo límite de frames", validacion["event"]["payload"]["frames"].size() <= GhostDatos.MAX_FRAMES, true)
+	_comprobar(
+		"fixture queda bajo límite de frames",
+		validacion["event"]["payload"]["frames"].size() <= GhostDatos.MAX_FRAMES,
+		true
+	)
 
 	var ghost := GhostRemoto3D.new()
-	_comprobar("reproductor acepta revisión compatible", ghost.cargar_evento(evento, "calle-r1", AHORA), true)
+	_comprobar(
+		"reproductor acepta revisión compatible",
+		ghost.cargar_evento(evento, "calle-r1", AHORA),
+		true
+	)
 	_comprobar("ghost no expone capa de colisión", ghost.has_method("get_collision_layer"), false)
 	var x_inicial := ghost.position.x
 	ghost.avanzar(0.75)
@@ -56,7 +64,9 @@ func _probar_fixture_y_reproductor() -> void:
 func _probar_revision_y_apagado() -> void:
 	var evento := _fixture()
 	var ghost := GhostRemoto3D.new()
-	_comprobar("revisión incompatible se ignora", ghost.cargar_evento(evento, "calle-r2", AHORA), false)
+	_comprobar(
+		"revisión incompatible se ignora", ghost.cargar_evento(evento, "calle-r2", AHORA), false
+	)
 	ghost.free()
 
 	var transporte := TransporteFixture.new([evento])
@@ -72,18 +82,24 @@ func _probar_revision_y_apagado() -> void:
 
 
 func _probar_grabador_local() -> void:
-	var grabador := GhostGrabador.new(
-		"calle", "calle-r1", "test-376", "anon-local", 6.0
-	)
+	var grabador := GhostGrabador.new("calle", "calle-r1", "test-376", "anon-local", 6.0)
 	_comprobar("primera muestra se graba", grabador.registrar(10.0, Vector3.ZERO, 0.0), true)
-	_comprobar("muestra demasiado próxima se omite", grabador.registrar(10.05, Vector3(1, 0, 0), 0.0), false)
-	_comprobar("segunda muestra se graba", grabador.registrar(10.2, Vector3(1, 0, 0), 0.2, "saludo"), true)
+	_comprobar(
+		"muestra demasiado próxima se omite",
+		grabador.registrar(10.05, Vector3(1, 0, 0), 0.0),
+		false
+	)
+	_comprobar(
+		"segunda muestra se graba", grabador.registrar(10.2, Vector3(1, 0, 0), 0.2, "saludo"), true
+	)
 	var exportado := grabador.exportar_evento(AHORA, "ghost-local-001")
 	_comprobar("grabador exporta contrato válido", exportado["ok"], true)
 	if exportado["ok"]:
 		var texto := JSON.stringify(exportado["event"])
 		_comprobar("paquete no contiene Partida", texto.find("Partida") == -1, true)
-		_comprobar("paquete no contiene textos de expedientes", texto.find("expediente_texto") == -1, true)
+		_comprobar(
+			"paquete no contiene textos de expedientes", texto.find("expediente_texto") == -1, true
+		)
 
 
 func _probar_sueno_seguro() -> void:
@@ -143,9 +159,7 @@ func _probar_movimiento_npc_sueno() -> void:
 	npc.position = Vector3(10.0, 0.0, 5.0)
 	_comprobar(
 		"EcoSueno acepta movimiento anchor-compatible",
-		EcosSueno3D.aplicar_movimiento_ghost(
-			npc, creado["event"], "sueno-r1", "eco-dia", AHORA
-		),
+		EcosSueno3D.aplicar_movimiento_ghost(npc, creado["event"], "sueno-r1", "eco-dia", AHORA),
 		true
 	)
 	var trayectoria := npc.get_node_or_null("MovimientoGhost")
@@ -153,9 +167,17 @@ func _probar_movimiento_npc_sueno() -> void:
 	if trayectoria != null:
 		trayectoria.avanzar(0.5)
 		_comprobar("NPC conserva origen local", npc.position.z, 5.0)
-		_comprobar("NPC interpola movimiento grabado", npc.position.x > 10.0 and npc.position.x < 12.0, true)
-		_comprobar("gesto queda como enum visual", String(npc.get_meta("ghost_gesture", "")), "asentir")
-	_comprobar("movimiento NPC no añade navegación", npc.get_node_or_null("NavigationAgent3D"), null)
+		_comprobar(
+			"NPC interpola movimiento grabado",
+			npc.position.x > 10.0 and npc.position.x < 12.0,
+			true
+		)
+		_comprobar(
+			"gesto queda como enum visual", String(npc.get_meta("ghost_gesture", "")), "asentir"
+		)
+	_comprobar(
+		"movimiento NPC no añade navegación", npc.get_node_or_null("NavigationAgent3D"), null
+	)
 	npc.free()
 
 	var rechazado := Node3D.new()
