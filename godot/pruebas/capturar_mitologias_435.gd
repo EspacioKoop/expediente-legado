@@ -108,6 +108,21 @@ func _capturar_gilgamesh(salida: String, manifiesto: Dictionary) -> bool:
 	if not await _guardar(salida, "436_gilgamesh_puzzle.png", "gilgamesh_puzzle", 436, manifiesto):
 		return false
 
+	if not _resolver_gilgamesh(sueno):
+		return false
+
+	camara.position = Vector3(entrada.x, ALTURA_JUGADOR, entrada.z)
+	camara.look_at(ancla + Vector3(0.0, 1.05, -0.5), Vector3.UP)
+	if not await _guardar(
+		salida, "436_gilgamesh_resuelto.png", "gilgamesh_resuelto", 436, manifiesto
+	):
+		return false
+	mundo.queue_free()
+	await process_frame
+	return true
+
+
+func _resolver_gilgamesh(sueno: SuenoGilgamesh) -> bool:
 	var fragmentos: Array = SuenoGilgamesh.ENCAJES.keys()
 	fragmentos.sort()
 	for bruto in fragmentos:
@@ -120,15 +135,6 @@ func _capturar_gilgamesh(salida: String, manifiesto: Dictionary) -> bool:
 	if not sueno.resuelto():
 		printerr("Gilgamesh no alcanzó el estado resuelto")
 		return false
-
-	camara.position = Vector3(entrada.x, ALTURA_JUGADOR, entrada.z)
-	camara.look_at(ancla + Vector3(0.0, 1.05, -0.5), Vector3.UP)
-	if not await _guardar(
-		salida, "436_gilgamesh_resuelto.png", "gilgamesh_resuelto", 436, manifiesto
-	):
-		return false
-	mundo.queue_free()
-	await process_frame
 	return true
 
 
