@@ -45,7 +45,9 @@ func _ejecutar() -> void:
 		interactuable != null and interactuable.get_node_or_null("Colision") != null,
 	)
 
-	var interactuado := interactuable != null and interactuable.interactuar(host)
+	var interactuado := false
+	if interactuable != null:
+		interactuado = bool(interactuable.interactuar(host))
 	_comprobar("interactuar con anchor abre compositor", interactuado)
 	await process_frame
 
