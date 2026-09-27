@@ -161,7 +161,8 @@ jobs:
           openai_api_key: ${{ secrets.QWEN_API_KEY }}
           openai_base_url: ${{ vars.QWEN_BASE_URL || steps.qwen.outputs.url }}
           openai_model: ${{ vars.QWEN_MODEL || steps.qwen.outputs.model }}
-          settings: '{"model":{"maxSessionTurns":30},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
+          qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
+          settings: '{"model":{"maxSessionTurns":30},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
           prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json y .agent-ci-failure.log. Corrige solo la causa del CI y solo rutas del CLAIM. No ejecutes shell ni Git.'
 
       - name: Reparar con Gemini
@@ -170,7 +171,8 @@ jobs:
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ vars.GEMINI_MODEL }}
-          settings: '{"model":{"maxSessionTurns":30},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
+          qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
+          settings: '{"model":{"maxSessionTurns":30},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
           prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-plan.json y .agent-ci-failure.log. Corrige solo la causa del CI y solo rutas del CLAIM. No ejecutes shell ni Git.'
 
       - name: Validar reparación
