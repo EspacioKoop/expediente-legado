@@ -9,7 +9,7 @@ extends SceneTree
 ##
 ## El workflow de GitHub genera un PREVIEW con Lavapipe. El pase de aceptación
 ## final se hace en GPU real:
-## env DISPLAY=:0 godot4 --rendering-method forward_plus --path godot \\
+## env DISPLAY=:0 SIGA98_GPU_REAL=1 godot4 --rendering-method forward_plus --path godot \\
 ##   --script res://pruebas/capturar_rocketbox_oficina_1319.gd -- /ruta/salida
 
 const TAM := Vector2i(1280, 720)
@@ -240,7 +240,7 @@ func _guardar_manifest() -> void:
 		"issue": 1319,
 		"sha": OS.get_environment("GITHUB_SHA").strip_edges(),
 		"renderer": RenderingServer.get_current_rendering_method(),
-		"gpu_real": false,
+		"gpu_real": OS.get_environment("SIGA98_GPU_REAL") == "1",
 		"casos": _casos,
 	}
 	var ruta_json := _salida.path_join("manifest.json")
@@ -266,7 +266,7 @@ exigido por #1319. El workflow usa un renderer software para poder detectar clip
 equivocados, poses hundidas y regresiones obvias de composición.
 
 Para el cierre visual, ejecutar el mismo capturador en una máquina con Vulkan
-real mediante DISPLAY=:0, revisar los cuatro PNG y confirmar: pies apoyados,
+real mediante DISPLAY=:0 y SIGA98_GPU_REAL=1, revisar los cuatro PNG y confirmar: pies apoyados,
 sin flotación, brazos sin torsión, postura legible y contexto de oficina.
 
 El manifest.json registra avatar, sexo, clip efectivo, renderer y medidas de
