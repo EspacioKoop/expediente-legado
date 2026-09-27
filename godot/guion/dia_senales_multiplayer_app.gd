@@ -31,6 +31,8 @@ var _servicio
 var _activa := false
 var _conocimiento: Array = []
 var _actor_public_id := ""
+var _room_id := ""
+var _red_status := "local"
 var _acumulado := 0.0
 var _raiz: Node3D
 var _mundo_id := 0
@@ -55,6 +57,7 @@ func activar(
 	transporte: RefCounted = null,
 	conocimiento: Array = [],
 	actor_public_id: String = "",
+	room_id: String = "",
 ) -> Dictionary:
 	if _host == null or not is_instance_valid(_host):
 		return {"ok": false, "status": "dia_no_disponible"}
@@ -66,6 +69,14 @@ func activar(
 	_servicio = SenalServicio.new(transporte_efectivo)
 	_conocimiento = conocimiento.duplicate()
 	_actor_public_id = actor_public_id.strip_edges()
+	_room_id = room_id.strip_edges()
+	_red_status = "local"
+	if not _room_id.is_empty():
+		if _actor_public_id.is_empty():
+			_red_status = "identity_required"
+		else:
+			var apertura: Dictionary = _servicio.abrir_sala(SCENE_KEY, _room_id, _actor_public_id)
+			_red_status = String(apertura.get("status", "transport_error"))
 	_activa = true
 	_acumulado = INTERVALO_CONSULTA
 	if not _asegurar_raiz():
@@ -76,9 +87,13 @@ func activar(
 
 func desactivar() -> Dictionary:
 	_activa = false
+	if _servicio != null and not _room_id.is_empty():
+		_servicio.cerrar_sala()
 	_servicio = null
 	_conocimiento.clear()
 	_actor_public_id = ""
+	_room_id = ""
+	_red_status = "local"
 	_acumulado = 0.0
 	_limpiar_players()
 	_retirar_compositor()
@@ -88,6 +103,10 @@ func desactivar() -> Dictionary:
 func procesar(delta: float, ahora_unix: int = -1) -> void:
 	if not _activa:
 		return
+	if _servicio != null and not _room_id.is_empty():
+		_servicio.procesar_red(delta)
+		var salud: Dictionary = _servicio.health()
+		_red_status = String(salud.get("status", _red_status))
 	if _host == null or not is_instance_valid(_host) or _fase_actual() != FASE:
 		desactivar()
 		return
@@ -154,6 +173,8 @@ func estado() -> Dictionary:
 		"anchors": POSICIONES_ANCHOR.keys(),
 		"anchors_interactivos": _interactuables.size(),
 		"actor_configurado": not _actor_public_id.is_empty(),
+		"room_id": _room_id,
+		"red_status": _red_status,
 		"compositor_abierto": _compositor != null and _compositor.estado()["abierto"],
 	}
 
