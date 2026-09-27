@@ -41,8 +41,17 @@ static func montar_lote_servicio(raiz: Node3D) -> bool:
 	):
 		lote.free()
 		return false
+	# La caja va encima del palé: a ras de suelo junto a él se metía 40 cm en
+	# su volumen, y apilada no ocupa más huella que la del trolley al que
+	# sustituyen.
 	if not _pieza(
-		lote, "Crate", CRATE, Vector3(1.20, TAM_CRATE.y * 0.5, 0.18), TAM_CRATE, MADERA_CAJA, 7.0
+		lote,
+		"Crate",
+		CRATE,
+		Vector3(1.18, TAM_PALLET.y + TAM_CRATE.y * 0.5, -0.52),
+		TAM_CRATE,
+		MADERA_CAJA,
+		7.0
 	):
 		lote.free()
 		return false

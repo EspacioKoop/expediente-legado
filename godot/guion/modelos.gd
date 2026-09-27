@@ -905,15 +905,26 @@ static func _limites(nodo: Node3D) -> AABB:
 	for hijo in _mallas(nodo):
 		var malla: MeshInstance3D = hijo
 		var caja: AABB = malla.get_aabb()
-		# Del espacio de la malla al del nodo raíz, que es donde se encaja.
-		var trans: Transform3D = nodo.global_transform.affine_inverse() * malla.global_transform
-		caja = trans * caja
+		caja = _relativa(nodo, malla) * caja
 		if primero:
 			total = caja
 			primero = false
 		else:
 			total = total.merge(caja)
 	return total
+
+
+## Del espacio de [param malla] al de su antepasado [param nodo], componiendo las
+## transformaciones locales en vez de restar globales: hay montajes —la zona de
+## servicio de la calle (#220)— que encajan muebles antes de colgarlos del
+## árbol, y fuera de él `global_transform` no existe.
+static func _relativa(nodo: Node3D, malla: Node3D) -> Transform3D:
+	var trans := Transform3D.IDENTITY
+	var actual: Node = malla
+	while actual != nodo and actual is Node3D:
+		trans = (actual as Node3D).transform * trans
+		actual = actual.get_parent()
+	return trans
 
 
 ## Le pone a cada malla el material de la casa. El modelo aporta la forma y el

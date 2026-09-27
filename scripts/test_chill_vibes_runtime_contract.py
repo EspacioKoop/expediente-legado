@@ -1,6 +1,9 @@
+import hashlib
 import json
 from pathlib import Path
 import unittest
+
+from scripts.godot_pruebas import comprobar_contrato
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -51,9 +54,26 @@ class ChillVibesRuntimeContractTest(unittest.TestCase):
         self.assertIn("seleccionar_assets_individuales", texto)
         self.assertIn("--asset y --lote son alternativas", texto)
 
-    def test_este_pr_no_fabrica_binarios(self):
-        self.assertFalse((ASSET_DIR / "shipping_pallet.glb").exists())
-        self.assertFalse((ASSET_DIR / "crate.glb").exists())
+    def test_binarios_son_exactamente_los_del_manifiesto(self):
+        # Solo palé y caja: el resto del pack sigue fuera hasta que una escena
+        # lo justifique. Un puntero LFS sin objeto también falla aquí.
+        datos = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        por_id = {asset["id"]: asset for asset in datos["assets"]}
+        self.assertEqual(
+            {"shipping_pallet.glb", "crate.glb"},
+            {ruta.name for ruta in ASSET_DIR.glob("*.glb")},
+        )
+        for asset_id in ("pallet", "crate"):
+            asset = por_id[asset_id]
+            contenido = (ASSET_DIR / asset["destino_sugerido"]).read_bytes()
+            self.assertEqual(asset["sha256"], hashlib.sha256(contenido).hexdigest())
+
+    def test_zona_de_servicio_monta_pallet_y_crate_sin_errores(self):
+        comprobar_contrato(
+            self,
+            "pruebas/pruebas_chill_vibes_servicio_220.gd",
+            "14 pasadas, 0 fallos",
+        )
 
 
 if __name__ == "__main__":
