@@ -17,7 +17,7 @@ class EditorExpedientes953Test(unittest.TestCase):
         comprobar_contrato(
             self,
             "pruebas/pruebas_editor_expedientes_953.gd",
-            "28 pasadas, 0 fallos",
+            "32 pasadas, 0 fallos",
         )
 
     def test_el_acceso_es_explicito_y_solo_qa(self):
@@ -38,6 +38,8 @@ class EditorExpedientes953Test(unittest.TestCase):
         self.assertIn('"formato": FORMATO', editor)
         self.assertIn('"editor_meta":', editor)
         self.assertIn('"contenido_bbcode":', editor)
+        self.assertIn("formato_equilibrado(cuerpo)", editor)
+        self.assertIn("Ctrl+B/I formatea", editor)
 
 
 if __name__ == "__main__":
