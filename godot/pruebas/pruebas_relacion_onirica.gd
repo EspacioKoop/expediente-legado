@@ -10,6 +10,7 @@ var _fallos := 0
 func _initialize() -> void:
 	_probar_fuentes_y_distractor()
 	_probar_determinismo_y_contenido()
+	_probar_contenido_completo_caso_real()
 	_probar_acierto()
 	_probar_fallo_unico()
 	_probar_restauracion_pendiente()
@@ -110,6 +111,48 @@ func _probar_determinismo_y_contenido() -> void:
 		_comprobar(
 			not String(documento.get("extracto", "")).contains("no encajan entre sí"),
 			"antes de resolver solo muestra texto del documento, no la conclusión",
+		)
+
+
+func _probar_contenido_completo_caso_real() -> void:
+	var datos = JSON.parse_string(FileAccess.get_file_as_string("res://datos/casos.json"))
+	_comprobar(datos is Dictionary, "carga el catálogo real para probar lectura completa")
+	if not datos is Dictionary:
+		return
+	var casos: Array = datos.get("casos", [])
+	_comprobar(not casos.is_empty(), "el catálogo real conserva al menos un expediente")
+	if casos.is_empty():
+		return
+	var caso: Dictionary = casos[0]
+	_comprobar(String(caso.get("id", "")) == "caso@1", "la regresión usa el primer expediente real")
+	var leidos: Array = caso.get("registros", []).map(func(r): return String(r.get("folio", "")))
+
+	var pista_acta := _pista_por_id(caso, "pista20@1")
+	var relacion_acta = Relacion.crear(caso, pista_acta, leidos, 1457)
+	_comprobar(relacion_acta != null, "monta la relación real del acta de Contraloría")
+	if relacion_acta != null:
+		var acta := _documento_por_id(relacion_acta.documentos, "actaContraloria1@1")
+		_comprobar(
+			String(acta.get("contenido", "")).contains("cinco minutos después"),
+			"la consulta conserva el dato de los cinco minutos fuera del extracto",
+		)
+		_comprobar(
+			not String(acta.get("extracto", "")).contains("cinco minutos después"),
+			"el panel 3D sigue usando un extracto breve",
+		)
+
+	var pista_tinta := _pista_por_id(caso, "pista28@1")
+	var relacion_tinta = Relacion.crear(caso, pista_tinta, leidos, 1458)
+	_comprobar(relacion_tinta != null, "monta la relación real del peritaje de tinta")
+	if relacion_tinta != null:
+		var empleado := _documento_por_id(relacion_tinta.documentos, "empleado1@1")
+		_comprobar(
+			String(empleado.get("contenido", "")).contains("peritaje incorporado"),
+			"la consulta conserva el peritaje de tinta completo",
+		)
+		_comprobar(
+			not String(empleado.get("extracto", "")).contains("peritaje incorporado"),
+			"el peritaje no se filtra al extracto abreviado",
 		)
 
 
@@ -265,6 +308,20 @@ func _probar_abandono_y_serializacion() -> void:
 		datos.get("nucleo", {}).get("reward_id", "") == "P-REL",
 		"serializa la identidad de recompensa sin copiar la conclusión",
 	)
+
+
+func _pista_por_id(caso: Dictionary, pista_id: String) -> Dictionary:
+	for pista in caso.get("pistas", []):
+		if String(pista.get("id", "")) == pista_id:
+			return pista
+	return {}
+
+
+func _documento_por_id(documentos: Array, registro_id: String) -> Dictionary:
+	for documento in documentos:
+		if String(documento.get("id", "")) == registro_id:
+			return documento
+	return {}
 
 
 func _indice(documentos: Array, registro_id: String) -> int:
