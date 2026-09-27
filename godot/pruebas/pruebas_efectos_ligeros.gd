@@ -32,7 +32,7 @@ func _probar() -> void:
 	_probar_calle_con_lluvia()
 	_probar_reduccion()
 	_probar_calle()
-	_probar_chispas_y_neblina()
+	_probar_chispas_y_deriva_onirica()
 	_probar_sin_nada()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -233,7 +233,7 @@ func _probar_calle() -> void:
 	mundo.free()
 
 
-func _probar_chispas_y_neblina() -> void:
+func _probar_chispas_y_deriva_onirica() -> void:
 	var mundo := _mundo()
 	var archivo := EfectosLigeros.montar(mundo, "archivo", Clima.DESPEJADO, false)
 	var chispas := archivo.get_node_or_null("ChispasFluorescente") as GPUParticles3D
@@ -247,20 +247,21 @@ func _probar_chispas_y_neblina() -> void:
 		quieto == null or quieto.get_node_or_null("ChispasFluorescente") == null,
 		"sin destellos con reducción de movimiento"
 	)
-	var sueno := EfectosLigeros.montar(mundo, "sueño", Clima.DESPEJADO, true)
-	var neblina := sueno.get_node_or_null("NeblinaBaja") as MeshInstance3D
+	var sueno := EfectosLigeros.montar(mundo, "sueño", Clima.DESPEJADO, false)
+	var polvo := sueno.get_node_or_null(EfectosLigeros.NOMBRE_POLVO_ONIRICO) as GPUParticles3D
+	_comprobar(polvo != null, "el sueño deriva un efecto conocido en vez de añadir niebla genérica")
 	_comprobar(
-		neblina != null and neblina.position.y < 0.5, "el sueño tiene neblina a ras de suelo"
+		polvo != null and polvo.amount == EfectosLigeros.PARTICULAS_POLVO_ONIRICO,
+		"la deriva onírica mantiene presupuesto cerrado"
 	)
+	var proceso := polvo.process_material as ParticleProcessMaterial
+	_comprobar(proceso.gravity.y > 0.0, "el polvo onírico cae al revés")
+	_comprobar(absf(proceso.gravity.x) > 0.0, "el polvo onírico también deriva lateralmente")
+	var sueno_quieto := EfectosLigeros.montar(mundo, "sueño", Clima.DESPEJADO, true)
 	_comprobar(
-		(
-			neblina != null
-			and (
-				(neblina.material_override as ShaderMaterial).get_shader_parameter("velocidad")
-				== 0.0
-			)
-		),
-		"quieta con reducción de movimiento"
+		sueno_quieto == null
+		or sueno_quieto.get_node_or_null(EfectosLigeros.NOMBRE_POLVO_ONIRICO) == null,
+		"con reducción de movimiento no hay deriva onírica continua"
 	)
 	mundo.free()
 
