@@ -27,13 +27,13 @@ extends RefCounted
 const NOMBRE := "EfectosLigeros"
 const SHADER_CHARCO := "res://arte/charco_ondas.gdshader"
 const SHADER_GOTAS := "res://arte/gotas_cristal.gdshader"
-const SHADER_NEBLINA := "res://arte/neblina_baja.gdshader"
 const PARTICULAS_CHISPAS := 14
 ## Cada cuánto chisporrotea el fluorescente, en segundos: lo bastante raro para
 ## que sorprenda y lo bastante fijo para que se repita igual cada partida.
 const INTERVALO_CHISPAS := 23.0
 const PARPADEO := 0.15
-const LADO_NEBLINA := 40.0
+const PARTICULAS_POLVO_ONIRICO := 18
+const NOMBRE_POLVO_ONIRICO := "PolvoOnirico"
 
 const PARTICULAS_VAPOR := 10
 const MAX_TAZAS := 8
@@ -82,8 +82,11 @@ static func montar(
 	# El parpadeo es un destello: con reducción de movimiento no se monta.
 	if fase == "archivo" and not reducir:
 		_chispas(mundo, raiz)
-	if fase == "sueño":
-		_neblina(raiz, reducir)
+	# En el sueño no añadimos una niebla/humo genérico separado: deformamos un
+	# efecto ya conocido de vigilia. Las mismas motas de polvo desafían la
+	# gravedad y derivan lateralmente; con reducción de movimiento desaparecen.
+	if fase == "sueño" and not reducir:
+		_polvo_onirico(raiz)
 	if llueve:
 		mojar_cristales(mundo, reducir)
 		_seguir_mojando(mundo, raiz, reducir)
@@ -214,22 +217,31 @@ static func chisporrotear(lampara: OmniLight3D, chispas: GPUParticles3D) -> void
 	tween.tween_property(lampara, "light_energy", energia, PARPADEO * 0.7)
 
 
-# --- Neblina del sueño ----------------------------------------------------------
+# --- Deriva onírica -------------------------------------------------------------
 
 
-static func _neblina(raiz: Node3D, reducir: bool) -> void:
-	var neblina := MeshInstance3D.new()
-	neblina.name = "NeblinaBaja"
-	var plano := PlaneMesh.new()
-	plano.size = Vector2(LADO_NEBLINA, LADO_NEBLINA)
-	neblina.mesh = plano
-	neblina.position = Vector3(0, 0.18, 0)
-	neblina.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var material := ShaderMaterial.new()
-	material.shader = load(SHADER_NEBLINA)
-	material.set_shader_parameter("velocidad", 0.0 if reducir else 1.0)
-	neblina.material_override = material
-	raiz.add_child(neblina)
+## Reutiliza el vocabulario visual del polvo de oficina, pero rompe su física:
+## las motas suben y se desplazan de lado en vez de caer/flotar normalmente.
+## No es feedback obligatorio ni altera colisiones, objetivos o navegación.
+static func _polvo_onirico(raiz: Node3D) -> void:
+	var polvo := _emisor(PARTICULAS_POLVO_ONIRICO, 7.0, Vector2(0.012, 0.012))
+	polvo.name = NOMBRE_POLVO_ONIRICO
+	polvo.position = Vector3(0.0, 0.8, 0.0)
+	var proceso := polvo.process_material as ParticleProcessMaterial
+	proceso.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+	proceso.emission_box_extents = Vector3(3.2, 0.7, 3.2)
+	proceso.direction = Vector3(0.35, 1.0, 0.1)
+	proceso.spread = 65.0
+	proceso.initial_velocity_min = 0.03
+	proceso.initial_velocity_max = 0.08
+	proceso.gravity = Vector3(0.025, 0.06, -0.015)
+	proceso.turbulence_enabled = true
+	proceso.turbulence_noise_strength = 0.22
+	proceso.turbulence_noise_scale = 2.5
+	proceso.alpha_curve = _curva_aparece_y_se_va()
+	_color(polvo, Color(1.0, 0.95, 0.82, 0.45), true)
+	polvo.visibility_aabb = AABB(Vector3(-4, -1, -4), Vector3(8, 4, 8))
+	raiz.add_child(polvo)
 
 
 # --- Charcos y gotas: shader, sin partículas ------------------------------------
