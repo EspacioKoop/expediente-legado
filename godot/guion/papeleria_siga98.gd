@@ -98,7 +98,13 @@ static func agregar_multicopia(raiz: Node3D, pos: Vector3, semilla: int = 0) -> 
 			Vector3(0.18, 0.006, 0.24),
 			color
 		)
-	_caja(\n		grupo,\n		"BandaMulticopia",\n		Vector3(0.0, 0.024, -0.075),\n		Vector3(0.16, 0.004, 0.018),\n		_tono(COLOR_BANDA, semilla, 2)\n	)
+	_caja(
+		grupo,
+		"BandaMulticopia",
+		Vector3(0.0, 0.024, -0.075),
+		Vector3(0.16, 0.004, 0.018),
+		_tono(COLOR_BANDA, semilla, 2)
+	)
 	return grupo
 
 
@@ -106,8 +112,20 @@ static func agregar_carpeta(raiz: Node3D, pos: Vector3, semilla: int = 0) -> Nod
 	var grupo := _grupo(raiz, "CarpetaCartulina", pos)
 	var color := _tono(COLOR_CARTULINA, semilla, 0)
 	_caja(grupo, "BaseCarpeta", Vector3.ZERO, Vector3(0.22, 0.012, 0.28), color)
-	_caja(\n		grupo,\n		"SolapaCarpeta",\n		Vector3(0.07, 0.010, -0.135),\n		Vector3(0.075, 0.018, 0.035),\n		color.lightened(0.05)\n	)
-	_caja(\n		grupo,\n		"EtiquetaSinTexto",\n		Vector3(-0.045, 0.010, -0.115),\n		Vector3(0.08, 0.004, 0.020),\n		COLOR_PAPEL_CALIDO\n	)
+	_caja(
+		grupo,
+		"SolapaCarpeta",
+		Vector3(0.07, 0.010, -0.135),
+		Vector3(0.075, 0.018, 0.035),
+		color.lightened(0.05)
+	)
+	_caja(
+		grupo,
+		"EtiquetaSinTexto",
+		Vector3(-0.045, 0.010, -0.115),
+		Vector3(0.08, 0.004, 0.020),
+		COLOR_PAPEL_CALIDO
+	)
 	return grupo
 
 
@@ -116,8 +134,20 @@ static func agregar_separadores(raiz: Node3D, pos: Vector3, semilla: int = 0) ->
 	for i in range(4):
 		var color := _tono(COLOR_BANDA, semilla, i)
 		var z := float(i) * 0.025
-		_caja(\n			grupo,\n			"Separador%d" % (i + 1),\n			Vector3(0.0, float(i) * 0.004, z),\n			Vector3(0.17, 0.006, 0.19),\n			COLOR_PAPEL\n		)
-		_caja(\n			grupo,\n			"Pestana%d" % (i + 1),\n			Vector3(0.07, 0.006 + float(i) * 0.004, z - 0.075),\n			Vector3(0.055, 0.006, 0.025),\n			color\n		)
+		_caja(
+			grupo,
+			"Separador%d" % (i + 1),
+			Vector3(0.0, float(i) * 0.004, z),
+			Vector3(0.17, 0.006, 0.19),
+			COLOR_PAPEL
+		)
+		_caja(
+			grupo,
+			"Pestana%d" % (i + 1),
+			Vector3(0.07, 0.006 + float(i) * 0.004, z - 0.075),
+			Vector3(0.055, 0.006, 0.025),
+			color
+		)
 	return grupo
 
 
@@ -125,16 +155,41 @@ static func agregar_sobre_interno(raiz: Node3D, pos: Vector3, semilla: int = 0) 
 	var grupo := _grupo(raiz, "SobreInternoDetallado", pos)
 	var papel := COLOR_PAPEL_CALIDO.darkened(0.02 * float(_indice(semilla, 1, 3)))
 	_caja(grupo, "CuerpoSobre", Vector3.ZERO, Vector3(0.21, 0.012, 0.13), papel)
-	_caja(\n		grupo,\n		"SolapaSobre",\n		Vector3(0.0, 0.009, -0.037),\n		Vector3(0.16, 0.005, 0.045),\n		papel.darkened(0.05)\n	)
-	_caja(\n		grupo,\n		"MarcaRutaSinTexto",\n		Vector3(0.052, 0.012, 0.030),\n		Vector3(0.065, 0.004, 0.012),\n		_tono(COLOR_BANDA, semilla, 4)\n	)
+	_caja(
+		grupo,
+		"SolapaSobre",
+		Vector3(0.0, 0.009, -0.037),
+		Vector3(0.16, 0.005, 0.045),
+		papel.darkened(0.05)
+	)
+	_caja(
+		grupo,
+		"MarcaRutaSinTexto",
+		Vector3(0.052, 0.012, 0.030),
+		Vector3(0.065, 0.004, 0.012),
+		_tono(COLOR_BANDA, semilla, 4)
+	)
 	return grupo
 
 
 static func agregar_sello_tampon(raiz: Node3D, pos: Vector3, semilla: int = 0) -> Node3D:
 	var grupo := _grupo(raiz, "SelloYTampon", pos)
-	_caja(\n		grupo,\n		"TamponCerrado",\n		Vector3(-0.055, 0.018, 0.0),\n		Vector3(0.11, 0.036, 0.085),\n		COLOR_TAMPON\n	)
+	_caja(
+		grupo,
+		"TamponCerrado",
+		Vector3(-0.055, 0.018, 0.0),
+		Vector3(0.11, 0.036, 0.085),
+		COLOR_TAMPON
+	)
 	_caja(grupo, "BaseSello", Vector3(0.065, 0.022, 0.0), Vector3(0.075, 0.042, 0.052), COLOR_GOMA)
-	var mango := _cilindro(\n		grupo,\n		"MangoSello",\n		Vector3(0.065, 0.080, 0.0),\n		0.018,\n		0.090,\n		_tono(COLOR_CARTULINA, semilla, 2)\n	)
+	var mango := _cilindro(
+		grupo,
+		"MangoSello",
+		Vector3(0.065, 0.080, 0.0),
+		0.018,
+		0.090,
+		_tono(COLOR_CARTULINA, semilla, 2)
+	)
 	mango.rotation_degrees.z = 5.0 * float(_indice(semilla, 3, 3) - 1)
 	return grupo
 
@@ -151,7 +206,13 @@ static func agregar_consumibles(raiz: Node3D, pos: Vector3, semilla: int = 0) ->
 			Vector3(0.032, 0.006, 0.008),
 			COLOR_METAL
 		)
-	_caja(\n		grupo,\n		"Grapas",\n		Vector3(0.065, 0.010, 0.045),\n		Vector3(0.055, 0.012, 0.018),\n		COLOR_METAL.darkened(0.08)\n	)
+	_caja(
+		grupo,
+		"Grapas",
+		Vector3(0.065, 0.010, 0.045),
+		Vector3(0.055, 0.012, 0.018),
+		COLOR_METAL.darkened(0.08)
+	)
 	return grupo
 
 
@@ -163,9 +224,27 @@ static func agregar_bandejas(raiz: Node3D, semilla: int = 0) -> Node3D:
 	for i in range(2):
 		var centro: Vector3 = centros[i]
 		var color := _tono(COLOR_BANDA, semilla, i)
-		_caja(\n			grupo,\n			"BordeLargoA%d" % i,\n			centro + Vector3(-0.22, 0.0, 0.0),\n			Vector3(0.025, 0.055, 0.32),\n			color\n		)
-		_caja(\n			grupo,\n			"BordeLargoB%d" % i,\n			centro + Vector3(0.22, 0.0, 0.0),\n			Vector3(0.025, 0.055, 0.32),\n			color\n		)
-		_caja(\n			grupo,\n			"CodigoVisual%d" % i,\n			centro + Vector3(0.0, 0.032, -0.13),\n			Vector3(0.12, 0.006, 0.025),\n			color.lightened(0.08)\n		)
+		_caja(
+			grupo,
+			"BordeLargoA%d" % i,
+			centro + Vector3(-0.22, 0.0, 0.0),
+			Vector3(0.025, 0.055, 0.32),
+			color
+		)
+		_caja(
+			grupo,
+			"BordeLargoB%d" % i,
+			centro + Vector3(0.22, 0.0, 0.0),
+			Vector3(0.025, 0.055, 0.32),
+			color
+		)
+		_caja(
+			grupo,
+			"CodigoVisual%d" % i,
+			centro + Vector3(0.0, 0.032, -0.13),
+			Vector3(0.12, 0.006, 0.025),
+			color.lightened(0.08)
+		)
 	return grupo
 
 
@@ -174,8 +253,20 @@ static func agregar_lomos_expediente(raiz: Node3D, pos: Vector3, semilla: int = 
 	for i in range(3):
 		var color := _tono(COLOR_CARTULINA, semilla, i)
 		var x := (float(i) - 1.0) * 0.055
-		_caja(\n			grupo,\n			"Expediente%d" % (i + 1),\n			Vector3(x, float(i) * 0.010, 0.0),\n			Vector3(0.048, 0.035, 0.20),\n			color\n		)
-		_caja(\n			grupo,\n			"BandaLomo%d" % (i + 1),\n			Vector3(x, 0.020 + float(i) * 0.010, -0.045),\n			Vector3(0.050, 0.006, 0.025),\n			_tono(COLOR_BANDA, semilla, i + 2)\n		)
+		_caja(
+			grupo,
+			"Expediente%d" % (i + 1),
+			Vector3(x, float(i) * 0.010, 0.0),
+			Vector3(0.048, 0.035, 0.20),
+			color
+		)
+		_caja(
+			grupo,
+			"BandaLomo%d" % (i + 1),
+			Vector3(x, 0.020 + float(i) * 0.010, -0.045),
+			Vector3(0.050, 0.006, 0.025),
+			_tono(COLOR_BANDA, semilla, i + 2)
+		)
 	return grupo
 
 
@@ -186,12 +277,30 @@ static func _agregar_formulario(
 	var papel := COLOR_PAPEL.lerp(COLOR_PAPEL_CALIDO, float(_indice(semilla, 0, 4)) * 0.08)
 	_caja(grupo, "Hoja", Vector3.ZERO, Vector3(tam.x, 0.008, tam.y), papel)
 	var banda := _tono(COLOR_BANDA, semilla, 1)
-	_caja(\n		grupo,\n		"CabeceraGrafica",\n		Vector3(0.0, 0.007, -tam.y * 0.34),\n		Vector3(tam.x * 0.82, 0.004, tam.y * 0.055),\n		banda\n	)
+	_caja(
+		grupo,
+		"CabeceraGrafica",
+		Vector3(0.0, 0.007, -tam.y * 0.34),
+		Vector3(tam.x * 0.82, 0.004, tam.y * 0.055),
+		banda
+	)
 	for i in range(3):
 		var ancho := tam.x * (0.25 + 0.10 * float((i + semilla) % 3))
 		var z := -tam.y * 0.13 + float(i) * tam.y * 0.16
-		_caja(\n			grupo,\n			"BloqueGrafico%d" % i,\n			Vector3(-tam.x * 0.15, 0.007, z),\n			Vector3(ancho, 0.003, tam.y * 0.022),\n			COLOR_TINTA_FALSA\n		)
-		_caja(\n			grupo,\n			"Casilla%d" % i,\n			Vector3(tam.x * 0.32, 0.007, z),\n			Vector3(tam.x * 0.065, 0.003, tam.x * 0.065),\n			COLOR_TINTA_FALSA\n		)
+		_caja(
+			grupo,
+			"BloqueGrafico%d" % i,
+			Vector3(-tam.x * 0.15, 0.007, z),
+			Vector3(ancho, 0.003, tam.y * 0.022),
+			COLOR_TINTA_FALSA
+		)
+		_caja(
+			grupo,
+			"Casilla%d" % i,
+			Vector3(tam.x * 0.32, 0.007, z),
+			Vector3(tam.x * 0.065, 0.003, tam.x * 0.065),
+			COLOR_TINTA_FALSA
+		)
 	return grupo
 
 
