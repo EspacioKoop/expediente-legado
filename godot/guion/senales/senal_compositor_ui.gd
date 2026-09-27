@@ -60,16 +60,22 @@ func seleccionar_opcion(indice: int) -> Dictionary:
 	if indice < 0 or indice >= _opciones.size():
 		return {"ok": false, "status": "invalid_option"}
 	var opcion: Dictionary = _opciones[indice]
-	publicar_solicitada.emit(
-		_anchor_id,
-		String(opcion["plantilla_id"]),
-		(opcion["tokens"] as Array).duplicate(),
+	(
+		publicar_solicitada
+		. emit(
+			_anchor_id,
+			String(opcion["plantilla_id"]),
+			(opcion["tokens"] as Array).duplicate(),
+		)
 	)
 	return {"ok": true, "status": "requested"}
 
 
 func resolver_publicacion(resultado: Dictionary) -> void:
-	if bool(resultado.get("ok", false)) and String(resultado.get("status", "")) != "discarded_offline":
+	if (
+		bool(resultado.get("ok", false))
+		and String(resultado.get("status", "")) != "discarded_offline"
+	):
 		cerrar()
 		return
 	if _estado_label == null:
@@ -189,12 +195,15 @@ func _combinar_tokens(
 		var renderizado := SenalVocabulario.renderizar(payload, conocimiento)
 		if not renderizado["ok"]:
 			return
-		salida.append(
-			{
-				"plantilla_id": plantilla_id,
-				"tokens": actuales.duplicate(),
-				"texto": String(renderizado["text"]),
-			}
+		(
+			salida
+			. append(
+				{
+					"plantilla_id": plantilla_id,
+					"tokens": actuales.duplicate(),
+					"texto": String(renderizado["text"]),
+				}
+			)
 		)
 		return
 
