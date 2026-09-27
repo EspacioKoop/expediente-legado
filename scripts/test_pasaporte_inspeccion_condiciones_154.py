@@ -11,6 +11,7 @@ CATALOGO = ROOT / "godot/datos/puntos_inspeccion.json"
 PASAPORTE = ROOT / "godot/guion/pasaporte_inspeccion.gd"
 RUNTIME = ROOT / "godot/guion/pasaporte_inspeccion_runtime.gd"
 PRUEBA = ROOT / "godot/pruebas/pruebas_pasaporte_inspeccion_condiciones_154.gd"
+ESCENA = ROOT / "godot" / "escenas" / "dia.tscn"
 RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 
 
