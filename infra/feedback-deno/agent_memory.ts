@@ -69,6 +69,12 @@ function decodeJwtJson<T>(value: string): T {
   return JSON.parse(new TextDecoder().decode(decodeBase64Url(value))) as T;
 }
 
+function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  const copy = new Uint8Array(bytes.byteLength);
+  copy.set(bytes);
+  return copy.buffer;
+}
+
 async function oidcKeys(): Promise<OidcJwk[]> {
   const now = Date.now();
   if (oidcJwksCache && oidcJwksCache.expiresAt > now) {
@@ -129,8 +135,8 @@ async function authenticateAgentRequest(
   const verified = await crypto.subtle.verify(
     "RSASSA-PKCS1-v1_5",
     key,
-    decodeBase64Url(parts[2]),
-    new TextEncoder().encode(parts[0] + "." + parts[1]),
+    toArrayBuffer(decodeBase64Url(parts[2])),
+    toArrayBuffer(new TextEncoder().encode(parts[0] + "." + parts[1])),
   );
   if (!verified) return null;
 
