@@ -119,6 +119,18 @@ func _probar_sueno_seguro() -> void:
 	)
 	_comprobar("sueño rechaza coordenadas de escena global", inseguro["ok"], false)
 
+	var inseguro_canonico := GhostDatos.crear_evento(
+		"suenio/primera_noche",
+		"sueno-r1",
+		"test-376",
+		"anon-sueno",
+		frames,
+		6.0,
+		AHORA,
+		"ghost-sueno-canonico-inseguro"
+	)
+	_comprobar("scene_key canónica de sueño también exige anchor", inseguro_canonico["ok"], false)
+
 	var seguro := GhostDatos.crear_evento(
 		"sueno/familia-laberinto",
 		"sueno-r1",
