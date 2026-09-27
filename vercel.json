@@ -4,5 +4,6 @@
     "api/report.js": {
       "maxDuration": 10
     }
-  }
+  },
+  "ignoreCommand": "git diff --quiet \"${VERCEL_GIT_PREVIOUS_SHA:-HEAD^}\" HEAD -- api vercel.json .vercelignore"
 }
