@@ -1,0 +1,225 @@
+
+name: Agent PR follow-up
+
+on:
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: agent-followup-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+jobs:
+  follow:
+    if: ${{ startsWith(github.event.workflow_run.head_branch, 'agent/qwen-') || startsWith(github.event.workflow_run.head_branch, 'agent/gemini-') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Resolver PR
+        id: meta
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+        run: |
+          set -euo pipefail
+          j="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "$BRANCH" --limit 1             --json number,body,headRefOid)"
+          pr="$(jq -r '.[0].number // empty' <<<"$j")"
+          [[ -n "$pr" ]] || { echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0; }
+          body="$(jq -r '.[0].body // ""' <<<"$j")"
+          marker="$(grep -oE 'agent-autopilot provider=(qwen|gemini) issue=[0-9]+' <<<"$body" | head -n1 || true)"
+          provider="$(sed -nE 's/.*provider=(qwen|gemini).*/\1/p' <<<"$marker")"
+          issue="$(sed -nE 's/.*issue=([0-9]+).*/\1/p' <<<"$marker")"
+          paths="$(sed -nE 's/.*<!-- agent-paths:([^>]*) -->.*/\1/p' <<<"$body" | head -n1)"
+          [[ -n "$provider" && -n "$issue" && -n "$paths" ]] || { echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0; }
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+          echo "pr=$pr" >> "$GITHUB_OUTPUT"
+          echo "issue=$issue" >> "$GITHUB_OUTPUT"
+          echo "provider=$provider" >> "$GITHUB_OUTPUT"
+          echo "paths=$paths" >> "$GITHUB_OUTPUT"
+          echo "sha=$(jq -r '.[0].headRefOid' <<<"$j")" >> "$GITHUB_OUTPUT"
+          echo "conclusion=$CONCLUSION" >> "$GITHUB_OUTPUT"
+
+      - if: ${{ steps.meta.outputs.ok == 'true' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+          lfs: true
+          persist-credentials: false
+
+      - name: Contexto
+        if: ${{ steps.meta.outputs.ok == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ steps.meta.outputs.pr }}
+          ISSUE: ${{ steps.meta.outputs.issue }}
+          PATHS: ${{ steps.meta.outputs.paths }}
+        run: |
+          mkdir -p .agent
+          tr ',' '\n' <<<"$PATHS" > .agent/allowed.txt
+          gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json number,title,body,comments > .agent/issue.json
+          gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json number,title,body,files,reviews,comments > .agent/pr.json
+
+      - name: Contar reparaciones
+        id: attempts
+        if: ${{ steps.meta.outputs.ok == 'true' && steps.meta.outputs.conclusion != 'success' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ steps.meta.outputs.pr }}
+        run: |
+          n="$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json comments             --jq '[.comments[].body|select(contains("agent-ci-fix attempt="))]|length')"
+          echo "n=$n" >> "$GITHUB_OUTPUT"
+
+      - name: Limite de reparaciones
+        if: ${{ steps.meta.outputs.ok == 'true' && steps.meta.outputs.conclusion != 'success' && fromJSON(steps.attempts.outputs.n) >= 2 }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ steps.meta.outputs.pr }}
+          ISSUE: ${{ steps.meta.outputs.issue }}
+        run: |
+          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human
+          gh pr comment "$PR" --repo "$GITHUB_REPOSITORY"             --body "Agent autopilot: CI sigue fallando tras dos reparaciones automaticas. Se detienen los reintentos."
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY"             --body "Agent autopilot: PR #$PR alcanzo el limite de dos reparaciones de CI."
+
+      - name: Logs de CI
+        if: ${{ steps.meta.outputs.ok == 'true' && steps.meta.outputs.conclusion != 'success' && fromJSON(steps.attempts.outputs.n) < 2 }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          gh run view "$RUN_ID" --repo "$GITHUB_REPOSITORY" --log-failed > .agent/ci.log || true
+          [[ -s .agent/ci.log ]] || echo "Sin logs detallados." > .agent/ci.log
+
+      - name: Reparar Qwen
+        if: ${{ steps.meta.outputs.ok == 'true' && steps.meta.outputs.conclusion != 'success' && fromJSON(steps.attempts.outputs.n) < 2 && steps.meta.outputs.provider == 'qwen' }}
+        uses: QwenLM/qwen-code-action@v1
+        env:
+          GITHUB_TOKEN: ''
+        with:
+          openai_api_key: ${{ secrets.QWEN_API_KEY }}
+          openai_base_url: ${{ vars.QWEN_BASE_URL || 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1' }}
+          openai_model: ${{ vars.QWEN_MODEL || 'qwen-coder-plus-latest' }}
+          settings: '{"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
+          prompt: 'Repara solo el fallo de .agent/ci.log. Lee AGENTS.md, QWEN.md, .agent/issue.json y .agent/pr.json. Solo modifica rutas de .agent/allowed.txt. Sin shell, GitHub ni red. No rebajes tests ni gates.'
+
+      - name: Reparar Gemini
+        if: ${{ steps.meta.outputs.ok == 'true' && steps.meta.outputs.conclusion != 'success' && fromJSON(steps.attempts.outputs.n) < 2 && steps.meta.outputs.provider == 'gemini' }}
+        uses: google-github-actions/run-gemini-cli@v0
+        env:
+          GEMINI_CLI_TRUST_WORKSPACE: 'true'
+          GITHUB_TOKEN: ''
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: ${{ vars.GEMINI_MODEL }}
+          settings: '{"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
+          prompt: 'Repara solo el fallo de .agent/ci.log. Lee AGENTS.md, GEMINI.md, .agent/issue.json y .agent/pr.json. Solo modifica rutas de .agent/allowed.txt. Sin shell, GitHub ni red. No rebajes tests ni gates.'
+
+      - name: Publicar reparacion
+        if: ${{ steps.meta.outputs.ok == 'true' && steps.meta.outputs.conclusion != 'success' && fromJSON(steps.attempts.outputs.n) < 2 }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ steps.meta.outputs.pr }}
+          ISSUE: ${{ steps.meta.outputs.issue }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          ATTEMPT: ${{ fromJSON(steps.attempts.outputs.n) + 1 }}
+        run: |
+          set -euo pipefail
+          cp .agent/allowed.txt "$RUNNER_TEMP/allowed"
+          rm -rf .agent .qwen .gemini qwen-artifacts gemini-artifacts
+          { git diff --name-only HEAD; git ls-files --others --exclude-standard; } | sed '/^$/d' | sort -u > "$RUNNER_TEMP/changed"
+          if [[ ! -s "$RUNNER_TEMP/changed" ]]; then
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human
+            gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body "Agent autopilot no encontro una reparacion dentro de la reserva."
+            exit 0
+          fi
+          ALLOWED="$RUNNER_TEMP/allowed" CHANGED="$RUNNER_TEMP/changed" python3 - <<'PY'
+          import os
+          from pathlib import Path
+          a=set(Path(os.environ["ALLOWED"]).read_text().splitlines())
+          c=set(Path(os.environ["CHANGED"]).read_text().splitlines())
+          x=sorted(c-a)
+          if x: raise SystemExit("Fuera de reserva: "+", ".join(x))
+          PY
+          git diff --check
+          git config user.name "agent-autopilot[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix(agent): reparar CI de #$ISSUE intento $ATTEMPT"
+          git push "https://x-access-token:$GH_TOKEN@github.com/$GITHUB_REPOSITORY.git" "HEAD:$BRANCH"
+          gh pr comment "$PR" --repo "$GITHUB_REPOSITORY"             --body "<!-- agent-ci-fix attempt=$ATTEMPT --> Reparacion automatica $ATTEMPT/2 publicada."
+          gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$BRANCH"
+
+      - name: Elegir revisor
+        id: reviewer
+        if: ${{ steps.meta.outputs.ok == 'true' && steps.meta.outputs.conclusion == 'success' }}
+        env:
+          PROVIDER: ${{ steps.meta.outputs.provider }}
+          HAS_QWEN: ${{ secrets.QWEN_API_KEY != '' }}
+          HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
+        run: |
+          r=""
+          [[ "$PROVIDER" == qwen && "$HAS_GEMINI" == true ]] && r=gemini
+          [[ "$PROVIDER" == gemini && "$HAS_QWEN" == true ]] && r=qwen
+          echo "r=$r" >> "$GITHUB_OUTPUT"
+
+      - name: Review Qwen
+        id: qr
+        if: ${{ steps.reviewer.outputs.r == 'qwen' }}
+        uses: QwenLM/qwen-code-action@v1
+        env:
+          GITHUB_TOKEN: ''
+        with:
+          openai_api_key: ${{ secrets.QWEN_API_KEY }}
+          openai_base_url: ${{ vars.QWEN_BASE_URL || 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1' }}
+          openai_model: ${{ vars.QWEN_MODEL || 'qwen-coder-plus-latest' }}
+          settings: '{"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
+          prompt: 'Revisa el PR verde contra main. Lee AGENTS.md, QWEN.md y .agent/pr.json. Solo lectura. Busca bugs, regresiones y pruebas ausentes. Responde en Markdown conciso.'
+
+      - name: Review Gemini
+        id: gr
+        if: ${{ steps.reviewer.outputs.r == 'gemini' }}
+        uses: google-github-actions/run-gemini-cli@v0
+        env:
+          GEMINI_CLI_TRUST_WORKSPACE: 'true'
+          GITHUB_TOKEN: ''
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: ${{ vars.GEMINI_MODEL }}
+          settings: '{"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
+          prompt: 'Revisa el PR verde contra main. Lee AGENTS.md, GEMINI.md y .agent/pr.json. Solo lectura. Busca bugs, regresiones y pruebas ausentes. Responde en Markdown conciso.'
+
+      - name: PR_READY
+        if: ${{ steps.meta.outputs.ok == 'true' && steps.meta.outputs.conclusion == 'success' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ steps.meta.outputs.pr }}
+          ISSUE: ${{ steps.meta.outputs.issue }}
+          SHA: ${{ steps.meta.outputs.sha }}
+          REVIEWER: ${{ steps.reviewer.outputs.r }}
+          QREV: ${{ steps.qr.outputs.summary }}
+          GREV: ${{ steps.gr.outputs.summary }}
+        run: |
+          set -euo pipefail
+          note="sin-review-cruzada"
+          if [[ "$REVIEWER" == qwen ]]; then
+            printf '%s
+' "$QREV" > "$RUNNER_TEMP/review"
+            gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/review"
+            note=review-cruzada-qwen
+          elif [[ "$REVIEWER" == gemini ]]; then
+            printf '%s
+' "$GREV" > "$RUNNER_TEMP/review"
+            gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/review"
+            note=review-cruzada-gemini
+          fi
+          gh pr ready "$PR" --repo "$GITHUB_REPOSITORY" || true
+          gh issue comment 182 --repo "$GITHUB_REPOSITORY"             --body "PR_READY issue=#$ISSUE pr=#$PR sha=$SHA pruebas=CI-despachado-verde limites=$note"
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY"             --body "Agent autopilot: PR #$PR tiene CI verde y queda listo para revision/merge humano ($note)."
