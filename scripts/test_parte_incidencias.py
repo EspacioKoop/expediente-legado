@@ -134,7 +134,7 @@ class ParteIncidenciasTest(unittest.TestCase):
         self.assertIn("HTTPRequest.new()", self.app)
         self.assertIn("HTTPClient.METHOD_POST", self.app)
         self.assertIn('"Content-Type: application/json"', self.app)
-        self.assertIn("JSON.stringify(payload)", self.app)
+        self.assertIn("JSON.stringify(_payload_pendiente)", self.app)
         self.assertNotIn("clipboard_set", self.app)
         self.assertNotIn("api.github.com", self.app)
         self.assertNotIn("Authorization", self.app)
