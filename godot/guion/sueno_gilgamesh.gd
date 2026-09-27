@@ -11,9 +11,13 @@ const CLAVE_SEMILLA := "semilla_onirica_gilgamesh"
 const FUENTE_VIGILIA := "libro:arqueologia_uruk_98"
 const PAGINAS_MINIMAS := 3
 const FRAGMENTOS_NECESARIOS := 4
-## Escala canónica del encuentro nocturno. La comparte runtime y evidencia para
-## que el gate visual no evalúe un diorama a una escala distinta de la partida.
-const ESCALA_ENCUENTRO := 0.44
+## La ciudad mide 22 m de ancho en su espacio local. A 0.34 ocupa 7.48 m:
+## cabe incluso en el diente de 8 m de la forma "peine" sin atravesar sus muros.
+## La comparte runtime y evidencia para que el gate mida la partida real.
+const ESCALA_ENCUENTRO := 0.34
+## Cinco celdas son 10 m: suficiente separación para leer la ciudad desde la
+## entrada sin esconderla en otro brazo de una planta cóncava.
+const PASOS_ANCLA_VISIBLE := 5
 const TRANSFORMACION_FINAL := "muralla_archivo_continua_por_techo"
 const TEXTURAS_FRAGMENTOS := {
 	"fragmento_puerta": preload("res://arte/gilgamesh/fragmento_puerta.svg"),
@@ -67,6 +71,59 @@ static func puede_entrar(estado: Dictionary) -> bool:
 	if estado.has("dia"):
 		return SemillasOniricas.familias_activas(estado).has(ID_MITO)
 	return bool(estado.get(CLAVE_SEMILLA, false))
+
+
+## Punto de montaje nocturno dentro de la sala real.
+##
+## El antiguo punto medio entrada↔salida falla en plantas cóncavas: en "peine"
+## ambos extremos están en dientes distintos y el encuentro queda detrás de
+## muros aunque el punto medio sea caminable. Para plantas de celdas reutiliza
+## la misma regla Planta.a_la_vista que ya coloca contenido visible al llegar.
+## En familias poligonales avanza por el eje de entrada mientras siga dentro del
+## contorno. Solo cae al punto medio como compatibilidad con espacios antiguos.
+static func ancla_encuentro(espacio: Dictionary) -> Vector3:
+	var entrada: Vector3 = espacio.get("entrada", Vector3.ZERO)
+	var bloques: Array = espacio.get("planta", [])
+	if not bloques.is_empty() and not espacio.has("contorno"):
+		var celda_entrada := _celda_mas_cercana(bloques, entrada)
+		var celda_visible := Planta.a_la_vista(bloques, celda_entrada, PASOS_ANCLA_VISIBLE)
+		return Planta.centro_en_metros(bloques, celda_visible)
+
+	var contorno: PackedVector2Array = espacio.get("contorno", PackedVector2Array())
+	if contorno.size() >= 3:
+		var origen := Vector2(entrada.x, entrada.z)
+		var ultimo := origen
+		for paso in range(1, PASOS_ANCLA_VISIBLE + 1):
+			var candidato := origen + Vector2(0.0, -Planta.CELDA * float(paso))
+			if not Geometry2D.is_point_in_polygon(candidato, contorno):
+				break
+			ultimo = candidato
+		if ultimo != origen:
+			return Vector3(ultimo.x, entrada.y, ultimo.y)
+
+	var salidas: Array = espacio.get("salidas", [])
+	if salidas.is_empty():
+		return entrada
+	var salida: Vector3 = salidas[0].get("pos", entrada)
+	return entrada.lerp(salida, 0.5)
+
+
+static func _celda_mas_cercana(bloques: Array, punto: Vector3) -> Vector2i:
+	var candidatas: Array = Planta.celdas(bloques).keys()
+	if candidatas.is_empty():
+		return Vector2i.ZERO
+	var mejor: Vector2i = candidatas[0]
+	var mejor_distancia := INF
+	for dato in candidatas:
+		var celda: Vector2i = dato
+		var posicion := Planta.centro_en_metros(bloques, celda)
+		var dx := posicion.x - punto.x
+		var dz := posicion.z - punto.z
+		var distancia := dx * dx + dz * dz
+		if distancia < mejor_distancia:
+			mejor_distancia = distancia
+			mejor = celda
+	return mejor
 
 
 ## La contraparte de vigilia exige varias acciones deliberadas y llegar a la
