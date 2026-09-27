@@ -39,12 +39,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh label create agent:auto --color 5319E7 --description "Cola automática" --force
-          gh label create agent:qwen --color 1D76DB --description "Ejecutar con Qwen" --force
-          gh label create agent:gemini --color A2EEEF --description "Ejecutar con Gemini" --force
-          gh label create agent:working --color F9D0C4 --description "Agente trabajando" --force
-          gh label create agent:pr-open --color 0E8A16 --description "PR autónomo abierto" --force
-          gh label create agent:needs-human --color D93F0B --description "Necesita intervención humana" --force
+          gh label create agent:auto --repo "$GITHUB_REPOSITORY" --color 5319E7 --description "Cola automática" --force
+          gh label create agent:qwen --repo "$GITHUB_REPOSITORY" --color 1D76DB --description "Ejecutar con Qwen" --force
+          gh label create agent:gemini --repo "$GITHUB_REPOSITORY" --color A2EEEF --description "Ejecutar con Gemini" --force
+          gh label create agent:working --repo "$GITHUB_REPOSITORY" --color F9D0C4 --description "Agente trabajando" --force
+          gh label create agent:pr-open --repo "$GITHUB_REPOSITORY" --color 0E8A16 --description "PR autónomo abierto" --force
+          gh label create agent:needs-human --repo "$GITHUB_REPOSITORY" --color D93F0B --description "Necesita intervención humana" --force
 
   agent:
     if: github.event_name != 'push'
@@ -104,7 +104,7 @@ jobs:
           [[ "$provider" == qwen && "$HAS_QWEN" != true ]] && { gh issue edit "$issue" --add-label agent:needs-human >/dev/null; echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
           [[ "$provider" == gemini && "$HAS_GEMINI" != true ]] && { gh issue edit "$issue" --add-label agent:needs-human >/dev/null; echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
 
-          existing="$(gh pr list --state open --limit 100 --json body | jq -r --arg n "Refs #$issue" '[.[]|select((.body//"")|contains($n))]|length')"
+          existing="$(gh pr list --state open --limit 100 --json body | jq -r --arg n "Refs #$issue" '[.[]|select(((.body//"")|split("\n")|index($n)) != null)]|length')"
           [[ "$existing" != 0 ]] && { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
 
           echo "run=true" >> "$GITHUB_OUTPUT"
@@ -195,7 +195,11 @@ jobs:
           if not p["files"]:
               open(os.environ["GITHUB_OUTPUT"],"a").write("reserved=false\nreason=sin-corte-seguro\n")
           PY
-          grep -q '"files": \[\]' .agent-plan.json 2>/dev/null && exit 0 || true
+          if grep -q '"files": \[\]' .agent-plan.json 2>/dev/null; then
+            gh issue edit "$ISSUE" --add-label agent:needs-human >/dev/null 2>&1 || true
+            gh issue comment "$ISSUE" --body "Agent autopilot: no encontró un corte seguro y concreto; requiere revisión humana." || true
+            exit 0
+          fi
 
           files="$(jq -r '.files|join(",")' .agent-plan.json)"
           goal="$(jq -r '.goal|gsub("[[:space:]]+";"-")' .agent-plan.json)"
