@@ -526,6 +526,7 @@ jobs:
       - id: implement_gemini
         name: Implementar con Gemini
         if: steps.reserve.outputs.reserved == 'true' && steps.select.outputs.provider == 'gemini'
+        continue-on-error: true
         uses: google-github-actions/run-gemini-cli@v0
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
@@ -564,11 +565,10 @@ jobs:
           MAX_REPLANS: '2'
         run: |
           set -euo pipefail
-          base_sha="$(git rev-parse HEAD)"
           outside="$(jq -r '.outside | join(",")' /tmp/claim-guard.json)"
           previous="$(
             gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json comments |
-              jq --arg base "$base_sha"                 '[.comments[].body | select(startswith("AUTOPILOT_REPLAN base=" + $base + " "))] | length'
+              jq '[.comments[].body | select(startswith("AUTOPILOT_REPLAN "))] | length'
           )"
           attempt=$((previous + 1))
 
@@ -581,7 +581,7 @@ jobs:
 
           if (( attempt <= MAX_REPLANS )); then
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-              "AUTOPILOT_REPLAN base=$base_sha attempt=$attempt provider=$PROVIDER observed_paths=$outside
+              "AUTOPILOT_REPLAN attempt=$attempt provider=$PROVIDER observed_paths=$outside
 
 La implementación intentó modificar rutas fuera del CLAIM. El runner ya restauró esos cambios y no se publicará nada de este intento. El próximo plan debe reinspeccionar la integración, incluir las rutas observadas solo si son realmente necesarias y volver a pasar la comprobación de solapes de #182."
             gh workflow run agent-autopilot.yml --repo "$GITHUB_REPOSITORY" --ref main \
@@ -591,7 +591,7 @@ La implementación intentó modificar rutas fuera del CLAIM. El runner ya restau
             gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
               --add-label agent:needs-human >/dev/null
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-              "AUTOPILOT_REPLAN base=$base_sha attempt=$attempt provider=$PROVIDER observed_paths=$outside
+              "AUTOPILOT_REPLAN attempt=$attempt provider=$PROVIDER observed_paths=$outside
 
 Se agotó el límite de $MAX_REPLANS replans automáticos para esta revisión de main. Los cambios fuera del CLAIM fueron restaurados y no se publicó ningún PR."
             echo "scheduled=false" >> "$GITHUB_OUTPUT"
