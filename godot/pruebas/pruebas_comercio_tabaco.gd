@@ -53,9 +53,7 @@ func _probar_tabaco_recurrente() -> void:
 
 	jornada["dinero"] = 30
 	jornada["hora_minutos"] = 21 * 60 + 1
-	var cerrado := ComercioBarrio.comprar(
-		jornada, inventario, "quiosco", "paquete_cigarrillos_98"
-	)
+	var cerrado := ComercioBarrio.comprar(jornada, inventario, "quiosco", "paquete_cigarrillos_98")
 	_comprobar(String(cerrado.get("motivo", "")) == "cerrado", "el quiosco respeta su cierre")
 	_comprobar(int(jornada["dinero"]) == 30, "un comercio cerrado no cobra")
 	_comprobar(not ComercioBarrio.abierto("quiosco", jornada), "estado horario queda cerrado")
