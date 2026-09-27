@@ -32,11 +32,14 @@ func _init(
 	if configuraciones.size() != Golf.HOYOS:
 		return
 
-	var sesion := MinijuegoSesionDatos.nueva_sesion(
-		session_id,
-		MINIGAME_ID,
-		RULES_VERSION,
-		players,
+	var sesion := (
+		MinijuegoSesionDatos
+		. nueva_sesion(
+			session_id,
+			MINIGAME_ID,
+			RULES_VERSION,
+			players,
+		)
 	)
 	if sesion.is_empty():
 		return
@@ -104,7 +107,9 @@ func aplicar_evento(evento: Variant, ahora_unix: int) -> Dictionary:
 		return _rechazo("invalid_action", validacion_tiro["reason"])
 
 	var hoyo_antes := int(_golf["hoyo"])
-	var resultado_tiro := _ejecutar_tiro(actor, validacion_tiro["direction"], validacion_tiro["power"])
+	var resultado_tiro := _ejecutar_tiro(
+		actor, validacion_tiro["direction"], validacion_tiro["power"]
+	)
 	if not resultado_tiro["ok"]:
 		return resultado_tiro
 
@@ -233,14 +238,17 @@ func _normalizar_configuraciones(configuraciones: Array) -> Array:
 				return []
 			obstaculos_validos.append(caja)
 
-		salida.append(
-			{
-				"inicio": inicio,
-				"objetivo": objetivo,
-				"limite": recta,
-				"radio_objetivo": radio,
-				"obstaculos": obstaculos_validos,
-			}
+		(
+			salida
+			. append(
+				{
+					"inicio": inicio,
+					"objetivo": objetivo,
+					"limite": recta,
+					"radio_objetivo": radio,
+					"obstaculos": obstaculos_validos,
+				}
+			)
 		)
 	return salida
 
@@ -251,10 +259,13 @@ func _reiniciar_bolas() -> void:
 		return
 	var config := _configuracion(int(_golf["hoyo"]))
 	for player in _golf.get("jugadores", []):
-		_bolas[String(player)] = GolfBola.nueva(
-			config["inicio"],
-			config["limite"],
-			config["obstaculos"],
+		_bolas[String(player)] = (
+			GolfBola
+			. nueva(
+				config["inicio"],
+				config["limite"],
+				config["obstaculos"],
+			)
 		)
 
 
