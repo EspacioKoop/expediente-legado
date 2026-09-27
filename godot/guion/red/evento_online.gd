@@ -19,6 +19,7 @@ const ESPECIFICACIONES := {
 	"presence": {"max_bytes": 1024, "max_ttl": 120},
 	"help": {"max_bytes": 2048, "max_ttl": 1800},
 	"coop_combat": {"max_bytes": 1536, "max_ttl": 30},
+	"minigame_action": {"max_bytes": 2048, "max_ttl": 30},
 }
 
 
