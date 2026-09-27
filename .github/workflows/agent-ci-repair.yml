@@ -171,8 +171,8 @@ jobs:
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ vars.GEMINI_MODEL }}
-          qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
-          settings: '{"model":{"maxSessionTurns":30},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
+          gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
+          settings: '{"model":{"maxSessionTurns":30},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
           prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-plan.json y .agent-ci-failure.log. Corrige solo la causa del CI y solo rutas del CLAIM. No ejecutes shell ni Git.'
 
       - name: Validar reparación
