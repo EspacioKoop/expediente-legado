@@ -151,7 +151,9 @@ func _montar() -> void:
 
 	_codigo = LineEdit.new()
 	_codigo.name = "CodigoSala"
-	_codigo.max_length = CODIGO_LONGITUD
+	# Deja margen al pegar códigos con espacios/guiones: text_changed normaliza
+	# antes de limitar a los seis caracteres útiles.
+	_codigo.max_length = CODIGO_LONGITUD * 2
 	_codigo.placeholder_text = _texto("placeholder")
 	_codigo.accessibility_name = _texto("codigo")
 	_codigo.focus_mode = Control.FOCUS_ALL
