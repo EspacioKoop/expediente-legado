@@ -40,7 +40,8 @@ class GatoAsistenteVisualTest(unittest.TestCase):
         self.assertIn('preferencias.get("reduccion_movimiento", false)', self.dia)
         self.assertIn("set_process(not reduccion_movimiento)", self.avatar)
         self.assertIn("if _reduccion_movimiento:", self.avatar)
-        self.assertIn("return FRAME_IDLE", self.avatar)
+        self.assertIn("frame = FRAME_IDLE", self.avatar)
+        self.assertIn("return frame", self.avatar)
         self.assertIn("return 0.0", self.avatar)
 
     def test_el_avatar_usa_atlas_gba_original(self):
@@ -80,12 +81,16 @@ class GatoAsistenteVisualTest(unittest.TestCase):
         self.assertIn("call_deferred(\"_colocar_asistente_siga\"", self.dia)
         self.assertIn("MARGEN_BOTONES_ASISTENTE", self.dia)
 
-    def test_el_conjunto_se_puede_arrastrar_y_la_posicion_persiste(self):
+    def test_el_avatar_se_puede_arrastrar_y_la_posicion_persiste(self):
         self.assertIn("func _al_input_asistente_siga(", self.dia)
         self.assertIn("func _fijar_posicion_libre_asistente(", self.dia)
         self.assertIn("func _guardar_posicion_asistente_siga(", self.dia)
         self.assertIn('CLAVE_POSICION_ASISTENTE := "posicion_asistente_gato"', self.dia)
-        self.assertIn("conjunto.mouse_filter = Control.MOUSE_FILTER_PASS", self.dia)
+        self.assertIn("conjunto.mouse_filter = Control.MOUSE_FILTER_IGNORE", self.dia)
+        self.assertIn(
+            "avatar.gui_input.connect(_al_input_asistente_siga.bind(avatar))",
+            self.dia,
+        )
 
     def test_el_atlas_reserva_ocho_posturas_discretas(self):
         frames = (
