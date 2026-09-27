@@ -58,7 +58,10 @@ func _ejecutar() -> void:
 		await _montar_caso(estado as Dictionary, plantilla, sitios)
 
 	_guardar_manifest()
-	print(\n\t\t"Evidencia Rocketbox #1319: %d casos, %d fallos -> %s" % [_casos.size(), _fallos, _salida]\n\t)
+	print(
+		"Evidencia Rocketbox #1319: %d casos, %d fallos -> %s"
+		% [_casos.size(), _fallos, _salida]
+	)
 	quit(1 if _fallos else 0)
 
 
