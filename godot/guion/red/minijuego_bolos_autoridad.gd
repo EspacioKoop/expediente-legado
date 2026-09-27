@@ -215,10 +215,13 @@ func _validar_lanzamiento(action: Dictionary) -> Dictionary:
 func _simular(apuntado: float, potencia: float) -> Dictionary:
 	var simulador := BolosPasillo3D.new()
 	simulador.configurar_variante(_variante)
-	var resultado := simulador.simular_lanzamiento_autoritativo(
-		apuntado,
-		potencia,
-		_bolos_en_pie,
+	var resultado := (
+		simulador
+		. simular_lanzamiento_autoritativo(
+			apuntado,
+			potencia,
+			_bolos_en_pie,
+		)
 	)
 	simulador.free()
 	return resultado
@@ -228,9 +231,7 @@ func _refrescar_snapshot() -> void:
 	if not _valida:
 		return
 
-	var finalizada := (
-		bool(_bolos.get("terminada", false)) or bool(_bolos.get("abandonada", false))
-	)
+	var finalizada := bool(_bolos.get("terminada", false)) or bool(_bolos.get("abandonada", false))
 	_sesion["phase"] = "finished" if finalizada else "playing"
 	_sesion["turn"] = int(_bolos.get("turno", 0))
 	_sesion["allowed_actions"] = [] if finalizada else [TIPO_LANZAMIENTO]
