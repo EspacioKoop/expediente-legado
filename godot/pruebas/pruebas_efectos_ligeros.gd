@@ -259,8 +259,10 @@ func _probar_chispas_y_deriva_onirica() -> void:
 	_comprobar(absf(proceso.gravity.x) > 0.0, "el polvo onírico también deriva lateralmente")
 	var sueno_quieto := EfectosLigeros.montar(mundo, "sueño", Clima.DESPEJADO, true)
 	_comprobar(
-		sueno_quieto == null
-		or sueno_quieto.get_node_or_null(EfectosLigeros.NOMBRE_POLVO_ONIRICO) == null,
+		(
+			sueno_quieto == null
+			or sueno_quieto.get_node_or_null(EfectosLigeros.NOMBRE_POLVO_ONIRICO) == null
+		),
 		"con reducción de movimiento no hay deriva onírica continua"
 	)
 	mundo.free()
