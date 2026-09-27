@@ -162,8 +162,8 @@ jobs:
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ vars.GEMINI_MODEL }}
-          qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
-          settings: '{"model":{"maxSessionTurns":20},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
+          gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
+          settings: '{"model":{"maxSessionTurns":20},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
           prompt: 'Lee AGENTS.md, GEMINI.md y .agent-task.md. Inspecciona sin editar. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: reserve
@@ -267,8 +267,8 @@ jobs:
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ vars.GEMINI_MODEL }}
-          qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
-          settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
+          gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
+          settings: '{"model":{"maxSessionTurns":40},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
           prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md y .agent-plan.json. Implementa solo el plan y solo esas rutas. No hagas commit/push/PR/merge.'
 
       - name: Validar diff y preflight
