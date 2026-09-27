@@ -133,7 +133,7 @@ def _sanitize_failure_line(line: str) -> str:
     line = re.sub(r"/home/runner/work/[^/]+/[^/]+/", "<workspace>/", line)
     line = SHA_RE.sub("<sha>", line)
     line = LINE_NUMBER_RE.sub(":<n>", line)
-    line = re.sub(r"\\s+", " ", line).strip()
+    line = re.sub(r"\s+", " ", line).strip()
     return line[:240]
 
 
@@ -148,7 +148,7 @@ def normalize_failure_signature(log_text: str) -> str:
         if IMPORTANT_FAILURE_RE.search(line) and line not in selected:
             selected.append(line)
     source = selected[-8:] if selected else fallback[-4:]
-    return "\\n".join(source)[:MAX_MEMORY_SUMMARY]
+    return "\n".join(source)[:MAX_MEMORY_SUMMARY]
 
 
 def failure_fingerprint(signature: str) -> str:
