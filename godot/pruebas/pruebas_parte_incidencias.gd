@@ -14,6 +14,37 @@ func _init() -> void:
 		"https://example.test/report",
 	)
 	comprobar(
+		"failover conserva orden y elimina duplicados",
+		(
+			Parte
+			. urls_configuradas(
+				{
+					"feedback_urls":
+					[
+						"https://primario.test/api/report",
+						"https://respaldo.test/api/report",
+						"https://primario.test/api/report",
+					],
+					"feedback_url": "https://respaldo.test/api/report",
+				}
+			)
+		),
+		[
+			"https://primario.test/api/report",
+			"https://respaldo.test/api/report",
+		],
+	)
+	comprobar(
+		"HTTP remoto rechazado",
+		Parte.url_configurada({"feedback_url": "http://example.test/report"}),
+		"",
+	)
+	comprobar(
+		"HTTP loopback permitido para desarrollo",
+		Parte.url_configurada({"feedback_url": "http://127.0.0.1:8787/api/report"}),
+		"http://127.0.0.1:8787/api/report",
+	)
+	comprobar(
 		"esquema no web rechazado",
 		Parte.url_configurada({"feedback_url": "file:///tmp/form"}),
 		"",

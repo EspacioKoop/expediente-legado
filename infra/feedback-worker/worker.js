@@ -8,14 +8,17 @@ const CATEGORIES = new Set([
   "otro",
 ]);
 const MAX_BODY = 16000;
+const MAX_REQUEST_BYTES = 24576;
 
-function json(data, status = 200) {
+function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       "content-type": "application/json; charset=utf-8",
       "cache-control": "no-store",
       "x-content-type-options": "nosniff",
+      "referrer-policy": "no-referrer",
+      ...extraHeaders,
     },
   });
 }
@@ -25,6 +28,12 @@ function cleanText(value, max) {
   return value.trim().slice(0, max);
 }
 
+function cleanTitle(value, max) {
+  return cleanText(value, max)
+    .replace(/[\r\n\t]+/g, " ")
+    .replace(/\s{2,}/g, " ");
+}
+
 function escapeHtml(value) {
   return value
     .replaceAll("&", "&amp;")
@@ -32,6 +41,28 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+async function digestKey(value) {
+  const bytes = new TextEncoder().encode(value);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest).slice(0, 16), (byte) =>
+    byte.toString(16).padStart(2, "0"),
+  ).join("");
+}
+
+async function rateLimit(request, env) {
+  if (!env.REPORT_RATE_LIMITER || !env.REPORT_GLOBAL_LIMITER) {
+    return true;
+  }
+
+  const sourceIp = request.headers.get("cf-connecting-ip") || "unknown";
+  const actor = await digestKey(sourceIp);
+  const [actorLimit, globalLimit] = await Promise.all([
+    env.REPORT_RATE_LIMITER.limit({ key: actor }),
+    env.REPORT_GLOBAL_LIMITER.limit({ key: "siga98-f9" }),
+  ]);
+  return actorLimit.success && globalLimit.success;
 }
 
 async function createGitHubIssue(env, payload) {
@@ -110,16 +141,36 @@ async function sendOptionalEmail(env, payload, issue) {
 
 export default {
   async fetch(request, env) {
-    if (request.method === "GET") {
-      return json({ ok: true, service: "siga98-feedback", version: 1 });
+    const url = new URL(request.url);
+
+    if (request.method === "GET" && (url.pathname === "/" || url.pathname === "/health")) {
+      return json({
+        ok: true,
+        service: "siga98-feedback",
+        version: 2,
+        github_configured: Boolean(env.GITHUB_TOKEN),
+      });
+    }
+
+    if (url.pathname !== "/api/report") {
+      return json({ ok: false, error: "not_found" }, 404);
     }
     if (request.method !== "POST") {
       return json({ ok: false, error: "method_not_allowed" }, 405);
     }
 
     const declaredLength = Number(request.headers.get("content-length") || "0");
-    if (declaredLength > 24576) {
+    if (declaredLength > MAX_REQUEST_BYTES) {
       return json({ ok: false, error: "payload_too_large" }, 413);
+    }
+
+    const allowed = await rateLimit(request, env);
+    if (!allowed) {
+      return json(
+        { ok: false, error: "rate_limited" },
+        429,
+        { "retry-after": "60" },
+      );
     }
 
     let raw;
@@ -129,12 +180,17 @@ export default {
       return json({ ok: false, error: "invalid_json" }, 400);
     }
 
-    if (!raw || typeof raw !== "object" || raw.source !== "siga98-f9") {
+    if (
+      !raw ||
+      typeof raw !== "object" ||
+      raw.schema !== 1 ||
+      raw.source !== "siga98-f9"
+    ) {
       return json({ ok: false, error: "invalid_source" }, 400);
     }
 
     const category = cleanText(raw.category, 32);
-    const title = cleanText(raw.title, 120);
+    const title = cleanTitle(raw.title, 120);
     const body = cleanText(raw.body, MAX_BODY);
     if (!CATEGORIES.has(category) || !title || !body) {
       return json({ ok: false, error: "invalid_report" }, 400);

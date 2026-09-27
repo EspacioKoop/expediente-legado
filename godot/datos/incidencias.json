@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "feedback_url": "",
   "fallback_issue_url": "https://github.com/EspacioKoop/expediente-legado/issues/new",
   "fallback": "No se pudo enviar automáticamente. Se abrirá GitHub con el reporte preparado.",
@@ -38,6 +38,8 @@
     "volver": "Volver",
     "faltan": "Faltan título y descripción para tramitar el parte.",
     "error_guardar": "No se pudo guardar la copia local.",
-    "guardado": "Copia local guardada: %s"
-  }
+    "guardado": "Copia local guardada: %s",
+    "reintentando_gateway": "Gateway no disponible; probando el respaldo…"
+  },
+  "feedback_urls": []
 }

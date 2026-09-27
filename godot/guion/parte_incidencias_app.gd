@@ -24,6 +24,8 @@ var _http: HTTPRequest
 var _configuracion: Dictionary = {}
 var _reduccion_movimiento := false
 var _payload_pendiente: Dictionary = {}
+var _urls_pendientes: Array[String] = []
+var _indice_endpoint := 0
 
 
 func _ready() -> void:
@@ -49,7 +51,7 @@ func cerrar() -> void:
 
 func _montar() -> void:
 	_http = HTTPRequest.new()
-	_http.timeout = 15.0
+	_http.timeout = 8.0
 	_http.request_completed.connect(_al_envio_completado)
 	add_child(_http)
 
@@ -167,6 +169,8 @@ func _reiniciar(diagnostico_por_defecto: bool) -> void:
 	_esperado.clear()
 	_observado.clear()
 	_payload_pendiente.clear()
+	_urls_pendientes.clear()
+	_indice_endpoint = 0
 	_enviar.disabled = false
 	_diagnostico.button_pressed = diagnostico_por_defecto
 	_actualizar_diagnostico(diagnostico_por_defecto)
@@ -226,14 +230,37 @@ func _enviar_reporte() -> void:
 	if payload.is_empty():
 		return
 
-	var url := ParteIncidencias.url_configurada(_configuracion)
-	if url.is_empty():
+	var urls := ParteIncidencias.urls_configuradas(_configuracion)
+	if urls.is_empty():
 		_abrir_fallback(payload, _texto("sin_endpoint"))
 		return
 
 	_payload_pendiente = payload
+	_urls_pendientes = urls
+	_indice_endpoint = 0
 	_enviar.disabled = true
 	_estado.text = _texto("enviando")
+	_intentar_gateway()
+
+
+func _intentar_gateway() -> void:
+	if _payload_pendiente.is_empty():
+		_enviar.disabled = false
+		_estado.text = _texto("error_envio")
+		return
+	if _indice_endpoint >= _urls_pendientes.size():
+		var payload := _payload_pendiente.duplicate(true)
+		_payload_pendiente.clear()
+		_urls_pendientes.clear()
+		_indice_endpoint = 0
+		_enviar.disabled = false
+		_abrir_fallback(payload, _texto("error_envio"))
+		return
+
+	var url := _urls_pendientes[_indice_endpoint]
+	_indice_endpoint += 1
+	if _indice_endpoint > 1:
+		_estado.text = _texto("reintentando_gateway")
 	var cabeceras := PackedStringArray(
 		[
 			"Content-Type: application/json",
@@ -246,12 +273,11 @@ func _enviar_reporte() -> void:
 			url,
 			cabeceras,
 			HTTPClient.METHOD_POST,
-			JSON.stringify(payload),
+			JSON.stringify(_payload_pendiente),
 		)
 	)
 	if error != OK:
-		_enviar.disabled = false
-		_abrir_fallback(payload, _texto("error_envio"))
+		_intentar_gateway()
 
 
 func _al_envio_completado(
@@ -260,8 +286,8 @@ func _al_envio_completado(
 	_cabeceras: PackedStringArray,
 	cuerpo: PackedByteArray,
 ) -> void:
-	_enviar.disabled = false
 	if resultado == HTTPRequest.RESULT_SUCCESS and codigo >= 200 and codigo < 300:
+		_enviar.disabled = false
 		_estado.text = _texto("enviado")
 		var datos = JSON.parse_string(cuerpo.get_string_from_utf8())
 		if datos is Dictionary:
@@ -269,14 +295,11 @@ func _al_envio_completado(
 			if issue_url.begins_with("https://github.com/"):
 				_estado.text = _texto("enviado_issue") % issue_url
 		_payload_pendiente.clear()
+		_urls_pendientes.clear()
+		_indice_endpoint = 0
 		return
 
-	var payload := _payload_pendiente.duplicate(true)
-	_payload_pendiente.clear()
-	if payload.is_empty():
-		_estado.text = _texto("error_envio")
-		return
-	_abrir_fallback(payload, _texto("error_envio"))
+	_intentar_gateway()
 
 
 func _abrir_fallback(payload: Dictionary, motivo: String) -> void:

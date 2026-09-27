@@ -80,7 +80,7 @@ func _capturar_gilgamesh(salida: String, manifiesto: Dictionary) -> bool:
 		sueno.remove_child(standalone)
 		standalone.free()
 	sueno.scale = Vector3.ONE * SuenoGilgamesh.ESCALA_ENCUENTRO
-	var ancla := _ancla_entre_entrada_y_salida(espacio)
+	var ancla := SuenoGilgamesh.ancla_encuentro(espacio)
 	sueno.position = ancla
 	mundo.add_child(sueno)
 
@@ -100,29 +100,14 @@ func _capturar_gilgamesh(salida: String, manifiesto: Dictionary) -> bool:
 
 	# Segundo encuadre: vista frente a la tablilla, a altura de jugador.
 	# Sirve para revisar motivo↔ancla sin usar la cámara elevada del prototipo.
-	var posicion_puzzle := sueno.to_global(Vector3(0.0, 0.0, 8.0))
+	var posicion_puzzle := sueno.to_global(Vector3(0.0, 0.0, 16.0))
 	posicion_puzzle.y = ALTURA_JUGADOR
-	var objetivo_puzzle := sueno.to_global(Vector3(0.0, 1.2, 3.25))
+	var objetivo_puzzle := sueno.to_global(Vector3(0.0, 1.15, 3.25))
 	camara.position = posicion_puzzle
 	camara.look_at(objetivo_puzzle, Vector3.UP)
 	if not await _guardar(salida, "436_gilgamesh_puzzle.png", "gilgamesh_puzzle", 436, manifiesto):
 		return false
 
-	if not _resolver_gilgamesh(sueno):
-		return false
-
-	camara.position = Vector3(entrada.x, ALTURA_JUGADOR, entrada.z)
-	camara.look_at(ancla + Vector3(0.0, 1.05, -0.5), Vector3.UP)
-	if not await _guardar(
-		salida, "436_gilgamesh_resuelto.png", "gilgamesh_resuelto", 436, manifiesto
-	):
-		return false
-	mundo.queue_free()
-	await process_frame
-	return true
-
-
-func _resolver_gilgamesh(sueno: SuenoGilgamesh) -> bool:
 	var fragmentos: Array = SuenoGilgamesh.ENCAJES.keys()
 	fragmentos.sort()
 	for bruto in fragmentos:
@@ -135,7 +120,15 @@ func _resolver_gilgamesh(sueno: SuenoGilgamesh) -> bool:
 	if not sueno.resuelto():
 		printerr("Gilgamesh no alcanzó el estado resuelto")
 		return false
-	return true
+
+	camara.position = Vector3(entrada.x, ALTURA_JUGADOR, entrada.z)
+	camara.look_at(ancla + Vector3(0.0, 1.05, -0.5), Vector3.UP)
+	var guardado_final := await _guardar(
+		salida, "436_gilgamesh_resuelto.png", "gilgamesh_resuelto", 436, manifiesto
+	)
+	mundo.queue_free()
+	await process_frame
+	return guardado_final
 
 
 func _capturar_aquiles(salida: String, manifiesto: Dictionary) -> bool:
@@ -247,15 +240,6 @@ func _montar_camara_jugador(
 	mundo.add_child(camara)
 	camara.look_at(objetivo, Vector3.UP)
 	return camara
-
-
-func _ancla_entre_entrada_y_salida(espacio: Dictionary) -> Vector3:
-	var entrada: Vector3 = espacio.get("entrada", Vector3.ZERO)
-	var salidas: Array = espacio.get("salidas", [])
-	if salidas.is_empty():
-		return entrada
-	var salida: Vector3 = salidas[0].get("pos", entrada)
-	return entrada.lerp(salida, 0.5)
 
 
 func _montar_camara_duat(mundo: Node3D) -> void:

@@ -83,17 +83,8 @@ func _montar_gilgamesh(mundo: Node3D, espacio: Dictionary) -> void:
 		camara.free()
 
 	gilgamesh.scale = Vector3.ONE * SuenoGilgamesh.ESCALA_ENCUENTRO
-	gilgamesh.position = _ancla_entre_entrada_y_salida(espacio)
+	gilgamesh.position = SuenoGilgamesh.ancla_encuentro(espacio)
 	mundo.add_child(gilgamesh)
-
-
-func _ancla_entre_entrada_y_salida(espacio: Dictionary) -> Vector3:
-	var entrada: Vector3 = espacio.get("entrada", Vector3.ZERO)
-	var salidas: Array = espacio.get("salidas", [])
-	if salidas.is_empty():
-		return entrada
-	var salida: Vector3 = salidas[0].get("pos", entrada)
-	return entrada.lerp(salida, 0.5)
 
 
 func gilgamesh_montado_esta_noche() -> bool:
