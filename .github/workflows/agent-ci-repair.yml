@@ -181,7 +181,7 @@ jobs:
           set -euo pipefail
           cp .agent-plan.json /tmp/plan.json
           rm -f .agent-task.md .agent-plan.json .agent-ci-failure.log gha-creds-*.json
-          rm -rf .gemini .qwen
+          rm -rf .gemini .qwen gemini-artifacts qwen-artifacts
           git add -A
           git diff --cached --quiet && { echo "el agente no produjo cambios"; exit 2; }
           python3 - <<'PY'
