@@ -83,5 +83,15 @@ renderer/rendering_method=\"forward_plus\"
         )
 
 
+    def test_smoke_sentry_es_manual_y_no_contamina_cada_alpha(self):
+        texto = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("sentry_smoke:", texto)
+        self.assertIn("type: boolean", texto)
+        self.assertIn("github.event_name == 'workflow_dispatch' && inputs.sentry_smoke", texto)
+        self.assertIn('SentrySDK.capture_message("SIGA-98 Sentry smoke manual")', texto)
+        self.assertIn("SentrySDK.close()", texto)
+        self.assertIn("SENTRY_SMOKE_SENT event_id=", texto)
+        self.assertIn("sentry_smoke requiere el secret SENTRY_DSN", texto)
+
 if __name__ == "__main__":
     unittest.main()
