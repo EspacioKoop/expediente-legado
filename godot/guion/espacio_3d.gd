@@ -217,6 +217,17 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 		# Hacia dónde mira. Por defecto, al frente de siempre; una cinemática de
 		# salida (#899) necesita espaldas, no caras.
 		cuerpo.rotation.y = float(figura.get("giro", 0.0))
+		# Las figuras pueden pedir microgestos sin convertir Espacio3D en lógica
+		# de sueño: es un dato visual más, igual que giro/modelo/rótulo.
+		if figura.get("movimiento_idle", false):
+			var idle_figura := FiguraIdle3D.new()
+			idle_figura.name = "IdleFigura"
+			cuerpo.add_child(idle_figura)
+			idle_figura.configurar(
+				cuerpo,
+				float(figura.get("fase_idle", 0.0)),
+				bool(figura.get("mirar_jugador", false))
+			)
 		var id_companero := String(figura.get("id_companero", ""))
 		if not id_companero.is_empty():
 			cuerpo.set_meta("companero_id", id_companero)

@@ -209,6 +209,12 @@ static func espacio(id: String, quedan: int, contenido: Dictionary = {}) -> Dict
 					# CONTRA QUIÉN, porque ganar se apunta por persona.
 					"duelo": quien.get("id", "") if quien.get("acusado", false) else "",
 					"ataques": quien.get("ataques", []),
+					# #134: las siluetas dejan de ser maniquíes. El desfase
+					# depende del reparto determinista; solo el acusado mira
+					# al jugador de cerca para que ese gesto tenga intención.
+					"movimiento_idle": true,
+					"fase_idle": float(i) * 1.37,
+					"mirar_jugador": quien.get("acusado", false),
 				}
 			)
 		)
