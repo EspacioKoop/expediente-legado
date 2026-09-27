@@ -7,6 +7,7 @@ const GhostDatos = preload("res://guion/red/ghost_datos.gd")
 const GhostGrabador = preload("res://guion/red/ghost_grabador.gd")
 const GhostServicio = preload("res://guion/red/ghost_servicio.gd")
 const GhostRemoto3D = preload("res://guion/red/ghost_remoto_3d.gd")
+const EcosSueno3D = preload("res://guion/ecos_sueno_3d.gd")
 const TransporteFixture = preload("res://guion/red/transporte_fixture.gd")
 
 const AHORA := 2_100_000_000
@@ -21,6 +22,7 @@ func _init() -> void:
 	_probar_revision_y_apagado()
 	_probar_grabador_local()
 	_probar_sueno_seguro()
+	_probar_movimiento_npc_sueno()
 	print("\nGhosts #376: %d pasadas, %d fallos" % [pasadas, fallos])
 	quit(1 if fallos > 0 else 0)
 
@@ -114,6 +116,57 @@ func _probar_sueno_seguro() -> void:
 		"entrada-local"
 	)
 	_comprobar("sueño permite anchor local explícito", seguro["ok"], true)
+
+
+func _probar_movimiento_npc_sueno() -> void:
+	var frames := [
+		{"t": 0.0, "position": [0.0, 0.0, 0.0], "yaw": 0.0, "gesture": ""},
+		{"t": 1.0, "position": [2.0, 0.0, 0.0], "yaw": 0.5, "gesture": "asentir"},
+	]
+	var creado := GhostDatos.crear_evento(
+		"sueno/familia-laberinto",
+		"sueno-r1",
+		"test-376",
+		"anon-movimiento",
+		frames,
+		6.0,
+		AHORA,
+		"ghost-npc-sueno-001",
+		"anchor",
+		"eco-dia"
+	)
+	_comprobar("trayectoria NPC de sueño válida", creado["ok"], true)
+	if not creado["ok"]:
+		return
+
+	var npc := Node3D.new()
+	npc.position = Vector3(10.0, 0.0, 5.0)
+	_comprobar(
+		"EcoSueno acepta movimiento anchor-compatible",
+		EcosSueno3D.aplicar_movimiento_ghost(
+			npc, creado["event"], "sueno-r1", "eco-dia", AHORA
+		),
+		true
+	)
+	var trayectoria := npc.get_node_or_null("MovimientoGhost")
+	_comprobar("NPC recibe reproductor común", trayectoria != null, true)
+	if trayectoria != null:
+		trayectoria.avanzar(0.5)
+		_comprobar("NPC conserva origen local", npc.position.z, 5.0)
+		_comprobar("NPC interpola movimiento grabado", npc.position.x > 10.0 and npc.position.x < 12.0, true)
+		_comprobar("gesto queda como enum visual", String(npc.get_meta("ghost_gesture", "")), "asentir")
+	_comprobar("movimiento NPC no añade navegación", npc.get_node_or_null("NavigationAgent3D"), null)
+	npc.free()
+
+	var rechazado := Node3D.new()
+	_comprobar(
+		"anchor distinto no mueve NPC",
+		EcosSueno3D.aplicar_movimiento_ghost(
+			rechazado, creado["event"], "sueno-r1", "otro-anchor", AHORA
+		),
+		false
+	)
+	rechazado.free()
 
 
 func _comprobar(nombre: String, obtenido: Variant, esperado: Variant) -> void:
