@@ -586,23 +586,24 @@ func _mostrar_ticket(superficie: String, resultado: Dictionary, operacion: Strin
 
 
 func _texto_ticket(resultado: Dictionary, operacion: String) -> String:
+	var texto := "NO DISPONIBLE"
 	if bool(resultado.get("ok", false)):
 		if operacion == "compra" and bool(resultado.get("ya_comprado", false)):
-			return "YA COMPRADO"
-		var importe := maxi(0, int(resultado.get("importe", 0)))
-		return "REVENTA · +%d" % importe if operacion == "venta" else "PAGO · -%d" % importe
-
-	match String(resultado.get("motivo", "fallo")):
-		"sin_dinero":
-			return "NO LLEGA EL DINERO"
-		"no_llevado":
-			return "NO LO LLEVAS"
-		"cerrado":
-			return "CERRADO"
-		"onirico", "no_vendible":
-			return "NO SE VENDE"
-		_:
-			return "NO DISPONIBLE"
+			texto = "YA COMPRADO"
+		else:
+			var importe := maxi(0, int(resultado.get("importe", 0)))
+			texto = "REVENTA · +%d" % importe if operacion == "venta" else "PAGO · -%d" % importe
+	else:
+		match String(resultado.get("motivo", "fallo")):
+			"sin_dinero":
+				texto = "NO LLEGA EL DINERO"
+			"no_llevado":
+				texto = "NO LO LLEVAS"
+			"cerrado":
+				texto = "CERRADO"
+			"onirico", "no_vendible":
+				texto = "NO SE VENDE"
+	return texto
 
 
 func _buscar_entrada(
