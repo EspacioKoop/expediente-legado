@@ -61,9 +61,9 @@ class OficinaVisualGate126Test(unittest.TestCase):
         self.assertIn("SIGA-98-oficina-visual-gate-126-${{ github.sha }}", self.workflow)
         self.assertIn("puestos-archivo.png", self.workflow)
         self.assertIn("acceso-ventanas.png", self.workflow)
-        self.assertIn("puestos-archivo-mediodia.png", self.workflow)
-        self.assertIn("acceso-ventanas-tarde.png", self.workflow)
-        self.assertIn("puestos-archivo-noche.png", self.workflow)
+        self.assertIn("for sufijo in mediodia tarde noche; do", self.workflow)
+        self.assertIn('test -s "$salida/puestos-archivo-$sufijo.png"', self.workflow)
+        self.assertIn('test -s "$salida/acceso-ventanas-$sufijo.png"', self.workflow)
         self.assertIn("'godot/guion/dia_reloj_horario_app.gd'", self.workflow)
 
 
