@@ -7,7 +7,8 @@
   },
   "git": {
     "deploymentEnabled": {
-      "odiseo/*": false
+      "*": false,
+      "main": true
     }
   },
   "ignoreCommand": "git diff --quiet \"${VERCEL_GIT_PREVIOUS_SHA:-HEAD^}\" HEAD -- api vercel.json .vercelignore"
