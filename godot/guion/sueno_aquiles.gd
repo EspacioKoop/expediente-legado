@@ -280,12 +280,12 @@ func _montar_impactos() -> void:
 	# Tres documentos quedan congelados justo antes de tocar la figura. Cada uno
 	# conserva una estela física y una placa de rechazo contra el cuerpo: la
 	# invulnerabilidad se lee en el espacio sin tutorial ni texto explicativo.
-	var posiciones := [
+	var posiciones: Array[Vector3] = [
 		Vector3(-2.6, 6.8, 1.5),
 		Vector3(2.5, 5.9, 1.1),
 		Vector3(0.7, 8.0, 1.2),
 	]
-	var origenes := [
+	var origenes: Array[Vector3] = [
 		Vector3(-4.9, 7.5, 5.2),
 		Vector3(4.7, 6.6, 4.8),
 		Vector3(1.9, 9.0, 5.0),
@@ -301,7 +301,7 @@ func _montar_impactos() -> void:
 		impacto.rotation_degrees = Vector3(12.0 * i, 24.0 * i, -18.0 + 9.0 * i)
 		_impactos.append(impacto)
 
-		var delta := posiciones[i] - origenes[i]
+		var delta: Vector3 = posiciones[i] - origenes[i]
 		var estela := _crear_caja(
 			self,
 			"EstelaImpacto%d" % (i + 1),
