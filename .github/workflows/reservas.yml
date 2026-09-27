@@ -7,6 +7,10 @@ on:
     - cron: '17 */6 * * *'
   workflow_dispatch:
 
+# Serializa para no publicar RELEASE duplicados. Ojo: GitHub guarda solo UNA
+# ejecución pendiente por grupo y cancela las demás aunque cancel-in-progress
+# sea false, así que en una ráfaga de merges se pierden las del medio. Por eso
+# --pr también recupera cualquier reserva de PR ya cerrada (#1512).
 concurrency:
   group: reservas-${{ github.repository }}
   cancel-in-progress: false
