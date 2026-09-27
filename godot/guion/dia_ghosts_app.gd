@@ -235,7 +235,9 @@ func _contexto_actual() -> Dictionary:
 	if typeof(_host.jornada) != TYPE_DICTIONARY:
 		return {}
 	var fase := String(_host.jornada.get("fase", ""))
-	var espacio: Dictionary = (\n\t\t_host._espacio_actual if typeof(_host._espacio_actual) == TYPE_DICTIONARY else {}\n\t)
+	var espacio: Dictionary = (
+		_host._espacio_actual if typeof(_host._espacio_actual) == TYPE_DICTIONARY else {}
+	)
 	if fase == "trayecto":
 		return {
 			"scene_key": "trayecto",
