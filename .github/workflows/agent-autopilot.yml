@@ -125,4 +125,87 @@ jobs:
         if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen'
         env:
           KEY: ${{ secrets.QWEN_API_KEY }}
-        r
+        run: |
+          if [[ "$KEY" == sk-sp-* ]]; then
+            echo "url=https://coding-intl.dashscope.aliyuncs.com/v1" >> "$GITHUB_OUTPUT"
+          else
+            echo "url=https://dashscope-intl.aliyuncs.com/compatible-mode/v1" >> "$GITHUB_OUTPUT"
+          fi
+          echo "model=qwen3-coder-plus" >> "$GITHUB_OUTPUT"
+
+      - name: Contexto
+        if: steps.select.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.select.outputs.issue }}
+        run: |
+          gh issue view "$ISSUE" --json title,body,comments \
+            --jq '"# Issue\n\n## " + .title + "\n\n" + (.body//"") + "\n\n## Comentarios recientes\n" + ((.comments[-20:]//[])|map("- "+.author.login+": "+.body)|join("\n\n"))' \
+            > .agent-task.md
+
+      - id: plan_qwen
+        name: Plan Qwen
+        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen'
+        uses: QwenLM/qwen-code-action@v1
+        with:
+          openai_api_key: ${{ secrets.QWEN_API_KEY }}
+          openai_base_url: ${{ vars.QWEN_BASE_URL || steps.qwen.outputs.url }}
+          openai_model: ${{ vars.QWEN_MODEL || steps.qwen.outputs.model }}
+          settings: '{"model":{"maxSessionTurns":20},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
+          prompt: 'Lee AGENTS.md, QWEN.md y .agent-task.md. Inspecciona sin editar. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+
+      - id: plan_gemini
+        name: Plan Gemini
+        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'gemini'
+        uses: google-github-actions/run-gemini-cli@v0
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: ${{ vars.GEMINI_MODEL }}
+          settings: '{"model":{"maxSessionTurns":20},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
+          prompt: 'Lee AGENTS.md, GEMINI.md y .agent-task.md. Inspecciona sin editar. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+
+      - id: reserve
+        name: Validar plan y reservar
+        if: steps.select.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.select.outputs.issue }}
+          PROVIDER: ${{ steps.select.outputs.provider }}
+          BRANCH: ${{ steps.select.outputs.branch }}
+          SUMMARY: ${{ steps.plan_qwen.outputs.summary || steps.plan_gemini.outputs.summary }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$SUMMARY" > /tmp/summary.txt
+          python3 - <<'PY'
+          import json, os, re
+          raw=open("/tmp/summary.txt",encoding="utf-8").read()
+          m=re.search(r"AGENT_PLAN_BEGIN\s*(\{.*?\})\s*AGENT_PLAN_END",raw,re.S)
+          if not m: raise SystemExit("plan no parseable")
+          p=json.loads(m.group(1)); files=p.get("files",[])
+          if not isinstance(files,list) or len(files)>12: raise SystemExit("plan inválido")
+          clean=[]
+          for x in files:
+              if not isinstance(x,str): raise SystemExit("ruta inválida")
+              x=x.strip().replace("\\","/")
+              if not x or x.startswith("/") or ".." in x.split("/") or any(c in x for c in "*?[]"): raise SystemExit("ruta inválida")
+              if x.startswith(".github/") or x in {"AGENTS.md","QWEN.md","GEMINI.md","docs/agents-autonomos.md"}: raise SystemExit("ruta protegida")
+              clean.append(x)
+          p={"files":list(dict.fromkeys(clean)),"goal":str(p.get("goal",""))[:180]}
+          open(".agent-plan.json","w",encoding="utf-8").write(json.dumps(p,ensure_ascii=False))
+          if not p["files"]:
+              open(os.environ["GITHUB_OUTPUT"],"a").write("reserved=false\nreason=sin-corte-seguro\n")
+          PY
+          grep -q '"files": \[\]' .agent-plan.json 2>/dev/null && exit 0 || true
+
+          files="$(jq -r '.files|join(",")' .agent-plan.json)"
+          goal="$(jq -r '.goal|gsub("[[:space:]]+";"-")' .agent-plan.json)"
+          claim="CLAIM issue=#$ISSUE agent=Autopilot-$PROVIDER branch=$BRANCH files=$files goal=$goal lease=48h"
+          cid="$(gh api -X POST "repos/$GITHUB_REPOSITORY/issues/182/comments" -f body="$claim" --jq .id)"
+          gh api --paginate "repos/$GITHUB_REPOSITORY/issues/182/comments?per_page=100" \
+            --jq '.[]|[.id,(.body|@base64)]|@tsv' > /tmp/reservas.tsv
+          CLAIM_ID="$cid" BRANCH="$BRANCH" python3 - <<'PY'
+          import base64,os,re
+          me=int(os.environ["CLAIM_ID"]); branch=os.environ["BRANCH"]; active={}; mine=None
+          cr=re.compile(r"^CLAIM\s+issue=#(\d+).*?\bbranch=([^\s]+).*?\bfiles=([^\s]+)",re.M)
+          rr=re.compile(r"^RELEASE\s+issue=#(\d+)(?:.*?\bbranch=([^\s]+))?",re.M)
+          def ov(a,b): a=a.rstrip("/"); b=b.rstrip("/"); return a
