@@ -740,6 +740,7 @@ func _plantilla_en(sitio: Dictionary) -> Array:
 			. append(
 				{
 					"pos": sitios[i],
+					"id_companero": String(quien.get("id", "")),
 					"color": quien["color"],
 					"rotulo": tr(quien["nombre"]),
 					"frase": Companeros.frase_de(quien, jornada["dia"]),

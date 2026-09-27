@@ -217,6 +217,9 @@ static func construir(raiz: Node3D, espacio: Dictionary) -> Array:
 		# Hacia dónde mira. Por defecto, al frente de siempre; una cinemática de
 		# salida (#899) necesita espaldas, no caras.
 		cuerpo.rotation.y = float(figura.get("giro", 0.0))
+		var id_companero := String(figura.get("id_companero", ""))
+		if not id_companero.is_empty():
+			cuerpo.set_meta("companero_id", id_companero)
 		if not figura.get("rotulo", "").is_empty():
 			# El nombre va SOBRE la cabeza, y la cabeza está más alta o más baja
 			# según se sea una silueta o una persona de verdad. Silueta y modelo
