@@ -9,28 +9,35 @@ extends RefCounted
 const BASE := "res://assets/texturas/calle_ai_98/"
 const NOMBRE_CAPA := "FondosFotorealistas98"
 
+# `hueco_inferior`: fracción de la imagen, desde abajo, que el recorte dejó sin
+# planta baja (transparente salvo restos de pilares). Se mide sobre el webp con
+# el mismo umbral de alfa que usa el sprite (#1526).
 const BLOQUES := [
 	{
 		"nombre": "BloqueOesteSur98",
 		"archivo": "bloque_01.webp",
+		"hueco_inferior": 0.135,
 		"pos": Vector3(-9.4, 0.0, -0.8),
 		"altura": 9.6,
 	},
 	{
 		"nombre": "BloqueOesteNorte98",
 		"archivo": "bloque_03.webp",
+		"hueco_inferior": 0.128,
 		"pos": Vector3(-11.4, 0.0, 3.0),
 		"altura": 9.8,
 	},
 	{
 		"nombre": "BloqueEsteSur98",
 		"archivo": "bloque_02.webp",
+		"hueco_inferior": 0.177,
 		"pos": Vector3(9.4, 0.0, -0.4),
 		"altura": 10.8,
 	},
 	{
 		"nombre": "BloqueEsteNorte98",
 		"archivo": "bloque_04.webp",
+		"hueco_inferior": 0.125,
 		"pos": Vector3(11.4, 0.0, 3.0),
 		"altura": 10.6,
 	},
@@ -58,7 +65,12 @@ static func _agregar_bloque(capa: Node3D, datos: Dictionary) -> void:
 	var sprite := Sprite3D.new()
 	sprite.name = String(datos.get("nombre", "BloqueFondo98"))
 	sprite.texture = textura
-	sprite.position = base + Vector3(0.0, altura * 0.5, 0.0)
+	# La base del EDIFICIO toca la acera, no la de la imagen: apoyada por la
+	# imagen, la planta baja recortada dejaba un hueco de 1,3–1,9 m por el que
+	# asomaban las siluetas oscuras del skyline (#1526). Los restos del recorte
+	# quedan bajo el suelo.
+	var hueco := float(datos.get("hueco_inferior", 0.0))
+	sprite.position = base + Vector3(0.0, altura * (0.5 - hueco), 0.0)
 	sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 	sprite.pixel_size = altura / maxf(float(textura.get_height()), 1.0)
 	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD

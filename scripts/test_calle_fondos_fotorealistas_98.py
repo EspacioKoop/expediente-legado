@@ -3,6 +3,8 @@ import hashlib
 import json
 import unittest
 
+from scripts.godot_pruebas import comprobar_contrato
+
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / "godot" / "guion" / "calle_fondos_fotorealistas_98.gd"
@@ -56,6 +58,17 @@ class CalleFondosFotorealistas98Test(unittest.TestCase):
             "guardar(",
         ):
             self.assertNotIn(termino, self.runtime)
+
+    def test_la_base_del_edificio_toca_la_acera(self):
+        # #1526: el recorte no tiene planta baja; apoyado por la imagen, el
+        # impostor dejaba 1,3–1,9 m de hueco por el que asomaba el skyline.
+        self.assertEqual(4, self.runtime.count('"hueco_inferior":'))
+        self.assertIn('altura * (0.5 - hueco)', self.runtime)
+        comprobar_contrato(
+            self,
+            "pruebas/pruebas_calle_fondos_1526.gd",
+            "17 pasadas, 0 fallos",
+        )
 
     def test_capa_es_idempotente(self):
         self.assertIn("mundo.has_node(NOMBRE_CAPA)", self.runtime)
