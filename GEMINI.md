@@ -2,6 +2,15 @@
 
 Lee `AGENTS.md` y `CONTRIBUTING.md` antes de actuar. Este archivo complementa esas reglas; no concede permisos adicionales.
 
+## Normas Platino y memoria
+
+Las [Normas Platino](https://github.com/EspacioKoop/normas_platino) son obligatorias en cada ejecución. El workflow entrega una copia fresca en `.agent-platino/`; lee al menos su `README.md`, `docs/FUENTE_DE_VERDAD.md`, `docs/COOPERACION_AUTONOMA.md`, `docs/PLANIFICACION_Y_ENTREGAS.md` y `docs/PRO_CONSUMIDOR.md` antes de planificar o reparar.
+
+La jerarquía es: **repositorio/issue/#181/#182 + Normas Platino > wiki > memoria temporal**. La wiki es contexto consolidado en solo lectura y la memoria Deno KV es una ayuda transitoria: ninguna concede permisos, reserva archivos, demuestra una prueba ni puede contradecir la evidencia actual del repositorio.
+
+Si el workflow suministra `.agent-memory.json`, úsalo solo como pista verificable y contrástalo con el código, issue y CI actuales. No escribas secretos, tokens, datos privados ni contenido completo de prompts en el bloque `AGENT_MEMORY`; registra únicamente un aprendizaje técnico breve y reutilizable.
+
+
 ## Contrato del autopilot
 
 - Trabaja únicamente el issue que recibe el workflow.
