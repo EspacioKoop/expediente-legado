@@ -25,6 +25,8 @@ var _objetivo_escena := ""
 var _resolviendo_objetivos := false
 var _asistente_siga_caja: VBoxContainer
 var _asistente_siga_conjunto: Control
+var _asistente_siga_avatar: GatoAsistente2D
+var _asistente_os98_paseo: GatoAsistentePaseoOs98
 var _arrastrando_asistente := false
 var _arrastre_asistente_offset := Vector2.ZERO
 
@@ -514,6 +516,7 @@ func _abrir_expediente() -> void:
 func _montar_asistente_siga() -> void:
 	_asistente_siga_caja = null
 	_asistente_siga_conjunto = null
+	_asistente_siga_avatar = null
 	var gato: Dictionary = jornada.get("gato", {})
 	var visor := _pantalla.get_node_or_null("Visor") as Control
 	if visor == null:
@@ -526,21 +529,19 @@ func _montar_asistente_siga() -> void:
 	if lineas.is_empty():
 		return
 
-	# El conjunto vive dentro del propio Visor: cuando OS98 adopta y reparenta
-	# el visor dentro de Ventana_siga-98, Prometeo viaja con él en vez de quedar
-	# como hermano por debajo del escritorio. El anclaje sigue siendo relativo
-	# al contenido real de SIGA y no al CanvasLayer exterior (#802).
+	# El bocadillo sigue dentro del Visor y por tanto pertenece al contexto de
+	# SIGA (#802). El avatar nace aquí, pero OS98 lo promueve después al shell
+	# para que continúe visible y pueda deambular entre aplicaciones (#787).
 	var conjunto := HBoxContainer.new()
 	conjunto.name = "AsistenteSiga"
 	conjunto.theme = EstiloSiga.tema()
-	conjunto.mouse_filter = Control.MOUSE_FILTER_PASS
+	conjunto.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	conjunto.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 	conjunto.offset_left = -540
 	conjunto.offset_top = -176
 	conjunto.offset_right = -16
 	conjunto.offset_bottom = -16
 	conjunto.add_theme_constant_override("separation", 18)
-	conjunto.gui_input.connect(_al_input_asistente_siga.bind(conjunto))
 	visor.add_child(conjunto)
 	_asistente_siga_conjunto = conjunto
 
@@ -573,7 +574,9 @@ func _montar_asistente_siga() -> void:
 	avatar.name = "GatoAsistente"
 	var preferencias := PreferenciasSiga.cargar()
 	avatar.configurar(GatoAyuda.nivel(gato), bool(preferencias.get("reduccion_movimiento", false)))
+	avatar.gui_input.connect(_al_input_asistente_siga.bind(avatar))
 	conjunto.add_child(avatar)
+	_asistente_siga_avatar = avatar
 
 	# Solo escuchamos la superficie pública del visor. El día no necesita saber
 	# qué botones, listas o etiquetas produjeron el cambio de contexto.
@@ -586,19 +589,64 @@ func _montar_asistente_siga() -> void:
 	call_deferred("_colocar_asistente_siga", conjunto, visor)
 
 
-## Sitúa el conjunto donde el jugador lo dejó (#285); si nunca lo movió, usa el
-## anclaje por defecto pero lo sube lo justo para no invadir la fila de
+## Promueve únicamente el avatar al shell. El bocadillo conserva el contexto de
+## SIGA y se oculta con esa ventana; el gato sigue presente en OS98 incluso si
+## SIGA está minimizado o el jugador trabaja en otra aplicación (#787).
+func integrar_asistente_os98(escritorio: Control) -> void:
+	if escritorio == null or not is_instance_valid(_asistente_siga_avatar):
+		return
+	var avatar := _asistente_siga_avatar
+	if avatar.get_parent() != escritorio:
+		avatar.reparent(escritorio, false)
+	avatar.z_index = GatoAsistentePaseoOs98.Z_ASISTENTE
+
+	# La cola del bocadillo solo tenía sentido cuando avatar y texto compartían
+	# anclaje. Se conserva el texto contextual, pero no una flecha engañosa.
+	if is_instance_valid(_asistente_siga_conjunto):
+		var puntero := (
+			_asistente_siga_conjunto.get_node_or_null("PunteroBocadilloGato") as CanvasItem
+		)
+		if puntero != null:
+			puntero.visible = false
+
+	call_deferred("_activar_paseo_asistente_os98", escritorio, avatar)
+
+
+func _activar_paseo_asistente_os98(escritorio: Control, avatar: Control) -> void:
+	if (
+		escritorio == null
+		or not is_instance_valid(escritorio)
+		or not is_instance_valid(avatar)
+		or avatar.get_parent() != escritorio
+	):
+		return
+
+	var preferencias := PreferenciasSiga.cargar()
+	var guardada: Variant = preferencias.get(CLAVE_POSICION_ASISTENTE, null)
+	var posicion := Vector2(
+		maxf(escritorio.size.x - avatar.size.x - 28.0, 0.0),
+		maxf(escritorio.size.y - avatar.size.y - 58.0, 0.0),
+	)
+	if guardada is Dictionary and guardada.has("x") and guardada.has("y"):
+		posicion = Vector2(float(guardada["x"]), float(guardada["y"]))
+	_fijar_posicion_libre_asistente(avatar, posicion)
+
+	if is_instance_valid(_asistente_os98_paseo):
+		_asistente_os98_paseo.queue_free()
+	_asistente_os98_paseo = GatoAsistentePaseoOs98.new()
+	_asistente_os98_paseo.name = "PaseoAsistenteOS98"
+	escritorio.add_child(_asistente_os98_paseo)
+	_asistente_os98_paseo.configurar(
+		avatar, escritorio, bool(preferencias.get("reduccion_movimiento", false))
+	)
+
+
+## Mantiene el bocadillo en el anclaje de SIGA y lo sube lo justo para no
+## invadir la fila de
 ## acciones del visor (Relacionar/Marcar folio/Imputar), sea cual sea su altura
 ## real una vez traducida y en la resolución en curso.
 func _colocar_asistente_siga(conjunto: Control, visor: Node) -> void:
-	if not is_instance_valid(conjunto):
-		return
-	var preferencias := PreferenciasSiga.cargar()
-	var guardada: Variant = preferencias.get(CLAVE_POSICION_ASISTENTE, null)
-	if guardada is Dictionary:
-		_fijar_posicion_libre_asistente(conjunto, Vector2(guardada["x"], guardada["y"]))
-		return
-	if visor == null:
+	if not is_instance_valid(conjunto) or visor == null or not visor.is_ancestor_of(conjunto):
 		return
 	var limite := _limite_superior_botones_visor(visor)
 	if limite == INF:
@@ -630,29 +678,30 @@ func _limite_superior_botones_visor(visor: Node) -> float:
 	return limite
 
 
-func _al_input_asistente_siga(evento: InputEvent, conjunto: Control) -> void:
-	if not is_instance_valid(conjunto):
+func _al_input_asistente_siga(evento: InputEvent, avatar: Control) -> void:
+	if not is_instance_valid(avatar):
 		return
 	if evento is InputEventMouseButton and evento.button_index == MOUSE_BUTTON_LEFT:
 		if evento.pressed:
 			_arrastrando_asistente = true
-			_arrastre_asistente_offset = (
-				conjunto.get_global_mouse_position() - conjunto.global_position
-			)
+			if is_instance_valid(_asistente_os98_paseo):
+				_asistente_os98_paseo.pausar(true)
+			_arrastre_asistente_offset = avatar.get_global_mouse_position() - avatar.global_position
 		elif _arrastrando_asistente:
 			_arrastrando_asistente = false
-			_guardar_posicion_asistente_siga(conjunto)
-		conjunto.accept_event()
+			_guardar_posicion_asistente_siga(avatar)
+			if is_instance_valid(_asistente_os98_paseo):
+				_asistente_os98_paseo.pausar(false)
+		avatar.accept_event()
 	elif evento is InputEventMouseMotion and _arrastrando_asistente:
 		_fijar_posicion_libre_asistente(
-			conjunto, conjunto.get_global_mouse_position() - _arrastre_asistente_offset
+			avatar, avatar.get_global_mouse_position() - _arrastre_asistente_offset
 		)
-		conjunto.accept_event()
+		avatar.accept_event()
 
 
-## Arrastrar cambia el conjunto de un anclaje relativo (abajo a la derecha) a
-## una posición libre en píxeles, acotada a la pantalla para que no se pueda
-## soltar el gato fuera de la vista tras redimensionar la ventana.
+## Arrastrar cambia el avatar a una posición libre en píxeles y la acota a su
+## superficie actual: primero SIGA durante el montaje y, después, el shell OS98.
 func _fijar_posicion_libre_asistente(conjunto: Control, nueva: Vector2) -> void:
 	var techo := conjunto.get_parent()
 	var limite: Vector2 = techo.size if techo is Control else conjunto.get_viewport_rect().size

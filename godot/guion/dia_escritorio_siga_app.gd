@@ -304,6 +304,10 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	escritorio.registrar_identidad_visual("ayuda-sistema", "ayuda")
 	escritorio.activar_ayuda_sistema()
 	_siga_app.adoptar_en(escritorio, visor)
+	# El mismo gato deja de pertenecer a Ventana_siga-98 y pasa a ser presencia
+	# del shell; SIGA conserva únicamente su bocadillo/contexto (#787).
+	if dia.has_method("integrar_asistente_os98"):
+		dia.call("integrar_asistente_os98", escritorio)
 	escritorio.salir_solicitado.connect(_solicitar_salida)
 	_preparar_bingo_diario(dia)
 
