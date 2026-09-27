@@ -208,4 +208,97 @@ jobs:
           me=int(os.environ["CLAIM_ID"]); branch=os.environ["BRANCH"]; active={}; mine=None
           cr=re.compile(r"^CLAIM\s+issue=#(\d+).*?\bbranch=([^\s]+).*?\bfiles=([^\s]+)",re.M)
           rr=re.compile(r"^RELEASE\s+issue=#(\d+)(?:.*?\bbranch=([^\s]+))?",re.M)
-          def ov(a,b): a=a.rstrip("/"); b=b.rstrip("/"); return a
+          def ov(a,b): a=a.rstrip("/"); b=b.rstrip("/"); return a==b or a.startswith(b+"/") or b.startswith(a+"/")
+          for line in open("/tmp/reservas.tsv",encoding="utf-8"):
+              sid,enc=line.rstrip("\n").split("\t",1); cid=int(sid); body=base64.b64decode(enc).decode("utf-8","replace")
+              for m in rr.finditer(body):
+                  issue,br=m.groups()
+                  for k in list(active):
+                      if active[k][0]==issue and (not br or br==k): del active[k]
+              for m in cr.finditer(body):
+                  issue,br,fs=m.groups(); item=(issue,cid,fs.split(",")); active[br]=item
+                  if cid==me: mine=item
+          if mine is None: raise SystemExit("CLAIM perdido")
+          conflicts=[]
+          for br,(issue,cid,fs) in active.items():
+              if cid>=me or br==branch: continue
+              if any(ov(a,b) for a in mine[2] for b in fs): conflicts.append(br)
+          out=open(os.environ["GITHUB_OUTPUT"],"a")
+          if conflicts: out.write("reserved=false\nreason=solape:"+",".join(conflicts)+"\n")
+          else: out.write("reserved=true\n")
+          PY
+
+          if grep -q '^reserved=false$' "$GITHUB_OUTPUT"; then
+            gh issue comment 182 --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=colision-autopilot" >/dev/null || true
+            gh issue edit "$ISSUE" --add-label agent:needs-human >/dev/null || true
+            gh issue comment "$ISSUE" --body "Agent autopilot detenido: $(grep '^reason=' "$GITHUB_OUTPUT"|cut -d= -f2-)" || true
+          fi
+
+      - name: Crear rama
+        if: steps.reserve.outputs.reserved == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.select.outputs.issue }}
+          BRANCH: ${{ steps.select.outputs.branch }}
+        run: |
+          git checkout -b "$BRANCH"
+          gh issue edit "$ISSUE" --add-label agent:working --remove-label agent:needs-human >/dev/null 2>&1 || true
+
+      - name: Implementar con Qwen
+        if: steps.reserve.outputs.reserved == 'true' && steps.select.outputs.provider == 'qwen'
+        uses: QwenLM/qwen-code-action@v1
+        with:
+          openai_api_key: ${{ secrets.QWEN_API_KEY }}
+          openai_base_url: ${{ vars.QWEN_BASE_URL || steps.qwen.outputs.url }}
+          openai_model: ${{ vars.QWEN_MODEL || steps.qwen.outputs.model }}
+          settings: '{"model":{"maxSessionTurns":40},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md y .agent-plan.json. Implementa solo el plan y solo esas rutas. No hagas commit/push/PR/merge.'
+
+      - name: Implementar con Gemini
+        if: steps.reserve.outputs.reserved == 'true' && steps.select.outputs.provider == 'gemini'
+        uses: google-github-actions/run-gemini-cli@v0
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: ${{ vars.GEMINI_MODEL }}
+          settings: '{"model":{"maxSessionTurns":40},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
+          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md y .agent-plan.json. Implementa solo el plan y solo esas rutas. No hagas commit/push/PR/merge.'
+
+      - name: Validar diff y preflight
+        if: steps.reserve.outputs.reserved == 'true'
+        run: |
+          set -euo pipefail
+          cp .agent-plan.json /tmp/plan.json
+          rm -f .agent-task.md .agent-plan.json gha-creds-*.json
+          rm -rf .gemini .qwen
+          git add -A
+          git diff --cached --quiet && { echo "sin cambios"; exit 2; }
+          python3 - <<'PY'
+          import json,subprocess
+          allowed=set(json.load(open("/tmp/plan.json"))["files"])
+          changed=subprocess.check_output(["git","diff","--cached","--name-only"],text=True).splitlines()
+          bad=[x for x in changed if x not in allowed]
+          if bad: raise SystemExit("fuera de CLAIM: "+",".join(bad))
+          PY
+          mapfile -t files < <(git diff --cached --name-only)
+          gd=false; py=false; backend=false
+          for f in "${files[@]}"; do
+            [[ "$f" == *.gd ]] && gd=true
+            [[ "$f" == scripts/*.py ]] && py=true
+            [[ "$f" == backend/* ]] && backend=true
+          done
+          if [[ "$gd" == true ]]; then bash scripts/check_gdscript.sh
+          elif [[ "$py" == true ]]; then python3 -m unittest discover -s scripts -p 'test_*.py'; fi
+          if [[ "$backend" == true ]]; then (cd backend && mvn test && npm ci && npm test); fi
+
+      - id: publish
+        name: Publicar PR draft
+        if: steps.reserve.outputs.reserved == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.select.outputs.issue }}
+          PROVIDER: ${{ steps.select.outputs.provider }}
+          BRANCH: ${{ steps.select.outputs.branch }}
+        run: |
+          set -euo pipefail
+          git config user.name "agent-autopilot[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.
