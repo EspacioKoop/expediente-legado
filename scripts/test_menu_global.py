@@ -4,6 +4,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 MENU = ROOT / "godot" / "guion" / "menu_global.gd"
+PREFERENCIAS = ROOT / "godot" / "guion" / "preferencias_siga.gd"
 PROJECT = ROOT / "godot" / "project.godot"
 TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
 
@@ -11,6 +12,7 @@ TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
 class MenuGlobalTest(unittest.TestCase):
     def setUp(self):
         self.menu = MENU.read_text(encoding="utf-8")
+        self.preferencias = PREFERENCIAS.read_text(encoding="utf-8")
         self.project = PROJECT.read_text(encoding="utf-8")
         self.textos = TEXTOS.read_text(encoding="utf-8")
 
@@ -45,9 +47,29 @@ class MenuGlobalTest(unittest.TestCase):
             "MENU_GLOBAL_SALIR",
             "MENU_GLOBAL_VOLUMEN",
             "MENU_GLOBAL_REDUCCION_MOVIMIENTO",
+            "MENU_GLOBAL_RONDA_CIERRE",
         ):
             self.assertIn(clave, self.textos)
             self.assertIn(f'tr("{clave}")', self.menu)
+
+    def test_ronda_cierre_es_preferencia_persistente(self):
+        self.assertIn('"ofrecer_ronda_cierre": true', self.preferencias)
+        self.assertIn(
+            'datos.get("ofrecer_ronda_cierre", true)',
+            self.preferencias,
+        )
+        self.assertIn(
+            '_ronda_cierre.button_pressed = bool(_preferencias.get("ofrecer_ronda_cierre", true))',
+            self.menu,
+        )
+        self.assertIn(
+            '_preferencias["ofrecer_ronda_cierre"] = activa',
+            self.menu,
+        )
+        bloque = self.menu.split("func _al_cambiar_ronda_cierre", 1)[1].split(
+            "\n\nfunc ", 1
+        )[0]
+        self.assertIn("PreferenciasSiga.guardar(_preferencias)", bloque)
 
     def test_historial_de_decisiones_es_superficie_del_menu(self):
         for clave in (
