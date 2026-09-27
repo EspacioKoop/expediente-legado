@@ -87,6 +87,7 @@ func _construir() -> void:
 	entorno.ambient_light_energy = 0.78
 	world_environment.environment = entorno
 	_mundo.add_child(world_environment)
+	FiltroPantalla.aplicar(world_environment, PreferenciasSiga.cargar())
 
 	var principal := DirectionalLight3D.new()
 	principal.name = "LuzPrincipal"

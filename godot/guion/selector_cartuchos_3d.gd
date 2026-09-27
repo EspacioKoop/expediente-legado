@@ -190,6 +190,7 @@ func _montar_escena() -> void:
 	entorno.environment.ambient_light_color = Color(0.46, 0.52, 0.54)
 	entorno.environment.ambient_light_energy = 0.72
 	_viewport.add_child(entorno)
+	FiltroPantalla.aplicar(entorno, PreferenciasSiga.cargar())
 
 	var camara := Camera3D.new()
 	camara.position = Vector3(0.0, -0.05, 3.1)
