@@ -58,7 +58,7 @@ jobs:
             echo "Snapshot $previous recuperado."
           fi
 
-      - name: Recoger ventana reciente de Actions
+      - name: Recoger ventana y fingerprints recientes de Actions
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
