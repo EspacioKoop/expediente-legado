@@ -8,7 +8,7 @@ extends Control
 const SEGMENTOS := 4
 const RADIO := 11.0
 const GROSOR := 2.0
-const ANGULO_SEGMENTO := TAU / float(SEGMENTOS)
+const ANGULO_SEGMENTO := TAU / 4.0
 const HUECO := 0.22
 
 var _segmentos_activos := 1
