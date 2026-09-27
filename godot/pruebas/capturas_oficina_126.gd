@@ -69,6 +69,11 @@ func _ejecutar() -> void:
 		return
 
 	_montar_oficina()
+	var renderer := String(RenderingServer.get_current_rendering_method())
+	if renderer != "forward_plus":
+		_fallar("renderer esperado forward_plus, actual %s" % renderer)
+		quit(1)
+		return
 	for _i in range(8):
 		await process_frame
 

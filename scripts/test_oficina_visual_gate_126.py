@@ -36,6 +36,8 @@ class OficinaVisualGate126Test(unittest.TestCase):
         self.assertIn('OS.get_environment("GITHUB_SHA")', self.captura)
         self.assertIn('has_meta("oficina_styloo_cc0")', self.captura)
         self.assertIn("RenderingServer.get_current_rendering_method()", self.captura)
+        self.assertIn('renderer != "forward_plus"', self.captura)
+        self.assertIn('renderer esperado forward_plus', self.captura)
         self.assertIn('preload("res://guion/dia_reloj_horario_app.gd")', self.captura)
         self.assertIn('_dia.jornada["hora_minutos"] = minutos', self.captura)
         self.assertIn("_horario._transicionar_luz(_dia, 10.0)", self.captura)
@@ -48,7 +50,7 @@ class OficinaVisualGate126Test(unittest.TestCase):
         self.assertIn('"frase": ""', self.captura)
 
     def test_workflow_publica_artifact_para_revision_humana(self):
-        self.assertIn("xvfb-run -a godot4", self.workflow)
+        self.assertIn("xvfb-run -a godot4 --rendering-method forward_plus --path godot", self.workflow)
         self.assertIn("res://pruebas/capturas_oficina_126.gd", self.workflow)
         self.assertIn("actions/upload-artifact@v4", self.workflow)
         self.assertIn("SIGA-98-oficina-visual-gate-126-${{ github.sha }}", self.workflow)
