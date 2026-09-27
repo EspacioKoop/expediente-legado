@@ -6,8 +6,6 @@ extends Node3D
 
 const GhostTrayectoria3D = preload("res://guion/red/ghost_trayectoria_3d.gd")
 
-var _trayectoria: GhostTrayectoria3D
-
 var actor_public_id: String:
 	get:
 		return _trayectoria.actor_public_id if _trayectoria != null else ""
@@ -15,6 +13,8 @@ var actor_public_id: String:
 var gesture: String:
 	get:
 		return _trayectoria.gesture if _trayectoria != null else ""
+
+var _trayectoria: GhostTrayectoria3D
 
 
 func _init() -> void:
