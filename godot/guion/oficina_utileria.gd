@@ -60,7 +60,9 @@ const PERFILES_NEUTROS := [
 static func montar(raiz: Node3D, precio_cafe: int = 0) -> void:
 	for i in PUESTOS.size():
 		_montar_puesto(raiz, i, PUESTOS[i], _companero_del_puesto(raiz, PUESTOS[i]))
-	# #1472: identidad burocrática visual en la mesa de clasificación; sin datos de caso.\n	PapeleriaSiga98.montar_mesa_clasificacion(raiz)\n	_montar_maquina_cafe(raiz, precio_cafe)
+	# #1472: identidad burocrática visual en la mesa de clasificación; sin datos de caso.
+	PapeleriaSiga98.montar_mesa_clasificacion(raiz)
+	_montar_maquina_cafe(raiz, precio_cafe)
 
 
 ## Monta un único puesto en coordenadas arbitrarias, sin la planta de #400 ni
