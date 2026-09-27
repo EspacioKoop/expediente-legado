@@ -12,6 +12,7 @@ El proyecto nació como aplicación web con Spring Boot y se está reescribiendo
 | [Registro de reservas #182](https://github.com/EspacioKoop/expediente-legado/issues/182) | Quién está tocando qué |
 | [ROADMAP.md](ROADMAP.md) | Fases, gates y dirección hasta la 1.0 |
 | [Índice de documentación](docs/README.md) | Qué documento es canónico para cada área |
+| [Wiki](https://github.com/EspacioKoop/expediente-legado/wiki) | Conceptos permanentes para jugadores, desarrolladores y agentes; si discrepa del repo, manda el repo |
 | [Referencias ludonarrativas](docs/research/referencias-ludonarrativas.md) | Técnicas de investigación/presentación y sus límites de adopción |
 | [AGENTS.md](AGENTS.md) | Flujo obligatorio para agentes y trampas conocidas |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Ramas, PR, pruebas y revisión |
