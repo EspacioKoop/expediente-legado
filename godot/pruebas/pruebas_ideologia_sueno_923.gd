@@ -14,6 +14,7 @@ func _ejecutar() -> void:
 	_probar_base_intacta()
 	_probar_elecciones_deforman_la_misma_familia()
 	_probar_exposicion_solo_visual()
+	_probar_regla_jugable_local()
 	_probar_reproducibilidad()
 	_probar_reduccion_movimiento()
 	print("ideologia_sueno_923: %d pasadas, %d fallos" % [_pasadas, _fallos])
@@ -199,6 +200,64 @@ func _probar_exposicion_solo_visual() -> void:
 		IDEOLOGIA_SUENO.modificadores(estado, 2, 923, false).is_empty(),
 		"la exposición del día anterior no se filtra a otra noche",
 	)
+
+
+func _probar_regla_jugable_local() -> void:
+	var reparto := SuenoReglaIdeologica923.new()
+	root.add_child(reparto)
+	reparto.configurar("distribuir", false)
+	var antes := reparto.estado_jugable()
+	var accion_reparto := reparto.aplicar_accion(1)
+	var despues := reparto.estado_jugable()
+	_comprobar(
+		bool(accion_reparto.get("ok", false)), "la regla distribuida acepta interacción local"
+	)
+	_comprobar(
+		int(antes.get("total", -1)) == int(despues.get("total", -2)),
+		"distribuir conserva la cantidad total",
+	)
+	_comprobar(
+		antes.get("cargas", []) != despues.get("cargas", []),
+		"distribuir cambia la relación entre anclas",
+	)
+	_comprobar(
+		reparto.find_children("*", "Area3D", true, false).size() == 3,
+		"la regla se puede operar con hotspots del contrato 3D común",
+	)
+	_comprobar(
+		reparto.find_children("*", "StaticBody3D", true, false).is_empty(),
+		"los hotspots no crean cuerpos que bloqueen navegación",
+	)
+
+	var equilibrio := SuenoReglaIdeologica923.new()
+	root.add_child(equilibrio)
+	equilibrio.configurar("equilibrar", false)
+	var accion_equilibrio := equilibrio.aplicar_accion(1)
+	var estado_equilibrio: Dictionary = accion_equilibrio.get("estado", {})
+	_comprobar(
+		bool(estado_equilibrio.get("equilibrado", false)),
+		"equilibrar produce una regla jugable distinta de distribuir",
+	)
+	_comprobar(
+		estado_equilibrio.has("pesos") and not estado_equilibrio.has("cargas"),
+		"las reglas comparten contrato sin colapsar su comportamiento",
+	)
+
+	var reducida := SuenoReglaIdeologica923.new()
+	root.add_child(reducida)
+	reducida.configurar("distribuir", true)
+	reducida.aplicar_accion(1)
+	_comprobar(
+		reducida.estado_jugable() == reparto.estado_jugable(),
+		"reducción de movimiento conserva exactamente el estado y la regla jugable",
+	)
+	_comprobar(
+		String(reducida.plan_presentacion().get("regla", "")) == "distribuir",
+		"accesibilidad no sustituye la familia seleccionada",
+	)
+	reparto.queue_free()
+	equilibrio.queue_free()
+	reducida.queue_free()
 
 
 func _probar_reproducibilidad() -> void:

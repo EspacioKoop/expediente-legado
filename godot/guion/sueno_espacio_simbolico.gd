@@ -62,9 +62,21 @@ static func _aplicar_modificadores(rimas: Array, modificadores: Array) -> void:
 		capa.name = "ModificadorIdeologico"
 		capa.set_meta("canal_modificador", String(activo.get("canal", "")))
 		capa.set_meta("familia_modificadora", String(activo.get("familia", "")))
-		capa.set_meta("regla_modificadora", String(activo.get("regla", "")))
+		var regla_id := String(activo.get("regla", ""))
+		capa.set_meta("regla_modificadora", regla_id)
 		rima.add_child(capa)
-		_montar_regla(capa, String(activo.get("regla", "")))
+		_montar_regla(capa, regla_id)
+
+		var jugable := SuenoReglaIdeologica923.new()
+		jugable.name = "ReglaJugable"
+		capa.add_child(jugable)
+		(
+			jugable
+			. configurar(
+				regla_id,
+				bool(activo.get("reduccion_movimiento", false)),
+			)
+		)
 
 
 static func _montar_regla(raiz: Node3D, regla: String) -> void:
