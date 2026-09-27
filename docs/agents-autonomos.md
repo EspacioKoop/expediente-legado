@@ -34,6 +34,27 @@ No pegues ninguna key en issues, comentarios, archivos, variables públicas ni l
 
 Si solo configuras una clave, `agent:auto` usa ese proveedor. Con ambas disponibles, `agent:auto` prioriza Qwen; `agent:gemini` fuerza Gemini y `agent:qwen` fuerza Qwen.
 
+### Cadena de fallback OpenAI-compatible
+
+El worker Qwen admite además **4 backends de reserva**. Esto permite trasladar al repositorio conexiones de OmniRoute, FreeInference u otros gateways siempre que expongan una API compatible con OpenAI.
+
+El orden es fijo y deliberado:
+
+`QWEN_API_KEY` → `QWEN_FALLBACK_1_*` → `QWEN_FALLBACK_2_*` → `QWEN_FALLBACK_3_*` → `QWEN_FALLBACK_4_*`.
+
+Cada slot usa:
+
+| Slot | Secret | Repository variable | Repository variable |
+| --- | --- | --- | --- |
+| 1 | `QWEN_FALLBACK_1_API_KEY` | `QWEN_FALLBACK_1_BASE_URL` | `QWEN_FALLBACK_1_MODEL` |
+| 2 | `QWEN_FALLBACK_2_API_KEY` | `QWEN_FALLBACK_2_BASE_URL` | `QWEN_FALLBACK_2_MODEL` |
+| 3 | `QWEN_FALLBACK_3_API_KEY` | `QWEN_FALLBACK_3_BASE_URL` | `QWEN_FALLBACK_3_MODEL` |
+| 4 | `QWEN_FALLBACK_4_API_KEY` | `QWEN_FALLBACK_4_BASE_URL` | `QWEN_FALLBACK_4_MODEL` |
+
+La key va siempre en **Actions Secrets**. La URL y el ID de modelo van en **Actions Variables**. Los slots vacíos se saltan. Un fallo del backend primario hace que el mismo paso se reintente con el primer slot disponible, y así sucesivamente. La misma cadena se usa al planificar, implementar y reparar CI.
+
+No apuntes estos slots a `127.0.0.1` o `localhost`: los runners hospedados por GitHub no pueden alcanzar el OmniRoute local de tu PC. Para reutilizar una conexión de OmniRoute hay que copiar al repo el endpoint público del proveedor/gateway, el modelo y su key; alternativamente habría que usar un runner self-hosted con acceso a OmniRoute.
+
 ## Único ajuste de GitHub que puede ser necesario
 
 GitHub puede impedir por política que `GITHUB_TOKEN` cree PRs. Si el primer intento implementa y hace push pero falla al abrir el draft:
@@ -125,6 +146,8 @@ No son necesarias para empezar:
 - `QWEN_BASE_URL`: sustituye el endpoint detectado automáticamente; por ejemplo, el endpoint OpenAI-compatible de FreeInference.
 - `QWEN_MODEL`: sustituye `qwen3-coder-plus`; debe ser un ID de modelo válido en el backend elegido.
 - `QWEN_CLI_VERSION`: fija una versión concreta del CLI.
+- `QWEN_FALLBACK_1_BASE_URL` … `QWEN_FALLBACK_4_BASE_URL`: endpoints OpenAI-compatible de reserva.
+- `QWEN_FALLBACK_1_MODEL` … `QWEN_FALLBACK_4_MODEL`: modelos usados por cada endpoint de reserva.
 - `GEMINI_MODEL`: fija un modelo Gemini.
 - `GEMINI_CLI_VERSION`: fija una versión concreta del CLI.
 
