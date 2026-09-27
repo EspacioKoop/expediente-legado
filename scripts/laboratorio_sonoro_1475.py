@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 from array import array
 import hashlib
+from html import escape
 import json
 import math
 from pathlib import Path
@@ -18,10 +19,12 @@ import re
 import shutil
 import struct
 import subprocess
+import tempfile
 import wave
 
 RAIZ = Path(__file__).resolve().parents[1]
 RECETA = RAIZ / "referencia/audio/laboratorio_1475/oficina_machine_pulse.json"
+RECETA_CATA = RECETA.with_name("cata_motivos_timbres.json")
 SR = 44_100
 FILTROS = ((0, 0), (60, 0), (115, -52), (98, -55), (122, -60))
 
@@ -266,6 +269,197 @@ def medir_ffmpeg(ruta: Path, ejecutable: str) -> dict:
     return dict(true_peak_dbtp=float(pico[-1]), programa_lufs_i=float(lufs[-1]))
 
 
+def escribir_escucha(destino: Path, salidas: list[dict], fichas: list[dict]) -> None:
+    """Reproduce los WAV originales sin servidor, instalación ni recodificación."""
+    def reproductor(ruta: str, etiqueta: str) -> str:
+        return (f'<div class="version"><p>{escape(etiqueta)}</p>'
+                f'<audio controls preload="none" aria-label="{escape(etiqueta)}" '
+                f'src="{escape(ruta)}"></audio>'
+                f'<a href="{escape(ruta)}" download>Descargar WAV</a></div>')
+
+    estudio = "".join(reproductor(r["archivo"], etiqueta) for r, etiqueta in zip(
+        salidas, ("A · Estudio limpio — 28 s", "B · Estudio con ADPCM — 28 s")))
+    banco = "".join(
+        f'<section><h3>{escape(f["id"].capitalize())}</h3><div class="pareja">' +
+        "".join(reproductor(f'banco/{f["id"]}_{variante}.wav', f'{f["id"]} · {etiqueta}')
+                for variante, etiqueta in (("limpio", "A · limpio"), ("adpcm", "B · ADPCM"))) +
+        '</div></section>' for f in fichas)
+    cata = "motivo" in salidas[0]
+    titulo = "Oficina · machine pulse"
+    descripcion = "Misma partitura y ganancia en el estudio A/B; sin reverberación."
+    instrucciones = "Compara las versiones limpia y ADPCM y escucha cada fuente."
+    banco = ('<h2>Banco de cuatro samples</h2><p>Fuentes sintéticas aisladas; '
+             '«Red» es un ciclo de 40 ms, cuyo uso sostenido se oye en el estudio.</p>' + banco)
+    limites = "Experimento ADPCM por instrumento; no emula una SPU completa."
+    if cata:
+        estudio = "".join(reproductor(r["archivo"],
+                                     f'{r["motivo"].upper()} · {r["timbre"].upper()} — 10 s')
+                           for r in salidas)
+        titulo = "Dos motivos · dos timbres"
+        descripcion = "96 BPM, raíz 220 Hz, puerta 0,25 s. Nivel calibrado por timbre; PCM limpio, sin reverb."
+        instrucciones = "Compara el mismo motivo entre timbres y el mismo timbre entre motivos."
+        banco = '<p>Repite en orden inverso. Describe primero lo que oyes, sin buscar una emoción prefijada.</p>'
+        limites = "Boceto compositivo T01: no emula SPU-98 ni FM-98 completos."
+    pagina = """<!doctype html>
+<html lang="es"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SIGA-98 · __TITULO__</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#111b20;color:#e7efec}
+body{max-width:900px;margin:auto;padding:32px 20px;line-height:1.6}
+h1,h2,h3{line-height:1.2}h1{font-size:2.3rem}h2{margin-top:36px}
+.ceja{color:#a1c8b0;letter-spacing:.15em;font-size:.8rem}
+.nota{color:#b8c7cb}section{border-top:1px solid #385057;padding:12px 0}
+.pareja{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.version{min-width:0}audio{display:block;width:100%;margin:10px 0}
+a{color:#b4e5c6}button{font:inherit;border:1px solid #87bda1;border-radius:6px;
+padding:8px 16px;background:#1d3530;color:#e7efec;cursor:pointer}
+@media(max-width:620px){.pareja{grid-template-columns:1fr;gap:8px}}
+</style>
+<body><header><p class="ceja">SIGA-98 / LABORATORIO SONORO / 1475</p>
+<h1>__TITULO__</h1><p>__INSTRUCCIONES__</p>
+<p class="nota">Sonidos sintéticos originales. __DESCRIPCION__ Escucha humana pendiente.</p></header>
+<button id="parar" type="button">Parar todos</button>
+<h2>Escuchar y comparar</h2><div class="pareja">__ESTUDIO__</div>
+__BANCO__
+<footer><h2>Registrar la escucha</h2>
+<p>Comenta en <a href="https://github.com/EspacioKoop/expediente-legado/issues/1475">#1475</a>
+indicando los identificadores del audio, instante y qué mejorarías.
+El issue enlaza la PR vigente, sus pruebas y la discusión.</p>
+<p><a href="REVISION.md">Ficha de revisión</a> · <a href="manifest.json">Parámetros y hashes</a></p>
+<p class="nota">WAV PCM originales, sin conversión con pérdidas. La página funciona
+sin conexión tras descomprimir el ZIP entero. __LIMITES__</p></footer>
+<script>
+const audios = [...document.querySelectorAll('audio')];
+audios.forEach(audio => audio.addEventListener('play', () => {
+  audios.forEach(otro => { if (otro !== audio) otro.pause(); });
+}));
+document.querySelector('#parar').addEventListener('click', () => {
+  audios.forEach(audio => { audio.pause(); audio.currentTime = 0; });
+});
+</script></body></html>
+"""
+    for clave, valor in {"TITULO": escape(titulo), "DESCRIPCION": escape(descripcion),
+                         "INSTRUCCIONES": escape(instrucciones), "LIMITES": escape(limites),
+                         "ESTUDIO": estudio, "BANCO": banco}.items():
+        pagina = pagina.replace(f"__{clave}__", valor)
+    (destino / "escucha.html").write_text(pagina, encoding="utf-8")
+
+
+def generar_cata(receta: Path, destino: Path) -> dict:
+    """Cuatro celdas; calibración por timbre congelada para ambos motivos."""
+    cfg = json.loads(receta.read_text(encoding="utf-8"))
+    ffmpeg = shutil.which("ffmpeg")
+    if not ffmpeg:
+        raise RuntimeError("la cata 2x2 requiere FFmpeg para calibrar sonoridad")
+    if (RAIZ / "godot").resolve() in destino.resolve().parents or destino.resolve() == (RAIZ / "godot").resolve():
+        raise ValueError("la cata no escribe dentro del runtime")
+    if (cfg["id"] != "cata_motivos_timbres" or set(cfg["motivos"]) != {"m01", "m02"}
+            or set(cfg["timbres"]) != {"t01", "t02"}
+            or cfg["duracion_s"] != 10 or cfg["bpm"] != 96
+            or cfg["inicios_frase_s"] != [0.5, 5.5] or cfg["puerta_s"] != 0.25
+            or not 0 < cfg["ganancia_evento"] <= 0.3
+            or not -18 <= cfg["pico_techo_dbfs"] <= -9
+            or not -30 <= cfg["calibracion_lufs"] <= -24
+            or not 0 < cfg["tolerancia_calibracion_lu"] <= 0.5):
+        raise ValueError("receta fuera del protocolo de cata 2x2")
+    timbres = cfg["timbres"]
+    for fuente in timbres.values():
+        if any(fuente[k] != v for k, v in {"tipo": "fm", "hz": 220, "muestras": 28224, "caida": 6}.items()):
+            raise ValueError("los timbres deben compartir raíz, duración y envolvente")
+    fuentes_pcm = {nombre: pcm16(sintetizar(fuente)) for nombre, fuente in timbres.items()}
+    banco = {nombre: [x[0] / 32768 for x in struct.iter_unpack("<h", pcm)]
+             for nombre, pcm in fuentes_pcm.items()}
+    memoria = sum(len(x) * 2 for x in banco.values())
+    if not 0 < memoria <= cfg["max_banco_pcm_bytes"] <= 131072:
+        raise ValueError("presupuesto PCM excedido")
+    partituras, renders = {}, {}
+    n = round(cfg["duracion_s"] * SR)
+    for motivo, datos in cfg["motivos"].items():
+        filas, tonos = datos["filas"], datos["semitonos"]
+        if (not 2 <= len(filas) == len(tonos) <= 8 or filas != sorted(set(filas))
+                or any(type(f) is not int or not 0 <= f < 16 for f in filas)
+                or any(type(t) is not int or not -12 <= t <= 12 for t in tonos)):
+            raise ValueError("partitura inválida")
+        notas = [dict(inicio=round((inicio + fila * 15 / cfg["bpm"]) * SR),
+                      muestras=round(cfg["puerta_s"] * SR), ratio=2 ** (tono / 12),
+                      ganancia=cfg["ganancia_evento"], pan=0, offset=0, bucle=False)
+                 for inicio in cfg["inicios_frase_s"] for fila, tono in zip(filas, tonos)]
+        if contar_voces(notas) != 1:
+            raise ValueError("la cata debe conservar una voz sin solapamientos")
+        partituras[motivo] = notas
+        for timbre in timbres:
+            renders[motivo, timbre] = mezclar(banco, [dict(e, instrumento=timbre) for e in notas], n)
+
+    def programa(timbre: str) -> list[array]:
+        return [array("d", (x for motivo in cfg["motivos"] for x in renders[motivo, timbre][c]))
+                for c in range(2)]
+
+    calibracion = {}
+    with tempfile.TemporaryDirectory() as temporal:
+        for timbre in timbres:
+            ruta = Path(temporal) / f"{timbre}.wav"
+            escribir_wav(ruta, programa(timbre))
+            medida = medir_ffmpeg(ruta, ffmpeg)
+            if not math.isfinite(medida["programa_lufs_i"]):
+                raise ValueError("no hay señal suficiente para calibrar")
+            ganancia = 10 ** ((cfg["calibracion_lufs"] - medida["programa_lufs_i"]) / 20)
+            calibracion[timbre] = dict(lufs_antes=medida["programa_lufs_i"], ganancia=ganancia)
+        pico = max(abs(x) * calibracion[t]["ganancia"]
+                   for (_, t), render in renders.items() for canal in render for x in canal)
+        comun = min(1.0, 10 ** (cfg["pico_techo_dbfs"] / 20) / pico)
+        for (_, timbre), render in renders.items():
+            for canal in render:
+                for i in range(len(canal)):
+                    canal[i] *= calibracion[timbre]["ganancia"] * comun
+        for timbre in timbres:
+            ruta = Path(temporal) / f"{timbre}.wav"
+            escribir_wav(ruta, programa(timbre))
+            calibracion[timbre]["lufs_despues"] = medir_ffmpeg(ruta, ffmpeg)["programa_lufs_i"]
+    niveles = [x["lufs_despues"] for x in calibracion.values()]
+    if max(niveles) - min(niveles) > cfg["tolerancia_calibracion_lu"]:
+        raise ValueError("la calibración supera la tolerancia entre timbres")
+    destino.mkdir(parents=True, exist_ok=True)
+    salidas = []
+    for (motivo, timbre), render in renders.items():
+        ruta = destino / f"{motivo}_{timbre}.wav"
+        escribir_wav(ruta, render)
+        medida = dict(**medir_wav(ruta), **medir_ffmpeg(ruta, ffmpeg))
+        if (medida["clipping"] or medida["true_peak_dbtp"] > -6
+                or max(map(abs, medida["dc_por_canal"])) > 0.0001
+                or medida["mono_delta_db"] < -3):
+            raise ValueError("celda fuera del gate técnico de cata")
+        salidas.append(dict(archivo=ruta.name, motivo=motivo, timbre=timbre, **medida))
+    manifest = dict(issue=1475, estudio=cfg["id"], receta_sha256=sha256(receta.read_bytes()),
+                    generador_sha256=sha256(Path(__file__).read_bytes()),
+                    biblia_sha256=sha256((RAIZ / "docs/audio/biblia-sonora-1475.md").read_bytes()),
+                    python=platform.python_version(),
+                    ffmpeg=subprocess.run([ffmpeg, "-version"], capture_output=True, text=True,
+                                          check=True).stdout.splitlines()[0],
+                    frecuencia_hz=SR, voces_maximas=1, banco_pcm_bytes=memoria,
+                    fuentes={t: dict(origen="sintesis_original", licencia="MIT", receta=timbres[t],
+                                     sha256_pcm=sha256(fuentes_pcm[t])) for t in timbres},
+                    calibracion=calibracion, atenuacion_comun=comun, renders=salidas,
+                    escucha_humana="pendiente", limite="Boceto T01; no SPU-98/FM-98 completos ni prueba en juego.")
+    for nombre, datos in (("manifest.json", manifest), ("partitura.json", partituras), ("receta.json", cfg)):
+        (destino / nombre).write_text(json.dumps(datos, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    for nombre, orden in (("cata.m3u", salidas), ("cata_inversa.m3u", list(reversed(salidas)))):
+        (destino / nombre).write_text("#EXTM3U\n" + "\n".join(r["archivo"] for r in orden) + "\n", encoding="utf-8")
+    (destino / "REVISION.md").write_text(
+        "# Cata 2×2 — escucha pendiente\n\nDescomprimir todo y abrir escucha.html.\n\n"
+        "Cuatro clips: M01_T01, M01_T02, M02_T01, M02_T02. Cada uno dura 10 s.\n"
+        "Comparar por motivo y por timbre; repetir en orden inverso.\n"
+        "Anotar SHA del manifest, orden, dispositivo, volumen relativo, instante y observación.\n"
+        "Preguntas: ¿se distingue cada motivo?, ¿se reconoce con el otro timbre?, "
+        "¿qué ataque o cola molesta?, ¿qué se recuerda tras una pausa registrada?\n"
+        "Decisión: iterar / descartar / candidato. Registrar en #1475.\n\n"
+        "Nivel calibrado por timbre sobre M01+M02; no por clip. No garantiza igual percepción.\n"
+        "No valida lectura, fatiga prolongada, mezcla runtime, fidelidad de chip ni producción.\n",
+        encoding="utf-8")
+    escribir_escucha(destino, salidas, [])
+    return manifest
+
+
 def generar(receta: Path, destino: Path, exigir_ffmpeg: bool = False) -> dict:
     cfg = json.loads(receta.read_text(encoding="utf-8"))
     if cfg["id"] != "oficina_machine_pulse" or not 20 <= cfg["duracion_s"] <= 45:
@@ -341,8 +535,10 @@ def generar(receta: Path, destino: Path, exigir_ffmpeg: bool = False) -> dict:
     (destino / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (destino / "partitura.json").write_text(json.dumps(partitura, indent=2) + "\n", encoding="utf-8")
     (destino / "cata.m3u").write_text("#EXTM3U\n" + "\n".join(r["archivo"] for r in salidas) + "\n", encoding="utf-8")
+    escribir_escucha(destino, salidas, fichas)
     (destino / "REVISION.md").write_text(
         "# Cata oficina_machine_pulse — pendiente\n\n"
+        "Abrir escucha.html en el navegador tras descomprimir el ZIP completo.\n\n"
         "A=limpio; B=SPU-ADPCM por instrumento. Ganancia común; sin reverb.\n"
         "Escuchar completos A/B y banco, alternar a igual volumen; consultar delta RMS.\n"
         "Comprobar auriculares, altavoces/TV, mono, volumen bajo y repetición prolongada.\n"
@@ -362,11 +558,18 @@ def generar(receta: Path, destino: Path, exigir_ffmpeg: bool = False) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--receta", type=Path, default=RECETA)
-    parser.add_argument("--destino", type=Path, default=RAIZ / "dist/salida/laboratorio_1475")
+    parser.add_argument("--destino", type=Path)
+    parser.add_argument("--cata-motivos-timbres", action="store_true")
     parser.add_argument("--exigir-ffmpeg", action="store_true")
     args = parser.parse_args()
-    manifest = generar(args.receta, args.destino, args.exigir_ffmpeg)
-    print(json.dumps({k: manifest[k] for k in ("voces_maximas", "banco_adpcm_bytes", "renders")}, indent=2))
+    destino = args.destino or RAIZ / "dist/salida" / (
+        "cata_motivos_timbres_1475" if args.cata_motivos_timbres else "laboratorio_1475")
+    if args.cata_motivos_timbres:
+        receta = RECETA_CATA if args.receta == RECETA else args.receta
+        manifest = generar_cata(receta, destino)
+    else:
+        manifest = generar(args.receta, destino, args.exigir_ffmpeg)
+    print(json.dumps({k: manifest[k] for k in ("voces_maximas", "renders")}, indent=2))
 
 
 if __name__ == "__main__":

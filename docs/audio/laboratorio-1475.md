@@ -1,8 +1,27 @@
-# Laboratorio sonoro #1475 — primer corte escuchable
+# Laboratorio sonoro #1475 — estudio y cata 2×2
 
-Entrega parcial: `oficina_machine_pulse`, 28 segundos, A limpio/B ADPCM.
+Entrega principal: **dos motivos × dos timbres**, cuatro clips de 10 segundos,
+generados después del estudio y sus tres revisiones especializadas.
+Antecedente técnico: `oficina_machine_pulse`, 28 segundos, A limpio/B ADPCM.
 Pendientes: `careo_tracker`, `casa_chip`, `sueno_memory` y sus catas humanas.
 Dirección e investigación: [biblia-sonora-1475.md](biblia-sonora-1475.md).
+
+## Escuchar sin instalar herramientas
+
+En el [checkpoint vigente de #1475](https://github.com/EspacioKoop/expediente-legado/issues/1475), abrir
+el enlace al paquete de escucha, descargar el ZIP de Actions (requiere sesión de
+GitHub), **descomprimirlo entero y abrir `escucha.html`** en el navegador.
+Incluye cuatro reproductores: M01/T01, M01/T02, M02/T01 y M02/T02.
+Reproducir uno pausa el anterior; «Parar todos» los detiene.
+Los WAV se reproducen sin recodificación. Funciona sin conexión y sin arrancar
+el juego. El último checkpoint de escucha del PR contiene el enlace vigente.
+
+La cata usa PCM limpio, una voz, 96 BPM, raíz 220 Hz y puerta de 0,25 s.
+Ambos timbres comparten envolvente y duración; cambia el espectro FM. El nivel
+se calibra por timbre sobre los dos motivos concatenados y se mantiene fijo
+entre ellos. No se añaden ADPCM, acompañamiento ni reverb a estos cuatro clips.
+Su alcance es compositivo T01; no demuestra emulación SPU-98/FM-98 ni sustituye
+la cata en contexto o las futuras T18/T21 del plan.
 
 ## Auditoría del audio existente
 
@@ -33,15 +52,25 @@ true peak/LUFS y ya se utiliza en la cata #119. Sin Godot, tracker, NumPy ni red
 
 ```bash
 python3 -m unittest -v scripts/test_laboratorio_sonoro_1475.py
-python3 scripts/laboratorio_sonoro_1475.py --exigir-ffmpeg
+python3 scripts/laboratorio_sonoro_1475.py --cata-motivos-timbres --exigir-ffmpeg
 ```
 
-Salida ignorada por Git: `dist/salida/laboratorio_1475/`. Abrir `cata.m3u` en un
-reproductor local, o los dos WAV individualmente. No hace falta arrancar el juego.
+Salida ignorada por Git: `dist/salida/cata_motivos_timbres_1475/`. Abrir `escucha.html` en el
+navegador, `cata.m3u` en un reproductor local o los WAV individualmente.
 El workflow **Laboratorio sonoro 1475** adjunta el mismo paquete durante 14 días,
 con el SHA de Actions en el nombre; después se puede regenerar desde la rama/PR.
 
 | Salida | Contenido |
+| --- | --- |
+| `escucha.html` | Cuatro reproductores de la matriz motivos/timbres, sin servidor |
+| `m01_t01.wav`, `m01_t02.wav`, `m02_t01.wav`, `m02_t02.wav` | Cuatro cruces PCM estéreo 16-bit/44,1 kHz, 10 s cada uno |
+| `receta.json`, `partitura.json`, `manifest.json` | Parámetros, eventos, hashes, niveles y ganancias de calibración |
+| `REVISION.md`, `cata.m3u`, `cata_inversa.m3u` | Protocolo y órdenes de comparación |
+
+El antecedente de oficina se regenera sin `--cata-motivos-timbres`, en
+`dist/salida/laboratorio_1475/`; el codec sigue conservando su propio A/B.
+
+| Salida del antecedente | Contenido |
 | --- | --- |
 | `oficina_machine_pulse_limpio.wav` | A, PCM estéreo 16-bit/44,1 kHz |
 | `oficina_machine_pulse_psx_adpcm.wav` | B, misma partitura/ganancia; codec por instrumento |
@@ -99,13 +128,14 @@ El workflow canónico descarga LFS y prepara la toolchain completa.
 
 ## Cooperación y siguiente corte
 
-Reserva #182 limitada a las seis rutas nuevas del laboratorio. No bloquea el
+Reserva #182 limitada a seis rutas de la continuación, incluida la receta 2×2. No bloquea el
 runtime, todo el audio, `main` ni todo #1475. El checkpoint vigente vive en el
 issue; la PR conserva SHA, pruebas, artifact y limitaciones. No usar este documento
 como una segunda cola ni inferir permiso de merge o propiedad de archivos ajenos.
 
-Tras CI: escuchar A/B, registrar observaciones por instrumento y decidir si
-merece mantener ADPCM. Después reclamar un corte independiente para careo/XM;
+Tras CI: escuchar la cata 2×2 y registrar observaciones por motivo y timbre.
+ADPCM conserva una comparación técnica separada. Después decidir el siguiente
+corte de composición conforme al plan del issue;
 casa y sueño llegarán con fuentes y motivos trazables. Cualquier promoción al
 juego exige el gate humano y los contratos de #1471/#76/#119. Esta PR no cierra
 ninguno de esos issues ni #1475.

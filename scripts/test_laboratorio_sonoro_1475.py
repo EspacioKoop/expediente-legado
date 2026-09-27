@@ -2,8 +2,10 @@
 import copy
 import importlib.util
 import json
+from html.parser import HTMLParser
 import math
 from pathlib import Path
+import shutil
 import tempfile
 import unittest
 import wave
@@ -139,6 +141,75 @@ class ExportTest(unittest.TestCase):
             self.assertTrue((destino / "REVISION.md").is_file())
             self.assertEqual(json.loads((destino / "manifest.json").read_text()), manifest)
             self.assertTrue((destino / "cata.m3u").read_text().startswith("#EXTM3U\n"))
+            audios = []
+
+            class Reproductores(HTMLParser):
+                def handle_starttag(self, tag, attrs):
+                    if tag == "audio":
+                        audios.append(dict(attrs))
+
+            Reproductores().feed((destino / "escucha.html").read_text(encoding="utf-8"))
+            self.assertEqual({a["src"] for a in audios},
+                             {p.relative_to(destino).as_posix() for p in destino.rglob("*.wav")})
+            self.assertEqual(len(audios), 10)
+            for audio in audios:
+                self.assertIn("controls", audio)
+                self.assertNotIn("autoplay", audio)
+
+
+@unittest.skipUnless(shutil.which("ffmpeg"), "La cata calibrada exige FFmpeg; su workflow lo instala")
+class CataCompositivaTest(unittest.TestCase):
+    def test_cuatro_cruces_pcm_y_calibracion_por_timbre(self):
+        with tempfile.TemporaryDirectory() as temporal:
+            destino = Path(temporal)
+            manifest = LAB.generar_cata(LAB.RECETA_CATA, destino)
+            self.assertEqual(manifest["voces_maximas"], 1)
+            self.assertEqual(manifest["banco_pcm_bytes"], 112896)
+            self.assertEqual(manifest["escucha_humana"], "pendiente")
+            self.assertEqual({(r["motivo"], r["timbre"]) for r in manifest["renders"]},
+                             {(m, t) for m in ("m01", "m02") for t in ("t01", "t02")})
+            niveles = [x["lufs_despues"] for x in manifest["calibracion"].values()]
+            self.assertLessEqual(max(niveles) - min(niveles), 0.5)
+            self.assertEqual(len({r["sha256"] for r in manifest["renders"]}), 4)
+            for r in manifest["renders"]:
+                self.assertEqual(r["duracion_s"], 10)
+                self.assertEqual(r["clipping"], 0)
+                self.assertLessEqual(r["true_peak_dbtp"], -6)
+                self.assertEqual(r["sha256"], LAB.sha256((destino / r["archivo"]).read_bytes()))
+                with wave.open(str(destino / r["archivo"])) as wav:
+                    self.assertEqual((wav.getnchannels(), wav.getsampwidth(), wav.getframerate()), (2, 2, 44100))
+                    self.assertEqual(set(wav.readframes(22050)), {0})
+            partitura = json.loads((destino / "partitura.json").read_text())
+            self.assertEqual([len(p) for p in partitura.values()], [6, 8])
+            for notas in partitura.values():
+                self.assertEqual({e["muestras"] for e in notas}, {11025})
+                self.assertEqual(notas[0]["inicio"], 22050)
+            audios = []
+
+            class Reproductores(HTMLParser):
+                def handle_starttag(self, tag, attrs):
+                    if tag == "audio":
+                        audios.append(dict(attrs))
+
+            Reproductores().feed((destino / "escucha.html").read_text(encoding="utf-8"))
+            self.assertEqual({a["src"] for a in audios}, {r["archivo"] for r in manifest["renders"]})
+            self.assertEqual(len(audios), 4)
+            self.assertTrue(all("controls" in a and "autoplay" not in a for a in audios))
+
+    def test_rechaza_duracion_de_timbre_distinta_y_solapamiento(self):
+        for cambio in ("duracion", "solapamiento"):
+            with self.subTest(cambio=cambio), tempfile.TemporaryDirectory() as temporal:
+                cfg = json.loads(LAB.RECETA_CATA.read_text())
+                if cambio == "duracion":
+                    cfg["timbres"]["t02"]["muestras"] = 14112
+                else:
+                    cfg["motivos"]["m01"]["filas"] = [0, 1, 6]
+                receta = Path(temporal) / "receta.json"
+                receta.write_text(json.dumps(cfg))
+                destino = Path(temporal) / "salida"
+                with self.assertRaises(ValueError):
+                    LAB.generar_cata(receta, destino)
+                self.assertFalse(destino.exists())
 
 
 if __name__ == "__main__":

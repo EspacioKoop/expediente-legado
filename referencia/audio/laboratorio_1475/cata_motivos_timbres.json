@@ -1,0 +1,22 @@
+{
+  "id": "cata_motivos_timbres",
+  "version": 1,
+  "estudio": "docs/audio/biblia-sonora-1475.md",
+  "bpm": 96,
+  "duracion_s": 10,
+  "inicios_frase_s": [0.5, 5.5],
+  "puerta_s": 0.25,
+  "ganancia_evento": 0.3,
+  "pico_techo_dbfs": -9,
+  "calibracion_lufs": -24,
+  "tolerancia_calibracion_lu": 0.5,
+  "max_banco_pcm_bytes": 131072,
+  "motivos": {
+    "m01": {"semitonos": [0, 3, -5], "filas": [0, 3, 6]},
+    "m02": {"semitonos": [0, 2, 7, 5], "filas": [0, 6, 8, 12]}
+  },
+  "timbres": {
+    "t01": {"tipo": "fm", "muestras": 28224, "hz": 220, "ratio_fm": 1, "indice_fm": 0.25, "caida": 6, "semilla": 147511},
+    "t02": {"tipo": "fm", "muestras": 28224, "hz": 220, "ratio_fm": 2, "indice_fm": 1.8, "caida": 6, "semilla": 147512}
+  }
+}

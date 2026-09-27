@@ -36,13 +36,13 @@ jobs:
         run: python3 -m unittest -v scripts/test_laboratorio_sonoro_1475.py
       - name: Renderizar y verificar repetibilidad
         run: |
-          python3 scripts/laboratorio_sonoro_1475.py --destino cata-1475 --exigir-ffmpeg
-          python3 scripts/laboratorio_sonoro_1475.py --destino cata-repetida --exigir-ffmpeg
+          python3 scripts/laboratorio_sonoro_1475.py --cata-motivos-timbres --destino cata-1475 --exigir-ffmpeg
+          python3 scripts/laboratorio_sonoro_1475.py --cata-motivos-timbres --destino cata-repetida --exigir-ffmpeg
           diff -r cata-1475 cata-repetida
-      - name: Adjuntar estudio A/B y fuentes para escucha humana
+      - name: Adjuntar cata de dos motivos por dos timbres y reproductor
         uses: actions/upload-artifact@v4
         with:
-          name: laboratorio-sonoro-1475-${{ github.sha }}
+          name: cata-motivos-timbres-1475-${{ github.sha }}
           path: cata-1475/
           if-no-files-found: error
           retention-days: 14
