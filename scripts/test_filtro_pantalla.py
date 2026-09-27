@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SHADER = ROOT / "godot" / "arte" / "pantalla_98.glsl"
 EFECTO = ROOT / "godot" / "guion" / "efecto_pantalla_98.gd"
 FILTRO = ROOT / "godot" / "guion" / "filtro_pantalla.gd"
+CAPTURADOR = ROOT / "godot" / "pruebas" / "capturar_filtro_pantalla.gd"
 PRUEBA_GODOT = "res://pruebas/pruebas_filtro_pantalla.gd"
 RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 
@@ -36,6 +37,13 @@ class FiltroPantallaTest(unittest.TestCase):
         self.assertIn("Copyright (c) 2017 Keijiro Takahashi", shader)
         self.assertIn("MIT License", shader)
         self.assertIn("https://github.com/keijiro/KinoTube", shader)
+
+    def test_evidencia_incluye_sueno_determinista(self):
+        captura = CAPTURADOR.read_text(encoding="utf-8")
+        self.assertIn('"fase": "sueño"', captura)
+        self.assertIn('"escena": "crucero"', captura)
+        self.assertIn('dia.jornada["sueno_escenas"]', captura)
+        self.assertIn('String(caso["id"])', captura)
 
     def test_flujo_real_en_godot(self):
         resultado = ejecutar_script(PRUEBA_GODOT)

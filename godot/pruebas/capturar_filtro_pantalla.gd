@@ -1,7 +1,8 @@
 ## Capturas A/B del filtro de pantalla (#1270) en GPU real.
 ##
-## Entra en archivo y trayecto con la cámara jugable y el HUD visible —el HUD
-## es justo lo que tiene que salir igual— y guarda una captura por preajuste.
+## Entra en archivo, trayecto y un sueño determinista con la cámara jugable y
+## el HUD visible —el HUD es justo lo que tiene que salir igual— y guarda una
+## captura por preajuste.
 ## Sin casa: al entrar desde aquí se abre la interfaz de la portátil, que no es
 ## lo que se compara y enseña rutas locales del equipo que captura.
 ## No toca las preferencias guardadas: aplica los preajustes en memoria. El
@@ -10,7 +11,11 @@
 extends SceneTree
 
 const SALIDA := "res://../docs/evidencias/filtro-pantalla/"
-const FASES := ["archivo", "trayecto"]
+const CASOS := [
+	{"id": "archivo", "fase": "archivo"},
+	{"id": "trayecto", "fase": "trayecto"},
+	{"id": "sueno", "fase": "sueño", "escena": "crucero"},
+]
 
 
 func _initialize() -> void:
@@ -27,7 +32,12 @@ func _capturar() -> void:
 		dia._entrada.saltar()
 		await process_frame
 
-	for fase in FASES:
+	for caso in CASOS:
+		var fase := String(caso["fase"])
+		if fase == "sueño":
+			dia.jornada["sueno_escenas"] = [String(caso["escena"])]
+			dia.jornada["sueno_total"] = Sueno.segundos_de_noche(dia.jornada["sueno_escenas"])
+			dia.jornada["sueno_resto"] = dia.jornada["sueno_total"]
 		dia._entrar_en(fase)
 		await create_timer(1.5).timeout
 		# La escena se queda quieta para que las cuatro capturas sean el mismo
@@ -38,7 +48,7 @@ func _capturar() -> void:
 			await create_timer(0.4).timeout
 			await RenderingServer.frame_post_draw
 			root.get_texture().get_image().save_jpg(
-				ProjectSettings.globalize_path(SALIDA + "%s-%s.jpg" % [fase, id]), 0.9
+				ProjectSettings.globalize_path(SALIDA + "%s-%s.jpg" % [String(caso["id"]), id]), 0.9
 			)
 		dia.set_process(true)
 	quit(0)

@@ -1,11 +1,15 @@
 # Filtro de pantalla de época (#1270)
 
-Capturas en GPU real (Intel Alder Lake-N, `DISPLAY=:0`) del mismo cuadro de
-archivo y trayecto con los cuatro preajustes: `ninguno`, `monitor`,
-`televisor` y `vhs`. El HUD de la esquina superior izquierda sale igual en
-todas: el filtro es un `CompositorEffect` sobre el 3D y la interfaz no pasa
-por él (frontera de #115). Los nombres que flotan sobre la gente son texto
-del mundo 3D y sí se filtran.
+Las capturas versionadas actuales en GPU real (Intel Alder Lake-N,
+`DISPLAY=:0`) cubren archivo y trayecto con los cuatro preajustes:
+`ninguno`, `monitor`, `televisor` y `vhs`. El HUD de la esquina superior
+izquierda sale igual en todas: el filtro es un `CompositorEffect` sobre el 3D
+y la interfaz no pasa por él (frontera de #115). Los nombres que flotan sobre
+la gente son texto del mundo 3D y sí se filtran.
+
+El capturador ya recorre también un sueño determinista (`crucero`) y guarda
+`sueno-{preajuste}.jpg`. Falta regenerar esas cuatro imágenes en GPU real
+antes de dar por satisfecho ese punto del criterio de salida.
 
 No hay capturas de casa: al entrar desde el script se abre la interfaz de la
 portátil, que no es lo que se compara y muestra rutas locales del equipo.
