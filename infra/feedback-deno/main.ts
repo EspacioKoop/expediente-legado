@@ -222,7 +222,9 @@ async function handler(
     return json({ ok: false, error: "service_unavailable" }, 503);
   }
 
-  const remoteIp = info.remoteAddr.hostname || "unknown";
+  const remoteIp = "hostname" in info.remoteAddr
+    ? String(info.remoteAddr.hostname)
+    : "unknown";
   const actor = await actorKey(remoteIp, token);
   let allowed = false;
   try {
