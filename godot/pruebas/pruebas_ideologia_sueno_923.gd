@@ -293,7 +293,9 @@ func _probar_cruce_tarot_con_modificador_comun() -> void:
 			modificadores,
 		)
 	)
-	_comprobar(anomalias.size() == 1, "el tarot conocido sigue siendo el único original de la escena")
+	_comprobar(
+		anomalias.size() == 1, "el tarot conocido sigue siendo el único original de la escena"
+	)
 	var rima := _primera_rima(mundo)
 	_comprobar(
 		rima != null and String(rima.get_meta("motivo_simbolico", "")) == "ciclo-centro",
