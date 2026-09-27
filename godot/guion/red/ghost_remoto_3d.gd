@@ -39,18 +39,10 @@ func _init() -> void:
 
 
 func cargar_evento(
-	evento: Dictionary,
-	scene_revision: String,
-	ahora_unix: int,
-	anchor_key: String = ""
+	evento: Dictionary, scene_revision: String, ahora_unix: int, anchor_key: String = ""
 ) -> bool:
 	return _trayectoria.cargar_evento(
-		evento,
-		self,
-		scene_revision,
-		ahora_unix,
-		anchor_key,
-		Vector3.ZERO
+		evento, self, scene_revision, ahora_unix, anchor_key, Vector3.ZERO
 	)
 
 
