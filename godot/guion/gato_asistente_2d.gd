@@ -1,4 +1,4 @@
-## Gato 2D de escritorio para SIGA (#92, #285).
+## Gato 2D del asistente compartido por SIGA y el shell OS98 (#92, #285, #787).
 ##
 ## El avatar usa un atlas original de estética GBA: conserva una silueta felina
 ## legible a tamaño pequeño sin convertir el asistente en otra fuente de estado.
@@ -12,12 +12,16 @@ const ALTO := 150.0
 const ANCHO_FRAME := 48.0
 const ALTO_FRAME := 64.0
 const TAMANO_DIBUJO := Vector2(96.0, 128.0)
+const CICLO_ANIMACION := 14.0
 const ATLAS_GATO: Texture2D = preload("res://arte/gato_asistente_gba.svg")
 const FRAME_IDLE := 0
 const FRAME_ALERTA := 1
 const FRAME_PARPADEO := 2
 const FRAME_HAMBRIENTO := 3
+const FRAME_SATISFECHO := 4
+const FRAME_LOAF := 5
 const FRAME_MIRANDO := 6
+const FRAME_ESPALDA := 7
 const NIVEL_COMPLETO := GatoAyuda.COMPLETA
 const NIVEL_ESCASO := GatoAyuda.ESCASA
 
@@ -28,7 +32,9 @@ var _tiempo := 0.0
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(ANCHO, ALTO)
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Solo la silueta del gato captura el arrastre. El bocadillo puede seguir
+	# dejando pasar clics a SIGA/OS98 aunque el avatar se mueva por el shell.
+	mouse_filter = Control.MOUSE_FILTER_PASS
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	set_process(not _reduccion_movimiento)
 	queue_redraw()
@@ -43,7 +49,7 @@ func configurar(nivel: String, reduccion_movimiento: bool) -> void:
 
 
 func _process(delta: float) -> void:
-	_tiempo = fmod(_tiempo + delta, 8.0)
+	_tiempo = fmod(_tiempo + delta, CICLO_ANIMACION)
 	queue_redraw()
 
 
@@ -66,22 +72,23 @@ func _draw() -> void:
 func _respiracion() -> float:
 	if _reduccion_movimiento:
 		return 0.0
-	# Dos respiraciones por ciclo, con una modulación lenta de amplitud. Las dos
-	# ondas cierran exactamente en 8 s para evitar un salto al reiniciar `_tiempo`
-	# y romper la sensación orgánica con un loop demasiado perfecto.
+	# La respiración y el catálogo de poses comparten un ciclo cerrado, pero las
+	# frecuencias no coinciden exactamente: evita que cada mirada ocurra siempre
+	# en el mismo punto de inspiración y mantiene el loop discreto.
 	var respiracion_base := sin((_tiempo / 4.0) * TAU)
-	var variacion := 0.78 + 0.22 * sin((_tiempo / 8.0) * TAU + 0.8)
+	var variacion := 0.78 + 0.22 * sin((_tiempo / CICLO_ANIMACION) * TAU + 0.8)
 	return respiracion_base * variacion
 
 
 func _amplitud_respiracion(frame: int) -> Vector2:
-	# No todas las poses respiran igual: el idle tiene más caja torácica; alerta
-	# y mirada son más tensas, y hambre queda algo más contenida. El atlas no se
-	# redibuja: solo cambia menos de ~1 px de alto en el tamaño de destino.
 	if frame == FRAME_HAMBRIENTO:
 		return Vector2(0.002, 0.006)
-	if frame == FRAME_ALERTA or frame == FRAME_MIRANDO:
+	if frame == FRAME_ALERTA or frame == FRAME_MIRANDO or frame == FRAME_ESPALDA:
 		return Vector2(0.0025, 0.005)
+	if frame == FRAME_LOAF:
+		return Vector2(0.004, 0.004)
+	if frame == FRAME_SATISFECHO:
+		return Vector2(0.003, 0.007)
 	return Vector2(0.0035, 0.008)
 
 
@@ -92,12 +99,37 @@ func _frame_actual() -> int:
 	if _reduccion_movimiento:
 		return FRAME_IDLE
 
-	# El idle evita el efecto de mascota hiperactiva. En cada ciclo solo hay un
-	# parpadeo y dos cambios breves de postura sin desplazar el avatar por la UI.
-	if _tiempo >= 3.65 and _tiempo < 3.82:
+	# Las ocho poses del atlas participan ahora en secuencias cortas. No hay RNG:
+	# los in-betweens son presentación determinista y nunca deciden progreso.
+	# 1) doble parpadeo, más orgánico que un único frame periódico.
+	if (_tiempo >= 2.70 and _tiempo < 2.86) or (_tiempo >= 3.02 and _tiempo < 3.14):
 		return FRAME_PARPADEO
-	if _tiempo >= 5.70 and _tiempo < 6.35:
-		return FRAME_ALERTA
-	if _tiempo >= 7.10 and _tiempo < 7.55:
+
+	# 2) mirar -> alerta -> mirar: una atención breve hacia otra zona del OS98.
+	if _tiempo >= 4.45 and _tiempo < 4.82:
 		return FRAME_MIRANDO
+	if _tiempo >= 4.82 and _tiempo < 5.18:
+		return FRAME_ALERTA
+	if _tiempo >= 5.18 and _tiempo < 5.58:
+		return FRAME_MIRANDO
+
+	# 3) satisfecho -> loaf -> satisfecho: se acomoda antes de volver a idle.
+	if _tiempo >= 7.05 and _tiempo < 7.42:
+		return FRAME_SATISFECHO
+	if _tiempo >= 7.42 and _tiempo < 8.18:
+		return FRAME_LOAF
+	if _tiempo >= 8.18 and _tiempo < 8.50:
+		return FRAME_SATISFECHO
+
+	# 4) giro completo: usa espalda como transición, no como pose congelada.
+	if _tiempo >= 10.35 and _tiempo < 10.76:
+		return FRAME_MIRANDO
+	if _tiempo >= 10.76 and _tiempo < 11.48:
+		return FRAME_ESPALDA
+	if _tiempo >= 11.48 and _tiempo < 11.90:
+		return FRAME_MIRANDO
+
+	# Un último parpadeo rompe la simetría antes de cerrar el ciclo.
+	if _tiempo >= 12.72 and _tiempo < 12.90:
+		return FRAME_PARPADEO
 	return FRAME_IDLE
