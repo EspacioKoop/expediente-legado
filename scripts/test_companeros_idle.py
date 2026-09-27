@@ -65,6 +65,11 @@ class CompanerosIdleTest(unittest.TestCase):
         self.assertIn("DURACION_TRABAJO", self.idle)
         self.assertIn("DURACION_PAUSA", self.idle)
         self.assertIn('"work" if _trabajando else "idle"', self.idle)
+        self.assertIn("_reproducir(clip_rutina, fase / TAU)", self.idle)
+        self.assertIn("AnimacionesRocketbox.sexo(nodo as Node3D)", self.idle)
+        self.assertIn("return avatar if avatar != null else objetivo", self.idle)
+        self.assertIn("Modelos._animar(objetivo, clip_rutina)", self.idle)
+        self.assertNotIn("AnimacionesUAL.reproducir(objetivo,", self.idle)
         self.assertIn("_reloj_actividad = fmod", self.idle)
 
     def test_dia_monta_controller_hijo(self):

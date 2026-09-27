@@ -117,17 +117,40 @@ func conversar(activo: bool) -> void:
 		# A mitad de recado está de pie: se para, habla y luego sigue.
 		recado.pausar(activo)
 		if activo:
-			AnimacionesUAL.reproducir(objetivo, "conversar", fase / TAU)
+			_reproducir("conversar", fase / TAU)
 		return
 	if activo:
 		var clip := CLIP_SENTADO_ACTIVO if sentado else "conversar"
-		AnimacionesUAL.reproducir(objetivo, clip, fase / TAU)
+		_reproducir(clip, fase / TAU)
 	else:
 		_retomar_rutina()
 
 
 func en_recado() -> bool:
 	return is_instance_valid(recado)
+
+
+## Espacio3D envuelve el .glb en un Node3D posicionado. Para que
+## AnimacionesRocketbox pueda reconocer sexo/ruta hay que entregar la pieza
+## importada, no ese wrapper; UAL conserva el wrapper como fallback.
+func _pieza_animada() -> Node3D:
+	var avatar := _buscar_avatar_rocketbox(objetivo)
+	return avatar if avatar != null else objetivo
+
+
+func _buscar_avatar_rocketbox(nodo: Node) -> Node3D:
+	if nodo is Node3D and not AnimacionesRocketbox.sexo(nodo as Node3D).is_empty():
+		return nodo as Node3D
+	for hijo in nodo.get_children():
+		var encontrado := _buscar_avatar_rocketbox(hijo)
+		if encontrado != null:
+			return encontrado
+	return null
+
+
+func _reproducir(clip: String, desfase: float = 0.0) -> bool:
+	var pieza := _pieza_animada()
+	return is_instance_valid(pieza) and AnimacionesUAL.reproducir(pieza, clip, desfase)
 
 
 func empezar_recado(nuevo: RecadoCompanero3D) -> void:
@@ -156,7 +179,7 @@ func sitio() -> Vector3:
 func _retomar_rutina() -> void:
 	_actualizar_actividad(true)
 	if gesto_telefono:
-		AnimacionesUAL.reproducir(objetivo, "telefono", fase / TAU)
+		_reproducir("telefono", fase / TAU)
 
 
 func _process(delta: float) -> void:
@@ -188,7 +211,8 @@ func huir_de(origen_global: Vector3) -> void:
 	if en_recado():
 		recado.cancelar()
 	recado = null
-	Modelos._animar(objetivo, "idle")
+	if not _reproducir("idle"):
+		Modelos._animar(objetivo, "idle")
 	var direccion := objetivo.global_position - origen_global
 	direccion.y = 0.0
 	if direccion.length_squared() < 0.01:
@@ -212,7 +236,8 @@ func _exit_tree() -> void:
 		objetivo.rotation.y = _rotacion_original
 		objetivo.position = _posicion_original
 		if actividad_trabajo or actividad_brazos or gesto_telefono or _conversando or sentado:
-			Modelos._animar(objetivo, "idle")
+			if not _reproducir("idle"):
+				Modelos._animar(objetivo, "idle")
 
 
 func _actualizar_actividad(forzar: bool) -> void:
@@ -232,11 +257,14 @@ func _actualizar_actividad(forzar: bool) -> void:
 	_brazos_cruzados = debe_cruzar_brazos
 	if sentado:
 		var clip := CLIP_SENTADO_ACTIVO if _trabajando else CLIP_SENTADO
-		if AnimacionesUAL.reproducir(objetivo, clip, fase / TAU):
+		if _reproducir(clip, fase / TAU):
 			return
-	if _brazos_cruzados and AnimacionesUAL.reproducir(objetivo, "brazos_cruzados"):
+	if _brazos_cruzados and _reproducir("brazos_cruzados"):
 		return
-	Modelos._animar(objetivo, "work" if _trabajando else "idle")
+	var clip_rutina := "work" if _trabajando else "idle"
+	if _reproducir(clip_rutina, fase / TAU):
+		return
+	Modelos._animar(objetivo, clip_rutina)
 
 
 ## Mira brevemente al actor solo si cruza por delante y dentro de un radio
