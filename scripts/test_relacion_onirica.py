@@ -79,6 +79,7 @@ class RelacionOniricaTest(unittest.TestCase):
         core = CORE.read_text(encoding="utf-8")
         self.assertIn("func confirmar() -> String:", core)
         self.assertIn('return "deseleccionado"', core)
+        self.assertIn('"contenido": contenido_completo', core)
         self.assertIn("Interactuable3D.new()", codigo)
         self.assertIn("activado.connect(_al_activar_documento.bind(indice))", codigo)
         self.assertIn("activado.connect(_al_confirmar)", codigo)
@@ -87,13 +88,34 @@ class RelacionOniricaTest(unittest.TestCase):
         self.assertIn("CollisionShape3D.new()", codigo)
         for cuerpo in ("StaticBody3D", "CharacterBody3D", "NavigationObstacle3D"):
             self.assertNotIn(cuerpo, codigo)
-        self.assertNotIn("Input.", codigo)
         for clave in (
             "VISOR_ELIJA",
             "VISOR_RELACION_DISTINTO",
             "GATO_SIGA_COMBINACION_FALLIDA",
         ):
             self.assertIn(f'tr("{clave}")', codigo)
+
+    def test_vertical_separa_consulta_completa_y_seleccion(self):
+        codigo = VERTICAL.read_text(encoding="utf-8")
+        compacto = "".join(codigo.split())
+        self.assertIn("RichTextLabel.new()", codigo)
+        self.assertIn("_lector_contenido.scroll_active=true", compacto)
+        self.assertIn("_lector_contenido.focus_mode=Control.FOCUS_ALL", compacto)
+        self.assertIn("CheckButton.new()", codigo)
+        self.assertIn('tr("VISOR_RELACIONAR")', codigo)
+        self.assertIn('tr("MENU_GLOBAL_VOLVER")', codigo)
+        self.assertIn("func _abrir_documento(indice:int)->void:", compacto)
+        self.assertIn(
+            "documento.habilitado=notrelacion.cerradaandrelacion.nucleo.pendiente()",
+            compacto,
+        )
+        activar = codigo.split("func _al_activar_documento", 1)[1].split(
+            "func _abrir_documento", 1
+        )[0]
+        self.assertIn("_abrir_documento(indice)", activar)
+        self.assertNotIn("relacion.seleccionar", activar)
+        self.assertIn("get_tree().paused=true", compacto)
+        self.assertIn("Input.mouse_mode=Input.MOUSE_MODE_VISIBLE", compacto)
 
     def test_controller_esta_montado_antes_de_ecos(self):
         escena = DIA.read_text(encoding="utf-8")
