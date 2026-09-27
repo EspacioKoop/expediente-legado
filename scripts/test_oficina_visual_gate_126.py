@@ -50,6 +50,9 @@ class OficinaVisualGate126Test(unittest.TestCase):
         self.assertIn('"frase": ""', self.captura)
 
     def test_workflow_publica_artifact_para_revision_humana(self):
+        self.assertIn("mesa-vulkan-drivers", self.workflow)
+        self.assertIn("VK_DRIVER_FILES", self.workflow)
+        self.assertIn("vulkaninfo --summary", self.workflow)
         self.assertIn("xvfb-run -a godot4 --rendering-method forward_plus --path godot", self.workflow)
         self.assertIn("res://pruebas/capturas_oficina_126.gd", self.workflow)
         self.assertIn("actions/upload-artifact@v4", self.workflow)

@@ -89,14 +89,20 @@ jobs:
       - name: Importar proyecto
         run: godot4 --headless --editor --path godot --quit
 
-      - name: Preparar display virtual
+      - name: Preparar display virtual y Vulkan software
         shell: bash
         run: |
           set -euo pipefail
-          if ! command -v xvfb-run >/dev/null 2>&1; then
-            sudo apt-get update
-            sudo apt-get install -y xvfb xauth
-          fi
+          sudo apt-get update
+          sudo apt-get install -y xvfb xauth libvulkan1 mesa-vulkan-drivers vulkan-tools
+
+          lvp="$(find /usr/share/vulkan/icd.d -maxdepth 1 -type f -name 'lvp_icd*.json' | head -n 1)"
+          test -n "$lvp"
+          echo "VK_DRIVER_FILES=$lvp" >> "$GITHUB_ENV"
+
+          # Xvfb no aporta una GPU. Lavapipe sí debe exponer una superficie
+          # Vulkan completa para que Godot no degrade silenciosamente a OpenGL.
+          VK_DRIVER_FILES="$lvp" xvfb-run -a vulkaninfo --summary
 
       - name: Generar capturas de oficina #126
         shell: bash
