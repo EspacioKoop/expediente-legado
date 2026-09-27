@@ -271,6 +271,8 @@ class AislamientoDeFallosTest(unittest.TestCase):
 
         with mock.patch.object(reservas, "publicar_release", publicar), mock.patch.object(
             reservas, "obtener_comentarios", lambda: comentarios
+        ), mock.patch.object(
+            reservas, "obtener_pr_cerrada_de_rama", lambda rama: None
         ), mock.patch("sys.argv", ["x", "--sweep"]):
             codigo = reservas.main()
 
@@ -292,6 +294,121 @@ class AislamientoDeFallosTest(unittest.TestCase):
         acciones = reservas.planificar_barrido(estado, t0 + timedelta(hours=2), obtener_pr)
 
         self.assertEqual([(11, "reserva-caducada")], [(a[0].issue, a[1]) for a in acciones])
+
+
+def pr_cerrada(numero: int, rama: str, cerrada: datetime, merged: bool = True) -> dict:
+    return {
+        "number": numero,
+        "state": "closed",
+        "head": {"ref": rama},
+        "closed_at": cerrada.isoformat().replace("+00:00", "Z"),
+        "merged_at": cerrada.isoformat().replace("+00:00", "Z") if merged else None,
+        "merge_commit_sha": "cafe" if merged else None,
+    }
+
+
+class RafagaDeMergesTest(unittest.TestCase):
+    """#1512: GitHub cancela ejecuciones pendientes de reservas.yml en ráfagas."""
+
+    t0 = datetime(2026, 9, 27, 14, 0, tzinfo=UTC)
+
+    def test_claim_sin_pr_ready_se_libera_por_la_pr_cerrada_de_su_rama(self):
+        estado = reservas.reconstruir_reservas([
+            comentario("CLAIM issue=#20 agent=A branch=feature/20-a files=a.gd goal=A lease=48h", self.t0),
+        ])
+        acciones = reservas.planificar_barrido(
+            estado,
+            self.t0 + timedelta(hours=2),
+            lambda n: {},
+            pr_cerrada_de_rama=lambda rama: pr_cerrada(200, rama, self.t0 + timedelta(hours=1)),
+        )
+        self.assertEqual(
+            [(20, "merge-detectado-automaticamente", 200)],
+            [(r.issue, motivo, pr["number"]) for r, motivo, pr in acciones],
+        )
+
+    def test_rama_reutilizada_no_libera_un_claim_posterior_al_cierre(self):
+        estado = reservas.reconstruir_reservas([
+            comentario("CLAIM issue=#21 agent=A branch=feature/21-a files=a.gd goal=A lease=48h", self.t0),
+        ])
+        acciones = reservas.planificar_barrido(
+            estado,
+            self.t0 + timedelta(hours=2),
+            lambda n: {},
+            pr_cerrada_de_rama=lambda rama: pr_cerrada(201, rama, self.t0 - timedelta(hours=1)),
+        )
+        self.assertEqual([], acciones)
+
+    def test_si_la_busqueda_por_rama_falla_solo_decide_la_lease(self):
+        estado = reservas.reconstruir_reservas([
+            comentario("CLAIM issue=#22 agent=A branch=feature/22-a files=a.gd goal=A lease=1h", self.t0),
+        ])
+
+        def falla(rama: str) -> dict | None:
+            raise reservas.ErrorTransitorio("rate limit")
+
+        acciones = reservas.planificar_barrido(
+            estado, self.t0 + timedelta(hours=2), lambda n: {}, pr_cerrada_de_rama=falla
+        )
+        self.assertEqual([(22, "reserva-caducada")], [(a[0].issue, a[1]) for a in acciones])
+
+    def test_solo_prs_cerradas_no_adelanta_leases_caducadas(self):
+        estado = reservas.reconstruir_reservas([
+            comentario("CLAIM issue=#23 agent=A branch=feature/23-a files=a.gd goal=A lease=1h", self.t0),
+        ])
+        acciones = reservas.planificar_barrido(
+            estado,
+            self.t0 + timedelta(hours=5),
+            lambda n: {},
+            pr_cerrada_de_rama=lambda rama: None,
+            solo_prs_cerradas=True,
+        )
+        self.assertEqual([], acciones)
+
+    def test_la_ultima_ejecucion_de_la_rafaga_libera_las_canceladas(self):
+        # Tres merges seguidos: las ejecuciones de #301 y #302 se cancelaron y
+        # solo corre la de #303. Debe liberar las tres, conservar la reserva con
+        # PR abierta y no tocar la lease caducada, que es del barrido periódico.
+        t0 = self.t0
+        comentarios = [
+            comentario("CLAIM issue=#31 agent=A branch=feature/31-a files=a.gd goal=A lease=48h", t0),
+            comentario("PR_READY issue=#31 pr=#301 sha=abc", t0),
+            comentario("CLAIM issue=#32 agent=B branch=feature/32-b files=b.gd goal=B lease=48h", t0),
+            comentario("CLAIM issue=#33 agent=C branch=feature/33-c files=c.gd goal=C lease=48h", t0),
+            comentario("PR_READY issue=#33 pr=#303 sha=abc", t0),
+            comentario("CLAIM issue=#34 agent=D branch=feature/34-d files=d.gd goal=D lease=48h", t0),
+            comentario("PR_READY issue=#34 pr=#304 sha=abc", t0),
+            comentario("CLAIM issue=#35 agent=E branch=feature/35-e files=e.gd goal=E lease=1h", t0),
+        ]
+        merge = t0 + timedelta(hours=3)
+        prs = {
+            301: pr_cerrada(301, "feature/31-a", merge),
+            303: pr_cerrada(303, "feature/33-c", merge),
+            304: {"number": 304, "state": "open", "head": {"ref": "feature/34-d"}},
+        }
+        por_rama = {"feature/32-b": pr_cerrada(302, "feature/32-b", merge)}
+        publicadas: list[tuple[int, str]] = []
+
+        def publicar(reserva, motivo, pr, dry_run):
+            publicadas.append((reserva.issue, motivo))
+            reserva.released = True
+
+        with mock.patch.object(reservas, "publicar_release", publicar), mock.patch.object(
+            reservas, "obtener_comentarios", lambda: comentarios
+        ), mock.patch.object(reservas, "obtener_pr", lambda n: prs[n]), mock.patch.object(
+            reservas, "obtener_pr_cerrada_de_rama", lambda rama: por_rama.get(rama)
+        ), mock.patch("sys.argv", ["x", "--pr", "303"]):
+            codigo = reservas.main()
+
+        self.assertEqual(0, codigo)
+        self.assertEqual(
+            [
+                (33, "merge-detectado-automaticamente"),
+                (31, "merge-detectado-automaticamente"),
+                (32, "merge-detectado-automaticamente"),
+            ],
+            publicadas,
+        )
 
 
 if __name__ == "__main__":

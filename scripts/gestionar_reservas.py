@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Callable
 from urllib.error import HTTPError
+from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 REGISTRO_ISSUE = int(os.environ.get("REGISTRO_RESERVAS_ISSUE", "182"))
@@ -118,16 +119,44 @@ def reconstruir_reservas(comentarios: list[dict]) -> dict[tuple[int, str], Reser
     return reservas
 
 
+def motivo_de_cierre(pr: dict) -> str:
+    return "merge-detectado-automaticamente" if pr.get("merged_at") else "PR-cerrado-sin-integrar"
+
+
 def planificar_barrido(
     reservas: dict[tuple[int, str], Reserva],
     ahora: datetime,
     obtener_pr: Callable[[int], dict],
     legacy_cutoff: datetime | None = None,
+    pr_cerrada_de_rama: Callable[[str], dict | None] | None = None,
+    solo_prs_cerradas: bool = False,
 ) -> list[tuple[Reserva, str, dict | None]]:
+    """Decide qué reservas liberar.
+
+    ``pr_cerrada_de_rama`` resuelve la PR de una reserva sin ``PR_READY``: sin
+    ella, una reserva cuyo RELEASE automático se perdió esperaba a que caducara
+    la lease (#1512). ``solo_prs_cerradas`` limita el barrido a PRs cerradas;
+    lo usa el modo ``--pr`` para recuperar merges de ejecuciones canceladas sin
+    adelantar la caducidad de leases, que sigue siendo cosa del barrido periódico.
+    """
     acciones: list[tuple[Reserva, str, dict | None]] = []
     cache_pr: dict[int, dict] = {}
     for reserva in reservas.values():
         if reserva.released:
+            continue
+
+        if reserva.pr is None and pr_cerrada_de_rama is not None:
+            try:
+                pr = pr_cerrada_de_rama(reserva.branch)
+            except RuntimeError as exc:
+                print(f"AVISO: no se pudo buscar la PR de {reserva.branch}: {exc}")
+                pr = None
+            # Una rama reutilizada tras un merge anterior no libera el CLAIM nuevo.
+            if pr and parse_fecha(pr["closed_at"]) >= reserva.claimed_at:
+                acciones.append((reserva, motivo_de_cierre(pr), pr))
+                continue
+
+        if solo_prs_cerradas and reserva.pr is None:
             continue
 
         if reserva.pr is not None:
@@ -141,8 +170,7 @@ def planificar_barrido(
                     continue
             pr = cache_pr[reserva.pr]
             if pr.get("state") == "closed":
-                motivo = "merge-detectado-automaticamente" if pr.get("merged_at") else "PR-cerrado-sin-integrar"
-                acciones.append((reserva, motivo, pr))
+                acciones.append((reserva, motivo_de_cierre(pr), pr))
             continue
 
         if reserva.lease_hours is not None:
@@ -251,6 +279,16 @@ def obtener_pr(numero: int) -> dict:
     return dict(payload or {})
 
 
+def obtener_pr_cerrada_de_rama(rama: str) -> dict | None:
+    """La PR cerrada más reciente cuya rama de origen es ``rama``, o None."""
+    duenio = REPO.split("/", 1)[0]
+    payload, _ = api_json(
+        "GET", f"/repos/{REPO}/pulls?state=closed&head={duenio}:{quote(rama, safe='')}&per_page=10"
+    )
+    cerradas = [dict(pr) for pr in (payload or []) if pr.get("closed_at")]
+    return max(cerradas, key=lambda pr: pr["closed_at"]) if cerradas else None
+
+
 def publicar_release(reserva: Reserva, motivo: str, pr: dict | None, dry_run: bool) -> None:
     partes = [f"RELEASE issue=#{reserva.issue}"]
     if pr:
@@ -264,7 +302,23 @@ def publicar_release(reserva: Reserva, motivo: str, pr: dict | None, dry_run: bo
     print(body)
     if not dry_run:
         api_json("POST", f"/repos/{REPO}/issues/{REGISTRO_ISSUE}/comments", {"body": body})
-        reserva.released = True
+    # También en dry-run: el estado es solo de esta ejecución, y así la
+    # recuperación del modo --pr no vuelve a anunciar lo que ya se liberó.
+    reserva.released = True
+
+
+def publicar_acciones(acciones: list[tuple[Reserva, str, dict | None]], dry_run: bool) -> int:
+    fallos = 0
+    for reserva, motivo, pr in acciones:
+        try:
+            publicar_release(reserva, motivo, pr, dry_run)
+        except RuntimeError as exc:
+            # Un fallo por reserva no debe dejar sin liberar a las siguientes.
+            fallos += 1
+            print(f"ERROR: no se pudo liberar #{reserva.issue} ({reserva.branch}): {exc}")
+    if fallos:
+        print(f"ERROR: {fallos} de {len(acciones)} liberaciones fallaron; el resto sí se publicó")
+    return fallos
 
 
 def liberar_por_pr(reservas: dict[tuple[int, str], Reserva], numero_pr: int, dry_run: bool) -> int:
@@ -272,21 +326,32 @@ def liberar_por_pr(reservas: dict[tuple[int, str], Reserva], numero_pr: int, dry
     if pr.get("state") != "closed":
         return 0
     branch = ((pr.get("head") or {}).get("ref"))
-    candidatas = [
-        reserva
+    acciones = [
+        (reserva, motivo_de_cierre(pr), pr)
         for reserva in reservas.values()
         if not reserva.released and (reserva.pr == numero_pr or reserva.branch == branch)
     ]
-    motivo = "merge-detectado-automaticamente" if pr.get("merged_at") else "PR-cerrado-sin-integrar"
-    fallos = 0
-    for reserva in candidatas:
-        try:
-            publicar_release(reserva, motivo, pr, dry_run)
-        except RuntimeError as exc:
-            # Un fallo por reserva no debe dejar sin liberar a las siguientes.
-            fallos += 1
-            print(f"ERROR: no se pudo liberar #{reserva.issue} ({reserva.branch}): {exc}")
-    return fallos
+    return publicar_acciones(acciones, dry_run)
+
+
+def recuperar_prs_cerradas(
+    reservas: dict[tuple[int, str], Reserva], ahora: datetime, dry_run: bool
+) -> int:
+    """Libera reservas de PRs cerradas cuyo RELEASE se perdió (#1512).
+
+    reservas.yml serializa sus ejecuciones con `concurrency`, y GitHub solo
+    guarda una pendiente por grupo: en una ráfaga de merges cancela las del
+    medio. La última de la ráfaga nunca se cancela y corre después de todos
+    los merges, así que recuperando aquí se liberan también las perdidas.
+    """
+    acciones = planificar_barrido(
+        reservas,
+        ahora,
+        obtener_pr,
+        pr_cerrada_de_rama=obtener_pr_cerrada_de_rama,
+        solo_prs_cerradas=True,
+    )
+    return publicar_acciones(acciones, dry_run)
 
 
 def main() -> int:
@@ -299,22 +364,17 @@ def main() -> int:
     args = parser.parse_args()
 
     reservas = reconstruir_reservas(obtener_comentarios())
+    ahora = datetime.now(timezone.utc)
     if args.pr:
-        return 1 if liberar_por_pr(reservas, args.pr, args.dry_run) else 0
+        fallos = liberar_por_pr(reservas, args.pr, args.dry_run)
+        fallos += recuperar_prs_cerradas(reservas, ahora, args.dry_run)
+        return 1 if fallos else 0
 
     cutoff = parse_fecha(args.legacy_cutoff) if args.legacy_cutoff else None
-    ahora = datetime.now(timezone.utc)
-    acciones = planificar_barrido(reservas, ahora, obtener_pr, cutoff)
-    fallos = 0
-    for reserva, motivo, pr in acciones:
-        try:
-            publicar_release(reserva, motivo, pr, args.dry_run)
-        except RuntimeError as exc:
-            fallos += 1
-            print(f"ERROR: no se pudo liberar #{reserva.issue} ({reserva.branch}): {exc}")
-    if fallos:
-        print(f"ERROR: {fallos} de {len(acciones)} liberaciones fallaron; el resto sí se publicó")
-    return 1 if fallos else 0
+    acciones = planificar_barrido(
+        reservas, ahora, obtener_pr, cutoff, pr_cerrada_de_rama=obtener_pr_cerrada_de_rama
+    )
+    return 1 if publicar_acciones(acciones, args.dry_run) else 0
 
 
 if __name__ == "__main__":
