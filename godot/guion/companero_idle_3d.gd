@@ -111,6 +111,8 @@ func conversar(activo: bool) -> void:
 	if activo and reduccion_movimiento:
 		return
 	_conversando = activo
+	if activo:
+		_reiniciar_atencion()
 	if en_recado():
 		# A mitad de recado está de pie: se para, habla y luego sigue.
 		recado.pausar(activo)
