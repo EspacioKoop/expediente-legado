@@ -72,7 +72,7 @@ autenticación en el keyring del sistema.
 ## Healthcheck
 
 ```bash
-curl -fsS https://TU-APP.deno.net/health
+curl -fsS https://siga98-feedback-deno.<tu-organizacion>.deno.net/health
 ```
 
 Debe responder con:
@@ -94,7 +94,7 @@ No añadas la URL a las builds hasta que ambos indicadores sean `true`.
 En GitHub Actions añade una variable pública:
 
 ```text
-SIGA98_FEEDBACK_FALLBACK_URL=https://TU-APP.deno.net/api/report
+SIGA98_FEEDBACK_FALLBACK_URL=https://siga98-feedback-deno.<tu-organizacion>.deno.net/api/report
 ```
 
 El exportador conservará `SIGA98_FEEDBACK_URL` como primario y añadirá este
