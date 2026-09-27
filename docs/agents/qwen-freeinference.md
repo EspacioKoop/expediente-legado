@@ -30,6 +30,16 @@ El workflow lee `QWEN_BASE_URL` antes que cualquier detección automática. Si n
 
 Al definir `QWEN_BASE_URL`, sobrescribes ambos comportamientos: el workflow usa tu URL tal cual.
 
+### Usar FreeInference u otro gateway como fallback
+
+No es necesario reemplazar el backend principal. También puedes configurarlo como uno de los cuatro slots de reserva:
+
+- secret: `QWEN_FALLBACK_1_API_KEY`;
+- variable: `QWEN_FALLBACK_1_BASE_URL`;
+- variable: `QWEN_FALLBACK_1_MODEL`.
+
+Los slots 2–4 usan el mismo patrón. El autopilot prueba el primario y después los fallbacks configurados, en orden. La reparación automática de CI reutiliza exactamente la misma cadena.
+
 ### `QWEN_MODEL`
 
 Si se define `QWEN_MODEL`, el workflow lo pasa como `openai_model` al CLI de Qwen. Si no se define, el workflow usa `qwen3-coder-plus`. Este campo permite probar modelos distintos sin modificar el workflow ni crear nuevas variables.
