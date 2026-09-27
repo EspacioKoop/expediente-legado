@@ -6,10 +6,7 @@
     }
   },
   "git": {
-    "deploymentEnabled": {
-      "*": false,
-      "main": true
-    }
+    "deploymentEnabled": false
   },
   "ignoreCommand": "git diff --quiet \"${VERCEL_GIT_PREVIOUS_SHA:-HEAD^}\" HEAD -- api vercel.json .vercelignore"
 }
