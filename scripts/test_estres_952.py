@@ -12,6 +12,7 @@ MARCADORES = ROOT / "godot" / "guion" / "dia_marcadores_mundo_app.gd"
 VISOR = ROOT / "godot" / "guion" / "visor_expediente.gd"
 DIA = ROOT / "godot" / "guion" / "dia_clima_app.gd"
 HUD = ROOT / "godot" / "guion" / "dia_hud_fases_app.gd"
+INDICADOR = ROOT / "godot" / "guion" / "estres_hud_indicador.gd"
 ENTORNO = ROOT / "godot" / "guion" / "estres_ambiental.gd"
 SMOKE = "pruebas/issue_952_smoke.gd"
 
@@ -24,6 +25,7 @@ class Estres952Test(unittest.TestCase):
         cls.visor = VISOR.read_text(encoding="utf-8")
         cls.dia = DIA.read_text(encoding="utf-8")
         cls.hud = HUD.read_text(encoding="utf-8")
+        cls.indicador = INDICADOR.read_text(encoding="utf-8")
         cls.entorno = ENTORNO.read_text(encoding="utf-8")
 
     def test_estado_interno_y_acotado_vive_en_jornada(self):
@@ -34,13 +36,19 @@ class Estres952Test(unittest.TestCase):
         self.assertNotIn("ProgressBar", self.estres)
         self.assertNotIn("TextureProgressBar", self.estres)
 
-    def test_hud_expone_solo_banda_cualitativa(self):
-        self.assertIn('"estres_banda": banda_estres(Estres.nivel(jornada))', self.hud)
-        for banda in ("calma", "inquietud", "tension", "paranoia"):
-            self.assertIn(f'return "{banda}"', self.hud)
+    def test_hud_expone_indicador_visual_sin_texto_de_estado(self):
+        self.assertIn('"estres_segmentos": segmentos_estres(Estres.nivel(jornada))', self.hud)
+        self.assertIn('preload("res://guion/estres_hud_indicador.gd")', self.hud)
+        self.assertIn('fila.add_child(_indicador_estres)', self.hud)
         self.assertNotIn("Estres.valor(", self.hud)
-        self.assertNotIn("ProgressBar", self.hud)
-        self.assertNotIn("TextureProgressBar", self.hud)
+        for palabra in ("CALMA", "INQUIETUD", "TENSIÓN", "PARANOIA"):
+            self.assertNotIn(palabra, self.hud)
+        self.assertIn("draw_arc(", self.indicador)
+        self.assertIn("draw_circle(", self.indicador)
+        self.assertIn("const SEGMENTOS := 4", self.indicador)
+        self.assertNotIn("Label", self.indicador)
+        self.assertNotIn("ProgressBar", self.indicador)
+        self.assertNotIn("TextureProgressBar", self.indicador)
 
     def test_catalogo_cubre_tension_y_recuperacion_sin_bloqueos(self):
         for evento in (
