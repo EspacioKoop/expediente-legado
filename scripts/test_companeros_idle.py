@@ -56,8 +56,8 @@ class CompanerosIdleTest(unittest.TestCase):
         self.assertIn("AtencionCabeza3D.new()", self.idle)
         self.assertIn("PORCION_GIRO_CUERPO", self.idle)
         self.assertIn("extends SkeletonModifier3D", self.atencion)
-        self.assertIn('find_bone("Neck")', self.atencion)
-        self.assertIn('find_bone("Head")', self.atencion)
+        self.assertIn('_girar(esqueleto, "Neck"', self.atencion)
+        self.assertIn('_girar(esqueleto, "Head"', self.atencion)
         self.assertNotIn("for idle in _idles:\n\t\tidle.atencion_jugador = true", self.controller)
 
     def test_actividad_trabajo_es_selectiva_e_intermitente(self):
