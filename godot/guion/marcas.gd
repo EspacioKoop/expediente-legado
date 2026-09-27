@@ -129,6 +129,7 @@ static func de_registro(registro: Dictionary, pistas: Array, descubiertas: Array
 
 	var carta := CartasOcultas.en_folio(registro.get("folio", ""))
 	if not carta.is_empty():
-		hallazgos.append(frase(contenido, carta["frase"], "carta", {"carta": carta["carta"]}))
+		var visible := CartasOcultas.frase_en_texto(carta, contenido)
+		hallazgos.append(frase(contenido, visible, "carta", {"carta": carta["carta"]}))
 
 	return segmentar(contenido, hallazgos)
