@@ -12,6 +12,8 @@ on:
       - 'gbc/minijuegos/caza_pixeles_98/**'
       - 'scripts/preparar_emulador_gb.sh'
       - 'scripts/auditar_frontera_qa.py'
+      - 'scripts/preparar_sentry.sh'
+      - 'scripts/configurar_sentry.py'
       - 'dist/exportar-godot-alpha.sh'
       - '.godot-version'
   push:
@@ -24,6 +26,8 @@ on:
       - 'gbc/minijuegos/caza_pixeles_98/**'
       - 'scripts/preparar_emulador_gb.sh'
       - 'scripts/auditar_frontera_qa.py'
+      - 'scripts/preparar_sentry.sh'
+      - 'scripts/configurar_sentry.py'
       - 'scripts/playtest.sh'
       - 'scripts/playtest.ps1'
       - 'scripts/playtest.cmd'
@@ -182,6 +186,24 @@ jobs:
           mkdir -p "$template_dir"
           unzip -q "$plantillas" -d "$RUNNER_TEMP/export-templates"
           cp -a "$RUNNER_TEMP/export-templates/templates/." "$template_dir/"
+
+      - name: Preparar Sentry para alpha (opcional)
+        shell: bash
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$SENTRY_DSN" ]]; then
+            echo "Sentry no configurado; la alpha mantiene el comportamiento anterior."
+            exit 0
+          fi
+          bash scripts/preparar_sentry.sh
+          python3 scripts/configurar_sentry.py \
+            --project godot/project.godot \
+            --dsn "$SENTRY_DSN" \
+            --release "siga98@${GITHUB_SHA}" \
+            --environment "alpha" \
+            --dist "${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}"
 
       - name: Importar proyecto antes del smoke
         run: godot4 --headless --editor --path godot --quit

@@ -28,6 +28,9 @@ godot/.godot/
 godot/native/siga98_gb/.deps/
 godot/native/siga98_gb/bin/
 godot/addons/siga98_gb/bin/
+
+# Sentry Godot se descarga y verifica en CI/local; sus binarios no se versionan.
+godot/addons/sentry/
 godot/roms/*.gb
 godot/roms/*.gbc
 
