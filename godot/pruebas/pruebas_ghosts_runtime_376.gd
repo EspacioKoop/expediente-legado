@@ -6,9 +6,9 @@ const DiaGhostsApp = preload("res://guion/dia_ghosts_app.gd")
 const RelayPresenciaWebSocket = preload("res://guion/red/relay_presencia_websocket.gd")
 const TransporteWebSocket = preload("res://guion/red/transporte_websocket.gd")
 
-var _ahora := int(Time.get_unix_time_from_system())
 var pasadas := 0
 var fallos := 0
+var _ahora := int(Time.get_unix_time_from_system())
 
 
 class HostFalso:
