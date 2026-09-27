@@ -1,6 +1,7 @@
 extends SceneTree
 
 const Relacion := preload("res://guion/relacion_onirica.gd")
+const Vertical := preload("res://guion/sueno_relacion_onirica_3d.gd")
 const Puzzle := preload("res://guion/puzzle_onirico.gd")
 
 var _pasadas := 0
@@ -11,6 +12,7 @@ func _initialize() -> void:
 	_probar_fuentes_y_distractor()
 	_probar_determinismo_y_contenido()
 	_probar_contenido_completo_caso_real()
+	_probar_interfaz_consulta_y_seleccion()
 	_probar_acierto()
 	_probar_fallo_unico()
 	_probar_restauracion_pendiente()
@@ -154,6 +156,48 @@ func _probar_contenido_completo_caso_real() -> void:
 			not String(empleado.get("extracto", "")).contains("peritaje incorporado"),
 			"el peritaje no se filtra al extracto abreviado",
 		)
+
+
+func _probar_interfaz_consulta_y_seleccion() -> void:
+	var caso := _caso()
+	var relacion = Relacion.crear(caso, caso["pistas"][0], ["F-1", "F-2", "F-3"], 1457)
+	var vertical = Vertical.new()
+	root.add_child(vertical)
+	_comprobar(vertical.configurar(relacion), "la vertical monta el lector de documentos")
+	_comprobar(
+		vertical._lector_contenido is RichTextLabel and vertical._lector_contenido.scroll_active,
+		"el contenido completo usa un lector desplazable",
+	)
+	_comprobar(
+		vertical._lector_seleccion is CheckButton,
+		"la selección vive en un control explícito separado de leer",
+	)
+
+	var i1 := _indice(relacion.documentos, "r1")
+	var i2 := _indice(relacion.documentos, "r2")
+	var i3 := _indice(relacion.documentos, "r3")
+	relacion.seleccionar(i1)
+	relacion.seleccionar(i2)
+	vertical._sincronizar()
+	_comprobar(
+		vertical._documentos_3d[i3].habilitado,
+		"con dos elegidos el tercer documento sigue disponible para consultar",
+	)
+
+	vertical._abrir_documento(i3)
+	_comprobar(vertical._lector.visible, "interactuar abre la lectura completa sin seleccionar")
+	_comprobar(
+		vertical._lector_contenido.text == String(relacion.documentos[i3].get("contenido", "")),
+		"el lector muestra el contenido completo y no el extracto",
+	)
+	_comprobar(
+		vertical._lector_seleccion.disabled,
+		"una tercera selección se bloquea sin bloquear la consulta",
+	)
+	_comprobar(relacion.seleccion == ["r1", "r2"], "consultar no modifica la pareja preparada")
+	vertical._cerrar_lector()
+	_comprobar(not paused, "cerrar el lector devuelve el control al sueño")
+	vertical.free()
 
 
 func _probar_acierto() -> void:
