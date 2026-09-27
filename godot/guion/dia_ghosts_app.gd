@@ -217,9 +217,7 @@ func _sincronizar_contexto(ahora_unix: int) -> void:
 		return
 	if _transporte != null and _transporte.has_method("abrir_sala"):
 		var apertura = _transporte.call(
-			"abrir_sala",
-			_scene_key,
-			{"room_id": _room_id, "actor_public_id": _actor_public_id}
+			"abrir_sala", _scene_key, {"room_id": _room_id, "actor_public_id": _actor_public_id}
 		)
 		if typeof(apertura) == TYPE_DICTIONARY and not bool(apertura.get("ok", false)):
 			_scene_key = ""
@@ -304,11 +302,14 @@ func _publicar_segmento(ahora_unix: int) -> Dictionary:
 		return {"ok": true, "status": "too_short"}
 
 	_contador_eventos += 1
-	var event_id := "ghost-%s-%d-%d" % [
-		_actor_public_id.right(12),
-		ahora_unix,
-		_contador_eventos,
-	]
+	var event_id := (
+		"ghost-%s-%d-%d"
+		% [
+			_actor_public_id.right(12),
+			ahora_unix,
+			_contador_eventos,
+		]
+	)
 	var creado := _grabador.exportar_evento(ahora_unix, event_id.left(EventoOnline.MAX_EVENT_ID))
 	var resultado := {"ok": false, "status": "invalid_ghost"}
 	if bool(creado.get("ok", false)):
@@ -322,11 +323,14 @@ func _publicar_segmento(ahora_unix: int) -> Dictionary:
 func _consultar(ahora_unix: int) -> Dictionary:
 	if _servicio == null or _scene_key.is_empty():
 		return {"ok": true, "status": "inactive", "ghosts": []}
-	var consulta := _servicio.consultar(
-		_scene_key,
-		_scene_revision,
-		ahora_unix,
-		_anchor_key,
+	var consulta := (
+		_servicio
+		. consultar(
+			_scene_key,
+			_scene_revision,
+			ahora_unix,
+			_anchor_key,
+		)
 	)
 	if not bool(consulta.get("ok", false)):
 		return consulta
@@ -369,12 +373,15 @@ func _aplicar_pendiente_sueno(ahora_unix: int) -> void:
 		return
 	var evento := _pendiente_sueno
 	var huella := EventoOnline.huella(evento)
-	if EcosSueno3D.aplicar_movimiento_ghost(
-		eco,
-		evento,
-		_scene_revision,
-		_anchor_key,
-		ahora_unix,
+	if (
+		EcosSueno3D
+		. aplicar_movimiento_ghost(
+			eco,
+			evento,
+			_scene_revision,
+			_anchor_key,
+			ahora_unix,
+		)
 	):
 		_vistos[huella] = true
 		_pendiente_sueno.clear()
@@ -427,22 +434,25 @@ func _revision_espacio(nombre: String, espacio: Dictionary) -> String:
 		if typeof(salida) == TYPE_DICTIONARY:
 			var pos: Vector3 = salida.get("pos", Vector3.ZERO)
 			salidas.append([pos.x, pos.y, pos.z])
-	var firma := JSON.stringify(
-		{
-			"entrada": [entrada.x, entrada.y, entrada.z],
-			"salidas": salidas,
-			"contorno": String(espacio.get("contorno", [])),
-			"planta": String(espacio.get("planta", [])),
-		}
+	var firma := (
+		JSON
+		. stringify(
+			{
+				"entrada": [entrada.x, entrada.y, entrada.z],
+				"salidas": salidas,
+				"contorno": String(espacio.get("contorno", [])),
+				"planta": String(espacio.get("planta", [])),
+			}
+		)
 	)
 	var prefijo := nombre.to_lower().replace("ñ", "n").replace(" ", "-").left(36)
 	return "%s-%s" % [prefijo, firma.sha256_text().left(16)]
 
 
 func _game_build() -> String:
-	var version := String(
-		ProjectSettings.get_setting("application/config/version", "dev")
-	).strip_edges()
+	var version := (
+		String(ProjectSettings.get_setting("application/config/version", "dev")).strip_edges()
+	)
 	return "dev" if version.is_empty() else version
 
 
