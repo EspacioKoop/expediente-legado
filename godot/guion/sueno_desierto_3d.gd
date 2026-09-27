@@ -134,10 +134,13 @@ func _montar_suelo(contorno: PackedVector2Array, espacio: Dictionary) -> void:
 	var suelo := MeshInstance3D.new()
 	suelo.name = "ArenaCaminable"
 	suelo.mesh = st.commit()
-	suelo.material_override = Espacio3D.material_declarado(
-		espacio,
-		"textura_suelo",
-		Color(0.58, 0.39, 0.20),
+	suelo.material_override = (
+		Espacio3D
+		. material_declarado(
+			espacio,
+			"textura_suelo",
+			Color(0.58, 0.39, 0.20),
+		)
 	)
 	add_child(suelo)
 
@@ -149,10 +152,13 @@ func _montar_tabiques_visibles(tabiques: Array, espacio: Dictionary) -> void:
 	var visual := MeshInstance3D.new()
 	visual.name = "CrestasMineralesFragmentadas"
 	visual.mesh = malla
-	visual.material_override = Espacio3D.material_declarado(
-		espacio,
-		"textura_muro",
-		Color(0.44, 0.29, 0.16),
+	visual.material_override = (
+		Espacio3D
+		. material_declarado(
+			espacio,
+			"textura_muro",
+			Color(0.44, 0.29, 0.16),
+		)
 	)
 	add_child(visual)
 
