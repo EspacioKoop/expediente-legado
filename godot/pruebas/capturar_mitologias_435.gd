@@ -35,7 +35,8 @@ func _init() -> void:
 		"veredicto_automatico": false,
 		"requiere_revision_humana": true,
 		"tamano": [TAMANO.x, TAMANO.y],
-		"gilgamesh_runtime": {
+		"gilgamesh_runtime":
+		{
 			"forma": FORMA_GILGAMESH,
 			"escala": SuenoGilgamesh.ESCALA_ENCUENTRO,
 			"fov": FOV_JUGADOR,
@@ -79,7 +80,7 @@ func _capturar_gilgamesh(salida: String, manifiesto: Dictionary) -> bool:
 		sueno.remove_child(standalone)
 		standalone.free()
 	sueno.scale = Vector3.ONE * SuenoGilgamesh.ESCALA_ENCUENTRO
-	var ancla := _ancla_entre_entrada_y_salida(espacio)
+	var ancla := SuenoGilgamesh.ancla_encuentro(espacio)
 	sueno.position = ancla
 	mundo.add_child(sueno)
 
@@ -99,14 +100,12 @@ func _capturar_gilgamesh(salida: String, manifiesto: Dictionary) -> bool:
 
 	# Segundo encuadre: vista frente a la tablilla, a altura de jugador.
 	# Sirve para revisar motivo↔ancla sin usar la cámara elevada del prototipo.
-	var posicion_puzzle := sueno.to_global(Vector3(0.0, 0.0, 8.0))
+	var posicion_puzzle := sueno.to_global(Vector3(0.0, 0.0, 16.0))
 	posicion_puzzle.y = ALTURA_JUGADOR
-	var objetivo_puzzle := sueno.to_global(Vector3(0.0, 1.2, 3.25))
+	var objetivo_puzzle := sueno.to_global(Vector3(0.0, 1.15, 3.25))
 	camara.position = posicion_puzzle
 	camara.look_at(objetivo_puzzle, Vector3.UP)
-	if not await _guardar(
-		salida, "436_gilgamesh_puzzle.png", "gilgamesh_puzzle", 436, manifiesto
-	):
+	if not await _guardar(salida, "436_gilgamesh_puzzle.png", "gilgamesh_puzzle", 436, manifiesto):
 		return false
 
 	var fragmentos: Array = SuenoGilgamesh.ENCAJES.keys()
@@ -242,15 +241,6 @@ func _montar_camara_jugador(
 	mundo.add_child(camara)
 	camara.look_at(objetivo, Vector3.UP)
 	return camara
-
-
-func _ancla_entre_entrada_y_salida(espacio: Dictionary) -> Vector3:
-	var entrada: Vector3 = espacio.get("entrada", Vector3.ZERO)
-	var salidas: Array = espacio.get("salidas", [])
-	if salidas.is_empty():
-		return entrada
-	var salida: Vector3 = salidas[0].get("pos", entrada)
-	return entrada.lerp(salida, 0.5)
 
 
 func _montar_camara_duat(mundo: Node3D) -> void:
