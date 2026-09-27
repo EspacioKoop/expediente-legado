@@ -97,7 +97,7 @@ func _capturar_gilgamesh(salida: String, manifiesto: Dictionary) -> bool:
 	):
 		return false
 
-	# Segundo encuadre: punto alcanzable frente a la tablilla, a altura de jugador.
+	# Segundo encuadre: vista frente a la tablilla, a altura de jugador.
 	# Sirve para revisar motivo↔ancla sin usar la cámara elevada del prototipo.
 	var posicion_puzzle := sueno.to_global(Vector3(0.0, 0.0, 8.0))
 	posicion_puzzle.y = ALTURA_JUGADOR
@@ -131,6 +131,7 @@ func _capturar_gilgamesh(salida: String, manifiesto: Dictionary) -> bool:
 	mundo.queue_free()
 	await process_frame
 	return true
+
 
 func _capturar_aquiles(salida: String, manifiesto: Dictionary) -> bool:
 	var mundo := _nuevo_mundo("EvidenciaAquiles438", Color(0.045, 0.045, 0.055))
