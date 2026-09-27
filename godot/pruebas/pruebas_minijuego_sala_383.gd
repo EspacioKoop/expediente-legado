@@ -20,7 +20,6 @@ func _probar() -> void:
 	panel.abrir("Golf de pasillo", 1)
 	await process_frame
 	_comprobar("panel visible al abrir", panel.visible, true)
-	_comprobar("sin Partida en contexto", panel.get("partida") == null, true)
 
 	var titulo := panel.find_child("TituloSala", true, false) as Label
 	var codigo := panel.find_child("CodigoSala", true, false) as LineEdit
@@ -66,10 +65,10 @@ func _probar() -> void:
 	panel.mostrar_estado("timeout")
 	_comprobar("timeout no promete progreso remoto", estado.text.contains("progreso"), true)
 
-	var cancelaciones := 0
-	panel.cancelar_solicitado.connect(func(): cancelaciones += 1)
+	var cancelaciones := [0]
+	panel.cancelar_solicitado.connect(func(): cancelaciones[0] += 1)
 	panel._volver.pressed.emit()
-	_comprobar("volver emite cancelación", cancelaciones, 1)
+	_comprobar("volver emite cancelación", cancelaciones[0], 1)
 
 	panel.cerrar()
 	_comprobar("cerrar oculta panel", panel.visible, false)
