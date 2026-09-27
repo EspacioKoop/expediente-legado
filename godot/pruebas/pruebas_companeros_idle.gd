@@ -81,7 +81,7 @@ func _probar_modificador_cabeza() -> void:
 	var modificador := AtencionCabeza3D.new()
 	esqueleto.add_child(modificador)
 	modificador.giro = deg_to_rad(12.0)
-	modificador._process_modification()
+	modificador._process_modification_with_delta(0.0)
 	_comprobar(
 		esqueleto.get_bone_pose_rotation(0).get_angle() > 0.001,
 		"la atención añade giro al cuello después de la animación",
