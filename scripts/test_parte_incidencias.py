@@ -15,6 +15,7 @@ CONFIG = ROOT / "godot" / "datos" / "incidencias.json"
 EXPORT = ROOT / "dist" / "exportar-godot-alpha.sh"
 WORKFLOW = ROOT / ".github" / "workflows" / "alpha-playtest.yml"
 WORKER = ROOT / "infra" / "feedback-worker" / "worker.js"
+VERCEL_CONFIG = ROOT / "vercel.json"
 RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 
 
@@ -29,6 +30,7 @@ class ParteIncidenciasTest(unittest.TestCase):
         cls.export = EXPORT.read_text(encoding="utf-8")
         cls.workflow = WORKFLOW.read_text(encoding="utf-8")
         cls.worker = WORKER.read_text(encoding="utf-8")
+        cls.vercel_config = json.loads(VERCEL_CONFIG.read_text(encoding="utf-8"))
 
     def test_contrato_ejecutable_en_godot(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
@@ -150,6 +152,13 @@ class ParteIncidenciasTest(unittest.TestCase):
         cliente = self.nucleo + self.app + self.reportador
         for secreto in ("GITHUB_TOKEN", "RESEND_API_KEY", "REPORT_EMAIL_TO"):
             self.assertNotIn(secreto, cliente)
+
+    def test_vercel_no_construye_cambios_ajenos_al_gateway(self):
+        comando = self.vercel_config["ignoreCommand"]
+        self.assertIn("VERCEL_GIT_PREVIOUS_SHA", comando)
+        self.assertIn("-- api vercel.json .vercelignore", comando)
+        self.assertNotIn("godot", comando)
+        self.assertNotIn("docs", comando)
 
     def test_formulario_usa_controles_navegables_estandar(self):
         for control in (
