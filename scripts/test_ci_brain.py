@@ -111,6 +111,11 @@ class CiBrainTest(unittest.TestCase):
         firma_a = self.mod.normalize_failure_signature(log_a)
         firma_b = self.mod.normalize_failure_signature(log_b)
         self.assertEqual(firma_a, firma_b)
+        self.assertEqual(
+            "ERROR scripts/foo.py:<n> <sha>\nAssertionError: <redacted>",
+            firma_a,
+        )
+        self.assertNotIn("2026-09-27", firma_a)
         self.assertNotIn("sk-", firma_a)
         self.assertIn("<redacted>", firma_a)
         self.assertEqual(
