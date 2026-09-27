@@ -182,6 +182,7 @@ static func _modificador(
 		"familia": familia,
 		# Exposición puede cambiar lenguaje visual, nunca regla estructural.
 		"regla": String(definicion.get("regla", "")) if canal == CANAL_ELECCION else "",
+		"reduccion_movimiento": reduccion_movimiento,
 		"parametros": parametros,
 	}
 
