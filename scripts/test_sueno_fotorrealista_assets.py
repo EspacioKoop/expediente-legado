@@ -67,9 +67,9 @@ class SuenoFotorrealistaAssetsTest(unittest.TestCase):
                 f'preload("res://arte/sueno_fotorrealista/{escena}")',
                 utileria,
             )
-        self.assertIn("escena_visual: PackedScene = null", anomalia)
+        self.assertIn("func configurar_escena_visual(escena_visual: PackedScene)", anomalia)
         self.assertIn('detalle.name = "DetallePBR"', anomalia)
-        self.assertIn("datos.get(\"escena_visual\", null) as PackedScene", utileria)
+        self.assertIn("anomalia.configurar_escena_visual(escena_visual)", utileria)
 
     def test_lote_no_introduce_binarios_marcas_ni_texto_narrativo(self):
         # Godot 4 puede crear sidecars .uid de texto al importar recursos.
