@@ -24,7 +24,7 @@ Este documento resume cómo los agentes de IA pueden contribuir al proyecto **Ex
    CLAIM issue=#N agent=<nombre> branch=<rama> files=<rutas> goal=<objetivo> lease=48h
    ```
 
-4. **Releer inmediatamente #182**. Se gana la reserva activa anterior por fecha de GitHub; en empate, el comentario con ID menor. Si hay solape, no editar.
+4. **Releer inmediatamente #182**. Se gana la reserva activa anterior por fecha de GitHub; en empate, el comentario con ID menor. Si hay solape, no editar esos archivos; la reserva **no bloquea la cooperación**: revisar, proponer, entregar parches al titular y trabajar rutas no reservadas del mismo issue con CLAIM propio sigue permitido. Editar lo reservado exige acuerdo del titular en #182.
 5. **Trabajar en rama propia desde `main` actualizado**: `feature/NN-slug`, `fix/NN-slug` o `docs/NN-slug`.
 6. **Mantener el corte pequeño**. Trabajar por verticales, no con una reescritura total de un paraguas grande.
 7. **Añadir regresión ejecutable** cuando cambie comportamiento (test de contrato real si Godot lo permite).

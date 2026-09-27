@@ -19,7 +19,7 @@ El proyecto nació como aplicación web con Spring Boot y se está reescribiendo
 | [Milestones](https://github.com/EspacioKoop/expediente-legado/milestones) | Qué está comprometido para una versión |
 | [Releases](https://github.com/EspacioKoop/expediente-legado/releases) | Qué se ha publicado |
 
-Este repositorio adopta las [Normas Platino](https://github.com/EspacioKoop/normas_platino): **reserva antes de editar, rama propia, PR obligatorio, CI y autorización humana de integración**. El silencio no caduca una reserva y `PR_READY` no equivale a permiso para mergear.
+Este repositorio adopta las [Normas Platino](https://github.com/EspacioKoop/normas_platino): **reserva antes de editar, rama propia, PR obligatorio, CI y autorización humana de integración**. El silencio no caduca una reserva y `PR_READY` no equivale a permiso para mergear. Una reserva protege archivos, no bloquea la cooperación.
 
 ## Estado actual — 2026-09-26
 
