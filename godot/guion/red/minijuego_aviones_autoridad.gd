@@ -87,7 +87,8 @@ func aplicar_evento(evento: Variant, ahora_unix: int) -> Dictionary:
 		return _rechazo("invalid_action", validacion_accion["reason"])
 
 	var actor := String(normalizado["actor_public_id"])
-	var cantidad_antes := int((_aviones["resultados"].get(actor, []) as Array).size())
+	var vuelos_actor: Array = _aviones["resultados"].get(actor, [])
+	var cantidad_antes := vuelos_actor.size()
 	AvionesPapel.lanzar(
 		_aviones,
 		validacion_accion["model"],
