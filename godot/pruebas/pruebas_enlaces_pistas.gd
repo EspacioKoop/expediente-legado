@@ -55,9 +55,9 @@ func _init() -> void:
 				true
 			)
 
-	comprobar("el recorrido cubre las 47 pistas del catálogo", total, 47)
-	comprobar("las 24 pistas con frase son enlazables", enlazables, 24)
-	comprobar("las 23 pistas sin frase no se confunden con enlaces", sin_frase, 23)
+	comprobar("el recorrido cubre las 54 pistas del catálogo", total, 54)
+	comprobar("las 27 pistas con frase son enlazables", enlazables, 27)
+	comprobar("las 27 pistas sin frase no se confunden con enlaces", sin_frase, 27)
 	print("%d pasadas, %d fallos" % [pasadas, fallos])
 	quit(1 if fallos > 0 else 0)
 
