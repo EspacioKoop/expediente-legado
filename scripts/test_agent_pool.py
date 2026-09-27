@@ -90,6 +90,15 @@ class AgentPoolTest(unittest.TestCase):
         ]
         self.assertEqual(6, len(mod.select_tasks(issues, workers, max_parallel=99)))
 
+    def test_memoria_oidc_reconoce_worker_reusable_sin_abrir_dispatcher(self):
+        memory = (ROOT / "infra" / "feedback-deno" / "agent_memory.ts").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("job_workflow_ref?: string;", memory)
+        self.assertIn('/.github/workflows/agent-worker.yml@";', memory)
+        self.assertIn('/.github/workflows/agent-pool.yml@";', memory)
+        self.assertIn("jobWorkflowRef.startsWith(workerPrefix)", memory)
+
 
 if __name__ == "__main__":
     unittest.main()
