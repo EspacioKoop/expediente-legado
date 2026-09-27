@@ -92,12 +92,15 @@ func aplicar_evento(evento: Variant, ahora_unix: int) -> Dictionary:
 	var actor := String(normalizado["actor_public_id"])
 	var vuelos_actor: Array = _aviones["resultados"].get(actor, [])
 	var cantidad_antes := vuelos_actor.size()
-	AvionesPapel.lanzar(
-		_aviones,
-		validacion_accion["model"],
-		validacion_accion["direction"],
-		validacion_accion["height"],
-		validacion_accion["power"],
+	(
+		AvionesPapel
+		. lanzar(
+			_aviones,
+			validacion_accion["model"],
+			validacion_accion["direction"],
+			validacion_accion["height"],
+			validacion_accion["power"],
+		)
 	)
 	var resultados_despues: Array = _aviones["resultados"].get(actor, [])
 	if resultados_despues.size() <= cantidad_antes:
