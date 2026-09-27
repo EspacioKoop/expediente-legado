@@ -435,8 +435,8 @@ func _revision_espacio(nombre: String, espacio: Dictionary) -> String:
 			{
 				"entrada": [entrada.x, entrada.y, entrada.z],
 				"salidas": salidas,
-				"contorno": String(espacio.get("contorno", [])),
-				"planta": String(espacio.get("planta", [])),
+				"contorno": var_to_str(espacio.get("contorno", [])),
+				"planta": var_to_str(espacio.get("planta", [])),
 			}
 		)
 	)
