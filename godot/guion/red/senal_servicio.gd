@@ -21,6 +21,38 @@ func _init(transporte: RefCounted = null) -> void:
 		_transporte = transporte
 
 
+func abrir_sala(scene_key: String, room_id: String, actor_public_id: String) -> Dictionary:
+	var resultado = _transporte.call(
+		"abrir_sala",
+		scene_key,
+		{
+			"room_id": room_id,
+			"actor_public_id": actor_public_id,
+		},
+	)
+	if typeof(resultado) != TYPE_DICTIONARY:
+		return {"ok": false, "status": "invalid_transport_result"}
+	return resultado
+
+
+func cerrar_sala() -> Dictionary:
+	var resultado = _transporte.call("cerrar_sala")
+	if typeof(resultado) != TYPE_DICTIONARY:
+		return {"ok": false, "status": "invalid_transport_result"}
+	return resultado
+
+
+func procesar_red(delta: float) -> void:
+	_transporte.call("procesar", maxf(delta, 0.0))
+
+
+func health() -> Dictionary:
+	var resultado = _transporte.call("health")
+	if typeof(resultado) != TYPE_DICTIONARY:
+		return {"ok": false, "status": "invalid_transport_result", "online": false}
+	return resultado
+
+
 func publicar(
 	scene_key: String,
 	game_build: String,
