@@ -51,7 +51,9 @@ func _probar_archivo() -> void:
 	Estres.aplicar(estado["jornada"], "documento_sensible", 2.0)
 	Estres.aplicar(estado["jornada"], "documento_sensible", 2.0)
 	modelo = ControladorHUD.modelo_recursos(estado)
-	_comprobar(modelo.get("estres_banda", "") == "inquietud", "HUD sigue la fuente canónica de estrés")
+	_comprobar(
+		modelo.get("estres_banda", "") == "inquietud", "HUD sigue la fuente canónica de estrés"
+	)
 
 	estado["jornada"]["leido_hoy"].append("folio-a")
 	modelo = ControladorHUD.modelo_recursos(estado)
