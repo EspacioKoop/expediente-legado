@@ -8,17 +8,21 @@ esquema y filas a Turso/libSQL mediante Hrana sobre HTTP, sin instalar SDKs.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
+import re
 import sqlite3
 import statistics
 import sys
 import urllib.error
 import urllib.parse
 import urllib.request
+import zipfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterable
+from io import BytesIO
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -75,6 +79,286 @@ def github_json(url: str, token: str) -> dict[str, Any]:
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", "replace")[:1000]
         raise RuntimeError(f"GitHub API {exc.code}: {detail}") from exc
+
+
+ANSI_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+TIMESTAMP_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\s+")
+IMPORTANT_FAILURE_RE = re.compile(
+    r"(?:error|failed|failure|fatal|traceback|assert|gdformat|gdlint|"
+    r"parse error|exit code|not found|missing|required check)",
+    re.IGNORECASE,
+)
+SECRET_RE = re.compile(
+    r"(?:github_pat_[A-Za-z0-9_]+|gh[pousr]_[A-Za-z0-9]+|"
+    r"AIza[0-9A-Za-z_-]{12,}|sk-[A-Za-z0-9_-]{12,}|"
+    r"Bearer\s+[A-Za-z0-9._-]{12,})",
+    re.IGNORECASE,
+)
+SHA_RE = re.compile(r"\b[0-9a-f]{7,40}\b", re.IGNORECASE)
+LINE_NUMBER_RE = re.compile(r":\d+(?::\d+)?(?=[:\s)]|$)")
+TOKEN_RE = re.compile(r"[A-Za-z0-9_./:-]{4,}")
+CONTEXT_STOPWORDS = {
+    "para", "como", "esta", "este", "estos", "estas", "desde", "solo", "sobre",
+    "issue", "agent", "https", "github", "repositorio", "corrige", "usando",
+    "with", "that", "this", "from", "only", "error", "failed", "failure",
+}
+
+
+def github_bytes(url: str, token: str) -> bytes:
+    request = urllib.request.Request(
+        url,
+        headers={
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {token}",
+            "User-Agent": USER_AGENT,
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            return response.read()
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", "replace")[:1000]
+        raise RuntimeError(f"GitHub API {exc.code}: {detail}") from exc
+
+
+def github_text(url: str, token: str) -> str:
+    return github_bytes(url, token).decode("utf-8", "replace")
+
+
+def _sanitize_failure_line(line: str) -> str:
+    line = ANSI_RE.sub("", line)
+    line = TIMESTAMP_RE.sub("", line).strip()
+    line = SECRET_RE.sub("<redacted>", line)
+    line = re.sub(r"/home/runner/work/[^/]+/[^/]+/", "<workspace>/", line)
+    line = SHA_RE.sub("<sha>", line)
+    line = LINE_NUMBER_RE.sub(":<n>", line)
+    line = re.sub(r"\s+", " ", line).strip()
+    return line[:240]
+
+
+def normalize_failure_signature(log_text: str) -> str:
+    selected: list[str] = []
+    fallback: list[str] = []
+    for raw in log_text.splitlines():
+        line = _sanitize_failure_line(raw)
+        if not line:
+            continue
+        fallback.append(line)
+        if IMPORTANT_FAILURE_RE.search(line) and line not in selected:
+            selected.append(line)
+    source = selected[-8:] if selected else fallback[-4:]
+    return "\n".join(source)[:MAX_MEMORY_SUMMARY]
+
+
+def failure_fingerprint(signature: str) -> str:
+    if not signature:
+        return ""
+    return hashlib.sha256(signature.encode("utf-8")).hexdigest()[:16]
+
+
+def remember_failure_sample(
+    conn: sqlite3.Connection,
+    run: dict[str, Any],
+    job: dict[str, Any],
+    log_text: str,
+    *,
+    retention_days: int,
+) -> str:
+    signature = normalize_failure_signature(log_text)
+    fingerprint = failure_fingerprint(signature)
+    if not fingerprint:
+        return ""
+    completed = job.get("completed_at") or run.get("updated_at") or iso(utc_now())
+    expires_at = iso(utc_now() + timedelta(days=max(1, retention_days)))
+    remember(
+        conn,
+        kind="ci_failure_sample",
+        key=str(int(job["id"])),
+        summary=signature,
+        metadata={
+            "fingerprint": fingerprint,
+            "workflow": str(run.get("name") or "workflow"),
+            "job": str(job.get("name") or "job"),
+            "run_id": int(run["id"]),
+            "job_id": int(job["id"]),
+            "completed_at": completed,
+        },
+        expires_at=expires_at,
+    )
+    return fingerprint
+
+
+def refresh_failure_fingerprint_memory(conn: sqlite3.Connection) -> None:
+    now = iso(utc_now())
+    rows = conn.execute(
+        """
+        SELECT summary, metadata_json
+        FROM memory_entries
+        WHERE kind = 'ci_failure_sample'
+          AND (expires_at IS NULL OR expires_at >= ?)
+        """,
+        (now,),
+    ).fetchall()
+    groups: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        try:
+            metadata = json.loads(row["metadata_json"])
+        except (TypeError, json.JSONDecodeError):
+            continue
+        fingerprint = str(metadata.get("fingerprint") or "")
+        if not fingerprint:
+            continue
+        group = groups.setdefault(
+            fingerprint,
+            {
+                "count": 0,
+                "signature": row["summary"],
+                "workflows": set(),
+                "jobs": set(),
+                "last_failed": "",
+            },
+        )
+        group["count"] += 1
+        group["workflows"].add(str(metadata.get("workflow") or ""))
+        group["jobs"].add(str(metadata.get("job") or ""))
+        completed = str(metadata.get("completed_at") or "")
+        if completed > group["last_failed"]:
+            group["last_failed"] = completed
+            group["signature"] = row["summary"]
+
+    for fingerprint, group in groups.items():
+        signature = str(group["signature"])
+        first_line = signature.splitlines()[0] if signature else "fallo sin firma"
+        remember(
+            conn,
+            kind="ci_failure_fingerprint",
+            key=fingerprint,
+            summary=(
+                f"Fingerprint CI {fingerprint}: {group['count']} aparición(es); "
+                f"última {group['last_failed'] or 'desconocida'}. {first_line}"
+            ),
+            metadata={
+                "fingerprint": fingerprint,
+                "count": group["count"],
+                "workflows": sorted(item for item in group["workflows"] if item)[:8],
+                "jobs": sorted(item for item in group["jobs"] if item)[:12],
+                "last_failed": group["last_failed"],
+                "signature": signature[:1200],
+            },
+        )
+
+
+def _context_tokens(text: str) -> set[str]:
+    return {
+        token.lower()
+        for token in TOKEN_RE.findall(text)
+        if token.lower() not in CONTEXT_STOPWORDS
+    }
+
+
+def build_memory_context(
+    conn: sqlite3.Connection,
+    query_text: str,
+    paths: list[str] | None = None,
+    *,
+    limit: int = 8,
+) -> dict[str, Any]:
+    now = iso(utc_now())
+    rows = conn.execute(
+        """
+        SELECT kind, memory_key, summary, metadata_json, updated_at
+        FROM memory_entries
+        WHERE kind != 'ci_failure_sample'
+          AND (expires_at IS NULL OR expires_at >= ?)
+        ORDER BY updated_at DESC
+        LIMIT 500
+        """,
+        (now,),
+    ).fetchall()
+    query_tokens = _context_tokens(query_text)
+    path_tokens: set[str] = set()
+    for path in paths or []:
+        path_tokens |= _context_tokens(path.replace("\\", "/"))
+
+    scored: list[tuple[int, str, dict[str, Any]]] = []
+    for row in rows:
+        try:
+            metadata = json.loads(row["metadata_json"])
+        except (TypeError, json.JSONDecodeError):
+            metadata = {}
+        item = {
+            "kind": row["kind"],
+            "key": row["memory_key"],
+            "summary": row["summary"],
+            "metadata": metadata,
+            "updated_at": row["updated_at"],
+        }
+        haystack = " ".join(
+            [
+                str(row["memory_key"]),
+                str(row["summary"]),
+                json.dumps(metadata, ensure_ascii=False, sort_keys=True),
+            ]
+        ).lower()
+        score = sum(2 for token in query_tokens if token in haystack)
+        score += sum(5 for token in path_tokens if token in haystack)
+        if row["kind"] == "ci_failure_fingerprint" and score:
+            score += 3
+        if score:
+            scored.append((score, str(row["updated_at"]), item))
+    scored.sort(key=lambda item: (item[0], item[1]), reverse=True)
+    return {
+        "ok": True,
+        "source": "ci-brain-sqlite",
+        "memories": [item for _, _, item in scored[: max(1, min(limit, 20))]],
+    }
+
+
+def restore_latest_snapshot(
+    destination: Path,
+    *,
+    repo: str,
+    token: str,
+    workflow: str = "ci-brain.yml",
+) -> int | None:
+    encoded = urllib.parse.quote(workflow, safe="")
+    query = urllib.parse.urlencode(
+        {"branch": "main", "status": "success", "per_page": 10}
+    )
+    runs = github_json(
+        f"{GITHUB_API}/repos/{repo}/actions/workflows/{encoded}/runs?{query}",
+        token,
+    ).get("workflow_runs", [])
+    for run in runs:
+        run_id = int(run["id"])
+        artifacts = github_json(
+            f"{GITHUB_API}/repos/{repo}/actions/runs/{run_id}/artifacts?per_page=100",
+            token,
+        ).get("artifacts", [])
+        expected = f"ci-brain-{run_id}"
+        artifact = next(
+            (
+                item
+                for item in artifacts
+                if item.get("name") == expected and not item.get("expired", False)
+            ),
+            None,
+        )
+        if not artifact:
+            continue
+        payload = github_bytes(str(artifact["archive_download_url"]), token)
+        with zipfile.ZipFile(BytesIO(payload)) as archive:
+            member = next(
+                (name for name in archive.namelist() if name.endswith("ci-brain.sqlite3")),
+                None,
+            )
+            if not member:
+                continue
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(archive.read(member))
+            return run_id
+    return None
 
 
 RUN_SQL = """
@@ -253,8 +537,27 @@ def collect(args: argparse.Namespace) -> int:
             for job in jobs:
                 conn.execute(JOB_SQL, normalize_job(run, job))
                 jobs_seen += 1
+                if job.get("conclusion") == "failure":
+                    try:
+                        log_text = github_text(
+                            f"{GITHUB_API}/repos/{repo}/actions/jobs/{int(job['id'])}/logs",
+                            token,
+                        )
+                        remember_failure_sample(
+                            conn,
+                            run,
+                            job,
+                            log_text,
+                            retention_days=args.retention_days,
+                        )
+                    except (RuntimeError, ValueError) as exc:
+                        print(
+                            f"aviso: no se pudo fingerprint job {job.get('id')}: {exc}",
+                            file=sys.stderr,
+                        )
         prune(conn, days=args.retention_days)
         refresh_failure_memory(conn)
+        refresh_failure_fingerprint_memory(conn)
         conn.commit()
     finally:
         conn.close()
@@ -310,8 +613,10 @@ def build_summary(conn: sqlite3.Connection) -> dict[str, Any]:
             """
             SELECT memory_key, summary, metadata_json, updated_at
             FROM memory_entries
-            WHERE kind = 'ci_failure'
-            ORDER BY updated_at DESC
+            WHERE kind IN ('ci_failure_fingerprint', 'ci_failure')
+            ORDER BY
+                CASE kind WHEN 'ci_failure_fingerprint' THEN 0 ELSE 1 END,
+                updated_at DESC
             LIMIT 20
             """
         )
@@ -389,6 +694,51 @@ def recall(args: argparse.Namespace) -> int:
         item["metadata"] = json.loads(item.pop("metadata_json"))
         result.append(item)
     print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0
+
+
+def context_command(args: argparse.Namespace) -> int:
+    query_text = ""
+    if args.query_file:
+        query_text = Path(args.query_file).read_text(encoding="utf-8", errors="replace")
+    if args.query:
+        query_text += "\\n" + args.query
+    paths: list[str] = []
+    if args.paths_json:
+        raw = json.loads(Path(args.paths_json).read_text(encoding="utf-8"))
+        if isinstance(raw, dict):
+            raw = raw.get("files", [])
+        if isinstance(raw, list):
+            paths = [str(item) for item in raw[:50]]
+    conn = connect(Path(args.sqlite))
+    try:
+        result = build_memory_context(conn, query_text, paths, limit=args.limit)
+    finally:
+        conn.close()
+    rendered = json.dumps(result, ensure_ascii=False, indent=2) + "\\n"
+    if args.output:
+        Path(args.output).write_text(rendered, encoding="utf-8")
+    sys.stdout.write(rendered)
+    return 0
+
+
+def restore_command(args: argparse.Namespace) -> int:
+    token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    repo = args.repo or os.environ.get("GITHUB_REPOSITORY")
+    if not token:
+        raise SystemExit("falta GH_TOKEN/GITHUB_TOKEN")
+    if not repo or "/" not in repo:
+        raise SystemExit("falta --repo owner/name o GITHUB_REPOSITORY")
+    run_id = restore_latest_snapshot(
+        Path(args.sqlite),
+        repo=repo,
+        token=token,
+        workflow=args.workflow,
+    )
+    if run_id is None:
+        print(json.dumps({"restored": False}, ensure_ascii=False))
+        return 1
+    print(json.dumps({"restored": True, "run_id": run_id}, ensure_ascii=False))
     return 0
 
 
@@ -538,6 +888,21 @@ def parser() -> argparse.ArgumentParser:
     r.add_argument("--query", required=True)
     r.add_argument("--limit", type=int, default=10)
     r.set_defaults(func=recall)
+
+    x = sub.add_parser("context", help="selecciona memoria histórica relevante")
+    x.add_argument("--sqlite", default="dist/.cache/ci-brain.sqlite3")
+    x.add_argument("--query")
+    x.add_argument("--query-file")
+    x.add_argument("--paths-json")
+    x.add_argument("--limit", type=int, default=8)
+    x.add_argument("--output")
+    x.set_defaults(func=context_command)
+
+    z = sub.add_parser("restore", help="recupera el último snapshot CI brain de Actions")
+    z.add_argument("--sqlite", default="dist/.cache/ci-brain.sqlite3")
+    z.add_argument("--repo")
+    z.add_argument("--workflow", default="ci-brain.yml")
+    z.set_defaults(func=restore_command)
 
     t = sub.add_parser("sync-turso", help="replica snapshot local a Turso/libSQL")
     t.add_argument("--sqlite", default="dist/.cache/ci-brain.sqlite3")

@@ -185,6 +185,22 @@ jobs:
           No hagas commit, push, PR ni merge.
           EOF
 
+      - name: Cargar memoria histórica del fallo
+        if: steps.limit.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          printf '%s\n' '{"ok":true,"source":"ci-brain-sqlite","memories":[]}' > .agent-history.json
+          if python3 scripts/ci_brain.py restore --sqlite /tmp/ci-brain.sqlite3 >/tmp/ci-brain-restore.json; then
+            python3 scripts/ci_brain.py context \
+              --sqlite /tmp/ci-brain.sqlite3 \
+              --query-file .agent-ci-failure.log \
+              --paths-json .agent-plan.json \
+              --output .agent-history.json \
+              >/dev/null
+          fi
+
       - id: qwen
         name: Configurar Qwen
         if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen'
@@ -208,7 +224,7 @@ jobs:
           openai_model: ${{ vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":30},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-ci-failure.log, .agent-memory.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki y memoria. Corrige solo la causa del CI y solo rutas del CLAIM. No ejecutes shell ni Git. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable sobre el fallo y su corrección, sin secretos","tags":["ci"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-ci-failure.log, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Corrige solo la causa del CI y solo rutas del CLAIM. No ejecutes shell ni Git. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable sobre el fallo y su corrección, sin secretos","tags":["ci"]} y AGENT_MEMORY_END.'
 
       - id: repair_gemini
         name: Reparar con Gemini
@@ -219,14 +235,14 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":30},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-plan.json, .agent-ci-failure.log, .agent-memory.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki y memoria. Corrige solo la causa del CI y solo rutas del CLAIM. No ejecutes shell ni Git. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable sobre el fallo y su corrección, sin secretos","tags":["ci"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-plan.json, .agent-ci-failure.log, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Corrige solo la causa del CI y solo rutas del CLAIM. No ejecutes shell ni Git. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable sobre el fallo y su corrección, sin secretos","tags":["ci"]} y AGENT_MEMORY_END.'
 
       - name: Validar reparación
         if: steps.limit.outputs.run == 'true'
         run: |
           set -euo pipefail
           cp .agent-plan.json /tmp/plan.json
-          rm -f .agent-task.md .agent-plan.json .agent-ci-failure.log .agent-memory.json .agent-platino-sha gha-creds-*.json
+          rm -f .agent-task.md .agent-plan.json .agent-ci-failure.log .agent-memory.json .agent-history.json .agent-platino-sha gha-creds-*.json
           rm -rf .agent-platino .agent-wiki .gemini .qwen gemini-artifacts qwen-artifacts
           git add -A
           git diff --cached --quiet && { echo "el agente no produjo cambios"; exit 2; }

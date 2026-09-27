@@ -145,6 +145,21 @@ jobs:
             --jq '"# Issue\n\n## " + .title + "\n\n" + (.body//"") + "\n\n## Comentarios recientes\n" + ((.comments[-20:]//[])|map("- "+.author.login+": "+.body)|join("\n\n"))' \
             > .agent-task.md
 
+      - name: Cargar memoria histórica de CI
+        if: steps.select.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          printf '%s\n' '{"ok":true,"source":"ci-brain-sqlite","memories":[]}' > .agent-history.json
+          if python3 scripts/ci_brain.py restore --sqlite /tmp/ci-brain.sqlite3 >/tmp/ci-brain-restore.json; then
+            python3 scripts/ci_brain.py context \
+              --sqlite /tmp/ci-brain.sqlite3 \
+              --query-file .agent-task.md \
+              --output .agent-history.json \
+              >/dev/null
+          fi
+
       - name: Cargar Normas Platino, wiki y memoria
         if: steps.select.outputs.run == 'true'
         env:
@@ -192,7 +207,7 @@ jobs:
           openai_model: ${{ vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":20},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-memory.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal. Inspecciona sin editar. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: plan_gemini
         name: Plan Gemini
@@ -203,7 +218,7 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":20},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-memory.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal. Inspecciona sin editar. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: reserve
         name: Validar plan y reservar
@@ -304,6 +319,18 @@ jobs:
             fi
           fi
 
+      - name: Afinar memoria histórica por rutas
+        if: steps.reserve.outputs.reserved == 'true'
+        run: |
+          set -euo pipefail
+          [[ -s /tmp/ci-brain.sqlite3 ]] || exit 0
+          python3 scripts/ci_brain.py context \
+            --sqlite /tmp/ci-brain.sqlite3 \
+            --query-file .agent-task.md \
+            --paths-json .agent-plan.json \
+            --output .agent-history.json \
+            >/dev/null
+
       - name: Crear rama
         if: steps.reserve.outputs.reserved == 'true'
         env:
@@ -324,7 +351,7 @@ jobs:
           openai_model: ${{ vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-memory.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki y memoria. Implementa solo el plan y solo esas rutas. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
 
       - id: implement_gemini
         name: Implementar con Gemini
@@ -335,14 +362,14 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-plan.json, .agent-memory.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki y memoria. Implementa solo el plan y solo esas rutas. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
 
       - name: Validar diff y preflight
         if: steps.reserve.outputs.reserved == 'true'
         run: |
           set -euo pipefail
           cp .agent-plan.json /tmp/plan.json
-          rm -f .agent-task.md .agent-plan.json .agent-memory.json .agent-platino-sha gha-creds-*.json
+          rm -f .agent-task.md .agent-plan.json .agent-memory.json .agent-history.json .agent-platino-sha gha-creds-*.json
           rm -rf .agent-platino .agent-wiki .gemini .qwen gemini-artifacts qwen-artifacts
           git add -A
           git diff --cached --quiet && { echo "sin cambios"; exit 2; }

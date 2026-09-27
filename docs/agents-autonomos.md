@@ -63,9 +63,9 @@ La jerarquía de contexto es:
 
 1. repositorio, issue, #181, #182 y Normas Platino;
 2. wiki de Expediente Legado como memoria consolidada en solo lectura;
-3. Deno KV como memoria operativa temporal.
+3. Deno KV como memoria operativa temporal;\n4. SQLite/Turso del CI brain como memoria histórica de fallos y workarounds.
 
-La wiki y Deno KV **no son fuentes de autoridad**. Un recuerdo puede orientar búsquedas, pero debe contrastarse con el código, el issue y CI actuales.
+La wiki, Deno KV y SQLite/Turso **no son fuentes de autoridad**. Un recuerdo puede orientar búsquedas, pero debe contrastarse con el código, el issue y CI actuales.
 
 La memoria temporal reutiliza el Deno KV del gateway F9 y no necesita un secret nuevo. GitHub Actions solicita un token OIDC de corta duración con audiencia `siga98-agent-memory`; el gateway valida firma, repositorio y workflow antes de leer o escribir. Solo se aceptan `agent-autopilot.yml` y `agent-ci-repair.yml`.
 
@@ -78,6 +78,12 @@ Cada recuerdo:
 - nunca contiene prompts completos, secretos ni datos privados.
 
 La búsqueda revisa como máximo los 50 recuerdos recientes y devuelve hasta 8 por coincidencia de issue, rutas o tags. Si Deno no está disponible, el agente sigue sin memoria temporal; si Normas Platino no pueden cargarse, se detiene.
+
+Además, cada ejecución intenta recuperar el último snapshot del **CI brain**.
+Antes del plan se seleccionan recuerdos históricos por el texto del issue; tras
+reservar, se refinan por rutas. En reparación, el selector usa el log fallido y
+las rutas del CLAIM. Los logs no se guardan completos: el CI brain persiste solo
+fingerprints normalizados y metadatos compactos.
 
 La URL de memoria se deriva de la variable ya existente `SIGA98_FEEDBACK_FALLBACK_URL`, sustituyendo `/api/report` por `/api/agent-memory/*`. No hay otra credencial que copiar.
 

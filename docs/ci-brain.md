@@ -9,7 +9,7 @@ siendo GitHub; esta base es memoria técnica auxiliar.
 - run ID, workflow, SHA/rama, evento, resultado y duración;
 - job ID, nombre, resultado y duración;
 - recuerdos técnicos de hasta 2.000 caracteres con metadata JSON acotada;
-- agregados de jobs que han fallado al menos dos veces en los últimos 30 días.
+- agregados de jobs que han fallado al menos dos veces en los últimos 30 días;\n- fingerprints compactos de fallos: firma normalizada, frecuencia y última aparición.\n\nLos logs completos solo se leen durante la ingesta. Se eliminan timestamps, SHA,\nnúmeros de línea y patrones de secretos antes de generar una firma de hasta 2 KB;\nsolo esa firma compacta entra en SQLite/Turso.
 
 El snapshot local se poda a 120 días por defecto. Con ese esquema, incluso
 miles de ejecuciones ocupan muy poco frente a logs o artefactos.
@@ -47,7 +47,13 @@ configura en GitHub:
 - variable de Actions `TURSO_DATABASE_URL` (normalmente `libsql://...`);
 - secret de Actions `TURSO_AUTH_TOKEN`.
 
-El workflow **CI brain** se ejecuta cada hora. Antes de recoger datos recupera el\nSQLite del último run correcto, si su artifact sigue disponible, y continúa sobre\nél; por tanto el fallback local conserva historia entre ejecuciones. Si ambos\nvalores de Turso están presentes, replica el snapshot mediante `/v2/pipeline`. Si\nninguno existe, no falla: mantiene SQLite + resumen como artifact durante 14\ndías. Una configuración a medias sí falla para evitar creer que existe memoria\nremota cuando no la hay.
+El workflow **CI brain** se ejecuta cada hora. Antes de recoger datos recupera el
+SQLite del último run correcto, si su artifact sigue disponible, y continúa sobre
+él; por tanto el fallback local conserva historia entre ejecuciones. Si ambos
+valores de Turso están presentes, replica el snapshot mediante `/v2/pipeline`. Si
+ninguno existe, no falla: mantiene SQLite + resumen como artifact durante 14
+días. Una configuración a medias sí falla para evitar creer que existe memoria
+remota cuando no la hay.
 
 ## Relación con #1551
 
@@ -74,3 +80,18 @@ fría adicional sin cambiar #182 ni las Normas Platino.
 - la URL se valida como `libsql://` o HTTPS;
 - el protocolo remoto comprueba errores Hrana aunque el HTTP sea 2xx;
 - ningún recuerdo concede permisos ni sustituye CLAIM/PR_READY/RELEASE.
+
+
+## Contexto histórico para agentes
+
+`ci_brain.py restore` recupera el último SQLite producido por el workflow desde
+GitHub Actions. `ci_brain.py context` puntúa recuerdos por términos del issue,
+rutas reservadas o firma del log fallido y devuelve como máximo ocho entradas.
+
+El autopilot usa este contexto antes del plan y lo vuelve a calcular tras conocer
+el CLAIM. La reparación de CI lo calcula con el log fallido y las rutas del CLAIM.
+El resultado se escribe en `.agent-history.json`; el modelo nunca recibe el
+token de GitHub ni el SQLite completo.
+
+La memoria histórica es orientativa. No puede conceder permisos, ampliar rutas,
+cambiar #182 ni contradecir el repositorio, las Normas Platino o CI actual.
