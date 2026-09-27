@@ -43,17 +43,15 @@ func _probar_archivo() -> void:
 	_comprobar(modelo.get("dinero", -1) == 725, "archivo muestra dinero real")
 	_comprobar(modelo.get("pistas", -1) == 2, "archivo cuenta pistas descubiertas")
 	_comprobar(modelo.get("lecturas_gratis", -1) == 1, "archivo anuncia la lectura gratuita")
-	_comprobar(modelo.get("estres_banda", "") == "calma", "archivo muestra calma al inicio")
-	_comprobar(ControladorHUD.banda_estres(0.24) == "calma", "banda calma llega hasta 24%")
-	_comprobar(ControladorHUD.banda_estres(0.25) == "inquietud", "25% entra en inquietud")
-	_comprobar(ControladorHUD.banda_estres(0.50) == "tension", "50% entra en tensión")
-	_comprobar(ControladorHUD.banda_estres(0.75) == "paranoia", "75% entra en paranoia")
+	_comprobar(modelo.get("estres_segmentos", 0) == 1, "archivo inicia con un segmento visual")
+	_comprobar(ControladorHUD.segmentos_estres(0.24) == 1, "primer cuarto usa un segmento")
+	_comprobar(ControladorHUD.segmentos_estres(0.25) == 2, "segundo cuarto usa dos segmentos")
+	_comprobar(ControladorHUD.segmentos_estres(0.50) == 3, "tercer cuarto usa tres segmentos")
+	_comprobar(ControladorHUD.segmentos_estres(0.75) == 4, "último cuarto usa cuatro segmentos")
 	Estres.aplicar(estado["jornada"], "documento_sensible", 2.0)
 	Estres.aplicar(estado["jornada"], "documento_sensible", 2.0)
 	modelo = ControladorHUD.modelo_recursos(estado)
-	_comprobar(
-		modelo.get("estres_banda", "") == "inquietud", "HUD sigue la fuente canónica de estrés"
-	)
+	_comprobar(modelo.get("estres_segmentos", 0) == 2, "HUD sigue la fuente canónica de estrés")
 
 	estado["jornada"]["leido_hoy"].append("folio-a")
 	modelo = ControladorHUD.modelo_recursos(estado)
