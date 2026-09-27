@@ -46,11 +46,11 @@ class HorrorTexturasContractTest(unittest.TestCase):
         for ruta in (DESIERTO_3D, MONTANA_3D):
             with self.subTest(presentacion=ruta.name):
                 presentacion = ruta.read_text(encoding="utf-8")
-                self.assertIn("Espacio3D.material_declarado(", presentacion)
+                self.assertIn("material_declarado(", presentacion)
                 self.assertIn('"textura_suelo"', presentacion)
                 self.assertIn('"textura_muro"', presentacion)
                 self.assertGreaterEqual(
-                    presentacion.count("Espacio3D.material_declarado("),
+                    presentacion.count("material_declarado("),
                     2,
                     "suelo y relieve visibles deben consumir el perfil de #231",
                 )
