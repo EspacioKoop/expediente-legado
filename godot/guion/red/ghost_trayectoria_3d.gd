@@ -85,11 +85,7 @@ func _aplicar_tiempo(t: float) -> void:
 		var tb := float(b["t"])
 		if t > tb:
 			continue
-		var peso := (
-			0.0
-			if is_equal_approx(ta, tb)
-			else clampf((t - ta) / (tb - ta), 0.0, 1.0)
-		)
+		var peso := 0.0 if is_equal_approx(ta, tb) else clampf((t - ta) / (tb - ta), 0.0, 1.0)
 		var pa := _vector(a["position"])
 		var pb := _vector(b["position"])
 		_objetivo.position = _origen + pa.lerp(pb, peso)
