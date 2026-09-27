@@ -31,6 +31,18 @@ Cada build queda identificado con:
 El tracing de rendimiento queda desactivado (`0.0`) en este corte: buscamos
 primero errores y crashes sin aumentar tráfico ni coste de forma accidental.
 
+## Smoke manual de ingestión
+
+Para comprobar extremo a extremo que Sentry recibe eventos sin provocar un crash,
+abre **Actions → Alpha playtest → Run workflow** y activa `sentry_smoke`.
+
+Ese modo solo existe en `workflow_dispatch`: no envía eventos sintéticos en cada
+PR, push o alpha normal. El job exige `SENTRY_DSN`, inicia Godot con la misma
+configuración efímera de la alpha, envía un único
+`SentrySDK.capture_message("SIGA-98 Sentry smoke manual")`, cierra el SDK para
+vaciar la cola y continúa con la exportación. En Sentry puede localizarse por el
+mensaje y por `release`, `environment=alpha` y `dist`.
+
 ## Desarrollo local
 
 Para instalar el SDK sin comprometer binarios:
