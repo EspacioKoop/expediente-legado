@@ -29,7 +29,7 @@ static func montar(mundo: Node3D, espacio: Dictionary) -> Node3D:
 func _configurar(espacio: Dictionary) -> void:
 	_ocultar_sala_cerrada()
 	var contorno: PackedVector2Array = espacio.get("contorno", PackedVector2Array())
-	_montar_cima(contorno)
+	_montar_cima(contorno, espacio)
 	_montar_mar_de_nubes()
 	_montar_huellas()
 
@@ -87,7 +87,7 @@ func _ocultar_sala_cerrada() -> void:
 			return
 
 
-func _montar_cima(contorno: PackedVector2Array) -> void:
+func _montar_cima(contorno: PackedVector2Array, espacio: Dictionary) -> void:
 	if contorno.size() < 3:
 		return
 	var indices := Geometry2D.triangulate_polygon(contorno)
@@ -107,10 +107,11 @@ func _montar_cima(contorno: PackedVector2Array) -> void:
 	var cima := MeshInstance3D.new()
 	cima.name = "CimaNevada"
 	cima.mesh = nieve.commit()
-	var mat_nieve := StandardMaterial3D.new()
-	mat_nieve.albedo_color = Color(0.78, 0.87, 0.93)
-	mat_nieve.roughness = 0.86
-	cima.material_override = mat_nieve
+	cima.material_override = Espacio3D.material_declarado(
+		espacio,
+		"textura_suelo",
+		Color(0.78, 0.87, 0.93),
+	)
 	add_child(cima)
 
 	var centro := Vector2.ZERO
@@ -138,10 +139,11 @@ func _montar_cima(contorno: PackedVector2Array) -> void:
 	var roca := MeshInstance3D.new()
 	roca.name = "LaderasDeLaCima"
 	roca.mesh = laderas.commit()
-	var mat_roca := StandardMaterial3D.new()
-	mat_roca.albedo_color = Color(0.20, 0.24, 0.28)
-	mat_roca.roughness = 1.0
-	roca.material_override = mat_roca
+	roca.material_override = Espacio3D.material_declarado(
+		espacio,
+		"textura_muro",
+		Color(0.20, 0.24, 0.28),
+	)
 	add_child(roca)
 
 
