@@ -1,0 +1,240 @@
+{
+  "version": 1,
+  "perfil": "laboratorio-1475-adpcm-v1",
+  "estado": "perfil documental; no validación de hardware",
+  "procedencia": "Datos sintéticos propios y resultados literales calculados por aritmética, sin extraer audio ni usar el decodificador bajo prueba para obtenerlos.",
+  "fuentes": {
+    "spu": "https://github.com/psx-spx/psx-spx.github.io/blob/7d89534f7b642aa302222269039cbf754893d3be/docs/ps1/spu/soundprocessingunitspu.md",
+    "adpcm": "https://github.com/psx-spx/psx-spx.github.io/blob/7d89534f7b642aa302222269039cbf754893d3be/docs/ps1/cdr/cdromformat.md"
+  },
+  "contrato": {
+    "historia_inicial": [0,0],
+    "orden_historia": "h1 más reciente; h2 anterior",
+    "division": "floor((a*h1+b*h2+32)/64)",
+    "saturacion": "int16 antes de actualizar historia",
+    "flags": "ignorados por el decoder offline",
+    "cobertura": "Solo se certifican los tramos indicados; la longitud total también se comprueba."
+  },
+  "adpcm": [
+    {
+      "id": "ADPCM-01",
+      "objetivo": "Orden bajo/alto y extensión de signo, shift 12",
+      "bloques_hex": ["0c 00 7f 80 00 00 00 00 00 00 00 00 00 00 00 00"],
+      "tramos": [
+        {
+          "desde": 0,
+          "pcm": [-1,7,0,-8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        }
+      ],
+      "derivacion": "0x7f → -1,+7; 0x80 → 0,-8. Con F0 y shift12 el residuo es la salida; los 24 nibbles restantes son cero."
+    },
+    {
+      "id": "ADPCM-02",
+      "objetivo": "Escala de shift 0",
+      "bloques_hex": ["00 00 7f 80 00 00 00 00 00 00 00 00 00 00 00 00"],
+      "tramos": [
+        {
+          "desde": 0,
+          "pcm": [-4096,28672,0,-32768,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        }
+      ],
+      "derivacion": "F0: cada nibble firmado se multiplica por 4096; -8 alcanza -32768 sin desbordar."
+    },
+    {
+      "id": "ADPCM-03",
+      "objetivo": "Predicción con historia entre bloques",
+      "bloques_hex": ["06 00 00 00 00 00 00 00 00 00 00 00 00 00 00 1f","1c 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"],
+      "tramos": [
+        {
+          "desde": 26,
+          "pcm": [-64,64]
+        },
+        {
+          "desde": 28,
+          "pcm": [60,56]
+        }
+      ],
+      "derivacion": "El bloque de preparación F0/shift6 termina en -64,64. F1: (64*60+32)//64=60; (60*60+32)//64=56."
+    },
+    {
+      "id": "ADPCM-04",
+      "objetivo": "Predicción con historia entre bloques",
+      "bloques_hex": ["06 00 00 00 00 00 00 00 00 00 00 00 00 00 00 1f","2c 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"],
+      "tramos": [
+        {
+          "desde": 26,
+          "pcm": [-64,64]
+        },
+        {
+          "desde": 28,
+          "pcm": [167,248]
+        }
+      ],
+      "derivacion": "El bloque de preparación F0/shift6 termina en -64,64. F2: (64*115+(-64)*(-52)+32)//64=167; (167*115+64*(-52)+32)//64=248."
+    },
+    {
+      "id": "ADPCM-05",
+      "objetivo": "Predicción con historia entre bloques",
+      "bloques_hex": ["06 00 00 00 00 00 00 00 00 00 00 00 00 00 00 1f","3c 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"],
+      "tramos": [
+        {
+          "desde": 26,
+          "pcm": [-64,64]
+        },
+        {
+          "desde": 28,
+          "pcm": [153,179]
+        }
+      ],
+      "derivacion": "El bloque de preparación F0/shift6 termina en -64,64. F3: (64*98+(-64)*(-55)+32)//64=153; (153*98+64*(-55)+32)//64=179."
+    },
+    {
+      "id": "ADPCM-06",
+      "objetivo": "Predicción con historia entre bloques",
+      "bloques_hex": ["06 00 00 00 00 00 00 00 00 00 00 00 00 00 00 1f","4c 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"],
+      "tramos": [
+        {
+          "desde": 26,
+          "pcm": [-64,64]
+        },
+        {
+          "desde": 28,
+          "pcm": [182,287]
+        }
+      ],
+      "derivacion": "El bloque de preparación F0/shift6 termina en -64,64. F4: (64*122+(-64)*(-60)+32)//64=182; (182*122+64*(-60)+32)//64=287."
+    },
+    {
+      "id": "ADPCM-07",
+      "objetivo": "División negativa hacia menos infinito",
+      "bloques_hex": ["0c 00 00 00 00 00 00 00 00 00 00 00 00 00 00 f0","1c 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"],
+      "tramos": [
+        {
+          "desde": 26,
+          "pcm": [0,-1]
+        },
+        {
+          "desde": 28,
+          "pcm": [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
+        }
+      ],
+      "derivacion": "h1=-1: floor((-60+32)/64)=-1, no 0. F1 mantiene -1 con residuo cero."
+    },
+    {
+      "id": "ADPCM-08",
+      "objetivo": "Empate positivo del predictor",
+      "bloques_hex": ["0b 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40","1c 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"],
+      "tramos": [
+        {
+          "desde": 26,
+          "pcm": [0,8]
+        },
+        {
+          "desde": 28,
+          "pcm": [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8]
+        }
+      ],
+      "derivacion": "F0/shift11: 4*2=8. F1: floor((480+32)/64)=8; se mantiene 8."
+    },
+    {
+      "id": "ADPCM-09",
+      "objetivo": "Empate negativo del predictor",
+      "bloques_hex": ["0c 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80","1c 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"],
+      "tramos": [
+        {
+          "desde": 26,
+          "pcm": [0,-8]
+        },
+        {
+          "desde": 28,
+          "pcm": [-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7,-7]
+        }
+      ],
+      "derivacion": "F1: floor((-480+32)/64)=-7; después floor((-420+32)/64)=-7."
+    },
+    {
+      "id": "ADPCM-10",
+      "objetivo": "Saturación positiva e historia reconstruida",
+      "bloques_hex": ["10 00 77 00 00 00 00 00 00 00 00 00 00 00 00 00"],
+      "tramos": [
+        {
+          "desde": 0,
+          "pcm": [28672,32767,30719]
+        }
+      ],
+      "derivacion": "Primero 7*4096=28672. Segundo 28672+26880=55552 → 32767. Tercero floor((32767*60+32)/64)=30719: usa la muestra saturada."
+    },
+    {
+      "id": "ADPCM-11",
+      "objetivo": "Saturación negativa e historia reconstruida",
+      "bloques_hex": ["10 00 88 00 00 00 00 00 00 00 00 00 00 00 00 00"],
+      "tramos": [
+        {
+          "desde": 0,
+          "pcm": [-32768,-32768,-30720]
+        }
+      ],
+      "derivacion": "Primero -8*4096=-32768. Segundo -32768-30720=-63488 → -32768. Tercero floor((-32768*60+32)/64)=-30720."
+    }
+  ],
+  "pitch": {
+    "estado": "pendiente de implementación T07; no ejecutado por test_spu98_vectores.py",
+    "pmon": false,
+    "casos_tasa": [
+      {
+        "registro": 0,
+        "paso": 0,
+        "tasa_consumo_hz": 0
+      },
+      {
+        "registro": 1,
+        "paso": 1,
+        "tasa_consumo_hz": 10.7666015625
+      },
+      {
+        "registro": 2048,
+        "paso": 2048,
+        "tasa_consumo_hz": 22050
+      },
+      {
+        "registro": 4096,
+        "paso": 4096,
+        "tasa_consumo_hz": 44100
+      },
+      {
+        "registro": 6144,
+        "paso": 6144,
+        "tasa_consumo_hz": 66150
+      },
+      {
+        "registro": 16384,
+        "paso": 16384,
+        "tasa_consumo_hz": 176400
+      },
+      {
+        "registro": 65535,
+        "paso": 16384,
+        "tasa_consumo_hz": 176400
+      }
+    ],
+    "trazas": [
+      {
+        "registro": 6144,
+        "contador_inicial": 0,
+        "ticks": [1,2,3,4],
+        "contadores": [6144,12288,18432,24576],
+        "indices_muestra": [1,3,4,6],
+        "indices_interpolacion": [128,0,128,0]
+      },
+      {
+        "registro": 1,
+        "contador_inicial": 0,
+        "ticks": [16,4096],
+        "contadores": [16,4096],
+        "indices_muestra": [0,1],
+        "indices_interpolacion": [1,0]
+      }
+    ],
+    "derivacion": "Sin PMON: paso=min(registro,16384); consumo=44100*paso/4096. Contador += paso; índice muestra=contador>>12; índice interpolación=(contador>>4)&255. No describe PCM interpolado ni cambia la tasa del DAC."
+  }
+}
