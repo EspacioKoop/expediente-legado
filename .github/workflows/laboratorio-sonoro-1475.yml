@@ -1,0 +1,48 @@
+name: Laboratorio sonoro 1475
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/laboratorio-sonoro-1475.yml'
+      - 'scripts/laboratorio_sonoro_1475.py'
+      - 'scripts/test_laboratorio_sonoro_1475.py'
+      - 'referencia/audio/laboratorio_1475/**'
+      - 'docs/audio/biblia-sonora-1475.md'
+      - 'docs/audio/laboratorio-1475.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cata:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Instalar medidor de programa
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+      - name: Regresiones de codec, partitura y señal exportada
+        run: python3 -m unittest -v scripts/test_laboratorio_sonoro_1475.py
+      - name: Renderizar y verificar repetibilidad
+        run: |
+          python3 scripts/laboratorio_sonoro_1475.py --destino cata-1475 --exigir-ffmpeg
+          python3 scripts/laboratorio_sonoro_1475.py --destino cata-repetida --exigir-ffmpeg
+          diff -r cata-1475 cata-repetida
+      - name: Adjuntar estudio A/B y fuentes para escucha humana
+        uses: actions/upload-artifact@v4
+        with:
+          name: laboratorio-sonoro-1475-${{ github.sha }}
+          path: cata-1475/
+          if-no-files-found: error
+          retention-days: 14

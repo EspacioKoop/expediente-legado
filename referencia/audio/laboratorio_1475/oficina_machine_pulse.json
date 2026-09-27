@@ -1,0 +1,51 @@
+{
+  "id": "oficina_machine_pulse",
+  "version": 1,
+  "duracion_s": 28,
+  "bpm": 96,
+  "ticks_fila": 6,
+  "filas_patron": 16,
+  "max_voces": 24,
+  "max_banco_adpcm_bytes": 32768,
+  "pico_techo_dbfs": -9,
+  "banco": {
+    "sello": {"tipo": "fm", "muestras": 7056, "hz": 110, "ratio_fm": 1.43, "indice_fm": 2.2, "caida": 28, "semilla": 147501},
+    "tecla": {"tipo": "ruido", "muestras": 2520, "hz": 1650, "caida": 78, "semilla": 147502},
+    "carro": {"tipo": "fm", "muestras": 14112, "hz": 220, "ratio_fm": 2.01, "indice_fm": 1.4, "caida": 9, "semilla": 147503},
+    "red": {"tipo": "ciclo", "muestras": 1764, "hz": 50, "semilla": 147504}
+  },
+  "orden": ["aire", "pulso", "pulso", "respuesta", "aire", "tension", "respuesta", "pulso", "aire", "salida"],
+  "patrones": {
+    "aire": [
+      {"fila": 0, "instrumento": "red", "duracion_filas": 12, "ganancia": 0.06, "pan": 0},
+      {"fila": 7, "instrumento": "tecla", "ganancia": 0.08, "pan": -0.2, "delay_ticks": 2},
+      {"fila": 11, "instrumento": "tecla", "ganancia": 0.05, "pan": 0.18, "semitonos": -2}
+    ],
+    "pulso": [
+      {"fila": 0, "instrumento": "sello", "ganancia": 0.36, "pan": 0},
+      {"fila": 3, "instrumento": "tecla", "ganancia": 0.1, "pan": -0.15},
+      {"fila": 6, "instrumento": "carro", "ganancia": 0.12, "pan": 0.12, "semitonos": -12, "duracion_filas": 3},
+      {"fila": 8, "instrumento": "sello", "ganancia": 0.2, "pan": 0, "semitonos": -5},
+      {"fila": 12, "instrumento": "tecla", "ganancia": 0.07, "pan": 0.15, "retrigger_ticks": 2}
+    ],
+    "respuesta": [
+      {"fila": 0, "instrumento": "sello", "ganancia": 0.28, "pan": 0},
+      {"fila": 4, "instrumento": "carro", "ganancia": 0.11, "pan": -0.12, "semitonos": 0, "duracion_filas": 2},
+      {"fila": 7, "instrumento": "carro", "ganancia": 0.085, "pan": 0.12, "semitonos": 3, "duracion_filas": 2},
+      {"fila": 10, "instrumento": "carro", "ganancia": 0.075, "pan": 0, "semitonos": -5, "offset": 280, "duracion_filas": 2},
+      {"fila": 14, "instrumento": "tecla", "ganancia": 0.06, "pan": -0.15, "delay_ticks": 3}
+    ],
+    "tension": [
+      {"fila": 0, "instrumento": "red", "duracion_filas": 14, "ganancia": 0.035, "pan": 0},
+      {"fila": 0, "instrumento": "sello", "ganancia": 0.3, "pan": 0},
+      {"fila": 4, "instrumento": "tecla", "ganancia": 0.09, "pan": -0.2, "retrigger_ticks": 2},
+      {"fila": 6, "instrumento": "carro", "ganancia": 0.08, "pan": 0.12, "semitonos": 7},
+      {"fila": 8, "instrumento": "sello", "ganancia": 0.25, "pan": 0, "semitonos": -5},
+      {"fila": 12, "instrumento": "tecla", "ganancia": 0.05, "pan": 0.2, "retrigger_ticks": 1}
+    ],
+    "salida": [
+      {"fila": 0, "instrumento": "sello", "ganancia": 0.22, "pan": 0, "semitonos": -12},
+      {"fila": 4, "instrumento": "carro", "ganancia": 0.07, "pan": 0, "semitonos": -12, "duracion_filas": 4}
+    ]
+  }
+}
