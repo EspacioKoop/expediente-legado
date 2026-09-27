@@ -91,6 +91,17 @@ def test_reduccion_movimiento_viaja_hasta_la_regla_sin_cambiar_semantica() -> No
     assert 'activo.get("reduccion_movimiento", false)' in espacio
 
 
+def test_tarot_reutiliza_la_ruta_simbolica_comun_sin_adaptador_especial() -> None:
+    modelo = fuente(MODELO).lower()
+    espacio = fuente(ESPACIO).lower()
+    utileria = fuente(UTILERIA)
+    assert "tarot" not in modelo
+    assert "la-luna" not in espacio
+    assert '"motivo_simbolico": "ciclo-centro"' in utileria
+    assert "modificadores_simbolicos" in utileria
+    assert "SuenoEspacioSimbolico.montar(mundo, creadas, modificadores_simbolicos)" in utileria
+
+
 def test_runtime_conecta_estructura_y_cielo_sin_fuente_paralela() -> None:
     reactivo = fuente(REACTIVO)
     cielo = fuente(CIELO)
