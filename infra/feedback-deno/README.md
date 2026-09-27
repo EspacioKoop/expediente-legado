@@ -27,6 +27,21 @@ El servicio:
 El HMAC reutiliza `GITHUB_TOKEN` como clave únicamente para derivar la clave
 efímera del rate limiter. El token nunca se devuelve, registra ni persiste en KV.
 
+## Memoria temporal de agentes
+
+El mismo Deno KV ofrece dos endpoints privados para Qwen/Gemini:
+
+- `POST /api/agent-memory/search`
+- `POST /api/agent-memory/remember`
+
+No usan `GITHUB_TOKEN` como credencial del cliente. Los workflows solicitan a GitHub Actions un token **OIDC** efímero con audiencia `siga98-agent-memory`. El gateway valida la firma RS256 contra el JWKS oficial de GitHub, el claim `repository` y que `workflow_ref` corresponda a `agent-autopilot.yml` o `agent-ci-repair.yml`.
+
+La memoria es deliberadamente pequeña: TTL de 30 días, hasta 1200 caracteres por resumen, 8 tags, 12 rutas, búsqueda sobre los 50 registros recientes y devolución máxima de 8 resultados. Los resúmenes con patrones de credenciales se rechazan.
+
+El repositorio, los issues, #181/#182, CI y las Normas Platino siguen siendo la fuente de verdad. La wiki es memoria consolidada en solo lectura; Deno KV es únicamente memoria operativa transitoria.
+
+No hace falta crear otro secret en GitHub ni en Deno. La única dependencia adicional del runtime es acceso saliente a `token.actions.githubusercontent.com` para validar los tokens OIDC.
+
 ## Despliegue
 
 Usa el Deno Deploy actual en `https://console.deno.com`, no Deploy Classic.
@@ -83,7 +98,8 @@ Debe responder con:
   "service": "siga98-feedback-deno",
   "version": 1,
   "github_configured": true,
-  "kv_configured": true
+  "kv_configured": true,
+  "agent_memory": true
 }
 ```
 
