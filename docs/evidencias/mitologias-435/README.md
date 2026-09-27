@@ -18,7 +18,7 @@ El workflow comprueba únicamente propiedades mecánicas y reproducibles:
 - el capturador alcanza las transiciones mediante las APIs reales del vertical;
 - no se introduce HUD ni una escena alternativa de gameplay.
 
-Para **Gilgamesh #436**, el capturador ya no usa el diorama standalone. Instancia `sueno_gilgamesh.tscn`, retira `CamaraStandalone` como hace `Dia`, monta una base real con `Espacio3D`, aplica `SuenoGilgamesh.ESCALA_ENCUENTRO` y encuadra a 1,65 m de altura con FOV 70. La tercera captura acerca la cámara al puzzle para revisar motivo↔ancla sin una vista cenital artificial.
+Para **Gilgamesh #436**, el capturador ya no usa el diorama standalone. Instancia `sueno_gilgamesh.tscn`, retira `CamaraStandalone` como hace `Dia`, monta una base real con `Espacio3D`, aplica `SuenoGilgamesh.ESCALA_ENCUENTRO` y encuadra a 1,65 m de altura con FOV 70. La segunda captura acerca la cámara al puzzle para revisar motivo↔ancla sin una vista cenital artificial.
 
 ## Qué **no** valida
 
