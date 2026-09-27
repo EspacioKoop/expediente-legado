@@ -64,9 +64,7 @@ static func _agregar_lamina(raiz: Node3D, datos: Dictionary) -> void:
 	var material := StandardMaterial3D.new()
 	material.albedo_texture = textura
 	material.roughness = 0.92
-	material.texture_filter = (
-		BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
-	)
+	material.texture_filter = (BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC)
 	lamina.material_override = material
 	lamina.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	raiz.add_child(lamina)
