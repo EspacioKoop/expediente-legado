@@ -613,8 +613,10 @@ def build_summary(conn: sqlite3.Connection) -> dict[str, Any]:
             """
             SELECT memory_key, summary, metadata_json, updated_at
             FROM memory_entries
-            WHERE kind = 'ci_failure'
-            ORDER BY updated_at DESC
+            WHERE kind IN ('ci_failure_fingerprint', 'ci_failure')
+            ORDER BY
+                CASE kind WHEN 'ci_failure_fingerprint' THEN 0 ELSE 1 END,
+                updated_at DESC
             LIMIT 20
             """
         )
