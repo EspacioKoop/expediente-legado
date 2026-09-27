@@ -61,6 +61,18 @@ class KevRouterTest(unittest.TestCase):
         self.assertEqual("gemini", result["provider"])
         self.assertEqual("explicit", result["source"])
 
+    def test_proveedor_explicito_ausente_no_se_sustituye(self):
+        result = kev_router.route_provider(
+            state={"title": "Issue"},
+            labels=["agent:gemini"],
+            has_qwen=True,
+            has_gemini=False,
+            base_url="http://kev.invalid",
+        )
+        self.assertIsNone(result["provider"])
+        self.assertEqual("gemini", result["requested_provider"])
+        self.assertEqual("explicit-unavailable", result["source"])
+
     def test_unico_proveedor_disponible_no_necesita_kev(self):
         result = kev_router.route_provider(
             state={"title": "Issue"},
