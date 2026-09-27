@@ -16,6 +16,8 @@ Una vez fusionados los workflows, solo hacen falta las claves de los proveedores
 
 ### Qwen
 
+`QWEN_API_KEY` puede apuntar al proveedor configurado para Qwen Code. Con `QWEN_BASE_URL` y `QWEN_MODEL` se puede usar un backend OpenAI-compatible como FreeInference; si esas variables no existen, el workflow conserva la detección de Alibaba Cloud.
+
 El workflow detecta automáticamente dos tipos habituales de clave:
 
 - **Model Studio / DashScope internacional**: claves `sk-...`; usa el endpoint internacional compatible con OpenAI.
@@ -53,6 +55,32 @@ Los labels se crean automáticamente al integrarse el workflow:
 
 Etiquetar un issue con `agent:auto`, `agent:qwen` o `agent:gemini` lo dispara. Además, cada hora el scheduler recoge el primer `agent:auto` que siga pendiente. También se puede lanzar **Agent autopilot** manualmente desde Actions indicando issue y proveedor.
 
+## Normas Platino, wiki y memoria
+
+Cada ejecución carga una copia fresca de `EspacioKoop/normas_platino` y debe leer sus fuentes operativas antes de planificar o reparar. Si esa carga falla, el agente no continúa: las reglas son obligatorias y no se sustituyen por memoria.
+
+La jerarquía de contexto es:
+
+1. repositorio, issue, #181, #182 y Normas Platino;
+2. wiki de Expediente Legado como memoria consolidada en solo lectura;
+3. Deno KV como memoria operativa temporal.
+
+La wiki y Deno KV **no son fuentes de autoridad**. Un recuerdo puede orientar búsquedas, pero debe contrastarse con el código, el issue y CI actuales.
+
+La memoria temporal reutiliza el Deno KV del gateway F9 y no necesita un secret nuevo. GitHub Actions solicita un token OIDC de corta duración con audiencia `siga98-agent-memory`; el gateway valida firma, repositorio y workflow antes de leer o escribir. Solo se aceptan `agent-autopilot.yml` y `agent-ci-repair.yml`.
+
+Cada recuerdo:
+- caduca a los 30 días;
+- tiene un resumen de hasta 1200 caracteres;
+- admite como máximo 8 tags y 12 rutas;
+- se rechaza si parece contener tokens o credenciales;
+- solo se guarda tras una implementación o reparación validada por el preflight;
+- nunca contiene prompts completos, secretos ni datos privados.
+
+La búsqueda revisa como máximo los 50 recuerdos recientes y devuelve hasta 8 por coincidencia de issue, rutas o tags. Si Deno no está disponible, el agente sigue sin memoria temporal; si Normas Platino no pueden cargarse, se detiene.
+
+La URL de memoria se deriva de la variable ya existente `SIGA98_FEEDBACK_FALLBACK_URL`, sustituyendo `/api/report` por `/api/agent-memory/*`. No hay otra credencial que copiar.
+
 ## Flujo de seguridad y coordinación
 
 1. El proveedor lee el issue y sus comentarios recientes.
@@ -88,8 +116,8 @@ Cuando CI pasa, se registra `PR_READY` en #182 con el SHA y el PR permanece draf
 
 No son necesarias para empezar:
 
-- `QWEN_BASE_URL`: sustituye el endpoint detectado automáticamente.
-- `QWEN_MODEL`: sustituye `qwen3-coder-plus`.
+- `QWEN_BASE_URL`: sustituye el endpoint detectado automáticamente; por ejemplo, el endpoint OpenAI-compatible de FreeInference.
+- `QWEN_MODEL`: sustituye `qwen3-coder-plus`; debe ser un ID de modelo válido en el backend elegido.
 - `QWEN_CLI_VERSION`: fija una versión concreta del CLI.
 - `GEMINI_MODEL`: fija un modelo Gemini.
 - `GEMINI_CLI_VERSION`: fija una versión concreta del CLI.
