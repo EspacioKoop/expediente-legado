@@ -5,6 +5,8 @@ import unittest
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 ASSET_DIR = ROOT / "godot" / "arte" / "sueno_fotorrealista"
 SHADER = ASSET_DIR / "material_microdetalle.gdshader"
+UTILERIA = ROOT / "godot" / "guion" / "sueno_utileria.gd"
+ANOMALIA = ROOT / "godot" / "guion" / "anomalia_sueno_3d.gd"
 SCENES = {
     "archivador_humedo.tscn": "archivador",
     "armario_desencajado.tscn": "armario_domestico",
@@ -49,6 +51,25 @@ class SuenoFotorrealistaAssetsTest(unittest.TestCase):
             with self.subTest(nombre=nombre):
                 self.assertIn(f'metadata/origen_id = "{origen_id}"', texto)
                 self.assertIn('metadata/issue_padre = 79', texto)
+
+    def test_kit_esta_conectado_a_anomalias_reales(self):
+        utileria = UTILERIA.read_text(encoding="utf-8")
+        anomalia = ANOMALIA.read_text(encoding="utf-8")
+        for escena in (
+            "silla_reflejo.tscn",
+            "monitor_estirado.tscn",
+            "archivador_humedo.tscn",
+            "crt_condensacion.tscn",
+            "armario_desencajado.tscn",
+            "tarot_pliegue.tscn",
+        ):
+            self.assertIn(
+                f'preload("res://arte/sueno_fotorrealista/{escena}")',
+                utileria,
+            )
+        self.assertIn("func configurar_escena_visual(escena_visual: PackedScene)", anomalia)
+        self.assertIn('detalle.name = "DetallePBR"', anomalia)
+        self.assertIn("anomalia.configurar_escena_visual(escena_visual)", utileria)
 
     def test_lote_no_introduce_binarios_marcas_ni_texto_narrativo(self):
         # Godot 4 puede crear sidecars .uid de texto al importar recursos.

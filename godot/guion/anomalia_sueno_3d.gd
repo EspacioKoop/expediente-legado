@@ -19,6 +19,7 @@ var _escala_reaccion := Vector3.ONE
 var _giro_base := Vector3.ZERO
 var _giro_reaccion := Vector3.ZERO
 var _reactiva := false
+var _escena_visual: PackedScene
 
 
 func configurar(
@@ -54,14 +55,22 @@ func configurar(
 	_visual = Node3D.new()
 	_visual.name = "FormaDeformada"
 	add_child(_visual)
-	if modelo == "tarotCard":
-		_montar_tarot(tam, color)
-	elif usar_asset_cc0:
-		# Conserva la misma malla y paleta PSX que el original de vigilia.
-		if not AssetCc0.sustituir(_visual, modelo, tam):
-			_montar_respaldo(tam, color)
-	elif not Modelos.mueble(_visual, modelo, tam, color):
-		_montar_respaldo(tam, color)
+	var conservar_original := usar_asset_cc0 or modelo == "tarotCard"
+	if conservar_original:
+		_montar_visual_original(modelo, tam, color, usar_asset_cc0)
+	if _escena_visual != null:
+		var instancia := _escena_visual.instantiate()
+		if instancia is Node3D:
+			var detalle := instancia as Node3D
+			detalle.name = "DetallePBR"
+			detalle.position = Vector3(0.0, -tam.y * 0.5, 0.0)
+			_visual.add_child(detalle)
+		else:
+			instancia.free()
+			if not conservar_original:
+				_montar_visual_original(modelo, tam, color, usar_asset_cc0)
+	elif not conservar_original:
+		_montar_visual_original(modelo, tam, color, usar_asset_cc0)
 	_aplicar_estado_visual()
 
 	_luz = OmniLight3D.new()
@@ -75,6 +84,10 @@ func configurar(
 
 	activado.connect(_alternar)
 	activado.connect(_emitir_observacion)
+
+
+func configurar_escena_visual(escena_visual: PackedScene) -> void:
+	_escena_visual = escena_visual
 
 
 func id_catalogo() -> String:
@@ -116,6 +129,22 @@ func _aplicar_estado_visual() -> void:
 ## Carta procedural reconocible incluso antes de deformarse: cuerpo fino,
 ## marco frontal y medallón central. No reproduce el arcano concreto; esa
 ## identidad ya pertenece a la carta encontrada y viaja como metadato.
+func _montar_visual_original(
+	modelo: String,
+	tam: Vector3,
+	color: Color,
+	usar_asset_cc0: bool,
+) -> void:
+	if modelo == "tarotCard":
+		_montar_tarot(tam, color)
+	elif usar_asset_cc0:
+		# Conserva la misma malla y paleta PSX que el original de vigilia.
+		if not AssetCc0.sustituir(_visual, modelo, tam):
+			_montar_respaldo(tam, color)
+	elif not Modelos.mueble(_visual, modelo, tam, color):
+		_montar_respaldo(tam, color)
+
+
 func _montar_tarot(tam: Vector3, color: Color) -> void:
 	var cuerpo := MeshInstance3D.new()
 	cuerpo.name = "Carta"

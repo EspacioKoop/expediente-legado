@@ -17,6 +17,7 @@ extends RefCounted
 const PRESCRIPCIONES := [
 	{
 		"objeto_id": "silla",
+		"escena_visual": preload("res://arte/sueno_fotorrealista/silla_reflejo.tscn"),
 		"anomalia_id": "silla-demasiado-alta",
 		"modelo": "chairDesk",
 		"tam": Vector3(0.62, 0.95, 0.62),
@@ -30,6 +31,7 @@ const PRESCRIPCIONES := [
 	},
 	{
 		"objeto_id": "monitor",
+		"escena_visual": preload("res://arte/sueno_fotorrealista/monitor_estirado.tscn"),
 		"anomalia_id": "monitor-estirado",
 		"modelo": "computerScreen",
 		"tam": Vector3(0.50, 0.45, 0.40),
@@ -43,6 +45,7 @@ const PRESCRIPCIONES := [
 	},
 	{
 		"objeto_id": "archivador",
+		"escena_visual": preload("res://arte/sueno_fotorrealista/archivador_humedo.tscn"),
 		"anomalia_id": "archivador-torcido",
 		"modelo": "bookcaseClosed",
 		"tam": Vector3(1.0, 1.8, 0.6),
@@ -56,6 +59,7 @@ const PRESCRIPCIONES := [
 	},
 	{
 		"objeto_id": "televisor_casa",
+		"escena_visual": preload("res://arte/sueno_fotorrealista/crt_condensacion.tscn"),
 		"anomalia_id": "televisor-domestico-desfasado",
 		"modelo": "televisionVintage",
 		"tam": Vector3(0.85, 0.75, 0.60),
@@ -69,6 +73,7 @@ const PRESCRIPCIONES := [
 	},
 	{
 		"objeto_id": "armario_hogar",
+		"escena_visual": preload("res://arte/sueno_fotorrealista/armario_desencajado.tscn"),
 		"anomalia_id": "armario-domestico-desencajado",
 		"modelo": "household_goods/wardrobe_01",
 		"tam": Vector3(0.99, 1.93, 0.63),
@@ -84,6 +89,7 @@ const PRESCRIPCIONES := [
 ]
 
 const PRESCRIPCION_TAROT := {
+	"escena_visual": preload("res://arte/sueno_fotorrealista/tarot_pliegue.tscn"),
 	"anomalia_id": "tarot-geometria-viva",
 	"modelo": "tarotCard",
 	"tam": Vector3(0.42, 0.70, 0.035),
@@ -157,6 +163,9 @@ static func montar(
 			anomalia.set_meta("motivo_simbolico", motivo)
 
 		mundo.add_child(anomalia)
+		var escena_visual := datos.get("escena_visual", null) as PackedScene
+		if escena_visual != null:
+			anomalia.configurar_escena_visual(escena_visual)
 		(
 			anomalia
 			. configurar(
