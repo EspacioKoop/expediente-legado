@@ -51,6 +51,15 @@ func _probar_tabaco_recurrente() -> void:
 	_comprobar(String(sin_saldo.get("motivo", "")) == "sin_dinero", "explica falta de dinero")
 	_comprobar(int(jornada["dinero"]) == 7, "sin saldo no deja deuda")
 
+	jornada["dinero"] = 30
+	jornada["hora_minutos"] = 21 * 60 + 1
+	var cerrado := ComercioBarrio.comprar(
+		jornada, inventario, "quiosco", "paquete_cigarrillos_98"
+	)
+	_comprobar(String(cerrado.get("motivo", "")) == "cerrado", "el quiosco respeta su cierre")
+	_comprobar(int(jornada["dinero"]) == 30, "un comercio cerrado no cobra")
+	_comprobar(not ComercioBarrio.abierto("quiosco", jornada), "estado horario queda cerrado")
+
 
 func _probar_reventa_segunda_mano() -> void:
 	var jornada := Jornada.nueva(97, 1)
@@ -118,6 +127,20 @@ func _probar_reventa_segunda_mano() -> void:
 	jornada["fase"] = "casa"
 	var fuera := ComercioBarrio.vender(jornada, inventario, "segunda_mano", "llave-imposible")
 	_comprobar(String(fuera.get("motivo", "")) == "fuera_del_trayecto", "solo se vende en trayecto")
+
+	jornada["fase"] = "trayecto"
+	jornada["hora_minutos"] = 20 * 60 + 1
+	var cierre_reventa := ComercioBarrio.vender(
+		jornada, inventario, "segunda_mano", "llave-imposible"
+	)
+	_comprobar(
+		String(cierre_reventa.get("motivo", "")) == "cerrado",
+		"El Trastero no compra fuera de horario",
+	)
+	_comprobar(
+		Inventario.contiene(inventario, "llave-imposible"),
+		"el cierre conserva el objeto llevado",
+	)
 
 
 func _comprobar(condicion: bool, nombre: String) -> void:
