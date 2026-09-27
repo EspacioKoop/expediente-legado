@@ -153,3 +153,83 @@ jobs:
             echo "url=https://dashscope-intl.aliyuncs.com/compatible-mode/v1" >> "$GITHUB_OUTPUT"
           fi
           echo "model=qwen3-coder-plus" >> "$GITHUB_OUTPUT"
+
+      - name: Reparar con Qwen
+        if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen'
+        uses: QwenLM/qwen-code-action@v1
+        with:
+          openai_api_key: ${{ secrets.QWEN_API_KEY }}
+          openai_base_url: ${{ vars.QWEN_BASE_URL || steps.qwen.outputs.url }}
+          openai_model: ${{ vars.QWEN_MODEL || steps.qwen.outputs.model }}
+          settings: '{"model":{"maxSessionTurns":30},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json y .agent-ci-failure.log. Corrige solo la causa del CI y solo rutas del CLAIM. No ejecutes shell ni Git.'
+
+      - name: Reparar con Gemini
+        if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'gemini'
+        uses: google-github-actions/run-gemini-cli@v0
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: ${{ vars.GEMINI_MODEL }}
+          settings: '{"model":{"maxSessionTurns":30},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
+          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-plan.json y .agent-ci-failure.log. Corrige solo la causa del CI y solo rutas del CLAIM. No ejecutes shell ni Git.'
+
+      - name: Validar reparación
+        if: steps.limit.outputs.run == 'true'
+        run: |
+          set -euo pipefail
+          cp .agent-plan.json /tmp/plan.json
+          rm -f .agent-task.md .agent-plan.json .agent-ci-failure.log gha-creds-*.json
+          rm -rf .gemini .qwen
+          git add -A
+          git diff --cached --quiet && { echo "el agente no produjo cambios"; exit 2; }
+          python3 - <<'PY'
+          import json,subprocess
+          allowed=set(json.load(open("/tmp/plan.json"))["files"])
+          changed=subprocess.check_output(["git","diff","--cached","--name-only"],text=True).splitlines()
+          bad=[x for x in changed if x not in allowed]
+          if bad: raise SystemExit("fuera de CLAIM: "+",".join(bad))
+          stat=subprocess.check_output(["git","diff","--cached","--numstat"],text=True).splitlines()
+          total=0
+          for line in stat:
+              a,d,_=line.split("\t",2)
+              if a.isdigit(): total+=int(a)
+              if d.isdigit(): total+=int(d)
+          if total>8000: raise SystemExit("reparación demasiado grande")
+          PY
+          mapfile -t files < <(git diff --cached --name-only)
+          gd=false; py=false; backend=false
+          for f in "${files[@]}"; do
+            [[ "$f" == *.gd ]] && gd=true
+            [[ "$f" == scripts/*.py ]] && py=true
+            [[ "$f" == backend/* ]] && backend=true
+          done
+          if [[ "$gd" == true ]]; then bash scripts/check_gdscript.sh
+          elif [[ "$py" == true ]]; then python3 -m unittest discover -s scripts -p 'test_*.py'; fi
+          if [[ "$backend" == true ]]; then (cd backend && mvn test && npm ci && npm test); fi
+
+      - name: Publicar reparación y relanzar CI
+        if: steps.limit.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.meta.outputs.issue }}
+          PROVIDER: ${{ steps.meta.outputs.provider }}
+          ATTEMPT: ${{ steps.limit.outputs.attempt }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          set -euo pipefail
+          git config user.name "agent-autopilot[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "agent-ci-repair: intento $ATTEMPT para #$ISSUE ($PROVIDER)"
+          gh auth setup-git
+          git push origin HEAD:"$BRANCH"
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent autopilot: reparación CI $ATTEMPT/2 publicada; relanzando CI."
+          gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$BRANCH"
+
+      - name: Marcar fallo de reparación
+        if: failure() && steps.meta.outputs.issue != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.meta.outputs.issue }}
+        run: |
+          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human >/dev/null 2>&1 || true
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent autopilot: la reparación automática no pudo completarse. Revisa $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" || true
