@@ -104,7 +104,7 @@ class RelacionOniricaTest(unittest.TestCase):
         self.assertIn("CheckButton.new()", codigo)
         self.assertIn('tr("VISOR_RELACIONAR")', codigo)
         self.assertIn('tr("MENU_GLOBAL_VOLVER")', codigo)
-        self.assertIn("func _abrir_documento(indice:int)->void:", compacto)
+        self.assertIn("func_abrir_documento(indice:int)->void:", compacto)
         self.assertIn(
             "documento.habilitado=notrelacion.cerradaandrelacion.nucleo.pendiente()",
             compacto,
@@ -114,7 +114,7 @@ class RelacionOniricaTest(unittest.TestCase):
         )[0]
         self.assertIn("_abrir_documento(indice)", activar)
         self.assertNotIn("relacion.seleccionar", activar)
-        self.assertIn("get_tree().paused=true", compacto)
+        self.assertIn("arbol.paused=true", compacto)
         self.assertIn("Input.mouse_mode=Input.MOUSE_MODE_VISIBLE", compacto)
 
     def test_controller_esta_montado_antes_de_ecos(self):
