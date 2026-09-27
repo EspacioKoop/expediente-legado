@@ -65,6 +65,41 @@ static func shader_del_sitio() -> String:
 	return _shader_del_sitio
 
 
+## Crea el mismo material declarado que usa la envolvente de un espacio sobre
+## una malla visual alternativa. Las presentaciones abiertas del sueño conservan
+## la física de la sala, pero sustituyen su malla: sin este puente, #231 aplicaba
+## el perfil a la envolvente oculta y el jugador nunca llegaba a verlo.
+static func material_declarado(
+	espacio: Dictionary, clave_textura: String, color: Color
+) -> ShaderMaterial:
+	var material := ShaderMaterial.new()
+	material.shader = load(_shader_del_sitio)
+	material.set_shader_parameter("color_base", color)
+
+	var textura := String(espacio.get(clave_textura, ""))
+	if textura.is_empty():
+		return material
+	var contraste := float(espacio.get("contraste_textura", 1.0))
+	var imagen := TexturaProcedural.por_nombre(textura, color, hash(textura), contraste)
+	if imagen == null:
+		return material
+
+	var metros := maxf(float(espacio.get("escala_textura", 1.2)), 0.001)
+	var deformacion: Vector3 = espacio.get("deformacion_textura", Vector3.ONE)
+	material.set_shader_parameter("textura", imagen)
+	material.set_shader_parameter("con_textura", true)
+	material.set_shader_parameter("escala_textura", 1.0 / metros)
+	material.set_shader_parameter("deformacion_textura", deformacion)
+	(
+		material
+		. set_shader_parameter(
+			"preservar_detalle_textura",
+			bool(espacio.get("preservar_detalle_textura", false)),
+		)
+	)
+	return material
+
+
 ## Monta el espacio bajo [param raiz] y devuelve las salidas creadas, para que
 ## quien orquesta el día pueda escucharlas.
 static func construir(raiz: Node3D, espacio: Dictionary) -> Array:

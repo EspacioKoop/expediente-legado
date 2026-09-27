@@ -15,6 +15,8 @@ HORROR = GODOT / "guion" / "horror_texturas.gd"
 TEXTURAS = GODOT / "guion" / "textura_procedural.gd"
 DIA_SUENO = GODOT / "guion" / "dia_sueno_app.gd"
 SUENO = GODOT / "guion" / "sueno.gd"
+DESIERTO_3D = GODOT / "guion" / "sueno_desierto_3d.gd"
+MONTANA_3D = GODOT / "guion" / "sueno_montana_3d.gd"
 PROCEDENCIA = GODOT / "assets" / "procedencia.json"
 PAQUETE_128_SHA256 = "1fee483ce0253e64096442a2c16833ec9da90bdfa2836e5d54a061f293abf6fb"
 
@@ -39,6 +41,19 @@ class HorrorTexturasContractTest(unittest.TestCase):
         self.assertIn("HorrorTexturas.aplicar", dia)
         self.assertLess(dia.index("SuenoEscuela.adaptar_espacio"), dia.index("HorrorTexturas.aplicar"))
         self.assertNotIn("TexturaProcedural.aplicar_horror_sueno", sueno)
+
+    def test_presentaciones_abiertas_consumen_el_perfil_visible(self) -> None:
+        for ruta in (DESIERTO_3D, MONTANA_3D):
+            with self.subTest(presentacion=ruta.name):
+                presentacion = ruta.read_text(encoding="utf-8")
+                self.assertIn("material_declarado(", presentacion)
+                self.assertIn('"textura_suelo"', presentacion)
+                self.assertIn('"textura_muro"', presentacion)
+                self.assertGreaterEqual(
+                    presentacion.count("material_declarado("),
+                    2,
+                    "suelo y relieve visibles deben consumir el perfil de #231",
+                )
 
     def test_lote_lfs_cubre_exactamente_los_perfiles(self) -> None:
         # Se lee el PNG como puntero LFS desde el índice de git: así la prueba
