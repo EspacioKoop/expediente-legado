@@ -79,7 +79,9 @@ La implementación actual conserva estas fronteras:
 - la UI de inventario no vende a distancia y `home_storage` no se consulta desde El Trastero;
 - comprar cultura nunca activa #442 por sí solo; la lectura deliberada de #674 conserva esa autoridad;
 - no se introducen marcas, productos o IP comerciales reales en señalética y merchandising;
-- feedback y horarios permanecen diegéticos: no se añade otro HUD ni un menú comercial global.
+- feedback y horarios permanecen diegéticos: no se añade otro HUD ni un menú comercial global;
+- `godot/guion/calle_identidad.gd` sigue siendo la frontera de identidad general de la calle: este módulo añade superficies comerciales sin duplicar su catálogo espacial;
+- `godot/datos/textos.csv` no se usa como almacén de precios, horarios ni estado comercial; esos datos permanecen en sus contratos canónicos, y `godot/guion/casa_utileria.gd` conserva la autoridad sobre la materialización doméstica.
 
 ## Quiosco Avenida y El Trastero físicos — 2026-09-21
 
