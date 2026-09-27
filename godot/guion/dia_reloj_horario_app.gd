@@ -5,7 +5,9 @@
 ## decide disponibilidad, progreso o economía.
 extends Node
 
-const POSICION_RELOJ := Vector3(2.25, 2.25, -4.76)
+# Junto al calendario, en el tramo libre del muro norte: en x=2,25 tapaba el
+# póster del cineclub y rozaba la lámina Piramide03 (#1519).
+const POSICION_RELOJ := Vector3(5.45, 2.25, -4.76)
 const MEZCLA_TINTE := 0.14
 const VELOCIDAD_TRANSICION := 2.4
 
