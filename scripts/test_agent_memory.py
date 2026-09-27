@@ -92,6 +92,17 @@ class AgentMemoryContractTest(unittest.TestCase):
         self.assertIn('x.startswith(".agent-")', self.autopilot)
         self.assertIn("rm -rf .agent-platino .agent-wiki", self.autopilot)
 
+    def test_autopilot_acepta_plan_json_con_fence_markdown(self):
+        self.assertIn("AGENT_PLAN_BEGIN(.*?)AGENT_PLAN_END", self.autopilot)
+        self.assertIn("fenced=re.fullmatch", self.autopilot)
+        self.assertIn(r'(?:json)?\s*(.*?)\s*', self.autopilot)
+        self.assertIn("payload=fenced.group(1).strip()", self.autopilot)
+        self.assertIn("json.loads(payload)", self.autopilot)
+        self.assertNotIn(
+            r'AGENT_PLAN_BEGIN\s*(\{.*?\})\s*AGENT_PLAN_END',
+            self.autopilot,
+        )
+
     def test_reparacion_usa_misma_memoria_y_normas(self):
         self.assertIn("AGENT_MEMORY_BEGIN", self.repair)
         self.assertIn("/api/agent-memory/remember", self.repair)
