@@ -33,8 +33,8 @@ static func montar(mundo: Node3D, espacio: Dictionary) -> Node3D:
 func _configurar(espacio: Dictionary) -> void:
 	_ocultar_sala_cerrada()
 	var contorno: PackedVector2Array = espacio.get("contorno", PackedVector2Array())
-	_montar_suelo(contorno)
-	_montar_tabiques_visibles(espacio.get("tabiques_poligonales", []))
+	_montar_suelo(contorno, espacio)
+	_montar_tabiques_visibles(espacio.get("tabiques_poligonales", []), espacio)
 	_montar_dunas_lejanas()
 	_montar_huellas()
 	_montar_sombra_sin_objeto()
@@ -117,7 +117,7 @@ func _ocultar_sala_cerrada() -> void:
 			return
 
 
-func _montar_suelo(contorno: PackedVector2Array) -> void:
+func _montar_suelo(contorno: PackedVector2Array, espacio: Dictionary) -> void:
 	if contorno.size() < 3:
 		return
 	var indices := Geometry2D.triangulate_polygon(contorno)
@@ -134,18 +134,26 @@ func _montar_suelo(contorno: PackedVector2Array) -> void:
 	var suelo := MeshInstance3D.new()
 	suelo.name = "ArenaCaminable"
 	suelo.mesh = st.commit()
-	suelo.material_override = _material(Color(0.58, 0.39, 0.20), 0.96)
+	suelo.material_override = Espacio3D.material_declarado(
+		espacio,
+		"textura_suelo",
+		Color(0.58, 0.39, 0.20),
+	)
 	add_child(suelo)
 
 
-func _montar_tabiques_visibles(tabiques: Array) -> void:
+func _montar_tabiques_visibles(tabiques: Array, espacio: Dictionary) -> void:
 	var malla := _malla_crestas_minerales(tabiques)
 	if malla.get_surface_count() == 0:
 		return
 	var visual := MeshInstance3D.new()
 	visual.name = "CrestasMineralesFragmentadas"
 	visual.mesh = malla
-	visual.material_override = _material(Color(0.44, 0.29, 0.16), 1.0)
+	visual.material_override = Espacio3D.material_declarado(
+		espacio,
+		"textura_muro",
+		Color(0.44, 0.29, 0.16),
+	)
 	add_child(visual)
 
 
