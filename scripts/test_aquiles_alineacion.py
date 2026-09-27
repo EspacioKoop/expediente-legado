@@ -54,7 +54,9 @@ class AquilesAlineacionTest(unittest.TestCase):
         self.assertIn('"EstelaImpacto%d"', base)
         self.assertIn('"OndaRechazo%d"', base)
         self.assertIn("COLOR_RECHAZO", base)
-        self.assertNotIn("tutorial", base.lower())
+        self.assertNotIn("Label.new()", base)
+        self.assertNotIn("RichTextLabel.new()", base)
+        self.assertNotIn("texto_tutorial", base.lower())
 
     def test_escena_standalone_usa_vertical_de_alineacion(self):
         self.assertIn('path="res://guion/sueno_aquiles_alineacion.gd"', self.escena)
