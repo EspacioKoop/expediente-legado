@@ -32,6 +32,10 @@ func _initialize() -> void:
 
 func _ejecutar() -> void:
 	var ventana := get_root()
+	# Este smoke compara una captura de referencia a píxel. El juego puede usar
+	# canvas_items para escalar a 4K (#1467), pero la evidencia visual debe
+	# permanecer aislada de la política global de stretch.
+	ventana.content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
 	ventana.size = Vector2i(ANCHO, ALTO)
 
 	var escritorio := EscritorioSigaVisual.new()
