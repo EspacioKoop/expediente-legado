@@ -96,19 +96,22 @@ func publicar_accion(
 		return {"ok": false, "status": "not_in_room"}
 
 	var ahora := _ahora(ahora_unix)
-	var creado := MinijuegoSesionDatos.crear_accion(
-		_scene_key,
-		game_build,
-		_actor_public_id,
-		_room_id,
-		_session_id,
-		_minigame_id,
-		_rules_version,
-		sequence,
-		turn,
-		action,
-		ahora,
-		event_id,
+	var creado := (
+		MinijuegoSesionDatos
+		. crear_accion(
+			_scene_key,
+			game_build,
+			_actor_public_id,
+			_room_id,
+			_session_id,
+			_minigame_id,
+			_rules_version,
+			sequence,
+			turn,
+			action,
+			ahora,
+			event_id,
+		)
 	)
 	if not creado["ok"]:
 		return {"ok": false, "status": "invalid_action", "reason": creado["reason"]}
@@ -248,16 +251,19 @@ func _validar_contexto(
 	if actor_public_id.is_empty() or actor_public_id.length() > EventoOnline.MAX_ACTOR_ID:
 		return "invalid_actor_id"
 
-	var prueba := MinijuegoSesionDatos.validar_payload(
-		{
-			"room_id": room_id,
-			"session_id": session_id,
-			"minigame_id": minigame_id,
-			"rules_version": rules_version,
-			"sequence": 0,
-			"turn": 0,
-			"action": {"type": "context_probe"},
-		}
+	var prueba := (
+		MinijuegoSesionDatos
+		. validar_payload(
+			{
+				"room_id": room_id,
+				"session_id": session_id,
+				"minigame_id": minigame_id,
+				"rules_version": rules_version,
+				"sequence": 0,
+				"turn": 0,
+				"action": {"type": "context_probe"},
+			}
+		)
 	)
 	if not prueba["ok"]:
 		return String(prueba["reason"])
