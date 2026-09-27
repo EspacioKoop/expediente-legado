@@ -90,9 +90,12 @@ static func material_declarado(
 	material.set_shader_parameter("con_textura", true)
 	material.set_shader_parameter("escala_textura", 1.0 / metros)
 	material.set_shader_parameter("deformacion_textura", deformacion)
-	material.set_shader_parameter(
-		"preservar_detalle_textura",
-		bool(espacio.get("preservar_detalle_textura", false)),
+	(
+		material
+		. set_shader_parameter(
+			"preservar_detalle_textura",
+			bool(espacio.get("preservar_detalle_textura", false)),
+		)
 	)
 	return material
 
