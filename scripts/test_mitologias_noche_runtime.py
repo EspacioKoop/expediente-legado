@@ -112,9 +112,12 @@ class MitologiasNocheRuntimeTest(unittest.TestCase):
         self.assertIn("gilgamesh.remove_child(camara)", self.gilgamesh)
         self.assertIn("camara.free()", self.gilgamesh)
         self.assertNotIn("mundo.queue_free", self.gilgamesh)
-        self.assertIn('espacio.get("entrada", Vector3.ZERO)', self.gilgamesh)
-        self.assertIn('espacio.get("salidas", [])', self.gilgamesh)
-        self.assertIn("entrada.lerp(salida, 0.5)", self.gilgamesh)
+        # Desde #1521 el ancla vive en SuenoGilgamesh.ancla_encuentro(): el
+        # controller delega y el ancla sigue saliendo de la sala real.
+        self.assertIn("SuenoGilgamesh.ancla_encuentro(espacio)", self.gilgamesh)
+        self.assertIn('espacio.get("entrada", Vector3.ZERO)', self.sueno_gilgamesh)
+        self.assertIn('espacio.get("salidas", [])', self.sueno_gilgamesh)
+        self.assertIn("entrada.lerp(salida, 0.5)", self.sueno_gilgamesh)
 
     def test_dia_monta_controladores_nocturnos_originales(self):
         rutas = (
