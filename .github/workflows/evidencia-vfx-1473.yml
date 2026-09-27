@@ -1,0 +1,123 @@
+name: Evidencia VFX 1473
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/evidencia-vfx-1473.yml'
+      - '.godot-version'
+      - 'godot/project.godot'
+      - 'godot/arte/**'
+      - 'godot/guion/efectos_ligeros.gd'
+      - 'godot/guion/efectos_calle.gd'
+      - 'godot/guion/dia_*app.gd'
+      - 'godot/guion/espacio_3d.gd'
+      - 'godot/guion/espacios_catalogo.gd'
+      - 'godot/escenas/dia.tscn'
+      - 'godot/pruebas/capturar_vfx_1473.gd'
+      - 'scripts/test_evidencia_vfx_1473.py'
+      - 'docs/evidencias/vfx-1473/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidencia:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar Godot declarado por el proyecto
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cat .godot-version)"
+          archivo="Godot_v${version}_linux.x86_64.zip"
+          base="https://github.com/godotengine/godot-builds/releases/download/${version}"
+          curl --fail --location --retry 3 "$base/$archivo" -o "$RUNNER_TEMP/$archivo"
+          curl --fail --location --retry 3 "$base/SHA512-SUMS.txt" -o "$RUNNER_TEMP/SHA512-SUMS.txt"
+          cd "$RUNNER_TEMP"
+          grep -F " $archivo" SHA512-SUMS.txt | sha512sum --check --strict
+          unzip -q "$archivo"
+          mkdir -p godot-bin
+          mv "Godot_v${version}_linux.x86_64" godot-bin/godot4
+          chmod +x godot-bin/godot4
+          echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
+
+      - name: Importar proyecto
+        run: godot4 --headless --editor --path godot --quit
+
+      - name: Validar contrato de evidencia
+        run: python3 -m unittest -v scripts/test_evidencia_vfx_1473.py
+
+      - name: Renderizar A/B y medir VFX en Forward+
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidencia-vfx-1473
+          xvfb-run -a godot4 --path godot \
+            --script res://pruebas/capturar_vfx_1473.gd -- \
+            "$GITHUB_WORKSPACE/evidencia-vfx-1473"
+
+          for fase in oficina calle casa sueno; do
+            test -s "evidencia-vfx-1473/${fase}_activo.png"
+            test -s "evidencia-vfx-1473/${fase}_inactivo.png"
+          done
+          test -s evidencia-vfx-1473/manifest.json
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(Path("evidencia-vfx-1473/manifest.json").read_text())
+          if manifest.get("issue") != 1473:
+              raise SystemExit("manifiesto fuera del gate #1473")
+          if manifest.get("renderer") != "forward_plus":
+              raise SystemExit("la evidencia #1473 debe usar el renderer Forward+ canónico")
+          if manifest.get("locale") != "es" or manifest.get("hud") is not False:
+              raise SystemExit("la evidencia debe usar locale es y HUD oculto")
+          if manifest.get("camara") != "jugable":
+              raise SystemExit("la evidencia debe usar la cámara jugable")
+          if manifest.get("veredicto_automatico") is not False:
+              raise SystemExit("el gate técnico no puede autoaprobar la calidad visual")
+          if manifest.get("muestras_frames", 0) < 30:
+              raise SystemExit("muestra de rendimiento demasiado corta")
+
+          casos = {caso["id"]: caso for caso in manifest.get("casos", [])}
+          if set(casos) != {"oficina", "calle", "casa", "sueno"}:
+              raise SystemExit("faltan fases del gate #1473")
+          if sum(c["particulas_vfx_activo"] for c in casos.values()) <= 0:
+              raise SystemExit("no se detectaron partículas de EfectosLigeros en el pase activo")
+
+          for nombre, c in casos.items():
+              if c["ms_frame_activo"] <= 0 or c["ms_frame_inactivo"] <= 0:
+                  raise SystemExit(f"{nombre}: medición de frame inválida")
+              if c["particulas_vfx_inactivo"] != 0:
+                  raise SystemExit(f"{nombre}: quedaron partículas de la capa VFX en el pase inactivo")
+              for clave in ("sha256_activo", "sha256_inactivo"):
+                  if len(c.get(clave, "")) != 64:
+                      raise SystemExit(f"{nombre}: hash de captura inválido ({clave})")
+
+          print("4/4 fases, 8/8 capturas y comparación A/B listas para revisión humana")
+          PY
+
+      - name: Adjuntar evidencia visual y métricas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-vfx-1473-${{ github.sha }}
+          path: evidencia-vfx-1473/
+          if-no-files-found: error
+          retention-days: 14
