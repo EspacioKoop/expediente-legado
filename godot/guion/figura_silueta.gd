@@ -33,25 +33,74 @@ static func construir(raiz: Node3D, base: Vector3, color: Color) -> Node3D:
 
 	# Piernas separadas y ligeramente abiertas: incluso a contraluz la base
 	# deja de leerse como un único bloque rectangular.
-	_capsula(\n\t\tfigura, "PiernaIzquierda", Vector3(-0.17, 0.45, 0), 0.13, 0.90, Vector3(0.90, 1.0, 0.75), -0.04, material\n\t)
-	_capsula(\n\t\tfigura, "PiernaDerecha", Vector3(0.17, 0.45, 0), 0.13, 0.90, Vector3(0.90, 1.0, 0.75), 0.04, material\n\t)
+	_capsula(
+		figura,
+		"PiernaIzquierda",
+		Vector3(-0.17, 0.45, 0),
+		0.13,
+		0.90,
+		Vector3(0.90, 1.0, 0.75),
+		-0.04,
+		material
+	)
+	_capsula(
+		figura,
+		"PiernaDerecha",
+		Vector3(0.17, 0.45, 0),
+		0.13,
+		0.90,
+		Vector3(0.90, 1.0, 0.75),
+		0.04,
+		material
+	)
 
 	# El torso se ensancha en hombros por escala, no mediante un cubo. Los
 	# brazos rompen la simetría mínima para que el contorno no parezca un tótem.
-	_capsula(\n\t\tfigura, "Torso", Vector3(0, 1.06, 0), 0.36, 1.10, Vector3(1.12, 1.0, 0.62), 0.0, material\n\t)
 	_capsula(
-		figura,\n\t	"BrazoIzquierdo",\n\t	Vector3(-0.42, 1.05, 0.01),\n\t	0.105,\n\t	0.82,\n\t	Vector3(0.90, 1.0, 0.70),\n\t	0.15,\n\t	material
+		figura,
+		"Torso",
+		Vector3(0, 1.06, 0),
+		0.36,
+		1.10,
+		Vector3(1.12, 1.0, 0.62),
+		0.0,
+		material
 	)
 	_capsula(
-		figura,\n\t	"BrazoDerecho",\n\t	Vector3(0.42, 1.03, -0.01),\n\t	0.105,\n\t	0.82,\n\t	Vector3(0.90, 1.0, 0.70),\n\t	-0.11,\n\t	material
+		figura,
+		"BrazoIzquierdo",
+		Vector3(-0.42, 1.05, 0.01),
+		0.105,
+		0.82,
+		Vector3(0.90, 1.0, 0.70),
+		0.15,
+		material
+	)
+	_capsula(
+		figura,
+		"BrazoDerecho",
+		Vector3(0.42, 1.03, -0.01),
+		0.105,
+		0.82,
+		Vector3(0.90, 1.0, 0.70),
+		-0.11,
+		material
 	)
 
-	_esfera(figura, "Cabeza", Vector3(0, 1.72, 0), 0.22, Vector3(1.0, 1.0, 0.86), material)
+	_esfera(
+		figura,
+		"Cabeza",
+		Vector3(0, 1.72, 0),
+		0.22,
+		Vector3(1.0, 1.0, 0.86),
+		material
+	)
 	return figura
 
 
 static func _capsula(
 	padre: Node3D,
+	nombre: String,
 	posicion: Vector3,
 	radio: float,
 	alto: float,
@@ -60,6 +109,7 @@ static func _capsula(
 	material: Material
 ) -> void:
 	var instancia := MeshInstance3D.new()
+	instancia.name = nombre
 	var capsula := CapsuleMesh.new()
 	capsula.radius = radio
 	capsula.height = alto
@@ -74,9 +124,15 @@ static func _capsula(
 
 
 static func _esfera(
-	padre: Node3D, posicion: Vector3, radio: float, escala: Vector3, material: Material
+	padre: Node3D,
+	nombre: String,
+	posicion: Vector3,
+	radio: float,
+	escala: Vector3,
+	material: Material
 ) -> void:
 	var instancia := MeshInstance3D.new()
+	instancia.name = nombre
 	var esfera := SphereMesh.new()
 	esfera.radius = radio
 	esfera.height = radio * 2.0
