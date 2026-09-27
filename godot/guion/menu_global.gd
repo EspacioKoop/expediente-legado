@@ -52,6 +52,7 @@ var _historial_lista: VBoxContainer
 var _salir: Button
 var _volumen: HSlider
 var _reduccion: CheckButton
+var _ronda_cierre: CheckButton
 var _filtro: OptionButton
 var _dificultad: OptionButton
 var _dificultad_detalle: Label
@@ -291,6 +292,12 @@ func _opciones_contenido(caja: VBoxContainer) -> void:
 	_reduccion.button_pressed = bool(_preferencias.get("reduccion_movimiento", false))
 	_reduccion.toggled.connect(_al_cambiar_reduccion)
 	caja.add_child(_reduccion)
+
+	_ronda_cierre = CheckButton.new()
+	_ronda_cierre.text = tr("MENU_GLOBAL_RONDA_CIERRE")
+	_ronda_cierre.button_pressed = bool(_preferencias.get("ofrecer_ronda_cierre", true))
+	_ronda_cierre.toggled.connect(_al_cambiar_ronda_cierre)
+	caja.add_child(_ronda_cierre)
 
 	_montar_filtro_pantalla(caja)
 	_montar_preferencias_camara(caja)
@@ -908,6 +915,11 @@ func _al_cambiar_reduccion(activa: bool) -> void:
 	PreferenciasSiga.guardar(_preferencias)
 	# El filtro también se mueve (temblor, grano): se congela o se suelta ya.
 	FiltroPantalla.refrescar(get_tree(), _preferencias)
+
+
+func _al_cambiar_ronda_cierre(activa: bool) -> void:
+	_preferencias["ofrecer_ronda_cierre"] = activa
+	PreferenciasSiga.guardar(_preferencias)
 
 
 func _al_cambiar_filtro(indice: int) -> void:
