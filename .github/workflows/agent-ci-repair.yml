@@ -48,9 +48,11 @@ jobs:
       issues: write
       pull-requests: read
       actions: write
+      id-token: write
     env:
       HAS_QWEN: ${{ secrets.QWEN_API_KEY != '' }}
       HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
+      GEMINI_CLI_TRUST_WORKSPACE: 'true'
     steps:
       - id: meta
         name: Resolver rama y proveedor
@@ -131,6 +133,43 @@ jobs:
           open(".agent-plan.json","w",encoding="utf-8").write(json.dumps({"files":files},ensure_ascii=False))
           PY
 
+      - name: Cargar Normas Platino, wiki y memoria
+        if: steps.limit.outputs.run == 'true'
+        env:
+          ISSUE: ${{ steps.meta.outputs.issue }}
+          PROVIDER: ${{ steps.meta.outputs.provider }}
+          MEMORY_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/EspacioKoop/normas_platino.git .agent-platino
+          git -C .agent-platino rev-parse HEAD > .agent-platino-sha
+          rm -rf .agent-platino/.git
+
+          if git clone --depth 1 https://github.com/EspacioKoop/expediente-legado.wiki.git .agent-wiki; then
+            rm -rf .agent-wiki/.git
+          else
+            mkdir -p .agent-wiki
+            printf '%s\n' '# Wiki no disponible en esta ejecución' > .agent-wiki/README.md
+          fi
+
+          printf '%s\n' '{"ok":true,"memories":[]}' > .agent-memory.json
+          [[ -z "${MEMORY_URL:-}" ]] && exit 0
+          base="${MEMORY_URL%/}"
+          base="${base%/api/report}"
+          paths="$(jq -c '.files' .agent-plan.json)"
+          if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-memory")" &&
+            oidc_token="$(jq -er '.value' <<<"$oidc_json")"; then
+            payload="$(jq -nc --argjson issue "$ISSUE" --arg provider "$PROVIDER" --argjson paths "$paths" \
+              '{schema:1,issue:$issue,provider:$provider,paths:$paths}')"
+            if curl -fsS -X POST "$base/api/agent-memory/search" \
+              -H "Authorization: Bearer $oidc_token" \
+              -H 'Content-Type: application/json' \
+              --data "$payload" -o /tmp/agent-memory.json; then
+              mv /tmp/agent-memory.json .agent-memory.json
+            fi
+          fi
+
       - name: Capturar logs fallidos
         if: steps.limit.outputs.run == 'true'
         env:
@@ -159,7 +198,8 @@ jobs:
           fi
           echo "model=qwen3-coder-plus" >> "$GITHUB_OUTPUT"
 
-      - name: Reparar con Qwen
+      - id: repair_qwen
+        name: Reparar con Qwen
         if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'qwen'
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -168,9 +208,10 @@ jobs:
           openai_model: ${{ vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":30},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json y .agent-ci-failure.log. Corrige solo la causa del CI y solo rutas del CLAIM. No ejecutes shell ni Git.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-ci-failure.log, .agent-memory.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki y memoria. Corrige solo la causa del CI y solo rutas del CLAIM. No ejecutes shell ni Git. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable sobre el fallo y su corrección, sin secretos","tags":["ci"]} y AGENT_MEMORY_END.'
 
-      - name: Reparar con Gemini
+      - id: repair_gemini
+        name: Reparar con Gemini
         if: steps.limit.outputs.run == 'true' && steps.meta.outputs.provider == 'gemini'
         uses: google-github-actions/run-gemini-cli@v0
         with:
@@ -178,15 +219,15 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":30},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-plan.json y .agent-ci-failure.log. Corrige solo la causa del CI y solo rutas del CLAIM. No ejecutes shell ni Git.'
+          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-plan.json, .agent-ci-failure.log, .agent-memory.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki y memoria. Corrige solo la causa del CI y solo rutas del CLAIM. No ejecutes shell ni Git. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable sobre el fallo y su corrección, sin secretos","tags":["ci"]} y AGENT_MEMORY_END.'
 
       - name: Validar reparación
         if: steps.limit.outputs.run == 'true'
         run: |
           set -euo pipefail
           cp .agent-plan.json /tmp/plan.json
-          rm -f .agent-task.md .agent-plan.json .agent-ci-failure.log gha-creds-*.json
-          rm -rf .gemini .qwen gemini-artifacts qwen-artifacts
+          rm -f .agent-task.md .agent-plan.json .agent-ci-failure.log .agent-memory.json .agent-platino-sha gha-creds-*.json
+          rm -rf .agent-platino .agent-wiki .gemini .qwen gemini-artifacts qwen-artifacts
           git add -A
           git diff --cached --quiet && { echo "el agente no produjo cambios"; exit 2; }
           python3 - <<'PY'
@@ -213,6 +254,47 @@ jobs:
           if [[ "$gd" == true ]]; then bash scripts/check_gdscript.sh
           elif [[ "$py" == true ]]; then python3 -m unittest discover -s scripts -p 'test_*.py'; fi
           if [[ "$backend" == true ]]; then (cd backend && mvn test && npm ci && npm test); fi
+
+      - name: Guardar memoria de reparación
+        if: steps.limit.outputs.run == 'true'
+        continue-on-error: true
+        env:
+          ISSUE: ${{ steps.meta.outputs.issue }}
+          PROVIDER: ${{ steps.meta.outputs.provider }}
+          MEMORY_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+          SUMMARY: ${{ steps.repair_qwen.outputs.summary || steps.repair_gemini.outputs.summary }}
+        run: |
+          set -euo pipefail
+          [[ -z "${MEMORY_URL:-}" ]] && exit 0
+          printf '%s' "$SUMMARY" > /tmp/agent-summary.txt
+          python3 - <<'PY'
+          import json,re
+          raw=open("/tmp/agent-summary.txt",encoding="utf-8").read()
+          match=re.search(r"AGENT_MEMORY_BEGIN\s*(\{.*?\})\s*AGENT_MEMORY_END",raw,re.S)
+          if not match:
+              raise SystemExit(0)
+          data=json.loads(match.group(1))
+          summary=str(data.get("summary","")).strip()
+          tags=data.get("tags",[])
+          if len(summary)<20 or not isinstance(tags,list):
+              raise SystemExit(0)
+          open("/tmp/agent-memory-note.json","w",encoding="utf-8").write(
+              json.dumps({"summary":summary,"tags":tags},ensure_ascii=False)
+          )
+          PY
+          [[ -s /tmp/agent-memory-note.json ]] || exit 0
+          base="${MEMORY_URL%/}"
+          base="${base%/api/report}"
+          paths="$(jq -c '.files' /tmp/plan.json)"
+          payload="$(jq -c --argjson issue "$ISSUE" --arg provider "$PROVIDER" --argjson paths "$paths" \
+            '. + {schema:1,issue:$issue,provider:$provider,paths:$paths}' /tmp/agent-memory-note.json)"
+          oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-memory")"
+          oidc_token="$(jq -er '.value' <<<"$oidc_json")"
+          curl -fsS -X POST "$base/api/agent-memory/remember" \
+            -H "Authorization: Bearer $oidc_token" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" >/dev/null
 
       - name: Publicar reparación y relanzar CI
         if: steps.limit.outputs.run == 'true'
