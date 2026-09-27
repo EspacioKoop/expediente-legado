@@ -44,6 +44,26 @@ class RondaCierreFisica156Tests(unittest.TestCase):
         self.assertIn("RondaCierre.abandonar(estado)", self.controlador)
         self.assertIn('fase != "archivo"', self.controlador)
 
+    def test_preferencia_solo_bloquea_ofertas_nuevas(self):
+        bloque_nuevo = self.controlador.split("if estado.is_empty():", 1)[1].split(
+            'if bool(estado.get("abandonada", false)):', 1
+        )[0]
+        self.assertIn(
+            'PreferenciasSiga.cargar().get("ofrecer_ronda_cierre", true)',
+            bloque_nuevo,
+        )
+        self.assertNotIn("RondaCierre.abandonar", bloque_nuevo)
+        self.assertNotIn('jornada["ronda_cierre"] = {}', bloque_nuevo)
+
+        # El estado no vacío continúa por los mismos caminos de progreso,
+        # finalización y montaje físico: el toggle no borra una ronda iniciada.
+        despues = self.controlador.split(
+            'if bool(estado.get("abandonada", false)):', 1
+        )[1]
+        self.assertIn('estado.get("finalizada", false)', despues)
+        self.assertIn("RondaCierre.progreso(estado)", despues)
+        self.assertIn("RondaCierre3D.new()", despues)
+
     def test_concede_solo_el_sello_cosmetico_sin_tocar_balance(self):
         self.assertIn('SELLO_RECOMPENSA := "planta-en-orden"', self.controlador)
         self.assertIn("Sellos.registrar_sello", self.controlador)
