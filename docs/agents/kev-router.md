@@ -36,6 +36,7 @@ incompatible o confianza insuficiente conservan el comportamiento determinista:
 La salida JSON indica el origen en `source`:
 
 - `explicit`;
+- `explicit-unavailable` cuando se fuerza un worker sin credencial/configuración;
 - `single-provider`;
 - `kev`;
 - `fallback:no-kev`;
