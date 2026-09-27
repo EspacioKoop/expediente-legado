@@ -34,7 +34,7 @@ El mismo Deno KV ofrece dos endpoints privados para Qwen/Gemini:
 - `POST /api/agent-memory/search`
 - `POST /api/agent-memory/remember`
 
-No usan `GITHUB_TOKEN` como credencial del cliente. Los workflows solicitan a GitHub Actions un token **OIDC** efímero con audiencia `siga98-agent-memory`. El gateway valida la firma RS256 contra el JWKS oficial de GitHub, el claim `repository` y que `workflow_ref` corresponda a `agent-autopilot.yml` o `agent-ci-repair.yml`.
+No usan `GITHUB_TOKEN` como credencial del cliente. Los workflows solicitan a GitHub Actions un token **OIDC** efímero con audiencia `siga98-agent-memory`. El gateway valida la firma RS256 contra el JWKS oficial de GitHub y el claim `repository`. Para ejecuciones directas admite `agent-autopilot.yml`, `agent-ci-repair.yml` y `agent-worker.yml`; cuando el worker es reutilizable exige además que `workflow_ref` sea `agent-pool.yml` y que `job_workflow_ref` identifique `agent-worker.yml`, evitando autorizar al dispatcher por sí solo.
 
 La memoria es deliberadamente pequeña: TTL de 30 días, hasta 1200 caracteres por resumen, 8 tags, 12 rutas, búsqueda sobre los 50 registros recientes y devolución máxima de 8 resultados. Los resúmenes con patrones de credenciales se rechazan.
 
