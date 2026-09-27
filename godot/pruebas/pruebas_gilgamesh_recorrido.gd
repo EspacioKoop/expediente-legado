@@ -86,6 +86,14 @@ func _probar() -> void:
 		sueno.get_node_or_null("CamaraStandalone") == null,
 		"el vertical integrado no secuestra la cámara del recorrido",
 	)
+	_comprobar(
+		sueno.position.is_equal_approx(SuenoGilgamesh.ancla_encuentro(dia._espacio_actual)),
+		"el encuentro usa un ancla caminable a la vista y no el punto medio geométrico",
+	)
+	_comprobar(
+		sueno.scale.is_equal_approx(Vector3.ONE * SuenoGilgamesh.ESCALA_ENCUENTRO),
+		"el encuentro usa la escala canónica que cabe en la sala real",
+	)
 	var interaccion := sueno.get_node_or_null("Interaccion3D")
 	var puzzle := sueno.get_node_or_null("CiudadImposible/PuzzleTablilla") as Node3D
 	_comprobar(interaccion != null, "el controller físico del puzzle está presente")
