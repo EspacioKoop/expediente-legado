@@ -62,9 +62,8 @@ func _init() -> void:
 		"hud": false,
 		"locale": TranslationServer.get_locale(),
 		"camara": "jugable",
-		"renderer": String(
-			ProjectSettings.get_setting("rendering/renderer/rendering_method", "desconocido")
-		),
+		"renderer":
+		String(ProjectSettings.get_setting("rendering/renderer/rendering_method", "desconocido")),
 		"muestras_frames": FRAMES_MEDICION,
 		"criterio": "evidencia_para_revision_humana",
 		"comparacion_rendimiento": "diagnostico_misma_ejecucion_sin_umbral",
@@ -102,24 +101,27 @@ func _init() -> void:
 			quit(1)
 			return
 
-		manifiesto["casos"].append(
-			{
-				"id": String(caso["id"]),
-				"fase": String(caso["fase"]),
-				"activo": activo,
-				"inactivo": inactivo,
-				"sha256_activo": FileAccess.get_sha256(ruta_activa),
-				"sha256_inactivo": FileAccess.get_sha256(ruta_inactiva),
-				"ms_frame_activo": ms_activo,
-				"ms_frame_inactivo": ms_inactivo,
-				"delta_ms_frame": ms_activo - ms_inactivo,
-				"particulas_vfx_activo": int(auditoria_activa["particulas"]),
-				"particulas_vfx_inactivo": int(auditoria_inactiva["particulas"]),
-				"emisores_vfx_activo": int(auditoria_activa["emisores"]),
-				"emisores_vfx_inactivo": int(auditoria_inactiva["emisores"]),
-				"superficies_vfx_activo": int(auditoria_activa["superficies"]),
-				"superficies_vfx_inactivo": int(auditoria_inactiva["superficies"]),
-			}
+		(
+			manifiesto["casos"]
+			. append(
+				{
+					"id": String(caso["id"]),
+					"fase": String(caso["fase"]),
+					"activo": activo,
+					"inactivo": inactivo,
+					"sha256_activo": FileAccess.get_sha256(ruta_activa),
+					"sha256_inactivo": FileAccess.get_sha256(ruta_inactiva),
+					"ms_frame_activo": ms_activo,
+					"ms_frame_inactivo": ms_inactivo,
+					"delta_ms_frame": ms_activo - ms_inactivo,
+					"particulas_vfx_activo": int(auditoria_activa["particulas"]),
+					"particulas_vfx_inactivo": int(auditoria_inactiva["particulas"]),
+					"emisores_vfx_activo": int(auditoria_activa["emisores"]),
+					"emisores_vfx_inactivo": int(auditoria_inactiva["emisores"]),
+					"superficies_vfx_activo": int(auditoria_activa["superficies"]),
+					"superficies_vfx_inactivo": int(auditoria_inactiva["superficies"]),
+				}
+			)
 		)
 
 	var ruta_manifiesto := salida.path_join("manifest.json")
