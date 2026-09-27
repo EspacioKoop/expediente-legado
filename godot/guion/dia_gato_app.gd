@@ -586,7 +586,7 @@ func _montar_asistente_siga() -> void:
 	# El layout del visor (botones, traducciones) no se conoce hasta que la
 	# escena termina de encuadrar en este frame; colocar un frame más tarde
 	# evita medir un tamaño 0x0 tanto del conjunto como de los botones.
-	call_deferred("_colocar_asistente_siga", avatar, visor)
+	call_deferred("_colocar_asistente_siga", conjunto, visor)
 
 
 ## Promueve únicamente el avatar al shell. El bocadillo conserva el contexto de
@@ -641,27 +641,22 @@ func _activar_paseo_asistente_os98(escritorio: Control, avatar: Control) -> void
 	)
 
 
-## Sitúa el avatar donde el jugador lo dejó (#285); si nunca lo movió, usa el
-## anclaje por defecto pero lo sube lo justo para no invadir la fila de
+## Mantiene el bocadillo en el anclaje de SIGA y lo sube lo justo para no
+## invadir la fila de
 ## acciones del visor (Relacionar/Marcar folio/Imputar), sea cual sea su altura
 ## real una vez traducida y en la resolución en curso.
-func _colocar_asistente_siga(avatar: Control, visor: Node) -> void:
-	if not is_instance_valid(avatar) or visor == null or not visor.is_ancestor_of(avatar):
-		return
-	var preferencias := PreferenciasSiga.cargar()
-	var guardada: Variant = preferencias.get(CLAVE_POSICION_ASISTENTE, null)
-	if guardada is Dictionary:
-		_fijar_posicion_libre_asistente(avatar, Vector2(guardada["x"], guardada["y"]))
+func _colocar_asistente_siga(conjunto: Control, visor: Node) -> void:
+	if not is_instance_valid(conjunto) or visor == null or not visor.is_ancestor_of(conjunto):
 		return
 	var limite := _limite_superior_botones_visor(visor)
 	if limite == INF:
 		return
 	var exceso: float = (
-		(avatar.global_position.y + avatar.size.y) - (limite - MARGEN_BOTONES_ASISTENTE)
+		(conjunto.global_position.y + conjunto.size.y) - (limite - MARGEN_BOTONES_ASISTENTE)
 	)
 	if exceso > 0.0:
-		avatar.offset_top -= exceso
-		avatar.offset_bottom -= exceso
+		conjunto.offset_top -= exceso
+		conjunto.offset_bottom -= exceso
 
 
 ## El visor no expone sus botones como superficie pública (#455 ya fijó que
@@ -705,9 +700,8 @@ func _al_input_asistente_siga(evento: InputEvent, avatar: Control) -> void:
 		avatar.accept_event()
 
 
-## Arrastrar cambia el conjunto de un anclaje relativo (abajo a la derecha) a
-## una posición libre en píxeles, acotada a la pantalla para que no se pueda
-## soltar el gato fuera de la vista tras redimensionar la ventana.
+## Arrastrar cambia el avatar a una posición libre en píxeles y la acota a su
+## superficie actual: primero SIGA durante el montaje y, después, el shell OS98.
 func _fijar_posicion_libre_asistente(conjunto: Control, nueva: Vector2) -> void:
 	var techo := conjunto.get_parent()
 	var limite: Vector2 = techo.size if techo is Control else conjunto.get_viewport_rect().size
