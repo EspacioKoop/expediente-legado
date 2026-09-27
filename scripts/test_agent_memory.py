@@ -95,11 +95,11 @@ class AgentMemoryContractTest(unittest.TestCase):
     def test_autopilot_acepta_plan_json_con_fence_markdown(self):
         self.assertIn("AGENT_PLAN_BEGIN(.*?)AGENT_PLAN_END", self.autopilot)
         self.assertIn("fenced=re.fullmatch", self.autopilot)
-        self.assertIn('(?:json)?\\\\s*(.*?)\\\\s*', self.autopilot)
+        self.assertIn(r'(?:json)?\s*(.*?)\s*', self.autopilot)
         self.assertIn("payload=fenced.group(1).strip()", self.autopilot)
         self.assertIn("json.loads(payload)", self.autopilot)
         self.assertNotIn(
-            'AGENT_PLAN_BEGIN\\\\s*(\\\\{.*?\\\\})\\\\s*AGENT_PLAN_END',
+            r'AGENT_PLAN_BEGIN\s*(\{.*?\})\s*AGENT_PLAN_END',
             self.autopilot,
         )
 
