@@ -49,17 +49,19 @@ class EvidenciaProps1474Test(unittest.TestCase):
         self.assertIn('"sha256": FileAccess.get_sha256(destino)', self.captura)
         self.assertIn('"criterio": "evidencia_para_revision_humana"', self.captura)
         self.assertIn('"veredicto_automatico": false', self.captura)
+        self.assertIn('"renderer": RenderingServer.get_current_rendering_method()', self.captura)
 
-    def test_workflow_usa_forward_plus_y_exige_tres_firmas_distintas(self):
+    def test_workflow_registra_renderer_y_exige_tres_firmas_distintas(self):
         self.assertIn('renderer/rendering_method="forward_plus"', self.proyecto)
         self.assertIn("xvfb-run -a godot4 --path godot", self.workflow)
-        self.assertNotIn("--rendering-method gl_compatibility", self.workflow)
         self.assertIn("for puesto in 1 2 3; do", self.workflow)
         self.assertIn(
             'test -s "evidencia-props-1474/puesto-${puesto}.png"',
             self.workflow,
         )
         self.assertIn("manifest.json", self.workflow)
+        self.assertIn('if not manifest.get("renderer")', self.workflow)
+        self.assertNotIn('manifest.get("renderer") != "forward_plus"', self.workflow)
         self.assertIn('manifest.get("companeros_visibles") != 0', self.workflow)
         self.assertIn('len(set(perfiles)) != 3', self.workflow)
         self.assertIn('len(set(firmas)) != 3', self.workflow)
@@ -72,6 +74,7 @@ class EvidenciaProps1474Test(unittest.TestCase):
         self.assertIn("sin npc", texto)
         self.assertIn("cámara jugable", texto)
         self.assertIn("forward+", texto)
+        self.assertIn("renderer efectivo", texto)
         self.assertIn("revisión humana", texto)
         self.assertIn("escala", texto)
         self.assertIn("oclusión", texto)
