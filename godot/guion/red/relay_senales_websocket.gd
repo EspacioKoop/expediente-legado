@@ -121,10 +121,7 @@ func _permite_publicar(clave_sala: String, actor_public_id: String, ahora: int) 
 	var clave := "%s|%s" % [clave_sala, actor_public_id]
 	if not _ultima_publicacion.has(clave):
 		return true
-	return (
-		ahora - int(_ultima_publicacion[clave])
-		>= SenalServicio.INTERVALO_MINIMO_SEGUNDOS
-	)
+	return ahora - int(_ultima_publicacion[clave]) >= SenalServicio.INTERVALO_MINIMO_SEGUNDOS
 
 
 func _activas_actor(clave_sala: String, actor_public_id: String) -> int:
