@@ -109,6 +109,7 @@ func _montar_oficina() -> void:
 	OficinaAssetsCc0.montar(_mundo)
 	PostersOficina.montar(_mundo)
 	CuadrosOficina.montar(_mundo)
+	SenaleticaOficina98.montar(_mundo)
 
 	_camara = Camera3D.new()
 	_camara.name = "CamaraGate126"
