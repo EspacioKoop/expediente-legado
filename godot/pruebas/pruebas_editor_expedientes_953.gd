@@ -12,6 +12,7 @@ func _initialize() -> void:
 	_probar_roundtrip()
 	_probar_validacion()
 	_probar_bbcode_seguro()
+	_probar_formato_equilibrado()
 	_probar_plantillas_qa()
 	_probar_calendario()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
@@ -100,6 +101,15 @@ func _probar_bbcode_seguro() -> void:
 		vista.contains("[lb]url=https://example.invalid]") and not vista.contains("[url=https://"),
 		"la vista previa neutraliza BBCode no permitido",
 	)
+
+
+func _probar_formato_equilibrado() -> void:
+	_comprobar(Editor.formato_equilibrado("Texto [b]válido [i]anidado[/i][/b]."), "acepta formato permitido bien anidado")
+	_comprobar(not Editor.formato_equilibrado("Texto [b]sin cierre."), "detecta etiquetas sin cierre")
+	_comprobar(not Editor.formato_equilibrado("[b][i]cruzado[/b][/i]"), "detecta etiquetas cruzadas")
+	var roto := _base()
+	roto["contenido_bbcode"] = "Texto [center]incompleto"
+	_comprobar(not Editor.validar(roto).is_empty(), "impide guardar formato estructuralmente roto")
 
 
 func _probar_plantillas_qa() -> void:
