@@ -32,6 +32,7 @@ func configurar(
 	giro_base: Vector3,
 	giro_reaccion: Vector3,
 	usar_asset_cc0: bool = false,
+	escena_visual: PackedScene = null,
 ) -> void:
 	verbo = Verbo.EXAMINAR
 	nombre_objeto = nombre
@@ -54,7 +55,17 @@ func configurar(
 	_visual = Node3D.new()
 	_visual.name = "FormaDeformada"
 	add_child(_visual)
-	if modelo == "tarotCard":
+	if escena_visual != null:
+		var instancia := escena_visual.instantiate()
+		if instancia is Node3D:
+			var detalle := instancia as Node3D
+			detalle.name = "DetallePBR"
+			detalle.position = Vector3(0.0, -tam.y * 0.5, 0.0)
+			_visual.add_child(detalle)
+		else:
+			instancia.free()
+			_montar_respaldo(tam, color)
+	elif modelo == "tarotCard":
 		_montar_tarot(tam, color)
 	elif usar_asset_cc0:
 		# Conserva la misma malla y paleta PSX que el original de vigilia.
