@@ -59,8 +59,9 @@ async function actorKey(remoteIp: string, secret: string): Promise<string> {
     ["sign"],
   );
   const digest = await crypto.subtle.sign("HMAC", key, encoder.encode(remoteIp));
-  return Array.from(new Uint8Array(digest).slice(0, 16), (byte) =>
-    byte.toString(16).padStart(2, "0")
+  return Array.from(
+    new Uint8Array(digest).slice(0, 16),
+    (byte) => byte.toString(16).padStart(2, "0"),
   ).join("");
 }
 
