@@ -7,6 +7,10 @@ extends SceneTree
 
 const TAMANO := Vector2i(1280, 720)
 const FRAMES_ESTABILIZACION := 18
+const FOV_JUGADOR := 70.0
+const ALTURA_JUGADOR := 1.65
+const FORMA_GILGAMESH := "peine"
+const ESCENA_GILGAMESH := preload("res://escenas/sueno_gilgamesh.tscn")
 
 
 func _init() -> void:
@@ -31,6 +35,12 @@ func _init() -> void:
 		"veredicto_automatico": false,
 		"requiere_revision_humana": true,
 		"tamano": [TAMANO.x, TAMANO.y],
+		"gilgamesh_runtime": {
+			"forma": FORMA_GILGAMESH,
+			"escala": SuenoGilgamesh.ESCALA_ENCUENTRO,
+			"fov": FOV_JUGADOR,
+			"altura_jugador": ALTURA_JUGADOR,
+		},
 		"capturas": [],
 	}
 
@@ -53,9 +63,33 @@ func _init() -> void:
 
 func _capturar_gilgamesh(salida: String, manifiesto: Dictionary) -> bool:
 	var mundo := _nuevo_mundo("EvidenciaGilgamesh436", Color(0.055, 0.045, 0.035))
-	var sueno := SuenoGilgamesh.new()
+	var espacio := Sueno.espacio(FORMA_GILGAMESH, 0, {})
+	Espacio3D.construir(mundo, espacio)
+
+	# Reproducir el montaje nocturno: escena real (incluye arte ambiental), misma
+	# escala canónica y sin la cámara standalone que Dia retira antes de insertarla.
+	var sueno := ESCENA_GILGAMESH.instantiate() as SuenoGilgamesh
+	if sueno == null:
+		printerr("No se pudo instanciar la escena real de Gilgamesh")
+		return false
 	sueno.name = "GilgameshEvidencia"
+	sueno.preparar()
+	var standalone := sueno.get_node_or_null("CamaraStandalone")
+	if standalone != null:
+		sueno.remove_child(standalone)
+		standalone.free()
+	sueno.scale = Vector3.ONE * SuenoGilgamesh.ESCALA_ENCUENTRO
+	var ancla := _ancla_entre_entrada_y_salida(espacio)
+	sueno.position = ancla
 	mundo.add_child(sueno)
+
+	var entrada: Vector3 = espacio.get("entrada", Vector3.ZERO)
+	var camara := _montar_camara_jugador(
+		mundo,
+		Vector3(entrada.x, ALTURA_JUGADOR, entrada.z),
+		ancla + Vector3(0.0, 0.9, 0.0),
+		"CamaraEntradaGilgamesh",
+	)
 	await _estabilizar()
 
 	if not await _guardar(
@@ -63,19 +97,33 @@ func _capturar_gilgamesh(salida: String, manifiesto: Dictionary) -> bool:
 	):
 		return false
 
+	# Segundo encuadre: punto alcanzable frente a la tablilla, a altura de jugador.
+	# Sirve para revisar motivo↔ancla sin usar la cámara elevada del prototipo.
+	var posicion_puzzle := sueno.to_global(Vector3(0.0, 0.0, 8.0))
+	posicion_puzzle.y = ALTURA_JUGADOR
+	var objetivo_puzzle := sueno.to_global(Vector3(0.0, 1.2, 3.25))
+	camara.position = posicion_puzzle
+	camara.look_at(objetivo_puzzle, Vector3.UP)
+	if not await _guardar(
+		salida, "436_gilgamesh_puzzle.png", "gilgamesh_puzzle", 436, manifiesto
+	):
+		return false
+
 	var fragmentos: Array = SuenoGilgamesh.ENCAJES.keys()
 	fragmentos.sort()
 	for bruto in fragmentos:
 		var fragmento := String(bruto)
-		var ancla := String(SuenoGilgamesh.ENCAJES[fragmento])
-		var resultado := sueno.colocar_fragmento(fragmento, ancla, true)
+		var ancla_id := String(SuenoGilgamesh.ENCAJES[fragmento])
+		var resultado := sueno.colocar_fragmento(fragmento, ancla_id, true)
 		if not bool(resultado.get("aceptada", false)):
-			printerr("Gilgamesh no aceptó %s -> %s" % [fragmento, ancla])
+			printerr("Gilgamesh no aceptó %s -> %s" % [fragmento, ancla_id])
 			return false
 	if not sueno.resuelto():
 		printerr("Gilgamesh no alcanzó el estado resuelto")
 		return false
 
+	camara.position = Vector3(entrada.x, ALTURA_JUGADOR, entrada.z)
+	camara.look_at(ancla + Vector3(0.0, 1.05, -0.5), Vector3.UP)
 	if not await _guardar(
 		salida, "436_gilgamesh_resuelto.png", "gilgamesh_resuelto", 436, manifiesto
 	):
@@ -83,7 +131,6 @@ func _capturar_gilgamesh(salida: String, manifiesto: Dictionary) -> bool:
 	mundo.queue_free()
 	await process_frame
 	return true
-
 
 func _capturar_aquiles(salida: String, manifiesto: Dictionary) -> bool:
 	var mundo := _nuevo_mundo("EvidenciaAquiles438", Color(0.045, 0.045, 0.055))
@@ -178,6 +225,31 @@ func _nuevo_mundo(nombre: String, fondo: Color) -> Node3D:
 	luz.shadow_enabled = true
 	mundo.add_child(luz)
 	return mundo
+
+
+func _montar_camara_jugador(
+	mundo: Node3D,
+	posicion: Vector3,
+	objetivo: Vector3,
+	nombre: String,
+) -> Camera3D:
+	var camara := Camera3D.new()
+	camara.name = nombre
+	camara.position = posicion
+	camara.fov = FOV_JUGADOR
+	camara.current = true
+	mundo.add_child(camara)
+	camara.look_at(objetivo, Vector3.UP)
+	return camara
+
+
+func _ancla_entre_entrada_y_salida(espacio: Dictionary) -> Vector3:
+	var entrada: Vector3 = espacio.get("entrada", Vector3.ZERO)
+	var salidas: Array = espacio.get("salidas", [])
+	if salidas.is_empty():
+		return entrada
+	var salida: Vector3 = salidas[0].get("pos", entrada)
+	return entrada.lerp(salida, 0.5)
 
 
 func _montar_camara_duat(mundo: Node3D) -> void:
