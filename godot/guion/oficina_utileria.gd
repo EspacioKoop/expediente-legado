@@ -411,7 +411,4 @@ static func _agregar_esfera(
 
 
 static func _aplicar_material(malla: MeshInstance3D, color: Color) -> void:
-	var material := ShaderMaterial.new()
-	material.shader = load(Espacio3D.shader_del_sitio())
-	material.set_shader_parameter("color_base", color)
-	malla.material_override = material
+	Modelos._pintar(malla, color)
