@@ -195,6 +195,54 @@ func simular_hasta_reposo(max_pasos: int = LIMITE_PASOS_PRUEBA) -> int:
 	return pasos
 
 
+func simular_lanzamiento_autoritativo(
+	apuntado: float,
+	potencia: float,
+	bolos_en_pie: Array = [],
+) -> Dictionary:
+	## Ejecuta exactamente la misma física del vertical individual, pero sin
+	## montar presentación ni depender del árbol de escena. #383 usa este camino
+	## para que el host sea autoridad sin crear una física "online" paralela.
+	if potencia <= 0.0:
+		return {"ok": false, "reason": "invalid_power"}
+
+	_preparar_variante()
+	estado = Bolos.nueva(["autoridad"])
+	_finalizada = false
+	_tiro_activo = false
+	_cargando = false
+	_potencia = 0.0
+	_apuntado = 0.0
+	_bolos_en_pie.clear()
+
+	if bolos_en_pie.is_empty():
+		for _indice in _posiciones_bolos.size():
+			_bolos_en_pie.append(true)
+	else:
+		if bolos_en_pie.size() != _posiciones_bolos.size():
+			return {"ok": false, "reason": "invalid_pins_state"}
+		for valor in bolos_en_pie:
+			if typeof(valor) != TYPE_BOOL:
+				return {"ok": false, "reason": "invalid_pins_state"}
+			_bolos_en_pie.append(bool(valor))
+
+	var antes := total_bolos_en_pie()
+	estado["derribados_turno"] = Bolos.BOLOS_POR_TURNO - antes
+	_preparar_bola()
+	if not lanzar(apuntado, potencia):
+		return {"ok": false, "reason": "launch_rejected"}
+
+	var pasos := simular_hasta_reposo()
+	var despues := total_bolos_en_pie()
+	return {
+		"ok": true,
+		"reason": "",
+		"knocked": maxi(antes - despues, 0),
+		"pins_standing": _bolos_en_pie.duplicate(),
+		"steps": pasos,
+	}
+
+
 func abandonar() -> Dictionary:
 	if _finalizada:
 		return Bolos.resultado(estado)
