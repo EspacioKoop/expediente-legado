@@ -23,6 +23,7 @@ func _process(_delta: float) -> void:
 		OficinaFotorealista98.montar(mundo)
 		PostersOficina.montar(mundo)
 		CuadrosOficina.montar(mundo)
+		SenaleticaOficina98.montar(mundo)
 		_conectar_cafe(dia, mundo)
 
 
