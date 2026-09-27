@@ -18,7 +18,8 @@ class EvidenciaRocketboxOficina1319Test(unittest.TestCase):
     def test_matriz_cubre_los_cuatro_estados(self):
         for estado in ("pie", "sentado", "telefono", "conversacion"):
             self.assertIn(f'"nombre": "{estado}"', self.captura)
-            self.assertIn(f'"{estado}.png"', self.workflow)
+        self.assertIn("for estado in pie sentado telefono conversacion; do", self.workflow)
+        self.assertIn('test -s "$salida/$estado.png"', self.workflow)
         for clip in ("idle", "sentado_hablando", "telefono", "conversar"):
             self.assertIn(f'"clip": "{clip}"', self.captura)
 
