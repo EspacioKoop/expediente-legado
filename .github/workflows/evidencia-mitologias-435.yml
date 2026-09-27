@@ -7,6 +7,7 @@ on:
       - '.github/workflows/evidencia-mitologias-435.yml'
       - '.godot-version'
       - 'godot/guion/sueno_gilgamesh.gd'
+      - 'godot/guion/dia_gilgamesh_sueno_app.gd'
       - 'godot/guion/sueno_aquiles.gd'
       - 'godot/guion/sueno_duat.gd'
       - 'godot/guion/mitologias_435_*'
@@ -72,6 +73,7 @@ jobs:
             "$GITHUB_WORKSPACE/evidencia-mitologias-435"
           for archivo in \
             436_gilgamesh_inicial.png \
+            436_gilgamesh_puzzle.png \
             436_gilgamesh_resuelto.png \
             438_aquiles_revelado.png \
             438_aquiles_resuelto.png \
@@ -92,18 +94,22 @@ jobs:
           if manifest["requiere_revision_humana"] is not True:
               raise SystemExit("falta el gate humano explícito")
           capturas = manifest["capturas"]
-          if len(capturas) != 6:
-              raise SystemExit("se esperaban seis capturas")
+          if len(capturas) != 7:
+              raise SystemExit("se esperaban siete capturas")
           por_issue = {}
           for captura in capturas:
               por_issue.setdefault(captura["issue"], []).append(captura)
           if sorted(por_issue) != [436, 438, 441]:
               raise SystemExit("faltan familias en el manifiesto")
-          for issue, estados in por_issue.items():
+          esperadas = {436: 3, 438: 2, 441: 2}
+          for issue, cantidad in esperadas.items():
+              estados = por_issue[issue]
               hashes = {estado["sha256"] for estado in estados}
-              if len(estados) != 2 or len(hashes) != 2:
-                  raise SystemExit(f"#{issue}: los dos estados deben ser visualmente distintos")
-          print("6 capturas reproducibles; juicio de legibilidad pendiente de revisión humana")
+              if len(estados) != cantidad or len(hashes) != cantidad:
+                  raise SystemExit(
+                      f"#{issue}: se esperaban {cantidad} capturas visualmente distintas"
+                  )
+          print("7 capturas reproducibles; juicio de legibilidad pendiente de revisión humana")
           PY
 
       - name: Adjuntar evidencia visual
