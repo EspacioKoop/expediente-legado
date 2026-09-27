@@ -74,41 +74,22 @@ func aplicar_evento(evento: Variant, ahora_unix: int) -> Dictionary:
 	if bool(_golf.get("terminada", false)):
 		return _rechazo("session_finished")
 
-	var validacion := MinijuegoSesionDatos.validar_evento(evento, ahora_unix)
-	if not validacion["ok"]:
-		return _rechazo("invalid_event", validacion["reason"])
+	var contexto := _validar_contexto_evento(evento, ahora_unix)
+	if not contexto["ok"]:
+		return _rechazo(contexto["status"], contexto["reason"])
 
-	var normalizado: Dictionary = validacion["event"]
+	var normalizado: Dictionary = contexto["event"]
 	var payload: Dictionary = normalizado["payload"]
-	if String(payload["room_id"]) != _room_id:
-		return _rechazo("wrong_room")
-	if String(payload["session_id"]) != String(_sesion["session_id"]):
-		return _rechazo("wrong_session")
-	if String(payload["minigame_id"]) != MINIGAME_ID:
-		return _rechazo("wrong_minigame")
-	if int(payload["rules_version"]) != RULES_VERSION:
-		return _rechazo("incompatible_rules")
-
-	var sequence := int(payload["sequence"])
-	var esperado := int(_sesion["sequence"])
-	if sequence < esperado:
-		return _rechazo("late_or_duplicate")
-	if sequence > esperado:
-		return _rechazo("out_of_order")
-	if int(payload["turn"]) != int(_sesion["turn"]):
-		return _rechazo("wrong_turn")
-
-	var actor := String(normalizado["actor_public_id"])
-	if actor != Golf.jugador_actual(_golf):
-		return _rechazo("not_actor_turn")
-
 	var validacion_tiro := _validar_tiro(payload["action"])
 	if not validacion_tiro["ok"]:
 		return _rechazo("invalid_action", validacion_tiro["reason"])
 
+	var esperado := int(_sesion["sequence"])
 	var hoyo_antes := int(_golf["hoyo"])
 	var resultado_tiro := _ejecutar_tiro(
-		actor, validacion_tiro["direction"], validacion_tiro["power"]
+		String(normalizado["actor_public_id"]),
+		validacion_tiro["direction"],
+		validacion_tiro["power"],
 	)
 	if not resultado_tiro["ok"]:
 		return resultado_tiro
@@ -123,6 +104,44 @@ func aplicar_evento(evento: Variant, ahora_unix: int) -> Dictionary:
 		"shot": resultado_tiro["shot"],
 		"snapshot": _sesion.duplicate(true),
 	}
+
+
+func _validar_contexto_evento(evento: Variant, ahora_unix: int) -> Dictionary:
+	var validacion := MinijuegoSesionDatos.validar_evento(evento, ahora_unix)
+	if not validacion["ok"]:
+		return {
+			"ok": false,
+			"status": "invalid_event",
+			"reason": validacion["reason"],
+			"event": {},
+		}
+
+	var normalizado: Dictionary = validacion["event"]
+	var payload: Dictionary = normalizado["payload"]
+	var status := ""
+	if String(payload["room_id"]) != _room_id:
+		status = "wrong_room"
+	elif String(payload["session_id"]) != String(_sesion["session_id"]):
+		status = "wrong_session"
+	elif String(payload["minigame_id"]) != MINIGAME_ID:
+		status = "wrong_minigame"
+	elif int(payload["rules_version"]) != RULES_VERSION:
+		status = "incompatible_rules"
+	else:
+		var sequence := int(payload["sequence"])
+		var esperado := int(_sesion["sequence"])
+		if sequence < esperado:
+			status = "late_or_duplicate"
+		elif sequence > esperado:
+			status = "out_of_order"
+		elif int(payload["turn"]) != int(_sesion["turn"]):
+			status = "wrong_turn"
+		elif String(normalizado["actor_public_id"]) != Golf.jugador_actual(_golf):
+			status = "not_actor_turn"
+
+	if not status.is_empty():
+		return {"ok": false, "status": status, "reason": "", "event": {}}
+	return {"ok": true, "status": "ok", "reason": "", "event": normalizado}
 
 
 func abandonar() -> Dictionary:
@@ -171,86 +190,104 @@ func _ejecutar_tiro(actor: String, direccion: Vector2, potencia: float) -> Dicti
 
 
 func _validar_tiro(action: Dictionary) -> Dictionary:
+	var razon := ""
+	var direccion = []
+	var vector := Vector2.ZERO
+	var potencia := 0.0
 	var esperadas := ["type", "direction", "power"]
+
 	if action.size() != esperadas.size():
-		return {"ok": false, "reason": "unexpected_shot_fields"}
-	for campo in esperadas:
-		if not action.has(campo):
-			return {"ok": false, "reason": "missing_%s" % campo}
-	if String(action["type"]) != TIPO_TIRO:
-		return {"ok": false, "reason": "wrong_action_type"}
+		razon = "unexpected_shot_fields"
+	else:
+		for campo in esperadas:
+			if not action.has(campo):
+				razon = "missing_%s" % campo
+				break
 
-	var direccion = action["direction"]
-	if typeof(direccion) != TYPE_ARRAY or direccion.size() != 2:
-		return {"ok": false, "reason": "invalid_direction"}
-	if not _numero(direccion[0]) or not _numero(direccion[1]):
-		return {"ok": false, "reason": "invalid_direction"}
-	var x := float(direccion[0])
-	var y := float(direccion[1])
-	if is_nan(x) or is_inf(x) or is_nan(y) or is_inf(y):
-		return {"ok": false, "reason": "invalid_direction"}
-	var vector := Vector2(x, y)
-	if vector.length_squared() <= 0.000001:
-		return {"ok": false, "reason": "zero_direction"}
+	if razon.is_empty() and String(action["type"]) != TIPO_TIRO:
+		razon = "wrong_action_type"
 
-	if not _numero(action["power"]):
-		return {"ok": false, "reason": "invalid_power"}
-	var potencia := float(action["power"])
-	if is_nan(potencia) or is_inf(potencia) or potencia <= 0.0 or potencia > 1.0:
-		return {"ok": false, "reason": "invalid_power"}
+	if razon.is_empty():
+		direccion = action["direction"]
+		if typeof(direccion) != TYPE_ARRAY or direccion.size() != 2:
+			razon = "invalid_direction"
+		elif not _numero(direccion[0]) or not _numero(direccion[1]):
+			razon = "invalid_direction"
 
+	if razon.is_empty():
+		var x := float(direccion[0])
+		var y := float(direccion[1])
+		if is_nan(x) or is_inf(x) or is_nan(y) or is_inf(y):
+			razon = "invalid_direction"
+		else:
+			vector = Vector2(x, y)
+			if vector.length_squared() <= 0.000001:
+				razon = "zero_direction"
+
+	if razon.is_empty():
+		if not _numero(action["power"]):
+			razon = "invalid_power"
+		else:
+			potencia = float(action["power"])
+			if is_nan(potencia) or is_inf(potencia) or potencia <= 0.0 or potencia > 1.0:
+				razon = "invalid_power"
+
+	if not razon.is_empty():
+		return {"ok": false, "reason": razon}
 	return {"ok": true, "reason": "", "direction": vector, "power": potencia}
 
 
 func _normalizar_configuraciones(configuraciones: Array) -> Array:
 	var salida: Array = []
 	for valor in configuraciones:
-		if typeof(valor) != TYPE_DICTIONARY:
+		var normalizada := _normalizar_configuracion(valor)
+		if normalizada.is_empty():
 			return []
-		var config: Dictionary = valor
-		var inicio = config.get("inicio")
-		var objetivo = config.get("objetivo")
-		if typeof(inicio) != TYPE_VECTOR2 or typeof(objetivo) != TYPE_VECTOR2:
-			return []
+		salida.append(normalizada)
+	return salida
 
-		var limite = config.get("limite", GolfBola.LIMITES_POR_DEFECTO)
-		if typeof(limite) != TYPE_RECT2:
-			return []
-		var recta: Rect2 = limite
-		if recta.size.x <= GolfBola.RADIO_BOLA * 2.0:
-			return []
-		if recta.size.y <= GolfBola.RADIO_BOLA * 2.0:
-			return []
 
-		var radio := float(config.get("radio_objetivo", 0.12))
-		if radio < GolfBola.RADIO_BOLA * 1.5 or radio > 0.35:
-			return []
+func _normalizar_configuracion(valor: Variant) -> Dictionary:
+	if typeof(valor) != TYPE_DICTIONARY:
+		return {}
 
-		var obstaculos = config.get("obstaculos", [])
-		if typeof(obstaculos) != TYPE_ARRAY:
-			return []
-		var obstaculos_validos: Array = []
+	var config: Dictionary = valor
+	var inicio = config.get("inicio")
+	var objetivo = config.get("objetivo")
+	var limite = config.get("limite", GolfBola.LIMITES_POR_DEFECTO)
+	var obstaculos = config.get("obstaculos", [])
+	var valido := typeof(inicio) == TYPE_VECTOR2 and typeof(objetivo) == TYPE_VECTOR2
+	valido = valido and typeof(limite) == TYPE_RECT2 and typeof(obstaculos) == TYPE_ARRAY
+
+	var recta := Rect2()
+	var radio := float(config.get("radio_objetivo", 0.12))
+	var obstaculos_validos: Array = []
+	if valido:
+		recta = limite
+		valido = recta.size.x > GolfBola.RADIO_BOLA * 2.0
+		valido = valido and recta.size.y > GolfBola.RADIO_BOLA * 2.0
+		valido = valido and radio >= GolfBola.RADIO_BOLA * 1.5 and radio <= 0.35
+
+	if valido:
 		for obstaculo in obstaculos:
 			if typeof(obstaculo) != TYPE_RECT2:
-				return []
+				valido = false
+				break
 			var caja: Rect2 = obstaculo
 			if caja.size.x <= 0.0 or caja.size.y <= 0.0:
-				return []
+				valido = false
+				break
 			obstaculos_validos.append(caja)
 
-		(
-			salida
-			. append(
-				{
-					"inicio": inicio,
-					"objetivo": objetivo,
-					"limite": recta,
-					"radio_objetivo": radio,
-					"obstaculos": obstaculos_validos,
-				}
-			)
-		)
-	return salida
+	if not valido:
+		return {}
+	return {
+		"inicio": inicio,
+		"objetivo": objetivo,
+		"limite": recta,
+		"radio_objetivo": radio,
+		"obstaculos": obstaculos_validos,
+	}
 
 
 func _reiniciar_bolas() -> void:
