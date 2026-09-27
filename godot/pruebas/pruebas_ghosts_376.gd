@@ -129,7 +129,9 @@ func _probar_sueno_seguro() -> void:
 		AHORA,
 		"ghost-sueno-canonico-inseguro"
 	)
-	_comprobar("scene_key canónica de sueño también exige anchor", inseguro_canonico["ok"], false)
+	_comprobar(
+		"scene_key canónica de sueño también exige anchor", inseguro_canonico["ok"], false
+	)
 
 	var seguro := GhostDatos.crear_evento(
 		"sueno/familia-laberinto",
