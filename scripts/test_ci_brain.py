@@ -10,6 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "ci_brain.py"
 SCHEMA = ROOT / "infra" / "ci-brain" / "schema.sql"
 WORKFLOW = ROOT / ".github" / "workflows" / "ci-brain.yml"
+AUTOPILOT = ROOT / ".github" / "workflows" / "agent-autopilot.yml"
+REPAIR = ROOT / ".github" / "workflows" / "agent-ci-repair.yml"
 
 
 def cargar():
@@ -98,6 +100,77 @@ class CiBrainTest(unittest.TestCase):
                     self.mod.remember(conn, kind="x", key="y", summary="x" * 2001)
                 finally:
                     conn.close()
+
+    def test_fingerprint_normaliza_ruido_y_redacta_secretos(self):
+        log_a = """2026-09-27T20:00:00Z ERROR scripts/foo.py:123:45 abcdef1234567890
+2026-09-27T20:00:01Z AssertionError: sk-abcdefghijklmnopqrstuvwxyz
+"""
+        log_b = """2026-09-27T21:00:00Z ERROR scripts/foo.py:999:2 fedcba9876543210
+2026-09-27T21:00:01Z AssertionError: sk-zyxwvutsrqponmlkjihgfedcba
+"""
+        firma_a = self.mod.normalize_failure_signature(log_a)
+        firma_b = self.mod.normalize_failure_signature(log_b)
+        self.assertEqual(firma_a, firma_b)
+        self.assertNotIn("sk-", firma_a)
+        self.assertIn("<redacted>", firma_a)
+        self.assertEqual(
+            self.mod.failure_fingerprint(firma_a),
+            self.mod.failure_fingerprint(firma_b),
+        )
+
+    def test_muestra_de_fallo_es_idempotente_y_contexto_la_recupera(self):
+        with tempfile.TemporaryDirectory() as td:
+            db = Path(td) / "brain.sqlite3"
+            conn = self.mod.connect(db)
+            run = {
+                "id": 11,
+                "name": "CI",
+                "updated_at": "2026-09-27T10:01:10Z",
+            }
+            job = {
+                "id": 21,
+                "name": "godot",
+                "completed_at": "2026-09-27T10:01:00Z",
+            }
+            log = "ERROR gdformat: formato inesperado en scripts/test_demo.py:33"
+            fp = self.mod.remember_failure_sample(
+                conn, run, job, log, retention_days=120
+            )
+            self.mod.remember_failure_sample(
+                conn, run, job, log, retention_days=120
+            )
+            self.mod.refresh_failure_fingerprint_memory(conn)
+            conn.commit()
+            self.assertEqual(
+                1,
+                conn.execute(
+                    "SELECT COUNT(*) FROM memory_entries "
+                    "WHERE kind='ci_failure_sample' AND memory_key='21'"
+                ).fetchone()[0],
+            )
+            contexto = self.mod.build_memory_context(
+                conn,
+                "gdformat scripts/test_demo.py",
+                ["scripts/test_demo.py"],
+            )
+            conn.close()
+            self.assertTrue(fp)
+            self.assertTrue(contexto["memories"])
+            self.assertEqual(
+                "ci_failure_fingerprint",
+                contexto["memories"][0]["kind"],
+            )
+
+    def test_agentes_consumen_snapshot_historico_sin_hacerlo_autoritativo(self):
+        autopilot = AUTOPILOT.read_text(encoding="utf-8")
+        repair = REPAIR.read_text(encoding="utf-8")
+        for workflow in (autopilot, repair):
+            self.assertIn("scripts/ci_brain.py restore", workflow)
+            self.assertIn("scripts/ci_brain.py context", workflow)
+            self.assertIn(".agent-history.json", workflow)
+            self.assertIn("memoria histórica", workflow)
+        self.assertIn("--paths-json .agent-plan.json", autopilot)
+        self.assertIn("--paths-json .agent-plan.json", repair)
 
     def test_url_turso_se_convierte_a_pipeline_https(self):
         self.assertEqual(
