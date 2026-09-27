@@ -36,10 +36,7 @@ func publicar(evento: Dictionary, ahora_unix: int) -> Dictionary:
 
 
 func consultar(
-	scene_key: String,
-	scene_revision: String,
-	ahora_unix: int,
-	anchor_key: String = ""
+	scene_key: String, scene_revision: String, ahora_unix: int, anchor_key: String = ""
 ) -> Dictionary:
 	if not _habilitado:
 		return {"ok": true, "status": "disabled", "ghosts": []}
