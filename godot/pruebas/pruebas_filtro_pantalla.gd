@@ -157,9 +157,16 @@ func _probar_menu() -> void:
 
 
 func _probar_integraciones_3d() -> void:
+	# Mundos 3D raíz: los subrenders anidados (p. ej. VentanaExterior3D) no
+	# llevan una segunda pasada para evitar filtrar dos veces la misma imagen.
 	var rutas := [
 		"res://guion/careo_app.gd",
+		"res://guion/golf_hoyo_app.gd",
+		"res://guion/inicio_diorama_3d.gd",
 		"res://guion/juicio_combate_arena_3d.gd",
+		"res://guion/previsualizador_personaje_3d.gd",
+		"res://guion/previsualizador_reclamante_3d.gd",
+		"res://guion/selector_cartuchos_3d.gd",
 	]
 	for ruta in rutas:
 		var fichero := FileAccess.open(ruta, FileAccess.READ)

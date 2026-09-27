@@ -278,6 +278,7 @@ func _construir() -> void:
 	_entorno.ambient_light_energy = 0.30
 	world_environment.environment = _entorno
 	mundo.add_child(world_environment)
+	FiltroPantalla.aplicar(world_environment, PreferenciasSiga.cargar())
 
 	_camara = Camera3D.new()
 	_camara.fov = FOV_BASE
