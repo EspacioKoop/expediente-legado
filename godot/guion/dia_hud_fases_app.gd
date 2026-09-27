@@ -2,7 +2,7 @@
 ##
 ## Controller hijo: conserva `dia_clima_app.gd` como raíz histórica y observa la
 ## fase efectiva de Jornada. Gobierna el slot ESTADO, una banda compacta de
-## recursos, una tarjeta transitoria de fase y la superficie modal del inventario;
+## recursos/estado, una tarjeta transitoria de fase y la superficie modal del inventario;
 ## prompts y diálogo siguen siendo responsabilidad de HUDLayer.
 extends Node
 
@@ -111,6 +111,7 @@ static func modelo_recursos(estado_partida: Dictionary) -> Dictionary:
 		"dia": dia,
 		"hora_minutos": Jornada.hora_minutos(jornada),
 		"dinero": int(jornada.get("dinero", 0)),
+		"estres_banda": banda_estres(Estres.nivel(jornada)),
 	}
 
 	match fase:
@@ -132,6 +133,17 @@ static func modelo_recursos(estado_partida: Dictionary) -> Dictionary:
 			modelo["objetos"] = Inventario.visibles(inventario, true).size()
 
 	return modelo
+
+
+static func banda_estres(nivel: float) -> String:
+	var acotado := clampf(nivel, 0.0, 1.0)
+	if acotado < 0.25:
+		return "calma"
+	if acotado < 0.50:
+		return "inquietud"
+	if acotado < 0.75:
+		return "tension"
+	return "paranoia"
 
 
 func _sincronizar_recursos(hud: HUDLayer, dia: Node, jornada: Dictionary) -> void:
@@ -188,6 +200,10 @@ func _texto_de_recursos(modelo: Dictionary) -> String:
 	var minutos := int(modelo.get("hora_minutos", 0))
 	_anadir_parte(partes, _formatear_recurso("dia", [int(modelo.get("dia", 1))]))
 	_anadir_parte(partes, _formatear_recurso("hora", [int(minutos / 60), minutos % 60]))
+	_anadir_parte(
+		partes,
+		_formatear_recurso("estres_" + String(modelo.get("estres_banda", "calma")))
+	)
 
 	match String(modelo.get("fase", "")):
 		"archivo":
