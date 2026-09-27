@@ -96,7 +96,7 @@ Debe responder con:
 {
   "ok": true,
   "service": "siga98-feedback-deno",
-  "version": 1,
+  "version": 2,
   "github_configured": true,
   "kv_configured": true,
   "agent_memory": true
