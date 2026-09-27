@@ -15,6 +15,7 @@ CONFIG = ROOT / "godot" / "datos" / "incidencias.json"
 EXPORT = ROOT / "dist" / "exportar-godot-alpha.sh"
 WORKFLOW = ROOT / ".github" / "workflows" / "alpha-playtest.yml"
 WORKER = ROOT / "infra" / "feedback-worker" / "worker.js"
+WRANGLER = ROOT / "infra" / "feedback-worker" / "wrangler.jsonc"
 VERCEL_CONFIG = ROOT / "vercel.json"
 RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 
@@ -30,6 +31,7 @@ class ParteIncidenciasTest(unittest.TestCase):
         cls.export = EXPORT.read_text(encoding="utf-8")
         cls.workflow = WORKFLOW.read_text(encoding="utf-8")
         cls.worker = WORKER.read_text(encoding="utf-8")
+        cls.wrangler = json.loads(WRANGLER.read_text(encoding="utf-8"))
         cls.vercel_config = json.loads(VERCEL_CONFIG.read_text(encoding="utf-8"))
 
     def test_contrato_ejecutable_en_godot(self):
@@ -52,7 +54,7 @@ class ParteIncidenciasTest(unittest.TestCase):
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
         resumen = RESUMEN.search(resultado.stdout)
         self.assertIsNotNone(resumen, resultado.stdout)
-        self.assertGreaterEqual(int(resumen.group(1)), 24, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 29, resultado.stdout)
         self.assertNotIn("SCRIPT ERROR:", resultado.stdout)
         self.assertNotIn("Parse Error:", resultado.stdout)
 
@@ -69,15 +71,18 @@ class ParteIncidenciasTest(unittest.TestCase):
 
     def test_endpoint_esta_fuera_del_codigo_y_se_inyecta_al_exportar(self):
         self.assertEqual(self.config["feedback_url"], "")
+        self.assertEqual(self.config["feedback_urls"], [])
         self.assertIn(
             'DEFAULT_FEEDBACK_URL="https://expediente-legado.vercel.app/api/report"',
             self.export,
         )
         self.assertIn("SIGA98_FEEDBACK_URL", self.export)
-        self.assertIn("datos/incidencias.json", self.export)
-        self.assertIn("url = override or default", self.export)
-        self.assertIn('url.startswith(("https://", "http://"))', self.export)
+        self.assertIn('datos["feedback_urls"] = urls', self.export)
+        self.assertIn('partes.scheme == "https"', self.export)
+        self.assertIn('partes.hostname in {"127.0.0.1", "localhost"}', self.export)
         self.assertIn("vars.SIGA98_FEEDBACK_URL", self.workflow)
+        self.assertIn("urls_configuradas", self.nucleo)
+        self.assertIn("_intentar_gateway", self.app)
         self.assertNotIn("SIGA98_FEEDBACK_URL", self.nucleo)
         self.assertNotIn("SIGA98_FEEDBACK_URL", self.app)
         self.assertNotIn("expediente-legado.vercel.app", self.nucleo)
@@ -152,6 +157,19 @@ class ParteIncidenciasTest(unittest.TestCase):
         cliente = self.nucleo + self.app + self.reportador
         for secreto in ("GITHUB_TOKEN", "RESEND_API_KEY", "REPORT_EMAIL_TO"):
             self.assertNotIn(secreto, cliente)
+
+    def test_cloudflare_declara_secret_y_rate_limits_sin_credenciales(self):
+        self.assertEqual(self.wrangler["name"], "siga98-feedback")
+        self.assertEqual(self.wrangler["main"], "worker.js")
+        self.assertIn("GITHUB_TOKEN", self.wrangler["secrets"]["required"])
+        self.assertEqual(len(self.wrangler["ratelimits"]), 2)
+        self.assertIn("REPORT_RATE_LIMITER", self.worker)
+        self.assertIn("REPORT_GLOBAL_LIMITER", self.worker)
+        self.assertIn('raw.schema !== 1', self.worker)
+        self.assertIn('url.pathname !== "/api/report"', self.worker)
+        serialized = json.dumps(self.wrangler)
+        self.assertNotIn("github_pat_", serialized)
+        self.assertNotIn("Bearer ", serialized)
 
     def test_vercel_no_construye_cambios_ajenos_al_gateway(self):
         comando = self.vercel_config["ignoreCommand"]
