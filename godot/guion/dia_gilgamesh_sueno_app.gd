@@ -5,8 +5,6 @@
 extends Node
 
 const ESCENA_GILGAMESH := preload("res://escenas/sueno_gilgamesh.tscn")
-const ESCALA_ENCUENTRO := 0.44
-
 var _mundo_montado_id := 0
 var _gilgamesh_montado_esta_noche := false
 var _fase_anterior := ""
@@ -84,7 +82,7 @@ func _montar_gilgamesh(mundo: Node3D, espacio: Dictionary) -> void:
 		gilgamesh.remove_child(camara)
 		camara.free()
 
-	gilgamesh.scale = Vector3.ONE * ESCALA_ENCUENTRO
+	gilgamesh.scale = Vector3.ONE * SuenoGilgamesh.ESCALA_ENCUENTRO
 	gilgamesh.position = _ancla_entre_entrada_y_salida(espacio)
 	mundo.add_child(gilgamesh)
 
