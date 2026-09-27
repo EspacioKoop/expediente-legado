@@ -36,10 +36,7 @@ func _init(
 
 
 func registrar(
-	instante_segundos: float,
-	position: Vector3,
-	yaw: float,
-	gesture: String = ""
+	instante_segundos: float, position: Vector3, yaw: float, gesture: String = ""
 ) -> bool:
 	if _frames.size() >= GhostDatos.MAX_FRAMES:
 		return false
@@ -53,12 +50,17 @@ func registrar(
 	var intervalo := 1.0 / _sample_rate
 	if _ultimo_t >= 0.0 and relativo - _ultimo_t < intervalo:
 		return false
-	_frames.append({
-		"t": relativo,
-		"position": [position.x, position.y, position.z],
-		"yaw": yaw,
-		"gesture": gesture,
-	})
+	(
+		_frames
+		. append(
+			{
+				"t": relativo,
+				"position": [position.x, position.y, position.z],
+				"yaw": yaw,
+				"gesture": gesture,
+			}
+		)
+	)
 	_ultimo_t = relativo
 	return true
 
