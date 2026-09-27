@@ -16,6 +16,8 @@ EXPORT = ROOT / "dist" / "exportar-godot-alpha.sh"
 WORKFLOW = ROOT / ".github" / "workflows" / "alpha-playtest.yml"
 WORKER = ROOT / "infra" / "feedback-worker" / "worker.js"
 WRANGLER = ROOT / "infra" / "feedback-worker" / "wrangler.jsonc"
+DENO_GATEWAY = ROOT / "infra" / "feedback-deno" / "main.ts"
+DENO_CONFIG = ROOT / "infra" / "feedback-deno" / "deno.json"
 VERCEL_CONFIG = ROOT / "vercel.json"
 RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 
@@ -32,6 +34,8 @@ class ParteIncidenciasTest(unittest.TestCase):
         cls.workflow = WORKFLOW.read_text(encoding="utf-8")
         cls.worker = WORKER.read_text(encoding="utf-8")
         cls.wrangler = json.loads(WRANGLER.read_text(encoding="utf-8"))
+        cls.deno_gateway = DENO_GATEWAY.read_text(encoding="utf-8")
+        cls.deno_config = json.loads(DENO_CONFIG.read_text(encoding="utf-8"))
         cls.vercel_config = json.loads(VERCEL_CONFIG.read_text(encoding="utf-8"))
 
     def test_contrato_ejecutable_en_godot(self):
@@ -77,10 +81,12 @@ class ParteIncidenciasTest(unittest.TestCase):
             self.export,
         )
         self.assertIn("SIGA98_FEEDBACK_URL", self.export)
+        self.assertIn("SIGA98_FEEDBACK_FALLBACK_URL", self.export)
         self.assertIn('datos["feedback_urls"] = urls', self.export)
         self.assertIn('partes.scheme == "https"', self.export)
         self.assertIn('partes.hostname in {"127.0.0.1", "localhost"}', self.export)
         self.assertIn("vars.SIGA98_FEEDBACK_URL", self.workflow)
+        self.assertIn("vars.SIGA98_FEEDBACK_FALLBACK_URL", self.workflow)
         self.assertIn("urls_configuradas", self.nucleo)
         self.assertIn("_intentar_gateway", self.app)
         self.assertNotIn("SIGA98_FEEDBACK_URL", self.nucleo)
@@ -170,6 +176,23 @@ class ParteIncidenciasTest(unittest.TestCase):
         serialized = json.dumps(self.wrangler)
         self.assertNotIn("github_pat_", serialized)
         self.assertNotIn("Bearer ", serialized)
+
+    def test_deno_es_fallback_aislado_y_falla_cerrado(self):
+        self.assertIn("kv", self.deno_config["unstable"])
+        self.assertIn("Deno.openKv()", self.deno_gateway)
+        self.assertIn("consumeRateLimits", self.deno_gateway)
+        self.assertIn("ACTOR_LIMIT = 6", self.deno_gateway)
+        self.assertIn("GLOBAL_LIMIT = 30", self.deno_gateway)
+        self.assertIn('url.pathname !== "/api/report"', self.deno_gateway)
+        self.assertIn('(raw as Record<string, unknown>).schema !== 1', self.deno_gateway)
+        self.assertIn('(raw as Record<string, unknown>).source !== "siga98-f9"', self.deno_gateway)
+        self.assertIn("await request.arrayBuffer()", self.deno_gateway)
+        self.assertIn("bytes.byteLength > MAX_REQUEST_BYTES", self.deno_gateway)
+        self.assertIn('Deno.env.get("GITHUB_TOKEN")', self.deno_gateway)
+        self.assertIn("service_unavailable", self.deno_gateway)
+        self.assertNotIn("github_pat_", self.deno_gateway)
+        self.assertNotIn('detail:', self.deno_gateway)
+        self.assertNotIn("GITHUB_TOKEN", self.nucleo + self.app + self.reportador)
 
     def test_vercel_no_construye_cambios_ajenos_al_gateway(self):
         comando = self.vercel_config["ignoreCommand"]
