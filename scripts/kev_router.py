@@ -80,17 +80,16 @@ def _available_providers(has_qwen: bool, has_gemini: bool) -> list[str]:
     return providers
 
 
-def _explicit_provider(
+def _requested_explicit_provider(
     requested_provider: str,
     labels: Sequence[str],
-    available: Sequence[str],
 ) -> str | None:
-    if requested_provider in {"qwen", "gemini"} and requested_provider in available:
+    if requested_provider in {"qwen", "gemini"}:
         return requested_provider
 
     label_set = set(labels)
     for provider in ("qwen", "gemini"):
-        if f"agent:{provider}" in label_set and provider in available:
+        if f"agent:{provider}" in label_set:
             return provider
     return None
 
@@ -146,8 +145,16 @@ def route_provider(
             "available": [],
         }
 
-    explicit = _explicit_provider(requested_provider, labels, available)
+    explicit = _requested_explicit_provider(requested_provider, labels)
     if explicit is not None:
+        if explicit not in available:
+            return {
+                "provider": None,
+                "requested_provider": explicit,
+                "source": "explicit-unavailable",
+                "confidence": None,
+                "available": available,
+            }
         return {
             "provider": explicit,
             "source": "explicit",
