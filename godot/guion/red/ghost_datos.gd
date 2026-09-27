@@ -73,7 +73,9 @@ static func validar_evento(evento: Variant, ahora_unix: int) -> Dictionary:
 	var normalizado: Dictionary = validacion_evento["event"]
 	if normalizado["kind"] != KIND:
 		return _invalido("wrong_kind")
-	var validacion_payload := validar_payload(normalizado["payload"], String(normalizado["scene_key"]))
+	var validacion_payload := validar_payload(
+		normalizado["payload"], String(normalizado["scene_key"])
+	)
 	if not validacion_payload["ok"]:
 		return _invalido(validacion_payload["reason"])
 	normalizado["payload"] = validacion_payload["payload"]
@@ -98,11 +100,7 @@ static func validar_payload(payload: Variant, scene_key: String = "") -> Diction
 	if typeof(sample_raw) != TYPE_INT and typeof(sample_raw) != TYPE_FLOAT:
 		return _invalido("invalid_sample_rate")
 	var sample_rate := float(sample_raw)
-	if (
-		not is_finite(sample_rate)
-		or sample_rate < MIN_SAMPLE_RATE
-		or sample_rate > MAX_SAMPLE_RATE
-	):
+	if not is_finite(sample_rate) or sample_rate < MIN_SAMPLE_RATE or sample_rate > MAX_SAMPLE_RATE:
 		return _invalido("invalid_sample_rate")
 
 	var space := String(payload.get("space", "scene"))
@@ -140,7 +138,8 @@ static func validar_payload(payload: Variant, scene_key: String = "") -> Diction
 	return {
 		"ok": true,
 		"reason": "",
-		"payload": {
+		"payload":
+		{
 			"scene_revision": revision,
 			"sample_rate": sample_rate,
 			"space": space,
@@ -194,7 +193,8 @@ static func _validar_frame(frame_raw: Variant, tiempo_anterior: float) -> Dictio
 	return {
 		"ok": true,
 		"reason": "",
-		"frame": {
+		"frame":
+		{
 			"t": t,
 			"position": posicion_normalizada,
 			"yaw": yaw,
