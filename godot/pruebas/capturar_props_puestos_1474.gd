@@ -79,7 +79,7 @@ func _init() -> void:
 	}
 
 	for i in PUESTOS.size():
-		var nombre := PUESTOS[i]
+		var nombre: String = PUESTOS[i]
 		var puesto := dia._mundo.find_child(nombre, true, false) as Node3D
 		if puesto == null:
 			printerr("No se encontró %s" % nombre)
