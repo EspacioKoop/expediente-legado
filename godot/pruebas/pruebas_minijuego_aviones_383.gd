@@ -212,8 +212,16 @@ func _probar_abandono_sin_partida() -> void:
 	var autoridad := _nueva()
 	var abandono := autoridad.abandonar()
 	_comprobar("abandono termina sesión", abandono["snapshot"]["phase"], "finished")
+	_comprobar("abandono quita acciones", abandono["snapshot"]["allowed_actions"].size(), 0)
+	_comprobar("abandono limpia jugador actual", abandono["snapshot"]["state"]["current_player"], "")
 	_comprobar("abandono queda marcado", abandono["snapshot"]["result"]["abandonada"], true)
 	_comprobar("abandono no es completa", abandono["snapshot"]["result"]["completa"], false)
+	var posterior := _accion("anon-a", 0, 0)
+	_comprobar(
+		"abandono rechaza acciones posteriores",
+		autoridad.aplicar_evento(posterior["event"], AHORA)["status"],
+		"session_finished",
+	)
 	_comprobar("Partida sigue intacta", JSON.stringify(partida), antes)
 
 
