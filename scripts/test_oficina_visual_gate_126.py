@@ -19,6 +19,11 @@ class OficinaVisualGate126Test(unittest.TestCase):
         self.assertIn("const TAM := Vector2i(1280, 720)", self.captura)
         self.assertIn("RenderingServer.frame_post_draw", self.captura)
         self.assertIn("imagen.save_png(ruta)", self.captura)
+        self.assertIn("const MOMENTOS := [", self.captura)
+        self.assertIn('"sufijo": "mediodia"', self.captura)
+        self.assertIn('"sufijo": "tarde"', self.captura)
+        self.assertIn('"sufijo": "noche"', self.captura)
+        self.assertIn("Jornada.MINUTOS_INICIO_JORNADA", self.captura)
 
     def test_monta_el_archivo_real_sin_hud(self):
         self.assertIn("EspaciosCatalogo.OFICINA.duplicate(true)", self.captura)
@@ -31,6 +36,9 @@ class OficinaVisualGate126Test(unittest.TestCase):
         self.assertIn('OS.get_environment("GITHUB_SHA")', self.captura)
         self.assertIn('has_meta("oficina_styloo_cc0")', self.captura)
         self.assertIn("RenderingServer.get_current_rendering_method()", self.captura)
+        self.assertIn('preload("res://guion/dia_reloj_horario_app.gd")', self.captura)
+        self.assertIn('_dia.jornada["hora_minutos"] = minutos', self.captura)
+        self.assertIn("_horario._transicionar_luz(_dia, 10.0)", self.captura)
         self.assertIn("build cuyo SHA coincida", self.captura)
         self.assertNotIn("CanvasLayer.new()", self.captura)
 
@@ -46,6 +54,10 @@ class OficinaVisualGate126Test(unittest.TestCase):
         self.assertIn("SIGA-98-oficina-visual-gate-126-${{ github.sha }}", self.workflow)
         self.assertIn("puestos-archivo.png", self.workflow)
         self.assertIn("acceso-ventanas.png", self.workflow)
+        self.assertIn("puestos-archivo-mediodia.png", self.workflow)
+        self.assertIn("acceso-ventanas-tarde.png", self.workflow)
+        self.assertIn("puestos-archivo-noche.png", self.workflow)
+        self.assertIn("'godot/guion/dia_reloj_horario_app.gd'", self.workflow)
 
 
 if __name__ == "__main__":

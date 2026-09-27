@@ -1,15 +1,33 @@
 extends SceneTree
 
+const Horario := preload("res://guion/dia_reloj_horario_app.gd")
+const DIA_MINIMO := """
+extends Node
+var _mundo: Node3D
+var jornada := {}
+var _espacio_actual := {}
+var _ambiente: Environment
+var _sol: DirectionalLight3D
+"""
+
 ## Gate visual reproducible para #126.
 ##
 ## Construye la oficina con el catálogo y las mismas capas de dressing que usa
 ## el día, sin CanvasLayer/HUD. Genera dos encuadres fijos para revisar la
-## lectura espacial tras cambios de mobiliario, materiales o assets.
+## lectura espacial tras cambios de mobiliario, materiales, assets o iluminación.
+## Los mismos encuadres se repiten en las cuatro franjas reales del controlador
+## horario para que el artifact represente lo que ve el jugador (#789).
 ##
 ## Uso:
 ## godot4 --path godot --script res://pruebas/capturas_oficina_126.gd -- /ruta/salida
 
 const TAM := Vector2i(1280, 720)
+const MOMENTOS := [
+	{"sufijo": "", "hora": Jornada.MINUTOS_INICIO_JORNADA, "etiqueta": "09:00 · mañana"},
+	{"sufijo": "mediodia", "hora": 13 * 60, "etiqueta": "13:00 · mediodía"},
+	{"sufijo": "tarde", "hora": 16 * 60 + 30, "etiqueta": "16:30 · tarde"},
+	{"sufijo": "noche", "hora": 20 * 60, "etiqueta": "20:00 · noche"},
+]
 const VISTAS := [
 	{
 		"nombre": "puestos-archivo",
@@ -30,6 +48,10 @@ const VISTAS := [
 var _viewport: SubViewport
 var _mundo: Node3D
 var _camara: Camera3D
+var _ambiente: Environment
+var _sol: DirectionalLight3D
+var _dia: Node
+var _horario: Node
 var _salida := ""
 var _fallos := 0
 
@@ -50,11 +72,15 @@ func _ejecutar() -> void:
 	for _i in range(8):
 		await process_frame
 
-	for vista in VISTAS:
-		await _capturar(vista as Dictionary)
+	var capturas := 0
+	for momento in MOMENTOS:
+		await _aplicar_hora(int(momento["hora"]))
+		for vista in VISTAS:
+			await _capturar(vista as Dictionary, String(momento["sufijo"]))
+			capturas += 1
 
 	_guardar_manifest()
-	print("Gate visual #126: %d capturas, %d fallos -> %s" % [VISTAS.size(), _fallos, _salida])
+	print("Gate visual #126: %d capturas, %d fallos -> %s" % [capturas, _fallos, _salida])
 	quit(1 if _fallos else 0)
 
 
@@ -82,19 +108,21 @@ func _montar_oficina() -> void:
 	_viewport.add_child(_mundo)
 
 	var entorno := WorldEnvironment.new()
-	var ambiente := Environment.new()
-	ambiente.background_mode = Environment.BG_COLOR
-	ambiente.background_color = Color(0.05, 0.05, 0.06)
-	ambiente.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	ambiente.ambient_light_color = EspaciosCatalogo.OFICINA.get("ambiente", Color(0.42, 0.43, 0.45))
-	ambiente.ambient_light_energy = EspaciosCatalogo.OFICINA.get("ambiente_energia", 0.55)
-	entorno.environment = ambiente
+	_ambiente = Environment.new()
+	_ambiente.background_mode = Environment.BG_COLOR
+	_ambiente.background_color = Color(0.05, 0.05, 0.06)
+	_ambiente.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	_ambiente.ambient_light_color = EspaciosCatalogo.OFICINA.get(
+		"ambiente", Color(0.42, 0.43, 0.45)
+	)
+	_ambiente.ambient_light_energy = EspaciosCatalogo.OFICINA.get("ambiente_energia", 0.55)
+	entorno.environment = _ambiente
 	_mundo.add_child(entorno)
 
-	var sol := DirectionalLight3D.new()
-	sol.rotation_degrees = Vector3(-55, -35, 0)
-	sol.light_energy = EspaciosCatalogo.OFICINA.get("sol", 0.25)
-	_mundo.add_child(sol)
+	_sol = DirectionalLight3D.new()
+	_sol.rotation_degrees = Vector3(-55, -35, 0)
+	_sol.light_energy = EspaciosCatalogo.OFICINA.get("sol", 0.25)
+	_mundo.add_child(_sol)
 
 	var espacio := EspaciosCatalogo.OFICINA.duplicate(true)
 	espacio["figuras"] = _plantilla_visual()
@@ -111,12 +139,44 @@ func _montar_oficina() -> void:
 	CuadrosOficina.montar(_mundo)
 	SenaleticaOficina98.montar(_mundo)
 
+	_montar_horario()
+
 	_camara = Camera3D.new()
 	_camara.name = "CamaraGate126"
 	_camara.current = true
 	_camara.near = 0.05
 	_camara.far = 40.0
 	_mundo.add_child(_camara)
+
+
+func _montar_horario() -> void:
+	_dia = Node.new()
+	var guion := GDScript.new()
+	guion.source_code = DIA_MINIMO
+	guion.reload()
+	_dia.set_script(guion)
+	_dia.name = "DiaMinimoGate126"
+	_dia._mundo = _mundo
+	_dia._espacio_actual = EspaciosCatalogo.OFICINA
+	_dia._ambiente = _ambiente
+	_dia._sol = _sol
+	_dia.jornada = {
+		"fase": "archivo",
+		"hora_minutos": Jornada.MINUTOS_INICIO_JORNADA,
+	}
+	_viewport.add_child(_dia)
+
+	_horario = Horario.new()
+	_dia.add_child(_horario)
+
+
+func _aplicar_hora(minutos: int) -> void:
+	_dia.jornada["hora_minutos"] = minutos
+	# El controller actualiza reloj y objetivos en su _process. Después se fuerza
+	# la convergencia para capturar el perfil, no un fotograma intermedio del fundido.
+	await process_frame
+	_horario._transicionar_luz(_dia, 10.0)
+	await process_frame
 
 
 func _plantilla_visual() -> Array:
@@ -141,7 +201,7 @@ func _plantilla_visual() -> Array:
 	return figuras
 
 
-func _capturar(vista: Dictionary) -> void:
+func _capturar(vista: Dictionary, sufijo: String) -> void:
 	_camara.fov = float(vista["fov"])
 	_camara.position = vista["pos"]
 	_camara.look_at(vista["objetivo"], Vector3.UP)
@@ -155,7 +215,10 @@ func _capturar(vista: Dictionary) -> void:
 		_fallar("viewport vacío para %s" % String(vista["nombre"]))
 		return
 
-	var nombre := "%s.png" % String(vista["nombre"])
+	var base := String(vista["nombre"])
+	var nombre := "%s.png" % base
+	if not sufijo.is_empty():
+		nombre = "%s-%s.png" % [base, sufijo]
 	var ruta := _salida.path_join(nombre)
 	var error_png := imagen.save_png(ruta)
 	if error_png != OK:
@@ -184,12 +247,17 @@ Capturas deterministas del espacio real sin HUD.
 - commit SHA: `%s`
 - Styloo administrativo activo: **%s**
 - renderer: `%s`
-- `puestos-archivo.png`: puestos, mesa de clasificación y batería de archivo.
-- `acceso-ventanas.png`: acceso, café y ventanas nocturnas.
+- iluminación horaria: `dia_reloj_horario_app.gd`, misma fuente que el runtime.
+- `puestos-archivo.png` y `acceso-ventanas.png`: **09:00 · mañana** (nombres históricos).
+- sufijo `-mediodia`: **13:00 · mediodía**.
+- sufijo `-tarde`: **16:30 · tarde**.
+- sufijo `-noche`: **20:00 · noche**.
+- total esperado: **8 PNG**, dos encuadres × cuatro franjas.
 
 La revisión humana debe comprobar que el lugar se reconoce como oficina/archivo
-habitado y funcional sin depender de rótulos. El playtest final debe usar una
-build cuyo SHA coincida con el commit de este artifact.
+habitado y funcional sin depender de rótulos, y que cada franja conserva volumen,
+sombras y lectura del puesto sin quemar techo/paredes ni inventar luz solar de noche.
+El playtest final debe usar una build cuyo SHA coincida con el commit de este artifact.
 """
 				% [commit_sha, "sí" if styloo_activo else "no", renderer]
 			)
