@@ -47,6 +47,14 @@ class AgentMemoryContractTest(unittest.TestCase):
         self.assertIn("containsPotentialSecret", self.deno_memory)
         self.assertIn('{ expireIn: AGENT_MEMORY_TTL_MS }', self.deno_memory)
 
+    def test_configured_repository_no_es_recursivo_y_valida_env(self):
+        bloque = self.deno_main.split("function configuredRepository(): string {", 1)[1].split("\n}", 1)[0]
+        self.assertNotIn("configuredRepository()", bloque)
+        self.assertIn('Deno.env.get("GITHUB_REPOSITORY")', bloque)
+        self.assertIn("DEFAULT_REPOSITORY", bloque)
+        self.assertIn("GITHUB_REPOSITORY inválido", bloque)
+        self.assertIn("const repository = configuredRepository();", self.deno_main)
+
     def test_gateway_expone_memoria_sin_romper_reportes(self):
         self.assertIn('import { handleAgentMemory } from "./agent_memory.ts";', self.deno_main)
         self.assertIn('url.pathname.startsWith("/api/agent-memory/")', self.deno_main)
