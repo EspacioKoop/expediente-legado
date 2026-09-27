@@ -57,14 +57,7 @@ static func construir(raiz: Node3D, base: Vector3, color: Color) -> Node3D:
 	# El torso se ensancha en hombros por escala, no mediante un cubo. Los
 	# brazos rompen la simetría mínima para que el contorno no parezca un tótem.
 	_capsula(
-		figura,
-		"Torso",
-		Vector3(0, 1.06, 0),
-		0.36,
-		1.10,
-		Vector3(1.12, 1.0, 0.62),
-		0.0,
-		material
+		figura, "Torso", Vector3(0, 1.06, 0), 0.36, 1.10, Vector3(1.12, 1.0, 0.62), 0.0, material
 	)
 	_capsula(
 		figura,
@@ -87,14 +80,7 @@ static func construir(raiz: Node3D, base: Vector3, color: Color) -> Node3D:
 		material
 	)
 
-	_esfera(
-		figura,
-		"Cabeza",
-		Vector3(0, 1.72, 0),
-		0.22,
-		Vector3(1.0, 1.0, 0.86),
-		material
-	)
+	_esfera(figura, "Cabeza", Vector3(0, 1.72, 0), 0.22, Vector3(1.0, 1.0, 0.86), material)
 	return figura
 
 

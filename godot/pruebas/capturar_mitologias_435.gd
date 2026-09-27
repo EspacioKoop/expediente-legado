@@ -35,7 +35,8 @@ func _init() -> void:
 		"veredicto_automatico": false,
 		"requiere_revision_humana": true,
 		"tamano": [TAMANO.x, TAMANO.y],
-		"gilgamesh_runtime": {
+		"gilgamesh_runtime":
+		{
 			"forma": FORMA_GILGAMESH,
 			"escala": SuenoGilgamesh.ESCALA_ENCUENTRO,
 			"fov": FOV_JUGADOR,
@@ -104,9 +105,7 @@ func _capturar_gilgamesh(salida: String, manifiesto: Dictionary) -> bool:
 	var objetivo_puzzle := sueno.to_global(Vector3(0.0, 1.2, 3.25))
 	camara.position = posicion_puzzle
 	camara.look_at(objetivo_puzzle, Vector3.UP)
-	if not await _guardar(
-		salida, "436_gilgamesh_puzzle.png", "gilgamesh_puzzle", 436, manifiesto
-	):
+	if not await _guardar(salida, "436_gilgamesh_puzzle.png", "gilgamesh_puzzle", 436, manifiesto):
 		return false
 
 	var fragmentos: Array = SuenoGilgamesh.ENCAJES.keys()
