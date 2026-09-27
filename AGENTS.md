@@ -27,7 +27,7 @@ Lee también el issue concreto, sus comentarios, PRs relacionadas, reviews y CI.
    CLAIM issue=#N agent=<nombre> branch=<rama> files=<rutas> goal=<objetivo> lease=48h
    ```
 
-4. Relee inmediatamente #182. Gana la reserva activa anterior por fecha de GitHub; en empate, el comentario con ID menor. Si hay solape, no edites.
+4. Relee inmediatamente #182. Gana la reserva activa anterior por fecha de GitHub; en empate, el comentario con ID menor. Si hay solape, no edites esos archivos. **Una reserva protege archivos, no bloquea la cooperación:** puedes revisar, proponer, entregar parches o commits al titular y trabajar rutas no reservadas del mismo issue con tu propio CLAIM. Editar lo reservado exige acuerdo del titular registrado en #182 ([guía de cooperación de las Normas Platino](https://github.com/EspacioKoop/normas_platino/blob/main/docs/COOPERACION_AUTONOMA.md), EspacioKoop/normas_platino#16).
 5. La lease dura 48 horas mientras no exista una PR abierta. Para renovar trabajo sin PR publica:
 
    ```text
