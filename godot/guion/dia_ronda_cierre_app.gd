@@ -37,6 +37,10 @@ func _procesar_archivo(dia) -> void:
 	var estado: Dictionary = estado_var
 
 	if estado.is_empty():
+		# La preferencia solo evita crear una oferta nueva. Una ronda ya iniciada
+		# sigue disponible para no borrar progreso ni convertir el toggle en abandono.
+		if not bool(PreferenciasSiga.cargar().get("ofrecer_ronda_cierre", true)):
+			return
 		var fuera_de_horario := Jornada.hora_minutos(dia.jornada) < HORA_OFERTA
 		var oferta_hoy := ofrecida(int(dia.jornada.get("dia", 1)), int(dia.jornada.get("raiz", 0)))
 		if fuera_de_horario or not oferta_hoy:
