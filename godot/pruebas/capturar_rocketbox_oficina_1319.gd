@@ -58,7 +58,7 @@ func _ejecutar() -> void:
 		await _montar_caso(estado as Dictionary, plantilla, sitios)
 
 	_guardar_manifest()
-	print("Evidencia Rocketbox #1319: %d casos, %d fallos -> %s" % [_casos.size(), _fallos, _salida])
+	print(\n\t\t"Evidencia Rocketbox #1319: %d casos, %d fallos -> %s" % [_casos.size(), _fallos, _salida]\n\t)
 	quit(1 if _fallos else 0)
 
 
@@ -177,16 +177,19 @@ func _montar_caso(estado: Dictionary, plantilla: Array, sitios: Array) -> void:
 		_fallar("%s esperaba %s y reproduce %s" % [estado["nombre"], clip, actual])
 
 	var medidas := _medir_postura(pieza, String(estado["nombre"]) == "sentado")
-	_casos.append(
-		{
-			"estado": estado["nombre"],
-			"companero": quien.get("id", ""),
-			"modelo": modelo,
-			"sexo": AnimacionesRocketbox.sexo(pieza),
-			"clip": actual,
-			"pie_min_y": medidas["pie"],
-			"cabeza_y": medidas["cabeza"],
-		}
+	(
+		_casos
+		. append(
+			{
+				"estado": estado["nombre"],
+				"companero": quien.get("id", ""),
+				"modelo": modelo,
+				"sexo": AnimacionesRocketbox.sexo(pieza),
+				"clip": actual,
+				"pie_min_y": medidas["pie"],
+				"cabeza_y": medidas["cabeza"],
+			}
+		)
 	)
 
 	_camara.position = sitio + Vector3(2.35, 1.55, 2.65)
@@ -255,8 +258,10 @@ func _guardar_manifest() -> void:
 	if readme == null:
 		_fallar("no se pudo escribir README.md")
 		return
-	readme.store_string(
-		"""# Preview Rocketbox oficina · #1319
+	(
+		readme
+		. store_string(
+			"""# Preview Rocketbox oficina · #1319
 
 Matriz automática de cuatro estados reales del compañero de oficina:
 **pie**, **sentado**, **teléfono** y **conversación**.
@@ -272,6 +277,7 @@ sin flotación, brazos sin torsión, postura legible y contexto de oficina.
 El manifest.json registra avatar, sexo, clip efectivo, renderer y medidas de
 pie/cabeza para cada estado.
 """
+		)
 	)
 	readme.close()
 
