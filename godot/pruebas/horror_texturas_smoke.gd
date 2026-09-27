@@ -106,10 +106,13 @@ func _comprobar_material_declarado() -> void:
 		"preservar_detalle_textura": true,
 	}
 	var espacio := HorrorTexturas.aplicar(base, "peine", HorrorTexturas.NIVEL_MAX)
-	var material := Espacio3D.material_declarado(
-		espacio,
-		"textura_suelo",
-		Color(0.58, 0.39, 0.20),
+	var material := (
+		Espacio3D
+		. material_declarado(
+			espacio,
+			"textura_suelo",
+			Color(0.58, 0.39, 0.20),
+		)
 	)
 	var textura = material.get_shader_parameter("textura") as Texture2D
 	comprobar(
