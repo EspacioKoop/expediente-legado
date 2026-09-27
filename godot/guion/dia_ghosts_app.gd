@@ -228,40 +228,35 @@ func _sincronizar_contexto(ahora_unix: int) -> void:
 
 
 func _contexto_actual() -> Dictionary:
-	if _host == null or not is_instance_valid(_host):
-		return {}
-	if typeof(_host.jornada) != TYPE_DICTIONARY:
-		return {}
-	var fase := String(_host.jornada.get("fase", ""))
-	var espacio: Dictionary = (
-		_host._espacio_actual if typeof(_host._espacio_actual) == TYPE_DICTIONARY else {}
-	)
-	if fase == "trayecto":
-		return {
-			"scene_key": "trayecto",
-			"scene_revision": _revision_espacio("trayecto", espacio),
-			"space": "scene",
-			"anchor_key": "",
-			"origen_anchor": Vector3.ZERO,
-			"modo": "trayecto",
-		}
-	if fase != "sueño":
-		return {}
-
-	var escenas = _host.jornada.get("sueno_escenas", [])
-	if typeof(escenas) != TYPE_ARRAY or escenas.is_empty():
-		return {}
-	var escena_id := String(escenas[0]).strip_edges()
-	if escena_id.is_empty():
-		return {}
-	return {
-		"scene_key": "sueno/%s" % escena_id,
-		"scene_revision": _revision_espacio("sueno-%s" % escena_id, espacio),
-		"space": "anchor",
-		"anchor_key": ANCHOR_SUENO,
-		"origen_anchor": espacio.get("entrada", Vector3.ZERO),
-		"modo": "sueno",
-	}
+	var contexto: Dictionary = {}
+	if _host != null and is_instance_valid(_host) and typeof(_host.jornada) == TYPE_DICTIONARY:
+		var fase := String(_host.jornada.get("fase", ""))
+		var espacio: Dictionary = (
+			_host._espacio_actual if typeof(_host._espacio_actual) == TYPE_DICTIONARY else {}
+		)
+		if fase == "trayecto":
+			contexto = {
+				"scene_key": "trayecto",
+				"scene_revision": _revision_espacio("trayecto", espacio),
+				"space": "scene",
+				"anchor_key": "",
+				"origen_anchor": Vector3.ZERO,
+				"modo": "trayecto",
+			}
+		elif fase == "sueño":
+			var escenas = _host.jornada.get("sueno_escenas", [])
+			if typeof(escenas) == TYPE_ARRAY and not escenas.is_empty():
+				var escena_id := String(escenas[0]).strip_edges()
+				if not escena_id.is_empty():
+					contexto = {
+						"scene_key": "sueno/%s" % escena_id,
+						"scene_revision": _revision_espacio("sueno-%s" % escena_id, espacio),
+						"space": "anchor",
+						"anchor_key": ANCHOR_SUENO,
+						"origen_anchor": espacio.get("entrada", Vector3.ZERO),
+						"modo": "sueno",
+					}
+	return contexto
 
 
 func _crear_grabador() -> void:
