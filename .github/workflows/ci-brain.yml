@@ -24,6 +24,40 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Recuperar snapshot anterior (si existe)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist/.cache
+          previous="$(gh run list \
+            --workflow ci-brain.yml \
+            --branch main \
+            --status success \
+            --limit 1 \
+            --json databaseId \
+            --jq '.[0].databaseId // empty')"
+          if [[ -z "$previous" ]]; then
+            echo "Primer snapshot: no existe una ejecución anterior."
+            exit 0
+          fi
+
+          destino="$RUNNER_TEMP/ci-brain-prev"
+          mkdir -p "$destino"
+          if ! gh run download "$previous" \
+            --name "ci-brain-$previous" \
+            --dir "$destino"; then
+            echo "El run anterior no conserva artifact; se inicia un snapshot nuevo."
+            exit 0
+          fi
+
+          anterior="$(find "$destino" -name ci-brain.sqlite3 -print -quit)"
+          if [[ -n "$anterior" ]]; then
+            cp "$anterior" dist/.cache/ci-brain.sqlite3
+            echo "Snapshot $previous recuperado."
+          fi
+
       - name: Recoger ventana reciente de Actions
         env:
           GH_TOKEN: ${{ github.token }}
