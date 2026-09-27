@@ -107,10 +107,13 @@ func _montar_cima(contorno: PackedVector2Array, espacio: Dictionary) -> void:
 	var cima := MeshInstance3D.new()
 	cima.name = "CimaNevada"
 	cima.mesh = nieve.commit()
-	cima.material_override = Espacio3D.material_declarado(
-		espacio,
-		"textura_suelo",
-		Color(0.78, 0.87, 0.93),
+	cima.material_override = (
+		Espacio3D
+		. material_declarado(
+			espacio,
+			"textura_suelo",
+			Color(0.78, 0.87, 0.93),
+		)
 	)
 	add_child(cima)
 
@@ -139,10 +142,13 @@ func _montar_cima(contorno: PackedVector2Array, espacio: Dictionary) -> void:
 	var roca := MeshInstance3D.new()
 	roca.name = "LaderasDeLaCima"
 	roca.mesh = laderas.commit()
-	roca.material_override = Espacio3D.material_declarado(
-		espacio,
-		"textura_muro",
-		Color(0.20, 0.24, 0.28),
+	roca.material_override = (
+		Espacio3D
+		. material_declarado(
+			espacio,
+			"textura_muro",
+			Color(0.20, 0.24, 0.28),
+		)
 	)
 	add_child(roca)
 
