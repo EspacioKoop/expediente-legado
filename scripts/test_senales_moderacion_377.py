@@ -27,7 +27,14 @@ class SenalesModeracion377RuntimeTest(unittest.TestCase):
             root / "godot/guion/senales/senal_player.gd",
             root / "godot/guion/dia_senales_multiplayer_app.gd",
         ]
-        codigo = "\n".join(ruta.read_text(encoding="utf-8") for ruta in rutas)
+        # Solo cuenta el código: un comentario que explica que la red no toca
+        # Partida no debe hacer fallar la comprobación de que no la toca (#1536).
+        codigo = "\n".join(
+            linea
+            for ruta in rutas
+            for linea in ruta.read_text(encoding="utf-8").splitlines()
+            if not linea.lstrip().startswith("#")
+        )
         self.assertNotIn("LineEdit.new", codigo)
         self.assertNotIn("TextEdit.new", codigo)
         self.assertNotIn("Partida.", codigo)
