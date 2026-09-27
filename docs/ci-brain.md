@@ -47,10 +47,7 @@ configura en GitHub:
 - variable de Actions `TURSO_DATABASE_URL` (normalmente `libsql://...`);
 - secret de Actions `TURSO_AUTH_TOKEN`.
 
-El workflow **CI brain** se ejecuta cada hora. Si ambos valores están presentes,
-replica el snapshot a Turso mediante `/v2/pipeline`. Si ninguno existe, no
-falla: deja SQLite + resumen como artifact durante 14 días. Una configuración a
-medias sí falla para evitar creer que existe memoria remota cuando no la hay.
+El workflow **CI brain** se ejecuta cada hora. Antes de recoger datos recupera el\nSQLite del último run correcto, si su artifact sigue disponible, y continúa sobre\nél; por tanto el fallback local conserva historia entre ejecuciones. Si ambos\nvalores de Turso están presentes, replica el snapshot mediante `/v2/pipeline`. Si\nninguno existe, no falla: mantiene SQLite + resumen como artifact durante 14\ndías. Una configuración a medias sí falla para evitar creer que existe memoria\nremota cuando no la hay.
 
 ## Relación con #1551
 
