@@ -84,6 +84,7 @@ var _sello: OptionButton
 var _firma: OptionButton
 var _plantilla: OptionButton
 var _vista: RichTextLabel
+var _diagnostico: Label
 var _estado: Label
 
 
@@ -129,6 +130,8 @@ static func validar(datos: Dictionary) -> PackedStringArray:
 		errores.append("Falta contenido")
 	elif cuerpo.length() > MAX_CONTENIDO:
 		errores.append("El contenido supera %d caracteres" % MAX_CONTENIDO)
+	if not formato_equilibrado(cuerpo):
+		errores.append("El formato del cuerpo tiene etiquetas abiertas o cruzadas")
 	var fecha := String(datos.get("fecha", "")).strip_edges()
 	if not fecha.is_empty() and not _fecha_valida(fecha):
 		errores.append("La fecha debe usar AAAA-MM-DD")
@@ -246,6 +249,29 @@ static func _quitar_formato(texto: String) -> String:
 	return salida
 
 
+static func formato_equilibrado(texto: String) -> bool:
+	var pila: Array[String] = []
+	var posicion := 0
+	while posicion < texto.length():
+		var encontrada := ""
+		for etiqueta in ETIQUETAS_FORMATO:
+			if texto.substr(posicion, etiqueta.length()) == etiqueta:
+				encontrada = etiqueta
+				break
+		if encontrada.is_empty():
+			posicion += 1
+			continue
+		if encontrada.begins_with("[/"):
+			var esperada := "[" + encontrada.substr(2)
+			if pila.is_empty() or pila.back() != esperada:
+				return false
+			pila.pop_back()
+		else:
+			pila.append(encontrada)
+		posicion += encontrada.length()
+	return pila.is_empty()
+
+
 static func _bbcode_seguro(texto: String) -> String:
 	var salida := BBCode.escapar(texto)
 	for etiqueta in ETIQUETAS_FORMATO:
@@ -311,7 +337,10 @@ func _montar() -> void:
 	margen.add_child(raiz)
 
 	var ayuda := Label.new()
-	ayuda.text = "Herramienta QA. Guarda en user://editor_expedientes. Ctrl+Shift+F10 muestra/oculta."
+	ayuda.text = (
+		"Herramienta QA. Guarda en user://editor_expedientes. "
+		+ "Ctrl+B/I formatea; Ctrl+Shift+L/E/R alinea; Ctrl+Shift+F10 muestra/oculta."
+	)
 	raiz.add_child(ayuda)
 
 	var division := HSplitContainer.new()
@@ -320,6 +349,10 @@ func _montar() -> void:
 	raiz.add_child(division)
 	division.add_child(_montar_formulario())
 	division.add_child(_montar_vista())
+
+	_diagnostico = Label.new()
+	_diagnostico.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	raiz.add_child(_diagnostico)
 
 	_estado = Label.new()
 	_estado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -353,11 +386,13 @@ func _montar_formulario() -> Control:
 	_boton_formato(barra, "Izq.", "[left]", "[/left]")
 	_boton_formato(barra, "Centro", "[center]", "[/center]")
 	_boton_formato(barra, "Der.", "[right]", "[/right]")
+	_boton_accion(barra, "Limpiar", _limpiar_formato_seleccion)
 
 	_cuerpo = TextEdit.new()
 	_cuerpo.custom_minimum_size.y = 300
 	_cuerpo.wrap_mode = TextEdit.LINE_WRAPPING_BOUNDARY
 	_cuerpo.text_changed.connect(_refrescar_vista)
+	_cuerpo.gui_input.connect(_al_input_cuerpo)
 	lista.add_child(_cuerpo)
 
 	_sello = _opciones(lista, "Sello", SELLOS)
@@ -490,14 +525,66 @@ func _aplicar_plantilla(indice: int) -> void:
 func _refrescar_vista() -> void:
 	if _vista != null:
 		_vista.text = vista_bbcode(_datos())
+	_refrescar_diagnostico()
+
+
+func _refrescar_diagnostico() -> void:
+	if _diagnostico == null or _cuerpo == null:
+		return
+	var datos := _datos()
+	var errores := validar(datos)
+	var caracteres := _quitar_formato(String(datos.get("contenido_bbcode", ""))).length()
+	var resumen := "%d/%d caracteres de cuerpo" % [caracteres, MAX_CONTENIDO]
+	if errores.is_empty():
+		_diagnostico.text = "Validación inmediata: OK · " + resumen
+	else:
+		_diagnostico.text = "Validación inmediata: %s · %s" % ["; ".join(errores), resumen]
+
+
+func _al_input_cuerpo(evento: InputEvent) -> void:
+	if not evento is InputEventKey or not evento.pressed or evento.echo or not evento.ctrl_pressed:
+		return
+	var manejado := true
+	if evento.keycode == KEY_B and not evento.shift_pressed:
+		_aplicar_formato("[b]", "[/b]")
+	elif evento.keycode == KEY_I and not evento.shift_pressed:
+		_aplicar_formato("[i]", "[/i]")
+	elif evento.shift_pressed and evento.keycode == KEY_L:
+		_aplicar_formato("[left]", "[/left]")
+	elif evento.shift_pressed and evento.keycode == KEY_E:
+		_aplicar_formato("[center]", "[/center]")
+	elif evento.shift_pressed and evento.keycode == KEY_R:
+		_aplicar_formato("[right]", "[/right]")
+	else:
+		manejado = false
+	if manejado:
+		_cuerpo.accept_event()
 
 
 func _aplicar_formato(apertura: String, cierre: String) -> void:
 	var seleccionado := _cuerpo.get_selected_text()
 	if _cuerpo.has_selection():
 		_cuerpo.delete_selection()
-	_cuerpo.insert_text_at_caret(apertura + seleccionado + cierre)
+		_cuerpo.insert_text_at_caret(apertura + seleccionado + cierre)
+	else:
+		var linea := _cuerpo.get_caret_line()
+		var columna := _cuerpo.get_caret_column()
+		_cuerpo.insert_text_at_caret(apertura + cierre)
+		_cuerpo.set_caret_line(linea)
+		_cuerpo.set_caret_column(columna + apertura.length())
 	_refrescar_vista()
+	_cuerpo.grab_focus()
+
+
+func _limpiar_formato_seleccion() -> void:
+	if not _cuerpo.has_selection():
+		_estado.text = "Selecciona texto del cuerpo antes de limpiar su formato."
+		return
+	var seleccionado := _cuerpo.get_selected_text()
+	_cuerpo.delete_selection()
+	_cuerpo.insert_text_at_caret(_quitar_formato(seleccionado))
+	_refrescar_vista()
+	_estado.text = "Formato permitido eliminado de la selección."
 	_cuerpo.grab_focus()
 
 
