@@ -27,12 +27,35 @@ static func cargar_configuracion(ruta: String = RUTA_CONFIG) -> Dictionary:
 	return datos if datos is Dictionary else {}
 
 
-static func url_configurada(configuracion: Dictionary = {}) -> String:
+static func urls_configuradas(configuracion: Dictionary = {}) -> Array[String]:
 	var datos := configuracion if not configuracion.is_empty() else cargar_configuracion()
-	var url := String(datos.get("feedback_url", "")).strip_edges()
-	if url.begins_with("https://") or url.begins_with("http://"):
-		return url
-	return ""
+	var resultado: Array[String] = []
+	var candidatas = datos.get("feedback_urls", [])
+	if candidatas is Array:
+		for candidata in candidatas:
+			_agregar_url_feedback(resultado, String(candidata))
+	_agregar_url_feedback(resultado, String(datos.get("feedback_url", "")))
+	return resultado
+
+
+static func url_configurada(configuracion: Dictionary = {}) -> String:
+	var urls := urls_configuradas(configuracion)
+	return urls[0] if not urls.is_empty() else ""
+
+
+static func _agregar_url_feedback(resultado: Array[String], valor: String) -> void:
+	var url := valor.strip_edges()
+	var segura := url.begins_with("https://")
+	var desarrollo_local := (
+		url.begins_with("http://127.0.0.1:")
+		or url.begins_with("http://localhost:")
+		or url == "http://127.0.0.1"
+		or url == "http://localhost"
+	)
+	if not segura and not desarrollo_local:
+		return
+	if url not in resultado:
+		resultado.append(url)
 
 
 static func url_issue_fallback(configuracion: Dictionary = {}) -> String:

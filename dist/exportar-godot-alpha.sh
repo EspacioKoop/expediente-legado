@@ -33,22 +33,48 @@ if [ "$QA_TOOLS" != "0" ] && [ "$QA_TOOLS" != "1" ]; then
 fi
 
 # El formulario de feedback se configura al empaquetar, no queda hardcodeado
-# en GDScript. Las alphas usan el gateway desplegado por defecto; una
-# SIGA98_FEEDBACK_URL no vacía permite redirigir builds concretas. La URL es
-# pública dentro de la build y solo se aceptan HTTP(S).
+# en GDScript. SIGA98_FEEDBACK_URL señala el gateway primario de una build
+# (Cloudflare en producción); Vercel queda como respaldo mientras siga
+# disponible. No se embeben tokens: las únicas URLs permitidas son HTTPS,
+# salvo loopback HTTP para desarrollo local.
 python3 - "$CONFIG_INCIDENCIAS" "${SIGA98_FEEDBACK_URL:-}" "$DEFAULT_FEEDBACK_URL" <<'PY'
 import json
 from pathlib import Path
 import sys
+from urllib.parse import urlsplit
 
 ruta = Path(sys.argv[1])
 override = sys.argv[2].strip()
 default = sys.argv[3].strip()
-url = override or default
-if not url.startswith(("https://", "http://")):
-    raise SystemExit("ERROR: SIGA98_FEEDBACK_URL debe usar http:// o https://")
+
+def segura(url: str) -> bool:
+    partes = urlsplit(url)
+    if partes.scheme == "https" and partes.netloc:
+        return True
+    return (
+        partes.scheme == "http"
+        and partes.hostname in {"127.0.0.1", "localhost"}
+        and bool(partes.netloc)
+    )
+
+primaria = override or default
+candidatas = [primaria]
+if default and default != primaria:
+    candidatas.append(default)
+
+urls = []
+for url in candidatas:
+    if not segura(url):
+        raise SystemExit(
+            "ERROR: SIGA98_FEEDBACK_URL debe usar HTTPS "
+            "(HTTP solo se admite en localhost/127.0.0.1)"
+        )
+    if url not in urls:
+        urls.append(url)
+
 datos = json.loads(ruta.read_text(encoding="utf-8"))
-datos["feedback_url"] = url
+datos["feedback_urls"] = urls
+datos["feedback_url"] = urls[0]
 ruta.write_text(json.dumps(datos, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 PY
 
