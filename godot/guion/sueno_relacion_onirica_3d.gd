@@ -235,8 +235,7 @@ func _abrir_documento(indice: int) -> void:
 	var dato: Dictionary = relacion.documentos[indice]
 	_indice_lectura = indice
 	_lector_cabecera.text = (
-		tr("VISOR_CABECERA")
-		% [dato.get("folio", ""), dato.get("tipo", ""), dato.get("fecha", "")]
+		tr("VISOR_CABECERA") % [dato.get("folio", ""), dato.get("tipo", ""), dato.get("fecha", "")]
 	)
 	_lector_contenido.text = String(dato.get("contenido", dato.get("extracto", "")))
 	_sincronizar_lector_seleccion()
