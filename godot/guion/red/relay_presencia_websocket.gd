@@ -9,15 +9,18 @@ extends RefCounted
 
 const EventoOnline = preload("res://guion/red/evento_online.gd")
 const PresenciaDatos = preload("res://guion/red/presencia_datos.gd")
+const GhostDatos = preload("res://guion/red/ghost_datos.gd")
 
 const MAX_PEERS := 8
 const MAX_MENSAJE_BYTES := 4096
+const MAX_GHOSTS_POR_SALA := 12
 
 var _server := TCPServer.new()
 var _peers: Dictionary = {}
 var _siguiente_peer_id := 1
 var _puerto := 0
 var _rechazados := 0
+var _ghosts_por_sala: Dictionary = {}
 
 
 func iniciar(puerto: int, bind_address: String = "127.0.0.1") -> Dictionary:
@@ -98,6 +101,7 @@ func detener() -> void:
 		if socket.get_ready_state() != WebSocketPeer.STATE_CLOSED:
 			socket.close(-1)
 	_peers.clear()
+	_ghosts_por_sala.clear()
 	if _server.is_listening():
 		_server.stop()
 	_puerto = 0
@@ -185,6 +189,7 @@ func _unir(peer_id: int, datos: Dictionary) -> void:
 			"room_id": room_id,
 		},
 	)
+	_enviar_historial_ghosts(peer_id, scene_key, room_id)
 
 
 func _publicar(peer_id: int, datos: Dictionary) -> void:
@@ -199,30 +204,97 @@ func _publicar(peer_id: int, datos: Dictionary) -> void:
 		return
 
 	var ahora := int(Time.get_unix_time_from_system())
-	var validacion := PresenciaDatos.validar_evento(evento, ahora)
-	if not validacion["ok"]:
-		_rechazar(peer_id, "invalid_presence")
+	var base := EventoOnline.validar(evento, ahora)
+	if not base["ok"]:
+		_rechazar(peer_id, "invalid_event")
 		return
-	var normalizado: Dictionary = validacion["event"]
-	var payload: Dictionary = normalizado["payload"]
+	var normalizado: Dictionary = base["event"]
 	if (
 		String(normalizado["scene_key"]) != String(peer["scene_key"])
 		or String(normalizado["actor_public_id"]) != String(peer["actor_public_id"])
-		or String(payload["room_id"]) != String(peer["room_id"])
 	):
 		_rechazar(peer_id, "membership_mismatch")
 		return
 
+	match String(normalizado["kind"]):
+		"presence":
+			var validacion_presencia := PresenciaDatos.validar_evento(normalizado, ahora)
+			if not validacion_presencia["ok"]:
+				_rechazar(peer_id, "invalid_presence")
+				return
+			normalizado = validacion_presencia["event"]
+			var payload: Dictionary = normalizado["payload"]
+			if String(payload["room_id"]) != String(peer["room_id"]):
+				_rechazar(peer_id, "membership_mismatch")
+				return
+		"ghost":
+			var validacion_ghost := GhostDatos.validar_evento(normalizado, ahora)
+			if not validacion_ghost["ok"]:
+				_rechazar(peer_id, "invalid_ghost")
+				return
+			normalizado = validacion_ghost["event"]
+			_guardar_ghost(String(peer["scene_key"]), String(peer["room_id"]), normalizado, ahora)
+		_:
+			_rechazar(peer_id, "unsupported_event_kind")
+			return
+
+	_reenviar_evento(peer_id, normalizado)
+
+
+func _reenviar_evento(origen_id: int, evento: Dictionary) -> void:
+	var origen: Dictionary = _peers.get(origen_id, {})
+	if origen.is_empty():
+		return
 	for destino_id in _peers.keys():
-		if destino_id == peer_id:
+		if destino_id == origen_id:
 			continue
 		var destino: Dictionary = _peers[destino_id]
 		if (
-			String(destino.get("scene_key", "")) != String(peer["scene_key"])
-			or String(destino.get("room_id", "")) != String(peer["room_id"])
+			String(destino.get("scene_key", "")) != String(origen["scene_key"])
+			or String(destino.get("room_id", "")) != String(origen["room_id"])
 		):
 			continue
-		_enviar(destino_id, {"op": "event", "event": normalizado})
+		_enviar(destino_id, {"op": "event", "event": evento})
+
+
+func _guardar_ghost(
+	scene_key: String, room_id: String, evento: Dictionary, ahora_unix: int
+) -> void:
+	var clave := _clave_sala(scene_key, room_id)
+	var historial: Array = _ghosts_por_sala.get(clave, [])
+	var limpio: Array = []
+	var huella_nueva := EventoOnline.huella(evento)
+	for anterior in historial:
+		var validacion := GhostDatos.validar_evento(anterior, ahora_unix)
+		if not validacion["ok"]:
+			continue
+		if EventoOnline.huella(validacion["event"]) == huella_nueva:
+			continue
+		limpio.append(validacion["event"])
+	limpio.append(evento.duplicate(true))
+	while limpio.size() > MAX_GHOSTS_POR_SALA:
+		limpio.pop_front()
+	_ghosts_por_sala[clave] = limpio
+
+
+func _enviar_historial_ghosts(peer_id: int, scene_key: String, room_id: String) -> void:
+	var clave := _clave_sala(scene_key, room_id)
+	var historial: Array = _ghosts_por_sala.get(clave, [])
+	if historial.is_empty():
+		return
+	var ahora := int(Time.get_unix_time_from_system())
+	var limpio: Array = []
+	for crudo in historial:
+		var validacion := GhostDatos.validar_evento(crudo, ahora)
+		if validacion["ok"]:
+			limpio.append(validacion["event"])
+	_ghosts_por_sala[clave] = limpio
+	for indice in range(limpio.size() - 1, -1, -1):
+		_enviar(peer_id, {"op": "event", "event": limpio[indice]})
+
+
+func _clave_sala(scene_key: String, room_id: String) -> String:
+	return "%s|%s" % [scene_key, room_id]
 
 
 func _dejar(peer_id: int) -> void:
