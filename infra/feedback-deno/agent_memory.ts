@@ -17,6 +17,7 @@ interface OidcClaims {
   nbf?: number;
   repository?: string;
   workflow_ref?: string;
+  job_workflow_ref?: string;
   run_id?: string;
 }
 
@@ -155,11 +156,19 @@ async function authenticateAgentRequest(
   if (claims.repository !== repository) return null;
 
   const workflowRef = claims.workflow_ref ?? "";
+  const jobWorkflowRef = claims.job_workflow_ref ?? "";
   const allowedWorkflows = [
     repository + "/.github/workflows/agent-autopilot.yml@",
     repository + "/.github/workflows/agent-ci-repair.yml@",
   ];
-  if (!allowedWorkflows.some((prefix) => workflowRef.startsWith(prefix))) {
+  const workerPrefix = repository + "/.github/workflows/agent-worker.yml@";
+  const poolPrefix = repository + "/.github/workflows/agent-pool.yml@";
+  const directAllowed = allowedWorkflows.some((prefix) =>
+    workflowRef.startsWith(prefix)
+  ) || workflowRef.startsWith(workerPrefix);
+  const reusableAllowed = workflowRef.startsWith(poolPrefix) &&
+    jobWorkflowRef.startsWith(workerPrefix);
+  if (!directAllowed && !reusableAllowed) {
     return null;
   }
 
