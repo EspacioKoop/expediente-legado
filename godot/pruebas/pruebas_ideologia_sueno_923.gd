@@ -209,7 +209,9 @@ func _probar_regla_jugable_local() -> void:
 	var antes := reparto.estado_jugable()
 	var accion_reparto := reparto.aplicar_accion(1)
 	var despues := reparto.estado_jugable()
-	_comprobar(bool(accion_reparto.get("ok", false)), "la regla distribuida acepta interacción local")
+	_comprobar(
+		bool(accion_reparto.get("ok", false)), "la regla distribuida acepta interacción local"
+	)
 	_comprobar(
 		int(antes.get("total", -1)) == int(despues.get("total", -2)),
 		"distribuir conserva la cantidad total",
