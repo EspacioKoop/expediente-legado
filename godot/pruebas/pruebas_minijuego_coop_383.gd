@@ -29,14 +29,17 @@ func _init() -> void:
 func _configuraciones_faciles() -> Array:
 	var salida: Array = []
 	for _i in range(3):
-		salida.append(
-			{
-				"inicio": Vector2.ZERO,
-				"objetivo": Vector2(0.0, -0.14625),
-				"limite": Rect2(-1.0, -1.0, 2.0, 2.0),
-				"radio_objetivo": 0.04,
-				"obstaculos": [],
-			}
+		(
+			salida
+			. append(
+				{
+					"inicio": Vector2.ZERO,
+					"objetivo": Vector2(0.0, -0.14625),
+					"limite": Rect2(-1.0, -1.0, 2.0, 2.0),
+					"radio_objetivo": 0.04,
+					"obstaculos": [],
+				}
+			)
 		)
 	return salida
 
@@ -47,19 +50,22 @@ func _crear_evento(
 	turn: int,
 	rules_version: int = MinijuegoGolfAutoridad.RULES_VERSION,
 ) -> Dictionary:
-	return MinijuegoSesionDatos.crear_accion(
-		SCENE_KEY,
-		BUILD,
-		actor,
-		ROOM_ID,
-		SESSION_ID,
-		MinijuegoGolfAutoridad.MINIGAME_ID,
-		rules_version,
-		sequence,
-		turn,
-		{"type": "shot", "direction": [0.0, -1.0], "power": 0.1},
-		AHORA + sequence,
-		"evt-%s-%d-%d" % [actor, rules_version, sequence],
+	return (
+		MinijuegoSesionDatos
+		. crear_accion(
+			SCENE_KEY,
+			BUILD,
+			actor,
+			ROOM_ID,
+			SESSION_ID,
+			MinijuegoGolfAutoridad.MINIGAME_ID,
+			rules_version,
+			sequence,
+			turn,
+			{"type": "shot", "direction": [0.0, -1.0], "power": 0.1},
+			AHORA + sequence,
+			"evt-%s-%d-%d" % [actor, rules_version, sequence],
+		)
 	)
 
 
@@ -69,27 +75,33 @@ func _probar_contrato_acciones() -> void:
 	_comprobar("kind dedicado", evento["event"]["kind"], "minigame_action")
 	_comprobar("no transporta resultado", evento["event"]["payload"].has("result"), false)
 
-	var puntuacion := MinijuegoSesionDatos.crear_accion(
-		SCENE_KEY,
-		BUILD,
-		"anon-a",
-		ROOM_ID,
-		SESSION_ID,
-		MinijuegoGolfAutoridad.MINIGAME_ID,
-		1,
-		0,
-		0,
-		{"type": "shot", "direction": [0.0, -1.0], "power": 0.1, "score": 900},
-		AHORA,
+	var puntuacion := (
+		MinijuegoSesionDatos
+		. crear_accion(
+			SCENE_KEY,
+			BUILD,
+			"anon-a",
+			ROOM_ID,
+			SESSION_ID,
+			MinijuegoGolfAutoridad.MINIGAME_ID,
+			1,
+			0,
+			0,
+			{"type": "shot", "direction": [0.0, -1.0], "power": 0.1, "score": 900},
+			AHORA,
+		)
 	)
 	_comprobar("cliente no puede enviar score", puntuacion["ok"], false)
 	_comprobar("rechazo identifica resultado", puntuacion["reason"], "forbidden_result_field")
 
-	var sesion := MinijuegoSesionDatos.nueva_sesion(
-		SESSION_ID,
-		MinijuegoGolfAutoridad.MINIGAME_ID,
-		1,
-		["anon-a", "anon-b"],
+	var sesion := (
+		MinijuegoSesionDatos
+		. nueva_sesion(
+			SESSION_ID,
+			MinijuegoGolfAutoridad.MINIGAME_ID,
+			1,
+			["anon-a", "anon-b"],
+		)
 	)
 	_comprobar("contrato tiene jugadores", sesion["players"].size(), 2)
 	_comprobar("contrato tiene fase", sesion["phase"], "playing")
@@ -98,11 +110,14 @@ func _probar_contrato_acciones() -> void:
 
 
 func _probar_vertical_dos_clientes() -> void:
-	var autoridad := MinijuegoGolfAutoridad.new(
-		ROOM_ID,
-		SESSION_ID,
-		["anon-a", "anon-b"],
-		_configuraciones_faciles(),
+	var autoridad := (
+		MinijuegoGolfAutoridad
+		. new(
+			ROOM_ID,
+			SESSION_ID,
+			["anon-a", "anon-b"],
+			_configuraciones_faciles(),
+		)
 	)
 	_comprobar("autoridad válida", autoridad.valida(), true)
 
@@ -121,10 +136,13 @@ func _probar_vertical_dos_clientes() -> void:
 		_comprobar("cliente publica acción %d" % indice, publicado["ok"], true)
 
 		relay_host.inyectar(evento["event"])
-		var consulta := relay_host.consultar_eventos(
-			SCENE_KEY,
-			MinijuegoSesionDatos.KIND,
-			AHORA + indice,
+		var consulta := (
+			relay_host
+			. consultar_eventos(
+				SCENE_KEY,
+				MinijuegoSesionDatos.KIND,
+				AHORA + indice,
+			)
 		)
 		_comprobar("relay entrega acción %d" % indice, consulta["events"].is_empty(), false)
 		var recibida: Dictionary = consulta["events"][-1]
