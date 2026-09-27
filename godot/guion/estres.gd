@@ -4,7 +4,7 @@
 ## crear un singleton ni otra fuente de verdad. No concede ni retira progreso,
 ## no expone el valor numérico ni una barra y no decide efectos visuales, sonoros
 ## o narrativos: los consumidores reciben únicamente un nivel normalizado 0..1.
-## La presentación puede traducirlo a bandas cualitativas sin revelar la cifra.
+## La presentación puede traducirlo a estados gráficos discretos sin revelar la cifra.
 class_name Estres
 extends RefCounted
 
