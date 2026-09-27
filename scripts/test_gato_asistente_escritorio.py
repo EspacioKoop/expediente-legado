@@ -42,8 +42,8 @@ class GatoAsistenteEscritorioTest(unittest.TestCase):
         ):
             self.assertIn(constante, fuente)
         self.assertIn("CICLO_ANIMACION := 14.0", fuente)
-        self.assertIn("return FRAME_LOAF", fuente)
-        self.assertIn("return FRAME_ESPALDA", fuente)
+        self.assertIn("frame = FRAME_LOAF", fuente)
+        self.assertIn("frame = FRAME_ESPALDA", fuente)
 
     def test_paseo_es_determinista_y_respeta_reduccion_movimiento(self):
         fuente = PASEO.read_text(encoding="utf-8")
