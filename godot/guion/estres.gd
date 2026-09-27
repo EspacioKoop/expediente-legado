@@ -1,9 +1,10 @@
-## Estado invisible de estrés/paranoia para #952.
+## Estado canónico de estrés/paranoia para #952.
 ##
 ## Vive dentro del Dictionary de Jornada para atravesar escenas y guardados sin
 ## crear un singleton ni otra fuente de verdad. No concede ni retira progreso,
-## no expone barra y no decide efectos visuales, sonoros o narrativos: esos
-## consumidores reciben únicamente un nivel normalizado 0..1.
+## no expone el valor numérico ni una barra y no decide efectos visuales, sonoros
+## o narrativos: los consumidores reciben únicamente un nivel normalizado 0..1.
+## La presentación puede traducirlo a estados gráficos discretos sin revelar la cifra.
 class_name Estres
 extends RefCounted
 
@@ -41,7 +42,7 @@ static func aplicar(jornada: Dictionary, evento: String, intensidad: float = 1.0
 
 
 ## Valor interno 0..100. Se conserva para autoría y depuración, pero no debe
-## mostrarse como recurso o estadística al jugador.
+## mostrarse como cifra, barra o estadística directa al jugador.
 static func valor(jornada: Dictionary) -> float:
 	return float(_asegurar(jornada)["valor"])
 

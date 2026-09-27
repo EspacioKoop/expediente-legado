@@ -2,12 +2,13 @@
 ##
 ## Controller hijo: conserva `dia_clima_app.gd` como raíz histórica y observa la
 ## fase efectiva de Jornada. Gobierna el slot ESTADO, una banda compacta de
-## recursos, una tarjeta transitoria de fase y la superficie modal del inventario;
+## recursos/estado, una tarjeta transitoria de fase y la superficie modal del inventario;
 ## prompts y diálogo siguen siendo responsabilidad de HUDLayer.
 extends Node
 
 const DURACION_TARJETA_FASE := 1.5
 const RUTA_TEXTOS_RECURSOS := "res://datos/hud_recursos_textos.json"
+const EstresIndicadorHUD := preload("res://guion/estres_hud_indicador.gd")
 const FASES_RECURSOS := ["archivo", "trayecto", "casa"]
 const NOMBRES_FASE := {
 	"archivo": "ARCHIVO · PLANTA 4",
@@ -22,6 +23,7 @@ var _texto_fase: Label
 var _temporizador_fase: Timer
 var _recursos_panel: PanelContainer
 var _texto_recursos: Label
+var _indicador_estres: Control
 var _firma_recursos := ""
 var _textos_recursos: Dictionary = {}
 var _inventario_panel: InventarioMenuApp
@@ -111,6 +113,7 @@ static func modelo_recursos(estado_partida: Dictionary) -> Dictionary:
 		"dia": dia,
 		"hora_minutos": Jornada.hora_minutos(jornada),
 		"dinero": int(jornada.get("dinero", 0)),
+		"estres_segmentos": segmentos_estres(Estres.nivel(jornada)),
 	}
 
 	match fase:
@@ -134,6 +137,11 @@ static func modelo_recursos(estado_partida: Dictionary) -> Dictionary:
 	return modelo
 
 
+static func segmentos_estres(nivel: float) -> int:
+	var acotado := clampf(nivel, 0.0, 1.0)
+	return mini(4, int(floor(acotado * 4.0)) + 1)
+
+
 func _sincronizar_recursos(hud: HUDLayer, dia: Node, jornada: Dictionary) -> void:
 	var partida_actual = dia.get("partida")
 	if not partida_actual is Partida:
@@ -153,6 +161,7 @@ func _sincronizar_recursos(hud: HUDLayer, dia: Node, jornada: Dictionary) -> voi
 	var firma := JSON.stringify(modelo)
 	if firma != _firma_recursos:
 		_texto_recursos.text = _texto_de_recursos(modelo)
+		_indicador_estres.call("configurar_segmentos", int(modelo.get("estres_segmentos", 1)))
 		_firma_recursos = firma
 	hud.activar(HUDLayer.RECURSOS)
 
@@ -172,13 +181,23 @@ func _asegurar_recursos(hud: HUDLayer) -> void:
 	_recursos_panel.visible = false
 	hud.add_child(_recursos_panel)
 
+	var fila := HBoxContainer.new()
+	fila.name = "FilaRecursos"
+	fila.alignment = BoxContainer.ALIGNMENT_END
+	fila.add_theme_constant_override("separation", 8)
+	_recursos_panel.add_child(fila)
+
+	_indicador_estres = EstresIndicadorHUD.new()
+	_indicador_estres.name = "IndicadorEstres"
+	fila.add_child(_indicador_estres)
+
 	_texto_recursos = Label.new()
 	_texto_recursos.name = "TextoRecursos"
 	_texto_recursos.custom_minimum_size = Vector2(0.0, 30.0)
 	_texto_recursos.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_texto_recursos.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_texto_recursos.add_theme_font_size_override("font_size", 14)
-	_recursos_panel.add_child(_texto_recursos)
+	fila.add_child(_texto_recursos)
 
 	hud.registrar(HUDLayer.RECURSOS, _recursos_panel)
 
@@ -188,7 +207,6 @@ func _texto_de_recursos(modelo: Dictionary) -> String:
 	var minutos := int(modelo.get("hora_minutos", 0))
 	_anadir_parte(partes, _formatear_recurso("dia", [int(modelo.get("dia", 1))]))
 	_anadir_parte(partes, _formatear_recurso("hora", [int(minutos / 60), minutos % 60]))
-
 	match String(modelo.get("fase", "")):
 		"archivo":
 			_anadir_parte(partes, _formatear_recurso("acciones", [modelo.get("acciones", 0)]))
