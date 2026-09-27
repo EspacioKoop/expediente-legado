@@ -262,9 +262,7 @@ func _asegurar_compositor() -> bool:
 	return true
 
 
-func _al_publicar_desde_compositor(
-	anchor_id: String, plantilla_id: String, tokens: Array
-) -> void:
+func _al_publicar_desde_compositor(anchor_id: String, plantilla_id: String, tokens: Array) -> void:
 	if _compositor == null or not is_instance_valid(_compositor):
 		return
 	var resultado := publicar_en_anchor(
