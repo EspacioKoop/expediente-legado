@@ -23,18 +23,14 @@ func _initialize() -> void:
 			continue
 		_comprobar(lamina.mesh is QuadMesh, nombre + " usa un plano fijo")
 		_comprobar(
-			lamina.material_override is StandardMaterial3D,
-			nombre + " tiene material propio"
+			lamina.material_override is StandardMaterial3D, nombre + " tiene material propio"
 		)
 
 	_comprobar(
 		conjunto.find_children("*", "CollisionShape3D", true, false).is_empty(),
 		"no añade colisiones"
 	)
-	_comprobar(
-		conjunto.find_children("*", "Sprite3D", true, false).is_empty(),
-		"no usa billboards"
-	)
+	_comprobar(conjunto.find_children("*", "Sprite3D", true, false).is_empty(), "no usa billboards")
 
 	var salida := conjunto.get_node("SalidaEmergencia") as MeshInstance3D
 	_comprobar(is_equal_approx(salida.rotation_degrees.y, 90.0), "salida sigue la pared lateral")
