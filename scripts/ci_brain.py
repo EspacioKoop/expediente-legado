@@ -81,8 +81,8 @@ def github_json(url: str, token: str) -> dict[str, Any]:
         raise RuntimeError(f"GitHub API {exc.code}: {detail}") from exc
 
 
-ANSI_RE = re.compile(r"\\x1b\\[[0-9;]*[A-Za-z]")
-TIMESTAMP_RE = re.compile(r"^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z\\s+")
+ANSI_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+TIMESTAMP_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\s+")
 IMPORTANT_FAILURE_RE = re.compile(
     r"(?:error|failed|failure|fatal|traceback|assert|gdformat|gdlint|"
     r"parse error|exit code|not found|missing|required check)",
@@ -91,11 +91,11 @@ IMPORTANT_FAILURE_RE = re.compile(
 SECRET_RE = re.compile(
     r"(?:github_pat_[A-Za-z0-9_]+|gh[pousr]_[A-Za-z0-9]+|"
     r"AIza[0-9A-Za-z_-]{12,}|sk-[A-Za-z0-9_-]{12,}|"
-    r"Bearer\\s+[A-Za-z0-9._-]{12,})",
+    r"Bearer\s+[A-Za-z0-9._-]{12,})",
     re.IGNORECASE,
 )
-SHA_RE = re.compile(r"\\b[0-9a-f]{7,40}\\b", re.IGNORECASE)
-LINE_NUMBER_RE = re.compile(r":\\d+(?::\\d+)?(?=[:\\s)]|$)")
+SHA_RE = re.compile(r"\b[0-9a-f]{7,40}\b", re.IGNORECASE)
+LINE_NUMBER_RE = re.compile(r":\d+(?::\d+)?(?=[:\s)]|$)")
 TOKEN_RE = re.compile(r"[A-Za-z0-9_./:-]{4,}")
 CONTEXT_STOPWORDS = {
     "para", "como", "esta", "este", "estos", "estas", "desde", "solo", "sobre",
