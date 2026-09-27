@@ -59,8 +59,7 @@ func _ejecutar() -> void:
 
 	_guardar_manifest()
 	print(
-		"Evidencia Rocketbox #1319: %d casos, %d fallos -> %s"
-		% [_casos.size(), _fallos, _salida]
+		"Evidencia Rocketbox #1319: %d casos, %d fallos -> %s" % [_casos.size(), _fallos, _salida]
 	)
 	quit(1 if _fallos else 0)
 
@@ -91,9 +90,7 @@ func _montar_oficina() -> void:
 	ambiente.background_mode = Environment.BG_COLOR
 	ambiente.background_color = Color(0.05, 0.05, 0.06)
 	ambiente.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	ambiente.ambient_light_color = EspaciosCatalogo.OFICINA.get(
-		"ambiente", Color(0.42, 0.43, 0.45)
-	)
+	ambiente.ambient_light_color = EspaciosCatalogo.OFICINA.get("ambiente", Color(0.42, 0.43, 0.45))
 	ambiente.ambient_light_energy = EspaciosCatalogo.OFICINA.get("ambiente_energia", 0.55)
 	entorno.environment = ambiente
 	_mundo.add_child(entorno)
@@ -136,10 +133,7 @@ func _montar_caso(estado: Dictionary, plantilla: Array, sitios: Array) -> void:
 
 	var modelo := Companeros.cuerpo_de(quien)
 	if not Modelos.persona(
-		soporte,
-		modelo,
-		quien.get("color", Color(0.3, 0.3, 0.3)),
-		String(quien.get("retrato", ""))
+		soporte, modelo, quien.get("color", Color(0.3, 0.3, 0.3)), String(quien.get("retrato", ""))
 	):
 		_fallar("%s no pudo montar %s" % [estado["nombre"], modelo])
 		soporte.queue_free()
@@ -217,10 +211,10 @@ func _medir_postura(pieza: Node3D, sentado: bool) -> Dictionary:
 	if esqueleto == null:
 		_fallar("avatar sin Skeleton3D")
 		return {"pie": -999.0, "cabeza": -999.0}
-	var pie := minf(
-		_hueso_global(esqueleto, "LeftFoot").y,
-		_hueso_global(esqueleto, "RightFoot").y
-	) - pieza.global_position.y
+	var pie := (
+		minf(_hueso_global(esqueleto, "LeftFoot").y, _hueso_global(esqueleto, "RightFoot").y)
+		- pieza.global_position.y
+	)
 	var cabeza := _hueso_global(esqueleto, "Head").y - pieza.global_position.y
 	if sentado:
 		if pie < -CompaneroIdle3D.ALTURA_ASIENTO - 0.02:
