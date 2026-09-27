@@ -112,7 +112,10 @@ func _comprobar_material_declarado() -> void:
 		Color(0.58, 0.39, 0.20),
 	)
 	var textura = material.get_shader_parameter("textura") as Texture2D
-	comprobar("la malla alternativa activa la textura declarada", material.get_shader_parameter("con_textura"))
+	comprobar(
+		"la malla alternativa activa la textura declarada",
+		bool(material.get_shader_parameter("con_textura")),
+	)
 	comprobar(
 		"la malla alternativa carga el PNG 128x128",
 		textura != null and textura.get_size() == Vector2(128, 128),
@@ -130,7 +133,7 @@ func _comprobar_material_declarado() -> void:
 	)
 	comprobar(
 		"la malla alternativa conserva el detalle opt-in",
-		material.get_shader_parameter("preservar_detalle_textura"),
+		bool(material.get_shader_parameter("preservar_detalle_textura")),
 	)
 
 
