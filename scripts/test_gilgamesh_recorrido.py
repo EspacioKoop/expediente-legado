@@ -8,6 +8,8 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 SMOKE = ROOT / "godot" / "pruebas" / "pruebas_gilgamesh_recorrido.gd"
 DIA = ROOT / "godot" / "escenas" / "dia.tscn"
+SUENO = ROOT / "godot" / "guion" / "sueno_gilgamesh.gd"
+CONTROLLER = ROOT / "godot" / "guion" / "dia_gilgamesh_sueno_app.gd"
 
 
 class GilgameshRecorridoTest(unittest.TestCase):
@@ -15,6 +17,8 @@ class GilgameshRecorridoTest(unittest.TestCase):
     def setUpClass(cls):
         cls.smoke = SMOKE.read_text(encoding="utf-8")
         cls.dia = DIA.read_text(encoding="utf-8")
+        cls.sueno = SUENO.read_text(encoding="utf-8")
+        cls.controller = CONTROLLER.read_text(encoding="utf-8")
 
     def test_smoke_entra_por_el_recorrido_real(self):
         self.assertIn('const DIA := preload("res://escenas/dia.tscn")', self.smoke)
@@ -42,6 +46,13 @@ class GilgameshRecorridoTest(unittest.TestCase):
         self.assertIn('"CiudadImposible/PuertaBloqueada"', self.smoke)
         self.assertIn('"CiudadImposible/RutaFinal"', self.smoke)
         self.assertIn("sueno.resuelto()", self.smoke)
+
+    def test_runtime_no_vuelve_al_punto_medio_geometrico(self):
+        self.assertIn("static func ancla_encuentro(", self.sueno)
+        self.assertIn("Planta.a_la_vista(", self.sueno)
+        self.assertIn("_centro_tramo_horizontal(", self.sueno)
+        self.assertIn("SuenoGilgamesh.ancla_encuentro(espacio)", self.controller)
+        self.assertNotIn("entrada.lerp(salida, 0.5)", self.controller)
 
     def test_dia_sigue_montando_controller_nocturno(self):
         self.assertIn('path="res://guion/dia_gilgamesh_sueno_app.gd"', self.dia)
