@@ -60,6 +60,7 @@ func _init() -> void:
 	)
 
 	_comprobar_lote_materializado(carteles)
+	_comprobar_material_declarado()
 
 	print("horror_texturas_smoke: %d fallos" % fallos)
 	quit(1 if fallos > 0 else 0)
@@ -91,6 +92,46 @@ func _comprobar_lote_materializado(carteles: Array) -> void:
 		for entrada in decals:
 			var ruta := String(entrada["ruta"])
 			comprobar("%s: %s carga con alfa" % [perfil, ruta.get_file()], _carga_128(ruta, true))
+
+
+## Las presentaciones abiertas de montaña y desierto sustituyen la malla que
+## Espacio3D vistió originalmente. Este puente debe trasladar también la textura,
+## escala y warp declarados, o el perfil queda aplicado solo a una malla oculta.
+func _comprobar_material_declarado() -> void:
+	var base := {
+		"identidad_onirica": "desierto",
+		"carteles": [],
+		"figuras": [],
+		"deformacion_textura": Vector3(0.52, 1.0, 2.4),
+		"preservar_detalle_textura": true,
+	}
+	var espacio := HorrorTexturas.aplicar(base, "peine", HorrorTexturas.NIVEL_MAX)
+	var material := Espacio3D.material_declarado(
+		espacio,
+		"textura_suelo",
+		Color(0.58, 0.39, 0.20),
+	)
+	var textura = material.get_shader_parameter("textura") as Texture2D
+	comprobar("la malla alternativa activa la textura declarada", material.get_shader_parameter("con_textura"))
+	comprobar(
+		"la malla alternativa carga el PNG 128x128",
+		textura != null and textura.get_size() == Vector2(128, 128),
+	)
+	comprobar(
+		"la malla alternativa conserva la escala del perfil",
+		is_equal_approx(
+			float(material.get_shader_parameter("escala_textura")),
+			1.0 / float(espacio["escala_textura"]),
+		),
+	)
+	comprobar(
+		"la malla alternativa conserva el warp onírico",
+		material.get_shader_parameter("deformacion_textura") == base["deformacion_textura"],
+	)
+	comprobar(
+		"la malla alternativa conserva el detalle opt-in",
+		material.get_shader_parameter("preservar_detalle_textura"),
+	)
 
 
 func _carga_128(ruta: String, exigir_alfa: bool) -> bool:
