@@ -42,9 +42,13 @@ else
 fi
 
 paso "ROMs propias"
-if compgen -G "godot/roms/*.gbc" >/dev/null; then
-    echo "ya presentes: $(ls godot/roms/*.gbc | wc -l) ROM(s)"
+# Contra el índice, no contra «hay algún .gbc»: una ROM que main añade después
+# quedaría sin compilar y la suite fallaría pidiendo ejecutar este script.
+FALTAN="$(python3 scripts/roms_propias_ausentes.py)"
+if [[ -z "$FALTAN" ]]; then
+    echo "ya presentes: todas las ROMs jugables del índice"
 else
+    echo "faltan: $FALTAN"
     bash scripts/preparar_emulador_gb.sh rom
 fi
 
