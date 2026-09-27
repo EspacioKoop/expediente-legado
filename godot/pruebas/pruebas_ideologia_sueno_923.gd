@@ -15,6 +15,7 @@ func _ejecutar() -> void:
 	_probar_elecciones_deforman_la_misma_familia()
 	_probar_exposicion_solo_visual()
 	_probar_regla_jugable_local()
+	_probar_cruce_tarot_con_modificador_comun()
 	_probar_reproducibilidad()
 	_probar_reduccion_movimiento()
 	print("ideologia_sueno_923: %d pasadas, %d fallos" % [_pasadas, _fallos])
@@ -258,6 +259,63 @@ func _probar_regla_jugable_local() -> void:
 	reparto.queue_free()
 	equilibrio.queue_free()
 	reducida.queue_free()
+
+
+func _probar_cruce_tarot_con_modificador_comun() -> void:
+	var estado := _estado()
+	(
+		Prometeo
+		. registrar_eleccion_ideologica(
+			estado,
+			"fixture:negociacion-tarot",
+			"expediente",
+			"centrista",
+			"caso-fixture",
+			1,
+			["conciliacion"],
+		)
+	)
+	var modificadores := IDEOLOGIA_SUENO.modificadores(estado, 1, 923, false)
+	_comprobar(modificadores.size() == 1, "una elección semántica produce un único modificador")
+
+	var mundo := Node3D.new()
+	root.add_child(mundo)
+	var anomalias := (
+		SuenoUtileria
+		. montar(
+			mundo,
+			"crucero",
+			1,
+			923,
+			["F-1996-00187"],
+			[],
+			["la-luna"],
+			modificadores,
+		)
+	)
+	_comprobar(anomalias.size() == 1, "el tarot conocido sigue siendo el único original de la escena")
+	var rima := _primera_rima(mundo)
+	_comprobar(
+		rima != null and String(rima.get_meta("motivo_simbolico", "")) == "ciclo-centro",
+		"el cruce conserva la familia común ciclo-centro del tarot",
+	)
+	if rima != null:
+		var capa := rima.find_child("ModificadorIdeologico", false, false) as Node3D
+		_comprobar(capa != null, "el tarot recibe el modificador por la ruta simbólica común")
+		if capa != null:
+			_comprobar(
+				String(capa.get_meta("familia_modificadora", "")) == "negociacion",
+				"el modificador conserva su familia semántica sin conocer el arcano",
+			)
+			_comprobar(
+				String(capa.get_meta("regla_modificadora", "")) == "equilibrar",
+				"ciclo-centro reutiliza la regla común en vez de código especial de tarot",
+			)
+			_comprobar(
+				capa.find_child("ReglaJugable", false, false) is SuenoReglaIdeologica923,
+				"el cruce tarot + ideología usa el mismo contrato jugable",
+			)
+	mundo.queue_free()
 
 
 func _probar_reproducibilidad() -> void:
