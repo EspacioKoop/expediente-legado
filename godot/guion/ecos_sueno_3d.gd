@@ -14,6 +14,8 @@
 class_name EcosSueno3D
 extends RefCounted
 
+const GhostTrayectoria3D = preload("res://guion/red/ghost_trayectoria_3d.gd")
+
 const NOMBRE := "EcoDelDia"
 const VELOCIDAD_GESTO := 0.42
 ## Distancia a la entrada que se busca en las salas poligonales: a la vista
@@ -32,7 +34,13 @@ const ALCANCE_LUZ := 3.6
 ## Monta el eco que toque en esta sala y devuelve su interactuable, o null si
 ## en esta sala no hay nadie.
 static func montar(
-	mundo: Node3D, espacio: Dictionary, jornada: Dictionary
+	mundo: Node3D,
+	espacio: Dictionary,
+	jornada: Dictionary,
+	movimiento_ghost: Dictionary = {},
+	scene_revision: String = "",
+	anchor_key: String = "",
+	ahora_unix: int = -1
 ) -> CompaneroInteractivo3D:
 	if mundo == null:
 		return null
@@ -81,7 +89,49 @@ static func montar(
 	charla.clave_dialogo = String(eco["frase"])
 	charla.set_meta("dependiente", eco["id"])
 	raiz.add_child(charla)
+
+	if not movimiento_ghost.is_empty():
+		aplicar_movimiento_ghost(
+			raiz, movimiento_ghost, scene_revision, anchor_key, ahora_unix
+		)
 	return charla
+
+
+## Reutiliza una trayectoria ghost como coreografía local de un NPC de sueño.
+## Las posiciones son offsets respecto al sitio ya elegido para el NPC. Solo
+## acepta space=anchor: la run remota no dicta geometría, objetivos ni navegación.
+static func aplicar_movimiento_ghost(
+	raiz_npc: Node3D,
+	evento: Dictionary,
+	scene_revision: String,
+	anchor_key: String,
+	ahora_unix: int
+) -> bool:
+	if (
+		raiz_npc == null
+		or scene_revision.is_empty()
+		or anchor_key.is_empty()
+		or ahora_unix <= 0
+	):
+		return false
+	var payload = evento.get("payload", {})
+	if typeof(payload) != TYPE_DICTIONARY or String(payload.get("space", "")) != "anchor":
+		return false
+
+	var anterior := raiz_npc.get_node_or_null("MovimientoGhost")
+	if anterior != null:
+		anterior.free()
+	var trayectoria := GhostTrayectoria3D.new()
+	trayectoria.name = "MovimientoGhost"
+	raiz_npc.add_child(trayectoria)
+	var origen := raiz_npc.position
+	if not trayectoria.cargar_evento(
+		evento, raiz_npc, scene_revision, ahora_unix, anchor_key, origen
+	):
+		trayectoria.free()
+		return false
+	raiz_npc.set_meta("movimiento_ghost_activo", true)
+	return true
 
 
 ## Dónde se pone el eco en [param espacio], en metros y a ras de suelo.
