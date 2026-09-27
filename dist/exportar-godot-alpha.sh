@@ -33,11 +33,12 @@ if [ "$QA_TOOLS" != "0" ] && [ "$QA_TOOLS" != "1" ]; then
 fi
 
 # El formulario de feedback se configura al empaquetar, no queda hardcodeado
-# en GDScript. SIGA98_FEEDBACK_URL señala el gateway primario de una build
-# (Cloudflare en producción); Vercel queda como respaldo mientras siga
-# disponible. No se embeben tokens: las únicas URLs permitidas son HTTPS,
-# salvo loopback HTTP para desarrollo local.
-python3 - "$CONFIG_INCIDENCIAS" "${SIGA98_FEEDBACK_URL:-}" "$DEFAULT_FEEDBACK_URL" <<'PY'
+# en GDScript. SIGA98_FEEDBACK_URL señala el gateway primario (Cloudflare);
+# SIGA98_FEEDBACK_FALLBACK_URL añade Deno como segundo proveedor y Vercel
+# queda de último gateway alojado. No se embeben tokens: las únicas URLs
+# permitidas son HTTPS, salvo loopback HTTP para desarrollo local.
+python3 - "$CONFIG_INCIDENCIAS" "${SIGA98_FEEDBACK_URL:-}" \
+    "${SIGA98_FEEDBACK_FALLBACK_URL:-}" "$DEFAULT_FEEDBACK_URL" <<'PY'
 import json
 from pathlib import Path
 import sys
@@ -45,7 +46,8 @@ from urllib.parse import urlsplit
 
 ruta = Path(sys.argv[1])
 override = sys.argv[2].strip()
-default = sys.argv[3].strip()
+fallback = sys.argv[3].strip()
+default = sys.argv[4].strip()
 
 def segura(url: str) -> bool:
     partes = urlsplit(url)
@@ -57,8 +59,10 @@ def segura(url: str) -> bool:
         and bool(partes.netloc)
     )
 
-primaria = override or default
+primaria = override or fallback or default
 candidatas = [primaria]
+if fallback and fallback != primaria:
+    candidatas.append(fallback)
 if default and default != primaria:
     candidatas.append(default)
 
@@ -66,7 +70,7 @@ urls = []
 for url in candidatas:
     if not segura(url):
         raise SystemExit(
-            "ERROR: SIGA98_FEEDBACK_URL debe usar HTTPS "
+            "ERROR: los gateways de feedback deben usar HTTPS "
             "(HTTP solo se admite en localhost/127.0.0.1)"
         )
     if url not in urls:

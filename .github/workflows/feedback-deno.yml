@@ -1,0 +1,38 @@
+name: Deno feedback gateway
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'infra/feedback-deno/**'
+      - 'dist/exportar-godot-alpha.sh'
+      - '.github/workflows/alpha-playtest.yml'
+      - 'scripts/test_parte_incidencias.py'
+      - '.github/workflows/feedback-deno.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'infra/feedback-deno/**'
+      - 'dist/exportar-godot-alpha.sh'
+      - '.github/workflows/alpha-playtest.yml'
+      - 'scripts/test_parte_incidencias.py'
+      - '.github/workflows/feedback-deno.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.9.6
+      - name: Formato
+        working-directory: infra/feedback-deno
+        run: deno fmt --check main.ts deno.json
+      - name: Tipos
+        working-directory: infra/feedback-deno
+        run: deno check main.ts
