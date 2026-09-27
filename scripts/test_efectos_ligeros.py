@@ -1,4 +1,4 @@
-"""Efectos ligeros de ambiente: vapor, polvo, charcos y gotas con presupuesto cerrado."""
+"""Efectos ligeros: presupuesto cerrado, reducción de movimiento y deriva onírica reutilizable."""
 
 import os
 from pathlib import Path
@@ -30,6 +30,13 @@ class EfectosLigerosTest(unittest.TestCase):
         luces = int(re.search(r"const MAX_LUCES_POLVO := (\d+)", MODULO).group(1))
         # Una décima parte de la lluvia exterior (1450 partículas) como mucho.
         self.assertLessEqual(vapor * tazas + polvo * luces, 160)
+
+    def test_sueno_deriva_un_vfx_conocido_y_no_niebla_generica(self):
+        self.assertIn('NOMBRE_POLVO_ONIRICO := "PolvoOnirico"', MODULO)
+        self.assertIn('if fase == "sueño" and not reducir:', MODULO)
+        self.assertIn("_polvo_onirico(raiz)", MODULO)
+        self.assertNotIn('SHADER_NEBLINA', MODULO)
+        self.assertNotIn('NeblinaBaja', MODULO)
 
     def test_en_godot_headless(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
