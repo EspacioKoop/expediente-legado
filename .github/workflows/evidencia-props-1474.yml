@@ -70,7 +70,7 @@ jobs:
             "$GITHUB_WORKSPACE/evidencia-props-1474"
 
           for puesto in 1 2 3; do
-            test -s "evidencia-props-1474/${puesto:+puesto-${puesto}.png}"
+            test -s "evidencia-props-1474/puesto-${puesto}.png"
           done
           test -s evidencia-props-1474/manifest.json
 
