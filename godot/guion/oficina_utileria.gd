@@ -136,13 +136,13 @@ static func _companero_del_puesto(raiz: Node3D, base: Vector3) -> String:
 	return elegido
 
 
-static func _montar_perfil_personal(
-	puesto: Node3D, indice: int, companero_id: String
-) -> void:
+static func _montar_perfil_personal(puesto: Node3D, indice: int, companero_id: String) -> void:
 	var perfil: Array = PERFILES_HISTORICOS.get(
 		companero_id, PERFILES_NEUTROS[indice % PERFILES_NEUTROS.size()]
 	)
-	puesto.set_meta("perfil_props", companero_id if not companero_id.is_empty() else "neutral_%d" % indice)
+	puesto.set_meta(
+		"perfil_props", companero_id if not companero_id.is_empty() else "neutral_%d" % indice
+	)
 	for i in mini(perfil.size(), RANURAS_PROPS.size()):
 		_agregar_prop(puesto, String(perfil[i]), RANURAS_PROPS[i])
 
@@ -189,35 +189,63 @@ static func agregar_portalapices(raiz: Node3D, pos: Vector3) -> Node3D:
 
 static func agregar_agenda(raiz: Node3D, pos: Vector3) -> Node3D:
 	var prop := _grupo_prop(raiz, "AgendaCerrada", pos)
-	_agregar_caja(prop, "CuerpoAgenda", Vector3(0, 0.025, 0), Vector3(0.22, 0.05, 0.16), COLOR_AGENDA)
-	_agregar_caja(prop, "LomoAgenda", Vector3(-0.105, 0.052, 0), Vector3(0.012, 0.018, 0.15), COLOR_METAL)
+	_agregar_caja(
+		prop, "CuerpoAgenda", Vector3(0, 0.025, 0), Vector3(0.22, 0.05, 0.16), COLOR_AGENDA
+	)
+	_agregar_caja(
+		prop, "LomoAgenda", Vector3(-0.105, 0.052, 0), Vector3(0.012, 0.018, 0.15), COLOR_METAL
+	)
 	return prop
 
 
 static func agregar_libreta(raiz: Node3D, pos: Vector3) -> Node3D:
 	var prop := _grupo_prop(raiz, "Libreta", pos)
-	_agregar_caja(prop, "HojasLibreta", Vector3(0, 0.018, 0), Vector3(0.20, 0.035, 0.14), COLOR_LIBRETA)
-	_agregar_caja(prop, "EspiralLibreta", Vector3(-0.096, 0.043, 0), Vector3(0.012, 0.018, 0.13), COLOR_METAL)
+	_agregar_caja(
+		prop, "HojasLibreta", Vector3(0, 0.018, 0), Vector3(0.20, 0.035, 0.14), COLOR_LIBRETA
+	)
+	_agregar_caja(
+		prop, "EspiralLibreta", Vector3(-0.096, 0.043, 0), Vector3(0.012, 0.018, 0.13), COLOR_METAL
+	)
 	return prop
 
 
 static func agregar_caja_personal(raiz: Node3D, pos: Vector3) -> Node3D:
 	var prop := _grupo_prop(raiz, "CajaPersonal", pos)
 	_agregar_caja(prop, "CajaCarton", Vector3(0, 0.06, 0), Vector3(0.23, 0.12, 0.17), COLOR_CARTON)
-	_agregar_caja(prop, "TapaCaja", Vector3(0, 0.125, 0), Vector3(0.24, 0.018, 0.18), COLOR_CARTON.lightened(0.06))
+	_agregar_caja(
+		prop,
+		"TapaCaja",
+		Vector3(0, 0.125, 0),
+		Vector3(0.24, 0.018, 0.18),
+		COLOR_CARTON.lightened(0.06)
+	)
 	return prop
 
 
 static func agregar_calculadora(raiz: Node3D, pos: Vector3) -> Node3D:
 	var prop := _grupo_prop(raiz, "Calculadora", pos)
-	_agregar_caja(prop, "CuerpoCalculadora", Vector3(0, 0.025, 0), Vector3(0.17, 0.05, 0.12), COLOR_PLASTICO)
-	_agregar_caja(prop, "PantallaCalculadora", Vector3(0, 0.055, -0.035), Vector3(0.11, 0.012, 0.025), Color(0.18, 0.24, 0.18))
+	_agregar_caja(
+		prop, "CuerpoCalculadora", Vector3(0, 0.025, 0), Vector3(0.17, 0.05, 0.12), COLOR_PLASTICO
+	)
+	_agregar_caja(
+		prop,
+		"PantallaCalculadora",
+		Vector3(0, 0.055, -0.035),
+		Vector3(0.11, 0.012, 0.025),
+		Color(0.18, 0.24, 0.18)
+	)
 	return prop
 
 
 static func agregar_funda_gafas(raiz: Node3D, pos: Vector3) -> Node3D:
 	var prop := _grupo_prop(raiz, "FundaGafas", pos)
-	_agregar_caja(prop, "EstucheGafas", Vector3(0, 0.03, 0), Vector3(0.18, 0.06, 0.075), Color(0.20, 0.18, 0.16))
+	_agregar_caja(
+		prop,
+		"EstucheGafas",
+		Vector3(0, 0.03, 0),
+		Vector3(0.18, 0.06, 0.075),
+		Color(0.20, 0.18, 0.16)
+	)
 	return prop
 
 
@@ -232,8 +260,12 @@ static func agregar_planta(raiz: Node3D, pos: Vector3) -> Node3D:
 
 static func agregar_llavero(raiz: Node3D, pos: Vector3) -> Node3D:
 	var prop := _grupo_prop(raiz, "Llavero", pos)
-	_agregar_caja(prop, "CabezaLlave", Vector3(-0.045, 0.012, 0), Vector3(0.055, 0.02, 0.05), COLOR_METAL)
-	_agregar_caja(prop, "VastagoLlave", Vector3(0.025, 0.012, 0), Vector3(0.10, 0.014, 0.018), COLOR_METAL)
+	_agregar_caja(
+		prop, "CabezaLlave", Vector3(-0.045, 0.012, 0), Vector3(0.055, 0.02, 0.05), COLOR_METAL
+	)
+	_agregar_caja(
+		prop, "VastagoLlave", Vector3(0.025, 0.012, 0), Vector3(0.10, 0.014, 0.018), COLOR_METAL
+	)
 	return prop
 
 
@@ -247,27 +279,45 @@ static func agregar_termo(raiz: Node3D, pos: Vector3) -> Node3D:
 static func agregar_sobre(raiz: Node3D, pos: Vector3) -> Node3D:
 	var prop := _grupo_prop(raiz, "SobreInterno", pos)
 	_agregar_caja(prop, "PapelSobre", Vector3(0, 0.012, 0), Vector3(0.22, 0.024, 0.13), COLOR_PAPEL)
-	_agregar_caja(prop, "SolapaSobre", Vector3(0, 0.027, -0.035), Vector3(0.17, 0.006, 0.045), COLOR_PAPEL.darkened(0.05))
+	_agregar_caja(
+		prop,
+		"SolapaSobre",
+		Vector3(0, 0.027, -0.035),
+		Vector3(0.17, 0.006, 0.045),
+		COLOR_PAPEL.darkened(0.05)
+	)
 	return prop
 
 
 static func agregar_sello(raiz: Node3D, pos: Vector3) -> Node3D:
 	var prop := _grupo_prop(raiz, "SelloCaucho", pos)
-	_agregar_caja(prop, "BaseSello", Vector3(0, 0.018, 0), Vector3(0.10, 0.035, 0.06), Color(0.18, 0.15, 0.12))
+	_agregar_caja(
+		prop, "BaseSello", Vector3(0, 0.018, 0), Vector3(0.10, 0.035, 0.06), Color(0.18, 0.15, 0.12)
+	)
 	_agregar_cilindro(prop, "MangoSello", Vector3(0, 0.085, 0), 0.022, 0.10, COLOR_CARTON)
 	return prop
 
 
 static func agregar_regla(raiz: Node3D, pos: Vector3) -> Node3D:
 	var prop := _grupo_prop(raiz, "Regla", pos)
-	_agregar_caja(prop, "ReglaSinTexto", Vector3(0, 0.009, 0), Vector3(0.25, 0.018, 0.025), Color(0.66, 0.57, 0.35))
+	_agregar_caja(
+		prop,
+		"ReglaSinTexto",
+		Vector3(0, 0.009, 0),
+		Vector3(0.25, 0.018, 0.025),
+		Color(0.66, 0.57, 0.35)
+	)
 	return prop
 
 
 static func agregar_cuaderno_dibujo(raiz: Node3D, pos: Vector3) -> Node3D:
 	var prop := _grupo_prop(raiz, "CuadernoDibujoCerrado", pos)
-	_agregar_caja(prop, "Cuaderno", Vector3(0, 0.025, 0), Vector3(0.21, 0.05, 0.15), Color(0.50, 0.48, 0.41))
-	_agregar_caja(prop, "LapizDibujo", Vector3(0, 0.058, 0.07), Vector3(0.20, 0.012, 0.012), COLOR_CARTON)
+	_agregar_caja(
+		prop, "Cuaderno", Vector3(0, 0.025, 0), Vector3(0.21, 0.05, 0.15), Color(0.50, 0.48, 0.41)
+	)
+	_agregar_caja(
+		prop, "LapizDibujo", Vector3(0, 0.058, 0.07), Vector3(0.20, 0.012, 0.012), COLOR_CARTON
+	)
 	return prop
 
 
