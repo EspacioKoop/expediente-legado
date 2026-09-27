@@ -40,11 +40,14 @@ func _probar() -> void:
 	var controller := DiaSenalesMultiplayerApp.new()
 	host.add_child(controller)
 	await process_frame
-	var activacion := controller.activar(
-		transporte_dia,
-		[],
-		"anon-signal-dia",
-		"SALA-SENAL",
+	var activacion := (
+		controller
+		. activar(
+			transporte_dia,
+			[],
+			"anon-signal-dia",
+			"SALA-SENAL",
+		)
 	)
 	_comprobar("Dia acepta sala remota opt-in", activacion["ok"], true)
 	_comprobar("Dia conserva room_id", controller.estado()["room_id"], "SALA-SENAL")
@@ -59,14 +62,17 @@ func _probar() -> void:
 	_comprobar("B completa handshake", servicio_b.health()["online"], true)
 	_comprobar("relay ve dos clientes", relay.clientes_en_sala("SALA-SENAL"), 2)
 
-	var publicacion := controller.publicar_en_anchor(
-		"anon-signal-dia",
-		"calle_escaparate",
-		"cuidado_con",
-		["trampa"],
-		ahora,
-		-1,
-		"signal-a-0",
+	var publicacion := (
+		controller
+		. publicar_en_anchor(
+			"anon-signal-dia",
+			"calle_escaparate",
+			"cuidado_con",
+			["trampa"],
+			ahora,
+			-1,
+			"signal-a-0",
+		)
 	)
 	_comprobar("Dia publica señal por WebSocket", publicacion["ok"], true)
 	await _bombear(relay, controller, [transporte_b], 12)
@@ -79,17 +85,20 @@ func _probar() -> void:
 			"signal-a-0",
 		)
 
-	var bloqueada := servicio_b.publicar(
-		"calle",
-		"test-377",
-		"anon-signal-b",
-		"calle_escaparate",
-		"cuidado_con",
-		["simbolo_amarillo"],
-		ahora + 2,
-		["simbolo_amarillo"],
-		-1,
-		"signal-b-locked",
+	var bloqueada := (
+		servicio_b
+		. publicar(
+			"calle",
+			"test-377",
+			"anon-signal-b",
+			"calle_escaparate",
+			"cuidado_con",
+			["simbolo_amarillo"],
+			ahora + 2,
+			["simbolo_amarillo"],
+			-1,
+			"signal-b-locked",
+		)
 	)
 	_comprobar("relay admite token catalogado sin conocer progreso", bloqueada["ok"], true)
 	await _bombear(relay, controller, [transporte_b], 12)
