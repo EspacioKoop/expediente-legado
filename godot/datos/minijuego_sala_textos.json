@@ -1,0 +1,20 @@
+{
+  "titulo": "SALA PRIVADA · %s",
+  "reglas": "Reglas v%d · sin recompensas de campaña",
+  "descripcion": "Crea un código para invitar a otra persona o escribe el código de una sala existente. El multijugador es opcional y no modifica tu partida.",
+  "codigo": "Código de sala",
+  "placeholder": "6 caracteres",
+  "crear": "Crear sala",
+  "unirse": "Unirse",
+  "volver": "Volver",
+  "ayuda": "Elige crear una sala o introduce un código.",
+  "codigo_listo": "Código %s listo para compartir.",
+  "codigo_invalido": "Introduce un código válido de 6 caracteres.",
+  "conectando": "Conectando con la sala…",
+  "reconectando": "Reconectando… la partida local sigue intacta.",
+  "online": "Conectado a la sala %s.",
+  "timeout": "No hay respuesta de red. Puedes volver a intentarlo sin perder progreso.",
+  "reglas_incompatibles": "Reglas incompatibles: esta copia usa v%d y la sala v%d.",
+  "cerrada": "Sala cerrada.",
+  "error": "No se pudo abrir la sala."
+}
