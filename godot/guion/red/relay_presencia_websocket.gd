@@ -235,9 +235,7 @@ func _validar_publicacion(peer: Dictionary, datos: Dictionary) -> Dictionary:
 	return resultado
 
 
-func _validar_kind_publicado(
-	peer: Dictionary, normalizado: Dictionary, ahora: int
-) -> Dictionary:
+func _validar_kind_publicado(peer: Dictionary, normalizado: Dictionary, ahora: int) -> Dictionary:
 	var resultado := {
 		"ok": false,
 		"reason": "unsupported_event_kind",
