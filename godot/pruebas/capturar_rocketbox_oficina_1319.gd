@@ -251,7 +251,7 @@ func _guardar_manifest() -> void:
 	if fichero == null:
 		_fallar("no se pudo escribir manifest.json")
 		return
-	fichero.store_string(JSON.stringify(manifest, "\\t"))
+	fichero.store_string(JSON.stringify(manifest, "\t"))
 	fichero.close()
 
 	var readme := FileAccess.open(_salida.path_join("README.md"), FileAccess.WRITE)
