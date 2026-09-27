@@ -43,6 +43,11 @@ renderer/rendering_method="forward_plus"
 
 window/size/viewport_width=1920
 window/size/viewport_height=1080
+; La UI se diseña en 1080p y debe conservar ese tamaño lógico al salir a 4K.
+; Sin stretch, un texto de 14 px seguía midiendo 14 píxeles físicos en una TV
+; 3840x2160 y quedaba aproximadamente a la mitad del tamaño esperado (#1467).
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
 
 [input]
 
