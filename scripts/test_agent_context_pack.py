@@ -1,5 +1,6 @@
 import importlib.util
 from pathlib import Path
+import sys
 import tempfile
 import unittest
 
@@ -9,6 +10,7 @@ MODULE_PATH = ROOT / "scripts" / "agent_context_pack.py"
 SPEC = importlib.util.spec_from_file_location("agent_context_pack", MODULE_PATH)
 assert SPEC and SPEC.loader
 mod = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = mod
 SPEC.loader.exec_module(mod)
 
 
