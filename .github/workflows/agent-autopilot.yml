@@ -83,28 +83,28 @@ jobs:
           elif [[ "$EVENT" == workflow_dispatch ]]; then
             issue="$INPUT_ISSUE"
           else
-            issue="$(gh issue list --state open --label agent:auto --limit 100 --json number,labels \
+            issue="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --label agent:auto --limit 100 --json number,labels \
               --jq '[.[]|select(([.labels[].name]|index("agent:working")|not) and ([.labels[].name]|index("agent:pr-open")|not) and ([.labels[].name]|index("agent:needs-human")|not))][0].number // empty')"
           fi
           [[ -z "$issue" ]] && { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
           [[ "$issue" =~ ^[0-9]+$ ]] || exit 2
 
-          labels="$(gh issue view "$issue" --json labels --jq '[.labels[].name]|join(" ")')"
+          labels="$(gh issue view "$issue" --repo "$GITHUB_REPOSITORY" --json labels --jq '[.labels[].name]|join(" ")')"
           if [[ "$provider" == auto ]]; then
             if [[ " $labels " == *" agent:qwen "* ]]; then provider=qwen
             elif [[ " $labels " == *" agent:gemini "* ]]; then provider=gemini
             elif [[ "$HAS_QWEN" == true ]]; then provider=qwen
             elif [[ "$HAS_GEMINI" == true ]]; then provider=gemini
             else
-              gh issue edit "$issue" --add-label agent:needs-human >/dev/null
-              gh issue comment "$issue" --body 'Faltan `QWEN_API_KEY` y `GEMINI_API_KEY` en Actions Secrets.'
+              gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human >/dev/null
+              gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body 'Faltan `QWEN_API_KEY` y `GEMINI_API_KEY` en Actions Secrets.'
               echo "run=false" >> "$GITHUB_OUTPUT"; exit 0
             fi
           fi
-          [[ "$provider" == qwen && "$HAS_QWEN" != true ]] && { gh issue edit "$issue" --add-label agent:needs-human >/dev/null; echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
-          [[ "$provider" == gemini && "$HAS_GEMINI" != true ]] && { gh issue edit "$issue" --add-label agent:needs-human >/dev/null; echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
+          [[ "$provider" == qwen && "$HAS_QWEN" != true ]] && { gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human >/dev/null; echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
+          [[ "$provider" == gemini && "$HAS_GEMINI" != true ]] && { gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human >/dev/null; echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
 
-          existing="$(gh pr list --state open --limit 100 --json body | jq -r --arg n "Refs #$issue" '[.[]|select(((.body//"")|split("\n")|index($n)) != null)]|length')"
+          existing="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 100 --json body | jq -r --arg n "Refs #$issue" '[.[]|select(((.body//"")|split("\n")|index($n)) != null)]|length')"
           [[ "$existing" != 0 ]] && { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
 
           echo "run=true" >> "$GITHUB_OUTPUT"
