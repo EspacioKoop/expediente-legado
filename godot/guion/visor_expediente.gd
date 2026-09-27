@@ -76,6 +76,7 @@ func _ready() -> void:
 	# no para un documento servido de regalo al arrancar.
 	_documento.text = ""
 	_cabecera.text = tr("VISOR_ELIJA")
+	_limpiar_lectura_accesible()
 	_refrescar_estado()
 	_archivo.grab_focus()
 
@@ -159,6 +160,7 @@ func _columna_indice() -> Control:
 	columna.custom_minimum_size.x = 300
 	columna.add_child(_etiqueta(tr("ARCHIVO_TITULO"), EstiloSiga.NEGRO))
 	_archivo = ItemList.new()
+	_archivo.accessibility_name = tr("ARCHIVO_TITULO")
 	_archivo.custom_minimum_size.y = 220
 	_archivo.add_theme_stylebox_override("panel", _caja_hundida(EstiloSiga.BLANCO))
 	_archivo.add_theme_color_override("font_color", EstiloSiga.NEGRO)
@@ -174,6 +176,7 @@ func _columna_indice() -> Control:
 	columna.add_child(_etiqueta(tr("VISOR_COSTE_REGLA"), EstiloSiga.NEGRO))
 
 	_lista = ItemList.new()
+	_lista.accessibility_name = tr("VISOR_DOCUMENTOS")
 	# El índice de documentos es la acción principal del visor. Sin un mínimo,
 	# las tarjetas opcionales añadidas debajo podían comprimirlo hasta una fila
 	# casi invisible y el jugador no tenía forma evidente de abrir un folio.
@@ -255,6 +258,7 @@ func _al_elegir_caso(indice: int) -> void:
 	_aviso_partida = ""
 	_documento.text = ""
 	_cabecera.text = tr("VISOR_ELIJA")
+	_limpiar_lectura_accesible()
 	_titulo_ventana.text = (
 		tr("VISOR_BARRA_TITULO")
 		% (int(caso["anioSuceso"]) if caso.get("anioSuceso") != null else tr("SIN_FECHA_CORTA"))
@@ -273,6 +277,8 @@ func _columna_documento() -> Control:
 
 	_documento = RichTextLabel.new()
 	_documento.bbcode_enabled = true
+	_documento.focus_mode = Control.FOCUS_ALL
+	_documento.selection_enabled = true
 	_documento.fit_content = false
 	_documento.scroll_active = true
 	_documento.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -398,7 +404,16 @@ func _mostrar_registro(registro: Dictionary) -> void:
 		"normal", _caja_hundida(_color_papel_documento(registro))
 	)
 	_documento.text = BBCode.render(Marcas.de_registro(registro, pistas, descubiertas))
+	_documento.accessibility_name = _cabecera.text
+	# El texto accesible procede del mismo documento ya abierto y de sus marcas
+	# visibles. get_parsed_text evita anunciar etiquetas BBCode como contenido.
+	_documento.accessibility_description = _documento.get_parsed_text()
 	_refrescar_estado()
+
+
+func _limpiar_lectura_accesible() -> void:
+	_documento.accessibility_name = tr("VISOR_ELIJA")
+	_documento.accessibility_description = ""
 
 
 ## Una huella usa ids de dominio ya estables; no serializa nodos ni coordenadas.
