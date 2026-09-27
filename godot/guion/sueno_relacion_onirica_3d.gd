@@ -25,6 +25,14 @@ var recompensa_texto := ""
 var _documentos_3d: Array = []
 var _estado: Label3D
 var _confirmar: Interactuable3D
+var _lector: Window
+var _lector_cabecera: Label
+var _lector_contenido: RichTextLabel
+var _lector_seleccion: CheckButton
+var _lector_volver: Button
+var _indice_lectura := -1
+var _pausa_previa := false
+var _mouse_previo := Input.MOUSE_MODE_CAPTURED
 
 
 func configurar(una_relacion: RelacionOnirica, recompensa: String = "") -> bool:
@@ -35,6 +43,10 @@ func configurar(una_relacion: RelacionOnirica, recompensa: String = "") -> bool:
 	_montar()
 	_sincronizar()
 	return true
+
+
+func _exit_tree() -> void:
+	_restaurar_control_lector()
 
 
 func abandonar() -> bool:
@@ -87,6 +99,7 @@ func _montar() -> void:
 	_confirmar.activado.connect(_al_confirmar)
 	add_child(_confirmar)
 	_montar_confirmacion(_confirmar)
+	_montar_lector()
 
 
 func _montar_panel(documento: Interactuable3D) -> void:
@@ -156,12 +169,127 @@ func _montar_confirmacion(confirmar: Interactuable3D) -> void:
 	confirmar.add_child(colision)
 
 
+func _montar_lector() -> void:
+	_lector = Window.new()
+	_lector.name = "LectorRelacionOnirica"
+	_lector.process_mode = Node.PROCESS_MODE_ALWAYS
+	_lector.visible = false
+	_lector.title = tr("VISOR_DOCUMENTOS")
+	_lector.size = Vector2i(760, 560)
+	_lector.exclusive = true
+	_lector.transient = true
+	_lector.close_requested.connect(_cerrar_lector)
+	add_child(_lector)
+
+	var margen := MarginContainer.new()
+	margen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	for lado in ["left", "top", "right", "bottom"]:
+		margen.add_theme_constant_override("margin_" + lado, 20)
+	_lector.add_child(margen)
+
+	var columna := VBoxContainer.new()
+	columna.add_theme_constant_override("separation", 10)
+	margen.add_child(columna)
+
+	_lector_cabecera = Label.new()
+	_lector_cabecera.name = "CabeceraDocumentoRelacion"
+	_lector_cabecera.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	columna.add_child(_lector_cabecera)
+
+	_lector_contenido = RichTextLabel.new()
+	_lector_contenido.name = "ContenidoDocumentoRelacion"
+	_lector_contenido.bbcode_enabled = false
+	_lector_contenido.fit_content = false
+	_lector_contenido.scroll_active = true
+	_lector_contenido.focus_mode = Control.FOCUS_ALL
+	_lector_contenido.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_lector_contenido.custom_minimum_size.y = 390
+	columna.add_child(_lector_contenido)
+
+	var acciones := HBoxContainer.new()
+	acciones.alignment = BoxContainer.ALIGNMENT_END
+	acciones.add_theme_constant_override("separation", 8)
+	columna.add_child(acciones)
+
+	_lector_seleccion = CheckButton.new()
+	_lector_seleccion.name = "SeleccionDocumentoRelacion"
+	_lector_seleccion.text = tr("VISOR_RELACIONAR")
+	_lector_seleccion.tooltip_text = tr("VISOR_RELACIONAR")
+	_lector_seleccion.toggled.connect(_al_cambiar_seleccion_desde_lector)
+	acciones.add_child(_lector_seleccion)
+
+	_lector_volver = Button.new()
+	_lector_volver.name = "VolverDocumentoRelacion"
+	_lector_volver.text = tr("MENU_GLOBAL_VOLVER")
+	_lector_volver.pressed.connect(_cerrar_lector)
+	acciones.add_child(_lector_volver)
+
+
 func _al_activar_documento(_actor: Node, indice: int) -> void:
-	if relacion == null:
+	_abrir_documento(indice)
+
+
+func _abrir_documento(indice: int) -> void:
+	if relacion == null or indice < 0 or indice >= relacion.documentos.size():
 		return
-	var evento := relacion.seleccionar(indice)
+	var dato: Dictionary = relacion.documentos[indice]
+	_indice_lectura = indice
+	_lector_cabecera.text = (
+		tr("VISOR_CABECERA")
+		% [dato.get("folio", ""), dato.get("tipo", ""), dato.get("fecha", "")]
+	)
+	_lector_contenido.text = String(dato.get("contenido", dato.get("extracto", "")))
+	_sincronizar_lector_seleccion()
+
+	_pausa_previa = get_tree().paused
+	_mouse_previo = Input.mouse_mode
+	get_tree().paused = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	_lector.popup_centered()
+	_lector_contenido.grab_focus.call_deferred()
+
+
+func _al_cambiar_seleccion_desde_lector(_activo: bool) -> void:
+	if relacion == null or _indice_lectura < 0:
+		return
+	var evento := relacion.seleccionar(_indice_lectura)
 	_sincronizar()
-	estado_cambiado.emit(evento)
+	_sincronizar_lector_seleccion()
+	if evento == "seleccionado" or evento == "deseleccionado":
+		estado_cambiado.emit(evento)
+
+
+func _sincronizar_lector_seleccion() -> void:
+	if (
+		_lector_seleccion == null
+		or relacion == null
+		or _indice_lectura < 0
+		or _indice_lectura >= relacion.documentos.size()
+	):
+		return
+	var dato: Dictionary = relacion.documentos[_indice_lectura]
+	var seleccionado := relacion.seleccion.has(String(dato.get("id", "")))
+	_lector_seleccion.set_pressed_no_signal(seleccionado)
+	_lector_seleccion.disabled = (
+		relacion.cerrada
+		or not relacion.nucleo.pendiente()
+		or (relacion.seleccion.size() >= 2 and not seleccionado)
+	)
+
+
+func _cerrar_lector() -> void:
+	if _lector == null or not _lector.visible:
+		return
+	_lector.hide()
+	_restaurar_control_lector()
+
+
+func _restaurar_control_lector() -> void:
+	if _indice_lectura < 0:
+		return
+	_indice_lectura = -1
+	get_tree().paused = _pausa_previa
+	Input.mouse_mode = _mouse_previo
 
 
 func _al_confirmar(_actor: Node) -> void:
@@ -184,10 +312,9 @@ func _sincronizar() -> void:
 		var texto := documento.get_node("Texto") as Label3D
 		var panel := documento.get_node("Panel") as MeshInstance3D
 		var seleccionado := relacion.seleccion.has(String(dato.get("id", "")))
-		var seleccion_completa := relacion.seleccion.size() >= 2
 		titulo.text = "%s · %s" % [dato.get("folio", ""), dato.get("fecha", "")]
 		texto.text = String(dato.get("extracto", ""))
-		documento.habilitado = (not relacion.cerrada and (not seleccion_completa or seleccionado))
+		documento.habilitado = not relacion.cerrada and relacion.nucleo.pendiente()
 		var material := StandardMaterial3D.new()
 		material.albedo_color = COLOR_SELECCION if seleccionado else COLOR_BASE
 		material.roughness = 0.9
@@ -197,6 +324,8 @@ func _sincronizar() -> void:
 		_confirmar.habilitado = (
 			not relacion.cerrada and relacion.nucleo.pendiente() and relacion.seleccion.size() == 2
 		)
+	if _lector != null and _lector.visible:
+		_sincronizar_lector_seleccion()
 
 	if _estado == null:
 		return
