@@ -170,25 +170,28 @@ func _probar_validaciones() -> void:
 		"direction_out_of_range",
 	)
 
-	var score := MinijuegoSesionDatos.crear_accion(
-		SCENE_KEY,
-		BUILD,
-		"anon-a",
-		ROOM_ID,
-		SESSION_ID,
-		MinijuegoAvionesAutoridad.MINIGAME_ID,
-		1,
-		1,
-		0,
-		{
-			"type": "launch",
-			"model": "estable",
-			"direction": 0.0,
-			"height": 15.0,
-			"power": 0.7,
-			"score": 999,
-		},
-		AHORA + 1,
+	var score := (
+		MinijuegoSesionDatos
+		. crear_accion(
+			SCENE_KEY,
+			BUILD,
+			"anon-a",
+			ROOM_ID,
+			SESSION_ID,
+			MinijuegoAvionesAutoridad.MINIGAME_ID,
+			1,
+			1,
+			0,
+			{
+				"type": "launch",
+				"model": "estable",
+				"direction": 0.0,
+				"height": 15.0,
+				"power": 0.7,
+				"score": 999,
+			},
+			AHORA + 1,
+		)
 	)
 	_comprobar("cliente no envía score", score["ok"], false)
 	_comprobar("score cae en contrato común", score["reason"], "forbidden_result_field")
