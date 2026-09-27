@@ -33,14 +33,15 @@ const ADELANTO_SENTADO := 0.08
 const CLIP_SENTADO := "sentado"
 const CLIP_SENTADO_ACTIVO := "sentado_hablando"
 const DURACION_HUIDA := 0.42
-## Solo una figura por oficina puede reaccionar al paso del jugador. El giro se
-## aplica al cuerpo como gesto de torso deliberadamente pequeño: evita pelearse
-## con las pistas de cabeza/cuello de las animaciones UAL y no convierte toda la
-## plantilla en figuras que siguen con la mirada.
+## Solo una figura por oficina puede reaccionar al paso del jugador. La mayor
+## parte del gesto sigue siendo muy pequeña y corporal para conservar lectura a
+## distancia; el resto se aplica a Neck/Head mediante SkeletonModifier3D después
+## de la animación, sin competir con las pistas de UAL/Rocketbox.
 const DISTANCIA_ATENCION := 2.7
 const ANGULO_ATENCION := deg_to_rad(70.0)
 const GIRO_ATENCION_MAX := deg_to_rad(14.0)
 const VELOCIDAD_ATENCION := deg_to_rad(65.0)
+const PORCION_GIRO_CUERPO := 0.55
 
 var objetivo: Node3D
 var fase := 0.0
@@ -63,6 +64,7 @@ var _trabajando := false
 var _brazos_cruzados := false
 var _conversando := false
 var _giro_atencion := 0.0
+var _modificador_atencion: AtencionCabeza3D
 
 
 func configurar(
@@ -90,6 +92,7 @@ func configurar(
 	_escala_base = objetivo.scale
 	_rotacion_original = objetivo.rotation.y
 	_posicion_original = objetivo.position
+	_preparar_atencion_cabeza()
 	if sentado:
 		objetivo.rotation.y += PI
 		var frente := Basis(Vector3.UP, objetivo.rotation.y).z
@@ -108,6 +111,8 @@ func conversar(activo: bool) -> void:
 	if activo and reduccion_movimiento:
 		return
 	_conversando = activo
+	if activo:
+		_reiniciar_atencion()
 	if en_recado():
 		# A mitad de recado está de pie: se para, habla y luego sigue.
 		recado.pausar(activo)
@@ -129,6 +134,7 @@ func empezar_recado(nuevo: RecadoCompanero3D) -> void:
 	recado = nuevo
 	_trabajando = false
 	_brazos_cruzados = false
+	_reiniciar_atencion()
 
 
 func terminar_recado(hecho: RecadoCompanero3D) -> void:
@@ -177,7 +183,7 @@ func huir_de(origen_global: Vector3) -> void:
 	_trabajando = false
 	_brazos_cruzados = false
 	_conversando = false
-	_giro_atencion = 0.0
+	_reiniciar_atencion()
 	sentado = false
 	if en_recado():
 		recado.cancelar()
@@ -198,6 +204,9 @@ func huir_de(origen_global: Vector3) -> void:
 
 
 func _exit_tree() -> void:
+	if is_instance_valid(_modificador_atencion):
+		_modificador_atencion.giro = 0.0
+		_modificador_atencion.queue_free()
 	if is_instance_valid(objetivo):
 		objetivo.scale = _escala_base
 		objetivo.rotation.y = _rotacion_original
@@ -254,15 +263,40 @@ func _actualizar_atencion(delta: float) -> void:
 			if absf(relativo) <= ANGULO_ATENCION:
 				destino = clampf(relativo, -GIRO_ATENCION_MAX, GIRO_ATENCION_MAX)
 	_giro_atencion = move_toward(_giro_atencion, destino, VELOCIDAD_ATENCION * maxf(delta, 0.0))
+	if is_instance_valid(_modificador_atencion):
+		_modificador_atencion.giro = _giro_atencion * (1.0 - PORCION_GIRO_CUERPO)
+
+
+func _preparar_atencion_cabeza() -> void:
+	if not atencion_jugador:
+		return
+	var esqueleto := Modelos._esqueleto(objetivo)
+	if esqueleto == null:
+		return
+	if esqueleto.find_bone("Neck") < 0 and esqueleto.find_bone("Head") < 0:
+		return
+	_modificador_atencion = AtencionCabeza3D.new()
+	_modificador_atencion.name = "AtencionCabeza"
+	esqueleto.add_child(_modificador_atencion)
+
+
+func _reiniciar_atencion() -> void:
+	_giro_atencion = 0.0
+	if is_instance_valid(_modificador_atencion):
+		_modificador_atencion.giro = 0.0
+	if is_instance_valid(objetivo):
+		objetivo.rotation.y = _rotacion_base
 
 
 func _aplicar(angulo: float) -> void:
 	if reduccion_movimiento:
 		_giro_atencion = 0.0
+		if is_instance_valid(_modificador_atencion):
+			_modificador_atencion.giro = 0.0
 		objetivo.scale = _escala_base
 		objetivo.rotation.y = _rotacion_base
 		return
 	var respiracion := sin(angulo) * AMPLITUD_RESPIRACION
 	objetivo.scale = Vector3(_escala_base.x, _escala_base.y * (1.0 + respiracion), _escala_base.z)
 	var gesto := sin(angulo * 0.55) * AMPLITUD_GESTO if gesto_telefono else 0.0
-	objetivo.rotation.y = _rotacion_base + gesto + _giro_atencion
+	objetivo.rotation.y = _rotacion_base + gesto + _giro_atencion * PORCION_GIRO_CUERPO

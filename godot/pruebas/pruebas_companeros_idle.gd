@@ -16,6 +16,7 @@ func _initialize() -> void:
 func _ejecutar() -> void:
 	_probar_movimiento()
 	_probar_atencion_selectiva()
+	_probar_modificador_cabeza()
 	_probar_reduccion()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -62,6 +63,12 @@ func _probar_atencion_selectiva() -> void:
 		absf(cuerpo.rotation.y) <= Idle.GIRO_ATENCION_MAX + 0.001,
 		"la atención nunca supera el giro corporal permitido"
 	)
+	idle.conversar(true)
+	_comprobar(
+		is_zero_approx(cuerpo.rotation.y),
+		"una conversación corta inmediatamente la atención al jugador",
+	)
+	idle.conversar(false)
 	actor.position = Vector3(0.0, 0.0, 2.0)
 	idle._process(0.5)
 	_comprobar(
@@ -69,6 +76,27 @@ func _probar_atencion_selectiva() -> void:
 	)
 	idle.free()
 	escenario.free()
+
+
+func _probar_modificador_cabeza() -> void:
+	var esqueleto := Skeleton3D.new()
+	root.add_child(esqueleto)
+	esqueleto.add_bone("Neck")
+	esqueleto.add_bone("Head")
+	esqueleto.set_bone_parent(1, 0)
+	var modificador := AtencionCabeza3D.new()
+	esqueleto.add_child(modificador)
+	modificador.giro = deg_to_rad(12.0)
+	modificador._process_modification_with_delta(0.0)
+	_comprobar(
+		esqueleto.get_bone_pose_rotation(0).get_angle() > 0.001,
+		"la atención añade giro al cuello después de la animación",
+	)
+	_comprobar(
+		esqueleto.get_bone_pose_rotation(1).get_angle() > 0.001,
+		"la atención añade giro a la cabeza después de la animación",
+	)
+	esqueleto.free()
 
 
 func _probar_reduccion() -> void:
