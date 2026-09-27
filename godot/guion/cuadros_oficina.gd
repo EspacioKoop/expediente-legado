@@ -1,10 +1,9 @@
 ## Montaje visible de los cuadros piramidales de #195.
 ##
-## Las imágenes todavía no forman parte de este corte. Cada declaración apunta
-## al nombre definitivo que tendrá su lámina y `Cuadros` decide si existe; si
-## falta, se conserva una superficie neutra dentro del marco. Así el montaje 3D
-## se puede revisar antes de introducir binarios/licencias y el hueco nunca
-## desaparece por un asset roto.
+## Cada declaración apunta a su lámina en `assets/texturas/` —renders propios
+## CC0, ver docs/assets/cuadros-piramidales-originales.md— y `Cuadros` decide si
+## existe; si falta, se conserva una superficie neutra dentro del marco. Así el
+## hueco nunca desaparece por un asset roto o un checkout sin objetos LFS.
 class_name CuadrosOficina
 extends RefCounted
 

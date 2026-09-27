@@ -1,8 +1,8 @@
 # Láminas piramidales originales · #195
 
-Este corte fija las **tres imágenes exactas** que consumen los marcos ya
-integrados por #612, pero mantiene los PNG fuera de Git hasta poder
-materializarlos mediante Git LFS real.
+Tres imágenes exactas cuelgan en los marcos de la oficina integrados por #612.
+Viven en `godot/assets/texturas/` como objetos Git LFS y son la salida del
+renderizador sin retoques.
 
 Las composiciones son originales del proyecto y no copian iconografía de
 terceros. Se publican como **CC0-1.0**. Las fuentes versionadas son tres recetas
@@ -28,14 +28,16 @@ de `godot/assets/`. El PNG se codifica con bloques DEFLATE almacenados en vez
 de depender del nivel o versión de compresión de zlib; por eso el SHA-256 del
 fichero es estable y puede registrarse antes de promover el binario.
 
-## Qué falta para cerrar #195
+## Materialización
 
-El corte de materialización debe copiar esas tres salidas sin modificarlas a
-`godot/assets/texturas/`, registrar cada una en
-`godot/assets/procedencia.json` con autor, fuente, licencia y los hashes de la
-tabla, añadirlas con **Git LFS real** y producir una captura de la oficina.
+Los tres PNG de `godot/assets/texturas/` son copia byte a byte de la salida del
+generador. Cada uno tiene ficha en `godot/assets/procedencia.json` con
+`origen: generado_por_script`, su receta y el generador. Si se cambia una
+receta, hay que volver a generar, copiar y actualizar a la vez la tabla, la
+receta y la ficha. `test_cuadros_piramidales_originales.py` falla si el PNG
+versionado se aparta del render catalogado o si queda un puntero LFS sin
+objeto.
 
-No se crea aquí ningún puntero LFS manual: el repositorio prohíbe un puntero si
-el objeto correspondiente no se ha subido al almacén LFS. Mientras ese último
-paso no exista, el fallback de `Cuadros` mantiene los tres marcos visibles y la
-escena sigue siendo válida.
+`godot/pruebas/pruebas_cuadros_oficina_195.gd` monta los marcos y comprueba que
+cada lámina carga su textura. Si falta un fichero, el fallback de `Cuadros`
+mantiene el marco con relleno neutro y la escena sigue siendo válida.

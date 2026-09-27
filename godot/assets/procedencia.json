@@ -2227,6 +2227,39 @@
       "licencia": "Propio del proyecto; salida generada con OpenAI",
       "fuente": "https://openai.com/policies/eu-terms-of-use/",
       "sha256": "9752604a9fbbecf0d869984113779dc86caf109e23236ebd3dd28741f50ecdd9"
+    },
+    {
+      "ruta": "texturas/cuadro-piramide-01.png",
+      "titulo": "Tres monumentos bajo sol administrativo — lámina piramidal de la oficina (#195)",
+      "autor": "Expediente Legado",
+      "licencia": "CC0-1.0",
+      "fuente": "https://github.com/EspacioKoop/expediente-legado/blob/main/docs/assets/cuadros-piramidales-originales.md",
+      "sha256": "f409296951511243d8754eaead458ee01c5cac4767e7cc7f37d21aaad9f8d53e",
+      "origen": "generado_por_script",
+      "receta": "referencia/arte/cuadros_piramidales/piramide-01.json",
+      "generador": "scripts/generar_cuadros_piramidales.py"
+    },
+    {
+      "ruta": "texturas/cuadro-piramide-02.png",
+      "titulo": "Sección de monumento y retícula — lámina piramidal de la oficina (#195)",
+      "autor": "Expediente Legado",
+      "licencia": "CC0-1.0",
+      "fuente": "https://github.com/EspacioKoop/expediente-legado/blob/main/docs/assets/cuadros-piramidales-originales.md",
+      "sha256": "c7ab003f17daeb22032b4a40b510487a02257d0985cc1bb00fa298e4c86e187f",
+      "origen": "generado_por_script",
+      "receta": "referencia/arte/cuadros_piramidales/piramide-02.json",
+      "generador": "scripts/generar_cuadros_piramidales.py"
+    },
+    {
+      "ruta": "texturas/cuadro-piramide-03.png",
+      "titulo": "Pirámide nocturna y triángulo celeste — lámina piramidal de la oficina (#195)",
+      "autor": "Expediente Legado",
+      "licencia": "CC0-1.0",
+      "fuente": "https://github.com/EspacioKoop/expediente-legado/blob/main/docs/assets/cuadros-piramidales-originales.md",
+      "sha256": "e35897cee9344eda22661feec1c85c482f5c1ec5fcb06bd629110e729f54da44",
+      "origen": "generado_por_script",
+      "receta": "referencia/arte/cuadros_piramidales/piramide-03.json",
+      "generador": "scripts/generar_cuadros_piramidales.py"
     }
   ]
 }

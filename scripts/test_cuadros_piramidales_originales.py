@@ -16,9 +16,12 @@ if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
 import generar_cuadros_piramidales as generador  # noqa: E402
+from godot_pruebas import comprobar_contrato  # noqa: E402
 
 ORIGEN = RAIZ / "referencia" / "arte" / "cuadros_piramidales"
 CONSUMIDOR = RAIZ / "godot" / "guion" / "cuadros_oficina.gd"
+TEXTURAS = RAIZ / "godot" / "assets" / "texturas"
+PROCEDENCIA = RAIZ / "godot" / "assets" / "procedencia.json"
 NOMBRES = {
     "cuadro-piramide-01.png",
     "cuadro-piramide-02.png",
@@ -63,6 +66,40 @@ class CuadrosPiramidalesOriginalesTest(unittest.TestCase):
         codigo = CONSUMIDOR.read_text(encoding="utf-8")
         for nombre in NOMBRES:
             self.assertIn(f'"textura": "{nombre}"', codigo)
+
+    def test_runtime_usa_exactamente_el_render_catalogado(self) -> None:
+        # El PNG versionado por LFS es la salida del generador sin retoques: si
+        # alguien lo reexporta desde un editor, el hash deja de coincidir.
+        for item in self.especificaciones():
+            ruta = TEXTURAS / item["salida"]
+            datos = ruta.read_bytes()
+            self.assertFalse(
+                datos.startswith(b"version https://git-lfs"),
+                f"{ruta.name} es un puntero LFS sin objeto; falta git lfs pull",
+            )
+            self.assertEqual(item["sha256"], hashlib.sha256(datos).hexdigest())
+
+    def test_procedencia_registra_cada_lamina_con_su_receta(self) -> None:
+        fichas = {
+            ficha["ruta"]: ficha
+            for ficha in json.loads(PROCEDENCIA.read_text(encoding="utf-8"))["assets"]
+        }
+        for item in self.especificaciones():
+            ficha = fichas.get(f"texturas/{item['salida']}")
+            self.assertIsNotNone(ficha, item["salida"])
+            self.assertEqual(item["sha256"], ficha["sha256"])
+            self.assertEqual(item["licencia"], ficha["licencia"])
+            self.assertEqual(item["autor"], ficha["autor"])
+            self.assertEqual("generado_por_script", ficha["origen"])
+            self.assertTrue((RAIZ / ficha["receta"]).is_file(), ficha["receta"])
+            self.assertTrue((RAIZ / ficha["generador"]).is_file(), ficha["generador"])
+
+    def test_marcos_de_la_oficina_montan_las_laminas(self) -> None:
+        comprobar_contrato(
+            self,
+            "pruebas/pruebas_cuadros_oficina_195.gd",
+            "18 pasadas, 0 fallos",
+        )
 
     def test_salidas_son_distintas(self) -> None:
         hashes = {
