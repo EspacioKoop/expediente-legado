@@ -104,9 +104,16 @@ func _probar_bbcode_seguro() -> void:
 
 
 func _probar_formato_equilibrado() -> void:
-	_comprobar(Editor.formato_equilibrado("Texto [b]válido [i]anidado[/i][/b]."), "acepta formato permitido bien anidado")
-	_comprobar(not Editor.formato_equilibrado("Texto [b]sin cierre."), "detecta etiquetas sin cierre")
-	_comprobar(not Editor.formato_equilibrado("[b][i]cruzado[/b][/i]"), "detecta etiquetas cruzadas")
+	_comprobar(
+		Editor.formato_equilibrado("Texto [b]válido [i]anidado[/i][/b]."),
+		"acepta formato permitido bien anidado"
+	)
+	_comprobar(
+		not Editor.formato_equilibrado("Texto [b]sin cierre."), "detecta etiquetas sin cierre"
+	)
+	_comprobar(
+		not Editor.formato_equilibrado("[b][i]cruzado[/b][/i]"), "detecta etiquetas cruzadas"
+	)
 	var roto := _base()
 	roto["contenido_bbcode"] = "Texto [center]incompleto"
 	_comprobar(not Editor.validar(roto).is_empty(), "impide guardar formato estructuralmente roto")
