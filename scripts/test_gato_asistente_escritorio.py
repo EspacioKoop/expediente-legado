@@ -29,7 +29,7 @@ class GatoAsistenteEscritorioTest(unittest.TestCase):
         self.assertIn("visor.add_child(conjunto)", fuente)
         self.assertIn("conjunto.mouse_filter = Control.MOUSE_FILTER_IGNORE", fuente)
         self.assertIn("avatar.gui_input.connect(_al_input_asistente_siga.bind(avatar))", fuente)
-        self.assertIn("call_deferred(\"_colocar_asistente_siga\", avatar, visor)", fuente)
+        self.assertIn("call_deferred(\"_colocar_asistente_siga\", conjunto, visor)", fuente)
 
     def test_avatar_reutiliza_las_ocho_poses_del_atlas(self):
         fuente = AVATAR.read_text(encoding="utf-8")
