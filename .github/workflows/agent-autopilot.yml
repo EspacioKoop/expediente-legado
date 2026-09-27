@@ -238,7 +238,7 @@ jobs:
           m=re.search(r"AGENT_PLAN_BEGIN(.*?)AGENT_PLAN_END",raw,re.S)
           if not m: raise SystemExit("plan no parseable")
           payload=m.group(1).strip()
-          fenced=re.fullmatch(r"```(?:json)?\\s*(.*?)\\s*```",payload,re.S|re.I)
+          fenced=re.fullmatch(r"```(?:json)?\s*(.*?)\s*```",payload,re.S|re.I)
           if fenced:
               payload=fenced.group(1).strip()
           try:
