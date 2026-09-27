@@ -34,6 +34,12 @@ on:
       - 'dist/exportar-godot-alpha.sh'
       - '.godot-version'
   workflow_dispatch:
+    inputs:
+      sentry_smoke:
+        description: 'Enviar un evento diagnóstico real a Sentry'
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -207,6 +213,39 @@ jobs:
 
       - name: Importar proyecto antes del smoke
         run: godot4 --headless --editor --path godot --quit
+
+      - name: Smoke Sentry manual
+        if: github.event_name == 'workflow_dispatch' && inputs.sentry_smoke
+        shell: bash
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          set -euo pipefail
+          [[ -n "$SENTRY_DSN" ]] || {
+            echo "ERROR: sentry_smoke requiere el secret SENTRY_DSN" >&2
+            exit 2
+          }
+          smoke="godot/.sentry_smoke.gd"
+          trap 'rm -f "$smoke"' EXIT
+          cat > "$smoke" <<'GDSCRIPT'
+          extends SceneTree
+
+          func _initialize() -> void:
+              call_deferred("_enviar")
+
+
+          func _enviar() -> void:
+              if not SentrySDK.is_enabled():
+                  push_error("Sentry smoke: SDK no inicializado")
+                  quit(2)
+                  return
+              var event_id = SentrySDK.capture_message("SIGA-98 Sentry smoke manual")
+              print("SENTRY_SMOKE_SENT event_id=", event_id)
+              await create_timer(1.0).timeout
+              SentrySDK.close()
+              quit()
+          GDSCRIPT
+          godot4 --headless --path godot --script res://.sentry_smoke.gd
 
       - name: Smoke de Caza Píxeles 98 antes de exportar
         run: godot4 --headless --path godot --script res://pruebas/emulador_gb_smoke.gd
