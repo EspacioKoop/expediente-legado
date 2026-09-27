@@ -1,0 +1,54 @@
+name: Cleanup merged branches
+
+on:
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  cleanup:
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == 'main' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Delete merged work branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const ref = context.payload.pull_request.head.ref;
+            const allowedPrefixes = [
+              'feature/',
+              'fix/',
+              'docs/',
+              'agent/',
+              'infra/',
+              'chore/',
+              'test/',
+            ];
+
+            if (!allowedPrefixes.some((prefix) => ref.startsWith(prefix))) {
+              core.notice(`Skipping unmanaged branch: ${ref}`);
+              return;
+            }
+
+            try {
+              await github.rest.git.deleteRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `heads/${ref}`,
+              });
+              core.notice(`Deleted merged branch: ${ref}`);
+            } catch (error) {
+              if (error.status === 404 || error.status === 422) {
+                core.notice(`Branch already absent or not deletable: ${ref}`);
+                return;
+              }
+              throw error;
+            }
