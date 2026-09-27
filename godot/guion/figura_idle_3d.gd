@@ -37,9 +37,7 @@ func configurar(nuevo: Node3D, nueva_fase: float = 0.0, seguir: bool = false) ->
 	objetivo = nuevo
 	fase = nueva_fase
 	mirar_jugador = seguir
-	reduccion_movimiento = bool(
-		PreferenciasSiga.cargar().get("reduccion_movimiento", false)
-	)
+	reduccion_movimiento = bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false))
 	_escala_base = objetivo.scale
 	_cabeza = objetivo.get_node_or_null("Cabeza") as Node3D
 	_brazo_izquierdo = objetivo.get_node_or_null("BrazoIzquierdo") as Node3D
@@ -63,9 +61,7 @@ func _process(delta: float) -> void:
 	_tiempo += paso * VELOCIDAD
 	var pulso := sin(_tiempo + fase)
 	objetivo.scale = Vector3(
-		_escala_base.x,
-		_escala_base.y * (1.0 + pulso * AMPLITUD_RESPIRACION),
-		_escala_base.z
+		_escala_base.x, _escala_base.y * (1.0 + pulso * AMPLITUD_RESPIRACION), _escala_base.z
 	)
 
 	var giro_ambiente := sin(_tiempo * 0.45 + fase * 1.7) * AMPLITUD_CABEZA
@@ -74,8 +70,7 @@ func _process(delta: float) -> void:
 	if is_instance_valid(_cabeza):
 		_cabeza.rotation.y = _rotacion_cabeza.y + _giro_cabeza
 		_cabeza.rotation.z = (
-			_rotacion_cabeza.z
-			+ sin(_tiempo * 0.31 + fase * 0.8) * AMPLITUD_INCLINACION
+			_rotacion_cabeza.z + sin(_tiempo * 0.31 + fase * 0.8) * AMPLITUD_INCLINACION
 		)
 
 	var balanceo := sin(_tiempo * 0.72 + fase * 1.3) * AMPLITUD_BRAZO
