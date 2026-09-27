@@ -105,7 +105,7 @@ jobs:
             elif [[ "$HAS_GEMINI" == true ]]; then provider=gemini
             else
               gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human >/dev/null
-              gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body 'No hay ningún backend Qwen configurado (`QWEN_API_KEY` o `QWEN_FALLBACK_N_API_KEY`) ni `GEMINI_API_KEY` en Actions Secrets.'
+              gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body 'No hay ningún backend de agente configurado: OmniRoute privado, Qwen directo/fallbacks o Gemini.'
               echo "run=false" >> "$GITHUB_OUTPUT"; exit 0
             fi
           fi
@@ -255,7 +255,7 @@ jobs:
 
       - id: plan_qwen_fallback_1
         name: Plan Qwen (fallback 1)
-        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_1 == 'true' && steps.implement_omniroute.outcome != 'success' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success'
+        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_1 == 'true' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -268,7 +268,7 @@ jobs:
 
       - id: plan_qwen_fallback_2
         name: Plan Qwen (fallback 2)
-        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_2 == 'true' && steps.implement_omniroute.outcome != 'success' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.plan_qwen_fallback_1.outcome != 'success'
+        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_2 == 'true' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.plan_qwen_fallback_1.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -281,7 +281,7 @@ jobs:
 
       - id: plan_qwen_fallback_3
         name: Plan Qwen (fallback 3)
-        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_3 == 'true' && steps.implement_omniroute.outcome != 'success' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.plan_qwen_fallback_1.outcome != 'success' && steps.plan_qwen_fallback_2.outcome != 'success'
+        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_3 == 'true' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.plan_qwen_fallback_1.outcome != 'success' && steps.plan_qwen_fallback_2.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -294,7 +294,7 @@ jobs:
 
       - id: plan_qwen_fallback_4
         name: Plan Qwen (fallback 4)
-        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_4 == 'true' && steps.implement_omniroute.outcome != 'success' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.plan_qwen_fallback_1.outcome != 'success' && steps.plan_qwen_fallback_2.outcome != 'success' && steps.plan_qwen_fallback_3.outcome != 'success'
+        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_4 == 'true' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.plan_qwen_fallback_1.outcome != 'success' && steps.plan_qwen_fallback_2.outcome != 'success' && steps.plan_qwen_fallback_3.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -465,7 +465,7 @@ jobs:
 
       - id: implement_qwen_fallback_1
         name: Implementar con Qwen (fallback 1)
-        if: steps.reserve.outputs.reserved == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_1 == 'true' && steps.implement_qwen.outcome != 'success'
+        if: steps.reserve.outputs.reserved == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_1 == 'true' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -478,7 +478,7 @@ jobs:
 
       - id: implement_qwen_fallback_2
         name: Implementar con Qwen (fallback 2)
-        if: steps.reserve.outputs.reserved == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_2 == 'true' && steps.implement_qwen.outcome != 'success' && steps.implement_qwen_fallback_1.outcome != 'success'
+        if: steps.reserve.outputs.reserved == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_2 == 'true' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.implement_qwen_fallback_1.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -491,7 +491,7 @@ jobs:
 
       - id: implement_qwen_fallback_3
         name: Implementar con Qwen (fallback 3)
-        if: steps.reserve.outputs.reserved == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_3 == 'true' && steps.implement_qwen.outcome != 'success' && steps.implement_qwen_fallback_1.outcome != 'success' && steps.implement_qwen_fallback_2.outcome != 'success'
+        if: steps.reserve.outputs.reserved == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_3 == 'true' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.implement_qwen_fallback_1.outcome != 'success' && steps.implement_qwen_fallback_2.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -504,7 +504,7 @@ jobs:
 
       - id: implement_qwen_fallback_4
         name: Implementar con Qwen (fallback 4)
-        if: steps.reserve.outputs.reserved == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_4 == 'true' && steps.implement_qwen.outcome != 'success' && steps.implement_qwen_fallback_1.outcome != 'success' && steps.implement_qwen_fallback_2.outcome != 'success' && steps.implement_qwen_fallback_3.outcome != 'success'
+        if: steps.reserve.outputs.reserved == 'true' && steps.select.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_4 == 'true' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.implement_qwen_fallback_1.outcome != 'success' && steps.implement_qwen_fallback_2.outcome != 'success' && steps.implement_qwen_fallback_3.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
