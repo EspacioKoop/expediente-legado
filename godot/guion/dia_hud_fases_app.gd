@@ -201,8 +201,7 @@ func _texto_de_recursos(modelo: Dictionary) -> String:
 	_anadir_parte(partes, _formatear_recurso("dia", [int(modelo.get("dia", 1))]))
 	_anadir_parte(partes, _formatear_recurso("hora", [int(minutos / 60), minutos % 60]))
 	_anadir_parte(
-		partes,
-		_formatear_recurso("estres_" + String(modelo.get("estres_banda", "calma")))
+		partes, _formatear_recurso("estres_" + String(modelo.get("estres_banda", "calma")))
 	)
 
 	match String(modelo.get("fase", "")):
