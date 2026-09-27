@@ -297,4 +297,30 @@ jobs:
         run: |
           set -euo pipefail
           git config user.name "agent-autopilot[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "agent: avanzar #$ISSUE con $PROVIDER"
+          gh auth setup-git
+          git push -u origin "$BRANCH"
+          title="$(gh issue view "$ISSUE" --json title --jq .title)"
+          url="$(gh pr create --base main --head "$BRANCH" --draft             --title "agent($PROVIDER): #$ISSUE $title"             --body "Refs #$ISSUE
+
+          Implementación autónoma. Plan reservado en #182; cambios limitados al CLAIM; preflight ejecutado. PR draft, sin auto-merge.")"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          gh issue edit "$ISSUE" --add-label agent:pr-open --remove-label agent:working --remove-label agent:auto --remove-label agent:qwen --remove-label agent:gemini >/dev/null 2>&1 || true
+          gh issue comment "$ISSUE" --body "Agent autopilot ($PROVIDER): $url"
+          gh workflow run ci.yml --ref "$BRANCH"
+
+      - name: Marcar fallo
+        if: failure() && steps.select.outputs.issue != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.select.outputs.issue }}
+          BRANCH: ${{ steps.select.outputs.branch }}
+          RESERVED: ${{ steps.reserve.outputs.reserved }}
+        run: |
+          gh issue edit "$ISSUE" --add-label agent:needs-human --remove-label agent:working >/dev/null 2>&1 || true
+          gh issue comment "$ISSUE" --body "Agent autopilot se detuvo: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" || true
+          pr="$(gh pr list --state open --head "${BRANCH:-none}" --json number --jq '.[0].number // empty' || true)"
+          if [[ "$RESERVED" == true && -z "$pr" ]]; then
+            gh issue comment 182 --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=autopilot-fallo-antes-de-PR" >/dev/null || true
+          fi
