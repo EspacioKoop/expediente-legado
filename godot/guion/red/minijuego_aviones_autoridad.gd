@@ -38,16 +38,19 @@ func _init(
 	)
 	if sesion.is_empty():
 		return
-	var contexto := MinijuegoSesionDatos.validar_payload(
-		{
-			"room_id": room_id,
-			"session_id": session_id,
-			"minigame_id": MINIGAME_ID,
-			"rules_version": RULES_VERSION,
-			"sequence": 0,
-			"turn": 0,
-			"action": {"type": TIPO_LANZAMIENTO},
-		}
+	var contexto := (
+		MinijuegoSesionDatos
+		. validar_payload(
+			{
+				"room_id": room_id,
+				"session_id": session_id,
+				"minigame_id": MINIGAME_ID,
+				"rules_version": RULES_VERSION,
+				"sequence": 0,
+				"turn": 0,
+				"action": {"type": TIPO_LANZAMIENTO},
+			}
+		)
 	)
 	if not contexto["ok"]:
 		return
