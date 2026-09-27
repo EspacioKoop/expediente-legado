@@ -103,6 +103,7 @@ static func nuevas() -> Dictionary:
 		"version": VERSION,
 		"acciones": ACCIONES.duplicate(true),
 		"reduccion_movimiento": false,
+		"ofrecer_ronda_cierre": true,
 		"escala_ui": 1.0,
 		"volumen": 1.0,
 		"volumen_efectos": 1.0,
@@ -264,6 +265,7 @@ static func cargar(ruta: String = RUTA) -> Dictionary:
 				guardada["mando"] = ACCIONES[accion]["mando"]
 			resultado["acciones"][accion] = guardada
 	resultado["reduccion_movimiento"] = bool(datos.get("reduccion_movimiento", false))
+	resultado["ofrecer_ronda_cierre"] = bool(datos.get("ofrecer_ronda_cierre", true))
 	resultado["escala_ui"] = clampf(
 		float(datos.get("escala_ui", 1.0)), ESCALA_UI_MIN, ESCALA_UI_MAX
 	)
