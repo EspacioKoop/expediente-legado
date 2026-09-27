@@ -56,6 +56,9 @@ class ComercioBarrio676FisicoTest(unittest.TestCase):
         self.assertIn('"PAGO · -%d"', self.helper)
         self.assertIn('"REVENTA · +%d"', self.helper)
         self.assertIn('"YA COMPRADO"', self.helper)
+        self.assertIn('"CERRADO"', self.helper)
+        self.assertIn('"EstadoHorario"', self.helper)
+        self.assertIn("ComercioBarrio.estado", self.helper)
         self.assertNotIn("CanvasLayer", self.helper)
         self.assertNotIn("Control.new()", self.helper)
 
