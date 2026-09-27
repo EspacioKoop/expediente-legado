@@ -3,6 +3,7 @@ extends SceneTree
 const DiaSenalesMultiplayerApp = preload("res://guion/dia_senales_multiplayer_app.gd")
 const TransporteFixture = preload("res://guion/red/transporte_fixture.gd")
 
+
 class HostFalso:
 	extends Node3D
 	var jornada := {"fase": "trayecto"}
