@@ -130,7 +130,7 @@ La operación:
 Esto **no autoriza por sí solo a importar el lote completo**: la selección final sigue ligada a una escena concreta y al gate de #181.
 
 
-## Primer vertical runtime preparado: zona de servicio de la calle
+## Primer vertical runtime: zona de servicio de la calle
 
 La zona secundaria creada por #228 ya tiene bobina, cuadro eléctrico, trolley y foco de obra. Es un lugar mejor para probar #220 que añadir props nuevos al archivo o sustituir el contenedor urbano de #222: el shipping container de Chill Vibes mide unos 6,20 m y no es equivalente al contenedor de basura existente.
 
@@ -153,11 +153,22 @@ python3 scripts/materializar_chill_vibes_cc0.py /tmp/chill-vibes \
   --aplicar
 ```
 
-La PR que active los binarios debe contener exactamente `shipping_pallet.glb`, `crate.glb` y sus fichas de procedencia, además de evidencia visual de la zona de servicio. No necesita reabrir la arquitectura runtime.
+### Binarios activos
+
+`shipping_pallet.glb` y `crate.glb` están versionados por Git LFS en `godot/assets/modelos/chill_vibes/`, copiados sin modificar del `.7z` auditado (`fdeadea9…`). Cada GLB declara `asset.copyright: "CC0"` en su propio JSON glTF, así que la licencia queda probada también en el binario y no solo en la página de itch. Las fichas de procedencia conservan `archivo_origen` y `paquete_sha256`.
+
+El materializador reescribe `procedencia.json` entero con `json.dumps`, y el fichero actual no conserva exactamente ese formato. Por eso las dos fichas se insertaron por texto tras el último modelo, reutilizando del script la selección, la ficha, la verificación de hash post-copia y `verificar_indice_lfs`.
+
+Activar los binarios destapó dos fallos latentes del runtime preparado, que nunca se habían ejecutado:
+
+- `IndustrialCC0.crear_zona_servicio()` monta el lote antes de colgarlo del árbol y `Modelos._limites()` usaba `global_transform`, lo que daba un `ERROR` por pieza. Ahora compone las transformaciones locales, con el mismo resultado dentro del árbol.
+- La caja, a ras de suelo junto al palé, se metía unos 40 cm en su volumen. Ahora va apilada encima y no ocupa más huella que el trolley al que sustituye.
+
+`godot/pruebas/pruebas_chill_vibes_servicio_220.gd` cubre ambos casos, y las capturas están en `docs/evidencias/chill-vibes-220/`.
 
 ## Integración real cuando una escena lo justifique
 
-#181 sigue priorizando validar el saneamiento P0 antes de expandir decoración opcional. Por eso este corte **audita y prepara**, pero no versiona todavía GLB ni cambia escenas.
+#181 sigue priorizando validar el saneamiento P0 antes de expandir decoración opcional. Fuera de palé y caja, el pack sigue siendo **biblioteca auditada**: ningún otro GLB se versiona hasta que una escena concreta lo justifique.
 
 Cuando una zona real de carga/servicio necesite estas piezas:
 

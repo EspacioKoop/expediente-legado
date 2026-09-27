@@ -2133,6 +2133,26 @@
       "conversion": "Veinticuatro .max.fbx reunidos en un glb sin malla con godot/herramientas/convertir_animaciones_rocketbox.gd (Godot 4.7): solo los huesos del BoneMap humanoide, posición solo en raíz y pelvis, claves optimizadas; un triángulo degenerado ancla la piel para que el importador cree el esqueleto (#1319)."
     },
     {
+      "ruta": "modelos/chill_vibes/shipping_pallet.glb",
+      "titulo": "Shipping pallet",
+      "autor": "psychic_magpie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://psychic-magpie.itch.io/chill-vibes-art-jam-4",
+      "sha256": "28e678772b418a61bfe5aa987ae2eca4fff0cdb8366d495d81c15de127ebaba3",
+      "archivo_origen": "3D/Shipping pallet/shipping_pallet.glb",
+      "paquete_sha256": "fdeadea99cf98bac3c77787ae85b5befb3a0df5de084177387896fb32a3bdf82"
+    },
+    {
+      "ruta": "modelos/chill_vibes/crate.glb",
+      "titulo": "Crate",
+      "autor": "psychic_magpie",
+      "licencia": "CC0-1.0",
+      "fuente": "https://psychic-magpie.itch.io/chill-vibes-art-jam-4",
+      "sha256": "036fc37d2c3f710d2532887250e7dc695294d8883ddc3db4db8a71cf885536c9",
+      "archivo_origen": "3D/Crate/crate.glb",
+      "paquete_sha256": "fdeadea99cf98bac3c77787ae85b5befb3a0df5de084177387896fb32a3bdf82"
+    },
+    {
       "ruta": "texturas/calle_ai_98/bloque_01.webp",
       "titulo": "Bloque residencial de fondo 01",
       "autor": "EspacioKoop (generado con OpenAI ImageGen)",
