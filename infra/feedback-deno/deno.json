@@ -1,10 +1,18 @@
 {
-  "unstable": ["kv"],
+  "unstable": [
+    "kv"
+  ],
   "fmt": {
     "lineWidth": 100
   },
   "tasks": {
     "check": "deno check main.ts",
     "start": "deno run --unstable-kv --allow-env=GITHUB_TOKEN,GITHUB_REPOSITORY,GITHUB_LABELS --allow-net=0.0.0.0:8000,api.github.com --allow-read --allow-write main.ts"
+  },
+  "deploy": {
+    "runtime": {
+      "type": "dynamic",
+      "entrypoint": "./main.ts"
+    }
   }
 }
