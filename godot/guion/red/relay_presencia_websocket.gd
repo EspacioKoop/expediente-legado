@@ -194,51 +194,77 @@ func _unir(peer_id: int, datos: Dictionary) -> void:
 
 func _publicar(peer_id: int, datos: Dictionary) -> void:
 	var peer: Dictionary = _peers.get(peer_id, {})
-	if peer.is_empty() or String(peer.get("room_id", "")).is_empty():
-		_rechazar(peer_id, "not_joined")
+	var validacion := _validar_publicacion(peer, datos)
+	if not validacion["ok"]:
+		_rechazar(peer_id, String(validacion["reason"]))
 		return
 
+	var normalizado: Dictionary = validacion["event"]
+	if String(normalizado["kind"]) == "ghost":
+		_guardar_ghost(
+			String(peer["scene_key"]),
+			String(peer["room_id"]),
+			normalizado,
+			int(validacion["ahora"]),
+		)
+	_reenviar_evento(peer_id, normalizado)
+
+
+func _validar_publicacion(peer: Dictionary, datos: Dictionary) -> Dictionary:
+	var resultado := {"ok": false, "reason": "invalid_event", "event": {}, "ahora": 0}
 	var evento = datos.get("event")
-	if typeof(evento) != TYPE_DICTIONARY:
-		_rechazar(peer_id, "invalid_event")
-		return
+	if peer.is_empty() or String(peer.get("room_id", "")).is_empty():
+		resultado["reason"] = "not_joined"
+	elif typeof(evento) != TYPE_DICTIONARY:
+		resultado["reason"] = "invalid_event"
+	else:
+		var ahora := int(Time.get_unix_time_from_system())
+		resultado["ahora"] = ahora
+		var base := EventoOnline.validar(evento, ahora)
+		if not base["ok"]:
+			resultado["reason"] = "invalid_event"
+		else:
+			var normalizado: Dictionary = base["event"]
+			if (
+				String(normalizado["scene_key"]) != String(peer["scene_key"])
+				or String(normalizado["actor_public_id"]) != String(peer["actor_public_id"])
+			):
+				resultado["reason"] = "membership_mismatch"
+			else:
+				resultado = _validar_kind_publicado(peer, normalizado, ahora)
+	return resultado
 
-	var ahora := int(Time.get_unix_time_from_system())
-	var base := EventoOnline.validar(evento, ahora)
-	if not base["ok"]:
-		_rechazar(peer_id, "invalid_event")
-		return
-	var normalizado: Dictionary = base["event"]
-	if (
-		String(normalizado["scene_key"]) != String(peer["scene_key"])
-		or String(normalizado["actor_public_id"]) != String(peer["actor_public_id"])
-	):
-		_rechazar(peer_id, "membership_mismatch")
-		return
 
+func _validar_kind_publicado(
+	peer: Dictionary, normalizado: Dictionary, ahora: int
+) -> Dictionary:
+	var resultado := {
+		"ok": false,
+		"reason": "unsupported_event_kind",
+		"event": {},
+		"ahora": ahora,
+	}
 	match String(normalizado["kind"]):
 		"presence":
-			var validacion_presencia := PresenciaDatos.validar_evento(normalizado, ahora)
-			if not validacion_presencia["ok"]:
-				_rechazar(peer_id, "invalid_presence")
-				return
-			normalizado = validacion_presencia["event"]
-			var payload: Dictionary = normalizado["payload"]
-			if String(payload["room_id"]) != String(peer["room_id"]):
-				_rechazar(peer_id, "membership_mismatch")
-				return
+			var validacion := PresenciaDatos.validar_evento(normalizado, ahora)
+			if not validacion["ok"]:
+				resultado["reason"] = "invalid_presence"
+			else:
+				var evento: Dictionary = validacion["event"]
+				var payload: Dictionary = evento["payload"]
+				if String(payload["room_id"]) != String(peer["room_id"]):
+					resultado["reason"] = "membership_mismatch"
+				else:
+					resultado["ok"] = true
+					resultado["event"] = evento
 		"ghost":
-			var validacion_ghost := GhostDatos.validar_evento(normalizado, ahora)
-			if not validacion_ghost["ok"]:
-				_rechazar(peer_id, "invalid_ghost")
-				return
-			normalizado = validacion_ghost["event"]
-			_guardar_ghost(String(peer["scene_key"]), String(peer["room_id"]), normalizado, ahora)
-		_:
-			_rechazar(peer_id, "unsupported_event_kind")
-			return
-
-	_reenviar_evento(peer_id, normalizado)
+			var validacion := GhostDatos.validar_evento(normalizado, ahora)
+			if not validacion["ok"]:
+				resultado["reason"] = "invalid_ghost"
+			else:
+				resultado["ok"] = true
+				resultado["event"] = validacion["event"]
+	return resultado
 
 
 func _reenviar_evento(origen_id: int, evento: Dictionary) -> void:
