@@ -38,6 +38,19 @@ func _init(
 	)
 	if sesion.is_empty():
 		return
+	var contexto := MinijuegoSesionDatos.validar_payload(
+		{
+			"room_id": room_id,
+			"session_id": session_id,
+			"minigame_id": MINIGAME_ID,
+			"rules_version": RULES_VERSION,
+			"sequence": 0,
+			"turn": 0,
+			"action": {"type": TIPO_LANZAMIENTO},
+		}
+	)
+	if not contexto["ok"]:
+		return
 
 	_room_id = room_id
 	_sesion = sesion
@@ -74,7 +87,7 @@ func aplicar_evento(evento: Variant, ahora_unix: int) -> Dictionary:
 		return _rechazo("invalid_action", validacion_accion["reason"])
 
 	var actor := String(normalizado["actor_public_id"])
-	var resultados_antes: Array = _aviones["resultados"].get(actor, [])
+	var cantidad_antes := int((_aviones["resultados"].get(actor, []) as Array).size())
 	AvionesPapel.lanzar(
 		_aviones,
 		validacion_accion["model"],
@@ -83,7 +96,7 @@ func aplicar_evento(evento: Variant, ahora_unix: int) -> Dictionary:
 		validacion_accion["power"],
 	)
 	var resultados_despues: Array = _aviones["resultados"].get(actor, [])
-	if resultados_despues.size() <= resultados_antes.size():
+	if resultados_despues.size() <= cantidad_antes:
 		return _rechazo("launch_not_applied")
 
 	var vuelo: Dictionary = resultados_despues[-1]
@@ -167,7 +180,7 @@ func _validar_lanzamiento(action: Dictionary) -> Dictionary:
 
 	if razon.is_empty():
 		var numeros := [action["direction"], action["height"], action["power"]]
-		if not numeros.all(_es_numero_finito):
+		if not numeros.all(func(valor): return _es_numero_finito(valor)):
 			razon = "invalid_launch_number"
 		else:
 			direccion = float(action["direction"])
