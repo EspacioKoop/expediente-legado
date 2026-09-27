@@ -84,6 +84,10 @@ class HudFasesTest(unittest.TestCase):
         for clave in (
             "dia",
             "hora",
+            "estres_calma",
+            "estres_inquietud",
+            "estres_tension",
+            "estres_paranoia",
             "acciones",
             "dinero",
             "pistas",
@@ -95,6 +99,8 @@ class HudFasesTest(unittest.TestCase):
             self.assertTrue(self.textos_recursos.get(clave), clave)
         self.assertNotIn('"ACCIONES %d"', self.controlador)
         self.assertNotIn('"DINERO %d"', self.controlador)
+        self.assertIn('"estres_banda": banda_estres(Estres.nivel(jornada))', self.controlador)
+        self.assertNotIn("Estres.valor(", self.controlador)
 
     def test_tarjeta_se_registra_en_arbitro_comun(self):
         self.assertIn("hud.add_child(_tarjeta_fase)", self.controlador)
