@@ -22,7 +22,7 @@ func _probar_biblioteca() -> void:
 
 	_comprobar(conjunto == repetido, "el montaje es idempotente")
 	_comprobar(Papeleria.familias().size() >= 10, "hay al menos diez familias reutilizables")
-	_comprobar(int(conjunto.get_meta("familias_visuales", 0)) >= 10, "el conjunto declara sus familias")
+	_comprobar(\n		int(conjunto.get_meta("familias_visuales", 0)) >= 10, "el conjunto declara sus familias"\n	)
 	_comprobar(int(conjunto.get_meta("semilla_visual", -1)) == 1472, "la semilla queda trazable")
 
 	for nombre in [
@@ -57,8 +57,8 @@ func _probar_biblioteca() -> void:
 	_comprobar(not texto_malla, "ninguna malla contiene texto")
 
 	var formulario := conjunto.get_node("FormularioA4") as Node3D
-	_comprobar(formulario.position.x >= 3.0 and formulario.position.x <= 4.2, "A4 queda sobre la mesa")
-	_comprobar(formulario.position.z >= -0.45 and formulario.position.z <= 0.45, "A4 no sobresale en profundidad")
+	_comprobar(\n		formulario.position.x >= 3.0 and formulario.position.x <= 4.2, "A4 queda sobre la mesa"\n	)
+	_comprobar(\n		formulario.position.z >= -0.45 and formulario.position.z <= 0.45,\n		"A4 no sobresale en profundidad"\n	)
 	mundo.queue_free()
 
 
