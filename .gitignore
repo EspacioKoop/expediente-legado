@@ -39,6 +39,8 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+**/.dev.vars
+**/.dev.vars.*
 
 # Configuración local de Claude Code (permisos específicos de esta máquina)
 .claude/settings.local.json
