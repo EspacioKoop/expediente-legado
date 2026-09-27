@@ -63,6 +63,12 @@ func _probar_atencion_selectiva() -> void:
 		absf(cuerpo.rotation.y) <= Idle.GIRO_ATENCION_MAX + 0.001,
 		"la atención nunca supera el giro corporal permitido"
 	)
+	idle.conversar(true)
+	_comprobar(
+		is_zero_approx(cuerpo.rotation.y),
+		"una conversación corta inmediatamente la atención al jugador",
+	)
+	idle.conversar(false)
 	actor.position = Vector3(0.0, 0.0, 2.0)
 	idle._process(0.5)
 	_comprobar(
