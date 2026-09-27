@@ -1,0 +1,25 @@
+{
+  "protocol_version": 1,
+  "kind": "ghost",
+  "game_build": "fixture-376",
+  "scene_key": "calle",
+  "created_at": 2099999990,
+  "expires_at": 2100000890,
+  "actor_public_id": "anon-fixture-376",
+  "event_id": "ghost-calle-fixture-001",
+  "payload": {
+    "scene_revision": "calle-r1",
+    "sample_rate": 6.0,
+    "space": "scene",
+    "anchor_key": "",
+    "frames": [
+      {"t": 0.0, "position": [-3.0, 0.0, 1.0], "yaw": 1.57, "gesture": ""},
+      {"t": 0.5, "position": [-2.0, 0.0, 1.0], "yaw": 1.57, "gesture": ""},
+      {"t": 1.0, "position": [-1.0, 0.0, 1.0], "yaw": 1.57, "gesture": "mirar_escaparate"},
+      {"t": 1.5, "position": [-1.0, 0.0, 1.0], "yaw": 1.57, "gesture": "detenerse"},
+      {"t": 2.0, "position": [0.0, 0.0, 1.0], "yaw": 1.57, "gesture": ""},
+      {"t": 2.5, "position": [1.0, 0.0, 0.5], "yaw": 1.20, "gesture": ""},
+      {"t": 3.0, "position": [2.0, 0.0, 0.0], "yaw": 1.20, "gesture": "saludo"}
+    ]
+  }
+}
