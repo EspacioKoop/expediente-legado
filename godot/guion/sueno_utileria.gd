@@ -163,6 +163,9 @@ static func montar(
 			anomalia.set_meta("motivo_simbolico", motivo)
 
 		mundo.add_child(anomalia)
+		var escena_visual := datos.get("escena_visual", null) as PackedScene
+		if escena_visual != null:
+			anomalia.configurar_escena_visual(escena_visual)
 		(
 			anomalia
 			. configurar(
@@ -176,7 +179,6 @@ static func montar(
 				datos["giro"],
 				datos["giro_reaccion"],
 				datos.get("asset_cc0", false) == true,
-				datos.get("escena_visual", null) as PackedScene,
 			)
 		)
 		_montar_eco_simbolico(anomalia, motivo)
