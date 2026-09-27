@@ -15,15 +15,19 @@ func _init() -> void:
 	)
 	comprobar(
 		"failover conserva orden y elimina duplicados",
-		Parte.urls_configuradas(
-			{
-				"feedback_urls": [
-					"https://primario.test/api/report",
-					"https://respaldo.test/api/report",
-					"https://primario.test/api/report",
-				],
-				"feedback_url": "https://respaldo.test/api/report",
-			}
+		(
+			Parte
+			. urls_configuradas(
+				{
+					"feedback_urls":
+					[
+						"https://primario.test/api/report",
+						"https://respaldo.test/api/report",
+						"https://primario.test/api/report",
+					],
+					"feedback_url": "https://respaldo.test/api/report",
+				}
+			)
 		),
 		[
 			"https://primario.test/api/report",
