@@ -94,42 +94,43 @@ func _amplitud_respiracion(frame: int) -> Vector2:
 
 func _frame_actual() -> int:
 	# Hambre es estado, no animación: permanece en una pose legible y estable.
+	var frame := FRAME_IDLE
 	if _nivel == NIVEL_ESCASO:
-		return FRAME_HAMBRIENTO
-	if _reduccion_movimiento:
-		return FRAME_IDLE
+		frame = FRAME_HAMBRIENTO
+	elif _reduccion_movimiento:
+		frame = FRAME_IDLE
 
 	# Las ocho poses del atlas participan ahora en secuencias cortas. No hay RNG:
 	# los in-betweens son presentación determinista y nunca deciden progreso.
 	# 1) doble parpadeo, más orgánico que un único frame periódico.
-	if (_tiempo >= 2.70 and _tiempo < 2.86) or (_tiempo >= 3.02 and _tiempo < 3.14):
-		return FRAME_PARPADEO
+	elif (_tiempo >= 2.70 and _tiempo < 2.86) or (_tiempo >= 3.02 and _tiempo < 3.14):
+		frame = FRAME_PARPADEO
 
 	# 2) mirar -> alerta -> mirar: una atención breve hacia otra zona del OS98.
-	if _tiempo >= 4.45 and _tiempo < 4.82:
-		return FRAME_MIRANDO
-	if _tiempo >= 4.82 and _tiempo < 5.18:
-		return FRAME_ALERTA
-	if _tiempo >= 5.18 and _tiempo < 5.58:
-		return FRAME_MIRANDO
+	elif _tiempo >= 4.45 and _tiempo < 4.82:
+		frame = FRAME_MIRANDO
+	elif _tiempo >= 4.82 and _tiempo < 5.18:
+		frame = FRAME_ALERTA
+	elif _tiempo >= 5.18 and _tiempo < 5.58:
+		frame = FRAME_MIRANDO
 
 	# 3) satisfecho -> loaf -> satisfecho: se acomoda antes de volver a idle.
-	if _tiempo >= 7.05 and _tiempo < 7.42:
-		return FRAME_SATISFECHO
-	if _tiempo >= 7.42 and _tiempo < 8.18:
-		return FRAME_LOAF
-	if _tiempo >= 8.18 and _tiempo < 8.50:
-		return FRAME_SATISFECHO
+	elif _tiempo >= 7.05 and _tiempo < 7.42:
+		frame = FRAME_SATISFECHO
+	elif _tiempo >= 7.42 and _tiempo < 8.18:
+		frame = FRAME_LOAF
+	elif _tiempo >= 8.18 and _tiempo < 8.50:
+		frame = FRAME_SATISFECHO
 
 	# 4) giro completo: usa espalda como transición, no como pose congelada.
-	if _tiempo >= 10.35 and _tiempo < 10.76:
-		return FRAME_MIRANDO
-	if _tiempo >= 10.76 and _tiempo < 11.48:
-		return FRAME_ESPALDA
-	if _tiempo >= 11.48 and _tiempo < 11.90:
-		return FRAME_MIRANDO
+	elif _tiempo >= 10.35 and _tiempo < 10.76:
+		frame = FRAME_MIRANDO
+	elif _tiempo >= 10.76 and _tiempo < 11.48:
+		frame = FRAME_ESPALDA
+	elif _tiempo >= 11.48 and _tiempo < 11.90:
+		frame = FRAME_MIRANDO
 
 	# Un último parpadeo rompe la simetría antes de cerrar el ciclo.
-	if _tiempo >= 12.72 and _tiempo < 12.90:
-		return FRAME_PARPADEO
-	return FRAME_IDLE
+	elif _tiempo >= 12.72 and _tiempo < 12.90:
+		frame = FRAME_PARPADEO
+	return frame
