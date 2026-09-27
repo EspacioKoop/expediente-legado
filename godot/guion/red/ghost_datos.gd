@@ -151,7 +151,10 @@ static func validar_payload(payload: Variant, scene_key: String = "") -> Diction
 
 static func _es_scene_sueno(scene_key: String) -> bool:
 	var clave := scene_key.to_lower()
-	return clave.begins_with("sueno") or clave.begins_with("suenio") or clave.begins_with("sueño")
+	for prefijo in ["sueno", "suenio", "sueño"]:
+		if clave.begins_with(prefijo):
+			return true
+	return false
 
 
 static func _validar_frame(frame_raw: Variant, tiempo_anterior: float) -> Dictionary:
