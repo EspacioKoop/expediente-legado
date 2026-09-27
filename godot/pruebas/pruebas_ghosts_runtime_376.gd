@@ -90,11 +90,15 @@ func _probar_trayecto_asincrono(relay: RelayPresenciaWebSocket) -> void:
 
 	var raiz := host_b._mundo.get_node_or_null(DiaGhostsApp.NOMBRE_RAIZ)
 	_comprobar("runtime monta raíz de ghosts", raiz != null, true)
-	_comprobar(\n\t\t"runtime monta al menos un ghost", raiz != null and raiz.get_child_count() >= 1, true\n\t)
+	_comprobar(
+		"runtime monta al menos un ghost", raiz != null and raiz.get_child_count() >= 1, true
+	)
 	if raiz != null and raiz.get_child_count() >= 1:
 		var ghost = raiz.get_child(0)
 		_comprobar("ghost histórico pertenece a A", ghost.actor_public_id, "anon-ghost-a")
-		_comprobar(\n\t\t\t"ghost histórico no tiene colisión", ghost.has_method("get_collision_layer"), false\n\t\t)
+		_comprobar(
+			"ghost histórico no tiene colisión", ghost.has_method("get_collision_layer"), false
+		)
 	b.desactivar(AHORA + 1)
 	host_a.free()
 	host_b.free()
@@ -106,7 +110,9 @@ func _probar_movimiento_npc_sueno(relay: RelayPresenciaWebSocket) -> void:
 	var transporte_a := TransporteWebSocket.new(relay.url())
 	var a := _nuevo_controlador(host_a, transporte_a, "anon-sueno-a")
 	_comprobar("A abre contexto de sueño", a.estado()["scene_key"], "sueno/crucero")
-	_comprobar(\n\t\t"revisión de sueño existe", not String(a.estado()["scene_revision"]).is_empty(), true\n\t)
+	_comprobar(
+		"revisión de sueño existe", not String(a.estado()["scene_revision"]).is_empty(), true
+	)
 	await _bombear_controladores(relay, [a], 50)
 
 	for i in range(5):
@@ -137,7 +143,9 @@ func _probar_movimiento_npc_sueno(relay: RelayPresenciaWebSocket) -> void:
 	_comprobar("NPC no recibe NavigationAgent3D", eco.get_node_or_null("NavigationAgent3D"), null)
 	if trayectoria != null:
 		trayectoria.avanzar(2.0)
-		_comprobar(\n\t\t\t"NPC conserva offset local del anchor", is_equal_approx(eco.position.z, 5.0), true\n\t\t)
+		_comprobar(
+			"NPC conserva offset local del anchor", is_equal_approx(eco.position.z, 5.0), true
+		)
 		_comprobar("NPC se mueve con la forma de la run", eco.position.x > 10.0, true)
 
 	var raiz := host_b._mundo.get_node_or_null(DiaGhostsApp.NOMBRE_RAIZ)
