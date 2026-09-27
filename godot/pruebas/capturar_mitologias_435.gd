@@ -123,13 +123,12 @@ func _capturar_gilgamesh(salida: String, manifiesto: Dictionary) -> bool:
 
 	camara.position = Vector3(entrada.x, ALTURA_JUGADOR, entrada.z)
 	camara.look_at(ancla + Vector3(0.0, 1.05, -0.5), Vector3.UP)
-	if not await _guardar(
+	var guardado_final := await _guardar(
 		salida, "436_gilgamesh_resuelto.png", "gilgamesh_resuelto", 436, manifiesto
-	):
-		return false
+	)
 	mundo.queue_free()
 	await process_frame
-	return true
+	return guardado_final
 
 
 func _capturar_aquiles(salida: String, manifiesto: Dictionary) -> bool:
