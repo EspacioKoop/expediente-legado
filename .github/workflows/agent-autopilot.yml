@@ -1,0 +1,340 @@
+name: Agent autopilot
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/agent-autopilot.yml']
+  issues:
+    types: [labeled]
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: 'Issue (vacío = siguiente agent:auto)'
+        required: false
+        type: string
+      provider:
+        description: 'Proveedor'
+        required: true
+        default: auto
+        type: choice
+        options: [auto, qwen, gemini]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agent-autopilot
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Crear labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create agent:auto --repo "$GITHUB_REPOSITORY" --color 5319E7 --description "Cola automática" --force
+          gh label create agent:qwen --repo "$GITHUB_REPOSITORY" --color 1D76DB --description "Ejecutar con Qwen" --force
+          gh label create agent:gemini --repo "$GITHUB_REPOSITORY" --color A2EEEF --description "Ejecutar con Gemini" --force
+          gh label create agent:working --repo "$GITHUB_REPOSITORY" --color F9D0C4 --description "Agente trabajando" --force
+          gh label create agent:pr-open --repo "$GITHUB_REPOSITORY" --color 0E8A16 --description "PR autónomo abierto" --force
+          gh label create agent:needs-human --repo "$GITHUB_REPOSITORY" --color D93F0B --description "Necesita intervención humana" --force
+
+  agent:
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      actions: write
+    env:
+      HAS_QWEN: ${{ secrets.QWEN_API_KEY != '' }}
+      HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
+    steps:
+      - id: select
+        name: Elegir trabajo
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          LABEL: ${{ github.event.label.name }}
+          EVENT_ISSUE: ${{ github.event.issue.number }}
+          INPUT_ISSUE: ${{ inputs.issue }}
+          INPUT_PROVIDER: ${{ inputs.provider }}
+        run: |
+          set -euo pipefail
+          issue=""
+          provider="${INPUT_PROVIDER:-auto}"
+          if [[ "$EVENT" == issues ]]; then
+            case "$LABEL" in
+              agent:auto) provider=auto ;;
+              agent:qwen) provider=qwen ;;
+              agent:gemini) provider=gemini ;;
+              *) echo "run=false" >> "$GITHUB_OUTPUT"; exit 0 ;;
+            esac
+            issue="$EVENT_ISSUE"
+          elif [[ "$EVENT" == workflow_dispatch ]]; then
+            issue="$INPUT_ISSUE"
+          else
+            issue="$(gh issue list --state open --label agent:auto --limit 100 --json number,labels \
+              --jq '[.[]|select(([.labels[].name]|index("agent:working")|not) and ([.labels[].name]|index("agent:pr-open")|not) and ([.labels[].name]|index("agent:needs-human")|not))][0].number // empty')"
+          fi
+          [[ -z "$issue" ]] && { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
+          [[ "$issue" =~ ^[0-9]+$ ]] || exit 2
+
+          labels="$(gh issue view "$issue" --json labels --jq '[.labels[].name]|join(" ")')"
+          if [[ "$provider" == auto ]]; then
+            if [[ " $labels " == *" agent:qwen "* ]]; then provider=qwen
+            elif [[ " $labels " == *" agent:gemini "* ]]; then provider=gemini
+            elif [[ "$HAS_QWEN" == true ]]; then provider=qwen
+            elif [[ "$HAS_GEMINI" == true ]]; then provider=gemini
+            else
+              gh issue edit "$issue" --add-label agent:needs-human >/dev/null
+              gh issue comment "$issue" --body 'Faltan `QWEN_API_KEY` y `GEMINI_API_KEY` en Actions Secrets.'
+              echo "run=false" >> "$GITHUB_OUTPUT"; exit 0
+            fi
+          fi
+          [[ "$provider" == qwen && "$HAS_QWEN" != true ]] && { gh issue edit "$issue" --add-label agent:needs-human >/dev/null; echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
+          [[ "$provider" == gemini && "$HAS_GEMINI" != true ]] && { gh issue edit "$issue" --add-label agent:needs-human >/dev/null; echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
+
+          existing="$(gh pr list --state open --limit 100 --json body | jq -r --arg n "Refs #$issue" '[.[]|select(((.body//"")|split("\n")|index($n)) != null)]|length')"
+          [[ "$existing" != 0 ]] && { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
+
+          echo "run=true" >> "$GITHUB_OUTPUT"
+          echo "issue=$issue" >> "$GITHUB_OUTPUT"
+          echo "provider=$provider" >> "$GITHUB_OUTPUT"
+          echo "branch=agent/${provider}-${issue}-${GITHUB_RUN_ID}" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout
+        if: steps.select.outputs.run == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - id: qwen
+        name: Configurar Qwen
+        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen'
+        env:
+          KEY: ${{ secrets.QWEN_API_KEY }}
+        run: |
+          if [[ "$KEY" == sk-sp-* ]]; then
+            echo "url=https://coding-intl.dashscope.aliyuncs.com/v1" >> "$GITHUB_OUTPUT"
+          else
+            echo "url=https://dashscope-intl.aliyuncs.com/compatible-mode/v1" >> "$GITHUB_OUTPUT"
+          fi
+          echo "model=qwen3-coder-plus" >> "$GITHUB_OUTPUT"
+
+      - name: Contexto
+        if: steps.select.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.select.outputs.issue }}
+        run: |
+          gh issue view "$ISSUE" --json title,body,comments \
+            --jq '"# Issue\n\n## " + .title + "\n\n" + (.body//"") + "\n\n## Comentarios recientes\n" + ((.comments[-20:]//[])|map("- "+.author.login+": "+.body)|join("\n\n"))' \
+            > .agent-task.md
+
+      - id: plan_qwen
+        name: Plan Qwen
+        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'qwen'
+        uses: QwenLM/qwen-code-action@v1
+        with:
+          openai_api_key: ${{ secrets.QWEN_API_KEY }}
+          openai_base_url: ${{ vars.QWEN_BASE_URL || steps.qwen.outputs.url }}
+          openai_model: ${{ vars.QWEN_MODEL || steps.qwen.outputs.model }}
+          qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
+          settings: '{"model":{"maxSessionTurns":20},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
+          prompt: 'Lee AGENTS.md, QWEN.md y .agent-task.md. Inspecciona sin editar. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+
+      - id: plan_gemini
+        name: Plan Gemini
+        if: steps.select.outputs.run == 'true' && steps.select.outputs.provider == 'gemini'
+        uses: google-github-actions/run-gemini-cli@v0
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: ${{ vars.GEMINI_MODEL }}
+          gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
+          settings: '{"model":{"maxSessionTurns":20},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
+          prompt: 'Lee AGENTS.md, GEMINI.md y .agent-task.md. Inspecciona sin editar. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+
+      - id: reserve
+        name: Validar plan y reservar
+        if: steps.select.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.select.outputs.issue }}
+          PROVIDER: ${{ steps.select.outputs.provider }}
+          BRANCH: ${{ steps.select.outputs.branch }}
+          SUMMARY: ${{ steps.plan_qwen.outputs.summary || steps.plan_gemini.outputs.summary }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$SUMMARY" > /tmp/summary.txt
+          python3 - <<'PY'
+          import json, os, re
+          raw=open("/tmp/summary.txt",encoding="utf-8").read()
+          m=re.search(r"AGENT_PLAN_BEGIN\s*(\{.*?\})\s*AGENT_PLAN_END",raw,re.S)
+          if not m: raise SystemExit("plan no parseable")
+          p=json.loads(m.group(1)); files=p.get("files",[])
+          if not isinstance(files,list) or len(files)>12: raise SystemExit("plan inválido")
+          clean=[]
+          for x in files:
+              if not isinstance(x,str): raise SystemExit("ruta inválida")
+              x=x.strip().replace("\\","/")
+              if not x or x.startswith("/") or ".." in x.split("/") or any(c in x for c in "*?[]"): raise SystemExit("ruta inválida")
+              if x.startswith(".github/") or x in {"AGENTS.md","QWEN.md","GEMINI.md","docs/agents-autonomos.md"}: raise SystemExit("ruta protegida")
+              clean.append(x)
+          p={"files":list(dict.fromkeys(clean)),"goal":str(p.get("goal",""))[:180]}
+          open(".agent-plan.json","w",encoding="utf-8").write(json.dumps(p,ensure_ascii=False))
+          if not p["files"]:
+              open(os.environ["GITHUB_OUTPUT"],"a").write("reserved=false\nreason=sin-corte-seguro\n")
+          PY
+          if grep -q '"files": \[\]' .agent-plan.json 2>/dev/null; then
+            gh issue edit "$ISSUE" --add-label agent:needs-human >/dev/null 2>&1 || true
+            gh issue comment "$ISSUE" --body "Agent autopilot: no encontró un corte seguro y concreto; requiere revisión humana." || true
+            exit 0
+          fi
+
+          files="$(jq -r '.files|join(",")' .agent-plan.json)"
+          goal="$(jq -r '.goal|gsub("[[:space:]]+";"-")' .agent-plan.json)"
+          claim="CLAIM issue=#$ISSUE agent=Autopilot-$PROVIDER branch=$BRANCH files=$files goal=$goal lease=48h"
+          cid="$(gh api -X POST "repos/$GITHUB_REPOSITORY/issues/182/comments" -f body="$claim" --jq .id)"
+          gh api --paginate "repos/$GITHUB_REPOSITORY/issues/182/comments?per_page=100" \
+            --jq '.[]|[.id,(.body|@base64)]|@tsv' > /tmp/reservas.tsv
+          CLAIM_ID="$cid" BRANCH="$BRANCH" python3 - <<'PY'
+          import base64,os,re
+          me=int(os.environ["CLAIM_ID"]); branch=os.environ["BRANCH"]; active={}; mine=None
+          cr=re.compile(r"^CLAIM\s+issue=#(\d+).*?\bbranch=([^\s]+).*?\bfiles=([^\s]+)",re.M)
+          rr=re.compile(r"^RELEASE\s+issue=#(\d+)(?:.*?\bbranch=([^\s]+))?",re.M)
+          def ov(a,b): a=a.rstrip("/"); b=b.rstrip("/"); return a==b or a.startswith(b+"/") or b.startswith(a+"/")
+          for line in open("/tmp/reservas.tsv",encoding="utf-8"):
+              sid,enc=line.rstrip("\n").split("\t",1); cid=int(sid); body=base64.b64decode(enc).decode("utf-8","replace")
+              for m in rr.finditer(body):
+                  issue,br=m.groups()
+                  for k in list(active):
+                      if active[k][0]==issue and (not br or br==k): del active[k]
+              for m in cr.finditer(body):
+                  issue,br,fs=m.groups(); item=(issue,cid,fs.split(",")); active[br]=item
+                  if cid==me: mine=item
+          if mine is None: raise SystemExit("CLAIM perdido")
+          conflicts=[]
+          for br,(issue,cid,fs) in active.items():
+              if cid>=me or br==branch: continue
+              if any(ov(a,b) for a in mine[2] for b in fs): conflicts.append(br)
+          out=open(os.environ["GITHUB_OUTPUT"],"a")
+          if conflicts: out.write("reserved=false\nreason=solape:"+",".join(conflicts)+"\n")
+          else: out.write("reserved=true\n")
+          PY
+
+          if grep -q '^reserved=false$' "$GITHUB_OUTPUT"; then
+            gh issue comment 182 --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=colision-autopilot" >/dev/null || true
+            gh issue edit "$ISSUE" --add-label agent:needs-human >/dev/null || true
+            gh issue comment "$ISSUE" --body "Agent autopilot detenido: $(grep '^reason=' "$GITHUB_OUTPUT"|cut -d= -f2-)" || true
+          fi
+
+      - name: Crear rama
+        if: steps.reserve.outputs.reserved == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.select.outputs.issue }}
+          BRANCH: ${{ steps.select.outputs.branch }}
+        run: |
+          git checkout -b "$BRANCH"
+          gh issue edit "$ISSUE" --add-label agent:working --remove-label agent:needs-human >/dev/null 2>&1 || true
+
+      - name: Implementar con Qwen
+        if: steps.reserve.outputs.reserved == 'true' && steps.select.outputs.provider == 'qwen'
+        uses: QwenLM/qwen-code-action@v1
+        with:
+          openai_api_key: ${{ secrets.QWEN_API_KEY }}
+          openai_base_url: ${{ vars.QWEN_BASE_URL || steps.qwen.outputs.url }}
+          openai_model: ${{ vars.QWEN_MODEL || steps.qwen.outputs.model }}
+          qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
+          settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md y .agent-plan.json. Implementa solo el plan y solo esas rutas. No hagas commit/push/PR/merge.'
+
+      - name: Implementar con Gemini
+        if: steps.reserve.outputs.reserved == 'true' && steps.select.outputs.provider == 'gemini'
+        uses: google-github-actions/run-gemini-cli@v0
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: ${{ vars.GEMINI_MODEL }}
+          gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
+          settings: '{"model":{"maxSessionTurns":40},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
+          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md y .agent-plan.json. Implementa solo el plan y solo esas rutas. No hagas commit/push/PR/merge.'
+
+      - name: Validar diff y preflight
+        if: steps.reserve.outputs.reserved == 'true'
+        run: |
+          set -euo pipefail
+          cp .agent-plan.json /tmp/plan.json
+          rm -f .agent-task.md .agent-plan.json gha-creds-*.json
+          rm -rf .gemini .qwen gemini-artifacts qwen-artifacts
+          git add -A
+          git diff --cached --quiet && { echo "sin cambios"; exit 2; }
+          python3 - <<'PY'
+          import json,subprocess
+          allowed=set(json.load(open("/tmp/plan.json"))["files"])
+          changed=subprocess.check_output(["git","diff","--cached","--name-only"],text=True).splitlines()
+          bad=[x for x in changed if x not in allowed]
+          if bad: raise SystemExit("fuera de CLAIM: "+",".join(bad))
+          PY
+          mapfile -t files < <(git diff --cached --name-only)
+          gd=false; py=false; backend=false
+          for f in "${files[@]}"; do
+            [[ "$f" == *.gd ]] && gd=true
+            [[ "$f" == scripts/*.py ]] && py=true
+            [[ "$f" == backend/* ]] && backend=true
+          done
+          if [[ "$gd" == true ]]; then bash scripts/check_gdscript.sh
+          elif [[ "$py" == true ]]; then python3 -m unittest discover -s scripts -p 'test_*.py'; fi
+          if [[ "$backend" == true ]]; then (cd backend && mvn test && npm ci && npm test); fi
+
+      - id: publish
+        name: Publicar PR draft
+        if: steps.reserve.outputs.reserved == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.select.outputs.issue }}
+          PROVIDER: ${{ steps.select.outputs.provider }}
+          BRANCH: ${{ steps.select.outputs.branch }}
+        run: |
+          set -euo pipefail
+          git config user.name "agent-autopilot[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "agent: avanzar #$ISSUE con $PROVIDER"
+          gh auth setup-git
+          git push -u origin "$BRANCH"
+          title="$(gh issue view "$ISSUE" --json title --jq .title)"
+          url="$(gh pr create --base main --head "$BRANCH" --draft \
+            --title "agent($PROVIDER): #$ISSUE $title" \
+            --body "Refs #$ISSUE
+
+          Implementación autónoma. Plan reservado en #182; cambios limitados al CLAIM; preflight ejecutado. PR draft, sin auto-merge.")"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          gh issue edit "$ISSUE" --add-label agent:pr-open --remove-label agent:working --remove-label agent:auto --remove-label agent:qwen --remove-label agent:gemini >/dev/null 2>&1 || true
+          gh issue comment "$ISSUE" --body "Agent autopilot ($PROVIDER): $url"
+          gh workflow run ci.yml --ref "$BRANCH"
+
+      - name: Marcar fallo
+        if: failure() && steps.select.outputs.issue != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.select.outputs.issue }}
+          BRANCH: ${{ steps.select.outputs.branch }}
+          RESERVED: ${{ steps.reserve.outputs.reserved }}
+        run: |
+          gh issue edit "$ISSUE" --add-label agent:needs-human --remove-label agent:working >/dev/null 2>&1 || true
+          gh issue comment "$ISSUE" --body "Agent autopilot se detuvo: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" || true
+          pr="$(gh pr list --state open --head "${BRANCH:-none}" --json number --jq '.[0].number // empty' || true)"
+          if [[ "$RESERVED" == true && -z "$pr" ]]; then
+            gh issue comment 182 --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=autopilot-fallo-antes-de-PR" >/dev/null || true
+          fi
