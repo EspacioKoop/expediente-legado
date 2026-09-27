@@ -1,8 +1,9 @@
 # Gateway de feedback F9
 
-Este directorio contiene el gateway serverless del Parte de incidencias de
-SIGA-98. El despliegue recomendado es Cloudflare Workers; Vercel queda como
-respaldo mientras siga disponible.
+Este directorio contiene el gateway serverless primario del Parte de
+incidencias de SIGA-98. Cloudflare Workers es el proveedor recomendado; Deno
+Deploy actúa como segundo gateway y Vercel queda como tercer respaldo mientras
+siga disponible.
 
 El juego **no** habla directamente con la API de GitHub y **no** contiene PAT,
 tokens ni credenciales SMTP. Solo conoce URLs HTTPS públicas.
@@ -12,7 +13,8 @@ tokens ni credenciales SMTP. Solo conoce URLs HTTPS públicas.
 ```text
 F9
  ├─ gateway primario: Cloudflare Worker
- ├─ gateway secundario: Vercel
+ ├─ gateway secundario: Deno Deploy
+ ├─ gateway terciario: Vercel
  └─ último recurso: issue de GitHub pre-rellenado + copia local
 ```
 
@@ -98,9 +100,13 @@ SIGA98_FEEDBACK_URL=https://siga98-feedback.<tu-subdominio>.workers.dev/api/repo
 ```
 
 Esta URL **no es un secreto**. El exportador la empaqueta como endpoint
-primario y añade automáticamente el endpoint Vercel existente como respaldo.
-Si ambos fallan, F9 conserva el reporte localmente y abre un issue
-pre-rellenado.
+primario. Si también está definida
+`SIGA98_FEEDBACK_FALLBACK_URL`, la inserta como segundo gateway (Deno) y
+añade después el endpoint Vercel existente. Si los tres fallan, F9 conserva el
+reporte localmente y abre un issue pre-rellenado.
+
+La configuración y despliegue de Deno están documentados en
+`infra/feedback-deno/README.md`.
 
 ## Desarrollo local
 
