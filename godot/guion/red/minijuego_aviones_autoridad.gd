@@ -76,7 +76,7 @@ func snapshot() -> Dictionary:
 func aplicar_evento(evento: Variant, ahora_unix: int) -> Dictionary:
 	if not _valida:
 		return _rechazo("invalid_session")
-	if bool(_aviones.get("terminada", false)):
+	if bool(_aviones.get("terminada", false)) or bool(_aviones.get("abandonada", false)):
 		return _rechazo("session_finished")
 
 	var contexto := _validar_contexto_evento(evento, ahora_unix)
@@ -215,11 +215,13 @@ func _validar_lanzamiento(action: Dictionary) -> Dictionary:
 func _refrescar_snapshot() -> void:
 	if not _valida:
 		return
-	var terminada := bool(_aviones.get("terminada", false))
-	_sesion["phase"] = "finished" if terminada else "playing"
+	var finalizada := (
+		bool(_aviones.get("terminada", false)) or bool(_aviones.get("abandonada", false))
+	)
+	_sesion["phase"] = "finished" if finalizada else "playing"
 	_sesion["turn"] = int(_aviones.get("turno", 0))
-	_sesion["allowed_actions"] = [] if terminada else [TIPO_LANZAMIENTO]
-	_sesion["result"] = AvionesPapel.resultado(_aviones) if terminada else {}
+	_sesion["allowed_actions"] = [] if finalizada else [TIPO_LANZAMIENTO]
+	_sesion["result"] = AvionesPapel.resultado(_aviones) if finalizada else {}
 	_sesion["state"] = {
 		"mode": String(_aviones.get("modalidad", "distancia")),
 		"current_player": _jugador_actual(),
@@ -231,7 +233,7 @@ func _refrescar_snapshot() -> void:
 
 
 func _jugador_actual() -> String:
-	if bool(_aviones.get("terminada", false)):
+	if bool(_aviones.get("terminada", false)) or bool(_aviones.get("abandonada", false)):
 		return ""
 	var participantes: Array = _aviones.get("participantes", [])
 	var turno := int(_aviones.get("turno", 0))
