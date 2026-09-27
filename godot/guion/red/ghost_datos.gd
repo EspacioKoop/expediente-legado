@@ -113,7 +113,7 @@ static func validar_payload(payload: Variant, scene_key: String = "") -> Diction
 		return _invalido("missing_anchor")
 	if space == "scene" and not anchor_key.is_empty():
 		return _invalido("unexpected_anchor")
-	if scene_key.begins_with("sueno") and space != "anchor":
+	if _es_scene_sueno(scene_key) and space != "anchor":
 		return _invalido("dream_requires_anchor")
 
 	var frames_raw = payload.get("frames")
@@ -147,6 +147,11 @@ static func validar_payload(payload: Variant, scene_key: String = "") -> Diction
 			"frames": normalizados,
 		},
 	}
+
+
+static func _es_scene_sueno(scene_key: String) -> bool:
+	var clave := scene_key.to_lower()
+	return clave.begins_with("sueno") or clave.begins_with("suenio") or clave.begins_with("sueño")
 
 
 static func _validar_frame(frame_raw: Variant, tiempo_anterior: float) -> Dictionary:
