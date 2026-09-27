@@ -1,0 +1,108 @@
+name: Agent pool dispatcher
+
+on:
+  issues:
+    types: [labeled]
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+    inputs:
+      max_parallel:
+        description: 'Máximo de workers de esta tanda (1-6)'
+        required: true
+        default: '6'
+        type: choice
+        options: ['1', '2', '3', '4', '5', '6']
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/agent-pool.yml'
+      - '.github/workflows/agent-worker.yml'
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: write
+  id-token: write
+
+concurrency:
+  group: agent-pool-dispatch-${{ github.event_name == 'issues' && github.event.issue.number || 'queue' }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.event_name != 'issues' || github.event.label.name == 'agent:pool'
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.select.outputs.matrix }}
+      count: ${{ steps.select.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Crear etiqueta opt-in
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create agent:pool --repo "$GITHUB_REPOSITORY" --color 7057FF \
+            --description "Pool paralelo de agentes (no combinar con agent:auto)" --force
+
+      - id: select
+        name: Construir tanda
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_MAX: ${{ inputs.max_parallel || '6' }}
+          HAS_QWEN: ${{ secrets.QWEN_API_KEY != '' }}
+          HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
+          HAS_F1: ${{ secrets.QWEN_FALLBACK_1_API_KEY != '' }}
+          HAS_F2: ${{ secrets.QWEN_FALLBACK_2_API_KEY != '' }}
+          HAS_F3: ${{ secrets.QWEN_FALLBACK_3_API_KEY != '' }}
+          HAS_F4: ${{ secrets.QWEN_FALLBACK_4_API_KEY != '' }}
+          F1_URL: ${{ vars.QWEN_FALLBACK_1_BASE_URL }}
+          F2_URL: ${{ vars.QWEN_FALLBACK_2_BASE_URL }}
+          F3_URL: ${{ vars.QWEN_FALLBACK_3_BASE_URL }}
+          F4_URL: ${{ vars.QWEN_FALLBACK_4_BASE_URL }}
+        run: |
+          set -euo pipefail
+          gh issue list --repo "$GITHUB_REPOSITORY" --state open --label agent:pool --limit 100 \
+            --json number,labels,createdAt,updatedAt > /tmp/issues.json
+
+          workers='[]'
+          add_worker() {
+            local id="$1" provider="$2"
+            workers="$(jq -c --arg worker "$id" --arg provider "$provider" \
+              '. + [{worker:$worker,provider:$provider}]' <<<"$workers")"
+          }
+          [[ "$HAS_QWEN" == true ]] && add_worker qwen-primary qwen
+          [[ "$HAS_GEMINI" == true ]] && add_worker gemini gemini
+          [[ "$HAS_F1" == true && -n "$F1_URL" ]] && add_worker qwen-fallback-1 qwen
+          [[ "$HAS_F2" == true && -n "$F2_URL" ]] && add_worker qwen-fallback-2 qwen
+          [[ "$HAS_F3" == true && -n "$F3_URL" ]] && add_worker qwen-fallback-3 qwen
+          [[ "$HAS_F4" == true && -n "$F4_URL" ]] && add_worker qwen-fallback-4 qwen
+          printf '%s\n' "$workers" > /tmp/workers.json
+
+          python3 scripts/agent_pool.py \
+            --issues /tmp/issues.json \
+            --workers /tmp/workers.json \
+            --max-parallel "$REQUESTED_MAX" \
+            --output /tmp/matrix.json >/dev/null
+
+          matrix="$(cat /tmp/matrix.json)"
+          count="$(jq '.include|length' /tmp/matrix.json)"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          echo "Seleccionados $count workers de $(jq 'length' /tmp/workers.json) disponibles."
+
+  run:
+    needs: prepare
+    if: needs.prepare.outputs.count != '0'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    uses: ./.github/workflows/agent-worker.yml
+    with:
+      issue: ${{ matrix.issue }}
+      provider: ${{ matrix.provider }}
+      worker: ${{ matrix.worker }}
+    secrets: inherit

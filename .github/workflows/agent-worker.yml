@@ -1,0 +1,546 @@
+name: Agent worker reusable
+
+on:
+  workflow_call:
+    inputs:
+      issue:
+        description: 'Issue a ejecutar'
+        required: true
+        type: number
+      provider:
+        description: 'Proveedor logico'
+        required: true
+        type: string
+      worker:
+        description: 'Slot fisico del pool'
+        required: true
+        type: string
+    secrets:
+      QWEN_API_KEY:
+        required: false
+      QWEN_FALLBACK_1_API_KEY:
+        required: false
+      QWEN_FALLBACK_2_API_KEY:
+        required: false
+      QWEN_FALLBACK_3_API_KEY:
+        required: false
+      QWEN_FALLBACK_4_API_KEY:
+        required: false
+      GEMINI_API_KEY:
+        required: false
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: 'Issue a ejecutar'
+        required: true
+        type: number
+      provider:
+        description: 'Proveedor logico'
+        required: true
+        type: choice
+        options: [qwen, gemini]
+      worker:
+        description: 'Slot fisico'
+        required: true
+        type: choice
+        options:
+          - qwen-primary
+          - gemini
+          - qwen-fallback-1
+          - qwen-fallback-2
+          - qwen-fallback-3
+          - qwen-fallback-4
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: write
+  id-token: write
+
+concurrency:
+  group: agent-pool-issue-${{ inputs.issue }}
+  cancel-in-progress: false
+
+jobs:
+  worker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      GEMINI_CLI_TRUST_WORKSPACE: 'true'
+    steps:
+      - id: guard
+        name: Validar issue y slot
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ inputs.issue }}
+          PROVIDER: ${{ inputs.provider }}
+          WORKER: ${{ inputs.worker }}
+          HAS_QWEN: ${{ secrets.QWEN_API_KEY != '' }}
+          HAS_QWEN_FALLBACK_1: ${{ secrets.QWEN_FALLBACK_1_API_KEY != '' }}
+          HAS_QWEN_FALLBACK_2: ${{ secrets.QWEN_FALLBACK_2_API_KEY != '' }}
+          HAS_QWEN_FALLBACK_3: ${{ secrets.QWEN_FALLBACK_3_API_KEY != '' }}
+          HAS_QWEN_FALLBACK_4: ${{ secrets.QWEN_FALLBACK_4_API_KEY != '' }}
+          HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
+          FALLBACK_1_URL: ${{ vars.QWEN_FALLBACK_1_BASE_URL }}
+          FALLBACK_2_URL: ${{ vars.QWEN_FALLBACK_2_BASE_URL }}
+          FALLBACK_3_URL: ${{ vars.QWEN_FALLBACK_3_BASE_URL }}
+          FALLBACK_4_URL: ${{ vars.QWEN_FALLBACK_4_BASE_URL }}
+        run: |
+          set -euo pipefail
+          [[ "$ISSUE" =~ ^[0-9]+$ ]] || exit 2
+          case "$WORKER:$PROVIDER" in
+            qwen-primary:qwen) [[ "$HAS_QWEN" == true ]] || exit 3 ;;
+            qwen-fallback-1:qwen) [[ "$HAS_QWEN_FALLBACK_1" == true && -n "$FALLBACK_1_URL" ]] || exit 3 ;;
+            qwen-fallback-2:qwen) [[ "$HAS_QWEN_FALLBACK_2" == true && -n "$FALLBACK_2_URL" ]] || exit 3 ;;
+            qwen-fallback-3:qwen) [[ "$HAS_QWEN_FALLBACK_3" == true && -n "$FALLBACK_3_URL" ]] || exit 3 ;;
+            qwen-fallback-4:qwen) [[ "$HAS_QWEN_FALLBACK_4" == true && -n "$FALLBACK_4_URL" ]] || exit 3 ;;
+            gemini:gemini) [[ "$HAS_GEMINI" == true ]] || exit 3 ;;
+            *) echo "Combinacion worker/provider invalida: $WORKER/$PROVIDER" >&2; exit 2 ;;
+          esac
+
+          labels="$(gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json labels --jq '[.labels[].name]|join(" ")')"
+          [[ " $labels " == *" agent:pool "* ]] || { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
+          [[ " $labels " == *" agent:auto "* ]] && { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
+          for blocked in agent:working agent:pr-open agent:needs-human; do
+            [[ " $labels " == *" $blocked "* ]] && { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
+          done
+
+          existing="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 100 --json body \
+            | jq -r --arg n "Refs #$ISSUE" '[.[]|select(((.body//"")|split("\n")|index($n)) != null)]|length')"
+          [[ "$existing" == 0 ]] || { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
+
+          branch="agent/${PROVIDER}-${ISSUE}-${GITHUB_RUN_ID}"
+          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:working >/dev/null
+          echo "run=true" >> "$GITHUB_OUTPUT"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout
+        if: steps.guard.outputs.run == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - id: qwen_config
+        name: Resolver endpoint Qwen
+        if: steps.guard.outputs.run == 'true' && inputs.provider == 'qwen'
+        env:
+          WORKER: ${{ inputs.worker }}
+          PRIMARY_KEY: ${{ secrets.QWEN_API_KEY }}
+          PRIMARY_URL: ${{ vars.QWEN_BASE_URL }}
+          PRIMARY_MODEL: ${{ vars.QWEN_MODEL }}
+          F1_URL: ${{ vars.QWEN_FALLBACK_1_BASE_URL }}
+          F1_MODEL: ${{ vars.QWEN_FALLBACK_1_MODEL }}
+          F2_URL: ${{ vars.QWEN_FALLBACK_2_BASE_URL }}
+          F2_MODEL: ${{ vars.QWEN_FALLBACK_2_MODEL }}
+          F3_URL: ${{ vars.QWEN_FALLBACK_3_BASE_URL }}
+          F3_MODEL: ${{ vars.QWEN_FALLBACK_3_MODEL }}
+          F4_URL: ${{ vars.QWEN_FALLBACK_4_BASE_URL }}
+          F4_MODEL: ${{ vars.QWEN_FALLBACK_4_MODEL }}
+        run: |
+          set -euo pipefail
+          model="${PRIMARY_MODEL:-qwen3-coder-plus}"
+          case "$WORKER" in
+            qwen-primary)
+              url="$PRIMARY_URL"
+              if [[ -z "$url" ]]; then
+                if [[ "$PRIMARY_KEY" == sk-sp-* ]]; then
+                  url="https://coding-intl.dashscope.aliyuncs.com/v1"
+                else
+                  url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+                fi
+              fi
+              ;;
+            qwen-fallback-1) url="$F1_URL"; model="${F1_MODEL:-$model}" ;;
+            qwen-fallback-2) url="$F2_URL"; model="${F2_MODEL:-$model}" ;;
+            qwen-fallback-3) url="$F3_URL"; model="${F3_MODEL:-$model}" ;;
+            qwen-fallback-4) url="$F4_URL"; model="${F4_MODEL:-$model}" ;;
+            *) exit 2 ;;
+          esac
+          [[ -n "$url" && -n "$model" ]] || exit 3
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "model=$model" >> "$GITHUB_OUTPUT"
+
+      - name: Materializar contexto del issue
+        if: steps.guard.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ inputs.issue }}
+        run: |
+          gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json title,body,comments \
+            --jq '"# Issue\n\n## " + .title + "\n\n" + (.body//"") + "\n\n## Comentarios recientes\n" + ((.comments[-20:]//[])|map("- "+.author.login+": "+.body)|join("\n\n"))' \
+            > .agent-task.md
+
+      - name: Cargar memoria historica de CI
+        if: steps.guard.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          printf '%s\n' '{"ok":true,"source":"ci-brain-sqlite","memories":[]}' > .agent-history.json
+          if python3 scripts/ci_brain.py restore --sqlite /tmp/ci-brain.sqlite3 >/tmp/ci-brain-restore.json; then
+            python3 scripts/ci_brain.py context \
+              --sqlite /tmp/ci-brain.sqlite3 \
+              --query-file .agent-task.md \
+              --output .agent-history.json >/dev/null
+          fi
+
+      - name: Cargar Normas Platino, wiki y memoria
+        if: steps.guard.outputs.run == 'true'
+        env:
+          ISSUE: ${{ inputs.issue }}
+          PROVIDER: ${{ inputs.provider }}
+          MEMORY_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/EspacioKoop/normas_platino.git .agent-platino
+          git -C .agent-platino rev-parse HEAD > .agent-platino-sha
+          rm -rf .agent-platino/.git
+
+          if git clone --depth 1 https://github.com/EspacioKoop/expediente-legado.wiki.git .agent-wiki; then
+            rm -rf .agent-wiki/.git
+          else
+            mkdir -p .agent-wiki
+            printf '%s\n' '# Wiki no disponible en esta ejecucion' > .agent-wiki/README.md
+          fi
+
+          python3 scripts/agent_context_pack.py \
+            --wiki-dir .agent-wiki \
+            --issue-file .agent-task.md \
+            --max-pages 8 \
+            --max-bytes 24000 \
+            --output .agent-context.md
+
+          printf '%s\n' '{"ok":true,"memories":[]}' > .agent-memory.json
+          if [[ -n "${MEMORY_URL:-}" ]]; then
+            base="${MEMORY_URL%/}"
+            base="${base%/api/report}"
+            if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+              "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-memory")" &&
+              oidc_token="$(jq -er '.value' <<<"$oidc_json")"; then
+              payload="$(jq -nc --argjson issue "$ISSUE" --arg provider "$PROVIDER" \
+                '{schema:1,issue:$issue,provider:$provider}')"
+              if curl -fsS -X POST "$base/api/agent-memory/search" \
+                -H "Authorization: Bearer $oidc_token" \
+                -H 'Content-Type: application/json' \
+                --data "$payload" -o /tmp/agent-memory.json; then
+                mv /tmp/agent-memory.json .agent-memory.json
+              fi
+            fi
+          fi
+
+      - id: plan_qwen
+        name: Plan Qwen
+        if: steps.guard.outputs.run == 'true' && inputs.provider == 'qwen'
+        uses: QwenLM/qwen-code-action@v1
+        with:
+          openai_api_key: ${{ inputs.worker == 'qwen-primary' && secrets.QWEN_API_KEY || inputs.worker == 'qwen-fallback-1' && secrets.QWEN_FALLBACK_1_API_KEY || inputs.worker == 'qwen-fallback-2' && secrets.QWEN_FALLBACK_2_API_KEY || inputs.worker == 'qwen-fallback-3' && secrets.QWEN_FALLBACK_3_API_KEY || secrets.QWEN_FALLBACK_4_API_KEY }}
+          openai_base_url: ${{ steps.qwen_config.outputs.url }}
+          openai_model: ${{ steps.qwen_config.outputs.model }}
+          qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
+          settings: '{"model":{"maxSessionTurns":20},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-context.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+
+      - id: plan_gemini
+        name: Plan Gemini
+        if: steps.guard.outputs.run == 'true' && inputs.provider == 'gemini'
+        uses: google-github-actions/run-gemini-cli@v0
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: ${{ vars.GEMINI_MODEL }}
+          gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
+          settings: '{"model":{"maxSessionTurns":20},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
+          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-context.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+
+      - id: reserve
+        name: Validar plan y reservar rutas
+        if: steps.guard.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ inputs.issue }}
+          PROVIDER: ${{ inputs.provider }}
+          BRANCH: ${{ steps.guard.outputs.branch }}
+          SUMMARY: ${{ steps.plan_qwen.outputs.summary || steps.plan_gemini.outputs.summary }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$SUMMARY" > /tmp/summary.txt
+          python3 - <<'PY'
+          import json, os, re
+          raw=open("/tmp/summary.txt",encoding="utf-8").read()
+          pattern=r"AGENT_PLAN_BEGIN\s*(?:```(?:json)?\s*)?(\{.*?\})(?:\s*```)?\s*AGENT_PLAN_END"
+          match=re.search(pattern,raw,re.S|re.I)
+          if not match:
+              raise SystemExit("plan no parseable")
+          plan=json.loads(match.group(1))
+          files=plan.get("files",[])
+          if not isinstance(files,list) or len(files)>12:
+              raise SystemExit("plan invalido")
+          clean=[]
+          for item in files:
+              if not isinstance(item,str):
+                  raise SystemExit("ruta invalida")
+              item=item.strip().replace("\\","/")
+              if not item or item.startswith("/") or ".." in item.split("/") or any(c in item for c in "*?[]"):
+                  raise SystemExit("ruta invalida")
+              if item.startswith(".github/") or item.startswith(".agent-") or item in {
+                  "AGENTS.md","QWEN.md","GEMINI.md","docs/agents-autonomos.md"
+              }:
+                  raise SystemExit("ruta protegida")
+              clean.append(item)
+          normalized={"files":list(dict.fromkeys(clean)),"goal":str(plan.get("goal",""))[:180]}
+          open(".agent-plan.json","w",encoding="utf-8").write(json.dumps(normalized,ensure_ascii=False))
+          if not normalized["files"]:
+              open(os.environ["GITHUB_OUTPUT"],"a").write("reserved=false\nreason=sin-corte-seguro\n")
+          PY
+
+          if grep -q '"files": \[\]' .agent-plan.json 2>/dev/null; then
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human --remove-label agent:working >/dev/null 2>&1 || true
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent pool ($PROVIDER): no encontro un corte seguro y concreto; requiere revision humana." || true
+            exit 0
+          fi
+
+          files="$(jq -r '.files|join(",")' .agent-plan.json)"
+          goal="$(jq -r '.goal|gsub("[[:space:]]+";"-")' .agent-plan.json)"
+          claim="CLAIM issue=#$ISSUE agent=Pool-$PROVIDER branch=$BRANCH files=$files goal=$goal lease=48h"
+          cid="$(gh api -X POST "repos/$GITHUB_REPOSITORY/issues/182/comments" -f body="$claim" --jq .id)"
+          gh api --paginate "repos/$GITHUB_REPOSITORY/issues/182/comments?per_page=100" \
+            --jq '.[]|[.id,(.body|@base64)]|@tsv' > /tmp/reservas.tsv
+
+          CLAIM_ID="$cid" BRANCH="$BRANCH" python3 - <<'PY'
+          import base64, os, re
+          mine_id=int(os.environ["CLAIM_ID"]); branch=os.environ["BRANCH"]; active={}; mine=None
+          claim_re=re.compile(r"^CLAIM\s+issue=#(\d+).*?\bbranch=([^\s]+).*?\bfiles=([^\s]+)",re.M)
+          release_re=re.compile(r"^RELEASE\s+issue=#(\d+)(?:.*?\bbranch=([^\s]+))?",re.M)
+          def overlap(a,b):
+              a=a.rstrip("/"); b=b.rstrip("/")
+              return a==b or a.startswith(b+"/") or b.startswith(a+"/")
+          for line in open("/tmp/reservas.tsv",encoding="utf-8"):
+              sid,encoded=line.rstrip("\n").split("\t",1)
+              comment_id=int(sid)
+              body=base64.b64decode(encoded).decode("utf-8","replace")
+              for match in release_re.finditer(body):
+                  issue,released_branch=match.groups()
+                  for key in list(active):
+                      if active[key][0]==issue and (not released_branch or released_branch==key):
+                          del active[key]
+              for match in claim_re.finditer(body):
+                  issue,claimed_branch,raw_files=match.groups()
+                  item=(issue,comment_id,raw_files.split(","))
+                  active[claimed_branch]=item
+                  if comment_id==mine_id:
+                      mine=item
+          if mine is None:
+              raise SystemExit("CLAIM perdido")
+          conflicts=[]
+          for claimed_branch,(issue,comment_id,files) in active.items():
+              if comment_id>=mine_id or claimed_branch==branch:
+                  continue
+              if any(overlap(a,b) for a in mine[2] for b in files):
+                  conflicts.append(claimed_branch)
+          out=open(os.environ["GITHUB_OUTPUT"],"a")
+          if conflicts:
+              out.write("reserved=false\nreason=solape:"+",".join(conflicts)+"\n")
+          else:
+              out.write("reserved=true\n")
+          PY
+
+          if grep -q '^reserved=false$' "$GITHUB_OUTPUT"; then
+            gh issue comment 182 --repo "$GITHUB_REPOSITORY" --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=colision-agent-pool" >/dev/null || true
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human --remove-label agent:working >/dev/null || true
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent pool detenido: $(grep '^reason=' "$GITHUB_OUTPUT"|cut -d= -f2-)" || true
+          fi
+
+      - name: Afinar contexto y memoria por rutas
+        if: steps.reserve.outputs.reserved == 'true'
+        env:
+          ISSUE: ${{ inputs.issue }}
+          PROVIDER: ${{ inputs.provider }}
+          MEMORY_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(jq -r '.files[]' .agent-plan.json)
+          args=()
+          for file in "${files[@]}"; do args+=(--path "$file"); done
+          python3 scripts/agent_context_pack.py \
+            --wiki-dir .agent-wiki \
+            --issue-file .agent-task.md \
+            "${args[@]}" \
+            --max-pages 8 \
+            --max-bytes 24000 \
+            --output .agent-context.md
+
+          [[ -s /tmp/ci-brain.sqlite3 ]] && python3 scripts/ci_brain.py context \
+            --sqlite /tmp/ci-brain.sqlite3 \
+            --query-file .agent-task.md \
+            --paths-json .agent-plan.json \
+            --output .agent-history.json >/dev/null || true
+
+          [[ -z "${MEMORY_URL:-}" ]] && exit 0
+          base="${MEMORY_URL%/}"
+          base="${base%/api/report}"
+          paths="$(jq -c '.files' .agent-plan.json)"
+          if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-memory")" &&
+            oidc_token="$(jq -er '.value' <<<"$oidc_json")"; then
+              payload="$(jq -nc --argjson issue "$ISSUE" --arg provider "$PROVIDER" --argjson paths "$paths" \
+                '{schema:1,issue:$issue,provider:$provider,paths:$paths}')"
+              if curl -fsS -X POST "$base/api/agent-memory/search" \
+                -H "Authorization: Bearer $oidc_token" \
+                -H 'Content-Type: application/json' \
+                --data "$payload" -o /tmp/agent-memory.json; then
+                mv /tmp/agent-memory.json .agent-memory.json
+              fi
+          fi
+
+      - name: Crear rama
+        if: steps.reserve.outputs.reserved == 'true'
+        env:
+          BRANCH: ${{ steps.guard.outputs.branch }}
+        run: git checkout -b "$BRANCH"
+
+      - id: implement_qwen
+        name: Implementar con Qwen
+        if: steps.reserve.outputs.reserved == 'true' && inputs.provider == 'qwen'
+        uses: QwenLM/qwen-code-action@v1
+        with:
+          openai_api_key: ${{ inputs.worker == 'qwen-primary' && secrets.QWEN_API_KEY || inputs.worker == 'qwen-fallback-1' && secrets.QWEN_FALLBACK_1_API_KEY || inputs.worker == 'qwen-fallback-2' && secrets.QWEN_FALLBACK_2_API_KEY || inputs.worker == 'qwen-fallback-3' && secrets.QWEN_FALLBACK_3_API_KEY || secrets.QWEN_FALLBACK_4_API_KEY }}
+          openai_base_url: ${{ steps.qwen_config.outputs.url }}
+          openai_model: ${{ steps.qwen_config.outputs.model }}
+          qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
+          settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales en .agent-platino. Repo/issue/#181/#182 y Normas Platino prevalecen siempre. Implementa solo el plan y solo esas rutas. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+
+      - id: implement_gemini
+        name: Implementar con Gemini
+        if: steps.reserve.outputs.reserved == 'true' && inputs.provider == 'gemini'
+        uses: google-github-actions/run-gemini-cli@v0
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: ${{ vars.GEMINI_MODEL }}
+          gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
+          settings: '{"model":{"maxSessionTurns":40},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
+          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales en .agent-platino. Repo/issue/#181/#182 y Normas Platino prevalecen siempre. Implementa solo el plan y solo esas rutas. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+
+      - name: Validar diff y preflight
+        if: steps.reserve.outputs.reserved == 'true'
+        run: |
+          set -euo pipefail
+          cp .agent-plan.json /tmp/plan.json
+          rm -f .agent-task.md .agent-plan.json .agent-context.md .agent-memory.json .agent-history.json .agent-platino-sha gha-creds-*.json
+          rm -rf .agent-platino .agent-wiki .gemini .qwen gemini-artifacts qwen-artifacts
+          git add -A
+          git diff --cached --quiet && { echo "sin cambios"; exit 2; }
+          python3 - <<'PY'
+          import json, subprocess
+          allowed=set(json.load(open("/tmp/plan.json"))["files"])
+          changed=subprocess.check_output(["git","diff","--cached","--name-only"],text=True).splitlines()
+          bad=[path for path in changed if path not in allowed]
+          if bad:
+              raise SystemExit("fuera de CLAIM: "+",".join(bad))
+          PY
+          mapfile -t files < <(git diff --cached --name-only)
+          gd=false; py=false; backend=false
+          for file in "${files[@]}"; do
+            [[ "$file" == *.gd ]] && gd=true
+            [[ "$file" == scripts/*.py ]] && py=true
+            [[ "$file" == backend/* ]] && backend=true
+          done
+          if [[ "$gd" == true ]]; then
+            bash scripts/check_gdscript.sh
+          elif [[ "$py" == true ]]; then
+            python3 -m unittest discover -s scripts -p 'test_*.py'
+          fi
+          if [[ "$backend" == true ]]; then
+            (cd backend && mvn test && npm ci && npm test)
+          fi
+
+      - name: Guardar memoria de trabajo
+        if: steps.reserve.outputs.reserved == 'true'
+        continue-on-error: true
+        env:
+          ISSUE: ${{ inputs.issue }}
+          PROVIDER: ${{ inputs.provider }}
+          MEMORY_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+          SUMMARY: ${{ steps.implement_qwen.outputs.summary || steps.implement_gemini.outputs.summary }}
+        run: |
+          set -euo pipefail
+          [[ -z "${MEMORY_URL:-}" ]] && exit 0
+          printf '%s' "$SUMMARY" > /tmp/agent-summary.txt
+          python3 - <<'PY'
+          import json, re
+          raw=open("/tmp/agent-summary.txt",encoding="utf-8").read()
+          match=re.search(r"AGENT_MEMORY_BEGIN\s*(?:```(?:json)?\s*)?(\{.*?\})(?:\s*```)?\s*AGENT_MEMORY_END",raw,re.S|re.I)
+          if not match:
+              raise SystemExit(0)
+          data=json.loads(match.group(1))
+          summary=str(data.get("summary","")).strip()
+          tags=data.get("tags",[])
+          if len(summary)<20 or not isinstance(tags,list):
+              raise SystemExit(0)
+          open("/tmp/agent-memory-note.json","w",encoding="utf-8").write(
+              json.dumps({"summary":summary,"tags":tags},ensure_ascii=False)
+          )
+          PY
+          [[ -s /tmp/agent-memory-note.json ]] || exit 0
+          base="${MEMORY_URL%/}"
+          base="${base%/api/report}"
+          paths="$(jq -c '.files' /tmp/plan.json)"
+          payload="$(jq -c --argjson issue "$ISSUE" --arg provider "$PROVIDER" --argjson paths "$paths" \
+            '. + {schema:1,issue:$issue,provider:$provider,paths:$paths}' /tmp/agent-memory-note.json)"
+          oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-memory")"
+          oidc_token="$(jq -er '.value' <<<"$oidc_json")"
+          curl -fsS -X POST "$base/api/agent-memory/remember" \
+            -H "Authorization: Bearer $oidc_token" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" >/dev/null
+
+      - name: Publicar PR draft y lanzar CI canonica
+        if: steps.reserve.outputs.reserved == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ inputs.issue }}
+          PROVIDER: ${{ inputs.provider }}
+          WORKER: ${{ inputs.worker }}
+          BRANCH: ${{ steps.guard.outputs.branch }}
+        run: |
+          set -euo pipefail
+          git config user.name "agent-pool[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "agent: avanzar #$ISSUE con $WORKER"
+          gh auth setup-git
+          git push -u origin "$BRANCH"
+          title="$(gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json title --jq .title)"
+          url="$(gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" --draft \
+            --title "agent($PROVIDER): #$ISSUE $title" \
+            --body "Refs #$ISSUE
+
+          Implementacion autonoma mediante worker \`$WORKER\`. Plan reservado en #182; cambios limitados al CLAIM; preflight ejecutado. PR draft, sin auto-merge.")"
+          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+            --add-label agent:pr-open \
+            --remove-label agent:working \
+            --remove-label agent:pool \
+            --remove-label agent:qwen \
+            --remove-label agent:gemini >/dev/null 2>&1 || true
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent pool ($WORKER): $url"
+          # Los PR creados con GITHUB_TOKEN pueden dejar el pull_request CI esperando
+          # aprobacion; workflow_dispatch es la ruta no recursiva y ya usada por el autopilot.
+          gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$BRANCH"
+
+      - name: Marcar fallo
+        if: failure() && inputs.issue != 0
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ inputs.issue }}
+          BRANCH: ${{ steps.guard.outputs.branch }}
+          RESERVED: ${{ steps.reserve.outputs.reserved }}
+          WORKER: ${{ inputs.worker }}
+        run: |
+          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human --remove-label agent:working >/dev/null 2>&1 || true
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agent pool ($WORKER) se detuvo: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" || true
+          pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "${BRANCH:-none}" --json number --jq '.[0].number // empty' || true)"
+          if [[ "$RESERVED" == true && -z "$pr" ]]; then
+            gh issue comment 182 --repo "$GITHUB_REPOSITORY" --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=agent-pool-fallo-antes-de-PR" >/dev/null || true
+          fi
