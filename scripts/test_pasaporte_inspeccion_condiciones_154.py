@@ -11,6 +11,7 @@ CATALOGO = ROOT / "godot/datos/puntos_inspeccion.json"
 PASAPORTE = ROOT / "godot/guion/pasaporte_inspeccion.gd"
 RUNTIME = ROOT / "godot/guion/pasaporte_inspeccion_runtime.gd"
 PRUEBA = ROOT / "godot/pruebas/pruebas_pasaporte_inspeccion_condiciones_154.gd"
+ESCENA = ROOT / "godot" / "escenas" / "dia.tscn"
 RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 
 
@@ -21,6 +22,7 @@ class PasaporteInspeccionCondiciones154Test(unittest.TestCase):
         cls.pasaporte = PASAPORTE.read_text(encoding="utf-8")
         cls.runtime = RUNTIME.read_text(encoding="utf-8")
         cls.prueba = PRUEBA.read_text(encoding="utf-8")
+        cls.escena = ESCENA.read_text(encoding="utf-8")
 
     def test_catalogo_resuelve_anclas_sin_coordenadas_duplicadas(self):
         tipos = {entrada["ancla_tipo"] for entrada in self.catalogo}
@@ -61,6 +63,10 @@ class PasaporteInspeccionCondiciones154Test(unittest.TestCase):
         self.assertIn("PasaporteInspeccion.registrar_observacion_contextual", self.runtime)
         self.assertIn('if not bool(registro.get("cambio", false)):', self.runtime)
         self.assertIn('dia.call("_guardar_o_avisar", "")', self.runtime)
+
+    def test_runtime_esta_montado_en_dia(self):
+        self.assertIn('path="res://guion/pasaporte_inspeccion_runtime.gd"', self.escena)
+        self.assertIn('name="PasaporteInspeccionController"', self.escena)
 
     def test_runtime_no_toca_economia_pistas_ni_input(self):
         for prohibido in (
