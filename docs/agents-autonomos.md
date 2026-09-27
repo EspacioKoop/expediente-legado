@@ -34,6 +34,34 @@ No pegues ninguna key en issues, comentarios, archivos, variables públicas ni l
 
 Si solo configuras una clave, `agent:auto` usa ese proveedor. Con ambas disponibles, `agent:auto` prioriza Qwen; `agent:gemini` fuerza Gemini y `agent:qwen` fuerza Qwen.
 
+### OmniRoute privado como backend preferente
+
+El autopilot puede usar una instancia local de OmniRoute como primer backend de Qwen sin publicarla en Internet. El runner hospedado por GitHub entra en la tailnet con un nodo efímero usando OIDC, accede a `Tailscale Serve` por HTTPS privado y Serve reenvía únicamente al loopback de OmniRoute.
+
+Configuración del repositorio:
+
+| Tipo | Nombre | Uso |
+| --- | --- | --- |
+| Secret | `OMNIROUTE_API_KEY` | API key de endpoint creada en OmniRoute; no usar la contraseña del dashboard |
+| Variable | `OMNIROUTE_BASE_URL` | URL privada Tailscale terminada en `/v1` |
+| Variable | `OMNIROUTE_MODEL` | Modelo, alias o combo de OmniRoute; recomendado: `autopilot-code` |
+| Secret | `TS_OAUTH_CLIENT_ID` | Client ID de la identidad federada de Tailscale |
+| Secret | `TS_AUDIENCE` | Audience de la identidad federada |
+
+El workflow usa `tailscale/github-action@v4` con `tag:github-autopilot`. La policy de la tailnet debe permitir a ese tag únicamente TCP/443 hacia el equipo que ejecuta OmniRoute. No usar Tailscale Funnel ni abrir los puertos 20128/20130/20131 en el router.
+
+En la máquina que aloja OmniRoute, publica únicamente el puerto API local mediante `tailscale serve --bg http://127.0.0.1:<puerto>`, usa la URL MagicDNS resultante terminada en `/v1` como `OMNIROUTE_BASE_URL` y restringe la policy para que `tag:github-autopilot` solo pueda alcanzar TCP/443 de ese equipo.
+
+Para varias cuentas de un mismo proveedor, mantener cada cuenta como conexión separada en OmniRoute. Un `429` debe enfriar solo esa conexión, permitiendo que las demás sigan disponibles. En Dashboard → Settings → Resilience conviene habilitar Rate Limit Auto-Detection y respetar los hints de `Retry-After`. Para cuentas free o con límites inciertos, empezar con `Max Concurrent Requests = 1`; si el proveedor publica un RPM conocido, usar un objetivo conservador y derivar `Min Time Between Requests ≈ 60000 / RPM_objetivo`. Subir concurrencia únicamente después de observar estabilidad.
+
+Para el combo `autopilot-code`, usar solo modelos que soporten correctamente las herramientas requeridas por Qwen Code. `Least-Used` reparte carga entre candidatos; `Priority` es preferible si se quiere agotar primero una suscripción principal y usar el resto solo como fallback.
+
+Orden efectivo del worker Qwen:
+
+`OmniRoute privado → Qwen directo → fallback 1 → fallback 2 → fallback 3 → fallback 4`.
+
+Si el equipo local, Tailscale u OmniRoute no están disponibles, el workflow continúa automáticamente por la cadena directa.
+
 ### Cadena de fallback OpenAI-compatible
 
 El worker Qwen admite además **4 backends de reserva**. Esto permite trasladar al repositorio conexiones de OmniRoute, FreeInference u otros gateways siempre que expongan una API compatible con OpenAI.
