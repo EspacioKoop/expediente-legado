@@ -115,8 +115,8 @@ class CatalogoLocaleTest(unittest.TestCase):
                 self.assertNotEqual(opcion_es["etiqueta"], opcion_en["etiqueta"])
                 self.assertNotEqual(opcion_es["texto"], opcion_en["texto"])
 
-    def test_casos_1_a_10_estan_traducidos_al_ingles(self):
-        for indice in range(10):
+    def test_casos_1_a_11_estan_traducidos_al_ingles(self):
+        for indice in range(11):
             caso_es = self.es["casos"][indice]
             caso_en = self.en["casos"][indice]
             self.assertEqual(caso_es["id"], caso_en["id"])
@@ -142,6 +142,18 @@ class CatalogoLocaleTest(unittest.TestCase):
                 self.assertNotEqual(
                     sospechoso_es["desenlace"], sospechoso_en["desenlace"]
                 )
+
+    def test_frases_gatillo_inglesas_aparecen_literalmente_en_su_documento(self):
+        # Sin esto la pista existe pero nunca se descubre jugando en inglés.
+        for caso in self.en["casos"]:
+            registros = {r["id"]: r["contenido"] for r in caso["registros"]}
+            for pista in caso["pistas"]:
+                if "fraseGatillo" in pista:
+                    self.assertIn(
+                        pista["fraseGatillo"],
+                        registros[pista["registroOrigen"]],
+                        f"{caso['id']}/{pista['id']}",
+                    )
 
     def test_ataques_del_caso_6_son_texto_localizable(self):
         caso_es = self.es["casos"][5]

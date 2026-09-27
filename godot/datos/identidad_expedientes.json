@@ -78,5 +78,13 @@
     "lamina": "res://arte/siga_expedientes/lamina_10_mesa0.svg",
     "sujeto": "res://arte/siga_expedientes/sujeto_10_tarjeta0000.svg",
     "motivo": "86 empleados y una presencia administrativa adicional"
+  },
+  "caso11@11": {
+    "codigo": "0/98 ← 11/97",
+    "acento": "#3F6F73",
+    "icono": "res://arte/siga_expedientes/caso_11_circular.svg",
+    "lamina": "res://arte/siga_expedientes/lamina_11_circular.svg",
+    "sujeto": "res://arte/siga_expedientes/sujeto_11_circular.svg",
+    "motivo": "circular citada y registrada antes de su propia fecha de emisión"
   }
 }

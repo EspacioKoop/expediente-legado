@@ -53,6 +53,7 @@ CASO_7_TITULO,El expediente de la herencia Karamázov
 CASO_8_TITULO,El expediente del empleado #427
 CASO_9_TITULO,El funcionario que dejó de tramitar
 CASO_10_TITULO,El empleado adicional
+CASO_11_TITULO,Circular 0/98
 COMBATE_CRONICA,Usted: %s   ·   %s: %s   —   %s
 COMBATE_INSISTENCIA,Insistencia
 COMBATE_OBJECION,Objeción
@@ -454,6 +455,10 @@ GATO_SIGA_DESCUBRIMIENTO,Ha aparecido una pista nueva.
 GATO_SIGA_COMBINACION_FALLIDA,Esos documentos no justifican una relación.
 GATO_SIGA_COMBINACION_REPETIDA,Esa relación ya constaba.
 RESUMEN_PLANTILLA,Resumen de plantilla
+PARTE_IMPRENTA,Parte de imprenta
+EVALUACION,Evaluación
+EXPEDIENTE_DISCIPLINARIO,Expediente disciplinario
+REGISTRO_ARCHIVO,Registro de Archivo
 EVALUACION_APP_TITULO,Evaluaciones
 EVALUACION_CABECERA,SIGA-98 · EVALUACIÓN DE DESEMPEÑO
 EVALUACION_AYUDA,Historial de vidas laborales cerradas. Seleccione una para consultar el informe archivado.

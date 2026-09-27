@@ -219,7 +219,7 @@
           "id": "pista6@3",
           "registroOrigen": "acta3@3",
           "descripcion": "The 'Ad Honorem Committee' that ordered the transfer appears in no known company organization chart, budget, or founding record.",
-          "fraseGatillo": "No record of this committee was found in any official organization chart"
+          "fraseGatillo": "No record of this committee was found in any official company organization chart"
         },
         {
           "id": "pista23@3",
@@ -298,7 +298,7 @@
           "id": "pista7@4",
           "registroOrigen": "acta4@4",
           "descripcion": "The contract with Carcosa contains a clause expressly forbidding performance of Act II. Nobody on the committee remembers who proposed it or why.",
-          "fraseGatillo": "not proceed with the reading of the second act"
+          "fraseGatillo": "not to proceed with the reading of the second act"
         },
         {
           "id": "pista8@4",
@@ -467,7 +467,7 @@
           "id": "pista12@6",
           "registroOrigen": "empleado6@6",
           "descripcion": "The committee's authorized-signatory list already includes the current auditor's username, with an enrollment date earlier than their own hiring.",
-          "fraseGatillo": "with an enrollment date earlier than any recorded hiring"
+          "fraseGatillo": "with an enrollment date earlier than any hiring recorded"
         },
         {
           "id": "pista13@6",
@@ -955,6 +955,123 @@
           "nombre": "Holder of card 0000",
           "descripcion": "Unassigned identity that left nineteen days of ordinary access records; the file cannot establish that this person caused the other Desk 0 traces.",
           "desenlace": "The system attempts to open a liability notice in the name of the holder of card 0000 and creates an employee record with a blank identity field. The staff count rises from 86 to 87 without a name appearing."
+        }
+      ]
+    },
+    {
+      "id": "caso11@11",
+      "titulo": "Circular 0/98",
+      "descripcion": "In March 1998 the General Secretariat issues Circular 0/98, which voids every evaluation form printed before 1 March. Two procedures closed in December 1997 already cite it, the Archive logs the receipt of a copy in November 1997, and the print shop order dates its first typesetting to 2 March 1998. The file must establish who introduced, normalized, or certified a reference older than the document itself.",
+      "anioSuceso": 1998,
+      "estado": "ABIERTO",
+      "confidencial": false,
+      "principal": false,
+      "registros": [
+        {
+          "id": "circular11@11",
+          "tipo": "CIRCULAR",
+          "folio": "CIR-0-98",
+          "contenido": "Circular 0/98. Date of issue: 2 March 1998. Upon receipt of this circular, evaluation forms printed before 1 March are void. Any pending review must be redone using the attached model. No exceptions or earlier versions of this instruction will be recognized.",
+          "fecha": "1998-03-02"
+        },
+        {
+          "id": "imprenta11@11",
+          "tipo": "PARTE_IMPRENTA",
+          "folio": "IMP-1998-031",
+          "contenido": "Order 031/98. Job: Circular 0/98. First typesetting: 2 March 1998, 08:15. Initial print run: 120 copies. No proofs, drafts, or earlier print runs with this numbering are on record. Plate made the same day from the original sent by the General Secretariat.",
+          "fecha": "1998-03-02"
+        },
+        {
+          "id": "evaluacion11@11",
+          "tipo": "EVALUACION",
+          "folio": "EVA-1997-144",
+          "contenido": "Annual evaluation of M. Cifuentes. Closed: 18 December 1997. Remark: returned so that section 4 is redone in accordance with Circular 0/98. The form keeps the signatures of management and of the employee, dated December 1997.",
+          "fecha": "1997-12-18"
+        },
+        {
+          "id": "disciplinario11@11",
+          "tipo": "EXPEDIENTE_DISCIPLINARIO",
+          "folio": "DIS-1997-022",
+          "contenido": "Processing note, 11 December 1997: the decision is suspended until the criterion of Circular 0/98 is applied to the assessment of prior record. No copy of the circular is attached, and it is not stated who supplied the reference.",
+          "fecha": "1997-12-11"
+        },
+        {
+          "id": "archivo11@11",
+          "tipo": "REGISTRO_ARCHIVO",
+          "folio": "ARC-1997-C0",
+          "contenido": "Archive intake ledger. 27 November 1997, 16:40. Document received: Circular 0/98. Origin: General Secretariat. Copies: 1. Destination: restricted consultation. The entry sits between records 1841 and 1842, both dated the same day and numbered consecutively.",
+          "fecha": "1997-11-27"
+        },
+        {
+          "id": "acta11@11",
+          "tipo": "ACTA",
+          "folio": "ACT-1998-044",
+          "contenido": "Document regularization meeting, 6 March 1998. It is agreed to treat every earlier reference to Circular 0/98 as valid \"for administrative continuity\", even though no earlier version is on record at the General Secretariat or the Print Shop. Signed: Clara Valdés, head of the Technical Secretariat.",
+          "fecha": "1998-03-06"
+        }
+      ],
+      "pistas": [
+        {
+          "id": "pista48@11",
+          "registroOrigen": "imprenta11@11",
+          "descripcion": "The print shop states that no proofs, drafts, or earlier print runs with the number 0/98 ever existed.",
+          "fraseGatillo": "No proofs, drafts, or earlier print runs with this numbering are on record."
+        },
+        {
+          "id": "pista49@11",
+          "registroOrigen": "evaluacion11@11",
+          "descripcion": "An evaluation closed in December 1997 literally cites Circular 0/98.",
+          "fraseGatillo": "in accordance with Circular 0/98"
+        },
+        {
+          "id": "pista50@11",
+          "registroOrigen": "circular11@11",
+          "descripcion": "The March 1998 circular expressly refuses to recognize any earlier version of the instruction itself.",
+          "fraseGatillo": "No exceptions or earlier versions of this instruction will be recognized."
+        },
+        {
+          "id": "pista51@11",
+          "registroOrigen": "circular11@11",
+          "registroOrigen2": "evaluacion11@11",
+          "descripcion": "The evaluation closed on 18 December 1997 returns a section under a circular whose date of issue is 2 March 1998."
+        },
+        {
+          "id": "pista52@11",
+          "registroOrigen": "imprenta11@11",
+          "registroOrigen2": "archivo11@11",
+          "descripcion": "The print shop dates the circular's first typesetting to 2 March 1998, while the Archive logs the receipt of a copy on 27 November 1997."
+        },
+        {
+          "id": "pista53@11",
+          "registroOrigen": "evaluacion11@11",
+          "registroOrigen2": "disciplinario11@11",
+          "descripcion": "Two separate procedures cite the same circular in December 1997, which makes a single isolated typing error less likely."
+        },
+        {
+          "id": "pista54@11",
+          "registroOrigen": "acta11@11",
+          "registroOrigen2": "imprenta11@11",
+          "descripcion": "The minutes validate earlier references to the circular \"for administrative continuity\", even though the print shop states there were no earlier versions."
+        }
+      ],
+      "sospechosos": [
+        {
+          "id": "sospechosoClara11@11",
+          "nombre": "Clara Valdés",
+          "descripcion": "Head of the Technical Secretariat who signs the minutes that retroactively normalize references older than the circular's official date.",
+          "desenlace": "Clara Valdés is held responsible for regularizing references with no prior documentary support. The minutes are annulled, but the 1997 files keep citing Circular 0/98 because they had already been closed with that reference."
+        },
+        {
+          "id": "sospechosoArchivo11@11",
+          "nombre": "1997 Archive officer",
+          "descripcion": "Certified the receipt of a Circular 0/98 more than three months before the date of issue printed on the circular itself.",
+          "desenlace": "Entry ARC-1997-C0 is invalidated. When the ledger is renumbered, entries 1841 and 1842 remain consecutive and an unnumbered gap is left exactly where the circular used to be."
+        },
+        {
+          "id": "sospechosoSecretaria11@11",
+          "nombre": "General Secretariat",
+          "descripcion": "Appears as the origin both of the original the print shop typeset in 1998 and of the copy the Archive claims to have received in 1997.",
+          "desenlace": "The General Secretariat is held responsible for a break in documentary traceability. The official reply states that Circular 0/98 \"came into force when it was needed\", without giving any date other than 2 March 1998."
         }
       ]
     }

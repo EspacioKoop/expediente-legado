@@ -957,6 +957,123 @@
           "desenlace": "El sistema intenta abrir una responsiva a nombre del titular de la tarjeta 0000 y crea un registro de empleado con el campo de identidad vacío. La plantilla pasa de 86 a 87 sin que aparezca un nombre."
         }
       ]
+    },
+    {
+      "id": "caso11@11",
+      "titulo": "CASO_11_TITULO",
+      "descripcion": "En marzo de 1998 Secretaría General emite la Circular 0/98, que deja sin efecto los formularios de evaluación impresos antes del 1 de marzo. Dos trámites cerrados en diciembre de 1997 ya la citan, Archivo registra la recepción de una copia en noviembre de 1997 y el parte de imprenta fija su primera composición el 2 de marzo de 1998. El expediente debe determinar quién introdujo, normalizó o certificó una referencia anterior a la fecha del propio documento.",
+      "anioSuceso": 1998,
+      "estado": "ABIERTO",
+      "confidencial": false,
+      "principal": false,
+      "registros": [
+        {
+          "id": "circular11@11",
+          "tipo": "CIRCULAR",
+          "folio": "CIR-0-98",
+          "contenido": "Circular 0/98. Fecha de emisión: 02/03/1998. A partir de la recepción de la presente, quedan sin efecto los formularios de evaluación impresos antes del 1 de marzo. Toda revisión pendiente deberá rehacerse con el modelo adjunto. No se reconocerán excepciones ni versiones anteriores de esta instrucción.",
+          "fecha": "1998-03-02"
+        },
+        {
+          "id": "imprenta11@11",
+          "tipo": "PARTE_IMPRENTA",
+          "folio": "IMP-1998-031",
+          "contenido": "Orden 031/98. Trabajo: Circular 0/98. Primera composición: 02/03/1998, 08:15. Tirada inicial: 120 copias. No constan pruebas, borradores ni tiradas previas con esta numeración. Matriz creada el mismo día a partir del original remitido por Secretaría General.",
+          "fecha": "1998-03-02"
+        },
+        {
+          "id": "evaluacion11@11",
+          "tipo": "EVALUACION",
+          "folio": "EVA-1997-144",
+          "contenido": "Evaluación anual de M. Cifuentes. Cierre: 18/12/1997. Observación: se devuelve para rehacer el apartado 4 según Circular 0/98. El formulario conserva firmas de jefatura y del empleado con fecha de diciembre de 1997.",
+          "fecha": "1997-12-18"
+        },
+        {
+          "id": "disciplinario11@11",
+          "tipo": "EXPEDIENTE_DISCIPLINARIO",
+          "folio": "DIS-1997-022",
+          "contenido": "Nota de trámite, 11/12/1997: se suspende la resolución hasta aplicar el criterio de la Circular 0/98 a la valoración de antecedentes. No se adjunta copia de la circular ni se identifica quién facilitó la referencia.",
+          "fecha": "1997-12-11"
+        },
+        {
+          "id": "archivo11@11",
+          "tipo": "REGISTRO_ARCHIVO",
+          "folio": "ARC-1997-C0",
+          "contenido": "Libro de entradas de Archivo. 27/11/1997, 16:40. Documento recibido: Circular 0/98. Procedencia: Secretaría General. Copias: 1. Destino: consulta restringida. El asiento está entre los registros 1841 y 1842, ambos fechados el mismo día y con numeración correlativa.",
+          "fecha": "1997-11-27"
+        },
+        {
+          "id": "acta11@11",
+          "tipo": "ACTA",
+          "folio": "ACT-1998-044",
+          "contenido": "Reunión de regularización documental, 06/03/1998. Se acuerda considerar válidas todas las referencias previas a Circular 0/98 «por continuidad administrativa», aunque no conste una versión anterior en Secretaría General ni en Imprenta. Firma: Clara Valdés, jefa de Secretaría Técnica.",
+          "fecha": "1998-03-06"
+        }
+      ],
+      "pistas": [
+        {
+          "id": "pista48@11",
+          "registroOrigen": "imprenta11@11",
+          "descripcion": "La imprenta declara que no existieron pruebas, borradores ni tiradas anteriores con la numeración 0/98.",
+          "fraseGatillo": "No constan pruebas, borradores ni tiradas previas con esta numeración."
+        },
+        {
+          "id": "pista49@11",
+          "registroOrigen": "evaluacion11@11",
+          "descripcion": "Una evaluación cerrada en diciembre de 1997 cita literalmente la Circular 0/98.",
+          "fraseGatillo": "según Circular 0/98"
+        },
+        {
+          "id": "pista50@11",
+          "registroOrigen": "circular11@11",
+          "descripcion": "La circular de marzo de 1998 niega expresamente que se reconozca cualquier versión anterior de la propia instrucción.",
+          "fraseGatillo": "No se reconocerán excepciones ni versiones anteriores de esta instrucción."
+        },
+        {
+          "id": "pista51@11",
+          "registroOrigen": "circular11@11",
+          "registroOrigen2": "evaluacion11@11",
+          "descripcion": "La evaluación cerrada el 18/12/1997 devuelve un apartado según una circular cuya fecha de emisión es el 02/03/1998."
+        },
+        {
+          "id": "pista52@11",
+          "registroOrigen": "imprenta11@11",
+          "registroOrigen2": "archivo11@11",
+          "descripcion": "Imprenta fija la primera composición de la circular el 02/03/1998, mientras Archivo asienta la recepción de una copia el 27/11/1997."
+        },
+        {
+          "id": "pista53@11",
+          "registroOrigen": "evaluacion11@11",
+          "registroOrigen2": "disciplinario11@11",
+          "descripcion": "Dos trámites distintos citan la misma circular en diciembre de 1997, lo que hace menos probable un único error aislado de mecanografía."
+        },
+        {
+          "id": "pista54@11",
+          "registroOrigen": "acta11@11",
+          "registroOrigen2": "imprenta11@11",
+          "descripcion": "El acta da por válidas las referencias previas a la circular «por continuidad administrativa», aunque Imprenta afirma que no hubo versiones anteriores."
+        }
+      ],
+      "sospechosos": [
+        {
+          "id": "sospechosoClara11@11",
+          "nombre": "Clara Valdés",
+          "descripcion": "Jefa de Secretaría Técnica que firma el acta que normaliza a posteriori las referencias anteriores a la fecha oficial de la circular.",
+          "desenlace": "Se atribuye a Clara Valdés la regularización de referencias sin soporte documental previo. El acta se anula, pero los expedientes de 1997 siguen citando la Circular 0/98 porque ya se habían cerrado con esa referencia."
+        },
+        {
+          "id": "sospechosoArchivo11@11",
+          "nombre": "Responsable de Archivo de 1997",
+          "descripcion": "Certificó la recepción de una Circular 0/98 más de tres meses antes de la fecha de emisión que figura en la propia circular.",
+          "desenlace": "Se invalida el asiento ARC-1997-C0. Al renumerar el libro, los asientos 1841 y 1842 siguen siendo correlativos y queda un hueco sin número exactamente donde estaba la circular."
+        },
+        {
+          "id": "sospechosoSecretaria11@11",
+          "nombre": "Secretaría General",
+          "descripcion": "Figura como procedencia tanto del original que Imprenta compuso en 1998 como de la copia que Archivo dice haber recibido en 1997.",
+          "desenlace": "Se atribuye a Secretaría General una ruptura de trazabilidad documental. La respuesta oficial indica que la Circular 0/98 «entró en vigor cuando fue necesaria», sin aclarar una fecha distinta del 02/03/1998."
+        }
+      ]
     }
   ],
   "conceptos": [
