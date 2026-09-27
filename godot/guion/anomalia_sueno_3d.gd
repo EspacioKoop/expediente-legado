@@ -19,6 +19,7 @@ var _escala_reaccion := Vector3.ONE
 var _giro_base := Vector3.ZERO
 var _giro_reaccion := Vector3.ZERO
 var _reactiva := false
+var _escena_visual: PackedScene
 
 
 func configurar(
@@ -32,7 +33,6 @@ func configurar(
 	giro_base: Vector3,
 	giro_reaccion: Vector3,
 	usar_asset_cc0: bool = false,
-	escena_visual: PackedScene = null,
 ) -> void:
 	verbo = Verbo.EXAMINAR
 	nombre_objeto = nombre
@@ -55,8 +55,8 @@ func configurar(
 	_visual = Node3D.new()
 	_visual.name = "FormaDeformada"
 	add_child(_visual)
-	if escena_visual != null:
-		var instancia := escena_visual.instantiate()
+	if _escena_visual != null:
+		var instancia := _escena_visual.instantiate()
 		if instancia is Node3D:
 			var detalle := instancia as Node3D
 			detalle.name = "DetallePBR"
@@ -86,6 +86,10 @@ func configurar(
 
 	activado.connect(_alternar)
 	activado.connect(_emitir_observacion)
+
+
+func configurar_escena_visual(escena_visual: PackedScene) -> void:
+	_escena_visual = escena_visual
 
 
 func id_catalogo() -> String:
