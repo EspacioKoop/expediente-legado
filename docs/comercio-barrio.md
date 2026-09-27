@@ -1,6 +1,6 @@
 # Comercio de barrio del trayecto
 
-Primer corte ejecutable de #676. El objetivo es fijar la frontera de datos y economía de tres superficies comerciales sin abrir todavía nuevos interiores ni competir con trabajo visual activo en la calle o la casa.
+Estado consolidado de #676. El sistema cubre tres superficies comerciales canónicas, presencia física en el trayecto, compra/reventa sobre la economía existente, microinteriores donde aportan valor y feedback diegético sin convertir la calle en un mundo abierto comercial.
 
 ## Superficies
 
@@ -19,6 +19,16 @@ Toda compra normal pasa por `Jornada.gastar()`, por lo que reutiliza la economí
 Las compras de objetos se registran en `jornada["comercio_barrio_compras"]` y son idempotentes: volver a comprar el mismo objeto no vuelve a cobrar. La superficie de videojuegos mantiene su persistencia especializada en `TiendaVideojuegos`.
 
 El paquete de cigarrillos es la excepción deliberada: cuesta **8**, se marca `repetible`, se consume en el acto y puede volver a comprarse. No entra en inventario, no concede acciones, no aumenta ingresos y no activa contenido cultural u onírico. Su única consecuencia es gastar parte del mismo saldo que compite con comida propia, comida del gato, café, alquiler e imprevistos.
+
+### Horarios diegéticos — #963
+
+`ComercioBarrio.HORARIOS` reutiliza el reloj persistente de `Jornada`; no existe un contador comercial paralelo. Quiosco Avenida, Bit 98 y El Trastero declaran ventanas distintas y `ComercioBarrio.estado()` deriva `abierto/cerrado` desde `Jornada.hora_minutos()`.
+
+- comprar o revender fuera de horario devuelve `motivo == "cerrado"`;
+- un intento fuera de horario no cobra, no mueve inventario y no consume acciones;
+- Quiosco Avenida y El Trastero muestran el estado y la franja horaria mediante señalética `Label3D` integrada en el puesto;
+- el ticket diegético reutilizado muestra `CERRADO` si se intenta una transacción fuera de ventana;
+- los comercios siguen siendo contenido opcional: el cierre nunca impide terminar `trayecto` ni avanzar la campaña.
 
 ### Reventa e inventario — #61 / #97
 
@@ -59,16 +69,19 @@ La conexión de páginas hojeables pertenece a #674 y queda fuera de este corte.
 
 `ComercioBarrio` delega `listar()` y `comprar()` en `TiendaVideojuegos` para `videojuegos`. No inspecciona ni comercializa `user://roms`, no descarga contenido y no introduce una segunda lista de ROMs. La procedencia/licencia sigue gobernada por #244 y el contrato ya existente de #93/#124.
 
-## Límites deliberados
+## Límites de arquitectura
 
-Este PR es **standalone first** y no modifica:
+La implementación actual conserva estas fronteras:
 
-- `godot/guion/calle_identidad.gd` — la materialización del quiosco/segunda mano debe coordinarse después con el trabajo visual de calle;
-- `godot/guion/casa_utileria.gd` — #96 ya tiene su propio contrato ambiental y materialización;
-- `godot/datos/textos.csv` — evitamos reservar un fichero compartido hasta que exista una UI física concreta;
-- escenas, geometría o interiores 3D;
-- precios/calibración global fuera de los importes pequeños del primer catálogo;
-- la UI de inventario: sigue siendo de consulta y no vende a distancia.
+- no existe economía, moneda, crédito ni stock paralelo: compra/reventa terminan en `Jornada`, `Inventario` o `TiendaVideojuegos`;
+- entrar en Electrodomésticos o Bit 98 sigue dentro de `trayecto`: no crea una fase de Jornada;
+- Quiosco Avenida y El Trastero son superficies compactas de calle, sin interiores añadidos por inercia;
+- la UI de inventario no vende a distancia y `home_storage` no se consulta desde El Trastero;
+- comprar cultura nunca activa #442 por sí solo; la lectura deliberada de #674 conserva esa autoridad;
+- no se introducen marcas, productos o IP comerciales reales en señalética y merchandising;
+- feedback y horarios permanecen diegéticos: no se añade otro HUD ni un menú comercial global;
+- `godot/guion/calle_identidad.gd` sigue siendo la frontera de identidad general de la calle: este módulo añade superficies comerciales sin duplicar su catálogo espacial;
+- `godot/datos/textos.csv` no se usa como almacén de precios, horarios ni estado comercial; esos datos permanecen en sus contratos canónicos, y `godot/guion/casa_utileria.gd` conserva la autoridad sobre la materialización doméstica.
 
 ## Quiosco Avenida y El Trastero físicos — 2026-09-21
 
@@ -136,22 +149,20 @@ Los SVG de `godot/arte/bit98/` son originales del proyecto y no introducen
 marcas reales ni títulos nuevos en `RomsPropias`. Esta capa es estrictamente
 visual: no conoce precios, inventario, compras, desbloqueos ni semillas oníricas.
 
-## Siguiente corte
+## Estado de aceptación — 2026-09-27
 
-Con las tres superficies ya físicas y la reventa operable, quedan mejoras de
-segunda capa sin necesidad de abrir más interiores:
+El alcance funcional de #676 está cubierto en `main`:
 
-1. completar el feedback diegético de compra/reventa con vendedor fuera de campo o
-   pequeñas variaciones de estado, sin diálogo obligatorio;
-2. comprobar en playtest que la bandeja de reventa sigue siendo legible con varios
-   objetos `carried` y no invade el paso;
-3. hacer que la lámpara/marco de `home_storage` tenga representación visible mediante #96;
-4. conectar la revista a una interacción hojeable de #674 y solo entonces activar #442;
-5. completar #97 con una recompensa onírica física que pueda salir del sueño pero no venderse ni conceder acciones.
+- tres superficies comerciales diferenciables: Quiosco Avenida, Bit 98 y El Trastero;
+- compra y reventa reutilizan la economía de #83/#93 y el inventario canónico;
+- lámpara/marco de segunda mano llegan a `home_storage` y la casa ya los materializa mediante #96/#677;
+- Umbral y otras publicaciones enlazan compra con lectura real de #674 y solo la interacción cultural deliberada alimenta #442;
+- Electrodomésticos y Bit 98 tienen interiores compactos accesibles sin crear mundo abierto ni una fase «tienda»;
+- todas las compras son opcionales y no bloquean la campaña;
+- interacción física reutiliza `Interactuable3D`/InputMap, por lo que conserva teclado, mando, remapeo y prompts del dispositivo activo;
+- el gate de evidencia de #1136 mantiene revisión visual reproducible para exterior/interior de Bit 98, quiosco y segunda mano.
 
-Así #676 cubre ya compra y venta sobre superficies reales sin convertir la calle
-en un mundo abierto comercial, y #61 dispone de una costura económica directa
-entre trayecto, casa e inventario.
+Las mejoras posteriores deben tratarse como **pulido** (composición, densidad, vendedor ambiental o playtest de legibilidad), no como deuda del contrato comercial.
 
 Refs #61 #83 #93 #96 #97 #124 #244 #442 #674 #676.
 

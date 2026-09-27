@@ -38,6 +38,13 @@ class ComercioBarrioTest(unittest.TestCase):
         self.assertIn("TiendaVideojuegos.comprar(jornada, item_id)", self.comercio)
         self.assertNotIn("user://roms", self.comercio)
 
+    def test_horarios_reutilizan_el_reloj_canonico(self):
+        self.assertIn("const HORARIOS :=", self.comercio)
+        self.assertIn("Jornada.hora_minutos(jornada)", self.comercio)
+        self.assertIn("static func estado(", self.comercio)
+        self.assertIn("static func abierto(", self.comercio)
+        self.assertIn('"cerrado"', self.comercio)
+
     def test_segunda_mano_materializa_en_home_storage(self):
         self.assertIn('"destino": "home_storage"', self.comercio)
         self.assertIn("Inventario.recoger(inventario, objeto)", self.comercio)

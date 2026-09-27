@@ -9,6 +9,15 @@ extends RefCounted
 
 const CLAVE_COMPRAS := "comercio_barrio_compras"
 
+## Ventanas diegéticas del trayecto. Son contenido opcional: cerrar un comercio
+## nunca bloquea la campaña ni avanza Jornada. El reloj canónico sigue viviendo
+## en Jornada (#963), aquí solo se declara cuándo atiende cada superficie.
+const HORARIOS := {
+	"quiosco": {"desde": 7 * 60, "hasta": 21 * 60},
+	"videojuegos": {"desde": 9 * 60, "hasta": 22 * 60},
+	"segunda_mano": {"desde": 9 * 60, "hasta": 20 * 60},
+}
+
 const SUPERFICIES := [
 	{
 		"id": "quiosco",
@@ -99,6 +108,26 @@ static func superficies() -> Array[Dictionary]:
 	return salida
 
 
+static func estado(superficie_id: String, jornada: Dictionary) -> Dictionary:
+	if not HORARIOS.has(superficie_id):
+		return {"conocida": false, "abierto": false}
+	var horario: Dictionary = HORARIOS[superficie_id]
+	var ahora := Jornada.hora_minutos(jornada)
+	var desde := int(horario.get("desde", 0))
+	var hasta := int(horario.get("hasta", 0))
+	return {
+		"conocida": true,
+		"abierto": ahora >= desde and ahora < hasta,
+		"desde": desde,
+		"hasta": hasta,
+		"ahora": ahora,
+	}
+
+
+static func abierto(superficie_id: String, jornada: Dictionary) -> bool:
+	return bool(estado(superficie_id, jornada).get("abierto", false))
+
+
 static func compras(jornada: Dictionary) -> Array[String]:
 	var bruto = jornada.get(CLAVE_COMPRAS, [])
 	var salida: Array[String] = []
@@ -141,12 +170,14 @@ static func listar(
 static func comprar(
 	jornada: Dictionary, inventario: Dictionary, superficie_id: String, item_id: String
 ) -> Dictionary:
-	if superficie_id == "videojuegos":
-		return TiendaVideojuegos.comprar(jornada, item_id)
 	if String(jornada.get("fase", "")) != "trayecto":
 		return _fallo(superficie_id, item_id, "fuera_del_trayecto")
 	if not jornada.has("dinero"):
 		return _fallo(superficie_id, item_id, "jornada_invalida")
+	if not abierto(superficie_id, jornada):
+		return _fallo(superficie_id, item_id, "cerrado")
+	if superficie_id == "videojuegos":
+		return TiendaVideojuegos.comprar(jornada, item_id)
 
 	var entrada := _buscar(item_id)
 	if entrada.is_empty() or String(entrada.get("superficie", "")) != superficie_id:
@@ -224,6 +255,8 @@ static func vender(
 		return _fallo_reventa(jornada, superficie_id, item_id, "fuera_del_trayecto")
 	if not jornada.has("dinero"):
 		return _fallo_reventa(jornada, superficie_id, item_id, "jornada_invalida")
+	if not abierto(superficie_id, jornada):
+		return _fallo_reventa(jornada, superficie_id, item_id, "cerrado")
 
 	Inventario.completar(inventario)
 	if not _llevado(inventario, item_id):
