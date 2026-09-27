@@ -18,6 +18,7 @@ class EvidenciaMitologias435Test(unittest.TestCase):
 
     def test_cubre_las_tres_familias_sin_gate_dedicado(self):
         self.assertIn("ESCENA_GILGAMESH.instantiate()", self.capturador)
+        self.assertNotIn("SuenoGilgamesh.new()", self.capturador)
         for captura in (
             "436_gilgamesh_inicial.png",
             "436_gilgamesh_puzzle.png",
