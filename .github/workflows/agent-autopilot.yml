@@ -238,7 +238,7 @@ jobs:
           openai_model: ${{ vars.OMNIROUTE_MODEL }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":20},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integración y sus tests: files debe incluir TODAS las rutas que una implementación correcta podría necesitar. Si los comentarios recientes contienen AUTOPILOT_REPLAN, revisa explícitamente sus observed_paths y añádelas solo si son necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: plan_qwen
         name: Plan Qwen (primario)
@@ -251,7 +251,7 @@ jobs:
           openai_model: ${{ vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":20},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integración y sus tests: files debe incluir TODAS las rutas que una implementación correcta podría necesitar. Si los comentarios recientes contienen AUTOPILOT_REPLAN, revisa explícitamente sus observed_paths y añádelas solo si son necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: plan_qwen_fallback_1
         name: Plan Qwen (fallback 1)
@@ -264,7 +264,7 @@ jobs:
           openai_model: ${{ vars.QWEN_FALLBACK_1_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":20},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integración y sus tests: files debe incluir TODAS las rutas que una implementación correcta podría necesitar. Si los comentarios recientes contienen AUTOPILOT_REPLAN, revisa explícitamente sus observed_paths y añádelas solo si son necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: plan_qwen_fallback_2
         name: Plan Qwen (fallback 2)
@@ -277,7 +277,7 @@ jobs:
           openai_model: ${{ vars.QWEN_FALLBACK_2_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":20},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integración y sus tests: files debe incluir TODAS las rutas que una implementación correcta podría necesitar. Si los comentarios recientes contienen AUTOPILOT_REPLAN, revisa explícitamente sus observed_paths y añádelas solo si son necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: plan_qwen_fallback_3
         name: Plan Qwen (fallback 3)
@@ -290,7 +290,7 @@ jobs:
           openai_model: ${{ vars.QWEN_FALLBACK_3_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":20},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integración y sus tests: files debe incluir TODAS las rutas que una implementación correcta podría necesitar. Si los comentarios recientes contienen AUTOPILOT_REPLAN, revisa explícitamente sus observed_paths y añádelas solo si son necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: plan_qwen_fallback_4
         name: Plan Qwen (fallback 4)
@@ -303,7 +303,7 @@ jobs:
           openai_model: ${{ vars.QWEN_FALLBACK_4_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":20},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integración y sus tests: files debe incluir TODAS las rutas que una implementación correcta podría necesitar. Si los comentarios recientes contienen AUTOPILOT_REPLAN, revisa explícitamente sus observed_paths y añádelas solo si son necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: plan_gemini
         name: Plan Gemini
@@ -314,7 +314,7 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":20},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino/README.md, .agent-platino/docs/FUENTE_DE_VERDAD.md, .agent-platino/docs/COOPERACION_AUTONOMA.md, .agent-platino/docs/PLANIFICACION_Y_ENTREGAS.md y .agent-platino/docs/PRO_CONSUMIDOR.md. Consulta .agent-wiki solo para contexto relevante. Jerarquía: repo/issue/#181/#182 y Normas Platino > wiki > memoria temporal Deno KV > memoria histórica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integración y sus tests: files debe incluir TODAS las rutas que una implementación correcta podría necesitar. Si los comentarios recientes contienen AUTOPILOT_REPLAN, revisa explícitamente sus observed_paths y añádelas solo si son necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Máximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: reserve
         name: Validar plan y reservar
@@ -456,7 +456,7 @@ jobs:
           openai_model: ${{ vars.OMNIROUTE_MODEL }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
 
       - id: implement_qwen
         name: Implementar con Qwen (primario)
@@ -469,7 +469,7 @@ jobs:
           openai_model: ${{ vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
 
       - id: implement_qwen_fallback_1
         name: Implementar con Qwen (fallback 1)
@@ -482,7 +482,7 @@ jobs:
           openai_model: ${{ vars.QWEN_FALLBACK_1_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
 
       - id: implement_qwen_fallback_2
         name: Implementar con Qwen (fallback 2)
@@ -495,7 +495,7 @@ jobs:
           openai_model: ${{ vars.QWEN_FALLBACK_2_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
 
       - id: implement_qwen_fallback_3
         name: Implementar con Qwen (fallback 3)
@@ -508,7 +508,7 @@ jobs:
           openai_model: ${{ vars.QWEN_FALLBACK_3_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
 
       - id: implement_qwen_fallback_4
         name: Implementar con Qwen (fallback 4)
@@ -521,21 +521,88 @@ jobs:
           openai_model: ${{ vars.QWEN_FALLBACK_4_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
 
       - id: implement_gemini
         name: Implementar con Gemini
         if: steps.reserve.outputs.reserved == 'true' && steps.select.outputs.provider == 'gemini'
+        continue-on-error: true
         uses: google-github-actions/run-gemini-cli@v0
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-plan.json, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; consulta .agent-wiki solo si aporta contexto. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+
+      - id: claim_guard
+        name: Normalizar cambios al CLAIM
+        if: steps.reserve.outputs.reserved == 'true'
+        run: |
+          set -euo pipefail
+          python3 scripts/agent_claim_guard.py \
+            --plan .agent-plan.json \
+            --report /tmp/claim-guard.json \
+            --restore
+          outside="$(jq -c '.outside' /tmp/claim-guard.json)"
+          count="$(jq '.outside | length' /tmp/claim-guard.json)"
+          if [[ "$count" -gt 0 ]]; then
+            echo "drift=true" >> "$GITHUB_OUTPUT"
+            echo "outside=$outside" >> "$GITHUB_OUTPUT"
+          else
+            echo "drift=false" >> "$GITHUB_OUTPUT"
+            echo "outside=[]" >> "$GITHUB_OUTPUT"
+          fi
+
+      - id: replan
+        name: Replanificar tras desvío de CLAIM
+        if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.select.outputs.issue }}
+          PROVIDER: ${{ steps.select.outputs.provider }}
+          BRANCH: ${{ steps.select.outputs.branch }}
+          MAX_REPLANS: '2'
+        run: |
+          set -euo pipefail
+          outside="$(jq -r '.outside | join(",")' /tmp/claim-guard.json)"
+          previous="$(
+            gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json comments |
+              jq '[.comments[].body | select(startswith("AUTOPILOT_REPLAN "))] | length'
+          )"
+          attempt=$((previous + 1))
+
+          gh issue comment 182 --repo "$GITHUB_REPOSITORY" \
+            --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=autopilot-replan-claim-incompleto" \
+            >/dev/null || true
+          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+            --remove-label agent:working --remove-label agent:needs-human \
+            >/dev/null 2>&1 || true
+
+          if (( attempt <= MAX_REPLANS )); then
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+              "AUTOPILOT_REPLAN attempt=$attempt provider=$PROVIDER observed_paths=$outside
+
+La implementación intentó modificar rutas fuera del CLAIM. El runner ya restauró esos cambios y no se publicará nada de este intento. El próximo plan debe reinspeccionar la integración, incluir las rutas observadas solo si son realmente necesarias y volver a pasar la comprobación de solapes de #182."
+            gh workflow run agent-autopilot.yml --repo "$GITHUB_REPOSITORY" --ref main \
+              -f issue="$ISSUE" -f provider="$PROVIDER"
+            echo "scheduled=true" >> "$GITHUB_OUTPUT"
+          else
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+              --add-label agent:needs-human >/dev/null
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+              "AUTOPILOT_REPLAN attempt=$attempt provider=$PROVIDER observed_paths=$outside
+
+Se agotó el límite de $MAX_REPLANS replans automáticos para esta revisión de main. Los cambios fuera del CLAIM fueron restaurados y no se publicó ningún PR."
+            echo "scheduled=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          # El job actual no publicará nada: deja el checkout exactamente en HEAD.
+          git reset --hard HEAD
+          git clean -fd
 
       - name: Validar diff y preflight
-        if: steps.reserve.outputs.reserved == 'true'
+        if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true'
         run: |
           set -euo pipefail
           cp .agent-plan.json /tmp/plan.json
@@ -562,7 +629,7 @@ jobs:
           if [[ "$backend" == true ]]; then (cd backend && mvn test && npm ci && npm test); fi
 
       - name: Guardar memoria de trabajo
-        if: steps.reserve.outputs.reserved == 'true'
+        if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true'
         continue-on-error: true
         env:
           ISSUE: ${{ steps.select.outputs.issue }}
@@ -604,7 +671,7 @@ jobs:
 
       - id: publish
         name: Publicar PR draft
-        if: steps.reserve.outputs.reserved == 'true'
+        if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ steps.select.outputs.issue }}
