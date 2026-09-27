@@ -8,6 +8,7 @@ from scripts.godot_pruebas import importar_proyecto
 ROOT = Path(__file__).resolve().parents[1]
 MODELO = ROOT / "godot" / "guion" / "ideologia_sueno_923.gd"
 ESPACIO = ROOT / "godot" / "guion" / "sueno_espacio_simbolico.gd"
+REGLA = ROOT / "godot" / "guion" / "sueno_regla_ideologica_923.gd"
 UTILERIA = ROOT / "godot" / "guion" / "sueno_utileria.gd"
 REACTIVO = ROOT / "godot" / "guion" / "dia_sueno_reactivo_app.gd"
 CIELO = ROOT / "godot" / "guion" / "dia_cielo_app.gd"
@@ -57,6 +58,37 @@ def test_gramatica_estructural_sigue_sin_colisiones_ni_hud() -> None:
     assert "Area3D.new" not in bloque
     assert "Control.new" not in bloque
     assert "ModificadorIdeologico" in bloque
+
+
+def test_regla_jugable_es_local_no_bloqueante_y_neutral() -> None:
+    codigo = fuente(REGLA)
+    assert "Interactuable3D.new()" in codigo
+    assert "CollisionShape3D.new()" in codigo
+    assert "collision_mask = 0" in codigo
+    for cuerpo in ("StaticBody3D.new()", "CharacterBody3D.new()", "RigidBody3D.new()"):
+        assert cuerpo not in codigo
+    for persistencia in (
+        "Partida",
+        "guardar(",
+        "pistas_descubiertas",
+        "veredictos",
+        "casos.json",
+        "historias_cartas",
+    ):
+        assert persistencia not in codigo
+    for eje in ("comunismo", "socialdemocrata", "centrista", "neoliberal"):
+        assert eje not in codigo
+    assert '"distribuir"' in codigo
+    assert '"equilibrar"' in codigo
+    assert '"modo": "estatico"' in codigo
+
+
+def test_reduccion_movimiento_viaja_hasta_la_regla_sin_cambiar_semantica() -> None:
+    modelo = fuente(MODELO)
+    espacio = fuente(ESPACIO)
+    assert '"reduccion_movimiento": reduccion_movimiento' in modelo
+    assert "SuenoReglaIdeologica923.new()" in espacio
+    assert 'activo.get("reduccion_movimiento", false)' in espacio
 
 
 def test_runtime_conecta_estructura_y_cielo_sin_fuente_paralela() -> None:
