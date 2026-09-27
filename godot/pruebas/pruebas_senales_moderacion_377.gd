@@ -29,29 +29,35 @@ func _initialize() -> void:
 func _ejecutar() -> void:
 	var host := HostFalso.new()
 	root.add_child(host)
-	var evento_a := SenalDatos.crear_evento(
-		"calle",
-		"test",
-		"anon-a",
-		"calle_escaparate",
-		"cuidado_con",
-		["trampa"],
-		AHORA,
-		[],
-		-1,
-		"sig-mod-a",
+	var evento_a := (
+		SenalDatos
+		. crear_evento(
+			"calle",
+			"test",
+			"anon-a",
+			"calle_escaparate",
+			"cuidado_con",
+			["trampa"],
+			AHORA,
+			[],
+			-1,
+			"sig-mod-a",
+		)
 	)
-	var evento_b := SenalDatos.crear_evento(
-		"calle",
-		"test",
-		"anon-b",
-		"calle_portal",
-		"sigue",
-		["derecha"],
-		AHORA + 1,
-		[],
-		-1,
-		"sig-mod-b",
+	var evento_b := (
+		SenalDatos
+		. crear_evento(
+			"calle",
+			"test",
+			"anon-b",
+			"calle_portal",
+			"sigue",
+			["derecha"],
+			AHORA + 1,
+			[],
+			-1,
+			"sig-mod-b",
+		)
 	)
 	_comprobar("fixtures de moderación válidos", evento_a["ok"] and evento_b["ok"])
 
@@ -68,17 +74,27 @@ func _ejecutar() -> void:
 	var escaparate := (
 		raiz.get_node_or_null("Senal_calle_escaparate") as SenalPlayer if raiz != null else null
 	)
-	_comprobar("señal visible conserva event_id", escaparate != null and escaparate.evento_id() == "sig-mod-a")
-	_comprobar("señal visible se puede examinar", escaparate != null and escaparate.get_node_or_null("Moderar") != null)
+	_comprobar(
+		"señal visible conserva event_id",
+		escaparate != null and escaparate.evento_id() == "sig-mod-a"
+	)
+	_comprobar(
+		"señal visible se puede examinar",
+		escaparate != null and escaparate.get_node_or_null("Moderar") != null
+	)
 
-	var moderador_a := escaparate.get_node_or_null("Moderar") as Interactuable3D if escaparate != null else null
+	var moderador_a := (
+		escaparate.get_node_or_null("Moderar") as Interactuable3D if escaparate != null else null
+	)
 	var interactuado_a := moderador_a.interactuar(host) if moderador_a != null else false
 	_comprobar("examinar señal abre moderación", interactuado_a)
 	await process_frame
 
 	var ui := host.get_node_or_null("SenalModeracionUI") as SenalModeracionUI
 	_comprobar("UI de moderación vive fuera de Partida", ui != null)
-	_comprobar("UI de moderación no contiene texto libre", ui != null and not _contiene_line_edit(ui))
+	_comprobar(
+		"UI de moderación no contiene texto libre", ui != null and not _contiene_line_edit(ui)
+	)
 	_comprobar(
 		"UI apunta al evento mostrado",
 		ui != null and String(ui.estado().get("event_id", "")) == "sig-mod-a",
@@ -86,7 +102,10 @@ func _ejecutar() -> void:
 	if ui != null:
 		ui.solicitar_ocultar()
 	await process_frame
-	_comprobar("ocultar retira la señal inmediatamente", escaparate != null and not escaparate.esta_visible())
+	_comprobar(
+		"ocultar retira la señal inmediatamente",
+		escaparate != null and not escaparate.esta_visible()
+	)
 	_comprobar("ocultar cierra el panel", not controller.estado()["moderacion_abierta"])
 
 	controller.procesar(1.0, AHORA + 3)
@@ -96,8 +115,12 @@ func _ejecutar() -> void:
 		escaparate != null and not escaparate.esta_visible(),
 	)
 
-	var portal := raiz.get_node_or_null("Senal_calle_portal") as SenalPlayer if raiz != null else null
-	var moderador_b := portal.get_node_or_null("Moderar") as Interactuable3D if portal != null else null
+	var portal := (
+		raiz.get_node_or_null("Senal_calle_portal") as SenalPlayer if raiz != null else null
+	)
+	var moderador_b := (
+		portal.get_node_or_null("Moderar") as Interactuable3D if portal != null else null
+	)
 	var interactuado_b := moderador_b.interactuar(host) if moderador_b != null else false
 	_comprobar("segunda señal también abre moderación", interactuado_b)
 	await process_frame
@@ -116,7 +139,9 @@ func _ejecutar() -> void:
 	host.jornada["fase"] = "oficina"
 	controller.procesar(0.1, AHORA + 5)
 	await process_frame
-	_comprobar("salir de trayecto desmonta moderación", host.get_node_or_null("SenalModeracionUI") == null)
+	_comprobar(
+		"salir de trayecto desmonta moderación", host.get_node_or_null("SenalModeracionUI") == null
+	)
 
 	host.queue_free()
 	await process_frame
