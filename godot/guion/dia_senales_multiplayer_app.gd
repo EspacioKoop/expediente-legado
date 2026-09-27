@@ -10,6 +10,7 @@ extends Node
 
 const Interactuable3D = preload("res://guion/interactuable_3d.gd")
 const SenalCompositorUI = preload("res://guion/senales/senal_compositor_ui.gd")
+const SenalModeracionUI = preload("res://guion/senales/senal_moderacion_ui.gd")
 const SenalPlayer = preload("res://guion/senales/senal_player.gd")
 const SenalServicio = preload("res://guion/red/senal_servicio.gd")
 const SenalVocabulario = preload("res://guion/red/senal_vocabulario.gd")
@@ -39,6 +40,7 @@ var _mundo_id := 0
 var _players: Dictionary = {}
 var _interactuables: Dictionary = {}
 var _compositor: SenalCompositorUI
+var _moderacion: SenalModeracionUI
 
 
 func _ready() -> void:
@@ -97,6 +99,7 @@ func desactivar() -> Dictionary:
 	_acumulado = 0.0
 	_limpiar_players()
 	_retirar_compositor()
+	_retirar_moderacion()
 	return {"ok": true, "status": "inactive"}
 
 
@@ -176,6 +179,7 @@ func estado() -> Dictionary:
 		"room_id": _room_id,
 		"red_status": _red_status,
 		"compositor_abierto": _compositor != null and _compositor.estado()["abierto"],
+		"moderacion_abierta": _moderacion != null and _moderacion.estado()["abierto"],
 	}
 
 
@@ -220,6 +224,7 @@ func _mostrar(anchor_id: String, evento: Dictionary, ahora_unix: int) -> void:
 		player = SenalPlayer.new()
 		player.name = "Senal_%s" % anchor_id
 		player.position = POSICIONES_ANCHOR[anchor_id]
+		player.moderacion_solicitada.connect(_al_solicitar_moderacion.bind(anchor_id))
 		_raiz.add_child(player)
 		_players[anchor_id] = player
 	player.mostrar_evento(evento, _conocimiento, ahora_unix)
@@ -293,6 +298,74 @@ func _al_publicar_desde_compositor(anchor_id: String, plantilla_id: String, toke
 		tokens,
 	)
 	_compositor.resolver_publicacion(resultado)
+
+
+func _al_solicitar_moderacion(event_id: String, anchor_id: String) -> void:
+	if _servicio == null or event_id.is_empty():
+		return
+	if not _players.has(anchor_id):
+		return
+	var player = _players[anchor_id]
+	if player == null or not is_instance_valid(player):
+		return
+	if String(player.evento_id()) != event_id:
+		return
+	if not _asegurar_moderacion():
+		return
+	_moderacion.abrir(event_id, String(player.texto_actual()))
+
+
+func _asegurar_moderacion() -> bool:
+	if _host == null or not is_instance_valid(_host):
+		return false
+	if _moderacion != null and is_instance_valid(_moderacion):
+		return true
+	_moderacion = SenalModeracionUI.new()
+	_moderacion.name = "SenalModeracionUI"
+	_moderacion.ocultar_solicitado.connect(_al_ocultar_evento)
+	_moderacion.reportar_solicitado.connect(_al_reportar_evento)
+	_host.add_child(_moderacion)
+	return true
+
+
+func _al_ocultar_evento(event_id: String) -> void:
+	if _servicio == null:
+		return
+	var resultado: Dictionary = _servicio.ocultar_evento(event_id)
+	if bool(resultado.get("ok", false)):
+		_ocultar_player_por_evento(event_id)
+		if _moderacion != null:
+			_moderacion.cerrar()
+
+
+func _al_reportar_evento(event_id: String) -> void:
+	if _servicio == null:
+		return
+	_servicio.reportar_evento(event_id)
+	var ocultacion: Dictionary = _servicio.ocultar_evento(event_id)
+	if bool(ocultacion.get("ok", false)):
+		_ocultar_player_por_evento(event_id)
+		if _moderacion != null:
+			_moderacion.cerrar()
+
+
+func _ocultar_player_por_evento(event_id: String) -> void:
+	for player in _players.values():
+		if player == null or not is_instance_valid(player):
+			continue
+		if String(player.evento_id()) == event_id:
+			player.ocultar()
+
+
+func _retirar_moderacion() -> void:
+	if not is_instance_valid(_moderacion):
+		_moderacion = null
+		return
+	_moderacion.cerrar()
+	if _moderacion.get_parent() != null:
+		_moderacion.get_parent().remove_child(_moderacion)
+	_moderacion.queue_free()
+	_moderacion = null
 
 
 func _limpiar_players() -> void:
