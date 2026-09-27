@@ -50,7 +50,7 @@ Configuración del repositorio:
 
 El workflow usa `tailscale/github-action@v4` con `tag:github-autopilot`. La policy de la tailnet debe permitir a ese tag únicamente TCP/443 hacia el equipo que ejecuta OmniRoute. No usar Tailscale Funnel ni abrir los puertos 20128/20130/20131 en el router.
 
-El helper `scripts/setup_omniroute_autopilot.sh` detecta OmniRoute en 20131/20128/20130, valida la API key sin guardarla en disco, configura Tailscale Serve, genera un snippet de mínimo privilegio y, si `gh` está autenticado, carga `OMNIROUTE_BASE_URL`, `OMNIROUTE_MODEL` y `OMNIROUTE_API_KEY` en el repositorio.
+En la máquina que aloja OmniRoute, publica únicamente el puerto API local mediante `tailscale serve --bg http://127.0.0.1:<puerto>`, usa la URL MagicDNS resultante terminada en `/v1` como `OMNIROUTE_BASE_URL` y restringe la policy para que `tag:github-autopilot` solo pueda alcanzar TCP/443 de ese equipo.
 
 Para varias cuentas de un mismo proveedor, mantener cada cuenta como conexión separada en OmniRoute. Un `429` debe enfriar solo esa conexión, permitiendo que las demás sigan disponibles. En Dashboard → Settings → Resilience conviene habilitar Rate Limit Auto-Detection y respetar los hints de `Retry-After`. Para cuentas free o con límites inciertos, empezar con `Max Concurrent Requests = 1`; si el proveedor publica un RPM conocido, usar un objetivo conservador y derivar `Min Time Between Requests ≈ 60000 / RPM_objetivo`. Subir concurrencia únicamente después de observar estabilidad.
 
