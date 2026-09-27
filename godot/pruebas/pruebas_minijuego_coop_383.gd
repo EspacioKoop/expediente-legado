@@ -160,11 +160,14 @@ func _probar_vertical_dos_clientes() -> void:
 
 
 func _probar_orden_version_y_timeout() -> void:
-	var autoridad := MinijuegoGolfAutoridad.new(
-		ROOM_ID,
-		SESSION_ID,
-		["anon-a", "anon-b"],
-		_configuraciones_faciles(),
+	var autoridad := (
+		MinijuegoGolfAutoridad
+		. new(
+			ROOM_ID,
+			SESSION_ID,
+			["anon-a", "anon-b"],
+			_configuraciones_faciles(),
+		)
 	)
 	var evento := _crear_evento("anon-a", 0, 0)
 	var primero := autoridad.aplicar_evento(evento["event"], AHORA)
@@ -197,11 +200,14 @@ func _probar_abandono_sin_partida() -> void:
 		"veredictos": {"caso-previo": "firma"},
 	}
 	var antes := JSON.stringify(partida)
-	var autoridad := MinijuegoGolfAutoridad.new(
-		ROOM_ID,
-		SESSION_ID,
-		["anon-a", "anon-b"],
-		_configuraciones_faciles(),
+	var autoridad := (
+		MinijuegoGolfAutoridad
+		. new(
+			ROOM_ID,
+			SESSION_ID,
+			["anon-a", "anon-b"],
+			_configuraciones_faciles(),
+		)
 	)
 	var abandono := autoridad.abandonar()
 	_comprobar("abandono termina sesión", abandono["snapshot"]["phase"], "finished")
