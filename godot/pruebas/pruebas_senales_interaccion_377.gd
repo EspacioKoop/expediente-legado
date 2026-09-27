@@ -44,8 +44,8 @@ func _ejecutar() -> void:
 		interactuable != null and interactuable.get_node_or_null("Colision") != null,
 	)
 
-	var apertura := controller.abrir_compositor("calle_escaparate")
-	_comprobar("compositor abre desde anchor permitido", apertura["ok"])
+	var interactuado := interactuable != null and interactuable.interactuar(host)
+	_comprobar("interactuar con anchor abre compositor", interactuado)
 	await process_frame
 
 	var compositor := host.get_node_or_null("SenalCompositorUI")
