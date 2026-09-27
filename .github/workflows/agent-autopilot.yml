@@ -104,7 +104,7 @@ jobs:
             elif [[ "$HAS_GEMINI" == true ]]; then provider=gemini
             else
               gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" --add-label agent:needs-human >/dev/null
-              gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body 'Faltan `QWEN_API_KEY` y `GEMINI_API_KEY` en Actions Secrets.'
+              gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body 'No hay ningún backend Qwen configurado (`QWEN_API_KEY` o `QWEN_FALLBACK_N_API_KEY`) ni `GEMINI_API_KEY` en Actions Secrets.'
               echo "run=false" >> "$GITHUB_OUTPUT"; exit 0
             fi
           fi
