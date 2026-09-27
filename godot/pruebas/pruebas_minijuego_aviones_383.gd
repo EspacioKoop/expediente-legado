@@ -88,7 +88,9 @@ func _probar_dos_jugadores() -> void:
 		_comprobar("vuelo tiene distancia %d" % indice, aplicado["flight"]["distance"] > 0.0, true)
 
 		if indice == 2:
-			_comprobar("tras tres lanza B", aplicado["snapshot"]["state"]["current_player"], "anon-b")
+			_comprobar(
+				"tras tres lanza B", aplicado["snapshot"]["state"]["current_player"], "anon-b"
+			)
 			_comprobar("turno avanza a uno", aplicado["snapshot"]["turn"], 1)
 
 	var final := autoridad.snapshot()
@@ -130,7 +132,9 @@ func _probar_determinismo_y_serializacion() -> void:
 func _probar_validaciones() -> void:
 	var autoridad := _nueva()
 	var primero := _accion("anon-a", 0, 0)
-	_comprobar("primer evento se aplica", autoridad.aplicar_evento(primero["event"], AHORA)["ok"], true)
+	_comprobar(
+		"primer evento se aplica", autoridad.aplicar_evento(primero["event"], AHORA)["ok"], true
+	)
 
 	var duplicado := autoridad.aplicar_evento(primero["event"], AHORA)
 	_comprobar("duplicado rechazado", duplicado["status"], "late_or_duplicate")
