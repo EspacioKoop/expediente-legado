@@ -121,6 +121,8 @@ class CiBrainTest(unittest.TestCase):
         self.assertIn("schedule:", texto)
         self.assertIn("actions: read", texto)
         self.assertIn("python3 scripts/ci_brain.py collect", texto)
+        self.assertIn("gh run download", texto)
+        self.assertIn("ci-brain.sqlite3", texto)
         self.assertIn("python3 scripts/ci_brain.py sync-turso", texto)
         self.assertIn("vars.TURSO_DATABASE_URL", texto)
         self.assertIn("secrets.TURSO_AUTH_TOKEN", texto)
