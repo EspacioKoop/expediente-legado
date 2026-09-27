@@ -251,19 +251,20 @@ static func _leido_hoy(registro: Dictionary, leido_hoy: Array) -> bool:
 
 
 static func _vista_registro(registro: Dictionary) -> Dictionary:
-	var contenido := String(registro.get("contenido", "")).strip_edges()
-	contenido = contenido.replace("\n", " ").replace("\r", " ").replace("\t", " ")
-	while contenido.contains("  "):
-		contenido = contenido.replace("  ", " ")
-	if contenido.length() > MAX_EXTRACTO:
-		contenido = contenido.substr(0, MAX_EXTRACTO).strip_edges() + "…"
-	contenido = _envolver(contenido)
+	var contenido_completo := String(registro.get("contenido", "")).strip_edges()
+	var extracto := contenido_completo.replace("\n", " ").replace("\r", " ").replace("\t", " ")
+	while extracto.contains("  "):
+		extracto = extracto.replace("  ", " ")
+	if extracto.length() > MAX_EXTRACTO:
+		extracto = extracto.substr(0, MAX_EXTRACTO).strip_edges() + "…"
+	extracto = _envolver(extracto)
 	return {
 		"id": String(registro.get("id", "")),
 		"folio": String(registro.get("folio", "")),
 		"tipo": String(registro.get("tipo", "")),
 		"fecha": String(registro.get("fecha", "")),
-		"extracto": contenido,
+		"extracto": extracto,
+		"contenido": contenido_completo,
 	}
 
 
