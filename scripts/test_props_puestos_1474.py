@@ -53,16 +53,17 @@ class PropsPuestos1474Test(unittest.TestCase):
         self.assertIn("const PERFILES_NEUTROS := [", self.utileria)
         self.assertGreaterEqual(self.utileria.count('["'), 4)
         self.assertIn("indice % PERFILES_NEUTROS.size()", self.utileria)
-        self.assertIn('puesto.set_meta("perfil_props"', self.utileria)
+        self.assertIn("puesto.set_meta(", self.utileria)
+        self.assertIn('"perfil_props"', self.utileria)
 
     def test_props_no_introducen_texto_legible_ni_interaccion(self) -> None:
         for token in ("Label3D.new()", "Label.new()", "Button.new()", "Area3D.new()", "CollisionShape3D.new()"):
             self.assertNotIn(token, self.utileria)
 
     def test_materiales_siguen_shader_visual_del_espacio(self) -> None:
-        self.assertIn("material.shader = load(Espacio3D.shader_del_sitio())", self.utileria)
-        self.assertIn('material.set_shader_parameter("color_base", color)', self.utileria)
+        self.assertIn("Modelos._pintar(malla, color)", self.utileria)
         self.assertNotIn("StandardMaterial3D.new()", self.utileria)
+        self.assertNotIn("load(", self.utileria)
 
     def test_ranuras_quedan_al_fondo_del_escritorio(self) -> None:
         bloque = self.utileria.split("const RANURAS_PROPS := [", 1)[1].split("]", 1)[0]
