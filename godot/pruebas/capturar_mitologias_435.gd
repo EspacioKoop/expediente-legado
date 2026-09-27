@@ -121,7 +121,6 @@ func _capturar_gilgamesh(salida: String, manifiesto: Dictionary) -> bool:
 	return guardado_final
 
 
-
 ## Coloca cada fragmento en su ancla canónica y exige el estado resuelto.
 func _resolver_gilgamesh(sueno: SuenoGilgamesh) -> bool:
 	var fragmentos: Array = SuenoGilgamesh.ENCAJES.keys()
