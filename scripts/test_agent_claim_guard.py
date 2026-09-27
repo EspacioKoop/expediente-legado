@@ -92,6 +92,11 @@ class AgentClaimGuardTest(unittest.TestCase):
         self.assertIn("MAX_REPLANS: '2'", workflow)
         self.assertIn("gh workflow run agent-autopilot.yml", workflow)
         self.assertIn("motivo=autopilot-replan-claim-incompleto", workflow)
+        self.assertIn('select(startswith("AUTOPILOT_REPLAN "))', workflow)
+        gemini = workflow.split("name: Implementar con Gemini", 1)[1].split(
+            "uses: google-github-actions/run-gemini-cli@v0", 1
+        )[0]
+        self.assertIn("continue-on-error: true", gemini)
         self.assertIn("steps.claim_guard.outputs.drift != 'true'", workflow)
 
 
