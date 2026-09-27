@@ -116,7 +116,13 @@ async function consumeRateLimits(
 }
 
 function configuredRepository(): string {
-  const repository = configuredRepository();
+  const repository = cleanText(
+    Deno.env.get("GITHUB_REPOSITORY") || DEFAULT_REPOSITORY,
+    200,
+  );
+  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository)) {
+    throw new Error("GITHUB_REPOSITORY inválido");
+  }
   return repository;
 }
 
@@ -131,13 +137,7 @@ async function createGitHubIssue(payload: {
     throw new Error("GITHUB_TOKEN no configurado");
   }
 
-  const repository = cleanText(
-    Deno.env.get("GITHUB_REPOSITORY") || DEFAULT_REPOSITORY,
-    200,
-  );
-  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository)) {
-    throw new Error("GITHUB_REPOSITORY inválido");
-  }
+  const repository = configuredRepository();
 
   const category = CATEGORIES.has(payload.category) ? payload.category : "otro";
   const title = `[Playtest][${category.toUpperCase()}] ${payload.title}`;
