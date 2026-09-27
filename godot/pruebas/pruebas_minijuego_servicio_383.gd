@@ -26,13 +26,16 @@ func _init() -> void:
 
 
 func _abrir(servicio: MinijuegoServicio, actor: String) -> Dictionary:
-	return servicio.abrir_sala(
-		SCENE_KEY,
-		ROOM_ID,
-		SESSION_ID,
-		MINIGAME_ID,
-		1,
-		actor,
+	return (
+		servicio
+		. abrir_sala(
+			SCENE_KEY,
+			ROOM_ID,
+			SESSION_ID,
+			MINIGAME_ID,
+			1,
+			actor,
+		)
 	)
 
 
@@ -43,19 +46,22 @@ func _evento(
 	rules_version: int = 1,
 	sequence: int = 0,
 ) -> Dictionary:
-	return MinijuegoSesionDatos.crear_accion(
-		SCENE_KEY,
-		"test-383-service",
-		actor,
-		room_id,
-		session_id,
-		MINIGAME_ID,
-		rules_version,
-		sequence,
-		sequence,
-		{"type": "shot", "direction": [0.0, -1.0], "power": 0.3},
-		AHORA + sequence,
-		"service-%s-%d-%d" % [actor, rules_version, sequence],
+	return (
+		MinijuegoSesionDatos
+		. crear_accion(
+			SCENE_KEY,
+			"test-383-service",
+			actor,
+			room_id,
+			session_id,
+			MINIGAME_ID,
+			rules_version,
+			sequence,
+			sequence,
+			{"type": "shot", "direction": [0.0, -1.0], "power": 0.3},
+			AHORA + sequence,
+			"service-%s-%d-%d" % [actor, rules_version, sequence],
+		)
 	)
 
 
@@ -68,13 +74,16 @@ func _probar_apertura_y_publicacion() -> void:
 	_comprobar("contexto conserva sala", servicio.contexto()["room_id"], ROOM_ID)
 	_comprobar("contexto conserva sesión", servicio.contexto()["session_id"], SESSION_ID)
 
-	var publicacion := servicio.publicar_accion(
-		"test-383-service",
-		0,
-		0,
-		{"type": "shot", "direction": [0.0, -1.0], "power": 0.3},
-		AHORA,
-		"service-a-0",
+	var publicacion := (
+		servicio
+		. publicar_accion(
+			"test-383-service",
+			0,
+			0,
+			{"type": "shot", "direction": [0.0, -1.0], "power": 0.3},
+			AHORA,
+			"service-a-0",
+		)
 	)
 	_comprobar("publica acción", publicacion["ok"], true)
 	_comprobar("fixture recibe una", transporte.publicados().size(), 1)
@@ -84,12 +93,15 @@ func _probar_apertura_y_publicacion() -> void:
 		SESSION_ID,
 	)
 
-	var prohibida := servicio.publicar_accion(
-		"test-383-service",
-		1,
-		1,
-		{"type": "shot", "direction": [0.0, -1.0], "power": 0.3, "score": 900},
-		AHORA + 1,
+	var prohibida := (
+		servicio
+		. publicar_accion(
+			"test-383-service",
+			1,
+			1,
+			{"type": "shot", "direction": [0.0, -1.0], "power": 0.3, "score": 900},
+			AHORA + 1,
+		)
 	)
 	_comprobar("score sigue prohibido", prohibida["ok"], false)
 	_comprobar("score falla antes de transporte", transporte.publicados().size(), 1)
@@ -133,24 +145,30 @@ func _probar_version_y_recuperacion() -> void:
 	_comprobar("expone versión remota", incompatible["remote"], 2)
 
 	transporte.simular_timeout(true)
-	var fallo := servicio.publicar_accion(
-		"test-383-service",
-		0,
-		0,
-		{"type": "shot", "direction": [0.0, -1.0], "power": 0.3},
-		AHORA,
+	var fallo := (
+		servicio
+		. publicar_accion(
+			"test-383-service",
+			0,
+			0,
+			{"type": "shot", "direction": [0.0, -1.0], "power": 0.3},
+			AHORA,
+		)
 	)
 	_comprobar("timeout visible", fallo["status"], "timeout")
 	_comprobar("timeout no cierra servicio", servicio.activa(), true)
 	_comprobar("health refleja caída", servicio.estado_transporte()["online"], false)
 
 	transporte.simular_timeout(false)
-	var recuperado := servicio.publicar_accion(
-		"test-383-service",
-		0,
-		0,
-		{"type": "shot", "direction": [0.0, -1.0], "power": 0.3},
-		AHORA,
+	var recuperado := (
+		servicio
+		. publicar_accion(
+			"test-383-service",
+			0,
+			0,
+			{"type": "shot", "direction": [0.0, -1.0], "power": 0.3},
+			AHORA,
+		)
 	)
 	_comprobar("recupera sin reabrir sala", recuperado["ok"], true)
 	_comprobar("health vuelve online", servicio.estado_transporte()["online"], true)
