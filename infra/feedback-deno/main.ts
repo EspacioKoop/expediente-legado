@@ -1,3 +1,5 @@
+import { handleAgentMemory } from "./agent_memory.ts";
+
 const DEFAULT_REPOSITORY = "EspacioKoop/expediente-legado";
 const CATEGORIES = new Set([
   "bug",
@@ -113,6 +115,11 @@ async function consumeRateLimits(
   return false;
 }
 
+function configuredRepository(): string {
+  const repository = configuredRepository();
+  return repository;
+}
+
 async function createGitHubIssue(payload: {
   source: string;
   category: string;
@@ -188,10 +195,22 @@ async function handler(
     return json({
       ok: true,
       service: "siga98-feedback-deno",
-      version: 1,
+      version: 2,
       github_configured: Boolean(Deno.env.get("GITHUB_TOKEN")),
       kv_configured: kvConfigured,
+      agent_memory: true,
     });
+  }
+
+  if (url.pathname.startsWith("/api/agent-memory/")) {
+    let kv: Deno.Kv;
+    try {
+      kv = await getKv();
+    } catch (error) {
+      console.error("Agent memory KV unavailable", error);
+      return json({ ok: false, error: "service_unavailable" }, 503);
+    }
+    return await handleAgentMemory(request, url, kv, configuredRepository());
   }
 
   if (url.pathname !== "/api/report") {
