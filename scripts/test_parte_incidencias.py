@@ -159,6 +159,8 @@ class ParteIncidenciasTest(unittest.TestCase):
         self.assertIn("-- api vercel.json .vercelignore", comando)
         self.assertNotIn("godot", comando)
         self.assertNotIn("docs", comando)
+        despliegues = self.vercel_config["git"]["deploymentEnabled"]
+        self.assertIs(despliegues["odiseo/*"], False)
 
     def test_formulario_usa_controles_navegables_estandar(self):
         for control in (
