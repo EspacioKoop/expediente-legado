@@ -1,90 +1,149 @@
 # Gateway de feedback F9
 
-Este directorio contiene un gateway serverless de referencia para el Parte de
-incidencias de SIGA-98 (#1460).
+Este directorio contiene el gateway serverless del Parte de incidencias de
+SIGA-98. El despliegue recomendado es Cloudflare Workers; Vercel queda como
+respaldo mientras siga disponible.
 
 El juego **no** habla directamente con la API de GitHub y **no** contiene PAT,
-tokens ni credenciales SMTP. Solo conoce una URL HTTPS pública. El gateway
-recibe el payload filtrado, crea el issue usando un secreto de servidor y puede
-enviar un correo adicional.
+tokens ni credenciales SMTP. Solo conoce URLs HTTPS públicas.
+
+## Arquitectura
+
+```text
+F9
+ ├─ gateway primario: Cloudflare Worker
+ ├─ gateway secundario: Vercel
+ └─ último recurso: issue de GitHub pre-rellenado + copia local
+```
 
 ## Contrato HTTP
 
-`POST /` con `Content-Type: application/json`:
+El endpoint de creación es:
 
-```json
-{
-  "schema": 1,
-  "source": "siga98-f9",
-  "category": "bug",
-  "title": "Texto breve",
-  "body": "PARTE DE INCIDENCIAS · SIGA-98\n...",
-  "diagnostic": {
-    "build": "<sha>",
-    "plataforma": "windows"
-  }
-}
+```text
+POST /api/report
+Content-Type: application/json
 ```
 
-El gateway ignora campos que no necesita para crear el issue. Valida origen,
-categoría, título y tamaño antes de llamar a GitHub.
+El payload usa `schema: 1`, `source: siga98-f9`, una categoría permitida,
+título y cuerpo. El gateway limita tamaño y formato antes de llamar a GitHub.
 
-Respuesta de éxito:
+Los healthchecks están en `GET /` y `GET /health`.
 
-```json
-{
-  "ok": true,
-  "issue_number": 1234,
-  "issue_url": "https://github.com/EspacioKoop/expediente-legado/issues/1234",
-  "email_sent": false
-}
+## Seguridad
+
+Crea un **fine-grained personal access token** de GitHub dedicado a este
+servicio:
+
+- acceso únicamente a `EspacioKoop/expediente-legado`;
+- permiso de repositorio **Issues: Read and write**;
+- ningún permiso de Contents, Actions, Administration o código;
+- caducidad corta y rotación periódica.
+
+No reutilices un token personal amplio ni el token de otro servicio.
+
+El Worker protege la creación de issues antes de contactar con GitHub:
+
+- 6 reportes/minuto por origen de red;
+- 30 reportes/minuto globales por ubicación Cloudflare;
+- el origen de red se convierte a SHA-256 truncado antes de llegar al
+  rate-limiter;
+- esa información no se incorpora al issue ni se persiste en el repositorio;
+- los payloads de más de 24 KiB se rechazan.
+
+El rate limiting es una defensa de abuso, no una autenticación: un cliente
+público no puede guardar de forma segura un secreto compartido.
+
+## Despliegue inicial en Cloudflare
+
+Requiere Node.js/npm y una cuenta de Cloudflare Workers.
+
+```bash
+cd infra/feedback-worker
+npx wrangler@latest login
+npx wrangler@latest secret put GITHUB_TOKEN
+npx wrangler@latest deploy
 ```
 
-## Variables/secrets del servidor
+Wrangler solicita el token de GitHub de forma interactiva. **No lo pongas en la
+línea de comandos, en un archivo versionado, en una captura ni en un mensaje.**
 
-Obligatorias:
+El despliegue devolverá una URL parecida a:
 
-- `GITHUB_TOKEN`: token de servidor con permiso mínimo para crear issues en el
-  repositorio objetivo.
+```text
+https://siga98-feedback.<tu-subdominio>.workers.dev
+```
 
-Opcionales:
+Comprueba el servicio:
 
-- `GITHUB_REPOSITORY`: por defecto `EspacioKoop/expediente-legado`.
-- `GITHUB_LABELS`: etiquetas separadas por comas, solo si ya existen.
-- `RESEND_API_KEY`: activa el aviso por correo.
-- `REPORT_EMAIL_TO`: destinatario del aviso.
-- `REPORT_EMAIL_FROM`: remitente verificado por Resend.
+```bash
+curl -fsS https://siga98-feedback.<tu-subdominio>.workers.dev/health
+```
 
-El correo usa la API HTTPS de Resend desde el servidor. Ninguna de estas
-variables debe copiarse a `godot/datos/incidencias.json`, GitHub Actions
-artifacts ni al ejecutable.
+Debe responder con `ok: true` y `github_configured: true`.
 
-## Despliegue
+El endpoint para el juego es:
 
-`worker.js` usa únicamente Web APIs estándar y el formato `export default
-{ fetch() }` de Cloudflare Workers. Puede desplegarse con Wrangler o adaptarse
-sin dependencias a otra función serverless.
+```text
+https://siga98-feedback.<tu-subdominio>.workers.dev/api/report
+```
 
-Una vez desplegado, crear en GitHub:
+## Conectar las alphas
+
+En GitHub:
 
 ```text
 Settings → Secrets and variables → Actions → Variables
-SIGA98_FEEDBACK_URL=https://<gateway>
+SIGA98_FEEDBACK_URL=https://siga98-feedback.<tu-subdominio>.workers.dev/api/report
 ```
 
-`.github/workflows/alpha-playtest.yml` pasa esa **URL pública** al exportador.
-`dist/exportar-godot-alpha.sh` la inyecta temporalmente en
-`godot/datos/incidencias.json` durante el empaquetado.
+Esta URL **no es un secreto**. El exportador la empaqueta como endpoint
+primario y añade automáticamente el endpoint Vercel existente como respaldo.
+Si ambos fallan, F9 conserva el reporte localmente y abre un issue
+pre-rellenado.
 
-## Protección frente a abuso
+## Desarrollo local
 
-El endpoint es público por necesidad: un secreto incluido en el juego se puede
-extraer. Configura rate limiting en el proveedor serverless (por IP y ventana
-temporal) y mantén los límites de tamaño/categoría de `worker.js`. El token de
-GitHub debe tener el alcance mínimo posible y vivir solo como secreto del
-servidor.
+Los secretos locales van en `infra/feedback-worker/.dev.vars`; Git los
+ignora:
 
-## Fallback
+```dotenv
+GITHUB_TOKEN=github_pat_...
+```
 
-Si `SIGA98_FEEDBACK_URL` no está configurada o el POST falla, el juego guarda
-una copia local y abre un GitHub Issue pre-rellenado. No usa el portapapeles.
+Después:
+
+```bash
+cd infra/feedback-worker
+npx wrangler@latest dev
+```
+
+El cliente solo admite HTTP contra `localhost` o `127.0.0.1`. Cualquier
+gateway remoto debe usar HTTPS.
+
+## Variables del Worker
+
+No secretas:
+
+- `GITHUB_REPOSITORY`: configurada en `wrangler.jsonc`.
+- `GITHUB_LABELS`: opcional; solo etiquetas que ya existan.
+
+Secrets:
+
+- `GITHUB_TOKEN`: obligatorio.
+- `RESEND_API_KEY`, `REPORT_EMAIL_TO`, `REPORT_EMAIL_FROM`: opcionales si
+  se quiere conservar también el aviso por correo.
+
+Los secrets deben configurarse con Wrangler o el panel de Cloudflare; nunca en
+`wrangler.jsonc`.
+
+## Rotación del token
+
+Para sustituir el token sin tocar código:
+
+```bash
+cd infra/feedback-worker
+npx wrangler@latest secret put GITHUB_TOKEN
+```
+
+Comprueba el healthcheck y revoca después el token anterior en GitHub.
