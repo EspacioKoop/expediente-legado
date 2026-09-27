@@ -129,7 +129,6 @@ func _montar() -> void:
 
 	_titulo = Label.new()
 	_titulo.name = "TituloSala"
-	_titulo.accessibility_role = AccessibilityServer.ROLE_HEADING
 	caja.add_child(_titulo)
 
 	_reglas = Label.new()
