@@ -70,9 +70,12 @@ static func _aplicar_modificadores(rimas: Array, modificadores: Array) -> void:
 		var jugable := SuenoReglaIdeologica923.new()
 		jugable.name = "ReglaJugable"
 		capa.add_child(jugable)
-		jugable.configurar(
-			regla_id,
-			bool(activo.get("reduccion_movimiento", false)),
+		(
+			jugable
+			. configurar(
+				regla_id,
+				bool(activo.get("reduccion_movimiento", false)),
+			)
 		)
 
 
