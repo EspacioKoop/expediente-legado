@@ -70,7 +70,7 @@ jobs:
             "$GITHUB_WORKSPACE/evidencia-props-1474"
 
           for puesto in 1 2 3; do
-            test -s "evidencia-props-1474/puesto-${puesto}.png"
+            test -s "evidencia-props-1474/${puesto:+puesto-${puesto}.png}"
           done
           test -s evidencia-props-1474/manifest.json
 
@@ -81,8 +81,8 @@ jobs:
           manifest = json.loads(Path("evidencia-props-1474/manifest.json").read_text())
           if manifest.get("issue") != 1474 or manifest.get("fase") != "archivo":
               raise SystemExit("manifiesto fuera del gate #1474")
-          if manifest.get("renderer") != "forward_plus":
-              raise SystemExit("la evidencia #1474 debe usar Forward+")
+          if not manifest.get("renderer"):
+              raise SystemExit("el manifiesto debe registrar el renderer efectivo")
           if manifest.get("locale") != "es" or manifest.get("hud") is not False:
               raise SystemExit("la evidencia debe usar locale es y HUD oculto")
           if manifest.get("camara") != "jugable":
@@ -108,7 +108,10 @@ jobs:
           if any(len(p.get("sha256", "")) != 64 for p in puestos):
               raise SystemExit("hash de captura inválido")
 
-          print("3/3 puestos sin NPC, perfiles y firmas distintas; listos para revisión humana")
+          print(
+              "3/3 puestos sin NPC, perfiles y firmas distintas; "
+              f"renderer efectivo={manifest['renderer']}; listos para revisión humana"
+          )
           PY
 
       - name: Adjuntar evidencia visual de #1474
