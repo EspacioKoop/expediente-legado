@@ -2227,6 +2227,33 @@
       "licencia": "Propio del proyecto; salida generada con OpenAI",
       "fuente": "https://openai.com/policies/eu-terms-of-use/",
       "sha256": "9752604a9fbbecf0d869984113779dc86caf109e23236ebd3dd28741f50ecdd9"
+    },
+    {
+      "ruta": "texturas/senaletica_oficina_98/salida_emergencia_98.png",
+      "titulo": "Señal de salida de emergencia del archivo",
+      "autor": "EspacioKoop (generado por scripts/generar_senaletica_oficina_98.py)",
+      "licencia": "MIT (propio del proyecto, como el repositorio)",
+      "fuente": "https://github.com/EspacioKoop/expediente-legado/issues/1468",
+      "sha256": "a44f6839edbaa509c985525262826de405052f7d88f93c097ff9349398c1bda6",
+      "origen": "generado_por_script"
+    },
+    {
+      "ruta": "texturas/senaletica_oficina_98/extintor_98.png",
+      "titulo": "Señal de extintor del archivo",
+      "autor": "EspacioKoop (generado por scripts/generar_senaletica_oficina_98.py)",
+      "licencia": "MIT (propio del proyecto, como el repositorio)",
+      "fuente": "https://github.com/EspacioKoop/expediente-legado/issues/1468",
+      "sha256": "08ec98e7613d45a5655658453ae967647df09b5a35bcbf9f9ceb2b4cfb214abf",
+      "origen": "generado_por_script"
+    },
+    {
+      "ruta": "texturas/senaletica_oficina_98/calendario_pared_98.png",
+      "titulo": "Calendario de pared sin fecha del archivo",
+      "autor": "EspacioKoop (generado por scripts/generar_senaletica_oficina_98.py)",
+      "licencia": "MIT (propio del proyecto, como el repositorio)",
+      "fuente": "https://github.com/EspacioKoop/expediente-legado/issues/1468",
+      "sha256": "2f996b0a6c74696246c838455d78cb34d69ea483ec27c4f18af80afe793bc09f",
+      "origen": "generado_por_script"
     }
   ]
 }

@@ -58,3 +58,6 @@ godot/assets/texturas/oficina_ai_98/*.webp -filter -diff -merge -text
 
 # Atrezzo Yggdrasil propio, pequeño y autocontenido (<10 KiB cada uno).
 godot/assets/texturas/yggdrasil_ai_98/*.webp -filter -diff -merge -text
+
+# Señalética propia del archivo, generada por script y pequeña (<5 KiB).
+godot/assets/texturas/senaletica_oficina_98/*.png -filter -diff -merge -text
