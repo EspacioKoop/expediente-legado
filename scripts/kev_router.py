@@ -136,6 +136,21 @@ def route_provider(
     """Selecciona worker. Kev nunca puede romper la cola: todo fallo cae al fallback."""
 
     available = _available_providers(has_qwen, has_gemini)
+    explicit_labels = {
+        provider
+        for provider in ("qwen", "gemini")
+        if f"agent:{provider}" in set(labels)
+    }
+    if len(explicit_labels) > 1:
+        return {
+            "provider": None,
+            "source": "explicit-conflict",
+            "reason": "multiple-explicit-provider-labels",
+            "conflicting_providers": sorted(explicit_labels),
+            "confidence": None,
+            "available": available,
+        }
+
     fallback = _fallback_provider(available)
     if fallback is None:
         return {
