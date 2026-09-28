@@ -5,6 +5,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 DIA = ROOT / "godot" / "guion" / "dia_app.gd"
 ALQUILER = ROOT / "godot" / "guion" / "dia_alquiler_app.gd"
+ESPACIOS = ROOT / "godot" / "guion" / "dia_espacios_app.gd"
 
 
 class SuenoDegradadoTest(unittest.TestCase):
@@ -16,8 +17,9 @@ class SuenoDegradadoTest(unittest.TestCase):
 
     def test_la_politica_se_aplica_sin_duplicar_jornada(self):
         source = DIA.read_text(encoding="utf-8")
+        espacios = ESPACIOS.read_text(encoding="utf-8")
         self.assertIn("func _opciones_sueno() -> Dictionary:", source)
-        self.assertIn("Sueno.noche(", source)
+        self.assertIn("Sueno.noche(", espacios)
         self.assertNotIn("Jornada.dormir(", source[source.index("func _aplicar_politica_sueno"):])
 
     def test_la_oficina_pide_una_escena_y_prioriza_vistas(self):
