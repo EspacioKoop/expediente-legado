@@ -244,7 +244,9 @@ func _probar_superficie_opt_in() -> void:
 			ronda + 1
 		)
 
-	_comprobar("tres rondas terminan la sesión UI", panel.get("_sesion").get("terminado", false), true)
+	_comprobar(
+		"tres rondas terminan la sesión UI", panel.get("_sesion").get("terminado", false), true
+	)
 	_comprobar(
 		"la superficie publica exactamente tres elecciones propias",
 		transporte_ui.publicados().size(),
