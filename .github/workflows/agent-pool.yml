@@ -136,9 +136,9 @@ jobs:
                   worker, provider, reason, until=match.groups()
                   until=int(until)
                   if until > now:
-                      unhealthy[worker]={"provider":provider,"reason":reason,"until":until}
-                  else:
-                      unhealthy.pop(worker,None)
+                      anterior=unhealthy.get(worker)
+                      if anterior is None or until > int(anterior["until"]):
+                          unhealthy[worker]={"provider":provider,"reason":reason,"until":until}
 
           for worker in workers:
               worker["healthy"]=worker.get("worker") not in unhealthy
@@ -147,8 +147,8 @@ jobs:
               print("Slots en cooldown:", ",".join(sorted(unhealthy)))
           PY
 
-          has_qwen="$(jq -r 'any(.[]; .provider == "qwen" and (.healthy // true))' /tmp/workers.json)"
-          has_gemini="$(jq -r 'any(.[]; .provider == "gemini" and (.healthy // true))' /tmp/workers.json)"
+          has_qwen="$(jq -r 'any(.[]; .provider == "qwen" and (if has("healthy") then .healthy else true end))' /tmp/workers.json)"
+          has_gemini="$(jq -r 'any(.[]; .provider == "gemini" and (if has("healthy") then .healthy else true end))' /tmp/workers.json)"
           route_limit=$((REQUESTED_MAX * 2))
           (( route_limit > 12 )) && route_limit=12
           mapfile -t candidates < <(
@@ -204,7 +204,7 @@ jobs:
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
           echo "count=$count" >> "$GITHUB_OUTPUT"
           configured="$(jq 'length' /tmp/workers.json)"
-          healthy="$(jq '[.[] | select(.healthy // true)] | length' /tmp/workers.json)"
+          healthy="$(jq '[.[] | select(if has("healthy") then .healthy else true end)] | length' /tmp/workers.json)"
           echo "Seleccionados $count workers de $healthy saludables ($configured configurados)."
 
   run:
