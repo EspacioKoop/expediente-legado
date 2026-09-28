@@ -14,5 +14,8 @@
   "sin_endpoint": "Multiplayer no configurado en esta build. El juego continúa offline.",
   "codigo_invalido": "El código debe tener 6 caracteres legibles.",
   "cerrada": "Sala cerrada.",
-  "error": "No se pudo abrir la sala. El juego continúa offline."
+  "error": "No se pudo abrir la sala. El juego continúa offline.",
+  "boton": "COOP",
+  "participantes": "Participantes visibles",
+  "ocultar": "Ocultar participante"
 }
