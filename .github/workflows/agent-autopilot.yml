@@ -283,7 +283,7 @@ jobs:
 
       - id: qwen_fallbacks
         name: Resolver fallbacks Qwen dinámicos
-        if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success'
+        if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen'
         env:
           VARS_JSON: ${{ toJSON(vars) }}
           FALLBACK_KEYS: >-
@@ -320,7 +320,7 @@ jobs:
 
       - id: plan_qwen_fallback_1
         name: Plan Qwen (fallback dinámico 1)
-        if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_1 != ''
+        if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_1 != ''
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -333,7 +333,7 @@ jobs:
 
       - id: plan_qwen_fallback_2
         name: Plan Qwen (fallback dinámico 2)
-        if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_2 != '' && steps.plan_qwen_fallback_1.outcome != 'success'
+        if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_2 != '' && steps.plan_qwen_fallback_1.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -346,7 +346,7 @@ jobs:
 
       - id: plan_qwen_fallback_3
         name: Plan Qwen (fallback dinámico 3)
-        if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_3 != '' && steps.plan_qwen_fallback_1.outcome != 'success' && steps.plan_qwen_fallback_2.outcome != 'success'
+        if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_3 != '' && steps.plan_qwen_fallback_1.outcome != 'success' && steps.plan_qwen_fallback_2.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -359,7 +359,7 @@ jobs:
 
       - id: plan_qwen_fallback_4
         name: Plan Qwen (fallback dinámico 4)
-        if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_4 != '' && steps.plan_qwen_fallback_1.outcome != 'success' && steps.plan_qwen_fallback_2.outcome != 'success' && steps.plan_qwen_fallback_3.outcome != 'success'
+        if: steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.plan_omniroute.outcome != 'success' && steps.plan_qwen.outcome != 'success' && steps.route.outputs.run == 'true' && steps.route.outputs.provider == 'qwen' && steps.qwen_fallbacks.outputs.worker_4 != '' && steps.plan_qwen_fallback_1.outcome != 'success' && steps.plan_qwen_fallback_2.outcome != 'success' && steps.plan_qwen_fallback_3.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -537,53 +537,53 @@ jobs:
           prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; usa .agent-context.md como contexto wiki seleccionado y consulta .agent-wiki solo si falta contexto imprescindible. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
 
       - id: implement_qwen_fallback_1
-        name: Implementar con Qwen (fallback 1)
-        if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_1 == 'true' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success'
+        name: Implementar con Qwen (fallback dinámico 1)
+        if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.qwen_fallbacks.outputs.worker_1 != ''
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
-          openai_api_key: ${{ secrets.QWEN_FALLBACK_1_API_KEY }}
-          openai_base_url: ${{ vars.QWEN_FALLBACK_1_BASE_URL }}
-          openai_model: ${{ vars.QWEN_FALLBACK_1_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
+          openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_1] }}
+          openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_1 }}
+          openai_model: ${{ steps.qwen_fallbacks.outputs.model_1 }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
           prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; usa .agent-context.md como contexto wiki seleccionado y consulta .agent-wiki solo si falta contexto imprescindible. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
 
       - id: implement_qwen_fallback_2
-        name: Implementar con Qwen (fallback 2)
-        if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_2 == 'true' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.implement_qwen_fallback_1.outcome != 'success'
+        name: Implementar con Qwen (fallback dinámico 2)
+        if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.qwen_fallbacks.outputs.worker_2 != '' && steps.implement_qwen_fallback_1.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
-          openai_api_key: ${{ secrets.QWEN_FALLBACK_2_API_KEY }}
-          openai_base_url: ${{ vars.QWEN_FALLBACK_2_BASE_URL }}
-          openai_model: ${{ vars.QWEN_FALLBACK_2_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
+          openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_2] }}
+          openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_2 }}
+          openai_model: ${{ steps.qwen_fallbacks.outputs.model_2 }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
           prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; usa .agent-context.md como contexto wiki seleccionado y consulta .agent-wiki solo si falta contexto imprescindible. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
 
       - id: implement_qwen_fallback_3
-        name: Implementar con Qwen (fallback 3)
-        if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_3 == 'true' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.implement_qwen_fallback_1.outcome != 'success' && steps.implement_qwen_fallback_2.outcome != 'success'
+        name: Implementar con Qwen (fallback dinámico 3)
+        if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.qwen_fallbacks.outputs.worker_3 != '' && steps.implement_qwen_fallback_1.outcome != 'success' && steps.implement_qwen_fallback_2.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
-          openai_api_key: ${{ secrets.QWEN_FALLBACK_3_API_KEY }}
-          openai_base_url: ${{ vars.QWEN_FALLBACK_3_BASE_URL }}
-          openai_model: ${{ vars.QWEN_FALLBACK_3_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
+          openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_3] }}
+          openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_3 }}
+          openai_model: ${{ steps.qwen_fallbacks.outputs.model_3 }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
           prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; usa .agent-context.md como contexto wiki seleccionado y consulta .agent-wiki solo si falta contexto imprescindible. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
 
       - id: implement_qwen_fallback_4
-        name: Implementar con Qwen (fallback 4)
-        if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && env.HAS_QWEN_FALLBACK_4 == 'true' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.implement_qwen_fallback_1.outcome != 'success' && steps.implement_qwen_fallback_2.outcome != 'success' && steps.implement_qwen_fallback_3.outcome != 'success'
+        name: Implementar con Qwen (fallback dinámico 4)
+        if: steps.reserve.outputs.reserved == 'true' && steps.route.outputs.provider == 'qwen' && steps.implement_omniroute.outcome != 'success' && steps.implement_qwen.outcome != 'success' && steps.qwen_fallbacks.outputs.worker_4 != '' && steps.implement_qwen_fallback_1.outcome != 'success' && steps.implement_qwen_fallback_2.outcome != 'success' && steps.implement_qwen_fallback_3.outcome != 'success'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
-          openai_api_key: ${{ secrets.QWEN_FALLBACK_4_API_KEY }}
-          openai_base_url: ${{ vars.QWEN_FALLBACK_4_BASE_URL }}
-          openai_model: ${{ vars.QWEN_FALLBACK_4_MODEL || vars.QWEN_MODEL || steps.qwen.outputs.model }}
+          openai_api_key: ${{ secrets[steps.qwen_fallbacks.outputs.secret_4] }}
+          openai_base_url: ${{ steps.qwen_fallbacks.outputs.url_4 }}
+          openai_model: ${{ steps.qwen_fallbacks.outputs.model_4 }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
           prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales suministradas en .agent-platino; usa .agent-context.md como contexto wiki seleccionado y consulta .agent-wiki solo si falta contexto imprescindible. Repo/issue/#181/#182 y Normas Platino prevalecen siempre sobre wiki, memoria temporal y memoria histórica. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitió una ruta necesaria, no intentes saltarte el CLAIM: el orquestador detectará el desvío y replanificará. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
