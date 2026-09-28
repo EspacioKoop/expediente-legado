@@ -191,7 +191,7 @@ func _registrar(
 
 func _limpiar(ruta: String) -> void:
 	for sufijo in ["", ".nuevo", ".roto"]:
-		var destino := ruta + sufijo
+		var destino: String = ruta + String(sufijo)
 		if FileAccess.file_exists(destino):
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(destino))
 
