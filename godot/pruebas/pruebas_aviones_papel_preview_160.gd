@@ -36,7 +36,7 @@ func _probar() -> void:
 	var posicion_inicial: Vector3 = previo.get("posicion", Vector3.ZERO)
 	app.direccion.value = 0.75
 	await process_frame
-	var lateral := app._vuelo_previo()
+	var lateral: Dictionary = app._vuelo_previo()
 	_comprobar(
 		not lateral.is_empty() and lateral.get("posicion", Vector3.ZERO) != posicion_inicial,
 		"cambiar dirección actualiza el punto previsto",
