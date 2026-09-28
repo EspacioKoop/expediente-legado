@@ -16,7 +16,7 @@ Mapa de fases hasta la primera versión completa. **La prioridad operativa la fi
 
 ## Estado de integración — 2026-09-28
 
-La referencia es `main`, con corte documental en `366cbee398dd337c77c29625ea4a5fe3f8432044`. Un PR cerrado sin merge no cuenta como integración y una CI verde no sustituye validación humana.
+La referencia es `main`, con corte documental en `b21901c5b7036d27b427e022cb4a7b3659dd95ba`. Un PR cerrado sin merge no cuenta como integración y una CI verde no sustituye validación humana.
 
 Desde el corte anterior el proyecto ha añadido profundidad jugable y, además, una capa operativa mucho más fuerte para playtest y agentes. La regla de prioridad no cambia: **un fallo reproducible del recorrido base gana frente a una expansión opcional o una mejora de infraestructura**.
 
@@ -54,7 +54,7 @@ Desde el corte anterior el proyecto ha añadido profundidad jugable y, además, 
 
 - #1446 mantiene una alpha continua identificada por SHA; #1461 añade F9 como reporte de betatest desde el juego.
 - #1524/#1531 añaden failover alojado para feedback sin secretos en el cliente y #1556 prepara Sentry opcional para alphas.
-- #1542 integra el autopilot Qwen/Gemini; #1555/#1563 añaden memoria temporal e histórica, siempre subordinada al repo y a las Normas Platino; #1590 conecta Kev opcional y context packer al carril `agent:auto` sin alterar selecciones explícitas ni auto-merge.
+- #1542 integra el autopilot Qwen/Gemini; #1555/#1563 añaden memoria temporal e histórica, siempre subordinada al repo y a las Normas Platino; #1590 conecta Kev y context packer; #1595 unifica las etiquetas de cola en el dispatcher paralelo y deja el autopilot serial como entrada manual.
 - #1569/#1571/#1585 incorporan OmniRoute privado por Tailscale y fallbacks OpenAI-compatible; #1583 aporta smoke de proveedores sin permisos de escritura.
 - #1572 habilita un pool opt-in de hasta seis workers; #1579/#1588 hacen que autopilot y pool descarten intentos fuera del CLAIM y replanifiquen con un máximo de dos ciclos.
 

@@ -1,6 +1,6 @@
 # Agentes autónomos: autopilot, pool, Qwen + Gemini
 
-El repositorio puede convertir issues autorizados en PRs draft usando Qwen Code o Gemini CLI sin entregar al modelo credenciales de push. Hay dos carriles: el autopilot legado para cola serial y el pool opt-in para paralelismo controlado de hasta seis workers.
+El repositorio puede convertir issues autorizados en PRs draft usando Qwen Code o Gemini CLI sin entregar al modelo credenciales de push. La cola operativa entra por el dispatcher paralelo de hasta seis workers; `agent-autopilot.yml` se conserva como entrada manual para ejecutar un issue concreto.
 
 ## Configuración mínima
 
@@ -102,18 +102,19 @@ El workflow nunca aprueba ni fusiona PRs; el ajuste solo permite crear el draft.
 
 Los labels se crean automáticamente al integrarse el workflow:
 
-- `agent:auto`: entra en la cola automática;
-- `agent:qwen`: ejecución inmediata con Qwen;
-- `agent:gemini`: ejecución inmediata con Gemini;
+- `agent:auto`: cola automática, proveedor elegido por disponibilidad/Kev;
+- `agent:pool`: alias compatible de la misma cola paralela;
+- `agent:qwen`: cola con Qwen obligatorio;
+- `agent:gemini`: cola con Gemini obligatorio;
 - `agent:working`: hay una ejecución activa;
 - `agent:pr-open`: ya existe un PR generado;
 - `agent:needs-human`: hubo ambigüedad, conflicto, falta de configuración o se agotó la reparación automática.
 
-Etiquetar un issue con `agent:auto`, `agent:qwen` o `agent:gemini` lo dispara. Además, cada hora el scheduler recoge el primer `agent:auto` que siga pendiente. También se puede lanzar **Agent autopilot** manualmente desde Actions indicando issue y proveedor.
+Etiquetar un issue con `agent:auto`, `agent:pool`, `agent:qwen` o `agent:gemini` lo mete en el dispatcher común. El pool hace además un barrido cada 15 minutos y deduplica issues encontrados por varias etiquetas. **Agent autopilot** queda disponible desde Actions para ejecutar manualmente un issue concreto y un proveedor (`auto`, Qwen o Gemini).
 
 ### Selección automática y contexto acotado
 
-Para `agent:auto`, el autopilot consulta `scripts/kev_router.py` **solo** cuando hay más de un worker disponible y no existe una selección explícita. `agent:qwen`, `agent:gemini` y `workflow_dispatch` tienen prioridad. Sin `KEV_BASE_URL`, con timeout, baja confianza o respuesta inválida, se conserva el fallback Qwen → Gemini.
+En la cola unificada, el dispatcher consulta `scripts/kev_router.py` para obtener una **preferencia blanda** cuando no existe proveedor explícito. `agent:qwen` y `agent:gemini` son obligatorios; para `agent:auto`/`agent:pool`, si el proveedor sugerido no tiene slot libre se usa otro worker disponible. La ejecución manual de `agent-autopilot.yml` mantiene el router cuando se selecciona `provider=auto`. Sin `KEV_BASE_URL`, con timeout, baja confianza o respuesta inválida, se conserva una selección determinista.
 
 Kev recibe únicamente título, cuerpo y labels del issue. No recibe `GITHUB_TOKEN`, secretos de proveedores, logs completos ni memorias sin filtrar.
 
@@ -121,7 +122,7 @@ El autopilot y el pool usan además `scripts/agent_context_pack.py`: generan un 
 
 ### Pool paralelo
 
-La etiqueta `agent:pool` entra en el dispatcher paralelo documentado en [`agents/parallel-pool.md`](agents/parallel-pool.md). No debe coexistir con `agent:auto` durante la migración actual.
+El dispatcher documentado en [`agents/parallel-pool.md`](agents/parallel-pool.md) es la cola operativa común para `agent:auto`, `agent:pool`, `agent:qwen` y `agent:gemini`. `agent:pool` se conserva como alias compatible y ya puede coexistir con `agent:auto`: el selector deduplica por issue.
 
 El dispatcher:
 
@@ -132,7 +133,7 @@ El dispatcher:
 - ejecuta context packer, Deno KV y CI brain antes de abrir un PR draft;
 - ante cambios fuera del CLAIM, restaura el intento, libera la reserva y replantea hasta dos veces antes de escalar a `agent:needs-human`.
 
-El barrido del pool se ejecuta cada 15 minutos, además del disparo por etiqueta. El autopilot `agent:auto` conserva su carril separado hasta completar la migración.
+El barrido del pool se ejecuta cada 15 minutos, además del disparo por etiqueta. `agent-autopilot.yml` ya no hace polling ni escucha labels: queda únicamente como ejecución manual.
 
 ## Normas Platino, wiki y memoria
 
@@ -212,7 +213,7 @@ No son necesarias para empezar:
 ## Límites deliberados
 
 - nunca merge automático;
-- el autopilot legado conserva concurrencia serial; el pool `agent:pool` permite hasta seis workers, uno por slot y nunca dos simultáneos sobre el mismo issue;
+- la cola automática usa el pool de hasta seis workers, uno por slot y nunca dos simultáneos sobre el mismo issue; el autopilot manual conserva una ejecución concreta por invocación;
 - máximo dos replans automáticos cuando un intento sale de las rutas del CLAIM;
 - máximo 12 rutas por corte;
 - máximo dos reparaciones automáticas de CI;

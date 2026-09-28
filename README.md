@@ -25,7 +25,7 @@ Este repositorio adopta las [Normas Platino](https://github.com/EspacioKoop/norm
 
 ## Estado actual — 2026-09-28
 
-La referencia sigue siendo `main`. Este corte documenta el estado integrado hasta `366cbee398dd337c77c29625ea4a5fe3f8432044`; un PR abierto o una rama adelantada no cuentan como funcionalidad disponible hasta su merge.
+La referencia sigue siendo `main`. Este corte documenta el estado integrado hasta `b21901c5b7036d27b427e022cb4a7b3659dd95ba`; un PR abierto o una rama adelantada no cuentan como funcionalidad disponible hasta su merge.
 
 El núcleo ya no está en una fase de “port mínimo”. En los últimos cortes se han reforzado la investigación documental, la interfaz diegética de SIGA-98, las consecuencias espaciales del trabajo burocrático, la vida ambiental y la identidad visual/onírica. Aun así, **el siguiente playthrough humano completo sigue siendo el gate principal**: CI verde y evidencia automatizada no sustituyen legibilidad, tacto, ritmo ni continuidad real.
 
@@ -77,10 +77,10 @@ Siguen necesitando persona, hardware o export real, entre otros:
 
 - **Canal continuo de playtest:** `playtest-latest` mantiene una alpha identificada por SHA. F9 abre el parte de incidencias desde el juego (#1461); el envío remoto conserva copia/fallback y la cadena alojada puede usar Cloudflare → Deno → Vercel (#1524/#1531) sin incluir credenciales en la build.
 - **Observabilidad opcional:** #1556 prepara Sentry para las alphas solo cuando Actions recibe `SENTRY_DSN`. Sin DSN no cambia la build; F9 sigue siendo el canal humano independiente.
-- **Autopilot conservador:** #1542 convierte issues autorizados en PRs draft con Qwen/Gemini, con planificación antes del CLAIM, rutas acotadas, CI explícita y sin auto-merge. #1590 integra Kev como router opcional para `agent:auto`, manteniendo las selecciones explícitas y el fallback determinista.
+- **Agentes autónomos:** #1542 inicia el autopilot Qwen/Gemini y #1590 integra Kev + context packer. #1595 unifica `agent:auto`, `agent:pool`, `agent:qwen` y `agent:gemini` en el dispatcher paralelo; `agent-autopilot.yml` queda como entrada manual. Las selecciones Qwen/Gemini explícitas siguen siendo obligatorias y nunca hay auto-merge.
 - **Memoria y contexto:** #1555/#1563 añaden Normas Platino + wiki + Deno KV + CI brain; #1567 aporta selección determinista de contexto de wiki y #1590 conecta ese context packer también al autopilot antes del plan y tras el CLAIM. La autoridad sigue siendo repo/issue/#181/#182 y las Normas Platino.
 - **Resiliencia de proveedores:** #1569/#1571/#1585 permiten OmniRoute privado por Tailscale con fallback a Qwen directo y slots OpenAI-compatible; #1583 añade smoke aislado para los fallbacks sin permisos de escritura.
-- **Paralelismo seguro:** #1572 añade un pool opt-in de hasta seis workers y #1579/#1588 hacen que autopilot y pool replanifiquen hasta dos veces si el modelo intenta salir de las rutas reservadas. El pool no cambia la regla de merge humano ni sustituye #182.
+- **Paralelismo seguro:** #1572 añade un pool de hasta seis workers; #1579/#1588 replanifican hasta dos veces si el modelo sale de las rutas reservadas y #1595 convierte ese pool en la cola operativa común. La preferencia de Kev es blanda cuando no hay proveedor explícito: si el slot sugerido no está libre, puede usarse otro disponible. El pool no cambia la regla de merge humano ni sustituye #182.
 
 Esta infraestructura acelera mantenimiento y QA, pero **no cuenta como avance jugable por sí sola**. El gate del proyecto sigue siendo la partida humana completa sobre un SHA concreto de `main`.
 
