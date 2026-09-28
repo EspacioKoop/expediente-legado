@@ -463,9 +463,7 @@ static func _validar_jornada(jornada: Dictionary) -> Array:
 		if typeof(jornada[CatalogoVidaMetricas.CLAVE_ANTERIOR]) != TYPE_DICTIONARY:
 			errores.append("jornada.%s no es un objeto" % CatalogoVidaMetricas.CLAVE_ANTERIOR)
 		else:
-			for error in CatalogoVidaMetricas.validar(
-				jornada[CatalogoVidaMetricas.CLAVE_ANTERIOR]
-			):
+			for error in CatalogoVidaMetricas.validar(jornada[CatalogoVidaMetricas.CLAVE_ANTERIOR]):
 				errores.append("jornada.%s.%s" % [CatalogoVidaMetricas.CLAVE_ANTERIOR, error])
 	for clave in ["leido_hoy", "leidos_total", "mapa", "sueno_escenas", "mapa_anoche"]:
 		if jornada.has(clave) and typeof(jornada[clave]) != TYPE_ARRAY:
