@@ -49,6 +49,22 @@ class Archivado3DTest(unittest.TestCase):
         self.assertIn('_texto("destino_incorrecto")', bloque)
         self.assertIn("sigue en tu mano", self.textos["destino_incorrecto"])
 
+    def test_primer_destino_incorrecto_aplica_fallo_critico_sin_farmeo(self):
+        bloque = self.controlador.split("func _archivar_en", 1)[1].split(
+            "func _sincronizar_desorden_espacial", 1
+        )[0]
+        self.assertIn("var primer_error := not _caso_tiene_error_previo(caso_id)", bloque)
+        self.assertIn("var colocaciones_antes: int =", bloque)
+        self.assertIn("var registrada: bool =", bloque)
+        self.assertIn("if not correcta and registrada and primer_error:", bloque)
+        self.assertIn('Estres.aplicar(host.jornada, "fallo_critico")', bloque)
+        self.assertIn("func _caso_tiene_error_previo", self.controlador)
+        helper = self.controlador.split("func _caso_tiene_error_previo", 1)[1].split(
+            "func _sincronizar_desorden_espacial", 1
+        )[0]
+        self.assertIn('_estado_archivado.get("colocaciones", [])', helper)
+        self.assertIn("Archivado.destino_de(caso_previo)", helper)
+
     def test_estado_se_persiste_en_jornada_y_se_rehidrata(self):
         self.assertIn('const CLAVE_JORNADA := "archivado_bandeja"', self.controlador)
         self.assertIn("ArchivadoBandeja.serializar", self.controlador)

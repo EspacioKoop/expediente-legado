@@ -16,6 +16,7 @@ INDICADOR = ROOT / "godot" / "guion" / "estres_hud_indicador.gd"
 ENTORNO = ROOT / "godot" / "guion" / "estres_ambiental.gd"
 AVIONES = ROOT / "godot" / "guion" / "aviones_papel_descanso.gd"
 GATO = ROOT / "godot" / "guion" / "dia_gato_app.gd"
+ARCHIVADO = ROOT / "godot" / "guion" / "dia_archivado_app.gd"
 SMOKE = "pruebas/issue_952_smoke.gd"
 
 
@@ -31,6 +32,7 @@ class Estres952Test(unittest.TestCase):
         cls.entorno = ENTORNO.read_text(encoding="utf-8")
         cls.aviones = AVIONES.read_text(encoding="utf-8")
         cls.gato = GATO.read_text(encoding="utf-8")
+        cls.archivado = ARCHIVADO.read_text(encoding="utf-8")
 
     def test_estado_interno_y_acotado_vive_en_jornada(self):
         self.assertIn('const CAMPO_JORNADA := "estres_dinamico"', self.estres)
@@ -126,6 +128,14 @@ class Estres952Test(unittest.TestCase):
         self.assertLess(bloque.index(completar), bloque.index(resolucion))
         self.assertLess(bloque.index(resolucion), bloque.index("_tras_cambio_objetivo"))
         self.assertIn("if not " + completar + ":", bloque)
+
+    def test_archivado_incorrecto_es_productor_real_de_fallo_critico(self):
+        bloque = self.archivado.split("func _archivar_en", 1)[1].split(
+            "func _sincronizar_desorden_espacial", 1
+        )[0]
+        self.assertIn('Estres.aplicar(host.jornada, "fallo_critico")', bloque)
+        self.assertIn("if not correcta and registrada and primer_error:", bloque)
+        self.assertIn("func _caso_tiene_error_previo", self.archivado)
 
     def test_smoke_godot(self):
         motor = os.environ.get("GODOT_BIN", "godot4")

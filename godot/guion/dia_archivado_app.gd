@@ -206,7 +206,13 @@ func _archivar_en(actor: Node, host, archivador: ArchivadorInteractivo3D) -> voi
 	if _carpeta_archivado.get_parent() != actor.get_node_or_null("Camara"):
 		return
 	var destino := String(archivador.get_meta("destino_archivado", ""))
+	var caso_id := String(_carpeta_archivado.caso.get("id", ""))
+	var primer_error := not _caso_tiene_error_previo(caso_id)
+	var colocaciones_antes: int = _estado_archivado.get("colocaciones", []).size()
 	var correcta := ArchivadoBandeja.colocar(_estado_archivado, _carpeta_archivado.caso, destino)
+	var registrada: bool = _estado_archivado.get("colocaciones", []).size() > colocaciones_antes
+	if not correcta and registrada and primer_error:
+		Estres.aplicar(host.jornada, "fallo_critico")
 	_persistir(host)
 	_sincronizar_desorden_espacial(host)
 	_guardar(host)
@@ -222,6 +228,21 @@ func _archivar_en(actor: Node, host, archivador: ArchivadorInteractivo3D) -> voi
 	_carpeta_archivado.queue_free()
 	_carpeta_archivado = null
 	refrescar(host)
+
+
+func _caso_tiene_error_previo(caso_id: String) -> bool:
+	if caso_id.is_empty():
+		return false
+	for colocacion in _estado_archivado.get("colocaciones", []):
+		if typeof(colocacion) != TYPE_DICTIONARY:
+			continue
+		var caso_previo: Dictionary = colocacion.get("caso", {})
+		if String(caso_previo.get("id", "")) != caso_id:
+			continue
+		var destino_previo := String(colocacion.get("destino", ""))
+		if not destino_previo.is_empty() and destino_previo != Archivado.destino_de(caso_previo):
+			return true
+	return false
 
 
 func _sincronizar_desorden_espacial(host) -> void:
