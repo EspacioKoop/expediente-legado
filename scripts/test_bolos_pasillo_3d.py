@@ -35,6 +35,20 @@ class BolosPasillo3DTest(unittest.TestCase):
         self.assertNotIn("RigidBody3D.new(", self.source)
         self.assertNotIn("extends RigidBody3D", self.source)
 
+    def test_feedback_de_tiro_es_visual_y_no_cambia_input(self):
+        self.assertIn("func _montar_feedback_tiro()", self.source)
+        self.assertIn('name = "GuiaApuntado"', self.source)
+        self.assertIn("ProgressBar.new()", self.source)
+        self.assertIn('accessibility_name = "Potencia de lanzamiento"', self.source)
+        self.assertIn("func _refrescar_feedback()", self.source)
+        self.assertIn("Bolos.LANZAMIENTOS_POR_TURNO", self.source)
+        bloque = self.source.split("func _refrescar_feedback", 1)[1].split(
+            "\n\nfunc ", 1
+        )[0]
+        self.assertNotIn("InputMap.", bloque)
+        self.assertNotIn("Bolos.derribar", bloque)
+        self.assertNotIn("Partida", bloque)
+
     def test_pista_tiene_diez_bolos_y_simulacion_acotada(self):
         bloque = re.search(
             r"const POSICIONES_BOLOS := \[(.*?)\n\]",
