@@ -41,7 +41,10 @@ jobs:
           gh issue list --repo "$GITHUB_REPOSITORY" --state open             --label agent:pr-open --limit 100 --json number,labels,updatedAt             > /tmp/issues-pr.json
           jq -s 'add | unique_by(.number)'             /tmp/issues-working.json /tmp/issues-pr.json > /tmp/issues.json
 
-          gh issue view 182 --repo "$GITHUB_REPOSITORY" --json comments             --jq '[.comments[-300:][]? | {body:.body}]' > /tmp/comments.json
+          # #182 completo con id y fecha: la capa única (#1662) aplica lease y
+          # PR_READY; una ventana de 300 comentarios perdía CLAIM antiguos (#1630).
+          gh api --paginate "repos/$GITHUB_REPOSITORY/issues/182/comments?per_page=100" \
+            --jq '.[]|{id,created_at,body}' | jq -s '.' > /tmp/comments.json
           gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 100             --json number,state,headRefName,title,body > /tmp/prs.json
 
           python3 scripts/agent_reconciler.py discover             --issues /tmp/issues.json             --comments /tmp/comments.json             --output /tmp/discovery.json >/dev/null

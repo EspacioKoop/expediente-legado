@@ -10,14 +10,8 @@ from pathlib import Path
 import re
 from typing import Any
 
-CLAIM_RE = re.compile(
-    r"^CLAIM\s+issue=#(?P<issue>\d+).*?\bbranch=(?P<branch>[^\s]+).*?\bfiles=(?P<files>[^\s]+)",
-    re.MULTILINE,
-)
-RELEASE_RE = re.compile(
-    r"^RELEASE\s+issue=#(?P<issue>\d+)(?:.*?\bbranch=(?P<branch>[^\s]+))?",
-    re.MULTILINE,
-)
+import reservas_registro
+
 RUN_ID_RE = re.compile(r"-(?P<run>\d+)$")
 TERMINAL_CONCLUSIONS = {
     "cancelled", "failure", "timed_out", "action_required",
@@ -47,32 +41,24 @@ def _parse_time(value: Any) -> datetime | None:
         return None
 
 
-def active_claims(comments: list[dict[str, Any]]) -> dict[int, dict[str, str]]:
-    active: dict[tuple[int, str], dict[str, str]] = {}
-    for comment in comments:
-        body = comment.get("body", "") if isinstance(comment, dict) else ""
-        if not isinstance(body, str):
-            continue
-        for match in RELEASE_RE.finditer(body):
-            issue = int(match.group("issue"))
-            branch = match.group("branch")
-            for key in list(active):
-                if key[0] == issue and (not branch or key[1] == branch):
-                    del active[key]
-        for match in CLAIM_RE.finditer(body):
-            issue = int(match.group("issue"))
-            branch = match.group("branch")
-            active[(issue, branch)] = {
-                "issue": str(issue),
-                "branch": branch,
-                "files": match.group("files"),
-            }
+def active_claims(
+    comments: list[dict[str, Any]], now: datetime | None = None
+) -> dict[int, dict[str, str]]:
+    """Reserva vigente más reciente por issue, leída con la capa única de #182 (#1662).
 
+    Antes tenía su propio parser sobre los últimos 300 comentarios: sin lease
+    y ciego a CLAIM más antiguos, reencolaba issues con PR abierta (#1630).
+    """
+
+    ahora = now or datetime.now(timezone.utc)
     latest: dict[int, dict[str, str]] = {}
-    for (issue, _branch), claim in active.items():
-        latest[issue] = claim
+    for vigente in reservas_registro.vigentes(comments, ahora):
+        latest[vigente.reserva.issue] = {
+            "issue": str(vigente.reserva.issue),
+            "branch": vigente.reserva.branch,
+            "files": vigente.reserva.files,
+        }
     return latest
-
 
 def _run_id(branch: str | None) -> int | None:
     if not branch or not branch.startswith("agent/"):
@@ -84,8 +70,9 @@ def _run_id(branch: str | None) -> int | None:
 def discover_run_ids(
     issues: list[dict[str, Any]],
     comments: list[dict[str, Any]],
+    now: datetime | None = None,
 ) -> list[int]:
-    claims = active_claims(comments)
+    claims = active_claims(comments, now)
     result: set[int] = set()
     for issue in issues:
         try:
@@ -112,7 +99,7 @@ def reconcile(
     now: datetime,
     ttl_minutes: int = 90,
 ) -> list[dict[str, Any]]:
-    claims = active_claims(comments)
+    claims = active_claims(comments, now)
     run_map = {
         int(run["id"]): run
         for run in runs
@@ -269,14 +256,14 @@ def main() -> int:
     issues = _read_list(args.issues)
     comments = _read_list(args.comments)
 
+    now = _parse_time(args.now) if args.now else datetime.now(timezone.utc)
+    if now is None:
+        raise SystemExit("--now inválido")
     if args.mode == "discover":
-        result: Any = {"run_ids": discover_run_ids(issues, comments)}
+        result: Any = {"run_ids": discover_run_ids(issues, comments, now)}
     else:
         if not args.prs or not args.runs:
             raise SystemExit("reconcile requiere --prs y --runs")
-        now = _parse_time(args.now) if args.now else datetime.now(timezone.utc)
-        if now is None:
-            raise SystemExit("--now inválido")
         result = {
             "actions": reconcile(
                 issues,
