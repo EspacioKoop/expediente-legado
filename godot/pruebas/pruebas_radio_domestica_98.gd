@@ -84,20 +84,20 @@ func _probar_preflight_audio() -> void:
 		return
 
 	var inicial := audio.stream as AudioStreamWAV
-	var hash_radio := inicial.data.hash()
+	var hash_radio := hash(inicial.data)
 	var pico_radio := _pico_pcm(inicial)
 	_comprobar(pico_radio > 0.005, "la cama de radio no es silencio accidental")
 	_comprobar(pico_radio < 0.10, "la cama de radio conserva headroom amplio antes de ganancia/bus")
 
 	radio.cambiar_emisora()
 	var otra_emisora := audio.stream as AudioStreamWAV
-	_comprobar(otra_emisora.data.hash() != hash_radio, "cambiar emisora cambia la textura audible")
+	_comprobar(hash(otra_emisora.data) != hash_radio, "cambiar emisora cambia la textura audible")
 	_comprobar(_pico_pcm(otra_emisora) < 0.10, "otra emisora conserva el mismo límite de headroom")
 
 	radio.alternar_cassette()
 	var cassette := audio.stream as AudioStreamWAV
 	_comprobar(
-		cassette.data.hash() != otra_emisora.data.hash(),
+		hash(cassette.data) != hash(otra_emisora.data),
 		"cassette y radio no comparten la misma textura"
 	)
 	_comprobar(_pico_pcm(cassette) < 0.10, "la cama de cassette conserva headroom amplio")
