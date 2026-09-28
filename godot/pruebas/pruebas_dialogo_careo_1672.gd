@@ -121,7 +121,7 @@ func _probar_persistencia() -> void:
 
 func _limpiar() -> void:
 	for sufijo in ["", ".nuevo", ".roto"]:
-		var ruta := RUTA + sufijo
+		var ruta: String = RUTA + sufijo
 		if FileAccess.file_exists(ruta):
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(ruta))
 
