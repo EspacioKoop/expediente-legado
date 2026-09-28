@@ -39,7 +39,7 @@ class CreditosInicioCinematicaTest(unittest.TestCase):
         self.assertIn("const ENTRADAS_POR_PLANO := 4", self.creditos)
         self.assertIn('entrada.get("nombre", "")', self.creditos)
         self.assertIn('entrada.get("licencia", "")', self.creditos)
-        self.assertIn('paginas.append("  ·  ".join(actual))', self.creditos)
+        self.assertIn('paginas.append("  ·  ".join(PackedStringArray(actual)))', self.creditos)
 
     def test_inicio_reproduce_una_sola_vez_por_sesion(self) -> None:
         self.assertIn("static var _apertura_creditos_mostrada := false", self.inicio)
