@@ -6,8 +6,9 @@
     "lineWidth": 100
   },
   "tasks": {
-    "check": "deno check main.ts",
-    "start": "deno run --unstable-kv --allow-env=GITHUB_TOKEN,GITHUB_REPOSITORY,GITHUB_LABELS --allow-net=0.0.0.0:8000,api.github.com,token.actions.githubusercontent.com --allow-read --allow-write main.ts"
+    "check": "deno check main.ts agent_memory_test.ts",
+    "start": "deno run --unstable-kv --allow-env=GITHUB_TOKEN,GITHUB_REPOSITORY,GITHUB_LABELS,AGENT_MEMORY_NIVEL2_TOKEN --allow-net=0.0.0.0:8000,api.github.com,token.actions.githubusercontent.com --allow-read --allow-write main.ts",
+    "test": "deno test --unstable-kv agent_memory_test.ts"
   },
   "deploy": {
     "org": "expediente-legado",
