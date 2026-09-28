@@ -59,6 +59,13 @@ func abandonar(host, guardar: bool = true) -> Dictionary:
 	return resumen
 
 
+func desorden_total() -> int:
+	var total := 0
+	for cantidad in ArchivadoBandeja.desorden_por_destino(_estado_archivado).values():
+		total += int(cantidad)
+	return total
+
+
 func _casos_clasificables(host, folios_leidos: Array) -> Array:
 	var casos := []
 	for caso in host.contenido.casos:
