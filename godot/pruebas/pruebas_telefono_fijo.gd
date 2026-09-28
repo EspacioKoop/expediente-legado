@@ -134,9 +134,13 @@ func _probar() -> void:
 	_comprobar(cerrar != null, "cerrar existe como destino de foco")
 	if descolgar != null:
 		_comprobar(not descolgar.focus_next.is_empty(), "descolgar tiene foco siguiente explícito")
-		_comprobar(not descolgar.focus_previous.is_empty(), "descolgar tiene foco anterior explícito")
+		_comprobar(
+			not descolgar.focus_previous.is_empty(), "descolgar tiene foco anterior explícito"
+		)
 	if contestador != null:
-		_comprobar(not contestador.focus_next.is_empty(), "contestador tiene foco siguiente explícito")
+		_comprobar(
+			not contestador.focus_next.is_empty(), "contestador tiene foco siguiente explícito"
+		)
 	if cerrar != null:
 		_comprobar(not cerrar.focus_next.is_empty(), "cerrar cierra el ciclo de foco")
 	panel.queue_free()
