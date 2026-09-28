@@ -72,6 +72,24 @@ def _payloads(body: str) -> Iterator[dict[str, Any]]:
         elif stripped.startswith("~~~"):
             fence_token = "~~~"
 
+        if collecting:
+            if stripped == END:
+                payload = "\n".join(buffer).strip()
+                collecting = False
+                buffer = []
+                try:
+                    parsed = json.loads(payload)
+                except (json.JSONDecodeError, TypeError):
+                    continue
+                valid = _valid_plan(parsed)
+                if valid is not None:
+                    yield valid
+                continue
+            if fence_token:
+                continue
+            buffer.append(raw_line)
+            continue
+
         if fence_token:
             if not in_fence:
                 in_fence = True
@@ -88,22 +106,6 @@ def _payloads(body: str) -> Iterator[dict[str, Any]]:
             collecting = True
             buffer = []
             continue
-
-        if collecting and stripped == END:
-            payload = "\n".join(buffer).strip()
-            collecting = False
-            buffer = []
-            try:
-                parsed = json.loads(payload)
-            except (json.JSONDecodeError, TypeError):
-                continue
-            valid = _valid_plan(parsed)
-            if valid is not None:
-                yield valid
-            continue
-
-        if collecting:
-            buffer.append(raw_line)
 
 
 def select_delegated_plan(issue: dict[str, Any]) -> dict[str, Any] | None:
