@@ -17,9 +17,14 @@ jobs:
     if: github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.head_branch, 'agent/')
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       issues: write
       pull-requests: read
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
       - name: Registrar PR_READY
         env:
           GH_TOKEN: ${{ github.token }}
@@ -156,14 +161,15 @@ jobs:
           BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
           set -euo pipefail
-          python3 scripts/gestionar_reservas_rollover.py --comments-output /tmp/reservas.json
-          # Capa única de lectura de #182 (#1662): respeta lease y PR_READY. Se toma
-          # de main, no de la rama reparada, que puede ser anterior a la capa.
-          mkdir -p /tmp/capa182
+          # La rama reparada puede ser anterior al rollover. Recuperar siempre la
+          # capa de reservas desde main antes de consultar #182 + registro activo.
+          mkdir -p /tmp/capa182 /tmp/.github
           git fetch --quiet --depth 1 origin main
-          for modulo in reservas_registro.py gestionar_reservas.py; do
+          for modulo in reservas_registro.py gestionar_reservas.py gestionar_reservas_rollover.py; do
             git show "FETCH_HEAD:scripts/$modulo" > "/tmp/capa182/$modulo"
           done
+          git show "FETCH_HEAD:.github/reservas-registro.json" > /tmp/.github/reservas-registro.json
+          python3 /tmp/capa182/gestionar_reservas_rollover.py --comments-output /tmp/reservas.json
           python3 /tmp/capa182/reservas_registro.py rutas \
             --comments /tmp/reservas.json --branch "$BRANCH" > /tmp/reserva.json
           if [[ "$(jq -r '.found' /tmp/reserva.json)" != true ]]; then
