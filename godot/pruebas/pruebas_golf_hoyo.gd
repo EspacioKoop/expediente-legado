@@ -87,6 +87,10 @@ func _probar_partida_tres_hoyos() -> void:
 	)
 	_comprobar(partida.hoyo_actual.numero_hoyo == 1, "la partida abre el hoyo uno")
 	_comprobar(
+		partida.estado.get("jugadores", []) == GolfPartidaApp.LANZADORES,
+		"la partida incluye jugador y tres perfiles de compañeros",
+	)
+	_comprobar(
 		not partida.hoyo_actual.obstaculos.is_empty(), "el hoyo jugable monta obstáculos simples"
 	)
 
@@ -94,6 +98,18 @@ func _probar_partida_tres_hoyos() -> void:
 	await process_frame
 	_comprobar(int(partida.estado.get("hoyo", -1)) == 1, "completar uno avanza al segundo")
 	_comprobar(partida.hoyo_actual.numero_hoyo == 2, "el segundo hoyo reemplaza al primero")
+	_comprobar(
+		partida.estado["tarjetas"]["prudente"] == [4],
+		"el perfil prudente termina su turno con plan conservador",
+	)
+	_comprobar(
+		partida.estado["tarjetas"]["agresiva"] == [3],
+		"el perfil agresivo arriesga menos golpes en el primer hoyo",
+	)
+	_comprobar(
+		partida.estado["tarjetas"]["absurda"] == [7],
+		"el perfil absurdo conserva un plan propio y finito",
+	)
 
 	partida._al_completar_hoyo(2)
 	await process_frame
@@ -104,9 +120,14 @@ func _probar_partida_tres_hoyos() -> void:
 	await process_frame
 	_comprobar(bool(partida.estado.get("terminada", false)), "el tercer hoyo termina la partida")
 	_comprobar(bool(partida.resultado_final.get("completa", false)), "el resultado queda completo")
+	var totales: Dictionary = partida.resultado_final.get("totales", {})
+	_comprobar(int(totales.get("jugador", 0)) == 6, "la tarjeta suma los golpes del jugador")
+	_comprobar(int(totales.get("prudente", 0)) == 12, "prudente completa los tres hoyos")
+	_comprobar(int(totales.get("agresiva", 0)) == 11, "agresiva completa los tres hoyos")
+	_comprobar(int(totales.get("absurda", 0)) == 21, "absurda completa los tres hoyos")
 	_comprobar(
-		int(partida.resultado_final.get("totales", {}).get("jugador", 0)) == 6,
-		"la tarjeta suma los golpes de los tres hoyos",
+		partida.resultado_final.get("ranking", []).size() == 4,
+		"el resultado final ordena las cuatro tarjetas",
 	)
 	_comprobar(partida.hoyo_actual == null, "al terminar no queda otro hoyo activo")
 
