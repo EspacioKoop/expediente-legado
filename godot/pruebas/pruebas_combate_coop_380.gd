@@ -7,8 +7,11 @@ const CombateCoopDatos = preload("res://guion/red/combate_coop_datos.gd")
 const CombateCoopServicio = preload("res://guion/red/combate_coop_servicio.gd")
 const TransporteFixture = preload("res://guion/red/transporte_fixture.gd")
 const TransporteNulo = preload("res://guion/red/transporte_nulo.gd")
+const IdentidadOnline = preload("res://guion/red/identidad_online.gd")
+const VentanillaCoopAcceso = preload("res://guion/ventanilla_coop_acceso.gd")
 
 const AHORA := 2_100_000_000
+const RUTA_IDENTIDAD := "user://prueba-ventanilla-coop-380.json"
 
 var pasadas := 0
 var fallos := 0
@@ -20,6 +23,7 @@ func _init() -> void:
 	_probar_desconexion_reintento()
 	_probar_suplencia_desconectado()
 	_probar_offline_y_partida_intacta()
+	_probar_superficie_opt_in()
 	print("\n%d pasadas, %d fallos" % [pasadas, fallos])
 	quit(1 if fallos > 0 else 0)
 
@@ -191,6 +195,29 @@ func _probar_offline_y_partida_intacta() -> void:
 	)
 	offline.cerrar()
 	_comprobar("Partida queda byte a byte igual", JSON.stringify(partida), antes)
+
+
+func _probar_superficie_opt_in() -> void:
+	if FileAccess.file_exists(RUTA_IDENTIDAD):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(RUTA_IDENTIDAD))
+	var identidad := IdentidadOnline.new(RUTA_IDENTIDAD)
+	_comprobar("identidad coop empieza desactivada", identidad.cargar()["status"], "disabled")
+	_comprobar("opt-in crea pseudónimo local", identidad.habilitar()["ok"], true)
+
+	var panel := VentanillaCoopAcceso.new()
+	panel.configurar_prueba(RUTA_IDENTIDAD, TransporteFixture.new())
+	root.add_child(panel)
+	_comprobar("montar panel no abre sala", panel.get("_servicio") == null, true)
+	var sala := panel.get_node("FilaSalaCoop/SalaCoop") as LineEdit
+	sala.text = "SALA-UI-380"
+	panel.call("_entrar_sala")
+	_comprobar("entrada explícita abre sala", panel.get("_servicio") != null, true)
+	_comprobar("sala queda bloqueada mientras está activa", sala.editable, false)
+	panel.call("_cerrar_sala")
+	_comprobar("cerrar sala libera el servicio", panel.get("_servicio") == null, true)
+	_comprobar("cerrar sala no desactiva identidad", identidad.cargar()["status"], "enabled")
+	panel.free()
+	identidad.deshabilitar()
 
 
 func _comprobar(nombre: String, obtenido: Variant, esperado: Variant) -> void:
