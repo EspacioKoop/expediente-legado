@@ -249,11 +249,65 @@ func _conversar_con_dependiente(
 	var clima := String(jornada.get("clima_forzado", ""))
 	if clima.is_empty():
 		clima = Clima.estado(int(jornada.get("dia", 1)))
+	var id_dependiente := String(charla.get_meta("dependiente", ""))
 	# Quien te da conversación de día vuelve de noche (EcosSueno).
-	EcosSueno.registrar(jornada, String(charla.get_meta("dependiente", "")))
+	EcosSueno.registrar(jornada, id_dependiente)
+
+	# #1672: la primera charla de una visita puede ramificarse. El recuerdo vive
+	# en Jornada y, al volver a entrar al trayecto, produce una secuela breve.
+	if (
+		int(charla.get_meta("charlas", 0)) == 0
+		and DialogoDependientesContextual.tiene_ramas(id_dependiente)
+	):
+		var clave_reentrada := DialogoDependientesContextual.reentrada(jornada, id_dependiente)
+		if not clave_reentrada.is_empty():
+			charla.set_meta("charlas", 1)
+			_iniciar_conversacion(charla, actor, clave_reentrada)
+			return
+
+		var dependiente := DependientesTiendas.de(id_dependiente)
+		var modelo_opciones := DialogoDependientesContextual.opciones(
+			dependiente, jornada, clima
+		)
+		var opciones := []
+		for opcion_bruta in modelo_opciones:
+			if typeof(opcion_bruta) != TYPE_DICTIONARY:
+				continue
+			var opcion: Dictionary = opcion_bruta
+			opciones.append(
+				{
+					"id": String(opcion.get("id", "")),
+					"texto": tr(String(opcion.get("texto", ""))),
+				}
+			)
+		if opciones.size() >= 2:
+			var apertura := DependientesTiendas3D.siguiente_frase(charla, jornada, clima)
+			_dialogo_actual = (
+				DialogoDiegetico
+				. mostrar_eleccion(
+					_hud_prioridades,
+					_caminante,
+					charla,
+					tr(apertura),
+					opciones,
+					_resolver_eleccion_dependiente.bind(id_dependiente),
+				)
+			)
+			_enfocar_dialogo_actual(charla)
+			return
+
 	_iniciar_conversacion(
 		charla, actor, DependientesTiendas3D.siguiente_frase(charla, jornada, clima)
 	)
+
+
+func _resolver_eleccion_dependiente(id_rama: String, id_dependiente: String) -> String:
+	var resultado := DialogoDependientesContextual.registrar(jornada, id_dependiente, id_rama)
+	if not bool(resultado.get("valida", false)):
+		return ""
+	if bool(resultado.get("nueva", false)):
+		_guardar_o_avisar("")
+	return tr(String(resultado.get("respuesta", "")))
 
 
 ## El eco del día en la sala del sueño. Su frase es fija en la sala, así que
