@@ -287,11 +287,14 @@ func importar_estado(estado: Dictionary) -> void:
 
 func _reiniciar_objetos_limpiador() -> void:
 	_objetos_limpiador.clear()
-	_objetos_limpiador.append(
-		{
-			"id": "residente-cinta-azul-demo",
-			"firma_id": "residente-cinta-azul",
-			"activo": true,
-			"neutralizado": false,
-		}
+	(
+		_objetos_limpiador
+		. append(
+			{
+				"id": "residente-cinta-azul-demo",
+				"firma_id": "residente-cinta-azul",
+				"activo": true,
+				"neutralizado": false,
+			}
+		)
 	)
