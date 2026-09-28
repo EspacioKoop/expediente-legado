@@ -827,7 +827,7 @@ jobs:
                 detalle=""
               fi
               gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-                "Agent pool reencolado tras fallo de planificación en `$WORKER`; el siguiente dispatcher evitará ese worker para este issue.$detalle" || true
+                "Agent pool reencolado tras fallo de planificación en $WORKER; el siguiente dispatcher evitará ese worker para este issue.$detalle" || true
             fi
             exit 0
           fi
