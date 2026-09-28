@@ -62,14 +62,19 @@ El servidor oficial de Kev documenta `POST /v1/systemone`, `kev-latest` y
 autenticación Bearer opcional mediante `KEV_API_KEY`:
 https://github.com/jaredpalmer/kev
 
-## Integración con GitHub Actions
+## Estado de integración con GitHub Actions
 
-El enganche directo en `.github/workflows/agent-autopilot.yml` se deja para el
-siguiente corte porque #1559 mantiene una reserva activa sobre ese archivo.
+En el corte actual de `main`, `scripts/kev_router.py` sigue disponible y probado como
+componente standalone. El autopilot legado aún no depende de Kev y el pool paralelo
+asigna slots/proveedores de forma determinista.
 
-Cuando quede libre, el paso de selección puede construir un estado compacto a partir
-del issue y ejecutar el router antes del fallback actual. No debe entregarse a Kev el
-`GITHUB_TOKEN`, secretos de proveedores, logs completos ni memoria sin filtrar.
+Una integración posterior puede construir un estado compacto a partir del issue y
+consultar Kev antes del fallback normal, siempre con estas condiciones:
+
+- etiquetas explícitas y selección manual conservan prioridad;
+- ausencia, timeout, baja confianza o respuesta inválida de Kev no bloquean el worker;
+- Kev no recibe `GITHUB_TOKEN`, secretos de proveedores, logs completos ni memoria sin filtrar;
+- el comportamiento sin `KEV_BASE_URL` debe seguir siendo determinista.
 
 Configuración prevista:
 
@@ -78,8 +83,8 @@ Configuración prevista:
 - repository variable opcional `KEV_ROUTER_MIN_CONFIDENCE`;
 - Actions secret `KEV_API_KEY` únicamente si el endpoint lo exige.
 
-La ausencia de todas estas variables debe equivaler exactamente al comportamiento
-actual del autopilot.
+No se documenta una PR abierta como funcionalidad integrada: hasta que el cambio llegue
+a `main`, este fichero describe solo el contrato standalone.
 
 ## Validación
 
