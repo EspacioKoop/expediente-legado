@@ -79,6 +79,12 @@ func _cerrar(
 		if not gano:
 			Auditorias.resolver_fin_sueno(partida_estado, false)
 		resultado = SuenoCombate.resolver(partida_estado, jornada, objetivo, gano)
+		if bool(resultado.get("gano", false)) and is_instance_valid(zona):
+			if zona.has_meta("cuerpo"):
+				var cuerpo = zona.get_meta("cuerpo")
+				if is_instance_valid(cuerpo):
+					cuerpo.queue_free()
+			zona.queue_free()
 
 	var combate := _combate
 	_combate = null
