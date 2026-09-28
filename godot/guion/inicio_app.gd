@@ -13,8 +13,6 @@ const COLOR_TEXTO := Color(0.92, 0.93, 0.90)
 const COLOR_TEXTO_DESACTIVADO := Color(0.55, 0.56, 0.53)
 const COLOR_CONTORNO := Color(0.0, 0.0, 0.0, 0.85)
 
-static var _apertura_creditos_mostrada := false
-
 ## Deriva de encuadre del diorama por cada acción del menú (`InicioDiorama3D.ZONAS`).
 const ZONAS_POR_BOTON := {
 	"_continuar": "continuar",
@@ -27,6 +25,8 @@ const ZONAS_POR_BOTON := {
 	"_ajustes": "opciones",
 	"_salir": "salir",
 }
+
+static var _apertura_creditos_mostrada := false
 
 var ruta := Partida.RUTA
 var partida := Partida.new()
