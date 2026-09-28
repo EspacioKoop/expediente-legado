@@ -130,7 +130,9 @@ func _montar_prototipo() -> void:
 
 func _montar_escritorio(capa: Node3D) -> void:
 	_crear_caja(capa, "Mesa", Vector3(12.0, 0.35, 8.0), Vector3(0.0, -0.20, 0.0), COLOR_SUELO)
-	var pluma := _crear_caja(capa, "Pluma", Vector3(3.8, 0.10, 0.36), Vector3(0.0, 0.18, 0.2), COLOR_PLUMA)
+	var pluma := _crear_caja(
+		capa, "Pluma", Vector3(3.8, 0.10, 0.36), Vector3(0.0, 0.18, 0.2), COLOR_PLUMA
+	)
 	pluma.set_meta("ancla_equivalencia", ANCLA_PLUMA)
 	_crear_punto_cambio(
 		capa,
@@ -150,7 +152,9 @@ func _montar_escritorio(capa: Node3D) -> void:
 			Vector3(-3.2 + i * 2.1, 0.70, -2.0),
 			COLOR_ARCHIVO,
 		)
-	var lampara := _crear_caja(capa, "Lampara", Vector3(2.4, 0.22, 2.4), Vector3(3.7, 3.2, -1.8), COLOR_LUZ)
+	var lampara := _crear_caja(
+		capa, "Lampara", Vector3(2.4, 0.22, 2.4), Vector3(3.7, 3.2, -1.8), COLOR_LUZ
+	)
 	lampara.set_meta("ancla_equivalencia", ANCLA_LAMPARA)
 	_crear_caja(capa, "Retorno", Vector3(1.4, 0.12, 1.4), Vector3(-4.7, 0.10, 2.8), COLOR_RETORNO)
 
