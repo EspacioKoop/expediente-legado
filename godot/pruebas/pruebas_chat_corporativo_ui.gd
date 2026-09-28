@@ -24,10 +24,7 @@ func _probar() -> void:
 			senales["mensaje"] = mensaje_id
 			senales["opcion"] = opcion_id
 	)
-	chat.enlace_abierto.connect(
-		func(recurso_id: String):
-			senales["enlace"] = recurso_id
-	)
+	chat.enlace_abierto.connect(func(recurso_id: String): senales["enlace"] = recurso_id)
 	chat.configurar_contexto(_contexto(1, Jornada.ACCIONES_POR_DIA - 1))
 	get_root().add_child(chat)
 	await process_frame
@@ -46,7 +43,9 @@ func _probar() -> void:
 		detalle != null and detalle.selection_enabled, "el texto del mensaje se puede seleccionar"
 	)
 	_comprobar(canales.focus_mode == Control.FOCUS_ALL, "los canales aceptan foco de teclado/mando")
-	_comprobar(mensajes.focus_mode == Control.FOCUS_ALL, "los mensajes aceptan foco de teclado/mando")
+	_comprobar(
+		mensajes.focus_mode == Control.FOCUS_ALL, "los mensajes aceptan foco de teclado/mando"
+	)
 	_comprobar(not _contiene_entrada_libre(chat), "el primer corte no ofrece chat de texto libre")
 
 	var indice_planta := _indice_por_id(canales, "planta4")
@@ -76,7 +75,9 @@ func _probar() -> void:
 	_comprobar(guardadas.has("cunado-cafe"), "la elección queda en estado local exportable")
 	_comprobar(senales["mensaje"] == "cunado-cafe", "la UI emite el mensaje respondido")
 	_comprobar(not String(senales["opcion"]).is_empty(), "la UI emite una opción catalogada")
-	_comprobar(_botones(respuestas).is_empty(), "una respuesta persistida no puede enviarse dos veces")
+	_comprobar(
+		_botones(respuestas).is_empty(), "una respuesta persistida no puede enviarse dos veces"
+	)
 
 	chat.configurar_contexto(_contexto(1, Jornada.ACCIONES_POR_DIA - 2))
 	await process_frame
