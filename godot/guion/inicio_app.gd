@@ -260,7 +260,7 @@ func _crear_boton(texto: String, accion: Callable) -> Button:
 	boton.size_flags_horizontal = Control.SIZE_SHRINK_END
 	boton.focus_mode = Control.FOCUS_ALL
 	boton.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	boton.flat = true
+	boton.flat = false
 	_aplicar_contraste(boton)
 	boton.add_theme_color_override("font_disabled_color", COLOR_TEXTO_DESACTIVADO)
 	boton.add_theme_color_override("font_hover_color", EstiloJuego.ACENTO)
