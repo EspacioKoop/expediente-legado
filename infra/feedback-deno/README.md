@@ -120,6 +120,12 @@ desplegar con `--prod` y compara el `/health` de producción con el de
 se produjo el 404 de `/api/agent-memory/search` de #1606, con producción aún en
 `version: 1` y el repo ya en `version: 2`.
 
+## Freshness de producción
+
+`.github/workflows/feedback-deno-production-smoke.yml` compara periódicamente el `/health` desplegado con el contrato declarado por `main.ts`. Extrae la versión y las features `agent_*=true` directamente del source, por lo que no hay que mantener otro número de versión en YAML.
+
+El smoke corre tras cambios del gateway integrados en `main`, cada seis horas y por `workflow_dispatch`. No corre en pull requests: una PR que sube la versión no debe fallar solo porque producción todavía sirve la versión anterior antes del merge. Tras integrar el cambio, el check falla hasta que se haga `deno deploy --prod`, dejando visible la deriva que antes aparecía como 404 silencioso en los agentes.
+
 ## Healthcheck
 
 ```bash
