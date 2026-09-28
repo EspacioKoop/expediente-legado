@@ -92,6 +92,21 @@ func _probar() -> void:
 		"liquidez y dependencia altas conservan su contradicción narrativa",
 	)
 
+	var estado_v3 := estado_v2.duplicate(true)
+	estado_v3["evaluaciones_desempeno"][0]["version_evaluacion"] = 3
+	estado_v3["evaluaciones_desempeno"][0]["evaluacion"]["actividad_improductiva"] = (
+		EvaluacionDesempeno.MEDIA
+	)
+	var planos_v3 := EvaluacionDesempenoCinematica.planos_de(estado_v3)
+	var figura_v3: Array = planos_v3[0].get("figura", [])
+	_comprobar(figura_v3.size() == 17, "un informe v3 dibuja siete barras independientes")
+	var ultima_barra: Dictionary = figura_v3[figura_v3.size() - 1]
+	var ultimo_rect: Rect2 = ultima_barra.get("rect", Rect2())
+	_comprobar(
+		ultimo_rect.end.y <= 84.0,
+		"la séptima barra permanece dentro de la hoja del informe",
+	)
+
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 

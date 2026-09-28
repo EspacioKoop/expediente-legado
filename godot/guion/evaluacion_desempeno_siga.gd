@@ -13,6 +13,7 @@ const CATEGORIAS := [
 	{"id": "liquidez", "texto": "EVALUACION_CATEGORIA_LIQUIDEZ"},
 	{"id": "exploracion_onirica", "texto": "EVALUACION_CATEGORIA_SUENO"},
 	{"id": "dependencia_dinero", "texto": "EVALUACION_CATEGORIA_DEPENDENCIA_DINERO"},
+	{"id": "actividad_improductiva", "texto": "EVALUACION_CATEGORIA_ACTIVIDAD_IMPRODUCTIVA"},
 ]
 
 var _estado: Dictionary = {}
