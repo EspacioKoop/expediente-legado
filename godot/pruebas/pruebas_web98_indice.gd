@@ -363,9 +363,7 @@ func _probar_navegador() -> void:
 	indice_directorio.configurar_contexto(
 		{"dia": 1, "conocimiento": ["enlace13"], "urls_caidas": []}
 	)
-	navegador_ui.configurar_contexto(
-		{"dia": 1, "conocimiento": ["enlace13"], "urls_caidas": []}
-	)
+	navegador_ui.configurar_contexto({"dia": 1, "conocimiento": ["enlace13"], "urls_caidas": []})
 	navegador_ui.abrir_directorio()
 	lista_directorio = navegador_ui.get("_enlaces") as ItemList
 	item_institucional = -1
