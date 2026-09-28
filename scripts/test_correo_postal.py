@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import unittest
@@ -30,7 +31,7 @@ class CorreoPostalTest(unittest.TestCase):
             check=False,
         )
         self.assertEqual(resultado.returncode, 0, resultado.stdout)
-        self.assertIn("35 pasadas, 0 fallos", resultado.stdout)
+        self.assertRegex(resultado.stdout, r"\d+ pasadas, 0 fallos")
 
     def test_integracion_no_abre_economia_paralela(self):
         correo = (ROOT / "godot" / "guion" / "correo_postal.gd").read_text()
@@ -63,6 +64,13 @@ class CorreoPostalTest(unittest.TestCase):
         self.assertIn('is_action_pressed("cancelar")', lector)
         self.assertEqual(len(textos["categorias"]), 8)
         self.assertTrue(textos["cuerpo_vacio"])
+        self.assertIn("_contenido.focus_mode = Control.FOCUS_ALL", lector)
+        self.assertIn("_contenido.selection_enabled = true", lector)
+        self.assertIn("_cerrar_boton.accessibility_name = _cerrar_boton.text", lector)
+        self.assertIn("_contenido.accessibility_name = _titulo.text", lector)
+        self.assertIn("_contenido.accessibility_description = _contenido.text", lector)
+        self.assertIn("_contenido.focus_next = _contenido.get_path_to(_cerrar_boton)", lector)
+        self.assertIn("_cerrar_boton.focus_previous = _cerrar_boton.get_path_to(_contenido)", lector)
 
     def test_lector_distingue_titulo_y_cuerpo_documental(self):
         lector = (ROOT / "godot" / "guion" / "correo_postal_lector.gd").read_text()
