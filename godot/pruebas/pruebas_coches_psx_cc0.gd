@@ -166,8 +166,10 @@ func _probar() -> void:
 	tween_trafico.set_speed_scale(50.0)
 	await create_timer(0.50).timeout
 	_comprobar(
-		trafico.position.x >= x_inicial - 0.25
-		and trafico.position.x <= x_inicial + Coches.DESPLAZAMIENTO_FONDO + 0.25,
+		(
+			trafico.position.x >= x_inicial - 0.25
+			and trafico.position.x <= x_inicial + Coches.DESPLAZAMIENTO_FONDO + 0.25
+		),
 		"el tráfico permanece acotado tras varias vueltas aceleradas",
 	)
 	tween_trafico.set_speed_scale(1.0)
