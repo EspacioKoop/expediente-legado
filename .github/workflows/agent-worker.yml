@@ -680,8 +680,8 @@ jobs:
           # aprobacion; workflow_dispatch es la ruta no recursiva y ya usada por el autopilot.
           gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$BRANCH"
 
-      - name: Marcar fallo
-        if: failure() && inputs.issue != 0
+      - name: Limpiar fallo o cancelacion
+        if: (failure() || cancelled()) && inputs.issue != 0
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ inputs.issue }}
@@ -704,9 +704,38 @@ jobs:
           PLAN_QWEN_OUTCOME: ${{ steps.plan_qwen.outcome }}
           PLAN_GEMINI_OUTCOME: ${{ steps.plan_gemini.outcome }}
           AGENT_PROVIDER_COOLDOWN_SECONDS: ${{ vars.AGENT_PROVIDER_COOLDOWN_SECONDS || '3600' }}
+          JOB_STATUS: ${{ job.status }}
         run: |
           set -euo pipefail
           pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "${BRANCH:-none}" --json number --jq '.[0].number // empty' || true)"
+
+          if [[ "$JOB_STATUS" == cancelled ]]; then
+            if [[ -n "$pr" ]]; then
+              gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+                --add-label agent:pr-open \
+                --remove-label agent:working \
+                --remove-label agent:needs-human \
+                --remove-label agent:auto \
+                --remove-label agent:pool \
+                --remove-label agent:qwen \
+                --remove-label agent:gemini \
+                >/dev/null 2>&1 || true
+              gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+                "Agent pool ($WORKER) fue cancelado, pero ya existe PR #$pr; se conserva la reserva y se normaliza el estado a agent:pr-open." || true
+            else
+              if [[ "${RESERVED:-}" == true && -n "${BRANCH:-}" ]]; then
+                gh issue comment 182 --repo "$GITHUB_REPOSITORY" \
+                  --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=agent-pool-cancelado-sin-PR" \
+                  >/dev/null || true
+              fi
+              gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+                --remove-label agent:working --remove-label agent:needs-human \
+                >/dev/null 2>&1 || true
+              gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+                "Agent pool ($WORKER) fue cancelado antes de publicar PR; se libera el CLAIM y la tarea vuelve a cola sin penalizar al worker." || true
+            fi
+            exit 0
+          fi
 
           if [[ "${RESERVED:-}" != true && -z "$pr" ]]; then
             quota_failure=false
@@ -798,7 +827,7 @@ jobs:
                 detalle=""
               fi
               gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-                "Agent pool reencolado tras fallo de planificación en `$WORKER`; el siguiente dispatcher evitará ese worker para este issue.$detalle" || true
+                "Agent pool reencolado tras fallo de planificación en $WORKER; el siguiente dispatcher evitará ese worker para este issue.$detalle" || true
             fi
             exit 0
           fi
