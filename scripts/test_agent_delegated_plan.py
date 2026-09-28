@@ -48,6 +48,30 @@ class AgentDelegatedPlanTest(unittest.TestCase):
         issue = source(block(), association="MEMBER", login="robot", __typename="Bot")
         self.assertIsNone(mod.select_delegated_plan(issue))
 
+    def test_acepta_json_cercado_dentro_de_marcadores(self):
+        issue = source(
+            "AGENT_PLAN_BEGIN\n"
+            "```json\n"
+            '{"files":["scripts/a.py"],"goal":"json cercado"}\n'
+            "```\n"
+            "AGENT_PLAN_END"
+        )
+        selected = mod.select_delegated_plan(issue)
+        self.assertEqual(["scripts/a.py"], selected["plan"]["files"])
+        self.assertEqual("json cercado", selected["plan"]["goal"])
+
+    def test_acepta_tildes_cercadas_dentro_de_marcadores(self):
+        issue = source(
+            "AGENT_PLAN_BEGIN\n"
+            "~~~\n"
+            '{"files":["scripts/a.py"],"goal":"tilde cercada"}\n'
+            "~~~\n"
+            "AGENT_PLAN_END"
+        )
+        selected = mod.select_delegated_plan(issue)
+        self.assertEqual(["scripts/a.py"], selected["plan"]["files"])
+        self.assertEqual("tilde cercada", selected["plan"]["goal"])
+
     def test_ignora_ejemplo_en_fence_markdown(self):
         issue = source("Ejemplo:\n```text\n" + block() + "\n```\nNo debe ejecutar.")
         self.assertIsNone(mod.select_delegated_plan(issue))
