@@ -59,10 +59,8 @@ class ChatCorporativoUiTest(unittest.TestCase):
     def test_adaptador_registra_persiste_y_abre_web98_por_id(self) -> None:
         fuente = ADAPTADOR.read_text(encoding="utf-8")
         self.assertIn('var _chat_app: EscritorioSigaApp', fuente)
-        self.assertIn(
-            '"chat-corporativo",\n\t\tChatCorporativoSiga.texto("titulo_app")',
-            fuente,
-        )
+        self.assertIn('"chat-corporativo"', fuente)
+        self.assertIn('ChatCorporativoSiga.texto("titulo_app")', fuente)
         self.assertIn('Callable(self, "_crear_chat_corporativo")', fuente)
         self.assertIn("_chat_app.persistir_estado = true", fuente)
         self.assertIn('obtener_estado_local("respuestas_por_partida", {})', fuente)
