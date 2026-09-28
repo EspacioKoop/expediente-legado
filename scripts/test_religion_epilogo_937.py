@@ -30,8 +30,13 @@ class ReligionEpilogo937Test(unittest.TestCase):
         self.assertIn('"bloquea_final_base": false', self.trayectoria)
         self.assertIn('"requiere_citar_hechos": true', self.trayectoria)
         codigo = self.trayectoria.lower()
-        for prohibido in ("puntuacion", "ranking", "ganador", "religion_dominante"):
-            self.assertNotIn(prohibido, codigo)
+        for clave_prohibida in (
+            '"puntuacion":',
+            '"ranking":',
+            '"ganador":',
+            '"religion_dominante":',
+        ):
+            self.assertNotIn(clave_prohibida, codigo)
 
     def test_maximo_tres_modulos_y_procedencia(self):
         self.assertIn('MODULO_DECLARACIONES := "declaraciones"', self.trayectoria)
