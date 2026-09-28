@@ -5,6 +5,8 @@ RUTA = Path("godot/guion/auditorias.gd")
 PARTIDA = Path("godot/guion/partida.gd")
 PROMETEO = Path("godot/guion/prometeo.gd")
 DIA = Path("godot/guion/dia_app.gd")
+CICLO = Path("godot/guion/dia_ciclo_laboral_app.gd")
+COMBATE_DIA = Path("godot/guion/dia_combate_contextual_app.gd")
 ASCENSOR = Path("godot/guion/dia_ascensor_app.gd")
 SUENO = Path("godot/guion/dia_sueno_app.gd")
 CREADOR = Path("godot/guion/creador_personaje_app.gd")
@@ -91,15 +93,15 @@ def test_seleccion_de_vuelta_tiene_estado_persistible_y_unico():
 
 def test_alta_y_reasignacion_resuelven_antes_de_empezar():
     creador = CREADOR.read_text(encoding="utf-8")
-    dia = DIA.read_text(encoding="utf-8")
+    ciclo = CICLO.read_text(encoding="utf-8")
     assert "Auditorias.resolver_seleccion(_partida.estado, _auditorias.seleccion())" in creador
-    assert "Auditorias.seleccion_pendiente(partida.estado)" in dia
-    assert "AuditoriasNuevaVidaApp.new()" in dia
-    assert "Auditorias.resolver_seleccion(partida.estado, seleccion)" in dia
-    abrir = dia.split("func _abrir_vuelta() -> void:", 1)[1].split(
-        "func _abrir_auditorias_nueva_vida", 1
+    assert "Auditorias.seleccion_pendiente(_partida.estado)" in ciclo
+    assert "AuditoriasNuevaVidaApp.new()" in ciclo
+    assert "Auditorias.resolver_seleccion(_partida.estado, seleccion)" in ciclo
+    abrir = ciclo.split("func abrir_vuelta(jornada: Dictionary) -> void:", 1)[1].split(
+        "func _al_canjear_ultimo_recurso", 1
     )[0]
-    assert abrir.index("Auditorias.seleccion_pendiente(partida.estado)") < abrir.index(
+    assert abrir.index("Auditorias.seleccion_pendiente(_partida.estado)") < abrir.index(
         "_registrar_reincorporacion()"
     )
 
@@ -186,12 +188,13 @@ def test_sueno_completo_distingue_salidas_normales_y_forzadas():
     assert resolver_fallo in proceso
     assert proceso.index(resolver_fallo) < proceso.index(despertar_forzado)
 
-    duelo = dia.split("func _cerrar_duelo", 1)[1].split(
-        "func _cerrar_expediente", 1
+    combate_dia = COMBATE_DIA.read_text(encoding="utf-8")
+    duelo = combate_dia.split("func _cerrar(", 1)[1].split(
+        "func _preparar_mundo", 1
     )[0]
     assert "if not gano:" in duelo
-    assert resolver_fallo in duelo
-    assert duelo.index(resolver_fallo) < duelo.index("SuenoCombate.resolver")
+    assert "Auditorias.resolver_fin_sueno(partida_estado, false)" in duelo
+    assert duelo.index("Auditorias.resolver_fin_sueno") < duelo.index("SuenoCombate.resolver")
 
 
 def test_sueno_completo_recibe_un_hecho_y_no_duplica_sistemas():
