@@ -35,6 +35,17 @@ def test_shareware_expira_de_forma_determinista_y_persistible() -> None:
     assert "RandomNumberGenerator" not in modelo
 
 
+def test_barrido_98_reutiliza_el_contrato_y_persiste_solo_estado_simulado() -> None:
+    modelo = fuente(MODELO_SOFTWARE)
+    assert '"id": "barrido-98"' in modelo
+    assert '"interaccion": "limpiador"' in modelo
+    assert "FallosMundanosOs98.escanear_limpiador" in modelo
+    assert "FallosMundanosOs98.neutralizar_limpiador" in modelo
+    assert '"limpiador_objetos": _objetos_limpiador.duplicate(true)' in modelo
+    assert 'estado.get("limpiador_objetos", _objetos_limpiador)' in modelo
+    assert '"residente-cinta-azul"' in modelo
+
+
 def test_software_y_explorador_reutilizan_el_mismo_panel() -> None:
     software = fuente(SOFTWARE)
     explorador = fuente(EXPLORADOR)
