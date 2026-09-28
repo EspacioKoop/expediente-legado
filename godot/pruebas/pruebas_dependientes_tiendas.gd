@@ -138,11 +138,15 @@ func _probar_dialogo_contextual() -> void:
 	_comprobar(basicas.size() == 2, "sin contexto extra ofrece dos respuestas")
 	_comprobar(basicas[0]["id"] == "pragmatica", "la primera respuesta es pragmática")
 	var lluvia := DialogoDependientesContextual.opciones(paco, jornada, Clima.LLUVIA)
-	_comprobar(lluvia.any(func(opcion): return opcion["id"] == "tiempo"), "la lluvia abre rama propia")
+	_comprobar(
+		lluvia.any(func(opcion): return opcion["id"] == "tiempo"), "la lluvia abre rama propia"
+	)
 
 	var cliente := {"dia": 3, ComercioBarrio.CLAVE_COMPRAS: ["periodico_tarde_98"]}
 	var compra := DialogoDependientesContextual.opciones(paco, cliente, Clima.DESPEJADO)
-	_comprobar(compra.any(func(opcion): return opcion["id"] == "cliente"), "la compra previa abre rama")
+	_comprobar(
+		compra.any(func(opcion): return opcion["id"] == "cliente"), "la compra previa abre rama"
+	)
 	_comprobar(compra.size() <= 4, "nunca muestra más de cuatro respuestas")
 
 	var primera := DialogoDependientesContextual.registrar(jornada, "paco", "curiosidad")
