@@ -1,6 +1,7 @@
 extends SceneTree
 
 const Relacion := preload("res://guion/relacion_onirica.gd")
+const Vertical := preload("res://guion/sueno_relacion_onirica_3d.gd")
 const Puzzle := preload("res://guion/puzzle_onirico.gd")
 
 var _pasadas := 0
@@ -8,8 +9,14 @@ var _fallos := 0
 
 
 func _initialize() -> void:
+	call_deferred("_ejecutar_pruebas")
+
+
+func _ejecutar_pruebas() -> void:
 	_probar_fuentes_y_distractor()
 	_probar_determinismo_y_contenido()
+	_probar_contenido_completo_caso_real()
+	_probar_interfaz_consulta_y_seleccion()
 	_probar_acierto()
 	_probar_fallo_unico()
 	_probar_restauracion_pendiente()
@@ -111,6 +118,90 @@ func _probar_determinismo_y_contenido() -> void:
 			not String(documento.get("extracto", "")).contains("no encajan entre sí"),
 			"antes de resolver solo muestra texto del documento, no la conclusión",
 		)
+
+
+func _probar_contenido_completo_caso_real() -> void:
+	var datos = JSON.parse_string(FileAccess.get_file_as_string("res://datos/casos.json"))
+	_comprobar(datos is Dictionary, "carga el catálogo real para probar lectura completa")
+	if not datos is Dictionary:
+		return
+	var casos: Array = datos.get("casos", [])
+	_comprobar(not casos.is_empty(), "el catálogo real conserva al menos un expediente")
+	if casos.is_empty():
+		return
+	var caso: Dictionary = casos[0]
+	_comprobar(String(caso.get("id", "")) == "caso@1", "la regresión usa el primer expediente real")
+	var leidos: Array = caso.get("registros", []).map(func(r): return String(r.get("folio", "")))
+
+	var pista_acta := _pista_por_id(caso, "pista20@1")
+	var relacion_acta = Relacion.crear(caso, pista_acta, leidos, 1457)
+	_comprobar(relacion_acta != null, "monta la relación real del acta de Contraloría")
+	if relacion_acta != null:
+		var acta := _documento_por_id(relacion_acta.documentos, "actaContraloria1@1")
+		_comprobar(
+			String(acta.get("contenido", "")).contains("cinco minutos después"),
+			"la consulta conserva el dato de los cinco minutos fuera del extracto",
+		)
+		_comprobar(
+			not String(acta.get("extracto", "")).contains("cinco minutos después"),
+			"el panel 3D sigue usando un extracto breve",
+		)
+
+	var pista_tinta := _pista_por_id(caso, "pista28@1")
+	var relacion_tinta = Relacion.crear(caso, pista_tinta, leidos, 1458)
+	_comprobar(relacion_tinta != null, "monta la relación real del peritaje de tinta")
+	if relacion_tinta != null:
+		var empleado := _documento_por_id(relacion_tinta.documentos, "empleado1@1")
+		_comprobar(
+			String(empleado.get("contenido", "")).contains("peritaje incorporado"),
+			"la consulta conserva el peritaje de tinta completo",
+		)
+		_comprobar(
+			not String(empleado.get("extracto", "")).contains("peritaje incorporado"),
+			"el peritaje no se filtra al extracto abreviado",
+		)
+
+
+func _probar_interfaz_consulta_y_seleccion() -> void:
+	var caso := _caso()
+	var relacion = Relacion.crear(caso, caso["pistas"][0], ["F-1", "F-2", "F-3"], 1457)
+	var vertical = Vertical.new()
+	root.add_child(vertical)
+	_comprobar(vertical.configurar(relacion), "la vertical monta el lector de documentos")
+	_comprobar(
+		vertical._lector_contenido is RichTextLabel and vertical._lector_contenido.scroll_active,
+		"el contenido completo usa un lector desplazable",
+	)
+	_comprobar(
+		vertical._lector_seleccion is CheckButton,
+		"la selección vive en un control explícito separado de leer",
+	)
+
+	var i1 := _indice(relacion.documentos, "r1")
+	var i2 := _indice(relacion.documentos, "r2")
+	var i3 := _indice(relacion.documentos, "r3")
+	relacion.seleccionar(i1)
+	relacion.seleccionar(i2)
+	vertical._sincronizar()
+	_comprobar(
+		vertical._documentos_3d[i3].habilitado,
+		"con dos elegidos el tercer documento sigue disponible para consultar",
+	)
+
+	vertical._abrir_documento(i3)
+	_comprobar(vertical._lector.visible, "interactuar abre la lectura completa sin seleccionar")
+	_comprobar(
+		vertical._lector_contenido.text == String(relacion.documentos[i3].get("contenido", "")),
+		"el lector muestra el contenido completo y no el extracto",
+	)
+	_comprobar(
+		vertical._lector_seleccion.disabled,
+		"una tercera selección se bloquea sin bloquear la consulta",
+	)
+	_comprobar(relacion.seleccion == ["r1", "r2"], "consultar no modifica la pareja preparada")
+	vertical._cerrar_lector()
+	_comprobar(not paused, "cerrar el lector devuelve el control al sueño")
+	vertical.free()
 
 
 func _probar_acierto() -> void:
@@ -265,6 +356,20 @@ func _probar_abandono_y_serializacion() -> void:
 		datos.get("nucleo", {}).get("reward_id", "") == "P-REL",
 		"serializa la identidad de recompensa sin copiar la conclusión",
 	)
+
+
+func _pista_por_id(caso: Dictionary, pista_id: String) -> Dictionary:
+	for pista in caso.get("pistas", []):
+		if String(pista.get("id", "")) == pista_id:
+			return pista
+	return {}
+
+
+func _documento_por_id(documentos: Array, registro_id: String) -> Dictionary:
+	for documento in documentos:
+		if String(documento.get("id", "")) == registro_id:
+			return documento
+	return {}
 
 
 func _indice(documentos: Array, registro_id: String) -> int:
