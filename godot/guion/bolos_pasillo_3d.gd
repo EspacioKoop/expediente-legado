@@ -69,6 +69,9 @@ var _nodos_bolos: Array[Node3D] = []
 var _companeros_visual: Array[Node3D] = []
 var _idles_companeros: Array[CompaneroIdle3D] = []
 var _bola: MeshInstance3D
+var _guia_apuntado: MeshInstance3D
+var _barra_potencia: ProgressBar
+var _estado_lanzamientos: Label
 var _bola_posicion := POSICION_BOLA
 var _bola_velocidad := Vector3.ZERO
 var _acumulador := 0.0
@@ -147,6 +150,7 @@ func _physics_process(delta: float) -> void:
 			var fuerza := maxf(_potencia, 0.12)
 			_cargando = false
 			lanzar(_apuntado, fuerza)
+		_refrescar_feedback()
 
 	if not _tiro_activo:
 		return
@@ -165,6 +169,7 @@ func reiniciar() -> void:
 	_apuntado = 0.0
 	_preparar_bola()
 	_restaurar_bolos()
+	_refrescar_feedback()
 
 
 func lanzar(apuntado: float, potencia: float) -> bool:
@@ -182,6 +187,7 @@ func lanzar(apuntado: float, potencia: float) -> bool:
 	_tiempo_tiro = 0.0
 	_tiro_activo = true
 	_refrescar_bola()
+	_refrescar_feedback()
 	return true
 
 
@@ -332,6 +338,7 @@ func _resolver_lanzamiento() -> void:
 		return
 	_tiro_activo = false
 	_bola_velocidad = Vector3.ZERO
+	_refrescar_feedback()
 
 	var derribados_totales := Bolos.BOLOS_POR_TURNO - total_bolos_en_pie()
 	var ya_contabilizados := int(estado.get("derribados_turno", 0))
@@ -362,6 +369,7 @@ func _finalizar(resultado: Dictionary) -> void:
 	_finalizada = true
 	_tiro_activo = false
 	_cargando = false
+	_refrescar_feedback()
 	actividad_terminada.emit(resultado)
 
 
@@ -371,6 +379,7 @@ func _preparar_bola() -> void:
 	_acumulador = 0.0
 	_tiempo_tiro = 0.0
 	_refrescar_bola()
+	_refrescar_feedback()
 
 
 func _restaurar_bolos() -> void:
@@ -433,6 +442,7 @@ func _montar_presentacion() -> void:
 
 	_montar_obstaculo_variante()
 	_montar_companeros()
+	_montar_feedback_tiro()
 
 	var camara := Camera3D.new()
 	camara.name = "Camara"
@@ -446,6 +456,67 @@ func _montar_presentacion() -> void:
 	luz.light_energy = energia_luz_de(variante)
 	luz.shadow_enabled = true
 	add_child(luz)
+
+
+func _montar_feedback_tiro() -> void:
+	_guia_apuntado = MeshInstance3D.new()
+	_guia_apuntado.name = "GuiaApuntado"
+	var malla_guia := BoxMesh.new()
+	malla_guia.size = Vector3(0.035, 0.012, 1.1)
+	_guia_apuntado.mesh = malla_guia
+	var material_guia := StandardMaterial3D.new()
+	material_guia.albedo_color = Color(0.84, 0.82, 0.42, 0.92)
+	material_guia.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_guia_apuntado.material_override = material_guia
+	add_child(_guia_apuntado)
+
+	var capa := CanvasLayer.new()
+	capa.name = "FeedbackTiro"
+	add_child(capa)
+
+	var caja := VBoxContainer.new()
+	caja.name = "CajaFeedbackTiro"
+	caja.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	caja.offset_left = 28.0
+	caja.offset_top = -96.0
+	caja.offset_right = 308.0
+	caja.offset_bottom = -24.0
+	caja.add_theme_constant_override("separation", 6)
+	capa.add_child(caja)
+
+	_barra_potencia = ProgressBar.new()
+	_barra_potencia.name = "Potencia"
+	_barra_potencia.min_value = 0.0
+	_barra_potencia.max_value = 100.0
+	_barra_potencia.show_percentage = true
+	_barra_potencia.custom_minimum_size = Vector2(260.0, 22.0)
+	_barra_potencia.accessibility_name = "Potencia de lanzamiento"
+	caja.add_child(_barra_potencia)
+
+	_estado_lanzamientos = Label.new()
+	_estado_lanzamientos.name = "Lanzamientos"
+	_estado_lanzamientos.accessibility_name = "Lanzamientos del turno"
+	caja.add_child(_estado_lanzamientos)
+	_refrescar_feedback()
+
+
+func _refrescar_feedback() -> void:
+	var turno_jugador := int(estado.get("turno", 0)) == 0 and not _finalizada
+	if is_instance_valid(_barra_potencia):
+		_barra_potencia.value = clampf(_potencia * 100.0, 0.0, 100.0)
+		_barra_potencia.visible = turno_jugador and not _tiro_activo
+	if is_instance_valid(_estado_lanzamientos):
+		var usados := clampi(int(estado.get("lanzamiento", 0)), 0, Bolos.LANZAMIENTOS_POR_TURNO)
+		_estado_lanzamientos.text = "%d/%d" % [usados, Bolos.LANZAMIENTOS_POR_TURNO]
+		_estado_lanzamientos.visible = turno_jugador
+	if not is_instance_valid(_guia_apuntado):
+		return
+	_guia_apuntado.visible = turno_jugador and not _tiro_activo
+	if not _guia_apuntado.visible:
+		return
+	var direccion := Vector3(_apuntado * 0.55, 0.0, -1.0).normalized()
+	_guia_apuntado.position = POSICION_BOLA + Vector3.UP * 0.035 + direccion * 0.55
+	_guia_apuntado.look_at(_guia_apuntado.global_position + direccion, Vector3.UP)
 
 
 func _montar_obstaculo_variante() -> void:

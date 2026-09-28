@@ -54,11 +54,25 @@ func _probar() -> void:
 		escena._idles_companeros.all(func(idle): return idle.objetivo in escena._companeros_visual),
 		"cada idle anima su figura de bolos",
 	)
+	_comprobar(escena._guia_apuntado is MeshInstance3D, "el tiro tiene guía 3D de apuntado")
+	_comprobar(escena._barra_potencia is ProgressBar, "el tiro muestra potencia visual")
+	_comprobar(escena._estado_lanzamientos.text == "0/2", "el HUD empieza con cero de dos tiros")
+	escena._apuntado = 0.65
+	escena._potencia = 0.60
+	escena._refrescar_feedback()
+	_comprobar(
+		is_equal_approx(escena._barra_potencia.value, 60.0),
+		"la barra representa la potencia acumulada",
+	)
+	_comprobar(escena._guia_apuntado.visible, "la guía se ve mientras se puede apuntar")
 	_comprobar(escena.lanzar(0.0, 1.0), "un tiro recto puede comenzar")
+	_comprobar(not escena._guia_apuntado.visible, "la guía se oculta con la bola en movimiento")
+	_comprobar(not escena._barra_potencia.visible, "la potencia no tapa el tiro ya lanzado")
 	var pasos_recto := escena.simular_hasta_reposo()
 	_comprobar(pasos_recto > 0, "el tiro avanza con paso fijo")
 	_comprobar(not escena.lanzamiento_activo(), "el tiro termina siempre")
 	_comprobar(int(escena.estado.get("lanzamiento", 0)) == 1, "primer tiro consume un lanzamiento")
+	_comprobar(escena._estado_lanzamientos.text == "1/2", "el feedback avanza al segundo tiro")
 	_comprobar(int(escena.estado.get("puntuaciones", [0])[0]) > 0, "el tiro recto derriba")
 
 	escena.reiniciar()
