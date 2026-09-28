@@ -11,10 +11,25 @@ func _initialize() -> void:
 
 
 func _ejecutar() -> void:
+	_probar_politica()
 	await _probar_secuencia()
+	await _probar_retorno()
 	await _probar_permanencia()
 	print("Sueño variedad objetivos 299: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
+
+
+func _probar_politica() -> void:
+	var dia_uno := SuenoObjetivosVariedad.tipos_para(1, "montana")
+	var dia_dos := SuenoObjetivosVariedad.tipos_para(2, "montana")
+	_comprobar("cada noche ofrece tres objetivos", dia_uno.size(), 3)
+	_comprobar("los tres objetivos de una noche son distintos", dia_uno.duplicate().size(), 3)
+	_comprobar("otra semilla rota el repertorio", dia_dos == dia_uno, false)
+	_comprobar(
+		"retorno declara ida y vuelta",
+		SuenoObjetivosVariedad.condicion(SuenoObjetivosVariedad.TIPO_RETORNO),
+		"ida_y_vuelta",
+	)
 
 
 func _actor() -> CharacterBody3D:
@@ -73,6 +88,41 @@ func _probar_secuencia() -> void:
 	await physics_frame
 	_comprobar("segundo paso completa una vez", _completados, ["escena:secuencia"])
 	_comprobar("controlador queda terminal", controlador.terminado(), true)
+	controlador.queue_free()
+	actor.queue_free()
+	await process_frame
+
+
+func _probar_retorno() -> void:
+	_completados.clear()
+	_rumbos.clear()
+	var actor := _actor()
+	var origen := Vector3(6.0, 0.0, 0.0)
+	var foco := Vector3.ZERO
+	actor.position = Vector3(10.0, 0.0, 0.0)
+	var controlador := _controlador(actor)
+	_comprobar(
+		"retorno se configura",
+		controlador.configurar(
+			"escena:retorno",
+			SuenoObjetivoVariedad3D.TIPO_RETORNO,
+			actor,
+			[foco, origen],
+		),
+		true,
+	)
+	await physics_frame
+	actor.position = foco
+	await physics_frame
+	await physics_frame
+	_comprobar("llegar al foco aún no completa retorno", _completados.size(), 0)
+	_comprobar("retorno reorienta hacia el origen", _rumbos, [origen])
+	actor.position = Vector3(10.0, 0.0, 0.0)
+	await physics_frame
+	actor.position = origen
+	await physics_frame
+	await physics_frame
+	_comprobar("volver al origen completa", _completados, ["escena:retorno"])
 	controlador.queue_free()
 	actor.queue_free()
 	await process_frame
