@@ -213,23 +213,23 @@ jobs:
 
             files="$(jq -r '.files[] | "- "+.' <<<"$task")"
             cat > /tmp/subissue.md <<EOF
-Subtarea generada automáticamente desde #$ISSUE.
+          Subtarea generada automáticamente desde #$ISSUE.
 
-## Objetivo
-$goal
+          ## Objetivo
+          $goal
 
-## Rutas previstas
-$files
+          ## Rutas previstas
+          $files
 
-## Dependencias
-$dep_text
+          ## Dependencias
+          $dep_text
 
-<!-- agent-parent: #$ISSUE -->
-<!-- agent-depends-on: $dep_marker -->
-<!-- agent-provider: $REQUESTED_PROVIDER -->
+          <!-- agent-parent: #$ISSUE -->
+          <!-- agent-depends-on: $dep_marker -->
+          <!-- agent-provider: $REQUESTED_PROVIDER -->
 
-El CLAIM real lo decidirá el worker al planificar; estas rutas son el corte esperado, no una reserva.
-EOF
+          El CLAIM real lo decidirá el worker al planificar; estas rutas son el corte esperado, no una reserva.
+          EOF
             url="$(gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body-file /tmp/subissue.md --label "$queue_label")"
             number="${url##*/}"
             [[ "$number" =~ ^[0-9]+$ ]] || exit 5
