@@ -19,7 +19,7 @@ class DiaCicloLaboral1761Test(unittest.TestCase):
         self.assertIn("_ciclo_laboral.configurar(", self.dia)
         self.assertIn("_ciclo_laboral.reasignacion_solicitada.connect(_reasignar)", self.dia)
         self.assertIn("_ciclo_laboral.abrir_ultimo_recurso_pendiente(jornada)", self.dia)
-        self.assertIn("_ciclo_laboral.abrir_vuelta(jornada)", self.dia)
+        self.assertIn("func _abrir_vuelta() -> void:", self.dia)\n        self.assertIn("_ciclo_laboral.abrir_vuelta(jornada)", self.dia)
 
     def test_estado_temporal_del_ciclo_ya_no_vive_en_dia(self):
         for nombre in (
@@ -44,12 +44,12 @@ class DiaCicloLaboral1761Test(unittest.TestCase):
 
     def test_reasignacion_vuelve_al_orquestador(self):
         self.assertIn("signal reasignacion_solicitada", self.ciclo)
-        self.assertIn("reasignacion_solicitada.emit()", self.ciclo)
+        self.assertIn("reasignacion_solicitada.emit()", self.ciclo)\n        self.assertIn("signal vuelta_solicitada", self.ciclo)\n        self.assertIn("signal vuelta_terminada", self.ciclo)
         reasignar = self.dia.split("func _reasignar() -> void:", 1)[1].split(
             "func _refrescar_rotulos", 1
         )[0]
         self.assertIn('_entrar_en(jornada["fase"])', reasignar)
-        self.assertIn("_ciclo_laboral.abrir_vuelta(jornada)", reasignar)
+        self.assertIn("_abrir_vuelta()", reasignar)
 
 
 if __name__ == "__main__":
