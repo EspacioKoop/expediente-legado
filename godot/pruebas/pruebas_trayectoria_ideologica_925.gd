@@ -79,12 +79,25 @@ func _probar_cierre_final() -> void:
 	_comprobar(historial[0]["vuelta"], 2, "el final conserva la vuelta real")
 	_comprobar(historial[0]["patron"], "consistente", "una sola orientación queda descrita")
 	_comprobar(historial[0]["motivo"], "final_narrativo", "el cierre final queda distinguido")
+	var evaluaciones: Array = estado.get("evaluaciones_desempeno", [])
+	_comprobar(evaluaciones.size(), 1, "el final sella una única evaluación de desempeño")
+	_comprobar(evaluaciones[0]["vuelta"], 2, "la evaluación conserva la vuelta final real")
+	_comprobar(
+		evaluaciones[0]["motivo"],
+		"final_narrativo",
+		"la evaluación distingue el final narrativo de una reasignación",
+	)
 
 	FinalPolitico.confirmar_cierre(estado)
 	_comprobar(
 		Prometeo.historial_trayectorias_ideologicas(estado).size(),
 		1,
 		"confirmar el final otra vez es idempotente",
+	)
+	_comprobar(
+		estado.get("evaluaciones_desempeno", []).size(),
+		1,
+		"confirmar el final no duplica la evaluación sellada",
 	)
 
 
