@@ -1,11 +1,11 @@
 # Roadmap
 
-Mapa de fases hasta la primera versión completa. **La prioridad operativa la fija el [plan maestro #181](https://github.com/EspacioKoop/expediente-legado/issues/181)**; este documento resume estado, gates y dirección. Los criterios de aceptación siguen viviendo en cada issue.
+Mapa de fases hasta la primera versión completa. El registro activo de reservas es [#1713](https://github.com/EspacioKoop/expediente-legado/issues/1713); #182 queda como histórico durante la transición. **La prioridad operativa la fija el [plan maestro #181](https://github.com/EspacioKoop/expediente-legado/issues/181)**; este documento resume estado, gates y dirección. Los criterios de aceptación siguen viviendo en cada issue.
 
 | Dónde se mira | Qué responde |
 | --- | --- |
 | [Plan maestro #181](https://github.com/EspacioKoop/expediente-legado/issues/181) | Qué va primero ahora |
-| [Registro de reservas #182](https://github.com/EspacioKoop/expediente-legado/issues/182) | Quién puede editar qué |
+| [Registro central de reservas #1713](https://github.com/EspacioKoop/expediente-legado/issues/1713) | Quién puede editar qué; #182 queda histórico |
 | [Índice de documentación](docs/README.md) | Qué documento es canónico para cada sistema |
 | [Paridad SIGA](docs/paridad-expedientes.md) | Qué del legado existe ya en Godot |
 | [Paridad ideologías](docs/paridad-ideologias.md) | Qué se recuperó y qué se generalizó |

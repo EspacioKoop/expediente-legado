@@ -2,7 +2,7 @@
 
 Este proyecto combina colaboración humana y agentes. El objetivo no es maximizar cambios simultáneos, sino avanzar sin pisar trabajo ajeno y sin afirmar más de lo que se ha probado.
 
-Las reglas operativas completas están en [AGENTS.md](AGENTS.md). La prioridad vigente está en el [plan maestro #181](https://github.com/EspacioKoop/expediente-legado/issues/181) y las reservas en [#182](https://github.com/EspacioKoop/expediente-legado/issues/182).
+Las reglas operativas completas están en [AGENTS.md](AGENTS.md). El registro activo de reservas es [#1713](https://github.com/EspacioKoop/expediente-legado/issues/1713); [#182](https://github.com/EspacioKoop/expediente-legado/issues/182) queda como histórico de transición. La prioridad vigente está en el [plan maestro #181](https://github.com/EspacioKoop/expediente-legado/issues/181) y las reservas en [#1713](https://github.com/EspacioKoop/expediente-legado/issues/1713).
 
 ## Regla de oro: nunca se trabaja directamente sobre `main`
 
@@ -16,20 +16,20 @@ Ramas:
 
 `NN` es el issue asociado. Si no existe issue, créalo antes de empezar.
 
-Antes de modificar archivos compartidos —y, para agentes, antes de cualquier edición— publica un `CLAIM` en #182 con issue, agente, rama, archivos y objetivo. Relee las reservas después de publicarlo. Una reserva anterior activa gana; no resuelvas un solape por tu cuenta.
+Antes de modificar archivos compartidos —y, para agentes, antes de cualquier edición— publica un `CLAIM` en #1713 con issue, agente, rama, archivos y objetivo. Relee las reservas después de publicarlo. Una reserva anterior activa gana; no resuelvas un solape por tu cuenta.
 
 ## Flujo de entrega
 
-1. Actualiza contexto: `main`, issue, comentarios, PR relacionadas, #181 y #182.
+1. Actualiza contexto: `main`, issue, comentarios, PR relacionadas, #181, #1713 y, durante el rollover, el histórico #182.
 2. Reserva las rutas reales del corte.
 3. Trabaja en rama propia y mantén el alcance pequeño.
 4. Añade pruebas de comportamiento cuando corresponda.
 5. Ejecuta los gates locales.
 6. Abre PR contra `main` y describe qué cubre y qué deja fuera.
-7. Registra `PR_READY` en #182 con SHA, pruebas y límites.
+7. Registra `PR_READY` en #1713 con SHA, pruebas y límites.
 8. Espera CI y revisión. `PR_READY` no autoriza merge.
 9. La integración requiere autorización explícita de @eGurucharri.
-10. Tras integrar, verifica el remoto y publica `RELEASE` en #182.
+10. Tras integrar, verifica el remoto y publica `RELEASE` en #1713.
 
 No uses `Closes #N` en una entrega parcial. Usa `Refs #N` y deja explícito qué falta.
 

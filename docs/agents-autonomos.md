@@ -101,6 +101,10 @@ GitHub puede impedir por política que `GITHUB_TOKEN` cree PRs. Si el primer int
 
 El workflow nunca aprueba ni fusiona PRs; el ajuste solo permite crear el draft. Si la organización ya lo permite, no hay que tocar nada.
 
+## Registro de reservas activo
+
+El registro operativo pasó de **#182** a **[#1713](https://github.com/EspacioKoop/expediente-legado/issues/1713)** al alcanzar #182 el límite de comentarios de GitHub. Los workflows deben publicar nuevas reservas en #1713 y, durante el rollover, leer también #182 para no perder reservas heredadas aún vivas.
+
 ## Cola de trabajo
 
 Los labels se crean automáticamente al integrarse el workflow:
@@ -121,7 +125,7 @@ En la cola unificada, el dispatcher consulta `scripts/kev_router.py` para obtene
 
 Kev recibe únicamente título, cuerpo y labels del issue. No recibe `GITHUB_TOKEN`, secretos de proveedores, logs completos ni memorias sin filtrar.
 
-El autopilot y el pool usan además `scripts/agent_context_pack.py`: generan un `.agent-context.md` acotado desde la wiki antes del plan y lo regeneran tras el CLAIM incorporando las rutas reservadas. La wiki completa queda como respaldo local; el pack nunca desplaza al repositorio, issue, #181/#182 ni a las Normas Platino como fuentes de autoridad.
+El autopilot y el pool usan además `scripts/agent_context_pack.py`: generan un `.agent-context.md` acotado desde la wiki antes del plan y lo regeneran tras el CLAIM incorporando las rutas reservadas. La wiki completa queda como respaldo local; el pack nunca desplaza al repositorio, issue, #181/#1713 ni a las Normas Platino como fuentes de autoridad.
 
 ### Pool paralelo
 
@@ -132,7 +136,7 @@ El dispatcher:
 - reúne hasta seis issues elegibles y usa como máximo un trabajo por slot/proveedor en cada tanda;
 - separa Qwen primario, Gemini y cuatro slots OpenAI-compatible;
 - aplica `concurrency` por issue para impedir dos workers simultáneos sobre la misma tarea;
-- sigue publicando y releyendo CLAIMs en #182: el lock técnico no sustituye la reserva;
+- sigue publicando y releyendo CLAIMs en #1713: el lock técnico no sustituye la reserva;
 - ejecuta context packer, Deno KV y CI brain antes de abrir un PR draft;
 - ante cambios fuera del CLAIM, restaura el intento, libera la reserva y replantea hasta dos veces antes de escalar a `agent:needs-human`.
 
@@ -144,7 +148,7 @@ Cada ejecución carga una copia fresca de `EspacioKoop/normas_platino` y debe le
 
 La jerarquía de contexto es:
 
-1. repositorio, issue, #181, #182 y Normas Platino;
+1. repositorio, issue, #181, #1713 y Normas Platino;
 2. wiki de Expediente Legado como memoria consolidada en solo lectura;
 3. Deno KV como memoria operativa temporal;\n4. SQLite/Turso del CI brain como memoria histórica de fallos y workarounds.
 
@@ -174,8 +178,8 @@ La URL de memoria se deriva de la variable ya existente `SIGA98_FEEDBACK_FALLBAC
 
 1. El proveedor lee el issue y sus comentarios recientes.
 2. Hace una fase de planificación **solo lectura** y propone como máximo 12 rutas concretas.
-3. El workflow publica el `CLAIM` en #182.
-4. Relee #182 y rechaza el trabajo si una reserva anterior solapa alguna ruta.
+3. El workflow publica el `CLAIM` en #1713.
+4. Relee #1713 y rechaza el trabajo si una reserva anterior solapa alguna ruta.
 5. Solo entonces crea la rama `agent/<proveedor>-<issue>-<run>`.
 6. El modelo recibe herramientas de archivos, pero no shell, GitHub API ni credenciales Git.
 7. El workflow rechaza cualquier modificación fuera de las rutas del `CLAIM`.
@@ -191,7 +195,7 @@ La API key solo se inyecta en la Action oficial del proveedor correspondiente. L
 
 Si CI falla:
 
-1. recupera el `CLAIM` activo de #182;
+1. recupera el `CLAIM` activo de #1713;
 2. descarga los logs fallidos;
 3. entrega logs + rutas reservadas al mismo proveedor;
 4. vuelve a bloquear cambios fuera del `CLAIM`;
@@ -199,7 +203,7 @@ Si CI falla:
 
 Hay un máximo de **2 commits de reparación automática** por rama. Después se aplica `agent:needs-human`.
 
-Cuando CI pasa, se registra `PR_READY` en #182 con el SHA y el PR permanece draft para revisión humana.
+Cuando CI pasa, se registra `PR_READY` en #1713 con el SHA y el PR permanece draft para revisión humana.
 
 ## Variables opcionales
 

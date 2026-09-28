@@ -9,7 +9,7 @@ El proyecto nació como aplicación web con Spring Boot y se está reescribiendo
 | Dónde | Qué responde |
 | --- | --- |
 | [Plan maestro #181](https://github.com/EspacioKoop/expediente-legado/issues/181) | Qué va primero ahora mismo |
-| [Registro de reservas #182](https://github.com/EspacioKoop/expediente-legado/issues/182) | Quién está tocando qué |
+| [Registro central de reservas #1713](https://github.com/EspacioKoop/expediente-legado/issues/1713) | Quién está tocando qué; #182 queda histórico |
 | [ROADMAP.md](ROADMAP.md) | Fases, gates y dirección hasta la 1.0 |
 | [Índice de documentación](docs/README.md) | Qué documento es canónico para cada área |
 | [Wiki](https://github.com/EspacioKoop/expediente-legado/wiki) | Conceptos permanentes para jugadores, desarrolladores y agentes; si discrepa del repo, manda el repo |
@@ -21,7 +21,7 @@ El proyecto nació como aplicación web con Spring Boot y se está reescribiendo
 | [Milestones](https://github.com/EspacioKoop/expediente-legado/milestones) | Qué está comprometido para una versión |
 | [Releases](https://github.com/EspacioKoop/expediente-legado/releases) | Qué se ha publicado |
 
-Este repositorio adopta las [Normas Platino](https://github.com/EspacioKoop/normas_platino): **reserva antes de editar, rama propia, PR obligatorio, CI y autorización humana de integración**. El silencio no caduca una reserva y `PR_READY` no equivale a permiso para mergear. Una reserva protege archivos, no bloquea la cooperación.
+Este repositorio adopta las [Normas Platino](https://github.com/EspacioKoop/normas_platino): **reserva antes de editar, rama propia, PR obligatorio, CI y autorización humana de integración**. El registro activo es [#1713](https://github.com/EspacioKoop/expediente-legado/issues/1713); [#182](https://github.com/EspacioKoop/expediente-legado/issues/182) se conserva solo para reservas históricas durante el rollover. El silencio no caduca una reserva y `PR_READY` no equivale a permiso para mergear. Una reserva protege archivos, no bloquea la cooperación.
 
 ## Estado actual — 2026-09-28
 
@@ -78,9 +78,9 @@ Siguen necesitando persona, hardware o export real, entre otros:
 - **Canal continuo de playtest:** `playtest-latest` mantiene una alpha identificada por SHA. F9 abre el parte de incidencias desde el juego (#1461); el envío remoto conserva copia/fallback y la cadena alojada puede usar Cloudflare → Deno → Vercel (#1524/#1531) sin incluir credenciales en la build.
 - **Observabilidad opcional:** #1556 prepara Sentry para las alphas solo cuando Actions recibe `SENTRY_DSN`. Sin DSN no cambia la build; F9 sigue siendo el canal humano independiente.
 - **Agentes autónomos:** #1542 inicia el autopilot Qwen/Gemini y #1590 integra Kev + context packer. #1595 unifica `agent:auto`, `agent:pool`, `agent:qwen` y `agent:gemini` en el dispatcher paralelo; `agent-autopilot.yml` queda como entrada manual. Las selecciones Qwen/Gemini explícitas siguen siendo obligatorias y nunca hay auto-merge.
-- **Memoria y contexto:** #1555/#1563 añaden Normas Platino + wiki + Deno KV + CI brain; #1567 aporta selección determinista de contexto de wiki y #1590 conecta ese context packer también al autopilot antes del plan y tras el CLAIM. La autoridad sigue siendo repo/issue/#181/#182 y las Normas Platino.
+- **Memoria y contexto:** #1555/#1563 añaden Normas Platino + wiki + Deno KV + CI brain; #1567 aporta selección determinista de contexto de wiki y #1590 conecta ese context packer también al autopilot antes del plan y tras el CLAIM. La autoridad sigue siendo repo/issue/#181/#1713 y las Normas Platino.
 - **Resiliencia de proveedores:** #1569/#1571/#1585 permiten OmniRoute privado por Tailscale con fallback a Qwen directo y slots OpenAI-compatible; #1583 añade smoke aislado para los fallbacks sin permisos de escritura.
-- **Paralelismo seguro:** #1572 añade un pool de hasta seis workers; #1579/#1588 replanifican hasta dos veces si el modelo sale de las rutas reservadas y #1595 convierte ese pool en la cola operativa común. La preferencia de Kev es blanda cuando no hay proveedor explícito: si el slot sugerido no está libre, puede usarse otro disponible. El pool no cambia la regla de merge humano ni sustituye #182.
+- **Paralelismo seguro:** #1572 añade un pool de hasta seis workers; #1579/#1588 replanifican hasta dos veces si el modelo sale de las rutas reservadas y #1595 convierte ese pool en la cola operativa común. La preferencia de Kev es blanda cuando no hay proveedor explícito: si el slot sugerido no está libre, puede usarse otro disponible. El pool no cambia la regla de merge humano ni sustituye #1713.
 
 Esta infraestructura acelera mantenimiento y QA, pero **no cuenta como avance jugable por sí sola**. El gate del proyecto sigue siendo la partida humana completa sobre un SHA concreto de `main`.
 
