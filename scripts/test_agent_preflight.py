@@ -120,5 +120,18 @@ class PreflightTest(unittest.TestCase):
         self.assertIn("se delega al CI", informe["python"]["aviso"])
 
 
+class CableadoWorkerTest(unittest.TestCase):
+    def test_worker_usa_preflight_dirigido_y_no_la_suite_completa(self):
+        worker = (preflight.RAIZ / ".github" / "workflows" / "agent-worker.yml").read_text(encoding="utf-8")
+        paso = worker.split("name: Validar diff y preflight", 1)[1].split("\n      - ", 1)[0]
+        self.assertIn("python3 scripts/agent_preflight.py --changed", paso)
+        # La suite completa lanza Godot, que el runner del worker no tiene (#1656).
+        self.assertNotIn("unittest discover -s scripts -p 'test_*.py'", paso)
+        self.assertNotIn("bash scripts/check_gdscript.sh", paso)
+        # Se conserva el autoformato de .gd antes del --check.
+        self.assertLess(paso.index('gdformat "${gd_files[@]}"'), paso.index("agent_preflight.py"))
+        self.assertIn("gdtoolkit==4.3.4", paso)
+
+
 if __name__ == "__main__":
     unittest.main()

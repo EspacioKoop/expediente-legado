@@ -641,17 +641,23 @@ jobs:
               raise SystemExit("fuera de CLAIM: "+",".join(bad))
           PY
           mapfile -t files < <(git diff --cached --name-only)
-          gd=false; py=false; backend=false
+          gd_files=(); backend=false
           for file in "${files[@]}"; do
-            [[ "$file" == *.gd ]] && gd=true
-            [[ "$file" == scripts/*.py ]] && py=true
+            [[ "$file" == *.gd && -f "$file" ]] && gd_files+=("$file")
             [[ "$file" == backend/* ]] && backend=true
           done
-          if [[ "$gd" == true ]]; then
-            bash scripts/check_gdscript.sh
-          elif [[ "$py" == true ]]; then
-            python3 -m unittest discover -s scripts -p 'test_*.py'
+          if (( ${#gd_files[@]} )); then
+            # gdtoolkit en venv propio (PEP 668). Autoformato como en local, antes
+            # de que el preflight compruebe con --check.
+            python3 -m venv /tmp/gdtoolkit
+            /tmp/gdtoolkit/bin/pip install --quiet --disable-pip-version-check gdtoolkit==4.3.4
+            export PATH="/tmp/gdtoolkit/bin:$PATH"
+            gdformat "${gd_files[@]}"
+            git add -- "${gd_files[@]}"
           fi
+          # Preflight dirigido (#1636): solo lo que toca el diff. La suite completa
+          # necesita Godot y es trabajo del CI canónico que se lanza sobre la PR.
+          python3 scripts/agent_preflight.py --changed "${files[@]}" --report /tmp/agent-preflight.json
           if [[ "$backend" == true ]]; then
             (cd backend && mvn test && npm ci && npm test)
           fi
