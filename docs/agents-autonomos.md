@@ -62,6 +62,12 @@ Orden efectivo del worker Qwen:
 
 Si el equipo local, Tailscale u OmniRoute no están disponibles, el workflow continúa automáticamente por la cadena directa.
 
+### Smoke aislado de proveedores
+
+`.github/workflows/agent-provider-smoke.yml` valida cada slot sin crear trabajo ficticio ni dar permisos de escritura al modelo. El smoke usa Qwen Code únicamente con `read_file`, obliga a leer `AGENTS.md` y exige el marcador `AGENT_PROVIDER_SMOKE_OK file=AGENTS.md`.
+
+Al integrarse o modificarse el workflow, el push a `main` comprueba automáticamente `qwen-fallback-1`. Después puede ejecutarse manualmente desde **Actions → Agent provider smoke** para cualquiera de los cuatro slots. Esto valida conjuntamente secret, URL, modelo, compatibilidad OpenAI y tool-calling básico.
+
 ### Cadena de fallback OpenAI-compatible
 
 El worker Qwen admite además **4 backends de reserva**. Esto permite trasladar al repositorio conexiones de OmniRoute, FreeInference u otros gateways siempre que expongan una API compatible con OpenAI.
