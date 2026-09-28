@@ -9,6 +9,10 @@ var _fallos := 0
 
 
 func _initialize() -> void:
+	call_deferred("_ejecutar_pruebas")
+
+
+func _ejecutar_pruebas() -> void:
 	_probar_fuentes_y_distractor()
 	_probar_determinismo_y_contenido()
 	_probar_contenido_completo_caso_real()
