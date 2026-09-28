@@ -7,11 +7,15 @@ extends Node
 ## controller no publica ni consulta nada. Solo opera en `trayecto`: cambiar de
 ## fase cierra la sala y desmonta las presencias remotas.
 
+const IdentidadOnline = preload("res://guion/red/identidad_online.gd")
 const PresenciaDatos = preload("res://guion/red/presencia_datos.gd")
 const PresenciaServicio = preload("res://guion/red/presencia_servicio.gd")
 const PresenciaRemota3D = preload("res://guion/red/presencia_remota_3d.gd")
+const PresenciaSalaPanel = preload("res://guion/red/presencia_sala_panel.gd")
 const TransporteNulo = preload("res://guion/red/transporte_nulo.gd")
+const TransporteWebSocket = preload("res://guion/red/transporte_websocket.gd")
 
+const AJUSTE_ENDPOINT := "multiplayer/presencia/websocket_url"
 const FASE_COMPARTIDA := "trayecto"
 const SCENE_KEY := "trayecto"
 const NOMBRE_RAIZ := "PresenciasCoopRemotas"
@@ -31,17 +35,26 @@ var _mundo_id := 0
 var _raiz_remota: Node3D
 var _avatares: Dictionary = {}
 var _ultimo_visto: Dictionary = {}
+var _capa_ui: CanvasLayer
+var _boton_sala: Button
+var _panel_sala: PresenciaSalaPanel
+var _caminante_ui: Node
+var _modo_caminante_previo := Node.PROCESS_MODE_INHERIT
+var _mouse_previo := Input.MOUSE_MODE_CAPTURED
 
 
 func _ready() -> void:
 	_host = get_parent()
+	call_deferred("_asegurar_ui")
 
 
 func _process(delta: float) -> void:
+	_sincronizar_ui()
 	procesar(delta)
 
 
 func _exit_tree() -> void:
+	_cerrar_panel()
 	desactivar_sala()
 
 
@@ -95,7 +108,56 @@ func desactivar_sala() -> Dictionary:
 	_acumulado_publicar = 0.0
 	_acumulado_consultar = 0.0
 	_limpiar_remotos()
+	_actualizar_lista_participantes()
+	_actualizar_boton_sala()
 	return resultado
+
+
+func conectar_codigo(codigo: String) -> Dictionary:
+	var normalizado := PresenciaSalaPanel.normalizar_codigo(codigo)
+	if not PresenciaSalaPanel.codigo_valido(normalizado) or not PresenciaDatos.validar_room_id(normalizado):
+		var invalido := {"ok": false, "status": "invalid_room_id"}
+		_mostrar_estado_sala(invalido)
+		return invalido
+
+	var endpoint := String(ProjectSettings.get_setting(AJUSTE_ENDPOINT, "")).strip_edges()
+	if endpoint.is_empty():
+		var sin_endpoint := {"ok": false, "status": "unconfigured"}
+		_mostrar_estado_sala(sin_endpoint)
+		return sin_endpoint
+
+	var identidad := IdentidadOnline.new()
+	var carga := identidad.cargar()
+	if not bool(carga.get("ok", false)):
+		var invalida := {"ok": false, "status": "identity_unavailable"}
+		_mostrar_estado_sala(invalida)
+		return invalida
+	if not identidad.activa():
+		var habilitada := identidad.habilitar()
+		if not bool(habilitada.get("ok", false)):
+			_mostrar_estado_sala(habilitada)
+			return habilitada
+
+	var actor_id := identidad.actor_public_id()
+	var resultado := activar_sala(normalizado, TransporteWebSocket.new(endpoint), actor_id)
+	_mostrar_estado_sala(resultado)
+	return resultado
+
+
+func ocultar_participante(actor_public_id: String) -> bool:
+	if _servicio == null or not _servicio.activa():
+		return false
+	if not _servicio.ocultar_participante(actor_public_id):
+		return false
+	var avatar = _avatares.get(actor_public_id)
+	if avatar != null and is_instance_valid(avatar):
+		if avatar.get_parent() != null:
+			avatar.get_parent().remove_child(avatar)
+		avatar.queue_free()
+	_avatares.erase(actor_public_id)
+	_ultimo_visto.erase(actor_public_id)
+	_actualizar_lista_participantes()
+	return true
 
 
 func hacer_gesto(gesto: String) -> bool:
@@ -116,6 +178,7 @@ func procesar(delta: float, ahora_unix: int = -1) -> void:
 		return
 	if _servicio != null:
 		_servicio.procesar(delta)
+		_actualizar_estado_red()
 	if not _host.has_method("get") or not is_instance_valid(_host._mundo):
 		return
 
@@ -145,6 +208,7 @@ func estado() -> Dictionary:
 		"room_id": _room_id,
 		"actor_public_id": _actor_public_id,
 		"remotos": _avatares.size(),
+		"red": _estado_red(),
 	}
 
 
@@ -197,6 +261,7 @@ func _aplicar_remoto(evento: Dictionary, ahora_unix: int) -> void:
 
 	if avatar.aplicar_evento(evento):
 		_ultimo_visto[actor_id] = ahora_unix
+		_actualizar_lista_participantes()
 
 
 func _limpiar_expirados(ahora_unix: int) -> void:
@@ -211,6 +276,7 @@ func _limpiar_expirados(ahora_unix: int) -> void:
 			avatar.queue_free()
 		_avatares.erase(actor_id)
 		_ultimo_visto.erase(actor_id)
+	_actualizar_lista_participantes()
 
 
 func _asegurar_raiz_remota() -> bool:
@@ -241,6 +307,142 @@ func _limpiar_remotos() -> void:
 			_raiz_remota.get_parent().remove_child(_raiz_remota)
 		_raiz_remota.queue_free()
 	_raiz_remota = null
+
+
+func _asegurar_ui() -> void:
+	if is_instance_valid(_capa_ui):
+		return
+	if _host == null or not is_instance_valid(_host):
+		return
+
+	_capa_ui = CanvasLayer.new()
+	_capa_ui.name = "PresenciaCoopUI"
+	_capa_ui.layer = 38
+	add_child(_capa_ui)
+
+	_panel_sala = PresenciaSalaPanel.new()
+	_panel_sala.name = "PanelPresenciaCoop"
+	_panel_sala.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	_panel_sala.position = Vector2(-260.0, -150.0)
+	_panel_sala.crear_sala_solicitada.connect(_al_crear_sala)
+	_panel_sala.unirse_sala_solicitada.connect(_al_unirse_sala)
+	_panel_sala.salir_sala_solicitada.connect(_salir_sala_desde_ui)
+	_panel_sala.ocultar_participante_solicitado.connect(ocultar_participante)
+	_panel_sala.cerrar_solicitado.connect(_cerrar_panel)
+	_capa_ui.add_child(_panel_sala)
+
+	_boton_sala = Button.new()
+	_boton_sala.name = "AbrirPresenciaCoop"
+	_boton_sala.text = _panel_sala.texto("boton")
+	_boton_sala.accessibility_name = _panel_sala.texto("titulo")
+	_boton_sala.focus_mode = Control.FOCUS_ALL
+	_boton_sala.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	_boton_sala.offset_left = 18.0
+	_boton_sala.offset_top = -58.0
+	_boton_sala.offset_right = 108.0
+	_boton_sala.offset_bottom = -18.0
+	_boton_sala.pressed.connect(_abrir_panel)
+	_capa_ui.add_child(_boton_sala)
+	_sincronizar_ui()
+
+
+func _sincronizar_ui() -> void:
+	if not is_instance_valid(_capa_ui):
+		_asegurar_ui()
+	if not is_instance_valid(_boton_sala):
+		return
+	var en_trayecto := _fase_actual() == FASE_COMPARTIDA
+	_boton_sala.visible = en_trayecto
+	if not en_trayecto and is_instance_valid(_panel_sala) and _panel_sala.visible:
+		_cerrar_panel()
+	_actualizar_boton_sala()
+
+
+func _abrir_panel() -> void:
+	if _fase_actual() != FASE_COMPARTIDA:
+		return
+	_asegurar_ui()
+	if not is_instance_valid(_panel_sala):
+		return
+	_mouse_previo = Input.mouse_mode
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	_caminante_ui = _host.get("_caminante") if _host != null else null
+	if is_instance_valid(_caminante_ui):
+		_modo_caminante_previo = _caminante_ui.process_mode
+		_caminante_ui.process_mode = Node.PROCESS_MODE_DISABLED
+	_panel_sala.abrir(_room_id)
+	_actualizar_lista_participantes()
+	if _activa:
+		_actualizar_estado_red()
+
+
+func _cerrar_panel() -> void:
+	if is_instance_valid(_panel_sala):
+		_panel_sala.cerrar()
+	if is_instance_valid(_caminante_ui):
+		_caminante_ui.process_mode = _modo_caminante_previo
+	_caminante_ui = null
+	Input.mouse_mode = _mouse_previo
+
+
+func _al_crear_sala(codigo: String) -> void:
+	conectar_codigo(codigo)
+
+
+func _al_unirse_sala(codigo: String) -> void:
+	conectar_codigo(codigo)
+
+
+func _salir_sala_desde_ui() -> void:
+	desactivar_sala()
+	if is_instance_valid(_panel_sala):
+		_panel_sala.mostrar_estado("closed")
+
+
+func _mostrar_estado_sala(resultado: Dictionary) -> void:
+	if not is_instance_valid(_panel_sala):
+		return
+	_panel_sala.mostrar_estado(
+		String(resultado.get("status", "error")),
+		{"room_id": _room_id},
+	)
+	_actualizar_boton_sala()
+
+
+func _actualizar_estado_red() -> void:
+	if not _activa:
+		return
+	var estado_red := _estado_red()
+	if is_instance_valid(_panel_sala) and _panel_sala.visible:
+		_panel_sala.mostrar_estado(String(estado_red.get("status", "error")), {"room_id": _room_id})
+	_actualizar_boton_sala()
+
+
+func _estado_red() -> Dictionary:
+	if _servicio == null or not _servicio.activa():
+		return {"ok": true, "status": "inactive", "online": false}
+	var estado_transporte := _servicio.estado_transporte()
+	if not estado_transporte is Dictionary:
+		return {"ok": false, "status": "transport_unavailable", "online": false}
+	return estado_transporte
+
+
+func _actualizar_boton_sala() -> void:
+	if not is_instance_valid(_boton_sala) or not is_instance_valid(_panel_sala):
+		return
+	_boton_sala.text = _panel_sala.texto("boton")
+	if _activa and not _room_id.is_empty():
+		_boton_sala.text += " · " + _room_id
+
+
+func _actualizar_lista_participantes() -> void:
+	if not is_instance_valid(_panel_sala):
+		return
+	var actores: Array[String] = []
+	for actor in _avatares.keys():
+		actores.append(String(actor))
+	actores.sort()
+	_panel_sala.actualizar_participantes(actores)
 
 
 func _fase_actual() -> String:
