@@ -157,11 +157,14 @@ static func validar_payload(payload: Variant) -> Dictionary:
 	if not _id_valido(minigame_id, MAX_MINIGAME_ID):
 		return _invalido("invalid_minigame_id")
 
-	if typeof(payload["rules_version"]) != TYPE_INT or int(payload["rules_version"]) <= 0:
+	var rules_version := _entero_json(payload["rules_version"])
+	if rules_version <= 0:
 		return _invalido("invalid_rules_version")
-	if typeof(payload["sequence"]) != TYPE_INT or int(payload["sequence"]) < 0:
+	var sequence := _entero_json(payload["sequence"])
+	if sequence < 0:
 		return _invalido("invalid_sequence")
-	if typeof(payload["turn"]) != TYPE_INT or int(payload["turn"]) < 0:
+	var turn := _entero_json(payload["turn"])
+	if turn < 0:
 		return _invalido("invalid_turn")
 
 	var action = payload["action"]
@@ -177,9 +180,9 @@ static func validar_payload(payload: Variant) -> Dictionary:
 			"room_id": room_id,
 			"session_id": session_id,
 			"minigame_id": minigame_id,
-			"rules_version": int(payload["rules_version"]),
-			"sequence": int(payload["sequence"]),
-			"turn": int(payload["turn"]),
+			"rules_version": rules_version,
+			"sequence": sequence,
+			"turn": turn,
 			"action": validacion_action["action"],
 		},
 	}
@@ -205,6 +208,17 @@ static func _validar_action(action: Variant) -> Dictionary:
 			return {"ok": false, "reason": "forbidden_result_field", "action": {}}
 
 	return {"ok": true, "reason": "", "action": action.duplicate(true)}
+
+
+static func _entero_json(valor: Variant) -> int:
+	if typeof(valor) == TYPE_INT:
+		return int(valor)
+	if typeof(valor) != TYPE_FLOAT or not is_finite(float(valor)):
+		return -1
+	var numero := float(valor)
+	if numero != floor(numero):
+		return -1
+	return int(numero)
 
 
 static func _id_valido(valor: String, maximo: int) -> bool:
