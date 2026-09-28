@@ -1,4 +1,5 @@
 import importlib.util
+import itertools
 import sys
 import unittest
 from datetime import datetime, timezone
@@ -22,8 +23,14 @@ def issue(number, *labels, updated="2026-09-28T12:00:00Z"):
     }
 
 
+_IDS = itertools.count(1)
+
+
 def comment(body):
-    return {"body": body}
+    # La capa de #182 necesita id y fecha: orden de creación y lease vigente
+    # respecto al `now` de los tests (2026-09-28T16:00Z).
+    ident = next(_IDS)
+    return {"id": ident, "created_at": f"2026-09-28T15:{ident % 60:02d}:00Z", "body": body}
 
 
 class AgentReconcilerTest(unittest.TestCase):
@@ -210,6 +217,20 @@ class AgentReconcilerTest(unittest.TestCase):
         self.assertNotIn("`$", workflow)
         self.assertRegex(workflow, r"--json\s+number,state,headRefName,title,body")
 
+
+    def test_lee_182_completo_con_la_capa_unica(self):
+        # #1662: sin ventana de 300 comentarios ni parser propio de CLAIM.
+        workflow = (ROOT / ".github" / "workflows" / "agent-reconciler.yml").read_text(encoding="utf-8")
+        self.assertNotIn("comments[-300:]", workflow)
+        self.assertIn("--jq '.[]|{id,created_at,body}'", workflow)
+        fuente = MODULE_PATH.read_text(encoding="utf-8")
+        self.assertIn("reservas_registro.vigentes(", fuente)
+        self.assertNotIn("CLAIM_RE", fuente)
+
+    def test_claim_caducado_no_cuenta_como_activo(self):
+        vieja = {"id": 1, "created_at": "2026-09-20T10:00:00Z",
+                 "body": "CLAIM issue=#40 agent=Pool-qwen branch=agent/qwen-40-1 files=a goal=x lease=48h"}
+        self.assertEqual({}, mod.active_claims([vieja], self.now))
 
 if __name__ == "__main__":
     unittest.main()
