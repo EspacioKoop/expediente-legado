@@ -143,7 +143,53 @@ class ConflictosTest(unittest.TestCase):
         self.assertEqual(["feature/10-a"], [c["branch"] for c in json.loads(salida)["conflicts"]])
 
 
+class RutasDeRamaTest(unittest.TestCase):
+    def test_devuelve_la_reserva_vigente_mas_reciente_de_la_rama(self):
+        com = [
+            comentario(1, claim(10, "agent/qwen-10-1", "a.gd")),
+            comentario(2, claim(10, "agent/qwen-10-1", "a.gd,b.gd")),
+            comentario(3, claim(11, "feature/11-x", "c.gd")),
+        ]
+        self.assertEqual(
+            {"found": True, "issue": 10, "files": ["a.gd", "b.gd"]},
+            rr.rutas_de_rama(com, "agent/qwen-10-1", T0),
+        )
+
+    def test_rama_liberada_o_caducada_no_tiene_rutas(self):
+        com = [
+            comentario(1, claim(10, "agent/qwen-10-1", "a.gd", lease="1h")),
+            comentario(2, claim(11, "agent/qwen-11-2", "b.gd")),
+            comentario(3, "RELEASE issue=#11 branch=agent/qwen-11-2 motivo=x"),
+        ]
+        self.assertEqual({"found": False}, rr.rutas_de_rama(com, "agent/qwen-10-1", T0 + timedelta(hours=2)))
+        self.assertEqual({"found": False}, rr.rutas_de_rama(com, "agent/qwen-11-2", T0))
+
+
 class WorkflowsUsanLaCapaTest(unittest.TestCase):
+    def _paso(self, workflow, nombre):
+        texto = (ROOT / ".github" / "workflows" / workflow).read_text(encoding="utf-8")
+        return texto.split(f"name: {nombre}", 1)[1].split("\n      - ", 1)[0]
+
+    def test_ningun_workflow_de_agentes_parsea_182_por_su_cuenta(self):
+        for workflow in ("agent-worker.yml", "agent-autopilot.yml", "agent-ci-repair.yml"):
+            with self.subTest(workflow=workflow):
+                texto = (ROOT / ".github" / "workflows" / workflow).read_text(encoding="utf-8")
+                self.assertNotIn("reservas.tsv", texto)
+                self.assertNotRegex(texto, r"re\.compile\(r\"\^CLAIM")
+
+    def test_autopilot_reserva_con_la_capa(self):
+        paso = self._paso("agent-autopilot.yml", "Validar plan y reservar")
+        self.assertIn("python3 scripts/reservas_registro.py conflictos", paso)
+        self.assertIn("CLAIM perdido", paso)
+
+    def test_ci_repair_toma_la_capa_de_main(self):
+        paso = self._paso("agent-ci-repair.yml", "Recuperar CLAIM activo")
+        # La rama reparada puede ser anterior a la capa: se usa la de main.
+        self.assertIn("git fetch --quiet --depth 1 origin main", paso)
+        self.assertIn('git show "FETCH_HEAD:scripts/$modulo"', paso)
+        self.assertIn("python3 /tmp/capa182/reservas_registro.py rutas", paso)
+        self.assertIn("> .agent-plan.json", paso)
+
     def test_worker_reserva_con_la_capa_y_sin_parser_propio(self):
         worker = (ROOT / ".github" / "workflows" / "agent-worker.yml").read_text(encoding="utf-8")
         paso = worker.split("name: Validar plan y reservar rutas", 1)[1].split("\n      - ", 1)[0]

@@ -154,26 +154,23 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
+          set -euo pipefail
           gh api --paginate "repos/$GITHUB_REPOSITORY/issues/182/comments?per_page=100" \
-            --jq '.[]|[.id,(.body|@base64)]|@tsv' > /tmp/reservas.tsv
-          BRANCH="$BRANCH" python3 - <<'PY'
-          import base64,json,os,re
-          branch=os.environ["BRANCH"]; active={}
-          cr=re.compile(r"^CLAIM\s+issue=#(\d+).*?\bbranch=([^\s]+).*?\bfiles=([^\s]+)",re.M)
-          rr=re.compile(r"^RELEASE\s+issue=#(\d+)(?:.*?\bbranch=([^\s]+))?",re.M)
-          for line in open("/tmp/reservas.tsv",encoding="utf-8"):
-              _,enc=line.rstrip("\n").split("\t",1)
-              body=base64.b64decode(enc).decode("utf-8","replace")
-              for m in rr.finditer(body):
-                  issue,br=m.groups()
-                  for k in list(active):
-                      if active[k][0]==issue and (not br or br==k): del active[k]
-              for m in cr.finditer(body):
-                  issue,br,fs=m.groups(); active[br]=(issue,fs.split(","))
-          if branch not in active: raise SystemExit("sin CLAIM activo")
-          issue,files=active[branch]
-          open(".agent-plan.json","w",encoding="utf-8").write(json.dumps({"files":files},ensure_ascii=False))
-          PY
+            --jq '.[]|{id,created_at,body}' | jq -s '.' > /tmp/reservas.json
+          # Capa única de lectura de #182 (#1662): respeta lease y PR_READY. Se toma
+          # de main, no de la rama reparada, que puede ser anterior a la capa.
+          mkdir -p /tmp/capa182
+          git fetch --quiet --depth 1 origin main
+          for modulo in reservas_registro.py gestionar_reservas.py; do
+            git show "FETCH_HEAD:scripts/$modulo" > "/tmp/capa182/$modulo"
+          done
+          python3 /tmp/capa182/reservas_registro.py rutas \
+            --comments /tmp/reservas.json --branch "$BRANCH" > /tmp/reserva.json
+          if [[ "$(jq -r '.found' /tmp/reserva.json)" != true ]]; then
+            echo "sin CLAIM activo" >&2
+            exit 1
+          fi
+          jq -c '{files: .files}' /tmp/reserva.json > .agent-plan.json
 
       - name: Cargar Normas Platino, wiki y memoria
         if: steps.limit.outputs.run == 'true'
