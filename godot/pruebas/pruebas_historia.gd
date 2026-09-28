@@ -87,7 +87,9 @@ static func _aplazamiento_no_orienta_decision(comprobar: Callable) -> void:
 		2
 	)
 	comprobar.call("la historia sigue marcada como pospuesta", vista_despues["estado"], "pospuesta")
-	comprobar.call("aplazar no reordena ni cambia opciones", vista_despues["opciones"], opciones_antes)
+	comprobar.call(
+		"aplazar no reordena ni cambia opciones", vista_despues["opciones"], opciones_antes
+	)
 	comprobar.call(
 		"aplazar no reduce decisiones pendientes", historias.pendientes(estado), pendientes_antes
 	)
