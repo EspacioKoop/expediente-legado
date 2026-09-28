@@ -1,0 +1,96 @@
+name: Agent queue feeder
+
+on:
+  schedule:
+    - cron: '19 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  actions: write
+
+concurrency:
+  group: agent-queue-feeder
+  cancel-in-progress: false
+
+jobs:
+  feed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Crear labels del feeder
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create agent:no-auto --repo "$GITHUB_REPOSITORY" --color B60205 \
+            --description "Excluir este issue del feeder automatico" --force
+          gh label create agent:decompose --repo "$GITHUB_REPOSITORY" --color C5DEF5 \
+            --description "Descomponer issue en cortes pequenos" --force
+
+      - id: select
+        name: Seleccionar un candidato conservador
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          queued=0
+          for label in agent:auto agent:pool agent:qwen agent:gemini agent:decompose; do
+            count="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+              --label "$label" --limit 100 --json number --jq 'length')"
+            queued=$((queued + count))
+          done
+          if (( queued > 0 )); then
+            echo "Hay $queued tareas en cola/planificacion; feeder no añade otra."
+            echo "selected=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          gh issue list --repo "$GITHUB_REPOSITORY" --state open --limit 100 \
+            --json number,title,body,labels,createdAt,updatedAt > /tmp/feeder-issues.json
+          gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 100 \
+            --json number,body > /tmp/feeder-prs.json
+
+          python3 scripts/agent_feeder.py \
+            --issues /tmp/feeder-issues.json \
+            --prs /tmp/feeder-prs.json \
+            --output /tmp/agent-feeder.json
+
+          number="$(jq -r '.selected.number // empty' /tmp/agent-feeder.json)"
+          title="$(jq -r '.selected.title // empty' /tmp/agent-feeder.json)"
+          score="$(jq -r '.selected.score // 0' /tmp/agent-feeder.json)"
+          eligible="$(jq -r '.eligible' /tmp/agent-feeder.json)"
+          echo "Candidatos elegibles: $eligible"
+          if [[ -z "$number" ]]; then
+            echo "No hay candidato seguro para alimentar la pool."
+            echo "selected=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Seleccionado #$number (score=$score): $title"
+          echo "selected=$number" >> "$GITHUB_OUTPUT"
+          echo "score=$score" >> "$GITHUB_OUTPUT"
+
+      - name: Enviar candidato al planner
+        if: steps.select.outputs.selected != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ steps.select.outputs.selected }}
+          SCORE: ${{ steps.select.outputs.score }}
+        run: |
+          set -euo pipefail
+          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:decompose >/dev/null
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+            "Agent feeder: seleccionado conservadoramente (score=$SCORE). Pasa primero por agent:decompose; no entra directamente a implementación. Añade agent:no-auto para excluirlo de futuros ciclos." \
+            >/dev/null || true
+
+          # Los eventos creados con GITHUB_TOKEN no encadenan otro workflow.
+          # Se despacha explícitamente el planner para que el feeder sea inmediato.
+          gh workflow run agent-decompose.yml --repo "$GITHUB_REPOSITORY" --ref main \
+            -f issue="$ISSUE"
