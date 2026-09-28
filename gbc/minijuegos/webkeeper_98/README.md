@@ -24,7 +24,7 @@ Perder no reinicia el torneo: se repite **solo el partido actual**. Tras dos der
 
 ## Integración
 
-La ROM se reserva como `webkeeper_98` y permanece `en_proyecto` hasta que el handshake quede conectado al runtime.
+`webkeeper_98` es una ROM jugable del catálogo y entra en el build de runtime. Se vende como cartucho opcional en la tienda de videojuegos; no viene incluida de serie.
 
 - cabecera: `WEBKEEPER98`;
 - modo CGB: dual (`0x80`);
@@ -32,4 +32,4 @@ La ROM se reserva como `webkeeper_98` y permanece `en_proyecto` hasta que el han
 - completar de verdad la final escribe `0xA5` en WRAM `$C100`;
 - arrancar, ganar solo uno o dos partidos, perder o reintentar nunca escribe el handshake.
 
-El futuro consumidor debe usar `rom:webkeeper_98` como fuente estable y activar `anansi_akan` mediante `SemillasOniricas`, sin lógica especial dentro del emulador.
+`Webkeeper98Vigilia`, montado en la casa real desde el controller de Anansi, observa la cabecera `WEBKEEPER98` y solo registra `anansi_akan` cuando lee `0xA5` en `$C100`. La fuente estable es `rom:webkeeper_98`; comprar o arrancar la ROM no activa nada. La consola y el emulador permanecen genéricos.
