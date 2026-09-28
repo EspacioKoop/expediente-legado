@@ -204,8 +204,10 @@ func _probar_superficie_opt_in() -> void:
 	_comprobar("identidad coop empieza desactivada", identidad.cargar()["status"], "disabled")
 	_comprobar("opt-in crea pseudónimo local", identidad.habilitar()["ok"], true)
 
+	var transporte_ui := TransporteFixture.new()
 	var panel := VentanillaCoopAcceso.new()
-	panel.configurar_prueba(RUTA_IDENTIDAD, TransporteFixture.new())
+	panel.configurar_prueba(RUTA_IDENTIDAD, transporte_ui)
+	panel.ahora_override = AHORA
 	root.add_child(panel)
 	_comprobar("montar panel no abre sala", panel.get("_servicio") == null, true)
 	var sala := panel.get_node("FilaSalaCoop/SalaCoop") as LineEdit
@@ -213,6 +215,43 @@ func _probar_superficie_opt_in() -> void:
 	panel.call("_entrar_sala")
 	_comprobar("entrada explícita abre sala", panel.get("_servicio") != null, true)
 	_comprobar("sala queda bloqueada mientras está activa", sala.editable, false)
+	var acciones := panel.get_node("AccionesCoop") as HBoxContainer
+	_comprobar("sala activa muestra las tres acciones", acciones.get_child_count(), 3)
+
+	var propias := ["objecion", "silencio", "insistencia"]
+	var pareja := ["silencio", "silencio", "objecion"]
+	for ronda in range(3):
+		panel.ahora_override = AHORA + ronda
+		panel.call("_elegir", propias[ronda])
+		var boton := panel.get_node("AccionesCoop/AccionCoop_%s" % propias[ronda]) as Button
+		_comprobar("elegir bloquea repetición %d" % ronda, boton.disabled, true)
+		var remota := CombateCoopDatos.crear_eleccion(
+			"ventanilla_coop",
+			"test-ui-380",
+			"anon-pareja",
+			"SALA-UI-380",
+			"ventanilla-experimental",
+			ronda,
+			pareja[ronda],
+			AHORA + ronda,
+			"ui-pareja-%d" % ronda
+		)
+		transporte_ui.inyectar(remota["event"])
+		panel._process(VentanillaCoopAcceso.INTERVALO_CONSULTA + 0.01)
+		_comprobar(
+			"la UI consume una ronda completa %d" % ronda,
+			panel.get("_sesion").get("historial", []).size(),
+			ronda + 1
+		)
+
+	_comprobar(
+		"tres rondas terminan la sesión UI", panel.get("_sesion").get("terminado", false), true
+	)
+	_comprobar(
+		"la superficie publica exactamente tres elecciones propias",
+		transporte_ui.publicados().size(),
+		3
+	)
 	panel.call("_cerrar_sala")
 	_comprobar("cerrar sala libera el servicio", panel.get("_servicio") == null, true)
 	_comprobar("cerrar sala no desactiva identidad", identidad.cargar()["status"], "enabled")
