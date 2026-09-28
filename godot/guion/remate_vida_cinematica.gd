@@ -22,8 +22,6 @@ const CAJA := Color("876f50")
 ## `estado` se lee, nunca se modifica. Las partidas anteriores a #100 son
 ## válidas porque `RemateVida.resumir()` ya define valores compatibles.
 static func planos_de(estado: Dictionary, vistas: int = 0) -> Array:
-	var resumen := RemateVida.resumir(estado)
-	var variante := RemateVida.variante(estado)
 	return (
 		Cinematica
 		. resolver(
@@ -31,7 +29,7 @@ static func planos_de(estado: Dictionary, vistas: int = 0) -> Array:
 				{
 					"tipo": "2d",
 					"segundos": 1.4,
-					"figura": _figura(variante, resumen),
+					"figura": figura_de(estado),
 					"desde": Vector2.ZERO,
 					"hasta": Vector2.ZERO,
 				}
@@ -40,6 +38,13 @@ static func planos_de(estado: Dictionary, vistas: int = 0) -> Array:
 			vistas
 		)
 	)
+
+
+## Expone la composición sin reproducir una cinemática para que otros finales
+## puedan reutilizar exactamente la misma capa visual.
+static func figura_de(estado: Dictionary) -> Array:
+	var resumen := RemateVida.resumir(estado)
+	return _figura(RemateVida.variante(estado), resumen)
 
 
 static func _figura(variante: String, resumen: Dictionary) -> Array:
