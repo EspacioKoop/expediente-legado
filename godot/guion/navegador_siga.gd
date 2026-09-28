@@ -304,7 +304,7 @@ func _construir_interfaz() -> void:
 
 	_directorio_boton = Button.new()
 	_directorio_boton.name = "DirectorioWeb98"
-	_directorio_boton.text = "Directorio"
+	_directorio_boton.text = tr("NAVEGADOR_DIRECTORIO")
 	_directorio_boton.pressed.connect(abrir_directorio)
 	barra_busqueda.add_child(_directorio_boton)
 
@@ -751,7 +751,7 @@ func _mostrar_directorio_categorias() -> void:
 	_cache.visible = false
 	_descargar_software.visible = false
 	_paquete_software_actual = ""
-	_pagina.text = "[b]Directorio Red 98[/b]\nSitios ordenados a mano por categorías."
+	_pagina.text = tr("NAVEGADOR_DIRECTORIO_PORTADA")
 	_enlaces.clear()
 	for categoria in _indice.categorias():
 		var categoria_id := String(categoria.get("id", ""))
@@ -778,7 +778,7 @@ func _mostrar_directorio_categoria(categoria_id: String) -> void:
 	_cache.visible = false
 	_descargar_software.visible = false
 	_paquete_software_actual = ""
-	_pagina.text = "[b]%s[/b]\n%d sitios disponibles." % [titulo, recursos.size()]
+	_pagina.text = tr("NAVEGADOR_DIRECTORIO_CATEGORIA") % [titulo, recursos.size()]
 	_enlaces.clear()
 	for recurso in recursos:
 		var item := _enlaces.add_item(
