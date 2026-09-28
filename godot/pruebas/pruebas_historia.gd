@@ -19,6 +19,7 @@ static func catalogo(comprobar: Callable) -> void:
 	_contrato_ideologico(comprobar)
 	_contexto_narrativo(comprobar)
 	_historial_acumulativo(comprobar)
+	_aplazamiento_no_orienta_decision(comprobar)
 
 
 static func _historial_acumulativo(comprobar: Callable) -> void:
@@ -54,6 +55,46 @@ static func _historial_acumulativo(comprobar: Callable) -> void:
 	comprobar.call("el diario conserva la vuelta", diario[-1]["vuelta"], 2)
 	comprobar.call(
 		"resolver limpia la marca pendiente", historias.esta_pospuesta(estado, "la-justicia"), false
+	)
+
+
+static func _aplazamiento_no_orienta_decision(comprobar: Callable) -> void:
+	var historias := Historias.new()
+	comprobar.call("la neutralidad carga el catálogo", historias.cargar(), true)
+	var estado := Partida.nueva()
+	var carta := "la-justicia"
+	var vista_antes := historias.vista(estado, carta)
+	var opciones_antes: Array = vista_antes["opciones"].duplicate(true)
+	var pendientes_antes := historias.pendientes(estado)
+	var inventario_antes: Dictionary = estado["inventario"].duplicate(true)
+	var jornada_antes: Dictionary = estado["jornada"].duplicate(true)
+	var pistas_antes: Array = estado["pistas_descubiertas"].duplicate(true)
+	var sellos_antes: Array = estado["sellos_obtenidos"].duplicate(true)
+	var elecciones_antes := Prometeo.conteo_elecciones_ideologicas(estado)
+	var vida_antes := int(estado["vida"])
+
+	for intento in range(3):
+		comprobar.call(
+			"aplazar sigue siendo válido en intento %d" % (intento + 1),
+			historias.postergar(estado, carta),
+			true
+		)
+
+	var vista_despues := historias.vista(estado, carta)
+	comprobar.call("tres aplazamientos elevan solo la presión descriptiva", historias.presion_indecision(estado)["nivel"], 2)
+	comprobar.call("la historia sigue marcada como pospuesta", vista_despues["estado"], "pospuesta")
+	comprobar.call("aplazar no reordena ni cambia opciones", vista_despues["opciones"], opciones_antes)
+	comprobar.call("aplazar no reduce decisiones pendientes", historias.pendientes(estado), pendientes_antes)
+	comprobar.call("aplazar no registra una elección", estado["historias_cartas"], {})
+	comprobar.call("aplazar no cambia el inventario", estado["inventario"], inventario_antes)
+	comprobar.call("aplazar no cambia la jornada", estado["jornada"], jornada_antes)
+	comprobar.call("aplazar no cambia pistas", estado["pistas_descubiertas"], pistas_antes)
+	comprobar.call("aplazar no cambia sellos", estado["sellos_obtenidos"], sellos_antes)
+	comprobar.call("aplazar no cambia la vida", int(estado["vida"]), vida_antes)
+	comprobar.call(
+		"aplazar no registra una preferencia política",
+		Prometeo.conteo_elecciones_ideologicas(estado),
+		elecciones_antes
 	)
 
 
