@@ -146,14 +146,39 @@ jobs:
           echo "fallback_keys=$(python3 scripts/agent_slots.py usables)" >> "$GITHUB_OUTPUT"
           printf '%s\n' "$workers" > /tmp/workers-configured.json
 
-          # #1600: credencial configurada no equivale a slot saludable. Los workers
-          # que reportaron 429/503 de cuota quedan fuera solo hasta que expire su
-          # cooldown global registrado en el registro de reservas. Tras el rollover
-          # (#1713) los marcadores nuevos van al registro activo: se lee el
-          # historial combinado, no el #182 congelado.
-          python3 scripts/gestionar_reservas_rollover.py --comments-output /tmp/registro-reservas.json
-          jq '[.[-200:][] | {body:.body}]' /tmp/registro-reservas.json > /tmp/provider-health.json
-          NOW_EPOCH="$(date +%s)" python3 - <<'PY'
+          # #1728: Deno KV es la fuente primaria del circuit breaker por
+          # worker. Si el endpoint no está desplegado o falla, se conserva el
+          # parser histórico de #1713 como fallback durante la migración.
+          health_from_deno=false
+          if [[ -n "${CONTROL_URL:-}" ]]; then
+            base="${CONTROL_URL%/}"
+            base="${base%/api/report}"
+            if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+              "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")" &&
+              oidc_token="$(jq -er '.value' <<<"$oidc_json")"; then
+              worker_ids="$(jq -c '[.[].worker]' /tmp/workers-configured.json)"
+              payload="$(jq -nc --argjson workers "$worker_ids" '{schema:1,workers:$workers}')"
+              if curl -fsS -X POST "$base/api/agent-pool/worker-health/status" \
+                -H "Authorization: Bearer $oidc_token" \
+                -H 'Content-Type: application/json' \
+                --data "$payload" -o /tmp/worker-health-kv.json; then
+                unhealthy="$(jq -c '[.unhealthy[]?.worker]' /tmp/worker-health-kv.json)"
+                jq --argjson unhealthy "$unhealthy" \
+                  'map(. + {healthy: (.worker as $w | ($unhealthy | index($w) | not))})' \
+                  /tmp/workers-configured.json > /tmp/workers.json
+                health_from_deno=true
+                if [[ "$(jq 'length' <<<"$unhealthy")" -gt 0 ]]; then
+                  echo "Slots en cooldown (Deno KV): $(jq -r 'join(",")' <<<"$unhealthy")"
+                fi
+              fi
+            fi
+          fi
+
+          if [[ "$health_from_deno" != true ]]; then
+            echo "::warning::Health KV no disponible; usando cooldowns históricos de #1713."
+            python3 scripts/gestionar_reservas_rollover.py --comments-output /tmp/registro-reservas.json
+            jq '[.[-200:][] | {body:.body}]' /tmp/registro-reservas.json > /tmp/provider-health.json
+            NOW_EPOCH="$(date +%s)" python3 - <<'PY'
           import json, os, re
 
           now=int(os.environ["NOW_EPOCH"])
@@ -187,8 +212,9 @@ jobs:
               worker["healthy"]=worker.get("worker") not in unhealthy
           json.dump(workers,open("/tmp/workers.json","w",encoding="utf-8"))
           if unhealthy:
-              print("Slots en cooldown:", ",".join(sorted(unhealthy)))
+              print("Slots en cooldown (#1713 fallback):", ",".join(sorted(unhealthy)))
           PY
+          fi
 
           # #1621: ranking histórico sin estado adicional. Se usan solo los
           # últimos runs completados del propio pool; si la API falla, score=50.
