@@ -457,11 +457,13 @@ async function leaseStatus(
     return json({ ok: false, error: "invalid_request" }, 400);
   }
 
-  const issues = [...new Set(
-    input.issues
-      .map(cleanIssue)
-      .filter((issue): issue is number => issue !== null),
-  )].slice(0, AGENT_POOL_STATUS_LIMIT);
+  const issues = [
+    ...new Set(
+      input.issues
+        .map(cleanIssue)
+        .filter((issue): issue is number => issue !== null),
+    ),
+  ].slice(0, AGENT_POOL_STATUS_LIMIT);
 
   const entries = await Promise.all(
     issues.map((issue) => kv.get<AgentPoolLease>(leaseKey(issue))),
