@@ -104,49 +104,13 @@ func _entrada_vuelta_activa() -> bool:
 	return _ciclo_laboral != null and _ciclo_laboral.entrada_activa()
 
 
-## Luz y ambiente. Una sola direccional, ahora con sombra, y oclusión.
-##
-## Desde #275 el proyecto usa Forward+, que trae sombra real y oclusión de
-## contacto: son ellas las que asientan un objeto contra el suelo, y antes no
-## había ninguna. El relleno ambiental no se toca aquí —cada espacio fija el
-## suyo al entrar con `ambiente_energia`, y este valor es solo el inicial—.
+## Hook heredable de entorno; dia_cielo amplía el resultado tras super.
 func _montar_entorno() -> void:
-	var entorno := WorldEnvironment.new()
-	var ajustes := Environment.new()
-	_ambiente = ajustes
-	ajustes.background_mode = Environment.BG_COLOR
-	ajustes.background_color = Color(0.05, 0.05, 0.06)
-	ajustes.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	ajustes.ambient_light_color = Color(0.55, 0.55, 0.58)
-	# El relleno real lo fija cada espacio al entrar; este es solo el inicial.
-	ajustes.ambient_light_energy = 0.7
-	# Oclusión ambiental y su equivalente para luz indirecta. Las dos son de
-	# Forward+ y son lo que asienta un objeto contra el suelo y contra el muro
-	# cuando la sombra proyectada no llega.
-	ajustes.ssao_enabled = true
-	ajustes.ssao_radius = 0.8
-	ajustes.ssao_intensity = 2.0
-	ajustes.ssil_enabled = true
-	ajustes.ssil_intensity = 0.7
-	entorno.environment = ajustes
-	add_child(entorno)
-	FiltroPantalla.aplicar(entorno, PreferenciasSiga.cargar())
+	var entorno := DiaEntornoApp.montar(self, partida.estado)
+	_ambiente = entorno["ambiente"]
+	_sol = entorno["sol"]
+	_caminante = entorno["caminante"]
 
-	var sol := DirectionalLight3D.new()
-	sol.rotation_degrees = Vector3(-55, -35, 0)
-	sol.light_energy = 0.7
-	sol.shadow_enabled = true
-	sol.shadow_bias = 0.03
-	sol.shadow_normal_bias = 1.4
-	add_child(sol)
-	_sol = sol
-
-	_caminante = load("res://escenas/caminante.tscn").instantiate()
-	# #701: el cuerpo visible usa la ficha de ESTA partida, ya cargada aquí.
-	var cuerpo_jugador := _caminante.get_node_or_null("CuerpoJugador3D") as CuerpoJugador3D
-	if cuerpo_jugador != null:
-		cuerpo_jugador.perfil = partida.estado.get("perfil_jugador", {})
-	add_child(_caminante)
 
 func _montar_interfaz() -> void:
 	var capa := CanvasLayer.new()
