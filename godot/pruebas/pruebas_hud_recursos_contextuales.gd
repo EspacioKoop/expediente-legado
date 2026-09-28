@@ -167,9 +167,7 @@ func _probar_prioridades_exhaustivas() -> void:
 			bool((controles[HUDLayer.ESTADO] as Control).visible),
 			"estado secundario puede convivir sin modal",
 		)
-		var recursos_deberian_verse := (
-			esperada == StringName() or esperada == HUDLayer.INTERACCION
-		)
+		var recursos_deberian_verse := esperada == StringName() or esperada == HUDLayer.INTERACCION
 		_comprobar(
 			bool((controles[HUDLayer.RECURSOS] as Control).visible) == recursos_deberian_verse,
 			"recursos solo conviven con ausencia de primaria o interacción breve",
