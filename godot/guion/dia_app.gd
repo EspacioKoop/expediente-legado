@@ -877,10 +877,11 @@ func _abrir_combate_hack_slash(objetivo: Dictionary, zona: Area3D = null) -> boo
 
 	_pantalla = CanvasLayer.new()
 	add_child(_pantalla)
-	_combate_contextual_app = DiaCombateContextualApp.new()
-	add_child(_combate_contextual_app)
-	_combate_contextual_app.terminado.connect(_cerrar_combate_hack_slash)
-	_combate_contextual_app.abrir(
+	var app := DiaCombateContextualApp.new()
+	_combate_contextual_app = app
+	add_child(app)
+	app.terminado.connect(_cerrar_combate_hack_slash)
+	app.abrir(
 		objetivo,
 		decision,
 		zona,
