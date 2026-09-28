@@ -165,7 +165,7 @@ func _probar() -> void:
 		0.2,
 	)
 	_comprobar(
-		(perfil_sueno["tinte"] as Color) != (perfil_seco["tinte"] as Color),
+		Color(perfil_sueno["tinte"]) != Color(perfil_seco["tinte"]),
 		"el sueño deforma el tinte sin mover la huella",
 	)
 
