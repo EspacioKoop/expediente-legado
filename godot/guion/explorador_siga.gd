@@ -95,12 +95,8 @@ func _construir_interfaz() -> void:
 	_ruta.add_theme_color_override("font_color", TINTA)
 	_ruta.add_theme_color_override("caret_color", FOCO)
 	_ruta.add_theme_color_override("selection_color", Color("#b8d4ea"))
-	_ruta.add_theme_stylebox_override(
-		"normal", _caja(FONDO_RUTA, BORDE, 1, 1, 7.0, 4.0)
-	)
-	_ruta.add_theme_stylebox_override(
-		"focus", _caja(FONDO_RUTA, FOCO, 2, 1, 6.0, 3.0)
-	)
+	_ruta.add_theme_stylebox_override("normal", _caja(FONDO_RUTA, BORDE, 1, 1, 7.0, 4.0))
+	_ruta.add_theme_stylebox_override("focus", _caja(FONDO_RUTA, FOCO, 2, 1, 6.0, 3.0))
 	_ruta.text_submitted.connect(_ruta_introducida)
 	barra.add_child(_ruta)
 
@@ -135,12 +131,8 @@ func _construir_interfaz() -> void:
 	_lista.select_mode = ItemList.SELECT_SINGLE
 	_lista.add_theme_color_override("font_color", TINTA)
 	_lista.add_theme_color_override("font_selected_color", Color("#f7fbff"))
-	_lista.add_theme_stylebox_override(
-		"panel", _caja(FONDO_LISTA, BORDE, 1, 1, 7.0, 6.0)
-	)
-	_lista.add_theme_stylebox_override(
-		"focus", _caja(Color("#d9e8f1"), FOCO, 2, 1, 6.0, 5.0)
-	)
+	_lista.add_theme_stylebox_override("panel", _caja(FONDO_LISTA, BORDE, 1, 1, 7.0, 6.0))
+	_lista.add_theme_stylebox_override("focus", _caja(Color("#d9e8f1"), FOCO, 2, 1, 6.0, 5.0))
 	_lista.item_activated.connect(_activar_indice)
 	contenido.add_child(_lista)
 
@@ -154,9 +146,7 @@ func _construir_interfaz() -> void:
 	_visor.add_theme_stylebox_override(
 		"normal", _caja(FONDO_VISOR, Color("#9d967f"), 1, 1, 10.0, 8.0)
 	)
-	_visor.add_theme_stylebox_override(
-		"focus", _caja(FONDO_VISOR, FOCO, 2, 1, 9.0, 7.0)
-	)
+	_visor.add_theme_stylebox_override("focus", _caja(FONDO_VISOR, FOCO, 2, 1, 9.0, 7.0))
 	_visor.text = tr("EXPLORADOR_VISOR_INICIAL")
 	contenido.add_child(_visor)
 
@@ -176,29 +166,17 @@ func _construir_interfaz() -> void:
 func _estilizar_boton_barra(boton: Button) -> void:
 	boton.add_theme_color_override("font_color", TINTA)
 	boton.add_theme_color_override("font_focus_color", TINTA)
-	boton.add_theme_stylebox_override(
-		"normal", _caja(FONDO_BARRA, BORDE, 1, 1, 7.0, 4.0)
-	)
-	boton.add_theme_stylebox_override(
-		"hover", _caja(FONDO_BARRA_HOVER, BORDE, 1, 1, 7.0, 4.0)
-	)
-	boton.add_theme_stylebox_override(
-		"pressed", _caja(FONDO_BARRA_PULSADA, BORDE, 1, 1, 7.0, 4.0)
-	)
-	boton.add_theme_stylebox_override(
-		"focus", _caja(FONDO_BARRA_HOVER, FOCO, 2, 1, 6.0, 3.0)
-	)
+	boton.add_theme_stylebox_override("normal", _caja(FONDO_BARRA, BORDE, 1, 1, 7.0, 4.0))
+	boton.add_theme_stylebox_override("hover", _caja(FONDO_BARRA_HOVER, BORDE, 1, 1, 7.0, 4.0))
+	boton.add_theme_stylebox_override("pressed", _caja(FONDO_BARRA_PULSADA, BORDE, 1, 1, 7.0, 4.0))
+	boton.add_theme_stylebox_override("focus", _caja(FONDO_BARRA_HOVER, FOCO, 2, 1, 6.0, 3.0))
 
 
 func _estilizar_control_barra(control: Control) -> void:
 	control.add_theme_color_override("font_color", TINTA)
 	control.add_theme_color_override("font_focus_color", TINTA)
-	control.add_theme_stylebox_override(
-		"normal", _caja(FONDO_BARRA, BORDE, 1, 1, 7.0, 4.0)
-	)
-	control.add_theme_stylebox_override(
-		"focus", _caja(FONDO_BARRA_HOVER, FOCO, 2, 1, 6.0, 3.0)
-	)
+	control.add_theme_stylebox_override("normal", _caja(FONDO_BARRA, BORDE, 1, 1, 7.0, 4.0))
+	control.add_theme_stylebox_override("focus", _caja(FONDO_BARRA_HOVER, FOCO, 2, 1, 6.0, 3.0))
 
 
 func _caja(
