@@ -12,6 +12,7 @@ func _initialize() -> void:
 	_probar_casa()
 	_probar_sueno()
 	_probar_prioridades()
+	_probar_prioridades_exhaustivas()
 	print("hud_recursos: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
 
@@ -108,6 +109,78 @@ func _probar_prioridades() -> void:
 	hud.activar(HUDLayer.MODAL)
 	_comprobar(not hud.debe_ser_visible(HUDLayer.RECURSOS), "modal oculta recursos")
 	hud.free()
+
+
+func _probar_prioridades_exhaustivas() -> void:
+	var hud := HUDLayer.new()
+	root.add_child(hud)
+	var tipos := [
+		HUDLayer.ESTADO,
+		HUDLayer.RECURSOS,
+		HUDLayer.INTERACCION,
+		HUDLayer.TUTORIAL,
+		HUDLayer.FASE,
+		HUDLayer.DIALOGO,
+		HUDLayer.MODAL,
+	]
+	var controles := {}
+	for tipo in tipos:
+		var control := Control.new()
+		control.name = "Superficie_%s" % String(tipo)
+		hud.add_child(control)
+		hud.registrar(tipo, control)
+		controles[tipo] = control
+
+	var primarias := [
+		HUDLayer.INTERACCION,
+		HUDLayer.TUTORIAL,
+		HUDLayer.FASE,
+		HUDLayer.DIALOGO,
+	]
+	for mascara in range(1 << primarias.size()):
+		hud.desactivar_todo()
+		hud.activar(HUDLayer.ESTADO)
+		hud.activar(HUDLayer.RECURSOS)
+		var esperada := StringName()
+		var prioridad_esperada := -1
+		for indice in range(primarias.size()):
+			if (mascara & (1 << indice)) == 0:
+				continue
+			var tipo: StringName = primarias[indice]
+			hud.activar(tipo)
+			var prioridad := int(HUDLayer.PRIORIDADES[tipo])
+			if prioridad > prioridad_esperada:
+				prioridad_esperada = prioridad
+				esperada = tipo
+
+		var visibles_primarias := 0
+		for tipo in primarias:
+			var control: Control = controles[tipo]
+			if control.visible:
+				visibles_primarias += 1
+				_comprobar(tipo == esperada, "solo gana la primaria de mayor prioridad")
+		_comprobar(
+			visibles_primarias == (0 if esperada == StringName() else 1),
+			"cada combinación expone como máximo una superficie primaria",
+		)
+		_comprobar(
+			bool((controles[HUDLayer.ESTADO] as Control).visible),
+			"estado secundario puede convivir sin modal",
+		)
+		var recursos_deberian_verse := esperada == StringName() or esperada == HUDLayer.INTERACCION
+		_comprobar(
+			bool((controles[HUDLayer.RECURSOS] as Control).visible) == recursos_deberian_verse,
+			"recursos solo conviven con ausencia de primaria o interacción breve",
+		)
+
+	hud.activar(HUDLayer.MODAL)
+	for tipo in tipos:
+		var control: Control = controles[tipo]
+		_comprobar(
+			control.visible == (tipo == HUDLayer.MODAL),
+			"modal oculta cualquier otra superficie registrada",
+		)
+	hud.queue_free()
 
 
 func _comprobar(condicion: bool, nombre: String) -> void:
