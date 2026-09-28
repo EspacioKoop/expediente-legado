@@ -29,6 +29,17 @@ El lock por issue no sustituye #182. Despues de planificar, cada worker publica 
 
 Las etiquetas `agent:qwen` y `agent:gemini` fuerzan proveedor, no un slot concreto. Sin ellas, el selector usa el siguiente slot libre en orden determinista.
 
+## Replan ante salidas del CLAIM
+
+Después de la implementación, el worker ejecuta un guard provider-agnostic. Si Qwen o Gemini modifican rutas no incluidas en el plan/CLAIM:
+
+1. restaura esas rutas antes de preflight, memoria, commit o push;
+2. libera la reserva del intento descartado;
+3. publica `AGENT_POOL_REPLAN` con las rutas observadas;
+4. reejecuta el mismo issue/proveedor para que el planner amplíe el corte y vuelva a comprobar #182.
+
+Se permiten como máximo **dos replans** por issue. Si el modelo vuelve a salir del alcance, el issue pasa a `agent:needs-human`. Este mecanismo recupera errores de planificación; no autoriza a saltarse una reserva existente.
+
 ## CI
 
 El worker abre un PR draft y ejecuta `ci.yml` mediante `workflow_dispatch`, igual que el autopilot existente. Se conserva este disparo deliberadamente: un PR creado por un workflow con `GITHUB_TOKEN` puede dejar los workflows de `pull_request` esperando aprobacion, mientras que `workflow_dispatch` evita depender de esa aprobacion.
