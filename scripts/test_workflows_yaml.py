@@ -39,5 +39,23 @@ class WorkflowsYamlTest(unittest.TestCase):
                 self.assertIn("jobs", datos)
 
 
+    def test_acciones_privilegiadas_clave_fijadas_por_sha(self):
+        casos = {
+            "cleanup-merged-branches.yml": (
+                "actions/github-script",
+                "3a2844b7e9c422d3c10d287c895573f7108da1b3",
+            ),
+            "alpha-playtest.yml": (
+                "softprops/action-gh-release",
+                "efb35369e0ad2afab669f228072c1b0d510eae64",
+            ),
+        }
+        for nombre, (accion, sha) in casos.items():
+            texto = (ROOT / ".github" / "workflows" / nombre).read_text(encoding="utf-8")
+            with self.subTest(workflow=nombre, action=accion):
+                self.assertIn(f"uses: {accion}@{sha}", texto)
+                self.assertNotRegex(texto, rf"uses:\\s*{re.escape(accion)}@v\\d+")
+
+
 if __name__ == "__main__":
     unittest.main()
