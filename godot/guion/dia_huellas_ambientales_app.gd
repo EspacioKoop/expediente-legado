@@ -264,11 +264,14 @@ func _sincronizar_contexto_visual(dia: Node, mundo: Node3D) -> void:
 	var clima := String(dia.jornada.get("clima_forzado", "")).strip_edges()
 	if clima.is_empty():
 		clima = Clima.estado(int(dia.jornada.get("dia", 1)))
-	var firma := "%s|%s|%s" % [
-		String(dia.jornada.get("fase", "")),
-		clima,
-		Jornada.franja_horaria(dia.jornada),
-	]
+	var firma := (
+		"%s|%s|%s"
+		% [
+			String(dia.jornada.get("fase", "")),
+			clima,
+			Jornada.franja_horaria(dia.jornada),
+		]
+	)
 	if firma == _contexto_visual:
 		return
 	_contexto_visual = firma
