@@ -44,6 +44,12 @@ class AvionesPapelDescansoTest(unittest.TestCase):
         ):
             self.assertNotIn(prohibido, codigo)
 
+    def test_autocuidado_solo_se_aplica_al_completar_y_una_vez_por_dia(self):
+        self.assertIn('var ya_jugado := int(jornada.get(CLAVE_ULTIMO_DIA, 0)) == dia', self.regla)
+        self.assertIn('if resultado.get("abandonada", false):', self.regla)
+        self.assertIn('if not ya_jugado:', self.regla)
+        self.assertIn('Estres.aplicar(jornada, "autocuidado")', self.regla)
+
     def test_comentario_reutiliza_la_guarda_del_cunado(self):
         self.assertIn("Cunado.POR_MOMENTO", self.regla)
         self.assertIn("Cunado.todas_las_frases()", self.regla)

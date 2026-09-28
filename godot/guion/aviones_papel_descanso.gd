@@ -37,12 +37,17 @@ static func marcar_jugado(jornada: Dictionary) -> void:
 	jornada[CLAVE_ULTIMO_DIA] = maxi(1, int(jornada.get("dia", 1)))
 
 
-## Cierra la integración de una ronda. El resultado del núcleo se conserva
-## intacto y se añade únicamente una frase ambiental ya cubierta por #81.
+## Cierra la integración de una ronda. El resultado del núcleo se conserva.
+## Completar este descanso opcional aplica una única recuperación de autocuidado
+## de #952; abandonar o repetir el cierre del mismo día no reduce estrés.
 static func finalizar(jornada: Dictionary, resultado: Dictionary) -> Dictionary:
+	var dia := maxi(1, int(jornada.get("dia", 1)))
+	var ya_jugado := int(jornada.get(CLAVE_ULTIMO_DIA, 0)) == dia
 	marcar_jugado(jornada)
 	if resultado.get("abandonada", false):
 		return {"comentario": "", "jugado": true}
+	if not ya_jugado:
+		Estres.aplicar(jornada, "autocuidado")
 
 	var ganador := String(resultado.get("ganador", "empate"))
 	var momento := "empate"
