@@ -44,6 +44,37 @@ func _probar() -> void:
 		"el buzon vacio tiene feedback legible",
 	)
 
+	var lector := CorreoPostalLector.new()
+	root.add_child(lector)
+	lector.abrir({"pieza": pieza_lectura})
+	var contenido_lector := lector.find_child("CorreoPostalContenido", true, false) as RichTextLabel
+	var cerrar_lector := lector.find_child("CorreoPostalCerrar", true, false) as Button
+	_comprobar(
+		contenido_lector != null
+		and contenido_lector.focus_mode == Control.FOCUS_ALL
+		and contenido_lector.selection_enabled,
+		"el cuerpo postal puede recibir foco y recorrerse",
+	)
+	_comprobar(
+		contenido_lector != null
+		and contenido_lector.accessibility_name == String(pieza_lectura.get("asunto", ""))
+		and contenido_lector.accessibility_description
+		== String(pieza_lectura.get("contenido", "")),
+		"el lector anuncia asunto y cuerpo sin inventar contenido",
+	)
+	_comprobar(
+		cerrar_lector != null and cerrar_lector.accessibility_name == cerrar_lector.text,
+		"cerrar correo expone nombre accesible",
+	)
+	_comprobar(
+		contenido_lector != null
+		and cerrar_lector != null
+		and not contenido_lector.focus_next.is_empty()
+		and not cerrar_lector.focus_previous.is_empty(),
+		"el foco recorre cuerpo postal y cierre",
+	)
+	lector.queue_free()
+
 	var jornada := Jornada.nueva(672, 1)
 	jornada["fase"] = "trayecto"
 	var inventario := Inventario.nuevo()
