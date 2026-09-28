@@ -31,6 +31,7 @@ func _initialize() -> void:
 func _probar() -> void:
 	_limpiar_temporales()
 	_probar_condiciones_y_registro()
+	_probar_tras_sueno()
 	_probar_persistencia_variantes()
 	_probar_runtime_casa()
 	_probar_resolucion_de_anclas()
@@ -117,6 +118,48 @@ func _probar_condiciones_y_registro() -> void:
 	_comprobar(
 		partida.estado.get("pistas_descubiertas", []) == pistas_antes,
 		"las variantes no conceden pistas",
+	)
+
+
+func _probar_tras_sueno() -> void:
+	var partida := Partida.new()
+	partida.estado = Partida.nueva()
+	var jornada: Dictionary = partida.estado["jornada"]
+	jornada["fase"] = "archivo"
+
+	var antes := PasaporteInspeccion.condiciones_activas(partida.estado)
+	_comprobar(not antes.has("tras-sueno"), "sin noche completada no existe variante tras sueño")
+
+	var sello := Sellos.registrar_sello(
+		partida.estado, PasaporteInspeccion.SELLO_DESPERTAR_REGLAMENTARIO
+	)
+	_comprobar(
+		sello.get("resultado", "") == "registrado",
+		"el sello canónico de despertar puede fijar el hecho persistente",
+	)
+	var despues := PasaporteInspeccion.condiciones_activas(partida.estado)
+	_comprobar(despues.has("tras-sueno"), "fuera del sueño el despertar completado activa la variante")
+
+	jornada["fase"] = "sueño"
+	_comprobar(
+		not PasaporteInspeccion.condiciones_activas(partida.estado).has("tras-sueno"),
+		"estar dentro de otro sueño no cuenta como estar tras el sueño",
+	)
+
+	jornada["fase"] = "casa"
+	var registro := PasaporteInspeccion.registrar_observacion_contextual(
+		partida.estado, "casa:ventana"
+	)
+	_comprobar(
+		registro.get("variantes_nuevas", []).has("tras-sueno"),
+		"una inspección posterior registra la variante desde el sello existente",
+	)
+	var repetida := PasaporteInspeccion.registrar_observacion_contextual(
+		partida.estado, "casa:ventana"
+	)
+	_comprobar(
+		not repetida.get("variantes_nuevas", []).has("tras-sueno"),
+		"la variante tras sueño sigue siendo idempotente",
 	)
 
 
