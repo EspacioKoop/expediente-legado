@@ -50,8 +50,8 @@ def parse_decomposition(raw: str) -> dict[str, Any]:
 
     if fits:
         return {"schema": 1, "fits_single_cut": True, "subtasks": []}
-    if not 2 <= len(raw_tasks) <= 4:
-        raise ValueError("una descomposición debe tener entre 2 y 4 subtareas")
+    if not 2 <= len(raw_tasks) <= 6:
+        raise ValueError("una descomposición debe tener entre 2 y 6 subtareas")
 
     clean: list[dict[str, Any]] = []
     titles: set[str] = set()
@@ -69,8 +69,8 @@ def parse_decomposition(raw: str) -> dict[str, Any]:
         titles.add(title.casefold())
 
         raw_files = task.get("files", [])
-        if not isinstance(raw_files, list) or not 1 <= len(raw_files) <= 12:
-            raise ValueError("files debe contener entre 1 y 12 rutas")
+        if not isinstance(raw_files, list) or not 1 <= len(raw_files) <= 8:
+            raise ValueError("files debe contener entre 1 y 8 rutas")
         files = list(dict.fromkeys(_safe_path(item) for item in raw_files))
 
         raw_deps = task.get("depends_on", [])
