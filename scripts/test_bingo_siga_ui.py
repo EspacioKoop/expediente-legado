@@ -52,6 +52,12 @@ class BingoSigaUiTest(unittest.TestCase):
         self.assertIn('dia.call("_guardar_o_avisar", "")', self.controller)
         self.assertIn("(partida_actual as Partida).guardar()", self.controller)
 
+    def test_panel_muestra_resumen_historico_derivado(self):
+        self.assertIn("var _historial: Label", self.panel)
+        self.assertIn('BingoSiga.resumen_historial(jornada)', self.panel)
+        self.assertIn('tr("BINGO_SIGA_HISTORIAL")', self.panel)
+        self.assertIn("BINGO_SIGA_HISTORIAL,", self.textos)
+
     def test_ui_no_concede_recompensas(self):
         codigo = sin_comentarios(self.panel + "\n" + self.controller)
         for prohibido in (
