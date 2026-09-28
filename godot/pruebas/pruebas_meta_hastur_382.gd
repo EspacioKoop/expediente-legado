@@ -25,7 +25,11 @@ func _probar_snapshots() -> void:
 	var snapshots: Dictionary = datos.get("snapshots", {})
 	for nombre in ["cero", "primer_umbral", "completo"]:
 		var resultado := MetaHasturDatos.validar_snapshot(snapshots.get(nombre, {}))
-		_comprobar("snapshot %s valido" % nombre, resultado["ok"], true)
+		_comprobar(
+			"snapshot %s valido (%s)" % [nombre, String(resultado.get("reason", ""))],
+			resultado["ok"],
+			true,
+		)
 	_comprobar("fixture 0%", snapshots["cero"]["community_progress"], 0)
 	_comprobar("fixture umbral", snapshots["primer_umbral"]["community_progress"], 25)
 	_comprobar("fixture 100%", snapshots["completo"]["community_progress"], 100)
@@ -51,7 +55,13 @@ func _probar_contribuciones_idempotentes() -> void:
 	var resultado := MetaHasturDatos.simular_agregado_fixture(
 		snapshot, [contribucion, contribucion.duplicate(true)]
 	)
-	_comprobar("agregado fixture valido", resultado["ok"], true)
+	_comprobar(
+		"agregado fixture valido (%s)" % String(resultado.get("reason", "")),
+		resultado["ok"],
+		true,
+	)
+	if not bool(resultado.get("ok", false)):
+		return
 	_comprobar("una aceptada", resultado["accepted"], 1)
 	_comprobar("duplicado ignorado", resultado["duplicates"], 1)
 	_comprobar(
