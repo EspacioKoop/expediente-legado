@@ -78,11 +78,28 @@ GITHUB_REPOSITORY=EspacioKoop/expediente-legado
 y despliega:
 
 ```bash
-deno deploy --app siga98-feedback-deno --prod
+deno deploy --prod
 ```
+
+La organización (`expediente-legado`) y la aplicación (`siga98-feedback-deno`)
+están versionadas en el bloque `deploy` de `deno.json`: sin `org`, la CLI
+aborta con `missing field 'org'`. Despliega siempre desde este directorio; un
+`--config` que apunte fuera de él hace que la subida falle con «source upload
+did not arrive intact». Sin `--prod` crea solo un preview, útil para probar
+antes de promocionar. La CLI puede reescribir `deno.json` al desplegar; pasa
+`deno fmt deno.json` antes de comitear o CI fallará en «Formato».
 
 La CLI autentica mediante el flujo de Deno Deploy y guarda su token de
 autenticación en el keyring del sistema.
+
+### Redeploy tras cambiar el gateway
+
+`feedback-deno.yml` solo comprueba formato y tipos: **no despliega**. Tras
+integrar en `main` cualquier cambio de `main.ts` o `agent_memory.ts`, vuelve a
+desplegar con `--prod` y compara el `/health` de producción con el de
+`main.ts`. Si no coinciden, producción sigue sirviendo una versión antigua; así
+se produjo el 404 de `/api/agent-memory/search` de #1606, con producción aún en
+`version: 1` y el repo ya en `version: 2`.
 
 ## Healthcheck
 

@@ -10,6 +10,8 @@
     "start": "deno run --unstable-kv --allow-env=GITHUB_TOKEN,GITHUB_REPOSITORY,GITHUB_LABELS --allow-net=0.0.0.0:8000,api.github.com,token.actions.githubusercontent.com --allow-read --allow-write main.ts"
   },
   "deploy": {
+    "org": "expediente-legado",
+    "app": "siga98-feedback-deno",
     "runtime": {
       "type": "dynamic",
       "entrypoint": "./main.ts"
