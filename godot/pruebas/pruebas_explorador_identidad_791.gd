@@ -29,7 +29,7 @@ func _probar() -> void:
 	_comprobar(estado != null, "crea la barra de estado")
 
 	_comprobar(
-		_fondo(atras, "normal").is_equal_approx(Color("#d9dee4")),
+		_fondo(atras, "normal").is_equal_approx(Color("#c9dbe8")),
 		"la toolbar usa su superficie fría propia",
 	)
 	_comprobar(
