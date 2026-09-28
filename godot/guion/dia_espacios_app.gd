@@ -27,12 +27,15 @@ static func construir(
 		int(opciones.get("cantidad", Sueno.ESCENAS_POR_NOCHE)), 1, SuenoFormas.ids().size()
 	)
 	if jornada["sueno_escenas"].is_empty():
-		jornada["sueno_escenas"] = Sueno.noche(
-			jornada["dia"],
-			jornada["leido_hoy"],
-			jornada["mapa"],
-			raiz,
-			opciones,
+		jornada["sueno_escenas"] = (
+			Sueno
+			. noche(
+				jornada["dia"],
+				jornada["leido_hoy"],
+				jornada["mapa"],
+				raiz,
+				opciones,
+			)
 		)
 
 	var id: String = jornada["sueno_escenas"][0]
@@ -49,11 +52,14 @@ static func construir(
 			SuenoCombate.vencidos(estado),
 		)
 	)
-	var semilla_noche := Sueno.semilla(
-		jornada["dia"],
-		jornada["leido_hoy"],
-		raiz,
-		opciones.get("seleccion_nocturna", []),
+	var semilla_noche := (
+		Sueno
+		. semilla(
+			jornada["dia"],
+			jornada["leido_hoy"],
+			raiz,
+			opciones.get("seleccion_nocturna", []),
+		)
 	)
 	var reparto := SuenoContenido.repartir(fuentes, cantidad, semilla_noche)
 	var cual: int = cantidad - jornada["sueno_escenas"].size()
@@ -84,15 +90,18 @@ static func plantilla_en(sitio: Dictionary, jornada: Dictionary) -> Array:
 	var quienes := Companeros.plantilla(jornada["plantilla"])
 	for i in mini(quienes.size(), sitios.size()):
 		var quien: Dictionary = quienes[i]
-		figuras.append(
-			{
-				"pos": sitios[i],
-				"id_companero": String(quien.get("id", "")),
-				"color": quien["color"],
-				"rotulo": TranslationServer.translate(String(quien["nombre"])),
-				"frase": Companeros.frase_de(quien, jornada["dia"]),
-				"modelo": Companeros.cuerpo_de(quien),
-				"retrato": quien.get("retrato", ""),
-			}
+		(
+			figuras
+			. append(
+				{
+					"pos": sitios[i],
+					"id_companero": String(quien.get("id", "")),
+					"color": quien["color"],
+					"rotulo": TranslationServer.translate(String(quien["nombre"])),
+					"frase": Companeros.frase_de(quien, jornada["dia"]),
+					"modelo": Companeros.cuerpo_de(quien),
+					"retrato": quien.get("retrato", ""),
+				}
+			)
 		)
 	return figuras
