@@ -34,14 +34,17 @@ static func aplicar(espacio: Dictionary, seleccion: Array, analisis: Dictionary)
 		var folio := String(folios[i])
 		var veces := maxi(1, int(repeticiones.get(folio, 1)))
 		var relacionado := relacionados.has(folio)
-		luces.append(
-			{
-				"pos": entrada + DESPLAZAMIENTOS[i],
-				"color": COLOR_RELACION if relacionado else COLOR_MEMORIA,
-				"energia": ENERGIA_BASE + float(veces - 1) * ENERGIA_REPETIDA_DELTA,
-				"alcance": ALCANCE_BASE + float(veces - 1) * ALCANCE_REPETIDO_DELTA,
-				"carcasa": false,
-			}
+		(
+			luces
+			. append(
+				{
+					"pos": entrada + DESPLAZAMIENTOS[i],
+					"color": COLOR_RELACION if relacionado else COLOR_MEMORIA,
+					"energia": ENERGIA_BASE + float(veces - 1) * ENERGIA_REPETIDA_DELTA,
+					"alcance": ALCANCE_BASE + float(veces - 1) * ALCANCE_REPETIDO_DELTA,
+					"carcasa": false,
+				}
+			)
 		)
 	resultado["luces"] = luces
 
