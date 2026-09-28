@@ -138,7 +138,9 @@ func _probar_tras_sueno() -> void:
 		"el sello canónico de despertar puede fijar el hecho persistente",
 	)
 	var despues := PasaporteInspeccion.condiciones_activas(partida.estado)
-	_comprobar(despues.has("tras-sueno"), "fuera del sueño el despertar completado activa la variante")
+	_comprobar(
+		despues.has("tras-sueno"), "fuera del sueño el despertar completado activa la variante"
+	)
 
 	jornada["fase"] = "sueño"
 	_comprobar(
