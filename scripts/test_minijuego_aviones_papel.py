@@ -65,7 +65,7 @@ class MinijuegoAvionesPapelTest(unittest.TestCase):
 
     def test_prevision_reutiliza_el_simulador_sin_mutar_reglas(self):
         self.assertIn("func _vuelo_previo() -> Dictionary:", self.script)
-        self.assertIn("AvionesPapel.simular(", self.script)
+        self.assertRegex(self.script, r"AvionesPapel\s*\n\s*\. simular\(")
         self.assertIn("func _dibujar_prevision() -> void:", self.script)
         self.assertIn("direccion.value_changed.connect(_al_cambiar_configuracion)", self.script)
         self.assertIn("altura.value_changed.connect(_al_cambiar_configuracion)", self.script)
