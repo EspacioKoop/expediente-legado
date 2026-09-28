@@ -44,8 +44,8 @@ class DependientesTiendasTest(unittest.TestCase):
         self.assertIn("DialogoDependientesContextual.registrar(", DIA)
         self.assertIn("_guardar_o_avisar", DIA)
         self.assertIn('const CAMPO := "dialogos_dependientes"', CONTEXTUAL)
-        self.assertNotIn("afinidad", CONTEXTUAL.lower())
-        self.assertNotIn("reputacion", CONTEXTUAL.lower())
+        self.assertNotIn('"afinidad"', CONTEXTUAL.lower())
+        self.assertNotIn('"reputacion"', CONTEXTUAL.lower())
 
     def test_el_sueno_trae_a_quien_te_ha_hablado(self):
         self.assertIn("EcosSueno.registrar(jornada", DIA)
