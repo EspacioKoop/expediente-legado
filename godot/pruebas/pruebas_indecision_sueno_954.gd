@@ -101,6 +101,13 @@ func _probar() -> void:
 		int(Jornada.nueva(17)["presion_indecision_onirica"]) == 0,
 		"una vida laboral nueva reinicia la presión onírica",
 	)
+	var reasignada := jornada.duplicate(true)
+	reasignada["presion_indecision_onirica"] = 2
+	Jornada.reiniciar_vuelta(reasignada)
+	_comprobar(
+		int(reasignada["presion_indecision_onirica"]) == 0,
+		"reasignar reinicia la rumiación junto con la vida laboral",
+	)
 
 	_terminar()
 
