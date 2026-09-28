@@ -15,38 +15,46 @@ class EstresFalloPuzzle952Test(unittest.TestCase):
         )[1].split("func ", 1)[0]
 
     def test_fallo_aceptado_aplica_fallo_critico_despues_de_registrarlo(self):
-        fallo = "resultado_estado == PuzzleOnirico.ESTADO_FALLADO"
         registrar = "SuenoObjetivos.fallar(estado, objetivo_id)"
+        condicion = (
+            "if fallo_registrado and "
+            "resultado_estado == PuzzleOnirico.ESTADO_FALLADO:"
+        )
         estres = 'Estres.aplicar(jornada, "fallo_critico")'
 
-        self.assertIn(fallo, self.bloque)
-        self.assertIn("if not " + registrar + ":", self.bloque)
+        self.assertIn("var fallo_registrado := " + registrar, self.bloque)
+        self.assertIn(condicion, self.bloque)
         self.assertIn(estres, self.bloque)
-        self.assertLess(self.bloque.index(fallo), self.bloque.index(registrar))
-        self.assertLess(self.bloque.index(registrar), self.bloque.index(estres))
+        self.assertLess(self.bloque.index(registrar), self.bloque.index(condicion))
+        self.assertLess(self.bloque.index(condicion), self.bloque.index(estres))
 
-    def test_abandono_registra_objetivo_sin_aplicar_estres(self):
-        abandono = self.bloque.split(
-            "if resultado_estado == PuzzleOnirico.ESTADO_ABANDONADO:", 1
-        )[1]
+    def test_abandono_comparte_registro_pero_no_condicion_de_estres(self):
         self.assertIn(
-            "return SuenoObjetivos.fallar(estado, objetivo_id)",
-            abandono,
+            "resultado_estado == PuzzleOnirico.ESTADO_ABANDONADO",
+            self.bloque,
         )
-        self.assertNotIn('Estres.aplicar(jornada, "fallo_critico")', abandono)
+        condicion_estres = (
+            "if fallo_registrado and "
+            "resultado_estado == PuzzleOnirico.ESTADO_FALLADO:"
+        )
+        self.assertIn(condicion_estres, self.bloque)
+        self.assertNotIn(
+            "resultado_estado == PuzzleOnirico.ESTADO_ABANDONADO:\n"
+            '\t\t\tEstres.aplicar(jornada, "fallo_critico")',
+            self.bloque,
+        )
 
-    def test_fallo_no_se_puede_farmear_si_objetivo_ya_es_terminal(self):
-        fallo = self.bloque.split(
-            "if resultado_estado == PuzzleOnirico.ESTADO_FALLADO:", 1
-        )[1].split(
-            "if resultado_estado == PuzzleOnirico.ESTADO_ABANDONADO:", 1
-        )[0]
-        self.assertIn("if not SuenoObjetivos.fallar(estado, objetivo_id):", fallo)
-        self.assertIn("return false", fallo)
-        self.assertLess(
-            fallo.index("return false"),
-            fallo.index('Estres.aplicar(jornada, "fallo_critico")'),
+    def test_fallo_terminal_no_se_puede_farmear(self):
+        self.assertIn(
+            "var fallo_registrado := SuenoObjetivos.fallar(estado, objetivo_id)",
+            self.bloque,
         )
+        self.assertIn(
+            "if fallo_registrado and "
+            "resultado_estado == PuzzleOnirico.ESTADO_FALLADO:",
+            self.bloque,
+        )
+        self.assertIn("return fallo_registrado", self.bloque)
 
 
 if __name__ == "__main__":
