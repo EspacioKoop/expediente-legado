@@ -12,6 +12,7 @@ from scripts.godot_pruebas import importar_proyecto
 
 RAIZ = Path(__file__).resolve().parents[1]
 MODULO = (RAIZ / "godot/guion/dependientes_tiendas.gd").read_text(encoding="utf-8")
+CONTEXTUAL = (RAIZ / "godot/guion/dialogo_dependientes_contextual.gd").read_text(encoding="utf-8")
 DIA = (RAIZ / "godot/guion/dia_clima_app.gd").read_text(encoding="utf-8")
 TEXTOS = RAIZ / "godot/datos/textos.csv"
 RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
@@ -35,6 +36,16 @@ class DependientesTiendasTest(unittest.TestCase):
             textos.extend(propias)
         # Una frase compartida entre dos dependientes les quitaría la voz propia.
         self.assertEqual(len(textos), len(set(textos)))
+
+    def test_dialogo_contextual_reutiliza_hud_y_jornada(self):
+        self.assertIn("DialogoDiegetico", DIA)
+        self.assertIn("mostrar_eleccion(", DIA)
+        self.assertIn("DialogoDependientesContextual.opciones(", DIA)
+        self.assertIn("DialogoDependientesContextual.registrar(", DIA)
+        self.assertIn("_guardar_o_avisar", DIA)
+        self.assertIn('const CAMPO := "dialogos_dependientes"', CONTEXTUAL)
+        self.assertNotIn('"afinidad"', CONTEXTUAL.lower())
+        self.assertNotIn('"reputacion"', CONTEXTUAL.lower())
 
     def test_el_sueno_trae_a_quien_te_ha_hablado(self):
         self.assertIn("EcosSueno.registrar(jornada", DIA)
