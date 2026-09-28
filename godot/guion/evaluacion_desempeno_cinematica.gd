@@ -24,6 +24,7 @@ const CATEGORIAS := [
 	"liquidez",
 	"exploracion_onirica",
 	"dependencia_dinero",
+	"actividad_improductiva",
 ]
 
 
@@ -61,17 +62,17 @@ static func planos_de(estado: Dictionary, vistas: int = 0) -> Array:
 static func _figura(evaluacion: Dictionary) -> Array:
 	var figura := [
 		{"rect": Rect2(-190, -95, 380, 190), "color": FONDO},
-		{"rect": Rect2(-142, -78, 284, 156), "color": PAPEL},
-		{"rect": Rect2(-112, -56, 224, 8), "color": TINTA},
+		{"rect": Rect2(-142, -84, 284, 168), "color": PAPEL},
+		{"rect": Rect2(-112, -62, 224, 8), "color": TINTA},
 	]
-	var y := -34.0
+	var y := -40.0
 	for categoria in CATEGORIAS:
 		if not evaluacion.has(categoria):
 			continue
 		var rango := String(evaluacion.get(categoria, ""))
 		figura.append({"rect": Rect2(-105, y, 210, 8), "color": GUIA})
 		figura.append({"rect": Rect2(-105, y, _ancho_de(rango), 8), "color": TINTA})
-		y += 19.0
+		y += 17.0
 	return figura
 
 
