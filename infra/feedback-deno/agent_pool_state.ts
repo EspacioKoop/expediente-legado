@@ -2,6 +2,9 @@ const AGENT_POOL_AUDIENCE = "siga98-agent-pool";
 const AGENT_POOL_LEASE_TTL_MS = 30 * 60 * 1000;
 const AGENT_POOL_EVENT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const AGENT_POOL_STATUS_LIMIT = 100;
+const AGENT_POOL_HEALTH_LIMIT = 64;
+const AGENT_POOL_MIN_COOLDOWN_MS = 5 * 60 * 1000;
+const AGENT_POOL_MAX_COOLDOWN_MS = 6 * 60 * 60 * 1000;
 const GITHUB_OIDC_ISSUER = "https://token.actions.githubusercontent.com";
 const GITHUB_OIDC_JWKS = "https://token.actions.githubusercontent.com/.well-known/jwks";
 
@@ -35,7 +38,7 @@ interface OidcClaims {
 
 interface AuthenticatedActor {
   claims: OidcClaims;
-  role: "dispatcher" | "worker";
+  role: "dispatcher" | "worker" | "smoke";
 }
 
 export interface AgentPoolLease {
@@ -49,6 +52,18 @@ export interface AgentPoolLease {
   state: string;
   generation: number;
   acquired_at: string;
+  updated_at: string;
+  expires_at: string;
+}
+
+export interface AgentPoolWorkerHealth {
+  schema: 1;
+  worker: string;
+  provider: "qwen" | "gemini";
+  status: "unhealthy";
+  reason: string;
+  run_id: string;
+  failures: number;
   updated_at: string;
   expires_at: string;
 }
@@ -185,6 +200,7 @@ async function authenticateAgentPoolRequest(
   const jobWorkflowRef = claims.job_workflow_ref ?? "";
   const poolPrefix = repository + "/.github/workflows/agent-pool.yml@";
   const workerPrefix = repository + "/.github/workflows/agent-worker.yml@";
+  const smokePrefix = repository + "/.github/workflows/agent-provider-smoke.yml@";
 
   if (workflowRef.startsWith(workerPrefix)) {
     return { claims, role: "worker" };
@@ -197,6 +213,9 @@ async function authenticateAgentPoolRequest(
   }
   if (workflowRef.startsWith(poolPrefix) && !jobWorkflowRef) {
     return { claims, role: "dispatcher" };
+  }
+  if (workflowRef.startsWith(smokePrefix)) {
+    return { claims, role: "smoke" };
   }
 
   return null;
@@ -477,6 +496,100 @@ async function leaseStatus(
   });
 }
 
+function healthKey(worker: string): Deno.KvKey {
+  return ["agent_pool", "worker_health", worker];
+}
+
+async function workerHealthStatus(
+  kv: Deno.Kv,
+  raw: unknown,
+): Promise<Response> {
+  if (!raw || typeof raw !== "object") {
+    return json({ ok: false, error: "invalid_request" }, 400);
+  }
+  const input = raw as Record<string, unknown>;
+  if (input.schema !== 1 || !Array.isArray(input.workers)) {
+    return json({ ok: false, error: "invalid_request" }, 400);
+  }
+
+  const workers = [
+    ...new Set(
+      input.workers
+        .map((worker) => cleanWorker(worker))
+        .filter(Boolean),
+    ),
+  ].slice(0, AGENT_POOL_HEALTH_LIMIT);
+
+  const entries = await Promise.all(
+    workers.map((worker) => kv.get<AgentPoolWorkerHealth>(healthKey(worker))),
+  );
+  return json({
+    ok: true,
+    unhealthy: entries
+      .map((entry) => entry.value)
+      .filter((health): health is AgentPoolWorkerHealth => Boolean(health)),
+  });
+}
+
+async function reportWorkerHealth(
+  kv: Deno.Kv,
+  raw: unknown,
+  actor: AuthenticatedActor,
+): Promise<Response> {
+  if (actor.role !== "worker" && actor.role !== "smoke") {
+    return json({ ok: false, error: "forbidden" }, 403);
+  }
+  if (!raw || typeof raw !== "object") {
+    return json({ ok: false, error: "invalid_request" }, 400);
+  }
+
+  const input = raw as Record<string, unknown>;
+  const worker = cleanWorker(input.worker);
+  const provider = cleanProvider(input.provider);
+  const status = cleanText(input.status, 16);
+  const reason = cleanText(input.reason, 64) || "unknown";
+  const runId = cleanText(actor.claims.run_id, 80);
+  if (
+    input.schema !== 1 ||
+    !worker ||
+    !provider ||
+    !runId ||
+    !["healthy", "unhealthy"].includes(status)
+  ) {
+    return json({ ok: false, error: "invalid_request" }, 400);
+  }
+
+  const key = healthKey(worker);
+  if (status === "healthy") {
+    await kv.delete(key);
+    return json({ ok: true, worker, status: "healthy" });
+  }
+
+  const requestedSeconds = Number(input.cooldown_seconds);
+  const requestedMs = Number.isFinite(requestedSeconds)
+    ? Math.round(requestedSeconds * 1000)
+    : 60 * 60 * 1000;
+  const cooldownMs = Math.min(
+    AGENT_POOL_MAX_COOLDOWN_MS,
+    Math.max(AGENT_POOL_MIN_COOLDOWN_MS, requestedMs),
+  );
+  const previous = await kv.get<AgentPoolWorkerHealth>(key);
+  const now = Date.now();
+  const health: AgentPoolWorkerHealth = {
+    schema: 1,
+    worker,
+    provider,
+    status: "unhealthy",
+    reason,
+    run_id: runId,
+    failures: (previous.value?.failures ?? 0) + 1,
+    updated_at: new Date(now).toISOString(),
+    expires_at: new Date(now + cooldownMs).toISOString(),
+  };
+  await kv.set(key, health, { expireIn: cooldownMs });
+  return json({ ok: true, health }, 201);
+}
+
 export async function handleAgentPool(
   request: Request,
   url: URL,
@@ -520,6 +633,12 @@ export async function handleAgentPool(
   }
   if (url.pathname === "/api/agent-pool/status") {
     return await leaseStatus(kv, raw);
+  }
+  if (url.pathname === "/api/agent-pool/worker-health/status") {
+    return await workerHealthStatus(kv, raw);
+  }
+  if (url.pathname === "/api/agent-pool/worker-health/report") {
+    return await reportWorkerHealth(kv, raw, actor);
   }
 
   return json({ ok: false, error: "not_found" }, 404);

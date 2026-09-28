@@ -969,6 +969,7 @@ jobs:
           PLAN_QWEN_OUTCOME: ${{ steps.plan_qwen.outcome }}
           PLAN_GEMINI_OUTCOME: ${{ steps.plan_gemini.outcome }}
           AGENT_PROVIDER_COOLDOWN_SECONDS: ${{ vars.AGENT_PROVIDER_COOLDOWN_SECONDS || '3600' }}
+          CONTROL_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
           JOB_STATUS: ${{ job.status }}
         run: |
           set -euo pipefail
@@ -1025,8 +1026,31 @@ jobs:
               [[ "$cooldown" =~ ^[0-9]+$ ]] || cooldown=3600
               (( cooldown < 300 )) && cooldown=300
               (( cooldown > 21600 )) && cooldown=21600
-              until_epoch=$(( $(date +%s) + cooldown ))
-              gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" --body                 "AGENT_POOL_SLOT_UNHEALTHY worker=$WORKER provider=$PROVIDER reason=quota until=$until_epoch run=$GITHUB_RUN_ID"                 >/dev/null || true
+
+              health_reported=false
+              if [[ -n "${CONTROL_URL:-}" ]]; then
+                base="${CONTROL_URL%/}"
+                base="${base%/api/report}"
+                if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+                  "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")" &&
+                  oidc_token="$(jq -er '.value' <<<"$oidc_json")"; then
+                  payload="$(jq -nc --arg worker "$WORKER" --arg provider "$PROVIDER" \
+                    --argjson cooldown "$cooldown" \
+                    '{schema:1,worker:$worker,provider:$provider,status:"unhealthy",reason:"quota",cooldown_seconds:$cooldown}')"
+                  if curl -fsS -X POST "$base/api/agent-pool/worker-health/report" \
+                    -H "Authorization: Bearer $oidc_token" \
+                    -H 'Content-Type: application/json' --data "$payload" >/dev/null; then
+                    health_reported=true
+                  fi
+                fi
+              fi
+
+              if [[ "$health_reported" != true ]]; then
+                until_epoch=$(( $(date +%s) + cooldown ))
+                gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" \
+                  --body "AGENT_POOL_SLOT_UNHEALTHY worker=$WORKER provider=$PROVIDER reason=quota until=$until_epoch run=$GITHUB_RUN_ID" \
+                  >/dev/null || true
+              fi
             fi
 
             marker="AGENT_POOL_WORKER_FAILURE worker=$WORKER provider=$PROVIDER stage=plan run=$GITHUB_RUN_ID"

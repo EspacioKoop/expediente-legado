@@ -40,6 +40,8 @@ El dispatcher consulta esos leases antes de construir la matrix. `agent-worker.y
 
 Durante la migración el control-plane es fail-open cuando Deno u OIDC no están disponibles: se conserva el comportamiento anterior de labels + `concurrency` + CLAIM. Solo un 409 explícito de lease activo bloquea el arranque. Los labels son el espejo visible, no la fuente de locking.
 
+El mismo control-plane mantiene el **circuit breaker por worker**. Un fallo de cuota/servicio abre un registro KV con TTL entre 5 minutos y 6 horas; el dispatcher excluye ese slot mientras siga vivo. Si el endpoint de health no está disponible, usa los marcadores históricos de #1713 como fallback. Un `Agent provider smoke` verde elimina el registro KV inmediatamente y devuelve el slot a rotación.
+
 ## Activacion
 
 1. Configura al menos un proveedor: `QWEN_API_KEY`, `GEMINI_API_KEY`, o un `QWEN_FALLBACK_N_API_KEY` acompañado de `QWEN_FALLBACK_N_BASE_URL`.

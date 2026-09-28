@@ -196,11 +196,12 @@ async function handler(
     return json({
       ok: true,
       service: "siga98-feedback-deno",
-      version: 3,
+      version: 4,
       github_configured: Boolean(Deno.env.get("GITHUB_TOKEN")),
       kv_configured: kvConfigured,
       agent_memory: true,
       agent_pool_control: true,
+      agent_pool_worker_health: true,
     });
   }
 

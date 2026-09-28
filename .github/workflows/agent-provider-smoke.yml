@@ -15,6 +15,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   smoke:
@@ -71,3 +72,23 @@ jobs:
           set -euo pipefail
           grep -Fq 'AGENT_PROVIDER_SMOKE_OK file=AGENTS.md' <<<"$SUMMARY"
           echo "Smoke de $SLOT validado."
+
+
+      - name: Cerrar circuit breaker del slot
+        continue-on-error: true
+        env:
+          CONTROL_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+        run: |
+          set -euo pipefail
+          [[ -n "${CONTROL_URL:-}" ]] || exit 0
+          base="${CONTROL_URL%/}"
+          base="${base%/api/report}"
+          oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")"
+          oidc_token="$(jq -er '.value' <<<"$oidc_json")"
+          payload="$(jq -nc --arg worker "$SLOT" \
+            '{schema:1,worker:$worker,provider:"qwen",status:"healthy",reason:"provider-smoke"}')"
+          curl -fsS -X POST "$base/api/agent-pool/worker-health/report" \
+            -H "Authorization: Bearer $oidc_token" \
+            -H 'Content-Type: application/json' --data "$payload" >/dev/null
+          echo "Circuit breaker de $SLOT cerrado en Deno KV."

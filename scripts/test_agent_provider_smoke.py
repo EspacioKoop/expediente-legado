@@ -13,6 +13,7 @@ class AgentProviderSmokeTest(unittest.TestCase):
 
     def test_es_solo_lectura_y_sin_permisos_de_escritura(self):
         self.assertIn("permissions:\n  contents: read", self.workflow)
+        self.assertIn("id-token: write", self.workflow)
         self.assertIn('"tools":{"core":["read_file"]}', self.workflow)
         for prohibido in (
             '"write_file"',
@@ -42,6 +43,12 @@ class AgentProviderSmokeTest(unittest.TestCase):
         self.assertIn("Usa obligatoriamente read_file para leer AGENTS.md", self.workflow)
         self.assertIn("AGENT_PROVIDER_SMOKE_OK file=AGENTS.md", self.workflow)
         self.assertIn("grep -Fq", self.workflow)
+
+    def test_smoke_verde_cierra_circuit_breaker(self):
+        self.assertIn("Cerrar circuit breaker del slot", self.workflow)
+        self.assertIn("siga98-agent-pool", self.workflow)
+        self.assertIn("/api/agent-pool/worker-health/report", self.workflow)
+        self.assertIn('status:"healthy"', self.workflow)
 
     def test_no_expone_la_key_en_pasos_shell(self):
         bloque = self.workflow.split("- id: config", 1)[1].split("- id: smoke", 1)[0]

@@ -71,7 +71,7 @@ class AgentMemoryContractTest(unittest.TestCase):
         self.assertIn('url.pathname.startsWith("/api/agent-memory/")', self.deno_main)
         self.assertIn('url.pathname !== "/api/report"', self.deno_main)
         self.assertIn("agent_memory: true", self.deno_main)
-        self.assertIn("version: 3", self.deno_main)
+        self.assertIn("version: 4", self.deno_main)
         self.assertIn(
             "token.actions.githubusercontent.com",
             self.deno_config["tasks"]["start"],
