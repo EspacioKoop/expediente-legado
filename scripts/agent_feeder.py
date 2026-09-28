@@ -29,6 +29,11 @@ BLOCKING_TITLE_FRAGMENTS = (
 PR_REF_RE = re.compile(
     r"(?im)\b(?:refs?|fix(?:es|ed)?|clos(?:es|ed)?|resolv(?:es|ed)?)\s+#(\d+)\b"
 )
+HUMAN_GATE_RE = re.compile(
+    r"(gate\s+(?:de\s+)?validaci[oó]n\s+humana|"
+    r"validaci[oó]n\s+pendiente|pase\s+humano|mando\s+f[ií]sico)",
+    re.IGNORECASE,
+)
 
 
 def _labels(issue: dict[str, Any]) -> set[str]:
@@ -94,6 +99,8 @@ def eligible(
     body = str(issue.get("body") or "").strip()
     if len(body) < 80:
         return False, "sin-contexto"
+    if HUMAN_GATE_RE.search(body):
+        return False, "gate-humano"
 
     updated = _parse_time(issue.get("updatedAt") or issue.get("updated_at"))
     if updated is not None:
