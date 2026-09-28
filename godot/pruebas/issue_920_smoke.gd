@@ -16,6 +16,7 @@ func _ejecutar() -> void:
 	_probar_exposicion_en_careo()
 	_probar_minimo_elecciones()
 	_probar_condiciones_de_memoria()
+	_probar_companeros_con_memoria()
 	print("issue_920: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
 
@@ -213,6 +214,109 @@ func _probar_condiciones_de_memoria() -> void:
 		DialogoIdeologico.cumple(estado, condicion),
 		true,
 		"actor_recuerda consulta el canal social separado",
+	)
+
+
+func _probar_companeros_con_memoria() -> void:
+	var estado := _estado_base()
+	estado["veredictos"][DecisionIdeologicaExpediente.CASO_VERTICAL] = "sospechosoIbarra@1"
+	(
+		DecisionIdeologicaExpediente
+		. resolver(
+			estado,
+			DecisionIdeologicaExpediente.CASO_VERTICAL,
+			"responsabilidad_compartida",
+		)
+	)
+
+	var primera_becario := (
+		DialogoIdeologico
+		. resolver_companero(
+			DecisionIdeologicaExpediente.ACTOR_BECARIO,
+			estado,
+		)
+	)
+	_comprobar(
+		primera_becario.get("clave", ""),
+		"COMPA_BECARIO_2",
+		"el becario tiene una primera reacción contextual",
+	)
+	_comprobar(
+		DialogoIdeologico.registrar_respuesta(estado, primera_becario),
+		true,
+		"la primera charla registra memoria social autorizada",
+	)
+	var segunda_becario := (
+		DialogoIdeologico
+		. resolver_companero(
+			DecisionIdeologicaExpediente.ACTOR_BECARIO,
+			estado,
+		)
+	)
+	_comprobar(
+		segunda_becario.get("clave", ""),
+		"COMPA_BECARIO_3",
+		"la segunda charla avanza a una secuela por memoria",
+	)
+	_comprobar(
+		DialogoIdeologico.registrar_respuesta(estado, segunda_becario),
+		false,
+		"la secuela no duplica memoria ni elecciones",
+	)
+
+	var primera_jubilacion := (
+		DialogoIdeologico
+		. resolver_companero(
+			DecisionIdeologicaExpediente.ACTOR_JUBILACION,
+			estado,
+		)
+	)
+	_comprobar(
+		primera_jubilacion.get("clave", ""),
+		"COMPA_JUBILACION_2",
+		"otro compañero tiene una lectura propia del mismo hecho",
+	)
+	_comprobar(
+		DialogoIdeologico.registrar_respuesta(estado, primera_jubilacion),
+		true,
+		"cada actor conserva su memoria por separado",
+	)
+	var segunda_jubilacion := (
+		DialogoIdeologico
+		. resolver_companero(
+			DecisionIdeologicaExpediente.ACTOR_JUBILACION,
+			estado,
+		)
+	)
+	_comprobar(
+		segunda_jubilacion.get("clave", ""),
+		"COMPA_JUBILACION_3",
+		"la jubilación también progresa a una secuela distinta",
+	)
+
+	_comprobar(
+		DialogoIdeologico.resolver_companero("telefono", estado).is_empty(),
+		true,
+		"un actor sin superficie no inventa conocimiento",
+	)
+	_comprobar(
+		DecisionIdeologicaExpediente.registrar_lectura_social(
+			estado,
+			DecisionIdeologicaExpediente.CASO_VERTICAL,
+			"telefono",
+		),
+		false,
+		"un actor no autorizado no adquiere la decisión por telepatía",
+	)
+	_comprobar(
+		Prometeo.elecciones_ideologicas(estado).size(),
+		1,
+		"las conversaciones no añaden nuevas elecciones",
+	)
+	_comprobar(
+		estado["pistas_descubiertas"],
+		["pista1@1"],
+		"las ramas sociales no alteran pistas",
 	)
 
 
