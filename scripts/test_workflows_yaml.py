@@ -10,35 +10,35 @@ import re
 import unittest
 
 
+def _escapado(texto: str, indice: int) -> bool:
+    barras = 0
+    indice -= 1
+    while indice >= 0 and texto[indice] == "\\":
+        barras += 1
+        indice -= 1
+    return barras % 2 == 1
+
+
 def backtick_peligroso(linea: str) -> bool:
-    """Devuelve True si la línea contiene un backtick no escapado cuyo contenido
-    hasta el siguiente backtick no escapado incluye $, y antes de ese backtick
-    hay un número impar de comillas dobles no escapadas en la misma línea.
-    """
-    i = 0
-    while i < len(linea):
-        if linea[i] == '`' and (i == 0 or linea[i-1] != '\\'):
-            # Found an unescaped backtick
-            # Count unescaped double quotes from start to i
-            dq_count = 0
-            for j in range(i):
-                if linea[j] == '"' and (j == 0 or linea[j-1] != '\\'):
-                    dq_count += 1
-            if dq_count % 2 == 1:  # odd number -> inside double quotes
-                # Find the next unescaped backtick
-                j = i + 1
-                while j < len(linea):
-                    if linea[j] == '`' and (j == 0 or linea[j-1] != '\\'):
-                        # Found closing backtick
-                        content = linea[i+1:j]
-                        if '$' in content:
-                            return True
-                        else:
-                            break  # break inner while, continue to next backtick?
-                    j += 1
-                # If we didn't find a closing backtick, we just continue
-            # else: not inside double quotes, continue
-        i += 1
+    """Detecta sustitución con $ dentro de backticks contenidos en comillas dobles."""
+    dentro_dobles = False
+    indice = 0
+    while indice < len(linea):
+        caracter = linea[indice]
+        if caracter == '"' and not _escapado(linea, indice):
+            dentro_dobles = not dentro_dobles
+        elif caracter == "`" and not _escapado(linea, indice):
+            cierre = indice + 1
+            while cierre < len(linea):
+                if linea[cierre] == "`" and not _escapado(linea, cierre):
+                    break
+                cierre += 1
+            if cierre >= len(linea):
+                return False
+            if dentro_dobles and "$" in linea[indice + 1 : cierre]:
+                return True
+            indice = cierre
+        indice += 1
     return False
 
 
@@ -72,7 +72,7 @@ class WorkflowsYamlTest(unittest.TestCase):
                 self.assertIn("jobs", datos)
 
     def test_sin_backticks_ejecutables_en_comillas_dobles(self):
-        """Ningún línea de los workflows debe contener un backtick peligroso."""
+        """Ninguna línea de los workflows debe contener un backtick peligroso."""
         for ruta in WORKFLOWS:
             for numero, linea in enumerate(ruta.read_text(encoding="utf-8").splitlines(), 1):
                 with self.subTest(workflow=ruta.name, linea=numero):
