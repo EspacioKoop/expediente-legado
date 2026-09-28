@@ -46,5 +46,13 @@
     "origen": "bolos-pasillo",
     "icono": "sello-bolos",
     "disponible": true
+  },
+  {
+    "id": "trayectoria-reglamentaria",
+    "titulo": "SELLO_TRAYECTORIA_REGLAMENTARIA_TITULO",
+    "descripcion": "SELLO_TRAYECTORIA_REGLAMENTARIA_DESCRIPCION",
+    "origen": "aviones-papel",
+    "icono": "sello-archivo",
+    "disponible": true
   }
 ]
