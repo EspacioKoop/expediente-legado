@@ -62,10 +62,8 @@ var _gato: Gato
 ## Se llena al montar la escena del sueño: la zona que se pisa solo lleva el
 ## id, y el combate necesita el nombre y las réplicas.
 var _rivales: Dictionary = {}
-## Arena hack & slash temporal de #1752. No sustituye al caminante: solo existe
-## mientras una escena ha autorizado combate.
-var _combate_contextual_3d: JuicioCombate3D
-var _contexto_combate: Dictionary = {}
+## Controlador temporal del hack & slash contextual de #1752.
+var _combate_contextual_app: DiaCombateContextualApp
 
 
 ## La raíz del azar de esta partida (#147). Se lee de la partida y no se guarda
@@ -858,168 +856,78 @@ func _abrir_expediente() -> void:
 ## de un menú no sería una decisión del jugador, sería un descuido de quien
 ## montó la pantalla.
 func _abrir_duelo(quien: Dictionary, zona: Area3D) -> void:
-	var decision := CombateContextual.evaluar(
-		String(jornada.get("fase", "")), quien, partida.estado
-	)
-	if not bool(decision.get("permitido", false)):
-		return
-	_abrir_combate_hack_slash(quien, decision, zona)
+	_abrir_combate_hack_slash(quien, zona)
 
 
-## Entrada para escenas de vigilia. Una escena no puede abrir combate limitándose
-## a pedirlo: el objetivo debe traer `combate_autorizado=true` Y una
-## `consecuencia_combate` no vacía. Así toda pelea real tiene un dueño que cobra
-## el resultado y una agresión gratuita continúa perteneciendo a conducta (#209).
+## Una escena real solo entra si declara permiso y consecuencia (#1752).
 func abrir_combate_real(objetivo: Dictionary) -> bool:
-	if _pantalla != null or partida.guardado_pendiente:
+	if String(jornada.get("fase", "")) == "sueño":
+		return false
+	return _abrir_combate_hack_slash(objetivo)
+
+
+func _abrir_combate_hack_slash(objetivo: Dictionary, zona: Area3D = null) -> bool:
+	if _pantalla != null or _combate_contextual_app != null:
 		return false
 	var decision := CombateContextual.evaluar(
 		String(jornada.get("fase", "")), objetivo, partida.estado
 	)
-	if (
-		not bool(decision.get("permitido", false))
-		or String(decision.get("plano", "")) != CombateContextual.PLANO_REALIDAD
-	):
+	if not bool(decision.get("permitido", false)):
 		return false
-	_abrir_combate_hack_slash(objetivo, decision)
+
+	_pantalla = CanvasLayer.new()
+	add_child(_pantalla)
+	_combate_contextual_app = DiaCombateContextualApp.new()
+	add_child(_combate_contextual_app)
+	_combate_contextual_app.terminado.connect(_cerrar_combate_hack_slash)
+	_combate_contextual_app.abrir(
+		objetivo,
+		decision,
+		zona,
+		_caminante,
+		_mundo,
+		_hud,
+		_ambiente,
+		partida.estado,
+		jornada,
+		_raiz(),
+	)
+	_hablando = false
+	_nomina.text = ""
 	return true
 
 
-func _abrir_combate_hack_slash(
-	objetivo: Dictionary, decision: Dictionary, zona: Area3D = null
+func _cerrar_combate_hack_slash(
+	gano: bool,
+	objetivo: Dictionary,
+	_zona: Area3D,
+	decision: Dictionary,
+	resultado: Dictionary,
 ) -> void:
-	if _pantalla != null or _combate_contextual_3d != null:
-		return
-
-	_contexto_combate = decision.duplicate(true)
-	_contexto_combate["objetivo_id"] = String(objetivo.get("id", ""))
-
-	# `_pantalla` sigue siendo el semáforo del día: pausa reloj nocturno, gato
-	# y aperturas superpuestas. El combate es 3D y vive como hermano, no dentro
-	# del CanvasLayer.
-	_pantalla = CanvasLayer.new()
-	add_child(_pantalla)
-	_preparar_mundo_para_combate()
-
-	_combate_contextual_3d = JuicioCombate3D.new()
-	(
-		_combate_contextual_3d
-		. configurar(
-			objetivo,
-			0,
-			bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false)),
-			_raiz(),
-		)
-	)
-	_combate_contextual_3d.perfil_jugador = partida.estado.get("perfil_jugador", {})
-	_combate_contextual_3d.terminado.connect(_cerrar_combate_hack_slash.bind(objetivo, zona))
-	add_child(_combate_contextual_3d)
-	_hacer_actual_camara_combate()
-	_hablando = false
-	_nomina.text = ""
-
-
-func _preparar_mundo_para_combate() -> void:
-	_caminante.set_physics_process(false)
-	_caminante.visible = false
-	if is_instance_valid(_mundo):
-		_mundo.visible = false
-	if is_instance_valid(_hud):
-		_hud.visible = false
-	var entorno := _entorno_del_dia()
-	if entorno != null:
-		entorno.environment = null
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-
-
-func _restaurar_mundo_tras_combate() -> void:
-	var entorno := _entorno_del_dia()
-	if entorno != null:
-		entorno.environment = _ambiente
-	if is_instance_valid(_mundo):
-		_mundo.visible = true
-	if is_instance_valid(_hud):
-		_hud.visible = true
-	if is_instance_valid(_caminante):
-		_caminante.visible = true
-		_caminante.set_physics_process(true)
-		var camara := _caminante.get_node_or_null("Camara") as Camera3D
-		if camara != null:
-			camara.current = true
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-
-
-func _entorno_del_dia() -> WorldEnvironment:
-	for hijo in get_children():
-		if hijo is WorldEnvironment:
-			return hijo
-	return null
-
-
-func _hacer_actual_camara_combate() -> void:
-	if not is_instance_valid(_combate_contextual_3d):
-		return
-	for hijo in _combate_contextual_3d.get_children():
-		if hijo is Camera3D:
-			hijo.current = true
-			return
-
-
-func _cerrar_combate_hack_slash(gano: bool, objetivo: Dictionary, zona: Area3D = null) -> void:
-	var decision := _contexto_combate.duplicate(true)
-	_contexto_combate.clear()
-
-	var combate := _combate_contextual_3d
-	_combate_contextual_3d = null
-	if is_instance_valid(combate):
-		combate.queue_free()
+	var app := _combate_contextual_app
+	_combate_contextual_app = null
+	if is_instance_valid(app):
+		app.queue_free()
 	if _pantalla != null:
 		_pantalla.queue_free()
 		_pantalla = null
-	_restaurar_mundo_tras_combate()
 
 	if String(decision.get("plano", "")) == CombateContextual.PLANO_REALIDAD:
-		(
-			combate_real_terminado
-			. emit(
-				String(objetivo.get("id", "")),
-				gano,
-				decision.get("consecuencia", {}).duplicate(true),
-			)
-		)
+		var id := String(objetivo.get("id", ""))
+		var consecuencia: Dictionary = decision.get("consecuencia", {}).duplicate(true)
+		combate_real_terminado.emit(id, gano, consecuencia)
 		return
 
-	_resolver_combate_sueno(gano, objetivo, zona)
-
-
-func _resolver_combate_sueno(gano: bool, quien: Dictionary, zona: Area3D) -> void:
-	if not gano:
-		Auditorias.resolver_fin_sueno(partida.estado, false)
-	var final := SuenoCombate.resolver(partida.estado, jornada, quien, gano)
-	# El duelo ya está resuelto en memoria, así que se devuelve el control pase
-	# lo que pase: encerrar al jugador en una pantalla muerta no salva nada. Si
-	# no se pudo escribir, el aviso queda puesto y pisar una salida reintenta.
 	_guardar_o_avisar("")
-
-	if not final["gano"]:
-		# Perder corta la noche: se despierta de golpe, con lo que eso cuesta
-		# —el mapa no crece— y ni un castigo más.
-		_nomina.text = tr("DIA_DESPERTAR_DE_GOLPE") % final["dia"]
+	if not bool(resultado.get("gano", false)):
+		_nomina.text = tr("DIA_DESPERTAR_DE_GOLPE") % resultado["dia"]
 		_entrar_en("archivo")
 		return
 
-	# Ganar: deja de estar ahí, y se ha dormido. La vida solo se dice cuando
-	# de verdad se ha recuperado alguna; al tope, decirlo sería mentir.
-	_rivales.erase(quien.get("id", ""))
-	if is_instance_valid(zona):
-		if zona.has_meta("cuerpo"):
-			var cuerpo = zona.get_meta("cuerpo")
-			if is_instance_valid(cuerpo):
-				cuerpo.queue_free()
-		zona.queue_free()
+	_rivales.erase(objetivo.get("id", ""))
 	_nomina.text = (
-		tr("SUENO_DUELO_VIDA") % final["vida"]
-		if final["recuperada"]
+		tr("SUENO_DUELO_VIDA") % resultado["vida"]
+		if resultado["recuperada"]
 		else tr("SUENO_DUELO_SIN_VIDA")
 	)
 
