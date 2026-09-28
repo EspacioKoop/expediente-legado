@@ -53,7 +53,9 @@ func _probar_contribuciones_idempotentes() -> void:
 	_comprobar("agregado fixture valido", resultado["ok"], true)
 	_comprobar("una aceptada", resultado["accepted"], 1)
 	_comprobar("duplicado ignorado", resultado["duplicates"], 1)
-	_comprobar("peso sale de reglas, no del cliente", resultado["snapshot"]["community_progress"], 1)
+	_comprobar(
+		"peso sale de reglas, no del cliente", resultado["snapshot"]["community_progress"], 1
+	)
 	_comprobar("fase resistencia tras progreso", resultado["snapshot"]["phase"], "resistencia")
 
 
