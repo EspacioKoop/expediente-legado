@@ -53,6 +53,10 @@ var _enlaces: ItemList
 var _historial_lista: ItemList
 var _favoritos_lista: ItemList
 var _busqueda: LineEdit
+var _directorio_boton: Button
+var _directorio_vista := ""
+var _directorio_categoria := ""
+var _foco_antes_directorio: Control
 var _cache: Button
 var _descargar_software: Button
 var _paquete_software_actual := ""
@@ -167,6 +171,15 @@ func navegar(url: String, registrar_historial: bool = true) -> Dictionary:
 
 func buscar(consulta: String) -> Array[Dictionary]:
 	return _indice.buscar(consulta)
+
+
+func abrir_directorio() -> void:
+	if not is_node_ready():
+		return
+	if _directorio_vista.is_empty():
+		var foco := get_viewport().gui_get_focus_owner()
+		_foco_antes_directorio = foco if foco != null else _directorio_boton
+	_mostrar_directorio_categorias()
 
 
 func ir_atras() -> void:
@@ -288,6 +301,12 @@ func _construir_interfaz() -> void:
 	boton_buscar.text = tr("NAVEGADOR_BUSCAR")
 	boton_buscar.pressed.connect(func() -> void: _mostrar_busqueda(_busqueda.text))
 	barra_busqueda.add_child(boton_buscar)
+
+	_directorio_boton = Button.new()
+	_directorio_boton.name = "DirectorioWeb98"
+	_directorio_boton.text = tr("NAVEGADOR_DIRECTORIO")
+	_directorio_boton.pressed.connect(abrir_directorio)
+	barra_busqueda.add_child(_directorio_boton)
 
 	var cuerpo := HSplitContainer.new()
 	cuerpo.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -484,6 +503,8 @@ func _mostrar_decoracion_busqueda() -> void:
 
 
 func _renderizar(resultado: Dictionary) -> void:
+	_directorio_vista = ""
+	_directorio_categoria = ""
 	var url := url_actual()
 	_direccion.text = url
 	_atras.disabled = _indice_historial <= 0
@@ -723,7 +744,75 @@ func _renderizar_enlaces(recurso: Dictionary) -> void:
 		_enlaces.set_item_metadata(indice_item, String(destino.get("url", "")))
 
 
+func _mostrar_directorio_categorias() -> void:
+	_directorio_vista = "categorias"
+	_directorio_categoria = ""
+	_ocultar_visuales_web()
+	_cache.visible = false
+	_descargar_software.visible = false
+	_paquete_software_actual = ""
+	_pagina.text = tr("NAVEGADOR_DIRECTORIO_PORTADA")
+	_enlaces.clear()
+	for categoria in _indice.categorias():
+		var categoria_id := String(categoria.get("id", ""))
+		var recursos := _indice.directorio(categoria_id)
+		if categoria_id.is_empty() or recursos.is_empty():
+			continue
+		var item := _enlaces.add_item(
+			"%s (%d)" % [String(categoria.get("titulo", categoria_id)), recursos.size()]
+		)
+		_enlaces.set_item_metadata(item, categoria_id)
+	_enfocar_primer_enlace()
+
+
+func _mostrar_directorio_categoria(categoria_id: String) -> void:
+	var titulo := categoria_id
+	for categoria in _indice.categorias():
+		if String(categoria.get("id", "")) == categoria_id:
+			titulo = String(categoria.get("titulo", categoria_id))
+			break
+	var recursos := _indice.directorio(categoria_id)
+	_directorio_vista = "recursos"
+	_directorio_categoria = categoria_id
+	_ocultar_visuales_web()
+	_cache.visible = false
+	_descargar_software.visible = false
+	_paquete_software_actual = ""
+	_pagina.text = tr("NAVEGADOR_DIRECTORIO_CATEGORIA") % [titulo, recursos.size()]
+	_enlaces.clear()
+	for recurso in recursos:
+		var item := _enlaces.add_item(
+			"%s — %s" % [String(recurso.get("titulo", "")), String(recurso.get("snippet", ""))]
+		)
+		_enlaces.set_item_metadata(item, String(recurso.get("url", "")))
+	_enfocar_primer_enlace()
+
+
+func _enfocar_primer_enlace() -> void:
+	if _enlaces.item_count <= 0:
+		_enlaces.grab_focus()
+		return
+	_enlaces.select(0)
+	_enlaces.grab_focus()
+
+
+func _volver_directorio() -> void:
+	if _directorio_vista == "recursos":
+		_mostrar_directorio_categorias()
+		return
+	if _directorio_vista != "categorias":
+		return
+	_directorio_vista = ""
+	_directorio_categoria = ""
+	_renderizar(_resultado_actual)
+	_refrescar_laterales()
+	if is_instance_valid(_foco_antes_directorio):
+		_foco_antes_directorio.grab_focus()
+
+
 func _mostrar_busqueda(consulta: String) -> void:
+	_directorio_vista = ""
+	_directorio_categoria = ""
 	var resultados := buscar(consulta)
 	_ocultar_visuales_web()
 	_mostrar_decoracion_busqueda()
@@ -763,7 +852,14 @@ func _abrir_cache_actual() -> void:
 
 
 func _activar_enlace(indice_item: int) -> void:
-	navegar(String(_enlaces.get_item_metadata(indice_item)))
+	var destino := String(_enlaces.get_item_metadata(indice_item))
+	if _directorio_vista == "categorias":
+		_mostrar_directorio_categoria(destino)
+		return
+	if _directorio_vista == "recursos":
+		_directorio_vista = ""
+		_directorio_categoria = ""
+	navegar(destino)
 
 
 func _activar_historial(indice_item: int) -> void:
@@ -785,6 +881,14 @@ func _refrescar_laterales() -> void:
 	for url in _favoritos:
 		var indice_item := _favoritos_lista.add_item(url)
 		_favoritos_lista.set_item_metadata(indice_item, url)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if _directorio_vista.is_empty():
+		return
+	if event.is_action_pressed("ui_cancel"):
+		_volver_directorio()
+		get_viewport().set_input_as_handled()
 
 
 func _unhandled_key_input(event: InputEvent) -> void:

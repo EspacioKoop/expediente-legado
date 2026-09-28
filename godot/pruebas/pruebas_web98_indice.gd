@@ -310,6 +310,91 @@ func _probar_navegador() -> void:
 		restaurado.navegar("http://byte.local/")["estado"] == "caido",
 		"propaga estados de servidor simulado sin tocar la red real",
 	)
+
+	var navegador_ui := NavegadorSiga.new()
+	get_root().add_child(navegador_ui)
+	navegador_ui.configurar_contexto({"dia": 1, "conocimiento": [], "urls_caidas": []})
+	var busqueda_ui := navegador_ui.get("_busqueda") as LineEdit
+	busqueda_ui.grab_focus()
+	navegador_ui.abrir_directorio()
+	var lista_directorio := navegador_ui.get("_enlaces") as ItemList
+	var indice_directorio := Web98Indice.new()
+	indice_directorio.configurar_contexto({"dia": 1, "conocimiento": [], "urls_caidas": []})
+	var categorias_visibles := 0
+	for categoria in indice_directorio.categorias():
+		if not indice_directorio.directorio(String(categoria.get("id", ""))).is_empty():
+			categorias_visibles += 1
+	_comprobar(
+		lista_directorio.item_count == categorias_visibles,
+		"la UI del directorio expone exactamente las categorías con recursos visibles",
+	)
+
+	var item_institucional := -1
+	for item in range(lista_directorio.item_count):
+		if String(lista_directorio.get_item_metadata(item)) == "institucional":
+			item_institucional = item
+			break
+	_comprobar(item_institucional >= 0, "la categoría institucional es navegable desde la UI")
+	var institucional_bloqueado := indice_directorio.directorio("institucional").size()
+	if item_institucional >= 0:
+		lista_directorio.item_activated.emit(item_institucional)
+		_comprobar(
+			lista_directorio.item_count == institucional_bloqueado,
+			"la vista de categoría refleja el directorio filtrado por conocimiento",
+		)
+		var cancelar := InputEventAction.new()
+		cancelar.action = "ui_cancel"
+		cancelar.pressed = true
+		navegador_ui.call("_unhandled_input", cancelar)
+		_comprobar(
+			String(navegador_ui.get("_directorio_vista")) == "categorias",
+			"ui_cancel vuelve de recursos a categorías",
+		)
+		navegador_ui.call("_unhandled_input", cancelar)
+		_comprobar(
+			String(navegador_ui.get("_directorio_vista")).is_empty(),
+			"ui_cancel cierra el directorio desde la raíz",
+		)
+		_comprobar(
+			navegador_ui.get_viewport().gui_get_focus_owner() == busqueda_ui,
+			"cerrar el directorio restaura el foco anterior",
+		)
+
+	indice_directorio.configurar_contexto(
+		{"dia": 1, "conocimiento": ["enlace13"], "urls_caidas": []}
+	)
+	navegador_ui.configurar_contexto({"dia": 1, "conocimiento": ["enlace13"], "urls_caidas": []})
+	navegador_ui.abrir_directorio()
+	lista_directorio = navegador_ui.get("_enlaces") as ItemList
+	item_institucional = -1
+	for item in range(lista_directorio.item_count):
+		if String(lista_directorio.get_item_metadata(item)) == "institucional":
+			item_institucional = item
+			break
+	if item_institucional >= 0:
+		lista_directorio.item_activated.emit(item_institucional)
+		var institucional_desbloqueado := indice_directorio.directorio("institucional").size()
+		_comprobar(
+			lista_directorio.item_count == institucional_desbloqueado,
+			"el directorio UI incorpora recursos al adquirir el conocimiento requerido",
+		)
+		_comprobar(
+			institucional_desbloqueado == institucional_bloqueado + 1,
+			"enlace13 añade exactamente su recurso restringido a la categoría",
+		)
+		if lista_directorio.item_count > 0:
+			var destino := String(lista_directorio.get_item_metadata(0))
+			lista_directorio.item_activated.emit(0)
+			_comprobar(
+				navegador_ui.url_actual() == destino,
+				"activar un recurso del directorio reutiliza navegar(url)",
+			)
+			_comprobar(
+				String(navegador_ui.get("_directorio_vista")).is_empty(),
+				"navegar desde el directorio abandona su modo temporal",
+			)
+
+	navegador_ui.free()
 	navegador.free()
 	restaurado.free()
 

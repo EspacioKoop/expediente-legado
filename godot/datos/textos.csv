@@ -181,6 +181,9 @@ NAVEGADOR_CACHE,Ver caché
 NAVEGADOR_CACHE_PAGINA,[b]%s[/b]\nCopia guardada · día %d\n\n%s\n\n%s
 NAVEGADOR_CACHE_TITULO,Copia en caché
 NAVEGADOR_DIRECCION,Dirección
+NAVEGADOR_DIRECTORIO,Directorio
+NAVEGADOR_DIRECTORIO_CATEGORIA,[b]%s[/b]\n%d sitios disponibles.
+NAVEGADOR_DIRECTORIO_PORTADA,[b]Directorio Red 98[/b]\nSitios ordenados a mano por categorías.
 NAVEGADOR_DESCARGAR_SOFTWARE,Descargar %s
 NAVEGADOR_ENLACE,Enlace
 NAVEGADOR_ENLACES,Enlaces
