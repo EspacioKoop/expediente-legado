@@ -99,7 +99,9 @@ func _probar() -> void:
 		servicio_otra.consultar_acciones(ahora + 3)["actions"].size(),
 		0,
 	)
-	_comprobar("A recibe acción de B", servicio_a.consultar_acciones(ahora + 3)["actions"].size(), 1)
+	_comprobar(
+		"A recibe acción de B", servicio_a.consultar_acciones(ahora + 3)["actions"].size(), 1
+	)
 
 	_comprobar("relay corta A", relay.cortar_actor("anon-mini-a"), true)
 	await _bombear(relay, [servicio_a, servicio_b, servicio_otra], 5)
