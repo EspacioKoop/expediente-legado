@@ -84,10 +84,24 @@ func _ready() -> void:
 	add_child(_ciclo_laboral)
 	_ciclo_laboral.configurar(partida, _caminante, _hud, Callable(self, "_guardar_o_avisar"))
 	_ciclo_laboral.reasignacion_solicitada.connect(_reasignar)
+	_ciclo_laboral.vuelta_solicitada.connect(_abrir_vuelta)
+	_ciclo_laboral.vuelta_terminada.connect(_cerrar_vuelta)
 	# #1205: vida cero se resuelve antes de devolver movimiento al jugador.
 	if _ciclo_laboral.abrir_ultimo_recurso_pendiente(jornada):
 		return
+	_abrir_vuelta()
+
+
+func _abrir_vuelta() -> void:
 	_ciclo_laboral.abrir_vuelta(jornada)
+
+
+func _cerrar_vuelta() -> void:
+	_ciclo_laboral.cerrar_vuelta()
+
+
+func _entrada_vuelta_activa() -> bool:
+	return _ciclo_laboral != null and _ciclo_laboral.entrada_activa()
 
 
 ## Luz y ambiente. Una sola direccional, ahora con sombra, y oclusión.
@@ -825,7 +839,7 @@ func _cerrar_expediente() -> void:
 ## —eso es #73—, solo la garantía de que el ciclo no se queda a medias.
 func _reasignar() -> void:
 	_entrar_en(jornada["fase"])
-	_ciclo_laboral.abrir_vuelta(jornada)
+	_abrir_vuelta()
 
 
 func _refrescar_rotulos(espacio: Dictionary) -> void:
