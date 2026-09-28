@@ -63,10 +63,10 @@ static func _paginas_de(bloque: Dictionary) -> Array:
 	for linea in lineas:
 		actual.append(linea)
 		if actual.size() >= ENTRADAS_POR_PLANO:
-			paginas.append("  ·  ".join(actual))
+			paginas.append("  ·  ".join(PackedStringArray(actual)))
 			actual.clear()
 	if not actual.is_empty():
-		paginas.append("  ·  ".join(actual))
+		paginas.append("  ·  ".join(PackedStringArray(actual)))
 	return paginas
 
 
