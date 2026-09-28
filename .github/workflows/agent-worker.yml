@@ -739,7 +739,8 @@ jobs:
           git reset --hard HEAD
           git clean -fd
 
-      - name: Validar diff y preflight
+      - id: validate_diff
+        name: Validar diff y preflight
         if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true'
         env:
           IMPLEMENT_OUTCOME: ${{ inputs.provider == 'qwen' && steps.implement_qwen.outcome || steps.implement_gemini.outcome }}
@@ -748,7 +749,8 @@ jobs:
           # La implementación usa continue-on-error: si se cortó (timeout, error de
           # API) sus cambios están a medias y nunca deben llegar a una PR.
           if [[ "$IMPLEMENT_OUTCOME" != success ]]; then
-            echo "::error::implementación incompleta (outcome=$IMPLEMENT_OUTCOME); no se publica" >&2
+            echo "retry_stage=implement" >> "$GITHUB_OUTPUT"
+            echo "::error::implementación incompleta (outcome=$IMPLEMENT_OUTCOME); se reintentará con otro worker" >&2
             exit 1
           fi
           cp .agent-plan.json /tmp/plan.json
@@ -756,7 +758,11 @@ jobs:
           rm -f .agent-task.md .agent-plan.json .agent-context.md .agent-memory.json .agent-history.json .agent-platino-sha gha-creds-*.json
           rm -rf .agent-platino .agent-wiki .gemini .qwen gemini-artifacts qwen-artifacts
           git add -A
-          git diff --cached --quiet && { echo "sin cambios"; exit 2; }
+          if git diff --cached --quiet; then
+            echo "retry_stage=no-changes" >> "$GITHUB_OUTPUT"
+            echo "::error::implementación terminó sin cambios; se reintentará con otro worker" >&2
+            exit 2
+          fi
           python3 - <<'PY'
           import json, subprocess
           allowed=set(json.load(open("/tmp/plan.json"))["files"])
@@ -982,6 +988,10 @@ jobs:
           PLAN_SUMMARY: ${{ steps.delegated.outputs.summary || steps.plan_qwen.outputs.summary || steps.plan_gemini.outputs.summary }}
           PLAN_QWEN_OUTCOME: ${{ steps.plan_qwen.outcome }}
           PLAN_GEMINI_OUTCOME: ${{ steps.plan_gemini.outcome }}
+          IMPLEMENT_SUMMARY: ${{ steps.implement_qwen.outputs.summary || steps.implement_gemini.outputs.summary }}
+          IMPLEMENT_QWEN_OUTCOME: ${{ steps.implement_qwen.outcome }}
+          IMPLEMENT_GEMINI_OUTCOME: ${{ steps.implement_gemini.outcome }}
+          RETRY_STAGE: ${{ steps.validate_diff.outputs.retry_stage }}
           AGENT_PROVIDER_COOLDOWN_SECONDS: ${{ vars.AGENT_PROVIDER_COOLDOWN_SECONDS || '3600' }}
           CONTROL_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
           JOB_STATUS: ${{ job.status }}
@@ -1017,13 +1027,26 @@ jobs:
             exit 0
           fi
 
+          retry_stage=""
           if [[ "${RESERVED:-}" != true && -z "$pr" ]]; then
+            retry_stage=plan
+          elif [[ "${RESERVED:-}" == true && -z "$pr" && -n "${RETRY_STAGE:-}" ]]; then
+            retry_stage="$RETRY_STAGE"
+          fi
+
+          if [[ -n "$retry_stage" ]]; then
             quota_failure=false
             quota_pattern='(^|[^0-9])(429|503)([^0-9]|$)|Quota exceeded|TerminalQuotaError|RetryableQuotaError|RESOURCE_EXHAUSTED|rate.?limit|high demand|temporarily unavailable'
-            if [[ -n "${PLAN_SUMMARY:-}" ]] && grep -Eiq "$quota_pattern" <<<"$PLAN_SUMMARY"; then
+            failure_summary="$PLAN_SUMMARY"
+            gemini_outcome="$PLAN_GEMINI_OUTCOME"
+            if [[ "$retry_stage" != plan ]]; then
+              failure_summary="$IMPLEMENT_SUMMARY"
+              gemini_outcome="$IMPLEMENT_GEMINI_OUTCOME"
+            fi
+            if [[ -n "${failure_summary:-}" ]] && grep -Eiq "$quota_pattern" <<<"$failure_summary"; then
               quota_failure=true
             fi
-            if [[ "$PROVIDER" == gemini && "${PLAN_GEMINI_OUTCOME:-}" != success ]]; then
+            if [[ "$PROVIDER" == gemini && "${gemini_outcome:-}" != success ]]; then
               shopt -s nullglob
               reports=(/tmp/gemini-client-error-*.json "${RUNNER_TEMP:-/tmp}"/gemini-client-error-*.json)
               for report in "${reports[@]}"; do
@@ -1067,10 +1090,12 @@ jobs:
               fi
             fi
 
-            marker="AGENT_POOL_WORKER_FAILURE worker=$WORKER provider=$PROVIDER stage=plan run=$GITHUB_RUN_ID"
+            marker="AGENT_POOL_WORKER_FAILURE worker=$WORKER provider=$PROVIDER stage=$retry_stage run=$GITHUB_RUN_ID"
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "$marker" >/dev/null || true
+
+            release_reason="agent-pool-${retry_stage}-retry"
             gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" \
-              --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=agent-pool-plan-retry" \
+              --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=$release_reason" \
               >/dev/null || true
 
             labels="$(gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json labels --jq '[.labels[].name]|join(" ")')"
@@ -1120,7 +1145,7 @@ jobs:
                 --add-label agent:needs-human --remove-label agent:working \
                 >/dev/null 2>&1 || true
               gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-                "Agent pool agotó los workers compatibles durante planificación. Último fallo: $WORKER. Requiere revisión humana o AGENT_POOL_RETRY_RESET cuando cambie la disponibilidad." || true
+                "Agent pool agotó los workers compatibles durante $retry_stage. Último fallo: $WORKER. Requiere revisión humana o AGENT_POOL_RETRY_RESET cuando cambie la disponibilidad." || true
             else
               gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
                 --remove-label agent:working --remove-label agent:needs-human \
@@ -1131,7 +1156,7 @@ jobs:
                 detalle=""
               fi
               gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-                "Agent pool reencolado tras fallo de planificación en $WORKER; el siguiente dispatcher evitará ese worker para este issue.$detalle" || true
+                "Agent pool reencolado tras fallo de $retry_stage en $WORKER; el siguiente dispatcher evitará ese worker para este issue.$detalle" || true
             fi
             exit 0
           fi
