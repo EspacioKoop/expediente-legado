@@ -33,7 +33,9 @@ func _probar() -> void:
 	var conocida := String(formas[0])
 	jornada["mapa"] = [conocida]
 
-	var opciones_originales: Array = historias.vista(estado, carta_id).get("opciones", []).duplicate(true)
+	var opciones_originales: Array = (
+		historias.vista(estado, carta_id).get("opciones", []).duplicate(true)
+	)
 	var dinero_antes := int(jornada["dinero"])
 	var acciones_antes := int(jornada["acciones"])
 	var pistas_antes: Array = estado.get("pistas_descubiertas", []).duplicate()
@@ -52,25 +54,33 @@ func _probar() -> void:
 		"un único aplazamiento todavía no fuerza recurrencia",
 	)
 	_comprobar(historias.postergar(estado, carta_id), "segundo aplazamiento se registra")
-	_comprobar(int(jornada["presion_indecision_onirica"]) == 1, "dos aplazamientos activan rumiación leve")
+	_comprobar(
+		int(jornada["presion_indecision_onirica"]) == 1, "dos aplazamientos activan rumiación leve"
+	)
 
 	var opciones1 := SeleccionNocturna.opciones_sueno(jornada)
 	var noche1 := Sueno.noche(
 		jornada["dia"], jornada["leido_hoy"], jornada["mapa"], int(jornada["raiz"]), opciones1
 	)
-	_comprobar(int(opciones1.get("rumiacion_indecision", 0)) == 1, "la selección nocturna recibe nivel 1")
+	_comprobar(
+		int(opciones1.get("rumiacion_indecision", 0)) == 1, "la selección nocturna recibe nivel 1"
+	)
 	_comprobar(not opciones1.has("cantidad"), "la indecisión no cambia la cantidad de escenas")
 	_comprobar(noche1.size() == Sueno.ESCENAS_POR_NOCHE, "nivel 1 conserva tres escenas")
 	_comprobar(String(noche1[0]) != conocida, "nivel 1 conserva una escena nueva primero")
 	_comprobar(String(noche1[1]) == conocida, "nivel 1 intercala una sala ya vivida")
 
 	_comprobar(historias.postergar(estado, carta_id), "tercer aplazamiento se registra")
-	_comprobar(int(jornada["presion_indecision_onirica"]) == 2, "tres aplazamientos activan rumiación alta")
+	_comprobar(
+		int(jornada["presion_indecision_onirica"]) == 2, "tres aplazamientos activan rumiación alta"
+	)
 	var opciones2 := SeleccionNocturna.opciones_sueno(jornada)
 	var noche2 := Sueno.noche(
 		jornada["dia"], jornada["leido_hoy"], jornada["mapa"], int(jornada["raiz"]), opciones2
 	)
-	_comprobar(int(opciones2.get("rumiacion_indecision", 0)) == 2, "la selección nocturna recibe nivel 2")
+	_comprobar(
+		int(opciones2.get("rumiacion_indecision", 0)) == 2, "la selección nocturna recibe nivel 2"
+	)
 	_comprobar(noche2.size() == Sueno.ESCENAS_POR_NOCHE, "nivel 2 conserva tres escenas")
 	_comprobar(String(noche2[0]) == conocida, "nivel 2 abre con una sala ya vivida")
 	_comprobar(
