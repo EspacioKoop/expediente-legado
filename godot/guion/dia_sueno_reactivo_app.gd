@@ -105,9 +105,7 @@ func _process(delta: float) -> void:
 		var documento_origen := String(anomalia.get_meta("documento_origen", ""))
 		anomalia.observada.connect(_al_observar_anomalia.bind(documento_origen))
 		if not documento_origen.strip_edges().is_empty():
-			anomalia.observada.connect(
-				_al_gestionar_grabacion.bind(anomalia, documento_origen)
-			)
+			anomalia.observada.connect(_al_gestionar_grabacion.bind(anomalia, documento_origen))
 
 	# La primera deformación que venga de un folio leído hoy ocupa una plaza
 	# puntuable de la escena (#299). Si esta noche no hay material documental,
@@ -160,10 +158,13 @@ func finalizar_grabacion(
 	if not partida_actual is Partida:
 		return {"ok": false, "error": "partida_no_disponible"}
 
-	var resultado := _grabacion_runtime.finalizar(
-		partida_actual.estado,
-		frase_completa,
-		figura_detecto_camara,
+	var resultado := (
+		_grabacion_runtime
+		. finalizar(
+			partida_actual.estado,
+			frase_completa,
+			figura_detecto_camara,
+		)
 	)
 	_anomalia_grabada = null
 	if bool(resultado.get("ok", false)):
