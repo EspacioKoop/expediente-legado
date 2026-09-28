@@ -15,6 +15,7 @@ HUD = ROOT / "godot" / "guion" / "dia_hud_fases_app.gd"
 INDICADOR = ROOT / "godot" / "guion" / "estres_hud_indicador.gd"
 ENTORNO = ROOT / "godot" / "guion" / "estres_ambiental.gd"
 AVIONES = ROOT / "godot" / "guion" / "aviones_papel_descanso.gd"
+GATO = ROOT / "godot" / "guion" / "dia_gato_app.gd"
 SMOKE = "pruebas/issue_952_smoke.gd"
 
 
@@ -29,6 +30,7 @@ class Estres952Test(unittest.TestCase):
         cls.indicador = INDICADOR.read_text(encoding="utf-8")
         cls.entorno = ENTORNO.read_text(encoding="utf-8")
         cls.aviones = AVIONES.read_text(encoding="utf-8")
+        cls.gato = GATO.read_text(encoding="utf-8")
 
     def test_estado_interno_y_acotado_vive_en_jornada(self):
         self.assertIn('const CAMPO_JORNADA := "estres_dinamico"', self.estres)
@@ -112,6 +114,18 @@ class Estres952Test(unittest.TestCase):
         abandono = self.aviones.index('if resultado.get("abandonada", false):')
         autocuidado = self.aviones.index('Estres.aplicar(jornada, "autocuidado")')
         self.assertLess(abandono, autocuidado)
+
+    def test_puzzle_onirico_completado_aplica_resolucion_una_vez(self):
+        bloque = self.gato.split(
+            "func _actualizar_objetivo_puzzle_onirico", 1
+        )[1].split("func ", 1)[0]
+        completar = "SuenoObjetivos.completar(estado, objetivo_id)"
+        resolucion = 'Estres.aplicar(jornada, "resolucion")'
+        self.assertIn(completar, bloque)
+        self.assertIn(resolucion, bloque)
+        self.assertLess(bloque.index(completar), bloque.index(resolucion))
+        self.assertLess(bloque.index(resolucion), bloque.index("_tras_cambio_objetivo"))
+        self.assertIn("if not " + completar + ":", bloque)
 
     def test_smoke_godot(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
