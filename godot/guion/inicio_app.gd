@@ -12,6 +12,9 @@ const CINEMATICA_APP := preload("res://guion/cinematica_app.gd")
 const COLOR_TEXTO := Color(0.92, 0.93, 0.90)
 const COLOR_TEXTO_DESACTIVADO := Color(0.55, 0.56, 0.53)
 const COLOR_CONTORNO := Color(0.0, 0.0, 0.0, 0.85)
+const COLOR_FONDO_ITEM := Color(0.03, 0.035, 0.045, 0.46)
+const COLOR_FONDO_ITEM_HOVER := Color(0.05, 0.055, 0.07, 0.78)
+const COLOR_FONDO_ITEM_PULSADO := Color(0.02, 0.025, 0.035, 0.88)
 
 ## Deriva de encuadre del diorama por cada acción del menú (`InicioDiorama3D.ZONAS`).
 const ZONAS_POR_BOTON := {
@@ -52,7 +55,7 @@ var _entrando := false
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	theme = EstiloSiga.tema()
+	theme = EstiloJuego.tema()
 	_construir_interfaz()
 	_confirmacion = ConfirmationDialog.new()
 	_confirmacion.title = tr("INICIO_NUEVA")
@@ -142,7 +145,7 @@ func _construir_interfaz() -> void:
 	var caja := VBoxContainer.new()
 	caja.name = "ListaInicio"
 	caja.alignment = BoxContainer.ALIGNMENT_END
-	caja.add_theme_constant_override("separation", 6)
+	caja.add_theme_constant_override("separation", 8)
 	_envoltorio.add_child(caja)
 
 	_crear_cabecera(caja)
@@ -253,14 +256,25 @@ func _crear_boton(texto: String, accion: Callable) -> Button:
 	boton.text = texto
 	# #1449 / #830: el menú debe leerse como una lista compacta superpuesta al
 	# diorama, no como una botonera que ocupa todo el viewport.
-	boton.custom_minimum_size = Vector2(360, 36)
+	boton.custom_minimum_size = Vector2(380, 40)
 	boton.size_flags_horizontal = Control.SIZE_SHRINK_END
 	boton.focus_mode = Control.FOCUS_ALL
 	boton.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	boton.flat = true
 	_aplicar_contraste(boton)
 	boton.add_theme_color_override("font_disabled_color", COLOR_TEXTO_DESACTIVADO)
-	boton.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	boton.add_theme_color_override("font_hover_color", EstiloJuego.ACENTO)
+	boton.add_theme_color_override("font_focus_color", EstiloJuego.ACENTO)
+	boton.add_theme_stylebox_override(
+		"normal", EstiloJuego.caja(COLOR_FONDO_ITEM, Color.TRANSPARENT, 10.0)
+	)
+	boton.add_theme_stylebox_override(
+		"hover", EstiloJuego.caja(COLOR_FONDO_ITEM_HOVER, EstiloJuego.BORDE, 10.0)
+	)
+	boton.add_theme_stylebox_override(
+		"pressed", EstiloJuego.caja(COLOR_FONDO_ITEM_PULSADO, EstiloJuego.ACENTO, 10.0)
+	)
+	boton.add_theme_stylebox_override("focus", EstiloJuego.caja_foco())
 	boton.focus_entered.connect(func(): boton.text = "> " + texto)
 	boton.focus_exited.connect(func(): boton.text = texto)
 	boton.pressed.connect(accion)
