@@ -762,7 +762,7 @@ DEPEND_PACO_SALUDO_5,"Usted trabaja en el archivo, ¿verdad? Se le nota en los d
 DEPEND_PACO_LLUVIA,Con este agua no se vende ni un periódico. La gente prefiere mojarse sin saber lo que pasa.
 DEPEND_PACO_NIEVE,"Nieve en esta calle... La última vez fue el año que cerraron la fábrica. Yo no digo nada, eh."
 DEPEND_PACO_NIEBLA,Con esta niebla hasta los titulares se leen borrosos.
-DEPEND_PACO_CLIENTE,"¿Qué tal lo que se llevó? Yo esas revistas no las leo, que me dan pesadillas, pero se venden solas."
+DEPEND_PACO_CLIENTE,"¿Qué tal lo que se llevó? Yo esas revistas no las leo, que me dan pesadillas, pero se venden solas."\nDEPEND_PACO_CLIENTE_SEGUIMIENTO,"Si le gustó, mañana me llega otro número. Si no, no me lo diga, que me lo como yo."\nDEPEND_PACO_CLIMA_SEGUIMIENTO,Y encima el reparto llega tarde. Luego dicen que el papel está muerto.
 DEPEND_PACO_INSISTE,"Si no va a comprar, apártese un poquito, que me tapa las revistas."
 DEPEND_REMEDIOS,"Remedios, de El Trastero"
 DEPEND_REMEDIOS_SALUDO_1,"Pase, pase. Aquí nada es nuevo, pero todo lo ha querido alguien."
@@ -773,7 +773,7 @@ DEPEND_REMEDIOS_SALUDO_5,"Mi marido decía que el trastero de uno es la memoria 
 DEPEND_REMEDIOS_LLUVIA,Con la humedad la madera se queja. ¿La oye? Cruje como si quisiera contar algo.
 DEPEND_REMEDIOS_NIEVE,Los días de nieve viene gente a venderme las cosas de sus difuntos. No sé por qué será.
 DEPEND_REMEDIOS_NIEBLA,Con niebla entran clientes que luego no recuerdo haber atendido.
-DEPEND_REMEDIOS_CLIENTE,¿Cómo se ha hecho a la casa lo que se llevó? A veces les cuesta acostumbrarse.
+DEPEND_REMEDIOS_CLIENTE,¿Cómo se ha hecho a la casa lo que se llevó? A veces les cuesta acostumbrarse.\nDEPEND_REMEDIOS_CLIENTE_SEGUIMIENTO,"Si todavía no le ha encontrado sitio, no la fuerce. Las cosas avisan."\nDEPEND_REMEDIOS_CLIMA_SEGUIMIENTO,La humedad despierta los cajones. Esta mañana uno se abrió solo dos veces.
 DEPEND_REMEDIOS_INSISTE,"Tómese su tiempo. Aquí nadie tiene prisa, ni siquiera lo que está a la venta."
 DEPEND_JULIAN,"Julián, de Electrodomésticos"
 DEPEND_JULIAN_SALUDO_1,"¡Buenas! Televisor de veintinueve pulgadas con teletexto y mando a distancia. En doce cómodos plazos sin intereses. Sin intereses, ¿eh?"
@@ -783,7 +783,7 @@ DEPEND_JULIAN_SALUDO_4,"¿Tiene vídeo en casa? ¿Con programador? Entonces no t
 DEPEND_JULIAN_SALUDO_5,"Mire, yo no le vendo una lavadora. Le vendo los domingos por la mañana."
 DEPEND_JULIAN_LLUVIA,"Día de lluvia, día de secadora. Tengo una que se lo deja todo seco en cuarenta minutos. Garantizado."
 DEPEND_JULIAN_NIEVE,Con este frío lo que usted necesita es un radiador de aceite. Silencioso: ni se entera de que lo tiene.
-DEPEND_JULIAN_NIEBLA,"Con niebla la antena coge fatal. Nada que no arregle un buen descodificador, por cierto."
+DEPEND_JULIAN_NIEBLA,"Con niebla la antena coge fatal. Nada que no arregle un buen descodificador, por cierto."\nDEPEND_JULIAN_CLIMA_SEGUIMIENTO,"Y cuando escampe seguirá necesitando el aparato. El clima pasa; la cuota se queda."
 DEPEND_JULIAN_INSISTE,"Piénselo, piénselo. Pero la oferta acaba el sábado. Bueno, acaba todos los sábados, pero este también."
 DEPEND_KIKE,"Kike, de Bit 98"
 DEPEND_KIKE_SALUDO_1,"Si vienes a preguntar si la Play lee copias, la respuesta oficial es que no."
@@ -794,7 +794,7 @@ DEPEND_KIKE_SALUDO_5,"Cartuchos, mandos, tarjetas de memoria... Lo que quieras m
 DEPEND_KIKE_LLUVIA,Llueve. Mejor: la gente se mete aquí y se queda jugando en vez de irse a casa.
 DEPEND_KIKE_NIEVE,Con nieve se va la luz y se borran las partidas guardadas. Te lo digo por experiencia.
 DEPEND_KIKE_NIEBLA,Con esta niebla parece que la calle no ha terminado de cargar.
-DEPEND_KIKE_CLIENTE,"¿Qué tal el cartucho? No me lo devuelvas, que aquí no hay devoluciones. Ni cambios. Ni nada."
+DEPEND_KIKE_CLIENTE,"¿Qué tal el cartucho? No me lo devuelvas, que aquí no hay devoluciones. Ni cambios. Ni nada."\nDEPEND_KIKE_CLIENTE_SEGUIMIENTO,"Si te atascas, no mires una guía. Bueno, mírala. Pero no digas que te lo he dicho."\nDEPEND_KIKE_CLIMA_SEGUIMIENTO,"Como se vaya la luz, hoy no me preguntes por partidas perdidas. Ya he avisado."
 DEPEND_KIKE_INSISTE,Sigo aquí. Tampoco tengo adónde ir.
 DEPEND_PACO_SUENO_1,Aquí también vendo el periódico de mañana. Nadie lo compra: da miedo saber lo que va a pasar.
 DEPEND_PACO_SUENO_2,He visto pasar tres alcaldes... y a usted. A usted lo he visto pasar muchas veces. Demasiadas.
