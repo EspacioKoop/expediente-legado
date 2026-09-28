@@ -104,9 +104,7 @@ static func para_caso(estado: Dictionary, caso: Dictionary) -> Dictionary:
 
 	var proyeccion := GrabacionOniricaContrato.para_proyeccion(evaluacion)
 	proyeccion["original_id"] = original_id
-	proyeccion["toma_indice"] = int(
-		asegurar_en_estado(estado).get("toma_seleccionada", SIN_TOMA)
-	)
+	proyeccion["toma_indice"] = int(asegurar_en_estado(estado).get("toma_seleccionada", SIN_TOMA))
 	return proyeccion
 
 
@@ -166,10 +164,13 @@ static func validar(actual) -> Array:
 			errores.append("cinta.tomas[%d] no es un objeto" % i)
 			continue
 		var estado := String(evaluacion.get("estado", ""))
-		if estado not in [
-			GrabacionOniricaContrato.ESTADO_VALIDA,
-			GrabacionOniricaContrato.ESTADO_CONTAMINADA,
-		]:
+		if (
+			estado
+			not in [
+				GrabacionOniricaContrato.ESTADO_VALIDA,
+				GrabacionOniricaContrato.ESTADO_CONTAMINADA,
+			]
+		):
 			errores.append("cinta.tomas[%d].estado inválido" % i)
 		if typeof(evaluacion.get("motivos", [])) != TYPE_ARRAY:
 			errores.append("cinta.tomas[%d].motivos no es una lista" % i)
@@ -183,9 +184,7 @@ static func validar(actual) -> Array:
 
 static func _numero_no_negativo(valor) -> bool:
 	return (
-		typeof(valor) in [TYPE_INT, TYPE_FLOAT]
-		and is_finite(float(valor))
-		and float(valor) >= 0.0
+		typeof(valor) in [TYPE_INT, TYPE_FLOAT] and is_finite(float(valor)) and float(valor) >= 0.0
 	)
 
 
