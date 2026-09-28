@@ -18,11 +18,14 @@ func _probar() -> void:
 	var antes: Dictionary = app.estado.duplicate(true)
 	var previo: Dictionary = app._vuelo_previo()
 	_comprobar(not previo.is_empty(), "el turno inicial ofrece una previsión")
-	var esperado := AvionesPapel.simular(
-		app.MODELOS[app.modelo.selected],
-		float(app.direccion.value),
-		float(app.altura.value),
-		float(app.potencia.value),
+	var esperado := (
+		AvionesPapel
+		. simular(
+			app.MODELOS[app.modelo.selected],
+			float(app.direccion.value),
+			float(app.altura.value),
+			float(app.potencia.value),
+		)
 	)
 	_comprobar(
 		previo.get("posicion", Vector3.INF) == esperado.get("posicion", Vector3.ZERO),
