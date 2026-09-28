@@ -79,6 +79,17 @@ class HuellasAmbientales959Test(unittest.TestCase):
         self.assertNotIn("HuellasAmbientales.registrar", self.lampara)
         self.assertNotIn("HuellasAmbientales.registrar", self.televisor)
 
+    def test_contexto_visual_reutiliza_hora_y_clima_canonicos(self):
+        self.assertIn("static func perfil_visual(", self.controller)
+        self.assertIn("Jornada.franja_horaria(jornada)", self.controller)
+        self.assertIn("Clima.estado(int(jornada.get", self.controller)
+        self.assertIn("Clima.precipitacion(clima)", self.controller)
+        self.assertIn("_sincronizar_contexto_visual(dia, mundo)", self.controller)
+        self.assertNotIn('estado_partida["clima"', self.controller)
+        self.assertNotIn('estado_partida["hora"', self.controller)
+        self.assertIn("cambiar de franja no muta la persistencia", self.godot_test)
+        self.assertIn("la precipitación hace más legible el desgaste de paso", self.godot_test)
+
     def test_no_convierte_huellas_en_progreso(self):
         for forbidden in ("Sellos.", "Prometeo.", "Economia.", "Acusacion."):
             self.assertNotIn(forbidden, self.controller)

@@ -132,6 +132,58 @@ func _probar() -> void:
 		marca.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF,
 		"la huella no añade coste de sombras",
 	)
+
+	var material_marca := (marca.mesh as PlaneMesh).material as StandardMaterial3D
+	var alpha_manana := material_marca.albedo_color.a
+	var estado_huellas_antes := JSON.stringify(dia.partida.estado["huellas_ambientales"])
+	dia.jornada["hora_minutos"] = 19 * 60
+	controller._process(0.0)
+	var alpha_noche := material_marca.albedo_color.a
+	_comprobar(alpha_noche > alpha_manana, "la noche cambia solo la lectura visual")
+	_comprobar(
+		JSON.stringify(dia.partida.estado["huellas_ambientales"]) == estado_huellas_antes,
+		"cambiar de franja no muta la persistencia",
+	)
+
+	var perfil_seco: Dictionary = (
+		controller
+		. perfil_visual(
+			{
+				"fase": "trayecto",
+				"dia": 1,
+				"hora_minutos": 12 * 60,
+				"clima_forzado": Clima.DESPEJADO
+			},
+			"paso",
+			0.2,
+		)
+	)
+	var perfil_lluvia: Dictionary = (
+		controller
+		. perfil_visual(
+			{"fase": "trayecto", "dia": 1, "hora_minutos": 12 * 60, "clima_forzado": Clima.LLUVIA},
+			"paso",
+			0.2,
+		)
+	)
+	_comprobar(
+		float(perfil_lluvia["alpha"]) > float(perfil_seco["alpha"]),
+		"la precipitación hace más legible el desgaste de paso",
+	)
+	var perfil_sueno: Dictionary = (
+		controller
+		. perfil_visual(
+			{"fase": "sueño", "dia": 1, "hora_minutos": 23 * 60},
+			"uso",
+			0.2,
+		)
+	)
+	_comprobar(
+		Color(perfil_sueno["tinte"]) != Color(perfil_seco["tinte"]),
+		"el sueño deforma el tinte sin mover la huella",
+	)
+
+	dia.jornada["hora_minutos"] = 9 * 60
 	sin_meta.interactuar(dia)
 	_comprobar(
 		dia.partida.estado["huellas_ambientales"].size() == 1,
