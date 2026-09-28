@@ -15,6 +15,11 @@ on:
         description: 'Slot fisico del pool'
         required: true
         type: string
+      fallback_keys:
+        description: 'Slots de fallback con clave, separados por espacios (tabla del pool)'
+        required: false
+        type: string
+        default: ''
     secrets:
       QWEN_API_KEY:
         required: false
@@ -26,6 +31,9 @@ on:
         required: false
       TS_AUDIENCE:
         required: false
+      # Los slots de fallback se leen con secrets[format(...)] (#1685). Con el
+      # `secrets: inherit` del pool llegan todos; estas declaraciones son solo
+      # las históricas y no limitan el número de slots.
       QWEN_FALLBACK_1_API_KEY:
         required: false
       QWEN_FALLBACK_2_API_KEY:
@@ -91,24 +99,23 @@ jobs:
           HAS_TS_OAUTH: ${{ secrets.TS_OAUTH_CLIENT_ID != '' && secrets.TS_OAUTH_SECRET != '' }}
           HAS_TS_OIDC: ${{ secrets.TS_OAUTH_CLIENT_ID != '' && secrets.TS_AUDIENCE != '' }}
           HAS_OMNIROUTE: ${{ secrets.OMNIROUTE_API_KEY != '' && secrets.TS_OAUTH_CLIENT_ID != '' && (secrets.TS_OAUTH_SECRET != '' || secrets.TS_AUDIENCE != '') && vars.OMNIROUTE_BASE_URL != '' && vars.OMNIROUTE_MODEL != '' }}
-          HAS_QWEN_FALLBACK_1: ${{ secrets.QWEN_FALLBACK_1_API_KEY != '' }}
-          HAS_QWEN_FALLBACK_2: ${{ secrets.QWEN_FALLBACK_2_API_KEY != '' }}
-          HAS_QWEN_FALLBACK_3: ${{ secrets.QWEN_FALLBACK_3_API_KEY != '' }}
-          HAS_QWEN_FALLBACK_4: ${{ secrets.QWEN_FALLBACK_4_API_KEY != '' }}
           HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
-          FALLBACK_1_URL: ${{ vars.QWEN_FALLBACK_1_BASE_URL }}
-          FALLBACK_2_URL: ${{ vars.QWEN_FALLBACK_2_BASE_URL }}
-          FALLBACK_3_URL: ${{ vars.QWEN_FALLBACK_3_BASE_URL }}
-          FALLBACK_4_URL: ${{ vars.QWEN_FALLBACK_4_BASE_URL }}
+          VARS_JSON: ${{ toJSON(vars) }}
+          POOL_FALLBACK_KEYS: ${{ inputs.fallback_keys }}
         run: |
           set -euo pipefail
           [[ "$ISSUE" =~ ^[0-9]+$ ]] || exit 2
           case "$WORKER:$PROVIDER" in
             qwen-primary:qwen) [[ "$HAS_QWEN" == true || "$HAS_OMNIROUTE" == true ]] || exit 3 ;;
-            qwen-fallback-1:qwen) [[ "$HAS_QWEN_FALLBACK_1" == true && -n "$FALLBACK_1_URL" ]] || exit 3 ;;
-            qwen-fallback-2:qwen) [[ "$HAS_QWEN_FALLBACK_2" == true && -n "$FALLBACK_2_URL" ]] || exit 3 ;;
-            qwen-fallback-3:qwen) [[ "$HAS_QWEN_FALLBACK_3" == true && -n "$FALLBACK_3_URL" ]] || exit 3 ;;
-            qwen-fallback-4:qwen) [[ "$HAS_QWEN_FALLBACK_4" == true && -n "$FALLBACK_4_URL" ]] || exit 3 ;;
+            qwen-fallback-[1-9]*:qwen)
+              # Aún sin checkout: URL desde las variables y clave según la tabla del
+              # pool. qwen_config vuelve a comprobar la clave del propio slot.
+              n="${WORKER#qwen-fallback-}"
+              [[ "$n" =~ ^[1-9][0-9]*$ ]] || exit 2
+              url="$(jq -r --arg k "QWEN_FALLBACK_${n}_BASE_URL" '.[$k] // ""' <<<"$VARS_JSON")"
+              [[ -n "$url" ]] || exit 3
+              [[ -z "$POOL_FALLBACK_KEYS" || " $POOL_FALLBACK_KEYS " == *" $n "* ]] || exit 3
+              ;;
             gemini:gemini) [[ "$HAS_GEMINI" == true ]] || exit 3 ;;
             *) echo "Combinacion worker/provider invalida: $WORKER/$PROVIDER" >&2; exit 2 ;;
           esac
@@ -175,6 +182,17 @@ jobs:
           jq -e '.data | type == "array"' /tmp/omniroute-models.json >/dev/null
           echo "ready=true" >> "$GITHUB_OUTPUT"
 
+      - id: slot
+        name: Identificar slot de fallback
+        if: steps.guard.outputs.run == 'true' && inputs.provider == 'qwen'
+        env:
+          WORKER: ${{ inputs.worker }}
+        run: |
+          # qwen-fallback-N -> N; permite resolver la clave con secrets[format(...)].
+          if [[ "$WORKER" =~ ^qwen-fallback-([1-9][0-9]*)$ ]]; then
+            echo "n=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+          fi
+
       - id: qwen_config
         name: Resolver endpoint Qwen
         if: steps.guard.outputs.run == 'true' && inputs.provider == 'qwen'
@@ -183,61 +201,61 @@ jobs:
           OMNI_READY: ${{ steps.omniroute.outputs.ready }}
           OMNI_URL: ${{ vars.OMNIROUTE_BASE_URL }}
           OMNI_MODEL: ${{ vars.OMNIROUTE_MODEL }}
-          PRIMARY_KEY: ${{ secrets.QWEN_API_KEY }}
+          HAS_PRIMARY_KEY: ${{ secrets.QWEN_API_KEY != '' }}
+          PRIMARY_KEY_PREFIX: ${{ startsWith(secrets.QWEN_API_KEY, 'sk-sp-') && 'sk-sp-' || '' }}
           PRIMARY_URL: ${{ vars.QWEN_BASE_URL }}
           PRIMARY_MODEL: ${{ vars.QWEN_MODEL }}
-          F1_KEY: ${{ secrets.QWEN_FALLBACK_1_API_KEY }}
-          F1_URL: ${{ vars.QWEN_FALLBACK_1_BASE_URL }}
-          F1_MODEL: ${{ vars.QWEN_FALLBACK_1_MODEL }}
-          F2_KEY: ${{ secrets.QWEN_FALLBACK_2_API_KEY }}
-          F2_URL: ${{ vars.QWEN_FALLBACK_2_BASE_URL }}
-          F2_MODEL: ${{ vars.QWEN_FALLBACK_2_MODEL }}
-          F3_KEY: ${{ secrets.QWEN_FALLBACK_3_API_KEY }}
-          F3_URL: ${{ vars.QWEN_FALLBACK_3_BASE_URL }}
-          F3_MODEL: ${{ vars.QWEN_FALLBACK_3_MODEL }}
-          F4_KEY: ${{ secrets.QWEN_FALLBACK_4_API_KEY }}
-          F4_URL: ${{ vars.QWEN_FALLBACK_4_BASE_URL }}
-          F4_MODEL: ${{ vars.QWEN_FALLBACK_4_MODEL }}
+          # Slots de fallback dinámicos (#1685): URL/modelo desde las variables y
+          # clave propia comprobada sin exponerla al shell.
+          VARS_JSON: ${{ toJSON(vars) }}
+          POOL_FALLBACK_KEYS: ${{ inputs.fallback_keys }}
+          SLOT: ${{ steps.slot.outputs.n }}
+          SLOT_HAS_KEY: ${{ steps.slot.outputs.n != '' && secrets[format('QWEN_FALLBACK_{0}_API_KEY', steps.slot.outputs.n)] != '' }}
         run: |
           set -euo pipefail
           model="${PRIMARY_MODEL:-qwen3-coder-plus}"
           credential=""
+          slot=""
+          fallback() {
+            local resuelto
+            resuelto="$(python3 scripts/agent_slots.py resolver --worker "$1" --modelo-por-defecto "$model")" || return 1
+            credential=fallback
+            slot="$(jq -r '.slot' <<<"$resuelto")"
+            url="$(jq -r '.url' <<<"$resuelto")"
+            model="$(jq -r '.model' <<<"$resuelto")"
+          }
           case "$WORKER" in
             qwen-primary)
               if [[ "$OMNI_READY" == true ]]; then
                 credential=omniroute
                 url="$OMNI_URL"
                 model="$OMNI_MODEL"
-              elif [[ -n "$PRIMARY_KEY" ]]; then
+              elif [[ "$HAS_PRIMARY_KEY" == true ]]; then
                 credential=primary
                 url="$PRIMARY_URL"
                 if [[ -z "$url" ]]; then
-                  if [[ "$PRIMARY_KEY" == sk-sp-* ]]; then
+                  if [[ "$PRIMARY_KEY_PREFIX" == sk-sp- ]]; then
                     url="https://coding-intl.dashscope.aliyuncs.com/v1"
                   else
                     url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
                   fi
                 fi
-              elif [[ -n "$F1_KEY" && -n "$F1_URL" ]]; then
-                credential=fallback-1; url="$F1_URL"; model="${F1_MODEL:-$model}"
-              elif [[ -n "$F2_KEY" && -n "$F2_URL" ]]; then
-                credential=fallback-2; url="$F2_URL"; model="${F2_MODEL:-$model}"
-              elif [[ -n "$F3_KEY" && -n "$F3_URL" ]]; then
-                credential=fallback-3; url="$F3_URL"; model="${F3_MODEL:-$model}"
-              elif [[ -n "$F4_KEY" && -n "$F4_URL" ]]; then
-                credential=fallback-4; url="$F4_URL"; model="${F4_MODEL:-$model}"
               else
-                exit 3
+                FALLBACK_KEYS="$POOL_FALLBACK_KEYS" fallback primera || exit 3
               fi
               ;;
-            qwen-fallback-1) credential=fallback-1; url="$F1_URL"; model="${F1_MODEL:-$model}" ;;
-            qwen-fallback-2) credential=fallback-2; url="$F2_URL"; model="${F2_MODEL:-$model}" ;;
-            qwen-fallback-3) credential=fallback-3; url="$F3_URL"; model="${F3_MODEL:-$model}" ;;
-            qwen-fallback-4) credential=fallback-4; url="$F4_URL"; model="${F4_MODEL:-$model}" ;;
+            qwen-fallback-*)
+              if [[ "$SLOT_HAS_KEY" != true ]]; then
+                echo "::error::$WORKER no tiene QWEN_FALLBACK_${SLOT}_API_KEY configurada" >&2
+                exit 3
+              fi
+              FALLBACK_KEYS="$SLOT" fallback "$WORKER" || exit 3
+              ;;
             *) exit 2 ;;
           esac
           [[ -n "$credential" && -n "$url" && -n "$model" ]] || exit 3
           echo "credential=$credential" >> "$GITHUB_OUTPUT"
+          echo "slot=$slot" >> "$GITHUB_OUTPUT"
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "model=$model" >> "$GITHUB_OUTPUT"
 
@@ -363,7 +381,7 @@ jobs:
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
-          openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || steps.qwen_config.outputs.credential == 'fallback-1' && secrets.QWEN_FALLBACK_1_API_KEY || steps.qwen_config.outputs.credential == 'fallback-2' && secrets.QWEN_FALLBACK_2_API_KEY || steps.qwen_config.outputs.credential == 'fallback-3' && secrets.QWEN_FALLBACK_3_API_KEY || secrets.QWEN_FALLBACK_4_API_KEY }}
+          openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[format('QWEN_FALLBACK_{0}_API_KEY', steps.qwen_config.outputs.slot)] }}
           openai_base_url: ${{ steps.qwen_config.outputs.url }}
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
@@ -515,7 +533,7 @@ jobs:
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
-          openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || steps.qwen_config.outputs.credential == 'fallback-1' && secrets.QWEN_FALLBACK_1_API_KEY || steps.qwen_config.outputs.credential == 'fallback-2' && secrets.QWEN_FALLBACK_2_API_KEY || steps.qwen_config.outputs.credential == 'fallback-3' && secrets.QWEN_FALLBACK_3_API_KEY || secrets.QWEN_FALLBACK_4_API_KEY }}
+          openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[format('QWEN_FALLBACK_{0}_API_KEY', steps.qwen_config.outputs.slot)] }}
           openai_base_url: ${{ steps.qwen_config.outputs.url }}
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
@@ -661,7 +679,7 @@ jobs:
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
-          openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || steps.qwen_config.outputs.credential == 'fallback-1' && secrets.QWEN_FALLBACK_1_API_KEY || steps.qwen_config.outputs.credential == 'fallback-2' && secrets.QWEN_FALLBACK_2_API_KEY || steps.qwen_config.outputs.credential == 'fallback-3' && secrets.QWEN_FALLBACK_3_API_KEY || secrets.QWEN_FALLBACK_4_API_KEY }}
+          openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || secrets[format('QWEN_FALLBACK_{0}_API_KEY', steps.qwen_config.outputs.slot)] }}
           openai_base_url: ${{ steps.qwen_config.outputs.url }}
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
@@ -790,14 +808,8 @@ jobs:
           WORKER: ${{ inputs.worker }}
           HAS_QWEN: ${{ secrets.QWEN_API_KEY != '' }}
           HAS_OMNIROUTE: ${{ secrets.OMNIROUTE_API_KEY != '' && secrets.TS_OAUTH_CLIENT_ID != '' && (secrets.TS_OAUTH_SECRET != '' || secrets.TS_AUDIENCE != '') && vars.OMNIROUTE_BASE_URL != '' && vars.OMNIROUTE_MODEL != '' }}
-          HAS_F1: ${{ secrets.QWEN_FALLBACK_1_API_KEY != '' }}
-          HAS_F2: ${{ secrets.QWEN_FALLBACK_2_API_KEY != '' }}
-          HAS_F3: ${{ secrets.QWEN_FALLBACK_3_API_KEY != '' }}
-          HAS_F4: ${{ secrets.QWEN_FALLBACK_4_API_KEY != '' }}
-          F1_URL: ${{ vars.QWEN_FALLBACK_1_BASE_URL }}
-          F2_URL: ${{ vars.QWEN_FALLBACK_2_BASE_URL }}
-          F3_URL: ${{ vars.QWEN_FALLBACK_3_BASE_URL }}
-          F4_URL: ${{ vars.QWEN_FALLBACK_4_BASE_URL }}
+          VARS_JSON: ${{ toJSON(vars) }}
+          POOL_FALLBACK_KEYS: ${{ inputs.fallback_keys }}
           HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
           PLAN_SUMMARY: ${{ steps.delegated.outputs.summary || steps.plan_qwen.outputs.summary || steps.plan_gemini.outputs.summary }}
           PLAN_QWEN_OUTCOME: ${{ steps.plan_qwen.outcome }}
@@ -878,10 +890,11 @@ jobs:
 
             if [[ "$qwen_allowed" == true ]]; then
               [[ "$HAS_QWEN" == true || "$HAS_OMNIROUTE" == true ]] && available+=(qwen-primary)
-              [[ "$HAS_F1" == true && -n "$F1_URL" ]] && available+=(qwen-fallback-1)
-              [[ "$HAS_F2" == true && -n "$F2_URL" ]] && available+=(qwen-fallback-2)
-              [[ "$HAS_F3" == true && -n "$F3_URL" ]] && available+=(qwen-fallback-3)
-              [[ "$HAS_F4" == true && -n "$F4_URL" ]] && available+=(qwen-fallback-4)
+              if [[ -f scripts/agent_slots.py ]]; then
+                while IFS= read -r fallback_worker; do
+                  [[ -n "$fallback_worker" ]] && available+=("$fallback_worker")
+                done < <(FALLBACK_KEYS="$POOL_FALLBACK_KEYS" python3 scripts/agent_slots.py listar | jq -r '.[].worker' || true)
+              fi
             fi
             if [[ "$gemini_allowed" == true && "$HAS_GEMINI" == true ]]; then
               available+=(gemini)

@@ -4,15 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       slot:
-        description: 'Backend Qwen a validar'
+        description: 'Número de slot de fallback a validar (QWEN_FALLBACK_N_*)'
         required: true
-        default: qwen-fallback-1
-        type: choice
-        options:
-          - qwen-fallback-1
-          - qwen-fallback-2
-          - qwen-fallback-3
-          - qwen-fallback-4
+        default: 1
+        type: number
   push:
     branches: [main]
     paths:
@@ -26,83 +21,34 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      SLOT: ${{ github.event_name == 'push' && 'qwen-fallback-1' || inputs.slot }}
+      SLOT_N: ${{ github.event_name == 'push' && 1 || inputs.slot }}
+      SLOT: ${{ format('qwen-fallback-{0}', github.event_name == 'push' && 1 || inputs.slot) }}
     steps:
       - uses: actions/checkout@v4
 
       - id: config
         name: Resolver backend
         env:
-          HAS_F1: ${{ secrets.QWEN_FALLBACK_1_API_KEY != '' }}
-          HAS_F2: ${{ secrets.QWEN_FALLBACK_2_API_KEY != '' }}
-          HAS_F3: ${{ secrets.QWEN_FALLBACK_3_API_KEY != '' }}
-          HAS_F4: ${{ secrets.QWEN_FALLBACK_4_API_KEY != '' }}
-          F1_URL: ${{ vars.QWEN_FALLBACK_1_BASE_URL }}
-          F1_MODEL: ${{ vars.QWEN_FALLBACK_1_MODEL }}
-          F2_URL: ${{ vars.QWEN_FALLBACK_2_BASE_URL }}
-          F2_MODEL: ${{ vars.QWEN_FALLBACK_2_MODEL }}
-          F3_URL: ${{ vars.QWEN_FALLBACK_3_BASE_URL }}
-          F3_MODEL: ${{ vars.QWEN_FALLBACK_3_MODEL }}
-          F4_URL: ${{ vars.QWEN_FALLBACK_4_BASE_URL }}
-          F4_MODEL: ${{ vars.QWEN_FALLBACK_4_MODEL }}
+          # Slots dinámicos (#1685): URL/modelo desde las variables; la clave se
+          # comprueba sin exponerla al shell.
+          VARS_JSON: ${{ toJSON(vars) }}
+          SLOT_HAS_KEY: ${{ secrets[format('QWEN_FALLBACK_{0}_API_KEY', env.SLOT_N)] != '' }}
         run: |
           set -euo pipefail
-          case "$SLOT" in
-            qwen-fallback-1) has="$HAS_F1"; url="$F1_URL"; model="$F1_MODEL" ;;
-            qwen-fallback-2) has="$HAS_F2"; url="$F2_URL"; model="$F2_MODEL" ;;
-            qwen-fallback-3) has="$HAS_F3"; url="$F3_URL"; model="$F3_MODEL" ;;
-            qwen-fallback-4) has="$HAS_F4"; url="$F4_URL"; model="$F4_MODEL" ;;
-            *) echo "Slot no permitido: $SLOT" >&2; exit 2 ;;
-          esac
-          [[ "$has" == true ]] || { echo "Falta el secret del slot $SLOT" >&2; exit 3; }
-          [[ -n "$url" ]] || { echo "Falta BASE_URL para $SLOT" >&2; exit 3; }
+          [[ "$SLOT" =~ ^qwen-fallback-([1-9][0-9]*)$ ]] || { echo "Slot no permitido: $SLOT" >&2; exit 2; }
+          [[ "$SLOT_HAS_KEY" == true ]] || { echo "Falta el secret QWEN_FALLBACK_${SLOT_N}_API_KEY" >&2; exit 3; }
+          resuelto="$(FALLBACK_KEYS="$SLOT_N" python3 scripts/agent_slots.py resolver --worker "$SLOT")"
+          model="$(jq -r '.model' <<<"$resuelto")"
           [[ -n "$model" ]] || { echo "Falta MODEL para $SLOT" >&2; exit 3; }
-          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "url=$(jq -r '.url' <<<"$resuelto")" >> "$GITHUB_OUTPUT"
           echo "model=$model" >> "$GITHUB_OUTPUT"
           echo "Validando $SLOT con modelo $model"
 
-      - id: smoke_f1
-        name: Smoke fallback 1
-        if: env.SLOT == 'qwen-fallback-1'
+      - id: smoke
+        name: Smoke del slot
         uses: QwenLM/qwen-code-action@v1
         with:
-          openai_api_key: ${{ secrets.QWEN_FALLBACK_1_API_KEY }}
-          openai_base_url: ${{ steps.config.outputs.url }}
-          openai_model: ${{ steps.config.outputs.model }}
-          qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
-          settings: '{"model":{"maxSessionTurns":6},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file"]}}'
-          prompt: 'Usa obligatoriamente read_file para leer AGENTS.md. No edites nada y no intentes ejecutar comandos. Después responde con una última línea exactamente: AGENT_PROVIDER_SMOKE_OK file=AGENTS.md'
-
-      - id: smoke_f2
-        name: Smoke fallback 2
-        if: env.SLOT == 'qwen-fallback-2'
-        uses: QwenLM/qwen-code-action@v1
-        with:
-          openai_api_key: ${{ secrets.QWEN_FALLBACK_2_API_KEY }}
-          openai_base_url: ${{ steps.config.outputs.url }}
-          openai_model: ${{ steps.config.outputs.model }}
-          qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
-          settings: '{"model":{"maxSessionTurns":6},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file"]}}'
-          prompt: 'Usa obligatoriamente read_file para leer AGENTS.md. No edites nada y no intentes ejecutar comandos. Después responde con una última línea exactamente: AGENT_PROVIDER_SMOKE_OK file=AGENTS.md'
-
-      - id: smoke_f3
-        name: Smoke fallback 3
-        if: env.SLOT == 'qwen-fallback-3'
-        uses: QwenLM/qwen-code-action@v1
-        with:
-          openai_api_key: ${{ secrets.QWEN_FALLBACK_3_API_KEY }}
-          openai_base_url: ${{ steps.config.outputs.url }}
-          openai_model: ${{ steps.config.outputs.model }}
-          qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
-          settings: '{"model":{"maxSessionTurns":6},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file"]}}'
-          prompt: 'Usa obligatoriamente read_file para leer AGENTS.md. No edites nada y no intentes ejecutar comandos. Después responde con una última línea exactamente: AGENT_PROVIDER_SMOKE_OK file=AGENTS.md'
-
-      - id: smoke_f4
-        name: Smoke fallback 4
-        if: env.SLOT == 'qwen-fallback-4'
-        uses: QwenLM/qwen-code-action@v1
-        with:
-          openai_api_key: ${{ secrets.QWEN_FALLBACK_4_API_KEY }}
+          openai_api_key: ${{ secrets[format('QWEN_FALLBACK_{0}_API_KEY', env.SLOT_N)] }}
           openai_base_url: ${{ steps.config.outputs.url }}
           openai_model: ${{ steps.config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
@@ -111,7 +57,7 @@ jobs:
 
       - name: Verificar marcador
         env:
-          SUMMARY: ${{ steps.smoke_f1.outputs.summary || steps.smoke_f2.outputs.summary || steps.smoke_f3.outputs.summary || steps.smoke_f4.outputs.summary }}
+          SUMMARY: ${{ steps.smoke.outputs.summary }}
         run: |
           set -euo pipefail
           grep -Fq 'AGENT_PROVIDER_SMOKE_OK file=AGENTS.md' <<<"$SUMMARY"

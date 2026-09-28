@@ -28,13 +28,14 @@ class AgentProviderSmokeTest(unittest.TestCase):
         ):
             self.assertNotIn(prohibido, self.workflow)
 
-    def test_cubre_los_cuatro_slots_y_fallback1_es_smoke_de_merge(self):
-        self.assertIn("github.event_name == 'push' && 'qwen-fallback-1'", self.workflow)
-        for numero in range(1, 5):
-            self.assertIn(f"qwen-fallback-{numero}", self.workflow)
-            self.assertIn(f"QWEN_FALLBACK_{numero}_API_KEY", self.workflow)
-            self.assertIn(f"QWEN_FALLBACK_{numero}_BASE_URL", self.workflow)
-            self.assertIn(f"QWEN_FALLBACK_{numero}_MODEL", self.workflow)
+    def test_cualquier_slot_y_fallback1_es_smoke_de_merge(self):
+        # #1685: un solo paso para cualquier QWEN_FALLBACK_N; nada de pasos por slot.
+        self.assertIn("SLOT_N: ${{ github.event_name == 'push' && 1 || inputs.slot }}", self.workflow)
+        self.assertIn("format('qwen-fallback-{0}'", self.workflow)
+        self.assertIn("python3 scripts/agent_slots.py resolver", self.workflow)
+        self.assertIn("secrets[format('QWEN_FALLBACK_{0}_API_KEY', env.SLOT_N)]", self.workflow)
+        self.assertNotIn("smoke_f1", self.workflow)
+        self.assertNotIn("QWEN_FALLBACK_2_API_KEY", self.workflow)
 
     def test_exige_tool_call_y_marcador_verificable(self):
         self.assertIn("Usa obligatoriamente read_file para leer AGENTS.md", self.workflow)
@@ -42,10 +43,10 @@ class AgentProviderSmokeTest(unittest.TestCase):
         self.assertIn("grep -Fq", self.workflow)
 
     def test_no_expone_la_key_en_pasos_shell(self):
-        bloque = self.workflow.split("- id: config", 1)[1].split("- id: smoke_f1", 1)[0]
-        self.assertNotIn("QWEN_FALLBACK_1_API_KEY:", bloque)
-        self.assertIn("secrets.QWEN_FALLBACK_1_API_KEY != ''", bloque)
-
+        bloque = self.workflow.split("- id: config", 1)[1].split("- id: smoke", 1)[0]
+        # En el paso shell solo entra si hay clave, nunca la clave.
+        self.assertIn("SLOT_HAS_KEY: ${{ secrets[format('QWEN_FALLBACK_{0}_API_KEY', env.SLOT_N)] != '' }}", bloque)
+        self.assertNotRegex(bloque, r"_API_KEY', env\.SLOT_N\)\] \}\}")
 
 if __name__ == "__main__":
     unittest.main()
