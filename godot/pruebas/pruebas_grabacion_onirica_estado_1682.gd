@@ -71,9 +71,7 @@ func _probar_roundtrip_y_acusacion() -> void:
 	_comprobar("la partida relee la cinta", carga.get("resultado"), "cargada")
 	var seleccion := Estado.seleccion_actual(releida.estado)
 	_comprobar(
-		"roundtrip conserva original",
-		seleccion.get("toma", {}).get("original_id"),
-		"doc-caso-a"
+		"roundtrip conserva original", seleccion.get("toma", {}).get("original_id"), "doc-caso-a"
 	)
 	_comprobar(
 		"roundtrip conserva evaluación",
@@ -88,11 +86,7 @@ func _probar_roundtrip_y_acusacion() -> void:
 
 	var jornada := Jornada.nueva()
 	var resultado := Acusacion.acusar(
-		releida.estado,
-		jornada,
-		_caso("caso-a", "doc-caso-a"),
-		_sospechoso(),
-		["pista-caso-a"]
+		releida.estado, jornada, _caso("caso-a", "doc-caso-a"), _sospechoso(), ["pista-caso-a"]
 	)
 	_comprobar("acusación cerrada", resultado.get("resultado"), "cerrado")
 	_comprobar(
@@ -120,11 +114,7 @@ func _probar_toma_contaminada() -> void:
 	_comprobar("selecciona contaminada", Estado.seleccionar_toma(estado, 0), true)
 
 	var resultado := Acusacion.acusar(
-		estado,
-		Jornada.nueva(),
-		_caso("caso-b", "doc-caso-b"),
-		_sospechoso(),
-		["pista-caso-b"]
+		estado, Jornada.nueva(), _caso("caso-b", "doc-caso-b"), _sospechoso(), ["pista-caso-b"]
 	)
 	_comprobar(
 		"contaminada llega sin recalcular",
@@ -156,11 +146,7 @@ func _probar_sin_seleccion_y_caso_ajeno() -> void:
 	Estado.registrar_toma(ajeno, _toma("doc-otro"))
 	Estado.seleccionar_toma(ajeno, 0)
 	var resultado_ajeno := Acusacion.acusar(
-		ajeno,
-		Jornada.nueva(),
-		_caso("caso-d", "doc-caso-d"),
-		_sospechoso(),
-		["pista-caso-d"]
+		ajeno, Jornada.nueva(), _caso("caso-d", "doc-caso-d"), _sospechoso(), ["pista-caso-d"]
 	)
 	_comprobar("original de otro caso no se proyecta", resultado_ajeno.has("cinta_onirica"), false)
 
@@ -185,7 +171,9 @@ func _probar_validacion() -> void:
 	Estado.iniciar_cinta(valida, 10.0)
 	Estado.registrar_toma(valida, _toma("doc-validacion"))
 	Estado.seleccionar_toma(valida, 0)
-	_comprobar("estado de cinta válido no da errores", Estado.validar(valida[Estado.CLAVE_ESTADO]), [])
+	_comprobar(
+		"estado de cinta válido no da errores", Estado.validar(valida[Estado.CLAVE_ESTADO]), []
+	)
 
 	var rota := valida.duplicate(true)
 	rota[Estado.CLAVE_ESTADO]["toma_seleccionada"] = 99
