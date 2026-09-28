@@ -55,6 +55,17 @@ class AgentMemoryContractTest(unittest.TestCase):
         self.assertIn("GITHUB_REPOSITORY inválido", bloque)
         self.assertIn("const repository = configuredRepository();", self.deno_main)
 
+    def test_despliegue_deno_versiona_destino_y_redeploy(self):
+        # Sin org la CLI de Deno Deploy aborta; producción quedó en version 1
+        # (404 en memoria, #1606) porque CI no despliega.
+        deploy = self.deno_config["deploy"]
+        self.assertEqual(deploy["org"], "expediente-legado")
+        self.assertEqual(deploy["app"], "siga98-feedback-deno")
+        self.assertEqual(deploy["runtime"]["entrypoint"], "./main.ts")
+        self.assertIn("deno deploy --prod", self.deno_readme)
+        self.assertIn("**no despliega**", self.deno_readme)
+        self.assertIn("/health", self.deno_readme)
+
     def test_gateway_expone_memoria_sin_romper_reportes(self):
         self.assertIn('import { handleAgentMemory } from "./agent_memory.ts";', self.deno_main)
         self.assertIn('url.pathname.startsWith("/api/agent-memory/")', self.deno_main)
