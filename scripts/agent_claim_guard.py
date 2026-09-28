@@ -102,13 +102,33 @@ def _es_trackeada(root: Path, ruta: str) -> bool:
 
 
 def _ruta_segura(root: Path, ruta: str) -> Path:
-    candidata = (root / ruta).resolve(strict=False)
+    """Valida la ruta sin seguir el symlink final.
+
+    Resolver el destino completo haría que un symlink no trackeado que apunte
+    fuera del repo se considerase una fuga antes de poder eliminarlo. Sí se
+    resuelve el directorio padre para impedir escapar mediante componentes
+    intermedios que sean symlinks.
+    """
+
     raiz = root.resolve()
+    candidata = root / ruta
+    padre = candidata.parent.resolve(strict=False)
     try:
-        candidata.relative_to(raiz)
+        padre.relative_to(raiz)
     except ValueError as exc:
         raise ValueError(f"ruta fuera del repositorio: {ruta}") from exc
     return candidata
+
+
+def _podar_padres_vacios(root: Path, destino: Path) -> None:
+    raiz = root.resolve()
+    padre = destino.parent
+    while padre != raiz:
+        try:
+            padre.rmdir()
+        except OSError:
+            break
+        padre = padre.parent
 
 
 def restaurar_fuera_del_claim(root: Path, fuera: list[str]) -> None:
@@ -120,8 +140,10 @@ def restaurar_fuera_del_claim(root: Path, fuera: list[str]) -> None:
         destino = root / ruta
         if destino.is_symlink() or destino.is_file():
             destino.unlink(missing_ok=True)
+            _podar_padres_vacios(root, destino)
         elif destino.is_dir():
             shutil.rmtree(destino)
+            _podar_padres_vacios(root, destino)
 
 
 def ejecutar(root: Path, plan: Path, *, restaurar: bool) -> dict[str, object]:

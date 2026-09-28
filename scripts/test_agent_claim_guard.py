@@ -77,6 +77,40 @@ class AgentClaimGuardTest(unittest.TestCase):
         self.assertFalse((self.repo / "nuevo.txt").exists())
         self.assertEqual(guard.rutas_cambiadas(self.repo), {"permitido.txt"})
 
+    def test_restore_elimina_symlink_no_trackeado_sin_seguir_destino(self):
+        (self.repo / "permitido.txt").write_text("cambio válido\n", encoding="utf-8")
+
+        with tempfile.TemporaryDirectory() as fuera_tmp:
+            objetivo = Path(fuera_tmp) / "objetivo.txt"
+            objetivo.write_text("no tocar\n", encoding="utf-8")
+            enlace = self.repo / "enlace-fuera"
+            enlace.symlink_to(objetivo)
+
+            resultado = guard.ejecutar(self.repo, self.plan, restaurar=True)
+
+            self.assertTrue(resultado["restored"])
+            self.assertFalse(enlace.exists())
+            self.assertFalse(enlace.is_symlink())
+            self.assertEqual(objetivo.read_text(encoding="utf-8"), "no tocar\n")
+            self.assertEqual(guard.rutas_cambiadas(self.repo), {"permitido.txt"})
+
+    def test_restore_elimina_directorio_no_trackeado_completo(self):
+        (self.repo / "permitido.txt").write_text("cambio válido\n", encoding="utf-8")
+        carpeta = self.repo / "fuera-claim"
+        (carpeta / "sub").mkdir(parents=True)
+        (carpeta / "uno.txt").write_text("x\n", encoding="utf-8")
+        (carpeta / "sub" / "dos.txt").write_text("y\n", encoding="utf-8")
+
+        resultado = guard.ejecutar(self.repo, self.plan, restaurar=True)
+
+        self.assertTrue(resultado["restored"])
+        self.assertFalse(carpeta.exists())
+        self.assertEqual(
+            (self.repo / "permitido.txt").read_text(encoding="utf-8"),
+            "cambio válido\n",
+        )
+        self.assertEqual(guard.rutas_cambiadas(self.repo), {"permitido.txt"})
+
     def test_rechaza_rutas_que_escapan_del_repo(self):
         self.plan.write_text(
             json.dumps({"files": ["../fuera.txt"], "goal": "mal"}),
