@@ -37,7 +37,7 @@ func _probar() -> void:
 		"la ruta se lee como campo editable separado",
 	)
 	_comprobar(
-		_fondo(medio, "normal").is_equal_approx(Color("#d9dee4")),
+		_fondo(medio, "normal").is_equal_approx(ExploradorSiga.FONDO_BARRA),
 		"los medios extraíbles comparten lenguaje de toolbar",
 	)
 	_comprobar(
