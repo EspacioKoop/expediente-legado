@@ -18,6 +18,10 @@ import subprocess
 IGNORED_EXACT = {
     ".agent-task.md",
     ".agent-plan.json",
+    # Los genera el propio worker (context packer y reviewer); sin ellos aquí,
+    # toda implementación salía «fuera del CLAIM» y se replanificaba (#1657).
+    ".agent-context.md",
+    ".agent-review-input.md",
     ".agent-memory.json",
     ".agent-history.json",
     ".agent-platino-sha",
