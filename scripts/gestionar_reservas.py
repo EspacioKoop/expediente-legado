@@ -314,13 +314,20 @@ def limpiar_labels_agente(issue: int, dry_run: bool) -> list[str]:
         for item in (payload or {}).get("labels", [])
         if isinstance(item, dict) and item.get("name")
     ]
-    nuevas = [label for label in actuales if label not in LABELS_COORDINACION_AGENTE]
     retiradas = [label for label in actuales if label in LABELS_COORDINACION_AGENTE]
     if not retiradas:
         return []
     print(f"CLEANUP_LABELS issue=#{issue} removed={','.join(retiradas)}")
     if not dry_run:
-        api_json("PATCH", f"/repos/{REPO}/issues/{issue}", {"labels": nuevas})
+        for label in retiradas:
+            try:
+                # DELETE por label en vez de un PATCH con la lista completa:
+                # el PATCH borra labels añadidas por otros entre el GET y ahora.
+                api_json("DELETE", f"/repos/{REPO}/issues/{issue}/labels/{quote(label, safe='')}")
+            except RuntimeError as exc:
+                if "404" not in str(exc):
+                    raise
+                # La label ya no estaba; continuar con las demás.
     return retiradas
 
 

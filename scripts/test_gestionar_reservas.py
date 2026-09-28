@@ -340,14 +340,15 @@ class LimpiezaLabelsAgenteTest(unittest.TestCase):
                 dry_run=False,
             )
 
-        self.assertIn(
-            (
-                "PATCH",
-                f"/repos/{reservas.REPO}/issues/70",
-                {"labels": ["area:siga", "prioridad:P1"]},
-            ),
-            llamadas,
+        self.assertEqual(
+            [
+                ("DELETE", f"/repos/{reservas.REPO}/issues/70/labels/agent%3Aauto", None),
+                ("DELETE", f"/repos/{reservas.REPO}/issues/70/labels/agent%3Apr-open", None),
+                ("DELETE", f"/repos/{reservas.REPO}/issues/70/labels/agent%3Aneeds-human", None),
+            ],
+            [llamada for llamada in llamadas if llamada[0] == "DELETE"],
         )
+        self.assertFalse(any(method == "PATCH" for method, _, _ in llamadas))
         self.assertTrue(
             any(
                 method == "POST"
@@ -406,6 +407,35 @@ class LimpiezaLabelsAgenteTest(unittest.TestCase):
         self.assertEqual(
             [("GET", f"/repos/{reservas.REPO}/issues/72", None)],
             llamadas,
+        )
+
+    def test_delete_404_no_impide_el_resto(self):
+        retiradas_esperadas = ["agent:auto", "agent:working"]
+        llamadas = []
+        borradas = []
+
+        def api(method, path, payload=None, dormir=None):
+            llamadas.append((method, path, payload))
+            if method == "GET":
+                return (
+                    {"labels": [{"name": nombre} for nombre in retiradas_esperadas]},
+                    {},
+                )
+            borradas.append(path)
+            if path.endswith("/agent%3Aauto"):
+                raise RuntimeError("GitHub API 404 en {path}: not found")
+            return ({}, {})
+
+        with mock.patch.object(reservas, "api_json", api):
+            retiradas = reservas.limpiar_labels_agente(73, dry_run=False)
+
+        self.assertEqual(retiradas_esperadas, retiradas)
+        self.assertEqual(
+            [
+                f"/repos/{reservas.REPO}/issues/73/labels/agent%3Aauto",
+                f"/repos/{reservas.REPO}/issues/73/labels/agent%3Aworking",
+            ],
+            borradas,
         )
 
     def test_fallo_al_limpiar_labels_no_impide_el_release(self):
