@@ -1,8 +1,8 @@
 ## Reacciones puras de la memoria nocturna (#162).
 ##
 ## Consume exclusivamente la selección ya validada, el catálogo recibido y las
-## pistas que Partida ya conoce. No carga archivos, no modifica Jornada y no
-## convierte una relación no descubierta en una pista nueva.
+## pistas ya conocidas que se le pasan como argumentos. No carga archivos ni
+## modifica estado global, y no convierte relaciones desconocidas en pistas nuevas.
 class_name MemoriaNocturna
 extends RefCounted
 
