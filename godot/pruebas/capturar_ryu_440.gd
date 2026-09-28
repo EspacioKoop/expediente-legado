@@ -10,10 +10,18 @@ const FOV := 70.0
 const ALTURA_JUGADOR := 1.65
 const FORMA := "peine"
 const ESCALA_RYU := SuenoRyu.ESCALA_ENCUENTRO
+const KIT_VISUAL_RYU := preload("res://arte/ryu_440/kit_visual_ryu.gd")
+const PIEZAS_KIT_COMPARATIVO := ["ToriiSuspendido", "CascadaInvertida", "FarolesDeLluvia"]
 
 const CASOS := [
 	{"id": "normal_inicial", "reduccion_movimiento": false, "resolver": false},
 	{"id": "normal_resuelto", "reduccion_movimiento": false, "resolver": true},
+	{
+		"id": "normal_resuelto_kit",
+		"reduccion_movimiento": false,
+		"resolver": true,
+		"kit_visual": true,
+	},
 	{"id": "reducido_resuelto", "reduccion_movimiento": true, "resolver": true},
 ]
 
@@ -69,6 +77,10 @@ func _init() -> void:
 		ryu.position = ancla
 		mundo.add_child(ryu)
 
+		var piezas_kit: Array[String] = []
+		if bool(caso.get("kit_visual", false)):
+			piezas_kit = _montar_kit_comparativo(mundo, ancla)
+
 		var camara := _montar_camara(mundo, ancla)
 		if bool(caso["resolver"]):
 			if not _resolver_flujo(ryu, mundo):
@@ -100,6 +112,8 @@ func _init() -> void:
 					"ancla": _vector_a_array(ancla),
 					"camara": _vector_a_array(camara.position),
 					"objetivo": _vector_a_array(ancla + Vector3(0.0, 1.55, 0.0)),
+					"kit_visual": not piezas_kit.is_empty(),
+					"piezas_kit": piezas_kit,
 				}
 			)
 		)
@@ -178,6 +192,30 @@ func _montar_camara(mundo: Node3D, ancla: Vector3) -> Camera3D:
 	mundo.add_child(camara)
 	camara.look_at(ancla + Vector3(0.0, 1.15, 0.4), Vector3.UP)
 	return camara
+
+
+func _montar_kit_comparativo(mundo: Node3D, ancla: Vector3) -> Array[String]:
+	var kit := KIT_VISUAL_RYU.new()
+	kit.name = "KitVisualRyuComparativo"
+	kit.construir_al_cargar = false
+	kit.position = ancla
+	kit.scale = Vector3.ONE * 0.42
+	mundo.add_child(kit)
+	kit.construir()
+
+	var raiz := kit.get_node_or_null("KitRyuVisual")
+	if raiz == null:
+		return []
+
+	var visibles: Array[String] = []
+	for hijo in raiz.get_children():
+		if hijo is Node3D:
+			var pieza := hijo as Node3D
+			var conservar := pieza.name in PIEZAS_KIT_COMPARATIVO
+			pieza.visible = conservar
+			if conservar:
+				visibles.append(pieza.name)
+	return visibles
 
 
 func _resolver_flujo(ryu: SuenoRyu, mundo: Node3D) -> bool:
