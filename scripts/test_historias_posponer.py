@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import unittest
 
 
@@ -56,6 +57,24 @@ class HistoriasPosponerTest(unittest.TestCase):
         bloque = self.codigo.split("func pendientes", 1)[1].split("func _pospuestas", 1)[0]
         self.assertIn('estado.get("historias_cartas", {})', bloque)
         self.assertNotIn("historias_pospuestas", bloque)
+
+    def test_posponer_solo_escribe_estado_de_aplazamiento(self):
+        bloque = self.codigo.split("func postergar", 1)[1].split("func esta_pospuesta", 1)[0]
+        escrituras = set(re.findall(r'estado\["([^"]+)"\]\s*=', bloque))
+        self.assertEqual(escrituras, {"historias_pospuestas"})
+        self.assertIn("estado[CLAVE_CONTEO_POSPUESTAS] =", bloque)
+        self.assertIn("_registrar_historial", bloque)
+        for campo in (
+            "inventario",
+            "jornada",
+            "pistas_descubiertas",
+            "sellos_obtenidos",
+            "vida",
+        ):
+            self.assertNotIn(f'estado["{campo}"]', bloque)
+        self.assertNotIn("Prometeo.", bloque)
+        self.assertNotIn("resolver(", bloque)
+
 
 
 if __name__ == "__main__":
