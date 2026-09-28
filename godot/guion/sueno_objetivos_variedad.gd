@@ -9,8 +9,10 @@ extends RefCounted
 const TIPO_RECORRIDO := "recorrido"
 const TIPO_SECUENCIA := "secuencia"
 const TIPO_PERMANENCIA := "permanencia"
+const TIPO_RETORNO := "retorno"
 
-const TIPOS := [TIPO_RECORRIDO, TIPO_SECUENCIA, TIPO_PERMANENCIA]
+const CANTIDAD_POR_NOCHE := 3
+const TIPOS := [TIPO_RECORRIDO, TIPO_SECUENCIA, TIPO_PERMANENCIA, TIPO_RETORNO]
 
 
 static func tipos_para(dia: int, escena_id: String) -> Array:
@@ -19,7 +21,7 @@ static func tipos_para(dia: int, escena_id: String) -> Array:
 		semilla += int(byte)
 	var rotacion := posmod(semilla, TIPOS.size())
 	var salida: Array = []
-	for indice in TIPOS.size():
+	for indice in CANTIDAD_POR_NOCHE:
 		salida.append(TIPOS[posmod(indice + rotacion, TIPOS.size())])
 	return salida
 
@@ -30,6 +32,8 @@ static func condicion(tipo: String) -> String:
 			return "seguir_secuencia"
 		TIPO_PERMANENCIA:
 			return "permanecer"
+		TIPO_RETORNO:
+			return "ida_y_vuelta"
 		_:
 			return "alcanzar"
 
