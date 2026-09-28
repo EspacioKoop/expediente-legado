@@ -58,12 +58,15 @@ var _detalle_resumen: RichTextLabel
 func configurar(jornada: Dictionary, conceptos: Dictionary) -> void:
 	_jornada = jornada
 	_conceptos = conceptos
+	# La semántica accesible no debe depender de haber entrado ya al árbol.
+	accessibility_name = tr(TITULO)
 	_montar()
 	_montar_fichas()
 
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	accessibility_name = tr(TITULO)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_montar()
 	_colocar_todo()
@@ -163,6 +166,7 @@ func _montar() -> void:
 	_cerrar.name = "Cerrar"
 	_cerrar.theme = EstiloSiga.tema()
 	_cerrar.text = tr(CERRAR)
+	_cerrar.accessibility_name = _cerrar.text
 	_cerrar.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	_cerrar.offset_left = -130
 	_cerrar.offset_top = 12
@@ -173,6 +177,7 @@ func _montar() -> void:
 
 	_detalle = PanelContainer.new()
 	_detalle.name = "DetalleFicha"
+	_detalle.accessibility_name = tr(DETALLE_TITULO)
 	var papel_detalle := StyleBoxFlat.new()
 	papel_detalle.bg_color = Color(0.90, 0.86, 0.72, 0.98)
 	papel_detalle.border_color = COLOR_MARCO
@@ -200,6 +205,7 @@ func _montar() -> void:
 	detalle_caja.add_child(_detalle_nombre)
 	_detalle_resumen = RichTextLabel.new()
 	_detalle_resumen.name = "DetalleResumen"
+	_detalle_resumen.accessibility_name = tr(DETALLE_TITULO)
 	_detalle_resumen.bbcode_enabled = false
 	_detalle_resumen.fit_content = false
 	_detalle_resumen.scroll_active = true
@@ -262,6 +268,7 @@ func _montar_fichas() -> void:
 		var boton := Button.new()
 		boton.name = "Ficha_%s" % id.validate_node_name()
 		boton.tooltip_text = tr(String(_conceptos[id].get("nombre", id)))
+		boton.accessibility_name = boton.tooltip_text
 		boton.clip_contents = true
 		boton.focus_mode = Control.FOCUS_ALL
 		boton.gui_input.connect(_entrada_ficha.bind(id))

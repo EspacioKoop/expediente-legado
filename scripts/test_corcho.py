@@ -62,6 +62,13 @@ class CorchoConceptosTest(unittest.TestCase):
             self.assertIn(clave + ",", self.textos)
         self.assertNotIn('const TITULO := "Corcho de conceptos"', self.panel)
 
+    def test_fichas_y_controles_exponen_nombres_accesibles(self):
+        self.assertIn("accessibility_name = tr(TITULO)", self.panel)
+        self.assertIn("_cerrar.accessibility_name = _cerrar.text", self.panel)
+        self.assertIn("_detalle.accessibility_name = tr(DETALLE_TITULO)", self.panel)
+        self.assertIn("_detalle_resumen.accessibility_name = tr(DETALLE_TITULO)", self.panel)
+        self.assertIn("boton.accessibility_name = boton.tooltip_text", self.panel)
+
     def test_posiciones_persistidas_se_sanean_al_area_util(self):
         self.assertIn("static func limitar_posiciones", self.estado)
         self.assertIn("static func mover", self.estado)
