@@ -42,7 +42,7 @@ jobs:
           jq -s 'add | unique_by(.number)'             /tmp/issues-working.json /tmp/issues-pr.json > /tmp/issues.json
 
           gh issue view 182 --repo "$GITHUB_REPOSITORY" --json comments             --jq '[.comments[-300:][]? | {body:.body}]' > /tmp/comments.json
-          gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 100             --json number,state,headRefName > /tmp/prs.json
+          gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 100             --json number,state,headRefName,title,body > /tmp/prs.json
 
           python3 scripts/agent_reconciler.py discover             --issues /tmp/issues.json             --comments /tmp/comments.json             --output /tmp/discovery.json >/dev/null
 
@@ -93,7 +93,7 @@ jobs:
                   [[ " $labels " == *" $label "* ]] && queue=true
                 done
                 [[ "$queue" == true ]] || gh issue edit "$issue"                   --repo "$GITHUB_REPOSITORY" --add-label agent:auto >/dev/null
-                gh issue comment "$issue" --repo "$GITHUB_REPOSITORY"                   --body "Agent reconciler: estado huérfano reparado (`$reason`). El issue vuelve a la cola si sigue siendo elegible."                   >/dev/null || true
+                gh issue comment "$issue" --repo "$GITHUB_REPOSITORY"                   --body "Agent reconciler: estado huérfano reparado (motivo: $reason). El issue vuelve a la cola si sigue siendo elegible."                   >/dev/null || true
                 ;;
             esac
           done
