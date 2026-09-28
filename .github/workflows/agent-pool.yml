@@ -104,10 +104,51 @@ jobs:
           [[ "$HAS_F2" == true && -n "$F2_URL" ]] && add_worker qwen-fallback-2 qwen
           [[ "$HAS_F3" == true && -n "$F3_URL" ]] && add_worker qwen-fallback-3 qwen
           [[ "$HAS_F4" == true && -n "$F4_URL" ]] && add_worker qwen-fallback-4 qwen
-          printf '%s\n' "$workers" > /tmp/workers.json
+          printf '%s\n' "$workers" > /tmp/workers-configured.json
 
-          has_qwen="$(jq -r 'any(.[]; .provider == "qwen")' /tmp/workers.json)"
-          has_gemini="$(jq -r 'any(.[]; .provider == "gemini")' /tmp/workers.json)"
+          # #1600: credencial configurada no equivale a slot saludable. Los workers
+          # que reportaron 429/503 de cuota quedan fuera solo hasta que expire su
+          # cooldown global registrado en #182.
+          gh issue view 182 --repo "$GITHUB_REPOSITORY" --json comments             --jq '[.comments[-100:][]? | {body:.body}]' > /tmp/provider-health.json
+          NOW_EPOCH="$(date +%s)" python3 - <<'PY'
+          import json, os, re
+
+          now=int(os.environ["NOW_EPOCH"])
+          workers=json.load(open("/tmp/workers-configured.json",encoding="utf-8"))
+          comments=json.load(open("/tmp/provider-health.json",encoding="utf-8"))
+          unhealthy={}
+          marker=re.compile(
+              r"^AGENT_POOL_SLOT_UNHEALTHY\s+worker=([A-Za-z0-9._-]+)\s+"
+              r"provider=(qwen|gemini)\s+reason=([A-Za-z0-9._-]+)\s+until=(\d+)\b"
+          )
+          reset=re.compile(r"^AGENT_POOL_SLOT_HEALTHY\s+worker=([A-Za-z0-9._-]+)\b")
+          for comment in comments:
+              body=comment.get("body","") if isinstance(comment,dict) else ""
+              for raw in body.splitlines():
+                  line=raw.strip()
+                  clear=reset.match(line)
+                  if clear:
+                      unhealthy.pop(clear.group(1),None)
+                      continue
+                  match=marker.match(line)
+                  if not match:
+                      continue
+                  worker, provider, reason, until=match.groups()
+                  until=int(until)
+                  if until > now:
+                      anterior=unhealthy.get(worker)
+                      if anterior is None or until > int(anterior["until"]):
+                          unhealthy[worker]={"provider":provider,"reason":reason,"until":until}
+
+          for worker in workers:
+              worker["healthy"]=worker.get("worker") not in unhealthy
+          json.dump(workers,open("/tmp/workers.json","w",encoding="utf-8"))
+          if unhealthy:
+              print("Slots en cooldown:", ",".join(sorted(unhealthy)))
+          PY
+
+          has_qwen="$(jq -r 'any(.[]; .provider == "qwen" and (if has("healthy") then .healthy else true end))' /tmp/workers.json)"
+          has_gemini="$(jq -r 'any(.[]; .provider == "gemini" and (if has("healthy") then .healthy else true end))' /tmp/workers.json)"
           route_limit=$((REQUESTED_MAX * 2))
           (( route_limit > 12 )) && route_limit=12
           mapfile -t candidates < <(
@@ -162,7 +203,9 @@ jobs:
           count="$(jq '.include|length' /tmp/matrix.json)"
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
           echo "count=$count" >> "$GITHUB_OUTPUT"
-          echo "Seleccionados $count workers de $(jq 'length' /tmp/workers.json) disponibles."
+          configured="$(jq 'length' /tmp/workers.json)"
+          healthy="$(jq '[.[] | select(if has("healthy") then .healthy else true end)] | length' /tmp/workers.json)"
+          echo "Seleccionados $count workers de $healthy saludables ($configured configurados)."
 
   run:
     needs: prepare

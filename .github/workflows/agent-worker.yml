@@ -700,11 +700,41 @@ jobs:
           F3_URL: ${{ vars.QWEN_FALLBACK_3_BASE_URL }}
           F4_URL: ${{ vars.QWEN_FALLBACK_4_BASE_URL }}
           HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
+          PLAN_SUMMARY: ${{ steps.plan_qwen.outputs.summary || steps.plan_gemini.outputs.summary }}
+          PLAN_QWEN_OUTCOME: ${{ steps.plan_qwen.outcome }}
+          PLAN_GEMINI_OUTCOME: ${{ steps.plan_gemini.outcome }}
+          AGENT_PROVIDER_COOLDOWN_SECONDS: ${{ vars.AGENT_PROVIDER_COOLDOWN_SECONDS || '3600' }}
         run: |
           set -euo pipefail
           pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "${BRANCH:-none}" --json number --jq '.[0].number // empty' || true)"
 
           if [[ "${RESERVED:-}" != true && -z "$pr" ]]; then
+            quota_failure=false
+            quota_pattern='(^|[^0-9])(429|503)([^0-9]|$)|Quota exceeded|TerminalQuotaError|RetryableQuotaError|RESOURCE_EXHAUSTED|rate.?limit|high demand|temporarily unavailable'
+            if [[ -n "${PLAN_SUMMARY:-}" ]] && grep -Eiq "$quota_pattern" <<<"$PLAN_SUMMARY"; then
+              quota_failure=true
+            fi
+            if [[ "$PROVIDER" == gemini && "${PLAN_GEMINI_OUTCOME:-}" != success ]]; then
+              shopt -s nullglob
+              reports=(/tmp/gemini-client-error-*.json "${RUNNER_TEMP:-/tmp}"/gemini-client-error-*.json)
+              for report in "${reports[@]}"; do
+                if [[ -f "$report" ]] && grep -Eiq "$quota_pattern" "$report"; then
+                  quota_failure=true
+                  break
+                fi
+              done
+              shopt -u nullglob
+            fi
+
+            if [[ "$quota_failure" == true ]]; then
+              cooldown="${AGENT_PROVIDER_COOLDOWN_SECONDS:-3600}"
+              [[ "$cooldown" =~ ^[0-9]+$ ]] || cooldown=3600
+              (( cooldown < 300 )) && cooldown=300
+              (( cooldown > 21600 )) && cooldown=21600
+              until_epoch=$(( $(date +%s) + cooldown ))
+              gh issue comment 182 --repo "$GITHUB_REPOSITORY" --body                 "AGENT_POOL_SLOT_UNHEALTHY worker=$WORKER provider=$PROVIDER reason=quota until=$until_epoch run=$GITHUB_RUN_ID"                 >/dev/null || true
+            fi
+
             marker="AGENT_POOL_WORKER_FAILURE worker=$WORKER provider=$PROVIDER stage=plan run=$GITHUB_RUN_ID"
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "$marker" >/dev/null || true
             gh issue comment 182 --repo "$GITHUB_REPOSITORY" \
@@ -762,8 +792,13 @@ jobs:
               gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
                 --remove-label agent:working --remove-label agent:needs-human \
                 >/dev/null 2>&1 || true
+              if [[ "$quota_failure" == true ]]; then
+                detalle=" El slot queda además fuera de rotación global durante el cooldown de cuota."
+              else
+                detalle=""
+              fi
               gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
-                "Agent pool reencolado tras fallo de planificación en `$WORKER`; el siguiente dispatcher evitará ese worker para este issue." || true
+                "Agent pool reencolado tras fallo de planificación en `$WORKER`; el siguiente dispatcher evitará ese worker para este issue.$detalle" || true
             fi
             exit 0
           fi
