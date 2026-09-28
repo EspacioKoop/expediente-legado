@@ -262,7 +262,10 @@ func _seleccionar_mensaje(indice: int) -> void:
 func _mostrar_mensaje(mensaje: Dictionary) -> void:
 	var autor := _modelo.perfil_usuario(String(mensaje.get("autor", "")))
 	var nick := String(autor.get("nick", mensaje.get("autor", "")))
-	_detalle.text = "%s · %s\n%s" % [String(mensaje.get("hora", "--:--")), nick, String(mensaje.get("texto", ""))]
+	_detalle.text = (
+		"%s · %s\n%s"
+		% [String(mensaje.get("hora", "--:--")), nick, String(mensaje.get("texto", ""))]
+	)
 	var enlace := _modelo.enlace_de_mensaje(_mensaje_actual)
 	_enlace_actual = String(enlace.get("recurso_id", ""))
 	_abrir_enlace.visible = not _enlace_actual.is_empty()
