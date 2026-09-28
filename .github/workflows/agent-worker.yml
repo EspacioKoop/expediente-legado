@@ -138,6 +138,7 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
+          lfs: true
           persist-credentials: false
 
       - name: Conectar qwen-primary a OmniRoute por Tailscale (OAuth)
