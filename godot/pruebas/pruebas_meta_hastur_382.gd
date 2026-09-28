@@ -25,7 +25,8 @@ func _probar_snapshots() -> void:
 	var snapshots: Dictionary = datos.get("snapshots", {})
 	for nombre in ["cero", "primer_umbral", "completo"]:
 		var resultado := MetaHasturDatos.validar_snapshot(snapshots.get(nombre, {}))
-		_comprobar("snapshot %s valido" % nombre, resultado["ok"], true)
+		var razon := String(resultado.get("reason", ""))
+		_comprobar("snapshot %s valido (%s)" % [nombre, razon], resultado["ok"], true)
 	_comprobar("fixture 0%", snapshots["cero"]["community_progress"], 0)
 	_comprobar("fixture umbral", snapshots["primer_umbral"]["community_progress"], 25)
 	_comprobar("fixture 100%", snapshots["completo"]["community_progress"], 100)
@@ -51,7 +52,10 @@ func _probar_contribuciones_idempotentes() -> void:
 	var resultado := MetaHasturDatos.simular_agregado_fixture(
 		snapshot, [contribucion, contribucion.duplicate(true)]
 	)
-	_comprobar("agregado fixture valido", resultado["ok"], true)
+	var razon := String(resultado.get("reason", ""))
+	_comprobar("agregado fixture valido (%s)" % razon, resultado["ok"], true)
+	if not bool(resultado.get("ok", false)):
+		return
 	_comprobar("una aceptada", resultado["accepted"], 1)
 	_comprobar("duplicado ignorado", resultado["duplicates"], 1)
 	_comprobar(
@@ -80,9 +84,7 @@ func _probar_enteros_json_sin_truncar() -> void:
 	var progreso_fraccional := MetaHasturDatos.validar_snapshot(snapshot)
 	_comprobar("progreso fraccional rechazado", progreso_fraccional["ok"], false)
 	_comprobar(
-		"progreso fraccional no se trunca",
-		progreso_fraccional["reason"],
-		"invalid_progress_type"
+		"progreso fraccional no se trunca", progreso_fraccional["reason"], "invalid_progress_type"
 	)
 
 	snapshot = datos["snapshots"]["primer_umbral"].duplicate(true)
