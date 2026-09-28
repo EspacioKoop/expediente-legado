@@ -95,28 +95,50 @@ def select_tasks(
         normalized for item in workers if (normalized := _worker(item))
     ]
     tasks: list[dict[str, Any]] = []
-
+    eligible: list[tuple[dict[str, Any], str | None]] = []
     for issue in sorted(issues, key=_sort_key):
-        if not free_workers:
+        ok, requested_provider = eligible_issue(issue)
+        if ok:
+            eligible.append((issue, requested_provider))
+
+    # Reserva primero la capacidad obligatoria. Así una tarea flexible más antigua
+    # no puede consumir el único slot de un proveedor exigido por otra tarea.
+    for issue, requested_provider in eligible:
+        if requested_provider is None:
+            continue
+        if len(tasks) >= limit or not free_workers:
             break
 
-        ok, requested_provider = eligible_issue(issue)
-        if not ok:
+        choice_index = next(
+            (
+                index
+                for index, worker in enumerate(free_workers)
+                if worker["provider"] == requested_provider
+            ),
+            None,
+        )
+        if choice_index is None:
             continue
 
-        preferred_provider = requested_provider or _preferred_provider(issue)
+        worker = free_workers.pop(choice_index)
+        tasks.append(
+            {
+                "issue": int(issue["number"]),
+                "provider": worker["provider"],
+                "worker": worker["worker"],
+            }
+        )
+
+    # Las tareas flexibles consumen únicamente la capacidad que queda después de
+    # reservar los proveedores explícitos. Kev sigue siendo una preferencia blanda.
+    for issue, requested_provider in eligible:
         if requested_provider is not None:
-            choice_index = next(
-                (
-                    index
-                    for index, worker in enumerate(free_workers)
-                    if worker["provider"] == requested_provider
-                ),
-                None,
-            )
-            if choice_index is None:
-                continue
-        elif preferred_provider is not None:
+            continue
+        if len(tasks) >= limit or not free_workers:
+            break
+
+        preferred_provider = _preferred_provider(issue)
+        if preferred_provider is not None:
             choice_index = next(
                 (
                     index
@@ -136,8 +158,6 @@ def select_tasks(
                 "worker": worker["worker"],
             }
         )
-        if len(tasks) >= limit:
-            break
 
     return tasks
 

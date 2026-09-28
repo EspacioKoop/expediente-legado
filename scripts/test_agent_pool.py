@@ -109,6 +109,61 @@ class AgentPoolTest(unittest.TestCase):
         issues = [issue(50, "agent:auto", "agent:qwen", "agent:gemini")]
         self.assertEqual([], mod.select_tasks(issues, self.workers))
 
+    def test_reserva_gemini_explicito_antes_de_tarea_flexible(self):
+        workers = [
+            {"worker": "gemini-unico", "provider": "gemini"},
+            {"worker": "qwen-unico", "provider": "qwen"},
+        ]
+        issues = [
+            issue(
+                51,
+                "agent:auto",
+                created="2026-09-28T00:00:00Z",
+                preferred="gemini",
+            ),
+            issue(
+                52,
+                "agent:gemini",
+                created="2026-09-28T01:00:00Z",
+            ),
+        ]
+
+        tasks = mod.select_tasks(issues, workers)
+
+        self.assertEqual(
+            {
+                51: ("qwen", "qwen-unico"),
+                52: ("gemini", "gemini-unico"),
+            },
+            {
+                task["issue"]: (task["provider"], task["worker"])
+                for task in tasks
+            },
+        )
+
+    def test_reserva_qwen_explicito_antes_de_tarea_flexible(self):
+        workers = [
+            {"worker": "qwen-unico", "provider": "qwen"},
+            {"worker": "gemini-unico", "provider": "gemini"},
+        ]
+        issues = [
+            issue(53, "agent:auto", created="2026-09-28T00:00:00Z"),
+            issue(54, "agent:qwen", created="2026-09-28T01:00:00Z"),
+        ]
+
+        tasks = mod.select_tasks(issues, workers)
+
+        self.assertEqual(
+            {
+                53: ("gemini", "gemini-unico"),
+                54: ("qwen", "qwen-unico"),
+            },
+            {
+                task["issue"]: (task["provider"], task["worker"])
+                for task in tasks
+            },
+        )
+
     def test_capacidad_provider_no_se_sobreasigna(self):
         workers = [{"worker": "gemini", "provider": "gemini"}]
         issues = [
