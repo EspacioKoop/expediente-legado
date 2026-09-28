@@ -16,6 +16,7 @@ func _ejecutar() -> void:
 	_probar_saturacion()
 	_probar_normalizacion()
 	_probar_entorno()
+	_probar_autocuidado_aviones()
 	_probar_persistencia_json()
 	print("issue_952: %d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos > 0 else 0)
@@ -95,6 +96,25 @@ func _probar_entorno() -> void:
 		"",
 		"el sueño no retroalimenta estrés por su propia iluminación",
 	)
+
+
+func _probar_autocuidado_aviones() -> void:
+	var jornada := {"dia": 3, "vuelta": 1, "fase": "archivo"}
+	Estres.aplicar(jornada, "documento_sensible", 2.0)
+	_comprobar_cerca(Estres.valor(jornada), 24.0, "la prueba parte de tensión visible")
+	AvionesPapelDescanso.finalizar(jornada, {"ganador": "jugador"})
+	_comprobar_cerca(
+		Estres.valor(jornada),
+		12.0,
+		"completar el descanso de aviones aplica autocuidado una sola vez",
+	)
+	AvionesPapelDescanso.finalizar(jornada, {"ganador": "jugador"})
+	_comprobar_cerca(Estres.valor(jornada), 12.0, "repetir el cierre no permite farmear recuperación")
+
+	var abandonada := {"dia": 6, "vuelta": 1, "fase": "archivo"}
+	Estres.aplicar(abandonada, "documento_sensible", 2.0)
+	AvionesPapelDescanso.finalizar(abandonada, {"abandonada": true})
+	_comprobar_cerca(Estres.valor(abandonada), 24.0, "abandonar no aplica autocuidado")
 
 
 func _probar_persistencia_json() -> void:
