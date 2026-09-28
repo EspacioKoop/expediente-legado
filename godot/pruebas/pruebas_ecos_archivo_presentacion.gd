@@ -194,7 +194,9 @@ func _probar_confirmacion_3d_legible() -> void:
 	_seleccionar_id(presentacion, 2)
 	vertical._sincronizar()
 	_comprobar(vertical._confirmar.habilitado, "tres ecos habilitan confirmar")
-	_comprobar(vertical._estado.text.begins_with("3/3"), "la secuencia lista se lee como tres de tres")
+	_comprobar(
+		vertical._estado.text.begins_with("3/3"), "la secuencia lista se lee como tres de tres"
+	)
 
 	var base := vertical._confirmar.get_node("Base") as MeshInstance3D
 	var material := base.material_override as StandardMaterial3D
