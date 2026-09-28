@@ -39,6 +39,16 @@ class AgentReviewContractTest(unittest.TestCase):
         raw = 'AGENT_REVIEW_BEGIN {"verdict":"findings","findings":[]} AGENT_REVIEW_END'
         self.assertEqual("skipped", mod.parse_review(raw)["status"])
 
+    def test_workflow_reviewer_tiene_presupuesto_duro_y_sin_retry(self):
+        workflow = (
+            ROOT / ".github" / "workflows" / "agent-worker.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn('maxSessionTurns":4', workflow)
+        self.assertIn("timeout-minutes: 3", workflow)
+        self.assertIn('"core":["read_file"]', workflow)
+        self.assertIn("Reviewer acotado (advisory; sin retries automaticos)", workflow)
+        self.assertNotIn("review_retry", workflow)
+
     def test_json_invalido_es_skipped(self):
         raw = "AGENT_REVIEW_BEGIN {mal json} AGENT_REVIEW_END"
         self.assertEqual("skipped", mod.parse_review(raw)["status"])
