@@ -11,7 +11,6 @@ signal combate_real_terminado(objetivo_id: String, gano: bool, consecuencia: Dic
 ## centímetros.
 const METROS_POR_ZANCADA := 0.72
 const SELLO_FIRMA_SIN_PRISA := "firma-sin-prisa"
-const SELLO_REINCORPORACION := "reincorporacion-administrativa"
 const SELLO_DESPERTAR_REGLAMENTARIO := "despertar-reglamentario"
 
 var partida := Partida.new()
@@ -38,11 +37,8 @@ var _pantalla: CanvasLayer
 ## Los rótulos del día. Se guarda para poder apagarlos mientras se pone la
 ## entrada de la vuelta.
 var _hud: CanvasLayer
-## La entrada de la vuelta mientras se está poniendo (#68). Fuera de ella es
-## nula: el reproductor se descarta al terminar en vez de quedarse escuchando.
-var _entrada: Node3D
-var _ultimo_recurso: UltimoRecursoApp
-var _auditorias_nueva_vida: AuditoriasNuevaVidaApp
+## UI temporal del ciclo de vida laboral: último recurso, auditorías y entrada.
+var _ciclo_laboral: DiaCicloLaboralApp
 
 ## El sitio montado ahora mismo, tal como se construyó. Las cinemáticas que
 ## ruedan dentro de él (#395) lo leen en vez de volver a pedirlo: en el sueño
@@ -84,168 +80,14 @@ func _ready() -> void:
 	_montar_entorno()
 	_montar_interfaz()
 	_entrar_en(jornada["fase"])
-	# #1205: una recarga en vida cero debe recuperar la decisión, no fabricar
-	# un reinicio ni dejar al jugador caminar con el cese sin resolver.
-	if Acusacion.despido_pendiente(partida.estado):
-		_abrir_ultimo_recurso_pendiente()
+	_ciclo_laboral = DiaCicloLaboralApp.new()
+	add_child(_ciclo_laboral)
+	_ciclo_laboral.configurar(partida, _caminante, _hud, Callable(self, "_guardar_o_avisar"))
+	_ciclo_laboral.reasignacion_solicitada.connect(_reasignar)
+	# #1205: vida cero se resuelve antes de devolver movimiento al jugador.
+	if _ciclo_laboral.abrir_ultimo_recurso_pendiente(jornada):
 		return
-	# Conserva la plantilla inicial y las migraciones antes de abrir el visor,
-	# que lee su propia instancia de Partida.
-	_abrir_vuelta()
-
-
-## Recupera o presenta la única decisión pendiente de vida cero.
-func _abrir_ultimo_recurso_pendiente() -> void:
-	if not Acusacion.despido_pendiente(partida.estado):
-		return
-	if is_instance_valid(_ultimo_recurso):
-		_ultimo_recurso.actualizar(partida.estado)
-		return
-	if is_instance_valid(_caminante):
-		_caminante.set_physics_process(false)
-	_ultimo_recurso = UltimoRecursoApp.new()
-	_ultimo_recurso.name = "UltimoRecurso"
-	_ultimo_recurso.canje_solicitado.connect(_al_canjear_ultimo_recurso)
-	_ultimo_recurso.cese_solicitado.connect(_al_aceptar_cese)
-	add_child(_ultimo_recurso)
-	_ultimo_recurso.abrir(partida.estado)
-
-
-func _al_canjear_ultimo_recurso(carta_id: String) -> void:
-	var resultado := Acusacion.canjear_carta_por_vida(partida.estado, carta_id)
-	if String(resultado.get("resultado", "")) != "canje":
-		if is_instance_valid(_ultimo_recurso):
-			_ultimo_recurso.actualizar(partida.estado)
-		return
-
-	# Una derrota de Hastur deja su combate interrumpido mientras existe la
-	# frontera. Si el canje salva la misma vuelta, se rearma ese mismo intento.
-	ClimaxHastur.reanudar_tras_ultimo_recurso(partida.estado, jornada)
-	var guardado := _guardar_o_avisar("")
-	_cerrar_ultimo_recurso()
-	if not guardado:
-		if is_instance_valid(_caminante):
-			_caminante.set_physics_process(true)
-		return
-
-	var climax := get_node_or_null("ClimaxHasturOwnerController")
-	if climax != null and climax.has_method("_reanudar_si_procede"):
-		climax.call_deferred("_reanudar_si_procede")
-	elif is_instance_valid(_caminante):
-		_caminante.set_physics_process(true)
-
-
-func _al_aceptar_cese() -> void:
-	var resultado := Acusacion.aceptar_cese(partida.estado, jornada)
-	if not bool(resultado.get("despido", false)):
-		if is_instance_valid(_ultimo_recurso):
-			_ultimo_recurso.actualizar(partida.estado)
-		return
-	_guardar_o_avisar("")
-	_cerrar_ultimo_recurso()
-	_reasignar()
-
-
-func _cerrar_ultimo_recurso() -> void:
-	if is_instance_valid(_ultimo_recurso):
-		_ultimo_recurso.queue_free()
-	_ultimo_recurso = null
-
-
-## La entrada de una vida laboral (#68).
-##
-## Se pone ENCIMA de la oficina ya montada y no antes de montarla: así al
-## terminar no hay ningún fotograma en negro esperando a que se construya el
-## archivo, y saltarla deja al jugador exactamente donde estaría.
-##
-## Solo abre una vuelta —día uno, en el archivo y con la jornada entera por
-## delante—, que es lo que distingue empezar de volver a cargar una partida a
-## medias. Una entrada que se repita cada vez que se abre el juego dejaría de
-## ser una entrada.
-##
-## Ocurre al arrancar y también a media sesión: cuando firmar cuesta la última
-## vida, `_cerrar_expediente` vuelve a llamar aquí por `_reasignar`. Esa es la
-## razón de que la condición mire la jornada y no una bandera de "ya
-## arrancamos" — lo que abre una entrada es que la vida laboral esté por
-## estrenar, venga de donde venga.
-func _abrir_vuelta() -> void:
-	if jornada["fase"] != "archivo" or jornada["dia"] != 1:
-		return
-	if jornada["acciones"] != Jornada.ACCIONES_POR_DIA:
-		return
-	if int(jornada.get("vuelta", 1)) > 1 and Auditorias.seleccion_pendiente(partida.estado):
-		_abrir_auditorias_nueva_vida()
-		return
-
-	_registrar_reincorporacion()
-
-	# El cuerpo se queda quieto mientras dura: la cinemática se salta con
-	# cualquier tecla, y sin esto esa misma tecla sería también un paso.
-	_caminante.set_physics_process(false)
-
-	# Y los rótulos del día se apagan. No es limpieza: la oficina ya está
-	# montada detrás, así que sin esto la frase de un compañero se lee ENCIMA de
-	# la pantalla de arranque —alguien te habla antes de que hayas entrado, en la
-	# cinemática cuyo remate es que no hay nadie más—.
-	_hud.visible = false
-
-	_entrada = load("res://escenas/cinematica.tscn").instantiate()
-	add_child(_entrada)
-	_entrada.terminada.connect(_cerrar_vuelta)
-	var vistas := Cinematica.vistas_de(partida.estado, EntradaCinematica.ID)
-	_entrada.reproducir(EntradaCinematica.planos_de(vistas), EntradaCinematica.ID, partida.estado)
-
-
-## La segunda vida laboral y siguientes ya son una reincorporación administrativa.
-##
-## Se deriva del contador de vuelta existente: no hace falta una bandera paralela
-## y recargar el día 1 sigue siendo idempotente. El guardado ocurre al cerrar la
-## misma entrada de vuelta.
-func _abrir_auditorias_nueva_vida() -> void:
-	if is_instance_valid(_auditorias_nueva_vida):
-		return
-	if is_instance_valid(_caminante):
-		_caminante.set_physics_process(false)
-	if is_instance_valid(_hud):
-		_hud.visible = false
-	_auditorias_nueva_vida = AuditoriasNuevaVidaApp.new()
-	_auditorias_nueva_vida.name = "AuditoriasNuevaVida"
-	_auditorias_nueva_vida.seleccion_confirmada.connect(_confirmar_auditorias_nueva_vida)
-	add_child(_auditorias_nueva_vida)
-	_auditorias_nueva_vida.abrir(partida.estado)
-
-
-func _confirmar_auditorias_nueva_vida(seleccion: Array) -> void:
-	var anterior := Dictionary(partida.estado.get(Auditorias.CLAVE_ESTADO, {})).duplicate(true)
-	if not Auditorias.resolver_seleccion(partida.estado, seleccion):
-		return
-	if not _guardar_o_avisar(""):
-		partida.estado[Auditorias.CLAVE_ESTADO] = anterior
-		return
-	if is_instance_valid(_auditorias_nueva_vida):
-		_auditorias_nueva_vida.queue_free()
-	_auditorias_nueva_vida = null
-	_abrir_vuelta()
-
-
-func _registrar_reincorporacion() -> Dictionary:
-	if int(jornada.get("vuelta", 1)) <= 1:
-		return {"resultado": "no-cumplido", "id": SELLO_REINCORPORACION}
-	return Sellos.registrar_sello(partida.estado, SELLO_REINCORPORACION)
-
-
-## Al acabar la entrada se guarda, y no por costumbre: lo que hay que conservar
-## es que se ha visto. Sin este guardado la cuenta se pierde al cerrar el juego
-## y la entrada volvería a durar lo mismo para siempre, que es justo lo que el
-## acortado de #67 vino a evitar.
-func _cerrar_vuelta() -> void:
-	if _entrada == null:
-		return
-	_entrada.queue_free()
-	_entrada = null
-	_caminante.set_physics_process(true)
-	_hud.visible = true
-	_guardar_o_avisar("")
+	_ciclo_laboral.abrir_vuelta(jornada)
 
 
 ## Luz y ambiente. Una sola direccional, ahora con sombra, y oclusión.
@@ -980,7 +822,7 @@ func _cerrar_expediente() -> void:
 ## —eso es #73—, solo la garantía de que el ciclo no se queda a medias.
 func _reasignar() -> void:
 	_entrar_en(jornada["fase"])
-	_abrir_vuelta()
+	_ciclo_laboral.abrir_vuelta(jornada)
 
 
 func _refrescar_rotulos(espacio: Dictionary) -> void:
