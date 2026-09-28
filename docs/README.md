@@ -11,6 +11,7 @@ Este directorio contiene auditorías, decisiones de diseño, investigación, evi
 | Fases | [ROADMAP.md](../ROADMAP.md) | Dirección v0.6 → 1.0 |
 | Entrada al repo | [README.md](../README.md) | Estado general, stack y comandos |
 | Flujo de contribución | [AGENTS.md](../AGENTS.md), [CONTRIBUTING.md](../CONTRIBUTING.md) | Ramas, PR, CI, merge |
+| Operación de agentes | [agents-autonomos.md](agents-autonomos.md), [agents/parallel-pool.md](agents/parallel-pool.md) | Autopilot, pool, memoria, proveedores y límites |
 | Paridad SIGA | [paridad-expedientes.md](paridad-expedientes.md) | Legado → Godot para expedientes |
 | Paridad ideologías | [paridad-ideologias.md](paridad-ideologias.md) | Legado político y contrato transversal |
 | Paridad religión | [paridad-religion.md](paridad-religion.md) | Fronteras religión/Tarot/mitología |
@@ -19,9 +20,9 @@ Este directorio contiene auditorías, decisiones de diseño, investigación, evi
 | Referencias ludonarrativas | [research/referencias-ludonarrativas.md](research/referencias-ludonarrativas.md) | Técnicas externas, riesgos y mapa de adopción; no declara features integradas |
 | Procedencia de assets | `godot/assets/procedencia.json` + `docs/licencias/` | Licencia, fuente y hashes |
 
-## Estado transversal — 2026-09-26
+## Estado transversal — 2026-09-28
 
-El índice se sincroniza con `main` hasta el commit `6ccfa4317897d70ca9462e7c92aefea41095b2bc`. Para prioridad operativa sigue mandando #181; para integración real, `main` y los PR fusionados.
+El índice se sincroniza con `main` hasta el commit `ae561599a4a72554b208c4b6b5a2c69729c68ee7`. Para prioridad operativa sigue mandando #181; para integración real, `main` y los PR fusionados.
 
 Cambios materiales desde el corte anterior:
 
@@ -34,6 +35,8 @@ Cambios materiales desde el corte anterior:
 - **sueños/mitologías:** PBR y props propios se conectan a las seis familias (#1414/#1417/#1419/#1425/#1428), Mari entra al runtime (#1427) y Baba Yaga gana arquitectura mutable por fases (#1413/#1415/#1421/#1424/#1430/#1434);
 - **atrezzo cultural:** #1440 añade el bonsái inspirado en Yggdrasil y **Yggdrasil's Egg** como dressing sin desbloqueos ni economía;
 - **investigación de diseño:** #1433 versiona el corpus [referencias ludonarrativas](research/referencias-ludonarrativas.md), separando técnica reutilizable de contenido protegido y de features realmente integradas.
+- **playtest/observabilidad:** #1446 mantiene la alpha continua; #1461 habilita F9 para reportes, #1524/#1531 aportan failover de gateway y #1556 prepara Sentry opcional sin sustituir el reporte humano.
+- **agentes:** #1542 integra autopilot Qwen/Gemini; #1555/#1563 memoria subordinada a fuentes canónicas; #1569/#1571/#1585 OmniRoute privado y fallbacks; #1572 pool opt-in de hasta seis workers; #1579/#1588 replan automático ante salidas del CLAIM.
 
 El criterio de lectura sigue siendo el mismo: separar **hecho integrado**, **gate pendiente** y **propuesta**. Un artefacto de CI, screenshot automatizado o documento de investigación no cierra por sí solo un requisito humano.
 
