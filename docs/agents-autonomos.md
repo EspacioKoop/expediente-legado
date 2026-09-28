@@ -145,6 +145,14 @@ El dispatcher:
 
 El barrido cada 15 minutos queda como red de seguridad; el drenado tras cada tanda evita esperar al siguiente cron cuando aún hay cola. `agent-autopilot.yml` ya no hace polling ni escucha labels: queda únicamente como ejecución manual.
 
+### Feeder conservador de backlog
+
+`agent-feeder.yml` evita que una pool sana se quede ociosa cuando no existe ninguna tarea en `agent:auto`/`agent:pool`/provider. Una vez por hora, y solo si la cola/planificación está vacía, selecciona como máximo **un** issue y lo envía primero a `agent:decompose`; nunca lo manda directamente a implementación.
+
+El selector excluye cualquier issue con labels `agent:*`, `estado:validacion-humana`, `prioridad:P0` o `agent:no-auto`, títulos de playtest/épica, registros de reservas, issues actualizados en los últimos 90 minutos y issues ya cubiertos por un PR abierto (`Refs/Fixes/Closes/Resolves #N`). Prioriza bugs, infraestructura/tests y prioridades P2/P3. `agent:no-auto` es el opt-out explícito.
+
+El feeder ejecuta `agent-decompose.yml` mediante `workflow_dispatch` porque los eventos creados por `GITHUB_TOKEN` no encadenan workflows. Del mismo modo, `agent-decompose.yml` despacha `agent-pool.yml` explícitamente cuando devuelve el padre a cola o crea subtareas independientes.
+
 ## Normas Platino, wiki y memoria
 
 Cada ejecución carga una copia fresca de `EspacioKoop/normas_platino` y debe leer sus fuentes operativas antes de planificar o reparar. Si esa carga falla, el agente no continúa: las reglas son obligatorias y no se sustituyen por memoria.
