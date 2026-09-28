@@ -93,6 +93,23 @@ func _probar_partida_tres_hoyos() -> void:
 	_comprobar(
 		not partida.hoyo_actual.obstaculos.is_empty(), "el hoyo jugable monta obstáculos simples"
 	)
+	for perfil in ["prudente", "agresiva", "absurda"]:
+		var cuerpo := partida.find_child("CompaneroGolf_%s" % perfil, true, false) as Node3D
+		_comprobar(cuerpo != null, "%s aparece físicamente junto al hoyo" % perfil)
+		if cuerpo == null:
+			continue
+		_comprobar(
+			String(cuerpo.get_meta("perfil_golf", "")) == perfil,
+			"%s conserva su perfil visual sin estado paralelo" % perfil,
+		)
+		_comprobar(
+			absf(cuerpo.position.x) > GolfHoyoApp.LIMITE.size.x * 0.5,
+			"%s queda fuera del rectángulo jugable" % perfil,
+		)
+		_comprobar(
+			_buscar_colision(cuerpo) == null,
+			"%s no añade colisión a la física del golf" % perfil,
+		)
 
 	partida._al_completar_hoyo(2)
 	await process_frame
@@ -150,6 +167,16 @@ func _probar_abandono() -> void:
 	)
 	partida.queue_free()
 	await process_frame
+
+
+func _buscar_colision(nodo: Node) -> CollisionObject3D:
+	if nodo is CollisionObject3D:
+		return nodo
+	for hijo in nodo.get_children():
+		var encontrada := _buscar_colision(hijo)
+		if encontrada != null:
+			return encontrada
+	return null
 
 
 func _comprobar(condicion: bool, nombre: String) -> void:
