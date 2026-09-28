@@ -177,6 +177,48 @@ class CiBrainTest(unittest.TestCase):
         self.assertIn("--paths-json .agent-plan.json", autopilot)
         self.assertIn("--paths-json .agent-plan.json", repair)
 
+    def test_redirect_de_artefacto_no_reenvia_authorization_a_otro_host(self):
+        request = self.mod.urllib.request.Request(
+            "https://api.github.com/repos/EspacioKoop/expediente-legado/actions/artifacts/1/zip",
+            headers={
+                "Authorization": "Bearer secreto",
+                "User-Agent": self.mod.USER_AGENT,
+            },
+        )
+        handler = self.mod._GithubSafeRedirectHandler()
+
+        redirected = handler.redirect_request(
+            request,
+            None,
+            302,
+            "Found",
+            {},
+            "https://results-receiver.actions.githubusercontent.com/blob/signed.zip",
+        )
+
+        self.assertIsNotNone(redirected)
+        self.assertIsNone(redirected.get_header("Authorization"))
+        self.assertEqual(self.mod.USER_AGENT, redirected.get_header("User-agent"))
+
+    def test_redirect_github_mismo_host_conserva_authorization(self):
+        request = self.mod.urllib.request.Request(
+            "https://api.github.com/repos/EspacioKoop/expediente-legado/actions/artifacts/1/zip",
+            headers={"Authorization": "Bearer secreto"},
+        )
+        handler = self.mod._GithubSafeRedirectHandler()
+
+        redirected = handler.redirect_request(
+            request,
+            None,
+            302,
+            "Found",
+            {},
+            "https://api.github.com/repos/EspacioKoop/expediente-legado/actions/artifacts/1/archive",
+        )
+
+        self.assertIsNotNone(redirected)
+        self.assertEqual("Bearer secreto", redirected.get_header("Authorization"))
+
     def test_url_turso_se_convierte_a_pipeline_https(self):
         self.assertEqual(
             "https://siga98-org.turso.io/v2/pipeline",
