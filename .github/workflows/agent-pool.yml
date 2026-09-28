@@ -32,7 +32,7 @@ concurrency:
 
 jobs:
   prepare:
-    if: github.event_name != 'issues' || github.event.label.name == 'agent:pool'
+    if: github.event_name != 'issues' || github.event.label.name == 'agent:auto' || github.event.label.name == 'agent:pool' || github.event.label.name == 'agent:qwen' || github.event.label.name == 'agent:gemini'
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.select.outputs.matrix }}
@@ -40,12 +40,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Crear etiqueta opt-in
+      - name: Crear etiquetas de cola
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          gh label create agent:auto --repo "$GITHUB_REPOSITORY" --color 5319E7 \
+            --description "Cola automatica de agentes" --force
           gh label create agent:pool --repo "$GITHUB_REPOSITORY" --color 7057FF \
-            --description "Pool paralelo de agentes (no combinar con agent:auto)" --force
+            --description "Alias compatible de la cola paralela" --force
+          gh label create agent:qwen --repo "$GITHUB_REPOSITORY" --color 1D76DB \
+            --description "Cola de agentes forzada a Qwen" --force
+          gh label create agent:gemini --repo "$GITHUB_REPOSITORY" --color A2EEEF \
+            --description "Cola de agentes forzada a Gemini" --force
+          gh label create agent:working --repo "$GITHUB_REPOSITORY" --color F9D0C4 \
+            --description "Agente trabajando" --force
+          gh label create agent:pr-open --repo "$GITHUB_REPOSITORY" --color 0E8A16 \
+            --description "PR autonomo abierto" --force
+          gh label create agent:needs-human --repo "$GITHUB_REPOSITORY" --color D93F0B \
+            --description "Necesita intervencion humana" --force
 
       - id: select
         name: Construir tanda
@@ -53,7 +65,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REQUESTED_MAX: ${{ inputs.max_parallel || '6' }}
           HAS_QWEN: ${{ secrets.QWEN_API_KEY != '' }}
+          HAS_OMNIROUTE: ${{ secrets.OMNIROUTE_API_KEY != '' && secrets.TS_OAUTH_CLIENT_ID != '' && (secrets.TS_OAUTH_SECRET != '' || secrets.TS_AUDIENCE != '') && vars.OMNIROUTE_BASE_URL != '' && vars.OMNIROUTE_MODEL != '' }}
           HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
+          KEV_BASE_URL: ${{ vars.KEV_BASE_URL }}
+          KEV_MODEL: ${{ vars.KEV_MODEL || 'kev-latest' }}
+          KEV_ROUTER_MIN_CONFIDENCE: ${{ vars.KEV_ROUTER_MIN_CONFIDENCE || '0.45' }}
+          KEV_API_KEY: ${{ secrets.KEV_API_KEY }}
           HAS_F1: ${{ secrets.QWEN_FALLBACK_1_API_KEY != '' }}
           HAS_F2: ${{ secrets.QWEN_FALLBACK_2_API_KEY != '' }}
           HAS_F3: ${{ secrets.QWEN_FALLBACK_3_API_KEY != '' }}
@@ -64,8 +81,16 @@ jobs:
           F4_URL: ${{ vars.QWEN_FALLBACK_4_BASE_URL }}
         run: |
           set -euo pipefail
-          gh issue list --repo "$GITHUB_REPOSITORY" --state open --label agent:pool --limit 100 \
-            --json number,labels,createdAt,updatedAt > /tmp/issues.json
+          for label in auto pool qwen gemini; do
+            gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+              --label "agent:$label" --limit 100 \
+              --json number,title,body,labels,createdAt,updatedAt \
+              > "/tmp/issues-$label.json"
+          done
+          jq -s 'add | unique_by(.number)' \
+            /tmp/issues-auto.json /tmp/issues-pool.json \
+            /tmp/issues-qwen.json /tmp/issues-gemini.json \
+            > /tmp/issues.json
 
           workers='[]'
           add_worker() {
@@ -73,13 +98,49 @@ jobs:
             workers="$(jq -c --arg worker "$id" --arg provider "$provider" \
               '. + [{worker:$worker,provider:$provider}]' <<<"$workers")"
           }
-          [[ "$HAS_QWEN" == true ]] && add_worker qwen-primary qwen
+          [[ "$HAS_QWEN" == true || "$HAS_OMNIROUTE" == true ]] && add_worker qwen-primary qwen
           [[ "$HAS_GEMINI" == true ]] && add_worker gemini gemini
           [[ "$HAS_F1" == true && -n "$F1_URL" ]] && add_worker qwen-fallback-1 qwen
           [[ "$HAS_F2" == true && -n "$F2_URL" ]] && add_worker qwen-fallback-2 qwen
           [[ "$HAS_F3" == true && -n "$F3_URL" ]] && add_worker qwen-fallback-3 qwen
           [[ "$HAS_F4" == true && -n "$F4_URL" ]] && add_worker qwen-fallback-4 qwen
           printf '%s\n' "$workers" > /tmp/workers.json
+
+          has_qwen="$(jq -r 'any(.[]; .provider == "qwen")' /tmp/workers.json)"
+          has_gemini="$(jq -r 'any(.[]; .provider == "gemini")' /tmp/workers.json)"
+          route_limit=$((REQUESTED_MAX * 2))
+          (( route_limit > 12 )) && route_limit=12
+          mapfile -t candidates < <(
+            jq -r --argjson limit "$route_limit" \
+              'sort_by(.createdAt, .number)[:$limit][].number' /tmp/issues.json
+          )
+
+          for issue in "${candidates[@]}"; do
+            state="/tmp/kev-$issue.json"
+            jq --argjson issue "$issue" \
+              '.[] | select(.number == $issue) |
+               {title:.title,body:(.body//""),labels:[.labels[].name]}' \
+              /tmp/issues.json > "$state"
+
+            args=(--state-file "$state" --requested-provider auto)
+            [[ "$has_qwen" == true ]] && args+=(--has-qwen)
+            [[ "$has_gemini" == true ]] && args+=(--has-gemini)
+            while IFS= read -r label; do
+              args+=(--label "$label")
+            done < <(jq -r '.labels[]' "$state")
+
+            result="$(python3 scripts/kev_router.py "${args[@]}" 2>/dev/null || true)"
+            preferred="$(jq -r '.provider // empty' <<<"$result" 2>/dev/null || true)"
+            [[ "$preferred" == qwen || "$preferred" == gemini ]] || continue
+
+            tmp="$(mktemp)"
+            jq --argjson issue "$issue" --arg preferred "$preferred" \
+              'map(if .number == $issue
+                   then . + {preferredProvider:$preferred}
+                   else . end)' \
+              /tmp/issues.json > "$tmp"
+            mv "$tmp" /tmp/issues.json
+          done
 
           python3 scripts/agent_pool.py \
             --issues /tmp/issues.json \
