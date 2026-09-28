@@ -14,6 +14,7 @@ DIA = ROOT / "godot" / "guion" / "dia_clima_app.gd"
 HUD = ROOT / "godot" / "guion" / "dia_hud_fases_app.gd"
 INDICADOR = ROOT / "godot" / "guion" / "estres_hud_indicador.gd"
 ENTORNO = ROOT / "godot" / "guion" / "estres_ambiental.gd"
+AVIONES = ROOT / "godot" / "guion" / "aviones_papel_descanso.gd"
 SMOKE = "pruebas/issue_952_smoke.gd"
 
 
@@ -27,6 +28,7 @@ class Estres952Test(unittest.TestCase):
         cls.hud = HUD.read_text(encoding="utf-8")
         cls.indicador = INDICADOR.read_text(encoding="utf-8")
         cls.entorno = ENTORNO.read_text(encoding="utf-8")
+        cls.aviones = AVIONES.read_text(encoding="utf-8")
 
     def test_estado_interno_y_acotado_vive_en_jornada(self):
         self.assertIn('const CAMPO_JORNADA := "estres_dinamico"', self.estres)
@@ -103,6 +105,13 @@ class Estres952Test(unittest.TestCase):
         self.assertIn("is_instance_valid(_dialogo_actual)", self.dia)
         self.assertIn("not _caminante.is_physics_processing()", self.dia)
         self.assertIn('_guardar_o_avisar("")', self.dia)
+
+    def test_descanso_de_aviones_es_productor_real_de_autocuidado(self):
+        self.assertIn('Estres.aplicar(jornada, "autocuidado")', self.aviones)
+        self.assertIn('if not ya_jugado:', self.aviones)
+        abandono = self.aviones.index('if resultado.get("abandonada", false):')
+        autocuidado = self.aviones.index('Estres.aplicar(jornada, "autocuidado")')
+        self.assertLess(abandono, autocuidado)
 
     def test_smoke_godot(self):
         motor = os.environ.get("GODOT_BIN", "godot4")
