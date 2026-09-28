@@ -63,8 +63,7 @@ class AgentMemoryContractTest(unittest.TestCase):
         self.assertEqual(deploy["app"], "siga98-feedback-deno")
         self.assertEqual(deploy["runtime"]["entrypoint"], "./main.ts")
         self.assertIn("deno deploy --prod", self.deno_readme)
-        self.assertIn("feedback-deno-deploy.yml", self.deno_readme)
-        self.assertIn("DENO_DEPLOY_TOKEN", self.deno_readme)
+        self.assertIn("**no despliega**", self.deno_readme)
         self.assertIn("/health", self.deno_readme)
 
     def test_gateway_expone_memoria_sin_romper_reportes(self):
