@@ -49,7 +49,6 @@ func _empezar_duelo() -> void:
 	_preparar_dialogo_previo()
 
 
-
 func _preparar_dialogo_previo() -> void:
 	var jornada_var = estado.get("jornada", {})
 	if typeof(jornada_var) != TYPE_DICTIONARY or folio.strip_edges().is_empty():
