@@ -91,12 +91,8 @@ jobs:
         run: |
           set -euo pipefail
           gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json title,body,comments --jq '"# Issue\n\n## " + .title + "\n\n" + (.body//"") + "\n\n## Comentarios recientes\n" + ((.comments[-12:]//[])|map("- "+.author.login+": "+.body)|join("\n\n"))' > .agent-decompose-input.md
-          if git clone --depth 1 https://github.com/EspacioKoop/normas_platino.git .agent-platino; then
-            rm -rf .agent-platino/.git
-          else
-            mkdir -p .agent-platino
-            printf '%s\n' '# Normas Platino no disponibles en esta ejecucion' > .agent-platino/README.md
-          fi
+          git clone --depth 1 https://github.com/EspacioKoop/normas_platino.git .agent-platino
+          rm -rf .agent-platino/.git
 
       - id: qwen_config
         name: Resolver Qwen
@@ -134,7 +130,7 @@ jobs:
 
       - id: plan_gemini
         name: Descomponer con Gemini
-        if: steps.select.outputs.run == 'true' && env.HAS_QWEN != 'true' && env.HAS_GEMINI == 'true'
+        if: steps.select.outputs.run == 'true' && env.HAS_GEMINI == 'true' && (env.HAS_QWEN != 'true' || steps.plan_qwen.outcome != 'success')
         timeout-minutes: 5
         continue-on-error: true
         uses: google-github-actions/run-gemini-cli@v0
@@ -152,7 +148,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ steps.select.outputs.issue }}
           REQUESTED_PROVIDER: ${{ steps.select.outputs.requested_provider }}
-          SUMMARY: ${{ steps.plan_qwen.outputs.summary || steps.plan_gemini.outputs.summary }}
+          SUMMARY: ${{ steps.plan_qwen.outcome == 'success' && steps.plan_qwen.outputs.summary || steps.plan_gemini.outputs.summary }}
         run: |
           set -euo pipefail
           if [[ "$HAS_QWEN" != true && "$HAS_GEMINI" != true ]]; then
