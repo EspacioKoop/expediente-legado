@@ -10,6 +10,12 @@ const HELP_TYPES := {
 		"visual": "pulso_luz",
 		"audio": "eco_breve",
 	},
+	"eco_compania":
+	{
+		"visual": "silueta_compania",
+		"audio": "eco_breve",
+		"anchors": ["suenio_umbral"],
+	},
 }
 
 const STRENGTHS := ["leve", "media"]
@@ -55,6 +61,11 @@ static func validar_payload(payload: Variant, conocimiento: Array = []) -> Dicti
 		return _invalido("unknown_help_type")
 	if not STRENGTHS.has(strength):
 		return _invalido("unknown_strength")
+
+	var tipo: Dictionary = HELP_TYPES[help_type]
+	var anchors_permitidos: Array = tipo.get("anchors", [])
+	if not anchors_permitidos.is_empty() and not anchors_permitidos.has(anchor_id):
+		return _invalido("help_anchor_mismatch")
 
 	var anchor: Dictionary = ANCHORS[anchor_id]
 	var gate := String(anchor.get("knowledge_gate", ""))

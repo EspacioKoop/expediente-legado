@@ -27,10 +27,15 @@ func _init() -> void:
 
 
 func _evento(
-	actor: String, anchor: String, conocimiento: Array, event_id: String, instante: int = AHORA
+	actor: String,
+	anchor: String,
+	conocimiento: Array,
+	event_id: String,
+	instante: int = AHORA,
+	help_type: String = "resonancia"
 ) -> Dictionary:
 	var creado := AyudaDatos.crear_evento(
-		ESCENA, "test-378", actor, anchor, "resonancia", "leve", instante, conocimiento, event_id
+		ESCENA, "test-378", actor, anchor, help_type, "leve", instante, conocimiento, event_id
 	)
 	return creado
 
@@ -66,9 +71,34 @@ func _probar_catalogo_y_conocimiento() -> void:
 		AyudaCatalogo.validar_payload(bloqueado, ["figura_onirica"])["ok"],
 		true
 	)
+	var eco_compania := {
+		"anchor_id": "suenio_umbral",
+		"help_type": "eco_compania",
+		"strength": "leve",
+	}
+	_comprobar(
+		"eco de compañía usa un tipo cerrado",
+		AyudaCatalogo.validar_payload(eco_compania)["ok"],
+		true
+	)
+	var eco_fuera_de_umbral := eco_compania.duplicate(true)
+	eco_fuera_de_umbral["anchor_id"] = "suenio_figura"
+	eco_fuera_de_umbral["knowledge_gate"] = "figura_onirica"
+	var validacion_fuera := AyudaCatalogo.validar_payload(eco_fuera_de_umbral, ["figura_onirica"])
+	_comprobar(
+		"eco de compañía no puede revelar una figura",
+		validacion_fuera["reason"],
+		"help_anchor_mismatch"
+	)
 	var feedback := AyudaCatalogo.feedback_para(abierto)
 	_comprobar("feedback visual cerrado", feedback["feedback"]["visual"], "pulso_luz")
 	_comprobar("feedback sonoro cerrado", feedback["feedback"]["audio"], "eco_breve")
+	var feedback_compania := AyudaCatalogo.feedback_para(eco_compania)
+	_comprobar(
+		"eco de compañía usa silueta declarativa",
+		feedback_compania["feedback"]["visual"],
+		"silueta_compania"
+	)
 
 
 func _probar_evento_seguro() -> void:
@@ -153,8 +183,13 @@ func _probar_offline_y_rate_limit() -> void:
 func _probar_presentacion_local() -> void:
 	var abierta := _evento("anon-visual", "suenio_umbral", [], "help-visual")
 	var figura := _evento("anon-figura", "suenio_figura", ["figura_onirica"], "help-figura")
+	var compania := _evento(
+		"anon-compania", "suenio_umbral", [], "help-compania", AHORA, "eco_compania"
+	)
 	var controlador := DiaAyudaResonanciaApp.new()
-	controlador.configurar_transporte(TransporteFixture.new([abierta["event"], figura["event"]]))
+	controlador.configurar_transporte(
+		TransporteFixture.new([abierta["event"], figura["event"], compania["event"]])
+	)
 
 	var mundo := Node3D.new()
 	root.add_child(mundo)
@@ -163,7 +198,7 @@ func _probar_presentacion_local() -> void:
 		"figuras": [{"pos": Vector3(4.0, 0.0, 5.0)}],
 	}
 	var creadas := controlador.mostrar_ayudas_en(mundo, espacio, AHORA + 1)
-	_comprobar("dos ayudas conocidas se presentan", creadas.size(), 2)
+	_comprobar("tres ayudas conocidas se presentan", creadas.size(), 3)
 	_comprobar("la presentación usa el nodo local", creadas[0] is SuenoAyudaResonancia3D, true)
 	_comprobar("el umbral usa la entrada visible", creadas[0].position, Vector3(1.0, 0.55, 2.0))
 	_comprobar(
@@ -176,19 +211,41 @@ func _probar_presentacion_local() -> void:
 		"la resonancia crea audio", creadas[0].get_node_or_null("EcoResonancia") != null, true
 	)
 	_comprobar(
+		"el eco de compañía crea silueta",
+		creadas[2].get_node_or_null("SiluetaCompania") != null,
+		true
+	)
+	_comprobar(
+		"el eco de compañía no necesita luz de pista",
+		creadas[2].get_node_or_null("PulsoResonancia") == null,
+		true
+	)
+	_comprobar(
+		"el tipo queda trazable sin tocar progreso",
+		creadas[2].get_meta("help_type"),
+		"eco_compania"
+	)
+	_comprobar(
 		"la resonancia no crea colisión",
 		creadas[0].find_children("*", "CollisionShape3D", true, false).size(),
 		0
 	)
+	_comprobar(
+		"el eco de compañía tampoco crea colisión",
+		creadas[2].find_children("*", "CollisionShape3D", true, false).size(),
+		0
+	)
 
 	var filtrado := DiaAyudaResonanciaApp.new()
-	filtrado.configurar_transporte(TransporteFixture.new([abierta["event"], figura["event"]]))
+	filtrado.configurar_transporte(
+		TransporteFixture.new([abierta["event"], figura["event"], compania["event"]])
+	)
 	var mundo_sin_figura := Node3D.new()
 	root.add_child(mundo_sin_figura)
 	var solo_umbral := filtrado.mostrar_ayudas_en(
 		mundo_sin_figura, {"entrada": Vector3.ZERO, "figuras": []}, AHORA + 1
 	)
-	_comprobar("sin figura conocida solo se presenta el umbral", solo_umbral.size(), 1)
+	_comprobar("sin figura conocida solo se presentan ayudas del umbral", solo_umbral.size(), 2)
 
 	# Esta prueba termina desde SceneTree._init(): queue_free() no llega a vaciarse
 	# antes de quit(), así que liberamos los fixtures sin esperar a otro frame.
