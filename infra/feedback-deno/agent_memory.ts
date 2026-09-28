@@ -167,9 +167,8 @@ async function authenticateAgentRequest(
   ];
   const workerPrefix = repository + "/.github/workflows/agent-worker.yml@";
   const poolPrefix = repository + "/.github/workflows/agent-pool.yml@";
-  const directAllowed = allowedWorkflows.some((prefix) =>
-    workflowRef.startsWith(prefix)
-  ) || workflowRef.startsWith(workerPrefix);
+  const directAllowed = allowedWorkflows.some((prefix) => workflowRef.startsWith(prefix)) ||
+    workflowRef.startsWith(workerPrefix);
   const reusableAllowed = workflowRef.startsWith(poolPrefix) &&
     jobWorkflowRef.startsWith(workerPrefix);
   if (!directAllowed && !reusableAllowed) {
@@ -185,9 +184,7 @@ type MemoryAuth =
 
 function bearerToken(request: Request): string {
   const authorization = request.headers.get("authorization") ?? "";
-  return authorization.startsWith("Bearer ")
-    ? authorization.slice("Bearer ".length).trim()
-    : "";
+  return authorization.startsWith("Bearer ") ? authorization.slice("Bearer ".length).trim() : "";
 }
 
 function tokensEqual(left: string, right: string): boolean {
@@ -227,11 +224,13 @@ async function readJsonBody(request: Request, maxBytes = 8192): Promise<unknown>
 function cleanMemoryTags(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
 
-  return [...new Set(
-    value
-      .map((tag) => cleanTitle(tag, 40).toLowerCase())
-      .filter((tag) => /^[a-z0-9áéíóúüñ_.:/-]+$/i.test(tag)),
-  )].slice(0, 8);
+  return [
+    ...new Set(
+      value
+        .map((tag) => cleanTitle(tag, 40).toLowerCase())
+        .filter((tag) => /^[a-z0-9áéíóúüñ_.:/-]+$/i.test(tag)),
+    ),
+  ].slice(0, 8);
 }
 
 function cleanMemoryPaths(value: unknown): string[] {
@@ -259,12 +258,14 @@ function cleanMemoryPaths(value: unknown): string[] {
 function cleanQueryWords(value: unknown): string[] {
   const text = cleanText(value, 800).toLowerCase();
   if (!text) return [];
-  return [...new Set(
-    text
-      .split(/[^a-z0-9áéíóúüñ_.:/-]+/i)
-      .map((word) => word.trim())
-      .filter((word) => word.length >= 3),
-  )].slice(0, AGENT_MEMORY_WORD_LIMIT);
+  return [
+    ...new Set(
+      text
+        .split(/[^a-z0-9áéíóúüñ_.:/-]+/i)
+        .map((word) => word.trim())
+        .filter((word) => word.length >= 3),
+    ),
+  ].slice(0, AGENT_MEMORY_WORD_LIMIT);
 }
 
 function pathsOverlap(left: string, right: string): boolean {
