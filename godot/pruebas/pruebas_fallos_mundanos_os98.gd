@@ -82,9 +82,12 @@ func _probar() -> void:
 	)
 
 	var firmas := FallosMundanosOs98.firmas_limpiador()
-	_comprobar(firmas.size() >= 2, "el limpiador usa un catálogo interno pequeño de firmas ficticias")
+	_comprobar(
+		firmas.size() >= 2, "el limpiador usa un catálogo interno pequeño de firmas ficticias"
+	)
 	var estado_limpiador := {
-		"objetos_simulados": [
+		"objetos_simulados":
+		[
 			{"id": "memo-uno", "firma_id": "macro-marmota-98", "activo": true},
 			{"id": "objeto-desconocido", "firma_id": "firma-no-catalogada", "activo": true},
 			{"id": "residente-uno", "firma_id": "residente-cinta-azul", "activo": true},
@@ -115,9 +118,12 @@ func _probar() -> void:
 		FallosMundanosOs98.escanear_limpiador(estado_limpiador).size() == 2,
 		"restaurar devuelve la detección catalogada",
 	)
-	var firma_imposible := FallosMundanosOs98.evaluar(
-		"firma_catalogada_detectada",
-		{"fixture_anomalo": "firma_no_catalogada_detectada"},
+	var firma_imposible := (
+		FallosMundanosOs98
+		. evaluar(
+			"firma_catalogada_detectada",
+			{"fixture_anomalo": "firma_no_catalogada_detectada"},
+		)
 	)
 	_comprobar(
 		firma_imposible["estado"] == FallosMundanosOs98.ESTADO_FIXTURE_ANOMALO,
