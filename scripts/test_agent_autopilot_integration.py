@@ -1,5 +1,5 @@
-from pathlib import Path
 import unittest
+from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,7 +11,7 @@ class AgentAutopilotIntegrationTest(unittest.TestCase):
     def setUpClass(cls):
         cls.workflow = WORKFLOW.read_text(encoding="utf-8")
 
-    def test_kevin_router_se_ejecuta_tras_checkout(self):
+    def test_kev_router_se_ejecuta_tras_checkout(self):
         checkout = self.workflow.index("- name: Checkout")
         router = self.workflow.index("- id: route")
         qwen = self.workflow.index("- id: qwen")
@@ -35,8 +35,14 @@ class AgentAutopilotIntegrationTest(unittest.TestCase):
         )
         self.assertIn("--output .agent-context.md", self.workflow)
         self.assertIn('args+=(--path "$file")', self.workflow)
-        self.assertIn(".agent-plan.json, .agent-context.md, .agent-memory.json", self.workflow)
-        self.assertIn(".agent-task.md, .agent-context.md, .agent-memory.json", self.workflow)
+        self.assertIn(
+            ".agent-plan.json, .agent-context.md, .agent-memory.json",
+            self.workflow,
+        )
+        self.assertIn(
+            ".agent-task.md, .agent-context.md, .agent-memory.json",
+            self.workflow,
+        )
 
     def test_contexto_temporal_no_se_publica_en_el_pr(self):
         self.assertIn(
