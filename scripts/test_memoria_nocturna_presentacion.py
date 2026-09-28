@@ -18,6 +18,9 @@ class MemoriaNocturnaPresentacionTest(unittest.TestCase):
         self.assertIn("class_name MemoriaNocturnaPresentacion", fuente)
         self.assertIn('"luces"', fuente)
         self.assertIn('"ambiente_energia"', fuente)
+        self.assertIn("COLOR_CONTRADICCION_A", fuente)
+        self.assertIn("COLOR_CONTRADICCION_B", fuente)
+        self.assertIn('analisis.get("contradicciones", [])', fuente)
         self.assertNotIn("FileAccess", fuente)
         self.assertNotIn("casos.json", fuente)
         self.assertNotIn('"salidas"] =', fuente)
@@ -30,6 +33,7 @@ class MemoriaNocturnaPresentacionTest(unittest.TestCase):
         self.assertIn("MemoriaNocturnaPresentacion.aplicar(", compacto)
         self.assertIn("contenido.casos", compacto)
         self.assertIn('partida.estado.get("pistas_descubiertas",[])', compacto)
+        self.assertIn("MemoriaNocturnaContradicciones.todas()", compacto)
 
     def test_regresion_ejecutable_en_godot(self) -> None:
         motor = os.environ.get("GODOT_BIN", "godot4")

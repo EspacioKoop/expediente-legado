@@ -8,6 +8,7 @@ from scripts.godot_pruebas import importar_proyecto
 
 ROOT = Path(__file__).resolve().parents[1]
 MODELO = ROOT / "godot" / "guion" / "memoria_nocturna.gd"
+CONTRADICCIONES = ROOT / "godot" / "guion" / "memoria_nocturna_contradicciones.gd"
 PRUEBA = ROOT / "godot" / "pruebas" / "pruebas_memoria_nocturna.gd"
 
 
@@ -34,6 +35,19 @@ class MemoriaNocturnaTest(unittest.TestCase):
         self.assertNotIn('pista.get("descripcion"', cuerpo)
         self.assertIn('"pistas": []', cuerpo)
         self.assertIn('"folios": pareja', cuerpo)
+
+    def test_contradicciones_son_explicitas_y_no_inferidas_de_texto(self) -> None:
+        catalogo = CONTRADICCIONES.read_text(encoding="utf-8")
+        modelo = MODELO.read_text(encoding="utf-8")
+
+        self.assertIn('"caso_id": "caso@1"', catalogo)
+        self.assertIn('"registros": ["memo1@1", "actaContraloria1@1"]', catalogo)
+        self.assertIn('"pistas_requeridas": ["pista1@1", "pista20@1"]', catalogo)
+        self.assertNotIn('"contenido"', catalogo)
+        self.assertNotIn('"descripcion"', catalogo)
+        self.assertIn("contradicciones_declaradas", modelo)
+        self.assertIn("_contradicciones_conocidas(", modelo)
+        self.assertNotIn('pista.get("descripcion"', modelo.split("static func _contradicciones_conocidas", 1)[1])
 
     def test_repeticion_es_determinista_y_separada_de_relaciones(self) -> None:
         fuente = MODELO.read_text(encoding="utf-8")
