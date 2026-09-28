@@ -130,7 +130,7 @@ jobs:
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":8},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, .agent-decompose-input.md y las Normas Platino en .agent-platino. Inspecciona el repo solo para decidir si el issue cabe en un corte seguro de <=8 rutas. No edites nada. Si cabe, devuelve fits_single_cut=true. Si no, crea entre 2 y 6 subtareas pequeñas; cada una con title, goal, files concretos (max 8) y depends_on con indices anteriores. Si dos subtareas comparten ruta, la posterior DEBE depender de la anterior. Termina con AGENT_DECOMPOSE_BEGIN seguido de JSON {"fits_single_cut":false,"subtasks":[{"title":"...","goal":"...","files":["ruta"],"depends_on":[]}]} y AGENT_DECOMPOSE_END.'
+          prompt: 'Lee AGENTS.md, .agent-decompose-input.md y las Normas Platino en .agent-platino. Inspecciona el repo solo para decidir el siguiente corte seguro; no edites nada. Si el pendiente restante es exclusivamente un gate/playtest humano, requiere hardware físico o no justifica ningún cambio de código, devuelve needs_human=true, fits_single_cut=false, reason concreto y subtasks=[]. Si cabe en un corte seguro de <=8 rutas, devuelve fits_single_cut=true y needs_human=false. Si no, crea entre 2 y 6 subtareas pequeñas; cada una con title, goal, files concretos (max 8) y depends_on con indices anteriores. Si dos subtareas comparten ruta, la posterior DEBE depender de la anterior. Termina con AGENT_DECOMPOSE_BEGIN seguido de JSON {"fits_single_cut":false,"needs_human":false,"reason":"","subtasks":[{"title":"...","goal":"...","files":["ruta"],"depends_on":[]}]} y AGENT_DECOMPOSE_END.'
 
       - id: plan_gemini
         name: Descomponer con Gemini
@@ -143,7 +143,7 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":8},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, .agent-decompose-input.md y las Normas Platino en .agent-platino. Inspecciona el repo solo para decidir si el issue cabe en un corte seguro de <=8 rutas. No edites nada. Si cabe, devuelve fits_single_cut=true. Si no, crea entre 2 y 6 subtareas pequeñas; cada una con title, goal, files concretos (max 8) y depends_on con indices anteriores. Si dos subtareas comparten ruta, la posterior DEBE depender de la anterior. Termina con AGENT_DECOMPOSE_BEGIN seguido de JSON {"fits_single_cut":false,"subtasks":[{"title":"...","goal":"...","files":["ruta"],"depends_on":[]}]} y AGENT_DECOMPOSE_END.'
+          prompt: 'Lee AGENTS.md, .agent-decompose-input.md y las Normas Platino en .agent-platino. Inspecciona el repo solo para decidir el siguiente corte seguro; no edites nada. Si el pendiente restante es exclusivamente un gate/playtest humano, requiere hardware físico o no justifica ningún cambio de código, devuelve needs_human=true, fits_single_cut=false, reason concreto y subtasks=[]. Si cabe en un corte seguro de <=8 rutas, devuelve fits_single_cut=true y needs_human=false. Si no, crea entre 2 y 6 subtareas pequeñas; cada una con title, goal, files concretos (max 8) y depends_on con indices anteriores. Si dos subtareas comparten ruta, la posterior DEBE depender de la anterior. Termina con AGENT_DECOMPOSE_BEGIN seguido de JSON {"fits_single_cut":false,"needs_human":false,"reason":"","subtasks":[{"title":"...","goal":"...","files":["ruta"],"depends_on":[]}]} y AGENT_DECOMPOSE_END.'
 
       - id: normalize
         name: Validar descomposicion
@@ -162,7 +162,15 @@ jobs:
           printf '%s' "${SUMMARY:-}" > /tmp/agent-decompose-summary.txt
           python3 scripts/agent_decompose.py --summary-file /tmp/agent-decompose-summary.txt --output /tmp/agent-decompose.json >/dev/null
           fits="$(jq -r '.fits_single_cut' /tmp/agent-decompose.json)"
-          if [[ "$fits" == true ]]; then
+          needs_human="$(jq -r '.needs_human // false' /tmp/agent-decompose.json)"
+          if [[ "$needs_human" == true ]]; then
+            reason="$(jq -r '.reason' /tmp/agent-decompose.json)"
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+              --remove-label agent:decompose --add-label agent:needs-human >/dev/null
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+              "Agent decompose: no hay un corte de código autónomo justificado. Gate humano: $reason" >/dev/null
+            echo "create=false" >> "$GITHUB_OUTPUT"
+          elif [[ "$fits" == true ]]; then
             queue_label=agent:auto
             [[ "$REQUESTED_PROVIDER" == qwen ]] && queue_label=agent:qwen
             [[ "$REQUESTED_PROVIDER" == gemini ]] && queue_label=agent:gemini
