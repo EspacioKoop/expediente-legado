@@ -723,17 +723,20 @@ func _abrir_combate_hack_slash(objetivo: Dictionary, zona: Area3D = null) -> boo
 	_combate_contextual_app = app
 	add_child(app)
 	app.terminado.connect(_cerrar_combate_hack_slash)
-	app.abrir(
-		objetivo,
-		decision,
-		zona,
-		_caminante,
-		_mundo,
-		_hud,
-		_ambiente,
-		partida.estado,
-		jornada,
-		_raiz(),
+	(
+		app
+		. abrir(
+			objetivo,
+			decision,
+			zona,
+			_caminante,
+			_mundo,
+			_hud,
+			_ambiente,
+			partida.estado,
+			jornada,
+			_raiz(),
+		)
 	)
 	_hablando = false
 	_nomina.text = ""
