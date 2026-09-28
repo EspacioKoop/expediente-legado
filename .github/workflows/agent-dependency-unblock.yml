@@ -55,6 +55,13 @@ jobs:
           PY
             )"
             [[ -n "$deps" ]] || continue
+            provider="$(
+              BODY="$body" python3 - <<'PY'
+          import os, re
+          match=re.search(r"<!--\s*agent-provider:\s*(auto|qwen|gemini)\s*-->", os.environ.get("BODY",""))
+          print(match.group(1) if match else "auto")
+          PY
+            )"
 
             ready=true
             for dep in $deps; do
@@ -66,6 +73,9 @@ jobs:
             done
             [[ "$ready" == true ]] || continue
 
-            gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" --remove-label agent:blocked --add-label agent:auto >/dev/null
-            gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body "Agent dependencies: todas las dependencias declaradas están cerradas; la subtarea entra en agent:auto." >/dev/null || true
+            queue_label=agent:auto
+            [[ "$provider" == qwen ]] && queue_label=agent:qwen
+            [[ "$provider" == gemini ]] && queue_label=agent:gemini
+            gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" --remove-label agent:blocked --add-label "$queue_label" >/dev/null
+            gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body "Agent dependencies: todas las dependencias declaradas están cerradas; la subtarea entra en $queue_label." >/dev/null || true
           done
