@@ -108,55 +108,9 @@ func _init() -> void:
 	}
 
 	for caso in CASOS:
-		if String(caso["capa"]) != simurgh.capa_actual():
-			simurgh.cambiar_capa(true)
-		if String(caso["capa"]) != simurgh.capa_actual():
-			printerr("No se pudo activar capa %s" % caso["capa"])
+		if not await _capturar_caso(simurgh, camara, caso, salida, manifiesto):
 			quit(1)
 			return
-		var meta := simurgh.get_node_or_null(String(caso["meta_path"])) as Node3D
-		var objetivo := simurgh.get_node_or_null(String(caso["target_path"])) as Node3D
-		if meta == null or objetivo == null:
-			printerr("Falta ancla %s" % caso["id"])
-			quit(1)
-			return
-		var ancla_meta := String(meta.get_meta("ancla_equivalencia", ""))
-		if ancla_meta != String(caso["ancla"]):
-			printerr("Metadato de equivalencia incorrecto en %s" % caso["id"])
-			quit(1)
-			return
-
-		camara.position = caso["camara"]
-		camara.look_at(caso["mirada"], Vector3.UP)
-		for _i in FRAMES_ESTABILIZACION:
-			await process_frame
-		await RenderingServer.frame_post_draw
-		if not camara.is_position_in_frustum(objetivo.global_position):
-			printerr("Ancla fuera de encuadre: %s" % caso["id"])
-			quit(1)
-			return
-
-		var archivo := "%s.png" % String(caso["id"])
-		var destino := salida.path_join(archivo)
-		var imagen := root.get_texture().get_image()
-		if imagen == null or imagen.is_empty() or imagen.save_png(destino) != OK:
-			printerr("No se pudo guardar %s" % destino)
-			quit(1)
-			return
-		(
-			manifiesto["casos"]
-			. append(
-				{
-					"id": String(caso["id"]),
-					"capa": String(caso["capa"]),
-					"ancla": ancla_meta,
-					"nodo": String(meta.name),
-					"en_frustum": true,
-					"pantalla": _v2(camara.unproject_position(objetivo.global_position)),
-					"sha256": FileAccess.get_sha256(destino),
-				}
-			)
-		)
 
 	var archivo_manifiesto := FileAccess.open(salida.path_join("manifest.json"), FileAccess.WRITE)
 	if archivo_manifiesto == null:
@@ -166,6 +120,63 @@ func _init() -> void:
 	archivo_manifiesto.close()
 	print("evidencia #658 -> %s" % salida)
 	quit(0)
+
+
+func _capturar_caso(
+	simurgh: SuenoSimurgh,
+	camara: Camera3D,
+	caso: Dictionary,
+	salida: String,
+	manifiesto: Dictionary
+) -> bool:
+	if String(caso["capa"]) != simurgh.capa_actual():
+		simurgh.cambiar_capa(true)
+	if String(caso["capa"]) != simurgh.capa_actual():
+		printerr("No se pudo activar capa %s" % caso["capa"])
+		return false
+
+	var meta := simurgh.get_node_or_null(String(caso["meta_path"])) as Node3D
+	var objetivo := simurgh.get_node_or_null(String(caso["target_path"])) as Node3D
+	if meta == null or objetivo == null:
+		printerr("Falta ancla %s" % caso["id"])
+		return false
+
+	var ancla_meta := String(meta.get_meta("ancla_equivalencia", ""))
+	if ancla_meta != String(caso["ancla"]):
+		printerr("Metadato de equivalencia incorrecto en %s" % caso["id"])
+		return false
+
+	camara.position = caso["camara"]
+	camara.look_at(caso["mirada"], Vector3.UP)
+	for _i in FRAMES_ESTABILIZACION:
+		await process_frame
+	await RenderingServer.frame_post_draw
+	if not camara.is_position_in_frustum(objetivo.global_position):
+		printerr("Ancla fuera de encuadre: %s" % caso["id"])
+		return false
+
+	var archivo := "%s.png" % String(caso["id"])
+	var destino := salida.path_join(archivo)
+	var imagen := root.get_texture().get_image()
+	if imagen == null or imagen.is_empty() or imagen.save_png(destino) != OK:
+		printerr("No se pudo guardar %s" % destino)
+		return false
+
+	(
+		manifiesto["casos"]
+		. append(
+			{
+				"id": String(caso["id"]),
+				"capa": String(caso["capa"]),
+				"ancla": ancla_meta,
+				"nodo": String(meta.name),
+				"en_frustum": true,
+				"pantalla": _v2(camara.unproject_position(objetivo.global_position)),
+				"sha256": FileAccess.get_sha256(destino),
+			}
+		)
+	)
+	return true
 
 
 func _nuevo_mundo() -> Node3D:
