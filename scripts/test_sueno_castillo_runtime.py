@@ -7,6 +7,7 @@ CASTILLO = RAIZ / "godot" / "guion" / "sueno_castillo.gd"
 FORMAS = RAIZ / "godot" / "guion" / "sueno_formas.gd"
 SUENO = RAIZ / "godot" / "guion" / "sueno.gd"
 DIA = RAIZ / "godot" / "guion" / "dia_app.gd"
+DIA_ESPACIOS = RAIZ / "godot" / "guion" / "dia_espacios_app.gd"
 DIA_SUENO = RAIZ / "godot" / "guion" / "dia_sueno_app.gd"
 ESPACIO_3D = RAIZ / "godot" / "guion" / "espacio_3d.gd"
 
@@ -18,6 +19,7 @@ class SuenoCastilloRuntimeTest(unittest.TestCase):
         cls.formas = FORMAS.read_text(encoding="utf-8")
         cls.sueno = SUENO.read_text(encoding="utf-8")
         cls.dia = DIA.read_text(encoding="utf-8")
+        cls.dia_espacios = DIA_ESPACIOS.read_text(encoding="utf-8")
         cls.dia_sueno = DIA_SUENO.read_text(encoding="utf-8")
         cls.espacio_3d = ESPACIO_3D.read_text(encoding="utf-8")
 
@@ -75,12 +77,12 @@ class SuenoCastilloRuntimeTest(unittest.TestCase):
         self.assertNotIn("quaternius.com/packs/fantasypropsmegakit.html", self.texto)
 
     def test_runtime_deriva_variante_de_la_noche_sin_estado_persistente_extra(self):
-        self.assertIn("var semilla_noche := Sueno.semilla(", self.dia)
-        self.assertIn('forma_actual.get("identidad_onirica", "")', self.dia)
-        self.assertIn("== SuenoCastillo.ID", self.dia)
-        self.assertIn('estado_castillo["vuelta_castillo"] = cual + 1', self.dia)
-        self.assertIn('estado_castillo["semilla_castillo"] = semilla_noche', self.dia)
-        self.assertNotIn('if id == "patio"', self.dia)
+        self.assertIn("var semilla_noche := Sueno.semilla(", self.dia_espacios)
+        self.assertIn('forma_actual.get("identidad_onirica", "")', self.dia_espacios)
+        self.assertIn("== SuenoCastillo.ID", self.dia_espacios)
+        self.assertIn('estado_castillo["vuelta_castillo"] = cual + 1', self.dia_espacios)
+        self.assertIn('estado_castillo["semilla_castillo"] = semilla_noche', self.dia_espacios)
+        self.assertNotIn('if id == "patio"', self.dia_espacios)
 
     def test_patio_declara_castillo_sobre_familia_anular(self):
         self.assertIn('"familia_poligonal": SuenoFamilias.ANULAR', self.formas)
