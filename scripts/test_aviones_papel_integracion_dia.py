@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 import unittest
 
@@ -6,6 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTROLLER = ROOT / "godot" / "guion" / "dia_aviones_papel_app.gd"
 DIA = ROOT / "godot" / "escenas" / "dia.tscn"
 TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
+SELLOS = ROOT / "godot" / "datos" / "sellos.json"
 
 
 def sin_comentarios(fuente):
@@ -17,6 +19,7 @@ class AvionesPapelIntegracionDiaTest(unittest.TestCase):
         self.controller = CONTROLLER.read_text(encoding="utf-8")
         self.dia = DIA.read_text(encoding="utf-8")
         self.textos = TEXTOS.read_text(encoding="utf-8")
+        self.sellos = json.loads(SELLOS.read_text(encoding="utf-8"))
 
     def test_dia_monta_el_controller(self):
         self.assertIn('path="res://guion/dia_aviones_papel_app.gd"', self.dia)
@@ -41,16 +44,64 @@ class AvionesPapelIntegracionDiaTest(unittest.TestCase):
         codigo = sin_comentarios(self.controller)
         self.assertNotIn("AvionesPapelDescanso.marcar_jugado", codigo)
 
-    def test_pausa_no_toca_economia_ni_sellos(self):
+    def test_pausa_no_toca_economia(self):
         codigo = sin_comentarios(self.controller)
         for prohibido in (
             "Jornada.gastar_accion",
             'jornada["acciones"]',
             'jornada["dinero"]',
-            "Sellos.registrar_sello",
-            "registrar_sello(",
+            "Economia.",
+            "Acusacion.",
         ):
             self.assertNotIn(prohibido, codigo)
+
+    def test_completar_concede_sello_cosmetico_y_abandonar_no(self):
+        self.assertIn(
+            'SELLO_RECOMPENSA := "trayectoria-reglamentaria"',
+            self.controller,
+        )
+        self.assertIn(
+            'if bool(resultado.get("completa", false)):\n\t\t_registrar_recompensa(dia)',
+            self.controller,
+        )
+        bloque_cierre = self.controller.split("func _cerrar_sesion", 1)[1].split(
+            "func _registrar_recompensa", 1
+        )[0]
+        self.assertNotIn('resultado.get("abandonada"', bloque_cierre)
+        self.assertIn("Sellos.registrar_sello", self.controller)
+
+    def test_sello_usa_partida_y_guardado_canonicos_de_forma_idempotente(self):
+        bloque = self.controller.split("func _registrar_recompensa", 1)[1].split(
+            "func _mostrar_comentario", 1
+        )[0]
+        self.assertIn('dia.get("partida")', bloque)
+        self.assertIn('partida.get("estado")', bloque)
+        self.assertIn("Sellos.registrar_sello(estado, SELLO_RECOMPENSA)", bloque)
+        self.assertIn('resultado in ["registrado", "ya-obtenido"]', bloque)
+        self.assertIn('dia.call("_guardar_o_avisar", "")', bloque)
+
+        fichas = {entrada["id"]: entrada for entrada in self.sellos}
+        ficha = fichas["trayectoria-reglamentaria"]
+        self.assertEqual("aviones-papel", ficha["origen"])
+        self.assertTrue(ficha["disponible"])
+        self.assertEqual(
+            "SELLO_TRAYECTORIA_REGLAMENTARIA_TITULO",
+            ficha["titulo"],
+        )
+        self.assertEqual(
+            "SELLO_TRAYECTORIA_REGLAMENTARIA_DESCRIPCION",
+            ficha["descripcion"],
+        )
+        self.assertIn(
+            "SELLO_TRAYECTORIA_REGLAMENTARIA_TITULO,Trayectoria reglamentaria",
+            self.textos,
+        )
+        self.assertIn(
+            "SELLO_TRAYECTORIA_REGLAMENTARIA_DESCRIPCION,"
+            "Ronda de aviones de papel completada y asentada sin incidencia "
+            "en el registro interno.",
+            self.textos,
+        )
 
     def test_companeros_reutilizan_sistema_134_sin_entrar_en_fisica(self):
         self.assertIn("POSICIONES_COMPANEROS", self.controller)

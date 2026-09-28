@@ -10,6 +10,7 @@ const ESCENA_AVIONES := preload("res://escenas/minijuego_aviones_papel_jornada.t
 const POSICION_OFERTA := Vector3(3.6, 0.82, 0.0)
 const RADIO_OFERTA := 0.55
 const DURACION_COMENTARIO := 4.0
+const SELLO_RECOMPENSA := "trayectoria-reglamentaria"
 const POSICIONES_COMPANEROS := [
 	Vector3(2.65, 0.0, 0.95),
 	Vector3(4.55, 0.0, 0.85),
@@ -234,8 +235,27 @@ func _cerrar_sesion(resultado: Dictionary) -> void:
 	_capa_sesion = null
 	_sesion = null
 	_restaurar_presentacion()
+	if bool(resultado.get("completa", false)):
+		_registrar_recompensa(dia)
 	_mostrar_comentario(resultado)
 	_cerrando = false
+
+
+func _registrar_recompensa(dia: Node) -> Dictionary:
+	if dia == null:
+		return {}
+	var partida: Variant = dia.get("partida")
+	if partida == null:
+		return {}
+	var estado: Variant = partida.get("estado")
+	if typeof(estado) != TYPE_DICTIONARY:
+		return {}
+
+	var registro := Sellos.registrar_sello(estado, SELLO_RECOMPENSA)
+	var resultado := String(registro.get("resultado", ""))
+	if resultado in ["registrado", "ya-obtenido"] and dia.has_method("_guardar_o_avisar"):
+		dia.call("_guardar_o_avisar", "")
+	return registro
 
 
 func _mostrar_comentario(resultado: Dictionary) -> void:
