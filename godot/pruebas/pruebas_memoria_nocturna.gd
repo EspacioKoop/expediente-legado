@@ -11,6 +11,14 @@ func _initialize() -> void:
 
 func _probar() -> void:
 	var casos := [_caso_uno(), _caso_dos()]
+	var contradicciones := [
+		{
+			"id": "revision-vs-acta",
+			"caso_id": "caso-1",
+			"registros": ["R-1", "R-2"],
+			"pistas_requeridas": ["P-1", "P-12"],
+		},
+	]
 
 	var vacia := MemoriaNocturna.analizar([], casos, [])
 	_comprobar(vacia["documentos_unicos"] == 0, "vacío no inventa documentos")
@@ -39,6 +47,47 @@ func _probar() -> void:
 	_comprobar(
 		desconocida["relaciones"].is_empty(),
 		"una relación no descubierta no se filtra mediante el sueño",
+	)
+
+	var contradiccion_oculta := MemoriaNocturna.analizar(
+		["F-1", "F-2"], casos, ["P-12"], contradicciones
+	)
+	_comprobar(
+		contradiccion_oculta["contradicciones"].is_empty(),
+		"una contradicción declarada no aparece si falta una pista requerida",
+	)
+
+	var contradiccion_activa := MemoriaNocturna.analizar(
+		["F-1", "F-2"], casos, ["P-12", "P-1"], contradicciones
+	)
+	_comprobar(
+		contradiccion_activa["contradicciones"].size() == 1,
+		"una contradicción explícita y conocida se detecta",
+	)
+	_comprobar(
+		contradiccion_activa["contradicciones"][0]["id"] == "revision-vs-acta",
+		"la contradicción conserva solo su identidad canónica",
+	)
+	_comprobar(
+		contradiccion_activa["contradicciones"][0]["folios"] == ["F-1", "F-2"],
+		"la contradicción usa los folios seleccionados",
+	)
+	_comprobar(
+		contradiccion_activa["contradicciones"][0]["pistas"] == ["P-1", "P-12"],
+		"la contradicción solo expone IDs de pistas ya conocidas",
+	)
+	_comprobar(
+		contradiccion_activa["firma"]
+		!= MemoriaNocturna.analizar(["F-1", "F-2"], casos, ["P-12", "P-1"])["firma"],
+		"la firma distingue la contradicción declarada sin cambiar la selección",
+	)
+
+	var contradiccion_incompleta := MemoriaNocturna.analizar(
+		["F-1"], casos, ["P-12", "P-1"], contradicciones
+	)
+	_comprobar(
+		contradiccion_incompleta["contradicciones"].is_empty(),
+		"una contradicción exige los dos documentos seleccionados",
 	)
 
 	var incompleta := MemoriaNocturna.analizar(["F-1"], casos, ["P-12"])
