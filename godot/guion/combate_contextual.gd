@@ -54,9 +54,7 @@ static func evaluar(fase: String, objetivo: Dictionary, estado: Dictionary) -> D
 
 
 ## Atajo para escenas reales: obliga a declarar la consecuencia junto al permiso.
-static func autorizar_realidad(
-	objetivo: Dictionary, consecuencia: Dictionary
-) -> Dictionary:
+static func autorizar_realidad(objetivo: Dictionary, consecuencia: Dictionary) -> Dictionary:
 	var copia := objetivo.duplicate(true)
 	copia["combate_autorizado"] = not consecuencia.is_empty()
 	copia["consecuencia_combate"] = consecuencia.duplicate(true)
