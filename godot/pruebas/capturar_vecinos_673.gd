@@ -89,12 +89,12 @@ func _capturar_caso(caso: Dictionary, salida: String) -> Dictionary:
 	dia.jornada["dia"] = int(caso["dia"])
 	dia._entrar_en("trayecto")
 	await process_frame
-	var controller := dia.get_node_or_null("VecinosEdificioController")
+	var controller: Node = dia.get_node_or_null("VecinosEdificioController")
 	if controller != null and controller.has_method("_process"):
 		controller._process(0.0)
 	await process_frame
 
-	var vecinos := dia._mundo.get_node_or_null(VecinosEdificio3D.NOMBRE_RAIZ)
+	var vecinos: Node3D = dia._mundo.get_node_or_null(VecinosEdificio3D.NOMBRE_RAIZ) as Node3D
 	if vecinos == null:
 		printerr("No se monto VecinosEdificio3D en dia %d" % int(caso["dia"]))
 		dia.queue_free()
@@ -119,7 +119,7 @@ func _capturar_caso(caso: Dictionary, salida: String) -> Dictionary:
 
 	var objetivos := {}
 	for nombre in caso["objetivos"]:
-		var nodo := vecinos.get_node_or_null(String(nombre))
+		var nodo: Node3D = vecinos.get_node_or_null(String(nombre)) as Node3D
 		if nodo == null:
 			printerr("Falta objetivo %s en caso %s" % [nombre, caso["id"]])
 			dia.queue_free()
