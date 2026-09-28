@@ -143,5 +143,18 @@ class ConflictosTest(unittest.TestCase):
         self.assertEqual(["feature/10-a"], [c["branch"] for c in json.loads(salida)["conflicts"]])
 
 
+class WorkflowsUsanLaCapaTest(unittest.TestCase):
+    def test_worker_reserva_con_la_capa_y_sin_parser_propio(self):
+        worker = (ROOT / ".github" / "workflows" / "agent-worker.yml").read_text(encoding="utf-8")
+        paso = worker.split("name: Validar plan y reservar rutas", 1)[1].split("\n      - ", 1)[0]
+        self.assertIn("python3 scripts/reservas_registro.py conflictos", paso)
+        self.assertIn("--jq '.[]|{id,created_at,body}'", paso)
+        # El parser inline daba por vivos CLAIM no canónicos para siempre.
+        self.assertNotIn("claim_re", paso)
+        self.assertNotIn("release_re", paso)
+        self.assertIn("CLAIM perdido", paso)
+        self.assertIn('echo "reserved=true" >> "$GITHUB_OUTPUT"', paso)
+
+
 if __name__ == "__main__":
     unittest.main()
