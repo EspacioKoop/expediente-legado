@@ -222,6 +222,12 @@ No son necesarias para empezar:
 - `GEMINI_MODEL`: fija un modelo Gemini.
 - `GEMINI_CLI_VERSION`: fija una versión concreta del CLI.
 
+## Fast-path de CI para infraestructura de agentes
+
+El check requerido sigue llamándose `CI / godot`, pero `scripts/ci_scope.py` clasifica el diff antes de descargar LFS, RGBDS o Godot. Solo usa fast-path cuando **todas** las rutas pertenecen a workflows/scripts/docs de agentes o al gateway Deno. En ese caso ejecuta la suite Python completa y deja la validación TypeScript al workflow específico de Deno.
+
+Cualquier ruta de juego, GBC, backend, script genérico o el propio `ci.yml` fuerza el recorrido completo. Un diff vacío también fuerza full. Así se conservan las reglas de branch protection mientras las PRs puramente operativas dejan de ocupar runners con ROMs y arranques headless innecesarios.
+
 ## Límites deliberados
 
 - nunca merge automático;
