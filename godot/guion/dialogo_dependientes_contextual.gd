@@ -119,20 +119,21 @@ static func opciones(
 		var rama: Dictionary = ramas.get(id_rama, {})
 		if rama.is_empty():
 			continue
-		salida.append(
-			{
-				"id": id_rama,
-				"texto": String(rama.get("texto", "")),
-			}
+		(
+			salida
+			. append(
+				{
+					"id": id_rama,
+					"texto": String(rama.get("texto", "")),
+				}
+			)
 		)
 	return salida
 
 
 ## Primera escritura gana. Repetir el callback o intentar cambiar de enfoque no
 ## reinterpreta la conversación ya guardada.
-static func registrar(
-	jornada: Dictionary, id_dependiente: String, id_rama: String
-) -> Dictionary:
+static func registrar(jornada: Dictionary, id_dependiente: String, id_rama: String) -> Dictionary:
 	var rama := _rama(id_dependiente, id_rama)
 	if rama.is_empty():
 		return {"valida": false}
