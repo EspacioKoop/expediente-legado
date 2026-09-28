@@ -32,6 +32,21 @@ class CombateCoop380RuntimeTest(unittest.TestCase):
         self.assertIn("IdentidadOnline", codigo)
         self.assertIn("CombateCoopServicio", codigo)
 
+    def test_superficie_resuelve_rondas_con_el_nucleo_existente(self):
+        acceso = ACCESO.read_text(encoding="utf-8")
+        self.assertIn("for accion in Combate.TIPOS:", acceso)
+        self.assertIn("Combate.etiqueta(accion)", acceso)
+        self.assertIn("_servicio.publicar_eleccion(", acceso)
+        self.assertIn("_servicio.consultar_elecciones(", acceso)
+        self.assertIn("CombateCoop.nueva(", acceso)
+        self.assertIn("CombateCoop.elegir(", acceso)
+        self.assertIn("CombateCoop.MAX_RONDAS", acceso)
+        self.assertNotIn("Combate.jugar(", acceso)
+        self.assertNotIn("Partida", "\n".join(
+            linea for linea in acceso.splitlines()
+            if not linea.lstrip().startswith("#")
+        ))
+
     def test_ventanilla_monta_acceso_opt_in(self):
         ventanilla = VENTANILLA.read_text(encoding="utf-8")
         self.assertIn('preload("res://guion/ventanilla_coop_acceso.gd")', ventanilla)
