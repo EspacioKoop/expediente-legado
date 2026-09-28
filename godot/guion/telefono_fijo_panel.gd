@@ -80,12 +80,16 @@ func _construir() -> void:
 	columna.add_child(acciones)
 
 	_descolgar = _boton("Descolgar", _al_descolgar)
+	_descolgar.name = "Descolgar"
 	acciones.add_child(_descolgar)
 	_contestador = _boton("Dejar al contestador", _al_contestador)
+	_contestador.name = "Contestador"
 	acciones.add_child(_contestador)
 	_escuchar = _boton("Escuchar mensaje", _al_escuchar)
+	_escuchar.name = "EscucharMensaje"
 	acciones.add_child(_escuchar)
 	_colgar = _boton("Colgar", _al_colgar)
+	_colgar.name = "Colgar"
 	acciones.add_child(_colgar)
 
 	_mensajes = HFlowContainer.new()
@@ -106,6 +110,7 @@ func _construir() -> void:
 		_contactos.add_child(boton)
 
 	_cerrar = _boton("Cerrar", _cerrar_panel)
+	_cerrar.name = "CerrarTelefono"
 	columna.add_child(_cerrar)
 
 
@@ -149,6 +154,7 @@ func _refrescar() -> void:
 		if hijo is Button:
 			hijo.disabled = not descolgado
 	_refrescar_mensajes()
+	_actualizar_cadena_foco()
 
 
 func _refrescar_mensajes() -> void:
@@ -174,6 +180,32 @@ func _refrescar_mensajes() -> void:
 		)
 		boton.pressed.connect(_al_escuchar_guardado.bind(indice))
 		_mensajes.add_child(boton)
+
+
+func _actualizar_cadena_foco() -> void:
+	var botones: Array[Button] = []
+	for boton in [_descolgar, _contestador, _escuchar, _colgar]:
+		if is_instance_valid(boton) and boton.visible and not boton.disabled:
+			botones.append(boton)
+	for contenedor in [_mensajes, _contactos]:
+		if not is_instance_valid(contenedor):
+			continue
+		for hijo in contenedor.get_children():
+			if hijo is Button and hijo.visible and not hijo.disabled:
+				botones.append(hijo)
+	if is_instance_valid(_cerrar) and _cerrar.visible and not _cerrar.disabled:
+		botones.append(_cerrar)
+	if botones.is_empty():
+		return
+	for indice in range(botones.size()):
+		var boton := botones[indice]
+		var siguiente := botones[(indice + 1) % botones.size()]
+		var anterior := botones[posmod(indice - 1, botones.size())]
+		boton.focus_mode = Control.FOCUS_ALL
+		boton.focus_next = boton.get_path_to(siguiente)
+		boton.focus_previous = boton.get_path_to(anterior)
+		boton.focus_neighbor_bottom = boton.focus_next
+		boton.focus_neighbor_top = boton.focus_previous
 
 
 func _al_descolgar() -> void:
