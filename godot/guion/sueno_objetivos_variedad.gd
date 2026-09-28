@@ -11,7 +11,7 @@ const TIPO_SECUENCIA := "secuencia"
 const TIPO_PERMANENCIA := "permanencia"
 const TIPO_RETORNO := "retorno"
 
-const CANTIDAD_POR_NOCHE := 3
+const CANTIDAD_POR_NOCHE := SuenoObjetivos.POSIBLES_PRIMER_CORTE
 const TIPOS := [TIPO_RECORRIDO, TIPO_SECUENCIA, TIPO_PERMANENCIA, TIPO_RETORNO]
 
 
