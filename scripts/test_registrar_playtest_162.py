@@ -28,6 +28,7 @@ BASE = {
     "mando_fisico": True,
     "sin_incidencia_bloqueante": True,
     "contradicciones_canonicas_resueltas": False,
+    "fuente_contradicciones": "",
     "incidencia": "",
     "observaciones": "",
 }
@@ -46,10 +47,22 @@ class RegistrarPlaytest162Test(unittest.TestCase):
                 gate = playtest.evaluar_gate(dict(BASE, **{clave: False}))
                 self.assertFalse(gate["gate_visual_mando"])
 
-    def test_solo_con_fuente_canonica_y_gate_visual_queda_cerrable(self):
+    def test_declarar_resuelto_sin_fuente_no_cierra(self):
         gate = playtest.evaluar_gate(
             dict(BASE, contradicciones_canonicas_resueltas=True)
         )
+        self.assertFalse(gate["contradicciones_canonicas_resueltas"])
+        self.assertFalse(gate["issue_completamente_cerrable"])
+
+    def test_solo_con_fuente_canonica_y_gate_visual_queda_cerrable(self):
+        gate = playtest.evaluar_gate(
+            dict(
+                BASE,
+                contradicciones_canonicas_resueltas=True,
+                fuente_contradicciones="godot/datos/contradicciones.json@abc123",
+            )
+        )
+        self.assertTrue(gate["contradicciones_canonicas_resueltas"])
         self.assertTrue(gate["issue_completamente_cerrable"])
 
     def test_informe_no_infiere_contradicciones(self):
