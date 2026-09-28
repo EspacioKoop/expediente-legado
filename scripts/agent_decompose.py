@@ -44,12 +44,36 @@ def parse_decomposition(raw: str) -> dict[str, Any]:
     if not isinstance(fits, bool):
         raise ValueError("fits_single_cut debe ser booleano")
 
+    needs_human = data.get("needs_human", False)
+    if not isinstance(needs_human, bool):
+        raise ValueError("needs_human debe ser booleano")
+    reason = " ".join(str(data.get("reason", "")).split()).strip()
+
     raw_tasks = data.get("subtasks", [])
     if not isinstance(raw_tasks, list):
         raise ValueError("subtasks debe ser lista")
 
+    if needs_human:
+        if fits or raw_tasks:
+            raise ValueError("needs_human no puede combinarse con corte o subtareas")
+        if not 10 <= len(reason) <= 400:
+            raise ValueError("reason humano fuera de límites")
+        return {
+            "schema": 1,
+            "fits_single_cut": False,
+            "needs_human": True,
+            "reason": reason,
+            "subtasks": [],
+        }
+
     if fits:
-        return {"schema": 1, "fits_single_cut": True, "subtasks": []}
+        return {
+            "schema": 1,
+            "fits_single_cut": True,
+            "needs_human": False,
+            "reason": "",
+            "subtasks": [],
+        }
     if not 2 <= len(raw_tasks) <= 6:
         raise ValueError("una descomposición debe tener entre 2 y 6 subtareas")
 
@@ -103,7 +127,13 @@ def parse_decomposition(raw: str) -> dict[str, Any]:
             }
         )
 
-    return {"schema": 1, "fits_single_cut": False, "subtasks": clean}
+    return {
+        "schema": 1,
+        "fits_single_cut": False,
+        "needs_human": False,
+        "reason": "",
+        "subtasks": clean,
+    }
 
 
 def main() -> int:
