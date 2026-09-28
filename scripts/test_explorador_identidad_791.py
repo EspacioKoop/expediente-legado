@@ -18,7 +18,7 @@ class ExploradorIdentidad791Tests(unittest.TestCase):
 
     def test_identidad_es_local_y_diferencia_las_superficies(self):
         for token in (
-            'const FONDO_BARRA := Color("#d9dee4")',
+            'const FONDO_BARRA := Color("#c9dbe8")',
             'const FONDO_RUTA := Color("#f8fbfc")',
             'const FONDO_LISTA := Color("#eef4f7")',
             'const FONDO_VISOR := Color("#fffaf0")',
