@@ -166,6 +166,13 @@ class RutasDeRamaTest(unittest.TestCase):
 
 
 class WorkflowsUsanLaCapaTest(unittest.TestCase):
+    def test_salud_de_slots_lee_el_registro_activo(self):
+        # Los marcadores AGENT_POOL_SLOT_UNHEALTHY nuevos van a #1713: leer solo
+        # #182 dejaría muerto el circuit breaker de cuotas (#1600).
+        pool = (ROOT / ".github" / "workflows" / "agent-pool.yml").read_text(encoding="utf-8")
+        self.assertNotIn("gh issue view 182", pool)
+        self.assertIn("gestionar_reservas_rollover.py --comments-output", pool)
+
     def _paso(self, workflow, nombre):
         texto = (ROOT / ".github" / "workflows" / workflow).read_text(encoding="utf-8")
         return texto.split(f"name: {nombre}", 1)[1].split("\n      - ", 1)[0]
@@ -194,7 +201,8 @@ class WorkflowsUsanLaCapaTest(unittest.TestCase):
         worker = (ROOT / ".github" / "workflows" / "agent-worker.yml").read_text(encoding="utf-8")
         paso = worker.split("name: Validar plan y reservar rutas", 1)[1].split("\n      - ", 1)[0]
         self.assertIn("python3 scripts/reservas_registro.py conflictos", paso)
-        self.assertIn("--jq '.[]|{id,created_at,body}'", paso)
+        # Historial combinado de todos los registros tras el rollover (#1713).
+        self.assertIn("gestionar_reservas_rollover.py --comments-output", paso)
         # El parser inline daba por vivos CLAIM no canónicos para siempre.
         self.assertNotIn("claim_re", paso)
         self.assertNotIn("release_re", paso)
