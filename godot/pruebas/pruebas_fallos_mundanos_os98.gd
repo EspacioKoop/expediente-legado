@@ -81,6 +81,53 @@ func _probar() -> void:
 		"sin disparador la regla permanece en normalidad",
 	)
 
+	var firmas := FallosMundanosOs98.firmas_limpiador()
+	_comprobar(firmas.size() >= 2, "el limpiador usa un catálogo interno pequeño de firmas ficticias")
+	var estado_limpiador := {
+		"objetos_simulados": [
+			{"id": "memo-uno", "firma_id": "macro-marmota-98", "activo": true},
+			{"id": "objeto-desconocido", "firma_id": "firma-no-catalogada", "activo": true},
+			{"id": "residente-uno", "firma_id": "residente-cinta-azul", "activo": true},
+		]
+	}
+	var detecciones := FallosMundanosOs98.escanear_limpiador(estado_limpiador)
+	_comprobar(detecciones.size() == 2, "solo detecta firmas presentes en el catálogo interno")
+	_comprobar(
+		String(detecciones[0].get("objeto_id", "")) == "memo-uno",
+		"el escaneo es determinista y no depende del host",
+	)
+	var neutralizacion := FallosMundanosOs98.neutralizar_limpiador(estado_limpiador, "memo-uno")
+	_comprobar(bool(neutralizacion.get("ok", false)), "una firma conocida se puede neutralizar")
+	var incidencia_limpiador: Dictionary = neutralizacion.get("incidencia", {})
+	_comprobar(
+		incidencia_limpiador.get("estado", "") == FallosMundanosOs98.ESTADO_FALLO_MUNDANO,
+		"la detección del limpiador reutiliza el contrato de incidencia normal",
+	)
+	_comprobar(
+		FallosMundanosOs98.escanear_limpiador(estado_limpiador).size() == 1,
+		"neutralizar retira solo la detección elegida del estado simulado",
+	)
+	_comprobar(
+		FallosMundanosOs98.restaurar_limpiador(estado_limpiador, "memo-uno"),
+		"la neutralización es reversible sin destruir el objeto simulado",
+	)
+	_comprobar(
+		FallosMundanosOs98.escanear_limpiador(estado_limpiador).size() == 2,
+		"restaurar devuelve la detección catalogada",
+	)
+	var firma_imposible := FallosMundanosOs98.evaluar(
+		"firma_catalogada_detectada",
+		{"fixture_anomalo": "firma_no_catalogada_detectada"},
+	)
+	_comprobar(
+		firma_imposible["estado"] == FallosMundanosOs98.ESTADO_FIXTURE_ANOMALO,
+		"#539 puede romper explícitamente la regla de firmas catalogadas",
+	)
+	_comprobar(
+		firma_imposible["regla_normal"].contains("solo detecta firmas"),
+		"el fixture conserva la regla normal que viola",
+	)
+
 	var desconocido := FallosMundanosOs98.evaluar("no_existe", {"evento": "cualquier_cosa"})
 	_comprobar(not desconocido["activo"], "un id desconocido no inventa una incidencia")
 	_comprobar(
