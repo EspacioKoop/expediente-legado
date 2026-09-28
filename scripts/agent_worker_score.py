@@ -36,6 +36,23 @@ def score_jobs(jobs: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
         match = JOB_RE.match(name)
         if not match:
             continue
+
+        if conclusion == "success":
+            steps = job.get("steps", [])
+            publish = next(
+                (
+                    step
+                    for step in steps
+                    if isinstance(step, dict)
+                    and step.get("name") == "Publicar PR draft y lanzar CI canonica"
+                ),
+                None,
+            )
+            # Un job puede acabar success tras salir temprano en el guard. Eso no
+            # demuestra que el worker haya completado una tarea y no debe premiarlo.
+            if not publish or publish.get("conclusion") != "success":
+                continue
+
         worker = match.group("worker")
         providers[worker] = match.group("provider")
         per_worker.setdefault(worker, []).append(OUTCOME_VALUE[conclusion])
