@@ -143,16 +143,19 @@ func _init() -> void:
 			printerr("No se pudo guardar %s" % destino)
 			quit(1)
 			return
-		manifiesto["casos"].append(
-			{
-				"id": String(caso["id"]),
-				"capa": String(caso["capa"]),
-				"ancla": ancla_meta,
-				"nodo": String(meta.name),
-				"en_frustum": true,
-				"pantalla": _v2(camara.unproject_position(objetivo.global_position)),
-				"sha256": FileAccess.get_sha256(destino),
-			}
+		(
+			manifiesto["casos"]
+			. append(
+				{
+					"id": String(caso["id"]),
+					"capa": String(caso["capa"]),
+					"ancla": ancla_meta,
+					"nodo": String(meta.name),
+					"en_frustum": true,
+					"pantalla": _v2(camara.unproject_position(objetivo.global_position)),
+					"sha256": FileAccess.get_sha256(destino),
+				}
+			)
 		)
 
 	var archivo_manifiesto := FileAccess.open(salida.path_join("manifest.json"), FileAccess.WRITE)
