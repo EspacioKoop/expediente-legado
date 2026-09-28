@@ -16,11 +16,10 @@ static func construir(
 	raiz: int,
 	opciones_sueno: Callable,
 	registro_literario: Callable,
-	plantilla: Callable,
 ) -> Dictionary:
 	if fase != "sueño":
 		var sitio := EspaciosCatalogo.de_fase(fase).duplicate(true)
-		sitio["figuras"] = plantilla.call(sitio)
+		sitio["figuras"] = plantilla_en(sitio, jornada)
 		return {"espacio": sitio}
 
 	var opciones := SeleccionNocturna.opciones_sueno(jornada, opciones_sueno.call())
@@ -75,3 +74,25 @@ static func construir(
 	var espacio_sueno := Sueno.espacio(id, jornada["sueno_escenas"].size() - 1, trozo)
 	var espacio := SuenoLiteratura.aplicar(espacio_sueno, registro_literario.call(), cual)
 	return {"espacio": espacio, "rivales": rivales}
+
+
+static func plantilla_en(sitio: Dictionary, jornada: Dictionary) -> Array:
+	var sitios: Array = sitio.get("sitios_companeros", [])
+	if sitios.is_empty():
+		return []
+	var figuras := []
+	var quienes := Companeros.plantilla(jornada["plantilla"])
+	for i in mini(quienes.size(), sitios.size()):
+		var quien: Dictionary = quienes[i]
+		figuras.append(
+			{
+				"pos": sitios[i],
+				"id_companero": String(quien.get("id", "")),
+				"color": quien["color"],
+				"rotulo": tr(quien["nombre"]),
+				"frase": Companeros.frase_de(quien, jornada["dia"]),
+				"modelo": Companeros.cuerpo_de(quien),
+				"retrato": quien.get("retrato", ""),
+			}
+		)
+	return figuras
