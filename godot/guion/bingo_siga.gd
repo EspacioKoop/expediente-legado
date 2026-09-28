@@ -155,6 +155,51 @@ static func estado_tarjeta(estado: Dictionary) -> Array:
 	return resultado
 
 
+## Resumen puramente derivado del historial de esta vida laboral.
+## No concede recompensas ni escribe estado: una tarjeta cuenta como completa
+## cuando sus tres objetivos guardados figuran en `completados`.
+static func resumen_historial(jornada: Dictionary) -> Dictionary:
+	var resumen := {
+		"jornadas_registradas": 0,
+		"objetivos_completados": 0,
+		"tarjetas_completas": 0,
+		"racha_actual": 0,
+	}
+	var bingo: Variant = jornada.get(CLAVE_ESTADO, {})
+	if not bingo is Dictionary:
+		return resumen
+	var historial: Variant = (bingo as Dictionary).get("historial", [])
+	if not historial is Array:
+		return resumen
+
+	var completas_por_dia := {}
+	var ultimo_dia := 0
+	for valor in historial as Array:
+		if not valor is Dictionary:
+			continue
+		var entrada := valor as Dictionary
+		var dia := int(entrada.get("dia", 0))
+		if dia <= 0:
+			continue
+		var objetivos: Variant = entrada.get("objetivos", [])
+		var completados: Variant = entrada.get("completados", [])
+		var total_objetivos: int = objetivos.size() if objetivos is Array else 0
+		var total_completados: int = completados.size() if completados is Array else 0
+		resumen["jornadas_registradas"] += 1
+		resumen["objetivos_completados"] += total_completados
+		var completa: bool = total_objetivos > 0 and total_completados >= total_objetivos
+		completas_por_dia[dia] = completa
+		if completa:
+			resumen["tarjetas_completas"] += 1
+		ultimo_dia = maxi(ultimo_dia, dia)
+
+	var esperado := ultimo_dia
+	while esperado > 0 and bool(completas_por_dia.get(esperado, false)):
+		resumen["racha_actual"] += 1
+		esperado -= 1
+	return resumen
+
+
 ## Congela el resultado del día antes de que Jornada.despertar() limpie los
 ## contadores. Si la tarjeta se abrió pero nunca se respondió, cerrar el día la
 ## registra como ignorada. Es idempotente por número de día.

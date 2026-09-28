@@ -12,6 +12,7 @@ var _estado_partida: Dictionary = {}
 var _firma_estado := ""
 
 var _decision: Label
+var _historial: Label
 var _objetivos: VBoxContainer
 var _aceptar: Button
 var _descartar: Button
@@ -58,6 +59,11 @@ func _construir() -> void:
 	_decision.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(_decision)
 
+	_historial = Label.new()
+	_historial.name = "HistorialBingoSiga"
+	_historial.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	add_child(_historial)
+
 	add_child(HSeparator.new())
 
 	_objetivos = VBoxContainer.new()
@@ -93,10 +99,11 @@ func _construir() -> void:
 
 
 func _refrescar() -> void:
-	if _decision == null or _objetivos == null:
+	if _decision == null or _historial == null or _objetivos == null:
 		return
 	if _estado_partida.is_empty():
 		_decision.text = tr("BINGO_SIGA_SIN_PARTIDA")
+		_historial.text = ""
 		_limpiar_objetivos()
 		_actualizar_botones(true)
 		_firma_estado = _firma_actual()
@@ -106,6 +113,17 @@ func _refrescar() -> void:
 	_decision.text = (
 		tr("BINGO_SIGA_DECISION")
 		% tr(_clave_decision(String(actual.get("decision", BingoSiga.DECISION_PENDIENTE))))
+	)
+	var jornada: Dictionary = _estado_partida.get("jornada", {})
+	var resumen := BingoSiga.resumen_historial(jornada)
+	_historial.text = (
+		tr("BINGO_SIGA_HISTORIAL")
+		% [
+			int(resumen.get("jornadas_registradas", 0)),
+			int(resumen.get("objetivos_completados", 0)),
+			int(resumen.get("tarjetas_completas", 0)),
+			int(resumen.get("racha_actual", 0)),
+		]
 	)
 
 	_limpiar_objetivos()

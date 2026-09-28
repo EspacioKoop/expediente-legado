@@ -648,6 +648,7 @@ ULTIMO_RECURSO_VOLVER,Volver al aviso
 BINGO_SIGA_APP_TITULO,Bingo del auditor
 BINGO_SIGA_CABECERA,Tarjeta diaria de SIGA
 BINGO_SIGA_AYUDA,"Tres objetivos opcionales para esta jornada. No conceden dinero, acciones, vidas ni pistas."
+BINGO_SIGA_HISTORIAL,"Historial: %d jornadas · %d objetivos completados · %d tarjetas completas · racha actual: %d"
 BINGO_SIGA_DECISION,Decisión: %s
 BINGO_SIGA_DECISION_PENDIENTE,Pendiente
 BINGO_SIGA_DECISION_ACEPTADA,Aceptada
