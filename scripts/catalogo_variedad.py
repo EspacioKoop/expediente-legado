@@ -4,6 +4,11 @@
 No decide cuántos casos ofrecer por vida laboral. Produce evidencia estable para
 esa decisión usando únicamente forma editorial (tipos, conteos y flags), nunca
 el texto visible ni ids internos de documentos/pistas.
+
+También puede simular tamaños de subconjunto sin tocar runtime ni guardados. La
+simulación enumera combinaciones del catálogo actual y expone por separado
+similitud estructural, cobertura de tipos documentales y solape esperado entre
+dos vidas; no mezcla esas señales en una puntuación arbitraria.
 """
 
 from __future__ import annotations
@@ -12,8 +17,8 @@ import argparse
 import json
 from itertools import combinations
 from pathlib import Path
-from statistics import mean
-from typing import Any
+from statistics import mean, median
+from typing import Any, Iterable
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -120,11 +125,7 @@ def analizar(casos: list[dict[str, Any]]) -> dict[str, Any]:
 
     firmas = {
         json.dumps(
-            {
-                key: value
-                for key, value in item.items()
-                if key != "id"
-            },
+            {key: value for key, value in item.items() if key != "id"},
             ensure_ascii=False,
             sort_keys=True,
         )
@@ -146,11 +147,111 @@ def analizar(casos: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _similitud_media_subconjunto(perfiles: tuple[dict[str, Any], ...]) -> float:
+    valores = [similitud(a, b) for a, b in combinations(perfiles, 2)]
+    return mean(valores) if valores else 0.0
+
+
+def _cobertura_tipos(
+    perfiles: tuple[dict[str, Any], ...],
+    tipos_totales: set[str],
+) -> float:
+    if not tipos_totales:
+        return 1.0
+    presentes = {
+        tipo for item in perfiles for tipo in item.get("tipos_documento", [])
+    }
+    return len(presentes) / len(tipos_totales)
+
+
+def _redondear(valor: float) -> float:
+    return round(float(valor), 4)
+
+
+def simular_subconjuntos(
+    informe: dict[str, Any],
+    tamanos: Iterable[int],
+) -> list[dict[str, Any]]:
+    perfiles = tuple(informe.get("perfiles", []))
+    total = len(perfiles)
+    if total < 2:
+        raise ValueError("se necesitan al menos dos casos para simular subconjuntos")
+
+    tamanos_limpios = sorted({int(tamano) for tamano in tamanos})
+    if not tamanos_limpios:
+        raise ValueError("indica al menos un tamaño de subconjunto")
+    if any(tamano < 2 or tamano > total for tamano in tamanos_limpios):
+        raise ValueError(f"cada tamaño debe estar entre 2 y {total}")
+
+    tipos_totales = {
+        tipo for item in perfiles for tipo in item.get("tipos_documento", [])
+    }
+    salida = []
+    for tamano in tamanos_limpios:
+        muestras = []
+        for grupo in combinations(perfiles, tamano):
+            ids = tuple(item["id"] for item in grupo)
+            muestras.append(
+                {
+                    "ids": ids,
+                    "similitud_media": _similitud_media_subconjunto(grupo),
+                    "cobertura_tipos": _cobertura_tipos(grupo, tipos_totales),
+                }
+            )
+
+        similitudes = sorted(item["similitud_media"] for item in muestras)
+        coberturas = sorted(item["cobertura_tipos"] for item in muestras)
+        menor_similitud = min(
+            muestras,
+            key=lambda item: (item["similitud_media"], item["ids"]),
+        )
+        mayor_cobertura = min(
+            muestras,
+            key=lambda item: (
+                -item["cobertura_tipos"],
+                item["similitud_media"],
+                item["ids"],
+            ),
+        )
+
+        salida.append(
+            {
+                "tamano": tamano,
+                "combinaciones": len(muestras),
+                "similitud_subconjunto_min": _redondear(similitudes[0]),
+                "similitud_subconjunto_mediana": _redondear(median(similitudes)),
+                "similitud_subconjunto_max": _redondear(similitudes[-1]),
+                "cobertura_tipos_min": _redondear(coberturas[0]),
+                "cobertura_tipos_mediana": _redondear(median(coberturas)),
+                "cobertura_tipos_max": _redondear(coberturas[-1]),
+                "subconjunto_menor_similitud": list(menor_similitud["ids"]),
+                "subconjunto_mayor_cobertura": list(mayor_cobertura["ids"]),
+                "solape_esperado_dos_vidas": _redondear(
+                    (tamano * tamano) / total
+                ),
+                "fraccion_catalogo_repetida_esperada": _redondear(
+                    tamano / total
+                ),
+            }
+        )
+    return salida
+
+
 def cargar(ruta: Path) -> list[dict[str, Any]]:
     datos = json.loads(ruta.read_text(encoding="utf-8"))
     if not isinstance(datos, dict) or not isinstance(datos.get("casos"), list):
         raise ValueError("el catálogo debe contener una lista 'casos'")
     return datos["casos"]
+
+
+def _parsear_tamanos(valor: str) -> list[int]:
+    partes = [parte.strip() for parte in valor.split(",") if parte.strip()]
+    if not partes:
+        raise ValueError("indica tamaños separados por comas, por ejemplo 3,5,7")
+    try:
+        return [int(parte) for parte in partes]
+    except ValueError as exc:
+        raise ValueError("los tamaños deben ser enteros separados por comas") from exc
 
 
 def markdown(informe: dict[str, Any]) -> str:
@@ -170,6 +271,28 @@ def markdown(informe: dict[str, Any]) -> str:
     ]
     for par in informe["pares_mas_similares"]:
         lineas.append(f"| {par['a']} | {par['b']} | {par['similitud']:.4f} |")
+
+    subconjuntos = informe.get("subconjuntos", [])
+    if subconjuntos:
+        lineas.extend(
+            [
+                "",
+                "## Simulación de tamaños por vida",
+                "",
+                "| Casos/vida | Combinaciones | Sim. mediana | "
+                "Cobertura tipos mediana | Solape esperado | Fracción repetida |",
+                "|---:|---:|---:|---:|---:|---:|",
+            ]
+        )
+        for fila in subconjuntos:
+            lineas.append(
+                "| {tamano} | {combinaciones} | "
+                "{similitud_subconjunto_mediana:.4f} | "
+                "{cobertura_tipos_mediana:.4f} | "
+                "{solape_esperado_dos_vidas:.4f} | "
+                "{fraccion_catalogo_repetida_esperada:.4f} |".format(**fila)
+            )
+
     lineas.extend(
         [
             "",
@@ -178,6 +301,14 @@ def markdown(informe: dict[str, Any]) -> str:
             "debe ofrecer una vida laboral.",
         ]
     )
+    if subconjuntos:
+        lineas.extend(
+            [
+                "La simulación tampoco propone un ganador: separa variedad, "
+                "cobertura y repetición para que la política de selección se "
+                "decida con esos compromisos visibles.",
+            ]
+        )
     return "\n".join(lineas) + "\n"
 
 
@@ -186,9 +317,18 @@ def main() -> int:
     parser.add_argument("--catalogo", type=Path, default=CATALOGO_POR_DEFECTO)
     parser.add_argument("--formato", choices=("json", "markdown"), default="json")
     parser.add_argument("--output", type=Path)
+    parser.add_argument(
+        "--tamanos",
+        help="simula subconjuntos de esos tamaños, p. ej. 3,5,7,9",
+    )
     args = parser.parse_args()
 
     informe = analizar(cargar(args.catalogo))
+    if args.tamanos:
+        informe["subconjuntos"] = simular_subconjuntos(
+            informe,
+            _parsear_tamanos(args.tamanos),
+        )
     if args.formato == "markdown":
         salida = markdown(informe)
     else:
