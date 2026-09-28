@@ -76,7 +76,9 @@ func _probar_preflight_audio() -> void:
 	root.add_child(radio)
 	radio.configurar({"dia": 1, "acciones": Jornada.ACCIONES_POR_DIA})
 	var audio := radio.get_node_or_null("MusicaPuntual") as AudioStreamPlayer3D
-	_comprobar(audio != null and audio.stream is AudioStreamWAV, "el preflight dispone de PCM procedural")
+	_comprobar(
+		audio != null and audio.stream is AudioStreamWAV, "el preflight dispone de PCM procedural"
+	)
 	if audio == null or not audio.stream is AudioStreamWAV:
 		radio.queue_free()
 		return
