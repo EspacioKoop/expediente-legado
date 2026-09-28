@@ -111,9 +111,7 @@ func _probar_valida(controlador: Node, dia: DiaFalso, anomalia: AnomaliaSueno3D)
 	anomalia.position = Vector3(0.0, 0.0, -5.0)
 
 
-func _probar_desconocida(
-	controlador: Node, dia: DiaFalso, anomalia: AnomaliaSueno3D
-) -> void:
+func _probar_desconocida(controlador: Node, dia: DiaFalso, anomalia: AnomaliaSueno3D) -> void:
 	var antes := dia.partida.estado[GrabacionOniricaEstado.CLAVE_ESTADO]["cinta"]["tomas"].size()
 	var inicio: Dictionary = controlador.iniciar_grabacion_anomalia(anomalia)
 	_comprobar("un original no leído no inicia toma", inicio.get("ok"), false)
@@ -124,9 +122,7 @@ func _probar_desconocida(
 	)
 
 
-func _probar_contaminada(
-	controlador: Node, dia: DiaFalso, anomalia: AnomaliaSueno3D
-) -> void:
+func _probar_contaminada(controlador: Node, dia: DiaFalso, anomalia: AnomaliaSueno3D) -> void:
 	anomalia.position = Vector3(0.0, 0.0, -5.0)
 	_comprobar(
 		"segunda toma conocida puede empezar",
@@ -145,9 +141,7 @@ func _probar_contaminada(
 	anomalia.position = Vector3(0.0, 0.0, -5.0)
 
 
-func _probar_salida_sueno(
-	controlador: Node, dia: DiaFalso, anomalia: AnomaliaSueno3D
-) -> void:
+func _probar_salida_sueno(controlador: Node, dia: DiaFalso, anomalia: AnomaliaSueno3D) -> void:
 	var antes := dia.partida.estado[GrabacionOniricaEstado.CLAVE_ESTADO]["cinta"]["tomas"].size()
 	_comprobar(
 		"toma previa a despertar empieza",
