@@ -45,8 +45,14 @@ def test_final_archiva_la_ultima_vida_de_forma_idempotente() -> None:
         "static func confirmar_cierre(estado: Dictionary) -> Array:",
         1,
     )[1].split("static func _patron", 1)[0]
-    assert 'Prometeo.archivar_trayectoria_ideologica(estado, "final_narrativo")' in bloque
-    assert 'estado["final_politico_mostrado"] = true' in bloque
+    sello = 'EvaluacionDesempeno.sellar(estado, "final_narrativo")'
+    archivo = 'Prometeo.archivar_trayectoria_ideologica(estado, "final_narrativo")'
+    mostrado = 'estado["final_politico_mostrado"] = true'
+    assert sello in bloque
+    assert archivo in bloque
+    assert mostrado in bloque
+    assert bloque.index(sello) < bloque.index(mostrado)
+    assert bloque.index(archivo) < bloque.index(mostrado)
 
 
 def test_snapshot_no_mezcla_exposicion_ni_lecturas_sociales() -> None:
