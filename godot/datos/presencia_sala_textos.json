@@ -1,0 +1,18 @@
+{
+  "titulo": "PRESENCIA COOP",
+  "descripcion": "Comparte únicamente tu presencia en el trayecto. La campaña, expedientes y decisiones siguen siendo locales.",
+  "codigo": "Código de sala",
+  "placeholder": "ABC234",
+  "ayuda": "Crea una sala o introduce el código de otra persona.",
+  "crear": "Crear sala",
+  "unirse": "Unirse",
+  "salir": "Salir de sala",
+  "volver": "Volver",
+  "conectando": "Conectando…",
+  "reconectando": "Reconectando…",
+  "online": "Conectado · sala %s",
+  "sin_endpoint": "Multiplayer no configurado en esta build. El juego continúa offline.",
+  "codigo_invalido": "El código debe tener 6 caracteres legibles.",
+  "cerrada": "Sala cerrada.",
+  "error": "No se pudo abrir la sala. El juego continúa offline."
+}
