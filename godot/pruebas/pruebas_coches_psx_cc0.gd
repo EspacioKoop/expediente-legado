@@ -159,6 +159,18 @@ func _probar() -> void:
 	var x_inicial := trafico.position.x
 	await create_timer(0.20).timeout
 	_comprobar(trafico.position.x > x_inicial + 0.01, "tráfico lejano se mueve")
+	# Acelerar el mismo Tween permite recorrer varias vueltas sin convertir la
+	# regresión en una espera de 12 s. El callback debe devolver X al origen en
+	# cada ciclo: si desaparece, as_relative() acumularía desplazamiento y el
+	# coche terminaría atravesando el fondo urbano.
+	tween_trafico.set_speed_scale(50.0)
+	await create_timer(0.50).timeout
+	_comprobar(
+		trafico.position.x >= x_inicial - 0.25
+		and trafico.position.x <= x_inicial + Coches.DESPLAZAMIENTO_FONDO + 0.25,
+		"el tráfico permanece acotado tras varias vueltas aceleradas",
+	)
+	tween_trafico.set_speed_scale(1.0)
 	mundo.free()
 
 	var dia = DIA.instantiate()
