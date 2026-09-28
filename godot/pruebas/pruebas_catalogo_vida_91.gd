@@ -113,7 +113,7 @@ func _probar_cierre_real() -> void:
 	CatalogoVidaMetricas.sincronizar_disponibles(jornada, contenido.casos)
 	var caso: Dictionary = contenido.casos[0]
 	var sospechoso: Dictionary = caso["sospechosos"][0]
-	var descubiertas := caso.get("pistas", []).map(func(pista): return pista["id"])
+	var descubiertas: Array = caso.get("pistas", []).map(func(pista): return pista["id"])
 	var resultado := Acusacion.acusar(estado, jornada, caso, sospechoso, descubiertas)
 	_comprobar(resultado.get("resultado", "") == "cerrado", "la firma real cierra el caso")
 	var actual := CatalogoVidaMetricas.snapshot(jornada)
