@@ -52,15 +52,14 @@ func abrir(
 		)
 	)
 	_combate.perfil_jugador = partida_estado.get("perfil_jugador", {})
-	_combate.terminado.connect(
-		_cerrar.bind(
-			objetivo,
-			zona,
-			decision.duplicate(true),
-			partida_estado,
-			jornada,
-		)
+	var al_terminar := _cerrar.bind(
+		objetivo,
+		zona,
+		decision.duplicate(true),
+		partida_estado,
+		jornada,
 	)
+	_combate.terminado.connect(al_terminar)
 	add_child(_combate)
 	_hacer_actual_camara()
 	return true
