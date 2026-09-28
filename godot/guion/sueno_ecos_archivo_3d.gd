@@ -408,6 +408,6 @@ func _refrescar_confirmacion(disponible: bool) -> void:
 		material.roughness = 0.9
 		base.material_override = material
 	if indicador != null:
-		indicador.modulate = COLOR_TEXTO if disponible else Color(
-			COLOR_TEXTO.r, COLOR_TEXTO.g, COLOR_TEXTO.b, 0.28
+		indicador.modulate = (
+			COLOR_TEXTO if disponible else Color(COLOR_TEXTO.r, COLOR_TEXTO.g, COLOR_TEXTO.b, 0.28)
 		)
