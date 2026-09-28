@@ -41,6 +41,32 @@
             "apariencia",
             "representacion"
           ]
+        },
+        {
+          "id": "pragmatica",
+          "texto": "No sé qué significa en abstracto. Me interesa qué cambia cuando vuelve al archivo.",
+          "respuesta": "Marta cierra un poco el libro: «Eso también es una lectura: bajar la discusión a consecuencias concretas sin convertirla en una etiqueta.»",
+          "consecuencia_visible": "Marta anota «consecuencia antes que etiqueta» al margen.",
+          "reentrada": "Marta toca la anotación: «Seguimos con la pregunta concreta: qué cambia, no qué te define.»",
+          "insight_id": "apariencia_y_eleccion",
+          "etiquetas": [
+            "barroco",
+            "apariencia",
+            "pragmatica"
+          ]
+        },
+        {
+          "id": "contradiccion",
+          "texto": "Que pueda defender una cosa y actuar como si creyera otra.",
+          "respuesta": "Marta marca dos pasajes: «La contradicción no resuelve al personaje; lo vuelve legible sin obligarlo a ser coherente.»",
+          "consecuencia_visible": "Marta dibuja dos flechas opuestas junto a «lo dicho / lo hecho».",
+          "reentrada": "Marta vuelve a las dos flechas: «La contradicción sigue ahí; no hace falta convertirla en una esencia.»",
+          "insight_id": "apariencia_y_eleccion",
+          "etiquetas": [
+            "barroco",
+            "apariencia",
+            "contradiccion"
+          ]
         }
       ]
     }
