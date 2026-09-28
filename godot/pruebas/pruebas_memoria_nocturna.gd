@@ -77,8 +77,10 @@ func _probar() -> void:
 		"la contradicción solo expone IDs de pistas ya conocidas",
 	)
 	_comprobar(
-		contradiccion_activa["firma"]
-		!= MemoriaNocturna.analizar(["F-1", "F-2"], casos, ["P-12", "P-1"])["firma"],
+		(
+			contradiccion_activa["firma"]
+			!= MemoriaNocturna.analizar(["F-1", "F-2"], casos, ["P-12", "P-1"])["firma"]
+		),
 		"la firma distingue la contradicción declarada sin cambiar la selección",
 	)
 
