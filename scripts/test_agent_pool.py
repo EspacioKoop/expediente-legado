@@ -51,14 +51,15 @@ class AgentPoolTest(unittest.TestCase):
         self.assertEqual([1, 2, 3, 4, 5, 6], [task["issue"] for task in tasks])
 
     def test_todas_las_etiquetas_de_cola_son_elegibles(self):
-        issues = [
-            issue(10, "agent:auto"),
-            issue(11, "agent:pool"),
-            issue(12, "agent:qwen"),
-            issue(13, "agent:gemini"),
+        cases = [
+            (issue(10, "agent:auto"), None),
+            (issue(11, "agent:pool"), None),
+            (issue(12, "agent:qwen"), "qwen"),
+            (issue(13, "agent:gemini"), "gemini"),
         ]
-        tasks = mod.select_tasks(issues, self.workers, max_parallel=4)
-        self.assertEqual([10, 11, 12, 13], [task["issue"] for task in tasks])
+        for candidate, provider in cases:
+            with self.subTest(issue=candidate["number"]):
+                self.assertEqual((True, provider), mod.eligible_issue(candidate))
 
     def test_auto_y_pool_pueden_coexistir_durante_migracion(self):
         tasks = mod.select_tasks([issue(20, "agent:auto", "agent:pool")], self.workers)
