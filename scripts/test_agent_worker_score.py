@@ -17,7 +17,16 @@ class AgentWorkerScoreTest(unittest.TestCase):
     def test_success_supera_failure(self):
         scores = mod.score_jobs(
             [
-                {"name": "run (1, qwen, qwen-primary) / worker", "conclusion": "success"},
+                {
+                    "name": "run (1, qwen, qwen-primary) / worker",
+                    "conclusion": "success",
+                    "steps": [
+                        {
+                            "name": "Publicar PR draft y lanzar CI canonica",
+                            "conclusion": "success",
+                        }
+                    ],
+                },
                 {"name": "run (2, qwen, qwen-fallback-1) / worker", "conclusion": "failure"},
             ]
         )
@@ -29,11 +38,38 @@ class AgentWorkerScoreTest(unittest.TestCase):
     def test_recencia_pesa_mas(self):
         scores = mod.score_jobs(
             [
-                {"name": "run (3, gemini, gemini) / worker", "conclusion": "success"},
+                {
+                    "name": "run (3, gemini, gemini) / worker",
+                    "conclusion": "success",
+                    "steps": [
+                        {
+                            "name": "Publicar PR draft y lanzar CI canonica",
+                            "conclusion": "success",
+                        }
+                    ],
+                },
                 {"name": "run (4, gemini, gemini) / worker", "conclusion": "failure"},
             ]
         )
         self.assertGreater(scores["gemini"]["score"], 50.0)
+
+    def test_success_sin_publicar_pr_no_puntua(self):
+        scores = mod.score_jobs(
+            [
+                {
+                    "name": "run (7, qwen, qwen-primary) / worker",
+                    "conclusion": "success",
+                    "steps": [
+                        {"name": "Validar issue y slot", "conclusion": "success"},
+                        {
+                            "name": "Publicar PR draft y lanzar CI canonica",
+                            "conclusion": "skipped",
+                        },
+                    ],
+                }
+            ]
+        )
+        self.assertEqual({}, scores)
 
     def test_cancelled_penaliza_menos_que_failure(self):
         scores = mod.score_jobs(
