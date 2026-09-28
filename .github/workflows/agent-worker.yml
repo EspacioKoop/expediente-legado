@@ -241,7 +241,7 @@ jobs:
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":20},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-context.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-context.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integracion y sus tests: files debe incluir TODAS las rutas que una implementacion correcta podria necesitar. Si los comentarios recientes contienen AGENT_POOL_REPLAN, revisa explicitamente sus observed_paths y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: plan_gemini
         name: Plan Gemini
@@ -252,7 +252,7 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":20},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-context.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
+          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-context.md, .agent-memory.json, .agent-history.json y obligatoriamente las Normas Platino actuales en .agent-platino. Jerarquia: repo/issue/#181/#182 y Normas Platino > contexto de wiki > memoria temporal Deno KV > memoria historica CI. Inspecciona sin editar. Antes de cerrar el plan, revisa los puntos reales de integracion y sus tests: files debe incluir TODAS las rutas que una implementacion correcta podria necesitar. Si los comentarios recientes contienen AGENT_POOL_REPLAN, revisa explicitamente sus observed_paths y anadelas solo si son realmente necesarias. Termina con AGENT_PLAN_BEGIN seguido de JSON {"files":["ruta"],"goal":"objetivo"} y AGENT_PLAN_END. Maximo 12 archivos concretos; usa files=[] si no hay corte seguro.'
 
       - id: reserve
         name: Validar plan y reservar rutas
@@ -403,6 +403,7 @@ jobs:
       - id: implement_qwen
         name: Implementar con Qwen
         if: steps.reserve.outputs.reserved == 'true' && inputs.provider == 'qwen'
+        continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
           openai_api_key: ${{ inputs.worker == 'qwen-primary' && secrets.QWEN_API_KEY || inputs.worker == 'qwen-fallback-1' && secrets.QWEN_FALLBACK_1_API_KEY || inputs.worker == 'qwen-fallback-2' && secrets.QWEN_FALLBACK_2_API_KEY || inputs.worker == 'qwen-fallback-3' && secrets.QWEN_FALLBACK_3_API_KEY || secrets.QWEN_FALLBACK_4_API_KEY }}
@@ -410,21 +411,88 @@ jobs:
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","write_file","edit","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales en .agent-platino. Repo/issue/#181/#182 y Normas Platino prevalecen siempre. Implementa solo el plan y solo esas rutas. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee AGENTS.md, QWEN.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales en .agent-platino. Repo/issue/#181/#182 y Normas Platino prevalecen siempre. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitio una ruta necesaria, no intentes saltarte el CLAIM: el orquestador restaurara el desvio y replanificara. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
 
       - id: implement_gemini
         name: Implementar con Gemini
         if: steps.reserve.outputs.reserved == 'true' && inputs.provider == 'gemini'
+        continue-on-error: true
         uses: google-github-actions/run-gemini-cli@v0
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":40},"tools":{"core":["read_file","write_file","replace","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales en .agent-platino. Repo/issue/#181/#182 y Normas Platino prevalecen siempre. Implementa solo el plan y solo esas rutas. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+          prompt: 'Lee AGENTS.md, GEMINI.md, .agent-task.md, .agent-plan.json, .agent-context.md, .agent-memory.json, .agent-history.json y las Normas Platino actuales en .agent-platino. Repo/issue/#181/#182 y Normas Platino prevalecen siempre. Implementa solo el plan y solo esas rutas. No edites ninguna ruta que no figure en .agent-plan.json; si descubres que el plan omitio una ruta necesaria, no intentes saltarte el CLAIM: el orquestador restaurara el desvio y replanificara. No hagas commit/push/PR/merge. Termina con AGENT_MEMORY_BEGIN seguido de JSON {"summary":"aprendizaje verificable y reusable, sin secretos","tags":["tag"]} y AGENT_MEMORY_END.'
+
+      - id: claim_guard
+        name: Normalizar cambios al CLAIM
+        if: steps.reserve.outputs.reserved == 'true'
+        run: |
+          set -euo pipefail
+          python3 scripts/agent_claim_guard.py \
+            --plan .agent-plan.json \
+            --report /tmp/claim-guard.json \
+            --restore
+          outside="$(jq -c '.outside' /tmp/claim-guard.json)"
+          count="$(jq '.outside | length' /tmp/claim-guard.json)"
+          if [[ "$count" -gt 0 ]]; then
+            echo "drift=true" >> "$GITHUB_OUTPUT"
+            echo "outside=$outside" >> "$GITHUB_OUTPUT"
+          else
+            echo "drift=false" >> "$GITHUB_OUTPUT"
+            echo "outside=[]" >> "$GITHUB_OUTPUT"
+          fi
+
+      - id: replan
+        name: Replanificar pool tras desvio de CLAIM
+        if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ inputs.issue }}
+          PROVIDER: ${{ inputs.provider }}
+          WORKER: ${{ inputs.worker }}
+          BRANCH: ${{ steps.guard.outputs.branch }}
+          MAX_REPLANS: '2'
+        run: |
+          set -euo pipefail
+          outside="$(jq -r '.outside | join(",")' /tmp/claim-guard.json)"
+          previous="$(
+            gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json comments |
+              jq '[.comments[].body | select(startswith("AGENT_POOL_REPLAN "))] | length'
+          )"
+          attempt=$((previous + 1))
+
+          gh issue comment 182 --repo "$GITHUB_REPOSITORY" \
+            --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=agent-pool-replan-claim-incompleto" \
+            >/dev/null || true
+          gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+            --remove-label agent:working --remove-label agent:needs-human \
+            >/dev/null 2>&1 || true
+
+          if (( attempt <= MAX_REPLANS )); then
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+              "AGENT_POOL_REPLAN attempt=$attempt provider=$PROVIDER worker=$WORKER observed_paths=$outside
+
+La implementacion intento modificar rutas fuera del CLAIM. El worker ya restauro esos cambios y no publicara nada de este intento. El proximo plan debe reinspeccionar la integracion, incluir las rutas observadas solo si son realmente necesarias y volver a comprobar #182."
+            gh workflow run agent-worker.yml --repo "$GITHUB_REPOSITORY" --ref main \
+              -f issue="$ISSUE" -f provider="$PROVIDER" -f worker="$WORKER"
+            echo "scheduled=true" >> "$GITHUB_OUTPUT"
+          else
+            gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+              --add-label agent:needs-human >/dev/null
+            gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+              "AGENT_POOL_REPLAN attempt=$attempt provider=$PROVIDER worker=$WORKER observed_paths=$outside
+
+Se agoto el limite de $MAX_REPLANS replans automaticos del pool. Los cambios fuera del CLAIM fueron restaurados y no se publico ningun PR."
+            echo "scheduled=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          git reset --hard HEAD
+          git clean -fd
 
       - name: Validar diff y preflight
-        if: steps.reserve.outputs.reserved == 'true'
+        if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true'
         run: |
           set -euo pipefail
           cp .agent-plan.json /tmp/plan.json
@@ -457,7 +525,7 @@ jobs:
           fi
 
       - name: Guardar memoria de trabajo
-        if: steps.reserve.outputs.reserved == 'true'
+        if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true'
         continue-on-error: true
         env:
           ISSUE: ${{ inputs.issue }}
@@ -498,7 +566,7 @@ jobs:
             --data "$payload" >/dev/null
 
       - name: Publicar PR draft y lanzar CI canonica
-        if: steps.reserve.outputs.reserved == 'true'
+        if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE: ${{ inputs.issue }}
