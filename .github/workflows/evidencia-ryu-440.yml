@@ -9,6 +9,7 @@ on:
       - 'godot/guion/espacio_3d.gd'
       - 'godot/guion/sueno.gd'
       - 'godot/guion/sueno_ryu.gd'
+      - 'godot/arte/ryu_440/**'
       - 'godot/pruebas/capturar_ryu_440.gd'
       - 'scripts/test_evidencia_ryu_440.py'
       - 'docs/evidencias/ryu-440/**'
@@ -66,6 +67,7 @@ jobs:
             "$GITHUB_WORKSPACE/evidencia-ryu-440"
           test -s evidencia-ryu-440/normal_inicial.png
           test -s evidencia-ryu-440/normal_resuelto.png
+          test -s evidencia-ryu-440/normal_resuelto_kit.png
           test -s evidencia-ryu-440/reducido_resuelto.png
           test -s evidencia-ryu-440/manifest.json
 

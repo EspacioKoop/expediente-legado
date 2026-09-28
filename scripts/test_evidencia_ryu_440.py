@@ -16,13 +16,30 @@ class EvidenciaRyu440Test(unittest.TestCase):
         cls.doc = DOC.read_text(encoding="utf-8")
 
     def test_captura_inicio_resolucion_y_reduccion_de_movimiento(self) -> None:
-        for caso in ("normal_inicial", "normal_resuelto", "reducido_resuelto"):
+        for caso in (
+            "normal_inicial",
+            "normal_resuelto",
+            "normal_resuelto_kit",
+            "reducido_resuelto",
+        ):
             self.assertIn(f'"id": "{caso}"', self.capturador)
             self.assertIn(f"{caso}.png", self.workflow)
 
         self.assertIn('"resolver": false', self.capturador)
-        self.assertGreaterEqual(self.capturador.count('"resolver": true'), 2)
+        self.assertGreaterEqual(self.capturador.count('"resolver": true'), 3)
         self.assertIn('"reduccion_movimiento": true', self.capturador)
+
+    def test_compara_kit_visual_sin_integrarlo_en_runtime(self) -> None:
+        self.assertIn(
+            'preload("res://arte/ryu_440/kit_visual_ryu.gd")',
+            self.capturador,
+        )
+        self.assertIn('"kit_visual": true', self.capturador)
+        self.assertIn("PIEZAS_KIT_COMPARATIVO", self.capturador)
+        for pieza in ("ToriiSuspendido", "CascadaInvertida", "FarolesDeLluvia"):
+            self.assertIn(pieza, self.capturador)
+        self.assertIn('"piezas_kit"', self.capturador)
+        self.assertNotIn("kit_visual_ryu.gd", (ROOT / "godot" / "guion" / "sueno_ryu.gd").read_text(encoding="utf-8"))
 
     def test_reproduce_el_contexto_runtime_sin_hud(self) -> None:
         self.assertIn('const FORMA := "peine"', self.capturador)
