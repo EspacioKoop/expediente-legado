@@ -105,11 +105,29 @@ const PAQUETES := [
 		"Demo de un minuto: un topo astronauta recoge tres tornillos y vuelve al módulo.",
 		"interaccion": "demo",
 	},
+	{
+		"id": "barrido-98",
+		"nombre": "Barrido 98",
+		"tipo": "Limpiador",
+		"version": "1.0",
+		"licencia": "freeware",
+		"tamano_kb": 284,
+		"origen_superficie": "cd",
+		"origen": "CD Archivo 98 · Herramientas de mantenimiento",
+		"descripcion":
+		"Busca únicamente firmas ficticias catalogadas dentro del estado simulado de OS98.",
+		"interaccion": "limpiador",
+	},
 ]
 
 var _instalados: Array[String] = []
 var _ejecuciones: Dictionary = {}
 var _obtenidos: Array[String] = []
+var _objetos_limpiador: Array[Dictionary] = []
+
+
+func _init() -> void:
+	_reiniciar_objetos_limpiador()
 
 
 func catalogo() -> Array[Dictionary]:
@@ -171,6 +189,7 @@ func ejecutar(id: String) -> Dictionary:
 	var numero := int(_ejecuciones.get(id, 0)) + 1
 	_ejecuciones[id] = numero
 	var mensaje := ""
+	var incidencia: Dictionary = {}
 	match String(paquete.get("interaccion", "")):
 		"benchmark":
 			# Resultado deliberadamente ficticio y determinista: nunca inspecciona CPU/GPU.
@@ -190,9 +209,25 @@ func ejecutar(id: String) -> Dictionary:
 			mensaje = "Simulación: 12 archivos → ARCHIVO.AZO (41% de ahorro ficticio)."
 		"iconos":
 			mensaje = "Lienzo 32×32 abierto con paleta de 16 colores."
+		"limpiador":
+			var estado_os := {"objetos_simulados": _objetos_limpiador}
+			var detecciones := FallosMundanosOs98.escanear_limpiador(estado_os)
+			if detecciones.is_empty():
+				mensaje = "Barrido completado: no se encontraron firmas catalogadas activas."
+			else:
+				var primera := detecciones[0] as Dictionary
+				var resultado_limpieza := FallosMundanosOs98.neutralizar_limpiador(
+					estado_os, String(primera.get("objeto_id", ""))
+				)
+				var incidencia_valor: Variant = resultado_limpieza.get("incidencia", {})
+				if incidencia_valor is Dictionary:
+					incidencia = (incidencia_valor as Dictionary).duplicate(true)
+				mensaje = (
+					"Barrido completado: %s neutralizado dentro del OS simulado."
+					% String(primera.get("nombre", "incidencia catalogada"))
+				)
 		_:
 			mensaje = "PixelVista muestra una imagen de ejemplo integrada."
-	var incidencia := {}
 	if id == "relojito-pro" and numero >= 3:
 		incidencia = {
 			"id": "shareware_expirado",
@@ -206,6 +241,7 @@ func exportar_estado() -> Dictionary:
 		"instalados": _instalados.duplicate(),
 		"ejecuciones": _ejecuciones.duplicate(true),
 		"obtenidos": _obtenidos.duplicate(),
+		"limpiador_objetos": _objetos_limpiador.duplicate(true),
 	}
 
 
@@ -213,6 +249,17 @@ func importar_estado(estado: Dictionary) -> void:
 	_instalados.clear()
 	_ejecuciones.clear()
 	_obtenidos.clear()
+	_reiniciar_objetos_limpiador()
+	var objetos_limpiador: Variant = estado.get("limpiador_objetos", _objetos_limpiador)
+	if objetos_limpiador is Array:
+		_objetos_limpiador.clear()
+		for valor in objetos_limpiador as Array:
+			if not valor is Dictionary:
+				continue
+			var objeto := (valor as Dictionary).duplicate(true)
+			if String(objeto.get("id", "")).is_empty():
+				continue
+			_objetos_limpiador.append(objeto)
 	var obtenidos: Variant = estado.get("obtenidos", [])
 	if obtenidos is Array:
 		for valor in obtenidos as Array:
@@ -236,3 +283,18 @@ func importar_estado(estado: Dictionary) -> void:
 			var id := String(clave)
 			if not ficha(id).is_empty():
 				_ejecuciones[id] = max(0, int((ejecuciones as Dictionary).get(clave, 0)))
+
+
+func _reiniciar_objetos_limpiador() -> void:
+	_objetos_limpiador.clear()
+	(
+		_objetos_limpiador
+		. append(
+			{
+				"id": "residente-cinta-azul-demo",
+				"firma_id": "residente-cinta-azul",
+				"activo": true,
+				"neutralizado": false,
+			}
+		)
+	)

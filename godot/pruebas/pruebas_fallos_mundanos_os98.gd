@@ -134,6 +134,31 @@ func _probar() -> void:
 		"el fixture conserva la regla normal que viola",
 	)
 
+	var software := SoftwareSigaModelo.new()
+	_comprobar(software.instalar("barrido-98"), "Barrido 98 se instala como software ficticio")
+	var primer_barrido := software.ejecutar("barrido-98")
+	_comprobar(bool(primer_barrido.get("ok", false)), "Barrido 98 se ejecuta dentro del modelo")
+	var primer_aviso: Variant = primer_barrido.get("incidencia", {})
+	_comprobar(primer_aviso is Dictionary, "Barrido 98 devuelve la incidencia común")
+	if primer_aviso is Dictionary:
+		_comprobar(
+			String((primer_aviso as Dictionary).get("id", "")) == "firma_catalogada_detectada",
+			"la primera ejecución neutraliza una firma catalogada",
+		)
+	var estado_software := software.exportar_estado()
+	var software_recargado := SoftwareSigaModelo.new()
+	software_recargado.importar_estado(estado_software)
+	var segundo_barrido := software_recargado.ejecutar("barrido-98")
+	var segundo_aviso: Variant = segundo_barrido.get("incidencia", {})
+	_comprobar(
+		segundo_aviso is Dictionary and (segundo_aviso as Dictionary).is_empty(),
+		"guardar y recargar conserva la neutralización del objeto simulado",
+	)
+	_comprobar(
+		String(segundo_barrido.get("mensaje", "")).contains("no se encontraron"),
+		"el segundo barrido informa que no quedan firmas activas",
+	)
+
 	var desconocido := FallosMundanosOs98.evaluar("no_existe", {"evento": "cualquier_cosa"})
 	_comprobar(not desconocido["activo"], "un id desconocido no inventa una incidencia")
 	_comprobar(
