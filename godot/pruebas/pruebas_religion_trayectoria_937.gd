@@ -107,11 +107,15 @@ func _probar_archivado_reset_y_persistencia() -> void:
 	Jornada.reiniciar_vuelta(estado["jornada"])
 	var registro_nueva := Eventos.asegurar_en_estado(estado)
 	_comprobar(
-		Eventos.eventos_de_vuelta(
-			registro_nueva,
-			Eventos.CANAL_CONVICCION,
-			2,
-		).is_empty(),
+		(
+			Eventos
+			. eventos_de_vuelta(
+				registro_nueva,
+				Eventos.CANAL_CONVICCION,
+				2,
+			)
+			. is_empty()
+		),
 		"la vida nueva no hereda una convicción como estado activo",
 	)
 
@@ -166,18 +170,21 @@ func _registrar(
 		metadatos["declaracion"] = declaracion
 	if not actor.is_empty():
 		metadatos["actor"] = actor
-	var evento := Eventos.crear_evento(
-		"937:%s" % sufijo,
-		canal,
-		"prueba:937",
-		"contexto:937",
-		3,
-		"",
-		[],
-		[],
-		false,
-		[],
-		metadatos,
+	var evento := (
+		Eventos
+		. crear_evento(
+			"937:%s" % sufijo,
+			canal,
+			"prueba:937",
+			"contexto:937",
+			3,
+			"",
+			[],
+			[],
+			false,
+			[],
+			metadatos,
+		)
 	)
 	_comprobar(Eventos.registrar(registro, evento), "registra %s en su canal" % sufijo)
 
