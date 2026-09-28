@@ -33,8 +33,9 @@ jobs:
           pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "$BRANCH" --json number --jq '.[0].number // empty')"
           [[ -z "$pr" ]] && exit 0
           marker="PR_READY issue=#$issue pr=#$pr sha=$SHA"
-          if ! gh api --paginate "repos/$GITHUB_REPOSITORY/issues/182/comments?per_page=100" --jq '.[].body' | grep -Fq "$marker"; then
-            gh issue comment 182 --repo "$GITHUB_REPOSITORY" --body "$marker pruebas=CI-canónico-verde limites=PR-draft;sin-validación-humana provider=$provider"
+          python3 scripts/gestionar_reservas_rollover.py --comments-output /tmp/reservas-ready.json
+          if ! jq -r '.[].body' /tmp/reservas-ready.json | grep -Fq "$marker"; then
+            gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" --body "$marker pruebas=CI-canónico-verde limites=PR-draft;sin-validación-humana provider=$provider"
           fi
           gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" --add-label agent:pr-open --remove-label agent:needs-human >/dev/null 2>&1 || true
           gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body "Agent autopilot: CI verde en $SHA; PR #$pr queda draft para revisión humana." || true
@@ -155,8 +156,7 @@ jobs:
           BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
           set -euo pipefail
-          gh api --paginate "repos/$GITHUB_REPOSITORY/issues/182/comments?per_page=100" \
-            --jq '.[]|{id,created_at,body}' | jq -s '.' > /tmp/reservas.json
+          python3 scripts/gestionar_reservas_rollover.py --comments-output /tmp/reservas.json
           # Capa única de lectura de #182 (#1662): respeta lease y PR_READY. Se toma
           # de main, no de la rama reparada, que puede ser anterior a la capa.
           mkdir -p /tmp/capa182
