@@ -7,7 +7,14 @@ class_name DialogoIdeologico
 extends RefCounted
 
 const SUPERFICIE_OFICINA_CUNADO := "oficina:cunado:postcierre"
+const SUPERFICIE_OFICINA_BECARIO := "oficina:becario:postcierre"
+const SUPERFICIE_OFICINA_JUBILACION := "oficina:jubilacion:postcierre"
 const SUPERFICIE_CAREO_EXPOSICION := "careo:exposicion"
+
+const SUPERFICIES_COMPANEROS := {
+	DecisionIdeologicaExpediente.ACTOR_BECARIO: SUPERFICIE_OFICINA_BECARIO,
+	DecisionIdeologicaExpediente.ACTOR_JUBILACION: SUPERFICIE_OFICINA_JUBILACION,
+}
 
 const VARIANTES := {
 	SUPERFICIE_OFICINA_CUNADO:
@@ -61,6 +68,180 @@ const VARIANTES := {
 			},
 		},
 	],
+	SUPERFICIE_OFICINA_BECARIO:
+	[
+		{
+			"clave": "COMPA_BECARIO_3",
+			"prioridad": 20,
+			"requiere_eleccion":
+			{
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+				"etiqueta": "opcion:responsabilidad_compartida",
+			},
+			"actor_recuerda":
+			{
+				"actor": DecisionIdeologicaExpediente.ACTOR_BECARIO,
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+			},
+		},
+		{
+			"clave": "COMPA_BECARIO_2",
+			"prioridad": 10,
+			"requiere_eleccion":
+			{
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+				"etiqueta": "opcion:responsabilidad_compartida",
+			},
+			"respuesta_registra":
+			{
+				"caso": DecisionIdeologicaExpediente.CASO_VERTICAL,
+				"actor": DecisionIdeologicaExpediente.ACTOR_BECARIO,
+			},
+		},
+		{
+			"clave": "COMPA_BECARIO_2",
+			"prioridad": 20,
+			"requiere_eleccion":
+			{
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+				"etiqueta": "opcion:revision_procedimental",
+			},
+			"actor_recuerda":
+			{
+				"actor": DecisionIdeologicaExpediente.ACTOR_BECARIO,
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+			},
+		},
+		{
+			"clave": "COMPA_BECARIO_1",
+			"prioridad": 10,
+			"requiere_eleccion":
+			{
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+				"etiqueta": "opcion:revision_procedimental",
+			},
+			"respuesta_registra":
+			{
+				"caso": DecisionIdeologicaExpediente.CASO_VERTICAL,
+				"actor": DecisionIdeologicaExpediente.ACTOR_BECARIO,
+			},
+		},
+		{
+			"clave": "COMPA_BECARIO_1",
+			"prioridad": 20,
+			"requiere_eleccion":
+			{
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+				"etiqueta": "opcion:conciliacion_interna",
+			},
+			"actor_recuerda":
+			{
+				"actor": DecisionIdeologicaExpediente.ACTOR_BECARIO,
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+			},
+		},
+		{
+			"clave": "COMPA_BECARIO_3",
+			"prioridad": 10,
+			"requiere_eleccion":
+			{
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+				"etiqueta": "opcion:conciliacion_interna",
+			},
+			"respuesta_registra":
+			{
+				"caso": DecisionIdeologicaExpediente.CASO_VERTICAL,
+				"actor": DecisionIdeologicaExpediente.ACTOR_BECARIO,
+			},
+		},
+	],
+	SUPERFICIE_OFICINA_JUBILACION:
+	[
+		{
+			"clave": "COMPA_JUBILACION_3",
+			"prioridad": 20,
+			"requiere_eleccion":
+			{
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+				"etiqueta": "opcion:responsabilidad_compartida",
+			},
+			"actor_recuerda":
+			{
+				"actor": DecisionIdeologicaExpediente.ACTOR_JUBILACION,
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+			},
+		},
+		{
+			"clave": "COMPA_JUBILACION_2",
+			"prioridad": 10,
+			"requiere_eleccion":
+			{
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+				"etiqueta": "opcion:responsabilidad_compartida",
+			},
+			"respuesta_registra":
+			{
+				"caso": DecisionIdeologicaExpediente.CASO_VERTICAL,
+				"actor": DecisionIdeologicaExpediente.ACTOR_JUBILACION,
+			},
+		},
+		{
+			"clave": "COMPA_JUBILACION_2",
+			"prioridad": 20,
+			"requiere_eleccion":
+			{
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+				"etiqueta": "opcion:revision_procedimental",
+			},
+			"actor_recuerda":
+			{
+				"actor": DecisionIdeologicaExpediente.ACTOR_JUBILACION,
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+			},
+		},
+		{
+			"clave": "COMPA_JUBILACION_1",
+			"prioridad": 10,
+			"requiere_eleccion":
+			{
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+				"etiqueta": "opcion:revision_procedimental",
+			},
+			"respuesta_registra":
+			{
+				"caso": DecisionIdeologicaExpediente.CASO_VERTICAL,
+				"actor": DecisionIdeologicaExpediente.ACTOR_JUBILACION,
+			},
+		},
+		{
+			"clave": "COMPA_JUBILACION_1",
+			"prioridad": 20,
+			"requiere_eleccion":
+			{
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+				"etiqueta": "opcion:conciliacion_interna",
+			},
+			"actor_recuerda":
+			{
+				"actor": DecisionIdeologicaExpediente.ACTOR_JUBILACION,
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+			},
+		},
+		{
+			"clave": "COMPA_JUBILACION_3",
+			"prioridad": 10,
+			"requiere_eleccion":
+			{
+				"evento": DecisionIdeologicaExpediente.EVENTO_VERTICAL,
+				"etiqueta": "opcion:conciliacion_interna",
+			},
+			"respuesta_registra":
+			{
+				"caso": DecisionIdeologicaExpediente.CASO_VERTICAL,
+				"actor": DecisionIdeologicaExpediente.ACTOR_JUBILACION,
+			},
+		},
+	],
 	SUPERFICIE_CAREO_EXPOSICION:
 	[
 		{
@@ -91,6 +272,7 @@ static func resolver(superficie: String, estado: Dictionary) -> Dictionary:
 		return {}
 
 	var mejor: Dictionary = {}
+	var mejor_prioridad := -2147483648
 	var mejor_recencia := -2
 	for candidato in valor:
 		if typeof(candidato) != TYPE_DICTIONARY:
@@ -98,11 +280,24 @@ static func resolver(superficie: String, estado: Dictionary) -> Dictionary:
 		var variante: Dictionary = candidato
 		if not cumple(estado, variante):
 			continue
+		var prioridad := int(variante.get("prioridad", 0))
 		var recencia := _recencia_exposicion(estado, variante.get("requiere_exposicion", {}))
-		if mejor.is_empty() or recencia > mejor_recencia:
+		if (
+			mejor.is_empty()
+			or prioridad > mejor_prioridad
+			or (prioridad == mejor_prioridad and recencia > mejor_recencia)
+		):
 			mejor = variante.duplicate(true)
+			mejor_prioridad = prioridad
 			mejor_recencia = recencia
 	return mejor
+
+
+static func resolver_companero(actor: String, estado: Dictionary) -> Dictionary:
+	var superficie := String(SUPERFICIES_COMPANEROS.get(actor.strip_edges(), ""))
+	if superficie.is_empty():
+		return {}
+	return resolver(superficie, estado)
 
 
 ## Contrato de condiciones reutilizable por futuras conversaciones.
@@ -140,8 +335,13 @@ static func registrar_respuesta(estado: Dictionary, variante: Dictionary) -> boo
 		return false
 	var respuesta: Dictionary = valor
 	var actor := String(respuesta.get("actor", ""))
+	if actor.is_empty():
+		return false
+	var caso := String(respuesta.get("caso", ""))
+	if not caso.is_empty():
+		return DecisionIdeologicaExpediente.registrar_lectura_social(estado, caso, actor)
 	var evento := String(respuesta.get("evento", ""))
-	if actor.is_empty() or evento.is_empty() or _eleccion_por_id(estado, evento).is_empty():
+	if evento.is_empty() or _eleccion_por_id(estado, evento).is_empty():
 		return false
 	var etiquetas = respuesta.get("etiquetas", [])
 	var lista: Array = etiquetas.duplicate() if typeof(etiquetas) == TYPE_ARRAY else []
