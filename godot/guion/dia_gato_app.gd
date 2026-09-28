@@ -55,13 +55,15 @@ func _espacio_de(fase: String) -> Dictionary:
 
 	var posiciones: Array = _posiciones_objetivo(espacio, foco)
 	_entrada_guia = espacio.get("entrada", Vector3.ZERO)
-	var tipos: Array = _tipos_objetivo_sueno()
+	var tipos: Array = SuenoObjetivosVariedad.tipos_para(
+		int(jornada.get("dia", 0)), _objetivo_escena
+	)
 	for i in SuenoObjetivos.POSIBLES_PRIMER_CORTE:
 		var tipo := String(tipos[i])
 		var posicion: Vector3 = posiciones[i]
 		var guia_pos := posicion
 		if tipo == SuenoObjetivoVariedad3D.TIPO_SECUENCIA:
-			guia_pos = _punto_inicial_secuencia(_entrada_guia, posicion)
+			guia_pos = SuenoObjetivosVariedad.punto_inicial_secuencia(_entrada_guia, posicion)
 		(
 			_objetivos_espacio
 			. append(
@@ -70,7 +72,7 @@ func _espacio_de(fase: String) -> Dictionary:
 					"pos": posicion,
 					"guia_pos": guia_pos,
 					"tipo": tipo,
-					"condicion": _condicion_objetivo_sueno(tipo),
+					"condicion": SuenoObjetivosVariedad.condicion(tipo),
 				}
 			)
 		)
@@ -145,64 +147,6 @@ func _posiciones_objetivo(espacio: Dictionary, foco: Vector3) -> Array:
 	return posiciones
 
 
-func _tipos_objetivo_sueno() -> Array:
-	var tipos := [
-		SuenoObjetivoVariedad3D.TIPO_RECORRIDO,
-		SuenoObjetivoVariedad3D.TIPO_SECUENCIA,
-		SuenoObjetivoVariedad3D.TIPO_PERMANENCIA,
-	]
-	var semilla := int(jornada.get("dia", 0)) * 17
-	for byte in _objetivo_escena.to_utf8_buffer():
-		semilla += int(byte)
-	var rotacion := posmod(semilla, tipos.size())
-	var salida: Array = []
-	for indice in tipos.size():
-		salida.append(tipos[posmod(indice + rotacion, tipos.size())])
-	return salida
-
-
-func _condicion_objetivo_sueno(tipo: String) -> String:
-	match tipo:
-		SuenoObjetivoVariedad3D.TIPO_SECUENCIA:
-			return "seguir_secuencia"
-		SuenoObjetivoVariedad3D.TIPO_PERMANENCIA:
-			return "permanecer"
-		_:
-			return "alcanzar"
-
-
-func _punto_inicial_secuencia(origen: Vector3, destino: Vector3) -> Vector3:
-	var punto := origen.lerp(destino, 0.45)
-	punto.y = destino.y
-	return punto
-
-
-func _descriptor_objetivo_sueno(objetivo: Dictionary) -> Dictionary:
-	return {
-		"id": String(objetivo.get("id", "")),
-		"tipo": String(objetivo.get("tipo", "interaccion")),
-		"condicion": String(objetivo.get("condicion", "evento_determinista")),
-		"feedback": "ambiente",
-		"cuenta": true,
-	}
-
-
-func _sincronizar_descriptores_objetivos(estado: Dictionary) -> void:
-	var descriptores: Array = estado.get("objetivos", [])
-	for indice in descriptores.size():
-		var descriptor: Dictionary = descriptores[indice]
-		var objetivo_id := String(descriptor.get("id", ""))
-		for objetivo in _objetivos_espacio:
-			if String(objetivo.get("id", "")) != objetivo_id:
-				continue
-			descriptor["tipo"] = String(objetivo.get("tipo", descriptor.get("tipo", "interaccion")))
-			descriptor["condicion"] = String(
-				objetivo.get("condicion", descriptor.get("condicion", "evento_determinista"))
-			)
-			descriptores[indice] = descriptor
-			break
-	estado["objetivos"] = descriptores
-
 
 func _clave_objetivos_actual() -> String:
 	return "%d:%s" % [int(jornada.get("dia", 0)), _objetivo_escena]
@@ -216,10 +160,10 @@ func _estado_objetivos_actual() -> Dictionary:
 	if not estados.has(clave):
 		var descriptores: Array = []
 		for objetivo in _objetivos_espacio:
-			descriptores.append(_descriptor_objetivo_sueno(objetivo))
+			descriptores.append(SuenoObjetivosVariedad.descriptor(objetivo))
 		estados[clave] = SuenoObjetivos.nuevo(descriptores)
 	else:
-		_sincronizar_descriptores_objetivos(estados[clave])
+		SuenoObjetivosVariedad.sincronizar_descriptores(estados[clave], _objetivos_espacio)
 	return estados[clave]
 
 
