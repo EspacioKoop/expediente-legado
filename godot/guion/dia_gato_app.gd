@@ -147,7 +147,6 @@ func _posiciones_objetivo(espacio: Dictionary, foco: Vector3) -> Array:
 	return posiciones
 
 
-
 func _clave_objetivos_actual() -> String:
 	return "%d:%s" % [int(jornada.get("dia", 0)), _objetivo_escena]
 
@@ -184,11 +183,14 @@ func _montar_objetivos_sueno() -> void:
 			continue
 		var tipo := String(objetivo.get("tipo", SuenoObjetivoVariedad3D.TIPO_RECORRIDO))
 		if (
-			tipo in [
-				SuenoObjetivoVariedad3D.TIPO_SECUENCIA,
-				SuenoObjetivoVariedad3D.TIPO_PERMANENCIA,
-				SuenoObjetivoVariedad3D.TIPO_RETORNO,
-			]
+			(
+				tipo
+				in [
+					SuenoObjetivoVariedad3D.TIPO_SECUENCIA,
+					SuenoObjetivoVariedad3D.TIPO_PERMANENCIA,
+					SuenoObjetivoVariedad3D.TIPO_RETORNO,
+				]
+			)
 			and _montar_objetivo_variedad(objetivo)
 		):
 			continue
