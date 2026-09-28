@@ -1,11 +1,15 @@
 from pathlib import Path
+import re
 import unittest
+
+from scripts.godot_pruebas import ejecutar_script
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "godot" / "guion" / "minijuego_aviones_papel.gd"
 SCENE = ROOT / "godot" / "escenas" / "minijuego_aviones_papel.tscn"
 TEXTOS = ROOT / "godot" / "datos" / "textos.csv"
+RESUMEN = re.compile(r"(\d+) pasadas, 0 fallos")
 
 
 class MinijuegoAvionesPapelTest(unittest.TestCase):
@@ -58,6 +62,30 @@ class MinijuegoAvionesPapelTest(unittest.TestCase):
         self.assertIn('tr("AVIONES_ESTADO_LANZAMIENTO")', self.script)
         self.assertNotIn('.text = "Tu turno', self.script)
         self.assertNotIn('.text = "Marcador', self.script)
+
+    def test_prevision_reutiliza_el_simulador_sin_mutar_reglas(self):
+        self.assertIn("func _vuelo_previo() -> Dictionary:", self.script)
+        self.assertRegex(self.script, r"AvionesPapel\s*\n\s*\. simular\(")
+        self.assertIn("func _dibujar_prevision() -> void:", self.script)
+        self.assertIn("direccion.value_changed.connect(_al_cambiar_configuracion)", self.script)
+        self.assertIn("altura.value_changed.connect(_al_cambiar_configuracion)", self.script)
+        self.assertIn("potencia.value_changed.connect(_al_cambiar_configuracion)", self.script)
+        self.assertIn("modelo.item_selected.connect(_al_cambiar_configuracion)", self.script)
+        bloque = self.script.split("func _vuelo_previo()", 1)[1].split(
+            "\n\nfunc _dibujar_prevision", 1
+        )[0]
+        self.assertNotIn("AvionesPapel.lanzar(", bloque)
+        self.assertNotIn('estado["', bloque)
+        self.assertNotIn("Partida", bloque)
+
+    def test_prevision_runtime_no_consume_lanzamientos(self):
+        resultado = ejecutar_script("pruebas/pruebas_aviones_papel_preview_160.gd")
+        self.assertEqual(resultado.returncode, 0, resultado.stdout)
+        resumen = RESUMEN.search(resultado.stdout)
+        self.assertIsNotNone(resumen, resultado.stdout)
+        self.assertGreaterEqual(int(resumen.group(1)), 6, resultado.stdout)
+        self.assertNotIn("SCRIPT ERROR:", resultado.stdout)
+        self.assertNotIn("Parse Error:", resultado.stdout)
 
     def test_abandono_no_persiste_recompensas(self):
         self.assertIn("AvionesPapel.abandonar", self.script)

@@ -6,8 +6,11 @@ const PARTICIPANTES := ["jugador", "distancia", "papelera", "cunado"]
 const MODALIDADES := ["distancia", "precision", "zona"]
 const MODELOS := ["estable", "rapido", "impredecible"]
 const PISTA := Rect2(70.0, 50.0, 560.0, 580.0)
+const COLOR_PREVISION := Color(0.22, 0.34, 0.28, 0.72)
+const RADIO_PREVISION := 14.0
 
 var estado: Dictionary = {}
+var _vuelo_en_curso := false
 
 @onready var avion: Label = %Avion
 @onready var modalidad: OptionButton = %Modalidad
@@ -35,6 +38,10 @@ func _ready() -> void:
 	]:
 		modelo.add_item(tr(clave))
 	modalidad.item_selected.connect(_al_cambiar_modalidad)
+	modelo.item_selected.connect(_al_cambiar_configuracion)
+	direccion.value_changed.connect(_al_cambiar_configuracion)
+	altura.value_changed.connect(_al_cambiar_configuracion)
+	potencia.value_changed.connect(_al_cambiar_configuracion)
 	lanzar.pressed.connect(_al_lanzar)
 	abandonar.pressed.connect(_al_abandonar)
 	_nueva_ronda()
@@ -65,6 +72,7 @@ func _draw() -> void:
 	draw_circle(papelera, 10.0, Color("40484d"))
 	var objetivo := _proyectar(Vector3(AvionesPapel.OBJETIVO.x, 0.0, AvionesPapel.OBJETIVO.y))
 	draw_circle(objetivo, 22.0, Color("76896b"), false, 3.0)
+	_dibujar_prevision()
 
 
 func _nueva_ronda() -> void:
@@ -80,6 +88,7 @@ func _nueva_ronda() -> void:
 	avion.position = _origen_avion()
 	estado_label.text = tr("AVIONES_ESTADO_LANZAMIENTO") % 1
 	_actualizar_marcador()
+	queue_redraw()
 
 
 func _al_cambiar_modalidad(indice: int) -> void:
@@ -87,6 +96,11 @@ func _al_cambiar_modalidad(indice: int) -> void:
 		return
 	estado = AvionesPapel.nueva(PARTICIPANTES, MODALIDADES[indice])
 	_actualizar_marcador()
+	queue_redraw()
+
+
+func _al_cambiar_configuracion(_valor = null) -> void:
+	queue_redraw()
 
 
 func _al_lanzar() -> void:
@@ -155,6 +169,8 @@ func _al_abandonar() -> void:
 
 
 func _animar_vuelo(vuelo: Dictionary) -> void:
+	_vuelo_en_curso = true
+	queue_redraw()
 	var posicion: Vector3 = vuelo.get("posicion", Vector3.ZERO)
 	var destino := _proyectar(posicion) - avion.size * 0.5
 	avion.position = _origen_avion()
@@ -163,6 +179,7 @@ func _animar_vuelo(vuelo: Dictionary) -> void:
 	tween.set_trans(Tween.TRANS_QUAD)
 	tween.set_ease(Tween.EASE_OUT)
 	tween.tween_property(avion, "position", destino, duracion)
+	tween.finished.connect(_al_terminar_animacion_vuelo)
 	estado_label.text = (
 		tr("AVIONES_ESTADO_VUELO")
 		% [
@@ -170,6 +187,40 @@ func _animar_vuelo(vuelo: Dictionary) -> void:
 			float(vuelo.get("precision", 0.0)),
 		]
 	)
+
+
+func _al_terminar_animacion_vuelo() -> void:
+	_vuelo_en_curso = false
+	queue_redraw()
+
+
+func _vuelo_previo() -> Dictionary:
+	if not is_instance_valid(modelo):
+		return {}
+	if estado.get("terminada", false) or estado.get("abandonada", false):
+		return {}
+	if int(estado.get("turno", 0)) != 0 or _vuelo_en_curso:
+		return {}
+	return (
+		AvionesPapel
+		. simular(
+			MODELOS[modelo.selected],
+			float(direccion.value),
+			float(altura.value),
+			float(potencia.value),
+		)
+	)
+
+
+func _dibujar_prevision() -> void:
+	var vuelo := _vuelo_previo()
+	if vuelo.is_empty():
+		return
+	var posicion: Vector3 = vuelo.get("posicion", Vector3.ZERO)
+	var aterrizaje := _proyectar(posicion)
+	var origen := Vector2(PISTA.get_center().x, PISTA.end.y - 40.0)
+	draw_line(origen, aterrizaje, COLOR_PREVISION, 2.0)
+	draw_circle(aterrizaje, RADIO_PREVISION, COLOR_PREVISION, false, 3.0)
 
 
 func _actualizar_marcador() -> void:
