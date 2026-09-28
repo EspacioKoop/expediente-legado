@@ -63,7 +63,7 @@ class CreditosInicioCinematicaTest(unittest.TestCase):
         self.assertIn('evento.is_action_pressed("ui_accept")', self.reproductor)
         self.assertIn('evento.is_action_pressed("ui_cancel")', self.reproductor)
         self.assertIn("evento is InputEventMouseButton", self.inicio)
-        self.assertIn("evento.button_index == MOUSE_BUTTON_LEFT", self.inicio)
+        self.assertIn("click.button_index == MOUSE_BUTTON_LEFT", self.inicio)
         self.assertIn('_apertura_creditos.call("saltar")', self.inicio)
 
     def test_reduccion_de_movimiento_sigue_en_el_reproductor_comun(self) -> None:
