@@ -611,6 +611,8 @@ static func actualizar_racha(racha: int, mejor: int, gano: bool) -> Dictionary:
 static func reiniciar_vuelta(estado: Dictionary, vida_maxima: int) -> Dictionary:
 	# #925: se fotografía la trayectoria antes de borrar historias/elecciones.
 	archivar_trayectoria_ideologica(estado, "reinicio_vuelta")
+	# #937: religión conserva hechos por canal, nunca una identidad inferida.
+	ReligionEventos.archivar_trayectoria(estado, "reinicio_vuelta")
 	estado["vida"] = vida_maxima
 	estado["despido_mostrado"] = false
 	estado["epilogo_avisado"] = false
