@@ -179,8 +179,7 @@ func _montar() -> void:
 
 	_panel_historial = _crear_panel()
 	_panel_historial.custom_minimum_size.y = minf(
-		520.0,
-		maxf(300.0, get_viewport().get_visible_rect().size.y - MARGEN_SEGURO_PANEL * 2.0)
+		520.0, maxf(300.0, get_viewport().get_visible_rect().size.y - MARGEN_SEGURO_PANEL * 2.0)
 	)
 	_panel_historial.visible = false
 	centro.add_child(_panel_historial)
@@ -230,8 +229,7 @@ func _caja(panel: PanelContainer, desplazable: bool = false) -> VBoxContainer:
 		var ancho_disponible := maxf(240.0, vista.x - MARGEN_SEGURO_PANEL * 2.0)
 		var alto_disponible := maxf(240.0, vista.y - MARGEN_SEGURO_PANEL * 2.0)
 		scroll.custom_minimum_size = Vector2(
-			minf(ANCHO_PANEL - 40.0, ancho_disponible),
-			minf(ALTO_MAXIMO_PANEL, alto_disponible)
+			minf(ANCHO_PANEL - 40.0, ancho_disponible), minf(ALTO_MAXIMO_PANEL, alto_disponible)
 		)
 		# El foco de teclado/mando arrastra el desplazamiento hasta el control.
 		scroll.follow_focus = true
