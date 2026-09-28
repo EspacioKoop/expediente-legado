@@ -37,6 +37,7 @@ jobs:
     outputs:
       matrix: ${{ steps.select.outputs.matrix }}
       count: ${{ steps.select.outputs.count }}
+      fallback_keys: ${{ steps.select.outputs.fallback_keys }}
     steps:
       - uses: actions/checkout@v4
 
@@ -71,14 +72,24 @@ jobs:
           KEV_MODEL: ${{ vars.KEV_MODEL || 'kev-latest' }}
           KEV_ROUTER_MIN_CONFIDENCE: ${{ vars.KEV_ROUTER_MIN_CONFIDENCE || '0.45' }}
           KEV_API_KEY: ${{ secrets.KEV_API_KEY }}
-          HAS_F1: ${{ secrets.QWEN_FALLBACK_1_API_KEY != '' }}
-          HAS_F2: ${{ secrets.QWEN_FALLBACK_2_API_KEY != '' }}
-          HAS_F3: ${{ secrets.QWEN_FALLBACK_3_API_KEY != '' }}
-          HAS_F4: ${{ secrets.QWEN_FALLBACK_4_API_KEY != '' }}
-          F1_URL: ${{ vars.QWEN_FALLBACK_1_BASE_URL }}
-          F2_URL: ${{ vars.QWEN_FALLBACK_2_BASE_URL }}
-          F3_URL: ${{ vars.QWEN_FALLBACK_3_BASE_URL }}
-          F4_URL: ${{ vars.QWEN_FALLBACK_4_BASE_URL }}
+          # Slots de fallback (#1685): URL y modelo se descubren desde las variables
+          # con scripts/agent_slots.py. Los secretos no se pueden enumerar, así que
+          # esta tabla es el único sitio con números de slot: añade una línea por
+          # slot nuevo (y sube MAX_FALLBACKS en el script si pasas de 12).
+          VARS_JSON: ${{ toJSON(vars) }}
+          FALLBACK_KEYS: >-
+            ${{ secrets.QWEN_FALLBACK_1_API_KEY != '' && '1' || '' }}
+            ${{ secrets.QWEN_FALLBACK_2_API_KEY != '' && '2' || '' }}
+            ${{ secrets.QWEN_FALLBACK_3_API_KEY != '' && '3' || '' }}
+            ${{ secrets.QWEN_FALLBACK_4_API_KEY != '' && '4' || '' }}
+            ${{ secrets.QWEN_FALLBACK_5_API_KEY != '' && '5' || '' }}
+            ${{ secrets.QWEN_FALLBACK_6_API_KEY != '' && '6' || '' }}
+            ${{ secrets.QWEN_FALLBACK_7_API_KEY != '' && '7' || '' }}
+            ${{ secrets.QWEN_FALLBACK_8_API_KEY != '' && '8' || '' }}
+            ${{ secrets.QWEN_FALLBACK_9_API_KEY != '' && '9' || '' }}
+            ${{ secrets.QWEN_FALLBACK_10_API_KEY != '' && '10' || '' }}
+            ${{ secrets.QWEN_FALLBACK_11_API_KEY != '' && '11' || '' }}
+            ${{ secrets.QWEN_FALLBACK_12_API_KEY != '' && '12' || '' }}
         run: |
           set -euo pipefail
           for label in auto pool qwen gemini; do
@@ -100,10 +111,9 @@ jobs:
           }
           [[ "$HAS_QWEN" == true || "$HAS_OMNIROUTE" == true ]] && add_worker qwen-primary qwen
           [[ "$HAS_GEMINI" == true ]] && add_worker gemini gemini
-          [[ "$HAS_F1" == true && -n "$F1_URL" ]] && add_worker qwen-fallback-1 qwen
-          [[ "$HAS_F2" == true && -n "$F2_URL" ]] && add_worker qwen-fallback-2 qwen
-          [[ "$HAS_F3" == true && -n "$F3_URL" ]] && add_worker qwen-fallback-3 qwen
-          [[ "$HAS_F4" == true && -n "$F4_URL" ]] && add_worker qwen-fallback-4 qwen
+          fallbacks="$(python3 scripts/agent_slots.py listar)"
+          workers="$(jq -c --argjson extra "$fallbacks" '. + $extra' <<<"$workers")"
+          echo "fallback_keys=$(tr -s ' ' <<<"$FALLBACK_KEYS" | xargs)" >> "$GITHUB_OUTPUT"
           printf '%s\n' "$workers" > /tmp/workers-configured.json
 
           # #1600: credencial configurada no equivale a slot saludable. Los workers
@@ -250,4 +260,5 @@ jobs:
       issue: ${{ matrix.issue }}
       provider: ${{ matrix.provider }}
       worker: ${{ matrix.worker }}
+      fallback_keys: ${{ needs.prepare.outputs.fallback_keys }}
     secrets: inherit

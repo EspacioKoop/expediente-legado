@@ -67,26 +67,23 @@ Si el equipo local, Tailscale u OmniRoute no están disponibles, el workflow con
 
 `.github/workflows/agent-provider-smoke.yml` valida cada slot sin crear trabajo ficticio ni dar permisos de escritura al modelo. El smoke usa Qwen Code únicamente con `read_file`, obliga a leer `AGENTS.md` y exige el marcador `AGENT_PROVIDER_SMOKE_OK file=AGENTS.md`.
 
-Al integrarse o modificarse el workflow, el push a `main` comprueba automáticamente `qwen-fallback-1`. Después puede ejecutarse manualmente desde **Actions → Agent provider smoke** para cualquiera de los cuatro slots. Esto valida conjuntamente secret, URL, modelo, compatibilidad OpenAI y tool-calling básico.
+Al integrarse o modificarse el workflow, el push a `main` comprueba automáticamente `qwen-fallback-1`. Después puede ejecutarse manualmente desde **Actions → Agent provider smoke** indicando el **número** de slot (1-12). Esto valida conjuntamente secret, URL, modelo, compatibilidad OpenAI y tool-calling básico.
 
 ### Cadena de fallback OpenAI-compatible
 
-El worker Qwen admite además **4 backends de reserva**. Esto permite trasladar al repositorio conexiones de OmniRoute, FreeInference u otros gateways siempre que expongan una API compatible con OpenAI.
+El worker Qwen admite hasta **12 backends de reserva** (#1685). Esto permite trasladar al repositorio conexiones de OmniRoute, FreeInference, NVIDIA u otros gateways siempre que expongan una API compatible con OpenAI y *tool calling*.
 
-El orden es fijo y deliberado:
+Cada slot `N` (1-12) usa:
 
-`QWEN_API_KEY` → `QWEN_FALLBACK_1_*` → `QWEN_FALLBACK_2_*` → `QWEN_FALLBACK_3_*` → `QWEN_FALLBACK_4_*`.
+| Qué | Dónde | Nombre |
+| --- | --- | --- |
+| Clave | Actions **Secret** | `QWEN_FALLBACK_N_API_KEY` |
+| Endpoint | Actions **Variable** | `QWEN_FALLBACK_N_BASE_URL` |
+| Modelo | Actions **Variable** | `QWEN_FALLBACK_N_MODEL` |
 
-Cada slot usa:
+Para añadir un slot basta con crear esas tres entradas: `scripts/agent_slots.py` descubre las variables desde `toJSON(vars)` y el worker toma la clave con `secrets[format('QWEN_FALLBACK_{0}_API_KEY', N)]`. Los secretos no se pueden enumerar, así que el pool tiene **una única tabla** (`FALLBACK_KEYS` en `agent-pool.yml`) que dice qué slots tienen clave; es el único sitio con números de slot. Para pasar de 12, añade líneas a esa tabla y sube `MAX_FALLBACKS` en el script: un test exige que coincidan.
 
-| Slot | Secret | Repository variable | Repository variable |
-| --- | --- | --- | --- |
-| 1 | `QWEN_FALLBACK_1_API_KEY` | `QWEN_FALLBACK_1_BASE_URL` | `QWEN_FALLBACK_1_MODEL` |
-| 2 | `QWEN_FALLBACK_2_API_KEY` | `QWEN_FALLBACK_2_BASE_URL` | `QWEN_FALLBACK_2_MODEL` |
-| 3 | `QWEN_FALLBACK_3_API_KEY` | `QWEN_FALLBACK_3_BASE_URL` | `QWEN_FALLBACK_3_MODEL` |
-| 4 | `QWEN_FALLBACK_4_API_KEY` | `QWEN_FALLBACK_4_BASE_URL` | `QWEN_FALLBACK_4_MODEL` |
-
-La key va siempre en **Actions Secrets**. La URL y el ID de modelo van en **Actions Variables**. Los slots vacíos se saltan. Un fallo del backend primario hace que el mismo paso se reintente con el primer slot disponible, y así sucesivamente. La misma cadena se usa al planificar, implementar y reparar CI.
+Un slot con URL pero sin clave no recibe trabajo, así que se puede preparar el endpoint antes de tener la cuenta. Cada slot es un worker propio del pool (`qwen-fallback-N`). Si `qwen-primary` no tiene clave ni OmniRoute, usa el primer fallback con clave. Antes de confiar en un slot, valida el smoke y después un issue real con plan delegado: el smoke comprueba *tool calling*, pero no que el modelo sepa implementar.
 
 No apuntes estos slots a `127.0.0.1` o `localhost`: los runners hospedados por GitHub no pueden alcanzar el OmniRoute local de tu PC. Para reutilizar una conexión de OmniRoute hay que copiar al repo el endpoint público del proveedor/gateway, el modelo y su key; alternativamente habría que usar un runner self-hosted con acceso a OmniRoute.
 
