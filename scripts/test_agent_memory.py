@@ -66,6 +66,19 @@ class AgentMemoryContractTest(unittest.TestCase):
         self.assertIn("**no despliega**", self.deno_readme)
         self.assertIn("/health", self.deno_readme)
 
+    def test_nivel2_es_fail_closed_y_ci_ejecuta_regresion(self):
+        # #1756: el comportamiento lo prueba agent_memory_test.ts; aquí solo se
+        # fija que existe, que CI lo ejecuta y que el token vive en Deno.
+        self.assertIn('"AGENT_MEMORY_NIVEL2_TOKEN"', self.deno_memory)
+        self.assertIn("AGENT_MEMORY_NIVEL2_MIN_TOKEN = 32", self.deno_memory)
+        self.assertIn("AGENT_MEMORY_NIVEL2_TOKEN", self.deno_config["tasks"]["start"])
+        self.assertIn("agent_memory_test.ts", self.deno_config["tasks"]["test"])
+        workflow = (ROOT / ".github" / "workflows" / "feedback-deno.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("deno task test", workflow)
+        self.assertIn("agent_memory_test.ts", workflow)
+
     def test_gateway_expone_memoria_sin_romper_reportes(self):
         self.assertIn('import { handleAgentMemory } from "./agent_memory.ts";', self.deno_main)
         self.assertIn('url.pathname.startsWith("/api/agent-memory/")', self.deno_main)
