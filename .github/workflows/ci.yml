@@ -20,12 +20,45 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          lfs: true
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
+      - id: scope
+        name: Resolver alcance de CI
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_BEFORE: ${{ github.event.before }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == pull_request && -n "${PR_BASE_SHA:-}" ]]; then
+            base="$PR_BASE_SHA"
+          elif [[ "$EVENT_NAME" == push && -n "${EVENT_BEFORE:-}" && ! "$EVENT_BEFORE" =~ ^0+$ ]]; then
+            base="$EVENT_BEFORE"
+          else
+            git fetch origin main --no-tags
+            base="$(git merge-base HEAD origin/main)"
+          fi
+          echo "Base CI: $base"
+          python scripts/ci_scope.py --base "$base" --head HEAD --github-output "$GITHUB_OUTPUT"
+
+      - name: Preflight infra rápido
+        if: steps.scope.outputs.mode == 'fast'
+        run: python -m unittest discover -s scripts -p 'test_*.py'
+
+      - name: Materializar LFS para CI completo
+        if: steps.scope.outputs.mode == 'full'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git lfs install --local
+          git lfs pull
+
       - name: Instalar RGBDS fijado
+        if: steps.scope.outputs.mode == 'full'
         shell: bash
         env:
           RGBDS_VERSION: v1.0.3
@@ -41,12 +74,14 @@ jobs:
           rgbasm --version
 
       - name: Compilar núcleo GB y ROM propia
+        if: steps.scope.outputs.mode == 'full'
         shell: bash
         run: |
           bash scripts/preparar_emulador_gb.sh linux-debug
           bash scripts/preparar_emulador_gb.sh rom
 
       - name: Instalar el motor declarado por el proyecto
+        if: steps.scope.outputs.mode == 'full'
         shell: bash
         run: |
           set -euo pipefail
@@ -64,6 +99,7 @@ jobs:
           echo "$RUNNER_TEMP/godot-bin" >> "$GITHUB_PATH"
 
       - name: Preflight GDScript canónico
+        if: steps.scope.outputs.mode == 'full'
         shell: bash
         # El script formatea, lintea y ejecuta la suite de scripts/. Aquí la
         # GDExtension ya está compilada, así que su ausencia sería un entorno
@@ -73,12 +109,15 @@ jobs:
         run: bash scripts/check_gdscript.sh
 
       - name: Importar, ejecutar la suite y arrancar el juego
+        if: steps.scope.outputs.mode == 'full'
         run: python scripts/verificar_godot.py
 
       - name: Arrancar Caza Píxeles 98 en el núcleo nativo
+        if: steps.scope.outputs.mode == 'full'
         run: godot4 --headless --path godot --script res://pruebas/emulador_gb_smoke.gd
 
       - name: Arrancar una ROM GB clásica en el núcleo nativo
+        if: steps.scope.outputs.mode == 'full'
         shell: bash
         run: |
           make -C gbc/fixtures/dmg_only_smoke clean all
@@ -86,6 +125,7 @@ jobs:
             -- "$GITHUB_WORKSPACE/gbc/fixtures/dmg_only_smoke/build/dmg_only_smoke.gb"
 
       - name: Arrancar la ROM CGB-only en el núcleo nativo
+        if: steps.scope.outputs.mode == 'full'
         shell: bash
         run: |
           make -C gbc/fixtures/cgb_only_smoke clean all
@@ -93,6 +133,7 @@ jobs:
             -- "$GITHUB_WORKSPACE/gbc/fixtures/cgb_only_smoke/build/cgb_only_smoke.gbc"
 
       - name: Verificar paletas GB sin recolorear CGB
+        if: steps.scope.outputs.mode == 'full'
         shell: bash
         run: |
           godot4 --headless --path godot --script res://pruebas/emulador_paletas_gb_smoke.gd \
@@ -100,6 +141,7 @@ jobs:
                "$GITHUB_WORKSPACE/gbc/fixtures/cgb_only_smoke/build/cgb_only_smoke.gbc"
 
       - name: Persistir y aislar SRAM por ROM al cerrar la portátil
+        if: steps.scope.outputs.mode == 'full'
         shell: bash
         run: |
           make -C gbc/fixtures/sram_persist_smoke clean all
@@ -108,6 +150,7 @@ jobs:
                "$GITHUB_WORKSPACE/gbc/fixtures/sram_persist_smoke/build/sram_b.gbc"
 
       - name: Pantalla legible de las ROMs propias en el núcleo nativo
+        if: steps.scope.outputs.mode == 'full'
         shell: bash
         # Mismo núcleo que la Portátil Color 98 (#805): arranca cada ROM, pulsa
         # Start y falla si el fondo visible está lleno de tiles sueltos.
