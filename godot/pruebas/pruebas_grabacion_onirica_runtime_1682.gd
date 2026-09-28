@@ -122,7 +122,7 @@ func _probar_desconocida(controlador: Node, dia: DiaFalso, anomalia: AnomaliaSue
 	)
 
 
-func _probar_contaminada(controlador: Node, dia: DiaFalso, anomalia: AnomaliaSueno3D) -> void:
+func _probar_contaminada(controlador: Node, _dia: DiaFalso, anomalia: AnomaliaSueno3D) -> void:
 	anomalia.position = Vector3(0.0, 0.0, -5.0)
 	_comprobar(
 		"segunda toma conocida puede empezar",
