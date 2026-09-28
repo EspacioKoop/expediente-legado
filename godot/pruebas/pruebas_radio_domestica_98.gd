@@ -96,7 +96,10 @@ func _probar_preflight_audio() -> void:
 
 	radio.alternar_cassette()
 	var cassette := audio.stream as AudioStreamWAV
-	_comprobar(cassette.data.hash() != otra_emisora.data.hash(), "cassette y radio no comparten la misma textura")
+	_comprobar(
+		cassette.data.hash() != otra_emisora.data.hash(),
+		"cassette y radio no comparten la misma textura"
+	)
 	_comprobar(_pico_pcm(cassette) < 0.10, "la cama de cassette conserva headroom amplio")
 	radio.queue_free()
 
