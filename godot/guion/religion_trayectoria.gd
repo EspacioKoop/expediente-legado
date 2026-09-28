@@ -21,11 +21,14 @@ static func resumir(snapshot: Dictionary) -> Dictionary:
 
 	var declaraciones := _hechos_de(canales, [ReligionEventos.CANAL_CONVICCION])
 	if not declaraciones.is_empty():
-		modulos.append(
-			_modulo(
-				MODULO_DECLARACIONES,
-				[ReligionEventos.CANAL_CONVICCION],
-				declaraciones,
+		(
+			modulos
+			. append(
+				_modulo(
+					MODULO_DECLARACIONES,
+					[ReligionEventos.CANAL_CONVICCION],
+					declaraciones,
+				)
 			)
 		)
 
@@ -37,24 +40,30 @@ static func resumir(snapshot: Dictionary) -> Dictionary:
 		],
 	)
 	if not practicas_exposiciones.is_empty():
-		modulos.append(
-			_modulo(
-				MODULO_PRACTICAS_EXPOSICIONES,
-				[
-					ReligionEventos.CANAL_PRACTICA,
-					ReligionEventos.CANAL_EXPOSICION,
-				],
-				practicas_exposiciones,
+		(
+			modulos
+			. append(
+				_modulo(
+					MODULO_PRACTICAS_EXPOSICIONES,
+					[
+						ReligionEventos.CANAL_PRACTICA,
+						ReligionEventos.CANAL_EXPOSICION,
+					],
+					practicas_exposiciones,
+				)
 			)
 		)
 
 	var vinculos := _hechos_de(canales, [ReligionEventos.CANAL_VINCULO])
 	if not vinculos.is_empty():
-		modulos.append(
-			_modulo(
-				MODULO_VINCULOS,
-				[ReligionEventos.CANAL_VINCULO],
-				vinculos,
+		(
+			modulos
+			. append(
+				_modulo(
+					MODULO_VINCULOS,
+					[ReligionEventos.CANAL_VINCULO],
+					vinculos,
+				)
 			)
 		)
 
