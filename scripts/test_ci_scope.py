@@ -62,7 +62,27 @@ class CiScopeTest(unittest.TestCase):
         self.assertIn("id: scope", workflow)
         self.assertIn("python scripts/ci_scope.py", workflow)
         self.assertIn("Preflight infra rápido", workflow)
-        self.assertIn("python -m unittest discover -s scripts -p 'test_*.py'", workflow)
+        fast = workflow.split("- name: Preflight infra rápido", 1)[1].split(
+            "- name: Materializar LFS para CI completo", 1
+        )[0]
+        self.assertIn(
+            "python -m unittest discover -s scripts -p 'test_agent_*.py'",
+            fast,
+        )
+        for test in (
+            "test_ci_scope.py",
+            "test_deno_production_freshness.py",
+            "test_parte_incidencias.py",
+            "test_workflows_yaml.py",
+        ):
+            with self.subTest(test=test):
+                self.assertIn(f"python scripts/{test}", fast)
+        self.assertIn("if [[ -f scripts/test_deno_deploy_workflow.py ]]", fast)
+        self.assertNotIn(
+            "python -m unittest discover -s scripts -p 'test_*.py'",
+            fast,
+        )
+        self.assertNotIn("git lfs pull", fast)
         self.assertIn("steps.scope.outputs.mode == 'full'", workflow)
         self.assertIn("steps.scope.outputs.mode == 'fast'", workflow)
         self.assertIn("git lfs pull", workflow)
