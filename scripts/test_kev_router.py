@@ -61,6 +61,40 @@ class KevRouterTest(unittest.TestCase):
         self.assertEqual("gemini", result["provider"])
         self.assertEqual("explicit", result["source"])
 
+    def test_labels_explicitas_en_conflicto_no_eligen_proveedor_ni_consultan_kev(self):
+        def fail_requester(**kwargs):
+            raise AssertionError(f"no debería invocarse Kev: {kwargs}")
+
+        result = kev_router.route_provider(
+            state={"title": "Issue ambiguo"},
+            labels=["agent:qwen", "bug", "agent:gemini"],
+            has_qwen=True,
+            has_gemini=True,
+            base_url="http://kev.invalid",
+            requester=fail_requester,
+        )
+        self.assertIsNone(result["provider"])
+        self.assertEqual("explicit-conflict", result["source"])
+        self.assertEqual("multiple-explicit-provider-labels", result["reason"])
+        self.assertEqual(["gemini", "qwen"], result["conflicting_providers"])
+        self.assertEqual(["qwen", "gemini"], result["available"])
+
+    def test_conflicto_de_labels_prevalece_sobre_proveedor_manual(self):
+        def fail_requester(**kwargs):
+            raise AssertionError(f"no debería invocarse Kev: {kwargs}")
+
+        result = kev_router.route_provider(
+            state={"title": "Issue ambiguo"},
+            labels=["agent:qwen", "agent:gemini"],
+            requested_provider="qwen",
+            has_qwen=True,
+            has_gemini=True,
+            base_url="http://kev.invalid",
+            requester=fail_requester,
+        )
+        self.assertIsNone(result["provider"])
+        self.assertEqual("explicit-conflict", result["source"])
+
     def test_proveedor_explicito_ausente_no_se_sustituye(self):
         result = kev_router.route_provider(
             state={"title": "Issue"},
