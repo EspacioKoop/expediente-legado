@@ -10,8 +10,9 @@ extends RefCounted
 const RUTA_CATALOGO := "res://datos/puntos_inspeccion.json"
 const PREFIJO_SELLO := "inspeccion:"
 const SEPARADOR_VARIANTE := "@"
+const SELLO_DESPERTAR_REGLAMENTARIO := "despertar-reglamentario"
 const ZONAS := ["archivo", "trayecto", "casa", "sueño"]
-const CONDICIONES_ESPECIALES := ["noche", "lluvia", "reasignacion", "gato-ausente"]
+const CONDICIONES_ESPECIALES := ["noche", "lluvia", "reasignacion", "gato-ausente", "tras-sueno"]
 
 
 static func catalogo() -> Array:
@@ -58,9 +59,10 @@ static func variantes(estado: Dictionary, punto_id: String) -> Array:
 
 ## Condiciones que se pueden demostrar desde la Jornada persistida.
 ##
-## No se inventa un reloj paralelo ni una bandera de clima: Jornada y Clima
-## siguen siendo las fuentes de verdad. "Tras salir del sueño" queda fuera hasta
-## que exista un hecho persistido que distinga ese instante de cualquier mañana.
+## No se inventa un reloj paralelo ni una bandera de clima: Jornada, Clima y
+## Sellos siguen siendo fuentes de verdad. `despertar-reglamentario` ya registra
+## de forma persistente que se completó una noche; fuera del sueño permite la
+## variante `tras-sueno` sin añadir otra bandera.
 static func condiciones_activas(estado: Dictionary) -> Array:
 	var jornada = estado.get("jornada", {})
 	if typeof(jornada) != TYPE_DICTIONARY:
@@ -77,6 +79,11 @@ static func condiciones_activas(estado: Dictionary) -> Array:
 	var gato = jornada.get("gato", {})
 	if typeof(gato) == TYPE_DICTIONARY and not bool(gato.get("presente", true)):
 		activas.append("gato-ausente")
+	if (
+		String(jornada.get("fase", "")) != "sueño"
+		and Sellos.tiene_sello(estado, SELLO_DESPERTAR_REGLAMENTARIO)
+	):
+		activas.append("tras-sueno")
 	return activas
 
 
