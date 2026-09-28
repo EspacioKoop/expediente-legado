@@ -66,7 +66,5 @@ static func opciones_sueno(jornada: Dictionary, base: Dictionary = {}) -> Dictio
 	# como el sueño degradado que ya haya pedido priorizar vistas.
 	var nivel := clampi(int(jornada.get(CLAVE_PRESION_INDECISION, 0)), 0, 2)
 	if nivel > 0:
-		opciones["rumiacion_indecision"] = maxi(
-			nivel, int(opciones.get("rumiacion_indecision", 0))
-		)
+		opciones["rumiacion_indecision"] = maxi(nivel, int(opciones.get("rumiacion_indecision", 0)))
 	return opciones
