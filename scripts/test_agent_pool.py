@@ -18,6 +18,7 @@ def issue(
     *labels,
     created="2026-09-28T00:00:00Z",
     preferred=None,
+    comments=None,
 ):
     result = {
         "number": number,
@@ -26,6 +27,8 @@ def issue(
     }
     if preferred is not None:
         result["preferredProvider"] = preferred
+    if comments is not None:
+        result["comments"] = [{"body": body} for body in comments]
     return result
 
 
@@ -95,6 +98,65 @@ class AgentPoolTest(unittest.TestCase):
         )
         self.assertEqual("qwen", fallback[0]["provider"])
 
+    def test_reserva_slot_para_provider_explicito_antes_de_flexible(self):
+        workers = [
+            {"worker": "qwen-primary", "provider": "qwen"},
+            {"worker": "gemini", "provider": "gemini"},
+        ]
+        issues = [
+            issue(
+                35,
+                "agent:auto",
+                created="2026-09-27T00:00:00Z",
+                preferred="gemini",
+            ),
+            issue(
+                36,
+                "agent:gemini",
+                created="2026-09-28T00:00:00Z",
+            ),
+        ]
+
+        tasks = mod.select_tasks(issues, workers, max_parallel=2)
+
+        self.assertEqual(
+            [
+                {"issue": 36, "provider": "gemini", "worker": "gemini"},
+                {"issue": 35, "provider": "qwen", "worker": "qwen-primary"},
+            ],
+            tasks,
+        )
+
+    def test_evitar_worker_que_ya_fallo_planificando(self):
+        candidate = issue(
+            37,
+            "agent:auto",
+            preferred="gemini",
+            comments=[
+                "AGENT_POOL_WORKER_FAILURE worker=gemini provider=gemini stage=plan run=1"
+            ],
+        )
+
+        tasks = mod.select_tasks(candidate and [candidate], self.workers)
+
+        self.assertEqual("qwen-primary", tasks[0]["worker"])
+        self.assertEqual("qwen", tasks[0]["provider"])
+
+    def test_retry_reset_permite_reutilizar_worker(self):
+        candidate = issue(
+            38,
+            "agent:auto",
+            preferred="gemini",
+            comments=[
+                "AGENT_POOL_WORKER_FAILURE worker=gemini provider=gemini stage=plan run=1",
+                "AGENT_POOL_RETRY_RESET motivo=cuota-recuperada",
+            ],
+        )
+
+        tasks = mod.select_tasks([candidate], self.workers)
+
+        self.assertEqual("gemini", tasks[0]["worker"])
+
     def test_bloquea_estados_que_ya_tienen_trabajo(self):
         issues = [
             issue(40, "agent:auto", "agent:working"),
@@ -127,7 +189,7 @@ class AgentPoolTest(unittest.TestCase):
         ]
         self.assertEqual(6, len(mod.select_tasks(issues, workers, max_parallel=99)))
 
-    def test_workflows_comparten_cola_y_kev(self):
+    def test_workflows_comparten_cola_y_failover(self):
         pool = (ROOT / ".github" / "workflows" / "agent-pool.yml").read_text(
             encoding="utf-8"
         )
@@ -144,6 +206,9 @@ class AgentPoolTest(unittest.TestCase):
 
         self.assertIn("python3 scripts/kev_router.py", pool)
         self.assertIn("preferredProvider", pool)
+        self.assertIn("--json comments", pool)
+        self.assertIn("AGENT_POOL_WORKER_FAILURE", worker)
+        self.assertIn('maxSessionTurns":40', worker)
         self.assertIn("tailscale/github-action@v4", worker)
         self.assertIn("steps.omniroute.outputs.ready", worker)
         self.assertNotIn("\n  schedule:\n", autopilot)
