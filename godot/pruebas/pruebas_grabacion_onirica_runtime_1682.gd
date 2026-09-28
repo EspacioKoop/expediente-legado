@@ -100,7 +100,7 @@ func _probar_valida(controlador: Node, dia: DiaFalso, anomalia: AnomaliaSueno3D)
 		GrabacionOniricaEstado.seleccion_actual(dia.partida.estado),
 		{},
 	)
-	var antes := dia.partida.estado[GrabacionOniricaEstado.CLAVE_ESTADO]["cinta"]["tomas"].size()
+	var antes: int = int(dia.partida.estado[GrabacionOniricaEstado.CLAVE_ESTADO]["cinta"]["tomas"].size())
 	var repetida: Dictionary = controlador.finalizar_grabacion(true, false)
 	_comprobar("finalizar dos veces se rechaza", repetida.get("ok"), false)
 	_comprobar(
@@ -112,7 +112,7 @@ func _probar_valida(controlador: Node, dia: DiaFalso, anomalia: AnomaliaSueno3D)
 
 
 func _probar_desconocida(controlador: Node, dia: DiaFalso, anomalia: AnomaliaSueno3D) -> void:
-	var antes := dia.partida.estado[GrabacionOniricaEstado.CLAVE_ESTADO]["cinta"]["tomas"].size()
+	var antes: int = int(dia.partida.estado[GrabacionOniricaEstado.CLAVE_ESTADO]["cinta"]["tomas"].size())
 	var inicio: Dictionary = controlador.iniciar_grabacion_anomalia(anomalia)
 	_comprobar("un original no leído no inicia toma", inicio.get("ok"), false)
 	_comprobar(
@@ -142,7 +142,7 @@ func _probar_contaminada(controlador: Node, _dia: DiaFalso, anomalia: AnomaliaSu
 
 
 func _probar_salida_sueno(controlador: Node, dia: DiaFalso, anomalia: AnomaliaSueno3D) -> void:
-	var antes := dia.partida.estado[GrabacionOniricaEstado.CLAVE_ESTADO]["cinta"]["tomas"].size()
+	var antes: int = int(dia.partida.estado[GrabacionOniricaEstado.CLAVE_ESTADO]["cinta"]["tomas"].size())
 	_comprobar(
 		"toma previa a despertar empieza",
 		controlador.iniciar_grabacion_anomalia(anomalia).get("ok"),
@@ -180,7 +180,7 @@ func _probar_roundtrip(partida: Partida) -> void:
 
 func _limpiar() -> void:
 	for sufijo in ["", ".nuevo", ".roto"]:
-		var ruta := _ruta + sufijo
+		var ruta: String = _ruta + String(sufijo)
 		if FileAccess.file_exists(ruta):
 			DirAccess.remove_absolute(ProjectSettings.globalize_path(ruta))
 
