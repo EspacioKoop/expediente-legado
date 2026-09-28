@@ -9,6 +9,17 @@ signal documento_abierto(id: String)
 signal ruta_abierta(ruta: String)
 signal paquete_software_obtenido(id: String)
 
+const FONDO_BARRA := Color("#c9dbe8")
+const FONDO_BARRA_HOVER := Color("#e4eff6")
+const FONDO_BARRA_PULSADA := Color("#b8cddd")
+const FONDO_RUTA := Color("#f8fbfc")
+const FONDO_LISTA := Color("#eef4f7")
+const FONDO_VISOR := Color("#fffaf0")
+const BORDE := Color("#687884")
+const FOCO := Color("#315f86")
+const TINTA := Color("#1f2930")
+const TINTA_SECUNDARIA := Color("#4e5c66")
+
 var _modelo := ExploradorSigaModelo.new()
 var _medios := MediosExtraiblesSigaModelo.new()
 var _ruta_actual := ExploradorSigaModelo.RUTA_RAIZ
@@ -42,6 +53,7 @@ func _ready() -> void:
 	custom_minimum_size = Vector2(560, 390)
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	size_flags_vertical = Control.SIZE_EXPAND_FILL
+	add_theme_constant_override("separation", 5)
 	_construir_interfaz()
 	_navegar_a(ExploradorSigaModelo.RUTA_RAIZ, true)
 
@@ -56,6 +68,7 @@ func _construir_interfaz() -> void:
 	_boton_atras.name = "Atras"
 	_boton_atras.text = "<"
 	_boton_atras.tooltip_text = tr("EXPLORADOR_ATRAS")
+	_estilizar_boton_barra(_boton_atras)
 	_boton_atras.pressed.connect(_ir_atras)
 	barra.add_child(_boton_atras)
 
@@ -63,6 +76,7 @@ func _construir_interfaz() -> void:
 	_boton_adelante.name = "Adelante"
 	_boton_adelante.text = ">"
 	_boton_adelante.tooltip_text = tr("EXPLORADOR_ADELANTE")
+	_estilizar_boton_barra(_boton_adelante)
 	_boton_adelante.pressed.connect(_ir_adelante)
 	barra.add_child(_boton_adelante)
 
@@ -70,6 +84,7 @@ func _construir_interfaz() -> void:
 	_boton_arriba.name = "Arriba"
 	_boton_arriba.text = "↑"
 	_boton_arriba.tooltip_text = tr("EXPLORADOR_SUBIR")
+	_estilizar_boton_barra(_boton_arriba)
 	_boton_arriba.pressed.connect(_ir_arriba)
 	barra.add_child(_boton_arriba)
 
@@ -77,6 +92,11 @@ func _construir_interfaz() -> void:
 	_ruta.name = "Ruta"
 	_ruta.placeholder_text = tr("EXPLORADOR_RAIZ")
 	_ruta.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_ruta.add_theme_color_override("font_color", TINTA)
+	_ruta.add_theme_color_override("caret_color", FOCO)
+	_ruta.add_theme_color_override("selection_color", Color("#b8d4ea"))
+	_ruta.add_theme_stylebox_override("normal", _caja(FONDO_RUTA, BORDE, 1, 1, 7.0, 4.0))
+	_ruta.add_theme_stylebox_override("focus", _caja(FONDO_RUTA, FOCO, 2, 1, 6.0, 3.0))
 	_ruta.text_submitted.connect(_ruta_introducida)
 	barra.add_child(_ruta)
 
@@ -88,11 +108,13 @@ func _construir_interfaz() -> void:
 	_selector_medio = OptionButton.new()
 	_selector_medio.name = "Medio"
 	_selector_medio.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_estilizar_control_barra(_selector_medio)
 	_selector_medio.item_selected.connect(_medio_seleccionado)
 	barra_medios.add_child(_selector_medio)
 
 	_boton_medio = Button.new()
 	_boton_medio.name = "InsertarRetirarMedio"
+	_estilizar_boton_barra(_boton_medio)
 	_boton_medio.pressed.connect(_alternar_medio)
 	barra_medios.add_child(_boton_medio)
 
@@ -107,6 +129,10 @@ func _construir_interfaz() -> void:
 	_lista.custom_minimum_size = Vector2(0, 180)
 	_lista.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_lista.select_mode = ItemList.SELECT_SINGLE
+	_lista.add_theme_color_override("font_color", TINTA)
+	_lista.add_theme_color_override("font_selected_color", Color("#f7fbff"))
+	_lista.add_theme_stylebox_override("panel", _caja(FONDO_LISTA, BORDE, 1, 1, 7.0, 6.0))
+	_lista.add_theme_stylebox_override("focus", _caja(Color("#d9e8f1"), FOCO, 2, 1, 6.0, 5.0))
 	_lista.item_activated.connect(_activar_indice)
 	contenido.add_child(_lista)
 
@@ -116,18 +142,67 @@ func _construir_interfaz() -> void:
 	_visor.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_visor.fit_content = false
 	_visor.selection_enabled = true
+	_visor.add_theme_color_override("default_color", TINTA)
+	_visor.add_theme_stylebox_override(
+		"normal", _caja(FONDO_VISOR, Color("#9d967f"), 1, 1, 10.0, 8.0)
+	)
+	_visor.add_theme_stylebox_override("focus", _caja(FONDO_VISOR, FOCO, 2, 1, 9.0, 7.0))
 	_visor.text = tr("EXPLORADOR_VISOR_INICIAL")
 	contenido.add_child(_visor)
 
 	_estado = Label.new()
 	_estado.name = "Estado"
 	_estado.text = ""
+	_estado.add_theme_font_size_override("font_size", 12)
+	_estado.add_theme_color_override("font_color", TINTA_SECUNDARIA)
 	add_child(_estado)
 
 	_incidencia = FalloMundanoSigaPanel.new()
 	add_child(_incidencia)
 
 	_refrescar_medios()
+
+
+func _estilizar_boton_barra(boton: Button) -> void:
+	boton.add_theme_color_override("font_color", TINTA)
+	boton.add_theme_color_override("font_focus_color", TINTA)
+	boton.add_theme_stylebox_override("normal", _caja(FONDO_BARRA, BORDE, 1, 1, 7.0, 4.0))
+	boton.add_theme_stylebox_override("hover", _caja(FONDO_BARRA_HOVER, BORDE, 1, 1, 7.0, 4.0))
+	boton.add_theme_stylebox_override("pressed", _caja(FONDO_BARRA_PULSADA, BORDE, 1, 1, 7.0, 4.0))
+	boton.add_theme_stylebox_override("focus", _caja(FONDO_BARRA_HOVER, FOCO, 2, 1, 6.0, 3.0))
+
+
+func _estilizar_control_barra(control: Control) -> void:
+	control.add_theme_color_override("font_color", TINTA)
+	control.add_theme_color_override("font_focus_color", TINTA)
+	control.add_theme_stylebox_override("normal", _caja(FONDO_BARRA, BORDE, 1, 1, 7.0, 4.0))
+	control.add_theme_stylebox_override("focus", _caja(FONDO_BARRA_HOVER, FOCO, 2, 1, 6.0, 3.0))
+
+
+func _caja(
+	fondo: Color,
+	borde: Color,
+	ancho: int,
+	radio: int,
+	margen_horizontal: float,
+	margen_vertical: float
+) -> StyleBoxFlat:
+	var caja := StyleBoxFlat.new()
+	caja.bg_color = fondo
+	caja.border_color = borde
+	caja.border_width_left = ancho
+	caja.border_width_top = ancho
+	caja.border_width_right = ancho
+	caja.border_width_bottom = ancho
+	caja.corner_radius_top_left = radio
+	caja.corner_radius_top_right = radio
+	caja.corner_radius_bottom_left = radio
+	caja.corner_radius_bottom_right = radio
+	caja.content_margin_left = margen_horizontal
+	caja.content_margin_top = margen_vertical
+	caja.content_margin_right = margen_horizontal
+	caja.content_margin_bottom = margen_vertical
+	return caja
 
 
 func _navegar_a(ruta: String, registrar_historial: bool) -> void:
