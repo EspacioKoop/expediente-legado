@@ -1,6 +1,6 @@
-# Agentes autónomos: Qwen + Gemini
+# Agentes autónomos: autopilot, pool, Qwen + Gemini
 
-El repositorio puede convertir issues autorizados en PRs draft usando Qwen Code o Gemini CLI sin entregar al modelo credenciales de push.
+El repositorio puede convertir issues autorizados en PRs draft usando Qwen Code o Gemini CLI sin entregar al modelo credenciales de push. Hay dos carriles: el autopilot legado para cola serial y el pool opt-in para paralelismo controlado de hasta seis workers.
 
 ## Configuración mínima
 
@@ -45,10 +45,11 @@ Configuración del repositorio:
 | Secret | `OMNIROUTE_API_KEY` | API key de endpoint creada en OmniRoute; no usar la contraseña del dashboard |
 | Variable | `OMNIROUTE_BASE_URL` | URL privada Tailscale terminada en `/v1` |
 | Variable | `OMNIROUTE_MODEL` | Modelo, alias o combo de OmniRoute; recomendado: `autopilot-code` |
-| Secret | `TS_OAUTH_CLIENT_ID` | Client ID de la identidad federada de Tailscale |
-| Secret | `TS_AUDIENCE` | Audience de la identidad federada |
+| Secret | `TS_OAUTH_CLIENT_ID` | Client ID de Tailscale |
+| Secret | `TS_OAUTH_SECRET` | OAuth secret preferente para el tag `github-autopilot` |
+| Secret | `TS_AUDIENCE` | Audience usada solo como fallback OIDC |
 
-El workflow usa `tailscale/github-action@v4` con `tag:github-autopilot`. La policy de la tailnet debe permitir a ese tag únicamente TCP/443 hacia el equipo que ejecuta OmniRoute. No usar Tailscale Funnel ni abrir los puertos 20128/20130/20131 en el router.
+El workflow usa `tailscale/github-action@v4` con `tag:github-autopilot`. OAuth (`TS_OAUTH_CLIENT_ID` + `TS_OAUTH_SECRET`) tiene prioridad; OIDC (`TS_OAUTH_CLIENT_ID` + `TS_AUDIENCE`) queda como fallback. Si Tailscale falla, OmniRoute se marca como no disponible y el worker continúa por los backends directos. La policy de la tailnet debe permitir al tag únicamente TCP/443 hacia el equipo que ejecuta OmniRoute. No usar Tailscale Funnel ni abrir los puertos 20128/20130/20131 en el router.
 
 En la máquina que aloja OmniRoute, publica únicamente el puerto API local mediante `tailscale serve --bg http://127.0.0.1:<puerto>`, usa la URL MagicDNS resultante terminada en `/v1` como `OMNIROUTE_BASE_URL` y restringe la policy para que `tag:github-autopilot` solo pueda alcanzar TCP/443 de ese equipo.
 
@@ -109,6 +110,21 @@ Los labels se crean automáticamente al integrarse el workflow:
 - `agent:needs-human`: hubo ambigüedad, conflicto, falta de configuración o se agotó la reparación automática.
 
 Etiquetar un issue con `agent:auto`, `agent:qwen` o `agent:gemini` lo dispara. Además, cada hora el scheduler recoge el primer `agent:auto` que siga pendiente. También se puede lanzar **Agent autopilot** manualmente desde Actions indicando issue y proveedor.
+
+### Pool paralelo
+
+La etiqueta `agent:pool` entra en el dispatcher paralelo documentado en [`agents/parallel-pool.md`](agents/parallel-pool.md). No debe coexistir con `agent:auto` durante la migración actual.
+
+El dispatcher:
+
+- reúne hasta seis issues elegibles y usa como máximo un trabajo por slot/proveedor en cada tanda;
+- separa Qwen primario, Gemini y cuatro slots OpenAI-compatible;
+- aplica `concurrency` por issue para impedir dos workers simultáneos sobre la misma tarea;
+- sigue publicando y releyendo CLAIMs en #182: el lock técnico no sustituye la reserva;
+- ejecuta context packer, Deno KV y CI brain antes de abrir un PR draft;
+- ante cambios fuera del CLAIM, restaura el intento, libera la reserva y replantea hasta dos veces antes de escalar a `agent:needs-human`.
+
+El barrido del pool se ejecuta cada 15 minutos, además del disparo por etiqueta. El autopilot `agent:auto` conserva su carril separado hasta completar la migración.
 
 ## Normas Platino, wiki y memoria
 
@@ -188,7 +204,8 @@ No son necesarias para empezar:
 ## Límites deliberados
 
 - nunca merge automático;
-- una sola creación autónoma a la vez para reducir colisiones;
+- el autopilot legado conserva concurrencia serial; el pool `agent:pool` permite hasta seis workers, uno por slot y nunca dos simultáneos sobre el mismo issue;
+- máximo dos replans automáticos cuando un intento sale de las rutas del CLAIM;
 - máximo 12 rutas por corte;
 - máximo dos reparaciones automáticas de CI;
 - no se automatizan validaciones humanas visuales, mando físico ni decisiones narrativas;
