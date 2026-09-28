@@ -33,3 +33,9 @@ def test_cancelar_retrocede_antes_de_cerrar_el_menu() -> None:
     assert "_mostrar_principal(_opciones)" in codigo
     assert "_mostrar_principal(_sellos)" in codigo
     assert "_mostrar_principal(_historial_boton)" in codigo
+
+
+def test_diorama_responde_al_foco_y_al_hover() -> None:
+    codigo = INICIO.read_text(encoding="utf-8")
+    assert "boton.focus_entered.connect(_diorama.enfocar.bind(zona))" in codigo
+    assert "boton.mouse_entered.connect(_diorama.enfocar.bind(zona))" in codigo
