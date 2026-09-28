@@ -1,0 +1,131 @@
+extends SceneTree
+
+var _pasadas := 0
+var _fallos := 0
+var _completados: Array[String] = []
+var _rumbos: Array[Vector3] = []
+
+
+func _initialize() -> void:
+	_ejecutar.call_deferred()
+
+
+func _ejecutar() -> void:
+	await _probar_secuencia()
+	await _probar_permanencia()
+	print("Sueño variedad objetivos 299: %d pasadas, %d fallos" % [_pasadas, _fallos])
+	quit(1 if _fallos else 0)
+
+
+func _actor() -> CharacterBody3D:
+	var actor := CharacterBody3D.new()
+	var colision := CollisionShape3D.new()
+	var forma := CapsuleShape3D.new()
+	forma.radius = 0.35
+	forma.height = 1.5
+	colision.shape = forma
+	actor.add_child(colision)
+	root.add_child(actor)
+	return actor
+
+
+func _controlador(actor: Node3D) -> SuenoObjetivoVariedad3D:
+	var controlador := SuenoObjetivoVariedad3D.new()
+	root.add_child(controlador)
+	controlador.completado.connect(_al_completar)
+	controlador.rumbo_cambiado.connect(_al_rumbo)
+	return controlador
+
+
+func _probar_secuencia() -> void:
+	_completados.clear()
+	_rumbos.clear()
+	var actor := _actor()
+	actor.position = Vector3(8.0, 0.0, 0.0)
+	var controlador := _controlador(actor)
+	var puntos := [Vector3.ZERO, Vector3(4.0, 0.0, 0.0)]
+	_comprobar(
+		"secuencia se configura",
+		controlador.configurar(
+			"escena:secuencia",
+			SuenoObjetivoVariedad3D.TIPO_SECUENCIA,
+			actor,
+			puntos,
+		),
+		true,
+	)
+	await physics_frame
+	actor.position = puntos[1]
+	await physics_frame
+	await physics_frame
+	_comprobar("saltar al segundo paso no completa", _completados.size(), 0)
+
+	actor.position = puntos[0]
+	await physics_frame
+	await physics_frame
+	_comprobar("primer paso cambia el rumbo", _rumbos.size(), 1)
+	_comprobar("rumbo apunta al segundo paso", _rumbos[0], puntos[1])
+
+	actor.position = Vector3(8.0, 0.0, 0.0)
+	await physics_frame
+	actor.position = puntos[1]
+	await physics_frame
+	await physics_frame
+	_comprobar("segundo paso completa una vez", _completados, ["escena:secuencia"])
+	_comprobar("controlador queda terminal", controlador.terminado(), true)
+	controlador.queue_free()
+	actor.queue_free()
+	await process_frame
+
+
+func _probar_permanencia() -> void:
+	_completados.clear()
+	_rumbos.clear()
+	var actor := _actor()
+	actor.position = Vector3(5.0, 0.0, 0.0)
+	var controlador := _controlador(actor)
+	_comprobar(
+		"permanencia se configura",
+		controlador.configurar(
+			"escena:permanencia",
+			SuenoObjetivoVariedad3D.TIPO_PERMANENCIA,
+			actor,
+			[Vector3.ZERO],
+		),
+		true,
+	)
+	await physics_frame
+	actor.position = Vector3.ZERO
+	await physics_frame
+	await physics_frame
+	controlador._physics_process(SuenoObjetivoVariedad3D.TIEMPO_PERMANENCIA * 0.6)
+	_comprobar("medio intervalo no completa", _completados.size(), 0)
+	actor.position = Vector3(5.0, 0.0, 0.0)
+	await physics_frame
+	await physics_frame
+	actor.position = Vector3.ZERO
+	await physics_frame
+	await physics_frame
+	controlador._physics_process(SuenoObjetivoVariedad3D.TIEMPO_PERMANENCIA + 0.01)
+	_comprobar("salir reinicia y volver permite completar", _completados, ["escena:permanencia"])
+	controlador._physics_process(SuenoObjetivoVariedad3D.TIEMPO_PERMANENCIA + 1.0)
+	_comprobar("permanencia terminal no duplica", _completados.size(), 1)
+	controlador.queue_free()
+	actor.queue_free()
+	await process_frame
+
+
+func _al_completar(objetivo_id: String) -> void:
+	_completados.append(objetivo_id)
+
+
+func _al_rumbo(posicion: Vector3) -> void:
+	_rumbos.append(posicion)
+
+
+func _comprobar(nombre: String, obtenido, esperado) -> void:
+	if obtenido == esperado:
+		_pasadas += 1
+		return
+	_fallos += 1
+	push_error("FALLO variedad #299: %s (obtenido=%s esperado=%s)" % [nombre, obtenido, esperado])
