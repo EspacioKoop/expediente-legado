@@ -18,6 +18,14 @@ on:
     secrets:
       QWEN_API_KEY:
         required: false
+      OMNIROUTE_API_KEY:
+        required: false
+      TS_OAUTH_CLIENT_ID:
+        required: false
+      TS_OAUTH_SECRET:
+        required: false
+      TS_AUDIENCE:
+        required: false
       QWEN_FALLBACK_1_API_KEY:
         required: false
       QWEN_FALLBACK_2_API_KEY:
@@ -77,6 +85,9 @@ jobs:
           PROVIDER: ${{ inputs.provider }}
           WORKER: ${{ inputs.worker }}
           HAS_QWEN: ${{ secrets.QWEN_API_KEY != '' }}
+          HAS_TS_OAUTH: ${{ secrets.TS_OAUTH_CLIENT_ID != '' && secrets.TS_OAUTH_SECRET != '' }}
+          HAS_TS_OIDC: ${{ secrets.TS_OAUTH_CLIENT_ID != '' && secrets.TS_AUDIENCE != '' }}
+          HAS_OMNIROUTE: ${{ secrets.OMNIROUTE_API_KEY != '' && secrets.TS_OAUTH_CLIENT_ID != '' && (secrets.TS_OAUTH_SECRET != '' || secrets.TS_AUDIENCE != '') && vars.OMNIROUTE_BASE_URL != '' && vars.OMNIROUTE_MODEL != '' }}
           HAS_QWEN_FALLBACK_1: ${{ secrets.QWEN_FALLBACK_1_API_KEY != '' }}
           HAS_QWEN_FALLBACK_2: ${{ secrets.QWEN_FALLBACK_2_API_KEY != '' }}
           HAS_QWEN_FALLBACK_3: ${{ secrets.QWEN_FALLBACK_3_API_KEY != '' }}
@@ -90,7 +101,7 @@ jobs:
           set -euo pipefail
           [[ "$ISSUE" =~ ^[0-9]+$ ]] || exit 2
           case "$WORKER:$PROVIDER" in
-            qwen-primary:qwen) [[ "$HAS_QWEN" == true ]] || exit 3 ;;
+            qwen-primary:qwen) [[ "$HAS_QWEN" == true || "$HAS_OMNIROUTE" == true ]] || exit 3 ;;
             qwen-fallback-1:qwen) [[ "$HAS_QWEN_FALLBACK_1" == true && -n "$FALLBACK_1_URL" ]] || exit 3 ;;
             qwen-fallback-2:qwen) [[ "$HAS_QWEN_FALLBACK_2" == true && -n "$FALLBACK_2_URL" ]] || exit 3 ;;
             qwen-fallback-3:qwen) [[ "$HAS_QWEN_FALLBACK_3" == true && -n "$FALLBACK_3_URL" ]] || exit 3 ;;
@@ -100,8 +111,11 @@ jobs:
           esac
 
           labels="$(gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json labels --jq '[.labels[].name]|join(" ")')"
-          [[ " $labels " == *" agent:pool "* ]] || { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
-          [[ " $labels " == *" agent:auto "* ]] && { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
+          queue=false
+          for label in agent:auto agent:pool agent:qwen agent:gemini; do
+            [[ " $labels " == *" $label "* ]] && queue=true
+          done
+          [[ "$queue" == true ]] || { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
           for blocked in agent:working agent:pr-open agent:needs-human; do
             [[ " $labels " == *" $blocked "* ]] && { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
           done
@@ -123,43 +137,103 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Conectar qwen-primary a OmniRoute por Tailscale (OAuth)
+        if: steps.guard.outputs.run == 'true' && inputs.worker == 'qwen-primary' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH == 'true'
+        continue-on-error: true
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:github-autopilot
+
+      - name: Conectar qwen-primary a OmniRoute por Tailscale (OIDC)
+        if: steps.guard.outputs.run == 'true' && inputs.worker == 'qwen-primary' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH != 'true' && env.HAS_TS_OIDC == 'true'
+        continue-on-error: true
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          audience: ${{ secrets.TS_AUDIENCE }}
+          tags: tag:github-autopilot
+
+      - id: omniroute
+        name: Comprobar OmniRoute para qwen-primary
+        if: steps.guard.outputs.run == 'true' && inputs.worker == 'qwen-primary' && env.HAS_OMNIROUTE == 'true'
+        continue-on-error: true
+        env:
+          OMNIROUTE_BASE_URL: ${{ vars.OMNIROUTE_BASE_URL }}
+          OMNIROUTE_API_KEY: ${{ secrets.OMNIROUTE_API_KEY }}
+        run: |
+          set -euo pipefail
+          base="${OMNIROUTE_BASE_URL%/}"
+          code="$(curl -sS --max-time 12 -o /tmp/omniroute-models.json -w '%{http_code}' \
+            -H "Authorization: Bearer $OMNIROUTE_API_KEY" "$base/models" || true)"
+          [[ "$code" == 200 ]]
+          jq -e '.data | type == "array"' /tmp/omniroute-models.json >/dev/null
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+
       - id: qwen_config
         name: Resolver endpoint Qwen
         if: steps.guard.outputs.run == 'true' && inputs.provider == 'qwen'
         env:
           WORKER: ${{ inputs.worker }}
+          OMNI_READY: ${{ steps.omniroute.outputs.ready }}
+          OMNI_URL: ${{ vars.OMNIROUTE_BASE_URL }}
+          OMNI_MODEL: ${{ vars.OMNIROUTE_MODEL }}
           PRIMARY_KEY: ${{ secrets.QWEN_API_KEY }}
           PRIMARY_URL: ${{ vars.QWEN_BASE_URL }}
           PRIMARY_MODEL: ${{ vars.QWEN_MODEL }}
+          F1_KEY: ${{ secrets.QWEN_FALLBACK_1_API_KEY }}
           F1_URL: ${{ vars.QWEN_FALLBACK_1_BASE_URL }}
           F1_MODEL: ${{ vars.QWEN_FALLBACK_1_MODEL }}
+          F2_KEY: ${{ secrets.QWEN_FALLBACK_2_API_KEY }}
           F2_URL: ${{ vars.QWEN_FALLBACK_2_BASE_URL }}
           F2_MODEL: ${{ vars.QWEN_FALLBACK_2_MODEL }}
+          F3_KEY: ${{ secrets.QWEN_FALLBACK_3_API_KEY }}
           F3_URL: ${{ vars.QWEN_FALLBACK_3_BASE_URL }}
           F3_MODEL: ${{ vars.QWEN_FALLBACK_3_MODEL }}
+          F4_KEY: ${{ secrets.QWEN_FALLBACK_4_API_KEY }}
           F4_URL: ${{ vars.QWEN_FALLBACK_4_BASE_URL }}
           F4_MODEL: ${{ vars.QWEN_FALLBACK_4_MODEL }}
         run: |
           set -euo pipefail
           model="${PRIMARY_MODEL:-qwen3-coder-plus}"
+          credential=""
           case "$WORKER" in
             qwen-primary)
-              url="$PRIMARY_URL"
-              if [[ -z "$url" ]]; then
-                if [[ "$PRIMARY_KEY" == sk-sp-* ]]; then
-                  url="https://coding-intl.dashscope.aliyuncs.com/v1"
-                else
-                  url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+              if [[ "$OMNI_READY" == true ]]; then
+                credential=omniroute
+                url="$OMNI_URL"
+                model="$OMNI_MODEL"
+              elif [[ -n "$PRIMARY_KEY" ]]; then
+                credential=primary
+                url="$PRIMARY_URL"
+                if [[ -z "$url" ]]; then
+                  if [[ "$PRIMARY_KEY" == sk-sp-* ]]; then
+                    url="https://coding-intl.dashscope.aliyuncs.com/v1"
+                  else
+                    url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+                  fi
                 fi
+              elif [[ -n "$F1_KEY" && -n "$F1_URL" ]]; then
+                credential=fallback-1; url="$F1_URL"; model="${F1_MODEL:-$model}"
+              elif [[ -n "$F2_KEY" && -n "$F2_URL" ]]; then
+                credential=fallback-2; url="$F2_URL"; model="${F2_MODEL:-$model}"
+              elif [[ -n "$F3_KEY" && -n "$F3_URL" ]]; then
+                credential=fallback-3; url="$F3_URL"; model="${F3_MODEL:-$model}"
+              elif [[ -n "$F4_KEY" && -n "$F4_URL" ]]; then
+                credential=fallback-4; url="$F4_URL"; model="${F4_MODEL:-$model}"
+              else
+                exit 3
               fi
               ;;
-            qwen-fallback-1) url="$F1_URL"; model="${F1_MODEL:-$model}" ;;
-            qwen-fallback-2) url="$F2_URL"; model="${F2_MODEL:-$model}" ;;
-            qwen-fallback-3) url="$F3_URL"; model="${F3_MODEL:-$model}" ;;
-            qwen-fallback-4) url="$F4_URL"; model="${F4_MODEL:-$model}" ;;
+            qwen-fallback-1) credential=fallback-1; url="$F1_URL"; model="${F1_MODEL:-$model}" ;;
+            qwen-fallback-2) credential=fallback-2; url="$F2_URL"; model="${F2_MODEL:-$model}" ;;
+            qwen-fallback-3) credential=fallback-3; url="$F3_URL"; model="${F3_MODEL:-$model}" ;;
+            qwen-fallback-4) credential=fallback-4; url="$F4_URL"; model="${F4_MODEL:-$model}" ;;
             *) exit 2 ;;
           esac
-          [[ -n "$url" && -n "$model" ]] || exit 3
+          [[ -n "$credential" && -n "$url" && -n "$model" ]] || exit 3
+          echo "credential=$credential" >> "$GITHUB_OUTPUT"
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "model=$model" >> "$GITHUB_OUTPUT"
 
@@ -236,7 +310,7 @@ jobs:
         if: steps.guard.outputs.run == 'true' && inputs.provider == 'qwen'
         uses: QwenLM/qwen-code-action@v1
         with:
-          openai_api_key: ${{ inputs.worker == 'qwen-primary' && secrets.QWEN_API_KEY || inputs.worker == 'qwen-fallback-1' && secrets.QWEN_FALLBACK_1_API_KEY || inputs.worker == 'qwen-fallback-2' && secrets.QWEN_FALLBACK_2_API_KEY || inputs.worker == 'qwen-fallback-3' && secrets.QWEN_FALLBACK_3_API_KEY || secrets.QWEN_FALLBACK_4_API_KEY }}
+          openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || steps.qwen_config.outputs.credential == 'fallback-1' && secrets.QWEN_FALLBACK_1_API_KEY || steps.qwen_config.outputs.credential == 'fallback-2' && secrets.QWEN_FALLBACK_2_API_KEY || steps.qwen_config.outputs.credential == 'fallback-3' && secrets.QWEN_FALLBACK_3_API_KEY || secrets.QWEN_FALLBACK_4_API_KEY }}
           openai_base_url: ${{ steps.qwen_config.outputs.url }}
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
@@ -406,7 +480,7 @@ jobs:
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
-          openai_api_key: ${{ inputs.worker == 'qwen-primary' && secrets.QWEN_API_KEY || inputs.worker == 'qwen-fallback-1' && secrets.QWEN_FALLBACK_1_API_KEY || inputs.worker == 'qwen-fallback-2' && secrets.QWEN_FALLBACK_2_API_KEY || inputs.worker == 'qwen-fallback-3' && secrets.QWEN_FALLBACK_3_API_KEY || secrets.QWEN_FALLBACK_4_API_KEY }}
+          openai_api_key: ${{ steps.qwen_config.outputs.credential == 'omniroute' && secrets.OMNIROUTE_API_KEY || steps.qwen_config.outputs.credential == 'primary' && secrets.QWEN_API_KEY || steps.qwen_config.outputs.credential == 'fallback-1' && secrets.QWEN_FALLBACK_1_API_KEY || steps.qwen_config.outputs.credential == 'fallback-2' && secrets.QWEN_FALLBACK_2_API_KEY || steps.qwen_config.outputs.credential == 'fallback-3' && secrets.QWEN_FALLBACK_3_API_KEY || secrets.QWEN_FALLBACK_4_API_KEY }}
           openai_base_url: ${{ steps.qwen_config.outputs.url }}
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
@@ -589,6 +663,7 @@ jobs:
           gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
             --add-label agent:pr-open \
             --remove-label agent:working \
+            --remove-label agent:auto \
             --remove-label agent:pool \
             --remove-label agent:qwen \
             --remove-label agent:gemini >/dev/null 2>&1 || true
