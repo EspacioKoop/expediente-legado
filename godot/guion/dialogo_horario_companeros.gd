@@ -1,7 +1,7 @@
 ## Comentarios horarios diegéticos de compañeros (#963).
 ##
 ## Es una capa puramente contextual: recibe actor + hora canónica, devuelve una
-## clave de traducción y no modifica Jornada, Partida, presencia ni progreso.
+## clave de traducción y no modifica estado persistente, presencia ni progreso.
 class_name DialogoHorarioCompaneros
 extends RefCounted
 
