@@ -10,9 +10,9 @@ extends Node3D
 signal completado(objetivo_id: String)
 signal rumbo_cambiado(posicion: Vector3)
 
-const TIPO_RECORRIDO := "recorrido"
-const TIPO_SECUENCIA := "secuencia"
-const TIPO_PERMANENCIA := "permanencia"
+const TIPO_RECORRIDO := SuenoObjetivosVariedad.TIPO_RECORRIDO
+const TIPO_SECUENCIA := SuenoObjetivosVariedad.TIPO_SECUENCIA
+const TIPO_PERMANENCIA := SuenoObjetivosVariedad.TIPO_PERMANENCIA
 
 const RADIO_ZONA := 1.2
 const RANGO_LUZ := 2.8
