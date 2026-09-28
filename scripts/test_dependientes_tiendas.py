@@ -30,11 +30,20 @@ class DependientesTiendasTest(unittest.TestCase):
         textos = []
         for clave in claves:
             propias = [valor for nombre, valor in filas.items() if nombre.startswith(clave + "_")]
-            # Cinco saludos, tres climas e insistencia como mínimo.
-            self.assertGreaterEqual(len(propias), 9, clave)
+            # Cinco saludos, tres climas, seguimiento contextual e insistencia como mínimo.
+            self.assertGreaterEqual(len(propias), 10, clave)
             textos.extend(propias)
         # Una frase compartida entre dos dependientes les quitaría la voz propia.
         self.assertEqual(len(textos), len(set(textos)))
+
+    def test_hay_ramas_de_visita_y_no_reputacion(self):
+        self.assertIn("func rama_contextual(", MODULO)
+        self.assertIn('"cliente"', MODULO)
+        self.assertIn('"clima"', MODULO)
+        self.assertIn('"seguimiento_cliente"', MODULO)
+        self.assertIn('"seguimiento_clima"', MODULO)
+        for forbidden in ("reputacion", "afinidad", "fidelidad", "puntos_cliente"):
+            self.assertNotIn(forbidden, MODULO.lower())
 
     def test_el_sueno_trae_a_quien_te_ha_hablado(self):
         self.assertIn("EcosSueno.registrar(jornada", DIA)
