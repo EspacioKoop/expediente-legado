@@ -11,11 +11,16 @@
 extends Node
 
 var _mundo_vestido_id := 0
+var _grabacion_runtime := GrabacionOniricaRuntime.new()
+var _anomalia_grabada: AnomaliaSueno3D
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	var dia := get_parent()
-	if dia == null or dia._mundo == null:
+	if dia == null:
+		return
+	_actualizar_grabacion(dia, delta)
+	if dia._mundo == null:
 		return
 	var mundo: Node3D = dia._mundo
 	var mundo_id := mundo.get_instance_id()
@@ -99,6 +104,10 @@ func _process(_delta: float) -> void:
 	for anomalia in anomalias:
 		var documento_origen := String(anomalia.get_meta("documento_origen", ""))
 		anomalia.observada.connect(_al_observar_anomalia.bind(documento_origen))
+		if not documento_origen.strip_edges().is_empty():
+			anomalia.observada.connect(
+				_al_gestionar_grabacion.bind(anomalia, documento_origen)
+			)
 
 	# La primera deformación que venga de un folio leído hoy ocupa una plaza
 	# puntuable de la escena (#299). Si esta noche no hay material documental,
@@ -108,6 +117,97 @@ func _process(_delta: float) -> void:
 			continue
 		if dia.registrar_objetivo_anomalia_documental(anomalia):
 			break
+
+
+func iniciar_grabacion_anomalia(anomalia: AnomaliaSueno3D) -> Dictionary:
+	var dia := get_parent()
+	if dia == null or String(dia.jornada.get("fase", "")) != "sueño":
+		return {"ok": false, "error": "fuera_de_sueno"}
+	var partida_actual = dia.get("partida")
+	if not partida_actual is Partida:
+		return {"ok": false, "error": "partida_no_disponible"}
+	if anomalia == null or not is_instance_valid(anomalia):
+		return {"ok": false, "error": GrabacionOniricaRuntime.ERROR_SUJETO_INVALIDO}
+
+	var documento := String(anomalia.get_meta("documento_origen", "")).strip_edges()
+	var leidos = dia.jornada.get("leido_hoy", [])
+	if documento.is_empty() or typeof(leidos) != TYPE_ARRAY or not leidos.has(documento):
+		return {"ok": false, "error": GrabacionOniricaRuntime.ERROR_ORIGINAL_DESCONOCIDO}
+
+	var contenedor := GrabacionOniricaEstado.asegurar_en_estado(partida_actual.estado)
+	var cinta = contenedor.get("cinta", {})
+	if typeof(cinta) != TYPE_DICTIONARY or cinta.is_empty():
+		return {"ok": false, "error": GrabacionOniricaEstado.ERROR_CINTA_NO_INICIADA}
+
+	var caminante = dia.get("_caminante")
+	if caminante == null or not is_instance_valid(caminante):
+		return {"ok": false, "error": GrabacionOniricaRuntime.ERROR_CAMARA_INVALIDA}
+	var camara := caminante.get_node_or_null("Camara") as Camera3D
+	var inicio := _grabacion_runtime.iniciar(camara, anomalia, documento, true)
+	if bool(inicio.get("ok", false)):
+		_anomalia_grabada = anomalia
+	return inicio
+
+
+func finalizar_grabacion(
+	frase_completa: bool,
+	figura_detecto_camara: bool,
+) -> Dictionary:
+	var dia := get_parent()
+	if dia == null:
+		return {"ok": false, "error": "dia_no_disponible"}
+	var partida_actual = dia.get("partida")
+	if not partida_actual is Partida:
+		return {"ok": false, "error": "partida_no_disponible"}
+
+	var resultado := _grabacion_runtime.finalizar(
+		partida_actual.estado,
+		frase_completa,
+		figura_detecto_camara,
+	)
+	_anomalia_grabada = null
+	if bool(resultado.get("ok", false)):
+		dia._guardar_o_avisar("")
+	return resultado
+
+
+func interrumpir_grabacion() -> void:
+	_grabacion_runtime.interrumpir()
+
+
+func grabacion_activa() -> bool:
+	return _grabacion_runtime.esta_activa()
+
+
+func _actualizar_grabacion(dia: Node, delta: float) -> void:
+	if not _grabacion_runtime.esta_activa():
+		return
+	if String(dia.jornada.get("fase", "")) != "sueño":
+		_grabacion_runtime.interrumpir()
+		finalizar_grabacion(false, false)
+		return
+	_grabacion_runtime.muestrear(delta)
+
+
+func _al_gestionar_grabacion(
+	_anomalia_id: String,
+	_actor: Node,
+	anomalia: AnomaliaSueno3D,
+	_documento_origen: String,
+) -> void:
+	# Una anomalía documental no detecta la cámara por sí misma. El primer
+	# examen inicia la medición y el segundo del mismo sujeto completa el ciclo.
+	# Si todavía no existe cinta (adquisición fuera de #1682), no cambia nada.
+	if not _grabacion_runtime.esta_activa():
+		iniciar_grabacion_anomalia(anomalia)
+		return
+	if _anomalia_grabada == anomalia:
+		finalizar_grabacion(true, false)
+		return
+
+	_grabacion_runtime.interrumpir()
+	finalizar_grabacion(false, false)
+	iniciar_grabacion_anomalia(anomalia)
 
 
 func _al_observar_anomalia(
