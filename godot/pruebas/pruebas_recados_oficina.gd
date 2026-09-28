@@ -149,6 +149,23 @@ func _probar_densidad_horaria() -> void:
 	_comprobar(not Controller.recados_habilitados("noche"), "de noche no se lanzan recados")
 	_comprobar(Controller.recados_habilitados("manana"), "la mañana conserva recados")
 
+	var mundo := _sala()
+	var cafe := Node3D.new()
+	cafe.name = Controller.MAQUINA_CAFE
+	cafe.position = Vector3(-6.0, 0.75, 4.2)
+	mundo.add_child(cafe)
+	var destinos_cerrado := Controller.destinos_recado(mundo, false)
+	var destinos_abierto := Controller.destinos_recado(mundo, true)
+	_comprobar(
+		destinos_abierto.size() == destinos_cerrado.size() + 1,
+		"abrir cafetería añade un único destino ambiental de café",
+	)
+	_comprobar(
+		destinos_cerrado.size() >= 1,
+		"cerrar cafetería conserva los recados a archivadores",
+	)
+	mundo.free()
+
 
 func _probar_controller() -> void:
 	var dia := DiaFalso.new()
