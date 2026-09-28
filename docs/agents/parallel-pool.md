@@ -51,6 +51,14 @@ El mismo control-plane mantiene el **circuit breaker por worker**. Un fallo de c
 5. Al terminar la tanda, si aún queda cola elegible, se lanza otra inmediatamente; no se espera al siguiente cron.
 6. Si no hay cola ni planificación pendiente, `agent-feeder.yml` puede seleccionar un único issue conservador y enviarlo primero a `agent:decompose`; el feeder nunca implementa directamente.
 
+Los CLAIM automáticos usan `lease=2h` como respaldo: suficiente para el job máximo y mucho menos dañino que las 48 h históricas si el runner desaparece sin publicar RELEASE.
+
+## Failover después de reservar
+
+Una reserva válida no convierte automáticamente cualquier fallo posterior en intervención humana. Si la Action del proveedor termina con error/timeout o el agente no deja ningún cambio dentro del CLAIM, el intento se clasifica como reintentable: se publica `AGENT_POOL_WORKER_FAILURE` con la fase, se libera el CLAIM y el dispatcher evita ese worker para ese issue en el siguiente intento. Al agotarse todos los workers compatibles se usa `agent:needs-human`.
+
+Un fallo de preflight sobre un diff real **no** entra en este failover: indica un problema del cambio generado y conserva la escalada humana para no rotar proveedores sobre código inválido indefinidamente.
+
 ## Replan ante salidas del CLAIM
 
 Después de la implementación, el worker ejecuta un guard provider-agnostic. Si Qwen o Gemini modifican rutas no incluidas en el plan/CLAIM:

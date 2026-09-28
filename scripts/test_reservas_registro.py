@@ -197,6 +197,17 @@ class WorkflowsUsanLaCapaTest(unittest.TestCase):
         self.assertIn("python3 /tmp/capa182/reservas_registro.py rutas", paso)
         self.assertIn("> .agent-plan.json", paso)
 
+    def test_claims_automaticos_usan_lease_corto_de_respaldo(self):
+        worker = (ROOT / ".github" / "workflows" / "agent-worker.yml").read_text(
+            encoding="utf-8"
+        )
+        autopilot = (ROOT / ".github" / "workflows" / "agent-autopilot.yml").read_text(
+            encoding="utf-8"
+        )
+        for workflow in (worker, autopilot):
+            self.assertIn("lease=2h", workflow)
+            self.assertNotIn("lease=48h", workflow)
+
     def test_worker_reserva_con_la_capa_y_sin_parser_propio(self):
         worker = (ROOT / ".github" / "workflows" / "agent-worker.yml").read_text(encoding="utf-8")
         paso = worker.split("name: Validar plan y reservar rutas", 1)[1].split("\n      - ", 1)[0]

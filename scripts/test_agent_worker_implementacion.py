@@ -10,7 +10,8 @@ WORKER = (ROOT / ".github" / "workflows" / "agent-worker.yml").read_text(encodin
 
 def paso(marca: str) -> str:
     inicio = WORKER.index(marca)
-    return WORKER[inicio : WORKER.index("\n      - ", inicio + 1)]
+    siguiente = WORKER.find("\n      - ", inicio + len(marca))
+    return WORKER[inicio:] if siguiente < 0 else WORKER[inicio:siguiente]
 
 
 class ImplementacionTest(unittest.TestCase):
@@ -23,7 +24,7 @@ class ImplementacionTest(unittest.TestCase):
         self.assertIn("timeout-minutes: 60", WORKER)
 
     def test_implementacion_incompleta_no_se_publica(self):
-        bloque = paso("- name: Validar diff y preflight\n")
+        bloque = paso("name: Validar diff y preflight\n")
         self.assertIn(
             "IMPLEMENT_OUTCOME: ${{ inputs.provider == 'qwen' && steps.implement_qwen.outcome || steps.implement_gemini.outcome }}",
             bloque,

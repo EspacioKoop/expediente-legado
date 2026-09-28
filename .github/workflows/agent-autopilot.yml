@@ -395,7 +395,7 @@ jobs:
 
           files="$(jq -r '.files|join(",")' .agent-plan.json)"
           goal="$(jq -r '.goal|gsub("[[:space:]]+";"-")' .agent-plan.json)"
-          claim="CLAIM issue=#$ISSUE agent=Autopilot-$PROVIDER branch=$BRANCH files=$files goal=$goal lease=48h"
+          claim="CLAIM issue=#$ISSUE agent=Autopilot-$PROVIDER branch=$BRANCH files=$files goal=$goal lease=2h"
           cid="$(gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$(python3 scripts/gestionar_reservas_rollover.py --active)/comments" -f body="$claim" --jq .id)"
           python3 scripts/gestionar_reservas_rollover.py --comments-output /tmp/reservas.json
           # Capa única de lectura de #182 (#1662), la misma que usa el worker.
