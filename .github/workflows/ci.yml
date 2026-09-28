@@ -48,7 +48,17 @@ jobs:
 
       - name: Preflight infra rápido
         if: steps.scope.outputs.mode == 'fast'
-        run: python -m unittest discover -s scripts -p 'test_*.py'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s scripts -p 'test_agent_*.py'
+          python scripts/test_ci_scope.py
+          python scripts/test_deno_production_freshness.py
+          python scripts/test_parte_incidencias.py
+          python scripts/test_workflows_yaml.py
+          if [[ -f scripts/test_deno_deploy_workflow.py ]]; then
+            python scripts/test_deno_deploy_workflow.py
+          fi
 
       - name: Materializar LFS para CI completo
         if: steps.scope.outputs.mode == 'full'
