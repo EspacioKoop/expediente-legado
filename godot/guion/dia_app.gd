@@ -84,8 +84,8 @@ func _ready() -> void:
 	add_child(_ciclo_laboral)
 	_ciclo_laboral.configurar(partida, _caminante, _hud, Callable(self, "_guardar_o_avisar"))
 	_ciclo_laboral.reasignacion_solicitada.connect(_reasignar)
-	_ciclo_laboral.vuelta_solicitada.connect(_abrir_vuelta)
-	_ciclo_laboral.vuelta_terminada.connect(_cerrar_vuelta)
+	_ciclo_laboral.vuelta_solicitada.connect(Callable(self, "_abrir_vuelta"))
+	_ciclo_laboral.vuelta_terminada.connect(Callable(self, "_cerrar_vuelta"))
 	# #1205: vida cero se resuelve antes de devolver movimiento al jugador.
 	if _ciclo_laboral.abrir_ultimo_recurso_pendiente(jornada):
 		return
