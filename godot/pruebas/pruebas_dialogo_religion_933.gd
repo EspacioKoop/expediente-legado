@@ -32,18 +32,21 @@ func _registrar(
 	conocido_por: Array = [],
 ) -> void:
 	var registro: Dictionary = estado[ReligionEventos.CLAVE_ESTADO]
-	var evento := ReligionEventos.crear_evento(
-		id_evento,
-		canal,
-		"prueba:933",
-		"dialogo",
-		1,
-		"",
-		[],
-		[],
-		publico,
-		conocido_por,
-		{"vuelta": vuelta},
+	var evento := (
+		ReligionEventos
+		. crear_evento(
+			id_evento,
+			canal,
+			"prueba:933",
+			"dialogo",
+			1,
+			"",
+			[],
+			[],
+			publico,
+			conocido_por,
+			{"vuelta": vuelta},
+		)
 	)
 	ReligionEventos.registrar(registro, evento)
 
