@@ -32,8 +32,7 @@ func _probar() -> void:
 		"el becario reacciona a horas extra",
 	)
 	_comprobar(
-		DialogoHorarioCompaneros.resolver("jubilacion", 14.99)
-		== "COMPA_HORA_JUBILACION_MEDIODIA",
+		DialogoHorarioCompaneros.resolver("jubilacion", 14.99) == "COMPA_HORA_JUBILACION_MEDIODIA",
 		"el límite de mediodía es estable",
 	)
 	_comprobar(
