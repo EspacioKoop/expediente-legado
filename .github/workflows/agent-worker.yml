@@ -261,6 +261,43 @@ jobs:
             echo "$delim"
           } >> "$GITHUB_OUTPUT"
 
+      - id: delegated
+        name: Buscar plan delegado por el nivel 2
+        if: steps.guard.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ inputs.issue }}
+        run: |
+          set -euo pipefail
+          # Planificar es trabajo del nivel 2 (#1637): si una cuenta de confianza
+          # dejó AGENT_PLAN en el issue, se ejecuta sin invocar al planificador.
+          # REST y no `gh issue view`: el cuerpo del issue necesita
+          # author_association para decidir si es de confianza.
+          # Best-effort: ante cualquier fallo se planifica como siempre.
+          if ! gh api "repos/$GITHUB_REPOSITORY/issues/$ISSUE" > /tmp/delegado-issue.json ||
+            ! gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$ISSUE/comments?per_page=100" \
+              --jq '.[]' | jq -s '.' > /tmp/delegado-comments.json ||
+            ! jq -s '.[0] + {comments: .[1]}' /tmp/delegado-issue.json /tmp/delegado-comments.json \
+              > /tmp/delegado-entrada.json ||
+            ! python3 scripts/agent_delegated_plan.py \
+              --issue /tmp/delegado-entrada.json --output /tmp/delegado.json >/dev/null; then
+            echo "AVISO: no se pudo buscar plan delegado; se usará el planificador"
+            exit 0
+          fi
+          if [[ "$(jq -r '.found' /tmp/delegado.json)" == true ]]; then
+            source="$(jq -r '"\(.source) de \(.author)"' /tmp/delegado.json)"
+            delim="PLAN_$(openssl rand -hex 8)"
+            {
+              echo "found=true"
+              echo "summary<<$delim"
+              echo "AGENT_PLAN_BEGIN"
+              jq -c '.plan' /tmp/delegado.json
+              echo "AGENT_PLAN_END"
+              echo "$delim"
+            } >> "$GITHUB_OUTPUT"
+            echo "Plan delegado por el nivel 2 ($source); se omite el planificador."
+          fi
+
       - name: Cargar memoria historica de CI
         if: steps.guard.outputs.run == 'true'
         env:
@@ -321,7 +358,7 @@ jobs:
 
       - id: plan_qwen
         name: Plan Qwen
-        if: steps.guard.outputs.run == 'true' && inputs.provider == 'qwen'
+        if: steps.guard.outputs.run == 'true' && inputs.provider == 'qwen' && steps.delegated.outputs.found != 'true'
         continue-on-error: true
         uses: QwenLM/qwen-code-action@v1
         with:
@@ -334,7 +371,7 @@ jobs:
 
       - id: plan_gemini
         name: Plan Gemini
-        if: steps.guard.outputs.run == 'true' && inputs.provider == 'gemini'
+        if: steps.guard.outputs.run == 'true' && inputs.provider == 'gemini' && steps.delegated.outputs.found != 'true'
         continue-on-error: true
         uses: google-github-actions/run-gemini-cli@v0
         with:
@@ -352,7 +389,7 @@ jobs:
           ISSUE: ${{ inputs.issue }}
           PROVIDER: ${{ inputs.provider }}
           BRANCH: ${{ steps.guard.outputs.branch }}
-          SUMMARY: ${{ steps.plan_qwen.outputs.summary || steps.plan_gemini.outputs.summary }}
+          SUMMARY: ${{ steps.delegated.outputs.summary || steps.plan_qwen.outputs.summary || steps.plan_gemini.outputs.summary }}
         run: |
           set -euo pipefail
           printf '%s' "$SUMMARY" > /tmp/summary.txt
@@ -777,7 +814,7 @@ jobs:
           F3_URL: ${{ vars.QWEN_FALLBACK_3_BASE_URL }}
           F4_URL: ${{ vars.QWEN_FALLBACK_4_BASE_URL }}
           HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
-          PLAN_SUMMARY: ${{ steps.plan_qwen.outputs.summary || steps.plan_gemini.outputs.summary }}
+          PLAN_SUMMARY: ${{ steps.delegated.outputs.summary || steps.plan_qwen.outputs.summary || steps.plan_gemini.outputs.summary }}
           PLAN_QWEN_OUTCOME: ${{ steps.plan_qwen.outcome }}
           PLAN_GEMINI_OUTCOME: ${{ steps.plan_gemini.outcome }}
           AGENT_PROVIDER_COOLDOWN_SECONDS: ${{ vars.AGENT_PROVIDER_COOLDOWN_SECONDS || '3600' }}

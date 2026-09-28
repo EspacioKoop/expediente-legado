@@ -16,6 +16,22 @@ Slots:
 
 Cada slot cuenta como capacidad 1 por tanda. Asi un endpoint con limites ajustados no recibe varias tareas simultaneas por defecto.
 
+## Niveles y plan delegado
+
+El pool es el **nivel 3**. Por encima están el coordinador (nivel 1) y las sesiones asistidas de Claude/ChatGPT (nivel 2). Planificar es trabajo del nivel 2: el planificador barato del pool apenas cumplía el contrato de plan (#1636).
+
+Para delegar un issue, el nivel 2 deja el plan en el cuerpo o en un comentario, con los marcadores en líneas propias. Se pega **sin** la valla de código del ejemplo: un marcador dentro de un bloque de código se trata como documentación, no como encargo.
+
+```text
+AGENT_PLAN_BEGIN
+{"files": ["godot/guion/ejemplo.gd", "godot/pruebas/pruebas_ejemplo.gd"], "goal": "Objetivo concreto del corte"}
+AGENT_PLAN_END
+```
+
+Después añade `agent:auto`. El worker (`scripts/agent_delegated_plan.py`) toma el plan válido más reciente de cuentas `OWNER`/`MEMBER`/`COLLABORATOR` que no sean bots, **omite el planificador** y sigue el circuito normal: validación de rutas, CLAIM en #182, implementación, guard, preflight y PR draft. Para corregir el plan basta un comentario nuevo. Si el plan se queda corto de rutas, el replan acaba en `agent:needs-human` y el nivel 2 lo amplía.
+
+Sin plan delegado, el pool planifica como siempre.
+
 ## Aislamiento
 
 `agent-worker.yml` usa `concurrency` por numero de issue. Dos issues distintos pueden correr a la vez, pero dos ejecuciones del pool no pueden trabajar simultaneamente sobre el mismo issue.
