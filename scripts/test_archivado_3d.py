@@ -54,8 +54,8 @@ class Archivado3DTest(unittest.TestCase):
             "func _sincronizar_desorden_espacial", 1
         )[0]
         self.assertIn("var primer_error := not _caso_tiene_error_previo(caso_id)", bloque)
-        self.assertIn("var colocaciones_antes :=", bloque)
-        self.assertIn("var registrada :=", bloque)
+        self.assertIn("var colocaciones_antes: int =", bloque)
+        self.assertIn("var registrada: bool =", bloque)
         self.assertIn("if not correcta and registrada and primer_error:", bloque)
         self.assertIn('Estres.aplicar(host.jornada, "fallo_critico")', bloque)
         self.assertIn("func _caso_tiene_error_previo", self.controlador)
