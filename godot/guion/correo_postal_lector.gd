@@ -126,6 +126,8 @@ func _construir() -> void:
 	_contenido = RichTextLabel.new()
 	_contenido.name = "CorreoPostalContenido"
 	_contenido.bbcode_enabled = false
+	_contenido.focus_mode = Control.FOCUS_ALL
+	_contenido.selection_enabled = true
 	_contenido.fit_content = false
 	_contenido.scroll_active = true
 	_contenido.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -143,21 +145,35 @@ func _construir() -> void:
 	_cerrar_boton = Button.new()
 	_cerrar_boton.name = "CorreoPostalCerrar"
 	_cerrar_boton.text = String(_textos.get("cerrar", "Cerrar"))
+	_cerrar_boton.accessibility_name = _cerrar_boton.text
+	_cerrar_boton.focus_mode = Control.FOCUS_ALL
 	_cerrar_boton.pressed.connect(_cerrar)
 	columna.add_child(_cerrar_boton)
+
+	_contenido.focus_next = _contenido.get_path_to(_cerrar_boton)
+	_contenido.focus_neighbor_bottom = _contenido.focus_next
+	_cerrar_boton.focus_previous = _cerrar_boton.get_path_to(_contenido)
+	_cerrar_boton.focus_neighbor_top = _cerrar_boton.focus_previous
 
 
 func _mostrar_modelo(modelo: Dictionary) -> void:
 	_titulo.text = String(modelo.get("titulo", ""))
+	_titulo.accessibility_name = _titulo.text
 	_cabecera.text = String(modelo.get("cabecera", ""))
+	_cabecera.accessibility_description = _cabecera.text
 	_cabecera.visible = not _cabecera.text.is_empty()
 	_contenido.text = String(modelo.get("contenido", ""))
+	_contenido.accessibility_name = _titulo.text
+	_contenido.accessibility_description = _contenido.text
 	_detalle.text = String(modelo.get("detalle", ""))
+	_detalle.accessibility_description = _detalle.text
 	_detalle.visible = not _detalle.text.is_empty()
 
 
 func _enfocar() -> void:
-	if is_instance_valid(_cerrar_boton):
+	if is_instance_valid(_contenido) and not _contenido.text.is_empty():
+		_contenido.grab_focus()
+	elif is_instance_valid(_cerrar_boton):
 		_cerrar_boton.grab_focus()
 
 
