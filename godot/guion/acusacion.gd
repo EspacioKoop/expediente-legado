@@ -80,6 +80,7 @@ static func acusar(
 	var veredictos: Dictionary = estado.get("veredictos", {})
 	veredictos[caso_id] = sospechoso["id"]
 	estado["veredictos"] = veredictos
+	CatalogoVidaMetricas.registrar_resuelto(jornada, caso_id)
 
 	# #1029: el primer veredicto real re-gana El Hierofante en esta vuelta.
 	# Vive aquí, junto a la firma irreversible, para que cargar/abrir UI nunca
