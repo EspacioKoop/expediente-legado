@@ -64,22 +64,25 @@ https://github.com/jaredpalmer/kev
 
 ## Integración con GitHub Actions
 
-El enganche directo en `.github/workflows/agent-autopilot.yml` se deja para el
-siguiente corte porque #1559 mantiene una reserva activa sobre ese archivo.
+`.github/workflows/agent-autopilot.yml` ejecuta el router después del checkout y
+antes de inicializar cualquier worker. El estado enviado a Kev se limita a título,
+cuerpo y labels del issue; no incluye `GITHUB_TOKEN`, secretos de proveedores, logs
+completos ni memorias de los agentes.
 
-Cuando quede libre, el paso de selección puede construir un estado compacto a partir
-del issue y ejecutar el router antes del fallback actual. No debe entregarse a Kev el
-`GITHUB_TOKEN`, secretos de proveedores, logs completos ni memoria sin filtrar.
+Las etiquetas explícitas `agent:qwen` / `agent:gemini` y el proveedor elegido en
+`workflow_dispatch` siguen prevaleciendo. Para `auto`, Kev decide únicamente entre
+workers realmente disponibles y, ante ausencia, timeout, baja confianza o respuesta
+inválida, `kev_router.py` conserva el fallback determinista Qwen → Gemini.
 
-Configuración prevista:
+Configuración:
 
 - repository variable `KEV_BASE_URL`;
 - repository variable opcional `KEV_MODEL`;
 - repository variable opcional `KEV_ROUTER_MIN_CONFIDENCE`;
 - Actions secret `KEV_API_KEY` únicamente si el endpoint lo exige.
 
-La ausencia de todas estas variables debe equivaler exactamente al comportamiento
-actual del autopilot.
+Sin `KEV_BASE_URL` no hay llamada de red a Kev y el autopilot conserva el
+comportamiento histórico.
 
 ## Validación
 
