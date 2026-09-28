@@ -100,6 +100,7 @@ class EmbudoPoolTest(unittest.TestCase):
                 text=True,
             ).stdout
         self.assertIn("| pr_draft | 1 | 100% |", salida)
+        self.assertIn("PR/worker: 100%.", salida)
 
 
 if __name__ == "__main__":
