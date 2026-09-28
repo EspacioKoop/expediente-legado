@@ -217,6 +217,40 @@ class AgentPoolTest(unittest.TestCase):
             tasks,
         )
 
+    def test_score_elige_mejor_slot_dentro_del_provider_explicito(self):
+        workers = [
+            {"worker": "qwen-primary", "provider": "qwen", "score": 35},
+            {"worker": "qwen-fallback-1", "provider": "qwen", "score": 88},
+        ]
+
+        tasks = mod.select_tasks([issue(57, "agent:qwen")], workers)
+
+        self.assertEqual("qwen-fallback-1", tasks[0]["worker"])
+
+    def test_score_respeta_preferencia_kev_y_solo_desempata_slot(self):
+        workers = [
+            {"worker": "qwen-primary", "provider": "qwen", "score": 99},
+            {"worker": "gemini-a", "provider": "gemini", "score": 30},
+            {"worker": "gemini-b", "provider": "gemini", "score": 80},
+        ]
+
+        tasks = mod.select_tasks(
+            [issue(58, "agent:auto", preferred="gemini")],
+            workers,
+        )
+
+        self.assertEqual("gemini-b", tasks[0]["worker"])
+
+    def test_sin_score_conserva_orden_historico(self):
+        workers = [
+            {"worker": "qwen-primary", "provider": "qwen"},
+            {"worker": "qwen-fallback-1", "provider": "qwen"},
+        ]
+
+        tasks = mod.select_tasks([issue(59, "agent:qwen")], workers)
+
+        self.assertEqual("qwen-primary", tasks[0]["worker"])
+
     def test_slot_no_saludable_sale_de_rotacion_para_tarea_flexible(self):
         workers = [
             {"worker": "gemini", "provider": "gemini", "healthy": False},

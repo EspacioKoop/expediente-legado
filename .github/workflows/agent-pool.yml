@@ -147,6 +147,37 @@ jobs:
               print("Slots en cooldown:", ",".join(sorted(unhealthy)))
           PY
 
+          # #1621: ranking histórico sin estado adicional. Se usan solo los
+          # últimos runs completados del propio pool; si la API falla, score=50.
+          printf '[]\n' > /tmp/worker-jobs.json
+          if mapfile -t history_runs < <(
+            gh api "repos/$GITHUB_REPOSITORY/actions/workflows/agent-pool.yml/runs?status=completed&per_page=8" \
+              --jq '.workflow_runs[].id' 2>/dev/null
+          ); then
+            for history_run in "${history_runs[@]}"; do
+              [[ -n "$history_run" ]] || continue
+              if gh api "repos/$GITHUB_REPOSITORY/actions/runs/$history_run/jobs?per_page=100" \
+                --jq '[.jobs[] | {name:.name,conclusion:.conclusion,steps:[.steps[]? | {name:.name,conclusion:.conclusion}]}]' \
+                > /tmp/worker-jobs-one.json 2>/dev/null; then
+                tmp="$(mktemp)"
+                jq -s '.[0] + .[1]' /tmp/worker-jobs.json /tmp/worker-jobs-one.json > "$tmp"
+                mv "$tmp" /tmp/worker-jobs.json
+              fi
+            done
+          fi
+          printf '{}\n' > /tmp/worker-scores.json
+          python3 scripts/agent_worker_score.py \
+            --jobs /tmp/worker-jobs.json \
+            --output /tmp/worker-scores.json >/dev/null || true
+          tmp="$(mktemp)"
+          jq --slurpfile scores /tmp/worker-scores.json \
+            'map(. + {
+              score: (($scores[0][.worker].score) // 50),
+              score_samples: (($scores[0][.worker].samples) // 0)
+            })' /tmp/workers.json > "$tmp"
+          mv "$tmp" /tmp/workers.json
+          jq -r '.[] | "worker-score \(.worker)=\(.score) samples=\(.score_samples)"' /tmp/workers.json
+
           has_qwen="$(jq -r 'any(.[]; .provider == "qwen" and (if has("healthy") then .healthy else true end))' /tmp/workers.json)"
           has_gemini="$(jq -r 'any(.[]; .provider == "gemini" and (if has("healthy") then .healthy else true end))' /tmp/workers.json)"
           route_limit=$((REQUESTED_MAX * 2))
