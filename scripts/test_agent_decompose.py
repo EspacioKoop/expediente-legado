@@ -26,6 +26,34 @@ class AgentDecomposeTest(unittest.TestCase):
         self.assertTrue(result["fits_single_cut"])
         self.assertEqual([], result["subtasks"])
 
+    def test_gate_humano_no_crea_subtareas(self):
+        result = mod.parse_decomposition(
+            wrap(
+                {
+                    "fits_single_cut": False,
+                    "needs_human": True,
+                    "reason": "Solo queda un pase con mando físico real.",
+                    "subtasks": [],
+                }
+            )
+        )
+        self.assertTrue(result["needs_human"])
+        self.assertFalse(result["fits_single_cut"])
+        self.assertEqual([], result["subtasks"])
+
+    def test_gate_humano_no_se_mezcla_con_trabajo_automatico(self):
+        with self.assertRaisesRegex(ValueError, "no puede combinarse"):
+            mod.parse_decomposition(
+                wrap(
+                    {
+                        "fits_single_cut": True,
+                        "needs_human": True,
+                        "reason": "Queda una validación física.",
+                        "subtasks": [],
+                    }
+                )
+            )
+
     def test_valida_cadena_de_dependencias(self):
         result = mod.parse_decomposition(
             wrap(
@@ -162,6 +190,8 @@ class AgentDecomposeTest(unittest.TestCase):
         self.assertIn("timeout-minutes: 5", workflow)
         self.assertIn("continue-on-error: true", workflow)
         self.assertIn("crea entre 2 y 6 subtareas pequeñas", workflow)
+        self.assertIn("needs_human=true", workflow)
+        self.assertIn("Gate humano", workflow)
         self.assertIn("files concretos (max 8)", workflow)
         self.assertIn("agent:decomposed", workflow)
         self.assertNotIn('gh issue close "$ISSUE"', workflow)
