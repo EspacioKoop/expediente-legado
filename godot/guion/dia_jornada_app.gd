@@ -37,7 +37,7 @@ func _reintentar_guardado() -> void:
 
 
 func _abrir_inicio_jornada_si_toca(tras_entrada := false) -> void:
-	if _inicio_jornada != null or _entrada != null or _pantalla != null:
+	if _inicio_jornada != null or _entrada_vuelta_activa() or _pantalla != null:
 		return
 	if partida.guardado_pendiente:
 		return
