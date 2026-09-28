@@ -46,15 +46,18 @@ El resultado incluye un inventario con score y motivos de selección antes del c
 - nunca promueve la wiki por encima del repositorio o las Normas Platino;
 - no resume ni reescribe: conserva el texto fuente seleccionado y solo puede truncarlo por presupuesto.
 
-## Integración pendiente
+## Integración actual
 
-Mientras #1559 reserve `.github/workflows/agent-autopilot.yml` y `agent-ci-repair.yml`, este corte permanece standalone. Cuando esas reservas se liberen, el workflow puede:
+El script sigue siendo utilizable de forma standalone, pero ya está integrado en el
+worker reusable del **pool paralelo**:
 
-1. clonar Normas Platino y wiki como ahora;
-2. generar `.agent-context.md` con este script;
-3. entregar al modelo el pack en vez de pedirle explorar toda `.agent-wiki`;
-4. conservar la wiki completa localmente por si una tarea necesita una lectura adicional explícita.
+1. clona Normas Platino y la wiki;
+2. genera `.agent-context.md` antes del plan a partir del issue;
+3. tras el CLAIM, lo regenera usando también las rutas reservadas;
+4. entrega al modelo el pack seleccionado y conserva la wiki como fuente secundaria local.
 
-Esto permite medir después si baja el consumo de tokens y la latencia sin cambiar reglas de autoridad ni seguridad.
+El carril legado `agent:auto` todavía no usa este packer en el corte actual de
+`main`. Esa diferencia es deliberada mientras se estabiliza/migra la infraestructura.
+La jerarquía de autoridad y los límites de seguridad no cambian.
 
 Refs #1538 #1551 #1559 #1566.
