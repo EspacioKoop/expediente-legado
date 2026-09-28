@@ -16,6 +16,7 @@ const RUTA_TEXTOS_FILTRO := "res://datos/filtro_pantalla_textos.json"
 const ALTO_MAXIMO_PANEL := 860.0
 const ANCHO_PANEL := 720.0
 const ALTO_BOTON := 44.0
+const MARGEN_SEGURO_PANEL := 48.0
 const ETIQUETAS_ACCIONES := {
 	"mover_adelante": "Avanzar",
 	"mover_atras": "Retroceder",
@@ -191,7 +192,10 @@ func _dar_cuerpo_a_botones() -> void:
 ## gris oscuro.
 func _crear_panel() -> PanelContainer:
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(ANCHO_PANEL, 300)
+	var ancho_disponible := maxf(
+		240.0, get_viewport().get_visible_rect().size.x - MARGEN_SEGURO_PANEL * 2.0
+	)
+	panel.custom_minimum_size = Vector2(minf(ANCHO_PANEL, ancho_disponible), 300)
 	panel.theme = EstiloJuego.tema()
 	return panel
 
@@ -202,7 +206,13 @@ func _caja(panel: PanelContainer, desplazable: bool = false) -> VBoxContainer:
 		var scroll := ScrollContainer.new()
 		scroll.name = "Desplazable"
 		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-		scroll.custom_minimum_size = Vector2(ANCHO_PANEL - 40.0, ALTO_MAXIMO_PANEL)
+		var vista := get_viewport().get_visible_rect().size
+		var ancho_disponible := maxf(240.0, vista.x - MARGEN_SEGURO_PANEL * 2.0)
+		var alto_disponible := maxf(240.0, vista.y - MARGEN_SEGURO_PANEL * 2.0)
+		scroll.custom_minimum_size = Vector2(
+			minf(ANCHO_PANEL - 40.0, ancho_disponible),
+			minf(ALTO_MAXIMO_PANEL, alto_disponible)
+		)
 		# El foco de teclado/mando arrastra el desplazamiento hasta el control.
 		scroll.follow_focus = true
 		panel.add_child(scroll)
@@ -210,10 +220,10 @@ func _caja(panel: PanelContainer, desplazable: bool = false) -> VBoxContainer:
 	var margen := MarginContainer.new()
 	margen.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for lado in ["left", "top", "right", "bottom"]:
-		margen.add_theme_constant_override("margin_" + lado, 12)
+		margen.add_theme_constant_override("margin_" + lado, 16)
 	contenedor.add_child(margen)
 	var caja := VBoxContainer.new()
-	caja.add_theme_constant_override("separation", 14)
+	caja.add_theme_constant_override("separation", 16)
 	margen.add_child(caja)
 	return caja
 
