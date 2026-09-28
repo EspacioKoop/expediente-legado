@@ -21,6 +21,7 @@ class SuenoObjetivoVariedad299Test(unittest.TestCase):
             "TIPO_RECORRIDO",
             "TIPO_SECUENCIA",
             "TIPO_PERMANENCIA",
+            "TIPO_RETORNO",
             "SuenoObjetivosVariedad.tipos_para",
             "SuenoObjetivosVariedad.condicion",
         ):
@@ -33,6 +34,9 @@ class SuenoObjetivoVariedad299Test(unittest.TestCase):
         self.assertIn("to_utf8_buffer()", self.politica)
         self.assertIn("dia * 17", self.politica)
         self.assertIn("posmod", self.politica)
+        self.assertIn("CANTIDAD_POR_NOCHE := 3", self.politica)
+        self.assertIn("TIPO_RETORNO", self.politica)
+        self.assertIn('"ida_y_vuelta"', self.politica)
         self.assertIn("SuenoObjetivosVariedad.tipos_para", self.dia)
         for prohibido in ("randf", "randi", "randomize"):
             self.assertNotIn(prohibido, self.politica)
@@ -49,6 +53,7 @@ class SuenoObjetivoVariedad299Test(unittest.TestCase):
         self.assertIn("body_exited.connect", self.variedad)
         self.assertIn("TIEMPO_PERMANENCIA", self.variedad)
         self.assertIn("rumbo_cambiado.emit", self.variedad)
+        self.assertIn("TIPO_RETORNO", self.variedad)
         ejecutable = "\n".join(
             linea
             for linea in self.variedad.splitlines()
