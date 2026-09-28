@@ -155,6 +155,21 @@ func _probar_panel() -> void:
 		panel.queue_free()
 		return
 	_comprobar(boton_a.focus_mode == Control.FOCUS_ALL, "las fichas se eligen con teclado y mando")
+	_comprobar(
+		boton_a.accessibility_name == boton_a.tooltip_text and not boton_a.accessibility_name.is_empty(),
+		"la ficha expone el mismo nombre visible al lector de pantalla",
+	)
+	_comprobar(not panel.accessibility_name.is_empty(), "el panel del corcho tiene nombre accesible")
+	var cerrar := panel.get_node_or_null("Cerrar") as Button
+	_comprobar(
+		cerrar != null and cerrar.accessibility_name == cerrar.text and not cerrar.text.is_empty(),
+		"cerrar conserva un nombre accesible explícito",
+	)
+	var detalle_resumen := panel.find_child("DetalleResumen", true, false) as RichTextLabel
+	_comprobar(
+		detalle_resumen != null and not detalle_resumen.accessibility_name.is_empty(),
+		"la región de detalle queda identificada para lectura no visual",
+	)
 
 	panel.inspeccionar("a")
 	_comprobar(panel.detalle_id() == "a", "inspeccionar fija la ficha de lectura")
