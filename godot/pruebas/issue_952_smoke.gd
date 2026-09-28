@@ -109,7 +109,9 @@ func _probar_autocuidado_aviones() -> void:
 		"completar el descanso de aviones aplica autocuidado una sola vez",
 	)
 	AvionesPapelDescanso.finalizar(jornada, {"ganador": "jugador"})
-	_comprobar_cerca(Estres.valor(jornada), 12.0, "repetir el cierre no permite farmear recuperación")
+	_comprobar_cerca(
+		Estres.valor(jornada), 12.0, "repetir el cierre no permite farmear recuperación"
+	)
 
 	var abandonada := {"dia": 6, "vuelta": 1, "fase": "archivo"}
 	Estres.aplicar(abandonada, "documento_sensible", 2.0)
