@@ -28,6 +28,47 @@ jobs:
           test -n "$TS_OAUTH_CLIENT_ID"
           test -n "$TS_AUDIENCE"
 
+      - name: Mostrar claims OIDC seguros
+        env:
+          TS_AUDIENCE: ${{ secrets.TS_AUDIENCE }}
+        run: |
+          set -euo pipefail
+          encoded_audience="$(python3 - <<'PY'
+          import os, urllib.parse
+          print(urllib.parse.quote(os.environ["TS_AUDIENCE"], safe=""))
+          PY
+          )"
+          oidc_json="$(curl -fsS \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${encoded_audience}")"
+          token="$(jq -er '.value' <<<"$oidc_json")"
+          TOKEN="$token" python3 - <<'PY'
+          import base64, json, os
+
+          payload = os.environ["TOKEN"].split(".")[1]
+          payload += "=" * (-len(payload) % 4)
+          claims = json.loads(base64.urlsafe_b64decode(payload))
+          safe = {
+              key: claims.get(key)
+              for key in (
+                  "iss",
+                  "sub",
+                  "repository",
+                  "repository_id",
+                  "repository_owner",
+                  "repository_owner_id",
+                  "workflow",
+                  "workflow_ref",
+                  "ref",
+                  "ref_type",
+                  "event_name",
+                  "runner_environment",
+              )
+          }
+          print(json.dumps(safe, indent=2, sort_keys=True))
+          PY
+          unset token oidc_json
+
       - name: Entrar en la tailnet
         uses: tailscale/github-action@v4
         with:
