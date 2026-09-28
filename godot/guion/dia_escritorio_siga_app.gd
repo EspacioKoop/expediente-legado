@@ -11,6 +11,7 @@ var _explorador_app: EscritorioSigaApp
 var _navegador_app: EscritorioSigaApp
 var _software_app: EscritorioSigaApp
 var _correo_app: EscritorioSigaApp
+var _chat_app: EscritorioSigaApp
 var _bloc_notas_app: EscritorioSigaApp
 var _calculadora_app: EscritorioSigaApp
 var _catalogo_anomalias_app: EscritorioSigaApp
@@ -19,6 +20,7 @@ var _auditorias_app: EscritorioSigaApp
 var _bingo_app: EscritorioSigaApp
 var _explorador_vista: ExploradorSiga
 var _navegador_vista: NavegadorSiga
+var _chat_vista: ChatCorporativoSiga
 var _software_vista: SoftwareSiga
 var _menu_global: Node
 var _boton_salida_menu_global: Button
@@ -69,6 +71,8 @@ func _process(_delta: float) -> void:
 		_pantalla_envuelta_id = 0
 		return
 	var id := (pantalla as Node).get_instance_id()
+	if is_instance_valid(_chat_vista):
+		_chat_vista.configurar_contexto(_contexto_chat(dia, _companeros_presentes(dia)))
 	if id == _pantalla_envuelta_id:
 		return
 	var visor := (pantalla as Node).get_node_or_null("Visor")
@@ -200,6 +204,24 @@ func _envolver_puesto(dia: Node, pantalla: CanvasLayer, visor: Control) -> void:
 	_correo_app.persistir_estado = true
 	_correo_app.registrar_en(escritorio)
 	_apps.append(_correo_app)
+
+	# #666 reutiliza el mismo shell y estado narrativo que correo/Web98. El
+	# cliente es puramente local: no crea sockets ni permite texto libre.
+	_chat_app = (
+		EscritorioSigaApp
+		. new(
+			"chat-corporativo",
+			ChatCorporativoSiga.texto("titulo_app"),
+			Callable(self, "_crear_chat_corporativo"),
+			"correo",
+		)
+	)
+	_chat_app.tamano_minimo = Vector2(660, 420)
+	_chat_app.tamano_preferido = Vector2(860, 580)
+	_chat_app.redimensionable = true
+	_chat_app.persistir_estado = true
+	_chat_app.registrar_en(escritorio)
+	_apps.append(_chat_app)
 
 	# Primeras utilidades funcionales de #538. El bloc persiste solo texto local,
 	# separado por raíz de partida; la calculadora no conserva estado y limita su
@@ -371,13 +393,7 @@ func _crear_correo() -> Control:
 	if dia == null:
 		return correo
 
-	var presentes: Array[String] = []
-	var semilla_plantilla := int(dia.jornada.get("plantilla", 0))
-	for valor in Companeros.plantilla(semilla_plantilla):
-		if valor is Dictionary:
-			var id := String((valor as Dictionary).get("id", ""))
-			if not id.is_empty():
-				presentes.append(id)
+	var presentes := _companeros_presentes(dia)
 	correo.configurar_contexto(dia.jornada, presentes)
 
 	if _correo_app != null:
@@ -398,6 +414,55 @@ func _crear_correo() -> Control:
 	correo.respuesta_enviada.connect(_registrar_respuesta_correo)
 	correo.paquete_software_obtenido.connect(_registrar_paquete_software_obtenido)
 	return correo
+
+
+func _crear_chat_corporativo() -> Control:
+	var chat := ChatCorporativoSiga.new()
+	_chat_vista = chat
+	var dia := get_parent()
+	if dia == null:
+		return chat
+
+	var presentes := _companeros_presentes(dia)
+	chat.configurar_contexto(_contexto_chat(dia, presentes))
+	if _chat_app != null:
+		var por_partida: Variant = _chat_app.obtener_estado_local("respuestas_por_partida", {})
+		if por_partida is Dictionary:
+			var guardadas: Variant = (por_partida as Dictionary).get(_clave_partida(dia), {})
+			if guardadas is Dictionary:
+				chat.configurar_respuestas(guardadas as Dictionary)
+	chat.respuesta_elegida.connect(_registrar_respuesta_chat)
+	chat.enlace_abierto.connect(_abrir_enlace_chat)
+	return chat
+
+
+func _companeros_presentes(dia: Node) -> Array[String]:
+	var presentes: Array[String] = []
+	var semilla_plantilla := int(dia.jornada.get("plantilla", 0))
+	for valor in Companeros.plantilla(semilla_plantilla):
+		if not valor is Dictionary:
+			continue
+		var id := String((valor as Dictionary).get("id", ""))
+		if not id.is_empty():
+			presentes.append(id)
+	return presentes
+
+
+func _contexto_chat(dia: Node, presentes: Array[String]) -> Dictionary:
+	var contexto := _contexto_os98(dia)
+	contexto["fase"] = String(dia.jornada.get("fase", "archivo"))
+	contexto["dia"] = int(dia.jornada.get("dia", 1))
+	contexto["acciones"] = int(dia.jornada.get("acciones", Jornada.ACCIONES_POR_DIA))
+	contexto["companeros"] = presentes.duplicate()
+	var eventos: Array[String] = []
+	var declarados: Variant = dia.jornada.get("eventos", [])
+	if declarados is Array:
+		for valor in declarados as Array:
+			var evento := String(valor)
+			if not evento.is_empty() and not eventos.has(evento):
+				eventos.append(evento)
+	contexto["eventos"] = eventos
+	return contexto
 
 
 func _crear_bloc_notas() -> Control:
@@ -533,6 +598,8 @@ func _sincronizar_contexto_os98(dia: Node) -> void:
 		_explorador_vista.configurar_contexto(contexto)
 	if _navegador_vista != null and is_instance_valid(_navegador_vista):
 		_navegador_vista.configurar_contexto(contexto)
+	if _chat_vista != null and is_instance_valid(_chat_vista):
+		_chat_vista.configurar_contexto(_contexto_chat(dia, _companeros_presentes(dia)))
 
 
 func _contexto_os98(dia: Node) -> Dictionary:
@@ -669,6 +736,63 @@ func _registrar_respuesta_correo(
 	}
 	por_partida[clave] = respuestas
 	_correo_app.establecer_estado_local("respuestas_por_partida", por_partida)
+
+
+func _registrar_respuesta_chat(mensaje_id: String, opcion_id: String) -> void:
+	if _chat_app == null or mensaje_id.is_empty() or opcion_id.is_empty():
+		return
+	var dia := get_parent()
+	if dia == null:
+		return
+	var por_partida: Dictionary = {}
+	var guardado: Variant = _chat_app.obtener_estado_local("respuestas_por_partida", {})
+	if guardado is Dictionary:
+		por_partida = (guardado as Dictionary).duplicate(true)
+	var clave := _clave_partida(dia)
+	var respuestas: Dictionary = {}
+	var anteriores: Variant = por_partida.get(clave, {})
+	if anteriores is Dictionary:
+		respuestas = (anteriores as Dictionary).duplicate(true)
+	if respuestas.has(mensaje_id):
+		return
+	respuestas[mensaje_id] = {
+		"opcion_id": opcion_id,
+		"dia": int(dia.jornada.get("dia", 1)),
+		"acciones": int(dia.jornada.get("acciones", Jornada.ACCIONES_POR_DIA)),
+	}
+	por_partida[clave] = respuestas
+	_chat_app.establecer_estado_local("respuestas_por_partida", por_partida)
+
+
+func _abrir_enlace_chat(recurso_id: String) -> void:
+	if recurso_id.is_empty() or _navegador_app == null:
+		return
+	var dia := get_parent()
+	if dia == null:
+		return
+	var indice := Web98Indice.new()
+	indice.configurar_contexto(_contexto_os98(dia))
+	var url := ""
+	for recurso in indice.recursos_visibles():
+		if String(recurso.get("id", "")) == recurso_id:
+			url = String(recurso.get("url", ""))
+			break
+	if url.is_empty():
+		return
+
+	var pantalla: Variant = dia.get("_pantalla")
+	if pantalla == null or not is_instance_valid(pantalla):
+		return
+	var escritorio := (pantalla as Node).get_node_or_null("EscritorioSiga")
+	if escritorio == null or not escritorio is EscritorioSiga:
+		return
+	_navegador_app.abrir(escritorio as EscritorioSiga)
+	call_deferred("_navegar_enlace_chat_diferido", url)
+
+
+func _navegar_enlace_chat_diferido(url: String) -> void:
+	if _navegador_vista != null and is_instance_valid(_navegador_vista):
+		_navegador_vista.navegar(url)
 
 
 func _registrar_texto_bloc(texto: String) -> void:
