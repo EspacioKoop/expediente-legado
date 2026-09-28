@@ -18,6 +18,7 @@ signal cerrada
 const SEGUNDOS_POR_CARACTER := 0.018
 const SACUDIDA := 7.0
 const SACUDIDA_SEGUNDOS := 0.28
+const VentanillaCoopAcceso = preload("res://guion/ventanilla_coop_acceso.gd")
 
 var contenido := Contenido.new()
 var partida := Partida.new()
@@ -54,6 +55,7 @@ var _jugada_pendiente := ""
 var _evidencia_pendiente := ""
 var _habilidad_pendiente := ""
 var _pulso_racha := 0
+var _coop_panel: VBoxContainer
 
 
 func _ready() -> void:
@@ -513,11 +515,28 @@ func _construir() -> void:
 	_habilidades = HBoxContainer.new()
 	_tablero.add_child(_habilidades)
 
+	var coop := Button.new()
+	coop.name = "AbrirCoopVentanilla"
+	coop.text = tr("VENTANILLA_COOP_ABRIR")
+	coop.pressed.connect(_alternar_coop)
+	_tablero.add_child(coop)
+
+	_coop_panel = VentanillaCoopAcceso.new()
+	_coop_panel.name = "CooperativoVentanilla"
+	_coop_panel.visible = false
+	_tablero.add_child(_coop_panel)
+
 	var salir := Button.new()
 	salir.name = "SalirVentanilla"
 	salir.text = tr("VENTANILLA_SALIR")
 	salir.pressed.connect(_salir_ventanilla)
 	_tablero.add_child(salir)
+
+
+func _alternar_coop() -> void:
+	_coop_panel.visible = not _coop_panel.visible
+	if _coop_panel.visible:
+		_coop_panel.refrescar()
 
 
 func _construir_vidas() -> Control:
