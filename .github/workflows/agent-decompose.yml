@@ -129,7 +129,7 @@ jobs:
           openai_model: ${{ steps.qwen_config.outputs.model }}
           qwen_cli_version: ${{ vars.QWEN_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":8},"experimental":{"emitToolUseSummaries":false},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, .agent-decompose-input.md y las Normas Platino en .agent-platino. Inspecciona el repo solo para decidir si el issue cabe en un corte seguro de <=12 rutas. No edites nada. Si cabe, devuelve fits_single_cut=true. Si no, crea entre 2 y 4 subtareas pequeñas; cada una con title, goal, files concretos (max 12) y depends_on con indices anteriores. Si dos subtareas comparten ruta, la posterior DEBE depender de la anterior. Termina con AGENT_DECOMPOSE_BEGIN seguido de JSON {"fits_single_cut":false,"subtasks":[{"title":"...","goal":"...","files":["ruta"],"depends_on":[]}]} y AGENT_DECOMPOSE_END.'
+          prompt: 'Lee AGENTS.md, .agent-decompose-input.md y las Normas Platino en .agent-platino. Inspecciona el repo solo para decidir si el issue cabe en un corte seguro de <=8 rutas. No edites nada. Si cabe, devuelve fits_single_cut=true. Si no, crea entre 2 y 6 subtareas pequeñas; cada una con title, goal, files concretos (max 8) y depends_on con indices anteriores. Si dos subtareas comparten ruta, la posterior DEBE depender de la anterior. Termina con AGENT_DECOMPOSE_BEGIN seguido de JSON {"fits_single_cut":false,"subtasks":[{"title":"...","goal":"...","files":["ruta"],"depends_on":[]}]} y AGENT_DECOMPOSE_END.'
 
       - id: plan_gemini
         name: Descomponer con Gemini
@@ -142,7 +142,7 @@ jobs:
           gemini_model: ${{ vars.GEMINI_MODEL }}
           gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION || 'latest' }}
           settings: '{"model":{"maxSessionTurns":8},"tools":{"core":["read_file","glob","grep_search","list_directory"]}}'
-          prompt: 'Lee AGENTS.md, .agent-decompose-input.md y las Normas Platino en .agent-platino. Inspecciona el repo solo para decidir si el issue cabe en un corte seguro de <=12 rutas. No edites nada. Si cabe, devuelve fits_single_cut=true. Si no, crea entre 2 y 4 subtareas pequeñas; cada una con title, goal, files concretos (max 12) y depends_on con indices anteriores. Si dos subtareas comparten ruta, la posterior DEBE depender de la anterior. Termina con AGENT_DECOMPOSE_BEGIN seguido de JSON {"fits_single_cut":false,"subtasks":[{"title":"...","goal":"...","files":["ruta"],"depends_on":[]}]} y AGENT_DECOMPOSE_END.'
+          prompt: 'Lee AGENTS.md, .agent-decompose-input.md y las Normas Platino en .agent-platino. Inspecciona el repo solo para decidir si el issue cabe en un corte seguro de <=8 rutas. No edites nada. Si cabe, devuelve fits_single_cut=true. Si no, crea entre 2 y 6 subtareas pequeñas; cada una con title, goal, files concretos (max 8) y depends_on con indices anteriores. Si dos subtareas comparten ruta, la posterior DEBE depender de la anterior. Termina con AGENT_DECOMPOSE_BEGIN seguido de JSON {"fits_single_cut":false,"subtasks":[{"title":"...","goal":"...","files":["ruta"],"depends_on":[]}]} y AGENT_DECOMPOSE_END.'
 
       - id: normalize
         name: Validar descomposicion
