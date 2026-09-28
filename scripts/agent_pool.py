@@ -55,7 +55,16 @@ def _worker(item: dict[str, Any]) -> dict[str, Any] | None:
     if isinstance(raw_score, bool):
         score = 50.0
     score = max(0.0, min(100.0, score))
-    return {"worker": worker_id.strip(), "provider": provider, "score": score}
+    # Tier (#1685): 1 = preferente. Un tier mayor solo recibe trabajo cuando los
+    # anteriores no tienen hueco; sirve para dejar backends flojos de reserva.
+    raw_tier = item.get("tier", 1)
+    try:
+        tier = int(raw_tier)
+    except (TypeError, ValueError):
+        tier = 1
+    if isinstance(raw_tier, bool) or tier < 1:
+        tier = 1
+    return {"worker": worker_id.strip(), "provider": provider, "score": score, "tier": tier}
 
 
 def _preferred_provider(issue: dict[str, Any]) -> str | None:
@@ -159,9 +168,14 @@ def _best_index(
     ]
     if not candidates:
         return None
+    # Primero el tier más bajo; dentro del tier, el mejor score histórico.
     return max(
         candidates,
-        key=lambda index: (float(workers[index].get("score", 50.0)), -index),
+        key=lambda index: (
+            -int(workers[index].get("tier", 1)),
+            float(workers[index].get("score", 50.0)),
+            -index,
+        ),
     )
 
 

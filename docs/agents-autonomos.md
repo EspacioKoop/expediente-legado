@@ -80,8 +80,11 @@ Cada slot `N` (1-12) usa:
 | Clave | Actions **Secret** | `QWEN_FALLBACK_N_API_KEY` |
 | Endpoint | Actions **Variable** | `QWEN_FALLBACK_N_BASE_URL` |
 | Modelo | Actions **Variable** | `QWEN_FALLBACK_N_MODEL` |
+| Tier (opcional) | Actions **Variable** | `QWEN_FALLBACK_N_TIER` (entero ≥ 1; 1 por defecto) |
 
 Para añadir un slot basta con crear esas tres entradas: `scripts/agent_slots.py` descubre las variables desde `toJSON(vars)` y el worker toma la clave con `secrets[format('QWEN_FALLBACK_{0}_API_KEY', N)]`. Los secretos no se pueden enumerar, así que el pool tiene **una única tabla** (`FALLBACK_KEYS` en `agent-pool.yml`) que dice qué slots tienen clave; es el único sitio con números de slot. Para pasar de 12, añade líneas a esa tabla y sube `MAX_FALLBACKS` en el script: un test exige que coincidan.
+
+**Tiers.** El dispatcher agota el tier más bajo antes de usar el siguiente; dentro de un tier decide el score histórico (#1621). Sirve para dejar de último recurso un backend flojo o caro sin quitarlo: por ejemplo `QWEN_FALLBACK_1_TIER=2` deja ese slot detrás de todos los de tier 1. La cascada de `qwen-primary` sin clave también empieza por el tier más bajo. Se pueden usar tantos niveles como se quiera.
 
 Un slot con URL pero sin clave no recibe trabajo, así que se puede preparar el endpoint antes de tener la cuenta. Cada slot es un worker propio del pool (`qwen-fallback-N`). Si `qwen-primary` no tiene clave ni OmniRoute, usa el primer fallback con clave. Antes de confiar en un slot, valida el smoke y después un issue real con plan delegado: el smoke comprueba *tool calling*, pero no que el modelo sepa implementar.
 

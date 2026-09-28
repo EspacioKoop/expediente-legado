@@ -61,9 +61,19 @@ def fallbacks(variables: dict[str, Any], con_clave: set[int]) -> list[dict[str, 
                 "slot": n,
                 "url": url,
                 "model": str(variables.get(f"QWEN_FALLBACK_{n}_MODEL") or "").strip(),
+                "tier": tier_de(variables, n),
             }
         )
-    return salida
+    # Orden por tier y luego por número: `primera` y la cascada de qwen-primary
+    # agotan un tier antes de bajar al siguiente.
+    return sorted(salida, key=lambda s: (s["tier"], s["slot"]))
+
+
+def tier_de(variables: dict[str, Any], n: int) -> int:
+    """`QWEN_FALLBACK_N_TIER` (entero >= 1); 1 si falta o no es válido."""
+
+    crudo = str(variables.get(f"QWEN_FALLBACK_{n}_TIER") or "").strip()
+    return int(crudo) if crudo.isdigit() and int(crudo) >= 1 else 1
 
 
 def resolver(
@@ -100,7 +110,10 @@ def main() -> int:
     variables = _variables()
     con_clave = claves_presentes(os.environ.get("FALLBACK_KEYS", ""))
     if args.orden == "listar":
-        workers = [{"worker": s["worker"], "provider": "qwen"} for s in fallbacks(variables, con_clave)]
+        workers = [
+            {"worker": s["worker"], "provider": "qwen", "tier": s["tier"]}
+            for s in fallbacks(variables, con_clave)
+        ]
         json.dump(workers, sys.stdout)
         print()
         return 0

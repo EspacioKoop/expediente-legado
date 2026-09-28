@@ -39,18 +39,37 @@ class SlotsTest(unittest.TestCase):
 
     def test_resolver_worker_y_modelo_por_defecto(self):
         self.assertEqual(
-            {"worker": "qwen-fallback-7", "slot": 7, "url": NVIDIA, "model": "qwen3-coder-plus"},
+            {"worker": "qwen-fallback-7", "slot": 7, "url": NVIDIA, "model": "qwen3-coder-plus", "tier": 1},
             slots.resolver(VARS, "qwen-fallback-7", {7}, "qwen3-coder-plus"),
         )
         self.assertIsNone(slots.resolver(VARS, "qwen-fallback-7", {2}))
         self.assertEqual(2, slots.resolver(VARS, "primera", {2, 7})["slot"])
+
+    def test_tiers_ordenan_y_la_cascada_agota_el_tier_preferente(self):
+        # Caso real: Cohere (slot 1) de último recurso tras los Nemotron (2, 7).
+        variables = {**VARS, "QWEN_FALLBACK_1_TIER": "2", "QWEN_FALLBACK_7_TIER": "1"}
+        orden = [(s["worker"], s["tier"]) for s in slots.fallbacks(variables, {1, 2, 7})]
+        self.assertEqual(
+            [("qwen-fallback-2", 1), ("qwen-fallback-7", 1), ("qwen-fallback-1", 2)], orden
+        )
+        self.assertEqual(2, slots.resolver(variables, "primera", {1, 2, 7})["slot"])
+        self.assertEqual(1, slots.resolver(variables, "primera", {1})["slot"])
+
+    def test_tier_invalido_es_1(self):
+        for valor in ("", "0", "-1", "x", None):
+            with self.subTest(valor=valor):
+                self.assertEqual(1, slots.tier_de({"QWEN_FALLBACK_3_TIER": valor}, 3))
+        self.assertEqual(3, slots.tier_de({"QWEN_FALLBACK_3_TIER": " 3 "}, 3))
 
     def test_cli_listar_y_resolver(self):
         entorno = {**os.environ, "VARS_JSON": json.dumps(VARS), "FALLBACK_KEYS": "2 7"}
         script = str(ROOT / "scripts" / "agent_slots.py")
         listar = subprocess.run([sys.executable, script, "listar"], env=entorno, capture_output=True, text=True, check=True)
         self.assertEqual(
-            [{"worker": "qwen-fallback-2", "provider": "qwen"}, {"worker": "qwen-fallback-7", "provider": "qwen"}],
+            [
+                {"worker": "qwen-fallback-2", "provider": "qwen", "tier": 1},
+                {"worker": "qwen-fallback-7", "provider": "qwen", "tier": 1},
+            ],
             json.loads(listar.stdout),
         )
         falla = subprocess.run(
