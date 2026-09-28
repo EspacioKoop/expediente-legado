@@ -134,7 +134,9 @@ jobs:
           KEV_API_KEY: ${{ secrets.KEV_API_KEY }}
         run: |
           set -euo pipefail
-          gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json title,body,labels             --jq '{title:.title,body:(.body//""),labels:[.labels[].name]}'             > /tmp/kev-state.json
+          gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json title,body,labels \
+            --jq '{title:.title,body:(.body//""),labels:[.labels[].name]}' \
+            > /tmp/kev-state.json
 
           args=(--state-file /tmp/kev-state.json --requested-provider "$REQUESTED_PROVIDER")
           [[ "$HAS_QWEN_ANY" == true ]] && args+=(--has-qwen)
