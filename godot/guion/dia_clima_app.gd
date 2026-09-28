@@ -464,6 +464,13 @@ func _clave_conversacion_contextual(
 	var clave_religiosa := DialogoReligion933.resolver_clave(partida.estado, actor_id)
 	if not clave_religiosa.is_empty():
 		return clave_religiosa
+
+	var variante_social := DialogoIdeologico.resolver_companero(actor_id, partida.estado)
+	var clave_social := String(variante_social.get("clave", ""))
+	if not clave_social.is_empty():
+		if DialogoIdeologico.registrar_respuesta(partida.estado, variante_social):
+			_guardar_o_avisar("")
+		return clave_social
 	return clave_dialogo
 
 

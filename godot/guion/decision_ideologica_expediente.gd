@@ -14,6 +14,8 @@ extends RefCounted
 const CASO_VERTICAL := "caso@1"
 const EVENTO_VERTICAL := "expediente:caso@1:postcierre"
 const ACTOR_CUNADO := "cunado"
+const ACTOR_BECARIO := "becario"
+const ACTOR_JUBILACION := "jubilacion"
 const PREFIJO_OPCION := "opcion:"
 
 const DECISIONES := {
@@ -45,6 +47,18 @@ const DECISIONES := {
 				"responsabilidad_compartida": "cierre_colectivo",
 				"revision_procedimental": "cierre_procedimental",
 				"conciliacion_interna": "cierre_negociado",
+			},
+			ACTOR_BECARIO:
+			{
+				"responsabilidad_compartida": "lee_coste_compartido",
+				"revision_procedimental": "lee_regla_formal",
+				"conciliacion_interna": "lee_arreglo_interno",
+			},
+			ACTOR_JUBILACION:
+			{
+				"responsabilidad_compartida": "distancia_reparto",
+				"revision_procedimental": "distancia_revision",
+				"conciliacion_interna": "distancia_acuerdo",
 			}
 		},
 	}
