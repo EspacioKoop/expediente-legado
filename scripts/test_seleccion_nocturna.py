@@ -7,6 +7,7 @@ SELECCION = ROOT / "godot" / "guion" / "seleccion_nocturna.gd"
 JORNADA = ROOT / "godot" / "guion" / "jornada.gd"
 SUENO = ROOT / "godot" / "guion" / "sueno.gd"
 DIA = ROOT / "godot" / "guion" / "dia_app.gd"
+ESPACIOS = ROOT / "godot" / "guion" / "dia_espacios_app.gd"
 SUITE = ROOT / "godot" / "pruebas" / "pruebas.gd"
 
 
@@ -17,6 +18,7 @@ class SeleccionNocturnaContratoTest(unittest.TestCase):
         cls.jornada = JORNADA.read_text(encoding="utf-8")
         cls.sueno = SUENO.read_text(encoding="utf-8")
         cls.dia = DIA.read_text(encoding="utf-8")
+        cls.espacios = ESPACIOS.read_text(encoding="utf-8")
         cls.suite = SUITE.read_text(encoding="utf-8")
 
     def test_tres_huecos_solo_con_documentos_leidos(self):
@@ -35,8 +37,9 @@ class SeleccionNocturnaContratoTest(unittest.TestCase):
         self.assertIn('opciones.get("seleccion_nocturna", [])', self.sueno)
 
     def test_reparto_y_recalculo_usan_la_misma_memoria(self):
-        self.assertIn("SeleccionNocturna.opciones_sueno(jornada, _opciones_sueno())", self.dia)
-        self.assertIn('opciones.get("seleccion_nocturna", [])', self.dia)
+        self.assertIn("SeleccionNocturna.opciones_sueno(jornada, opciones_sueno.call())", self.espacios)
+        self.assertIn('opciones.get("seleccion_nocturna", [])', self.espacios)
+        self.assertIn('Callable(self, "_opciones_sueno")', self.dia)
         self.assertIn("opciones = SeleccionNocturna.opciones_sueno(jornada, opciones)", self.dia)
 
     def test_hay_regresion_godot_ejecutable(self):
