@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MODULE_PATH = ROOT / "scripts" / "agent_feeder.py"
 WORKFLOW = ROOT / ".github" / "workflows" / "agent-feeder.yml"
 DECOMPOSE = ROOT / ".github" / "workflows" / "agent-decompose.yml"
+DEPENDENCY = ROOT / ".github" / "workflows" / "agent-dependency-unblock.yml"
 
 SPEC = importlib.util.spec_from_file_location("agent_feeder", MODULE_PATH)
 assert SPEC and SPEC.loader
@@ -113,6 +114,12 @@ class AgentFeederTest(unittest.TestCase):
         decompose = DECOMPOSE.read_text(encoding="utf-8")
         self.assertIn("actions: write", decompose)
         self.assertGreaterEqual(decompose.count("gh workflow run agent-pool.yml"), 2)
+
+    def test_unblock_despacha_pool_si_libera_subtareas(self):
+        dependency = DEPENDENCY.read_text(encoding="utf-8")
+        self.assertIn("actions: write", dependency)
+        self.assertIn("/tmp/agent-unblocked.txt", dependency)
+        self.assertIn("gh workflow run agent-pool.yml", dependency)
 
 
 if __name__ == "__main__":
