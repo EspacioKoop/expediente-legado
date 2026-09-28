@@ -8,6 +8,7 @@ from scripts.godot_pruebas import ejecutar_script
 
 ROOT = Path(__file__).resolve().parents[1]
 CATALOGO = ROOT / "godot/datos/puntos_inspeccion.json"
+SELLOS = ROOT / "godot/datos/sellos.json"
 PASAPORTE = ROOT / "godot/guion/pasaporte_inspeccion.gd"
 RUNTIME = ROOT / "godot/guion/pasaporte_inspeccion_runtime.gd"
 PRUEBA = ROOT / "godot/pruebas/pruebas_pasaporte_inspeccion_condiciones_154.gd"
@@ -19,6 +20,7 @@ class PasaporteInspeccionCondiciones154Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.catalogo = json.loads(CATALOGO.read_text(encoding="utf-8"))
+        cls.sellos = {entrada["id"]: entrada for entrada in json.loads(SELLOS.read_text(encoding="utf-8"))}
         cls.pasaporte = PASAPORTE.read_text(encoding="utf-8")
         cls.runtime = RUNTIME.read_text(encoding="utf-8")
         cls.prueba = PRUEBA.read_text(encoding="utf-8")
@@ -78,9 +80,21 @@ class PasaporteInspeccionCondiciones154Test(unittest.TestCase):
         ):
             self.assertNotIn(prohibido, self.runtime)
 
-    def test_tras_sueno_no_se_finge_sin_hecho_persistente(self):
-        self.assertIn('"Tras salir del sueño" queda fuera', self.pasaporte)
-        self.assertNotIn('"tras-sueno"', self.pasaporte)
+    def test_tras_sueno_usa_el_sello_canonico_y_no_otra_bandera(self):
+        self.assertEqual(
+            self.sellos["despertar-reglamentario"]["origen"], "sueno-completado"
+        )
+        self.assertIn(
+            'const SELLO_DESPERTAR_REGLAMENTARIO := "despertar-reglamentario"',
+            self.pasaporte,
+        )
+        self.assertIn('"tras-sueno"', self.pasaporte)
+        self.assertIn(
+            "Sellos.tiene_sello(estado, SELLO_DESPERTAR_REGLAMENTARIO)",
+            self.pasaporte,
+        )
+        self.assertIn('String(jornada.get("fase", "")) != "sueño"', self.pasaporte)
+        self.assertNotIn("ultimo_despertar", self.pasaporte)
 
     def test_contrato_ejecutable_en_godot(self):
         resultado = ejecutar_script("pruebas/pruebas_pasaporte_inspeccion_condiciones_154.gd")
