@@ -7,16 +7,17 @@ var fallos := 0
 
 
 func _initialize() -> void:
-	_probar_catalogo_y_dos_ramas()
+	_probar_catalogo_y_cuatro_ramas()
 	_probar_insight_con_procedencia()
 	_probar_reentrada_idempotente()
+	_probar_reentrada_especifica_de_rama()
 	_probar_dos_consumidores()
 	_probar_exposicion_no_es_identidad()
 	print("%d pasadas, %d fallos" % [pasadas, fallos])
 	quit(1 if fallos > 0 else 0)
 
 
-func _probar_catalogo_y_dos_ramas() -> void:
+func _probar_catalogo_y_cuatro_ramas() -> void:
 	var dialogo := LiteraturaDialogo.obtener(DIALOGO)
 	_comprobar(not dialogo.is_empty(), "carga el primer dialogo literario")
 	var npc: Dictionary = dialogo.get("npc", {})
@@ -25,21 +26,28 @@ func _probar_catalogo_y_dos_ramas() -> void:
 		"el catalogo identifica al NPC fisico de archivo",
 	)
 	var ramas: Array = dialogo.get("ramas", [])
-	_comprobar(ramas.size() == 2, "el primer dialogo ofrece dos ramas")
-	if ramas.size() < 2:
+	_comprobar(ramas.size() == 4, "el dialogo ofrece cuatro ramas")
+	if ramas.size() < 4:
 		return
-	_comprobar(
-		String(ramas[0].get("insight_id", "")) == String(ramas[1].get("insight_id", "")),
-		"las dos lecturas convergen en un insight contextual comun",
-	)
-	_comprobar(
-		not String(ramas[0].get("consecuencia_visible", "")).is_empty(),
-		"la primera rama declara una consecuencia visible",
-	)
-	_comprobar(
-		not String(ramas[1].get("consecuencia_visible", "")).is_empty(),
-		"la segunda rama declara una consecuencia visible",
-	)
+	var ids := {}
+	var insight_comun := String(ramas[0].get("insight_id", ""))
+	for rama_bruta in ramas:
+		var rama: Dictionary = rama_bruta
+		ids[String(rama.get("id", ""))] = true
+		_comprobar(
+			String(rama.get("insight_id", "")) == insight_comun,
+			"todas las lecturas convergen en un insight contextual comun",
+		)
+		_comprobar(
+			not String(rama.get("consecuencia_visible", "")).is_empty(),
+			"cada rama declara una consecuencia visible",
+		)
+		_comprobar(
+			not String(rama.get("reentrada", "")).is_empty(),
+			"cada rama declara una reentrada propia",
+		)
+	_comprobar(ids.has("pragmatica"), "existe una respuesta pragmatica")
+	_comprobar(ids.has("contradiccion"), "existe una lectura de contradiccion")
 
 
 func _probar_insight_con_procedencia() -> void:
@@ -120,6 +128,33 @@ func _probar_reentrada_idempotente() -> void:
 	_comprobar(
 		LiteraturaEventos.eventos(registro, LiteraturaEventos.CANAL_INSIGHT).size() == 1,
 		"la reentrada mantiene un solo evento",
+	)
+
+
+func _probar_reentrada_especifica_de_rama() -> void:
+	var registro := LiteraturaEventos.nuevo()
+	(
+		LiteraturaDialogo
+		. conversar(
+			registro,
+			DIALOGO,
+			"pragmatica",
+			"npc:archivo:mediadora_98",
+			6,
+		)
+	)
+	var dialogo := LiteraturaDialogo.obtener(DIALOGO)
+	var esperada := ""
+	for rama_bruta in dialogo.get("ramas", []):
+		var rama: Dictionary = rama_bruta
+		if String(rama.get("id", "")) == "pragmatica":
+			esperada = String(rama.get("reentrada", ""))
+			break
+	var reentrada := LiteraturaDialogoReentrada.resolver(registro, DIALOGO)
+	_comprobar(bool(reentrada["disponible"]), "la rama pragmatica admite reentrada")
+	_comprobar(
+		String(reentrada["texto"]) == esperada,
+		"la reentrada conserva la rama concreta elegida",
 	)
 
 

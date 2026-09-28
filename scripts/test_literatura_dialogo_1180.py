@@ -28,11 +28,15 @@ class LiteraturaDialogo1180Test(unittest.TestCase):
         cls.diegetico = DIEGETICO.read_text(encoding="utf-8")
         cls.gestor = GESTOR.read_text(encoding="utf-8")
 
-    def test_catalogo_tiene_dos_ramas_y_movimiento_contextual(self) -> None:
+    def test_catalogo_tiene_cuatro_ramas_y_movimiento_contextual(self) -> None:
         dialogos = self.catalogo["dialogos"]
         self.assertEqual(len(dialogos), 1)
         dialogo = dialogos[0]
-        self.assertEqual(len(dialogo["ramas"]), 2)
+        self.assertEqual(len(dialogo["ramas"]), 4)
+        self.assertEqual(
+            {rama["id"] for rama in dialogo["ramas"]},
+            {"eleccion", "representacion", "pragmatica", "contradiccion"},
+        )
         self.assertEqual(dialogo["movimiento"]["id"], "barroco")
         self.assertEqual(dialogo["npc"]["id"], "mediadora_archivo_98")
         self.assertTrue(all(rama["consecuencia_visible"] for rama in dialogo["ramas"]))
@@ -40,6 +44,19 @@ class LiteraturaDialogo1180Test(unittest.TestCase):
             {rama["insight_id"] for rama in dialogo["ramas"]},
             {"apariencia_y_eleccion"},
         )
+
+    def test_ramas_nuevas_no_crean_identidad_ni_respuesta_correcta(self) -> None:
+        dialogo = self.catalogo["dialogos"][0]
+        por_id = {rama["id"]: rama for rama in dialogo["ramas"]}
+        self.assertIn("pragmatica", por_id["pragmatica"]["etiquetas"])
+        self.assertIn("contradiccion", por_id["contradiccion"]["etiquetas"])
+        self.assertEqual(
+            {rama["insight_id"] for rama in dialogo["ramas"]},
+            {"apariencia_y_eleccion"},
+        )
+        serializado = json.dumps(dialogo, ensure_ascii=False).lower()
+        for forbidden in ("respuesta_correcta", "afinidad", "reputacion", "alineamiento"):
+            self.assertNotIn(forbidden, serializado)
 
     def test_productor_solo_escribe_contrato_literario(self) -> None:
         self.assertIn("LiteraturaEventos.CANAL_INSIGHT", self.productor)
