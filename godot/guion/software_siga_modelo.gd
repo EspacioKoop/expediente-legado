@@ -189,7 +189,7 @@ func ejecutar(id: String) -> Dictionary:
 	var numero := int(_ejecuciones.get(id, 0)) + 1
 	_ejecuciones[id] = numero
 	var mensaje := ""
-	var incidencia := {}
+	var incidencia: Dictionary = {}
 	match String(paquete.get("interaccion", "")):
 		"benchmark":
 			# Resultado deliberadamente ficticio y determinista: nunca inspecciona CPU/GPU.
@@ -219,7 +219,9 @@ func ejecutar(id: String) -> Dictionary:
 				var resultado_limpieza := FallosMundanosOs98.neutralizar_limpiador(
 					estado_os, String(primera.get("objeto_id", ""))
 				)
-				incidencia = resultado_limpieza.get("incidencia", {})
+				var incidencia_valor: Variant = resultado_limpieza.get("incidencia", {})
+				if incidencia_valor is Dictionary:
+					incidencia = (incidencia_valor as Dictionary).duplicate(true)
 				mensaje = (
 					"Barrido completado: %s neutralizado dentro del OS simulado."
 					% String(primera.get("nombre", "incidencia catalogada"))
