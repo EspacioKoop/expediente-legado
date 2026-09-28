@@ -17,9 +17,14 @@ jobs:
     if: github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.head_branch, 'agent/')
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       issues: write
       pull-requests: read
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
       - name: Registrar PR_READY
         env:
           GH_TOKEN: ${{ github.token }}
@@ -33,8 +38,9 @@ jobs:
           pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "$BRANCH" --json number --jq '.[0].number // empty')"
           [[ -z "$pr" ]] && exit 0
           marker="PR_READY issue=#$issue pr=#$pr sha=$SHA"
-          if ! gh api --paginate "repos/$GITHUB_REPOSITORY/issues/182/comments?per_page=100" --jq '.[].body' | grep -Fq "$marker"; then
-            gh issue comment 182 --repo "$GITHUB_REPOSITORY" --body "$marker pruebas=CI-canónico-verde limites=PR-draft;sin-validación-humana provider=$provider"
+          python3 scripts/gestionar_reservas_rollover.py --comments-output /tmp/reservas-ready.json
+          if ! jq -r '.[].body' /tmp/reservas-ready.json | grep -Fq "$marker"; then
+            gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" --body "$marker pruebas=CI-canónico-verde limites=PR-draft;sin-validación-humana provider=$provider"
           fi
           gh issue edit "$issue" --repo "$GITHUB_REPOSITORY" --add-label agent:pr-open --remove-label agent:needs-human >/dev/null 2>&1 || true
           gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body "Agent autopilot: CI verde en $SHA; PR #$pr queda draft para revisión humana." || true
@@ -155,15 +161,15 @@ jobs:
           BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
           set -euo pipefail
-          gh api --paginate "repos/$GITHUB_REPOSITORY/issues/182/comments?per_page=100" \
-            --jq '.[]|{id,created_at,body}' | jq -s '.' > /tmp/reservas.json
-          # Capa única de lectura de #182 (#1662): respeta lease y PR_READY. Se toma
-          # de main, no de la rama reparada, que puede ser anterior a la capa.
-          mkdir -p /tmp/capa182
+          # La rama reparada puede ser anterior al rollover. Recuperar siempre la
+          # capa de reservas desde main antes de consultar #182 + registro activo.
+          mkdir -p /tmp/capa182 /tmp/.github
           git fetch --quiet --depth 1 origin main
-          for modulo in reservas_registro.py gestionar_reservas.py; do
+          for modulo in reservas_registro.py gestionar_reservas.py gestionar_reservas_rollover.py; do
             git show "FETCH_HEAD:scripts/$modulo" > "/tmp/capa182/$modulo"
           done
+          git show "FETCH_HEAD:.github/reservas-registro.json" > /tmp/.github/reservas-registro.json
+          python3 /tmp/capa182/gestionar_reservas_rollover.py --comments-output /tmp/reservas.json
           python3 /tmp/capa182/reservas_registro.py rutas \
             --comments /tmp/reservas.json --branch "$BRANCH" > /tmp/reserva.json
           if [[ "$(jq -r '.found' /tmp/reserva.json)" != true ]]; then

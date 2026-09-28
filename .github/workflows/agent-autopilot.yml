@@ -396,9 +396,8 @@ jobs:
           files="$(jq -r '.files|join(",")' .agent-plan.json)"
           goal="$(jq -r '.goal|gsub("[[:space:]]+";"-")' .agent-plan.json)"
           claim="CLAIM issue=#$ISSUE agent=Autopilot-$PROVIDER branch=$BRANCH files=$files goal=$goal lease=48h"
-          cid="$(gh api -X POST "repos/$GITHUB_REPOSITORY/issues/182/comments" -f body="$claim" --jq .id)"
-          gh api --paginate "repos/$GITHUB_REPOSITORY/issues/182/comments?per_page=100" \
-            --jq '.[]|{id,created_at,body}' | jq -s '.' > /tmp/reservas.json
+          cid="$(gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$(python3 scripts/gestionar_reservas_rollover.py --active)/comments" -f body="$claim" --jq .id)"
+          python3 scripts/gestionar_reservas_rollover.py --comments-output /tmp/reservas.json
           # Capa única de lectura de #182 (#1662), la misma que usa el worker.
           python3 scripts/reservas_registro.py conflictos \
             --comments /tmp/reservas.json --claim-id "$cid" --issue "$ISSUE" --branch "$BRANCH" \
@@ -415,7 +414,7 @@ jobs:
           fi
 
           if grep -q '^reserved=false$' "$GITHUB_OUTPUT"; then
-            gh issue comment 182 --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=colision-autopilot" >/dev/null || true
+            gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=colision-autopilot" >/dev/null || true
             gh issue edit "$ISSUE" --add-label agent:needs-human >/dev/null || true
             gh issue comment "$ISSUE" --body "Agent autopilot detenido: $(grep '^reason=' "$GITHUB_OUTPUT"|cut -d= -f2-)" || true
           fi
@@ -605,7 +604,7 @@ jobs:
           )"
           attempt=$((previous + 1))
 
-          gh issue comment 182 --repo "$GITHUB_REPOSITORY" \
+          gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" \
             --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=autopilot-replan-claim-incompleto" \
             >/dev/null || true
           gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
@@ -740,5 +739,5 @@ jobs:
           gh issue comment "$ISSUE" --body "Agent autopilot se detuvo: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" || true
           pr="$(gh pr list --state open --head "${BRANCH:-none}" --json number --jq '.[0].number // empty' || true)"
           if [[ "$RESERVED" == true && -z "$pr" ]]; then
-            gh issue comment 182 --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=autopilot-fallo-antes-de-PR" >/dev/null || true
+            gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=autopilot-fallo-antes-de-PR" >/dev/null || true
           fi

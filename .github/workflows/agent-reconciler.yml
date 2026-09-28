@@ -43,8 +43,7 @@ jobs:
 
           # #182 completo con id y fecha: la capa única (#1662) aplica lease y
           # PR_READY; una ventana de 300 comentarios perdía CLAIM antiguos (#1630).
-          gh api --paginate "repos/$GITHUB_REPOSITORY/issues/182/comments?per_page=100" \
-            --jq '.[]|{id,created_at,body}' | jq -s '.' > /tmp/comments.json
+          python3 scripts/gestionar_reservas_rollover.py --comments-output /tmp/comments.json
           gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 100             --json number,state,headRefName,title,body > /tmp/prs.json
 
           python3 scripts/agent_reconciler.py discover             --issues /tmp/issues.json             --comments /tmp/comments.json             --output /tmp/discovery.json >/dev/null
@@ -87,7 +86,7 @@ jobs:
                 ;;
               requeue)
                 if [[ -n "$branch" && "$branch" == agent/* ]]; then
-                  gh issue comment 182 --repo "$GITHUB_REPOSITORY"                     --body "RELEASE issue=#$issue branch=$branch motivo=agent-reconciler-$reason"                     >/dev/null || true
+                  gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY"                     --body "RELEASE issue=#$issue branch=$branch motivo=agent-reconciler-$reason"                     >/dev/null || true
                 fi
                 gh issue edit "$issue" --repo "$GITHUB_REPOSITORY"                   --remove-label agent:working --remove-label agent:pr-open                   --remove-label agent:needs-human >/dev/null 2>&1 || true
                 labels="$(gh issue view "$issue" --repo "$GITHUB_REPOSITORY"                   --json labels --jq '[.labels[].name]|join(" ")')"

@@ -463,9 +463,8 @@ jobs:
           files="$(jq -r '.files|join(",")' .agent-plan.json)"
           goal="$(jq -r '.goal|gsub("[[:space:]]+";"-")' .agent-plan.json)"
           claim="CLAIM issue=#$ISSUE agent=Pool-$PROVIDER branch=$BRANCH files=$files goal=$goal lease=48h"
-          cid="$(gh api -X POST "repos/$GITHUB_REPOSITORY/issues/182/comments" -f body="$claim" --jq .id)"
-          gh api --paginate "repos/$GITHUB_REPOSITORY/issues/182/comments?per_page=100" \
-            --jq '.[]|{id,created_at,body}' | jq -s '.' > /tmp/reservas.json
+          cid="$(gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$(python3 scripts/gestionar_reservas_rollover.py --active)/comments" -f body="$claim" --jq .id)"
+          python3 scripts/gestionar_reservas_rollover.py --comments-output /tmp/reservas.json
           # Capa única de lectura de #182 (#1662): misma semántica que el barrido
           # (lease, HEARTBEAT, PR_READY, RELEASE por rama) y sin parser propio aquí,
           # que daba por vivos CLAIM no canónicos que nunca se liberan.
@@ -484,7 +483,7 @@ jobs:
           fi
 
           if grep -q '^reserved=false$' "$GITHUB_OUTPUT"; then
-            gh issue comment 182 --repo "$GITHUB_REPOSITORY" --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=colision-agent-pool" >/dev/null || true
+            gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=colision-agent-pool" >/dev/null || true
           gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
               --remove-label agent:working --remove-label agent:needs-human \
               >/dev/null 2>&1 || true
@@ -603,7 +602,7 @@ jobs:
           )"
           attempt=$((previous + 1))
 
-          gh issue comment 182 --repo "$GITHUB_REPOSITORY" \
+          gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" \
             --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=agent-pool-replan-claim-incompleto" \
             >/dev/null || true
           gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
@@ -802,7 +801,7 @@ jobs:
                 --remove-label agent:gemini >/dev/null 2>&1 || true
               gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
                 "Agent pool ($WORKER) completó implementación, preflight y reviewer y publicó la rama \`$BRANCH\`, pero GitHub Actions no tiene permiso para crear PRs. Habilita Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests o abre la PR manualmente desde esa rama. El worker no se penaliza." || true
-              gh issue comment 182 --repo "$GITHUB_REPOSITORY" \
+              gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" \
                 --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=agent-pool-pr-policy-block" \
                 >/dev/null || true
               exit 0
@@ -867,7 +866,7 @@ jobs:
                 "Agent pool ($WORKER) fue cancelado, pero ya existe PR #$pr; se conserva la reserva y se normaliza el estado a agent:pr-open." || true
             else
               if [[ "${RESERVED:-}" == true && -n "${BRANCH:-}" ]]; then
-                gh issue comment 182 --repo "$GITHUB_REPOSITORY" \
+                gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" \
                   --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=agent-pool-cancelado-sin-PR" \
                   >/dev/null || true
               fi
@@ -904,12 +903,12 @@ jobs:
               (( cooldown < 300 )) && cooldown=300
               (( cooldown > 21600 )) && cooldown=21600
               until_epoch=$(( $(date +%s) + cooldown ))
-              gh issue comment 182 --repo "$GITHUB_REPOSITORY" --body                 "AGENT_POOL_SLOT_UNHEALTHY worker=$WORKER provider=$PROVIDER reason=quota until=$until_epoch run=$GITHUB_RUN_ID"                 >/dev/null || true
+              gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" --body                 "AGENT_POOL_SLOT_UNHEALTHY worker=$WORKER provider=$PROVIDER reason=quota until=$until_epoch run=$GITHUB_RUN_ID"                 >/dev/null || true
             fi
 
             marker="AGENT_POOL_WORKER_FAILURE worker=$WORKER provider=$PROVIDER stage=plan run=$GITHUB_RUN_ID"
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "$marker" >/dev/null || true
-            gh issue comment 182 --repo "$GITHUB_REPOSITORY" \
+            gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" \
               --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=agent-pool-plan-retry" \
               >/dev/null || true
 
@@ -982,7 +981,7 @@ jobs:
           gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
             "Agent pool ($WORKER) se detuvo después de reservar/implementar: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" || true
           if [[ "${RESERVED:-}" == true && -z "$pr" ]]; then
-            gh issue comment 182 --repo "$GITHUB_REPOSITORY" \
+            gh issue comment "$(python3 scripts/gestionar_reservas_rollover.py --active)" --repo "$GITHUB_REPOSITORY" \
               --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=agent-pool-fallo-antes-de-PR" \
               >/dev/null || true
           fi
