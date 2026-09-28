@@ -902,16 +902,17 @@ func _abrir_combate_hack_slash(
 	_preparar_mundo_para_combate()
 
 	_combate_contextual_3d = JuicioCombate3D.new()
-	_combate_contextual_3d.configurar(
-		objetivo,
-		0,
-		bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false)),
-		_raiz(),
+	(
+		_combate_contextual_3d
+		. configurar(
+			objetivo,
+			0,
+			bool(PreferenciasSiga.cargar().get("reduccion_movimiento", false)),
+			_raiz(),
+		)
 	)
 	_combate_contextual_3d.perfil_jugador = partida.estado.get("perfil_jugador", {})
-	_combate_contextual_3d.terminado.connect(
-		_cerrar_combate_hack_slash.bind(objetivo, zona)
-	)
+	_combate_contextual_3d.terminado.connect(_cerrar_combate_hack_slash.bind(objetivo, zona))
 	add_child(_combate_contextual_3d)
 	_hacer_actual_camara_combate()
 	_hablando = false
@@ -964,9 +965,7 @@ func _hacer_actual_camara_combate() -> void:
 			return
 
 
-func _cerrar_combate_hack_slash(
-	gano: bool, objetivo: Dictionary, zona: Area3D = null
-) -> void:
+func _cerrar_combate_hack_slash(gano: bool, objetivo: Dictionary, zona: Area3D = null) -> void:
 	var decision := _contexto_combate.duplicate(true)
 	_contexto_combate.clear()
 
@@ -980,10 +979,13 @@ func _cerrar_combate_hack_slash(
 	_restaurar_mundo_tras_combate()
 
 	if String(decision.get("plano", "")) == CombateContextual.PLANO_REALIDAD:
-		combate_real_terminado.emit(
-			String(objetivo.get("id", "")),
-			gano,
-			decision.get("consecuencia", {}).duplicate(true),
+		(
+			combate_real_terminado
+			. emit(
+				String(objetivo.get("id", "")),
+				gano,
+				decision.get("consecuencia", {}).duplicate(true),
+			)
 		)
 		return
 
