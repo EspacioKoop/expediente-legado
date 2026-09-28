@@ -10,6 +10,7 @@ var _fallos := 0
 
 func _initialize() -> void:
 	_probar_acumulacion_domestica()
+	_probar_ocho_objetos_desde_productores_reales()
 	_probar_iman_postal_en_nevera()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -93,6 +94,100 @@ func _probar_acumulacion_domestica() -> void:
 	var limitado := CasaAcumulacion.montar(casa, saturado)
 	_comprobar(limitado.get_child_count() == 8, "la presentación no crece como inventario infinito")
 
+	casa.queue_free()
+
+
+func _probar_ocho_objetos_desde_productores_reales() -> void:
+	var casa := Node3D.new()
+	root.add_child(casa)
+	CasaUtileriaScript.montar_zonas_domesticas(casa)
+
+	var inventario := Inventario.nuevo()
+	var jornada := {
+		"fase": "trayecto",
+		"dia": 4,
+		"dinero": 500,
+		"hora_minutos": 12 * 60,
+	}
+	var compras := [
+		["segunda_mano", "lampara_verde_usada"],
+		["segunda_mano", "marco_latón_usado"],
+		["quiosco", "revista_umbral_98"],
+		["quiosco", "libro_popol_wuj_98"],
+		["quiosco", "periodico_tarde_98"],
+	]
+	for compra in compras:
+		var item_id := String(compra[1])
+		var resultado := ComercioBarrio.comprar(
+			jornada, inventario, String(compra[0]), item_id
+		)
+		_comprobar(bool(resultado.get("ok", false)), "compra real %s en #676" % item_id)
+		if String(resultado.get("destino", "")) == "carried":
+			_comprobar(
+				Inventario.guardar_en_casa(inventario, item_id),
+				"mueve %s de #676 a home_storage" % item_id
+			)
+
+	var postal := CorreoPostal.recoger(
+		jornada, inventario, "paquete_calendario_magnetico"
+	)
+	_comprobar(bool(postal.get("ok", false)), "recoge el calendario real de #672")
+	_comprobar(
+		Inventario.guardar_en_casa(inventario, CasaAcumulacion.ID_IMAN_CALENDARIO),
+		"mueve el calendario postal a home_storage"
+	)
+
+	for item_id in ["byte_domestico_42", "manual_casa_98"]:
+		var objeto := PublicacionesEncontrables3D.objeto_inventario(item_id)
+		_comprobar(not objeto.is_empty(), "obtiene publicación real %s de #674" % item_id)
+		_comprobar(Inventario.recoger(inventario, objeto), "recoge %s desde #674" % item_id)
+		_comprobar(
+			Inventario.guardar_en_casa(inventario, item_id),
+			"mueve %s de #674 a home_storage" % item_id
+		)
+
+	var objetos_reales: Array = inventario.get(Inventario.HOME_STORAGE, [])
+	_comprobar(
+		objetos_reales.size() == 8,
+		"ocho objetos reales de #676/#672/#674 llegan al estado doméstico"
+	)
+	var origenes := {}
+	var ids_esperados: Array[String] = []
+	for valor in objetos_reales:
+		if not valor is Dictionary:
+			continue
+		var objeto: Dictionary = valor
+		origenes[String(objeto.get("origen", ""))] = true
+		ids_esperados.append(String(objeto.get("id", "")))
+	_comprobar(origenes.size() == 3, "los ocho objetos proceden de tres productores reales")
+
+	var estado := CasaEstadoAmbientalScript.derivar({"vuelta": 3}, inventario)
+	var acumulacion := CasaAcumulacion.montar(casa, estado)
+	_comprobar(acumulacion != null, "materializa la acumulación doméstica real")
+	if acumulacion == null:
+		casa.queue_free()
+		return
+
+	var ids_montados: Array[String] = []
+	for hijo in acumulacion.get_children():
+		ids_montados.append(String(hijo.get_meta("objeto_id", "")))
+	var nevera := casa.find_child("NeveraCasa", true, false) as Node3D
+	var iman := (
+		nevera.get_node_or_null(CasaAcumulacion.NOMBRE_IMAN_CALENDARIO) as Node3D
+		if nevera != null
+		else null
+	)
+	_comprobar(iman != null, "el octavo objeto real ocupa su ancla específica en la nevera")
+	if iman != null:
+		ids_montados.append(String(iman.get_meta("objeto_id", "")))
+
+	ids_esperados.sort()
+	ids_montados.sort()
+	_comprobar(ids_montados.size() == 8, "la casa presenta ocho objetos reales simultáneos")
+	_comprobar(
+		ids_montados == ids_esperados,
+		"la presentación deriva exactamente de home_storage sin fixtures paralelos"
+	)
 	casa.queue_free()
 
 
