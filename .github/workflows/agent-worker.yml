@@ -774,11 +774,30 @@ jobs:
           gh auth setup-git
           git push -u origin "$BRANCH"
           title="$(gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json title --jq .title)"
-          url="$(gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" --draft \
+          if ! pr_salida="$(gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" --draft \
             --title "agent($PROVIDER): #$ISSUE $title" \
             --body "Refs #$ISSUE
 
-          Implementacion autonoma mediante worker \`$WORKER\`. Plan reservado en #182; cambios limitados al CLAIM; preflight ejecutado. Reviewer acotado: \`$REVIEW_STATUS/$REVIEW_VERDICT\`. PR draft, sin auto-merge.")"
+          Implementacion autonoma mediante worker \`$WORKER\`. Plan reservado en #182; cambios limitados al CLAIM; preflight ejecutado. Reviewer acotado: \`$REVIEW_STATUS/$REVIEW_VERDICT\`. PR draft, sin auto-merge." 2>&1)"; then
+            if grep -Eiq 'not permitted to create or approve pull requests|createPullRequest|Resource not accessible by integration' <<<"$pr_salida"; then
+              gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" \
+                --add-label agent:needs-human \
+                --remove-label agent:working \
+                --remove-label agent:auto \
+                --remove-label agent:pool \
+                --remove-label agent:qwen \
+                --remove-label agent:gemini >/dev/null 2>&1 || true
+              gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
+                "Agent pool ($WORKER) completó implementación, preflight y reviewer y publicó la rama \`$BRANCH\`, pero GitHub Actions no tiene permiso para crear PRs. Habilita Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests o abre la PR manualmente desde esa rama. El worker no se penaliza." || true
+              gh issue comment 182 --repo "$GITHUB_REPOSITORY" \
+                --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=agent-pool-pr-policy-block" \
+                >/dev/null || true
+              exit 0
+            fi
+            printf '%s\n' "$pr_salida" >&2
+            exit 1
+          fi
+          url="$pr_salida"
           if [[ -s /tmp/agent-review.json && "$(jq -r '.verdict // empty' /tmp/agent-review.json)" == findings ]]; then
             findings="$(jq -r '.findings[] | "- " + .' /tmp/agent-review.json)"
             gh pr comment "$url" --repo "$GITHUB_REPOSITORY" --body "Reviewer acotado (advisory; sin retries automaticos):
