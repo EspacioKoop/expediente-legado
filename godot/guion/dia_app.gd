@@ -26,11 +26,8 @@ var _mundo: Node3D
 var _rotulo: Label
 var _nomina: Label
 
-## El destino al que no se llegó a entrar porque no se pudo guardar. Mientras
-## haya uno, pisar cualquier salida REINTENTA el guardado en vez de volver a
-## fichar: la nómina y la noche ya están cobradas en memoria, y cobrarlas dos
-## veces sería peor que no haberlas escrito.
-var _transito_pendiente := ""
+## Persistencia/transición pendiente del día (#1761).
+var _guardado_app: DiaGuardadoApp
 var _borrar: Button
 var _borrar_confirmando := false
 var _pantalla: CanvasLayer
@@ -79,6 +76,9 @@ func _ready() -> void:
 
 	_montar_entorno()
 	_montar_interfaz()
+	_guardado_app = DiaGuardadoApp.new()
+	add_child(_guardado_app)
+	_guardado_app.configurar(partida, self, _nomina)
 	_entrar_en(jornada["fase"])
 	_ciclo_laboral = DiaCicloLaboralApp.new()
 	add_child(_ciclo_laboral)
@@ -367,41 +367,21 @@ func _process(delta: float) -> void:
 	_rotulo.text = _texto_de_rotulo(Sueno.senal_de_noche(Jornada.noche_restante(jornada)))
 
 
-## Escribe la partida y dice si pudo. Si no pudo, apunta el tránsito que se
-## queda esperando y lo cuenta: nada de esto deshace lo ya aplicado a la
-## jornada, que sigue siendo lo vigente aunque el disco no se haya enterado.
+## API histórica usada por controladores y capas hijas.
 func _guardar_o_avisar(destino: String) -> bool:
-	if partida.guardar():
-		# Sección aparte y deliberadamente distinta de la partida (#535): si
-		# esto falla no se cuenta como fallo de guardado de campaña, que es
-		# lo que de verdad bloquea el tránsito.
-		var escritorio_controller := get_node_or_null("EscritorioSigaController")
-		if (
-			escritorio_controller != null
-			and escritorio_controller.has_method("guardar_estado_aplicaciones")
-		):
-			escritorio_controller.guardar_estado_aplicaciones()
-		return true
-	_transito_pendiente = destino
-	_hablando = false
-	_nomina.text = tr("ARCHIVO_ERROR_GUARDAR")
-	return false
+	var guardado := _guardado_app.guardar_o_avisar(destino)
+	if not guardado:
+		_hablando = false
+	return guardado
 
 
-## El reintento. Solo vuelve a escribir el mismo estado —ni ficha, ni paga, ni
-## gasta una acción— y, si esta vez sale, termina el tránsito que quedó a
-## medias.
+## Mantiene el hook heredable de reintento; la implementación vive en #1761.
 func _reintentar_guardado() -> void:
-	var destino := _transito_pendiente
-	if not _guardar_o_avisar(destino):
-		return
-	_transito_pendiente = ""
-	_nomina.text = tr("ARCHIVO_GUARDADO_HECHO")
-	if destino.is_empty():
-		return
-	if jornada["fase"] != "sueño":
-		_sonar("puerta_abre")
-	_entrar_en(destino)
+	_guardado_app.reintentar_guardado(
+		jornada,
+		Callable(self, "_entrar_en"),
+		Callable(self, "_sonar"),
+	)
 
 
 func _al_pisar_salida(cuerpo: Node3D, salida: Area3D) -> void:
