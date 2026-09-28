@@ -16,9 +16,9 @@ class DiaFalso:
 		"leido_hoy": ["doc-conocido"],
 	}
 	var partida := Partida.new()
+	var guardados := 0
 	var _mundo: Node3D
 	var _caminante: Node3D
-	var guardados := 0
 
 	func _guardar_o_avisar(_mensaje: String) -> bool:
 		guardados += 1
