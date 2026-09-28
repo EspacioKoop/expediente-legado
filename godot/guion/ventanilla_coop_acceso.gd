@@ -316,11 +316,14 @@ func _actualizar_estado_ronda() -> void:
 	var mostrada := mini(_ronda + 1, CombateCoop.MAX_RONDAS)
 	if bool(_sesion.get("terminado", false)):
 		mostrada = CombateCoop.MAX_RONDAS
-	_estado.text = "%s · %d/%d" % [
-		tr("VENTANILLA_COOP_EN_SALA") % sala,
-		mostrada,
-		CombateCoop.MAX_RONDAS,
-	]
+	_estado.text = (
+		"%s · %d/%d"
+		% [
+			tr("VENTANILLA_COOP_EN_SALA") % sala,
+			mostrada,
+			CombateCoop.MAX_RONDAS,
+		]
+	)
 
 
 func _habilitar_acciones(habilitadas: bool) -> void:
@@ -336,7 +339,9 @@ func _ahora() -> int:
 
 
 func _game_build() -> String:
-	var version := String(ProjectSettings.get_setting("application/config/version", "dev")).strip_edges()
+	var version := (
+		String(ProjectSettings.get_setting("application/config/version", "dev")).strip_edges()
+	)
 	return version if not version.is_empty() else "dev"
 
 
