@@ -56,6 +56,18 @@ class GolfTest(unittest.TestCase):
         for prohibido in ("RandomNumberGenerator", "randf(", "randi(", "Partida.", "RankingGolf"):
             self.assertNotIn(prohibido, self.partida)
 
+    def test_companeros_reutilizan_134_sin_entrar_en_la_fisica(self):
+        self.assertIn("const POSICIONES_COMPANEROS := [", self.partida)
+        self.assertIn('cuerpo.name = "CompaneroGolf_%s" % perfil', self.partida)
+        self.assertIn('cuerpo.set_meta("perfil_golf", perfil)', self.partida)
+        self.assertIn('Modelos.persona(cuerpo, "persona"', self.partida)
+        self.assertIn("CompaneroIdle3D.new()", self.partida)
+        self.assertIn("PreferenciasSiga.cargar()", self.partida)
+        self.assertIn('perfil == "prudente"', self.partida)
+        self.assertNotIn("StaticBody3D.new()", self.partida)
+        self.assertNotIn("Area3D.new()", self.partida)
+        self.assertNotIn("CharacterBody3D.new()", self.partida)
+
     def test_abandono_no_marca_partida_completa(self):
         self.assertIn('estado["abandonada"] = true', self.source)
         self.assertIn("var completa: bool = (", self.source)
