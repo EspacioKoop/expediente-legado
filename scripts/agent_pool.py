@@ -10,12 +10,16 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import re
 from typing import Any
 
 BLOCKING_LABELS = {"agent:working", "agent:pr-open", "agent:needs-human"}
 QUEUE_LABELS = {"agent:auto", "agent:pool", "agent:qwen", "agent:gemini"}
 PROVIDER_LABELS = {"agent:qwen": "qwen", "agent:gemini": "gemini"}
 MAX_ALLOWED_PARALLEL = 6
+WORKER_FAILURE_RE = re.compile(
+    r"^AGENT_POOL_WORKER_FAILURE\s+worker=([A-Za-z0-9._-]+)\b"
+)
 
 
 def _labels(issue: dict[str, Any]) -> set[str]:
@@ -48,6 +52,41 @@ def _preferred_provider(issue: dict[str, Any]) -> str | None:
     if provider in {"qwen", "gemini"}:
         return str(provider)
     return None
+
+
+def _comment_bodies(issue: dict[str, Any]) -> list[str]:
+    raw = issue.get("comments", [])
+    if not isinstance(raw, list):
+        return []
+    bodies: list[str] = []
+    for item in raw:
+        if isinstance(item, str):
+            bodies.append(item)
+        elif isinstance(item, dict) and isinstance(item.get("body"), str):
+            bodies.append(item["body"])
+    return bodies
+
+
+def _avoid_workers(issue: dict[str, Any]) -> set[str]:
+    avoided: set[str] = set()
+    direct = issue.get("avoidWorkers") or issue.get("avoid_workers") or []
+    if isinstance(direct, list):
+        avoided.update(
+            item.strip()
+            for item in direct
+            if isinstance(item, str) and item.strip()
+        )
+
+    for body in _comment_bodies(issue):
+        for line in body.splitlines():
+            line = line.strip()
+            if line.startswith("AGENT_POOL_RETRY_RESET"):
+                avoided.clear()
+                continue
+            match = WORKER_FAILURE_RE.match(line)
+            if match:
+                avoided.add(match.group(1))
+    return avoided
 
 
 def _sort_key(issue: dict[str, Any]) -> tuple[str, int]:
@@ -84,6 +123,18 @@ def eligible_issue(issue: dict[str, Any]) -> tuple[bool, str | None]:
     return True, provider
 
 
+def _usable_indices(
+    workers: list[dict[str, str]],
+    issue: dict[str, Any],
+) -> list[int]:
+    avoided = _avoid_workers(issue)
+    return [
+        index
+        for index, worker in enumerate(workers)
+        if worker["worker"] not in avoided
+    ]
+
+
 def select_tasks(
     issues: list[dict[str, Any]],
     workers: list[dict[str, Any]],
@@ -109,11 +160,12 @@ def select_tasks(
         if len(tasks) >= limit or not free_workers:
             break
 
+        usable = _usable_indices(free_workers, issue)
         choice_index = next(
             (
                 index
-                for index, worker in enumerate(free_workers)
-                if worker["provider"] == requested_provider
+                for index in usable
+                if free_workers[index]["provider"] == requested_provider
             ),
             None,
         )
@@ -130,25 +182,29 @@ def select_tasks(
         )
 
     # Las tareas flexibles consumen únicamente la capacidad que queda después de
-    # reservar los proveedores explícitos. Kev sigue siendo una preferencia blanda.
+    # reservar los providers explícitos. Kev sigue siendo una preferencia blanda.
     for issue, requested_provider in eligible:
         if requested_provider is not None:
             continue
         if len(tasks) >= limit or not free_workers:
             break
 
+        usable = _usable_indices(free_workers, issue)
+        if not usable:
+            continue
+
         preferred_provider = _preferred_provider(issue)
         if preferred_provider is not None:
             choice_index = next(
                 (
                     index
-                    for index, worker in enumerate(free_workers)
-                    if worker["provider"] == preferred_provider
+                    for index in usable
+                    if free_workers[index]["provider"] == preferred_provider
                 ),
-                0,
+                usable[0],
             )
         else:
-            choice_index = 0
+            choice_index = usable[0]
 
         worker = free_workers.pop(choice_index)
         tasks.append(
