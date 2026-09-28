@@ -253,7 +253,6 @@ func _espacio_de(fase: String) -> Dictionary:
 		_raiz(),
 		Callable(self, "_opciones_sueno"),
 		Callable(self, "_registro_literario_para_sueno"),
-		Callable(self, "_plantilla_en"),
 	)
 	if resultado.has("rivales"):
 		_rivales = resultado["rivales"]
@@ -511,36 +510,6 @@ func _dar_de_comer() -> void:
 	if not _guardar_o_avisar(""):
 		return
 	_nomina.text = tr("DIA_GATO_COME") % [Jornada.PRECIO_COMIDA_GATO, jornada["dinero"]]
-
-
-## Los compañeros de esta vida laboral, sentados donde el sitio diga.
-##
-## La plantilla se sortea por la semilla de la vuelta, que vive en la jornada:
-## te reasignan y los de al lado son otros, pero volver a cargar la partida no
-## los cambia. Una oficina cuya gente cambia al recargar no es una oficina.
-func _plantilla_en(sitio: Dictionary) -> Array:
-	var sitios: Array = sitio.get("sitios_companeros", [])
-	if sitios.is_empty():
-		return []
-	var figuras := []
-	var quienes := Companeros.plantilla(jornada["plantilla"])
-	for i in mini(quienes.size(), sitios.size()):
-		var quien: Dictionary = quienes[i]
-		(
-			figuras
-			. append(
-				{
-					"pos": sitios[i],
-					"id_companero": String(quien.get("id", "")),
-					"color": quien["color"],
-					"rotulo": tr(quien["nombre"]),
-					"frase": Companeros.frase_de(quien, jornada["dia"]),
-					"modelo": Companeros.cuerpo_de(quien),
-					"retrato": quien.get("retrato", ""),
-				}
-			)
-		)
-	return figuras
 
 
 ## Los pasos. Suenan por DISTANCIA andada y no por tiempo: parado no se pisa,
