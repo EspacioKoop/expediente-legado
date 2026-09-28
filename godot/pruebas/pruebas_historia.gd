@@ -68,6 +68,8 @@ static func _aplazamiento_no_orienta_decision(comprobar: Callable) -> void:
 	var pendientes_antes := historias.pendientes(estado)
 	var inventario_antes: Dictionary = estado["inventario"].duplicate(true)
 	var jornada_antes: Dictionary = estado["jornada"].duplicate(true)
+	var jornada_esperada: Dictionary = jornada_antes.duplicate(true)
+	jornada_esperada["presion_indecision_onirica"] = 2
 	var pistas_antes: Array = estado["pistas_descubiertas"].duplicate(true)
 	var sellos_antes: Array = estado["sellos_obtenidos"].duplicate(true)
 	var elecciones_antes := Prometeo.conteo_elecciones_ideologicas(estado)
@@ -95,7 +97,9 @@ static func _aplazamiento_no_orienta_decision(comprobar: Callable) -> void:
 	)
 	comprobar.call("aplazar no registra una elección", estado["historias_cartas"], {})
 	comprobar.call("aplazar no cambia el inventario", estado["inventario"], inventario_antes)
-	comprobar.call("aplazar no cambia la jornada", estado["jornada"], jornada_antes)
+	comprobar.call(
+		"aplazar solo proyecta presión onírica en la jornada", estado["jornada"], jornada_esperada
+	)
 	comprobar.call("aplazar no cambia pistas", estado["pistas_descubiertas"], pistas_antes)
 	comprobar.call("aplazar no cambia sellos", estado["sellos_obtenidos"], sellos_antes)
 	comprobar.call("aplazar no cambia la vida", int(estado["vida"]), vida_antes)
