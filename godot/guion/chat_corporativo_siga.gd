@@ -373,11 +373,14 @@ func _vaciar_canal() -> void:
 
 
 func _firma_actual() -> String:
-	return "%d|%d|%s|%s|%s|%s" % [
-		int(_contexto.get("dia", 1)),
-		int(_contexto.get("acciones", Jornada.ACCIONES_POR_DIA)),
-		String(_contexto.get("fase", "archivo")),
-		str(_contexto.get("companeros", [])),
-		str(_contexto.get("conocimiento", [])),
-		str(_contexto.get("eventos", [])),
-	]
+	return (
+		"%d|%d|%s|%s|%s|%s"
+		% [
+			int(_contexto.get("dia", 1)),
+			int(_contexto.get("acciones", Jornada.ACCIONES_POR_DIA)),
+			String(_contexto.get("fase", "archivo")),
+			str(_contexto.get("companeros", [])),
+			str(_contexto.get("conocimiento", [])),
+			str(_contexto.get("eventos", [])),
+		]
+	)
