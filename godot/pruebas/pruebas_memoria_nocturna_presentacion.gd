@@ -46,9 +46,7 @@ func _probar() -> void:
 	)
 
 	var repetida_analisis := MemoriaNocturna.analizar(["F-1", "F-1"], casos, [])
-	var repetida := MemoriaNocturnaPresentacion.aplicar(
-		base, ["F-1", "F-1"], repetida_analisis
-	)
+	var repetida := MemoriaNocturnaPresentacion.aplicar(base, ["F-1", "F-1"], repetida_analisis)
 	_comprobar(repetida["luces"].size() == 3, "repetir conserva dos apariciones visibles")
 	_comprobar(
 		repetida["luces"][1]["energia"] > unica["luces"][1]["energia"],
