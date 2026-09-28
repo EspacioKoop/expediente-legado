@@ -55,6 +55,37 @@ func _probar() -> void:
 		"volver desde Historial restaura el lanzador Historial",
 	)
 
+	menu._mostrar_opciones()
+	await process_frame
+	_comprobar(menu._volver_un_nivel(), "cancelar reconoce Opciones como un nivel secundario")
+	await process_frame
+	_comprobar(menu._panel_principal.visible, "cancelar desde Opciones vuelve al panel principal")
+	_comprobar(
+		menu.get_viewport().gui_get_focus_owner() == menu._opciones,
+		"cancelar desde Opciones restaura su lanzador",
+	)
+
+	menu._mostrar_sellos()
+	await process_frame
+	_comprobar(menu._volver_un_nivel(), "cancelar reconoce Sellos como un nivel secundario")
+	await process_frame
+	_comprobar(menu._panel_principal.visible, "cancelar desde Sellos vuelve al panel principal")
+	_comprobar(
+		menu.get_viewport().gui_get_focus_owner() == menu._sellos,
+		"cancelar desde Sellos restaura su lanzador",
+	)
+
+	menu._mostrar_historial()
+	await process_frame
+	_comprobar(menu._volver_un_nivel(), "cancelar reconoce Historial como un nivel secundario")
+	await process_frame
+	_comprobar(menu._panel_principal.visible, "cancelar desde Historial vuelve al panel principal")
+	_comprobar(
+		menu.get_viewport().gui_get_focus_owner() == menu._historial_boton,
+		"cancelar desde Historial restaura su lanzador",
+	)
+	_comprobar(not menu._volver_un_nivel(), "el panel principal no inventa un nivel anterior")
+
 	menu._fondo.visible = false
 	_terminar()
 
