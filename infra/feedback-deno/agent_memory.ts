@@ -3,6 +3,8 @@ const AGENT_MEMORY_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const AGENT_MEMORY_SCAN_LIMIT = 50;
 const AGENT_MEMORY_RETURN_LIMIT = 8;
 const AGENT_MEMORY_MAX_SUMMARY = 1200;
+const AGENT_MEMORY_WORD_LIMIT = 16;
+const AGENT_MEMORY_LEVEL2_AUTHORS = new Set(["claude", "codex", "hermes", "odiseo"]);
 const GITHUB_OIDC_ISSUER = "https://token.actions.githubusercontent.com";
 const GITHUB_OIDC_JWKS = "https://token.actions.githubusercontent.com/.well-known/jwks";
 
@@ -25,13 +27,15 @@ export interface AgentMemoryRecord {
   schema: 1;
   id: string;
   issue: number;
-  provider: "qwen" | "gemini";
+  provider: string;
+  kind?: "episodio" | "leccion";
+  author?: string;
   summary: string;
   tags: string[];
   paths: string[];
   source: string;
   created_at: string;
-  expires_at: string;
+  expires_at: string | null;
 }
 
 let oidcJwksCache: { expiresAt: number; keys: OidcJwk[] } | null = null;
@@ -175,6 +179,40 @@ async function authenticateAgentRequest(
   return claims;
 }
 
+type MemoryAuth =
+  | { mode: "oidc"; claims: OidcClaims }
+  | { mode: "nivel2" };
+
+function bearerToken(request: Request): string {
+  const authorization = request.headers.get("authorization") ?? "";
+  return authorization.startsWith("Bearer ")
+    ? authorization.slice("Bearer ".length).trim()
+    : "";
+}
+
+function tokensEqual(left: string, right: string): boolean {
+  if (!left || !right || left.length !== right.length) return false;
+  let diff = 0;
+  for (let index = 0; index < left.length; index += 1) {
+    diff |= left.charCodeAt(index) ^ right.charCodeAt(index);
+  }
+  return diff === 0;
+}
+
+async function authenticateMemoryRequest(
+  request: Request,
+  repository: string,
+  level2Token: string,
+): Promise<MemoryAuth | null> {
+  const token = bearerToken(request);
+  if (tokensEqual(token, level2Token)) {
+    return { mode: "nivel2" };
+  }
+
+  const claims = await authenticateAgentRequest(request, repository);
+  return claims ? { mode: "oidc", claims } : null;
+}
+
 async function readJsonBody(request: Request, maxBytes = 8192): Promise<unknown> {
   const declaredLength = Number(request.headers.get("content-length") || "0");
   if (Number.isFinite(declaredLength) && declaredLength > maxBytes) {
@@ -218,6 +256,17 @@ function cleanMemoryPaths(value: unknown): string[] {
   return clean;
 }
 
+function cleanQueryWords(value: unknown): string[] {
+  const text = cleanText(value, 800).toLowerCase();
+  if (!text) return [];
+  return [...new Set(
+    text
+      .split(/[^a-z0-9áéíóúüñ_.:/-]+/i)
+      .map((word) => word.trim())
+      .filter((word) => word.length >= 3),
+  )].slice(0, AGENT_MEMORY_WORD_LIMIT);
+}
+
 function pathsOverlap(left: string, right: string): boolean {
   const a = left.replace(/\/+$/, "");
   const b = right.replace(/\/+$/, "");
@@ -241,16 +290,10 @@ async function searchAgentMemory(
   const issue = Number(input.issue);
   const paths = cleanMemoryPaths(input.paths);
   const tags = cleanMemoryTags(input.tags);
+  const words = cleanQueryWords(input.query);
   const scored: Array<{ score: number; memory: AgentMemoryRecord }> = [];
 
-  const iterator = kv.list<AgentMemoryRecord>(
-    { prefix: ["agent_memory", "record"] },
-    { reverse: true, limit: AGENT_MEMORY_SCAN_LIMIT },
-  );
-  for await (const entry of iterator) {
-    const memory = entry.value;
-    if (!memory || memory.schema !== 1) continue;
-
+  const scoreMemory = (memory: AgentMemoryRecord): number => {
     let score = 0;
     if (Number.isInteger(issue) && issue > 0 && memory.issue === issue) {
       score += 100;
@@ -264,8 +307,33 @@ async function searchAgentMemory(
       if (memory.tags.includes(tag)) score += 10;
     }
 
-    if (score > 0) scored.push({ score, memory });
-  }
+    const searchable = [
+      memory.summary,
+      memory.author ?? "",
+      ...memory.tags,
+      ...memory.paths,
+    ].join(" ").toLowerCase();
+    for (const word of words) {
+      if (searchable.includes(word)) score += 5;
+    }
+    return score;
+  };
+
+  const collect = async (prefix: Deno.KvKey) => {
+    const iterator = kv.list<AgentMemoryRecord>(
+      { prefix },
+      { reverse: true, limit: AGENT_MEMORY_SCAN_LIMIT },
+    );
+    for await (const entry of iterator) {
+      const memory = entry.value;
+      if (!memory || memory.schema !== 1) continue;
+      const score = scoreMemory(memory);
+      if (score > 0) scored.push({ score, memory });
+    }
+  };
+
+  await collect(["agent_memory", "record"]);
+  await collect(["agent_memory", "lesson"]);
 
   scored.sort((left, right) =>
     right.score - left.score ||
@@ -309,7 +377,8 @@ async function rememberAgentMemory(
     schema: 1,
     id,
     issue,
-    provider: provider as "qwen" | "gemini",
+    provider,
+    kind: "episodio",
     summary,
     tags,
     paths,
@@ -326,24 +395,97 @@ async function rememberAgentMemory(
   return memory;
 }
 
+async function rememberLevel2Lesson(
+  kv: Deno.Kv,
+  raw: unknown,
+): Promise<AgentMemoryRecord | null> {
+  if (!raw || typeof raw !== "object") return null;
+
+  const input = raw as Record<string, unknown>;
+  if (input.schema !== 1 || input.kind !== "leccion") return null;
+
+  const issue = Number(input.issue ?? 0);
+  const author = cleanText(input.author, 24).toLowerCase();
+  const summary = cleanText(input.summary, AGENT_MEMORY_MAX_SUMMARY);
+  if (
+    !Number.isInteger(issue) ||
+    issue < 0 ||
+    !AGENT_MEMORY_LEVEL2_AUTHORS.has(author) ||
+    summary.length < 20 ||
+    containsPotentialSecret(summary)
+  ) {
+    return null;
+  }
+
+  const tags = cleanMemoryTags(input.tags);
+  const paths = cleanMemoryPaths(input.paths);
+  const now = Date.now();
+  const id = String(now) + "-" + crypto.randomUUID();
+  const memory: AgentMemoryRecord = {
+    schema: 1,
+    id,
+    issue,
+    provider: author,
+    kind: "leccion",
+    author,
+    summary,
+    tags,
+    paths,
+    source: "nivel2:" + author,
+    created_at: new Date(now).toISOString(),
+    expires_at: null,
+  };
+
+  const committed = await kv.atomic()
+    .set(["agent_memory", "lesson", now, id], memory)
+    .set(["agent_memory", "lesson_id", id], { created_at_ms: now })
+    .commit();
+  return committed.ok ? memory : null;
+}
+
+async function forgetLevel2Lesson(
+  kv: Deno.Kv,
+  raw: unknown,
+): Promise<boolean> {
+  if (!raw || typeof raw !== "object") return false;
+  const input = raw as Record<string, unknown>;
+  if (input.schema !== 1) return false;
+
+  const id = cleanTitle(input.id, 160);
+  if (!id) return false;
+
+  const indexKey: Deno.KvKey = ["agent_memory", "lesson_id", id];
+  const index = await kv.get<{ created_at_ms?: number }>(indexKey);
+  const createdAt = Number(index.value?.created_at_ms);
+  if (!Number.isInteger(createdAt) || createdAt <= 0) return false;
+
+  const committed = await kv.atomic()
+    .check(index)
+    .delete(["agent_memory", "lesson", createdAt, id])
+    .delete(indexKey)
+    .commit();
+  return committed.ok;
+}
+
 export async function handleAgentMemory(
   request: Request,
   url: URL,
   kv: Deno.Kv,
   repository: string,
+  level2Token = Deno.env.get("AGENT_MEMORY_NIVEL2_TOKEN") ?? "",
 ): Promise<Response> {
   if (request.method !== "POST") {
     return json({ ok: false, error: "method_not_allowed" }, 405);
   }
 
-  let claims: OidcClaims | null;
+  let auth: MemoryAuth | null;
   try {
-    claims = await authenticateAgentRequest(request, repository);
+    auth = await authenticateMemoryRequest(request, repository, level2Token);
   } catch (error) {
-    console.error("Agent memory OIDC failure", error);
+    console.error("Agent memory auth failure", error);
     return json({ ok: false, error: "service_unavailable" }, 503);
   }
-  if (!claims) {
+  if (!auth) {
     return json({ ok: false, error: "unauthorized" }, 401);
   }
 
@@ -366,11 +508,23 @@ export async function handleAgentMemory(
   }
 
   if (url.pathname === "/api/agent-memory/remember") {
-    const memory = await rememberAgentMemory(kv, raw, claims);
+    const memory = auth.mode === "nivel2"
+      ? await rememberLevel2Lesson(kv, raw)
+      : await rememberAgentMemory(kv, raw, auth.claims);
     if (!memory) {
       return json({ ok: false, error: "invalid_memory" }, 400);
     }
     return json({ ok: true, memory }, 201);
+  }
+
+  if (url.pathname === "/api/agent-memory/forget") {
+    if (auth.mode !== "nivel2") {
+      return json({ ok: false, error: "forbidden" }, 403);
+    }
+    const forgotten = await forgetLevel2Lesson(kv, raw);
+    return forgotten
+      ? json({ ok: true }, 200)
+      : json({ ok: false, error: "lesson_not_found" }, 404);
   }
 
   return json({ ok: false, error: "not_found" }, 404);
