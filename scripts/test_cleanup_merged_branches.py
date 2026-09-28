@@ -38,7 +38,11 @@ class CleanupMergedBranchesWorkflowTest(unittest.TestCase):
     def test_does_not_execute_pull_request_head_code(self):
         self.assertNotIn("actions/checkout", self.text)
         self.assertNotIn("\n        run:", self.text)
-        self.assertIn("uses: actions/github-script@v7", self.text)
+        self.assertIn(
+            "uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0",
+            self.text,
+        )
+        self.assertNotIn("uses: actions/github-script@v", self.text)
 
 
 if __name__ == "__main__":
