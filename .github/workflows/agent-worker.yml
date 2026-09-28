@@ -102,6 +102,7 @@ jobs:
           HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
           VARS_JSON: ${{ toJSON(vars) }}
           POOL_FALLBACK_KEYS: ${{ inputs.fallback_keys }}
+          CONTROL_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
         run: |
           set -euo pipefail
           [[ "$ISSUE" =~ ^[0-9]+$ ]] || exit 2
@@ -135,9 +136,51 @@ jobs:
           [[ "$existing" == 0 ]] || { echo "run=false" >> "$GITHUB_OUTPUT"; exit 0; }
 
           branch="agent/${PROVIDER}-${ISSUE}-${GITHUB_RUN_ID}"
+          control="github-fallback"
+          lease_id=""
+
+          # #1728: el lease Deno KV es el lock técnico primario. Durante la
+          # migración se mantiene fail-open: solo un 409 (otro lease vivo)
+          # impide arrancar; indisponibilidad de Deno conserva labels/CLAIM.
+          if [[ -n "${CONTROL_URL:-}" ]]; then
+            base="${CONTROL_URL%/}"
+            base="${base%/api/report}"
+            if oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+              "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")" &&
+              oidc_token="$(jq -er '.value' <<<"$oidc_json")"; then
+              payload="$(jq -nc --argjson issue "$ISSUE" --arg provider "$PROVIDER" \
+                --arg worker "$WORKER" --arg branch "$branch" \
+                '{schema:1,issue:$issue,provider:$provider,worker:$worker,branch:$branch}')"
+              if control_code="$(curl -sS --max-time 12 -o /tmp/agent-pool-acquire.json -w '%{http_code}' \
+                -X POST "$base/api/agent-pool/acquire" \
+                -H "Authorization: Bearer $oidc_token" \
+                -H 'Content-Type: application/json' --data "$payload")"; then
+                if [[ "$control_code" == 201 ]]; then
+                  lease_id="$(jq -er '.lease.lease_id' /tmp/agent-pool-acquire.json)"
+                  control="deno"
+                elif [[ "$control_code" == 409 ]]; then
+                  echo "::notice::Issue #$ISSUE ya tiene lease activo en Deno KV; este worker no arranca."
+                  echo "run=false" >> "$GITHUB_OUTPUT"
+                  echo "branch=$branch" >> "$GITHUB_OUTPUT"
+                  echo "control=deno-conflict" >> "$GITHUB_OUTPUT"
+                  echo "lease_id=" >> "$GITHUB_OUTPUT"
+                  exit 0
+                else
+                  echo "::warning::Control-plane devolvió HTTP $control_code; se usa fallback GitHub."
+                fi
+              else
+                echo "::warning::Control-plane Deno no accesible; se usa fallback GitHub."
+              fi
+            else
+              echo "::warning::No se pudo obtener OIDC del control-plane; se usa fallback GitHub."
+            fi
+          fi
+
           gh issue edit "$ISSUE" --repo "$GITHUB_REPOSITORY" --add-label agent:working >/dev/null
           echo "run=true" >> "$GITHUB_OUTPUT"
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          echo "control=$control" >> "$GITHUB_OUTPUT"
+          echo "lease_id=$lease_id" >> "$GITHUB_OUTPUT"
 
       - name: Checkout
         if: steps.guard.outputs.run == 'true'
@@ -147,6 +190,26 @@ jobs:
           fetch-depth: 0
           lfs: true
           persist-credentials: false
+
+      - name: Renovar lease Deno · planning
+        if: steps.guard.outputs.run == 'true' && steps.guard.outputs.control == 'deno'
+        continue-on-error: true
+        env:
+          CONTROL_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+          ISSUE: ${{ inputs.issue }}
+          LEASE_ID: ${{ steps.guard.outputs.lease_id }}
+        run: |
+          set -euo pipefail
+          base="${CONTROL_URL%/}"
+          base="${base%/api/report}"
+          oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")"
+          oidc_token="$(jq -er '.value' <<<"$oidc_json")"
+          payload="$(jq -nc --argjson issue "$ISSUE" --arg lease "$LEASE_ID" \
+            '{schema:1,issue:$issue,lease_id:$lease,state:"planning"}')"
+          curl -fsS -X POST "$base/api/agent-pool/transition" \
+            -H "Authorization: Bearer $oidc_token" \
+            -H 'Content-Type: application/json' --data "$payload" >/dev/null
 
       - name: Conectar qwen-primary a OmniRoute por Tailscale (OAuth)
         if: steps.guard.outputs.run == 'true' && inputs.worker == 'qwen-primary' && env.HAS_OMNIROUTE == 'true' && env.HAS_TS_OAUTH == 'true'
@@ -491,6 +554,26 @@ jobs:
               "Agent pool: $(grep '^reason=' "$GITHUB_OUTPUT"|cut -d= -f2-). Se reencola automáticamente; la colisión de CLAIM no requiere intervención humana." || true
           fi
 
+      - name: Renovar lease Deno · implementing
+        if: steps.reserve.outputs.reserved == 'true' && steps.guard.outputs.control == 'deno'
+        continue-on-error: true
+        env:
+          CONTROL_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+          ISSUE: ${{ inputs.issue }}
+          LEASE_ID: ${{ steps.guard.outputs.lease_id }}
+        run: |
+          set -euo pipefail
+          base="${CONTROL_URL%/}"
+          base="${base%/api/report}"
+          oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")"
+          oidc_token="$(jq -er '.value' <<<"$oidc_json")"
+          payload="$(jq -nc --argjson issue "$ISSUE" --arg lease "$LEASE_ID" \
+            '{schema:1,issue:$issue,lease_id:$lease,state:"implementing"}')"
+          curl -fsS -X POST "$base/api/agent-pool/transition" \
+            -H "Authorization: Bearer $oidc_token" \
+            -H 'Content-Type: application/json' --data "$payload" >/dev/null
+
       - name: Afinar contexto y memoria por rutas
         if: steps.reserve.outputs.reserved == 'true'
         env:
@@ -582,6 +665,26 @@ jobs:
             echo "drift=false" >> "$GITHUB_OUTPUT"
             echo "outside=[]" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Renovar lease Deno · validating
+        if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true' && steps.guard.outputs.control == 'deno'
+        continue-on-error: true
+        env:
+          CONTROL_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+          ISSUE: ${{ inputs.issue }}
+          LEASE_ID: ${{ steps.guard.outputs.lease_id }}
+        run: |
+          set -euo pipefail
+          base="${CONTROL_URL%/}"
+          base="${base%/api/report}"
+          oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")"
+          oidc_token="$(jq -er '.value' <<<"$oidc_json")"
+          payload="$(jq -nc --argjson issue "$ISSUE" --arg lease "$LEASE_ID" \
+            '{schema:1,issue:$issue,lease_id:$lease,state:"validating"}')"
+          curl -fsS -X POST "$base/api/agent-pool/transition" \
+            -H "Authorization: Bearer $oidc_token" \
+            -H 'Content-Type: application/json' --data "$payload" >/dev/null
 
       - id: replan
         name: Replanificar pool tras desvio de CLAIM
@@ -767,6 +870,26 @@ jobs:
             -H "Authorization: Bearer $oidc_token" \
             -H 'Content-Type: application/json' \
             --data "$payload" >/dev/null
+
+      - name: Renovar lease Deno · publishing
+        if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true' && steps.guard.outputs.control == 'deno'
+        continue-on-error: true
+        env:
+          CONTROL_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+          ISSUE: ${{ inputs.issue }}
+          LEASE_ID: ${{ steps.guard.outputs.lease_id }}
+        run: |
+          set -euo pipefail
+          base="${CONTROL_URL%/}"
+          base="${base%/api/report}"
+          oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")"
+          oidc_token="$(jq -er '.value' <<<"$oidc_json")"
+          payload="$(jq -nc --argjson issue "$ISSUE" --arg lease "$LEASE_ID" \
+            '{schema:1,issue:$issue,lease_id:$lease,state:"publishing"}')"
+          curl -fsS -X POST "$base/api/agent-pool/transition" \
+            -H "Authorization: Bearer $oidc_token" \
+            -H 'Content-Type: application/json' --data "$payload" >/dev/null
 
       - name: Publicar PR draft y lanzar CI canonica
         if: steps.reserve.outputs.reserved == 'true' && steps.claim_guard.outputs.drift != 'true'
@@ -985,3 +1108,25 @@ jobs:
               --body "RELEASE issue=#$ISSUE branch=$BRANCH motivo=agent-pool-fallo-antes-de-PR" \
               >/dev/null || true
           fi
+
+
+      - name: Liberar lease Deno KV
+        if: always() && steps.guard.outputs.control == 'deno' && steps.guard.outputs.lease_id != ''
+        continue-on-error: true
+        env:
+          CONTROL_URL: ${{ vars.SIGA98_FEEDBACK_FALLBACK_URL }}
+          ISSUE: ${{ inputs.issue }}
+          LEASE_ID: ${{ steps.guard.outputs.lease_id }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          base="${CONTROL_URL%/}"
+          base="${base%/api/report}"
+          oidc_json="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=siga98-agent-pool")"
+          oidc_token="$(jq -er '.value' <<<"$oidc_json")"
+          payload="$(jq -nc --argjson issue "$ISSUE" --arg lease "$LEASE_ID" --arg reason "$JOB_STATUS" \
+            '{schema:1,issue:$issue,lease_id:$lease,reason:$reason}')"
+          curl -fsS -X POST "$base/api/agent-pool/release" \
+            -H "Authorization: Bearer $oidc_token" \
+            -H 'Content-Type: application/json' --data "$payload" >/dev/null
