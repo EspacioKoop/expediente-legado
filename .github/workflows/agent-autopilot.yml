@@ -595,7 +595,7 @@ jobs:
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
               "AUTOPILOT_REPLAN attempt=$attempt provider=$PROVIDER observed_paths=$outside
 
-La implementación intentó modificar rutas fuera del CLAIM. El runner ya restauró esos cambios y no se publicará nada de este intento. El próximo plan debe reinspeccionar la integración, incluir las rutas observadas solo si son realmente necesarias y volver a pasar la comprobación de solapes de #182."
+              La implementación intentó modificar rutas fuera del CLAIM. El runner ya restauró esos cambios y no se publicará nada de este intento. El próximo plan debe reinspeccionar la integración, incluir las rutas observadas solo si son realmente necesarias y volver a pasar la comprobación de solapes de #182."
             gh workflow run agent-autopilot.yml --repo "$GITHUB_REPOSITORY" --ref main \
               -f issue="$ISSUE" -f provider="$PROVIDER"
             echo "scheduled=true" >> "$GITHUB_OUTPUT"
@@ -605,7 +605,7 @@ La implementación intentó modificar rutas fuera del CLAIM. El runner ya restau
             gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body \
               "AUTOPILOT_REPLAN attempt=$attempt provider=$PROVIDER observed_paths=$outside
 
-Se agotó el límite de $MAX_REPLANS replans automáticos para esta revisión de main. Los cambios fuera del CLAIM fueron restaurados y no se publicó ningún PR."
+              Se agotó el límite de $MAX_REPLANS replans automáticos para esta revisión de main. Los cambios fuera del CLAIM fueron restaurados y no se publicó ningún PR."
             echo "scheduled=false" >> "$GITHUB_OUTPUT"
           fi
 
