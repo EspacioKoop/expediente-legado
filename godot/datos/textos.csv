@@ -99,6 +99,21 @@ COMPA_TELEFONO,El del teléfono
 COMPA_TELEFONO_1,"…sí… sí… no, si yo lo entiendo…"
 COMPA_TELEFONO_2,Llevo desde las nueve. No contestan.
 COMPA_TELEFONO_3,"Un momento, que me tienen en espera desde ayer."
+COMPA_HORA_CUNADO_MEDIODIA,A mediodía esto se queda tranquilo. Luego todo entra de golpe.
+COMPA_HORA_CUNADO_TARDE,A estas horas yo no abriría nada que no puedas cerrar hoy.
+COMPA_HORA_CUNADO_NOCHE,"Si seguimos aquí a esta hora, mañana dirán que fue por iniciativa propia."
+COMPA_HORA_TELEFONO_MEDIODIA,Ya es hora de comer. Siguen sin contestar.
+COMPA_HORA_TELEFONO_TARDE,Llevo toda la tarde en espera. Ahora ya es una cuestión de principios.
+COMPA_HORA_TELEFONO_NOCHE,"Si contestan ahora, cuelgo yo."
+COMPA_HORA_BECARIO_MEDIODIA,Los de prácticas también paramos a comer. En teoría.
+COMPA_HORA_BECARIO_TARDE,Por la tarde me encargan lo que por la mañana nadie quiso hacer.
+COMPA_HORA_BECARIO_NOCHE,"A estas horas sigo de prácticas, pero con menos luz."
+COMPA_HORA_JUBILACION_MEDIODIA,A mediodía ya no cojo nada que no quepa en una carpeta.
+COMPA_HORA_JUBILACION_TARDE,A estas horas ya no cojo nada nuevo. Esa parte de jubilarse se aprende rápido.
+COMPA_HORA_JUBILACION_NOCHE,"Yo ya me habría ido. Me quedan tres semanas y pienso llegar a ellas."
+COMPA_HORA_RIEGOS_MEDIODIA,A mediodía el edificio suena distinto. Antes se notaba más.
+COMPA_HORA_RIEGOS_TARDE,La tarde es cuando aparecen los papeles que llevaban todo el día perdidos.
+COMPA_HORA_RIEGOS_NOCHE,De noche todos los departamentos parecen cerrados. Algunos lo están desde hace años.
 CUNADO_DERROTA_1,Es que se lo has puesto muy fácil.
 CUNADO_DERROTA_2,"Bueno. Tampoco es para tanto. A ver, sí lo es."
 CUNADO_DERROTA_3,Yo de ti no volvía a intentarlo hasta el jueves.
