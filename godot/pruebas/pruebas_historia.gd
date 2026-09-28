@@ -81,10 +81,16 @@ static func _aplazamiento_no_orienta_decision(comprobar: Callable) -> void:
 		)
 
 	var vista_despues := historias.vista(estado, carta)
-	comprobar.call("tres aplazamientos elevan solo la presión descriptiva", historias.presion_indecision(estado)["nivel"], 2)
+	comprobar.call(
+		"tres aplazamientos elevan solo la presión descriptiva",
+		historias.presion_indecision(estado)["nivel"],
+		2
+	)
 	comprobar.call("la historia sigue marcada como pospuesta", vista_despues["estado"], "pospuesta")
 	comprobar.call("aplazar no reordena ni cambia opciones", vista_despues["opciones"], opciones_antes)
-	comprobar.call("aplazar no reduce decisiones pendientes", historias.pendientes(estado), pendientes_antes)
+	comprobar.call(
+		"aplazar no reduce decisiones pendientes", historias.pendientes(estado), pendientes_antes
+	)
 	comprobar.call("aplazar no registra una elección", estado["historias_cartas"], {})
 	comprobar.call("aplazar no cambia el inventario", estado["inventario"], inventario_antes)
 	comprobar.call("aplazar no cambia la jornada", estado["jornada"], jornada_antes)
