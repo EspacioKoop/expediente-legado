@@ -17,9 +17,19 @@ RESUMEN_GODOT = re.compile(r"(\d+) pasadas, 0 fallos")
 
 class GestosCompanerosTest(unittest.TestCase):
     def test_gestos_no_tocan_estado_de_juego(self):
-        texto = IDLE.read_text(encoding="utf-8") + CONTROLLER.read_text(encoding="utf-8")
-        for termino in ("Jornada.", "Partida", "guardar(", "dinero", "acciones"):
+        idle = IDLE.read_text(encoding="utf-8")
+        controller = CONTROLLER.read_text(encoding="utf-8")
+        texto = idle + controller
+        for termino in ("Partida", "guardar(", "dinero", "acciones"):
             self.assertNotIn(termino, texto)
+
+        # #963 puede consultar la franja horaria canónica para modular únicamente
+        # densidad ambiental. El gesto visual puro sigue sin depender de Jornada,
+        # y el controller no puede usar ninguna otra API de Jornada.
+        self.assertNotIn("Jornada.", idle)
+        usos_jornada = re.findall(r"Jornada\.([A-Za-z_][A-Za-z0-9_]*)\s*\(", controller)
+        self.assertGreater(len(usos_jornada), 0)
+        self.assertEqual({"franja_horaria"}, set(usos_jornada))
 
     def test_consume_no_se_ofrece_como_cafe(self):
         # En captura el clip Consume de UAL extiende el brazo al frente: no se

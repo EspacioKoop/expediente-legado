@@ -12,6 +12,16 @@ const ALTURA_CONVERSABLE := 0.9
 ## espacian lo bastante como para que levantarse siga siendo un acontecimiento.
 const PRIMER_RECADO := 20.0
 const INTERVALO_RECADO := 45.0
+const PRIMER_RECADO_POR_FRANJA := {
+	"manana": 20.0,
+	"mediodia": 35.0,
+	"tarde": 12.0,
+}
+const INTERVALO_RECADO_POR_FRANJA := {
+	"manana": 45.0,
+	"mediodia": 80.0,
+	"tarde": 30.0,
+}
 ## Distancia a la que se para delante de un mueble, además de su media anchura.
 const HOLGURA_DESTINO := 0.55
 const MAQUINA_CAFE := "MaquinaCafeInteractuable"
@@ -36,7 +46,7 @@ func _process(delta: float) -> void:
 	var id := mundo.get_instance_id()
 	if id == _mundo_id:
 		_vigilar_conversacion(dia)
-		_seguir_recados(mundo, delta)
+		_seguir_recados(mundo, delta, Jornada.franja_horaria(dia.jornada))
 		return
 	_mundo_id = id
 	_limpiar()
@@ -84,7 +94,8 @@ func _montar(mundo: Node3D) -> void:
 		_idles.append(idle)
 	_conectar_conversaciones(mundo)
 	_reloj_recados = 0.0
-	_proximo_recado = PRIMER_RECADO
+	var franja := Jornada.franja_horaria(dia.jornada) if dia != null else "manana"
+	_proximo_recado = espera_recado(franja, true)
 	if not reducir:
 		_navegacion = NavegacionOficina.montar(mundo)
 
@@ -135,7 +146,7 @@ func huir_de(origen_global: Vector3) -> void:
 
 ## Lanza el siguiente recado cuando toca y mantiene el volumen conversable
 ## encima del cuerpo que anda: hablar con alguien es hablar donde está.
-func _seguir_recados(mundo: Node3D, delta: float) -> void:
+func _seguir_recados(mundo: Node3D, delta: float, franja: String = "manana") -> void:
 	for idle in _conversables:
 		if not is_instance_valid(idle) or not is_instance_valid(_conversables[idle]):
 			continue
@@ -143,14 +154,25 @@ func _seguir_recados(mundo: Node3D, delta: float) -> void:
 		_conversables[idle].position = (
 			Vector3(base.x, idle.sitio().y, base.z) + Vector3.UP * ALTURA_CONVERSABLE
 		)
-	if _reducir or _hay_recado():
+	if _reducir or _hay_recado() or not recados_habilitados(franja):
 		return
 	_reloj_recados += delta
 	if _reloj_recados < _proximo_recado:
 		return
 	_reloj_recados = 0.0
-	_proximo_recado = INTERVALO_RECADO
+	_proximo_recado = espera_recado(franja, false)
 	lanzar_recado(mundo)
+
+
+## #963: la hora solo modula densidad ambiental. No oculta compañeros ni
+## altera conversación, progreso o disponibilidad de sistemas críticos.
+static func recados_habilitados(franja: String) -> bool:
+	return franja != "noche"
+
+
+static func espera_recado(franja: String, primero: bool) -> float:
+	var catalogo := PRIMER_RECADO_POR_FRANJA if primero else INTERVALO_RECADO_POR_FRANJA
+	return float(catalogo.get(franja, PRIMER_RECADO if primero else INTERVALO_RECADO))
 
 
 ## Manda al siguiente compañero sentado a por el siguiente destino. Público

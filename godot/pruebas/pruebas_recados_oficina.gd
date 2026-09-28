@@ -24,6 +24,7 @@ func _ejecutar() -> void:
 	_probar_inicio_invalido()
 	_probar_pausa_al_hablar()
 	_probar_huida_cancela()
+	_probar_densidad_horaria()
 	await _probar_controller()
 	print("%d pasadas, %d fallos" % [_pasadas, _fallos])
 	quit(1 if _fallos else 0)
@@ -134,6 +135,19 @@ func _probar_huida_cancela() -> void:
 	_comprobar(recado.is_queued_for_deletion(), "huir cancela el recado")
 	_comprobar(not idle.sentado, "y no vuelve a sentarse")
 	_liberar()
+
+
+func _probar_densidad_horaria() -> void:
+	_comprobar(
+		Controller.espera_recado("mediodia", false) > Controller.espera_recado("manana", false),
+		"al mediodía baja la actividad ambiental",
+	)
+	_comprobar(
+		Controller.espera_recado("tarde", false) < Controller.espera_recado("manana", false),
+		"por la tarde aumenta la actividad ambiental",
+	)
+	_comprobar(not Controller.recados_habilitados("noche"), "de noche no se lanzan recados")
+	_comprobar(Controller.recados_habilitados("manana"), "la mañana conserva recados")
 
 
 func _probar_controller() -> void:
