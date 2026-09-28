@@ -305,9 +305,17 @@ func _encolar_publicacion(mensaje: Dictionary) -> void:
 		_descartados += 1
 
 
-func _vaciar_cola() -> void:
+func _vaciar_cola(ahora_unix: int = -1) -> void:
+	var ahora := _ahora(ahora_unix)
 	while _unido and not _cola_saliente.is_empty():
 		var mensaje: Dictionary = _cola_saliente[0]
+		if String(mensaje.get("op", "")) == "publish":
+			var evento = mensaje.get("event", {})
+			var validacion := EventoOnline.validar(evento, ahora)
+			if not bool(validacion.get("ok", false)):
+				_cola_saliente.pop_front()
+				_descartados += 1
+				continue
 		if not _enviar(mensaje):
 			_marcar_reconexion("queue_send_failed")
 			return
